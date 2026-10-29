@@ -464,3 +464,149 @@ void* func_00117AC0(void* ret, s32 a1, void* src, s32 a3)
     func_00117910(ret, a1, src, a3, 0x66);
     return ret;
 }
+
+struct Handle_1141B8 { s32 word; u8 pad[12]; };
+
+void func_0011B008(Handle_1141B8* h);
+void func_0011B018(void* dst, Handle_1141B8* src);
+void func_0011B060(Handle_1141B8* h, int mode);
+void func_0011B5F0(Handle_1141B8* h, int flag);
+
+void* func_001141B8(void* dst, int unused, s32* key)
+{
+    Handle_1141B8 a;
+    func_0011B008(&a);
+    func_0011B5F0(&a, *key == 0x19);
+    func_0011B018(dst, &a);
+    func_0011B060(&a, 2);
+    return dst;
+}
+
+struct Handle_114220 { s32 word; u8 pad[12]; };
+
+void func_0011B008(Handle_114220* h);
+void func_0011B018(void* dst, Handle_114220* src);
+void func_0011B060(Handle_114220* h, int mode);
+void func_0011B5F0(Handle_114220* h, int flag);
+
+void* func_00114220(void* dst, int unused, s32* key)
+{
+    Handle_114220 a;
+    func_0011B008(&a);
+    func_0011B5F0(&a, *key == 0x1A);
+    func_0011B018(dst, &a);
+    func_0011B060(&a, 2);
+    return dst;
+}
+
+struct Entry_1156B0 { u8 pad0[4]; s32 index; u8 pad1[4]; s32 value; };
+struct Var_1156B0 { s32 tag; s32 value; u8 pad[8]; };
+
+void func_0011B008(void* self);
+void func_0011B538(void* self, s32 n);
+void func_0011B018(void* out, void* src);
+void func_0011B060(void* self, s32 mode);
+void func_001C0C08(s32 index, s32 value);
+
+void* func_001156B0(void* self, s32, Entry_1156B0* src)
+{
+    Var_1156B0 q;
+    func_001C0C08(src->index, src->value);
+    func_0011B008(&q);
+    func_0011B538(&q, 0x22);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Entry_115710 { s32 tag; s32 word; };
+struct Var_115710 { s32 tag; f32 value; u8 pad[8]; };
+
+void* func_0011C748();
+void func_0011B9A8(void* out, void* src);
+void func_0011B0A8(void* dst, void* src);
+void func_0011B060(void* self, s32 mode);
+void func_0011B7D0(void* self, void* ptr);
+void func_0011B018(void* out, void* src);
+void func_0011B008(void* self);
+
+void* func_00115710(void* self, s32, Entry_115710* in)
+{
+    Var_115710 a;
+    Var_115710 b;
+    f32* base;
+    f32* out;
+    s32 n = 2;
+    func_0011B008(&a);
+    Entry_115710* p = in;
+    base = (f32*)func_0011C748();
+    out = base;
+    do {
+        func_0011B9A8(&b, p);
+        p++;
+        func_0011B0A8(&a, &b);
+        n--;
+        func_0011B060(&b, 2);
+        *out++ = a.value;
+    } while (n >= 0);
+    func_0011B7D0(&a, base);
+    func_0011B018(self, &a);
+    func_0011B060(&a, 2);
+    return self;
+}
+
+struct Entry_1157E0 { s32 tag; s32 word; };
+struct Var_1157E0 { s32 tag; f32 value; u8 pad[8]; };
+
+void* func_0011C858();
+void func_0011B9A8(void* out, void* src);
+void func_0011B0A8(void* dst, void* src);
+void func_0011B060(void* self, s32 mode);
+void func_0011B818(void* self, void* ptr);
+void func_0011B018(void* out, void* src);
+void func_0011B008(void* self);
+
+void* func_001157E0(void* self, s32, Entry_1157E0* in)
+{
+    Var_1157E0 a;
+    Var_1157E0 b;
+    f32* out;
+    func_0011B008(&a);
+    out = (f32*)func_0011C858();
+    func_0011B9A8(&b, in);
+    func_0011B0A8(&a, &b);
+    func_0011B060(&b, 2);
+    out[0] = a.value;
+    func_0011B9A8(&b, in + 1);
+    func_0011B0A8(&a, &b);
+    func_0011B060(&b, 2);
+    out[1] = a.value;
+    func_0011B818(&a, out);
+    func_0011B018(self, &a);
+    func_0011B060(&a, 2);
+    return self;
+}
+
+union Word_115B78 { s32 i; f32 f; };
+struct Entry_115B78 { s32 tag; Word_115B78 word; };
+struct Var_115B78 { s32 tag; f32 value; u8 pad[8]; };
+
+void func_0011B008(void* self);
+void func_0011B018(void* out, void* src);
+void func_0011B060(void* self, s32 mode);
+void func_001F66F8(s32 v);
+
+void* func_00115B78(void* self, s32, Entry_115B78* e)
+{
+    Var_115B78 q;
+    func_0011B008(&q);
+    if (e->tag == 0x14) {
+        func_001F66F8(e->word.i);
+    } else {
+        func_001F66F8((s32)e->word.f);
+    }
+    q.tag = 0x22;
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

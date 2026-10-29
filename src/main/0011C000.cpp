@@ -371,3 +371,25 @@ void func_0011EF48(void* unused, s32* a, s32* b)
 void func_0011EF60(void)
 {
 }
+
+extern u8 D_00259F38[];
+extern u8 D_0025C250[];
+extern u8 D_0025C270[];
+extern u8 D_0025C290[];
+extern u8 D_0025C2B0[];
+extern u8 D_0025C2D0[];
+
+void func_0011A6B8(void* p);
+void func_0011C1D0(void* p);
+void func_0011CBB0(void);
+
+void func_0011C040(void)
+{
+    func_0011C1D0(D_0025C250);
+    func_0011C1D0(D_0025C270);
+    func_0011C1D0(D_0025C290);
+    func_0011C1D0(D_0025C2B0);
+    func_0011CBB0();
+    func_0011C1D0(D_0025C2D0);
+    func_0011A6B8(D_00259F38);
+}
