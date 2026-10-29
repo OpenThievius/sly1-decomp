@@ -759,3 +759,95 @@ void func_0011B640(Obj_11B640* self, void* arg)
     self->ptr = arg;
     self->tag = 0x1C;
 }
+
+struct Vec_118850 { f32 x, y, z, w; };
+struct Src_118850 { s32 pad0; s32 n; };
+
+void func_0011B008(void* self);
+void func_0011B9A8(void* out, void* src);
+void func_0016EC38(void* p, s32 n, f32 f);
+void func_0011B060(void* self, s32 mode);
+void func_0011B018(void* dst, void* src);
+
+extern u8 D_00262C70[];
+
+void* func_00118850(void* ret, s32 unused, Src_118850* src)
+{
+    Vec_118850 t;
+    Vec_118850 u;
+    func_0011B008(&t);
+    void* p = D_00262C70;
+    s32 n = src->n;
+    func_0011B9A8(&u, (u8*)src + 8);
+    func_0016EC38(p, n, u.y);
+    func_0011B060(&u, 2);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+extern u8 D_0025C270[];
+void* func_0011C240(void* p);
+
+void* func_0011A630(void)
+{
+    void* p = func_0011C240(D_0025C270);
+    func_001F5C0C(p, 0, 0x1C);
+    return p;
+}
+
+void func_0011A670(void)
+{
+}
+
+struct Stack_11A7B8 { u8 pad[0x1310]; s32 count; s32 items[1]; };
+
+void func_0011A7B8(Stack_11A7B8* s, s32 value)
+{
+    s32 n = s->count;
+    s->items[n] = value;
+    s->count = n + 1;
+}
+
+struct Tag_11B680 { s32 tag; s32 value; };
+void func_0011B418(void* self);
+
+void func_0011B680(Tag_11B680* r, s32 value)
+{
+    func_0011B418(r);
+    r->value = value;
+    r->tag = 0x1D;
+}
+
+struct Tagged_11B8E8 { s32 tag; s32 value; };
+
+void func_0011B418(void* self);
+
+void func_0011B8E8(Tagged_11B8E8* self, s32 value)
+{
+    func_0011B418(self);
+    self->tag = 0x21;
+    self->value = value;
+}
+
+struct Quad_11B928 { s32 a, b, c, d; };
+struct Scaled_11B928 { s32 tag; f32 scale; };
+
+void func_0011B008(Quad_11B928* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(Quad_11B928* q, int mode);
+void func_0011B570(Quad_11B928* q, s32 n);
+
+void* func_0011B928(void* out, Scaled_11B928* in)
+{
+    if (in->tag == 0x14) {
+        func_0011B018(out, in);
+    } else {
+        Quad_11B928 q;
+        func_0011B008(&q);
+        func_0011B570(&q, (s32)in->scale);
+        func_0011B018(out, &q);
+        func_0011B060(&q, 2);
+    }
+    return out;
+}

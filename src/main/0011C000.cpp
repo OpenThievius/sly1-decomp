@@ -803,3 +803,100 @@ void func_0011F3E8(Self_11F3E8* self, s32* outCount, f32** outArr)
         }
     }
 }
+
+struct Entry_11C3B8 { u8 pad[8]; };
+
+Entry_11C3B8* func_0011C3B8(u8* base)
+{
+    return (Entry_11C3B8*)(base + 8);
+}
+
+struct Entry_11C3C0 { u8 pad[8]; };
+
+Entry_11C3C0* func_0011C3C0(u8* base)
+{
+    return (Entry_11C3C0*)(base - 8);
+}
+
+s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
+
+void func_0011D420(void)
+{
+    func_0011DB00(0x8, 0, 0, 0, 0);
+}
+
+s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
+
+void func_0011D480(s32 a0, s32 a1)
+{
+    s32 buf[2];
+    buf[0] = a0;
+    buf[1] = a1;
+    func_0011DB00(0x9, 0x8, buf, 0, 0);
+}
+
+s32 func_0011D968(s32 kind, s32 count, void* words);
+
+struct Words_11D7D8 { s32 a; s32 b; };
+
+s32 func_0011D7D8(s32 a, s32 b)
+{
+    Words_11D7D8 w;
+    w.a = a;
+    w.b = b;
+    return func_0011D968(0x1C, 8, &w);
+}
+
+s32 func_0011D968(s32 id, s32 flags, void* args);
+
+void func_0011E4C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
+{
+    s32 args[5];
+    args[0] = a0;
+    args[1] = a1;
+    args[2] = a2;
+    args[3] = a3;
+    args[4] = a4;
+    func_0011D968(0x3E, 0x14, args);
+}
+
+struct Object_11F798 { void** vtbl; };
+typedef void (*Method_11F798)(Object_11F798* self, void* src);
+
+s32 func_00137B90(void* src);
+void func_00137E70(void* src, void* dst);
+void* func_00121160(s32 index);
+
+void func_0011F798(Object_11F798** out, void* dst, void* src)
+{
+    s32 mask = func_00137B90(src);
+    Object_11F798** slot = out;
+    func_00137E70(src, dst);
+    s32 i = 2;
+    do {
+        s32 bit = mask & 1;
+        mask >>= 1;
+        if (bit) {
+            Object_11F798* o = (Object_11F798*)func_00121160(func_00137B90(src));
+            Method_11F798 fn = (Method_11F798)o->vtbl[1];
+            if (fn)
+                fn(o, src);
+            *slot = o;
+        }
+        slot++;
+        i--;
+    } while (i >= 0);
+}
+
+struct Scratch_11F9F8 { f32 diff; f32 delta; u8* ptr; };
+
+void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
+void func_00130540(u8* a, u8* b, u8* c, u8* d, f32 f12, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
+
+void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 scale)
+{
+    Scratch_11F9F8 s;
+    func_0011EE70(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
+    u8* p = s.ptr;
+    func_00130540(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
+}
