@@ -609,3 +609,30 @@ void func_001AB938(void* self)
 {
     func_001ABE20(self, 2);
 }
+
+extern u8 D_00261868[];
+
+struct Obj_1AAF58 {
+    u8 pad0[0x254];
+    f32 f254;
+    void* f258;
+};
+
+void func_001AAF58(Obj_1AAF58* self, f32* p)
+{
+    if (self->f258 != p) {
+        if (p == 0) {
+            p = (f32*)D_00261868;
+        }
+        self->f254 = *p;
+    }
+    self->f258 = p;
+}
+
+struct Obj_1AB928 { u8 pad[0x288]; f32 f288; s32 f28c; };
+
+void func_001AB928(Obj_1AB928* self, s32 v, f32 f)
+{
+    self->f288 = f;
+    self->f28c = v;
+}

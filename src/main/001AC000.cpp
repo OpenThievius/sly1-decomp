@@ -451,3 +451,95 @@ s32 func_001AEE50(Obj_1AEE50* self, void* key)
     }
     return 0;
 }
+
+typedef void* (*VFn_1ACDA0)(void* self, f32 sx, f32 sy);
+struct VTab_1ACDA0 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1ACDA0 fn; };
+struct Obj_1ACDA0 { u8 pad0[0x4C]; VTab_1ACDA0* vt; };
+struct Node_1ACDA0 { u8 pad0[4]; void* f4; u8 pad1[0x20C - 8]; f32 f20c; void** slot; u8 pad2[0x248 - 0x214]; f32 f248; };
+
+extern u8 D_00274410[];
+void func_001AA268(void* self);
+s32 func_0015C188(s32 k);
+void* func_0015C1C0(s32 k);
+
+void func_001ACDA0(Node_1ACDA0* self)
+{
+    Obj_1ACDA0* o;
+    VTab_1ACDA0* vt;
+
+    func_001AA268(self);
+    o = (Obj_1ACDA0*)func_0015C1C0(0);
+    vt = o->vt;
+    self->f4 = vt->fn((u8*)o + vt->delta, 1.0f, 1.0f);
+    self->f20c = 0.8f;
+    self->f248 = 0.5f;
+    if (func_0015C188(2)) {
+        self->slot = (void**)D_00274410;
+        *self->slot = func_0015C1C0(2);
+    }
+}
+
+extern u8* D_00275710;
+extern f32 D_00261858[];
+extern s32 D_002744D0;
+
+struct Node_1AF508 {
+    u8 pad0[0x558];
+    s32 x558;
+    u8 pad1[0xAF0 - 0x55C];
+    Node_1AF508* next;
+    u8 pad2[0xAFC - 0xAF4];
+    f32 fAFC;
+};
+
+void func_001AF508()
+{
+    s32 scratch[4];
+    (void)scratch;
+    s32 count = 0;
+    Node_1AF508* n = *(Node_1AF508**)(D_00275710 + 0x1CA8);
+    while (n != 0) {
+        s32 t = count + 1;
+        count = (n->x558 != 8) ? t : count;
+        n = n->next;
+    }
+    if (count != 0) {
+        s32 idx = 0;
+        n = *(Node_1AF508**)(D_00275710 + 0x1CA8);
+        while (n != 0) {
+            if (n->x558 != 8) {
+                n->fAFC = D_00261858[1] + (0.03333333507180214f / (f32)count) * (f32)idx;
+                idx++;
+            }
+            n = n->next;
+        }
+    }
+    D_002744D0 = 0;
+}
+
+extern s32 D_002744D0;
+void func_0015FCD8(void* self, void* p);
+void func_00152470(void* list, void* item);
+void func_00152600(void* list, void* item);
+
+struct Obj_1AF7A8 {
+    u8 pad0[0x14];
+    u8* p14;
+    u8 pad1[0xAF8 - 0x18];
+    s32 flag_AF8;
+};
+
+void func_001AF7A8(Obj_1AF7A8* self, void* p)
+{
+    func_0015FCD8(self, p);
+    if (p != 0) {
+        if (self->flag_AF8 != 0) {
+            func_00152600(self->p14 + 0x1CA8, self);
+            self->flag_AF8 = 0;
+        }
+    } else {
+        func_00152470(self->p14 + 0x1CA8, self);
+        self->flag_AF8 = 1;
+    }
+    D_002744D0 = 1;
+}
