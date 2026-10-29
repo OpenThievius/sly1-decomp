@@ -243,3 +243,51 @@ void* func_001BED98(void)
     }
     return p;
 }
+
+struct VtItem_1BC760 { u8 pad0[8]; u32 flags; u8 pad1[0xE4 - 0x0C]; void (*visit)(void* item, s32* index, void* list); };
+struct Item_1BC760 { VtItem_1BC760* vtbl; u8 pad[0x18]; Item_1BC760* next; };
+struct Obj_1BC760 { u8 pad0[0x34]; Item_1BC760* head; u8 pad1[0x4C0 - 0x38]; s32 count; };
+
+void func_001BC760(Obj_1BC760* self, s32* index, Obj_1BC760** list)
+{
+    s32 scratch[4];
+    (void)scratch;
+    self->count = *index;
+    list[*index] = self;
+    (*index)++;
+    for (Item_1BC760* item = self->head; item; item = item->next)
+        if (item->vtbl->flags & 2)
+            item->vtbl->visit(item, index, list);
+}
+
+struct Entry_1BF048 {
+    s32 key;
+};
+
+extern s32 D_002748EC;
+extern s32 D_00274734;
+extern s32 D_00274738;
+
+void func_001BEDF8(void* self);
+void func_001BEF88(void* self);
+void func_0011D928(s32 a);
+void func_001C06A0(s32 a, s32 b, f32 x);
+
+void func_001BF048(Entry_1BF048* self)
+{
+    if (self != 0) {
+        s32 key = self->key;
+        func_001BEDF8(self);
+        if (key == D_00274734) {
+            func_001BEF88(self);
+            s32 cur = D_00274734;
+            if (cur >= 0) {
+                D_002748EC = 0;
+            }
+            D_00274738 = cur;
+            func_0011D928(cur + 0x14);
+            func_001C06A0(7, 1, 1.0f);
+            D_00274738 = -0x64;
+        }
+    }
+}

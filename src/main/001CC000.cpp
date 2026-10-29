@@ -68,3 +68,43 @@ f32 func_001CE9E8(Obj_001CE9E8* self)
     func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, f.vecB, 0, &f.result, 0, 0);
     return f.result;
 }
+
+struct Ref_001CEA58 { u8 pad0[0x18]; void* p18; };
+struct Obj_001CEA58 { void* p0; Ref_001CEA58* p4; u8 pad1[0x10 - 8]; };
+struct Frame_001CEA58 { u8 vecA[0x10]; f32 result; };
+
+void func_0016A240(void* a0, void* a1, s32 a2);
+void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
+
+f32 func_001CEA58(Obj_001CEA58* self)
+{
+    Frame_001CEA58 f;
+    func_0016A240(self->p4, f.vecA, 0);
+    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, 0, 0, &f.result, 0, 0);
+    return f.result;
+}
+
+
+void func_00169E20(void* a0, void* a1, s32 a2);
+void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
+
+f32 func_001CEAB8(Obj_001CEA58* self)
+{
+    Frame_001CEA58 f;
+    func_00169E20(self->p4, f.vecA, 0);
+    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, 0, 0, &f.result, 0, 0);
+    return f.result;
+}
+
+struct Obj_001CF138 { u8 pad0[0x2BDC]; s32 key; };
+
+extern f32 D_00274E3C;
+
+f32 func_001CF138(Obj_001CF138* self, s32 id, f32 a, f32 b)
+{
+    f32 r = a + b;
+    if (id == self->key) {
+        r = r + D_00274E3C;
+    }
+    return r;
+}

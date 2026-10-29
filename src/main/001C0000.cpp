@@ -205,3 +205,64 @@ void func_001C0CB0(void)
         func_001C0C08(i, 0);
     }
 }
+
+typedef void (*Slot_001C0FF0)(void* self);
+
+struct Obj_001C0FF0 {
+    Slot_001C0FF0* vtbl;
+    u8 pad[0x328];
+    s32 f32C;
+};
+
+void func_001C1030(void* self, s32 v);
+void func_00124A48(void* self);
+
+void func_001C0FF0(Obj_001C0FF0* self)
+{
+    func_00124A48(self);
+    func_001C1030(self, self->f32C);
+    self->vtbl[7](self);
+}
+
+struct Obj_001C1030 {
+    void* vtbl;
+    u8 pad[0x10];
+    void* host;
+    u8 pad2[0x314];
+    s32 f32C;
+    s32 f330;
+    s32 f334;
+};
+
+void func_001B6438(s32 p);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+s32 func_001B6290(s32 p, void* ctx, s32 a2, s32 a3);
+
+void func_001C1030(Obj_001C1030* self, s32 v)
+{
+    if (self->f334 != 0) {
+        func_001B6438(self->f334);
+        self->f334 = 0;
+    }
+    s32 r = func_0015A418(self->host, 0x101, v, self);
+    self->f330 = r;
+    if (r != 0) {
+        self->f334 = func_001B6290(r, self, -1, 1);
+    }
+    self->f32C = v;
+}
+
+struct Obj_001C10D8 {
+    void* vtbl;
+    u8 pad[0x10];
+    u8* host;
+};
+
+void func_00182D48(void* self);
+void func_00152470(u8* table, void* self);
+
+void func_001C10D8(Obj_001C10D8* self)
+{
+    func_00182D48(self);
+    func_00152470(self->host + 0x1C84, self);
+}

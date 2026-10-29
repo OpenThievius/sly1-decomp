@@ -341,3 +341,56 @@ void func_001CA888(Latch_001CA888* self, s32 v)
     self->value = v;
     self->flag = 1;
 }
+
+struct Slot_1CA898 { s32 key; s32 value; };
+struct Table_1CA898 { u8 pad[0x870]; Slot_1CA898 slots[16]; };
+
+s32 func_001CA600(s32 index);
+
+void func_001CA898(Table_1CA898* self, s32 index, s32 value)
+{
+    if (func_001CA600(index))
+        self->slots[index].key = value;
+}
+
+struct Entry_1CA960 { s32 first; s32 middle; s32 last; };
+struct Queue_1CA960 { u8 pad[0xA78]; u32 count; Entry_1CA960 entries[4]; };
+
+void func_001CA960(Queue_1CA960* self, s32 a, s32 b)
+{
+    u32 n = self->count;
+    if (n < 4) {
+        self->count = n + 1;
+        Entry_1CA960* e = &self->entries[n];
+        e->first = a;
+        e->last = b;
+    }
+}
+
+struct Set_1CA998 {
+    u8 pad0[0x14];
+    void* owner;
+    u8 pad1[0x924 - 0x18];
+    s32 index;
+    s32 found;
+    u8 pad2[0xA60 - 0x92C];
+    s32 cleared;
+};
+
+s32 func_0015A448(void* owner, s32 index, Set_1CA998* self);
+
+void func_001CA998(Set_1CA998* self, s32 index)
+{
+    s32 v;
+    if (index == -1) {
+        v = 0;
+    } else {
+        v = func_0015A448(self->owner, index, self);
+        if (v == 0)
+            return;
+    }
+    if (v != self->found)
+        self->cleared = 0;
+    self->index = index;
+    self->found = v;
+}
