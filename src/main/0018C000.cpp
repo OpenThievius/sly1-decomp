@@ -84,3 +84,80 @@ void func_0018FF28(Obj_18FF28* self)
     self->fC40 = func_001CA758(self, 0x16A);
     self->fC44 = func_001CA758(self, 0x16B);
 }
+
+void func_0018D4F8(s32 size)
+{
+    (void)size;
+}
+
+extern u8* D_002C2A1C;
+
+void func_0018D4F8(s32 size);
+
+u8* func_0018D500(s32 size)
+{
+    u8* result;
+
+    if (size == 0) {
+        return 0;
+    }
+    func_0018D4F8(size);
+    result = D_002C2A1C;
+    D_002C2A1C = result + ((size + 15) & ~15);
+    return result;
+}
+
+extern u8* D_002C2A18;
+
+u8* func_0018D500(s32 size);
+void func_0018D800(u8* dst, void* src, s32 count);
+
+extern u8 D_002C2A28[];
+extern s32 D_002C2A34;
+extern u8* D_002C2A20;
+extern u8 D_002C2A38[];
+
+void func_001E22F8(void* obj);
+
+s32 func_0018F940(s32 a, s32 b);
+
+struct Actor_0018F988 {
+    u8 pad_000[0x538];
+    u64 flags_538;
+};
+
+void func_001B7968(void* self);
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+
+struct Actor_0018FEF8 {
+    u8 pad_000[0xBD0];
+    s32 field_BD0;
+    s32 field_BD4;
+};
+
+void func_001C6F48(void* self);
+
+struct Actor_0018FFB0 {
+    u8 pad_000[0x4];
+    s32 field_004;
+    u8 pad_008[0x720 - 0x008];
+    void* field_720_ptr;
+    s32 field_724;
+    u8 pad_728[0xC04 - 0x728];
+    s32 field_C04;
+    u8 pad_C08[0xC10 - 0xC08];
+    s32 field_C10;
+    u8 pad_C14[0xC28 - 0xC14];
+    s32 field_C28;
+    s32 field_C2C;
+    s32 field_C30;
+    s32 field_C34;
+    s32 field_C38;
+    s32 field_C3C;
+    s32 field_C40;
+    s32 field_C44;
+};
+
+void func_001CB6F8(void* a, void* b);
+void func_001C91C8(void* self, s32 a, s32 b);
+

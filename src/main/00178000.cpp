@@ -128,3 +128,10 @@ struct Obj_17B998 {
     s32 f68;
 };
 
+void func_0017B998(void* self)
+{
+    Obj_17B998* o = (Obj_17B998*)self;
+    func_00182C18(self);
+    o->f38 = func_0018D500(0xA00);
+    o->f68 = 1;
+}

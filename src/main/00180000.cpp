@@ -100,3 +100,102 @@ void func_00183FE0(f32* out, s32* flag, f32 x, f32 y, f32 z, f32 w)
     *(f32*)flag = t;
     *out = y - t / x;
 }
+
+void func_00128018(void* a0, s32 zero, void* table, void* out);
+void func_001BC260(f32 t, void* obj, void* a, void* b);
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA408(f32 a);
+void func_001C5D58(void* obj);
+void func_00175170(void* obj, s32 a, s32 b);
+
+extern u8 D_00264180[];
+extern f32 D_00264190;
+
+struct Vec_181B20 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+};
+
+struct Obj_181B20 {
+    void** vtbl;
+    u8 pad0[0x638 - 4];
+    f32 x638;
+};
+
+void func_00181B20(void* unused, void* obj_)
+{
+    Obj_181B20* obj = (Obj_181B20*)obj_;
+    Vec_181B20 first;
+    Vec_181B20 second;
+
+    func_00128018(unused, 0, D_00264180, &first);
+    func_001BC260(D_00264190, obj, &first, &second);
+    ((void (*)(void*, void*))obj->vtbl[0x90 / 4])(obj, &second);
+    f32 r = func_00205778(second.y, second.x);
+    obj->x638 = func_001EA408(r + 3.1415927f);
+    func_001C5D58(obj);
+    func_00175170(obj, 4, 0x2B);
+}
+
+void func_001BC4D8(void* self, void* sub);
+
+void func_00181D88(void* self)
+{
+    func_001BC4D8(self, (u8*)self + 0xC04);
+}
+
+void func_0013CE40(void* self);
+void func_00124DF8(void* self, s32 a, void* table);
+s32 func_001B6290(void* a0, void* self, s32 b, s32 c);
+s32 func_00121160(s32 a);
+void* func_0018D500(s32 size);
+
+extern u8 D_00264230[];
+
+struct Alloc_1824D8 {
+    u8 pad[8];
+    s32 field8;
+    void* field_c;
+};
+
+struct Obj_1824D8 {
+    u8 pad0[0x6C4];
+    void* x6C4;
+    void* x6C8;
+    u8 pad1[0x6E8 - 0x6CC];
+    Alloc_1824D8* x6E8;
+};
+
+void func_001824D8(void* self_)
+{
+    Obj_1824D8* self = (Obj_1824D8*)self_;
+    func_0013CE40(self);
+    func_00124DF8(self, 2, D_00264230);
+    self->x6C8 = (void*)func_001B6290(self->x6C4, self, 0x36E, 0);
+    Alloc_1824D8* n = (Alloc_1824D8*)func_00121160(0);
+    self->x6E8 = n;
+    n->field8 = 0;
+    self->x6E8->field_c = func_0018D500(0xC00);
+}
+
+typedef void (*VFn_182C18)(void* self);
+
+struct Obj_182C18 {
+    VFn_182C18* vtbl;
+};
+
+void func_00182C18(void* self_)
+{
+    Obj_182C18* self = (Obj_182C18*)self_;
+    self->vtbl[5](self);
+    self->vtbl[6](self);
+}
+
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+
+void func_00182C58(void* self)
+{
+    func_001837E0(self, 0, 0, 0);
+}
