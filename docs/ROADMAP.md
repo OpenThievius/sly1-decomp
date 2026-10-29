@@ -7,34 +7,31 @@ splits are taken from other projects or from the prototype
 
 ## Done
 
-- [x] Disc recognition and executable extraction for all three versions (`tools/setup.py`, `tools/disc.py`)
-- [x] A first splat split of the US executable, one unit per section (`config/splat/us.yaml`)
-- [x] The compiler identified (2.9-ee-991111b, C++) and its Windows build running under wibo (`tools/toolchain.py`, [TOOLCHAIN.md](TOOLCHAIN.md))
-- [x] Repository checks and CI that need no game data, with a scan for proprietary material (`tools/proprietary.py`, `tests/`)
+- [x] Disc recognition and executable extraction (`tools/setup.py`, `tools/disc.py`)
+- [x] Both executables split by splat and built byte for byte from assembly (`tools/build.py`)
+- [x] Every function of each version, and PAL's pairing with US (`tools/inventory.py`)
+- [x] The compiler qualified: SN GCC 2.95.3, C++, `-O2 -G0 -fno-exceptions` ([TOOLCHAIN.md](TOOLCHAIN.md))
+- [x] The per-function checker, on US and on PAL (`tools/check.py`)
+- [x] C linked into the US build at each function's address (`tools/c_layout.py`)
+- [x] The ByteMatch reports and their CI (`tools/progress.py`, `.github/workflows/progress.yml`)
+- [x] The coordination issue and the matching workflow ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md))
+- [x] Repository checks and CI that need no game data, with a scan for proprietary material
 
 ## Next
 
-1. **A byte-identical build from assembly.** A linker script for the whole
-   image (the `.DVP.overlay` sections, `.reginfo`, `.stack` and the overlay
-   tables included), assembled and linked to `SCUS_971.98`, checked by SHA-1:
-   `MATCH`. Everything after rests on this.
-2. **File boundaries, found in retail.** Where one source file ends and the
-   next begins, from retail's own code: alignment padding between functions,
-   which functions call or share static data with which, how `.rodata` and
-   `.data` group, and compiler-generated functions (static initialisers) that
-   end a file. Then split by file (`src/<name>.cpp` with `INCLUDE_ASM`
-   markers), so each file gets its own flags. File names are ours.
-3. **Compiler qualification.** Small retail functions written in C++ and
-   compiled with `cc1plus.exe` ([TOOLCHAIN.md](TOOLCHAIN.md#still-to-qualify)),
-   then the per-file flags table.
-4. **The checker.** `tools/check.py FILE.cpp func`: compiles one function with
-   its file's flags and diffs it against retail.
-5. **Progress.** A report per version, the README table, and objdiff units.
-6. **PAL.** Its own split, with shared source checked against both versions.
+1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)).
+2. **Data from C.** Today a C file may hold only code: `.rodata` (float literals, jump tables,
+   strings) and `.data` still come from the disassembly. Placing each file's data where retail
+   has it opens the functions tagged `rodata` and `jtbl`.
+3. **File boundaries, found in retail.** Where one source file ends and the next begins, from
+   retail's own code: which functions share static data, how `.rodata` and `.data` group, and
+   compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of
+   `src/main/` then give way to real files, with names that are ours.
+4. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
+   counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C.
+5. **Names and types.** Ours, from what the code does, as the C is cleaned up.
 
 ## Open decisions
 
-- **The build system.** A Python `tools/build.py` like OpenRAC's rac3-decomp,
-  or a `configure.py` that writes a ninja file.
 - **The assembly macros.** splat writes its own macro files into `include/`
   (gitignored); the build will need macros written by this project instead.
