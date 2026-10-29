@@ -342,3 +342,24 @@ void func_0012F6D0(Rec_0012F6D0* self, f32 x)
     self->scale = x;
     func_0012F6B0(self, r);
 }
+
+extern u8* D_00275710;
+
+void func_00152600(u8* a, void* b);
+void func_001B5F28(u8* a, void* b);
+
+void func_0012E710(void* a0)
+{
+    func_00152600(D_00275710 + 0x1B7C, a0);
+    func_001B5F28(D_00275710 + 0x1B58, a0);
+}
+
+struct Obj_12E928 { void** vtbl; };
+
+void* func_0012D570(void* a0, void* a1);
+
+void func_0012E928(void* a0, void* a1, void* a2)
+{
+    Obj_12E928* n = (Obj_12E928*)func_0012D570(a0, a1);
+    if (n) ((void (*)(void*, void*))n->vtbl[2])(n, a2);
+}

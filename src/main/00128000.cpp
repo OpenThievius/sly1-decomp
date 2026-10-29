@@ -628,3 +628,160 @@ void func_0012B420(Bits_0012B420* self, s32 flag)
         func_00143B20(D_00261990, self);
     }
 }
+
+void func_001B1FB0(void* self, f32 x);
+
+void func_00129318(f32 x)
+{
+    func_001B1FB0(func_001291D0(x), x);
+}
+
+void func_001B1FE0(void* self, f32 x);
+
+void func_00129348(f32 x)
+{
+    func_001B1FE0(func_001291D0(x), x);
+}
+
+void func_001B2010(void* self, f32 x);
+
+void func_00129378(f32 x)
+{
+    func_001B2010(func_001291D0(x), x);
+}
+
+void func_001B2068(void* self, void* src);
+
+void func_001293A8(void* self, void* src)
+{
+    func_001B2068(func_001291D0(self), src);
+}
+
+typedef u64 Quad_129EE0 __attribute__((mode(TI)));
+struct Frame_129EE0 { Quad_129EE0 r; Quad_129EE0 a; Quad_129EE0 b; };
+
+void func_00118CF0(Quad_129EE0* out, void* src);
+void func_00118D10(Quad_129EE0* out, void* src);
+Quad_129EE0 func_00118D30(Quad_129EE0 a, Quad_129EE0 b);
+Quad_129EE0 func_00118D20(Quad_129EE0* out, Quad_129EE0 v);
+void func_00129F58(void* self, Quad_129EE0* src);
+
+void func_00129EE0(void* self, void* src)
+{
+    Frame_129EE0 f;
+    u8* p = D_00260E80;
+    func_00118CF0(&f.a, src);
+    Quad_129EE0 av = f.a;
+    func_00118D10(&f.b, p);
+    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    func_00129F58(self, &f.r);
+}
+
+struct __attribute__((packed)) Vec4_12A150 { f32 x, y, z, w; };
+struct Vec4F_12A150 { f32 x, y, z, w; };
+struct Holder_12A150 { u8 pad[0x21C]; Vec4_12A150* cur; };
+extern Vec4F_12A150 D_00260EB0;
+
+void func_0012A200(Holder_12A150* self, Vec4_12A150* src);
+
+void func_0012A150(Holder_12A150* self, f32 scale)
+{
+    Vec4F_12A150 tmp;
+    tmp.x = D_00260EB0.x * scale;
+    tmp.y = D_00260EB0.y * scale;
+    tmp.z = D_00260EB0.z;
+    tmp.w = D_00260EB0.w * scale;
+    func_0012A200(self, (Vec4_12A150*)&tmp);
+}
+
+
+
+void func_0012A1A0(Holder_12A150* self, f32 scale)
+{
+    Vec4_12A150 tmp = *self->cur;
+    tmp.w = scale * (tmp.x - tmp.y) / tmp.z;
+    func_0012A200(self, &tmp);
+}
+
+void* func_0018D500(s32 size);
+
+void func_0012A200(Holder_12A150* self, Vec4_12A150* src)
+{
+    if (self->cur == (Vec4_12A150*)&D_00260EB0) {
+        self->cur = (Vec4_12A150*)func_0018D500(16);
+    }
+    *self->cur = *src;
+}
+
+struct Part_0012AC08 { void* link; f32 f4; f32 f8; f32 fc; f32 f10; u8 sub14[8]; u8 sub1C[4]; f32 f20; };
+struct Host_0012AC08 { u8 pad[0x2AC]; Part_0012AC08* part; };
+
+void func_0012ABA8(Host_0012AC08* self);
+
+void func_0012ACA0(Host_0012AC08* self, f32 value)
+{
+    func_0012ABA8(self);
+    self->part->f4 = value;
+}
+
+
+
+void func_0012ADD0(Host_0012AC08* self, f32 value)
+{
+    func_0012ABA8(self);
+    self->part->f20 = value;
+}
+
+
+void func_0012AE08(Host_0012AC08* self, f32* out)
+{
+    f32 r = 0.0f;
+    if (self->part != 0) {
+        r = self->part->f20;
+    }
+    *out = r;
+}
+
+typedef void (*CtrlVFn_12B4C8)(void* self);
+struct Ctrl_12B290 { CtrlVFn_12B4C8* vtbl; u8 pad_04[0x14]; s32 f18; u8 pad_1C[0x294 - 0x1C]; s32 f294; u8 pad_298[0x2B1 - 0x298]; u8 b2B1; u8 b2B2; u8 b2B3; };
+
+void func_0012B290(Ctrl_12B290* self, s32* out)
+{
+    *out = self->b2B1;
+}
+
+
+void func_0012B2A8(Ctrl_12B290* self, s32* out)
+{
+    *out = self->b2B2;
+}
+
+
+void func_0012B2B8(Ctrl_12B290* self, s32 value)
+{
+    self->b2B3 = value;
+}
+
+
+s32 func_00182FC8(void* self);
+
+void func_0012B4C8(Ctrl_12B290* self, s32 flag)
+{
+    if ((0 < (u32)flag) != (self->f294 == 0)) {
+        goto done;
+    }
+    if (func_00182FC8(self) == 0) {
+        goto store;
+    }
+    if (self->f18 != 0) {
+        goto store;
+    }
+    self->vtbl[7](self);
+    self->f294 = flag;
+    self->vtbl[6](self);
+    goto done;
+store:
+    self->f294 = flag;
+done:
+    return;
+}
