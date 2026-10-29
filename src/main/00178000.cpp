@@ -351,3 +351,38 @@ void func_0017A6D0(void* self)
     func_00192C58(self);
     func_0017ABE8(self, 2);
 }
+
+struct Rec_17AB58 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+};
+
+struct Self_17AB58 {
+    u8 pad_000[0x618];
+    s32 f618;
+    u8 pad_61C[0x6E0 - 0x61C];
+    s32 f6E0;
+    u8 pad_6E4[0x70C - 0x6E4];
+    s32 f70C;
+};
+
+void func_00192230(void* self, s32 kind, Rec_17AB58* rec);
+
+void func_0017AB58(Self_17AB58* self, s32 kind, Rec_17AB58* rec)
+{
+    if (kind == 0x13 && rec->f0 == self->f618) {
+        switch (rec->f8) {
+        case 0x15E:
+            self->f6E0 = 1;
+            break;
+        case 0x15F:
+            self->f6E0 = 0;
+            break;
+        case 0x467:
+            self->f70C = 1;
+            break;
+        }
+    }
+    func_00192230(self, kind, rec);
+}

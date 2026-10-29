@@ -602,3 +602,10 @@ void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
         func_00128150(0, a3, a2, a2);
     }
 }
+
+void func_001ABE20(void* self, s32 state);
+
+void func_001AB938(void* self)
+{
+    func_001ABE20(self, 2);
+}

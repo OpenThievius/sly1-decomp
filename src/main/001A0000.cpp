@@ -406,3 +406,19 @@ s32 func_001A2B18(Self_1A2B18* self, Other_1A2B18* other)
     }
     return other != self->f7C;
 }
+
+struct Src_1A2D30 { u8 pad0[0x7C]; void* link; u8 pad1[0x1F0 - 0x80]; s32 f1F0; s32 f1F4; };
+struct Dst_1A2D30 { u8 pad0[0xB0]; s32 f0B0; u8 pad1[0x110 - 0xB4]; s32 f0110; s32 f0114; s32 f0118; s32 f011C; s32 f0120; s32 f0124; };
+
+void func_00128018(void* a0, void* a1, void* a2, void* a3);
+
+void func_001A2D30(void* a0, void* a1)
+{
+    Dst_1A2D30* dst = (Dst_1A2D30*)a0;
+    Src_1A2D30* src = (Src_1A2D30*)a1;
+    func_00128018(src->link, 0, (u8*)src + 0x20, (u8*)dst + 0x80);
+    dst->f0B0 = 0;
+    dst->f0110 = 0;
+    dst->f0120 = src->f1F4;
+    dst->f0124 = src->f1F0;
+}

@@ -937,3 +937,19 @@ void func_00123BB0(Obj_00123BB0* self)
         }
     }
 }
+
+typedef void (*VFn_123C20)(void* self);
+struct Item_123C20 { VFn_123C20* vtbl; };
+struct Mgr_123C20 { u8 pad[0x5BC]; s32 count; Item_123C20* items[1]; };
+
+void func_00123C20(Mgr_123C20* self)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        Item_123C20* it = self->items[i];
+        VFn_123C20 fn = it->vtbl[79];
+        if (fn != 0) {
+            fn(it);
+        }
+    }
+}

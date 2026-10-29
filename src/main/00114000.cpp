@@ -1240,3 +1240,46 @@ void* func_00115398(void* ret, s32 unused, void* src, s32 c)
     func_0011B060(&t, 2);
     return ret;
 }
+
+struct Quad_1169E8 { s32 a, b, c, d; };
+struct __attribute__((aligned(16))) Block_1169E8 { s32 w[16]; };
+struct Src_1169E8 { s32 f0; Block_1169E8* f4; };
+
+void func_0011B008(Quad_1169E8* q);
+void func_0011B018(void* dst, Quad_1169E8* src);
+void func_0011B060(Quad_1169E8* q, int mode);
+void* func_0011C618(void);
+void func_001884C0(void* p);
+void func_0011B788(Quad_1169E8* q, void* b);
+
+void* func_001169E8(void* self, void* x, Src_1169E8* src)
+{
+    Quad_1169E8 q;
+    void* obj;
+    func_0011B008(&q);
+    obj = func_0011C618();
+    *(Block_1169E8*)obj = *src->f4;
+    func_001884C0(obj);
+    func_0011B788(&q, obj);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_117E20 { s32 a, b, c, d; };
+
+void func_0011B008(Quad_117E20* q);
+void func_0011B018(void* dst, Quad_117E20* src);
+void func_0011B060(Quad_117E20* q, int mode);
+s32 func_0011B8A8(Quad_117E20* q, s32 v);
+void* func_001925F0(void);
+
+void* func_00117E20(void* self)
+{
+    Quad_117E20 q;
+    func_0011B008(&q);
+    (void)func_0011B8A8(&q, (s32)func_001925F0());
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

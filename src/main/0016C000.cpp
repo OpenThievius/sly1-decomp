@@ -461,3 +461,42 @@ void func_0016F430(s32 flags)
 
 struct S_16EC88 { u8 pad[0x28]; s32 a; s32 b; };
 void func_0016EC88(S_16EC88* p) { p->a = 0; p->b = 0; }
+
+void func_001261C0(void);
+
+void func_0016C508(void)
+{
+    func_001261C0();
+}
+
+struct Self_16D040 {
+    u8 pad_00[0x14];
+    void* f14;
+    u8 pad_18[0x578 - 0x18];
+    void* f578;
+};
+
+struct Res_16D040 {
+    u8 pad_00[0x7AC];
+    s32 f7AC;
+};
+
+void* func_0015A448(void* obj, void* id, void* owner);
+void func_0016D3F0(Self_16D040* self, void* x);
+void func_0016D788(Self_16D040* self);
+void func_0016DAC0(Self_16D040* self, s32 mode);
+
+void func_0016D040(Self_16D040* self, void* x)
+{
+    self->f578 = x;
+    Res_16D040* p = (Res_16D040*)func_0015A448(self->f14, x, self);
+    if (p != 0) {
+        func_0016D3F0(self, p);
+        func_0016D788(self);
+        if (p->f7AC != 0) {
+            func_0016DAC0(self, 2);
+        } else {
+            func_0016DAC0(self, 4);
+        }
+    }
+}

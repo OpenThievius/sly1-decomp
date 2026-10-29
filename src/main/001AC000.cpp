@@ -431,3 +431,23 @@ void func_001AE7F8(Obj_1AE7F8* self, s32 flag)
     }
     func_001AA998(self, flag);
 }
+
+struct Obj_1AEE50 { u8 pad0[0x578]; s32 count578; s32 items57C[9]; s32 count5A0; s32 items5A4[9]; };
+
+s32 func_001833F0(void* key, s32 item);
+s32 func_001300E8(void* key, s32 item);
+
+s32 func_001AEE50(Obj_1AEE50* self, void* key)
+{
+    for (s32 i = 0; i < self->count578; i++) {
+        if (func_001833F0(key, self->items57C[i]) != 0) {
+            return 1;
+        }
+    }
+    for (s32 i = 0; i < self->count5A0; i++) {
+        if (func_001300E8(key, self->items5A4[i]) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}

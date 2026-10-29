@@ -1357,3 +1357,24 @@ struct State_0012B140 { u8 pad[0x288]; Sub_0012B140* sub; };
 
 struct Sub_0012B1A0 { u8 pad[0x20]; Vec16_12A5D0 value; };
 struct State_0012B1A0 { u8 pad[0x288]; Sub_0012B1A0* sub; };
+
+struct Node_1299E0 { u8 pad0[8]; Node_1299E0* next; u8 pad1[8]; s32 key; };
+struct VT_1299E0 { u8 pad[0xBC]; void (*f_BC)(void* self); };
+struct Obj_1299E0 { VT_1299E0* vt; u8 pad[0x1E0 - 4]; Node_1299E0* head; };
+
+void func_00152540(void* list, Node_1299E0* before, Node_1299E0* value);
+
+void func_001299E0(Obj_1299E0* self, Node_1299E0* src)
+{
+    s32 scratch[4];
+    Node_1299E0* node = self->head;
+    (void)scratch;
+    if (node != 0 && node->key > src->key) {
+        node = node->next;
+        while (node != 0 && node->key > src->key) {
+            node = node->next;
+        }
+    }
+    func_00152540(&self->head, node, src);
+    self->vt->f_BC(self);
+}

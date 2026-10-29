@@ -872,3 +872,21 @@ void func_00183A90(void* a0, void* a1, void* a2)
     func_0011B060(&b, 2);
     func_0011B060(&a, 2);
 }
+
+struct Item_183320 { u8 pad0[0x44]; void* f44; };
+struct Src_183320 { Item_183320* f0; };
+struct Mgr_183320 { u8 pad0[0x14]; void* f14; u8 pad1[0x10]; void* f28; };
+
+void func_00183238(void* mgr, void** link, s32 key1, Src_183320* key2);
+
+void func_00183320(Mgr_183320* self, Src_183320* src)
+{
+    func_00183238(self->f14, &self->f28, (s32)src->f0->f44, src);
+}
+
+void func_0011EC40(void* a, void* b);
+
+void func_001833D0(void* a, void* b)
+{
+    func_0011EC40(a, b);
+}

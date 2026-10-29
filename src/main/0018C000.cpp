@@ -845,3 +845,27 @@ s32 func_0018EC40(void* a0, void* a1, void* a2)
     }
     return 0;
 }
+
+void* func_0018D5C0(u32 n);
+
+void* func_0018D758(u32 n)
+{
+    return func_0018D5C0(n);
+}
+
+struct Args_18EC80 { u8 pad0[8]; s32 f8; s32 fC; };
+
+void func_0018EAF8(void* self, s32 a, s32 b);
+
+void func_0018EC80(void* a0, Args_18EC80* a1, void* a2)
+{
+    func_0018EAF8((u8*)a2 + 0x80, a1->fC, a1->f8);
+}
+
+void func_0018F890(void* self, s32 flag);
+
+s32 func_0018ED78(void* a0, s32 a1, void* a2)
+{
+    func_0018F890(a2, 0);
+    return 1;
+}

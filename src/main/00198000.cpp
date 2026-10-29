@@ -890,3 +890,67 @@ void func_00198530(void* self)
         func_001C8920(self);
     }
 }
+
+struct Req_1986E8 {
+    s32 a;
+    s32 b;
+};
+
+struct Self_1986E8 {
+    u8 pad[0xC10];
+    s32 slot;
+};
+
+void func_001C9DE0(void* self, s32 code, void* req);
+
+void func_001986E8(Self_1986E8* self, s32 code, Req_1986E8* req)
+{
+    func_001C9DE0(self, code, req);
+    if (code != 10) {
+        if (code == 11) {
+            if (req->b == (s32)self) {
+                self->slot = 0;
+            }
+        }
+    } else {
+        if (req->b == (s32)self) {
+            self->slot = req->a;
+        }
+    }
+}
+
+struct Ev_199C78 { u8 pad[0xC]; s32 flags; };
+typedef void (*VFnA_199C78)(void* self, s32 a);
+typedef void (*VFnB_199C78)(void* self);
+struct Obj_199C78 { void** vtbl; };
+
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+s32 func_001BC320(void* self, Ev_199C78* ev);
+
+s32 func_00199C78(void* a0, Ev_199C78* a1)
+{
+    Obj_199C78* self = (Obj_199C78*)a0;
+    if (a1->flags & 0x8) {
+        ((VFnA_199C78)self->vtbl[25])(self, 0);
+        func_001B9AE0(self, 0, 0, 3, 0);
+    }
+    func_001BC320(self, a1);
+    if (a1->flags & 0x10) {
+        ((VFnB_199C78)self->vtbl[77])(self);
+    }
+    return 1;
+}
+
+struct __attribute__((packed)) Q_19B250 { s64 v; };
+struct Obj_19B250 { u8 pad[0x600]; Q_19B250 q; };
+
+void func_001BA130(void* self);
+
+void func_0019B250(void* a0)
+{
+    Obj_19B250* self = (Obj_19B250*)a0;
+    Q_19B250 tmp;
+    tmp = self->q;
+    func_001BA130(self);
+    self->q = tmp;
+}

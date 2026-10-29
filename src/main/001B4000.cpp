@@ -1035,3 +1035,101 @@ void func_001B5E30(Walk_1B5E30* s, s32 size, s32 count)
     s->b = (void*)((addr + 0x3F) & -0x40);
     func_001B5D80(s, size, count);
 }
+
+struct Node_1B6388 {
+    u8 pad0[0x8];
+    Node_1B6388* next;
+    u8 pad1[0x10];
+    s32 key;
+};
+
+struct Owner_1B6388 {
+    u8 pad0[0x48];
+    Node_1B6388* head;
+};
+
+void* func_001B6388(Owner_1B6388* self, s32 key)
+{
+    s32 scratch[4];
+    (void)scratch;
+    Node_1B6388* node = self->head;
+    if (node != 0) {
+        do {
+            if (node->key == key) {
+                return node;
+            }
+            node = node->next;
+        } while (node != 0);
+    }
+    return 0;
+}
+
+struct Entry_1B6DF8 {
+    u8 pad0[0x44];
+    s32 value;
+};
+
+struct Holder_1B6DF8 {
+    u8 pad0[0x14];
+    void* ptr;
+};
+
+struct Self_1B6DF8 {
+    u8 pad0[0x18];
+    Holder_1B6DF8* holder;
+};
+
+void func_001831E8(void* a, void* b, s32 c, void* d);
+
+void func_001B6DF8(Self_1B6DF8* self, Entry_1B6DF8** p)
+{
+    func_001831E8(self->holder->ptr, (u8*)self + 0x3C, (*p)->value, p);
+}
+
+struct Pair_1B7128 {
+    s32 key;
+    s32 value;
+};
+
+struct Self_1B7128 {
+    u8 pad0[0x14];
+    void* host;
+    u8 pad1[0xC28 - 0x18];
+    s32 sel;
+    s32 result;
+    u8 pad2[0xCD4 - 0xC30];
+    s32 count;
+    Pair_1B7128 pairs[1];
+};
+
+void func_001C72A0(void* self);
+void func_001B6F50(void* self);
+s32 func_0015A448(void* host, s32 id, void* ctx);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+void func_001B7128(Self_1B7128* self)
+{
+    func_001C72A0(self);
+    func_001B6F50(self);
+    if (self->sel != -1) {
+        self->result = func_0015A448(self->host, self->sel, self);
+    }
+    if (self->count > 0) {
+        s32 i = 0;
+        Pair_1B7128* p = self->pairs;
+        do {
+            p->value = func_0015A418(self->host, 0x104, p->key, self);
+            p++;
+            i++;
+        } while (i < self->count);
+    }
+}
+
+void func_001C7CB8(void* self);
+void func_001B7638(void* self);
+
+void func_001B7608(void* self)
+{
+    func_001C7CB8(self);
+    func_001B7638(self);
+}

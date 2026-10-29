@@ -689,3 +689,55 @@ void func_0014EF40(Obj_0014EF40* self, void* other) { Pack_0014EF40 save=self->v
 void func_001BAC30(void*);
 void func_00159478(void*,void*);
 void func_0014EF88(u8* self) { func_001BAC30(self); func_00159478(self+0x58C,self); }
+
+struct Obj_14EFB8 {
+    u8 pad0[0x578];
+    void* field_578;
+};
+
+void func_00127378(void* self, s32 kind, void* msg);
+void func_0014F110(Obj_14EFB8* self, s32 value);
+
+void func_0014EFB8(Obj_14EFB8* self, s32 kind, void* msg)
+{
+    func_00127378(self, kind, msg);
+    if (kind == 6) {
+        if (msg == self->field_578) {
+            self->field_578 = 0;
+            func_0014F110(self, 4);
+        }
+    }
+}
+
+typedef void (*VFn_14F770)(void* self, void* arg);
+struct Sub_14F770 { u8 pad0[0x1C]; s32 f1C; u8 pad1[0x2C]; s32 f4C; };
+struct Child_14F770 { VFn_14F770* vtbl; u8 pad0[0x1FC]; Sub_14F770* f200; };
+struct Obj_14F770 { u8 pad0[0x680]; s32 f680; u8 pad1[0xB0]; Child_14F770* f734; Child_14F770* f738; u8 pad2[4]; void* f740; };
+
+void func_00127378(void* self, s32 kind, void* msg);
+void func_001B6568(void* dev, s32* out);
+void func_001B6438(void* h);
+
+void func_0014F770(Obj_14F770* self, s32 kind, void* msg)
+{
+    s32 result;
+
+    func_00127378(self, kind, msg);
+    if (kind == 0x14) {
+        if (msg == self->f740) {
+            func_001B6568(msg, &result);
+            if (result == 0x2B7) {
+                if (self->f680 != 0) {
+                    func_001B6438(self->f740);
+                    self->f740 = 0;
+                } else {
+                    self->f734->f200->f4C = 1;
+                    self->f734->f200->f1C = 0;
+                    self->f734->vtbl[0x84 / 4](self->f734, (u8*)self->f734 + 0x190);
+                    self->f734->vtbl[0x88 / 4](self->f734, (u8*)self->f734 + 0x1A0);
+                    self->f738->vtbl[0x88 / 4](self->f738, (u8*)self->f738 + 0x1A0);
+                }
+            }
+        }
+    }
+}

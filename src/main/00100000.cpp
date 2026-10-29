@@ -893,3 +893,77 @@ void* func_00103C10(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct Quad_103CC0 { s32 a, b, c, d; };
+struct Frame_103CC0 { Quad_103CC0 q; Quad_103CC0 t; s32 n; s32 out; };
+
+void func_0011B008(Quad_103CC0* q);
+void func_0011B018(void* dst, Quad_103CC0* src);
+void func_0011B060(Quad_103CC0* q, int mode);
+void func_0011B0A8(Quad_103CC0* a, Quad_103CC0* b);
+s32 func_0011B5F0(Quad_103CC0* q, s32 flag);
+void func_001C23B0(Quad_103CC0* t, int mode, int c, void* z, void* z2);
+s32 func_001DD908(void* self, s32 index);
+
+void* func_00103CC0(void* self, void* x, int unused, int c)
+{
+    Frame_103CC0 f;
+    func_0011B008(&f.q);
+    f.n = 0x1000;
+    func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_0011B5F0(&f.q, func_001DD908(x, f.out));
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_103D70 { s32 a, b, c, d; };
+struct Frame_103D70 { Quad_103D70 q; Quad_103D70 t; };
+
+void func_0011B008(Quad_103D70* q);
+void func_0011B018(void* dst, Quad_103D70* src);
+void func_0011B060(Quad_103D70* q, int mode);
+void func_0011B0A8(Quad_103D70* a, Quad_103D70* b);
+s32 func_0011B570(Quad_103D70* q, s32 v);
+void func_001C23B0(Quad_103D70* t, int mode, int c, void* z);
+s32 func_001DD928(void* self);
+
+void* func_00103D70(void* self, void* x, int unused, int c)
+{
+    Frame_103D70 f;
+    func_0011B008(&f.q);
+    func_001C23B0(&f.t, 0, c, 0);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_0011B570(&f.q, func_001DD928(x));
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_103E10 { s32 a, b, c, d; };
+struct Frame_103E10 { Quad_103E10 q; Quad_103E10 t; };
+
+void func_0011B008(Quad_103E10* q);
+void func_0011B018(void* dst, Quad_103E10* src);
+void func_0011B060(Quad_103E10* q, int mode);
+void func_0011B0A8(Quad_103E10* a, Quad_103E10* b);
+void func_0011B538(Quad_103E10* q, int n);
+void func_001C23B0(Quad_103E10* t, int mode, int c, void* z);
+void func_001DDAD0(void* x);
+
+void* func_00103E10(void* self, void* x, int unused, int c)
+{
+    Frame_103E10 f;
+    func_0011B008(&f.q);
+    func_001C23B0(&f.t, 0, c, 0);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001DDAD0(x);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

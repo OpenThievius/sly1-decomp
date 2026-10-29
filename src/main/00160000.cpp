@@ -516,3 +516,36 @@ void func_00161B80(u8* self)
     *(s32*)(self+0x124)=0;
     ((Fill_161B80)func_001F5C0C)(self+0x128,0,0x1720);
 }
+
+struct Stream_161588 {
+    u8 pad0[0xC];
+    u8* cur;
+};
+
+void func_001612E8(void* self, s32 a1, s32 a2);
+
+void func_00161588(Stream_161588* self, s32 a1, s32 a2, u64 a3)
+{
+    func_001612E8(self, 1, 5);
+    u8* p = self->cur;
+    self->cur = p + 0x10;
+    *(s32*)(p + 0x0) = a1;
+    *(s32*)(p + 0x4) = a2;
+    *(u64*)(p + 0x8) = a3;
+}
+
+struct Stream_161860 {
+    u8 pad0[0xC];
+    u64* cur;
+};
+
+void func_001612E8(void* self, s32 a1, s32 a2);
+
+void func_00161860(Stream_161860* self, s32 a1, s32 a2)
+{
+    func_001612E8(self, 0, 3);
+    u64 v = (u64)a1 | (u64)(a2 << 16);
+    u64* p = self->cur;
+    self->cur = p + 1;
+    *p = v;
+}

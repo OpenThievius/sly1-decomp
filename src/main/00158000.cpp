@@ -938,3 +938,20 @@ void func_0015A918(u8* self,void* other)
     func_001289C0(self,other);
     func_001E4C48(other,self+0x2D0,self+0x2D4,self+0x2D8,self+0x2DC);
 }
+
+struct Rec_159A80 { u8 pad[0x3C]; s32 f3C; };
+struct Key_159A80 { u8 pad[0x2]; s16 f2; };
+
+u8* func_001B4B48(void* owner, void* key);
+
+u8* func_00159A80(Rec_159A80* self, Key_159A80* key)
+{
+    u8* p = func_001B4B48(self, key);
+    if (p == 0) {
+        p = (u8*)self + 0x40;
+        if ((key->f2 ^ self->f3C) != 0) {
+            p = 0;
+        }
+    }
+    return p;
+}

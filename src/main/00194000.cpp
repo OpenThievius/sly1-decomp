@@ -182,3 +182,10 @@ void func_00197A68(void* ctx, Pair_00197A68* out)
     out->f98 = D_0026A83C;
     out->f94 = D_0026A840;
 }
+
+void func_001922E8(void* a, void* b);
+
+void func_001974D8(void* a, void* b)
+{
+    func_001922E8(a, b);
+}
