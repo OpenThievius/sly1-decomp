@@ -270,3 +270,35 @@ void func_00137E70(void* src, void* dst)
 {
     func_00137A60(src, 12, dst);
 }
+
+// Newly matched US functions from the small-function wave.
+struct Obj_1365A0 { u8 pad[0x2FC]; s32 f2FC; };
+struct Obj_137260 { u8 pad[0x14]; s32 f14; };
+extern void func_00136FE8(s32, s32);
+extern void func_001373D0(void*);
+extern void func_0018D778(void*);
+struct Obj_137398 { u8 pad0[4]; s32 state; u8 pad8[0x10]; s32 f18; s32 f1C; };
+extern void func_00137A60(void*, s32, void*);
+
+void func_001365A0(Obj_1365A0* self, s32 value) { self->f2FC = value; }
+
+void func_00137260(Obj_137260* self, s32 value) { self->f14 = value; }
+
+void func_00137270() { func_00136FE8(1, 0xFFFF); }
+
+void func_001372E0(void* self, s32 flags)
+{
+    func_001373D0(self);
+    if (flags & 1) func_0018D778(self);
+}
+
+void func_00137398(Obj_137398* self, s32 a1, s32 a2) { self->f1C = a1; self->f18 = a2; self->state = 2; }
+
+void func_00137E90(void* self, void* out) { func_00137A60(self, 0x10, out); }
+
+void func_00137EB0(void* self, u8* buffer)
+{
+    func_00137A60(self, 0xC, buffer);
+    func_00137A60(self, 0xC, buffer + 0x10);
+    func_00137A60(self, 0xC, buffer + 0x20);
+}

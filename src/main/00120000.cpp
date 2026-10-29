@@ -684,6 +684,21 @@ done:
 }
 
 struct Counter_00123B18 { u8 pad[0x61C]; s32 value; };
+struct Self_123578;
+extern void func_00123888(Self_123578*, s32);
+
+void func_00123AB0(Self_123578* object, s32 mode)
+{
+    s32 mapped;
+    switch (mode) {
+    case 0: mapped = 2; break;
+    case 1: mapped = 0; break;
+    case 2: mapped = 1; break;
+    default: return;
+    }
+    func_00123888(object, mapped);
+}
+
 
 void func_00123B18(Counter_00123B18* counter)
 {
@@ -773,4 +788,74 @@ s32 func_00123D40(TestList_00123D40* self, void* arg)
         }
     }
     return 1;
+}
+struct Records_001250C8 {
+    u8 pad0[0x238];
+    s32 count;
+    u8 pad1[4];
+    u8* data;
+};
+
+struct Record_001250C8 { u8 pad[8]; s32 value; };
+
+void func_001250C8(Records_001250C8* records)
+{
+    for (s32 i = 0; i < records->count; i++) {
+        Record_001250C8* record = (Record_001250C8*)(records->data + i * 0x28);
+        record->value = -1;
+    }
+}
+
+struct Object_00126A48 {
+    u32* vtable;
+    u8 pad0[0x18];
+    Object_00126A48* next;
+    u8 pad1[0x14];
+    Object_00126A48* child;
+    u8 pad2[0x22C];
+    u32 state_flags;
+    u32 state;
+};
+
+void func_00126A48(Object_00126A48* object, u32 value)
+{
+    u32 scratch[4];
+    (void)scratch;
+    Object_00126A48* child = object->child;
+    object->state = value;
+    object->state_flags |= 2;
+    while (child != 0) {
+        if ((child->vtable[2] & 1) != 0)
+            func_00126A48(child, value);
+        child = child->next;
+    }
+}
+
+struct Object_00126BC0 {
+    u32* vtable;
+    u8 pad0[0x18];
+    Object_00126BC0* next;
+    u8 pad1[0x14];
+    Object_00126BC0* child;
+    u8 pad2[0x200];
+    s32 count;
+    u8* records;
+};
+struct Record_00126BC0 { u8 pad0[0x14]; s32 type; u8 pad1[0x54]; s32 value; };
+
+void func_00126BC0(Object_00126BC0* object, s32 value)
+{
+    s32 scratch[4];
+    (void)scratch;
+    for (s32 i = 0; i < object->count; i++) {
+        Record_00126BC0* record = (Record_00126BC0*)(object->records + i * 0x70);
+        record->type = 2;
+        record->value = value;
+    }
+    Object_00126BC0* child = object->child;
+    while (child != 0) {
+        if ((child->vtable[2] & 1) != 0)
+            func_00126BC0(child, value);
+        child = child->next;
+    }
 }

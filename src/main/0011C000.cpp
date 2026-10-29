@@ -1031,3 +1031,101 @@ void func_0011FF08(u8* self, Obj_11FF08* other, s32 c, void* p3, void* p4)
     if (other)
         other->vtbl[45](other, p3, p4);
 }
+
+// Newly matched US functions from the small-function wave.
+extern void* func_0011C1D8(void*);
+extern void* func_0011F6B0(void*, u32, u32, void*, u32, u32);
+struct Node_0011C2A0 {
+    Node_0011C2A0* next;
+    s32 state;
+};
+struct State_0011C2B0 {
+    u8 pad0[0x10];
+    Node_0011C2A0* current;
+};
+
+Node_11C418* func_0011C240(void* self)
+{
+    Node_11C418* result = (Node_11C418*)func_0011C1D8(self);
+    func_001F5C0C(result, 0, *(s32*)self - 8);
+    return result;
+}
+
+void func_0011C2A0(State_0011C2B0* self)
+{
+    *(Node_0011C2A0**)((u8*)self + 0x14) = self->current;
+}
+
+void func_0011C2B0(State_0011C2B0* self)
+{
+    Node_0011C2A0* node = self->current;
+    if (node == 0) return;
+    do {
+        node->state = 0;
+        node = node->next;
+    } while (node != 0);
+}
+
+void func_0011D640(s32 value)
+{
+    s32 local = value;
+    func_0011DB00(0x13, 4, &local, 0, 0);
+}
+
+void func_0011D730(s32 value, s32 a1, s32 a2)
+{
+    s32 local = value;
+    func_0011DB00(0x19, 4, &local, a1, a2);
+}
+
+void func_0011D760(s32 a0, s32 a1)
+{
+    s32 local[2];
+    local[0] = a0;
+    local[1] = a1;
+    func_0011D968(0x1A, 8, local);
+}
+
+void func_0011D860(s32 a0, s32 a1, s32 a2, s32 a3)
+{
+    s32 local[4];
+    local[0] = a0;
+    local[1] = a1;
+    local[2] = a2;
+    local[3] = a3;
+    func_0011DB00(0x22, 16, local, 0, 0);
+}
+
+void func_0011E328(s32 a0, s32 a1)
+{
+    s32 local[2];
+    local[0] = a0;
+    local[1] = a1;
+    func_0011DB00(0xE, 8, local, 0, 0);
+}
+
+void func_0011E360(s32 a0, s32 a1, s32 a2)
+{
+    s32 local[3];
+    local[0] = a0;
+    local[1] = a1;
+    local[2] = a2;
+    func_0011DB00(0xF, 12, local, 0, 0);
+}
+
+void func_0011E3A0(s32 a0, s32 a1)
+{
+    s32 local[2];
+    local[0] = a0;
+    local[1] = a1;
+    func_0011DB00(0x51, 8, local, 0, 0);
+}
+
+void func_0011EFA8()
+{
+}
+
+void* func_0011FFA8(void* self, u32 a1, u32 a2, u32 a3, u32 a4)
+{
+    return func_0011F6B0((u8*)self + 0x20, a1, a2, (u8*)self + 0x10, a3, a4);
+}

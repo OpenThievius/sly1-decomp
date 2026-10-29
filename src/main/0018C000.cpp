@@ -62,6 +62,32 @@ struct Obj_18D168 { u8 pad0[4]; void* p4; void* p8; u8 pad1[0x18]; s32 p24; s32 
 
 s32 func_00209CB8(void* a, void* b, s32* c, s32* d, s32* e);
 s32 func_0018BD00(s32 v, s32 code, s32 extra);
+struct State_18CFC0 { s32 type; s32 size; s32 handle; };
+extern s32 func_00160650(void*);
+extern s32 func_0018D368(void*, void*, void*, s32);
+
+s32 func_0018CFC0(void* owner, void* name, State_18CFC0* state)
+{
+    state->type = 18;
+    state->size = 0x1A00;
+    return func_0018D368(owner, name,
+        (state->handle = func_00160650(state), state), 0x1A00);
+}
+extern void func_001605E8(void*);
+extern s32 func_0018CFC0(void*, void*, void*);
+extern s32 func_0018C9C0(void*, void*, void*);
+
+s32 func_0018D028(void* a0, void* a1, void* a2, void* a3)
+{
+    u8 local[0x60];
+    func_001605E8(a2);
+    if (a3 == 0) a3 = local;
+    s32 result = func_0018CFC0(a0, a1, (State_18CFC0*)a2);
+    if (result != 0) return result;
+    return func_0018C9C0(a0, a1, a3);
+}
+
+
 
 s32 func_0018D168(Obj_18D168* a0, s32* a1)
 {
@@ -108,6 +134,23 @@ void func_0018D328(void* unused, void* a1, void* a2, void* a3, void* a4)
 {
 	func_0018BD00((s32)func_00209990(a1, a2, a3), (void*)6, (s32)a4);
 }
+struct Result_18D368 { s32 first; s32 second; };
+extern s32 func_0018D268(void*, void*, void*, void*);
+extern void func_0018D328(void*, void*, void*, void*, void*);
+extern void func_0018D2B0(void*, void*);
+
+s32 func_0018D368(void* self, void* code, void* data, s32 version)
+{
+    Result_18D368 result;
+    result.first = -1;
+    s32 status = func_0018D268(self, code, (void*)514, &result.first);
+    if (status != 0) return status;
+    status = ((s32 (*)(void*, void*, void*, void*, void*))func_0018D328)(self, (void*)result.first, data, (void*)version, &result.second);
+    if (status == 0) status = result.second == version ? 0 : 7;
+    func_0018D2B0(self, (void*)result.first);
+    return status;
+}
+
 
 void func_0018D4F8(s32 size)
 {

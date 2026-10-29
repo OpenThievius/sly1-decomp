@@ -91,3 +91,18 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.
+
+Additional US checks on 2026-10-29: 80 small functions across
+`src/main/00104000.cpp`, `0011C000.cpp`, `00128000.cpp`, `00134000.cpp`, and
+`00140000.cpp` matched with SN GCC 2.95.3 and `-O2 -G0 -fno-exceptions`.
+The full US build, linked with GNU binutils using `-march=r5900 -mabi=eabi`,
+printed `MATCH: build/us/SCUS_971.98 sha1
+57dc305db57932ad3f1122966cdb695d2e62a47a with 1785 functions from C`.
+
+Twenty-two near misses from this wave are retained under `nonmatching/` with
+the remaining differences recorded in each file. PAL version check reported
+27 absent, 42 differs, 7 error, 1709 match; 79 of the 80 functions in this
+wave match at their PAL counterparts, while `func_001365A0` differs there.
+Progress reported US 1785/4766 functions (13.38%) and PAL 1709/4791 (12.62%).
+Unit tests printed `OK` (11 tests), and
+`python3 tests/check_repository.py` printed `ok: 0 problem(s)`.

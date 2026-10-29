@@ -763,3 +763,43 @@ void func_001439C8(Obj_1439C8* self, f32 value)
     self->f1FC = value;
     func_00143560(self);
 }
+
+// Newly matched US functions from the small-function wave.
+extern void func_0013EB30(void*);
+extern s32 func_0011E1F8(s32);
+extern void func_001439A8(void*);
+extern void func_001439C8(void*);
+extern void func_001439E8(void*);
+extern void func_00143A08(void*);
+extern void* D_00261990;
+extern void func_001448C8(void*, s32, void*);
+
+void func_00140710(void* self, void* value)
+{
+    s32 i = *(s32*)((u8*)self + 0x78C);
+    u32 address = (u32)self + (u32)(i << 2);
+    *(u32*)(address + 0x790) = (u32)value;
+    *(s32*)((u8*)self + 0x78C) = i + 1;
+}
+
+void func_00140730(void* self, void* value)
+{
+    s32 i = *(s32*)((u8*)self + 0x550);
+    u32 address = (u32)self + (u32)(i << 2);
+    *(u32*)(address + 0x554) = (u32)value;
+    *(s32*)((u8*)self + 0x550) = i + 1;
+}
+
+void func_00140770(void* self) { func_0013EB30((u8*)self + 0x5C0); }
+
+s32 func_00140D68(s32 value) { s32 result = func_0011E1F8((u32)value < 1u); return result == 0; }
+
+void func_00143838(void) { func_001439A8(D_00261990); }
+
+void func_00143860(void) { func_001439C8(D_00261990); }
+
+void func_00143888(void) { func_001439E8(D_00261990); }
+
+void func_001438B0(void) { func_00143A08(D_00261990); }
+
+void func_00143920(void* arg, void* arg2) { func_001448C8(arg, 0, arg2); }
