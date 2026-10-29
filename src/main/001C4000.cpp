@@ -256,3 +256,16 @@ s32 func_001C7278(Obj_1C7278* self)
 {
     return self->vtbl[7](self);
 }
+
+void func_00192820(void* self);
+void func_001CB648(void* list, void* value);
+
+struct Obj_1C74E8 { u8 pad0[0x720]; void* list; };
+
+void func_001C74E8(Obj_1C74E8* self)
+{
+    func_00192820(self);
+    if (self->list != 0) {
+        func_001CB648(self->list, self);
+    }
+}

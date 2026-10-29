@@ -418,3 +418,36 @@ void func_001CAB00(Obj_1CAB00* self, s32 value)
     self->value_B48 = value;
     self->flag_B40 = 1;
 }
+
+struct Obj_1C84C0 { u8 pad0[0x92C]; s32 a; s32 b; u8 pad1[0xA60 - 0x934]; s32 c; };
+
+s32 func_001C84C0(Obj_1C84C0* self)
+{
+    s32 result = 0;
+    if (self->c != 0) {
+        result = self->b == self->a;
+    }
+    return result;
+}
+
+struct Inner_001C9CF8 { u8 pad0[0x8]; void* p8; };
+struct Owner_001C9CF8 { u8 pad0[0x7E0]; Inner_001C9CF8* inner; u8 pad1[0xA60 - 0x7E4]; s32 f_A60; u8 pad2[0xB8C - 0xA64]; s32 f_B8C; u8 pad3[0xBA4 - 0xB90]; s32 f_BA4; };
+
+f32 func_0012CCC0(void* obj, s32 id);
+void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
+
+void func_001C9CF8(Owner_001C9CF8* self)
+{
+    self->f_B8C = 0;
+    self->f_A60 = 0;
+    f32 r = func_0012CCC0(self->inner->p8, 0x1B1);
+    func_0012F0A0(self->inner, 0, r, 1.0f);
+    self->f_BA4 = 0;
+}
+
+void func_001C49C8(void);
+
+void func_001CA5E0(void)
+{
+    func_001C49C8();
+}

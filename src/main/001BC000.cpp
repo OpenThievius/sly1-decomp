@@ -354,3 +354,28 @@ void func_001BF0D8(Obj_1BF0D8* self)
         func_001BEF88(self);
     }
 }
+
+extern s32 D_0027472C;
+
+s32 func_001BE980(void)
+{
+    return D_0027472C != 0;
+}
+
+typedef void (*Fn_001BF578)(void);
+
+extern u8* D_00261990;
+s32 func_001493A0(u8* p);
+s32 func_00149638(u8* s);
+void func_001BF398(void);
+void func_001BF2E0(void);
+
+Fn_001BF578 func_001BF578(void)
+{
+    s32 n;
+    if (func_001493A0(D_00261990 + 0x460) == 0) return func_001BF398;
+    n = func_00149638(D_00261990 + 0x460);
+    if (n >= 3) return func_001BF398;
+    if (n <= 0) return func_001BF398;
+    return func_001BF2E0;
+}

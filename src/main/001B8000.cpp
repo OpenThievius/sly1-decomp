@@ -418,3 +418,35 @@ void func_001B93F8(void* self)
 {
     func_00124FC0(self);
 }
+
+struct __attribute__((aligned(16))) Quad_001B9680 { s32 a, b, c, d; };
+struct Obj_001B9680 { u8 pad0[0x140]; Quad_001B9680 src; u8 pad1[0x370 - 0x150]; Quad_001B9680 dst; };
+
+void func_001B9680(Obj_001B9680* self)
+{
+    self->dst = self->src;
+}
+
+void func_001BA430(void* a, void* b, void* c, s32 d);
+
+void func_001BA500(void* self, void* a, void* b, void* c, s32 d)
+{
+    func_001BA430(a, b, c, d);
+}
+
+struct Node_1BA528 { u8 pad0[8]; Node_1BA528* next; };
+struct Owner_1BA528 { u8 pad0[0x4B0]; Node_1BA528* head; };
+
+void func_00129DF8(void* self);
+
+void func_001BA528(Owner_1BA528* self, Node_1BA528* node)
+{
+    node->next = self->head;
+    self->head = node;
+    func_00129DF8(self);
+}
+
+s32 func_001BBC30(void)
+{
+    return 0;
+}

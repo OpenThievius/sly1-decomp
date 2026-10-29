@@ -297,3 +297,40 @@ void* func_001C1390(s32 index, Obj_1C1390* self)
         return p;
     }
 }
+
+void func_0011D480(s32 a, s32 b);
+
+void func_001C05D0(f32 x)
+{
+    func_0011D480(8, (s32)(x * 1024.0f));
+}
+
+extern s32 D_00274808[];
+
+void func_0011E328(s32 a, s32 b);
+void func_0011E360(s32 a, s32 b, s32 c);
+
+struct Obj_1C09D8 { u8 pad[0x2328]; s32 f2328; s32 f232C; u8 pad2[0x18]; s32 f2348; };
+
+void func_001C09D8(Obj_1C09D8* self, s32 index, s32 value)
+{
+    func_0011E328(2, D_00274808[index]);
+    func_0011E360(2, value, value);
+    self->f2328 = index;
+    self->f232C = value;
+    self->f2348 = 1;
+}
+
+struct Pt_1C0AB8 { f32 x; f32 y; };
+struct Ent_1C0AB8 { s32 key; f32 a0; f32 a1; f32 b0; f32 b1; };
+struct Obj_1C0AB8 { u8 pad[0x1D80]; s32 count; };
+
+void func_001C0AB8(Obj_1C0AB8* self, Pt_1C0AB8* p)
+{
+    s32 n = self->count;
+    if (n != 0) {
+        Ent_1C0AB8* e = (Ent_1C0AB8*)((u8*)self + 0x1D70 + n * 20);
+        e->b0 = 8000.0f - p->y * 50.0f;
+        e->b1 = 8000.0f - p->x * 50.0f;
+    }
+}
