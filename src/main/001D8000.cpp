@@ -164,3 +164,50 @@ void func_001DAE18(void* self)
     func_001B89B8(self);
     func_001DAD28(self);
 }
+
+struct Counter_1DAF08 { u8 pad[0x27C]; s32 count; };
+struct Link_1DAF08 { u8 pad[0x50]; void* owner; };
+struct Rec_1DAF08 { u8 pad0[8]; s32 kind; u8 pad1[0x6CC - 0xC]; Link_1DAF08* link; };
+
+extern u8 D_00272430[];
+extern u8 D_002726B0[];
+extern s32 D_002751D4;
+
+void func_00192230(void* self, s32 kind, Rec_1DAF08* rec);
+
+void func_001DAF08(void* self, s32 code, Rec_1DAF08* rec)
+{
+    func_00192230(self, code, rec);
+    if (code == 0xE && rec->kind == 0x426) {
+        Counter_1DAF08* a = (Counter_1DAF08*)D_00272430;
+        s32 lim = D_002751D4;
+        if (a->count < lim) {
+            Counter_1DAF08* b = (Counter_1DAF08*)D_002726B0;
+            if (b->count < lim) {
+                if (rec->link->owner == self) {
+                    a->count = a->count + 1;
+                } else {
+                    b->count = b->count + 1;
+                }
+            }
+        }
+    }
+}
+
+struct Obj_1DBA38 { u8 pad0[0x14]; s32 f14; };
+
+extern s32 D_0027571C;
+extern s32 D_00275718;
+extern s32 D_00275720;
+extern s32 D_00275728;
+void func_00137B60(void* self, s32 n);
+void func_00137A60(void* self, s32 size, s32 obj);
+
+void func_001DBA38(Obj_1DBA38* self)
+{
+    if (D_0027571C != 0) {
+        D_00275728 = self->f14;
+        func_00137B60(self, 0x10);
+        func_00137A60(self, D_00275720, D_00275718);
+    }
+}

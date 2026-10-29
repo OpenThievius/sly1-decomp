@@ -141,3 +141,35 @@ void func_001D4C90(Ctx_1D4C90* self, s32 value)
 {
     self->f26B0 = value;
 }
+
+typedef void (*VFnA_1D5398)(void* self);
+struct Obj_1D5398 { VFnA_1D5398* vtbl; };
+
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void func_00175170(void* self, s32 mode, s32 count);
+void func_001D4C90(void* self, s32 value);
+
+void func_001D5398(Obj_1D5398* self)
+{
+    func_001BFCD8(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+    func_00175170(self, 4, 0x2A);
+    func_001D4C90(self, (s32)func_001D5418);
+}
+
+typedef void (*VFnA_1D5468)(void* self);
+typedef void (*VFnB_1D5468)(void* self, void* arg);
+struct Obj_1D5468 { void** vtbl; };
+
+s32 func_00160C58();
+void func_00175170(void* self, s32 mode, s32 count);
+
+void func_001D5468(Obj_1D5468* self)
+{
+    ((VFnB_1D5468)self->vtbl[36])(self, (u8*)self + 0x2BB0);
+    ((VFnB_1D5468)self->vtbl[37])(self, (u8*)self + 0x2BC0);
+    if (func_00160C58()) {
+        ((VFnA_1D5468)self->vtbl[84])(self);
+    } else {
+        func_00175170(self, 4, 0x2D);
+    }
+}

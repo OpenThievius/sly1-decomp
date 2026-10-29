@@ -396,3 +396,63 @@ s32 func_001DFBD0(Self_001DFBD0* self)
 {
     return self->f728 != 0;
 }
+
+s32 func_00137C40(void* src);
+void func_00138518(void* self);
+
+extern s32 D_00275714;
+
+void func_001DCCC0(void* self)
+{
+    s32 n = func_00137C40(self);
+    if (D_00275714) {
+        s32 i = 1;
+        if (i < n) {
+            i = n - 1;
+            do {
+                func_00138518(self);
+                i--;
+            } while (i != 0);
+        }
+    }
+}
+
+struct Field_002623C8 { u8 pad0[0x10]; f32 value; };
+
+void func_001DDA08(void* unused, f32* out)
+{
+    *out = ((Field_002623C8*)D_002623C8)->value;
+}
+
+struct Owner_1DDB58 { u8 pad[0x2320]; s32 count; };
+
+void func_001AA8B8(void* self, f32 v);
+
+void func_001DDB58(Owner_1DDB58* self)
+{
+    if (++self->count == 1) {
+        func_001AA8B8(&D_002721D0, 0.0f);
+        D_002721D0.vtbl[14](&D_002721D0);
+    }
+}
+
+extern u8 D_002758D0[];
+
+void func_00152440(void* p);
+
+void func_001DFD70()
+{
+    func_00152440(D_002758D0);
+}
+
+struct Obj_001DFD90 { u8 pad[0x88]; s32 count; f32 scale; };
+
+void func_001F39F8(void* self);
+
+void func_001DFD90(void* self)
+{
+    Obj_001DFD90* o = (Obj_001DFD90*)self;
+    func_001F39F8(self);
+    o->count = 30;
+    o->scale = 25.0f;
+}

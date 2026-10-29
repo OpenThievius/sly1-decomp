@@ -192,3 +192,29 @@ void func_001E2840(void* selfv, s32 value)
     self->f398 = value;
     func_001E2870(self, 0, 0);
 }
+
+struct Tally_1E2358 { s32 count; s32 last; void* ptr; };
+extern void func_001F6B40(void* a);
+
+void func_001E2358(Tally_1E2358* self)
+{
+    if (--self->count == 0) {
+        self->last = -1;
+        func_001F6B40(self->ptr);
+    }
+}
+
+struct Actor_1E2940 { u8 pad000[0x14]; void* f14; u8 pad018[0x398 - 0x18]; s32 f398; };
+
+void func_00124FC0(void* self);
+void func_001E2870(void* self, s32 a, s32 b);
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+
+void func_001E2940(void* selfv)
+{
+    Actor_1E2940* self = (Actor_1E2940*)selfv;
+    func_00124FC0(self);
+    if (self->f398 != 0) {
+        func_001DBCC8(self->f14, (void*)func_001E2870, self, 0, 0);
+    }
+}
