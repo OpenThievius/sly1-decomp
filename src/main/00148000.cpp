@@ -21,7 +21,6 @@ void func_00148178(void)
     g->f19E0 = r;
 }
 
-
 struct Self_1481A0 {
     u8 pad0[0x14];
     void* p14;
@@ -237,7 +236,6 @@ void func_001495E8(Stack4_1495E8* s, s32 value)
     }
 }
 
-
 s32 func_00149610(Stack4_1495E8* s)
 {
     s32 n = s->count;
@@ -248,7 +246,6 @@ s32 func_00149610(Stack4_1495E8* s)
     s->count = n;
     return s->items[n];
 }
-
 
 s32 func_00149638(Stack4_1495E8* s)
 {
@@ -664,4 +661,28 @@ s32 func_00148910(const f32* first, const f32* second)
     s32 result = -1;
     if (*first < *second) result = 1;
     return result;
+}
+
+struct State_00149168 { u8 pad[0x340]; s32 value; };
+void func_00146340(void* self);
+void func_00149168(State_00149168* self)
+{
+    func_00146340(self);
+    self->value = 0;
+}
+
+struct Parent_0014A8D0 { u8 pad[0x3DC]; u8* child; };
+struct State_0014A8D0 { s32 unused; Parent_0014A8D0* parent; };
+void func_0014A8D0(State_0014A8D0* self)
+{
+    Parent_0014A8D0* parent = self->parent;
+    func_00144B70(parent, parent->child + 0x370);
+}
+
+struct State_0014B678 { f32 a; f32 b; s32 value; };
+void func_001EAD88(void* a, void* b, f32 value);
+void func_0014B678(State_0014B678* self, f32 value)
+{
+    func_001EAD88(&self->b, self, value);
+    self->value = 0;
 }

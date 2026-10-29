@@ -273,3 +273,27 @@ void func_00146018(Obj_146018* obj, s32 value, f32 first, f32 second) { obj->int
 extern f32 D_0026185C;
 struct Obj_146028 { u8 pad[0x218]; f32 value; };
 void func_00146028(Obj_146028* obj) { obj->value = D_0026185C; }
+
+struct State_00145DD8 { u8 pad[0x538]; s32 value; };
+s32 func_00145DD8(void* unused, State_00145DD8* other)
+{
+    return other->value != 0;
+}
+
+void func_001495E8(void* self, s32 value);
+void func_00145FB8(u8* self, s32 value)
+{
+    func_001495E8(self + 0x460, value);
+}
+
+s32 func_00149610(void* self);
+s32 func_00145FD8(u8* self)
+{
+    return func_00149610(self + 0x460);
+}
+
+s32 func_00149638(void* self);
+s32 func_00145FF8(u8* self)
+{
+    return func_00149638(self + 0x460);
+}
