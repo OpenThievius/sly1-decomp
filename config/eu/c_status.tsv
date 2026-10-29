@@ -648,14 +648,18 @@ func_001387F8	func_00138AF8	match
 func_00138828	func_00138B28	match	
 func_001389C8	func_00138CC8	match	
 func_00138BE0	func_00138EE0	match	
+func_00139970	func_00139C70	match	
 func_00139B38	func_00139E38	match	
 func_00139C38	func_00139F38	match	
 func_00139C70	func_00139F70	match	
 func_00139D28	func_0013A028	match	
+func_00139D68	func_0013A068	match	
 func_00139E80	func_0013A180	match	
+func_00139F80	func_0013A280	match	
 func_0013A418	func_0013A718	match	
 func_0013B598	func_0013B898	match	
 func_0013B5C8	func_0013B8C8	match	
+func_0013B708	func_0013BA08	match	
 func_0013BE00	func_0013C100	match	
 func_0013C950	func_0013CC50	match	
 func_0013C988	func_0013CC88	match	
@@ -698,6 +702,7 @@ func_0013F0E0	func_0013F3E0	match
 func_0013F110	func_0013F410	match	
 func_0013F6C0	func_0013F9C0	match	
 func_0013F6F8	func_0013F9F8	match	
+func_0013F940	func_0013FC40	match	
 func_00140028	func_00140328	match	
 func_00140100	func_00140400	match	
 func_00140140	func_00140440	match	
@@ -727,12 +732,15 @@ func_00140FF8	func_001412F8	match
 func_00141008	func_00141308	match	
 func_00141108	func_00141408	match	
 func_00141170	func_00141470	match	
+func_001411A8	func_001414A8	match	
 func_001415D0	func_001418D0	match	
 func_001417F0	func_00141AF0	match	
 func_00141870	func_00141B70	match	
 func_001419A0	func_00141CA0	match	
 func_001419C0	func_00141CC0	match	
 func_001419E0	func_00141CE0	match	
+func_00141C28	func_00141F28	match	
+func_00141C90	func_00141F90	match	
 func_00141D00	func_00142000	match	
 func_00142ED0	func_001431D0	match	
 func_00142F10	func_00143210	differs	
@@ -765,6 +773,7 @@ func_00143AF0	func_00143DF0	match
 func_00143AF8	func_00143DF8	match	
 func_00143B20	func_00143E20	match	
 func_00143BA8	func_00143EA8	match	
+func_00144270	func_00144570	match	
 func_00144FF8	func_001452F8	match	
 func_001455C0	func_001458C0	match	
 func_001455E0	func_001458E0	match	
@@ -786,17 +795,24 @@ func_00146418	func_00146718	match
 func_00146470	func_00146770	match	
 func_001473E0	func_001476E0	match	
 func_00147ED0	func_001481D0	match	
+func_00147EF8	func_001481F8	match	
 func_00147FB0	func_001482B0	match	
 func_00148178	func_00148478	match	
 func_001481A0	func_001484A0	differs	
+func_00148400	func_00148700	match	
+func_00148470	func_00148770	match	
 func_00148598	func_00148898	differs	the C is 252 bytes, retail's function 236
 func_00148718	func_00148A08	match	
 func_00148748	func_00148A38	match	
 func_00148770	func_00148A60	match	
 func_00148828	func_00148B18	match	
+func_00148888	func_00148B78	match	
 func_00148910	func_00148C00	match	
 func_00148CE0	func_00148FD0	match	
 func_00148E18	func_00149108	match	
+func_00148E40	func_00149130	match	
+func_00148EF8	func_001491E8	match	
+func_00148F80	func_00149270	differs	
 func_00149168	func_00149458	match	
 func_00149398	func_00149688	match	
 func_001493A0	func_00149690	match	
@@ -807,6 +823,7 @@ func_00149610	func_00149900	match
 func_00149638	func_00149928	match	
 func_00149660	func_00149950	match	
 func_001496C0	func_001499B0	match	
+func_0014A7B8	func_0014AAA8	match	
 func_0014A8D0	func_0014ABC0	match	
 func_0014AA90	func_0014AD80	match	
 func_0014AA98	func_0014AD88	match	
@@ -825,6 +842,7 @@ func_0014BD38	func_0014BFE8	match
 func_0014BDC8	func_0014C078	match	
 func_0014BEA8	func_0014C158	match	
 func_0014BEF8	func_0014C1A8	match	
+func_0014BF88	func_0014C238	match	
 func_0014C668	func_0014C918	match	
 func_0014C6E0	func_0014C990	match	
 func_0014C788	func_0014CA38	match	
@@ -846,6 +864,7 @@ func_0014DE40	func_0014E0F0	match
 func_0014DE78	func_0014E128	match	
 func_0014DF68	func_0014E218	match	
 func_0014DF98	func_0014E248	match	
+func_0014E000	func_0014E2B0	match	
 func_0014E068	func_0014E318	match	
 func_0014E090	func_0014E340	match	
 func_0014E170	func_0014E420	match	
@@ -855,6 +874,7 @@ func_0014E500	func_0014E7B0	match
 func_0014E510	func_0014E7C0	match	
 func_0014E6A8	func_0014E958	match	
 func_0014E910	func_0014EBC0	match	
+func_0014E990	func_0014EC40	match	
 func_0014EA48	func_0014ECF8	match	
 func_0014EE40	func_0014F0F0	match	
 func_0014EE70	func_0014F120	match	
@@ -867,6 +887,7 @@ func_0014F740	func_0014F9F0	match
 func_0014F770	func_0014FA20	match	
 func_0014F850	func_0014FB00	match	
 func_0014F900	func_0014FBB0	match	
+func_0014F920	func_0014FBD0	match	
 func_0014FBE0	func_0014FE90	match	
 func_0014FC38	func_0014FEE8	match	
 func_0014FCE8	func_0014FF98	match	
@@ -957,6 +978,7 @@ func_00158B30	func_00158DE8	match
 func_00158C28	func_00158EE0	match	
 func_00158C60	func_00158F18	match	
 func_00158D38	func_00158FF0	match	
+func_00158D40	func_00158FF8	match	
 func_00158DD8	func_00159090	match	
 func_00158E10	func_001590C8	match	
 func_00158E48	func_00159100	match	
@@ -985,11 +1007,14 @@ func_0015A960	func_0015AC18	match
 func_0015A9A8	func_0015AC60	match	
 func_0015AAE0	func_0015AD98	match	
 func_0015AEB0	func_0015B168	match	
+func_0015B720	func_0015B9D8	match	
 func_0015C0A0	func_0015C358	match	
 func_0015C178	func_0015C430	match	
 func_0015C1C0	func_0015C478	match	
+func_0015C200	func_0015C4B8	error	a reference to D_00262250, which has no address in this version
 func_0015C260	func_0015C538	match	
 func_0015C3C0	-	absent	
+func_0015C4A8	-	absent	
 func_0015C8B8	func_0015C9F0	match	
 func_0015C900	func_0015CA38	match	
 func_0015C9B0	func_0015CAE8	match	
