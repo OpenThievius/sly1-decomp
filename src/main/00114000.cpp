@@ -658,3 +658,115 @@ void* func_001147B8(void* self, s32 u1, Args_147B8* src, s32 u3, s32 mode)
     func_0011B060(&q, 2);
     return self;
 }
+
+void* func_001147B8(void* self, s32 u1, void* src, s32 u3, s32 mode);
+
+void* func_00114888(void* self, s32 u1, void* src, s32 u3)
+{
+    (void)func_001147B8(self, u1, src, u3, 0x24);
+    return self;
+}
+
+struct Src_116A88 { s32 pad0; void* p; };
+struct Tmp_116A88 { u8 bytes[0x10]; };
+
+void func_0011B008(void* obj);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* obj, s32 n);
+void func_0011B740(void* a, void* b);
+void* func_0011C508(void);
+void func_00188FD8(void* a, void* b);
+
+void* func_00116A88(void* ret, s32 unused, Src_116A88* src)
+{
+    Tmp_116A88 t;
+    func_0011B008(&t);
+    void* c = func_0011C508();
+    func_00188FD8(src->p, c);
+    func_0011B740(&t, c);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Src_116B08 { s32 pad0; void* p; };
+struct Tmp_116B08 { u8 bytes[0x10]; };
+struct Vec_116B08 { f32 v[4]; };
+
+void func_0011B008(void* obj);
+void* func_0011C508(void);
+void func_0011B740(void* a, void* b);
+void func_00188D28(void* a, void* b, void* c);
+void func_0011B6C0(void* a, void* b);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* obj, s32 n);
+
+void* func_00116B08(void* ret, s32 unused, Src_116B08* src)
+{
+    Tmp_116B08 t;
+    Vec_116B08 vec;
+    func_0011B008(&t);
+    void* a = func_0011AF28();
+    void* b = func_0011AF28();
+    void* c = func_0011C508();
+    func_0011B740(b, c);
+    *(void**)((u8*)a + 8) = b;
+    func_00188D28(src->p, &vec, c);
+    func_0011B5B0(a, vec.v[0]);
+    func_0011B6C0(&t, a);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Src_116C80 { s32 pad0; void* p; };
+struct Tmp_116C80 { u8 bytes[0x10]; };
+struct Vec_116C80 { u8 bytes[0x30]; };
+
+void func_0011B008(void* obj);
+void* func_0011C618(void);
+void func_00189378(void* sub, s32 zero, void* out);
+void func_00188B08(void* a, void* b, void* c);
+void func_0011B788(void* obj, void* b);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* obj, s32 n);
+
+void* func_00116C80(void* ret, s32 unused, Src_116C80* src)
+{
+    Tmp_116C80 t;
+    Vec_116C80 v;
+    func_0011B008(&t);
+    void* a = func_0011C618();
+    func_00189378(src->p, 0, &v);
+    func_00188B08((u8*)src->p + 0x30, &v, a);
+    func_0011B788(&t, a);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Coef_116D20 { f32 a; f32 b; f32 c; };
+struct Src_116D20 { s32 pad0; Coef_116D20* coef; };
+struct Tmp_116D20 { u8 bytes[0x10]; };
+struct Vec_116D20 { f32 v[4]; };
+
+void func_0011B008(void* obj);
+void func_0011B9A8(void* out, void* src);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* obj, s32 n);
+
+void* func_00116D20(void* ret, s32 unused, Src_116D20* src)
+{
+    Tmp_116D20 t;
+    Vec_116D20 v;
+    func_0011B008(&t);
+    Coef_116D20* k = src->coef;
+    func_0011B9A8(&v, (u8*)src + 8);
+    f32 x = v.v[1];
+    f32 r = k->a + x * (k->b + x * k->c);
+    func_0011B5B0(&t, r);
+    func_0011B060(&v, 2);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}

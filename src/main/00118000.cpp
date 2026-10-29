@@ -380,3 +380,225 @@ void func_0011BF70(void)
     func_0011CA90();
     func_0011C128(D_0025C2D0, 0xC, 0x80);
 }
+
+struct Quad_1180C0 { s32 a, b, c, d; };
+struct Frame_1180C0 { Quad_1180C0 q; Quad_1180C0 t; s32 a; s32 b; };
+union Raw_1180C0 { s32 i; f32 f; };
+struct In_1180C0 { u8 pad0[4]; s32 w4; s32 kind; Raw_1180C0 raw; };
+
+extern void* D_00275710;
+
+void func_0011B008(Quad_1180C0* q);
+void func_0018D608(void);
+void func_0018D6F0(void);
+void func_001DC4D0(void* self, f32 scale, s32 p1, s32 p2, s32 p3, s32 p4, s32* o1, s32* o2);
+void func_00117AF0(Quad_1180C0* t, s32 a, s32 b);
+void func_0011B0A8(Quad_1180C0* a, Quad_1180C0* b);
+void func_0011B060(Quad_1180C0* q, int mode);
+void func_0011B018(void* dst, Quad_1180C0* src);
+
+void* func_001180C0(void* out, s32 unused, In_1180C0* in)
+{
+    Frame_1180C0 f;
+    f32 scale;
+    func_0011B008(&f.q);
+    if (in->kind == 0x14) scale = (f32)in->raw.i; else scale = in->raw.f;
+    func_0018D608();
+    func_001DC4D0(D_00275710, scale, 0, in->w4, 0, 0, &f.a, &f.b);
+    func_00117AF0(&f.t, f.a, f.b);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0018D6F0();
+    func_0011B018(out, &f.q);
+    func_0011B060(&f.q, 2);
+    return out;
+}
+
+struct Quad_1183B8 { s32 a, b, c, d; };
+struct Frame_1183B8 { Quad_1183B8 q; Quad_1183B8 t; };
+
+void func_0011B008(Quad_1183B8* q);
+void func_00118198(Quad_1183B8* dst, s32 code, s32 x, s32 y, s32 z);
+void func_0011B0A8(Quad_1183B8* a, Quad_1183B8* b);
+void func_0011B060(Quad_1183B8* q, int mode);
+void func_0011B018(void* dst, Quad_1183B8* src);
+
+void* func_001183B8(void* out, s32 x, s32 y, s32 z)
+{
+    Frame_1183B8 f;
+    func_0011B008(&f.q);
+    func_00118198(&f.t, 0x71, x, y, z);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0011B018(out, &f.q);
+    func_0011B060(&f.q, 2);
+    return out;
+}
+
+struct Quad_118458 { s32 a, b, c, d; };
+struct Frame_118458 { Quad_118458 q; Quad_118458 t; };
+
+void func_0011B008(Quad_118458* q);
+void func_00118198(Quad_118458* dst, s32 code, s32 x, s32 y, s32 z);
+void func_0011B0A8(Quad_118458* a, Quad_118458* b);
+void func_0011B060(Quad_118458* q, int mode);
+void func_0011B018(void* dst, Quad_118458* src);
+
+void* func_00118458(void* out, s32 x, s32 y, s32 z)
+{
+    Frame_118458 f;
+    func_0011B008(&f.q);
+    func_00118198(&f.t, 0x72, x, y, z);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0011B018(out, &f.q);
+    func_0011B060(&f.q, 2);
+    return out;
+}
+
+struct Blob_119FA0 { s32 w[4]; };
+struct Inner_119FA0 { u8 pad0[4]; s32 id; };
+struct Mid_119FA0 { u8 pad0[8]; Inner_119FA0* inner; };
+struct Outer_119FA0 { u8 pad0[4]; Mid_119FA0* mid; };
+
+
+void func_0011B008(Blob_119FA0* b);
+void func_0011B018(void* dst, Blob_119FA0* src);
+void func_0011B060(Blob_119FA0* b, s32 mode);
+void func_0011B0A8(Blob_119FA0* a, void* b);
+void func_0011B538(Blob_119FA0* b, s32 n);
+void func_001C13E8(void* dst, s32 id, u8* ctx);
+void* func_001C1390(s32 id, u8* ctx);
+void func_0011A338(void* list, void* value);
+
+void* func_00119FA0(void* self, Outer_119FA0* src, void* item)
+{
+    Blob_119FA0 a;
+    Blob_119FA0 b;
+    void* found;
+    s32 id;
+
+    func_0011B008(&a);
+    id = src->mid->inner->id;
+    found = func_001C1390(id, (u8*)D_00275710);
+    if (found == 0) {
+        func_001C13E8(&b, id, (u8*)D_00275710);
+        func_0011B0A8(&a, &b);
+        func_0011B060(&b, 2);
+        found = func_001C1390(id, (u8*)D_00275710);
+    }
+    func_0011A338(item, found);
+    func_0011B538(&a, 0x22);
+    func_0011B018(self, &a);
+    func_0011B060(&a, 2);
+    return self;
+}
+
+struct Slot_11A328 { s32 flag; s32 value; };
+
+void func_0011A328(Slot_11A328* slot, s32 value)
+{
+    slot->value = value;
+    slot->flag = 1;
+}
+
+struct Blob_11A358 { s32 w[4]; };
+struct Node_11A358 { s32 kind; u8 body[8]; Node_11A358* next; };
+struct Owner_11A358 { u8 pad0[0x14]; Node_11A358* head; };
+
+void func_0011B008(Blob_11A358* b);
+void func_0011B018(void* dst, Blob_11A358* src);
+void func_0011B060(Blob_11A358* b, s32 mode);
+s32 func_0011B0A8(u8* a, void* b);
+void func_0011B538(Blob_11A358* b, s32 n);
+s32 func_0011C498(void);
+
+void* func_0011A358(void* self, Owner_11A358* owner, s32 kind, void* body)
+{
+    Blob_11A358 a;
+    Node_11A358* node;
+
+    func_0011B008(&a);
+    node = (Node_11A358*)func_0011C498();
+    node->kind = kind;
+    (void)func_0011B0A8(node->body, body);
+    node->next = owner->head;
+    owner->head = node;
+    func_0011B538(&a, 0x22);
+    func_0011B018(self, &a);
+    func_0011B060(&a, 2);
+    return self;
+}
+
+struct Blob_11A400 { s32 w[4]; };
+
+void func_0011B008(Blob_11A400* b);
+void func_0011B018(void* dst, Blob_11A400* src);
+void func_0011B060(Blob_11A400* b, s32 mode);
+void func_0011B0A8(void* a, void* b);
+void func_0011B538(Blob_11A400* b, s32 n);
+void* func_0011A4D8(void* table, void* key, s32 mode);
+
+void* func_0011A400(void* self, void* table, void* key, void* item)
+{
+    Blob_11A400 a;
+    void* found;
+
+    func_0011B008(&a);
+    found = func_0011A4D8(table, key, 1);
+    if (found != 0) {
+        (void)func_0011B0A8(found, item);
+    }
+    func_0011B538(&a, 0x22);
+    func_0011B018(self, &a);
+    func_0011B060(&a, 2);
+    return self;
+}
+
+struct Stack_11A7D8 { u8 pad[0x1310]; s32 count; s32 items[1]; };
+
+s32 func_0011A7D8(Stack_11A7D8* s)
+{
+    s32 n = s->count;
+    if (n > 0) {
+        n = n - 1;
+        s->count = n;
+        return s->items[n];
+    }
+    return 0;
+}
+
+struct Pair_11B0A8 { s32 a; s32 b; };
+
+void func_0011B418(void* self);
+void func_0011B4A8(void* self);
+
+Pair_11B0A8* func_0011B0A8(Pair_11B0A8* dst, Pair_11B0A8* src)
+{
+    func_0011B4A8(src);
+    func_0011B418(dst);
+    dst->a = src->a;
+    dst->b = src->b;
+    return dst;
+}
+
+struct Cell_11B538 { s32 value; };
+
+void func_0011B418(void* self);
+
+void func_0011B538(Cell_11B538* self, s32 v)
+{
+    func_0011B418(self);
+    self->value = v;
+}
+
+struct Tagged_11B5B0 { s32 tag; f32 value; };
+
+void func_0011B418(void* self);
+
+void func_0011B5B0(Tagged_11B5B0* self, f32 v)
+{
+    func_0011B418(self);
+    self->value = v;
+    self->tag = 0x15;
+}
