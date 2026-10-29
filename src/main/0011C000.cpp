@@ -900,3 +900,134 @@ void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 sc
     u8* p = s.ptr;
     func_00130540(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
 }
+
+void func_0011C1D0(void* p)
+{
+}
+
+struct Link_11C1D8 { struct Link_11C1D8* next; };
+struct Pool_11C1D8 { u8 pad0[0xC]; Link_11C1D8* free; Link_11C1D8* used; };
+
+extern u8 D_00259F38[];
+void func_0011AB58(void* p);
+void* func_0011C3B8(void* base);
+
+void* func_0011C1D8(Pool_11C1D8* self)
+{
+    if (self->free == 0) {
+        func_0011AB58(D_00259F38);
+    }
+    Link_11C1D8* n = self->free;
+    if (n != 0) {
+        self->free = n->next;
+        n->next = self->used;
+        self->used = n;
+        return func_0011C3B8(n);
+    }
+    return 0;
+}
+
+struct Link_11C3C0 { s32 pad0; s32 value; };
+
+void func_0011C3F0(u8* base)
+{
+    ((Link_11C3C0*)func_0011C3C0(base))->value = 1;
+}
+
+void func_0011CBB0(void)
+{
+}
+
+s32 func_0011D968(s32 id, s32 size, void* data);
+
+void func_0011D4B8(s32 arg)
+{
+    s32 local = arg;
+    func_0011D968(10, 4, &local);
+}
+
+s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
+
+s32 func_0011D4E0(s32 arg)
+{
+    s32 local = arg;
+    return func_0011DB00(11, 4, &local, 0, 0);
+}
+
+void func_0011DB00(s32 a, s32 b, void* args, void* c, void* d);
+
+void func_0011D810(s32 x, s32 y)
+{
+    s32 args[2];
+    args[0] = x;
+    args[1] = y;
+    func_0011DB00(0x1E, 8, args, 0, 0);
+}
+
+void func_0011EF68(void)
+{
+}
+
+struct Word_11EF70 { s32 value; };
+
+void func_0011EF70(void* context, Word_11EF70* first, Word_11EF70* second)
+{
+    first->value = 0;
+    if (second != 0) {
+        second->value = 0;
+    }
+}
+
+struct Item_11FA88 { f32 k; u8 pad0[0xC]; u8 v0[0x10]; u8 v1[0x10]; u8 v2[0x10]; };
+
+s32 func_00137BE0(void* src);
+s32 func_00137D10(void* src);
+void func_00137E70(void* src, void* dst);
+void* func_0018D500(s32 size);
+
+void func_0011FA88(s32* outCount, void** outItems, void* src)
+{
+    s32 count = func_00137BE0(src);
+    Item_11FA88* items = (Item_11FA88*)func_0018D500(count << 6);
+    if (count > 0) {
+        u8* p2 = items->v2;
+        u8* p1 = items->v1;
+        u8* p0 = items->v0;
+        Item_11FA88* it = items;
+        s32 left = count;
+        do {
+            left--;
+            it->k = (f32)func_00137D10(src) * 0.016666668f;
+            func_00137E70(src, p0);
+            p0 += 0x40;
+            func_00137E70(src, p1);
+            p1 += 0x40;
+            func_00137E70(src, p2);
+            p2 += 0x40;
+            it++;
+        } while (left != 0);
+    }
+    *outCount = count;
+    *outItems = items;
+}
+
+struct Obj_11FF08;
+typedef void (*Method_11FF08)(Obj_11FF08* self, void* a, void* b);
+struct Obj_11FF08 { Method_11FF08* vtbl; };
+struct Scratch_11FF08 { s32 a[4]; s32 b[4]; };
+
+void func_0011F6B0(u8* a, void* b, s32 c, u8* d, void* e, void* f);
+void func_00188A20(void* a, void* b);
+void func_001EDE38(void* a, void* b, void* c);
+
+void func_0011FF08(u8* self, Obj_11FF08* other, s32 c, void* p3, void* p4)
+{
+    Scratch_11FF08 tmp;
+    func_0011F6B0(self + 0x20, other, c, self + 0x10, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
+    if (p3)
+        func_00188A20(&tmp, p3);
+    if (p4)
+        func_001EDE38(&tmp, tmp.b, p4);
+    if (other)
+        other->vtbl[45](other, p3, p4);
+}

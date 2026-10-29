@@ -157,3 +157,47 @@ void func_00126C58(Obj_126C58* self)
         }
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1273F0 {
+    s32 w[4];
+};
+
+struct Frame_1273F0 {
+    void* self;
+    u8 pad[0xC];
+    Quad_1273F0 q;
+};
+
+struct Vtbl_1273F0 {
+    u8 pad[0x48];
+    void (*f48)(void* self, s32 n, void* frame);
+    u8 pad2[0x58 - 0x4C];
+    void (*f58)(void* self);
+};
+
+struct Obj_1273F0 {
+    Vtbl_1273F0* vt;
+    u8 pad0[0x100 - 4];
+    Quad_1273F0 q100;
+    u8 pad1[0x140 - 0x110];
+    Quad_1273F0 q140;
+    u8 pad2[0x1EC - 0x150];
+    void* p1EC;
+};
+
+void func_001226D8(void* p);
+
+void func_001273F0(Obj_1273F0* self, Quad_1273F0* src)
+{
+    Frame_1273F0 f;
+    f.q = self->q140;
+    f.self = self;
+    self->q100 = *src;
+    if (self->vt->f58 != 0) {
+        self->vt->f58(self);
+    }
+    if (self->p1EC != 0) {
+        func_001226D8(self->p1EC);
+    }
+    self->vt->f48(self, 3, &f);
+}
