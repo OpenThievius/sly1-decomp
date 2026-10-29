@@ -439,3 +439,292 @@ void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
     args[2] = &v2;
     func_001837E0(self->host, 0xE, 3, args);
 }
+
+struct Data_1B46E0 { u8 pad0[0x20]; s32 count; };
+struct Node_1B46E0 {
+    u8 pad0[4];
+    Data_1B46E0* data;
+    s32 idx;
+    u8 pad1[0xC];
+    Node_1B46E0* next;
+};
+
+
+void func_001B46E0(Node_1B46E0* a0, s32 a1)
+{
+    if (a0->data != 0) {
+        s32 hi = a0->data->count - 1;
+        if (a1 < 0) {
+            a1 = 0;
+        } else {
+            a1 = (hi < a1) ? hi : a1;
+        }
+        if (a0->idx != a1) {
+            Node_1B46E0* n = a0->next;
+            a0->idx = a1;
+            if (n == 0) {
+                if ((void*)a0 != (void*)D_00274544) {
+                    if (D_00274544 == 0) {
+                        D_00274544 = (Node_1B4750*)a0;
+                    }
+                    a0->next = (Node_1B46E0*)D_0027451C;
+                    D_0027451C = (Node_1B4750*)a0;
+                }
+            }
+        }
+    }
+}
+
+struct Src_1B47C0 { s32 scale; s32 base; };
+struct Dst_1B47C0 { u8 pad0[4]; s32 value; };
+struct Entry_1B47C0 {
+    Src_1B47C0* src;
+    Dst_1B47C0* dst;
+    Entry_1B47C0* next;
+};
+struct Node_1B47C0 {
+    s32 flags;
+    u8 pad4[4];
+    s32 idx;
+    u8 pad0C[8];
+    Entry_1B47C0* entries;
+    Node_1B47C0* next;
+};
+
+
+void func_001694A0(void* p);
+
+void func_001B47C0(void)
+{
+    Node_1B47C0* n = (Node_1B47C0*)D_0027451C;
+    while (n != 0) {
+        for (Entry_1B47C0* e = n->entries; e != 0; e = e->next) {
+            if (n->flags & 1) {
+                e->dst->value = e->src->base + ((n->idx * e->src->scale) << 4);
+            }
+            func_001694A0(e->dst);
+        }
+        Node_1B47C0* nx = n->next;
+        n->next = 0;
+        n = nx;
+    }
+    D_0027451C = 0;
+    D_00274544 = 0;
+}
+
+typedef void (*Hook_1B4878)(void* self, f32 t);
+struct Obj_1B4878 { Hook_1B4878* vt; };
+
+extern s32 D_0027453C;
+extern Obj_1B4878** D_00274540;
+
+s32 func_001B4B08(void* p);
+
+void func_001B4878(f32 t)
+{
+    for (s32 i = 0; i < D_0027453C; i++) {
+        Obj_1B4878* o = D_00274540[i];
+        if (func_001B4B08(o) != 0) {
+            Hook_1B4878 fn = o->vt[2];
+            if (fn != 0) {
+                fn(o, t);
+            }
+        }
+    }
+}
+
+typedef void (*Fn_1B4A10)(void* self, void* buf);
+struct Obj_1B4A10 { void* vt; u8 pad4[4]; s32 type; };
+
+s32 func_00137BE0(void* a);
+s32 func_001B4920(s32 type);
+void* func_0018D5C0(s32 size);
+void* func_001B4980(s32 type);
+void func_00137A60(void* owner, s32 key, void* out);
+
+Obj_1B4A10* func_001B4A10(void* a0)
+{
+    s32 type = func_00137BE0(a0);
+    Obj_1B4A10* result = 0;
+    if (type != 0) {
+        Obj_1B4A10* o = (Obj_1B4A10*)func_0018D5C0(func_001B4920(type));
+        void* vt = func_001B4980(type);
+        o->type = type;
+        o->vt = vt;
+        u32 buf[8];
+        func_00137A60(a0, 0x1C, buf);
+        ((Fn_1B4A10*)o->vt)[0](o, buf);
+        result = o;
+    }
+    return result;
+}
+
+struct Node_1B5EA0 { Node_1B5EA0* next; };
+struct Pool_1B5EA0 { u8 pad[8]; Node_1B5EA0* head; };
+
+void* func_001B5EA0(Pool_1B5EA0* pool)
+{
+    Node_1B5EA0* n = pool->head;
+    if (n != 0) {
+        pool->head = n->next;
+    }
+    return n;
+}
+
+struct Node_1B5EC0 { Node_1B5EC0* next; };
+struct Pool_1B5EC0 { u8 pad[8]; Node_1B5EC0* head; };
+
+void* func_001B5EA0(Pool_1B5EC0* pool);
+
+void* func_001B5EC0(Pool_1B5EC0* pool)
+{
+    return func_001B5EA0(pool);
+}
+
+struct Node_1B5EE0 { Node_1B5EE0* next; };
+struct Pool_1B5EE0 { s32 count; u8 pad[4]; Node_1B5EE0* head; };
+
+void* func_001B5EA0(Pool_1B5EE0* pool);
+void func_001F5C0C(void* p, int zero, s32 count);
+
+void* func_001B5EE0(Pool_1B5EE0* pool)
+{
+    void* p = func_001B5EA0(pool);
+    func_001F5C0C(p, 0, pool->count);
+    return p;
+}
+
+typedef void (*VFn_1B7A98)(void* self);
+struct Sub_1B7A98 { VFn_1B7A98* vtbl; };
+struct Owner_1B7A98 {
+    u8 pad0[0x34];
+    s32 count34;
+    s32 count38;
+};
+struct Node_1B7A98 {
+    VFn_1B7A98* vtbl;
+    u8 pad0[0x14 - 4];
+    Owner_1B7A98* owner;
+    s32 flag18;
+    u8 pad1[0x50 - 0x1C];
+    Sub_1B7A98* sub50;
+    u8 pad2[0x480 - 0x54];
+    s32 handle480;
+    u8 pad3[0x538 - 0x484];
+    u64 flags538;
+    s32 field540;
+};
+
+void func_00138828(void* owner, void* self);
+s32 func_001DC7D0(void* owner, void* self);
+void func_00138F28(void* owner, void* self);
+void func_00152470(void* p, void* self);
+void func_001240F8(void* self);
+void func_001B7C40(void* self, s32 flag);
+void func_001BB580(void* p);
+void func_001BB4A0(void* self);
+
+void func_001B7A98(Node_1B7A98* self)
+{
+    Owner_1B7A98* owner = self->owner;
+    owner->count34++;
+    if (self->flag18 == 0) {
+        func_00138828(owner, self);
+        self->handle480 = func_001DC7D0(owner, self);
+        func_00138F28(owner, self);
+        owner->count38++;
+        func_00152470((u8*)owner + 0x3C, self);
+    }
+    func_001240F8(self);
+    func_001B7C40(self, 1);
+    self->vtbl[72](self);
+    if (!(self->flags538 & (1ULL << 54))) {
+        func_001BB580(self->sub50);
+    } else {
+        func_001BB580(self);
+    }
+    func_001BB4A0(self);
+}
+
+typedef void (*VFn_1B7B78)(void* self);
+struct Sub_1B7B78 { VFn_1B7B78* vtbl; };
+struct Owner_1B7B78 {
+    u8 pad0[0x34];
+    s32 count34;
+    s32 count38;
+};
+struct Node_1B7B78 {
+    VFn_1B7B78* vtbl;
+    u8 pad0[0x14 - 4];
+    Owner_1B7B78* owner;
+    s32 flag18;
+    u8 pad1[0x50 - 0x1C];
+    Sub_1B7B78* sub50;
+    u8 pad2[0x480 - 0x54];
+    s32 handle480;
+    u8 pad3[0x538 - 0x484];
+    u64 flags538;
+    s32 field540;
+};
+
+void func_001B7C40(void* self, s32 flag);
+void func_001243E0(void* self);
+void func_001388A0(void* owner, void* self);
+void func_001DC828(void* owner, s32 handle);
+void func_00152600(void* p, void* self);
+void func_001DC108(void* owner, s32 value);
+void func_001BB580(void* p);
+
+void func_001B7B78(Node_1B7B78* self)
+{
+    Sub_1B7B78* old50 = self->sub50;
+    Owner_1B7B78* owner = self->owner;
+    func_001B7C40(self, 0);
+    func_001243E0(self);
+    owner->count34--;
+    if (self->flag18 == 0) {
+        func_001388A0(owner, self);
+        func_001DC828(owner, self->handle480);
+        owner->count38--;
+        func_00152600((u8*)owner + 0x3C, self);
+    }
+    func_001DC108(owner, self->field540);
+    u64 flags = self->flags538;
+    self->field540 = 0;
+    if (!(flags & (1ULL << 54)) && old50 != (Sub_1B7B78*)self) {
+        func_001BB580(old50);
+    }
+}
+
+typedef void (*VFn_1B7C40)(void* self);
+struct Sub_1B7C40 { VFn_1B7C40* vtbl; };
+struct Owner_1B7C40 { u8 pad0[1]; };
+struct Node_1B7C40 {
+    VFn_1B7C40* vtbl;
+    u8 pad0[0x14 - 4];
+    Owner_1B7C40* owner;
+    u8 pad1[0x50 - 0x18];
+    Sub_1B7C40* sub50;
+    u8 pad2[0x538 - 0x54];
+    u64 flags538;
+};
+
+void func_00138BE0(void* owner, void* self, s32 n);
+void func_00152470(void* p, void* self);
+void func_00152600(void* p, void* self);
+
+void func_001B7C40(Node_1B7C40* self, s32 flag)
+{
+    if (flag == ((self->flags538 >> 50) & 1)) {
+        return;
+    }
+    if (flag != 0) {
+        func_00152470((u8*)self->sub50 + 0x2D8, self);
+    } else {
+        func_00152600((u8*)self->sub50 + 0x2D8, self);
+    }
+    self->flags538 = (self->flags538 & ~(1ULL << 50)) | ((u64)(flag & 1) << 50);
+    func_00138BE0(self->owner, self, 7);
+    Sub_1B7C40* sub = self->sub50;
+    sub->vtbl[54](sub);
+}

@@ -132,3 +132,38 @@ void func_001AEF68(Obj_001AEF68* self)
         self->f5c8 = node;
     }
 }
+
+struct Sink_001AEFA0 { u8 pad0[0x18]; f32 value; };
+struct Mixer_001AEFA0 { u8 pad0[0x5C8]; Sink_001AEFA0* sink; f32 pending; };
+struct Global_001AEFA0 { u8 pad0[0x2220]; s32 state; };
+
+extern Global_001AEFA0* D_00262E10;
+
+void func_001B93F8(Mixer_001AEFA0* self);
+
+void func_001AEFA0(Mixer_001AEFA0* self)
+{
+    func_001B93F8(self);
+    Sink_001AEFA0* sink = self->sink;
+    if (sink != 0) {
+        Global_001AEFA0* g = D_00262E10;
+        if (g != 0) {
+            if (g->state != 4) {
+                sink->value = self->pending;
+                self->sink = 0;
+                *(s32*)&self->pending = 0;
+            }
+        }
+    }
+}
+
+struct Stack_001AF000 { u8 pad0[0x564]; u32 count; s32 items[4]; };
+
+void func_001AF000(Stack_001AF000* self, s32 value)
+{
+    u32 n = self->count;
+    if (n < 4) {
+        self->items[n] = value;
+        self->count = n + 1;
+    }
+}
