@@ -694,8 +694,6 @@ void func_0012A150(Holder_12A150* self, f32 scale)
     func_0012A200(self, (Vec4_12A150*)&tmp);
 }
 
-
-
 void func_0012A1A0(Holder_12A150* self, f32 scale)
 {
     Vec4_12A150 tmp = *self->cur;
@@ -724,14 +722,11 @@ void func_0012ACA0(Host_0012AC08* self, f32 value)
     self->part->f4 = value;
 }
 
-
-
 void func_0012ADD0(Host_0012AC08* self, f32 value)
 {
     func_0012ABA8(self);
     self->part->f20 = value;
 }
-
 
 void func_0012AE08(Host_0012AC08* self, f32* out)
 {
@@ -750,18 +745,15 @@ void func_0012B290(Ctrl_12B290* self, s32* out)
     *out = self->b2B1;
 }
 
-
 void func_0012B2A8(Ctrl_12B290* self, s32* out)
 {
     *out = self->b2B2;
 }
 
-
 void func_0012B2B8(Ctrl_12B290* self, s32 value)
 {
     self->b2B3 = value;
 }
-
 
 s32 func_00182FC8(void* self);
 
@@ -1277,4 +1269,10 @@ void func_0012B1A0(Owner_12B1A0* self, Vec_12B1A0* input)
 {
     func_0012B040(self);
     *(Vec_12B1A0*)((u8*)self->inner + 0x20) = *input;
+}
+
+void func_0012B200(Obj_0012B238* self, f32 value)
+{
+    func_0012B040(self);
+    self->inner->value = value;
 }
