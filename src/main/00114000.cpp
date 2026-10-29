@@ -1151,3 +1151,92 @@ void* func_00114B80(void* self, void* unused, void* value)
     func_0011B018(self, value);
     return self;
 }
+
+struct Quad_114300 { s32 a, b, c, d; };
+struct Src_114300 { s32 flag; };
+
+void func_0011B008(Quad_114300* q);
+s32 func_0011B5F0(Quad_114300* q, s32 flag);
+void func_0011B018(void* dst, Quad_114300* src);
+void func_0011B060(Quad_114300* q, int mode);
+
+void* func_00114300(void* self, s32 unused, Src_114300* src)
+{
+    Quad_114300 q;
+    func_0011B008(&q);
+    (void)func_0011B5F0(&q, src->flag == 0);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_114360 { s32 a, b, c, d; };
+struct Src_114360 { s32 flag; };
+
+void func_0011B008(Quad_114360* q);
+s32 func_0011B5F0(Quad_114360* q, s32 flag);
+void func_0011B018(void* dst, Quad_114360* src);
+void func_0011B060(Quad_114360* q, int mode);
+
+void* func_00114360(void* self, s32 unused, Src_114360* src)
+{
+    Quad_114360 q;
+    func_0011B008(&q);
+    (void)func_0011B5F0(&q, (src->flag ^ 0x20) == 0);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_114638 { s32 a, b, c, d; };
+struct Node_114638 { u8 pad[8]; s32 val; };
+struct Src_114638 { u8 pad[8]; s32 kind; s32 val; };
+struct Sub_114638 { s32 pad; s32 val; };
+
+void func_0011B008(Quad_114638* q);
+void func_0011B0A8(void* node, Src_114638* src);
+void func_0011B6C0(Quad_114638* q, void* node);
+void func_0011B018(void* dst, Quad_114638* src);
+void func_0011B060(Quad_114638* q, int mode);
+
+void* func_00114638(void* self, s32 unused, Src_114638* src)
+{
+    Quad_114638 q;
+    func_0011B008(&q);
+    Node_114638* node = (Node_114638*)func_0011AF28();
+    func_0011B0A8(node, src);
+    s32 kind = src->kind;
+    src = (Src_114638*)((u8*)src + 8);
+    if (kind == 0) {
+        node->val = 0;
+    } else if (kind == 0x1E) {
+        node->val = ((Sub_114638*)src)->val;
+    }
+    func_0011B6C0(&q, node);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Tmp_115398 { u8 bytes[0x10]; };
+
+void func_0011B008(void* obj);
+void func_0011B0A8(void* a, void* b);
+void func_0011A080(void* t, void* n, s32 c);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* obj, s32 n);
+
+void* func_00115398(void* ret, s32 unused, void* src, s32 c)
+{
+    Tmp_115398 t;
+    Tmp_115398 u;
+    func_0011B008(&t);
+    void* n = func_0011AF28();
+    func_0011B0A8(n, src);
+    func_0011A080(&u, n, c);
+    func_0011B0A8(&t, &u);
+    func_0011B060(&u, 2);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}

@@ -1158,3 +1158,63 @@ void func_0011D110(s32* ptr, s32 count)
     ptr[count + 1] = 0;
     ptr[0] = 0;
 }
+
+void* func_0011C3B8(void* base);
+
+struct Node_11C2E8;
+typedef void (*Cb_11C2E8)(void* p);
+
+struct Node_11C2E8 {
+    Node_11C2E8* next;
+    s32 f4;
+};
+
+struct Pool_11C2E8 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    Node_11C2E8* freeHead;
+    Node_11C2E8* head;
+    Node_11C2E8* tail;
+    Cb_11C2E8 onRemove;
+};
+
+void func_0011C2E8(Pool_11C2E8* self)
+{
+    Node_11C2E8* prev = (Node_11C2E8*)&self->head;
+    Node_11C2E8* cur = self->head;
+    if (cur != 0 && cur != self->tail) {
+        prev = cur;
+        for (;;) {
+            cur = cur->next;
+            if (cur == 0 || cur == self->tail) {
+                break;
+            }
+            prev = cur;
+        }
+    }
+    Node_11C2E8* s2 = prev;
+    cur = s2->next;
+    while (cur != 0) {
+        if (cur->f4 != 0) {
+            prev = cur;
+        } else {
+            prev->next = cur->next;
+            cur->next = self->freeHead;
+            self->freeHead = cur;
+            if (self->onRemove != 0) {
+                self->onRemove(func_0011C3B8(cur));
+            }
+        }
+        cur = prev->next;
+    }
+    self->tail = s2->next;
+}
+
+void func_0011EF90(void* a0, s32* a1, s32* a2)
+{
+    *a1 = 0;
+    if (a2 != 0) {
+        *a2 = 0;
+    }
+}

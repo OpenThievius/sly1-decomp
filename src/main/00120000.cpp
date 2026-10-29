@@ -859,3 +859,81 @@ void func_00126BC0(Object_00126BC0* object, s32 value)
         child = child->next;
     }
 }
+
+struct Flags_1215C0 { u8 pad0[8]; s32 w8; };
+struct Node_1215C0 {
+    Flags_1215C0* flags;
+    u8 pad4[0x2C9 - 4];
+    s8 b2C9;
+    s8 b2CA;
+    u8 pad2CB[0x450 - 0x2CB];
+    s32 w450;
+    u8 pad454[0x470 - 0x454];
+    s32 w470;
+};
+struct Obj_1215C0 {
+    u8 pad0[4];
+    Node_1215C0* node;
+    u8 pad8[8];
+    s8 b10;
+    s8 b11;
+};
+
+void func_001215C0(Obj_1215C0* obj)
+{
+    Node_1215C0* node = obj->node;
+    Node_1215C0* a2 = (node->flags->w8 & 2) ? node : 0;
+    s8 b2C9 = node->b2C9;
+    if (b2C9 != -1) {
+        obj->b10 = b2C9;
+    } else {
+        if (a2 == 0 || a2->w450 == 3) {
+            obj->b10 = 2;
+        } else {
+            obj->b10 = 3;
+        }
+    }
+    s8 b2CA = node->b2CA;
+    if (b2CA != -1) {
+        obj->b11 = b2CA;
+        return;
+    }
+    if (a2 == 0 || a2->w470 == 3) {
+        obj->b11 = 2;
+    } else {
+        obj->b11 = 3;
+    }
+}
+
+struct __attribute__((packed)) Pair_122F88 { s32 lo; s32 hi; };
+struct Obj_122F88 { u8 pad0[0x1C]; s32 w1C; Pair_122F88 p20; };
+
+void func_001212D8(void* self, s32 a1);
+
+void func_00122F88(Obj_122F88* self, s32 a1)
+{
+    s32 saved = self->w1C;
+    Pair_122F88 tmp = self->p20;
+    func_001212D8(self, a1);
+    self->p20 = tmp;
+    self->w1C = saved;
+}
+
+struct Child_00123BB0 { void** vt; };
+struct Obj_00123BB0 {
+    u8 pad0[0x5BC];
+    s32 count;
+    Child_00123BB0* items[1];
+};
+
+void func_00123BB0(Obj_00123BB0* self)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        Child_00123BB0* c = self->items[i];
+        void* fn = c->vt[0x138 / 4];
+        if (fn != 0) {
+            ((void (*)(void*))fn)(c);
+        }
+    }
+}
