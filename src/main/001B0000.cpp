@@ -538,3 +538,47 @@ struct S_1B0488 { u8 pad[0xB08]; f32 value; };
 void func_001B0488(S_1B0488* p, f32 x) { p->value = 1.0f / x; }
 
 s32 func_001B0BD8() { return 1; }
+
+typedef void (*VFn_1B0EA8)(void* self, s32 arg);
+
+struct Obj_1B0EA8 {
+    VFn_1B0EA8* vtbl;
+    u8 pad_4[0x554 - 4];
+    s32 f554;
+};
+
+void func_001B0EA8(Obj_1B0EA8* self, s32 value)
+{
+    s32 m = 5;
+    self->f554 = value;
+    if (!value) {
+        m = 1;
+    }
+    self->vtbl[0x144 / 4](self, m);
+}
+
+typedef void (*Fn_1B2840)(void* self, void* other);
+
+struct Obj_1B2840 {
+    Fn_1B2840* vtbl;
+};
+
+struct Self_1B2840 {
+    u8 pad_0[0x34];
+    Obj_1B2840* f34;
+};
+
+s32 func_00137B90(void* src);
+void* func_0014D9A8(s32 index);
+void func_0011EC40(void* self, void* obj);
+
+void func_001B2840(Self_1B2840* self, void* obj)
+{
+    Obj_1B2840* p = (Obj_1B2840*)func_0014D9A8(func_00137B90(obj));
+    self->f34 = p;
+    Fn_1B2840 fn = p->vtbl[0];
+    if (fn != 0) {
+        fn(p, obj);
+    }
+    func_0011EC40(self, obj);
+}

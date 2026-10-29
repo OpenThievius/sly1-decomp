@@ -532,3 +532,73 @@ s32 func_001A8820(S_1A8820* list, T_1A8820* query) { for(s32 i=0;i<list->count;i
 
 struct S_1A93C8 { u8 pad0[0x3C]; s32 ptr; u8 pad1[8]; s32 field; };
 void func_001A93C8(S_1A93C8* p) { p->field = 0; if (p->ptr != 0 && *(s32*)((u8*)p->ptr + 4) != 0) *(s32*)((u8*)p->ptr + 0x10) = 0; }
+
+struct Entry_1A87E0 { s32 pad0; s32 f4; s32 pad1; s32 fC; };
+
+Entry_1A87E0* func_001A8718(void* table, s32 key);
+
+void func_001A87E0(void* table, s32 key, s32 value)
+{
+    Entry_1A87E0* e = func_001A8718(table, key);
+    if (e != 0) {
+        if (value >= e->fC) {
+            value = e->fC;
+        }
+        e->f4 = value;
+    }
+}
+
+struct __attribute__((aligned(16))) Quad_1A94C0 { s32 a, b, c, d; };
+struct Inner_1A94C0 {
+    u8 pad0[0x110];
+    Quad_1A94C0 q110;
+    Quad_1A94C0 q120;
+    Quad_1A94C0 q130;
+    Quad_1A94C0 q140;
+};
+struct Obj_1A94C0 {
+    void* f0;
+    void* f4;
+    Inner_1A94C0* f8;
+    u8 pad0[4];
+    Quad_1A94C0 q10;
+    Quad_1A94C0 q20;
+    Quad_1A94C0 q30;
+    Quad_1A94C0 q40;
+};
+
+void func_001920B0(void* self, void* arg);
+void func_001F3BD8(void* self, void* arg);
+void func_001F3C08(void* self, void* arg);
+void func_00128018(void* a0, void* a1, void* a2, void* a3);
+void func_00128150(void* a0, void* a1, void* a2, void* a3);
+
+void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
+{
+    if (self->f0 != 0) {
+        func_001920B0(self->f0, a1);
+        a2[0] = self->q20;
+        a2[1] = self->q30;
+        a2[2] = self->q40;
+    } else if (self->f4 != 0) {
+        func_001F3BD8(self->f4, a1);
+        func_001F3C08(self->f4, a2);
+    } else {
+        if (self->f8 != 0) {
+            a1[0] = self->f8->q140;
+            Inner_1A94C0* in = self->f8;
+            a2[0] = in->q110;
+            a2[1] = in->q120;
+            a2[2] = in->q130;
+        } else {
+            a1[0] = self->q10;
+            a2[0] = self->q20;
+            a2[1] = self->q30;
+            a2[2] = self->q40;
+        }
+    }
+    if (a3 != 0) {
+        func_00128018(0, a3, a1, a1);
+        func_00128150(0, a3, a2, a2);
+    }
+}

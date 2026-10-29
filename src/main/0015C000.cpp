@@ -725,3 +725,34 @@ s32 func_0015FBA0(Obj_0015FBA0* self, s32* out)
 
 struct Obj_15C900 { u8 pad0[0xC]; s32 index; u8 pad1[0x34]; f32 first; f32 second; };
 void func_0015C900(Obj_15C900* obj) { obj->index--; f32* item = (f32*)((u8*)obj + 0x10 + obj->index * 8); obj->first = item[0]; obj->second = item[1]; }
+
+struct __attribute__((packed)) Unaligned_15DBB8 { s32 v; };
+
+void func_0015DBB8(u8* dst, u8* src)
+{
+    s32 v = ((Unaligned_15DBB8*)src)->v;
+    ((Unaligned_15DBB8*)(dst + 0xA4))->v = v;
+    v = ((Unaligned_15DBB8*)(dst + 0xA4))->v;
+    ((Unaligned_15DBB8*)(dst + 0x9C))->v = v;
+}
+
+struct Elem_15F6C0 { u8 pad[0x54]; void* owner; Elem_15F6C0* next; };
+struct Owner_15F6C0 { u8 pad[0x60]; Elem_15F6C0* head; };
+
+void func_00152730(void* dst, void* src);
+
+void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other)
+{
+    s32 scratch[4];
+    (void)scratch;
+    if (self != other) {
+        Elem_15F6C0* e = other->head;
+        if (e != 0) {
+            e->owner = self;
+            for (e = e->next; e != 0; e = e->next) {
+                e->owner = self;
+            }
+        }
+        func_00152730(&self->head, &other->head);
+    }
+}

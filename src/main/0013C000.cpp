@@ -623,3 +623,45 @@ void func_0013EB30(u8* self, s32 a, s32 b, s32 c, s32 d)
 {
     func_0013EC00(self + 0x14C, 8, self + 0x148, a, b, c, d);
 }
+
+struct Obj_13CD80 { u8 pad0[0x14]; void* f14; u8 pad1[0x5FC]; s32 f614; s32 f618; };
+
+void func_001BAC30(void* self);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void func_00159478(void* sub, void* self);
+void func_00182ED8(s32 a);
+
+void func_0013CD80(Obj_13CD80* self)
+{
+    func_001BAC30(self);
+    if (self->f614 == -1) {
+        func_00159478(&self->f618, self);
+        return;
+    }
+    s32 v = func_0015A418(self->f14, 0x101, self->f614, self);
+    self->f618 = v;
+    if (v != 0) {
+        func_00182ED8(v);
+    }
+}
+
+struct Elem_13E6C8 { s32 f0; s32 f4; s32 f8; };
+struct Tbl_13E6C8 { s32 count; s32 f4; Elem_13E6C8* elems; };
+struct Self_13E6C8 { u8 pad0[0x10]; s32 f10; };
+struct Base_13E6C8 { u8 pad0[0x10]; s32 f10; };
+
+void* func_0018D500(s32 size);
+
+void func_0013E6C8(Self_13E6C8* self, Tbl_13E6C8* src, Base_13E6C8* base, Tbl_13E6C8* dst)
+{
+    dst->count = src->count;
+    dst->f4 = src->f4;
+    dst->elems = (Elem_13E6C8*)func_0018D500(src->count * 12);
+    for (s32 i = 0; i < dst->count; i++) {
+        Elem_13E6C8* s = &src->elems[i];
+        Elem_13E6C8* d = &dst->elems[i];
+        d->f0 = base->f10 + (s->f0 - self->f10);
+        d->f4 = s->f4 != 0 ? (s32)dst->elems + (s->f4 - (s32)src->elems) : 0;
+        d->f8 = s->f8 != 0 ? (s32)dst->elems + (s->f8 - (s32)src->elems) : 0;
+    }
+}

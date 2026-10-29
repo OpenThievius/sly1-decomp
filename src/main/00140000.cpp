@@ -854,3 +854,28 @@ void func_00140100(Obj_140100* self)
         self->f6FC = 1;
     }
 }
+
+s32 func_001BC320(void* self, void* ev);
+void func_0013F6F8(void* state, s32 mode);
+
+s32 func_00140028(void* a0, void* a1)
+{
+    s32 r = func_001BC320(a0, a1);
+    if (r != 0 && (*(s32*)((u8*)a1 + 0xC) & 4) == 0 && *(s32*)((u8*)a0 + 0x550) == 3 && *(s32*)((u8*)a0 + 0x680) == 0) {
+        func_0013F6F8(a0, 1);
+    }
+    return r;
+}
+
+void func_00137EB0(void* a, void* b);
+void func_00137E70(void* a, void* b);
+s32 func_001E4C48(void*, void*, void*, void*, void*);
+void func_0011EC40(void* a, void* b);
+
+void func_00141108(void* a0, void* a1)
+{
+    func_00137EB0(a1, (u8*)a0 + 0x50);
+    func_00137E70(a1, (u8*)a0 + 0x40);
+    func_001E4C48(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
+    func_0011EC40(a0, a1);
+}

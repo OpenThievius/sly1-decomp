@@ -1001,3 +1001,37 @@ struct S_1B5308 { u8 pad0[0x1C]; f32 a; f32 b; u8 pad1[8]; f32 testA; f32 testB;
 f32 func_001B5308(S_1B5308* p) { f32 result=0.0f; if (p->testA != 0.0f) result=(p->a/p->denomA)*0.5f; else result=0.5f; if (p->testB != 0.0f) result += (p->b/p->denomB)*0.5f; else result += 0.5f; return result; }
 
 void func_001B5568(void* base, void** out) { out[0] = (u8*)base + 0x44; out[1] = (u8*)base + 0x4C; out[2] = (u8*)base + 0x48; }
+
+struct Actor_1B5CD8 { u8 pad0[0x2C8]; u64 flags; };
+
+void func_00124A48(void* self);
+
+void func_001B5CD8(Actor_1B5CD8* self)
+{
+    func_00124A48(self);
+    self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
+}
+
+struct Walk_1B5DD0 { s32 a; void* b; s32 c; };
+
+void* func_0018D500(s32 size);
+void func_001B5D80(void* s, s32 v, s32 n);
+
+void func_001B5DD0(Walk_1B5DD0* s, s32 size, s32 count)
+{
+    s32 stride = (size + 7) & ~7;
+    s->b = func_0018D500(stride * count);
+    func_001B5D80(s, stride, count);
+}
+
+struct Walk_1B5E30 { s32 a; void* b; s32 c; };
+
+void* func_0018D500(s32 size);
+void func_001B5D80(void* s, s32 v, s32 n);
+
+void func_001B5E30(Walk_1B5E30* s, s32 size, s32 count)
+{
+    s32 addr = (s32)func_0018D500(size * count + 0x30);
+    s->b = (void*)((addr + 0x3F) & -0x40);
+    func_001B5D80(s, size, count);
+}

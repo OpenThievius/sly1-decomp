@@ -318,3 +318,36 @@ void func_001793F0(Obj_1793F0* self)
     ((Packed_1793F0*)(base + 0x288))->v = 0.0f;
     *(s32*)(base + 0x284) = func_001B4688(0x36A);
 }
+
+struct Obj_178038 { u8 pad0[0x1520]; u8 f1520[0x2768 - 0x1520]; };
+
+void func_001C29E8(void* sub);
+void func_00192820(void* self);
+
+void func_00178038(Obj_178038* self)
+{
+    func_001C29E8(self->f1520);
+    func_00192820(self);
+}
+
+struct Obj_179690 { void** vtbl; };
+
+typedef void (*VFn_179690)(void*);
+
+void func_001BC088(void* self, void* b);
+
+void func_00179690(Obj_179690* self)
+{
+    func_001BC088(self, 0);
+    VFn_179690 fn = (VFn_179690)((void**)self->vtbl)[0x58 / 4];
+    if (fn != 0) fn(self);
+}
+
+void func_00192C58(void* self);
+void func_0017ABE8(void* self, s32 a1);
+
+void func_0017A6D0(void* self)
+{
+    func_00192C58(self);
+    func_0017ABE8(self, 2);
+}

@@ -848,3 +848,45 @@ void func_00199AF0(void* p)
     Obj_199AF0* o = (Obj_199AF0*)p;
     o->vtbl[77](o);
 }
+
+void func_001C72A0(void* self);
+
+void func_00198090(void* self)
+{
+    func_001C72A0(self);
+}
+
+struct __attribute__((aligned(16))) Quad_1984B8 { s32 a, b, c, d; };
+typedef void (*VFn_1984B8)(void* self, void* ctx);
+struct Actor_1984B8 { VFn_1984B8* vtbl; u8 pad0[0x150 - 4]; Quad_1984B8 q150; u8 pad1[0x724 - 0x160]; s32 kind; };
+
+void* func_001925F0(void);
+void func_00197A08(void* h, void* self);
+void func_001C9008(void* self, void* arg);
+
+void func_001984B8(void* self, void* arg)
+{
+    Actor_1984B8* actor = (Actor_1984B8*)self;
+    if (actor->kind == 0x10) {
+        void* h = func_001925F0();
+        func_00197A08(h, self);
+        Quad_1984B8 ctx = actor->q150;
+        ctx.c = 0;
+        actor->vtbl[36](self, &ctx);
+    }
+    func_001C9008(self, arg);
+}
+
+struct Actor_198530 { u8 pad0[0x724]; s32 kind; };
+
+void func_001C91C8(void* self);
+void func_001C8920(void* self);
+
+void func_00198530(void* self)
+{
+    Actor_198530* actor = (Actor_198530*)self;
+    func_001C91C8(self);
+    if (actor->kind == 0x10) {
+        func_001C8920(self);
+    }
+}

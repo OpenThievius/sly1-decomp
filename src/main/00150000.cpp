@@ -617,3 +617,33 @@ void func_00152D30(void* self)
 }
 
 void func_00152E18() {}
+
+struct Ctl_001517C0 { u8 pad0[0x2DC]; s32 count; u8* base; s32 index; u8 pad2E8[0x10]; void* p2F8; };
+void func_00150DC0(Ctl_001517C0* self, u8* item);
+s32 func_00151300(Ctl_001517C0* self);
+void func_0012E760(void* obj);
+void func_001516C0(Ctl_001517C0* self);
+
+void func_001517C0(Ctl_001517C0* self)
+{
+    s32 index;
+
+    if (self->index < self->count) {
+        for (;;) {
+            if (func_00151300(self) != 0) {
+                return;
+            }
+            if (self->p2F8 != 0) {
+                func_0012E760(self->p2F8);
+                self->p2F8 = 0;
+            }
+            index = self->index + 1;
+            self->index = index;
+            if (!(index < self->count)) {
+                break;
+            }
+            func_00150DC0(self, self->base + index * 0x28);
+        }
+        func_001516C0(self);
+    }
+}

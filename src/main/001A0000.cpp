@@ -320,3 +320,89 @@ void func_001A3990(Node_1A3990* self)
     }
     func_0019F858(self);
 }
+
+void func_001A0338(void* self, s32 kind, s32 extra);
+
+void func_001A0950(void* self, s32 kind, s32 extra)
+{
+    if (kind == 3) {
+        goto three;
+    }
+    if (kind < 4) {
+        if (kind == 2) {
+            goto zero;
+        }
+        return;
+    }
+    if (kind == 10) {
+        goto zero;
+    }
+    if (kind != 16) {
+        return;
+    }
+zero:
+    func_001A0338(self, 0, 0);
+    return;
+three:
+    func_001A0338(self, 0, extra + 16);
+}
+
+struct Self_1A26F8 { u8 pad0[0x120]; void* f120; };
+
+void func_00128018(void* a0, void* a1, void* a2, void* a3);
+void func_00128150(void* a0, void* a1, void* a2, void* a3);
+s32 func_0019F620(void* self, void* a1, void* a2, void* a3);
+
+void func_001A26F8(void* a0, void* a1)
+{
+    Self_1A26F8* self = (Self_1A26F8*)a0;
+    u8 scratch[0x40];
+
+    func_00128018(self->f120, 0, (u8*)self + 0x80, scratch);
+    func_00128150(self->f120, 0, (u8*)self + 0x50, scratch + 0x10);
+    func_0019F620(self, a1, scratch, scratch + 0x10);
+}
+
+struct Self_1A2A68 { u8 pad0[0x20]; s32 f20; };
+struct Other_1A2A68 { u8 pad0[0x50]; void* f50; };
+
+s32 func_001300E8(void* node, s32 kind);
+void func_001A2380(void* self, s32 v, void* other, void* a2, void* a3, void* out);
+void func_00128150(void* a0, void* a1, void* a2, void* a3);
+void func_0019EBE8(void* self);
+
+s32 func_001A2A68(void* a0, void* a1, void* a2, void* a3)
+{
+    Self_1A2A68* self = (Self_1A2A68*)a0;
+    Other_1A2A68* other = (Other_1A2A68*)a1;
+    u8 out[0x10];
+    void* p;
+
+    if (func_001300E8(other->f50, 0x40) != 0) {
+        return 0;
+    }
+    if (func_001300E8(other->f50, 6) != 0) {
+        return 0;
+    }
+    func_001A2380(self, self->f20, other, a2, a3, out);
+    p = *(void**)out;
+    if (p != 0) {
+        func_00128150(0, other, (u8*)p + 0x50, (u8*)p + 0x50);
+    }
+    func_0019EBE8(self);
+    return 1;
+}
+
+struct Self_1A2B18 { u8 pad0[0x7C]; void* f7C; };
+struct Other_1A2B18 { u8 pad0[0x538]; u64 f538; };
+
+s32 func_001A2B18(Self_1A2B18* self, Other_1A2B18* other)
+{
+    u64 flag = 0x8000;
+
+    flag <<= 28;
+    if ((other->f538 & flag) != 0) {
+        return 0;
+    }
+    return other != self->f7C;
+}

@@ -364,3 +364,70 @@ void func_001AD940(Timer_001AD940* self)
     func_001AA268(self);
     self->value = 0.5f;
 }
+
+struct Obj_1ACA68 { u8 pad[0x250]; s32 f250; u8 pad2[0x260 - 0x254]; s32 f260; };
+
+void func_001AA958(void* self);
+
+void func_001ACA68(Obj_1ACA68* self)
+{
+    if (self->f250 == 3 && self->f260 != 0) {
+        self->f260 = 0;
+    } else {
+        func_001AA958(self);
+    }
+}
+
+typedef void (*VFn_1ACE38)(void* self, s32 mode);
+
+struct Obj_1ACE38 {
+    VFn_1ACE38* vtbl;
+    u8 pad0[0x250 - 4];
+    s32 state;
+    u8 pad1[0x260 - 0x254];
+    s32 flag;
+    u8 f264;
+};
+
+void func_001AA4F0(void* self, s32 v);
+s32 func_001F6738(void* p, s32 v);
+void func_001E2138(void* dst, s32 v);
+
+void func_001ACE38(Obj_1ACE38* self, s32 v)
+{
+    s32 k = self->state;
+    if (k == 0) {
+        func_001AA4F0(self, v);
+        return;
+    }
+    if (k < 0) {
+        return;
+    }
+    if (k >= 4) {
+        return;
+    }
+    if (self->flag == 0) {
+        if (func_001F6738((u8*)self + 8, v) == 0) {
+            return;
+        }
+    }
+    self->flag = 1;
+    if (v != 0) {
+        func_001E2138(&self->f264, v);
+    } else {
+        self->f264 = 0;
+    }
+    self->vtbl[16](self, 3);
+}
+
+struct Obj_1AE7F8 { u8 pad[0x260]; s32 f260; };
+
+void func_001AA998(void* self, s32 flag);
+
+void func_001AE7F8(Obj_1AE7F8* self, s32 flag)
+{
+    if (flag == 0) {
+        self->f260 = 0;
+    }
+    func_001AA998(self, flag);
+}
