@@ -710,3 +710,99 @@ void func_0019FCE8(void* value, u32 enabled)
 {
     func_0019F9D0(value, enabled < 1);
 }
+
+extern u8 D_0026A8E0[];
+
+struct Obj_198920 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x684 - 0x18];
+    s32 f684;
+};
+
+void func_00124A48(void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+void* func_0015A838(void* a, s32 b, s32 c, void* d);
+
+void func_00198920(Obj_198920* self)
+{
+    func_00124DF8(self, 3, D_0026A8E0);
+    func_00124A48(self);
+    Obj_198920* p = (Obj_198920*)func_0015A838(self->f14, 5, 0x18, 0);
+    if (p != 0) {
+        p->f684 = p->f684 + 1;
+    }
+}
+
+extern u8 D_00261420[];
+
+struct Obj_199070 {
+    u8 pad0[0x5A0];
+    void* f5A0;
+};
+
+void func_00198980(void* self);
+void* func_00140FF8(void* p);
+
+void func_00199070(Obj_199070* self)
+{
+    func_00198980(self);
+    self->f5A0 = func_00140FF8(D_00261420);
+}
+
+struct Owner_199428 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x5AC - 0x18];
+    s32 n5AC;
+    void* arr5B0;
+};
+
+void func_001989B0(void* self);
+void func_00124DF8(void* self, s32 a1, void* a2);
+void* func_0018D500(s32 size);
+void func_00182ED8(s32 a);
+extern u8 D_0026A948[];
+
+void func_00199428(Owner_199428* self)
+{
+    func_001989B0(self);
+    s32 i = 0x318;
+    func_00124DF8(self, 1, D_0026A948);
+    self->arr5B0 = func_0018D500(0x80);
+    while (i < 0x338) {
+        s32 r = (s32)func_0015A418(self->f14, 1, i, self);
+        if (r == 0) {
+            break;
+        }
+        s32 count = self->n5AC;
+        i++;
+        ((s32*)self->arr5B0)[count] = r;
+        self->n5AC = count + 1;
+        func_00182ED8(r);
+    }
+}
+
+struct Vec4_19BE08 { s32 a, b, c, d; } __attribute__((aligned(16)));
+struct Src_19BE08 { u8 pad[0x20]; Vec4_19BE08 q20; Vec4_19BE08 q30; };
+struct Local_19BE08 { s32 mode; u8 pad[0xC]; Vec4_19BE08 qa; Vec4_19BE08 qb; u8 pad2[0x20]; };
+typedef void (*VFn_19BE08)(void* self, void* arg);
+struct Obj_19BE08 { VFn_19BE08* vtbl; };
+
+void func_0019C1C0(void* self, s32 mode);
+
+s32 func_0019BE08(u8* self, Src_19BE08* src)
+{
+    Local_19BE08 loc;
+    if (*(s32*)(self + 0x550) != 3) {
+        func_0019C1C0(self, 3);
+        Obj_19BE08* obj = *(Obj_19BE08**)(self + 0x5F8);
+        if (obj != 0) {
+            loc.mode = 6;
+            loc.qb = src->q20;
+            loc.qa = src->q30;
+            obj->vtbl[31](obj, &loc);
+        }
+    }
+    return 1;
+}

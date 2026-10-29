@@ -169,3 +169,85 @@ void func_0019EBE8(void* self)
     func_00152600(o->fC + 0x558, self);
     func_0019EC30(self);
 }
+
+typedef void (*ItemFn_19EC30)(void* payload, s32 n, void* owner);
+typedef void (*VFn_19EC30)(void* self);
+
+struct Item_19EC30 {
+    ItemFn_19EC30 fn;
+    void* payload;
+    u8 pad_08[0x8];
+    Item_19EC30* next;
+};
+
+struct Ctx_19EC30 {
+    u8 pad_00[0x14];
+    u8* table;
+};
+
+struct Owner_19EC30 {
+    VFn_19EC30* vtbl;
+    u8 pad_04[0x4];
+    s32 count;
+    Ctx_19EC30* ctx;
+    u8 pad_10[0x108];
+    Item_19EC30* head;
+};
+
+void func_001DBC18(void* a, void* b);
+void func_001B5F28(void* a, void* b);
+
+void func_0019EC30(Owner_19EC30* self)
+{
+    s32 n = self->count - 1;
+    self->count = n;
+    if (n != 0) {
+        return;
+    }
+    VFn_19EC30 fn = self->vtbl[2];
+    if (fn != 0) {
+        fn(self);
+    }
+    Item_19EC30* head = self->head;
+    if (head != 0) {
+        self->head = 0;
+        for (Item_19EC30* it = head; it != 0; it = it->next) {
+            it->fn(it->payload, 0x10, self);
+        }
+        func_001DBC18(D_00275710, head);
+    }
+    func_001B5F28(self->ctx->table + 0x1B2C, self);
+}
+
+struct Lerp_19ED00 {
+    u8 pad_00[0x18];
+    f32 a18;
+    f32 a1C;
+};
+
+extern f32 D_00261858[];
+
+void func_0019ED00(Lerp_19ED00* self, f32 x)
+{
+    f32 span = D_00261858[1] - self->a18;
+    f32 t = self->a1C - span;
+    if (x < t) {
+        f32 r = t / self->a1C;
+        f32 q = x / r;
+        self->a1C = q;
+        self->a18 = D_00261858[1] - (1.0f - r) * q;
+    }
+}
+
+struct Obj_19FE10 { u8 pad0[0x1C]; f32 f1C; s32 i20; };
+
+void func_0019EB28(Obj_19FE10* self);
+
+void func_0019FE10(Obj_19FE10* self)
+{
+    func_0019EB28(self);
+    u8* g = D_00275710;
+    s32 v = *(s32*)(g + 0x1D00);
+    self->f1C = 0.5f;
+    self->i20 = v;
+}

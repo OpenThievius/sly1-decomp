@@ -80,3 +80,46 @@ s32 func_00196E48(s32 a0, Obj_196E48* self)
     }
     return self->f50 != a0;
 }
+
+void func_001B6598(void* obj, s32* out);
+void* func_001E9970(s32 arg);
+
+typedef void (*VFn_197788)(void* self);
+struct Iface_197788 { VFn_197788* vtbl; };
+extern Iface_197788 D_0026D348;
+extern Iface_197788 D_0026E4E0;
+extern Iface_197788 D_0026E760;
+
+struct Obj_197788 { u8 pad[0x6B8]; void* f6B8; };
+
+void func_00197788(Obj_197788* self)
+{
+    s32 v;
+    func_001B6598(self->f6B8, &v);
+    void* p = 0;
+    if (v == 0x3F3) p = func_001E9970(0);
+    if (p != 0) {
+        D_0026D348.vtbl[14](&D_0026D348);
+        D_0026E4E0.vtbl[14](&D_0026E4E0);
+        D_0026E760.vtbl[14](&D_0026E760);
+        return;
+    }
+    D_0026D348.vtbl[15](&D_0026D348);
+    D_0026E4E0.vtbl[15](&D_0026E4E0);
+    D_0026E760.vtbl[15](&D_0026E760);
+}
+
+void func_001A76A0(void* node, s32 flag);
+void func_00152600(void* a, void* b);
+void func_00152470(void* a, void* b);
+
+struct Ctx_197A08 { u8 pad[0xC14]; void* fC14; };
+
+void func_00197A08(u8* self, Ctx_197A08* ctx)
+{
+    void* p = ctx->fC14;
+    func_001A76A0(p, 0);
+    func_00152600(self + 0x6A8, p);
+    func_00152470(self + 0x69C, p);
+    ctx->fC14 = 0;
+}

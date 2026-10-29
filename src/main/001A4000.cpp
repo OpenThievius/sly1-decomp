@@ -487,3 +487,97 @@ void func_001A4878(List_1A4878* list, s32 value)
     list->items[n] = value;
     list->count = n + 1;
 }
+
+typedef void (*VFn_1A4B30)(void* self);
+
+struct Kin_1A4B30 {
+    f32 pos;
+    f32 vel;
+    f32 acc;
+};
+
+struct Blend_1A4B30 {
+    VFn_1A4B30* vtbl;
+    u8 pad0[0x3D0 - 4];
+    Kin_1A4B30 kin;
+    u8 pad1[0x3E0 - 0x3DC];
+    f32 a3e0[48];
+    f32 b4a0[48];
+    f32 out560[48];
+    u8 pad2[0x64C - 0x620];
+    s32 state64c;
+};
+
+struct Ctx_1A4B30 {
+    u8 pad0[0xC];
+    f32 dt;
+};
+
+extern Ctx_1A4B30* D_002623C8;
+extern f32 D_00275C60[];
+
+void func_00124A48(void* self);
+s32 func_001A4898(void);
+void func_001A5760(void* self, f32 t);
+void func_001A4EF0(void* self, void* p);
+
+void func_001A4B30(void* self)
+{
+    Blend_1A4B30* s = (Blend_1A4B30*)self;
+    func_00124A48(self);
+    if (s->state64c != func_001A4898()) {
+        s->vtbl[7](self);
+    } else {
+        Kin_1A4B30* k = &s->kin;
+        f32 dt = D_002623C8->dt;
+        f32 v = k->pos + dt * (k->vel + dt * k->acc);
+        f32 lo = D_00275C60[0];
+        f32 hi = D_00275C60[1];
+        f32 t;
+        if (v < lo) {
+            t = lo;
+        } else if (hi < v) {
+            t = hi;
+        } else {
+            t = v;
+        }
+        f32 u = 1.0f - t;
+        f32* pa = s->a3e0;
+        f32* pb = s->b4a0;
+        f32* po = s->out560;
+        for (u32 i = 0; i < 48; i++) {
+            *po++ = u * *pa++ + t * *pb++;
+        }
+        func_001A5760(self, 0.0f);
+        func_001A4EF0(self, 0);
+    }
+}
+
+typedef void (*VFn_1A4D60)(void* self);
+
+struct Mgr_1A4D60 {
+    VFn_1A4D60* vtbl;
+};
+
+struct Node_1A4D60 {
+    u8 pad0[0x650];
+    s32 mode650;
+};
+
+extern Mgr_1A4D60 D_0026D0C8;
+
+void* func_001E9970(void* zero);
+
+void func_001A4D60(void* self)
+{
+    Node_1A4D60* n = (Node_1A4D60*)self;
+    void* p = 0;
+    if (n->mode650 == 2) {
+        p = func_001E9970(p);
+    }
+    if (p != 0) {
+        D_0026D0C8.vtbl[14](&D_0026D0C8);
+    } else {
+        D_0026D0C8.vtbl[15](&D_0026D0C8);
+    }
+}
