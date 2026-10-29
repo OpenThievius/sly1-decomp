@@ -806,3 +806,32 @@ s32 func_00193598(s32 index)
 {
     return D_0026A068[index];
 }
+
+// was NEAR: GCC folds the final return 1/return 0 into sltiu/xori; retail keeps li v0,16 + bne and a separate move v0,zero tail
+
+struct Obj_190740 {
+    u8 pad0[0x724];
+    s32 kind;
+};
+
+s32 func_00190740(Obj_190740* self)
+{
+    switch (self->kind) {
+    case 0x10: return 1;
+    case 0xB: return 2;
+    }
+    return 0;
+}
+
+s32 func_001DDA80(void* p);
+
+struct Obj_00192450 {
+    u8 pad[0x14];
+    void* f14;
+};
+
+s32 func_00192450(Obj_00192450* self)
+{
+    if ((D_00262C64 & 1) || func_001DDA80(self->f14)) return 1;
+    return 0;
+}

@@ -1371,3 +1371,18 @@ void func_001B6EC8(Node_1B6EC8* self)
     } while (i >= 0);
     self->fC10 = -1;
 }
+
+struct Node_1B5398 {
+    u8 pad0[0x10]; s32 flags; void* data; u8 pad1[4];
+    f32 f1C; f32 f20; u8 pad2[8];
+    f32 f2C; f32 f30; f32 f34; f32 f38; f32 f3C; f32 f40; f32 f44; f32 f48;
+};
+struct Src_1B5398 { u8 pad0[4]; f32 f4; f32 f8; f32 fC; f32 f10; };
+
+void func_001B4AA0(void* a, void* b);
+
+void func_001B5398(Node_1B5398* p, Src_1B5398* s)
+{
+    func_001B4AA0(p, s);
+    p->f2C = s->f4; p->f30 = s->f8; p->f34 = s->fC; p->f38 = s->f10; p->flags = (p->flags & ~1) | 2;
+}

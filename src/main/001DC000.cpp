@@ -668,3 +668,39 @@ void func_001DFE00(void* self)
     func_00182ED0(self);
     func_00152600(D_002758D0, self);
 }
+
+// NEAR: the loop, the calls and the frame match; retail stores the new block to 0x1AE4 before 0x1AE0 (the compiler emits 0x1AE0 first, and so does a store through a separate struct type).
+
+struct Node_DC740 { u8 pad[8]; Node_DC740* next; Node_DC740* prev; };
+struct Pool_DC740 { u8 pad0[0x1AE0]; void* f1AE0; void* f1AE4; };
+
+void* func_0018D5C0(u32 n);
+
+void func_001DC740(Pool_DC740* self)
+{
+    void* mem = func_0018D5C0(0x1000);
+    self->f1AE0 = mem;
+    self->f1AE4 = mem;
+    for (s32 i = 0; i < 0x100; i++) {
+        Node_DC740* n = (Node_DC740*)((u8*)self->f1AE0 + (i << 4));
+        n->prev = (i < 1) ? 0 : n - 1;
+        n->next = (i > 0xFE) ? 0 : n + 1;
+    }
+}
+
+struct Obj_001DF5A0 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x720 - 0x18];
+    s32 f720;
+    s32 f724;
+    s32 f728;
+};
+
+s32 func_001DDA80(void* p);
+
+s32 func_001DF5A0(Obj_001DF5A0* self, s32 mode)
+{
+    if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || func_001DDA80(self->f14) != 0) return 1;
+    return 0;
+}

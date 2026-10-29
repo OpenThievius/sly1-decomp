@@ -415,3 +415,83 @@ void func_0019FD70(Obj_19FD70* self)
     self->f34 = 0.6f;
     self->i20 = v;
 }
+
+extern u8 D_0027B314[];
+extern f32 D_00261858[];
+
+typedef void (*VFn_19E848)(void* self, void* arg);
+
+struct Node_19E848 {
+    VFn_19E848* vtbl;
+    u8 pad4[0x14];
+    f32 f18;
+};
+
+struct List_19E848 {
+    void* head;
+    u8 pad4[0x4];
+    s32 link;
+};
+
+struct Obj_19E848 {
+    u8 pad0[0x558];
+    List_19E848 list;
+};
+
+struct Frame_19E848 {
+    s32 list;
+    s32 cursor;
+    s32 link;
+    s32 prev;
+};
+
+void func_0019E848(Obj_19E848* self, void* arg)
+{
+    Frame_19E848 fr;
+    s32 e = (s32)&self->list;
+    fr.cursor = e;
+    fr.list = e;
+    s32 old = *(s32*)D_0027B314;
+    s32 link = *(s32*)(e + 8);
+    *(s32*)D_0027B314 = (s32)&fr;
+    fr.prev = old;
+    s32 h = *(s32*)e;
+    fr.link = link;
+    fr.cursor = h + link;
+    s32 n = h;
+    while (n != 0) {
+        Node_19E848* node = (Node_19E848*)n;
+        if (node->f18 >= D_00261858[1]) {
+        } else {
+            node->vtbl[5](node, arg);
+        }
+        s32 nx = *(s32*)fr.cursor;
+        s32 lk = fr.link;
+        fr.cursor = nx + lk;
+        n = nx;
+    }
+    *(s32*)D_0027B314 = fr.prev;
+}
+
+struct __attribute__((aligned(16))) Quad_19FDC0 { s32 a, b, c, d; };
+struct Obj_19FDC0 {
+    u8 pad_00[0x1C];
+    f32 f1C;
+    u8 pad_20[0x38 - 0x20];
+    f32 f38;
+    u8 pad_3C[0xC0 - 0x3C];
+    Quad_19FDC0 q0C0;
+};
+
+extern u8* D_00275710;
+
+void func_0019EB28(void* self);
+
+void func_0019FDC0(Obj_19FDC0* self)
+{
+    func_0019EB28(self);
+    self->f1C = 2.0f;
+    u8* g = D_00275710;
+    self->q0C0 = *(Quad_19FDC0*)(g + 0x1EE0);
+    self->f38 = -1.0f;
+}

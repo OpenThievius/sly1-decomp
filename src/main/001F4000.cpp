@@ -62,3 +62,46 @@ s32 func_001F4318(void* unused, void* a, void* b)
 done:
     return r;
 }
+
+// NEAR: only the vtbl[19] load differs: retail loads it into $v1 (lw v1,76(v1)), we use $v0 for the test and the call.
+
+extern u8 D_002623C8[];
+
+typedef void (*Fn_1F4660)(void* self);
+
+struct Node_1F4660 {
+    Fn_1F4660* vtbl;
+    u8 pad04[0x14];
+    Node_1F4660* next;
+    u8 pad1C[0x2D4 - 0x1C];
+    void* f2D4;
+    u8 pad2D8[0x310 - 0x2D8];
+    s32 count;
+    Node_1F4660** items;
+};
+
+void func_00124A48(void* self);
+
+void func_001F4660(Node_1F4660* self)
+{
+    func_00124A48(self);
+    for (s32 i = 0; i < self->count; i++) {
+        Node_1F4660* e = self->items[i];
+        Fn_1F4660* vt = e->vtbl;
+        if (vt[19] != 0) {
+            vt[19](e);
+        }
+        Node_1F4660* e2 = self->items[i];
+        e2->vtbl[20](e2);
+    }
+    if (self->f2D4 != 0) {
+        s32* g = (s32*)*(void**)D_002623C8;
+        if ((g[0] & 2) == 0) {
+            Node_1F4660* a = self;
+            while (a->next != 0) {
+                a = a->next;
+            }
+            a->vtbl[7](a);
+        }
+    }
+}

@@ -327,3 +327,26 @@ void func_001E30A0(Obj_1E30A0* self)
     }
     self->sub = 0;
 }
+
+extern u8 D_002758E0[];
+void func_001F5C0C(void* p, s32 zero, s32 size);
+
+struct Obj_1E0848 {
+    u8 pad0[4];
+    u8 f4;
+    u8 pad5[3];
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    u32 f18;
+};
+
+void func_001E0848(s32 flag, s32 key)
+{
+    if (key == 0xFFFF && flag != 0) {
+        Obj_1E0848* p = (Obj_1E0848*)D_002758E0;
+        func_001F5C0C(p, 0, 0x1C);
+        p->f4 = 0x2D;p->f8 = 2.0f;p->fC = 1.0f;p->f10 = 0.3f;p->f14 = 0.3f;p->f18 = 0xFF7D4B00;
+    }
+}

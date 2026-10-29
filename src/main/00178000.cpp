@@ -448,3 +448,134 @@ void func_00178598(Obj_178598* self, Pair_178598* s2, f32 f)
     self->q2B80 = s2->q1;
     func_00175170(self, 4, 0x2C);
 }
+
+// NEAR: the float store of f6D4 is scheduled before the li/sw of f6D0; retail stores f6D0 first
+
+typedef s32 (*VFn_17AA40_A)(void* self, s32 v);
+typedef void (*VFn_17AA40_B)(void* self, void* p);
+typedef void (*VFn_17AA40_C)(void* self, s32 a, void* b);
+
+struct Obj_17AA40 {
+    void** vtbl;
+    u8 pad0[0x668 - 4];
+    void* f668;
+    u8 pad1[0x6D0 - 0x66C];
+    s32 f6D0;
+    f32 f6D4;
+    u8 pad2[0x704 - 0x6D8];
+    s32 f704;
+    f32 f708;
+};
+
+struct Msg_17AA40 {
+    void* self;
+    s32 v;
+};
+
+s32 func_00160C58(void);
+void func_001794E0(void* self, void* a, void* b);
+void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void func_0017ABE8(void* self, s32 a1);
+
+extern f32 D_0026185C;
+
+s32 func_0017AA40(Obj_17AA40* self, s32* arg)
+{
+    u8 bufA[16];
+    u8 bufB[16];
+
+    if (((VFn_17AA40_A)self->vtbl[79])(self, *arg) != 0) {
+        return 0;
+    }
+    if (func_00160C58() != 0) {
+        self->f6D0 = 1;
+        self->f6D4 = *(f32*)&D_0026185C;
+    }
+    if (self->f6D0 != 0) {
+        self->f704 = 0;
+        self->f708 = 3.0f;
+        func_001794E0(self, bufA, bufB);
+        func_00127E60(self->f668, 0, bufA, 0, bufB, 0);
+        ((VFn_17AA40_B)self->vtbl[36])(self, bufB);
+    }
+    if (func_00160C58() != 0) {
+        func_0017ABE8(self, 3);
+    } else {
+        func_0017ABE8(self, 4);
+    }
+    {
+        Msg_17AA40* m = (Msg_17AA40*)bufA;
+        m->self = self;
+        m->v = arg[1];
+        ((VFn_17AA40_C)self->vtbl[18])(self, 0x17, bufA);
+    }
+    return 1;
+}
+
+// NEAR: 0x558 clamp uses movz with the operand order ours does not reproduce; msg->f0C mask load goes to the other register
+
+struct Msg_17B7A8 {
+    u8 pad0[0xC];
+    s32 f0C;
+    s32 f10;
+};
+
+struct Obj_17B7A8 {
+    u8 pad0[0x558];
+    s32 f558;
+    void* f55C;
+    void* f560;
+    void* f564;
+    u8 f568[4];
+};
+
+struct Vis_17B7A8 {
+    u8 pad0[0x223C];
+    s32 f223C;
+};
+
+extern u8 D_0026E248[];
+extern void* D_00262E10;
+extern s32 D_00263E2C;
+
+void func_001AC060(void* p);
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+void func_0012C918(void* a, Obj_17B7A8* b, s32 c, void* d, f32 e, f32 f);
+s32 func_001BC320(void* self, Msg_17B7A8* msg);
+
+s32 func_0017B7A8(Obj_17B7A8* self, Msg_17B7A8* msg)
+{
+    void* p;
+    if (msg->f0C & 0x20) {
+        s32 n = self->f558 - 1;
+        s32 pos = (0 < n);
+        self->f558 = pos ? n : 0;
+        func_001AC060(D_0026E248);
+        if (self->f558 == 0) {
+            D_00263E2C = 2;
+            p = 0;
+        } else {
+            s32 flags = msg->f10;
+            if (flags & 2) {
+                if (D_00262E10 == 0) {
+                    p = self->f55C;
+                } else {
+                    s32 t = ((Vis_17B7A8*)D_00262E10)->f223C;
+                    if (t == 4 || t == 6) {
+                        p = self->f55C;
+                    } else {
+                        p = self->f560;
+                    }
+                }
+            } else if (flags & 4) {
+                p = self->f564;
+            } else {
+                p = self->f55C;
+            }
+        }
+        func_0012C918(p, self, 1, self->f568, 0.0f, 1.0f);
+        msg->f0C &= ~0x20;
+        func_001837E0(self, 2, 0, 0);
+    }
+    return func_001BC320(self, msg);
+}

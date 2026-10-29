@@ -634,3 +634,12 @@ void func_001BB210(Obj_1BB210* self, void* a, void* b)
         } while (n != 0);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1BB028 { s32 v[4]; };
+struct Entry_1BB028 { Quad_1BB028* quad; s32 value; };
+extern Entry_1BB028 D_002746E0[];
+void func_001BB028(s32 index, s32* out, Quad_1BB028* dst)
+{
+    *out = D_002746E0[index].value;
+    *dst = *D_002746E0[index].quad;
+}

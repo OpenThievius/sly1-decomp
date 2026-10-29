@@ -736,3 +736,49 @@ void func_001EF9C8(Obj_1EF9C8* self, s32 kind, Msg_1EF9C8* msg)
         }
     }
 }
+
+struct Buf_1EE4C0 { u8 pad[0xC]; u32* cur; };
+void func_001EE4C0(Buf_1EE4C0* b, u32* src){
+ u32 *p1,*p2,*p3,*p4,*p5;
+ p1=b->cur; b->cur=p1+1; *p1=0x30000000;
+ p2=b->cur; b->cur=p2+1; *p2=src[0];
+ p3=b->cur; b->cur=p3+1; *p3=src[1];
+ p4=b->cur; b->cur=p4+1; *p4=src[2];
+ p5=b->cur; b->cur=p5+1; *p5=src[3];
+}
+
+// NEAR: the calls and the single-field stores match; the order of the four stores to 0x360 to 0x588 differs (retail: 0x588, the 64-bit flags at 0x538, 0x360, 0x584, 0x364)
+void func_001B7968(void* self);
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+void func_001F5590(void* a, void* b);
+
+struct Obj_1EEC60 {
+    u8 pad0[0x360];
+    f32 f360;
+    f32 f364;
+    u8 pad1[0x584 - 0x368];
+    s32 f584;
+    s32 f588;
+    u8 pad2[0x590 - 0x58C];
+    u8 f590[4];
+    s32 f594;
+};
+
+void func_001EEC60(Obj_1EEC60* self)
+{
+    u64 bits;
+    s32 one;
+
+    func_001B7968(self);
+    bits = *(u64*)((u8*)self + 0x538);
+    one = 0x8000;
+    bits |= (u64)one << 28;
+    *(u64*)((u8*)self + 0x538) = bits;
+    self->f584 = 1;
+    self->f588 = 1;
+    self->f364 = 1.0f;
+    self->f360 = 1.0f;
+    func_001B9AE0(self, 3, 0, 3, 0);
+    func_001F5590((u8*)self + 0x590, self);
+    self->f594 = 3;
+}

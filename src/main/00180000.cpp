@@ -890,3 +890,72 @@ void func_001833D0(void* a, void* b)
 {
     func_0011EC40(a, b);
 }
+
+// NEAR: all calls and branches match; only the vtable load for the last call differs (retail loads the vtable into $v1 and the slot into $v0, ours the other way round)
+typedef s32 (*VFnQ_181BC8)(void* self, s32 a);
+typedef void (*VFnP_181BC8)(void* self, void* a);
+typedef s32 (*VFnR_181BC8)(void* self, void* a);
+typedef void (*VFnV_181BC8)(void* self);
+typedef void (*VFnPPP_181BC8)(void* self, s32 a, void* b);
+typedef void (*Fn_181BC8)(void);
+
+s32 func_00160C58();
+void func_00181DA8(void* self, s32 n);
+void func_00192990(void* self, s32 value);
+void func_00175170(void* self, s32 a, s32 b);
+void func_001929D0(void* value);
+void func_001D7098(void* out, s32 mode, void* owner);
+void func_00181B20(void);
+
+extern s32 D_00262E10;
+extern f32 D_0026185C;
+
+struct Self_181BC8 { void** vt; u8 pad004[0xBC8 - 4]; void* pBC8; u8 padBCC[0xBF0 - 0xBCC]; s32 bf0; f32 bf4; };
+struct Vt_181BC8 { void** vt; };
+struct Loc_181BC8 { void* self; s32 val; s32 pad8; Fn_181BC8 fn; };
+
+s32 func_00181BC8(void* selfv, s32* arg)
+{
+    Self_181BC8* self = (Self_181BC8*)selfv;
+    Loc_181BC8 loc;
+    s32 r;
+    s32 g;
+    Vt_181BC8* gp;
+    VFnP_181BC8 f;
+    void** vt2;
+
+    if (((VFnQ_181BC8)self->vt[79])(self, arg[0])) {
+        return 0;
+    }
+    if (func_00160C58()) {
+        self->bf0 = 1;
+    }
+    self->bf4 = D_0026185C;
+    r = func_00160C58();
+    if (r == 0) {
+        g = D_00262E10;
+        if (g != 0) {
+            goto then_block;
+        }
+    }
+    func_00181DA8(self, 2);
+    goto tail;
+then_block:
+    ((VFnV_181BC8)((Vt_181BC8*)D_00262E10)->vt[6])((void*)D_00262E10);
+    ((VFnP_181BC8)((Vt_181BC8*)D_00262E10)->vt[35])((void*)D_00262E10, self->pBC8);
+    ((VFnV_181BC8)((Vt_181BC8*)self->pBC8)->vt[7])(self->pBC8);
+    func_00192990((void*)D_00262E10, 1);
+    func_00175170((void*)D_00262E10, 2, 2);
+    func_001929D0((void*)D_00262E10);
+    func_00181DA8(self, 3);
+    func_001D7098(&loc, 0, self);
+    gp = (Vt_181BC8*)D_00262E10;
+    gp = (Vt_181BC8*)D_00262E10;
+    loc.fn = func_00181B20;
+    (void)((VFnR_181BC8)gp->vt[80])(gp, &loc);
+tail:
+    loc.self = self;
+    loc.val = arg[1];
+    ((VFnPPP_181BC8)self->vt[18])(self, 0x17, &loc);
+    return 1;
+}

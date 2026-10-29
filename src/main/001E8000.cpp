@@ -729,3 +729,72 @@ void func_001EBEB0(u8* self)
     *(s32*)D_00275DB8 = 2;
     *(s32*)D_00275DBC = 0;
 }
+
+// NEAR: the li and lui registers differ (retail keeps 1 in v0 and the global base in a2)
+
+extern u8 D_00262C70[];
+
+struct Obj_1E9688 {
+    u8 pad0[0xC];
+    s32 f_0C;
+    u8 pad1[0x2C - 0x10];
+    s32 f_2C;
+    s32 f_30;
+};
+
+void func_001E9570(void* g);
+void func_001A7D98(void* self, s32 mode);
+void func_001AA0C0(void);
+
+void func_001E9688(Obj_1E9688* self)
+{
+    while (self->f_2C >= 2) {
+        func_001E9570(self);
+    }
+    s32 one = 1;
+    self->f_30 = -1;
+    u8* base = D_00262C70;
+    self->f_2C = one;
+    self->f_0C = 0;
+    func_001A7D98(*(void**)(base + 0xBC), 3);
+    func_001AA0C0();
+}
+
+// NEAR: prologue copies: retail moves $f12 to $f22 before $a1 to $s1, and sets $f14 from $f20 before $a1 = sp; the compiler orders both differently (4 lines).
+
+struct Obj_1EA620 { u8 pad[0xC]; f32 f0C; };
+
+f32 func_001EA4B8(f32 a, f32 b, f32 c, void* p, f32* out);
+
+f32 func_001EA620(f32 a, f32 b, f32 c, f32 d, void* self, f32* out)
+{
+    Obj_1EA620* o = (Obj_1EA620*)self;
+    f32 tmp;
+    f32 res = func_001EA4B8(a, c, d, self, &tmp);
+    f32 k = o->f0C;
+    if (0.0f < k) {
+        f32 hi = b + k * d;
+        f32 lo = b - k * d;
+        if (hi < tmp) {
+            tmp = hi;
+            res = a + b * d + (k * (d * 0.5f)) * d;
+        } else if (tmp < lo) {
+            tmp = lo;
+            res = a + b * d - (k * (d * 0.5f)) * d;
+        }
+    }
+    if (out != 0) *out = tmp;
+    return res;
+}
+
+// NEAR: ints are saved to s0/s1 the wrong way round (self in s1, a1 in s0) and mov.s f21,f15 lands in the delay slot; ordering of the callee-saved moves differs.
+
+f32 func_001EA408(f32 a);
+f32 func_001EA620(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1);
+
+f32 func_001EA798(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1)
+{
+    f32 t = func_001EA408(f14 - f12);
+    f32 r = func_001EA620(0.0f, f13, t, f15, self, a1);
+    return func_001EA408(f12 + r);
+}

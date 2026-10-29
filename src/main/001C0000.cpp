@@ -538,3 +538,62 @@ void func_001C33C8(Obj_1C33C8* self)
     self->count = c + 1;
     func_001C3FC8(self, 1);
 }
+
+// NEAR: retail ends the zero path with beqz + move $v0,$zero and falls into li $v0,1; ours folds the call result into sltu $v0,$zero,$v0 (2 lines differ).
+
+struct Obj_1C3D28 { u8 pad[0x14]; void* f14; };
+extern s32 D_00262C64;
+s32 func_001DDA80(void* p);
+
+s32 func_001C3D28(Obj_1C3D28* self)
+{ if ((D_00262C64 & 1) || func_001DDA80(self->f14)) return 1; return 0; }
+
+// EXACT: declare D_0026185C as extern f32 D_0026185C[] and read [0]
+
+typedef s32 (*VFnA_1C3D60)(void* self, s32 v);
+typedef void (*VFnB_1C3D60)(void* self, s32 v, void* data);
+typedef void (*VFnC_1C3D60)(void* a0, void* self);
+struct Obj_1C3D60 {
+    void** vtbl;
+    u8 pad0[0x610 - 4];
+    s32 f610;
+    u8 pad1[0x638 - 0x614];
+    s32 f638;
+    f32 f63C;
+};
+struct Arg_1C3D60 {
+    s32 f0;
+    s32 f4;
+    void* f8;
+    VFnC_1C3D60 fC;
+};
+struct Local_1C3D60 { void* self; s32 v; };
+extern f32 D_0026185C[];
+s32 func_00160C58();
+void func_001C3FC8(void* self, s32 flag);
+
+s32 func_001C3D60(Obj_1C3D60* self, Arg_1C3D60* arg)
+{
+    Local_1C3D60 local;
+    s32 m;
+    if (((VFnA_1C3D60)self->vtbl[79])(self, arg->f0)) return 0;
+    if (arg->f0 == 0) {
+        if (arg->fC != 0) arg->fC(arg->f8, self);
+    }
+    m = self->f610;
+    if (m < 5) {
+        if (!(m < 2)) return 1;
+    }
+    if (self->f638 != 0) return 1;
+    if (func_00160C58()) {
+        func_001C3FC8(self, 2);
+        self->f638 = 1;
+        self->f63C = D_0026185C[0];
+    } else {
+        func_001C3FC8(self, 3);
+    }
+    local.self = self;
+    local.v = arg->f4;
+    ((VFnB_1C3D60)self->vtbl[18])(self, 0x17, &local);
+    return 1;
+}
