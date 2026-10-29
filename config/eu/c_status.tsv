@@ -615,6 +615,7 @@ func_0013F0E0	func_0013F3E0	match
 func_0013F110	func_0013F410	match	
 func_0013F6C0	func_0013F9C0	match	
 func_0013F6F8	func_0013F9F8	match	
+func_00140100	func_00140400	match	
 func_00140140	func_00140440	match	
 func_00140200	func_00140500	match	
 func_00140238	func_00140538	match	
@@ -1082,13 +1083,17 @@ func_00180EB0	func_00181510	match
 func_00180EE8	func_00181548	match	
 func_00180F20	func_00181580	match	
 func_00180F68	func_001815C8	match	
+func_00181A58	func_001820B8	match	
 func_00181AE0	func_00182140	match	
 func_00181AF0	func_00182150	match	
 func_00181B20	func_00182180	match	
+func_00181D28	func_00182388	match	
 func_00181D88	func_001823E8	match	
+func_00182470	func_00182AD0	match	
 func_001824D8	func_00182B38	match	
 func_00182C18	func_00183278	match	
 func_00182C58	func_001832B8	match	
+func_00182C80	func_001832E0	match	
 func_00182D00	func_00183360	match	
 func_00182D48	func_001833A8	match	
 func_00182D50	func_001833B0	match	
@@ -1099,17 +1104,24 @@ func_00182ED0	func_00183530	match
 func_00182ED8	func_00183538	match	
 func_00182F40	func_001835A0	match	
 func_00182F78	func_001835D8	match	
+func_00182FC8	func_00183628	match	
 func_00183028	func_00183688	match	
 func_00183058	func_001836B8	match	
 func_001830B0	func_00183710	match	
 func_001830D8	func_00183738	match	
 func_001831E8	func_00183848	match	
 func_00183238	func_00183898	match	
+func_00183290	func_001838F0	match	
+func_001832C0	func_00183920	match	
+func_001832F0	func_00183950	match	
 func_001833F0	func_00183A50	match	
 func_00183438	func_00183A98	match	
 func_00183458	func_00183AB8	match	
 func_00183478	func_00183AD8	match	
 func_00183910	func_00183F70	match	
+func_00183990	func_00183FF0	match	
+func_00183A10	func_00184070	match	
+func_00183A90	func_001840F0	match	
 func_00183B20	func_00184180	match	
 func_00183BB8	func_00184218	match	
 func_00183C38	func_00184298	match	
@@ -1143,6 +1155,9 @@ func_00185358	func_001859B8	match
 func_00185C18	func_00186280	match	
 func_00185CA0	func_00186308	match	
 func_001861E8	func_00186850	match	
+func_001879C0	func_00188028	match	
+func_00187C28	func_00188290	match	
+func_00187E88	func_001884F0	match	
 func_001884E0	func_00188B48	match	
 func_001885E0	func_00188C48	match	
 func_00188770	func_00188DD8	match	
@@ -1154,8 +1169,10 @@ func_001891C0	func_00189828	match
 func_00189AF0	func_0018A158	match	
 func_0018A388	func_0018A9F0	match	
 func_0018A3B8	func_0018AA20	match	
+func_0018AAE0	func_0018B148	match	
 func_0018AB88	func_0018B1F0	match	
 func_0018ABF0	func_0018B258	match	
+func_0018AC58	func_0018B2C0	match	
 func_0018ACD0	func_0018B338	match	
 func_0018ACF0	func_0018B358	match	
 func_0018B2E8	func_0018B950	match	
@@ -1168,8 +1185,12 @@ func_0018B930	func_0018BF98	match
 func_0018BC90	func_0018C2F8	match	
 func_0018BD00	func_0018C368	match	
 func_0018BFA8	func_0018C610	match	
+func_0018C028	func_0018C690	match	
+func_0018C178	func_0018C7E0	match	
 func_0018C1A8	func_0018C810	match	
 func_0018C1E8	func_0018C850	match	
+func_0018C7F8	func_0018CE60	differs	
+func_0018C888	func_0018CEF0	match	
 func_0018C9C0	func_0018D028	match	
 func_0018CFC0	func_0018D628	match	
 func_0018D028	func_0018D690	match	
@@ -1182,6 +1203,7 @@ func_0018D2E8	func_0018D978	match
 func_0018D328	func_0018D9B8	match	
 func_0018D368	func_0018D9F8	match	
 func_0018D410	func_0018DAA0	match	
+func_0018D4B0	func_0018DB40	match	
 func_0018D4F8	func_0018DB88	match	
 func_0018D500	func_0018DB90	match	
 func_0018D550	func_0018DBE0	match	
@@ -1197,6 +1219,7 @@ func_0018D750	func_0018DDE0	match
 func_0018D778	func_0018DE08	match	
 func_0018D8E0	func_0018DF70	match	
 func_0018D910	func_0018DFA0	match	
+func_0018D978	func_0018E008	match	
 func_0018DC88	func_0018E318	match	
 func_0018DD50	func_0018E3E0	match	
 func_0018DD78	func_0018E408	match	
@@ -1204,7 +1227,10 @@ func_0018E678	-	absent
 func_0018E7C0	-	absent	
 func_0018E8C0	func_0018F328	match	
 func_0018E938	func_0018F3A0	match	
+func_0018E940	func_0018F3A8	error	a reference to D_002CBB40, which has no address in this version
 func_0018EA48	func_0018F478	error	a call to func_0018E6A0__FPv, which has no address in this version
+func_0018EAA0	func_0018F4D8	differs	
+func_0018EC40	func_0018F6F0	match	
 func_0018EDA0	func_0018F870	match	
 func_0018F148	func_0018FC18	match	
 func_0018F968	func_001904F0	match	
