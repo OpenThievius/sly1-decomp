@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-
-struct Point2 { f32 x, y; };
-
 extern void* D_0024A220;
 struct Render_15C930 { u8 pad[0x44]; f32 x; f32 y; void* callback; };
-void* func_0018D758(s32);
+void* func_0018D758(u32);
 void func_0015C9B0(void*, Render_15C930*);
 Render_15C930* func_0015C930(void* owner, f32 x, f32 y)
 {
@@ -17,6 +14,8 @@ Render_15C930* func_0015C930(void* owner, f32 x, f32 y)
 	out->y *= y;
 	return out;
 }
+
+struct Point2 { f32 x, y; };
 
 // Points recorded in order, the first of them scaled into u and v.
 struct Trail
@@ -741,20 +740,65 @@ s32 func_0015FBA0(Obj_0015FBA0* self, s32* out)
 struct Obj_15C900 { u8 pad0[0xC]; s32 index; u8 pad1[0x34]; f32 first; f32 second; };
 void func_0015C900(Obj_15C900* obj) { obj->index--; f32* item = (f32*)((u8*)obj + 0x10 + obj->index * 8); obj->first = item[0]; obj->second = item[1]; }
 
-struct Descriptor_15C418 { u8 pad0[0x18]; s16 offset; u8 pad1[2]; f32 (*callback)(void* self, s32 character); };
-struct Obj_15C418 { u8 pad0[0x4C]; Descriptor_15C418* descriptor; };
-f32 func_0015C418(Obj_15C418* self, const char* text)
+struct __attribute__((packed)) Unaligned_15DBB8 { s32 v; };
+
+void func_0015DBB8(u8* dst, u8* src)
 {
-    if (text != 0) goto nonempty;
-    return 0.0f;
-nonempty:
-    f32 total = 0.0f;
-    const char* cursor = text;
-    while (*cursor != 0) {
-        s8 character = *cursor;
-        Descriptor_15C418* descriptor = self->descriptor;
-        total += descriptor->callback((u8*)self + descriptor->offset, character);
-        cursor++;
+    s32 v = ((Unaligned_15DBB8*)src)->v;
+    ((Unaligned_15DBB8*)(dst + 0xA4))->v = v;
+    v = ((Unaligned_15DBB8*)(dst + 0xA4))->v;
+    ((Unaligned_15DBB8*)(dst + 0x9C))->v = v;
+}
+
+struct Elem_15F6C0 { u8 pad[0x54]; void* owner; Elem_15F6C0* next; };
+struct Owner_15F6C0 { u8 pad[0x60]; Elem_15F6C0* head; };
+
+void func_00152730(void* dst, void* src);
+
+void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other)
+{
+    s32 scratch[4];
+    (void)scratch;
+    if (self != other) {
+        Elem_15F6C0* e = other->head;
+        if (e != 0) {
+            e->owner = self;
+            for (e = e->next; e != 0; e = e->next) {
+                e->owner = self;
+            }
+        }
+        func_00152730(&self->head, &other->head);
     }
-    return total;
+}
+
+extern s8 D_00262250[];
+extern s32 D_00262268[];
+
+s32 func_0015C200(s32 a0)
+{
+    s8 key = (s8)a0;
+    s32 i = 0;
+    while (i < 5 && key != D_00262250[i]) {
+        i++;
+    }
+    if (i < 5) {
+        return D_00262268[i];
+    }
+    return 0;
+}
+
+struct Obj_15C4A8 {
+    u8 pad0[8];
+    s32 f8;
+    u8 pad0C[0x3C];
+    f32 f48;
+};
+
+s32 func_0015C4E8(void* self, u8* s);
+
+f32 func_0015C4A8(Obj_15C4A8* self, u8* s)
+{
+    f32 a = (f32)self->f8 * self->f48;
+    s32 n = func_0015C4E8(self, s);
+    return a * (f32)n;
 }

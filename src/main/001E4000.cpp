@@ -323,3 +323,105 @@ void* func_001E5E60(Obj_001E5E60* self) { return self->value ? self->value : sel
 
 struct Obj_001E6268 { u8 pad[0xC70]; f32 value; };
 void func_001E6268(Obj_001E6268* self, s32* first, s32* second) { s32 n = (s32)(self->value * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
+
+typedef s32 (*VFn_1E55D0)(void* self);
+struct Obj_1E55D0 { VFn_1E55D0* vtbl; };
+struct Item_1E55D0 { u8 pad0[0x724]; s32 f724; };
+struct Self_1E55D0 { u8 pad0[0x14]; void* f14; u8 pad1[0x568]; s32 f580; u8 pad2[0x9C]; Obj_1E55D0* f620; };
+
+void func_00192B58(void* self);
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void func_001C8F20(void* node, s32 kind, s32 flag);
+
+void func_001E55D0(Self_1E55D0* self)
+{
+    void* arr[8];
+    s32 n;
+    s32 count;
+    s32 i;
+
+    func_00192B58(self);
+    if (self->f620 != 0) {
+        if (self->f620->vtbl[81](self->f620)) {
+            n = func_0015A4F0(self->f14, 5, 8, 0, 8, arr);
+            if (n > 0) {
+                count = n;
+                i = 0;
+                do {
+                    void* item = arr[i];
+                    if (item != self->f620) {
+                        if (((Item_1E55D0*)item)->f724 != 0xB) {
+                            func_001C8F20(item, 0xA, 0);
+                        }
+                    }
+                    count--;
+                    i++;
+                } while (count != 0);
+            }
+            self->f580 = 0;
+        } else {
+            self->f580 = 1;
+        }
+    }
+}
+
+extern u8* D_00275710;
+extern u8 D_00275640[];
+extern u8 D_00275B58[];
+extern f32 D_00275650;
+extern f32 D_00275654;
+extern f32 D_00275658;
+extern f32 D_0027565C;
+extern f32 D_00275660;
+
+typedef void (*VFn_1E6188)(void* self);
+struct Inst_1E6188 { VFn_1E6188* vtbl; };
+struct Obj_1E6188 { u8 pad[0x27C]; Inst_1E6188* p27C; };
+
+void func_001AA268(void* self);
+void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
+void func_00184768(void* p, s32 v);
+void func_001847F0(void* p, void* q);
+void func_00184858(void* p, f32 v);
+void func_00184818(void* p, f32 v);
+void func_00184878(void* p, f32 v);
+void func_00184838(void* p, f32 v);
+void func_00184898(void* p, f32 v);
+void func_00184990(void* p, void* q);
+void func_00184968(void* p, s32 v);
+
+void func_001E6188(Obj_1E6188* self)
+{
+    func_001AA268(self);
+    self->p27C = (Inst_1E6188*)func_0011E580(0x51, D_00275710, 0, 0x201, -1);
+    func_00184768(self->p27C, 1);
+    func_001847F0(self->p27C, D_00275640);
+    func_00184858(self->p27C, D_00275650);
+    func_00184818(self->p27C, D_00275654);
+    func_00184878(self->p27C, D_00275658);
+    func_00184838(self->p27C, D_0027565C);
+    func_00184898(self->p27C, D_00275660);
+    func_00184990(self->p27C, D_00275B58);
+    func_00184968(self->p27C, 1);
+    self->p27C->vtbl[7](self->p27C);
+}
+
+extern u8 D_00262280[];
+
+s32 func_001E9A68(void);
+void func_001613C0(void* p, s32 a, s32 b, s32 c);
+void func_00161708(void* p, s32 a, u64 b);
+void func_001E6600(void* self, void* p);
+void func_001E6C20(void* self, void* p);
+
+void func_001E73B8(void* self)
+{
+    u8* s = D_00262280;
+    if (func_001E9A68()) {
+        func_001613C0(s, 0, 1, 0xE);
+        func_00161708(s, 0x47, 0x31001);
+        func_00161708(s, 0x42, 0x44);
+        func_001E6600(self, s);
+        func_001E6C20(self, s);
+    }
+}

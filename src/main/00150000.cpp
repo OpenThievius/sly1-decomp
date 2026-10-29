@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-struct State_001503E0 { u8 pad[0x744]; u32 count; u32 items[8]; };
-
 struct Node_150298 { u8 pad[0x554]; f32 value554; u8 pad2[0x558 - 0x558]; Node_150298* next; };
 struct State_150298 { u8 pad[0x6CC]; Node_150298* selected; };
 extern Node_150298* D_00262708;
@@ -20,16 +18,12 @@ void func_00150298(State_150298* self)
 	while (current != 0) {
 		Node_150298* candidate = func_0016A820(current);
 		current = current->next;
-		if (candidate != 0 && candidate->value554 < minimum) {
-			best = candidate;
-			minimum = candidate->value554;
-		}
+		if (candidate != 0 && candidate->value554 < minimum) { best = candidate; minimum = candidate->value554; }
 	}
-	if (best != 0) {
-		func_0014F110(best, 5);
-		self->selected = best;
-	}
+	if (best != 0) { func_0014F110(best, 5); self->selected = best; }
 }
+
+struct State_001503E0 { u8 pad[0x744]; u32 count; u32 items[8]; };
 
 struct Object_00150338 { u8 pad[0x550]; s32 status; };
 struct State_00150338 { u8 pad[0x78C]; s32 count; Object_00150338* items[8]; };
@@ -301,7 +295,6 @@ void func_00151E20(void* self, f32 amount)
     f32 result = ((f32 (*)(void*, f32))func_001EB0F8)(D_00275C60, *(f32*)((u8*)*(void**)&D_002623C8 + 0x10) + amount * y);
     *(f32*)((u8*)*(void**)&D_002623C8 + 0x10) = result;
 }
-
 
 void func_00151FC8(void* object)
 {
@@ -645,29 +638,34 @@ void func_00152D30(void* self)
     *(u64*)(cursor + 8) = 0;
 }
 
-struct Callback_152D70 { u8 pad000[8]; s16 offset; u16 pad00A; void (*function)(void*, s32); };
-struct Object_152D70 {
-    u8 pad000[8];
-    u32* start;
-    u32* cursor;
-    s32 align;
-    s32 notify;
-    Callback_152D70* callback;
-};
-void func_00152D70(Object_152D70* self)
+void func_00152E18() {}
+
+struct Ctl_001517C0 { u8 pad0[0x2DC]; s32 count; u8* base; s32 index; u8 pad2E8[0x10]; void* p2F8; };
+void func_00150DC0(Ctl_001517C0* self, u8* item);
+s32 func_00151300(Ctl_001517C0* self);
+void func_0012E760(void* obj);
+void func_001516C0(Ctl_001517C0* self);
+
+void func_001517C0(Ctl_001517C0* self)
 {
-    if (self->align) {
-        u32* cursor = self->cursor;
-        while ((u32)cursor & 0xF) *cursor++ = 0;
-        self->cursor = cursor;
-    } else if (self->notify) {
-        self->callback->function((u8*)self + self->callback->offset, 0);
-    }
-    if (self->start) {
-        s32 length = (s32)((u8*)self->cursor - (u8*)self->start);
-        *self->start |= (length >> 4) - 1;
-        self->start = 0;
+    s32 index;
+
+    if (self->index < self->count) {
+        for (;;) {
+            if (func_00151300(self) != 0) {
+                return;
+            }
+            if (self->p2F8 != 0) {
+                func_0012E760(self->p2F8);
+                self->p2F8 = 0;
+            }
+            index = self->index + 1;
+            self->index = index;
+            if (!(index < self->count)) {
+                break;
+            }
+            func_00150DC0(self, self->base + index * 0x28);
+        }
+        func_001516C0(self);
     }
 }
-
-void func_00152E18() {}

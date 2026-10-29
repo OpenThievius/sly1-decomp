@@ -538,3 +538,195 @@ struct S_1B0488 { u8 pad[0xB08]; f32 value; };
 void func_001B0488(S_1B0488* p, f32 x) { p->value = 1.0f / x; }
 
 s32 func_001B0BD8() { return 1; }
+
+typedef void (*VFn_1B0EA8)(void* self, s32 arg);
+
+struct Obj_1B0EA8 {
+    VFn_1B0EA8* vtbl;
+    u8 pad_4[0x554 - 4];
+    s32 f554;
+};
+
+void func_001B0EA8(Obj_1B0EA8* self, s32 value)
+{
+    s32 m = 5;
+    self->f554 = value;
+    if (!value) {
+        m = 1;
+    }
+    self->vtbl[0x144 / 4](self, m);
+}
+
+typedef void (*Fn_1B2840)(void* self, void* other);
+
+struct Obj_1B2840 {
+    Fn_1B2840* vtbl;
+};
+
+struct Self_1B2840 {
+    u8 pad_0[0x34];
+    Obj_1B2840* f34;
+};
+
+s32 func_00137B90(void* src);
+void* func_0014D9A8(s32 index);
+void func_0011EC40(void* self, void* obj);
+
+void func_001B2840(Self_1B2840* self, void* obj)
+{
+    Obj_1B2840* p = (Obj_1B2840*)func_0014D9A8(func_00137B90(obj));
+    self->f34 = p;
+    Fn_1B2840 fn = p->vtbl[0];
+    if (fn != 0) {
+        fn(p, obj);
+    }
+    func_0011EC40(self, obj);
+}
+
+extern u8 D_002744D8[];
+void func_00124A48(void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+
+typedef void (*VFn_1B04D0)(void* self, s32 v);
+
+struct Sub_1B04D0 {
+    u8 pad0[0x44];
+    s32 x44;
+};
+
+struct Obj_1B04D0 {
+    VFn_1B04D0* vtbl;
+    u8 pad0[0x14 - 4];
+    u8* p14;
+    u8 pad1[0x200 - 0x18];
+    Sub_1B04D0* p200;
+    u8 pad2[0x538 - 0x204];
+    u64 f538;
+    u8 pad3[0x560 - 0x540];
+    s32 x560;
+    u8 pad4[0x5D0 - 0x564];
+    Obj_1B04D0* x5D0;
+    s32 x5D4;
+};
+
+void func_001B04D0(Obj_1B04D0* self)
+{
+    func_00124A48(self);
+    func_00124DF8(self, 2, D_002744D8);
+    if (self->x5D0 == 0) {
+        self->x5D0 = self;
+    }
+    if (self->x5D4 == 0) {
+        self->x5D4 = *(s32*)(self->p14 + 0x1D14);
+    }
+    if (self->p200 != 0) {
+        self->p200->x44 = 0;
+    }
+    u64 m = 0x8000;
+    m <<= 28;
+    self->f538 |= m;
+    func_001B9AE0(self, 3, 0, 3, 0);
+    self->vtbl[81](self, self->x560);
+}
+
+typedef void (*VFn_1B0EE0)(void* self, s32 arg);
+
+struct Vtbl_1B0EE0 {
+    u8 pad0[0x144];
+    VFn_1B0EE0 fn144;
+};
+
+struct Rec_1B0EE0 {
+    u8 pad0[0x550];
+    s32 f550;
+    f32 f554;
+};
+
+struct Obj_1B0EE0 {
+    Vtbl_1B0EE0* vt;
+    u8 pad0[0x550 - 0x4];
+    Rec_1B0EE0* f550;
+    s32 f554;
+    s32 f558;
+    u8 pad1[0x5C0 - 0x55C];
+    s32 f5C0;
+};
+
+extern f32 D_0026185C;
+
+void func_001B0EE0(Obj_1B0EE0* self)
+{
+    if (self->f558 != 8) {
+        self->vt->fn144(self, self->f554 == 0 ? 3 : 7);
+    }
+    Rec_1B0EE0* r = self->f550;
+    if (r != 0) {
+        if (r->f550 == 1) {
+            if (__builtin_fabsf(D_0026185C - r->f554) < 0.2f) {
+                self->f5C0 = r->f550;
+            }
+        }
+    }
+}
+
+struct Dma_1B2640 {
+    u8 pad0[0xC];
+    u8* f0C;
+};
+
+struct Sub_1B2640 {
+    u8 pad0[0xC];
+    s32 f0C;
+};
+
+struct Obj_1B2640 {
+    Sub_1B2640* f0;
+    u8 pad4[0xBC];
+    s32 fC0;
+    u8 padC4[0xC];
+};
+
+struct Ctx_1B2640 {
+    u8 pad0[0x21C];
+    s32 f21C;
+};
+
+extern u8 D_00261990[];
+extern u8 D_002622A8[];
+
+void func_001B2358(void* o);
+
+void func_001B2640(Obj_1B2640* o)
+{
+    if (o->f0 != 0) {
+        Ctx_1B2640* c = *(Ctx_1B2640**)D_00261990;
+        s32 bits = o->f0->f0C;
+        s32 need = c->f21C;
+        s32 a2 = 0;
+        if ((bits & 0x10000000) != 0) {
+            goto set;
+        }
+        if ((need & bits) != need) {
+            goto skip;
+        }
+    set:
+        a2 = 1;
+    skip:
+        if (a2 != 0) {
+            if (o->fC0 == 0) {
+                func_001B2358(o);
+                if (o->fC0 == 0) {
+                    goto done;
+                }
+            }
+            Dma_1B2640* g = (Dma_1B2640*)D_002622A8;
+            u64 hi = (u64)(u32)((u8*)o + 0xD0) << 32;
+            u64 v = (u64)(s64)(o->fC0 | 0x40000000) | hi;
+            *(u64*)g->f0C = v;
+            g->f0C = g->f0C + 0x10;
+        }
+    }
+done:
+    ;
+}

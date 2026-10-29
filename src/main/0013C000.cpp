@@ -100,38 +100,6 @@ void func_00124A48(Node_CE40* self);
 void func_0013CE80(void* self);
 void func_001DBCC8(void* target, Hook_CE40 fn, Node_CE40* ctx, s32 a3, s32 a4);
 
-struct Object_13CCF8 {
-    u8 pad000[0x2B0];
-    u8 small[5];
-    u8 pad2B5[0x35F];
-    s32 f614;
-    u8 pad618[0xC];
-    f32 f624;
-    f32 f628;
-    f32 f62C;
-    u8 pad630[0x58];
-    void* f688;
-    s32 f68C;
-};
-extern u8 D_00261420[];
-void func_001B7968(void*);
-void* func_00140FF8(void*);
-void func_0013CCF8(Object_13CCF8* self)
-{
-    func_001B7968(self);
-    self->f628 = 0.8f;
-    self->f62C = 1.2f;
-    self->f68C = 1;
-    self->f624 = 1.0f;
-    self->small[4] = 0x10;
-    self->small[3] = 0x10;
-    self->small[2] = 0x10;
-    self->small[1] = 0x10;
-    self->small[0] = 0x10;
-    self->f688 = func_00140FF8(D_00261420);
-    self->f614 = -1;
-}
-
 void func_0013CE40(Node_CE40* self)
 {
     func_00124A48(self);
@@ -613,3 +581,132 @@ void func_0013DA48(Obj_0013DA48* obj, s32 value) { if (obj->count < 4) { obj->va
 
 struct Obj_13DAB8 { u8 pad[0x63C]; u32 flags; u8 gap[0x28]; u32 count; u32 values[4]; };
 void func_0013DAB8(Obj_13DAB8* obj, s32 value) { if (obj->count < 3) { obj->values[obj->count++] = value; obj->flags |= 2; } }
+
+void func_0013D900(Queue_D950* self, s32 value)
+{
+    if ((u32)self->count < 16) {
+        self->slots[self->count].y = value;
+        self->slots[self->count].x = 2;
+        self->count++;
+    }
+}
+
+void func_0013D9A0(FlagState* self, s32 enabled)
+{
+    if (enabled) {
+        self->flags = (self->flags | 1) & ~8;
+    } else {
+        self->flags &= ~1;
+        if (self->flags == 0) self->flags = 8;
+    }
+}
+
+void func_0013D9F0(FlagState* self, s32 enabled)
+{
+    if (enabled) {
+        self->flags = (self->flags | 4) & ~8;
+    } else {
+        self->flags &= ~4;
+        if (self->flags == 0) self->flags = 8;
+    }
+}
+
+struct State_0013DAF0 { u8 pad[0x6B4]; void* slot; };
+void* func_0013DAF0(State_0013DAF0* self)
+{
+    if (!self->slot) func_001BE4D8(&self->slot);
+    return self->slot;
+}
+
+void func_0013EC00(void* list, s32 size, void* count, s32 a, s32 b, s32 c, s32 d);
+void func_0013EB30(u8* self, s32 a, s32 b, s32 c, s32 d)
+{
+    func_0013EC00(self + 0x14C, 8, self + 0x148, a, b, c, d);
+}
+
+struct Obj_13CD80 { u8 pad0[0x14]; void* f14; u8 pad1[0x5FC]; s32 f614; s32 f618; };
+
+void func_001BAC30(void* self);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void func_00159478(void* sub, void* self);
+void func_00182ED8(s32 a);
+
+void func_0013CD80(Obj_13CD80* self)
+{
+    func_001BAC30(self);
+    if (self->f614 == -1) {
+        func_00159478(&self->f618, self);
+        return;
+    }
+    s32 v = func_0015A418(self->f14, 0x101, self->f614, self);
+    self->f618 = v;
+    if (v != 0) {
+        func_00182ED8(v);
+    }
+}
+
+struct Elem_13E6C8 { s32 f0; s32 f4; s32 f8; };
+struct Tbl_13E6C8 { s32 count; s32 f4; Elem_13E6C8* elems; };
+struct Self_13E6C8 { u8 pad0[0x10]; s32 f10; };
+struct Base_13E6C8 { u8 pad0[0x10]; s32 f10; };
+
+void* func_0018D500(s32 size);
+
+void func_0013E6C8(Self_13E6C8* self, Tbl_13E6C8* src, Base_13E6C8* base, Tbl_13E6C8* dst)
+{
+    dst->count = src->count;
+    dst->f4 = src->f4;
+    dst->elems = (Elem_13E6C8*)func_0018D500(src->count * 12);
+    for (s32 i = 0; i < dst->count; i++) {
+        Elem_13E6C8* s = &src->elems[i];
+        Elem_13E6C8* d = &dst->elems[i];
+        d->f0 = base->f10 + (s->f0 - self->f10);
+        d->f4 = s->f4 != 0 ? (s32)dst->elems + (s->f4 - (s32)src->elems) : 0;
+        d->f8 = s->f8 != 0 ? (s32)dst->elems + (s->f8 - (s32)src->elems) : 0;
+    }
+}
+
+extern void func_00189150(void*, void*, void*);
+f32 func_00188CE0(void* p);
+f32 func_00205578(f32 x);
+
+struct Entry_13F940 {
+    u8 pad0[0x30];
+};
+
+struct Self_13F940 {
+    u8 pad0[0x7E0];
+    s32 f7E0;
+    u8 pad1[0x7F0 - 0x7E4];
+    Entry_13F940 entries[1];
+};
+
+struct Loc_13F940 {
+    f32 v[12];
+};
+
+s32 func_0013F940(void* self, f32* out)
+{
+    Self_13F940* s = (Self_13F940*)self;
+    Loc_13F940 loc;
+    f32 best = 0.0f;
+    s32 idx;
+    s32 i;
+
+    if (s->f7E0 == 0) {
+        return 0;
+    }
+    for (i = s->f7E0 - 1; i >= 0; i--) {
+        Entry_13F940* e = (Entry_13F940*)((u8*)s + 0x7F0 + i * 0x30);
+        func_00189150((u8*)s + 0xD0, e, &loc);
+        f32 t = func_00188CE0(&loc);
+        if (best < t) {
+            best = t;
+            idx = i;
+        }
+    }
+    if (out != 0) {
+        *out = func_00205578(best);
+    }
+    return idx;
+}

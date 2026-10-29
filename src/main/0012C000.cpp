@@ -483,7 +483,7 @@ s32 func_0012FF10(Obj_12FF10* a0)
     return a0->f0C != 0;
 }
 
-struct Obj_12FF20 { s32 f00; s32 f04; s32 f08; s32 f0C; s32 f10; u8 pad14[4]; s32 f18; s32 f1C; s32 f20; s32 f24; s32 f28; };
+struct Obj_12FF20 { s32 f00; s32 f04; u8 pad08[4]; s32 f0C; s32 f10; u8 pad14[4]; s32 f18; u8 pad1C[4]; s32 f20; };
 
 s32 func_0012FF10(Obj_12FF20* a0);
 s32 func_001F92E8(s32 a, s32 b, s32* c);
@@ -515,26 +515,6 @@ s32 func_0012FF20(Obj_12FF20* a0)
     return r;
 }
 
-void func_0012FFE8(Obj_12FF20* self)
-{
-    if (!func_0012FF20(self)) return;
-    if (self->f00 == 1) {
-        s32 value = self->f0C;
-        s32 rounded = value;
-        if (value < 0) rounded = value + 0x7FF;
-        self->f08 += rounded >> 11;
-    }
-    s32 value = self->f0C;
-    s32 remaining = self->f24 - value;
-    s32 duration = self->f10;
-    self->f20 = 0;
-    self->f0C = 0;
-    self->f10 = 0;
-    self->f24 = remaining;
-    self->f1C = duration;
-    self->f18 = value;
-}
-
 void func_0012D3E0() {}
 
 void func_0012D3E8() {}
@@ -560,15 +540,40 @@ Obj_12FCF0* func_0012FCF0(Obj_12FCF0* obj, s32 value)
     return obj;
 }
 
-void func_0012C7B0(void* self, s32 key, f32 first, f32 second, s32 kind, void** out);
-
-void func_0012C918(void* self, s32 key, f32 first, f32 second, s32 kind, void** out)
+void func_0018D778(void* self);
+void func_0012FD30(void* self, s32 flags)
 {
-    if (*out != 0) {
-        func_0012E760((Obj_0012F0A0*)*out);
-        *out = 0;
+    func_0012FDE8((Obj_12FDE8*)self);
+    if (flags & 1) func_0018D778(self);
+}
+
+struct Pair_0012FD78 { s32 a; s32 b; };
+s32 func_0012FDA0(void* self, s32 a, s32 b);
+s32 func_0012FD78(void* self, Pair_0012FD78* pair)
+{
+    return func_0012FDA0(self, pair->a, pair->b);
+}
+
+struct State_0012FCF0 { s32 w[11]; };
+
+struct Obj_12D448 {
+    u8 pad0[0x24];
+    s8 state;
+};
+
+
+void func_001DDA20(void* a);
+void func_001DDA50(void* a);
+
+void func_0012D448(Obj_12D448* self, s32 v)
+{
+    if (v == self->state) {
+        return;
     }
-    if (self != 0) {
-        func_0012C7B0(self, key, first, second, kind, out);
+    if (v != 0) {
+        func_001DDA20(*(void**)&D_00275710);
+    } else {
+        func_001DDA50(*(void**)&D_00275710);
     }
+    self->state = (s8)v;
 }

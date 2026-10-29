@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Near miss: the loop exit and insertion call are scheduled through a different branch path.
 #include "common.h"
+
 struct Node_1299E0 { u8 pad[8]; Node_1299E0* next; u8 pad1[8]; s32 key; };
 struct Pair_1299E0 { Node_1299E0* first; Node_1299E0* second; u32 base; };
 struct Vtbl_1299E0 { u8 pad[0xBC]; void (*notify)(void*); };

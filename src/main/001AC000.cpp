@@ -1,21 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-struct State_1AEE50 { u8 pad[0x578]; s32 count578; void* first[1]; u8 pad2[0x20]; s32 count5A0; void* second[1]; };
-s32 func_001833F0(void* self, void* item);
-s32 func_001300E8(void* self, void* item);
-
-s32 func_001AEE50(State_1AEE50* self, void* item)
-{
-    for (s32 i = 0; i < self->count578; ++i) {
-        if (func_001833F0(item, self->first[i])) return 1;
-    }
-    for (s32 i = 0; i < self->count5A0; ++i) {
-        if (func_001300E8(item, self->second[i])) return 1;
-    }
-    return 0;
-}
-
 struct Obj_1AC638 {
     u8 pad0[4];
     s32 handle;
@@ -378,4 +363,183 @@ void func_001AD940(Timer_001AD940* self)
 {
     func_001AA268(self);
     self->value = 0.5f;
+}
+
+struct Obj_1ACA68 { u8 pad[0x250]; s32 f250; u8 pad2[0x260 - 0x254]; s32 f260; };
+
+void func_001AA958(void* self);
+
+void func_001ACA68(Obj_1ACA68* self)
+{
+    if (self->f250 == 3 && self->f260 != 0) {
+        self->f260 = 0;
+    } else {
+        func_001AA958(self);
+    }
+}
+
+typedef void (*VFn_1ACE38)(void* self, s32 mode);
+
+struct Obj_1ACE38 {
+    VFn_1ACE38* vtbl;
+    u8 pad0[0x250 - 4];
+    s32 state;
+    u8 pad1[0x260 - 0x254];
+    s32 flag;
+    u8 f264;
+};
+
+void func_001AA4F0(void* self, s32 v);
+s32 func_001F6738(void* p, s32 v);
+void func_001E2138(void* dst, s32 v);
+
+void func_001ACE38(Obj_1ACE38* self, s32 v)
+{
+    s32 k = self->state;
+    if (k == 0) {
+        func_001AA4F0(self, v);
+        return;
+    }
+    if (k < 0) {
+        return;
+    }
+    if (k >= 4) {
+        return;
+    }
+    if (self->flag == 0) {
+        if (func_001F6738((u8*)self + 8, v) == 0) {
+            return;
+        }
+    }
+    self->flag = 1;
+    if (v != 0) {
+        func_001E2138(&self->f264, v);
+    } else {
+        self->f264 = 0;
+    }
+    self->vtbl[16](self, 3);
+}
+
+struct Obj_1AE7F8 { u8 pad[0x260]; s32 f260; };
+
+void func_001AA998(void* self, s32 flag);
+
+void func_001AE7F8(Obj_1AE7F8* self, s32 flag)
+{
+    if (flag == 0) {
+        self->f260 = 0;
+    }
+    func_001AA998(self, flag);
+}
+
+struct Obj_1AEE50 { u8 pad0[0x578]; s32 count578; s32 items57C[9]; s32 count5A0; s32 items5A4[9]; };
+
+s32 func_001833F0(void* key, s32 item);
+s32 func_001300E8(void* key, s32 item);
+
+s32 func_001AEE50(Obj_1AEE50* self, void* key)
+{
+    for (s32 i = 0; i < self->count578; i++) {
+        if (func_001833F0(key, self->items57C[i]) != 0) {
+            return 1;
+        }
+    }
+    for (s32 i = 0; i < self->count5A0; i++) {
+        if (func_001300E8(key, self->items5A4[i]) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+typedef void* (*VFn_1ACDA0)(void* self, f32 sx, f32 sy);
+struct VTab_1ACDA0 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1ACDA0 fn; };
+struct Obj_1ACDA0 { u8 pad0[0x4C]; VTab_1ACDA0* vt; };
+struct Node_1ACDA0 { u8 pad0[4]; void* f4; u8 pad1[0x20C - 8]; f32 f20c; void** slot; u8 pad2[0x248 - 0x214]; f32 f248; };
+
+extern u8 D_00274410[];
+void func_001AA268(void* self);
+s32 func_0015C188(s32 k);
+void* func_0015C1C0(s32 k);
+
+void func_001ACDA0(Node_1ACDA0* self)
+{
+    Obj_1ACDA0* o;
+    VTab_1ACDA0* vt;
+
+    func_001AA268(self);
+    o = (Obj_1ACDA0*)func_0015C1C0(0);
+    vt = o->vt;
+    self->f4 = vt->fn((u8*)o + vt->delta, 1.0f, 1.0f);
+    self->f20c = 0.8f;
+    self->f248 = 0.5f;
+    if (func_0015C188(2)) {
+        self->slot = (void**)D_00274410;
+        *self->slot = func_0015C1C0(2);
+    }
+}
+
+extern u8* D_00275710;
+extern f32 D_00261858[];
+extern s32 D_002744D0;
+
+struct Node_1AF508 {
+    u8 pad0[0x558];
+    s32 x558;
+    u8 pad1[0xAF0 - 0x55C];
+    Node_1AF508* next;
+    u8 pad2[0xAFC - 0xAF4];
+    f32 fAFC;
+};
+
+void func_001AF508()
+{
+    s32 scratch[4];
+    (void)scratch;
+    s32 count = 0;
+    Node_1AF508* n = *(Node_1AF508**)(D_00275710 + 0x1CA8);
+    while (n != 0) {
+        s32 t = count + 1;
+        count = (n->x558 != 8) ? t : count;
+        n = n->next;
+    }
+    if (count != 0) {
+        s32 idx = 0;
+        n = *(Node_1AF508**)(D_00275710 + 0x1CA8);
+        while (n != 0) {
+            if (n->x558 != 8) {
+                n->fAFC = D_00261858[1] + (0.03333333507180214f / (f32)count) * (f32)idx;
+                idx++;
+            }
+            n = n->next;
+        }
+    }
+    D_002744D0 = 0;
+}
+
+extern s32 D_002744D0;
+void func_0015FCD8(void* self, void* p);
+void func_00152470(void* list, void* item);
+void func_00152600(void* list, void* item);
+
+struct Obj_1AF7A8 {
+    u8 pad0[0x14];
+    u8* p14;
+    u8 pad1[0xAF8 - 0x18];
+    s32 flag_AF8;
+};
+
+void func_001AF7A8(Obj_1AF7A8* self, void* p)
+{
+    func_0015FCD8(self, p);
+    if (p != 0) {
+        if (self->flag_AF8 != 0) {
+            func_00152600(self->p14 + 0x1CA8, self);
+            self->flag_AF8 = 0;
+        }
+    } else {
+        func_00152470(self->p14 + 0x1CA8, self);
+        self->flag_AF8 = 1;
+    }
+    D_002744D0 = 1;
 }

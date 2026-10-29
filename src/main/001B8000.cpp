@@ -491,3 +491,146 @@ void func_001BB1D8(Obj_001BB1D8* self, u8 value) { self->value = value; }
 
 struct Obj_001BB1E0 { u8 pad[0x538]; u64 flags; };
 void func_001BB1E0(Obj_001BB1E0* self, u32 value) { self->flags = (self->flags & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
+
+typedef u64 Quad_1B8960 __attribute__((mode(TI)));
+
+struct Obj_1B8960 {
+    u8 pad0[0x140];
+    Quad_1B8960 f140;
+};
+
+void func_00125138(void* self);
+void func_001B8820(void* a, void* b, Quad_1B8960 q, void* c);
+
+void func_001B8960(Obj_1B8960* self)
+{
+    func_00125138(self);
+    func_001B8820((u8*)self + 0x380, (u8*)self + 0x3A4, self->f140, (u8*)self + 0x110);
+    func_001B8820((u8*)self + 0x4E8, (u8*)self + 0x50C, self->f140, (u8*)self + 0x110);
+}
+
+struct __attribute__((aligned(16))) Quad_1B9B50 { s32 a, b, c, d; };
+
+struct Obj_1B9B50 {
+    u8 pad0[0x18];
+    void* f18;
+    u8 pad1[0x50 - 0x1C];
+    Obj_1B9B50* f50;
+    u8 pad2[0x538 - 0x54];
+    u64 f538;
+};
+
+void func_001280C0(void* a, void* b, void* c, void* d);
+void func_001245A8(void* self, void* p);
+void func_001BB580(void* p);
+void func_001BB4A0(void* self);
+
+void func_001B9B50(Obj_1B9B50* self, void* p)
+{
+    Quad_1B9B50 local0;
+    Quad_1B9B50 local1;
+    if (self->f18 == p) {
+        return;
+    }
+    Obj_1B9B50* s5 = self->f50;
+    func_001280C0(self->f18, 0, (u8*)self + 0x440, &local0);
+    func_001280C0(self->f18, 0, (u8*)self + 0x460, &local1);
+    func_001245A8(self, p);
+    func_001280C0(0, p, &local0, (u8*)self + 0x440);
+    func_001280C0(0, p, &local1, (u8*)self + 0x460);
+    if (self->f50 != 0) {
+        if ((self->f538 & (1ULL << 54)) != 0 && s5 != 0) {
+            func_001BB580(s5);
+        }
+        Obj_1B9B50* f = self->f50;
+        if ((f->f538 & (1ULL << 55)) != 0) {
+            func_001BB580(f);
+        } else {
+            func_001BB580(self);
+        }
+    }
+    func_001BB4A0(self);
+}
+
+struct Pair_1BA068 {
+    s32 f0;
+    void* f4;
+    u8 pad8[0x40 - 8];
+    s32 g0;
+    void* g4;
+    u8 pad48[0xD0 - 0x48];
+    Pair_1BA068* next;
+};
+
+struct Outer_1BA068 {
+    Pair_1BA068* f0;
+    Outer_1BA068* f4;
+};
+
+struct Obj_1BA068 {
+    u8 pad0[0x50];
+    Obj_1BA068* f50;
+};
+
+s32 func_00182F40(void* e, void* b);
+
+void* func_001BA068(Obj_1BA068* self)
+{
+    Obj_1BA068* s3 = self->f50;
+    Outer_1BA068* s2 = *(Outer_1BA068**)(*(u8**)((u8*)s3 + 0x480));
+    for (; s2 != 0; s2 = s2->f4) {
+        Pair_1BA068* s0 = s2->f0;
+        while (s0 != 0) {
+            s32 s1 = ((u32)s3 ^ (u32)s0->f0) != 0;
+            if (func_00182F40(*(void**)((u8*)(s0) + (s1 << 6) + 4), self) != 0) {
+                return *(void**)((u8*)(s0) + ((1 - s1) << 6) + 4);
+            }
+            s0 = s0->next;
+        }
+    }
+    return 0;
+}
+
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+
+void func_001BB000(void* self)
+{
+    func_001B9AE0(self, 3, 0, 3, 0);
+}
+
+typedef void (*VFn_1BB210)(void* self, void* a, void* b);
+
+struct Obj_1BB210;
+
+struct Node_1BB210 {
+    Obj_1BB210* f0;
+    u8 pad4[4];
+    Node_1BB210* f8;
+};
+
+struct Obj_1BB210 {
+    VFn_1BB210* vtbl;
+    u8 pad4[0x4B0 - 4];
+    Node_1BB210* f4B0;
+};
+
+void func_00183350(void* self, void* a, void* b);
+
+void func_001BB210(Obj_1BB210* self, void* a, void* b)
+{
+    func_00183350(self, a, b);
+    Node_1BB210* n = self->f4B0;
+    if (n != 0) {
+        do {
+            Node_1BB210* next = n->f8;
+            Obj_1BB210* obj = n->f0;
+            if (obj != self) {
+                VFn_1BB210 fn = obj->vtbl[17];
+                if (fn != 0) {
+                    fn(obj, a, b);
+                }
+            }
+            n = next;
+        } while (n != 0);
+    }
+}

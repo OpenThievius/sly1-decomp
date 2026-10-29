@@ -12,34 +12,6 @@ struct Actor_156108 {
 void func_00155F90();
 void func_00155FA0(Actor_156108* self);
 
-struct Object_156088 {
-    u8 pad000[0x2D0];
-    void* a;
-    s32 type;
-    u8 pad2D8[4];
-    f32 first;
-    f32 second;
-    u8 pad2E4[0x44];
-    f32 result;
-    u8 pad32C[0x18];
-    void* resourceA;
-    void* resourceB;
-    s32 state;
-};
-void func_0013A128(void*, void*);
-void func_0019E158(void*, void*);
-f32 func_001EAAE0(f32, f32);
-void func_00156088(Object_156088* self)
-{
-    self->state = 0;
-    if (self->resourceB) func_0013A128(self->resourceB, self->a);
-    if (self->resourceA) func_0019E158(self->resourceA, self->a);
-    if (self->type == 3)
-        self->result = func_001EAAE0(self->first, self->second) * 60.0f;
-    else
-        self->result = func_001EAAE0(self->first, self->second);
-}
-
 void func_00156108(Actor_156108* self, s32 a1)
 {
     if (self->f2D4 == -1) {
@@ -477,4 +449,66 @@ s32 func_00155FB0(Obj_156030* self);
 void func_00156030(Obj_156030* self, s32* out)
 {
     *out = func_00155FB0(self) == 0;
+}
+
+void func_00123ED0(void*);
+void func_00152438(void*,s32);
+void func_00154C10(u8* self)
+{
+    func_00123ED0(self);
+    *(s32*)(self+0x2D8)=-1;
+    *(f32*)(self+0x2E0)=10.0f;
+    *(s32*)(self+0x2F8)=-1;
+    *(s32*)(self+0x2FC)=-1;
+    *(s32*)(self+0x304)=-1;
+    *(s32*)(self+0x300)=-1;
+    *(s32*)(self+0x30C)=-1;
+    *(s32*)(self+0x2D4)=-1;
+    *(f32*)(self+0x2DC)=10.0f;
+    *(f32*)(self+0x340)=-1.0f;
+    *(s32*)(self+0x310)=-1;
+    func_00152438(self+0x314,0x320);
+}
+
+void func_00158198(void*,void*,void*,f32,f32,f32,f32,void*);
+void func_001557D0(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
+{
+    u8* p=(u8*)func_00155778(self,1);
+    func_00158198(p+16,a,b,x,y,z,w,self);
+}
+
+void func_00156060(void* self,s32* out)
+{
+    *out=func_00155FB0((Obj_155FB0*)self);
+}
+
+void func_0013A128(void*,void*);
+void func_0019E158(void*,void*);
+f32 func_001EAAE0(f32,f32);
+void func_00156088(u8* self)
+{
+    *(s32*)(self+0x34C)=0;
+    if (*(void**)(self+0x348)) func_0013A128(*(void**)(self+0x348),*(void**)(self+0x2D0));
+    if (*(void**)(self+0x344)) func_0019E158(*(void**)(self+0x344),*(void**)(self+0x2D0));
+    f32 value;
+    if (*(s32*)(self+0x2D4)==3) value=func_001EAAE0(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0))*60.0f;
+    else value=func_001EAAE0(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0));
+    *(f32*)(self+0x328)=value;
+}
+
+void* func_001F5C0C(void*,s32,s32);
+void func_00156188(u8* self,s32 kind)
+{
+    *(s32*)(self+0x1B0)=kind;
+    func_001F5C0C(self+0x1F0,0,12);
+    if (kind!=24) {
+        if (kind==27) {
+            *(s32*)(self+0x1F0)=-1;
+            *(f32*)(self+0x1F4)=10.0f;
+        }
+    } else {
+        *(f32*)(self+0x1F0)=25.0f;
+        *(f32*)(self+0x1F4)=0.8f;
+        *(f32*)(self+0x1F8)=0.8f;
+    }
 }

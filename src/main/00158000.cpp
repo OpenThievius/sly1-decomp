@@ -1,40 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-void func_001BF788(s32 value, s32 unused);
-void func_001BFCD8(s32 type, void* data, void* a2, s32 a3, f32 f12, f32 f13,
-                   f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_001BA130(void);
-s32 func_001526D0(void* a, void* b);
-void func_00152600(void* a, void* b);
-
-void func_0015AE38(void* self, s32 initialize)
-{
-    if (*(s32*)((u8*)self + 0x550) != 0) return;
-    if (initialize) {
-        func_001BF788(*(s32*)((u8*)self + 0x5E4), 0);
-    } else {
-        func_001BFCD8(0x41, (u8*)self + 0x5E4, self, 0,
-                      700.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-    }
-}
-
-struct __attribute__((packed)) Saved_15AD80 { u64 value; };
-
-void func_0015AD80(void* self)
-{
-    Saved_15AD80 saved = *(Saved_15AD80*)((u8*)self + 0x5DC);
-    func_001BA130();
-    *(Saved_15AD80*)((u8*)self + 0x5DC) = saved;
-    if (*(s32*)((u8*)self + 0x550) == 0) {
-        func_001BFCD8(0x41, (u8*)self + 0x5E4, self, 0,
-                      700.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-    } else {
-        if (func_001526D0((u8*)*(void**)((u8*)self + 0x14) + 0x1C48, self))
-            func_00152600((u8*)*(void**)((u8*)self + 0x14) + 0x1C48, self);
-    }
-}
-
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
 struct Obj_158108 {
@@ -934,4 +900,113 @@ void func_00159ED0(Ctx_159ED0* a0)
         a0->f54 = D_0026185C;
         func_00152470(D_00275710 + 0x1CD8, a0);
     }
+}
+
+s32 func_0015A198(void*,s32,s32,void*,s32,void*);
+Rec_158C60* func_0015A418(void* self,s32 flags,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A198(self,flags|0x200,kind,arg,1,&out);
+    return (Rec_158C60*)out;
+}
+
+s32 func_0015A448(void* self,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A198(self,0x204,kind,arg,1,&out);
+    return out;
+}
+
+s32 func_0015A480(void* self,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A198(self,0x201,kind,arg,1,&out);
+    return out;
+}
+
+s32 func_0015A838(void* self,s32 flags,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A4F0(self,flags|0x200,kind,arg,1,&out);
+    return out;
+}
+
+void func_001289C0(void*,void*);
+s32 func_001E4C48(void*,void*,void*,void*,void*);
+void func_0015A918(u8* self,void* other)
+{
+    func_001289C0(self,other);
+    func_001E4C48(other,self+0x2D0,self+0x2D4,self+0x2D8,self+0x2DC);
+}
+
+struct Rec_159A80 { u8 pad[0x3C]; s32 f3C; };
+struct Key_159A80 { u8 pad[0x2]; s16 f2; };
+
+u8* func_001B4B48(void* owner, void* key);
+
+u8* func_00159A80(Rec_159A80* self, Key_159A80* key)
+{
+    u8* p = func_001B4B48(self, key);
+    if (p == 0) {
+        p = (u8*)self + 0x40;
+        if ((key->f2 ^ self->f3C) != 0) {
+            p = 0;
+        }
+    }
+    return p;
+}
+
+void* func_00158DD8(void* self, s32 flag);
+void func_00158198(void*,void*,void*,f32,f32,f32,f32,void*);
+
+void func_00158D40(void* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
+{
+    u8* p = (u8*)func_00158DD8(self, 1);
+    func_00158198(p+16,a,b,x,y,z,w,self);
+}
+
+struct __attribute__((aligned(16))) Quad_15B720 { s32 a, b, c, d; };
+struct Rec_15B720 {
+    u8 pad0[0x8];
+    f32 f8;
+    s32 fC;
+    u8 pad1[0x20 - 0x10];
+    Quad_15B720 f20;
+    Quad_15B720 f30;
+};
+struct __attribute__((aligned(16))) Local_15B720 {
+    s32 f0;
+    u8 pad0[0x10 - 0x4];
+    Quad_15B720 f10;
+    Quad_15B720 f20;
+    u8 pad1[0x50 - 0x30];
+};
+typedef void (*VFn_15B720)(void* self, void* a);
+struct Obj_15B720 { VFn_15B720* vtbl; };
+struct Actor_15B720 {
+    u8 pad0[0x554];
+    s32 f554;
+    u8 pad1[0x5D4 - 0x558];
+    Obj_15B720* f5D4;
+};
+
+void func_0015B7B8(void* self, s32 x);
+void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
+
+s32 func_0015B720(Actor_15B720* self, Rec_15B720* r)
+{
+    if (self->f554 != 1) {
+        func_0015B7B8(self, 1);
+        if ((r->fC & 8) != 0) {
+            func_001BC0E0(self, r->f8, &r->f20, &r->f30);
+        }
+        if (self->f5D4 != 0) {
+            Local_15B720 loc;
+            loc.f0 = 6;
+            loc.f20 = r->f20;
+            loc.f10 = r->f30;
+            self->f5D4->vtbl[31](self->f5D4, &loc);
+        }
+    }
+    return 1;
 }

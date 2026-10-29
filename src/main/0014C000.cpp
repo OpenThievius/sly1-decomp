@@ -1,28 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-
-struct Obj_14C5E8 { u8 pad[0x2D0]; s32 numerator; s32 denominator; };
-extern u8 D_00261EF0[];
-void func_00151E20(void* data, f32 amount);
-
-void func_0014C5E8(Obj_14C5E8* self)
-{
-    f32 one = 1.0f;
-    f32 ratio = (f32)self->numerator / (f32)self->denominator;
-    f32 amount;
-    if (ratio < 0.0f) {
-        amount = 0.0f;
-        goto apply;
-    }
-    if (one < ratio)
-        amount = one;
-    else
-        amount = ratio;
-apply:
-    func_00151E20(D_00261EF0, 1.0f - amount * 0.8f);
-}
-
 struct Item_14C838 { s32 value; s32 pad[4]; };
 struct List_14C838 { u8 pad0[0x2DC]; s32 count; Item_14C838 items[1]; };
 
@@ -697,3 +675,160 @@ f32 func_0014DB58(Obj_14DB58* obj) { u32 address = obj->index * 4 + obj->base; r
 struct Obj_14E500 { u8 pad[0x1C0]; s32 value; };
 void func_0014E500(Obj_14E500* obj) { obj->value = -1; }
 
+void func_0014DF68(u8* self,void* a,void* b) { func_0014D938(*(s32*)(self+0xC),*(Quad_14D938**)(self+0x18),a,b); }
+
+void func_00182D50(void*);
+void func_00152470(void*,void*);
+void func_0014EF00(u8* self) { func_00182D50(self); func_00152470(*(u8**)(self+0x14)+0x1C78,self); func_0014F110((Obj_14EE40*)self,0); }
+
+struct __attribute__((packed)) Pack_0014EF40 { u64 value; };
+struct Obj_0014EF40 { u8 pad[0x56C]; Pack_0014EF40 value; };
+void func_001BA130(void*, void*);
+void func_0014EF40(Obj_0014EF40* self, void* other) { Pack_0014EF40 save=self->value; func_001BA130(self,other); self->value=save; }
+
+void func_001BAC30(void*);
+void func_00159478(void*,void*);
+void func_0014EF88(u8* self) { func_001BAC30(self); func_00159478(self+0x58C,self); }
+
+struct Obj_14EFB8 {
+    u8 pad0[0x578];
+    void* field_578;
+};
+
+void func_00127378(void* self, s32 kind, void* msg);
+void func_0014F110(Obj_14EFB8* self, s32 value);
+
+void func_0014EFB8(Obj_14EFB8* self, s32 kind, void* msg)
+{
+    func_00127378(self, kind, msg);
+    if (kind == 6) {
+        if (msg == self->field_578) {
+            self->field_578 = 0;
+            func_0014F110(self, 4);
+        }
+    }
+}
+
+typedef void (*VFn_14F770)(void* self, void* arg);
+struct Sub_14F770 { u8 pad0[0x1C]; s32 f1C; u8 pad1[0x2C]; s32 f4C; };
+struct Child_14F770 { VFn_14F770* vtbl; u8 pad0[0x1FC]; Sub_14F770* f200; };
+struct Obj_14F770 { u8 pad0[0x680]; s32 f680; u8 pad1[0xB0]; Child_14F770* f734; Child_14F770* f738; u8 pad2[4]; void* f740; };
+
+void func_00127378(void* self, s32 kind, void* msg);
+void func_001B6568(void* dev, s32* out);
+void func_001B6438(void* h);
+
+void func_0014F770(Obj_14F770* self, s32 kind, void* msg)
+{
+    s32 result;
+
+    func_00127378(self, kind, msg);
+    if (kind == 0x14) {
+        if (msg == self->f740) {
+            func_001B6568(msg, &result);
+            if (result == 0x2B7) {
+                if (self->f680 != 0) {
+                    func_001B6438(self->f740);
+                    self->f740 = 0;
+                } else {
+                    self->f734->f200->f4C = 1;
+                    self->f734->f200->f1C = 0;
+                    self->f734->vtbl[0x84 / 4](self->f734, (u8*)self->f734 + 0x190);
+                    self->f734->vtbl[0x88 / 4](self->f734, (u8*)self->f734 + 0x1A0);
+                    self->f738->vtbl[0x88 / 4](self->f738, (u8*)self->f738 + 0x1A0);
+                }
+            }
+        }
+    }
+}
+
+struct Obj_14E000 { u8 pad0[0x10]; f32* p10; };
+
+s32 func_0014DA68(Obj_14E000* self, f32* a1, f32* a2);
+
+f32 func_0014E000(Obj_14E000* self)
+{
+    f32 lo, hi;
+    s32 idx = func_0014DA68(self, &lo, &hi);
+    f32 t = lo / hi;
+    return (1.0f - t) * self->p10[idx] + t * self->p10[idx + 1];
+}
+
+struct Obj_14E990 { u8 pad0[0x10]; f32* p10; u8 pad1[0x170 - 0x14]; f32 buf170[4]; };
+
+s32 func_0014DA68(Obj_14E990* self, f32* a1, f32* a2);
+void func_0014E510(Obj_14E990* self, s32 i);
+s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi);
+
+f32 func_0014E990(Obj_14E990* self)
+{
+    f32 lo, a, b;
+    s32 idx = func_0014DA68(self, &lo, 0);
+    func_0014E510(self, idx);
+    s32 n = func_0014D1A0(lo, 20, self->buf170, 0, &a, &b);
+    f32 t = a / b;
+    f32 u = ((f32)n + t) * 0.0526315793f;
+    return (1.0f - u) * self->p10[idx] + u * self->p10[idx + 1];
+}
+
+struct __attribute__((aligned(16))) Quad_14F920 { s32 a, b, c, d; };
+struct Sub_14F920 { u8 pad0[0x4C]; s32 f4C; };
+struct Obj734_14F920 { u8 pad0[0x200]; Sub_14F920* p200; };
+struct Elem_14F920 { void** vtbl; };
+struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; s32 f18; u8 pad1[0x190 - 0x1C]; Quad_14F920 q190[4]; };
+struct Self_14F920 {
+    u8 pad0[0x14];
+    void* p14;
+    u8 pad1[0x6C0 - 0x18];
+    s32 f6C0;
+    s32 cnt;
+    u8 pad2[0x6F0 - 0x6C8];
+    Quad_14F920 q6F0[4];
+    s32 f730;
+    Obj734_14F920* p734;
+    u8 pad3[0x73C - 0x738];
+    void* p73C;
+    void* f740;
+};
+
+typedef void (*VFn_14F920)(void* self);
+typedef void (*VFn_14F920Arg)(void* self, s32 x);
+
+extern u8 D_00261CE0[];
+
+void func_0013CE40(void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+Src_14F920* func_0015A480(void* a, s32 kind, void* arg);
+void* func_00183058(void* item, void* x, void* self);
+void func_0014F900(void* self);
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001B6290(void* a, void* b, s32 c, s32 d);
+
+void func_0014F920(Self_14F920* self)
+{
+    func_0013CE40(self);
+    func_00124DF8(self, 3, D_00261CE0);
+    self->p734->p200->f4C = 1;
+    Src_14F920* s2 = func_0015A480(self->p14, self->f6C0, self);
+    self->q6F0[0] = s2->q190[0];
+    self->q6F0[1] = s2->q190[1];
+    self->q6F0[2] = s2->q190[2];
+    self->q6F0[3] = s2->q190[3];
+    self->f730 = s2->f18;
+    s32 i = 1;
+    if (i < self->cnt) {
+        do {
+            Elem_14F920* e = (Elem_14F920*)func_00183058(s2, s2->p14, 0);
+            if (e->vtbl[19] != 0) {
+                ((VFn_14F920)e->vtbl[19])(e);
+            }
+            i++;
+            ((VFn_14F920)e->vtbl[20])(e);
+            ((VFn_14F920)e->vtbl[7])(e);
+        } while (i < self->cnt);
+    }
+    ((VFn_14F920Arg)s2->vtbl[25])(s2, 0);
+    ((VFn_14F920)s2->vtbl[7])(s2);
+    func_001DBCC8(self->p14, (void*)(void (*)(void*))func_0014F900, self, 0, 0);
+    self->f740 = func_001B6290(self->p73C, self, 0x2B7, 1);
+}

@@ -559,3 +559,173 @@ void func_001E8EF8(Obj_1E8EF8* self)
 
 extern u8 D_00275B50[];
 void func_001E8878(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
+
+struct Obj_1E8FA8 { u8 pad0[0x724]; s32 f724; };
+
+void func_001C8BC0(Obj_1E8FA8* self);
+void func_001C8E28(Obj_1E8FA8* self);
+
+void func_001E8FA8(Obj_1E8FA8* self)
+{
+    if (self->f724 == 8) {
+        func_001C8BC0(self);
+    } else {
+        func_001C8E28(self);
+    }
+}
+
+typedef void (*VFn_1E9E30)(void* self);
+struct Node_1E9E30 {
+    VFn_1E9E30* vtbl;
+    u8 pad0[0x6C - 4];
+    Node_1E9E30* f6C;
+    u8 pad1[0x2D8 - 0x70];
+    Node_1E9E30* f2D8;
+    u8 pad2[0x2E4 - 0x2DC];
+    Node_1E9E30* f2E4;
+    u8 pad3[0x414 - 0x2E8];
+    Node_1E9E30* f414;
+    u8 pad4[0x538 - 0x418];
+    u64 f538;
+};
+
+void func_001E9E30(void* self)
+{
+    s32 scratch[4];
+    (void)scratch;
+    Node_1E9E30* s1 = ((Node_1E9E30*)self)->f6C;
+    if (s1 != 0) {
+        do {
+            Node_1E9E30* s0 = s1->f2D8;
+            if (s0 != 0) {
+                do {
+                    u64 bit = (u64)1 << 53;
+                    if ((s0->f538 & bit) == 0) {
+                        s0->vtbl[72](s0);
+                    }
+                    s0->f538 &= ~bit;
+                    s0 = s0->f2E4;
+                } while (s0 != 0);
+            }
+            s1 = s1->f414;
+        } while (s1 != 0);
+    }
+}
+
+struct Obj_1E8948 {
+    u8 pad0[0x14];
+    void* f_14;
+    u8 pad1[0xC50 - 0x18];
+    void* f_C50;
+    void* f_C54;
+    u8 pad2[0xC80 - 0xC58];
+    void* f_C80[4];
+    s32 f_C90;
+};
+
+extern u8 D_00261420[];
+extern u8 D_00275B60[];
+
+void func_00124DF8(void* self, s32 a1, void* a2);
+void func_001DDC38(void* sub, void* self);
+void* func_001B6290(void* a, void* b, s32 c, s32 d);
+void* func_00140FF8(void* p);
+void func_00167E08(void* self);
+
+void func_001E8948(Obj_1E8948* self)
+{
+    func_00124DF8(self, 8, D_00275B60);
+    func_001DDC38(self->f_14, self);
+    if (self->f_C50 != 0) {
+        self->f_C54 = func_001B6290(self->f_C50, 0, 0x2D7, 0);
+    }
+    self->f_C90 = 4;
+    for (u32 i = 0; i < 4; i++) {
+        self->f_C80[i] = func_00140FF8(D_00261420);
+    }
+    func_00167E08(self);
+}
+
+extern u8 D_0026E248[];
+
+typedef void (*VFn_1E8FE8)(void* self);
+struct Obj_1E8FE8 {
+    VFn_1E8FE8* vtbl;
+};
+
+s32 func_001E9970(void);
+
+void func_001E8FE8(void)
+{
+    if (func_001E9970()) {
+        ((Obj_1E8FE8*)D_0026E248)->vtbl[14](D_0026E248);
+    } else {
+        ((Obj_1E8FE8*)D_0026E248)->vtbl[15](D_0026E248);
+    }
+}
+
+struct Gate_1E9A68 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; };
+
+extern s32 D_00275F84;
+extern u8 D_0026FF68[];
+extern u8 D_0026F808[];
+extern s32 D_00270458;
+
+s32 func_001E9A68(void)
+{
+    s32 m;
+    if (D_00275F84 != 0) goto fail;
+    if (((Gate_1E9A68*)D_0026FF68)->f25C != 0) goto fail;
+    if (((Gate_1E9A68*)D_0026FF68)->f250 != 0) goto fail;
+    if (((Gate_1E9A68*)D_0026F808)->f25C != 0) goto fail;
+    if (((Gate_1E9A68*)D_0026F808)->f250 != 0) goto fail;
+    m = D_00270458;
+    if (m == 4) goto fail;
+    if (m != 1) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}
+
+struct Gate_1E9AD8 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; };
+
+extern s32 D_00275F84;
+extern u8 D_0026FF68[];
+extern u8 D_0026F808[];
+
+s32 func_001E9AD8(void)
+{
+    if (D_00275F84 != 0) goto fail;
+    if (((Gate_1E9AD8*)D_0026FF68)->f25C != 0) goto fail;
+    if (((Gate_1E9AD8*)D_0026FF68)->f250 != 0) goto fail;
+    if (((Gate_1E9AD8*)D_0026F808)->f25C != 0) goto fail;
+    if (((Gate_1E9AD8*)D_0026F808)->f250 == 0) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}
+
+extern u8 D_00275DB8[];
+extern u8 D_00275DBC[];
+void func_001C6F48(void* self);
+void* func_0018D500(s32 size);
+void func_001BEA78(void);
+
+void func_001EBEB0(u8* self)
+{
+    func_001C6F48(self);
+    *(s32*)(self + 0xC5C) = 0x3C;
+    *(f32*)(self + 0xC8C) = 1.0f;
+    *(f32*)(self + 0xC64) = 8.0f;
+    *(s32*)(self + 0xC70) = 0;
+    *(s32*)(self + 0xC78) = -1;
+    *(s32*)(self + 0xC74) = -1;
+    *(s32*)(self + 0xC60) = 8;
+    *(s32*)(self + 0xC6C) = (s32)func_0018D500(0x400);
+    *(s32*)(*(u8**)(self + 0x14) + 0x2358) = 1;
+    func_001BEA78();
+    *(s32*)D_00275DB8 = 2;
+    *(s32*)D_00275DBC = 0;
+}

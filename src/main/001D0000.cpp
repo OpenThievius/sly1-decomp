@@ -166,3 +166,43 @@ void func_001D1260(Thing_1D1260* self)
     o->f3A0 = 0;
     func_001E2840(o, 0);
 }
+
+struct Self_1D1478 { u8 pad[0x14]; void* f14; };
+struct Obj_1D1478 { u8 pad[0x50]; s32 f50; };
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+s32 func_001D1478(Self_1D1478* self)
+{
+    void* arr[64];
+    s32 n = func_0015A4F0(self->f14, 5, 0x89, 0, 0x40, arr);
+    for (s32 i = 0; i < n; i++) {
+        Obj_1D1478* o = (Obj_1D1478*)arr[i];
+        s32 v = o->f50;
+        if (v < 3) {
+            if (v > 0) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+void func_001BC4D8(void* self, void* sub);
+
+void func_001D34E0(void* self)
+{
+    func_001BC4D8(self, (u8*)self + 0x554);
+}
+
+typedef void (*VFn_1D3290)(void* self);
+struct Obj_1D3290 { VFn_1D3290* vtbl; };
+
+void func_00124A48(void* self);
+void func_00124DF8(void* self, s32 a1, void* a2);
+extern u8 D_00274F90[];
+
+void func_001D3290(Obj_1D3290* self)
+{
+    func_00124A48(self);
+    func_00124DF8(self, 1, D_00274F90);
+    self->vtbl[7](self);
+}

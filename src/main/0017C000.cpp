@@ -193,3 +193,115 @@ void func_0017FE48(Slot_17FE48* self)
         self->result = func_0015A418(self->ref, 0x104, self->key, self);
     }
 }
+
+void func_001837E0(void* self, s32 kind, s32 a, s32 b);
+void func_0016E0F0(s32 a);
+void func_001DDA20(void* a);
+
+struct Self_17CE20 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x3C - 0x18];
+    void* f3C;
+    s32 f40;
+    u8 pad2[0x68 - 0x44];
+    s32 f68;
+};
+
+struct Other_17CE20 {
+    u8 pad[0x2740];
+    void* f2740;
+};
+
+void func_0017CE20(void* a0, void* a1)
+{
+    Self_17CE20* self = (Self_17CE20*)a0;
+    ((Other_17CE20*)a1)->f2740 = self;
+    self->f3C = a1;
+    self->f40 = -1;
+    func_001837E0(self, 0x17, 0, 0);
+    if (self->f68 != 0) {
+        func_0016E0F0(4);
+        func_001DDA20(self->f14);
+    }
+}
+
+
+void* func_0017CFC8(void* self, s32 b)
+{
+    return func_0017CF38(self, 0, b, 1);
+}
+
+
+void* func_0017CFF0(void* self, s32 b)
+{
+    return func_0017CF38(self, 1, b, 1);
+}
+
+
+void* func_0017D018(void* self, s32 b)
+{
+    return func_0017CF38(self, 10, b, 1);
+}
+
+
+void* func_0017D078(void* self, s32 value)
+{
+    return func_0017CF38(self, 3, value, 1);
+}
+
+
+void* func_0017D0D8(void* self, s32 value, s32 c)
+{
+    return func_0017CF38(self, 9, value, c);
+}
+
+
+struct Obj_17D100 {
+    u8 pad0[0xC];
+    s32 fC;
+    s32 f10;
+};
+
+void func_0017D100(void* self, s32 b, s32 c, s32 d, s32 e)
+{
+    Obj_17D100* o = (Obj_17D100*)func_0017CF38(self, 5, b, e);
+    o->fC = c;
+    o->f10 = d;
+}
+
+
+struct Obj_17D1B8 {
+    u8 pad0[0xC];
+    s32 fC;
+};
+
+void func_0017D1B8(void* self, s32 b, s32 c, s32 d)
+{
+    Obj_17D1B8* o = (Obj_17D1B8*)func_0017CF38(self, 8, b, d);
+    o->fC = c;
+}
+
+struct Obj_17D0A0 { u8 pad0[0xC]; f32 f0C; };
+
+void func_0017D0A0(void* self, s32 a, f32 value)
+{
+    Obj_17D0A0* o = (Obj_17D0A0*)func_0017CF38(self, 4, a, 0);
+    o->f0C = value;
+}
+
+struct Obj_17D180 { u8 pad0[0xC]; f32 f0C; };
+
+void func_0017D180(void* self, s32 b, s32 c, f32 value)
+{
+    Obj_17D180* o = (Obj_17D180*)func_0017CF38(self, 7, b, c);
+    o->f0C = value;
+}
+
+struct Obj_17D1E8 { u8 pad0[0xC]; f32 f0C; };
+
+void func_0017D1E8(void* self, f32 value)
+{
+    Obj_17D1E8* o = (Obj_17D1E8*)func_0017CF38(self, 11, -1, 1);
+    o->f0C = value;
+}

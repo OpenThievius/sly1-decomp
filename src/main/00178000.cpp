@@ -1,26 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-void func_001B6598(s32 handle, s32* out);
-void func_001B6568(s32 handle, s32* out);
-
-struct Self_001781E0 { u8 pad0[0x2220]; s32 state2220; u8 pad2224[0x9BC]; void* result2BE0; };
-struct Arg_001781E0 { u8 pad0[0x2D8]; s32 handle; };
-
-void func_001781E0(Self_001781E0* self, Arg_001781E0* arg)
-{
-    if (self->state2220 == 9) {
-        return;
-    }
-    s32 value0;
-    s32 value1;
-    func_001B6598(arg->handle, &value0);
-    func_001B6568(arg->handle, &value1);
-    if (value0 == 0x22E && (value1 == value0 || value1 == -1)) {
-        self->result2BE0 = arg;
-    }
-}
-
 struct Obj_178008 {
     u8 pad0[0x1520];
     u8 f1520[0x2768 - 0x1520];
@@ -148,29 +128,6 @@ struct Obj_17B998 {
     s32 f68;
 };
 
-struct Object_17B710 { u8 pad[0x550]; s32 state; };
-struct VTable_17B710 { void* pad[14]; void* f38; void* f3C; };
-struct Singleton_17B710 { VTable_17B710* vtbl; };
-extern u8 D_0026E248[];
-extern s32 D_00270458;
-extern s32 D_00270B54;
-extern s32 D_002717CC;
-s32 func_001E9970(void);
-
-void func_0017B710(Object_17B710* self)
-{
-    s32 first = 0;
-    if (self->state == 1 && func_001E9970()) {
-        if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0))
-            first = 1;
-    }
-    typedef void (*Callback)(void*);
-    if (first)
-        ((Callback)((Singleton_17B710*)D_0026E248)->vtbl->f38)(D_0026E248);
-    else
-        ((Callback)((Singleton_17B710*)D_0026E248)->vtbl->f3C)(D_0026E248);
-}
-
 void func_0017B998(void* self)
 {
     Obj_17B998* o = (Obj_17B998*)self;
@@ -270,32 +227,6 @@ void func_001AC060(void* p);
 void func_0017B598(void* self);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
-struct Object_17B308 { u8 pad[0x550]; s32 state; };
-struct VTable_17B308 { void* pad[14]; void* f38; void* f3C; };
-struct Singleton_17B308 { VTable_17B308* vtbl; };
-extern u8 D_0026E248[];
-extern s32 D_00270458;
-extern s32 D_00270B54;
-extern s32 D_002717CC;
-s32 func_001E9970(void);
-
-void func_0017B308(Object_17B308* self)
-{
-    s32 first = 0;
-    s32 state = self->state;
-    if (state < 2) {
-        if (state >= 0 && func_001E9970()) {
-            if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0))
-                first = 1;
-        }
-    }
-    typedef void (*Callback)(void*);
-    if (first)
-        ((Callback)((Singleton_17B308*)D_0026E248)->vtbl->f38)(D_0026E248);
-    else
-        ((Callback)((Singleton_17B308*)D_0026E248)->vtbl->f3C)(D_0026E248);
-}
-
 s32 func_0017B3A8(Obj_17B3A8* self, Msg_17B3A8* msg)
 {
     if (msg->f10 & 0x10) {
@@ -386,4 +317,134 @@ void func_001793F0(Obj_1793F0* self)
     u8* base = D_00270650;
     ((Packed_1793F0*)(base + 0x288))->v = 0.0f;
     *(s32*)(base + 0x284) = func_001B4688(0x36A);
+}
+
+struct Obj_178038 { u8 pad0[0x1520]; u8 f1520[0x2768 - 0x1520]; };
+
+void func_001C29E8(void* sub);
+void func_00192820(void* self);
+
+void func_00178038(Obj_178038* self)
+{
+    func_001C29E8(self->f1520);
+    func_00192820(self);
+}
+
+struct Obj_179690 { void** vtbl; };
+
+typedef void (*VFn_179690)(void*);
+
+void func_001BC088(void* self, void* b);
+
+void func_00179690(Obj_179690* self)
+{
+    func_001BC088(self, 0);
+    VFn_179690 fn = (VFn_179690)((void**)self->vtbl)[0x58 / 4];
+    if (fn != 0) fn(self);
+}
+
+void func_00192C58(void* self);
+void func_0017ABE8(void* self, s32 a1);
+
+void func_0017A6D0(void* self)
+{
+    func_00192C58(self);
+    func_0017ABE8(self, 2);
+}
+
+struct Rec_17AB58 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+};
+
+struct Self_17AB58 {
+    u8 pad_000[0x618];
+    s32 f618;
+    u8 pad_61C[0x6E0 - 0x61C];
+    s32 f6E0;
+    u8 pad_6E4[0x70C - 0x6E4];
+    s32 f70C;
+};
+
+void func_00192230(void* self, s32 kind, Rec_17AB58* rec);
+
+void func_0017AB58(Self_17AB58* self, s32 kind, Rec_17AB58* rec)
+{
+    if (kind == 0x13 && rec->f0 == self->f618) {
+        switch (rec->f8) {
+        case 0x15E:
+            self->f6E0 = 1;
+            break;
+        case 0x15F:
+            self->f6E0 = 0;
+            break;
+        case 0x467:
+            self->f70C = 1;
+            break;
+        }
+    }
+    func_00192230(self, kind, rec);
+}
+
+struct __attribute__((aligned(16))) Quad_178598 {
+    s32 a, b, c, d;
+};
+
+struct Pair_178598 {
+    Quad_178598 q0;
+    Quad_178598 q1;
+};
+
+struct Sub_178598 {
+    u8 pad0[0x18];
+    f32 f18;
+    u8 pad1[0x20 - 0x1C];
+    Quad_178598 q20;
+    Quad_178598 q30;
+};
+
+typedef void (*VFn_178598)(void* self, void* a);
+
+struct Obj_178598 {
+    VFn_178598* vtbl;
+    u8 pad0[0x2514 - 4];
+    Sub_178598* f2514;
+    u8 pad1[0x2B70 - 0x2518];
+    Quad_178598 q2B70;
+    Quad_178598 q2B80;
+};
+
+struct Frame_178598 {
+    Quad_178598 q0;
+    Quad_178598 q1;
+    Quad_178598 q2;
+    Quad_178598 p0;
+    Quad_178598 p1;
+    f32 fl;
+};
+
+void func_00178D98(void* self, s32 a1, s32 a2, void* a3, void* a4);
+void func_001782C0(void* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+void func_00175170(void* self, s32 a, s32 b);
+
+extern f32 D_0026185C;
+
+void func_00178598(Obj_178598* self, Pair_178598* s2, f32 f)
+{
+    Frame_178598 fr;
+    fr.fl = f;
+    if (s2 == 0) {
+        func_00178D98(self, 0, 0, &fr.p0, &fr.fl);
+        s2 = (Pair_178598*)&fr.p0;
+    }
+    void* q1 = &fr.q1;
+    func_001782C0(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
+    self->f2514->f18 = D_0026185C + fr.fl;
+    self->f2514->q20 = fr.q0;
+    self->f2514->q30 = fr.q2;
+    self->vtbl[36](self, q1);
+    self->q2B70 = s2->q0;
+    self->q2B80 = s2->q1;
+    func_00175170(self, 4, 0x2C);
 }

@@ -253,21 +253,6 @@ struct Self_18ACF0 {
 
 extern Obj_18ACF0 D_0026E248;
 
-extern void* D_002649D8[];
-extern void* D_002649E8[];
-void func_001AC060(void*);
-void func_001C8F20(void*, void*, s32);
-
-struct State_18AC58 { u8 pad[0xE28]; s32 index; u8 pad2[4]; s32 data[1]; u8 pad3[8]; void* current; };
-
-void func_0018AC58(State_18AC58* self)
-{
-    func_001AC060((void*)&D_0026E248);
-    func_001C8F20(self, D_002649D8[self->index], self->data[self->index]);
-    self->current = D_002649E8[self->index];
-    self->index++;
-}
-
 s32 func_001E9970(void);
 
 void func_0018ACF0(Self_18ACF0* self)
@@ -479,4 +464,67 @@ s32 func_0018BFA8(void* lhs, void* rhs)
 	difference = *(u8*)((char*)lhs + 0x57) - *(u8*)((char*)rhs + 0x57);
 	if (difference) return difference;
 	return *(u8*)((char*)lhs + 0x58) - *(u8*)((char*)rhs + 0x58);
+}
+
+typedef s32 (*VFnI_0018AAE0)(void* self);
+
+struct Obj_0018AAE0 {
+    VFnI_0018AAE0* vtbl;
+    u8 pad0[0x14 - 4];
+    void* owner;
+    u8 pad1[0x724 - 0x18];
+    s32 f724;
+    u8 pad2[0xC10 - 0x728];
+    s32 fC10;
+    u8 pad3[0xE10 - 0xC14];
+    void* fE10;
+};
+
+s32 func_001DDA80(void* p);
+void func_001B6598(void* dev, s32* out);
+
+s32 func_0018AAE0(Obj_0018AAE0* self)
+{
+    s32 out;
+    if (func_001DDA80(self->owner) != 0) goto zero;
+    if (self->fC10 != 0) goto zero;
+    if (self->f724 == 0x10) goto zero;
+    if (self->f724 == 0xB) goto zero;
+    if (self->vtbl[0x66](self) == 0) goto zero;
+    func_001B6598(self->fE10, &out);
+    if (out == 0x43C) goto one;
+    if (out < 0x43D) {
+        if (out == 0x43A) goto one;
+        goto zero;
+    }
+    if (out == 0x43E) goto one;
+zero:
+    return 0;
+one:
+    return 1;
+}
+
+extern s32 D_002649D8[];
+extern s32 D_002649E8[];
+
+struct Obj_0018AC58 {
+    u8 pad0[0xE28];
+    s32 fE28;
+    u8 pad1[0xE30 - 0xE2C];
+    s32 fE30[1];
+    u8 pad2[0xE3C - 0xE34];
+    s32 fE3C;
+};
+
+void func_001AC060(void* p);
+void func_001C8F20(void* node, s32 kind, s32 flag);
+
+void func_0018AC58(Obj_0018AC58* self)
+{
+    func_001AC060((u8*)&D_0026E248);
+    s32 idx = self->fE28;
+    func_001C8F20(self, D_002649D8[idx], self->fE30[idx]);
+    s32 n = self->fE28;
+    self->fE3C = D_002649E8[n];
+    self->fE28 = n + 1;
 }
