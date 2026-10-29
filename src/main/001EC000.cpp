@@ -95,3 +95,139 @@ void func_001ED650(Out_1ED650* out, f32 unused, f32 scale, f32 z)
     out->y = p.a * scale;
     out->z = z;
 }
+
+void func_00192820(void);
+
+void func_001EC0B8(void)
+{
+    func_00192820();
+}
+
+typedef void (*VFn_1ECDF8)(void* self);
+struct Obj_1ECDF8 { VFn_1ECDF8* vtbl; };
+struct Sub_1ECDF8 { u8 pad[0xC54]; void* sub; };
+extern Obj_1ECDF8 D_0026E248;
+
+void func_001B6598(void* sub, s32* out);
+void* func_001E9970(void);
+
+void func_001ECDF8(Sub_1ECDF8* self)
+{
+    s32 code;
+    func_001B6598(self->sub, &code);
+    void* obj = 0;
+    if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) {
+        obj = func_001E9970();
+    }
+    if (obj) D_0026E248.vtbl[14](&D_0026E248);
+    else D_0026E248.vtbl[15](&D_0026E248);
+}
+
+struct Entry_1ED090 { void* a; s32 b; };
+struct Self_1ED090 { u8 pad[0xC68]; s32 count; Entry_1ED090* items; };
+void func_0012F810(void* a, Self_1ED090* self);
+
+void func_001ED090(Self_1ED090* self, void* a, s32 b)
+{
+    Entry_1ED090* e = &self->items[self->count++];
+    e->b = b;
+    e->a = a;
+    func_0012F810(a, self);
+}
+
+void func_001EDEF0(void* self);
+
+void func_001EE290(void* self)
+{
+    func_001EDEF0(self);
+}
+
+struct Buf_1EE468 { u8 pad[0xC]; u32* out; };
+
+void func_001EE468(Buf_1EE468* b)
+{
+    u32* p = b->out;
+    b->out = p + 1;
+    *p = 0x13000000;
+}
+
+struct Stream_1EE5C8 { u8 pad[0xC]; u8* cursor; };
+s32 func_001EE560(Stream_1EE5C8* s);
+
+void func_001EE5C8(Stream_1EE5C8* s, void* unused1, s32 size, void* unused3, s32* outSize, u8** outCursor)
+{
+    if (size == 0) {
+        if (outCursor) *outCursor = 0;
+        if (outSize) *outSize = 0;
+    } else {
+        size = func_001EE560(s);
+        if (outCursor) *outCursor = s->cursor;
+        s->cursor += ((size + 3) / 4) * 4;
+        if (outSize) *outSize = size;
+    }
+}
+
+struct Owner_1EE900 { u8 pad[0x1EC4]; void* slot; };
+struct Self_1EE900 { u8 pad[0x14]; Owner_1EE900* owner; };
+void func_00182C18(Self_1EE900* self);
+
+void func_001EE900(Self_1EE900* self)
+{
+    func_00182C18(self);
+    self->owner->slot = self;
+}
+
+struct Obj_1EEE50 { u8 pad[0x538]; u64 flags; };
+struct Node_1EEE50 { s32 unused0; Obj_1EEE50* obj; s32 unused2; Node_1EEE50* next; };
+
+void func_001BA550(void* o, Node_1EEE50* node);
+void func_001BA528(void* o, Node_1EEE50* node);
+void func_001DBB90(void* owner, Node_1EEE50* list);
+
+void func_001EEE50(void* owner, Node_1EEE50** head)
+{
+    Node_1EEE50** link = head;
+    Node_1EEE50* node = *head;
+    Node_1EEE50* removed = 0;
+    while (node != 0) {
+        Obj_1EEE50* o = node->obj;
+        Node_1EEE50* next = node->next;
+        if (((o->flags >> 59) & 1) != ((o->flags >> 60) & 1)) {
+            if (o->flags & (1ULL << 59)) {
+                func_001BA550(o, node);
+            } else {
+                func_001BA528(o, node);
+            }
+        }
+        Obj_1EEE50* p = node->obj;
+        if (p->flags & (1ULL << 60)) {
+            link = &node->next;
+        } else {
+            *link = next;
+            node->next = removed;
+            removed = node;
+        }
+        Obj_1EEE50* q = node->obj;
+        q->flags = q->flags & ~(1ULL << 60);
+        q->flags = q->flags & ~(1ULL << 59);
+        node = next;
+    }
+    func_001DBB90(owner, removed);
+}
+
+struct Obj_1EF830 { u8 pad[0x624]; s32 field624; };
+
+void func_001EF830(Obj_1EF830* o)
+{
+    o->field624 = 0;
+}
+
+struct Obj_1EFCE8 { u8 pad[4]; s32 field4; };
+
+void func_001F0220(void* o, s32 mode);
+
+void func_001EFCE8(Obj_1EFCE8* o)
+{
+    o->field4 = -1;
+    func_001F0220(o, 0);
+}
