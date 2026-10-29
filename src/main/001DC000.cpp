@@ -233,3 +233,29 @@ void func_001DD9C0(void* unused, f32* out)
 {
     *out = D_002623C8->value;
 }
+
+struct Owner_1DDBB8 { u8 pad[0x2320]; s32 count; };
+typedef void (*VFn_1DDBB8)(void* self);
+struct Svc_1DDBB8 { VFn_1DDBB8* vtbl; };
+extern Svc_1DDBB8 D_002721D0;
+
+void func_001DDBB8(Owner_1DDBB8* self)
+{
+    if (--self->count == 0) {
+        D_002721D0.vtbl[15](&D_002721D0);
+    }
+}
+
+void* func_001BF0D8(void* p);
+
+void* func_001DDC18(void* unused, void* p)
+{
+    return func_001BF0D8(p);
+}
+
+struct Owner_1DDC38 { u8 pad[0x2324]; void* ptr; };
+
+void func_001DDC38(Owner_1DDC38* self, void* v)
+{
+    self->ptr = v;
+}

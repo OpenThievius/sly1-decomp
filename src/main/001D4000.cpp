@@ -114,3 +114,23 @@ Node_1D7100* func_001D7100(Node_1D7100* self, s32 value)
     self->f14 = 0;
     return self;
 }
+
+struct Ctx_1D65D8 {
+    u8 pad0[0x2220];
+    s32 mode;
+    u8 pad1[0x2228 - 0x2224];
+    s32 level;
+    u8 pad2[0x26C4 - 0x222C];
+    s32 flag;
+};
+
+s32 func_001D65D8(Ctx_1D65D8* self)
+{
+    if (self->mode != 4) {
+        return self->flag != 0;
+    }
+    if (self->level < 45) {
+        return 1;
+    }
+    return 2;
+}

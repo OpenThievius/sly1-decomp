@@ -78,3 +78,36 @@ done:
     self->f268 = -1;
     func_001E7518(self, 3);
 }
+
+struct Ret_1E4880 { u8 pad[0x20]; f32 value; };
+
+f32 func_001E4880(void* a0, void* a1, void* a2, Ret_1E4880* a3)
+{
+    return a3->value;
+}
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+
+struct Ctor_1E4E38 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; u8 body[0x20]; };
+
+Ctor_1E4E38* func_001E4E38(Ctor_1E4E38* self)
+{
+    self->f4 = 0;
+    self->f10 = 0;
+    self->fC = self->f8 = -1;
+    func_001F5C0C(self->body, 0, 0x20);
+    return self;
+}
+
+struct Blk_1E4E80 { s32 state; s32 a; s32 b; s32 c; s32 d; };
+
+void func_001E4E80(Blk_1E4E80* self, s32 a1, s32 a2, s32 a3, s32 a4)
+{
+    if (self->state == 0) {
+        self->state = 1;
+        self->a = a1;
+        self->b = a2;
+        self->c = a3;
+        self->d = a4;
+    }
+}

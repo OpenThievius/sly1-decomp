@@ -204,3 +204,60 @@ s32 func_001EBD08(void)
 {
     return 0;
 }
+
+struct Table_001E9038 {
+    u8 pad0[0xC64];
+    s32 items[6];
+};
+
+struct Probe_001E9038 {
+    u8 pad0[0x50];
+    s32 key;
+};
+
+s32 func_001C7468(void* self, void* probe);
+
+s32 func_001E9038(Table_001E9038* self, Probe_001E9038* probe)
+{
+    s32 key = probe->key;
+    u32 i = 0;
+    s32 result;
+    do {
+        if (key == self->items[i]) {
+            result = 0;
+            goto done;
+        }
+        i++;
+    } while (i < 6);
+    result = func_001C7468(self, probe);
+done:
+    return result;
+}
+
+struct Ctor_001E90A8 {
+    u8 pad0[4];
+    s32 a04;
+    u8 pad1[4];
+    s32 a0C;
+    u8 pad2[0x1C];
+    s32 a2C;
+    s32 a30;
+};
+
+void func_001E96F8(void* self, s32 mode);
+
+void func_001E90A8(Ctor_001E90A8* self)
+{
+    self->a30 = -1;
+    self->a04 = -1;
+    func_001E96F8(self, 3);
+    self->a0C = 0;
+    self->a2C = 1;
+}
+
+void func_001E96F8(void* self, s32 mode);
+
+void func_001E90E8(void* self)
+{
+    func_001E96F8(self, 3);
+}
