@@ -658,3 +658,10 @@ void func_0014AA90(Obj_14AA90* obj, s32 value) { obj->value = value; }
 
 struct Obj_14AA98 { u8 pad[8]; s32 value; };
 void func_0014AA98(Obj_14AA98* obj) { obj->value = 0; }
+
+s32 func_00148910(const f32* first, const f32* second)
+{
+    s32 result = -1;
+    if (*first < *second) result = 1;
+    return result;
+}
