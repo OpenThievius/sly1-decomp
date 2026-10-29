@@ -460,3 +460,76 @@ s32 func_0018EDA0(void)
 {
     return 1;
 }
+
+u8* func_0018D658(s32 size);
+void func_001F5C0C(void* p, s32 v, s32 n);
+
+void* func_0018D6A8(s32 size)
+{
+    u8* p = func_0018D658(size);
+    if (p) {
+        func_001F5C0C(p, 0, size);
+    }
+    return p;
+}
+
+extern u8 D_002C2A28[];
+extern s32 D_002C2A34;
+extern u8* D_002C2A20;
+extern u8 D_002C2A38[];
+
+void func_001E2358(void* obj);
+
+void func_0018D6F0(void)
+{
+    s32 n = D_002C2A34;
+    u8** slot = &((u8**)D_002C2A38)[n];
+    n = n - 1;
+    D_002C2A34 = n;
+    D_002C2A20 = *slot;
+    func_001E2358(D_002C2A28);
+}
+
+struct Queue_18DD78 { u8 pad0[0x6D0]; s32 count; s32 items[4]; };
+
+void func_0018DD78(Queue_18DD78* self, s32 value)
+{
+    s32 n = self->count;
+    if ((u32)n < 4) {
+        self->items[n] = value;
+        self->count = n + 1;
+    }
+}
+
+struct Obj_18EA48 { s32 flag; u8 pad0[0x2C - 4]; };
+
+void func_0011E460(void);
+void func_0013C9B0(void* state);
+void func_0018E6A0(void* self);
+
+void func_0018EA48(Obj_18EA48* self)
+{
+    if (self->flag != 0) {
+        func_0011E460();
+        self->flag = 1;
+        func_0013C9B0((u8*)self + 0x2C);
+        func_0013C9B0((u8*)self + 0x4C);
+        func_0018E6A0((u8*)self + 0x6C);
+    }
+}
+
+struct Obj_18F148 { u8 pad0[4]; s32 f04; s32 f08; };
+
+void func_0018F198(void* self, s32 value);
+
+void func_0018F148(Obj_18F148* self)
+{
+    s32 pending = self->f08;
+    s32 first = self->f04;
+    self->f04 = 0;
+    self->f08 = 0;
+    func_0018F198(self, first);
+    if (pending != 0) {
+        func_0018F198(self, pending);
+    }
+}

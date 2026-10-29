@@ -685,3 +685,39 @@ void func_00193E58(Obj_193E58* self)
     }
     self->f284 = 1.0f;
 }
+
+struct Obj_191AA8 {
+    u8 pad0[0x54];
+    void* p54;
+};
+
+s32 func_001909F0(void* p);
+
+void func_00191AA8(Obj_191AA8* self)
+{
+    func_001909F0(self->p54);
+}
+
+extern s32 D_00269BA4;
+
+void func_001F6C20(s32 a);
+
+void func_00191E70(s32 value)
+{
+    if (D_00269BA4 != value) {
+        func_001F6C20(0);
+        D_00269BA4 = value;
+    }
+}
+
+void* func_001930B0(void* p)
+{
+    return p;
+}
+
+s32 func_001930B8(s32 a, s32 b);
+
+s32 func_001931F0(void)
+{
+    return func_001930B8(1, 0xFFFF);
+}

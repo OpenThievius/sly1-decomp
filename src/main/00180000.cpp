@@ -568,3 +568,115 @@ s32 func_00183438(Owner_183438* self)
     }
     return -1;
 }
+
+struct Obj_180EE8 { u8 pad[0x14]; u8* f14; };
+
+void func_00182ED0(void* self);
+void func_00152600(u8* table, Obj_180EE8* self);
+
+void func_00180EE8(Obj_180EE8* self)
+{
+    func_00182ED0(self);
+    func_00152600(self->f14 + 0x1C9C, self);
+}
+
+struct Obj_180F68 { u8 pad[0xBF4]; f32 fBF4; };
+
+void func_001D73A8(void* self);
+
+void func_00180F68(Obj_180F68* self)
+{
+    func_001D73A8(self);
+    self->fBF4 = -10.0f;
+}
+
+struct Hdr_182DD8 {
+    u8 pad[8];
+    s32 flags;
+};
+
+struct Node_182DD8 {
+    s32 value;
+    Node_182DD8* next;
+};
+
+struct Ent_182DD8 {
+    Hdr_182DD8* hdr;
+    u8 pad4[4];
+    s32 value;
+    u8 pad12[0xC];
+    Ent_182DD8* parent;
+    u8 pad1C[0x2C4 - 0x1C];
+    Node_182DD8* list;
+};
+
+void* func_0018D500(s32 size);
+
+void func_00182DD8(Ent_182DD8* self)
+{
+    Ent_182DD8* target;
+    if (self->hdr->flags & 1) {
+        target = self;
+    } else {
+        target = self->parent;
+    }
+    if (target != 0) {
+        Node_182DD8* n = (Node_182DD8*)func_0018D500(8);
+        n->value = self->value;
+        n->next = target->list;
+        target->list = n;
+    }
+}
+
+struct Node_183238 {
+    s32 key1;
+    s32 key2;
+    u8 pad8[8];
+    Node_183238* next;
+};
+
+void func_001DBC18(void* a, void* b);
+
+void func_00183238(void* mgr, Node_183238** link, s32 key1, s32 key2)
+{
+    Node_183238* node;
+    goto test;
+advance:
+    link = &(*link)->next;
+test:
+    node = *link;
+    if (node == 0) {
+        return;
+    }
+    if (node->key1 != key1 || node->key2 != key2) {
+        goto advance;
+    }
+    *link = node->next;
+    node->next = 0;
+    func_001DBC18(mgr, node);
+}
+
+s32 func_00183438(void* self);
+
+void func_00183478(void* self, s32* out)
+{
+    *out = func_00183438(self);
+}
+
+struct __attribute__((aligned(16))) Quad_183910 { s32 w[4]; };
+
+void func_0011B008(void* self);
+void func_0011B5F0(void* self, void* arg);
+void func_001C2320(void* self, void* a1, void* a2, void* a3);
+void func_0011B060(void* self, s32 mode);
+
+void func_00183910(void* a0, void* a1, void* a2)
+{
+    Quad_183910 a;
+    Quad_183910 b;
+    func_0011B008(&a);
+    func_0011B5F0(&a, a2);
+    func_001C2320(&b, a0, a1, &a);
+    func_0011B060(&b, 2);
+    func_0011B060(&a, 2);
+}

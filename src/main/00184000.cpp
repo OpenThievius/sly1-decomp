@@ -278,3 +278,22 @@ f32 func_00185CA0(IndexPair_185CA0* p)
     if (one < r) r = one;
     return r;
 }
+
+struct Node_1861E8 {
+    u8 pad0[0xD0];
+    Node_1861E8* next;
+};
+
+void func_001B5F28(u8* a, void* b);
+
+void func_001861E8(u8* self, Node_1861E8* head)
+{
+    if (head != 0) {
+        Node_1861E8* cur = head;
+        do {
+            Node_1861E8* next = cur->next;
+            func_001B5F28(self + 0x1AFC, cur);
+            cur = next;
+        } while (cur != 0);
+    }
+}
