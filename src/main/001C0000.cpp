@@ -102,3 +102,90 @@ void func_001C3F68(Obj_1C3F68* self, s32 value)
     local.fn = func_001C3EB0;
     self->vtbl[80]((void*)self, (void*)&local);
 }
+
+void func_001C06A0(s32 a, s32 b, f32 x);
+
+void func_001C0000(s32 flag, f32 x)
+{
+    func_001C06A0(6, 0, x);
+    func_001C06A0(6, 2, x);
+    func_001C06A0(6, 3, x);
+    if (flag) {
+        func_001C06A0(6, 1, x);
+    }
+}
+
+s32 func_0011D4E0(s32 flag);
+
+s32 func_001C0790(s32 value)
+{
+    return func_0011D4E0(value != 0);
+}
+
+struct Pk8_1C0A50 { u64 v; } __attribute__((packed));
+struct Ent_1C0A50 { s32 key; Pk8_1C0A50 a; Pk8_1C0A50 b; };
+struct Obj_1C0A50 { u8 pad[0x1D80]; s32 count; Ent_1C0A50 ents[16]; };
+
+extern Pk8_1C0A50 D_00274820;
+extern Pk8_1C0A50 D_00274828;
+
+void func_001C0A50(Obj_1C0A50* self, s32 key)
+{
+    if (self->count < 16) {
+        Ent_1C0A50* e = &self->ents[self->count];
+        e->key = key;
+        e->a = D_00274820;
+        e->b = D_00274828;
+        self->count++;
+    }
+}
+
+extern s32 D_00274728;
+extern s32 D_006053E0[];
+
+s32 func_0011D8F0(s32 a, s32 b);
+
+void func_001C0C68(s32 i)
+{
+    D_006053E0[i] = func_0011D8F0(D_00274728, i);
+}
+
+struct Obj_1C1110 { u8 pad[0x14]; s32 f14; };
+
+void func_00182ED0(Obj_1C1110* self);
+void func_00152600(s32 p, Obj_1C1110* self);
+
+void func_001C1110(Obj_1C1110* self)
+{
+    func_00182ED0(self);
+    func_00152600(self->f14 + 0x1C84, self);
+}
+
+struct Loc_1C1E48 { u8 obj[0x10]; s32 tmp; s32 flag; s32 cnt; };
+
+void func_0011B008(Loc_1C1E48* p);
+void func_0011B6C0(Loc_1C1E48* p, s32 v);
+void func_0011B538(Loc_1C1E48* p, s32 v);
+void func_0011B018(void* self, Loc_1C1E48* p);
+void func_0011B060(Loc_1C1E48* p, s32 v);
+void func_001C1A28(s32* p, s32 v);
+
+void* func_001C1E48(void* self, s32 n, s32* keys, s32* vals)
+{
+    Loc_1C1E48 loc;
+    func_0011B008(&loc);
+    loc.flag = 0;
+    loc.cnt = 0;
+    for (s32 i = 0; i < n; i++) {
+        loc.tmp = keys[i];
+        func_001C1A28(&loc.tmp, vals[i]);
+    }
+    if (loc.flag) {
+        func_0011B6C0(&loc, loc.flag);
+    } else {
+        func_0011B538(&loc, 0);
+    }
+    func_0011B018(self, &loc);
+    func_0011B060(&loc, 2);
+    return self;
+}
