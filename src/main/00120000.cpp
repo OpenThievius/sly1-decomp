@@ -221,3 +221,180 @@ void func_00122F28(Self_122F28* self, void* a1)
     }
     func_00121358(self, a1);
 }
+
+struct __attribute__((aligned(16))) Quad_121648 {
+    s32 w[4];
+};
+
+struct Obj_121648 {
+    void** vt;
+    Obj_121648* parent;
+    u8 pad0[8];
+    s8 b10;
+    s8 b11;
+    u8 pad1[0x1EC - 0x12];
+    Obj_121648* p1EC;
+    Obj_121648* p1F0;
+};
+
+struct Locals_121648 {
+    Quad_121648 l0;
+    Quad_121648 l1;
+    Quad_121648 l2;
+    Quad_121648 spare[2];
+};
+
+void func_00121648(Obj_121648* self, s32 flag)
+{
+    Locals_121648 loc;
+    Obj_121648* s2 = self->parent;
+
+    if (self == s2->p1EC) {
+        if (flag != 0 || self->b10 == 2) {
+            ((void (*)(Obj_121648*, void*, void*, f32))self->vt[4])(self, &loc.l0, &loc.l1, 0.0f);
+            ((void (*)(Obj_121648*, void*))s2->vt[0x84 / 4])(s2, &loc.l0);
+            ((void (*)(Obj_121648*, void*))s2->vt[0x90 / 4])(s2, &loc.l1);
+        }
+    }
+    if (self == s2->p1F0) {
+        if (flag != 0 || self->b11 == 2) {
+            ((void (*)(Obj_121648*, void*, void*, f32))self->vt[5])(self, &loc.l2, &loc.l0, 0.0f);
+            ((void (*)(Obj_121648*, void*))s2->vt[0x88 / 4])(s2, &loc.l2);
+            ((void (*)(Obj_121648*, void*))s2->vt[0x94 / 4])(s2, &loc.l0);
+        }
+    }
+}
+
+struct Flags_1226D8 {
+    u8 pad[0x10];
+    s8 a;
+    s8 b;
+};
+
+void func_001226D8(Flags_1226D8* self)
+{
+    if (self->a == 7) {
+        self->a = 3;
+    }
+    if (self->b == 7) {
+        self->b = 3;
+    }
+}
+
+struct __attribute__((aligned(16))) Quad_1227B0 {
+    s32 w[4];
+};
+
+struct Vtbl_1227B0 {
+    u8 pad[0xB0];
+    void (*fn)(void*, Quad_1227B0*, Quad_1227B0*);
+};
+
+struct Obj_1227B0 {
+    Vtbl_1227B0* vt;
+};
+
+struct Src_1227B0 {
+    u8 pad0[4];
+    Obj_1227B0* obj;
+    u8 pad1[0x18];
+    Quad_1227B0 lo;
+    Quad_1227B0 hi;
+};
+
+void func_001227B0(Src_1227B0* src, Quad_1227B0* d0, Quad_1227B0* d1)
+{
+    *d0 = src->lo;
+    *d1 = src->hi;
+    Obj_1227B0* obj = src->obj;
+    void (*fn)(void*, Quad_1227B0*, Quad_1227B0*) = obj->vt->fn;
+    if (fn != 0) {
+        fn(obj, d0, d1);
+    }
+}
+
+struct __attribute__((aligned(16))) Quad_1227F0 {
+    s32 w[4];
+};
+
+struct Block_1227F0 {
+    Quad_1227F0 q[3];
+};
+
+struct Vtbl_1227F0 {
+    u8 pad[0xB4];
+    void (*fn)(void* self, Block_1227F0* b, Quad_1227F0* q);
+};
+
+struct Obj_1227F0 {
+    Vtbl_1227F0* vt;
+};
+
+struct Src_1227F0 {
+    u8 pad0[4];
+    Obj_1227F0* obj;
+    u8 pad1[0x38];
+    Quad_1227F0 q40;
+    Quad_1227F0 q50;
+    Quad_1227F0 q60;
+    Quad_1227F0 q70;
+};
+
+void func_001227F0(Src_1227F0* src, Block_1227F0* d0, Quad_1227F0* d1)
+{
+    d0->q[0] = src->q40;
+    d0->q[1] = src->q50;
+    d0->q[2] = src->q60;
+    *d1 = src->q70;
+    Obj_1227F0* obj = src->obj;
+    void (*fn)(void*, Block_1227F0*, Quad_1227F0*) = obj->vt->fn;
+    fn(obj, d0, d1);
+}
+
+struct SlotList4_00123C90 { u8 pad0[0x564]; u32 count; s32 items[4]; };
+
+void func_00123C90(SlotList4_00123C90* self, s32 value)
+{
+    u32 n = self->count;
+    if (n < 4) {
+        self->items[n] = value;
+        self->count = n + 1;
+    }
+}
+
+struct SlotList16_00123CB8 { u8 pad0[0x578]; u32 count; s32 items[16]; };
+
+void func_00123CB8(SlotList16_00123CB8* self, s32 value)
+{
+    u32 n = self->count;
+    if (n < 16) {
+        self->items[n] = value;
+        self->count = n + 1;
+    }
+}
+
+struct SlotList6_00123CE0 { u8 pad0[0x600]; u32 count; s32 items[6]; };
+
+void func_00123CE0(SlotList6_00123CE0* self, s32 value)
+{
+    u32 n = self->count;
+    if (n < 6) {
+        self->items[n] = value;
+        self->count = n + 1;
+    }
+}
+
+struct TestList_00123D40 { u8 pad0[0x5BC]; s32 count; void* items[1]; };
+
+s32 func_001C1A28(void* a, void* b);
+
+s32 func_00123D40(TestList_00123D40* self, void* arg)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        if (func_001C1A28(arg, &self->items[i]) == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}

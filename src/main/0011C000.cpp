@@ -393,3 +393,129 @@ void func_0011C040(void)
     func_0011C1D0(D_0025C2D0);
     func_0011A6B8(D_00259F38);
 }
+
+extern u8 D_0062C568[];
+extern u8 D_00259F38[];
+
+void* func_001B5EA0(void* pool);
+void* func_001B5EE0(void* pool);
+void func_001F5C0C(void* p, s32 zero, u32 count);
+void func_0011AB58(void* p);
+
+void* func_0011C618(void)
+{
+    void* s0 = func_001B5EA0(D_0062C568);
+    if (s0 != 0) {
+        func_001F5C0C(s0, 0, *(u32*)D_0062C568);
+    } else {
+        func_0011AB58(D_00259F38);
+        s0 = func_001B5EE0(D_0062C568);
+    }
+    return s0;
+}
+
+s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
+
+void func_0011D6A8(s32 a0)
+{
+    s32 buf = a0;
+    func_0011DB00(0x16, 4, &buf, 0, 0);
+}
+
+s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
+
+void func_0011D6D8(s32 a0)
+{
+    s32 buf = a0;
+    func_0011DB00(0x17, 4, &buf, 0, 0);
+}
+
+s32 func_0011D968(s32 id, s32 size, void* data);
+
+void func_0011D708(s32 a0)
+{
+    s32 buf = a0;
+    func_0011D968(0x19, 4, &buf);
+}
+
+s32 func_0011D968(s32 id, s32 flags, void* args);
+
+void func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
+{
+    s32 args[5];
+    args[0] = a0;
+    args[1] = a1;
+    args[2] = a2;
+    args[3] = a3;
+    args[4] = a4;
+    func_0011D968(0x3B, 0x14, args);
+}
+
+s32 func_0011D968(s32 id, s32 flags, void* args);
+
+void func_0011E460(void)
+{
+    func_0011D968(0x3D, 0, 0);
+}
+
+s32 func_0011D968(s32 id, s32 flags, void* args);
+
+void func_0011E498(void)
+{
+    func_0011D968(0x3C, 0, 0);
+}
+
+struct Entry_11FB98 { f32 value; u8 rest[0x3C]; };
+
+void* func_0018D658(s32 size);
+
+void func_0011FB98(s32 count, Entry_11FB98* src, s32* outCount, f32** outArr)
+{
+    *outCount = count;
+    if (outArr) {
+        *outArr = (f32*)func_0018D658(count * 4);
+        s32 i = 0;
+        if (*outCount > 0) {
+            Entry_11FB98* p = src;
+            do {
+                (*outArr)[i] = p->value;
+                p++;
+                i++;
+            } while (i < *outCount);
+        }
+    }
+}
+
+typedef void (*Hook_11FC20)(void* self, s32 a, s32 b);
+struct Owner_11FC20 { Hook_11FC20* vtbl; };
+
+void func_0011F6B0(u8* a, Owner_11FC20* b, s32 c, u8* d, s32 e, s32 f, f32 g, f32 h);
+
+void func_0011FC20(u8* self, Owner_11FC20* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
+{
+    func_0011F6B0(self + 0x20, other, c, self + 0x10, e, f, p12, p13);
+    if (other && other->vtbl[44])
+        other->vtbl[44](other, e, f);
+}
+
+typedef void (*Hook_11FDD8)(void* self, s32 a, s32 b);
+struct Owner_11FDD8 { Hook_11FDD8* vtbl; };
+struct Self_11FDD8 { u8 pad0[0xC]; s32 f0c; s32 f10; };
+
+void func_0011F9F8(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
+
+void func_0011FDD8(Self_11FDD8* self, Owner_11FDD8* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
+{
+    func_0011F9F8(self->f0c, self->f10, a2, a3, a4, p12, p13);
+    if (other && other->vtbl[44])
+        other->vtbl[44](other, a3, a4);
+}
+
+struct Self_11FED8 { u8 pad0[0xC]; s32 count; u8* records; };
+
+void func_0011FB98(s32 count, u8* src, s32* outCount, f32** outArr);
+
+void func_0011FED8(Self_11FED8* self, s32* outCount, f32** outArr)
+{
+    func_0011FB98(self->count, self->records, outCount, outArr);
+}
