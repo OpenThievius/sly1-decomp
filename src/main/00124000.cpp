@@ -247,3 +247,29 @@ void func_00127590(Obj_127590* self, Quad_127590* src)
         func_00129DF8(self);
     }
 }
+
+struct Vec3_127558 { f32 x; f32 y; f32 z; };
+typedef void (*VFn_127558)(void* self, void* v);
+struct Obj_127558 { VFn_127558* vtbl; };
+
+void func_00127558(void* self, f32 x, f32 y, f32 z)
+{
+    Vec3_127558 v;
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    Obj_127558* o = (Obj_127558*)self;
+    o->vtbl[36](self, &v);
+}
+
+typedef void (*VFn_001275F0)(void* self, f32* v);
+struct Obj_001275F0 { VFn_001275F0* vtbl; };
+
+void func_001275F0(Obj_001275F0* self, f32 x, f32 y, f32 z)
+{
+    f32 v[3];
+    v[0] = x;
+    v[1] = y;
+    v[2] = z;
+    self->vtbl[37](self, v);
+}

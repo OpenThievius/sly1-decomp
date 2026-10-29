@@ -1283,3 +1283,198 @@ void* func_00117E20(void* self)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct Quad_114518 { s32 a, b, c, d; };
+struct Frame_114518 { Quad_114518 q; f32 out[3]; };
+union Bits_114518 { s32 i; f32 f; };
+struct Elem_114518 { s32 tag; Bits_114518 v; };
+
+void func_0011B008(Quad_114518* q);
+void func_0011B018(void* dst, Quad_114518* src);
+void func_0011B060(Quad_114518* q, int mode);
+s32 func_001EAC68(f32 a, f32 b, f32 c);
+s32 func_0011B5F0(Quad_114518* q, s32 flag);
+
+void* func_00114518(void* self, s32 unused, Elem_114518* e)
+{
+    Frame_114518 f;
+    func_0011B008(&f.q);
+    for (s32 k = 0; k < 3; k++) {
+        if (e[k].tag == 0x14) {
+            f.out[k] = (f32)e[k].v.i;
+        } else {
+            f.out[k] = e[k].v.f;
+        }
+    }
+    s32 flag = func_001EAC68(f.out[0], f.out[1], f.out[2]);
+    (void)func_0011B5F0(&f.q, flag);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_116520 { s32 a, b, c, d; };
+struct Value_116520 { s32 tag; f32 payload; };
+struct Obj4_116520 { s32 pad0; void* f4; };
+struct Src_116520 { s32 pad0; void* f4; s32 pad8; void* fC; Value_116520 f10; void* f18; void* f1C; };
+struct Frame_116520 { Quad_116520 q; Value_116520 v; };
+
+void func_0011B008(Quad_116520* q);
+void func_0011B018(void* dst, Quad_116520* src);
+void func_0011B060(void* q, int mode);
+void func_0011B9A8(void* out, void* src);
+void func_0011B740(Quad_116520* q, void* p);
+void* func_0011C508(void);
+void func_001EDEF0(void* a0, void* a1, void* a2, void* a3, f32 f);
+
+void* func_00116520(void* self, s32 unused, Src_116520* src)
+{
+    Frame_116520 f;
+    func_0011B008(&f.q);
+    void* p = func_0011C508();
+    void* s3;
+    if (src->f18 == 0) {
+        s3 = 0;
+    } else {
+        s3 = ((Obj4_116520*)src->f1C)->f4;
+    }
+    void* s1 = src->f4;
+    void* fc = src->fC;
+    func_0011B9A8(&f.v, &src->f10);
+    func_001EDEF0(s1, fc, p, s3, f.v.payload);
+    func_0011B060(&f.v, 2);
+    func_0011B740(&f.q, p);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_117080 { s32 a, b, c, d; };
+struct Value_117080 { s32 tag; f32 payload; };
+struct Src_117080 { s32 pad0; void* f4; Value_117080 f8; };
+struct Frame_117080 { Quad_117080 q; Value_117080 v; };
+
+void func_0011B008(Quad_117080* q);
+void func_0011B018(void* dst, Quad_117080* src);
+void func_0011B060(void* q, int mode);
+void func_0011B9A8(void* out, void* src);
+s32 func_001EB050(void* target, f32 scale);
+s32 func_0011B5F0(Quad_117080* q, s32 flag);
+
+void* func_00117080(void* self, s32 unused, Src_117080* src)
+{
+    Frame_117080 f;
+    func_0011B008(&f.q);
+    void* s1 = src->f4;
+    func_0011B9A8(&f.v, &src->f8);
+    s32 flag = func_001EB050(s1, f.v.payload);
+    (void)func_0011B5F0(&f.q, flag);
+    func_0011B060(&f.v, 2);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_117118 { s32 a, b, c, d; };
+struct In_117118 { s32 pad0; f32 f4; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, int mode);
+void func_0011B570(void* q, s32 v);
+
+void* func_00117118(void* self, s32 unused, In_117118* x)
+{
+    Quad_117118 q;
+    func_0011B008(&q);
+    func_0011B570(&q, (s32)x->f4);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_117BC8 { s32 a, b, c, d; };
+struct In_117BC8 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+
+extern void* D_00275710;
+
+void func_0011B008(Quad_117BC8* q);
+s32 func_0011B8A8(Quad_117BC8* q, s32 v);
+void func_0011B018(void* dst, Quad_117BC8* src);
+void func_0011B060(Quad_117BC8* q, int mode);
+s32 func_0015A418(void* host, s32 a1, s32 a2, s32 ctx);
+
+void* func_00117BC8(void* out, s32 unused, In_117BC8* in)
+{
+    Quad_117BC8 q;
+    s32 r;
+    func_0011B008(&q);
+    s32 flag = 0x105;
+    s32 k = 0x101;
+    if (in->wc != 0) flag = k;
+    r = func_0015A418(D_00275710, flag, in->w4, in->wc);
+    func_0011B8A8(&q, r);
+    func_0011B018(out, &q);
+    func_0011B060(&q, 2);
+    return out;
+}
+
+struct Quad_117D00 { s32 a, b, c, d; };
+struct In_117D00 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+
+extern void* D_00275710;
+
+void func_0011B008(Quad_117D00* q);
+s32 func_0011B8A8(Quad_117D00* q, s32 v);
+void func_0011B018(void* dst, Quad_117D00* src);
+void func_0011B060(Quad_117D00* q, int mode);
+s32 func_0015A418(void* host, s32 a1, s32 a2, s32 ctx);
+
+void* func_00117D00(void* out, s32 unused, In_117D00* in)
+{
+    Quad_117D00 q;
+    s32 r;
+    func_0011B008(&q);
+    r = func_0015A418(D_00275710, 0x104, in->w4, in->wc);
+    func_0011B8A8(&q, r);
+    func_0011B018(out, &q);
+    func_0011B060(&q, 2);
+    return out;
+}
+
+struct Quad_117E78 { s32 a, b, c, d; };
+
+
+s32 func_0011B008(Quad_117E78* q);
+void func_0011B018(void* dst, Quad_117E78* src);
+void func_0011B060(Quad_117E78* q, int mode);
+void func_0011B8A8(Quad_117E78* q, s32 v);
+
+void* func_00117E78(void* self)
+{
+    Quad_117E78 q;
+    s32 r = func_0011B008(&q);
+    func_0011B8A8(&q, (s32)D_00275710);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_117ED0 { s32 a, b, c, d; };
+
+extern s32 D_00261990;
+
+s32 func_0011B008(Quad_117ED0* q);
+void func_0011B018(void* dst, Quad_117ED0* src);
+void func_0011B060(Quad_117ED0* q, int mode);
+void func_0011B8A8(Quad_117ED0* q, s32 v);
+
+void* func_00117ED0(void* self)
+{
+    Quad_117ED0 q;
+    s32 r = func_0011B008(&q);
+    func_0011B8A8(&q, D_00261990);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

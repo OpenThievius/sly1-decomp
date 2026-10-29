@@ -338,3 +338,43 @@ void func_0013B5C8(State_0013B5C8* self, State_0013B5C8* other)
     func_001BA130(self, other);
     if (other->slot) self->slot = (void*)func_0018D568(0x24, other->slot);
 }
+
+struct Item_138398 {
+    u8 pad0[0x10];
+    f32 f10;
+    s32 f14;
+    s32 f18;
+    u8 pad1[0x20 - 0x1C];
+};
+
+s32 func_00137BE0(void* src);
+void* func_0018D5C0(s32 bytes);
+void func_00137E70(void* src, void* item);
+f32 func_00137DF8(void* src);
+s32 func_00137C40(void* src);
+
+void func_00138398(void* src, s32* count, Item_138398** out)
+{
+    s32 n = func_00137BE0(src);
+    *count = n;
+    *out = (Item_138398*)func_0018D5C0(n << 5);
+
+    for (s32 i = 0; i < *count; i++) {
+        Item_138398* item = &(*out)[i];
+        func_00137E70(src, item);
+        item->f10 = func_00137DF8(src);
+
+        s32 v = func_00137C40(src);
+        if ((v & 0x80000000) != 0) {
+            item->f14 = v;
+        } else {
+            item->f14 = (s32)((*out) + v);
+        }
+        v = func_00137C40(src);
+        if ((v & 0x80000000) != 0) {
+            item->f18 = v;
+        } else {
+            item->f18 = (s32)((*out) + v);
+        }
+    }
+}
