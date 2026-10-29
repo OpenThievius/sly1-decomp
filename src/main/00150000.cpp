@@ -74,8 +74,6 @@ void func_00152A50(Span_152A50* self, u32* count, u32* begin, u32* out)
     func_001528C8(self);
 }
 
-void func_00152D70(void* self);
-
 struct Buf_152CA0 { u8 pad[0xC]; u8* cur; };
 
 void func_00152CA0(Buf_152CA0* self)
@@ -85,4 +83,122 @@ void func_00152CA0(Buf_152CA0* self)
     self->cur = (u8*)p + 0x10;
     p[0] = 0x60000000ull;
     p[1] = 0;
+}
+
+struct Ctx_001503E0 {
+    u8 pad0[0x744];
+    s32 count744;
+    void* items748[8];
+};
+
+void func_001503E0(Ctx_001503E0* self, void* item)
+{
+    u32 n = (u32)self->count744;
+    if (n < 8) {
+        self->items748[n] = item;
+        self->count744 = n + 1;
+    }
+}
+
+struct Ctx_00150408 {
+    u8 pad0[0x78C];
+    s32 f78C;
+    u8 pad1[0x7B0 - 0x790];
+    s32 f7B0;
+};
+
+void func_00150408(Ctx_00150408* self)
+{
+    self->f78C = 0;
+    self->f7B0 = 0;
+}
+
+struct PktList_1529C8 {
+    u8* end;
+    u8* begin;
+    u8* chunk;
+    u8* write;
+};
+
+void func_001529C8(PktList_1529C8* self, s32 count, u8* base)
+{
+    self->begin = base;
+    self->write = base;
+    self->end = base + count * 16;
+}
+
+void func_00152D70(PktList_1529C8* self);
+void func_001528C8(PktList_1529C8* self);
+
+void func_001529E0(PktList_1529C8* self, u32* outCount, u8** outBegin)
+{
+    func_00152D70(self);
+    if (outCount != 0) {
+        *outCount = ((u32)self->write - (u32)self->begin) >> 4;
+    }
+    if (outBegin != 0) {
+        *outBegin = self->begin;
+    }
+    func_001528C8(self);
+}
+
+void func_001F6C20(s32 unused);
+void func_00202A80(void* dma, void* addr);
+
+void func_00152AE0(PktList_1529C8* self, void* dma)
+{
+    func_00152D70(self);
+    func_001F6C20(0);
+    func_00202A80(dma, self->begin);
+    self->write = self->begin;
+}
+
+void func_00152B38(PktList_1529C8* self)
+{
+    func_00152D70(self);
+    u8* q = self->write;
+    self->chunk = q;
+    self->write = q + 16;
+    *(u64*)q = 0x10000000;
+    *(u64*)(self->chunk + 8) = 0;
+}
+
+void func_00152B80(PktList_1529C8* self, s32 lo, s32 hi)
+{
+    s32 flag = 0;
+    if (self->chunk != 0) {
+        func_00152D70(self);
+        flag = 1;
+    }
+    u8* p = self->write;
+    self->write = p + 16;
+    *(u64*)p = (u64)lo | 0x40000000 | ((u64)hi << 32);
+    *(u64*)(p + 8) = 0;
+    if (flag != 0) {
+        u8* q = self->write;
+        self->chunk = q;
+        self->write = q + 16;
+        *(u64*)q = 0x10000000;
+        *(u64*)(self->chunk + 8) = 0;
+    }
+}
+
+void func_00152C18(PktList_1529C8* self, s32 hi)
+{
+    s32 flag = 0;
+    if (self->chunk != 0) {
+        func_00152D70(self);
+        flag = 1;
+    }
+    u8* p = self->write;
+    self->write = p + 16;
+    *(u64*)p = ((u64)hi << 32) | 0x50000000;
+    *(u64*)(p + 8) = 0;
+    if (flag != 0) {
+        u8* q = self->write;
+        self->chunk = q;
+        self->write = q + 16;
+        *(u64*)q = 0x10000000;
+        *(u64*)(self->chunk + 8) = 0;
+    }
 }
