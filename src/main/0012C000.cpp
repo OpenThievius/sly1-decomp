@@ -112,3 +112,147 @@ void func_0012FDE8(Obj_12FDE8* a0)
     }
     a0->state = -1;
 }
+
+void func_001830D8(void);
+
+void func_0012C140(void)
+{
+    func_001830D8();
+}
+
+struct Kin_0012C160 {
+    f32 pos;
+    f32 vel;
+    f32 acc;
+};
+
+struct Track_0012C160 {
+    u8 pad0[0x14];
+    void* host;
+    u8 pad1[0x30];
+    s32 enabled;
+    u8 pad2[0x34];
+    Kin_0012C160 kin;
+    u8 pad3[4];
+    f32 lo;
+    f32 hi;
+    f32 out;
+};
+
+struct Step_002623C8 {
+    u8 pad0[0xC];
+    f32 dt;
+};
+
+extern Step_002623C8* D_002623C8;
+
+void func_00182C58(void* self);
+void func_0012C208(void* self);
+void func_001DBC60(void* host, void* cb, void* ctx, s32 a3, s32 a4);
+
+void func_0012C160(Track_0012C160* self)
+{
+    func_00182C58(self);
+    Kin_0012C160* k = &self->kin;
+    f32 t = D_002623C8->dt;
+    f32 v = k->pos + t * (k->vel + t * k->acc);
+    f32 lo = self->lo;
+    f32 hi = self->hi;
+    if (v < lo) {
+        v = lo;
+    } else if (hi < v) {
+        v = hi;
+    }
+    self->out = v;
+    if (self->enabled) {
+        func_001DBC60(self->host, (void*)func_0012C208, self, 0, 0);
+    }
+}
+
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void func_0012C7B0(void* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
+
+struct Obj_0012C208 {
+    u8 pad0[0x14];
+    void* host;
+    u8 pad1[0x28];
+    s32 id;
+};
+
+void func_0012C208(Obj_0012C208* self)
+{
+    s32 scratch[4];
+    s32 v;
+    if (self->id != -1) {
+        v = func_0015A418(self->host, 4, self->id, self);
+        if (v == 0) {
+            v = func_0015A418(self->host, 0x104, self->id, self);
+        }
+    } else {
+        v = 0;
+    }
+    func_0012C7B0(self, v, 0, scratch, 0.0f, 1.0f);
+}
+
+void func_0012C288(void* self, s32 a1, s32 a2, s32 a3, s32 a4, void** out);
+
+void* func_0012C7D8(void* self, s32 key, s32 a2)
+{
+    void* out;
+    func_0012C288(self, key, 0, 0, a2, &out);
+    return out;
+}
+
+struct Node_0012C808 {
+    u8 pad0[0xC];
+    s32 key;
+    u8 pad1[0x2C];
+    Node_0012C808* next;
+};
+
+struct Owner_0012C808 {
+    u8 pad0[0x6C];
+    Node_0012C808* head;
+};
+
+Node_0012C808* func_0012C808(Owner_0012C808* self, s32 key)
+{
+    s32 scratch[4];
+    (void)scratch;
+    Node_0012C808* node = self->head;
+    if (node != 0) {
+        do {
+            if (node->key == key) {
+                return node;
+            }
+            node = node->next;
+        } while (node != 0);
+    }
+    return 0;
+}
+
+void* func_0012C808(void* self, s32 key);
+void func_0012C7B0(void* self, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
+void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
+
+void func_0012C840(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 fb)
+{
+    void* hit;
+    void** dst = out ? out : &hit;
+    hit = func_0012C808(self, key);
+    if (hit) {
+        *dst = hit;
+    } else {
+        func_0012C7B0(self, key, a3, dst, 0.0f, 1.0f);
+    }
+    func_0012F0A0(*dst, a2, fa, fb);
+}
+
+void func_0012C840(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 fb);
+
+void* func_0012C8F8(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb)
+{
+    void* out;
+    func_0012C840(self, key, a2, a3, &out, fa, fb);
+    return out;
+}

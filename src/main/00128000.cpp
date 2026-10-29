@@ -324,3 +324,176 @@ s32 func_0012B2E8(void* a0, Obj_12B2E8* a1)
 {
     return a1->value != 0;
 }
+
+struct Node_128DB8 { u8 pad[0x18]; s32 f18; };
+struct Part_128DB8 {
+    u8 pad0[0x60];
+    Node_128DB8* p60;
+    Node_128DB8* p64;
+    u8 pad68[0x18];
+    s32 f80;
+    Node_128DB8* p84;
+    void* p88;
+    u8 pad8c[0xB0 - 0x8C];
+    s32 flags;
+};
+struct Ent_128DB8 { u8 pad0[0x14]; void* p14; u8 pad18[0x224 - 0x18]; Part_128DB8* p224; };
+
+Node_128DB8* func_0015A448(void* a0, void* a1, void* a2);
+void* func_0015A868(void* a0, s32 a1);
+
+void func_00128DB8(Ent_128DB8* self)
+{
+    Part_128DB8* p = self->p224;
+    if (p == 0) return;
+    s32 v = p->flags | 0x8000;
+    p->flags = v;
+    if (v & 0x10) {
+        p->p60 = func_0015A448(self->p14, p->p60, self);
+        p->p64 = (Node_128DB8*)1;
+    }
+    if (p->flags & 0x20) {
+        Node_128DB8* r = func_0015A448(self->p14, p->p84, self);
+        p->p84 = r;
+        s32 x = r->f18;
+        p->f80 = x;
+        p->p88 = func_0015A868(self, x);
+    }
+    if (p->flags & 0x40) {
+        p->p60 = func_0015A448(self->p14, p->p60, self);
+        p->p64 = func_0015A448(self->p14, p->p64, self);
+    }
+}
+
+struct Timer_129108 { u8 pad0[4]; s32 f4; s32 f8; s32 fC; f32 f10; };
+struct Ent_129108 { u8 pad[0x2A0]; Timer_129108* p2A0; };
+
+void* func_0018D5C0(s32 size);
+
+Timer_129108* func_00129108(Ent_129108* self)
+{
+    if (self->p2A0 == 0) {
+        Timer_129108* t = (Timer_129108*)func_0018D5C0(0x14);
+        self->p2A0 = t;
+        t->f4 = -1;
+        self->p2A0->f8 = 0;
+        self->p2A0->fC = 0;
+        self->p2A0->f10 = 1.0f;
+    }
+    return self->p2A0;
+}
+
+struct Ent_129170 { u8 pad[0x28C]; f32 f28C; };
+
+void func_00129170(Ent_129170* self, f32 x)
+{
+    self->f28C = x * 0.01f;
+}
+
+struct Ent_129188 { u8 pad[0x28C]; f32 f28C; };
+
+void func_00129188(Ent_129188* self, f32* out)
+{
+    *out = self->f28C * 100.0f;
+}
+
+struct Ent_1291B8 { u8 pad[0x290]; f32 f290; };
+
+void func_001291B8(Ent_1291B8* self, f32* out)
+{
+    *out = self->f290 * 100.0f;
+}
+
+struct Ent_1291D0 { u8 pad0[0x14]; u8* p14; u8 pad18[0x284 - 0x18]; void* p284; };
+
+void* func_001B5EE0(void* a0);
+void func_001B1AC8(void* a0);
+void func_00152470(void* a0, void* a1);
+
+void* func_001291D0(Ent_1291D0* self)
+{
+    if (self->p284 == 0) {
+        void* o = func_001B5EE0(self->p14 + 0x1BF4);
+        self->p284 = o;
+        func_001B1AC8(o);
+        func_00152470(self->p14 + 0x1C00, self->p284);
+    }
+    return self->p284;
+}
+
+struct Sub_12A7F8 { u8 pad0[0x48]; s32 f48; };
+struct Owner_12A7F8 { u8 pad0[0x200]; Sub_12A7F8* sub; };
+
+void func_0012A7F8(Owner_12A7F8* self, s32* out)
+{
+    s32 v = 0;
+    if (self->sub != 0) {
+        v = self->sub->f48;
+    }
+    *out = v;
+}
+
+struct Sub_12A810 { u8 pad0[0x20]; s32 f20; };
+struct Owner_12A810 { u8 pad0[0x200]; Sub_12A810* sub; };
+
+void func_00129730(Owner_12A810* self);
+
+void func_0012A810(Owner_12A810* self, s32 value)
+{
+    func_00129730(self);
+    self->sub->f20 = value;
+}
+
+struct Sub_12A848 { u8 pad0[0x20]; s32 f20; };
+struct Owner_12A848 { u8 pad0[0x200]; Sub_12A848* sub; };
+
+void func_0012A848(Owner_12A848* self, s32* out)
+{
+    s32 v = -1;
+    if (self->sub != 0) {
+        v = self->sub->f20;
+    }
+    *out = v;
+}
+
+struct Sub_12A8B8 { u8 pad0[0x4C]; s32 f4C; };
+struct Owner_12A8B8 { u8 pad0[0x200]; Sub_12A8B8* sub; };
+
+void func_0012A8B8(Owner_12A8B8* self)
+{
+    self->sub->f4C = 0;
+}
+
+struct Sub_12A8C8 { u8 pad0[0x4C]; s32 f4C; };
+struct Owner_12A8C8 { u8 pad0[0x200]; Sub_12A8C8* sub; };
+
+void func_0012A8C8(Owner_12A8C8* self)
+{
+    self->sub->f4C = 1;
+}
+
+struct Obj_12A970 { u8 pad0[0x14]; s32 f14; };
+
+void* func_0015A418(s32 a0, s32 a1, s32 a2, void* a3);
+void* func_0011E580(s32 a0, s32 a1, void* a2, s32 a3, s32 a4);
+
+void* func_0012A970(Obj_12A970* self)
+{
+    void* r = func_0015A418(self->f14, 0x102, 0x22A, self);
+    if (r != 0) {
+        return r;
+    }
+    return func_0011E580(0x75, self->f14, self, 0x22A, -1);
+}
+
+struct Obj_12A9C8 { u8 pad0[0x88]; s32 f88; };
+
+void* func_0012A970(Obj_12A9C8* self);
+
+void func_0012A9C8(Obj_12A9C8* self, s32 value)
+{
+    Obj_12A9C8* o = (Obj_12A9C8*)func_0012A970(self);
+    if (value != -1) {
+        o->f88 = value;
+    }
+}
