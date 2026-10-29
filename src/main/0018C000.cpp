@@ -248,3 +248,78 @@ void func_0018FFB0(Actor_0018FFB0* self, s32 a1, s32 a2)
         self->field_C04 = 0;
     }
 }
+
+struct Obj_18C1A8 { u8 pad0[0x14]; s32 f14; };
+
+s32 func_0018D1F8(void* self);
+
+s32 func_0018C1A8(Obj_18C1A8* self)
+{
+    s32 r = func_0018D1F8(self);
+    if (r != 0) {
+        self->f14 = 2;
+    } else {
+        self->f14 = 3;
+    }
+    return r;
+}
+
+struct Key_18C1E8 { s32 w0; s32 w4; s32 w8; s32 wC; };
+struct Obj_18C1E8 { s32 f00; s32 f04; u8 pad08[0xC]; s32 f14; u8 pad18[4]; s32 f1C; };
+
+void func_0018D410(void* p);
+s32 func_001407A0(void* p);
+
+s32 func_0018C1E8(Obj_18C1E8* self)
+{
+    Key_18C1E8 key;
+    s32 flag;
+    func_0018D410(&key);
+    if (self == 0) {
+        flag = 0;
+    } else {
+        s32 x = self->f04 ^ self->f1C;
+        key.w0 = self->f00 ^ self->f14;
+        key.w4 = x;
+        flag = x != 0;
+    }
+    if (flag != 0) {
+        return func_001407A0(&key);
+    }
+    return 0;
+}
+
+void func_0018D778(void* self)
+{
+}
+
+struct Ctx_0018D8E0 { u8 pad[0x6B8]; s32 ready; };
+
+void func_0013B4C0(void* self);
+
+void func_0018D8E0(Ctx_0018D8E0* self)
+{
+    func_0013B4C0(self);
+    self->ready = 1;
+}
+
+struct Ctx_0018D910 { u8 pad[0x2C8]; u64 flags; };
+
+extern u8 D_002699B0[];
+
+void func_0013B598(void* self);
+void func_00124DF8(void* self, s32 mode, void* data);
+
+void func_0018D910(Ctx_0018D910* self)
+{
+    u64 mask = (u64)(s64)-0x301;
+    u64 set = 0x8000;
+    func_0013B598(self);
+    func_00124DF8(self, 1, D_002699B0);
+    mask <<= 16;
+    mask |= 0xFFFF;
+    mask <<= 16;
+    mask |= 0xFFFF;
+    set <<= 25;
+    self->flags = (self->flags & mask) | set;
+}

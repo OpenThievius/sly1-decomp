@@ -205,3 +205,28 @@ void func_0018ACF0(Self_18ACF0* self)
     else
         D_0026E248.vtbl[15](&D_0026E248);
 }
+
+struct Span_188FD8 { f32 w[11]; };
+struct Out_188FD8 { f32 o[3]; };
+
+f32 func_00205678(f32 x);
+f32 func_00205778(f32 y, f32 x);
+
+void func_00188FD8(Span_188FD8* self, Out_188FD8* out)
+{
+    f32 k = 1.57069635f;
+    f32 r = func_00205678(-self->w[2]);
+    out->o[1] = r;
+    if (r < k) {
+        if (-k < r) {
+            out->o[0] = func_00205778(self->w[6], self->w[10]);
+            out->o[2] = func_00205778(self->w[1], self->w[0]);
+        } else {
+            out->o[0] = 0.0f;
+            out->o[2] = -func_00205778(-self->w[4], self->w[8]);
+        }
+    } else {
+        out->o[0] = 0.0f;
+        out->o[2] = func_00205778(-self->w[4], self->w[8]);
+    }
+}

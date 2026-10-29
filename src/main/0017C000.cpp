@@ -84,3 +84,21 @@ void func_0017FE90(void* self)
     func_00182C18(self);
     D_002640A4 = self;
 }
+
+extern u8 D_00264088[];
+void func_00152438(void* self, s32 value);
+
+void func_0017FD48(void)
+{
+    func_00152438(D_00264088, 0x50);
+}
+
+extern u8 D_00264088[];
+void func_00182D48(void* self);
+void func_00152470(void* table, void* self);
+
+void func_0017FD90(void* self)
+{
+    func_00182D48(self);
+    func_00152470(D_00264088, self);
+}

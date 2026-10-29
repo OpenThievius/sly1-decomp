@@ -199,3 +199,50 @@ void func_00184D10(Obj_184D10* self, f32* out)
 {
     *out = self->f2F0;
 }
+
+struct __attribute__((aligned(16))) Quad_00184D20 { s32 a, b, c, d; };
+
+void func_001B4600(void* a0, void* a1);
+void func_001847F0(void* self, void* a1);
+
+void func_00184D20(void* self, void* a1)
+{
+    Quad_00184D20 q;
+    func_001B4600(a1, &q);
+    func_001847F0(self, &q);
+}
+
+void func_001B4580(void* self);
+
+void func_00184D58(u8* self)
+{
+    func_001B4580(self + 736);
+}
+
+struct __attribute__((aligned(16))) Quad_00185358 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pk8_00185358 { u64 v; };
+
+struct __attribute__((aligned(16))) Obj_00185358 {
+    u8 pad0[32]; s32 f20; u8 pad1[28]; f32 f40; s32 f44; s32 f48; u8 pad2[4];
+    Quad_00185358 q50; Pk8_00185358 p60; u8 pad3[8]; Quad_00185358 q70; Pk8_00185358 p80;
+};
+
+extern u8 D_00264770[];
+extern u8 D_00264780[];
+extern u8 D_00264790[];
+extern u8 D_002647A0[];
+
+void func_00121338(void* self);
+
+void func_00185358(Obj_00185358* self)
+{
+    func_00121338(self);
+    self->f20 = -1;
+    self->f40 = 800.0f;
+    *(Quad_00185358*)&self->q50 = *(Quad_00185358*)D_00264770;
+    self->p60 = *(Pk8_00185358*)D_00264780;
+    self->q70 = *(Quad_00185358*)D_00264790;
+    self->p80 = *(Pk8_00185358*)D_002647A0;
+    self->f44 = 1;
+    self->f48 = -1;
+}
