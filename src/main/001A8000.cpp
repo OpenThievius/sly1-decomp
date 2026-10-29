@@ -486,3 +486,41 @@ f32 func_001AB5D8(void)
 {
     return D_00261858 != 0 ? 2.5f : 0.0f;
 }
+
+void func_001A93C8(void* self);
+
+void func_001A86F8(void* self, s32 flag)
+{
+    if (flag) {
+        func_001A93C8(self);
+    }
+}
+
+struct Entry_1A8718 { s32 key; s32 pad[3]; s32 flags; };
+struct Table_1A8718 { u8 pad[0x34]; s32 count; Entry_1A8718* entries; };
+
+Entry_1A8718* func_001A8718(Table_1A8718* table, s32 key);
+
+void func_001A8778(Table_1A8718* table, s32 key)
+{
+    Entry_1A8718* e = func_001A8718(table, key);
+    if (e) {
+        e->flags |= 2;
+    }
+}
+
+typedef void (*VFn_1AA8C8)(void* self, s32 arg);
+struct Obj_1AA8C8 { VFn_1AA8C8* vtbl; };
+
+void func_001AA8C8(void* self)
+{
+    Obj_1AA8C8* o = (Obj_1AA8C8*)self;
+    o->vtbl[16](self, 0);
+}
+
+struct Actor_001AB920 { u8 pad[0x26C]; f32 field_26C; };
+
+void func_001AB920(Actor_001AB920* self, f32 value)
+{
+    self->field_26C = value;
+}

@@ -957,3 +957,42 @@ void func_001B7968(Obj_001B7968* self)
     func_001BB4A0(self);
     func_0011B060(&local, 2);
 }
+
+struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
+
+void func_001B4330(Quad_001B4580* p);
+
+void func_001B4580(Quad_001B4580* src, f32* dst)
+{
+    Quad_001B4580 tmp = *src;
+    tmp.v[1] = tmp.v[1] * 0.003921569f;
+    tmp.v[2] = tmp.v[2] * 0.003921569f;
+    func_001B4330(&tmp);
+    dst[0] = dst[0] * 255.0f;
+    dst[1] = dst[1] * 255.0f;
+    dst[2] = dst[2] * 255.0f;
+}
+
+struct Slot_1B70B0 { s32 value; s32 pad4; };
+struct Self_1B70B0 { u8 pad0[0xC38]; Slot_1B70B0 slots[1]; };
+
+s32 func_001CA600(s32 index);
+
+void func_001B70B0(Self_1B70B0* self, s32 index, s32 value)
+{
+    (void)func_001CA600(index);
+    self->slots[index].value = value;
+}
+
+struct Entry_1B7100 { s32 value; s32 pad4; };
+struct Self_1B7100 { u8 pad0[0xCD4]; s32 count; Entry_1B7100 entries[1]; };
+
+void func_001B7100(Self_1B7100* self, s32 value)
+{
+    s32 n = self->count;
+    if ((u32)n < 4) {
+        self->entries[n].value = value;
+        n++;
+        self->count = n;
+    }
+}

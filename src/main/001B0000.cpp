@@ -474,3 +474,62 @@ u64 func_001B2988(Table_1B2988* t, s32 i, s32 j)
     if (c != 0) r |= c->value;
     return r;
 }
+
+typedef void (*VFn_1B0160)(void* self, s32 arg);
+
+struct Obj_1B0160 {
+    VFn_1B0160* vtbl;
+    u8 pad_4[0x554 - 4];
+    s32 f554;
+    s32 f558;
+};
+
+void func_001B0160(Obj_1B0160* self)
+{
+    if (self->f558 < 3) {
+        if (self->f558 >= 0) {
+            self->vtbl[0x144 / 4](self, 3);
+        }
+    }
+    self->f554 = 1;
+}
+
+struct Obj_1B0470 {
+    u8 pad_0[0xB08];
+    f32 fB08;
+};
+
+void func_001B0470(Obj_1B0470* self, f32 x)
+{
+    self->fB08 = -1.0f / x;
+}
+
+struct Obj_1B1FB0 {
+    u8 pad_0[0x40];
+    f32 f40;
+};
+
+void func_001B1BF8(Obj_1B1FB0* o);
+void func_001B1BF0(Obj_1B1FB0* o);
+
+void func_001B1FB0(Obj_1B1FB0* o, f32 v)
+{
+    o->f40 = v;
+    func_001B1BF8(o);
+    func_001B1BF0(o);
+}
+
+struct Obj_1B1FE0 {
+    u8 pad_0[0x44];
+    f32 f44;
+};
+
+void func_001B1BF8(Obj_1B1FE0* o);
+void func_001B1BF0(Obj_1B1FE0* o);
+
+void func_001B1FE0(Obj_1B1FE0* o, f32 v)
+{
+    o->f44 = v;
+    func_001B1BF8(o);
+    func_001B1BF0(o);
+}

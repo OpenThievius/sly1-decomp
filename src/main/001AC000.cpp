@@ -329,3 +329,38 @@ void func_001AD378(Obj_1AD378* self)
     if (self->f250 == 3 && self->f260 != 0) return;
     func_001AA8F0(self);
 }
+
+typedef void (*VFn_001AD718)(void* self);
+struct Actor_001AD718 { VFn_001AD718* vtbl; u8 pad0[0x25C]; s32 slot260; };
+struct Mgr_001AD718 { u8 pad0[4]; s32 f4; u8 pad1[0x2C - 8]; s32 f2C; };
+
+extern u8 D_00275BC0[];
+void func_001AA298(void* self);
+
+void func_001AD718(Actor_001AD718* self)
+{
+    Global_001AEFA0* g;
+    Mgr_001AD718* m;
+
+    func_001AA298(self);
+    if (self->slot260 == 0) goto tail;
+    g = D_00262E10;
+    if (g != 0 && g->state == 6) goto tail;
+    m = (Mgr_001AD718*)D_00275BC0;
+    if (m->f4 == 3 && m->f2C < 2) {
+        self->vtbl[14](self);
+        return;
+    }
+tail:
+    self->vtbl[15](self);
+}
+
+struct Timer_001AD940 { u8 pad0[0x248]; f32 value; };
+
+void func_001AA268(void* self);
+
+void func_001AD940(Timer_001AD940* self)
+{
+    func_001AA268(self);
+    self->value = 0.5f;
+}
