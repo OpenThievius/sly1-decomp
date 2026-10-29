@@ -4,7 +4,8 @@
     python3 tools/todo.py [--max-size N] [--min-size N] [--tags leaf,calls] [--exclude vu,jtbl] [--window 00118000]
 
 One row per unfinished function: name, address, size, its source file (the
-16 KiB window of src/main/ that holds it) and tags read from its disassembly:
+16 KiB window that holds it, in src/main/ for game code and src/lib/ for the
+libraries, config/us/layout.tsv) and tags read from its disassembly:
 
 - leaf: makes no calls;  calls: makes calls (jal)
 - data: refers to data by address (%hi/%lo);  rodata: refers into .rodata (literals,
@@ -39,8 +40,28 @@ def window_of(addr):
     return addr & ~(WINDOW - 1)
 
 
+def layout(key="us"):
+    """config/<key>/layout.tsv: [(kind, name, start, end, category, source folder)]."""
+    rows = []
+    for line in (ROOT / "config" / key / "layout.tsv").read_text().splitlines():
+        if not line or line.startswith(("#", "kind\t")):
+            continue
+        kind, name, start, end, category, source = line.split("\t")
+        rows.append((kind, name, int(start, 16), int(end, 16), category, source))
+    return rows
+
+
+def code_range_of(addr, key="us"):
+    """The layout row of the code range that holds an address (game code or libraries)."""
+    for row in layout(key):
+        if row[0] == "code" and row[2] <= addr < row[3]:
+            return row
+    raise KeyError("0x%X is in no code range of config/%s/layout.tsv" % (addr, key))
+
+
 def source_of(addr):
-    return "src/main/%08X.cpp" % window_of(addr)
+    """The source file that holds a US function: its code range's folder, its 16 KiB window."""
+    return "%s/%08X.cpp" % (code_range_of(addr)[5], window_of(addr))
 
 
 def finished():

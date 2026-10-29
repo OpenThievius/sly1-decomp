@@ -126,8 +126,8 @@ top saying what still differs, and move on.
 
 A worker's `EXACT` is not a match: the full build is. The lead (or you, alone):
 
-1. puts each EXACT function into its source file, the 16 KiB window of `src/main/` its address
-   falls in (`tools/todo.py` names it), in address order, with the declarations it needs;
+1. puts each EXACT function into its source file, the 16 KiB window of `src/main/` (game code) or
+   `src/lib/` (libraries, config/us/layout.tsv) its address falls in (`tools/todo.py` names it), in address order, with the declarations it needs;
 2. runs `python3 tools/build.py`: it must print `MATCH ... with N functions from C`. A function
    that broke it goes back to `nonmatching/`;
 3. runs `python3 tools/version_check.py`, `python3 tools/progress.py`, the tests and
