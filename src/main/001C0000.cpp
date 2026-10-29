@@ -334,3 +334,56 @@ void func_001C0AB8(Obj_1C0AB8* self, Pt_1C0AB8* p)
         e->b1 = 8000.0f - p->x * 50.0f;
     }
 }
+
+extern f32 D_00274838[][4];
+
+void func_0011D480(s32 slot, s32 value);
+
+void func_001C0600(s32 column)
+{
+    f32* p = &D_00274838[0][column];
+    f32 prod = 1.0f;
+    s32 n = 10;
+
+    do {
+        prod = prod * *p;
+        p += 4;
+        n--;
+    } while (n >= 0);
+
+    f32 one = 1.0f;
+
+    if (prod < 0.0f) {
+        prod = 0.0f;
+    } else if (one < prod) {
+        prod = one;
+    }
+
+    func_0011D480(column, (s32)(prod * 1024.0f));
+}
+
+extern f32 D_00274838[][4];
+
+void func_001C0600(s32 column);
+
+void func_001C06A0(s32 row, s32 column, f32 value)
+{
+    D_00274838[row][column] = value;
+    func_001C0600(column);
+}
+
+struct __attribute__((packed)) Pk8_1C0B38 { u64 v; };
+struct Ent_1C0B38 { s32 key; Pk8_1C0B38 a; Pk8_1C0B38 b; };
+struct Obj_1C0B38 { u8 pad[0x1D80]; s32 count; Ent_1C0B38 ents[16]; };
+
+extern u8 D_002748E8[];
+
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, void* a4, void* a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+
+void func_001C0B38(Obj_1C0B38* self)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        Ent_1C0B38* e = &self->ents[i];
+        func_001BFCD8(e->key, D_002748E8, 0, 0, &e->a, &e->b, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f);
+    }
+}

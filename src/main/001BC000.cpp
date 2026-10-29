@@ -379,3 +379,63 @@ Fn_001BF578 func_001BF578(void)
     if (n <= 0) return func_001BF398;
     return func_001BF2E0;
 }
+
+struct Rec_1BE4D8 {
+    s32 f00;
+    f32 f04;
+    f32 f08;
+    f32 f0C;
+    s32 f10;
+    f32 f14;
+    u8 pad18[4];
+    s32 f1C;
+    s32 f20;
+};
+
+struct Owner_1BE4D8 {
+    Rec_1BE4D8* rec;
+};
+
+void* func_0018D5C0(s32 bytes);
+
+void func_001BE4D8(Owner_1BE4D8* self)
+{
+    self->rec = (Rec_1BE4D8*)func_0018D5C0(0x24);
+    self->rec->f00 = -1;
+    self->rec->f04 = 3000.0f;
+    self->rec->f08 = 300.0f;
+    self->rec->f0C = 1.0f;
+    self->rec->f10 = 0;
+    self->rec->f1C = 0;
+    self->rec->f14 = -1.0f;
+    self->rec->f20 = 0;
+}
+
+extern s32 D_00274730;
+
+void func_001BE5D8(void)
+{
+    D_00274730 = 0;
+}
+
+extern s32 D_0027472C;
+
+void func_0011D640(s32 a);
+
+void func_001BEA28(void)
+{
+    if (D_0027472C != 0) {
+        func_0011D640(D_0027472C);
+    }
+}
+
+extern s32 D_0027472C;
+
+void func_0011D670(s32 a);
+
+void func_001BEA50(void)
+{
+    if (D_0027472C != 0) {
+        func_0011D670(D_0027472C);
+    }
+}

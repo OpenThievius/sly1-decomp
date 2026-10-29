@@ -269,3 +269,27 @@ void func_001C74E8(Obj_1C74E8* self)
         func_001CB648(self->list, self);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1C4458 { s32 a; s32 b; s32 c; s32 d; };
+struct __attribute__((packed)) Pack8_1C4458 { u64 v; };
+struct Blk12_1C4458 { Pack8_1C4458 a; s32 b; };
+struct Obj_1C4458 { u8 p0[0x360]; f32 f360; u8 p364[0x6F0 - 0x364]; Quad_1C4458 f6F0; f32 f700; };
+
+extern f32 D_00274B20;
+extern u8 D_00274B30[];
+extern u8 D_00274B40[];
+extern u8 D_00274B50[];
+
+void func_001921A8(void* self);
+void func_001C5E50(void* self, f32 x);
+
+void func_001C4458(Obj_1C4458* self)
+{
+    func_001921A8(self);
+    self->f700 = 1.0f;
+    self->f360 = D_00274B20;
+    func_001C5E50(self, 1.0f);
+    self->f6F0 = *(Quad_1C4458*)D_00274B30;
+    *(Blk12_1C4458*)((u8*)self + 0x710) = *(Blk12_1C4458*)D_00274B40;
+    *(Blk12_1C4458*)((u8*)self + 0x704) = *(Blk12_1C4458*)D_00274B50;
+}

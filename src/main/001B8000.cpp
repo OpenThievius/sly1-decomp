@@ -450,3 +450,32 @@ s32 func_001BBC30(void)
 {
     return 0;
 }
+
+struct __attribute__((aligned(16))) Quad_1B97E0 { s32 a, b, c, d; };
+typedef void (*VFn_1B97E0)(void* self);
+typedef void (*VFnB_1B97E0)(void* self, s32 a, void* b);
+struct Obj_1B97E0 { VFn_1B97E0* vtbl; u8 pad0[0x50 - 4]; void* f50; u8 pad1[0xD0 - 0x54]; Quad_1B97E0 q0; Quad_1B97E0 q1; Quad_1B97E0 q2; };
+
+void func_001B94F0(void* self, s32 value);
+
+void func_001B97E0(Obj_1B97E0* self, Quad_1B97E0* src)
+{
+    self->q0 = src[0];
+    self->q1 = src[1];
+    self->q2 = src[2];
+    if (self->f50 != 0) {
+        if (self->vtbl[0x58 / 4] != 0) {
+            self->vtbl[0x58 / 4](self);
+        }
+        func_001B94F0(self, 1);
+    }
+    ((VFnB_1B97E0)self->vtbl[0x48 / 4])(self, 4, self);
+}
+
+struct Obj_1BAFE0 { u8 pad0[0x3CC]; f32 f3CC; u8 pad1[0x538 - 0x3D0]; u64 bits538; };
+
+void func_001BAFE0(Obj_1BAFE0* self, f32 v)
+{
+    self->bits538 |= (u64)0x8000 << 25;
+    self->f3CC = v;
+}

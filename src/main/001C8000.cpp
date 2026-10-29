@@ -451,3 +451,30 @@ void func_001CA5E0(void)
 {
     func_001C49C8();
 }
+
+struct Obj_1C8BC0 { u8 pad[0x140]; };
+
+void func_001454E0(void* a, void* b, f32* x, f32* y, s32 flag);
+void func_001C7AE0(void* self, f32 x, f32 y);
+
+void func_001C8BC0(Obj_1C8BC0* self)
+{
+    f32 x;
+    f32 y;
+    func_001454E0((u8*)self + 0xA40, (u8*)self + 0x140, &x, &y, 0);
+    func_001C7AE0(self, x, y);
+}
+
+s32 func_001CA600(s32 index)
+{
+    return (u32)index < 17;
+}
+
+s32 func_001CA600(s32 index);
+
+void func_001CA608(u8* self, s32 index, s32 value)
+{
+    if (func_001CA600(index)) {
+        *(s32*)(self + (index << 3) + 0x758) = value;
+    }
+}
