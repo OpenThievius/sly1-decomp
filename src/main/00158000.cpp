@@ -865,3 +865,39 @@ void func_0015A9A8(Obj_15A9A8* self, void* arg1, void* arg2)
     f.m40[3] = f.m90[3];
     func_001261C0(self, arg1, f.m40);
 }
+
+extern u8 D_002622A8[];
+
+struct Frame_159CA0 { u8 buf[0x2C0]; s32 value; };
+
+void func_00168770(void* buf, s32* value, s32 flag);
+void func_00152B38(void* self);
+void func_001EE7D0(void* self, s32 n, void* buf, s32 flag);
+void func_00152D70(void* self);
+
+void func_00159CA0(u8* a0)
+{
+    Frame_159CA0 f;
+    f.value = *(s32*)(a0 + 0x60);
+    func_00168770(&f, &f.value, 0);
+    u8* s = D_002622A8;
+    func_00152B38(s);
+    func_001EE7D0(s, 0x2C, &f, 0);
+    func_00152D70(s);
+}
+
+extern u8* D_00275710;
+extern f32 D_0026185C;
+
+struct Ctx_159ED0 { u8 pad0[0x54]; f32 f54; u8 pad58[4]; s32 f5C; };
+
+void func_00152470(void* list, void* item);
+
+void func_00159ED0(Ctx_159ED0* a0)
+{
+    if (a0->f5C == 0) {
+        a0->f5C = 1;
+        a0->f54 = D_0026185C;
+        func_00152470(D_00275710 + 0x1CD8, a0);
+    }
+}

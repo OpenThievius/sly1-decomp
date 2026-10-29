@@ -427,3 +427,26 @@ void func_00155FA0(Actor_155FA0* self)
 {
     self->f340 = -1.0f;
 }
+
+struct Obj_156000;
+
+void func_00155F90();
+void func_00155FA0(Obj_156000* self);
+
+void func_00156000(Obj_156000* self, s32 a1)
+{
+    if (a1 != 0) {
+        func_00155FA0(self);
+    } else {
+        func_00155F90();
+    }
+}
+
+struct Obj_156030;
+
+s32 func_00155FB0(Obj_156030* self);
+
+void func_00156030(Obj_156030* self, s32* out)
+{
+    *out = func_00155FB0(self) == 0;
+}

@@ -605,3 +605,63 @@ void func_0014F740(Ctx_0014F740* self)
     func_0013DDB8(self);
     self->f6C0 = -1;
 }
+
+f32 func_0014DA28(void)
+{
+    return 0.0f;
+}
+
+struct Obj_14DA38 { u8 pad0[0x8]; void* p8; s32 cnt; f32* p10; };
+
+s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
+
+s32 func_0014DA38(void* self, f32* a, f32* b)
+{
+    Obj_14DA38* o = (Obj_14DA38*)self;
+    return func_0014D1A0(o->cnt, o->p10, o->p8, a, b);
+}
+
+struct Obj_14E170 { u8 pad0[0x8]; s32 a8; s32 cnt; f32* p10; f32* p14; void* p18; };
+
+s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
+void func_0014D680(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
+
+void func_0014E170(Obj_14E170* self, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
+{
+    s32 idx = func_0014D1A0(self->cnt, self->p10, (void*)self->a8, 0, 0);
+    s32 ia;
+    f32 fb;
+    func_0014D680(a1, a2, self->cnt, self->p18, idx, self->a8, a3, a4, &ia, &fb);
+    if (a6) *a6 = (1.0f - fb) * self->p14[ia] + fb * self->p14[ia + 1];
+    if (a5) *a5 = (1.0f - fb) * self->p10[ia] + fb * self->p10[ia + 1];
+}
+
+struct Obj_14E3D0 { void** vtbl; u8 pad0[4]; s32 a8; s32 cnt; f32* p10; f32* p14; void* p18; void* p1C; void* p20; };
+typedef void (*Fn_14E3D0)(void* self);
+
+s32 func_00137B90(void* src);
+f32 func_00137DF8(void* src);
+void func_00137E70(void* src, void* dst);
+void* func_0018D500(s32 size);
+void func_0014E500(void* self);
+
+void func_0014E3D0(Obj_14E3D0* self, void* src)
+{
+    self->a8 = func_00137B90(src);
+    s32 n = func_00137B90(src);
+    self->cnt = n;
+    self->p10 = (f32*)func_0018D500(n * 4);
+    self->p14 = (f32*)func_0018D500(self->cnt * 4);
+    self->p18 = func_0018D500(self->cnt * 16);
+    self->p1C = func_0018D500(self->cnt * 16);
+    self->p20 = func_0018D500(self->cnt * 16);
+    for (s32 i = 0; i < self->cnt; i++) {
+        self->p10[i] = func_00137DF8(src);
+        func_00137E70(src, (u8*)self->p18 + i * 16);
+        func_00137E70(src, (u8*)self->p1C + i * 16);
+        func_00137E70(src, (u8*)self->p20 + i * 16);
+    }
+    Fn_14E3D0 fn = (Fn_14E3D0)self->vtbl[9];
+    if (fn) fn(self);
+    func_0014E500(self);
+}

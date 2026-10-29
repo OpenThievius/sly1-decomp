@@ -559,3 +559,96 @@ void func_0014AD70(Owner_14AD70* self)
         s->vtbl[2](s);
     }
 }
+
+void func_00127378(void* self, s32 kind, void* msg);
+void func_001B6598(void* dev, s32* out);
+void func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
+
+typedef void (*VFn_148770)(void* self, void* arg);
+struct Dev_148770 { VFn_148770* vtbl; };
+struct Hub_148770 { u8 pad0[0x1D60]; Dev_148770* f1D60; };
+struct Self_148770 { u8 pad0[0x14]; Hub_148770* hub; u8 pad1[0x2E8 - 0x18]; void* f2E8; };
+struct Note_148770 { s32 flag; void* owner; };
+struct Frame_148770 { Note_148770 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
+
+void func_00148770(Self_148770* self, s32 kind, void* msg)
+{
+    Frame_148770 fr;
+    func_00127378(self, kind, msg);
+    if (kind != 0x14) return;
+    if (msg != self->f2E8) return;
+    func_001B6598(msg, &fr.code);
+    if (fr.code != 0x263) return;
+    Dev_148770* dev = self->hub->f1D60;
+    if (dev != 0) {
+        fr.note.flag = 1;
+        fr.note.owner = self;
+        dev->vtbl[31](dev, &fr.note);
+    }
+    func_001DBCC8(self->hub, (void*)func_00148748, self, 0, 0);
+}
+
+extern f32 D_0026185C;
+void func_00147428(void* a);
+
+typedef void (*VFn_148828)(void* self, s32 arg);
+struct Sub_148828 { u8 pad0[0x2308]; f32 f2308; };
+struct Obj_148828 { VFn_148828* vtbl; u8 pad0[0x10]; Sub_148828* sub; u8 pad1[0x2D0 - 0x18]; s32 f2D0; };
+
+void func_00148828(Obj_148828* self)
+{
+    func_00147428(self);
+    if (self->f2D0 != 0) return;
+    if (self->sub->f2308 <= D_0026185C) self->vtbl[51](self, 6);
+}
+
+struct Slot_1493B8 { u8 pad[0x8]; s32 value; };
+
+void func_001493B8(Slot_1493B8* self, s32 value)
+{
+    self->value = value;
+}
+
+void func_001493C0(void)
+{
+}
+
+void func_0014B3E0(s32 n, f32* m, f32* b, f32* x)
+{
+    s32 i;
+    s32 k;
+    f32 sum;
+
+    for (i = 0; i < n; i++) {
+        if (m[i * n + i] == 0.0f) {
+            x[i] = 0.0f;
+        } else {
+            sum = 0.0f;
+            for (k = 0; k < i; k++) {
+                sum += m[k * n + i] * x[k];
+            }
+            x[i] = (b[i] - sum) / m[i * n + i];
+        }
+    }
+
+    for (i = n - 2; i >= 0; i--) {
+        if (m[i * n + i] != 0.0f) {
+            sum = 0.0f;
+            for (k = i + 1; k < n; k++) {
+                sum += m[k * n + i] * x[k];
+            }
+            x[i] -= sum;
+        }
+    }
+}
+
+struct Owner_0014B550 { u8 pad0[0x14]; u8* p14; };
+
+void func_001C74E8(void* self);
+void func_00152470(void* table, void* self);
+
+void func_0014B550(Owner_0014B550* self)
+{
+    func_001C74E8(self);
+    func_00152470(self->p14 + 0x1CCC, self);
+}

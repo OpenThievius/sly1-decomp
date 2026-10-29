@@ -435,3 +435,10 @@ void func_00152CA0(Buf_152CA0* self)
 }
 
 void func_00152E18() {}
+
+extern u8 D_00261EF0[];
+
+void* func_00151A58(void)
+{
+    return D_00261EF0;
+}
