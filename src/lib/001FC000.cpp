@@ -37,3 +37,25 @@ u8* func_001FF048(u8* input, u32* output)
 void* func_001FFFE0(void* a0, void* a1) { return a1; }
 
 void* func_001FFFE8(void* a0, void* a1) { return a1; }
+
+u8* func_001FF090(u8* input, s32* output)
+{
+    u32 shift = 0;
+    u32 value = 0;
+    u8 byte;
+
+    do {
+        byte = *input++;
+        value |= (u32)(byte & 0x7F) << shift;
+        shift += 7;
+    } while (byte & 0x80);
+
+    if (shift < 32) {
+        s32 signMask = -1;
+        if (byte & 0x40) {
+            value |= signMask << shift;
+        }
+    }
+    *output = (s32)value;
+    return input;
+}

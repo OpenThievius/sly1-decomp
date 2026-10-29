@@ -47,6 +47,42 @@ void func_00150408(Ctx_00150408* self)
     self->f7B0 = 0;
 }
 
+struct Events_150418 {
+    u8 pad0[0x768];
+    s32 eventCount;
+    void* events[8];
+    s32 candidateCount;
+    void* candidates[8];
+    s32 state;
+};
+
+s32 func_001300E8(void* event, s32 kind);
+
+void func_00150418(Events_150418* self, void* event)
+{
+    if (func_001300E8(event, 7)) {
+        self->state = 1;
+        return;
+    }
+    if (!func_001300E8(event, 0x41)) {
+        return;
+    }
+    s32 found = 0;
+    for (s32 i = 0; i < self->eventCount; i++) {
+        if (self->events[i] == event) {
+            found = 1;
+            break;
+        }
+    }
+    if (found) {
+        u32 count = self->candidateCount;
+        if (count < 8) {
+            self->candidates[count] = event;
+            self->candidateCount = count + 1;
+        }
+    }
+}
+
 extern void func_00123ED0();
 struct State_001504E0 { u8 pad0[0x2C8]; u64 flags; u8 pad1[0x30]; s32 second; u8 pad2[8]; s32 first; };
 
@@ -144,6 +180,30 @@ void func_001512A8(State_001512A8* state, u32 mode, u32 value)
 		state->value = 0;
 }
 
+extern u8 D_00275BC0[];
+struct Global_2701F8 { u8 pad[0x324]; void* value; };
+extern Global_2701F8 D_002701F8;
+void func_001E9498(void* a, void* b);
+
+typedef void (*Callback_151860)(void* self, void* value);
+struct VTable_151860 {
+    u8 pad[0x158];
+    Callback_151860 callback;
+};
+struct Object_151860 {
+    VTable_151860* vtable;
+};
+
+void func_00151860(void* value, Object_151860* object)
+{
+    if (object != 0) {
+        object->vtable->callback(object, value);
+    } else {
+        D_002701F8.value = value;
+        func_001E9498(D_00275BC0, &D_002701F8);
+    }
+}
+
 struct Obj_1519A8 { u8 pad[0x2D4]; s32 state; };
 
 void func_00150790(void* self, s32 arg);
@@ -169,6 +229,13 @@ void func_001519E0(Collection_001519E0* collection, const char* name, u32 kind)
 	u32 count = collection->count;
 	collection->items[count] = value;
 	collection->count = count + 1;
+}
+
+extern u8 D_00261EF0[];
+
+void* func_00151A58(void)
+{
+    return D_00261EF0;
 }
 
 extern void func_001F5C0C(void*, u32, u32);
@@ -232,11 +299,84 @@ u32 func_00152460(Pair_00152460* p, u32 value)
 	return value + p->value;
 }
 
+struct Pair_152470 { u32 first, second; };
+void func_00152470(Pair_152470* self, u32 value)
+{
+    u32* slot = (u32*)func_00152460((Pair_00152460*)self, value);
+    if (self->second == 0) {
+        self->first = value;
+    } else {
+        u32* oldTail = (u32*)func_00152460((Pair_00152460*)self, self->second);
+        slot[1] = self->second;
+        oldTail[0] = value;
+    }
+    self->second = value;
+}
+
+struct Pair_152540 { u32 first, second, base; };
+void func_00152470(Pair_152540*, u32);
+void func_001524D8(Pair_152540*, u32);
+void func_00152540(Pair_152540* self, u32 before, u32 value)
+{
+    if (before == 0) {
+        func_00152470(self, value);
+        return;
+    }
+    if (before == self->first) {
+        func_001524D8(self, value);
+        return;
+    }
+    u32* next = (u32*)func_00152460((Pair_00152460*)self, value);
+    u32* previous = (u32*)func_00152460((Pair_00152460*)self, before);
+    u32 after = previous[1];
+    u32* afterSlot = (u32*)func_00152460((Pair_00152460*)self, after);
+    next[0] = before;
+    next[1] = after;
+    previous[1] = value;
+    afterSlot[0] = value;
+}
+
+s32 func_001526D0(void* self, u8* item)
+{
+    u8* slot = (u8*)func_00152460((Pair_00152460*)self, (u32)item);
+    s32 result = 0;
+    if (*(void**)slot != 0) {
+        goto matched;
+    }
+    if (*(void**)((u8*)self + 4) != item) {
+        goto done;
+    }
+matched:
+    result = 1;
+done:
+    return result;
+}
+
 struct Count_00152720 { u32 count; };
 
 u32 func_00152720(Count_00152720* p)
 {
 	return p->count == 0;
+}
+
+struct LinkCounter_1527D8 {
+    void* head;
+    u32 pad4;
+    s32 stride;
+};
+
+s32 func_001527D8(LinkCounter_1527D8* list)
+{
+    s32 count = 0;
+    u8* node = (u8*)list->head;
+    if (node != 0) {
+        s32 stride = list->stride;
+        do {
+            node = *(u8**)(node + stride);
+            count++;
+        } while (node != 0);
+    }
+    return count;
 }
 
 extern u32 func_002027C8(u32);
@@ -434,11 +574,23 @@ void func_00152CA0(Buf_152CA0* self)
     p[1] = 0;
 }
 
-void func_00152E18() {}
+void func_0018D780(void* cursor, s32 count, s32 index);
 
-extern u8 D_00261EF0[];
-
-void* func_00151A58(void)
+void func_00152CE0(void* self, s32 index, s32 count)
 {
-    return D_00261EF0;
+    func_0018D780(*(void**)((u8*)self + 0xC), count, index);
+    *(u8**)((u8*)self + 0xC) += index * 16;
 }
+
+void func_00152D70(void* self);
+
+void func_00152D30(void* self)
+{
+    func_00152D70(self);
+    u8* cursor = *(u8**)((u8*)self + 0xC);
+    *(u8**)((u8*)self + 0xC) = cursor + 0x10;
+    *(u64*)cursor = 0x70000000;
+    *(u64*)(cursor + 8) = 0;
+}
+
+void func_00152E18() {}
