@@ -539,3 +539,17 @@ Obj_12FCF0* func_0012FCF0(Obj_12FCF0* obj, s32 value)
     obj->f18 = 0;
     return obj;
 }
+
+void func_0018D778(void* self);
+void func_0012FD30(void* self, s32 flags)
+{
+    func_0012FDE8((Obj_12FDE8*)self);
+    if (flags & 1) func_0018D778(self);
+}
+
+struct Pair_0012FD78 { s32 a; s32 b; };
+s32 func_0012FDA0(void* self, s32 a, s32 b);
+s32 func_0012FD78(void* self, Pair_0012FD78* pair)
+{
+    return func_0012FDA0(self, pair->a, pair->b);
+}

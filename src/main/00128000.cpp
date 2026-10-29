@@ -1276,3 +1276,40 @@ void func_0012B200(Obj_0012B238* self, f32 value)
     func_0012B040(self);
     self->inner->value = value;
 }
+
+struct Sub_00129540 { u8 pad[4]; f32 value; u8 gap[0x38]; f32 scale; };
+f32 func_00205778(f32 a, f32 b);
+void func_00129540(void* self, f32* out)
+{
+    Sub_00129540* sub = (Sub_00129540*)func_00129400(self);
+    f32 value = func_00205778(sub->value / sub->scale, 1.0f) * 57.2957763671875f;
+    *out = value + value;
+}
+
+struct Sub_00129598 { u8 pad[0x30]; Vec16_12A5D0 value; };
+
+typedef void (*Call_0012A528)(void*);
+struct State_0012A528 { Call_0012A528* vtable; u8 pad[0x1FC]; u8* sub; };
+void func_0012A528(State_0012A528* self, s32 value)
+{
+    func_00129730(self);
+    if (value == 3) value = 9;
+    self->sub[0x11] = value;
+    self->vtable[47](self);
+}
+
+struct Sub_0012AA00 { u8 pad[0x8C]; f32 value; };
+void func_0012AA00(void* self, f32 value)
+{
+    ((Sub_0012AA00*)func_0012A970(self))->value = value;
+}
+
+struct Sub_0012B010 { u8 pad[0x1C]; void* value; };
+struct State_0012B010 { u8 pad[0x2AC]; Sub_0012B010* sub; };
+void func_001BF788(void* ptr, s32 value);
+
+struct Sub_0012B140 { u8 pad[0x10]; Vec16_12A5D0 value; };
+struct State_0012B140 { u8 pad[0x288]; Sub_0012B140* sub; };
+
+struct Sub_0012B1A0 { u8 pad[0x20]; Vec16_12A5D0 value; };
+struct State_0012B1A0 { u8 pad[0x288]; Sub_0012B1A0* sub; };
