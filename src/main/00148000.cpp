@@ -225,3 +225,154 @@ void func_0014AF10(Obj_14AF10* self)
 {
     self->vtbl[16](self, 0);
 }
+
+struct Stack4_1495E8 { u8 pad[0x30]; s32 items[4]; s32 count; };
+
+void func_001495E8(Stack4_1495E8* s, s32 value)
+{
+    s32 n = s->count;
+    if ((u32)n < 4) {
+        s->items[n] = value;
+        s->count = n + 1;
+    }
+}
+
+
+s32 func_00149610(Stack4_1495E8* s)
+{
+    s32 n = s->count;
+    if (n <= 0) {
+        return -1;
+    }
+    n = n - 1;
+    s->count = n;
+    return s->items[n];
+}
+
+
+s32 func_00149638(Stack4_1495E8* s)
+{
+    s32 n = s->count;
+    if (n <= 0) {
+        return -1;
+    }
+    return s->items[n - 1];
+}
+
+struct Pending_0014BD38 { u8 pad0[0x10]; s32 f10; };
+struct Actor_0014BD38 { u8 pad0[0x724]; s32 kind; u8 pad1[0x7E0 - 0x728]; void* handle; u8 pad2[0xC28 - 0x7E4]; Pending_0014BD38* pending; };
+struct Ctx_0014BD38 { u8 pad0[0x448]; f32 scale; };
+extern Ctx_0014BD38* D_0027C00C;
+void func_001C91C8(Actor_0014BD38* self);
+void func_0014CDC8(Ctx_0014BD38* ctx, Actor_0014BD38* self);
+void func_0012F6B0(void* handle, f32 scale);
+
+void func_0014BD38(Actor_0014BD38* self)
+{
+    func_001C91C8(self);
+    switch (self->kind) {
+    case 0xB:
+        func_0014CDC8(D_0027C00C, self);
+        if (self->pending != 0) { self->pending->f10 = 0; self->pending = 0; }
+        break;
+    case 0xC:
+        if (self->pending != 0) { self->pending->f10 = 0; self->pending = 0; }
+        func_0012F6B0(self->handle, D_0027C00C->scale);
+        break;
+    }
+}
+
+typedef void (*VFn_0014BDC8)(void* self, void* arg);
+
+struct Node_0014BDC8 {
+    VFn_0014BDC8* vtbl;
+    u8 pad0[0xC10 - 4];
+    Node_0014BDC8* next;
+};
+
+struct Owner_0014BDC8 {
+    u8 pad0[0x1CCC];
+    Node_0014BDC8* head;
+};
+
+struct Obj_0014BDC8 {
+    u8 pad0[0x14];
+    Owner_0014BDC8* owner;
+};
+
+struct Scratch_0014BDC8 {
+    s32 words[8];
+};
+
+s32 func_001C8010(Obj_0014BDC8* self);
+Node_0014BDC8* func_001925F0(void);
+s32 func_001B9FB0(void* a, void* b);
+void func_001D7098(void* out, s32 mode, Obj_0014BDC8* owner);
+void func_001C8F20(void* node, s32 kind, s32 flag);
+
+s32 func_0014BDC8(Obj_0014BDC8* self)
+{
+    s32 result = func_001C8010(self);
+    if (result == 0xB) return result;
+    Node_0014BDC8* n = func_001925F0();
+    if (n != 0 && func_001B9FB0(self, n) != 0) {
+        Scratch_0014BDC8 buf;
+        func_001D7098(&buf, 0, self);
+        result = 0xB;
+        n->vtbl[0x50](n, &buf);
+    }
+    for (Node_0014BDC8* x = self->owner->head; x != 0; x = x->next) {
+        if ((void*)x != (void*)self && func_001300E8(x, 0x12) != 0 && func_001B9FB0(self, x) != 0) {
+            func_001C8F20(x, 0xB, 0);
+        }
+    }
+    return result;
+}
+
+struct Actor_0014BEA8 {
+    u8 pad0[0x14];
+    void* owner;
+    u8 pad1[0x724 - 0x18];
+    s32 kind;
+};
+
+s32 func_001DDA80(void* p);
+
+s32 func_0014BEA8(Actor_0014BEA8* self)
+{
+    if (func_001DDA80(self->owner) != 0) return 0;
+    if (self->kind == 0xB || self->kind == 0x10) return 0;
+    return 1;
+}
+
+typedef void (*VFn_0014BEF8)(void* self, void* arg);
+
+struct Node_0014BEF8 {
+    VFn_0014BEF8* vtbl;
+};
+
+struct Obj_0014BEF8 {
+    u8 pad0[0x724];
+    s32 kind;
+};
+
+struct Scratch_0014BEF8 {
+    s32 words[4];
+};
+
+s32 func_001C96D8(Obj_0014BEF8* self, Node_0014BEF8** slot);
+void func_001D7098(void* out, s32 mode, Obj_0014BEF8* owner);
+
+s32 func_0014BEF8(Obj_0014BEF8* self, Node_0014BEF8** slot)
+{
+    if (self->kind == 0x10 || self->kind == 0xB) return 1;
+    if (func_001C96D8(self, slot) == 0) return 0;
+    Node_0014BEF8* found = (Node_0014BEF8*)func_001925F0();
+    Node_0014BEF8* n = *slot;
+    if (n == found) {
+        Scratch_0014BEF8 buf;
+        func_001D7098(&buf, 0, self);
+        n->vtbl[0x50](n, &buf);
+    }
+    return 1;
+}

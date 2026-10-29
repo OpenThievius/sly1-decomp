@@ -212,3 +212,32 @@ zero:
 store:
     *out = func_001EA408(t + func_00205778(self->x_84, self->y_80));
 }
+
+extern u32 D_002618B0;
+
+void func_001460B8(void* self, s32 code)
+{
+    if (code == 0xFFFF && self != 0) {
+        D_002618B0 = 0x80303030;
+    }
+}
+
+void func_001460B8(void* self, s32 code);
+
+void func_001460E0(void)
+{
+    func_001460B8((void*)1, 0xFFFF);
+}
+
+struct Obj_00146100 {
+    u8 pad_000[0x550];
+    f32 value_550;
+};
+
+void func_001B7968(void* self);
+
+void func_00146100(Obj_00146100* self)
+{
+    func_001B7968(self);
+    self->value_550 = 100.0f;
+}
