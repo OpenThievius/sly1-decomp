@@ -223,3 +223,154 @@ void* func_001167C0(void* ret, s32 unused, Src_1167C0* src)
     func_0011B060(&t, 2);
     return ret;
 }
+
+struct Quad_114018 { s32 a, b, c, d; };
+
+void func_0011B008(Quad_114018* q);
+void func_0011B5F0(Quad_114018* q, int flag);
+void func_0011B018(void* out, Quad_114018* q);
+void func_0011B060(Quad_114018* q, int mode);
+
+void* func_00114018(void* self, int unused, s32* kind)
+{
+    Quad_114018 q;
+    func_0011B008(&q);
+    func_0011B5F0(&q, *kind == 0x1C);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_114288 { s32 a, b, c, d; };
+
+void func_0011B008(Quad_114288* q);
+void func_0011B5F0(Quad_114288* q, int flag);
+void func_0011B018(void* out, Quad_114288* q);
+void func_0011B060(Quad_114288* q, int mode);
+
+void* func_00114288(void* self, int unused, s32* kind)
+{
+    Quad_114288 q;
+    func_0011B008(&q);
+    s32 v = *kind;
+    func_0011B5F0(&q, v == 0x1E || v == 0);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+void func_001147B8(void* self, int a, void* b, void* c, int n);
+
+void* func_00114858(void* self, int a, void* b, void* c)
+{
+    func_001147B8(self, a, b, c, 0x23);
+    return self;
+}
+
+struct Vec_1158B8 { f32 x, y, z, w; };
+
+void func_0011B008(void* self);
+void* func_0011C968(void);
+void func_0011B9A8(void* out, void* src);
+void func_0011B0A8(void* self, void* other);
+void func_0011B060(void* self, s32 n);
+void func_0011B860(void* a, void* b);
+void func_0011B018(void* dst, void* src);
+
+void* func_001158B8(void* ret, s32 unused, void* src)
+{
+    Vec_1158B8 t;
+    Vec_1158B8 u;
+    func_0011B008(&t);
+    f32* out = (f32*)func_0011C968();
+    func_0011B9A8(&u, src);
+    func_0011B0A8(&t, &u);
+    func_0011B060(&u, 2);
+    out[0] = t.y;
+    func_0011B9A8(&u, (u8*)src + 8);
+    func_0011B0A8(&t, &u);
+    func_0011B060(&u, 2);
+    out[1] = t.y;
+    func_0011B9A8(&u, (u8*)src + 0x10);
+    func_0011B0A8(&t, &u);
+    func_0011B060(&u, 2);
+    out[2] = t.y;
+    func_0011B860(&t, out);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Vec_116DC8 { f32 x, y, z, w; };
+struct Src_116DC8 { s32 pad0; f32* poly; s32 pad8; f32* range; };
+void func_0011B008(void* self);
+void func_0011B9A8(void* out, void* src);
+void* func_0011B5B0(void* obj, f32 x);
+void func_0011B060(void* self, s32 n);
+void func_0011B018(void* dst, void* src);
+void* func_00116DC8(void* ret, s32 unused, Src_116DC8* src)
+{
+    Vec_116DC8 t;
+    Vec_116DC8 u;
+    func_0011B008(&t);
+    f32* poly = src->poly;
+    f32* range = src->range;
+    func_0011B9A8(&u, (u8*)src + 0x10);
+    f32 k = u.y;
+    f32 v = poly[0] + k * (poly[1] + k * poly[2]);
+    f32 lo = range[0];
+    f32 hi = range[1];
+    if (v < lo) {
+        v = lo;
+    } else if (hi < v) {
+        v = hi;
+    }
+    func_0011B5B0(&t, v);
+    func_0011B060(&u, 2);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Tmp_1171F0 { s32 w[4]; };
+struct Src_1171F0 { s32 pad0; f32 v; };
+
+void func_0011B008(void* self);
+void func_0011B570(void* self, s32 n);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* self, s32 n);
+
+void* func_001171F0(void* ret, s32 unused, Src_1171F0* src)
+{
+    Tmp_1171F0 t;
+    func_0011B008(&t);
+    s32 n = (s32)(src->v + 0.5f);
+    func_0011B570(&t, n);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Tmp_117880 { s32 w[4]; };
+struct Obj_117880 { u8 pad[0x29C]; f32 value; };
+struct Src_117880 { s32 pad0; Obj_117880* obj; };
+
+void func_0011B008(void* self);
+void func_0011B9A8(void* out, void* src);
+void func_0011B060(void* self, s32 n);
+void func_0011B018(void* dst, void* src);
+
+void* func_00117880(void* ret, s32 unused, Src_117880* src)
+{
+    Tmp_117880 t;
+    Tmp_117880 u;
+    func_0011B008(&t);
+    Obj_117880* obj = src->obj;
+    func_0011B9A8(&u, (u8*)src + 8);
+    f32 f = ((f32*)&u)[1];
+    func_0011B060(&u, 2);
+    obj->value = f;
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
