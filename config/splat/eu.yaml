@@ -1,0 +1,73 @@
+# splat configuration for SCES_509.17 (PAL v1.00), the second target.
+#
+# A first split: one unit per ELF section. File boundaries (from the May 2002
+# prototype's stabs, docs/PROTOTYPE.md) come next. tools/setup_asm.py runs this.
+name: Sly Raccoon (Europe)
+sha1: f23240fc4a3efd463a5b3617b9250da4d5fe842c
+
+options:
+  basename: SCES_509.17
+  target_path: baserom/eu/SCES_509.17
+  elf_path: build/eu/SCES_509.17.elf
+  base_path: ../..
+  platform: ps2
+  compiler: EEGCC
+
+  asm_path: asm/eu
+  asset_path: assets/eu
+  src_path: src
+  build_path: build/eu
+  ld_script_path: build/eu/SCES_509.17.splat.ld
+
+  symbol_addrs_path: config/eu/symbol_addrs.txt
+  create_undefined_funcs_auto: True
+  undefined_funcs_auto_path: build/eu/undefined_funcs_auto.txt
+  create_undefined_syms_auto: True
+  undefined_syms_auto_path: build/eu/undefined_syms_auto.txt
+
+  generate_asm_macros_files: True
+  named_regs_for_c_funcs: False
+  mips_abi_gpr: n32           # the names GNU as accepts with -mabi=eabi ($a4-$a7, $t0-$t3)
+  find_file_boundaries: False
+  disasm_unknown: True
+  rodata_string_guesser_level: 0
+  migrate_rodata_to_functions: False
+  section_order: [".text", ".vutext", ".rodata", ".data", ".gcc_except_table", ".sbss", ".bss"]
+  subalign: null
+
+segments:
+  - [0x0, databin, elf_header]
+
+  # The segments follow the file's own order, so that the linked image laid
+  # out by file offset (objcopy -O binary) is the executable itself. Each
+  # unit runs to the next one's start, which takes in the alignment padding.
+  - name: text
+    type: code
+    start: 0x1000
+    vram: 0x100000
+    subsegments:
+      - [0x001000, asm, text]                    # .text     0x100000, 0x1132CC bytes
+
+  - name: vutext
+    type: code
+    start: 0x1142D0
+    vram: 0x2132D0
+    subsegments:
+      - [0x1142D0, bin, vutext]                  # .vutext   0x2132D0, VU microcode
+
+  - name: main
+    type: code
+    start: 0x119880
+    vram: 0x218880
+    bss_size: 0x3B1384      # .sbss (0x284A80) through the end of .bss (0x635E04)
+    subsegments:
+      - [0x119880, rodata, rodata]               # .rodata   0x218880
+      - [0x152880, data, data]                   # .data     0x251880
+      - [0x185980, bin, gcc_except_table]        # .gcc_except_table 0x284980, padded to 0x284A80
+      - { start: 0x185A80, type: bss, vram: 0x284A80, name: bss }
+
+  # The rest of the file padding, the DVP overlay sections, .reginfo, .stack,
+  # the overlay tables and the section header table: copied as they are until
+  # the linker script models them.
+  - [0x185A80, databin, elf_tail]
+  - [0x1AB848]

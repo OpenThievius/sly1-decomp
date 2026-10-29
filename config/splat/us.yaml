@@ -14,6 +14,7 @@ options:
   compiler: EEGCC
 
   asm_path: asm/us
+  asset_path: assets/us
   src_path: src
   build_path: build/us
   ld_script_path: build/us/SCUS_971.98.splat.ld
@@ -26,6 +27,7 @@ options:
 
   generate_asm_macros_files: True
   named_regs_for_c_funcs: False
+  mips_abi_gpr: n32           # the names GNU as accepts with -mabi=eabi ($a4-$a7, $t0-$t3)
   find_file_boundaries: False
   disasm_unknown: True
   rodata_string_guesser_level: 0
@@ -36,20 +38,36 @@ options:
 segments:
   - [0x0, databin, elf_header]
 
-  - name: main
+  # The segments follow the file's own order, so that the linked image laid
+  # out by file offset (objcopy -O binary) is the executable itself. Each
+  # unit runs to the next one's start, which takes in the alignment padding.
+  - name: text
     type: code
     start: 0x1000
     vram: 0x100000
-    bss_size: 0x3B1384      # .sbss (0x27B300) through the end of .bss (0x62C684)
     subsegments:
       - [0x001000, asm, text]                    # .text     0x100000, 0x111E0C bytes
+
+  - name: vutext
+    type: code
+    start: 0x112E10
+    vram: 0x211E10
+    subsegments:
       - [0x112E10, bin, vutext]                  # .vutext   0x211E10, VU microcode
+
+  - name: main
+    type: code
+    start: 0x118380
+    vram: 0x217380
+    bss_size: 0x3B1384      # .sbss (0x27B300) through the end of .bss (0x62C684)
+    subsegments:
       - [0x118380, rodata, rodata]               # .rodata   0x217380
       - [0x151580, data, data]                   # .data     0x250580
-      - [0x17C200, bin, gcc_except_table]        # .gcc_except_table 0x27B200
-      - { start: 0x17C294, type: bss, vram: 0x27B300, name: bss }
+      - [0x17C200, bin, gcc_except_table]        # .gcc_except_table 0x27B200, padded to 0x27B300
+      - { start: 0x17C300, type: bss, vram: 0x27B300, name: bss }
 
-  # The DVP overlay sections, .reginfo, .stack, the overlay tables and the
-  # section header table: copied as they are until the linker script models them.
-  - [0x17C354, databin, elf_tail]
+  # The rest of the file padding, the DVP overlay sections, .reginfo, .stack,
+  # the overlay tables and the section header table: copied as they are until
+  # the linker script models them.
+  - [0x17C300, databin, elf_tail]
   - [0x1A20C8]

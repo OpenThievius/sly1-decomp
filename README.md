@@ -7,14 +7,29 @@ A work-in-progress **matching decompilation** of *Sly Cooper and the Thievius Ra
 
 ## Status
 
-The project is being set up. Nothing is matched yet. What works today:
+- Both executables build **byte for byte** from their disassembly (`tools/build.py`), and the US
+  build links every matched C function at its retail address and still prints `MATCH`.
+- The compiler is identified and qualified: SN Systems' GCC 2.95.3 for the PS2, compiling C++
+  ([docs/TOOLCHAIN.md](docs/TOOLCHAIN.md)).
+- `tools/check.py` compares one function with retail, on US or PAL; matching follows
+  [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md), coordinated in the pinned
+  [Contributor coordination](https://github.com/OpenThievius/sly1-decomp/issues/1) issue.
 
-- `tools/setup.py` finds your disc images, recognises each version and puts its boot executable in `baserom/`;
-- `tools/setup_asm.py` splits the US executable with splat (4,766 functions in `.text`, one unit per section so far);
-- `tools/toolchain.py` finds the compiler and checks that it runs;
-- `tests/check_repository.py` keeps game data and proprietary material out of the repository.
+## Progress
 
-[docs/ROADMAP.md](docs/ROADMAP.md) lists what comes next and the decisions still open.
+Tracked on **[ByteMatch](https://bytematch.dev/OpenThievius/sly1-decomp)**.
+
+[![Code](https://bytematch.dev/OpenThievius/sly1-decomp.svg?mode=shield&label=Code&measure=matched_code_percent)](https://bytematch.dev/OpenThievius/sly1-decomp)
+[![Functions](https://bytematch.dev/OpenThievius/sly1-decomp.svg?mode=shield&label=Functions&measure=matched_functions)](https://bytematch.dev/OpenThievius/sly1-decomp)
+
+<!-- progress:begin (tools/progress.py) -->
+| Version | Functions | Code |
+| --- | ---: | ---: |
+| NTSC-U `SCUS_971.98` | 1,878 of 4,766 | 151,800 of 1,112,520 bytes (13.64%) |
+| PAL `SCES_509.17` | 1,800 of 4,791 | 143,900 of 1,117,772 bytes (12.87%) |
+
+A US function counts when the build links its C and still prints `MATCH`; a PAL function when that same C also builds PAL's bytes at its counterpart (`tools/version_check.py`).
+<!-- progress:end -->
 
 ## Versions
 
@@ -28,7 +43,7 @@ Disc checksums are in [`config/versions.json`](config/versions.json); [docs/VERS
 
 ## Quick start
 
-You need Python 3.9 or newer and git. To compile you also need [wibo](https://github.com/decompals/wibo) (or Wine) and the compiler ([docs/TOOLCHAIN.md](docs/TOOLCHAIN.md)).
+You need Python 3.9 or newer, git, GNU binutils for mips, [wibo](https://github.com/decompals/wibo) (or Wine) and the compiler ([docs/TOOLCHAIN.md](docs/TOOLCHAIN.md)).
 
 1. **Clone:**
    ```sh
@@ -49,13 +64,17 @@ You need Python 3.9 or newer and git. To compile you also need [wibo](https://gi
    venv/bin/python tools/setup_asm.py --version us
    ```
    It writes `asm/us/` (gitignored) and the linker script under `build/us/`.
-5. **The compiler:**
+5. **The compiler and binutils:** link the toolchain mirror's `local/sce/ee/gcc` as `./toolchain`
+   and wibo as `./wibo`, and install GNU binutils for mips ([docs/TOOLCHAIN.md](docs/TOOLCHAIN.md)):
    ```sh
-   export SLY1_TOOLCHAIN=/path/to/sce_ps2_sdk_24/local/sce/ee/gcc
-   python3 tools/toolchain.py        # ends with "ok: the compiler runs and is 2.9-ee-991111b"
+   python3 tools/toolchain.py
    ```
-
-The build that links a byte-identical `SCUS_971.98` is the next step ([docs/ROADMAP.md](docs/ROADMAP.md)).
+6. **Build:**
+   ```sh
+   python3 tools/build.py                 # MATCH: build/us/SCUS_971.98 sha1 57dc305d... with N functions from C
+   python3 tools/build.py --version eu    # MATCH: build/eu/SCES_509.17 sha1 f23240fc...
+   ```
+   Then `docs/AGENT_WORKFLOW.md` for matching.
 
 ## Tools
 
@@ -63,9 +82,14 @@ The build that links a byte-identical `SCUS_971.98` is the next step ([docs/ROAD
 |---|---|
 | `tools/setup.py` | Recognises your disc images and puts each version's boot executable in `baserom/<version>/` |
 | `tools/setup_asm.py` | Runs splat on `config/splat/<version>.yaml` and writes `asm/<version>/` |
+| `tools/build.py` | The full build of a version, with the C of `src/` linked into US: `MATCH` |
+| `tools/check.py` | Compiles one file and compares one function with retail, on US or PAL |
+| `tools/todo.py` | The functions still to match, with their size, source file and tags |
+| `tools/version_check.py` | Every C function at its PAL counterpart (`config/eu/c_status.tsv`) |
+| `tools/progress.py` | The ByteMatch reports (`progress/<version>/report.json`) and the table above |
+| `tools/inventory.py` | Every function of each version, and PAL's pairing with US |
+| `tools/compile.py`, `tools/c_layout.py` | How C is compiled, and placed in the build |
 | `tools/toolchain.py` | Finds the compiler and its runner and compiles a test unit |
-| `tools/disc.py` | Reads ISO 9660 and raw CD images (shared with OpenThievius) |
-| `tools/versions.py` | The version table every tool reads |
 | `tools/proprietary.py` | Scans what git would commit for game data and proprietary material (shared with OpenThievius) |
 | `tests/check_repository.py` | The pre-commit check: `proprietary.py`, licence headers (CI runs it) |
 

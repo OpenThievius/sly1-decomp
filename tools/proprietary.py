@@ -13,7 +13,7 @@ What it rejects:
   copyright or confidentiality banners;
 - splat disassembly (its address comments), wherever it is pasted;
 - runs of hex byte literals long enough to be a dump of retail data;
-- files over 512 KiB.
+- files over 512 KiB, except the generated progress reports (up to 2.5 MB).
 
 This file is shared with OpenThievius (tools/proprietary.py there); keep the
 two copies identical (OpenThievius's shared/files.json lists them).
@@ -25,6 +25,9 @@ import sys
 from pathlib import Path
 
 MAX_BYTES = 512 * 1024
+# Generated reports that are large by nature: names, addresses and sizes of every function.
+LARGE_OK = re.compile(r"^progress/[a-z0-9_]+/report\.json$")
+LARGE_MAX = 2_500_000
 
 BINARY_SUFFIXES = {
     # disc images and their sidecars
@@ -88,8 +91,9 @@ def check_file(rel, data):
         errors.append("an ELF file")
     if data[:2] == b"MZ" and b"PE\0\0" in data[:1024]:
         errors.append("a Windows executable")
-    if len(data) > MAX_BYTES:
-        errors.append("%d bytes; files over %d bytes are not committed" % (len(data), MAX_BYTES))
+    limit = LARGE_MAX if LARGE_OK.match(rel) else MAX_BYTES
+    if len(data) > limit:
+        errors.append("%d bytes; files over %d bytes are not committed" % (len(data), limit))
     if name in SDK_HEADERS:
         errors.append("named like a Sony SDK header")
     if b"\0" in data[:8192]:

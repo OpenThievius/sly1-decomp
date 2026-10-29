@@ -1,0 +1,8 @@
+# What each part of SCES_509.17 is: as config/us/layout.tsv, at PAL's addresses.
+kind	name	start	end	category	source
+code	game	00100000	001F69C4	game	src/main
+code	lib	001F69C4	002132CC	lib	src/lib
+data	vutext	002132D0	00218820	data	-
+data	rodata	00218880	0025185B	data	-
+data	data	00251880	00284974	data	-
+data	gcc_except_table	00284980	00284A14	data	-

@@ -11,6 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 import disc  # noqa: E402
+import todo  # noqa: E402
 import versions  # noqa: E402
 
 BOOT = b"\x7fELF" + bytes(range(256)) * 20
@@ -164,3 +165,31 @@ class ProprietaryTest(unittest.TestCase):
         line = b", ".join(b"0x%02X" % i for i in range(16)) + b"\n"
         self.assertTrue(self.check("src/table.c", line * 8))
         self.assertEqual(self.check("src/table.c", line * 7), [])
+
+
+class DefinitionTest(unittest.TestCase):
+    def names(self, text):
+        return [m.group(1) for m in todo.DEFINITION.finditer(text)]
+
+    def test_definitions_and_declarations(self):
+        text = ("s32 func_00100008(void* a, s32 b);\n"
+                "void func_00100010(void) {}\n"
+                "\n"
+                "s32 func_00100018(u8* bits, s32 index)\n"
+                "{\n"
+                "    s32 mask = 1 << (index & 7);\n"
+                "    return bits[index / 8] & mask;\n"
+                "}\n"
+                "struct __attribute__((aligned(16))) Quad_100018 {\n"
+                "    s32 a, b, c, d;\n"
+                "};\n"
+                "u32 func_0010001C(u32 i) { if (i >= 10) return 0; return i; }\n"
+                "void* func_00100020(void* self,\n"
+                "                    s32 n)\n"
+                "{\n"
+                "    return self;\n"
+                "}\n")
+        # A one-line definition does not swallow the one after it, and a struct
+        # with an attribute in front of its name is not a function; a one-line
+        # definition with statements in its body is one.
+        self.assertEqual(self.names(text), ["func_00100010", "func_00100018", "func_0010001C", "func_00100020"])
