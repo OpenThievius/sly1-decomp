@@ -553,3 +553,5 @@ s32 func_0012FD78(void* self, Pair_0012FD78* pair)
 {
     return func_0012FDA0(self, pair->a, pair->b);
 }
+
+struct State_0012FCF0 { s32 w[11]; };

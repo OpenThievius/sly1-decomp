@@ -1304,6 +1304,50 @@ void func_0012AA00(void* self, f32 value)
     ((Sub_0012AA00*)func_0012A970(self))->value = value;
 }
 
+struct State_00129E88 { u8 pad[0x20C]; Vec16_12A5D0* value; };
+void func_00129E88(State_00129E88* self, Vec16_12A5D0* value)
+{
+    if (self->value == (Vec16_12A5D0*)D_00260E70)
+        self->value = (Vec16_12A5D0*)func_0018D500(16);
+    *self->value = *value;
+}
+
+struct Part_0012AA50 { u8 pad[8]; s32 kind; };
+struct State_0012AA50 { u8 pad[0x27C]; s32 count; Part_0012AA50** parts; };
+void func_001B5388(void* part, f32 a, f32 b);
+void func_0012AA50(State_0012AA50* self, f32 a, f32 b)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        Part_0012AA50* p = self->parts[i];
+        if (p->kind == 6) func_001B5388(p, a, b);
+    }
+}
+
+struct State_0012AAE8 { s32* table; u8 pad[0x18]; State_0012AAE8* next; u8 gap[0x14]; State_0012AAE8* child; u8 gap2[0x244]; s32 count; Part_0012AA50** parts; };
+void func_00159A00(void* part, f32 value);
+void func_0012AAE8(State_0012AAE8* self, f32 value)
+{
+    s32 scratch[4];
+    for (s32 i = 0; i < self->count; i++) {
+        Part_0012AA50* p = self->parts[i];
+        if (p->kind == 5) func_00159A00(p, value);
+    }
+    for (State_0012AAE8* child = self->child; child; child = child->next) {
+        if (child->table[2] & 1) func_0012AAE8(child, value);
+    }
+}
+
+extern Entry_12B0B0 D_00261000;
+void func_0012B040(void* ptr)
+{
+    Outer_12B0B0* self = (Outer_12B0B0*)ptr;
+    if (!self->slot) {
+        self->slot = (Entry_12B0B0*)func_0018D500(64);
+        *self->slot = D_00261000;
+        self->slot->w[0] = -1;
+    }
+}
+
 struct Sub_0012B010 { u8 pad[0x1C]; void* value; };
 struct State_0012B010 { u8 pad[0x2AC]; Sub_0012B010* sub; };
 void func_001BF788(void* ptr, s32 value);
