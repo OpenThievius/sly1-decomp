@@ -1,6 +1,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+extern u8 D_002622A8[];
+void func_00152B38(void* self);
+void func_001EE3B8(void* self, s32 size, s32 flags);
+void func_001EE668(void* self, s32 a, s32 b, void* data, s32 c);
+void func_00152D70(void* self);
+void func_00144AA0(void* a0, void* a1, void* a2, f32 f12, f32 f13, f32 f14);
+void func_00144978(void* a0, void* a1, void* a2, f32* a3, f32* a4, f32* a5);
+
+void func_00144848(void* self)
+{
+    u8* cursor = D_002622A8;
+    func_00152B38(cursor);
+    func_001EE3B8(cursor, 0, 0);
+    func_001EE668(cursor, 12, 4, (u8*)self + 0x100, 4);
+    func_001EE668(cursor, 12, 4, (u8*)self + 0x140, 8);
+    func_00152D70(cursor);
+}
+
 extern u8 D_002619A0[];
 void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);

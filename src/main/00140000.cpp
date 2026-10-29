@@ -803,3 +803,40 @@ void func_00143888(void) { func_001439E8(D_00261990); }
 void func_001438B0(void) { func_00143A08(D_00261990); }
 
 void func_00143920(void* arg, void* arg2) { func_001448C8(arg, 0, arg2); }
+
+extern u8 D_00247AA0[];
+extern s32 D_002613F4;
+extern s32 D_002613F8;
+s32 func_0011E138(void* a, void* b, void* c, void* d);
+s32 func_0011E1F8(s32 value);
+s32 func_0011E2E8(void);
+
+void func_00140C28(void* a, void* b, void* c)
+{
+    s32 result;
+    do {
+        result = func_0011E138(a, b, c, D_00247AA0);
+        D_002613F4 = result;
+        if (result != 1) {
+            func_0011E1F8(0);
+            D_002613F8 = func_0011E2E8();
+        }
+    } while (result != 1);
+}
+
+s32 func_00203B18(void* a, void* b, void* c, void* d);
+s32 func_002032C8(s32 value);
+s32 func_00203D90(void);
+
+void func_00140CC8(void* a, void* b, void* c)
+{
+    s32 result;
+    do {
+        result = func_00203B18(a, b, c, D_00247AA0);
+        D_002613F4 = result;
+        if (result != 1) {
+            func_002032C8(0);
+            D_002613F8 = func_00203D90();
+        }
+    } while (result != 1);
+}

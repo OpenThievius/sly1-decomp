@@ -624,6 +624,25 @@ void func_001685B8(void);
 void func_001682C0(void);
 void func_00168698(void);
 
+extern s32 D_002BE468;
+extern s32 D_002BE464;
+s32 func_00202120(void);
+void func_00202058(s32);
+void func_001F6C20(s32);
+void func_00202A80(void*, void*);
+void func_001F6B60(s32);
+void func_001686E8(void* first, void* second)
+{
+    D_002BE468 = 1;
+    volatile u64* dma = (volatile u64*)0x12001000;
+    *dma |= 2;
+    s32 status = func_00202120();
+    func_00202058(status & ~0x200);
+    func_001F6C20(0);
+    func_00202A80(first, second);
+    func_001F6B60(D_002BE464);
+}
+
 void func_001688B8(void)
 {
     Quad_1688B8 k;
@@ -696,3 +715,14 @@ void func_00168D68(S_168D68* p, s32 value, s32 other) { p->b = value; p->a = val
 
 struct S_168D78 { s32 a; s32 b; };
 void func_00168D78(S_168D78* p) { p->b = p->a; }
+
+extern u8 D_00262988[];
+extern f32 D_00262970[];
+void func_001AA268(void* self);
+s32 func_0015C188(s32 index);
+void* func_0015C1C0(s32 index);
+void func_001AA8B8(void* self, f32 zero);
+
+
+void func_001C6F48(void* self);
+

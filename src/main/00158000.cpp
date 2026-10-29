@@ -1,6 +1,40 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+void func_001BF788(s32 value, s32 unused);
+void func_001BFCD8(s32 type, void* data, void* a2, s32 a3, f32 f12, f32 f13,
+                   f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BA130(void);
+s32 func_001526D0(void* a, void* b);
+void func_00152600(void* a, void* b);
+
+void func_0015AE38(void* self, s32 initialize)
+{
+    if (*(s32*)((u8*)self + 0x550) != 0) return;
+    if (initialize) {
+        func_001BF788(*(s32*)((u8*)self + 0x5E4), 0);
+    } else {
+        func_001BFCD8(0x41, (u8*)self + 0x5E4, self, 0,
+                      700.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    }
+}
+
+struct __attribute__((packed)) Saved_15AD80 { u64 value; };
+
+void func_0015AD80(void* self)
+{
+    Saved_15AD80 saved = *(Saved_15AD80*)((u8*)self + 0x5DC);
+    func_001BA130();
+    *(Saved_15AD80*)((u8*)self + 0x5DC) = saved;
+    if (*(s32*)((u8*)self + 0x550) == 0) {
+        func_001BFCD8(0x41, (u8*)self + 0x5E4, self, 0,
+                      700.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    } else {
+        if (func_001526D0((u8*)*(void**)((u8*)self + 0x14) + 0x1C48, self))
+            func_00152600((u8*)*(void**)((u8*)self + 0x14) + 0x1C48, self);
+    }
+}
+
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
 struct Obj_158108 {

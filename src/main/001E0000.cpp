@@ -8,6 +8,34 @@ void func_001E0828(void* self)
     func_001E02C8(self, 3);
 }
 
+struct Config_1E0848 {
+    u8 pad000[4];
+    s8 marker04;
+    u8 pad005[3];
+    f32 value08;
+    f32 value0C;
+    f32 value10;
+    f32 value14;
+    s32 value18;
+};
+
+extern Config_1E0848 D_002758E0;
+
+void func_001F5C0C(void* dst, s32 value, s32 size);
+
+void func_001E0848(void* self, u32 mode)
+{
+    if (mode != 0xFFFF || self == 0) return;
+
+    func_001F5C0C(&D_002758E0, 0, 0x1C);
+    D_002758E0.marker04 = 0x2D;
+    D_002758E0.value08 = 2.0f;
+    D_002758E0.value0C = 1.0f;
+    D_002758E0.value10 = 0.3f;
+    D_002758E0.value14 = 0.3f;
+    D_002758E0.value18 = 0xFF7D4B00;
+}
+
 void func_001D7120(u8* buf, char* dst, s32 cap);
 s32 func_001E1DB8(u8* buf, s32 a, s32 b);
 void func_001D7148(u8* buf, s32 n);

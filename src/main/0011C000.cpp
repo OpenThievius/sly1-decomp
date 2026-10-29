@@ -775,6 +775,34 @@ void* func_0011C748(void)
     return s0;
 }
 
+extern u8 D_0062C588[];
+
+void* func_0011C858(void)
+{
+    void* s0 = func_001B5EA0(D_0062C588);
+    if (s0 != 0) {
+        func_001F5C0C(s0, 0, *(u32*)D_0062C588);
+    } else {
+        func_0011AB58(D_00259F38);
+        s0 = func_001B5EE0(D_0062C588);
+    }
+    return s0;
+}
+
+extern u8 D_0062C598[];
+
+void* func_0011C968(void)
+{
+    void* s0 = func_001B5EA0(D_0062C598);
+    if (s0 != 0) {
+        func_001F5C0C(s0, 0, *(u32*)D_0062C598);
+    } else {
+        func_0011AB58(D_00259F38);
+        s0 = func_001B5EE0(D_0062C598);
+    }
+    return s0;
+}
+
 s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 
 void func_0011D600(s32 value)

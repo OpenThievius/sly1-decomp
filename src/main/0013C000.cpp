@@ -100,6 +100,38 @@ void func_00124A48(Node_CE40* self);
 void func_0013CE80(void* self);
 void func_001DBCC8(void* target, Hook_CE40 fn, Node_CE40* ctx, s32 a3, s32 a4);
 
+struct Object_13CCF8 {
+    u8 pad000[0x2B0];
+    u8 small[5];
+    u8 pad2B5[0x35F];
+    s32 f614;
+    u8 pad618[0xC];
+    f32 f624;
+    f32 f628;
+    f32 f62C;
+    u8 pad630[0x58];
+    void* f688;
+    s32 f68C;
+};
+extern u8 D_00261420[];
+void func_001B7968(void*);
+void* func_00140FF8(void*);
+void func_0013CCF8(Object_13CCF8* self)
+{
+    func_001B7968(self);
+    self->f628 = 0.8f;
+    self->f62C = 1.2f;
+    self->f68C = 1;
+    self->f624 = 1.0f;
+    self->small[4] = 0x10;
+    self->small[3] = 0x10;
+    self->small[2] = 0x10;
+    self->small[1] = 0x10;
+    self->small[0] = 0x10;
+    self->f688 = func_00140FF8(D_00261420);
+    self->f614 = -1;
+}
+
 void func_0013CE40(Node_CE40* self)
 {
     func_00124A48(self);

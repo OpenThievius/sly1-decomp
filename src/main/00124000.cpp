@@ -19,7 +19,6 @@ struct Self_1243E0 {
 };
 
 extern void* D_00261990;
-
 void func_00182ED0(Self_1243E0* self);
 void func_00152600(void* list, void* item);
 void func_00152440(void* a);

@@ -1,7 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+
 struct Point2 { f32 x, y; };
+
+extern void* D_0024A220;
+struct Render_15C930 { u8 pad[0x44]; f32 x; f32 y; void* callback; };
+void* func_0018D758(s32);
+void func_0015C9B0(void*, Render_15C930*);
+Render_15C930* func_0015C930(void* owner, f32 x, f32 y)
+{
+	Render_15C930* out = (Render_15C930*)func_0018D758(0x88);
+	out->callback = &D_0024A220;
+	func_0015C9B0(owner, out);
+	out->x *= x;
+	out->y *= y;
+	return out;
+}
 
 // Points recorded in order, the first of them scaled into u and v.
 struct Trail
@@ -725,3 +740,21 @@ s32 func_0015FBA0(Obj_0015FBA0* self, s32* out)
 
 struct Obj_15C900 { u8 pad0[0xC]; s32 index; u8 pad1[0x34]; f32 first; f32 second; };
 void func_0015C900(Obj_15C900* obj) { obj->index--; f32* item = (f32*)((u8*)obj + 0x10 + obj->index * 8); obj->first = item[0]; obj->second = item[1]; }
+
+struct Descriptor_15C418 { u8 pad0[0x18]; s16 offset; u8 pad1[2]; f32 (*callback)(void* self, s32 character); };
+struct Obj_15C418 { u8 pad0[0x4C]; Descriptor_15C418* descriptor; };
+f32 func_0015C418(Obj_15C418* self, const char* text)
+{
+    if (text != 0) goto nonempty;
+    return 0.0f;
+nonempty:
+    f32 total = 0.0f;
+    const char* cursor = text;
+    while (*cursor != 0) {
+        s8 character = *cursor;
+        Descriptor_15C418* descriptor = self->descriptor;
+        total += descriptor->callback((u8*)self + descriptor->offset, character);
+        cursor++;
+    }
+    return total;
+}

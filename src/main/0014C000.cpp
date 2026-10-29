@@ -1,6 +1,28 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+
+struct Obj_14C5E8 { u8 pad[0x2D0]; s32 numerator; s32 denominator; };
+extern u8 D_00261EF0[];
+void func_00151E20(void* data, f32 amount);
+
+void func_0014C5E8(Obj_14C5E8* self)
+{
+    f32 one = 1.0f;
+    f32 ratio = (f32)self->numerator / (f32)self->denominator;
+    f32 amount;
+    if (ratio < 0.0f) {
+        amount = 0.0f;
+        goto apply;
+    }
+    if (one < ratio)
+        amount = one;
+    else
+        amount = ratio;
+apply:
+    func_00151E20(D_00261EF0, 1.0f - amount * 0.8f);
+}
+
 struct Item_14C838 { s32 value; s32 pad[4]; };
 struct List_14C838 { u8 pad0[0x2DC]; s32 count; Item_14C838 items[1]; };
 
@@ -674,3 +696,4 @@ f32 func_0014DB58(Obj_14DB58* obj) { u32 address = obj->index * 4 + obj->base; r
 
 struct Obj_14E500 { u8 pad[0x1C0]; s32 value; };
 void func_0014E500(Obj_14E500* obj) { obj->value = -1; }
+

@@ -609,3 +609,4 @@ void func_001A7550(u8* self)
 
 struct S_1A7698 { u8 pad[0x550]; s32 value; };
 s32 func_001A7698(S_1A7698* p) { return p->value; }
+

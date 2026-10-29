@@ -1278,3 +1278,5 @@ void func_0012B1A0(Owner_12B1A0* self, Vec_12B1A0* input)
     func_0012B040(self);
     *(Vec_12B1A0*)((u8*)self->inner + 0x20) = *input;
 }
+
+

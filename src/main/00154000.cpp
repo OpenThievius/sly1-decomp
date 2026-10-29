@@ -12,6 +12,34 @@ struct Actor_156108 {
 void func_00155F90();
 void func_00155FA0(Actor_156108* self);
 
+struct Object_156088 {
+    u8 pad000[0x2D0];
+    void* a;
+    s32 type;
+    u8 pad2D8[4];
+    f32 first;
+    f32 second;
+    u8 pad2E4[0x44];
+    f32 result;
+    u8 pad32C[0x18];
+    void* resourceA;
+    void* resourceB;
+    s32 state;
+};
+void func_0013A128(void*, void*);
+void func_0019E158(void*, void*);
+f32 func_001EAAE0(f32, f32);
+void func_00156088(Object_156088* self)
+{
+    self->state = 0;
+    if (self->resourceB) func_0013A128(self->resourceB, self->a);
+    if (self->resourceA) func_0019E158(self->resourceA, self->a);
+    if (self->type == 3)
+        self->result = func_001EAAE0(self->first, self->second) * 60.0f;
+    else
+        self->result = func_001EAAE0(self->first, self->second);
+}
+
 void func_00156108(Actor_156108* self, s32 a1)
 {
     if (self->f2D4 == -1) {

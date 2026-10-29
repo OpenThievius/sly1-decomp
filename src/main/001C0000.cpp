@@ -170,6 +170,31 @@ void func_0011B018(void* self, Loc_1C1E48* p);
 void func_0011B060(Loc_1C1E48* p, s32 v);
 void func_001C1A28(s32* p, s32 v);
 
+struct Node_1C1A28 { u8 pad00[8]; Node_1C1A28* next; };
+struct Owner_1C1A28 { void* context; Node_1C1A28* head; Node_1C1A28* tail; };
+void* func_0011AF28(void);
+void* func_0011B0A8(void*, void*);
+void func_0011B060(void*, s32);
+void func_001C15D8(void*, void*, void*);
+void* func_001F5C0C(void*, s32, u32);
+
+s32 func_001C1A28(Owner_1C1A28* self, void* source)
+{
+    u8 frame[0x30];
+    func_001F5C0C(frame, 0, 0x20);
+    ((s32*)frame)[0] = (s32)self->context;
+    ((s32*)frame)[1] = 2;
+    ((s32*)frame)[3] = 0;
+    Node_1C1A28* node = (Node_1C1A28*)func_0011AF28();
+    func_001C15D8(frame + 0x20, source, frame);
+    func_0011B0A8(node, frame + 0x20);
+    func_0011B060(frame + 0x20, 2);
+    if (self->head != 0) self->tail->next = node;
+    else self->head = node;
+    self->tail = node;
+    return 1;
+}
+
 void* func_001C1E48(void* self, s32 n, s32* keys, s32* vals)
 {
     Loc_1C1E48 loc;

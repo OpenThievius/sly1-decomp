@@ -923,3 +923,52 @@ struct Obj_0011A770 { u8 pad[0xF0C]; s32 count; s32 values[1]; };
 void func_0011A770(Obj_0011A770* obj, s32 value) { obj->values[obj->count++] = value; }
 
 void func_0011A6B8() {}
+struct Blob_11BD28 { s32 w[4]; };
+struct Node_11BD28 { s32 kind; u8 body[8]; Node_11BD28* next; };
+struct Owner_11BD28 { Node_11BD28* head; };
+void func_0011B008(Blob_11BD28* b);
+void func_0011B018(void* dst, Blob_11BD28* src);
+void func_0011B060(Blob_11BD28* b, s32 mode);
+void func_0011B0A8(void* a, void* b);
+void func_0011B538(Blob_11BD28* b, s32 n);
+s32 func_0011C498(void);
+void* func_0011BD28(void* self, Owner_11BD28* owner, s32 kind, void* body)
+{
+    Blob_11BD28 b;
+    Node_11BD28* node;
+    func_0011B008(&b);
+    node = (Node_11BD28*)func_0011C498();
+    node->kind = kind;
+    func_0011B0A8(node->body, body);
+    node->next = owner->head;
+    owner->head = node;
+    func_0011B538(&b, 0x22);
+    func_0011B018(self, &b);
+    func_0011B060(&b, 2);
+    return self;
+}
+
+void* func_0011BDD0(void* self, Node_11BD28** list, s32 kind, void* body)
+{
+    Blob_11BD28 b;
+    Node_11BD28* node = *list;
+    if (node) {
+        do {
+            if (node->kind == kind) {
+                func_0011B008(&b);
+                func_0011B0A8(node->body, body);
+                func_0011B538(&b, 0x22);
+                func_0011B018(self, &b);
+                func_0011B060(&b, 2);
+                goto done;
+            }
+            node = node->next;
+        } while (node);
+    }
+    func_0011B008(&b);
+    func_0011B538(&b, 0x22);
+    func_0011B018(self, &b);
+    func_0011B060(&b, 2);
+done:
+    return self;
+}

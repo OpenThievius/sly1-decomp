@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+
 int func_001EAC68(f32 a, f32 b, f32 eps);
 
 void func_00183F40(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d)
@@ -325,6 +326,28 @@ void func_0011B570(void* self, s32 n);
 void func_001C2320(void* self, void* a1, void* a2, void* a3);
 void func_0011B060(void* self, s32 mode);
 
+void func_00183990(void* self, void* arg1, void* arg2)
+{
+    u8 a[0x10], b[0x10];
+    func_0011B008(a);
+    func_0011B570(a, (s32)arg2);
+    func_001C2320(b, self, arg1, a);
+    func_0011B060(b, 2);
+    func_0011B060(a, 2);
+}
+
+void func_0011B5B0(void* self, f32 value);
+
+void func_00183A10(void* self, void* arg1, f32 value)
+{
+    u8 a[0x10], b[0x10];
+    func_0011B008(a);
+    func_0011B5B0(a, value);
+    func_001C2320(b, self, arg1, a);
+    func_0011B060(b, 2);
+    func_0011B060(a, 2);
+}
+
 void func_00183BB8(void* a0, void* a1, s32 n)
 {
     Quad_183BB8 a;
@@ -492,6 +515,16 @@ struct Node_182D50 {
 s32 func_001526D0(void* sub, Node_182D50* self);
 s32 func_00182FC8(Node_182D50* self);
 void func_00152600(void* sub, Node_182D50* self);
+
+struct State_182C80 { VFn_182D50* vtbl; u8 pad[0x10]; void* p14; void* p18; };
+void func_00182C80(State_182C80* self)
+{
+    void* p = self->p18 ? (void*)((u8*)self->p18 + 0x34) : (void*)((u8*)self->p14 + 0x48);
+    if (func_001526D0(p, (Node_182D50*)self)) return;
+    func_00152470(p, self);
+    if (!func_00182FC8((Node_182D50*)self)) return;
+    self->vtbl[8](self);
+}
 
 void func_00182D50(Node_182D50* self)
 {

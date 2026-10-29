@@ -297,3 +297,4 @@ void func_001861E8(u8* self, Node_1861E8* head)
         } while (cur != 0);
     }
 }
+

@@ -1,6 +1,28 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+struct Manager_197458 { u8 pad[0x6B8]; void* object; };
+extern Manager_197458* D_0026A904;
+void func_001B6568(void*, s32*);
+void func_001B6598(void*, s32*);
+void func_001B64D8(void*, s32);
+void func_001973D8(Manager_197458*);
+
+void func_00197458(void*, s32 mode)
+{
+    if (mode == 1) {
+        if (D_0026A904->object != 0) {
+            s32 a, b;
+            func_001B6568(D_0026A904->object, &a);
+            func_001B6598(D_0026A904->object, &b);
+            if (a != 0x3F4 && b != 0x3F4) {
+                func_001B64D8(D_0026A904->object, 0x3F5);
+                func_001973D8(D_0026A904);
+            }
+        }
+    }
+}
+
 void func_001AA8F0(void* self);
 
 struct Ctl_194F00 { u8 pad[0x250]; s32 mode250; u8 pad2[0x20]; s32 f274; };
@@ -181,4 +203,25 @@ void func_00197A68(void* ctx, Pair_00197A68* out)
     (void)ctx;
     out->f98 = D_0026A83C;
     out->f94 = D_0026A840;
+}
+
+void func_001936A0(void* self);
+void func_00195928(void* self, s32 value);
+void func_001AA998(void* self, s32 value);
+struct Obj_194E60 { u8 pad[0x250]; s32 mode; u8 pad1[0xC]; s32 f260; u8 pad2[0x10]; s32 f274; s32 f278; };
+void func_00194E60(Obj_194E60* self, s32 mode)
+{
+    if (self->mode == mode) return;
+    if (self->mode == 0 && self->f260 == 0) func_001936A0(self);
+    if (mode == 0) {
+        if (self->f274 != 0) {
+            func_00195928(self, self->f278);
+            mode = 1;
+            self->f274 = 0;
+            self->f278 = -1;
+        } else if (self->f260 == 0) {
+            func_001936A0(self);
+        }
+    }
+    func_001AA998(self, mode);
 }

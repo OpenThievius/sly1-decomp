@@ -228,6 +228,33 @@ void func_0014AF10(Obj_14AF10* self)
 
 struct Stack4_1495E8 { u8 pad[0x30]; s32 items[4]; s32 count; };
 
+struct __attribute__((aligned(16))) Vec_1493C8 { f32 x, y, z, w; };
+struct Object_1493C8 { u8 pad000[0x140]; Vec_1493C8 value; };
+struct Global_1493C8 { u8 pad000[0x40]; Vec_1493C8 value; };
+struct Node_0014BDC8;
+extern f32 D_00261BF8;
+extern Global_1493C8* D_00261990;
+void func_001920B0(void*, Vec_1493C8*);
+Node_0014BDC8* func_001925F0(void);
+void* func_001493C8(Vec_1493C8* out, void* object)
+{
+    Vec_1493C8 value;
+    if (*(void**)((u8*)object + 0x5C)) {
+        func_001920B0(*(void**)((u8*)object + 0x5C), &value);
+    } else {
+        Object_1493C8* current = (Object_1493C8*)func_001925F0();
+        if (current) {
+            current = (Object_1493C8*)func_001925F0();
+            value = current->value;
+            value.z += D_00261BF8;
+        } else {
+            value = D_00261990->value;
+        }
+    }
+    *out = value;
+    return out;
+}
+
 void func_001495E8(Stack4_1495E8* s, s32 value)
 {
     s32 n = s->count;

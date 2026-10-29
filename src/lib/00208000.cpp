@@ -103,3 +103,4 @@ s32 func_0020B9D0(Item_20B9D0* item, s32 x, s32 y)
     item->top = y >> 4;
     return 1;
 }
+

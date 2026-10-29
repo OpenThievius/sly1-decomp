@@ -316,3 +316,26 @@ s32 func_00172EB8(Unit_172EB8* self)
     }
     return 3;
 }
+
+struct __attribute__((aligned(16))) Vec4_172B08 { f32 x, y, z, w; };
+extern f32 D_00261860;
+void func_001BC088(void* self, s32 flag, f32 value);
+void func_00172B08(void* self)
+{
+    *(Vec4_172B08*)((u8*)self + 0x21E0) = *(Vec4_172B08*)((u8*)*(void**)((u8*)self + 0x23D4) + 0x140);
+    *(s32*)((u8*)self + 0x21CC) = 0;
+    func_001BC088(self, 0, D_00261860);
+    void* table;
+    if (*(s32*)((u8*)self + 0x223C) != 0) goto clear;
+    *(Vec4_172B08*)((u8*)self + 0x21D0) = *(Vec4_172B08*)((u8*)self + 0x140);
+    table = *(void**)self;
+    *(Vec4_172B08*)((u8*)self + 0x21F0) = *(Vec4_172B08*)((u8*)*(void**)((u8*)self + 0x23D4) + 0x140);
+    *(s32*)((u8*)self + 0x21CC) = 3;
+    typedef void (*Callback)(void* self);
+    ((Callback*)table)[54](self);
+    goto done;
+clear:
+    *(s32*)((u8*)self + 0x21CC) = 0;
+done:
+    return;
+}

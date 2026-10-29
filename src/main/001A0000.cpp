@@ -320,3 +320,31 @@ void func_001A3990(Node_1A3990* self)
     }
     func_0019F858(self);
 }
+
+typedef u64 Quad_1A0BA0 __attribute__((mode(TI)));
+struct Obj_1A0BA0 { u8 pad0[0x1C]; f32 scale; u32 handle; u8 pad28[0x18]; Quad_1A0BA0 value40; u8 pad50[0x60]; f32 valueB0; };
+extern u8* D_00275710;
+extern Quad_1A0BA0 D_0026B5D0;
+extern Quad_1A0BA0 D_0026B5E0;
+void func_001A0258(void* self, f32 value);
+void func_00118CF0(Quad_1A0BA0* out, f32 value);
+Quad_1A0BA0* func_00118D10(Quad_1A0BA0* out, void* src);
+Quad_1A0BA0 func_00118D30(Quad_1A0BA0 a, Quad_1A0BA0 b);
+Quad_1A0BA0* func_00118D20(Quad_1A0BA0* out, Quad_1A0BA0 value);
+
+void func_001A0BA0(Obj_1A0BA0* self, f32 value)
+{
+    Quad_1A0BA0 first;
+    Quad_1A0BA0 second;
+    func_001A0258(self, value);
+    Quad_1A0BA0* constant = &D_0026B5E0;
+    Quad_1A0BA0* output = (Quad_1A0BA0*)((u8*)self + 0x30);
+    u32 handle = *(u32*)(D_00275710 + 0x1D10);
+    self->valueB0 = -15.0f;
+    self->handle = handle;
+    self->value40 = D_0026B5D0;
+    func_00118CF0(&first, value);
+    Quad_1A0BA0 firstValue = first;
+    func_00118D10(&second, constant);
+    func_00118D20(output, func_00118D30(firstValue, second));
+}

@@ -1,6 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+void func_001B6598(s32 handle, s32* out);
+void func_001B6568(s32 handle, s32* out);
+
+struct Self_001781E0 { u8 pad0[0x2220]; s32 state2220; u8 pad2224[0x9BC]; void* result2BE0; };
+struct Arg_001781E0 { u8 pad0[0x2D8]; s32 handle; };
+
+void func_001781E0(Self_001781E0* self, Arg_001781E0* arg)
+{
+    if (self->state2220 == 9) {
+        return;
+    }
+    s32 value0;
+    s32 value1;
+    func_001B6598(arg->handle, &value0);
+    func_001B6568(arg->handle, &value1);
+    if (value0 == 0x22E && (value1 == value0 || value1 == -1)) {
+        self->result2BE0 = arg;
+    }
+}
+
 struct Obj_178008 {
     u8 pad0[0x1520];
     u8 f1520[0x2768 - 0x1520];
@@ -128,6 +148,29 @@ struct Obj_17B998 {
     s32 f68;
 };
 
+struct Object_17B710 { u8 pad[0x550]; s32 state; };
+struct VTable_17B710 { void* pad[14]; void* f38; void* f3C; };
+struct Singleton_17B710 { VTable_17B710* vtbl; };
+extern u8 D_0026E248[];
+extern s32 D_00270458;
+extern s32 D_00270B54;
+extern s32 D_002717CC;
+s32 func_001E9970(void);
+
+void func_0017B710(Object_17B710* self)
+{
+    s32 first = 0;
+    if (self->state == 1 && func_001E9970()) {
+        if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0))
+            first = 1;
+    }
+    typedef void (*Callback)(void*);
+    if (first)
+        ((Callback)((Singleton_17B710*)D_0026E248)->vtbl->f38)(D_0026E248);
+    else
+        ((Callback)((Singleton_17B710*)D_0026E248)->vtbl->f3C)(D_0026E248);
+}
+
 void func_0017B998(void* self)
 {
     Obj_17B998* o = (Obj_17B998*)self;
@@ -226,6 +269,32 @@ extern u8 D_0026E248[];
 void func_001AC060(void* p);
 void func_0017B598(void* self);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
+
+struct Object_17B308 { u8 pad[0x550]; s32 state; };
+struct VTable_17B308 { void* pad[14]; void* f38; void* f3C; };
+struct Singleton_17B308 { VTable_17B308* vtbl; };
+extern u8 D_0026E248[];
+extern s32 D_00270458;
+extern s32 D_00270B54;
+extern s32 D_002717CC;
+s32 func_001E9970(void);
+
+void func_0017B308(Object_17B308* self)
+{
+    s32 first = 0;
+    s32 state = self->state;
+    if (state < 2) {
+        if (state >= 0 && func_001E9970()) {
+            if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0))
+                first = 1;
+        }
+    }
+    typedef void (*Callback)(void*);
+    if (first)
+        ((Callback)((Singleton_17B308*)D_0026E248)->vtbl->f38)(D_0026E248);
+    else
+        ((Callback)((Singleton_17B308*)D_0026E248)->vtbl->f3C)(D_0026E248);
+}
 
 s32 func_0017B3A8(Obj_17B3A8* self, Msg_17B3A8* msg)
 {

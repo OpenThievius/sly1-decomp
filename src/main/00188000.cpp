@@ -253,6 +253,21 @@ struct Self_18ACF0 {
 
 extern Obj_18ACF0 D_0026E248;
 
+extern void* D_002649D8[];
+extern void* D_002649E8[];
+void func_001AC060(void*);
+void func_001C8F20(void*, void*, s32);
+
+struct State_18AC58 { u8 pad[0xE28]; s32 index; u8 pad2[4]; s32 data[1]; u8 pad3[8]; void* current; };
+
+void func_0018AC58(State_18AC58* self)
+{
+    func_001AC060((void*)&D_0026E248);
+    func_001C8F20(self, D_002649D8[self->index], self->data[self->index]);
+    self->current = D_002649E8[self->index];
+    self->index++;
+}
+
 s32 func_001E9970(void);
 
 void func_0018ACF0(Self_18ACF0* self)

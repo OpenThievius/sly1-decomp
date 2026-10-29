@@ -1,6 +1,39 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+struct State_16D928 { u8 pad[0x5C0]; void* event; u8 pad2[8]; s32 done; };
+extern u8 D_002482D8[];
+s32 func_001BE980();
+s32 func_001EAA70(s32, s32);
+void func_001BE728(void*);
+void func_0016D928(State_16D928* self)
+{
+	if (!self->event) return;
+	if (func_001BE980()) return;
+	if (func_001EAA70(0, 100) >= 20) return;
+	s32 i = func_001EAA70(0, 6);
+	func_001BE728(D_002482D8 + i * 32);
+	self->done = 1;
+}
+
+extern u16 D_00262A50[];
+struct State_16F108 { u8 pad[0x18]; s32 count; u8 pad2[0x8C]; u16 mask; u8 pad3[4]; u8 values[1]; };
+
+f32 func_0016F108(State_16F108* state, s32 index)
+{
+    if (state->mask & D_00262A50[index]) {
+        if (state->count >= 4) {
+            s32 value = 1;
+            u8 raw = state->values[index];
+            if (value < raw) value = raw;
+            return (f32)value * (1.0f / 255.0f);
+        } else {
+            return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
 void func_001F3A40(void);
 
 void func_0016C4B8(void)

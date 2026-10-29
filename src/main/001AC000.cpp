@@ -1,6 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+struct State_1AEE50 { u8 pad[0x578]; s32 count578; void* first[1]; u8 pad2[0x20]; s32 count5A0; void* second[1]; };
+s32 func_001833F0(void* self, void* item);
+s32 func_001300E8(void* self, void* item);
+
+s32 func_001AEE50(State_1AEE50* self, void* item)
+{
+    for (s32 i = 0; i < self->count578; ++i) {
+        if (func_001833F0(item, self->first[i])) return 1;
+    }
+    for (s32 i = 0; i < self->count5A0; ++i) {
+        if (func_001300E8(item, self->second[i])) return 1;
+    }
+    return 0;
+}
+
 struct Obj_1AC638 {
     u8 pad0[4];
     s32 handle;

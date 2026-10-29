@@ -18,6 +18,35 @@ void func_0019DB20(void);
 void func_0019DB68(void);
 void func_0019DBB0(void);
 
+extern s32 D_00604780;
+extern s32 D_00604784;
+extern u8 D_002622A8[];
+extern u8 D_002BDC20[];
+extern u8 D_002BDEE0[];
+void func_00152B38(void*);
+void func_00152D70(void*);
+void func_001EE450(void*);
+void func_001EE7D0(void*, s32, void*, s32);
+
+void func_0019D968(void)
+{
+    if (D_00604780 == 0) {
+        void* object = D_002622A8;
+        func_00152B38(object);
+        func_001EE7D0(object, 0x2C, D_002BDC20, 0);
+        func_00152D70(object);
+        D_00604780 = 1;
+        D_00604784 = 1;
+    } else if (D_00604784 == 0) {
+        void* object = D_002622A8;
+        func_00152B38(object);
+        func_001EE450(object);
+        func_001EE7D0(object, 0x2C, D_002BDEE0, 0);
+        func_00152D70(object);
+        D_00604784 = 1;
+    }
+}
+
 void func_0019DF48(void)
 {
     Buf_19DF48 buf;

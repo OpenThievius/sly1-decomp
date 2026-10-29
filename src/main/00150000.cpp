@@ -3,6 +3,34 @@
 
 struct State_001503E0 { u8 pad[0x744]; u32 count; u32 items[8]; };
 
+struct Node_150298 { u8 pad[0x554]; f32 value554; u8 pad2[0x558 - 0x558]; Node_150298* next; };
+struct State_150298 { u8 pad[0x6CC]; Node_150298* selected; };
+extern Node_150298* D_00262708;
+extern f32 D_0024A014;
+Node_150298* func_0016A820(Node_150298*);
+void func_0014F110(Node_150298*, s32);
+void func_00150298(State_150298* self)
+{
+	s32 scratch[4];
+	(void)scratch;
+	if (self->selected != 0) return;
+	Node_150298* current = D_00262708;
+	Node_150298* best = 0;
+	f32 minimum = D_0024A014;
+	while (current != 0) {
+		Node_150298* candidate = func_0016A820(current);
+		current = current->next;
+		if (candidate != 0 && candidate->value554 < minimum) {
+			best = candidate;
+			minimum = candidate->value554;
+		}
+	}
+	if (best != 0) {
+		func_0014F110(best, 5);
+		self->selected = best;
+	}
+}
+
 struct Object_00150338 { u8 pad[0x550]; s32 status; };
 struct State_00150338 { u8 pad[0x78C]; s32 count; Object_00150338* items[8]; };
 extern Object_00150338* func_00182FC8(Object_00150338*);
@@ -615,6 +643,31 @@ void func_00152D30(void* self)
     *(u8**)((u8*)self + 0xC) = cursor + 0x10;
     *(u64*)cursor = 0x70000000;
     *(u64*)(cursor + 8) = 0;
+}
+
+struct Callback_152D70 { u8 pad000[8]; s16 offset; u16 pad00A; void (*function)(void*, s32); };
+struct Object_152D70 {
+    u8 pad000[8];
+    u32* start;
+    u32* cursor;
+    s32 align;
+    s32 notify;
+    Callback_152D70* callback;
+};
+void func_00152D70(Object_152D70* self)
+{
+    if (self->align) {
+        u32* cursor = self->cursor;
+        while ((u32)cursor & 0xF) *cursor++ = 0;
+        self->cursor = cursor;
+    } else if (self->notify) {
+        self->callback->function((u8*)self + self->callback->offset, 0);
+    }
+    if (self->start) {
+        s32 length = (s32)((u8*)self->cursor - (u8*)self->start);
+        *self->start |= (length >> 4) - 1;
+        self->start = 0;
+    }
 }
 
 void func_00152E18() {}
