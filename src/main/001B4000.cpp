@@ -332,3 +332,110 @@ void func_001B7920(Obj_1B7920* self, void* p)
         self->fCC0 = 0;
     }
 }
+
+struct Entry_1B65C8 { s32 value; s32 extra; };
+struct Host_1B65C8 { u8 pad[0x38]; Entry_1B65C8* entries; };
+struct Node_1B65C8 { u8 pad[0x18]; Host_1B65C8* host; u8 pad2[0x2C - 0x1C]; s32 index; };
+
+void func_001B65C8(Node_1B65C8* self, s32* out)
+{
+    s32 value;
+    if (self->index >= 0) {
+        value = self->host->entries[self->index].value;
+    } else {
+        value = -1;
+    }
+    *out = value;
+}
+
+struct Node_1B6C68 {
+    u8 pad[0x28];
+    s32 f28;
+    s32 index;
+};
+
+void func_001B6E28(Node_1B6C68* self, s32 a, s32 b);
+
+void func_001B6C68(Node_1B6C68* self)
+{
+    func_001B6E28(self, self->f28, self->index);
+    s32 v = self->index;
+    self->index = -1;
+    self->f28 = v;
+}
+
+struct Node_1B6CA8 {
+    u8 pad[0x24];
+    s32 f24;
+};
+
+void func_001B6C68(Node_1B6CA8* self);
+void func_001B66A0(Node_1B6CA8* self);
+
+void func_001B6CA8(Node_1B6CA8* self, s32 a, s32 b)
+{
+    if (a == 5 && b == self->f24) {
+        func_001B6C68(self);
+        func_001B66A0(self);
+    }
+}
+
+typedef void (*VFn_1B6D78)(void* self);
+struct Obj_1B6D78 { VFn_1B6D78* vtbl; };
+typedef void (*Cb_1B6D78)(void* obj, s32 a, s32 b);
+struct Link_1B6D78 {
+    Cb_1B6D78 fn;
+    void* obj;
+    u8 pad[0x8];
+    Link_1B6D78* next;
+};
+struct Node_1B6D78 {
+    u8 pad[0x1C];
+    Obj_1B6D78* f1C;
+    u8 pad2[0x3C - 0x20];
+    Link_1B6D78* f3C;
+};
+
+void func_001B6D78(Node_1B6D78* self, s32 a, s32 b)
+{
+    Obj_1B6D78* o = self->f1C;
+    if (o != 0) {
+        o->vtbl[18](o);
+    }
+    Link_1B6D78* link = self->f3C;
+    if (link != 0) {
+        do {
+            void* obj = link->obj;
+            Cb_1B6D78 fn = link->fn;
+            link = link->next;
+            fn(obj, a, b);
+        } while (link != 0);
+    }
+}
+
+struct Entry_1B6E28 { s32 value; s32 extra; };
+struct Host_1B6E28 { u8 pad[0x38]; Entry_1B6E28* entries; };
+struct Node_1B6E28 { u8 pad[0x18]; Host_1B6E28* host; };
+
+void func_001837E0(Host_1B6E28* host, s32 a, s32 b, void** args);
+
+void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
+{
+    void* args[3];
+    s32 v1;
+    s32 v2;
+    if (idx1 >= 0) {
+        v1 = self->host->entries[idx1].value;
+    } else {
+        v1 = -1;
+    }
+    if (idx2 >= 0) {
+        v2 = self->host->entries[idx2].value;
+    } else {
+        v2 = -1;
+    }
+    args[0] = &self;
+    args[1] = &v1;
+    args[2] = &v2;
+    func_001837E0(self->host, 0xE, 3, args);
+}

@@ -187,3 +187,52 @@ void func_001B2CA8(void* self, Blk_1B2CA8* obj)
     obj->blocks = (bytes + 0xF) >> 4;
     obj->offset = base + off;
 }
+
+struct Rec_1B2CF8 {
+    u8 pad0[4];
+    u32 flags;
+    u8 pad8[0x18];
+};
+
+extern s32 D_00274500;
+extern Rec_1B2CF8* D_00274504;
+extern s32 D_00274510;
+
+s32 func_00137BE0(void* self);
+void* func_0018D5C0(s32 bytes);
+void func_001B2CA8(void* self, Rec_1B2CF8* rec);
+
+void func_001B2CF8(void* self)
+{
+    s32 i;
+    s32 count = func_00137BE0(self);
+    D_00274500 = count;
+    D_00274504 = (Rec_1B2CF8*)func_0018D5C0(count * 0x20);
+    D_00274510 = 0;
+    for (i = 0; i < D_00274500; i++) {
+        func_001B2CA8(self, &D_00274504[i]);
+        if (D_00274504[i].flags & 0x10000000) {
+            D_00274510++;
+        }
+    }
+    {
+        s32 done = D_00274510;
+        s32 left = D_00274500 - done;
+        if (done < left) {
+            D_00274510 = left;
+        }
+    }
+}
+
+extern s32 D_00274518;
+
+void func_00168D68(void* dst, s32 size, s32 align);
+void func_001692B0(s32 a, void* b);
+
+void func_001B3450(void)
+{
+    s32 scratch[4];
+    func_00168D68(scratch, 0x1E00, 0x4000);
+    func_001692B0(0x10000000, scratch);
+    D_00274518 = 0;
+}
