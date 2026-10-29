@@ -337,12 +337,14 @@ void func_00158E10(void* self)
 struct Obj_158E48 { u8 pad0[0x14]; void* f14; u8 pad1[0x94]; s32 fAC; s32 fB0; s32 fB4; };
 struct Sub_158E48 { u8 pad[0x1D8]; void* f1D8; void* f1DC; void* f1E0; };
 
-void func_00158C60(void* self);
+struct Rec_158C60;
+struct Obj_158C60;
+void func_00158C60(Obj_158C60* self);
 void* func_00158DD8(void* self, s32 flag);
-void* func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
+Rec_158C60* func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
 s32 func_001300E8(void* self, s32 kind);
 
-void func_00158E48(void* self)
+void func_00158E48(Obj_158C60* self)
 {
     Obj_158E48* o = (Obj_158E48*)self;
     Sub_158E48* s;
@@ -457,4 +459,186 @@ void func_00159478(void** out, void* self)
         p->vtbl[7](p);
     }
     *out = s2;
+}
+
+struct Child_158C60 {
+    u8 pad0[0x10];
+    s32 kind;
+    u8 pad1[0x120 - 0x14];
+    void* link120;
+    u8 pad2[0x188 - 0x124];
+    s32 link188;
+};
+
+struct Rec_158C60 {
+    u8 pad0[0x18];
+    void* f18;
+    u8 pad1[0x20 - 0x1c];
+    s32 f20;
+    u8 pad2[0x34 - 0x24];
+    s32 f34;
+    u8 pad3[0x7c - 0x38];
+    Rec_158C60* f7c;
+};
+
+struct Obj_158C60 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x90 - 0x18];
+    Child_158C60* child;
+    s32 f94;
+    s32 f98;
+};
+
+Rec_158C60* func_0015A418(void* a0, s32 a1, s32 a2, void* a3);
+void func_00158288(Child_158C60* c, Obj_158C60* self);
+
+void func_00158C60(Obj_158C60* self)
+{
+    Rec_158C60* r;
+    Child_158C60* c;
+
+    if (self->f94 == -1 && self->f98 == -1) {
+        c = self->child;
+        if (c->kind != 3) {
+            if (c->link120 != 0) goto tail_c;
+            if (c->link188 == -1) goto tail;
+        }
+    }
+
+    {
+        s32 none = -1;
+
+        r = (Rec_158C60*)func_00158DD8(self, 1);
+        if (self->f94 != none) {
+            r->f7c = func_0015A418(self->f14, 260, self->f94, self);
+        }
+        if (self->f98 != none) {
+            Rec_158C60* q = func_0015A418(self->f14, 260, self->f98, self);
+            r->f20 = q->f34;
+            r->f7c = (Rec_158C60*)q->f18;
+        }
+    }
+
+tail:
+    c = self->child;
+tail_c:
+    func_00158288(c, self);
+}
+
+struct Fader_159770 {
+    u8 pad0[0x2c];
+    f32 scale;
+    f32 lo;
+    f32 hi;
+    f32 limit;
+    u8 pad1[0x20];
+    s32 count;
+    s32 mode;
+    f32 value;
+    f32 level;
+    f32 step;
+    f32 pos;
+    f32 ratio;
+};
+
+extern f32 D_0026185C;
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_00159770(Fader_159770* s, s32 mode)
+{
+    if (s->mode == mode) return;
+    if (mode == 1) goto store;
+    if (mode < 2) {
+        if (mode == 0) goto zero;
+        s->mode = mode;
+        goto tail;
+    }
+    if (mode == 2) goto two;
+    s->mode = mode;
+    goto tail;
+
+zero:
+    {
+        s32 n = s->count;
+        f32 span = (f32)(n << 1) * (1.0f - s->ratio) / s->scale;
+        s->pos = (f32)(n - 1) * s->ratio;
+        s->step = span;
+        f32 r = func_001EAAE0(0.0f, 1.0f);
+        if (r < s->limit) {
+            s->level = 0.0f;
+        } else {
+            s->level = func_001EAAE0(s->lo, s->hi);
+        }
+    }
+    goto store;
+
+two:
+    {
+        s32 last = s->count - 1;
+        if ((s32)s->pos == last) {
+            s->mode = mode;
+            goto tail;
+        }
+        s->pos = (f32)last;
+    }
+
+store:
+    s->mode = mode;
+
+tail:
+    s->value = D_0026185C;
+}
+
+extern f32 D_0026185C;
+f32 func_001EAAE0(f32 a, f32 b);
+void func_00159770(Fader_159770* s, s32 mode);
+void func_001B46E0(void* obj, s32 value);
+
+void func_00159890(Fader_159770* s, f32 dt)
+{
+    s32 count = s->count;
+    if (count < 2) return;
+    s32 mode = s->mode;
+    if (mode == 1) goto m1;
+    if (mode < 2) {
+        if (mode == 0) goto m0;
+        goto call;
+    }
+    if (mode == 2) goto m2;
+    if (mode == 3) goto m3;
+    goto call;
+
+m0:
+    if (s->level <= D_0026185C - s->value) mode = 1;
+    goto call;
+
+m1:
+    {
+        f32 step = s->step * dt;
+        f32 sum = s->pos + step;
+        s->pos = sum;
+        if ((f32)count <= sum) {
+            f32 back = sum - step;
+            s->pos = back;
+            mode = ((s32)back == count - 1) ? 2 : 3;
+        }
+    }
+    goto call;
+
+m2:
+    if (s->ratio < 1.0f) mode = 3;
+    goto call;
+
+m3:
+    {
+        f32 v = s->pos - s->step * dt;
+        s->pos = v;
+        if (v <= (f32)count * s->ratio) mode = 0;
+    }
+
+call:
+    func_00159770(s, mode);
+    func_001B46E0((u8*)s + 16, (s32)s->pos);
+    func_001B46E0((u8*)s + 64, (s32)s->pos);
 }

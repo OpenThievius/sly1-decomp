@@ -173,3 +173,107 @@ void func_00157E00(void* a, Obj_157E00* b, void* c)
     }
     func_0018D6F0();
 }
+
+struct Word_154EE0 {
+    s32 value;
+};
+
+struct __attribute__((packed)) Packed_154EE0 {
+    s32 value;
+};
+
+struct Buffer_154EE0 {
+    u8 pad0[0x4C];
+    s32 cap;
+    Packed_154EE0* items;
+    void* source;
+};
+
+void* func_0018D500(s32 size);
+void* func_00137B90(void* src);
+Word_154EE0 func_00137C40(void* src);
+
+void func_00154EE0(Buffer_154EE0* self, s32 count, void* unused, void* src)
+{
+    s32 limit = 31;
+    s32 cap = (limit < count) ? 32 : count;
+    self->cap = cap;
+    self->items = (Packed_154EE0*)func_0018D500(cap * 4);
+    self->source = func_00137B90(src);
+    for (s32 i = 0; i < count; i++) {
+        Word_154EE0 tmp = func_00137C40(src);
+        if (i < self->cap) {
+            self->items[i] = *(Packed_154EE0*)&tmp;
+        }
+    }
+}
+
+typedef void (*VFn_154F98)(void* self, s32 count);
+
+struct Obj_154F98 {
+    VFn_154F98* vtbl;
+};
+
+struct Node_154F98 {
+    u8 pad0[0x10];
+    s32 kind;
+    u8 pad1[0x20 - 0x14];
+    Obj_154F98* obj;
+};
+
+struct Owner_154F98 {
+    u8 pad0[0x2D0];
+    Node_154F98* node;
+};
+
+void* func_0018D500(s32 size);
+void func_001549C8(void* mem);
+void func_001289C0(void* self, s32 count);
+s32 func_00137CC0(s32 count);
+void* func_0014D9A8(s32 index);
+void func_00154C80(void* self, s32 count);
+s32 func_00137BE0(s32 count);
+void* func_00155778(void* self, s32 flag);
+void func_00154EE0(void* self, s32 count, void* unused, s32 src);
+
+void func_00154F98(Owner_154F98* self, s32 count)
+{
+    void* mem = func_0018D500(0x200);
+    self->node = (Node_154F98*)mem;
+    func_001549C8(mem);
+    func_001289C0(self, count);
+    s32 index = func_00137CC0(count);
+    if (index != -1) {
+        Obj_154F98* obj = (Obj_154F98*)func_0014D9A8(index);
+        self->node->obj = obj;
+        VFn_154F98 fn = obj->vtbl[0];
+        if (fn != 0) {
+            fn(obj, count);
+        }
+    }
+    if (self->node->kind == 4) {
+        func_00154C80(&self->node->obj, count);
+    }
+    s32 n = func_00137BE0(count);
+    if (n != 0) {
+        void* b = func_00155778(self, 1);
+        func_00154EE0((u8*)b + 0x130, n, self, count);
+    }
+}
+
+struct Counter_155080 {
+    s32 count;
+};
+
+struct Owner_155080 {
+    u8 pad0[0x2D0];
+    Counter_155080* counter;
+};
+
+void func_00127048(void* self);
+
+void func_00155080(Owner_155080* self)
+{
+    func_00127048(self);
+    self->counter->count++;
+}

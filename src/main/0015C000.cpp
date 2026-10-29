@@ -333,3 +333,78 @@ void func_0015CC80(Obj_15CC80* self, void* obj)
     func_00161708(obj, 0, 0x1D6);
     func_00161768(obj, 5, 0x43431);
 }
+
+extern s32 D_0026227C;
+
+void func_0015C178(void)
+{
+    D_0026227C = 0;
+}
+
+struct Record_0015C260 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 count0C;
+    u8 body10[0x20];
+    s32 f30;
+    s64 f38;
+    s32 f40;
+    f32 f44;
+    f32 f48;
+};
+
+void func_0018D800(void* dst, void* src, s32 size);
+
+void func_0015C260(Record_0015C260* src, Record_0015C260* dst)
+{
+    dst->f00 = src->f00;
+    dst->f04 = src->f04;
+    dst->f08 = src->f08;
+    dst->f44 = src->f44;
+    dst->f48 = src->f48;
+    dst->count0C = src->count0C;
+    func_0018D800(dst->body10, src->body10, src->count0C << 3);
+    dst->f30 = src->f30;
+    dst->f38 = src->f38;
+    dst->f40 = src->f40;
+}
+
+struct Pair_15EF88 { u8 pad0[0x4]; s32 f4; u8 pad8[0x4]; s32 fC; };
+
+extern s32 D_00261F18;
+extern s32 D_00261F1C;
+
+void func_0015ED50(void* a, s32 b);
+void func_001686E8(s32 a, s32 b);
+
+void func_0015EF88(Pair_15EF88* self, s32 flag)
+{
+    func_0015ED50(self, flag);
+    func_001686E8(D_00261F18, self->fC);
+    if (flag != 0) {
+        *(volatile s32*)0x10003010 = 0;
+        func_001686E8(D_00261F1C, self->f4);
+    }
+}
+
+extern u8 D_00262280[];
+extern u8 D_002622A8[];
+
+void func_001611B8(void* p);
+void func_001EE318(void* p);
+
+void func_0015F618(s32 flag, s32 code)
+{
+    if (code == 0xFFFF && flag != 0) {
+        func_001611B8(D_00262280);
+        func_001EE318(D_002622A8);
+    }
+}
+
+void func_0015F618(s32 flag, s32 code);
+
+void func_0015F658(void)
+{
+    func_0015F618(1, 0xFFFF);
+}
