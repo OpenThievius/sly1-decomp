@@ -248,3 +248,11 @@ void func_001C71E0(Obj_1C71E0* self)
         func_00159478(&self->fB00, self);
     }
 }
+
+typedef s32 (*VFn_1C7278)(void* self);
+struct Obj_1C7278 { VFn_1C7278* vtbl; };
+
+s32 func_001C7278(Obj_1C7278* self)
+{
+    return self->vtbl[7](self);
+}

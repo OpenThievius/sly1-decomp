@@ -394,3 +394,27 @@ void func_001CA998(Set_1CA998* self, s32 index)
     self->index = index;
     self->found = v;
 }
+
+typedef s32 (*VFn_1CAAD0)(void* self);
+
+struct Obj_1CAAD0 {
+    VFn_1CAAD0* vtbl;
+};
+
+void func_001CAAD0(Obj_1CAAD0* self, s32* out)
+{
+    *out = self->vtbl[102](self);
+}
+
+struct Obj_1CAB00 {
+    u8 pad0[0xB40];
+    s32 flag_B40;
+    u8 pad1[4];
+    s32 value_B48;
+};
+
+void func_001CAB00(Obj_1CAB00* self, s32 value)
+{
+    self->value_B48 = value;
+    self->flag_B40 = 1;
+}

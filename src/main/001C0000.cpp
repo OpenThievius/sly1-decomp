@@ -266,3 +266,34 @@ void func_001C10D8(Obj_001C10D8* self)
     func_00182D48(self);
     func_00152470(self->host + 0x1C84, self);
 }
+
+struct __attribute__((packed)) Pack64_1C1148 { u64 v; };
+struct Obj_1C1148 { u8 pad[0x50]; Pack64_1C1148 field; };
+
+void func_001830D8(void* self);
+
+void func_001C1148(Obj_1C1148* self)
+{
+    Pack64_1C1148 saved;
+    saved = self->field;
+    func_001830D8(self);
+    self->field = saved;
+}
+
+struct Entry_1C1390 { s32 key; void* value; };
+struct Obj_1C1390 { u8 pad[0x1EF4]; Entry_1C1390* table; };
+
+extern u8 D_00259F38[];
+void func_0011A6C0(void* a, void* b);
+
+void* func_001C1390(s32 index, Obj_1C1390* self)
+{
+    if (index == -1) {
+        return 0;
+    } else {
+        Entry_1C1390* e = (Entry_1C1390*)((index << 3) + (u32)self->table);
+        void* p = e->value;
+        if (p != 0) func_0011A6C0(D_00259F38, p);
+        return p;
+    }
+}

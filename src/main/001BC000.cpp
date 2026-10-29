@@ -291,3 +291,66 @@ void func_001BF048(Entry_1BF048* self)
         }
     }
 }
+
+typedef signed int s32;
+typedef unsigned char u8;
+
+void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA)
+{
+    s32* b = (s32*)(base + rowB * stride);
+    s32* a = (s32*)(base + rowA * stride);
+    for (s32 n = stride; n > 0; n -= 4) {
+        s32 y = *a;
+        s32 x = *b;
+        *b = y;
+        *a = x;
+        a++;
+        b++;
+    }
+}
+
+typedef signed int s32;
+
+extern s32 D_00274720;
+extern s32 D_00274728;
+extern s32 D_0027473C;
+
+s32 func_0011CE30(void);
+void func_0011D450(s32 handle);
+void func_0011D600(s32 handle);
+
+void func_001BE1E8(void)
+{
+    if (D_0027473C != 0) {
+        if (D_00274728 != 0) {
+            func_0011D600(D_00274728);
+        }
+        func_0011D450(D_0027473C);
+        while (func_0011CE30() != 0) {
+        }
+        D_0027473C = 0;
+    }
+    D_00274720 = 0;
+    D_00274728 = 0;
+}
+
+struct Obj_1BF0D8 { s32 kind; };
+
+extern s32 D_00274734;
+extern s32 D_00274738;
+
+void func_001BEDF8(Obj_1BF0D8* self);
+void func_001BEF88(Obj_1BF0D8* self);
+
+void func_001BF0D8(Obj_1BF0D8* self)
+{
+    if (self == 0) {
+        return;
+    }
+    s32 k = self->kind;
+    func_001BEDF8(self);
+    if (k == D_00274734) {
+        D_00274738 = k;
+        func_001BEF88(self);
+    }
+}

@@ -97,3 +97,43 @@ Entry_1DBCC8* func_001DBCC8(Owner_1DBCC8* self, s32 a, s32 b, s32 c, s32 d)
     self->tail = e;
     return e;
 }
+
+typedef void (*VFn_1D92F0)(void* self);
+struct Sub_1D92F0 { VFn_1D92F0* vtbl; };
+struct Ctrl_1D92F0 {
+    u8 pad0[0x854];
+    f32 f854;
+    s32 n858;
+    u8 pad1[0xB14 - 0x85C];
+    Sub_1D92F0* sub;
+};
+
+extern f32 D_0026185C;
+
+void func_001D92F0(Ctrl_1D92F0* self)
+{
+    self->f854 = D_0026185C;
+    self->n858 = self->n858 - 1;
+    Sub_1D92F0* s = self->sub;
+    if (s != 0) {
+        s->vtbl[6](s);
+    }
+}
+
+typedef void (*VFn_1DBE48)(s32 a, s32 b, s32 c);
+struct Node_1DBE48 { VFn_1DBE48 fn; s32 a; s32 b; s32 c; Node_1DBE48* next; };
+struct Owner_1DBE48 { u8 pad[0x1EC8]; Node_1DBE48* head; Node_1DBE48* tail; };
+
+void func_001DBC18(void* self, void* node);
+
+void func_001DBE48(Owner_1DBE48* self)
+{
+    while (self->head != 0) {
+        Node_1DBE48* node = self->head;
+        if (node == self->tail) self->tail = 0;
+        self->head = node->next;
+        node->next = 0;
+        node->fn(node->a, node->b, node->c);
+        func_001DBC18(self, node);
+    }
+}
