@@ -274,7 +274,6 @@ void func_00151E20(void* self, f32 amount)
     *(f32*)((u8*)*(void**)&D_002623C8 + 0x10) = result;
 }
 
-
 void func_00151FC8(void* object)
 {
 	func_00152410(object, 0.0f);
