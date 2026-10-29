@@ -330,3 +330,11 @@ Node_1387C0* func_00138788(void* unused, Node_1387C0** head, Key_00138788* key)
     }
     return node;
 }
+
+struct State_0013B5C8 { u8 pad[0x680]; void* slot; };
+void func_001BA130(void* self, void* other);
+void func_0013B5C8(State_0013B5C8* self, State_0013B5C8* other)
+{
+    func_001BA130(self, other);
+    if (other->slot) self->slot = (void*)func_0018D568(0x24, other->slot);
+}

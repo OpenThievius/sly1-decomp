@@ -581,3 +581,45 @@ void func_0013DA48(Obj_0013DA48* obj, s32 value) { if (obj->count < 4) { obj->va
 
 struct Obj_13DAB8 { u8 pad[0x63C]; u32 flags; u8 gap[0x28]; u32 count; u32 values[4]; };
 void func_0013DAB8(Obj_13DAB8* obj, s32 value) { if (obj->count < 3) { obj->values[obj->count++] = value; obj->flags |= 2; } }
+
+void func_0013D900(Queue_D950* self, s32 value)
+{
+    if ((u32)self->count < 16) {
+        self->slots[self->count].y = value;
+        self->slots[self->count].x = 2;
+        self->count++;
+    }
+}
+
+void func_0013D9A0(FlagState* self, s32 enabled)
+{
+    if (enabled) {
+        self->flags = (self->flags | 1) & ~8;
+    } else {
+        self->flags &= ~1;
+        if (self->flags == 0) self->flags = 8;
+    }
+}
+
+void func_0013D9F0(FlagState* self, s32 enabled)
+{
+    if (enabled) {
+        self->flags = (self->flags | 4) & ~8;
+    } else {
+        self->flags &= ~4;
+        if (self->flags == 0) self->flags = 8;
+    }
+}
+
+struct State_0013DAF0 { u8 pad[0x6B4]; void* slot; };
+void* func_0013DAF0(State_0013DAF0* self)
+{
+    if (!self->slot) func_001BE4D8(&self->slot);
+    return self->slot;
+}
+
+void func_0013EC00(void* list, s32 size, void* count, s32 a, s32 b, s32 c, s32 d);
+void func_0013EB30(u8* self, s32 a, s32 b, s32 c, s32 d)
+{
+    func_0013EC00(self + 0x14C, 8, self + 0x148, a, b, c, d);
+}
