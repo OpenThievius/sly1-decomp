@@ -300,7 +300,7 @@ void func_0011A800(void)
 
 extern u8 D_00259F38[];
 
-void func_0011A678(void* p);
+void* func_0011A678(void* p);
 void func_0011A680(void* p, s32 n);
 
 void func_0011ADF8(s32 a, s32 b)
@@ -850,4 +850,64 @@ void* func_0011B928(void* out, Scaled_11B928* in)
         func_0011B060(&q, 2);
     }
     return out;
+}
+
+// A 128-bit value, copied as one quadword.
+typedef u64 Quad_118D10 __attribute__((mode(TI)));
+
+// Copies the quadword at src into out and returns out.
+Quad_118D10* func_00118D10(Quad_118D10* out, void* src)
+{
+    Quad_118D10 v = *(Quad_118D10*)src;
+    *out = v;
+    return out;
+}
+
+// A 128-bit value, stored as one quadword.
+typedef u64 Quad_118D20 __attribute__((mode(TI)));
+
+// Stores the quadword v into out and returns out.
+Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v)
+{
+    *out = v;
+    return out;
+}
+
+void* func_0011A678(void* self)
+{
+    return self;
+}
+
+struct Counters_11A6A8 {
+    s32 count;
+    u8 pad[0x500];
+    s32 count2;
+};
+
+void func_0011A6A8(Counters_11A6A8* self)
+{
+    self->count = 0;
+    self->count2 = 0;
+}
+
+struct Rec_11B6C0 { s32 tag; s32 value; };
+void func_0011B418(void* self);
+
+void func_0011B6C0(Rec_11B6C0* r, s32 value)
+{
+    func_0011B418(r);
+    r->value = value;
+    r->tag = 0x1E;
+}
+
+struct Rec_11B740 { s32 tag; s32 value; };
+void func_0011B418(void* self);
+s32 func_0011C580(u32 addr);
+
+void func_0011B740(Rec_11B740* r, s32 value)
+{
+    func_0011C580(value);
+    func_0011B418(r);
+    r->value = value;
+    r->tag = 0x16;
 }
