@@ -284,3 +284,116 @@ void func_0016AA18(Self_16AA18* self)
         }
     }
 }
+
+struct Actor_169D90 {
+    u8 pad_00[0x14];
+    void* ptr_14;
+    s32 arg_18;
+    u8 pad_1C[0x44 - 0x1C];
+    s32 key_44;
+    void* res_48;
+};
+
+struct Res_0015A448 {
+    u8 pad_00[0x398];
+    s32 f398;
+};
+
+void* func_0015A448(void* a, s32 b, s32 c);
+
+void func_00169D90(Actor_169D90* self)
+{
+    if (self->key_44 != -1) {
+        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->ptr_14, self->key_44, self->arg_18);
+        self->res_48 = r;
+        r->f398 = 0;
+    }
+}
+
+struct Blob_169DD8 {
+    u64 bits;
+} __attribute__((packed));
+
+struct Actor_169DD8 {
+    u8 pad_00[0x38];
+    Blob_169DD8 blob_38;
+};
+
+void func_001830D8(void* self);
+
+void func_00169DD8(Actor_169DD8* self)
+{
+    Blob_169DD8 saved = self->blob_38;
+    func_001830D8(self);
+    self->blob_38 = saved;
+}
+
+void func_0016A140(void* self)
+{
+    func_00182D48(self);
+    func_00152470(D_002626F8, self);
+}
+
+struct Actor_16A1B0 {
+    u8 pad_00[0x14];
+    void* ptr_14;
+    s32 arg_18;
+    u8 pad_1C[0x60 - 0x1C];
+    s32 key_60;
+    void* res_64;
+};
+
+void func_0016A1B0(Actor_16A1B0* self)
+{
+    if (self->key_60 != -1) {
+        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->ptr_14, self->key_60, self->arg_18);
+        self->res_64 = r;
+        r->f398 = 0;
+    }
+}
+
+struct Blob_16A1F8 {
+    u64 bits;
+} __attribute__((packed));
+
+struct Actor_16A1F8 {
+    u8 pad_00[0x50];
+    Blob_16A1F8 blob_50;
+};
+
+void func_0016A1F8(Actor_16A1F8* self)
+{
+    Blob_16A1F8 saved = self->blob_50;
+    func_001830D8(self);
+    self->blob_50 = saved;
+}
+
+struct Actor_16A3A8 {
+    u8 pad_000[0x568];
+    f32 f568;
+};
+
+void func_001B7968(void* self);
+void func_00129FB0(void* self, f32 k);
+void func_0012A080(void* self, f32 k);
+void func_0012A150(void* self, f32 k);
+void func_0012A270(void* self, f32 k);
+
+void func_0016A3A8(Actor_16A3A8* self)
+{
+    f32 k = 3.0f;
+    func_001B7968(self);
+    func_00129FB0(self, k);
+    func_0012A080(self, k);
+    func_0012A150(self, k);
+    func_0012A270(self, 2.0f);
+    self->f568 = 300.0f;
+}
+
+void func_001B7A98(void* self);
+
+void func_0016A490(void* self)
+{
+    func_001B7A98(self);
+    func_00152470(D_00262708, self);
+}

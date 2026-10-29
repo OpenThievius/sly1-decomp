@@ -219,3 +219,13 @@ struct Owner_162810
     void** refs;
 };
 
+void func_00162810(Owner_162810* owner)
+{
+    owner->refs = (void**)func_0018D500(owner->capacity << 2);
+    s32 n = 0;
+    for (s32 i = 0; i < owner->count; i++) {
+        void* ref = owner->items[i].ref;
+        if (ref != 0)
+            owner->refs[n++] = ref;
+    }
+}

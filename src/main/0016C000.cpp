@@ -57,3 +57,28 @@ void func_0016F7B0(Obj_16F7B0* self)
     self->f21c8 = -1.0f;
     D_00262E10 = self;
 }
+
+extern u8 D_00262A80[];
+extern u8 D_00262AB8[];
+extern u8 D_00262AF0[];
+extern u8 D_00262B28[];
+extern u8 D_00262B60[];
+extern u8 D_00262B98[];
+extern u8 D_00262BD0[];
+extern u8 D_00262C08[];
+extern u8 D_00262C48[];
+
+void func_0016F188(void* entry);
+
+void func_0016F588(void)
+{
+    func_0016F188(D_00262A80);
+    func_0016F188(D_00262AB8);
+    func_0016F188(D_00262AF0);
+    func_0016F188(D_00262B28);
+    func_0016F188(D_00262B60);
+    func_0016F188(D_00262B98);
+    func_0016F188(D_00262BD0);
+    func_0016F188(D_00262C08);
+    func_0016F188(D_00262C48);
+}

@@ -87,3 +87,44 @@ void func_0017BC20(Obj_17BC20* self, Comp_17BC20* next)
         func_001E2840(next, 1);
     }
 }
+
+void func_0017B598(void* self)
+{
+    func_0012C918(*(void**)((u8*)self + 0x60C), self, 1, (u8*)self + 0x610, 0.0f, 1.0f);
+}
+
+extern s32 D_00263E2C;
+extern s32 D_00263E30;
+
+struct Obj_17B5D0 { u8 pad0[0x558]; s32 f558; };
+
+void func_0017B5D0(void* self)
+{
+    Obj_17B5D0* o = (Obj_17B5D0*)self;
+    func_001B7968(self);
+    o->f558 = 0x10;
+    D_00263E2C = -1;
+    D_00263E30 = 0;
+}
+
+extern u8 D_00263E08[];
+
+void func_00124A48(void* self);
+void func_00124DF8(void* self, int n, void* table);
+
+void func_0017B610(void* self)
+{
+    func_00124A48(self);
+    func_00124DF8(self, 3, D_00263E08);
+}
+
+void func_00182C18(void* self);
+void* func_0018D500(int size);
+
+struct Obj_17B998 {
+    u8 pad0[0x38];
+    void* f38;
+    u8 pad1[0x68 - 0x3C];
+    s32 f68;
+};
+
