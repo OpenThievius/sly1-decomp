@@ -295,3 +295,50 @@ s32 func_0013E868(Set_0013E868* set, void* key)
     }
     return 0;
 }
+
+struct Actor_13DB28 {
+    u8 pad0[0x228];
+    s32 count_228;
+    u8 pad1[0x550 - 0x22C];
+    s32 state_550;
+    f32 stamp_554;
+    f32 limit_558;
+    f32 param_55C;
+};
+
+extern f32 D_0026185C;
+void func_001B93F8(Actor_13DB28* self);
+void func_0013DD78(Actor_13DB28* self, s32 state);
+
+void func_0013DC38(Actor_13DB28* self)
+{
+    s32 next;
+
+    func_001B93F8(self);
+    next = self->state_550;
+    if (next != 0) {
+        if (next == 1) {
+            if (self->count_228 >= 2 || self->limit_558 < D_0026185C - self->stamp_554) {
+                next = 2;
+            }
+        }
+    }
+    func_0013DD78(self, next);
+}
+
+struct Msg_13DB28 {
+    s32 kind_00;
+    Actor_13DB28* target_04;
+};
+
+void func_00127378(Actor_13DB28* self, s32 kind, Msg_13DB28* msg);
+
+void func_0013DCA8(Actor_13DB28* self, s32 kind, Msg_13DB28* msg)
+{
+    func_00127378(self, kind, msg);
+    if (kind == 0xF) {
+        if (msg->target_04 == self) {
+            func_0013DD78(self, 1);
+        }
+    }
+}

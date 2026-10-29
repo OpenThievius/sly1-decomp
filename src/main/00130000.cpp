@@ -100,3 +100,60 @@ void func_00131140(Obj_131140* self)
     self->f308 = 0;
     self->f314 = 0.4f;
 }
+
+struct Obj_130070 { s32 state; };
+
+void func_0012FE70(void* self);
+void func_0012FFE8(void* self);
+
+void func_00130070(Obj_130070* self)
+{
+    switch (self->state) {
+    case 0:
+        func_0012FE70(self);
+        func_0012FFE8(self);
+        break;
+    case 1:
+        func_0012FFE8(self);
+        func_0012FE70(self);
+        break;
+    }
+}
+
+struct Node_1300E8 { Node_1300E8* next; s32 key; };
+struct List_1300E8 { Node_1300E8* head; };
+
+s32 func_001300E8(List_1300E8* list, s32 key)
+{
+    Node_1300E8* node = list->head;
+    while (node != 0) {
+        if (node->key == key) {
+            return 1;
+        }
+        node = node->next;
+    }
+    return 0;
+}
+
+struct Obj_130110 { s32 pad0; s32 field4; };
+
+extern u8 D_00259F38[];
+s32 func_0011BF30(void);
+void func_0011A708(void* dst, s32 value);
+
+void func_00130110(Obj_130110* self)
+{
+    if (self->field4 == 0) {
+        s32 v = func_0011BF30();
+        self->field4 = v;
+        func_0011A708(D_00259F38, v);
+    }
+}
+
+struct Inner_130158 { s32 pad0; s32 value; };
+struct Holder_130158 { Inner_130158* inner; };
+
+void func_00130158(Holder_130158* holder, s32* out)
+{
+    *out = holder->inner->value;
+}

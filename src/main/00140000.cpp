@@ -281,3 +281,219 @@ void func_00143810(void)
 {
     func_00143988(D_00261990);
 }
+
+void func_001405D0(void* a, void* b, int c);
+
+void func_00140618(void* self, int value)
+{
+    func_001405D0((u8*)self + 0x5C0, self, value);
+}
+
+void func_0013E8F8(void* a, int b);
+
+void func_00140640(void* self, void* unused, int value)
+{
+    func_0013E8F8((u8*)self + 0x90, value);
+}
+
+void func_00140640(void* self, void* unused, int value);
+
+void func_00140660(void* self, int value)
+{
+    func_00140640((u8*)self + 0x554, self, value);
+}
+
+struct List_1406B0 { u8 pad0[0x720]; s32 count; s32 items[1]; };
+
+void func_001406B0(List_1406B0* list, s32 value)
+{
+    list->items[list->count++] = value;
+}
+
+struct Table_1415D0 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x564 - 0x18];
+    s32 countA;
+    void* arrA[9];
+    s32 countB;
+    void* arrB[8];
+    s32 f5B0;
+    s32 f5B4;
+};
+
+void func_001BA130(void* self);
+void* func_00183058(void* item, void* x, Table_1415D0* self);
+
+void func_001415D0(Table_1415D0* self)
+{
+    s32 keepB = self->f5B0;
+    s32 keepA = self->f5B4;
+    func_001BA130(self);
+    self->f5B0 = keepB;
+    self->f5B4 = keepA;
+    for (s32 i = 0; i < self->countA; i++) {
+        self->arrA[i] = func_00183058(self->arrA[i], self->f14, self);
+    }
+    for (s32 j = 0; j < self->countB; j++) {
+        self->arrB[j] = func_00183058(self->arrB[j], self->f14, self);
+    }
+}
+
+struct Event_1417F0 {
+    s32 type;
+    u8 pad[0xC];
+    s32 flags;
+};
+
+extern u8 D_00262C70[];
+
+void func_00141870(void* self);
+s32 func_001925F0(void* self, Event_1417F0* ev);
+s32 func_001BC320(void* self, Event_1417F0* ev);
+void func_0016EC38(void* p, f32 f, s32 n);
+
+s32 func_001417F0(void* self, Event_1417F0* ev)
+{
+    s32 r = func_001925F0(self, ev);
+    if (ev->type == r) {
+        if ((ev->flags & 0x10) == 0) {
+            func_0016EC38(D_00262C70, 0.2f, 2);
+        }
+        func_00141870(self);
+        return 1;
+    }
+    return func_001BC320(self, ev);
+}
+
+struct Slot_141870 {
+    s32 f0;
+    s32 f4;
+};
+
+struct Node_141870 {
+    u8 pad0[0x8];
+    s32 f8;
+    u8 pad1[0xC];
+    Node_141870* f18;
+    u8 pad2[0x14];
+    Slot_141870* f30;
+    u8 pad3[0x564 - 0x34];
+    s32 countA;
+    void* arrA[9];
+    s32 countB;
+    void* arrB[4];
+    s32 f5A0;
+    s32 f5A4;
+    u8 pad5[0x5AC - 0x5A8];
+    void* f5AC;
+    s32 f5B0;
+};
+
+extern u8 D_00261EF0[];
+extern u8 D_00261420[];
+
+void func_00151ED8(void* table, Node_141870* self);
+s32 func_00141008(void* table, s32 v);
+void func_00141040(void* table, s32 v);
+s32 func_00182F40(s32 v, Node_141870* self);
+void func_00140E10(void* table, s32 a, s32 idx);
+void func_0012C7B0(void* p, s32 a, s32 b, s32 c, f32 x, f32 y);
+void func_001B64D8(void* p, s32 n);
+
+void func_00141870(Node_141870* self)
+{
+    func_00151ED8(D_00261EF0, self);
+    s32 sel;
+    if (self->f5AC != 0) {
+        sel = func_00141008(D_00261420, self->f5B0) ? 0x549 : 0x548;
+    }
+    s32 idx = -1;
+    func_00141040(D_00261420, self->f5B0);
+    if (func_00182F40(self->f5A4, self)) {
+        for (Node_141870* n = self; n != 0; n = n->f18) {
+            Slot_141870* sl = n->f30;
+            if (sl != 0) {
+                idx = sl->f4;
+            }
+        }
+        if (idx == -1) {
+            idx = self->f8;
+        }
+    }
+    func_00140E10(D_00261420, self->f5A0, idx);
+    for (s32 i = 0; i < self->countA; i++) {
+        func_0012C7B0(self->arrA[i], 0, 0, 0, 0.0f, 1.0f);
+    }
+    if (self->f5AC != 0) {
+        func_001B64D8(self->f5AC, sel);
+    }
+}
+
+struct Queue_1419A0 {
+    u8 pad[0x578];
+    s32 count;
+    s32 items[1];
+};
+
+void func_001419A0(Queue_1419A0* q, s32 value)
+{
+    q->items[q->count++] = value;
+}
+
+struct Obj_143A38 {
+    u8 pad0[0x1C0];
+    f32 f1C0;
+};
+
+
+void func_00143A38(Obj_143A38* self, f32 value)
+{
+    self->f1C0 = value;
+    func_00143560(D_00261990);
+}
+
+struct Ctl_143A60 {
+    u8 pad0[0x218];
+    f32 f218;
+    s32 f21C;
+    u8 pad1[0x3D0 - 0x220];
+    s32 f3D0;
+    u8 pad2[0x454 - 0x3D4];
+    u8 f454[0x20];
+};
+
+extern u8 D_00261880[];
+extern u8 D_00261890[];
+void func_00144938(void* self, void* a, void* b);
+void func_001493B8(void* p, s32 zero);
+void func_00145088(void* self, s32 a1, void* a2, s32 a3, s32 a4);
+void func_001455C0(void* self, s32 zero);
+
+void func_00143A60(Ctl_143A60* self, s32 flag)
+{
+    if (flag != 0) {
+        func_00144938(self, D_00261880, D_00261890);
+    }
+    self->f3D0 = 0;
+    func_001493B8(self->f454, 0);
+    func_00145088(self, 0, self->f454, 0, 0);
+    func_001455C0(self, 0);
+    self->f21C = 0x0FFFFFFF;
+    self->f218 = -10.0f;
+}
+
+struct ItemList_143AF8 {
+    u8 pad0[0x340];
+    s32 count;
+    void* items[8];
+};
+
+void func_00143AF8(ItemList_143AF8* list, void* item)
+{
+    u32 n = list->count;
+    if (n < 8) {
+        list->items[n] = item;
+        list->count = n + 1;
+    }
+}

@@ -114,3 +114,28 @@ s32 func_00135858(Entry_135858* a, Entry_135858* b)
     }
     return 1;
 }
+
+struct Chan_1373D0 {
+    s32 a00;
+    s32 mode;
+    s32 a08;
+    s32 a0C;
+    s32 a10;
+    s32 a14;
+    s32 a18;
+    s32 a1C;
+    s32 a20;
+    s32 a24;
+    s32 a28;
+    s32 a2C;
+    void* a30;
+    void* a34;
+    s32 a38;
+    s32 a3C;
+    s32 a40;
+};
+
+s32 func_00137480(Chan_1373D0* self, s32 n)
+{
+    return self->a40 -= n;
+}
