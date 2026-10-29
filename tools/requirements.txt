@@ -1,0 +1,5 @@
+# tools/setup_asm.py: splat and the disassembler it drives, pinned.
+splat64[mips]==0.50.1
+spimdisasm==1.42.4
+rabbitizer==1.16.2
+PyYAML==6.0.3
