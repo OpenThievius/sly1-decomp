@@ -522,3 +522,57 @@ void func_001EF8F8(void) {}
 
 struct Obj_001EFA60 { u32 pad; u32 count; s32 items[8]; };
 void func_001EFA60(Obj_001EFA60* self, s32 value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }
+
+struct Obj_1EC380 { u8 pad[0x724]; s32 f724; };
+
+void func_00125B70(void* obj, void* c, void* out);
+void func_00125C90(void* obj, void* s, void* out);
+
+void func_001EC380(void* self, void* s, void* c)
+{
+    u8 tmp[0x50];
+    void* out = c;
+    if (((Obj_1EC380*)self)->f724 == 16) {
+        func_00125B70(self, c, tmp);
+        *(s32*)(tmp + 0x44) = 0;
+        out = tmp;
+    }
+    func_00125C90(self, s, out);
+}
+
+struct Obj_1ECE98 { u8 pad0[0x724]; s32 f724; u8 pad1[0xC48 - 0x728]; void* fC48; u8 pad2[0x140 - 0x4C]; };
+
+void func_001C8418(void* self, void* p);
+void func_001C8C08(void* self);
+void func_001F3BD8(void* self, void* arg);
+
+void func_001ECE98(Obj_1ECE98* self)
+{
+    s32 loc[4];
+    s32 v = self->f724;
+    if (v >= 14) goto tail;
+    if (v < 12) goto tail;
+    {
+        void* q = self->fC48;
+        if (q != 0) {
+            func_001F3BD8(q, loc);
+            func_001C8418(self, loc);
+        } else {
+            func_001C8418(self, (u8*)self + 0x140);
+        }
+    }
+    return;
+tail:
+    func_001C8C08(self);
+}
+
+struct Obj_1ED168 { u8 pad[0x38]; void* f38; };
+
+void func_00182C18(void* self);
+void* func_0018D500(s32 size);
+
+void func_001ED168(Obj_1ED168* self)
+{
+    func_00182C18(self);
+    self->f38 = func_0018D500(0xC00);
+}

@@ -295,3 +295,39 @@ void func_001C4458(Obj_1C4458* self)
 }
 
 s32 func_001C4F00(void) { return 3; }
+
+struct Sub_1C4578 { u8 pad[0x98]; s32 f98; u8 pad2[0xB0 - 0x9C]; s32 fB0; };
+struct Holder_1C4578 { u8 pad[0x224]; Sub_1C4578* f224; };
+struct Obj_1C4578 { u8 pad[0x618]; Holder_1C4578* f618; Holder_1C4578* f61C; };
+
+void func_001C4578(Obj_1C4578* self, s32 a1)
+{
+    Holder_1C4578* h = self->f61C;
+    if (h != 0) {
+        Sub_1C4578* s = h->f224;
+        if (s != 0 && (s->fB0 & 0x20) != 0) {
+            if (a1 != 0) s->f98 |= 2;
+            else s->f98 &= ~2;
+        }
+    }
+    Holder_1C4578* v = self->f618;
+    if (v != 0) {
+        Sub_1C4578* s = v->f224;
+        if (s != 0 && (s->fB0 & 0x20) != 0) {
+            if (a1 != 0) s->f98 |= 2;
+            else self->f61C->f224->f98 &= ~2;
+        }
+    }
+}
+
+typedef s32 (*VFn_1C4F08)(void* self);
+struct Obj_1C4F08 { VFn_1C4F08* vtbl; u8 pad[0x470 - 4]; s32 f470; };
+void func_001BC828(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+
+void func_001C4F08(Obj_1C4F08* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+{
+    s32 old = self->f470;
+    self->f470 = self->vtbl[0x164 / 4](self);
+    func_001BC828(self, a1, a2, a3, a4, a5);
+    self->f470 = old;
+}

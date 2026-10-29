@@ -323,3 +323,44 @@ void* func_001E5E60(Obj_001E5E60* self) { return self->value ? self->value : sel
 
 struct Obj_001E6268 { u8 pad[0xC70]; f32 value; };
 void func_001E6268(Obj_001E6268* self, s32* first, s32* second) { s32 n = (s32)(self->value * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
+
+typedef s32 (*VFn_1E55D0)(void* self);
+struct Obj_1E55D0 { VFn_1E55D0* vtbl; };
+struct Item_1E55D0 { u8 pad0[0x724]; s32 f724; };
+struct Self_1E55D0 { u8 pad0[0x14]; void* f14; u8 pad1[0x568]; s32 f580; u8 pad2[0x9C]; Obj_1E55D0* f620; };
+
+void func_00192B58(void* self);
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void func_001C8F20(void* node, s32 kind, s32 flag);
+
+void func_001E55D0(Self_1E55D0* self)
+{
+    void* arr[8];
+    s32 n;
+    s32 count;
+    s32 i;
+
+    func_00192B58(self);
+    if (self->f620 != 0) {
+        if (self->f620->vtbl[81](self->f620)) {
+            n = func_0015A4F0(self->f14, 5, 8, 0, 8, arr);
+            if (n > 0) {
+                count = n;
+                i = 0;
+                do {
+                    void* item = arr[i];
+                    if (item != self->f620) {
+                        if (((Item_1E55D0*)item)->f724 != 0xB) {
+                            func_001C8F20(item, 0xA, 0);
+                        }
+                    }
+                    count--;
+                    i++;
+                } while (count != 0);
+            }
+            self->f580 = 0;
+        } else {
+            self->f580 = 1;
+        }
+    }
+}

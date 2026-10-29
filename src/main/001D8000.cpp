@@ -222,3 +222,85 @@ void func_001DB1E8(Obj_001DB1E8* self, s32 a, s32 b, s32 c, f32 x, f32 y) { if (
 struct Obj_001DBB20 { u8 pad[0x38]; s32 count; };
 struct Link_001DBB20 { u32 pad[2]; u32 flags; };
 s32 func_001DBB20(Obj_001DBB20* self, Link_001DBB20** link, u32 value) { return ((*link)->flags & 2) && self->count >= 0xF7 && value == 0; }
+
+typedef void (*VFn_1DB0C8)(void* self, void* a, s32 b, void* c, s32 d, void* e, s32 f);
+struct Inner_1DB0C8 { VFn_1DB0C8* vtbl; };
+struct Outer_1DB0C8 { u8 pad0[0x34]; Inner_1DB0C8* inner; };
+
+void func_001DB0C8(u8* self, Outer_1DB0C8* obj)
+{
+    s32 loc[4];
+    Inner_1DB0C8* inner;
+
+    *(Outer_1DB0C8**)(self + 0x848) = obj;
+    inner = obj->inner;
+    if (inner->vtbl[10] != 0) {
+        inner->vtbl[10](inner, self + 0x100, 0, loc, 0, self + 0x84C, 0);
+    }
+}
+
+void func_00152438(void* self, s32 value);
+
+void func_001DB480(u8* self)
+{
+    u32 i;
+    for (i = 0; i < 0x200; i++) {
+        func_00152438(self + 0x84 + i * 0xC, 0xC);
+    }
+}
+
+struct Node_1DBD40 { s32 f0; s32 f4; s32 f8; s32 fC; struct Node_1DBD40* next; };
+struct Self_1DBD40 { u8 pad0[0x1EC8]; struct Node_1DBD40* head; struct Node_1DBD40* tail; };
+
+void func_001DBC18(void* self, void* node);
+
+void func_001DBD40(struct Self_1DBD40* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
+{
+    struct Node_1DBD40* prev = 0;
+    struct Node_1DBD40* removed = 0;
+    struct Node_1DBD40* cur = self->head;
+    struct Node_1DBD40* next;
+    s32 bit;
+
+    if (cur != 0) {
+        do {
+            next = cur->next;
+            bit = 1;
+            while (bit < 16) {
+                if (mask & bit) {
+                    switch (bit) {
+                    case 1:
+                        if (cur->f0 != k0) goto miss;
+                        break;
+                    case 2:
+                        if (cur->f4 != k1) goto miss;
+                        break;
+                    case 4:
+                        if (cur->f8 != k2) goto miss;
+                        break;
+                    case 8:
+                        if (cur->fC != k3) goto miss;
+                        break;
+                    }
+                }
+                bit <<= 1;
+            }
+            if (prev != 0) {
+                prev->next = next;
+            } else {
+                self->head = next;
+            }
+            if (next == 0) {
+                self->tail = prev;
+            }
+            cur->next = removed;
+            removed = cur;
+            goto advance;
+        miss:
+            prev = cur;
+        advance:
+            cur = next;
+        } while (cur != 0);
+    }
+    func_001DBC18(self, removed);
+}

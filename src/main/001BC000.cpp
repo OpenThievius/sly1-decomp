@@ -445,3 +445,41 @@ s32 func_001BE5E8(void) { return D_00274744; }
 
 extern s32 D_00274748;
 s32 func_001BF1F0(void) { return D_00274748; }
+
+typedef s32 (*Cmp_1BE0A8)(void* a, void* b);
+
+void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA);
+
+void func_001BE0A8(u8* base, s32 n, s32 size, Cmp_1BE0A8 cmp)
+{
+    if (n < 2) return;
+    s32 end = n - 1;
+    s32 start = n / 2;
+    for (;;) {
+        if (start > 0) {
+            start--;
+        } else {
+            func_001BE068(base, size, end, 0);
+            s32 t = end;
+            end = t - 1;
+            if (t < 2) return;
+        }
+        s32 i = start;
+        s32 c = 2 * i + 1;
+        if (end < c) continue;
+        for (;;) {
+            if (c < end) {
+                s32 s0 = c + 1;
+                if (cmp(base + c * size, base + s0 * size) < 0) c = s0;
+            }
+            if (cmp(base + i * size, base + c * size) < 0) {
+                func_001BE068(base, size, i, c);
+                i = c;
+                c = c + (c + 1);
+                if (end < c) break;
+                continue;
+            }
+            break;
+        }
+    }
+}

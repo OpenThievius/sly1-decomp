@@ -559,3 +559,55 @@ void func_001E8EF8(Obj_1E8EF8* self)
 
 extern u8 D_00275B50[];
 void func_001E8878(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
+
+struct Obj_1E8FA8 { u8 pad0[0x724]; s32 f724; };
+
+void func_001C8BC0(Obj_1E8FA8* self);
+void func_001C8E28(Obj_1E8FA8* self);
+
+void func_001E8FA8(Obj_1E8FA8* self)
+{
+    if (self->f724 == 8) {
+        func_001C8BC0(self);
+    } else {
+        func_001C8E28(self);
+    }
+}
+
+typedef void (*VFn_1E9E30)(void* self);
+struct Node_1E9E30 {
+    VFn_1E9E30* vtbl;
+    u8 pad0[0x6C - 4];
+    Node_1E9E30* f6C;
+    u8 pad1[0x2D8 - 0x70];
+    Node_1E9E30* f2D8;
+    u8 pad2[0x2E4 - 0x2DC];
+    Node_1E9E30* f2E4;
+    u8 pad3[0x414 - 0x2E8];
+    Node_1E9E30* f414;
+    u8 pad4[0x538 - 0x418];
+    u64 f538;
+};
+
+void func_001E9E30(void* self)
+{
+    s32 scratch[4];
+    (void)scratch;
+    Node_1E9E30* s1 = ((Node_1E9E30*)self)->f6C;
+    if (s1 != 0) {
+        do {
+            Node_1E9E30* s0 = s1->f2D8;
+            if (s0 != 0) {
+                do {
+                    u64 bit = (u64)1 << 53;
+                    if ((s0->f538 & bit) == 0) {
+                        s0->vtbl[72](s0);
+                    }
+                    s0->f538 &= ~bit;
+                    s0 = s0->f2E4;
+                } while (s0 != 0);
+            }
+            s1 = s1->f414;
+        } while (s1 != 0);
+    }
+}

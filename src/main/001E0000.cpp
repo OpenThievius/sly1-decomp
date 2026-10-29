@@ -235,3 +235,32 @@ struct Obj_001E29E8 { u8 pad[0x360]; f32 a; f32 b; f32 c; };
 void func_001E29E8(Obj_001E29E8* self, f32 value) { self->b = value; self->c = 1.0f; self->a = value; }
 
 void func_001E30E0(void) {}
+
+void func_001243E0(void* self);
+void func_001E2778(void* self, s32 state);
+void func_001DBD40(void* a, s32 b, s32 c, void* d, s32 e, s32 f);
+
+void func_001E25F8(void* self)
+{
+    func_001243E0(self);
+    func_001E2778(self, 0);
+    func_001DBD40(*(void**)((u8*)self + 0x14), 2, 0, self, -1, 0);
+}
+
+void func_00124A48(void* self);
+
+void func_001E2758(void* self)
+{
+    func_00124A48(self);
+}
+
+void func_0015FBB8(void* self, void* p);
+void func_001E2778(void* selfv, s32 state);
+
+void func_001E29A8(void* self, void* p)
+{
+    func_0015FBB8(self, p);
+    if (p != 0) {
+        func_001E2778(self, 0);
+    }
+}

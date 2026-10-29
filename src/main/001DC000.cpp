@@ -466,3 +466,141 @@ s32 func_001DDA80(Obj_001DDA80* self) { return self->value > 0; }
 
 struct Obj_001DDAC8 { u8 pad[0x2350]; f32 value; };
 void func_001DDAC8(Obj_001DDAC8* self, f32 value) { self->value = value; }
+
+struct __attribute__((packed)) Pair_1DC150 { s32 n; void* buf; };
+struct Self_1DC150 { u8 pad0[0x1EFC]; s32 count; struct Pair_1DC150 entries[1]; };
+
+void* func_0018D500(s32 size);
+void* func_00183058(void* a, void* b, void* c);
+
+void func_001DC150(struct Self_1DC150* self, void* src, s32 n)
+{
+    struct Pair_1DC150 tmp;
+    s32 i;
+    s32 idx;
+
+    tmp.n = n - 1;
+    if (tmp.n > 0) {
+        tmp.buf = func_0018D500(tmp.n * 4);
+        for (i = 0; i < tmp.n; i++) {
+            ((void**)tmp.buf)[i] = func_00183058(src, self, 0);
+        }
+    }
+    idx = self->count;
+    self->entries[idx] = tmp;
+    self->count = idx + 1;
+}
+
+struct Slot_DD888 { s32 key; s32 value; };
+struct Slots_DD888 { u8 pad[0x44]; Slot_DD888 slots[4]; };
+
+void* func_00160810(void* obj);
+
+s32 func_001DD888(void* self, void* obj, s32 key)
+{
+    Slots_DD888* t = (Slots_DD888*)func_00160810(obj);
+    if (t != 0) {
+        Slot_DD888* p = t->slots;
+        for (u32 i = 0; i < 4; i++) {
+            if (p->key == key) {
+                return p->value;
+            }
+            p++;
+        }
+    }
+    return 0;
+}
+
+s32 func_001BE980(void);
+
+void func_001DDA90(void* self, s32* out)
+{
+    *out = func_001BE980();
+}
+
+void func_00192C58(void* self);
+void func_001DFBE0(void* self, s32 flag);
+
+void func_001DEBB8(void* self)
+{
+    func_00192C58(self);
+    func_001DFBE0(self, 1);
+}
+
+void func_001BC4D8(void* self, void* sub);
+void func_001C57C8(void* self);
+
+void func_001DFA10(void* self)
+{
+    func_001BC4D8(self, (u8*)self + 0x740);
+    func_001C57C8(self);
+}
+
+struct Rec_001DFB08 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+};
+
+struct Dev_001DFB08 {
+    u8 pad0[0x24];
+    s32 f24;
+};
+
+struct Obj_001DFB08 {
+    u8 pad0[0x738];
+    s32 f738;
+    u8 pad1[0x75C - 0x73C];
+    Dev_001DFB08* f75C;
+};
+
+void func_001B6598(void* dev, s32* out);
+void func_001B6568(void* dev, s32* out);
+void func_00192230(void* self, s32 kind, Rec_001DFB08* rec);
+
+void func_001DFB08(Obj_001DFB08* self, s32 code, Rec_001DFB08* rec)
+{
+    s32 loc[2];
+
+    if (code != 0x13) {
+        if (code == 0x14) {
+            if (rec == (Rec_001DFB08*)self->f75C) {
+                func_001B6598(rec, &loc[0]);
+                func_001B6568(self->f75C, &loc[1]);
+            }
+        }
+    } else {
+        Dev_001DFB08* dev = self->f75C;
+        s32 key = rec->f0;
+        if (dev != 0 && key == dev->f24) {
+            s32 kind = rec->f8;
+            if (kind != 0x15E) {
+                if (kind == 0x15F) {
+                    self->f738 = 0;
+                }
+            } else {
+                self->f738 = 1;
+            }
+        }
+    }
+    func_00192230(self, code, rec);
+}
+
+struct __attribute__((packed)) Pk8_001DFE38 {
+    s64 v;
+};
+
+struct Obj_001DFE38 {
+    u8 pad0[0x80];
+    Pk8_001DFE38 f80;
+};
+
+void func_001830D8(void* self);
+
+void func_001DFE38(Obj_001DFE38* self)
+{
+    Pk8_001DFE38 tmp;
+    tmp = self->f80;
+    func_001830D8(self);
+    self->f80 = tmp;
+}

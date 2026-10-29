@@ -394,3 +394,79 @@ void func_001C0B08(Obj_001C0B08* self, Packed_001C0B08* item) { if (!self->count
 
 struct Obj_001C3E50 { u8 pad[0x610]; s32 state; u8 pad2[0x24]; s32 value; };
 s32 func_001C3E50(Obj_001C3E50* self) { if (self->state < 5) { if (self->state >= 2) return 1; } return self->value != 0; }
+
+void func_0011E010(void);
+s32 func_0011CE30(void);
+void func_0011E110(s32 a0);
+void func_0011E1F8(s32 flag);
+void func_001C0808(s32 a0);
+void func_001BEE48(void);
+void func_001C0CB0(void);
+
+void func_001C07B0(void)
+{
+    func_0011E010();
+    func_001C0808(0);
+    func_001BEE48();
+    func_001C0CB0();
+    while (func_0011CE30() != 0) {
+    }
+    func_0011E110(1);
+    func_0011E1F8(0);
+}
+
+struct Quad_1C1530 { s32 a, b, c, d; };
+struct Rec_1C1530 { s32 a; s32 flag; s32 cnt; };
+struct Frame_1C1530 { Quad_1C1530 q; Rec_1C1530 r; };
+typedef void (*Cb_1C1530)(void* a, void* b);
+
+void func_0011B008(void* q);
+void func_0011B6C0(void* q, s32 v);
+void func_0011B538(void* q, s32 n);
+void func_0011B018(void* self, void* q);
+void func_0011B060(void* q, s32 mode);
+
+void* func_001C1530(void* self, void* ctx, s32 v, Cb_1C1530 cb)
+{
+    Frame_1C1530 f;
+    func_0011B008(&f.q);
+    f.r.a = v;
+    f.r.flag = 0;
+    f.r.cnt = 0;
+    cb(ctx, &f.r);
+    if (f.r.flag != 0) {
+        func_0011B6C0(&f.q, f.r.flag);
+    } else {
+        func_0011B538(&f.q, 0);
+    }
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Obj_1C2238 { u8 pad[4]; void* f4; };
+void* func_001C14C0(void* a, s32 b);
+void func_001C1F20(void* self, void* a, void* b, void* c);
+void func_0011BDD0(void* self, void* a, void* b, void* c);
+
+void* func_001C2238(void* self, Obj_1C2238* p, s32 a2, void* a3)
+{
+    if (a2 < 0x495) {
+        void* v = func_001C14C0(p, a2);
+        func_001C1F20(self, p, v, a3);
+    } else {
+        func_0011BDD0(self, p->f4, (void*)a2, a3);
+    }
+    return self;
+}
+
+struct Obj_1C22B8 { u8 pad[4]; void* f4; };
+void func_00130110(void* p);
+void func_0011BD28(void* self, void* a, void* b, void* c);
+
+void* func_001C22B8(void* self, Obj_1C22B8* p, void* a2, void* a3)
+{
+    func_00130110(p);
+    func_0011BD28(self, p->f4, a2, a3);
+    return self;
+}
