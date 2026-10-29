@@ -185,3 +185,56 @@ extern void func_0013EB68(void* state);
 void func_0013F6F8(void* state) {
 	func_0013EB68((char*)state + 0x554);
 }
+
+typedef void (*VFn_13F070)(void* self, s32 code, void* arg);
+struct Node_13F070 { VFn_13F070* vtbl; };
+struct Ctl_13F070 {
+    u8 pad0[4];
+    Node_13F070* obj4;
+};
+
+void func_001837E0(void* obj, s32 kind, s32 a, s32 b);
+void func_0013ED90(void* self, s32 mode, void* p, s32 flag);
+
+void func_0013F070(Ctl_13F070* self, void* p)
+{
+    func_001837E0(self->obj4, 3, 0, 0);
+    func_0013ED90(self, 1, p, 0);
+    Node_13F070* o = self->obj4;
+    o->vtbl[18](o, 13, self);
+}
+
+void func_001B7968(void* self);
+void func_0013E918(void* p);
+
+void func_0013F0E0(void* self)
+{
+    func_001B7968(self);
+    func_0013E918((u8*)self + 0x554);
+}
+
+void func_001BAC30(void* self);
+void func_0013E950(void* p, void* self);
+
+void func_0013F110(void* self)
+{
+    func_001BAC30(self);
+    func_0013E950((u8*)self + 0x554, self);
+}
+
+struct Ctl_13F6C0 {
+    u8 pad0[0x558];
+    Ctl_13F6C0* self558;
+    u8 pad1[0x674 - 0x55C];
+    void* p674;
+};
+
+void func_001BA130(void* self);
+
+void func_0013F6C0(Ctl_13F6C0* self)
+{
+    void* keep = self->p674;
+    func_001BA130(self);
+    self->p674 = keep;
+    self->self558 = self;
+}

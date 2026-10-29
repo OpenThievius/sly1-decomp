@@ -150,3 +150,73 @@ void func_0013A418(Actor_A418* self, Src_A418* src)
         }
     }
 }
+
+void* func_001387C0(void* self, void* other);
+
+s32 func_001387F8(void* self, void* other)
+{
+    s32* p = (s32*)func_001387C0(self, other);
+    s32 r = 0;
+    if (p != 0) {
+        r = *p;
+    }
+    return r;
+}
+
+struct Slot_138828 {
+    s32 flag;
+    void* owner;
+    void* link;
+};
+
+struct Table_138828 {
+    u8 pad0[0x38];
+    s32 count;
+    u8 pad1[0x1AD8 - 0x3C];
+    u8* items;
+};
+
+void func_001389C8(void* self);
+
+void func_00138828(void* self, void* arg)
+{
+    Table_138828* t = (Table_138828*)self;
+    s32 stride = 24;
+    s32 one = 1;
+    u8* a3 = (u8*)arg + 0x430;
+    u8* a2 = (u8*)arg + 0x420;
+    s32 off = 0;
+    s32 n = 2;
+    do {
+        n--;
+        Slot_138828* e = (Slot_138828*)(t->items + off + t->count * stride);
+        off += 0x1800;
+        e->link = a2;
+        e->flag = 0;
+        e->owner = arg;
+        a2 += 4;
+        e++;
+        e->link = a3;
+        e->owner = arg;
+        e->flag = one;
+        a3 += 4;
+    } while (n >= 0);
+    func_001389C8(self);
+}
+
+struct Owner_139E80 {
+    u8 pad0[0x14];
+    u8* sub;
+};
+
+void func_00152600(void* sub, void* self);
+void func_00152470(void* sub, void* self);
+void func_001240F8(void* self);
+
+void func_00139E80(void* self)
+{
+    Owner_139E80* o = (Owner_139E80*)self;
+    func_00152600(o->sub + 0x1CC0, self);
+    func_00152470(o->sub + 0x1CB4, self);
+    func_001240F8(self);
+}

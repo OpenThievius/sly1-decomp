@@ -68,3 +68,49 @@ void func_00137B60(Ring_137B60* self, s32 n)
     self->head = aligned;
     self->size -= delta;
 }
+
+struct Entry_1357F0 {
+    void* obj;
+    f32 key;
+};
+
+s32 func_00182FC8(void* obj);
+
+s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b)
+{
+    if (func_00182FC8(a->obj) == 0) {
+        return 1;
+    }
+    if (func_00182FC8(b->obj) == 0) {
+        return -1;
+    }
+    if (a->key < b->key) {
+        return -1;
+    }
+    return 1;
+}
+
+struct Entry_135858 {
+    void* obj;
+    f32 key;
+};
+
+void func_00199C10(void* obj, s32* out);
+
+s32 func_00135858(Entry_135858* a, Entry_135858* b)
+{
+    s32 flag;
+
+    func_00199C10(a->obj, &flag);
+    if (flag != 0) {
+        return 1;
+    }
+    func_00199C10(b->obj, &flag);
+    if (flag != 0) {
+        return -1;
+    }
+    if (a->key < b->key) {
+        return -1;
+    }
+    return 1;
+}
