@@ -1,3 +1,5 @@
+<img align="right" width="108" alt="OpenThievius icon" src="branding/openthievius.png">
+
 # Sly Cooper and the Thievius Raccoonus (PS2) Decompilation
 
 A work-in-progress **matching decompilation** of *Sly Cooper and the Thievius Raccoonus* (Sucker Punch Productions, 2002) for the PlayStation 2, part of **[OpenThievius](https://github.com/OpenThievius/OpenThievius)**. The goal is C++ source that, built with the original compiler, gives back a byte-identical copy of the retail executable. The matched code is then cleaned up into readable code with real types and names, and the matching build stays on as the regression test.
