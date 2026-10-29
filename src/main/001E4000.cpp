@@ -111,3 +111,64 @@ void func_001E4E80(Blk_1E4E80* self, s32 a1, s32 a2, s32 a3, s32 a4)
         self->d = a4;
     }
 }
+
+extern u8 D_00275AF0[];
+
+void func_001E4E38(void* item);
+
+void func_001E5328(void* owner, s32 code)
+{
+    if (code == 0xFFFF && owner != 0) {
+        func_001E4E38(D_00275AF0);
+    }
+}
+
+void func_001E5328(void* owner, s32 code);
+
+void func_001E5358(void)
+{
+    func_001E5328((void*)1, 0xFFFF);
+}
+
+struct Table_1E5378 {
+    u8 pad0[0x63C];
+    void* p63C;
+    void* p640;
+    s32 f644;
+    u8 pad1[0x650 - 0x648];
+    f32 f650;
+    f32 f654;
+    f32 f658;
+    f32 f65C;
+};
+
+void func_001921A8(void* self);
+void* func_0018D500(s32 size);
+
+void func_001E5378(Table_1E5378* self)
+{
+    func_001921A8(self);
+    self->f644 = 1;
+    self->p63C = func_0018D500(0x40);
+    self->p640 = func_0018D500(0x40);
+    self->f658 = -1.5f;
+    self->f65C = 1.5f;
+    self->f650 = -0.7f;
+    self->f654 = 0.7f;
+}
+
+struct Table_1E53F8 {
+    u8 pad0[0x638];
+    s32 count;
+    u8 pad1[4];
+    void** items;
+};
+
+void func_001E53F8(Table_1E53F8* self, void* value)
+{
+    s32 n = self->count;
+    if (n < 0x11) {
+        self->items[n] = value;
+        self->count = n + 1;
+    }
+}

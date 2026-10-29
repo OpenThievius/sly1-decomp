@@ -159,7 +159,6 @@ void func_001DDBF8(void* self, void* p)
     func_001BEEF8(p);
 }
 
-extern void* D_002623C0;
 
 struct Obj_DDCB0 {
     u8 pad[0x19E4];
@@ -258,4 +257,43 @@ struct Owner_1DDC38 { u8 pad[0x2324]; void* ptr; };
 void func_001DDC38(Owner_1DDC38* self, void* v)
 {
     self->ptr = v;
+}
+
+typedef void (*VFn_001DDC40)(void* self);
+struct Child_001DDC40 { VFn_001DDC40* vtbl; };
+struct Owner_001DDC40 { u8 pad[0x2324]; Child_001DDC40* child; };
+
+void func_001DDC40(Owner_001DDC40* self)
+{
+    Child_001DDC40* p = self->child;
+    if (p != 0) {
+        VFn_001DDC40 fn = p->vtbl[50];
+        if (fn != 0) {
+            fn(p);
+        }
+    }
+}
+
+struct Flags_001DDC78 { u8 pad[0x235C]; s32 bits; };
+
+void func_001DDC78(Flags_001DDC78* self, s32 bit)
+{
+    s32 m = 1;
+    m <<= bit;
+    self->bits |= m;
+}
+
+struct Flags_001DDC90 { u8 pad[0x235C]; s32 bits; };
+
+void func_001DDC90(Flags_001DDC90* self, s32 bit)
+{
+    s32 m = 1;
+    m <<= bit;
+    self->bits &= ~m;
+}
+
+
+void func_001DDCC8(void* unused, s32* out)
+{
+    *out = *(s32*)((u8*)D_002623C0 + 0x19E0);
 }

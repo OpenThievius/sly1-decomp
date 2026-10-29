@@ -93,3 +93,50 @@ s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
     void* ap = (char*)__builtin_next_arg(fmt) - 40;
     return func_001E2018(dst, cap, fmt, ap);
 }
+
+struct Stream_1E1EB0 { u8 bytes[0x420]; };
+
+void func_001D7100(void* stream, s32 cap);
+s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
+void func_001D7148(void* stream, s32 mode);
+
+s32 func_001E1EB0(const char* fmt, void* ap)
+{
+    Stream_1E1EB0 buf;
+    func_001D7100(&buf, -1);
+    s32 n = func_001E1DB8(&buf, fmt, ap);
+    func_001D7148(&buf, 2);
+    return n;
+}
+
+s32 func_001E2100(void* p);
+void func_0018D800(void* dst, void* src, s32 count);
+
+void* func_001E2138(void* dst, void* src)
+{
+    s32 n = func_001E2100(src);
+    func_0018D800(dst, src, n + 1);
+    return dst;
+}
+
+s32 func_001E2100(void* p);
+void func_0018D800(void* dst, void* src, s32 count);
+
+void* func_001E2180(void* dst, void* src)
+{
+    s32 len = func_001E2100(dst);
+    s32 n = func_001E2100(src);
+    func_0018D800((u8*)dst + len, src, n + 1);
+    return dst;
+}
+
+char* func_001E21D8(char* s, s32 c)
+{
+    while (*s != 0) {
+        if ((s8)*s == c) {
+            return s;
+        }
+        s++;
+    }
+    return 0;
+}

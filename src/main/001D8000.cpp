@@ -56,3 +56,44 @@ void func_001DBB90(u8* self, Node_001DBB90* node)
         } while (node);
     }
 }
+
+f32 func_001D86F8(f32 x, f32 lim, f32 base)
+{
+    f32 d = lim - base;
+    if (x * 0.5f < d)
+        d = d - x;
+    else if (d < x * -0.5f)
+        d = d + x;
+    return d;
+}
+
+struct Node_1DBC18 { u8 pad[0x10]; Node_1DBC18* next; };
+
+void func_001B5F28(void* list, void* item);
+
+void func_001DBC18(u8* self, Node_1DBC18* node)
+{
+    while (node != 0) {
+        Node_1DBC18* next = node->next;
+        func_001B5F28(self + 0x1B14, node);
+        node = next;
+    }
+}
+
+struct Entry_1DBCC8 { s32 k0; s32 k1; s32 k2; s32 k3; Entry_1DBCC8* next; };
+struct Owner_1DBCC8 { u8 pad[0x1EC8]; Entry_1DBCC8* head; Entry_1DBCC8* tail; };
+
+void* func_001DBBD8(void* self);
+
+Entry_1DBCC8* func_001DBCC8(Owner_1DBCC8* self, s32 a, s32 b, s32 c, s32 d)
+{
+    Entry_1DBCC8* e = (Entry_1DBCC8*)func_001DBBD8(self);
+    e->k0 = a;
+    e->k1 = b;
+    e->k2 = c;
+    e->k3 = d;
+    if (self->tail != 0) self->tail->next = e;
+    else self->head = e;
+    self->tail = e;
+    return e;
+}
