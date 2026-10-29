@@ -365,3 +365,30 @@ void func_001EFC98(Node_1EFC98* self)
         func_001DBCC8(D_00275710, (void*)func_001EFB20, self, -1, 0);
     }
 }
+
+struct PktBuf_1EE450 { u8 pad[0xC]; u32* cur; };
+
+void func_001EE450(PktBuf_1EE450* b)
+{
+    u32* p = b->cur;
+    b->cur = p + 1;
+    *p = 0x11000000;
+}
+
+struct PktBuf_1EE480 { u8 pad[0xC]; u32* cur; };
+
+void func_001EE480(PktBuf_1EE480* b)
+{
+    u32* p = b->cur;
+    b->cur = p + 1;
+    *p = 0x10000000;
+}
+
+struct PktBuf_1EE498 { u8 pad[0xC]; u32* cur; };
+
+void func_001EE498(PktBuf_1EE498* b, u32 x, u32 y)
+{
+    u32* p = b->cur;
+    b->cur = p + 1;
+    *p = y | (x << 8) | 0x01000000;
+}

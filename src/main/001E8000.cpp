@@ -348,3 +348,80 @@ f32 func_001EB0F8(Span_001EB0F8* span, f32 x)
     }
     return x;
 }
+
+typedef void (*VFn3_1E9570)(void* self, int arg);
+typedef void (*VFn7_1E9570)(void* self);
+struct VTable_1E9570 {
+    u8 pad0[0xC];
+    VFn3_1E9570 slot3;
+    u8 pad1[0xC];
+    VFn7_1E9570 slot7;
+};
+struct Item_1E9570 { VTable_1E9570* vt; };
+struct Group_1E9570 {
+    u8 pad0[0xC];
+    Item_1E9570* items[8];
+    s32 count;
+};
+
+int func_001BE5E8(void);
+void func_001BEA50(void);
+
+void func_001E9570(Group_1E9570* g)
+{
+    Item_1E9570* item = g->items[--g->count];
+    if (item->vt->slot3) item->vt->slot3(item, 0);
+    if (item->vt->slot7) item->vt->slot7(item);
+    if (g->count >= 2) {
+        Item_1E9570* other = g->items[g->count - 1];
+        if (other->vt->slot3) other->vt->slot3(other, 1);
+    }
+    if (func_001BE5E8()) {
+        if (g->count == 1) func_001BEA50();
+    }
+}
+
+void func_001AA178(void);
+
+void func_001E9648(void)
+{
+    func_001AA178();
+}
+
+extern float D_0026185C;
+
+void func_001C06A0(int a, int b, float t);
+void func_00142ED0(float x);
+
+void func_001E98E8(float x)
+{
+    if (0.0f < D_0026185C) {
+        float t = (1.0f - x) * 0.6f + x;
+        func_001C06A0(4, 1, t);
+        func_001C06A0(4, 0, t);
+    }
+    func_00142ED0(x);
+}
+
+s32 func_001EB128(f32* a, f32* b)
+{
+    f32 x = *a;
+    f32 y = *b;
+    if (y < x) return 1;
+    if (x < y) return -1;
+    return 0;
+}
+
+void func_001EB160(void)
+{
+}
+
+void func_001BAC30(void* self);
+void func_00124DF8(void* self, s32 n, void* data);
+extern u8 D_00275C90[];
+
+void func_001EB518(void* self)
+{
+    func_001BAC30(self);
+    func_00124DF8(self, 1, D_00275C90);
+}

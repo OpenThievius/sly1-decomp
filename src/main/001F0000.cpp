@@ -111,3 +111,76 @@ void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d)
     u8* p = (u8*)func_001F3830(self, 1);
     func_001F38F0(p + 0x30, a, b, c, d);
 }
+
+struct __attribute__((packed)) Pair16_1F00C0 {
+    u64 lo;
+    u64 hi;
+};
+
+struct Src_1F00C0 {
+    Pair16_1F00C0 pair;
+    s32 mid;
+};
+
+struct Dst_1F00C0 {
+    u8 pad_000[0x28];
+    Pair16_1F00C0 pair;
+    s32 mid;
+    s32 last;
+};
+
+void func_001F00C0(Dst_1F00C0* dst, Src_1F00C0* src, s32 last)
+{
+    s32 mid = src->mid;
+    u64 lo = src->pair.lo;
+    u64 hi = src->pair.hi;
+    dst->pair.lo = lo;
+    dst->pair.hi = hi;
+    dst->last = last;
+    dst->mid = mid;
+}
+
+void* func_001F3830(void* self, s32 mode);
+void func_001F38F0(void* buf, f32 x, f32 y, f32 z, f32 w);
+
+void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d)
+{
+    u8* p = (u8*)func_001F3830(self, 1);
+    func_001F38F0(p + 0x80, a, b, c, d);
+}
+
+void func_00137EB0(void* a, void* b);
+void func_00137E70(void* a, void* b);
+void func_0011EC40(void* a, void* b);
+
+void func_001F3A40(void* self, void* other)
+{
+    func_00137EB0(other, (u8*)self + 0x50);
+    func_00137E70(other, (u8*)self + 0x40);
+    func_0011EC40(self, other);
+}
+
+struct Obj_1F3A90 { u8 pad[0x18]; void* link; };
+
+void func_00128018(void* a0, void* a1, void* a2, void* a3);
+void func_00128150(void* a0, void* a1, void* a2, void* a3);
+void func_00182F78(void* self, void* value);
+
+void func_001F3A90(void* self, void* other)
+{
+    Obj_1F3A90* s = (Obj_1F3A90*)self;
+    func_00128018(s->link, other, (u8*)self + 0x40, (u8*)self + 0x40);
+    func_00128150(s->link, other, (u8*)self + 0x50, (u8*)self + 0x50);
+    func_00182F78(self, other);
+}
+
+void func_00128018(void* a0, void* a1, void* a2, void* a3);
+void func_00128150(void* a0, void* a1, void* a2, void* a3);
+
+void func_001F3AF0(void* self, void* other)
+{
+    u8* p = (u8*)self;
+    func_00128018(other, 0, p + 0x40, p + 0x40);
+    p += 0x50;
+    func_00128150(other, 0, p, p);
+}
