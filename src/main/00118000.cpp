@@ -1068,3 +1068,155 @@ void* func_00119AF8(void* self, Owner_119AF8* owner, s32 c)
     func_0011B060(&q, 2);
     return self;
 }
+
+// EXACT: callee 0011B008 declared s32 and called as statement.
+
+struct __attribute__((aligned(16))) Quad_118DB8 { s32 w[4]; };
+struct Node_118DB8 { s32 pad0; Node_118DB8* f4; Node_118DB8* f8; };
+
+s32 func_0011B008(Quad_118DB8* q);
+void func_0011B018(void* out, Quad_118DB8* q);
+void func_0011B060(Quad_118DB8* q, s32 mode);
+void func_0011B0A8(Quad_118DB8* a, Quad_118DB8* b);
+void func_0011B538(Quad_118DB8* q, s32 n);
+void func_0011A080(Quad_118DB8* t, Node_118DB8* n, s32 c);
+void* func_0011A400(void* self, s32 table, void* key, void* item);
+
+void* func_00118DB8(void* self, Node_118DB8* x, s32 c)
+{
+    Quad_118DB8 q;
+    Quad_118DB8 t;
+    func_0011B008(&q);
+    Node_118DB8* p = x->f4;
+    Node_118DB8* m = p->f8;
+    func_0011A080(&t, m->f8, c);
+    func_0011B0A8(&q, &t);
+    func_0011B060(&t, 2);
+    func_0011A400(&t, c, m->f4, &q);
+    func_0011B0A8(&q, &t);
+    func_0011B060(&t, 2);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+// EXACT: func_0011B008 declared s32, called as statement.
+
+struct __attribute__((aligned(16))) Quad_118E80 { s32 w[4]; };
+struct Node_118E80 { s32 pad0; Node_118E80* f4; Node_118E80* f8; };
+
+s32 func_0011B008(Quad_118E80* q);
+void func_0011B018(void* out, Quad_118E80* q);
+void func_0011B060(Quad_118E80* q, s32 mode);
+void func_0011B0A8(Quad_118E80* a, Quad_118E80* b);
+void func_0011B538(Quad_118E80* q, s32 n);
+void func_0011A080(Quad_118E80* t, Node_118E80* n, s32 c);
+void* func_0011A358(void* self, s32 owner, void* kind, void* body);
+
+void* func_00118E80(void* self, Node_118E80* x, s32 c)
+{
+    Quad_118E80 q;
+    Quad_118E80 t;
+    func_0011B008(&q);
+    Node_118E80* p = x->f4;
+    Node_118E80* m = p->f8;
+    func_0011A080(&t, m->f8, c);
+    func_0011B0A8(&q, &t);
+    func_0011B060(&t, 2);
+    func_0011A358(&t, c, m->f4, &q);
+    func_0011B0A8(&q, &t);
+    func_0011B060(&t, 2);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+// EXACT: func_0011B008 declared s32, called as statement.
+
+struct __attribute__((aligned(16))) Quad_119878 { s32 w[4]; };
+struct Node_119878 { s32 pad[2]; Node_119878* next; };
+struct Wrap_119878 { s32 pad[2]; Node_119878* first; };
+struct Owner_119878 { s32 pad; Wrap_119878* wrap; };
+
+s32 func_0011B008(Quad_119878* q);
+void func_0011A080(Quad_119878* t, Node_119878* n, s32 c);
+void func_0011B0A8(Quad_119878* a, Quad_119878* b);
+void func_0011B060(Quad_119878* q, s32 mode);
+void func_0011B538(Quad_119878* q, s32 k);
+void func_0011B018(void* dst, Quad_119878* src);
+
+void* func_00119878(void* self, Owner_119878* owner, s32 c)
+{
+    Quad_119878 q, t;
+    s32 a, b;
+    func_0011B008(&q);
+    Node_119878* first = owner->wrap->first;
+    Node_119878* second = first->next;
+    for (;;) {
+        func_0011A080(&t, first, c);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+        a = q.w[0];
+        if (a != 0x1B)
+            goto other;
+        b = q.w[1];
+        if (b != 0)
+            goto other;
+        break;
+    other:
+        func_0011A080(&t, second, c);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+    }
+    func_0011B538(&q, 0x22);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+// EXACT: func_0011B008 declared s32, called as statement.
+
+struct __attribute__((aligned(16))) Quad_119970 { s32 w[4]; };
+struct Item_119970 { s32 tag; Item_119970* child; Item_119970* next; };
+struct Wrap_119970 { s32 pad[2]; Item_119970* first; };
+struct Owner_119970 { s32 pad; Wrap_119970* wrap; };
+struct Rec_119970 { s32 c; Item_119970* head; s32 count; s32 found; Item_119970* after; };
+
+s32 func_0011B008(Quad_119970* q);
+void* func_0011AFC8(void);
+void func_0011B700(Quad_119970* r, Rec_119970* value);
+void func_0011B018(void* dst, Quad_119970* src);
+void func_0011B060(Quad_119970* q, s32 mode);
+
+void* func_00119970(void* self, Owner_119970* owner, s32 c)
+{
+    Quad_119970 q;
+    func_0011B008(&q);
+    Item_119970* first = owner->wrap->first;
+    Item_119970* after = first->next;
+    Rec_119970* p = (Rec_119970*)func_0011AFC8();
+    p->c = c;
+    if (first->tag == 0)
+        p->head = 0;
+    else
+        p->head = first->child;
+    p->after = after;
+    s32 found = 0;
+    s32 count = 0;
+    Item_119970* n = p->head;
+    while (n != 0) {
+        if (n->tag == 0x13) {
+            found = 1;
+            n = 0;
+        } else {
+            n = n->next;
+            count++;
+        }
+    }
+    p->count = count;
+    p->found = found;
+    func_0011B700(&q, p);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

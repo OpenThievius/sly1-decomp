@@ -1010,3 +1010,58 @@ s32 func_0015B720(Actor_15B720* self, Rec_15B720* r)
     }
     return 1;
 }
+
+// NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
+
+struct __attribute__((packed)) Pk_15AD80 { u64 v; };
+struct Actor_15AD80 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad1[0x550 - 0x18];
+    s32 f550;
+    u8 pad2[0x5DC - 0x554];
+    Pk_15AD80 f5DC;
+};
+
+void func_001BA130();
+s32 func_001526D0(void* sub, Actor_15AD80* self);
+void func_00152600(void* data, Actor_15AD80* self);
+void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+
+void func_0015AD80(Actor_15AD80* self)
+{
+    Pk_15AD80 tmp;
+    tmp = self->f5DC;
+    func_001BA130();
+    self->f5DC = tmp;
+    if (self->f550 == 0) {
+        func_001BFCD8(700.0f, 10.0f, 1.0f, 0.0f, 0x41, (u8*)self + 0x5E4, self, 0, 0.0f, 0, 0);
+    } else {
+        if (func_001526D0((u8*)self->f14 + 0x1C48, self) != 0) {
+            func_00152600((u8*)self->f14 + 0x1C48, self);
+        }
+    }
+}
+
+// NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
+
+struct Actor_15AE38 {
+    u8 pad0[0x550];
+    s32 f550;
+    u8 pad1[0x5E4 - 0x554];
+    void* f5E4;
+};
+
+void func_001BF788(void* self, s32 n);
+void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+
+void func_0015AE38(Actor_15AE38* self, s32 flag)
+{
+    if (self->f550 == 0) {
+        if (flag != 0) {
+            func_001BF788(self->f5E4, 0);
+        } else {
+            func_001BFCD8(700.0f, 10.0f, 1.0f, 0.0f, 0x41, &self->f5E4, self, 0, 0.0f, 0, 0);
+        }
+    }
+}

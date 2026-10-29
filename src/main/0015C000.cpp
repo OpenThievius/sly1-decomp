@@ -788,3 +788,62 @@ f32 func_0015C4A8(Obj_15C4A8* self, u8* s)
     s32 n = func_0015C4E8(self, s);
     return a * (f32)n;
 }
+
+// NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
+// pointer loads differ in register choice; everything else matches.
+
+struct Frame_15D998 { u8 a[0x30]; u8 buf[0x100]; };
+struct Obj_15D998 { u8 pad[0x54]; u8* p54; u8* p58; u64 f60; u32 f68; u32 f6C; u32 f70; u32 f74; };
+struct Sub_15D998 { u8 pad[0xA]; u16 f0A; u8 pad2[0xC]; u64 f18; };
+struct Next_15D998 { u8 pad[6]; u16 f6; u8 pad8[8]; u64 f10; };
+
+s32 func_001611B8(Frame_15D998* p);
+s32 func_00168D88(void* self, s32 size);
+void func_00168FB0(void* self, s32 v);
+void func_001529C8(void* self, s32 count, void* base);
+void func_00169088(void* self, s32 dbp, void* ctx);
+void func_00152A50(void* self, u32* count, u32* begin, u32* out, s32 flag);
+void func_00168E78(void* self, s32 v);
+void func_00168F48(void* self, s32 v, void* ctx);
+
+void func_0015D998(Obj_15D998* self, void* arg)
+{
+    Frame_15D998 f;
+    s32 n;
+
+    (void)func_001611B8(&f);
+    Sub_15D998* q = (Sub_15D998*)self->p54;
+    n = func_00168D88(arg, q->f0A);
+    func_00168FB0(self->p54, n);
+    self->f60 = ((Sub_15D998*)self->p54)->f18;
+    func_001529C8(f.a, 16, f.buf);
+    func_00169088(self->p54, n, f.a);
+    func_00152A50(f.a, &self->f68, 0, &self->f6C, 7);
+    if (self->p58 != 0) {
+        n = func_00168D88(arg, ((Next_15D998*)self->p58)->f6);
+        func_00168E78(self->p58, n);
+        u64 t = self->f60;
+        t |= ((Next_15D998*)self->p58)->f10;
+        self->f60 = t;
+        func_001529C8(f.a, 16, f.buf);
+        func_00168F48(self->p58, n, f.a);
+        func_00152A50(f.a, &self->f70, 0, &self->f74, 7);
+    }
+}
+
+// Matched: for loop over i with D_00262264 + i * 0x88.
+
+extern s32 D_00262260;
+extern u8* D_00262264;
+
+void func_00168D68(void* dst, s32 size, s32 align);
+void func_0015D998(void* item, void* buf);
+
+void func_0015E5F0(void)
+{
+    u8 buf[16];
+    func_00168D68(buf, 0x1400, 0x1E00);
+    for (s32 i = 0; i < D_00262260; i++) {
+        func_0015D998(D_00262264 + i * 0x88, buf);
+    }
+}

@@ -1351,3 +1351,55 @@ void func_0011FFD8(Self_11FFD8* self, void* arg)
     self->flag = result;
     func_0018D6F0();
 }
+
+// NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f18` and the `move $a0`); the argument setup is scheduled differently.
+
+struct Table_11F0C8 { s32 pad[2]; s32 count; u8* items; };
+struct Entry_11F0C8 { u8 pad0[4]; f32 f04; u8 pad1[8]; s32 kind; f32 f14; u8 pad2[4]; f32 f1C; u8 pad3[4]; f32 f24; };
+
+void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
+void func_001303F0(f32 delta, f32 diff, f32 scale, f32 p4, f32 p14, f32 p1C, f32 p24, f32* outF, f32* outI, s32 zero);
+
+void func_0011F0C8(Table_11F0C8* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+{
+    f32 diff;
+    f32 delta;
+    u8* p;
+    func_0011EE70(key, flags, 0x18, self->count, self->items, &diff, &delta, &p);
+    if (((Entry_11F0C8*)p)->kind == 5) {
+        if (outF != 0) {
+            *outF = ((Entry_11F0C8*)p)->f04;
+        }
+        if (outI != 0) {
+            *outI = 0.0f;
+        }
+        return;
+    }
+    func_001303F0(delta, diff, scale, ((Entry_11F0C8*)p)->f04, ((Entry_11F0C8*)p)->f14, ((Entry_11F0C8*)p)->f1C, ((Entry_11F0C8*)p)->f24, outF, outI, 0);
+}
+
+// NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
+
+struct Table_11F320 { s32 pad[2]; s32 count; u8* items; };
+struct Entry_11F320 { u8 pad0[4]; f32 f04; u8 pad1[0xC]; s32 kind; f32 f18; f32 f1C; u8 pad2[4]; f32 f24; u8 pad3[4]; f32 f2C; f32 f30; };
+
+void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
+void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
+
+void func_0011F320(Table_11F320* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+{
+    f32 diff;
+    f32 delta;
+    u8* p;
+    func_0011EE70(key, flags, 0x20, self->count, self->items, &diff, &delta, &p);
+    if (((Entry_11F320*)p)->kind == 5) {
+        if (outF != 0) {
+            *outF = ((Entry_11F320*)p)->f04;
+        }
+        if (outI != 0) {
+            *outI = 0.0f;
+        }
+        return;
+    }
+    func_00130168(delta, diff, scale, ((Entry_11F320*)p)->f04, ((Entry_11F320*)p)->f18, ((Entry_11F320*)p)->f1C, ((Entry_11F320*)p)->f24, ((Entry_11F320*)p)->f2C, ((Entry_11F320*)p)->f30, outF, outI, 0);
+}

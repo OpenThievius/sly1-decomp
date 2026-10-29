@@ -368,3 +368,34 @@ void func_00147EF8(Self_147EF8* self, s32 kind, void* target)
     }
     func_001DBCC8(self->p14, (void*)(void (*)(void*))func_00147ED0, self, 0, 0);
 }
+
+void func_00146340(void* self);
+
+struct Self_147E40 {
+    u8 pad0[0x320];
+    f32 f320;
+    u8 pad1[0x20];
+    f32 f344;
+    f32 f348;
+    f32 f34C;
+    f32 f350;
+    f32 f354;
+    f32 f358;
+    u8 pad2[0x34];
+    f32 f390;
+    f32 f394;
+};
+
+void func_00147E40(Self_147E40* self)
+{
+    func_00146340(self);
+    f32 k = 50.0f;
+    self->f34C = 45.0f;
+    self->f344 = 250.0f;
+    self->f348 = self->f350 = k;
+    self->f358 = 0.6f;
+    self->f354 = 0.75f;
+    self->f320 = 0.25f;
+    self->f390 = 8.0f;
+    self->f394 = 10.0f;
+}

@@ -647,3 +647,41 @@ void func_001517C0(Ctl_001517C0* self)
         func_001516C0(self);
     }
 }
+
+typedef void (*VFn_153328)(void* self, void* arg);
+
+struct Self_153328 {
+    VFn_153328* vtbl;
+    u8 pad0[0x2D0 - 4];
+    void* f2D0;
+};
+
+struct Frame_153328 {
+    void* fn;
+    s32 f04;
+    s32 f08;
+    u8 pad0[4];
+    u8 out[0x50];
+    void* self;
+    u8 pad1[0x1C];
+};
+
+extern u8 func_001533A8[];
+s32 func_001F5C0C(void* p, s32 zero, s32 size);
+void func_00125B70(void* obj, void* c, void* out);
+void func_0019D410(void* p);
+
+void func_00153328(Self_153328* self, s32 unused, void* a2)
+{
+    (void)unused;
+    if (self->f2D0 != 0) {
+        self->vtbl[43](self, a2);
+        Frame_153328 f;
+        (void)func_001F5C0C(&f, 0, 0x80);
+        f.fn = (void*)func_001533A8;
+        f.f08 = 0;
+        func_00125B70(self, a2, f.out);
+        f.self = self;
+        func_0019D410(&f);
+    }
+}

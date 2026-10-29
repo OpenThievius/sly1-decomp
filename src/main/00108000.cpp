@@ -228,3 +228,113 @@ void* func_00108B48(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct Quad_108498 { s32 a, b, c, d; };
+struct Frame_108498 { Quad_108498 q; Quad_108498 t; s32 n; f32 out; };
+
+void func_0011B008(Quad_108498* q);
+void func_0011B018(void* dst, Quad_108498* src);
+void func_0011B060(Quad_108498* q, int mode);
+void func_0011B0A8(Quad_108498* a, Quad_108498* b);
+void func_0011B538(Quad_108498* q, int n);
+int func_001C23B0(Quad_108498* t, int mode, int c, void* z, void* z2);
+void func_0017D1E8(void* x, f32 f);
+
+void* func_00108498(void* self, void* x, int unused, int c)
+{
+    Frame_108498 f;
+    func_0011B008(&f.q);
+    f.n = 1;
+    (void)func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0017D1E8(x, f.out);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// NEAR: the 0x2000 store to the frame lands before the argument addresses (addiu a3, addiu t0); retail stores it after them. The 6 variant (func_00107EC0) matches.
+
+struct Quad_1091A8 { s32 a, b, c, d; };
+struct Frame_1091A8 { Quad_1091A8 q; Quad_1091A8 t; s32 n; s32 out; };
+
+void func_0011B008(Quad_1091A8* q);
+void func_0011B018(void* dst, Quad_1091A8* src);
+void func_0011B060(Quad_1091A8* q, int mode);
+void func_0011B0A8(Quad_1091A8* a, Quad_1091A8* b);
+void func_0011B538(Quad_1091A8* q, int n);
+s32 func_001C23B0(Quad_1091A8* t, int mode, int c, void* z, void* z2);
+void func_001C3F68(void* self, s32 value);
+
+void* func_001091A8(void* self, void* x, int unused, int c)
+{
+    Frame_1091A8 f;
+    func_0011B008(&f.q);
+    f.n = 0x2000;
+    (void)func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_001C3F68(x, f.out);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// NEAR: the 0x2000 store to the frame lands before the argument addresses (addiu a3, addiu t0); retail stores it after them. The 6 variant (func_00107EC0) matches.
+
+struct Quad_109258 { s32 a, b, c, d; };
+struct Frame_109258 { Quad_109258 q; Quad_109258 t; s32 n; s32 out; };
+
+void func_0011B008(Quad_109258* q);
+void func_0011B018(void* dst, Quad_109258* src);
+void func_0011B060(Quad_109258* q, int mode);
+void func_0011B0A8(Quad_109258* a, Quad_109258* b);
+void func_0011B538(Quad_109258* q, int n);
+s32 func_001C23B0(Quad_109258* t, int mode, int c, void* z, void* z2);
+void func_001C4180(void* self, s32 value);
+
+void* func_00109258(void* self, void* x, int unused, int c)
+{
+    Frame_109258 f;
+    func_0011B008(&f.q);
+    f.n = 0x2000;
+    (void)func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_001C4180(x, f.out);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// NEAR: the 0x2000 store to the frame lands before the argument addresses (addiu a3, addiu t0); retail stores it after them. The 6 variant (func_00107EC0) matches.
+
+struct Quad_109308 { s32 a, b, c, d; };
+struct Frame_109308 { Quad_109308 q; Quad_109308 t; s32 n; s32 out; };
+
+void func_0011B008(Quad_109308* q);
+void func_0011B018(void* dst, Quad_109308* src);
+void func_0011B060(Quad_109308* q, int mode);
+void func_0011B0A8(Quad_109308* a, Quad_109308* b);
+void func_0011B538(Quad_109308* q, int n);
+s32 func_001C23B0(Quad_109308* t, int mode, int c, void* z, void* z2);
+void func_001C41A0(void* self, s32 value);
+
+void* func_00109308(void* self, void* x, int unused, int c)
+{
+    Frame_109308 f;
+    func_0011B008(&f.q);
+    f.n = 0x2000;
+    (void)func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_001C41A0(x, f.out);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

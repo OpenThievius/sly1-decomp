@@ -1478,3 +1478,170 @@ void* func_00117ED0(void* self)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct Quad_114740 { s32 a, b, c, d; };
+struct Inner_114740 { u8 pad[8]; s32 val; };
+struct Src_114740 { u8 pad[4]; Inner_114740* inner; };
+
+s32 func_0011B008(Quad_114740* q);
+void func_0011B6C0(Quad_114740* q, s32 v);
+void func_0011B538(Quad_114740* q, s32 n);
+void func_0011B018(void* dst, Quad_114740* src);
+void func_0011B060(Quad_114740* q, int mode);
+
+void* func_00114740(void* self, s32 unused, Src_114740* src)
+{
+    Quad_114740 q;
+    (void)func_0011B008(&q);
+    Inner_114740* in = src->inner;
+    s32 v = in->val;
+    if (v != 0) {
+        func_0011B6C0(&q, v);
+    } else {
+        func_0011B538(&q, 0);
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Tmp_116978 { u8 bytes[0x10]; };
+struct __attribute__((aligned(16))) Quad_116978 { s32 a, b, c, d; };
+struct Src_116978 { s32 pad0; void* p; };
+
+void func_0011B008(void* obj);
+void* func_0011C508(void);
+s32 func_0011B740(Tmp_116978* a, void* b);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* obj, s32 n);
+
+void* func_00116978(void* ret, s32 unused, Src_116978* src)
+{
+    Tmp_116978 t;
+    func_0011B008(&t);
+    void* c = func_0011C508();
+    *(Quad_116978*)c = *(Quad_116978*)((u8*)src->p + 0x30);
+    (void)func_0011B740(&t, c);
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Node_117360 { s32 tag; union { s32 i; f32 f; } v; Node_117360* next; Node_117360* child; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, int mode);
+s32 func_0011B0A8(Node_117360* a, void* b);
+
+void* func_00117360(void* self, s32 unused, Node_117360* x)
+{
+    Node_117360 q;
+    func_0011B008(&q);
+    (void)func_0011B0A8(&q, x);
+    if (x->next == 0) {
+        x = 0;
+    } else {
+        x = x->child;
+    }
+    if (x != 0) {
+        do {
+            if (q.tag == 0x14) {
+                if (x->tag == 0x14) {
+                    if (q.v.i < x->v.i) {
+                        func_0011B0A8(&q, x);
+                    }
+                } else {
+                    if ((f32)q.v.i < x->v.f) {
+                        func_0011B0A8(&q, x);
+                    }
+                }
+            } else {
+                if (x->tag == 0x14) {
+                    if (q.v.f < (f32)x->v.i) {
+                        func_0011B0A8(&q, x);
+                    }
+                } else {
+                    f32 pf = x->v.f;
+                    if (q.v.f < pf) {
+                        func_0011B0A8(&q, x);
+                    }
+                }
+            }
+            x = x->next;
+        } while (x != 0);
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Node_117478 { s32 tag; union { s32 i; f32 f; } v; Node_117478* next; Node_117478* child; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, int mode);
+s32 func_0011B0A8(Node_117478* a, void* b);
+
+void* func_00117478(void* self, s32 unused, Node_117478* x)
+{
+    Node_117478 q;
+    func_0011B008(&q);
+    (void)func_0011B0A8(&q, x);
+    if (x->next == 0) {
+        x = 0;
+    } else {
+        x = x->child;
+    }
+    if (x != 0) {
+        do {
+            if (q.tag == 0x14) {
+                if (x->tag == 0x14) {
+                    if (x->v.i < q.v.i) {
+                        func_0011B0A8(&q, x);
+                    }
+                } else {
+                    if (x->v.f < (f32)q.v.i) {
+                        func_0011B0A8(&q, x);
+                    }
+                }
+            } else {
+                if (x->tag == 0x14) {
+                    if ((f32)x->v.i < q.v.f) {
+                        func_0011B0A8(&q, x);
+                    }
+                } else {
+                    f32 pf = x->v.f;
+                    if (pf < q.v.f) {
+                        func_0011B0A8(&q, x);
+                    }
+                }
+            }
+            x = x->next;
+        } while (x != 0);
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+// NEAR: the lui/lwc1 pair of D_0026185C uses $v1 in retail, $v0 here (scalar and array externs and a local float all tried).
+
+struct Quad_117610 { s32 a, b, c, d; };
+
+extern f32 D_0026185C;
+
+s32 func_0011B008(Quad_117610* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, int mode);
+void func_0011B5B0(Quad_117610* q, f32 v);
+
+void* func_00117610(void* self)
+{
+    Quad_117610 q;
+    func_0011B008(&q);
+    func_0011B5B0(&q, D_0026185C);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

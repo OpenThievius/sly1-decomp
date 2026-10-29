@@ -1494,3 +1494,80 @@ void func_0012B870(Obj_12B870* self)
     self->f94 = 1.0f;
     self->f98 = 1.0f;
 }
+
+// NEAR: same bytes except the load order of the arguments to func_001BFCD8 (retail loads a0, a4, f12, a1, f13..f15 and f16 last, in the delay slot)
+struct Part_0012AC08R { void* link; f32 f4; f32 f8; f32 fc; f32 f10; u8 sub14[8]; void* sub1C; f32 f20; };
+struct Host_0012AC08R { u8 pad[0x2AC]; Part_0012AC08R* part; };
+
+void func_0012ABA8(Host_0012AC08R* self);
+void func_001BF788(void* self, s32 n);
+void func_001BFCD8(void* a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a1, void* a2, s32 a3, void* a4, s32 a5);
+
+void func_0012AC08(Host_0012AC08R* self, void* value)
+{
+    func_0012ABA8(self);
+    func_001BF788(self->part->sub1C, 0);
+    self->part->link = value;
+    Part_0012AC08R* p = self->part;
+    func_001BFCD8(p->link, p->f4, p->f8, p->fc, p->f10, p->f20, &p->sub1C, self, 0, p->sub14, 0);
+}
+
+// NEAR: same bytes except the load order of the arguments to func_001BFCD8 (retail loads a0, a4, f12, a1, f13..f15 and f16 last, in the delay slot)
+struct __attribute__((packed)) Rec_0012AF38 { s32 a; s32 b; };
+struct Part_0012AF38 { void* link; f32 f4; f32 f8; f32 fc; f32 f10; Rec_0012AF38 rec14; void* sub1C; f32 f20; };
+struct Host_0012AF38 { u8 pad[0x2AC]; Part_0012AF38* part; };
+
+void func_0012ABA8(Host_0012AF38* self);
+void func_001BF788(void* self, s32 n);
+void func_001BFCD8(void* a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a1, void* a2, s32 a3, void* a4, s32 a5);
+
+void func_0012AF38(Host_0012AF38* self, void* value, Rec_0012AF38* src, f32 x, f32 y, f32 z)
+{
+    func_0012ABA8(self);
+    self->part->link = value;
+    self->part->f4 = x;
+    self->part->f8 = y;
+    self->part->fc = z;
+    self->part->rec14 = *src;
+    func_001BF788(self->part->sub1C, 0);
+    Part_0012AF38* p = self->part;
+    func_001BFCD8(p->link, p->f4, p->f8, p->fc, p->f10, p->f20, &p->sub1C, self, 0, &p->rec14, 0);
+}
+
+// NEAR: same bytes except the prologue order: retail loads the crc word and the table base before the n > 0 test (lw v0, addiu t1, then blez); ours tests first
+struct Obj_0012B760 { u8 pad[0x2D0]; u32 crc; u32* cursor; s32 remaining; u32 table[256]; };
+
+extern s32 D_00261080[];
+
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+
+void func_0012B760(Obj_0012B760* self)
+{
+    if (self->remaining != 0) {
+        s32 n = self->remaining;
+        u32* p = self->cursor;
+        u32 crc = self->crc;
+        u8* tbl = (u8*)self->table;
+        s32 i = 0;
+        if (n > 0) {
+            do {
+                u32 w = *p;
+                i++;
+                n -= 4;
+                crc = *(u32*)(tbl + (((crc ^ w) & 0xFF) << 2)) ^ (crc >> 8);
+                crc = *(u32*)(tbl + (((crc ^ (w >> 8)) & 0xFF) << 2)) ^ (crc >> 8);
+                crc = *(u32*)(tbl + (((crc ^ (w >> 16)) & 0xFF) << 2)) ^ (crc >> 8);
+                crc = *(u32*)(tbl + (((crc ^ (w >> 24)) & 0xFF) << 2)) ^ (crc >> 8);
+                p++;
+                if (i >= 64) break;
+            } while (n > 0);
+        }
+        self->cursor = p;
+        self->crc = crc;
+        self->remaining = n;
+        if (n == 0 && crc != 0) {
+            D_00261080[0] = 1;
+            func_001837E0(self, 2, 0, 0);
+        }
+    }
+}
