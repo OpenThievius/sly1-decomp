@@ -64,3 +64,13 @@ extern void func_0013EB68(void* state);
 void func_0013F6F8(void* state) {
 	func_0013EB68((char*)state + 0x554);
 }
+
+void func_0013C9B0(InitialState* state)
+{
+    state->field_1C = 0;
+    state->field_18 = 0;
+    state->field_14 = 0;
+    state->field_0C = 0;
+    state->field_08 = 0;
+    state->field_10 = state->field_04;
+}

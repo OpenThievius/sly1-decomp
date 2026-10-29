@@ -193,3 +193,120 @@ void func_00123D08(void* object, void* a1, void* a2, void* a3, void* a4)
 	func_0013EC00((u8*)object + 0x630, 8, (u8*)object + 0x62C,
 			  a1, a2, a3, a4);
 }
+
+struct Owner_00120130 {
+    u8 pad0[0xC];
+    void* first;
+    void* second;
+};
+struct Interface_00120130 { void** vtable; };
+struct Buffer_00120130 { u8 bytes[0x20]; };
+typedef void (*Finish_00120130)(void* self, void* output, void* state);
+extern void func_0011F9F8(void*, void*, s32, void*, void*);
+extern void func_00188A20(void*, void*);
+extern void func_001EDE38(void*, void*, void*);
+
+void func_00120130(Owner_00120130* self, Interface_00120130* parent, s32 mode,
+                   void* output, void* state)
+{
+    Buffer_00120130 buffer;
+    func_0011F9F8(self->first, self->second, mode,
+                  output ? &buffer.bytes[0] : 0,
+                  state ? &buffer.bytes[0x10] : 0);
+    if (output) {
+        func_00188A20(&buffer.bytes[0], output);
+    }
+    if (state) {
+        func_001EDE38(&buffer.bytes[0], &buffer.bytes[0x10], state);
+    }
+    if (parent) {
+        ((Finish_00120130)parent->vtable[0xB4 / 4])(parent, output, state);
+    }
+}
+
+
+struct Result_001202F0 { f32 x; f32 y; f32 z; };
+struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
+extern void func_0011F6B0(void*, void*, void*, void*, void*, s32, f32, f32);
+extern void func_001F5C0C(void*, s32, s32);
+
+void func_001202F0(void* first, void* second, void* third,
+                   Output_001202F0* output, f32 factor)
+{
+    Result_001202F0 result;
+    func_0011F6B0((u8*)first + 0x20, second, third, (u8*)first + 0x10,
+                  output ? &result : 0, 0, factor, 1.0f);
+    if (output) {
+        func_001F5C0C(output, 0, 0x30);
+        output->x = result.x;
+        output->y = result.y;
+        output->z = result.z;
+    }
+}
+
+
+struct Owner_001203A8 {
+    u8 pad0[8];
+    void* first;
+    void* second;
+};
+struct Result_001203A8 {
+    f32 first;
+    f32 second;
+    f32 third;
+};
+struct Output_001203A8 {
+    f32 first;
+    u8 pad4[0x10];
+    f32 second;
+    u8 pad18[0x10];
+    f32 third;
+};
+extern void func_0011F9F8(void*, void*, void*, f32*, s32, f32, f32);
+extern void func_001F5C0C(void*, s32, s32);
+
+void func_001203A8(Owner_001203A8* self, void* unused, void* mode,
+                   Output_001203A8* output, f32 factor)
+{
+    Result_001203A8 result;
+    func_0011F9F8(self->first, self->second, mode,
+                  output ? &result.first : 0, 0, factor, 1.0f);
+    if (output) {
+        func_001F5C0C(output, 0, 0x30);
+        output->first = result.first;
+        output->second = result.second;
+        output->third = result.third;
+    }
+}
+
+
+typedef void (*GetValue_00123358)(void* self, void* owner, s32 zero1,
+                                  f32* output, s32 zero2, f32 a, f32 b);
+struct Object_00123358 { GetValue_00123358* vtable; };
+struct Table_00123358 { u8 pad0[0x3C]; u8* base; };
+struct Track_00123358 {
+    u8 pad0[8];
+    Table_00123358* table;
+    u8 pad0C[8];
+    f32 f14;
+    f32 f18;
+};
+struct Owner_00123358 {
+    u8 pad0[4];
+    void* p4;
+    u8 pad8[0x14];
+    Track_00123358* track;
+    u8 pad20[8];
+    s32 row;
+};
+
+f32 func_00123358(Owner_00123358* self, s32 index)
+{
+    Track_00123358* track = self->track;
+    u8* row = track->table->base + self->row * 0x1C;
+    u8* values = *(u8**)(row + 0x18);
+    Object_00123358* object = *(Object_00123358**)(values + index * 4);
+    f32 result;
+    object->vtable[0](object, self->p4, 0, &result, 0, track->f14, track->f18);
+    return result;
+}
