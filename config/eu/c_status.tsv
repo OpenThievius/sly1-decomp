@@ -2,6 +2,7 @@ us_name	eu_name	status	note
 func_00100178	func_00100178	match	
 func_00100218	func_00100218	match	
 func_001002C0	func_001002C0	match	
+func_00100438	func_00100438	match	
 func_001004F0	func_001004F0	match	
 func_001005A0	func_001005A0	match	
 func_00100C28	func_00100C28	match	
@@ -831,6 +832,7 @@ func_00146240	func_00146540	match
 func_001463C0	func_001466C0	match	
 func_00146418	func_00146718	match	
 func_00146470	func_00146770	match	
+func_00146D10	func_00147010	match	
 func_001473E0	func_001476E0	match	
 func_00147E40	func_00148140	match	
 func_00147ED0	func_001481D0	match	
@@ -842,6 +844,7 @@ func_00148400	func_00148700	match
 func_00148470	func_00148770	match	
 func_00148510	func_00148810	match	
 func_00148598	func_00148898	differs	the C is 252 bytes, retail's function 236
+func_00148698	func_00148988	match	
 func_00148718	func_00148A08	match	
 func_00148748	func_00148A38	match	
 func_00148770	func_00148A60	match	
@@ -882,6 +885,7 @@ func_0014B5C0	func_0014B870	match
 func_0014B608	func_0014B8B8	match	
 func_0014B640	func_0014B8F0	match	
 func_0014B678	func_0014B928	match	
+func_0014BCE8	func_0014BF98	match	
 func_0014BD38	func_0014BFE8	match	
 func_0014BDC8	func_0014C078	match	
 func_0014BEA8	func_0014C158	match	
@@ -1255,6 +1259,7 @@ func_001793C0	func_00179A20	match
 func_001793F0	func_00179A50	error	a reference to D_00263AC8, which has no address in this version
 func_00179690	func_00179CF0	match	
 func_0017A6D0	func_0017AD30	match	
+func_0017A9E0	func_0017B040	match	
 func_0017AA40	func_0017B0A0	match	
 func_0017AB58	func_0017B1B8	match	
 func_0017ABD8	func_0017B238	match	
@@ -1502,6 +1507,7 @@ func_00192190	func_00192D18	match
 func_001921A8	func_00192D30	match	
 func_001921E8	func_00192D70	match	
 func_001922E8	func_00192E70	match	
+func_00192380	func_00192F08	match	
 func_00192410	func_00192F98	match	
 func_00192418	func_00192FA0	match	
 func_00192450	func_00192FD8	match	
@@ -2098,6 +2104,7 @@ func_001D6DA0	func_001D7A88	match
 func_001D7018	func_001D7D00	match	
 func_001D7100	func_001D7DE8	match	
 func_001D7120	func_001D7E08	match	
+func_001D8578	func_001D9260	match	
 func_001D86F8	func_001D93E0	match	
 func_001D8740	func_001D9428	match	
 func_001D92F0	func_001D9FD8	match	
