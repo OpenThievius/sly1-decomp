@@ -83,3 +83,42 @@ void func_001C7B60(Obj_C7B60* self)
         func_001C8F20(self, v, 0);
     }
 }
+
+void func_001B9338(void* self);
+void func_001C5148(void* self);
+
+void func_001C5118(void* self)
+{
+    func_001B9338(self);
+    func_001C5148(self);
+}
+
+void func_001C53A8(void);
+
+void func_001C5388(void)
+{
+    func_001C53A8();
+}
+
+void func_001C53A8(void)
+{
+}
+
+struct Obj_1C53E0;
+typedef s32 (*VFn_1C53E0)(void* self);
+struct Obj_1C53E0 { VFn_1C53E0* vtbl; };
+void func_001C54D0(Obj_1C53E0* self, void* b, s32 c);
+
+void func_001C53E0(Obj_1C53E0* self, void* b, s32 c)
+{
+    if (self->vtbl[90](self)) {
+        func_001C54D0(self, b, c);
+    }
+}
+
+void func_001C5C10(void* a, s32 b, s32 c, s32 d);
+
+void func_001C5BF0(void* a0, s32 a1, s32 unused2, s32 unused3, s32 a4, s32 a5)
+{
+    func_001C5C10(a0, a1, a4, a5);
+}

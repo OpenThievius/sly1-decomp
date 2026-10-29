@@ -170,3 +170,67 @@ void func_001CB7A0(Self_CB7A0* a0)
         }
     }
 }
+
+struct Obj_1CAEE0;
+typedef void (*VFn_1CAEE0)(void* self, void* arg);
+
+struct Obj_1CAEE0 {
+    VFn_1CAEE0* vtbl;
+};
+
+s32 func_001300E8(void* obj, s32 kind);
+void func_00175170(void* obj, s32 a, s32 b);
+
+void func_001CAEE0(u8* self, Obj_1CAEE0* other)
+{
+    other->vtbl[0x90 / 4](other, self + 0xAB0);
+    if (func_001300E8(other, 7) != 0) {
+        func_00175170(other, 4, 0x2B);
+    }
+}
+
+struct Obj_1CB328 {
+    u8 pad0[0x72C];
+    s32 f72C;
+    s32 f730;
+    u8 pad1[0x1C];
+    void* f750;
+    void* f754;
+};
+
+void func_0012E760(void* p);
+s32 func_001C96B8(void* self);
+void func_0012C9E8(void* a, void* b, f32 c, void* d, void* e, s32 f, s32 g);
+
+void func_001CB328(Obj_1CB328* self, void* value)
+{
+    void* p;
+
+    if (value == self->f750) {
+        return;
+    }
+    p = self->f754;
+    if (p != 0) {
+        func_0012E760(p);
+        self->f754 = 0;
+    }
+    self->f750 = value;
+    if (func_001C96B8(self) == 0) {
+        self->f730 = 0;
+        self->f72C = self->f72C | 1;
+    }
+    p = self->f750;
+    if (p != 0) {
+        func_0012C9E8(p, self, 0.0f, (u8*)self + 0x140, (u8*)self + 0x918, 0, 0);
+    }
+}
+
+s32 func_001CB3C0(void)
+{
+    return 1;
+}
+
+s32 func_001CB3C8(void)
+{
+    return 0;
+}
