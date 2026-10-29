@@ -406,3 +406,57 @@ void func_0018FFB0(Actor_0018FFB0* self, s32 a1, s32 a2)
         self->field_C04 = 0;
     }
 }
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+
+void func_0018D410(void* p)
+{
+    func_001F5C0C(p, 0, 8);
+}
+
+struct Obj_0018DC88 {
+    u8 pad0[0x6BC];
+    s32 count6BC;
+    void* items6C0[4];
+    s32 count6D0;
+    void* items6D4[4];
+    void* f6E4;
+};
+
+s32 func_001833F0(void* key, void* item);
+s32 func_001300E8(void* key, void* item);
+s32 func_001B8A08(void* self, void* key);
+
+s32 func_0018DC88(Obj_0018DC88* self, void* key)
+{
+    if (key == self->f6E4) {
+        return 1;
+    }
+    for (s32 i = 0; i < self->count6BC; i++) {
+        if (func_001833F0(key, self->items6C0[i]) != 0) {
+            return 1;
+        }
+    }
+    for (s32 j = 0; j < self->count6D0; j++) {
+        if (func_001300E8(key, self->items6D4[j]) != 0) {
+            return 1;
+        }
+    }
+    return func_001B8A08(self, key);
+}
+
+struct List_0018DD50 { u8 pad0[0x6BC]; u32 count; void* items[4]; };
+
+void func_0018DD50(List_0018DD50* list, void* item)
+{
+    u32 n = list->count;
+    if (n < 4) {
+        list->items[n] = item;
+        list->count = n + 1;
+    }
+}
+
+s32 func_0018EDA0(void)
+{
+    return 1;
+}

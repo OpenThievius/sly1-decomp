@@ -597,3 +597,91 @@ s32 func_00192488(void* self)
 {
     return 0;
 }
+
+struct Part_191A68 { u8 data[4]; };
+struct Owner_191A68 { u8 head[0x34]; Part_191A68 part; };
+
+void func_00191290(Part_191A68* part);
+
+void func_00191A68(Owner_191A68* self)
+{
+    func_00191290(&self->part);
+}
+
+struct Part_191A88 { u8 data[4]; };
+struct Owner_191A88 { u8 head[0x34]; Part_191A88 part; };
+
+void func_00191570(Part_191A88* part);
+
+void func_00191A88(Owner_191A88* self)
+{
+    func_00191570(&self->part);
+}
+
+void func_00137E70(void* a, void* b);
+void func_0011EC40(void* a, void* b);
+
+void func_00192068(void* self, void* other)
+{
+    func_00137E70(other, (u8*)self + 0x40);
+    func_0011EC40(self, other);
+}
+
+struct Node_001920B0 { u8 pad[0x18]; s32 link; };
+
+s32 func_00128018(void* a, s32 b, void* c, s32 d);
+
+void func_001920B0(Node_001920B0* self, s32 arg)
+{
+    func_00128018((void*)self->link, 0, (u8*)self + 0x40, arg);
+}
+
+extern u8* D_00275710;
+
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+s32 func_00193660(void)
+{
+    s32 r = func_0015A418(D_00275710, 5, 0x42C, 0);
+    s32 v;
+    if (r == 0) {
+        v = 0;
+    } else {
+        v = *(s32*)(r + 0x48);
+    }
+    return v;
+}
+
+extern u8 D_0026A210[];
+
+void func_001AA268(void* self);
+s32 func_0015C188(s32 k);
+void* func_0015C1C0(s32 k);
+
+struct Obj_193E58 {
+    u8 pad0[0x210];
+    void** f210;
+    u8 pad1[0x4C];
+    s32 f260;
+    u8 pad2[0x4];
+    s32 arr268[3];
+    u8 pad3[0x8];
+    s32 f27C;
+    u8 pad4[0x4];
+    f32 f284;
+};
+
+void func_00193E58(Obj_193E58* self)
+{
+    func_001AA268(self);
+    if (func_0015C188(2)) {
+        self->f210 = (void**)D_0026A210;
+        *self->f210 = func_0015C1C0(2);
+    }
+    self->f260 = -1;
+    self->f27C = -1;
+    for (u32 i = 0; i < 3; i++) {
+        self->arr268[i] = -1;
+    }
+    self->f284 = 1.0f;
+}

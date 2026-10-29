@@ -246,3 +246,35 @@ void func_00185358(Obj_00185358* self)
     self->f44 = 1;
     self->f48 = -1;
 }
+
+struct IndexPair_185C18 { s32 a; s32 b; };
+struct Weight_264840 { f32 a; f32 b; };
+
+extern Weight_264840 D_00264840[];
+extern s32 D_00262C64;
+
+f32 func_00185C18(IndexPair_185C18* p)
+{
+    f32 num = D_00264840[p->a].b + D_00264840[p->b].b;
+    f32 den = D_00264840[p->a].a + D_00264840[p->b].a;
+    f32 r = num / den;
+    if (r < 0.0f) r = 0.0f;
+    if (D_00262C64 & 8) r = r * 0.2f;
+    return r;
+}
+
+struct IndexPair_185CA0 { s32 a; s32 b; };
+struct Weight_2648A8 { f32 a; f32 b; };
+
+extern Weight_2648A8 D_002648A8[];
+
+f32 func_00185CA0(IndexPair_185CA0* p)
+{
+    f32 one = 1.0f;
+    f32 num = D_002648A8[p->a].b + D_002648A8[p->b].b;
+    f32 den = D_002648A8[p->a].a + D_002648A8[p->b].a;
+    f32 r = num / den;
+    if (r < 0.0f) return 0.0f;
+    if (one < r) r = one;
+    return r;
+}

@@ -457,3 +457,114 @@ void func_00183E40(Obj_00183E40* self)
     func_001240F8(self);
     func_00183DF8(self);
 }
+
+void func_00180E38(s32 a, s32 b);
+
+void func_00180E90(void)
+{
+    func_00180E38(1, 0xFFFF);
+}
+
+struct Obj_180EB0 { u8 pad[0x14]; u8* f14; };
+
+void func_00182D48(void* self);
+void func_00152470(u8* table, Obj_180EB0* self);
+
+void func_00180EB0(Obj_180EB0* self)
+{
+    func_00182D48(self);
+    func_00152470(self->f14 + 0x1C9C, self);
+}
+
+void func_00182D48(void)
+{
+}
+
+typedef void (*VFn_182D50)(void* self);
+
+struct Node_182D50 {
+    VFn_182D50* vtbl;
+    u8 pad4[0x10];
+    s32 p14;
+    s32 p18;
+};
+
+s32 func_001526D0(void* sub, Node_182D50* self);
+s32 func_00182FC8(Node_182D50* self);
+void func_00152600(void* sub, Node_182D50* self);
+
+void func_00182D50(Node_182D50* self)
+{
+    void* sub;
+    if (self->p18 == 0) {
+        sub = (void*)(self->p14 + 0x48);
+    } else {
+        sub = (void*)(self->p18 + 0x34);
+    }
+    if (func_001526D0(sub, self) != 0) {
+        if (func_00182FC8(self) != 0) {
+            func_00152600(sub, self);
+            self->vtbl[9](self);
+            return;
+        }
+        func_00152600(sub, self);
+    }
+}
+
+struct Link_1833F0;
+
+struct Owner_1833F0 {
+    u8 pad_00[8];
+    s32 id_08;
+    u8 pad_0C[0x24];
+    Link_1833F0* link_30;
+};
+
+struct Link_1833F0 {
+    u8 pad_00[4];
+    s32 id_04;
+};
+
+s32 func_001833F0(Owner_1833F0* self, s32 id)
+{
+    Link_1833F0* link;
+
+    if (id == -1) {
+        return 0;
+    }
+    if (self->id_08 == id) {
+        goto found;
+    }
+    link = self->link_30;
+    if (link == 0) {
+        goto missing;
+    }
+    if (link->id_04 != id) {
+        goto missing;
+    }
+found:
+    return 1;
+missing:
+    return 0;
+}
+
+struct Link_183438;
+
+struct Owner_183438 {
+    u8 pad_00[0x30];
+    Link_183438* link_30;
+};
+
+struct Link_183438 {
+    u8 pad_00[4];
+    s32 id_04;
+};
+
+s32 func_00183438(Owner_183438* self)
+{
+    Link_183438* link = self->link_30;
+    if (link != 0) {
+        return link->id_04;
+    }
+    return -1;
+}
