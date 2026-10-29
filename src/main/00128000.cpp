@@ -1138,3 +1138,143 @@ void func_0012B278(Obj_0012B278* self, s32* out)
 {
     *out = self->a;
 }
+
+// Newly matched US functions from the small-function wave.
+extern void func_0012A430(void*, s32);
+struct Packed_12A3E8 { u8 pad[0x2C8]; u64 value; };
+struct Packed_12A418 { u8 pad[0x2C8]; u64 value; };
+extern void func_001BE4D8(void*);
+struct Inner_12ABA8 { u8 pad[0x2AC]; void* ptr; };
+struct Outer_12B128 { u8 pad[0x288]; s32* ptr; };
+struct Obj_12B288 { u8 pad[0x2B1]; u8 value; };
+struct Quad_129598 { s32 words[4]; } __attribute__((aligned(16)));
+struct Result_129598 { u8 pad[0x30]; Quad_129598 value; };
+struct Node_129B98 { u8 pad0[8]; void* item; void* owner; u8 pad2[0x34 - 0x10]; Node_129B98* next; };
+struct Owner_129B98 { u8 pad[0x1B64]; Node_129B98* head; };
+struct Obj_129B98 { u8 pad[0x14]; Owner_129B98* owner; };
+extern s32 func_001833F0(void*, s32);
+struct Vtbl_12A430 { u8 pad[0xBC]; void (*notify)(void*); };
+struct State_12A430 { u8 pad[0x10]; u8 value; };
+struct Obj_12A430 { Vtbl_12A430* vtbl; u8 pad[0x1FC - 4]; State_12A430* state; };
+extern void func_001296E0(void*);
+struct Vtbl_12A4A0 { u8 pad[0xBC]; void (*notify)(void*); };
+struct State_12A4A0 { u8 pad[0x11]; u8 value; };
+struct Obj_12A4A0 { Vtbl_12A4A0* vtbl; u8 pad[0x1FC - 4]; State_12A4A0* state; };
+struct Vtbl_12A4E8 { u8 pad[0xBC]; void (*notify)(void*); };
+struct State_12A4E8 { u8 pad[0x14]; s32 value; };
+struct Obj_12A4E8 { Vtbl_12A4E8* vtbl; u8 pad[0x1FC - 4]; State_12A4E8* state; };
+extern void func_00129A58(void*);
+struct State_12A7C0 { u8 pad[0x48]; s32 value; };
+struct Obj_12A7C0 { u8 pad[0x200]; State_12A7C0* state; };
+extern void func_00129730(void*);
+extern void func_0012ABA8(void*);
+struct Inner_12ABD0 { s32 value; };
+struct Owner_12ABD0 { u8 pad[0x2AC]; Inner_12ABD0* inner; };
+extern void func_001BF788(void*, s32);
+struct Inner_12B010 { u8 pad[0x1C]; void* resource; };
+struct Owner_12B010 { u8 pad[0x2AC]; Inner_12B010* inner; };
+extern void func_0012B040(void*);
+struct Vec_12B140 { s32 v[4]; } __attribute__((aligned(16)));
+struct Owner_12B140 { u8 pad[0x288]; u8* inner; };
+struct Vec_12B1A0 { s32 v[4]; } __attribute__((aligned(16)));
+struct Owner_12B1A0 { u8 pad[0x288]; u8* inner; };
+
+void func_0012A390(void* self, s8 value) { *((s8*)((u8*)self + 0x2C9)) = value; }
+
+void func_0012A398(void* self, s8 value) { *((s8*)((u8*)self + 0x2CA)) = value; }
+
+void func_0012A3A0(void* self, s32 value) { func_0012A430(self, value ? 1 : -1); }
+
+void func_0012A3E8(Packed_12A3E8* self, u32 value)
+{
+    self->value = (self->value & ~(3ull << 40)) | ((u64)(value & 3) << 40);
+}
+
+void func_0012A418(Packed_12A418* self, u32* out)
+{
+    u32 value = (u32)(self->value >> 40);
+    value &= 3;
+    *out = value;
+}
+
+void func_0012ABA8(Inner_12ABA8* self)
+{
+    if (self->ptr == 0) func_001BE4D8(&self->ptr);
+}
+
+void func_0012B128(Outer_12B128* self, s32* out) { *out = self->ptr ? *self->ptr : -1; }
+
+void func_0012B288(Obj_12B288* self, u8 value) { self->value = value; }
+
+void func_0012B868(void) {}
+
+void func_00129598(void* self, Quad_129598* out)
+{
+    *out = ((Result_129598*)func_00129400(self))->value;
+}
+
+Node_129B98* func_00129B98(Obj_129B98* self, s32 key)
+{
+    s32 scratch[4];
+    Node_129B98* node = self->owner->head;
+    while (node != 0) {
+        if (node->owner == self) {
+            if (key == -1) return node;
+            if (func_001833F0(node->item, key) != 0) return node;
+        }
+        node = node->next;
+    }
+    (void)scratch;
+    return 0;
+}
+
+void func_0012A430(Obj_12A430* self, s32 value)
+{
+    func_001296E0(self);
+    self->state->value = value;
+    self->vtbl->notify(self);
+}
+
+void func_0012A4A0(Obj_12A4A0* self, s32 value)
+{
+    func_001296E0(self);
+    self->state->value = value;
+    self->vtbl->notify(self);
+}
+
+void func_0012A4E8(Obj_12A4E8* self, s32 value)
+{
+    func_001296E0(self);
+    self->state->value = value;
+    func_00129A58(self);
+}
+
+void func_0012A7C0(Obj_12A7C0* self, s32 value)
+{
+    func_00129730(self);
+    self->state->value = value;
+}
+
+void func_0012ABD0(Owner_12ABD0* self, s32 value)
+{
+    func_0012ABA8(self);
+    self->inner->value = value;
+}
+
+void func_0012B010(Owner_12B010* self)
+{
+    Inner_12B010* inner = self->inner;
+    if (inner != 0) func_001BF788(inner->resource, 0);
+}
+
+void func_0012B140(Owner_12B140* self, Vec_12B140* input)
+{
+    func_0012B040(self);
+    *(Vec_12B140*)((u8*)self->inner + 0x10) = *input;
+}
+
+void func_0012B1A0(Owner_12B1A0* self, Vec_12B1A0* input)
+{
+    func_0012B040(self);
+    *(Vec_12B1A0*)((u8*)self->inner + 0x20) = *input;
+}
