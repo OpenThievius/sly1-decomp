@@ -79,3 +79,57 @@ void func_001A0318(void* self)
 {
     func_001A0338(self, 0, 0);
 }
+
+typedef void (*VFn_1A0F88)(void* self);
+struct Holder_1A0F88 { u8 pad0[0x60]; VFn_1A0F88 fn60; };
+struct Node_1A0F88 { u8 pad0[0x18]; f32 f18; f32 f1C; u8 pad20[0x110]; Holder_1A0F88* holder130; void* arg134; };
+
+extern f32 D_0026185C;
+
+void func_0019EBE8(void* self);
+
+void func_001A0F88(Node_1A0F88* self)
+{
+    if (self->f1C < D_0026185C - self->f18) {
+        func_0019EBE8(self);
+        self->holder130->fn60(self->arg134);
+    }
+}
+
+typedef Quad_1A0040 Quad_1A0FE8;
+struct Node_1A0FE8 { u8 pad0[0x1C]; f32 f1C; u8 pad20[0x20]; Quad_1A0FE8 q40; };
+
+
+void func_0019EB28(void* self);
+
+void func_001A0FE8(Node_1A0FE8* self)
+{
+    func_0019EB28(self);
+    self->q40 = D_00275C50;
+    self->f1C = 2.0f;
+}
+
+struct Ctrl_1A3FE0 { u8 pad0[0x610]; s32 mode610; u8 pad1[8]; f32 level61C; u8 pad2[0x64]; s32 flag684; };
+
+s32 func_001A3FE0(Ctrl_1A3FE0* self)
+{
+    s32 r = self->mode610;
+    switch (r) {
+    case 0:
+        if (0.0f < self->level61C) {
+            r = 1;
+        }
+        break;
+    case 1:
+        if (self->level61C == 0.0f) {
+            r = 0;
+        }
+        break;
+    case 2:
+        if (self->flag684 == 0) {
+            r = 1;
+        }
+        break;
+    }
+    return r;
+}

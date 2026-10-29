@@ -311,3 +311,60 @@ void func_001A7520(Obj_1A7520* self)
     func_001B7968(self);
     self->state = -1;
 }
+
+struct Ctrl_1A4258 { u8 pad0[0x614]; s32 mode614; u8 pad1[0x0C]; f32 level624; };
+
+s32 func_001A4258(Ctrl_1A4258* self)
+{
+    s32 r = self->mode614;
+    switch (r) {
+    case 0:
+        if (0.8f <= self->level624) {
+            r = 1;
+        }
+        break;
+    case 1:
+        if (self->level624 < 0.8f) {
+            r = 0;
+        }
+        break;
+    }
+    return r;
+}
+
+struct Ctrl_1A44E8 { u8 pad0[0x618]; f32 level618; };
+
+extern f32 D_00261860;
+extern u8 D_0026B7D8[];
+
+void func_001B9338(Ctrl_1A44E8* self);
+void func_001892A0(f32* out, f32 unused, f32 value);
+void func_001B9D10(Ctrl_1A44E8* self, f32* buf, u8* table, f32 scale);
+
+void func_001A44E8(Ctrl_1A44E8* self)
+{
+    f32 buf[12];
+    func_001B9338(self);
+    func_001892A0(buf, self->level618, 0.0f);
+    func_001B9D10(self, buf, D_0026B7D8, D_00261860);
+}
+
+void func_001A7D18(void* self, void* entry);
+extern u8 D_0026B8B0[];
+
+void func_001A7CE8(void* self, s32 index)
+{
+    func_001A7D18(self, D_0026B8B0 + index * 0x104);
+}
+
+s32 func_002049E8(void* owner, s32 channel, u8* bytes);
+
+struct Pair_001A7E40 { u8 pad0[4]; void* owner; s32 channel; };
+
+void func_001A7E40(Pair_001A7E40* self)
+{
+    u8 bytes[2];
+    bytes[0] = 0;
+    bytes[1] = 0;
+    func_002049E8(self->owner, self->channel, bytes);
+}
