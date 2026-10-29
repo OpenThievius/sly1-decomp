@@ -91,3 +91,18 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.
+
+Additional US checks on 2026-10-29: the 17 functions in
+`src/main/0011C000.cpp` and `src/main/00140000.cpp` matched with SN BUILD 1.14
+and `-O2 -G0 -fno-exceptions`. The same function set compiled as a full US
+build with GNU binutils using `-march=r5900 -mabi=eabi`; it printed
+`MATCH: build/us/SCUS_971.98 sha1 57dc305db57932ad3f1122966cdb695d2e62a47a with 1705 functions from C`.
+
+Four near misses were retained under `nonmatching/`: `func_0011E048` (packed
+argument and store scheduling), `func_0011EF90` (nullable-output branch
+scheduling), and `func_00140710`/`func_00140730` (reversed `addu` operands).
+`func_00143900` was another near miss because its literal-zero argument adds
+one instruction. PAL version check then reported 27 absent, 41 differs, 7
+error, 1630 match; progress reported US 1705/4766 functions (12.70%) and PAL
+1630/4791 (11.95%). Unit tests printed `OK` (11 tests), and
+`python3 tests/check_repository.py` printed `ok: 0 problem(s)`.
