@@ -390,3 +390,57 @@ void func_0014FCE8(Ctx_0014FCE8* self, s32 code)
     }
     func_001B64D8(self->p740, code);
 }
+
+struct Span_0014DD00 { u8 pad0[0x10]; f32* p; };
+
+f32 func_0014DD00(Span_0014DD00* self)
+{
+    f32* p = self->p;
+    f32 b = p[1]; f32 a = p[0]; return (b - a) * 0.1f;
+}
+
+struct Frame_0014DE08 { u8 pad0[8]; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; };
+
+void func_0014D280(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+
+void func_0014DE08(Frame_0014DE08* self, s32 a1, s32 a2)
+{
+    func_0014D280(self->f0C, self->f18, self->f10, self->f08, a1, a2);
+}
+
+struct Frame_0014DE40 { u8 pad0[8]; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; };
+
+void func_0014D280(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+
+void func_0014DE40(Frame_0014DE40* self, s32 a1, s32 a2)
+{
+    func_0014D280(self->f0C, self->f18, self->f14, self->f08, a1, a2);
+}
+
+struct __attribute__((aligned(16))) Quad_0014DE78 { s32 v[4]; };
+struct __attribute__((packed)) Pack4_0014DE78 { s32 v; };
+struct Table_0014DE78 { u8 pad0[8]; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; };
+
+void func_00188700(void* a, void* b, void* c, f32 w);
+void func_001DD3E0(void* a, void* b, void* c, s32 d, s32 e);
+
+void func_0014DE78(Table_0014DE78* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
+{
+    Quad_0014DE78 A;
+    Quad_0014DE78 B;
+    Pack4_0014DE78 C;
+    s32 next;
+
+    if (idx == self->f0C - 1) {
+        next = 0;
+        if (self->f08 == 0) {
+            return;
+        }
+    } else {
+        next = idx + 1;
+    }
+    func_00188700(a2, (u8*)self->f18 + (idx << 4), &A, 1.0f);
+    func_00188700(a2, (u8*)self->f18 + (next << 4), &B, 1.0f);
+    C = *(Pack4_0014DE78*)a4;
+    func_001DD3E0(&A, &B, &C, a3, a5);
+}

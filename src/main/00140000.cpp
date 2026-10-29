@@ -217,3 +217,67 @@ void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3)
 {
     func_001ED650(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
 }
+
+extern s32 D_002613EC;
+
+void func_00140790(void)
+{
+    D_002613EC = 3;
+}
+
+struct Holder_1407A0 { u8 pad[0x4]; s32 value; };
+
+s32 func_001407A0(Holder_1407A0* holder)
+{
+    return holder->value;
+}
+
+extern s32 D_002613F0;
+void func_00203A20(s32 arg);
+
+void func_001409A8(void)
+{
+    if (D_002613F0 == 0x14) {
+        func_00203A20(2);
+    }
+}
+
+struct Scaler_001434C8 {
+    u8 pad0[0x1F8];
+    f32 f1F8;
+    f32 f1FC;
+    f32 f200;
+};
+
+void func_00183FE0(f32* a, f32* b, f32 x, f32 y, f32 z, f32 w);
+
+void func_001434C8(Scaler_001434C8* self, f32* out, f32 p)
+{
+    f32 one = 1.0f;
+    f32 scale = 4080.0f;
+    f32 a = self->f200 * p;
+    f32 b = self->f1FC;
+    f32 c = self->f1F8;
+    func_00183FE0(out, out + 1, one, scale, b / c, (one - a) * scale);
+    out[0] = out[0] + 8388608.0f;
+    out[2] = self->f1F8;
+    out[3] = out[0] + 36864.0f;
+}
+
+extern void* D_00261990;
+
+void func_00143940(void* self);
+
+void func_001437C0(void)
+{
+    func_00143940(D_00261990);
+}
+
+extern void* D_00261990;
+
+void func_00143988(void* self);
+
+void func_00143810(void)
+{
+    func_00143988(D_00261990);
+}

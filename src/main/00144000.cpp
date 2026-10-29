@@ -168,3 +168,47 @@ void func_00146240(void* self, f32 v)
         func_00129DF8(o);
     }
 }
+
+struct Probe_00144FF8 {
+    u8 pad_00[0x40];
+    f32 x_40;
+    f32 y_44;
+    u8 pad_48[0x2C];
+    f32 x_74;
+    f32 y_78;
+};
+
+struct Pose_00144FF8 {
+    u8 pad_00[0x80];
+    f32 y_80;
+    f32 x_84;
+};
+
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA408(f32 a);
+
+void func_00144FF8(Pose_00144FF8* self, Probe_00144FF8* p, s32 mode, f32* out)
+{
+    f32 t;
+    f32 x;
+    f32 y;
+    switch (mode) {
+    case 0:
+        y = p->y_44;
+        x = p->x_40;
+        goto call;
+    case 1:
+        y = p->y_78;
+        x = p->x_74;
+        goto call;
+    default:
+        goto zero;
+    }
+call:
+    t = func_00205778(-x, y);
+    goto store;
+zero:
+    t = 0.0f;
+store:
+    *out = func_001EA408(t + func_00205778(self->x_84, self->y_80));
+}

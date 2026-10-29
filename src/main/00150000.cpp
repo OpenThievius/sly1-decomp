@@ -202,3 +202,63 @@ void func_00152C18(PktList_1529C8* self, s32 hi)
         *(u64*)(self->chunk + 8) = 0;
     }
 }
+
+extern void* D_002623C8;
+void func_00124A48(void* self);
+void* func_00160CA0(void* base, s32 index);
+
+struct Slot_1506F0 {
+    u8 pad0[0x8];
+    s32 f8;
+    u8 pad1[0x2F8];
+    void* f304;
+    u8 f308[4];
+    s32 f30C;
+};
+
+void func_001506F0(Slot_1506F0* self)
+{
+    func_00124A48(self);
+    if (self->f30C == -1) {
+        self->f30C = self->f8;
+    }
+    void* v = func_00160CA0(D_002623C8, self->f30C);
+    self->f304 = v;
+    if (!v) {
+        self->f304 = self->f308;
+    }
+}
+
+struct State_150750 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+};
+
+void func_00150750(State_150750* self)
+{
+    self->f2D0 = 1;
+}
+
+struct State_150760 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+};
+
+void func_00150760(State_150760* self)
+{
+    self->f2D0 = 2;
+}
+
+struct Value_150770 {
+    s32 value;
+};
+
+struct Holder_150770 {
+    u8 pad0[0x304];
+    Value_150770* f304;
+};
+
+void func_00150770(Holder_150770* self, s32* out)
+{
+    *out = self->f304->value;
+}
