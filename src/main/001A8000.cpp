@@ -375,3 +375,34 @@ void func_001AA1F0(Obj_1AA1F0* self, s32 index)
     self->f21C = self->f22C;
     self->f220 = self->f230;
 }
+
+void* func_0018D5C0(u32 n);
+
+struct Owner_1A8110 {
+    u8 pad[0x3C];
+    void* sub;
+};
+
+void* func_001A8110(Owner_1A8110* self)
+{
+    if (self->sub == 0) {
+        void* p = func_0018D5C0(0x20);
+        self->sub = p;
+        *(Owner_1A8110**)p = self;
+    }
+    return self->sub;
+}
+
+struct Obj_1AA8B0 { u8 pad[0x240]; f32 value; };
+
+void func_001AA8B0(Obj_1AA8B0* self, f32 v)
+{
+    self->value = v;
+}
+
+struct Obj_1AA8C0 { u8 pad[0x248]; f32 value; };
+
+void func_001AA8C0(Obj_1AA8C0* self, f32 v)
+{
+    self->value = v;
+}

@@ -411,3 +411,10 @@ void func_001B93D8(void)
 {
     func_001261C0();
 }
+
+void func_00124FC0(void* self);
+
+void func_001B93F8(void* self)
+{
+    func_00124FC0(self);
+}

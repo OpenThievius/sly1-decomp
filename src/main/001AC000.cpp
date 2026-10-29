@@ -257,3 +257,47 @@ void func_001AF0D0(void* self)
     func_001BAC30(self);
     func_00124DF8(self, 2, D_002744B8);
 }
+
+typedef void (*VFn_1AC910)(void* self, s32 mode);
+struct Unit_1AC910 { VFn_1AC910* vtbl; u8 pad0[0x250 - 4]; s32 state; u8 pad1[0x260 - 0x254]; s32 flag; s32 value; };
+
+s32 func_001F6738(void* p, s32 v);
+void func_001AA4F0(void* self, s32 v);
+
+void func_001AC910(Unit_1AC910* self, s32 v)
+{
+    s32 k = self->state;
+    if (k == 0) {
+        func_001AA4F0(self, v);
+        goto done;
+    }
+    if (k < 0) {
+        goto done;
+    }
+    if (k >= 4) {
+        goto done;
+    }
+    if (func_001F6738((u8*)self + 8, v) != 0) {
+        self->value = v;
+        self->flag = 1;
+        self->vtbl[16](self, 3);
+    }
+done:
+    return;
+}
+
+struct Unit_1AC990 { u8 pad0[0x260]; s32 flag; s32 value; };
+
+void func_001AA4F0(void* self, s32 v);
+void func_001AA998(void* self, s32 flag);
+
+void func_001AC990(Unit_1AC990* self, s32 v)
+{
+    if (self->flag != 0 && v == 0) {
+        s32 x = self->value;
+        self->flag = 0;
+        func_001AA4F0(self, x);
+        v = 1;
+    }
+    func_001AA998(self, v);
+}

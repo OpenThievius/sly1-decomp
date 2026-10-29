@@ -471,3 +471,19 @@ zero:
 tail:
     return ((ctx->flags >> 5) ^ 1) & 1;
 }
+
+struct Obj_1A4870 { u8 pad[0x2DC]; s32 value; };
+
+void func_001A4870(Obj_1A4870* obj, s32 value)
+{
+    obj->value = value;
+}
+
+struct List_1A4878 { u8 pad[0x2E0]; s32 count; s32 items[1]; };
+
+void func_001A4878(List_1A4878* list, s32 value)
+{
+    s32 n = list->count;
+    list->items[n] = value;
+    list->count = n + 1;
+}

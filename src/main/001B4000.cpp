@@ -815,3 +815,96 @@ s32 func_001B63C0(Table_1B63C0* self, s32 key)
     }
     return -1;
 }
+
+struct Node_1B4B68 {
+    u8 pad0[0x2C]; f32 f2C; f32 f30; f32 f34; f32 f38; f32 f3C; f32 f40;
+};
+struct Src_1B4B68 { u8 pad0[4]; f32 f4; f32 f8; f32 fC; f32 f10; u16 u14; };
+
+void func_001B4AA0(void* a, void* b);
+
+void func_001B4B68(Node_1B4B68* p, Src_1B4B68* s)
+{
+    func_001B4AA0(p, s);
+    p->f2C = s->f4;
+    p->f30 = s->f8;
+    p->f34 = s->fC;
+    p->f38 = s->f10;
+    p->f40 = (f32)s->u14;
+}
+
+struct Data_1B4C30 { u8 pad0[0x20]; s32 count; };
+struct Node_1B4C30 {
+    u8 pad0[0x10]; s32 flags; Data_1B4C30* data; u8 pad1[4];
+    f32 f1C; f32 f20; u8 pad2[8];
+    f32 f2C; f32 f30; f32 f34; f32 f38; f32 f3C; f32 f40; f32 f44; f32 f48;
+};
+
+f32 func_001EAAE0(f32 a, f32 b);
+f32 func_001EAFE0(f32 a, f32 b);
+void func_001B46E0(void* obj, s32 value);
+
+void func_001B4C30(Node_1B4C30* p, f32 dt)
+{
+    if (p->data == 0) {
+        return;
+    }
+    if (p->data->count < 2) {
+        return;
+    }
+    if (p->f48 > 0.0f) {
+        p->f48 = p->f48 - dt;
+        return;
+    }
+    p->f40 = p->f40 + p->f3C * dt;
+    if ((f32)p->data->count <= p->f40) {
+        f32 a = func_001EAAE0(p->f2C, p->f30);
+        p->f3C = (f32)p->data->count / a;
+        f32 b = func_001EAAE0(p->f34, p->f38);
+        p->f44 = b;
+        p->f48 = b;
+    }
+    f32 t = func_001EAFE0(p->f40, (f32)p->data->count);
+    p->f40 = t;
+    func_001B46E0(&p->flags, (s32)t);
+}
+
+s32 func_001B63C0(void* self, s32 key);
+
+s32 func_001B63F8(void* self, s32 key)
+{
+    s32 r = func_001B63C0(self, key);
+    return r < 0 ? 0 : r;
+}
+
+struct Reg_001B6438 { u8 pad0[0x1B88]; };
+struct Owner_001B6438 { u8 pad0[0x14]; Reg_001B6438* reg_14; };
+struct Obj_001B6438 {
+    u8 pad0[0x18];
+    Owner_001B6438* owner_18;
+    u8 pad1[0x24 - 0x1C];
+    void* handle_24;
+    u8 pad2[0x3C - 0x28];
+    void* ptr_3C;
+};
+
+void func_0012E760(void* p);
+void func_001DBC18(void* a, void* b);
+void func_00152600(void* a, void* b);
+void func_001B5F28(void* a, void* b);
+void func_001837E0(void* a, s32 b, s32 c, s32 d);
+
+void func_001B6438(Obj_001B6438* self)
+{
+    Owner_001B6438* owner = self->owner_18;
+    if (self->handle_24 != 0) {
+        func_0012E760(self->handle_24);
+        self->handle_24 = 0;
+    }
+    func_001DBC18(self->owner_18->reg_14, self->ptr_3C);
+    self->ptr_3C = 0;
+    func_00152600((u8*)self->owner_18 + 0x48, self);
+    func_00152600((u8*)self->owner_18->reg_14 + 0x1B94, self);
+    func_001B5F28((u8*)self->owner_18->reg_14 + 0x1B88, self);
+    func_001837E0(owner, 0x12, 0, 0);
+}

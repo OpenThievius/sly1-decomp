@@ -188,3 +188,36 @@ s32 func_001A1F18(Item_1A1F18* a, Item_1A1F18* b)
     if (a->key20 < b->key20) return -1;
     return 1;
 }
+
+struct Self_1A22C8 { u8 pad0[0x120]; s32 f120; s32 f124; };
+struct Src_1A22C8 { u8 pad0[0x1DC]; s32 f1DC; u8 pad1[0x10]; s32 f1F0; };
+
+void func_001A22C8(Self_1A22C8* self, Src_1A22C8* src)
+{
+    self->f120 = src->f1DC;
+    self->f124 = src->f1F0;
+}
+
+struct Self_1A25F0 { u8 pad0[0x120]; s32 f120; };
+struct Obj_1A25F0 { u8 pad0[0x50]; void* f50; };
+
+extern void* D_0026B6C0[];
+
+void func_001A2380(void* self, s32 v, void* other, void* a2, void* a3, s32 zero);
+void func_0019EBE8(void* self);
+s32 func_001300E8(void* self, s32 kind);
+
+s32 func_001A25F0(Self_1A25F0* self, Obj_1A25F0* other, void* a2, void* a3)
+{
+    u32 i;
+    for (i = 0; i < 4; i++) {
+        if (func_001300E8(other->f50, (s32)D_0026B6C0[i]) != 0) {
+            return 0;
+        }
+    }
+    if (func_001300E8(other, 0x1F) == 0) {
+        func_001A2380(self, self->f120, other, a2, a3, 0);
+    }
+    func_0019EBE8(self);
+    return 1;
+}
