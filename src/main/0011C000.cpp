@@ -1148,3 +1148,13 @@ s32 func_0011C8D0(u32 addr)
     *p = v;
     return v;
 }
+
+extern s32* D_0025C340;
+extern s32 D_0025C344;
+void func_0011D110(s32* ptr, s32 count)
+{
+    D_0025C344 = count;
+    D_0025C340 = ptr;
+    ptr[count + 1] = 0;
+    ptr[0] = 0;
+}
