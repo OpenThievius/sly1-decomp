@@ -61,6 +61,24 @@ void func_001885E0(Vec4Init_1885E0* self)
     self->f14 = 1.0f;
     self->f00 = 1.0f;
 }
+struct Quad_188770 { f32 f[4]; } __attribute__((aligned(16)));
+
+void func_00188770(Quad_188770* src, Quad_188770* dst)
+{
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
+    f32 (*m)[4] = (f32 (*)[4])dst;
+    for (s32 i = 0; i < 3; i++) {
+        for (s32 j = i + 1; j < 4; j++) {
+            f32 tmp = m[i][j];
+            m[i][j] = *((f32*)((i * 4) + (u32)dst + j * 16));
+            *((f32*)((i * 4) + (u32)dst + j * 16)) = tmp;
+        }
+    }
+}
+
 
 void func_00188810(f32* a, f32* b, f32* out)
 {
@@ -256,6 +274,22 @@ void func_0018ACF0(Self_18ACF0* self)
     else
         D_0026E248.vtbl[15](&D_0026E248);
 }
+extern void func_001C9008(void*);
+extern void func_001B64D8(s32, s32);
+
+struct State_0018B2E8 { u8 pad0[0x724]; s32 type; u8 pad1[0xE10 - 0x728]; s32 handle; u8 pad2[0xE3C - 0xE14]; s32 token; };
+
+void func_0018B2E8(State_0018B2E8* self)
+{
+    func_001C9008(self);
+    if (self->type == 16) {
+        s32 token = self->token;
+        if (token == -1) return;
+        func_001B64D8(self->handle, token);
+        self->token = -1;
+    }
+}
+
 
 void func_0018B580(void)
 {
@@ -385,6 +419,16 @@ struct Pair_18BC90 { s32 a; s32 b; };
 s32 func_00209B80(void* a0, s32* a1, s32* a2);
 s32 func_0018B930(s32 h);
 s32 func_0018B988(void* a0, s32 b);
+s32 func_0018B930(s32 value)
+{
+    switch (value) {
+    case 0: return 32;
+    case 1: return 33;
+    case -1: return 34;
+    default: return 31;
+    }
+}
+
 
 s32 func_0018BC90(void* a0, void* a1, s32* a2)
 {

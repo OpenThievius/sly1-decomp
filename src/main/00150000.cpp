@@ -250,6 +250,30 @@ void func_00151E18(void* self)
 }
 
 extern void func_00152410(void*, f32);
+extern void* D_002623C8;
+extern void* D_002623C0;
+extern u8 D_00275C60[];
+struct Object_151E20 { u8 pad[0x1C]; void* field_1C; };
+void func_00152410(void*, f32);
+f32 func_001EB0F8(void*, f32);
+void func_00151E20(void* self, f32 amount)
+{
+    f32 x = *(f32*)((u8*)*(void**)&D_002623C8 + 0xC) + amount * *(f32*)((u8*)*(void**)((u8*)self + 0x1C) + 0x10);
+    func_00152410(self, x);
+    s32 index = *(s32*)((u8*)*(void**)&D_002623C0 + 0x19E0);
+    f32 y;
+    if (index < 0) {
+        y = *(f32*)((u8*)*(void**)((u8*)self + 0x1C) + 0x40);
+    } else {
+        y = *(f32*)((u8*)*(void**)((u8*)self + 0x1C) + 0x3C);
+        if (index <= *(s32*)((u8*)*(void**)((u8*)self + 0x1C) + 0x4C)) {
+            y += *(f32*)((u8*)*(void**)((u8*)self + 0x1C) + 0x50);
+        }
+    }
+    f32 result = ((f32 (*)(void*, f32))func_001EB0F8)(D_00275C60, *(f32*)((u8*)*(void**)&D_002623C8 + 0x10) + amount * y);
+    *(f32*)((u8*)*(void**)&D_002623C8 + 0x10) = result;
+}
+
 
 void func_00151FC8(void* object)
 {
@@ -260,12 +284,12 @@ void func_00151FC8(void* object)
 	func_001F5C0C(manager + 0x74, 0, 1);
 }
 
-extern f32 func_001EB0F8(void*);
+extern f32 func_001EB0F8(void*, f32);
 struct Object_00152410 { u8 pad[0x1C]; void* field_1C; };
 
 void func_00152410(Object_00152410* object, f32 unused)
 {
-	f32 value = func_001EB0F8(object->field_1C);
+	f32 value = ((f32 (*)(void*))func_001EB0F8)(object->field_1C);
 	*(f32*)((u8*)D_002623C8 + 0xC) = value;
 }
 
