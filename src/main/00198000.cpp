@@ -806,3 +806,45 @@ s32 func_0019BE08(u8* self, Src_19BE08* src)
     }
     return 1;
 }
+
+struct Actor_1990E0 {
+    u8 pad_00[0x5A0];
+    s32 slot_5A0;
+};
+
+extern u8 D_00261420[];
+s32 func_00198E98(void* self);
+s32 func_00141008(void* table, s32 index);
+
+s32 func_001990E0(Actor_1990E0* self)
+{
+    s32 r = func_00198E98(self);
+    if (r == 1) {
+        r = func_00141008(D_00261420, self->slot_5A0) ? 0 : r;
+    }
+    return r;
+}
+
+struct Actor_199138 {
+    u8 pad_00[0x5A0];
+    s32 slot_5A0;
+};
+
+extern u8 D_00261420[];
+void func_00141040(void* table, s32 index);
+void func_00198DA8(void* self);
+
+void func_00199138(Actor_199138* self)
+{
+    func_00141040(D_00261420, self->slot_5A0);
+    func_00198DA8(self);
+}
+
+typedef void (*VFn_199AF0)(void* self);
+struct Obj_199AF0 { VFn_199AF0* vtbl; };
+
+void func_00199AF0(void* p)
+{
+    Obj_199AF0* o = (Obj_199AF0*)p;
+    o->vtbl[77](o);
+}

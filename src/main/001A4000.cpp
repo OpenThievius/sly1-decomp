@@ -581,3 +581,28 @@ void func_001A4D60(void* self)
         D_0026D0C8.vtbl[15](&D_0026D0C8);
     }
 }
+
+struct Obj_1A5C38 { u8 pad[0x560]; void* child; };
+
+void func_00152600(void* table, void* node);
+void func_00152470(void* table, void* node);
+void func_001A76A0(void* node, s32 flag);
+
+void func_001A5C38(u8* self, Obj_1A5C38* obj)
+{
+    func_00152600(self + 0x3AC, obj->child);
+    func_00152470(self + 0x3A0, obj->child);
+    func_001A76A0(obj->child, 0);
+    obj->child = 0;
+}
+
+extern u8 D_0026B888[];
+
+void func_001BAC30(void* self);
+void func_00124DF8(void* self, int idx, void* table);
+
+void func_001A7550(u8* self)
+{
+    func_001BAC30(self);
+    func_00124DF8(self, 1, D_0026B888);
+}

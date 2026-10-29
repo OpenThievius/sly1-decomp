@@ -256,3 +256,67 @@ s32 func_001A3128(void* a0, Obj_1A3128* a1, void* a2, void* a3)
     }
     return func_0019ED58(a0, a1, a2, a3);
 }
+
+typedef u64 Quad_1A0C50 __attribute__((mode(TI)));
+struct Obj_1A0C50 { u8 pad00[0x1C]; f32 f1C; s32 i20; u8 pad24[0x9C]; Quad_1A0C50 qC0; };
+
+void func_0019EB28(void* self);
+extern u8* D_00275710;
+
+void func_001A0C50(Obj_1A0C50* self)
+{
+    func_0019EB28(self);
+    u8* g = D_00275710;
+    s32 v = *(s32*)(g + 0x1CEC);
+    self->f1C = 0.5f;
+    self->i20 = v;
+    self->qC0 = *(Quad_1A0C50*)(g + 0x1EE0);
+}
+
+typedef void (*VFn_1A38F0)(void* self);
+struct Obj_1A38F0 { VFn_1A38F0* vtbl; };
+struct Node_1A38F0 {
+    u8 pad_00[0x18];
+    f32 f18;
+    f32 f1C;
+    Obj_1A38F0* f20;
+    u8 pad_24[0x134 - 0x24];
+    s32 f134;
+};
+
+extern f32 D_00261858[];
+
+void func_001A35F0(void* self);
+void func_0019EBE8(void* self);
+
+void func_001A38F0(Node_1A38F0* self)
+{
+    if (self->f18 <= D_00261858[1]) {
+        if (self->f134 != 0) {
+            func_001A35F0(self);
+        }
+    }
+    f32 span = D_00261858[1] - self->f18;
+    if (self->f1C < span) {
+        Obj_1A38F0* o = self->f20;
+        o->vtbl[6](o);
+        func_0019EBE8(self);
+    }
+}
+
+struct Node_1A3990 {
+    u8 pad_00[0x18];
+    f32 f18;
+};
+
+extern f32 D_0026185C;
+
+void func_0019F858(void* self);
+
+void func_001A3990(Node_1A3990* self)
+{
+    if (D_0026185C < self->f18) {
+        return;
+    }
+    func_0019F858(self);
+}

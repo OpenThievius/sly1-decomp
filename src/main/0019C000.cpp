@@ -251,3 +251,123 @@ void func_0019FE10(Obj_19FE10* self)
     self->f1C = 0.5f;
     self->i20 = v;
 }
+
+struct Obj_19CE38 { u8 pad0[0x54]; f32 f54; f32 f58; f32 f5C; u8 pad1[0x80 - 0x60]; s32 f80; };
+
+void func_0019CE38(Obj_19CE38* self, f32 x, f32 y, f32 z)
+{
+    self->f80 = 1;
+    self->f54 = x;
+    self->f58 = y;
+    self->f5C = z;
+}
+
+struct Obj_19D2A8 { u8 pad0[0x2424]; f32 f2424; };
+struct __attribute__((aligned(16))) Vec_19D2A8 { s32 a, b, c, d; };
+struct Frame_19D2A8 { Vec_19D2A8 q0; Vec_19D2A8 q1; s32 w20; s32 w24; };
+
+extern f32 D_00261858[];
+
+void func_0019CEC0(void* a, void* b, void* c, f32 d);
+void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
+void func_0019C9C8(void* a, s32 b, void* c);
+
+void func_0019D2A8(Obj_19D2A8* self, void* x, void* y)
+{
+    Frame_19D2A8 f;
+    if (y != 0) {
+        f32 d = self->f2424 - D_00261858[1];
+        if (d < D_00261858[2]) {
+            d = D_00261858[2];
+        }
+        func_0019CEC0(x, y, &f.q0, d);
+        func_0019D0E0(x, &f.q0, &f.q1, &f.w20, &f.w24);
+        func_0019C9C8(x, f.w20, &f.q1);
+    }
+}
+
+struct Ctx_19F560 {
+    u8 pad_000[0x550];
+    s32 f550;
+};
+
+struct Sub_19F560 {
+    u8 pad_000[0x3F8];
+    s32 f3F8;
+};
+
+typedef void (*VFn_19F560)(void* self, s32 flag);
+
+struct Actor_19F560 {
+    VFn_19F560* vtbl;
+    u8 pad_004[0x0C - 4];
+    Ctx_19F560* ctx_0C;
+    u8 pad_010[0x18 - 0x10];
+    f32 f18;
+    f32 f1C;
+    u8 pad_020[0x24 - 0x20];
+    Sub_19F560* sub_24;
+    u8 pad_028[0x80 - 0x28];
+};
+
+extern f32 D_0026185C;
+
+void func_0019EBE8(void* self);
+s32 func_00182FC8(void* p);
+s32 func_0013E658(void* a, s32 b);
+
+void func_0019F560(Actor_19F560* self)
+{
+    f32 t = D_0026185C - self->f18;
+    if (self->f1C < t) {
+        func_0019EBE8(self);
+        return;
+    }
+    Ctx_19F560* c = self->ctx_0C;
+    if (c->f550 == 1) {
+        return;
+    }
+    Sub_19F560* h = self->sub_24;
+    if (h == 0) {
+        return;
+    }
+    if (h->f3F8 == 0) {
+        return;
+    }
+    s32 flag = 0;
+    if (func_00182FC8(h) != 0) {
+        if (func_0013E658(&self->pad_028[0x80 - 0x28], self->sub_24->f3F8) != 0) {
+            flag = 1;
+        }
+    }
+    self->vtbl[6](self, flag);
+}
+
+struct Obj_19F858 {
+    u8 pad_000[0x114];
+    void* f114;
+};
+
+void func_001F2EF0(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
+s32 func_0019F620(void* self, void* a1, void* a2, void* a3);
+void func_0019EBE8(void* self);
+
+void func_0019F858(Obj_19F858* self, void* a1)
+{
+    u8 scratch[0x40];
+    void* a2;
+    void* a3;
+    if (self->f114 != 0) {
+        func_001F2EF0(50.0f, self->f114, (u8*)self + 0x80, (u8*)self + 0x50,
+                      scratch, scratch + 0x10, 0);
+        a2 = scratch;
+        a3 = scratch + 0x10;
+    } else {
+        a2 = (u8*)self + 0x80;
+        a3 = (u8*)self + 0x50;
+    }
+    s32 r = func_0019F620(self, a1, a2, a3);
+    if (r == 0) {
+        func_0019EBE8(self);
+    }
+}
