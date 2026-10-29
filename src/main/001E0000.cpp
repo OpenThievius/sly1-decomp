@@ -218,3 +218,10 @@ void func_001E2940(void* selfv)
         func_001DBCC8(self->f14, (void*)func_001E2870, self, 0, 0);
     }
 }
+
+void func_001261C0(void);
+
+void func_001E2988(void)
+{
+    func_001261C0();
+}

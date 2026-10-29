@@ -491,3 +491,29 @@ s32 func_001EEB60(Obj_1EEB60* self, Quad_1EEB60* vec, s32* out)
     }
     return r;
 }
+
+struct Obj_1ED050 { u8 pad0[0xC5C]; s32 count; u8 pad1[0x2C]; f32 ratio; };
+
+void func_001ED050(Obj_1ED050* self, s32 v)
+{
+    self->count = v;
+    self->ratio = 60.0f / (f32)v;
+}
+
+struct Obj_1ED070 { u8 pad0[0xC60]; s32 count; f32 scaled; u8 pad1[0x20]; f32 rate; };
+
+void func_001ED070(Obj_1ED070* self, s32 v)
+{
+    self->count = v;
+    self->scaled = self->rate * (f32)v;
+}
+
+typedef void (*VFn_1EF3A8)(void* self, void* arg);
+struct Obj_1EF3A8 { VFn_1EF3A8* vtbl; };
+struct Link_1EF3A8 { u8 pad0[4]; Obj_1EF3A8* target; };
+
+void func_001EF3A8(void* self, Link_1EF3A8* link)
+{
+    Obj_1EF3A8* target = link->target;
+    target->vtbl[0x128 / 4](target, self);
+}

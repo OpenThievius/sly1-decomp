@@ -247,3 +247,31 @@ void func_001F2798(Owner_1F2798* self, s32 unused, Ctx_1F2798* ctx)
         }
     }
 }
+
+struct Obj_1F0878 { u8 pad[0x2F4]; s32 field2F4; };
+
+extern u8 D_0026F138[];
+void func_001AD0D0(void* list, s32 a, s32 b);
+void func_001F18B0(void* self, s32 value);
+
+void func_001F0878(Obj_1F0878* self, s32 value)
+{
+    if (value == 10) {
+        func_001AD0D0(D_0026F138, 0, 4);
+    } else {
+        u8* base = D_0026F138;
+        s32 t = value < 9;
+        s32 idx = t ? value : -1;
+        func_001AD0D0(base, self->field2F4, idx);
+    }
+    func_001F18B0(self, value);
+}
+
+extern s32 D_00276250;
+extern s32 D_00276654;
+
+void func_001F08F0(s32 unused, s32 a, s32 b)
+{
+    D_00276250 = a;
+    D_00276654 = b;
+}

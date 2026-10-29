@@ -290,3 +290,30 @@ void func_001E5CE8(Actor_1E5CE8* self, s32 kind, Rec_1E5CE8* rec)
         }
     }
 }
+
+struct Ctx_1E5DA8 { u8 pad[0x618]; void* p618; };
+
+s32 func_001B8A08(void* a, void* b);
+s32 func_001A8820(void* p, void* v);
+
+s32 func_001E5DA8(Ctx_1E5DA8* self, void* arg)
+{
+    if (func_001B8A08(self, arg)) {
+        return 1;
+    }
+    if (self->p618 != 0) {
+        s32 r = func_001A8820(self->p618, arg);
+        if (r != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+struct Pair_1E5E50 { s32 lo; s32 hi; };
+
+void func_001E5E50(void* a0, void* a1, Pair_1E5E50* out)
+{
+    out->lo = 0;
+    out->hi = 0;
+}

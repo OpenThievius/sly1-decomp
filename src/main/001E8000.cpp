@@ -499,3 +499,60 @@ void func_001EAD30(Vec3_1EAD30* in, Vec3_1EAD30* out, f32 s, f32 t)
     out->y = (in->z + in->z) * s * t + in->y * s;
     out->x = (in->z * t * t + in->y * t) + in->x;
 }
+
+struct Obj_1E8E48 { u8 pad0[0x724]; s32 f724; u8 pad1[0xC58 - 0x728]; s32 fC58; s32 fC5C; u8 pad2[0xC7C - 0xC60]; s32 fC7C; };
+
+s32 func_001BB290(void* a, s32 b, s32 c);
+s32 func_001E89F0(void* a, void* b);
+void* func_00129C20(s32 a, s32 b);
+void func_001B64D8(void* p, s32 n);
+void func_001C9CF8(void* a);
+
+void func_001E8E48(Obj_1E8E48* self)
+{
+    if (self->fC58 == 0x2DA && self->f724 == 0xC && func_001BB290(self, 0, 0) != 0) {
+        s32 s = func_001E89F0(self, (u8*)self + 0x140);
+        if (s != self->fC7C) {
+            s32 n = self->fC5C - 1;
+            if (!(0 < n)) n = 0;
+            self->fC5C = n;
+            if (n > 0) {
+                void* p = func_00129C20(s, -1);
+                if (p != 0) func_001B64D8(p, 0x2E0);
+                self->fC7C = s;
+            }
+        }
+    }
+    func_001C9CF8(self);
+}
+
+typedef void* (*VFn_1E8EF8)(void* self);
+struct Obj_1E8EF8 { VFn_1E8EF8* vtbl; u8 pad0[0x724 - 4]; s32 f724; u8 pad1[0xC40 - 0x728]; s32 fC40; u8 pad2[0xC60 - 0xC44]; void* fC60; };
+struct Buf_1E8EF8 { s32 v[4]; };
+
+void func_001C8418(Obj_1E8EF8* self, void* p);
+void func_001C8C08(Obj_1E8EF8* self);
+void func_001F3BD8(void* self, void* arg);
+
+void func_001E8EF8(Obj_1E8EF8* self)
+{
+    Buf_1E8EF8 loc;
+    switch (self->f724) {
+    case 4:
+        if (self->fC40 != 0) {
+            func_001C8418(self, (u8*)self + 0x190);
+        } else {
+            func_001F3BD8(self->fC60, &loc);
+            func_001C8418(self, &loc);
+        }
+        break;
+    case 8: {
+        void* r = self->vtbl[102](self);
+        if (r != 0) func_001C8418(self, (u8*)r + 0x140);
+        break;
+    }
+    default:
+        func_001C8C08(self);
+        break;
+    }
+}
