@@ -637,3 +637,135 @@ void func_001CBE70(Self_1CBE70* self, s32 mode)
         func_00123AB0(self->items[i], mode);
     }
 }
+
+struct Sub_1C8D78 {
+    u8 pad0[0x8];
+    s32 f8;
+    u8 pad1[0x2D0];
+    void* f2DC;
+};
+
+struct Obj_1C8D78 {
+    u8 pad0[0x1EC];
+    void* f1EC;
+    void* f1F0;
+    u8 pad1[0x560];
+    void* f754;
+    u8 pad2[0x31C];
+    Sub_1C8D78* fA74;
+};
+
+struct Node_1C8D78 {
+    u8 pad0[0x10];
+    u8 b10;
+    u8 b11;
+};
+
+void func_0012C288(void* self, void* a1, s32 a2, void* a3, s32 a4, void* a5, f32 f0, f32 f1);
+void func_0012F810(void* a0, Sub_1C8D78* a1);
+s32 func_00183458(Obj_1C8D78* a);
+void* func_0012D570(void* a0, s32 a1);
+
+void func_001C8D78(Obj_1C8D78* self)
+{
+    Sub_1C8D78* sub = self->fA74;
+    if (sub->f2DC != 0) {
+        s32 pair[2];
+        pair[0] = sub->f8;
+        pair[1] = (s32)self;
+        func_0012C288(sub->f2DC, self, 1, pair, 1, &self->f754, 0.0f, 1.0f);
+        func_0012F810(self->f754, self->fA74);
+        Node_1C8D78* node = (Node_1C8D78*)func_0012D570(self->f754, func_00183458(self));
+        if ((void*)node == self->f1EC) {
+            node->b10 = 5;
+        }
+        if ((void*)node == self->f1F0) {
+            node->b11 = 5;
+        }
+    }
+}
+
+typedef s32 (*VFn_1CAC30)(void* self, void* out);
+
+struct Obj_1CAC30 {
+    VFn_1CAC30* vtbl;
+    u8 pad4[0xBE4];
+    f32 fBE8;
+    u8 padBEC[0x18];
+    s32 fC04;
+};
+
+struct Out_1CAC30 {
+    u8 pad0[0x94];
+    f32 f94;
+    f32 f98;
+};
+
+extern f32 D_00274CF4[];
+extern f32 D_00274CF8[];
+
+void func_001CAC30(Obj_1CAC30* self, Out_1CAC30* out)
+{
+    if (self->fC04 != 0) {
+        f32 a = D_00274CF4[0];
+        f32 b = D_00274CF8[0];
+        out->f94 = a;
+        out->f98 = b;
+    } else {
+        if (self->vtbl[90](self, out) != 0) {
+            f32 t = self->fBE8;
+            out->f98 = 0.0f;
+            out->f94 = t;
+        } else {
+            out->f94 = 0.0f;
+            out->f98 = 0.0f;
+        }
+    }
+}
+
+extern u8 D_00262E10[];
+
+struct Obj_1CB578 { u8 pad0[0xB7C]; s32 fB7C; s32 fB80; };
+struct Glob_1CB578 { u8 pad0[0x275C]; s32 f275C; };
+
+s32 func_001CB578(Obj_1CB578* self)
+{
+    s32 r = 0;
+    Glob_1CB578* g;
+    if (self->fB7C != 0) {
+        goto set;
+    }
+    if (self->fB80 != 0) {
+        r = 1;
+    } else {
+        g = *(Glob_1CB578**)D_00262E10;
+        if (g != 0 && g->f275C != 0) {
+set:
+            r = 1;
+        }
+    }
+    return r;
+}
+
+
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void func_001CBB20(void* self);
+
+struct Obj_1CBAA0 { u8 pad0[0x50]; s32 f50; u8 pad1[0x17C - 0x54]; s32 f17C; };
+
+void func_001CBAA0(Obj_1CBAA0* a0)
+{
+    Obj_1CBAA0* self = a0;
+    if (self->f50 == 3) {
+        return;
+    }
+    if (self->f17C != 0) {
+        return;
+    }
+    {
+        s32 one = 1;
+        void* owner = *(void**)&D_00275710;
+        self->f17C = one;
+        func_001DBCC8(owner, (void*)(void (*)(void*))func_001CBB20, self, -1, 0);
+    }
+}

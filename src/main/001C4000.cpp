@@ -331,3 +331,24 @@ void func_001C4F08(Obj_1C4F08* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     func_001BC828(self, a1, a2, a3, a4, a5);
     self->f470 = old;
 }
+
+struct __attribute__((aligned(16))) Ent_1C4790 { u8 pad0[0x40]; f32 f40; u8 pad1[0x70 - 0x44]; };
+struct Obj_1C4790 { u8 pad0[0x50]; s32 f50; u8 pad1[0xD0 - 0x54]; f32 fD0; };
+s32 func_00141C90(void* self, void* a1, void* a2, void* a3, s32 a4, void* a5);
+
+void func_001C4790(void* unused, void* a1, void* a2, Obj_1C4790* self)
+{
+    Ent_1C4790 ents[2];
+    s32 n;
+    s32 idx;
+    if (self->f50 == 0) return;
+    n = func_00141C90(a1, a2, (u8*)self + 0x70, (u8*)self + 0x60, 2, ents);
+    idx = 0;
+    if (n > 0) {
+        if (ents[0].f40 == 0.0f) idx = 1;
+    }
+    if (!(idx < n)) return;
+    if (ents[idx].f40 < self->fD0) {
+        *(Ent_1C4790*)((u8*)self + 0x90) = ents[idx];
+    }
+}

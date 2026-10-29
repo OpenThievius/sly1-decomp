@@ -192,3 +192,17 @@ void func_001D34E0(void* self)
 {
     func_001BC4D8(self, (u8*)self + 0x554);
 }
+
+typedef void (*VFn_1D3290)(void* self);
+struct Obj_1D3290 { VFn_1D3290* vtbl; };
+
+void func_00124A48(void* self);
+void func_00124DF8(void* self, s32 a1, void* a2);
+extern u8 D_00274F90[];
+
+void func_001D3290(Obj_1D3290* self)
+{
+    func_00124A48(self);
+    func_00124DF8(self, 1, D_00274F90);
+    self->vtbl[7](self);
+}

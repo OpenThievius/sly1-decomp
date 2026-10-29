@@ -1204,3 +1204,170 @@ void func_001B78C0(Obj_1B78C0* self, s32 code, void* req)
         }
     }
 }
+
+struct Data_1B4DA8 { u8 pad0[0x20]; s32 count; };
+struct Node_1B4DA8 {
+    u8 pad0[0x10]; s32 flags; Data_1B4DA8* data; u8 pad1[4];
+    f32 f1C; f32 f20; u8 pad2[8];
+    f32 f2C; f32 f30; f32 f34; f32 f38; f32 f3C; f32 f40; f32 f44; f32 f48;
+};
+
+void func_001B4AD0(void* p);
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_001B4DA8(Node_1B4DA8* p)
+{
+    func_001B4AD0(p);
+    if (p->data != 0) {
+        f32 a = func_001EAAE0(p->f2C, p->f30);
+        p->f3C = (f32)(p->data->count * 2) / a;
+        f32 b = func_001EAAE0(p->f34, p->f38);
+        p->f44 = b;
+        p->f48 = b;
+    }
+}
+
+struct Data_1B4E18 { u8 pad0[0x20]; s32 count; };
+struct Node_1B4E18 {
+    u8 pad0[0x10]; s32 flags; Data_1B4E18* data; u8 pad1[4];
+    f32 f1C; f32 f20; u8 pad2[8];
+    f32 f2C; f32 f30; f32 f34; f32 f38; f32 f3C; f32 f40; f32 f44; f32 f48;
+};
+
+void func_001B46E0(void* p, s32 v);
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_001B4E18(Node_1B4E18* p, f32 dt)
+{
+    Data_1B4E18* d = p->data;
+    if (d == 0) return;
+    if (d->count < 2) return;
+    if (0.0f < p->f48) {
+        p->f48 = p->f48 - dt;
+        return;
+    }
+    f32 prod = p->f3C * dt;
+    f32 sum = p->f40 + prod;
+    p->f40 = sum;
+    if ((f32)d->count <= sum) {
+        p->f40 = sum - prod;
+        p->f3C = -p->f3C;
+    }
+    if (p->f40 < 0.0f) {
+        p->f40 = 0.0f;
+        f32 a = func_001EAAE0(p->f2C, p->f30);
+        p->f3C = (f32)(p->data->count * 2) / a;
+        f32 b = func_001EAAE0(p->f34, p->f38);
+        p->f44 = b;
+        p->f48 = b;
+    }
+    func_001B46E0((u8*)p + 0x10, (s32)p->f40);
+}
+
+struct Node_1B5400 { u8 pad0[0x14]; s32 f14; u8 pad1[0x14]; f32 f2C; f32 f30; f32 f34; f32 f38; };
+
+extern f32 D_0026185C;
+f32 func_001EA408(f32 a);
+void func_001EAD88(f32 angle, f32* a, f32* b);
+void func_001B4750(void* p, f32 a, f32 b);
+
+void func_001B5400(Node_1B5400* self)
+{
+    if (self->f14 != 0) {
+        f32 t[2];
+        f32 ang = func_001EA408(D_0026185C * self->f2C);
+        func_001EAD88(ang, &t[0], &t[1]);
+        t[0] = t[0] * self->f30 + self->f34;
+        t[1] = t[1] * self->f30 + self->f38;
+        func_001B4750((u8*)self + 0x10, t[0], t[1]);
+    }
+}
+
+struct Node_1B5488 { u8 pad0[0x2C]; f32 f2C; };
+
+extern f32 D_0026185C;
+f32 func_001EAFE0(f32 x, f32 y);
+
+f32 func_001B5488(Node_1B5488* p)
+{
+    f32 a = func_001EAFE0(D_0026185C * p->f2C, 6.2831855f);
+    return a * 0.15915494f;
+}
+
+struct Src_1B54D0 { u8 pad0[4]; f32 f4; f32 f8; f32 fC; f32 f10; f32 f14; f32 f18; };
+struct Node_1B54D0 { u8 pad0[0x10]; s32 flags; u8 pad1[0x18]; f32 f2C; f32 f30; f32 f34; f32 f38; f32 f3C; f32 f40; };
+
+void func_001B4AA0(void* a, void* b);
+
+void func_001B54D0(Node_1B54D0* self, Src_1B54D0* src)
+{
+    func_001B4AA0(self, src);
+    s32 fl = self->flags;
+    self->f2C = src->f4;
+    self->f30 = src->f8;
+    self->f34 = src->fC - src->f4;
+    self->f38 = src->f10 - src->f4;
+    self->f3C = src->f14 - src->f8;
+    f32 d = src->f18 - src->f8;
+    self->flags = (fl & -2) | 2;
+    self->f40 = d;
+}
+
+
+void func_00124FC0(void* self);
+
+struct __attribute__((aligned(16))) Quad_1B5D28 { s32 a, b; f32 c; s32 d; };
+
+typedef void (*VFn_1B5D28)(void* self, void* p);
+struct Node_1B5D28 {
+    VFn_1B5D28* vtbl;
+    u8 pad[0x148 - 4];
+    f32 f148;
+    u8 pad2[0x2D0 - 0x14C];
+    s32 f2D0;
+};
+
+void func_001B5D28(Node_1B5D28* self)
+{
+    func_00124FC0(self);
+    Quad_1B5D28* src = (Quad_1B5D28*)((u8*)D_00261990 + 0x40);
+    Quad_1B5D28 q = *src;
+    if (self->f2D0 == 0) {
+        q.c = self->f148;
+    }
+    self->vtbl[33](self, &q);
+}
+
+void func_001C6F48(void* self);
+
+struct Ent_1B6EC8 { s32 v; s32 pad; };
+struct Node_1B6EC8 {
+    u8 pad[0xC10];
+    s32 fC10;
+    u8 pad2[0xC18 - 0xC14];
+    f32 fC18;
+    f32 fC1C;
+    f32 fC20;
+    f32 fC24;
+    s32 fC28;
+    s32 fC2C;
+};
+
+void func_001B6EC8(Node_1B6EC8* self)
+{
+    func_001C6F48(self);
+    self->fC20 = 2000.0f;
+    self->fC18 = 300.0f;
+    self->fC1C = 300.0f;
+    self->fC24 = 300.0f;
+    self->fC28 = -1;
+    self->fC2C = 0;
+    s32 i = 16;
+    Ent_1B6EC8* e = (Ent_1B6EC8*)((u8*)self + 0xCB8);
+    do {
+        e->v = -1;
+        i--;
+        e--;
+    } while (i >= 0);
+    self->fC10 = -1;
+}
