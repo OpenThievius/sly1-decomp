@@ -497,3 +497,109 @@ void func_00169D58(void* self)
     func_00182ED0(self);
     func_00152600(D_002626E8, self);
 }
+
+struct Hdr_1694F8 { u8 pad0[0xC]; s32 f0C; };
+struct Src_1694F8 { s32 scale; s32 base; };
+struct Pool_1694F8 { s32 f0; s32 f4; s32 f8; s32 fC; };
+struct Link_1694F8 { Src_1694F8* src; Pool_1694F8* dst; Link_1694F8* next; };
+struct Node_1694F8 { s32 flags; u8 pad4[4]; s32 idx; u8 pad0C[8]; Link_1694F8* links; };
+
+
+void func_001694A0(void* p);
+void* func_0018D5C0(u32 n);
+
+void func_001694F8(Hdr_1694F8* a0, Src_1694F8* a1, s32 a2, s32 a3, s32 a4, Node_1694F8* a5)
+{
+    Pool_1694F8 local;
+    Pool_1694F8* e;
+    s32 link;
+    s32 idx;
+    s32 count;
+    s32 n;
+    s32 scale;
+    s32 base;
+    s32 off;
+
+    link = 0;
+    if (a5 != 0) {
+        link = a5->flags & 1;
+    }
+    count = D_002626D0;
+    if (count >= 0x4000) {
+        goto local_path;
+    }
+    if (a0 == 0) {
+        goto pool_path;
+    }
+    if ((a0->f0C & 0x10000000) == 0) {
+        goto pool_path;
+    }
+    if (link != 0) {
+        goto pool_path;
+    }
+local_path:
+    link = (count < 0x4000) ? link : 0;
+    e = &local;
+    goto store;
+pool_path:
+    n = D_002626D0;
+    e = (Pool_1694F8*)&D_0027DC20[n];
+    n++;
+    D_002626D0 = n;
+store:
+    e->f0 = a3;
+    idx = 0;
+    if (a5 != 0) {
+        idx = a5->idx;
+    }
+    scale = a1->scale;
+    base = a1->base;
+    off = idx * scale;
+    e->f8 = a2;
+    e->fC = a4;
+    e->f4 = base + (off << 4);
+    func_001694A0(e);
+    if (link != 0) {
+        Link_1694F8* p = (Link_1694F8*)func_0018D5C0(12);
+        if (p != 0) {
+            p->src = a1;
+            p->dst = e;
+            p->next = a5->links;
+            a5->links = p;
+        }
+    }
+}
+
+struct Pool_169608 { s32 f0; s32 f4; s32 f8; s32 fC; };
+struct Link_169608 { s32 src; Pool_169608* dst; Link_169608* next; };
+struct Node_169608 { u8 pad0[0x14]; Link_169608* links; };
+
+
+void func_001694A0(void* p);
+void* func_0018D5C0(u32 n);
+
+void func_00169608(s32 a0, s32 a1, Node_169608* a2)
+{
+    Pool_169608 local;
+    Pool_169608* e;
+    s32 count = D_002626D0;
+
+    if (count >= 0x4000) {
+        e = &local;
+    } else {
+        e = (Pool_169608*)&D_0027DC20[count];
+        D_002626D0 = count + 1;
+    }
+    e->f0 = a1;
+    e->f4 = (s32)a2 + 0xC;
+    e->f8 = a0;
+    e->fC = 0;
+    func_001694A0(e);
+    if (D_002626D0 < 0x4000) {
+        Link_169608* p = (Link_169608*)func_0018D5C0(12);
+        p->dst = e;
+        p->src = 0;
+        p->next = a2->links;
+        a2->links = p;
+    }
+}

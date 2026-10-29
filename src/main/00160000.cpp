@@ -434,3 +434,8 @@ void func_001617E8(Stream_1617E8* self, s32 tag, f32 value)
     self->cur = (u8*)(p + 1);
     *p = lo | hi;
 }
+
+s32 func_00160D98(void)
+{
+    return 2;
+}

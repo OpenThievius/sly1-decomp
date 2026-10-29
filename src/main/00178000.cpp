@@ -256,3 +256,23 @@ void func_0017B550(Obj_17B550* self, s32 index)
         self->f60C = func_0015A418(self->f14, 0x101, index, self);
     }
 }
+
+struct Item_178258 { u8 pad[0x2D0]; s32 link; };
+struct Owner_178258 { u8 pad0[0x2220]; s32 state; u8 pad1[0x2BE4 - 0x2224]; Item_178258* held; };
+
+void func_00178258(Owner_178258* a0, Item_178258* a1)
+{
+    if (a0->state != 9 && a1->link == 0) {
+        a0->held = a1;
+    }
+}
+
+struct Item_178280 { u8 pad[0x2D0]; s32 link; };
+struct Owner_178280 { u8 pad0[0x2220]; s32 state; u8 pad1[0x2BE8 - 0x2224]; Item_178280* held; };
+
+void func_00178280(Owner_178280* a0, Item_178280* a1)
+{
+    if (a0->state != 9 && a1->link == 0) {
+        a0->held = a1;
+    }
+}
