@@ -184,3 +184,27 @@ void func_001F3AF0(void* self, void* other)
     p += 0x50;
     func_00128150(other, 0, p, p);
 }
+
+struct Holder_1F3BD8 {
+    u8 pad[0x18];
+    void* link;
+};
+
+s32 func_00128018(void* a, s32 b, void* c, s32 d);
+
+s32 func_001F3BD8(Holder_1F3BD8* self, s32 arg)
+{
+    return func_00128018(self->link, 0, (u8*)self + 0x40, arg);
+}
+
+struct Holder_1F3C08 {
+    u8 pad[0x18];
+    void* link;
+};
+
+s32 func_00128150(void* a, s32 b, void* c, s32 d);
+
+s32 func_001F3C08(Holder_1F3C08* self, s32 arg)
+{
+    return func_00128150(self->link, 0, (u8*)self + 0x50, arg);
+}

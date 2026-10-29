@@ -297,3 +297,50 @@ void func_001DDCC8(void* unused, s32* out)
 {
     *out = *(s32*)((u8*)D_002623C0 + 0x19E0);
 }
+
+struct Node_1DC108 { s32 pad0; Node_1DC108* next; };
+
+void func_001B5F28(void* list, void* item);
+
+void func_001DC108(u8* owner, Node_1DC108* node)
+{
+    while (node != 0) {
+        Node_1DC108* next = node->next;
+        func_001B5F28(owner + 0x1C0C, node);
+        node = next;
+    }
+}
+
+struct __attribute__((aligned(16))) Quad_1DDCE0 { s32 a, b, c, d; };
+
+struct Obj_1DDCE0 {
+    u8 pad[0x320];
+    Quad_1DDCE0 q;
+};
+
+extern u8 D_00275730[];
+
+void func_00123ED0(Obj_1DDCE0* self);
+
+void func_001DDCE0(Obj_1DDCE0* self)
+{
+    func_00123ED0(self);
+    self->q = *(Quad_1DDCE0*)D_00275730;
+}
+
+struct Obj_1DE768 {
+    u8 pad0[0x2D0];
+    Obj_1DE768* self2D0;
+    u8 pad1[0x2DC - 0x2D4];
+    s32 flag2DC;
+};
+
+void func_001276C0(Obj_1DE768* self);
+
+void func_001DE768(Obj_1DE768* self)
+{
+    if (self->self2D0 == self) {
+        self->flag2DC = 1;
+    }
+    func_001276C0(self);
+}

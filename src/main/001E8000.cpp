@@ -425,3 +425,23 @@ void func_001EB518(void* self)
     func_001BAC30(self);
     func_00124DF8(self, 1, D_00275C90);
 }
+
+struct Gate_0026FF68 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; s32 f260; };
+struct Gate_0026F808 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; };
+
+extern s32 D_00275F84;
+extern u8 D_0026FF68[];
+extern u8 D_0026F808[];
+
+s32 func_001E9A10(void)
+{
+    if (D_00275F84 != 0) goto fail;
+    if (((Gate_0026FF68*)D_0026FF68)->f25C != 0) goto fail;
+    if (((Gate_0026FF68*)D_0026FF68)->f250 != 0) goto fail;
+    if (((Gate_0026F808*)D_0026F808)->f25C != 0) goto fail;
+    if (((Gate_0026F808*)D_0026F808)->f250 == 0) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}

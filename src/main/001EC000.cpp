@@ -392,3 +392,52 @@ void func_001EE498(PktBuf_1EE498* b, u32 x, u32 y)
     b->cur = p + 1;
     *p = y | (x << 8) | 0x01000000;
 }
+
+void func_00192850(void);
+
+void func_001EC098(void)
+{
+    func_00192850();
+}
+
+s32 func_001EC188(void)
+{
+    return 1;
+}
+
+struct Packer_1EE528 {
+    u8 pad0[0xC]; u32* cursor; u8 pad1[0xC]; s32 last;
+    void push(u32 word)
+    {
+        u32* p = cursor;
+        cursor = p + 1;
+        *p = word;
+    }
+};
+
+void func_001EE528(Packer_1EE528* self, s32 value)
+{
+    if (value != 0) {
+        self->push(0x20000000);
+        self->push((u32)value);
+    }
+    self->last = value;
+}
+
+struct Packer_1EE560 { u8 pad0[0xC]; u32* cursor; u8 pad1[0xC]; s32 last; };
+
+extern s32 D_00275DD0[];
+
+s32 func_001EE560(Packer_1EE560* self, s32 a, s32 b, s32 c)
+{
+    u32 lo = ((u32)b << 16) | 0x6000C000u;
+    u32 head = ((u32)a << 24) | lo;
+    u32* p = self->cursor;
+    self->cursor = p + 1;
+    u32 tag = head | (u32)c;
+    *p = tag;
+    if (self->last != 0) {
+        *p = tag | 0x10000000;
+    }
+    return D_00275DD0[a] * b;
+}
