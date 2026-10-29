@@ -231,3 +231,76 @@ void func_001EFCE8(Obj_1EFCE8* o)
     o->field4 = -1;
     func_001F0220(o, 0);
 }
+
+struct Node_1EF520 { s32 pad0; void* obj; s32 pad2; Node_1EF520* next; };
+struct Sub_1EF520 { u8 pad0[8]; s32 count; void** items; };
+struct Self_1EF520 { u8 pad0[0x14]; void* f14; u8 pad1[0x38]; void* f50; u8 pad2[0x4FC]; Node_1EF520* head; Sub_1EF520 sub; };
+
+void func_0015F9A0(void* a, Sub_1EF520* s);
+void func_0015F8B0(void* a, Sub_1EF520* s);
+
+void func_001EF520(Self_1EF520* self)
+{
+    if (self->f50 == self) {
+        Sub_1EF520* s = &self->sub;
+        func_0015F9A0(self->f14, s);
+        s->items[0] = self;
+        s->count = 1;
+        Node_1EF520* node = self->head;
+        if (node) {
+            do {
+                s->items[s->count++] = node->obj;
+                node = node->next;
+            } while (node);
+        }
+        func_0015F8B0(self->f14, s);
+    }
+}
+
+void func_001F57E0(void* p);
+
+s32 func_001EF808(void* self)
+{
+    func_001F57E0((u8*)self + 0x590);
+    return 1;
+}
+
+void* func_001EF828(void* self)
+{
+    return (u8*)self + 0x590;
+}
+
+struct Obj_1EF838 { u8 pad0[0x2D0]; s32 f2D0; u8 pad1[0xC]; s32 f2E0; };
+
+void func_00123ED0(void* self);
+
+void func_001EF838(Obj_1EF838* self)
+{
+    func_00123ED0(self);
+    self->f2D0 = -1;
+    self->f2E0 = -1;
+}
+
+typedef void (*VFn_1EF868)(void* self);
+struct Obj_1EF868 { VFn_1EF868* vtbl; };
+
+extern u8 D_00275E10[];
+
+void func_00124A48(void* self);
+void func_00124DF8(void* self, s32 a, void* b);
+void func_001EF900(void* self, s32 b);
+
+void func_001EF868(Obj_1EF868* self)
+{
+    func_00124A48(self);
+    func_00124DF8(self, 1, D_00275E10);
+    func_001EF900(self, 0);
+    self->vtbl[7](self);
+}
+
+void func_0013EC00(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
+
+void func_001EF8C0(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+{
+    func_0013EC00((u8*)self + 0x2E8, 4, (u8*)self + 0x2E4, a1, a2, a3, a4, a7);
+}
