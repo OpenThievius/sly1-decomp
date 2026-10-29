@@ -9,7 +9,8 @@ public sce_ps2_sdk_24 mirror; the compiler is proprietary and never committed.
 
 - SLY1_TOOLCHAIN, or the `toolchain` link in the repository root: the
   `ee/gcc` directory (it holds `lib/gcc-lib/ee/2.9-ee-991111/cc1plus.exe`).
-- SLY1_RUNNER: what runs the Windows tools; else `wibo`, then `wine`, from PATH.
+- SLY1_RUNNER: what runs the Windows tools; else a `wibo` link in the repository
+  root, then `wibo` or `wine` from PATH.
 """
 
 import os
@@ -50,6 +51,9 @@ def runner(tool):
     env = os.environ.get("SLY1_RUNNER")
     if env:
         return [env]
+    local = versions.ROOT / "wibo"
+    if local.exists():
+        return [str(local)]
     for name in ("wibo", "wine"):
         found = shutil.which(name)
         if found:

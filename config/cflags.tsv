@@ -1,0 +1,6 @@
+# The compiler and the flags of each source file (docs/TOOLCHAIN.md).
+# `compiler` names the folder under the toolchain's lib/gcc-lib/ee/ whose cc1plus
+# builds the game. Flags are one row per file, never per function; `default`
+# applies to every file without a row of its own.
+compiler	2.95.3
+default	-O2 -G0 -fno-exceptions

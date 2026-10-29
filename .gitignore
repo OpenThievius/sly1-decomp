@@ -15,6 +15,7 @@
 # The proprietary compiler you supply (docs/TOOLCHAIN.md).
 /toolchain
 /toolchain/
+/wibo
 
 # splat writes these generic macro files on every run (generate_asm_macros_files).
 /include/include_asm.h
