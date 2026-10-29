@@ -1145,3 +1145,9 @@ void* func_001172C8(void* dst, int unused, Value_1172C8* p)
     func_0011B060(&q, 2);
     return dst;
 }
+
+void* func_00114B80(void* self, void* unused, void* value)
+{
+    func_0011B018(self, value);
+    return self;
+}

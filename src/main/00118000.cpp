@@ -912,7 +912,6 @@ void func_0011B740(Rec_11B740* r, s32 value)
     r->tag = 0x16;
 }
 
-
 struct Obj_0011A708 { u8 pad[0x504]; s32 count; s32 values[1]; };
 void func_0011A708(Obj_0011A708* obj, s32 value) { obj->values[obj->count++] = value; }
 
@@ -923,3 +922,39 @@ struct Obj_0011A770 { u8 pad[0xF0C]; s32 count; s32 values[1]; };
 void func_0011A770(Obj_0011A770* obj, s32 value) { obj->values[obj->count++] = value; }
 
 void func_0011A6B8() {}
+
+s32 func_0011C690(u32 value);
+void func_0011B788(Rec_11B570* self, u32 value)
+{
+    (void)func_0011C690(value);
+    func_0011B418(self);
+    self->value = value;
+    self->tag = 23;
+}
+
+s32 func_0011C7C0(u32 value);
+void func_0011B7D0(Rec_11B570* self, u32 value)
+{
+    (void)func_0011C7C0(value);
+    func_0011B418(self);
+    self->value = value;
+    self->tag = 24;
+}
+
+s32 func_0011C8D0(u32 value);
+void func_0011B818(Rec_11B570* self, u32 value)
+{
+    (void)func_0011C8D0(value);
+    func_0011B418(self);
+    self->value = value;
+    self->tag = 25;
+}
+
+s32 func_0011C9E0(u32 value);
+void func_0011B860(Rec_11B570* self, u32 value)
+{
+    (void)func_0011C9E0(value);
+    func_0011B418(self);
+    self->value = value;
+    self->tag = 26;
+}

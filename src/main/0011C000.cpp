@@ -554,7 +554,6 @@ void func_0011C418(Node_11C418* a, Node_11C418* b, s32 c)
     }
 }
 
-
 extern u8 D_0025C290[];
 Node_11C418* func_0011C240(void* pool);
 void func_001F5C0C(void* dst, s32 value, u32 size);
@@ -1128,4 +1127,24 @@ void func_0011EFA8()
 void* func_0011FFA8(void* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     return func_0011F6B0((u8*)self + 0x20, a1, a2, (u8*)self + 0x10, a3, a4);
+}
+
+extern u32 D_0062C56C;
+s32 func_0011C690(u32 addr)
+{
+    u8* p = D_0027B300[1] + ((addr - D_0062C56C) >> 6);
+    s32 v = *p;
+    v++;
+    *p = v;
+    return v;
+}
+
+extern u32 D_0062C58C;
+s32 func_0011C8D0(u32 addr)
+{
+    u8* p = D_0027B300[3] + ((addr - D_0062C58C) >> 3);
+    s32 v = *p;
+    v++;
+    *p = v;
+    return v;
 }
