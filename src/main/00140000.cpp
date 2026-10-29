@@ -803,3 +803,40 @@ void func_00143888(void) { func_001439E8(D_00261990); }
 void func_001438B0(void) { func_00143A08(D_00261990); }
 
 void func_00143920(void* arg, void* arg2) { func_001448C8(arg, 0, arg2); }
+
+void func_001405F0(u8* self, s32 value)
+{
+    func_001405D0(self + 0x554, self, value);
+}
+
+struct State_00141170 { u8 pad[0x8C]; void* child; };
+struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
+void func_001F3B48(void* self, void* value, void* out);
+s32 func_001E4DC0(void* self, void* value);
+s32 func_00141170(State_00141170* self, void* value)
+{
+    Quad_00141170 local;
+    func_001F3B48(self, value, &local);
+    return func_001E4DC0(self->child, &local);
+}
+
+void func_001448C8(void* self, void* a, void* b);
+void func_00143900(void* self, void* value)
+{
+    func_001448C8(self, value, 0);
+}
+
+struct State_001439E8 { u8 pad[0x200]; f32 value; };
+void func_001439E8(void* ptr, f32 value)
+{
+    State_001439E8* self = (State_001439E8*)ptr;
+    self->value = value;
+    func_00143560(self);
+}
+
+struct __attribute__((packed)) Value_00143A08 { u32 value; };
+void func_00143A08(void* self, void* value)
+{
+    *(Value_00143A08*)((u8*)self + 0x204) = *(Value_00143A08*)value;
+    func_00143560(self);
+}
