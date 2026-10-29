@@ -1,15 +1,15 @@
 {
  "measures": {
-  "fuzzy_match_percent": 9.477066879470948,
+  "fuzzy_match_percent": 11.709006845761031,
   "total_code": "1117772",
-  "matched_code": "105932",
-  "matched_code_percent": 9.477066879470948,
+  "matched_code": "130880",
+  "matched_code_percent": 11.709006845761031,
   "total_data": "464563",
   "matched_data": "0",
   "matched_data_percent": 0.0,
   "total_functions": 4791,
-  "matched_functions": 1302,
-  "matched_functions_percent": 27.175954915466498,
+  "matched_functions": 1606,
+  "matched_functions_percent": 33.521185556251304,
   "complete_code": "0",
   "complete_code_percent": 0.0,
   "complete_data": "0",
@@ -21,16 +21,16 @@
   {
    "name": "game/00100000",
    "measures": {
-    "fuzzy_match_percent": 11.965811965811966,
+    "fuzzy_match_percent": 14.017094017094017,
     "total_code": "16380",
-    "matched_code": "1960",
-    "matched_code_percent": 11.965811965811966,
+    "matched_code": "2296",
+    "matched_code_percent": 14.017094017094017,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 87,
-    "matched_functions": 12,
-    "matched_functions_percent": 13.793103448275861,
+    "matched_functions": 14,
+    "matched_functions_percent": 16.091954022988507,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -564,7 +564,7 @@
     {
      "name": "func_001029D0",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10704",
      "metadata": {
       "virtual_address": "1059280"
@@ -690,7 +690,7 @@
     {
      "name": "func_00103590",
      "size": "176",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13712",
      "metadata": {
       "virtual_address": "1062288"
@@ -834,16 +834,16 @@
   {
    "name": "game/00104000",
    "measures": {
-    "fuzzy_match_percent": 16.90691424383093,
+    "fuzzy_match_percent": 24.993892010750063,
     "total_code": "16372",
-    "matched_code": "2768",
-    "matched_code_percent": 16.90691424383093,
+    "matched_code": "4092",
+    "matched_code_percent": 24.993892010750063,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 90,
-    "matched_functions": 17,
-    "matched_functions_percent": 18.88888888888889,
+    "matched_functions": 25,
+    "matched_functions_percent": 27.77777777777778,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -873,7 +873,7 @@
     {
      "name": "func_00104170",
      "size": "176",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "336",
      "metadata": {
       "virtual_address": "1065328"
@@ -909,7 +909,7 @@
     {
      "name": "func_00104470",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1104",
      "metadata": {
       "virtual_address": "1066096"
@@ -963,7 +963,7 @@
     {
      "name": "func_00104860",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2112",
      "metadata": {
       "virtual_address": "1067104"
@@ -981,7 +981,7 @@
     {
      "name": "func_001049D8",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2488",
      "metadata": {
       "virtual_address": "1067480"
@@ -1377,7 +1377,7 @@
     {
      "name": "func_001069C0",
      "size": "172",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10656",
      "metadata": {
       "virtual_address": "1075648"
@@ -1386,7 +1386,7 @@
     {
      "name": "func_00106A70",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10832",
      "metadata": {
       "virtual_address": "1075824"
@@ -1395,7 +1395,7 @@
     {
      "name": "func_00106B10",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10992",
      "metadata": {
       "virtual_address": "1075984"
@@ -1566,7 +1566,7 @@
     {
      "name": "func_00107898",
      "size": "176",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14456",
      "metadata": {
       "virtual_address": "1079448"
@@ -2166,16 +2166,16 @@
   {
    "name": "game/00114000",
    "measures": {
-    "fuzzy_match_percent": 31.1796377875673,
+    "fuzzy_match_percent": 39.647577092511014,
     "total_code": "16344",
-    "matched_code": "5096",
-    "matched_code_percent": 31.1796377875673,
+    "matched_code": "6480",
+    "matched_code_percent": 39.647577092511014,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 99,
-    "matched_functions": 43,
-    "matched_functions_percent": 43.43434343434343,
+    "matched_functions": 54,
+    "matched_functions_percent": 54.54545454545455,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -2268,7 +2268,7 @@
     {
      "name": "func_001143C8",
      "size": "112",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "944",
      "metadata": {
       "virtual_address": "1131464"
@@ -2277,7 +2277,7 @@
     {
      "name": "func_00114438",
      "size": "100",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1056",
      "metadata": {
       "virtual_address": "1131576"
@@ -2286,7 +2286,7 @@
     {
      "name": "func_001144A0",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1160",
      "metadata": {
       "virtual_address": "1131680"
@@ -2304,7 +2304,7 @@
     {
      "name": "func_001145C8",
      "size": "112",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1456",
      "metadata": {
       "virtual_address": "1131976"
@@ -2448,7 +2448,7 @@
     {
      "name": "func_00115440",
      "size": "208",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5160",
      "metadata": {
       "virtual_address": "1135680"
@@ -2520,7 +2520,7 @@
     {
      "name": "func_00115C00",
      "size": "156",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7144",
      "metadata": {
       "virtual_address": "1137664"
@@ -2529,7 +2529,7 @@
     {
      "name": "func_00115CA0",
      "size": "164",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7304",
      "metadata": {
       "virtual_address": "1137824"
@@ -2538,7 +2538,7 @@
     {
      "name": "func_00115D48",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7472",
      "metadata": {
       "virtual_address": "1137992"
@@ -2853,7 +2853,7 @@
     {
      "name": "func_00117180",
      "size": "112",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12648",
      "metadata": {
       "virtual_address": "1143168"
@@ -2871,7 +2871,7 @@
     {
      "name": "func_00117260",
      "size": "100",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12872",
      "metadata": {
       "virtual_address": "1143392"
@@ -2880,7 +2880,7 @@
     {
      "name": "func_001172C8",
      "size": "152",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12976",
      "metadata": {
       "virtual_address": "1143496"
@@ -3087,16 +3087,16 @@
   {
    "name": "game/00118000",
    "measures": {
-    "fuzzy_match_percent": 26.19641076769691,
+    "fuzzy_match_percent": 30.483549351944166,
     "total_code": "16048",
-    "matched_code": "4204",
-    "matched_code_percent": 26.19641076769691,
+    "matched_code": "4892",
+    "matched_code_percent": 30.483549351944166,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 99,
-    "matched_functions": 46,
-    "matched_functions_percent": 46.464646464646464,
+    "matched_functions": 59,
+    "matched_functions_percent": 59.5959595959596,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -3198,7 +3198,7 @@
     {
      "name": "func_00118850",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1936",
      "metadata": {
       "virtual_address": "1149008"
@@ -3234,7 +3234,7 @@
     {
      "name": "func_00118D10",
      "size": "16",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3152",
      "metadata": {
       "virtual_address": "1150224"
@@ -3243,7 +3243,7 @@
     {
      "name": "func_00118D20",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3168",
      "metadata": {
       "virtual_address": "1150240"
@@ -3477,7 +3477,7 @@
     {
      "name": "func_0011A630",
      "size": "64",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9584",
      "metadata": {
       "virtual_address": "1156656"
@@ -3486,7 +3486,7 @@
     {
      "name": "func_0011A670",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9648",
      "metadata": {
       "virtual_address": "1156720"
@@ -3495,7 +3495,7 @@
     {
      "name": "func_0011A678",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9656",
      "metadata": {
       "virtual_address": "1156728"
@@ -3513,7 +3513,7 @@
     {
      "name": "func_0011A6A8",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9704",
      "metadata": {
       "virtual_address": "1156776"
@@ -3585,7 +3585,7 @@
     {
      "name": "func_0011A7B8",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9976",
      "metadata": {
       "virtual_address": "1157048"
@@ -3828,7 +3828,7 @@
     {
      "name": "func_0011B680",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13760",
      "metadata": {
       "virtual_address": "1160832"
@@ -3837,7 +3837,7 @@
     {
      "name": "func_0011B6C0",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13824",
      "metadata": {
       "virtual_address": "1160896"
@@ -3855,7 +3855,7 @@
     {
      "name": "func_0011B740",
      "size": "72",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13952",
      "metadata": {
       "virtual_address": "1161024"
@@ -3909,7 +3909,7 @@
     {
      "name": "func_0011B8E8",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14376",
      "metadata": {
       "virtual_address": "1161448"
@@ -3918,7 +3918,7 @@
     {
      "name": "func_0011B928",
      "size": "128",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14440",
      "metadata": {
       "virtual_address": "1161512"
@@ -4008,16 +4008,16 @@
   {
    "name": "game/0011C000",
    "measures": {
-    "fuzzy_match_percent": 27.05,
+    "fuzzy_match_percent": 34.075,
     "total_code": "16000",
-    "matched_code": "4328",
-    "matched_code_percent": 27.05,
+    "matched_code": "5452",
+    "matched_code_percent": 34.075,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 152,
-    "matched_functions": 59,
-    "matched_functions_percent": 38.81578947368421,
+    "matched_functions": 77,
+    "matched_functions_percent": 50.6578947368421,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -4074,7 +4074,7 @@
     {
      "name": "func_0011C1D0",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "400",
      "metadata": {
       "virtual_address": "1163728"
@@ -4083,7 +4083,7 @@
     {
      "name": "func_0011C1D8",
      "size": "100",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "408",
      "metadata": {
       "virtual_address": "1163736"
@@ -4137,7 +4137,7 @@
     {
      "name": "func_0011C3B8",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "888",
      "metadata": {
       "virtual_address": "1164216"
@@ -4146,7 +4146,7 @@
     {
      "name": "func_0011C3C0",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "896",
      "metadata": {
       "virtual_address": "1164224"
@@ -4164,7 +4164,7 @@
     {
      "name": "func_0011C3F0",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "944",
      "metadata": {
       "virtual_address": "1164272"
@@ -4380,7 +4380,7 @@
     {
      "name": "func_0011CBB0",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2928",
      "metadata": {
       "virtual_address": "1166256"
@@ -4470,7 +4470,7 @@
     {
      "name": "func_0011D480",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5184",
      "metadata": {
       "virtual_address": "1168512"
@@ -4488,7 +4488,7 @@
     {
      "name": "func_0011D4E0",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5280",
      "metadata": {
       "virtual_address": "1168608"
@@ -4497,7 +4497,7 @@
     {
      "name": "func_0011D518",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5336",
      "metadata": {
       "virtual_address": "1168664"
@@ -4515,7 +4515,7 @@
     {
      "name": "func_0011D548",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5384",
      "metadata": {
       "virtual_address": "1168712"
@@ -4677,7 +4677,7 @@
     {
      "name": "func_0011D848",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6152",
      "metadata": {
       "virtual_address": "1169480"
@@ -4695,7 +4695,7 @@
     {
      "name": "func_0011D880",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6208",
      "metadata": {
       "virtual_address": "1169536"
@@ -5001,7 +5001,7 @@
     {
      "name": "func_0011E598",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9560",
      "metadata": {
       "virtual_address": "1172888"
@@ -5154,7 +5154,7 @@
     {
      "name": "func_0011F088",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12360",
      "metadata": {
       "virtual_address": "1175688"
@@ -5163,7 +5163,7 @@
     {
      "name": "func_0011F090",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12368",
      "metadata": {
       "virtual_address": "1175696"
@@ -5298,7 +5298,7 @@
     {
      "name": "func_0011F8B8",
      "size": "184",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14456",
      "metadata": {
       "virtual_address": "1177784"
@@ -5316,7 +5316,7 @@
     {
      "name": "func_0011FB18",
      "size": "140",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15064",
      "metadata": {
       "virtual_address": "1178392"
@@ -5325,7 +5325,7 @@
     {
      "name": "func_0011FBA8",
      "size": "268",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15208",
      "metadata": {
       "virtual_address": "1178536"
@@ -5406,16 +5406,16 @@
   {
    "name": "game/00120000",
    "measures": {
-    "fuzzy_match_percent": 18.359941944847606,
+    "fuzzy_match_percent": 19.327527818093856,
     "total_code": "16536",
-    "matched_code": "3036",
-    "matched_code_percent": 18.359941944847606,
+    "matched_code": "3196",
+    "matched_code_percent": 19.327527818093856,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 92,
-    "matched_functions": 40,
-    "matched_functions_percent": 43.47826086956522,
+    "matched_functions": 41,
+    "matched_functions_percent": 44.56521739130435,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -5427,7 +5427,7 @@
     {
      "name": "func_00120028",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
       "virtual_address": "1179688"
@@ -6264,16 +6264,16 @@
   {
    "name": "game/00124000",
    "measures": {
-    "fuzzy_match_percent": 3.798717316230883,
+    "fuzzy_match_percent": 4.538727183029107,
     "total_code": "16216",
-    "matched_code": "616",
-    "matched_code_percent": 3.798717316230883,
+    "matched_code": "736",
+    "matched_code_percent": 4.538727183029107,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 49,
-    "matched_functions": 6,
-    "matched_functions_percent": 12.244897959183673,
+    "matched_functions": 7,
+    "matched_functions_percent": 14.285714285714286,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -6618,7 +6618,7 @@
     {
      "name": "func_00127510",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13216",
      "metadata": {
       "virtual_address": "1209616"
@@ -6735,16 +6735,16 @@
   {
    "name": "game/00128000",
    "measures": {
-    "fuzzy_match_percent": 25.200681099489174,
+    "fuzzy_match_percent": 30.72245195816103,
     "total_code": "16444",
-    "matched_code": "4144",
-    "matched_code_percent": 25.200681099489174,
+    "matched_code": "5052",
+    "matched_code_percent": 30.72245195816103,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 159,
-    "matched_functions": 76,
-    "matched_functions_percent": 47.79874213836478,
+    "matched_functions": 94,
+    "matched_functions_percent": 59.119496855345915,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -7053,7 +7053,7 @@
     {
      "name": "func_00129570",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5176",
      "metadata": {
       "virtual_address": "1217904"
@@ -7062,7 +7062,7 @@
     {
      "name": "func_001295A0",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5224",
      "metadata": {
       "virtual_address": "1217952"
@@ -7071,7 +7071,7 @@
     {
      "name": "func_001295D0",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5272",
      "metadata": {
       "virtual_address": "1218000"
@@ -7080,7 +7080,7 @@
     {
      "name": "func_00129600",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5320",
      "metadata": {
       "virtual_address": "1218048"
@@ -7188,7 +7188,7 @@
     {
      "name": "func_00129D40",
      "size": "136",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7176",
      "metadata": {
       "virtual_address": "1219904"
@@ -7215,7 +7215,7 @@
     {
      "name": "func_00129E90",
      "size": "136",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7512",
      "metadata": {
       "virtual_address": "1220240"
@@ -7224,7 +7224,7 @@
     {
      "name": "func_00129F18",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7648",
      "metadata": {
       "virtual_address": "1220376"
@@ -7233,7 +7233,7 @@
     {
      "name": "func_00129F30",
      "size": "116",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7672",
      "metadata": {
       "virtual_address": "1220400"
@@ -7530,7 +7530,7 @@
     {
      "name": "func_0012A820",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9960",
      "metadata": {
       "virtual_address": "1222688"
@@ -7539,7 +7539,7 @@
     {
      "name": "func_0012A868",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10032",
      "metadata": {
       "virtual_address": "1222760"
@@ -7557,7 +7557,7 @@
     {
      "name": "func_0012A8C8",
      "size": "24",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10128",
      "metadata": {
       "virtual_address": "1222856"
@@ -7827,7 +7827,7 @@
     {
      "name": "func_0012AF98",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11872",
      "metadata": {
       "virtual_address": "1224600"
@@ -7845,7 +7845,7 @@
     {
      "name": "func_0012B008",
      "size": "24",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11984",
      "metadata": {
       "virtual_address": "1224712"
@@ -7854,7 +7854,7 @@
     {
      "name": "func_0012B020",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12008",
      "metadata": {
       "virtual_address": "1224736"
@@ -7953,7 +7953,7 @@
     {
      "name": "func_0012B358",
      "size": "24",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12832",
      "metadata": {
       "virtual_address": "1225560"
@@ -7971,7 +7971,7 @@
     {
      "name": "func_0012B380",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12872",
      "metadata": {
       "virtual_address": "1225600"
@@ -7980,7 +7980,7 @@
     {
      "name": "func_0012B390",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12888",
      "metadata": {
       "virtual_address": "1225616"
@@ -7989,7 +7989,7 @@
     {
      "name": "func_0012B398",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12896",
      "metadata": {
       "virtual_address": "1225624"
@@ -8196,16 +8196,16 @@
   {
    "name": "game/0012C000",
    "measures": {
-    "fuzzy_match_percent": 12.079510703363914,
+    "fuzzy_match_percent": 13.45565749235474,
     "total_code": "15696",
-    "matched_code": "1896",
-    "matched_code_percent": 12.079510703363914,
+    "matched_code": "2112",
+    "matched_code_percent": 13.45565749235474,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 61,
-    "matched_functions": 23,
-    "matched_functions_percent": 37.704918032786885,
+    "matched_functions": 27,
+    "matched_functions_percent": 44.26229508196721,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -8334,7 +8334,7 @@
     {
      "name": "func_0012CDF0",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2944",
      "metadata": {
       "virtual_address": "1232368"
@@ -8622,7 +8622,7 @@
     {
      "name": "func_0012F940",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14032",
      "metadata": {
       "virtual_address": "1243456"
@@ -8631,7 +8631,7 @@
     {
      "name": "func_0012F970",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14080",
      "metadata": {
       "virtual_address": "1243504"
@@ -8640,7 +8640,7 @@
     {
      "name": "func_0012F9B8",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14152",
      "metadata": {
       "virtual_address": "1243576"
@@ -8775,16 +8775,16 @@
   {
    "name": "game/00130000",
    "measures": {
-    "fuzzy_match_percent": 3.7296517617968266,
+    "fuzzy_match_percent": 4.821759736245621,
     "total_code": "19412",
-    "matched_code": "724",
-    "matched_code_percent": 3.7296517617968266,
+    "matched_code": "936",
+    "matched_code_percent": 4.821759736245621,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 24,
-    "matched_functions": 8,
-    "matched_functions_percent": 33.333333333333336,
+    "matched_functions": 10,
+    "matched_functions_percent": 41.666666666666664,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -8796,7 +8796,7 @@
     {
      "name": "func_00130040",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
       "virtual_address": "1245248"
@@ -8805,7 +8805,7 @@
     {
      "name": "func_00130050",
      "size": "200",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "16",
      "metadata": {
       "virtual_address": "1245264"
@@ -9021,16 +9021,16 @@
   {
    "name": "game/00134000",
    "measures": {
-    "fuzzy_match_percent": 2.4434389140271495,
+    "fuzzy_match_percent": 3.559577677224736,
     "total_code": "13260",
-    "matched_code": "324",
-    "matched_code_percent": 2.4434389140271495,
+    "matched_code": "472",
+    "matched_code_percent": 3.559577677224736,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 54,
-    "matched_functions": 6,
-    "matched_functions_percent": 11.11111111111111,
+    "matched_functions": 10,
+    "matched_functions_percent": 18.51851851851852,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -9285,7 +9285,7 @@
     {
      "name": "func_00137498",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10336",
      "metadata": {
       "virtual_address": "1275032"
@@ -9294,7 +9294,7 @@
     {
      "name": "func_001374A8",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10352",
      "metadata": {
       "virtual_address": "1275048"
@@ -9303,7 +9303,7 @@
     {
      "name": "func_001374B8",
      "size": "24",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10368",
      "metadata": {
       "virtual_address": "1275064"
@@ -9510,7 +9510,7 @@
     {
      "name": "func_00137F88",
      "size": "100",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13136",
      "metadata": {
       "virtual_address": "1277832"
@@ -9537,16 +9537,16 @@
   {
    "name": "game/00138000",
    "measures": {
-    "fuzzy_match_percent": 6.609756097560975,
+    "fuzzy_match_percent": 9.170731707317072,
     "total_code": "16400",
-    "matched_code": "1084",
-    "matched_code_percent": 6.609756097560975,
+    "matched_code": "1504",
+    "matched_code_percent": 9.170731707317072,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 65,
-    "matched_functions": 12,
-    "matched_functions_percent": 18.46153846153846,
+    "matched_functions": 18,
+    "matched_functions_percent": 27.692307692307693,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -9567,7 +9567,7 @@
     {
      "name": "func_00138070",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8",
      "metadata": {
       "virtual_address": "1278064"
@@ -9576,7 +9576,7 @@
     {
      "name": "func_001380E8",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "128",
      "metadata": {
       "virtual_address": "1278184"
@@ -9657,7 +9657,7 @@
     {
      "name": "func_00138790",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1832",
      "metadata": {
       "virtual_address": "1279888"
@@ -9684,7 +9684,7 @@
     {
      "name": "func_00138850",
      "size": "80",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2024",
      "metadata": {
       "virtual_address": "1280080"
@@ -9702,7 +9702,7 @@
     {
      "name": "func_00138A38",
      "size": "80",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2512",
      "metadata": {
       "virtual_address": "1280568"
@@ -9720,7 +9720,7 @@
     {
      "name": "func_00138AC0",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2648",
      "metadata": {
       "virtual_address": "1280704"
@@ -10152,16 +10152,16 @@
   {
    "name": "game/0013C000",
    "measures": {
-    "fuzzy_match_percent": 9.05,
+    "fuzzy_match_percent": 13.125,
     "total_code": "16000",
-    "matched_code": "1448",
-    "matched_code_percent": 9.05,
+    "matched_code": "2100",
+    "matched_code_percent": 13.125,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 75,
-    "matched_functions": 25,
-    "matched_functions_percent": 33.333333333333336,
+    "matched_functions": 32,
+    "matched_functions_percent": 42.666666666666664,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -10335,7 +10335,7 @@
     {
      "name": "func_0013D368",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4712",
      "metadata": {
       "virtual_address": "1299304"
@@ -10362,7 +10362,7 @@
     {
      "name": "func_0013DB20",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6688",
      "metadata": {
       "virtual_address": "1301280"
@@ -10371,7 +10371,7 @@
     {
      "name": "func_0013DB68",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6760",
      "metadata": {
       "virtual_address": "1301352"
@@ -10380,7 +10380,7 @@
     {
      "name": "func_0013DBB0",
      "size": "76",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6832",
      "metadata": {
       "virtual_address": "1301424"
@@ -10551,7 +10551,7 @@
     {
      "name": "func_0013E1E8",
      "size": "128",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8424",
      "metadata": {
       "virtual_address": "1303016"
@@ -10659,7 +10659,7 @@
     {
      "name": "func_0013ED38",
      "size": "168",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11320",
      "metadata": {
       "virtual_address": "1305912"
@@ -10668,7 +10668,7 @@
     {
      "name": "func_0013EDE0",
      "size": "76",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11488",
      "metadata": {
       "virtual_address": "1306080"
@@ -10857,16 +10857,16 @@
   {
    "name": "game/00140000",
    "measures": {
-    "fuzzy_match_percent": 13.349573690621193,
+    "fuzzy_match_percent": 17.612667478684532,
     "total_code": "16420",
-    "matched_code": "2192",
-    "matched_code_percent": 13.349573690621193,
+    "matched_code": "2892",
+    "matched_code_percent": 17.612667478684532,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 108,
-    "matched_functions": 38,
-    "matched_functions_percent": 35.18518518518518,
+    "matched_functions": 49,
+    "matched_functions_percent": 45.370370370370374,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -10914,7 +10914,7 @@
     {
      "name": "func_00140440",
      "size": "188",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1056",
      "metadata": {
       "virtual_address": "1311808"
@@ -10923,7 +10923,7 @@
     {
      "name": "func_00140500",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1248",
      "metadata": {
       "virtual_address": "1312000"
@@ -10932,7 +10932,7 @@
     {
      "name": "func_00140538",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1304",
      "metadata": {
       "virtual_address": "1312056"
@@ -10959,7 +10959,7 @@
     {
      "name": "func_001408D0",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2224",
      "metadata": {
       "virtual_address": "1312976"
@@ -11202,7 +11202,7 @@
     {
      "name": "func_001411D0",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4528",
      "metadata": {
       "virtual_address": "1315280"
@@ -11220,7 +11220,7 @@
     {
      "name": "func_001412F8",
      "size": "16",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4824",
      "metadata": {
       "virtual_address": "1315576"
@@ -11409,7 +11409,7 @@
     {
      "name": "func_00142000",
      "size": "136",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8160",
      "metadata": {
       "virtual_address": "1318912"
@@ -11724,7 +11724,7 @@
     {
      "name": "func_00143C40",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15392",
      "metadata": {
       "virtual_address": "1326144"
@@ -11733,7 +11733,7 @@
     {
      "name": "func_00143C68",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15432",
      "metadata": {
       "virtual_address": "1326184"
@@ -11742,7 +11742,7 @@
     {
      "name": "func_00143C88",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15464",
      "metadata": {
       "virtual_address": "1326216"
@@ -11760,7 +11760,7 @@
     {
      "name": "func_00143CC8",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15528",
      "metadata": {
       "virtual_address": "1326280"
@@ -11859,16 +11859,16 @@
   {
    "name": "game/00144000",
    "measures": {
-    "fuzzy_match_percent": 5.311040078682075,
+    "fuzzy_match_percent": 5.753626751905582,
     "total_code": "16268",
-    "matched_code": "864",
-    "matched_code_percent": 5.311040078682075,
+    "matched_code": "936",
+    "matched_code_percent": 5.753626751905582,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 59,
-    "matched_functions": 11,
-    "matched_functions_percent": 18.64406779661017,
+    "matched_functions": 14,
+    "matched_functions_percent": 23.728813559322035,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -12078,7 +12078,7 @@
     {
      "name": "func_001458C0",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6016",
      "metadata": {
       "virtual_address": "1333440"
@@ -12087,7 +12087,7 @@
     {
      "name": "func_001458E0",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6048",
      "metadata": {
       "virtual_address": "1333472"
@@ -12096,7 +12096,7 @@
     {
      "name": "func_001458F0",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6064",
      "metadata": {
       "virtual_address": "1333488"
@@ -12420,16 +12420,16 @@
   {
    "name": "game/00148000",
    "measures": {
-    "fuzzy_match_percent": 6.000996015936255,
+    "fuzzy_match_percent": 11.105577689243027,
     "total_code": "16064",
-    "matched_code": "964",
-    "matched_code_percent": 6.000996015936255,
+    "matched_code": "1784",
+    "matched_code_percent": 11.105577689243027,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 70,
-    "matched_functions": 12,
-    "matched_functions_percent": 17.142857142857142,
+    "matched_functions": 22,
+    "matched_functions_percent": 31.428571428571427,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -12558,7 +12558,7 @@
     {
      "name": "func_00148A08",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2248",
      "metadata": {
       "virtual_address": "1346056"
@@ -12567,7 +12567,7 @@
     {
      "name": "func_00148A38",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2296",
      "metadata": {
       "virtual_address": "1346104"
@@ -12576,7 +12576,7 @@
     {
      "name": "func_00148A60",
      "size": "184",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2336",
      "metadata": {
       "virtual_address": "1346144"
@@ -12585,7 +12585,7 @@
     {
      "name": "func_00148B18",
      "size": "96",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2520",
      "metadata": {
       "virtual_address": "1346328"
@@ -12711,7 +12711,7 @@
     {
      "name": "func_00149688",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5448",
      "metadata": {
       "virtual_address": "1349256"
@@ -12720,7 +12720,7 @@
     {
      "name": "func_00149690",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5456",
      "metadata": {
       "virtual_address": "1349264"
@@ -12729,7 +12729,7 @@
     {
      "name": "func_001496A8",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5480",
      "metadata": {
       "virtual_address": "1349288"
@@ -12738,7 +12738,7 @@
     {
      "name": "func_001496B0",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5488",
      "metadata": {
       "virtual_address": "1349296"
@@ -12972,7 +12972,7 @@
     {
      "name": "func_0014B690",
      "size": "364",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13648",
      "metadata": {
       "virtual_address": "1357456"
@@ -12981,7 +12981,7 @@
     {
      "name": "func_0014B800",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14016",
      "metadata": {
       "virtual_address": "1357824"
@@ -13080,16 +13080,16 @@
   {
    "name": "game/0014C000",
    "measures": {
-    "fuzzy_match_percent": 22.609340252038546,
+    "fuzzy_match_percent": 29.355077835433654,
     "total_code": "16188",
-    "matched_code": "3660",
-    "matched_code_percent": 22.609340252038546,
+    "matched_code": "4752",
+    "matched_code_percent": 29.355077835433654,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 81,
-    "matched_functions": 30,
-    "matched_functions_percent": 37.03703703703704,
+    "matched_functions": 39,
+    "matched_functions_percent": 48.148148148148145,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -13317,7 +13317,7 @@
     {
      "name": "func_0014DBE8",
      "size": "112",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7024",
      "metadata": {
       "virtual_address": "1367016"
@@ -13335,7 +13335,7 @@
     {
      "name": "func_0014DCC8",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7248",
      "metadata": {
       "virtual_address": "1367240"
@@ -13344,7 +13344,7 @@
     {
      "name": "func_0014DCD8",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7264",
      "metadata": {
       "virtual_address": "1367256"
@@ -13353,7 +13353,7 @@
     {
      "name": "func_0014DCE8",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7280",
      "metadata": {
       "virtual_address": "1367272"
@@ -13497,7 +13497,7 @@
     {
      "name": "func_0014E318",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8864",
      "metadata": {
       "virtual_address": "1368856"
@@ -13506,7 +13506,7 @@
     {
      "name": "func_0014E340",
      "size": "220",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8904",
      "metadata": {
       "virtual_address": "1368896"
@@ -13515,7 +13515,7 @@
     {
      "name": "func_0014E420",
      "size": "300",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9128",
      "metadata": {
       "virtual_address": "1369120"
@@ -13533,7 +13533,7 @@
     {
      "name": "func_0014E680",
      "size": "304",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9736",
      "metadata": {
       "virtual_address": "1369728"
@@ -13749,7 +13749,7 @@
     {
      "name": "func_0014F9F0",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14712",
      "metadata": {
       "virtual_address": "1374704"
@@ -13839,16 +13839,16 @@
   {
    "name": "game/00150000",
    "measures": {
-    "fuzzy_match_percent": 12.712275594371665,
+    "fuzzy_match_percent": 12.785055798156234,
     "total_code": "16488",
-    "matched_code": "2096",
-    "matched_code_percent": 12.712275594371665,
+    "matched_code": "2108",
+    "matched_code_percent": 12.785055798156234,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 79,
-    "matched_functions": 37,
-    "matched_functions_percent": 46.835443037974684,
+    "matched_functions": 38,
+    "matched_functions_percent": 48.10126582278481,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -14103,7 +14103,7 @@
     {
      "name": "func_00151D10",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7352",
      "metadata": {
       "virtual_address": "1383696"
@@ -14580,16 +14580,16 @@
   {
    "name": "game/00154000",
    "measures": {
-    "fuzzy_match_percent": 10.542018896071607,
+    "fuzzy_match_percent": 11.337642963699652,
     "total_code": "16088",
-    "matched_code": "1696",
-    "matched_code_percent": 10.542018896071607,
+    "matched_code": "1824",
+    "matched_code_percent": 11.337642963699652,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 45,
-    "matched_functions": 16,
-    "matched_functions_percent": 35.55555555555556,
+    "matched_functions": 20,
+    "matched_functions_percent": 44.44444444444444,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -14790,7 +14790,7 @@
     {
      "name": "func_00156230",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8376",
      "metadata": {
       "virtual_address": "1401392"
@@ -14808,7 +14808,7 @@
     {
      "name": "func_00156258",
      "size": "16",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8416",
      "metadata": {
       "virtual_address": "1401432"
@@ -14826,7 +14826,7 @@
     {
      "name": "func_001562B8",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8512",
      "metadata": {
       "virtual_address": "1401528"
@@ -14835,7 +14835,7 @@
     {
      "name": "func_001562E8",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8560",
      "metadata": {
       "virtual_address": "1401576"
@@ -15015,16 +15015,16 @@
   {
    "name": "game/00158000",
    "measures": {
-    "fuzzy_match_percent": 26.593625498007967,
+    "fuzzy_match_percent": 30.10458167330677,
     "total_code": "16064",
-    "matched_code": "4272",
-    "matched_code_percent": 26.593625498007967,
+    "matched_code": "4836",
+    "matched_code_percent": 30.10458167330677,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 71,
-    "matched_functions": 30,
-    "matched_functions_percent": 42.25352112676056,
+    "matched_functions": 36,
+    "matched_functions_percent": 50.70422535211268,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -15180,7 +15180,7 @@
     {
      "name": "func_00158CC8",
      "size": "112",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3088",
      "metadata": {
       "virtual_address": "1412296"
@@ -15198,7 +15198,7 @@
     {
      "name": "func_00158DB8",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3328",
      "metadata": {
       "virtual_address": "1412536"
@@ -15414,7 +15414,7 @@
     {
      "name": "func_00159F58",
      "size": "96",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7840",
      "metadata": {
       "virtual_address": "1417048"
@@ -15432,7 +15432,7 @@
     {
      "name": "func_0015A188",
      "size": "76",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8400",
      "metadata": {
       "virtual_address": "1417608"
@@ -15549,7 +15549,7 @@
     {
      "name": "func_0015AC18",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11104",
      "metadata": {
       "virtual_address": "1420312"
@@ -15558,7 +15558,7 @@
     {
      "name": "func_0015AC60",
      "size": "164",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11176",
      "metadata": {
       "virtual_address": "1420384"
@@ -15684,16 +15684,16 @@
   {
    "name": "game/0015C000",
    "measures": {
-    "fuzzy_match_percent": 13.942661112472432,
+    "fuzzy_match_percent": 15.780445969125214,
     "total_code": "16324",
-    "matched_code": "2276",
-    "matched_code_percent": 13.942661112472432,
+    "matched_code": "2576",
+    "matched_code_percent": 15.780445969125214,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 72,
-    "matched_functions": 19,
-    "matched_functions_percent": 26.38888888888889,
+    "matched_functions": 21,
+    "matched_functions_percent": 29.166666666666668,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -16326,7 +16326,7 @@
     {
      "name": "func_0015FE68",
      "size": "180",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15976",
      "metadata": {
       "virtual_address": "1441384"
@@ -16344,7 +16344,7 @@
     {
      "name": "func_0015FFF0",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "16368",
      "metadata": {
       "virtual_address": "1441776"
@@ -16362,16 +16362,16 @@
   {
    "name": "game/00160000",
    "measures": {
-    "fuzzy_match_percent": 13.23929720366246,
+    "fuzzy_match_percent": 14.303390249938134,
     "total_code": "16164",
-    "matched_code": "2140",
-    "matched_code_percent": 13.23929720366246,
+    "matched_code": "2312",
+    "matched_code_percent": 14.303390249938134,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 89,
-    "matched_functions": 26,
-    "matched_functions_percent": 29.213483146067414,
+    "matched_functions": 30,
+    "matched_functions_percent": 33.70786516853933,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -16383,7 +16383,7 @@
     {
      "name": "func_00160068",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "0",
      "metadata": {
       "virtual_address": "1441896"
@@ -16788,7 +16788,7 @@
     {
      "name": "func_001613F8",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5008",
      "metadata": {
       "virtual_address": "1446904"
@@ -16806,7 +16806,7 @@
     {
      "name": "func_001614E0",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5240",
      "metadata": {
       "virtual_address": "1447136"
@@ -16842,7 +16842,7 @@
     {
      "name": "func_00161860",
      "size": "116",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6136",
      "metadata": {
       "virtual_address": "1448032"
@@ -17349,16 +17349,16 @@
   {
    "name": "game/00168000",
    "measures": {
-    "fuzzy_match_percent": 14.530358069538142,
+    "fuzzy_match_percent": 18.55215360664245,
     "total_code": "15416",
-    "matched_code": "2240",
-    "matched_code_percent": 14.530358069538142,
+    "matched_code": "2860",
+    "matched_code_percent": 18.55215360664245,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 79,
-    "matched_functions": 24,
-    "matched_functions_percent": 30.379746835443036,
+    "matched_functions": 27,
+    "matched_functions_percent": 34.177215189873415,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -17514,7 +17514,7 @@
     {
      "name": "func_001690A8",
      "size": "176",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3368",
      "metadata": {
       "virtual_address": "1478824"
@@ -17667,7 +17667,7 @@
     {
      "name": "func_00169B50",
      "size": "268",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6096",
      "metadata": {
       "virtual_address": "1481552"
@@ -17676,7 +17676,7 @@
     {
      "name": "func_00169C60",
      "size": "176",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6368",
      "metadata": {
       "virtual_address": "1481824"
@@ -18090,16 +18090,16 @@
   {
    "name": "game/0016C000",
    "measures": {
-    "fuzzy_match_percent": 8.218215874502459,
+    "fuzzy_match_percent": 13.252165769140717,
     "total_code": "17084",
-    "matched_code": "1404",
-    "matched_code_percent": 8.218215874502459,
+    "matched_code": "2264",
+    "matched_code_percent": 13.252165769140717,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 64,
-    "matched_functions": 16,
-    "matched_functions_percent": 25.0,
+    "matched_functions": 24,
+    "matched_functions_percent": 37.5,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -18282,7 +18282,7 @@
     {
      "name": "func_0016DA38",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6608",
      "metadata": {
       "virtual_address": "1497656"
@@ -18327,7 +18327,7 @@
     {
      "name": "func_0016E000",
      "size": "84",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8088",
      "metadata": {
       "virtual_address": "1499136"
@@ -18390,7 +18390,7 @@
     {
      "name": "func_0016E440",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9176",
      "metadata": {
       "virtual_address": "1500224"
@@ -18417,7 +18417,7 @@
     {
      "name": "func_0016E5C0",
      "size": "116",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9560",
      "metadata": {
       "virtual_address": "1500608"
@@ -18597,7 +18597,7 @@
     {
      "name": "func_0016F850",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14312",
      "metadata": {
       "virtual_address": "1505360"
@@ -18615,7 +18615,7 @@
     {
      "name": "func_0016F938",
      "size": "292",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14544",
      "metadata": {
       "virtual_address": "1505592"
@@ -18624,7 +18624,7 @@
     {
      "name": "func_0016FA60",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14840",
      "metadata": {
       "virtual_address": "1505888"
@@ -18633,7 +18633,7 @@
     {
      "name": "func_0016FA88",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14880",
      "metadata": {
       "virtual_address": "1505928"
@@ -19152,16 +19152,16 @@
   {
    "name": "game/00178000",
    "measures": {
-    "fuzzy_match_percent": 7.870492234798631,
+    "fuzzy_match_percent": 8.633851013424586,
     "total_code": "15196",
-    "matched_code": "1196",
-    "matched_code_percent": 7.870492234798631,
+    "matched_code": "1312",
+    "matched_code_percent": 8.633851013424586,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 50,
-    "matched_functions": 14,
-    "matched_functions_percent": 28.0,
+    "matched_functions": 17,
+    "matched_functions_percent": 34.0,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -19245,7 +19245,7 @@
     {
      "name": "func_001788B8",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1080",
      "metadata": {
       "virtual_address": "1542328"
@@ -19254,7 +19254,7 @@
     {
      "name": "func_001788E0",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1120",
      "metadata": {
       "virtual_address": "1542368"
@@ -19335,7 +19335,7 @@
     {
      "name": "func_00179A20",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5536",
      "metadata": {
       "virtual_address": "1546784"
@@ -19977,16 +19977,16 @@
   {
    "name": "game/00180000",
    "measures": {
-    "fuzzy_match_percent": 11.667913238593867,
+    "fuzzy_match_percent": 16.50461231613064,
     "total_code": "16044",
-    "matched_code": "1872",
-    "matched_code_percent": 11.667913238593867,
+    "matched_code": "2648",
+    "matched_code_percent": 16.50461231613064,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 78,
-    "matched_functions": 27,
-    "matched_functions_percent": 34.61538461538461,
+    "matched_functions": 39,
+    "matched_functions_percent": 50.0,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -20133,7 +20133,7 @@
     {
      "name": "func_001814F0",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5072",
      "metadata": {
       "virtual_address": "1578224"
@@ -20142,7 +20142,7 @@
     {
      "name": "func_00181510",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5104",
      "metadata": {
       "virtual_address": "1578256"
@@ -20151,7 +20151,7 @@
     {
      "name": "func_00181548",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5160",
      "metadata": {
       "virtual_address": "1578312"
@@ -20169,7 +20169,7 @@
     {
      "name": "func_001815C8",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5288",
      "metadata": {
       "virtual_address": "1578440"
@@ -20412,7 +20412,7 @@
     {
      "name": "func_001833A8",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12936",
      "metadata": {
       "virtual_address": "1586088"
@@ -20421,7 +20421,7 @@
     {
      "name": "func_001833B0",
      "size": "136",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12944",
      "metadata": {
       "virtual_address": "1586096"
@@ -20430,7 +20430,7 @@
     {
      "name": "func_00183438",
      "size": "100",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13080",
      "metadata": {
       "virtual_address": "1586232"
@@ -20556,7 +20556,7 @@
     {
      "name": "func_00183898",
      "size": "88",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14200",
      "metadata": {
       "virtual_address": "1587352"
@@ -20619,7 +20619,7 @@
     {
      "name": "func_00183A50",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14640",
      "metadata": {
       "virtual_address": "1587792"
@@ -20628,7 +20628,7 @@
     {
      "name": "func_00183A98",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14712",
      "metadata": {
       "virtual_address": "1587864"
@@ -20646,7 +20646,7 @@
     {
      "name": "func_00183AD8",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14776",
      "metadata": {
       "virtual_address": "1587928"
@@ -20682,7 +20682,7 @@
     {
      "name": "func_00183F70",
      "size": "124",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15952",
      "metadata": {
       "virtual_address": "1589104"
@@ -20709,16 +20709,16 @@
   {
    "name": "game/00184000",
    "measures": {
-    "fuzzy_match_percent": 13.10907741775909,
+    "fuzzy_match_percent": 15.18674251793223,
     "total_code": "16172",
-    "matched_code": "2120",
-    "matched_code_percent": 13.10907741775909,
+    "matched_code": "2456",
+    "matched_code_percent": 15.18674251793223,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 63,
-    "matched_functions": 30,
-    "matched_functions_percent": 47.61904761904762,
+    "matched_functions": 33,
+    "matched_functions_percent": 52.38095238095238,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -21171,7 +21171,7 @@
     {
      "name": "func_00186280",
      "size": "136",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8720",
      "metadata": {
       "virtual_address": "1598080"
@@ -21180,7 +21180,7 @@
     {
      "name": "func_00186308",
      "size": "128",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8856",
      "metadata": {
       "virtual_address": "1598216"
@@ -21216,7 +21216,7 @@
     {
      "name": "func_00186850",
      "size": "72",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10208",
      "metadata": {
       "virtual_address": "1599568"
@@ -22047,16 +22047,16 @@
   {
    "name": "game/0018C000",
    "measures": {
-    "fuzzy_match_percent": 10.362300481378261,
+    "fuzzy_match_percent": 13.782619711173043,
     "total_code": "15788",
-    "matched_code": "1636",
-    "matched_code_percent": 10.362300481378261,
+    "matched_code": "2176",
+    "matched_code_percent": 13.782619711173043,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 99,
-    "matched_functions": 26,
-    "matched_functions_percent": 26.262626262626263,
+    "matched_functions": 34,
+    "matched_functions_percent": 34.343434343434346,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -22383,7 +22383,7 @@
     {
      "name": "func_0018DAA0",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6056",
      "metadata": {
       "virtual_address": "1628832"
@@ -22482,7 +22482,7 @@
     {
      "name": "func_0018DD38",
      "size": "72",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6720",
      "metadata": {
       "virtual_address": "1629496"
@@ -22491,7 +22491,7 @@
     {
      "name": "func_0018DD80",
      "size": "76",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6792",
      "metadata": {
       "virtual_address": "1629568"
@@ -22617,7 +22617,7 @@
     {
      "name": "func_0018E318",
      "size": "196",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8224",
      "metadata": {
       "virtual_address": "1631000"
@@ -22626,7 +22626,7 @@
     {
      "name": "func_0018E3E0",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8424",
      "metadata": {
       "virtual_address": "1631200"
@@ -22635,7 +22635,7 @@
     {
      "name": "func_0018E408",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8464",
      "metadata": {
       "virtual_address": "1631240"
@@ -22896,7 +22896,7 @@
     {
      "name": "func_0018F870",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13688",
      "metadata": {
       "virtual_address": "1636464"
@@ -22932,7 +22932,7 @@
     {
      "name": "func_0018FC18",
      "size": "76",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14624",
      "metadata": {
       "virtual_address": "1637400"
@@ -22968,16 +22968,16 @@
   {
    "name": "game/00190000",
    "measures": {
-    "fuzzy_match_percent": 20.599900842835893,
+    "fuzzy_match_percent": 22.459097669806642,
     "total_code": "16136",
-    "matched_code": "3324",
-    "matched_code_percent": 20.599900842835893,
+    "matched_code": "3624",
+    "matched_code_percent": 22.459097669806642,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 99,
-    "matched_functions": 42,
-    "matched_functions_percent": 42.42424242424242,
+    "matched_functions": 50,
+    "matched_functions_percent": 50.505050505050505,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -23349,7 +23349,7 @@
     {
      "name": "func_001925F0",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9376",
      "metadata": {
       "virtual_address": "1648112"
@@ -23358,7 +23358,7 @@
     {
      "name": "func_00192610",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9408",
      "metadata": {
       "virtual_address": "1648144"
@@ -23367,7 +23367,7 @@
     {
      "name": "func_00192630",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9440",
      "metadata": {
       "virtual_address": "1648176"
@@ -23394,7 +23394,7 @@
     {
      "name": "func_001929F8",
      "size": "64",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10408",
      "metadata": {
       "virtual_address": "1649144"
@@ -23475,7 +23475,7 @@
     {
      "name": "func_00192BF0",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10912",
      "metadata": {
       "virtual_address": "1649648"
@@ -23484,7 +23484,7 @@
     {
      "name": "func_00192C38",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10984",
      "metadata": {
       "virtual_address": "1649720"
@@ -23808,7 +23808,7 @@
     {
      "name": "func_00193C38",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15080",
      "metadata": {
       "virtual_address": "1653816"
@@ -23826,7 +23826,7 @@
     {
      "name": "func_00193D78",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15400",
      "metadata": {
       "virtual_address": "1654136"
@@ -23889,16 +23889,16 @@
   {
    "name": "game/00194000",
    "measures": {
-    "fuzzy_match_percent": 1.6164584864070537,
+    "fuzzy_match_percent": 3.7472446730345332,
     "total_code": "16332",
-    "matched_code": "264",
-    "matched_code_percent": 1.6164584864070537,
+    "matched_code": "612",
+    "matched_code_percent": 3.7472446730345332,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 31,
-    "matched_functions": 4,
-    "matched_functions_percent": 12.903225806451612,
+    "matched_functions": 6,
+    "matched_functions_percent": 19.35483870967742,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -23928,7 +23928,7 @@
     {
      "name": "func_00194398",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "632",
      "metadata": {
       "virtual_address": "1655704"
@@ -23973,7 +23973,7 @@
     {
      "name": "func_00194E90",
      "size": "288",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3440",
      "metadata": {
       "virtual_address": "1658512"
@@ -24198,16 +24198,16 @@
   {
    "name": "game/00198000",
    "measures": {
-    "fuzzy_match_percent": 15.780318091451292,
+    "fuzzy_match_percent": 20.725646123260436,
     "total_code": "16096",
-    "matched_code": "2540",
-    "matched_code_percent": 15.780318091451292,
+    "matched_code": "3336",
+    "matched_code_percent": 20.725646123260436,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 83,
-    "matched_functions": 31,
-    "matched_functions_percent": 37.34939759036145,
+    "matched_functions": 40,
+    "matched_functions_percent": 48.19277108433735,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -24255,7 +24255,7 @@
     {
      "name": "func_001984D0",
      "size": "188",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "944",
      "metadata": {
       "virtual_address": "1672400"
@@ -24273,7 +24273,7 @@
     {
      "name": "func_00198750",
      "size": "96",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1584",
      "metadata": {
       "virtual_address": "1673040"
@@ -24282,7 +24282,7 @@
     {
      "name": "func_001987B0",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1680",
      "metadata": {
       "virtual_address": "1673136"
@@ -24408,7 +24408,7 @@
     {
      "name": "func_00199668",
      "size": "96",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5448",
      "metadata": {
       "virtual_address": "1676904"
@@ -24525,7 +24525,7 @@
     {
      "name": "func_00199DB8",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7320",
      "metadata": {
       "virtual_address": "1678776"
@@ -24543,7 +24543,7 @@
     {
      "name": "func_00199E28",
      "size": "84",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7432",
      "metadata": {
       "virtual_address": "1678888"
@@ -24552,7 +24552,7 @@
     {
      "name": "func_00199E80",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7520",
      "metadata": {
       "virtual_address": "1678976"
@@ -24633,7 +24633,7 @@
     {
      "name": "func_0019A170",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8272",
      "metadata": {
       "virtual_address": "1679728"
@@ -24687,7 +24687,7 @@
     {
      "name": "func_0019A838",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10008",
      "metadata": {
       "virtual_address": "1681464"
@@ -24975,16 +24975,16 @@
   {
    "name": "game/0019C000",
    "measures": {
-    "fuzzy_match_percent": 8.451739343459089,
+    "fuzzy_match_percent": 11.832435080842725,
     "total_code": "16328",
-    "matched_code": "1380",
-    "matched_code_percent": 8.451739343459089,
+    "matched_code": "1932",
+    "matched_code_percent": 11.832435080842725,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 58,
-    "matched_functions": 19,
-    "matched_functions_percent": 32.758620689655174,
+    "matched_functions": 24,
+    "matched_functions_percent": 41.37931034482759,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -25032,7 +25032,7 @@
     {
      "name": "func_0019CB50",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2704",
      "metadata": {
       "virtual_address": "1690448"
@@ -25149,7 +25149,7 @@
     {
      "name": "func_0019DB80",
      "size": "24",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6848",
      "metadata": {
       "virtual_address": "1694592"
@@ -25194,7 +25194,7 @@
     {
      "name": "func_0019DFF0",
      "size": "144",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7984",
      "metadata": {
       "virtual_address": "1695728"
@@ -25482,7 +25482,7 @@
     {
      "name": "func_0019F978",
      "size": "176",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14520",
      "metadata": {
       "virtual_address": "1702264"
@@ -25500,7 +25500,7 @@
     {
      "name": "func_0019FA48",
      "size": "88",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14728",
      "metadata": {
       "virtual_address": "1702472"
@@ -25527,16 +25527,16 @@
   {
    "name": "game/001A0000",
    "measures": {
-    "fuzzy_match_percent": 7.543566483647648,
+    "fuzzy_match_percent": 12.031511100501312,
     "total_code": "16756",
-    "matched_code": "1264",
-    "matched_code_percent": 7.543566483647648,
+    "matched_code": "2016",
+    "matched_code_percent": 12.031511100501312,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 70,
-    "matched_functions": 17,
-    "matched_functions_percent": 24.285714285714285,
+    "matched_functions": 23,
+    "matched_functions_percent": 32.857142857142854,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -25557,7 +25557,7 @@
     {
      "name": "func_001A02A8",
      "size": "192",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "464",
      "metadata": {
       "virtual_address": "1704616"
@@ -25575,7 +25575,7 @@
     {
      "name": "func_001A05A0",
      "size": "144",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1224",
      "metadata": {
       "virtual_address": "1705376"
@@ -25683,7 +25683,7 @@
     {
      "name": "func_001A0B58",
      "size": "64",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2688",
      "metadata": {
       "virtual_address": "1706840"
@@ -25818,7 +25818,7 @@
     {
      "name": "func_001A17C0",
      "size": "164",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5864",
      "metadata": {
       "virtual_address": "1710016"
@@ -25845,7 +25845,7 @@
     {
      "name": "func_001A1998",
      "size": "72",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6336",
      "metadata": {
       "virtual_address": "1710488"
@@ -26142,7 +26142,7 @@
     {
      "name": "func_001A3E70",
      "size": "116",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15768",
      "metadata": {
       "virtual_address": "1719920"
@@ -26187,16 +26187,16 @@
   {
    "name": "game/001A4000",
    "measures": {
-    "fuzzy_match_percent": 11.217303822937625,
+    "fuzzy_match_percent": 15.467806841046277,
     "total_code": "15904",
-    "matched_code": "1784",
-    "matched_code_percent": 11.217303822937625,
+    "matched_code": "2460",
+    "matched_code_percent": 15.467806841046277,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 70,
-    "matched_functions": 24,
-    "matched_functions_percent": 34.285714285714285,
+    "matched_functions": 29,
+    "matched_functions_percent": 41.42857142857143,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -26235,7 +26235,7 @@
     {
      "name": "func_001A4638",
      "size": "160",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "856",
      "metadata": {
       "virtual_address": "1721912"
@@ -26244,7 +26244,7 @@
     {
      "name": "func_001A46D8",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1016",
      "metadata": {
       "virtual_address": "1722072"
@@ -26487,7 +26487,7 @@
     {
      "name": "func_001A5878",
      "size": "280",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5528",
      "metadata": {
       "virtual_address": "1726584"
@@ -26505,7 +26505,7 @@
     {
      "name": "func_001A5AA8",
      "size": "96",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6088",
      "metadata": {
       "virtual_address": "1727144"
@@ -26568,7 +26568,7 @@
     {
      "name": "func_001A6980",
      "size": "84",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9888",
      "metadata": {
       "virtual_address": "1730944"
@@ -26847,16 +26847,16 @@
   {
    "name": "game/001A8000",
    "measures": {
-    "fuzzy_match_percent": 8.352031912241337,
+    "fuzzy_match_percent": 12.44078783345799,
     "total_code": "16044",
-    "matched_code": "1340",
-    "matched_code_percent": 8.352031912241337,
+    "matched_code": "1996",
+    "matched_code_percent": 12.44078783345799,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 94,
-    "matched_functions": 19,
-    "matched_functions_percent": 20.21276595744681,
+    "matched_functions": 26,
+    "matched_functions_percent": 27.659574468085108,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -26895,7 +26895,7 @@
     {
      "name": "func_001A8298",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "304",
      "metadata": {
       "virtual_address": "1737368"
@@ -27147,7 +27147,7 @@
     {
      "name": "func_001A92D8",
      "size": "356",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4464",
      "metadata": {
       "virtual_address": "1741528"
@@ -27156,7 +27156,7 @@
     {
      "name": "func_001A9440",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4824",
      "metadata": {
       "virtual_address": "1741888"
@@ -27174,7 +27174,7 @@
     {
      "name": "func_001A94C0",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4952",
      "metadata": {
       "virtual_address": "1742016"
@@ -27273,7 +27273,7 @@
     {
      "name": "func_001AA180",
      "size": "92",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8216",
      "metadata": {
       "virtual_address": "1745280"
@@ -27282,7 +27282,7 @@
     {
      "name": "func_001AA1E0",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8312",
      "metadata": {
       "virtual_address": "1745376"
@@ -27606,7 +27606,7 @@
     {
      "name": "func_001AB6C0",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13656",
      "metadata": {
       "virtual_address": "1750720"
@@ -27723,16 +27723,16 @@
   {
    "name": "game/001AC000",
    "measures": {
-    "fuzzy_match_percent": 2.8175976272862084,
+    "fuzzy_match_percent": 3.0400395452298565,
     "total_code": "16184",
-    "matched_code": "456",
-    "matched_code_percent": 2.8175976272862084,
+    "matched_code": "492",
+    "matched_code_percent": 3.0400395452298565,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 73,
-    "matched_functions": 12,
-    "matched_functions_percent": 16.438356164383563,
+    "matched_functions": 13,
+    "matched_functions_percent": 17.80821917808219,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -27753,7 +27753,7 @@
     {
      "name": "func_001AC3F0",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "800",
      "metadata": {
       "virtual_address": "1754096"
@@ -28410,16 +28410,16 @@
   {
    "name": "game/001B0000",
    "measures": {
-    "fuzzy_match_percent": 11.985383678440925,
+    "fuzzy_match_percent": 14.445797807551767,
     "total_code": "16420",
-    "matched_code": "1968",
-    "matched_code_percent": 11.985383678440925,
+    "matched_code": "2372",
+    "matched_code_percent": 14.445797807551767,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 67,
-    "matched_functions": 17,
-    "matched_functions_percent": 25.37313432835821,
+    "matched_functions": 24,
+    "matched_functions_percent": 35.82089552238806,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -28494,7 +28494,7 @@
     {
      "name": "func_001B0DD8",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3376",
      "metadata": {
       "virtual_address": "1773016"
@@ -28512,7 +28512,7 @@
     {
      "name": "func_001B0E50",
      "size": "80",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "3496",
      "metadata": {
       "virtual_address": "1773136"
@@ -28539,7 +28539,7 @@
     {
      "name": "func_001B1160",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4280",
      "metadata": {
       "virtual_address": "1773920"
@@ -28665,7 +28665,7 @@
     {
      "name": "func_001B1E48",
      "size": "68",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "7584",
      "metadata": {
       "virtual_address": "1777224"
@@ -28836,7 +28836,7 @@
     {
      "name": "func_001B2CA0",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11256",
      "metadata": {
       "virtual_address": "1780896"
@@ -28845,7 +28845,7 @@
     {
      "name": "func_001B2CD0",
      "size": "48",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11304",
      "metadata": {
       "virtual_address": "1780944"
@@ -28953,7 +28953,7 @@
     {
      "name": "func_001B3678",
      "size": "84",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13776",
      "metadata": {
       "virtual_address": "1783416"
@@ -29043,16 +29043,16 @@
   {
    "name": "game/001B4000",
    "measures": {
-    "fuzzy_match_percent": 20.250421382133396,
+    "fuzzy_match_percent": 21.887791957620998,
     "total_code": "16612",
-    "matched_code": "3364",
-    "matched_code_percent": 20.250421382133396,
+    "matched_code": "3636",
+    "matched_code_percent": 21.887791957620998,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 90,
-    "matched_functions": 40,
-    "matched_functions_percent": 44.44444444444444,
+    "matched_functions": 44,
+    "matched_functions_percent": 48.888888888888886,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -29127,7 +29127,7 @@
     {
      "name": "func_001B5270",
      "size": "128",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4400",
      "metadata": {
       "virtual_address": "1790576"
@@ -29469,7 +29469,7 @@
     {
      "name": "func_001B6278",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8504",
      "metadata": {
       "virtual_address": "1794680"
@@ -29829,7 +29829,7 @@
     {
      "name": "func_001B7DA0",
      "size": "76",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15456",
      "metadata": {
       "virtual_address": "1801632"
@@ -29838,7 +29838,7 @@
     {
      "name": "func_001B7DF0",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15536",
      "metadata": {
       "virtual_address": "1801712"
@@ -29883,16 +29883,16 @@
   {
    "name": "game/001B8000",
    "measures": {
-    "fuzzy_match_percent": 8.775090066906845,
+    "fuzzy_match_percent": 12.300566134843026,
     "total_code": "15544",
-    "matched_code": "1364",
-    "matched_code_percent": 8.775090066906845,
+    "matched_code": "1912",
+    "matched_code_percent": 12.300566134843026,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 72,
-    "matched_functions": 13,
-    "matched_functions_percent": 18.055555555555557,
+    "matched_functions": 19,
+    "matched_functions_percent": 26.38888888888889,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -29967,7 +29967,7 @@
     {
      "name": "func_001B8658",
      "size": "304",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "864",
      "metadata": {
       "virtual_address": "1803864"
@@ -30201,7 +30201,7 @@
     {
      "name": "func_001BA370",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8312",
      "metadata": {
       "virtual_address": "1811312"
@@ -30219,7 +30219,7 @@
     {
      "name": "func_001BA4D0",
      "size": "124",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8664",
      "metadata": {
       "virtual_address": "1811664"
@@ -30390,7 +30390,7 @@
     {
      "name": "func_001BB1F0",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12024",
      "metadata": {
       "virtual_address": "1815024"
@@ -30399,7 +30399,7 @@
     {
      "name": "func_001BB218",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12064",
      "metadata": {
       "virtual_address": "1815064"
@@ -30444,7 +30444,7 @@
     {
      "name": "func_001BBCD0",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14808",
      "metadata": {
       "virtual_address": "1817808"
@@ -30561,16 +30561,16 @@
   {
    "name": "game/001BC000",
    "measures": {
-    "fuzzy_match_percent": 15.117994100294986,
+    "fuzzy_match_percent": 16.71583087512291,
     "total_code": "16272",
-    "matched_code": "2460",
-    "matched_code_percent": 15.117994100294986,
+    "matched_code": "2720",
+    "matched_code_percent": 16.71583087512291,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 74,
-    "matched_functions": 25,
-    "matched_functions_percent": 33.78378378378378,
+    "matched_functions": 31,
+    "matched_functions_percent": 41.891891891891895,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -30681,7 +30681,7 @@
     {
      "name": "func_001BC920",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2232",
      "metadata": {
       "virtual_address": "1820960"
@@ -30933,7 +30933,7 @@
     {
      "name": "func_001BF1C8",
      "size": "144",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12640",
      "metadata": {
       "virtual_address": "1831368"
@@ -30951,7 +30951,7 @@
     {
      "name": "func_001BF2C8",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12896",
      "metadata": {
       "virtual_address": "1831624"
@@ -31023,7 +31023,7 @@
     {
      "name": "func_001BF678",
      "size": "16",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "13840",
      "metadata": {
       "virtual_address": "1832568"
@@ -31050,7 +31050,7 @@
     {
      "name": "func_001BF720",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14008",
      "metadata": {
       "virtual_address": "1832736"
@@ -31059,7 +31059,7 @@
     {
      "name": "func_001BF748",
      "size": "40",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14048",
      "metadata": {
       "virtual_address": "1832776"
@@ -31257,16 +31257,16 @@
   {
    "name": "game/001C0000",
    "measures": {
-    "fuzzy_match_percent": 10.28796455820822,
+    "fuzzy_match_percent": 14.668963819837558,
     "total_code": "16252",
-    "matched_code": "1672",
-    "matched_code_percent": 10.28796455820822,
+    "matched_code": "2384",
+    "matched_code_percent": 14.668963819837558,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 72,
-    "matched_functions": 22,
-    "matched_functions_percent": 30.555555555555557,
+    "matched_functions": 28,
+    "matched_functions_percent": 38.888888888888886,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -31305,7 +31305,7 @@
     {
      "name": "func_001C0270",
      "size": "100",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "480",
      "metadata": {
       "virtual_address": "1835632"
@@ -31458,7 +31458,7 @@
     {
      "name": "func_001C12F8",
      "size": "156",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4712",
      "metadata": {
       "virtual_address": "1839864"
@@ -31467,7 +31467,7 @@
     {
      "name": "func_001C1398",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4872",
      "metadata": {
       "virtual_address": "1840024"
@@ -31539,7 +31539,7 @@
     {
      "name": "func_001C16D0",
      "size": "116",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5696",
      "metadata": {
       "virtual_address": "1840848"
@@ -31557,7 +31557,7 @@
     {
      "name": "func_001C17B0",
      "size": "80",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5920",
      "metadata": {
       "virtual_address": "1841072"
@@ -31575,7 +31575,7 @@
     {
      "name": "func_001C1830",
      "size": "204",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6048",
      "metadata": {
       "virtual_address": "1841200"
@@ -31935,16 +31935,16 @@
   {
    "name": "game/001C4000",
    "measures": {
-    "fuzzy_match_percent": 8.541616112594031,
+    "fuzzy_match_percent": 9.46372239747634,
     "total_code": "16484",
-    "matched_code": "1408",
-    "matched_code_percent": 8.541616112594031,
+    "matched_code": "1560",
+    "matched_code_percent": 9.46372239747634,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 65,
-    "matched_functions": 19,
-    "matched_functions_percent": 29.23076923076923,
+    "matched_functions": 20,
+    "matched_functions_percent": 30.76923076923077,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -32109,7 +32109,7 @@
     {
      "name": "func_001C5150",
      "size": "152",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4296",
      "metadata": {
       "virtual_address": "1855824"
@@ -32550,16 +32550,16 @@
   {
    "name": "game/001C8000",
    "measures": {
-    "fuzzy_match_percent": 8.479678876066231,
+    "fuzzy_match_percent": 10.762669342699448,
     "total_code": "15944",
-    "matched_code": "1352",
-    "matched_code_percent": 8.479678876066231,
+    "matched_code": "1716",
+    "matched_code_percent": 10.762669342699448,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 62,
-    "matched_functions": 16,
-    "matched_functions_percent": 25.806451612903224,
+    "matched_functions": 23,
+    "matched_functions_percent": 37.096774193548384,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -32580,7 +32580,7 @@
     {
      "name": "func_001C81E0",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "128",
      "metadata": {
       "virtual_address": "1868256"
@@ -32670,7 +32670,7 @@
     {
      "name": "func_001C91B8",
      "size": "36",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "4184",
      "metadata": {
       "virtual_address": "1872312"
@@ -32706,7 +32706,7 @@
     {
      "name": "func_001C98B8",
      "size": "72",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5976",
      "metadata": {
       "virtual_address": "1874104"
@@ -32841,7 +32841,7 @@
     {
      "name": "func_001CA9F0",
      "size": "84",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10384",
      "metadata": {
       "virtual_address": "1878512"
@@ -32886,7 +32886,7 @@
     {
      "name": "func_001CB2D8",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12664",
      "metadata": {
       "virtual_address": "1880792"
@@ -32895,7 +32895,7 @@
     {
      "name": "func_001CB2F8",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12696",
      "metadata": {
       "virtual_address": "1880824"
@@ -32904,7 +32904,7 @@
     {
      "name": "func_001CB300",
      "size": "80",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12704",
      "metadata": {
       "virtual_address": "1880832"
@@ -33828,16 +33828,16 @@
   {
    "name": "game/001D4000",
    "measures": {
-    "fuzzy_match_percent": 4.045109095366511,
+    "fuzzy_match_percent": 5.614121108114734,
     "total_code": "16316",
-    "matched_code": "660",
-    "matched_code_percent": 4.045109095366511,
+    "matched_code": "916",
+    "matched_code_percent": 5.614121108114734,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 51,
-    "matched_functions": 7,
-    "matched_functions_percent": 13.72549019607843,
+    "matched_functions": 10,
+    "matched_functions_percent": 19.607843137254903,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -34020,7 +34020,7 @@
     {
      "name": "func_001D5978",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6392",
      "metadata": {
       "virtual_address": "1923448"
@@ -34056,7 +34056,7 @@
     {
      "name": "func_001D6080",
      "size": "128",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8192",
      "metadata": {
       "virtual_address": "1925248"
@@ -34074,7 +34074,7 @@
     {
      "name": "func_001D6150",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8400",
      "metadata": {
       "virtual_address": "1925456"
@@ -34317,16 +34317,16 @@
   {
    "name": "game/001D8000",
    "measures": {
-    "fuzzy_match_percent": 1.0206561360874848,
+    "fuzzy_match_percent": 2.017010935601458,
     "total_code": "16460",
-    "matched_code": "168",
-    "matched_code_percent": 1.0206561360874848,
+    "matched_code": "332",
+    "matched_code_percent": 2.017010935601458,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 37,
-    "matched_functions": 3,
-    "matched_functions_percent": 8.108108108108109,
+    "matched_functions": 5,
+    "matched_functions_percent": 13.513513513513514,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -34563,7 +34563,7 @@
     {
      "name": "func_001DB998",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14600",
      "metadata": {
       "virtual_address": "1948056"
@@ -34581,7 +34581,7 @@
     {
      "name": "func_001DBB00",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14960",
      "metadata": {
       "virtual_address": "1948416"
@@ -34680,16 +34680,16 @@
   {
    "name": "game/001DC000",
    "measures": {
-    "fuzzy_match_percent": 10.699178900223936,
+    "fuzzy_match_percent": 13.610350833540682,
     "total_code": "16076",
-    "matched_code": "1720",
-    "matched_code_percent": 10.699178900223936,
+    "matched_code": "2188",
+    "matched_code_percent": 13.610350833540682,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 91,
-    "matched_functions": 37,
-    "matched_functions_percent": 40.65934065934066,
+    "matched_functions": 43,
+    "matched_functions_percent": 47.252747252747255,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -34755,7 +34755,7 @@
     {
      "name": "func_001DC720",
      "size": "88",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1520",
      "metadata": {
       "virtual_address": "1951520"
@@ -34971,7 +34971,7 @@
     {
      "name": "func_001DD4B8",
      "size": "88",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "5000",
      "metadata": {
       "virtual_address": "1955000"
@@ -34998,7 +34998,7 @@
     {
      "name": "func_001DD9A8",
      "size": "100",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6264",
      "metadata": {
       "virtual_address": "1956264"
@@ -35250,7 +35250,7 @@
     {
      "name": "func_001DE838",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9992",
      "metadata": {
       "virtual_address": "1959992"
@@ -35313,7 +35313,7 @@
     {
      "name": "func_001DE900",
      "size": "80",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10192",
      "metadata": {
       "virtual_address": "1960192"
@@ -35331,7 +35331,7 @@
     {
      "name": "func_001DE988",
      "size": "92",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10328",
      "metadata": {
       "virtual_address": "1960328"
@@ -35529,16 +35529,16 @@
   {
    "name": "game/001E0000",
    "measures": {
-    "fuzzy_match_percent": 5.663629647869983,
+    "fuzzy_match_percent": 9.086431913321842,
     "total_code": "16244",
-    "matched_code": "920",
-    "matched_code_percent": 5.663629647869983,
+    "matched_code": "1476",
+    "matched_code_percent": 9.086431913321842,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 83,
-    "matched_functions": 12,
-    "matched_functions_percent": 14.457831325301205,
+    "matched_functions": 21,
+    "matched_functions_percent": 25.301204819277107,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -35631,7 +35631,7 @@
     {
      "name": "func_001E0A00",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2368",
      "metadata": {
       "virtual_address": "1968640"
@@ -35658,7 +35658,7 @@
     {
      "name": "func_001E0BA0",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2784",
      "metadata": {
       "virtual_address": "1969056"
@@ -35667,7 +35667,7 @@
     {
      "name": "func_001E0BC0",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "2816",
      "metadata": {
       "virtual_address": "1969088"
@@ -36117,7 +36117,7 @@
     {
      "name": "func_001E32E8",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12840",
      "metadata": {
       "virtual_address": "1979112"
@@ -36135,7 +36135,7 @@
     {
      "name": "func_001E3380",
      "size": "56",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12992",
      "metadata": {
       "virtual_address": "1979264"
@@ -36207,7 +36207,7 @@
     {
      "name": "func_001E37A0",
      "size": "200",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14048",
      "metadata": {
       "virtual_address": "1980320"
@@ -36216,7 +36216,7 @@
     {
      "name": "func_001E3868",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14248",
      "metadata": {
       "virtual_address": "1980520"
@@ -36234,7 +36234,7 @@
     {
      "name": "func_001E3968",
      "size": "72",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14504",
      "metadata": {
       "virtual_address": "1980776"
@@ -36243,7 +36243,7 @@
     {
      "name": "func_001E39B0",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14576",
      "metadata": {
       "virtual_address": "1980848"
@@ -36306,16 +36306,16 @@
   {
    "name": "game/001E4000",
    "measures": {
-    "fuzzy_match_percent": 4.413825315273237,
+    "fuzzy_match_percent": 6.7725361980383,
     "total_code": "17128",
-    "matched_code": "756",
-    "matched_code_percent": 4.413825315273237,
+    "matched_code": "1160",
+    "matched_code_percent": 6.7725361980383,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 37,
-    "matched_functions": 10,
-    "matched_functions_percent": 27.027027027027028,
+    "matched_functions": 14,
+    "matched_functions_percent": 37.83783783783784,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -36552,7 +36552,7 @@
     {
      "name": "func_001E6CA8",
      "size": "112",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11232",
      "metadata": {
       "virtual_address": "1993896"
@@ -36561,7 +36561,7 @@
     {
      "name": "func_001E6D18",
      "size": "188",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11344",
      "metadata": {
       "virtual_address": "1994008"
@@ -36570,7 +36570,7 @@
     {
      "name": "func_001E6DD8",
      "size": "92",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11536",
      "metadata": {
       "virtual_address": "1994200"
@@ -36588,7 +36588,7 @@
     {
      "name": "func_001E6E80",
      "size": "12",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11704",
      "metadata": {
       "virtual_address": "1994368"
@@ -36669,16 +36669,16 @@
   {
    "name": "game/001E8000",
    "measures": {
-    "fuzzy_match_percent": 5.923799582463466,
+    "fuzzy_match_percent": 10.41231732776618,
     "total_code": "15328",
-    "matched_code": "908",
-    "matched_code_percent": 5.923799582463466,
+    "matched_code": "1596",
+    "matched_code_percent": 10.41231732776618,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 66,
-    "matched_functions": 11,
-    "matched_functions_percent": 16.666666666666668,
+    "matched_functions": 18,
+    "matched_functions_percent": 27.272727272727273,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -36861,7 +36861,7 @@
     {
      "name": "func_001E9DD8",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6640",
      "metadata": {
       "virtual_address": "2006488"
@@ -36870,7 +36870,7 @@
     {
      "name": "func_001E9DF8",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6672",
      "metadata": {
       "virtual_address": "2006520"
@@ -36888,7 +36888,7 @@
     {
      "name": "func_001E9E70",
      "size": "172",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6792",
      "metadata": {
       "virtual_address": "2006640"
@@ -36897,7 +36897,7 @@
     {
      "name": "func_001E9F20",
      "size": "172",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6968",
      "metadata": {
       "virtual_address": "2006816"
@@ -37122,7 +37122,7 @@
     {
      "name": "func_001EB480",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12440",
      "metadata": {
       "virtual_address": "2012288"
@@ -37131,7 +37131,7 @@
     {
      "name": "func_001EB4F8",
      "size": "52",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12560",
      "metadata": {
       "virtual_address": "2012408"
@@ -37248,7 +37248,7 @@
     {
      "name": "func_001EBDA8",
      "size": "88",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14784",
      "metadata": {
       "virtual_address": "2014632"
@@ -37293,16 +37293,16 @@
   {
    "name": "game/001EC000",
    "measures": {
-    "fuzzy_match_percent": 16.679095202585135,
+    "fuzzy_match_percent": 18.990802883420333,
     "total_code": "16092",
-    "matched_code": "2684",
-    "matched_code_percent": 16.679095202585135,
+    "matched_code": "3056",
+    "matched_code_percent": 18.990802883420333,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 104,
-    "matched_functions": 42,
-    "matched_functions_percent": 40.38461538461539,
+    "matched_functions": 48,
+    "matched_functions_percent": 46.15384615384615,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -37674,7 +37674,7 @@
     {
      "name": "func_001EE090",
      "size": "8",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8248",
      "metadata": {
       "virtual_address": "2023568"
@@ -37683,7 +37683,7 @@
     {
      "name": "func_001EE098",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8256",
      "metadata": {
       "virtual_address": "2023576"
@@ -37692,7 +37692,7 @@
     {
      "name": "func_001EE0C8",
      "size": "32",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8304",
      "metadata": {
       "virtual_address": "2023624"
@@ -37701,7 +37701,7 @@
     {
      "name": "func_001EE0E8",
      "size": "28",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "8336",
      "metadata": {
       "virtual_address": "2023656"
@@ -37944,7 +37944,7 @@
     {
      "name": "func_001EEEB0",
      "size": "184",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "11864",
      "metadata": {
       "virtual_address": "2027184"
@@ -38196,7 +38196,7 @@
     {
      "name": "func_001EFBD8",
      "size": "76",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15232",
      "metadata": {
       "virtual_address": "2030552"
@@ -38259,16 +38259,16 @@
   {
    "name": "game/001F0000",
    "measures": {
-    "fuzzy_match_percent": 3.5189202217401783,
+    "fuzzy_match_percent": 6.001446131597976,
     "total_code": "16596",
-    "matched_code": "584",
-    "matched_code_percent": 3.5189202217401783,
+    "matched_code": "996",
+    "matched_code_percent": 6.001446131597976,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 58,
-    "matched_functions": 11,
-    "matched_functions_percent": 18.96551724137931,
+    "matched_functions": 16,
+    "matched_functions_percent": 27.586206896551722,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -38289,7 +38289,7 @@
     {
      "name": "func_001F0420",
      "size": "44",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "1048",
      "metadata": {
       "virtual_address": "2032672"
@@ -38595,7 +38595,7 @@
     {
      "name": "func_001F1900",
      "size": "120",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6392",
      "metadata": {
       "virtual_address": "2038016"
@@ -38604,7 +38604,7 @@
     {
      "name": "func_001F1978",
      "size": "20",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "6512",
      "metadata": {
       "virtual_address": "2038136"
@@ -38766,7 +38766,7 @@
     {
      "name": "func_001F3748",
      "size": "60",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14144",
      "metadata": {
       "virtual_address": "2045768"
@@ -38775,7 +38775,7 @@
     {
      "name": "func_001F3788",
      "size": "168",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14208",
      "metadata": {
       "virtual_address": "2045832"
@@ -45316,16 +45316,16 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 10.524824054003345,
+    "fuzzy_match_percent": 13.014614595433986,
     "total_code": "1002012",
-    "matched_code": "105460",
-    "matched_code_percent": 10.524824054003345,
+    "matched_code": "130408",
+    "matched_code_percent": 13.014614595433986,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 4170,
-    "matched_functions": 1283,
-    "matched_functions_percent": 30.767386091127097,
+    "matched_functions": 1587,
+    "matched_functions_percent": 38.05755395683453,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
