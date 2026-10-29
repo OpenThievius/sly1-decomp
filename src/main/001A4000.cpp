@@ -193,3 +193,121 @@ void func_001A7D18(void* self, Vec_1A7D18* p, f32 f)
         }
     }
 }
+
+typedef void (*VFn1_1A5F78)(void* self);
+
+struct Obj_1A5F78 {
+    VFn1_1A5F78* vtbl;
+    u8 pad0[0x18 - 4];
+    void* a18;
+    u8 pad1[0x55C - 0x1C];
+    Obj_1A5F78* a55C;
+    void* a560;
+};
+
+struct Self_1A5F78 {
+    u8 pad0[0x35C];
+    u8 a35C[0xC];
+    u8 a368[0xC];
+    u8 a374[0xC];
+    s32 a380;
+    u8 a384[0xC];
+    u8 a390[0xC];
+    s32 a39C;
+    u8 a3A0[0xC];
+    u8 a3AC[0x14];
+    u8 pad1[0x628 - 0x3C0];
+    s32 a628;
+    u8 pad2[0x638 - 0x62C];
+    f32 a638;
+    f32 a63C;
+    f32 a640;
+};
+
+extern f32 D_0026185C;
+
+void func_00152600(void* a, void* b);
+void func_00152470(void* a, void* b);
+void func_001A76A0(void* child, s32 flag);
+void func_001A5D50(void* self, void* obj);
+s32 func_001A6238(void* self, void* child);
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_001A5F78(Self_1A5F78* self, Obj_1A5F78* obj)
+{
+    func_00152600(self->a384, obj);
+    func_00152470(self->a390, obj);
+    if (obj->a560 != 0) {
+        func_00152600(self->a3AC, obj->a560);
+        func_00152470(self->a3A0, obj->a560);
+        func_001A76A0(obj->a560, 0);
+    }
+    Obj_1A5F78* child = obj->a55C;
+    if (child != 0) {
+        if (child->a18 == obj) {
+            func_001A5D50(self, obj);
+        }
+        func_00152600(self->a35C, child);
+        func_00152470(self->a368, child);
+        if (func_001A6238(self, child) == 0) {
+            child->a55C = 0;
+        }
+    }
+    obj->a560 = 0;
+    obj->a55C = 0;
+    obj->vtbl[7](obj);
+    if (self->a39C == self->a628) {
+        f32 r = func_001EAAE0(self->a638, self->a63C);
+        self->a640 = D_0026185C + r;
+    }
+    self->a39C = self->a39C - 1;
+}
+
+struct Obj_1A6168 {
+    u8 pad[0x55C];
+    Obj_1A6168* a55C;
+};
+
+void func_00152600(void* a, void* b);
+void func_00152470(void* a, void* b);
+s32 func_001A6238(void* self, void* child);
+void func_001A6BE0(void* self, s32 mode);
+s32 func_001A6090(void* self, void* child);
+
+void func_001A6168(u8* self, Obj_1A6168* obj, Obj_1A6168* node)
+{
+    Obj_1A6168* cur = obj->a55C;
+    if (cur != 0 && cur == node) {
+        return;
+    }
+    Obj_1A6168* s2 = node->a55C;
+    obj->a55C = node;
+    node->a55C = obj;
+    if (s2 == 0) {
+        func_00152600(self + 0x368, node);
+        func_00152470(self + 0x35C, node);
+    }
+    if (cur != 0) {
+        func_00152600(self + 0x35C, cur);
+        func_00152470(self + 0x368, cur);
+        cur->a55C = 0;
+        func_001A6238(self, cur);
+    }
+    if (s2 != 0) {
+        s2->a55C = 0;
+        func_001A6BE0(s2, 2);
+        if (func_001A6090(self, s2) != 0) {
+            func_001A6BE0(s2, 3);
+        }
+    }
+}
+
+struct Obj_1A7520 { u8 pad[0x550]; s32 state; };
+
+void func_001B7968(void* self);
+
+void func_001A7520(Obj_1A7520* self)
+{
+    func_001B7968(self);
+    self->state = -1;
+}

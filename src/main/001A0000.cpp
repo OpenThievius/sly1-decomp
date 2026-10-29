@@ -46,3 +46,36 @@ void func_001A3B20(u8* self)
     func_001BAC30(self);
     func_00124DF8(self, 2, D_0026B778);
 }
+
+struct __attribute__((aligned(16))) Quad_1A0040 { s32 a, b, c, d; };
+
+struct Obj_1A0040 {
+    u8 pad00[0x1C];
+    f32 f1C;
+    s32 i20;
+    u8 pad24[0x1C];
+    Quad_1A0040 q40;
+    u8 pad50[0xD0];
+    f32 f120;
+};
+
+void func_0019EB28(Obj_1A0040* self);
+extern u8* D_00275710;
+extern Quad_1A0040 D_00275C50;
+
+void func_001A0040(Obj_1A0040* self)
+{
+    func_0019EB28(self);
+    self->f1C = 0.25f;
+    s32 v = *(s32*)(D_00275710 + 0x1CF8);
+    self->i20 = v;
+    self->q40 = D_00275C50;
+    self->f120 = 0.05f;
+}
+
+void func_001A0338(void* self, s32 kind, s32 extra);
+
+void func_001A0318(void* self)
+{
+    func_001A0338(self, 0, 0);
+}

@@ -95,3 +95,40 @@ void func_001AF078(Queue_1AF078* q, u32 value)
         q->count = n + 1;
     }
 }
+
+struct Obj_001AECE0 {
+    u8 pad0[0x550];
+    s32 f550;
+};
+
+void func_001AECE0(Obj_001AECE0* self, s32 value)
+{
+    self->f550 = value;
+}
+
+struct Node_129CA8 {
+    u8 pad0[0x18];
+    union {
+        s32 w;
+        f32 f;
+    } f18;
+};
+
+struct Obj_001AEF68 {
+    u8 pad0[0x5c8];
+    Node_129CA8* f5c8;
+    f32 f5cc;
+};
+
+Node_129CA8* func_00129CA8(Obj_001AEF68* self);
+
+void func_001AEF68(Obj_001AEF68* self)
+{
+    Node_129CA8* node = func_00129CA8(self);
+
+    if (node != 0) {
+        self->f5cc = node->f18.f;
+        node->f18.w = 0;
+        self->f5c8 = node;
+    }
+}

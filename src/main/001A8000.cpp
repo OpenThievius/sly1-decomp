@@ -107,3 +107,118 @@ void func_001ABE20(Obj_1ABE20* self, s32 state)
         self->timer = D_0026185C;
     }
 }
+
+struct Obj_1AA268 {
+    u8 pad0[4];
+    s32 f4;
+    u8 f8;
+    u8 pad9[0x208 - 9];
+    u32 f208;
+    f32 f20c;
+};
+
+extern s32 D_0026227C;
+
+void func_001AA268(Obj_1AA268* self)
+{
+    s32 value = D_0026227C;
+    u32 flags = 0xFF808080;
+    self->f4 = value;
+    self->f20c = 1.0f;
+    self->f208 = flags;
+    self->f8 = 0;
+}
+
+struct Obj_1AA790 {
+    u8 pad0[4];
+    s32 f4;
+    s8 f8;
+    u8 pad9[0x208 - 9];
+    s32 f208;
+    f32 f20c;
+    void* f210;
+    u8 pad214[0x21C - 0x214];
+    f32 f21c;
+    f32 f220;
+    u8 pad224[0x234 - 0x224];
+    f32 f234;
+    f32 f238;
+};
+
+typedef void (*VirtualCall_1AA790)(void* a, void* b, void* c, void* d);
+
+extern u8 D_00262280[];
+
+void func_00137228(void* out, f32 x, f32 y);
+void func_00137238(void* out, f32 x, f32 y);
+void func_00137248(void* out, s32* value);
+void func_00137260(void* out, s32 flag);
+void func_00137268(void* out, s32 flag);
+void func_0015C8B8(s32 a, f32 x, f32 y);
+void func_0015C638(s32 a, void* b, void* c, s32 d, void* e);
+void func_0015C900(s32 v);
+
+void func_001AA790(Obj_1AA790* self)
+{
+    u8 out[32];
+    s32 tmp;
+    void* handle;
+    f32 x;
+
+    if (self->f8 != 0) {
+        f32 p = self->f234;
+        f32 q = self->f238;
+        s32 held = self->f208;
+        func_00137228(out, self->f21c, self->f220);
+        func_00137238(out, p, q);
+        tmp = held;
+        func_00137248(out, &tmp);
+        func_00137260(out, 0);
+        func_00137268(out, 0);
+
+        handle = self->f210;
+        if (handle != 0) {
+            void* obj = *(void**)handle;
+            if (obj != 0) {
+                void* vt = *(void**)((u8*)obj + 76);
+                VirtualCall_1AA790 fn = *(VirtualCall_1AA790*)((u8*)vt + 76);
+                s16 adj = *(s16*)((u8*)vt + 72);
+                fn((u8*)obj + adj, handle, out, D_00262280);
+            }
+        }
+        x = self->f20c;
+        func_0015C8B8(self->f4, x, x);
+        func_0015C638(self->f4, &self->f8, out, 0, D_00262280);
+        func_0015C900(self->f4);
+    }
+}
+
+struct Obj_1AA898 {
+    u8 pad[576];
+    f32 value;
+};
+
+f32 func_001AA898(Obj_1AA898* self)
+{
+    return self->value;
+}
+
+struct Obj_1AA8A0 {
+    u8 pad[580];
+    f32 value;
+};
+
+f32 func_001AA8A0(Obj_1AA8A0* self)
+{
+    return self->value;
+}
+
+struct Obj_1AA8A8 {
+    u8 pad[584];
+    f32 value;
+};
+
+f32 func_001AA8A8(Obj_1AA8A8* self)
+{
+    return self->value;
+}
