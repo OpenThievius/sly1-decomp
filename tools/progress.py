@@ -148,16 +148,26 @@ def report(key):
                            for c in CATEGORIES]}
 
 
+BYTEMATCH = "https://bytematch.dev/OpenThievius/sly1-decomp"
+
+
+def badge(serial, label, measure):
+    return "[![%s](%s.svg?mode=shield&label=%s&measure=%s&version=%s)](%s/%s)" % (
+        label, BYTEMATCH, label, measure, serial, BYTEMATCH, serial)
+
+
 def readme_table(reports):
+    """The README's progress table: ByteMatch's live badges, and the numbers of the committed reports."""
     lines = [BEGIN,
-             "| Version | Functions | Code |",
-             "| --- | ---: | ---: |"]
+             "| Version | Region | Target | Code | Functions | In the committed report |",
+             "|---|---|---|---|---|---|"]
     for key, r in reports.items():
+        v = versions.get(key)
         m = r["measures"]
-        lines.append("| %s `%s` | %s of %s | %s of %s bytes (%.2f%%) |" % (
-            versions.get(key)["region"].split(" (")[0], versions.get(key)["serial"],
-            format(m["matched_functions"], ","), format(m["total_functions"], ","),
-            format(int(m["matched_code"]), ","), format(int(m["total_code"]), ","), m["matched_code_percent"]))
+        lines.append("| v1.00 | %s | `%s` | %s | %s | %s of %s functions, %.2f%% of code |" % (
+            v["region"], v["serial"],
+            badge(v["serial"], "Code", "matched_code_percent"), badge(v["serial"], "Functions", "matched_functions"),
+            format(m["matched_functions"], ","), format(m["total_functions"], ","), m["matched_code_percent"]))
     lines.append("")
     lines.append("A US function counts when the build links its C and still prints `MATCH`; a PAL function "
                  "when that same C also builds PAL's bytes at its counterpart (`tools/version_check.py`).")
