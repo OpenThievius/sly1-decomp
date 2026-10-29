@@ -429,3 +429,130 @@ void* func_001070E0(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct Quad_104170 { s32 a, b, c, d; };
+struct Frame_104170 { Quad_104170 q; Quad_104170 t; s32 n; s32 out; };
+
+void func_0011B008(Quad_104170* q);
+void func_0011B018(void* dst, Quad_104170* src);
+void func_0011B060(Quad_104170* q, int mode);
+void func_0011B0A8(Quad_104170* a, Quad_104170* b);
+void func_0011B538(Quad_104170* q, int n);
+void func_001C23B0(Quad_104170* t, int mode, int c, void* z, void* z2);
+s32 func_001DDC18(void* unused, s32 p);
+
+void* func_00104170(void* self, void* x, int unused, int c)
+{
+    Frame_104170 f;
+    func_0011B008(&f.q);
+    f.n = 0x5;
+    func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_001DDC18(x, f.out);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_104860 { s32 a, b, c, d; };
+struct Frame_104860 { Quad_104860 q; Quad_104860 t; };
+
+void func_0011B008(Quad_104860* q);
+void func_0011B018(void* dst, Quad_104860* src);
+void func_0011B060(Quad_104860* q, int mode);
+void func_0011B0A8(Quad_104860* a, Quad_104860* b);
+s32 func_0011B570(Quad_104860* q, s32 v);
+void func_001C23B0(Quad_104860* t, int mode, int c, void* z);
+s32 func_00145FF8(void* x);
+
+void* func_00104860(void* self, void* x, int unused, int c)
+{
+    Frame_104860 f;
+    func_0011B008(&f.q);
+    func_001C23B0(&f.t, 0, c, 0);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    s32 v = func_00145FF8(x);
+    (void)func_0011B570(&f.q, v);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_1049D8 { s32 a, b, c, d; };
+struct Frame_1049D8 { Quad_1049D8 q; Quad_1049D8 t; };
+
+void func_0011B008(Quad_1049D8* q);
+void func_0011B018(void* dst, Quad_1049D8* src);
+void func_0011B060(Quad_1049D8* q, int mode);
+void func_0011B0A8(Quad_1049D8* a, Quad_1049D8* b);
+void func_0011B538(Quad_1049D8* q, int n);
+void func_001C23B0(Quad_1049D8* t, int mode, int c, void* z);
+void func_00146028(void* x);
+
+void* func_001049D8(void* self, void* x, int unused, int c)
+{
+    Frame_1049D8 f;
+    func_0011B008(&f.q);
+    func_001C23B0(&f.t, 0, c, 0);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_00146028(x);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_1069C0 { s32 a, b, c, d; };
+struct Frame_1069C0 { Quad_1069C0 q; Quad_1069C0 t; s32 n; s32 out; };
+
+void func_0011B008(Quad_1069C0* q);
+void func_0011B018(void* dst, Quad_1069C0* src);
+void func_0011B060(Quad_1069C0* q, int mode);
+void func_0011B0A8(Quad_1069C0* a, Quad_1069C0* b);
+s32 func_0011B5F0(Quad_1069C0* q, s32 flag);
+void func_001C23B0(Quad_1069C0* t, int mode, int c, void* z, void* z2);
+s32 func_001A8C90(void* obj, s32 v);
+
+void* func_001069C0(void* self, void* x, int unused, int c)
+{
+    Frame_1069C0 f;
+    func_0011B008(&f.q);
+    f.n = 0;
+    func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    s32 flag = func_001A8C90(x, f.out);
+    (void)func_0011B5F0(&f.q, flag);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_106A70 { s32 a, b, c, d; };
+struct Frame_106A70 { Quad_106A70 q; Quad_106A70 t; };
+
+void func_0011B008(Quad_106A70* q);
+void func_0011B018(void* dst, Quad_106A70* src);
+void func_0011B060(Quad_106A70* q, int mode);
+void func_0011B0A8(Quad_106A70* a, Quad_106A70* b);
+void func_0011B538(Quad_106A70* q, int n);
+void func_001C23B0(Quad_106A70* t, int mode, int c, void* z);
+void func_001A93E8(void* x);
+
+void* func_00106A70(void* self, void* x, int unused, int c)
+{
+    Frame_106A70 f;
+    func_0011B008(&f.q);
+    func_001C23B0(&f.t, 0, c, 0);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001A93E8(x);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
