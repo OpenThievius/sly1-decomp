@@ -342,3 +342,38 @@ void func_0013DCA8(Actor_13DB28* self, s32 kind, Msg_13DB28* msg)
         }
     }
 }
+
+struct Track_13DDB8 {
+    u8 pad0[0x63C];
+    s32 state;
+    u8 pad1[0x698 - 0x640];
+    s32 flag;
+};
+
+void func_0013CCF8(void* self);
+
+void func_0013DDB8(Track_13DDB8* self)
+{
+    func_0013CCF8(self);
+    self->state = 5;
+    self->flag = -1;
+}
+
+struct Track_13DDF0 {
+    u8 pad0[0x63C];
+    s32 state;
+    u8 pad1[0x6C0 - 0x640];
+    f32 scale;
+    s32 dropA;
+    s32 dropB;
+};
+
+
+void func_0013DDF0(Track_13DDF0* self)
+{
+    func_0013CCF8(self);
+    self->state = 1;
+    self->scale = 1.0f;
+    self->dropA = -1;
+    self->dropB = -1;
+}

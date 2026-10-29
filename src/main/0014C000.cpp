@@ -509,3 +509,35 @@ void func_0014EA48(Obj_14EA48* self)
         self->p14[i + 1] = self->p14[i] + r;
     }
 }
+
+f32 func_0014D138(s32 count, f32* table, s32 wrap, f32 x)
+{
+    if (wrap == 0) {
+        return x;
+    }
+    f32 lo = table[0];
+    f32 hi = table[count - 1];
+    f32 span = hi - lo;
+    if (x < lo) {
+        do {
+            x += span;
+        } while (x < lo);
+    }
+    if (hi < x) {
+        do {
+            x -= span;
+        } while (hi < x);
+    }
+    return x;
+}
+
+struct Obj_14EE40;
+
+void func_001B7968(Obj_14EE40* self);
+void func_0014F110(Obj_14EE40* self, s32 value);
+
+void func_0014EE40(Obj_14EE40* self)
+{
+    func_001B7968(self);
+    func_0014F110(self, -1);
+}

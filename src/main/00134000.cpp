@@ -139,3 +139,45 @@ s32 func_00137480(Chan_1373D0* self, s32 n)
 {
     return self->a40 -= n;
 }
+
+struct SlotEntry_135E78 { void* handle; s32 extra; };
+
+struct SlotBank_135E78 {
+    u8 pad0[0x328];
+    s32 state;
+    u8 pad1[0x4];
+    u8 blockA[0x10];
+    u8 blockB[0x10];
+    s32 countA;
+    s32 count;
+    u8 pad2[0x4];
+    SlotEntry_135E78 entries[1];
+};
+
+void func_0019EBE8(void* handle);
+void func_001A1DF0(void* handle, s32 mode);
+void func_001F5C0C(void* block, s32 value, s32 size);
+
+void func_00135E78(SlotBank_135E78* self, s32 state, s32 flag)
+{
+    if (state == self->state) return;
+    s32 i = 0;
+    u8* blockA = self->blockA;
+    if (self->count > 0) {
+        SlotEntry_135E78* e = self->entries;
+        do {
+            if (flag != 0) {
+                func_0019EBE8(e->handle);
+                func_001F5C0C(self->blockB, 0, 16);
+            } else {
+                func_001A1DF0(e->handle, 2);
+            }
+            i++;
+            e++;
+        } while (i < self->count);
+    }
+    self->count = 0;
+    self->countA = 0;
+    func_001F5C0C(blockA, 0, 16);
+    self->state = state;
+}

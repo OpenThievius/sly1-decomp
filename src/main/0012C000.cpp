@@ -363,3 +363,63 @@ void func_0012E928(void* a0, void* a1, void* a2)
     Obj_12E928* n = (Obj_12E928*)func_0012D570(a0, a1);
     if (n) ((void (*)(void*, void*))n->vtbl[2])(n, a2);
 }
+
+struct Node_12F718 {
+    u8 pad0[4];
+    void* data4;
+    u8 pad8[0xC];
+    s32 value14;
+    u8 pad18[8];
+    Node_12F718* next;
+};
+
+struct Owner_12F718 {
+    u8 pad0[0x44];
+    Node_12F718* head;
+};
+
+void func_00129A58(void* p);
+
+void func_0012F718(Owner_12F718* owner, s32 value)
+{
+    s32 frame[4];
+    (void)frame;
+    Node_12F718* node = owner->head;
+    while (node != 0) {
+        node->value14 = value;
+        func_00129A58(node->data4);
+        node = node->next;
+    }
+}
+
+struct Obj_12F760 {
+    void (**vtbl)(void* self);
+};
+
+struct Node_12F760 {
+    void (*fn)(void* data, s32 a, s32 b);
+    void* data4;
+    u8 pad8[8];
+    Node_12F760* next;
+};
+
+struct Owner_12F760 {
+    u8 pad0[0xC];
+    Obj_12F760* obj;
+    u8 pad1[0xD4];
+    Node_12F760* list;
+};
+
+void func_0012F760(Owner_12F760* self, s32 a1, s32 a2)
+{
+    Obj_12F760* obj = self->obj;
+    if (obj != 0) {
+        obj->vtbl[18](obj);
+    }
+    Node_12F760* node = self->list;
+    while (node != 0) {
+        Node_12F760* next = node->next;
+        node->fn(node->data4, a1, a2);
+        node = next;
+    }
+}

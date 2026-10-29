@@ -497,3 +497,64 @@ void func_00143AF8(ItemList_143AF8* list, void* item)
         list->count = n + 1;
     }
 }
+
+struct WordStack_1406D0 { u8 pad[0x744]; s32 count; s32 items[1]; };
+
+void func_001406D0(WordStack_1406D0* self, s32 value)
+{
+    s32 n = self->count;
+    self->items[n] = value;
+    self->count = n + 1;
+}
+
+struct WordStack_1406F0 { u8 pad[0x768]; s32 count; s32 items[1]; };
+
+void func_001406F0(WordStack_1406F0* self, s32 value)
+{
+    s32 n = self->count;
+    self->items[n] = value;
+    self->count = n + 1;
+}
+
+struct Slot_1419E0 { u8 pad[0x5A0]; s32 value; };
+
+void func_001419E0(Slot_1419E0* self, s32 value)
+{
+    self->value = value;
+}
+
+struct IdList_143B20 { u8 pad[0x340]; s32 count; s32 items[1]; };
+
+void func_0018D800(void* dst, void* src, u32 size);
+
+void func_00143B20(IdList_143B20* list, s32 value)
+{
+    for (s32 i = 0; i < list->count; i++) {
+        if (value == list->items[i]) {
+            func_0018D800(&list->items[i], &list->items[i + 1], (list->count - i - 1) * 4);
+            list->count--;
+            return;
+        }
+    }
+}
+
+struct Entry_143BA8 { u8 pad0[0x404]; s32 flag404; u8 pad1[0x538 - 0x408]; u64 bits538; };
+
+s32 func_00143BA8(void* unused, Entry_143BA8* e)
+{
+    s64 field = 0xF000;
+    s64 want = 0x8000;
+    s32 r = 0;
+    field <<= 20;
+    want <<= 17;
+    if ((e->bits538 & field) == want) {
+        goto set;
+    }
+    if (e->flag404 == 0) {
+        goto done;
+    }
+set:
+    r = 1;
+done:
+    return r;
+}

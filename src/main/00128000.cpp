@@ -785,3 +785,93 @@ store:
 done:
     return;
 }
+
+struct Owner_1293D8 { u8 pad[0xB0]; s32 field_B0; };
+
+void func_001293D8(void* self, s32 value)
+{
+    ((Owner_1293D8*)func_001291D0(self))->field_B0 = value;
+}
+
+struct Flag_129440 { u8 pad[0x284]; s32 count; };
+
+void func_00129440(Flag_129440* self, s32* out)
+{
+    *out = self->count != 0;
+}
+
+struct __attribute__((packed)) Pack4_12A2C0 { f32 a, b, c, d; };
+struct Obj_12A2C0 { u8 pad[0x220]; Pack4_12A2C0* data; };
+
+extern void func_0012A320(Obj_12A2C0* self, Pack4_12A2C0* in);
+
+void func_0012A2C0(Obj_12A2C0* self, f32 scale)
+{
+    Pack4_12A2C0 tmp;
+    tmp = *self->data;
+    tmp.d = scale * (tmp.a - tmp.b) / tmp.c;
+    func_0012A320(self, &tmp);
+}
+
+struct __attribute__((packed)) Pack4_12A320 { f32 a, b, c, d; };
+struct Obj_12A320 { u8 pad[0x220]; Pack4_12A320* data; };
+
+void* func_0018D500(u32 size);
+
+void func_0012A320(Obj_12A320* self, Pack4_12A320* src)
+{
+    if (self->data == (Pack4_12A320*)D_00260EC0) {
+        self->data = (Pack4_12A320*)func_0018D500(0x10);
+    }
+    *self->data = *src;
+}
+
+struct Part_12AE20 { u8 pad0[0xC]; f32 weight; u8 pad1[0xC]; void* ptr; };
+struct Owner_12AE20 { u8 pad[0x2AC]; Part_12AE20* part; };
+
+void func_001BF8E8(void* p);
+
+void func_0012AE20(Owner_12AE20* self)
+{
+    Part_12AE20* part = self->part;
+    if (part != 0) {
+        void* p = part->ptr;
+        if (p != 0) {
+            func_001BF8E8(p);
+        }
+    }
+}
+
+struct Part_12AE58 { u8 pad0[0xC]; f32 weight; u8 pad1[0xC]; void* ptr; };
+struct Owner_12AE58 { u8 pad[0x2AC]; Part_12AE58* part; };
+
+void func_0012AE58(Owner_12AE58* self, f32* out)
+{
+    f32 v = 1.0f;
+    if (self->part != 0) {
+        v = self->part->weight;
+    }
+    *out = v;
+}
+
+struct Ctx_12B550 { u8 pad[0x2C8]; u64 flags; };
+
+void func_0012B550(Ctx_12B550* ctx, s32 on)
+{
+    if (on != 0) {
+        ctx->flags |= (u64)1 << 32;
+    } else {
+        ctx->flags &= ~((u64)1 << 32);
+    }
+}
+
+struct Ctx_12B590 { u8 pad[0x2C8]; u64 flags; };
+
+void func_0012B590(Ctx_12B590* ctx, s32* out)
+{
+    if ((ctx->flags & ((u64)1 << 32)) != 0) {
+        *out = 1;
+    } else {
+        *out = 0;
+    }
+}

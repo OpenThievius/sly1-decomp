@@ -229,3 +229,12 @@ void func_0013BE00(Offset_13BE00* self, f32 delta)
 {
     self->value = D_0026185C + delta;
 }
+
+void func_001BAC30(void* self);
+void func_00159478(void* sub, void* self);
+
+void func_0013B598(void* self)
+{
+    func_001BAC30(self);
+    func_00159478((u8*)self + 0x5BC, self);
+}
