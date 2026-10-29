@@ -189,3 +189,19 @@ void* func_001C1E48(void* self, s32 n, s32* keys, s32* vals)
     func_0011B060(&loc, 2);
     return self;
 }
+
+extern s32 D_006053E0[];
+
+s32 func_001C0C50(s32 index)
+{
+    return D_006053E0[index];
+}
+
+void func_001C0C08(s32 index, s32 value);
+
+void func_001C0CB0(void)
+{
+    for (s32 i = 0; i < 8; i++) {
+        func_001C0C08(i, 0);
+    }
+}

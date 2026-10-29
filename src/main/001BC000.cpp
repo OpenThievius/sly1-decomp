@@ -170,3 +170,76 @@ void func_001BFFC8(void* guard, s64 key)
         }
     }
 }
+
+struct Owner_001BC088 { u8 pad0[0x3C8]; void* hook; };
+
+void func_001BBEB8(Owner_001BC088* self);
+void func_00125440(Owner_001BC088* self, f32 x, void* b);
+
+void func_001BC088(Owner_001BC088* self, void* b, f32 x)
+{
+    if (self->hook != 0) {
+        func_001BBEB8(self);
+    }
+    func_00125440(self, x, b);
+}
+
+struct Shape_001BC320 { u8 pad0[8]; f32 radius; s32 flags; };
+
+void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
+
+s32 func_001BC320(void* a0, Shape_001BC320* self)
+{
+    if (self->flags & 0x8) {
+        func_001BC0E0(a0, self->radius, (u8*)self + 0x20, (u8*)self + 0x30);
+    }
+    return self->flags != 0;
+}
+
+struct Flagged_001BC710 { u8 pad[0x538]; u64 bits; };
+
+void func_001BC710(Flagged_001BC710* self, u32 flag)
+{
+    self->bits = (self->bits & 0xFFEFFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 52);
+}
+
+void func_001C06A0(s32 a, s32 b, f32 x);
+
+void func_001BED20(void)
+{
+    func_001C06A0(2, 1, 1.0f);
+}
+
+extern s32 D_00274728;
+
+void func_0011D640(s32 a);
+
+void func_001BED48(void)
+{
+    func_0011D640(D_00274728);
+}
+
+extern s32 D_00274728;
+
+void func_0011D670(s32 a);
+
+void func_001BED70(void)
+{
+    func_0011D670(D_00274728);
+}
+
+extern u8* D_00275710;
+
+void* func_001B5EA0(void* p);
+void func_001F5C0C(u8* p, s32 a, s32 b);
+void func_00152470(u8* a, void* b);
+
+void* func_001BED98(void)
+{
+    void* p = func_001B5EA0(D_00275710 + 0x1BB8);
+    if (p != 0) {
+        func_001F5C0C((u8*)p, 0, 12);
+        func_00152470(D_00275710 + 0x1BC4, p);
+    }
+    return p;
+}

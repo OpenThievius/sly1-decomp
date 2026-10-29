@@ -269,3 +269,75 @@ void func_001CB648(List_1CB648* self, void* value)
         self->count = n + 1;
     }
 }
+
+struct Host_001CA758 { u8 pad0[0x14]; void* source; u8 pad1[0xB74 - 0x18]; s32 mode; };
+struct Item_001CA758 { u8 pad0[0x48]; s32 state; };
+
+void* func_0015A418(void* source, s32 kind, void* arg, s32 mode);
+void func_0012D398(void* item, Host_001CA758* host);
+void func_00182ED8(void* item);
+
+void* func_001CA758(Host_001CA758* self, void* arg)
+{
+    Item_001CA758* item = (Item_001CA758*)func_0015A418(self->source, 0x101, arg, self->mode);
+    if (item != 0) {
+        item->state = 0;
+        func_0012D398(item, self);
+        func_00182ED8(item);
+    }
+    return item;
+}
+
+struct Slot8_001CA7C0 { s32 key; s32 value; };
+struct Slot12_001CA7C0 { s32 link; s32 key; s32 value; };
+struct Owner_001CA7C0 {
+    u8 pad0[0x758];
+    Slot8_001CA7C0 early[17];
+    u8 pad1[0xAC4 - 0x758 - 17 * 8];
+    s32 lateCount;
+    Slot12_001CA7C0 late[1];
+};
+
+void* func_001CA758(Owner_001CA7C0* self, s32 arg);
+
+void func_001CA7C0(Owner_001CA7C0* self)
+{
+    s32 i = 16;
+    Slot8_001CA7C0* slot = self->early;
+    do {
+        if (slot->key != -1) {
+            slot->value = (s32)func_001CA758(self, slot->key);
+            slot->key = -1;
+        }
+        i--;
+        slot++;
+    } while (i >= 0);
+
+    s32 j = 0;
+    if (self->lateCount > 0) {
+        do {
+            Slot12_001CA7C0* late = &self->late[j];
+            if (late->key != -1) {
+                late->value = (s32)func_001CA758(self, late->key);
+                late->key = -1;
+            }
+            j++;
+        } while (j < self->lateCount);
+    }
+}
+
+struct Latch_001CA878 { u8 pad0[0xAF8]; s32 flag; s32 value; };
+
+void func_001CA878(Latch_001CA878* self, s32 v)
+{
+    self->value = v;
+    self->flag = 1;
+}
+
+struct Latch_001CA888 { u8 pad0[0xB04]; s32 flag; s32 value; };
+
+void func_001CA888(Latch_001CA888* self, s32 v)
+{
+    self->value = v;
+    self->flag = 1;
+}

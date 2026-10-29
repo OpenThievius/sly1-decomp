@@ -122,3 +122,19 @@ void func_001C5BF0(void* a0, s32 a1, s32 unused2, s32 unused3, s32 a4, s32 a5)
 {
     func_001C5C10(a0, a1, a4, a5);
 }
+
+struct Vec2_1C4FA0 { f32 x; f32 y; };
+typedef void (*VFn_1C4FA0)(void* self);
+struct Obj_1C4FA0 { VFn_1C4FA0* vtbl; u8 pad0[0x630 - 4]; f32 f630; u8 pad1[0x638 - 0x634]; f32 f638; };
+
+void func_001B97E0(void* self, void* src);
+f32 func_00205778(f32 a, f32 b);
+
+void func_001C4FA0(Obj_1C4FA0* self, Vec2_1C4FA0* v)
+{
+    func_001B97E0(self, v);
+    f32 r = func_00205778(v->y, v->x);
+    self->f638 = r;
+    self->f630 = r;
+    self->vtbl[88](self);
+}
