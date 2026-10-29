@@ -180,10 +180,14 @@ class DefinitionTest(unittest.TestCase):
                 "    s32 mask = 1 << (index & 7);\n"
                 "    return bits[index / 8] & mask;\n"
                 "}\n"
+                "struct __attribute__((aligned(16))) Quad_100018 {\n"
+                "    s32 a, b, c, d;\n"
+                "};\n"
                 "void* func_00100020(void* self,\n"
                 "                    s32 n)\n"
                 "{\n"
                 "    return self;\n"
                 "}\n")
-        # A one-line definition does not swallow the one after it.
+        # A one-line definition does not swallow the one after it, and a struct
+        # with an attribute in front of its name is not a function.
         self.assertEqual(self.names(text), ["func_00100010", "func_00100018", "func_00100020"])
