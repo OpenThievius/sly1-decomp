@@ -25,7 +25,7 @@ procedure; read it before you match anything.
 | `config/cflags.tsv` | the compiler, and the flags of each source file | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
-| `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows (not yet supported: docs/TOOLCHAIN.md) | you |
+| `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with the default compiler until a file can name its own (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |
 | `nonmatching/` | near misses, never linked | you |
 | `progress/<version>/report.json`, the README table | what ByteMatch shows | `tools/progress.py` |
