@@ -397,3 +397,66 @@ void func_0016A490(void* self)
     func_001B7A98(self);
     func_00152470(D_00262708, self);
 }
+
+void func_001613C0(void* p, s32 a, s32 b, s32 c);
+void func_00161708(void* p, s32 a, u64 b);
+void func_00161958(void* p, s32 x);
+
+void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx)
+{
+    func_001613C0(ctx, 0, 1, 0xE);
+    func_00161708(ctx, 0x50, ((u64)dbp << 32) | ((u64)dbw << 48) | ((u64)dpsm << 56));
+    func_00161708(ctx, 0x51, 0);
+    func_00161708(ctx, 0x52, rrw | ((u64)rrh << 32));
+    func_00161708(ctx, 0x53, 0);
+    func_00161958(ctx, x);
+}
+
+struct Bits_168FB0 {
+    u64 f0 : 14;
+    u64 f14 : 6;
+    u64 f20 : 6;
+    u64 f26 : 4;
+    u64 f30 : 4;
+    u64 f34 : 1;
+    u64 rest : 29;
+};
+
+struct Ctx_168FB0 {
+    u16 u0;
+    u16 u2;
+    u8 pad4[4];
+    u8 b8;
+    u8 b9;
+    u8 pad10[0x0E];
+    Bits_168FB0 bits;
+};
+
+u32 func_00168D30(u32 n);
+
+void func_00168FB0(Ctx_168FB0* self, u32 a1)
+{
+    self->bits.f0 = a1;
+    self->bits.f14 = self->b9;
+    self->bits.f20 = self->b8;
+    self->bits.f26 = func_00168D30(self->u0) & 0xF;
+    self->bits.f30 = func_00168D30(self->u2) & 0xF;
+    self->bits.f34 = 1;
+}
+
+struct Desc_169088 {
+    u16 u0;
+    u16 u2;
+    u8 pad4[4];
+    u8 b8;
+    u8 b9;
+    u8 pad10[0x0A];
+    s32 x14;
+};
+
+void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
+
+void func_00169088(Desc_169088* d, u32 dbp, void* ctx)
+{
+    func_00168D98(dbp, d->b9, d->b8, d->u0, d->u2, d->x14, ctx);
+}

@@ -109,7 +109,7 @@ s32 func_001601D8(void* a0)
     return r;
 }
 
-struct Glob_002623C0 { u8 pad0[0xC]; f32 fC; u8 pad1[0x19C8]; s32 f19D8; s32 f19DC; s32 f19E0; u8 pad2[0x10]; s32 f19F4; s32 f19F8; };
+struct Glob_002623C0 { u8 pad0[0xC]; f32 fC; u8 pad1[0x19C8]; s32 f19D8; s32 f19DC; s32 f19E0; u8 pad2[0xC]; s32 mask; s32 f19F4; s32 f19F8; };
 extern Glob_002623C0* D_002623C0;
 
 s32 func_001602A0(void);
@@ -228,4 +228,84 @@ void func_00162810(Owner_162810* owner)
         if (ref != 0)
             owner->refs[n++] = ref;
     }
+}
+
+void func_001F5C0C(void* p, s32 value, s32 size);
+
+void func_00160CC8(void* p)
+{
+    func_001F5C0C(p, 0, 8);
+}
+
+struct Counter_160CE8
+{
+    u8 pad[4];
+    s32 count;
+};
+
+void func_00160CE8(Counter_160CE8* c)
+{
+    c->count = 0;
+}
+
+struct Counter_160CF0
+{
+    u8 pad[4];
+    s32 count;
+};
+
+s32 func_00160CF0(Counter_160CF0* c)
+{
+    return ++c->count;
+}
+
+struct Ctx_160D10
+{
+    u8 pad[0x235C];
+    s32 bits;
+};
+
+extern Ctx_160D10* D_00275710;
+
+s32 func_00160D10()
+{
+    return D_002623C0->mask & D_00275710->bits;
+}
+
+void func_0018D778(void);
+
+void func_00161A88(void* self, s32 flag)
+{
+    (void)self;
+    if (flag & 1) {
+        func_0018D778();
+    }
+}
+
+void func_00162508(void* self);
+void func_00188B08(void* a, void* b, void* c);
+void func_00188B48(void* a, void* b, void* c);
+
+void func_00161AB0(u8* self, void* a1, void* a2)
+{
+    func_00162508(self);
+    func_00188B08(a1, a2, self);
+    func_00188B48(a1, a2, self + 0x40);
+}
+
+struct Obj_00161BB0 {
+    u8 pad0[0xF8];
+    s32 f0F8;
+};
+
+void func_00162508(void* self);
+void func_001626A8(void* self, u32* value);
+
+void func_00161BB0(Obj_00161BB0* self, s32 value)
+{
+    u32 local;
+    func_00162508(self);
+    self->f0F8 = value;
+    local = 0xFFFFFFFF;
+    func_001626A8(self, &local);
 }
