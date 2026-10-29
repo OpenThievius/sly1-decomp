@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+extern void* D_0024A220;
+struct Render_15C930 { u8 pad[0x44]; f32 x; f32 y; void* callback; };
+void* func_0018D758(u32);
+void func_0015C9B0(void*, Render_15C930*);
+Render_15C930* func_0015C930(void* owner, f32 x, f32 y)
+{
+	Render_15C930* out = (Render_15C930*)func_0018D758(0x88);
+	out->callback = &D_0024A220;
+	func_0015C9B0(owner, out);
+	out->x *= x;
+	out->y *= y;
+	return out;
+}
+
 struct Point2 { f32 x, y; };
 
 // Points recorded in order, the first of them scaled into u and v.

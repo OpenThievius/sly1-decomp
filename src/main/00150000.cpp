@@ -1,6 +1,28 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+struct Node_150298 { u8 pad[0x554]; f32 value554; u8 pad2[0x558 - 0x558]; Node_150298* next; };
+struct State_150298 { u8 pad[0x6CC]; Node_150298* selected; };
+extern Node_150298* D_00262708;
+extern f32 D_0024A014;
+Node_150298* func_0016A820(Node_150298*);
+void func_0014F110(Node_150298*, s32);
+void func_00150298(State_150298* self)
+{
+	s32 scratch[4];
+	(void)scratch;
+	if (self->selected != 0) return;
+	Node_150298* current = D_00262708;
+	Node_150298* best = 0;
+	f32 minimum = D_0024A014;
+	while (current != 0) {
+		Node_150298* candidate = func_0016A820(current);
+		current = current->next;
+		if (candidate != 0 && candidate->value554 < minimum) { best = candidate; minimum = candidate->value554; }
+	}
+	if (best != 0) { func_0014F110(best, 5); self->selected = best; }
+}
+
 struct State_001503E0 { u8 pad[0x744]; u32 count; u32 items[8]; };
 
 struct Object_00150338 { u8 pad[0x550]; s32 status; };

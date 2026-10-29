@@ -19,3 +19,4 @@ void func_0020F0C0(Obj_20F0C0* obj, u32 value)
     *setting = value;
     obj->value = D_0027B040[index];
 }
+
