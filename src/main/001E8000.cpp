@@ -261,3 +261,90 @@ void func_001E90E8(void* self)
 {
     func_001E96F8(self, 3);
 }
+
+typedef void (*VFn_001E9498)(void* self);
+typedef void (*VFnFlag_001E9498)(void* self, s32 flag);
+
+struct Node_001E9498 {
+    VFn_001E9498* vtbl;
+};
+
+struct Set_001E9498 {
+    u8 pad0[0xC];
+    Node_001E9498* items[8];
+    s32 count;
+};
+
+s32 func_001BE5E8(void);
+void func_001BEA28(void);
+
+void func_001E9498(Set_001E9498* self, Node_001E9498* node)
+{
+    if (func_001BE5E8() && self->count == 1) {
+        func_001BEA28();
+    }
+    if (self->count >= 2) {
+        Node_001E9498* last = self->items[self->count - 1];
+        if (last->vtbl[3]) {
+            ((VFnFlag_001E9498)last->vtbl[3])(last, 0);
+        }
+    }
+    if (node->vtbl[3]) {
+        ((VFnFlag_001E9498)node->vtbl[3])(node, 1);
+    }
+    s32 index = self->count;
+    self->items[index] = node;
+    self->count = index + 1;
+    if (node->vtbl[6]) {
+        node->vtbl[6](node);
+    }
+}
+
+f32 func_002058A0(f32 v);
+
+f32 func_001EAFE0(f32 x, f32 y)
+{
+    f32 r = func_002058A0(x);
+    if (r < 0.0f) {
+        r += y;
+    }
+    return r;
+}
+
+struct Span_001EB050 { f32 lo; f32 hi; };
+
+s32 func_001EB050(Span_001EB050* span, f32 x)
+{
+    s32 inside = 0;
+    if (span->lo < x) {
+        if (x < span->hi) {
+            inside = 1;
+        }
+    }
+    return inside;
+}
+
+s32 func_001EB050(Span_001EB050* span, f32 x);
+
+s32 func_001EB080(s32 count, Span_001EB050* spans, f32 x)
+{
+    for (s32 i = 0; i < count; i++) {
+        if (func_001EB050(&spans[i], x)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+struct Span_001EB0F8 { f32 lo; f32 hi; };
+
+f32 func_001EB0F8(Span_001EB0F8* span, f32 x)
+{
+    if (x < span->lo) {
+        return span->lo;
+    }
+    if (span->hi < x) {
+        return span->hi;
+    }
+    return x;
+}

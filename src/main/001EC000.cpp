@@ -304,3 +304,64 @@ void func_001EF8C0(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s
 {
     func_0013EC00((u8*)self + 0x2E8, 4, (u8*)self + 0x2E4, a1, a2, a3, a4, a7);
 }
+
+struct Cursor_1EE368 { u8 pad[0xC]; u32* cursor; };
+
+void func_001EE368(Cursor_1EE368* s, s32 target)
+{
+    u32 raw = (u32)s->cursor;
+    s32 idx = (s32)((raw & 0xC) >> 2);
+    u32* p = (u32*)raw;
+    if (idx == target) goto done;
+    do {
+        *p = 0;
+        idx = (idx + 1) % 4;
+        p++;
+    } while (idx != target);
+done:
+    s->cursor = p;
+}
+
+struct Cursor_1EE3B8 { u8 pad[0xC]; u32* cursor; };
+
+void func_001EE3B8(Cursor_1EE3B8* s, u32 a, u32 b)
+{
+    u32* p = s->cursor;
+    s->cursor = p + 1;
+    *p = a | 0x3000000;
+    u32* q = s->cursor;
+    s->cursor = q + 1;
+    *q = b | 0x2000000;
+}
+
+struct Cursor_1EE3F0 { u8 pad[0xC]; u32* cursor; };
+
+void func_001EE3F0(Cursor_1EE3F0* s, s32 n)
+{
+    u32* p = s->cursor;
+    s->cursor = p + 1;
+    *p = (u32)((n / 8) | 0x14000000);
+}
+
+struct Cursor_1EE420 { u8 pad[0xC]; u32* cursor; };
+
+void func_001EE420(Cursor_1EE420* s, s32 n)
+{
+    u32* p = s->cursor;
+    s->cursor = p + 1;
+    *p = (u32)((n / 8) | 0x15000000);
+}
+
+extern s32 D_00275710;
+void func_001EFB20(void* self);
+void func_001DBCC8(s32 a, void* b, void* c, s32 d, s32 e);
+
+struct Node_1EFC98 { u8 pad[0x28]; s32 flag; };
+
+void func_001EFC98(Node_1EFC98* self)
+{
+    if (self->flag == 0) {
+        self->flag = 1;
+        func_001DBCC8(D_00275710, (void*)func_001EFB20, self, -1, 0);
+    }
+}
