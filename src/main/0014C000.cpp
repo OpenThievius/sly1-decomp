@@ -459,7 +459,7 @@ struct Obj_14E510 {
 };
 
 void func_00130B48(void* a, void* b, void* c, void* d, f32 x, f32 y, f32 z, s32 n, void* buf);
-void func_0014D0A8(s32 n, void* buf, void* other);
+f32 func_0014D0A8(s32 n, void* buf, void* other);
 
 void func_0014E510(Obj_14E510* self, s32 i)
 {
@@ -540,4 +540,68 @@ void func_0014EE40(Obj_14EE40* self)
 {
     func_001B7968(self);
     func_0014F110(self, -1);
+}
+
+struct __attribute__((aligned(16))) Quad_14D938 { s32 w[4]; };
+
+void func_001891C0(void* self, void* arg, Quad_14D938* out);
+void func_00188700(void* a, void* b, void* c, f32 w);
+
+void func_0014D938(s32 count, Quad_14D938* dst, void* arg, void* self)
+{
+    Quad_14D938 mat[4];
+    Quad_14D938 tmp;
+
+    func_001891C0(self, arg, mat);
+    if (count > 0) {
+        do {
+            func_00188700(mat, dst, &tmp, 1.0f);
+            *dst = tmp;
+            dst++;
+            count--;
+        } while (count != 0);
+    }
+}
+
+f32 func_0014DA18(void)
+{
+    return 0.0f;
+}
+
+struct Obj_14E068 { u8 pad0[0xC]; s32 f0C; u8 pad1[4]; void* f14; void* f18; };
+
+
+f32 func_0014E068(Obj_14E068* self)
+{
+    return func_0014D0A8(self->f0C, self->f18, self->f14);
+}
+
+struct Obj_14E090 { u8 pad0[0xC]; s32 f0C; f32* f10; f32* f14; void* f18; };
+struct Frac_14E090 { s32 idx; f32 t; };
+
+void func_0014D3A8(void* a0, void* a1, s32 count, void* a3, void* a4, void* a5, s32* outIdx, f32* outT);
+
+void func_0014E090(Obj_14E090* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
+{
+    Frac_14E090 f;
+    func_0014D3A8(a1, a2, self->f0C, self->f18, a3, a4, &f.idx, &f.t);
+    if (out1) {
+        *out1 = (1.0f - f.t) * self->f14[f.idx] + f.t * self->f14[f.idx + 1];
+    }
+    if (out0) {
+        *out0 = (1.0f - f.t) * self->f10[f.idx] + f.t * self->f10[f.idx + 1];
+    }
+}
+
+struct Ctx_0014F740 {
+    u8 pad0[0x6C0];
+    s32 f6C0;
+};
+
+void func_0013DDB8(void* self);
+
+void func_0014F740(Ctx_0014F740* self)
+{
+    func_0013DDB8(self);
+    self->f6C0 = -1;
 }

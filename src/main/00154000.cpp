@@ -411,3 +411,19 @@ void func_00155F28(Node_00155F28* self)
         self->field88 = p->field88;
     }
 }
+
+struct Actor_155F78 { u8 pad0[0x340]; f32 f340; };
+
+extern f32 D_0026185C;
+
+void func_00155F78(Actor_155F78* self, f32 f)
+{
+    self->f340 = D_0026185C + f;
+}
+
+struct Actor_155FA0 { u8 pad0[0x340]; f32 f340; };
+
+void func_00155FA0(Actor_155FA0* self)
+{
+    self->f340 = -1.0f;
+}

@@ -513,3 +513,49 @@ void func_001496C0(Obj_1496C0* self)
     self->f2C = eng->f1E4;
     func_00143968(eng, 49.0f);
 }
+
+extern void* D_0026EC68;
+void func_00146470(void* self);
+
+void func_00148718(void* self)
+{
+    func_00146470(self);
+    D_0026EC68 = self;
+}
+
+typedef void (*VFn_148748)(void* self, s32 arg);
+struct Dispatch_148748 { VFn_148748* vtbl; };
+
+void func_00148748(Dispatch_148748* self)
+{
+    self->vtbl[51](self, 2);
+}
+
+struct Holder_149398 { u8 pad[4]; void* value; };
+
+void func_00149398(Holder_149398* self, void* value)
+{
+    self->value = value;
+}
+
+struct Target_1493A0 { u8 pad[0x3D8]; void* ref; };
+struct Holder_1493A0 { u8 pad[4]; Target_1493A0* target; };
+
+s32 func_001493A0(Holder_1493A0* self)
+{
+    return self->target->ref == self;
+}
+
+void func_001AA298(void* self);
+typedef void (*VFn1_14AD70)(void* self);
+struct Slot_14AD70 { VFn1_14AD70* vtbl; u8 pad[0x260 - 4]; };
+struct Owner_14AD70 { u8 pad[0x260]; s32 count; Slot_14AD70 slots[1]; };
+
+void func_0014AD70(Owner_14AD70* self)
+{
+    func_001AA298(self);
+    for (s32 i = 0; i < self->count; i++) {
+        Slot_14AD70* s = &self->slots[i];
+        s->vtbl[2](s);
+    }
+}

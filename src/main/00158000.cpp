@@ -800,3 +800,68 @@ void func_00159C28(Node_159C28* node)
     node->owner->flag298 = 0;
     func_001B5F28(D_00275710 + 0x1C18, node);
 }
+
+typedef void (*VFn_158A10)(void* self);
+struct Item_158A10 { VFn_158A10* vtbl; };
+struct Owner_158A10 {
+    u8 pad[0x90];
+    s32 count;
+    Item_158A10* items[1];
+};
+
+void func_00158A10(Owner_158A10* self)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        Item_158A10* it = self->items[i];
+        VFn_158A10 fn = it->vtbl[19];
+        if (fn != 0) {
+            fn(it);
+        }
+    }
+}
+
+struct Obj_158B00 { u8 pad[0x94]; s32 f94; s32 f98; };
+
+void func_001F39F8(void* self);
+
+void func_00158B00(void* self)
+{
+    Obj_158B00* o = (Obj_158B00*)self;
+    func_001F39F8(self);
+    o->f94 = -1;
+    o->f98 = -1;
+}
+
+struct Obj_15A960 { u8 pad0[0x2EC]; f32 f2EC; f32 f2F0; };
+
+extern f32 D_00261860;
+void func_00124FC0(void* self);
+f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
+
+void func_0015A960(Obj_15A960* self)
+{
+    func_00124FC0(self);
+    self->f2EC = func_001EA4B8((u8*)self + 0x2E0, 0, self->f2EC, self->f2F0, D_00261860);
+}
+
+struct __attribute__((aligned(16))) Quad_15A9A8 { s32 w[4]; };
+struct Obj_15A9A8 { u8 pad0[0x2EC]; f32 f2EC; };
+struct Frame_15A9A8 { Quad_15A9A8 q0; u8 pad1[0x30]; Quad_15A9A8 m40[4]; u8 pad2[0x10]; Quad_15A9A8 m90[4]; };
+
+void func_0018A008(s32 zero, void* out, f32 v);
+void func_00125B70(void* obj, void* c, void* out);
+void func_00188668(Quad_15A9A8* out, void* b, Quad_15A9A8* in);
+void func_001261C0(void* obj, void* b, void* m);
+
+void func_0015A9A8(Obj_15A9A8* self, void* arg1, void* arg2)
+{
+    Frame_15A9A8 f;
+    func_0018A008(0, &f.q0, self->f2EC);
+    func_00125B70(self, arg2, f.m40);
+    func_00188668(f.m90, f.m40, &f.q0);
+    f.m40[0] = f.m90[0];
+    f.m40[1] = f.m90[1];
+    f.m40[2] = f.m90[2];
+    f.m40[3] = f.m90[3];
+    func_001261C0(self, arg1, f.m40);
+}
