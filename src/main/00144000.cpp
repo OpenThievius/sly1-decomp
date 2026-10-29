@@ -259,3 +259,10 @@ void func_001455E0(Flags_1455E0* self)
 {
     self->f220 = 1;
 }
+
+void func_001455C0(void* self, s32 zero);
+
+void func_001455F0(void* p)
+{
+    func_001455C0(p, 0);
+}

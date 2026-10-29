@@ -687,3 +687,79 @@ void func_00143968(void* self, f32 x)
     c->f1E4 = x;
     func_00143560(self);
 }
+
+typedef signed int s32;
+typedef unsigned char u8;
+
+extern void func_0013EB68(void* state);
+
+void func_00140238(void* self, s32 flag)
+{
+    func_0013EB68((u8*)self + 0x5C0);
+}
+
+typedef signed int s32;
+typedef unsigned char u8;
+
+void func_0013E8F8(void* a, s32 b);
+
+void func_001405D0(void* a, void* b, s32 c)
+{
+    func_0013E8F8((u8*)a + 0x8, c);
+}
+
+struct Ctr_140FF8 { u8 pad0[4]; s32 count; };
+
+s32 func_00140FF8(void* p)
+{
+    Ctr_140FF8* c = (Ctr_140FF8*)p;
+    c->count = c->count + 1;
+    return c->count;
+}
+
+s32 func_00142B78(void* a, void* b, void* c, void* d, s32 e, s32 f, f32 x);
+s32 func_00142170(void* a, void* b, void* c, void* d, s32 e, f32 fa, f32 fb);
+
+struct Self_141D00 {
+    u8 pad0[0x3CC];
+    f32 f3CC;
+    u8 pad1[0x3F8 - 0x3D0];
+    s32 f3F8;
+    u8 pad2[0x538 - 0x3FC];
+    u64 f538;
+};
+
+s32 func_00141D00(Self_141D00* self, void* p1, void* p2, f32 x, void* p3, s32 p4)
+{
+    if (self->f3F8 != 0) {
+        return func_00142B78((u8*)self + 0x3F0, (u8*)self + 0x3A4, p1, p2, (s32)p3, p4, x);
+    }
+    if (self->f538 & ((u64)0x8000 << 25)) {
+        return func_00142170((u8*)self + 0x140, p1, p2, p3, p4, self->f3CC, x);
+    }
+    return 0;
+}
+
+struct Obj_143988 {
+    u8 pad[0x1E8];
+    f32 f1E8;
+};
+void func_00143560(void* self);
+
+void func_00143988(Obj_143988* self, f32 value)
+{
+    self->f1E8 = value;
+    func_00143560(self);
+}
+
+struct Obj_1439C8 {
+    u8 pad[0x1FC];
+    f32 f1FC;
+};
+void func_00143560(void* self);
+
+void func_001439C8(Obj_1439C8* self, f32 value)
+{
+    self->f1FC = value;
+    func_00143560(self);
+}

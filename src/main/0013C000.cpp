@@ -447,3 +447,121 @@ void func_0013DEE8(Ctl_13DEE8* self, u8* table, s32 index)
         }
     }
 }
+
+struct Slot_13D868 {
+    s32 x;
+    s32 y;
+    s32 z;
+};
+
+struct Queue_13D868 {
+    u8 pad0[0x550];
+    s32 count;
+    Slot_13D868 slots[16];
+};
+
+void func_0013D868(Queue_13D868* q, s32 value)
+{
+    if ((u32)q->count < 16) {
+        q->slots[q->count].y = value;
+        q->slots[q->count].x = 0;
+        q->count++;
+    }
+}
+
+struct Slot_13D8B0 {
+    s32 x;
+    s32 y;
+    s32 z;
+};
+
+struct Queue_13D8B0 {
+    u8 pad0[0x550];
+    s32 count;
+    Slot_13D8B0 slots[16];
+};
+
+void func_0013D8B0(Queue_13D8B0* q, s32 value)
+{
+    if ((u32)q->count < 16) {
+        q->slots[q->count].y = value;
+        q->slots[q->count].x = 1;
+        q->count++;
+    }
+}
+
+struct Item_13EA38 {
+    u8 pad0[0x88];
+};
+
+struct Source_13EA38 {
+    u8 pad0[0x14];
+    void* f14;
+};
+
+struct Ctx_13EA38 {
+    u8 pad0[0x4];
+    Source_13EA38* f4;
+    Item_13EA38 items[2];
+    u8 pad1[0x4];
+    s32 f11C;
+    s32 f120;
+    u8 pad2[0x8];
+    s32 f12C;
+};
+
+extern u8 D_00261420[];
+
+void func_0013E7C0(void* a, void* b, void* c);
+s32 func_00141008(void* table, s32 v);
+void func_001DBCC8(void* a, void* fn, void* c, s32 d, s32 e);
+void func_0013EAE0(void* self, s32 mode);
+
+void func_0013EA38(Ctx_13EA38* self)
+{
+    s32 n;
+    Item_13EA38* p;
+    void* target;
+
+    self->f12C = -1;
+    target = self->f4->f14;
+    p = self->items;
+    n = 1;
+    do {
+        func_0013E7C0(target, p, self->f4);
+        p++;
+    } while (--n >= 0);
+    if (self->f11C != 0) {
+        if (func_00141008(D_00261420, self->f120)) {
+            func_001DBCC8(target, (void*)func_0013EAE0, self, 0, 0);
+        }
+    }
+}
+
+struct Item_13EAE0 {
+    u8 pad0[0x88];
+};
+
+struct Source_13EAE0 {
+    u8 pad0[0x14];
+    void* f14;
+};
+
+struct Ctx_13EAE0 {
+    u8 pad0[0x4];
+    Source_13EAE0* f4;
+    Item_13EAE0 items[2];
+};
+
+void func_001DBCC8(void* a, void* fn, void* c, s32 d, s32 e);
+void func_0013EF50(void* self, s32 a, s32 b);
+
+void func_0013EAE0(void* selfp, s32 mode)
+{
+    Ctx_13EAE0* self = (Ctx_13EAE0*)selfp;
+    if (mode == 0) {
+        func_001DBCC8(self->f4->f14, (void*)func_0013EAE0, self, 0xC, 0);
+    } else {
+        func_0013EF50(self, 1, 1);
+    }
+}

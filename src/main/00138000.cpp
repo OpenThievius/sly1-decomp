@@ -265,3 +265,42 @@ void func_00138550(void* self, u32* out)
         *out = 0;
     }
 }
+
+struct Node_138738 { s32 a0; Node_138738* next; void* a8; s32 value; };
+struct List_138738 { Node_138738* head; };
+struct Src_138738 { u8 pad0[4]; s32 value4; };
+struct Self_138738 { u8 pad0[0x1AF0]; };
+
+void* func_001B5EC0(void* pool);
+
+Node_138738* func_00138738(Self_138738* self, List_138738* list, Src_138738* src)
+{
+    Node_138738* n = (Node_138738*)func_001B5EC0((u8*)self + 0x1AF0);
+    n->a0 = 0;
+    n->value = src->value4;
+    n->next = list->head;
+    list->head = n;
+    return n;
+}
+
+struct Node_1387C0 { s32 a0; Node_1387C0* next; s32 a8; s32 key; };
+struct Chain_1387C0 { Node_1387C0* first; };
+struct Owner_1387C0 { u8 pad0[0x480]; Chain_1387C0* chain; };
+struct Self_1387C0 { u8 pad0[0x50]; Owner_1387C0* owner; };
+struct Other_1387C0 { u8 pad0[0x50]; s32 key; };
+
+void* func_001387C0(Self_1387C0* self, Other_1387C0* other)
+{
+    Node_1387C0* cur = self->owner->chain->first;
+    s32 key = other->key;
+    if (cur != 0) {
+        do {
+            if (cur->key != key) {
+                cur = cur->next;
+            } else {
+                return cur;
+            }
+        } while (cur != 0);
+    }
+    return 0;
+}

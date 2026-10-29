@@ -92,7 +92,7 @@ struct Obj_12FDE8 { s32 state; s32 f4; s32 f8; };
 
 s32 func_0012FF10(Obj_12FDE8* self);
 void func_001F8C38(s32 h);
-void func_002032C8(s32 x);
+s32 func_002032C8(s32 x);
 void func_0012FFE8(Obj_12FDE8* self);
 
 void func_0012FDE8(Obj_12FDE8* a0)
@@ -457,4 +457,60 @@ void func_0012F840(Obj_12F840* self)
     func_001B7968(self);
     func_001B9AE0(self, 3, 0, 3, 0);
     self->f590 = -1;
+}
+
+struct Self_12F888 {
+    u8 pad0[0x14];
+    void* f14;
+    s32 f18;
+};
+
+void func_001BA130(void* self);
+void func_00138F28(void* a, void* b);
+
+void func_0012F888(Self_12F888* self)
+{
+    func_001BA130(self);
+    if (self->f18 == 0) {
+        func_00138F28(self->f14, self);
+    }
+}
+
+struct Obj_12FF10 { u8 pad[0xC]; s32 f0C; };
+
+s32 func_0012FF10(Obj_12FF10* a0)
+{
+    return a0->f0C != 0;
+}
+
+struct Obj_12FF20 { s32 f00; s32 f04; u8 pad08[4]; s32 f0C; s32 f10; u8 pad14[4]; s32 f18; u8 pad1C[4]; s32 f20; };
+
+s32 func_0012FF10(Obj_12FF20* a0);
+s32 func_001F92E8(s32 a, s32 b, s32* c);
+s32 func_00203D90(void);
+
+s32 func_0012FF20(Obj_12FF20* a0)
+{
+    s32 r = 0;
+    s32 done = 0;
+    if (a0->f18 == a0->f20 && func_0012FF10(a0)) {
+        switch (a0->f00) {
+        case 0: {
+            s32 tmp;
+            done = func_001F92E8(a0->f04, 1, &tmp);
+            r = tmp == 0;
+            break;
+        }
+        case 1:
+            r = func_002032C8(1) == 0;
+            if (r) done = func_00203D90();
+            break;
+        }
+    }
+    if (done) {
+        a0->f0C = 0;
+        a0->f10 = 0;
+        r = 0;
+    }
+    return r;
 }

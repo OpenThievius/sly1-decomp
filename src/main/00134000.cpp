@@ -224,3 +224,49 @@ s32 func_00137D10(Reader_137D10* self)
     func_00137A60(self, 2, &tmp);
     return tmp;
 }
+
+struct Vec2_137238 { u8 pad0[0x8]; f32 x; f32 y; };
+
+void func_00137238(void* out, f32 x, f32 y)
+{
+    Vec2_137238* v = (Vec2_137238*)out;
+    v->x = x;
+    v->y = y;
+}
+
+struct __attribute__((packed)) Unaligned_137248 { u32 value; };
+
+void func_00137248(void* out, s32* value)
+{
+    *(Unaligned_137248*)((u8*)out + 0x10) = *(Unaligned_137248*)value;
+}
+
+struct Reader_137DF8 {
+    u8 pad0[0x18];
+    u8* cursor_18;
+    s32 left_1C;
+};
+
+void func_00137A60(void* self, s32 size, void* dst);
+
+f32 func_00137DF8(Reader_137DF8* r)
+{
+    s32 left = r->left_1C;
+    if (left >= 4) {
+        u8* p = r->cursor_18;
+        u32 v = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+        r->cursor_18 = p + 4;
+        r->left_1C = left - 4;
+        return *(f32*)&v;
+    }
+    f32 tmp;
+    func_00137A60(r, 4, &tmp);
+    return tmp;
+}
+
+void func_00137A60(void* self, s32 size, void* dst);
+
+void func_00137E70(void* src, void* dst)
+{
+    func_00137A60(src, 12, dst);
+}

@@ -1038,3 +1038,103 @@ void func_0012B260(Obj_0012B260* self, s32* out)
 {
     *out = self->a;
 }
+
+struct Sub_1294B0 { u8 pad[8]; f32 f8; };
+
+void* func_00129400(void* self);
+
+void func_001294B0(void* self, f32* out)
+{
+    *out = ((Sub_1294B0*)func_00129400(self))->f8;
+}
+
+struct Sub_1294E0 { u8 pad[0x40]; f32 f40; };
+
+void* func_00129400(void* self);
+
+void func_001294E0(void* self, f32* out)
+{
+    *out = ((Sub_1294E0*)func_00129400(self))->f40;
+}
+
+struct Sub_129DF8 { u8 pad[0x228]; s32 f228; };
+struct Obj_129DF8 { u8 pad[0x50]; Sub_129DF8* p50; };
+
+void func_00129DF8(Obj_129DF8* self)
+{
+    if (self->p50 != 0) self->p50->f228 = 0;
+}
+
+typedef u64 Quad_129E10 __attribute__((mode(TI)));
+struct Frame_129E10 { Quad_129E10 r; Quad_129E10 a; Quad_129E10 b; };
+
+extern u8 D_00260E70[];
+
+void func_00118CF0(Quad_129E10* out, void* src);
+void func_00118D10(Quad_129E10* out, void* src);
+Quad_129E10 func_00118D30(Quad_129E10 a, Quad_129E10 b);
+Quad_129E10 func_00118D20(Quad_129E10* out, Quad_129E10 v);
+void func_00129E88(void* self, Quad_129E10* v);
+
+void func_00129E10(void* self, void* src)
+{
+    Frame_129E10 f;
+    u8* p = D_00260E70;
+    func_00118CF0(&f.a, src);
+    Quad_129E10 av = f.a;
+    func_00118D10(&f.b, p);
+    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    func_00129E88(self, &f.r);
+}
+
+extern u8 D_00275C60[];
+
+struct __attribute__((packed)) U64_12A748 { u64 v; };
+struct Sub_12A748 { u8 pad[0x80]; U64_12A748 v80; };
+struct Obj_12A748 { void* vtbl; u8 pad[0x200 - 4]; Sub_12A748* p200; };
+
+void func_0012A748(Obj_12A748* self, U64_12A748* out)
+{
+    U64_12A748* src = self->p200 != 0 ? (U64_12A748*)((u8*)self->p200 + 0x80) : (U64_12A748*)D_00275C60;
+    *out = *src;
+}
+
+struct Sub_12A7A8 { u8 pad[0x44]; s32 v44; };
+struct Obj_12A7A8 { void* vtbl; u8 pad[0x200 - 4]; Sub_12A7A8* p200; };
+
+void func_0012A7A8(Obj_12A7A8* self, s32* out)
+{
+    s32 r = 0;
+    if (self->p200 != 0) r = self->p200->v44;
+    *out = r;
+}
+
+struct __attribute__((packed)) U64_12AF00 { u64 v; };
+struct Sub_12AF00 { u8 pad[0x14]; U64_12AF00 p14; };
+struct Owner_12AF00 { u8 pad[0x2AC]; Sub_12AF00* sub; };
+
+void func_0012AF00(Owner_12AF00* self, U64_12AF00* out)
+{
+    Sub_12AF00* s = self->sub;
+    if (s != 0) {
+        *out = s->p14;
+    } else {
+        f32* f = (f32*)out;
+        f[0] = -1.0f;
+        f[1] = -1.0f;
+    }
+}
+
+struct Obj_0012B270 { u8 pad[0x2B0]; u8 a; };
+
+void func_0012B270(Obj_0012B270* self, s32 v)
+{
+    self->a = v;
+}
+
+struct Obj_0012B278 { u8 pad[0x2B0]; u8 a; };
+
+void func_0012B278(Obj_0012B278* self, s32* out)
+{
+    *out = self->a;
+}
