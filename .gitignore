@@ -1,0 +1,36 @@
+# Your own discs and everything read or generated from them never go into git
+# (LEGAL.md): disc images, the boot executables, splat's assembly and assets,
+# build output. tests/check_repository.py checks this.
+/baserom/*
+!/baserom/README.md
+/asm/
+/assets/
+/build/
+*.iso
+*.img
+*.bin
+*.elf
+*.o
+
+# The proprietary compiler you supply (docs/TOOLCHAIN.md).
+/toolchain
+/toolchain/
+
+# splat writes these generic macro files on every run (generate_asm_macros_files).
+/include/include_asm.h
+/include/macro.inc
+/include/labels.inc
+
+# Python and editors
+venv/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Agent worktrees and local settings
+.claude/worktrees/
+.claude/settings.local.json
