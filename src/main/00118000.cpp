@@ -623,3 +623,29 @@ Value_11B008* func_0011B9A8(Value_11B008* out, Value_11B008* in)
     }
     return out;
 }
+
+struct Quad_118608 { s32 a, b, c, d; };
+struct Frame_118608 { Quad_118608 q; };
+struct In_118608 { u8 pad0[4]; s32 f4; u8 pad8[4]; s32 fC; u8 pad10[4]; s32 f14; };
+
+void func_0011B008(Quad_118608* q);
+void* func_0011C618(void);
+void func_00128150(s32 a, s32 b, s32 c, void* d);
+void func_001884C0(void* p);
+void func_0011B788(Quad_118608* q, void* b);
+void func_0011B018(void* dst, Quad_118608* src);
+void func_0011B060(Quad_118608* q, int mode);
+
+void* func_00118608(void* out, s32 unused, In_118608* in)
+{
+    Frame_118608 f;
+    void* obj;
+    func_0011B008(&f.q);
+    obj = func_0011C618();
+    func_00128150(in->f4, in->fC, in->f14, obj);
+    func_001884C0(obj);
+    func_0011B788(&f.q, obj);
+    func_0011B018(out, &f.q);
+    func_0011B060(&f.q, 2);
+    return out;
+}
