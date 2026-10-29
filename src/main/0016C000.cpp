@@ -82,3 +82,92 @@ void func_0016F588(void)
     func_0016F188(D_00262C08);
     func_0016F188(D_00262C48);
 }
+
+struct Packet_0016DA00 {
+    u8 pad0[0x8];
+    s32 code;
+};
+
+void func_00127378(void* self, s32 type, void* packet);
+void func_0016D490(void* self);
+void func_0016D828(void* self);
+void func_0016D928(void* self);
+void func_0016DAC0(void* self, s32 mode);
+
+void func_0016DA00(void* self, s32 type, Packet_0016DA00* packet)
+{
+    func_00127378(self, type, packet);
+    if (type != 0x13) {
+        return;
+    }
+    s32 code = packet->code;
+    if (code == 0x2FE) {
+        goto call928;
+    }
+    if (code < 0x2FF) {
+        if (code == 0x2FD) {
+            goto call490;
+        }
+        return;
+    }
+    if (code == 0x2FF) {
+        goto callDAC0;
+    }
+    if (code == 0x300) {
+        func_0016D828(self);
+    }
+    return;
+call490:
+    func_0016D490(self);
+    return;
+callDAC0:
+    func_0016DAC0(self, 2);
+    return;
+call928:
+    func_0016D928(self);
+}
+
+extern s32 D_002629C8;
+
+void func_0016DD00(void)
+{
+    D_002629C8 = 0;
+}
+
+struct Tune_0016DD10 {
+    u8 pad0[0x31C];
+    f32 f31C;
+    f32 f320;
+    f32 f324;
+    f32 f328;
+    f32 f32C;
+    f32 f330;
+    f32 f334;
+};
+
+void func_00123ED0(void* self);
+
+void func_0016DD10(Tune_0016DD10* self)
+{
+    func_00123ED0(self);
+    self->f31C = 2.25f;
+    self->f320 = 2.0f;
+    self->f324 = 0.8f;
+    self->f328 = 4.0f;
+    self->f32C = 0.5f;
+    self->f330 = 1000.0f;
+    self->f334 = 2000.0f;
+}
+
+void func_001289C0(void* self);
+s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
+
+void func_0016DD90(u8* self)
+{
+    func_001289C0(self);
+    s32 r = func_0015A4F0(*(s32*)(self + 0x14), 0x201, 0x73, self, 0x10, self + 0x2D0);
+    *(s32*)(self + 0x310) = r;
+    if ((u32)r >= 0x11) {
+        *(s32*)(self + 0x310) = 0x10;
+    }
+}

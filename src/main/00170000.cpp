@@ -239,3 +239,80 @@ void func_00171FE0(Obj_171FE0* self)
         func_00175170(self, 2, 2);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_172B88 { s32 a, b, c, d; };
+struct Unit_172B88 {
+    void** vtbl;
+    u8 pad0[0x21CC - 4];
+    s32 count;
+    Quad_172B88 slots[3];
+    u8 pad1[0x2420 - 0x2200];
+    f32 f2420;
+};
+
+void func_001B8540(void* self);
+void func_001B8420(void* self, void* p, f32 f);
+
+void func_00172B88(Unit_172B88* self)
+{
+    s32 i = 0;
+    func_001B8540(self);
+    if (self->count > 0) {
+        Quad_172B88* p = self->slots;
+        do {
+            func_001B8420(self, p, self->f2420);
+            i++;
+            p++;
+        } while (i < self->count);
+    }
+}
+
+struct Unit_172BF8 {
+    u8 pad0[0x25D8];
+    void* table[5];
+};
+
+s32 func_00182FC8(void* p);
+
+void* func_00172BF8(Unit_172BF8* self, s32* out)
+{
+    void* p = self->table[0];
+    if (p != 0 && func_00182FC8(p) != 0) {
+        *out = 0;
+        return self->table[0];
+    }
+    p = self->table[2];
+    if (p != 0 && func_00182FC8(p) != 0) {
+        *out = 1;
+        return self->table[2];
+    }
+    p = self->table[1];
+    if (p != 0 && func_00182FC8(p) != 0) {
+        *out = 2;
+        return self->table[1];
+    }
+    p = self->table[3];
+    if (p != 0 && func_00182FC8(p) != 0) {
+        *out = 2;
+        return self->table[3];
+    }
+    p = self->table[4];
+    if (p != 0 && func_00182FC8(p) != 0) {
+        *out = 1;
+        return self->table[4];
+    }
+    return 0;
+}
+
+struct Unit_172EB8 {
+    u8 pad0[0x2220];
+    s32 state;
+};
+
+s32 func_00172EB8(Unit_172EB8* self)
+{
+    if (self->state == 3 || self->state == 0xD) {
+        return 0;
+    }
+    return 3;
+}
