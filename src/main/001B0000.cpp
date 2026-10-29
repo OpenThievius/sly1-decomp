@@ -375,3 +375,45 @@ void func_001B1B38(Obj_1B1B38* self)
         }
     }
 }
+
+struct Slot_1B1BF0 { u8 pad[0xC0]; s32 value; };
+
+void func_001B1BF0(Slot_1B1BF0* self)
+{
+    self->value = 0;
+}
+
+struct Holder_1B1CF8 { void* link; };
+
+void* func_001B4688(s32 key);
+void func_001B1BF0(void* self);
+
+void func_001B1CF8(Holder_1B1CF8* self, s32 key)
+{
+    void* found = func_001B4688(key != -1 ? key : 0x2C);
+    self->link = found;
+    if (found)
+        func_001B1BF0(self);
+}
+
+struct Pair_1B1D38 { u8 pad[4]; f32 a; f32 b; };
+
+s32 func_001B1D38(Pair_1B1D38* p)
+{
+    s32 r = 0;
+    if (0.0f <= p->a && 0.0f <= p->b)
+        r = 1;
+    return r;
+}
+
+struct Pair_1B1D70 { u8 pad[4]; f32 a; f32 b; };
+
+void func_001B1BF0(void* self);
+
+void func_001B1D70(Pair_1B1D70* p, f32 v)
+{
+    p->a = v;
+    if (p->b < 0.0f)
+        p->b = v;
+    func_001B1BF0(p);
+}

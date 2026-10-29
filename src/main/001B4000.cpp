@@ -728,3 +728,90 @@ void func_001B7C40(Node_1B7C40* self, s32 flag)
     Sub_1B7C40* sub = self->sub50;
     sub->vtbl[54](sub);
 }
+
+struct Rec_1B4AA0 { u8 pad[0xC]; s32 value; s32 flags; };
+struct Src_1B4AA0 { s16 first; u16 second; };
+
+void func_001B4AA0(Rec_1B4AA0* rec, Src_1B4AA0* src)
+{
+    s32 old = rec->flags;
+    rec->value = src->first;
+    rec->flags = old | 1;
+    if (src->second != 0) {
+        rec->flags = old | 5;
+    }
+}
+
+s32 func_001B4688(void* key);
+
+struct Node_1B4AD0 { u8 pad[0xC]; void* key; s32 unk10; s32 result; };
+
+void func_001B4AD0(Node_1B4AD0* node)
+{
+    if (node->result == 0) {
+        node->result = func_001B4688(node->key);
+    }
+}
+
+f32 func_001B4B38(void)
+{
+    return 0.0f;
+}
+
+struct Owner_1B4B48 { u8 pad[0xC]; s32 id; };
+struct Key_1B4B48 { u8 pad[0x2]; s16 id; };
+
+u8* func_001B4B48(Owner_1B4B48* owner, Key_1B4B48* key)
+{
+    if (key->id == owner->id) {
+        return (u8*)owner + 0x10;
+    }
+    return 0;
+}
+
+struct Actor_1B61A8 {
+    u8 pad_00[0x14];
+    void* owner_14;
+    u8 pad_18[0x2C];
+    s32 armed_44;
+};
+
+void func_00182C58(void* self);
+void func_001B61F0(void* self);
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+
+void func_001B61A8(Actor_1B61A8* self)
+{
+    func_00182C58(self);
+    if (self->armed_44 != 0) {
+        func_001DBCC8(self->owner_14, (void*)func_001B61F0, self, 0, 0);
+    }
+}
+
+struct Pair_1B63C0 {
+    s32 key_00;
+    s32 value_04;
+};
+
+struct Table_1B63C0 {
+    u8 pad_00[0x34];
+    s32 count_34;
+    Pair_1B63C0* entries_38;
+};
+
+s32 func_001B63C0(Table_1B63C0* self, s32 key)
+{
+    s32 count = self->count_34;
+    if (count > 0) {
+        Pair_1B63C0* p = self->entries_38;
+        s32 i = 0;
+        do {
+            if (p->key_00 == key) {
+                return i;
+            }
+            i++;
+            p++;
+        } while (i < count);
+    }
+    return -1;
+}

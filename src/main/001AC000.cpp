@@ -167,3 +167,93 @@ void func_001AF000(Stack_001AF000* self, s32 value)
         self->count = n + 1;
     }
 }
+
+typedef void* (*VFn_1AC5C0)(void* self, f32 sx, f32 sy);
+struct VTab_1AC5C0 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1AC5C0 fn; };
+struct Obj_1AC5C0 { u8 pad0[0x4C]; VTab_1AC5C0* vt; };
+struct Node_1AC5C0 { u8 pad0[4]; Obj_1AC5C0* obj; u8 pad1[0x210 - 8]; void** slot; };
+
+extern u8 D_002743D0[];
+void func_001AA268(void* self);
+s32 func_0015C188(s32 k);
+void* func_0015C1C0(s32 k);
+
+void func_001AC5C0(Node_1AC5C0* self)
+{
+    VTab_1AC5C0* vt;
+
+    func_001AA268(self);
+    vt = self->obj->vt;
+    self->obj = (Obj_1AC5C0*)vt->fn((u8*)self->obj + vt->delta, 1.25f, 1.25f);
+    if (func_0015C188(2)) {
+        self->slot = (void**)D_002743D0;
+        *self->slot = func_0015C1C0(2);
+    }
+}
+
+typedef void* (*VFn_1AC888)(void* self, f32 sx, f32 sy);
+struct VTab_1AC888 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1AC888 fn; };
+struct Obj_1AC888 { u8 pad0[0x4C]; VTab_1AC888* vt; };
+struct Node_1AC888 { u8 pad0[4]; Obj_1AC888* obj; u8 pad1[0x208 - 8]; u32 color; u8 pad2[0x210 - 0x20C]; void** slot; };
+
+extern u8 D_002743F0[];
+void func_001AA268(void* self);
+s32 func_0015C188(s32 k);
+void* func_0015C1C0(s32 k);
+
+void func_001AC888(Node_1AC888* self)
+{
+    VTab_1AC888* vt;
+
+    func_001AA268(self);
+    vt = self->obj->vt;
+    self->obj = (Obj_1AC888*)vt->fn((u8*)self->obj + vt->delta, 0.9f, 0.9f);
+    self->color = 0xDF7F7F7Fu;
+    if (func_0015C188(2)) {
+        self->slot = (void**)D_002743F0;
+        *self->slot = func_0015C1C0(2);
+    }
+}
+
+struct Queue_1AF028 { u8 pad[0x578]; s32 count; void* items[4]; };
+
+void func_001AF028(Queue_1AF028* self, void* item)
+{
+    s32 n = self->count;
+    if ((u32)n < 4) {
+        self->items[n] = item;
+        self->count = n + 1;
+    }
+}
+
+struct Queue_1AF050 { u8 pad[0x58C]; s32 count; void* items[4]; };
+
+void func_001AF050(Queue_1AF050* self, void* item)
+{
+    s32 n = self->count;
+    if ((u32)n < 4) {
+        self->items[n] = item;
+        self->count = n + 1;
+    }
+}
+
+struct Unit_1AF0A0 { u8 pad[0xB04]; f32 scale; };
+
+void func_001AECB0(void* self);
+
+void func_001AF0A0(Unit_1AF0A0* self)
+{
+    func_001AECB0(self);
+    self->scale = 1.0f;
+}
+
+extern u8 D_002744B8[];
+
+void func_001BAC30(void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+
+void func_001AF0D0(void* self)
+{
+    func_001BAC30(self);
+    func_00124DF8(self, 2, D_002744B8);
+}

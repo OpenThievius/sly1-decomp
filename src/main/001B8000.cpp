@@ -291,3 +291,123 @@ s32 func_001BB710(Obj_1BB710* self, s32 value)
     }
     return 1;
 }
+
+struct Actor_1B8A08 { u8 pad[0x538]; u64 flags; };
+
+s32 func_001B8A08(Actor_1B8A08* a, Actor_1B8A08* b)
+{
+    u64 m1 = 0x8080;
+    s32 r = 0;
+    m1 <<= 40;
+    if ((a->flags & m1) != 0) {
+        u64 bf = b->flags;
+        u64 m2 = 0x8000;
+        m2 <<= 40;
+        if ((bf & m2) != 0) {
+            return 1;
+        }
+    }
+    return r;
+}
+
+typedef void (*Fn_1B8A48)(void* obj, void* item, s32 index);
+
+struct Obj_1B8A48 { Fn_1B8A48* vtbl; };
+
+struct Slot_1B8A48 { Obj_1B8A48* obj; u8 rest[0x3C]; };
+
+struct Item_1B8A48 {
+    u8 pad0[4];
+    Slot_1B8A48 slots[2];
+    u8 pad1[0xC4 - 0x84];
+    f32 timer;
+    u8 pad2[0xD0 - 0xC8];
+    Item_1B8A48* next;
+};
+
+struct Node_1B8A48 { Item_1B8A48* item; Node_1B8A48* next; };
+
+struct List_1B8A48 { Node_1B8A48* head; };
+
+struct Self_1B8A48 {
+    u8 pad[0x480];
+    List_1B8A48* list;
+};
+
+extern void* func_001BB540(void* obj, s32 type);
+
+void func_001B8A48(Self_1B8A48* self)
+{
+    Node_1B8A48* node = self->list->head;
+    while (node != 0) {
+        Item_1B8A48* it = node->item;
+        while (it != 0) {
+            if (0.0001f < it->timer) {
+                for (s32 i = 0; i < 2; i++) {
+                    Obj_1B8A48* obj = (Obj_1B8A48*)func_001BB540(it->slots[i].obj, 0x114);
+                    if (obj != 0) {
+                        Fn_1B8A48 fn = obj->vtbl[0x114 / 4];
+                        if (fn != 0) {
+                            fn(obj, it, i);
+                        }
+                    }
+                }
+                *(s32*)&it->timer = 0;
+            }
+            if (node->item == 0) {
+                break;
+            }
+            it = it->next;
+        }
+        node = node->next;
+    }
+}
+
+typedef void (*Fn_1B9338)(void* obj, void* node, f32 t);
+
+struct Obj_1B9338 { Fn_1B9338* vtbl; };
+
+struct Node_1B9338 { Obj_1B9338* obj; u8 pad[4]; Node_1B9338* next; };
+
+struct Actor_1B9338 {
+    u8 pad0[0x18];
+    s32 field18;
+    u8 pad1[0x4B0 - 0x1C];
+    Node_1B9338* chain;
+    u8 pad2[0x538 - 0x4B4];
+    u64 flags;
+};
+
+struct Vec_1B9338 { s32 v[4]; };
+
+void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
+void func_001B9AB0(void* a, void* b);
+
+void func_001B9338(Actor_1B9338* self, f32 t)
+{
+    Vec_1B9338 local;
+    Node_1B9338* node;
+    u64 m = 0x8000;
+    m <<= 36;
+    if (self->field18 == 0) {
+        if ((self->flags & m) == 0) {
+            func_001BA500(self, (u8*)self + 0x440, (u8*)self + 0x350, &local, 0);
+            func_001B9AB0(self, &local);
+        }
+    }
+    node = self->chain;
+    if (node != 0) {
+        do {
+            Obj_1B9338* obj = node->obj;
+            obj->vtbl[0xDC / 4](obj, node, t);
+            node = node->next;
+        } while (node != 0);
+    }
+}
+
+void func_001261C0(void);
+
+void func_001B93D8(void)
+{
+    func_001261C0();
+}
