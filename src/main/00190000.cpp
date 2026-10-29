@@ -49,9 +49,6 @@ void func_001926D0(Obj_1926D0* self)
     }
 }
 
-extern s32 D_00269BCC;
-extern s32 D_00269C90;
-extern void* D_00269C98[];
 s32 func_00192688(void* value);
 void func_00192880(s32 index);
 void func_001F5B08(void* dst, void* src, s32 size);
@@ -100,9 +97,6 @@ void func_00192990(Obj_192990* self, s32 value)
     if (value) func_001926D0(self);
     else func_00192780(self);
 }
-
-s32 func_00192688(void* value);
-void func_00192880(s32 index);
 
 void func_001929D0(void* value)
 {
@@ -205,4 +199,220 @@ s32 func_00192128(u8* self, void* other)
 {
     void* p = self + 0x40;
     return func_00128018(other, 0, p, p);
+}
+
+struct Child_001900A0;
+typedef void (*VirtFn)(void* self, s32 arg);
+typedef void (*ChildFn)(void* self);
+
+struct Actor_001900A0 {
+    VirtFn* vtbl;
+    u8 pad_004[0x5FC];
+    s32 field_600;
+    u8 pad_604[0x120];
+    s32 field_724;
+    u8 pad_728[0xC2C - 0x728];
+    Child_001900A0* field_C2C;
+};
+
+struct Child_001900A0 {
+    ChildFn* vtbl;
+};
+
+void func_001C9008(void* self);
+
+void func_001900A0(Actor_001900A0* self)
+{
+    func_001C9008(self);
+    s32 kind = self->field_724;
+    if (kind != 8) {
+        if (kind == 0x10) {
+            Child_001900A0* child = self->field_C2C;
+            if (child != 0) {
+                child->vtbl[0x54](child);
+            }
+        }
+    } else {
+        if (self->field_600 == 1) {
+            self->vtbl[0x53](self, 0);
+        }
+    }
+}
+
+struct Actor_001903F0 {
+    u8 pad_000[0x14];
+    void* field_14;
+};
+
+extern s32 D_00262C64;
+
+s32 func_001DDA80(void* p);
+s32 func_001C9A48(void* self, s32 a);
+
+s32 func_001903F0(Actor_001903F0* self, s32 a1)
+{
+    if (D_00262C64 & 1) {
+        return 1;
+    }
+    if (func_001DDA80(self->field_14) == 0) {
+        return func_001C9A48(self, a1);
+    }
+    return 1;
+}
+
+s32 func_00192490(void)
+{
+    return 0;
+}
+
+struct __attribute__((aligned(16))) Quad_001924C8 { s32 a, b, c, d; };
+
+typedef void (*Mode_001924C8)(void* self, s32 mode);
+typedef void (*Init_001924C8)(void* self, void* table, s32 zero, f32 scale);
+
+// A node made by func_0019EA78: a hook table, a float at 0x1C and a quad at 0xC0.
+struct Node_001924C8 {
+    Init_001924C8* vtbl;
+    u8 pad0[0x1C - 4];
+    f32 f1C;
+    s32 f20;
+    u8 pad1[0xC0 - 0x24];
+    Quad_001924C8 q0C0;
+    u8 pad2[0x134 - 0xD0];
+    void* p134;
+};
+
+// The object that owns the node: a hook table at 0 and fields at 0x59C to 0x5F0.
+struct Owner_001924C8 {
+    Mode_001924C8* vtbl;
+    u8 pad0[0x59C - 4];
+    s32 f59C;
+    u8 pad1[0x5AC - 0x5A0];
+    Node_001924C8* p5AC;
+    u8 pad2[0x5D0 - 0x5B0];
+    s32 f5D0;
+    u8 pad3[0x5F0 - 0x5D4];
+    void* p5F0;
+};
+
+// The argument; its pointer at 0x14 leads to a block with a quad at 0x1EE0.
+struct Source_001924C8 { u8 pad0[0x14]; u8* p14; };
+
+void* func_0019EA78(s32 kind, s32 zero);
+void func_0019F8E8(void* node, void* owner);
+f32 func_0012CCC0(void* obj, s32 id);
+
+void func_001924C8(Owner_001924C8* self, s32 mode, Source_001924C8* other)
+{
+    switch (mode) {
+    case 0:
+        if (self->p5F0 == 0)
+            return;
+        {
+            Node_001924C8* n = (Node_001924C8*)func_0019EA78(0x1A, 0);
+            self->p5AC = n;
+            self->f5D0 = 1;
+            if (n != 0) {
+                Init_001924C8 init = n->vtbl[0];
+                init(n, (u8*)other + 0x140, 0, 1.0f);
+                func_0019F8E8(n, self);
+                f32 r = func_0012CCC0(self->p5F0, 0x13F);
+                n->f1C = r;
+                n->f20 = self->f59C;
+                n->q0C0 = *(Quad_001924C8*)(other->p14 + 0x1EE0);
+                n->p134 = other;
+            }
+        }
+        self->vtbl[0x14C / 4](self, 1);
+        break;
+    case 1:
+        self->vtbl[0x14C / 4](self, 2);
+        break;
+    }
+}
+
+typedef void (*Hook_00192880)(void* self, s32 mode, void* other);
+
+// An entry with a hook table at 0 and a 64-bit flag word at 0x538.
+struct Entry_00269C98 { Hook_00192880* vtbl; u8 pad[0x538 - 4]; u64 flags; };
+
+void func_00192880(s32 index)
+{
+    if (index == D_00269BCC)
+        return;
+    if (D_00269BCC >= 0) {
+        u64 mask = (u64)(s64)-8193;
+        mask = (mask << 16) | 0xFFFF;
+        mask = (mask << 16) | 0xFFFF;
+        Entry_00269C98** slot = (Entry_00269C98**)&D_00269C98[D_00269BCC];
+        (*slot)->flags &= mask;
+        Hook_00192880* vt = (*slot)->vtbl;
+        Entry_00269C98* next = index >= 0 ? (Entry_00269C98*)D_00269C98[index] : 0;
+        vt[0x130 / 4]((*slot), 0, next);
+    }
+    s32 old = D_00269BCC;
+    D_00269BCC = index;
+    if (index >= 0) {
+        Entry_00269C98** slot = (Entry_00269C98**)&D_00269C98[index];
+        (*slot)->flags |= 1ULL << 45;
+        Hook_00192880* vt = (*slot)->vtbl;
+        Entry_00269C98* prev = old >= 0 ? (Entry_00269C98*)D_00269C98[old] : 0;
+        vt[0x130 / 4]((*slot), 1, prev);
+    }
+}
+
+extern u8 D_002701F8[];
+extern u8 D_00275BC0[];
+
+void func_001E9498(void* a, void* b);
+
+// A block whose 32-bit field at 0x324 is not aligned in the packed layout.
+struct __attribute__((packed)) BlockAt324 { u8 pad[0x324]; u32 field; };
+
+void func_00192A38(void* self, u32 value)
+{
+    BlockAt324* block = (BlockAt324*)D_002701F8;
+    block->field = value;
+    func_001E9498(D_00275BC0, D_002701F8);
+}
+
+extern u8* D_00261990;
+extern s32 D_00262C68;
+extern u8 D_00262C70[];
+extern u8 D_00262D38[];
+extern u8* D_0026F800;
+
+// A record whose 16-bit flags sit at 0xAA.
+struct Rec_00192A70 { u8 pad[0xAA]; u16 flags; };
+
+// The current context: a count at 0x2D4, a pointer at 0x304 and a value at 0x32C.
+struct Ctx_00192A70 {
+    u8 pad0[0x2D4];
+    s32 f2D4;
+    u8 pad1[0x304 - 0x2D8];
+    s32* p304;
+    u8 pad2[0x32C - 0x308];
+    s32 f32C;
+};
+
+extern Ctx_00192A70* D_0027051C;
+
+s32 func_001493A0(void* p);
+void func_001516C0(Ctx_00192A70* ctx, Rec_00192A70* rec);
+void func_00150790(void* p, s32 n);
+void func_0016EC20(Rec_00192A70* rec, s32 n);
+
+void func_00192A70(void* self, Rec_00192A70* rec)
+{
+    if (func_001493A0((u8*)D_00261990 + 0x454) != 0)
+        return;
+    Rec_00192A70* a1 = (D_00262C68 & 4) ? (Rec_00192A70*)D_00262C70 : (Rec_00192A70*)D_00262D38;
+    Ctx_00192A70* ctx = D_0027051C;
+    if (ctx != 0 && ctx->f2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
+        && *ctx->p304 != 0) {
+        func_001516C0(ctx, a1);
+    } else if ((rec->flags & 0xC) != 0 && D_0026F800 != 0) {
+        func_00150790(D_0026F800, 1);
+    }
+    func_0016EC20(rec, 0xC);
 }

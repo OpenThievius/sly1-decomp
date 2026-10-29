@@ -109,8 +109,23 @@ u8* func_0018D500(s32 size)
 
 extern u8* D_002C2A18;
 
+void func_0018D550(void)
+{
+    D_002C2A1C = D_002C2A18;
+}
+
 u8* func_0018D500(s32 size);
 void func_0018D800(u8* dst, void* src, s32 count);
+
+u8* func_0018D568(s32 size, void* src)
+{
+    u8* result = func_0018D500(size);
+
+    if (result != 0) {
+        func_0018D800(result, src, size);
+    }
+    return result;
+}
 
 extern u8 D_002C2A28[];
 extern s32 D_002C2A34;
@@ -119,7 +134,33 @@ extern u8 D_002C2A38[];
 
 void func_001E22F8(void* obj);
 
+void func_0018D608(void)
+{
+    func_001E22F8(D_002C2A28);
+    D_002C2A34 = D_002C2A34 + 1;
+    ((u8**)D_002C2A38)[D_002C2A34] = D_002C2A20;
+}
+
+u8* func_0018D658(s32 size)
+{
+    u8* result;
+
+    if (size == 0) {
+        return 0;
+    }
+    func_0018D4F8(size);
+    result = D_002C2A20;
+    result = result - ((size + 15) & ~15);
+    D_002C2A20 = result;
+    return result;
+}
+
 s32 func_0018F940(s32 a, s32 b);
+
+s32 func_0018F968(void)
+{
+    return func_0018F940(1, 0xFFFF);
+}
 
 struct Actor_0018F988 {
     u8 pad_000[0x538];
@@ -129,6 +170,13 @@ struct Actor_0018F988 {
 void func_001B7968(void* self);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 
+void func_0018F988(Actor_0018F988* self)
+{
+    func_001B7968(self);
+    self->flags_538 |= (u64)0x8000 << 28;
+    func_001B9AE0(self, 3, 0, 3, 0);
+}
+
 struct Actor_0018FEF8 {
     u8 pad_000[0xBD0];
     s32 field_BD0;
@@ -136,6 +184,13 @@ struct Actor_0018FEF8 {
 };
 
 void func_001C6F48(void* self);
+
+void func_0018FEF8(Actor_0018FEF8* self)
+{
+    func_001C6F48(self);
+    self->field_BD4 = 0;
+    self->field_BD0 = 0;
+}
 
 struct Actor_0018FFB0 {
     u8 pad_000[0x4];
@@ -161,3 +216,35 @@ struct Actor_0018FFB0 {
 void func_001CB6F8(void* a, void* b);
 void func_001C91C8(void* self, s32 a, s32 b);
 
+void func_0018FFB0(Actor_0018FFB0* self, s32 a1, s32 a2)
+{
+    s32 a2v = a2;
+    switch (self->field_724) {
+    case 4:
+        self->field_C28 = 0;
+        self->field_C10 = 0;
+        break;
+    case 0x10:
+        if (self->field_C30 == 4) {
+            a2v = self->field_C44;
+        } else {
+            a2v = self->field_C3C;
+        }
+        break;
+    case 0xB:
+        if (self->field_C30 == 4) {
+            a2v = self->field_C40;
+        } else {
+            a2v = self->field_C38;
+        }
+        if (self->field_720_ptr != 0) {
+            func_001CB6F8(self->field_720_ptr, self);
+        }
+        break;
+    }
+    func_001C91C8(self, a1, a2v);
+    s32 kind = self->field_724;
+    if (kind == 0xB || kind == 0x10) {
+        self->field_C04 = 0;
+    }
+}
