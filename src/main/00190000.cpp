@@ -488,3 +488,86 @@ void func_001921A8(Obj_001921A8* self)
     self->flag580 = 1;
     func_00192990(self, 1);
 }
+
+struct Obj_1906F0 { u8 pad0[0xC24]; s32 f_C24; };
+
+void func_001906F0(Obj_1906F0* self, s32 value)
+{
+    self->f_C24 = value;
+}
+
+struct Obj_1906F8 { u8 pad0[0x5F0]; s32 f_5F0; };
+
+extern void func_001924C8(Obj_1906F8* self, s32 mode, void* extra);
+extern void func_001C8F20(Obj_1906F8* self, s32 mode, s32 value);
+
+void func_001906F8(Obj_1906F8* self, s32 flag, void* extra)
+{
+    func_001924C8(self, flag, extra);
+    if (flag == 0) {
+        func_001C8F20(self, 8, self->f_5F0);
+    }
+}
+
+struct Obj_190770 { u8 pad0[0x7E0]; s32 f_7E0; };
+struct Req_190770 { s32 f_0; u8 pad4[4]; s32 f_8; };
+
+extern void func_001C9DE0(Obj_190770* self, s32 code, Req_190770* req);
+extern void func_00160DA0(void);
+
+void func_00190770(Obj_190770* self, s32 code, Req_190770* req)
+{
+    func_001C9DE0(self, code, req);
+    if (code == 0x13) {
+        if (req->f_0 == self->f_7E0) {
+            if (req->f_8 == 0x53A) {
+                func_00160DA0();
+            }
+        }
+    }
+}
+
+struct Obj_1921E8 { u8 pad0[0x550]; s32 flag; };
+
+void func_001BA130(Obj_1921E8* self);
+void func_00192990(Obj_1921E8* self, s32 mode);
+
+void func_001921E8(Obj_1921E8* self)
+{
+    func_001BA130(self);
+    if (self->flag != 0) {
+        return;
+    }
+    self->flag = 1;
+    func_00192990(self, 0);
+}
+
+struct __attribute__((aligned(16))) Quad_1922E8 { s32 a, b, c, d; };
+struct Obj_1922E8 {
+    u8 pad0[0x140];
+    Quad_1922E8 q140;
+    u8 pad1[0x560 - 0x150];
+    Quad_1922E8 q560;
+};
+struct Mgr_1922E8 { u8 pad0[0x224]; s32 f224; };
+
+
+void func_00145088(void* mgr, s32 a1, void* a2, Obj_1922E8* self, s32 a4);
+void func_001451F0(void* mgr, s32 a1, s32 a2, s32 a3, Obj_1922E8* self, s32 a5);
+
+void func_001922E8(Obj_1922E8* self, s32 mode)
+{
+    if (mode != 0) {
+        self->q560 = self->q140;
+        func_00145088(D_00261990, 1, (u8*)D_00261990 + 0x520, self, 0);
+        return;
+    }
+    for (s32 i = 1; i < 7; i++) {
+        func_001451F0(D_00261990, 5, i, 0, self, 0);
+    }
+}
+
+s32 func_00192410(void)
+{
+    return 1;
+}

@@ -36,3 +36,24 @@ void func_00195928(Ctl_195928* self, s32 v)
         if (v != -1) func_001936A0(self, v);
     }
 }
+
+struct Obj_1963D8 { u8 pad0[0x14]; u8* f14; };
+
+void func_00123ED0(Obj_1963D8* self);
+void func_00152470(u8* dst, Obj_1963D8* src);
+
+void func_001963D8(Obj_1963D8* self)
+{
+    func_00123ED0(self);
+    func_00152470(self->f14 + 0x1C3C, self);
+}
+
+struct Obj_196900 { void** vtbl; };
+
+void func_00124A48(Obj_196900* self);
+
+void func_00196900(Obj_196900* self)
+{
+    func_00124A48(self);
+    ((void (*)(Obj_196900*))self->vtbl[7])(self);
+}
