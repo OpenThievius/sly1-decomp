@@ -309,3 +309,46 @@ void func_00161BB0(Obj_00161BB0* self, s32 value)
     local = 0xFFFFFFFF;
     func_001626A8(self, &local);
 }
+
+
+s32 func_00160180(void)
+{
+    return (s32)func_00160110();
+}
+
+struct Rec_1600A0 { u8 pad[0x20]; s32 value; };
+
+Rec_1600A0* func_001600A0(void);
+
+s32 func_001601A0(void)
+{
+    s32 v;
+    Rec_1600A0* r = func_001600A0();
+    v = -1;
+    if (r != 0) v = r->value;
+    return v;
+}
+
+struct __attribute__((packed)) Word_269984 { u32 value; };
+
+extern u8 D_002623D8[];
+extern u8 D_00261EF0[];
+extern Word_269984 D_00269984;
+extern s32 D_00262C64;
+extern s32 D_002623CC;
+
+void func_001605E8(void* self);
+void func_00160CC8(void* self);
+void func_00151A68(void* self);
+void func_001608E0(void);
+
+void func_00160880(void)
+{
+    func_001605E8(D_002623C0);
+    D_00269984.value = 0;
+    func_00160CC8(D_002623D8);
+    func_00151A68(D_00261EF0);
+    D_00262C64 = 0;
+    D_002623CC = -1;
+    func_001608E0();
+}
