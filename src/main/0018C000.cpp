@@ -576,3 +576,7 @@ void func_0018F148(Obj_18F148* self)
         func_0018F198(self, pending);
     }
 }
+
+s32 func_0018D748() { return 0; }
+
+void func_0018D750() {}

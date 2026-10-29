@@ -524,3 +524,11 @@ void func_001AB920(Actor_001AB920* self, f32 value)
 {
     self->field_26C = value;
 }
+
+struct Row_1A8820 { s32 unk0; s32 itemCount; void** items; u8 pad[8]; };
+struct S_1A8820 { u8 pad[0x34]; s32 count; Row_1A8820* rows; };
+struct T_1A8820 { u8 pad[8]; s32 value; };
+s32 func_001A8820(S_1A8820* list, T_1A8820* query) { for(s32 i=0;i<list->count;i++){ Row_1A8820* row=(Row_1A8820*)((u8*)list->rows+i*0x14); if(row->itemCount<=0) continue; void** items=row->items; if(*(s32*)((u8*)items[0]+8) != query->value) continue; for(s32 j=0;j<row->itemCount;j++) if(query==items[j]) return 1; } return 0; }
+
+struct S_1A93C8 { u8 pad0[0x3C]; s32 ptr; u8 pad1[8]; s32 field; };
+void func_001A93C8(S_1A93C8* p) { p->field = 0; if (p->ptr != 0 && *(s32*)((u8*)p->ptr + 4) != 0) *(s32*)((u8*)p->ptr + 0x10) = 0; }

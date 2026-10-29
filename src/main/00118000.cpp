@@ -911,3 +911,15 @@ void func_0011B740(Rec_11B740* r, s32 value)
     r->value = value;
     r->tag = 0x16;
 }
+
+
+struct Obj_0011A708 { u8 pad[0x504]; s32 count; s32 values[1]; };
+void func_0011A708(Obj_0011A708* obj, s32 value) { obj->values[obj->count++] = value; }
+
+struct Obj_0011A728 { u8 pad[0x708]; s32 count; s32 values[1]; };
+void func_0011A728(Obj_0011A728* obj, s32 value) { obj->values[obj->count++] = value; }
+
+struct Obj_0011A770 { u8 pad[0xF0C]; s32 count; s32 values[1]; };
+void func_0011A770(Obj_0011A770* obj, s32 value) { obj->values[obj->count++] = value; }
+
+void func_0011A6B8() {}

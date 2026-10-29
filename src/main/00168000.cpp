@@ -688,3 +688,11 @@ void func_00168A48(Blob_168AF8* b)
     } while (i < 2);
     func_00202C38(D_00261F1C, 0, 0);
 }
+
+u32 func_00168D30(u32 n) { u32 count = 0; u32 value = 1; while (value < n && count < 31) { value <<= 1; count++; } return count; }
+
+struct S_168D68 { s32 a; s32 b; s32 c; };
+void func_00168D68(S_168D68* p, s32 value, s32 other) { p->b = value; p->a = value; p->c = other; }
+
+struct S_168D78 { s32 a; s32 b; };
+void func_00168D78(S_168D78* p) { p->b = p->a; }

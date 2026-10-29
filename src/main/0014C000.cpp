@@ -665,3 +665,12 @@ void func_0014E3D0(Obj_14E3D0* self, void* src)
     if (fn) fn(self);
     func_0014E500(self);
 }
+
+struct Obj_14DB40 { u8 pad[0xC]; u32 index; u32 base; };
+f32 func_0014DB40(Obj_14DB40* obj) { u32 address = obj->index * 4 + obj->base; return *(f32*)(address - 4); }
+
+struct Obj_14DB58 { u8 pad[0xC]; u32 index; u32 pad10; u32 base; };
+f32 func_0014DB58(Obj_14DB58* obj) { u32 address = obj->index * 4 + obj->base; return *(f32*)(address - 4); }
+
+struct Obj_14E500 { u8 pad[0x1C0]; s32 value; };
+void func_0014E500(Obj_14E500* obj) { obj->value = -1; }

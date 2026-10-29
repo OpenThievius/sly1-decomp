@@ -225,3 +225,13 @@ void func_001E2988(void)
 {
     func_001261C0();
 }
+
+s32 func_001E2100(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
+
+extern u8 D_00275980[];
+void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : D_00275980; }
+
+struct Obj_001E29E8 { u8 pad[0x360]; f32 a; f32 b; f32 c; };
+void func_001E29E8(Obj_001E29E8* self, f32 value) { self->b = value; self->c = 1.0f; self->a = value; }
+
+void func_001E30E0(void) {}

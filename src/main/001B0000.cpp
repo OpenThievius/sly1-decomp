@@ -533,3 +533,8 @@ void func_001B1FE0(Obj_1B1FE0* o, f32 v)
     func_001B1BF8(o);
     func_001B1BF0(o);
 }
+
+struct S_1B0488 { u8 pad[0xB08]; f32 value; };
+void func_001B0488(S_1B0488* p, f32 x) { p->value = 1.0f / x; }
+
+s32 func_001B0BD8() { return 1; }

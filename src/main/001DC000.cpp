@@ -456,3 +456,13 @@ void func_001DFD90(void* self)
     o->count = 30;
     o->scale = 25.0f;
 }
+
+struct Stack_001DC208 { s32 count; s32* values; };
+struct Obj_001DC208 { u8 pad[0x1F00]; Stack_001DC208 stacks[8]; };
+s32 func_001DC208(Obj_001DC208* self, s32 index) { Stack_001DC208* s = &self->stacks[index]; s->count--; return s->values[s->count]; }
+
+struct Obj_001DDA80 { u8 pad[0x231C]; s32 value; };
+s32 func_001DDA80(Obj_001DDA80* self) { return self->value > 0; }
+
+struct Obj_001DDAC8 { u8 pad[0x2350]; f32 value; };
+void func_001DDAC8(Obj_001DDAC8* self, f32 value) { self->value = value; }

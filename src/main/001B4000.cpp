@@ -996,3 +996,8 @@ void func_001B7100(Self_1B7100* self, s32 value)
         self->count = n;
     }
 }
+
+struct S_1B5308 { u8 pad0[0x1C]; f32 a; f32 b; u8 pad1[8]; f32 testA; f32 testB; f32 denomA; f32 denomB; };
+f32 func_001B5308(S_1B5308* p) { f32 result=0.0f; if (p->testA != 0.0f) result=(p->a/p->denomA)*0.5f; else result=0.5f; if (p->testB != 0.0f) result += (p->b/p->denomB)*0.5f; else result += 0.5f; return result; }
+
+void func_001B5568(void* base, void** out) { out[0] = (u8*)base + 0x44; out[1] = (u8*)base + 0x4C; out[2] = (u8*)base + 0x48; }

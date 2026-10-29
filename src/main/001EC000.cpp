@@ -517,3 +517,8 @@ void func_001EF3A8(void* self, Link_1EF3A8* link)
     Obj_1EF3A8* target = link->target;
     target->vtbl[0x128 / 4](target, self);
 }
+
+void func_001EF8F8(void) {}
+
+struct Obj_001EFA60 { u32 pad; u32 count; s32 items[8]; };
+void func_001EFA60(Obj_001EFA60* self, s32 value) { u32 i = self->count; if (i < 8) { self->items[i] = value; self->count = i + 1; } }

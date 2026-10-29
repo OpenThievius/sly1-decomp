@@ -469,3 +469,9 @@ void func_00161200(Obj_161200* self)
         s->fn((u8*)self + s->off8, 1);
     }
 }
+
+struct Obj_00160050 { u8 pad[0x34]; s32 count; s32 values[1]; };
+void func_00160050(Obj_00160050* obj, s32 value) { obj->values[obj->count++] = value; }
+
+struct Obj_1612E8 { u8 pad[0x24]; s32 value; };
+s32 func_001612E8(Obj_1612E8* obj) { return ++obj->value; }

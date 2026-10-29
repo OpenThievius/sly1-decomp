@@ -439,3 +439,9 @@ void func_001BEA50(void)
         func_0011D670(D_0027472C);
     }
 }
+
+extern s32 D_00274744;
+s32 func_001BE5E8(void) { return D_00274744; }
+
+extern s32 D_00274748;
+s32 func_001BF1F0(void) { return D_00274748; }

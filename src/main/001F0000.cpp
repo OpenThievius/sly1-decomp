@@ -275,3 +275,21 @@ void func_001F08F0(s32 unused, s32 a, s32 b)
     D_00276250 = a;
     D_00276654 = b;
 }
+
+f32 func_001F3328(f32 value, f32 denominator)
+{
+    return value / (1.0f + (1.0f / denominator - 2.0f) * (1.0f - value));
+}
+
+struct Object_1F37D8 { u8 pad1[0x38]; s32 state; u8 pad2[0x694]; s32 index; u8 pad3[0x210]; s32 cached; };
+
+void* func_001F37D8(Object_1F37D8* obj, s32 value)
+{
+    if (obj->state == 0) {
+        return 0;
+    }
+    if (value == 1) {
+        obj->cached = value;
+    }
+    return (u8*)obj + (obj->index * 0xD0 + 0x50);
+}

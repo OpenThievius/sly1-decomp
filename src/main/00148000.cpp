@@ -652,3 +652,9 @@ void func_0014B550(Owner_0014B550* self)
     func_001C74E8(self);
     func_00152470(self->p14 + 0x1CCC, self);
 }
+
+struct Obj_14AA90 { u8 pad[8]; s32 value; };
+void func_0014AA90(Obj_14AA90* obj, s32 value) { obj->value = value; }
+
+struct Obj_14AA98 { u8 pad[8]; s32 value; };
+void func_0014AA98(Obj_14AA98* obj) { obj->value = 0; }

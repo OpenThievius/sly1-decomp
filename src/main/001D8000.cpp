@@ -211,3 +211,14 @@ void func_001DBA38(Obj_1DBA38* self)
         func_00137A60(self, D_00275720, D_00275718);
     }
 }
+
+struct Obj_001DA310 { u8 pad[0x6A0]; s32 value; };
+void func_001DA310(Obj_001DA310* self) { self->value++; }
+
+struct Entry_001DB1E8 { s32 active; s32 a; u8 pad[0x10]; f32 x; f32 y; s32 b; s32 c; };
+struct Obj_001DB1E8 { u8 pad[0x870]; u32 count; Entry_001DB1E8 entries[16]; };
+void func_001DB1E8(Obj_001DB1E8* self, s32 a, s32 b, s32 c, f32 x, f32 y) { if (a && self->count < 16) { Entry_001DB1E8* e = &self->entries[self->count]; self->count++; e->a = a; e->active = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
+
+struct Obj_001DBB20 { u8 pad[0x38]; s32 count; };
+struct Link_001DBB20 { u32 pad[2]; u32 flags; };
+s32 func_001DBB20(Obj_001DBB20* self, Link_001DBB20** link, u32 value) { return ((*link)->flags & 2) && self->count >= 0xF7 && value == 0; }

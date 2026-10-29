@@ -722,3 +722,6 @@ s32 func_0015FBA0(Obj_0015FBA0* self, s32* out)
     *out = bit;
     return bit;
 }
+
+struct Obj_15C900 { u8 pad0[0xC]; s32 index; u8 pad1[0x34]; f32 first; f32 second; };
+void func_0015C900(Obj_15C900* obj) { obj->index--; f32* item = (f32*)((u8*)obj + 0x10 + obj->index * 8); obj->first = item[0]; obj->second = item[1]; }

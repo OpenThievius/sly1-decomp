@@ -478,3 +478,28 @@ void func_001CA608(u8* self, s32 index, s32 value)
         *(s32*)(self + (index << 3) + 0x758) = value;
     }
 }
+
+struct Obj_001C8D40 { u8 pad[0x92C]; s32 value; s32 limit; u8 pad2[0xA60 - 0x934]; s32 enabled; };
+void func_001C8D40(Obj_001C8D40* self, s32* out) { if (self->enabled && self->limit >= self->value - 2) { *out = 1; return; } *out = 0; }
+
+struct Obj_001C96B8 { u8 pad[0x720]; u32 object; };
+s32 func_001C96B8(Obj_001C96B8* self) { if (!self->object) return 3; return *(s32*)(self->object + 0x50); }
+
+struct Obj_001C9A48 { u8 pad[0xBD8]; u32 value; };
+s32 func_001C9A48(Obj_001C9A48* self) { return self->value != 0; }
+
+struct Obj_001CAD28 { u8 pad[0x74C]; f32 value; };
+void func_001CAD28(Obj_001CAD28* self, f32 value) { self->value = value * 0.017453294f; }
+
+struct Entry_001CAD60 { s32 a, b, c, d; };
+struct Obj_001CAD60 { u8 pad[0x7E4]; u32 count; Entry_001CAD60 entries[8]; };
+void func_001CAD60(Obj_001CAD60* self, s32 a, s32 b, s32 c, s32 d) { if (self->count < 8) { Entry_001CAD60* e = &self->entries[self->count]; self->count++; e->a = a; e->b = b; e->c = c; e->d = d; } }
+
+struct Obj_001CB6A8 { u8 pad[0x9C]; u32 count; s32 items[16]; };
+void func_001CB6A8(Obj_001CB6A8* self, s32 value) { u32 i = self->count; if (i < 16) { self->items[i] = value; self->count = i + 1; } }
+
+struct Obj_001CB6D0 { u8 pad[0x124]; u32 count; s32 items[16]; };
+void func_001CB6D0(Obj_001CB6D0* self, s32 value) { u32 i = self->count; if (i < 16) { self->items[i] = value; self->count = i + 1; } }
+
+struct Obj_001CBE20 { u8 pad[0x168]; s32 count; s32 items[4]; };
+void func_001CBE20(Obj_001CBE20* self, s32 value) { for (s32 i = 0; i < self->count; i++) if (value == self->items[i]) return; s32 i = self->count; if ((u32)i < 4) { s32 next = i + 1; self->items[i] = value; self->count = next; } }

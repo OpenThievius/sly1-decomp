@@ -293,3 +293,5 @@ void func_001C4458(Obj_1C4458* self)
     *(Blk12_1C4458*)((u8*)self + 0x710) = *(Blk12_1C4458*)D_00274B40;
     *(Blk12_1C4458*)((u8*)self + 0x704) = *(Blk12_1C4458*)D_00274B50;
 }
+
+s32 func_001C4F00(void) { return 3; }

@@ -387,3 +387,10 @@ void func_001C0B38(Obj_1C0B38* self)
         func_001BFCD8(e->key, D_002748E8, 0, 0, &e->a, &e->b, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f);
     }
 }
+
+struct Packed_001C0B08 { u64 value; } __attribute__((packed));
+struct Obj_001C0B08 { u8 pad[0x1D70]; u8 slots[16]; s32 count; };
+void func_001C0B08(Obj_001C0B08* self, Packed_001C0B08* item) { if (!self->count) return; u8* dst = (u8*)self + 0x1D70 + self->count * 20; *(Packed_001C0B08*)(dst + 4) = *item; }
+
+struct Obj_001C3E50 { u8 pad[0x610]; s32 state; u8 pad2[0x24]; s32 value; };
+s32 func_001C3E50(Obj_001C3E50* self) { if (self->state < 5) { if (self->state >= 2) return 1; } return self->value != 0; }

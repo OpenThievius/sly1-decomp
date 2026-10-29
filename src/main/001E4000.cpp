@@ -317,3 +317,9 @@ void func_001E5E50(void* a0, void* a1, Pair_1E5E50* out)
     out->lo = 0;
     out->hi = 0;
 }
+
+struct Obj_001E5E60 { u8 pad[0x620]; void* value; };
+void* func_001E5E60(Obj_001E5E60* self) { return self->value ? self->value : self; }
+
+struct Obj_001E6268 { u8 pad[0xC70]; f32 value; };
+void func_001E6268(Obj_001E6268* self, s32* first, s32* second) { s32 n = (s32)(self->value * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }

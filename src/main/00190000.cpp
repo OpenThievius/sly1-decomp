@@ -721,3 +721,12 @@ s32 func_001931F0(void)
 {
     return func_001930B8(1, 0xFFFF);
 }
+
+struct S_190EA8 { u8 pad[4]; s32 value; };
+s32 func_00190EA8(S_190EA8* p, s32 x) { return (x - p->value) >> 5; }
+
+struct S_193270 { s32 a,b,c,d,e; };
+void func_00193270(S_193270* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }
+
+struct S_193300 { s32 a,b,c,d,e; };
+void func_00193300(S_193300* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }

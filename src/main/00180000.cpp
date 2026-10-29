@@ -680,3 +680,6 @@ void func_00183910(void* a0, void* a1, void* a2)
     func_0011B060(&b, 2);
     func_0011B060(&a, 2);
 }
+
+struct S_181AE0 { u8 pad[0xBF0]; s32 value; };
+s32 func_00181AE0(S_181AE0* p) { return p->value != 0; }

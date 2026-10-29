@@ -266,3 +266,10 @@ void func_001455F0(void* p)
 {
     func_001455C0(p, 0);
 }
+
+struct Obj_146018 { u8 pad[0x4B0]; s32 integer; f32 first; f32 second; };
+void func_00146018(Obj_146018* obj, s32 value, f32 first, f32 second) { obj->integer = value; obj->first = first; obj->second = second; }
+
+extern f32 D_0026185C;
+struct Obj_146028 { u8 pad[0x218]; f32 value; };
+void func_00146028(Obj_146028* obj) { obj->value = D_0026185C; }

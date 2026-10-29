@@ -479,3 +479,15 @@ void func_001BAFE0(Obj_1BAFE0* self, f32 v)
     self->bits538 |= (u64)0x8000 << 25;
     self->f3CC = v;
 }
+
+struct Obj_001BB138 { u8 pad[0x538]; u64 flags; };
+void func_001BB138(Obj_001BB138* self, u32 value) { self->flags = (self->flags & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
+
+struct Obj_001BB168 { u8 pad[0x538]; u64 flags; };
+void func_001BB168(Obj_001BB168* self, u32 value) { self->flags = (self->flags & ~(1ULL << 47)) | ((u64)(value & 1) << 47); }
+
+struct Obj_001BB1D8 { u8 pad[0x2C8]; u8 value; };
+void func_001BB1D8(Obj_001BB1D8* self, u8 value) { self->value = value; }
+
+struct Obj_001BB1E0 { u8 pad[0x538]; u64 flags; };
+void func_001BB1E0(Obj_001BB1E0* self, u32 value) { self->flags = (self->flags & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }

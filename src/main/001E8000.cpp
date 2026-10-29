@@ -556,3 +556,6 @@ void func_001E8EF8(Obj_1E8EF8* self)
         break;
     }
 }
+
+extern u8 D_00275B50[];
+void func_001E8878(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }

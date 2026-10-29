@@ -173,3 +173,9 @@ void func_001D5468(Obj_1D5468* self)
         func_00175170(self, 4, 0x2D);
     }
 }
+
+struct Obj_001D5650 { u8 pad[0x10]; f32 value; };
+s32 func_001D5650(Obj_001D5650* a, Obj_001D5650* b) { if (a->value < b->value) return -1; return 1; }
+
+struct Obj_001D7120 { s32 a; s32 b; s32 c; s32 d; s32 e; s32 f; };
+Obj_001D7120* func_001D7120(Obj_001D7120* self, s32 a, s32 b) { self->a = a; self->b = b; self->c = 0; self->d = -1; self->e = 0; self->f = 0; return self; }

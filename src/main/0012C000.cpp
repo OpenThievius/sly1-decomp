@@ -514,3 +514,12 @@ s32 func_0012FF20(Obj_12FF20* a0)
     }
     return r;
 }
+
+void func_0012D3E0() {}
+
+void func_0012D3E8() {}
+
+void func_0012D3F0() {}
+
+struct Obj_0012FCD0 { u8 pad[0x568]; s32 count; s32 values[1]; };
+void func_0012FCD0(Obj_0012FCD0* obj, s32 value) { obj->values[obj->count++] = value; }

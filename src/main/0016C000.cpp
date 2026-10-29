@@ -458,3 +458,6 @@ void func_0016F430(s32 flags)
         func_001E5278(0);
     }
 }
+
+struct S_16EC88 { u8 pad[0x28]; s32 a; s32 b; };
+void func_0016EC88(S_16EC88* p) { p->a = 0; p->b = 0; }

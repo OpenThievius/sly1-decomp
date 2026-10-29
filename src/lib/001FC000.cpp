@@ -59,3 +59,37 @@ u8* func_001FF090(u8* input, s32* output)
     *output = (s32)value;
     return input;
 }
+
+extern s32 D_00278640;
+
+s32 func_001FE928(s32 value)
+{
+    s32 previous = D_00278640;
+    D_00278640 = value;
+    return previous;
+}
+
+struct Node_1FFBE0 { s32 first; s32 second; s32 value; s32 link; s32 flag; s32 previous; };
+extern Node_1FFBE0* D_0062A7B8;
+
+void func_001FFBE0(s32 value, Node_1FFBE0* item)
+{
+    item->link = value;
+    item->previous = (s32)D_0062A7B8;
+    D_0062A7B8 = item;
+    item->value = value;
+    item->second = 0;
+    item->flag = 0;
+    item->first = 0;
+    item->flag = 0;
+    item->second = 0;
+}
+
+extern s32 D_002789D8;
+
+s32 func_001FFFD0(s32 value)
+{
+    s32 previous = D_002789D8;
+    D_002789D8 = value;
+    return previous;
+}
