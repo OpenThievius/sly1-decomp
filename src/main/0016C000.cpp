@@ -171,3 +171,121 @@ void func_0016DD90(u8* self)
         *(s32*)(self + 0x310) = 0x10;
     }
 }
+
+extern s32 D_00262C6C;
+
+void func_0016E148();
+
+s32 func_0016E0F0(s32 bits)
+{
+    D_00262C6C |= bits;
+    return ((s32 (*)())func_0016E148)();
+}
+
+extern s32 D_00262C6C;
+extern s32 D_00262C68;
+
+void func_0016E148()
+{
+    s32 flags = D_00262C6C;
+    if ((flags & 0x84) != 0)
+    {
+        D_00262C68 = 0;
+        return;
+    }
+    if ((flags & 1) != 0)
+    {
+        D_00262C68 = 5;
+        return;
+    }
+    if ((flags & 2) != 0)
+    {
+        D_00262C68 = 4;
+        return;
+    }
+    D_00262C68 = 7;
+}
+
+struct Pair_16E1A0 { f32 lo; f32 hi; };
+
+struct Stream_16E1A0 {
+    u8 pad00[4];
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    f32 f1C;
+    s32 f20;
+    u8 pad24[0x2C];
+    s32 f50;
+    Pair_16E1A0 a54[4];
+    u8 pad74[0x10];
+    s32 f84;
+    Pair_16E1A0 a88[4];
+    s16 fA8;
+    u8 padAA[0x12];
+    void* fBC;
+    s32 fC0;
+};
+
+void func_001F5C0C(void* p, s32 value, s32 size);
+void* func_0018D4B0(s32 size);
+void func_002042C8(s32 a, s32 b, s32 c);
+void func_0016E630(Stream_16E1A0* self, s32 mode, s32 n);
+
+void func_0016E1A0(Stream_16E1A0* self, s32 a, s32 b)
+{
+    func_001F5C0C(self, 0, 0xC4);
+    func_0016E630(self, 1, 0);
+    self->f04 = a;
+    self->f08 = b;
+    s32 size = ((s32)func_0018D4B0(0x140) + 0x3F) & -0x40;
+    self->f0C = size;
+    func_002042C8(self->f04, self->f08, size);
+    self->fBC = func_0018D4B0(0x20);
+    self->fC0 = 1;
+}
+
+extern f32 D_00261858[];
+
+void func_001A7B20(void* a, s32 b, s32 c);
+
+void func_0016E630(Stream_16E1A0* self, s32 mode, s32 n)
+{
+    s32 next = mode;
+    if (mode == self->f14)
+    {
+        if (n == self->f18)
+        {
+            return;
+        }
+    }
+    if (n == 0)
+    {
+        self->f10 = 0;
+        next = 1;
+    }
+    if (self->f18 < 3 && n >= 3)
+    {
+        func_001A7B20(self->fBC, self->f04, self->f08);
+    }
+    if (next == 3)
+    {
+        self->f20 = 0;
+        self->f84 = 0;
+        self->f50 = 0;
+        self->fA8 = 0;
+        for (u32 i = 0; i < 4; i++)
+        {
+            self->a88[i].lo = -0.75f;
+            self->a54[i].lo = -0.75f;
+            self->a88[i].hi = 0.75f;
+            self->a54[i].hi = 0.75f;
+        }
+    }
+    self->f14 = next;
+    self->f18 = n;
+    self->f1C = D_00261858[4];
+}

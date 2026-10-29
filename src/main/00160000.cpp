@@ -352,3 +352,64 @@ void func_00160880(void)
     D_002623CC = -1;
     func_001608E0();
 }
+
+void func_001612E8(void* self, s32 a1, s32 a2);
+
+struct Stream_1615F0 {
+    u8 pad0[0xC];
+    u32* cur;
+};
+
+void func_001615F0(Stream_1615F0* self, u32 a1, u32 a2, u32 a3, u32 a4)
+{
+    func_001612E8(self, 1, 4);
+    u32* p = self->cur;
+    self->cur = p + 4;
+    p[0] = a1;
+    p[1] = a2;
+    p[2] = a3;
+    p[3] = (a4 & 0xFF) << 4;
+}
+
+void func_001612E8(void* self, s32 a1, s32 a2);
+
+struct Stream_161708 {
+    u8 pad0[0xC];
+    u64* cur;
+};
+
+void func_00161708(Stream_161708* self, u64 a1, u64 a2)
+{
+    func_001612E8(self, 1, 14);
+    u64* p = self->cur;
+    self->cur = p + 2;
+    p[0] = a2;
+    p[1] = a1;
+}
+
+typedef void (*Fn_161768)(void* self, s32 a1);
+
+struct Adjust_161768 { u8 pad0[8]; s16 adj; u8 pad1[2]; Fn_161768 fn; };
+
+struct Obj_161768 {
+    u8 pad0[0xC];
+    u64* cur;
+    u8 pad1[8];
+    Adjust_161768* sub;
+    u64* last;
+    u32 f20;
+    s32 f24;
+};
+
+void func_00161768(Obj_161768* self, u32 a1, u64 a2)
+{
+    Adjust_161768* sub = self->sub;
+    sub->fn((u8*)self + sub->adj, 0);
+    u64* p = self->cur;
+    self->cur = p + 2;
+    p[1] = a2;
+    p[0] = ((u64)a1 << 60) | ((u64)0x8000 << 43);
+    self->f20 = a1;
+    self->last = p;
+    self->f24 = 0;
+}

@@ -208,3 +208,33 @@ void func_0017AE00(Obj_0017AE00* self)
     func_0017B410(self, 0);
     func_0017B510(self, 1);
 }
+
+struct Msg_17B3A8 {
+    u8 pad0[4];
+    s32 f4;
+    u8 pad1[8];
+    u32 f10;
+};
+
+struct Obj_17B3A8 {
+    u8 pad0[0x608];
+    s32 f608;
+};
+
+extern u8 D_0026E248[];
+
+void func_001AC060(void* p);
+void func_0017B598(void* self);
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+
+s32 func_0017B3A8(Obj_17B3A8* self, Msg_17B3A8* msg)
+{
+    if (msg->f10 & 0x10) {
+        if (msg->f4 == self->f608) {
+            func_001AC060(D_0026E248);
+            func_0017B598(self);
+            func_001837E0(self, 2, 0, 0);
+        }
+    }
+    return 1;
+}

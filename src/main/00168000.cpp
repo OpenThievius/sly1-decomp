@@ -460,3 +460,40 @@ void func_00169088(Desc_169088* d, u32 dbp, void* ctx)
 {
     func_00168D98(dbp, d->b9, d->b8, d->u0, d->u2, d->x14, ctx);
 }
+
+extern u8 D_002626E8[];
+extern u8 D_002626F8[];
+extern u8 D_00262708[];
+
+void func_00152438(void* self, s32 value);
+
+void func_00169C58()
+{
+    func_00152438(D_002626E8, 0x38);
+    func_00152438(D_002626F8, 0x50);
+    func_00152438(D_00262708, 0x558);
+}
+
+extern u8 D_002626E8[];
+extern u8 D_002626F8[];
+extern u8 D_00262708[];
+
+void func_00152440(void* self);
+
+void func_00169CA0()
+{
+    func_00152440(D_002626E8);
+    func_00152440(D_002626F8);
+    func_00152440(D_00262708);
+}
+
+extern u8 D_002626E8[];
+
+void func_00182ED0(void* self);
+void func_00152600(void* data, void* self);
+
+void func_00169D58(void* self)
+{
+    func_00182ED0(self);
+    func_00152600(D_002626E8, self);
+}
