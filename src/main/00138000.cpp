@@ -304,3 +304,29 @@ void* func_001387C0(Self_1387C0* self, Other_1387C0* other)
     }
     return 0;
 }
+
+void* func_0018D500(s32 size);
+void func_001384A0(void* self, u8** out)
+{
+    s32 size = func_00137BE0(self);
+    u8* buffer = (u8*)func_0018D500(size + 1);
+    func_00137A60(self, size, buffer);
+    buffer[size] = 0;
+    *out = buffer;
+}
+
+struct Key_00138788 { s32 unused; s32 key; };
+Node_1387C0* func_00138788(void* unused, Node_1387C0** head, Key_00138788* key)
+{
+    Node_1387C0* node = *head;
+    s32 wanted = key->key;
+    while (node) {
+        if (node->key == wanted) {
+            *head = node->next;
+            break;
+        }
+        head = &node->next;
+        node = node->next;
+    }
+    return node;
+}

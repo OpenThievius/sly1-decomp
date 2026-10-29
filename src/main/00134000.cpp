@@ -302,3 +302,114 @@ void func_00137EB0(void* self, u8* buffer)
     func_00137A60(self, 0xC, buffer + 0x10);
     func_00137A60(self, 0xC, buffer + 0x20);
 }
+
+struct State_001365A8 { u8 pad[0x300]; f32 value;
+    void set(f32 x, f32 lo, f32 hi) {
+        if (x < lo) x = lo;
+        else if (hi < x) x = hi;
+        value = x;
+    }
+};
+void func_001365A8(State_001365A8* self, f32 value)
+{
+    self->set(value * 0.01f, 0.0f, 1.0f);
+}
+
+struct State_00136EC8 { u8 pad[0x304]; f32 x; f32 y; };
+void func_00136EC8(State_00136EC8* self, f32* x, f32* y)
+{
+    *x = self->x + 320.0f;
+    *y = self->y + 180.4000091552734375f;
+}
+
+struct State_00137820 { s32 w[13]; s32 maximum(s32 a, s32 b) { return a < b ? b : a; } };
+void func_001377C0(void* self);
+void func_00137490(void* self);
+void func_00193288(void* self, s32 value);
+void func_00137820(State_00137820* self)
+{
+    switch (self->w[1]) {
+    case 0: func_001377C0(self); break;
+    case 1: func_00137490(self); break;
+    }
+    s32 value = self->w[5] - self->w[9];
+    value = self->maximum(0, value);
+    self->w[5] = value;
+    if (self->w[12]) func_00193288((void*)self->w[12], value);
+}
+
+s32 func_00137B90(Reader_137D10* self)
+{
+    s32 count = self->remaining_1C;
+    if (count >= 1) {
+        u8* p = self->cur_18;
+        s32 value = p[0];
+        self->cur_18 = p + 1;
+        self->remaining_1C = count - 1;
+        return value;
+    }
+    u8 value;
+    func_00137A60(self, 1, &value);
+    return value;
+}
+
+s32 func_00137BE0(Reader_137D10* self)
+{
+    s32 count = self->remaining_1C;
+    if (count >= 2) {
+        u8* p = self->cur_18;
+        s32 value = p[0] | (p[1] << 8);
+        self->cur_18 = p + 2;
+        self->remaining_1C = count - 2;
+        return value;
+    }
+    u16 value;
+    func_00137A60(self, 2, &value);
+    return value;
+}
+
+u32 func_00137C40(Reader_137D10* self)
+{
+    s32 count = self->remaining_1C;
+    if (count >= 4) {
+        u8* p = self->cur_18;
+        u32 value = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+        self->cur_18 = p + 4;
+        self->remaining_1C = count - 4;
+        return value;
+    }
+    u32 value;
+    func_00137A60(self, 4, &value);
+    return value;
+}
+
+s32 func_00137CC0(Reader_137D10* self)
+{
+    s32 count = self->remaining_1C;
+    if (count >= 1) {
+        u8* p = self->cur_18;
+        s32 value = (s8)p[0];
+        self->cur_18 = p + 1;
+        self->remaining_1C = count - 1;
+        return value;
+    }
+    s8 value;
+    func_00137A60(self, 1, &value);
+    return value;
+}
+
+s32 func_00137D78(Reader_137D10* self)
+{
+    s32 count = self->remaining_1C;
+    if (count >= 4) {
+        u8* p = self->cur_18;
+        s32 value = p[0] + (p[1] << 8) + (p[2] << 16) + ((s8)p[3] << 24);
+        self->cur_18 = p + 4;
+        self->remaining_1C = count - 4;
+        return value;
+    }
+    s32 value;
+    func_00137A60(self, 4, &value);
+    return value;
+}
+
