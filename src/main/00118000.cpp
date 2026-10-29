@@ -649,3 +649,113 @@ void* func_00118608(void* out, s32 unused, In_118608* in)
     func_0011B060(&f.q, 2);
     return out;
 }
+
+struct Quad_118720 { s32 a, b, c, d; };
+struct Frame_118720 { Quad_118720 q; s32 n; s32 pad[3]; };
+struct In_118720 { u8 pad0[4]; s32 f4; u8 pad8[4]; s32 fC; };
+
+void func_0011B008(Quad_118720* q);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void func_0011B570(Quad_118720* q, s32 n);
+void func_001BF718(void* slot);
+void func_0011B018(void* dst, Quad_118720* src);
+void func_0011B060(Quad_118720* q, int mode);
+
+void* func_00118720(void* out, s32 unused, In_118720* in)
+{
+    Frame_118720 f;
+    func_0011B008(&f.q);
+    f.n = 0;
+    func_001BFCD8(in->f4, in->fC ? &f.n : 0, in->fC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+    func_0011B570(&f.q, f.n);
+    if (f.n != 0) func_001BF718(&f.n);
+    func_0011B018(out, &f.q);
+    func_0011B060(&f.q, 2);
+    return out;
+}
+
+// A node of a keyed list: the key, a value whose address is returned, and the next node at 0xC.
+struct Node_11A4D8 { s32 key; s32 value; s32 pad8; struct Node_11A4D8* next; };
+
+// A tree node: count and child pointers at 0x0 and 0x4, a list head at 0x14, a busy flag at 0x18.
+struct Tree_11A4D8 {
+    s32 count;
+    struct Tree_11A4D8* items[4];
+    struct Node_11A4D8* head;
+    s32 flag;
+};
+
+void* func_0011A4D8(struct Tree_11A4D8* self, s32 key, s32 flag)
+{
+    void* found = 0;
+    struct Node_11A4D8* n;
+    s32 i;
+
+    self->flag = 1;
+    for (n = self->head; n != 0; n = n->next) {
+        if (n->key == key) {
+            found = &n->value;
+            goto done;
+        }
+    }
+    if (flag != 0) {
+        for (i = 0; i < self->count; i++) {
+            struct Tree_11A4D8* c = self->items[i];
+            if (c->flag == 0) {
+                found = func_0011A4D8(c, key, flag);
+                if (found != 0)
+                    goto done;
+            }
+        }
+    }
+done:
+    self->flag = 0;
+    return found;
+}
+
+// The same tree node as func_0011A4D8: count and child pointers, a list head at 0x14, a flag at 0x18.
+struct Node_11A5B0;
+struct Tree_11A5B0 {
+    s32 count;
+    struct Tree_11A5B0* items[4];
+    struct Node_11A5B0* head;
+    s32 flag;
+};
+
+void func_0018D800(void* dst, void* src, s32 bytes);
+s32 func_0011C498(void);
+void func_0011C418(void* a, void* b, void* c);
+
+void func_0011A5B0(struct Tree_11A5B0* src, struct Tree_11A5B0* dst)
+{
+    dst->count = src->count;
+    func_0018D800(dst->items, src->items, src->count * 4);
+    if (src->head != 0) {
+        void* n = (void*)func_0011C498();
+        func_0011C418(src->head, n, dst);
+        dst->head = (struct Node_11A5B0*)n;
+    }
+}
+
+struct Flag_11B5F0 { s32 tag; s32 flag; };
+void func_0011B418(void* self);
+
+void func_0011B5F0(Flag_11B5F0* r, void* arg)
+{
+    func_0011B418(r);
+    if (arg != 0)
+        r->flag = 1;
+    else
+        r->flag = 0;
+    r->tag = 0x1B;
+}
+
+struct Obj_11B640 { s32 tag; void* ptr; };
+void func_0011B418(void* self);
+
+void func_0011B640(Obj_11B640* self, void* arg)
+{
+    func_0011B418(self);
+    self->ptr = arg;
+    self->tag = 0x1C;
+}

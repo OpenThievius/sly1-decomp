@@ -700,3 +700,106 @@ void func_0011F210(Table_11F210* self, void* src)
         e->h = e->b + u;
     }
 }
+
+s32 func_0011C0A8(void* p, s32 mask);
+
+void func_0011C108(void)
+{
+    (void)func_0011C0A8(0, 0xFFFF);
+}
+
+struct Pool_11C128 {
+    s32 slots;
+    s32 size;
+    void* mem;
+    void* head;
+    s32 live;
+    s32 high;
+};
+
+void* func_0018D500(s32 bytes);
+void* func_0011C288(Pool_11C128* p, s32 index);
+
+void func_0011C128(Pool_11C128* p, s32 count, s32 size)
+{
+    p->slots = count + 8;
+    p->size = size;
+    p->mem = func_0018D500((count + 8) * size);
+    void* node = func_0011C288(p, 0);
+    p->head = node;
+    s32 i = 1;
+    if (i < size) {
+        void* prev;
+        do {
+            prev = node;
+            node = func_0011C288(p, i);
+            i++;
+            *(void**)prev = node;
+        } while (i < size);
+    }
+    *(void**)node = 0;
+    p->live = 0;
+    p->high = 0;
+}
+
+extern u8* D_0027B300[];
+void func_001B5F28(void* list, void* item);
+
+void func_0011C5B0(u32 addr)
+{
+    u8* pool = (u8*)&D_0062C558;
+    u8* p = D_0027B300[0] + ((addr - *(u32*)(pool + 4)) >> 4);
+    s32 v = *p - 1;
+    *p = v;
+    if ((u8)v == 0) {
+        func_001B5F28(pool, (void*)addr);
+    }
+}
+
+extern u8 D_0062C578[];
+extern u8 D_00259F38[];
+void* func_001B5EA0(void* pool);
+void* func_001B5EE0(void* pool);
+void func_001F5C0C(void* p, s32 zero, u32 count);
+void func_0011AB58(void* p);
+
+void* func_0011C748(void)
+{
+    void* s0 = func_001B5EA0(D_0062C578);
+    if (s0 != 0) {
+        func_001F5C0C(s0, 0, *(u32*)D_0062C578);
+    } else {
+        func_0011AB58(D_00259F38);
+        s0 = func_001B5EE0(D_0062C578);
+    }
+    return s0;
+}
+
+s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
+
+void func_0011D600(s32 value)
+{
+    s32 buf = value;
+    func_0011DB00(0x15, 4, &buf, 0, 0);
+}
+
+struct Self_11F3E8 { u8 pad0[8]; s32 count; u8* items; };
+struct Item_11F3E8 { f32 v; u8 pad4[0x1C]; };
+void* func_0018D658(s32 size);
+
+void func_0011F3E8(Self_11F3E8* self, s32* outCount, f32** outArr)
+{
+    s32 n = self->count;
+    *outCount = n;
+    if (outArr) {
+        s32 i;
+        *outArr = (f32*)func_0018D658(n * 4);
+        i = 0;
+        if (*outCount > 0) {
+            do {
+                (*outArr)[i] = ((Item_11F3E8*)self->items)[i].v;
+                i++;
+            } while (i < *outCount);
+        }
+    }
+}
