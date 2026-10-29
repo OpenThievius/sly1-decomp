@@ -31,6 +31,8 @@ splits are taken from other projects or from the prototype
 4. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C.
 5. **Names and types.** Ours, from what the code does, as the C is cleaned up.
+6. **The disc's data.** Its loader and index, then each format from the code that reads it
+   ([DISC.md](DISC.md)); OpenThievius's extractor is written from that.
 
 ## Open decisions
 
