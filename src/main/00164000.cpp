@@ -139,3 +139,47 @@ void func_00167E08(Ctx_167E08* self)
         func_0018D6F0();
     }
 }
+
+struct Elem_165FE0;
+typedef void (*VFn_165FE0)(void* self, f32 f);
+
+struct Elem_165FE0 {
+    VFn_165FE0* vtbl;
+    u8 pad4[0x8];
+    void* f0C;
+    u8 pad10[0x70];
+    Elem_165FE0* next80;
+};
+
+struct Owner_165FE0 {
+    u8 pad0[0x4C];
+    Elem_165FE0* head4C;
+};
+
+struct Sub_165FE0 {
+    u8 pad0[0x27C];
+    s32 count27C;
+    Elem_165FE0** list280;
+};
+
+s32 func_001B4B08(void* p);
+void func_001F3408(void* p);
+
+void func_00165FE0(Owner_165FE0* self, Sub_165FE0* sub, f32 f)
+{
+    Elem_165FE0* e;
+    s32 i;
+
+    for (i = 0; i < sub->count27C; i++) {
+        e = sub->list280[i];
+        if (func_001B4B08(e) != 0) {
+            VFn_165FE0 fn = e->vtbl[2];
+            if (fn != 0) {
+                fn(e, f);
+            }
+        }
+    }
+    for (e = self->head4C; e != 0; e = e->next80) {
+        func_001F3408(e->f0C);
+    }
+}

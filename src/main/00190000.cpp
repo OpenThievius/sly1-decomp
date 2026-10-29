@@ -762,3 +762,47 @@ Obj_193210* func_00193210(Obj_193210* self, Word_193210* s1, Word_193210* s2, Wo
     self->f04 = 0;
     return self;
 }
+
+extern u8 D_00269BA8[];
+
+void func_00152438(void* self, s32 value);
+
+void func_00191EC0()
+{
+    func_00152438(D_00269BA8, 0x38);
+}
+
+extern u8 D_00269BA8[];
+void func_00152440(void* p);
+
+void func_00191EE8(void)
+{
+    func_00152440(D_00269BA8);
+}
+
+extern u8 D_00269BA8[];
+void func_00182D48(void* self);
+void func_00152470(void* table, void* self);
+
+void func_00191F68(void* self)
+{
+    func_00182D48(self);
+    func_00152470(D_00269BA8, self);
+}
+
+extern u8 D_00269BA8[];
+void func_00182ED0(void* self);
+void func_00152600(void* table, void* self);
+
+void func_00191FA0(void* self)
+{
+    func_00182ED0(self);
+    func_00152600(D_00269BA8, self);
+}
+
+extern s32 D_0026A068[];
+
+s32 func_00193598(s32 index)
+{
+    return D_0026A068[index];
+}

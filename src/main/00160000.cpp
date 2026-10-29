@@ -549,3 +549,67 @@ void func_00161860(Stream_161860* self, s32 a1, s32 a2)
     self->cur = p + 1;
     *p = v;
 }
+
+struct Ctx_161028 { u8 pad0[4]; s32 count; u8* base; };
+struct Entry_161028 { s16 k0; s16 k1; u8 pad[4]; Entry_161028* next; };
+struct Holder_161028 { u8 pad0[0x14]; Entry_161028* head; };
+struct Elem_161028 { Holder_161028* holder; u8 pad[8]; };
+
+void func_0018D608(void);
+u8* func_0018D658(s32 size);
+void func_0018D6F0(void);
+s32 func_0013E430(u8* a0, u8* a1, s32* a2, f32 scale);
+
+s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_161028** out)
+{
+    s32 buf[4];
+
+    func_0018D608();
+    u8* k = func_0018D658(src->count * 12);
+    buf[0] = (s32)k;
+    if (func_0013E430(src->base, dst->base + key * 16, buf, 1.0f) != 2) {
+        func_0018D6F0();
+        return 0;
+    }
+    s32 i = 0;
+    s32 n = (((s32)buf[0] - (s32)k) * (s32)0xAAAAAAAB) >> 2;
+    s32 j = 0;
+    if (n > 0) {
+        for (; i < n; i++) {
+            Elem_161028* e = (Elem_161028*)(k + i * 12);
+            Entry_161028* p = e->holder->head;
+            if (p == 0) {
+                continue;
+            }
+            Entry_161028** o = (Entry_161028**)(j * 4 + (s32)out);
+            while (p != 0) {
+                if (key == p->k0 || key == p->k1) {
+                    s32 m;
+                    for (m = 0; m < j; m++) {
+                        if (p == out[m]) {
+                            break;
+                        }
+                    }
+                    if (m >= j && j < maxOut) {
+                        *o = p;
+                        o++;
+                        j++;
+                    }
+                }
+                p = p->next;
+            }
+        }
+    }
+    func_0018D6F0();
+    return j;
+}
+
+extern u8 D_000018C0[];
+extern u8 D_000018F8[];
+
+void func_001EE3F0(void* s, s32 n);
+
+extern u8 D_00000FA0[];
+extern u8 D_00000FD8[];
+
+void func_001EE3F0(void* s, s32 n);

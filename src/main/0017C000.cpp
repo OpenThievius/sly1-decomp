@@ -281,3 +281,27 @@ void func_0017D1B8(void* self, s32 b, s32 c, s32 d)
     Obj_17D1B8* o = (Obj_17D1B8*)func_0017CF38(self, 8, b, d);
     o->fC = c;
 }
+
+struct Obj_17D0A0 { u8 pad0[0xC]; f32 f0C; };
+
+void func_0017D0A0(void* self, s32 a, f32 value)
+{
+    Obj_17D0A0* o = (Obj_17D0A0*)func_0017CF38(self, 4, a, 0);
+    o->f0C = value;
+}
+
+struct Obj_17D180 { u8 pad0[0xC]; f32 f0C; };
+
+void func_0017D180(void* self, s32 b, s32 c, f32 value)
+{
+    Obj_17D180* o = (Obj_17D180*)func_0017CF38(self, 7, b, c);
+    o->f0C = value;
+}
+
+struct Obj_17D1E8 { u8 pad0[0xC]; f32 f0C; };
+
+void func_0017D1E8(void* self, f32 value)
+{
+    Obj_17D1E8* o = (Obj_17D1E8*)func_0017CF38(self, 11, -1, 1);
+    o->f0C = value;
+}

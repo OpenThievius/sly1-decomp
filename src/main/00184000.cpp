@@ -355,3 +355,41 @@ s32 func_00187E88(void* a0, void* a1, void* a2)
     func_00185D20(loc.fb, a0, a1, loc.a, loc.b, 9, 0, 0, a2);
     return 1;
 }
+
+extern s32 D_00261F14;
+extern u8 D_00211E10[];
+void func_001F6C20(s32 unused);
+void func_00202A80(void* dma, void* addr);
+void func_00202C38(void* dma, s32 b, s32 c);
+
+void func_00185A58(void)
+{
+    s32* p = (s32*)D_00261F14;
+    *p |= 0x40;
+    func_001F6C20(0);
+    func_00202A80((void*)D_00261F14, D_00211E10);
+    func_00202C38((void*)D_00261F14, 0, 0);
+    s32* q = (s32*)D_00261F14;
+    *q &= ~0x40;
+}
+
+extern u8 D_00261F18[];
+extern u8 D_00212110[];
+
+void func_001F6C20(s32 a);
+void func_00202A80(void* a, void* b);
+void func_00202C38(void* a, s32 b, s32 c);
+
+struct Flags_185AC8 {
+    s32 flags;
+};
+
+void func_00185AC8()
+{
+    Flags_185AC8* p = *(Flags_185AC8**)D_00261F18;
+    p->flags |= 0x40;
+    func_001F6C20(0);
+    func_00202A80(*(void**)D_00261F18, D_00212110);
+    func_00202C38(*(void**)D_00261F18, 0, 0);
+    (*(Flags_185AC8**)D_00261F18)->flags &= ~0x40;
+}

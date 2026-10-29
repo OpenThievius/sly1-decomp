@@ -386,3 +386,65 @@ void func_0017AB58(Self_17AB58* self, s32 kind, Rec_17AB58* rec)
     }
     func_00192230(self, kind, rec);
 }
+
+struct __attribute__((aligned(16))) Quad_178598 {
+    s32 a, b, c, d;
+};
+
+struct Pair_178598 {
+    Quad_178598 q0;
+    Quad_178598 q1;
+};
+
+struct Sub_178598 {
+    u8 pad0[0x18];
+    f32 f18;
+    u8 pad1[0x20 - 0x1C];
+    Quad_178598 q20;
+    Quad_178598 q30;
+};
+
+typedef void (*VFn_178598)(void* self, void* a);
+
+struct Obj_178598 {
+    VFn_178598* vtbl;
+    u8 pad0[0x2514 - 4];
+    Sub_178598* f2514;
+    u8 pad1[0x2B70 - 0x2518];
+    Quad_178598 q2B70;
+    Quad_178598 q2B80;
+};
+
+struct Frame_178598 {
+    Quad_178598 q0;
+    Quad_178598 q1;
+    Quad_178598 q2;
+    Quad_178598 p0;
+    Quad_178598 p1;
+    f32 fl;
+};
+
+void func_00178D98(void* self, s32 a1, s32 a2, void* a3, void* a4);
+void func_001782C0(void* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+void func_00175170(void* self, s32 a, s32 b);
+
+extern f32 D_0026185C;
+
+void func_00178598(Obj_178598* self, Pair_178598* s2, f32 f)
+{
+    Frame_178598 fr;
+    fr.fl = f;
+    if (s2 == 0) {
+        func_00178D98(self, 0, 0, &fr.p0, &fr.fl);
+        s2 = (Pair_178598*)&fr.p0;
+    }
+    void* q1 = &fr.q1;
+    func_001782C0(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
+    self->f2514->f18 = D_0026185C + fr.fl;
+    self->f2514->q20 = fr.q0;
+    self->f2514->q30 = fr.q2;
+    self->vtbl[36](self, q1);
+    self->q2B70 = s2->q0;
+    self->q2B80 = s2->q1;
+    func_00175170(self, 4, 0x2C);
+}

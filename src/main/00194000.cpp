@@ -189,3 +189,60 @@ void func_001974D8(void* a, void* b)
 {
     func_001922E8(a, b);
 }
+
+extern u8 D_0026A210[];
+void func_001F5C0C(void* p, s32 zero, s32 size);
+
+void func_00196330(void* p, s32 flag)
+{
+    if (flag == 0xFFFF && p != 0) {
+        u8* s = D_0026A210;
+        func_001F5C0C(s, 0, 0x1C);
+        f32 k = 0.6f;
+        f32 big = 15.0f;
+        s[0x4] = 0x2D;
+        *(f32*)(s + 0x8) = big;
+        *(f32*)(s + 0x10) = k;
+        *(f32*)(s + 0x14) = k;
+        *(s32*)(s + 0x18) = (s32)0xFF7D4B00;
+    }
+}
+
+extern u8 D_00261EF0[];
+void func_00151E20(void* self, f32 amount);
+
+void func_001973D8(u8* self)
+{
+    f32 one = 1.0f;
+    f32 t = (f32)*(s32*)(self + 0x680) / (f32)*(s32*)(self + 0x684);
+    f32 c;
+    if (t < 0.0f) {
+        c = 0.0f;
+    } else if (one < t) {
+        c = one;
+    } else {
+        c = t;
+    }
+    func_00151E20(D_00261EF0, 1.0f - c * 0.8f);
+}
+
+extern void* D_0026A904;
+void func_001B6568(void* dev, s32* out);
+void func_001B6598(void* dev, s32* out);
+void func_001B64D8(void* dev, s32 value);
+void func_001973D8(u8* self);
+
+void func_00197458(s32 unused, s32 flag)
+{
+    s32 out[4];
+    if (flag == 1) {
+        if (*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8) != 0) {
+            func_001B6568(*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8), &out[0]);
+            func_001B6598(*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8), &out[1]);
+            if (out[0] != 0x3F4 && out[1] != 0x3F4) {
+                func_001B64D8(*(void**)((u8*)*(void**)&D_0026A904 + 0x6B8), 0x3F5);
+                func_001973D8(*(u8**)&D_0026A904);
+            }
+        }
+    }
+}
