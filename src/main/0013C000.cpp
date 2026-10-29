@@ -665,3 +665,48 @@ void func_0013E6C8(Self_13E6C8* self, Tbl_13E6C8* src, Base_13E6C8* base, Tbl_13
         d->f8 = s->f8 != 0 ? (s32)dst->elems + (s->f8 - (s32)src->elems) : 0;
     }
 }
+
+extern void func_00189150(void*, void*, void*);
+f32 func_00188CE0(void* p);
+f32 func_00205578(f32 x);
+
+struct Entry_13F940 {
+    u8 pad0[0x30];
+};
+
+struct Self_13F940 {
+    u8 pad0[0x7E0];
+    s32 f7E0;
+    u8 pad1[0x7F0 - 0x7E4];
+    Entry_13F940 entries[1];
+};
+
+struct Loc_13F940 {
+    f32 v[12];
+};
+
+s32 func_0013F940(void* self, f32* out)
+{
+    Self_13F940* s = (Self_13F940*)self;
+    Loc_13F940 loc;
+    f32 best = 0.0f;
+    s32 idx;
+    s32 i;
+
+    if (s->f7E0 == 0) {
+        return 0;
+    }
+    for (i = s->f7E0 - 1; i >= 0; i--) {
+        Entry_13F940* e = (Entry_13F940*)((u8*)s + 0x7F0 + i * 0x30);
+        func_00189150((u8*)s + 0xD0, e, &loc);
+        f32 t = func_00188CE0(&loc);
+        if (best < t) {
+            best = t;
+            idx = i;
+        }
+    }
+    if (out != 0) {
+        *out = func_00205578(best);
+    }
+    return idx;
+}

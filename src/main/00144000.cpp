@@ -297,3 +297,74 @@ s32 func_00145FF8(u8* self)
 {
     return func_00149638(self + 0x460);
 }
+
+void func_00144008(void* self);
+void func_001EEBB0(void* a, void* b, void* c);
+
+extern u8 D_00275710[];
+
+struct __attribute__((aligned(16))) Quad_144270 { s32 a, b, c, d; };
+
+struct Ctx_144270 {
+    u8 pad0[0x1EC4];
+    s32 f1EC4;
+};
+
+struct Self_144270 {
+    u8 pad0[0x40];
+    Quad_144270 f40;
+    u8 pad1[0x21C - 0x50];
+    s32 f21C;
+};
+
+void func_00144270(Self_144270* self)
+{
+    Quad_144270 in;
+    s32 out;
+    Ctx_144270* g;
+
+    func_00144008(self);
+    g = *(Ctx_144270**)D_00275710;
+    if (g != 0) {
+        in = self->f40;
+        func_001EEBB0((void*)g->f1EC4, &in, &out);
+        if (out != 0) {
+            self->f21C = out;
+        }
+    }
+}
+
+void func_00127378(void* self, s32 kind, void* msg);
+void func_001B6598(void* sub, s32* out);
+void func_001DBCC8(void* owner, void* fn, void* ctx, s32 a3, s32 a4);
+void func_00147ED0(void* self);
+
+typedef void (*VFn_147EF8)(void* self, void* args);
+struct Obj_147EF8 { VFn_147EF8* vtbl; };
+struct Mid_147EF8 { u8 pad0[0x1D60]; Obj_147EF8* p1D60; };
+struct Self_147EF8 {
+    u8 pad0[0x14];
+    Mid_147EF8* p14;
+    u8 pad1[0x2D0];
+    s32 f2E8;
+};
+struct Args_147EF8 { s32 flag; void* self; };
+
+void func_00147EF8(Self_147EF8* self, s32 kind, void* target)
+{
+    Args_147EF8 args;
+    s32 code;
+    u8 pad[0x40];
+    func_00127378(self, kind, target);
+    if (kind != 0x14) return;
+    if ((s32)target != self->f2E8) return;
+    func_001B6598(target, &code);
+    if (code != 0x263) return;
+    Obj_147EF8* obj = self->p14->p1D60;
+    if (obj != 0) {
+        args.flag = 1;
+        args.self = self;
+        obj->vtbl[31](obj, &args);
+    }
+    func_001DBCC8(self->p14, (void*)(void (*)(void*))func_00147ED0, self, 0, 0);
+}

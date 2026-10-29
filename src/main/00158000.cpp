@@ -955,3 +955,58 @@ u8* func_00159A80(Rec_159A80* self, Key_159A80* key)
     }
     return p;
 }
+
+void* func_00158DD8(void* self, s32 flag);
+void func_00158198(void*,void*,void*,f32,f32,f32,f32,void*);
+
+void func_00158D40(void* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
+{
+    u8* p = (u8*)func_00158DD8(self, 1);
+    func_00158198(p+16,a,b,x,y,z,w,self);
+}
+
+struct __attribute__((aligned(16))) Quad_15B720 { s32 a, b, c, d; };
+struct Rec_15B720 {
+    u8 pad0[0x8];
+    f32 f8;
+    s32 fC;
+    u8 pad1[0x20 - 0x10];
+    Quad_15B720 f20;
+    Quad_15B720 f30;
+};
+struct __attribute__((aligned(16))) Local_15B720 {
+    s32 f0;
+    u8 pad0[0x10 - 0x4];
+    Quad_15B720 f10;
+    Quad_15B720 f20;
+    u8 pad1[0x50 - 0x30];
+};
+typedef void (*VFn_15B720)(void* self, void* a);
+struct Obj_15B720 { VFn_15B720* vtbl; };
+struct Actor_15B720 {
+    u8 pad0[0x554];
+    s32 f554;
+    u8 pad1[0x5D4 - 0x558];
+    Obj_15B720* f5D4;
+};
+
+void func_0015B7B8(void* self, s32 x);
+void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
+
+s32 func_0015B720(Actor_15B720* self, Rec_15B720* r)
+{
+    if (self->f554 != 1) {
+        func_0015B7B8(self, 1);
+        if ((r->fC & 8) != 0) {
+            func_001BC0E0(self, r->f8, &r->f20, &r->f30);
+        }
+        if (self->f5D4 != 0) {
+            Local_15B720 loc;
+            loc.f0 = 6;
+            loc.f20 = r->f20;
+            loc.f10 = r->f30;
+            self->f5D4->vtbl[31](self->f5D4, &loc);
+        }
+    }
+    return 1;
+}

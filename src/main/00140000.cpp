@@ -879,3 +879,81 @@ void func_00141108(void* a0, void* a1)
     func_001E4C48(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
     func_0011EC40(a0, a1);
 }
+
+extern u8 D_00261420[];
+s32 func_00140FF8(void* p);
+void func_001B7968(void* self);
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+
+struct Inner_1411A8 {
+    u8 pad0[0x2304];
+    s32 f2304;
+};
+
+struct Self_1411A8 {
+    u8 pad0[0x14];
+    Inner_1411A8* f14;
+    u8 pad1[0x5A0 - 0x18];
+    s32 f5A0;
+    u8 pad2[0x5B0 - 0x5A4];
+    s32 f5B0;
+    s32 f5B4;
+};
+
+void func_001411A8(void* self)
+{
+    Self_1411A8* s = (Self_1411A8*)self;
+    func_001B7968(self);
+    s->f5B0 = func_00140FF8(D_00261420);
+    s->f5A0 = -1;
+    Inner_1411A8* in = s->f14;
+    s32 n = in->f2304;
+    s->f5B4 = n;
+    n = n + 1;
+    in->f2304 = n;
+    func_001B9AE0(self, 3, 0, 3, 0);
+}
+
+s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 func_00141F48(void* a, void* b, void* c, s32 d, s32 e, f32 x);
+
+struct Self_141C28 {
+    u8 pad0[0x3CC];
+    f32 f3CC;
+    u8 pad1[0x3F8 - 0x3D0];
+    s32 f3F8;
+    u8 pad2[0x538 - 0x3FC];
+    u64 f538;
+};
+
+s32 func_00141C28(Self_141C28* self, void* a1, void* a2, s32 a3, s32 a4)
+{
+    if (self->f3F8 != 0) {
+        return func_0013DFD8((void*)self->f3F8, a1, a2, 0, a3, (void*)a4);
+    }
+    if (self->f538 & ((u64)0x8000 << 25)) {
+        return func_00141F48((u8*)self + 0x140, a1, a2, a3, a4, self->f3CC);
+    }
+    return 0;
+}
+
+s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 func_00141F48(void* a, void* b, void* c, s32 d, s32 e, f32 x);
+
+struct Self_141C90 {
+    u8 pad0[0x3CC];
+    f32 f3CC;
+    u8 pad1[0x538 - 0x3D0];
+    u64 f538;
+};
+
+s32 func_00141C90(Self_141C90* self, void* a1, void* a2, void* a3, s32 a4, void* a5)
+{
+    if (a1 != 0) {
+        return func_0013DFD8(a1, a2, a3, 0, a4, a5);
+    }
+    if (self->f538 & ((u64)0x8000 << 25)) {
+        return func_00141F48((u8*)self + 0x140, a2, a3, a4, (s32)a5, self->f3CC);
+    }
+    return 0;
+}

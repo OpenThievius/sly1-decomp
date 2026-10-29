@@ -378,3 +378,101 @@ void func_00138398(void* src, s32* count, Item_138398** out)
         }
     }
 }
+
+struct Pair_139970 { f32 a; f32 b; };
+
+s32 func_00139970(s32 count, Pair_139970* p, f32 x, f32 period, f32* out)
+{
+    s32 i;
+    for (i = 0; i < count; p++, i++) {
+        if (p->b != 0.0f) {
+            f32 d = x - p->a;
+            if (d < 0.0f) {
+                d += period;
+            }
+            if (d < p->b + 0.0001f) {
+                if (out != 0) {
+                    *out = d;
+                }
+                break;
+            }
+        }
+    }
+    return i;
+}
+
+typedef void (*VFn_139D68)(void* self);
+
+struct Obj_139D68 {
+    VFn_139D68* vtbl;
+    u8 pad04[0x80 - 4];
+    f32 f80;
+    u8 pad84[0x2C8 - 0x84];
+    u64 bits2C8;
+    s32 w2D0;
+    u8 pad2D4[0x620 - 0x2D4];
+    s32 w620;
+};
+
+struct Outer_139D68 {
+    u8 pad0[0x1CC0];
+    Obj_139D68* obj1CC0;
+};
+
+Obj_139D68* func_00139D68(Outer_139D68* self)
+{
+    Obj_139D68* s0 = self->obj1CC0;
+    if (s0 != 0) {
+        u64 b = ((s0->bits2C8 & 0xFFFFFFFFF3FFFFFFull) | 0x08000000ull) & 0xFFFFFFFFCFFFFFFFull | 0x20000000ull;
+        s0->w2D0 = 0;
+        s0->f80 = 1e10f;
+        s0->bits2C8 = b;
+        s0->w620 = 0;
+        s0->vtbl[6](s0);
+    }
+    return s0;
+}
+
+struct Obj_139F80 { u8 pad0[0x380]; s32 f380; u8 pad1[0x20C]; s32 f590; u8 f594[4]; };
+
+extern s32 D_002744FC;
+s32 func_001B4688(void* x);
+void func_0013A008(Obj_139F80* self);
+
+void func_00139F80(Obj_139F80* self, void* x)
+{
+    s32 r = func_001B4688(x);
+    self->f380 = r;
+    if (r == 0) {
+        self->f380 = D_002744FC;
+    }
+    if (self->f590 == 0) {
+        self->f590 = 1;
+        s32 i = 0;
+        u8* dst = self->f594;
+        do {
+            u8* src = (u8*)self->f380 + i;
+            dst[i] = (u8)((src[4] + 1) >> 1);
+            i++;
+        } while (i < 4);
+    }
+    func_0013A008(self);
+}
+
+struct Actor_13B708 { u8 pad0[0x550]; s32 f550; };
+struct Msg_13B708 { s32 kind_00; Actor_13B708* target_04; };
+
+void func_00127378(Actor_13B708* self, s32 kind, Msg_13B708* msg);
+void func_0013BE00(Actor_13B708* p, f32 delta);
+
+void func_0013B708(Actor_13B708* self, s32 kind, Msg_13B708* msg)
+{
+    func_00127378(self, kind, msg);
+    if (kind == 0xA) {
+        if (msg->target_04 == self) {
+            if (msg->target_04->f550 == 0) {
+                func_0013BE00(msg->target_04, 0.0f);
+            }
+        }
+    }
+}

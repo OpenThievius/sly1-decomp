@@ -756,3 +756,35 @@ void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other)
         func_00152730(&self->head, &other->head);
     }
 }
+
+extern s8 D_00262250[];
+extern s32 D_00262268[];
+
+s32 func_0015C200(s32 a0)
+{
+    s8 key = (s8)a0;
+    s32 i = 0;
+    while (i < 5 && key != D_00262250[i]) {
+        i++;
+    }
+    if (i < 5) {
+        return D_00262268[i];
+    }
+    return 0;
+}
+
+struct Obj_15C4A8 {
+    u8 pad0[8];
+    s32 f8;
+    u8 pad0C[0x3C];
+    f32 f48;
+};
+
+s32 func_0015C4E8(void* self, u8* s);
+
+f32 func_0015C4A8(Obj_15C4A8* self, u8* s)
+{
+    f32 a = (f32)self->f8 * self->f48;
+    s32 n = func_0015C4E8(self, s);
+    return a * (f32)n;
+}
