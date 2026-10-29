@@ -102,3 +102,35 @@ void func_0017FD90(void* self)
     func_00182D48(self);
     func_00152470(D_00264088, self);
 }
+
+s32 func_0017D220(void* self)
+{
+    return (s32)func_0017CF38(self, 0xC, -1, 0);
+}
+
+extern u8 D_00264088[];
+
+void func_00182ED0(void* self);
+void func_00152600(void* table, void* self);
+
+void func_0017FDC8(void* self)
+{
+    func_00182ED0(self);
+    func_00152600(D_00264088, self);
+}
+
+struct __attribute__((packed)) Packed8_17FE00 { u64 bits; };
+
+struct Obj_17FE00 {
+    u8 pad[0x50];
+    Packed8_17FE00 field;
+};
+
+void func_001830D8(void* self);
+
+void func_0017FE00(Obj_17FE00* self)
+{
+    Packed8_17FE00 tmp = self->field;
+    func_001830D8(self);
+    self->field = tmp;
+}

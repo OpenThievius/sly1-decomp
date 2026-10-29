@@ -323,3 +323,42 @@ void func_0018D910(Ctx_0018D910* self)
     set <<= 25;
     self->flags = (self->flags & mask) | set;
 }
+
+struct Ctx_18E7C0 {
+    u8 pad0[4];
+    s32 f4;
+    u8 pad1[4];
+    s32 fC;
+};
+
+struct Span_18E7C0 {
+    s32 a;
+    s32 b;
+    void* c;
+    s32 d;
+};
+
+void func_001F6C20(s32 a);
+void* func_001F6CA0(Span_18E7C0* span, s32 n);
+s32 func_001F6C90(void* obj);
+
+void* func_0018E7C0(Ctx_18E7C0* p, void* a1, s32 a2)
+{
+    Span_18E7C0 span;
+    void* obj;
+
+    span.a = a2;
+    span.b = p->f4 + p->fC;
+    span.c = a1;
+    span.d = 0;
+    func_001F6C20(0);
+    obj = func_001F6CA0(&span, 1);
+    while (func_001F6C90(obj) >= 0) {
+    }
+    return a1;
+}
+
+void* func_0018E8C0(void)
+{
+    return 0;
+}

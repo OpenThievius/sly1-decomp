@@ -241,3 +241,130 @@ void func_00183E70(void* self)
     func_001243E0(self);
     func_00183DC0(self);
 }
+
+struct Tuning_182E40 { u8 pad[0xC]; f32 scale; };
+
+extern Tuning_182E40* D_002623C8;
+
+s32 func_001EB050(void* target, f32 scale);
+void func_00182DD8(void* self);
+
+void func_00182E40(void* self, void* target)
+{
+    if (func_001EB050(target, D_002623C8->scale)) {
+        func_00182DD8(self);
+    }
+}
+
+void func_00182ED0(void* self)
+{
+    (void)self;
+}
+
+typedef void (*VFn_182ED8)(void* self);
+struct Obj_182ED8 { VFn_182ED8* vtbl; };
+
+s32 func_00182FC8(void* self);
+
+void func_00182ED8(void* self)
+{
+    Obj_182ED8* obj = (Obj_182ED8*)self;
+    if (func_00182FC8(self)) {
+        VFn_182ED8 f = obj->vtbl[19];
+        if (f) {
+            f(self);
+        }
+        obj->vtbl[20](self);
+        obj->vtbl[7](self);
+    }
+}
+
+struct Link_182F40 { u8 pad[0x18]; Link_182F40* next; };
+
+s32 func_00182F40(Link_182F40* node, Link_182F40* target)
+{
+    if (node == 0) {
+        return 0;
+    }
+    while (node != 0) {
+        if (node == target) {
+            return 1;
+        }
+        node = node->next;
+    }
+    return target == 0;
+}
+
+struct __attribute__((aligned(16))) Quad_183B20 { s32 w[4]; };
+struct __attribute__((packed)) Pack_183B20 { u64 v; };
+
+void func_0011B008(void* self);
+void* func_0011C858(void);
+void func_0011B818(void* self, void* ptr);
+void func_001C2320(void* self, void* a1, void* a2, void* a3);
+void func_0011B060(void* self, s32 mode);
+
+void func_00183B20(void* a0, void* a1, void* a2)
+{
+    Quad_183B20 a;
+    Quad_183B20 b;
+    void* p;
+    func_0011B008(&a);
+    p = func_0011C858();
+    *(Pack_183B20*)p = *(Pack_183B20*)a2;
+    func_0011B818(&a, p);
+    func_001C2320(&b, a0, a1, &a);
+    func_0011B060(&b, 2);
+    func_0011B060(&a, 2);
+}
+
+struct __attribute__((aligned(16))) Quad_183BB8 { s32 w[4]; };
+
+void func_0011B008(void* self);
+void func_0011B570(void* self, s32 n);
+void func_001C2320(void* self, void* a1, void* a2, void* a3);
+void func_0011B060(void* self, s32 mode);
+
+void func_00183BB8(void* a0, void* a1, s32 n)
+{
+    Quad_183BB8 a;
+    Quad_183BB8 b;
+    func_0011B008(&a);
+    func_0011B570(&a, n);
+    func_001C2320(&b, a0, a1, &a);
+    func_0011B060(&b, 2);
+    func_0011B060(&a, 2);
+}
+
+struct __attribute__((aligned(16))) Quad_183C38 { s32 w[4]; };
+
+void func_0011B008(void* self);
+void* func_0011C508(void);
+void func_0011B740(void* a, void* b);
+void func_001C2320(void* self, void* a1, void* a2, void* a3);
+void func_0011B060(void* self, s32 mode);
+
+void func_00183C38(void* a0, void* a1, void* a2)
+{
+    Quad_183C38 a;
+    Quad_183C38 b;
+    void* p;
+    func_0011B008(&a);
+    p = func_0011C508();
+    *(Quad_183C38*)p = *(Quad_183C38*)a2;
+    func_0011B740(&a, p);
+    func_001C2320(&b, a0, a1, &a);
+    func_0011B060(&b, 2);
+    func_0011B060(&a, 2);
+}
+
+void func_00125138(void* self);
+void func_001841D0(void* self);
+void func_00184B58(void* self);
+
+void func_00183D88(void* self)
+{
+    func_00125138(self);
+    func_001841D0(self);
+    func_00184B58(self);
+}

@@ -238,3 +238,21 @@ s32 func_0017B3A8(Obj_17B3A8* self, Msg_17B3A8* msg)
     }
     return 1;
 }
+
+struct Obj_17B550 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x60C - 0x18];
+    s32 f60C;
+};
+
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+void func_0017B550(Obj_17B550* self, s32 index)
+{
+    if (index == -1) {
+        self->f60C = 0;
+    } else {
+        self->f60C = func_0015A418(self->f14, 0x101, index, self);
+    }
+}
