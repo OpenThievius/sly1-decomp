@@ -316,3 +316,49 @@ s32 func_00172EB8(Unit_172EB8* self)
     }
     return 3;
 }
+
+struct Obj_172530 {
+    u8 pad0[0x610];
+    void* f610;
+    void* f614;
+    u8 pad1[0x620 - 0x618];
+    s32 f620;
+    s32 f624;
+    u8 pad2[0x11E0 - 0x628];
+    s32 f11E0;
+    u8 pad3[0x12E0 - 0x11E4];
+    s32 f12E0;
+    u8 pad4[0x2220 - 0x12E4];
+    s32 f2220;
+    u8 pad5[0x239C - 0x2224];
+    s32 f239C;
+};
+
+void func_001C5438(Obj_172530* self);
+void func_001C4618(Obj_172530* self, void* a1, void* a2, s32 a3, f32 f12, void* a4);
+
+void func_00172530(Obj_172530* self)
+{
+    func_001C5438(self);
+    if (self->f2220 == 6 && self->f239C == 7) {
+        self->f12E0 = 0;
+        goto clear;
+    }
+    {
+        void* a1 = self->f610;
+        if (a1 == 0) {
+            self->f12E0 = 0;
+            goto clear;
+        }
+        if (self->f614 == 0) {
+            self->f12E0 = 0;
+            goto clear;
+        }
+        f32 k = 6.0f;
+        func_001C4618(self, a1, a1, self->f620, k, (u8*)self + 0x1190);
+        func_001C4618(self, self->f614, self->f614, self->f624, k, (u8*)self + 0x1290);
+    }
+    return;
+clear:
+    self->f11E0 = 0;
+}

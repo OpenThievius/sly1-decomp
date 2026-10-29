@@ -293,3 +293,156 @@ void* func_001F37D8(Object_1F37D8* obj, s32 value)
     }
     return (u8*)obj + (obj->index * 0xD0 + 0x50);
 }
+
+struct Msg_1F0428 { s32 kind; void* obj; void* value; u8 pad; s32 last; };
+
+extern u8 D_00275F80[];
+
+void func_001EFFA0(void* dst, void* args, s32 count);
+
+void func_001F0428(void* obj, void* value, s32 count)
+{
+    Msg_1F0428 m;
+    m.kind = 1;
+    m.obj = obj;
+    m.value = value;
+    m.last = 0;
+    func_001EFFA0(D_00275F80, &m, count);
+}
+
+extern u8 D_00275F80[];
+
+void func_00127378(void* self, s32 kind, void* msg);
+void func_001F0220(void* o, s32 mode);
+void func_001F1050(void* self, s32 mode);
+
+struct Obj_1F0F70 { u8 pad0[0x2D0]; s32 f2D0; u8 pad1[8]; s32 f2DC; s32 f2E0; u8 pad2[8]; s32 f2EC; };
+
+void func_001F0F70(Obj_1F0F70* self, s32 kind, void* msg)
+{
+    func_00127378(self, kind, msg);
+    if (kind != 5) return;
+    s32 v = self->f2D0;
+    if (v == 3) goto L_three;
+    if (v >= 4) goto L_ge4;
+    if (v == 1) goto L_one;
+    return;
+L_ge4:
+    if (v == 4) goto L_four;
+    return;
+L_one:
+    func_001F1050(self, self->f2E0);
+    return;
+L_three:
+    func_001F0220(D_00275F80, 2);
+    return;
+L_four:
+    if ((s32)msg != self->f2EC) return;
+    u8* g = D_00275F80;
+    if (*(s32*)(g + 4) == 3) {
+        func_001F0220(g, 0);
+    }
+    func_001F1050(self, 0);
+}
+
+void func_001F1050(void* self, s32 mode);
+
+struct Obj_1F1590 { u8 pad0[0x2D0]; s32 f2D0; u8 pad1[8]; s32 f2DC; s32 f2E0; u8 pad2[8]; s32 f2EC; };
+
+void func_001F1590(Obj_1F1590* self, s32 a1, s32 a2)
+{
+    s32 v = self->f2D0;
+    if (v == 2) goto L_two;
+    if (v < 3) {
+        if (v == 0) goto L_store;
+    } else {
+        if (v == 4) goto L_store;
+    }
+    return;
+L_store:
+    self->f2DC = a1;
+    self->f2E0 = a2;
+    func_001F1050(self, 1);
+    return;
+L_two:
+    self->f2DC = a1;
+    if (a2 == 3) {
+        func_001F1050(self, 3);
+    }
+}
+
+void func_001F1050(void* self, s32 mode);
+
+struct Obj_1F1610 { u8 pad0[0x2D0]; s32 f2D0; };
+
+void func_001F1610(Obj_1F1610* self)
+{
+    s32 v = self->f2D0;
+    if (v < 3) {
+        if (v > 0) {
+            func_001F1050(self, 4);
+        }
+    }
+}
+
+typedef void (*VFn_1F3D80)(void* self, void* arg);
+struct Item_1F3D80 { VFn_1F3D80* vtbl; };
+struct Obj_1F3D80 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x40 - 0x18];
+    u8 pad2[0x50 - 0x40];
+    u8 pad3[0xA0 - 0x50];
+    s32 count;
+    Item_1F3D80** arr;
+    s32 count2;
+    void** arr2;
+};
+
+void func_00137EB0(void* a, void* b);
+void func_00137E70(void* a, void* b);
+void func_0011EC40(void* a, void* b);
+s32 func_00137D10(void* p);
+void* func_0018D500(int size);
+void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
+void func_00138518(void* self);
+
+void func_001F3D80(Obj_1F3D80* self, void* other)
+{
+    func_00137EB0(other, (u8*)self + 0x50);
+    func_00137E70(other, (u8*)self + 0x40);
+    func_0011EC40(self, other);
+    self->count = func_00137D10(other);
+    self->arr = (Item_1F3D80**)func_0018D500(self->count << 2);
+    for (s32 i = 0; i < self->count; i++) {
+        s32 a = func_00137D10(other);
+        s32 b = func_00137D10(other);
+        s32 c = func_00137D10(other);
+        Item_1F3D80* it = (Item_1F3D80*)func_0011E580(a, self->f14, 0, b, c);
+        self->arr[i] = it;
+        it->vtbl[14](it, other);
+    }
+    func_00138518(other);
+    self->count2 = func_00137D10(other);
+    self->arr2 = (void**)func_0018D500(self->count2 << 2);
+    for (s32 i = 0; i < self->count2; i++) {
+        self->arr2[i] = (void*)func_00137D10(other);
+    }
+}
+
+typedef void (*VFn_1F3F80)(void* self, void* arg);
+struct Item_1F3F80 { VFn_1F3F80* vtbl; };
+struct Obj_1F3F80 { u8 pad0[0x18]; void* f18; u8 pad1[0xA0 - 0x1C]; s32 count; void** arr; };
+
+void func_00182C58(void* self);
+void func_00182ED8(void* a);
+
+void func_001F3F80(Obj_1F3F80* self)
+{
+    func_00182C58(self);
+    for (s32 i = 0; i < self->count; i++) {
+        Item_1F3F80* item = (Item_1F3F80*)self->arr[i];
+        item->vtbl[25](item, self->f18);
+        func_00182ED8(item);
+    }
+}

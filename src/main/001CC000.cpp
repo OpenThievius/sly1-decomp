@@ -108,3 +108,21 @@ f32 func_001CF138(Obj_001CF138* self, s32 id, f32 a, f32 b)
     }
     return r;
 }
+
+void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
+void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
+
+struct Obj_1CC410 { s32 f0; u8 pad0[0xC - 0x4]; s32 fC; u8 pad1[0x18 - 0x10]; f32 f18; };
+
+void func_001CC410(void* a0, Obj_1CC410* a1, void** a2)
+{
+    void* tmp;
+    a1->f0 = 0;
+    a1->fC = 0;
+    a1->f18 = 1.0f;
+    func_00139038(a0, 12, 3, a1, 0, 0, 0, &tmp);
+    func_001399F8(tmp, 12, 3, a1);
+    if (a2 != 0) {
+        *a2 = tmp;
+    }
+}

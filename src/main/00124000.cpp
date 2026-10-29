@@ -201,3 +201,75 @@ void func_001273F0(Obj_1273F0* self, Quad_1273F0* src)
     }
     self->vt->f48(self, 3, &f);
 }
+
+struct __attribute__((aligned(16))) Quad_1274F8 { s32 w[4]; };
+struct Obj_1274F8 {
+    u8 pad0[0x150];
+    Quad_1274F8 q150;
+    u8 pad1[0x1EC - 0x160];
+    void* p1EC;
+};
+
+void func_001226D8(void* p);
+s32 func_00123DC0(void* a);
+void func_00129DF8(void* self);
+
+void func_001274F8(Obj_1274F8* self, Quad_1274F8* src)
+{
+    self->q150 = *src;
+    if (self->p1EC != 0) {
+        func_001226D8(self->p1EC);
+    }
+    if (func_00123DC0(src) == 0) {
+        func_00129DF8(self);
+    }
+}
+
+struct __attribute__((aligned(16))) Quad_127590 { s32 w[4]; };
+struct Obj_127590 {
+    u8 pad0[0x160];
+    Quad_127590 q160;
+    u8 pad1[0x1F0 - 0x170];
+    void* p1F0;
+};
+
+void func_001226D8(void* p);
+s32 func_00123E00(void* a);
+void func_00129DF8(void* self);
+
+void func_00127590(Obj_127590* self, Quad_127590* src)
+{
+    self->q160 = *src;
+    if (self->p1F0 != 0) {
+        func_001226D8(self->p1F0);
+    }
+    if (func_00123E00(src) == 0) {
+        func_00129DF8(self);
+    }
+}
+
+struct Vec3_127558 { f32 x; f32 y; f32 z; };
+typedef void (*VFn_127558)(void* self, void* v);
+struct Obj_127558 { VFn_127558* vtbl; };
+
+void func_00127558(void* self, f32 x, f32 y, f32 z)
+{
+    Vec3_127558 v;
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    Obj_127558* o = (Obj_127558*)self;
+    o->vtbl[36](self, &v);
+}
+
+typedef void (*VFn_001275F0)(void* self, f32* v);
+struct Obj_001275F0 { VFn_001275F0* vtbl; };
+
+void func_001275F0(Obj_001275F0* self, f32 x, f32 y, f32 z)
+{
+    f32 v[3];
+    v[0] = x;
+    v[1] = y;
+    v[2] = z;
+    self->vtbl[37](self, v);
+}

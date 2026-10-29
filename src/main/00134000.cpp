@@ -413,3 +413,48 @@ s32 func_00137D78(Reader_137D10* self)
     return value;
 }
 
+struct Obj_136530 {
+    u8 pad0[4];
+    s32 handle;
+    s8 flag;
+    u8 pad1[0x268 - 9];
+    f32 f268;
+    u8 pad2[0x2F0 - 0x26C];
+    f32 scale;
+};
+
+extern f32 D_0026185C;
+
+void func_0015DB28(void* out, void* p, s32 handle);
+s32 func_0015DF58(void* self);
+
+s32 func_00136530(Obj_136530* self)
+{
+    u8 buf[0xB0];
+
+    if (self->flag == 0) {
+        return 1;
+    }
+    func_0015DB28(buf, &self->flag, self->handle);
+    s32 n = func_0015DF58(buf);
+    s32 v = (s32)((D_0026185C - self->f268) * self->scale);
+    return v >= n;
+}
+
+void func_00137A60(void* self, s32 size, void* obj);
+
+void func_00137F08(void* self, u8* p)
+{
+    u8* a = p + 0x10;
+    u8* b = p + 0x20;
+    u8* c = p + 0x30;
+
+    func_00137A60(self, 12, p);
+    func_00137A60(self, 12, a);
+    func_00137A60(self, 12, b);
+    func_00137A60(self, 12, c);
+    *(s32*)(p + 0xC) = 0;
+    *(s32*)(a + 0xC) = 0;
+    *(s32*)(b + 0xC) = 0;
+    *(f32*)(c + 0xC) = 1.0f;
+}

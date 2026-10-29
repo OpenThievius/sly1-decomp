@@ -555,3 +555,25 @@ s32 func_0012FD78(void* self, Pair_0012FD78* pair)
 }
 
 struct State_0012FCF0 { s32 w[11]; };
+
+struct Obj_12D448 {
+    u8 pad0[0x24];
+    s8 state;
+};
+
+
+void func_001DDA20(void* a);
+void func_001DDA50(void* a);
+
+void func_0012D448(Obj_12D448* self, s32 v)
+{
+    if (v == self->state) {
+        return;
+    }
+    if (v != 0) {
+        func_001DDA20(*(void**)&D_00275710);
+    } else {
+        func_001DDA50(*(void**)&D_00275710);
+    }
+    self->state = (s8)v;
+}

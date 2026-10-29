@@ -179,3 +179,84 @@ s32 func_001D5650(Obj_001D5650* a, Obj_001D5650* b) { if (a->value < b->value) r
 
 struct Obj_001D7120 { s32 a; s32 b; s32 c; s32 d; s32 e; s32 f; };
 Obj_001D7120* func_001D7120(Obj_001D7120* self, s32 a, s32 b) { self->a = a; self->b = b; self->c = 0; self->d = -1; self->e = 0; self->f = 0; return self; }
+
+struct Owner_1D40A0 {
+    u8 pad0[0x638];
+    f32 f638;
+    u8 f63C[0x4];
+    u8 f640[0x4];
+};
+
+struct Obj_1D40A0 {
+    f32 f0;
+    u8 pad4[0x4C];
+    f32 f50;
+    s32 f54;
+    u8 pad58[0x48];
+    s32 fA0;
+    u8 padA4[0x4C];
+    s32 fF0;
+    u8 padF4[0x4C];
+    s32 f140;
+    u8 pad144[0x4C];
+    s32 f190;
+};
+
+struct Sub_1D40A0 {
+    u8 pad0[0x8];
+    s32 f8;
+};
+
+struct Ctx_1D40A0 {
+    u8 pad0[0xC0];
+    Sub_1D40A0* sub;
+};
+
+void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
+void func_001D39E0(s32 a0, void* a1, s32 a2, void* a3);
+
+void func_001D40A0(Owner_1D40A0* a0, Obj_1D40A0* a1, Ctx_1D40A0* a2, f32 f12, f32 f13)
+{
+    a0->f638 = f12;
+    if (a1->f54 == 0) {
+        a1->f0 = 1.0f;
+        a1->f50 = 0.0f;
+    } else {
+        f32 one = 1.0f;
+        a1->f50 = f13;
+        a1->f0 = one - f13;
+    }
+    a1->fA0 = 0;
+    a1->f140 = 0;
+    a1->fF0 = 0;
+    a1->f190 = 0;
+    func_001399F8(a2, 0x50, 6, a1);
+    func_001D39E0(6, a1, a2->sub->f8, &a0->f640);
+}
+
+extern u8 D_00274FC0[];
+
+struct Item_1D4848 { s32 f0; u8 pad4[4]; s32 f8; };
+struct Obj_1D4848 { u8 pad0[0x14]; void* f14; u8 pad1[0x2690]; s32 f26A8; Item_1D4848* f26AC; };
+
+u8* func_0018D568(s32 size, void* src);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+void func_001D4848(Obj_1D4848* self)
+{
+    self->f26A8 = 7;
+    self->f26AC = (Item_1D4848*)func_0018D568(0x54, D_00274FC0);
+    for (s32 i = 0; i < self->f26A8; i++) {
+        Item_1D4848* it = self->f26AC + i;
+        it->f8 = func_0015A418(self->f14, 1, it->f0, self);
+    }
+}
+
+void func_0012AAE8(void* self, f32 value);
+void func_00160DA0(void);
+
+void func_001D5620(void* self)
+{
+    func_0012AAE8(self, 1.0f);
+    func_00160DA0();
+}

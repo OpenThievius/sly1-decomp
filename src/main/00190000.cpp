@@ -730,3 +730,79 @@ void func_00193270(S_193270* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }
 
 struct S_193300 { s32 a,b,c,d,e; };
 void func_00193300(S_193300* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }
+
+struct __attribute__((packed)) Pack_192020 { u64 value; };
+
+void func_001830D8(void* self);
+
+void func_00192020(void* a0)
+{
+    Pack_192020 tmp;
+    tmp = *(Pack_192020*)((u8*)a0 + 0x38);
+    func_001830D8(a0);
+    *(Pack_192020*)((u8*)a0 + 0x38) = tmp;
+}
+
+struct __attribute__((packed)) Word_193210 { u32 value; };
+struct Obj_193210 {
+    s32 f00; s32 f04; s32 f08; s32 f0C; s32 f10;
+    Word_193210 f14; Word_193210 f18; Word_193210 f1C; Word_193210 f20;
+};
+
+Obj_193210* func_00193210(Obj_193210* self, Word_193210* s1, Word_193210* s2, Word_193210* s3, Word_193210* s4)
+{
+    self->f14 = *s1;
+    self->f18 = *s2;
+    self->f1C = *s3;
+    self->f20 = *s4;
+    self->f00 = 0;
+    self->f10 = 0;
+    self->f0C = 0;
+    self->f08 = 0;
+    self->f04 = 0;
+    return self;
+}
+
+extern u8 D_00269BA8[];
+
+void func_00152438(void* self, s32 value);
+
+void func_00191EC0()
+{
+    func_00152438(D_00269BA8, 0x38);
+}
+
+extern u8 D_00269BA8[];
+void func_00152440(void* p);
+
+void func_00191EE8(void)
+{
+    func_00152440(D_00269BA8);
+}
+
+extern u8 D_00269BA8[];
+void func_00182D48(void* self);
+void func_00152470(void* table, void* self);
+
+void func_00191F68(void* self)
+{
+    func_00182D48(self);
+    func_00152470(D_00269BA8, self);
+}
+
+extern u8 D_00269BA8[];
+void func_00182ED0(void* self);
+void func_00152600(void* table, void* self);
+
+void func_00191FA0(void* self)
+{
+    func_00182ED0(self);
+    func_00152600(D_00269BA8, self);
+}
+
+extern s32 D_0026A068[];
+
+s32 func_00193598(s32 index)
+{
+    return D_0026A068[index];
+}

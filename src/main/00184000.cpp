@@ -297,3 +297,99 @@ void func_001861E8(u8* self, Node_1861E8* head)
         } while (cur != 0);
     }
 }
+
+struct Ent_001879C0 { u8 pad0[0x20]; f32 f; s32 b; s32 c; u8 pad1[4]; };
+
+s32 func_00187260(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, Ent_001879C0* a6);
+void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+
+void func_001879C0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
+{
+    Ent_001879C0 ents[64];
+    s32 n = func_00187260(a1, a3, a4, a5, (u8*)a2 + 0x3A4, 0x40, ents);
+    for (s32 i = n - 1; i >= 0; i--) {
+        Ent_001879C0* e = &ents[i];
+        func_00185D20(e->f, a0, a2, e, (u8*)e + 0x10, e->b, 0, e->c, a6);
+    }
+}
+
+struct Rec_00187C28 { u8 pad0[0x50]; void* p; u8 pad1[0x1C]; };
+struct Vec_00187C28 { f32 x; f32 y; f32 z; f32 w; };
+
+s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
+void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, void* a6, void* a7);
+
+s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
+{
+    Rec_00187C28 recs[2];
+    Vec_00187C28 v1;
+    Vec_00187C28 v2;
+    s32 count = func_0013DFD8(a4, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, 2, recs);
+    s32 idx = 0;
+    if (count > 0) {
+        idx = (recs[0].p == 0);
+    }
+    if (idx >= count) {
+        return 0;
+    }
+    void* p = recs[idx].p;
+    func_00187B60(a0, p, &v1, &v2, *(f32*)((u8*)p + 0x10));
+    func_00185D20(v2.x, a0, a1, &v1, p, 8, 0, p, a5);
+    return 1;
+}
+
+struct Loc_00187E88 { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
+
+s32 func_00187D08(void* a0, void* a1, void* a2, s32 a3, void* a4, void* a5, void* a6, f32 f);
+void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
+void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+
+s32 func_00187E88(void* a0, void* a1, void* a2)
+{
+    Loc_00187E88 loc;
+    if (func_00187D08((u8*)a1 + 0x140, (u8*)a0 + 0x370, (u8*)a0 + 0x140, 0, &loc, loc.b, &loc.fa, *(f32*)((u8*)a1 + 0x3CC)) == 0) {
+        return 0;
+    }
+    func_00187B60(a0, loc.b, loc.a, &loc.fb, loc.fa);
+    func_00185D20(loc.fb, a0, a1, loc.a, loc.b, 9, 0, 0, a2);
+    return 1;
+}
+
+extern s32 D_00261F14;
+extern u8 D_00211E10[];
+void func_001F6C20(s32 unused);
+void func_00202A80(void* dma, void* addr);
+void func_00202C38(void* dma, s32 b, s32 c);
+
+void func_00185A58(void)
+{
+    s32* p = (s32*)D_00261F14;
+    *p |= 0x40;
+    func_001F6C20(0);
+    func_00202A80((void*)D_00261F14, D_00211E10);
+    func_00202C38((void*)D_00261F14, 0, 0);
+    s32* q = (s32*)D_00261F14;
+    *q &= ~0x40;
+}
+
+extern u8 D_00261F18[];
+extern u8 D_00212110[];
+
+void func_001F6C20(s32 a);
+void func_00202A80(void* a, void* b);
+void func_00202C38(void* a, s32 b, s32 c);
+
+struct Flags_185AC8 {
+    s32 flags;
+};
+
+void func_00185AC8()
+{
+    Flags_185AC8* p = *(Flags_185AC8**)D_00261F18;
+    p->flags |= 0x40;
+    func_001F6C20(0);
+    func_00202A80(*(void**)D_00261F18, D_00212110);
+    func_00202C38(*(void**)D_00261F18, 0, 0);
+    (*(Flags_185AC8**)D_00261F18)->flags &= ~0x40;
+}

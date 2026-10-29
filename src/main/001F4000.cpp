@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+
 void func_001451F0(u32, int, int, void*, int, void*);
 void func_00125C90();
 struct Obj_1F4308 { u8 pad[0x98]; s32 state; f32 value; };
@@ -37,3 +38,27 @@ void func_001F55A8(void*);
 void func_001F4FD8(void* self) { func_00124A48(self); func_001F55A8((u8*)self + 0x550); }
 void func_001FA468();
 void func_001F4ED0(void* self) { if (!*(s32*)((u8*)self + 0x310)) { func_00145088(*(u32*)D_00261990, 7, (u8*)*(u32*)D_00261990 + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
+
+s32 func_001F3C38(void* a, void* b);
+s32 func_001F4008(void* x);
+s32 func_001925F0(void);
+s32 func_00192620(void);
+s32 func_001929D0(void* v);
+
+s32 func_001F4318(void* unused, void* a, void* b)
+{
+    s32 r = func_001F3C38(a, b);
+    if (r != 0) {
+        r = func_001F4008((void*)r);
+        goto done;
+    }
+    r = func_001925F0();
+    if (r == 0) {
+        r = func_00192620();
+        if (r != 0) {
+            r = func_001929D0((void*)r);
+        }
+    }
+done:
+    return r;
+}
