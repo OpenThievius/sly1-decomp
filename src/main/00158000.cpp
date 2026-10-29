@@ -901,3 +901,40 @@ void func_00159ED0(Ctx_159ED0* a0)
         func_00152470(D_00275710 + 0x1CD8, a0);
     }
 }
+
+s32 func_0015A198(void*,s32,s32,void*,s32,void*);
+Rec_158C60* func_0015A418(void* self,s32 flags,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A198(self,flags|0x200,kind,arg,1,&out);
+    return (Rec_158C60*)out;
+}
+
+s32 func_0015A448(void* self,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A198(self,0x204,kind,arg,1,&out);
+    return out;
+}
+
+s32 func_0015A480(void* self,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A198(self,0x201,kind,arg,1,&out);
+    return out;
+}
+
+s32 func_0015A838(void* self,s32 flags,s32 kind,void* arg)
+{
+    s32 out=0;
+    func_0015A4F0(self,flags|0x200,kind,arg,1,&out);
+    return out;
+}
+
+void func_001289C0(void*,void*);
+s32 func_001E4C48(void*,void*,void*,void*,void*);
+void func_0015A918(u8* self,void* other)
+{
+    func_001289C0(self,other);
+    func_001E4C48(other,self+0x2D0,self+0x2D4,self+0x2D8,self+0x2DC);
+}

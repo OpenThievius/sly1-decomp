@@ -310,7 +310,6 @@ void func_00161BB0(Obj_00161BB0* self, s32 value)
     func_001626A8(self, &local);
 }
 
-
 s32 func_00160180(void)
 {
     return (s32)func_00160110();
@@ -414,7 +413,6 @@ void func_00161768(Obj_161768* self, u32 a1, u64 a2)
     self->f24 = 0;
 }
 
-
 void func_00160C48(s32 value)
 {
     D_002623C0->f19E4 = value;
@@ -475,3 +473,19 @@ void func_00160050(Obj_00160050* obj, s32 value) { obj->values[obj->count++] = v
 
 struct Obj_1612E8 { u8 pad[0x24]; s32 value; };
 s32 func_001612E8(Obj_1612E8* obj) { return ++obj->value; }
+
+void func_00160918();
+void func_00160070() { func_00160918(); }
+
+s32 func_00160C58()
+{
+    s32 result=0;
+    if (D_002623C0->f19E4>0 || (D_00262C64&2)) result=1;
+    return result;
+}
+
+void* func_00160CA0(u8* self,s32 index)
+{
+    if ((u32)(index-0x33B)>=12) return 0;
+    else return self+(index*4-0xCD8);
+}
