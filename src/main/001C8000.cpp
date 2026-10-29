@@ -234,3 +234,38 @@ s32 func_001CB3C8(void)
 {
     return 0;
 }
+
+struct Obj_1CB618 {
+    u8 pad0[0x180];
+    s32 f180;
+};
+
+void func_00182C18(void* self);
+
+void func_001CB618(Obj_1CB618* self)
+{
+    func_00182C18(self);
+    self->f180 = -1;
+}
+
+struct List_1CB648 {
+    u8 pad0[0x58];
+    u32 count;
+    void* items[16];
+};
+
+void func_001CBEE8(void* self, s32 arg);
+
+void func_001CB648(List_1CB648* self, void* value)
+{
+    u32 n;
+
+    if (self->count == 0) {
+        func_001CBEE8(self, 0);
+    }
+    n = self->count;
+    if (n < 0x10) {
+        self->items[n] = value;
+        self->count = n + 1;
+    }
+}

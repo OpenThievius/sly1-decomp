@@ -52,3 +52,44 @@ void func_001E2268(void* a, void* b)
 void func_001E30D8(void* self)
 {
 }
+
+s32 func_001E1EB0(void* self, void* ap);
+
+s32 func_001E1F10(void* self, ...)
+{
+    void* ap = (char*)__builtin_next_arg(self) - 56;
+    return func_001E1EB0(self, ap);
+}
+
+struct Stream_001E1F58 { u8 bytes[0x420]; };
+
+void func_001D7120(void* stream, char* dst, s32 cap);
+s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
+void func_001D7148(void* stream, s32 mode);
+
+s32 func_001E1F58(char* dst, const char* fmt, void* ap)
+{
+    Stream_001E1F58 buf;
+    func_001D7120(&buf, dst, 0);
+    s32 n = func_001E1DB8(&buf, fmt, ap);
+    dst += n;
+    *dst = 0;
+    func_001D7148(&buf, 2);
+    return n;
+}
+
+s32 func_001E1F58(char* dst, const char* fmt, void* ap);
+
+s32 func_001E1FD0(char* dst, const char* fmt, ...)
+{
+    void* ap = (char*)__builtin_next_arg(fmt) - 48;
+    return func_001E1F58(dst, fmt, ap);
+}
+
+s32 func_001E2018(char* dst, s32 cap, const char* fmt, void* ap);
+
+s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
+{
+    void* ap = (char*)__builtin_next_arg(fmt) - 40;
+    return func_001E2018(dst, cap, fmt, ap);
+}

@@ -124,7 +124,8 @@ void func_001DD5F8(Obj_DD5F8* self, f32 v)
 }
 
 extern u8 D_00275C60[];
-extern void* D_002623C8;
+struct Node_001DD9C0;
+extern Node_001DD9C0* D_002623C8;
 
 struct Obj_DD9D8 {
     u8 pad[0x10];
@@ -192,4 +193,43 @@ void func_00152438(void* p, s32 n);
 void func_001DFD48()
 {
     func_00152438(D_002758D0, 0x80);
+}
+
+struct Obj_001DD610 { u8 pad[0x1D68]; f32 level; };
+
+
+void func_001DD610(Obj_001DD610* self, f32 v)
+{
+    self->level = v;
+    D_00264260 = D_002622CC;
+}
+
+extern void* D_00275710;
+
+void* func_001EAA70(void* a, void* b);
+void func_00148AC0(void* heap, int size, void* c, void* d, int e);
+
+void func_001DD950(void* unused, void* a, void* b, void* c)
+{
+    void* r = func_001EAA70(a, b);
+    if (r != 0) {
+        func_00148AC0(D_00275710, 0x58, c, r, 0);
+    }
+}
+
+extern u8 D_00261EF0[];
+
+void func_00152410(void* p);
+
+void func_001DD9A0(void)
+{
+    func_00152410(D_00261EF0);
+}
+
+struct Node_001DD9C0 { u8 pad[0xC]; f32 value; };
+
+
+void func_001DD9C0(void* unused, f32* out)
+{
+    *out = D_002623C8->value;
 }
