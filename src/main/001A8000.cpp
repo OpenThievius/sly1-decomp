@@ -297,3 +297,81 @@ f32 func_001ABE60(void)
 {
     return 0.0f;
 }
+
+struct Obj_1A99F8 { u8 pad[0x724]; s32 state; };
+
+extern u8 D_00264A40[];
+
+void func_001C91C8(Obj_1A99F8* self);
+void func_001603E8(s32 n);
+void func_0018C7F8(u8* p);
+
+void func_001A99F8(Obj_1A99F8* self)
+{
+    func_001C91C8(self);
+    if (self->state == 0xB) {
+        func_001603E8(4);
+        func_0018C7F8(D_00264A40);
+    }
+}
+
+typedef void (*VFn_1A9A98)(void* self);
+struct Obj_1A9A98 { VFn_1A9A98* vtbl; };
+
+extern Obj_1A9A98 D_0026E248;
+
+s32 func_001E9970(void);
+
+void func_001A9A98(void)
+{
+    if (func_001E9970()) {
+        D_0026E248.vtbl[14](&D_0026E248);
+    } else {
+        D_0026E248.vtbl[15](&D_0026E248);
+    }
+}
+
+struct Obj_1A9C58 { u8 pad[0xC14]; s32 f14; s32 f18; s32 f1C; };
+
+void func_001A9C58(Obj_1A9C58* self, s32 a, s32 b, s32 c)
+{
+    self->f14 = a;
+    self->f18 = b;
+    self->f1C = c;
+}
+
+struct Obj_1AA1F0 {
+    u8 pad0[0x214];
+    s32 index;
+    u8* entry218;
+    f32 f21C;
+    f32 f220;
+    u8 pad1[8];
+    f32 f22C;
+    f32 f230;
+    f32 f234;
+    f32 f238;
+    u8 pad4[4];
+    f32 f240;
+    u8 pad2[4];
+    f32 f248;
+    u8 pad3[12];
+    u8* table258;
+};
+
+extern u8 D_0026C3E0[];
+extern u8 D_00261868[];
+
+void func_001AAB20(Obj_1AA1F0* self, f32 x, f32 y);
+
+void func_001AA1F0(Obj_1AA1F0* self, s32 index)
+{
+    self->entry218 = D_0026C3E0 + index * 20;
+    self->f248 = 0.25f;
+    self->f240 = 0.25f;
+    self->table258 = D_00261868;
+    self->index = index;
+    func_001AAB20(self, self->f234, self->f238);
+    self->f21C = self->f22C;
+    self->f220 = self->f230;
+}

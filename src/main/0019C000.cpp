@@ -78,3 +78,34 @@ Node_19E040* func_0019E040(Pool_19E040* self, s32 flag)
     }
     return n;
 }
+
+struct Obj_19E0B8 {
+    u8 pad0[0x80];
+    f32 f80;
+    u8 pad84[0x2C8 - 0x84];
+    u64 q2C8;
+    u8 pad2D0[0x538 - 0x2D0];
+    u64 q538;
+    u8 pad540[0x558 - 0x540];
+};
+
+void func_001B7968(Obj_19E0B8* self);
+void func_00152438(void* p, s32 n);
+
+void func_0019E0B8(Obj_19E0B8* self)
+{
+    func_001B7968(self);
+    func_00152438((u8*)self + 0x558, 0x10);
+    u64 flags = self->q2C8;
+    flags &= (u64)(s64)(s32)0xCFFFFFFF;
+    flags |= 0x20000000ULL;
+    u64 wide = self->q538;
+    wide |= (u64)1 << 42;
+    flags &= 0xFFFFFCFFFFFFFFFFULL;
+    wide |= (u64)1 << 51;
+    f32 k = 1e10f;
+    flags |= (u64)1 << 40;
+    self->q538 = wide;
+    self->f80 = k;
+    self->q2C8 = flags;
+}

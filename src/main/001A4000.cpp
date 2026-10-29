@@ -368,3 +368,106 @@ void func_001A7E40(Pair_001A7E40* self)
     bytes[1] = 0;
     func_002049E8(self->owner, self->channel, bytes);
 }
+
+struct Obj_1A45B8 { u8 pad0[0x88]; f32 ratio; u8 pad1[8]; f32 value; };
+
+s32 func_00128230(void* ctx);
+
+void func_001A45B8(void* ctx, Obj_1A45B8* obj)
+{
+    if (func_00128230(ctx) != 0) {
+        return;
+    }
+    if (0.7f < obj->ratio) {
+        obj->value = 20.0f;
+    }
+}
+
+s32 func_001A4710(void)
+{
+    return 0;
+}
+
+struct Obj_1A4858 { u8 pad0[0x2D0]; s32 field2D0; };
+
+void func_001A4858(Obj_1A4858* obj, s32 value)
+{
+    obj->field2D0 = value;
+}
+
+struct Obj_1A4860 { u8 pad0[0x2D4]; s32 field2D4; };
+
+void func_001A4860(Obj_1A4860* obj, s32 value)
+{
+    obj->field2D4 = value;
+}
+
+extern s32 D_0026C3DC;
+
+void func_001A7E70(void)
+{
+    if (D_0026C3DC == 0) {
+        D_0026C3DC = 1;
+    }
+}
+
+extern s32 D_0026C3DC;
+
+struct Ctx_001A7E90 {
+    u8 pad[0x19EC];
+    s32 flags;
+};
+
+void func_001A7E90(Ctx_001A7E90* ctx)
+{
+    s32 v = D_0026C3DC;
+    if (v == 2) {
+        goto clear;
+    }
+    if (v < 3) {
+        return;
+    }
+    if (v == 3) {
+        goto set;
+    }
+    return;
+clear:
+    ctx->flags &= 0xFFFFFFDF;
+    return;
+set:
+    ctx->flags |= 0x20;
+}
+
+extern s32 D_0026C3DC;
+
+struct Ctx_001A7EE8 {
+    u8 pad[0x19EC];
+    s32 flags;
+};
+
+s32 func_001A7EE8(Ctx_001A7EE8* ctx)
+{
+    s32 v = D_0026C3DC;
+    if (v == 1) {
+        goto tail;
+    }
+    if (v < 2) {
+        if (v == 0) {
+            goto zero;
+        }
+        goto tail;
+    }
+    if (v == 2) {
+        goto one;
+    }
+    if (v == 3) {
+        goto zero;
+    }
+    goto tail;
+one:
+    return 1;
+zero:
+    return 0;
+tail:
+    return ((ctx->flags >> 5) ^ 1) & 1;
+}

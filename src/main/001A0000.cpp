@@ -133,3 +133,58 @@ s32 func_001A3FE0(Ctrl_1A3FE0* self)
     }
     return r;
 }
+
+struct Obj_1A1410 { u8 pad0[0x20]; s32 field20; u8 pad1[0xFC]; f32 f120; };
+struct Ctx_1A1410 { u8 pad0[0x1D28]; s32 value1D28; };
+
+void func_001A0040(void* self);
+
+void func_001A1410(Obj_1A1410* self)
+{
+    func_001A0040(self);
+    Ctx_1A1410* ctx = (Ctx_1A1410*)D_00275710;
+    s32 v = ctx->value1D28;
+    self->f120 = 0.15f;
+    self->field20 = v;
+}
+
+void func_001A1498(void)
+{
+}
+
+struct Ctrl_1A14A0 { u8 pad0[0x18]; f32 a18; f32 b1C; u8 pad1[0x100]; s32 mode120; f32 phase124; };
+
+extern f32 D_0026185C;
+extern f32 D_0026B600[];
+extern f32 D_0026B610[];
+void func_001A1DF0(void* self, s32 n);
+void func_0019EBE8(void* self);
+
+void func_001A14A0(Ctrl_1A14A0* c, f32 dt)
+{
+    f32 t = (D_0026185C - c->a18) / c->b1C;
+    f32 k;
+    switch (c->mode120) {
+    case 0: k = D_0026B600[0] + t * (D_0026B600[1] + t * D_0026B600[2]); break;
+    case 1: k = D_0026B610[0]; break;
+    case 2: k = D_0026B610[0] + t * (D_0026B610[1] + t * D_0026B610[2]); break;
+    }
+    f32 p = c->phase124 + k * dt;
+    c->phase124 = p;
+    if (1.0f <= p) c->phase124 = p - 1.0f;
+    if (1.0f < t) {
+        switch (c->mode120) {
+        case 0: func_001A1DF0(c, 1); break;
+        case 1: func_001A1DF0(c, 2); break;
+        case 2: func_0019EBE8(c); break;
+        }
+    }
+}
+
+struct Item_1A1F18 { u8 pad0[0x20]; f32 key20; };
+
+s32 func_001A1F18(Item_1A1F18* a, Item_1A1F18* b)
+{
+    if (a->key20 < b->key20) return -1;
+    return 1;
+}
