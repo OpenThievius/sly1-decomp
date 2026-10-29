@@ -208,3 +208,42 @@ s32 func_001F3C08(Holder_1F3C08* self, s32 arg)
 {
     return func_00128150(self->link, 0, (u8*)self + 0x50, arg);
 }
+
+struct Reset_1F2758 { u8 pad0[0x34]; f32 scale34; u8 pad1[0x40 - 0x38]; s32 index40; u8 pad2[0x6D0 - 0x44]; s32 index6D0; };
+
+void func_00182C18(void* self);
+
+void func_001F2758(Reset_1F2758* self)
+{
+    func_00182C18(self);
+    self->index40 = -1;
+    self->scale34 = -1.0f;
+    self->index6D0 = -1;
+}
+
+struct Node_1F2798 { u8 pad0[0xC]; void* owner0C; u8 pad1[0x84 - 0x10]; Node_1F2798* next84; };
+struct Item_1F2798 { s32 link; u8 pad0[0x3C]; };
+struct Sub_1F2798 { u8 pad0[4]; void* listA[4]; void* listB[1]; };
+struct Elem_1F2798 { u8 pad0[0x20]; Sub_1F2798* sub20; u8 pad1[0x2C]; };
+struct Ctx_1F2798 { u8 pad0[0x54]; Node_1F2798* node54; s32 count58; Elem_1F2798* elems5C; };
+struct Owner_1F2798 { u8 pad0[0x3C]; s32 count3C; u8 pad1[0x6E0 - 0x40]; Item_1F2798 items6E0[4]; Item_1F2798 items7E0[1]; u8 pad2[0x8E0 - 0x820]; Node_1F2798* head8E0; };
+
+void func_001F2798(Owner_1F2798* self, s32 unused, Ctx_1F2798* ctx)
+{
+    Node_1F2798* node = ctx->node54;
+    node->next84 = self->head8E0;
+    self->head8E0 = node;
+    node->owner0C = self;
+    for (s32 i = 0; i < ctx->count58; i++) {
+        Elem_1F2798* elem = ctx->elems5C + i;
+        Sub_1F2798* sub = elem->sub20;
+        for (s32 j = 0; j < self->count3C; j++) {
+            if (sub->listA[j]) {
+                *(void**)sub->listA[j] = &self->items6E0[j];
+            }
+            if (sub->listB[j]) {
+                *(void**)sub->listB[j] = &self->items7E0[j];
+            }
+        }
+    }
+}

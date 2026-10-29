@@ -445,3 +445,57 @@ fail:
 ok:
     return 1;
 }
+
+struct Obj_1E8DB0 { u8 pad[0xC40]; s32 f40; u8 pad2[0x18]; s32 f5C; };
+
+s32 func_001E8DB0(Obj_1E8DB0* a0)
+{
+    if (a0->f40 != 0) return 0;
+    return a0->f5C != 0;
+}
+
+struct Obj_1E8DD0 { u8 pad[0xC58]; s32 f58; s32 f5C; };
+
+s32 func_001E8DD0(Obj_1E8DD0* a0)
+{
+    if (a0->f58 != 0x2DB) return 0;
+    {
+        s32 v = a0->f5C;
+        if (v == 5 || v == 0) return 0;
+        return 1;
+    }
+}
+
+f32 func_001EAFE0(f32 x, f32 y);
+
+f32 func_001EA408(f32 a)
+{
+    f32 r = a;
+    if (a < -3.1415927f || a > 3.1415927f) {
+        r = func_001EAFE0(a + 3.1415927f, 6.2831855f) - 3.1415927f;
+    }
+    return r;
+}
+
+f32 func_001EA480(f32 a, f32 b)
+{
+    f32 r = a;
+    if (b < r) {
+        r = b;
+    } else {
+        b = -b;
+        if (r < b) {
+            r = b;
+        }
+    }
+    return r;
+}
+
+struct Vec3_1EAD30 { f32 x; f32 y; f32 z; };
+
+void func_001EAD30(Vec3_1EAD30* in, Vec3_1EAD30* out, f32 s, f32 t)
+{
+    out->z = in->z * s * s;
+    out->y = (in->z + in->z) * s * t + in->y * s;
+    out->x = (in->z * t * t + in->y * t) + in->x;
+}

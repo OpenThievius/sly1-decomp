@@ -441,3 +441,53 @@ s32 func_001EE560(Packer_1EE560* self, s32 a, s32 b, s32 c)
     }
     return D_00275DD0[a] * b;
 }
+
+struct Obj_1ED018 { u8 pad0[0xC34]; s32 fC34; };
+
+void func_001ED018(Obj_1ED018* self, s32 value)
+{
+    self->fC34 = value;
+}
+
+struct Obj_1ED020 { u8 pad0[0xC38]; void* fC38; };
+
+void func_001ED210(void* p);
+
+void func_001ED020(Obj_1ED020* self)
+{
+    func_001ED210(self->fC38);
+    self->fC38 = 0;
+}
+
+struct Angles_1EDE38 { f32 unused; f32 first; f32 second; };
+struct Vec3_1EDE38 { f32 x; f32 y; f32 z; };
+
+void func_001EAD88(f32 angle, f32* a, f32* b);
+
+void func_001EDE38(Angles_1EDE38* in, Vec3_1EDE38* b, Vec3_1EDE38* out)
+{
+    f32 t[4];
+    func_001EAD88(in->first, &t[0], &t[1]);
+    func_001EAD88(in->second, &t[2], &t[3]);
+    out->x = t[1] * t[3] * b->x - t[2] * b->y;
+    out->y = t[1] * t[2] * b->x + t[3] * b->y;
+    out->z = -t[0] * b->x + b->z;
+}
+
+typedef u64 Quad_1EEB60 __attribute__((mode(TI)));
+struct Obj_1EEB60 { u8 pad0[0x38]; void* node; };
+s32 func_001EEA40(void* self, void* node, Quad_1EEB60 q, s32* out);
+
+s32 func_001EEB60(Obj_1EEB60* self, Quad_1EEB60* vec, s32* out)
+{
+    s32 r;
+    if (self != 0 && self->node != 0) {
+        Quad_1EEB60 q = *vec;
+        *out = 0;
+        r = func_001EEA40(self, self->node, q, out);
+    } else {
+        r = 0x0FFFFFFF;
+        *out = r;
+    }
+    return r;
+}
