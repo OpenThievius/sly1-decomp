@@ -1,0 +1,73 @@
+# ByteMatch progress reports (https://bytematch.dev/OpenThievius/sly1-decomp).
+#
+# ByteMatch reads objdiff's report.json from an artifact named "<VERSION>_report",
+# from successful push runs on the default branch. This job does not build the
+# game: the compiler and the retail executable cannot be redistributed. The
+# reports are generated from committed tables (tools/progress.py) and committed
+# as progress/<version>/report.json; this job checks they are current, validates
+# them with objdiff and uploads them. They hold names, addresses and sizes: no
+# retail bytes. Adapted from OpenRAC's rac1-decomp.
+#
+# The repository is registered once by hand on https://bytematch.dev (sign in
+# with GitHub, Manage, Add project); this workflow alone does not add it.
+name: Progress report
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Fails if C was added or removed without regenerating the reports, or a C
+      # function has no row in config/eu/c_status.tsv.
+      - name: Check the committed reports are current
+        run: python tools/progress.py --check
+
+      - name: Validate the reports with objdiff
+        run: |
+          curl --fail --location --retry 3 -o "$RUNNER_TEMP/objdiff-cli" \
+            https://github.com/encounter/objdiff/releases/download/v3.8.1/objdiff-cli-linux-x86_64
+          echo "c8290281e82114bcc1a06ff73061110d3902a177822e750337de2537188e358f  $RUNNER_TEMP/objdiff-cli" | sha256sum --check
+          chmod +x "$RUNNER_TEMP/objdiff-cli"
+          for r in progress/us/report.json progress/eu/report.json; do
+            "$RUNNER_TEMP/objdiff-cli" report changes "$r" "$r" -o "$RUNNER_TEMP/validation.json"
+          done
+
+      - name: Summarise
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          for version, path in (("SCUS_971.98", "progress/us/report.json"), ("SCES_509.17", "progress/eu/report.json")):
+              m = json.load(open(path))["measures"]
+              print("%s: %.2f%% code, %s / %s functions  " % (version, m["matched_code_percent"],
+                                                            m["matched_functions"], m["total_functions"]))
+          PY
+
+      - name: Upload the NTSC-U report
+        uses: actions/upload-artifact@v4
+        with:
+          name: SCUS_971.98_report
+          path: progress/us/report.json
+          if-no-files-found: error
+
+      - name: Upload the PAL report
+        uses: actions/upload-artifact@v4
+        with:
+          name: SCES_509.17_report
+          path: progress/eu/report.json
+          if-no-files-found: error
