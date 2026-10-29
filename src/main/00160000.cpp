@@ -439,3 +439,33 @@ s32 func_00160D98(void)
 {
     return 2;
 }
+
+struct Rec_160E80 { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; };
+
+void func_00160E80(Rec_160E80* self)
+{
+    self->f4 = 0;
+    self->f8 = 0;
+    self->fC = 0;
+    self->f10 = 0;
+    self->f14 = 0;
+    self->f18 = 0;
+}
+
+typedef void (*Fn_161200)(void* self, s32 a);
+struct Sub_161200 { u8 pad0[8]; s16 off8; u8 pad1[2]; Fn_161200 fn; };
+struct Obj_161200 { u8 pad0[0x18]; Sub_161200* f18; s32 f1C; };
+
+void func_001613C0(void* self, s32 a, s32 b, s32 c);
+
+void func_00161200(Obj_161200* self)
+{
+    if (self->f1C != 0) {
+        Sub_161200* s = self->f18;
+        s->fn((u8*)self + s->off8, 1);
+    } else {
+        func_001613C0(self, 0, 1, 0xE);
+        Sub_161200* s = self->f18;
+        s->fn((u8*)self + s->off8, 1);
+    }
+}

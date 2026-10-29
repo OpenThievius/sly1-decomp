@@ -603,3 +603,88 @@ void func_00169608(s32 a0, s32 a1, Node_169608* a2)
         a2->links = p;
     }
 }
+
+struct Quad_1688B8 { u8 b0; u8 b1; u8 b2; u8 b3; } __attribute__((packed));
+
+extern u8 D_00262490[];
+extern u8 D_002BDC20[];
+extern u8 D_002BE1A0[];
+extern u8 D_002BDEE0[];
+extern s32 D_002BE460;
+extern s32 D_002BE464;
+
+void func_00201A18(s32 a0, s32 a1, s32 a2, s32 a3);
+void func_00201D60(void* p, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+void func_00168770(void* ctx, Quad_1688B8* v, s32 flag);
+s32 func_001E2268(void* a, void* b);
+void func_001F6950(s32 a0, void (*fn)(void), s32 a2);
+void func_001F6DA8(s32 a0);
+void func_00168D00(void);
+void func_001685B8(void);
+void func_001682C0(void);
+void func_00168698(void);
+
+void func_001688B8(void)
+{
+    Quad_1688B8 k;
+    Quad_1688B8 t;
+
+    func_00201A18(0, 1, 2, 1);
+    u8* s0 = D_00262490;
+    func_00201D60(s0, 0, 0x280, 0xE0, 3, 0x30, 0);
+    u8* p = s0;
+    s32 end = (s32)s0 + 0x50;
+    do {
+        *(s32*)p &= -2;
+        p[1] = 0x80;
+        *(s32*)p |= 0x20;
+        p += 0x28;
+    } while ((s32)p < end);
+    k.b0 = 0;
+    k.b1 = 0;
+    k.b2 = 0;
+    k.b3 = 0x80;
+    t = k;
+    func_00168770(D_002BDC20, &t, 0);
+    t = k;
+    func_00168770(D_002BE1A0, &t, 0);
+    t = k;
+    func_00168770(D_002BDEE0, &t, 1);
+    D_002BE460 = func_001E2268((void*)0, (void*)1);
+    D_002BE464 = func_001E2268((void*)0, (void*)1);
+    func_001F6950(2, func_001682C0, 0);
+    func_001F6DA8(2);
+    func_001F6950(0, func_00168698, 0);
+    func_001F6DA8(0);
+    func_00168D00();
+    func_001685B8();
+}
+
+
+extern s32 D_002626C0;
+extern u8 D_002624E0[];
+extern u8 D_002625D0[];
+extern s32 D_00261F1C;
+
+void func_001F6C20(s32 a0);
+void func_00201C78(void* p);
+void func_00202A80(s32 a, void* b);
+void func_00202C38(s32 a, s32 b, s32 c);
+
+void func_00168A48(Blob_168AF8* b)
+{
+    s32 i = 0;
+    func_001F6C20(0);
+    do {
+        void* p;
+        if (((i + D_002626C0) & 1) != 0) {
+            p = D_002624E0;
+        } else {
+            p = D_002625D0;
+        }
+        func_00201C78(p);
+        i++;
+        func_00202A80(D_00261F1C, b);
+    } while (i < 2);
+    func_00202C38(D_00261F1C, 0, 0);
+}

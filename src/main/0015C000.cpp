@@ -629,3 +629,96 @@ void func_0015F9A0(void* self, Sub_15F9A0* s)
         }
     }
 }
+
+typedef f32 (*Measure_15E068)(void* at, s32 ch);
+struct Glyph_15E068 { u8 pad[0x18]; s16 offset; u8 pad2[2]; Measure_15E068 measure; };
+struct Holder_15E068 { u8 pad[8]; s32 units; u8 pad2[0x3C]; f32 scale; Glyph_15E068* glyph; };
+struct Lines_15E068 { s8* start; s8* cur; Holder_15E068* holder; };
+
+void func_0015DB80(void* self);
+s32 func_0015DBE0(void* self);
+
+s32 func_0015E068(Lines_15E068* self, f32 limit)
+{
+    s32 lines = 1;
+    f32 width = 0.0f;
+    s32 newline = 10;
+    s32 space = 32;
+    s32 tab = 9;
+    func_0015DB80(self);
+    s32 c;
+    while ((c = func_0015DBE0(self)) != 0) {
+        if (c == newline) {
+            width = 0.0f;
+            lines++;
+        } else {
+            Holder_15E068* holder = self->holder;
+            Glyph_15E068* glyph = holder->glyph;
+            width += glyph->measure((u8*)holder + glyph->offset, c);
+        }
+        if (limit != 0.0f && limit < width) {
+            s8* p = self->cur - 1;
+            while (p >= self->start) {
+                if (*p == 10) {
+                    break;
+                }
+                if (*p == space || *p == tab) {
+                    width = 0.0f;
+                    self->cur = p + 1;
+                    lines++;
+                    *p = 10;
+                    break;
+                }
+                p--;
+            }
+            if (width != 0.0f) {
+                *self->cur = (s8)newline;
+                lines++;
+                width = 0.0f;
+            }
+        }
+    }
+    return lines;
+}
+
+struct Wrap_15E1B0 { u8 pad[0xC]; Holder_15E068* holder; };
+
+s32 func_0015E068(void* self);
+
+f32 func_0015E1B0(Wrap_15E1B0* self)
+{
+    Holder_15E068* holder = self->holder;
+    f32 width = (f32)holder->units * holder->scale;
+    s32 lines = func_0015E068(self);
+    return width * (f32)lines;
+}
+
+struct Class_0015FB28 { u8 pad0[8]; s32 flags; u8 pad1[0x54]; void (*visit)(void* self, void* arg); };
+struct Node_0015FB28 { Class_0015FB28* cls; u8 pad0[0x18]; Node_0015FB28* next; u8 pad1[0x14]; Node_0015FB28* child; };
+
+void func_0015FB28(Node_0015FB28* self, void* arg)
+{
+    s32 scratch[4];
+    (void)scratch;
+    if (self->cls->visit != 0)
+        self->cls->visit(self, arg);
+    Node_0015FB28* node = self->child;
+    if (node != 0)
+    {
+        do
+        {
+            if (node->cls->flags & 1)
+                func_0015FB28(node, arg);
+            node = node->next;
+        } while (node != 0);
+    }
+}
+
+struct Obj_0015FBA0 { u8 pad[0x2C8]; u64 flags; };
+
+s32 func_0015FBA0(Obj_0015FBA0* self, s32* out)
+{
+    s32 bit = (s32)(self->flags >> 38) & 1;
+    *out = bit;
+    return bit;
+}
