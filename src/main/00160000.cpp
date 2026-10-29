@@ -62,8 +62,6 @@ struct Stream_161670 {
     u32* cur;
 };
 
-void func_001612E8(void* self, s32 a1, s32 a2);
-
 void func_00161670(Stream_161670* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     func_001612E8(self, 1, 4);
@@ -79,8 +77,6 @@ struct Stream_1618C0 {
     u8 pad0[0xC];
     u64* cur;
 };
-
-void func_001612E8(void* self, s32 a1, s32 a2);
 
 void func_001618C0(Stream_1618C0* self, s32 a1, s32 a2, u32 a3, u32 a4)
 {
@@ -98,3 +94,128 @@ void func_001626A8(u8* dst, u8* src)
 {
     *(Unaligned_1626A8*)(dst + 0x114) = *(Unaligned_1626A8*)src;
 }
+
+struct Entry_001601D8 { u8 pad0[0x28]; s32 f28; };
+
+Entry_001601D8* func_00160110(void* a0);
+
+s32 func_001601D8(void* a0)
+{
+    Entry_001601D8* e = func_00160110(a0);
+    s32 r = 0;
+    if (e != 0) {
+        r = e->f28;
+    }
+    return r;
+}
+
+struct Glob_002623C0 { u8 pad0[0xC]; f32 fC; u8 pad1[0x19C8]; s32 f19D8; s32 f19DC; s32 f19E0; u8 pad2[0x10]; s32 f19F4; s32 f19F8; };
+extern Glob_002623C0* D_002623C0;
+
+s32 func_001602A0(void);
+
+void func_001604B8(s32 mode)
+{
+    switch (mode) {
+    case 2:
+        D_002623C0->f19F4 |= 0xA002;
+        D_002623C0->f19F8 |= 2;
+        break;
+    case 4:
+        if ((func_001602A0() & 4) != 0) {
+            D_002623C0->f19F4 |= 0xC000;
+        }
+        break;
+    case 8:
+        if ((func_001602A0() & 8) != 0) {
+            D_002623C0->f19F4 |= 0xC;
+            D_002623C0->f19F8 |= 0xC;
+        }
+        break;
+    }
+}
+
+struct Obj_002623C4 { u8 pad0[0x444]; f32 f444; s32 f448; };
+struct Blk_002623C8 { s32 f0; f32 f4; };
+
+extern Obj_002623C4* D_002623C4;
+extern Blk_002623C8* D_002623C8;
+extern s32 D_002623CC;
+extern u8 D_00261420[];
+
+s32 func_001601A0(s32 a0);
+void func_001608E0(void);
+void func_00140F48(u8* p);
+void func_00140D90(u8* p);
+void func_00160880(void);
+
+void func_00160690(s32 a0, s32 flags)
+{
+    s32 r = func_001601A0(a0);
+    s32 hi = (r != -1) ? (r >> 8) : 0;
+    s32 lo = (r != -1) ? (r & 0xFF) : 0;
+    u8* base = (u8*)D_002623C0 + (hi * 0x44C + 0x10);
+    Glob_002623C0* g = D_002623C0;
+    s32 gate = g->f19E0;
+    D_002623C4 = (Obj_002623C4*)base;
+    D_002623C8 = (Blk_002623C8*)(base + lo * 0x78);
+    if (gate < 0 || (flags & 2) != 0) {
+        func_001608E0();
+    } else if ((flags & 1) != 0) {
+        func_00140F48(D_00261420);
+    } else if ((flags & 4) != 0) {
+        func_00160880();
+    } else {
+        func_00140D90(D_00261420);
+    }
+    g = D_002623C0;
+    D_002623CC = g->f19D8;
+    g->f19D8 = hi;
+    g->f19DC = lo;
+    D_002623C4->f448 |= 1;
+    D_002623C8->f0 |= 1;
+}
+
+void func_001607D0(f32 dx)
+{
+    D_002623C0->fC += dx;
+    D_002623C4->f444 += dx;
+    D_002623C8->f4 += dx;
+}
+
+struct Vec3_162680 { f32 x; f32 y; f32 z; };
+
+struct Body_162680 { u8 pad[0xFC]; f32 x; f32 y; f32 z; };
+
+void func_00162680(Body_162680* body, Vec3_162680* v)
+{
+    body->x = v->x;
+    body->y = v->y;
+    body->z = v->z;
+}
+
+struct __attribute__((packed)) U64_1626C0 { u64 v; };
+
+struct Src_1626C0 { U64_1626C0 head; };
+
+struct Dst_1626C0 { u8 pad[0x118]; U64_1626C0 tail; };
+
+void func_001626C0(Dst_1626C0* dst, Src_1626C0* src)
+{
+    dst->tail.v = src->head.v;
+}
+
+void* func_0018D500(s32 size);
+
+struct Item_162810 { u8 pad[0x38]; void* ref; u8 rest[0x70 - 0x3C]; };
+
+struct Owner_162810
+{
+    u8 pad0[0xC];
+    s32 count;
+    Item_162810* items;
+    u8 pad1[0x50 - 0x14];
+    s32 capacity;
+    void** refs;
+};
+

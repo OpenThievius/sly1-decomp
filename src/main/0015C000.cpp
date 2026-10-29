@@ -120,3 +120,216 @@ void func_0015FF58(void* self)
     func_0015FA58(self);
     func_0015FD78(self);
 }
+
+struct Rec_15C9B0 {
+    u8 pad0[0x50];
+    s32 f50;
+    s32 f54;
+    s32 f58;
+    u8 pad5C[4];
+    s64 f60;
+    s32 f68;
+    s32 f6C;
+    s32 f70;
+    s32 f74;
+    s32 f78;
+    s32 f7C;
+    s32 f80;
+};
+
+void func_0015C260(void* self, void* dst);
+
+void func_0015C9B0(Rec_15C9B0* self, Rec_15C9B0* dst)
+{
+    func_0015C260(self, dst);
+    dst->f50 = self->f50;
+    dst->f54 = self->f54;
+    dst->f58 = self->f58;
+    dst->f60 = self->f60;
+    dst->f68 = self->f68;
+    dst->f6C = self->f6C;
+    dst->f70 = self->f70;
+    dst->f74 = self->f74;
+    dst->f78 = self->f78;
+    dst->f7C = self->f7C;
+    dst->f80 = self->f80;
+}
+
+struct Entry_15CA60 {
+    u16 key;
+    u8 pad2[4];
+    u16 value;
+};
+
+struct Owner_15CA60 {
+    u8 pad0[4];
+    s32 a4;
+    u8 pad8[0x3C];
+    f32 a44;
+};
+
+Entry_15CA60* func_0015DAB8(void* table, s8 key);
+
+f32 func_0015CA60(Owner_15CA60* self, s8 key)
+{
+    Entry_15CA60* e = func_0015DAB8(self, key);
+    f32 x;
+    f32 y;
+    if (e == 0) {
+        x = self->a44;
+        y = (f32)self->a4;
+    } else {
+        x = (f32)(e->value + 1);
+        y = self->a44;
+    }
+    return x * y;
+}
+
+struct Flags_15CAB8 {
+    u8 pad0[0x18];
+    u32 flags;
+};
+
+struct PairA_15CAB8 {
+    u8 pad0[0x10];
+    s32 f10;
+    s32 f14;
+};
+
+struct PairB_15CAB8 {
+    u8 pad0[8];
+    s32 f8;
+    s32 fC;
+};
+
+struct Obj_15CAB8 {
+    u8 pad0[0x54];
+    PairA_15CAB8* pa;
+    PairB_15CAB8* pb;
+    u8 pad5C[0xC];
+    s32 f68;
+    s32 f6C;
+    s32 f70;
+    s32 f74;
+    u8 pad78[8];
+    u32 mask;
+};
+
+extern Flags_15CAB8* D_002622D8;
+
+void func_00152D70(void* obj);
+void func_00152B80(void* obj, s32 a, s32 b);
+void func_00152B38(void* obj);
+
+s32 func_0015CAB8(Obj_15CAB8* self, void* obj)
+{
+    s32 r = (D_002622D8->flags & self->mask) == 0;
+    if (r != 0) {
+        func_00152D70(obj);
+        func_00152B80(obj, self->f68, self->f6C);
+        func_00152B80(obj, self->pa->f14, self->pa->f10);
+        if (self->pb != 0) {
+            func_00152B80(obj, self->f70, self->f74);
+            func_00152B80(obj, self->pb->fC, self->pb->f8);
+        }
+        func_00152B38(obj);
+        D_002622D8->flags |= self->mask;
+    }
+    return r;
+}
+
+struct Flags_15CB88 {
+    u8 pad0[0x18];
+    u32 flags;
+};
+
+struct PairA_15CB88 {
+    u8 pad0[0x10];
+    s32 f10;
+    s32 f14;
+};
+
+struct PairB_15CB88 {
+    u8 pad0[8];
+    s32 f8;
+    s32 fC;
+};
+
+struct Obj_15CB88 {
+    u8 pad0[0x30];
+    s32 f30;
+    u8 pad34[4];
+    s64 f38;
+    u8 pad40[0x20];
+    s64 f60;
+    u8 pad68[0x18];
+    u32 mask;
+};
+
+void func_0015C2E8(void* a0, s32 a1, void* a2);
+s32 func_0015CAB8(Obj_15CB88* self, void* obj);
+void func_001613C0(void* obj, s32 a, s32 b, s32 c);
+void func_00161708(void* obj, s32 tag, s64 value);
+void func_00161768(void* obj, s32 tag, s64 value);
+
+void func_0015CB88(Obj_15CB88* self, s32 a1, void* obj)
+{
+    func_0015C2E8(self, a1, obj);
+    s32 ok = func_0015CAB8(self, obj);
+    func_001613C0(obj, 6, 1, 0xE);
+    if (ok != 0) {
+        func_00161708(obj, 0x3F, 0);
+    }
+    s64 v = 0x31001;
+    if (self->f30 != 0) {
+        v = self->f38;
+    }
+    func_00161708(obj, 0x47, v);
+    func_00161708(obj, 0x42, 0x44);
+    func_00161708(obj, 6, self->f60);
+    func_00161708(obj, 0x14, 0x60);
+    func_00161708(obj, 8, 5);
+    func_00161708(obj, 0, 0x1D6);
+    func_00161768(obj, 5, 0x43431);
+}
+
+struct Flags_15CC80 {
+    u8 pad0[0x18];
+    u32 flags;
+};
+
+struct PairA_15CC80 {
+    u8 pad0[0x10];
+    s32 f10;
+    s32 f14;
+};
+
+struct PairB_15CC80 {
+    u8 pad0[8];
+    s32 f8;
+    s32 fC;
+};
+
+struct Obj_15CC80 {
+    u8 pad0[0x54];
+    PairA_15CC80* pa;
+    PairB_15CC80* pb;
+    u8 pad5C[4];
+    s64 f60;
+    u8 pad68[0x18];
+    u32 mask;
+};
+
+s32 func_0015CAB8(Obj_15CC80* self, void* obj);
+
+void func_0015CC80(Obj_15CC80* self, void* obj)
+{
+    s32 ok = func_0015CAB8(self, obj);
+    func_001613C0(obj, 6, 1, 0xE);
+    if (ok != 0) {
+        func_00161708(obj, 0x3F, 0);
+    }
+    func_00161708(obj, 6, self->f60);
+    func_00161708(obj, 0, 0x1D6);
+    func_00161768(obj, 5, 0x43431);
+}
