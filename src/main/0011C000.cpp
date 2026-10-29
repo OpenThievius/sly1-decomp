@@ -519,3 +519,184 @@ void func_0011FED8(Self_11FED8* self, s32* outCount, f32** outArr)
 {
     func_0011FB98(self->count, self->records, outCount, outArr);
 }
+
+extern s32 D_0025C268;
+extern s32 D_0025C288;
+extern s32 D_0025C2A8;
+extern s32 D_0025C2C8;
+extern s32 D_0025C2E8;
+
+void func_0011C0A8(s32 a, u32 b)
+{
+    if (b == 0xFFFF && a != 0) {
+        D_0025C268 = 0;
+        D_0025C288 = 0;
+        D_0025C2A8 = 0;
+        D_0025C2C8 = 0;
+        D_0025C2E8 = 0;
+    }
+}
+
+struct Node_11C418 { s32 f0; s32 f4; s32 f8; s32 fC; };
+
+void func_0011B258(void* dst, void* src);
+Node_11C418* func_0011C498(void);
+void func_0011C418(Node_11C418* a, Node_11C418* b, s32 c);
+
+void func_0011C418(Node_11C418* a, Node_11C418* b, s32 c)
+{
+    b->f0 = a->f0;
+    func_0011B258(&a->f4, &b->f4);
+    if (a->fC != 0) {
+        Node_11C418* n = func_0011C498();
+        func_0011C418((Node_11C418*)a->fC, n, c);
+        b->fC = (s32)n;
+    }
+}
+
+
+extern u8 D_0025C290[];
+Node_11C418* func_0011C240(void* pool);
+void func_001F5C0C(void* dst, s32 value, u32 size);
+void func_0011B008(void* p);
+
+Node_11C418* func_0011C498(void)
+{
+    Node_11C418* n = func_0011C240(D_0025C290);
+    func_001F5C0C(n, 0, 16);
+    func_0011B008(&n->f4);
+    n->f4 = -1;
+    return n;
+}
+
+void func_0011B060(void* p, s32 mode);
+
+void func_0011C4E8(void* a)
+{
+    func_0011B060((u8*)a + 4, 2);
+}
+
+extern s32 D_0062C558;
+extern u8 D_00259F38[];
+void* func_001B5EA0(void* pool);
+void* func_001B5EE0(void* pool);
+void func_0011AB58(void* arg);
+void func_001F5C0C(void* dst, s32 value, u32 size);
+
+void* func_0011C508(void)
+{
+    void* p = func_001B5EA0(&D_0062C558);
+    if (p != 0) {
+        func_001F5C0C(p, 0, D_0062C558);
+    } else {
+        func_0011AB58(D_00259F38);
+        p = func_001B5EE0(&D_0062C558);
+    }
+    return p;
+}
+
+void func_0011DB00(s32 a, s32 b, void* args, void* c, void* d);
+
+void func_0011D520(s32 x, s32 y)
+{
+    s32 args[2];
+    args[0] = x;
+    args[1] = y;
+    func_0011DB00(0xD, 8, args, 0, 0);
+}
+
+s32 func_0011D968(s32 a, s32 b, void* args);
+
+void func_0011D598(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+{
+    s32 args[6];
+    args[0] = a0;
+    args[1] = a1;
+    args[2] = a2;
+    args[3] = a3;
+    args[4] = a4;
+    args[5] = a5;
+    func_0011D968(0x11, 0x18, args);
+}
+
+struct Words_11D8F0 { s32 a; s32 b; };
+
+s32 func_0011D968(s32 kind, s32 count, void* words);
+
+void func_0011D8F0(s32 a, s32 b)
+{
+    Words_11D8F0 w;
+    w.a = a;
+    w.b = b;
+    func_0011D968(0x28, 8, &w);
+}
+
+struct Word_11D928 { s32 a; };
+
+s32 func_0011DB00(s32 kind, s32 count, void* words, s32 x, s32 y);
+
+void func_0011D928(s32 a)
+{
+    Word_11D928 w;
+    w.a = a;
+    func_0011DB00(0x27, 4, &w, 0, 0);
+}
+
+void func_0011EFB0(s32 unused, s32* a, s32* b)
+{
+    *a = 0;
+    if (b != 0)
+        *b = 0;
+}
+
+struct Sample_11EFC8 { f32 a; f32 b; s32 c; f32 d; s32 e; f32 f; };
+struct Table_11EFC8 { s32 pad[2]; s32 count; Sample_11EFC8* items; };
+
+s32 func_00137BE0(void* src);
+s32 func_00137D10(void* src);
+f32 func_00137DF8(void* src);
+s32 func_00137CC0(void* src);
+void* func_0018D500(s32 size);
+
+void func_0011EFC8(Table_11EFC8* self, void* src)
+{
+    self->count = func_00137BE0(src);
+    self->items = (Sample_11EFC8*)func_0018D500(0x18 * self->count);
+    for (s32 i = 0; i < self->count; i++) {
+        Sample_11EFC8* e = self->items + i;
+        e->a = (f32)func_00137D10(src) * 0.016666668f;
+        e->b = func_00137DF8(src);
+        e->c = func_00137CC0(src);
+        e->e = func_00137CC0(src);
+        e->d = func_00137DF8(src);
+        e->f = func_00137DF8(src);
+    }
+}
+
+struct Elem_11F210 { f32 a; f32 b; s32 c; f32 d; f32 e; s32 f; f32 g; f32 h; };
+struct Table_11F210 { s32 pad[2]; s32 count; Elem_11F210* items; };
+
+s32 func_00137BE0(void* src);
+s32 func_00137D10(void* src);
+f32 func_00137DF8(void* src);
+s32 func_00137CC0(void* src);
+void* func_0018D500(s32 size);
+
+void func_0011F210(Table_11F210* self, void* src)
+{
+    self->count = func_00137BE0(src);
+    self->items = (Elem_11F210*)func_0018D500(0x20 * self->count);
+    for (s32 i = 0; i < self->count; i++) {
+        Elem_11F210* e = self->items + i;
+        e->a = (f32)func_00137D10(src) * 0.016666668f;
+        e->b = func_00137DF8(src);
+        e->c = func_00137CC0(src);
+        e->f = func_00137CC0(src);
+        e->d = func_00137DF8(src);
+        f32 t = func_00137DF8(src);
+        e->e = e->b - t;
+        e->g = func_00137DF8(src);
+        f32 u = func_00137DF8(src);
+        e->h = e->b + u;
+    }
+}

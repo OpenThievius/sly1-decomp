@@ -602,3 +602,24 @@ void func_0011B5B0(Tagged_11B5B0* self, f32 v)
     self->value = v;
     self->tag = 0x15;
 }
+
+struct Value_11B008 { s32 tag; s32 payload; };
+
+void func_0011B008(Value_11B008* v);
+void func_0011B018(Value_11B008* dst, Value_11B008* src);
+void func_0011B060(Value_11B008* v, int mode);
+void func_0011B5B0(Value_11B008* v, f32 f);
+
+Value_11B008* func_0011B9A8(Value_11B008* out, Value_11B008* in)
+{
+    if (in->tag == 0x15) {
+        func_0011B018(out, in);
+    } else {
+        Value_11B008 tmp;
+        func_0011B008(&tmp);
+        func_0011B5B0(&tmp, (f32)in->payload);
+        func_0011B018(out, &tmp);
+        func_0011B060(&tmp, 2);
+    }
+    return out;
+}
