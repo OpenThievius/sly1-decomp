@@ -604,3 +604,67 @@ void func_001DFE38(Obj_001DFE38* self)
     func_001830D8(self);
     self->f80 = tmp;
 }
+
+struct __attribute__((aligned(16))) Quad_1DD548 { s32 v[4]; };
+struct __attribute__((packed)) Pack4_1DD548 { s32 v; };
+struct Locals_1DD548 { Quad_1DD548 pts[10]; Pack4_1DD548 c; };
+
+void func_00130B48(void* a0, void* a1, void* a2, void* a3, s32 n, void* out, f32 w0, f32 w1, f32 w2);
+void func_001DD3E0(void* a, void* b, void* c, s32 d, s32 e);
+
+void func_001DD548(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, f32 x)
+{
+    Locals_1DD548 L;
+    Quad_1DD548* p;
+    Quad_1DD548* q;
+    u32 i;
+
+    func_00130B48(a0, a1, a2, a3, 10, L.pts, x, 0.0f, x);
+    i = 1;
+    q = &L.pts[1];
+    p = &L.pts[0];
+    do {
+        L.c = *(Pack4_1DD548*)a4;
+        func_001DD3E0(p, q, &L.c, a5, 1);
+        i++;
+        q++;
+        p++;
+    } while (i < 10);
+}
+
+struct Obj_1DD628 { u8 pad0[0x2318]; f32 f2318; };
+
+extern u8 D_00274738[];
+
+void func_001C06A0(s32 a, s32 b, f32 x);
+void func_0011D928(s32 a);
+
+void func_001DD628(void* self, f32 x)
+{
+    Obj_1DD628* s = (Obj_1DD628*)self;
+
+    s->f2318 = x;
+    *(s32*)D_00274738 = -100;
+    func_001C06A0(7, 1, 1.0f);
+    func_0011D928((s32)(s->f2318 + 0.5f));
+}
+
+extern u8 D_002758D0[];
+void func_00182D48(void* self);
+void func_00152470(void* table, void* self);
+
+void func_001DFDC8(void* self)
+{
+    func_00182D48(self);
+    func_00152470(D_002758D0, self);
+}
+
+extern u8 D_002758D0[];
+void func_00182ED0(void* self);
+void func_00152600(void* table, void* self);
+
+void func_001DFE00(void* self)
+{
+    func_00182ED0(self);
+    func_00152600(D_002758D0, self);
+}
