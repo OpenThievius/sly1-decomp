@@ -30,7 +30,7 @@ import versions  # noqa: E402
 ROOT = versions.ROOT
 WINDOW = 0x4000
 RODATA = (0x217380, 0x250580)          # US .rodata (docs/VERSIONS.md)
-DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b)[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\([^;\n]*$", re.M)
+DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b)[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
 VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
 SYSTEM = {"syscall", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "eret", "ei", "di", "break"}
 MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu1|madd1|maddu1|mfsa|mtsa)")

@@ -183,11 +183,13 @@ class DefinitionTest(unittest.TestCase):
                 "struct __attribute__((aligned(16))) Quad_100018 {\n"
                 "    s32 a, b, c, d;\n"
                 "};\n"
+                "u32 func_0010001C(u32 i) { if (i >= 10) return 0; return i; }\n"
                 "void* func_00100020(void* self,\n"
                 "                    s32 n)\n"
                 "{\n"
                 "    return self;\n"
                 "}\n")
         # A one-line definition does not swallow the one after it, and a struct
-        # with an attribute in front of its name is not a function.
-        self.assertEqual(self.names(text), ["func_00100010", "func_00100018", "func_00100020"])
+        # with an attribute in front of its name is not a function; a one-line
+        # definition with statements in its body is one.
+        self.assertEqual(self.names(text), ["func_00100010", "func_00100018", "func_0010001C", "func_00100020"])
