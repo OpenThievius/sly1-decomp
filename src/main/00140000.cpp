@@ -98,3 +98,122 @@ void func_00143AF0(Obj_143AF0* obj)
 {
     obj->field = 0;
 }
+
+extern f32 D_00261850;
+extern s32 D_00261858;
+void func_001430C0(void* dst, s32 value);
+
+void func_00142ED0(f32 x)
+{
+    D_00261850 = x;
+    func_001430C0(&D_00261858, x > 0.0f ? 1 : 0);
+}
+
+struct Timer_00142F10 {
+    s32 running;
+    f32 acc_a;
+    f32 hist_b;
+    f32 hist_c;
+    f32 acc_d;
+    f32 step;
+    s64 last;
+};
+
+extern f32 D_00261850;
+extern f32 D_00261854;
+s64 func_001430F8(void);
+f32 func_001FB6B0(s64 value);
+
+void func_00142F10(Timer_00142F10* self)
+{
+    s64 now = func_001430F8();
+    s64 delta = now - self->last;
+    u64 half = (u64)delta >> 1;
+    f32 t;
+    if (delta >= 0) {
+        t = func_001FB6B0(delta);
+    } else {
+        t = func_001FB6B0((delta & 1) | half);
+        t = t + t;
+    }
+    f32 dt = t * 0.0000000033908420f;
+    f32 lo = 0.016666668f;
+    f32 hi = 0.033333335f;
+    if (dt < lo) {
+        dt = lo;
+    } else if (hi < dt) {
+        dt = hi;
+    }
+    self->step = dt;
+    f32 s = 0.0f;
+    if (self->running) {
+        s = dt;
+    }
+    s = s * (D_00261854 * D_00261850);
+    if (0.016666668f <= s) {
+        self->step = s;
+    }
+    f32 new_a = self->acc_a + s;
+    f32 old_b = self->hist_b;
+    f32 new_d = self->acc_d + self->step;
+    self->acc_a = new_a;
+    self->hist_c = old_b;
+    self->hist_b = s;
+    self->acc_d = new_d;
+    self->last = now;
+}
+
+struct Timer_00143030 {
+    u8 pad0[0x10];
+    f32 acc_d;
+    f32 step;
+    s64 last;
+};
+
+s64 func_001430F8(void);
+f32 func_001FB6B0(s64 value);
+
+void func_00143030(Timer_00143030* self)
+{
+    s64 now = func_001430F8();
+    s64 delta = now - self->last;
+    u64 half = (u64)delta >> 1;
+    f32 t;
+    if (delta >= 0) {
+        t = func_001FB6B0(delta);
+    } else {
+        t = func_001FB6B0((delta & 1) | half);
+        t = t + t;
+    }
+    f32 dt = t * 0.0000000033908420f;
+    self->last = now;
+    self->step = dt;
+    self->acc_d = self->acc_d + dt;
+}
+
+struct Timer_001430B8 {
+    u8 pad0[4];
+    f32 acc_a;
+};
+
+void func_001430B8(Timer_001430B8* self, f32 value)
+{
+    self->acc_a = value;
+}
+
+void func_00143140(void)
+{
+}
+
+struct Target_00143148 {
+    u8 pad0[0x30];
+    f32 f30;
+    f32 f34;
+};
+
+void func_001ED650(void* self, f32 x, f32 y, f32 z);
+
+void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3)
+{
+    func_001ED650(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
+}

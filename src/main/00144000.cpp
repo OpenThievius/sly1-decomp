@@ -120,3 +120,51 @@ void func_00147FB0(void* self)
         ((void (*)(void*, s32))vt[51])(self, 6);
     }
 }
+
+struct Obj_146130 {
+    u8 pad0[0x554];
+    f32 f554;
+    f32 f558;
+};
+
+void func_001BAC30(void* self, void* p);
+f32 func_00137DF8(void* p);
+
+void func_00146130(void* self, void* p)
+{
+    Obj_146130* o = (Obj_146130*)self;
+    func_001BAC30(self, p);
+    o->f554 = func_00137DF8(p);
+    o->f558 = func_00137DF8(p);
+}
+
+void func_00124A48(void* self);
+void func_00146298(void* self);
+
+void func_00146178(void* self)
+{
+    func_00124A48(self);
+    func_00146298(self);
+}
+
+struct Obj_146240 {
+    u8 pad0[0x14];
+    void* p14;
+    u8 pad1[0x538];
+    f32 f550;
+};
+
+void func_00138BE0(void* a, void* self, s32 n);
+void func_00146298(void* self);
+void func_00129DF8(void* self);
+
+void func_00146240(void* self, f32 v)
+{
+    Obj_146240* o = (Obj_146240*)self;
+    if (v != o->f550) {
+        o->f550 = v;
+        func_00138BE0(o->p14, o, 7);
+        func_00146298(o);
+        func_00129DF8(o);
+    }
+}
