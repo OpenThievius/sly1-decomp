@@ -399,3 +399,27 @@ void func_00147E40(Self_147E40* self)
     self->f390 = 8.0f;
     self->f394 = 10.0f;
 }
+
+struct Obj_146D10 {
+    u8 pad0[0x50];
+    void* list;
+    u8 pad1[0x538 - 0x54];
+    u64 flags;
+};
+
+s32 func_001300E8(void* node, s32 kind);
+
+s32 func_00146D10(void* unused, Obj_146D10* self)
+{
+    u64 bit = 0x8000;
+    bit <<= 28;
+    if (self->flags & bit) {
+        return 0;
+    }
+    if (func_001300E8(self->list, 5) != 0 || func_001300E8(self->list, 0x27) != 0 ||
+        func_001300E8(self->list, 0x3B) != 0 || func_001300E8(self->list, 0x40) != 0 ||
+        func_001300E8(self->list, 0x2E) != 0) {
+        return 0;
+    }
+    return 1;
+}

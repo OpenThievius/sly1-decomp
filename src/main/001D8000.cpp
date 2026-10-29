@@ -611,3 +611,66 @@ void func_001DBEC8(Self_1DBEC8* self, f32 limit)
     func_0011B060(&q, 2);
     func_0011B060(&a, 2);
 }
+
+struct Sub_1D8578 { u8 pad0[0xC]; s32 n0C; };
+struct Tri_1D8578 { f32 a; f32 b; f32 c; };
+
+struct Obj_1D8578 {
+    u8 pad0[0x670];
+    f32 f670;
+    f32 f674;
+    f32 f678;
+    u8 pad1[0x680 - 0x67C];
+    f32 f680;
+    f32 f684;
+    u8 pad2[0x85C - 0x688];
+    f32 f85C;
+    f32 f860;
+    f32 f864;
+    u8 pad3[0xAF8 - 0x868];
+    Sub_1D8578* sub;
+    u8 pad4[0xB00 - 0xAFC];
+    s32 nB00;
+};
+
+extern f32 D_00261858[];
+extern f32 D_002754A0[];
+extern u8 D_00275490[];
+
+void* func_001925F0(void);
+f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_001D8578(Obj_1D8578* self)
+{
+    if (self != func_001925F0()) {
+        self->f85C = func_001EA4B8(D_00275490, 0, self->f85C, self->f860, D_00261858[2]);
+        if (!(D_00261858[1] < self->f864)) {
+            f32 one = 1.0f;  // hoisted: retail holds 1.0f in $f3 before the multiply
+            s32 idx = 3 * (self->nB00 - 1) + self->sub->n0C;
+            f32 t = (f32)idx * 0.1f;
+            f32 w;
+            if (t < 0.0f) {
+                w = 0.0f;
+            } else if (one < t) {
+                w = one;
+            } else {
+                w = t;
+            }
+            Tri_1D8578* q = (Tri_1D8578*)((u8*)self + 0x670);
+            f32 val = q->a + w * (q->b + w * q->c);
+            f32 lo = self->f680;
+            f32 hi = self->f684;
+            if (val < lo) {
+                val = lo;
+            } else if (hi < val) {
+                val = hi;
+            }
+            self->f860 = val;
+            f32 r = func_001EAAE0(-0.05f, 0.05f);
+            self->f860 = self->f860 + r;
+            f32 r2 = func_001EAAE0(D_002754A0[0], D_002754A0[1]);
+            self->f864 = D_00261858[1] + r2;
+        }
+    }
+}

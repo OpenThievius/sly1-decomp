@@ -1231,3 +1231,60 @@ void func_0014AC48(Obj_14AC48* self)
         e++;
     }
 }
+
+void func_00146340(void* self);
+
+extern u8 D_0026EC60[];
+
+struct Obj_148698 {
+    u8 pad0[0x2D8];
+    s32 f2D8;
+    u8 pad1[0x320 - 0x2DC];
+    f32 f320;
+    u8 pad2[0x344 - 0x324];
+    f32 f344;
+    f32 f348;
+    f32 f34C;
+    f32 f350;
+    f32 f354;
+    f32 f358;
+};
+
+void func_00148698(Obj_148698* self)
+{
+    func_00146340(self);
+    self->f34C = 60.0f;
+    self->f350 = 60.0f;
+    self->f344 = 500.0f;
+    self->f358 = 0.6f;
+    self->f348 = 250.0f;
+    self->f354 = 0.6f;
+    self->f320 = 0.75f;
+    if (*(s32*)D_0026EC60 == 0) {
+        self->f2D8 = 2;
+    }
+}
+
+struct Obj_14BCE8 {
+    u8 pad0[0x724];
+    s32 state;
+    u8 pad1[0xC20 - 0x728];
+    s32 field_C20;
+};
+
+s32 func_001C96D8(Obj_14BCE8* self);
+
+s32 func_0014BCE8(Obj_14BCE8* self)
+{
+    if (self->state == 0x10) {
+        return 1;
+    }
+    if (self->state == 0xB) {
+        return 1;
+    }
+    if (func_001C96D8(self) == 0) {
+        return 0;
+    }
+    self->field_C20 = 0;
+    return 1;
+}

@@ -835,3 +835,25 @@ s32 func_00192450(Obj_00192450* self)
     if ((D_00262C64 & 1) || func_001DDA80(self->f14)) return 1;
     return 0;
 }
+
+struct __attribute__((aligned(16))) Quad_192380 { s32 w[4]; };
+
+extern u8 D_00269BC0[];
+extern u8* D_00261990;
+void func_001B9F30(void);
+// func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
+f32 func_001EA4B8(f32 a, f32 b, f32 c, Quad_192380* p, s32 zero);
+
+void func_00192380(u8* self, u8* out, f32 a)
+{
+    func_001B9F30();
+    if (*(s32*)(self + 0x554) != 0) {
+        *(Quad_192380*)(out + 0x10) = *(Quad_192380*)(self + 0x560);
+        return;
+    }
+    u8* base = D_00261990;
+    if (*(s32*)(base + 0x224) == 0) {
+        *(f32*)(out + 0x18) = func_001EA4B8(*(f32*)(self + 0x568), *(f32*)(self + 0x148), a, (Quad_192380*)D_00269BC0, 0);
+    }
+    *(Quad_192380*)(self + 0x560) = *(Quad_192380*)(out + 0x10);
+}

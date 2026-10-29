@@ -682,3 +682,30 @@ void func_0017B9D0(Self_17B9D0* self, Node_17B9D0* n, Quad_17B9D0* out, f32* out
         *outf = r;
     }
 }
+
+// Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
+
+struct Obj_17A9E0 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x610 - 0x18];
+    s32 f610;
+    u8 pad2[0x6D0 - 0x614];
+    s32 f6D0;
+};
+
+struct Ptr_17A9E0;
+s32 func_001DDA80(Ptr_17A9E0* p);
+s32 func_0017A9E0(Obj_17A9E0* self, s32 a1)
+{
+    if (a1 == 5) goto one;
+    if (self->f610 == 3) goto one;
+    if (self->f610 == 0) goto one;
+    if (self->f610 == 4) goto one;
+    if (self->f6D0 != 0) goto one;
+    if (func_001DDA80((Ptr_17A9E0*)self->f14) == 0) goto zero;
+one:
+    return 1;
+zero:
+    return 0;
+}
