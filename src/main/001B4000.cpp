@@ -908,3 +908,52 @@ void func_001B6438(Obj_001B6438* self)
     func_001B5F28((u8*)self->owner_18->reg_14 + 0x1B88, self);
     func_001837E0(owner, 0x12, 0, 0);
 }
+
+struct Vec3_1B5588 { f32 x; f32 y; f32 z; };
+
+void func_001B5588(Vec3_1B5588* dst, Vec3_1B5588* src)
+{
+    dst->x = src->x;
+    dst->y = src->y;
+    dst->z = src->z;
+}
+
+struct __attribute__((aligned(16))) Quad_001B7968 { s32 a, b, c, d; };
+struct __attribute__((packed)) Blk_001B7968 { s64 a, b, c, d; };
+struct Blk36_001B7968 { Blk_001B7968 body; s32 e; };
+struct Obj_001B7968 { u8 pad0[0x14]; void* p14; s32 f18; u8 pad1[0x2C - 0x1C]; void* p2C; u8 pad2[0x350 - 0x30]; Quad_001B7968 q350; u8 pad3[0x380 - 0x360]; Blk36_001B7968 src380; Blk36_001B7968 dst3A4; u8 pad4[0x4BC - 0x3C8]; s32 f4BC; s32 f4C0; u8 pad5[0x538 - 0x4C4]; u64 f538; };
+
+void func_0011B008(Quad_001B7968* q);
+void func_0011B060(Quad_001B7968* q, s32 mode);
+void func_00152438(void* self, s32 value);
+void func_00123ED0(void* self);
+void func_00160E80(void* self);
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+s32 func_0011A498(void* a, s32 b, s32 c, void* d);
+void func_001BB4A0(void* self);
+
+void func_001B7968(Obj_001B7968* self)
+{
+    Quad_001B7968 local;
+    s32 s0;
+    func_0011B008(&local);
+    func_00152438((u8*)self + 0x2D8, 0x2E4);
+    func_00123ED0(self);
+    func_00160E80((u8*)self + 0x380);
+    self->dst3A4 = self->src380;
+    if (self->f18 != 0) {
+        func_001B9AE0(self, 3, 0, 3, 0);
+    }
+    self->f4BC = -1;
+    self->f4C0 = -1;
+    if (self->p2C != 0) {
+        s0 = func_0011A498(self->p2C, 6, 1, &local);
+        s0 |= func_0011A498(self->p2C, 7, 1, &local);
+        if (s0 != 0) {
+            self->f538 |= (u64)0x8000 << 48;
+        }
+    }
+    self->q350 = *(Quad_001B7968*)((u8*)self->p14 + 0x1EE0);
+    func_001BB4A0(self);
+    func_0011B060(&local, 2);
+}

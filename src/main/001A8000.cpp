@@ -406,3 +406,83 @@ void func_001AA8C0(Obj_1AA8C0* self, f32 v)
 {
     self->value = v;
 }
+
+struct Obj_1A8590 { u8 pad0[0x14]; void* f14; u8 pad1[0x34]; s32 f4C; s32 f50; s32 f54; s32 f58; void* f5C; void* f60; void* f64; void* f68; u8 pad2[0x74]; void* fE0; void* fE4; u8 pad3[0x78]; void* f160; void* f164; s32 f168; };
+
+void func_00182C58(void* self);
+void* func_0015A448(void* obj, s32 id, void* owner);
+s32 func_001300E8(void* node, s32 kind);
+
+void func_001A8590(Obj_1A8590* self)
+{
+    func_00182C58(self);
+    if (self->f168 != 0) {
+        return;
+    }
+    self->f168 = 1;
+    if (self->f4C != -1) {
+        void* p = func_0015A448(self->f14, self->f4C, self);
+        if (p != 0) {
+            if (func_001300E8(p, 0x7E) != 0) {
+                self->f60 = p;
+            } else if (func_001300E8(p, 0x73) != 0) {
+                self->f64 = p;
+            } else if (func_001300E8(p, 2) != 0) {
+                self->f68 = p;
+            }
+        }
+    }
+    if (self->f50 != -1) {
+        void* p = func_0015A448(self->f14, self->f50, self);
+        if (p != 0) {
+            if (func_001300E8(p, 2) != 0) {
+                self->fE0 = p;
+            } else if (func_001300E8(p, 0x75) != 0) {
+                self->fE4 = p;
+            }
+        }
+    }
+    if (self->f54 != -1) {
+        void* p = func_0015A448(self->f14, self->f54, self);
+        if (p != 0) {
+            if (func_001300E8(p, 0x73) != 0) {
+                self->f160 = p;
+            } else if (func_001300E8(p, 2) != 0) {
+                self->f164 = p;
+            }
+        }
+    }
+    if (self->f58 != -1) {
+        self->f5C = func_0015A448(self->f14, self->f58, self);
+    }
+}
+
+void func_001F5C0C(void* p, s32 value, s32 size);
+
+struct Tail_001A9438 { s32 a; f32 b; s32 c; };
+struct Body_001A9438 { u8 pad0[0x110]; Tail_001A9438 tail; u8 gap[4]; s32 f120; f32 f124; };
+
+void func_001A9438(Body_001A9438* self)
+{
+    func_001F5C0C((u8*)self + 0xE0, 0, 0x70);
+    Tail_001A9438* t = &self->tail;
+    t->a = 0;
+    t->b = 1.0f;
+    t->c = 0;
+    self->f124 = 20000.0f;
+    self->f120 = 0;
+}
+
+void func_001F5C0C(void* p, s32 value, s32 size);
+
+void func_001A9498(u8* self)
+{
+    func_001F5C0C(self + 0x150, 0, 0x18);
+}
+
+extern s32 D_00261858;
+
+f32 func_001AB5D8(void)
+{
+    return D_00261858 != 0 ? 2.5f : 0.0f;
+}

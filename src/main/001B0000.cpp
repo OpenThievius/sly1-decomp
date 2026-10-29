@@ -417,3 +417,60 @@ void func_001B1D70(Pair_1B1D70* p, f32 v)
         p->b = v;
     func_001B1BF0(p);
 }
+
+typedef void (*VFn_1B00E8)(void* self, s32 arg);
+
+struct Obj_1B00E8 { VFn_1B00E8* vtbl; u8 pad_4[0x554 - 4]; s32 f554; s32 f558; };
+
+void func_001B00E8(Obj_1B00E8* self, s32 flag)
+{
+    s32 m = 5;
+    self->f554 = flag;
+    if (!flag) {
+        m = 1;
+    }
+    self->vtbl[0x144 / 4](self, m);
+}
+
+struct Obj_1B1158 {
+    u8 pad_0[0x5D0];
+    s32 f5D0;
+    s32 f5D4;
+    u8 pad_5D8[0x5E0 - 0x5D8];
+    s32 f5E0;
+    s32 f5E4;
+    u8 pad_5E8[0x5F0 - 0x5E8];
+    s32 f5F0;
+    s32 f5F4;
+    u8 pad_5F8[0x600 - 0x5F8];
+    s32 f600;
+};
+
+void func_001AECB0(void* self);
+
+void func_001B1158(Obj_1B1158* self)
+{
+    func_001AECB0(self);
+    self->f5D0 = -1;
+    self->f5D4 = -1;
+    self->f5E0 = -1;
+    self->f5E4 = -1;
+    self->f5F0 = -1;
+    self->f5F4 = -1;
+    self->f600 = -1;
+}
+
+struct Entry_1B2988 { u8 pad[0x18]; u64 tail; };
+struct Cell_1B2988 { u8 pad[0x10]; u64 value; };
+struct Table_1B2988 { u8 pad[8]; u8* flag; Entry_1B2988** entries; Cell_1B2988** cells; };
+
+u64 func_001B2988(Table_1B2988* t, s32 i, s32 j)
+{
+    Entry_1B2988* e = t->entries[i];
+    s32 stride = 1;
+    if (*t->flag == 0) stride = 3;
+    Cell_1B2988* c = t->cells[i * stride + j];
+    u64 r = e->tail;
+    if (c != 0) r |= c->value;
+    return r;
+}

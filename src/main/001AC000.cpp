@@ -301,3 +301,31 @@ void func_001AC990(Unit_1AC990* self, s32 v)
     }
     func_001AA998(self, v);
 }
+
+struct Obj_1AD320 { u8 pad[0x260]; s32 f260; u8 pad2[0x464 - 0x264]; s32 f464; };
+
+void func_001AA4F0(void* self, void* p);
+void func_001AA998(void* self, s32 flag);
+
+void func_001AD320(Obj_1AD320* self, s32 flag)
+{
+    if (self->f260 != 0 && flag == 0) {
+        self->f260 = 0;
+        func_001AA4F0(self, (u8*)self + 0x264);
+        flag = 1;
+    }
+    if (flag == 0) {
+        self->f464 = 0;
+    }
+    func_001AA998(self, flag);
+}
+
+struct Obj_1AD378 { u8 pad[0x250]; s32 f250; u8 pad2[0x260 - 0x254]; s32 f260; };
+
+void func_001AA8F0(void* self);
+
+void func_001AD378(Obj_1AD378* self)
+{
+    if (self->f250 == 3 && self->f260 != 0) return;
+    func_001AA8F0(self);
+}
