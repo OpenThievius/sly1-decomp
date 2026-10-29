@@ -25,8 +25,8 @@ Tracked on **[ByteMatch](https://bytematch.dev/OpenThievius/sly1-decomp)**.
 <!-- progress:begin (tools/progress.py) -->
 | Version | Functions | Code |
 | --- | ---: | ---: |
-| NTSC-U `SCUS_971.98` | 1,705 of 4,766 | 141,312 of 1,112,520 bytes (12.70%) |
-| PAL `SCES_509.17` | 1,630 of 4,791 | 133,532 of 1,117,772 bytes (11.95%) |
+| NTSC-U `SCUS_971.98` | 1,785 of 4,766 | 148,884 of 1,112,520 bytes (13.38%) |
+| PAL `SCES_509.17` | 1,709 of 4,791 | 141,096 of 1,117,772 bytes (12.62%) |
 
 A US function counts when the build links its C and still prints `MATCH`; a PAL function when that same C also builds PAL's bytes at its counterpart (`tools/version_check.py`).
 <!-- progress:end -->
