@@ -344,3 +344,55 @@ void func_001DE768(Obj_1DE768* self)
     }
     func_001276C0(self);
 }
+
+struct Node_1DC7D0 { u8 pad[8]; Node_1DC7D0* next; Node_1DC7D0* prev; };
+struct Owner_1DC7D0 { u8 pad[0x1AE4]; Node_1DC7D0* listA; Node_1DC7D0* listB; };
+
+void func_001DC710(Node_1DC7D0* node, Node_1DC7D0** head);
+void func_001DC7B0(Node_1DC7D0* node, Node_1DC7D0** head);
+
+Node_1DC7D0* func_001DC7D0(Owner_1DC7D0* owner, void* self)
+{
+    Node_1DC7D0* n = owner->listA;
+    func_001DC710(n, &owner->listA);
+    func_001DC7B0(n, &owner->listB);
+    *(void**)((u8*)n + 4) = self;
+    return n;
+}
+
+struct Ctx_1DDAD0 { u8 pad0[0x2D0]; s32 f2D0; s32 f2D4; };
+
+extern Ctx_1DDAD0* D_0027051C;
+extern u8 D_00275BC0[];
+
+void func_001E9570(void* g);
+
+void func_001DDAD0(void)
+{
+    Ctx_1DDAD0* ctx = D_0027051C;
+    if (ctx != 0 && ctx->f2D4 != 4) {
+        u32 t = (u32)(ctx->f2D0 - 1);
+        if (t < 2) func_001E9570(D_00275BC0);
+    }
+}
+
+extern u8 D_0026FF68[];
+
+struct __attribute__((packed)) Unaligned_1DDB20 { s32 v; };
+
+void func_00194D30(void* self, s32 mode, s32 value);
+
+void func_001DDB20(void* unused, s32 a1, s32 a2)
+{
+    s32 saved = a1;
+    u8* p = D_0026FF68;
+    ((Unaligned_1DDB20*)(p + 0x280))->v = a2;
+    func_00194D30(D_0026FF68, 0, saved);
+}
+
+struct Self_001DFBD0 { u8 pad0[0x728]; s32 f728; };
+
+s32 func_001DFBD0(Self_001DFBD0* self)
+{
+    return self->f728 != 0;
+}

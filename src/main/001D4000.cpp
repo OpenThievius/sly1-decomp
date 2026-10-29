@@ -134,3 +134,10 @@ s32 func_001D65D8(Ctx_1D65D8* self)
     }
     return 2;
 }
+
+struct Ctx_1D4C90 { u8 pad[0x26B0]; s32 f26B0; };
+
+void func_001D4C90(Ctx_1D4C90* self, s32 value)
+{
+    self->f26B0 = value;
+}

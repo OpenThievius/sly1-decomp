@@ -239,3 +239,54 @@ void func_001E5750(Actor_1E5750* self, u8* p)
         func_001B64D8(self->f614, 0x358);
     }
 }
+
+struct Actor_1E5C78 { u8 pad[0x614]; void* f614; void* f618; };
+
+void func_001B6598(void* dev, s32* out);
+void func_001B6568(void* dev, s32* out);
+s32 func_001A8C50(void* a);
+void func_001B64D8(void* dev, s32 value);
+
+void func_001E5C78(Actor_1E5C78* self)
+{
+    s32 a;
+    s32 b;
+    func_001B6598(self->f614, &a);
+    func_001B6568(self->f614, &b);
+    if (a == 0x359 && b == a) {
+        if (func_001A8C50(self->f618) != 0) {
+            func_001B64D8(self->f614, 0x35A);
+        }
+    }
+}
+
+struct Dev_1E5CE8 { u8 pad[0x24]; s32 f24; };
+struct Hdl_1E5CE8 { u8 pad[0x7E0]; s32 f7E0; };
+struct Actor_1E5CE8 { u8 pad[0x614]; void* f614; void* f618; u8 pad2[8]; Hdl_1E5CE8* f624; s32 f628; };
+struct Rec_1E5CE8 { s32 w0; s32 w4; s32 w8; };
+
+void func_00192230(void* self, s32 kind, Rec_1E5CE8* rec);
+void func_001A8C90(void* a, s32 b);
+
+void func_001E5CE8(Actor_1E5CE8* self, s32 kind, Rec_1E5CE8* rec)
+{
+    func_00192230(self, kind, rec);
+    if (kind == 0x13) {
+        Dev_1E5CE8* dev = (Dev_1E5CE8*)self->f614;
+        s32 id = rec->w0;
+        if (id == dev->f24) {
+            if (rec->w8 == 0x35B) {
+                func_001A8C90(self->f618, 1);
+            }
+        } else if (self->f624 != 0 && id == self->f624->f7E0) {
+            s32 k = rec->w8;
+            if (k != 0x15E) {
+                if (k == 0x15F) {
+                    self->f628 = 0;
+                }
+            } else {
+                self->f628 = 1;
+            }
+        }
+    }
+}

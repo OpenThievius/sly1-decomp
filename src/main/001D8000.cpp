@@ -137,3 +137,30 @@ void func_001DBE48(Owner_1DBE48* self)
         func_001DBC18(self, node);
     }
 }
+
+typedef void (*VFn_1DACB0)(void* self, void* a, void* b);
+struct Target_1DACB0 { VFn_1DACB0* vtbl; };
+struct Owner_1DACB0 { u8 pad[0xB78]; Target_1DACB0* target; };
+
+void func_001CB328(void* self, void* value);
+void func_001924C8(void* self, void* a, void* b);
+
+void func_001DACB0(Owner_1DACB0* self, void* a, void* b)
+{
+    if (self->target != 0) {
+        func_001CB328(self->target, 0);
+        Target_1DACB0* t = self->target;
+        t->vtbl[82](t, a, b);
+    } else {
+        func_001924C8(self, a, b);
+    }
+}
+
+void func_001B89B8(void* self);
+void func_001DAD28(void* self);
+
+void func_001DAE18(void* self)
+{
+    func_001B89B8(self);
+    func_001DAD28(self);
+}

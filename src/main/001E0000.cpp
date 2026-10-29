@@ -140,3 +140,55 @@ char* func_001E21D8(char* s, s32 c)
     }
     return 0;
 }
+
+s32 func_001E2268(s32 a, s32 b);
+
+struct IntPair_1E22C0 { u8 pad0[4]; s32 a; s32 b; };
+
+void func_001E22C0(IntPair_1E22C0* self)
+{
+    self->a = -1;
+    self->b = func_001E2268(1, 1);
+}
+
+struct Actor_1E2778 { u8 pad000[0x2D0]; s32 f2D0; u8 pad2D4[0x388 - 0x2D4]; s32 f388; u8 pad38C[0x394 - 0x38C]; s32 state394; u8 pad398[0x39C - 0x398]; f32 f39C; };
+
+void func_001451F0(u32 a0, int a1, int a2, void* a3, int a4, void* a5);
+void func_00145088(u32 a0, int a1, void* a2, int a3, void* a4);
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+extern u32 D_00261990;
+extern f32 D_0026185C;
+
+void func_001E2778(void* selfv, s32 state)
+{
+    Actor_1E2778* self = (Actor_1E2778*)selfv;
+    if (self->state394 == state) return;
+    if (state != 0) {
+        if (state != 1) {
+            self->state394 = state;
+            goto tail;
+        }
+        u32 base = D_00261990;
+        func_00145088(base, self->f388 + 2, (void*)(base + 0x520), self->f2D0, self);
+        func_001837E0(self, 2, 0, 0);
+    } else {
+        u32 base = D_00261990;
+        func_001451F0(base, 8, -1, 0, 0, self);
+        func_001837E0(self, 3, 0, 0);
+    }
+    self->state394 = state;
+tail:
+    self->f39C = D_0026185C;
+}
+
+struct Actor_1E2840 { u8 pad000[0x398]; s32 f398; };
+
+void func_001E2870(void* self, s32 a, s32 b);
+
+void func_001E2840(void* selfv, s32 value)
+{
+    Actor_1E2840* self = (Actor_1E2840*)selfv;
+    if (value == self->f398) return;
+    self->f398 = value;
+    func_001E2870(self, 0, 0);
+}
