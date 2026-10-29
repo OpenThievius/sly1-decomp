@@ -840,3 +840,17 @@ void func_00143A08(void* self, void* value)
     *(Value_00143A08*)((u8*)self + 0x204) = *(Value_00143A08*)value;
     func_00143560(self);
 }
+
+struct Obj_140100 { u8 pad0[0x6FC]; s32 f6FC; u8 pad1[0x790 - 0x700]; s32 f790; };
+
+void func_001BAC30(void* self);
+void func_0013E950(void* p, void* self);
+
+void func_00140100(Obj_140100* self)
+{
+    func_001BAC30(self);
+    func_0013E950((u8*)self + 0x5C0, self);
+    if (self->f790 != 0) {
+        self->f6FC = 1;
+    }
+}
