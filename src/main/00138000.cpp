@@ -89,3 +89,64 @@ void func_00139D28(Sub_139D28* o)
     func_00152600((u8*)o->owner + 0x624, o);
     func_00152470(D_002622F0, o);
 }
+
+struct Rec_138278 { s32 a; Rec_138278* b; Rec_138278* c; };
+struct Table_138278 { s32 count; s32 y; Rec_138278* recs; };
+struct In_138278 { u8 pad0[0x10]; s32 base; };
+
+s32 func_00137BE0(void* self);
+void* func_0018D5C0(s32 size);
+
+void func_00138278(void* self, In_138278* in, Table_138278* out)
+{
+    s32 x = func_00137BE0(self);
+    out->count = x;
+    s32 y = func_00137BE0(self);
+    out->y = y;
+    out->recs = (Rec_138278*)func_0018D5C0(12 * out->count);
+    for (s32 i = 0; i < out->count; i++) {
+        Rec_138278* e = out->recs + i;
+        s32 v = func_00137BE0(self);
+        e->a = in->base + (v << 5);
+        s32 w = func_00137BE0(self);
+        if ((w & 0xFFFF) != 0xFFFF) {
+            e->b = out->recs + w;
+        }
+        s32 z = func_00137BE0(self);
+        if ((z & 0xFFFF) != 0xFFFF) {
+            e->c = out->recs + z;
+        }
+    }
+}
+
+struct Actor_A418 {
+    u8 pad0[0x80];
+    f32 level;
+    u8 pad1[0x2C8 - 0x84];
+    u64 bits;
+    void* owner;
+};
+
+struct Src_A418 {
+    u8 pad0[0x80];
+    f32 level;
+    u8 pad1[0x314 - 0x84];
+    u8 sub[0x10];
+};
+
+void func_001832F0(Actor_A418* self, Src_A418* src);
+s32 func_001300E8(Src_A418* src, s32 kind);
+s32 func_00152720(void* sub);
+
+void func_0013A418(Actor_A418* self, Src_A418* src)
+{
+    func_001832F0(self, src);
+    if (func_001300E8(src, 0x50) != 0) {
+        self->owner = src;
+        self->level = src->level;
+        if (func_00152720(src->sub) == 0) {
+            self->bits &= 0xFFFFFFFFF3FFFFFFULL;
+            self->bits &= 0xFFFFFFFFCFFFFFFFULL;
+        }
+    }
+}

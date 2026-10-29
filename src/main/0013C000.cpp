@@ -1,10 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-
 #include "common.h"
-
-int func_0013CCE8() {
-	return 0;
-}
 
 struct InitialState {
 	s32 field_00;
@@ -25,6 +20,67 @@ void func_0013C988(InitialState* state, s32 initialValue, s32 secondaryValue) {
 	func_0013C9B0(state);
 }
 
+struct Span_CC48 {
+    u8 pad0[0x10];
+    s32 a;
+    u8 pad1[0x4];
+    s32 b;
+};
+
+void func_0013CC48(Span_CC48* p, s32 n)
+{
+    if (n == 0) {
+        n = p->b;
+        if (n == 0) {
+            return;
+        }
+    }
+    p->a += n;
+    p->b -= n;
+}
+
+int func_0013CCE8() {
+	return 0;
+}
+
+struct Node_CE40 {
+    u8 pad0[0x14];
+    void* child;
+};
+
+typedef void (*Hook_CE40)(void* self);
+
+void func_00124A48(Node_CE40* self);
+void func_0013CE80(void* self);
+void func_001DBCC8(void* target, Hook_CE40 fn, Node_CE40* ctx, s32 a3, s32 a4);
+
+void func_0013CE40(Node_CE40* self)
+{
+    func_00124A48(self);
+    func_001DBCC8(self->child, func_0013CE80, self, 0, 0);
+}
+
+struct Slot_D950 {
+    s32 x;
+    s32 y;
+    s32 z;
+};
+
+struct Queue_D950 {
+    u8 pad0[0x550];
+    s32 count;
+    Slot_D950 slots[16];
+};
+
+void func_0013D950(Queue_D950* q, s32 value)
+{
+    if ((u32)q->count < 16) {
+        q->slots[q->count].y = value;
+        q->slots[q->count].x = 3;
+        q->count++;
+    }
+}
+
 struct FlagState {
 	char padding[0x63C];
 	s32 flags;
@@ -36,6 +92,54 @@ void func_0013D9E0(FlagState* state, s32* result) {
 
 void func_0013DA30(FlagState* state, s32* result) {
 	*result = (state->flags >> 2) & 1;
+}
+
+struct Ring_DA80 {
+    u8 pad0[0x63C];
+    u32 flags;
+    u8 pad1[0x654 - 0x640];
+    s32 count;
+    s32 items[4];
+};
+
+void func_0013DA80(Ring_DA80* r, s32 value)
+{
+    s32 n = r->count;
+    if ((u32)n < 4) {
+        r->items[n] = value;
+        r->count = n + 1;
+        r->flags |= 2;
+    }
+}
+
+void func_0013D068(void* self);
+void* func_001925F0(void);
+void func_001D7098(void* out, void* a1, void* self);
+
+typedef void (*VFn_13DF68)(void* self, void* out);
+struct Obj_13DF68 { VFn_13DF68* vtbl; };
+
+struct Self_13DF68 {
+    u8 pad0[0x6D0];
+    void* f6D0;
+    Obj_13DF68* f6D4;
+};
+
+void func_0013DF68(void* self0)
+{
+    Self_13DF68* self = (Self_13DF68*)self0;
+    s32 local[4];
+    func_0013D068(self0);
+    if (self->f6D4 != 0) {
+        if (self->f6D4 != func_001925F0()) {
+            self->f6D4 = 0;
+            return;
+        }
+        func_001D7098(local, self->f6D0, self0);
+        Obj_13DF68* p = self->f6D4;
+        p->vtbl[80](p, local);
+        self->f6D4 = 0;
+    }
 }
 
 struct QueueWithPrefix {
@@ -57,6 +161,23 @@ struct Queue {
 bool func_0013E8F8(Queue* queue, s32 value) {
 	queue->values[queue->count++] = value;
 	return queue->count < 16;
+}
+
+extern u8 D_00261420[];
+void* func_00140FF8(void* p);
+
+struct Self_13E918 {
+    u8 pad0[0x120];
+    void* f120;
+    u8 pad1[0x140 - 0x124];
+    s32 f140;
+};
+
+void func_0013E918(void* self)
+{
+    Self_13E918* s = (Self_13E918*)self;
+    s->f120 = func_00140FF8(D_00261420);
+    s->f140 = -1;
 }
 
 extern void func_0013EB68(void* state);
