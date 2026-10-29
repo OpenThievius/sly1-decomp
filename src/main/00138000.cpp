@@ -220,3 +220,12 @@ void func_00139E80(void* self)
     func_00152470(o->sub + 0x1CB4, self);
     func_001240F8(self);
 }
+
+struct Offset_13BE00 { u8 pad[0x554]; f32 value; };
+
+extern f32 D_0026185C;
+
+void func_0013BE00(Offset_13BE00* self, f32 delta)
+{
+    self->value = D_0026185C + delta;
+}

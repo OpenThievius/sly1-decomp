@@ -238,3 +238,60 @@ void func_0013F6C0(Ctl_13F6C0* self)
     self->p674 = keep;
     self->self558 = self;
 }
+
+struct Slot_13C950 { u8 pad[0x680]; s32 slot; };
+
+void func_001BE4D8(void* p);
+
+s32 func_0013C950(Slot_13C950* self)
+{
+    if (self->slot == 0) {
+        func_001BE4D8(&self->slot);
+    }
+    return self->slot;
+}
+
+struct Cursor_13CC80 {
+    u8 pad0[4];
+    u8* base;
+    u8 pad8[4];
+    s32 pos;
+    s32 remain;
+};
+
+void func_001F5A58(void* dst, void* src, s32 n);
+
+s32 func_0013CC80(Cursor_13CC80* self, s32 want, void* dst)
+{
+    s32 n = self->remain;
+    u8* base = self->base;
+    s32 pos = self->pos;
+    if (want < n) {
+        n = want;
+    }
+    func_001F5A58(dst, base + pos, n);
+    self->pos += n;
+    self->remain -= n;
+    return n;
+}
+
+struct Set_0013E868 { s32 count; s32 items[1]; };
+
+s32 func_001833F0(void* key, s32 item);
+
+s32 func_0013E868(Set_0013E868* set, void* key)
+{
+    s32 i = set->count - 1;
+    s32* base = set->items;
+    if (i >= 0) {
+        s32* p = (s32*)(i * 4 + (s32)base);
+        do {
+            if (func_001833F0(key, *p) != 0) {
+                return 1;
+            }
+            i--;
+            p--;
+        } while (i >= 0);
+    }
+    return 0;
+}

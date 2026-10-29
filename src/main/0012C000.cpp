@@ -256,3 +256,89 @@ void* func_0012C8F8(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb)
     func_0012C840(self, key, a2, a3, &out, fa, fb);
     return out;
 }
+
+struct Sub_0012F0A0 { u8 pad[0x34]; f32 f34; };
+struct Obj_0012F0A0 { u8 pad0[0x8]; Sub_0012F0A0* sub; u8 pad1[0x8]; f32 value; };
+
+void func_0012F6B0(Obj_0012F0A0* self, f32 x);
+void func_0012F190(Obj_0012F0A0* self, s32 zero);
+void func_0012F1D8(Obj_0012F0A0* self);
+void func_0012E4E0(Obj_0012F0A0* self, Sub_0012F0A0* sub, s32* out);
+void func_0012E760(Obj_0012F0A0* self);
+void func_0012D4A8(Obj_0012F0A0* self);
+
+void func_0012F0A0(Obj_0012F0A0* self, s32 mode, f32 a, f32 b)
+{
+    s32 flag = 0;
+    f32 t;
+    f32 base;
+    switch (mode) {
+    case 0:
+        t = a;
+        goto call;
+    case 1:
+        base = self->value;
+        break;
+    case 2:
+    case 3:
+        base = self->sub->f34;
+        break;
+    default:
+        goto call;
+    }
+    t = base + a;
+call:
+    func_0012F6B0(self, b);
+    if (t == self->value) {
+        return;
+    }
+    self->value = t;
+    if (mode == 3) {
+        func_0012E4E0(self, self->sub, &flag);
+    } else {
+        func_0012D4A8(self);
+    }
+    func_0012F190(self, 0);
+    func_0012F1D8(self);
+    if (flag != 0) {
+        func_0012E760(self);
+    }
+}
+
+struct Item_0012F1D8 { u8 pad[0x20]; Item_0012F1D8* next; };
+struct Owner_0012F1D8 { u8 pad[0x44]; Item_0012F1D8* items; };
+
+void func_001226D8(Item_0012F1D8* item);
+
+void func_0012F1D8(Owner_0012F1D8* self)
+{
+    s32 scratch[4];
+    (void)scratch;
+    for (Item_0012F1D8* p = self->items; p != 0; p = p->next) {
+        func_001226D8(p);
+    }
+}
+
+struct Sub_0012F6B0 { u8 pad[0x98]; f32 k98; };
+struct Rec_0012F6B0 { u8 pad0[0x8]; Sub_0012F6B0* sub; u8 pad1[0xC]; f32 out; f32 scale; };
+
+void func_0012F6B0(Rec_0012F6B0* self, f32 x)
+{
+    self->out = x * self->scale * self->sub->k98;
+}
+
+struct Sub_0012F6D0 { u8 pad[0x98]; f32 k98; };
+struct Rec_0012F6D0 { u8 pad0[0x8]; Sub_0012F6D0* sub; u8 pad1[0xC]; f32 out; f32 scale; };
+
+void func_0012F6B0(Rec_0012F6D0* self, f32 x);
+
+void func_0012F6D0(Rec_0012F6D0* self, f32 x)
+{
+    f32 denom = self->scale * self->sub->k98;
+    f32 r = self->out;
+    if (denom != 0.0f) {
+        r = r / denom;
+    }
+    self->scale = x;
+    func_0012F6B0(self, r);
+}
