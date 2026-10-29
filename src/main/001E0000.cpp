@@ -1,0 +1,227 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+#include "common.h"
+
+void func_001E02C8(void* self, s32 n);
+
+void func_001E0828(void* self)
+{
+    func_001E02C8(self, 3);
+}
+
+void func_001D7120(u8* buf, char* dst, s32 cap);
+s32 func_001E1DB8(u8* buf, s32 a, s32 b);
+void func_001D7148(u8* buf, s32 n);
+
+s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
+{
+    u8 buf[0x420];
+    s32 n;
+
+    func_001D7120(buf, dst, cap);
+    n = func_001E1DB8(buf, a, b);
+    if (n >= cap) {
+        n = -1;
+        dst[cap - 1] = 0;
+    } else {
+        dst[n] = 0;
+    }
+    func_001D7148(buf, 2);
+    return n;
+}
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+void func_001F6B20(void* self);
+
+struct Ctor_1E2268 {
+    u8 pad0[4];
+    void* b;
+    void* a;
+    u8 pad1[0x14];
+};
+
+void func_001E2268(void* a, void* b)
+{
+    Ctor_1E2268 tmp;
+
+    func_001F5C0C(&tmp, 0, 0x18);
+    tmp.a = a;
+    tmp.b = b;
+    func_001F6B20(&tmp);
+}
+
+void func_001E30D8(void* self)
+{
+}
+
+s32 func_001E1EB0(void* self, void* ap);
+
+s32 func_001E1F10(void* self, ...)
+{
+    void* ap = (char*)__builtin_next_arg(self) - 56;
+    return func_001E1EB0(self, ap);
+}
+
+struct Stream_001E1F58 { u8 bytes[0x420]; };
+
+void func_001D7120(void* stream, char* dst, s32 cap);
+s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
+void func_001D7148(void* stream, s32 mode);
+
+s32 func_001E1F58(char* dst, const char* fmt, void* ap)
+{
+    Stream_001E1F58 buf;
+    func_001D7120(&buf, dst, 0);
+    s32 n = func_001E1DB8(&buf, fmt, ap);
+    dst += n;
+    *dst = 0;
+    func_001D7148(&buf, 2);
+    return n;
+}
+
+s32 func_001E1F58(char* dst, const char* fmt, void* ap);
+
+s32 func_001E1FD0(char* dst, const char* fmt, ...)
+{
+    void* ap = (char*)__builtin_next_arg(fmt) - 48;
+    return func_001E1F58(dst, fmt, ap);
+}
+
+s32 func_001E2018(char* dst, s32 cap, const char* fmt, void* ap);
+
+s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
+{
+    void* ap = (char*)__builtin_next_arg(fmt) - 40;
+    return func_001E2018(dst, cap, fmt, ap);
+}
+
+struct Stream_1E1EB0 { u8 bytes[0x420]; };
+
+void func_001D7100(void* stream, s32 cap);
+s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
+void func_001D7148(void* stream, s32 mode);
+
+s32 func_001E1EB0(const char* fmt, void* ap)
+{
+    Stream_1E1EB0 buf;
+    func_001D7100(&buf, -1);
+    s32 n = func_001E1DB8(&buf, fmt, ap);
+    func_001D7148(&buf, 2);
+    return n;
+}
+
+s32 func_001E2100(void* p);
+void func_0018D800(void* dst, void* src, s32 count);
+
+void* func_001E2138(void* dst, void* src)
+{
+    s32 n = func_001E2100(src);
+    func_0018D800(dst, src, n + 1);
+    return dst;
+}
+
+s32 func_001E2100(void* p);
+void func_0018D800(void* dst, void* src, s32 count);
+
+void* func_001E2180(void* dst, void* src)
+{
+    s32 len = func_001E2100(dst);
+    s32 n = func_001E2100(src);
+    func_0018D800((u8*)dst + len, src, n + 1);
+    return dst;
+}
+
+char* func_001E21D8(char* s, s32 c)
+{
+    while (*s != 0) {
+        if ((s8)*s == c) {
+            return s;
+        }
+        s++;
+    }
+    return 0;
+}
+
+s32 func_001E2268(s32 a, s32 b);
+
+struct IntPair_1E22C0 { u8 pad0[4]; s32 a; s32 b; };
+
+void func_001E22C0(IntPair_1E22C0* self)
+{
+    self->a = -1;
+    self->b = func_001E2268(1, 1);
+}
+
+struct Actor_1E2778 { u8 pad000[0x2D0]; s32 f2D0; u8 pad2D4[0x388 - 0x2D4]; s32 f388; u8 pad38C[0x394 - 0x38C]; s32 state394; u8 pad398[0x39C - 0x398]; f32 f39C; };
+
+void func_001451F0(u32 a0, int a1, int a2, void* a3, int a4, void* a5);
+void func_00145088(u32 a0, int a1, void* a2, int a3, void* a4);
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+extern u32 D_00261990;
+extern f32 D_0026185C;
+
+void func_001E2778(void* selfv, s32 state)
+{
+    Actor_1E2778* self = (Actor_1E2778*)selfv;
+    if (self->state394 == state) return;
+    if (state != 0) {
+        if (state != 1) {
+            self->state394 = state;
+            goto tail;
+        }
+        u32 base = D_00261990;
+        func_00145088(base, self->f388 + 2, (void*)(base + 0x520), self->f2D0, self);
+        func_001837E0(self, 2, 0, 0);
+    } else {
+        u32 base = D_00261990;
+        func_001451F0(base, 8, -1, 0, 0, self);
+        func_001837E0(self, 3, 0, 0);
+    }
+    self->state394 = state;
+tail:
+    self->f39C = D_0026185C;
+}
+
+struct Actor_1E2840 { u8 pad000[0x398]; s32 f398; };
+
+void func_001E2870(void* self, s32 a, s32 b);
+
+void func_001E2840(void* selfv, s32 value)
+{
+    Actor_1E2840* self = (Actor_1E2840*)selfv;
+    if (value == self->f398) return;
+    self->f398 = value;
+    func_001E2870(self, 0, 0);
+}
+
+struct Tally_1E2358 { s32 count; s32 last; void* ptr; };
+extern void func_001F6B40(void* a);
+
+void func_001E2358(Tally_1E2358* self)
+{
+    if (--self->count == 0) {
+        self->last = -1;
+        func_001F6B40(self->ptr);
+    }
+}
+
+struct Actor_1E2940 { u8 pad000[0x14]; void* f14; u8 pad018[0x398 - 0x18]; s32 f398; };
+
+void func_00124FC0(void* self);
+void func_001E2870(void* self, s32 a, s32 b);
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+
+void func_001E2940(void* selfv)
+{
+    Actor_1E2940* self = (Actor_1E2940*)selfv;
+    func_00124FC0(self);
+    if (self->f398 != 0) {
+        func_001DBCC8(self->f14, (void*)func_001E2870, self, 0, 0);
+    }
+}
+
+void func_001261C0(void);
+
+void func_001E2988(void)
+{
+    func_001261C0();
+}

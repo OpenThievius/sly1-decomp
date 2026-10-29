@@ -13,7 +13,8 @@ splits are taken from other projects or from the prototype
 - [x] The compiler qualified: SN GCC 2.95.3, C++, `-O2 -G0 -fno-exceptions` ([TOOLCHAIN.md](TOOLCHAIN.md))
 - [x] The per-function checker, on US and on PAL (`tools/check.py`)
 - [x] C linked into the US build at each function's address (`tools/c_layout.py`)
-- [x] The ByteMatch reports and their CI (`tools/progress.py`, `.github/workflows/progress.yml`)
+- [x] The ByteMatch reports and their CI (`tools/progress.py`, `.github/workflows/progress.yml`):
+  units for game code, libraries and data sections, each in its category (`config/<version>/layout.tsv`)
 - [x] The coordination issue and the matching workflow ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md))
 - [x] Repository checks and CI that need no game data, with a scan for proprietary material
 
@@ -30,6 +31,8 @@ splits are taken from other projects or from the prototype
 4. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C.
 5. **Names and types.** Ours, from what the code does, as the C is cleaned up.
+6. **The disc's data.** Its loader and index, then each format from the code that reads it
+   ([DISC.md](DISC.md)); OpenThievius's extractor is written from that.
 
 ## Open decisions
 

@@ -21,9 +21,11 @@ procedure; read it before you match anything.
 | `config/splat/<version>.yaml` | splat's configuration | by hand |
 | `config/<version>/symbol_addrs.txt` | names for retail addresses | by hand |
 | `config/<version>/functions.tsv`, `config/eu/map.tsv` | every function, and PAL's pairing with US | `tools/inventory.py` |
+| `config/<version>/layout.tsv` | what each part of the executable is: game code, libraries, data sections | by hand |
 | `config/cflags.tsv` | the compiler, and the flags of each source file | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
-| `src/main/XXXXXXXX.cpp` | matched C++, one file per 16 KiB window of `.text` | you |
+| `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
+| `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with the default compiler until a file can name its own (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |
 | `nonmatching/` | near misses, never linked | you |
 | `progress/<version>/report.json`, the README table | what ByteMatch shows | `tools/progress.py` |

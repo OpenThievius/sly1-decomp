@@ -79,9 +79,15 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    far (config/cflags.tsv); a file that needs other options gets its own row,
    never a function.
 3. **The libraries.** Sony's libraries and the compiler's runtime were linked
-   from prebuilt archives and may need other compilers or options. Their code
-   is decompiled from retail like the rest: never from SDK source, headers or
-   samples.
+   from prebuilt archives and need other compilers or options. Their code is
+   decompiled from retail like the rest: never from SDK source, headers or
+   samples. Measured on 2026-10-29: the double-precision float support at
+   0x1FB618–0x1FD6E0 makes tail calls and saves registers in 8 bytes, and
+   five of its functions (`func_001FBDF8`, `func_001FCD20`, `func_001FCD78`,
+   `func_001FD308`, `func_001FD548`) are EXACT with Sony's `2.9-ee-991111`,
+   none with the SN builds. Those files need their own compiler row in
+   config/cflags.tsv (and, being C, the release's `cc1`); tools/compile.py
+   does not support a compiler per file yet, so they are not landed.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.

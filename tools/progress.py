@@ -13,8 +13,16 @@ Everything comes from committed tables, so CI can regenerate it with no disc
 and no compiler: the functions of each version (config/<version>/functions.tsv),
 what src/ defines (a US function is finished when src/ defines it and the build
 links it), and PAL's check of that C (config/eu/c_status.tsv, from
-tools/version_check.py). Units are the source files of src/main/, one per
-16 KiB window of .text; a unit is complete when every function in it is.
+tools/version_check.py), and what each part of the executable is
+(config/<version>/layout.tsv).
+
+Units follow that layout. Code units are the source files: one per 16 KiB
+window of game code (game/<window>, src/main/) and of the libraries
+(lib/<window>, src/lib/); a unit is complete when every function in it is.
+Data units are the sections with bytes (data/<section>): they measure data,
+which comes from the disassembly until C can place it (docs/ROADMAP.md).
+Each unit is in one category, game, lib or data, and every category has its
+own measures.
 """
 
 import argparse
@@ -49,57 +57,95 @@ def finished(key):
     return {eu for us, (eu, s, _) in status.items() if s == "match" and us in done}
 
 
-def measures(funcs, done, linked):
+def measures(funcs, done, linked, data=0):
+    """objdiff's measures of some functions and some bytes of data (none of it matched yet)."""
     total = sum(s for _, _, s in funcs)
     matched = sum(s for n, _, s in funcs if n in done)
+    count = sum(1 for n, _, _ in funcs if n in done)
     pct = lambda a, b: (100.0 * a / b) if b else 100.0
-    m = {
+    return {
         "fuzzy_match_percent": pct(matched, total),
         "total_code": str(total),
         "matched_code": str(matched),
         "matched_code_percent": pct(matched, total),
+        "total_data": str(data),
+        "matched_data": "0",
+        "matched_data_percent": pct(0, data),
         "total_functions": len(funcs),
-        "matched_functions": sum(1 for n, _, _ in funcs if n in done),
-        "matched_functions_percent": pct(sum(1 for n, _, _ in funcs if n in done), len(funcs)),
+        "matched_functions": count,
+        "matched_functions_percent": pct(count, len(funcs)),
         "complete_code": str(matched if linked else 0),
         "complete_code_percent": pct(matched if linked else 0, total),
+        "complete_data": "0",
+        "complete_data_percent": pct(0, data),
     }
+
+
+def add(into, m):
+    """Sums one unit's measures into a total (percentages are recomputed by finish())."""
+    for k in ("total_code", "matched_code", "total_data", "matched_data", "complete_code", "complete_data"):
+        into[k] = str(int(into.get(k, "0")) + int(m[k]))
+    for k in ("total_functions", "matched_functions", "total_units", "complete_units"):
+        into[k] = into.get(k, 0) + m[k]
+
+
+def finish(m):
+    pct = lambda a, b: (100.0 * int(a) / int(b)) if int(b) else 100.0
+    m["matched_code_percent"] = m["fuzzy_match_percent"] = pct(m["matched_code"], m["total_code"])
+    m["matched_data_percent"] = pct(m["matched_data"], m["total_data"])
+    m["matched_functions_percent"] = pct(m["matched_functions"], m["total_functions"])
+    m["complete_code_percent"] = pct(m["complete_code"], m["total_code"])
+    m["complete_data_percent"] = pct(m["complete_data"], m["total_data"])
     return m
+
+
+CATEGORIES = {"game": "Game code", "lib": "Libraries", "data": "Data"}
 
 
 def report(key):
     funcs = functions(key)
     done = finished(key)
     linked = key == versions.primary()
-    units = {}
-    for f in funcs:
-        units.setdefault(todo.window_of(f[1]), []).append(f)
-    out_units, complete_units = [], 0
-    for window in sorted(units):
-        members = units[window]
-        m = measures(members, done, linked)
-        m["total_units"] = 1
-        complete = linked and all(n in done for n, _, _ in members)
-        m["complete_units"] = 1 if complete else 0
-        complete_units += m["complete_units"]
-        source = "src/main/%08X.cpp" % window
-        meta = {"complete": complete, "progress_categories": ["game"]}
-        if (ROOT / source).exists():
-            meta["source_path"] = source
-        out_units.append({
-            "name": "main/%08X" % window,
-            "measures": m,
-            "functions": [{"name": n, "size": str(s), "fuzzy_match_percent": 100.0 if n in done else 0.0,
-                           "address": str(a - members[0][1]), "metadata": {"virtual_address": str(a)}}
-                          for n, a, s in members],
-            "metadata": meta,
-        })
-    top = measures(funcs, done, linked)
-    top["total_units"] = len(out_units)
-    top["complete_units"] = complete_units
-    category = dict(top)
-    return {"measures": top, "units": out_units, "version": 2,
-            "categories": [{"id": "game", "name": "Game code", "measures": category}]}
+    units = []
+    for kind, name, start, end, category, folder in todo.layout(key):
+        if kind == "data":
+            m = measures([], done, linked, end - start)
+            m["total_units"], m["complete_units"] = 1, 0
+            units.append((category, {"name": "data/%s" % name, "measures": m,
+                                     "metadata": {"complete": False, "progress_categories": [category]}}))
+            continue
+        windows = {}
+        for f in funcs:
+            if start <= f[1] < end:
+                windows.setdefault(todo.window_of(f[1]), []).append(f)
+        for window in sorted(windows):
+            members = windows[window]
+            m = measures(members, done, linked)
+            complete = linked and all(n in done for n, _, _ in members)
+            m["total_units"], m["complete_units"] = 1, 1 if complete else 0
+            meta = {"complete": complete, "progress_categories": [category]}
+            source = "%s/%08X.cpp" % (folder, window)
+            if (ROOT / source).exists():
+                meta["source_path"] = source
+            units.append((category, {
+                "name": "%s/%08X" % (name, window),
+                "measures": m,
+                "functions": [{"name": n, "size": str(s), "fuzzy_match_percent": 100.0 if n in done else 0.0,
+                               "address": str(a - members[0][1]), "metadata": {"virtual_address": str(a)}}
+                              for n, a, s in members],
+                "metadata": meta,
+            }))
+    placed = sum(len(u.get("functions", [])) for _, u in units)
+    if placed != len(funcs):
+        raise SystemExit("error: config/%s/layout.tsv places %d of %d functions" % (key, placed, len(funcs)))
+    top, cats = {}, {c: {} for c in CATEGORIES}
+    for category, u in units:
+        add(top, u["measures"])
+        add(cats[category], u["measures"])
+    return {"measures": finish(dict(measures([], done, linked), **top)), "units": [u for _, u in units],
+            "version": 2,
+            "categories": [{"id": c, "name": CATEGORIES[c], "measures": finish(dict(measures([], done, linked), **cats[c]))}
+                           for c in CATEGORIES]}
 
 
 def readme_table(reports):
