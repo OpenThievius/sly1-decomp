@@ -1,0 +1,74 @@
+{
+  "game": "Sly Cooper and the Thievius Raccoonus",
+  "primary": "us",
+  "versions": {
+    "us": {
+      "title": "Sly Cooper and the Thievius Raccoonus",
+      "region": "NTSC-U (North America)",
+      "serial": "SCUS_971.98",
+      "disc_version": "1.00",
+      "role": "primary",
+      "boot": {
+        "name": "SCUS_971.98",
+        "size": 1712328,
+        "crc32": "dd44d2d9",
+        "md5": "851662b40ab176314825f5b413be274c",
+        "sha1": "57dc305db57932ad3f1122966cdb695d2e62a47a",
+        "sha256": "d4ba3ce30047ffb2a825ef13d37a48c4df63aa57977157a194f66bd0b859796c"
+      },
+      "disc": {
+        "size": 2802319360,
+        "crc32": "046bbcec",
+        "md5": "5be8ed86954c4d661567ac62bd32ec39",
+        "sha1": "347b54b4a0d8b2c2e6c18cdbde5f1cabcc45b5da",
+        "sha256": "b7d46b478efd1455f2142c00a0c81c3cf900bf46a72d0808e6d8bc477d25f49a"
+      }
+    },
+    "eu": {
+      "title": "Sly Raccoon",
+      "region": "PAL (Europe; En, Fr, De, Es, It)",
+      "serial": "SCES_509.17",
+      "disc_version": "1.00",
+      "role": "secondary",
+      "boot": {
+        "name": "SCES_509.17",
+        "size": 1751112,
+        "crc32": "61237eb7",
+        "md5": "066b4136817dc8ba5786b705968dc7ac",
+        "sha1": "f23240fc4a3efd463a5b3617b9250da4d5fe842c",
+        "sha256": "cfab20b47a0b9ae1c9eb47d278a48704ca8e272505594c6705de1525a7cccb91"
+      },
+      "disc": {
+        "size": 2923823104,
+        "crc32": "42d42d1f",
+        "md5": "db65a3d03b8e0b036ac7fb0fbc71830b",
+        "sha1": "dbd975260a70e87f518fa72a3741d22216559814",
+        "sha256": "4b9d9298ad61f374c09a01328b581c43152f2a880c0273c7a696c0230238a2f9"
+      }
+    },
+    "may19": {
+      "title": "Sly Cooper and the Thievius Raccoonus (E3 build 5-19D, prototype)",
+      "region": "NTSC-U (North America)",
+      "serial": "SCUS_971.98",
+      "disc_version": "1.00",
+      "role": "reference",
+      "note": "Prototype dated 2002-05-19. Recorded so that tools recognise it and never mistake it for retail; nothing is taken from it and no build uses it (docs/PROTOTYPE.md).",
+      "boot": {
+        "name": "SCUS_971.98",
+        "size": 12523740,
+        "crc32": "b3b39280",
+        "md5": "ea65b34c4249078e4f787d6ee2dc0bd3",
+        "sha1": "3e5fdf0c479a0f548e90b05d7fc558cd8e94f5c1",
+        "sha256": "5e9445dfc82a9be8ade9dcd01207c67954b4683a16b8c6dae6815731e9181013"
+      },
+      "disc": {
+        "format": "raw 2352-byte sectors (MODE2/2352 .img with .cue/.ccd/.sub)",
+        "size": 303582048,
+        "crc32": "97f824a2",
+        "md5": "28ccbed61f4694ab514a967f228e6c97",
+        "sha1": "4e7994653612f16f03017b4c77804f4b5483a43e",
+        "sha256": "7a8509601610549722b9c552459ee9d3436382d5ec05d0e34d14f4324f4bafb7"
+      }
+    }
+  }
+}
