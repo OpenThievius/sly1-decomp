@@ -134,3 +134,62 @@ void func_0017FE00(Obj_17FE00* self)
     func_001830D8(self);
     self->field = tmp;
 }
+
+struct Obj_17CDA8 {
+    u8 pad0[0x34];
+    s32 f34;
+    u8 pad1[0x3C - 0x38];
+    void* f3C;
+    s32 f40;
+};
+
+void func_0017C660(Obj_17CDA8* self);
+
+s32 func_0017CDA8(Obj_17CDA8* self)
+{
+    func_0017C660(self);
+    if (self->f34 > 0) {
+        return self->f40 < self->f34;
+    }
+    return 0;
+}
+
+struct Obj_17CDE0 {
+    u8 pad0[0x34];
+    s32 f34;
+    u8 pad1[0x3C - 0x38];
+    void* f3C;
+    s32 f40;
+};
+
+void func_0017CE80(Obj_17CDE0* self);
+
+void func_0017CDE0(Obj_17CDE0* self)
+{
+    if (self->f3C != 0) {
+        func_0017CE80(self);
+        self->f34 = 0;
+    } else {
+        self->f34 = 0;
+    }
+    self->f40 = 0;
+}
+
+struct Slot_17FE48 {
+    u8 pad0[0x14];
+    void* ref;
+    u8 pad1[0x44];
+    s32 key;
+    s32 result;
+};
+
+void func_00182C58(void* self);
+s32 func_0015A418(void* ref, s32 mode, s32 key, Slot_17FE48* self);
+
+void func_0017FE48(Slot_17FE48* self)
+{
+    func_00182C58(self);
+    if (self->key != -1) {
+        self->result = func_0015A418(self->ref, 0x104, self->key, self);
+    }
+}

@@ -523,3 +523,42 @@ void func_0015EC68(void)
     D_002622D8 = 0;
     func_001F6B40(D_002623B0);
 }
+
+struct Obj_0015C3C0;
+
+void func_001613C0(Obj_0015C3C0* obj, s32 a1, s32 a2, s32 a3);
+void func_00161708(Obj_0015C3C0* obj, s32 a1, u64 key);
+
+void func_0015C3C0(void* unused, s32 flag, Obj_0015C3C0* obj)
+{
+    if (flag != 0) {
+        func_001613C0(obj, 0, 1, 0xE);
+        func_00161708(obj, 0x40, 0xDF0000027F0000UL);
+    }
+}
+
+struct Ctx_15ED50 {
+    u8 pad0[0x10];
+    s32 f10;
+    u8 pad1[0x08];
+    s32 f1C;
+    u8 pad2[0x24];
+    s32 f44;
+};
+
+extern s32 D_002622D4;
+extern s32 D_00274538;
+extern s32 D_00261F1C;
+
+void func_001B3488(s32 value);
+void func_00202A80(s32 a, s32 b);
+
+void func_0015ED50(Ctx_15ED50* self)
+{
+    D_002622D4 = self->f10;
+    func_001B3488(self->f44);
+    if (self->f1C != 0 && D_00274538 != 0) {
+        *(volatile s32*)0x10003010 = 4;
+        func_00202A80(D_00261F1C, D_00274538);
+    }
+}

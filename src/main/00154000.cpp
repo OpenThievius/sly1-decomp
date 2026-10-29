@@ -385,3 +385,29 @@ void* func_00155778(Ctx_00155778* self, s32 mode)
     }
     return self->f2D0;
 }
+
+struct Node_00155F28 {
+    u8 pad0[0x18];
+    Node_00155F28* next;
+    u8 pad1[0x88 - 0x1C];
+    s32 field88;
+    u8 pad2[0x2C8 - 0x8C];
+    u64 flags;
+};
+
+void func_00155F28(Node_00155F28* self)
+{
+    if ((self->flags & 0x0C000000) == 0x08000000) {
+        return;
+    }
+    Node_00155F28* p = self->next;
+    while (p != 0) {
+        if ((p->flags & 0x0C000000) == 0x08000000) {
+            break;
+        }
+        p = p->next;
+    }
+    if (p != 0) {
+        self->field88 = p->field88;
+    }
+}

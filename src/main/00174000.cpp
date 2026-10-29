@@ -44,3 +44,19 @@ s32 func_00177E20(Ctx_177E20* self)
     if (self->kind == 12 && self->sub == 0x22) return 0;
     return func_001493A0(D_00261990 + 0x454) == 0;
 }
+
+void func_001924C8(void* self, s32 mode);
+void func_00175170(void* self, s32 a, s32 b);
+
+void func_00177E70(void* self, s32 mode)
+{
+    func_001924C8(self, mode);
+    switch (mode) {
+    case 0:
+        (void)func_00175170(self, 9, 0x1C);
+        break;
+    case 1:
+        (void)func_00175170(self, 9, 0x1D);
+        break;
+    }
+}

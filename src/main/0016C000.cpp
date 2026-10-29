@@ -289,3 +289,11 @@ void func_0016E630(Stream_16E1A0* self, s32 mode, s32 n)
     self->f18 = n;
     self->f1C = D_00261858[4];
 }
+
+struct FlagWord_16EC20 { u8 pad[0xAA]; u16 flags; };
+
+void func_0016EC20(FlagWord_16EC20* self, u32 mask)
+{
+    u16 m = (u16)mask;
+    self->flags &= (u16)~m;
+}

@@ -761,3 +761,42 @@ void func_0015AEB0(Actor_15AEB0* self)
     func_00124A48(self);
     self->f64c = self->f3cc + self->f3cc;
 }
+
+struct Owner_159BB0 { u8 pad[0x294]; s32 flag294; };
+struct Node_159BB0 { Owner_159BB0* owner; };
+
+extern u8* D_00275710;
+
+void* func_001B5EE0(void* where);
+void func_00152470(void* where, Node_159BB0* node);
+
+Node_159BB0* func_00159BB0(Owner_159BB0* self)
+{
+    Node_159BB0* node = (Node_159BB0*)func_001B5EE0(D_00275710 + 0x1C18);
+    node->owner = self;
+    if (self->flag294 != 0) {
+        func_00152470(D_00275710 + 0x1C30, node);
+    } else {
+        func_00152470(D_00275710 + 0x1C24, node);
+    }
+    return node;
+}
+
+struct Owner_159C28 { u8 pad[0x294]; s32 flag294; s32 flag298; };
+struct Node_159C28 { Owner_159C28* owner; };
+
+extern u8* D_00275710;
+
+void func_00152600(void* where, Node_159C28* node);
+void func_001B5F28(void* where, Node_159C28* node);
+
+void func_00159C28(Node_159C28* node)
+{
+    if (node->owner->flag294 != 0) {
+        func_00152600(D_00275710 + 0x1C30, node);
+    } else {
+        func_00152600(D_00275710 + 0x1C24, node);
+    }
+    node->owner->flag298 = 0;
+    func_001B5F28(D_00275710 + 0x1C18, node);
+}

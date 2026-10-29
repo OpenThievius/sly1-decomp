@@ -109,7 +109,7 @@ s32 func_001601D8(void* a0)
     return r;
 }
 
-struct Glob_002623C0 { u8 pad0[0xC]; f32 fC; u8 pad1[0x19C8]; s32 f19D8; s32 f19DC; s32 f19E0; u8 pad2[0xC]; s32 mask; s32 f19F4; s32 f19F8; };
+struct Glob_002623C0 { u8 pad0[0xC]; f32 fC; u8 pad1[0x19C8]; s32 f19D8; s32 f19DC; s32 f19E0; s32 f19E4; u8 pad2[8]; s32 mask; s32 f19F4; s32 f19F8; };
 extern Glob_002623C0* D_002623C0;
 
 s32 func_001602A0(void);
@@ -412,4 +412,25 @@ void func_00161768(Obj_161768* self, u32 a1, u64 a2)
     self->f20 = a1;
     self->last = p;
     self->f24 = 0;
+}
+
+
+void func_00160C48(s32 value)
+{
+    D_002623C0->f19E4 = value;
+}
+
+struct Stream_1617E8 { u8 pad0[0xC]; u8* cur; };
+
+void func_001612E8(void* self, s32 a1, s32 a2);
+
+void func_001617E8(Stream_1617E8* self, s32 tag, f32 value)
+{
+    func_001612E8(self, 0, 1);
+    s32 bits = *(s32*)&value;
+    u64 hi = (u64)(s64)bits << 32;
+    u64 lo = (u64)(u32)tag;
+    u64* p = (u64*)self->cur;
+    self->cur = (u8*)(p + 1);
+    *p = lo | hi;
 }

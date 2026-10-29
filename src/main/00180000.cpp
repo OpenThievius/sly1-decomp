@@ -368,3 +368,92 @@ void func_00183D88(void* self)
     func_001841D0(self);
     func_00184B58(self);
 }
+
+typedef s32 (*VFn_1830B0)(void* self);
+struct Obj_1830B0 { VFn_1830B0* vtbl; };
+
+s32 func_001830B0(Obj_1830B0* self)
+{
+    return ((VFn_1830B0*)self->vtbl)[13](self);
+}
+
+struct Desc_1830D8 { u8 pad0[0xC]; s32 size0C; };
+struct Obj_1830D8 {
+    Desc_1830D8* f0;
+    void* f4;
+    s32 f8;
+    u8 pad1[8];
+    u8* f14;
+    u8 pad2[0x14];
+    void* f2C;
+    s32 f30;
+};
+
+extern u8 D_00259F38[];
+
+void* func_0011BF30(void);
+void func_0011BEE0(void* a, void* b);
+void func_0011A708(u8* a, void* b);
+void func_0018D800(void* dst, void* src, s32 size);
+u8* func_00159F20(u8* base, s32 n);
+void func_00152600(u8* p, void* self);
+void func_00152470(u8* p, void* self);
+void* func_0011A630(void);
+void func_0011A800(u8* a);
+void func_0011A5B0(void* a, void* b);
+void func_0011A6C0(u8* a, void* b);
+
+void func_001830D8(Obj_1830D8* self, Obj_1830D8* src)
+{
+    if (src->f4 != 0) {
+        void* p = func_0011BF30();
+        func_0011BEE0(src->f4, p);
+        self->f4 = p;
+        func_0011A708(D_00259F38, p);
+    }
+    Desc_1830D8* d = src->f0;
+    u8* s0 = self->f14;
+    func_0018D800((u8*)self + 0x34, (u8*)src + 0x34, d->size0C - 0x34);
+    u8* t = func_00159F20(s0, self->f8);
+    func_00152600(t, self);
+    t = func_00159F20(s0, src->f8);
+    func_00152470(t, self);
+    self->f8 = src->f8;
+    if (src->f2C != 0) {
+        u8* s1 = D_00259F38;
+        func_0011A800(s1);
+        void* p = func_0011A630();
+        func_0011A5B0(src->f2C, p);
+        self->f2C = p;
+        func_0011A6C0(s1, p);
+    }
+    self->f30 = src->f30;
+}
+
+typedef void (*VFn_00183DF8)(void* self);
+
+struct Obj_00183DF8 { VFn_00183DF8* vtbl; u8 pad04[0x10]; u8* f14; };
+
+void func_00152470(void* sub, void* self);
+
+void func_00183DF8(Obj_00183DF8* self)
+{
+    VFn_00183DF8 fn;
+
+    func_00152470(self->f14 + 0x1BE8, self);
+    fn = self->vtbl[22];
+    if (fn != 0) fn(self);
+}
+
+typedef void (*VFn_00183E40)(void* self);
+
+struct Obj_00183E40 { VFn_00183E40* vtbl; u8 pad04[0x10]; u8* f14; };
+
+void func_001240F8(void* self);
+void func_00183DF8(Obj_00183E40* self);
+
+void func_00183E40(Obj_00183E40* self)
+{
+    func_001240F8(self);
+    func_00183DF8(self);
+}
