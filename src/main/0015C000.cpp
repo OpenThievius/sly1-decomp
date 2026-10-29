@@ -864,3 +864,56 @@ void func_0015D338(Self_15D338* self, u32 color, Strm_15D338* s, f32 x0, f32 y0,
     func_00161860(s, (s32)(u1 * 16.0f), (s32)(v1 * 16.0f));
     func_001618C0(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
 }
+
+struct Self_15CD18 {
+    u8 p0[0x4];
+    s32 m4;
+    s32 m8;
+    u8 p0c[0x40 - 0x0C];
+    s32 m40;
+    f32 f44;
+    f32 f48;
+    u8 p4c[0x60 - 0x4C];
+    u64 m60;
+};
+
+struct Entry_15CD18 {
+    u8 p0[0x2];
+    u16 a2;
+    u16 a4;
+    u16 a6;
+};
+
+struct Stream_15CD18 {
+    s32 unused;
+};
+
+Entry_15CD18* func_0015DAB8(Self_15CD18* self, s8 key);
+void func_001617E8(Stream_15CD18* s, s32 tag, f32 value);
+void func_00161860(Stream_15CD18* s, s32 a, s32 b);
+void func_001618C0(Stream_15CD18* s, s32 a, s32 b, s32 c, s32 d);
+
+f32 func_0015CD18(f32 x, f32 y, Self_15CD18* self, s8 key, u32 color, Stream_15CD18* s)
+{
+    Entry_15CD18* e = func_0015DAB8(self, key);
+    if (e != 0) {
+        s32 shift = (s32)((self->m60 >> 30) & 0xF);
+        s32 s4 = 1 << shift;
+        f32 h = (f32)self->m8 * self->f48;
+        f32 w = (f32)e->a6 * self->f44;
+        f32 px = x + w;
+        f32 py = y + h;
+        if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 492.80002f) {
+            u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
+            func_001617E8(s, tag, 0.0f);
+            func_00161860(s, e->a2 << 4, (s4 - e->a4) << 4);
+            func_001618C0(s, (s32)((x + 1728.0f) * 16.0f),
+                          (s32)((y * 0.45454547f + 1936.0f) * 16.0f), self->m40, 0);
+            func_00161860(s, (e->a2 + e->a6) << 4, (s4 - (e->a4 + self->m8)) << 4);
+            func_001618C0(s, (s32)((px + 1728.0f) * 16.0f),
+                          (s32)((py * 0.45454547f + 1936.0f) * 16.0f), self->m40, 0);
+        }
+        return (f32)(e->a6 + 1) * self->f44;
+    }
+    return (f32)self->m4 * self->f44;
+}

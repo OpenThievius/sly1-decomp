@@ -857,3 +857,98 @@ void func_001EFD10(Obj_1EFD10* self, s32 a1)
     }
     func_001F0220(self, s);
 }
+
+struct Sub_1ECBC8;
+struct Dev_1ECBC8;
+typedef void (*Cb_1ECBC8)(void);
+typedef s32 Id_1ECBC8;
+
+struct Obj_1ECBC8 {
+    u8 p0[0x14];
+    Dev_1ECBC8* f14;
+    u8 p1[0xC34 - 0x18];
+    Sub_1ECBC8* fC34;
+    Sub_1ECBC8* fC38;
+    u8 p2[0xC54 - 0xC3C];
+    Dev_1ECBC8* fC54;
+    u8 p3[0xC60 - 0xC58];
+    s32 fC60;
+    f32 fC64;
+    u8 p4[0xC70 - 0xC68];
+    s32 fC70;
+    s32 fC74;
+    s32 fC78;
+    f32 fC7C;
+    f32 fC80;
+    f32 fC84;
+    f32 fC88;
+    f32 fC8C;
+    u8 p5[0xC94 - 0xC90];
+    s32 fC94;
+};
+
+extern f32 D_00261858[];
+extern s32 D_00275DB8;
+extern s32 D_00275DBC;
+
+void func_001C7CB8(Obj_1ECBC8* self);
+void func_001ED1D8(Sub_1ECBC8* sub);
+void func_001ED278(Sub_1ECBC8* sub);
+void func_001B6598(Dev_1ECBC8* dev, s32* out);
+void func_001C0C68(Id_1ECBC8 a, Dev_1ECBC8* b);
+s32 func_001C0C50(Id_1ECBC8 a);
+void func_001DBCC8(Dev_1ECBC8* dev, Cb_1ECBC8 cb, Obj_1ECBC8* self, s32 a3, s32 a4);
+void func_001ECB18(void);
+
+void func_001ECBC8(Obj_1ECBC8* self)
+{
+    Sub_1ECBC8* sub;
+    s32 code;
+
+    func_001C7CB8(self);
+    if (D_00275DB8 == 2) {
+        if (self->fC88 != self->fC8C) {
+            self->fC88 = self->fC8C;
+            self->fC64 = self->fC8C * (f32)self->fC60;
+        }
+        sub = self->fC34;
+        self->fC84 = D_00261858[1] + self->fC88;
+        self->fC80 = D_00261858[1];
+        self->fC70 = 0;
+        self->fC78 = 0;
+        self->fC74 = 0;
+        if (sub != 0) {
+            self->fC34 = 0;
+            self->fC38 = sub;
+            func_001ED1D8(sub);
+        }
+        D_00275DB8 = 0;
+    }
+    if (self->fC84 <= D_00261858[1]) {
+        s32 a = self->fC74 + 1;
+        s32 b = self->fC78 + 1;
+        self->fC80 = self->fC84;
+        self->fC74 = a;
+        self->fC78 = b;
+        if (b >= 4) {
+            self->fC78 = 0;
+            self->fC70 = self->fC70 + 1;
+            if (self->fC88 != self->fC8C) {
+                self->fC88 = self->fC8C;
+                self->fC64 = self->fC8C * (f32)self->fC60;
+            }
+        }
+        if (self->fC94 == 1) {
+            func_001B6598(self->fC54, &code);
+            if (code == 0x4F1 || (code < 0x4F2 ? code == 0x4EE : (code == 0x4F4 || code == 0x4F7))) self->fC94 = 2;
+        }
+        self->fC84 = self->fC84 + self->fC88;
+    }
+    self->fC7C = (f32)self->fC78 + (D_00261858[1] - self->fC80) / self->fC88;
+    if (self->fC38 != 0) func_001ED278(self->fC38);
+    if (D_00275DB8 == 1) {
+        func_001C0C68(1, 0);
+        if (func_001C0C50(1) == D_00275DBC) D_00275DB8 = 2;
+    }
+    func_001DBCC8(self->f14, func_001ECB18, self, 0, 0);
+}

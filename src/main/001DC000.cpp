@@ -704,3 +704,86 @@ s32 func_001DF5A0(Obj_001DF5A0* self, s32 mode)
     if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || func_001DDA80(self->f14) != 0) return 1;
     return 0;
 }
+
+struct Obj_1DC9A0;
+struct Alloc_1DC9A0;
+typedef void (*VFn_1DC9A0)(void* self, void* p);
+struct Inst_1DC9A0 { VFn_1DC9A0* vtbl; };
+
+extern s32 D_00275630;
+extern u8 D_00275640[];
+extern f32 D_00275650;
+extern f32 D_00275654;
+extern f32 D_00275658;
+extern f32 D_0027565C;
+extern f32 D_00275660;
+extern u8 D_00275670[];
+extern u8 D_00275680[];
+extern u8 D_00275690[];
+extern u8 D_00275698[];
+extern u8 D_002756A0[];
+
+Inst_1DC9A0* func_0011E580(Alloc_1DC9A0* a0, Obj_1DC9A0* a1, void* a2, s32 a3, s32 a4);
+void func_00184768(Inst_1DC9A0* p, s32 v);
+void func_001847F0(Inst_1DC9A0* p, void* q);
+void func_00184858(Inst_1DC9A0* p, f32 v);
+void func_00184818(Inst_1DC9A0* p, f32 v);
+void func_00184878(Inst_1DC9A0* p, f32 v);
+void func_00184838(Inst_1DC9A0* p, f32 v);
+void func_00184898(Inst_1DC9A0* p, f32 v);
+void func_001848B8(Inst_1DC9A0* p, void* q);
+void func_00184990(Inst_1DC9A0* p, void* q);
+
+void func_001DC9A0(Obj_1DC9A0* self)
+{
+    Inst_1DC9A0* p;
+
+    if (D_00275630 & 1) {
+        p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
+        func_001847F0(p, D_00275640);
+        func_00184858(p, D_00275650);
+        func_00184818(p, D_00275654);
+        func_00184878(p, D_00275658);
+        func_00184838(p, D_0027565C);
+        func_00184898(p, D_00275660);
+        func_001848B8(p, D_00275670);
+    }
+    if (D_00275630 & 2) {
+        p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
+        func_00184768(p, 1);
+        func_001847F0(p, D_00275640);
+        func_00184858(p, D_00275650);
+        func_00184818(p, D_00275654);
+        func_00184878(p, D_00275658);
+        func_00184838(p, D_0027565C);
+        func_00184898(p, D_00275660);
+        func_00184990(p, D_00275690);
+        p->vtbl[33](p, D_00275680);
+    }
+    if (D_00275630 & 4) {
+        p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
+        func_00184768(p, 2);
+        func_001847F0(p, D_00275640);
+        func_00184858(p, D_00275650);
+        func_00184818(p, D_00275654);
+        func_00184878(p, D_00275658);
+        func_00184838(p, D_0027565C);
+        func_00184898(p, D_00275660);
+        func_001848B8(p, D_00275670);
+        func_00184990(p, D_00275698);
+        p->vtbl[33](p, D_00275680);
+    }
+    if (D_00275630 & 8) {
+        p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
+        func_00184768(p, 3);
+        func_001847F0(p, D_00275640);
+        func_00184858(p, D_00275650);
+        func_00184818(p, D_00275654);
+        func_00184878(p, D_00275658);
+        func_00184838(p, D_0027565C);
+        func_00184898(p, D_00275660);
+        func_001848B8(p, D_00275670);
+        func_00184990(p, D_002756A0);
+        p->vtbl[33](p, D_00275680);
+    }
+}

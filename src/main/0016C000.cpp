@@ -367,7 +367,7 @@ void func_0016F1F8(void)
     }
 }
 
-extern f32 D_00261868;
+extern f32 D_00261868[];
 extern f32 D_00262E00;
 
 void func_0016F1F8(void);
@@ -378,7 +378,7 @@ void func_0016F2E0(void)
     if (D_00262E00 == 0.0f) {
         return;
     }
-    if (!(D_00262E00 <= D_00261868)) {
+    if (!(D_00262E00 <= D_00261868[0])) {
         return;
     }
     Timer_16F1F8* best = 0;
@@ -680,4 +680,87 @@ f32 func_0016F108(Obj_16F108* self, s32 idx)
         return 1.0f;
     }
     return 0.0f;
+}
+
+struct Obj_16EED0 { u8 pad0[0x2C]; s32 f2C; u8 pad1[0x8]; f32 f38; f32 f3C; f32 f40; f32 f44; f32 f48; u8 pad2[0x5C]; u16 fA8; u16 fAA; };
+
+void func_0016EC20(Obj_16EED0* self, s32 mask);
+extern f32 D_00261858[];
+
+s32 func_0016EED0(Obj_16EED0* self)
+{
+    f32 c;
+    f32 base;
+    if (self->f2C == 0) {
+        u16 fl = self->fAA;
+        if (fl & 0x1000) {
+            func_0016EC20(self, 0x1000);
+            self->f2C = -1;
+        } else if (fl & 0x4000) {
+            func_0016EC20(self, 0x4000);
+            self->f2C = 1;
+        } else if (0.8f <= self->f48) {
+            f32 a = fabsf(self->f44);
+            f32 b = fabsf(self->f40);
+            if (b < a) {
+                if (0.0f < self->f44) {
+                    self->f2C = -1;
+                } else {
+                    self->f2C = 1;
+                }
+            }
+        }
+        if (self->f2C == 0) {
+            goto done;
+        }
+        c = 0.33329999446868896f;
+        self->f3C = c;
+        base = D_00261868[0];
+    } else {
+        s32 v1 = 0;
+        if (self->f2C < 0) {
+            if (self->fA8 & 0x1000) {
+                v1 = 1;
+            } else if (0.25f <= self->f48) {
+                f32 a = fabsf(self->f44);
+                f32 b = fabsf(self->f40);
+                if (b < a) {
+                    if (0.0f < self->f44) v1 = 1;
+                }
+            }
+        } else {
+            if (self->fA8 & 0x4000) {
+                v1 = 1;
+            } else if (0.25f <= self->f48) {
+                f32 a = fabsf(self->f44);
+                f32 b = fabsf(self->f40);
+                if (b < a) {
+                    if (self->f44 < 0.0f) v1 = 1;
+                }
+            }
+        }
+        if (v1 == 0) {
+            self->f2C = 0;
+            goto done;
+        }
+        if (self->f38 <= D_00261858[4]) {
+            f32 lo = 0.1f;
+            f32 hi = 0.33329999446868896f;
+            f32 t = (self->f3C + self->f3C) * 0.33333334f;
+            if (t < lo) {
+                c = lo;
+            } else if (hi < t) {
+                c = hi;
+            } else {
+                c = t;
+            }
+            self->f3C = c;
+            base = D_00261858[4];
+        } else {
+            return 0;
+        }
+    }
+    self->f38 = base + c;
+done:
+    return self->f2C;
 }
