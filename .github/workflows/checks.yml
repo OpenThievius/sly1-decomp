@@ -1,0 +1,31 @@
+name: Checks
+
+# Toolchain-free checks: they need no game data and no compiler, so they run on
+# every push and pull request. Builds need your own disc and the proprietary
+# compiler, so they run on contributors' machines.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: No game data, licence headers
+        run: python tests/check_repository.py
+      - name: Compile tools
+        run: python -m compileall -q tools tests
