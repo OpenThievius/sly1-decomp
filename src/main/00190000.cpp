@@ -129,3 +129,80 @@ void func_00192A28(s32, s32, Pair_192A28* out)
     out->b = 1;
     out->a = 1;
 }
+
+typedef s32 (*VFn_190450)(void* self, s32 value);
+
+struct Mid_190450 { u8 pad0[0x618]; void* p618; };
+
+struct Obj_190450 {
+    VFn_190450* vtbl;
+    u8 pad0[0xC2C - 4];
+    Mid_190450* mid;
+    s32 c30;
+    s32 c34;
+};
+
+s32 func_001A8820(void* p, s32 v);
+s32 func_001C9990(void* self, s32* arg);
+
+s32 func_00190450(Obj_190450* self, s32* arg)
+{
+    if (self->vtbl[79](self, arg[0])) {
+        return 0;
+    }
+    self->c34 = 0;
+    self->c30 = arg[0];
+    if (arg[0] == 0 && arg[1] != 0) {
+        if (func_001A8820(self->mid->p618, arg[1])) {
+            self->c34 = 1;
+        }
+    }
+    return func_001C9990(self, arg);
+}
+
+struct Obj_1906E8 { u8 pad0[0xC28]; s32 c28; };
+
+void func_001906E8(Obj_1906E8* self, s32 value)
+{
+    self->c28 = value;
+}
+
+u32 func_001907E0(u32 x)
+{
+    return (x & 1) ? 0 : x;
+}
+
+extern s32 D_00269BA4;
+
+void func_00191EB0(void)
+{
+    D_00269BA4 = 0;
+}
+
+struct Obj_191FD8 {
+    u8 pad0[0x14];
+    s32 c14;
+    s32 c18_pad;
+    u8 pad1[0x64 - 0x1C];
+    s32 c64;
+    s32 c68;
+};
+
+void func_00182C58(void* self);
+s32 func_0015A418(s32 a0, s32 a1, s32 a2, void* a3);
+
+void func_00191FD8(Obj_191FD8* self)
+{
+    func_00182C58(self);
+    if (self->c64 != -1) {
+        self->c68 = func_0015A418(self->c14, 4, self->c64, self);
+    }
+}
+
+s32 func_00128018(void* a0, s32 a1, void* a2, void* a3);
+
+s32 func_00192128(u8* self, void* other)
+{
+    void* p = self + 0x40;
+    return func_00128018(other, 0, p, p);
+}
