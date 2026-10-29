@@ -423,3 +423,38 @@ void func_0012F760(Owner_12F760* self, s32 a1, s32 a2)
         node = next;
     }
 }
+
+void* func_0012CBE8(void);
+
+f32 func_0012CCC0(void)
+{
+    f32* p = (f32*)func_0012CBE8();
+    f32 r = 0.0f;
+    if (p != 0) {
+        r = *p;
+    }
+    return r;
+}
+
+struct Mid_12F810 { u8 pad[0x14]; void* p14; };
+struct Obj_12F810 { u8 pad[8]; Mid_12F810* mid; };
+struct Entry_12F810 { u8 pad[0x44]; void* p44; };
+
+void func_001831E8(void* a, void* b, void* c, void* d);
+
+void func_0012F810(Obj_12F810* a0, Entry_12F810** a1)
+{
+    func_001831E8(a0->mid->p14, (u8*)a0 + 0xE4, (*a1)->p44, a1);
+}
+
+struct Obj_12F840 { u8 pad[0x590]; s32 f590; };
+
+void func_001B7968(void* self);
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+
+void func_0012F840(Obj_12F840* self)
+{
+    func_001B7968(self);
+    func_001B9AE0(self, 3, 0, 3, 0);
+    self->f590 = -1;
+}

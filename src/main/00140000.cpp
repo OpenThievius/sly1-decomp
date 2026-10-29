@@ -558,3 +558,132 @@ set:
 done:
     return r;
 }
+
+void func_00124A48(void* self);
+void func_0013EA38(void* p);
+void func_00140238(void* self, s32 flag);
+void* func_0015A448(void* obj, s32 id, void* ctx);
+
+struct Self_140140 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x550 - 0x18];
+    s32 f550;
+    s32 f554[8];
+    s32 f574;
+    s32 f578[1];
+    u8 pad2[0x5BC - 0x57C];
+    s32 f5BC;
+};
+
+void func_00140140(Self_140140* self)
+{
+    func_00124A48(self);
+    func_0013EA38((u8*)self + 0x5C0);
+    func_00140238(self, 0);
+    for (s32 i = 0; i < self->f550; i++) {
+        void* p = func_0015A448(self->f14, self->f554[i], self);
+        if (p != 0) {
+            s32 n = self->f574;
+            self->f578[n] = (s32)p;
+            self->f574 = n + 1;
+        }
+    }
+    if (self->f550 == 0) {
+        self->f5BC = 1;
+    }
+}
+
+void func_001BA130(void* self);
+
+struct Self_140200 {
+    u8 pad0[0x5C4];
+    void* f5C4;
+    u8 pad1[0x6E0 - 0x5C8];
+    s32 f6E0;
+};
+
+void func_00140200(Self_140200* self)
+{
+    s32 saved = self->f6E0;
+    func_001BA130(self);
+    self->f6E0 = saved;
+    self->f5C4 = self;
+}
+
+extern u8 D_00275B04[];
+extern u8 D_00275F80[];
+
+void func_001EFFA0(void* dst, void* args, s32 count);
+
+struct Args_140ED0 {
+    s32 kind;
+    void* text;
+    s32 x;
+    s32 y;
+    s32 z;
+};
+
+struct Ring_140ED0 {
+    u8 pad0[0x424];
+    s32 field424;
+    s32 field428;
+    s32 field42C;
+};
+
+void func_00140ED0(Ring_140ED0* r)
+{
+    Args_140ED0 args;
+    args.kind = 1;
+    args.text = D_00275B04;
+    if (r->field42C != 0) {
+        args.x = r->field424;
+        args.y = r->field428;
+        args.z = 0x11;
+    } else {
+        args.x = -1;
+        args.y = -1;
+        args.z = 0x10;
+    }
+    func_001EFFA0(D_00275F80, &args, 1);
+}
+
+typedef int s32;
+typedef unsigned char u8;
+typedef float f32;
+
+struct Ctl_143940 {
+    u8 pad0[0x1C4];
+    f32 f1C4;
+    f32 f1C8;
+    s32 i1CC;
+};
+
+void func_00143560(void* self);
+
+void func_00143940(void* self, f32 x)
+{
+    Ctl_143940* c = (Ctl_143940*)self;
+    c->f1C4 = x;
+    c->f1C8 = x;
+    c->i1CC = 0;
+    func_00143560(self);
+}
+
+typedef int s32;
+typedef unsigned char u8;
+typedef float f32;
+
+struct Ctl_143968 {
+    u8 pad0[0x1E4];
+    f32 f1E4;
+};
+
+void func_00143560(void* self);
+
+void func_00143968(void* self, f32 x)
+{
+    Ctl_143968* c = (Ctl_143968*)self;
+    c->f1E4 = x;
+    func_00143560(self);
+}

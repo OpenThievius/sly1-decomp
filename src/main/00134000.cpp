@@ -4,7 +4,7 @@
 struct Node_1363D0 { u8 pad0[0x324]; void* child; };
 
 void func_001AA8C8(void* self);
-void func_00150790(void* obj, s32 mode);
+s32 func_00150790(void* obj, s32 mode);
 
 void func_001363D0(Node_1363D0* self)
 {
@@ -180,4 +180,47 @@ void func_00135E78(SlotBank_135E78* self, s32 state, s32 flag)
     self->countA = 0;
     func_001F5C0C(blockA, 0, 16);
     self->state = state;
+}
+
+struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
+
+s32 func_001356C0(Owner_136FA8* self, s32 mode);
+
+s32 func_00136FA8(Owner_136FA8* self)
+{
+    s32 r;
+    if (self->child != 0) {
+        r = func_00150790(self->child, 4);
+        goto done;
+    }
+    r = func_001356C0(self, 0);
+done:
+    return r;
+}
+
+struct Pair_137228 { f32 x; f32 y; };
+
+void func_00137228(Pair_137228* out, f32 x, f32 y)
+{
+    out->x = x;
+    out->y = y;
+}
+
+struct Reader_137D10 { u8 pad0[0x18]; u8* cur_18; s32 remaining_1C; };
+
+void func_00137A60(void* self, s32 count, void* out);
+
+s32 func_00137D10(Reader_137D10* self)
+{
+    if (self->remaining_1C >= 2) {
+        u8* p = self->cur_18;
+        u8 lo = p[0];
+        s32 hi = p[1];
+        self->cur_18 = p + 2;
+        self->remaining_1C -= 2;
+        return lo | ((s16)(hi << 8));
+    }
+    s16 tmp;
+    func_00137A60(self, 2, &tmp);
+    return tmp;
 }

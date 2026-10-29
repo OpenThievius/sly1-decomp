@@ -377,3 +377,73 @@ void func_0013DDF0(Track_13DDF0* self)
     self->dropA = -1;
     self->dropB = -1;
 }
+
+void func_001B93F8(void* self);
+
+typedef void (*VFn_13D068)(void* self);
+
+struct Self_13D068 {
+    VFn_13D068* vtbl;
+    u8 pad0[0x678 - 4];
+    s32 f678;
+};
+
+void func_0013D068(void* self0)
+{
+    Self_13D068* self = (Self_13D068*)self0;
+    func_001B93F8(self0);
+    if (self->f678 != 0) {
+        self->f678 = 0;
+        self->vtbl[76](self0);
+    }
+}
+
+extern u8 D_00261420[];
+
+void func_00141040(void* table, s32 v);
+void func_001410A0(void* table, s32 v);
+
+struct Self_13D820 {
+    u8 pad0[0x680];
+    s32 f680;
+    u8 pad1[4];
+    s32 f688;
+};
+
+void func_0013D820(void* self0, s32 v)
+{
+    Self_13D820* self = (Self_13D820*)self0;
+    self->f680 = v;
+    if (v != 0) {
+        func_00141040(D_00261420, self->f688);
+    } else {
+        func_001410A0(D_00261420, self->f688);
+    }
+}
+
+struct Ctl_13DEE8 {
+    u8 pad0[0x368];
+    f32 level_368;
+    u8 pad1[0x680 - 0x36C];
+    s32 hold_680;
+    u8 pad2[0x6D4 - 0x684];
+    s32 sel_6D4;
+};
+
+void func_0013DE38(Ctl_13DEE8* self, u8* table, s32 index);
+s32 func_0013DB28(Ctl_13DEE8* self, s32 value);
+s32 func_001300E8(void* node, s32 kind);
+
+void func_0013DEE8(Ctl_13DEE8* self, u8* table, s32 index)
+{
+    s32 value;
+
+    func_0013DE38(self, table, index);
+    if (self->hold_680 != 0) return;
+    value = *(s32*)(table + ((1 - index) << 6));
+    if (func_001300E8((void*)value, 5) != 0) {
+        if (func_0013DB28(self, value) != 0) {
+            self->sel_6D4 = value;
+        }
+    }
+}

@@ -241,3 +241,21 @@ void func_00146100(Obj_00146100* self)
     func_001B7968(self);
     self->value_550 = 100.0f;
 }
+
+struct Flags_1455C0 { u8 pad0[0x224]; s32 f224; s32 f228; f32 f22C; };
+
+void func_001455C0(Flags_1455C0* self, f32* src)
+{
+    self->f224 = 1;
+    if (src != 0) {
+        self->f228 = 1;
+        self->f22C = *src;
+    }
+}
+
+struct Flags_1455E0 { u8 pad0[0x220]; s32 f220; };
+
+void func_001455E0(Flags_1455E0* self)
+{
+    self->f220 = 1;
+}

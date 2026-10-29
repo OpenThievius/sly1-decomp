@@ -238,3 +238,30 @@ void func_0013B598(void* self)
     func_001BAC30(self);
     func_00159478((u8*)self + 0x5BC, self);
 }
+
+s32 func_00137BE0(void* src);
+void func_00137A60(void* self, s32 size, void* obj);
+
+void func_00138518(void* self)
+{
+    s32 n = func_00137BE0(self);
+    func_00137A60(self, n, 0);
+}
+
+struct Range_138550 {
+    s32 w[8];
+};
+
+void func_00137A60(void* self, s32 size, void* obj);
+u32 func_0018D568(s32 size, void* src);
+
+void func_00138550(void* self, u32* out)
+{
+    Range_138550 r;
+    func_00137A60(self, 0x20, &r);
+    if (r.w[1] != r.w[7]) {
+        *out = func_0018D568(0x20, &r);
+    } else {
+        *out = 0;
+    }
+}
