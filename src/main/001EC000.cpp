@@ -782,3 +782,78 @@ void func_001EEC60(Obj_1EEC60* self)
     func_001F5590((u8*)self + 0x590, self);
     self->f594 = 3;
 }
+
+struct Obj_1EFD10 {
+    u8 pad0[4];
+    s32 state;
+    f32 f08;
+    f32 f0C;
+    s32 i10;
+    u8 pad14[0xC];
+    s32 i20;
+    s32 i24;
+};
+
+extern f32 D_00261858[];
+extern s32 D_00275AF0;
+
+s32 func_001F00F0(Obj_1EFD10* self, s32 a1, s32 a2);
+void func_001F0220(Obj_1EFD10* self, s32 state);
+void func_001C0000(s32 flag, f32 x);
+
+void func_001EFD10(Obj_1EFD10* self, s32 a1)
+{
+    s32 s = self->state;
+    f32 t = D_00261858[4] - self->f08;
+    f32 thr;
+    f32 r;
+    switch (s) {
+    case 0:
+        if (func_001F00F0(self, a1, 1) != 0) return;
+        break;
+    case 1:
+        if (self->i24 != 2) {
+            thr = 0.5f;
+            if (self->i24 == s) thr = 1.5f;
+            if (thr < t) {
+                s = 2;
+                func_001C0000(((self->i20 >> 3) ^ 1) & 1, 0.0f);
+            } else {
+                r = t / thr;
+                f32 hi = 1.0f;
+                f32 lo = 0.0f;
+                if (r < lo) r = lo;
+                else if (hi < r) r = hi;
+                self->f0C = r;
+                func_001C0000(((self->i20 >> 3) ^ 1) & 1, 1.0f - r);
+            }
+        }
+        break;
+    case 3: {
+        s32 v = self->i24;
+        if (v != 2) {
+            thr = 0.25f;
+            if (v == 1) thr = 1.0f;
+            if (thr < t) {
+                if (v == s) {
+                    self->i24 = 0;
+                    self->f08 = D_00261858[4];
+                    self->f0C = 1.0f;
+                } else {
+                    s = 0;
+                }
+            } else {
+                self->f0C = 1.0f - t / thr;
+            }
+        }
+        break;
+    }
+    case 2:
+        if (self->i10 == 0 && D_00275AF0 != 0) {
+        } else {
+            s = 3;
+        }
+        break;
+    }
+    func_001F0220(self, s);
+}

@@ -495,3 +495,88 @@ void func_0019FDC0(Obj_19FDC0* self)
     self->q0C0 = *(Quad_19FDC0*)(g + 0x1EE0);
     self->f38 = -1.0f;
 }
+
+extern u8 D_0027B314[];
+extern u8 D_0026AC10[];
+extern u8 D_005E4700[];
+
+struct Node_19D6C0;
+typedef void (*VFn_19D6C0)(Node_19D6C0* self, void* arg, s32 z);
+struct Node_19D6C0 {
+    VFn_19D6C0* vtbl;
+};
+
+struct Frame_19D6C0 {
+    s32 list;
+    s32 cursor;
+    s32 link;
+    s32 prev;
+};
+
+struct Obj_19D6C0 {
+    u8 pad0[0x60];
+    s32 h60;
+};
+
+void func_00159D00(Node_19D6C0* n);
+
+void func_0019D6C0(Obj_19D6C0* self, void* arg)
+{
+    Frame_19D6C0 f1;
+    Frame_19D6C0 f2;
+    Frame_19D6C0 f3;
+    s32 e = (s32)self + 0x60;
+    f1.cursor = e;
+    f1.list = e;
+    s32 old = *(s32*)D_0027B314;
+    s32 link = *(s32*)(e + 8);
+    *(s32*)D_0026AC10 = (s32)D_005E4700;
+    *(s32*)D_0027B314 = (s32)&f1;
+    f1.prev = old;
+    f1.link = link;
+    s32 h = *(s32*)e;
+    f1.cursor = h + link;
+    s32 n = h;
+    while (n != 0) {
+        Node_19D6C0* node = (Node_19D6C0*)n;
+        node->vtbl[40](node, arg, 0);
+        s32 nx = *(s32*)f1.cursor;
+        f1.cursor = nx + f1.link;
+        n = nx;
+    }
+    s32 e2 = (s32)self + 0x78;
+    s32 old2 = *(s32*)D_0027B314;
+    f2.cursor = e2;
+    f2.list = e2;
+    s32 link2 = *(s32*)(e2 + 8);
+    *(s32*)D_0027B314 = (s32)&f2;
+    f2.prev = old2;
+    s32 h2 = *(s32*)((s32)self + 0x78);
+    f2.link = link2;
+    f2.cursor = h2 + link2;
+    n = h2;
+    while (n != 0) {
+        Node_19D6C0* node = (Node_19D6C0*)n;
+        node->vtbl[40](node, arg, 0);
+        s32 nx = *(s32*)f2.cursor;
+        f2.cursor = nx + f2.link;
+        n = nx;
+    }
+    s32 e3 = (s32)self + 0x1CD8;
+    s32 old3 = *(s32*)D_0027B314;
+    s32 link3 = *(s32*)(e3 + 8);
+    f3.prev = old3;
+    *(s32*)D_0027B314 = (s32)&f3;
+    f3.list = e3;
+    s32 h3 = *(s32*)((s32)self + 0x1CD8);
+    f3.link = link3;
+    f3.cursor = h3 + link3;
+    n = h3;
+    while (n != 0) {
+        func_00159D00((Node_19D6C0*)n);
+        s32 nx = *(s32*)f3.cursor;
+        f3.cursor = nx + f3.link;
+        n = nx;
+    }
+    *(s32*)D_0027B314 = f1.prev;
+}

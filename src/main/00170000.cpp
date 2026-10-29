@@ -408,3 +408,79 @@ void func_00172B08(Obj_172B08* self)
         self->f21CC = 0;
     }
 }
+
+struct Aux_1725E0
+{
+    u8 pad0[0x2C8];
+    u64 f2C8;
+};
+struct VtObj_1725E0
+{
+    void** vt;
+};
+struct Self_1725E0
+{
+    u8 pad0[0x610];
+    void* f610;
+    void* f614;
+    u8 pad618[4];
+    Aux_1725E0* f61C;
+    u8 pad620[0x1190 - 0x620];
+    u8 f1190[0x100];
+    u8 f1290[0x100];
+    u8 pad1390[0x1520 - 0x1390];
+    u8 f1520[0x21C0 - 0x1520];
+    s32 f21C0;
+    u8 pad21C4[0x2220 - 0x21C4];
+    s32 f2220;
+    u8 pad2224[0x239C - 0x2224];
+    s32 f239C;
+    u8 pad23A0[0x2430 - 0x23A0];
+    f32 f2430;
+    f32 f2434;
+};
+
+void func_001C4848(Self_1725E0* s, void* a, void* b, void* c);
+void func_00125B70(Self_1725E0* s, void* c, f32* out);
+void func_00172078(Self_1725E0* s, f32* buf, f32 t);
+void func_00188B08(void* a, f32* b, f32* out);
+void func_001CDD98(Self_1725E0* s);
+void func_001C49C8(Self_1725E0* s, void* a, void* b);
+void func_001C3028(void* a, void* b);
+void func_001D62E0(Self_1725E0* s, void* a, void* b);
+
+void func_001725E0(Self_1725E0* self, void* a, void* b)
+{
+    f32 buf[12];
+    f32 out[20];
+    s32 i;
+
+    if (!(self->f2220 == 6 && self->f239C == 7))
+    {
+        func_001C4848(self, self->f610, self->f610, self->f1190);
+        func_001C4848(self, self->f614, self->f614, self->f1290);
+    }
+    if (self->f2434 != 0.0f || self->f2430 != 0.0f)
+    {
+        self->f61C->f2C8 &= ~(1ULL << 32);
+        func_00125B70(self, b, out);
+        out[16] *= 0.25f;
+        for (i = 0; i < 4; i++)
+        {
+            func_00172078(self, buf, (f32)i * 0.25f);
+            func_00188B08((u8*)self->f61C + 0x140, buf, out);
+            ((void (*)(void*, void*, f32*))((VtObj_1725E0*)self->f61C)->vt[0xA0 / 4])(self->f61C, a, out);
+        }
+        self->f61C->f2C8 |= 0x100000000UL;
+    }
+    if (self->f2220 == 3)
+    {
+        func_001CDD98(self);
+    }
+    func_001C49C8(self, a, b);
+    if (self->f21C0)
+    {
+        func_001C3028(self->f1520, a);
+    }
+    func_001D62E0(self, a, b);
+}

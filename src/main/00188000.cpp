@@ -528,3 +528,42 @@ void func_0018AC58(Obj_0018AC58* self)
     self->fE3C = D_002649E8[n];
     self->fE28 = n + 1;
 }
+
+struct Glob_18BDC8 { u8 pad0[0x25C]; s32 f25C; u8 pad260[8]; s32 f268; };
+struct Self2_18BDC8 { u8 pad0[0xC]; s32 fC; f32 f10; s32 f14; s32 f18; f32 f1C; f32 f20; u8 pad24[0x4F44 - 0x24]; s32 f4F44; };
+
+extern u8 D_00269990[];
+extern f32 D_00261868[];
+extern Glob_18BDC8 D_0026FF68[];
+
+s32 func_0018B770(u8* p);
+void func_0018B670(u8* p, void* fn, Self2_18BDC8* self);
+void func_0018C028(Self2_18BDC8* self, s32 v);
+void func_0018D0A0(Self2_18BDC8* self);
+void func_00194D30(Glob_18BDC8* g, s32 a, s32 b);
+
+void func_0018BDC8(Self2_18BDC8* self)
+{
+    if (func_0018B770(D_00269990) != 0) return;
+    if (self->fC == self->f14) {
+        if (self->f20 <= D_00261868[0])
+            func_0018B670(D_00269990, (void*)func_0018D0A0, self);
+    } else {
+        func_0018C028(self, self->f14);
+    }
+    if (func_0018B770(D_00269990) != 0) return;
+    if (self->f18 == 1 && D_00261868[0] - self->f10 >= 0.3f) {
+        if (self->f4F44 != 0) {
+            if (self->fC != 5) func_00194D30(D_0026FF68, 1, 0x15);
+        } else if (D_0026FF68->f25C != 0 && D_0026FF68->f268 == 0x11) {
+            if (self->fC != 5) func_00194D30(D_0026FF68, 1, 0x20);
+        } else {
+            switch (self->fC) {
+            case 1: func_00194D30(D_0026FF68, 1, 3); break;
+            case 2: func_00194D30(D_0026FF68, 1, 4); break;
+            case 3: func_00194D30(D_0026FF68, 1, 7); break;
+            case 4: func_00194D30(D_0026FF68, 1, 10); break;
+            }
+        }
+    }
+}

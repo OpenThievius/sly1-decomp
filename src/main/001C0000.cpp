@@ -597,3 +597,54 @@ s32 func_001C3D60(Obj_1C3D60* self, Arg_1C3D60* arg)
     ((VFnB_1C3D60)self->vtbl[18])(self, 0x17, &local);
     return 1;
 }
+
+struct Ring_1C25B0 {
+    s32 f0;
+    s32 f4;
+    s32 f8[8];
+    s32 f28[0x20 / 4];
+    s32 f48;
+    s32 f4C;
+};
+
+struct Dma_1C25B0 {
+    s32 f0;
+    u8 pad4[0x7C];
+    s32 f80;
+};
+
+extern Ring_1C25B0 D_002748F0[];
+extern s32 D_00274990;
+extern Dma_1C25B0* D_00261F20;
+void func_00202C38(Dma_1C25B0* d, s32 b, s32 c);
+void func_00202B68(Dma_1C25B0* d);
+
+void func_001C25B0(s32 first, ...) {
+    s32 buf[8];
+    Ring_1C25B0* r = &D_002748F0[D_00274990];
+    s32 n = 0;
+    s32 x = first;
+    r->f4C = 3;
+    func_00202C38(D_00261F20, 0, 0);
+    void* ap = (char*)__builtin_next_arg(first) - 56;
+    while (x) {
+        buf[n] = x;
+        ap = (char*)ap + 8;
+        x = *(s32*)((char*)ap - 8);
+        n++;
+    }
+    s32 i = 0;
+    n = r->f48 - n;
+    while (n < r->f48 - 1) {
+        *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x10000000) | ((u64)buf[i] << 32);
+        n++;
+        i++;
+    }
+    Dma_1C25B0* d = D_00261F20;
+    *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x70000000) | ((u64)buf[i] << 32);
+    d->f0 &= ~0x40;
+    d->f80 = (r->f4 & 0xFFFFFFF) + 0x80000000;
+    func_00202B68(d);
+    r = &D_002748F0[1 - D_00274990];
+    if (r->f4C == 3) r->f4C = 0;
+}

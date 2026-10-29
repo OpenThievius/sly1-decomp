@@ -1645,3 +1645,53 @@ void* func_00117610(void* self)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct __attribute__((aligned(16))) Quad_115510 { f32 f[4]; };
+struct Node_115510 { s32 pad0; Quad_115510* f4; Node_115510* f8; };
+struct List_115510 { s32 pad0; Node_115510* f4; };
+
+s32 func_0011B008(Quad_115510* q);
+void func_0011B018(void* out, Quad_115510* q);
+void func_0011B060(Quad_115510* q, s32 mode);
+void func_0011B0A8(Quad_115510* a, Quad_115510* b);
+void func_0011B788(Quad_115510* q, Quad_115510* v);
+void func_0011B9A8(Quad_115510* out, Node_115510* n);
+void func_001884C0(Quad_115510* v);
+
+void* func_00115510(void* self, s32 kind, List_115510* list)
+{
+    Quad_115510 t, u;
+    func_0011B008(&t);
+    Quad_115510* a = (Quad_115510*)func_0011C618();
+    Node_115510* n = list->f4;
+    switch (kind) {
+    case 3:
+    case 4: {
+        func_001884C0(a);
+        for (s32 i = 0; i < kind; i++) {
+            a[i] = *n->f4;
+            n = n->f8;
+        }
+        break;
+    }
+    case 9:
+        func_001884C0(a);
+    case 16: {
+        s32 m = kind == 9 ? 3 : 4;
+        for (s32 i = 0; i < m; i++) {
+            for (s32 j = 0; j < m; j++) {
+                func_0011B9A8(&u, n);
+                func_0011B0A8(&t, &u);
+                func_0011B060(&u, 2);
+                a[i].f[j] = t.f[1];
+                n = n->f8;
+            }
+        }
+        break;
+    }
+    }
+    func_0011B788(&t, a);
+    func_0011B018(self, &t);
+    func_0011B060(&t, 2);
+    return self;
+}

@@ -579,3 +579,106 @@ s32 func_0017B7A8(Obj_17B7A8* self, Msg_17B7A8* msg)
     }
     return func_001BC320(self, msg);
 }
+
+struct __attribute__((aligned(16))) Quad_17B9D0 { f32 v[4]; };
+
+struct Link_17B9D0
+{
+    u8 pad0[0x28];
+    void* f28;
+};
+struct Vt_17B9D0
+{
+    u8 pad0[0x28];
+    void (*f28)(void* self, Quad_17B9D0* a, s32 b, Quad_17B9D0* c, Quad_17B9D0* d, s32 e, s32 f);
+};
+struct Obj_17B9D0
+{
+    u8 pad0[0x18];
+    void* f18;
+};
+
+struct Node_17B9D0
+{
+    u8 pad0[0x18];
+    void* f18;
+    u8 pad1c[0x18];
+    struct { Vt_17B9D0* vt; }* f34;
+    u8 pad38[0x108];
+    Quad_17B9D0 f140;
+};
+
+struct Self_17B9D0
+{
+    u8 pad0[0x3C];
+    u8* f3C;
+};
+
+s32 func_001300E8(Node_17B9D0* n, s32 kind);
+void func_001920B0(Node_17B9D0* n, Quad_17B9D0* out);
+void func_001F3BD8(Node_17B9D0* n, Quad_17B9D0* out);
+void func_001F3C08(Node_17B9D0* n, Quad_17B9D0* out);
+f32 func_00205778(f32 a, f32 b);
+void func_00128018(void* a, void* b, void* c, Quad_17B9D0* d);
+void func_001280C0(void* a, void* b, Quad_17B9D0* c, Quad_17B9D0* d);
+
+void func_0017B9D0(Self_17B9D0* self, Node_17B9D0* n, Quad_17B9D0* out, f32* outf)
+{
+    Quad_17B9D0 v;
+    Quad_17B9D0 a;
+    Quad_17B9D0 b;
+    Quad_17B9D0 c;
+    u8* s1 = self->f3C;
+    f32 r;
+
+    if (n == 0)
+    {
+        goto tail;
+    }
+    if (func_001300E8(n, 0x7E))
+    {
+        func_001920B0(n, &v);
+        r = *(f32*)(s1 + 0x638);
+    }
+    else if (func_001300E8(n, 0x73))
+    {
+        func_001F3BD8(n, &v);
+        func_001F3C08(n, &a);
+        r = func_00205778(a.v[1], a.v[0]);
+    }
+    else if (func_001300E8(n, 0x6E))
+    {
+        func_00128018(0, n->f18, s1 + 0x100, &a);
+        {
+            void (*fn)(void*, Quad_17B9D0*, s32, Quad_17B9D0*, Quad_17B9D0*, s32, s32) =
+                (void (*)(void*, Quad_17B9D0*, s32, Quad_17B9D0*, Quad_17B9D0*, s32, s32))n->f34->vt->f28;
+            if (fn)
+            {
+                fn(n->f34, &a, 0, &a, &b, 0, 0);
+            }
+        }
+        func_00128018(n->f18, 0, &a, &v);
+        func_001280C0(n->f18, 0, &b, &c);
+        r = func_00205778(c.v[1], c.v[0]);
+    }
+    else if (func_001300E8(n, 2))
+    {
+        v = n->f140;
+        r = func_00205778(((f32*)n)[0x114 / 4], ((f32*)n)[0x110 / 4]);
+    }
+    else
+    {
+    tail:
+        v = *(Quad_17B9D0*)(s1 + 0x100);
+        v.v[2] -= 75.0f;
+        r = *(f32*)(s1 + 0x638);
+    }
+    if (out)
+    {
+        *out = v;
+    }
+    if (outf)
+    {
+        *outf = r;
+    }
+}

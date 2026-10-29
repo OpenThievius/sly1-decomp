@@ -1065,3 +1065,62 @@ void func_0015AE38(Actor_15AE38* self, s32 flag)
         }
     }
 }
+
+struct Col_159D00 { u8 c[4]; };
+struct __attribute__((aligned(4))) Out_159D00 { u8 c[4]; };
+struct Req_159D00 { void* fn; f32 f; s32 mode; u8 pad[0x54]; Out_159D00 col; u8 pad2[0x1C]; };
+struct Obj_159D00 {
+    u8 pad0[0x3C];
+    Col_159D00 c0, c1, c2;
+    f32 f48, f4C, f50, f54;
+    s32 m58, m5C;
+};
+extern s32 D_00275BC4;
+extern s32 D_00270458;
+extern f32 D_0026185C;
+void func_00152600(u8* a, Obj_159D00* b);
+void func_00159CA0(Obj_159D00* o);
+void func_0019D410(Req_159D00* r);
+
+void func_00159D00(Obj_159D00* self)
+{
+    if (D_00275BC4 != 3) return;
+    s32 g = D_00270458;
+    if (g == 1) return;
+    if (g == 2) return;
+    Out_159D00 out; Col_159D00 a, b;
+    f32 t = D_0026185C - self->f54;
+    f32 d;
+    if (t < self->f48) {
+        a = self->c0; b = self->c1;
+        d = self->f48;
+    } else {
+        t -= self->f48;
+        if (t < self->f4C) {
+            a = self->c1; b = self->c1;
+            d = self->f4C;
+        } else {
+            t -= self->f4C;
+            if (!(t < self->f50)) {
+                u8* p = *(u8**)&D_00275710 + 0x1CD8;
+                self->m5C = 0;
+                func_00152600(p, self);
+                return;
+            }
+            a = self->c1; b = self->c2;
+            d = self->f50;
+        }
+    }
+    f32 r = t / d;
+    for (s32 i = 0; i < 4; i++)
+        out.c[i] = (s32)((1.0f - r) * a.c[i] + r * b.c[i]);
+    Req_159D00 q;
+    q.f = -1.0f;
+    q.fn = (void*)(void (*)(Obj_159D00*))func_00159CA0;
+    q.col = out;
+    switch (self->m58) {
+    case 0: q.mode = 1; break;
+    case 1: q.mode = 0x10; break;
+    }
+    func_0019D410(&q);
+}

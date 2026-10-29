@@ -832,3 +832,89 @@ void func_0014F920(Self_14F920* self)
     func_001DBCC8(self->p14, (void*)(void (*)(void*))func_0014F900, self, 0, 0);
     self->f740 = func_001B6290(self->p73C, self, 0x2B7, 1);
 }
+
+struct Step_14C138 {
+    u8 pad0[0xC];
+    f32 dt;
+};
+
+struct Slot_14C138 {
+    void* obj;
+    void* f4;
+    void* f8;
+    u8 padC[8];
+};
+
+struct Node_14C138 {
+    u8 pad[0x14];
+    void* f14;
+};
+
+struct Obj_14C138 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad18[0x2DC - 0x18];
+    s32 n2DC;
+    Slot_14C138 slots[1];
+    u8 pad2F4[0x428 - 0x2F4];
+    void* f428;
+    void* f42C;
+    u8 f430[0x1C];
+    s32 f44C;
+    u8 pad450[0x470 - 0x450];
+    f32 poly[3];
+    u8 pad47C[4];
+    f32 a480[44];
+    f32 b530[44];
+    f32 o5E0[44];
+};
+
+extern Step_14C138* D_002623C8;
+extern f32 D_00275C60[];
+extern u8 D_00261CA0[];
+
+void func_00124A48(Obj_14C138* self);
+void func_00124DF8(Obj_14C138* self, s32 n, void* table);
+void* func_001B6290(void* a, s32 b, s32 c, s32 d);
+void func_001B6598(void* a, void* b);
+void func_001B6DF8(void* a, void* b);
+void func_0014C2F0(Obj_14C138* self);
+
+void func_0014C138(Obj_14C138* self)
+{
+    s32 i = 0;
+    func_00124A48(self);
+    func_00124DF8(self, 3, D_00261CA0);
+    self->f42C = func_001B6290(self->f428, 0, 0x3FB, 0);
+    func_001B6598(self->f42C, self->f430);
+    func_001B6DF8(self->f42C, self);
+    for (; i < self->n2DC; i++) {
+        Slot_14C138* s = &self->slots[i];
+        Node_14C138* n = (Node_14C138*)func_0015A448(self->f14, s->obj, self);
+        s->obj = n;
+        s->f8 = func_0015A480(n->f14, 0x3F7, n);
+        s->f4 = func_0015A480(n->f14, 0x3F6, n);
+    }
+    f32* p = self->poly;
+    f32 g = D_002623C8->dt;
+    f32 v = self->poly[0] + g * (p[1] + g * p[2]);
+    f32 lo = D_00275C60[0];
+    f32 hi = D_00275C60[1];
+    f32 t;
+    if (v < lo) {
+        t = lo;
+    } else if (hi < v) {
+        t = hi;
+    } else {
+        t = v;
+    }
+    f32 u = 1.0f - t;
+    f32* pa = self->a480;
+    f32* pb = self->b530;
+    f32* po = self->o5E0;
+    for (u32 k = 0; k < 44; k++) {
+        *po++ = u * *pa++ + t * *pb++;
+    }
+    self->f44C = (s32)self->o5E0[0];
+    func_0014C2F0(self);
+}
