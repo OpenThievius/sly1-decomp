@@ -112,11 +112,46 @@ Measured on this compiler; add to this list when you learn something.
   callee with fewer parameters in that file; do not add a dummy float.
 - **Dead loads** in retail are not reproduced by unused locals: the compiler removes them. Note it
   and move on.
+- **A `u8` return** adds `andi $v0, $v0, 0xff` before `jr $ra`; when retail has no mask, the
+  function and the local hold an `s32`.
+- **The frame is set by the locals that are used**, laid out in declaration order: a frame that
+  is off while the body matches usually means a missing local (a 12-float array, a 0x50-byte
+  struct). An unused `s32 scratch[4]; (void)scratch;` reproduces 16 extra bytes of frame, as long
+  as nothing is stored to it.
+- **Callees take what they read.** Count a callee's parameters from its own disassembly: an extra
+  argument changes the caller's prologue and delay slots. When retail leaves `$a0` untouched and
+  sets only `$a1`, the callee has a first parameter that is passed on unchanged.
+- **Branch shape.** `if (x != 0) { ...; return 1; } return 0;` gives retail's branch-likely form;
+  `if (c) A; else B;` makes `A` the fall-through, so flip the arms when retail branches to it; a
+  `switch` on 0, 1, 2 gives a compare tree where an `if` chain does not; `if (p) do { ... } while
+  (p);` gives a bottom-tested loop. A single exit (`if (r != 0 && c) { ... } return r;`) avoids
+  the `move $v0, $zero` of a second return.
+- **Expression shape.** Loads retail hoists above a branch are named locals before it; `i * a`
+  and `a * i` give `mult` its operands in different orders; the compiler reassociates
+  `(head - 1) + n`, so split it (`t = head - 1; t += n;`). Runs of stores to one base are
+  rescheduled whatever the source order: try the permutations of a few stores before anything
+  else.
+- **Struct initialisers** (`Pair p = { a, b };`) call `memset`; assign the fields one by one.
+  Packing only an 8-byte member gives `ldl`/`ldr`/`sdl`/`sdr` while the rest stays aligned.
+- **A store after a call** can land in the call's delay slot; write it before the call when retail
+  has it there. A local whose address is passed to a callee lives in the frame: put such locals
+  in one struct sized to retail's frame. Reloading `self->field` after a call, rather than keeping
+  it in a local, saves a callee-saved register.
+- **Float details.** `__builtin_fabsf(x)` gives `abs.s` (`x < 0 ? -x : x` does not); float
+  compares keep the source's operand order.
+- **Casts decide extension.** Packing 32-bit values into 64 bits matched with `s32` parameters,
+  not `u32` or `u64`; a 64-bit bit test needs an `(s32)` cast on each side.
+- **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
+  Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
+  `tools/todo.py` reads source files line by line.
 
 ## 4. When to stop
 
-Stop when it is not a function (it reads registers it never sets, or has no `jr $ra`), when it is
-hand-written (a bare busy-wait of `nop`s, a jump into another function), when three different
+Stop when it is not a function (it reads registers it never sets, or has no `jr $ra`; it starts
+with a stray `addiu $sp, $sp, +N`), when it is hand-written (a bare busy-wait of `nop`s, a loop in
+a delay slot, a jump into another function), when it needs an instruction C cannot ask for
+(`sqrt.s`: `__builtin_sqrtf` becomes a call to `sqrtf`), when it reads `$t0`–`$t3` as inputs
+(arguments past the eighth are on the stack, so plain C cannot pass them there), when three different
 wordings give the same wrong bytes, or after about ten compiles without getting closer. Variadic
 functions wait for a `stdarg.h` written for this project. If `check.py` says "the C is N bytes,
 retail's function M", fix the size first: something is extra or missing. Put the attempt in `nonmatching/func_XXXXXXXX.cpp` with a comment at the
