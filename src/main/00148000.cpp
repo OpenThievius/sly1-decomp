@@ -686,3 +686,19 @@ void func_0014B678(State_0014B678* self, f32 value)
     func_001EAD88(&self->b, self, value);
     self->value = 0;
 }
+
+void func_001C7520(void*);
+void func_00152600(void*, void*);
+void func_0014B588(u8* self) { func_001C7520(self); func_00152600(*(u8**)(self+0x14)+0x1CCC,self); }
+
+struct __attribute__((packed)) Pack_0014B5C0 { u64 value; };
+struct Obj_0014B5C0 { u8 pad[0xC10]; Pack_0014B5C0 value; };
+void func_001C7188(void*, void*);
+void func_0014B5C0(Obj_0014B5C0* self, void* other) { Pack_0014B5C0 save=self->value; func_001C7188(self,other); self->value=save; }
+
+void func_001C6F48(void*);
+extern s32 D_0027C008;
+void func_0014B608(u8* self) { func_001C6F48(self); *(s32*)(self+0xC24)=1; D_0027C008=0; }
+
+void func_001C72A0(void*);
+void func_0014B640(u8* self) { func_001C72A0(self); *(s32*)(self+0xC2C)=D_0027C008++; }

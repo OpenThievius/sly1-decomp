@@ -674,3 +674,18 @@ f32 func_0014DB58(Obj_14DB58* obj) { u32 address = obj->index * 4 + obj->base; r
 
 struct Obj_14E500 { u8 pad[0x1C0]; s32 value; };
 void func_0014E500(Obj_14E500* obj) { obj->value = -1; }
+
+void func_0014DF68(u8* self,void* a,void* b) { func_0014D938(*(s32*)(self+0xC),*(Quad_14D938**)(self+0x18),a,b); }
+
+void func_00182D50(void*);
+void func_00152470(void*,void*);
+void func_0014EF00(u8* self) { func_00182D50(self); func_00152470(*(u8**)(self+0x14)+0x1C78,self); func_0014F110((Obj_14EE40*)self,0); }
+
+struct __attribute__((packed)) Pack_0014EF40 { u64 value; };
+struct Obj_0014EF40 { u8 pad[0x56C]; Pack_0014EF40 value; };
+void func_001BA130(void*, void*);
+void func_0014EF40(Obj_0014EF40* self, void* other) { Pack_0014EF40 save=self->value; func_001BA130(self,other); self->value=save; }
+
+void func_001BAC30(void*);
+void func_00159478(void*,void*);
+void func_0014EF88(u8* self) { func_001BAC30(self); func_00159478(self+0x58C,self); }
