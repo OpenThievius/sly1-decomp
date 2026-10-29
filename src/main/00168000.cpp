@@ -660,7 +660,6 @@ void func_001688B8(void)
     func_001685B8();
 }
 
-
 extern s32 D_002626C0;
 extern u8 D_002624E0[];
 extern u8 D_002625D0[];
@@ -696,3 +695,18 @@ void func_00168D68(S_168D68* p, s32 value, s32 other) { p->b = value; p->a = val
 
 struct S_168D78 { s32 a; s32 b; };
 void func_00168D78(S_168D78* p) { p->b = p->a; }
+
+extern s32 D_002626D8[];
+void func_00168D68(s32*,s32,s32);
+void func_00168D00()
+{
+    func_00168D68(D_002626D8,0x1E00,0x4000);
+    D_002626D0=0;
+}
+
+s32 func_00168D88(s32* self,s32 size)
+{
+    s32 old=self[1];
+    self[1]=old+size;
+    return old;
+}

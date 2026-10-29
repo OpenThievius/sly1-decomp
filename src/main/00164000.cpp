@@ -22,3 +22,12 @@ void func_00167EF0(void)
 
 extern u32 D_002623E0;
 void func_00167D20(void* p, s32 value) { if ((u32)value == 0xFFFFu && p != 0) D_002623E0 = 0x80101010; }
+
+void func_0016C528(void*);
+void func_001660A0(u8* self)
+{
+    u8* p=*(u8**)(self+0x224);
+    if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) func_0016C528(*(void**)(p+0x60));
+}
+
+void func_00167D48() { func_00167D20((void*)1, 65535); }

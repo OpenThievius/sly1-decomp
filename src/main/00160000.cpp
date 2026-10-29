@@ -489,3 +489,30 @@ void* func_00160CA0(u8* self,s32 index)
     if ((u32)(index-0x33B)>=12) return 0;
     else return self+(index*4-0xCD8);
 }
+
+void func_001614C8(Stream_161458* self,s32 a,s32 b)
+{
+    func_001612E8(self,1,3);
+    s32* p=(s32*)self->cur;
+    self->cur+=4;
+    p[0]=a;
+    p[1]=b;
+}
+
+void func_00161520(Stream_161458* self,f32 a,f32 b,f32 c)
+{
+    func_001612E8(self,1,2);
+    f32* p=(f32*)self->cur;
+    self->cur+=4;
+    p[0]=a;
+    p[1]=b;
+    p[2]=c;
+}
+
+typedef void* (*Fill_161B80)(void*,s32,s32);
+void func_00161B80(u8* self)
+{
+    *(s32*)(self+0xF8)=0;
+    *(s32*)(self+0x124)=0;
+    ((Fill_161B80)func_001F5C0C)(self+0x128,0,0x1720);
+}
