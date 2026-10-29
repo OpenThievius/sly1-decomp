@@ -84,3 +84,37 @@ void* func_00113FB0(void* state, void* arg1, s32* value) {
 	func_0011B060(local, 2);
 	return state;
 }
+
+struct Quad_113730 { s32 a, b, c, d; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, s32 n);
+void func_0011B538(void* q, s32 n);
+
+void* func_00113730(void* self)
+{
+    Quad_113730 q;
+    func_0011B008(&q);
+    func_0011B538(&q, 0x22);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_1137D0 { s32 a, b, c, d; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, s32 n);
+void func_0011B538(void* q, s32 n);
+
+void* func_001137D0(void* self)
+{
+    Quad_1137D0 q;
+    func_0011B008(&q);
+    func_0011B538(&q, 0x22);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

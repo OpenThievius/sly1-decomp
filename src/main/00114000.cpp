@@ -374,3 +374,93 @@ void* func_00117880(void* ret, s32 unused, Src_117880* src)
     func_0011B060(&t, 2);
     return ret;
 }
+
+struct Quad_114080 { s32 a, b, c, d; };
+struct Tag_114080 { s32 tag; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, s32 n);
+void func_0011B5F0(void* q, s32 flag);
+
+void* func_00114080(void* self, s32 unused, Tag_114080* p)
+{
+    Quad_114080 q;
+    func_0011B008(&q);
+    func_0011B5F0(&q, p->tag == 0x16);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_1140E8 { s32 a, b, c, d; };
+struct Tag_1140E8 { s32 tag; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, s32 n);
+void func_0011B5F0(void* q, s32 flag);
+
+void* func_001140E8(void* self, s32 unused, Tag_1140E8* p)
+{
+    Quad_1140E8 q;
+    func_0011B008(&q);
+    func_0011B5F0(&q, p->tag == 0x17);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_114150 { s32 a, b, c, d; };
+struct Tag_114150 { s32 tag; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, s32 n);
+void func_0011B5F0(void* q, s32 flag);
+
+void* func_00114150(void* self, s32 unused, Tag_114150* p)
+{
+    Quad_114150 q;
+    func_0011B008(&q);
+    func_0011B5F0(&q, p->tag == 0x18);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+// Calls the common builder with kind 0x63 and returns its first argument.
+void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
+
+void* func_00117A30(void* ret, s32 a1, void* src, s32 a3)
+{
+    func_00117910(ret, a1, src, a3, 0x63);
+    return ret;
+}
+
+// Calls the common builder with kind 0x64 and returns its first argument.
+void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
+
+void* func_00117A60(void* ret, s32 a1, void* src, s32 a3)
+{
+    func_00117910(ret, a1, src, a3, 0x64);
+    return ret;
+}
+
+// Calls the common builder with kind 0x65 and returns its first argument.
+void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
+
+void* func_00117A90(void* ret, s32 a1, void* src, s32 a3)
+{
+    func_00117910(ret, a1, src, a3, 0x65);
+    return ret;
+}
+
+// Calls the common builder with kind 0x66 and returns its first argument.
+void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
+
+void* func_00117AC0(void* ret, s32 a1, void* src, s32 a3)
+{
+    func_00117910(ret, a1, src, a3, 0x66);
+    return ret;
+}

@@ -179,3 +179,104 @@ s32 func_0011BE90(Head_11BE90* head, s32 key, void* arg)
     }
     return 0;
 }
+
+struct Node_11AF28 {
+    s32 kind;
+    s32 value;
+    Node_11AF28* child;
+};
+typedef Node_11AF28 Node_11AEB8;
+
+void func_0011B258(void* src, void* dst, void* arg);
+Node_11AEB8* func_0011AF28(void);
+
+void func_0011AEB8(Node_11AEB8* src, Node_11AEB8* dst, void* arg)
+{
+    func_0011B258(src, dst, arg);
+    if (src->child != 0) {
+        Node_11AEB8* copy = func_0011AF28();
+        func_0011AEB8(src->child, copy, arg);
+        dst->child = copy;
+    }
+}
+
+extern u8 D_0025C250[];
+
+void* func_0011C240(void* pool);
+void func_001F5C0C(void* dst, s32 value, s32 size);
+Node_11AF28* func_0011B008(Node_11AF28* self);
+
+Node_11AF28* func_0011AF28(void)
+{
+    Node_11AF28* node = (Node_11AF28*)func_0011C240(D_0025C250);
+    func_001F5C0C(node, 0, 12);
+    func_0011B008(node);
+    node->kind = -1;
+    return node;
+}
+
+void func_0011B060(void* self, s32 flags);
+
+void func_0011AF78(void* self)
+{
+    func_0011B060(self, 2);
+}
+
+struct Ext_11AF98 {
+    s32 w0;
+    s32 w1;
+    s32 w2;
+    s32 w3;
+    s32 w4;
+};
+
+void func_0011AF98(Ext_11AF98* src, Ext_11AF98* dst, s32 first)
+{
+    if (first == 0) {
+        first = src->w0;
+    }
+    dst->w0 = first;
+    dst->w1 = src->w1;
+    dst->w2 = src->w2;
+    dst->w3 = src->w3;
+    dst->w4 = src->w4;
+}
+
+struct Node_11B008 {
+    s32 kind;
+    s32 value;
+    Node_11B008* child;
+};
+
+Node_11B008* func_0011B008(Node_11B008* self)
+{
+    self->kind = -1;
+    return self;
+}
+
+struct Node_11B018 {
+    s32 kind;
+    s32 value;
+    Node_11B018* child;
+};
+
+void func_0011B4A8(Node_11B018* node);
+
+Node_11B018* func_0011B018(Node_11B018* dst, Node_11B018* src)
+{
+    func_0011B4A8(src);
+    dst->kind = src->kind;
+    dst->value = src->value;
+    return dst;
+}
+
+void func_0011B418(void* self);
+void func_0018D778(void* self);
+
+void func_0011B060(void* self, s32 flags)
+{
+    func_0011B418(self);
+    if (flags & 1) {
+        func_0018D778(self);
+    }
+}
