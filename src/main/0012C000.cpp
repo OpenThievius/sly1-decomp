@@ -523,3 +523,19 @@ void func_0012D3F0() {}
 
 struct Obj_0012FCD0 { u8 pad[0x568]; s32 count; s32 values[1]; };
 void func_0012FCD0(Obj_0012FCD0* obj, s32 value) { obj->values[obj->count++] = value; }
+
+struct Obj_12FCF0 { u8 pad0[4]; s32 f4; s32 f8; s32 fc; s32 f10; s32 f14; s32 f18; s32 f1c; s32 f20; s32 f24; s32 f28; };
+Obj_12FCF0* func_0012FCF0(Obj_12FCF0* obj, s32 value)
+{
+    obj->f8 = 0;
+    obj->f14 = (value + 0x3F) & -64;
+    obj->f4 = -1;
+    obj->f10 = 0;
+    obj->f1c = 0;
+    obj->f28 = 0;
+    obj->f24 = 0;
+    obj->fc = 0;
+    obj->f20 = 0;
+    obj->f18 = 0;
+    return obj;
+}
