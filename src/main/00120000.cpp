@@ -122,3 +122,102 @@ void func_00123B28(Obj_123B28* self)
         }
     }
 }
+
+struct __attribute__((aligned(16))) Quad_122968 { s32 a, b, c, d; };
+typedef void (*VFn_122968)(void* self, void* a, void* b);
+struct Obj_122968 { VFn_122968* vtbl; };
+struct Self_122968 {
+    u8 pad0[4];
+    Obj_122968* obj;
+    u8 pad1[0x1C];
+    Quad_122968* src24;
+    Quad_122968* src28;
+};
+
+void func_00122968(Self_122968* self, Quad_122968* d1, Quad_122968* d2)
+{
+    Quad_122968* s = self->src24;
+    d1[0] = s[0];
+    d1[1] = s[1];
+    d1[2] = s[2];
+    *d2 = *self->src28;
+    self->obj->vtbl[45](self->obj, d1, d2);
+}
+
+struct Self_1229C0 {
+    u8 pad[0x2C];
+    f32* p2c;
+    f32* p30;
+};
+
+void func_001229C0(Self_1229C0* self, f32* a, f32* b)
+{
+    *a = *self->p2c;
+    *b = *self->p30;
+}
+
+struct __attribute__((aligned(16))) Quad_1229E0 { s32 a, b, c, d; };
+struct Self_1229E0 {
+    u8 pad[0x34];
+    Quad_1229E0* src;
+};
+
+void func_001229E0(Self_1229E0* self, Quad_1229E0* dst)
+{
+    Quad_1229E0* s = self->src;
+    dst[0] = s[0];
+    dst[1] = s[1];
+    dst[2] = s[2];
+}
+
+struct Self_122A00 {
+    u8 pad[0x3C];
+    f32* data;
+};
+
+f32 func_00122A00(Self_122A00* self, s32 i)
+{
+    return self->data[i];
+}
+
+f32 func_00122D90(void)
+{
+    return 0.0f;
+}
+
+struct Self_122DA0 {
+    u8 pad0[0x1C];
+    f32 f1c;
+    f32 f20;
+};
+
+void func_00121338(void* self, s32 a1);
+
+void func_00122DA0(Self_122DA0* self, s32 a1)
+{
+    func_00121338(self, a1);
+    self->f1c = 1.0f;
+    self->f20 = 0.25f;
+}
+
+struct Owner_122F28 {
+    u8 pad0[0x28];
+    void* p28;
+};
+struct Self_122F28 {
+    u8 pad0[0x1C];
+    Owner_122F28* owner;
+};
+
+void func_00152600(void* list, void* item);
+void func_00121358(void* self, void* a1);
+
+void func_00122F28(Self_122F28* self, void* a1)
+{
+    Owner_122F28* o = self->owner;
+    func_00152600((u8*)o + 0x44, self);
+    if (o->p28 == self) {
+        o->p28 = 0;
+    }
+    func_00121358(self, a1);
+}

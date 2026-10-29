@@ -329,3 +329,45 @@ void func_0011FDB8(u8* self, void* p)
 {
     func_0011F850(self + 0x20, p);
 }
+
+void func_00109488(void);
+
+void func_0011E560(void)
+{
+    func_00109488();
+}
+
+extern u8 D_002505D8[];
+
+void func_0011E680(void* self, void* slot, void* obj);
+s32 func_00137D10(void* p);
+
+void func_0011EC40(void* self, void* obj)
+{
+    s32 r;
+    while ((r = func_00137D10(obj)) >= 0) {
+        func_0011E680(self, D_002505D8 + (r << 5), obj);
+    }
+}
+
+s32 func_0011ECA0(s32 value)
+{
+    s32 r = value - 12;
+    return ((u32)30 < (u32)r) ? -1 : r;
+}
+
+void func_0011EF40(void)
+{
+}
+
+void func_0011EF48(void* unused, s32* a, s32* b)
+{
+    *a = 0;
+    if (b != 0) {
+        *b = 0;
+    }
+}
+
+void func_0011EF60(void)
+{
+}
