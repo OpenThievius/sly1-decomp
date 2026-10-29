@@ -102,3 +102,33 @@ void func_00184968(Obj_184968* self, s32 v)
         func_001841D0(self);
     }
 }
+
+struct Obj_184D78 {
+    u8 pad0[0x2C8];
+    u64 bits;
+    s32 f2D0;
+    u8 pad1[0x304 - 0x2D4];
+    s32 f304;
+    s32 f308;
+};
+
+s32 func_00184D78(Obj_184D78** a, Obj_184D78** b)
+{
+    Obj_184D78* x = *a;
+    Obj_184D78* y = *b;
+    s32 d;
+
+    d = x->f304 - y->f304;
+    if (d != 0) {
+        return d;
+    }
+    d = x->f308 - y->f308;
+    if (d != 0) {
+        return d;
+    }
+    d = ((s32)(x->bits >> 38) & 1) - ((s32)(y->bits >> 38) & 1);
+    if (d != 0) {
+        return d;
+    }
+    return x->f2D0 - y->f2D0;
+}
