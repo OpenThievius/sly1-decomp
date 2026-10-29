@@ -57,3 +57,26 @@ void func_00196900(Obj_196900* self)
     func_00124A48(self);
     ((void (*)(Obj_196900*))self->vtbl[7])(self);
 }
+
+extern u8 D_0026A728[];
+
+void func_001BAC30(void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+
+void func_001969C0(void* self)
+{
+    func_001BAC30(self);
+    func_00124DF8(self, 1, D_0026A728);
+}
+
+struct Obj_196E48 { u8 pad0[0x50]; s32 f50; u8 pad1[0x538 - 0x54]; u64 bits538; };
+
+s32 func_001300E8(void* self, s32 kind);
+
+s32 func_00196E48(s32 a0, Obj_196E48* self)
+{
+    if (self->bits538 & 0x80000000000ULL) {
+        if (func_001300E8(self, 0x1F) == 0) return 0;
+    }
+    return self->f50 != a0;
+}

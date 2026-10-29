@@ -571,3 +571,29 @@ s32 func_00192410(void)
 {
     return 1;
 }
+
+s32 func_001907F0(s32 value)
+{
+    if (value & 1) return value & -2;
+    return 0;
+}
+
+s32 func_001909B0(f32 value)
+{
+    if (value > 1.0f) return 0;
+    if (value < -1.0f) return 1;
+    return 2;
+}
+
+void* func_001925F0(void);
+void func_001929D0(void* value);
+
+void func_00192418(void* self)
+{
+    if (self != func_001925F0()) func_001929D0(self);
+}
+
+s32 func_00192488(void* self)
+{
+    return 0;
+}

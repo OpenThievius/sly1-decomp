@@ -109,3 +109,63 @@ void func_0019E0B8(Obj_19E0B8* self)
     self->f80 = k;
     self->q2C8 = flags;
 }
+
+struct Pool_19EA78 { s32 size; };
+struct Proc_19EA78 { u8 pad0[0x1B2C]; Pool_19EA78 pool1B2C; };
+struct Sys_19EA78 {
+    u8 pad0[0x14];
+    Proc_19EA78* f14;
+    u8 pad1[0x558 - 0x18];
+    u8 list558[4];
+};
+struct Obj_19EA78 {
+    void* f0;
+    void* f4;
+    u8 pad8[4];
+    void* fC;
+};
+
+extern u8* D_00275710;
+
+void* func_0019E040(void* ctx, s32 zero);
+void* func_001B5EA0(void* p);
+void func_001F5C0C(void* p, s32 zero, s32 size);
+void* func_0019E908(void* owner);
+void func_00152470(void* list, void* item);
+void func_0019EC20(void* self);
+
+void* func_0019EA78(s32 a, s32 b)
+{
+    void* owner = (void*)a;
+    Sys_19EA78* sys = (Sys_19EA78*)b;
+    if (sys == 0) {
+        sys = (Sys_19EA78*)func_0019E040(D_00275710, 0);
+        if (sys == 0) return 0;
+    }
+    Obj_19EA78* o = (Obj_19EA78*)func_001B5EA0((u8*)sys->f14 + 0x1B2C);
+    if (o != 0) {
+        func_001F5C0C(o, 0, sys->f14->pool1B2C.size);
+        void* r = func_0019E908(owner);
+        o->f4 = owner;
+        o->fC = sys;
+        o->f0 = r;
+        func_00152470(sys->list558, o);
+        func_0019EC20(o);
+    }
+    return o;
+}
+
+struct Obj_19EBE8 {
+    u8 pad0[0xC];
+    u8* fC;
+};
+
+void func_00152600(void* table, void* self);
+void func_0019EC30(void* self);
+
+void func_0019EBE8(void* self)
+{
+    Obj_19EBE8* o = (Obj_19EBE8*)self;
+    func_00152600(o->fC + 0x558, self);
+    func_0019EC30(self);
+}

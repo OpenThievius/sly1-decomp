@@ -245,3 +245,153 @@ void func_0019A178(Obj_19A178* self, s32 x)
     func_00182ED8(self->f4);
     self->f8 = func_001B6290(self->f4, self->f0, x, 0);
 }
+
+s32 func_001300E8(void* obj, s32 kind);
+
+s32 func_00198FB0(void* unused, void* obj)
+{
+    if (func_001300E8(obj, 8) != 0 || func_001300E8(obj, 0x3B) != 0) {
+        return 1;
+    }
+    return 0;
+}
+
+void* func_001929F8();
+s32 func_00182F40(void* e, void* b);
+
+struct Rec_199000 {
+    u8 pad0[0x18];
+    void* f18;
+};
+
+struct Elem_199000 {
+    u8 pad0[0x4];
+    void* f4;
+    u8 pad1[0x40 - 0x8];
+};
+
+struct Owner_199000 {
+u8 pad0[0x59C];
+    s32 f59C;
+};
+
+void func_00199000(Owner_199000* self, Elem_199000* elems, s32 idx)
+{
+    Rec_199000* r = (Rec_199000*)func_001929F8();
+    if (r->f18 == 0) return;
+    {
+        s32 one = 1;
+        Elem_199000* e = (Elem_199000*)((u8*)elems + ((one - idx) << 6));
+        if (func_00182F40(e->f4, r->f18) != 0) {
+            self->f59C = one;
+        }
+    }
+}
+
+struct __attribute__((aligned(16))) Quad_19A520 { s32 a, b, c, d; };
+struct Blk_19A520 { Quad_19A520 q[8]; };
+
+struct Src_19A520 {
+    u8 pad0[0x580];
+    Blk_19A520 blk580;
+    u8 pad1[4];
+    s32 f604;
+};
+
+struct Glob_19A520 {
+    u8 pad0[0x19EC];
+    s32 f19EC;
+};
+
+struct Actor_19A520 {
+    u8 pad0[0x580];
+    Blk_19A520 blk580;
+    u8 pad1[4];
+    s32 f604;
+    u8 pad2[0x614 - 0x608];
+    void* f614;
+    u8 pad3[0x648 - 0x618];
+    void* f648;
+    u8 pad4[0x7D8 - 0x64C];
+    s32 n7D8;
+    void* arr7DC[1];
+};
+
+void func_001B6568(void* dev, s32* out);
+void func_001B6598(void* dev, s32* out);
+void func_001B64D8(void* dev, s32 value);
+void func_0016EC88(void* p);
+s32 func_001602A0(void);
+void func_00160578(s32 value);
+void* func_0015A448(void* a, s32 code, void* c);
+
+extern u8 D_00262C70[];
+
+void func_0019A520(Actor_19A520* self, s32 flag)
+{
+    s32 r;
+    s32 flags;
+    void* a;
+    s32 n;
+
+    func_001B6568(self->f614, &r);
+    if (r == -1) {
+        func_001B6598(self->f614, &r);
+    }
+    if (flag != 0) {
+        if (r != 0x38F) {
+            func_001B64D8(self->f614, 0x385);
+        }
+        func_0016EC88(D_00262C70);
+        flags = ((Glob_19A520*)D_002623C0)->f19EC;
+        if ((flags & 8) == 0) {
+            a = func_0015A448((void*)D_00275710, 0x39A, self);
+        } else {
+            if ((flags & 0x10) != 0) {
+                goto tail;
+            }
+            a = func_0015A448((void*)D_00275710, 0x39B, self);
+        }
+        if (a != 0) {
+            n = self->n7D8;
+            self->arr7DC[n] = a;
+            self->n7D8 = n + 1;
+        }
+tail:
+        a = self->f648;
+        if (a != 0) {
+            n = self->n7D8;
+            self->arr7DC[n] = a;
+            self->n7D8 = n + 1;
+        }
+        if (D_00262E10 != 0) {
+            self->blk580 = ((Src_19A520*)D_00262E10)->blk580;
+            self->f604 = ((Src_19A520*)D_00262E10)->f604;
+        }
+    } else {
+        if (r != 0x38F) {
+            func_001B64D8(self->f614, 0x384);
+        }
+        self->n7D8 = 0;
+        if ((func_001602A0() & 4) != 0) {
+            func_00160578(4);
+        }
+    }
+}
+
+struct __attribute__((packed)) Field8_19AFF0 { s64 bits; };
+struct Obj_19AFF0 {
+    u8 pad0[0x38];
+    Field8_19AFF0 f38;
+};
+
+void func_001830D8(void* self);
+
+void func_0019AFF0(Obj_19AFF0* self)
+{
+    Field8_19AFF0 tmp;
+
+    tmp = self->f38;
+    func_001830D8(self);
+    self->f38 = tmp;
+}
