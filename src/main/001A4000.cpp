@@ -146,3 +146,50 @@ void func_001A7290(void* unused, Obj_1A7290* obj)
 {
     obj->a98 = obj->a98 * 0.6f;
 }
+
+void func_001A4868(u8* self, s32 value)
+{
+    *(s32*)(self + 0x2D8) = value;
+}
+
+typedef void (*VFn_1A7798)(void* self);
+
+void func_00124A48(void* self);
+void* func_0015A838(void* a, int b, int c, void* d);
+void func_001A7998(void* self, int flag);
+
+void func_001A7798(void* self)
+{
+    u8* s = (u8*)self;
+    func_00124A48(self);
+    if (*(s32*)(s + 0x558) == 0) {
+        VFn_1A7798* vt = *(VFn_1A7798**)self;
+        vt[7](self);
+        return;
+    }
+    *(void**)(s + 0x55C) = func_0015A838(*(void**)(s + 0x14), 0x101, 0x59, *(void**)(s + 0x34));
+    func_001A7998(self, 0);
+}
+
+struct Vec_1A7D18 { s32 count; s32 pad; f32 x; };
+
+extern s32 D_002623C0;
+
+int func_001A7EE8(void* a);
+void func_001A7D98(void* self, int mode);
+
+void func_001A7D18(void* self, Vec_1A7D18* p, f32 f)
+{
+    u8* s = (u8*)self;
+    if (*(s32*)(s + 0xC) != 0 && p->count > 0) {
+        if (func_001A7EE8((void*)D_002623C0) != 0) {
+            *(f32*)(s + 0x18) = f;
+            *(Vec_1A7D18**)(s + 0x10) = p;
+            *(s32*)(s + 0x14) = 0;
+            f32 x = p->x;
+            *(s32*)(s + 0xC) = -1;
+            *(f32*)(s + 0x1C) = x;
+            func_001A7D98(self, 2);
+        }
+    }
+}
