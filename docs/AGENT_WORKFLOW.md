@@ -36,8 +36,11 @@ Sort by size with `tools/todo.py`, and match by tier:
 - **Opus**: over 1,000 bytes, complex ones, near misses in `nonmatching/`, and leading (the full
   build, landing, the reports).
 
-Start with `--exclude vu,jtbl,rodata,system,handwritten`: those need things the build does not
-model yet (docs/ROADMAP.md). A worker stops at its bound and hands its attempt up a tier.
+Start with `--exclude vu,jtbl,system,handwritten`: those need things the build does not model yet
+(docs/ROADMAP.md). A `rodata` function is fine: its literals are plain constants in C (a float, or a
+string), and the build links it with retail's own address for them (tools/rodata.py); `check.py`
+compares the whole literal with retail's and prints `EXACT: ... (rodata)`. A table of data read by
+address is an `extern`, as ever. A worker stops at its bound and hands its attempt up a tier.
 
 ## 3. Write C++ until it is EXACT
 

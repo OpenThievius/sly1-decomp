@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 import disc  # noqa: E402
 import todo  # noqa: E402
 import c_layout  # noqa: E402
+import rodata  # noqa: E402
 import versions  # noqa: E402
 
 BOOT = b"\x7fELF" + bytes(range(256)) * 20
@@ -207,3 +208,62 @@ class RunAlignmentTest(unittest.TestCase):
         self.assertEqual(c_layout.run_alignment(["glabel a", "nop"]), 4)
         self.assertEqual(c_layout.run_alignment([".align 3", "glabel a", ".align 2", "nop"]), 8)
         self.assertEqual(c_layout.run_alignment(["  .align 4"]), 16)
+
+
+def tiny_object(rtypes=(5, 6), text_words=(0x3C020000, 0x8C420000)):
+    """A little-endian ELF32 object: one function in .text.func_X, a .rodata and its .rel.text."""
+    import struct
+    shstr = b"\0.text.func_X\0.rodata\0.rel.text.func_X\0.symtab\0.strtab\0.shstrtab\0"
+    off = lambda name: shstr.index(b"\0" + name.encode() + b"\0") + 1
+    strtab = b"\0func_X\0"
+    text = b"".join(struct.pack("<I", w) for w in text_words)
+    ro = b"\0\0\x80\x3f"
+    sym = lambda name, value, size, info, shndx: struct.pack("<IIIBBH", name, value, size, info, 0, shndx)
+    symtab = sym(0, 0, 0, 0, 0) + sym(0, 0, 0, 3, 2) + sym(1, 0, len(text), 2, 1)
+    rels = b"".join(struct.pack("<II", 4 * n, (1 << 8) | r) for n, r in enumerate(rtypes))
+    bodies = [text, ro, rels, symtab, strtab, shstr]
+    base = 52
+    offs, at = [], base
+    for b in bodies:
+        offs.append(at)
+        at += len(b)
+    at = (at + 3) & ~3
+    shdrs = [struct.pack("<IIIIIIIIII", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+    spec = [(".text.func_X", 1, 6, 0, 0, 0), (".rodata", 1, 2, 0, 0, 0), (".rel.text.func_X", 9, 0, 0, 1, 3),
+            (".symtab", 2, 0, 5, 0, 16), (".strtab", 3, 0, 0, 0, 0), (".shstrtab", 3, 0, 0, 0, 0)]
+    # link for .rel is the symtab (section 4); info is the text (section 1); .symtab links the strtab (5)
+    links = {3: 4, 4: 5}
+    infos = {3: 1}
+    for n, (name, typ, flags, _, _, entsize) in enumerate(spec):
+        idx = n + 1
+        shdrs.append(struct.pack("<IIIIIIIIII", off(name), typ, flags, 0, offs[n], len(bodies[n]),
+                                 links.get(idx, 0), infos.get(idx, 0) if idx != 4 else 1, 4, entsize))
+    header = bytearray(52)
+    header[:16] = b"\x7fELF\x01\x01\x01" + bytes(9)
+    struct.pack_into("<HHIIIIIHHHHHH", header, 16, 1, 8, 1, 0, 0, at, 0, 52, 0, 0, 40, len(shdrs), 6)
+    return bytes(header) + b"".join(bodies) + bytes(at - base - sum(len(b) for b in bodies)) + b"".join(shdrs)
+
+
+class RodataBakeTest(unittest.TestCase):
+    class Image:
+        def read_vaddr(self, addr, size):
+            words = {0x100000: 0x3C020025, 0x100004: 0x8C42A124}   # lui v0,0x25 ; lw v0,-0x5edc(v0)
+            return words[addr].to_bytes(4, "little")
+
+    class Resolver:
+        def us_address(self, name):
+            return 0x100000 if name == "func_X" else None
+
+    def test_the_immediates_become_retails_and_the_relocations_vanish(self):
+        patched, names, baked = rodata.patch(tiny_object(), self.Image(), self.Resolver())
+        self.assertEqual(names, [".rodata"])
+        self.assertEqual(baked, 2)
+        o = c_layout.elf.Elf(patched)
+        text = o.section(".text.func_X")
+        words = [int.from_bytes(patched[text["offset"] + i:text["offset"] + i + 4], "little") for i in (0, 4)]
+        self.assertEqual(words, [0x3C020025, 0x8C42A124])
+        self.assertEqual([r[1] for r in o.relocations(".text.func_X")], [0, 0])
+
+    def test_a_rodata_relocation_that_is_not_hi_or_lo_is_refused(self):
+        with self.assertRaises(rodata.RodataError):
+            rodata.patch(tiny_object(rtypes=(5, 2)), self.Image(), self.Resolver())

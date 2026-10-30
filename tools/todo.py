@@ -8,8 +8,8 @@ One row per unfinished function: name, address, size, its source file (the
 libraries, config/us/layout.tsv) and tags read from its disassembly:
 
 - leaf: makes no calls;  calls: makes calls (jal)
-- data: refers to data by address (%hi/%lo);  rodata: refers into .rodata (literals,
-  tables: it cannot be linked from C until its file's .rodata is modelled)
+- data: refers to data by address (%hi/%lo);  rodata: refers into .rodata (literals, tables;
+  a literal links through tools/rodata.py, a jump table does not yet)
 - jtbl: has a jump table;  vu: uses the vector unit (VU0 macro mode, COP2)
 - float: uses the FPU;  mmi: uses 128-bit multimedia instructions
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)

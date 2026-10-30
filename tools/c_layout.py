@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check  # noqa: E402
 import compile as cc  # noqa: E402
 import elf  # noqa: E402
+import rodata  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -38,6 +39,7 @@ def sources():
 def compile_sources(jobs):
     """{source: object path} for every src/ file, compiled where it changed."""
     out = {}
+    image, resolver = check.retail_image("us"), check.Resolver("us")
 
     def one(src):
         obj = ROOT / "build" / "us" / "src" / src.relative_to(ROOT / "src").with_suffix(".o")
@@ -46,8 +48,11 @@ def compile_sources(jobs):
         if not obj.exists() or obj.stat().st_mtime < max(d.stat().st_mtime for d in deps if d.exists()):
             try:
                 cc.compile_file(src, obj)
+                rodata.bake(obj, image, resolver)
             except cc.CompileError as e:
                 raise LayoutError("%s does not compile:\n%s" % (src.relative_to(ROOT), e))
+            except rodata.RodataError as e:
+                raise LayoutError("%s: %s" % (src.relative_to(ROOT), e))
         return src, obj
 
     with ThreadPoolExecutor(jobs) as pool:

@@ -21,9 +21,10 @@ splits are taken from other projects or from the prototype
 ## Next
 
 1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)).
-2. **Data from C.** Today a C file may hold only code: `.rodata` (float literals, jump tables,
-   strings) and `.data` still come from the disassembly. Placing each file's data where retail
-   has it opens the functions tagged `rodata` and `jtbl`.
+2. **Data from C.** A C file's `.rodata` literals (float constants, strings) are linked now: the
+   code takes retail's address for them and retail's bytes stay in the image (tools/rodata.py),
+   which opens the functions tagged `rodata`. Jump tables (`jtbl`), and `.data`, still come from the
+   disassembly: a table in `.rodata` points back into the code, and that needs the table placed.
 3. **File boundaries, found in retail.** Where one source file ends and the next begins, from
    retail's own code: which functions share static data, how `.rodata` and `.data` group, and
    compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of

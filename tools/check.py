@@ -17,8 +17,9 @@ Prints EXACT, or DIFFER with both disassemblies side by side (--diff shows
 them for EXACT too). With --version eu the function is checked at its PAL
 counterpart (config/eu/map.tsv), with every address translated to PAL's.
 
-A function that uses a .rodata literal is EXACT here but marked `rodata`:
-it cannot be linked into the build until its file's .rodata is modelled.
+A function that uses a .rodata literal is EXACT here and marked `rodata`: the literal, for as many
+bytes as the instruction reaches (a string, up to its NUL), is compared with retail's. The build
+links it by baking retail's address into the code (tools/rodata.py).
 """
 
 import argparse
@@ -155,6 +156,22 @@ def target_of(key, name):
     raise KeyError("%s has no counterpart in config/%s/map.tsv" % (name, key))
 
 
+LOAD_WIDTH = {0x20: 1, 0x24: 1, 0x21: 2, 0x25: 2, 0x23: 4, 0x27: 4, 0x31: 4, 0x35: 8, 0x37: 8, 0x1E: 16}
+
+
+def literal_width(insn, section, start):
+    """How many bytes of a .rodata literal the instruction at its %lo reaches.
+
+    A load or store says: 1, 2, 4, 8 or 16. An address (addiu) is a string, which is read up to
+    and including its terminating NUL.
+    """
+    op = insn >> 26
+    if op == 0x09:
+        end = section.find(b"\0", start)
+        return (end + 1 - start) if end >= 0 else len(section) - start + 1
+    return LOAD_WIDTH.get(op, 4)
+
+
 def s16(x):
     return x - 0x10000 if x & 0x8000 else x
 
@@ -219,12 +236,15 @@ def check_function(obj, name, key, resolver, image):
                 # Retail's own constant: read the address retail's hi/lo pair forms and compare the bytes.
                 r_hi = (words(retail, his[0]) & 0xFFFF) << 16 if his else 0
                 full = r_hi + s16(words(retail, i) & 0xFFFF)
-                lit = obj.contents(obj.sections[rsym["shndx"]])[addend + rsym["value"]:addend + rsym["value"] + 4]
+                section = obj.contents(obj.sections[rsym["shndx"]])
+                start = addend + rsym["value"]
+                width = literal_width(insn, section, start)
+                lit = section[start:start + width]
                 try:
-                    theirs = image.read_vaddr(full, 4)
+                    theirs = image.read_vaddr(full, len(lit))
                 except ValueError:
                     theirs = None
-                if theirs != lit:
+                if theirs != lit or len(lit) != width:
                     failure = failure or "the .rodata literal at +0x%X is not retail's constant at 0x%X" % (addend, full)
                 uses_rodata = True
             else:
