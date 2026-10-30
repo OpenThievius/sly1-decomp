@@ -29,7 +29,10 @@ you have exactly one comment there, and reserve what you will work on in it (AGE
 Sort by size with `tools/todo.py`, and match by tier:
 
 - **Haiku**: up to 400 bytes, many workers at once.
-- **Sonnet**: 401 to 1,000 bytes, and what Haiku gave up on.
+- **Sonnet**: 401 to 1,000 bytes, and what Haiku gave up on. A function Haiku left within a few
+  instructions of retail goes to a Sonnet worker, one function each, with the earlier attempt and
+  `tools/check.py --diff` as its start: that matched 40 of the 92 closest near misses (43%; the
+  closest dozen, 7 of 12), against 28 of 420 (7%) when Haiku retried the same kind of function.
 - **Opus**: over 1,000 bytes, complex ones, near misses in `nonmatching/`, and leading (the full
   build, landing, the reports).
 
@@ -141,6 +144,29 @@ Measured on this compiler; add to this list when you learn something.
   compares keep the source's operand order.
 - **Casts decide extension.** Packing 32-bit values into 64 bits matched with `s32` parameters,
   not `u32` or `u64`; a 64-bit bit test needs an `(s32)` cast on each side.
+- **Read the diff before rewriting.** A near miss (a few instructions off) is almost always a
+  fact about a callee or about order, and `tools/check.py FILE FUNC --diff` shows which:
+  - a register retail loads and ours leaves unused: the callee takes one more argument (pass the
+    local on); a float moved before `sq $ra`: the callee takes that float; `$v0` kept busy across a
+    call: the callee returns a value, so declare it non-void and cast the call to `(void)`;
+  - the same callee declared with its integer and float parameters in a different order moves the
+    argument moves, even though the registers are the same: copy the prototype from a caller that
+    already matches;
+  - a callee's declared return type can change the register an unrelated test uses; and a
+    memset-like callee returns its pointer, so declare it so;
+  - two independent stores swapped, or one store written as `*(s32*)((u8*)self + 0xNNN) = v`,
+    which the scheduler orders differently from member access (for five stores, try all 120
+    orders);
+  - `while (*p)` with `(u8)*p++` passed straight to an `s8` parameter keeps the separate `lb` test
+    and `lbu` load that a `u8 c` local folds into one;
+  - `extern s32 T[][2]` indexed `[i][1]` fixes the operand order of an address add for a stride-8
+    table; a loop counter copied into its own local when retail tests the call's `$v0` directly.
+- **What does not move.** A `lui`, `li` or `move` scheduled against a store or another `move`
+  before a `jal`; a pair of `$s` registers swapped; two `$v0`/`$v1` temporaries swapped; an
+  epilogue shared where retail duplicates it. Ten to thirty source variants each left these put.
+  After about 25 compiles, record it as NEAR and move on.
+- **Absolute addresses.** Data splat pins to an address outside the executable (`D_FA0` at 0xFA0)
+  is spelled with eight digits in C (`D_00000FA0`); the link maps it.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.

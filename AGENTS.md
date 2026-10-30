@@ -91,7 +91,8 @@ rac2-decomp's (OpenRAC). It is a noticeboard, not a task queue or a record of fi
 Sort by size with `tools/todo.py` (docs/AGENT_WORKFLOW.md):
 
 - **Haiku**: up to 400 bytes, many workers at once.
-- **Sonnet**: 401 to 1,000 bytes, and what Haiku gave up on.
+- **Sonnet**: 401 to 1,000 bytes, and what Haiku gave up on. Near misses are Sonnet's: on the ones
+  closest to retail, Sonnet workers matched 40 of 92 (43%), where Haiku retries matched 28 of 420 (7%).
 - **Opus**: over 1,000 bytes, complex ones, near misses in `nonmatching/`, and leading (the full
   build, landing, the reports).
 
