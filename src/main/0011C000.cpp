@@ -1403,3 +1403,20 @@ void func_0011F320(Table_11F320* self, s32 unused, s32 flags, f32* outF, f32* ou
     }
     func_00130168(delta, diff, scale, ((Entry_11F320*)p)->f04, ((Entry_11F320*)p)->f18, ((Entry_11F320*)p)->f1C, ((Entry_11F320*)p)->f24, ((Entry_11F320*)p)->f2C, ((Entry_11F320*)p)->f30, outF, outI, 0);
 }
+
+struct Pack7_11E048 { void* w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
+
+s32 func_0011D968(s32 id, s32 size, void* data);
+
+s32 func_0011E048(void* a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
+{
+    Pack7_11E048 buf;
+    buf.w0 = a0;
+    buf.w1 = a1;
+    buf.w2 = (a4 << 16) | (a2 & 0xFFFF);
+    buf.w3 = (a5 << 16) | (a3 & 0xFFFF);
+    buf.w4 = a6;
+    buf.w5 = a7;
+    buf.w6 = a8;
+    return func_0011D968(0x2C, 0x1C, &buf);
+}

@@ -273,3 +273,98 @@ void func_001275F0(Obj_001275F0* self, f32 x, f32 y, f32 z)
     v[2] = z;
     self->vtbl[37](self, v);
 }
+
+extern u8 D_0027B314[];
+
+typedef void (*VFn0_124EE8)(void* self);
+
+struct Info_124EE8 {
+    u8 pad0[8];
+    s32 flags;
+};
+
+struct Node_124EE8 {
+    Info_124EE8* info;
+};
+
+struct List_124EE8 {
+    s32 head;
+    u8 pad4[0x4];
+    s32 link;
+};
+
+struct Obj_124EE8 {
+    void** vt;
+    u8 pad4[0x30];
+    List_124EE8 list;
+};
+
+struct Frame_124EE8 {
+    s32 list;
+    s32 cursor;
+    s32 link;
+    s32 prev;
+};
+
+s32 func_00182FC8(void* self);
+void func_00124EE8(void* self, f32 f);
+
+void func_00124EE8(void* self, f32 f)
+{
+    Obj_124EE8* obj = (Obj_124EE8*)self;
+    Frame_124EE8 fr;
+    f32 saved = f;
+    VFn0_124EE8 pre = (VFn0_124EE8)obj->vt[21];
+    if (pre != 0) {
+        pre(self);
+    }
+    if (func_00182FC8(self) == 0) {
+        return;
+    }
+    s32 e = (s32)&obj->list;
+    fr.list = e;
+    fr.cursor = e;
+    s32 old = *(s32*)D_0027B314;
+    s32 link = *(s32*)(e + 8);
+    fr.prev = old;
+    fr.link = link;
+    *(s32*)D_0027B314 = (s32)&fr;
+    s32 head = obj->list.head;
+    fr.cursor = head + fr.link;
+    Node_124EE8* node = (Node_124EE8*)head;
+    while (node != 0) {
+        if ((node->info->flags & 1) != 0) {
+            func_00124EE8(node, saved);
+        }
+        s32 nx = *(s32*)fr.cursor;
+        fr.cursor = nx + fr.link;
+        node = (Node_124EE8*)nx;
+    }
+    *(s32*)D_0027B314 = fr.prev;
+}
+
+typedef void (*VFn_1261C0)(void* self, void* b, void* m);
+struct __attribute__((aligned(16))) Quad_1261C0 { s32 w[4]; };
+struct Inner_1261C0 { u8 pad0[0x60]; Quad_1261C0 q60[4]; u8 pad1[4]; s32 fA4; u8 pad2[8]; s32 fB0; };
+struct Self_1261C0 { VFn_1261C0* vt; u8 pad0[0x224 - 4]; Inner_1261C0* p224; };
+
+void func_001261C0(void* obj, void* b, void* m)
+{
+    Self_1261C0* self = (Self_1261C0*)obj;
+    Quad_1261C0* src = (Quad_1261C0*)m;
+    self->vt[0xC0 / 4](self, b, src);
+    Inner_1261C0* in = self->p224;
+    if (in != 0 && (in->fB0 & 0x80) != 0) {
+        if (src != 0) {
+            in->fA4 = 1;
+            Inner_1261C0* p = self->p224;
+            p->q60[0] = src[0];
+            p->q60[1] = src[1];
+            p->q60[2] = src[2];
+            p->q60[3] = src[3];
+        } else {
+            in->fA4 = 0;
+        }
+    }
+    self->vt[0xA8 / 4](self, b, src);
+}
