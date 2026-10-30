@@ -13,13 +13,17 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
   tables: it cannot be linked from C until its file's .rodata is modelled)
 - jtbl: has a jump table;  vu: uses the vector unit (VU0 macro mode, COP2)
 - float: uses the FPU;  mmi: uses 128-bit multimedia instructions
+- nonc: max.s, min.s, sqrt.s
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)
 - handwritten: spimdisasm says it was not made by the compiler
-- fragment: no `jr $ra` in its listing (a piece of a function, or a tail call), so it is not a whole function
+- fragment: no `jr $ra` in its listing, or a positive stack adjustment first: not a whole function
 
 What stops a function from being matched, the blocker column:
 
-- fragment: no `jr $ra` in its listing (a piece of a function, or a tail call): not a whole function
+- fragment: no `jr $ra` in its listing, or a positive stack adjustment first (the end of the
+  function before): a piece of a function, or a tail call, not a whole function
+- mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
+- nonc: max.s, min.s, sqrt.s: no plain C form in this compiler
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; its .rodata must be placed from C first
@@ -46,6 +50,7 @@ RODATA = (0x217380, 0x250580)          # US .rodata (docs/VERSIONS.md)
 DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b)[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
 VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
 SYSTEM = {"syscall", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "eret", "ei", "di", "break"}
+NONC = {"max.s", "min.s", "sqrt.s"}  # no plain C form in this compiler
 MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu1|madd1|maddu1|mfsa|mtsa)")
 
 
@@ -111,6 +116,9 @@ def tags_of(lines, kind):
         tags.add("handwritten")
     if lines and not any(line.split(None, 1)[:1] == ["jr"] for line in lines):
         tags.add("fragment")
+    first = next((line.split() for line in lines if line.split()), [])
+    if len(first) >= 4 and first[:3] == ["addiu", "$sp,", "$sp,"] and not first[3].startswith("-"):
+        tags.add("fragment")  # a positive stack adjustment first: the end of the function before
     for line in lines:
         if line.startswith("jlabel"):
             tags.add("jtbl")
@@ -133,6 +141,8 @@ def tags_of(lines, kind):
             tags.add("system")
         if op.endswith((".s", ".w")) or op in ("lwc1", "swc1", "mtc1", "mfc1"):
             tags.add("float")
+        if op in NONC:
+            tags.add("nonc")
         if MMI.match(op) and op != "pref":
             tags.add("mmi")
     if "calls" not in tags:
@@ -140,7 +150,7 @@ def tags_of(lines, kind):
     return tags
 
 
-PERMANENT = ("fragment", "vu", "system", "handwritten")
+PERMANENT = ("fragment", "vu", "system", "handwritten", "mmi", "nonc")
 
 
 def blocker(tags):
@@ -191,7 +201,7 @@ def main(argv=None):
             n, total = counts.get(key, (0, 0))
             counts[key] = (n + 1, total + size)
         print("blocker\tfunctions\tbytes")
-        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten"):
+        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten", "mmi", "nonc"):
             if key in counts:
                 print("%s\t%d\t%d" % (key, counts[key][0], counts[key][1]))
         return 0
