@@ -1244,3 +1244,39 @@ Value_11B008* func_0011BD28(Value_11B008* self, List_11BD28* list, s32 key, Valu
     func_0011B060(&tmp, 2);
     return self;
 }
+
+struct Node_119218 { s32 f0; s32 f4; Node_119218* next; };
+struct Holder_119218 { s32 f0; s32 f4; Node_119218* head; };
+struct Args_119218 { s32 f0; Holder_119218* holder; };
+
+void func_0011B008(void* p);
+void func_0011B5F0(void* p, s32 flag);
+void func_0011B060(void* p, s32 flags);
+struct Tmp_119218;
+void func_0011B018(void* out, void* p);
+
+struct Tmp_119218 {
+    s32 tag; s32 value; s32 pad[2];
+    ~Tmp_119218() { func_0011B060(this, 2); }
+};
+struct Cursor_119218 {
+    s32 tag; s32 value; s32 pad[2];
+    Cursor_119218(const Cursor_119218& o) { func_0011B018(this, (void*)&o); }
+    Cursor_119218() { func_0011B008(this); }
+    ~Cursor_119218() { func_0011B060(this, 2); }
+};
+
+Tmp_119218 func_0011A080(void* node, void* extra);
+void func_0011B0A8(void* a, const Tmp_119218& b);
+
+Cursor_119218 func_00119218(Args_119218* a1, void* a2)
+{
+    Cursor_119218 L;
+    func_0011B5F0(&L, 1);
+    for (Node_119218* n = a1->holder->head; n != 0; n = n->next) {
+        func_0011B0A8(&L, func_0011A080(n, a2));
+        if (L.tag == 27 && L.value == 0)
+            return L;
+    }
+    return L;
+}

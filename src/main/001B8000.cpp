@@ -723,3 +723,26 @@ void func_001BA550(Obj_1BA550* o, Node_1BA550* node)
 tail:
     func_00129DF8(o);
 }
+
+struct Slot_1B9FB0 { s32 f0; void* f4; u8 pad0[0x38]; };
+struct Node_1B9FB0 { Slot_1B9FB0 slot[2]; u8 pad0[0xD0 - 0x80]; Node_1B9FB0* next; };
+struct Self_1B9FB0 { u8 pad0[0x50]; s32 key; };
+
+s32 func_001387F8(void* self, void* other);
+s32 func_00182F40(void* e, void* b);
+s32 func_001B9FB0(Self_1B9FB0* self, void* other)
+{
+    s32 key;
+    Node_1B9FB0* n;
+    for (n = (Node_1B9FB0*)func_001387F8(self, other), key = self->key; n != 0; n = n->next) {
+        s32 s1 = (key ^ n->slot[0].f0) != 0;
+        s32 o0 = s1 * 64;
+        if (func_00182F40(*(void**)((u8*)n + o0 + 4), self) != 0) {
+            s32 o1 = (1 - s1) * 64;
+            if (func_00182F40(*(void**)((u8*)n + o1 + 4), other) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}

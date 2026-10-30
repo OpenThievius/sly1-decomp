@@ -866,3 +866,23 @@ void func_0017B308(Obj_0017B308* self)
     if (busy) ((Mgr_0017B308*)D_0026E248)->vtbl[0x38 / 4](D_0026E248);
     else ((Mgr_0017B308*)D_0026E248)->vtbl[0x3C / 4](D_0026E248);
 }
+
+typedef void (*Fn_0017B710)(void* self);
+
+struct Mgr_0017B710 { Fn_0017B710* vtbl; };
+struct Obj_0017B710 { u8 pad[0x550]; s32 mode; };
+
+extern s32 D_00270458;
+extern s32 D_00270B54;
+extern s32 D_002717CC;
+s32 func_001E9970(void* self);
+
+void func_0017B710(Obj_0017B710* self)
+{
+    s32 busy = 0;
+    if (self->mode == 1 && func_001E9970(self) != 0) {
+        if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
+    }
+    if (busy) ((Mgr_0017B710*)D_0026E248)->vtbl[0x38 / 4](D_0026E248);
+    else ((Mgr_0017B710*)D_0026E248)->vtbl[0x3C / 4](D_0026E248);
+}

@@ -1190,3 +1190,30 @@ void func_0015D8A8(Obj_15D8A8* obj, void* src)
     obj->f7C = func_0018D500(n << 3);
     func_00137A60(src, obj->f78 << 3, obj->f7C);
 }
+
+struct Obj_15FA58 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C; void* items70[1]; u8 pad2[0x2C8 - 0x74]; u64 flags2C8; };
+struct Self_15FA58 { u8 pad0[0x1ED0]; s32 count; Obj_15FA58** items; };
+
+void func_0015F7D8(void* self, void* item);
+
+void func_0015FA58(Self_15FA58* self)
+{
+    s32 i = self->count;
+    i--;
+    if (i >= 0) {
+        u64 mask = ((u64)~0x80 << 32) | 0xFFFFFFFF;
+        do {
+            Obj_15FA58* obj = self->items[i];
+            obj->flags2C8 &= mask;
+            if (obj->f54 == obj) {
+                s32 j = obj->count6C;
+                j--;
+                for (; j >= 0; j--) {
+                    func_0015F7D8(self, obj->items70[j]);
+                }
+            }
+            i--;
+        } while (i >= 0);
+    }
+    self->count = 0;
+}

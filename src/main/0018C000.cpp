@@ -1023,3 +1023,36 @@ void func_0018EF78(void* self, s32 a1, s32 a2)
     func_00152D30(&buf);
     func_001529E0(&buf, 0, 0);
 }
+
+typedef u64 Q18D780 __attribute__((mode(TI)));
+
+void func_0018D780(Q18D780* dst, Q18D780* src, s32 n)
+{
+    Q18D780* d = dst;
+    Q18D780* s = src;
+    s32 rem = n & 3;
+    s32 total = n - rem;
+    s32 k;
+    if (rem != 0) {
+        k = rem;
+        do {
+            *d++ = *s++;
+        } while (--k != 0);
+    }
+    if (total > 0) {
+        k = 0;
+        do {
+            Q18D780 q0 = s[0];
+            Q18D780 q1 = s[1];
+            Q18D780 q2 = s[2];
+            Q18D780 q3 = s[3];
+            s += 4;
+            k += 4;
+            d[0] = q0;
+            d[1] = q1;
+            d[2] = q2;
+            d[3] = q3;
+            d += 4;
+        } while (k < total);
+    }
+}

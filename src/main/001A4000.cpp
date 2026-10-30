@@ -1181,3 +1181,41 @@ void func_001A7B20(Track_001A7B20* self, s32 a1, s32 a2)
     self->value4 = a1;
     self->value8 = a2;
 }
+
+struct Obj_1A7480 {
+    u8 pad0[0x550];
+    s32 a550;
+    f32 a554;
+    void* a558;
+    u8 pad1[0x564 - 0x55C];
+    void* a564;
+};
+
+extern f32 D_0026185C;
+extern void* D_0026B860[];
+
+void func_001A5B28(void* a, void* b);
+void func_001B6628(void* self, void* item);
+void func_001B64D8(void* self, void* item);
+
+void func_001A7480(Obj_1A7480* self, s32 value)
+{
+    s32 old = self->a550;
+    if (value == old) {
+        return;
+    }
+    if (old == 9) {
+        func_001A5B28(self->a558, self);
+    }
+    *(s32*)((u8*)self + 0x550) = value;
+    self->a554 = D_0026185C;
+    void* a2 = self->a564;
+    if (a2 != 0) {
+        void* item = D_0026B860[value];
+        if (old == -1) {
+            func_001B6628(a2, item);
+        } else {
+            func_001B64D8(a2, item);
+        }
+    }
+}

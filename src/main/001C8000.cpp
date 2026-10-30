@@ -747,7 +747,6 @@ set:
     return r;
 }
 
-
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001CBB20(void* self);
 
@@ -957,4 +956,32 @@ void func_001CB6F8(List_1CB6F8* self, s32 value)
             }
         }
     }
+}
+
+struct Obj_CBD58;
+typedef s32 (*VFn_CBD58)(void* self);
+
+struct Obj_CBD58 {
+    VFn_CBD58* vtbl;
+};
+
+struct Self_CBD58 {
+    u8 pad0[0x58];
+    s32 count;
+    Obj_CBD58* items[1];
+};
+
+s32 func_001CBD58(Self_CBD58* a0)
+{
+    s32 result = 1;
+    for (s32 i = 0; i < a0->count; i++) {
+        Obj_CBD58* o = a0->items[i];
+        s32 v = o->vtbl[92](o);
+        switch (v) {
+        case 1: break;
+        case 0: result = 0; break;
+        case 2: return 1;
+        }
+    }
+    return result;
 }
