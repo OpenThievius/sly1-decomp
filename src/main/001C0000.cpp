@@ -538,3 +538,113 @@ void func_001C33C8(Obj_1C33C8* self)
     self->count = c + 1;
     func_001C3FC8(self, 1);
 }
+
+// NEAR: retail ends the zero path with beqz + move $v0,$zero and falls into li $v0,1; ours folds the call result into sltu $v0,$zero,$v0 (2 lines differ).
+
+struct Obj_1C3D28 { u8 pad[0x14]; void* f14; };
+extern s32 D_00262C64;
+s32 func_001DDA80(void* p);
+
+s32 func_001C3D28(Obj_1C3D28* self)
+{ if ((D_00262C64 & 1) || func_001DDA80(self->f14)) return 1; return 0; }
+
+// EXACT: declare D_0026185C as extern f32 D_0026185C[] and read [0]
+
+typedef s32 (*VFnA_1C3D60)(void* self, s32 v);
+typedef void (*VFnB_1C3D60)(void* self, s32 v, void* data);
+typedef void (*VFnC_1C3D60)(void* a0, void* self);
+struct Obj_1C3D60 {
+    void** vtbl;
+    u8 pad0[0x610 - 4];
+    s32 f610;
+    u8 pad1[0x638 - 0x614];
+    s32 f638;
+    f32 f63C;
+};
+struct Arg_1C3D60 {
+    s32 f0;
+    s32 f4;
+    void* f8;
+    VFnC_1C3D60 fC;
+};
+struct Local_1C3D60 { void* self; s32 v; };
+extern f32 D_0026185C[];
+s32 func_00160C58();
+void func_001C3FC8(void* self, s32 flag);
+
+s32 func_001C3D60(Obj_1C3D60* self, Arg_1C3D60* arg)
+{
+    Local_1C3D60 local;
+    s32 m;
+    if (((VFnA_1C3D60)self->vtbl[79])(self, arg->f0)) return 0;
+    if (arg->f0 == 0) {
+        if (arg->fC != 0) arg->fC(arg->f8, self);
+    }
+    m = self->f610;
+    if (m < 5) {
+        if (!(m < 2)) return 1;
+    }
+    if (self->f638 != 0) return 1;
+    if (func_00160C58()) {
+        func_001C3FC8(self, 2);
+        self->f638 = 1;
+        self->f63C = D_0026185C[0];
+    } else {
+        func_001C3FC8(self, 3);
+    }
+    local.self = self;
+    local.v = arg->f4;
+    ((VFnB_1C3D60)self->vtbl[18])(self, 0x17, &local);
+    return 1;
+}
+
+struct Ring_1C25B0 {
+    s32 f0;
+    s32 f4;
+    s32 f8[8];
+    s32 f28[0x20 / 4];
+    s32 f48;
+    s32 f4C;
+};
+
+struct Dma_1C25B0 {
+    s32 f0;
+    u8 pad4[0x7C];
+    s32 f80;
+};
+
+extern Ring_1C25B0 D_002748F0[];
+extern s32 D_00274990;
+extern Dma_1C25B0* D_00261F20;
+void func_00202C38(Dma_1C25B0* d, s32 b, s32 c);
+void func_00202B68(Dma_1C25B0* d);
+
+void func_001C25B0(s32 first, ...) {
+    s32 buf[8];
+    Ring_1C25B0* r = &D_002748F0[D_00274990];
+    s32 n = 0;
+    s32 x = first;
+    r->f4C = 3;
+    func_00202C38(D_00261F20, 0, 0);
+    void* ap = (char*)__builtin_next_arg(first) - 56;
+    while (x) {
+        buf[n] = x;
+        ap = (char*)ap + 8;
+        x = *(s32*)((char*)ap - 8);
+        n++;
+    }
+    s32 i = 0;
+    n = r->f48 - n;
+    while (n < r->f48 - 1) {
+        *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x10000000) | ((u64)buf[i] << 32);
+        n++;
+        i++;
+    }
+    Dma_1C25B0* d = D_00261F20;
+    *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x70000000) | ((u64)buf[i] << 32);
+    d->f0 &= ~0x40;
+    d->f80 = (r->f4 & 0xFFFFFFF) + 0x80000000;
+    func_00202B68(d);
+    r = &D_002748F0[1 - D_00274990];
+    if (r->f4C == 3) r->f4C = 0;
+}

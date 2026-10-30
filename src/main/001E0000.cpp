@@ -342,3 +342,6 @@ void func_001E30A0(Obj_1E30A0* self)
     }
     self->sub = 0;
 }
+
+void func_001F5C0C(void* p, s32 zero, s32 size);
+

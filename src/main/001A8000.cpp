@@ -636,3 +636,112 @@ void func_001AB928(Obj_1AB928* self, s32 v, f32 f)
     self->f288 = f;
     self->f28c = v;
 }
+
+struct Sub_1A84C8 { u8 pad0[4]; s32 f4; s32 f8; u8 pad1[8]; void* f14; };
+struct Obj_1A84C8 { u8 pad0[0x34]; s32 count; void* items; Sub_1A84C8* sub; };
+
+void func_001830D8(Obj_1A84C8* self, void* o);
+void* func_001A8110(void* self);
+void func_00152438(void* self, s32 value);
+void func_00152470(void* list, void* item);
+u8* func_0018D568(s32 size, void* src);
+
+void func_001A84C8(Obj_1A84C8* self, Obj_1A84C8* other)
+{
+    func_001830D8(self, other);
+    if (self->sub != 0 && self->sub->f4 != 0) {
+        if (other->sub->f8 != 0) {
+            self->sub = 0;
+        } else {
+            other->sub->f8 = 1;
+            func_00152438((u8*)other->sub + 0x14, 0x18);
+            self->sub = 0;
+        }
+        func_001A8110(self);
+        self->sub->f4 = 1;
+        self->sub->f8 = 2;
+        self->sub->f14 = other;
+        func_00152470((u8*)other->sub + 0x14, self->sub);
+    } else {
+        self->items = func_0018D568(other->count * 0x14, other->items);
+    }
+}
+
+// NEAR: frame and body match; the two local slots are swapped (retail: tmp at sp+0x30, buffer at sp+0x40; ours: buffer at sp+0x30, tmp at sp+0xE0), so the frame is 0x120 not 0x130
+
+extern u8 D_0026FF68[];
+extern u8 D_00262280[];
+
+struct __attribute__((packed)) Word_1AB198 {
+    s32 v;
+};
+
+struct Obj_1AB198 {
+    u8 pad0[4];
+    s32 f4;
+    s8 f8;
+    u8 pad1[0x208 - 9];
+    Word_1AB198 f208;
+    u8 pad2[0x20C - 0x20C];
+    f32 f20c;
+    u8 pad3[0x21C - 0x210];
+    f32 f21c;
+    f32 f220;
+    u8 pad4[0x234 - 0x224];
+    f32 f234;
+    f32 f238;
+};
+
+struct Glob_1AB198 {
+    u8 pad0[0x250];
+    s32 f250;
+    u8 pad1[0x284 - 0x254];
+    f32 f284;
+};
+
+void func_00137228(void* out, f32 x, f32 y);
+void func_00137238(void* out, f32 x, f32 y);
+void func_00137248(void* out, s32* value);
+void func_00137260(void* out, s32 flag);
+void func_00137268(void* out, s32 flag);
+void func_0015C8B8(s32 handle, f32 a, f32 b);
+void func_0015DB28(void* out, void* p, s32 handle);
+void func_0015E318(void* buf, void* out, s32 zero, void* data);
+void func_0015C900(s32 handle);
+
+void func_001AB198(Obj_1AB198* self)
+{
+    u8 out[0x20];
+    Word_1AB198 packed;
+    s32 held;
+    s32 tmp[4];
+    u8 buf[0xB0];
+    f32 scale;
+    f32 px;
+    f32 py;
+    Glob_1AB198* g;
+
+    if (self->f8 == 0) {
+        return;
+    }
+    g = (Glob_1AB198*)D_0026FF68;
+    scale = 1.0f;
+    if (g->f250 != 0) {
+        scale = g->f284;
+    }
+    packed = self->f208;
+    ((u8*)&packed)[3] = (u8)(s32)(scale * 255.0f);
+    held = packed.v;
+    px = self->f234;
+    py = self->f238;
+    func_00137228(out, self->f21c, self->f220);
+    func_00137238(out, px, py);
+    tmp[0] = held;
+    func_00137248(out, &tmp[0]);
+    func_00137260(out, 0);
+    func_00137268(out, 0);
+    func_0015C8B8(self->f4, self->f20c, self->f20c);
+    func_0015DB28(buf, &self->f8, self->f4);
+    func_0015E318(buf, out, 0, D_00262280);
+    func_0015C900(self->f4);
+}

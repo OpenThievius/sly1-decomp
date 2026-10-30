@@ -546,3 +546,52 @@ void func_001A3F40(Dst_1A3F40* out, Src_1A3F40* src)
     }
     out->f624 = src->f7C;
 }
+
+extern u8 D_0026B710[];
+extern u8 D_0026B720[];
+
+void func_0019EB28(void* self);
+
+struct __attribute__((aligned(16))) Quad_1A31F0 { s32 q[4]; };
+struct Obj_1A31F0 {
+    u8 pad000[0x1C];
+    f32 f1C;
+    s32 i20;
+    u8 pad024[0x30 - 0x24];
+    Quad_1A31F0 q30;
+    Quad_1A31F0 q40;
+};
+
+void func_001A31F0(void* selfv)
+{
+    Obj_1A31F0* self = (Obj_1A31F0*)selfv;
+    func_0019EB28(self);
+    f32 half = 0.5f;
+    u8* sys = *(u8**)&D_00275710;
+    self->f1C = half;
+    self->i20 = *(s32*)(sys + 0x1D30);
+    self->q40 = *(Quad_1A31F0*)D_0026B710;
+    self->q30 = *(Quad_1A31F0*)D_0026B720;
+}
+
+
+
+struct __attribute__((aligned(16))) Quad_1A3598 { s32 q[4]; };
+struct Obj_1A3598 {
+    u8 pad000[0x30];
+    f32 f30;
+    f32 f34;
+    s32 i38;
+    Quad_1A3598 q40;
+};
+
+void func_0019EB28(Obj_1A3598* self, f32 x);
+
+void func_001A3598(Obj_1A3598* self, f32 x)
+{
+    func_0019EB28(self, x);
+    self->q40 = *(Quad_1A3598*)&D_00275C50;
+    self->f30 = x;
+    self->f34 = 1.0f - x;
+    self->i38 = 0;
+}

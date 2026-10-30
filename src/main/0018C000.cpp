@@ -869,3 +869,61 @@ s32 func_0018ED78(void* a0, s32 a1, void* a2)
     func_0018F890(a2, 0);
     return 1;
 }
+
+struct Blk_18EB98 { u8 b[0x24]; };
+
+struct Self_18EB98 {
+    s32 state;
+    u8 pad4[0x4C - 4];
+    Blk_18EB98 f4C;
+    s32 f70;
+    s32 f74;
+    u8 pad78[8];
+    s32 f80;
+};
+
+s32 func_0013CAD8(Blk_18EB98* a, s32 b, void* c);
+void func_0011E4C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_0018E838(void* p);
+
+void func_0018EB98(Self_18EB98* self)
+{
+    switch (self->state) {
+    case 2:
+        func_0013CAD8(&self->f4C, self->f80, (u8*)&self->f4C + 0x20);
+        if (self->f80 != 0) {
+            break;
+        }
+        func_0011E4C0(self->f70, self->f74, self->f70, 0, 0);
+        self->state = 3;
+        break;
+    case 3: {
+        void* s0 = (u8*)&self->f4C + 0x20;
+        func_0018E838(s0);
+        func_0013CAD8(&self->f4C, self->f80, s0);
+        break;
+    }
+    }
+}
+
+// was NEAR: the shift arm: retail branches with bnez on (v < 16) to the sllv, with li v0,1 in the delay slot; ours uses beqz and the arms swap
+
+s32 func_0018E410(void* p);
+
+void func_0018F0E8(void* self, void* p)
+{
+    s32 m;
+    s32 v;
+
+    if (*(void**)((u8*)self + 4) != 0) {
+        return;
+    }
+    *(void**)((u8*)self + 4) = p;
+    v = func_0018E410(p);
+    if ((u32)v >= 16) {
+        m = 0;
+    } else {
+        m = 1 << v;
+    }
+    *(u32*)((u8*)D_002623C0 + 0x19F4) |= m;
+}

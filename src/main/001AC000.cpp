@@ -543,3 +543,67 @@ void func_001AF7A8(Obj_1AF7A8* self, void* p)
     }
     D_002744D0 = 1;
 }
+
+// NEAR: register and load order of D_00262C84 vs D_00269988 (retail keeps the x load in v1, ours in a0; xori placed differently)
+
+struct Node_001AE178 { u8 pad0[0xC]; f32 f0C; };
+struct Obj_001AE178 { u8 pad0[0x260]; s32 f260; s32 f264; };
+
+extern s32 D_00275BF0;
+extern s32 D_00262C84;
+extern Node_001AE178* D_00269988;
+
+void func_001AA298(void* self);
+void func_001ADFF0(void* self);
+
+void func_001AE178(Obj_001AE178* self)
+{
+    if (D_00275BF0 == 1) {
+        s32 b = 0;
+        s32 a = D_00262C84 == 3;
+        if (D_00269988 != 0 && D_00269988->f0C != 0.0f) {
+            b = 1;
+        }
+        if ((a == 0) != (self->f260 == 0) || (b == 0) != (self->f264 == 0)) {
+            self->f260 = a;
+            self->f264 = b;
+            func_001ADFF0(self);
+        }
+    }
+    func_001AA298(self);
+}
+
+// NEAR: the store of func_0015C1C0 result is before the float load and call; retail puts it in the delay slot of the func_001AA788 call
+
+typedef void (*VFn_1AE758)(void* self, void* arg);
+struct Flags_1AE758 { u8 a; u8 b; };
+struct Obj_1AE758 { VFn_1AE758* vtbl; void* f4; u8 f8; };
+void func_001AA268(void* self);
+void func_001AA8B0(void* self, f32 v);
+void func_001AA8C0(void* self, f32 v);
+void func_001AA8B8(void* self, f32 v);
+void* func_0015C1C0(s32 k);
+void func_001AA788(void* self, f32 v);
+s32 func_001AEA08(void);
+extern u8 D_002744AC[];
+
+void func_001AE758(Obj_1AE758* self)
+{
+    f32 k = 0.25f;
+    Flags_1AE758 fl;
+    s32 v;
+
+    func_001AA268(self);
+    func_001AA8B0(self, k);
+    func_001AA8C0(self, k);
+    func_001AA8B8(self, 0.0f);
+    void* r = func_0015C1C0(1);
+    f32 g = *(f32*)D_002744AC;
+    self->f4 = r;
+    func_001AA788(self, g);
+    v = func_001AEA08();
+    fl.b = 0;
+    fl.a = v;
+    self->vtbl[8](self, &fl);
+    self->f8 = 0;
+}

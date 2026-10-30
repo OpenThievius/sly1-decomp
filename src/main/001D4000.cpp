@@ -260,3 +260,125 @@ void func_001D5620(void* self)
     func_0012AAE8(self, 1.0f);
     func_00160DA0();
 }
+
+struct Obj_1D4A98 {
+    u8 pad0[0x150];
+    f32 f150;
+    f32 f154;
+    u8 pad158[0x638 - 0x158];
+    f32 f638;
+    u8 pad63C[0x690 - 0x63C];
+    s32 p690;
+    u8 pad694[0x2228 - 0x694];
+    s32 state;
+    f32 f222C;
+    u8 pad2230[0x2514 - 0x2230];
+    u8* p2514;
+    u8 pad2518[0x26B0 - 0x2518];
+    s32 f26B0;
+    u8 pad26B4[0x2B70 - 0x26B4];
+    void* p2B70;
+};
+
+extern f32 D_00261858[];
+extern u8 D_00275030[];
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA728(u8* p, s32 a, f32 b, f32 c, f32 d);
+s32 func_001300E8(void* e, s32 k);
+void func_001D4C98(Obj_1D4A98* self);
+void func_00175170(Obj_1D4A98* self, s32 a, s32 b);
+s32 func_001CF158(Obj_1D4A98* self, void* b);
+void func_001782C0(Obj_1D4A98* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+
+void func_001D4A98(Obj_1D4A98* self) {
+    switch (self->state) {
+    case 0x2B: {
+        f32 t = func_00205778(self->f154, self->f150);
+        self->f638 = func_001EA728(D_00275030, 0, self->f638, t + 3.1415927f, D_00261858[2]);
+        if (0.25f < D_00261858[1] - self->f222C && self->p690 != 0) {
+            func_001D4C98(self);
+        }
+        break;
+    }
+    case 0x2C: {
+        if (*(f32*)(self->p2514 + 0x18) < D_00261858[1]) {
+            func_001D4C98(self);
+        } else if (self->p2B70 != 0 && *(f32*)(self->p2514 + 0x18) < D_00261858[1] + 0.25f &&
+                   (func_001300E8(self->p2B70, 0x76) || func_001300E8(self->p2B70, 0x70) ||
+                    func_001300E8(self->p2B70, 0x71) || func_001300E8(self->p2B70, 0x81) ||
+                    func_001300E8(self->p2B70, 0x6F) || func_001300E8(self->p2B70, 0x7F))) {
+            if (self->f26B0 != 0) {
+                func_001D4C98(self);
+            } else {
+                void* o = self->p2B70;
+                func_00175170(self, 2, 2);
+                s32 r = func_001CF158(self, o);
+                func_00175170(self, 2, r);
+            }
+        } else {
+            func_001782C0(self, &self->p2B70, *(f32*)(self->p2514 + 0x18) - D_00261858[1], 0, self->p2514 + 0x20, 0);
+        }
+        break;
+    }
+    }
+}
+
+struct Obj_1D51A0 {
+    u8 pad0[0x158];
+    f32 f158;
+    u8 pad1[0x2220 - 0x15C];
+    s32 f2220;
+    s32 pad3;
+    s32 f2228;
+    u8 pad2[0x2B70 - 0x222C];
+    void* f2B70;
+};
+
+s32 func_001300E8(Obj_1D51A0* o, s32 kind);
+s32 func_00160C58(void);
+void func_00192C58(Obj_1D51A0* o);
+void func_00175170(Obj_1D51A0* o, s32 a, s32 b);
+s32 func_001CF158(Obj_1D51A0* o, void* p);
+void func_001D4C90(Obj_1D51A0* o, s32 value);
+void func_001D6608(void);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+extern f32 D_00275050[];
+extern f32 D_00275060[];
+extern f32 D_00275068[];
+
+void func_001D51A0(Obj_1D51A0* self)
+{
+    if (self->f2228 == 0x2C && self->f2B70 != 0 &&
+        (func_001300E8((Obj_1D51A0*)self->f2B70, 0x70) || func_001300E8((Obj_1D51A0*)self->f2B70, 0x71) ||
+         func_001300E8((Obj_1D51A0*)self->f2B70, 0x81) || func_001300E8((Obj_1D51A0*)self->f2B70, 0x6F) ||
+         func_001300E8((Obj_1D51A0*)self->f2B70, 0x7F) || func_001300E8((Obj_1D51A0*)self->f2B70, 0x76))) {
+        if (func_00160C58()) {
+            func_00192C58(self);
+            void* p = self->f2B70;
+            func_00175170(self, 2, 2);
+            func_00175170(self, 2, func_001CF158(self, p));
+        } else {
+            func_00175170(self, 4, 0x2D);
+        }
+    } else {
+        if (func_00160C58()) {
+            func_00175170(self, 4, 0x24);
+            func_001D4C90(self, (s32)func_001D6608);
+        } else {
+            func_00175170(self, 4, 0x2D);
+        }
+    }
+    if (self->f2220 == 4) {
+        f32 t = self->f158;
+        f32 x = D_00275050[0] + t * (D_00275050[1] + t * D_00275050[2]);
+        f32 lo = D_00275060[0];
+        f32 hi = D_00275060[1];
+        if (x < lo) {
+            x = lo;
+        } else if (hi < x) {
+            x = hi;
+        }
+        f32 z = 0.0f;
+        func_001BFCD8(0x49, 0, 0, 0, z, z, x, D_00275068[0], z, 0, 0);
+    }
+}

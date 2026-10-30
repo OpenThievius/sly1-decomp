@@ -634,3 +634,58 @@ void func_001BB210(Obj_1BB210* self, void* a, void* b)
         } while (n != 0);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1BB028 { s32 v[4]; };
+struct Entry_1BB028 { Quad_1BB028* quad; s32 value; };
+extern Entry_1BB028 D_002746E0[];
+void func_001BB028(s32 index, s32* out, Quad_1BB028* dst)
+{
+    *out = D_002746E0[index].value;
+    *dst = *D_002746E0[index].quad;
+}
+
+struct Item_1BB800 { void* owner; u8 pad[0xCC]; Item_1BB800* next; };
+struct Node_1BB800 { Item_1BB800* item; Node_1BB800* next; };
+struct List_1BB800 { Node_1BB800* head; };
+struct Owner_1BB800 { u8 pad[0x480]; List_1BB800* list; };
+struct Obj_1BB800 { u8 pad[0x50]; Owner_1BB800* owner; };
+struct Arg_1BB800 { s32 x; };
+
+s32 func_00182F40(void* a, Arg_1BB800* b);
+void* func_0018D658(s32 n);
+
+s32 func_001BB800(Obj_1BB800* obj, s32* outCount, void*** outArr)
+{
+    Owner_1BB800* own = obj->owner;
+    Node_1BB800* nd;
+    Item_1BB800* it;
+    s32 n = 0;
+    for (nd = own->list->head; nd; nd = nd->next) {
+        for (it = nd->item; it; it = it->next) {
+            s32 g = it->owner != own;
+            if (func_00182F40(*(void**)((u8*)it + (g << 6) + 4), (Arg_1BB800*)obj))
+                n++;
+        }
+    }
+    void** arr = (void**)func_0018D658(n << 2);
+    void** end = arr;
+    for (nd = own->list->head; nd; nd = nd->next) {
+        for (Item_1BB800* it2 = nd->item; it2; it2 = it2->next) {
+            s32 f = it2->owner != own;
+            if (func_00182F40(*(void**)((u8*)it2 + (f << 6) + 4), (Arg_1BB800*)obj)) {
+                void* v = *(void**)((u8*)it2 + ((1 - f) << 6) + 4);
+                void** p;
+                for (p = arr; p < end; p++)
+                    if (*p == v) break;
+                if (!(p < end)) {
+                    *end = v;
+                    end++;
+                }
+            }
+        }
+    }
+    *outArr = arr;
+    s32 cnt = end - arr;
+    *outCount = cnt;
+    return cnt;
+}

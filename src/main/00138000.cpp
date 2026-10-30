@@ -476,3 +476,53 @@ void func_0013B708(Actor_13B708* self, s32 kind, Msg_13B708* msg)
         }
     }
 }
+
+void func_00152470(void* list, void* item);
+void func_00152438(void* self, s32 value);
+void func_00123ED0(void* self);
+
+struct Obj_139DE8 {
+    u8 pad0[0x14];
+    u8* p14;
+    u8 pad18[0x80 - 0x18];
+    f32 f80;
+    u8 pad84[0x2C8 - 0x84];
+    u64 bits2C8;
+};
+
+void func_00139DE8(Obj_139DE8* self)
+{
+    func_00152470(self->p14 + 0x1CC0, self);
+    func_00123ED0(self);
+    func_00152438((u8*)self + 0x624, 0x1090);
+    u64 b = self->bits2C8;
+    b &= 0xFFFFFFFFCFFFFFFFull;
+    b |= 0x20000000ull;
+    b &= 0xFFFFFCFFFFFFFFFFull;
+    self->f80 = 1e10f;
+    b |= 0x10000000000ull;
+    self->bits2C8 = b;
+}
+
+typedef void (*VFn_13A3A0)(void* self);
+struct Sub_13A3A0 { u8 pad0[0xC]; u32 flags; };
+struct Obj_13A3A0 { VFn_13A3A0* vtbl; u8 pad0[0x380 - 4]; Sub_13A3A0* sub; };
+
+extern u8* D_00261990;
+void func_00124FC0(void* self);
+void func_00129DF8(void* self);
+
+void func_0013A3A0(Obj_13A3A0* self)
+{
+    func_00124FC0(self);
+    func_00129DF8(self);
+    Sub_13A3A0* sub = self->sub;
+    u8* g = D_00261990;
+    s32 hit = 0;
+    u32 flags = sub->flags;
+    u32 mask = *(u32*)(g + 0x21C);
+    if ((flags & 0x10000000) != 0 || (mask & flags) == mask)
+        hit = 1;
+    if (hit == 0)
+        self->vtbl[7](self);
+}

@@ -313,3 +313,40 @@ void func_00197F10(Obj_197F10* self, s32 kind, void* rec)
         return;
     }
 }
+
+struct Ctl_194E60 {
+    u8 pad0[0x250];
+    s32 f250;
+    u8 pad1[0x0C];
+    s32 f260;
+    u8 pad2[0x10];
+    s32 f274;
+    s32 f278;
+};
+
+void func_001936A0(Ctl_194E60* self);
+void func_00195928(void* self, s32 v);
+void func_001AA998(void* self, s32 flag);
+
+void func_00194E60(Ctl_194E60* self, s32 v)
+{
+    s32 flag = v;
+
+    if (self->f250 == v) return;
+    if (self->f250 == 0 && self->f260 == 0) {
+        func_001936A0(self);
+    }
+    if (v == 0) {
+        if (self->f274 != 0) {
+            func_00195928(self, self->f278);
+            flag = 1;
+            self->f274 = 0;
+            self->f278 = -1;
+        } else {
+            if (self->f260 == 0) {
+                func_001936A0(self);
+            }
+        }
+    }
+    func_001AA998(self, flag);
+}

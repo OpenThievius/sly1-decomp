@@ -425,3 +425,33 @@ void func_001E73B8(void* self)
         func_001E6C20(self, s);
     }
 }
+
+typedef s32 (*VFn_1E5888)(void* self, void* other);
+struct Vobj_1E5888 { VFn_1E5888* vtbl; };
+struct Rec_1E5888 { u8 pad0[0x48]; Vobj_1E5888* f48; };
+struct Ctx_1E5888 { u8 pad0[0x618]; Rec_1E5888* f618; };
+struct Node_1E5888 { u8 pad0[0x50]; Vobj_1E5888* f50; u8 pad1[0x4E0]; u64 f538; };
+
+s32 func_001A8820(void* p, void* v);
+
+s32 func_001E5888(Ctx_1E5888* self, Node_1E5888* node)
+{
+    Vobj_1E5888* a;
+    Vobj_1E5888* b;
+
+    if (node->f538 & (1ULL << 43)) {
+        return 0;
+    }
+    if ((void*)node->f50 == (void*)self) {
+        return 0;
+    }
+    if (func_001A8820(self->f618, node) != 0) {
+        return 0;
+    }
+    a = node->f50;
+    b = self->f618->f48;
+    if (a->vtbl[60](a, b) != 0 || b->vtbl[60](b, a) != 0) {
+        return 0;
+    }
+    return 1;
+}

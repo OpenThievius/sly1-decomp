@@ -352,3 +352,40 @@ void func_001C4790(void* unused, void* a1, void* a2, Obj_1C4790* self)
         *(Ent_1C4790*)((u8*)self + 0x90) = ents[idx];
     }
 }
+
+struct Obj_1C4A80 {
+    u8 pad0[0x140];
+    u8 f140[0x6C4 - 0x140];
+    f32 f6C4;
+    f32 f6C8;
+};
+
+extern f32 D_0026185C[];
+extern f32 D_00274B60[];
+extern s32 D_00605548;
+f32 func_001EAFE0(f32 x, f32 y);
+s32 func_001EAA70(s32 a, s32 b);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, u8* a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void func_001C0EC0();
+
+void func_001C4A80(Obj_1C4A80* self, f32* p, f32 f) {
+    f32 old = self->f6C4;
+    f32 ang;
+    self->f6C4 = f;
+    if (D_0026185C[0] - self->f6C8 < D_00274B60[0]) return;
+    if (func_001EAFE0(f - p[0], 1.0f) < 0.5f && 0.5f < func_001EAFE0(old - p[0], 1.0f)) {
+        ang = p[2];
+    } else if (func_001EAFE0(self->f6C4 - p[1], 1.0f) < 0.5f && 0.5f < func_001EAFE0(old - p[1], 1.0f)) {
+        ang = p[3];
+    } else {
+        return;
+    }
+    s32 idx = func_001EAA70(0x47, 0x4A);
+    if (idx == D_00605548) {
+        s32 x = idx - 0x46;
+        idx = x % 4 + 0x47;
+    }
+    D_00605548 = idx;
+    func_001BFCD8(idx, 0, 0, self->f140, 0, 0, 1000.0f, 200.0f, ang, 0.0f, 0.0f);
+    func_001C0EC0();
+}

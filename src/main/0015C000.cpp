@@ -802,3 +802,132 @@ f32 func_0015C4A8(Obj_15C4A8* self, u8* s)
     s32 n = func_0015C4E8(self, s);
     return a * (f32)n;
 }
+
+// NEAR: the first load of self->p54 goes to $v0 (retail $v1), so two
+// pointer loads differ in register choice; everything else matches.
+
+struct Frame_15D998 { u8 a[0x30]; u8 buf[0x100]; };
+struct Obj_15D998 { u8 pad[0x54]; u8* p54; u8* p58; u64 f60; u32 f68; u32 f6C; u32 f70; u32 f74; };
+struct Sub_15D998 { u8 pad[0xA]; u16 f0A; u8 pad2[0xC]; u64 f18; };
+struct Next_15D998 { u8 pad[6]; u16 f6; u8 pad8[8]; u64 f10; };
+
+s32 func_001611B8(Frame_15D998* p);
+s32 func_00168D88(void* self, s32 size);
+void func_00168FB0(void* self, s32 v);
+void func_001529C8(void* self, s32 count, void* base);
+void func_00169088(void* self, s32 dbp, void* ctx);
+void func_00152A50(void* self, u32* count, u32* begin, u32* out, s32 flag);
+void func_00168E78(void* self, s32 v);
+void func_00168F48(void* self, s32 v, void* ctx);
+
+void func_0015D998(Obj_15D998* self, void* arg)
+{
+    Frame_15D998 f;
+    s32 n;
+
+    (void)func_001611B8(&f);
+    Sub_15D998* q = (Sub_15D998*)self->p54;
+    n = func_00168D88(arg, q->f0A);
+    func_00168FB0(self->p54, n);
+    self->f60 = ((Sub_15D998*)self->p54)->f18;
+    func_001529C8(f.a, 16, f.buf);
+    func_00169088(self->p54, n, f.a);
+    func_00152A50(f.a, &self->f68, 0, &self->f6C, 7);
+    if (self->p58 != 0) {
+        n = func_00168D88(arg, ((Next_15D998*)self->p58)->f6);
+        func_00168E78(self->p58, n);
+        u64 t = self->f60;
+        t |= ((Next_15D998*)self->p58)->f10;
+        self->f60 = t;
+        func_001529C8(f.a, 16, f.buf);
+        func_00168F48(self->p58, n, f.a);
+        func_00152A50(f.a, &self->f70, 0, &self->f74, 7);
+    }
+}
+
+// Matched: for loop over i with D_00262264 + i * 0x88.
+
+extern s32 D_00262260;
+extern u8* D_00262264;
+
+void func_00168D68(void* dst, s32 size, s32 align);
+void func_0015D998(void* item, void* buf);
+
+void func_0015E5F0(void)
+{
+    u8 buf[16];
+    func_00168D68(buf, 0x1400, 0x1E00);
+    for (s32 i = 0; i < D_00262260; i++) {
+        func_0015D998(D_00262264 + i * 0x88, buf);
+    }
+}
+
+struct Self_15D338 { u8 pad[0x40]; u32 f40; };
+struct Strm_15D338 { u8 pad[4]; };
+void func_001617E8(Strm_15D338* s, u32 tag, f32 value);
+void func_00161860(Strm_15D338* s, s32 a, s32 b);
+void func_001618C0(Strm_15D338* s, s32 a, s32 b, u32 c, u32 d);
+
+void func_0015D338(Self_15D338* self, u32 color, Strm_15D338* s, f32 x0, f32 y0, f32 x1, f32 y1,
+                   f32 u0, f32 v0, f32 u1, f32 v1)
+{
+    color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
+    func_001617E8(s, color, 0.0f);
+    func_00161860(s, (s32)(u0 * 16.0f), (s32)(v0 * 16.0f));
+    func_001618C0(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+    func_00161860(s, (s32)(u1 * 16.0f), (s32)(v1 * 16.0f));
+    func_001618C0(s, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
+}
+
+struct Self_15CD18 {
+    u8 p0[0x4];
+    s32 m4;
+    s32 m8;
+    u8 p0c[0x40 - 0x0C];
+    s32 m40;
+    f32 f44;
+    f32 f48;
+    u8 p4c[0x60 - 0x4C];
+    u64 m60;
+};
+
+struct Entry_15CD18 {
+    u8 p0[0x2];
+    u16 a2;
+    u16 a4;
+    u16 a6;
+};
+
+struct Stream_15CD18 {
+    s32 unused;
+};
+
+Entry_15CD18* func_0015DAB8(Self_15CD18* self, s8 key);
+void func_001617E8(Stream_15CD18* s, s32 tag, f32 value);
+void func_00161860(Stream_15CD18* s, s32 a, s32 b);
+void func_001618C0(Stream_15CD18* s, s32 a, s32 b, s32 c, s32 d);
+
+f32 func_0015CD18(f32 x, f32 y, Self_15CD18* self, s8 key, u32 color, Stream_15CD18* s)
+{
+    Entry_15CD18* e = func_0015DAB8(self, key);
+    if (e != 0) {
+        s32 shift = (s32)((self->m60 >> 30) & 0xF);
+        s32 s4 = 1 << shift;
+        f32 h = (f32)self->m8 * self->f48;
+        f32 w = (f32)e->a6 * self->f44;
+        f32 px = x + w;
+        f32 py = y + h;
+        if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 492.80002f) {
+            u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
+            func_001617E8(s, tag, 0.0f);
+            func_00161860(s, e->a2 << 4, (s4 - e->a4) << 4);
+            func_001618C0(s, (s32)((x + 1728.0f) * 16.0f),
+                          (s32)((y * 0.45454547f + 1936.0f) * 16.0f), self->m40, 0);
+            func_00161860(s, (e->a2 + e->a6) << 4, (s4 - (e->a4 + self->m8)) << 4);
+            func_001618C0(s, (s32)((px + 1728.0f) * 16.0f),
+                          (s32)((py * 0.45454547f + 1936.0f) * 16.0f), self->m40, 0);
+        }
+        return (f32)(e->a6 + 1) * self->f44;
+    }
+    return (f32)self->m4 * self->f44;
+}

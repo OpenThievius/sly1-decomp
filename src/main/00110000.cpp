@@ -118,3 +118,23 @@ void* func_001137D0(void* self)
     func_0011B060(&q, 2);
     return self;
 }
+
+// NEAR: the second field load (0xC) goes to $v0, retail loads it into $v1 (xor operand register)
+
+struct Quad_113820 { s32 a, b, c, d; };
+struct Src_113820 { s32 f0; s32 f4; s32 f8; s32 fC; };
+
+Quad_113820* func_0011B008(Quad_113820* q);
+void func_0011B018(void* dst, Quad_113820* src);
+void func_0011B060(Quad_113820* q, int mode);
+s32 func_0011B5F0(Quad_113820* q, s32 flag);
+
+void* func_00113820(void* self, void* x, Src_113820* src)
+{
+    Quad_113820 q;
+    func_0011B008(&q);
+    (void)func_0011B5F0(&q, src->f4 == src->fC);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

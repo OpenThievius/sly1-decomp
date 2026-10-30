@@ -368,3 +368,58 @@ void func_00147EF8(Self_147EF8* self, s32 kind, void* target)
     }
     func_001DBCC8(self->p14, (void*)(void (*)(void*))func_00147ED0, self, 0, 0);
 }
+
+void func_00146340(void* self);
+
+struct Self_147E40 {
+    u8 pad0[0x320];
+    f32 f320;
+    u8 pad1[0x20];
+    f32 f344;
+    f32 f348;
+    f32 f34C;
+    f32 f350;
+    f32 f354;
+    f32 f358;
+    u8 pad2[0x34];
+    f32 f390;
+    f32 f394;
+};
+
+void func_00147E40(Self_147E40* self)
+{
+    func_00146340(self);
+    f32 k = 50.0f;
+    self->f34C = 45.0f;
+    self->f344 = 250.0f;
+    self->f348 = self->f350 = k;
+    self->f358 = 0.6f;
+    self->f354 = 0.75f;
+    self->f320 = 0.25f;
+    self->f390 = 8.0f;
+    self->f394 = 10.0f;
+}
+
+struct Obj_146D10 {
+    u8 pad0[0x50];
+    void* list;
+    u8 pad1[0x538 - 0x54];
+    u64 flags;
+};
+
+s32 func_001300E8(void* node, s32 kind);
+
+s32 func_00146D10(void* unused, Obj_146D10* self)
+{
+    u64 bit = 0x8000;
+    bit <<= 28;
+    if (self->flags & bit) {
+        return 0;
+    }
+    if (func_001300E8(self->list, 5) != 0 || func_001300E8(self->list, 0x27) != 0 ||
+        func_001300E8(self->list, 0x3B) != 0 || func_001300E8(self->list, 0x40) != 0 ||
+        func_001300E8(self->list, 0x2E) != 0) {
+        return 0;
+    }
+    return 1;
+}

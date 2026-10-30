@@ -12,7 +12,7 @@ f32 func_001EA480(f32 a, f32 b);
 s32 func_001B63C0(void* p, s32 n);
 void func_001B6628(void* p, s32 n);
 
-extern f32 D_00261860;
+extern f32 D_00261860[];
 
 void func_00171DD8(Obj_171DD8* self)
 {
@@ -21,7 +21,7 @@ void func_00171DD8(Obj_171DD8* self)
         if (self->f690 != 0) {
             func_001278A8(self->f6C0, 0, (u8*)self + 0x6A0, 0, &loc, 0, 0);
             loc.f8 = func_001EA480(loc.f8, 10.0f);
-            self->f638 = self->f638 + loc.f8 * D_00261860;
+            self->f638 = self->f638 + loc.f8 * D_00261860[0];
         }
     }
     if (self->f250C == 0) return;
@@ -88,7 +88,7 @@ void func_00170528(Obj_170528* self, s32 flags, Out_170528* out)
         if (flags & 0x10) {
             f32 v;
             if (flags & 1) {
-                v = -self->f368 * self->f358 * D_00261860 * D_002637BC;
+                v = -self->f368 * self->f358 * D_00261860[0] * D_002637BC;
             } else {
                 v = -self->f368 * self->f358 * D_002637C0;
             }
@@ -361,4 +361,126 @@ void func_00172530(Obj_172530* self)
     return;
 clear:
     self->f11E0 = 0;
+}
+
+// EXACT: declaring D_00261860 as an array (extern f32 D_00261860[], passed as D_00261860[0]) moved the float load into the jal delay slot.
+
+
+struct __attribute__((aligned(16))) Quad_172B08 {
+    s32 a, b, c, d;
+};
+
+struct Inner_172B08 {
+    u8 pad0[0x140];
+    Quad_172B08 q140;
+};
+
+struct Obj_172B08 {
+    void** vtbl;
+    u8 pad0[0x13C];
+    Quad_172B08 q140;
+    u8 pad1[0x21CC - 0x150];
+    s32 f21CC;
+    Quad_172B08 q21D0;
+    Quad_172B08 q21E0;
+    Quad_172B08 q21F0;
+    u8 pad2[0x223C - 0x2200];
+    s32 f223C;
+    u8 pad3[0x23D4 - 0x2240];
+    Inner_172B08* f23D4;
+};
+
+typedef void (*VFn_172B08)(void* self);
+
+void func_001BC088(void* self, void* b, f32 x);
+
+void func_00172B08(Obj_172B08* self)
+{
+    self->q21E0 = self->f23D4->q140;
+    self->f21CC = 0;
+    func_001BC088(self, 0, D_00261860[0]);
+    if (self->f223C == 0) {
+        self->q21D0 = self->q140;
+        self->q21F0 = self->f23D4->q140;
+        self->f21CC = 3;
+        ((VFn_172B08)self->vtbl[0xD8 / 4])(self);
+    } else {
+        self->f21CC = 0;
+    }
+}
+
+struct Aux_1725E0
+{
+    u8 pad0[0x2C8];
+    u64 f2C8;
+};
+struct VtObj_1725E0
+{
+    void** vt;
+};
+struct Self_1725E0
+{
+    u8 pad0[0x610];
+    void* f610;
+    void* f614;
+    u8 pad618[4];
+    Aux_1725E0* f61C;
+    u8 pad620[0x1190 - 0x620];
+    u8 f1190[0x100];
+    u8 f1290[0x100];
+    u8 pad1390[0x1520 - 0x1390];
+    u8 f1520[0x21C0 - 0x1520];
+    s32 f21C0;
+    u8 pad21C4[0x2220 - 0x21C4];
+    s32 f2220;
+    u8 pad2224[0x239C - 0x2224];
+    s32 f239C;
+    u8 pad23A0[0x2430 - 0x23A0];
+    f32 f2430;
+    f32 f2434;
+};
+
+void func_001C4848(Self_1725E0* s, void* a, void* b, void* c);
+void func_00125B70(Self_1725E0* s, void* c, f32* out);
+void func_00172078(Self_1725E0* s, f32* buf, f32 t);
+void func_00188B08(void* a, f32* b, f32* out);
+void func_001CDD98(Self_1725E0* s);
+void func_001C49C8(Self_1725E0* s, void* a, void* b);
+void func_001C3028(void* a, void* b);
+void func_001D62E0(Self_1725E0* s, void* a, void* b);
+
+void func_001725E0(Self_1725E0* self, void* a, void* b)
+{
+    f32 buf[12];
+    f32 out[20];
+    s32 i;
+
+    if (!(self->f2220 == 6 && self->f239C == 7))
+    {
+        func_001C4848(self, self->f610, self->f610, self->f1190);
+        func_001C4848(self, self->f614, self->f614, self->f1290);
+    }
+    if (self->f2434 != 0.0f || self->f2430 != 0.0f)
+    {
+        self->f61C->f2C8 &= ~(1ULL << 32);
+        func_00125B70(self, b, out);
+        out[16] *= 0.25f;
+        for (i = 0; i < 4; i++)
+        {
+            func_00172078(self, buf, (f32)i * 0.25f);
+            func_00188B08((u8*)self->f61C + 0x140, buf, out);
+            ((void (*)(void*, void*, f32*))((VtObj_1725E0*)self->f61C)->vt[0xA0 / 4])(self->f61C, a, out);
+        }
+        self->f61C->f2C8 |= 0x100000000UL;
+    }
+    if (self->f2220 == 3)
+    {
+        func_001CDD98(self);
+    }
+    func_001C49C8(self, a, b);
+    if (self->f21C0)
+    {
+        func_001C3028(self->f1520, a);
+    }
+    func_001D62E0(self, a, b);
 }

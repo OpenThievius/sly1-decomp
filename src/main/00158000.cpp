@@ -1010,3 +1010,117 @@ s32 func_0015B720(Actor_15B720* self, Rec_15B720* r)
     }
     return 1;
 }
+
+// NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
+
+struct __attribute__((packed)) Pk_15AD80 { u64 v; };
+struct Actor_15AD80 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad1[0x550 - 0x18];
+    s32 f550;
+    u8 pad2[0x5DC - 0x554];
+    Pk_15AD80 f5DC;
+};
+
+void func_001BA130();
+s32 func_001526D0(void* sub, Actor_15AD80* self);
+void func_00152600(void* data, Actor_15AD80* self);
+void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+
+void func_0015AD80(Actor_15AD80* self)
+{
+    Pk_15AD80 tmp;
+    tmp = self->f5DC;
+    func_001BA130();
+    self->f5DC = tmp;
+    if (self->f550 == 0) {
+        func_001BFCD8(700.0f, 10.0f, 1.0f, 0.0f, 0x41, (u8*)self + 0x5E4, self, 0, 0.0f, 0, 0);
+    } else {
+        if (func_001526D0((u8*)self->f14 + 0x1C48, self) != 0) {
+            func_00152600((u8*)self->f14 + 0x1C48, self);
+        }
+    }
+}
+
+// NEAR: the last float zero (f16) is scheduled into the jal delay slot instead of before the integer argument moves.
+
+struct Actor_15AE38 {
+    u8 pad0[0x550];
+    s32 f550;
+    u8 pad1[0x5E4 - 0x554];
+    void* f5E4;
+};
+
+void func_001BF788(void* self, s32 n);
+void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
+
+void func_0015AE38(Actor_15AE38* self, s32 flag)
+{
+    if (self->f550 == 0) {
+        if (flag != 0) {
+            func_001BF788(self->f5E4, 0);
+        } else {
+            func_001BFCD8(700.0f, 10.0f, 1.0f, 0.0f, 0x41, &self->f5E4, self, 0, 0.0f, 0, 0);
+        }
+    }
+}
+
+struct Col_159D00 { u8 c[4]; };
+struct __attribute__((aligned(4))) Out_159D00 { u8 c[4]; };
+struct Req_159D00 { void* fn; f32 f; s32 mode; u8 pad[0x54]; Out_159D00 col; u8 pad2[0x1C]; };
+struct Obj_159D00 {
+    u8 pad0[0x3C];
+    Col_159D00 c0, c1, c2;
+    f32 f48, f4C, f50, f54;
+    s32 m58, m5C;
+};
+extern s32 D_00275BC4;
+extern s32 D_00270458;
+extern f32 D_0026185C;
+void func_00152600(u8* a, Obj_159D00* b);
+void func_00159CA0(Obj_159D00* o);
+void func_0019D410(Req_159D00* r);
+
+void func_00159D00(Obj_159D00* self)
+{
+    if (D_00275BC4 != 3) return;
+    s32 g = D_00270458;
+    if (g == 1) return;
+    if (g == 2) return;
+    Out_159D00 out; Col_159D00 a, b;
+    f32 t = D_0026185C - self->f54;
+    f32 d;
+    if (t < self->f48) {
+        a = self->c0; b = self->c1;
+        d = self->f48;
+    } else {
+        t -= self->f48;
+        if (t < self->f4C) {
+            a = self->c1; b = self->c1;
+            d = self->f4C;
+        } else {
+            t -= self->f4C;
+            if (!(t < self->f50)) {
+                u8* p = *(u8**)&D_00275710 + 0x1CD8;
+                self->m5C = 0;
+                func_00152600(p, self);
+                return;
+            }
+            a = self->c1; b = self->c2;
+            d = self->f50;
+        }
+    }
+    f32 r = t / d;
+    for (s32 i = 0; i < 4; i++)
+        out.c[i] = (s32)((1.0f - r) * a.c[i] + r * b.c[i]);
+    Req_159D00 q;
+    q.f = -1.0f;
+    q.fn = (void*)(void (*)(Obj_159D00*))func_00159CA0;
+    q.col = out;
+    switch (self->m58) {
+    case 0: q.mode = 1; break;
+    case 1: q.mode = 0x10; break;
+    }
+    func_0019D410(&q);
+}

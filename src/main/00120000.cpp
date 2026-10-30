@@ -1070,3 +1070,29 @@ void func_00123448(Obj_123448* self)
     }
     *(s32*)D_0027B314 = fr.f0C;
 }
+
+struct Node_00122C48 {
+    void** vt;
+    u8 pad4[4];
+    Node_00122C48* next;
+    u8 pad0C[5];
+    s8 flag11;
+};
+struct Obj_00122C48 { u8 pad0[8]; Node_00122C48* head; };
+
+void func_00121568(void* parent, void* output, void* clear);
+
+void func_00122C48(Node_00122C48* self, void* a1, void* a2)
+{
+    Node_00122C48* p = self;
+    while ((p = p->next) != 0) {
+        s8 f = p->flag11;
+        if (f == 0) { p = 0; break; }
+        if (f != -1) break;
+    }
+    if (p != 0) {
+        ((void (*)(void*, void*, void*))p->vt[0x18 / 4])(p, a1, a2);
+    } else {
+        func_00121568(self, a1, a2);
+    }
+}
