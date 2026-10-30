@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
+void func_00168AF8(State_193288*);
+void func_00193318(State_193288*);
+void func_00193288(State_193288* self, s32 value)
+{
+	if (self->ptr != 0) {
+		if (self->size == 0) { self->scaled = value << 1; self->size = value; func_00168AF8(self); }
+		else if (self->value == value) self->repeat++;
+		else self->repeat = 0;
+		self->value = value;
+		func_00193318(self);
+	}
+}
+
 struct Obj_192498 {
     void** vtbl;
 };

@@ -1,6 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
+struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
+extern Config_1E0848 D_002758E0;
+void func_001F5C0C(void* dst, s32 value, s32 size);
+void func_001E0848(void* self, u32 mode)
+{
+	if (mode != 0xFFFF || self == 0) return;
+	func_001F5C0C(&D_002758E0, 0, 0x1C);
+	D_002758E0.marker04 = 0x2D;
+	D_002758E0.value08 = 2.0f;
+	D_002758E0.value0C = 1.0f;
+	D_002758E0.value10 = 0.3f;
+	D_002758E0.value14 = 0.3f;
+	D_002758E0.value18 = 0xFF7D4B00;
+}
+
 void func_001E02C8(void* self, s32 n);
 
 void func_001E0828(void* self)
@@ -328,25 +343,5 @@ void func_001E30A0(Obj_1E30A0* self)
     self->sub = 0;
 }
 
-extern u8 D_002758E0[];
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
-struct Obj_1E0848 {
-    u8 pad0[4];
-    u8 f4;
-    u8 pad5[3];
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    f32 f14;
-    u32 f18;
-};
-
-void func_001E0848(s32 flag, s32 key)
-{
-    if (key == 0xFFFF && flag != 0) {
-        Obj_1E0848* p = (Obj_1E0848*)D_002758E0;
-        func_001F5C0C(p, 0, 0x1C);
-        p->f4 = 0x2D;p->f8 = 2.0f;p->fC = 1.0f;p->f10 = 0.3f;p->f14 = 0.3f;p->f18 = 0xFF7D4B00;
-    }
-}
