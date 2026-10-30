@@ -15,9 +15,11 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
 - float: uses the FPU;  mmi: uses 128-bit multimedia instructions
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)
 - handwritten: spimdisasm says it was not made by the compiler
+- fragment: no `jr $ra` in its listing (a piece of a function, or a tail call), so it is not a whole function
 
 What stops a function from being matched, the blocker column:
 
+- fragment: no `jr $ra` in its listing (a piece of a function, or a tail call): not a whole function
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; its .rodata must be placed from C first
@@ -107,6 +109,8 @@ def tags_of(lines, kind):
     tags = set()
     if kind == "handwritten":
         tags.add("handwritten")
+    if lines and not any(line.split(None, 1)[:1] == ["jr"] for line in lines):
+        tags.add("fragment")
     for line in lines:
         if line.startswith("jlabel"):
             tags.add("jtbl")
@@ -136,7 +140,7 @@ def tags_of(lines, kind):
     return tags
 
 
-PERMANENT = ("vu", "system", "handwritten")
+PERMANENT = ("fragment", "vu", "system", "handwritten")
 
 
 def blocker(tags):
@@ -187,7 +191,7 @@ def main(argv=None):
             n, total = counts.get(key, (0, 0))
             counts[key] = (n + 1, total + size)
         print("blocker\tfunctions\tbytes")
-        for key in ("none", "rodata", "jtbl", "vu", "system", "handwritten"):
+        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten"):
             if key in counts:
                 print("%s\t%d\t%d" % (key, counts[key][0], counts[key][1]))
         return 0
