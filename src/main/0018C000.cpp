@@ -968,3 +968,22 @@ call:
 one:
     return 1;
 }
+
+struct Cursor_18E6A0 {
+    u8 pad0[8];
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+};
+
+void func_0018E6A0(Cursor_18E6A0* c)
+{
+    c->f14 = c->f8;
+    c->f18 = 0;
+    c->f10 = 0;
+    c->fC = 0;
+    c->f1C = 0;
+}

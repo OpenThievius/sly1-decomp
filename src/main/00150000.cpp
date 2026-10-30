@@ -856,3 +856,26 @@ void func_001518B8(Obj_001518B8* self)
     }
     func_00150790(self, mode);
 }
+
+struct Node_152730 { u32 a; u32 b; u32 c; };
+struct __attribute__((packed)) Wide_152730 { u64 v; u32 w __attribute__((aligned(4))); };
+
+u32 func_00152460(Node_152730* node, u32 value);
+void func_00152440(Node_152730* node);
+
+void func_00152730(Node_152730* dst, Node_152730* src)
+{
+    if (src->a != 0) {
+        if (dst->a == 0) {
+            *(Wide_152730*)dst = *(Wide_152730*)src;
+            func_00152440(src);
+        } else {
+            u32 p1 = func_00152460(dst, dst->b);
+            u32 p2 = func_00152460(src, src->a);
+            *(u32*)p1 = src->a;
+            *(u32*)(p2 + 4) = dst->b;
+            dst->b = src->b;
+            func_00152440(src);
+        }
+    }
+}

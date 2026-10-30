@@ -1420,3 +1420,39 @@ s32 func_0011E048(void* a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 
     buf.w6 = a8;
     return func_0011D968(0x2C, 0x1C, &buf);
 }
+
+typedef void (*Slot_11ECB8)(void* self, void* arg);
+
+struct Obj_11ECB8 {
+    Slot_11ECB8* vtbl;
+};
+
+struct Ctx_11ECB8 {
+    u8 pad[0x1CE8];
+    void* table[31];
+};
+
+s32 func_00137D10(void* p);
+void* func_0011E580(s32 slot, void* self, void* a1, s32 key, s32 flag);
+s32 func_0011ECA0(s32 value);
+void func_00182ED8(void* obj);
+
+void func_0011ECB8(Ctx_11ECB8* self, void* a1, void* a2)
+{
+    s32 n = func_00137D10(a2);
+    if (n > 0) {
+        s32 i = n;
+        do {
+            s32 slot = func_00137D10(a2);
+            s32 key = func_00137D10(a2);
+            s32 flag = func_00137D10(a2);
+            Obj_11ECB8* obj = (Obj_11ECB8*)func_0011E580(slot, self, a1, key, flag);
+            obj->vtbl[14](obj, a2);
+            s32 r = func_0011ECA0(key);
+            if (r >= 0) {
+                self->table[r] = obj;
+                func_00182ED8(obj);
+            }
+        } while (--i != 0);
+    }
+}

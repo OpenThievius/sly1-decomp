@@ -345,3 +345,65 @@ void func_001E30A0(Obj_1E30A0* self)
 
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
+extern u8 D_00275940[];
+
+u64 func_001FBE00(u64 value, u64 radix);
+s64 func_001FC3D0(u64 value, u64 radix);
+void func_0018D800(void* dst, void* src, s32 count);
+
+s32 func_001E0F58(u8* buf, s32 len, u64 value, u32 radixArg)
+{
+    u64 radix = radixArg;
+    u8* end = buf + len;
+    u8* stop = end;
+    u64 v = value;
+    do {
+        s64 digit = func_001FC3D0(v, radix);
+        end--;
+        *end = D_00275940[(s32)digit];
+        v = func_001FBE00(v, radix);
+    } while (v != 0 && end >= buf);
+    s32 count = stop - end;
+    if (count != 0 && buf < end) {
+        func_0018D800(buf, end, count);
+    }
+    return count;
+}
+
+extern u8 D_00275980[];
+extern u8 D_00275A10[];
+extern u8 D_00275A20[];
+
+void func_00123ED0(void* self);
+
+struct __attribute__((aligned(16))) Block_2520 {
+    u8 d[0x90];
+};
+
+struct __attribute__((aligned(16))) Quad_2520 {
+    u8 d[0x10];
+};
+
+struct __attribute__((packed)) Pack8_2520 {
+    u64 v;
+};
+
+void func_001E2520(void* self)
+{
+    u8* p = (u8*)self;
+
+    func_00123ED0(self);
+    *(Block_2520*)(p + 0x2F0) = *(Block_2520*)D_00275980;
+    *(f32*)(p + 0x428) = 2.0f;
+    *(f32*)(p + 0x42C) = 1.0f;
+    *(u64*)(p + 0x2C8) = (*(u64*)(p + 0x2C8) & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
+    *(f32*)(p + 0x420) = 2.0f;
+    *(f32*)(p + 0x424) = 1.0f;
+    *(s32*)(p + 0x430) = -1;
+    *(Quad_2520*)(p + 0x450) = *(Quad_2520*)D_00275A10;
+    {
+        u8* src = D_00275A20;
+        *(Pack8_2520*)(p + 0x460) = *(Pack8_2520*)src;
+    }
+    *(s32*)(p + 0x398) = -1;
+}

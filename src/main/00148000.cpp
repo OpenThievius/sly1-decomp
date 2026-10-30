@@ -1311,3 +1311,16 @@ Quad_1493C8 func_001493C8(Obj_1493C8* self)
     }
     return r;
 }
+
+void func_001AAF58(void* self, s32 arg);
+typedef void (*VFn2_14AD00)(void* self, s32 arg);
+
+void func_0014AD00(u8* self, s32 arg)
+{
+    func_001AAF58(self, arg);
+    self += 0x264;
+    for (u32 i = 0; i < 4; i++) {
+        (*(VFn2_14AD00**)self)[17](self, arg);
+        self += 0x260;
+    }
+}

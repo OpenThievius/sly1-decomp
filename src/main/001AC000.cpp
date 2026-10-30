@@ -607,3 +607,39 @@ void func_001AE758(Obj_1AE758* self)
     self->vtbl[8](self, &fl);
     self->f8 = 0;
 }
+
+struct Flt_1ADF28 { u8 pad[0xC]; f32 v; };
+struct Obj_1ADF28 { u8 pad0[0x4C]; struct VTab_1ADF28* vt; };
+struct VTab_1ADF28 { s32 w0; s32 w1; s16 delta; s16 w2; void* (*fn)(void* self, f32 sx, f32 sy); };
+struct Node_1ADF28 { u8 pad0[4]; Obj_1ADF28* obj; u8 pad1[0x210 - 8]; void** slot; u8 pad2[0x260 - 0x214]; s32 f260; s32 f264; };
+
+extern f32 D_0027446C;
+extern f32 D_00274470;
+extern u8 D_00274488[];
+extern s32 D_00262C84;
+
+void func_001AA268(void* self);
+void* func_0015C1C0(s32 k);
+void func_001ADFF0(void* self);
+
+void func_001ADF28(Node_1ADF28* self)
+{
+    VTab_1ADF28* vt;
+
+    func_001AA268(self);
+    vt = self->obj->vt;
+    self->obj = (Obj_1ADF28*)vt->fn((u8*)self->obj + vt->delta, D_0027446C, D_00274470);
+    if (func_0015C1C0(2)) {
+        self->slot = (void**)D_00274488;
+        *self->slot = func_0015C1C0(2);
+    }
+    s32 a1 = 0;
+    self->f264 = 0; *(s32*)((u8*)self+0x260) = (D_00262C84 == 3);
+    if (D_00269988 != 0) {
+        if (((Flt_1ADF28*)(void*)D_00269988)->v != 0.0f) {
+            a1 = 1;
+        }
+    }
+    self->f264 = a1;
+    func_001ADFF0(self);
+}

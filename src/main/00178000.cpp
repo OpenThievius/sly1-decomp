@@ -726,3 +726,70 @@ void func_001781E0(u8* self, u8* other)
         }
     }
 }
+
+typedef void (*Fn_17B410)(void* self);
+
+struct Sys_17B410 {
+    Fn_17B410* vtbl;
+    u8 pad0[0x260 - 4];
+    s32 f260;
+    s32 f264;
+    u8 pad1[0x26C - 0x268];
+    s32 f26C;
+    s32 f270;
+    s32 f274;
+    f32 f278;
+};
+
+struct Obj_17B410 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x550 - 0x18];
+    s32 f550;
+    f32 f554;
+    u8 f558[0x58C - 0x558];
+    void* f58C;
+    u8 pad2[0x5C0 - 0x590];
+    void* f5C0;
+};
+
+extern u8 D_0026E248[];
+extern f32 D_0026185C;
+
+void func_001DDC38(void* a, void* b);
+s32 func_0012C918(void* a, void* b, s32 c, void* d, f32 e, f32 f);
+
+void func_0017B410(Obj_17B410* self, s32 mode)
+{
+    void* x;
+    if (mode == self->f550) {
+        goto done;
+    }
+    x = 0;
+    if (mode != 0) {
+        if (mode == 1) {
+            x = self->f5C0;
+        }
+    } else {
+        x = self->f58C;
+    }
+    if (mode >= 0) {
+        if (mode < 2) {
+            Sys_17B410* sys = (Sys_17B410*)D_0026E248;
+            sys->f278 = 1.0f;
+            sys->f26C = sys->f260;
+            sys->f270 = sys->f264;
+            sys->f274 = 0;
+            func_001DDC38(self->f14, self);
+        } else if (mode < 4) {
+            Sys_17B410* sys = (Sys_17B410*)D_0026E248;
+            sys->vtbl[15](sys);
+            func_001DDC38(self->f14, 0);
+        }
+    }
+    (void)func_0012C918(x, self, 1, self->f558, 0.0f, 1.0f);
+    *(s32*)((u8*)self + 0x550) = mode;
+    self->f554 = D_0026185C;
+done:
+    return;
+}

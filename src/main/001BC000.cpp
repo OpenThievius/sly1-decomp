@@ -802,3 +802,30 @@ void func_001BD888(s32 n, Obj_1BD888** objs)
     func_0018D800(objs, sorted, n * 4);
     func_0018D6F0();
 }
+
+extern u8* D_00275710;
+extern s32 D_00274734;
+extern s32 D_00274738;
+
+s32 func_00152720(void* a);
+void* func_001BED98(void);
+
+void* func_001BEEF8(s32 x)
+{
+    s32 flag = func_00152720(D_00275710 + 0x1BC4);
+    void* p = func_001BED98();
+    s32 hi = 0x6B;
+    s32 v = -20;
+    if (x >= -20) {
+        if (hi < x) v = hi; else v = x;
+    }
+    if (p != 0) {
+        *(s32*)p = v;
+        s32 cur = D_00274734;
+        if (cur < v || flag != 0) {
+            D_00274734 = v;
+            D_00274738 = cur;
+        }
+    }
+    return p;
+}

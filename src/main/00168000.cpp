@@ -1068,3 +1068,84 @@ s32 func_001690C0(s32 mask, Ctl_1690C0* b, Ctx_1690C0* c)
     }
     return (c->fC ^ saved) != 0;
 }
+
+struct Obj_16B190 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+    u8 pad1[0x24];
+    void* f2F8;
+    u8 pad2[4];
+    s32 f300;
+    u8 pad3[0x20];
+    void* table[1];
+};
+
+struct Rec_16B190 {
+    s32 f0;
+    s32 f4;
+    u8 pad[0x14];
+    s32 f1C;
+};
+
+extern u8* D_002623C0;
+extern s32 D_00262860[][2];
+extern u8 D_00275BC0[];
+
+void* func_00160180(s32 key);
+void func_00160340(s32 idx);
+void func_0012C7B0(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
+s32 func_0012C9A8(void* a);
+void func_001F0428(void* a, s32 b, s32 c);
+void func_001E9570(void* p);
+void func_001B64D8(void* a, s32 b);
+void func_0016B300(void* self, s32 idx, s32 flag);
+
+void func_0016B190(Obj_16B190* self)
+{
+    s32 callB = 1;
+    s32 idx = self->f2D0;
+    if (idx != 0) {
+        s32 off = idx * 0x44C;
+        if ((*(s32*)(D_002623C0 + off + 0x458) & 1) == 0) {
+        if (idx != self->f300) {
+            s32 s2 = 1;
+            void* elt;
+            u8* table = (u8*)self + 0x324;
+            func_00160340(idx);
+            elt = *(void**)(table + (self->f2D0 << 2));
+            if (elt != 0) {
+                func_0012C7B0(elt, self, 0, 0, 0.0f, 1.0f);
+                elt = *(void**)(table + (self->f2D0 << 2));
+                if (elt != 0 && func_0012C9A8(elt) != 0) {
+                    goto tail;
+                }
+            }
+            {
+                Rec_16B190* a = (Rec_16B190*)func_00160180(self->f2D0 << 8);
+                s32 flag = 0;
+                if (a != 0) {
+                    flag = (a->f4 != a->f1C);
+                }
+                if (flag) {
+                    func_001F0428(a, -1, 1);
+                } else {
+                    s2 = 0;
+                }
+            }
+        tail:
+            if (s2) {
+                func_001E9570(D_00275BC0);
+            }
+        } else {
+            void* h = self->f2F8;
+            callB = 0;
+            if (h != 0) {
+                { func_001B64D8(h, D_00262860[idx][1]); }
+            }
+        }
+        }
+    }
+    if (callB) {
+        func_0016B300(self, self->f2D0, 1);
+    }
+}
