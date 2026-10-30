@@ -744,3 +744,61 @@ void func_001BEB10(Rec_1BEB10* self)
         func_0011D2A8(local[0], 0, (void*)func_001BEAC8, 0);
     }
 }
+
+struct Node_1BD888 { void* f0; Node_1BD888* f4; };
+struct Chain_1BD888 { Node_1BD888* head; };
+struct Obj_1BD888 { u8 pad0[0x480]; Chain_1BD888* f480; u8 pad1[0xB4]; u64 f538; };
+
+void func_0018D608(void);
+void* func_0018D658(s32 size);
+void func_001F5C0C(void* p, s32 zero, s32 size);
+void func_0018D800(void* dst, void* src, s32 count);
+void func_0018D6F0(void);
+
+void func_001BD888(s32 n, Obj_1BD888** objs)
+{
+    s32 local[5];
+    Obj_1BD888** sorted;
+    s32* counts;
+    s32 i;
+
+    if (n < 2) {
+        return;
+    }
+    func_0018D608();
+    sorted = (Obj_1BD888**)func_0018D658(n * 4);
+    counts = (s32*)func_0018D658(n * 4);
+    func_001F5C0C(counts, 0, n * 4);
+    func_001F5C0C(local, 0, 20);
+    for (i = 0; i < n; i++) {
+        Obj_1BD888* o = objs[i];
+        u32 cnt = 0;
+        Node_1BD888* p = o->f480->head;
+        while (p != 0) {
+            if (p->f0 != 0 && (o->f538 & 0x0080000000000000ULL) != 0) {
+                cnt++;
+                if (cnt >= 4) {
+                    break;
+                }
+            }
+            p = p->f4;
+        }
+        counts[i] = cnt;
+        if (cnt < 4) {
+            local[cnt + 1]++;
+        }
+    }
+    i = 1;
+    do {
+        local[i] += local[i - 1];
+        i++;
+    } while ((u32)i < 5);
+    for (i = 0; i < n; i++) {
+        s32 cnt = counts[i];
+        s32 idx = local[cnt];
+        sorted[idx] = objs[i];
+        local[cnt] = idx + 1;
+    }
+    func_0018D800(objs, sorted, n * 4);
+    func_0018D6F0();
+}

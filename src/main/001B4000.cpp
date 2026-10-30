@@ -1386,3 +1386,36 @@ void func_001B5398(Node_1B5398* p, Src_1B5398* s)
     func_001B4AA0(p, s);
     p->f2C = s->f4; p->f30 = s->f8; p->f34 = s->fC; p->f38 = s->f10; p->flags = (p->flags & ~1) | 2;
 }
+
+extern f32 D_0026185C;
+
+struct Obj_1B7860 {
+    u8 pad0[0x724];
+    s32 f724;
+    f32 f728;
+    u8 pad1[0xCC4 - 0x72C];
+    s32 fCC4;
+};
+
+s32 func_001B7860(Obj_1B7860* self)
+{
+    s32 r;
+    if (self->f724 == 11) {
+        goto ret1;
+    }
+    if (self->f724 != 6) {
+        goto ret0;
+    }
+    if (self->fCC4 <= 0) {
+        goto ret0;
+    }
+    if (5.0f < D_0026185C - self->f728) {
+        r = 2;
+        return r;
+    }
+ret1:
+    return 1;
+ret0:
+    r = 0;
+    return r;
+}

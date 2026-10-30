@@ -1070,3 +1070,49 @@ void func_001A76A0(void* self_, s32 idx)
     if (old == -1) func_001B6628(child, v);
     else func_001B64D8(child, v);
 }
+
+struct Quad_1A7998 { s32 a, b, c, d; } __attribute__((aligned(16)));
+struct Buf_1A7998 { s32 n; u8 pad[0x1C]; Quad_1A7998 q; u8 tail[0x20]; };
+typedef void (*FnP_1A7998)(void* self, void* arg);
+typedef void (*FnI_1A7998)(void* self, s32 arg);
+
+extern f32 D_0026185C;
+
+void func_0012E760(void* p);
+void func_0012C7B0(void* a, void* b, s32 c, void* d, f32 x, f32 y);
+
+void func_001A7998(void* self_, s32 idx)
+{
+    u8* self = (u8*)self_;
+    if (*(s32*)(self + 0x550) != idx) {
+        if (*(void**)(self + 0x564) != 0) {
+            func_0012E760(*(void**)(self + 0x564));
+            *(void**)(self + 0x564) = 0;
+        }
+        *(s32*)(self + 0x550) = idx;
+        void* s2 = 0;
+        *(f32*)(self + 0x554) = D_0026185C;
+        switch (idx) {
+        case 1: {
+            void* a2 = *(void**)(self + 0x568);
+            s2 = *(void**)(self + 0x560);
+            if (a2 != 0) {
+                Buf_1A7998 buf;
+                buf.n = 4;
+                buf.q = *(Quad_1A7998*)(self + 0x140);
+                FnP_1A7998* vt = *(FnP_1A7998**)a2;
+                vt[31](a2, &buf);
+            }
+            break;
+        }
+        case 2: {
+            void* a = *(void**)(self + 0x55C);
+            ((FnI_1A7998*)*(void**)a)[25](a, 0);
+            a = *(void**)(self + 0x55C);
+            ((FnI_1A7998*)*(void**)a)[51](a, 1);
+            break;
+        }
+        }
+        if (s2 != 0) func_0012C7B0(s2, self, 0, self + 0x564, 0.0f, 1.0f);
+    }
+}
