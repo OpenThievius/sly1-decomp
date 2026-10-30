@@ -591,3 +591,18 @@ void func_0012C918(void* self, void* a1, void* a2, void** out, f32 fa, f32 fb)
         func_0012C7B0(self, a1, fa, fb, a2, out);
     }
 }
+
+s32 func_001833F0(void* a, s32 b);
+
+struct Entry_12CCE8 { s32 key; u8 pad[0x18]; };
+struct Table_12CCE8 { u8 pad[0x38]; s32 count; u8* items; };
+void* func_0012CCE8(Table_12CCE8* self, void* key)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        Entry_12CCE8* e = (Entry_12CCE8*)(self->items + i * 0x1C);
+        if (func_001833F0(key, e->key) != 0) {
+            return e;
+        }
+    }
+    return 0;
+}

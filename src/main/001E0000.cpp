@@ -407,3 +407,19 @@ void func_001E2520(void* self)
     }
     *(s32*)(p + 0x398) = -1;
 }
+
+struct Tally_1E22F8 { s32 count; s32 last; void* ptr; };
+extern s32 func_001F6A90(void);
+extern s32 func_001F6B60(void* a);
+
+void func_001E22F8(Tally_1E22F8* self)
+{
+    s32 key = func_001F6A90();
+    if (key != self->last) {
+        (void)func_001F6B60(self->ptr);
+        self->last = key;
+        self->count = 1;
+    } else {
+        self->count++;
+    }
+}

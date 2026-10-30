@@ -879,3 +879,20 @@ void func_00152730(Node_152730* dst, Node_152730* src)
         }
     }
 }
+
+struct Pair_1524D8 { u32 first, second; };
+void func_001524D8(Pair_1524D8* self, u32 value)
+{
+    u32* slot = (u32*)func_00152460((Pair_00152460*)self, value);
+    if (self->first == 0) {
+        *(u32*)((u8*)self + 4) = value;
+        *(u32*)self = value;
+        return;
+    }
+    {
+        u32* oldHead = (u32*)func_00152460((Pair_00152460*)self, self->first);
+        slot[0] = self->first;
+        oldHead[1] = value;
+        self->first = value;
+    }
+}

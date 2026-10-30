@@ -829,3 +829,46 @@ void* func_001BEEF8(s32 x)
     }
     return p;
 }
+
+struct Item_1BD558 { u8 pad0[0xD0]; Item_1BD558* next; };
+struct Node_1BD558;
+struct Group_1BD558 { Item_1BD558* items; Group_1BD558* next; u8 pad[4]; Node_1BD558* child; };
+struct GroupHead_1BD558 { Group_1BD558* first; };
+struct Node_1BD558 { u8 pad0[0x480]; GroupHead_1BD558* groups; u8 pad1[0x4B4 - 0x484]; Item_1BD558* items; u8 pad2[0x538 - 0x4B8]; u64 flags; };
+
+s32 func_001BD558(s32 count, Node_1BD558** roots, s32 cap, Item_1BD558** out)
+{
+    s32 n = 0;
+    s32 i;
+    Node_1BD558* root;
+    for (i = 0; i < count; i++) {
+        root = roots[i];
+        root->flags |= ((u64)1 << 58);
+        for (Item_1BD558* item = root->items; item; item = item->next) {
+            if (n >= cap) goto done;
+            out[n++] = item;
+        }
+        GroupHead_1BD558* gh = root->groups;
+        for (Group_1BD558* g = gh->first; g; g = g->next) {
+            if (g->child->flags & ((u64)1 << 58)) continue;
+            for (Item_1BD558* item = g->items; item; item = item->next) {
+                if (n >= cap) goto done;
+                out[n++] = item;
+            }
+        }
+    }
+done:
+    {
+        Node_1BD558** r = roots;
+        if (count > 0) {
+            i = count;
+            do {
+                root = *r;
+                i--;
+                r++;
+                root->flags &= ~((u64)1 << 58);
+            } while (i != 0);
+        }
+    }
+    return n;
+}

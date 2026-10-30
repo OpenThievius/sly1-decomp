@@ -423,3 +423,37 @@ void func_001249A8(Obj_1249A8* self)
         }
     }
 }
+
+struct Sub_127378 {
+    s32 f0;
+    f32 fx;
+    f32 fy;
+    f32 fz;
+    f32 fw;
+    u8 pad14[8];
+    s32 f1C;
+    f32 f20;
+};
+
+struct Obj_127378 {
+    u8 pad[0x2AC];
+    Sub_127378* sub;
+};
+
+extern f32 D_0026185C;
+
+void func_001BFCD8(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
+
+void func_00127378(Obj_127378* self, s32 mode)
+{
+    if (mode == 1) {
+        Sub_127378* s = self->sub;
+        if (s != 0) {
+            if (D_0026185C != 0.0f) {
+                if (s->f1C == 0) {
+                    func_001BFCD8(s->f0, &s->f1C, self, 0, s->fx, s->fy, s->fz, s->fw, s->f20, &s->pad14, 0);
+                }
+            }
+        }
+    }
+}

@@ -1166,3 +1166,18 @@ void func_001A42C8(Ctrl_1A42C8* self, s32 state)
     f32 zero = 0.0f;
     func_001BFCD8(s1, &self->ptr658, self, 0, 10000.0f, 6000.0f, 1.0f, zero, zero, 0, 0);
 }
+
+void func_001A7D98(void* self, s32 mode);
+
+struct Track_001A7B20 { u8 pad0[4]; s32 value4; s32 value8; s32 state; };
+
+void func_001A7B20(Track_001A7B20* self, s32 a1, s32 a2)
+{
+    if (self->state == 0) {
+        func_001A7D98(self, 1);
+    } else {
+        func_001A7D98(self, 3);
+    }
+    self->value4 = a1;
+    self->value8 = a2;
+}

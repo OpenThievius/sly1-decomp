@@ -1313,7 +1313,6 @@ void func_001B54D0(Node_1B54D0* self, Src_1B54D0* src)
     self->f40 = d;
 }
 
-
 void func_00124FC0(void* self);
 
 struct __attribute__((aligned(16))) Quad_1B5D28 { s32 a, b; f32 c; s32 d; };
@@ -1446,4 +1445,47 @@ Entry_1B4688* func_001B4688(s32 key)
         } while (i < D_002744F8);
     }
     return 0;
+}
+
+struct Item_1B61F0 {
+    u8 pad_00[0x40];
+    s32 value_40;
+};
+
+struct Slot_1B61F0 {
+    Item_1B61F0* item_00;
+    s32 pad_04[4];
+};
+
+struct Bank_1B61F0 {
+    u8 pad_00[0x14];
+    void* owner_14;
+    u8 pad_18[0x24];
+    s32 count_3C;
+    Slot_1B61F0* slots_40;
+};
+
+s32 func_0015A448(void* owner, s32 value, void* bank);
+void func_001B6290(void* bank, s32 r, s32 minus_one, s32 zero);
+
+void func_001B61F0(Bank_1B61F0* self)
+{
+    s32 i = 0;
+    s32 n = self->count_3C;
+    Item_1B61F0* e = 0;
+    if (n > 0) {
+        Slot_1B61F0* p = self->slots_40;
+        do {
+            e = p->item_00;
+            i++;
+            p++;
+        } while (i < n && e == 0);
+    }
+    s32 r;
+    if (self->count_3C > 0 && e != 0 && e->value_40 != -1) {
+        r = func_0015A448(self->owner_14, e->value_40, self);
+    } else {
+        r = 0;
+    }
+    func_001B6290(self, r, -1, 0);
 }

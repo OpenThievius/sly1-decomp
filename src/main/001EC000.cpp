@@ -1013,3 +1013,44 @@ void* func_001EFA30(void)
     p->vtbl = D_002505C0;
     return p;
 }
+
+void func_001EE5C8(void* s, void* a1, s32 size, void* a3, s32* outSize, u8** outCursor);
+
+void func_001EE668(void* s, void* a1, s32 size, u32* src, void* a4)
+{
+    s32 outSize;
+    u8* outCursor;
+    s32 n;
+    s32 rem;
+    s32 full;
+    s32 i;
+    u32* dst;
+
+    func_001EE5C8(s, a1, size, a4, &outSize, &outCursor);
+    dst = (u32*)outCursor;
+    n = (outSize + 3) >> 2;
+    rem = n & 3;
+    full = n - rem;
+    if (rem != 0) {
+        i = rem;
+        do {
+            *dst++ = *src++;
+        } while (--i != 0);
+    }
+    i = 0;
+    if (full > 0) {
+        do {
+            u32 w0 = src[0];
+            u32 w1 = src[1];
+            u32 w2 = src[2];
+            u32 w3 = src[3];
+            i += 4;
+            dst[0] = w0;
+            dst[1] = w1;
+            dst[2] = w2;
+            dst[3] = w3;
+            src += 4;
+            dst += 4;
+        } while (i < full);
+    }
+}
