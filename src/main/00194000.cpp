@@ -350,3 +350,74 @@ void func_00194E60(Ctl_194E60* self, s32 v)
     }
     func_001AA998(self, flag);
 }
+
+typedef void (*VFn_194D30)(void* self, s32 a);
+struct Obj_194D30 { VFn_194D30* vtbl; };
+
+struct Self_194D30 {
+    u8 pad0[0x250];
+    s32 f250;
+    u8 pad1[0x25C - 0x254];
+    s32 f25C;
+    s32 f260;
+    u8 pad2[0x268 - 0x264];
+    s32 arr268[3];
+    s32 f274;
+    s32 f278;
+};
+
+extern u8 D_00275BC0[];
+
+void func_00193EE8(void* self, s32 a, s32 b);
+void func_00195928(void* self, s32 v);
+void func_001E9570(void* q);
+void func_001E9498(void* a, void* b);
+
+void func_00194D30(Self_194D30* self, s32 idx, s32 value)
+{
+    s32 s1;
+    s32 s2;
+    u32 i;
+    s32* p;
+
+    s2 = value;
+    self->arr268[idx] = s2;
+    p = self->arr268;
+    for (i = 0; i < 3; i++) {
+        if (*p != -1) {
+            s2 = *p;
+        }
+        p++;
+    }
+    if (self->f274 != 0) {
+        s1 = self->f278;
+    } else {
+        s1 = self->f260;
+    }
+    func_00193EE8(self, s1, s2);
+    if (s1 != s2) {
+        if (self->f250 == 0) {
+            func_00195928(self, s2);
+        } else if (self->f250 >= 0) {
+          if (self->f250 < 4) {
+            if (s2 == -1) {
+                self->f274 = 0;
+                self->f278 = s2;
+            } else {
+                self->f278 = s2;
+                self->f274 = 1;
+                ((Obj_194D30*)self)->vtbl[16](self, 3);
+            }
+          }
+        }
+    }
+    if (s2 == -1) {
+        if (self->f25C != 0) {
+            func_001E9570(D_00275BC0);
+        }
+    } else {
+        if (self->f25C == 0) {
+            func_001E9498(D_00275BC0, self);
+        }
+    }
+}

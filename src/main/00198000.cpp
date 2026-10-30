@@ -1250,3 +1250,69 @@ void func_0019AD68(Actor_19AD68* self)
         }
     }
 }
+
+typedef void (*VFn_199500)(void* self);
+struct Actor_199500 {
+    VFn_199500* vtbl;
+    u8 pad0[0x5A0 - 4];
+    s32 n5A0;
+    f32 f5A4;
+    f32 f5A8;
+    u8 pad1[0x5B4 - 0x5AC];
+    f32 f5B4;
+    f32 f5B8;
+};
+
+struct Bits_002623C8 {
+    u8 pad0[0x64];
+    s32 count64;
+    u8 bits68[1];
+};
+
+extern s32 D_00275C34;
+extern f32 D_0026A958[];
+extern f32 D_0026A960[];
+
+void func_00198B28(void* self);
+f32 func_001EAAE0(f32 a, f32 b);
+s32 func_001EAA70(s32 a, s32 b);
+
+void func_00199500(Actor_199500* self)
+{
+    s32 neg;
+    s32 one;
+    f32 r;
+
+    func_00198B28(self);
+    self->f5B8 = func_001EAAE0(-3.14159274f, 3.14159274f);
+    self->f5B4 = func_001EAAE0(D_0026A958[0], D_0026A958[1]);
+    if (func_001EAA70(0, 1) != 0) {
+        self->f5B4 = -self->f5B4;
+    }
+    neg = -1;
+    one = 1;
+    r = func_001EAAE0(D_0026A960[0], D_0026A960[1]);
+    self->f5A8 = self->f5A8 * r;
+    self->f5A4 = func_001EAAE0(0.0f, self->f5A8 + self->f5A8);
+
+    {
+        s32 bit = self->n5A0;
+        s32 mask = one << (bit & 7);
+        if (((Bits_002623C8*)D_002623C8)->bits68[bit / 8] & mask) {
+            self->vtbl[7](self);
+        }
+    }
+
+    if (D_00275C34 != 0) {
+        if (func_001EAA70(0, 100) < 20) {
+            Bits_002623C8* d = (Bits_002623C8*)D_002623C8;
+            s32 bit = self->n5A0;
+            s32 mask = one << (bit & 7);
+            if (d->bits68[bit / 8] & mask) {
+                d->bits68[bit / 8] = d->bits68[bit / 8] & ~mask;
+                d->count64--;
+            }
+            self->vtbl[7](self);
+        }
+    }
+}

@@ -786,3 +786,12 @@ void func_0016F188(Timer_16F1F8* node)
         node->f10 = 0;
     }
 }
+
+void func_0016E148(void);
+
+void func_0016E118(u32 mask)
+{
+    mask = ~mask;
+    D_00262C6C = D_00262C6C & mask;
+    func_0016E148();
+}

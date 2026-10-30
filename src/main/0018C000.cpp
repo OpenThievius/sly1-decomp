@@ -927,3 +927,44 @@ void func_0018F0E8(void* self, void* p)
     }
     *(u32*)((u8*)D_002623C0 + 0x19F4) |= m;
 }
+
+struct Stream_18EAF8 {
+    s32 mode;
+    u8 pad0[0x2C - 4];
+    u8 sub2C[0x10];
+    s32 v3C;
+    u8 pad1[0x4C - 0x40];
+    u8 sub4C[0x10];
+    s32 v5C;
+};
+
+s32 func_0013CC00(void* sub, s32 a, s32 b);
+
+s32 func_0018EAF8(Stream_18EAF8* self, s32 left, s32 right)
+{
+    s32 n;
+
+    if (self->mode == 0) {
+        goto zero;
+    }
+    left -= 4;
+    right += 4;
+    if (self->mode == 1) {
+        n = func_0013CC00(self->sub2C, left, right);
+        left -= n;
+        right += n;
+        if (self->v3C > 0) {
+            goto one;
+        }
+        self->mode = 2;
+    }
+    if (self->v5C >= left) {
+        goto call;
+    }
+zero:
+    return 0;
+call:
+    func_0013CC00(self->sub4C, left, right);
+one:
+    return 1;
+}

@@ -567,3 +567,74 @@ void func_0018BDC8(Self2_18BDC8* self)
         }
     }
 }
+
+// Matches US and EU: retail's return-1 block is a shared target that every return-1 path branches to.
+extern f32 D_0026185C;
+extern f32 D_002649C8;
+
+typedef void* (*FnSelf_18A9A8)(void* self);
+typedef s32 (*FnSub_18A9A8)(void* self);
+
+struct Loc_18A9A8 {
+    u8 buf[0x10];
+    s32 code;
+};
+
+s32 func_0018A910(void* self, void* a, void* b);
+s32 func_00125750(void* a, s32 b, void* c, s32 d, s32 e, s32 f, f32 g);
+
+s32 func_0018A9A8(void* self)
+{
+    u8* obj = (u8*)self;
+    Loc_18A9A8 loc;
+    void* sub;
+    s32 code;
+
+    if (D_0026185C < *(f32*)(obj + 0x748)) {
+        return 0;
+    }
+    sub = ((FnSelf_18A9A8)(*(void***)obj)[0x198 / 4])(obj);
+    if (sub == 0) {
+        return 0;
+    }
+    if (*(u32*)((u8*)*(void**)sub + 8) & 8) {
+        if (((FnSub_18A9A8)(*(void***)sub)[0x144 / 4])(sub)) {
+            return 0;
+        }
+    }
+    func_001B6598(*(void**)(obj + 0xE10), &loc.code);
+    code = loc.code;
+    if (code != 0x43C) {
+        if (code < 0x43D) {
+            if (code != 0x43A) {
+                return 0;
+            }
+        } else {
+            if (code == 0x43E) {
+                goto one;
+            }
+            return 0;
+        }
+    }
+    if (func_0018A910(obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
+        goto second;
+    }
+one:
+    return 1;
+second:
+    func_00125750(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
+    if (func_0018A910(obj, obj + 0x140, loc.buf) == 0) {
+        goto one;
+    }
+    return 0;
+}
+
+struct Slot_18B5C0 { s32 f00; s32 f04; u8 pad08[8]; s32 f10; };
+
+s32 func_001E2268(s32 a, s32 b);
+
+void func_0018B5C0(Slot_18B5C0* self)
+{
+    s32 r = func_001E2268(1, 1);
+    self->f00 = r; self->f04 = -1; self->f10 = 0x22;
+}
