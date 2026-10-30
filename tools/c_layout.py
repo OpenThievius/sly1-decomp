@@ -126,9 +126,28 @@ def write_if_changed(path, text):
         path.write_text(text)
 
 
+ABSOLUTE = re.compile(r"^(D_[0-9A-Fa-f]+)\s*=\s*0x([0-9A-Fa-f]+);", re.M)
+
+
+def absolute_aliases(syms_text):
+    """{8-digit name: splat's name} for the data symbols splat pins to an address outside the executable.
+
+    The disassembly knows D_FA0; C, like tools/check.py, spells it D_00000FA0.
+    """
+    out = {}
+    for m in ABSOLUTE.finditer(syms_text):
+        long = "D_%08X" % int(m.group(2), 16)
+        if long != m.group(1):
+            out[long] = m.group(1)
+    return out
+
+
 def layout(ld_script, objects):
     """Write the runs of disassembly and the linker script with the C placed. Returns (script, run sources)."""
     placed, aliases = placements(objects)
+    syms = ld_script.with_name("undefined_syms_auto.txt")
+    if syms.exists():
+        aliases.update(absolute_aliases(syms.read_text()))
     functions = check.load_functions("us")
     order = sorted(functions.items(), key=lambda kv: kv[1][0])
     text_start = order[0][1][0]
