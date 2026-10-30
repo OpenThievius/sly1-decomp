@@ -1,15 +1,15 @@
 {
  "measures": {
-  "fuzzy_match_percent": 21.400428709969475,
+  "fuzzy_match_percent": 21.45911688609126,
   "total_code": "1117772",
-  "matched_code": "239208",
-  "matched_code_percent": 21.400428709969475,
+  "matched_code": "239864",
+  "matched_code_percent": 21.45911688609126,
   "total_data": "464563",
   "matched_data": "0",
   "matched_data_percent": 0.0,
   "total_functions": 4791,
-  "matched_functions": 2427,
-  "matched_functions_percent": 50.6574827802129,
+  "matched_functions": 2430,
+  "matched_functions_percent": 50.720100187852225,
   "complete_code": "0",
   "complete_code_percent": 0.0,
   "complete_data": "0",
@@ -10152,16 +10152,16 @@
   {
    "name": "game/0013C000",
    "measures": {
-    "fuzzy_match_percent": 20.225,
+    "fuzzy_match_percent": 22.0,
     "total_code": "16000",
-    "matched_code": "3236",
-    "matched_code_percent": 20.225,
+    "matched_code": "3520",
+    "matched_code_percent": 22.0,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 75,
-    "matched_functions": 44,
-    "matched_functions_percent": 58.666666666666664,
+    "matched_functions": 45,
+    "matched_functions_percent": 60.0,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -10722,7 +10722,7 @@
     {
      "name": "func_0013F250",
      "size": "284",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "12624",
      "metadata": {
       "virtual_address": "1307216"
@@ -41106,16 +41106,16 @@
   {
    "name": "lib/001FC000",
    "measures": {
-    "fuzzy_match_percent": 0.290838584585555,
+    "fuzzy_match_percent": 1.16335433834222,
     "total_code": "16504",
-    "matched_code": "48",
-    "matched_code_percent": 0.290838584585555,
+    "matched_code": "192",
+    "matched_code_percent": 1.16335433834222,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 65,
-    "matched_functions": 5,
-    "matched_functions_percent": 7.6923076923076925,
+    "matched_functions": 6,
+    "matched_functions_percent": 9.23076923076923,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -41343,7 +41343,7 @@
     {
      "name": "func_001FEAA0",
      "size": "144",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "10440",
      "metadata": {
       "virtual_address": "2091680"
@@ -42920,16 +42920,16 @@
   {
    "name": "lib/00204000",
    "measures": {
-    "fuzzy_match_percent": 0.29390154298310067,
+    "fuzzy_match_percent": 1.6899338721528288,
     "total_code": "16332",
-    "matched_code": "48",
-    "matched_code_percent": 0.29390154298310067,
+    "matched_code": "276",
+    "matched_code_percent": 1.6899338721528288,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 66,
-    "matched_functions": 1,
-    "matched_functions_percent": 1.5151515151515151,
+    "matched_functions": 2,
+    "matched_functions_percent": 3.0303030303030303,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -43409,7 +43409,7 @@
     {
      "name": "func_00206658",
      "size": "228",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "9752",
      "metadata": {
       "virtual_address": "2123352"
@@ -43537,7 +43537,8 @@
     "complete": false,
     "progress_categories": [
      "lib"
-    ]
+    ],
+    "source_path": "src/lib/00204000.cpp"
    }
   },
   {
@@ -45320,16 +45321,16 @@
    "id": "game",
    "name": "Game code",
    "measures": {
-    "fuzzy_match_percent": 23.747020993760554,
+    "fuzzy_match_percent": 23.775363967696993,
     "total_code": "1002012",
-    "matched_code": "237948",
-    "matched_code_percent": 23.747020993760554,
+    "matched_code": "238232",
+    "matched_code_percent": 23.775363967696993,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 4170,
-    "matched_functions": 2388,
-    "matched_functions_percent": 57.26618705035971,
+    "matched_functions": 2389,
+    "matched_functions_percent": 57.29016786570743,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -45342,16 +45343,16 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 1.0884588804422943,
+    "fuzzy_match_percent": 1.409813407049067,
     "total_code": "115760",
-    "matched_code": "1260",
-    "matched_code_percent": 1.0884588804422943,
+    "matched_code": "1632",
+    "matched_code_percent": 1.409813407049067,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 621,
-    "matched_functions": 39,
-    "matched_functions_percent": 6.280193236714976,
+    "matched_functions": 41,
+    "matched_functions_percent": 6.602254428341385,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
