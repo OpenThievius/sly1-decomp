@@ -656,3 +656,20 @@ void* func_00160810(s32 key)
 {
     return key == -1 ? 0 : (u8*)D_002623C0 + ((key >> 8) * 0x44C + 0x10) + (key & 0xFF) * 0x78;
 }
+
+extern u8 D_000018C0[];
+extern u8 D_000018F8[];
+
+void func_001EE3F0(void* obj, void* text);
+
+void func_00163938(s32 mode, void* obj)
+{
+    switch (mode) {
+    case 0:
+        func_001EE3F0(obj, D_000018C0);
+        break;
+    case 1:
+        func_001EE3F0(obj, D_000018F8);
+        break;
+    }
+}
