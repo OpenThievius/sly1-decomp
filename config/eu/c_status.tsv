@@ -8,10 +8,13 @@ func_001004F0	func_001004F0	match
 func_001005A0	func_001005A0	match	
 func_00100650	func_00100650	match	
 func_00100720	func_00100720	match	
+func_001007F0	func_001007F0	match	
+func_001008B8	func_001008B8	match	
 func_00100A78	func_00100A78	match	
 func_00100C28	func_00100C28	match	
 func_00100CC8	func_00100CC8	match	
 func_00100D68	func_00100D68	match	
+func_00100EE0	func_00100EE0	match	
 func_00100FA8	func_00100FA8	match	
 func_00101168	func_00101168	match	
 func_00101208	func_00101208	match	
@@ -47,7 +50,9 @@ func_00102920	func_00102920	match
 func_001029D0	func_001029D0	match	
 func_00102A70	func_00102A70	match	
 func_00102D40	func_00102D40	match	
+func_00102DE0	func_00102DE0	match	
 func_00102F10	func_00102F10	match	
+func_001030E0	func_001030E0	match	
 func_001031C0	func_001031C0	match	
 func_00103350	func_00103350	match	
 func_00103420	func_00103420	match	
@@ -83,6 +88,7 @@ func_00104D40	func_00104D40	match
 func_00104DE0	func_00104DE0	match	
 func_00105020	func_00105020	match	
 func_001050D0	func_001050D0	match	
+func_00105290	func_00105290	match	
 func_00105500	func_00105500	match	
 func_001055A8	func_001055A8	match	
 func_00105728	func_00105728	match	
@@ -119,11 +125,13 @@ func_00106FA0	func_00106FA0	match
 func_00107040	func_00107040	match	
 func_001070E0	func_001070E0	match	
 func_00107350	func_00107350	match	
+func_001073F0	func_001073F0	match	
 func_001074C0	func_001074C0	match	
 func_00107678	func_00107678	match	
 func_00107718	func_00107718	match	
 func_001077D8	func_001077D8	match	
 func_00107898	func_00107898	match	
+func_00107948	func_00107948	match	
 func_00107A10	func_00107A10	match	
 func_00107AB0	func_00107AB0	match	
 func_00107B60	func_00107B60	match	
@@ -132,6 +140,8 @@ func_00107CB0	func_00107CB0	match
 func_00107D60	func_00107D60	match	
 func_00107E10	func_00107E10	match	
 func_00107EC0	func_00107EC0	match	
+func_00107F70	func_00107F70	match	
+func_001083C8	func_001083C8	match	
 func_00108498	func_00108498	match	
 func_00108548	func_00108548	match	
 func_001085E8	func_001085E8	match	
@@ -140,8 +150,10 @@ func_00108728	func_00108728	match
 func_001087D8	func_001087D8	match	
 func_00108878	func_00108878	match	
 func_00108928	func_00108928	match	
+func_001089C8	func_001089C8	match	
 func_00108A98	func_00108A98	match	
 func_00108B48	func_00108B48	match	
+func_00108DA8	func_00108DA8	match	
 func_001091A8	func_001091A8	match	
 func_00109258	func_00109258	match	
 func_00109308	func_00109308	match	
