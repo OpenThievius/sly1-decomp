@@ -1556,3 +1556,21 @@ void func_001B6CF0(Node_1B6CF0* self, f32 t)
         item = (Item_1B6CF0*)self->f24;
     }
 }
+
+struct Ctl_1B5060 { u8 pad0[0x2C]; f32 f2C; f32 f30; };
+struct Key_1B5060 { u8 pad0[4]; f32 f04; s32 f08; };
+
+void func_001B4AA0(Ctl_1B5060* self, Key_1B5060* key);
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_001B5060(Ctl_1B5060* self, Key_1B5060* key)
+{
+    func_001B4AA0(self, key);
+    self->f2C = key->f04;
+    f32 d = (f32)(u32)key->f08;
+    f32 q = 6.2831855f / d;
+    self->f30 = q;
+    if (self->f2C == 3.4028234663852886e+38f) {
+        self->f2C = func_001EAAE0(0.0f, q);
+    }
+}

@@ -764,3 +764,32 @@ Quad_1C23B0* func_001C23B0(Quad_1C23B0* t, s32 n, s32 c, void* z, ...)
     func_001C1BF8(t, n, c, z, arr);
     return t;
 }
+
+struct KeyPair_1C14C0 { s32 key; s32 value; };
+struct KeyTable_1C14C0 { s32 count; KeyPair_1C14C0* items; };
+struct KeyRef_1C14C0 { s32 pad0; s32 index; };
+struct KeyHolder_1C14C0 { KeyRef_1C14C0* ref; };
+
+extern KeyTable_1C14C0 D_00244950[];
+
+s32 func_001C14C0(KeyHolder_1C14C0* self, s32 key)
+{
+    KeyTable_1C14C0* entry = &D_00244950[self->ref->index];
+    s32 lo = 0;
+    s32 hi = entry->count - 1;
+    KeyPair_1C14C0* items = entry->items;
+
+    while (lo <= hi) {
+        s32 mid = (lo + hi) >> 1;
+        s32 k = items[mid].key;
+        if (k == key) {
+            return items[mid].value;
+        }
+        if (key < k) {
+            hi = mid - 1;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    return 0;
+}

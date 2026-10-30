@@ -873,3 +873,39 @@ void func_001D9338(Obj_1D9338* self)
         } while (s0 >= 0);
     }
 }
+
+struct Span_1D8470 { f32 lo; f32 hi; };
+
+s32 func_001EB080(s32 count, Span_1D8470* spans, f32 x);
+
+f32 func_001D8470(s32 count, Span_1D8470* spans, f32 x)
+{
+    if (func_001EB080(count, spans, x) == 0) {
+        return x;
+    }
+    f32 bestDist = 3.4028234663852886e+38f;
+    f32 best = bestDist;
+    if (count > 0) {
+        Span_1D8470* s = spans;
+        s32 n = count;
+        do {
+            f32 d = __builtin_fabsf(x - s->lo);
+            if (d < bestDist) {
+                if (func_001EB080(count, spans, s->lo) == 0) {
+                    best = s->lo;
+                    bestDist = d;
+                }
+            }
+            d = __builtin_fabsf(x - s->hi);
+            if (d < bestDist) {
+                if (func_001EB080(count, spans, s->hi) == 0) {
+                    best = s->hi;
+                    bestDist = d;
+                }
+            }
+            s++;
+            n--;
+        } while (n != 0);
+    }
+    return best;
+}
