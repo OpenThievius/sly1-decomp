@@ -338,3 +338,93 @@ void* func_00109308(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct __attribute__((aligned(16))) Quad_001083C8 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_001083C8 { u8 b[8]; };
+struct Frame_001083C8 { Quad_001083C8 q; Key8_001083C8 k; Quad_001083C8 t; s32 o1; s32 o2; };
+struct Arg_001083C8;
+extern Key8_001083C8 D_00248F90;
+
+void func_0011B008(Quad_001083C8* q);
+void func_0011B018(void* dst, Quad_001083C8* q);
+void func_0011B060(Quad_001083C8* q, int mode);
+void func_0011B0A8(Quad_001083C8* a, Quad_001083C8* b);
+void func_0011B538(Quad_001083C8* q, int n);
+s32 func_001C23B0(Quad_001083C8* t, int mode, int c, void* k, void* o1, void* o2);
+void func_0017D0D8(Arg_001083C8* p, s32 a, s32 b);
+
+void* func_001083C8(void* self, Arg_001083C8* p, int unused, int c)
+{
+    Frame_001083C8 f;
+    func_0011B008(&f.q);
+    f.k = D_00248F90;
+    (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0017D0D8(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct __attribute__((aligned(16))) Quad_001089C8 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_001089C8 { u8 b[8]; };
+struct Frame_001089C8 { Quad_001089C8 q; Key8_001089C8 k; Quad_001089C8 t; s32 o1; s32 o2; };
+struct Arg_001089C8;
+extern Key8_001089C8 D_00248F98;
+
+void func_0011B008(Quad_001089C8* q);
+void func_0011B018(void* dst, Quad_001089C8* q);
+void func_0011B060(Quad_001089C8* q, int mode);
+void func_0011B0A8(Quad_001089C8* a, Quad_001089C8* b);
+void func_0011B538(Quad_001089C8* q, int n);
+s32 func_001C23B0(Quad_001089C8* t, int mode, int c, void* k, void* o1, void* o2);
+void func_001ED090(Arg_001089C8* p, s32 a, s32 b);
+
+void* func_001089C8(void* self, Arg_001089C8* p, int unused, int c)
+{
+    Frame_001089C8 f;
+    func_0011B008(&f.q);
+    f.k = D_00248F98;
+    (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001ED090(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Callee declared s32 and called as (void): schedules the three address adds before the 8-byte copy.
+
+struct Quad_00108DA8 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pk_00108DA8 { u8 b[8]; };
+struct Frame_00108DA8 { Quad_00108DA8 q; Pk_00108DA8 k; u8 pad[8]; Quad_00108DA8 t; s32 n; f32 out; };
+struct Obj_00108DA8 { u8 pad[0x1]; };
+
+extern u8 D_00248FC0[];
+
+void func_0011B008(Quad_00108DA8* q);
+void func_0011B018(void* dst, Quad_00108DA8* src);
+void func_0011B060(Quad_00108DA8* q, int mode);
+void func_0011B0A8(Quad_00108DA8* a, Quad_00108DA8* b);
+void func_0011B538(Quad_00108DA8* q, int n);
+s32 func_001C23B0(Quad_00108DA8* t, int mode, int c, void* z, s32* n, f32* out);
+void func_001ED5B8(Obj_00108DA8* self, s32 p, f32 v);
+
+void* func_00108DA8(void* self, Obj_00108DA8* x, int unused, int c)
+{
+    Frame_00108DA8 f;
+    func_0011B008(&f.q);
+    f.k = *(Pk_00108DA8*)D_00248FC0;
+    (void)func_001C23B0(&f.t, 2, c, &f.k, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001ED5B8(x, f.n, f.out);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

@@ -1756,3 +1756,183 @@ void* func_00102560(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+// Callee declared s32 and called as (void): schedules the three address adds before the 8-byte copy.
+
+struct Quad_1007F0 { s32 a, b, c, d; };
+struct Pair_1007F0 { s32 a, b; };
+struct Frame_1007F0 { Quad_1007F0 q; Pair_1007F0 n; s32 pad[2]; Quad_1007F0 t; s32 a; f32 b; };
+
+extern u8 D_00248D98[];
+
+void func_0011B008(Quad_1007F0* q);
+void func_0011B018(void* out, Quad_1007F0* q);
+void func_0011B060(Quad_1007F0* q, int mode);
+void func_0011B0A8(Quad_1007F0* a, Quad_1007F0* b);
+void func_0011B538(Quad_1007F0* q, int n);
+s32 func_001C23B0(Quad_1007F0* t, int mode, int c, void* z, void* z2, void* z3);
+void func_00183A10(void* a0, s32 a1, f32 x);
+
+void* func_001007F0(void* self, void* x, int unused, int c)
+{
+    Frame_1007F0 f;
+    func_0011B008(&f.q);
+    f.n = *(Pair_1007F0*)D_00248D98;
+    (void)func_001C23B0(&f.t, 2, c, &f.n, &f.a, &f.b);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_00183A10(x, f.a, f.b);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Retail sets the frame addresses before the 8-byte rodata copy; the void call of an s32-returning callee keeps that order.
+
+struct __attribute__((packed)) Pack_001008B8 { s32 a, b; };
+struct __attribute__((aligned(16))) Quad_001008B8 { s32 w[4]; };
+struct __attribute__((aligned(16))) Frame_001008B8 {
+    Quad_001008B8 q;
+    Pack_001008B8 rod;
+    s32 pad0[2];
+    Quad_001008B8 b;
+    Quad_001008B8 t;
+    s32 out;
+};
+
+extern u8 D_00248DA0[];
+
+void func_0011B008(Quad_001008B8* q);
+void func_0011B018(void* dst, Quad_001008B8* src);
+void func_0011B060(Quad_001008B8* q, s32 mode);
+void func_0011B0A8(Quad_001008B8* a, Quad_001008B8* b);
+void func_0011B538(Quad_001008B8* q, s32 n);
+s32 func_001C23B0(Quad_001008B8* t, s32 mode, s32 c, void* z, void* z2, void* z3);
+void func_00183A90(void* a0, s32 a1, Quad_001008B8* a2);
+
+void* func_001008B8(void* self, void* x, s32 unused, s32 c)
+{
+    Frame_001008B8 f;
+    func_0011B008(&f.q);
+    f.rod = *(Pack_001008B8*)D_00248DA0;
+    (void)func_001C23B0(&f.t, 2, c, &f.rod, &f.out, &f.b);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_00183A90(x, f.out, &f.b);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Callee declared s32 and called as (void): schedules the three address adds before the 8-byte copy.
+
+struct Quad_100EE0 { s32 a, b, c, d; };
+struct Pair_100EE0 { s32 a, b; };
+struct Frame_100EE0 { Quad_100EE0 q; Pair_100EE0 n; s32 pad[2]; Quad_100EE0 t; f32 x; f32 y; };
+
+extern u8 D_00248DD0[];
+
+void func_0011B008(Quad_100EE0* q);
+void func_0011B018(void* out, Quad_100EE0* q);
+void func_0011B060(Quad_100EE0* q, int mode);
+void func_0011B0A8(Quad_100EE0* a, Quad_100EE0* b);
+void func_0011B538(Quad_100EE0* q, int n);
+s32 func_001C23B0(Quad_100EE0* t, int mode, int c, void* z, void* z2, void* z3);
+void func_0012AA50(void* self, f32 a, f32 b);
+
+void* func_00100EE0(void* self, void* x, int unused, int c)
+{
+    Frame_100EE0 f;
+    func_0011B008(&f.q);
+    f.n = *(Pair_100EE0*)D_00248DD0;
+    (void)func_001C23B0(&f.t, 2, c, &f.n, &f.x, &f.y);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0012AA50(x, f.x, f.y);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Retail computes the argument addresses before the 24-byte blob copy; a void call of an s32-returning callee and a pre-taken &t.i1 keep that order.
+
+struct Quad_102DE0 { s32 a; s32 b; s32 c; s32 d; };
+struct Blob_102DE0 { u8 bytes[24]; };
+struct Tail_102DE0 { s32 i0; s32 i1; f32 f0; f32 f1; };
+struct Obj_102DE0 { u8 pad0[4]; };
+
+extern u8 D_00248E58[];
+void func_0011B008(Quad_102DE0* q);
+void func_0011B060(Quad_102DE0* q, s32 mode);
+void func_0011B0A8(Quad_102DE0* a, Quad_102DE0* b);
+void func_0011B018(void* out, Quad_102DE0* src);
+void func_0011B538(Quad_102DE0* q, s32 n);
+s32 func_001C23B0(Quad_102DE0* t, s32 mode, s32 c, Blob_102DE0* z, s32* p4, s32* p5, Quad_102DE0* p6, Quad_102DE0* p7, f32* p8, f32* p9);
+void func_00158778(Obj_102DE0* a0, s32 a1, s32 a2, Quad_102DE0* a3, Quad_102DE0* a4, f32 x, f32 y);
+
+void* func_00102DE0(void* out, Obj_102DE0* self, s32 unused, s32 c)
+{
+    Quad_102DE0 r;
+    Blob_102DE0 blob;
+    Quad_102DE0 q40;
+    Quad_102DE0 q50;
+    Quad_102DE0 q60;
+    Tail_102DE0 t;
+
+    func_0011B008(&r);
+    s32* p5 = &t.i1;
+    blob = *(Blob_102DE0*)D_00248E58;
+    (void)func_001C23B0(&q60, 6, c, &blob, &t.i0, p5, &q40, &q50, &t.f0, &t.f1);
+    func_0011B0A8(&r, &q60);
+    func_0011B060(&q60, 2);
+    func_00158778(self, t.i0, t.i1, &q40, &q50, t.f0, t.f1);
+    func_0011B538(&r, 0x22);
+    func_0011B018(out, &r);
+    func_0011B060(&r, 2);
+    return out;
+}
+
+// Retail copies the 12-byte rodata as ldl/ldr plus lw and sets the frame addresses first; a non-packed 12-byte struct gives that copy, and a void call of an s32-returning callee keeps the order.
+
+struct Pair_001030E0 { s32 a, b; };
+struct Rod_001030E0 { Pair_001030E0 p; s32 c; };
+struct __attribute__((aligned(16))) Quad_001030E0 { s32 w[4]; };
+struct __attribute__((aligned(16))) Frame_001030E0 {
+    Quad_001030E0 q;
+    Rod_001030E0 rod;
+    s32 pad0;
+    Quad_001030E0 b;
+    s32 o1;
+    s32 o2;
+    s32 o3;
+};
+
+struct Obj_001030E0;
+
+extern u8 D_00248E70[];
+
+void func_0011B008(Quad_001030E0* q);
+void func_0011B018(void* dst, Quad_001030E0* src);
+void func_0011B060(Quad_001030E0* q, s32 mode);
+void func_0011B0A8(Quad_001030E0* a, Quad_001030E0* b);
+s32 func_0011B8A8(Quad_001030E0* q, s32 v);
+s32 func_001C23B0(Quad_001030E0* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
+void* func_001B6290(Obj_001030E0* a, s32 b, s32 c, s32 d);
+
+void* func_001030E0(void* self, void* x, s32 unused, s32 c)
+{
+    Frame_001030E0 f;
+    func_0011B008(&f.q);
+    f.rod = *(Rod_001030E0*)D_00248E70;
+    (void)func_001C23B0(&f.b, 3, c, &f.rod, &f.o1, &f.o2, &f.o3);
+    func_0011B0A8(&f.q, &f.b);
+    func_0011B060(&f.b, 2);
+    s32 v = (s32)func_001B6290((Obj_001030E0*)x, f.o1, f.o2, f.o3);
+    func_0011B8A8(&f.q, v);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

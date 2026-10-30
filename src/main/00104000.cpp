@@ -1403,3 +1403,125 @@ void* func_00106600(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+// Callee declared s32 and called as (void): schedules the three address adds before the 8-byte copy.
+
+struct Quad_00105290 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pair_00105290 { s32 a, b; };
+struct Frame_00105290 { Quad_00105290 q; Pair_00105290 p; s32 pad[2]; Quad_00105290 t; s32 out1; s32 out2; };
+struct Callee_00105290;
+
+extern u8 D_00248EE8[];
+
+void func_0011B008(Quad_00105290* q);
+void func_0011B018(void* dst, Quad_00105290* src);
+void func_0011B060(Quad_00105290* q, int mode);
+void func_0011B0A8(Quad_00105290* a, Quad_00105290* b);
+void func_0011B538(Quad_00105290* q, int n);
+s32 func_001C23B0(Quad_00105290* t, int mode, int c, void* z, void* z2, void* z3);
+void func_001CA720(Callee_00105290* self, s32 a, s32 b);
+
+void* func_00105290(void* self, void* x, int unused, int c)
+{
+    Frame_00105290 f;
+    func_0011B008(&f.q);
+    f.p = *(Pair_00105290*)&D_00248EE8;
+    (void)func_001C23B0(&f.t, 2, c, &f.p, &f.out1, &f.out2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001CA720((Callee_00105290*)x, f.out1, f.out2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct __attribute__((aligned(16))) Quad_001073F0 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_001073F0 { u8 b[8]; };
+struct Frame_001073F0 { Quad_001073F0 q; Key8_001073F0 k; Quad_001073F0 t; s32 o1; s32 o2; };
+struct Arg_001073F0;
+
+void func_0011B008(Quad_001073F0* q);
+void func_0011B018(void* dst, Quad_001073F0* q);
+void func_0011B060(Quad_001073F0* q, int mode);
+void func_0011B0A8(Quad_001073F0* a, Quad_001073F0* b);
+void func_0011B538(Quad_001073F0* q, int n);
+s32 func_001C23B0(Quad_001073F0* t, int mode, int c, void* k, void* o1, void* o2);
+void func_0019AD30(Arg_001073F0* p, s32 a, s32 b);
+
+void* func_001073F0(void* self, Arg_001073F0* p, int unused, int c)
+{
+    Frame_001073F0 f;
+    func_0011B008(&f.q);
+    f.k = *(Key8_001073F0*)&D_00248EE8;
+    (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0019AD30(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Callee declared s32 and called as (void): schedules the three address adds before the 8-byte copy.
+
+struct Quad_107948 { s32 a, b, c, d; };
+struct Pair_107948 { s32 a, b; };
+struct Frame_107948 { Quad_107948 q; Pair_107948 n; s32 pad[2]; Quad_107948 t; s32 a; f32 b; };
+
+extern u8 D_00248F50[];
+
+void func_0011B008(Quad_107948* q);
+void func_0011B018(void* out, Quad_107948* q);
+void func_0011B060(Quad_107948* q, int mode);
+void func_0011B0A8(Quad_107948* a, Quad_107948* b);
+void func_0011B538(Quad_107948* q, int n);
+s32 func_001C23B0(Quad_107948* t, int mode, int c, void* z, void* z2, void* z3);
+void func_00182948(void* a0, s32 a1, f32 x);
+
+void* func_00107948(void* self, void* x, int unused, int c)
+{
+    Frame_107948 f;
+    func_0011B008(&f.q);
+    f.n = *(Pair_107948*)D_00248F50;
+    (void)func_001C23B0(&f.t, 2, c, &f.n, &f.a, &f.b);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_00182948(x, f.a, f.b);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Callee declared s32 and called as (void): schedules the three address adds before the 8-byte copy.
+
+struct Quad_107F70 { s32 a, b, c, d; };
+struct Pair_107F70 { s32 a, b; };
+struct Frame_107F70 { Quad_107F70 q; Pair_107F70 n; s32 pad[2]; Quad_107F70 t; s32 a; f32 b; };
+
+extern u8 D_00248F58[];
+
+void func_0011B008(Quad_107F70* q);
+void func_0011B018(void* out, Quad_107F70* q);
+void func_0011B060(Quad_107F70* q, int mode);
+void func_0011B0A8(Quad_107F70* a, Quad_107F70* b);
+void func_0011B538(Quad_107F70* q, int n);
+s32 func_001C23B0(Quad_107F70* t, int mode, int c, void* z, void* z2, void* z3);
+void func_0017D0A0(void* self, s32 a, f32 value);
+
+void* func_00107F70(void* self, void* x, int unused, int c)
+{
+    Frame_107F70 f;
+    func_0011B008(&f.q);
+    f.n = *(Pair_107F70*)D_00248F58;
+    (void)func_001C23B0(&f.t, 2, c, &f.n, &f.a, &f.b);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0017D0A0(x, f.a, f.b);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
