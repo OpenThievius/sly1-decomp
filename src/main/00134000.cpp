@@ -458,3 +458,44 @@ void func_00137F08(void* self, u8* p)
     *(s32*)(b + 0xC) = 0;
     *(f32*)(c + 0xC) = 1.0f;
 }
+
+extern u8 D_00275710[];
+extern u8 func_00135E20[];
+extern u8 func_00135E40[];
+extern f32 D_00249CFC;
+
+struct Self_135F48 {
+    u8 pad000[0x328];
+    s32 f328;
+};
+
+struct Ctx_135F48 {
+    u8 pad000[0x1D44];
+    s32 f1D44;
+    u8 pad1D48[0x0C];
+    s32 f1D54;
+};
+
+struct Flag_135F48 { s32 v; };
+
+void func_00160D30(Flag_135F48* p);
+s32 func_00160D10(void);
+void func_00135E78(Self_135F48* self, s32 state, s32 flag);
+void func_001358D0(Self_135F48* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
+
+void func_00135F48(Self_135F48* self)
+{
+    Flag_135F48 flag;
+    func_00160D30(&flag);
+    if ((func_00160D10() & flag.v) == 0) {
+        func_00135E78(self, 0, 1);
+        return;
+    }
+    func_00135E78(self, 1, 0);
+    if (self->f328 == 1) {
+        f32 k = D_00249CFC;
+        Ctx_135F48* ctx = *(Ctx_135F48**)D_00275710;
+        func_001358D0(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, ctx->f1D44, k);
+        func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)D_00275710)->f1D54, k);
+    }
+}

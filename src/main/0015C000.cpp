@@ -1220,3 +1220,61 @@ Blk_0015DB28* func_0015DB28(Blk_0015DB28* self, s32 a1, s32 a2)
     func_0015DB80(self);
     return self;
 }
+
+struct Quad_15FBB8 { s32 a, b, c, d; } __attribute__((aligned(16)));
+struct Obj_15FBB8;
+struct Ctx_15FBB8 {
+    void* w0;
+    f32 f4;
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    u8 b14[8];
+    void* p1C;
+    f32 f20;
+};
+typedef void (*VFn_15FBB8)(void* self, void* b);
+struct Self_15FBB8 {
+    VFn_15FBB8* vtbl;
+    u8 pad04[0x9C];
+    Quad_15FBB8 qA0;
+    Quad_15FBB8 qB0;
+    u8 pad0C0[0x90];
+    Quad_15FBB8 q150;
+    Quad_15FBB8 q160;
+    u8 pad170[0x29C - 0x170];
+    s32 s29C;
+    u8 pad2A0[0x2AC - 0x2A0];
+    Ctx_15FBB8* p2AC;
+    u8 pad2B0[0x2C8 - 0x2B0];
+    u64 u2C8;
+};
+
+extern u8 D_00248D30[];
+
+void func_001BF788(Obj_15FBB8* self, s32 n);
+void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
+
+void func_0015FBB8(Self_15FBB8* self, s32 flag)
+{
+    if (flag != 0) {
+        self->qA0 = self->q150;
+        self->qB0 = self->q160;
+        self->s29C = 0;
+        if (self->p2AC != 0) {
+            func_001BF788((Obj_15FBB8*)self->p2AC->p1C, 0);
+        }
+        self->vtbl[36]((void*)self, D_00248D30);
+        self->vtbl[37]((void*)self, D_00248D30);
+        self->u2C8 |= (u64)1 << 38;
+    } else {
+        self->u2C8 &= ~((u64)1 << 38);
+        self->vtbl[36]((void*)self, &self->qA0);
+        self->vtbl[37]((void*)self, &self->qB0);
+        if (self->p2AC != 0) {
+            func_001BFCD8(self->p2AC->w0, &self->p2AC->p1C, (void*)self, 0,
+                          self->p2AC->f4, self->p2AC->f8, self->p2AC->fC,
+                          self->p2AC->f10, self->p2AC->f20, &self->p2AC->b14, 0);
+        }
+    }
+}

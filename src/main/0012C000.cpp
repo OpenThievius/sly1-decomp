@@ -700,3 +700,54 @@ Obj_12D3F8* func_0012D3F8(Pool_12D3F8* pool)
     *(void**)((u8*)o + 0x60) = (u8*)o + 0x64;
     return o;
 }
+
+struct Quad_12F9B8 { s32 a, b, c, d; };
+struct Mobj_12F9B8;
+struct Vt_12F9B8 {
+    u8 p0[0x84];
+    void (*m84)(Mobj_12F9B8* self, void* a);
+    u8 p1[0x90 - 0x88];
+    void (*m90)(Mobj_12F9B8* self, void* a);
+    void (*m94)(Mobj_12F9B8* self, void* a);
+};
+struct Mobj_12F9B8 { Vt_12F9B8* vt; };
+struct Node_12F9B8 { u8 p0[0x18]; Mobj_12F9B8* f18; };
+struct Obj_12F9B8 {
+    u8 p0[0x580];
+    s32 f580;
+    u8 p1[0x590 - 0x584];
+    Node_12F9B8* f590;
+    u8 p2[0x5A0 - 0x594];
+    Mobj_12F9B8* f5A0;
+    Mobj_12F9B8* f5A4;
+};
+
+void func_001B93F8(Obj_12F9B8* self);
+void func_00128018(Mobj_12F9B8* a, s32 b, void* c, Quad_12F9B8* d);
+
+extern u8 D_00248D30[];
+
+void func_0012F9B8(Obj_12F9B8* self)
+{
+    Quad_12F9B8 loc;
+    Mobj_12F9B8* cur;
+    func_001B93F8(self);
+    if (self->f5A0 != 0) {
+        self->f5A0->vt->m90(self->f5A0, D_00248D30);
+        self->f5A0->vt->m94(self->f5A0, D_00248D30);
+        switch (self->f580) {
+        case 1:
+            self->f5A0->vt->m84(self->f5A0, &self->f590);
+            break;
+        case 2: {
+            Node_12F9B8* node = self->f590;
+            func_00128018(node->f18, 0, (u8*)node + 0x40, &loc);
+            self->f5A0->vt->m84(self->f5A0, &loc);
+            break;
+        }
+        }
+        cur = self->f5A0;
+        self->f5A0 = 0;
+        self->f5A4 = cur;
+    }
+}

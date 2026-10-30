@@ -838,3 +838,38 @@ void func_001B3488(Obj_1B3488* self)
         D_00274518 = (s32)self;
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1B28A8 { s32 w[4]; };
+struct Dst_1B28A8 { Quad_1B28A8 q0, q1, q2, q3; };
+struct Obj_1B28A8 { u8 pad0[0x18]; void* f18; u8 pad1[0x34 - 0x1C]; void* f34; };
+
+typedef void (*VFn_1B28A8)(void* self, void* a, void* b);
+struct Vtbl_1B28A8 { void* slot[4]; VFn_1B28A8 fn4; };
+struct Hook_1B28A8 { Vtbl_1B28A8* vtbl; };
+
+extern u8 D_00248400[];
+
+void func_00188B08(void* a, void* b, Dst_1B28A8* dst);
+void func_00182F78(Obj_1B28A8* self, void* other);
+
+void func_001B28A8(Obj_1B28A8* self, void* other)
+{
+    Dst_1B28A8 a;
+    Dst_1B28A8 b;
+    Hook_1B28A8* h;
+    if (self->f18) {
+        func_00188B08((u8*)self->f18 + 0x140, (u8*)self->f18 + 0x110, &a);
+    } else {
+        a = *(Dst_1B28A8*)D_00248400;
+    }
+    if (other) {
+        func_00188B08((u8*)other + 0x140, (u8*)other + 0x110, &b);
+    } else {
+        b = *(Dst_1B28A8*)D_00248400;
+    }
+    h = (Hook_1B28A8*)self->f34;
+    if (h->vtbl->fn4) {
+        h->vtbl->fn4(h, &a, &b);
+    }
+    func_00182F78(self, other);
+}

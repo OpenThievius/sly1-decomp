@@ -1114,3 +1114,47 @@ void func_00183350(Mgr_183350* self, void* a1, void* a2)
     Node_183350* n = self->head;
     while (n) { s32 c = n->f4; Cb_183350 f = n->f0; n = n->f10; f(c, a1, a2); }
 }
+
+struct Quad_1837E0 { s32 a; s32 b; s32 c; s32 d; };
+struct Obj_1837E0 { u8 pad0[0x14]; void* f14; u8 pad18[0x2C - 0x18]; void* f2C; };
+
+extern u8 D_00259F38[];
+extern s32 D_00244EC0[];
+extern s32 D_00244DFC[];
+void func_0011B008(Quad_1837E0* q);
+void func_0011B060(Quad_1837E0* q, s32 mode);
+void func_0011B0A8(Quad_1837E0* a, Quad_1837E0* b);
+void func_0011A800(u8* a);
+s32 func_0011A498(void* a, s32 b, s32 c, Quad_1837E0* d);
+s32 func_00183668(Obj_1837E0* self, s32 idx, s32 flag, void* out);
+void* func_001C1E48(void* self, s32 n, s32* keys, void* vals);
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void func_001834A0(void* self, s32 key, void* list);
+
+void func_001837E0(Obj_1837E0* self, s32 idx, s32 flag, void* out)
+{
+    Quad_1837E0 r;
+    Quad_1837E0 tmp;
+    s32 a4;
+
+    func_0011B008(&r);
+    if (self->f2C == 0 || func_0011A498(self->f2C, idx, 1, &r) == 0) {
+        func_0011B060(&r, 2);
+        goto done;
+    }
+    func_0011A800(D_00259F38);
+    if (func_00183668(self, idx, flag, out) == 0) {
+        if (flag != 0) {
+            func_001C1E48(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], out);
+            func_0011B0A8(&r, &tmp);
+            func_0011B060(&tmp, 2);
+            a4 = ((s32*)&r)[1];
+        } else {
+            a4 = 0;
+        }
+        func_001DBCC8(self->f14, (void*)(void (*)(void*, s32, void*))func_001834A0, self, idx, a4);
+    }
+    func_0011B060(&r, 2);
+done:
+    ;
+}

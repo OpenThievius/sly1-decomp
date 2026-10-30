@@ -167,3 +167,26 @@ void func_001FD6E0(struct Src_1FD6E0* src, struct Parts_1FD6E0* out)
     out->f00 = 3;
     out->f0C = (mant << 7) | 0x40000000;
 }
+
+extern u8 D_0024F0C0[];
+
+void* func_001FEF58(void* self)
+{
+    *(void**)self = D_0024F0C0;
+    return self;
+}
+
+extern u8 D_0024F0D8[];
+
+void* func_001FEFF0(void* self)
+{
+    *(void**)self = D_0024F0D8;
+    return self;
+}
+
+extern u8 D_0024F1E0[];
+
+void* func_001FFFF0(void)
+{
+    return D_0024F1E0;
+}

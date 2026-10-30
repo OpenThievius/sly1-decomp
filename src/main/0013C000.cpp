@@ -798,3 +798,51 @@ void func_0013EF50(Obj_13EF50* self, void* p, void* q)
         ((VFn_13EF50)vt[0x48 / 4])(self->p4, 0xC, self);
     }
 }
+
+struct Obj_0013FA10 {
+    u8 pad0[0x20C];
+    s32 f20C;
+    s32 f210;
+    s32 f214;
+    s32 f218;
+    u8 pad1[0x550 - 0x21C];
+    s32 f550;
+    u8 pad2[0x680 - 0x554];
+    s32 f680;
+    u8 pad3[0x7B0 - 0x684];
+    s32 f7B0;
+    s32 f7B4;
+    u8 pad4[0x7E0 - 0x7B8];
+    s32 f7E0;
+};
+
+extern u8 D_00248D30[];
+
+void func_001B9338(Obj_0013FA10* self, f32 t);
+void func_001B9058(Obj_0013FA10* self, void* buf, s32 a, void* table, s32 b, f32 t);
+void func_001B91A8(Obj_0013FA10* self, void* buf, s32 a, void* table, s32 b, f32 t);
+
+void func_0013FA10(Obj_0013FA10* self, f32 t)
+{
+    func_001B9338(self, t);
+    switch (self->f550) {
+    case 0:
+        if (self->f7B4 != 0) {
+            u8* p = (u8*)self + 0x7C0;
+            if (self->f680 != 4) {
+                p += self->f7B0 << 4;
+            }
+            func_001B9058(self, p, self->f20C, D_00248D30, self->f210, t);
+        }
+        break;
+    case 1:
+        if (self->f7E0 != 0) {
+            u8* p = (u8*)self + 0x7F0;
+            if (self->f680 != 4) {
+                p += self->f7B0 * 0x30;
+            }
+            func_001B91A8(self, p, self->f214, D_00248D30, self->f218, t);
+        }
+        break;
+    }
+}

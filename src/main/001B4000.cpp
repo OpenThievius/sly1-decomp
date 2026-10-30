@@ -1507,3 +1507,58 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
         }
     }
 }
+
+extern u8 D_002198E8[];
+
+struct Self_1B6290 {
+    u8 pad00[0x14];
+    void* f14;
+    u8 pad18[0x48 - 0x18];
+};
+
+struct Obj_1B6290 {
+    void* f00;
+    u8 pad04[0x18 - 0x04];
+    Self_1B6290* f18;
+    s32 f1C;
+    s32 f20;
+    u8 pad24[0x28 - 0x24];
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    f32 f34_unused;
+    f32 f38;
+};
+
+struct Pool_1B6290 { s32 unused; };
+struct List_1B6290 { s32 unused; };
+
+void* func_001B5EE0(Pool_1B6290* pool);
+void func_00152470(List_1B6290* list, Obj_1B6290* item);
+s32 func_001B63F8(Self_1B6290* self, s32 key);
+void func_001B6E28(Obj_1B6290* self, s32 a, s32 b);
+void func_001B66A0(Obj_1B6290* self);
+void func_001837E0(Self_1B6290* self, s32 a, s32 b, void* c);
+
+Obj_1B6290* func_001B6290(Self_1B6290* self, s32 a1, s32 a2, s32 a3)
+{
+    Obj_1B6290* obj = (Obj_1B6290*)func_001B5EE0((Pool_1B6290*)((u8*)self->f14 + 0x1B88));
+    obj->f1C = a1;
+    obj->f00 = D_002198E8;
+    obj->f20 = a3;
+    obj->f38 = 1.0f;
+    obj->f18 = self;
+    obj->f2C = -1;
+    func_00152470((List_1B6290*)((u8*)self->f14 + 0x1B94), obj);
+    func_00152470((List_1B6290*)((u8*)self + 0x48), obj);
+    if (a2 != -1) {
+        s32 v = func_001B63F8(self, a2);
+        obj->f28 = v;
+        obj->f30 = v;
+        func_001B6E28(obj, -1, v);
+    }
+    func_001B66A0(obj);
+    Obj_1B6290** pp = &obj;
+    func_001837E0(self, 0x11, 1, (void*)&pp);
+    return obj;
+}

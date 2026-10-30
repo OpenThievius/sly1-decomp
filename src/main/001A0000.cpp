@@ -595,3 +595,67 @@ void func_001A3598(Obj_1A3598* self, f32 x)
     self->f34 = 1.0f - x;
     self->i38 = 0;
 }
+
+struct Obj_1A3C40;
+struct Inner_1A3C40;
+struct Src_1A3C40;
+struct Ptr_1A3C40;
+struct Out_1A3C40;
+typedef void (*VFn_1A3C40)(Inner_1A3C40* self, void* a);
+
+struct Tri_1A3C40 { s64 a __attribute__((packed)); s32 b; };
+struct Inner_1A3C40 {
+    VFn_1A3C40* vtbl;   // 0x00
+    u8 pad04[0x10C];
+    f32 f110;           // 0x110
+    f32 f114;           // 0x114
+};
+struct Obj_1A3C40 {
+    u8 pad000[0x618];
+    f32 f618;           // 0x618
+    f32 f61c;           // 0x61C
+    f32 f620;           // 0x620
+    u8 pad624[0x04];
+    f32 f628;           // 0x628
+    u8 pad62c[0x04];
+    u8 pad630[0x1C];
+    Inner_1A3C40* inner;    // 0x64C
+    u8 pad650[0x34];
+    Ptr_1A3C40* p684;   // 0x684
+    s32 s688;           // 0x688
+};
+struct Frame_1A3C40 {
+    f32 buf[4];         // 0x00
+    u8 pad10[0x20];
+    Tri_1A3C40 tri;     // 0x30
+    u8 pad3c[0x04];
+};
+
+extern u8 D_0024C9C0[];
+extern f32 D_00261860;
+
+void func_0012E760(Ptr_1A3C40* obj);
+void func_001A3F40(Obj_1A3C40* self, Src_1A3C40* src);
+void func_001ED650(Out_1A3C40* out, f32 unused, f32 scale, f32 z);
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA728(u8* p, s32 a, f32 b, f32 c, f32 d);
+void func_001892A0(f32* out, f32 unused, f32 value);
+void func_00128150(void* a0, Obj_1A3C40* a1, void* a2, void* a3);
+
+void func_001A3C40(Obj_1A3C40* self, Src_1A3C40* src)
+{
+    Frame_1A3C40 f;
+    if (self->s688 != 0) {
+        func_0012E760(self->p684);
+        self->p684 = 0;
+        self->s688 = 0;
+    }
+    func_001A3F40(self, src);
+    func_001ED650((Out_1A3C40*)((u8*)self + 0x630), self->f618, self->f61c * self->f628, 0.0f);
+    f.tri = *(Tri_1A3C40*)D_0024C9C0;
+    f32 r = func_00205778(self->inner->f114, self->inner->f110);
+    r = func_001EA728((u8*)&f.tri, 0, r, self->f620, D_00261860);
+    func_001892A0(f.buf, r, 0.0f);
+    func_00128150(0, self, f.buf, f.buf);
+    self->inner->vtbl[34](self->inner, f.buf);
+}

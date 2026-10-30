@@ -614,3 +614,56 @@ void func_00139B70(s32 idx, void* arg)
     func_00152D70(&f);
     func_001529E0(&f, 0, arg);
 }
+
+struct Quad_13B4C0 { s32 a, b, c, d; } __attribute__((aligned(16)));
+struct Pair_13B4C0 { s32 a, b; };
+struct Obj_13B4C0 {
+    u8 p0[0x550];
+    s32 f550;
+    f32 f554;
+    u8 p1[4];
+    f32 f55C;
+    f32 f560;
+    u8 p2[0x568 - 0x564];
+    f32 f568;
+    Pair_13B4C0 f56C;
+    f32 f574;
+    u8 p3[0x5D0 - 0x578];
+    Quad_13B4C0 f5D0;
+    Pair_13B4C0 f5E0;
+    u8 p4[0x5F0 - 0x5E8];
+    Quad_13B4C0 f5F0;
+    Pair_13B4C0 f600;
+    u8 p5[0x674 - 0x608];
+    s32 f674;
+    s32 f678;
+    s32 f67C;
+};
+
+void func_001B7968(Obj_13B4C0* self);
+
+extern f32 D_00249D74;
+extern u8 D_00261320[];
+extern u8 D_00261330[];
+extern u8 D_00261340[];
+extern u8 D_00261350[];
+extern u8 D_00261358[];
+
+void func_0013B4C0(Obj_13B4C0* self)
+{
+    func_001B7968(self);
+    self->f554 = D_00249D74;
+    self->f55C = 200.0f;
+    self->f560 = 200.0f;
+    self->f550 = 0;
+    self->f56C = *(Pair_13B4C0*)D_00261320;
+    self->f568 = 800.0f;
+    self->f574 = 5000.0f;
+    self->f5D0 = *(Quad_13B4C0*)D_00261330;
+    self->f5E0 = *(Pair_13B4C0*)D_00261350;
+    self->f5F0 = *(Quad_13B4C0*)D_00261340;
+    self->f600 = *(Pair_13B4C0*)D_00261358;
+    self->f674 = 1;
+    self->f678 = 1;
+    self->f67C = 0;
+}

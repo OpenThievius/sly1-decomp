@@ -1273,3 +1273,40 @@ void* func_00119310(void* self, Node_119310* x, s32 c)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct Quad_118F48 { s32 a, b, c, d; };
+struct Obj_118F48 { u8 pad[4]; Quad_118F48* f4; };
+struct Frame_118F48 { Quad_118F48 q; Quad_118F48 t; };
+
+void func_0011B008(Quad_118F48* q);
+void func_0011B018(void* dst, Quad_118F48* src);
+void func_0011B060(Quad_118F48* q, int mode);
+void func_0011B0A8(Quad_118F48* a, Quad_118F48* b);
+void func_0011B538(Quad_118F48* q, int n);
+void func_0011A080(Quad_118F48* t, void* n, s32 c);
+void func_001E1F10(void* x);
+s32 func_00113730(Quad_118F48* t, s32 mode, void* a, s32 c);
+extern u8 D_00249200[];
+
+void* func_00118F48(void* self, void* p, s32 x)
+{
+    Frame_118F48 f;
+    func_0011B008(&f.q);
+    u8* a = *(u8**)((u8*)p + 4);
+    u8* b = *(u8**)(a + 8);
+    u8* c = *(u8**)(b + 8);
+    func_0011A080(&f.t, b, x);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    if (f.q.b == 0) {
+        u8* v = *(u8**)(c + 4);
+        u8* w = *(u8**)(v + 8);
+        func_001E1F10(D_00249200);
+        func_00113730(&f.t, 1, w, x);
+        func_0011B060(&f.t, 2);
+    }
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
