@@ -932,3 +932,29 @@ s32 func_001C84E8(void* unused, Obj_1C84E8* self)
         return 0;
     return 1;
 }
+
+struct List_1CB6F8 { u8 pad0[0x58]; s32 count; s32 items[16]; };
+
+void func_001CBEE8(void* self, s32 arg);
+void func_0018D800(void* dst, void* src, s32 count);
+
+void func_001CB6F8(List_1CB6F8* self, s32 value)
+{
+    s32 i = 0;
+    if (self->count > 0) {
+        for (; i < self->count; i++) {
+            if (self->items[i] == value) break;
+        }
+        if (i >= self->count) return;
+        s32 n = self->count;
+        if (i < n) {
+            s32 m = n - 1;
+            self->count = m;
+            s32* d = &self->items[i];
+            func_0018D800(d, d + 1, (m - i) * 4);
+            if (self->count <= 0) {
+                func_001CBEE8(self, 3);
+            }
+        }
+    }
+}

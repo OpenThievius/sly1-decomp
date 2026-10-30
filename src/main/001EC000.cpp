@@ -1062,3 +1062,32 @@ s32 func_001EE9D0(Mask_1EE9D0* self, s32 bits)
     }
     return acc | bits;
 }
+
+extern s32 D_00275710;
+extern s32 D_00275F84;
+extern s32 D_002640A4;
+extern u8 D_00262280[];
+void func_00180398(s32 a, f32 v);
+void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, void* e, f32 f, f32 g, f32 h, f32 i);
+
+struct Emitter_1EFEE0 { u8 pad[0xC]; f32 scale; u8 pad2[0x14]; s32 mode; };
+
+void func_001EFEE0(Emitter_1EFEE0* self)
+{
+    if (D_00275710 != 0 && D_00275F84 != 0) {
+        s32 mode = self->mode;
+        if (mode != 1) {
+            if (mode < 2) {
+                if (mode == 0) goto draw;
+            }
+            return;
+        }
+        if (D_002640A4 != 0) {
+        func_00180398(D_002640A4, self->scale);
+            return;
+        }
+        draw:
+    f32 v = self->scale * 255.0f;
+    func_0019DDA0(0, 0, 0, (s32)v, D_00262280, 0.0f, 0.0f, 640.0f, 492.80002f);
+    }
+}

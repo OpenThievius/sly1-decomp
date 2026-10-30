@@ -823,3 +823,60 @@ void func_001DFA40(void* self, void* out)
         o->f98 = 0;
     }
 }
+
+struct Obj_1DC828;
+struct Elem_1DC828 { s32 word0; Elem_1DC828* next; u8 pad8[4]; Obj_1DC828* obj; };
+struct Obj_1DC828 { u8 pad0[0x480]; s32 handle480; u8 pad1[0x538 - 0x484]; u64 flags538; };
+struct Node_1DC828 { Elem_1DC828* elems; void* self; Node_1DC828* next; Node_1DC828* prev; };
+struct Owner_1DC828 { u8 pad0[0x1ADC]; u8* tab; Node_1DC828* base; Node_1DC828* listA; Node_1DC828* listB; };
+
+void func_001DC710(Node_1DC828* node, Node_1DC828** head);
+void func_001DC7B0(Node_1DC828* node, Node_1DC828** head);
+Elem_1DC828* func_00138788(void* owner, s32 h, Node_1DC828* handle);
+void func_001861E8(void* a, s32 b);
+void func_00129DF8(void* self);
+void func_001B5F28(void* list, void* item);
+
+void func_001DC828(Owner_1DC828* owner, Node_1DC828* handle)
+{
+    Elem_1DC828* e = handle->elems;
+    if (e != 0) {
+        void* freeList = (u8*)owner + 0x1AF0;
+        do {
+            Elem_1DC828* next = e->next;
+            Elem_1DC828* s1 = func_00138788(owner, e->obj->handle480, handle);
+            if (e->word0 != 0) {
+                func_001861E8(owner, e->word0);
+                if (!(e->obj->flags538 & (1ULL << 55))) {
+                    func_00129DF8(e->obj);
+                }
+                if (!(s1->obj->flags538 & (1ULL << 55))) {
+                    func_00129DF8(s1->obj);
+                }
+            }
+            s1->word0 = 0;
+            e->word0 = 0;
+            func_001B5F28(freeList, e);
+            func_001B5F28(freeList, s1);
+            e = next;
+        } while (e != 0);
+    }
+    handle->elems = 0;
+    Node_1DC828** hb = &owner->listB;
+    s32 a3 = handle - owner->base;
+    Node_1DC828* p = *hb;
+    if (p != 0) {
+        do {
+            s32 b = p - owner->base;
+            u8* tab = owner->tab;
+            u8* r1 = tab + (a3 << 8);
+            u8* r2 = tab + (b << 8);
+            r2[a3] = 0;
+            r1[b] = 0;
+            p = p->next;
+        } while (p != 0);
+    }
+    handle->self = 0;
+    func_001DC710(handle, hb);
+    func_001DC7B0(handle, &owner->listA);
+}

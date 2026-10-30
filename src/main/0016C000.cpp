@@ -795,3 +795,38 @@ void func_0016E118(u32 mask)
     D_00262C6C = D_00262C6C & mask;
     func_0016E148();
 }
+
+struct Entry_16CE80 { void* f0; s32 f4; s32 f8; u8 pad0[0x14 - 0xC]; };
+struct List_16CE80 { u8 pad0[0x3C]; s32 count; Entry_16CE80* items; };
+struct Obj_16CE80 { u8 pad0[0x550]; List_16CE80* f550; u8 pad1[0x5A4 - 0x554]; f32 f5A4; };
+struct Ref_16CE80 { u8 pad0[0x34]; f32 f34; };
+
+void func_001BAC30(void* self);
+void func_00124DF8(void* self, s32 id, void* table);
+s32 func_001B6420(void* a, s32 b);
+extern u8 D_002629D0[];
+
+void func_0016CE80(Obj_16CE80* self)
+{
+    s32 k1 = 0x2EF;
+    s32 k2 = 0x2F0;
+    s32 i = 0;
+    s32 off = 0;
+    func_001BAC30(self);
+    func_00124DF8(self, 5, D_002629D0);
+    for (;;) {
+        if (i >= self->f550->count) {
+            return;
+        }
+        Entry_16CE80* e = (Entry_16CE80*)((u8*)self->f550->items + off);
+        if (func_001B6420(self->f550, e->f4) == k1 && func_001B6420(self->f550, e->f8) == k2) {
+            break;
+        }
+        off += 0x14;
+        i++;
+    }
+    if (i < self->f550->count) {
+        Entry_16CE80* p = (Entry_16CE80*)((u8*)(i * 0x14) + (s32)self->f550->items);
+        self->f5A4 = ((Ref_16CE80*)p->f0)->f34;
+    }
+}

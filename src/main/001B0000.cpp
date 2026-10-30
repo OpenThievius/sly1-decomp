@@ -142,7 +142,7 @@ extern s32 D_00274508;
 extern Rec_1B2BA8* D_0027450C;
 extern s32 D_00274514;
 
-s32 func_00137BE0(void* self);
+u16 func_00137BE0(void* self);
 void* func_0018D5C0(s32 bytes);
 void func_001B2B50(void* self, Rec_1B2BA8* rec);
 
@@ -198,7 +198,7 @@ extern s32 D_00274500;
 extern Rec_1B2CF8* D_00274504;
 extern s32 D_00274510;
 
-s32 func_00137BE0(void* self);
+u16 func_00137BE0(void* self);
 void* func_0018D5C0(s32 bytes);
 void func_001B2CA8(void* self, Rec_1B2CF8* rec);
 
@@ -810,4 +810,40 @@ s32 func_001B2090(Obj_1B2090** self, u32 bits)
         }
     }
     return r;
+}
+
+struct Obj_1B2F00 {
+    u8 pad0[4];
+    u8 countA;
+    u8 countB;
+    u8 pad6[6];
+    u32* ptrC;
+    u32* ptr10;
+};
+
+
+void func_00137A60(void* self, s32 size, void* obj);
+u32* func_0018D500(s32 bytes);
+
+void func_001B2F00(void* self, Obj_1B2F00* o)
+{
+    func_00137A60(self, 6, o);
+    if (o->countA != 0) {
+        o->ptrC = func_0018D500(o->countA * 4);
+        for (s32 i = 0; i < o->countA; i++) {
+            u16 idx = func_00137BE0(self);
+            o->ptrC[i] = (u32)D_00274504 + (idx << 5);
+        }
+    }
+    if (o->countB != 0) {
+        o->ptr10 = func_0018D500(o->countB * 4);
+        for (s32 i = 0; i < o->countB; i++) {
+            u16 idx = func_00137BE0(self);
+            if (idx == 0xFFFF) {
+                o->ptr10[i] = 0;
+            } else {
+                o->ptr10[i] = (u32)D_0027450C + idx * 0x18;
+            }
+        }
+    }
 }

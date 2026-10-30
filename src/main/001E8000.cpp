@@ -902,3 +902,70 @@ void func_001E88D0(Obj_1E88D0* self)
     self->fC28 = 0;
     self->fC2C = 6.2831855f;
 }
+
+f32 func_001EAF28(f32 x)
+{
+    f32 buf[2];
+    u64* qp = (u64*)buf;
+    buf[0] = x;
+    u64 bits = *qp;
+    u32 ex = (u32)((s64)(bits << 9) >> 32) & 0xFF;
+    s32 e = (s32)ex - 0x7F;
+    if (e < 0)
+        return 0.0f;
+    if (e < 0x17) {
+        s32 mask = (s32)(((u64)1 << (0x17 - e)) - 1);
+        s32 frac = *(s32*)buf & 0x7FFFFF;
+        if ((frac & mask) == mask) {
+            { u64 lo = (u64)(s64)(frac & ~mask); *qp = (bits & (s32)0xFF800000) | lo; }
+            buf[0] = buf[0] + 1.0f;
+        } else {
+            { u64 lo = (u64)(s64)(frac & ~mask); *qp = (bits & (s32)0xFF800000) | lo; }
+        }
+    }
+    return buf[0];
+}
+
+struct Entry_1EBFB0 { s32 a; s32 b; s32 c; };
+struct Ctx_1EBFB0 {
+    u8 pad0[0x14];
+    void* p14;
+    u8 pad1[0xC50 - 0x18];
+    void* pC50;
+    void* pC54;
+    u8 pad2[0xC98 - 0xC58];
+    s32 countC98;
+    void* tableC9C;
+};
+
+void func_001C72A0(void* self);
+void func_001DDC38(void* a, void* self);
+void func_00124DF8(void* self, s32 n, void* data);
+void* func_001B6290(void* a, s32 b, s32 c, s32 d);
+void func_001B6DF8(void* a, void* self);
+void* func_0018D568(s32 size, void* name);
+s32 func_0015A418(void* a, s32 b, s32 c, void* self);
+extern u8 D_00275D08[];
+extern u8 D_00275D48[];
+
+void func_001EBFB0(Ctx_1EBFB0* self)
+{
+    func_001C72A0(self);
+    func_001DDC38(self->p14, self);
+    func_00124DF8(self, 5, D_00275D08);
+    void* r = func_001B6290(self->pC50, 0, -1, 0);
+    self->pC54 = r;
+    func_001B6DF8(r, self);
+    self->countC98 = 9;
+    self->tableC9C = func_0018D568(0x6C, D_00275D48);
+    s32 i = 0;
+    if (self->countC98 > 0) {
+        s32 off = 0;
+        do {
+            Entry_1EBFB0* e = (Entry_1EBFB0*)((u8*)self->tableC9C + off);
+            e->c = func_0015A418(self->p14, 1, e->a, self);
+            i++;
+            off += 12;
+        } while (i < self->countC98);
+    }
+}

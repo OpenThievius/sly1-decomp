@@ -1149,3 +1149,40 @@ void func_0016B190(Obj_16B190* self)
         func_0016B300(self, self->f2D0, 1);
     }
 }
+
+typedef void (*VFn_16BDD0)(void* self);
+struct Mgr_16BDD0 { VFn_16BDD0* vtbl; u8 pad0[0x25C - 4]; s32 x25C; s32 x260; };
+struct Glob_16BDD0 { u8 pad0[0x19F4]; u32 w19F4; };
+
+extern u8 D_00262C70[];
+
+void func_0016E0F0(s32 n);
+void func_0016E118(s32 n);
+void func_0016EC88(void* p);
+s32 func_0016BB78(s32 n);
+
+void func_0016BDD0(Mgr_16BDD0* self, s32 flag)
+{
+    if ((flag != 0) != (self->x25C == 0)) {
+        return;
+    }
+    if (flag != 0) {
+        s32 bit = 15;
+        func_0016E0F0(1);
+        func_0016EC88(D_00262C70);
+        self->vtbl[14](self);
+        s32 mask = func_0016BB78(15);
+        Glob_16BDD0* g = (Glob_16BDD0*)D_002623C0;
+        for (; bit > 0; bit--) {
+            if (g->w19F4 & mask) {
+                break;
+            }
+            mask >>= 1;
+        }
+        self->x260 = bit;
+    } else {
+        func_0016E118(1);
+        self->vtbl[15](self);
+    }
+    self->x25C = flag;
+}
