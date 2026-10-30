@@ -1497,6 +1497,7 @@ func_00184D20	func_00185380	match
 func_00184D58	func_001853B8	match	
 func_00184D78	func_001853D8	match	
 func_00185358	func_001859B8	match	
+func_00185758	func_00185DB8	match	
 func_00185A58	func_001860B8	match	
 func_00185AC8	func_00186128	match	
 func_00185C18	func_00186280	match	
@@ -1582,6 +1583,7 @@ func_0018DB20	func_0018E1B0	match
 func_0018DC88	func_0018E318	match	
 func_0018DD50	func_0018E3E0	match	
 func_0018DD78	func_0018E408	match	
+func_0018E558	-	absent	
 func_0018E678	-	absent	
 func_0018E6A0	-	absent	
 func_0018E7C0	-	absent	
