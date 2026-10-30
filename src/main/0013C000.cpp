@@ -1011,3 +1011,33 @@ s32 func_0013DD08(Node_DD08* node, Src_DD08* src)
     }
     return 1;
 }
+
+s32 func_001833F0(void* a, s32 n);
+void func_001F5B08(void* end, void* begin, s32 bytes);
+
+struct Quad_13F140 { s32 a, b, c, d; } __attribute__((aligned(16)));
+
+struct Self_13F140 {
+    u8 pad0[0x7B4];
+    s32 count;
+    u8 pad1[0x7C0 - 0x7B8];
+    Quad_13F140 items[8];
+};
+
+void func_0013F140(Self_13F140* self, void* a1, Quad_13F140* q)
+{
+    s32 n = self->count;
+    s32 idx;
+    if (func_001833F0(a1, 0x200)) {
+        idx = 0;
+        if (n > 0) {
+            u8* p = (u8*)self + n * 16;
+            s32 o = n * 16;
+            func_001F5B08((u8*)(o + (s32)self) + 0x7C0, &self->items[0], o);
+        }
+    } else {
+        idx = n;
+    }
+    self->items[idx] = *q;
+    self->count++;
+}

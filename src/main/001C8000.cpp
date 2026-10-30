@@ -985,3 +985,13 @@ s32 func_001CBD58(Self_CBD58* a0)
     }
     return result;
 }
+
+struct Inner_1CACB0 { u8 pad0[0x88]; f32 f88; };
+struct Out_1CACB0 { Inner_1CACB0* p0; u8 pad1[0x30 - 4]; s32 f30; };
+struct Self_1CACB0 { u8 pad0[0xC04]; s32 fC04; };
+
+void func_001C5388(Self_1CACB0*, s32, Out_1CACB0*);
+
+void func_001CACB0(Self_1CACB0* self, s32 flags, Out_1CACB0* out)
+{ func_001C5388(self, flags, out);
+    if (self->fC04 != 0) { if ((flags & 0x12) == 0x12) { if (0.7f < out->p0->f88) { out->f30 = 0; } } } }

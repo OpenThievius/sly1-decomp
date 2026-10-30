@@ -326,3 +326,24 @@ void* func_0017CF38(Pool_17CF38* pool, s32 a, s32 b, s32 c)
     f[2] = c;
     return e;
 }
+
+struct Obj_17E6D0 {
+    u8 pad0[0x634];
+    f32 f634;
+    u8 pad1[0x900 - 0x638];
+    s32 f900;
+    u8 pad2[0xA10 - 0x904];
+    s32 fA10;
+};
+s32 func_0017E6D0(Obj_17E6D0* self)
+{
+    s32 r;
+    if (0.0f < self->f634) {
+        if (self->f900 != 0) {
+            r = 1;
+        } else {
+            r = self->fA10 ? 5 : 0;
+        }
+    } else r = 0;
+    return r;
+}

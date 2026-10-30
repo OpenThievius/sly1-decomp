@@ -751,3 +751,145 @@ s32 func_001F00F0(Self_1F00F0* self, Obj_1F00F0* o, void* param2)
     }
     return 0;
 }
+
+struct Obj_1F0220 {
+    u8 pad0[0x4];
+    s32 f4;
+    f32 f8;
+    union { s32 i; f32 f; } fC;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    s32 f24;
+    s32 f28;
+};
+
+struct Quint_1F0220 { s32 a; s32 b; s32 c; s32 d; s32 e; };
+struct Tbl_1F0220 { u8 pad0[0x260]; void* f260; void* f264[1]; };
+struct Sub_1F0220 { u8 pad0[0x2E0]; s32 f2E0; };
+
+extern u8 D_00275AF0[];
+extern u8 D_00275BC0[];
+extern Tbl_1F0220 D_0026F808;
+extern void* D_0026FA68;
+extern void* D_00275710;
+extern s32 D_00275BF0;
+extern s32 D_002623CC;
+extern f32 D_00261868;
+
+void func_001E4E80(void* a, s32 b, s32 c, s32 d, s32 e);
+void func_001E96F8(void* obj, s32 mode);
+s32 func_001601A0(s32 a);
+void func_001F1590(void* self, s32 a1, s32 a2);
+void func_001F1050(void* self, s32 mode);
+void func_001DDB58(void* a);
+void func_00168B68(f32 t);
+
+void func_001F0220(Obj_1F0220* self, s32 mode)
+{
+    if (self->f4 == mode) goto L0410;
+    if (self->f4 == 2) {
+        if (D_0026FA68 != 0) {
+            func_001F1050(D_0026FA68, 0);
+        }
+    }
+    if (mode == 1) goto L02E0;
+    if (mode < 2) {
+        if (mode == 0) {
+            self->fC.i = 0;
+            goto L0400;
+        }
+        self->f4 = mode;
+        goto L0404;
+    }
+    if (mode == 2) goto L02A0;
+    if (mode == 3) goto L0374;
+    self->f4 = mode;
+    goto L0404;
+
+L02A0:
+    if (self->f10 != 0) {
+        Quint_1F0220* q = (Quint_1F0220*)((u8*)self + 0x10);
+        func_001E4E80(D_00275AF0, q->b, q->c, q->d, q->e);
+    }
+    self->f10 = 0;
+    self->fC.f = 1.0f;
+    self->f28 = 0;
+    goto L0400;
+
+L02E0:
+    {
+        s32 v = self->f24;
+        if (v == 2) goto L0300;
+        if (v == 3) goto L0354;
+        goto L0364;
+    }
+
+L0300:
+    {
+        s32 v = func_001601A0(self->f14);
+        s32 a3 = v >> 8;
+        s32 a2 = v & 0xFF;
+        if (D_0026FA68 == 0) goto L034C;
+        if (v == -1) goto L034C;
+        s32 a1 = 10;
+        if (a3 != 0) a1 = a2;
+        func_001F1590(D_0026FA68, a1, 3);
+        func_001DDB58(D_00275710);
+        goto L0364;
+    }
+
+L034C:
+    self->f24 = 0;
+    goto L0364;
+
+L0354:
+    mode = 2;
+    goto L02A0;
+
+L0364:
+    func_001E96F8(D_00275BC0, 8);
+    self->f4 = mode;
+    goto L0404;
+
+L0374:
+    {
+        s32 a = self->f24;
+        if (a == 2) goto L038C;
+        if (a == mode) goto L03EC;
+        self->f4 = mode;
+        goto L0404;
+    }
+
+L038C:
+    {
+        if (self->f24 == D_00275BF0) {
+            s32 idx = D_002623CC;
+            if (idx != -1) {
+                D_0026F808.f260 = D_0026F808.f264[idx];
+            }
+        }
+        if (D_0026F808.f260 != 0) {
+            ((Sub_1F0220*)D_0026F808.f260)->f2E0 = 3;
+            func_001F1050(D_0026F808.f260, 4);
+            self->f4 = mode;
+            goto L0404;
+        }
+        self->f24 = 3;
+        goto L0400;
+    }
+
+L03EC:
+    func_00168B68(0.25f);
+    self->f24 = 0;
+    goto L0400;
+
+L0400:
+    self->f4 = mode;
+L0404:
+    self->f8 = D_00261868;
+L0410:
+    return;
+}

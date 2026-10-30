@@ -573,3 +573,66 @@ void func_0013AD08(void* owner, s32 unused, Src_13AD08* src)
     blk.owner = owner;
     func_0019D410(&blk);
 }
+
+struct List_13B610 { s32 head; s32 pad; s32 off; };
+struct Frame_13B610;
+extern Frame_13B610* D_0027B314;
+struct Frame_13B610 {
+    void* base; void* cur; s32 off; Frame_13B610* prev;
+    Frame_13B610(List_13B610* l) {
+        cur = l;
+        base = l;
+        Frame_13B610* p = D_0027B314;
+        off = l->off;
+        D_0027B314 = this;
+        prev = p;
+    }
+    ~Frame_13B610() { D_0027B314 = prev; }
+};
+
+struct Self_13B610 {
+    u8 pad0[0x34];
+    s32 head;
+    s32 pad38;
+    s32 off;
+    u8 pad1[0x578 - 0x40];
+    s32 count;
+    s32 arr[16];
+    u8 pad2[0x684 - 0x5BC];
+    s32 f684;
+    u8 pad3[0x68C - 0x688];
+    s32 f68C;
+};
+
+
+void func_00124A48(void* self);
+s32 func_001300E8(void* node, s32 kind);
+void func_00182ED8(s32 a);
+void* func_0018D500(s32 size);
+
+void func_0013B610(Self_13B610* self)
+{
+    func_00124A48(self);
+    Frame_13B610 f((List_13B610*)&self->head);
+    void* n;
+    void* t = *(void**)f.base;
+    f.cur = (u8*)t + f.off;
+    n = t;
+    if (n != 0) {
+        do {
+            if (func_001300E8(n, 0x27)) {
+                s32 c = self->count;
+                if ((u32)c < 16) {
+                    self->arr[c] = (s32)n;
+                    self->count = c + 1;
+                    func_00182ED8((s32)n);
+                }
+            }
+            void* c = f.cur; s32 o = f.off; void* a = *(void**)c;
+            f.cur = (u8*)a + o; n = a;
+        } while (n != 0);
+    }
+    if (self->f684 != 0) {
+        self->f68C = (s32)func_0018D500(0xC0);
+    }
+}

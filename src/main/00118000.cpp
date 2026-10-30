@@ -1342,3 +1342,86 @@ void* func_00119128(void* out, Args_119128* a1, void* a2)
 done:
     return out;
 }
+
+struct Link_1194A8 { s32 f0; Link_1194A8* f4; Link_1194A8* f8; };
+struct __attribute__((aligned(16))) Quad_1194A8 { s32 type; Link_1194A8* head; s32 w2; s32 w3; };
+struct Ent_1194A8 { s32 f0; Link_1194A8* f4; Link_1194A8* f8; };
+struct Owner_1194A8 { s32 f0; Ent_1194A8* f4; };
+
+void* func_0011B008(void* q);
+void func_0011B018(void* self, void* q);
+void func_0011B538(void* q, s32 n);
+void func_0011A080(void* t, void* n, void* c);
+void func_0011B0A8(void* a, void* b);
+void func_0011B060(void* q, s32 mode);
+void func_00113AA8(void* a, s32 b, void* c, void* d);
+
+void* func_001194A8(void* self, Link_1194A8* h, void* arg)
+{
+    Quad_1194A8 a;
+    Quad_1194A8 b;
+    Quad_1194A8 c;
+    Quad_1194A8 d;
+    func_0011B008(&a);
+    u8* p = (u8*)&b;
+    for (s32 k = 1; k != -1; k--) {
+        func_0011B008(p);
+        p += 8;
+    }
+    func_0011B008(&c);
+    func_0011B538(&a, 0x22);
+    Link_1194A8* s0 = ((Owner_1194A8*)h)->f4->f8;
+    func_0011A080(&d, s0, arg);
+    func_0011B0A8(&b, &d);
+    func_0011B060(&d, 2);
+    h = s0->f8;
+    if (h) do {
+        Link_1194A8* e = h->f4;
+        s32 found;
+        if (e->f0 == 10) {
+            found = 1;
+        } else {
+            found = 0;
+            Link_1194A8* x = e->f4;
+            if (x) {
+                do {
+                    func_0011B0A8((u8*)&b + 8, x);
+                    func_00113AA8(&d, 2, &b, arg);
+                    func_0011B0A8(&c, &d);
+                    func_0011B060(&d, 2);
+                    if (c.type == 0x1B && c.head != 0) {
+                        found = 1;
+                        x = 0;
+                    } else {
+                        x = x->f8;
+                    }
+                } while (x);
+            }
+        }
+        if (found) {
+            e = e->f8;
+            if (e) {
+                do {
+                    func_0011A080(&d, e, arg);
+                    func_0011B0A8(&a, &d);
+                    func_0011B060(&d, 2);
+                    e = e->f8;
+                } while (e);
+            }
+            h = 0;
+        } else {
+            h = h->f8;
+        }
+    } while (h);
+    func_0011B018(self, &a);
+    func_0011B060(&c, 2);
+    u8* p2 = (u8*)&c;
+    if ((u8*)&b != p2) {
+        do {
+            p2 -= 8;
+            func_0011B060(p2, 0);
+        } while ((u8*)&b != p2);
+    }
+    func_0011B060(&a, 2);
+    return self;
+}
