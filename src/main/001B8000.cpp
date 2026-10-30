@@ -689,3 +689,37 @@ s32 func_001BB800(Obj_1BB800* obj, s32* outCount, void*** outArr)
     *outCount = cnt;
     return cnt;
 }
+
+struct Node_1BA550 { u8 pad0[8]; Node_1BA550* next; };
+
+struct Obj_1BA550 { u8 pad0[0x4B0]; Node_1BA550* chain; };
+
+void func_00129DF8(void* self);
+
+void func_001BA550(Obj_1BA550* o, Node_1BA550* node)
+{
+    Node_1BA550** link = &o->chain;
+    if (*link == 0) {
+        goto tail;
+    }
+    if (o->chain == node) {
+        o->chain = node->next;
+    } else {
+        Node_1BA550* prev;
+        for (;;) {
+            prev = *link;
+            Node_1BA550* nx = prev->next;
+            link = &prev->next;
+            if (nx == 0) {
+                goto tail;
+            }
+            if (nx == node) {
+                break;
+            }
+        }
+        prev->next = node->next;
+    }
+    node->next = 0;
+tail:
+    func_00129DF8(o);
+}

@@ -73,6 +73,7 @@ s32 func_0018CFC0(void* owner, void* name, State_18CFC0* state)
     return func_0018D368(owner, name,
         (state->handle = func_00160650(state), state), 0x1A00);
 }
+
 extern void func_001605E8(void*);
 extern s32 func_0018CFC0(void*, void*, void*);
 extern s32 func_0018C9C0(void*, void*, void*);
@@ -86,8 +87,6 @@ s32 func_0018D028(void* a0, void* a1, void* a2, void* a3)
     if (result != 0) return result;
     return func_0018C9C0(a0, a1, a3);
 }
-
-
 
 s32 func_0018D168(Obj_18D168* a0, s32* a1)
 {
@@ -134,6 +133,7 @@ void func_0018D328(void* unused, void* a1, void* a2, void* a3, void* a4)
 {
 	func_0018BD00((s32)func_00209990(a1, a2, a3), (void*)6, (s32)a4);
 }
+
 struct Result_18D368 { s32 first; s32 second; };
 extern s32 func_0018D268(void*, void*, void*, void*);
 extern void func_0018D328(void*, void*, void*, void*, void*);
@@ -150,7 +150,6 @@ s32 func_0018D368(void* self, void* code, void* data, s32 version)
     func_0018D2B0(self, (void*)result.first);
     return status;
 }
-
 
 void func_0018D4F8(s32 size)
 {
@@ -628,6 +627,7 @@ loop: {
         e = (Elem_18C028*)((u8*)e + 0x1A5C);
     } while (--n >= 0);
 }
+
 store:
     self->f0C = value;
     self->f10 = D_00261858->f10;
@@ -986,4 +986,40 @@ void func_0018E6A0(Cursor_18E6A0* c)
     c->f10 = 0;
     c->fC = 0;
     c->f1C = 0;
+}
+
+struct Local_18EF78 { u8 bytes[0x30]; };
+
+void func_001611B8(Local_18EF78* b);
+void func_001529C8(Local_18EF78* b, s32 a1, void* self);
+void func_00152B38(Local_18EF78* b);
+void func_001613C0(Local_18EF78* b, s32 a1, s32 a2, u64 a3);
+void func_00161708(Local_18EF78* b, s32 a1, u64 a2);
+void func_001614C8(Local_18EF78* b, s32 a1, s32 a2);
+void func_001615F0(Local_18EF78* b, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_00161200(Local_18EF78* b);
+void func_00152D30(Local_18EF78* b);
+void func_001529E0(Local_18EF78* b, s32 a1, s32 a2);
+
+void func_0018EF78(void* self, s32 a1, s32 a2)
+{
+    Local_18EF78 buf;
+    func_001611B8(&buf);
+    func_001529C8(&buf, 0x12, self);
+    func_00152B38(&buf);
+    func_001613C0(&buf, 6, 1, 0xE);
+    func_00161708(&buf, 6, 0x0AA8029E00ULL);
+    func_00161708(&buf, 0x14, 0x61);
+    func_00161708(&buf, 8, 5);
+    func_00161708(&buf, 0x42, 0x44);
+    func_00161708(&buf, 0x47, 0x31001);
+    func_001613C0(&buf, 0x116, 5, 0xE4343);
+    func_001614C8(&buf, 8, 8);
+    func_001615F0(&buf, 0x6C00, 0x7900, 0, 0);
+    func_001614C8(&buf, (a1 << 4) | 8, (a2 << 4) | 8);
+    func_001615F0(&buf, 0x9400, 0x8700, 0, 0);
+    func_00161708(&buf, 0x61, 0);
+    func_00161200(&buf);
+    func_00152D30(&buf);
+    func_001529E0(&buf, 0, 0);
 }

@@ -491,3 +491,83 @@ void func_001E56A0(void* self, void* obj, f32 t)
         }
     }
 }
+
+typedef void (*VFn_1E5428)(void* self, void* other);
+
+struct Vt_1E5428 {
+    VFn_1E5428* vtbl;
+};
+
+struct Ctx_1E5428 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x584 - 0x18];
+    void* f584;
+    void* f588[3];
+    f32 f594;
+    void* f598;
+    u8 pad2[0x610 - 0x59C];
+    void* f610;
+    void* f614;
+    u8 pad3[0x620 - 0x618];
+    void* f620;
+    void* f624;
+    u8 pad4[0x638 - 0x628];
+    s32 f638;
+    void** f63C;
+    s32* f640;
+};
+
+struct Peer_1E5428 {
+    u8 pad0[0xC2C];
+    Ctx_1E5428* owner;
+};
+
+extern u8 D_00275B28[];
+
+void func_00124A48(void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+void* func_001B6290(void* a, void* self, s32 b, s32 c);
+void* func_0015A448(void* a, s32 b, void* c);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void func_00189230(void* a, void* b, void* c);
+
+void func_001E5428(Ctx_1E5428* self)
+{
+    void* r2;
+    s32 i;
+    s32 n;
+    void* r;
+
+    func_00124A48(self);
+    func_00124DF8(self, 3, D_00275B28);
+    self->f614 = func_001B6290(self->f610, self, -1, 1);
+    r = func_0015A448(D_00275710, 7, self);
+    if (r != 0) {
+        self->f620 = r;
+        self->f624 = r;
+        ((Peer_1E5428*)r)->owner = self;
+        self->f598 = r;
+        self->f584 = (void*)func_0015A418(self->f14, 1, 0x160, r);
+        i = 0;
+        do {
+            self->f588[i] = (void*)func_0015A418(self->f14, 1, i + 0x161, r);
+            i++;
+        } while (i < 3);
+        self->f594 = 300.0f;
+        ((Vt_1E5428*)r)->vtbl[27](r, self);
+    } else {
+        self->f620 = (void*)D_00262E10;
+    }
+
+    n = 0;
+    while (n < self->f638) {
+        r2 = func_0015A448(self->f14, self->f640[n], self);
+        if (r2 != 0) {
+            self->f63C[n] = r2;
+            n++;
+        }
+    }
+    self->f638 = n;
+    func_00189230((u8*)self + 0x110, (u8*)self + 0x648, (u8*)self + 0x64C);
+}

@@ -765,3 +765,55 @@ void func_001DB238(Ctl_1DB110* self, s32 mode)
         }
     }
 }
+
+struct Ctrl_1D9C98 {
+    u8 pad0[0xF8];
+    f32 f0F8;
+    u8 pad1[0x698 - 0xFC];
+    s32 n698;
+    u8 pad2[0x850 - 0x69C];
+    f32 f850;
+    u8 pad3[0xB34 - 0x854];
+    s32 nB34;
+};
+
+void func_00192B58(Ctrl_1D9C98* self, f32 t);
+void func_001D8578(Ctrl_1D9C98* self);
+void func_001D87C8(Ctrl_1D9C98* self, s32* out);
+void func_001D8BD0(Ctrl_1D9C98* self);
+void func_001D9678(Ctrl_1D9C98* self, f32 t);
+void func_001D8D90(Ctrl_1D9C98* self);
+void func_001D8E40(Ctrl_1D9C98* self);
+void func_001D9488(Ctrl_1D9C98* self, s32 v);
+void func_001D9AC8(Ctrl_1D9C98* self);
+void func_00129DF8(Ctrl_1D9C98* self);
+
+extern f32 D_0026185C;
+
+void func_001D9C98(Ctrl_1D9C98* self, f32 t)
+{
+    s32 local = 0;
+    func_00192B58(self, t);
+    if (self->nB34 != 1) {
+        if (self->nB34 < 2) {
+            if (self->nB34 == 0) {
+                self->n698 = 0;
+            }
+        }
+    } else {
+        func_001D8578(self);
+        func_001D87C8(self, &local);
+        func_001D8BD0(self);
+    }
+    func_001D9678(self, t);
+    func_001D8D90(self);
+    func_001D8E40(self);
+    func_001D9488(self, local);
+    func_001D9AC8(self);
+    if (self->f0F8 > 0.5f) {
+        self->f850 = D_0026185C;
+    }
+    if (self->nB34 != 0) {
+        func_00129DF8(self);
+    }
+}

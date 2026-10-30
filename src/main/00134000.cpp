@@ -525,3 +525,59 @@ tail:
     tab = (f32*)D_00261858;
     self->f268 = tab[1];
 }
+
+struct Chan_001373D0 {
+    s32 a00;
+    s32 mode;
+    s32 a08;
+    s32 a0C;
+    s32 a10;
+    s32 a14;
+    s32 a18;
+    s32 a1C;
+    s32 a20;
+    s32 a24;
+    s32 a28;
+    s32 a2C;
+    s32 a30;
+    s32 a34;
+    s32 a38;
+    s32 a3C;
+    s32 a40;
+};
+
+s32 func_001F8DB8(s32 p, s32 a, s32 b);
+
+void func_001F8C38(s32 p);
+void func_00203E28(void);
+void func_0011E2A0(void);
+
+void func_001373D0(Chan_001373D0* self)
+{
+    s32 next = -1;
+    switch (self->mode) {
+    case 0:
+        if (self->a34 >= 0) {
+            func_001F8C38(self->a34);
+        }
+        break;
+    case 1:
+        if (self->a3C != 0) {
+            if ((self->a00 & 2) != 0) {
+                func_00203E28();
+            } else {
+                func_0011E2A0();
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    self->mode = next;
+    self->a20 = 0;
+    self->a18 = 0;
+    self->a24 = 0;
+    self->a1C = 0;
+    self->a28 = 0;
+    self->a2C = 0;
+}

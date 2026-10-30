@@ -651,3 +651,8 @@ void func_00163990(s32 mode, void* obj)
         break;
     }
 }
+
+void* func_00160810(s32 key)
+{
+    return key == -1 ? 0 : (u8*)D_002623C0 + ((key >> 8) * 0x44C + 0x10) + (key & 0xFF) * 0x78;
+}

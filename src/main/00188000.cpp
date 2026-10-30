@@ -655,3 +655,30 @@ void func_0018BD58(Obj_18BD58* self, s32 a, s32 b)
     self->f4F48 = 0;
     self->f4F44 = 0;
 }
+
+// NEAR: same callees, args and frame. Retail saves s2,s1,s0 then moves a2->s2, a1->s1 before the jal and fills its delay slot with self->s0; the compiler places move s0 early and fills the delay slot with move s1.
+typedef s32 (*Cb_18A910)(void* self, void* ctx);
+
+struct Self_18A910 {
+    u8 pad[0x14];
+    void* f14;
+};
+
+s32 func_0018A830(void* self, void* ctx);
+void func_0018D608(void* self, void* a1, void* a2);
+void func_001DC238(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
+s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f);
+void func_0018D6F0(void);
+extern f32 D_002649C4;
+
+s32 func_0018A910(Self_18A910* self, void* a1, void* a2)
+{
+    u8 buf[0x70];
+    s32 x;
+    s32 y;
+    func_0018D608(self, a1, a2);
+    func_001DC238(self->f14, 0, a1, a2, func_0018A830, self, &x, &y);
+    s32 r = func_0018A6C0(0, a1, a2, x, y, buf, D_002649C4);
+    func_0018D6F0();
+    return r != 0;
+}

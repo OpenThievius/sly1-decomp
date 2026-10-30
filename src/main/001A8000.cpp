@@ -777,3 +777,61 @@ call:
 store:
     self->f254 = *self->p258;
 }
+
+extern u8 D_00262280[];
+
+struct __attribute__((packed)) PackedWord_001AB710 { s32 v; };
+struct Local_001AB710 { f32 x; f32 y; u8 pad0[0x8]; PackedWord_001AB710 w10; u8 pad1[0xC]; s32 tag; u8 pad2[0xC]; PackedWord_001AB710 w30; };
+struct VDesc_001AB710 { u8 pad0[0x48]; s16 off48; u8 pad1[2]; void (*fn4C)(void* self, void* obj, void* out, void* d); };
+struct SubObj_001AB710 { u8 pad0[0x4C]; VDesc_001AB710* desc4C; };
+struct Actor_001AB710 { u8 pad0[4]; void* p4; s8 f08; u8 pad1[0x1FF]; s32 f208; f32 f20C; void* f210; u8 pad2[8]; f32 f21C; f32 f220; u8 pad3[0x10]; f32 f234; f32 f238; u8 pad4[0x40]; PackedWord_001AB710 w27C; u8 pad5[4]; s32 f284; };
+
+void func_00137228(void* out, f32 x, f32 y);
+void func_00137238(void* out, f32 x, f32 y);
+void func_00137248(void* out, void* p);
+void func_00137260(void* out, s32 v);
+void func_00137268(void* out, s32 v);
+void func_0015C8B8(void* p, f32 x, f32 y);
+f32 func_0015C418(void* p, void* name);
+void func_0015C638(void* p, void* name, void* out, s32 zero, void* d);
+void func_0015C900(void* p);
+
+void func_001AB710(Actor_001AB710* self)
+{
+    Local_001AB710 L;
+    if (self->f08 != 0) {
+        f32 f234 = self->f234;
+        f32 f238 = self->f238;
+        s32 s0v = self->f208;
+        func_00137228(&L, self->f21C, self->f220);
+        func_00137238(&L, f234, f238);
+        L.tag = s0v;
+        func_00137248(&L, &L.tag);
+        func_00137260(&L, 0);
+        func_00137268(&L, 0);
+        void* obj = self->f210;
+        if (obj != 0) {
+            SubObj_001AB710* sub = *(SubObj_001AB710**)obj;
+            if (sub != 0) {
+                VDesc_001AB710* d = sub->desc4C;
+                d->fn4C((u8*)sub + d->off48, obj, &L, D_00262280);
+            }
+        }
+        f32 v = self->f20C;
+        u8* dp = D_00262280;
+        func_0015C8B8(self->p4, v, v);
+        ((u8*)&L.tag)[0] = 0x54;
+        ((u8*)&L.tag)[1] = 0;
+        func_0015C638(self->p4, &L.tag, &L, 0, dp);
+        f32 r = func_0015C418(self->p4, &L.tag);
+        f32 a = self->f21C + r;
+        L.y = self->f220;
+        L.x = a;
+        if (self->f284 != 0) {
+            L.w30 = self->w27C;
+            L.w10 = L.w30;
+        }
+        func_0015C638(self->p4, (u8*)self + 9, &L, 0, dp);
+        func_0015C900(self->p4);
+    }
+}
