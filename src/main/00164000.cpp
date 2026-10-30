@@ -183,3 +183,42 @@ void func_00165FE0(Owner_165FE0* self, Sub_165FE0* sub, f32 f)
         func_001F3408(e->f0C);
     }
 }
+
+extern u8 D_00000010[];
+extern u8 D_000000F0[];
+
+struct Ctx_165588 { u8 pad0[0x28]; s32 f28; };
+struct Range_165588 { u16 lo; u16 hi; };
+struct Rec_165588 { u8 pad0[0x18]; u8* f18; Range_165588* f1C; };
+struct Out_165588 { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
+
+void func_001EE318(void* p);
+void func_00152938(void* buf, u32 count, u32 kind);
+void func_001EE498(void* b, u32 x, u32 y);
+void func_001EE5C8(void* s, u32 tag, s32 size, s32 a3, void* a4, void* a5);
+void func_001EE3F0(void* s, void* n);
+void func_001529E0(void* self, void* a, void* b);
+
+void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c)
+{
+    u8 buf[0x30];
+    s32 s0;
+
+    if (*b->f18 != 0) return;
+    if (a->f28 != 0) return;
+    func_001EE318(buf);
+    s0 = (b->f1C->hi - b->f1C->lo) / 4;
+    func_00152938(buf, (u32)((s0 + 7) / 4), 0x1A);
+    func_001EE498(buf, 1, 4);
+    func_001EE5C8(buf, 0xE, s0, b->f1C->lo + 1, 0, &c->f8);
+    func_001EE498(buf, 1, 1);
+    func_001EE3F0(buf, D_00000010);
+    func_001529E0(buf, &c->f0, &c->f4);
+    func_00152938(buf, (u32)((s0 + 4) / 2), 0x1A);
+    func_001EE498(buf, 1, 4);
+    func_001EE5C8(buf, 0xE, s0, b->f1C->lo + 2, 0, &c->f14);
+    func_001EE498(buf, 1, 1);
+    func_001EE5C8(buf, 0xE, s0, b->f1C->hi, 0, 0);
+    func_001EE3F0(buf, D_000000F0);
+    func_001529E0(buf, &c->fC, &c->f10);
+}

@@ -634,3 +634,20 @@ void func_001612F8(void* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out
     }
     w->cur0C = w->cur0C + nloop * nreg * 16;
 }
+
+extern u8 D_00000FA0[];
+extern u8 D_00000FD8[];
+
+void func_001EE3F0(void* obj, void* data);
+
+void func_00163990(s32 mode, void* obj)
+{
+    switch (mode) {
+    case 0:
+        func_001EE3F0(obj, D_00000FA0);
+        break;
+    case 1:
+        func_001EE3F0(obj, D_00000FD8);
+        break;
+    }
+}
