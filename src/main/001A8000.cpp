@@ -882,3 +882,194 @@ void func_001AA0C0(void)
         p++;
     } while (n >= 0);
 }
+
+struct VTable_1A9C68 { void (*fn)(void* self, s32 i); };
+struct Obj_1A9C68 { VTable_1A9C68* vt; };
+
+extern u8* D_0026C6C8;
+extern u8* D_0026CBC8;
+extern u8* D_0026CE48;
+extern u8* D_0026D0C8;
+extern u8* D_0026D348;
+extern u8* D_0026D5C8;
+extern u8* D_0026C948;
+extern u8* D_0026D848;
+extern u8* D_0026DAC8;
+extern u8* D_0026DD48;
+extern u8* D_0026DFC8;
+extern u8* D_0026E4E0;
+extern u8* D_0026E760;
+extern u8* D_0026E9F8;
+extern u8* D_0026EC70;
+extern u8* D_0026EED0;
+extern u8* D_0026F138;
+extern u8* D_0026F5A0;
+extern u8* D_0026F808;
+extern u8* D_0026FA90;
+extern u8* D_0026FD00;
+extern u8* D_002701F8;
+extern u8* D_00270650;
+extern u8* D_00271558;
+extern u8* D_00272430;
+extern u8* D_002726B0;
+extern u8* D_00272930;
+extern u8* D_00272B98;
+extern u8* D_002721D0;
+extern u8* D_00272E08;
+extern u8* D_002708E0;
+extern u8* D_002739F0;
+extern u8* D_00273C50;
+extern u8* D_00273EB0;
+extern u8* D_00274118;
+extern u8 D_00217E30[];
+extern u8 D_00217E80[];
+extern u8 D_00217ED0[];
+extern u8 D_00217F20[];
+extern u8 D_00217F70[];
+extern u8 D_00217FC0[];
+extern u8 D_00218010[];
+extern u8 D_00218060[];
+extern u8 D_002180B0[];
+extern u8 D_00218100[];
+extern u8 D_00218150[];
+extern u8 D_002181A0[];
+extern u8 D_002181F0[];
+extern u8 D_00218240[];
+extern u8 D_00218290[];
+extern u8 D_002182E0[];
+extern u8 D_00218330[];
+extern u8 D_00218380[];
+extern u8 D_002183D0[];
+extern u8 D_00218420[];
+extern u8 D_00218470[];
+extern u8 D_002184C0[];
+extern u8 D_00218510[];
+extern u8 D_00218560[];
+extern u8 D_002185B0[];
+extern u8 D_00218600[];
+extern u8 D_002186D0[];
+extern u8 D_00218720[];
+extern u8 D_0021A3F0[];
+extern u8 D_0021A440[];
+extern u8 D_00220BF0[];
+extern u8 D_002210F0[];
+extern u8 D_002212E0[];
+extern u8 D_00221330[];
+extern u8 D_00221380[];
+extern u8 D_00275F80[];
+
+void func_001EFCE8(void* p);
+
+void func_001A9C68()
+{
+    D_0026C6C8 = D_00217E30;
+    D_0026C948 = D_00217E80;
+    D_0026CBC8 = D_00217ED0;
+    D_0026CE48 = D_00217F20;
+    D_0026D0C8 = D_00217F70;
+    D_0026D348 = D_00217FC0;
+    D_0026D5C8 = D_002180B0;
+    D_0026D848 = D_00218010;
+    D_0026DAC8 = D_00218060;
+    D_0026DD48 = D_00218100;
+    D_0026DFC8 = D_00218150;
+    *(u8**)&D_0026E248 = D_002182E0;
+    D_0026E4E0 = D_002181A0;
+    D_0026E760 = D_00218510;
+    D_0026E9F8 = D_00221380;
+    D_0026EC70 = D_00218330;
+    D_0026EED0 = D_00218380;
+    D_0026F138 = D_002183D0;
+    D_0026F5A0 = D_00218420;
+    D_0026F808 = D_002210F0;
+    D_0026FA90 = D_002212E0;
+    D_0026FD00 = D_00221330;
+    *(u8**)&D_0026FF68 = D_002186D0;
+    D_002701F8 = D_0021A440;
+    D_00270650 = D_00220BF0;
+    D_002708E0 = D_0021A3F0;
+    D_00271558 = D_0021A3F0;
+    D_00272430 = D_00218240;
+    D_002726B0 = D_00218290;
+    D_00272930 = D_00218470;
+    D_00272B98 = D_002184C0;
+    D_002721D0 = D_00218560;
+    D_00272E08 = D_00218720;
+    D_002739F0 = D_002185B0;
+    D_00273C50 = D_002185B0;
+    D_00273EB0 = D_00218600;
+    D_00274118 = D_002181F0;
+    for (s32 i = 0x24; i >= 0; i--) {
+        ((Obj_1A9C68**)D_002486B0)[i]->vt->fn(((Obj_1A9C68**)D_002486B0)[i], i);
+    }
+    func_001EFCE8(D_00275F80);
+}
+
+struct VT_1AA5A0 {
+    u8 pad0[0x10];
+    s16 adj;
+    u8 pad1[2];
+    s32 (*fn)(void* self, s32 c);
+};
+
+struct In_1AA5A0 {
+    u8 pad[0x4C];
+    VT_1AA5A0* vt;
+    s32 call(s32 c) { return vt->fn((u8*)this + vt->adj, c); }
+};
+
+struct Obj_1AA5A0 {
+    u8 pad0[4];
+    In_1AA5A0* in;
+    s8 text[0x200];
+};
+
+extern s8 D_00262250[];
+extern u8 D_0024E879[];
+In_1AA5A0* func_0015C1C0(s32 k);
+s32 func_001E1FD0(char* dst, const char* fmt, ...);
+void func_001E2138(void* dst, void* src);
+
+void func_001AA5A0(Obj_1AA5A0* self)
+{
+    char buf[0x200];
+    s8* s = self->text;
+    char* d = buf;
+    if (*s != 0) {
+        do {
+            if (self->in->call(*s) == 0) {
+                if (func_0015C1C0(3)->call(*s) != 0) {
+                    d += func_001E1FD0(d, "&%c%c&.", D_00262250[3], *s);
+                    goto next;
+                }
+                if (func_0015C1C0(4)->call(*s) != 0) {
+                    d += func_001E1FD0(d, "&%c%c&.", D_00262250[4], *s);
+                    goto next;
+                }
+            }
+            if (*s == 0x2F) {
+                if (D_0024E879[s[1]] & 4) {
+                    d += func_001E1FD0(d, "^05~b2a83d/");
+                    s++;
+                    while (*s != 0 && (D_0024E879[*s] & 4)) {
+                        *d = *s;
+                        s++;
+                        d++;
+                    }
+                    d += func_001E1FD0(d, "~.^.");
+                    s--;
+                } else {
+                    *d = *(u8*)s;
+                    d++;
+                }
+            } else {
+                *d = *(u8*)s;
+                d++;
+            }
+        next:
+            s++;
+        } while (*s != 0);
+    }
+    *d = 0;
+    func_001E2138(self->text, buf);
+}

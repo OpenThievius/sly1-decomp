@@ -703,3 +703,117 @@ void func_001605E8(Obj_001605E8* self)
     self->g = -1;
     func_001A7E90(self);
 }
+
+struct Key_160948 {
+    u8 pad_000[8];
+    s32 f8;
+    u8 pad_00C[0xC];
+    s32 f18;
+    s32 Same(Key_160948* o)
+    {
+        if (this == o) {
+            return 1;
+        }
+        if (this == 0) {
+            return 0;
+        }
+        if (o == 0) {
+            return 0;
+        }
+        return ((f8 ^ f18) ^ (o->f8 ^ o->f18)) == 0;
+    }
+};
+
+struct Frame_160948;
+extern Frame_160948* D_0027B314;
+
+struct Lst_160948 {
+    void* head;
+    s32 pad4;
+    s32 next_off;
+};
+
+struct Frame_160948 {
+    void* list;
+    void* cursor;
+    s32 next_off;
+    Frame_160948* prev;
+    Frame_160948(Lst_160948* l)
+    {
+        list = l;
+        cursor = l;
+        next_off = l->next_off;
+        prev = D_0027B314;
+        D_0027B314 = this;
+    }
+    ~Frame_160948() { D_0027B314 = prev; }
+    void* Next()
+    {
+        void* n = *(void**)cursor;
+        cursor = (u8*)n + next_off;
+        return n;
+    }
+};
+
+struct Ctx_160948 {
+    u8 pad0[0xC];
+    f32 fC;
+    u8 pad10[0x19D8 - 0x10];
+    s32 f19D8;
+    s32 f19DC;
+    u8 pad19E0[0x19EC - 0x19E0];
+    s32 f19EC;
+};
+
+struct Rec_160948 {
+    u8 pad0[0x6C];
+    void* head;
+};
+
+extern u8 D_002623D8[];
+struct Sys_160948 { u8 pad0[0x30]; s32 f30; };
+extern Sys_160948 D_00275BC0;
+extern Key_160948 D_00275B04;
+extern Key_160948 D_00247AB0;
+extern s32 D_00275F84;
+
+Key_160948* func_00160180(s32 key);
+void func_00160CC8(void* p);
+void func_001F0428(void* a, s32 b, s32 c);
+void func_001C0760(s32 flag);
+void func_001C0790(s32 flag);
+Rec_160948* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void func_0012E760(void* obj);
+void func_001E96F8(void* obj, s32 mode);
+
+void func_00160948(void)
+{
+    Key_160948* k = func_00160180((((Ctx_160948*)D_002623C0)->f19D8 << 8) | ((Ctx_160948*)D_002623C0)->f19DC);
+    if (k == 0) {
+        k = &D_00247AB0;
+    }
+    func_00160CC8(D_002623D8);
+    if (D_00275BC0.f30 != 1 || ((Ctx_160948*)D_002623C0)->fC != 0.0f || !k->Same(&D_00275B04)) {
+        func_001F0428(k, -1, 1);
+    } else if (D_00275BC0.f30 == 1) {
+        if (D_00275F84 == 0) {
+            func_001C0760(((Ctx_160948*)D_002623C0)->f19EC & 0x80);
+            func_001C0790(((Ctx_160948*)D_002623C0)->f19EC & 0x40);
+            Rec_160948* r = func_0015A418(D_00275710, 0x105, 0x494, 0);
+            if (r != 0) {
+                Frame_160948 frame((Lst_160948*)((u8*)r + 0x6C));
+                void* head = r->head;
+                frame.cursor = (u8*)head + frame.next_off;
+                void* node = head;
+                if (node != 0) {
+                    do {
+                        func_0012E760(node);
+                        node = frame.Next();
+                    } while (node != 0);
+                }
+            }
+            D_00275BC0.f30 = -1;
+            func_001E96F8(&D_00275BC0, 3);
+        }
+    }
+}

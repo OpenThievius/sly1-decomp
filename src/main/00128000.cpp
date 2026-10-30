@@ -1732,3 +1732,66 @@ void func_0012B5B8(Obj_12B5B8* self, void* a1, void* a2)
         func_00128150(0, a2, (u8*)self + 0x110, (u8*)self + 0xD0);
     }
 }
+
+struct Blk_128C10 {
+    u8 b[48];
+} __attribute__((aligned(16)));
+
+struct Obj_128C10 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad18[0x224 - 0x18];
+    u8* f224;
+};
+
+extern u8 D_002483D0[];
+
+s32 func_00137C40(void* a);
+void* func_0018D5C0(u32 n);
+void func_00137EB0(void* a, void* b);
+s32 func_00137D10(void* a);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void func_00137E70(void* a, void* b);
+f32 func_00137DF8(void* a);
+f32 func_001EA408(f32 a);
+s32 func_00137B90(void* a);
+
+void func_00128C10(Obj_128C10* self, void* a1)
+{
+    s32 flags = func_00137C40(a1);
+    if (flags) {
+        u8* p = (u8*)func_0018D5C0(0xC0);
+        self->f224 = p;
+        *(s32*)(p + 0xB0) = flags;
+        u8* q = p + 0x30;
+        *(Blk_128C10*)p = *(Blk_128C10*)D_002483D0;
+        *(Blk_128C10*)q = *(Blk_128C10*)D_002483D0;
+        if (flags & 1) func_00137EB0(a1, p);
+        if (flags & 2) func_00137EB0(a1, q);
+        if (flags & 0xC) {
+            s32 r = func_00137D10(a1);
+            if (r != -1) {
+                *(s32*)(p + 0x60) = func_0015A418(self->f14, 3, r, self);
+            }
+        }
+        if (flags & 0x10) {
+            *(s32*)(p + 0x60) = func_00137D10(a1);
+        }
+        if (flags & 0x20) {
+            *(s32*)(p + 0x84) = func_00137D10(a1);
+            func_00137E70(a1, p + 0x60);
+            func_00137E70(a1, p + 0x70);
+            f32 f = func_001EA408(func_00137DF8(a1));
+            *(s32*)(p + 0x98) = 0;
+            *(f32*)(p + 0x8C) = f;
+            *(f32*)(p + 0x90) = f;
+        }
+        if (flags & 0x40) {
+            *(s32*)(p + 0x60) = func_00137D10(a1);
+            *(s32*)(p + 0x64) = func_00137D10(a1);
+        }
+        if (flags & 0x80) {
+            *(s32*)(p + 0xA0) = func_00137B90(a1);
+        }
+    }
+}

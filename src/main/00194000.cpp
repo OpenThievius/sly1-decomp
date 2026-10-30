@@ -421,3 +421,76 @@ void func_00194D30(Self_194D30* self, s32 idx, s32 value)
         }
     }
 }
+
+struct Obj_197848;
+struct VT_197848 {
+    u8 pad0[0x18];
+    void (*f18)(Obj_197848*);
+    u8 pad1[0x84 - 0x1C];
+    void (*f84)(Obj_197848*, void*);
+    void (*f88)(Obj_197848*, void*);
+    u8 pad2[0x90 - 0x8C];
+    void (*f90)(Obj_197848*, void*);
+    void (*f94)(Obj_197848*, void*);
+};
+struct Obj_197848 {
+    VT_197848* vt;
+    u8 pad[0xC14 - 4];
+    void* fC14;
+};
+struct Node_197848 {
+    u8 pad[0x568];
+    Node_197848* next;
+};
+struct Self_197848 {
+    u8 pad[0x690];
+    s32 count;
+    Obj_197848** items;
+    f32 time;
+    u8 list[4];
+};
+
+extern f32 D_00261858[];
+extern u8 D_00248D30[];
+extern f32 D_0026A838;
+extern Obj_197848* func_00182FC8(Obj_197848*);
+extern s32 func_001527D8(void* list);
+extern s32 func_001EAA70(s32 a, s32 b);
+extern void func_00152600(void* a, void* b);
+extern void func_00152470(void* a, void* b);
+extern void func_001C8F20(void* node, s32 kind, s32 flag);
+extern void func_001A76A0(void* node, s32 flag);
+
+void func_00197848(Self_197848* self)
+{
+    s32 scratch[4];
+    if (D_00261858[1] < self->time) return;
+    s32 i = 0;
+    for (; i < self->count; i++) {
+        if (func_00182FC8(self->items[i]) == 0) break;
+    }
+    if (i >= self->count) {
+        self->time = 3.4028234663852886e+38f;
+        return;
+    }
+    Obj_197848* o = self->items[i];
+    s32 n = func_001EAA70(0, func_001527D8(self->list) - 1);
+    Node_197848* nd = *(Node_197848**)self->list;
+    if (n > 0) {
+        do {
+            nd = nd->next;
+        } while (--n);
+    }
+    if (nd == 0) return;
+    func_00152600(self->list, nd);
+    func_00152470((u8*)self + 0x6A8, nd);
+    o->vt->f18(o);
+    o->vt->f84(o, (u8*)nd + 0x140);
+    o->vt->f88(o, (u8*)nd + 0x110);
+    o->vt->f90(o, D_00248D30);
+    o->vt->f94(o, D_00248D30);
+    func_001C8F20(o, 0x10, 0);
+    o->fC14 = nd;
+    func_001A76A0(nd, 1);
+    self->time = D_00261858[1] + D_0026A838;
+}

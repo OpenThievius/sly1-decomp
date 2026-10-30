@@ -1118,3 +1118,51 @@ void func_0018DB20(Self_18DB20* self, void* in1, void* in2)
         }
     }
 }
+
+struct Card_18C250 { u8 pad0[4]; void* f4; void* f8; u8 pad1[8]; s32 f14; u8 pad2[0x10]; s32 f28; };
+
+extern u8 D_00248470[];
+extern void* func_0020A078(void*, void*, const char*);
+extern s32 func_0018BD00(void*, s32, void*);
+extern s32 func_0018C1E8(void*);
+extern s32 func_0018D228(void*, const char*);
+extern s32 func_0018D368(void*, const char*, const char*, s32);
+extern s32 func_0018CA10(void*, const char*, const char*);
+extern s32 func_0018CBF8(void*, const char*);
+extern s32 func_001E1FD0(char*, const char*, ...);
+extern s32 func_0018D028(void*, void*, void*, void*);
+
+s32 func_0018C250(Card_18C250* self)
+{
+    char name[0x50];
+    s32 info[4];
+    s32 r = func_0018BD00(func_0020A078(self->f4, self->f8, "/"), 0x12, info);
+    if (r != 0) return r;
+    s32 need = info[0] == 0 ? 2 : 1;
+    s32 sz = func_0018C1E8(D_00248470);
+    need += 5;
+    need += (sz + 1023) / 1024;
+    need += 0x15;
+    if (self->f28 < need) return 1;
+    const char* dir = "/BASCUS-97198YAOTWTD!";
+    r = func_0018D228(self, dir);
+    if (r == 0) {
+        const char* title = "Sly Cooper";
+        r = func_0018D368(self, "/BASCUS-97198YAOTWTD!/BASCUS-97198YAOTWTD!", title, 10);
+        if (r == 0) {
+            r = func_0018CA10(self, dir, title);
+            if (r == 0) {
+                r = func_0018CBF8(self, dir);
+                if (r == 0) {
+                    for (s32 i = 0; i < 3; i++) {
+                        func_001E1FD0(name, "/%s/%s%d", "BASCUS-97198YAOTWTD!", "save", i + 1);
+                        r = func_0018D028(self, name, (u8*)self + 0x30 + i * 0x1A5C, (u8*)self + 0x1A30 + i * 0x1A5C);
+                        if (r != 0) return r;
+                    }
+                    if (self->f14 < 5) self->f14 = 5;
+                }
+            }
+        }
+    }
+    return r;
+}

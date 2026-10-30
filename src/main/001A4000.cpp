@@ -676,7 +676,6 @@ void func_001A7708(Obj_1A7708* self)
     func_001B9AE0(self, 3, 0, 3, 0);
 }
 
-
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001A5760(void* self, f32 t);
 void func_00152600(u8* a, void* b);
@@ -835,7 +834,6 @@ void func_001A7750(u8* self)
     func_00159478(self + 0x568, self);
 }
 
-
 struct Q_1A7AA0 { u8 pad[0x34]; f32 f34; };
 struct P_1A7AA0 { u8 pad0[0x8]; Q_1A7AA0* q; u8 pad1[0x8]; f32 f14; };
 struct Obj_1A7AA0 { u8 pad0[0x550]; s32 mode; u8 pad1[0x10]; P_1A7AA0* p; };
@@ -918,7 +916,6 @@ code5:
         self->i688 = 1;
     }
 }
-
 
 f32 func_001EAAE0(f32 a, f32 b);
 void func_00152600(u8* a, void* b);
@@ -1242,4 +1239,115 @@ void func_001A4610(Obj_1A4610* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     func_001BC828(self, a1, a2, a3, a4, a5);
     self->q440 = s0;
     self->q450 = s1;
+}
+
+struct Iter_1A54F8 {
+    void* head;
+    u32 pad4;
+    s32 link;
+};
+
+struct Frame_1A54F8;
+extern Frame_1A54F8* D_0027B314;
+
+struct Frame_1A54F8 {
+    Iter_1A54F8* iter;
+    void* cursor;
+    s32 link;
+    Frame_1A54F8* prev;
+    Frame_1A54F8(Iter_1A54F8* i)
+    {
+        iter = i;
+        cursor = i;
+        link = i->link;
+        prev = D_0027B314;
+        D_0027B314 = this;
+    }
+    ~Frame_1A54F8() { D_0027B314 = prev; }
+    void* Next()
+    {
+        void* n = *(void**)cursor;
+        cursor = (u8*)n + link;
+        return n;
+    }
+};
+
+struct Vt_1A54F8 {
+    void* slot[0x18 / 4];
+};
+
+struct Obj_1A54F8 {
+    u8 pad0[0x560];
+    void* f560;
+    f32 f564;
+    f32 f568;
+};
+
+struct Node_1A54F8 {
+    void** vtbl;
+};
+
+struct Spawn_1A54F8 {
+    u8 pad0[0x384];
+    u8 l384[0xC];
+    u8 l390[0xC];
+    s32 n39C;
+    Iter_1A54F8 l3A0;
+    u8 l3AC[0x628 - 0x3AC];
+    s32 n628;
+    u8 pad62C[0x638 - 0x62C];
+    f32 f638;
+    f32 f63C;
+    f32 f640;
+    f32 f644;
+    f32 f648;
+};
+
+s32 func_001527D8(Iter_1A54F8* list);
+void func_00152600(void* list, void* item);
+void func_00152470(void* list, void* item);
+s32 func_001EAA70(s32 a, s32 b);
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001A6BE0(void* self, s32 mode);
+void func_001A76A0(void* node, s32 flag);
+extern f32 D_00261858[];
+
+void func_001A54F8(Spawn_1A54F8* self)
+{
+    if (self->n39C >= self->n628) {
+        self->f640 = 3.4028234663852886e+38f;
+    } else {
+        Node_1A54F8* owner = *(Node_1A54F8**)(self->l390);
+        s32 count = func_001527D8(&self->l3A0);
+        if (count != 0) {
+            Frame_1A54F8 w(&self->l3A0);
+            u8* node;
+            s32 r = func_001EAA70(0, count - 1);
+            s32 j = r;
+            j--;
+            if (r >= 0) {
+                do {
+                    node = (u8*)w.Next();
+                } while (j-- >= 0);
+            }
+            func_00152600(&self->l3A0, node);
+            func_00152470(self->l3AC, node);
+            func_00152600(self->l390, owner);
+            func_00152470(self->l384, owner);
+            *(void**)((u8*)owner + 0x560) = node;
+            self->n39C++;
+            ((void (*)(void*))owner->vtbl[0x18 / 4])(owner);
+            ((void (*)(void*, void*))owner->vtbl[0x84 / 4])(owner, node + 0x140);
+            ((void (*)(void*, void*))owner->vtbl[0x88 / 4])(owner, node + 0x110);
+            func_001A6BE0(owner, 1);
+            func_001A76A0(*(void**)((u8*)owner + 0x560), 1);
+            *(f32*)((u8*)owner + 0x564) = self->f644;
+            *(f32*)((u8*)owner + 0x568) = self->f648;
+            f32* fp = &self->f638;
+            self->f640 = D_00261858[1] + func_001EAAE0(self->f638, fp[1]);
+            func_001BFCD8(-1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            func_001BFCD8(0x14E, 0, (s32)node, 0, 12000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        }
+    }
 }

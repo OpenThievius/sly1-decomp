@@ -932,3 +932,67 @@ void func_001DD3E0(Quad_001DD3E0* a, Quad_001DD3E0* b, Word_001DD3E0* c, u8* obj
                       tp, k);
     }
 }
+
+struct Cam_11A338 { u8 pad0[0x19D8]; s32 hi; s32 lo; };
+struct Ent_11A338 { u32 pad0; f32 f4; u8 pad1[0x1C - 8]; s32 w1c; u8 pad2[0x28 - 0x20]; void* w28; };
+struct Cur_11A338 { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
+struct Glob_11A338 { u8 pad0[0x230C]; f32 f; Cur_11A338* cur; void* nm; };
+struct VTab_11A338;
+struct Obj_11A338 { VTab_11A338* vt; u8 pad0[0x208 - 4]; s32 color; u8 pad1[4]; void** slot; u8 pad2[0x26C - 0x214]; s32 f26c; s32 f270; };
+struct VTab_11A338 { u8 pad[0x20]; void (*f20)(Obj_11A338*, const char*); u8 pad2[0x38 - 0x24]; void (*f38)(Obj_11A338*); };
+struct Flags_11A338 { u32 flags; };
+
+extern u8 D_002758E0[];
+
+void func_001AA268(void* self);
+Ent_11A338* func_001DFE80(s32 k);
+s32 func_001E2100(void* p);
+s32 func_0015C188(s32 k);
+void* func_0015C1C0(s32 k);
+void func_001AA788(void* self, f32 v);
+void func_001AA8B8(void* self, f32 v);
+s32 func_001DD7A0(Glob_11A338* g, s32 k);
+void func_001E02C8(void* self, s32 n);
+
+void func_001DFEB8(Obj_11A338* self)
+{
+    Ent_11A338* e;
+
+    func_001AA268(self);
+    e = func_001DFE80((((Cam_11A338*)D_002623C0)->hi << 8) | ((Cam_11A338*)D_002623C0)->lo);
+    if (e) {
+        if (e->f4 != 0.0f) {
+            ((Glob_11A338*)D_00275710)->f = e->f4;
+        }
+        if (!(((Glob_11A338*)D_00275710)->cur->differs())) {
+            ((Glob_11A338*)D_00275710)->cur = (Cur_11A338*)((u8*)e + 8);
+        }
+        if (((Glob_11A338*)D_00275710)->nm == 0 || !func_001E2100(((Glob_11A338*)D_00275710)->nm)) {
+            ((Glob_11A338*)D_00275710)->nm = e->w28;
+        }
+    }
+    if (func_0015C188(2)) {
+        self->slot = (void**)D_002758E0;
+        *self->slot = func_0015C1C0(2);
+    }
+    func_001AA788(self, 0.6f);
+    *(s32*)((u8*)self + 0x208) = (s32)0xDF7F7F7Fu;
+    if (func_001DD7A0((Glob_11A338*)D_00275710, (((Cam_11A338*)D_002623C0)->hi << 8) | ((Cam_11A338*)D_002623C0)->lo)) {
+        func_001E02C8(self, 1);
+    } else {
+        func_001E02C8(self, 0);
+    }
+    if (((Flags_11A338*)D_002623C8)->flags & 8) {
+        if (((Glob_11A338*)D_00275710)->cur->differs()) {
+            self->vt->f20(self, "Press &2L&. for Bonus Commentary");
+            func_001AA8B8(self, 5.0f);
+            self->vt->f38(self);
+            self->f26c = 1;
+        } else {
+            self->f26c = 0;
+        }
+    } else {
+        self->f26c = 0;
+    }
+    self->f270 = 0;
+}

@@ -1542,3 +1542,49 @@ s32 func_0011CE30(void)
         return 1;
     return 0;
 }
+
+struct Req_0025C3C0 { s32 a; s32 result; };
+
+extern Req_0025C3C0 D_0025C3C0;
+extern u8 D_0025C400[];
+extern s32 D_0025C380;
+extern s32 D_0025C384;
+extern u8 D_0027B4C8[];
+extern u8 D_002494E8[];
+
+s32 func_0011CE30(void);
+void func_001F6C20(s32 a);
+void func_0011D110(void* p, s32 n);
+s32 func_001F8480(void* p);
+s32 func_001E1F10(void* self, ...);
+void func_001F8290(void* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, s32 h, s32 i);
+s32 func_0011D078(void);
+void func_0011DE18(void);
+
+s32 func_0011D968(s32 id, s32 size, u8* data)
+{
+    s32 i;
+    s32 r;
+    for (i = 0; i < size; i++)
+        D_0025C400[i] = data[i];
+    while ((s32)D_0025C340) {
+        func_0011CE30();
+        func_001F6C20(0);
+    }
+    func_0011D110(&D_0025C3C0, 1);
+    while (func_001F8480(D_0027B4C8)) {
+        func_001E1F10(D_002494E8);
+        func_0011CE30();
+        func_001F6C20(0);
+    }
+    if (size)
+        func_001F8290(D_0027B4C8, id, 1, D_0025C400, size, &D_0025C3C0, 0xC, 0, 0);
+    else
+        func_001F8290(D_0027B4C8, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
+    while (!func_0011D078()) {
+    }
+    r = D_0025C3C0.result;
+    if (*((s32**)&D_0025C360)[D_0025C380] != 0 && D_0025C384 == 0)
+        func_0011DE18();
+    return r;
+}

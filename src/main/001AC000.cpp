@@ -758,3 +758,100 @@ void func_001AF3B8(Obj_1AF3B8* self)
     self->f_B00 = func_001AEF00((Obj_1AEF00*)self, (void*)D_00262E10);
     ((void (*)(void*, void*))self->vtbl[81])(self, self->f560);
 }
+
+typedef void (*VFn_1AE820)(void* self);
+
+struct Obj_1AE820 {
+    VFn_1AE820* vtbl;
+    void* f4;
+    u8 pad0[0x208 - 8];
+    s32 f208;
+    f32 f20c;
+    u8 pad1[0x21C - 0x210];
+    f32 f21c;
+    f32 f220;
+    u8 pad2[0x234 - 0x224];
+    f32 f234;
+    f32 f238;
+    u8 pad3[0x250 - 0x23C];
+    s32 f250;
+    f32 f254;
+    u8 pad4[0x260 - 0x258];
+    s32 f260;
+};
+
+extern f32 D_00261868;
+extern f32 D_0027240C;
+extern s32 D_00272420;
+extern u8 D_00269990[];
+extern u8 D_00262280[];
+extern void* D_002623C0;
+
+s32 func_0018B770(void* p);
+void func_00137228(void* out, f32 x, f32 y);
+void func_00137238(void* out, f32 x, f32 y);
+void func_00137248(void* out, s32* value);
+void func_00137260(void* out, s32 flag);
+void func_00137268(void* out, s32 flag);
+s32 func_001AEA08(void);
+void* func_00160B28(void* p);
+s32 func_001E1FD0(char* dst, const char* fmt, ...);
+void func_0015C8B8(void* handle, f32 a, f32 b);
+void func_0015DB28(void* out, void* p, void* handle);
+void func_0015E318(void* buf, void* out, s32 zero, void* data);
+void func_0015C900(void* handle);
+
+void func_001AE820(Obj_1AE820* self)
+{
+    u8 out[0x20];
+    s32 tmp[4];
+    char str[0x20];
+    u8 buf[0xB0];
+    f32 adj;
+    f32 d;
+    s32 held;
+    s32 c;
+    const char* fmt;
+    char* sp;
+    f32 px;
+    f32 py;
+
+    if (self->f250 == 0) {
+        return;
+    }
+    d = D_00261868 - self->f254;
+    if (self->f250 == 2) {
+        if (D_00272420 == self->f250) {
+            self->f260 = d < 2.0f;
+        }
+    }
+    if (self->f260 != 0) {
+        adj = (1.0f - D_0027240C) * 66.40000915527344f;
+    } else {
+        adj = 0.0f;
+        if (self->f250 == 2) {
+            if (1.0f < d) {
+                if (func_0018B770(D_00269990) == 0) {
+                    self->vtbl[0x3C / 4](self);
+                }
+            }
+        }
+    }
+    held = self->f208;
+    px = self->f234;
+    py = self->f238;
+    func_00137228(out, self->f21c, self->f220 + adj);
+    func_00137238(out, px, py);
+    tmp[0] = held;
+    func_00137248(out, tmp);
+    func_00137260(out, 0);
+    func_00137268(out, 0);
+    fmt = "%c&1^07~b2a83d%d%%&.";
+    sp = str;
+    c = func_001AEA08();
+    func_001E1FD0(sp, fmt, c, func_00160B28(D_002623C0));
+    func_0015C8B8(self->f4, self->f20c, self->f20c);
+    func_0015DB28(buf, sp, self->f4);
+    func_0015E318(buf, out, 0, D_00262280);
+    func_0015C900(self->f4);
+}
