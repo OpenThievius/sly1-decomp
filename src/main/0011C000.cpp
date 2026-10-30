@@ -1588,3 +1588,76 @@ s32 func_0011D968(s32 id, s32 size, u8* data)
         func_0011DE18();
     return r;
 }
+
+extern s32 D_0025C384;
+extern s32* D_0025C340;
+extern s32 D_0025C380;
+extern s32 D_0025C368[];
+extern u8 D_0027B4C8[];
+
+void func_0011D110(void* ptr, s32 count);
+s32 func_001E1F10(const char* fmt, ...);
+s32 func_0011CE30(void);
+void func_001F6C20(s32 a);
+s32 func_001F8480(void* p);
+void func_001F8290(void* a, s32 b, s32 c, s32 d, s32 e, void* f, s32 g, s32 h, s32 i);
+void func_0011DDD8(void);
+
+void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
+{
+    s32 flag = 0;
+    s32 i;
+
+    if (D_0025C384 == 0 && D_0025C340 == 0 && len == 0 && arg == 0) {
+        func_0011D110((&D_0025C3C0), 1);
+        while (func_001F8480(D_0027B4C8) != 0) {
+            func_001E1F10("989snd.c: RPC collision!\n");
+            func_0011CE30();
+            func_001F6C20(0);
+        }
+        func_001F8290(D_0027B4C8, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
+        return;
+    }
+
+    s32 size = len + 4;
+    i = 0;
+    if ((size & 3) != 0)
+    {
+        s32 t = len + 8;
+        size = t - size % 4;
+    }
+
+    for (;; i++) {
+        if (*(s32*)((u8**)&D_0025C360)[D_0025C380] != 0x100 && D_0025C368[D_0025C380] >= size)
+            break;
+        if (D_0025C384 != 0) {
+            D_0025C384 = 0;
+            flag = 1;
+        }
+        func_0011CE30();
+        if (i == 1)
+            func_001E1F10("snd_SendIOPCommandNoWait: BUFFER %d FULL(%d)! Sound stalled waiting for IOP comands to finish!\n", D_0025C380, *(s32*)((u8**)&D_0025C360)[D_0025C380]);
+    }
+    if (i != 0)
+        func_001E1F10("snd_SendIOPCommandNoWait: continueing (%d).\n", i);
+    if (flag != 0)
+        D_0025C384 = 1;
+
+    {
+        s16* p = (s16*)(((u8**)&D_0025C360)[D_0025C380] - (D_0025C368[D_0025C380] - 0x1000));
+        s32 j;
+        *p = cmd;
+        p++;
+        *p = len;
+        p++;
+        for (j = 0; j < len; j++)
+            ((u8*)p)[j] = data[j];
+    }
+    {
+        s32 k = D_0025C380;
+        D_0025C368[k] -= size;
+        *(s32*)(((u8**)&D_0025C370)[k] + *(s32*)((u8**)&D_0025C360)[k] * 16) = arg;
+        *(u64*)(((u8**)&D_0025C370)[k] + *(s32*)((u8**)&D_0025C360)[k] * 16 + 8) = val;
+    }
+    func_0011DDD8();
+}
