@@ -209,8 +209,8 @@ def check_function(obj, name, key, resolver, image):
     # Every relocation is resolved first, so that a difference shows real addresses. A HI16 waits
     # for the next LO16 of its symbol; every HI16 pending for that symbol takes that LO16's address,
     # as the GNU linker pairs them. A later LO16 without a pending HI16 reuses the last pairing's.
-    pending, last_hi, last_full, failure = {}, {}, {}, None
-    for offset, rtype, rsym in relocs:
+    pending, last_hi, last_full, forward, failure = {}, {}, {}, {}, None
+    for n_reloc, (offset, rtype, rsym) in enumerate(relocs):
         i = offset - sym["value"]
         insn = words(code, i)
         key_sym = (rsym["name"], rsym["shndx"])
@@ -223,7 +223,12 @@ def check_function(obj, name, key, resolver, image):
                 continue
             code[i:i + 4] = ((insn & 0xFC000000) | ((t >> 2) & 0x3FFFFFF)).to_bytes(4, "little")
         elif rtype == elf.R_MIPS_HI16:
-            pending.setdefault(key_sym, []).append(i)
+            if i in forward:
+                # Its %lo came first and has formed the address already.
+                hi_insn = words(code, i)
+                code[i:i + 4] = ((hi_insn & 0xFFFF0000) | (((forward.pop(i) + 0x8000) >> 16) & 0xFFFF)).to_bytes(4, "little")
+            else:
+                pending.setdefault(key_sym, []).append(i)
         elif rtype == elf.R_MIPS_LO16:
             his = pending.pop(key_sym, None)
             if his:
@@ -231,10 +236,18 @@ def check_function(obj, name, key, resolver, image):
                 last_hi[key_sym] = (his, hi_addend)
             else:
                 his, hi_addend = last_hi.get(key_sym, ([], 0))
+            ahead = None
+            if not his:
+                # A %lo before its %hi (the lui sits later, in a loop's delay slot): pair it with the next one.
+                ahead = next((o2 - sym["value"] for o2, t2, s2 in relocs[n_reloc + 1:]
+                              if t2 == elf.R_MIPS_HI16 and (s2["name"], s2["shndx"]) == key_sym), None)
+                if ahead is not None:
+                    hi_addend = (words(code, ahead) & 0xFFFF) << 16
             addend = hi_addend + s16(insn & 0xFFFF)
             if in_rodata:
                 # Retail's own constant: read the address retail's hi/lo pair forms and compare the bytes.
-                r_hi = (words(retail, his[0]) & 0xFFFF) << 16 if his else 0
+                r_hi = (words(retail, his[0]) & 0xFFFF) << 16 if his else \
+                    ((words(retail, ahead) & 0xFFFF) << 16 if ahead is not None else 0)
                 full = r_hi + s16(words(retail, i) & 0xFFFF)
                 section = obj.contents(obj.sections[rsym["shndx"]])
                 start = addend + rsym["value"]
@@ -254,6 +267,8 @@ def check_function(obj, name, key, resolver, image):
                     continue
                 full = t + addend
             last_full[key_sym] = full
+            if ahead is not None:
+                forward[ahead] = full
             for h in his:
                 hi_insn = words(code, h)
                 code[h:h + 4] = ((hi_insn & 0xFFFF0000) | (((full + 0x8000) >> 16) & 0xFFFF)).to_bytes(4, "little")
