@@ -852,3 +852,66 @@ yes:
 done:
     return r;
 }
+
+struct Tab_1A87A8;
+struct Ent_1A87A8 { s32 pad[4]; s32 flags; };
+
+Ent_1A87A8* func_001A8718(Tab_1A87A8* table, s32 key);
+
+void func_001A87A8(Tab_1A87A8* table, s32 key)
+{
+    Ent_1A87A8* e = func_001A8718(table, key);
+    if (e != 0) {
+        e->flags &= ~2;
+    }
+}
+
+struct Obj_001A8C50 {
+    u8 pad[0x48];
+    s32 count;
+};
+
+void func_001A8AF8(Obj_001A8C50* self);
+
+s32 func_001A8C50(Obj_001A8C50* self)
+{
+    if (self->count != 0) {
+        return 1;
+    }
+    func_001A8AF8(self);
+    return self->count != 0;
+}
+
+struct Obj_1AA958 {
+    void** vtbl;
+    u8 pad0[0x250 - 4];
+    s32 mode;
+};
+
+void func_001AA958(Obj_1AA958* self)
+{
+    s32 m = self->mode;
+    if (m < 3) {
+        if (m > 0) {
+            ((void (*)(Obj_1AA958*, s32))self->vtbl[16])(self, 3);
+        }
+    }
+}
+
+struct Obj_001AAB20 {
+    u8 pad[0x234];
+    f32 f234;
+    f32 f238;
+};
+
+void func_001AAB60(Obj_001AAB20 *self);
+
+void func_001AAB20(Obj_001AAB20 *self, f32 x, f32 y) {
+    if (0.0f <= x) {
+        self->f234 = x;
+    }
+    if (0.0f <= y) {
+        self->f238 = y;
+    }
+    func_001AAB60(self);
+}

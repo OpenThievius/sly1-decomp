@@ -671,3 +671,17 @@ void* func_001C21A0(void* self, Obj_1C21A0* p, s32 n)
     }
     return self;
 }
+
+struct Owner_1C0C08 { u8 pad0[1]; };
+
+void func_0011D8B0(Owner_1C0C08* a0, s32 a1, s32 a2);
+
+extern s32 D_006053E0[];
+
+void func_001C0C08(s32 idx, s32 val)
+{
+    if (val != D_006053E0[idx]) {
+        D_006053E0[idx] = val;
+        func_0011D8B0((Owner_1C0C08*)D_00274728, idx, val);
+    }
+}

@@ -394,3 +394,18 @@ void func_001D7040(Obj_1D7040* self, s32 kind, Ref_1D7040* ref)
         ref->f4->f694 = 0;
     }
 }
+
+struct Rec_001D7098 { s32 a; s32 b; s32 c; };
+void func_001F5C0C(struct Rec_001D7098* p, s32 zero, s32 size);
+void func_001D7098(struct Rec_001D7098* self, s32 a, s32 b) { func_001F5C0C(self, 0, 0x10); self->b = b; self->a = a; self->c = b; }
+
+struct Ctx_001D7148 { s32 pad; };
+
+void func_001D72C8(Ctx_001D7148* a0, s32 a1);
+void func_0018D778(Ctx_001D7148* a0);
+
+void func_001D7148(Ctx_001D7148* a0, s32 a1)
+{
+    func_001D72C8(a0, a1);
+    if (a1 & 1) func_0018D778(a0);
+}

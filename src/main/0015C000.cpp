@@ -1127,3 +1127,18 @@ void func_0015E810(void)
     } while (n < 256);
     func_001F6A20(D_00275958[1], 0);
 }
+
+
+s32 func_0015C188(s32 a0)
+{
+    if (a0 == -1) {
+        goto none;
+    }
+    if (((s32*)D_00262268)[a0] != 0) {
+        goto some;
+    }
+none:
+    return 0;
+some:
+    return 1;
+}

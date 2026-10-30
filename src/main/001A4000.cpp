@@ -1049,3 +1049,14 @@ s32 func_001A72B0(u8* self, u8* p)
 done:
     return *(s32*)(p + 0xC) != 0;
 }
+
+
+s32 func_001A4898(void)
+{
+    s32 flags = *(s32*)(Ctx_1A4B30*)D_002623C8;
+    if ((flags & 4) == 0) {
+        s32 bit = flags & 2;
+        return bit != 0;
+    }
+    return 2;
+}

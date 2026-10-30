@@ -1386,3 +1386,55 @@ void func_001B5398(Node_1B5398* p, Src_1B5398* s)
     func_001B4AA0(p, s);
     p->f2C = s->f4; p->f30 = s->f8; p->f34 = s->fC; p->f38 = s->f10; p->flags = (p->flags & ~1) | 2;
 }
+
+struct Entry_001B6568 {
+    s32 value;
+    s32 extra;
+};
+struct Sub_001B6568 {
+    u8 pad0[0x38];
+    Entry_001B6568* table;
+};
+struct Ctx_001B6568 {
+    u8 pad0[0x18];
+    Sub_001B6568* sub;
+    u8 pad1[0x30 - 0x1C];
+    s32 index;
+};
+
+void func_001B6568(Ctx_001B6568* a0, s32* out) {
+    s32 idx = a0->index;
+    s32 v;
+    if (idx >= 0) {
+        v = a0->sub->table[idx].value;
+    } else {
+        v = -1;
+    }
+    *out = v;
+}
+
+struct Entry_001B6598 {
+    s32 value;
+    s32 extra;
+};
+struct Sub_001B6598 {
+    u8 pad0[0x38];
+    Entry_001B6598* table;
+};
+struct Ctx_001B6598 {
+    u8 pad0[0x18];
+    Sub_001B6598* sub;
+    u8 pad1[0x28 - 0x1C];
+    s32 index;
+};
+
+void func_001B6598(Ctx_001B6598* a0, s32* out) {
+    s32 idx = a0->index;
+    s32 v;
+    if (idx >= 0) {
+        v = a0->sub->table[idx].value;
+    } else {
+        v = -1;
+    }
+    *out = v;
+}

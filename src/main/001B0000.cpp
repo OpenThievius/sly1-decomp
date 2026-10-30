@@ -787,3 +787,22 @@ void func_001B1698(Obj_1B1698* self)
         }
     }
 }
+
+struct Obj_001B2010 {
+    u8 pad0[4];
+    f32 f4;
+    f32 f8;
+    u8 pad1[0x40 - 0xC];
+    f32 f40;
+    f32 f44;
+};
+
+f32 func_002054F0(struct Obj_001B2010* o, f32 s);
+void func_001B1BF0(struct Obj_001B2010* o);
+
+void func_001B2010(struct Obj_001B2010* o, f32 s) {
+    f32 t = func_002054F0(o, s * 0.00872664712f);
+    o->f4 = t * o->f40;
+    o->f8 = t * o->f44;
+    func_001B1BF0(o);
+}

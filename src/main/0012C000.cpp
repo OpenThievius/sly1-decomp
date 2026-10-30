@@ -621,3 +621,34 @@ tail:
     }
     return hit ^ 1;
 }
+
+struct Ref_0012FDA0;
+
+struct Obj_0012FDA0 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fc;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    s32 f24;
+    s32 f28;
+};
+
+void func_0012FE70(Ref_0012FDA0 *self);
+
+s32 func_0012FDA0(Obj_0012FDA0 *self, s32 a1, s32 a2) {
+    self->f8 = a1;
+    s32 t = self->f14;
+    self->f28 = a2;
+    self->f24 = a2;
+    self->f0 = 1;
+    self->f1C = t;
+    self->f18 = 0;
+    self->f20 = 0;
+    func_0012FE70((Ref_0012FDA0 *)self);
+    return 1;
+}

@@ -764,3 +764,21 @@ void func_001BDD00(Obj_1BDD00* self, s32 flags, f32 f)
     }
     func_0018D6F0();
 }
+
+extern s32 D_00274744;
+extern s32 D_0027472C;
+extern s32 D_00274730;
+
+void func_0011E0B0(s32 a0);
+
+s32 func_001BE810(void)
+{
+    if (D_00274744 != 0)
+        return 0;
+    if (D_0027472C != 0) {
+        if (D_00274730 != 0)
+            return 1;
+        func_0011E0B0(D_0027472C);
+    }
+    return 0;
+}

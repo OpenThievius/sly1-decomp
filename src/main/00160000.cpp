@@ -613,3 +613,16 @@ extern u8 D_00000FA0[];
 extern u8 D_00000FD8[];
 
 void func_001EE3F0(void* s, s32 n);
+
+struct Sys_1608E0;
+void func_00140D90(Sys_1608E0* p);
+
+extern u8 D_00261420[];
+
+void func_001608E0(void)
+{
+    u8* g = (u8*)D_002623C0;
+    *(s32*)(g + 0x19E0) = 5;
+    *(s32*)(g + 0x19E4) = 0;
+    func_00140D90((Sys_1608E0*)D_00261420);
+}

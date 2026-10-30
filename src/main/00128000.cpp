@@ -1687,3 +1687,29 @@ void func_0012B8C8(Self_12B8C8* self, Other_12B8C8* other)
     func_0012BC38(self, other, 0, &self->f64, &self->f68);
     func_0011EC40(self, other);
 }
+
+struct Sub_00128230 {
+    u8 pad[0x10];
+    s8 b10;
+    s8 b11;
+};
+
+struct Obj_00128230 {
+    u8 pad[0x1EC];
+    Sub_00128230 *f1EC;
+    Sub_00128230 *f1F0;
+};
+
+s32 func_00128230(Obj_00128230 *self) {
+    Sub_00128230 *p = self->f1EC;
+    if (p != 0 && p->b10 == 5) {
+        return 1;
+    }
+    p = self->f1F0;
+    if (p != 0) {
+        if (p->b11 == 5) {
+            return 1;
+        }
+    }
+    return 0;
+}

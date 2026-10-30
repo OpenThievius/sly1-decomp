@@ -769,3 +769,15 @@ void func_001CBAA0(Obj_1CBAA0* a0)
         func_001DBCC8(owner, (void*)(void (*)(void*))func_001CBB20, self, -1, 0);
     }
 }
+
+struct Slot_001CA6D0 { s32 key; s32 value; };
+struct Table_001CA6D0 { u8 pad[0x75C]; Slot_001CA6D0 slots[1]; };
+
+s32 func_001CA600(s32 index);
+
+s32 func_001CA6D0(Table_001CA6D0* self, s32 index)
+{
+    if (func_001CA600(index) == 0)
+        return 0;
+    return self->slots[index].key;
+}

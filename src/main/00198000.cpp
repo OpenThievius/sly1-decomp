@@ -1384,3 +1384,12 @@ void func_00199B18(Actor_199B18* self)
     }
     func_001837E0(self, 2, 0, 0);
 }
+
+struct Arg_001993C0;
+s32 func_001781E0(Arg_001993C0* a, s32 v);
+
+void func_001993C0(s32 a0) {
+    if ((s32)D_00262E10 != 0) {
+        (void)func_001781E0((Arg_001993C0*)D_00262E10, a0);
+    }
+}

@@ -918,3 +918,41 @@ void func_0014C138(Obj_14C138* self)
     self->f44C = (s32)self->o5E0[0];
     func_0014C2F0(self);
 }
+
+struct Self_14F110 {
+    u8 pad0[0x550];
+    s32 f550;
+    f32 f554;
+    u8 pad1[0xC];
+    f32 f564;
+    u8 pad2[0x14];
+    s32 f57C;
+    s32 f580;
+    s32 f584;
+    s32 f588;
+};
+
+struct Sub_14F110;
+
+extern f32 D_0026185C;
+
+s32 func_00126D60(Sub_14F110* sub, f32 value);
+
+void func_0014F110(Self_14F110* self, s32 state)
+{
+    if (self->f550 != state) {
+        if (self->f550 != 2) {
+            self->f550 = state;
+        } else {
+            self->f57C = 0;
+            self->f580 = 0;
+            self->f584 = 0;
+            self->f588 = 0;
+            self->f550 = state;
+        }
+        self->f554 = D_0026185C;
+        if (state == 5) {
+            (void)func_00126D60((Sub_14F110*)self, self->f564);
+        }
+    }
+}

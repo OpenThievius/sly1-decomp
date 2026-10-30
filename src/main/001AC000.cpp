@@ -651,3 +651,17 @@ s32 func_001AFAF8(Obj_1AFAF8* a0, Obj_1AFAF8* a1)
     return ((s32)t ^ 1) & 1;
 
 }
+
+struct Obj_1AECB0 {
+    u8 pad_00[0x554];
+    s32 f554;
+    s32 f558;
+};
+
+void func_001B7968(Obj_1AECB0* self);
+
+void func_001AECB0(Obj_1AECB0* a0) {
+    func_001B7968(a0);
+    a0->f554 = 0;
+    a0->f558 = -1;
+}

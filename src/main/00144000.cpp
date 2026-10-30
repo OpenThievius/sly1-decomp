@@ -470,3 +470,12 @@ void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
     out[2] = r[2];
     out[3] = r[3];
 }
+
+struct Ctx_144938;
+
+void func_00144BE8(Ctx_144938* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
+
+void func_00144938(Ctx_144938* self, void* p, s32 q)
+{
+    func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+}

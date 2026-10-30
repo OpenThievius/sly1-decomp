@@ -952,3 +952,31 @@ void func_001ECBC8(Obj_1ECBC8* self)
     }
     func_001DBCC8(self->f14, func_001ECB18, self, 0, 0);
 }
+
+struct Self_1EC528 { u8 pad0[0xA68]; s32 fA68; };
+struct Glob_1EC528 { u8 pad0[0x274]; f32 f274; f32 f278; };
+
+void func_001AC060(void* p);
+
+
+void func_001EC528(Self_1EC528* self)
+{
+    Glob_1EC528* g = (Glob_1EC528*)&D_0026E248;
+    func_001AC060((u8*)&D_0026E248);
+    self->fA68 = 2;
+    g->f274 = g->f278;
+}
+
+struct Obj_1EE8D0 {
+    u8 pad_00[0x4];
+    u32 f4;
+    u32 f8;
+    u32 fC;
+};
+
+void func_001EE7D0(Obj_1EE8D0* self, s32 n, void* buf, s32 flag);
+
+void func_001EE8D0(Obj_1EE8D0* a0, Obj_1EE8D0* a1) {
+    u32 span = a1->fC - a1->f4;
+    func_001EE7D0(a0, span >> 4, (void*)a1->f4, 0);
+}

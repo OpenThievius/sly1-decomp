@@ -1007,3 +1007,44 @@ void func_00168B68(f32 t)
         } while (i < n);
     }
 }
+
+extern s32 D_002BE460;
+extern s32 D_002BE46C;
+struct Arg_001683B8;
+void func_001F6B60(Arg_001683B8* a);
+
+void func_001683B8(void) {
+    D_002BE46C = 1;
+    func_001F6B60((Arg_001683B8*)D_002BE460);
+}
+
+struct Dst_1694A0 {
+    s32 f0;
+    u8 pad0[0xC];
+    s32 f10;
+};
+
+struct Rec_1694A0 {
+    s32 f0;
+    s32 f4;
+    Dst_1694A0* f8;
+    s32 fC;
+};
+
+void func_0018D800(Dst_1694A0* dst, void* src, s32 count);
+
+void func_001694A0(Rec_1694A0* self)
+{
+    func_0018D800(self->f8, (void*)self->f4, self->f0);
+    s32 flag = self->fC;
+    if (flag != 0) {
+        Dst_1694A0* d = self->f8;
+        s32 a = d->f0;
+        s32 b = d->f10;
+        a = a | 0x8000;
+        a = a | flag;
+        b = b | 0x8000;
+        d->f0 = a;
+        d->f10 = b;
+    }
+}

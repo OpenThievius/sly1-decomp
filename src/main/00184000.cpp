@@ -435,3 +435,19 @@ void func_00185B38(void)
     func_00193300(&fr);
     func_00191EB0(1);
 }
+
+struct Obj_185468 {
+    u8 pad_00[0x1C];
+    s32 f1C;
+    u8 pad_20[0x4];
+    s32 f24;
+};
+
+s32 func_001925F0(void);
+
+s32 func_00185468(Obj_185468* a0) {
+    if (a0->f1C == 0) {
+        return func_001925F0();
+    }
+    return a0->f24;
+}
