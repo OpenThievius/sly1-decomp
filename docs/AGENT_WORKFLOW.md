@@ -170,6 +170,17 @@ Measured on this compiler; add to this list when you learn something.
   After about 25 compiles, record it as NEAR and move on.
 - **Absolute addresses.** Data splat pins to an address outside the executable (`D_FA0` at 0xFA0)
   is spelled with eight digits in C (`D_00000FA0`); the link maps it.
+- **Which `D_` load is a literal.** A `lui`/`lwc1` pair aimed at `.rodata` (0x217380 to 0x250580)
+  is a constant: write it as a literal (`3.4028234663852886e+38f` for 0x7F7FFFFF; a string as
+  `"text"`), and `check.py` compares it with retail's whole. The same pair aimed at `.data` (above
+  0x250580) is a variable: declare it `extern f32 D_0026185C;` with its eight digits. A block that is
+  only copied (`lq`/`sq` from a table) is an `extern u8 D_...[]` and an aligned struct assignment.
+  A constant retail builds with `lui`/`mtc1` (0.25f, 0.5f) is pooled in `.rodata` when written as a
+  literal, and does not match that way; so far no source form of it has.
+- **A function that cannot match for its size.** If a function's code is byte-identical and the
+  checker still says retail has more bytes after it, the function table gives it the size of the
+  function entered through a pointer after it. `config/<version>/symbol_addrs.txt` names those
+  starts (four so far); re-run `tools/setup_asm.py` and `tools/inventory.py`.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.
