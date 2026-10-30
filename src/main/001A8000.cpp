@@ -745,3 +745,35 @@ void func_001AB198(Obj_1AB198* self)
     func_0015E318(buf, out, 0, D_00262280);
     func_0015C900(self->f4);
 }
+
+typedef void (*VFn_1AA8F0)(void* self, s32 flag);
+
+struct Obj_1AA8F0 {
+    VFn_1AA8F0* vtbl;
+    u8 pad0[0x250 - 4];
+    s32 state;
+    f32 f254;
+    f32* p258;
+};
+
+void func_001AA8F0(Obj_1AA8F0* self)
+{
+    s32 s = self->state;
+    if (s == 2) {
+        goto store;
+    }
+    if (s < 3) {
+        if (s == 0) {
+            goto call;
+        }
+        return;
+    }
+    if (s != 3) {
+        return;
+    }
+call:
+    self->vtbl[16](self, 1);
+    return;
+store:
+    self->f254 = *self->p258;
+}

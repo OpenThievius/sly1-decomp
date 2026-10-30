@@ -648,3 +648,86 @@ void func_001C25B0(s32 first, ...) {
     r = &D_002748F0[1 - D_00274990];
     if (r->f4C == 3) r->f4C = 0;
 }
+
+extern u8 D_00274758[];
+extern u8* D_002623C0;
+
+void func_0018D800(void* dst, void* src, s32 count);
+
+void func_001C06D8(void)
+{
+    func_0018D800(D_00274838, D_00274758, 0xB0);
+    func_001C05D0(1.0f);
+    for (s32 i = 0; i < 4; i++) {
+        func_001C0600(i);
+    }
+    func_001C0760(*(s32*)(D_002623C0 + 0x19EC) & 0x80);
+    func_001C0790(*(s32*)(D_002623C0 + 0x19EC) & 0x40);
+}
+
+struct Pair_1C08B0 { s32 a; s32 b; };
+struct Stack_1C08B0 { u8 pad0[0x2328]; Pair_1C08B0 pairs[4]; s32 count; };
+
+extern s32 D_00274808[];
+
+void func_0011E328(s32 channel, s32 value);
+void func_0011E360(s32 channel, s32 value, s32 value2);
+
+void func_001C08B0(Stack_1C08B0* self, s32 a, s32 b)
+{
+    if ((u32)self->count < 4) {
+        func_0011E328(2, D_00274808[a]);
+        func_0011E360(2, b, b);
+        self->pairs[self->count].a = a;
+        self->pairs[self->count].b = b;
+        self->count++;
+    }
+}
+
+struct Pair_1C0950 { s32 a; s32 b; };
+struct Stack_1C0950 { u8 pad0[0x2328]; Pair_1C0950 pairs[4]; s32 count; };
+
+extern s32 D_00274808[];
+
+void func_0011E328(s32 channel, s32 value);
+void func_0011E360(s32 channel, s32 value, s32 value2);
+
+void func_001C0950(Stack_1C0950* self)
+{
+    s32 n = self->count;
+    if (n >= 2) {
+        self->count = n - 1;
+        func_0011E328(2, D_00274808[self->pairs[n - 2].a]);
+        func_0011E360(2, self->pairs[self->count - 1].b, self->pairs[self->count - 1].b);
+    }
+}
+
+struct Node_1C1A28 { s32 f0; s32 f4; Node_1C1A28* f8; };
+struct List_1C1A28 { s32 type; Node_1C1A28* head; Node_1C1A28* tail; };
+struct Frame_1C1A28 { s32 type; s32 kind; s32 w2; s32 w3; s32 pad[4]; s32 t[4]; };
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+void* func_0011AF28(void);
+void func_001C15D8(void* t, s32 value, void* q);
+void func_0011B0A8(void* a, void* b);
+void func_0011B060(void* q, s32 mode);
+
+s32 func_001C1A28(List_1C1A28* self, s32 value)
+{
+    Frame_1C1A28 f;
+    func_001F5C0C(&f, 0, 0x20);
+    f.kind = 2;
+    f.type = self->type;
+    f.w3 = 0;
+    Node_1C1A28* n = (Node_1C1A28*)func_0011AF28();
+    func_001C15D8(f.t, value, &f);
+    func_0011B0A8(n, f.t);
+    func_0011B060(f.t, 2);
+    if (self->head != 0) {
+        self->tail->f8 = n;
+    } else {
+        self->head = n;
+    }
+    self->tail = n;
+    return 1;
+}

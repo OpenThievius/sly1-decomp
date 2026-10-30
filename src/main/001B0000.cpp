@@ -730,3 +730,42 @@ void func_001B2640(Obj_1B2640* o)
 done:
     ;
 }
+
+struct __attribute__((aligned(16))) Quad_1B2068 {
+    s32 a, b, c, d;
+};
+
+void func_001B1BF0(void* self);
+
+void func_001B2068(void* self, Quad_1B2068* src)
+{
+    *(Quad_1B2068*)((u8*)self + 0x30) = *src;
+    func_001B1BF0(self);
+}
+
+struct Node_1B2790;
+struct Owner_1B2790 { u8 pad[0x1C00]; Node_1B2790* head; };
+struct Node_1B2790 { u8 pad[0xB8]; Node_1B2790* next; };
+
+s32 func_001B26F8(Node_1B2790* node, void* a1, f32 f);
+
+void func_001B2790(Owner_1B2790* self, void* a1, s32 max, s32* outCount, Node_1B2790** out, f32 f)
+{
+    s32 scratch[4];
+    s32 count = 0;
+    Node_1B2790* node;
+    (void)scratch;
+    for (node = self->head; node != 0; node = node->next) {
+        if (func_001B26F8(node, a1, f) == 0) {
+            continue;
+        }
+        if (count < max) {
+            *out = node;
+            out++;
+            count++;
+        } else {
+            break;
+        }
+    }
+    *outCount = count;
+}

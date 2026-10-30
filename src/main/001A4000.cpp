@@ -1049,3 +1049,24 @@ s32 func_001A72B0(u8* self, u8* p)
 done:
     return *(s32*)(p + 0xC) != 0;
 }
+
+extern f32 D_0026185C;
+extern s32 D_0026B898[];
+
+void func_001B6628(void* a, s32 b);
+void func_001B64D8(void* a, s32 b);
+
+void func_001A76A0(void* self_, s32 idx)
+{
+    u8* self = (u8*)self_;
+    s32 old = *(s32*)(self + 0x550);
+    if (old == idx) return;
+    *(s32*)(self + 0x550) = idx;
+    void* child = *(void**)(self + 0x560);
+    f32 d = D_0026185C;
+    *(f32*)(self + 0x554) = d;
+    if (child == 0) return;
+    s32 v = D_0026B898[idx];
+    if (old == -1) func_001B6628(child, v);
+    else func_001B64D8(child, v);
+}

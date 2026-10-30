@@ -649,3 +649,98 @@ void func_001BF620(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
         *flag = 0;
     }
 }
+
+struct Obj_1BE860 { u8 pad0[0x18]; void* f18; u8 pad1[0x34]; f32 f50; f32 f54; };
+
+void func_0011D798(void* a0, s32 a1, s32 a2);
+
+void func_001BE860(Obj_1BE860* self)
+{
+    s32 a1 = (s32)(self->f50 * 1024.0f);
+    s32 a2;
+    if (0.0f < self->f54) {
+        a2 = (s32)((self->f54 + 2.0f) * 179.5f) - 359;
+    } else {
+        a2 = (s32)((self->f54 + 2.0f) * 179.5f);
+    }
+    func_0011D798(self->f18, a1, a2);
+}
+
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BE860(void* self);
+void func_001BF718(void* slot);
+
+void func_001BE8F8(s32 a0, void** a1, f32 f12, f32 f13)
+{
+    s32 flag = 0;
+    void* local;
+    void** p = a1;
+    if (p == 0) {
+        flag = 1;
+        p = (void**)&local;
+    }
+    func_001BFCD8(-2, p, a0, 0, f12, f13, 1.0f, 0.0f, 0.0f, 0, 0);
+    if (*p != 0) {
+        func_001BE860(*p);
+        if (flag != 0) {
+            func_001BF718(p);
+        }
+    }
+}
+
+struct Rec_1BEB10 { s32 f0; s32 f4; s32 f8; u8 pad0[8]; s32 f14; s32 f18; s32 f1C; };
+
+extern s32 D_00274720;
+
+void func_001BEA78(void);
+void func_001BE1E8(void);
+void func_0018D410(void* p);
+s32 func_0011E1F8(s32 a);
+s32 func_0011CE30(void);
+void func_001F6C20(s32 a);
+void func_001BEAC8(s32 h);
+void func_0011D2A8(s32 a0, s32 a1, void* a2, s32 a3);
+
+void func_001BEB10(Rec_1BEB10* self)
+{
+    s32 local[2];
+    s32 same;
+    s32 flag;
+
+    if (self == 0) {
+        func_001BEA78();
+        return;
+    }
+    Rec_1BEB10* old = (Rec_1BEB10*)D_00274724;
+    if (self == old) {
+        same = 1;
+    } else if (self == 0) {
+        same = 0;
+    } else if (old == 0) {
+        same = 0;
+    } else {
+        same = ((self->f8 ^ self->f18) ^ (old->f8 ^ old->f18)) == 0;
+    }
+    if (same != 0 && D_00274720 != 0) {
+        return;
+    }
+    while (func_0011CE30() != 0 && D_00274720 == 1) {
+        func_001F6C20(0);
+    }
+    func_001BE1E8();
+    D_00274724 = (s32)self;
+    func_0018D410(local);
+    if (self == 0) {
+        flag = 0;
+    } else {
+        s32 x = self->f4 ^ self->f1C;
+        local[0] = self->f0 ^ self->f14;
+        local[1] = x;
+        flag = x != 0;
+    }
+    if (flag != 0) {
+        D_00274720 = 1;
+        func_0011E1F8(0);
+        func_0011D2A8(local[0], 0, (void*)func_001BEAC8, 0);
+    }
+}
