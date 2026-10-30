@@ -436,3 +436,81 @@ s32 func_00186450(s32 unused, Self_186450* self, u8* ctx, s32 cap, Out_186450* o
     }
     return total;
 }
+
+struct VT_275710 { u8 pad[0x54]; void (*fn)(void* self, f32 x); };
+struct Obj_275710 { VT_275710* vt; };
+struct Cfg_275F80 { s32 a; s32 mode; };
+struct Flag_269A00 { s32 a; s32 on; };
+struct Tm_261858 { s32 a; s32 b; f32 dt; };
+
+extern s32 D_00264834;
+extern s32 D_00264838;
+extern Flag_269A00 D_00269A00;
+extern Cfg_275F80 D_00275F80;
+extern s32 D_00275AF0;
+extern u8 D_00262C70[];
+extern u8 D_00275BC0[];
+extern Tm_261858 D_00261858;
+extern u8 D_00264A40[];
+extern Obj_275710* D_00275710;
+extern void* D_00261990;
+extern s32 D_002622CC;
+
+void func_001FAE18(void);
+void func_00185B38(void);
+void func_0015F210(s32 flag);
+void func_0018F148(void* p);
+void func_001E4EA8(void* p);
+void func_0016E238(void* p);
+void func_0016F2E0(void);
+void func_0018BDC8(void* p);
+void func_001E9108(void* p);
+void func_001607D0(f32 dt);
+void func_00144270(void* p);
+void func_0015E9F0(void);
+void func_00142F10(void* p);
+void func_0019D6C0(Obj_275710* o, void* a);
+void func_001E9668(void* p);
+void func_0019DC98(Obj_275710* o, void* a);
+void func_001E9648(void* p);
+void func_0015EC68(void);
+
+void func_00185758(s32 a, s32 b)
+{
+    func_001FAE18();
+    D_00264834 = a;
+    D_00264838 = b;
+    func_00185B38();
+    while (1) {
+        if (D_00269A00.on != 0 && D_00275F80.mode != 1) {
+            func_0015F210(1);
+            func_0018F148(&D_00269A00);
+        }
+        if (D_00275AF0 != 0) {
+            func_0015F210(1);
+            func_001E4EA8(&D_00275AF0);
+        }
+        if (D_00269A00.on != 0 && D_00275F80.mode != 1) {
+            func_0015F210(1);
+            func_0018F148(&D_00269A00);
+        }
+        func_0016E238(D_00262C70);
+        func_0016F2E0();
+        func_0018BDC8(D_00264A40);
+        func_001E9108(D_00275BC0);
+        func_001607D0(D_00261858.dt);
+        if (D_00275710 != 0) {
+            func_00144270(D_00261990);
+            func_0015E9F0();
+            func_00142F10(&D_00261858);
+            if (D_00275710->vt->fn != 0)
+                D_00275710->vt->fn(D_00275710, D_00261858.dt);
+            func_0019D6C0(D_00275710, D_00261990);
+            func_001E9668(D_00275BC0);
+            func_0019DC98(D_00275710, D_00261990);
+            func_001E9648(D_00275BC0);
+            func_0015EC68();
+        }
+        D_002622CC++;
+    }
+}

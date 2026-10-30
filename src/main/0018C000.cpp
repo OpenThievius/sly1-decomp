@@ -1166,3 +1166,38 @@ s32 func_0018C250(Card_18C250* self)
     }
     return r;
 }
+
+extern u8 D_00269A00[];
+extern s32 D_00261F1C;
+
+void func_001F6B60(s32 a);
+void func_001686E8(s32 a, s32 b);
+void func_001684E8(void);
+void func_001683E8(void);
+
+struct Task_18E558 {
+    u8 pad0[0x114];
+    s32 f114;
+    s32 f118;
+    u8 pad1[0x14];
+    s32 f130;
+    volatile s32 f134;
+};
+
+void func_0018E558(void)
+{
+    Task_18E558* t = (Task_18E558*)D_00269A00;
+
+    for (;;) {
+        t->f134 = 0;
+        func_001F6B60(t->f130);
+        t->f134 = 1;
+        func_001686E8(D_00261F1C, t->f114);
+        t->f134 = 2;
+        func_001684E8();
+        func_001686E8(D_00261F1C, t->f118);
+        func_001683E8();
+        func_001686E8(D_00261F1C, t->f118);
+        func_001683E8();
+    }
+}
