@@ -674,3 +674,73 @@ void func_001D8578(Obj_1D8578* self)
         }
     }
 }
+
+struct Entry_1DB110 {
+    s32 f0;
+    void* f4;
+    u8 pad8[4];
+    s32 fC;
+    void* f10;
+    Entry_1DB110* f14;
+    u8 pad18[0x10];
+};
+
+struct VObj_1DB110;
+typedef void (*VFn_1DB110)(VObj_1DB110* self, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, void* a6);
+struct VObj_1DB110 {
+    VFn_1DB110* vtbl;
+};
+
+struct Node_1DB110 {
+    u8 pad0[0x34];
+    VObj_1DB110* f34;
+};
+
+struct Pool_1DB110 {
+    u8 pad0[0x830];
+    Node_1DB110* f830;
+    u8 pad834[0x3C];
+    s32 f870;
+    Entry_1DB110 arr[16];
+    Entry_1DB110* fAF4;
+    Entry_1DB110* fAF8;
+};
+
+struct __attribute__((aligned(16))) Quad_1DB110 {
+    s32 a, b, c, d;
+};
+
+void func_001F3BD8(void* item, void* out);
+
+void func_001DB110(Pool_1DB110* self, void* item)
+{
+    if (item == 0) {
+        return;
+    }
+    s32 n = self->f870;
+    if ((u32)n >= 16) {
+        return;
+    }
+    self->f870 = n + 1;
+    Entry_1DB110* e = &self->arr[n];
+    e->f4 = item;
+    e->f0 = 0;
+    if (self->fAF4 == 0) {
+        self->fAF8 = e;
+        self->fAF4 = e;
+        e->f14 = e;
+    } else {
+        e->f14 = self->fAF4->f14;
+        self->fAF4->f14 = e;
+        e->fC = e->f14->fC + 1;
+    }
+    if (self->f830 != 0) {
+        Quad_1DB110 tmp;
+        func_001F3BD8(item, &tmp);
+        VObj_1DB110* o = self->f830->f34;
+        VFn_1DB110 fn = o->vtbl[10];
+        if (fn != 0) {
+            fn(o, &tmp, 0, 0, 0, 0, &e->f10);
+        }
+    }
+}

@@ -554,3 +554,86 @@ void func_001F1A08(Obj_1F1A08* self, Obj_1F1A08* t)
     }
     self->f27C = func_001EA4B8((Q3_1F1A08*)D_00276278, 0, self->f27C, self->f280, D_00261858[5]);
 }
+
+typedef void (*VFn_1F1C90)(void* self);
+struct Anim_1F1C90 { u8 pad[0x34]; f32 f34; };
+struct Sub_1F1C90 {
+    u8 pad0[0x2E4];
+    Anim_1F1C90* f2E4;
+    Anim_1F1C90* f2E8;
+    u8 pad1[0x560 - 0x2EC];
+    s32 f560;
+};
+struct Obj_1F1C90 {
+    VFn_1F1C90* vtbl;
+    u8 pad0[0x25C - 4];
+    s32 f25C;
+    Sub_1F1C90* f260;
+    u8 pad1[0x27C - 0x264];
+    f32 f27C;
+    f32 f280;
+};
+struct Glob_1F1C90 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; };
+
+
+extern void* D_002623C0;
+extern u8 D_00262C70[];
+extern u8 D_00275BC0[];
+
+void func_001AA060(void* self);
+s32 func_001F0468(void);
+s32 func_001F0490(void* o, s32 n, s32* a, s32* b);
+void func_001F1590(void* self, s32 a1, s32 a2);
+void func_001F1610(void* self);
+void func_001AA8B0(void* self, f32 v);
+void func_001AA8C0(void* self, f32 v);
+void func_001BED48(void);
+void func_001BED70(void);
+void func_0016E0F0(s32 bits);
+void func_0016E118(s32 n);
+void func_0016EC88(void* p);
+void func_001E96F8(void* obj, s32 mode);
+
+
+void func_001F1C90(Obj_1F1C90* self, s32 a1)
+{
+    if ((a1 != 0) != (self->f25C == 0)) return;
+    if (a1 != 0) {
+        func_001AA060(self);
+        s32 r = func_001F0468();
+        if (r == 10) {
+            r = (func_001F0490(self->f260, 1, 0, 0) != 0);
+        }
+        func_001F1590(self->f260, r, 2);
+        self->f280 = 1.0f;
+        self->f27C = 1.0f;
+        Anim_1F1C90* an = self->f260->f2E4;
+        if (an != 0) {
+            func_001AA8B0(self, an->f34);
+        }
+        Glob_1F1C90* g = (Glob_1F1C90*)D_002623C0;
+        if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+            func_001BED48();
+        }
+        self->vtbl[14](self);
+        func_0016E0F0(1);
+        func_0016EC88(D_00262C70);
+        func_001E96F8(D_00275BC0, 7);
+    } else {
+        self->vtbl[15](self);
+        if (self->f260->f560 == 0) {
+            func_001F1610(self->f260);
+            Anim_1F1C90* an = self->f260->f2E8;
+            if (an != 0) {
+                func_001AA8C0(self, an->f34);
+            }
+            func_0016E118(1);
+            func_001E96F8(D_00275BC0, 3);
+            Glob_1F1C90* g = (Glob_1F1C90*)D_002623C0;
+            if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
+                func_001BED70();
+            }
+        }
+    }
+    self->f25C = a1;
+}

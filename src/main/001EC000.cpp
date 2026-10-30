@@ -952,3 +952,52 @@ void func_001ECBC8(Obj_1ECBC8* self)
     }
     func_001DBCC8(self->f14, func_001ECB18, self, 0, 0);
 }
+
+void func_001C9008(void* self, void* arg);
+void func_001B6598(void* sub, s32* out);
+void func_001B64D8(void* p, s32 n);
+
+void func_001EC478(u8* self, void* arg)
+{
+    s32 out;
+    s32 sel;
+    func_001C9008(self, arg);
+    s32 st = *(s32*)(self + 0x724);
+    if (st != 0xE) {
+        if (st != 0x10) {
+            return;
+        }
+        *(s32*)(self + 0xC94) = 0;
+        func_001B6598(*(void**)(self + 0xC54), &out);
+        switch (out) {
+        case 0x4EE:
+            sel = 0x4EF;
+            break;
+        case 0x4F1:
+            sel = 0x4F2;
+            break;
+        case 0x4F4:
+            sel = 0x4F5;
+            break;
+        }
+        func_001B64D8(*(void**)(self + 0xC54), sel);
+    } else {
+        *(s32*)(self + 0xC94) = 0;
+    }
+}
+
+struct Cursor_1EE7D0 { u8 pad[0xC]; u32* cursor; };
+
+void func_001EE368(void* s, s32 target);
+void func_00152CE0(void* self, s32 index, s32 count);
+
+void func_001EE7D0(Cursor_1EE7D0* self, s32 n, void* buf, s32 flag)
+{
+    func_001EE368(self, 3);
+    u32* p = self->cursor;
+    u32 w = (u32)flag << 31;
+    self->cursor = p + 1;
+    w = w | 0x50000000u;
+    *p = (u32)n | w;
+    func_00152CE0(self, n, (s32)buf);
+}

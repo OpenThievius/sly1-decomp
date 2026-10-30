@@ -389,3 +389,94 @@ void func_001C4A80(Obj_1C4A80* self, f32* p, f32 f) {
     func_001BFCD8(idx, 0, 0, self->f140, 0, 0, 1000.0f, 200.0f, ang, 0.0f, 0.0f);
     func_001C0EC0();
 }
+
+struct Obj_1C72A0;
+typedef void (*VFnSelf_1C72A0)(void* self, void* item, s32 flag);
+typedef void (*VFnObj_1C72A0)(void* self);
+struct Obj_1C72A0 { VFnObj_1C72A0* vtbl00; u8 pad04[0x534]; u64 flags538; };
+struct Slot_1C72A0 { void* ptr00; void* aux04; };
+struct Elem_1C72A0 { s32 key00; Obj_1C72A0* obj04; s32 c08; };
+struct Self_1C72A0 {
+    VFnSelf_1C72A0* vtbl00;
+    u8 pad04[0x10];
+    void* host14;
+    u8 pad18[0x6DC - 0x18];
+    void* f6DC;
+    u8 pad6E0[0x700 - 0x6E0];
+    f32 f700;
+    u8 pad704[0x720 - 0x704];
+    void* f720;
+    u8 pad724[0x874 - 0x724];
+    Slot_1C72A0 slots874[17];
+    u8 pad8FC[0xA78 - 0x8FC];
+    s32 count_A78;
+    Elem_1C72A0 elems_A7C[1];
+    u8 padA88[0xB04 - 0xA88];
+    void* f_B04;
+    s32 f_B08;
+    void* f_B0C;
+    s32 f_B10;
+};
+
+void func_001C44F0(void* self);
+void func_00124DF8(void* self, s32 a1, u8* table);
+void* func_001CB5B8(void* host);
+void func_001CB648(void* a, void* b);
+void func_001CA7C0(void* self);
+void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+void* func_0015A838(void* host, s32 a1, s32 a2, void* ctx);
+void func_001C5EA8(void* self, f32 v);
+void func_001C8F20(void* node, s32 kind, s32 flag);
+s32 func_00141008(u8* table, s32 v);
+void func_001DBCC8(void* host, void* fn, void* ctx, s32 a3, s32 a4);
+extern u8 D_00274C30[];
+extern u8 D_00261420[];
+
+void func_001C72A0(Self_1C72A0* self)
+{
+    func_001C44F0(self);
+    func_00124DF8(self, 2, D_00274C30);
+    if (self->f720 == 0) {
+        void* t = func_001CB5B8(self->host14);
+        self->f720 = t;
+        func_001CB648(t, self);
+    }
+    func_001CA7C0(self);
+    for (s32 i = 0; i < 17; i++) {
+        void* item = self->slots874[i].ptr00;
+        if (item != 0) {
+            self->f6DC = item;
+            self->slots874[16].aux04 = item;
+            self->vtbl00[0x38](self, item, 1);
+            break;
+        }
+    }
+    s32 j = 0;
+    if (self->count_A78 > 0) {
+        u64 bit = 0x8000;
+        bit <<= 28;
+        Elem_1C72A0* e = self->elems_A7C;
+        do {
+            Obj_1C72A0* o = (Obj_1C72A0*)func_0015A418(self->host14, 0x101, e->key00, self);
+            e->obj04 = o;
+            if (o != 0) {
+                o->flags538 |= bit;
+                e->obj04->vtbl00[7](e->obj04);
+            }
+            e++;
+            j++;
+        } while (j < self->count_A78);
+    }
+    if (self->f_B04 != 0) {
+        if (self->f_B08 != -1) {
+            self->f_B0C = func_0015A418(self->host14, 0x101, self->f_B08, self);
+        }
+    } else {
+        self->f_B0C = func_0015A838(self->host14, 0x101, 0x8C, self);
+    }
+    func_001C5EA8(self, self->f700);
+    func_001C8F20(self, 0, 0);
+    if (func_00141008(D_00261420, self->f_B10)) {
+        func_001DBCC8(self->host14, (void*)func_001C7278, self, 0, 0);
+    }
+}

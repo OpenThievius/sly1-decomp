@@ -206,3 +206,43 @@ void func_001D3290(Obj_1D3290* self)
     func_00124DF8(self, 1, D_00274F90);
     self->vtbl[7](self);
 }
+
+typedef void (*VFn_D32D8)(void* self, s32 a, void* msg);
+typedef void (*VFnB_D32D8)(void* self);
+
+struct Self_D32D8 {
+    VFn_D32D8* vtbl;
+    u8 pad0[0x140 - 4];
+    u8 f140[0x10];
+    u8 pad1[0x550 - 0x150];
+    s32 f550;
+    u8 pad2[0x558 - 0x554];
+    void* f558;
+};
+
+struct Msg_D32D8 {
+    void* self;
+    void* v;
+};
+
+void func_00158730(void* x);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+
+void func_001D32D8(Self_D32D8* self, void* v, s32 flag)
+{
+    if (flag == 0) {
+        Msg_D32D8 msg;
+        msg.v = v;
+        msg.self = self;
+        self->vtbl[18](self, 0x17, &msg);
+        self->f550 = self->f550 - 1;
+        if (self->f550 > 0) {
+            return;
+        }
+    }
+    func_00158730(self->f558);
+    func_001BFCD8(0x67, 0, 0, (s32)self->f140, 0, 0, 4000.0f, 750.0f, 1.0f, 0.0f, 0.0f);
+    func_001837E0(self, 2, 0, 0);
+    ((VFnB_D32D8*)self->vtbl)[7](self);
+}

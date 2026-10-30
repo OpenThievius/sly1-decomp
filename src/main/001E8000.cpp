@@ -798,3 +798,27 @@ f32 func_001EA798(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1)
     f32 r = func_001EA620(0.0f, f13, t, f15, self, a1);
     return func_001EA408(f12 + r);
 }
+
+f32 func_001EA408(f32 a);
+f32 func_001EA4B8(f32 a, f32 b, f32 c, void* p, f32* out);
+
+f32 func_001EA728(f32 a, f32 b, f32 c, void* self, f32* out)
+{
+    f32 t = func_001EA408(b - a);
+    f32 r = func_001EA4B8(0.0f, t, c, self, out);
+    return func_001EA408(a + r);
+}
+
+s32 func_001F6708(void);
+
+f32 func_001EAAE0(f32 a, f32 b)
+{
+    f32 r;
+    if (a != b) {
+        s32 n = func_001F6708();
+        r = a + (b - a) * (f32)n * 0.0000000004656613f;
+    } else {
+        r = a;
+    }
+    return r;
+}
