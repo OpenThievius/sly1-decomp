@@ -1100,3 +1100,20 @@ void func_001834A0(Self_1834A0* self, s32 key, Item_1834A0* list)
     func_0011B060(&q1, 2);
     func_0011B060(&q0, 2);
 }
+
+s32 func_001DDA80(void* p);
+
+struct Obj_181A98 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0xBB0 - 0x18];
+    s32 fBB0;
+    u8 pad2[0xBF0 - 0xBB4];
+    s32 fBF0;
+};
+
+s32 func_00181A98(Obj_181A98* self)
+{
+    if (self->fBB0 != 1 || self->fBF0 != 0 || func_001DDA80(self->f14) != 0) return 1;
+    return 0;
+}

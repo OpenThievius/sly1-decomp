@@ -1201,3 +1201,110 @@ void func_001236C8(Self_1236C8* self)
         func_00123888(self, 0);
     }
 }
+
+extern f32 D_0026185C[];
+extern u8 D_002623D8[];
+extern u8 D_00261420[];
+
+struct Self_123888 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x538];
+    s32 f550;
+    f32 f554;
+    u8 pad2[0x4];
+    void* f55C;
+    u8 pad3[0xC0];
+    s32 f620;
+    s32 f624;
+    s32 f628;
+    s32 f62C;
+    s32 f630;
+    u8 pad4[0x7C];
+    s32 f6B0;
+};
+
+void func_001BF788(s32 a, s32 b);
+void func_001BF048(s32 a);
+void func_0013ECB0(void* a, s32 b, void* c, void* d, s32 e);
+void func_00160D00(void* p);
+void func_00123B28(Self_123888* self);
+void func_001B64D8(void* a, s32 b);
+void func_001B6628(void* a, s32 b);
+void func_00123BB0(Self_123888* self);
+s32 func_00141008(void* a, s32 b);
+void func_00141040(void* a, s32 b);
+void func_001837E0(Self_123888* self, s32 a, s32 b, s32 c);
+s32 func_001BEEF8(s32 a);
+void func_00123C20(Self_123888* self);
+void func_00160CF0(void* p);
+void func_001BFCD8(s32 a0, void* a1, Self_123888* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+void func_00123888(Self_123888* self, s32 mode)
+{
+    s32 cur = self->f550;
+    if (cur == mode) {
+        return;
+    }
+    if (cur < 0) {
+        goto store;
+    }
+    if (cur < 2) {
+        goto store;
+    }
+    if (cur != 2) {
+        goto store;
+    }
+    func_001BF788(self->f620, 0);
+    func_001BF048(self->f624);
+    func_0013ECB0(self->f14, self->f62C, &self->f630, self, 0);
+    if (mode == 1) {
+        func_00160D00(D_002623D8);
+    }
+store:
+    self->f550 = mode;
+    self->f554 = D_0026185C[0];
+    if (mode == 1) {
+        goto arm1;
+    }
+    if (mode < 2) {
+        if (mode == 0) {
+            goto arm0;
+        }
+        return;
+    }
+    if (mode == 2) {
+        goto arm2;
+    }
+    return;
+arm0:
+    if (self->f55C != 0) {
+        func_001B64D8(self->f55C, 0x21A);
+    }
+    func_00123B28(self);
+    return;
+arm1:
+    if (self->f55C != 0) {
+        func_001B6628(self->f55C, 0x220);
+    }
+    func_00123BB0(self);
+    if (func_00141008(D_00261420, self->f6B0) != 0) {
+        func_001837E0(self, 0x16, 0, 0);
+    } else {
+        func_001837E0(self, 3, 0, 0);
+    }
+    func_00141040(D_00261420, self->f6B0);
+    return;
+arm2:
+    if (self->f55C != 0) {
+        func_001B64D8(self->f55C, 0x21F);
+    }
+    if (self->f628 == 0) {
+        func_001BFCD8(0x15, &self->f620, self, 0, 8000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    }
+    self->f624 = func_001BEEF8(0x6B);
+    func_00123C20(self);
+    func_0013ECB0(self->f14, self->f62C, &self->f630, self, 1);
+    func_001837E0(self, 2, 0, 0);
+    func_00160CF0(D_002623D8);
+}

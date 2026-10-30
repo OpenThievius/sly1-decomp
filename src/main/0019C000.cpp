@@ -739,3 +739,41 @@ void func_0019DBB0(void)
         D_00261990->f1C8 = keep21;
     }
 }
+
+struct __attribute__((aligned(16))) Vec_19D338 { s32 a, b, c, d; };
+struct Frame_19D338 {
+    Vec_19D338 q0;
+    Vec_19D338 q1;
+    Vec_19D338 q2;
+    Vec_19D338 q3;
+    s32 w40;
+    s32 w44;
+    s32 w48;
+    s32 w4C;
+};
+
+typedef s32 (*Slot_19D338)(void* self, void* a1, s32 a2, void* a3, s32 a4, s32 a5, f32 f, void* a6);
+struct Obj_19D338 { Slot_19D338* vtbl; };
+struct Src_19D338 {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1[0x34 - 0x1C];
+    Obj_19D338* f34;
+};
+
+s32 func_00128018(void* a, s32 b, void* c, void* d);
+void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
+void func_0019C9C8(void* a, s32 b, void* c);
+
+void func_0019D338(void* self, void* dst, Src_19D338* src, f32* k)
+{
+    Frame_19D338 f;
+    func_00128018(0, src->f18, (u8*)self + 0x140, &f.q0);
+    Obj_19D338* o = src->f34;
+    if (o->vtbl[12] != 0) {
+        o->vtbl[12](o, &f.q0, 0, &f.q1, 0, 0, *k, k);
+    }
+    func_00128018((void*)src->f18, (s32)self, &f.q1, &f.q2);
+    func_0019D0E0(dst, &f.q2, &f.q3, &f.w40, &f.w44);
+    func_0019C9C8(dst, f.w40, &f.q3);
+}

@@ -513,7 +513,7 @@ void func_0015EBF0(void* obj, void* a, s32 b)
 void func_0015EB20(void* list, void* a, s32 b);
 void func_0015EBF0(void* obj, void* a, s32 b);
 void func_00152440(void* p);
-void func_001F6B40(void* a);
+s32 func_001F6B40(void* a);
 
 extern u8 D_002622A8[];
 extern u8 D_00262280[];
@@ -1058,4 +1058,46 @@ f32 func_0015C418(Obj_15C418* self, s8* s)
         acc = acc + n->fn((u8*)self + n->off, (u8)*p++);
     }
     return acc;
+}
+
+extern void* D_002623B4;
+extern volatile s32 D_002623B8;
+extern void* D_0026231C;
+extern s32 D_002626CC;
+extern u8 D_00262320[];
+
+s32 func_001F6B60(void* a);
+void func_0015EF88(void* self, s32 flag);
+void func_0015F320(void);
+void func_001683E8(void);
+void func_0015EFE8(void* p);
+void func_00191EB0(s32 a);
+
+void func_0015F210(s32 flag)
+{
+    for (s32 i = 0; (u32)i < 2; i++) {
+        func_001F6B60(D_002623B4);
+    }
+    for (s32 i = 0; (u32)i < 2; i++) {
+        func_001F6B40(D_002623B4);
+    }
+    while (D_002623B8 == 0) {
+    }
+    if (flag != 0 && D_0026231C != 0) {
+        s32 n = 2;
+        do {
+            func_0015EF88(D_0026231C, 1);
+            func_0015F320();
+            func_001683E8();
+        } while (--n >= 0);
+        D_002626CC = 3;
+    }
+    u8* p = D_00262320;
+    u8* end = p + 0x90;
+    do {
+        func_0015EFE8(p);
+        p += 0x48;
+    } while (p < end);
+    func_00191EB0(3);
+    D_0026231C = 0;
 }

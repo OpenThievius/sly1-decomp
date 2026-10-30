@@ -222,3 +222,40 @@ void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c)
     func_001EE3F0(buf, D_000000F0);
     func_001529E0(buf, &c->fC, &c->f10);
 }
+
+struct Cfg_167D68 {
+    u8 pad_000[0x738];
+    s32 f738;
+    f32 f73C;
+    u8 pad_740[0x0C];
+    f32 f74C;
+    u8 pad_750[0x4C0];
+    f32 fC10;
+    f32 fC14;
+    s32 fC18;
+    u8 padC1C[0x4];
+    f32 fC20;
+    f32 fC24;
+    f32 fC28;
+    f32 fC2C;
+    s32 fC30;
+};
+
+void func_001C6F48(void* self);
+void func_00167D68(Cfg_167D68* self);
+
+void func_00167D68(Cfg_167D68* self)
+{
+    func_001C6F48(self);
+    self->fC20 = 1000.0f;
+    self->fC24 = 1500.0f;
+    self->fC28 = 0.78539816f;
+    self->fC2C = 3.14159265f;
+    self->fC10 = 2000.0f;
+    self->fC30 = -1;
+    self->fC14 = 300.0f;
+    self->fC18 = -1;
+    self->f73C = 300.0f;
+    self->f738 = 0;
+    self->f74C = 1.04719755f;
+}
