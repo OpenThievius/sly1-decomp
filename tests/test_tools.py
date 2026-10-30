@@ -200,3 +200,10 @@ class AbsoluteAliasTest(unittest.TestCase):
     def test_short_names_get_their_eight_digit_spelling(self):
         text = "D_10 = 0x10;\nD_FA0 = 0xFA0;\nD_00000FD8 = 0xFD8;\nsomething_else = 0x20;\n"
         self.assertEqual(c_layout.absolute_aliases(text), {"D_00000010": "D_10", "D_00000FA0": "D_FA0"})
+
+
+class RunAlignmentTest(unittest.TestCase):
+    def test_a_run_needs_only_the_alignment_its_directives_ask_for(self):
+        self.assertEqual(c_layout.run_alignment(["glabel a", "nop"]), 4)
+        self.assertEqual(c_layout.run_alignment([".align 3", "glabel a", ".align 2", "nop"]), 8)
+        self.assertEqual(c_layout.run_alignment(["  .align 4"]), 16)

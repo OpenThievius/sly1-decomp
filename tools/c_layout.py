@@ -142,6 +142,15 @@ def absolute_aliases(syms_text):
     return out
 
 
+ALIGN = re.compile(r"^\s*\.align\s+(\d+)", re.M)
+
+
+def run_alignment(lines):
+    """The alignment, in bytes, that a run's section is given by its .align directives (4 for none)."""
+    bits = [int(m.group(1)) for m in ALIGN.finditer("\n".join(lines))]
+    return max([4] + [1 << b for b in bits])
+
+
 def layout(ld_script, objects):
     """Write the runs of disassembly and the linker script with the C placed. Returns (script, run sources)."""
     placed, aliases = placements(objects)
@@ -158,18 +167,29 @@ def layout(ld_script, objects):
     # from its start); ld fills the gaps with zeros, which is retail's padding (nop).
     entries, runs, run = [], [], []
 
-    def flush():
-        if not run:
-            return
-        start = functions[run[0]][0]
-        if start % 8:
-            raise LayoutError("a run of disassembly would start at 0x%X, which is not 8-byte aligned" % start)
+    def emit(names):
+        start = functions[names[0]][0]
+        body = header + [l for name in names for l in chunks[name]]
+        need = run_alignment(body)
+        if start % need:
+            if len(names) > 1:
+                # A later .align directive would round the whole section up: give the first
+                # function a section of its own, which asks for no more than its address has.
+                emit(names[:1])
+                emit(names[1:])
+                return
+            raise LayoutError("a run of disassembly would start at 0x%X, which is not %d-byte aligned, "
+                              "as its .align directives need" % (start, need))
         path = text_dir / ("run_%08X.s" % start)
-        body = header + [l for name in run for l in chunks[name]]
         write_if_changed(path, "\n".join(body) + "\n")
         runs.append(path)
         entries.append("        . = 0x%X;" % (start - text_start))
         entries.append("        %s(.text);" % path.relative_to(ROOT).with_suffix(".s.o"))
+
+    def flush():
+        if not run:
+            return
+        emit(list(run))
         run.clear()
 
     for name, (addr, size, kind) in order:

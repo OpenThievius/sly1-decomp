@@ -77,8 +77,9 @@ def build_run(src):
     if not out.exists() or out.stat().st_mtime < src.stat().st_mtime:
         run([tool("as")] + AS_FLAGS + [str(src), "-o", str(out)])
         # GNU as aligns a MIPS .text to 16; a run starts wherever its first function does
-        # (8-byte aligned), so its section asks for no more than that.
-        run([tool("objcopy"), "--set-section-alignment", ".text=8", str(out)])
+        # (8-byte aligned, or 4 in the libraries), so its section asks for no more than that.
+        start = int(src.stem.split("_")[-1], 16)
+        run([tool("objcopy"), "--set-section-alignment", ".text=%d" % (8 if start % 8 == 0 else 4), str(out)])
 
 
 def first_difference(a, b):
