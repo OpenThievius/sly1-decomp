@@ -725,3 +725,38 @@ void func_0018B460(Obj_18B460* a0, f32* a1)
         break;
     }
 }
+
+struct __attribute__((aligned(16))) Cand_18A6C0 { u8 pad0[0x40]; f32 score; u8 pad1[0x70 - 0x44]; };
+
+s32 func_00141D00(void* self, void* p1, void* p2, f32 x, s32 p3, void* p4);
+
+s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
+{
+    Cand_18A6C0 buf[2];
+    s32* table = (s32*)a4;
+    s32 best = 0;
+    f32 bestScore = 3.4028234663852886e+38f;
+    s32 i;
+
+    for (i = 0; i < a3; i++) {
+        s32 self = table[i];
+        s32 r = func_00141D00((void*)self, a1, a2, f, 2, (void*)buf);
+        s32 k = 0;
+        if (r > 0) {
+            if (buf[0].score == 0.0f && (a0 & 1)) {
+                k = 1;
+            }
+        }
+        if (k < r) {
+            Cand_18A6C0* c = &buf[k];
+            if (c->score < bestScore) {
+                bestScore = c->score;
+                best = self;
+                if (a5 != 0) {
+                    *(Cand_18A6C0*)a5 = *c;
+                }
+            }
+        }
+    }
+    return best;
+}

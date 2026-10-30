@@ -1219,3 +1219,27 @@ void func_001A7480(Obj_1A7480* self, s32 value)
         }
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1A4610 { s32 a, b, c, d; };
+struct Obj_1A4610 { u8 pad0[0x440]; Quad_1A4610 q440; Quad_1A4610 q450; };
+extern u8 D_00248D20[];
+s32 func_001300E8(void* node, s32 kind);
+void func_001BC828(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+
+void func_001A4610(Obj_1A4610* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+{
+    Quad_1A4610 s0;
+    Quad_1A4610 s1;
+    s32 n = *(s32*)(a2 + ((1 - a3) << 6));
+    s0 = self->q440;
+    s1 = self->q450;
+    if (n != 0) {
+        if (func_001300E8((void*)n, 0x43) || func_001300E8((void*)n, 0x42)) {
+            self->q450.a = 1;
+            self->q440 = *(Quad_1A4610*)D_00248D20;
+        }
+    }
+    func_001BC828(self, a1, a2, a3, a4, a5);
+    self->q440 = s0;
+    self->q450 = s1;
+}

@@ -1056,3 +1056,65 @@ void func_0018D780(Q18D780* dst, Q18D780* src, s32 n)
         } while (k < total);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_18DB20 { s32 a, b, c, d; };
+struct __attribute__((aligned(16))) Tbl3_18DB20 { Quad_18DB20 q[3]; };
+struct __attribute__((aligned(16))) Blk4_18DB20 { Quad_18DB20 q[4]; };
+
+struct Frame_18DB20 {
+    Quad_18DB20 q00;
+    Quad_18DB20 q10;
+    Quad_18DB20 q20;
+    Tbl3_18DB20 tbl30;
+    Quad_18DB20 q60;
+    u8 pad70[0xA0 - 0x70];
+    Blk4_18DB20 blkA0;
+    u8 padE0[0xF0 - 0xE0];
+    Blk4_18DB20 blkF0;
+};
+
+typedef void (*VFn_18DB20)(void* self, f32 f, void* a, void* b);
+struct Obj_18DB20 { VFn_18DB20* vtbl; };
+
+struct Self_18DB20 {
+    u8 pad0[0x1EC];
+    Obj_18DB20* p1EC;
+    Obj_18DB20* p1F0;
+    u8 pad1[0x2C8 - 0x1F4];
+    u64 flags2C8;
+};
+
+extern u8 D_00248D30[];
+extern u8 D_002483D0[];
+
+void func_00125B70(void* obj, void* c, void* out);
+void func_00188B08(void* a, void* b, void* out);
+void func_00188668(void* out, void* b, void* in);
+void func_00125C90(void* obj, void* s, void* out);
+
+void func_0018DB20(Self_18DB20* self, void* in1, void* in2)
+{
+    Frame_18DB20 f;
+
+    if ((self->flags2C8 & 0x100000000ULL) == 0) {
+        if (self->p1EC == 0 && self->p1F0 == 0) {
+            func_00125C90(self, in1, in2);
+        } else {
+            if (self->p1EC != 0) {
+                self->p1EC->vtbl[4](self->p1EC, 0.0f, &f, &f.q10);
+            } else {
+                f.q00 = *(Quad_18DB20*)D_00248D30;
+            }
+            if (self->p1F0 != 0) {
+                self->p1F0->vtbl[5](self->p1F0, 0.0f, &f.tbl30, &f.q20);
+            } else {
+                f.tbl30 = *(Tbl3_18DB20*)D_002483D0;
+            }
+            func_00125B70(self, in2, &f.blkA0);
+            func_00188B08(&f, &f.tbl30, &f.q60);
+            func_00188668(&f.blkF0, &f.blkA0, &f.q60);
+            f.blkA0 = f.blkF0;
+            func_00125C90(self, in1, &f.blkA0);
+        }
+    }
+}

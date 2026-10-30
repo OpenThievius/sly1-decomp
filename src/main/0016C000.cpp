@@ -830,3 +830,25 @@ void func_0016CE80(Obj_16CE80* self)
         self->f5A4 = ((Ref_16CE80*)p->f0)->f34;
     }
 }
+
+void func_001DFD90(void* self);
+
+struct Obj_16C470 {
+    u8 pad0[0x88];
+    s32 f88;
+    u8 pad8C[0xA8 - 0x8C];
+    s32 fA8;
+    s32 fAC;
+    u8 padB0[0xB4 - 0xB0];
+    f32 fB4;
+};
+
+void func_0016C470(void* a0)
+{
+    Obj_16C470* self = (Obj_16C470*)a0;
+    func_001DFD90(a0);
+    self->f88 = 1;
+    self->fA8 = 8;
+    self->fAC = 9;
+    self->fB4 = 3.4028234663852886e+38f;
+}

@@ -835,3 +835,50 @@ void func_001AB710(Actor_001AB710* self)
         func_0015C900(self->p4);
     }
 }
+
+typedef void (*VFn_1A9FD0)(void* self);
+struct Dyn_1A9FD0 { VFn_1A9FD0* vtbl; };
+
+extern u8 D_002486B0[];
+extern u8 D_00262C68[];
+extern u8 D_00262C70[];
+extern u8 D_00262D38[];
+extern u8 D_00275F80[];
+
+void func_001EFD10(void* a, void* b);
+
+void func_001A9FD0(void)
+{
+    Dyn_1A9FD0** slots = (Dyn_1A9FD0**)D_002486B0;
+    for (s32 i = 36; i >= 0; i--) {
+        Dyn_1A9FD0* o = slots[i];
+        o->vtbl[2](o);
+    }
+    u8* g = D_00275F80;
+    void* b;
+    if (*(s32*)D_00262C68 & 4) {
+        b = D_00262C70;
+    } else {
+        b = D_00262D38;
+    }
+    func_001EFD10(g, b);
+}
+
+typedef void (*VFn_1AA0C0)(void* self);
+struct Obj_1AA0C0 {
+    VFn_1AA0C0* vtbl;
+};
+
+extern u8 D_002486B0[];
+
+void func_001AA0C0(void)
+{
+    Obj_1AA0C0** p = (Obj_1AA0C0**)D_002486B0;
+    s32 n = 0x24;
+    do {
+        n--;
+        Obj_1AA0C0* o = *p;
+        o->vtbl[5](o);
+        p++;
+    } while (n >= 0);
+}
