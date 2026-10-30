@@ -1029,3 +1029,44 @@ void func_00141338(void* selfp)
         i++;
     }
 }
+
+struct BitSet_141040 {
+    u8 pad0[8];
+    s32 count;
+    u8 bits[0x20C - 0xC];
+    s32 flag;
+};
+
+void func_00141040(BitSet_141040* self, s32 bit)
+{
+    u8* base = self->bits;
+    u8* byte = base + bit / 8;
+    s32 mask = 1 << (bit & 7);
+    s32 cur = *byte & mask;
+    if (cur == 0) {
+        self->flag = 1;
+        goto done;
+    }
+done:
+    if (!(*byte & mask)) {
+        *byte = (u8)(*byte | mask);
+        self->count++;
+    }
+}
+
+void func_001410A0(BitSet_141040* self, s32 bit)
+{
+    u8* base = self->bits;
+    u8* byte = base + bit / 8;
+    s32 mask = 1 << (bit & 7);
+    s32 cur = *byte & mask;
+    if (cur != 0) {
+        self->flag = 1;
+        goto done;
+    }
+done:
+    if ((*byte & mask) != 0) {
+        *byte = (u8)(*byte & ~mask);
+        self->count--;
+    }
+}

@@ -749,3 +749,136 @@ void func_0013CCF8(void* self)
     o->f688 = func_00140FF8(D_00261420);
     o->f614 = -1;
 }
+
+struct Owner_13DB28 {
+    u8 pad0[8];
+    s32 flags_08;
+};
+
+struct MsgList_13DB28 {
+    Owner_13DB28* owner_00;
+};
+
+struct ActorList_13DB28 {
+    u8 pad0[0x63C];
+    s32 mask_63C;
+    s32 count_640;
+    void* list_644[4];
+    s32 count_654;
+    void* list_658[4];
+};
+
+void* func_001925F0(void);
+s32 func_001833F0(void* msg, void* item);
+s32 func_001300E8(void* msg, void* item);
+
+s32 func_0013DB28(ActorList_13DB28* self, MsgList_13DB28* msg)
+{
+
+
+    if (self->mask_63C == 0) {
+        return 1;
+    }
+    if (self->mask_63C & 1) {
+        if (msg == func_001925F0()) {
+            return 1;
+        }
+    }
+    if (self->mask_63C & 4) {
+        if (msg->owner_00->flags_08 & 0x20) {
+            return 1;
+        }
+    }
+    if ((self->mask_63C & 2) == 0) {
+        return 0;
+    }
+    for (s32 i = 0; i < self->count_640; i++) {
+        if (func_001833F0(msg, self->list_644[i]) != 0) {
+            return 1;
+        }
+    }
+    for (s32 i = 0; i < self->count_654; i++) {
+        if (func_001300E8(msg, self->list_658[i]) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+struct Ent_13EC00 { s32 k1; s32 k2; s32 f8; s32 fC; };
+
+s32 func_0013EC00(Ent_13EC00* tab, s32 cap, s32* count, s32 flag, s32 k1, s32 k2, s32 val)
+{
+    for (s32 i = 0; i < *count; i++) {
+        Ent_13EC00* p = &tab[i];
+        if (p->k1 == k1 && (p->k2 == -1 || p->k2 == k2)) {
+            if (flag != 0) {
+                p->f8 = val;
+            } else {
+                p->fC = val;
+            }
+            return 1;
+        }
+    }
+    s32 n = *count;
+    if (n + 1 >= cap) {
+        return 0;
+    }
+    *count = n + 1;
+    Ent_13EC00* e = (Ent_13EC00*)((n << 4) + (s32)tab);
+    e->k1 = k1;
+    e->k2 = k2;
+    if (flag != 0) {
+        e->f8 = val;
+        e->fC = -1;
+    } else {
+        e->fC = val;
+        e->f8 = -1;
+    }
+    return 1;
+}
+
+s32 func_0015A198(void* self, s32 kind, s32 key, void* arg, s32 flags, void* out);
+void* func_00129C20(void* a, s32 b);
+void func_001B64D8(void* a, s32 b);
+
+struct Ent_13ECB0 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+};
+
+s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
+{
+    s32 count = 0;
+    s32 more;
+    void* out;
+    if (n > 0) {
+        Ent_13ECB0* p = ent;
+        do {
+            s32 r = func_0015A198(self, 0x304, p->f0, arg, 1, &out);
+            if (r != 1) {
+                return r;
+            }
+            void* v = func_00129C20(out, p->f4);
+            if (v == 0) {
+                count++;
+            } else {
+                s32 k;
+                if (flag != 0) {
+                    k = p->f8;
+                } else {
+                    k = p->fC;
+                }
+                if (k != -1) {
+                    func_001B64D8(v, k);
+                }
+                count++;
+            }
+            p++;
+            more = count < n;
+        } while (more != 0);
+    }
+    return more;
+}

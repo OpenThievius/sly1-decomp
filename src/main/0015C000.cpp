@@ -995,3 +995,48 @@ void func_0015F8B0(void* self, Group_15F8B0* group)
         func_0015F7D8(self, group);
     }
 }
+
+struct Obj_0015C2E8;
+struct Vec4_0015C2E8 { f32 x; f32 y; f32 z; f32 w; };
+
+void func_001613C0(Obj_0015C2E8* obj, s32 a1, s32 a2, s32 a3);
+void func_00161708(Obj_0015C2E8* obj, s32 a1, u64 key);
+
+void func_0015C2E8(void* unused, Vec4_0015C2E8* v, Obj_0015C2E8* obj)
+{
+    if (v != 0) {
+        s32 pw = (s32)(v->x + v->z) - 1;
+        s32 pz = (s32)((v->y + v->w) * 0.454545468f) - 1;
+        s32 py = (s32)(v->y * 0.454545468f);
+        s32 px = (s32)v->x;
+        func_001613C0(obj, 0, 1, 0xE);
+        u64 key = (u64)px | ((u64)pw << 16) | ((u64)py << 32) | ((u64)pz << 48);
+        func_00161708(obj, 0x40, key);
+    }
+}
+
+extern u32 D_002C3B00[];
+extern u8 D_00148D74[];
+extern s32 D_00262310;
+
+void func_0015EDB8(void)
+{
+    const u8* table = (const u8*)D_002C3B00;
+    s32 n = (s32)D_00148D74;
+    u32 crc = 0xFFFFFFFF;
+    u32* p = (u32*)0x00100000;
+    if (n > 0) {
+        do {
+            u32 w = *p;
+            n -= 4;
+            p++;
+            crc = *(u32*)(table + (((crc ^ w) & 0xFF) << 2)) ^ (crc >> 8);
+            crc = *(u32*)(table + (((crc ^ (w >> 8)) & 0xFF) << 2)) ^ (crc >> 8);
+            crc = *(u32*)(table + (((crc ^ (w >> 16)) & 0xFF) << 2)) ^ (crc >> 8);
+            crc = *(u32*)(table + (((crc ^ (w >> 24)) & 0xFF) << 2)) ^ (crc >> 8);
+        } while (n > 0);
+    }
+    if (crc != 0) {
+        D_00262310 = 1;
+    }
+}

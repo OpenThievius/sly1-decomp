@@ -819,3 +819,40 @@ void func_00153528(Self_153528* self, s32 count)
 	self->f48 = func_0018D658(count << 3);
 	self->f4C = func_0018D658(count << 3);
 }
+
+struct Gl_0026E9F8 { u8 pad0[0x260]; s32 f260; u8 pad1[0x8]; s32 f26C; };
+struct Obj_001518B8 { u8 pad0[0x2D0]; s32 f2D0; s32 f2D4; u8 pad1[0x2C]; s32* p304; u8 pad2[0x8]; s32 count310; s32 items314[1]; };
+
+extern u8 D_0026E9F8[];
+extern s32 D_00275F84;
+extern void* D_0027051C;
+s32 func_001BE5E8(void);
+void func_00150790(void* self, s32 mode);
+
+void func_001518B8(Obj_001518B8* self)
+{
+    Gl_0026E9F8* g = (Gl_0026E9F8*)D_0026E9F8;
+    if (g->f260 >= 2 || g->f26C != 0)
+        return;
+    if (func_001BE5E8() != 0)
+        return;
+    if (D_00275F84 == 1)
+        return;
+    if (self == D_0027051C)
+        return;
+    s32 mode = 1;
+    if (*self->p304 != 0) {
+        mode = (self->f2D0 == 2) ? self->f2D4 : 5;
+    } else {
+        s32 n = self->count310;
+        if (n > 0) {
+            for (s32 i = 0; i < n; i++) {
+                if (*(s32*)self->items314[i] != 0) {
+                    mode = 5;
+                    break;
+                }
+            }
+        }
+    }
+    func_00150790(self, mode);
+}

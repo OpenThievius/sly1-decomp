@@ -918,3 +918,85 @@ void func_0014C138(Obj_14C138* self)
     self->f44C = (s32)self->o5E0[0];
     func_0014C2F0(self);
 }
+
+extern u8 D_0026E760[];
+extern f32 D_0026185C;
+
+struct Arg_14CDC8 {
+    u8 pad_00[0xC24];
+    s32 fC24;
+};
+
+struct Mgr_14CDC8 {
+    u8 pad_00[0x14];
+    void* f14;
+    u8 pad_18[0x2D0 - 0x18];
+    s32 f2D0;
+    s32 f2D4;
+    u8 pad_2D8[0x42C - 0x2D8];
+    void* dev;
+    u8 pad_430[0x434 - 0x430];
+    f32 f434;
+    f32 f438;
+    u8 pad_43C[0x44C - 0x43C];
+    s32 f44C;
+    u8 pad_450[0x454 - 0x450];
+    s32 f454;
+    u8 pad_458[0x460 - 0x458];
+    f32 f460;
+};
+
+typedef s32 (*VFnI_14CDC8)(void* self);
+struct Obj_14CDC8 { VFnI_14CDC8* vtbl; };
+
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001B6568(void* dev, s32* out);
+void func_001B6598(void* dev, s32* out);
+void* func_001925F0(void);
+void func_001B64D8(void* dev, s32 value);
+s32 func_0015A4F0(void* obj, s32 a1, s32 a2, s32 a3, s32 a4, s32* out);
+void func_001C8F20(s32 value, s32 a1, s32 a2);
+void func_001AB958(void* obj);
+void func_0014C2F0(Mgr_14CDC8* self);
+
+void func_0014CDC8(Mgr_14CDC8* self, Arg_14CDC8* arg)
+{
+    s32 hi = self->f2D4;
+    s32 v = self->f2D0 + arg->fC24;
+    if (v < 0) {
+        v = 0;
+    } else {
+        if (hi < v) {
+            v = hi;
+        }
+    }
+    self->f2D0 = v;
+    if (!(v < self->f2D4)) {
+        s32 arr[32];
+        s32 t1;
+        s32 t2;
+        func_001B6598(self->dev, &t1);
+        func_001B6568(self->dev, &t2);
+        void* p = func_001925F0();
+        Obj_14CDC8* o = (Obj_14CDC8*)p;
+        s32 r = o->vtbl[81](p);
+        if (t1 != 0x3FF && t2 != 0x3FF && r != 2) {
+            func_001B64D8(self->dev, 0x3FE);
+            s32 n = func_0015A4F0(self->f14, 5, 0x12, 0, 0x20, arr);
+            if (n > 0) {
+                s32 cnt = n;
+                s32* q = arr;
+                do {
+                    func_001C8F20(*q, 0xB, 0);
+                    q++;
+                } while (--cnt != 0);
+            }
+        }
+        func_001AB958(D_0026E760);
+    }
+    func_0014C2F0(self);
+    if (self->f454 == self->f44C) {
+        self->f460 = D_0026185C + func_001EAAE0(self->f434, self->f438);
+    }
+    self->f454 = self->f454 - 1;
+}
