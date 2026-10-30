@@ -1419,3 +1419,31 @@ ret0:
     r = 0;
     return r;
 }
+
+struct Entry_1B4688 {
+    u8 pad0[2];
+    s16 key;
+    u8 pad4[0x24];
+};
+
+extern s32 D_002744F8;
+extern Entry_1B4688* D_002744FC;
+
+Entry_1B4688* func_001B4688(s32 key)
+{
+    if (key == -1) {
+        return 0;
+    }
+    s32 i = 0;
+    if (i < D_002744F8) {
+        Entry_1B4688* p = D_002744FC;
+        do {
+            if (p->key == key) {
+                return p;
+            }
+            i++;
+            p++;
+        } while (i < D_002744F8);
+    }
+    return 0;
+}

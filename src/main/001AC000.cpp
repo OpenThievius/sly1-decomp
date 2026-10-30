@@ -643,3 +643,38 @@ void func_001ADF28(Node_1ADF28* self)
     self->f264 = a1;
     func_001ADFF0(self);
 }
+
+struct Obj_001AED78 {
+    u8 pad0[0x564];
+    s32 f564;
+    s32 f568[9];
+    s32 f58c;
+    s32 f590[9];
+    s32 f5b4;
+};
+
+s32 func_001AEE50(Obj_001AED78* self, s32 value);
+s32 func_001833F0(s32 value, s32 item);
+s32 func_001300E8(s32 value, s32 item);
+
+s32 func_001AED78(Obj_001AED78* self, s32 value)
+{
+
+    if (self->f5b4 != 0) {
+        return 1;
+    }
+    if (func_001AEE50(self, value) != 0) {
+        return 0;
+    }
+    for (s32 i = 0; i < self->f564; i++) {
+        if (func_001833F0(value, self->f568[i]) != 0) {
+            return 1;
+        }
+    }
+    for (s32 i = 0; i < self->f58c; i++) {
+        if (func_001300E8(value, self->f590[i]) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}

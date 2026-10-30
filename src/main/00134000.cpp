@@ -581,3 +581,46 @@ void func_001373D0(Chan_001373D0* self)
     self->a28 = 0;
     self->a2C = 0;
 }
+
+struct Ring_00137328 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    u8 pad24[0x14];
+    s32 f38;
+    s32 f3C;
+    s32 f40;
+    s32 f44;
+    s32 f48;
+    s32 f4C;
+    s32 f50;
+    s32 f54;
+    s32 f58;
+};
+
+s32 func_00137328(Ring_00137328* r, s32 a1, s32 a2)
+{
+    r->f04 = 1;
+    r->f48 = a1;
+    r->f10 = a2;
+    r->f14 = a2;
+    r->f40 = a2;
+    r->f20 = r->f08;
+    r->f38 = 0;
+    r->f44 = 0;
+    r->f3C = 0;
+    s32 count = r->f0C / 0x100000;
+    s32 m = 2;
+    if (m < count) m = count;
+    r->f50 = 0;
+    r->f54 = 0;
+    r->f4C = m;
+    r->f58 = m - 1;
+    return 1;
+}
