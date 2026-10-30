@@ -262,3 +262,21 @@ void func_001F57E0(Self_57E0* self, void* a1, Out_57E0* out)
     out->fC = (void*)func_001F56D8;
     func_001837E0(self->f0, 2, 0, 0);
 }
+
+struct IdList_1F5930 { u8 pad[0x94]; s32 count; s32 items[1]; };
+void func_0018D800(void* dst, void* src, s32 count);
+
+void func_001F5930(IdList_1F5930* self, s32 value)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        if (self->items[i] == value) {
+            break;
+        }
+    }
+    if (i < self->count) {
+        s32* p = &self->items[i];
+        func_0018D800(p, p + 1, (self->count - i - 1) * 4);
+        self->count = self->count - 1;
+    }
+}
