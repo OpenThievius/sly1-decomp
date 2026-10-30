@@ -806,3 +806,35 @@ void func_001B2010(struct Obj_001B2010* o, f32 s) {
     o->f8 = t * o->f44;
     func_001B1BF0(o);
 }
+
+typedef u64 Quad_1B2068 __attribute__((mode(TI)));
+struct Obj_1B2068 { u8 pad[0x30]; Quad_1B2068 value; };
+void func_001B1BF0(Obj_1B2068* self);
+void func_001B2068(Obj_1B2068* self, Quad_1B2068* src) { self->value = *src; func_001B1BF0(self); }
+
+struct Obj_1B3488;
+
+extern s32 D_00274518;
+extern u8 D_002626D8[];
+extern s32 D_002626CC;
+
+void func_001B47C0(void);
+void func_00168D78(Obj_1B3488* p);
+void func_001692B0(Obj_1B3488* self, u8* arg);
+void func_001B3510(Obj_1B3488* self);
+void func_00169718(void);
+void func_0013B430(Obj_1B3488* mask);
+
+void func_001B3488(Obj_1B3488* self)
+{
+    func_001B47C0();
+    if ((s32)self != D_00274518) {
+        func_00168D78((Obj_1B3488*)D_002626D8);
+        func_001692B0(self, D_002626D8);
+        func_001B3510(self);
+        func_00169718();
+        func_0013B430(self);
+        D_002626CC = 2;
+        D_00274518 = (s32)self;
+    }
+}

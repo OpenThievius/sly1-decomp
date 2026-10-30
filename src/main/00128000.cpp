@@ -1713,3 +1713,49 @@ s32 func_00128230(Obj_00128230 *self) {
     }
     return 0;
 }
+
+typedef u64 Quad_129FB0 __attribute__((mode(TI)));
+struct Frame_129FB0 { Quad_129FB0 r; Quad_129FB0 a; Quad_129FB0 b; };
+struct Obj_129FB0 { u8 pad[0]; };
+
+extern u8 D_00260E90[];
+
+void func_00118CF0(Quad_129FB0* out, void* src);
+void func_00118D10(Quad_129FB0* out, void* src);
+Quad_129FB0 func_00118D30(Quad_129FB0 a, Quad_129FB0 b);
+Quad_129FB0 func_00118D20(Quad_129FB0* out, Quad_129FB0 v);
+void func_0012A028(Obj_129FB0* self, Quad_129FB0* src);
+
+void func_00129FB0(Obj_129FB0* self, void* src)
+{
+    Frame_129FB0 f;
+    u8* p = D_00260E90;
+    func_00118CF0(&f.a, src);
+    Quad_129FB0 av = f.a;
+    func_00118D10(&f.b, p);
+    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    func_0012A028(self, &f.r);
+}
+
+typedef u64 Quad_12A080 __attribute__((mode(TI)));
+struct Frame_12A080 { Quad_12A080 r; Quad_12A080 a; Quad_12A080 b; };
+struct Obj_12A080 { u8 pad[0]; };
+
+extern u8 D_00260EA0[];
+
+void func_00118CF0(Quad_12A080* out, void* src);
+void func_00118D10(Quad_12A080* out, void* src);
+Quad_12A080 func_00118D30(Quad_12A080 a, Quad_12A080 b);
+Quad_12A080 func_00118D20(Quad_12A080* out, Quad_12A080 v);
+void func_0012A0F8(Obj_12A080* self, Quad_12A080* src);
+
+void func_0012A080(Obj_12A080* self, void* src)
+{
+    Frame_12A080 f;
+    u8* p = D_00260EA0;
+    func_00118CF0(&f.a, src);
+    Quad_12A080 av = f.a;
+    func_00118D10(&f.b, p);
+    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    func_0012A0F8(self, &f.r);
+}

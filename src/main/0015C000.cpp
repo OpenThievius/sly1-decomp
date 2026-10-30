@@ -1142,3 +1142,52 @@ none:
 some:
     return 1;
 }
+
+struct Block_0015DB80 { s32 w0; s32 w4; s32 w8; s32 wC; u8 pad10[0x88]; s32 tail98; };
+struct __attribute__((packed)) Unaligned_0015DB80 { s32 value; };
+
+void func_0015DB80(Block_0015DB80* self)
+{
+    s32 t;
+    self->w4 = self->w0;
+    self->w8 = self->wC;
+    t = ((Unaligned_0015DB80*)((u8*)self + 0xA4))->value;
+    ((Unaligned_0015DB80*)((u8*)self + 0xA0))->value = t;
+    t = ((Unaligned_0015DB80*)((u8*)self + 0xA0))->value;
+    ((Unaligned_0015DB80*)((u8*)self + 0x9C))->value = t;
+    self->tail98 = 0;
+}
+
+struct Ent_15F8B0;
+struct Self_15F8B0;
+
+struct Sub_15F8B0 {
+    u8 pad0[0x8];
+    s32 f8;
+    Ent_15F8B0** fC;
+};
+
+struct Ent_15F8B0 {
+    u8 pad0[0x6C];
+    u32 f6C;
+    Sub_15F8B0* f70[4];
+};
+
+void func_0015F7D8(Self_15F8B0* self);
+
+void func_0015F8B0(Self_15F8B0* self, Sub_15F8B0* s)
+{
+    s32 i;
+    if (s->f8 < 2) {
+        return;
+    }
+    for (i = 0; i < s->f8; i++) {
+        Ent_15F8B0* e = s->fC[i];
+        u32 c = e->f6C;
+        if (c < 4) {
+            e->f70[c] = s;
+            e->f6C = c + 1;
+        }
+    }
+    func_0015F7D8(self);
+}

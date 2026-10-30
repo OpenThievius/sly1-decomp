@@ -1048,3 +1048,27 @@ void func_001694A0(Rec_1694A0* self)
         d->f10 = b;
     }
 }
+
+extern s32 D_002BE468;
+extern s32 D_002BE464;
+
+struct Self_1686E8 {
+    u8 pad0[4];
+};
+
+s32 func_00202120(void);
+s32 func_00202058(s32 a);
+void func_001F6C20(s32 a);
+void func_00202A80(Self_1686E8* a, void* b);
+void func_001F6B60(s32 a);
+
+void func_001686E8(Self_1686E8* self, void* b)
+{
+    D_002BE468 = 1;
+    *(volatile u64*)0x12001000 |= 2;
+    s32 r = func_00202120();
+    func_00202058(r & -0x201);
+    func_001F6C20(0);
+    func_00202A80(self, b);
+    func_001F6B60(D_002BE464);
+}

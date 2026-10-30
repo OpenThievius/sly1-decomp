@@ -479,3 +479,94 @@ void func_00144938(Ctx_144938* self, void* p, s32 q)
 {
     func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
+
+struct Obj_144848 { u8 pad0[0x10]; };
+struct Self_144848 { u8 pad0[0x100]; };
+extern u8 D_002622A8[];
+
+void func_00152B38(Obj_144848* o);
+void func_00152D70(Obj_144848* o);
+void func_001EE3B8(Obj_144848* o, s32 size, s32 flags);
+void func_001EE668(Obj_144848* o, s32 a, s32 b, void* c, s32 d);
+
+void func_00144848(u8* self)
+{
+    Obj_144848* o = (Obj_144848*)D_002622A8;
+    func_00152B38(o);
+    func_001EE3B8(o, 0, 0);
+    func_001EE668(o, 0x0C, 4, self + 0x100, 4);
+    func_001EE668(o, 0x0C, 4, self + 0x140, 8);
+    func_00152D70(o);
+}
+
+struct __attribute__((aligned(16))) Quad_1448C8 {
+    s32 v[4];
+};
+
+struct Triple_1448C8 {
+    Quad_1448C8 q[3];
+};
+
+struct Obj_1448C8 {
+    u8 pad0[0x40];
+    Quad_1448C8 q40;
+    u8 pad1[0x30];
+    Quad_1448C8 q80;
+    Quad_1448C8 q90;
+    Quad_1448C8 qA0;
+    u8 pad2[0x200];
+    f32 f2B0;
+    f32 f2B4;
+    f32 f2B8;
+    f32 f2BC;
+    f32 f2C0;
+};
+
+extern void func_00144540(Obj_1448C8* self);
+
+void func_001448C8(Obj_1448C8* self, Quad_1448C8* a, Triple_1448C8* b)
+{
+    if (a != 0) {
+        self->q40 = *a;
+    }
+    if (b != 0) {
+        self->q80 = b->q[0];
+        self->q90 = b->q[1];
+        self->qA0 = b->q[2];
+    }
+    f32 zero;
+
+    func_00144540(self);
+    zero = 0.0f;
+    self->f2C0 = zero;
+    self->f2BC = zero;
+    self->f2B4 = zero;
+    self->f2B0 = zero;
+    self->f2B8 = zero;
+}
+
+struct __attribute__((aligned(16))) Vec_144B70 {
+    s32 w[4];
+};
+
+struct Eng_144B70 {
+    u8 pad0[0x40];
+    Vec_144B70 f40;
+    u8 pad50[0x2B0 - 0x50];
+    f32 f2B0;
+    f32 f2B4;
+    f32 f2B8;
+    u8 pad2BC[0x2D0 - 0x2BC];
+    Vec_144B70 f2D0;
+};
+
+void func_00144AA0(Vec_144B70* a, Vec_144B70* b, Vec_144B70* out, f32 x, f32 y, f32 z);
+void func_00144978(Vec_144B70* a, Vec_144B70* b, Vec_144B70* out, f32* x, f32* y, f32* z);
+
+void func_00144B70(Eng_144B70* self, Vec_144B70* arg)
+{
+    Vec_144B70 tmp;
+    func_00144AA0(&self->f2D0, &self->f40, &tmp, self->f2B0, self->f2B4, self->f2B8);
+    func_00144978(arg, &self->f40, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
+    self->f2D0 = *arg;
+}

@@ -1291,3 +1291,23 @@ void func_00120D58(Obj_120D58* o, Cam_120D58* cam, s32 c, f32* out0, f32* out1, 
     if (out1)
         *out1 = sum1;
 }
+
+struct Slot_00121338 {
+	u8 pad0[4];
+	s32 value;
+	u8 pad1[8];
+	s8 b10;
+	s8 b11;
+	s8 b12;
+	s8 b13;
+};
+
+void func_00121338(Slot_00121338* self, s32 value)
+{
+	s8 m = -1;
+	self->value = value;
+	self->b12 = m;
+	self->b13 = -1;
+	self->b11 = m;
+	self->b10 = m;
+}

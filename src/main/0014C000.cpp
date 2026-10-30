@@ -956,3 +956,22 @@ void func_0014F110(Self_14F110* self, s32 state)
         }
     }
 }
+
+struct Cfg_14C5E8 { u8 pad0[0x2D0]; s32 f2D0; s32 f2D4; };
+extern u8 D_00261EF0[];
+void func_00151E20(Cfg_14C5E8* self, f32 amount);
+
+void func_0014C5E8(Cfg_14C5E8* self)
+{
+    f32 one = 1.0f;
+    f32 ratio = (f32)self->f2D0 / (f32)self->f2D4;
+    f32 c;
+    if (ratio < 0.0f) {
+        c = 0.0f;
+    } else if (one < ratio) {
+        c = 1.0f;
+    } else {
+        c = ratio;
+    }
+    func_00151E20((Cfg_14C5E8*)D_00261EF0, 1.0f - c * 0.8f);
+}

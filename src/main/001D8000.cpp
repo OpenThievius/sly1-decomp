@@ -798,3 +798,22 @@ s32 func_001DBAE0(s32 unused, Id_1DBAE0 index)
 {
     return func_001C0C50(index);
 }
+
+struct Node_1DBC60 { s32 f0; s32 f4; s32 f8; s32 fC; Node_1DBC60* f10; };
+struct Obj_1DBC60 { u8 pad0[0x1EC8]; Node_1DBC60* f1EC8; };
+
+void func_001DBCC8(Obj_1DBC60* self, s32 a1, s32 a2, s32 a3, s32 a4);
+
+void func_001DBC60(Obj_1DBC60* self, s32 a1, s32 a2, s32 a3, s32 a4)
+{
+    Node_1DBC60* n = self->f1EC8;
+    if (n != 0) {
+        do {
+            if (n->f0 == a1 && n->f4 == a2 && n->f8 == a3 && n->fC == a4) {
+                return;
+            }
+            n = n->f10;
+        } while (n != 0);
+    }
+    func_001DBCC8(self, a1, a2, a3, a4);
+}

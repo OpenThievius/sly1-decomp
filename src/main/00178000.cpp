@@ -785,3 +785,35 @@ void func_0017A788(Obj_17A788* self, void* s, void* out)
     func_00126A48(self, *(u32*)&res);
     func_00125C90(self, s, out);
 }
+
+struct Tgt_1781E0;
+
+struct Self_1781E0 {
+    u8 pad0[0x2220];
+    s32 f2220;
+    u8 pad2224[0x2BE0 - 0x2224];
+    void* f2BE0;
+};
+
+struct Obj_1781E0 {
+    u8 pad0[0x2D8];
+    Tgt_1781E0* f2D8;
+};
+
+void func_001B6598(Tgt_1781E0* dev, s32* out);
+void func_001B6568(Tgt_1781E0* dev, s32* out);
+
+void func_001781E0(Self_1781E0* self, Obj_1781E0* other)
+{
+    s32 code[2];
+    if (self->f2220 == 9) {
+        return;
+    }
+    func_001B6598(other->f2D8, &code[0]);
+    func_001B6568(other->f2D8, &code[1]);
+    if (code[0] == 0x22E) {
+        if (code[1] == code[0] || code[1] == -1) {
+            self->f2BE0 = other;
+        }
+    }
+}

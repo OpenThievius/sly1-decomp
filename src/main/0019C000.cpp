@@ -676,3 +676,33 @@ void func_0019C470(Obj_19C470* o, Stream_19C470* in)
     o->fE0 = func_00137DF8(in);
     func_0011EC40(o, in);
 }
+
+struct Node_19DA60 { u8 pad[0x1C]; s32 f1C; };
+struct Obj_19DA60 { u8 pad[0]; };
+
+extern u8 D_002622A8[];
+extern u8 D_00212160[];
+extern u8 D_00215C50[];
+extern u32 D_00604780;
+extern Node_19DA60* D_002622D8;
+
+void func_0019D860(void);
+void func_0019D930(void);
+void func_0015EAE0(void*, void*, void*);
+void func_00152B38(Obj_19DA60* self);
+void func_001EE468(Obj_19DA60* self);
+void func_00152D70(Obj_19DA60* self);
+
+void func_0019DA60(void)
+{
+    u8* s;
+    func_0019D860();
+    func_0019D930();
+    s = D_002622A8;
+    func_0015EAE0(s, D_00212160, D_00215C50);
+    D_00604780 = 1;
+    D_002622D8->f1C = 1;
+    func_00152B38((Obj_19DA60*)s);
+    func_001EE468((Obj_19DA60*)s);
+    func_00152D70((Obj_19DA60*)s);
+}

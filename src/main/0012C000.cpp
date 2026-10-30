@@ -652,3 +652,35 @@ s32 func_0012FDA0(Obj_0012FDA0 *self, s32 a1, s32 a2) {
     func_0012FE70((Ref_0012FDA0 *)self);
     return 1;
 }
+
+struct Obj_12FFE8 {
+    s32 f0;
+    u8 pad4[4];
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    u8 pad14[4];
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    s32 f24;
+};
+
+s32 func_0012FF20(Obj_12FFE8* a0);
+
+void func_0012FFE8(Obj_12FFE8* self)
+{
+    if (func_0012FF20(self) == 0) {
+        return;
+    }
+    if (self->f0 == 1) {
+        self->f8 += self->fC / 2048;
+    }
+    s32 v = self->fC;
+    self->f24 -= v;
+    self->f18 = v;
+    self->f1C = self->f10;
+    self->fC = 0;
+    self->f10 = 0;
+    self->f20 = 0;
+}

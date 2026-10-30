@@ -915,3 +915,27 @@ void func_001AAB20(Obj_001AAB20 *self, f32 x, f32 y) {
     }
     func_001AAB60(self);
 }
+
+struct Self_1AA8F0;
+typedef void (*Slot_1AA8F0)(Self_1AA8F0* self, s32 arg);
+
+struct Self_1AA8F0 {
+    void** vtbl;
+    u8 pad0[0x250 - 4];
+    s32 f250;
+    f32 f254;
+    f32* f258;
+};
+
+void func_001AA8F0(Self_1AA8F0* self)
+{
+    switch (self->f250) {
+    case 0:
+    case 3:
+        ((Slot_1AA8F0)self->vtbl[16])(self, 1);
+        break;
+    case 2:
+        self->f254 = *self->f258;
+        break;
+    }
+}

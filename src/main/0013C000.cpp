@@ -710,3 +710,42 @@ s32 func_0013F940(void* self, f32* out)
     }
     return idx;
 }
+
+struct Obj_13CCF8 {
+    u8 pad0[0x2B0];
+    u8 f2B0;
+    u8 f2B1;
+    u8 f2B2;
+    u8 f2B3;
+    u8 f2B4;
+    u8 pad1[0x614 - 0x2B5];
+    s32 f614;
+    u8 pad2[0x624 - 0x618];
+    f32 f624;
+    f32 f628;
+    f32 f62C;
+    u8 pad3[0x688 - 0x630];
+    s32 f688;
+    s32 f68C;
+};
+
+extern u8 D_00261420[];
+
+void func_001B7968(Obj_13CCF8* self);
+s32 func_00140FF8(Obj_13CCF8* p);
+
+void func_0013CCF8(Obj_13CCF8* self)
+{
+    func_001B7968(self);
+    self->f628 = 0.8f;
+    self->f62C = 1.2f;
+    self->f68C = 1;
+    self->f624 = 1.0f;
+    self->f2B4 = 16;
+    self->f2B3 = 16;
+    self->f2B2 = 16;
+    self->f2B1 = 16;
+    self->f2B0 = 16;
+    self->f688 = func_00140FF8((Obj_13CCF8*)D_00261420);
+    self->f614 = -1;
+}

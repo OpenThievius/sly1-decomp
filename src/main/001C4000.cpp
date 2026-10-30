@@ -396,3 +396,36 @@ void func_001C49C8(void)
 {
     func_001B93D8();
 }
+
+struct Self_1C7468 {
+    u8 pad0[0x724];
+    s32 mode724;
+    u8 pad1[0xB0C - 0x728];
+    void* pB0C;
+};
+
+struct Obj_1C7468 {
+    u8 pad0[0x538];
+    u64 flags538;
+};
+
+s32 func_001B8A08(Self_1C7468* self, Obj_1C7468* obj);
+s32 func_001A8820(void* p, Obj_1C7468* obj);
+
+s32 func_001C7468(Self_1C7468* self, Obj_1C7468* obj)
+{
+    if (func_001B8A08(self, obj) != 0) {
+        return 1;
+    }
+    if (self->pB0C != 0) {
+        if (func_001A8820(self->pB0C, obj) != 0) {
+            return 1;
+        }
+    }
+    if (self->mode724 == 0xB) {
+        if ((obj->flags538 & ((u64)1 << 55)) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}

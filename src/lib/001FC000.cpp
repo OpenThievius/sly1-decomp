@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "common.h"
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "common.h"
 
@@ -92,4 +95,34 @@ s32 func_001FFFD0(s32 value)
     s32 previous = D_002789D8;
     D_002789D8 = value;
     return previous;
+}
+
+struct Cur_1FF490 { s32 off; s32 f4; s32 f8; s32 fC; };
+struct List_1FF490 { Cur_1FF490** items; s32 count; };
+
+void func_001FF490(Cur_1FF490* cur, List_1FF490* list, s32* lo, s32* hi)
+{
+    s32 mn = *lo;
+    s32 mx = *hi;
+    if (cur->off != 0) {
+        do {
+            if (cur->f4 == 0) goto next;
+            if (cur->f8 == 0) goto next;
+            {
+                s32 n = list->count;
+                list->items[n] = cur;
+                list->count = n + 1;
+                {
+                    s32 x = cur->f8;
+                    s32 e = x + cur->fC;
+                    if ((u32)x < (u32)mn) mn = x;
+                    if ((u32)mx < (u32)e) mx = e;
+                }
+            }
+        next:
+            cur = (Cur_1FF490*)((u8*)cur + cur->off + 4);
+        } while (cur->off != 0);
+    }
+    *lo = mn;
+    *hi = mx;
 }

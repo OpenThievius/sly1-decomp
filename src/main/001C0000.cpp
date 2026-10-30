@@ -685,3 +685,47 @@ void func_001C0C08(s32 idx, s32 val)
         func_0011D8B0((Owner_1C0C08*)D_00274728, idx, val);
     }
 }
+
+struct Arg_1C06D8;
+
+extern u8 D_00274758[];
+extern void* D_002623C0;
+
+void func_0018D800(Arg_1C06D8* dst, u8* src, s32 count);
+void func_001C05D0(f32 x);
+void func_001C0600(Arg_1C06D8* column);
+void func_001C0760(Arg_1C06D8* flag);
+s32 func_001C0790(Arg_1C06D8* value);
+
+void func_001C06D8(void)
+{
+    func_0018D800((Arg_1C06D8*)&D_00274838[0][0], D_00274758, 0xB0);
+    func_001C05D0(1.0f);
+    for (s32 i = 0; i < 4; i++) {
+        func_001C0600((Arg_1C06D8*)i);
+    }
+    func_001C0760((Arg_1C06D8*)(*(s32*)((u8*)D_002623C0 + 0x19EC) & 0x80));
+    func_001C0790((Arg_1C06D8*)(*(s32*)((u8*)D_002623C0 + 0x19EC) & 0x40));
+}
+
+struct Obj_1C0950 { u8 pad[0x2328]; };
+struct Arg_1C0950;
+
+extern s32 D_00274808[];
+
+void func_0011E328(Arg_1C0950* a, s32 b);
+void func_0011E360(Arg_1C0950* a, s32 b, s32 c);
+
+void func_001C0950(Obj_1C0950* self)
+{
+    s32 n = *(s32*)((u8*)self + 0x2348);
+    if (n >= 2) {
+        s32 m = n - 1;
+        *(s32*)((u8*)self + 0x2348) = m;
+        s32 i = n - 2;
+        func_0011E328((Arg_1C0950*)2, D_00274808[*(s32*)((u8*)self + (i << 3) + 0x2328)]);
+        s32 j = *(s32*)((u8*)self + 0x2348) - 1;
+        s32 v = *(s32*)((u8*)self + (j << 3) + 0x232C);
+        func_0011E360((Arg_1C0950*)2, v, v);
+    }
+}

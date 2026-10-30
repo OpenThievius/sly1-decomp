@@ -817,3 +817,15 @@ void func_001EA0A8(void* self, f32 x)
         o->f234C = func_001EA4B8(D_00275C28, 0, a, b, x);
     }
 }
+
+s32 func_001F6708(void);
+
+f32 func_001EAAE0(f32 a, f32 b)
+{
+    if (a == b) {
+        return a;
+    }
+    s32 r = func_001F6708();
+    f32 t = (b - a) * (f32)r;
+    return a + t * 4.6566128730773926e-10f;
+}

@@ -1403,3 +1403,44 @@ void func_0011F320(Table_11F320* self, s32 unused, s32 flags, f32* outF, f32* ou
     }
     func_00130168(delta, diff, scale, ((Entry_11F320*)p)->f04, ((Entry_11F320*)p)->f18, ((Entry_11F320*)p)->f1C, ((Entry_11F320*)p)->f24, ((Entry_11F320*)p)->f2C, ((Entry_11F320*)p)->f30, outF, outI, 0);
 }
+
+extern u8 D_0062C588[];
+extern u8 D_00259F38[];
+
+void* func_001B5EA0(void* pool);
+void* func_001B5EE0(void* pool);
+void func_001F5C0C(void* p, s32 zero, u32 count);
+void func_0011AB58(void* p);
+
+void* func_0011C858(void)
+{
+    void* s0 = func_001B5EA0(D_0062C588);
+    if (s0 != 0) {
+        func_001F5C0C(s0, 0, *(u32*)D_0062C588);
+    } else {
+        func_0011AB58(D_00259F38);
+        s0 = func_001B5EE0(D_0062C588);
+    }
+    return s0;
+}
+
+extern s32 D_0062C598[];
+extern u8 D_00259F38[];
+
+struct Pool_11C968;
+Pool_11C968* func_001B5EA0(s32* pool);
+void func_001F5C0C(Pool_11C968* p, s32 zero, s32 size);
+void func_0011AB58(u8* p);
+Pool_11C968* func_001B5EE0(s32* pool);
+
+Pool_11C968* func_0011C968(void)
+{
+    Pool_11C968* p = func_001B5EA0(D_0062C598);
+    if (p) {
+        func_001F5C0C(p, 0, D_0062C598[0]);
+    } else {
+        func_0011AB58(D_00259F38);
+        p = func_001B5EE0(D_0062C598);
+    }
+    return p;
+}

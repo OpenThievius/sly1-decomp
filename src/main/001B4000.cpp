@@ -1438,3 +1438,32 @@ void func_001B6598(Ctx_001B6598* a0, s32* out) {
     }
     *out = v;
 }
+
+struct Node_1B6628 {
+    u8 pad0[0x18];
+    void* f18;
+    u8 pad1[0x28 - 0x1C];
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+};
+
+s32 func_001B63F8(void* self, s32 key);
+void func_001B6E28(Node_1B6628* self, s32 a, s32 b);
+void func_001B66A0(Node_1B6628* self);
+
+void func_001B6628(Node_1B6628* self, s32 key)
+{
+    s32 s1 = func_001B63F8(self->f18, key);
+    if (self->f28 == s1) {
+        s32 v = self->f30;
+        if (v == s1 || v == -1) {
+            return;
+        }
+    }
+    func_001B6E28(self, self->f28, s1);
+    self->f30 = s1;
+    self->f28 = s1;
+    self->f2C = -1;
+    func_001B66A0(self);
+}
