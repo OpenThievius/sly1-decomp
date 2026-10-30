@@ -345,3 +345,70 @@ void func_001E30A0(Obj_1E30A0* self)
 
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
+struct VT_1E00B0 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
+struct Obj_1E00B0 { VT_1E00B0* vt; u8 pad04[0x25C]; s32 f260; u8 pad264[4]; f32 f268; s32 f26C; };
+struct Glob_1E00B0 { u8 pad[0x2310]; s32 f2310; void* f2314; };
+struct Cam_1E00B0 { s32 flags; u8 pad[4]; f32 f08; };
+struct Pool_1E00B0 { u8 pad[0xAA]; u16 fAA; };
+extern Obj_1E00B0 D_0026E760;
+extern Obj_1E00B0 D_0026E9F8;
+extern Glob_1E00B0* D_00275710;
+extern Cam_1E00B0* D_002623C8;
+extern Pool_1E00B0 D_00262C70;
+extern f32 D_0026185C;
+extern s32 D_002623DC;
+extern s32 D_002701C4;
+void func_001AA298(Obj_1E00B0* q);
+void func_0016EC20(Pool_1E00B0* q, s32 n);
+void func_001BE5F8(s32 q);
+void func_001AA8B8(Obj_1E00B0* q, f32 v);
+void func_001E02C8(Obj_1E00B0* q, s32 n);
+f32 func_00205C78(f32 a, f32 b);
+void func_001AB920(Obj_1E00B0* q, f32 v);
+s32 func_001E9970(void);
+
+void func_001E00B0(Obj_1E00B0* self)
+{
+    func_001AA298(self);
+    switch (self->f260) {
+    case 0:
+    case 1:
+    {
+        if (self->f26C != 0) {
+        if (D_00262C70.fAA & 4) {
+            func_0016EC20(&D_00262C70, 4);
+            func_001BE5F8(D_00275710->f2310);
+            if (D_00275710->f2314 != 0) {
+                func_001AA8B8(self, 15.0f);
+                self->vt->m20(self, D_00275710->f2314);
+            } else {
+                self->vt->m3C(self);
+            }
+            self->f26C = 0;
+        } else if (D_0026185C >= 5.0f) {
+            self->vt->m3C(self);
+            self->f26C = 0;
+        }
+        }
+    break;
+    }
+    case 2:
+    {
+        Obj_1E00B0* o = &D_0026E760;
+        s32 r;
+        if (o->f260 == 0) {
+            func_001E02C8(self, 3);
+            return;
+        }
+        func_001AB920(o, -func_00205C78(2.0f, (f32)D_002623DC));
+        r = func_001E9970();
+        if (r) o->vt->m38(o); else o->vt->m3C(o);
+        if (D_002623C8->flags & 8) {
+            s32 b = 0;
+            if (r && D_002701C4 == 0 && D_002623C8->f08 < D_0026E760.f268) b = 1;
+            if (b) D_0026E9F8.vt->m38(&D_0026E9F8); else D_0026E9F8.vt->m3C(&D_0026E9F8);
+        }
+    }
+    break;
+    }
+}

@@ -764,3 +764,115 @@ s32 func_0016EED0(Obj_16EED0* self)
 done:
     return self->f2C;
 }
+
+struct Glob_16E940 {
+    u8 pad0[0x3D0];
+    s32 f3D0;
+    u8 pad1[4];
+    u8* f3D8;
+};
+
+struct Pad_16E940 {
+    u8 pad0[4];
+    s32 f4;
+    s32 f8;
+    u8 padC[4];
+    s32 f10;
+    u8 pad14[4];
+    s32 f18;
+    u8 pad1C[4];
+    f32 f20;
+    f32 f24;
+    u8 pad28[0x40 - 0x28];
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    u8 f4C;
+    u8 f4D;
+    u8 pad4E[2];
+    f32 f50;
+    f32 f54;
+    u8 pad58[0x74 - 0x58];
+    f32 f74;
+    f32 f78;
+    f32 f7C;
+    u8 f80;
+    u8 f81;
+    u8 pad82[2];
+    f32 f84;
+    f32 f88;
+    u8 pad8C[0xA8 - 0x8C];
+    u16 hA8;
+    u16 hAA;
+    u16 hAC;
+    u8 fAE[0xC];
+};
+
+extern Glob_16E940* D_00261990;
+extern f32 D_00261858[];
+
+void func_001F5C0C(u8* p, s32 a, s32 b);
+s32 func_00204510(s32 a, s32 b, u8* c);
+void func_0018D800(u8* dst, u8* src, s32 n);
+void func_0016E738(Pad_16E940* p, s32 a, s32 b, f32* c, f32* d, f32* e, u8* f, u8* g, f32* h, f32* i);
+void func_0016F238(Pad_16E940* p, s32 old);
+
+s32 func_0016E940(Pad_16E940* self)
+{
+    u8 buf[0x40];
+    s32 res;
+    u16 old;
+    u16 cur;
+
+    u8* b = buf;
+    func_001F5C0C(b, 0, 0x40);
+    res = 1;
+    if (func_00204510(self->f4, self->f8, b) > 0) {
+        old = self->hA8;
+        self->hA8 = ~((buf[2] << 8) | buf[3]);
+        if (self->f10 != 0) {
+            if (self->f10 != buf[1]) res = 0;
+        }
+        self->f10 = buf[1];
+        if (self->f18 == 4) {
+            func_0018D800(self->fAE, buf + 8, 0xC);
+        }
+        cur = self->hA8;
+        self->hAA = cur & ~old;
+        self->hAC = old & ~cur;
+        if (self->f18 >= 2) {
+            func_0016E738(self, buf[6], buf[7], &self->f40, &self->f44, &self->f48, &self->f4C, &self->f4D, &self->f50, &self->f54);
+            func_0016E738(self, buf[4], buf[5], &self->f74, &self->f78, &self->f7C, &self->f80, &self->f81, &self->f84, &self->f88);
+        } else {
+            self->f74 = self->f78 = self->f7C = self->f40 = self->f44 = self->f48 = 0.0f;
+        }
+        if (D_00261990 == 0 || D_00261990->f3D0 == 0 || D_00261990->f3D8 != (u8*)D_00261990 + 0x454) {
+            if ((self->hA8 & 0xF000) != 0) {
+                self->f40 = self->f44 = self->f48 = 0.0f;
+                if ((self->hA8 & 0x8000) != 0) {
+                    self->f40 = -1.0f;
+                } else if ((self->hA8 & 0x2000) != 0) {
+                    self->f40 = 1.0f;
+                }
+                if ((self->hA8 & 0x1000) != 0) {
+                    self->f44 = 1.0f;
+                } else if ((self->hA8 & 0x4000) != 0) {
+                    self->f44 = -1.0f;
+                }
+                if (self->f40 * self->f44 != 0.0f) {
+                    self->f40 = self->f40 * 0.8f;
+                    self->f44 = self->f44 * 0.8f;
+                }
+                self->f48 = 1.0f;
+            }
+        }
+        func_0016F238(self, old);
+        self->f20 = D_00261858[4];
+        if (self->hA8 != 0 || self->f48 != 0.0f || self->f7C != 0.0f) {
+            self->f24 = D_00261858[4];
+        }
+    } else {
+        if (D_00261868[0] - self->f20 >= 2.0f) res = 0;
+    }
+    return res;
+}

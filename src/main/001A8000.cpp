@@ -745,3 +745,94 @@ void func_001AB198(Obj_1AB198* self)
     func_0015E318(buf, out, 0, D_00262280);
     func_0015C900(self->f4);
 }
+
+struct Quad_1A8208 { s32 a, b, c, d; } __attribute__((aligned(16)));
+struct Hdr_1A8208 { u8 pad0[4]; s32 f4; s32 f8; Quad_1A8208* fC; };
+struct Ent_1A8208 { s32 f0; s32 f4; void** f8; s32 fC; s32 f10; };
+struct Obj_1A8208;
+typedef void (*VFn_1A8208)(Obj_1A8208* self);
+typedef void (*VFn2_1A8208)(Obj_1A8208* self, s32 a);
+struct Obj_1A8208 {
+    VFn_1A8208* vtbl;
+    u8 pad4[0x10]; s32 f14; s32 f18;
+    u8 pad1C[0x174]; Quad_1A8208 q190; u8 pad1A0[0x30]; Quad_1A8208 q1D0;
+};
+struct Self_1A8208 {
+    u8 pad0[0x14]; void* f14; u8 pad18[0x1C];
+    s32 f34; Ent_1A8208* f38; Hdr_1A8208* f3C;
+};
+
+void* func_0018D500(s32 size);
+Obj_1A8208* func_0015A418(void* a, s32 b, s32 c, Self_1A8208* d);
+void func_00152438(void* p, s32 a);
+s32 func_001527D8(void* p);
+Obj_1A8208* func_00183058(Obj_1A8208* a, s32 b, s32 c);
+
+void func_001A8208(Self_1A8208* self)
+{
+    s32 i;
+    if (self->f3C != 0) {
+        if (self->f3C->f4 != 0) {
+            self->f3C->fC = (Quad_1A8208*)func_0018D500(self->f34 << 5);
+        }
+    }
+    for (i = 0; i < self->f34; i++) {
+        Ent_1A8208* e = &self->f38[i];
+        Obj_1A8208* obj = func_0015A418(self->f14, 4, e->f0, self);
+        s32 n;
+        s32 cnt;
+        if (obj == 0) {
+            e->f4 = 0;
+            continue;
+        }
+        if (self->f3C != 0 && self->f3C->f4 != 0) {
+            s32 x = self->f3C->f8;
+            if (x == 1) goto c1;
+            if (x < 2) {
+                if (x == 0) goto c0;
+            } else if (x == 2) {
+                n = 0;
+                cnt = 0;
+            }
+            goto done;
+        c0:
+            self->f3C->f8 = 1;
+            func_00152438((u8*)self->f3C + 0x14, 0x18);
+        c1: {
+                s32 r = func_001527D8((u8*)self->f3C + 0x14);
+                s32 lim = r + 1;
+                s32 m = e->f4;
+                s32 q = lim;
+                if (q < m) q = m;
+                n = q;
+                cnt = n - r - 1;
+            }
+        } else {
+            n = e->f4;
+            cnt = n - 1;
+        }
+    done:
+        if (n != 0) e->f8 = (void**)func_0018D500(n << 2);
+        e->f8[e->fC++] = obj;
+        if (cnt > 0) {
+            s32 k = cnt;
+            do {
+                Obj_1A8208* o2 = func_00183058(obj, obj->f14, obj->f18);
+                e->f8[e->fC++] = o2;
+                if (o2->vtbl[19] != 0) o2->vtbl[19](o2);
+                o2->vtbl[20](o2);
+                ((VFn2_1A8208)(o2->vtbl[25]))(o2, 0);
+                o2->vtbl[7](o2);
+            } while (--k);
+        }
+        if (obj->vtbl[19] != 0) obj->vtbl[19](obj);
+        obj->vtbl[20](obj);
+        ((VFn2_1A8208)(obj->vtbl[25]))(obj, 0);
+        obj->vtbl[7](obj);
+        if (self->f3C != 0 && self->f3C->f4 != 0) {
+            Quad_1A8208* d = self->f3C->fC + (i << 1);
+            d[0] = obj->q190;
+            d[1] = obj->q1D0;
+        }
+    }
+}

@@ -1695,3 +1695,91 @@ void* func_00115510(void* self, s32 kind, List_115510* list)
     func_0011B060(&t, 2);
     return self;
 }
+
+struct Quad_117668;
+void func_0011B008(Quad_117668* q);
+void func_0011B060(Quad_117668* q, s32 mode);
+struct Quad_117668 {
+    s32 a, b, c, d;
+    Quad_117668() { func_0011B008(this); }
+    ~Quad_117668() { func_0011B060(this, 2); }
+};
+struct QP_117668 { s32 a, b, c, d; };
+struct TQ_117668 { s32 a; f32 f4; s32 c, d; };
+struct Node_117668 { s32 type; Node_117668* head; Node_117668* next; };
+struct Ent_117668 { s32 pad0; Node_117668* node; };
+struct Src_117668 { Ent_117668 e[1]; };
+struct Self_117668 { u8 pad0[0x2C]; void* f2C; u8 pad30[0x1EF8 - 0x30]; s32 f1EF8; };
+
+void func_0011B008(QP_117668* q);
+void func_0011B060(QP_117668* q, s32 mode);
+void func_0011B6C0(QP_117668* q, Node_117668* v);
+s32 func_0011A498(void* a, s32 b, s32 c, QP_117668* d);
+void func_0011A400(TQ_117668* self, void* table, s32 key, QP_117668* item);
+void func_0011B018(void* out, Quad_117668* q);
+void func_0011B060(TQ_117668* q, s32 mode);
+void func_0011B538(Node_117668* q, s32 n);
+void func_0011B538(Quad_117668* q, s32 n);
+void func_0011B5B0(Node_117668* obj, f32 x);
+void func_0011B6C0(Node_117668* q, Node_117668* v);
+void func_0011B6C0(Quad_117668* q, Node_117668* v);
+void func_0011B700(Node_117668* n, s32 v);
+void func_0011B9A8(TQ_117668* t, Src_117668* s);
+s32 func_0011A498(void* a, s32 b, s32 c, Quad_117668* d);
+void func_0011A400(TQ_117668* self, void* table, s32 key, Quad_117668* item);
+extern s32 D_00259DE8;
+
+void* func_00117668(void* ret, s32 limit, Src_117668* src)
+{
+    Quad_117668 q;
+    QP_117668 r;
+    TQ_117668 t;
+    func_0011B008(&r);
+    Node_117668* a = (Node_117668*)func_0011AF28();
+    Node_117668* b = (Node_117668*)func_0011AF28();
+    Node_117668* c = (Node_117668*)func_0011AF28();
+    Node_117668* d = (Node_117668*)func_0011AF28();
+    Node_117668* e;
+    Node_117668* f;
+    e = (Node_117668*)func_0011AF28();
+    f = (Node_117668*)func_0011AF28();
+    func_0011B6C0(a, b);
+    func_0011B9A8(&t, src);
+    func_0011B5B0(b, t.f4);
+    func_0011B060(&t, 2);
+    b->next = c;
+    func_0011B6C0(c, d);
+    func_0011B6C0(d, e);
+    func_0011B538(e, 0x11);
+    e->next = f;
+    func_0011B700(f, ((s32*)src)[3]);
+    s32 idx = D_00259DE8;
+    if (idx < limit) {
+        Node_117668* n = *(Node_117668**)(idx * 8 + (u8*)src + 4);
+        if (n) {
+            Node_117668* prev = d;
+            do {
+                d = (Node_117668*)func_0011AF28();
+                e = (Node_117668*)func_0011AF28();
+                func_0011B6C0(d, e);
+                func_0011B538(e, 0x11);
+                e->next = n;
+                prev->next = d;
+                Node_117668* nx = n->next;
+                n->next = 0;
+                n = nx;
+                prev = d;
+            } while (n);
+        }
+    }
+    func_0011A498(((Self_117668*)D_00275710)->f2C, ((Self_117668*)D_00275710)->f1EF8, 0, &r);
+    if (r.a == 0x1E) {
+        a->next = (Node_117668*)r.b;
+    }
+    func_0011B6C0(&r, a);
+    func_0011A400(&t, ((Self_117668*)D_00275710)->f2C, ((Self_117668*)D_00275710)->f1EF8, &r);
+    func_0011B060(&t, 2);
+    func_0011B018(ret, &q);
+    func_0011B060(&r, 2);
+    return ret;
+}

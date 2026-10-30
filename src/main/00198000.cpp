@@ -1133,3 +1133,123 @@ void func_0019B188(void* self)
     func_0019C1C0(self, 1);
     o->q650 = o->q140;
 }
+
+struct Obj_19A1E0;
+struct VObj_19A1E0 { s32 (**vtbl)(VObj_19A1E0*, Obj_19A1E0*); };
+struct Ent_19A1E0 {
+    s32 count;
+    s32 keys[4];
+    s32 n;
+    VObj_19A1E0* list[4];
+    s32 pick;
+};
+struct Sub_19A1E0 { u8 pad[0x1CE4]; Obj_19A1E0* f1CE4; };
+struct Obj_19A1E0 {
+    u8 pad0[0x14];
+    Sub_19A1E0* f14;
+    u8 pad1[0x5F8];
+    s32 f610;
+    s32 f614;
+    u8 pad2[4];
+    u8 f61C[0x28];
+    s32 f644;
+    s32 f648;
+    s32 f64C;
+    VObj_19A1E0* f650;
+    u8 pad3[4];
+    Ent_19A1E0 ents[6];
+    u8 pad4[0x760 - 0x658 - 6 * 0x2C];
+    s32 f760;
+    s32 f764;
+};
+struct Sys_19A1E0 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u8 pad1[0x10]; u32 f19F0; };
+struct Pad_19A1E0 { u32 flags; u8 pad[0x74]; };
+struct Flags_19A1E0 { u32 flags; };
+
+extern u8 D_0026AA50[];
+extern Pad_19A1E0* D_002623C4;
+extern s32 D_0026A9E0[];
+
+void func_00124A48(Obj_19A1E0* o);
+void func_00124DF8(Obj_19A1E0* o, s32 n, u8* t);
+void func_0019A178(void* p, s32 x);
+s32 func_001B6290(s32 a, Obj_19A1E0* b, s32 c, s32 d);
+void func_001B64D8(s32 a, s32 b);
+VObj_19A1E0* func_0015A448(Sub_19A1E0* a, s32 b, Obj_19A1E0* c);
+s32 func_001EAA70(s32 a, s32 b);
+void func_00160D30(s32* p);
+
+void func_0019A1E0(Obj_19A1E0* o)
+{
+    u32 i;
+    func_00124A48(o);
+    func_00124DF8(o, 0x1A, D_0026AA50);
+    for (i = 0; i < 3; i++)
+        func_0019A178(o->f61C + i * 12, 0x390);
+    s32 h = func_001B6290(o->f610, o, 0x384, 1);
+    o->f764 = -1;
+    o->f614 = h;
+    if (((Flags_19A1E0*)D_002623C8)->flags & 4) {
+        func_001B64D8(h, 0x38F);
+        return;
+    }
+    o->f14->f1CE4 = o;
+    for (s32 e = 0; e < 6; e++) {
+        Ent_19A1E0* en = &o->ents[e];
+        for (s32 k = 0; k < en->count; k++) {
+            VObj_19A1E0* r = func_0015A448(o->f14, en->keys[k], o);
+            if (r) {
+                en->list[en->n++] = r;
+            }
+        }
+        if (en->n > 0)
+            en->pick = func_001EAA70(0, en->n - 1);
+    }
+    o->f648 = (s32)func_0015A448(o->f14, o->f644, o);
+    o->f650 = func_0015A448(o->f14, o->f64C, o);
+    if (o->f650)
+        o->f650->vtbl[0x6C / 4](o->f650, o);
+    if (((((Sys_19A1E0*)D_002623C0)->f19D8 << 8) | ((Sys_19A1E0*)D_002623C0)->f19DC) == 3) {
+        o->f760 = 1;
+    } else {
+        func_00160D30(&o->f760);
+        if (o->f760 & 0xF000FFFFl) {
+            s32 cnt = 0;
+            Pad_19A1E0* p = D_002623C4;
+            Pad_19A1E0* end = p + 9;
+            do {
+                if (p->flags & 4)
+                    cnt++;
+                p++;
+            } while (p < end);
+            if (cnt != 2)
+                o->f760 = 0;
+            if (o->f760 & 0xF000FFFFl) {
+                o->f764 = 0;
+                goto lookup;
+            }
+        }
+        o->f760 = 2;
+        if (((Sys_19A1E0*)D_002623C0)->f19F0 & 2) {
+            do {
+                o->f760 = o->f760 << 1;
+            } while ((o->f760 & 0xF000FFFFl) && (((Sys_19A1E0*)D_002623C0)->f19F0 & o->f760));
+        }
+        o->f760 &= (s32)0xF000FFFF;
+    }
+    if ((o->f760 & 0xF000FFFFl) == 0)
+        return;
+    o->f764 = 0;
+lookup:
+    if (D_0026A9E0[0] != (s32)o->f760) {
+        do {
+            o->f764++;
+            if (o->f764 >= 0x1C) {
+                o->f764 = -1;
+                return;
+            }
+        } while (D_0026A9E0[o->f764] != (s32)o->f760);
+    }
+    if (o->f764 >= 0x1C)
+        o->f764 = -1;
+}

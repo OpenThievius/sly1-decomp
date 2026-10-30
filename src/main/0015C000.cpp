@@ -931,3 +931,86 @@ f32 func_0015CD18(f32 x, f32 y, Self_15CD18* self, s8 key, u32 color, Stream_15C
     }
     return (f32)self->m4 * self->f44;
 }
+
+typedef void (*Fn_15CF70)(void* at, s32 a, void* b);
+struct Disp_15CF70 { u8 pad[0x38]; s16 offset; u8 pad2[2]; Fn_15CF70 fn; };
+struct Self_15CF70 {
+    u8 p0[4];
+    s32 m4;
+    s32 m8;
+    u8 p0c[0x30 - 0x0C];
+    s32 f30;
+    u8 p34[4];
+    u64 f38;
+    s32 m40;
+    f32 f44;
+    f32 f48;
+    Disp_15CF70* disp;
+    u8 p50[0x60 - 0x50];
+    u64 m60;
+};
+struct Entry_15CF70 { u8 p0[2]; u16 a2; u16 a4; u16 a6; };
+struct Strm_15CF70 { u8 pad[4]; };
+
+extern s32 D_00262258;
+extern s32 D_0026225C;
+extern u8 D_00262280[];
+
+Entry_15CF70* func_0015DAB8(Self_15CF70* self, s8 key);
+s32 func_0015CAB8(Self_15CF70* self, Strm_15CF70* s);
+void func_001613C0(Strm_15CF70* s, s32 a, s32 b, s32 c);
+void func_00161708(Strm_15CF70* s, s32 a, u64 b);
+void func_00161768(Strm_15CF70* s, s32 a, u64 b);
+void func_001617E8(Strm_15CF70* s, u32 tag, f32 value);
+void func_00161860(Strm_15CF70* s, s32 a, s32 b);
+void func_001618C0(Strm_15CF70* s, s32 a, s32 b, s32 c, s32 d);
+
+void func_0015CF70(Self_15CF70* self, s8 key, u32 color, Strm_15CF70* s, f32 x, f32 y)
+{
+    Entry_15CF70* e = func_0015DAB8(self, key);
+    if (e != 0) {
+        s32 shift = (s32)((self->m60 >> 30) & 0xF);
+        s32 s4 = 1 << shift;
+        f32 h = (f32)self->m8 * self->f48;
+        f32 w = (f32)e->a6 * self->f44;
+        f32 px = x + h;
+        f32 py = y + w;
+        if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 492.80002f) {
+            s32 u0 = (e->a2 << 4) + D_00262258;
+            s32 v0 = ((s4 - e->a4) << 4) + D_0026225C;
+            s32 u1 = ((e->a2 + e->a6) << 4) + D_00262258;
+            s32 v1 = ((s4 - (e->a4 + self->m8)) << 4) + D_0026225C;
+            s32 ok = func_0015CAB8(self, s);
+            func_001613C0(s, 6, 1, 0xE);
+            if (ok != 0) {
+                func_00161708(s, 0x3F, (u64)0);
+            }
+            u64 v = 0x31001;
+            if (self->f30 != 0) {
+                v = self->f38;
+            }
+            func_00161708(s, 0x47, (u64)v);
+            func_00161708(s, 0x42, (u64)0x44);
+            func_00161708(s, 6, (u64)self->m60);
+            func_00161708(s, 0x14, (u64)0x60);
+            func_00161708(s, 8, (u64)5);
+            func_00161708(s, 0, (u64)0x1D4);
+            func_00161768(s, 9, 0x434343431ULL);
+            u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
+            func_001617E8(s, tag, 0.0f);
+            func_00161860(s, u0, v0);
+            s32 sx = (s32)((x + 1728.0f) * 16.0f);
+            s32 sy = (s32)((py * 0.45454547f + 1936.0f) * 16.0f);
+            func_001618C0(s, sx, sy, self->m40, 0);
+            func_00161860(s, u1, v0);
+            s32 sy2 = (s32)((y * 0.45454547f + 1936.0f) * 16.0f);
+            func_001618C0(s, sx, sy2, self->m40, 0);
+            func_00161860(s, u0, v1);
+            s32 sx2 = (s32)((px + 1728.0f) * 16.0f);
+            func_001618C0(s, sx2, sy, self->m40, 0);
+            func_00161860(s, u1, v1);
+            func_001618C0(s, sx2, sy2, self->m40, 0);
+            self->disp->fn((u8*)self + self->disp->offset, 0, D_00262280);
+        }
+    }
+}
