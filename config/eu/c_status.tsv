@@ -233,6 +233,7 @@ func_00118D20	func_00118D20	match
 func_00118D48	func_00118D48	match	
 func_00118DB8	func_00118DB8	match	
 func_00118E80	func_00118E80	match	
+func_00119310	func_00119310	match	
 func_00119878	func_00119878	match	
 func_00119970	func_00119970	match	
 func_00119A58	func_00119A58	match	
@@ -626,6 +627,7 @@ func_0012F7E0	func_0012F910	match
 func_0012F810	func_0012F940	match	
 func_0012F840	func_0012F970	match	
 func_0012F888	func_0012F9B8	match	
+func_0012FA88	func_0012FBB8	match	
 func_0012FCB0	func_0012FDE0	match	
 func_0012FCD0	func_0012FE00	match	
 func_0012FCF0	func_0012FE20	match	
@@ -699,6 +701,7 @@ func_00139E80	func_0013A180	match
 func_00139F80	func_0013A280	match	
 func_0013A3A0	func_0013A6A0	match	
 func_0013A418	func_0013A718	match	
+func_0013B430	func_0013B730	match	
 func_0013B598	func_0013B898	match	
 func_0013B5C8	func_0013B8C8	match	
 func_0013B708	func_0013BA08	match	
@@ -818,6 +821,7 @@ func_00143AF8	func_00143DF8	match
 func_00143B20	func_00143E20	match	
 func_00143BA8	func_00143EA8	match	
 func_00144270	func_00144570	match	
+func_001442C8	func_001445C8	match	
 func_00144FF8	func_001452F8	match	
 func_001455C0	func_001458C0	match	
 func_001455E0	func_001458E0	match	
@@ -1074,6 +1078,7 @@ func_0015C200	func_0015C4B8	error	a reference to D_00262250, which has no addres
 func_0015C260	func_0015C538	match	
 func_0015C3C0	-	absent	
 func_0015C4A8	-	absent	
+func_0015C4E8	-	absent	
 func_0015C8B8	func_0015C9F0	match	
 func_0015C900	func_0015CA38	match	
 func_0015C930	func_0015CA68	match	
@@ -1094,6 +1099,7 @@ func_0015DFF8	-	absent
 func_0015E068	-	absent	
 func_0015E1B0	-	absent	
 func_0015E5F0	func_0015EAB8	match	
+func_0015E810	func_0015ECD8	match	
 func_0015EAE0	func_0015EFA8	match	
 func_0015EB20	func_0015EFE8	match	
 func_0015EBF0	func_0015F0B8	match	
@@ -1153,6 +1159,7 @@ func_001626C0	func_00162D20	match
 func_00162810	func_00162E70	match	
 func_00165728	func_00165D88	match	
 func_00165828	func_00165E88	match	
+func_00165920	func_00165F80	match	
 func_00165FE0	func_00166640	match	
 func_001660A0	func_00166700	match	
 func_00166658	func_00166CB8	match	
@@ -1349,6 +1356,7 @@ func_00183290	func_001838F0	match
 func_001832C0	func_00183920	match	
 func_001832F0	func_00183950	match	
 func_00183320	func_00183980	match	
+func_00183350	func_001839B0	match	
 func_001833D0	func_00183A30	match	
 func_001833F0	func_00183A50	match	
 func_00183438	func_00183A98	match	
@@ -1391,6 +1399,7 @@ func_00184D78	func_001853D8	match
 func_00185358	func_001859B8	match	
 func_00185A58	func_001860B8	match	
 func_00185AC8	func_00186128	match	
+func_00185B38	func_00186198	error	a reference to D_002647C0, which has no address in this version
 func_00185C18	func_00186280	match	
 func_00185CA0	func_00186308	match	
 func_001861E8	func_00186850	match	
@@ -1478,6 +1487,7 @@ func_0018ED78	func_0018F838	differs
 func_0018EDA0	func_0018F870	match	
 func_0018F0E8	func_0018FBB8	match	
 func_0018F148	func_0018FC18	match	
+func_0018F610	func_00190150	error	a reference to D_005A2E60, which has no address in this version
 func_0018F968	func_001904F0	match	
 func_0018F988	func_00190510	match	
 func_0018FEF8	func_00190A80	match	
@@ -1527,6 +1537,7 @@ func_00192490	func_00193018	match
 func_00192498	func_00193020	match	
 func_001924C8	func_00193050	match	
 func_001925F0	func_00193178	match	
+func_00192620	func_001931A8	match	
 func_001926D0	func_00193258	match	
 func_00192780	func_00193308	match	
 func_00192820	func_001933A8	match	
@@ -1565,6 +1576,7 @@ func_00197A08	func_00198750	match
 func_00197A68	func_001987B0	match	
 func_00197F10	func_00198C58	error	a reference to D_0026E744, which has no address in this version
 func_00198090	func_00198DD8	match	
+func_001982A0	func_00198FE8	match	
 func_001984B8	func_00199200	match	
 func_00198530	func_00199278	match	
 func_001986E8	func_00199430	match	
@@ -1587,12 +1599,14 @@ func_00199138	func_00199E80	match
 func_00199170	func_00199EB8	match	
 func_001991A8	func_00199EF0	match	
 func_001991E0	func_00199F28	match	
+func_00199218	func_00199F60	match	
 func_00199380	func_0019A0C8	match	
 func_00199398	func_0019A0E0	match	
 func_001993F0	func_0019A138	match	
 func_00199428	func_0019A170	match	
 func_001994C8	func_0019A210	match	
 func_00199AF0	func_0019A838	match	
+func_00199B18	func_0019A860	match	
 func_00199C10	func_0019A958	match	
 func_00199C58	func_0019A9A0	match	
 func_00199C78	func_0019A9C0	match	
@@ -1765,6 +1779,7 @@ func_001AA8B0	func_001AB6A8	differs
 func_001AA8B8	func_001AB6B0	differs	
 func_001AA8C0	func_001AB6B8	differs	
 func_001AA8C8	func_001AB6C0	match	
+func_001AAAC8	func_001AB8C0	differs	
 func_001AAF58	func_001ABD50	differs	
 func_001AB198	func_001ABF98	error	a call to func_0015DB28__FPvT0i, which has no address in this version
 func_001AB5D8	func_001AC3F0	match	
@@ -1782,6 +1797,7 @@ func_001AC638	-	absent
 func_001AC888	-	absent	
 func_001AC910	-	absent	
 func_001AC990	-	absent	
+func_001AC9E0	-	absent	
 func_001ACA30	-	absent	
 func_001ACA68	-	absent	
 func_001ACDA0	-	absent	
@@ -1807,6 +1823,7 @@ func_001AF0A0	func_001AFD90	match
 func_001AF0D0	func_001AFDC0	match	
 func_001AF508	func_001B01F8	match	
 func_001AF7A8	func_001B0498	match	
+func_001AFAF8	func_001B07E8	match	
 func_001B00E8	func_001B0DD8	match	
 func_001B0160	func_001B0E50	match	
 func_001B0470	func_001B1160	match	
@@ -1814,6 +1831,7 @@ func_001B0488	func_001B1178	match
 func_001B04A0	func_001B1190	match	
 func_001B04D0	func_001B11C0	match	
 func_001B0BD8	func_001B18C8	match	
+func_001B0BE0	func_001B18D0	match	
 func_001B0EA8	func_001B1B98	match	
 func_001B0EE0	func_001B1BD0	match	
 func_001B0F70	func_001B1C60	match	
@@ -1821,6 +1839,7 @@ func_001B1158	func_001B1E48	match
 func_001B11A0	func_001B1E90	match	
 func_001B15D0	func_001B22C0	match	
 func_001B1608	func_001B22F8	match	
+func_001B1698	func_001B2388	match	
 func_001B1B38	func_001B2828	match	
 func_001B1BF0	func_001B28E0	match	
 func_001B1CF8	func_001B29E8	match	
@@ -1941,6 +1960,7 @@ func_001BB580	func_001BC270	match
 func_001BB710	func_001BC400	match	
 func_001BB800	func_001BC4F0	match	
 func_001BB9A0	func_001BC690	match	
+func_001BB9D0	func_001BC6C0	match	
 func_001BBC30	func_001BC920	match	
 func_001BC088	func_001BCD78	match	
 func_001BC320	func_001BD010	match	
@@ -2005,6 +2025,7 @@ func_001C1148	func_001C1E40	match
 func_001C1390	func_001C2088	match	
 func_001C1530	func_001C2228	match	
 func_001C1E48	func_001C2B40	match	
+func_001C21A0	func_001C2E98	match	
 func_001C2238	func_001C2F30	match	
 func_001C22B8	func_001C2FB0	match	
 func_001C2320	func_001C3018	match	
@@ -2100,10 +2121,12 @@ func_001CF138	func_001CFE30	match
 func_001D1200	func_001D1EE0	match	
 func_001D1260	func_001D1F40	match	
 func_001D1478	func_001D2158	match	
+func_001D14F0	func_001D21D0	match	
 func_001D27C0	func_001D34A0	match	
 func_001D3290	func_001D3F78	match	
 func_001D34E0	func_001D41C8	match	
 func_001D3500	func_001D41E8	match	
+func_001D3C68	func_001D4950	match	
 func_001D40A0	func_001D4D88	match	
 func_001D4848	func_001D5530	match	
 func_001D4A98	func_001D5780	match	
@@ -2118,6 +2141,7 @@ func_001D65D8	func_001D72C0	match
 func_001D6CB0	func_001D7998	match	
 func_001D6DA0	func_001D7A88	match	
 func_001D7018	func_001D7D00	match	
+func_001D7040	func_001D7D28	match	
 func_001D7100	func_001D7DE8	match	
 func_001D7120	func_001D7E08	match	
 func_001D8578	func_001D9260	match	
@@ -2136,6 +2160,7 @@ func_001DAFB8	func_001DBCA0	match
 func_001DB0C8	func_001DBDB0	match	
 func_001DB1E8	func_001DBED0	match	
 func_001DB480	func_001DC168	match	
+func_001DB4C8	func_001DC1B0	match	
 func_001DB928	func_001DC610	match	
 func_001DBA38	func_001DC720	match	
 func_001DBAC0	func_001DC7A8	match	
@@ -2209,6 +2234,7 @@ func_001DFE38	func_001E0C68	match
 func_001E00B0	func_001E0EB0	error	a reference to D_002623DC, which has no address in this version
 func_001E0828	func_001E1650	match	
 func_001E0848	func_001E1670	match	
+func_001E08F8	func_001E1720	differs	the C is 124 bytes, retail's function 120
 func_001E1EB0	func_001E2CB0	match	
 func_001E1F10	func_001E2D10	match	
 func_001E1F58	func_001E2D58	match	
@@ -2283,6 +2309,7 @@ func_001E9A10	func_001EAA88	error	a reference to D_00275F84, which has no addres
 func_001E9A68	func_001EAAE0	error	a reference to D_00275F84, which has no address in this version
 func_001E9AD8	func_001EAB50	error	a reference to D_00275F84, which has no address in this version
 func_001E9E30	func_001EAEA8	match	
+func_001EA0A8	func_001EB120	match	
 func_001EA408	func_001EB480	match	
 func_001EA480	func_001EB4F8	match	
 func_001EA620	func_001EB698	match	
@@ -2372,6 +2399,7 @@ func_001F0F70	func_001F1FF8	match
 func_001F1590	func_001F2618	match	
 func_001F1610	func_001F2698	match	
 func_001F1A08	func_001F2A50	error	a reference to D_00275FC0, which has no address in this version
+func_001F2688	func_001F36E0	error	a reference to D_00276620, which has no address in this version
 func_001F2758	func_001F3748	match	
 func_001F2798	func_001F3788	match	
 func_001F3328	func_001F4318	match	
