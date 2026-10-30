@@ -1759,3 +1759,49 @@ void func_0012A080(Obj_12A080* self, void* src)
     (void)func_00118D20(&f.r, func_00118D30(av, f.b));
     func_0012A0F8(self, &f.r);
 }
+
+struct Sub_12B5B8 {
+    u8 pad0[0x60];
+    void* f60;
+    u8 pad1[0xB0 - 0x64];
+    u32 fB0;
+};
+
+struct Self_12B5B8 {
+    u8 pad0[0x18];
+    void* f18;
+    u8 pad1[0x224 - 0x1C];
+    Sub_12B5B8* f224;
+};
+
+struct Call_12B5B8;
+
+void* func_0018D5C0(u32 n);
+void func_00128018(Call_12B5B8* a0, void* a1, void* a2, void* a3);
+void func_00128150(Call_12B5B8* a0, void* a1, void* a2, void* a3);
+
+void func_0012B5B8(Self_12B5B8* self, void* a1, void* a2)
+{
+    if (a1 == self->f18 || a2 == self->f18 || a1 == a2) {
+        if (a1 != 0 || a2 != 0) {
+            if (self->f224 == 0) {
+                self->f224 = (Sub_12B5B8*)func_0018D5C0(0xC0);
+            }
+        }
+        Sub_12B5B8* o = self->f224;
+        if (a1 != self->f18) {
+            o->f60 = a1;
+            o->fB0 = o->fB0 | 4;
+        } else {
+            o->fB0 = o->fB0 & 4;
+        }
+        if (a2 != self->f18) {
+            o->f60 = a2;
+            o->fB0 = o->fB0 | 8;
+        } else {
+            o->fB0 = o->fB0 & 8;
+        }
+        func_00128018(0, a1, (u8*)self + 0x140, (u8*)self + 0x100);
+        func_00128150(0, a2, (u8*)self + 0x110, (u8*)self + 0xD0);
+    }
+}

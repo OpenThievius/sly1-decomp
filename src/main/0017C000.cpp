@@ -305,3 +305,20 @@ void func_0017D1E8(void* self, f32 value)
     Obj_17D1E8* o = (Obj_17D1E8*)func_0017CF38(self, 11, -1, 1);
     o->f0C = value;
 }
+
+struct Pool_17CF38 { u8 pad000[0x34]; s32 count; u8* items; };
+struct Entry_17CF38 { s32 f00; s32 f04; s32 f08; s32 pad0C; s32 pad10; };
+extern u8 D_002BE478[];
+void func_001F5C0C(Entry_17CF38* dst, s32 value, s32 size);
+
+void* func_0017CF38(Pool_17CF38* self, s32 a, s32 b, s32 c)
+{
+    if (self->count >= 0x80) return D_002BE478;
+    Entry_17CF38* e = (Entry_17CF38*)(self->items + self->count * 20);
+    self->count = self->count + 1;
+    func_001F5C0C(e, 0, 20);
+    e->f00 = a;
+    e->f04 = b;
+    e->f08 = c;
+    return e;
+}

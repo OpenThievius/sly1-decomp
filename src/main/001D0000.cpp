@@ -294,3 +294,36 @@ s32 func_001D3C68(s32 stride, s32 n, s32 m, char* out, ...) {
     }
     return changed;
 }
+
+struct Self_1D32D8 {
+    void** vt;
+    u8 pad0[0x140 - 4];
+    u8 f140[0x550 - 0x140];
+    s32 f550;
+    u8 pad2[4];
+    void* f558;
+};
+
+enum Kind_1D32D8 { };
+
+void func_00158730(void* x);
+void func_001837E0(Self_1D32D8* self, s32 a, s32 b, s32 c);
+void func_001BFCD8(Kind_1D32D8 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+void func_001D32D8(Self_1D32D8* self, s32 a1, s32 a2)
+{
+    s32 args[2];
+    if (a2 == 0) {
+        args[1] = a1;
+        args[0] = (s32)self;
+        ((void (*)(Self_1D32D8*, s32, s32*))self->vt[18])(self, 0x17, args);
+        self->f550 = self->f550 - 1;
+        if (self->f550 > 0) {
+            return;
+        }
+    }
+    func_00158730(self->f558);
+    func_001BFCD8((Kind_1D32D8)0x67, 0, 0, self->f140, 4000.0f, 750.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    func_001837E0(self, 2, 0, 0);
+    ((void (*)(Self_1D32D8*))self->vt[7])(self);
+}

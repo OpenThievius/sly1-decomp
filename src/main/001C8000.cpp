@@ -781,3 +781,57 @@ s32 func_001CA6D0(Table_001CA6D0* self, s32 index)
         return 0;
     return self->slots[index].key;
 }
+
+struct Obj_1C9990;
+struct Param_1C9990;
+struct Inner_1C9990;
+struct Frame_1C9990;
+struct __attribute__((aligned(16))) Quad_1C9990A { s32 a, b, c, d; };
+
+struct Frame_1C9990 {
+    s32 f0;
+    s32 f4;
+    u8 pad8[0x8];
+    s32 f10;
+    u8 pad14[0xC];
+    Quad_1C9990A q20;
+    u8 pad30[0x10];
+};
+
+s32 func_00177838(Frame_1C9990* f, s32 a, s32 b);
+void func_001F5C0C(void* p, s32 v, s32 n);
+
+struct Obj_1C9990 {
+    void** vtable;
+    u8 pad4[0x13C - 4];
+};
+
+struct Param_1C9990 {
+    s32 f0;
+    Inner_1C9990* f4;
+};
+
+struct Inner_1C9990 { void** w0; };
+
+s32 func_001C9990(Obj_1C9990* self, Param_1C9990* p)
+{
+    s32 r = ((s32 (*)(Obj_1C9990*, s32))self->vtable[0x13C / 4])(self, p->f0);
+    if (r != 0) {
+        return 0;
+    }
+    Frame_1C9990 f;
+    func_001F5C0C(&f, 0, 0x40);
+    f.f0 = (s32)p->f4;
+    f.f4 = (s32)self;
+    if (p->f0 == 4) {
+        f.f10 = 4;
+    } else if (p->f4 == 0) {
+        f.f10 = 2;
+    } else if ((s32)((Inner_1C9990*)p->f4)->w0[2] & 0x20) {
+        f.f10 = 0x10;
+    } else {
+        f.f10 = 2;
+    }
+    f.q20 = *(Quad_1C9990A*)((u8*)self + 0x140);
+    return func_00177838(&f, 0, 0) != 0;
+}

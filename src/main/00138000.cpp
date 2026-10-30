@@ -562,3 +562,55 @@ void func_0013B430(s32 mask)
         }
     }
 }
+
+struct Obj_138F28;
+typedef s32 (*Probe_138F28)(Obj_138F28* self, Obj_138F28* other);
+struct Vt_138F28 { u8 pad0[0xF0]; Probe_138F28 probe; };
+struct Obj_138F28 { Vt_138F28* vt; u8 pad0[0x480 - 4]; s32 f480; u8 pad1[0x4B8 - 0x484]; s32 f4B8; };
+struct Node_138F28 { u8 pad0[4]; Obj_138F28* obj; Node_138F28* next; };
+struct Self_138F28 { u8 pad0[0x1AE8]; Node_138F28* head; };
+
+void func_001385A0(Self_138F28* a0, s32 a1, Node_138F28* a2, s32 a3, s32 a4);
+
+void func_00138F28(Self_138F28* self, Obj_138F28* obj)
+{
+    obj->f4B8 = 0;
+    Node_138F28* n = self->head;
+    while (n != 0) {
+        if (n->obj != obj) {
+            s32 s2 = 0;
+            if (obj->vt->probe(obj, n->obj) || n->obj->vt->probe(n->obj, obj)) {
+                s2 = 1;
+            }
+            func_001385A0(self, obj->f480, n, s2 == 0 ? 8 : 0, s2 ? 8 : 0);
+        }
+        n = n->next;
+    }
+}
+
+struct Frame_139B70 { u8 buf[0x30]; };
+
+void func_001611B8(Frame_139B70* f);
+void func_001528F0(Frame_139B70* f, s32 count);
+void func_001613C0(Frame_139B70* f, s32 a, s32 b, s32 c);
+void func_00161708(Frame_139B70* f, s32 a, s64 b);
+void func_001612F8(Frame_139B70* f, s32 a, s32 b, s32 c, u64 d, s32 e);
+void func_00152D70(Frame_139B70* f);
+void func_001529E0(Frame_139B70* f, s32 a, void* out);
+
+void func_00139B70(s32 idx, void* arg)
+{
+    Frame_139B70 f;
+    u64 mask;
+
+    func_001611B8(&f);
+    func_001528F0(&f, 4);
+    func_001613C0(&f, 0, 1, 0xE);
+    func_00161708(&f, 0x47, 0x7180B);
+    mask = 0x40;
+    mask |= (s64)idx << 2;
+    func_00161708(&f, 0x42, mask);
+    func_001612F8(&f, 0x54, 0, 0xA, 0x424242412EULL, 0);
+    func_00152D70(&f);
+    func_001529E0(&f, 0, arg);
+}

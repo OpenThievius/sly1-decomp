@@ -273,3 +273,71 @@ void func_001275F0(Obj_001275F0* self, f32 x, f32 y, f32 z)
     v[2] = z;
     self->vtbl[37](self, v);
 }
+
+struct Ent_1249A8 { u8 pad[0x20]; s32 f20; };
+struct Ptr_1249A8 { u8 pad[0x4]; };
+struct Node_1249A8;
+typedef void (*VFn_1249A8)(Node_1249A8* self);
+struct Node_1249A8 { VFn_1249A8* vtbl; u8 pad[0x18]; Node_1249A8* f1C; };
+struct Obj_1249A8 { u8 pad[0x14]; void* f14; u8 pad2[0x1C]; Node_1249A8* f34; u8 pad3[0x1C8]; Ent_1249A8* f200; };
+
+void func_00128DB8(Obj_1249A8* self);
+void func_00124540(Obj_1249A8* self);
+void* func_0015A448(void* obj, s32 id, Obj_1249A8* self);
+void func_0012A860(Obj_1249A8* self, void* v);
+void func_00165828(Ptr_1249A8* a, Obj_1249A8* self);
+
+void func_001249A8(Obj_1249A8* self)
+{
+    s32 scratch[4];
+    (void)scratch;
+    func_00128DB8(self);
+    func_00124540(self);
+    Ent_1249A8* a1 = self->f200;
+    if (a1 != 0 && a1->f20 != -1) {
+        void* v = func_0015A448(self->f14, a1->f20, self);
+        if (v != 0) {
+            func_0012A860(self, v);
+        }
+    }
+    func_00165828((Ptr_1249A8*)((u8*)self + 0x22C), self);
+    Node_1249A8* n = self->f34;
+    if (n != 0) {
+        do {
+            VFn_1249A8 fn = n->vtbl[19];
+            if (fn != 0) {
+                fn(n);
+            }
+            n = n->f1C;
+        } while (n != 0);
+    }
+}
+
+typedef u64 Quad_1261C0 __attribute__((mode(TI)));
+
+struct Obj_1261C0 {
+    u8* vt;
+    u8 pad4[0x224 - 0x04];
+    u8* f224;
+};
+
+typedef void (*Slot_1261C0)(void* self, void* a, void* b);
+
+void func_001261C0(Obj_1261C0* self, void* a1, void* a2)
+{
+    (*(Slot_1261C0*)(self->vt + 0xC0))(self, a1, a2);
+    u8* ch = self->f224;
+    if (ch != 0 && (*(u32*)(ch + 0xB0) & 0x80) != 0) {
+        if (a2 != 0) {
+            *(s32*)(ch + 0xA4) = 1;
+            u8* dst = self->f224;
+            *(Quad_1261C0*)(dst + 0x60) = *(Quad_1261C0*)((u8*)a2 + 0x00);
+            *(Quad_1261C0*)(dst + 0x70) = *(Quad_1261C0*)((u8*)a2 + 0x10);
+            *(Quad_1261C0*)(dst + 0x80) = *(Quad_1261C0*)((u8*)a2 + 0x20);
+            *(Quad_1261C0*)(dst + 0x90) = *(Quad_1261C0*)((u8*)a2 + 0x30);
+        } else {
+            *(s32*)(ch + 0xA4) = 0;
+        }
+    }
+    (*(Slot_1261C0*)(self->vt + 0xA8))(self, a1, a2);
+}

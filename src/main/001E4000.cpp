@@ -455,3 +455,34 @@ s32 func_001E5888(Ctx_1E5888* self, Node_1E5888* node)
     }
     return 1;
 }
+
+struct Blk_1E5278 { u8 pad[0x14]; };
+struct Ring_1E5278 { s32 w; };
+
+extern u8 D_00261420[];
+extern u8 D_00275AF0[];
+
+void func_001C05D0(f32 x);
+void func_00140ED0(Ring_1E5278* r);
+void func_001E4E80(Blk_1E5278* self, u8* p, s32 a, s32 b, s32 c);
+
+void func_001E5278(s32 mode)
+{
+    s32 n;
+    func_001C05D0(0.0f);
+    switch (mode) {
+    case 0:
+        n = 0;
+        break;
+    case 1:
+        func_00140ED0((Ring_1E5278*)D_00261420);
+        return;
+    case 2:
+        n = 2;
+        break;
+    case 3:
+        n = 4;
+        break;
+    }
+    func_001E4E80((Blk_1E5278*)D_00275AF0, D_00275AF0 + 0x14, -1, -1, n);
+}

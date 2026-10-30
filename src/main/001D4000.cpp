@@ -443,3 +443,40 @@ void func_001D4C98(Obj_1D4C98* self)
         func_00175170(self, 2, 2);
     }
 }
+
+extern u8 D_00275290[];
+extern u8 D_00275250[];
+
+struct __attribute__((aligned(16))) Quad_1D73A8 { s32 a; s32 b; s32 c; s32 d; };
+
+struct Ctx_1D73A8 {
+    u8 pad0[0x610];
+    f32 f610;
+    f32 f614;
+    f32 f618;
+    f32 f61C;
+    Quad_1D73A8 f620;
+    u8 f630[0x40];
+    u8 pad1[0x868 - 0x670];
+    f32 f868;
+    u8 pad2[0xB04 - 0x86C];
+    s32 fB04;
+};
+
+void func_001921A8(Ctx_1D73A8* self);
+void func_0018D800(Ctx_1D73A8* dst, void* src, s32 count);
+void func_001DB290(Ctx_1D73A8* self);
+
+void func_001D73A8(Ctx_1D73A8* self)
+{
+    func_001921A8(self);
+    self->f614 = 50.0f;
+    self->f610 = 50.0f;
+    self->f618 = 3000.0f;
+    self->f61C = 1300.0f;
+    self->f868 = 2.0f;
+    self->fB04 = 3;
+    self->f620 = *(Quad_1D73A8*)D_00275290;
+    func_0018D800((Ctx_1D73A8*)self->f630, D_00275250, 0x40);
+    func_001DB290(self);
+}

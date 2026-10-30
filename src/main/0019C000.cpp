@@ -706,3 +706,153 @@ void func_0019DA60(void)
     func_001EE468((Obj_19DA60*)s);
     func_00152D70((Obj_19DA60*)s);
 }
+
+struct Obj_19D860;
+
+extern s32 D_0060478C;
+extern u8 D_002622A8[];
+extern u8 D_0026ABF0[];
+extern u8 D_0026AC00[];
+extern u8 D_0026AC20[];
+extern u8* D_00275710;
+
+void func_00152B38(Obj_19D860* self);
+void func_001EE3B8(Obj_19D860* o, s32 size, s32 flags);
+void func_001EE668(Obj_19D860* o, s32 a, s32 b, void* c, s32 d);
+void func_00152D70(Obj_19D860* self);
+
+void func_0019D860(void) {
+    if (D_0060478C == 0) {
+        D_0060478C = 1;
+        Obj_19D860* o = (Obj_19D860*)D_002622A8;
+        func_00152B38(o);
+        func_001EE3B8(o, 0, 0);
+        func_001EE668(o, 8, 1, D_0026ABF0, 0);
+        func_001EE668(o, 8, 1, D_0026AC00, 1);
+        func_001EE668(o, 0xC, 1, D_0026AC20, 0xC);
+        func_001EE668(o, 4, 1, (u8*)D_00275710 + 0x1D68, 3);
+        func_00152D70(o);
+    }
+}
+
+struct Obj_19D968 { u8 pad[0x10]; };
+
+extern s32 D_00604784;
+extern u8 D_002622A8[];
+extern u8 D_002BDC20[];
+extern u8 D_002BDEE0[];
+
+void func_00152B38(Obj_19D968* s);
+void func_001EE7D0(Obj_19D968* s, s32 n, void* buf, s32 flag);
+void func_001EE450(Obj_19D968* s);
+void func_00152D70(Obj_19D968* s);
+
+void func_0019D968(void)
+{
+    if ((s32)D_00604780 == 0) {
+        func_00152B38((Obj_19D968*)D_002622A8);
+        func_001EE7D0((Obj_19D968*)D_002622A8, 0x2C, D_002BDC20, 0);
+        func_00152D70((Obj_19D968*)D_002622A8);
+        D_00604780 = 1;
+        D_00604784 = 1;
+    } else if (D_00604784 == 0) {
+        func_00152B38((Obj_19D968*)D_002622A8);
+        func_001EE450((Obj_19D968*)D_002622A8);
+        func_001EE7D0((Obj_19D968*)D_002622A8, 0x2C, D_002BDEE0, 0);
+        func_00152D70((Obj_19D968*)D_002622A8);
+        D_00604784 = 1;
+    }
+}
+
+struct Obj_19DBB0 {
+    u8 pad0[0xC];
+    u8* fC;
+};
+
+struct Call_19DBB0;
+
+extern u8 D_002622A8[];
+extern u8 D_00212160[];
+extern u8 D_00215C50[];
+extern u8 D_0026FA68[];
+extern u8 D_00274520[];
+extern u8 D_00261990[];
+
+void func_0015EAE0(Call_19DBB0* a, void* b, void* c);
+void func_0019D860(void);
+void func_0019D930(void);
+void func_00143940(Call_19DBB0* self, f32 x);
+void func_00144848(Call_19DBB0* self);
+
+void func_0019DBB0(void)
+{
+    Obj_19DBB0* o = (Obj_19DBB0*)D_002622A8;
+    func_0015EAE0((Call_19DBB0*)D_002622A8, D_00212160, D_00215C50);
+    func_0019D860();
+    func_0019D930();
+    u8* g = *(u8**)D_0026FA68;
+    if (g != 0) {
+        s32 idx = *(s32*)(g + 0x2F4);
+        u32* tbl = (u32*)D_00274520;
+        u32 entry = tbl[idx];
+        if (entry != 0) {
+            u64 q = ((u64)entry << 32) | 0x50000000u;
+            *(u64*)o->fC = q;
+            o->fC = o->fC + 0x10;
+        }
+    }
+    u8* obj = *(u8**)D_00261990;
+    f32 f20 = *(f32*)(obj + 0x1C4);
+    f32 f21 = *(f32*)(obj + 0x1C8);
+    func_00143940((Call_19DBB0*)obj, 1.0f);
+    func_00144848((Call_19DBB0*)*(u8**)D_00261990);
+    func_00143940((Call_19DBB0*)*(u8**)D_00261990, f20);
+    *(f32*)(*(u8**)D_00261990 + 0x1C8) = f21;
+}
+
+struct __attribute__((aligned(16))) Quad_19F9D0 { s32 a, b, c, d; };
+struct Sub_19F9D0 { u8 pad0[0xC]; s32 f0C; };
+struct Ctx_19F9D0 { u8 pad0[0x278]; Sub_19F9D0* f278; u8 pad1[0x17C]; void* f3F8; };
+struct Node_19F9D0 {
+    u8 pad0[0x24];
+    Ctx_19F9D0* ctx;
+    u8 pad1[0x80 - 0x28];
+    Quad_19F9D0 q80;
+};
+struct Anim_19F9D0;
+typedef void (*Run_19F9D0)(Anim_19F9D0* self, f32 k, void* buf, s32 zero);
+struct Vt_19F9D0 { Run_19F9D0 run; };
+struct Anim_19F9D0 {
+    Vt_19F9D0* vt;
+    u8 pad0[0x18];
+    f32 f1C;
+    u8 pad1[0x14];
+    f32 f34;
+    u8 pad2[0xDC];
+    s32 f114;
+};
+
+void* func_0019EA78(s32 a, s32 b);
+void func_0019EBE8(Node_19F9D0* self);
+s32 func_0013DFD8(Node_19F9D0* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+
+void func_0019F9D0(Node_19F9D0* self, s32 flag)
+{
+    if (flag != 0) {
+        u8 buf[0x700];
+        *(Quad_19F9D0*)buf = self->q80;
+        if (self->ctx->f3F8 != 0) {
+            func_0013DFD8((Node_19F9D0*)self->ctx->f3F8, (u8*)self + 0x90, &self->q80, 0, 0x10, buf);
+        }
+        Anim_19F9D0* s0 = (Anim_19F9D0*)func_0019EA78(4, 0);
+        if (s0 != 0) {
+            s0->vt->run(s0, 40.0f, buf, 0);
+            s0->f1C = 0.75f;
+            s0->f34 = 30.0f;
+            if (self->ctx->f278 != 0) {
+                s0->f114 = self->ctx->f278->f0C;
+            }
+        }
+        func_0019EBE8(self);
+    }
+}

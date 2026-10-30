@@ -817,3 +817,53 @@ void func_001DBC60(Obj_1DBC60* self, s32 a1, s32 a2, s32 a3, s32 a4)
     }
     func_001DBCC8(self, a1, a2, a3, a4);
 }
+
+struct Val_1DB110;
+struct Quad_1DB110 { u8 pad0[16]; };
+struct Inner_1DB110;
+struct Ent_1DB110;
+struct Sub_1DB110 { s32 s0; Ent_1DB110* link; s32 s8; s32 sC; s32 s10; s32 s14; };
+struct Ent_1DB110 { s32 f0; s32 f4; s32 f8; s32 fC; Sub_1DB110 sub; };
+struct Obj_1DB110 { u8 pad0[0x34]; Inner_1DB110* in; };
+struct Self_1DB110 {
+    u8 pad0[0x830];
+    Obj_1DB110* f830;
+    u8 pad1[0x870 - 0x834];
+    s32 count;
+    Ent_1DB110 ents[16];
+    Ent_1DB110* head;
+    Ent_1DB110* tail;
+};
+typedef void (*VFn_1DB110)(Inner_1DB110* self, Quad_1DB110* q, s32 a2, s32 a3, s32 a4, s32 a5, Sub_1DB110* a6);
+
+void func_001F3BD8(Val_1DB110* v, Quad_1DB110* q);
+
+void func_001DB110(Self_1DB110* self, Val_1DB110* value)
+{
+    if (value == 0) return;
+    if ((u32)self->count >= 0x10) return;
+    s32 idx = self->count;
+    self->count = idx + 1;
+    Ent_1DB110* e = &self->ents[idx];
+    e->f4 = (s32)value;
+    e->f0 = 0;
+    if (self->head == 0) {
+        self->tail = e;
+        self->head = e;
+        e->sub.link = e;
+    } else {
+        e->sub.link = self->head->sub.link;
+        self->head->sub.link = e;
+        e->fC = e->sub.link->fC + 1;
+    }
+    if (self->f830 != 0) {
+        Quad_1DB110 q;
+        func_001F3BD8(value, &q);
+        Inner_1DB110* in = self->f830->in;
+        void** vt = *(void***)in;
+        VFn_1DB110 fn = (VFn_1DB110)vt[10];
+        if (fn != 0) {
+            fn(in, &q, 0, 0, 0, 0, &e->sub);
+        }
+    }
+}

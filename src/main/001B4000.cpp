@@ -1467,3 +1467,43 @@ void func_001B6628(Node_1B6628* self, s32 key)
     self->f2C = -1;
     func_001B66A0(self);
 }
+
+struct Flags_1B64D8 { u8 pad0[0xC]; s32 flags; };
+struct Node_1B64D8 {
+    u8 pad0[0x18];
+    void* f18;
+    u8 pad1[0x24 - 0x1C];
+    void* f24;
+    u8 pad2[0x30 - 0x28];
+    s32 f30;
+    Flags_1B64D8* f34;
+};
+struct Ptr_1B64D8 { s32 unused; };
+struct Ptr2_1B64D8 { s32 unused; };
+
+s32 func_001B63F8(Ptr_1B64D8* self, s32 key);
+void func_001B6C68(Node_1B64D8* self);
+void func_0012E760(Ptr2_1B64D8* obj);
+void func_001B66A0(Node_1B64D8* self);
+
+void func_001B64D8(Node_1B64D8* self, s32 key)
+{
+    s32 v;
+    if (key != -1) {
+        v = func_001B63F8((Ptr_1B64D8*)self->f18, key);
+    } else {
+        v = -1;
+    }
+    if (v != self->f30) {
+        self->f30 = v;
+        Flags_1B64D8* p = self->f34;
+        if (p != 0 && (p->flags & 2)) {
+            func_001B6C68(self);
+            func_0012E760((Ptr2_1B64D8*)self->f24);
+            self->f24 = 0;
+        }
+        if (self->f24 == 0) {
+            func_001B66A0(self);
+        }
+    }
+}

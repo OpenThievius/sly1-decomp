@@ -782,3 +782,27 @@ s32 func_001BE810(void)
     }
     return 0;
 }
+
+struct Obj_1BE860 { u8 pad[4]; };
+
+struct Ctx_1BE860 {
+    u8 pad0[0x18];
+    Obj_1BE860* f18;
+    u8 pad1[0x50 - 0x1C];
+    f32 f50;
+    f32 f54;
+};
+
+void func_0011D798(Obj_1BE860* a0, s32 a1, s32 a2);
+
+void func_001BE860(Ctx_1BE860* self)
+{
+    s32 a1 = (s32)(self->f50 * 1024.0f);
+    s32 a2;
+    if (0.0f < self->f54) {
+        a2 = (s32)((self->f54 + 2.0f) * 179.5f) - 0x167;
+    } else {
+        a2 = (s32)((self->f54 + 2.0f) * 179.5f);
+    }
+    func_0011D798(self->f18, a1, a2);
+}

@@ -626,3 +626,53 @@ void func_001608E0(void)
     *(s32*)(g + 0x19E4) = 0;
     func_00140D90((Sys_1608E0*)D_00261420);
 }
+
+struct Args_160DA0 {
+    s32 f0;
+    u8* f4;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+};
+
+struct Call_160DA0;
+
+extern u8 D_00275B04[];
+extern u8 D_00275F80[];
+extern u8 D_00261EF0[];
+extern u8 D_00261420[];
+extern u8 D_0026FF68[];
+
+void func_001DDAD0(Call_160DA0* x);
+void func_001BE708(void);
+void func_001EFFA0(Call_160DA0* dst, Args_160DA0* args, s32 count);
+void func_00140ED0(Call_160DA0* r);
+void func_00194D30(Call_160DA0* self, s32 a, s32 b);
+void func_00151E20(Call_160DA0* self, f32 amount);
+
+void func_00160DA0(void)
+{
+    u8* o = (u8*)D_002623C0;
+    u8* x = (u8*)D_00275710;
+    s32 t = *(s32*)(o + 0x19E0) - 1;
+    *(s32*)(o + 0x19E0) = t;
+    func_001DDAD0((Call_160DA0*)x);
+    func_001BE708();
+    u8* p = (u8*)D_002623C0;
+    s32 m = *(s32*)(p + 0x19DC);
+    if (m == 1) {
+        Args_160DA0 args;
+        args.f0 = m;
+        args.f4 = D_00275B04;
+        u8* base = args.f4 - 0x14;
+        args.f8 = *(s32*)(base + 0x8);
+        args.fC = *(s32*)(base + 0xC);
+        args.f10 = 0x10;
+        func_001EFFA0((Call_160DA0*)D_00275F80, &args, 1);
+    } else if (*(s32*)(p + 0x19E0) >= 0) {
+        func_00140ED0((Call_160DA0*)D_00261420);
+    } else {
+        func_00194D30((Call_160DA0*)D_0026FF68, 0, 1);
+    }
+    func_00151E20((Call_160DA0*)D_00261EF0, 1.0f);
+}

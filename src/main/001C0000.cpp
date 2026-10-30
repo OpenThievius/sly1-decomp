@@ -729,3 +729,55 @@ void func_001C0950(Obj_1C0950* self)
         func_0011E360((Arg_1C0950*)2, v, v);
     }
 }
+
+extern s32 D_00274808[];
+
+void func_0011E328(s32 a, s32 b);
+void func_0011E360(s32 a, s32 b, s32 c);
+
+struct Pair_1C08B0 { s32 first; s32 second; };
+struct Obj_1C08B0 { u8 pad[0x2328]; Pair_1C08B0 pairs[4]; s32 count; };
+
+void func_001C08B0(Obj_1C08B0* self, s32 index, s32 value)
+{
+    if ((u32)self->count < 4) {
+        func_0011E328(2, D_00274808[index]);
+        func_0011E360(2, value, value);
+        self->pairs[self->count].first = index;
+        self->pairs[self->count].second = value;
+        self->count++;
+    }
+}
+
+struct Tmp_1C1A28 { s32 w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; s32 w7; };
+struct Obj_1C1A28 { s32 w0; s32 w1; s32 w2; s32 w3; };
+struct Node_1C1A28 { s32 w0; s32 w1; Node_1C1A28* next; };
+struct List_1C1A28 { s32 value; Node_1C1A28* first; Node_1C1A28* last; };
+
+void func_001F5C0C(void* dst, s32 value, s32 size);
+Node_1C1A28* func_0011AF28(void);
+void func_001C15D8(void* self, void* a, Tmp_1C1A28* r);
+void func_0011B0A8(Node_1C1A28* a, void* b);
+void func_0011B060(void* p, s32 mode);
+
+s32 func_001C1A28(List_1C1A28* self, void* a1)
+{
+    Tmp_1C1A28 tmp;
+    Obj_1C1A28 o;
+    Node_1C1A28* n;
+    func_001F5C0C(&tmp, 0, 0x20);
+    tmp.w0 = self->value;
+    tmp.w1 = 2;
+    tmp.w3 = 0;
+    n = func_0011AF28();
+    func_001C15D8(&o, a1, &tmp);
+    func_0011B0A8(n, &o);
+    func_0011B060(&o, 2);
+    if (self->first != 0) {
+        self->last->next = n;
+    } else {
+        self->first = n;
+    }
+    self->last = n;
+    return 1;
+}

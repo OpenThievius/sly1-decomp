@@ -440,3 +440,63 @@ s32 func_001E08F8(s8* s, s32* out)
     *out = value * sign;
     return count;
 }
+
+struct Obj_1E2870;
+struct Sub_1E2870;
+struct Mgr_1E2870;
+struct Loc_1E2870 {
+    s32 v[4];
+};
+struct Pq_1E2870 {
+    u8 pad0[0x2220];
+    s32 f2220;
+};
+struct Glob_1E2870 {
+    u8 pad0[0x224];
+    s32 f224;
+};
+
+extern u8* D_00262E10;
+
+void* func_001925F0(void);
+void func_00128018(Mgr_1E2870* a0, Obj_1E2870* a1, void* a2, Loc_1E2870* a3);
+s32 func_001E4DC0(Sub_1E2870* self, Loc_1E2870* value);
+void func_001E2778(Obj_1E2870* self, s32 state);
+
+struct Obj_1E2870 {
+    u8 pad0[0x2D0];
+    void* f2D0;
+    u8 pad1[0x2E0 - 0x2D4];
+    Sub_1E2870* f2E0;
+    u8 pad2[0x384 - 0x2E4];
+    s32 f384;
+    u8 pad3[0x398 - 0x388];
+    s32 f398;
+};
+
+void func_001E2870(Obj_1E2870* self) {
+    Loc_1E2870 loc;
+    void* p = func_001925F0();
+    if (p == 0) {
+        return;
+    }
+    if (p != self->f2D0) {
+        func_001E2778(self, 0);
+        self->f2D0 = p;
+    }
+    s32 st;
+    if (self->f398 == -1) {
+        func_00128018(0, self, (u8*)p + 0x140, &loc);
+        s32 r = func_001E4DC0(self->f2E0, &loc);
+        st = (0u < (u32)r);
+    } else {
+        st = self->f398;
+    }
+    if (self->f384 == 0 && p == D_00262E10 && ((Pq_1E2870*)p)->f2220 == 2 &&
+        ((Glob_1E2870*)D_00261990)->f224 == 0) {
+        if (self->f398 == -1) {
+            return;
+        }
+    }
+    func_001E2778(self, st);
+}
