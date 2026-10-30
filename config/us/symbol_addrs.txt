@@ -1,0 +1,7 @@
+// Function starts that no jal reaches, so that splat's own analysis misses them: each one is
+// entered through a pointer (a table of callbacks or a static initialiser) and begins with its
+// own stack frame right after a branch. Found by tools/inventory.py's neighbour, named by us.
+func_001858F8 = 0x001858F8; // type:func
+func_0018E5E8 = 0x0018E5E8; // type:func
+func_001FEE48 = 0x001FEE48; // type:func
+func_001FEEC8 = 0x001FEEC8; // type:func
