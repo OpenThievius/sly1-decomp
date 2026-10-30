@@ -577,3 +577,17 @@ void func_0012D448(Obj_12D448* self, s32 v)
     }
     self->state = (s8)v;
 }
+
+void func_0012E760(void* obj);
+void func_0012C7B0(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
+
+void func_0012C918(void* self, void* a1, void* a2, void** out, f32 fa, f32 fb)
+{
+    if (*out != 0) {
+        func_0012E760(*out);
+        *out = 0;
+    }
+    if (self != 0) {
+        func_0012C7B0(self, a1, fa, fb, a2, out);
+    }
+}

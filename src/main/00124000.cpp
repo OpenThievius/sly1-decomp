@@ -368,3 +368,58 @@ void func_001261C0(void* obj, void* b, void* m)
     }
     self->vt[0xA8 / 4](self, b, src);
 }
+
+void func_00128DB8(void* self);
+void func_00124540(void* self);
+void* func_0015A448(void* a, s32 b, void* c);
+void func_0012A860(void* self, void* v);
+void func_00165828(void* a, void* b);
+
+typedef void (*VFn_1249A8)(void* self);
+
+struct Vtbl_1249A8 {
+    u8 pad0[0x4C];
+    VFn_1249A8 f4C;
+};
+
+struct Node_1249A8 {
+    Vtbl_1249A8* vt;
+    u8 pad1[0x1C - 4];
+    Node_1249A8* next1C;
+};
+
+struct Sub_1249A8 {
+    u8 pad0[0x20];
+    s32 f20;
+};
+
+struct Obj_1249A8 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x34 - 0x18];
+    Node_1249A8* f34;
+    u8 pad2[0x200 - 0x38];
+    Sub_1249A8* f200;
+};
+
+void func_001249A8(Obj_1249A8* self)
+{
+    s32 scratch[4];
+    (void)scratch;
+    func_00128DB8(self);
+    func_00124540(self);
+    Sub_1249A8* sub = self->f200;
+    if (sub != 0 && sub->f20 != -1) {
+        void* v = func_0015A448(self->f14, sub->f20, self);
+        if (v != 0) {
+            func_0012A860(self, v);
+        }
+    }
+    func_00165828((u8*)self + 0x22C, self);
+    for (Node_1249A8* p = self->f34; p != 0; p = p->next1C) {
+        VFn_1249A8 fn = p->vt->f4C;
+        if (fn != 0) {
+            fn(p);
+        }
+    }
+}

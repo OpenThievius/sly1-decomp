@@ -157,3 +157,47 @@ void func_00130158(Holder_130158* holder, s32* out)
 {
     *out = holder->inner->value;
 }
+
+void func_001303F0(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f32 a, f32 b, f32 c, f32 dd)
+{
+    f32 u = t / dur;
+    f32 v = 1.0f - u;
+    f32 span = c - a;
+    if (p0 != 0) {
+        f32 uv = u * v;
+        f32 vv = v * v;
+        f32 uu = u * u;
+        f32 uvv = uv * v;
+        f32 vvv = vv * v;
+        f32 uuv = uu * v;
+        f32 t5 = uvv * 3.0f;
+        f32 uvd = uvv * dur;
+        f32 t4 = uuv * 3.0f;
+        f32 t0 = vvv + t5;
+        f32 uuu = uu * u;
+        f32 p2b = uvd * b;
+        f32 p1a = t0 * a;
+        f32 q = uuv * dur;
+        f32 t3 = uuu + t4;
+        f32 s = p1a + p2b;
+        f32 qd = q * dd;
+        f32 t3c = t3 * c;
+        f32 r = s - qd;
+        *p0 = r + t3c;
+    }
+    if (p1 != 0) {
+        f32 t1 = (u * (6.0f * v)) / dur * span;
+        f32 t2 = (1.0f - (u * (4.0f - 3.0f * u))) * b;
+        f32 w2 = 3.0f * u + -2.0f;
+        f32 t3 = (u * w2) * dd;
+        *p1 = ((t1 + t2) + t3) * e;
+    }
+    if (p2 != 0) {
+        f32 dd2 = dur * dur;
+        f32 ee = e * e;
+        f32 s1 = (6.0f - 12.0f * u) / dd2 * span;
+        f32 s2 = (6.0f * u - 4.0f) / dur * b;
+        f32 s3 = (6.0f * u - 2.0f) / dur * dd;
+        *p2 = ((s1 + s2) + s3) * ee;
+    }
+}
