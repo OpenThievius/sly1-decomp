@@ -167,6 +167,18 @@ class ProprietaryTest(unittest.TestCase):
         self.assertEqual(self.check("src/table.c", line * 7), [])
 
 
+class BlockerTest(unittest.TestCase):
+    def test_permanent_blockers_come_first(self):
+        self.assertEqual(todo.blocker({"vu", "rodata", "jtbl"}), "vu")
+        self.assertEqual(todo.blocker({"system", "rodata"}), "system")
+        self.assertEqual(todo.blocker({"handwritten", "jtbl"}), "handwritten")
+
+    def test_jump_table_then_rodata_then_none(self):
+        self.assertEqual(todo.blocker({"jtbl", "rodata"}), "jtbl")
+        self.assertEqual(todo.blocker({"data", "rodata", "float"}), "rodata")
+        self.assertEqual(todo.blocker({"calls", "data"}), "none")
+
+
 class DefinitionTest(unittest.TestCase):
     def names(self, text):
         return [m.group(1) for m in todo.DEFINITION.finditer(text)]

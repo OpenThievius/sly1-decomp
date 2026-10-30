@@ -2,6 +2,7 @@
 """The US functions still to match, with what each one needs.
 
     python3 tools/todo.py [--max-size N] [--min-size N] [--tags leaf,calls] [--exclude vu,jtbl] [--window 00118000]
+    python3 tools/todo.py --untried --summary
 
 One row per unfinished function: name, address, size, its source file (the
 16 KiB window that holds it, in src/main/ for game code and src/lib/ for the
@@ -15,8 +16,18 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)
 - handwritten: spimdisasm says it was not made by the compiler
 
+What stops a function from being matched, the blocker column:
+
+- vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
+  hand-written library assembly (AGENTS.md: no inline asm)
+- jtbl: a jump table; its .rodata must be placed from C first
+- rodata: refers to named .rodata. C reads the constant through an extern
+  (extern u8 D_00219718[];), so the object keeps no .rodata of its own
+- none: nothing blocks it
+
 A function is finished when src/ defines it (tools/progress.py reads the same
-list). Needs asm/us/ (tools/setup_asm.py).
+list). --untried leaves out the functions a worker already attempted
+(build/swarm/*/func_*.cpp). Needs asm/us/ (tools/setup_asm.py).
 """
 
 import argparse
@@ -125,6 +136,23 @@ def tags_of(lines, kind):
     return tags
 
 
+PERMANENT = ("vu", "system", "handwritten")
+
+
+def blocker(tags):
+    """The first thing that stops a function from being matched (see the module doc)."""
+    for tag in PERMANENT + ("jtbl", "rodata"):
+        if tag in tags:
+            return tag
+    return "none"
+
+
+def attempted():
+    """Names of the functions a worker has already tried (a file in build/swarm/<worker>/)."""
+    swarm = ROOT / "build" / "swarm"
+    return {p.stem for p in swarm.glob("*/func_*.cpp")} if swarm.exists() else set()
+
+
 def todo():
     done = finished()
     body = bodies()
@@ -143,14 +171,29 @@ def main(argv=None):
     parser.add_argument("--tags", default="", help="only functions with all of these tags")
     parser.add_argument("--exclude", default="", help="leave out functions with any of these tags")
     parser.add_argument("--window", help="only the functions of one source file, e.g. 00118000")
+    parser.add_argument("--untried", action="store_true", help="leave out the functions a worker already attempted")
+    parser.add_argument("--summary", action="store_true", help="count the functions by blocker, instead of listing them")
     args = parser.parse_args(argv)
     want = {t for t in args.tags.split(",") if t}
     avoid = {t for t in args.exclude.split(",") if t}
+    done = attempted() if args.untried else set()
     rows = [r for r in todo() if args.min_size <= r[2] <= args.max_size and want <= set(r[4])
-            and not avoid & set(r[4]) and (not args.window or r[3].endswith(args.window + ".cpp"))]
-    print("name\taddress\tsize\tsource\ttags")
+            and not avoid & set(r[4]) and (not args.window or r[3].endswith(args.window + ".cpp"))
+            and r[0] not in done]
+    if args.summary:
+        counts = {}
+        for name, addr, size, src, tags in rows:
+            key = blocker(tags)
+            n, total = counts.get(key, (0, 0))
+            counts[key] = (n + 1, total + size)
+        print("blocker\tfunctions\tbytes")
+        for key in ("none", "rodata", "jtbl", "vu", "system", "handwritten"):
+            if key in counts:
+                print("%s\t%d\t%d" % (key, counts[key][0], counts[key][1]))
+        return 0
+    print("name\taddress\tsize\tsource\ttags\tblocker")
     for name, addr, size, src, tags in rows:
-        print("%s\t%08X\t%d\t%s\t%s" % (name, addr, size, src, ",".join(tags)))
+        print("%s\t%08X\t%d\t%s\t%s\t%s" % (name, addr, size, src, ",".join(tags), blocker(tags)))
     print("# %d functions, %d bytes" % (len(rows), sum(r[2] for r in rows)), file=sys.stderr)
     return 0
 
