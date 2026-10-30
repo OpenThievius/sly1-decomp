@@ -326,7 +326,6 @@ void func_001E2648(Obj_1E2648* self, void* a1)
     func_0011EC40(self, a1);
 }
 
-
 struct Sub_1E30A0 { u8 pad[0x438]; f32 f438; f32 f43C; };
 struct Obj_1E30A0 { u8 pad[0x8]; Sub_1E30A0* sub; };
 struct Glob_1E30A0 { u8 pad[0x1C8]; f32 f1C8; };
@@ -466,4 +465,228 @@ s32 func_001E0E18(Field_001E0E18* self, void* dst)
         }
     }
     return ret;
+}
+
+void func_001F5C0C(void* p, s32 zero, s32 size);
+
+struct VT_1E00B0 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
+struct Obj_1E00B0 { VT_1E00B0* vt; u8 pad04[0x25C]; s32 f260; u8 pad264[4]; f32 f268; s32 f26C; };
+struct Glob_1E00B0 { u8 pad[0x2310]; s32 f2310; void* f2314; };
+struct Cam_1E00B0 { s32 flags; u8 pad[4]; f32 f08; };
+struct Pool_1E00B0 { u8 pad[0xAA]; u16 fAA; };
+extern Obj_1E00B0 D_0026E760;
+extern Obj_1E00B0 D_0026E9F8;
+extern Glob_1E00B0* D_00275710;
+extern Cam_1E00B0* D_002623C8;
+extern Pool_1E00B0 D_00262C70;
+extern f32 D_0026185C;
+extern s32 D_002623DC;
+extern s32 D_002701C4;
+void func_001AA298(Obj_1E00B0* q);
+void func_0016EC20(Pool_1E00B0* q, s32 n);
+void func_001BE5F8(s32 q);
+void func_001AA8B8(Obj_1E00B0* q, f32 v);
+void func_001E02C8(Obj_1E00B0* q, s32 n);
+f32 func_00205C78(f32 a, f32 b);
+void func_001AB920(Obj_1E00B0* q, f32 v);
+s32 func_001E9970(void);
+
+void func_001E00B0(Obj_1E00B0* self)
+{
+    func_001AA298(self);
+    switch (self->f260) {
+    case 0:
+    case 1:
+    {
+        if (self->f26C != 0) {
+        if (D_00262C70.fAA & 4) {
+            func_0016EC20(&D_00262C70, 4);
+            func_001BE5F8(D_00275710->f2310);
+            if (D_00275710->f2314 != 0) {
+                func_001AA8B8(self, 15.0f);
+                self->vt->m20(self, D_00275710->f2314);
+            } else {
+                self->vt->m3C(self);
+            }
+            self->f26C = 0;
+        } else if (D_0026185C >= 5.0f) {
+            self->vt->m3C(self);
+            self->f26C = 0;
+        }
+        }
+    break;
+    }
+    case 2:
+    {
+        Obj_1E00B0* o = &D_0026E760;
+        s32 r;
+        if (o->f260 == 0) {
+            func_001E02C8(self, 3);
+            return;
+        }
+        func_001AB920(o, -func_00205C78(2.0f, (f32)D_002623DC));
+        r = func_001E9970();
+        if (r) o->vt->m38(o); else o->vt->m3C(o);
+        if (D_002623C8->flags & 8) {
+            s32 b = 0;
+            if (r && D_002701C4 == 0 && D_002623C8->f08 < D_0026E760.f268) b = 1;
+            if (b) D_0026E9F8.vt->m38(&D_0026E9F8); else D_0026E9F8.vt->m3C(&D_0026E9F8);
+        }
+    }
+    break;
+    }
+}
+
+s32 func_001E08F8(s8* s, s32* out)
+{
+    s8* p = s;
+    s32 sign = 1;
+    s32 value = 0;
+    s32 count = 0;
+    u8 c;
+
+    if (*p == 0x2D) {
+        sign = -1;
+    }
+    if (sign == -1) {
+        p++;
+        count = 1;
+    }
+    c = *p;
+    if ((u32)(c - 0x30) < 10) {
+        do {
+            value = value * 10 + ((s8)c - 0x30);
+            p++;
+            c = *p;
+            count++;
+        } while ((u32)(c - 0x30) < 10);
+    }
+    *out = value * sign;
+    return count;
+}
+
+struct Obj_1E2870;
+struct Sub_1E2870;
+struct Mgr_1E2870;
+struct Loc_1E2870 {
+    s32 v[4];
+};
+struct Pq_1E2870 {
+    u8 pad0[0x2220];
+    s32 f2220;
+};
+struct Glob_1E2870 {
+    u8 pad0[0x224];
+    s32 f224;
+};
+
+extern u8* D_00262E10;
+
+void* func_001925F0(void);
+void func_00128018(Mgr_1E2870* a0, Obj_1E2870* a1, void* a2, Loc_1E2870* a3);
+s32 func_001E4DC0(Sub_1E2870* self, Loc_1E2870* value);
+void func_001E2778(Obj_1E2870* self, s32 state);
+
+struct Obj_1E2870 {
+    u8 pad0[0x2D0];
+    void* f2D0;
+    u8 pad1[0x2E0 - 0x2D4];
+    Sub_1E2870* f2E0;
+    u8 pad2[0x384 - 0x2E4];
+    s32 f384;
+    u8 pad3[0x398 - 0x388];
+    s32 f398;
+};
+
+void func_001E2870(Obj_1E2870* self) {
+    Loc_1E2870 loc;
+    void* p = func_001925F0();
+    if (p == 0) {
+        return;
+    }
+    if (p != self->f2D0) {
+        func_001E2778(self, 0);
+        self->f2D0 = p;
+    }
+    s32 st;
+    if (self->f398 == -1) {
+        func_00128018(0, self, (u8*)p + 0x140, &loc);
+        s32 r = func_001E4DC0(self->f2E0, &loc);
+        st = (0u < (u32)r);
+    } else {
+        st = self->f398;
+    }
+    if (self->f384 == 0 && p == D_00262E10 && ((Pq_1E2870*)p)->f2220 == 2 &&
+        ((Glob_1E2870*)D_00261990)->f224 == 0) {
+        if (self->f398 == -1) {
+            return;
+        }
+    }
+    func_001E2778(self, st);
+}
+
+struct Ctx_1E1DB8 {
+    u8 pad00[0x10];
+    s32 count;      // 0x10
+};
+
+struct Locals_1E1DB8 {
+    u8 spec[0x40];      // the conversion spec, at sp + 0
+    void* va;           // the argument pointer, at sp + 0x40
+    u8 pad44[0xC];
+};
+
+struct Str_1E1DB8;
+
+void func_001D72C8(Ctx_1E1DB8* ctx);
+s32 func_001D7190(Ctx_1E1DB8* ctx, const char* p, s32 n);
+char* func_001E21D8(Str_1E1DB8* s, s32 c);
+s32 func_001E2100(Str_1E1DB8* s);
+s32 func_001E0978(const char* at, u8* spec, void* va);
+void func_001E1A08(u8* spec, Ctx_1E1DB8* ctx, void* va, const char* at, s32 len);
+
+s32 func_001E1DB8(Ctx_1E1DB8* ctx, const char* fmt, void* a2)
+{
+    Locals_1E1DB8 loc;
+    const char* s1 = fmt;
+
+    loc.va = a2;
+    if (*s1 != 0) {
+        do {
+            char* s2 = func_001E21D8((Str_1E1DB8*)s1, '%');
+            s32 n = (s32)s2 - (s32)s1;
+            if (s2 == 0) {
+                n = func_001E2100((Str_1E1DB8*)s1);
+                s2 = (char*)((s32)s1 + n);
+            }
+            if (n != 0) {
+                if (func_001D7190(ctx, s1, n) < n) {
+                    break;
+                }
+                s1 = s2;
+            }
+            if (*s1 == '%') {
+                s32 n2 = func_001E0978(s1, loc.spec, (void*)&loc.va);
+                func_001E1A08(loc.spec, ctx, (void*)&loc.va, s1, n2);
+                s1 = s1 + n2;
+            }
+        } while (*s1 != 0);
+    }
+    func_001D72C8(ctx);
+    return ctx->count;
+}
+
+extern u8 D_0024E879[];
+
+void func_001E2218(s8* p)
+{
+    while (*p != 0) {
+        s32 c = *p;
+        s32 r = c;
+        if (D_0024E879[c] & 2) {
+            r = c - 0x20;
+        }
+        *p = r;
+        p++;
+    }
 }

@@ -169,6 +169,38 @@ class ProprietaryTest(unittest.TestCase):
         self.assertEqual(self.check("src/table.c", line * 7), [])
 
 
+class BlockerTest(unittest.TestCase):
+    def test_permanent_blockers_come_first(self):
+        self.assertEqual(todo.blocker({"vu", "rodata", "jtbl"}), "vu")
+        self.assertEqual(todo.blocker({"system", "rodata"}), "system")
+        self.assertEqual(todo.blocker({"handwritten", "jtbl"}), "handwritten")
+
+    def test_jump_table_then_rodata_then_none(self):
+        self.assertEqual(todo.blocker({"jtbl", "rodata"}), "jtbl")
+        self.assertEqual(todo.blocker({"data", "rodata", "float"}), "rodata")
+        self.assertEqual(todo.blocker({"calls", "data"}), "none")
+
+
+class StructReturnTest(unittest.TestCase):
+    def test_struct_pointer_return_is_a_definition(self):
+        text = "struct Node_2003F8 *func_002003F8(struct Node_2003F8 *self, s32 a1) {\n    return self;\n}\n"
+        self.assertEqual([m.group(1) for m in todo.DEFINITION.finditer(text)], ["func_002003F8"])
+
+    def test_struct_definitions_are_not(self):
+        text = "struct Node_2003F8 {\n    s32 f0;\n};\nstruct Pad_1 *func_00100000(void);\n"
+        self.assertEqual([m.group(1) for m in todo.DEFINITION.finditer(text)], [])
+
+
+class DecodedListingTest(unittest.TestCase):
+    def test_raw_sqrt_word_is_named(self):
+        # sqrt.s $f0, $f0 is 0x46000004 (little-endian bytes 04 00 00 46 in the listing)
+        self.assertEqual(todo.decoded("    /* 1 2 04000046 */  c1         0x4").split()[0], "sqrt.s")
+        self.assertEqual(todo.decoded("    /* 1 2 00000046 */  c1         0x0").split()[0], "c1")
+
+    def test_other_lines_are_unchanged(self):
+        self.assertEqual(todo.decoded("    /* 1 2 00000000 */  nop"), "nop")
+
+
 class DefinitionTest(unittest.TestCase):
     def names(self, text):
         return [m.group(1) for m in todo.DEFINITION.finditer(text)]

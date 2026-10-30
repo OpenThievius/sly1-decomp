@@ -969,3 +969,42 @@ void func_001EBFB0(Ctx_1EBFB0* self)
         } while (i < self->countC98);
     }
 }
+
+struct Obj_1EA0A8 { u8 pad[0x234C]; f32 f234C; f32 f2350; };
+
+extern u8 D_00275C18[];
+extern u8 D_00275C28[];
+
+f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
+
+void func_001EA0A8(void* self, f32 x)
+{
+    Obj_1EA0A8* o = (Obj_1EA0A8*)self;
+    f32 a = o->f234C;
+    f32 b = o->f2350;
+    if (b < a) {
+        o->f234C = func_001EA4B8(D_00275C18, 0, a, b, x);
+    } else if (a < b) {
+        o->f234C = func_001EA4B8(D_00275C28, 0, a, b, x);
+    }
+}
+
+struct Self_1E8D58 { u8 p0[0x724]; s32 v724; u8 p1[0x7E0 - 0x728]; s32 v7E0; u8 p2[0xBFC - 0x7E4]; f32 fBFC; u8 p3[0xC5C - 0xC00]; s32 vC5C; };
+
+extern f32 D_0024E66C;
+s32 func_001C8010(Self_1E8D58* self);
+
+s32 func_001E8D58(Self_1E8D58* self)
+{
+    s32 a1;
+    if (self->vC5C <= 0) {
+        self->fBFC = D_0024E66C;
+    }
+    a1 = self->v724;
+    if (a1 == 10) {
+        a1 = (self->v7E0 == 0) ? 8 : 10;
+    } else {
+        a1 = func_001C8010(self);
+    }
+    return a1;
+}

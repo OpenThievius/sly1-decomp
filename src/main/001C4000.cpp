@@ -651,3 +651,107 @@ void func_001C7AE0(Obj_1C7AE0* self, f32 x, f32 y)
         func_00188850(D_00248D20, x, (u8*)self + 0x660);
     }
 }
+
+void func_001B93D8(void);
+
+void func_001C49C8(void)
+{
+    func_001B93D8();
+}
+
+struct Self_1C7468 {
+    u8 pad0[0x724];
+    s32 mode724;
+    u8 pad1[0xB0C - 0x728];
+    void* pB0C;
+};
+
+struct Obj_1C7468 {
+    u8 pad0[0x538];
+    u64 flags538;
+};
+
+s32 func_001B8A08(Self_1C7468* self, Obj_1C7468* obj);
+s32 func_001A8820(void* p, Obj_1C7468* obj);
+
+s32 func_001C7468(Self_1C7468* self, Obj_1C7468* obj)
+{
+    if (func_001B8A08(self, obj) != 0) {
+        return 1;
+    }
+    if (self->pB0C != 0) {
+        if (func_001A8820(self->pB0C, obj) != 0) {
+            return 1;
+        }
+    }
+    if (self->mode724 == 0xB) {
+        if ((obj->flags538 & ((u64)1 << 55)) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+struct Tbl_1C53B0 { u8 pad[0]; };
+
+extern u8 D_00248D20[];
+void func_00188850(Tbl_1C53B0* t, f32 x, void* p);
+
+void func_001C53B0(u8* self)
+{
+    func_00188850((Tbl_1C53B0*)D_00248D20, *(f32*)(self + 0x638), self + 0x660);
+}
+
+extern f32 D_0024D654;
+
+struct Obj_001C7520;
+
+struct Obj_001C7520 {
+    u8 pad0[0x720];
+    Obj_001C7520* f720;
+    u8 pad1[0x72C - 0x724];
+    s32 f72C;
+    u8 pad2[0x748 - 0x730];
+    s32 f748;
+    u8 pad3[0x754 - 0x74C];
+    Obj_001C7520* f754;
+    u8 pad4[0x7E0 - 0x758];
+    Obj_001C7520* f7E0;
+    u8 pad5[0xA60 - 0x7E4];
+    s32 fA60;
+    u8 pad6[0xBA4 - 0xA64];
+    s32 fBA4;
+    u8 pad7[0xBF4 - 0xBA8];
+    f32 fBF4;
+    f32 fBF8;
+    f32 fBFC;
+    f32 fC00;
+};
+
+void func_00192850(Obj_001C7520* self);
+void func_0012E760(Obj_001C7520* obj);
+void func_001CB6F8(Obj_001C7520* a, Obj_001C7520* b);
+
+void func_001C7520(Obj_001C7520* self)
+{
+    func_00192850(self);
+    if (self->f7E0 != 0) {
+        func_0012E760(self->f7E0);
+        self->f7E0 = 0;
+    }
+    if (self->f754 != 0) {
+        func_0012E760(self->f754);
+        self->f754 = 0;
+    }
+    if (self->f720 != 0) {
+        func_001CB6F8(self->f720, self);
+    }
+    self->f72C = 0;
+    self->fA60 = 0;
+    self->f748 = 0;
+    self->fBA4 = 0;
+    self->fBF4 = D_0024D654;
+    self->fBF8 = D_0024D654;
+    self->fBFC = D_0024D654;
+    self->fC00 = D_0024D654;
+}

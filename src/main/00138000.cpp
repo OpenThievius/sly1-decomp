@@ -690,3 +690,163 @@ void func_00139EC8(void* self)
     func_001243E0(self);
     *(s32*)&D_0027B314 = fr.prev;
 }
+
+// NEAR: frame and loop shape right; retail tests the call condition as a 0/1 value (li a0,1 / beqzl) and orders registers differently
+
+struct Sub_13B430 { u8 pad0[0xC]; s32 next_0C; };
+struct Node_13B430 { u8 pad0[0x380]; Sub_13B430* sub_380; u8 pad1[0x630 - 0x384]; Node_13B430* next_630; };
+struct Root_13B430 { u8 pad0[0x1CB4]; Node_13B430* first_1CB4; };
+
+extern u8* D_00275710;
+
+void func_0013A008(Node_13B430* node);
+
+void func_0013B430(s32 mask)
+{
+    Node_13B430* node;
+    s32 v;
+    s32 go;
+    s32 scratch[4];
+
+    (void)scratch;
+    if (mask != 0) {
+        node = ((Root_13B430*)D_00275710)->first_1CB4;
+        if (node != 0) {
+            do {
+                v = node->sub_380->next_0C;
+                go = 0;
+                if ((v & 0x10000000) != 0 || (mask & v) == mask) {
+                    go = 1;
+                }
+                if (go) {
+                    func_0013A008(node);
+                }
+                node = node->next_630;
+            } while (node != 0);
+        }
+    }
+}
+
+struct Obj_138F28;
+typedef s32 (*Probe_138F28)(Obj_138F28* self, Obj_138F28* other);
+struct Vt_138F28 { u8 pad0[0xF0]; Probe_138F28 probe; };
+struct Obj_138F28 { Vt_138F28* vt; u8 pad0[0x480 - 4]; s32 f480; u8 pad1[0x4B8 - 0x484]; s32 f4B8; };
+struct Node_138F28 { u8 pad0[4]; Obj_138F28* obj; Node_138F28* next; };
+struct Self_138F28 { u8 pad0[0x1AE8]; Node_138F28* head; };
+
+void func_001385A0(Self_138F28* a0, s32 a1, Node_138F28* a2, s32 a3, s32 a4);
+
+void func_00138F28(Self_138F28* self, Obj_138F28* obj)
+{
+    obj->f4B8 = 0;
+    Node_138F28* n = self->head;
+    while (n != 0) {
+        if (n->obj != obj) {
+            s32 s2 = 0;
+            if (obj->vt->probe(obj, n->obj) || n->obj->vt->probe(n->obj, obj)) {
+                s2 = 1;
+            }
+            func_001385A0(self, obj->f480, n, s2 == 0 ? 8 : 0, s2 ? 8 : 0);
+        }
+        n = n->next;
+    }
+}
+
+struct Quad_13B4C0 { s32 a, b, c, d; } __attribute__((aligned(16)));
+struct Pair_13B4C0 { s32 a, b; };
+struct Obj_13B4C0 {
+    u8 p0[0x550];
+    s32 f550;
+    f32 f554;
+    u8 p1[4];
+    f32 f55C;
+    f32 f560;
+    u8 p2[0x568 - 0x564];
+    f32 f568;
+    Pair_13B4C0 f56C;
+    f32 f574;
+    u8 p3[0x5D0 - 0x578];
+    Quad_13B4C0 f5D0;
+    Pair_13B4C0 f5E0;
+    u8 p4[0x5F0 - 0x5E8];
+    Quad_13B4C0 f5F0;
+    Pair_13B4C0 f600;
+    u8 p5[0x674 - 0x608];
+    s32 f674;
+    s32 f678;
+    s32 f67C;
+};
+
+void func_001B7968(Obj_13B4C0* self);
+
+extern f32 D_00249D74;
+extern u8 D_00261320[];
+extern u8 D_00261330[];
+extern u8 D_00261340[];
+extern u8 D_00261350[];
+extern u8 D_00261358[];
+
+void func_0013B4C0(Obj_13B4C0* self)
+{
+    func_001B7968(self);
+    self->f554 = D_00249D74;
+    self->f55C = 200.0f;
+    self->f560 = 200.0f;
+    self->f550 = 0;
+    self->f56C = *(Pair_13B4C0*)D_00261320;
+    self->f568 = 800.0f;
+    self->f574 = 5000.0f;
+    self->f5D0 = *(Quad_13B4C0*)D_00261330;
+    self->f5E0 = *(Pair_13B4C0*)D_00261350;
+    self->f5F0 = *(Quad_13B4C0*)D_00261340;
+    self->f600 = *(Pair_13B4C0*)D_00261358;
+    self->f674 = 1;
+    self->f678 = 1;
+    self->f67C = 0;
+}
+
+struct Ent_1385A0 { u8 pad[0x538]; u64 flags; };
+struct Link_1385A0 { s32 f0; s32 f4; Link_1385A0* f8; Ent_1385A0* fC; };
+struct World_1385A0 { u8 pad[0x1ADC]; u8* grid; s32 base; u8 pad2[8]; };
+
+Link_1385A0* func_00138738(World_1385A0* w, s32 a, s32 b);
+Link_1385A0* func_00138788(World_1385A0* w, s32 a, s32 b);
+void func_001861E8(World_1385A0* w, s32 a);
+void func_00129DF8(Ent_1385A0* e);
+void func_001B5F28(u8* w, Link_1385A0* l);
+
+void func_001385A0(World_1385A0* w, s32 a, s32 b, u8 set, u8 clr) {
+    Link_1385A0* n1;
+    Link_1385A0* n2;
+    s32 ia = (a - w->base) >> 4;
+    s32 ib = (b - w->base) >> 4;
+    u8* p = w->grid + (ia << 8) + ib;
+    u8* q = w->grid + (ib << 8) + ia;
+    u8 v = (set | *p) & ~clr;
+    *q = v;
+    *p = v;
+    if ((v & 0xF) == 0xF || (v & 0x40)) {
+        if (v & 0x80) return;
+        u8 v2 = v | 0x80;
+        *p = v2;
+        *q = v2;
+        n1 = func_00138738(w, a, b);
+        n2 = func_00138738(w, b, a);
+        n1->f8 = n2;
+        n2->f8 = n1;
+    } else if (v & 0x80) {
+        u8 v2 = v & 0x7F;
+        *p = v2;
+        *q = v2;
+        n1 = func_00138788(w, a, b);
+        n2 = func_00138788(w, b, a);
+        if (n1->f0) {
+            u64 m = (u64)0x8000 << 40;
+            func_001861E8(w, n1->f0);
+            if (!(n1->fC->flags & m)) func_00129DF8(n1->fC);
+            if (!(n2->fC->flags & m)) func_00129DF8(n2->fC);
+        }
+        func_001B5F28((u8*)w + 0x1AF0, n1);
+        func_001B5F28((u8*)w + 0x1AF0, n2);
+    }
+}

@@ -61,6 +61,7 @@ void func_001885E0(Vec4Init_1885E0* self)
     self->f14 = 1.0f;
     self->f00 = 1.0f;
 }
+
 struct Quad_188770 { f32 f[4]; } __attribute__((aligned(16)));
 
 void func_00188770(Quad_188770* src, Quad_188770* dst)
@@ -78,7 +79,6 @@ void func_00188770(Quad_188770* src, Quad_188770* dst)
         }
     }
 }
-
 
 void func_00188810(f32* a, f32* b, f32* out)
 {
@@ -274,6 +274,7 @@ void func_0018ACF0(Self_18ACF0* self)
     else
         D_0026E248.vtbl[15](&D_0026E248);
 }
+
 extern void func_001C9008(void*);
 extern void func_001B64D8(s32, s32);
 
@@ -289,7 +290,6 @@ void func_0018B2E8(State_0018B2E8* self)
         self->token = -1;
     }
 }
-
 
 void func_0018B580(void)
 {
@@ -428,7 +428,6 @@ s32 func_0018B930(s32 value)
     default: return 31;
     }
 }
-
 
 s32 func_0018BC90(void* a0, void* a1, s32* a2)
 {
@@ -759,4 +758,33 @@ s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f)
         }
     }
     return best;
+}
+
+struct __attribute__((aligned(16))) Quad_1884C0 { s32 a, b, c, d; };
+struct Obj_1884C0 {
+    u8 pad0[0xC];  s32 f0C;
+    u8 pad1[0xC];  s32 f1C;
+    u8 pad2[0xC];  s32 f2C;
+    Quad_1884C0 q30;
+};
+
+extern u8 D_0024B260[];
+
+void func_001884C0(Obj_1884C0* self)
+{
+    self->f0C = 0;
+    self->f1C = 0;
+    self->f2C = 0;
+    self->q30 = *(Quad_1884C0*)D_0024B260;
+}
+
+struct Obj_189350;
+
+void func_00189C28(Obj_189350* self, void* table, void* value);
+
+extern u8 D_00248D20[];
+
+void func_00189350(Obj_189350* self, void* value)
+{
+    func_00189C28(self, D_00248D20, value);
 }

@@ -514,3 +514,86 @@ void func_00185758(s32 a, s32 b)
         D_002622CC++;
     }
 }
+
+struct Frame_185B38 { s32 w[28]; };
+typedef void (*Fn_185B38)(void);
+
+extern u8 D_002647C0[];
+
+s32 func_00193210(void* a, void* b, void* c, void* d, void* e);
+void func_00191E70(s32 value);
+void func_00193270(void* p);
+void func_00193288(void* self, s32 value);
+void func_00193300(void* p);
+void func_00191EB0(s32 value);
+
+void func_00185B38(void)
+{
+    Frame_185B38 fr;
+    u32 i;
+    s32 idx;
+    Fn_185B38* tbl;
+
+    fr.w[12] = 0x7F0000;
+    fr.w[16] = 0x3F3F3F;
+    fr.w[20] = 0x3F3F;
+    fr.w[24] = 0x3F;
+    (void)func_00193210(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
+    idx = 0x1A;
+    func_00191E70(1);
+    func_00193270(&fr);
+    tbl = (Fn_185B38*)D_002647C0;
+    i = 0;
+    do {
+        if ((s32)i >= 3) {
+            func_00193288(&fr, idx);
+        }
+        tbl[i]();
+        i++;
+        idx--;
+    } while (i < 0x1D);
+    func_00193288(&fr, 0);
+    func_00193300(&fr);
+    func_00191EB0(1);
+}
+
+struct Obj_185468 {
+    u8 pad_00[0x1C];
+    s32 f1C;
+    u8 pad_20[0x4];
+    s32 f24;
+};
+
+s32 func_001925F0(void);
+
+s32 func_00185468(Obj_185468* a0) {
+    if (a0->f1C == 0) {
+        return func_001925F0();
+    }
+    return a0->f24;
+}
+
+struct __attribute__((aligned(16))) Quad_001853F0 { s32 w[4]; };
+struct Node_001853F0 {
+    u8 pad0[0x1C];
+    s32 f1C;
+    u8 pad1[0x04];
+    void* p24;
+    u8 pad2[0x08];
+    Quad_001853F0 q30;
+};
+
+extern Quad_001853F0 D_00248D30;
+
+void func_001853F0(Node_001853F0* self, void* obj, Quad_001853F0* src)
+{
+    if (obj == 0 || obj == (void*)func_001925F0()) {
+        self->f1C = 0;
+        self->p24 = 0;
+        self->q30 = D_00248D30;
+    } else {
+        self->p24 = obj;
+        self->f1C = 1;
+        self->q30 = *src;
+    }
+}

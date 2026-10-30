@@ -931,3 +931,163 @@ void func_001BD790(Obj_1BD790* obj, s32 mode)
         obj->flags = ((obj->flags & ~((u64)1 << 54)) | (bit0 << 54)) & ~((u64)1 << 55) | (bit1 << 55);
     }
 }
+
+extern u8 D_0027B314[];
+extern f32 D_00261858[];
+
+struct Frame_1BDD00 { s32 list; s32 cursor; s32 link; s32 prev; };
+struct Cnt_1BDD00 { s32 pad; s32 n1; s32 n2; };
+struct Cls_1BDD00;
+struct Node_1BDD00;
+typedef void (*VFn_1BDD00)(Node_1BDD00* self, s32 a, f32 f);
+struct Cls_1BDD00 {
+    u8 pad0[8];
+    s32 flags;
+    u8 pad0C[0x70];
+    VFn_1BDD00 fn7C;
+};
+struct Node_1BDD00 {
+    Cls_1BDD00* cls;
+    u8 pad4[0x224];
+    s32 f228;
+    u8 pad22C[0x30C];
+    u64 flags538;
+};
+struct Obj_1BDD00 {
+    u8 pad0[0x38];
+    s32 count;
+    s32 head3C;
+    u8 pad40[0x20];
+    s32 list60;
+    u8 pad64[8];
+    Node_1BDD00* head6C;
+};
+struct Item_1BDD00 {
+    u8 pad0[0x414];
+    Item_1BDD00* next;
+};
+
+void func_0018D608();
+void func_0018D6F0();
+void func_001F6C20(s32 a);
+void func_001BD678(Node_1BDD00* n, s32* c1, Node_1BDD00** a1, s32* c2, Node_1BDD00** a2);
+void func_001BDA50(Obj_1BDD00* ctx, s32 n, Node_1BDD00** arr, f32 f, s32 flags);
+s32 func_00129D70(Node_1BDD00* n);
+void func_00129DF8(Node_1BDD00* n);
+
+void func_001BDD00(Obj_1BDD00* self, s32 flags, f32 f)
+{
+    Frame_1BDD00 fr;
+    Cnt_1BDD00 c;
+    Node_1BDD00** arr1;
+    Node_1BDD00** arr2;
+    s32 j;
+    s32 i;
+    Node_1BDD00* s;
+    func_0018D608();
+    arr1 = (Node_1BDD00**)func_0018D658(self->count * 4);
+    c.n1 = 0;
+    arr2 = (Node_1BDD00**)func_0018D658(self->count * 4);
+    c.n2 = 0;
+    func_001F6C20(0);
+    if (flags & 1) {
+        s32 e = (s32)&self->list60;
+        fr.cursor = e;
+        fr.list = e;
+        s32 old = *(s32*)D_0027B314;
+        s32 link = *(s32*)(e + 8);
+        *(s32*)D_0027B314 = (s32)&fr;
+        fr.prev = old;
+        s32 h = *(s32*)e;
+        fr.link = link;
+        fr.cursor = h + link;
+        s32 p = h;
+        while (p != 0) {
+            Node_1BDD00* node = (Node_1BDD00*)p;
+            if (!(node->cls->flags & 2) || (node->flags538 & (1ULL << 55))) {
+                if (node->f228 < 2) {
+                    node->cls->fn7C(node, 0, D_00261858[2]);
+                }
+            }
+            s32 nx = *(s32*)fr.cursor;
+            fr.cursor = nx + fr.link;
+            p = nx;
+        }
+        *(s32*)D_0027B314 = fr.prev;
+    }
+    for (s = self->head6C; s != 0; s = (Node_1BDD00*)((Item_1BDD00*)s)->next) {
+        if (s->flags538 & (1ULL << 57)) continue;
+        if (s->flags538 & (1ULL << 55)) continue;
+        func_001BD678(s, &c.n1, arr1, &c.n2, arr2);
+        if (flags & 1) {
+            for (i = 0; i < c.n1; i++) {
+                if (arr1[i]->f228 < 2) break;
+            }
+            if (i >= c.n1) {
+                for (j = 0; j < c.n2; j++) {
+                    if (arr2[j]->f228 < 2) break;
+                }
+                if (j >= c.n2) continue;
+            }
+            for (i = 0; i < c.n1; i++) {
+                arr1[i]->cls->fn7C(arr1[i], 0, D_00261858[2]);
+            }
+        }
+        func_001BDA50(self, c.n1, arr1, f, flags);
+        for (i = 0; i < c.n1; i++) {
+            if (!func_00129D70(arr1[i])) {
+                func_00129DF8(arr1[i]);
+            }
+        }
+    }
+    for (s = (Node_1BDD00*)self->head3C; s != 0; s = *(Node_1BDD00**)((u8*)s + 0x2D0)) {
+        s->flags538 &= ~(1ULL << 57);
+    }
+    func_0018D6F0();
+}
+
+extern s32 D_00274744;
+extern s32 D_0027472C;
+extern s32 D_00274730;
+
+void func_0011E0B0(s32 a0);
+
+s32 func_001BE810(void)
+{
+    if (D_00274744 != 0)
+        return 0;
+    if (D_0027472C != 0) {
+        if (D_00274730 != 0)
+            return 1;
+        func_0011E0B0(D_0027472C);
+    }
+    return 0;
+}
+
+struct Ent_1BE4A8 { u8 pad[0]; };
+
+extern u8 D_00245020[];
+void func_001BE268(Ent_1BE4A8* e);
+
+void func_001BE4A8(s32 idx)
+{
+    func_001BE268(*(Ent_1BE4A8**)(D_00245020 + idx * 8));
+}
+
+struct Sel_1BE568;
+struct Pair_1BE568 { s32 key; s32 w4; };
+
+extern u8 D_00245020[];
+extern u8 D_006047B0[];
+extern u8 D_006047D0[];
+void func_001BE4A8(Sel_1BE568* self);
+
+s32 func_001BE568(s32 idx)
+{
+    Pair_1BE568* p = (Pair_1BE568*)D_00245020 + idx;
+
+    if (((s32*)D_006047B0)[p->key] == 0) {
+        func_001BE4A8((Sel_1BE568*)idx);
+    }
+    return ((s32*)D_006047D0)[idx];
+}

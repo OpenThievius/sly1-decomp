@@ -226,36 +226,30 @@ void func_0017CE20(void* a0, void* a1)
     }
 }
 
-
 void* func_0017CFC8(void* self, s32 b)
 {
     return func_0017CF38(self, 0, b, 1);
 }
-
 
 void* func_0017CFF0(void* self, s32 b)
 {
     return func_0017CF38(self, 1, b, 1);
 }
 
-
 void* func_0017D018(void* self, s32 b)
 {
     return func_0017CF38(self, 10, b, 1);
 }
-
 
 void* func_0017D078(void* self, s32 value)
 {
     return func_0017CF38(self, 3, value, 1);
 }
 
-
 void* func_0017D0D8(void* self, s32 value, s32 c)
 {
     return func_0017CF38(self, 9, value, c);
 }
-
 
 struct Obj_17D100 {
     u8 pad0[0xC];
@@ -269,7 +263,6 @@ void func_0017D100(void* self, s32 b, s32 c, s32 d, s32 e)
     o->fC = c;
     o->f10 = d;
 }
-
 
 struct Obj_17D1B8 {
     u8 pad0[0xC];

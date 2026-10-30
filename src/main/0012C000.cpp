@@ -606,3 +606,346 @@ void* func_0012CCE8(Table_12CCE8* self, void* key)
     }
     return 0;
 }
+
+struct Set_12FA88 {
+    u8 pad0[0x550];
+    s32 flag550;
+    s32 count554;
+    s32 items558[4];
+    s32 count568;
+    s32 items56C[1];
+};
+
+s32 func_001B8A08(void* self, void* key);
+s32 func_001833F0(void* key, s32 item);
+s32 func_001300E8(void* key, s32 kind);
+
+s32 func_0012FA88(Set_12FA88* self, void* key)
+{
+    s32 hit;
+    s32 i;
+    s32 j;
+
+    if (func_001B8A08(self, key) != 0) {
+        return 1;
+    }
+    for (i = 0; i < self->count554; i++) {
+        if (func_001833F0(key, self->items558[i]) != 0) {
+            break;
+        }
+    }
+    if (i < self->count554) {
+        hit = 1;
+        goto tail;
+    }
+    for (j = 0; j < self->count568; j++) {
+        if (func_001300E8(key, self->items56C[j]) != 0) {
+            break;
+        }
+    }
+    hit = j < self->count568;
+tail:
+    if (self->flag550 != 0) {
+        return hit;
+    }
+    return hit ^ 1;
+}
+
+struct Ref_0012FDA0;
+
+struct Obj_0012FDA0 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fc;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    s32 f24;
+    s32 f28;
+};
+
+void func_0012FE70(Ref_0012FDA0 *self);
+
+s32 func_0012FDA0(Obj_0012FDA0 *self, s32 a1, s32 a2) {
+    self->f8 = a1;
+    s32 t = self->f14;
+    self->f28 = a2;
+    self->f24 = a2;
+    self->f0 = 1;
+    self->f1C = t;
+    self->f18 = 0;
+    self->f20 = 0;
+    func_0012FE70((Ref_0012FDA0 *)self);
+    return 1;
+}
+
+struct Obj_12FFE8 {
+    s32 f0;
+    u8 pad4[4];
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    u8 pad14[4];
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    s32 f24;
+};
+
+s32 func_0012FF20(Obj_12FFE8* a0);
+
+void func_0012FFE8(Obj_12FFE8* self)
+{
+    if (func_0012FF20(self) == 0) {
+        return;
+    }
+    if (self->f0 == 1) {
+        self->f8 += self->fC / 2048;
+    }
+    s32 v = self->fC;
+    self->f24 -= v;
+    self->f18 = v;
+    self->f1C = self->f10;
+    self->fC = 0;
+    self->f10 = 0;
+    self->f20 = 0;
+}
+
+struct Pool_12D3F8 { u8 pad[4]; };
+struct Obj_12D3F8 { void* vt; u8 pad[0x5C]; };
+struct Buf_12D3F8 { u8 pad[4]; };
+extern u8 D_002197B8[];
+void* func_001B5EE0(Pool_12D3F8* pool);
+void func_00152438(Buf_12D3F8* self, s32 value);
+
+Obj_12D3F8* func_0012D3F8(Pool_12D3F8* pool)
+{
+    Obj_12D3F8* o = (Obj_12D3F8*)func_001B5EE0((Pool_12D3F8*)((u8*)pool + 0x1B58));
+    o->vt = D_002197B8;
+    func_00152438((Buf_12D3F8*)((u8*)o + 0x44), 0x20);
+    *(void**)((u8*)o + 0x60) = (u8*)o + 0x64;
+    return o;
+}
+
+struct Quad_12F9B8 { s32 a, b, c, d; };
+struct Mobj_12F9B8;
+struct Vt_12F9B8 {
+    u8 p0[0x84];
+    void (*m84)(Mobj_12F9B8* self, void* a);
+    u8 p1[0x90 - 0x88];
+    void (*m90)(Mobj_12F9B8* self, void* a);
+    void (*m94)(Mobj_12F9B8* self, void* a);
+};
+struct Mobj_12F9B8 { Vt_12F9B8* vt; };
+struct Node_12F9B8 { u8 p0[0x18]; Mobj_12F9B8* f18; };
+struct Obj_12F9B8 {
+    u8 p0[0x580];
+    s32 f580;
+    u8 p1[0x590 - 0x584];
+    Node_12F9B8* f590;
+    u8 p2[0x5A0 - 0x594];
+    Mobj_12F9B8* f5A0;
+    Mobj_12F9B8* f5A4;
+};
+
+void func_001B93F8(Obj_12F9B8* self);
+void func_00128018(Mobj_12F9B8* a, s32 b, void* c, Quad_12F9B8* d);
+
+extern u8 D_00248D30[];
+
+void func_0012F9B8(Obj_12F9B8* self)
+{
+    Quad_12F9B8 loc;
+    Mobj_12F9B8* cur;
+    func_001B93F8(self);
+    if (self->f5A0 != 0) {
+        self->f5A0->vt->m90(self->f5A0, D_00248D30);
+        self->f5A0->vt->m94(self->f5A0, D_00248D30);
+        switch (self->f580) {
+        case 1:
+            self->f5A0->vt->m84(self->f5A0, &self->f590);
+            break;
+        case 2: {
+            Node_12F9B8* node = self->f590;
+            func_00128018(node->f18, 0, (u8*)node + 0x40, &loc);
+            self->f5A0->vt->m84(self->f5A0, &loc);
+            break;
+        }
+        }
+        cur = self->f5A0;
+        self->f5A0 = 0;
+        self->f5A4 = cur;
+    }
+}
+
+struct Item_12E760 { s32 w[4]; };
+struct Sub_12E760 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad1[0x38];
+    s32 f50;
+    u8 pad54[0x10];
+    s32 cnt64;
+    Item_12E760* f68;
+    u8 f6C[1];
+};
+struct Vt_12E760 { void* pad[2]; void (*fn8)(void* self, s32 a); };
+struct Elem_12E760 { Vt_12E760* vt; };
+struct Obj_12E760 {
+    u8 pad0[8];
+    Sub_12E760* f8;
+    u8 padC[0x38];
+    s32 f44;
+    u8 pad48[8];
+    s32 f50;
+    u8 pad54[0x90];
+    s32 fE4;
+};
+struct Frame_12E760 { s32 f00; s32 f04; s32 f08; s32 f0C; };
+struct Tmp_12E760 { s32 a; s32 b; };
+
+extern u8 D_0027B314[];
+void func_0012D5D0(Obj_12E760* self, Item_12E760* item, Tmp_12E760* out);
+void func_0012F760(Obj_12E760* self, s32 a, Obj_12E760* b);
+void func_001DBC18(u8* self, s32 node);
+void func_0015F9A0(u8* a, Obj_12E760* s);
+void func_0012D448(Obj_12E760* self, s32 v);
+void func_001DBD40(u8* a, s32 b, s32 c, Obj_12E760* d, s32 e, s32 f);
+void func_00152600(u8* a, Obj_12E760* b);
+void func_00152470(u8* a, Obj_12E760* b);
+void func_001BF718(s32* slot);
+void func_001837E0(Sub_12E760* self, s32 a, s32 b, s32* c);
+
+void func_0012E760(Obj_12E760* self)
+{
+    Frame_12E760 fr;
+    Tmp_12E760 tmp;
+    s32 i = 0;
+    Sub_12E760* sub = self->f8;
+    u8* base = sub->f14;
+    for (i = 0; i < sub->cnt64; i++) {
+        Item_12E760* it = (Item_12E760*)((u8*)sub->f68 + i * 16);
+        tmp.a = 0;
+        func_0012D5D0(self, it, &tmp);
+    }
+    func_0012F760(self, 6, self);
+    func_001DBC18(base, self->fE4);
+    self->fE4 = 0;
+    func_0015F9A0(base, (Obj_12E760*)((u8*)self + 0x54));
+    func_0012D448(self, 0);
+    func_001DBD40(base, 2, 0, self, -1, 0);
+    func_00152600(sub->f6C, self);
+    if (sub->f50 != 0) {
+        func_00152600(base + 0x1B70, self);
+    } else {
+        func_00152600(base + 0x1B64, self);
+    }
+    func_00152470(base + 0x1B7C, self);
+    s32 s0 = (s32)self + 0xC;
+    s32 e = (s32)self + 0x44;
+    fr.f04 = e;
+    fr.f00 = e;
+    s32 link = *(s32*)(e + 8);
+    fr.f0C = *(s32*)D_0027B314;
+    *(s32*)D_0027B314 = (s32)&fr;
+    fr.f08 = link;
+    s32 head = *(s32*)e;
+    fr.f04 = head + fr.f08;
+    s32 a = head;
+    if (a != 0) {
+        do {
+            Elem_12E760* el = (Elem_12E760*)a;
+            el->vt->fn8(el, 7);
+            s32 nx = *(s32*)fr.f04;
+            fr.f04 = nx + fr.f08;
+            a = nx;
+        } while (a != 0);
+    }
+    if (self->f50 != 0)
+        func_001BF718(&self->f50);
+    tmp.b = s0;
+    func_001837E0(sub, 0xB, 1, &tmp.b);
+    *(s32*)D_0027B314 = fr.f0C;
+}
+
+struct Lim_12E9E0 {
+    u8 pad0[0x34];
+    f32 lim;
+    u8 pad1[0xC];
+    s32 mode;
+};
+struct Obj_12E9E0 {
+    u8 pad0[8];
+    Lim_12E9E0* l;
+};
+
+f32 func_002058A0(f32 a, f32 b);
+f32 func_001EAFE0(f32 a, f32 b);
+
+s32 func_0012E9E0(Obj_12E9E0* o, f32* pos, f32* vel)
+{
+    s32 r = 0;
+    Lim_12E9E0* l = o->l;
+    f32 x = *pos;
+    f32 lim = l->lim;
+    if (lim <= x) {
+        switch (l->mode) {
+        case 0:
+            if (lim < x) {
+                *pos = lim;
+                *vel = 0.0f;
+            }
+            break;
+        case 1:
+            *pos = func_002058A0(x, lim);
+            break;
+        case 2: {
+            f32 d = lim + lim;
+            s32 flag = 1;
+            if (d <= x) {
+                *pos = func_002058A0(x, d);
+                if (*pos < l->lim) flag = 0;
+                *vel = __builtin_fabsf(*vel);
+            }
+            if (flag) {
+                *pos = d - *pos;
+                *vel = -*vel;
+            }
+            break;
+        }
+        }
+        r = 1;
+    } else if (x < 0.0f) {
+        switch (l->mode) {
+        case 0:
+            *pos = 0.0f;
+            *vel = 0.0f;
+            break;
+        case 1:
+            *pos = func_001EAFE0(x, lim);
+            break;
+        case 2: {
+            x = -x;
+            if (x <= lim) {
+                *pos = x;
+                *vel = -*vel;
+            } else {
+                f32 d = lim + lim;
+                *vel = __builtin_fabsf(*vel);
+                f32 q = func_001EAFE0(*pos, d);
+                *pos = q;
+                if (l->lim <= q) {
+                    *pos = d - q;
+                    *vel = -*vel;
+                }
+            }
+            break;
+        }
+        }
+        r = 1;
+    }
+    return r;
+}

@@ -886,3 +886,79 @@ void func_0017B710(Obj_0017B710* self)
     if (busy) ((Mgr_0017B710*)D_0026E248)->vtbl[0x38 / 4](D_0026E248);
     else ((Mgr_0017B710*)D_0026E248)->vtbl[0x3C / 4](D_0026E248);
 }
+
+struct Obj_17A788 {
+    u8 pad0[0x2C8];
+    u64 f2C8;
+    u8 pad1[0x610 - 0x2D0];
+    s32 f610;
+    u8 pad2[0x6D0 - 0x614];
+    s32 f6D0;
+    f32 f6D4;
+    f32 f6D8;
+};
+
+struct Rgba_17A788 {
+    u8 r, g, b, a;
+};
+
+extern f32 D_00261858[];
+extern f32 D_00263D30[];
+extern f32 D_00263D40[];
+extern f32 D_00275C60[];
+extern Rgba_17A788 D_002623E0;
+
+f32 func_00205210(f32 x);
+void func_00126A48(Obj_17A788* o, u32 value);
+void func_00125C90(Obj_17A788* o, void* s, void* out);
+
+void func_0017A788(Obj_17A788* self, void* s, void* out)
+{
+    Rgba_17A788 res;
+    f32 t;
+    f32 u;
+    f32 a;
+    f32 b;
+    f32 k;
+    f32 c1;
+    f32 lo;
+    f32 hi;
+    u8 col[4];
+
+    if ((self->f2C8 & 0x100000000ULL) != 0) return;
+    *(u32*)col = 0x800000A0;
+    if (self->f6D0 != 0) {
+        if (self->f610 != 3) {
+            t = (D_00261858[1] - self->f6D8) * 0.5f;
+        } else {
+            t = 0.0f;
+        }
+        u = func_00205210((D_00261858[1] - self->f6D4) * 10.0f);
+        a = D_00263D30[0] + t * (D_00263D30[1] + t * D_00263D30[2]);
+        hi = D_00275C60[1];
+        if (a < D_00275C60[0]) {
+            c1 = D_00275C60[0];
+        } else if (hi < a) {
+            c1 = hi;
+        } else {
+            c1 = a;
+        }
+        b = D_00263D40[0] + u * (D_00263D40[1] + u * D_00263D40[2]);
+        lo = D_00275C60[0];
+        hi = D_00275C60[1];
+        if (b < lo) {
+            b = lo;
+        } else if (hi < b) {
+            b = hi;
+        }
+        k = c1 * b;
+        res.r = (s32)((1.0f - k) * D_002623E0.r + k * col[0]);
+        res.g = (s32)((1.0f - k) * D_002623E0.g + k * col[1]);
+        res.b = (s32)((1.0f - k) * D_002623E0.b + k * col[2]);
+        res.a = D_002623E0.a;
+    } else {
+        res = D_002623E0;
+    }
+    func_00126A48(self, *(u32*)&res);
+    func_00125C90(self, s, out);
+}

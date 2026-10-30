@@ -746,3 +746,141 @@ s32 func_001B9FB0(Self_1B9FB0* self, void* other)
     }
     return 0;
 }
+
+// Matched by indexing the end as (u32)e + (i << 6).
+
+struct Obj_1BB9D0;
+struct Edge_1BB9D0 {
+    struct End { Obj_1BB9D0* o; Obj_1BB9D0* other; u8 pad[0x38]; } e[2];
+    u8 pad80[0x50];
+    Edge_1BB9D0* next;
+};
+struct Out_1BB9D0 { Edge_1BB9D0* first; Out_1BB9D0* next; };
+struct OutHead_1BB9D0 { Out_1BB9D0* head; };
+struct Mem_1BB9D0 { Obj_1BB9D0* value; Mem_1BB9D0* next; };
+struct Core_1BB9D0 { u8 pad[0x480]; OutHead_1BB9D0* outs; };
+struct Obj_1BB9D0 {
+    u8 pad0[0x14]; void* pool;
+    u8 pad18[0x38]; Core_1BB9D0* core;
+    u8 pad54[0x4EC]; Mem_1BB9D0* mem;
+};
+
+s32 func_001BB9A0(Mem_1BB9D0* m, Obj_1BB9D0* v);
+void func_001837E0(Obj_1BB9D0* self, s32 a, s32 b, void* c);
+void func_001DC108(void* pool, Mem_1BB9D0* m);
+Mem_1BB9D0* func_001DC0C8(void* pool);
+
+void func_001BB9D0(Obj_1BB9D0* self)
+{
+    Core_1BB9D0* core = self->core;
+    Out_1BB9D0* o;
+    Edge_1BB9D0* e;
+    Mem_1BB9D0* m;
+    Mem_1BB9D0* prev;
+    Obj_1BB9D0* other;
+    void* args;
+    for (o = core->outs->head; o != 0; o = o->next) {
+        for (e = o->first; e != 0; e = e->next) {
+            s32 i = e->e[0].o != (Obj_1BB9D0*)core;
+            if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
+                other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
+                if (!func_001BB9A0(self->mem, other)) {
+                    args = &other;
+                    func_001837E0(self, 6, 1, &args);
+                }
+            }
+        }
+    }
+    for (m = self->mem; m != 0; m = m->next) {
+        s32 found = 0;
+        for (o = core->outs->head; o != 0 && !found; o = o->next) {
+            for (e = o->first; e != 0 && !found; e = e->next) {
+                s32 i = e->e[0].o != (Obj_1BB9D0*)core;
+                if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
+                    other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
+                    if (other == m->value) found = 1;
+                }
+            }
+        }
+        if (!found) {
+            args = m;
+            func_001837E0(self, 7, 1, &args);
+        }
+    }
+    func_001DC108(self->pool, self->mem);
+    self->mem = 0;
+    for (o = core->outs->head; o != 0; o = o->next) {
+        for (e = o->first; e != 0; e = e->next) {
+            s32 i = e->e[0].o != (Obj_1BB9D0*)core;
+            if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
+                other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
+                Mem_1BB9D0* n = func_001DC0C8(self->pool);
+                n->value = other;
+                if (self->mem != 0) prev->next = n; else self->mem = n;
+                prev = n;
+            }
+        }
+    }
+}
+
+struct B8_1BA130 { u8 b[8]; };
+struct B12_1BA130 { u8 b[8]; s32 w; };
+struct Obj_1BA130 {
+    u8 pad0[0x2D0];
+    B8_1BA130 f2D0;
+    B12_1BA130 f2D8;
+    B8_1BA130 f2E4;
+    u8 pad2EC[0x3A4 - 0x2EC];
+    u8 f3A4[0x4C];
+    s32 f3F0[2];
+    u8 pad3F8[0x414 - 0x3F8];
+    B8_1BA130 f414;
+    u8 pad41C[0x480 - 0x41C];
+    s32 f480;
+    u8 pad484[0x4B0 - 0x484];
+    s32 f4B0;
+    u8 pad4B4[4];
+    s32 f4B8;
+    u8 pad4BC[0x4E4 - 0x4BC];
+    s32 f4E4;
+    u8 pad4E8[0x510 - 0x4E8];
+    s32 f510;
+    u8 pad514[0x538 - 0x514];
+    u64 f538;
+    s32 f540;
+};
+
+void func_00127048(Obj_1BA130* self, Obj_1BA130* other);
+void func_001B7C40(Obj_1BA130* self, s32 flag);
+void func_00160EA0(u8* a, s32 b, u8* c);
+void func_0013E6C8(u8* a, u8* b, u8* c, u8* d);
+
+void func_001BA130(Obj_1BA130* self, Obj_1BA130* other)
+{
+    u64 bit = (self->f538 >> 50) & 1;
+    B8_1BA130 a, c, d;
+    B12_1BA130 b;
+    a = self->f2D0;
+    b = self->f2D8;
+    c = self->f2E4;
+    s32 s480 = self->f480;
+    s32 s4E4 = self->f4E4;
+    d = self->f414;
+    func_00127048(self, other);
+    self->f480 = s480;
+    self->f2D0 = a;
+    self->f2D8 = b;
+    self->f2E4 = c;
+    self->f414 = d;
+    self->f4E4 = s4E4;
+    self->f4B0 = 0;
+    self->f4B8 = 0;
+    self->f538 = (self->f538 & 0xFFFBFFFFFFFFFFFFULL) | (bit << 50);
+    func_001B7C40(self, 1);
+    if (*(s32*)(self->f3A4 + 4)) func_00160EA0((u8*)other + 0x3A4, 0, self->f3A4);
+    if (*(s32*)((u8*)self + 0x3F8)) func_0013E6C8((u8*)other + 0x3A4, (u8*)other + 0x3F0, self->f3A4, (u8*)self + 0x3F0);
+    if (self->f510) func_00160EA0((u8*)other + 0x50C, 0, (u8*)self + 0x50C);
+    if ((s32)self->f538) func_0013E6C8((u8*)other + 0x50C, (u8*)other + 0x530, (u8*)self + 0x50C, (u8*)self + 0x530);
+    self->f540 = 0;
+    self->f538 |= 0x20000000000ULL;
+}

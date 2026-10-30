@@ -1019,3 +1019,89 @@ void func_0014ED98(Obj_14ED98* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32
         fn(self, q1, r, q2, q3, q4, q5, q6);
     }
 }
+
+struct Self_14F110 {
+    u8 pad0[0x550];
+    s32 f550;
+    f32 f554;
+    u8 pad1[0xC];
+    f32 f564;
+    u8 pad2[0x14];
+    s32 f57C;
+    s32 f580;
+    s32 f584;
+    s32 f588;
+};
+
+struct Sub_14F110;
+
+extern f32 D_0026185C;
+
+s32 func_00126D60(Sub_14F110* sub, f32 value);
+
+void func_0014F110(Self_14F110* self, s32 state)
+{
+    if (self->f550 != state) {
+        if (self->f550 != 2) {
+            self->f550 = state;
+        } else {
+            self->f57C = 0;
+            self->f580 = 0;
+            self->f584 = 0;
+            self->f588 = 0;
+            self->f550 = state;
+        }
+        self->f554 = D_0026185C;
+        if (state == 5) {
+            (void)func_00126D60((Sub_14F110*)self, self->f564);
+        }
+    }
+}
+
+struct Cfg_14C5E8 { u8 pad0[0x2D0]; s32 f2D0; s32 f2D4; };
+extern u8 D_00261EF0[];
+void func_00151E20(Cfg_14C5E8* self, f32 amount);
+
+void func_0014C5E8(Cfg_14C5E8* self)
+{
+    f32 one = 1.0f;
+    f32 ratio = (f32)self->f2D0 / (f32)self->f2D4;
+    f32 c;
+    if (ratio < 0.0f) {
+        c = 0.0f;
+    } else if (one < ratio) {
+        c = 1.0f;
+    } else {
+        c = ratio;
+    }
+    func_00151E20((Cfg_14C5E8*)D_00261EF0, 1.0f - c * 0.8f);
+}
+
+struct Obj_14D9A8 { void* vt; s32 kind; };
+
+extern u8 D_002176D0[];
+extern u8 D_00217708[];
+
+void* func_0018D5C0(u32 n);
+
+Obj_14D9A8* func_0014D9A8(s32 kind)
+{
+    Obj_14D9A8* p;
+    switch (kind) {
+    case 0:
+        p = (Obj_14D9A8*)func_0018D5C0(0x1C);
+        p->vt = (void*)D_002176D0;
+        break;
+    case 1:
+        p = (Obj_14D9A8*)func_0018D5C0(0x1D0);
+        p->vt = (void*)D_00217708;
+        break;
+    default:
+        p = 0;
+        break;
+    }
+    if (p != 0) {
+        p->kind = kind;
+    }
+    return p;
+}

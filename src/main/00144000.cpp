@@ -479,3 +479,85 @@ void func_001448C8(Obj_1448C8* self, Quad_1448C8* a, Quad_1448C8* b)
     self->f2B0 = zero;
     self->f2B8 = zero;
 }
+
+// NEAR: only a0/a1 saved regs swapped (s0/s1) and the four loads use the other base; stores/frame match
+
+struct __attribute__((aligned(16))) Quad_1442C8 { s32 w[4]; };
+struct Mat_1442C8 { f32 m[16]; };
+
+void func_001885E0(void* self);
+void func_00189AF0(void* a0, void* a1);
+void func_00188668(void* out, void* b, void* in);
+
+void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
+{
+    Mat_1442C8 m;
+    Mat_1442C8 v;
+    Quad_1442C8 r[4];
+    f32* d0;
+    f32* d1;
+    f32* d2;
+    f32* d3;
+    func_001885E0(&m);
+    f32* pb = b;
+    f32* pa = a;
+    d3 = m.m + 12;
+    d2 = m.m + 8;
+    d1 = m.m + 4;
+    d0 = m.m;
+    s32 n = 2;
+    do {
+        n--;
+        f32 w = *pb;
+        f32 x = -pa[4];
+        f32 y = -pa[8];
+        f32 z = pa[0];
+        *d0++ = x;
+        *d1++ = y;
+        *d2++ = z;
+        *d3++ = w;
+        pb++;
+        pa++;
+    } while (n >= 0);
+    func_00189AF0(&m, &v);
+    func_00188668(r, c, &v);
+    out[0] = r[0];
+    out[1] = r[1];
+    out[2] = r[2];
+    out[3] = r[3];
+}
+
+struct Ctx_144938;
+
+void func_00144BE8(Ctx_144938* a, s32 b, void* c, s32 d, s32 e, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, f32 f5);
+
+void func_00144938(Ctx_144938* self, void* p, s32 q)
+{
+    func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+struct __attribute__((aligned(16))) Vec_144B70 {
+    s32 w[4];
+};
+
+struct Eng_144B70 {
+    u8 pad0[0x40];
+    Vec_144B70 f40;
+    u8 pad50[0x2B0 - 0x50];
+    f32 f2B0;
+    f32 f2B4;
+    f32 f2B8;
+    u8 pad2BC[0x2D0 - 0x2BC];
+    Vec_144B70 f2D0;
+};
+
+void func_00144AA0(Vec_144B70* a, Vec_144B70* b, Vec_144B70* out, f32 x, f32 y, f32 z);
+void func_00144978(Vec_144B70* a, Vec_144B70* b, Vec_144B70* out, f32* x, f32* y, f32* z);
+
+void func_00144B70(Eng_144B70* self, Vec_144B70* arg)
+{
+    Vec_144B70 tmp;
+    func_00144AA0(&self->f2D0, &self->f40, &tmp, self->f2B0, self->f2B4, self->f2B8);
+    func_00144978(arg, &self->f40, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
+    self->f2D0 = *arg;
+}

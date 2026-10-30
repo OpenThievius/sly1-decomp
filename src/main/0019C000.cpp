@@ -843,3 +843,99 @@ void func_0019E168(Obj_19E168* self)
     }
     func_001B7B78(self);
 }
+
+struct Stream_19C470;
+struct Tri_19C470 { u8* a; u8* b; u8* c; };
+struct Edge_19C470 { u8* a; u8* b; };
+struct Rec_19C470 { s32 id; u8 pos[96]; };
+struct Obj_19C470 {
+    u8 pad0[0x48];
+    s32 f48;
+    u8 pad1[0xA0 - 0x4C];
+    u8 fA0[4];
+    s32 fA4;
+    u8 padA8[8];
+    u8* fB0;
+    u8 padB4[0xC4 - 0xB4];
+    Rec_19C470* fC4;
+    s32 fC8;
+    u8* fCC;
+    s32 fD0;
+    s32 fD4;
+    Tri_19C470* fD8;
+    Edge_19C470* fDC;
+    f32 fE0;
+};
+
+s32 func_00137D10(Stream_19C470* in);
+void func_00137FB0(Stream_19C470* in, void* p);
+void* func_0018D5C0(s32 n);
+s32 func_00137CC0(Stream_19C470* in);
+void func_0019CD90(Obj_19C470* o, s32 i, f32* x, f32* y, f32* z);
+void func_0019CC10(f32 x, f32 y, f32 z, Obj_19C470* o, void* p);
+f32 func_00137DF8(Stream_19C470* in);
+void func_0011EC40(Obj_19C470* o, Stream_19C470* in);
+
+void func_0019C470(Obj_19C470* o, Stream_19C470* in)
+{
+    {
+        s32 i = 0x17;
+        s32* p = (s32*)((u8*)o + 0xF0);
+        do {
+            i--;
+            *p = func_00137D10(in);
+            p += 8;
+        } while (i >= 0);
+    }
+    s32 i = 0;
+    o->f48 = func_00137D10(in);
+    func_00137FB0(in, o->fA0);
+    o->fC4 = (Rec_19C470*)func_0018D5C0(o->fA4 * 100);
+    for (i = 0; i < o->fA4; i++) {
+        f32 x;
+        f32 y;
+        f32 z;
+        Rec_19C470* r = &o->fC4[i];
+        o->fC4[i].id = func_00137CC0(in);
+        func_0019CD90(o, i, &x, &y, &z);
+        func_0019CC10(x, y, z, o, r->pos);
+    }
+    o->fC8 = func_00137D10(in);
+    o->fCC = (u8*)func_0018D5C0(o->fC8 << 4);
+    for (s32 e = 0; e < o->fC8; e++) {
+        s32* r = (s32*)(o->fCC + (e << 4));
+        s32 j = 3;
+        do {
+            j--;
+            *r = func_00137D10(in);
+            r++;
+        } while (j >= 0);
+    }
+    o->fD0 = o->fD4 = func_00137D10(in);
+    o->fD8 = (Tri_19C470*)func_0018D5C0(o->fD0 * 12);
+    o->fDC = (Edge_19C470*)func_0018D5C0(o->fD0 << 3);
+    for (s32 n = 0; n < o->fD0; n++) {
+        Tri_19C470* t = &o->fD8[n];
+        Edge_19C470* e = &o->fDC[n];
+        s32 a = func_00137D10(in);
+        s32 b = func_00137D10(in);
+        s32 c = func_00137D10(in);
+        t->a = o->fB0 + (a << 5);
+        if (b > 0) {
+            b--;
+            t->b = (u8*)&o->fD8[b];
+        } else if (b < 0) {
+            b = ~b;
+            e->a = o->fCC + (b << 4);
+        }
+        if (c > 0) {
+            c--;
+            t->c = (u8*)&o->fD8[c];
+        } else if (c < 0) {
+            c = ~c;
+            e->b = o->fCC + (c << 4);
+        }
+    }
+    o->fE0 = func_00137DF8(in);
+    func_0011EC40(o, in);
+}

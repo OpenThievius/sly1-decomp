@@ -72,7 +72,9 @@ def placements(objects):
         rel = path.relative_to(ROOT)
         for sec in obj.sections:
             if sec["name"].startswith(DATA_SECTIONS) and sec["size"]:
-                raise LayoutError("%s has %s data (%d bytes): only code can be linked from C for now"
+                raise LayoutError("%s has %s data (%d bytes): only code can be linked from C for now. "
+                                  "A constant retail loads from .rodata is read through an extern "
+                                  "(extern f32 D_00219718[];), not written as a literal"
                                   % (src.relative_to(ROOT), sec["name"], sec["size"]))
         for sym in obj.symbols:
             if sym["type"] != elf.STT_FUNC or sym["shndx"] in (elf.SHN_UNDEF,) or sym["shndx"] >= len(obj.sections):

@@ -909,3 +909,146 @@ f32 func_001D8470(s32 count, Span_1D8470* spans, f32 x)
     }
     return best;
 }
+
+struct Self_1DB4C8 {
+    u8 pad0[0x1AD8];
+    void* f1AD8;
+    void* f1ADC;
+    u8 pad1AE0[0x1D64 - 0x1AE0];
+    u8 f1D64;
+    u8 f1D65;
+    u8 f1D66;
+    u8 pad1D67;
+    f32 f1D68;
+    u8 pad1D6C[4];
+    s32 f1D70;
+    s32 f1D74;
+    u8 pad1D78[0x1ED4 - 0x1D78];
+    void* f1ED4;
+    u8 pad1ED8[0x2308 - 0x1ED8];
+    f32 f2308;
+    f32 f230C;
+    u8 pad2310[0x234C - 0x2310];
+    f32 f234C;
+    f32 f2350;
+    s32 f2354;
+    u8 pad2358[4];
+    s32 f235C;
+};
+struct Sub_1DB4C8 { u8 b; };
+
+extern s32 D_00262C64;
+
+void func_00182C18(Self_1DB4C8* self);
+void func_001C09D8(Self_1DB4C8* self, s32 a, s32 b);
+void* func_0018D5C0(s32 size);
+void func_001DC740(Self_1DB4C8* self);
+void func_001B5DD0(Sub_1DB4C8* p, s32 a, s32 b);
+void func_001B5E30(Sub_1DB4C8* p, s32 a, s32 b);
+void func_00152438(Sub_1DB4C8* p, s32 a);
+void func_001DBA90(Self_1DB4C8* self, f32 x);
+
+#define SUB(off) ((Sub_1DB4C8*)((u8*)self + (off)))
+
+void func_001DB4C8(Self_1DB4C8* self)
+{
+    f32 x;
+    func_00182C18(self);
+    func_001C09D8(self, 0, 0);
+    self->f1AD8 = (void*)func_0018D500(0x4800);
+    self->f1ADC = func_0018D5C0(0x10000);
+    func_001DC740(self);
+    func_001B5DD0(SUB(0x1AF0), 0x10, 0x400);
+    func_001B5DD0(SUB(0x1AFC), 0xE0, 0x100);
+    func_001B5DD0(SUB(0x1B08), 0x10, 0x80);
+    func_001B5DD0(SUB(0x1B14), 0x14, 0x400);
+    func_001B5DD0(SUB(0x1B2C), 0x140, 0x180);
+    func_001B5E30(SUB(0x1B40), 0x10C0, 0x80);
+    func_001B5DD0(SUB(0x1B4C), 0x580, 0x20);
+    func_001B5DD0(SUB(0x1B58), 0xEC, 0x100);
+    func_001B5DD0(SUB(0x1B20), 0xD0, 0x400);
+    func_001B5DD0(SUB(0x1BA0), 0x90, 0x80);
+    func_001B5DD0(SUB(0x1BB8), 0xC, 0x20);
+    func_001B5DD0(SUB(0x1B88), 0x40, 0x100);
+    func_001B5DD0(SUB(0x1BF4), 0x2E0, 0x20);
+    func_001B5DD0(SUB(0x1BD0), 0x70, 0x20);
+    func_001B5DD0(SUB(0x1C0C), 0x8, 0x80);
+    func_001B5DD0(SUB(0x1C18), 0x14, 0x100);
+    self->f1ED4 = (void*)func_0018D500(0x1000);
+    func_00152438(SUB(0x48), 0x1C);
+    func_00152438(SUB(0x54), 0x48);
+    func_00152438(SUB(0x78), 0x48);
+    func_00152438(SUB(0x60), 0x40);
+    func_00152438(SUB(0x6C), 0x414);
+    func_00152438(SUB(0x3C), 0x2D0);
+    func_00152438(SUB(0x1B64), 0x34);
+    func_00152438(SUB(0x1B70), 0x34);
+    func_00152438(SUB(0x1B7C), 0x34);
+    func_00152438(SUB(0x1B94), 0x10);
+    func_00152438(SUB(0x1BAC), 0x64);
+    func_00152438(SUB(0x1BC4), 0x4);
+    func_00152438(SUB(0x1BE8), 0x410);
+    func_00152438(SUB(0x1C00), 0xB8);
+    func_00152438(SUB(0x1BDC), 0x64);
+    func_00152438(SUB(0x1C3C), 0x2DC);
+    func_00152438(SUB(0x1C48), 0x5DC);
+    func_00152438(SUB(0x1C54), 0x374);
+    func_00152438(SUB(0x1C60), 0x600);
+    func_00152438(SUB(0x1C6C), 0x90);
+    func_00152438(SUB(0x1C78), 0x56C);
+    func_00152438(SUB(0x1C84), 0x50);
+    func_00152438(SUB(0x1C90), 0x38);
+    func_00152438(SUB(0x1C9C), 0x38);
+    func_00152438(SUB(0x1CA8), 0xAF0);
+    func_00152438(SUB(0x1CB4), 0x630);
+    func_00152438(SUB(0x1CC0), 0x630);
+    func_00152438(SUB(0x1C24), 0xC);
+    func_00152438(SUB(0x1C30), 0xC);
+    func_00152438(SUB(0x1CCC), 0xC10);
+    func_00152438(SUB(0x1CD8), 0x34);
+    x = -1500.0f;
+    if (D_00262C64 & 4) {
+        x = -900.0f;
+    }
+    func_001DBA90(self, x);
+    self->f1D64 = 0x10;
+    self->f1D65 = 0x10;
+    self->f1D66 = 0x40;
+    self->f1D68 = 50.0f;
+    self->f1D70 = -1;
+    self->f1D74 = 0;
+    self->f2308 = 15.0f;
+    self->f230C = 180.0f;
+    self->f234C = 1.0f;
+    self->f2350 = 1.0f;
+    self->f2354 = 1;
+    self->f235C = 0xF03FFFFF;
+}
+
+typedef s32 Id_1DBAE0;
+
+s32 func_001C0C50(Id_1DBAE0 index);
+
+s32 func_001DBAE0(s32 unused, Id_1DBAE0 index)
+{
+    return func_001C0C50(index);
+}
+
+struct Node_1DBC60 { s32 f0; s32 f4; s32 f8; s32 fC; Node_1DBC60* f10; };
+struct Obj_1DBC60 { u8 pad0[0x1EC8]; Node_1DBC60* f1EC8; };
+
+void func_001DBCC8(Obj_1DBC60* self, s32 a1, s32 a2, s32 a3, s32 a4);
+
+void func_001DBC60(Obj_1DBC60* self, s32 a1, s32 a2, s32 a3, s32 a4)
+{
+    Node_1DBC60* n = self->f1EC8;
+    if (n != 0) {
+        do {
+            if (n->f0 == a1 && n->f4 == a2 && n->f8 == a3 && n->fC == a4) {
+                return;
+            }
+            n = n->f10;
+        } while (n != 0);
+    }
+    func_001DBCC8(self, a1, a2, a3, a4);
+}

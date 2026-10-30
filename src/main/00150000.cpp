@@ -929,3 +929,238 @@ void func_00151D28(Self_151D28* self)
     }
     func_00148CE0(D_00275710);
 }
+
+struct Self_152888 { u8 pad0[0x10]; s32 f10; s32 f14; u8* f18; };
+
+extern u8 D_0024A0E0[];
+void func_001528C8(Self_152888* p);
+
+Self_152888* func_00152888(Self_152888* self)
+{
+    self->f10 = 0;
+    self->f14 = 0;
+    self->f18 = D_0024A0E0;
+    func_001528C8(self);
+    return self;
+}
+
+struct Mgr_150790 { u8 pad0[0x460]; u8 f460[0x5C]; s32 f4BC; };
+struct Self_150790;
+struct Glob_150790 { u8 pad0[0x260]; Self_150790* f260; };
+struct __attribute__((packed)) Blk_150790 { u8 pad0[0x324]; s32 f324; };
+struct Ptr_150790 { s32 f0; };
+struct Self_150790 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad18[0x2D0 - 0x18];
+    s32 f2D0;
+    s32 f2D4;
+    f32 f2D8;
+    u8 pad2DC[0x2E4 - 0x2DC];
+    s32 f2E4;
+    s32 f2E8;
+    u8 pad2EC[0x2F8 - 0x2EC];
+    void* f2F8;
+    u8 pad2FC[4];
+    s32 f300;
+    Ptr_150790* f304;
+    u8 pad308[0x330 - 0x308];
+    s32 f330;
+};
+
+extern Mgr_150790* D_00261990;
+extern Glob_150790 D_0026F5A0;
+extern u8 D_002708E0[];
+extern u8 D_00271558[];
+extern s32 D_00261D38;
+extern f32 D_0026185C;
+extern void* D_00275710;
+
+void func_001BE998(void);
+void func_001837E0(Self_150790* self, s32 a, s32 b, s32 c);
+void func_001451F0(Mgr_150790* m, s32 a, s32 b, void* c, s32 d, s32 e);
+void func_001DDA50(void* a);
+void func_001DDA20(void* a);
+s32 func_00149610(void* a);
+void func_001495E8(void* a, s32 b);
+void func_00145088(Mgr_150790* m, s32 a, void* b, s32 c, s32 d);
+void func_0012E760(void* a);
+void func_001C06A0(s32 a, s32 b, f32 f);
+void func_001356C0(Blk_150790* a, s32 b);
+void func_001365A0(Blk_150790* a, s32 b);
+void* func_0015A448(void* a, s32 b, s32 c);
+void func_001E86E0(void* a, s32 b);
+void func_001E87F0(void* a, s32 b);
+
+void func_00150790(Self_150790* self, s32 next)
+{
+    s32 cur = self->f2D4;
+    if (next == cur) {
+        return;
+    }
+    switch (cur) {
+    case 5:
+        if (D_0026F5A0.f260 == self) {
+            D_0026F5A0.f260 = 0;
+        }
+        break;
+    case 1:
+        if (self->f2D0 != cur) {
+            D_00261D38 = D_00261D38 - 1;
+        }
+        break;
+    case 3:
+        self->f304->f0 = 1;
+        func_001BE998();
+        func_001837E0(self, 0x15, 0, 0);
+        if (self->f2D0 == 2) {
+            func_001451F0(D_00261990, 0xF, 6, D_00261990->f460, 0, 0);
+            func_001DDA50(D_00275710);
+        }
+        (void)func_00149610(D_00261990->f460);
+        if ((self->f2E8 & 0x10) != 0 && self->f2F8 != 0) {
+            func_0012E760(self->f2F8);
+        }
+        if (self->f2D0 == 2 && self->f330 != 0) {
+            f32 f = 1.0f;
+            func_001C06A0(9, 0, f);
+            func_001C06A0(9, 1, f);
+        }
+        break;
+    case 4:
+        ((Blk_150790*)&D_002701F8)->f324 = 0;
+        func_001356C0((Blk_150790*)&D_002701F8, 0);
+        break;
+    }
+    switch (next) {
+    case 5:
+        if (D_0026F5A0.f260 != 0) {
+            func_00150790(D_0026F5A0.f260, 0);
+        }
+        D_0026F5A0.f260 = self;
+        self->f2D4 = next;
+        break;
+    case 1:
+        if (self->f2D0 != next) {
+            D_00261D38 = D_00261D38 + 1;
+        }
+        self->f2D4 = next;
+        break;
+    case 3:
+        self->f2E4 = -1;
+        self->f2E8 = 0;
+        if (self->f2D0 == 2) {
+            func_001495E8(D_00261990->f460, 4);
+            func_00145088(D_00261990, 6, D_00261990->f460, 0, 0);
+            func_001DDA20(D_00275710);
+            func_001365A0((Blk_150790*)&D_002701F8, 0);
+            if (self->f330 != 0) {
+                f32 f = 0.6f;
+                func_001C06A0(9, 0, f);
+                func_001C06A0(9, 1, f);
+            }
+        } else {
+            func_001495E8(D_00261990->f460, 3);
+            if (self->f2D0 == 0) {
+                if (self->f300 != -1) {
+                    D_00261990->f4BC = (s32)func_0015A448(self->f14, self->f300, 0);
+                } else {
+                    D_00261990->f4BC = 0;
+                }
+            }
+        }
+        self->f2D4 = next;
+        break;
+    case 4:
+        func_001E86E0(D_002708E0, 0);
+        func_001E87F0(D_002708E0, 0);
+        func_001E86E0(D_00271558, 0);
+        func_001E87F0(D_00271558, 0);
+        self->f2D4 = next;
+        break;
+    default:
+        self->f2D4 = next;
+        break;
+    }
+    self->f2D8 = D_0026185C;
+}
+
+struct Node_153EC0 {
+    u8 pad_00[0x28];
+    s32 f28;
+    u8 pad_2C[0x38 - 0x2C];
+    f32 f38;
+    u8 pad_3C[0x44 - 0x3C];
+    s32 f44;
+    u8 pad_48[4];
+    Node_153EC0* next;
+};
+struct Obj_153EC0 {
+    u8 pad_00[0xC];
+    s32 listA;
+    u8 pad_10[0x30 - 0x10];
+    Node_153EC0* head;
+    u8 pad_34[8];
+    s32 f3C;
+};
+struct Frame_153EC0 {
+    s32 list;
+    s32 cursor;
+    s32 link;
+    s32 prev;
+};
+
+void func_00153780(Obj_153EC0* self, s32 a1, Node_153EC0* n, s32 a3, s32 a4, s32 a5, s32 a6);
+void func_00152600(void* list, Node_153EC0* n);
+void func_00152470(void* list, Node_153EC0* n);
+void func_00153A50(Obj_153EC0* self, Node_153EC0* n);
+extern f32 D_BC23D70A;
+
+void func_00153EC0(Obj_153EC0* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+{
+    Frame_153EC0 fr;
+    s32 scratch[4];
+    (void)scratch;
+    s32 e = (s32)&self->head;
+    fr.cursor = e;
+    fr.list = e;
+    s32 old = *(s32*)&D_0027B314;
+    s32 link = *(s32*)(e + 8);
+    *(s32*)&D_0027B314 = (s32)&fr;
+    fr.prev = old;
+    s32 h = *(s32*)e;
+    fr.link = link;
+    fr.cursor = h + link;
+    Node_153EC0* node = (Node_153EC0*)h;
+    while (node != 0) {
+        if (node->f28 == 2) {
+            if (node->f44 == 0) {
+                func_00153780(self, a1, node, a3, a4, a5, a6);
+            }
+            func_00152600(&self->head, node);
+            func_00152470(&self->listA, node);
+            self->f3C++;
+        }
+        Node_153EC0* nx = *(Node_153EC0**)fr.cursor;
+        s32 lk = fr.link;
+        fr.cursor = (s32)nx + lk;
+        node = nx;
+    }
+    func_00153A50(self, 0);
+    *(s32*)&D_0027B314 = fr.prev;
+    for (;;) {
+        f32 best = -0.01f;
+        Node_153EC0* sel = 0;
+        for (Node_153EC0* p = self->head; p != 0; p = p->next) {
+            if (p->f38 < best) {
+                best = p->f38;
+                sel = p;
+            }
+        }
+        if (!sel) break;
+        if (sel->f44 == 0) {
+            func_00153780(self, a1, sel, a3, a4, a5, a6);
+        }
+        func_00153A50(self, sel);
+    }
+}

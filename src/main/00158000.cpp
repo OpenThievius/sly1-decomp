@@ -1231,3 +1231,20 @@ void func_001587C8(Ctx_1587C8* self, void* src)
         }
     }
 }
+
+struct Node_15A4B8 { Node_15A4B8* next; s32 value; };
+
+extern u8 D_00247448[];
+
+s32 func_0015A4B8(s32 index, s32 value)
+{
+    Node_15A4B8* p = ((Node_15A4B8**)D_00247448)[index];
+    while (p != 0) {
+        if (p->value != value) {
+            p = p->next;
+        } else {
+            return 1;
+        }
+    }
+    return 0;
+}

@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "common.h"
+
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "common.h"
 
@@ -92,4 +95,98 @@ s32 func_001FFFD0(s32 value)
     s32 previous = D_002789D8;
     D_002789D8 = value;
     return previous;
+}
+
+struct Cur_1FF490 { s32 off; s32 f4; s32 f8; s32 fC; };
+struct List_1FF490 { Cur_1FF490** items; s32 count; };
+
+void func_001FF490(Cur_1FF490* cur, List_1FF490* list, s32* lo, s32* hi)
+{
+    s32 mn = *lo;
+    s32 mx = *hi;
+    if (cur->off != 0) {
+        do {
+            if (cur->f4 == 0) goto next;
+            if (cur->f8 == 0) goto next;
+            {
+                s32 n = list->count;
+                list->items[n] = cur;
+                list->count = n + 1;
+                {
+                    s32 x = cur->f8;
+                    s32 e = x + cur->fC;
+                    if ((u32)x < (u32)mn) mn = x;
+                    if ((u32)mx < (u32)e) mx = e;
+                }
+            }
+        next:
+            cur = (Cur_1FF490*)((u8*)cur + cur->off + 4);
+        } while (cur->off != 0);
+    }
+    *lo = mn;
+    *hi = mx;
+}
+
+struct Src_1FD6E0 {
+    u32 bits;
+};
+
+struct Parts_1FD6E0 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+};
+
+void func_001FD6E0(struct Src_1FD6E0* src, struct Parts_1FD6E0* out)
+{
+    u32 bits = src->bits;
+    u32 exp = bits >> 23;
+    u32 mant = bits & 0x7FFFFF;
+    exp &= 0xFF;
+
+    out->f04 = bits >> 31;
+    if (exp == 0) {
+        out->f00 = 2;
+        return;
+    }
+    if (exp == 0xFF) {
+        if (mant == 0) {
+            out->f00 = 4;
+            return;
+        }
+        if ((mant & 0x100000) != 0) {
+            out->f00 = 1;
+        } else {
+            out->f00 = 0;
+        }
+        out->f0C = mant;
+        return;
+    }
+    out->f08 = exp - 0x7F;
+    out->f00 = 3;
+    out->f0C = (mant << 7) | 0x40000000;
+}
+
+extern u8 D_0024F0C0[];
+
+void* func_001FEF58(void* self)
+{
+    *(void**)self = D_0024F0C0;
+    return self;
+}
+
+extern u8 D_0024F0D8[];
+
+void* func_001FEFF0(void* self)
+{
+    *(void**)self = D_0024F0D8;
+    return self;
+}
+
+extern u8 D_0024F1E0[];
+
+void* func_001FFFF0(void)
+{
+    return D_0024F1E0;
 }

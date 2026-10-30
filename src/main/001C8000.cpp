@@ -995,3 +995,165 @@ void func_001C5388(Self_1CACB0*, s32, Out_1CACB0*);
 void func_001CACB0(Self_1CACB0* self, s32 flags, Out_1CACB0* out)
 { func_001C5388(self, flags, out);
     if (self->fC04 != 0) { if ((flags & 0x12) == 0x12) { if (0.7f < out->p0->f88) { out->f30 = 0; } } } }
+
+struct Slot_001CA6D0 { s32 key; s32 value; };
+struct Table_001CA6D0 { u8 pad[0x75C]; Slot_001CA6D0 slots[1]; };
+
+s32 func_001CA600(s32 index);
+
+s32 func_001CA6D0(Table_001CA6D0* self, s32 index)
+{
+    if (func_001CA600(index) == 0)
+        return 0;
+    return self->slots[index].key;
+}
+
+extern f32 D_0024D828;
+
+struct Sub_1C9A58 {
+    u8 pad00[0x34];
+    f32 f34;
+};
+struct Child_1C9A58 {
+    u8 pad00[0x8];
+    Sub_1C9A58* sub8;
+    u8 pad0C[0x4];
+    f32 f10;
+    f32 f14;
+};
+struct Obj_1C9A58 {
+    u8 pad000[0x724];
+    u32 f724;
+    u8 pad728[0x4];
+    u32 flags72C;
+    void* f730;
+    u8 pad734[0xAC];
+    Child_1C9A58* f7E0;
+};
+
+void func_0012E760(Child_1C9A58* c);
+void func_001C8F20(Obj_1C9A58* self, void* arg, s32 mode);
+
+void func_001C9A58(Obj_1C9A58* self) {
+    if (self->flags72C == 0) {
+        return;
+    }
+    if (self->flags72C & 2) {
+        if (self->f7E0 != 0) {
+            if (self->f724 != 0xB) {
+                func_0012E760(self->f7E0);
+                self->f7E0 = 0;
+            } else {
+                self->f7E0->f14 = self->f7E0->sub8->f34;
+                self->f7E0->f10 = D_0024D828;
+            }
+        }
+        s32 m = -3;
+        self->flags72C &= m;
+    }
+    if (self->flags72C & 1) {
+        func_001C8F20(self, self->f730, 0);
+    }
+}
+
+struct Vt_1CBEE8 { u8 pad0[0x16C]; s32 (*fn16C)(void* self); };
+struct Item_1CBEE8 {
+    Vt_1CBEE8* vt;
+    u8 pad4[0xBEC];
+    f32 fBF0;
+    f32 fBF4;
+    f32 fBF8;
+    f32 fBFC;
+    f32 fC00;
+};
+struct Obj_1CBEE8 {
+    u8 pad0[0x50];
+    s32 f50;
+    f32 f54;
+    s32 cnt58;
+    Item_1CBEE8* items[1];
+    u8 pad60[0x124];
+    void* f184;
+};
+
+extern f32 D_00261858[];
+extern f32 D_00274D18[];
+extern f32 D_00274D08[];
+extern f32 D_00274D10[];
+
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001BF0D8(void* p);
+void* func_001BEEF8(s32 kind);
+void func_001CBE70(Obj_1CBEE8* self, s32 a);
+void func_001CC120(Obj_1CBEE8* self);
+
+void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
+{
+    s32 i;
+    if (self->f50 == ns)
+        return;
+    switch (self->f50) {
+    case 2:
+        func_001BF0D8(self->f184);
+        i = 0;
+        self->f184 = 0;
+        if (self->cnt58 > 0) {
+            Item_1CBEE8** p = self->items;
+            do {
+                Item_1CBEE8* it = *p;
+                f32 t = D_00261858[1];
+                i++;
+                f32 r = func_001EAAE0(D_00274D18[0], D_00274D18[1]);
+                it->fC00 = D_00261858[1] + r;
+                p++;
+            } while (i < self->cnt58);
+        }
+        break;
+    case 1: {
+        s32 j = 0;
+        if (self->cnt58 > 0) {
+            Item_1CBEE8** p = self->items;
+            do {
+                f32 t = D_00261858[1];
+                j++;
+                f32 r = func_001EAAE0(D_00274D08[0], D_00274D08[1]);
+                (*p)->fBF4 = D_00261858[1] + r;
+                p++;
+            } while (j < self->cnt58);
+        }
+        break;
+    }
+    }
+    switch (ns) {
+    case 2:
+        i = 0;
+        self->f184 = func_001BEEF8(0x6B);
+        func_001CBE70(self, 0);
+        if (self->cnt58 > 0) {
+            Item_1CBEE8** p = self->items;
+            do {
+                Item_1CBEE8* it = *p;
+                if (it->vt->fn16C(it) != 0) {
+                    it->fBF8 = D_00261858[1];
+                } else {
+                    f32 r = func_001EAAE0(D_00274D10[0], D_00274D10[1]);
+                    it->fBF8 = D_00261858[1] + r;
+                }
+                i++;
+                p++;
+            } while (i < self->cnt58);
+        }
+        break;
+    case 1:
+        func_001CC120(self);
+        break;
+    case 0:
+        func_001CBE70(self, 1);
+        break;
+    case 3:
+        func_001CBE70(self, 2);
+        break;
+    }
+    self->f50 = ns;
+    self->f54 = D_00261858[1];
+}

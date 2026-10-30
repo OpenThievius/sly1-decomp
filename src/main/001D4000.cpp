@@ -417,3 +417,64 @@ void func_001D73A8(Obj_1D73A8* self)
     func_0018D800(self->p1, D_00275250, 0x40);
     func_001DB290(self);
 }
+
+struct Obj_1D7040 { u8 pad[0x694]; s32 f694; };
+struct Ref_1D7040 { void* f0; Obj_1D7040* f4; };
+void func_0013B708(Obj_1D7040* self, s32 kind, Ref_1D7040* ref);
+
+void func_001D7040(Obj_1D7040* self, s32 kind, Ref_1D7040* ref)
+{
+    func_0013B708(self, kind, ref);
+    if (kind == 10 && ref->f4 == self) {
+        ref->f4->f694 = 0;
+    }
+}
+
+struct Rec_001D7098 { s32 a; s32 b; s32 c; };
+void func_001F5C0C(struct Rec_001D7098* p, s32 zero, s32 size);
+void func_001D7098(struct Rec_001D7098* self, s32 a, s32 b) { func_001F5C0C(self, 0, 0x10); self->b = b; self->a = a; self->c = b; }
+
+struct Ctx_001D7148 { s32 pad; };
+
+void func_001D72C8(Ctx_001D7148* a0, s32 a1);
+void func_0018D778(Ctx_001D7148* a0);
+
+void func_001D7148(Ctx_001D7148* a0, s32 a1)
+{
+    func_001D72C8(a0, a1);
+    if (a1 & 1) func_0018D778(a0);
+}
+
+struct Obj_1D4C98;
+typedef void (*Cb_1D4C98)(Obj_1D4C98* self);
+
+struct Obj_1D4C98 {
+    u8 pad0[0x2228];
+    s32 f2228;
+    u8 pad1[0x28];
+    s32 f2254;
+    u8 pad2[0x458];
+    Cb_1D4C98 f26B0;
+};
+
+extern void func_001D5620(Obj_1D4C98* self);
+extern void func_00175170(Obj_1D4C98* self, s32 mode, s32 count);
+
+void func_001D4C98(Obj_1D4C98* self)
+{
+    s32 v = self->f2254;
+    Cb_1D4C98 fn = self->f26B0;
+
+    v &= -0x11;
+    self->f26B0 = 0;
+    self->f2254 = v;
+    if (fn != 0) {
+        fn(self);
+        return;
+    }
+    if ((u32)(self->f2228 - 0x2D) < 5) {
+        func_001D5620(self);
+    } else {
+        func_00175170(self, 2, 2);
+    }
+}

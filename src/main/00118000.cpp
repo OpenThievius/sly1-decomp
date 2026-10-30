@@ -1425,3 +1425,186 @@ void* func_001194A8(void* self, Link_1194A8* h, void* arg)
     func_0011B060(&a, 2);
     return self;
 }
+
+// Fixed by merging the two flag tests into one "kind != 0x1B || p != 0".
+
+struct __attribute__((aligned(16))) Quad_119310 { s32 kind; void* p; s32 w[2]; };
+struct Node_119310 { s32 kind; Node_119310* f4; Node_119310* f8; };
+
+s32 func_0011B008(Quad_119310* q);
+void func_0011B018(void* out, Quad_119310* q);
+void func_0011B060(Quad_119310* q, s32 mode);
+void func_0011B0A8(Quad_119310* a, Quad_119310* b);
+void func_0011B538(Quad_119310* q, s32 n);
+void func_0011A080(Quad_119310* t, Node_119310* n, s32 c);
+
+void* func_00119310(void* self, Node_119310* x, s32 c)
+{
+    Quad_119310 q, r, t;
+    func_0011B008(&q);
+    func_0011B008(&r);
+    func_0011B538(&q, 0x22);
+    Node_119310* n = x->f4->f8;
+    while (n) {
+        Node_119310* e = n->f4;
+        s32 flag;
+        if (e->kind == 10) {
+            flag = 1;
+        } else {
+            func_0011A080(&t, e, c);
+            flag = 0;
+            func_0011B0A8(&r, &t);
+            func_0011B060(&t, 2);
+            if (r.kind != 0x1B || r.p != 0)
+                flag = 1;
+            if (flag && e->f8 == 0)
+                func_0011B0A8(&q, &r);
+        }
+        if (flag) {
+            e = e->f8;
+            while (e) {
+                func_0011A080(&t, e, c);
+                func_0011B0A8(&q, &t);
+                func_0011B060(&t, 2);
+                e = e->f8;
+            }
+            n = 0;
+        } else {
+            n = n->f8;
+        }
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&r, 2);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Quad_118F48 { s32 a, b, c, d; };
+struct Obj_118F48 { u8 pad[4]; Quad_118F48* f4; };
+struct Frame_118F48 { Quad_118F48 q; Quad_118F48 t; };
+
+void func_0011B008(Quad_118F48* q);
+void func_0011B018(void* dst, Quad_118F48* src);
+void func_0011B060(Quad_118F48* q, int mode);
+void func_0011B0A8(Quad_118F48* a, Quad_118F48* b);
+void func_0011B538(Quad_118F48* q, int n);
+void func_0011A080(Quad_118F48* t, void* n, s32 c);
+void func_001E1F10(void* x);
+s32 func_00113730(Quad_118F48* t, s32 mode, void* a, s32 c);
+extern u8 D_00249200[];
+
+void* func_00118F48(void* self, void* p, s32 x)
+{
+    Frame_118F48 f;
+    func_0011B008(&f.q);
+    u8* a = *(u8**)((u8*)p + 4);
+    u8* b = *(u8**)(a + 8);
+    u8* c = *(u8**)(b + 8);
+    func_0011A080(&f.t, b, x);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    if (f.q.b == 0) {
+        u8* v = *(u8**)(c + 4);
+        u8* w = *(u8**)(v + 8);
+        func_001E1F10(D_00249200);
+        func_00113730(&f.t, 1, w, x);
+        func_0011B060(&f.t, 2);
+    }
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Ent_11AB58;
+struct Sub_11AB58 { s32 type; Ent_11AB58* ent; };
+struct Node_11AB58 { Ent_11AB58* f0; Sub_11AB58 sub; Node_11AB58* fC; };
+struct List_11AB58 { Node_11AB58* head; };
+struct World_11AB58 {
+    s32 count;
+    Ent_11AB58* ents[0x140];
+    s32 n504;
+    List_11AB58* lists[1];
+};
+struct Item_11AB58 { void* fn; u8 p[8]; Ent_11AB58* fC; Item_11AB58* f10; };
+struct Glob_11AB58 { u8 p[0x1EC8]; Item_11AB58* f1EC8; };
+
+extern u8 D_0025C250[];
+extern u8 D_0025C270[];
+extern u8 D_0025C290[];
+extern u8 D_0025C2B0[];
+extern u8 D_0025C2D0[];
+
+void func_0011C2B0(u8* p);
+void func_0011C2E8(u8* p);
+s32 func_0011C3C8(Ent_11AB58* e);
+void func_0011C3F0(Ent_11AB58* e);
+void func_0011A728(World_11AB58* w, Ent_11AB58* e);
+void func_0011A770(World_11AB58* w, Ent_11AB58* e);
+void func_0011A7B8(World_11AB58* w, Ent_11AB58* e);
+void func_0011A850(World_11AB58* w);
+void func_001834A0(void* a);
+
+void func_0011AB58(World_11AB58* w) {
+    func_0011C2B0(D_0025C250);
+    func_0011C2B0(D_0025C270);
+    func_0011C2B0(D_0025C290);
+    func_0011C2B0(D_0025C2B0);
+    func_0011C2B0(D_0025C2D0);
+    s32 i = w->count;
+    *(s32*)((u8*)w + 0x708) = 0;
+    *(s32*)((u8*)w + 0xF0C) = 0;
+    *(s32*)((u8*)w + 0x1310) = 0;
+    for (i--; i >= 0; i--) {
+        Ent_11AB58* e = w->ents[i];
+        if (func_0011C3C8(e)) {
+            func_0011C3F0(e);
+            func_0011A728(w, e);
+        }
+    }
+    s32 j = w->n504;
+    for (j--; j >= 0; j--) {
+        Node_11AB58* n = w->lists[j]->head;
+        while (n) {
+            func_0011C3F0((Ent_11AB58*)n);
+            Sub_11AB58* sp = &n->sub;
+            switch (sp->type) {
+            case 0x1E: {
+                Ent_11AB58* e = sp->ent;
+                if (func_0011C3C8(e)) {
+                    func_0011C3F0(e);
+                    func_0011A770(w, e);
+                }
+                break;
+            }
+            case 0x1F: {
+                Ent_11AB58* e = sp->ent;
+                if (func_0011C3C8(e)) {
+                    func_0011C3F0(e);
+                    func_0011A7B8(w, e);
+                }
+                break;
+            }
+            case 0x21:
+                func_0011C3F0(sp->ent);
+                break;
+            }
+            n = n->fC;
+        }
+    }
+    for (Item_11AB58* it = ((Glob_11AB58*)D_00275710)->f1EC8; it; it = it->f10) {
+        if (it->fn == (void*)func_001834A0) {
+            Ent_11AB58* e = it->fC;
+            if (e && func_0011C3C8(e)) {
+                func_0011C3F0(e);
+                func_0011A770(w, e);
+            }
+        }
+    }
+    func_0011A850(w);
+    func_0011C2E8(D_0025C250);
+    func_0011C2E8(D_0025C270);
+    func_0011C2E8(D_0025C290);
+    func_0011C2E8(D_0025C2B0);
+    func_0011C2E8(D_0025C2D0);
+}

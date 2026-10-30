@@ -1198,3 +1198,25 @@ s32 func_00141B48(void* a0, void* a1, s32 count, Entry_141B48** list, s32 a4, s3
     }
     return result;
 }
+
+struct Self_1400A8 {
+    u8 pad0[0x538];
+    u64 f538;
+    u8 pad1[0x88];
+};
+
+struct Sub_1400A8;
+
+void func_001B7968(Self_1400A8* self);
+void func_0013E918(Sub_1400A8* p);
+void func_001B9AE0(Self_1400A8* self, s32 a, s32 b, s32 c, s32 d);
+
+void func_001400A8(Self_1400A8* self)
+{
+    u64 m = 0x8000;
+    func_001B7968(self);
+    func_0013E918((Sub_1400A8*)((u8*)self + 0x5C0));
+    m <<= 28;
+    self->f538 = self->f538 | m;
+    func_001B9AE0(self, 3, 0, 3, 0);
+}

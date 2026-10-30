@@ -17,9 +17,11 @@ Prints EXACT, or DIFFER with both disassemblies side by side (--diff shows
 them for EXACT too). With --version eu the function is checked at its PAL
 counterpart (config/eu/map.tsv), with every address translated to PAL's.
 
-A function that uses a .rodata literal is EXACT here and marked `rodata`: the literal, for as many
-bytes as the instruction reaches (a string, up to its NUL), is compared with retail's. The build
-links it by baking retail's address into the code (tools/rodata.py).
+A function that uses a .rodata literal of its own (a float or a string written in C) is EXACT here
+and marked `rodata`: the literal, for as many bytes as the instruction reaches (a string, up to its
+NUL), is compared with retail's, and the build links it by baking retail's address into the code
+(tools/rodata.py). A constant can also be read through an extern (extern f32 D_00219718[]): the
+object then has no .rodata, and the relocation reaches retail's address by name.
 """
 
 import argparse

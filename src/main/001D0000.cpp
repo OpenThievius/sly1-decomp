@@ -274,3 +274,134 @@ void func_001D31D0(Obj_1D31D0* self, s32 value)
     self->f275C = value;
     self->f2758 = D_00261858.b;
 }
+
+// NEAR: argument setup order of the func_0012CD78 calls differs ($a1 load and the $f12/$f13 constants in the loop call, $a4 address and float moves in the two calls after it); stores and frame match.
+
+struct Entry_1D14F0 {
+    u8 pad0[4];
+    void* p4;
+    u8 pad8[4];
+    f32 fC;
+};
+
+struct Self_1D14F0 {
+    u8 pad0[0x614];
+    void* f614;
+    void* f618;
+    u8 pad61C[0x103C - 0x61C];
+    Entry_1D14F0 entries[2];
+    u8 f105C[4];
+    u8 pad1060[4];
+    void* f1064;
+    u8 pad1068[0x23E0 - 0x1068];
+    f32 f23E0;
+    f32 f23E4;
+    u8 pad23E8[8];
+    f32 f23F0;
+    f32 f23F4;
+};
+
+void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+void func_0012CD78(f32 f12, f32 f13, void* a0, void* a1, void* a2, s32 a3, void* a4, s32 a5, void* a6, s32 a7);
+
+void func_001D14F0(Self_1D14F0* self)
+{
+    f32 out[4];
+    Entry_1D14F0* e = self->entries;
+    s32 i = 1;
+    do {
+        func_0012CD78(0.0f, 1.0f, e->p4, self->f614, self, 1, 0, 0, out, 0);
+        e->fC = out[2];
+        e++;
+        i--;
+    } while (i >= 0);
+    func_00139038(self, 0x10, 2, self->entries, 0, 0, 0, &self->f105C);
+    func_0012CD78(0.0f, 1.0f, self->f1064, self->f618, self, 1, &self->f23E0, 0, 0, 0);
+    func_0012CD78(0.0f, 1.0f, self->f1064, self->f614, self, 1, &self->f23F0, 0, 0, 0);
+    f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
+    self->f23F4 = 0.0f;
+    self->f23E4 = 0.0f;
+    self->f23F0 = avg;
+    self->f23E0 = avg;
+}
+
+f32 func_001FD578(u64 v);
+
+s32 func_001D3C68(s32 stride, s32 n, s32 m, char* out, ...) {
+    f32 rows[16];
+    f32 cols[16];
+    u64* ap = (u64*)((char*)__builtin_next_arg(out) - 32);
+    f32 sum = 0.0f;
+    s32 i;
+    s32 j;
+    s32 changed;
+    for (i = 1; i < n; i++) {
+        ap++;
+        rows[i] = func_001FD578(ap[-1]);
+        sum += rows[i];
+    }
+    rows[0] = 1.0f - sum;
+    sum = 0.0f;
+    for (j = 1; j < m; j++) {
+        ap++;
+        cols[j] = func_001FD578(ap[-1]);
+        sum += cols[j];
+    }
+    cols[0] = 1.0f - sum;
+    char* p = out;
+    changed = 0;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++) {
+            sum = rows[i] * cols[j];
+            if (sum != *(f32*)p) {
+                *(f32*)p = sum;
+                changed = 1;
+            }
+            p += stride;
+        }
+    }
+    return changed;
+}
+
+struct Node_1D3470;
+struct Sub_1D3470;
+
+struct Node_1D3470 {
+    u8 pad0[0x18];
+    s32 w18;
+    u8 pad1[0x214 - 0x1C];
+    s32 w214;
+    s32 w218;
+};
+
+extern u8 D_00248D30[];
+void func_001B9338(Node_1D3470* self, f32 t);
+void func_00189378(Sub_1D3470* sub, s32 zero, void* out);
+void func_001B91A8(Node_1D3470* self, void* buf, s32 a, void* p, s32 b, f32 t);
+
+void func_001D3470(Node_1D3470* self, f32 t)
+{
+    u8 buf[0x30];
+
+    func_001B9338(self, t);
+    if (self->w18 == 0) {
+        func_00189378((Sub_1D3470*)((u8*)self + 0xD0), 0, buf);
+        func_001B91A8(self, buf, self->w214, D_00248D30, self->w218, t);
+    }
+}
+
+struct Self_001D3678 { s32 pad; };
+struct Msg_001D3678 { s32 value; };
+
+extern u8 D_00248D20[];
+
+void func_00127378(Self_001D3678* self, s32 kind, Msg_001D3678* msg);
+void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+
+void func_001D3678(Self_001D3678* self, s32 kind, Msg_001D3678* msg)
+{
+    func_00127378(self, kind, msg);
+    if (kind == 10) {
+        func_00185D20(0.0f, self, (void*)msg->value, (u8*)self + 0x140, D_00248D20, 10, 0, 0, (u8*)self + 0x554);
+    }
+}
