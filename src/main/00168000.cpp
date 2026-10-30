@@ -1286,3 +1286,274 @@ s32 func_0016A758(u8* self)
     }
     return count;
 }
+
+void func_00182C18(void* self);
+
+struct Obj_169CD8 {
+    u8 pad0[0x44];
+    s32 f44;
+    s32 f48;
+    s32 f4C;
+    s32 f50;
+    u8 pad54[0x58 - 0x54];
+    f32 f58;
+};
+
+void func_00169CD8(void* self)
+{
+    Obj_169CD8* o = (Obj_169CD8*)self;
+    func_00182C18(self);
+    o->f44 = -1;
+    o->f4C = 1;
+    o->f50 = 3;
+    o->f58 = 3.4028234663852886e+38f;
+}
+
+struct __attribute__((aligned(16))) Quad_169FC0 { s32 v[4]; };
+
+struct Frame_169FC0 {
+    Quad_169FC0 a;
+    Quad_169FC0 b;
+    s32 c;
+    u8 pad[0xC];
+    f32 x;
+};
+
+struct Obj_169FC0 {
+    void** vt;
+    u8 pad4[4];
+    s32 f8;
+};
+
+struct Self_169FC0 {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1[0x34 - 0x1C];
+    Obj_169FC0* f34;
+};
+
+extern u8 D_00248D20[];
+
+void* func_001925F0(void);
+s32 func_00128018(void* a, s32 b, void* c, void* d);
+void func_001280C0(void* a, s32 b, void* c, void* d);
+void func_00169E20(void* a0, void* a1, void* a2, f32 f);
+
+void func_00169FC0(Self_169FC0* self, f32* out, void* a2, void* a3)
+{
+    Frame_169FC0 f;
+    u8* node = (u8*)func_001925F0();
+    Obj_169FC0* o = self->f34;
+    f.c = 1;
+    func_00128018(0, self->f18, node + 0x140, &f.a);
+    func_001280C0(0, self->f18, D_00248D20, &f.b);
+    if (o->vt[10] != 0) {
+        ((void (*)(void*, void*, void*, s32, s32, s32, void*))o->vt[10])(o, &f.a, &f.b, 0, 0, 0, &f.x);
+    }
+    if (o->f8 == 0) {
+        f32 k = 30.0f;
+        f32 t = ((f32 (*)(void*))self->f34->vt[8])(self->f34) - k;
+        f32 r = f.x;
+        if (r < k) {
+            r = k;
+        } else if (t < r) {
+            r = t;
+        }
+        f.x = r;
+    }
+    func_00169E20(self, a2, a3, f.x);
+    *out = f.x;
+}
+
+typedef void (*VFn_16A5F0)(void* self, void* a);
+
+struct Obj_16A5F0 {
+    VFn_16A5F0* vtbl;
+    u8 pad4[0x224 - 4];
+    s32 f224;
+    u8 pad228[0x550 - 0x228];
+    s32 f550;
+    f32 f554;
+};
+
+struct Frame_16A5F0 {
+    u8 a[0x30];
+    u8 b[0x30];
+    u8 c[0x30];
+    u8 d[0x10];
+    u8 e[0x10];
+};
+
+extern void* D_00262E10;
+extern u8 D_00248D30[];
+extern f32 D_0026185C[];
+
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
+void func_001837E0(void* obj, s32 kind, s32 a, s32 b);
+void func_00189378(void* sub, void* a, void* out);
+void func_00188D28(void* a, void* b, void* c);
+void func_00189150(void* a, void* b, s32 c);
+
+void func_0016A5F0(Obj_16A5F0* self, s32 v)
+{
+    Frame_16A5F0 f;
+
+    if (self->f550 == v) {
+        return;
+    }
+    if (self->f550 == 1) {
+        self->vtbl[25](self, 0);
+        func_001B9AE0(self, 0, 0, 0, 0);
+        func_001837E0(self, 3, 0, 0);
+    }
+    if (v == 1) {
+        self->vtbl[25](self, D_00262E10);
+        self->vtbl[36](self, D_00248D30);
+        self->vtbl[37](self, D_00248D30);
+        func_001B9AE0(self, 3, 0, 3, 0);
+        func_00189378((u8*)D_00262E10 + 0x110, 0, f.a);
+        func_00189378((u8*)self + 0x110, f.c, f.b);
+        func_00188D28(f.c, f.e, f.d);
+        func_00189150(f.a, f.b, self->f224);
+        func_001837E0(self, 2, 0, 0);
+    }
+    self->f550 = v;
+    self->f554 = D_0026185C[0];
+}
+
+extern void* D_0027B314;
+void* func_001300E8(void* node, s32 flags);
+
+struct Iter_16A820 {
+    void* head;
+    u8 pad4[4];
+    s32 link;
+};
+
+struct Walk_16A820 {
+    Iter_16A820* iter;
+    void* cursor;
+    s32 link;
+    void* prev;
+
+    Walk_16A820(Iter_16A820* i)
+    {
+        cursor = i;
+        iter = i;
+        link = i->link;
+        prev = D_0027B314;
+        D_0027B314 = this;
+    }
+    ~Walk_16A820() { D_0027B314 = prev; }
+    void* First()
+    {
+        void* n = *(void**)cursor;
+        cursor = (u8*)n + link;
+        return n;
+    }
+    void* Next()
+    {
+        void* n = *(void**)cursor;
+        cursor = (u8*)n + link;
+        return n;
+    }
+};
+
+struct Node_16A820 {
+    u8 pad0[0x550];
+    s32 f550;
+    f32 f554;
+};
+
+void* func_0016A820(u8* self)
+{
+    Walk_16A820 w((Iter_16A820*)(self + 0x34));
+    void* best = 0;
+    f32 bestF = 3.4028234663852886e+38f;
+    void* node = w.First();
+    while (node != 0) {
+        if (func_001300E8(node, 0x46)) {
+            Node_16A820* n = (Node_16A820*)node;
+            if (n->f550 == 4 && n->f554 < bestF) {
+                best = node;
+                bestF = n->f554;
+            }
+        }
+        node = w.Next();
+    }
+    return best;
+}
+
+typedef void (*VFnV_16AF80)(void* self);
+typedef void (*VFnS_16AF80)(void* self, const char* s);
+
+struct Obj_16AF80 {
+    void** vtbl;
+    u8 pad4[0x460];
+    s32 f464;
+};
+
+struct Pair_16AF80 {
+    u8 pad0[0x28];
+    s32 f28;
+    u8 pad1[4];
+    s32 f30;
+};
+
+struct Ctx_16AF80 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+    u8 pad1[0xC];
+    Pair_16AF80* f2E0;
+    u8 pad2[0x1C];
+    s32 f300;
+};
+
+extern u8 D_0026F138[];
+extern u8 D_0026FA90[];
+extern u8* D_002623C0;
+
+void func_001AA8B8(void* self, f32 v);
+void func_001AD1E8(void* self);
+
+void func_0016AF80(Ctx_16AF80* self)
+{
+    s32 s1 = 0;
+    s32 stride = 0x44C;
+    Pair_16AF80* p = self->f2E0;
+
+    if (p->f28 != p->f30) {
+        void** vt = *(void***)D_0026F138;
+        ((VFnS_16AF80)vt[8])(D_0026F138, "");
+    } else if (self->f2D0 == 0) {
+        void** vt = *(void***)D_0026F138;
+        ((VFnS_16AF80)vt[8])(D_0026F138, "Bentley");
+    } else {
+        s32 flags = *(s32*)(D_002623C0 + self->f2D0 * stride + 0x458);
+        if (flags & 1) {
+            func_001AD1E8(D_0026F138);
+        } else if (self->f2D0 == self->f300) {
+            void** vt = *(void***)D_0026F138;
+            ((VFnS_16AF80)vt[8])(D_0026F138, "Murray");
+        } else {
+            s1 = 1;
+            void** vt = *(void***)D_0026F138;
+            ((VFnS_16AF80)vt[8])(D_0026F138, "");
+        }
+    }
+
+    func_001AA8B8(D_0026F138, 0.0f);
+    ((Obj_16AF80*)D_0026F138)->f464 = 0;
+    {
+        void** vt = *(void***)D_0026F138;
+        ((VFnV_16AF80)vt[14])(D_0026F138);
+    }
+
+    if (s1 != 0) {
+        ((VFnS_16AF80)(*(void***)D_0026FA90)[8])(D_0026FA90, "Press &2X&. to Start Mission!");
+        ((VFnV_16AF80)(*(void***)D_0026FA90)[14])(D_0026FA90);
+    } else {
+        void** vt = *(void***)D_0026FA90;
+        ((VFnV_16AF80)vt[15])(D_0026FA90);
+    }
+}

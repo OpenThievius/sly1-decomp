@@ -699,7 +699,6 @@ void func_00123AB0(Self_123578* object, s32 mode)
     func_00123888(object, mapped);
 }
 
-
 void func_00123B18(Counter_00123B18* counter)
 {
 	counter->value++;
@@ -789,6 +788,7 @@ s32 func_00123D40(TestList_00123D40* self, void* arg)
     }
     return 1;
 }
+
 struct Records_001250C8 {
     u8 pad0[0x238];
     s32 count;
@@ -1394,4 +1394,73 @@ void func_00121358(Self_121358* self, s32 flags)
         }
     }
     func_001B5F28(m->p14 + 0x1B20, self);
+}
+
+struct __attribute__((aligned(16))) Quad_122708 {
+    s32 w[4];
+};
+
+struct Ptr_122708 {
+    u8 pad0[0x8C];
+    f32 f8C;
+    u8 pad1[0xB0 - 0x90];
+    s32 fB0;
+};
+
+struct Src_122708 {
+    u8 pad0[0x190];
+    Quad_122708 q190;
+    u8 pad1[0x1A0 - 0x190 - 16];
+    Quad_122708 q1A0;
+    u8 pad2[0x1B0 - 0x1A0 - 16];
+    Quad_122708 q1B0;
+    u8 pad3[0x1C0 - 0x1B0 - 16];
+    Quad_122708 q1C0;
+    u8 pad4[0x224 - 0x1C0 - 16];
+    Ptr_122708* p224;
+    u8 pad5[0x26C - 0x228];
+    s32 f26C;
+    u8 pad6[0x274 - 0x270];
+    s32 f274;
+};
+
+struct Dst_122708 {
+    u8 pad0[0x20];
+    Quad_122708 q20;
+    u8 pad1[0x40 - 0x30];
+    Quad_122708 q40;
+    Quad_122708 q50;
+    Quad_122708 q60;
+    u8 pad2[0x80 - 0x70];
+    f32 f80;
+    u8 pad3[0x90 - 0x84];
+    Quad_122708 q90;
+    Quad_122708 qA0;
+    Quad_122708 qB0;
+    s32 fC0;
+    s32 fC4;
+};
+
+extern u8 D_002483D0[];
+void func_00121338(void* self, void* a1);
+
+void func_00122708(Dst_122708* self, Src_122708* src)
+{
+    func_00121338(self, src);
+    self->q20 = src->q190;
+    self->q40 = src->q1A0;
+    self->q50 = src->q1B0;
+    self->q60 = src->q1C0;
+    Ptr_122708* p = src->p224;
+    if (p != 0) {
+        if (p->fB0 & 0x20) {
+            self->f80 = p->f8C;
+        }
+    }
+    Quad_122708* table = (Quad_122708*)D_002483D0;
+    self->q90 = table[0];
+    self->qA0 = table[1];
+    self->qB0 = table[2];
+    self->fC0 = src->f26C;
+    self->fC4 = src->f274;
 }
