@@ -1805,3 +1805,172 @@ void func_0012B5B8(Self_12B5B8* self, void* a1, void* a2)
         func_00128150(0, a2, (u8*)self + 0x110, (u8*)self + 0xD0);
     }
 }
+
+extern u8 D_00219560[];
+
+struct Obj_1296E0 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x1FC - 0x18];
+    void* f1FC;
+};
+
+void* func_00121228(Obj_1296E0* root, Obj_1296E0* value, void* table);
+void func_001299E0(Obj_1296E0* self, void* src);
+
+void func_001296E0(Obj_1296E0* self)
+{
+    if (self->f1FC == 0) {
+        void* v = func_00121228((Obj_1296E0*)self->f14, self, D_00219560);
+        self->f1FC = v;
+        func_001299E0(self, v);
+    }
+}
+
+extern u8 D_0021A790[];
+
+struct Obj_129730 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x200 - 0x18];
+    void* f200;
+};
+
+void* func_00121228(Obj_129730* root, Obj_129730* value, void* table);
+void func_001299E0(Obj_129730* self, void* src);
+
+void func_00129730(Obj_129730* self)
+{
+    if (self->f200 == 0) {
+        void* v = func_00121228((Obj_129730*)self->f14, self, D_0021A790);
+        self->f200 = v;
+        func_001299E0(self, v);
+    }
+}
+
+extern u8 D_002197C0[];
+
+struct Item_129CA8;
+struct Node_129CA8 {
+    u8 pad0[0x18];
+    Node_129CA8* f18;
+    u8 pad1[0x1EC - 0x1C];
+    Item_129CA8* f1EC;
+    Item_129CA8* f1F0;
+};
+
+struct Item_129CA8 {
+    void* tag;
+    u8 pad0[0x1C - 4];
+    void* f1C;
+};
+
+void* func_00129CA8(Node_129CA8* node)
+{
+    while (node != 0) {
+        Item_129CA8* a = node->f1EC;
+        if (a != 0 && a->tag == D_002197C0) {
+            return a->f1C;
+        }
+        a = node->f1F0;
+        if (a != 0 && a->tag == D_002197C0) {
+            return a->f1C;
+        }
+        node = node->f18;
+    }
+    return 0;
+}
+
+struct Root_129D00;
+struct Node_129D00 { u8 pad0[0x14]; void* w14; };
+struct Obj_129D00 { u8 pad0[0x14]; Root_129D00* root; };
+
+extern u8 D_002195D8[];
+Node_129D00* func_00121228(Root_129D00* root, Obj_129D00* value, void* table);
+void func_001299E0(Obj_129D00* self, Node_129D00* n);
+
+void func_00129D00(Obj_129D00* self, void* v, Node_129D00** out)
+{
+    Node_129D00* n;
+
+    if (self != 0) {
+        n = func_00121228(self->root, self, D_002195D8);
+        n->w14 = v;
+        func_001299E0(self, n);
+        *out = n;
+    }
+}
+
+struct Arg_12A860;
+struct Obj_12A860 { u8 pad[0x200]; Arg_12A860* inner; };
+
+void func_001853F0(Arg_12A860* a, void* b, void* c);
+
+extern u8 D_00248D30[];
+
+void func_0012A860(Obj_12A860* self, void* b)
+{
+    func_001853F0(self->inner, b, D_00248D30);
+}
+
+extern u8 D_00219600[];
+
+struct Root_0012A8D8;
+struct Obj_0012A8D8;
+struct Inner_0012A8D8;
+struct Tab_0012A8D8;
+typedef void (*VFn_0012A8D8)(Obj_0012A8D8* self);
+
+struct Inner_0012A8D8 {
+    u8 pad0[0x11];
+    u8 f11;
+    u8 pad1[0x1C - 0x12];
+    f32 f1C;
+    f32 f20;
+};
+
+struct Obj_0012A8D8 {
+    VFn_0012A8D8* vtbl;
+    u8 pad0[0x14 - 4];
+    Root_0012A8D8* f14;
+    u8 pad1[0x204 - 0x18];
+    Inner_0012A8D8* f204;
+};
+
+Inner_0012A8D8* func_00121228(Root_0012A8D8* root, Obj_0012A8D8* item, Tab_0012A8D8* table);
+void func_001299E0(Obj_0012A8D8* self, Inner_0012A8D8* src);
+
+void func_0012A8D8(Obj_0012A8D8* self, s32 a1, f32 x, f32 y)
+{
+    if (self->f204 == 0) {
+        Inner_0012A8D8* r = func_00121228(self->f14, self, (Tab_0012A8D8*)D_00219600);
+        self->f204 = r;
+        func_001299E0(self, r);
+    }
+    self->f204->f11 = a1;
+    self->f204->f1C = x;
+    self->f204->f20 = y;
+    self->vtbl[47](self);
+}
+
+struct __attribute__((aligned(16))) Quad_12B180 { s32 a, b, c, d; };
+struct Obj_12B180 { u8 pad[0x288]; u8* ptr; };
+
+extern u8 D_00248D30[];
+
+void func_0012B180(Obj_12B180* self, Quad_12B180* out)
+{
+    u8* src = self->ptr ? self->ptr + 0x10 : D_00248D30;
+    *out = *(Quad_12B180*)src;
+}
+
+struct __attribute__((aligned(16))) Quad_12B1E0 { s32 a, b, c, d; };
+struct Obj_12B1E0 { u8 pad[0x288]; u8* ptr; };
+
+extern u8 D_00248D30[];
+
+void func_0012B1E0(Obj_12B1E0* self, Quad_12B1E0* out)
+{
+    u8* src = self->ptr ? self->ptr + 0x20 : D_00248D30;
+    *out = *(Quad_12B1E0*)src;
+}

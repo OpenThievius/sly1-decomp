@@ -707,3 +707,17 @@ void func_00153328(Self_153328* self, s32 unused, void* a2)
         func_0019D410(&f);
     }
 }
+
+struct Self_152888 { u8 pad0[0x10]; s32 f10; s32 f14; u8* f18; };
+
+extern u8 D_0024A0E0[];
+void func_001528C8(Self_152888* p);
+
+Self_152888* func_00152888(Self_152888* self)
+{
+    self->f10 = 0;
+    self->f14 = 0;
+    self->f18 = D_0024A0E0;
+    func_001528C8(self);
+    return self;
+}

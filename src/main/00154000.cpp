@@ -512,3 +512,12 @@ void func_00156188(u8* self,s32 kind)
         *(f32*)(self+0x1F8)=0.8f;
     }
 }
+
+struct Obj_155F90 { u8 pad[0x340]; f32 value; };
+
+extern f32 D_0024A124;
+
+void func_00155F90(Obj_155F90* self)
+{
+    self->value = D_0024A124;
+}

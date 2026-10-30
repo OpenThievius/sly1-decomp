@@ -1072,3 +1072,67 @@ void func_001686E8(Self_1686E8* self, void* b)
     func_00202A80(self, b);
     func_001F6B60(D_002BE464);
 }
+
+struct Self_16A100 { u8 pad0[0x60]; s32 f60; u8 pad1[0x68 - 0x64]; s32 f68; u8 pad2[0x70 - 0x6C]; f32 f70; };
+
+extern f32 D_0024A798;
+void func_00182C18(Self_16A100* self);
+
+void func_0016A100(Self_16A100* self)
+{
+    func_00182C18(self);
+    f32 k = D_0024A798;
+    self->f60 = -1;
+    self->f68 = 1;
+    self->f70 = k;
+}
+
+struct Self_16A420;
+struct Blk_16A420 { u8 pad0[0xB0]; u32 flags; };
+struct __attribute__((aligned(16))) Quad_16A420 { s32 w[4]; };
+struct Self_16A420 { u8 pad0[0x224]; Blk_16A420* blk; };
+
+extern u8 D_002483D0[];
+void func_001BAC30(Self_16A420* self);
+void* func_0018D5C0(s32 bytes);
+
+void func_0016A420(Self_16A420* self)
+{
+    Blk_16A420* b;
+    Quad_16A420* dst;
+    Quad_16A420* src;
+
+    func_001BAC30(self);
+    if (self->blk == 0) {
+        self->blk = (Blk_16A420*)func_0018D5C0(0xC0);
+    }
+    b = self->blk;
+    b->flags |= 1;
+    dst = (Quad_16A420*)self->blk;
+    src = (Quad_16A420*)D_002483D0;
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+}
+
+struct Obj_16A580 { u8 pad0[0x214]; s32 w214; s32 w218; u8 pad1[0x550 - 0x21C]; s32 w550; };
+struct Sub_16A580 { u8 pad0[4]; };
+struct Buf_16A580 { f32 v[12]; };
+
+extern u8 D_00248D30[];
+
+void func_001B9338(Obj_16A580* self, f32 t);
+void func_00189378(Sub_16A580* sub, s32 zero, Buf_16A580* out);
+void func_001B91A8(Obj_16A580* self, Buf_16A580* out, s32 a, void* table, s32 b, f32 t);
+
+void func_0016A580(Obj_16A580* self, f32 t)
+{
+    Buf_16A580 buf;
+
+    func_001B9338(self, t);
+    if (self->w550 != 0) {
+        return;
+    }
+    func_00189378((Sub_16A580*)((u8*)self + 0xD0), 0, &buf);
+    func_001B91A8(self, &buf, self->w214, D_00248D30, self->w218, t);
+}

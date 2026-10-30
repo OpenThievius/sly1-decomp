@@ -835,3 +835,51 @@ s32 func_001C9990(Obj_1C9990* self, Param_1C9990* p)
     f.q20 = *(Quad_1C9990A*)((u8*)self + 0x140);
     return func_00177838(&f, 0, 0) != 0;
 }
+
+extern f32 D_0024D828;
+
+struct Sub_1C9A58 {
+    u8 pad00[0x34];
+    f32 f34;
+};
+struct Child_1C9A58 {
+    u8 pad00[0x8];
+    Sub_1C9A58* sub8;
+    u8 pad0C[0x4];
+    f32 f10;
+    f32 f14;
+};
+struct Obj_1C9A58 {
+    u8 pad000[0x724];
+    u32 f724;
+    u8 pad728[0x4];
+    u32 flags72C;
+    void* f730;
+    u8 pad734[0xAC];
+    Child_1C9A58* f7E0;
+};
+
+void func_0012E760(Child_1C9A58* c);
+void func_001C8F20(Obj_1C9A58* self, void* arg, s32 mode);
+
+void func_001C9A58(Obj_1C9A58* self) {
+    if (self->flags72C == 0) {
+        return;
+    }
+    if (self->flags72C & 2) {
+        if (self->f7E0 != 0) {
+            if (self->f724 != 0xB) {
+                func_0012E760(self->f7E0);
+                self->f7E0 = 0;
+            } else {
+                self->f7E0->f14 = self->f7E0->sub8->f34;
+                self->f7E0->f10 = D_0024D828;
+            }
+        }
+        s32 m = -3;
+        self->flags72C &= m;
+    }
+    if (self->flags72C & 1) {
+        func_001C8F20(self, self->f730, 0);
+    }
+}

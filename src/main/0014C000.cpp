@@ -975,3 +975,32 @@ void func_0014C5E8(Cfg_14C5E8* self)
     }
     func_00151E20((Cfg_14C5E8*)D_00261EF0, 1.0f - c * 0.8f);
 }
+
+struct Obj_14D9A8 { void* vt; s32 kind; };
+
+extern u8 D_002176D0[];
+extern u8 D_00217708[];
+
+void* func_0018D5C0(u32 n);
+
+Obj_14D9A8* func_0014D9A8(s32 kind)
+{
+    Obj_14D9A8* p;
+    switch (kind) {
+    case 0:
+        p = (Obj_14D9A8*)func_0018D5C0(0x1C);
+        p->vt = (void*)D_002176D0;
+        break;
+    case 1:
+        p = (Obj_14D9A8*)func_0018D5C0(0x1D0);
+        p->vt = (void*)D_00217708;
+        break;
+    default:
+        p = 0;
+        break;
+    }
+    if (p != 0) {
+        p->kind = kind;
+    }
+    return p;
+}

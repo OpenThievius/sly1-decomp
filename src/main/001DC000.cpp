@@ -875,3 +875,58 @@ void func_001DDA50(Obj_1DDA50* self)
         func_0016E118(2);
     }
 }
+
+struct Self_1DE798;
+struct Tab_1DE798;
+struct __attribute__((aligned(16))) Quad_1DE798 { s32 w[4]; };
+
+struct Self_1DE798 {
+    u8 pad0[0xD0];
+    f32 fD0;
+    f32 fD4;
+    u8 pad1[0x638 - 0xD8];
+    f32 f638;
+    u8 pad2[0x6F0 - 0x63C];
+    Quad_1DE798 q6F0;
+    u8 pad3[0x720 - 0x700];
+    s32 w720;
+    u8 pad4[0x72C - 0x724];
+    f32 f72C;
+};
+
+extern u8 D_00248D20[];
+extern u8 D_00275740[];
+void func_001C4458(Self_1DE798* self);
+f32 func_00205778(f32 a, f32 b);
+void func_00188850(Tab_1DE798* t, void* out, f32 x);
+
+void func_001DE798(Self_1DE798* self)
+{
+    f32 f;
+
+    func_001C4458(self);
+    f = func_00205778(self->fD4, self->fD0);
+    self->f638 = f;
+    func_00188850((Tab_1DE798*)D_00248D20, (u8*)self + 0x660, f);
+    self->w720 = -1;
+    self->f72C = -10.0f;
+    self->q6F0 = *(Quad_1DE798*)D_00275740;
+}
+
+struct Slot_001DFE80 { s32 key; s32 rest[10]; };
+
+extern u8 D_00248748[];
+
+void* func_001DFE80(s32 key)
+{
+    Slot_001DFE80* p = (Slot_001DFE80*)D_00248748;
+    Slot_001DFE80* end = (Slot_001DFE80*)(D_00248748 + 0x5AC);
+    do {
+        if (key != p->key) {
+            p++;
+        } else {
+            return p;
+        }
+    } while (p < end);
+    return 0;
+}

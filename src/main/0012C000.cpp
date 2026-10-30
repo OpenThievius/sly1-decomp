@@ -684,3 +684,19 @@ void func_0012FFE8(Obj_12FFE8* self)
     self->f10 = 0;
     self->f20 = 0;
 }
+
+struct Pool_12D3F8 { u8 pad[4]; };
+struct Obj_12D3F8 { void* vt; u8 pad[0x5C]; };
+struct Buf_12D3F8 { u8 pad[4]; };
+extern u8 D_002197B8[];
+void* func_001B5EE0(Pool_12D3F8* pool);
+void func_00152438(Buf_12D3F8* self, s32 value);
+
+Obj_12D3F8* func_0012D3F8(Pool_12D3F8* pool)
+{
+    Obj_12D3F8* o = (Obj_12D3F8*)func_001B5EE0((Pool_12D3F8*)((u8*)pool + 0x1B58));
+    o->vt = D_002197B8;
+    func_00152438((Buf_12D3F8*)((u8*)o + 0x44), 0x20);
+    *(void**)((u8*)o + 0x60) = (u8*)o + 0x64;
+    return o;
+}

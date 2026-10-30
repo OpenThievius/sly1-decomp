@@ -781,3 +781,14 @@ s32 func_001C1A28(List_1C1A28* self, void* a1)
     self->last = n;
     return 1;
 }
+
+struct Self_1C10A8 { u8 pad[0x58]; f32 f58; };
+
+extern f32 D_0024D3B4;
+void func_00182C18(Self_1C10A8* self);
+
+void func_001C10A8(Self_1C10A8* self)
+{
+    func_00182C18(self);
+    self->f58 = D_0024D3B4;
+}

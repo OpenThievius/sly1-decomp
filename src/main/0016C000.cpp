@@ -876,3 +876,90 @@ s32 func_0016E940(Pad_16E940* self)
     }
     return res;
 }
+
+struct Obj_16D0C0 { u8 pad0[0x5A0]; f32 f5a0; u8 pad1[0xC]; u8 sub5b0[0x28]; s32 w5d8; };
+struct Tab_16D0C0 { u8 pad0[4]; };
+struct Buf_16D0C0 { f32 v[12]; };
+
+extern u8 D_00248D20[];
+void func_001B9338(Obj_16D0C0* self, f32 t);
+void func_00188850(Tab_16D0C0* tab, Buf_16D0C0* out, f32 v);
+void func_001B9D10(Obj_16D0C0* self, f32 t, Buf_16D0C0* out, void* data);
+
+void func_0016D0C0(Obj_16D0C0* self, f32 t)
+{
+    Buf_16D0C0 buf;
+
+    func_001B9338(self, t);
+    if (self->w5d8 != 0) {
+        return;
+    }
+    func_00188850((Tab_16D0C0*)D_00248D20, &buf, self->f5a0);
+    func_001B9D10(self, t, &buf, self->sub5b0);
+}
+
+extern u8 D_00248D30[];
+struct Obj_16D788;
+struct Vec_16D788 {
+    f32 x;
+    f32 y;
+    f32 z;
+};
+struct Sub_16D788 {
+    u8 pad000[0x7A4];
+    void* f7A4;
+};
+typedef void (*VFn_16D788)(Obj_16D788* self, void* arg);
+struct Obj_16D788 {
+    VFn_16D788* vtbl;
+    u8 pad004[0x554];
+    Sub_16D788* sub;
+    u8 pad55C[0x10];
+    f32 f56C;
+};
+
+void func_001B9AE0(Obj_16D788* self, s32 a, s32 b, s32 c, s32 d);
+void func_001920B0(void* arg, Vec_16D788* out);
+
+void func_0016D788(Obj_16D788* self) {
+    Vec_16D788 v;
+    func_001B9AE0(self, 3, 0, 3, 0);
+    self->vtbl[36](self, D_00248D30);
+    self->vtbl[37](self, D_00248D30);
+    func_001920B0(self->sub->f7A4, &v);
+    v.z = v.z + self->f56C;
+    self->vtbl[33](self, &v);
+}
+
+struct Self_0016D928 {
+    u8 pad0[0x5C0];
+    s32 f5C0;
+    u8 pad1[0x5CC - 0x5C4];
+    s32 f5CC;
+};
+struct Slot_0016D928 { s32 w[8]; };
+
+extern u8 D_002482D8[];
+
+s32 func_001BE980(void);
+s32 func_001EAA70(Self_0016D928* a, s32 b);
+void func_001BE728(Slot_0016D928* slot);
+
+void func_0016D928(Self_0016D928* self)
+{
+    s32 r;
+
+    if (self->f5C0 == 0) {
+        return;
+    }
+    if (func_001BE980() != 0) {
+        return;
+    }
+    r = func_001EAA70(0, 0x64);
+    if (r >= 0x14) {
+        return;
+    }
+    r = func_001EAA70(0, 6);
+    func_001BE728((Slot_0016D928*)(D_002482D8 + (r << 5)));
+    self->f5CC = 1;
+}

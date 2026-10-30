@@ -806,3 +806,31 @@ void func_001BE860(Ctx_1BE860* self)
     }
     func_0011D798(self->f18, a1, a2);
 }
+
+struct Ent_1BE4A8 { u8 pad[0]; };
+
+extern u8 D_00245020[];
+void func_001BE268(Ent_1BE4A8* e);
+
+void func_001BE4A8(s32 idx)
+{
+    func_001BE268(*(Ent_1BE4A8**)(D_00245020 + idx * 8));
+}
+
+struct Sel_1BE568;
+struct Pair_1BE568 { s32 key; s32 w4; };
+
+extern u8 D_00245020[];
+extern u8 D_006047B0[];
+extern u8 D_006047D0[];
+void func_001BE4A8(Sel_1BE568* self);
+
+s32 func_001BE568(s32 idx)
+{
+    Pair_1BE568* p = (Pair_1BE568*)D_00245020 + idx;
+
+    if (((s32*)D_006047B0)[p->key] == 0) {
+        func_001BE4A8((Sel_1BE568*)idx);
+    }
+    return ((s32*)D_006047D0)[idx];
+}

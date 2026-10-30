@@ -451,3 +451,28 @@ s32 func_00185468(Obj_185468* a0) {
     }
     return a0->f24;
 }
+
+struct __attribute__((aligned(16))) Quad_001853F0 { s32 w[4]; };
+struct Node_001853F0 {
+    u8 pad0[0x1C];
+    s32 f1C;
+    u8 pad1[0x04];
+    void* p24;
+    u8 pad2[0x08];
+    Quad_001853F0 q30;
+};
+
+extern Quad_001853F0 D_00248D30;
+
+void func_001853F0(Node_001853F0* self, void* obj, Quad_001853F0* src)
+{
+    if (obj == 0 || obj == (void*)func_001925F0()) {
+        self->f1C = 0;
+        self->p24 = 0;
+        self->q30 = D_00248D30;
+    } else {
+        self->p24 = obj;
+        self->f1C = 1;
+        self->q30 = *src;
+    }
+}

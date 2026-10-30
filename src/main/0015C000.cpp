@@ -1191,3 +1191,32 @@ void func_0015F8B0(Self_15F8B0* self, Sub_15F8B0* s)
     }
     func_0015F7D8(self);
 }
+
+
+struct Blk_0015DB28 {
+    s32 f00;
+    u8 pad0[0x0C - 0x04];
+    s32 f0C;
+    u8 pad1[0x5C - 0x10];
+    void* f5C;
+    u8 pad2[0x9C - 0x60];
+    u32 f9C;
+    u32 fA0;
+    u32 fA4;
+    u32 fA8;
+};
+
+void func_0015DB80(Blk_0015DB28* self);
+
+Blk_0015DB28* func_0015DB28(Blk_0015DB28* self, s32 a1, s32 a2)
+{
+    self->f5C = (u8*)&D_0024A220;
+    self->f00 = a1;
+    self->f0C = a2;
+    self->fA8 = 0xFF808080;
+    self->fA4 = 0xFF808080;
+    self->fA0 = 0xFF808080;
+    self->f9C = 0xFF808080;
+    func_0015DB80(self);
+    return self;
+}

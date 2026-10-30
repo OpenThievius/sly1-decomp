@@ -1060,3 +1060,62 @@ s32 func_001A4898(void)
     }
     return 2;
 }
+
+extern u8 D_00248D30[];
+
+typedef void (*VFn_1A5C90)(void* self, void* a);
+struct Obj_1A5C90 { VFn_1A5C90* vtbl; };
+struct Self_1A5C90 { u8 pad[0x55C]; Obj_1A5C90* obj; };
+enum Kind_1A5C90 { };
+
+void func_001B9AE0(Obj_1A5C90* self, s32 a, s32 b, s32 c, s32 d);
+void func_001BFCD8(Kind_1A5C90 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+void func_001A5C90(void* a0, void* a1)
+{
+    Self_1A5C90* s = (Self_1A5C90*)a1;
+    s->obj->vtbl[25](s->obj, a1);
+    s = (Self_1A5C90*)a1;
+    s->obj->vtbl[36](s->obj, D_00248D30);
+    s = (Self_1A5C90*)a1;
+    s->obj->vtbl[37](s->obj, D_00248D30);
+    func_001B9AE0(((Self_1A5C90*)a1)->obj, 3, 0, 3, 0);
+    func_001BFCD8((Kind_1A5C90)0x151, (void*)0, 0, (void*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+}
+
+extern u8 D_00248D20[];
+extern u8 D_00248D30[];
+
+struct Ctx_1A5D50 { u8 bytes[4]; };
+struct Obj_1A5D50;
+typedef void (*VFn_1A5D50)(Obj_1A5D50* self, void* a);
+struct Obj_1A5D50 { VFn_1A5D50* vtbl; };
+struct Holder_1A5D50 { u8 pad0[0x55C]; Obj_1A5D50* f55C; };
+
+void func_001B9AE0(Obj_1A5D50* self, s32 a, void* b, s32 c, s32 d);
+
+void func_001A5D50(Ctx_1A5D50* unused, Holder_1A5D50* h)
+{
+    Obj_1A5D50* o = h->f55C;
+
+    (void)unused;
+    o->vtbl[25](o, (void*)0);
+    o->vtbl[36](o, (void*)D_00248D30);
+    o->vtbl[37](o, (void*)D_00248D30);
+    func_001B9AE0(o, 2, D_00248D20, 3, 0);
+}
+
+struct Self_001A6498 { u8 p0[0x550]; s32 f550; u8 p1[0x584 - 0x554]; f32 f584; f32 f588; };
+
+extern u8 D_00248D20[];
+void func_001B7968(Self_001A6498* self);
+void func_001B9AE0(Self_001A6498* self, s32 a, void* b, s32 c, void* d);
+
+void func_001A6498(Self_001A6498* self)
+{
+    func_001B7968(self);
+    self->f550 = -1;
+    self->f584 = 1.0f;
+    self->f588 = 2.5f;
+    func_001B9AE0(self, 1, D_00248D20, 2, D_00248D20);
+}

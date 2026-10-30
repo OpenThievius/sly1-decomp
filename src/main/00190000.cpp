@@ -1004,3 +1004,21 @@ void* func_00192620(void)
     }
     return r;
 }
+
+struct Quad_191F08 { u8 b[16]; } __attribute__((aligned(16)));
+struct Obj_191F08 { u8 p0[0x40]; Quad_191F08 q40; s32 f50; s32 f54; s32 f58; f32 f5C; u8 p60[4]; s32 f64; };
+
+extern u8 D_00248D00[];
+extern f32 D_0024B650;
+void func_00182C18(Obj_191F08* self);
+
+void func_00191F08(Obj_191F08* self)
+{
+    func_00182C18(self);
+    self->q40 = *(Quad_191F08*)D_00248D00;
+    self->f54 = 9;
+    self->f50 = 8;
+    self->f58 = -1;
+    self->f5C = D_0024B650;
+    self->f64 = -1;
+}

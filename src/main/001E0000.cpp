@@ -551,3 +551,18 @@ s32 func_001E1DB8(Ctx_1E1DB8* ctx, const char* fmt, void* a2)
     func_001D72C8(ctx);
     return ctx->count;
 }
+
+extern u8 D_0024E879[];
+
+void func_001E2218(s8* p)
+{
+    while (*p != 0) {
+        s32 c = *p;
+        s32 r = c;
+        if (D_0024E879[c] & 2) {
+            r = c - 0x20;
+        }
+        *p = r;
+        p++;
+    }
+}

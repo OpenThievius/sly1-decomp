@@ -1004,3 +1004,178 @@ void func_0018F7D0(Obj_18F7D0* self)
     }
     *(s32*)((u8*)D_002623C0 + 0x19F8) |= mask;
 }
+
+extern u8 D_0024B3A0[];
+extern u8 D_0024B3B0[];
+extern u8 D_0024B3C8[];
+
+struct Buf_18C770 { u8 bytes[0x50]; };
+struct Obj_18C770 { u8 pad0[0x4F4C]; s32 f4F4C; };
+
+s32 func_001E1FD0(Buf_18C770* dst, const char* fmt, ...);
+s32 func_0018D028(Obj_18C770* self, Buf_18C770* buf, void* a2, void* a3);
+
+s32 func_0018C770(Obj_18C770* self)
+{
+    Buf_18C770 buf;
+    s32 f = self->f4F4C;
+    s32 n;
+    s32 g;
+
+    if (f == 0) {
+        return 0x2C;
+    }
+    n = f - 0x30;
+    n = n - (s32)self;
+    n = n * 0x26FFD927;
+    n = (n >> 2) + 1;
+    func_001E1FD0(&buf, (const char*)D_0024B3A0, D_0024B3B0, D_0024B3C8, n);
+    g = self->f4F4C;
+    return func_0018D028(self, &buf, (void*)g, (void*)(g + 0x1A00));
+}
+
+struct Obj_18CBF8;
+
+void func_0018CC20(Obj_18CBF8* self, void* b, void* c, void* d);
+
+extern u8 D_00248470[];
+extern u8 D_0024B3D8[];
+
+void func_0018CBF8(Obj_18CBF8* self, void* b)
+{
+    func_0018CC20(self, b, D_00248470, D_0024B3D8);
+}
+
+struct __attribute__((aligned(16))) Quad_18DDA0 { s32 a, b, c, d; };
+struct Ctx_18DDA0 { u8 pad[0]; };
+
+extern u8 D_00248D30[];
+void func_0018D8E0(Ctx_18DDA0* self);
+
+void func_0018DDA0(Ctx_18DDA0* self)
+{
+    func_0018D8E0(self);
+    *(Quad_18DDA0*)((u8*)self + 0x350) = *(Quad_18DDA0*)D_00248D30;
+}
+
+struct Ent_18E410 {
+    u8 pad0[8];
+    s32 k0;
+    u8 pad1[0xC];
+    s32 k1;
+    u8 pad2[4];
+};
+
+extern u8 D_002484B0[];
+
+s32 func_0018E410(Ent_18E410* key)
+{
+    Ent_18E410* p = (Ent_18E410*)D_002484B0;
+    s32 i = 0;
+    s32 m;
+
+    do {
+        if (p == key) {
+            m = 1;
+        } else if (p == 0 || key == 0) {
+            m = 0;
+        } else {
+            m = ((p->k0 ^ p->k1) ^ (key->k0 ^ key->k1)) == 0;
+        }
+        if (!m) {
+            i++;
+            p++;
+        } else {
+            return i;
+        }
+    } while (i < 16);
+    return -1;
+}
+
+extern u8 D_002699C0[];
+extern u8 D_0024B580[];
+extern u8 D_0024B588[];
+
+u8* func_0018E480(s32 index)
+{
+    if ((u32)index < 16) {
+        return ((u8**)D_002699C0)[index];
+    }
+    if (index == -1) {
+        return D_0024B580;
+    }
+    return D_0024B588;
+}
+
+struct Ctl_18E4C0 { u8 pad[0]; };
+
+extern u8 D_00269A00[];
+extern u8 D_002484B0[];
+void func_0018F0E8(Ctl_18E4C0* self, void* p);
+
+void func_0018E4C0(s32 idx)
+{
+    func_0018F0E8((Ctl_18E4C0*)D_00269A00, D_002484B0 + (idx << 5));
+}
+
+struct Ctx_18E4F0 { u8 pad0[4]; };
+struct Dev_18E4F0 { u8 pad0[0x19F4]; s32 w19F4; };
+
+extern u8 D_002484B0[];
+extern u8 D_00269A08[];
+
+void func_0018E4C0(Ctx_18E4F0* self, u32 n);
+
+void func_0018E4F0(Ctx_18E4F0* self, u32 n)
+{
+    Dev_18E4F0* dev;
+    s32 m;
+
+    func_0018E4C0(self, n);
+    *(void**)D_00269A08 = (void*)(D_002484B0 + (n << 5));
+    if (n >= 16) { m = 0; } else { m = 1 << n; }
+    dev = (Dev_18E4F0*)D_002623C0;
+    dev->w19F4 |= m;
+}
+
+struct Obj_18ECA8 { u8 pad0[0x60]; u8 sub[0x14]; s32 f74; };
+struct Sub_18ECA8 { u8 b[0x14]; };
+struct Buf_18ECA8 { void* f0; u8 rest[0x3C]; };
+
+extern u8 D_0024B598[];
+
+s32 func_0018F890(Obj_18ECA8* self, s32 flag);
+void func_001F5C0C(void* dst, s32 value, s32 size);
+void func_0013CC00(Sub_18ECA8* a, u32 b, void* c);
+void func_0013CC48(Sub_18ECA8* p, s32 n);
+s32 func_0013CAD8(Sub_18ECA8* a, s32 b, void* c);
+
+s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self)
+{
+    Buf_18ECA8 buf;
+    s32 total = 0x40;
+    while (self->f74 < 0x1000) {
+        if (func_0018F890(self, 1) == 0) {
+            func_001F5C0C(&buf, 0, 0x40);
+            s32 k = self->f74;
+            func_0013CC00((Sub_18ECA8*)&self->sub, total - (k % 32), &buf);
+            break;
+        }
+    }
+    buf.f0 = (void*)D_0024B598;
+    func_0013CC48((Sub_18ECA8*)&self->sub, 0);
+    func_0013CAD8((Sub_18ECA8*)&self->sub, 0, &buf);
+    return 1;
+}
+
+extern u8 D_0024B5B8[];
+extern void* D_00269AEC;
+
+void func_0018F940(void* self, s32 key)
+{
+    if (key == 0xFFFF) {
+        if (self != 0) {
+            D_00269AEC = D_0024B5B8;
+        }
+    }
+}

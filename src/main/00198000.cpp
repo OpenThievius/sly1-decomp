@@ -1393,3 +1393,15 @@ void func_001993C0(s32 a0) {
         (void)func_001781E0((Arg_001993C0*)D_00262E10, a0);
     }
 }
+
+struct Self_19AF00 { u8 pad0[0x4C]; f32 f4C; u8 pad1[0x54 - 0x50]; s32 s54; };
+
+extern f32 D_0024C8C4;
+void func_00182C18(Self_19AF00* self);
+
+void func_0019AF00(Self_19AF00* self)
+{
+    func_00182C18(self);
+    self->s54 = -1;
+    self->f4C = D_0024C8C4;
+}

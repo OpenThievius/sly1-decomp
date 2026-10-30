@@ -829,3 +829,23 @@ f32 func_001EAAE0(f32 a, f32 b)
     f32 t = (b - a) * (f32)r;
     return a + t * 4.6566128730773926e-10f;
 }
+
+struct Self_1E8D58 { u8 p0[0x724]; s32 v724; u8 p1[0x7E0 - 0x728]; s32 v7E0; u8 p2[0xBFC - 0x7E4]; f32 fBFC; u8 p3[0xC5C - 0xC00]; s32 vC5C; };
+
+extern f32 D_0024E66C;
+s32 func_001C8010(Self_1E8D58* self);
+
+s32 func_001E8D58(Self_1E8D58* self)
+{
+    s32 a1;
+    if (self->vC5C <= 0) {
+        self->fBFC = D_0024E66C;
+    }
+    a1 = self->v724;
+    if (a1 == 10) {
+        a1 = (self->v7E0 == 0) ? 8 : 10;
+    } else {
+        a1 = func_001C8010(self);
+    }
+    return a1;
+}

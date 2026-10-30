@@ -1444,3 +1444,39 @@ Pool_11C968* func_0011C968(void)
     }
     return p;
 }
+
+struct Hdr_11EDA8 { u8 pad0[4]; s32 idx; };
+struct Obj_11EDA8 { Hdr_11EDA8* f0; };
+struct Entry_11EDA8 { s32 count; u8* list; };
+struct Pair_11EDA8 { void* node; s32 pad; };
+struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
+struct Buf_11EDA8 { u8 b[0x60]; };
+
+extern u8 D_00244950[];
+
+void func_00137290(Buf_11EDA8* self, s32 a, s32 b, s32 c);
+void func_00137398(Buf_11EDA8* self, s32 a1, u8* a2);
+void func_0011E680(Obj_11EDA8* self, Node_11EDA8* slot, Buf_11EDA8* obj);
+void func_001372E0(Buf_11EDA8* self, s32 flags);
+
+void func_0011EDA8(Obj_11EDA8* self)
+{
+    Buf_11EDA8 buf;
+    s32 off = self->f0->idx << 3;
+    s32 n = *(s32*)(D_00244950 + off);
+    u8* list = *(u8**)(D_00244950 + off + 4);
+    if (n > 0) {
+        Pair_11EDA8* p = (Pair_11EDA8*)(list + 4);
+        s32 i = n;
+        do {
+            Node_11EDA8* node = (Node_11EDA8*)p->node;
+            if (node->flags & 0x800) {
+                func_00137290(&buf, 0, 0, 0);
+                func_00137398(&buf, 4, node->body);
+                func_0011E680(self, node, &buf);
+                func_001372E0(&buf, 2);
+            }
+            p++;
+        } while (--i != 0);
+    }
+}

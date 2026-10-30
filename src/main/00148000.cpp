@@ -1288,3 +1288,15 @@ s32 func_0014BCE8(Obj_14BCE8* self)
     self->field_C20 = 0;
     return 1;
 }
+
+struct __attribute__((aligned(16))) Blk_14A888 { u8 b[48]; };
+struct Holder_14A888 { u8 pad[0x20]; };
+extern u8 D_002483D0[];
+void func_00149398(Holder_14A888* self, void* owner);
+
+void func_0014A888(Holder_14A888* self, void* a1)
+{
+    func_00149398(self, a1);
+    u8* dst = (u8*)self + 0x20;
+    *(Blk_14A888*)dst = *(Blk_14A888*)D_002483D0;
+}

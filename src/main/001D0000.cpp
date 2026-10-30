@@ -327,3 +327,46 @@ void func_001D32D8(Self_1D32D8* self, s32 a1, s32 a2)
     func_001837E0(self, 2, 0, 0);
     ((void (*)(Self_1D32D8*))self->vt[7])(self);
 }
+
+struct Node_1D3470;
+struct Sub_1D3470;
+
+struct Node_1D3470 {
+    u8 pad0[0x18];
+    s32 w18;
+    u8 pad1[0x214 - 0x1C];
+    s32 w214;
+    s32 w218;
+};
+
+extern u8 D_00248D30[];
+void func_001B9338(Node_1D3470* self, f32 t);
+void func_00189378(Sub_1D3470* sub, s32 zero, void* out);
+void func_001B91A8(Node_1D3470* self, void* buf, s32 a, void* p, s32 b, f32 t);
+
+void func_001D3470(Node_1D3470* self, f32 t)
+{
+    u8 buf[0x30];
+
+    func_001B9338(self, t);
+    if (self->w18 == 0) {
+        func_00189378((Sub_1D3470*)((u8*)self + 0xD0), 0, buf);
+        func_001B91A8(self, buf, self->w214, D_00248D30, self->w218, t);
+    }
+}
+
+struct Self_001D3678 { s32 pad; };
+struct Msg_001D3678 { s32 value; };
+
+extern u8 D_00248D20[];
+
+void func_00127378(Self_001D3678* self, s32 kind, Msg_001D3678* msg);
+void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+
+void func_001D3678(Self_001D3678* self, s32 kind, Msg_001D3678* msg)
+{
+    func_00127378(self, kind, msg);
+    if (kind == 10) {
+        func_00185D20(0.0f, self, (void*)msg->value, (u8*)self + 0x140, D_00248D20, 10, 0, 0, (u8*)self + 0x554);
+    }
+}
