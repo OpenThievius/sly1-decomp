@@ -1212,6 +1212,7 @@ func_00162680	func_00162CE0	match
 func_001626A8	func_00162D08	match	
 func_001626C0	func_00162D20	match	
 func_00162810	func_00162E70	match	
+func_00163938	func_00163F98	error	a reference to D_000018C0, which has no address in this version
 func_00163990	func_00163FF0	error	a reference to D_00000FA0, which has no address in this version
 func_00165588	func_00165BE8	error	a reference to D_00000010, which has no address in this version
 func_00165728	func_00165D88	match	
