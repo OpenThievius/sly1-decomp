@@ -697,3 +697,64 @@ s32 func_001AEF00(Obj_1AEF00* o, void* p)
     if (o->f5B4 == 0 && o->f564 == 1 && o->f58C == 0 && func_001833F0(p, o->f568) != 0) return 1;
     return 0;
 }
+
+typedef void (*VFn_1AF3B8)(void* self);
+
+struct Child_1AF3B8 { VFn_1AF3B8* vtbl; };
+
+struct Entry_1AF3B8 { void* obj; s32 value; };
+
+struct Group_1AF3B8 {
+    Child_1AF3B8* child;
+    u8 pad0[0x24 - 4];
+    s32 count;
+    Entry_1AF3B8 items[5];
+};
+
+struct Obj_1AF3B8 {
+    VFn_1AF3B8* vtbl;
+    u8 pad0[0x14 - 4];
+    void* f14;
+    u8 pad1[0x560 - 0x18];
+    void* f560;
+    u8 pad2[0x5D4 - 0x564];
+    s32 groupCount;
+    u8 pad3[0x5E0 - 0x5D8];
+    Group_1AF3B8 groups[1];
+    u8 pad4[0xB00 - 0x630];
+    s32 f_B00;
+};
+
+void func_00124A48(void* self);
+void* func_00183058(void* a, void* b, void* c);
+
+void func_001AF3B8(Obj_1AF3B8* self)
+{
+    Group_1AF3B8* src = &self->groups[0];
+    func_00124A48(self);
+    for (s32 i = 0; i < self->groupCount; i++) {
+        Group_1AF3B8* g = &self->groups[i];
+        Child_1AF3B8* c = g->child;
+        c->vtbl[7](c);
+        if (i != 0) {
+            {
+                s32 j;
+                for (j = 0; j < src->count; j++) {
+                    Entry_1AF3B8* s = src->items + j;
+                    Entry_1AF3B8* d = g->items + j;
+                    Child_1AF3B8* o = (Child_1AF3B8*)func_00183058(s->obj, self->f14, self);
+                    d->obj = o;
+                    if (o->vtbl[19] != 0) {
+                        o->vtbl[19](o);
+                    }
+                    o = (Child_1AF3B8*)d->obj;
+                    o->vtbl[20](o);
+                    d->value = s->value;
+                }
+            }
+            g->count = src->count;
+        }
+    }
+    self->f_B00 = func_001AEF00((Obj_1AEF00*)self, (void*)D_00262E10);
+    ((void (*)(void*, void*))self->vtbl[81])(self, self->f560);
+}

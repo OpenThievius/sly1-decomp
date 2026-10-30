@@ -884,3 +884,41 @@ s32 func_00192688(s32 key)
     }
     return -1;
 }
+
+struct Actor_1904E0;
+typedef void (*VFn_1904E0)(void* self, s32 kind, void* args);
+
+struct Actor_1904E0 {
+    VFn_1904E0* vtbl;
+    u8 pad0[0xA68 - 4];
+    s32 flag;
+    u8 pad1[0xC34 - 0xA6C];
+    s32 f_C34;
+};
+
+struct Msg_1904E0 { s32 id; };
+
+struct Args_1904E0 {
+    Actor_1904E0* self;
+    s32 id;
+};
+
+s32 func_00160C58(void* a, void* b);
+s32 func_001C96D8(void* a, void* b);
+
+s32 func_001904E0(Actor_1904E0* self, Msg_1904E0* msg)
+{
+    Args_1904E0 args;
+    if (func_00160C58(self, msg) != 0 && self->f_C34 == 0) {
+        self->flag = 1;
+    } else {
+        self->flag = 0;
+    }
+    if (func_001C96D8(self, msg) == 0) {
+        return 0;
+    }
+    args.self = self;
+    args.id = msg->id;
+    self->vtbl[18](self, 0x17, &args);
+    return 1;
+}

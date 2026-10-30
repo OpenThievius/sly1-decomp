@@ -580,3 +580,24 @@ void func_001C6D00(Obj_1C6D00* s, Out_1C6D00* out, void* ctx)
         func_001C5D58(s);
     }
 }
+
+struct Obj_1C7188 {
+    u8 pad0[0x720];
+    s32 f720;
+    u8 pad1[0xB10 - 0x724];
+    s32 fB10;
+    u8 pad2[0xB74 - 0xB14];
+    s32 fB74;
+};
+
+void func_001921E8(Obj_1C7188* self, s32 v);
+
+void func_001C7188(Obj_1C7188* self, s32 v)
+{
+    s32 b = self->fB10;
+    s32 a = self->f720;
+    func_001921E8(self, v);
+    self->fB10 = b;
+    self->f720 = a;
+    self->fB74 = v;
+}

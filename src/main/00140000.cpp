@@ -1101,3 +1101,70 @@ void func_00140E10(Ring_140E10* r, s32 a, s32 b)
     r->field428 = b;
     r->field42C = 1;
 }
+
+struct Obj_141210 {
+    u8 pad0[0x34];
+    struct L { void* head; s32 pad38; s32 next_off; } lst;
+    u8 pad1[0x564 - 0x40];
+    s32 count2;
+    void* arr2[9];
+    s32 count1;
+    void* arr1[1];
+};
+
+struct Frame_141210;
+extern Frame_141210* D_0027B314;
+
+struct Frame_141210 {
+    void* list;
+    void* cursor;
+    s32 next_off;
+    Frame_141210* prev;
+    Frame_141210(Obj_141210::L* l)
+    {
+        list = l;
+        cursor = l;
+        next_off = l->next_off;
+        prev = D_0027B314;
+        D_0027B314 = this;
+    }
+    ~Frame_141210() { D_0027B314 = prev; }
+};
+
+extern u8 D_00261410[];
+void func_001BAC30(void* self);
+void func_00124DF8(void* self, s32 a, void* b);
+s32 func_001300E8(void* node, s32 kind);
+void func_00182ED8(void* node);
+
+void func_00141210(Obj_141210* self)
+{
+    func_001BAC30(self);
+    func_00124DF8(self, 1, D_00261410);
+
+    Frame_141210 frame(&self->lst);
+    void* head = *(void**)((u8*)self + 0x34);
+    frame.cursor = (void*)((s32)head + frame.next_off);
+    void* node = head;
+    if (node != 0) {
+        do {
+            if (func_001300E8(node, 0x7B)) {
+                s32 n = self->count1;
+                self->arr1[n] = node;
+                self->count1 = n + 1;
+            } else {
+                if (!func_001300E8(node, 0x83)) {
+                    goto skip;
+                }
+                s32 n = self->count2;
+                self->arr2[n] = node;
+                self->count2 = n + 1;
+            }
+            func_00182ED8(node);
+skip:
+            void* next = *(void**)frame.cursor;
+            frame.cursor = (void*)((s32)next + frame.next_off);
+            node = next;
+        } while (node != 0);
+    }
+}

@@ -817,3 +817,59 @@ void func_001D9C98(Ctrl_1D9C98* self, f32 t)
         func_00129DF8(self);
     }
 }
+
+struct Inner_1D9338 { u8 pad0[0xC]; s32 value; };
+struct Obj_1D9338 {
+    u8 pad0[0xAF8];
+    Inner_1D9338* ptr;
+    u8 pad1[0xB00 - 0xAFC];
+    s32 b00;
+    u8 pad2[0xB08 - 0xB04];
+    s32 b08;
+    s32 b0c;
+};
+struct Bits_1D9338 {
+    u8 pad0[0x70];
+    s32 count;
+    u8 bits[1];
+};
+
+extern u8 D_00261EF0[];
+extern Bits_1D9338* D_002623C8;
+
+void func_00151E20(void* msg, f32 value);
+
+void func_001D9338(Obj_1D9338* self)
+{
+    f32 lo = 0.0f;
+    f32 hi = 1.0f;
+    s32 idx = self->b00 - 1;
+    f32 f = (f32)(idx * 3 + self->ptr->value) * 0.1f;
+    if (f < lo) {
+        f = lo;
+    } else if (hi < f) {
+        f = hi;
+    }
+    s32 s0 = self->b0c - self->b08;
+    s32 t = 0;
+    if (s0 >= 3) {
+        s32 mk = 1 << (s0 & 7);
+        t = D_002623C8->bits[s0 / 8] & mk;
+    }
+    if (s0 < 3 || t) {
+        func_00151E20(D_00261EF0, f);
+    }
+    if (s0 >= 0) {
+        do {
+            Bits_1D9338* g = D_002623C8;
+            u8* bb = g->bits;
+            u8* byte = bb + s0 / 8;
+            s32 mask = 1 << (s0 & 7);
+            if ((*byte & mask) == 0) {
+                *byte = (u8)(*byte | mask);
+                g->count++;
+            }
+            s0--;
+        } while (s0 >= 0);
+    }
+}

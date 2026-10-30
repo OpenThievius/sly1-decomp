@@ -1229,3 +1229,60 @@ void func_00168E78(Ctx_168E78* self, u32 a1){
  self->bits.f37 = a1;
  self->bits.f20 = (self->n4 <= 0x10) ? 0x14 : 0x13;
  self->bits.r51=0; self->bits.r55=0; self->bits.r56=0; self->bits.f61=1;}
+
+extern void* D_0027B314;
+
+void* func_001300E8(void* node, s32 flags);
+
+struct Iter_16A758 {
+    void* head;
+    u8 pad4[4];
+    s32 link;
+};
+
+struct Walk_16A758 {
+    Iter_16A758* iter;
+    void* cursor;
+    s32 link;
+    void* prev;
+
+    Walk_16A758(Iter_16A758* i)
+    {
+        cursor = i;
+        iter = i;
+        link = i->link;
+        prev = D_0027B314;
+        D_0027B314 = this;
+    }
+    ~Walk_16A758() { D_0027B314 = prev; }
+    void* First()
+    {
+        void* n = *(void**)cursor;
+        cursor = (u8*)n + link;
+        return n;
+    }
+    void* Next()
+    {
+        void* n = *(void**)cursor;
+        cursor = (u8*)n + link;
+        return n;
+    }
+};
+
+s32 func_0016A758(u8* self)
+{
+    Walk_16A758 w((Iter_16A758*)(self + 0x34));
+    s32 count = 0;
+    void* node = w.First();
+    while (node != 0) {
+        if (func_001300E8(node, 70)) {
+            s32 x = *(s32*)((u8*)node + 0x550);
+            if (1 < (u32)(x - 3)) {
+            } else {
+                count++;
+            }
+        }
+        node = w.Next();
+    }
+    return count;
+}
