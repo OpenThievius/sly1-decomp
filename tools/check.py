@@ -209,7 +209,7 @@ def check_function(obj, name, key, resolver, image):
     # Every relocation is resolved first, so that a difference shows real addresses. A HI16 waits
     # for the next LO16 of its symbol; every HI16 pending for that symbol takes that LO16's address,
     # as the GNU linker pairs them. A later LO16 without a pending HI16 reuses the last pairing's.
-    pending, last_hi, failure = {}, {}, None
+    pending, last_hi, last_full, failure = {}, {}, {}, None
     for offset, rtype, rsym in relocs:
         i = offset - sym["value"]
         insn = words(code, i)
@@ -253,6 +253,7 @@ def check_function(obj, name, key, resolver, image):
                     failure = failure or "a reference to %s, which has no address in this version" % rsym["name"]
                     continue
                 full = t + addend
+            last_full[key_sym] = full
             for h in his:
                 hi_insn = words(code, h)
                 code[h:h + 4] = ((hi_insn & 0xFFFF0000) | (((full + 0x8000) >> 16) & 0xFFFF)).to_bytes(4, "little")
@@ -261,6 +262,12 @@ def check_function(obj, name, key, resolver, image):
             failure = failure or "a 32-bit relocation in code (a jump table?): not supported yet"
         else:
             failure = failure or "relocation type %d is not supported yet" % rtype
+    # A %hi whose %lo came earlier (a lui in a loop's delay slot) takes the address that %lo formed.
+    for key_sym in list(pending):
+        if key_sym in last_full:
+            for h in pending.pop(key_sym):
+                hi_insn = words(code, h)
+                code[h:h + 4] = ((hi_insn & 0xFFFF0000) | (((last_full[key_sym] + 0x8000) >> 16) & 0xFFFF)).to_bytes(4, "little")
     if pending:
         failure = failure or "a %%hi without its %%lo (%s)" % ", ".join(k[0] for k in pending)
     shown = {"ours": bytes(code), "retail": retail, "address": addr}
