@@ -637,3 +637,41 @@ void func_001F1C90(Obj_1F1C90* self, s32 a1)
     }
     self->f25C = a1;
 }
+
+struct Obj_1F0580 { u8 pad[0x2F4]; s32 mode; };
+
+s32 func_001F0490(void* self, s32 code, s32 a2, s32 a3);
+
+s32 func_001F0580(void* self, s32 code)
+{
+    s32 r;
+    if (code == 9) {
+        return 0;
+    }
+    r = func_001F0490(self, code, 0, 0);
+    if (r == 0) {
+        switch (((Obj_1F0580*)self)->mode) {
+        case 1:
+            if (code >= 2) {
+                if (code < 6) {
+                    r = func_001F0490(self, 1, 0, 0);
+                } else if (code < 8) {
+                    r = func_001F0490(self, 9, 0, 0);
+                }
+            }
+            break;
+        case 2:
+        case 3:
+        case 4:
+            if (code >= 2) {
+                if (code < 5) {
+                    r = func_001F0490(self, 1, 0, 0);
+                } else if (code < 8) {
+                    r = func_001F0490(self, 9, 0, 0);
+                }
+            }
+            break;
+        }
+    }
+    return r;
+}

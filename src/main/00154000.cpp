@@ -512,3 +512,50 @@ void func_00156188(u8* self,s32 kind)
         *(f32*)(self+0x1F8)=0.8f;
     }
 }
+
+struct Item_154880 {
+    u8 pad0[0x34];
+    f32 f34;
+    f32 f38;
+    u8 pad1[0x44 - 0x3C];
+    void* p44;
+    u8 pad2[0x60 - 0x48];
+};
+
+struct Loc_154880 {
+    u32 hdr;
+    s32 count;
+    u8* items;
+    u8 pad[0x30 - 0xC];
+    u8 tmp[0x10];
+    u8 tail[0x10];
+};
+
+void func_0018D608(void);
+void func_0018D6F0(void);
+void* func_0018D658(s32 size);
+void func_0018D800(void* dst, void* src, s32 size);
+void func_00153528(Loc_154880* loc, s32 count);
+void func_00152470(void* tmp, Item_154880* item);
+void func_00153EC0(Loc_154880* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+
+void func_00154880(s32 count, u8* data, f32* values, f32* out)
+{
+    Loc_154880 loc;
+    s32 i;
+
+    func_0018D608();
+    func_00153528(&loc, count);
+    for (i = 0; i < count; i++) {
+        Item_154880* item = (Item_154880*)(loc.items + i * 0x60);
+        item->p44 = func_0018D658(count * 4);
+        func_0018D800(item->p44, data + i * count * 4, count * 4);
+        item->f38 = values[i];
+        func_00152470(loc.tmp, item);
+    }
+    loc.count = count;
+    func_00153EC0(&loc, 0, 0, 0, 0, 0);
+    for (i = 0; i < count; i++)
+        out[i] = *(f32*)(loc.items + i * 0x60 + 0x34);
+    func_0018D6F0();
+}

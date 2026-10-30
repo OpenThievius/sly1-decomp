@@ -484,3 +484,32 @@ void func_001725E0(Self_1725E0* self, void* a, void* b)
     }
     func_001D62E0(self, a, b);
 }
+
+struct Obj_1727B0 { u8 pad0[0x242C]; f32 f242C; f32 f2430; f32 f2434; };
+
+extern u8 D_002638A0[];
+
+f32 func_002058A0(f32 v, f32 m);
+f32 func_001EA4B8(void* p, f32 a, f32 b, void* o, f32 c);
+
+void func_001727B0(Obj_1727B0* self)
+{
+    if (self->f242C == 0.0f) {
+        if (self->f2434 == 0.0f) {
+            return;
+        }
+    }
+    if (self->f242C != 0.0f) {
+        *(f32*)((u8*)self + 0x2430) = self->f242C;
+        self->f2434 = func_002058A0(self->f2434 + self->f242C * D_00261860[0], 6.2831855f);
+    } else {
+        if (self->f2434 == 0.0f) {
+            return;
+        }
+        f32 r = func_001EA4B8(D_002638A0, self->f2434, 6.2831855f, &self->f2430, D_00261860[0]);
+        self->f2434 = r;
+        if (r == 6.2831855f) {
+            self->f2434 = 0.0f;
+        }
+    }
+}

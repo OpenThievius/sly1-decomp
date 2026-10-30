@@ -777,3 +777,69 @@ void func_0019D338(void* self, void* dst, Src_19D338* src, f32* k)
     func_0019D0E0(dst, &f.q2, &f.q3, &f.w40, &f.w44);
     func_0019C9C8(dst, f.w40, &f.q3);
 }
+
+struct Node_19E168;
+struct Obj_19E168;
+
+struct Scene_19E168 {
+    u8 pad0[0x1B38];
+    Obj_19E168* first1B38;
+    Obj_19E168* cur1B3C;
+};
+
+struct Obj_19E168 {
+    u8 pad0[0x14];
+    Scene_19E168* scene;
+    u8 pad18[0x558 - 0x18];
+    Node_19E168* head;
+    u8 pad55C[4];
+    s32 stride;
+    Obj_19E168* saved564;
+};
+
+struct Cursor_19E168;
+struct Node_19E168;
+struct Cursor_19E168 {
+    void* link;
+    u8* at;
+    s32 stride;
+    Cursor_19E168* prev;
+    Cursor_19E168(void* l) {
+        link = l;
+        at = (u8*)l;
+        stride = ((s32*)l)[2];
+        prev = *(Cursor_19E168**)D_0027B314;
+        *(Cursor_19E168**)D_0027B314 = this;
+    }
+    Node_19E168* first() {
+        Node_19E168* n = *(Node_19E168**)link;
+        at = (u8*)n + stride;
+        return n;
+    }
+    Node_19E168* next() {
+        Node_19E168* n = *(Node_19E168**)at;
+        at = (u8*)n + stride;
+        return n;
+    }
+    ~Cursor_19E168() { *(Cursor_19E168**)D_0027B314 = prev; }
+};
+
+
+void func_0019EBE8(Node_19E168* node);
+void func_001B7B78(Obj_19E168* self);
+
+void func_0019E168(Obj_19E168* self)
+{
+    Cursor_19E168 cur(&self->head);
+    Node_19E168* node = cur.first();
+    while (node != 0) {
+        func_0019EBE8(node);
+        node = cur.next();
+    }
+    self->saved564 = self->scene->first1B38;
+    self->scene->first1B38 = self;
+    if (self == self->scene->cur1B3C) {
+        self->scene->cur1B3C = 0;
+    }
+    func_001B7B78(self);
+}

@@ -1079,3 +1079,25 @@ void func_00140F48(u8* p)
     *(Blk_140F48*)(p + 8) = *(Blk_140F48*)(p + 0x220);
     *(s32*)(p + 0x20C) = 0;
 }
+
+struct Blk_140E10 { u8 b[0x200]; s32 tail; };
+
+struct Ring_140E10 {
+    u8 pad0[8];
+    Blk_140E10 src;
+    s32 tail1;
+    u8 pad1[0x10];
+    Blk_140E10 dst;
+    s32 field424;
+    s32 field428;
+    s32 field42C;
+};
+
+void func_00140E10(Ring_140E10* r, s32 a, s32 b)
+{
+    r->tail1 = 0;
+    r->dst = r->src;
+    r->field424 = a;
+    r->field428 = b;
+    r->field42C = 1;
+}
