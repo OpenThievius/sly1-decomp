@@ -721,3 +721,35 @@ void func_001A04A0(Obj_1A04A0* self)
         func_001A0338(self, 0, 0);
     }
 }
+
+typedef int V128_1A01B8 __attribute__((mode(TI)));
+
+struct Obj_1A01B8 {
+    u8 pad00[0x1C];
+    f32 f1C;
+    s32 i20;
+};
+
+void func_0019EB28(Obj_1A01B8* self, f32 f);
+void func_00118CF0(void* out, f32 f);
+void func_00118D10(void* out, void* in);
+V128_1A01B8 func_00118D30(V128_1A01B8 a, V128_1A01B8 b);
+void func_00118D20(void* dst, V128_1A01B8 v);
+extern u8* D_00275710;
+extern u8 D_0026B560[];
+
+void func_001A01B8(Obj_1A01B8* self, f32 f)
+{
+    func_0019EB28(self, f);
+    self->f1C = 0.5f;
+    s32 v = *(s32*)(D_00275710 + 0x1CFC);
+    u8* p = D_0026B560;
+    self->i20 = v;
+    V128_1A01B8 t;
+    func_00118CF0(&t, f);
+    u8* sub = (u8*)self + 0x30;
+    V128_1A01B8 tv = t;
+    V128_1A01B8 u;
+    func_00118D10(&u, p);
+    func_00118D20(sub, func_00118D30(tv, u));
+}

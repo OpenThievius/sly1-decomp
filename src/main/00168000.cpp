@@ -1206,3 +1206,26 @@ void func_00169B18(Bits_169B18* src, void* dst)
     func_00161708(dst, 0x48, 0x31001);
     func_00161708(dst, 0x43, 0x44);
 }
+
+struct Bits_168E78 {
+    u64 lo : 20;
+    u64 f20 : 6;
+    u64 mid : 11;
+    u64 f37 : 14;
+    u64 r51 : 4;
+    u64 r55 : 1;
+    u64 r56 : 5;
+    u64 f61 : 3;
+};
+
+struct Ctx_168E78 {
+    u8 pad0[4];
+    u16 n4;
+    u8 pad1[0x0A];
+    Bits_168E78 bits;
+};
+
+void func_00168E78(Ctx_168E78* self, u32 a1){
+ self->bits.f37 = a1;
+ self->bits.f20 = (self->n4 <= 0x10) ? 0x14 : 0x13;
+ self->bits.r51=0; self->bits.r55=0; self->bits.r56=0; self->bits.f61=1;}

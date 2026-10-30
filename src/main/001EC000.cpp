@@ -1091,3 +1091,37 @@ void func_001EFEE0(Emitter_1EFEE0* self)
     func_0019DDA0(0, 0, 0, (s32)v, D_00262280, 0.0f, 0.0f, 640.0f, 492.80002f);
     }
 }
+
+extern f32 D_00261858[];
+void func_001EF900(void* item, s32 mode);
+
+struct Item_1EFB20 { u8 pad[0x2D0]; s32 kind; f32 lo; f32 hi; s32 sub; s32 tag; };
+struct Owner_1EFB20 { u8 pad[0x180]; s32 link; };
+struct Set_1EFB20 { s32 pad0; s32 count; Item_1EFB20* items[8]; s32 flag; Owner_1EFB20* owner; };
+
+void func_001EFB20(Set_1EFB20* s)
+{
+    s->flag = 0;
+    if (s->owner != 0 && s->owner->link != -1 && s->items[0]->tag == s->owner->link) {
+        s32 i;
+        for (i = 0; i < s->count; i++) {
+            if (s->items[i]->kind != 1) break;
+        }
+        if (i >= s->count) {
+            for (i = 0; i < s->count; i++) {
+                func_001EF900(s->items[i], 2);
+            }
+            s->owner->link = -1;
+        }
+        return;
+    }
+    for (s32 i = 0; i < s->count; i++) {
+        Item_1EFB20* it = s->items[i];
+        if (it->kind != 2) continue;
+        if (it->sub != 0) continue;
+        f32 d = D_00261858[1] - it->lo;
+        if (it->hi < d) {
+            func_001EF900(it, 0);
+        }
+    }
+}

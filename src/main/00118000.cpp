@@ -30,7 +30,7 @@ int func_0011A748(StackAt708* stack)
 struct Vec_1188F0 { f32 x, y, z, w; };
 struct Src_1188F0 { s32 pad0; void* p4; };
 
-void func_0011B008(void* self);
+void* func_0011B008(void* self);
 void func_0011B9A8(void* out, void* src);
 void func_001566C8(void* obj, f32 f);
 void func_0011B060(void* self, s32 n);
@@ -763,7 +763,7 @@ void func_0011B640(Obj_11B640* self, void* arg)
 struct Vec_118850 { f32 x, y, z, w; };
 struct Src_118850 { s32 pad0; s32 n; };
 
-void func_0011B008(void* self);
+void* func_0011B008(void* self);
 void func_0011B9A8(void* out, void* src);
 void func_0016EC38(void* p, s32 n, f32 f);
 void func_0011B060(void* self, s32 mode);
@@ -962,7 +962,7 @@ void func_0011B860(Rec_11B570* self, u32 value)
 struct Tmp_1184F8 { u8 bytes[0x10]; };
 struct Src_1184F8 { s32 pad0; void* a; s32 pad2; s32 b; s32 pad4; void* c; };
 
-void func_0011B008(void* obj);
+void* func_0011B008(void* obj);
 void* func_0011C508(void);
 s32 func_00128018(void* a, s32 b, void* c, void* d);
 void func_0011B740(void* a, void* b);
@@ -984,7 +984,7 @@ void* func_001184F8(void* ret, s32 unused, Src_1184F8* src)
 struct Tmp_118580 { u8 bytes[0x10]; };
 struct Src_118580 { s32 pad0; void* a; s32 pad2; s32 b; s32 pad4; void* c; };
 
-void func_0011B008(void* obj);
+void* func_0011B008(void* obj);
 void* func_0011C508(void);
 s32 func_001280C0(void* a, s32 b, void* c, void* d);
 void func_0011B740(void* a, void* b);
@@ -1006,7 +1006,7 @@ void* func_00118580(void* ret, s32 unused, Src_118580* src)
 struct Tmp_1187E8 { s32 w0; s32 w1; s32 w2; s32 w3; };
 struct Src_1187E8 { s32 pad0; void* a; };
 
-void func_0011B008(void* obj);
+void* func_0011B008(void* obj);
 void func_001BF788(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
@@ -1025,7 +1025,7 @@ void* func_001187E8(void* ret, s32 unused, Src_1187E8* src)
 struct Tmp_118D48 { u8 bytes[0x10]; };
 struct Src_118D48 { s32 pad0; s32 a; };
 
-void func_0011B008(void* obj);
+void* func_0011B008(void* obj);
 s32 func_0011A498(void* a, s32 b, s32 c, void* d);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
@@ -1249,7 +1249,7 @@ struct Node_119218 { s32 f0; s32 f4; Node_119218* next; };
 struct Holder_119218 { s32 f0; s32 f4; Node_119218* head; };
 struct Args_119218 { s32 f0; Holder_119218* holder; };
 
-void func_0011B008(void* p);
+void* func_0011B008(void* p);
 void func_0011B5F0(void* p, s32 flag);
 void func_0011B060(void* p, s32 flags);
 struct Tmp_119218;
@@ -1300,6 +1300,45 @@ Value_11B008* func_0011BDD0(Value_11B008* out, List_11BD28* list, s32 key, Value
     func_0011B538(&tmp, 0x22);
     func_0011B018(out, &tmp);
     func_0011B060(&tmp, 2);
+done:
+    return out;
+}
+
+struct Cursor_119128 { s32 tag; s32 value; s32 pad[2]; };
+struct Node_119128 { s32 f0; s32 f4; Node_119128* next; };
+struct Holder_119128 { s32 f0; s32 f4; Node_119128* head; };
+struct Args_119128 { s32 f0; Holder_119128* holder; };
+
+void func_0011B5F0(void* p, s32 flag);
+void func_0011A080(void* out, void* node, void* extra);
+void func_0011B0A8(void* a, void* b);
+void func_0011B060(void* p, s32 flags);
+void func_0011B018(void* out, void* p);
+
+void* func_00119128(void* out, Args_119128* a1, void* a2)
+{
+    Cursor_119128 L;
+    Cursor_119128 M;
+    Node_119128* n;
+
+    func_0011B008(&L);
+    n = a1->holder->head;
+    if (n != 0) {
+        do {
+            func_0011A080(&M, n, a2);
+            func_0011B0A8(&L, &M);
+            func_0011B060(&M, 2);
+            if (L.tag != 27 || L.value != 0) {
+                func_0011B018(out, &L);
+                func_0011B060(&L, 2);
+                goto done;
+            }
+            n = n->next;
+        } while (n != 0);
+    }
+    func_0011B5F0(&L, 0);
+    func_0011B018(out, &L);
+    func_0011B060(&L, 2);
 done:
     return out;
 }

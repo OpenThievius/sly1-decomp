@@ -550,3 +550,26 @@ void func_00139B70(s32 idx, void* arg)
     func_00152D70(&f);
     func_001529E0(&f, 0, arg);
 }
+
+struct ParamBlock_13AD08 { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
+struct Src_13AD08 { u8 pad[0x40]; f32 scale; };
+
+void* func_001F5C0C(void* dst, s32 value, u32 size);
+void func_0019D410(void* block);
+void func_0013AD80(void* self);
+
+void func_0013AD08(void* owner, s32 unused, Src_13AD08* src)
+{
+    ParamBlock_13AD08 blk;
+    func_001F5C0C(&blk, 0, (u32)0x80);
+    blk.count = 0xF;
+    blk.fn = func_0013AD80;
+    blk.zero = 0;
+    if (src != 0) {
+        blk.radius = src->scale;
+    } else {
+        blk.radius = 1.0f;
+    }
+    blk.owner = owner;
+    func_0019D410(&blk);
+}

@@ -138,3 +138,51 @@ void* func_00113820(void* self, void* x, Src_113820* src)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct Entry_113888 {
+    s32 tag;
+    union {
+        s32 i;
+        f32 f;
+    } v;
+};
+
+struct __attribute__((aligned(16))) Quad_113888 { s32 a, b, c, d; };
+
+void func_0011B008(void* q);
+void func_0011B018(void* dst, void* src);
+void func_0011B060(void* q, s32 n);
+void func_0011B5F0(void* q, s32 flag);
+
+void* func_00113888(void* self, Entry_113888* e, s32 mode)
+{
+    f32 xy[2];
+    Quad_113888 obj;
+    func_0011B008(&obj);
+    f32* out = xy;
+    for (s32 i = 1; i >= 0; i--, e++) {
+        if (e->tag == 0x15) {
+            *out = e->v.f;
+        } else {
+            *out = (f32)e->v.i;
+        }
+        out++;
+    }
+    switch (mode) {
+    case 0:
+        func_0011B5F0(&obj, xy[0] < xy[1]);
+        break;
+    case 1:
+        func_0011B5F0(&obj, xy[0] <= xy[1]);
+        break;
+    case 2:
+        func_0011B5F0(&obj, xy[0] > xy[1]);
+        break;
+    case 3:
+        func_0011B5F0(&obj, xy[0] >= xy[1]);
+        break;
+    }
+    func_0011B018(self, &obj);
+    func_0011B060(&obj, 2);
+    return self;
+}

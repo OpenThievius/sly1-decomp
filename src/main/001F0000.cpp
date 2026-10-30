@@ -675,3 +675,79 @@ s32 func_001F0580(void* self, s32 code)
     }
     return r;
 }
+
+struct __attribute__((packed)) Pair16_1F00F0 {
+    u64 lo;
+    u64 hi;
+};
+
+struct Key_1F00F0 {
+    u8 pad_000[8];
+    s32 f8;
+    u8 pad_00C[0xC];
+    s32 f18;
+    s32 Same(Key_1F00F0* o)
+    {
+        if (this == o) {
+            return 1;
+        }
+        if (o == 0) {
+            return 0;
+        }
+        return ((o->f8 ^ o->f18) ^ (f8 ^ f18)) == 0;
+    }
+};
+
+struct Rec_1F00F0 {
+    u8 pad_000[4];
+    Key_1F00F0* key;
+    u8 pad_008[8];
+    s32 flags;
+    s32 tail;
+};
+
+struct Self_1F00F0 {
+    u8 pad_000[0x10];
+    Pair16_1F00F0 pair;
+    s32 flags;
+    s32 tail;
+    Pair16_1F00F0 spair;
+    s32 mid;
+    s32 last;
+};
+
+struct Blk20_1F00F0 {
+    Pair16_1F00F0 p;
+    s32 w;
+};
+
+struct Obj_1F00F0 {
+    u8 pad_000[0xAA];
+    u16 flags;
+};
+
+extern void* D_00275710;
+extern Key_1F00F0 D_00275B04;
+
+s32 func_001DDA80(void* p);
+void func_0016EC20(Obj_1F00F0* o, s32 n);
+s32 func_001F0220(Self_1F00F0* self, void* param);
+
+s32 func_001F00F0(Self_1F00F0* self, Obj_1F00F0* o, void* param2)
+{
+    if (func_001DDA80(D_00275710) != 0 && *(s32*)((u8*)self + 0x28) != 0 && (o->flags & 0x800) != 0) {
+        func_0016EC20(o, 0x800);
+        *(Blk20_1F00F0*)&self->pair = *(Blk20_1F00F0*)&self->spair;
+        self->tail = self->last;
+        Rec_1F00F0* rr = (Rec_1F00F0*)&self->pair;
+        Key_1F00F0* kk = rr->key;
+        if (kk == 0 || kk->Same(&D_00275B04)) {
+            rr->flags |= 8;
+        } else {
+            rr->flags &= ~8;
+        }
+        func_001F0220(self, param2);
+        return 1;
+    }
+    return 0;
+}
