@@ -1308,3 +1308,90 @@ arm2:
     func_001837E0(self, 2, 0, 0);
     func_00160CF0(D_002623D8);
 }
+
+struct Obj_120FB0 {
+    void** vtbl;
+    s32 kind;
+};
+
+extern u8 D_002196B8[];
+extern u8 D_002196C8[];
+extern u8 D_002196D8[];
+void* func_0018D5C0(s32 bytes);
+
+Obj_120FB0* func_00120FB0(s32 kind)
+{
+    Obj_120FB0* p;
+    switch (kind) {
+    case 0:
+        p = (Obj_120FB0*)func_0018D5C0(0x30);
+        p->vtbl = (void**)D_002196B8;
+        break;
+    case 1:
+        p = (Obj_120FB0*)func_0018D5C0(0x14);
+        p->vtbl = (void**)D_002196C8;
+        break;
+    case 2:
+        p = (Obj_120FB0*)func_0018D5C0(0x18);
+        p->vtbl = (void**)D_002196D8;
+        break;
+    default:
+        p = 0;
+        break;
+    }
+    if (p != 0) {
+        p->kind = kind;
+    }
+    return p;
+}
+
+struct Mgr_121358;
+struct Self_121358 {
+    u8 pad0[4];
+    Mgr_121358* mgr;
+};
+struct Mgr_121358 {
+    void** vtbl;
+    u8 pad4[0x10];
+    u8* p14;
+    u8 pad18[0x1EC - 0x18];
+    Self_121358* p1EC;
+    Self_121358* p1F0;
+};
+
+typedef void (*VFn1_121358)(void* self);
+typedef void (*VFn2_121358)(void* self, void* arg);
+
+extern u8 D_00248D30[];
+void func_00152600(void* a, void* b);
+void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
+void func_001274F8(void* a, void* b);
+void func_00127590(void* a, void* b);
+void func_001B5F28(void* a, void* b);
+
+void func_00121358(Self_121358* self, s32 flags)
+{
+    Mgr_121358* m = self->mgr;
+    s32 local[4];
+    func_00152600((u8*)m + 0x1E0, self);
+    Self_121358* a = m->p1EC;
+    Self_121358* b = m->p1F0;
+    ((VFn1_121358)m->vtbl[47])(m);
+    if (self == a && m->p1EC == 0 && (flags & 1) != 0) {
+        if ((((s32*)m->vtbl)[2] & 2) != 0) {
+            func_001BA500(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
+            ((VFn2_121358)m->vtbl[36])(m, local);
+        } else {
+            func_001274F8(m, D_00248D30);
+        }
+    }
+    if (self == b && m->p1F0 == 0 && (flags & 2) != 0) {
+        if ((((s32*)m->vtbl)[2] & 2) != 0) {
+            func_001BA500(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
+            ((VFn2_121358)m->vtbl[37])(m, local);
+        } else {
+            func_00127590(m, D_00248D30);
+        }
+    }
+    func_001B5F28(m->p14 + 0x1B20, self);
+}

@@ -1313,3 +1313,31 @@ void* func_00107D60(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct Quad_104B18 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pack8_104B18 { s64 a; };
+struct Table_104B18 { Pack8_104B18 p8; s32 w; };
+struct Frame_104B18 { Quad_104B18 q; Table_104B18 tbl; u8 pad[4]; Quad_104B18 out; Quad_104B18 t; f32 fx; f32 fy; };
+extern u8 D_00248ED8[];
+
+void func_0011B008(Quad_104B18* q);
+s32 func_0011B5F0(Quad_104B18* q, s32 flag);
+void func_0011B018(void* dst, Quad_104B18* src);
+void func_0011B060(Quad_104B18* q, s32 mode);
+void func_0011B0A8(Quad_104B18* a, Quad_104B18* b);
+void func_001C23B0(Quad_104B18* t, s32 mode, s32 c, void* z, void* z2, void* p5, void* p6);
+s32 func_00146038(void* obj, void* p, f32 x, f32 y);
+
+void* func_00104B18(void* self, void* x, s32 unused, s32 c)
+{
+    Frame_104B18 f;
+    func_0011B008(&f.q);
+    f.tbl = *(Table_104B18*)D_00248ED8;
+    func_001C23B0(&f.t, 3, c, &f.tbl, &f.out, &f.fx, &f.fy);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_0011B5F0(&f.q, func_00146038(x, &f.out, f.fx, f.fy));
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
