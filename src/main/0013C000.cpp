@@ -749,3 +749,52 @@ void func_0013CCF8(Obj_13CCF8* self)
     self->f688 = func_00140FF8((Obj_13CCF8*)D_00261420);
     self->f614 = -1;
 }
+
+struct Sub_13EF50 { u8 pad[1]; };
+enum Kind_13EF50 { kind_13EF50_2 = 2 };
+struct Tab_13EF50 { u8 pad[1]; };
+struct Obj_13EF50 {
+    u8 pad0[4];
+    Sub_13EF50* p4;
+    u8 pad1[0x11C - 8];
+    s32 f11C;
+    s32 f120;
+    u8 pad2[0x134 - 0x124];
+    s32 f134;
+    u8 pad3[4];
+    s32 f13C;
+};
+typedef void (*VFn_13EF50)(void* self, s32 k, void* a);
+
+extern u8 D_00261420[];
+
+void func_001837E0(Sub_13EF50* a, s32 b, s32 c, s32 d);
+void func_001BFCD8(Kind_13EF50 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_0013ED90(Obj_13EF50* self, s32 mode, void* p, void* q);
+void func_0013EB68(Obj_13EF50* self, s32 k);
+void func_00141040(Tab_13EF50* t, s32 v);
+
+void func_0013EF50(Obj_13EF50* self, void* p, void* q)
+{
+    if (q != 0) {
+        func_001837E0(self->p4, 0x16, 0, 0);
+    } else {
+        func_001837E0(self->p4, 2, 0, 0);
+    }
+    if (self->f134 == 0) {
+        if (q == 0) {
+            func_001BFCD8(kind_13EF50_2, 0, (s32)self->p4, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        }
+    }
+    func_0013ED90(self, 0, p, q);
+    if (self->f13C == 0) {
+        func_0013EB68(self, 2);
+    }
+    if (self->f11C != 0) {
+        func_00141040((Tab_13EF50*)D_00261420, self->f120);
+    }
+    {
+        void** vt = *(void***)self->p4;
+        ((VFn_13EF50)vt[0x48 / 4])(self->p4, 0xC, self);
+    }
+}

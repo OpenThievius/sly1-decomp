@@ -126,3 +126,44 @@ void func_001FF490(Cur_1FF490* cur, List_1FF490* list, s32* lo, s32* hi)
     *lo = mn;
     *hi = mx;
 }
+
+struct Src_1FD6E0 {
+    u32 bits;
+};
+
+struct Parts_1FD6E0 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+};
+
+void func_001FD6E0(struct Src_1FD6E0* src, struct Parts_1FD6E0* out)
+{
+    u32 bits = src->bits;
+    u32 exp = bits >> 23;
+    u32 mant = bits & 0x7FFFFF;
+    exp &= 0xFF;
+
+    out->f04 = bits >> 31;
+    if (exp == 0) {
+        out->f00 = 2;
+        return;
+    }
+    if (exp == 0xFF) {
+        if (mant == 0) {
+            out->f00 = 4;
+            return;
+        }
+        if ((mant & 0x100000) != 0) {
+            out->f00 = 1;
+        } else {
+            out->f00 = 0;
+        }
+        out->f0C = mant;
+        return;
+    }
+    out->f08 = exp - 0x7F;
+    out->f00 = 3;
+    out->f0C = (mant << 7) | 0x40000000;
+}
