@@ -1493,3 +1493,145 @@ void func_00122A18(Obj_122A18* self)
     d2[1] = src[1];
     d2[2] = src[2];
 }
+
+struct Obj_1236C8;
+struct Vt_1236C8 {
+    u8 pad[0x140];
+    void (*f140)(Obj_1236C8* self, Obj_1236C8* owner);
+};
+struct Obj_1236C8 {
+    Vt_1236C8* vt;
+    u8 pad04[0x10];
+    void* host;
+    u8 pad18[0x564 - 0x18];
+    s32 n564;
+    s32 a568[4];
+    s32 n578;
+    s32 a57C[16];
+    s32 n5BC;
+    Obj_1236C8* a5C0[16];
+    s32 n600;
+    s32 a604[0x2B];
+    s32 f6B0;
+};
+
+extern u8 D_00261420[];
+s32 func_0015A418(Obj_1236C8* host, s32 a1, s32 a2, Obj_1236C8* ctx);
+s32 func_001300E8(Obj_1236C8* n, s32 kind);
+void func_00123400(Obj_1236C8* state, Obj_1236C8* value);
+void func_001CAD40(Obj_1236C8* self, Obj_1236C8* value);
+s32 func_00141008(u8* bits, s32 index);
+void func_00123888(Obj_1236C8* self, s32 mode);
+
+void func_001236C8(Obj_1236C8* self)
+{
+    s32 i;
+    s32 n = 0;
+    Obj_1236C8* o;
+    for (i = 0; i < self->n564; i++) {
+        o = (Obj_1236C8*)func_0015A418((Obj_1236C8*)self->host, 0x104, self->a568[i], self);
+        if (o && func_001300E8(o, 0x22)) {
+            func_00123400(o, self);
+            n++;
+        }
+    }
+    self->n564 = n;
+    for (i = 0; i < self->n578; i++) {
+        o = (Obj_1236C8*)func_0015A418((Obj_1236C8*)self->host, 0x104, self->a57C[i], self);
+        if (o && func_001300E8(o, 0x30)) {
+            self->a5C0[self->n5BC++] = o;
+            o->vt->f140(o, self);
+        }
+    }
+    for (i = 0; i < self->n600; i++) {
+        o = (Obj_1236C8*)func_0015A418((Obj_1236C8*)self->host, 0x104, self->a604[i], self);
+        if (o && func_001300E8(o, 8))
+            func_001CAD40(o, self);
+    }
+    if (func_00141008(D_00261420, self->f6B0))
+        func_00123888(self, 1);
+    else
+        func_00123888(self, 0);
+}
+
+struct Obj_123888 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad18[0x550 - 0x18];
+    s32 f550;
+    f32 f554;
+    u8 pad558[4];
+    void* f55C;
+    u8 pad560[0x620 - 0x560];
+    s32* f620;
+    s32 f624;
+    s32 f628;
+    s32 f62C;
+    s32 f630;
+    u8 pad634[0x6B0 - 0x634];
+    s32 f6B0;
+};
+enum Kind_123888 { K_123888_0 };
+
+void func_001BF788(s32* p, s32 n);
+void func_001BF048(s32 x);
+void func_0013ECB0(void* a, s32 b, s32* c, Obj_123888* d, s32 e);
+void func_00160D00(u8* p);
+void func_00160CF0(u8* p);
+void func_001B64D8(void* p, s32 n);
+void func_001B6628(void* p, s32 n);
+void func_00123B28(Obj_123888* self);
+void func_00123BB0(Obj_123888* self);
+void func_00123C20(Obj_123888* self);
+s32 func_00141008(u8* a, s32 b);
+void func_00141040(u8* a, s32 b);
+void func_001837E0(Obj_123888* self, s32 a, s32 b, s32 c);
+s32 func_001BEEF8(s32 a);
+void func_001BFCD8(Kind_123888 a0, s32** a1, Obj_123888* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+extern f32 D_0026185C[];
+extern u8 D_002623D8[];
+extern u8 D_00261420[];
+
+void func_00123888(Obj_123888* self, s32 n)
+{
+    s32 old = self->f550;
+    if (old == n) return;
+    if (old >= 0) {
+        if (old < 2) {
+        } else if (old == 2) {
+            func_001BF788(self->f620, 0);
+            func_001BF048(self->f624);
+            func_0013ECB0(self->f14, self->f62C, &self->f630, self, 0);
+            if (n == 1) func_00160D00(D_002623D8);
+        }
+    }
+    self->f550 = n;
+    self->f554 = D_0026185C[0];
+    switch (n) {
+    case 0:
+        if (self->f55C) func_001B64D8(self->f55C, 0x21A);
+        func_00123B28(self);
+        break;
+    case 1:
+        if (self->f55C) func_001B6628(self->f55C, 0x220);
+        func_00123BB0(self);
+        if (func_00141008(D_00261420, self->f6B0)) {
+            func_001837E0(self, 0x16, 0, 0);
+        } else {
+            func_001837E0(self, 3, 0, 0);
+        }
+        func_00141040(D_00261420, self->f6B0);
+        break;
+    case 2:
+        if (self->f55C) func_001B64D8(self->f55C, 0x21F);
+        if (self->f628 == 0) {
+            func_001BFCD8((Kind_123888)0x15, &self->f620, self, 0, 8000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        }
+        self->f624 = func_001BEEF8(0x6B);
+        func_00123C20(self);
+        func_0013ECB0(self->f14, self->f62C, &self->f630, self, 1);
+        func_001837E0(self, 2, 0, 0);
+        func_00160CF0(D_002623D8);
+        break;
+    }
+}

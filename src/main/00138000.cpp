@@ -667,3 +667,49 @@ void func_0013B4C0(Obj_13B4C0* self)
     self->f678 = 1;
     self->f67C = 0;
 }
+
+struct Ent_1385A0 { u8 pad[0x538]; u64 flags; };
+struct Link_1385A0 { s32 f0; s32 f4; Link_1385A0* f8; Ent_1385A0* fC; };
+struct World_1385A0 { u8 pad[0x1ADC]; u8* grid; s32 base; u8 pad2[8]; };
+
+Link_1385A0* func_00138738(World_1385A0* w, s32 a, s32 b);
+Link_1385A0* func_00138788(World_1385A0* w, s32 a, s32 b);
+void func_001861E8(World_1385A0* w, s32 a);
+void func_00129DF8(Ent_1385A0* e);
+void func_001B5F28(u8* w, Link_1385A0* l);
+
+void func_001385A0(World_1385A0* w, s32 a, s32 b, u8 set, u8 clr) {
+    Link_1385A0* n1;
+    Link_1385A0* n2;
+    s32 ia = (a - w->base) >> 4;
+    s32 ib = (b - w->base) >> 4;
+    u8* p = w->grid + (ia << 8) + ib;
+    u8* q = w->grid + (ib << 8) + ia;
+    u8 v = (set | *p) & ~clr;
+    *q = v;
+    *p = v;
+    if ((v & 0xF) == 0xF || (v & 0x40)) {
+        if (v & 0x80) return;
+        u8 v2 = v | 0x80;
+        *p = v2;
+        *q = v2;
+        n1 = func_00138738(w, a, b);
+        n2 = func_00138738(w, b, a);
+        n1->f8 = n2;
+        n2->f8 = n1;
+    } else if (v & 0x80) {
+        u8 v2 = v & 0x7F;
+        *p = v2;
+        *q = v2;
+        n1 = func_00138788(w, a, b);
+        n2 = func_00138788(w, b, a);
+        if (n1->f0) {
+            u64 m = (u64)0x8000 << 40;
+            func_001861E8(w, n1->f0);
+            if (!(n1->fC->flags & m)) func_00129DF8(n1->fC);
+            if (!(n2->fC->flags & m)) func_00129DF8(n2->fC);
+        }
+        func_001B5F28((u8*)w + 0x1AF0, n1);
+        func_001B5F28((u8*)w + 0x1AF0, n2);
+    }
+}

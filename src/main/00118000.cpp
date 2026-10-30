@@ -1310,3 +1310,96 @@ void* func_00118F48(void* self, void* p, s32 x)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct Ent_11AB58;
+struct Sub_11AB58 { s32 type; Ent_11AB58* ent; };
+struct Node_11AB58 { Ent_11AB58* f0; Sub_11AB58 sub; Node_11AB58* fC; };
+struct List_11AB58 { Node_11AB58* head; };
+struct World_11AB58 {
+    s32 count;
+    Ent_11AB58* ents[0x140];
+    s32 n504;
+    List_11AB58* lists[1];
+};
+struct Item_11AB58 { void* fn; u8 p[8]; Ent_11AB58* fC; Item_11AB58* f10; };
+struct Glob_11AB58 { u8 p[0x1EC8]; Item_11AB58* f1EC8; };
+
+extern u8 D_0025C250[];
+extern u8 D_0025C270[];
+extern u8 D_0025C290[];
+extern u8 D_0025C2B0[];
+extern u8 D_0025C2D0[];
+
+void func_0011C2B0(u8* p);
+void func_0011C2E8(u8* p);
+s32 func_0011C3C8(Ent_11AB58* e);
+void func_0011C3F0(Ent_11AB58* e);
+void func_0011A728(World_11AB58* w, Ent_11AB58* e);
+void func_0011A770(World_11AB58* w, Ent_11AB58* e);
+void func_0011A7B8(World_11AB58* w, Ent_11AB58* e);
+void func_0011A850(World_11AB58* w);
+void func_001834A0(void* a);
+
+void func_0011AB58(World_11AB58* w) {
+    func_0011C2B0(D_0025C250);
+    func_0011C2B0(D_0025C270);
+    func_0011C2B0(D_0025C290);
+    func_0011C2B0(D_0025C2B0);
+    func_0011C2B0(D_0025C2D0);
+    s32 i = w->count;
+    *(s32*)((u8*)w + 0x708) = 0;
+    *(s32*)((u8*)w + 0xF0C) = 0;
+    *(s32*)((u8*)w + 0x1310) = 0;
+    for (i--; i >= 0; i--) {
+        Ent_11AB58* e = w->ents[i];
+        if (func_0011C3C8(e)) {
+            func_0011C3F0(e);
+            func_0011A728(w, e);
+        }
+    }
+    s32 j = w->n504;
+    for (j--; j >= 0; j--) {
+        Node_11AB58* n = w->lists[j]->head;
+        while (n) {
+            func_0011C3F0((Ent_11AB58*)n);
+            Sub_11AB58* sp = &n->sub;
+            switch (sp->type) {
+            case 0x1E: {
+                Ent_11AB58* e = sp->ent;
+                if (func_0011C3C8(e)) {
+                    func_0011C3F0(e);
+                    func_0011A770(w, e);
+                }
+                break;
+            }
+            case 0x1F: {
+                Ent_11AB58* e = sp->ent;
+                if (func_0011C3C8(e)) {
+                    func_0011C3F0(e);
+                    func_0011A7B8(w, e);
+                }
+                break;
+            }
+            case 0x21:
+                func_0011C3F0(sp->ent);
+                break;
+            }
+            n = n->fC;
+        }
+    }
+    for (Item_11AB58* it = ((Glob_11AB58*)D_00275710)->f1EC8; it; it = it->f10) {
+        if (it->fn == (void*)func_001834A0) {
+            Ent_11AB58* e = it->fC;
+            if (e && func_0011C3C8(e)) {
+                func_0011C3F0(e);
+                func_0011A770(w, e);
+            }
+        }
+    }
+    func_0011A850(w);
+    func_0011C2E8(D_0025C250);
+    func_0011C2E8(D_0025C270);
+    func_0011C2E8(D_0025C290);
+    func_0011C2E8(D_0025C2B0);
+    func_0011C2E8(D_0025C2D0);
+}

@@ -486,3 +486,57 @@ void func_001E5278(s32 mode)
     }
     func_001E4E80((Blk_1E5278*)D_00275AF0, D_00275AF0 + 0x14, -1, -1, n);
 }
+
+struct Obj_1E5428; struct Sub_1E5428;
+struct VT_1E5428 { u8 pad[0x6C]; void (*f6C)(Sub_1E5428*, Obj_1E5428*); };
+struct Sub_1E5428 { VT_1E5428* vt; u8 pad[0xC28]; void* f0C2C; };
+struct Obj_1E5428 {
+    u8 p0[0x14]; void* f14;
+    u8 p18[0x110 - 0x18]; u8 f110[1];
+    u8 p111[0x584 - 0x111]; s32 f584; s32 f588[3];
+    u8 p594a[0]; f32 f594; Sub_1E5428* f598;
+    u8 p59c[0x610 - 0x59C]; void* f610; s32 f614;
+    u8 p618[0x620 - 0x618]; Sub_1E5428* f620; Sub_1E5428* f624;
+    u8 p628[0x638 - 0x628]; s32 f638; s32* f63C; s32* f640;
+    u8 p644[0x648 - 0x644]; u8 f648[4]; u8 f64C[1];
+};
+
+void func_00124A48(Obj_1E5428* self);
+void func_00124DF8(Obj_1E5428* self, s32 n, void* table);
+s32 func_001B6290(void* p, Obj_1E5428* ctx, s32 a2, s32 a3);
+void* func_0015A448(void* a, s32 b, Obj_1E5428* c);
+s32 func_0015A418(void* host, s32 a1, s32 a2, Sub_1E5428* ctx);
+void func_00189230(void* a, void* b, void* c);
+extern u8 D_00275B28[];
+extern u8* D_00275710;
+extern Sub_1E5428* D_00262E10;
+
+void func_001E5428(Obj_1E5428* self) {
+    func_00124A48(self);
+    func_00124DF8(self, 3, D_00275B28);
+    self->f614 = func_001B6290(self->f610, self, -1, 1);
+    Sub_1E5428* s = (Sub_1E5428*)func_0015A448(D_00275710, 7, self);
+    if (s) {
+        self->f620 = s;
+        self->f624 = s;
+        s->f0C2C = self;
+        self->f598 = s;
+        self->f584 = func_0015A418(self->f14, 1, 0x160, s);
+        for (s32 j = 0; j < 3; j++)
+            self->f588[j] = func_0015A418(self->f14, 1, 0x161 + j, s);
+        self->f594 = 300.0f;
+        s->vt->f6C(s, self);
+    } else {
+        self->f620 = D_00262E10;
+    }
+    s32 i;
+    for (i = 0; i < self->f638;) {
+        void* r = func_0015A448(self->f14, self->f640[i], self);
+        if (r) {
+            self->f63C[i] = (s32)r;
+            i++;
+        }
+    }
+    self->f638 = i;
+    func_00189230(self->f110, self->f648, self->f64C);
+}

@@ -751,3 +751,172 @@ void func_0012F9B8(Obj_12F9B8* self)
         self->f5A4 = cur;
     }
 }
+
+struct Item_12E760 { s32 w[4]; };
+struct Sub_12E760 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad1[0x38];
+    s32 f50;
+    u8 pad54[0x10];
+    s32 cnt64;
+    Item_12E760* f68;
+    u8 f6C[1];
+};
+struct Vt_12E760 { void* pad[2]; void (*fn8)(void* self, s32 a); };
+struct Elem_12E760 { Vt_12E760* vt; };
+struct Obj_12E760 {
+    u8 pad0[8];
+    Sub_12E760* f8;
+    u8 padC[0x38];
+    s32 f44;
+    u8 pad48[8];
+    s32 f50;
+    u8 pad54[0x90];
+    s32 fE4;
+};
+struct Frame_12E760 { s32 f00; s32 f04; s32 f08; s32 f0C; };
+struct Tmp_12E760 { s32 a; s32 b; };
+
+extern u8 D_0027B314[];
+void func_0012D5D0(Obj_12E760* self, Item_12E760* item, Tmp_12E760* out);
+void func_0012F760(Obj_12E760* self, s32 a, Obj_12E760* b);
+void func_001DBC18(u8* self, s32 node);
+void func_0015F9A0(u8* a, Obj_12E760* s);
+void func_0012D448(Obj_12E760* self, s32 v);
+void func_001DBD40(u8* a, s32 b, s32 c, Obj_12E760* d, s32 e, s32 f);
+void func_00152600(u8* a, Obj_12E760* b);
+void func_00152470(u8* a, Obj_12E760* b);
+void func_001BF718(s32* slot);
+void func_001837E0(Sub_12E760* self, s32 a, s32 b, s32* c);
+
+void func_0012E760(Obj_12E760* self)
+{
+    Frame_12E760 fr;
+    Tmp_12E760 tmp;
+    s32 i = 0;
+    Sub_12E760* sub = self->f8;
+    u8* base = sub->f14;
+    for (i = 0; i < sub->cnt64; i++) {
+        Item_12E760* it = (Item_12E760*)((u8*)sub->f68 + i * 16);
+        tmp.a = 0;
+        func_0012D5D0(self, it, &tmp);
+    }
+    func_0012F760(self, 6, self);
+    func_001DBC18(base, self->fE4);
+    self->fE4 = 0;
+    func_0015F9A0(base, (Obj_12E760*)((u8*)self + 0x54));
+    func_0012D448(self, 0);
+    func_001DBD40(base, 2, 0, self, -1, 0);
+    func_00152600(sub->f6C, self);
+    if (sub->f50 != 0) {
+        func_00152600(base + 0x1B70, self);
+    } else {
+        func_00152600(base + 0x1B64, self);
+    }
+    func_00152470(base + 0x1B7C, self);
+    s32 s0 = (s32)self + 0xC;
+    s32 e = (s32)self + 0x44;
+    fr.f04 = e;
+    fr.f00 = e;
+    s32 link = *(s32*)(e + 8);
+    fr.f0C = *(s32*)D_0027B314;
+    *(s32*)D_0027B314 = (s32)&fr;
+    fr.f08 = link;
+    s32 head = *(s32*)e;
+    fr.f04 = head + fr.f08;
+    s32 a = head;
+    if (a != 0) {
+        do {
+            Elem_12E760* el = (Elem_12E760*)a;
+            el->vt->fn8(el, 7);
+            s32 nx = *(s32*)fr.f04;
+            fr.f04 = nx + fr.f08;
+            a = nx;
+        } while (a != 0);
+    }
+    if (self->f50 != 0)
+        func_001BF718(&self->f50);
+    tmp.b = s0;
+    func_001837E0(sub, 0xB, 1, &tmp.b);
+    *(s32*)D_0027B314 = fr.f0C;
+}
+
+struct Lim_12E9E0 {
+    u8 pad0[0x34];
+    f32 lim;
+    u8 pad1[0xC];
+    s32 mode;
+};
+struct Obj_12E9E0 {
+    u8 pad0[8];
+    Lim_12E9E0* l;
+};
+
+f32 func_002058A0(f32 a, f32 b);
+f32 func_001EAFE0(f32 a, f32 b);
+
+s32 func_0012E9E0(Obj_12E9E0* o, f32* pos, f32* vel)
+{
+    s32 r = 0;
+    Lim_12E9E0* l = o->l;
+    f32 x = *pos;
+    f32 lim = l->lim;
+    if (lim <= x) {
+        switch (l->mode) {
+        case 0:
+            if (lim < x) {
+                *pos = lim;
+                *vel = 0.0f;
+            }
+            break;
+        case 1:
+            *pos = func_002058A0(x, lim);
+            break;
+        case 2: {
+            f32 d = lim + lim;
+            s32 flag = 1;
+            if (d <= x) {
+                *pos = func_002058A0(x, d);
+                if (*pos < l->lim) flag = 0;
+                *vel = __builtin_fabsf(*vel);
+            }
+            if (flag) {
+                *pos = d - *pos;
+                *vel = -*vel;
+            }
+            break;
+        }
+        }
+        r = 1;
+    } else if (x < 0.0f) {
+        switch (l->mode) {
+        case 0:
+            *pos = 0.0f;
+            *vel = 0.0f;
+            break;
+        case 1:
+            *pos = func_001EAFE0(x, lim);
+            break;
+        case 2: {
+            x = -x;
+            if (x <= lim) {
+                *pos = x;
+                *vel = -*vel;
+            } else {
+                f32 d = lim + lim;
+                *vel = __builtin_fabsf(*vel);
+                f32 q = func_001EAFE0(*pos, d);
+                *pos = q;
+                if (l->lim <= q) {
+                    *pos = d - q;
+                    *vel = -*vel;
+                }
+            }
+            break;
+        }
+        }
+        r = 1;
+    }
+    return r;
+}

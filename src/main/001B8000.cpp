@@ -765,3 +765,65 @@ void func_001BB9D0(Obj_1BB9D0* self)
         }
     }
 }
+
+struct B8_1BA130 { u8 b[8]; };
+struct B12_1BA130 { u8 b[8]; s32 w; };
+struct Obj_1BA130 {
+    u8 pad0[0x2D0];
+    B8_1BA130 f2D0;
+    B12_1BA130 f2D8;
+    B8_1BA130 f2E4;
+    u8 pad2EC[0x3A4 - 0x2EC];
+    u8 f3A4[0x4C];
+    s32 f3F0[2];
+    u8 pad3F8[0x414 - 0x3F8];
+    B8_1BA130 f414;
+    u8 pad41C[0x480 - 0x41C];
+    s32 f480;
+    u8 pad484[0x4B0 - 0x484];
+    s32 f4B0;
+    u8 pad4B4[4];
+    s32 f4B8;
+    u8 pad4BC[0x4E4 - 0x4BC];
+    s32 f4E4;
+    u8 pad4E8[0x510 - 0x4E8];
+    s32 f510;
+    u8 pad514[0x538 - 0x514];
+    u64 f538;
+    s32 f540;
+};
+
+void func_00127048(Obj_1BA130* self, Obj_1BA130* other);
+void func_001B7C40(Obj_1BA130* self, s32 flag);
+void func_00160EA0(u8* a, s32 b, u8* c);
+void func_0013E6C8(u8* a, u8* b, u8* c, u8* d);
+
+void func_001BA130(Obj_1BA130* self, Obj_1BA130* other)
+{
+    u64 bit = (self->f538 >> 50) & 1;
+    B8_1BA130 a, c, d;
+    B12_1BA130 b;
+    a = self->f2D0;
+    b = self->f2D8;
+    c = self->f2E4;
+    s32 s480 = self->f480;
+    s32 s4E4 = self->f4E4;
+    d = self->f414;
+    func_00127048(self, other);
+    self->f480 = s480;
+    self->f2D0 = a;
+    self->f2D8 = b;
+    self->f2E4 = c;
+    self->f414 = d;
+    self->f4E4 = s4E4;
+    self->f4B0 = 0;
+    self->f4B8 = 0;
+    self->f538 = (self->f538 & 0xFFFBFFFFFFFFFFFFULL) | (bit << 50);
+    func_001B7C40(self, 1);
+    if (*(s32*)(self->f3A4 + 4)) func_00160EA0((u8*)other + 0x3A4, 0, self->f3A4);
+    if (*(s32*)((u8*)self + 0x3F8)) func_0013E6C8((u8*)other + 0x3A4, (u8*)other + 0x3F0, self->f3A4, (u8*)self + 0x3F0);
+    if (self->f510) func_00160EA0((u8*)other + 0x50C, 0, (u8*)self + 0x50C);
+    if ((s32)self->f538) func_0013E6C8((u8*)other + 0x50C, (u8*)other + 0x530, (u8*)self + 0x50C, (u8*)self + 0x530);
+    self->f540 = 0;
+    self->f538 |= 0x20000000000ULL;
+}

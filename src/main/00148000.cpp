@@ -1300,3 +1300,89 @@ void func_0014A888(Holder_14A888* self, void* a1)
     u8* dst = (u8*)self + 0x20;
     *(Blk_14A888*)dst = *(Blk_14A888*)D_002483D0;
 }
+
+struct Obj_148AC0;
+struct Vt_148AC0 {
+    u8 pad00[0x18];
+    void (*f18)(Obj_148AC0* self);
+    u8 pad1C[0x64 - 0x1C];
+    void (*f64)(Obj_148AC0* self, s32 a);
+    u8 pad68[0x84 - 0x68];
+    void (*f84)(Obj_148AC0* self, s32 a);
+    void (*f88)(Obj_148AC0* self, void* a);
+    u8 pad8C[4];
+    void (*f90)(Obj_148AC0* self, void* a);
+    void (*f94)(Obj_148AC0* self, void* a);
+    u8 pad98[0xCC - 0x98];
+    void (*fCC)(Obj_148AC0* self, s32 a);
+};
+struct Obj_148AC0 {
+    Vt_148AC0* vt;
+    u8 pad04[0x88 - 0x04];
+    u8 f88[0x2A8 - 0x88];
+    f32 f2A8;
+    u8 pad2AC[0x2E0 - 0x2AC];
+    f32 f2E0;
+    u8 pad2E4[0x33C - 0x2E4];
+    s32 f33C;
+};
+struct Self_148AC0 {
+    u8 pad[0x1EC4];
+    void* f1EC4;
+};
+
+extern u8 D_002483D0[];
+extern u8 D_00248D30[];
+extern f32 D_00261B40;
+extern f32 D_00261B48[];
+extern f32 D_00261B50[];
+
+void func_0018D608(void);
+Obj_148AC0** func_0018D658(s32 size);
+s32 func_00148938(Self_148AC0* self, s32 a1, s32 n, Obj_148AC0** arr);
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001ED650(void* out, f32 x, f32 y, f32 z);
+void func_001EEB60(Self_148AC0* a, f32 f, void* b, void* c);
+void func_0018D6F0(void);
+
+s32 func_00148AC0(Self_148AC0* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
+{
+    Obj_148AC0** p;
+    s32 i;
+    s32 count;
+    f32 ang;
+    f32 step;
+    func_0018D608();
+    if (arr == 0) {
+        arr = func_0018D658(n * 4);
+    }
+    count = func_00148938(self, a1, n, arr);
+    i = 0;
+    step = 6.2831855f / (f32)n;
+    ang = func_001EAAE0(0.0f, 6.2831855f);
+    {
+        for (; i < count;) {
+            Obj_148AC0* o = arr[i];
+            u8* q = (u8*)o + 0x300;
+            f32 a;
+            f32 b;
+            o->vt->f18(o);
+            o->vt->f64(o, 0);
+            o->vt->f84(o, a2);
+            o->vt->f88(o, D_002483D0);
+            o->vt->f90(o, D_00248D30);
+            o->vt->f94(o, D_00248D30);
+            o->f2E0 = (f32)i * D_00261B40;
+            o->f33C = 0;
+            i++;
+            o->vt->fCC(o, 3);
+            a = func_001EAAE0(D_00261B48[0], D_00261B48[1]);
+            b = func_001EAAE0(D_00261B50[0], D_00261B50[1]);
+            func_001ED650(q, ang, a, b);
+            ang += step;
+            func_001EEB60((Self_148AC0*)self->f1EC4, o->f2A8, (u8*)o + 0x140, (u8*)o + 0x88);
+        }
+    }
+    func_0018D6F0();
+    return count;
+}

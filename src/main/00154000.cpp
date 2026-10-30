@@ -521,3 +521,89 @@ void func_00155F90(Obj_155F90* self)
 {
     self->value = D_0024A124;
 }
+
+struct __attribute__((aligned(16))) Q_157320 { s32 a, b, c, d; };
+struct Self_157320 { u8 pad[4]; };
+struct Hdr_157320 { u8 pad[4]; s32* f4; s32 f8; };
+struct Node_157320 { u8 pad[4]; };
+struct Item_157320 { u8 pad[4]; };
+
+Node_157320* func_0019E040(u8* ctx, s32 flag);
+void func_0019E158(Node_157320* a, Self_157320* b);
+Item_157320* func_0019EA78(s32 a, Node_157320* b);
+void func_001A0338(Node_157320* self, s32 kind, Item_157320* extra);
+void func_001583E8(Item_157320* a, Self_157320* b);
+f32 func_001EAAE0(f32 a, f32 b);
+s32 func_00152720(void* p);
+
+#define AT(T, p, o) (*(T*)((u8*)(p) + (o)))
+typedef void (*VFn)();
+
+void func_00157320(Self_157320* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q2, f32* v5, f32* v6)
+{
+    u8* s7 = AT(u8*, self, 0x7C);
+    Node_157320* node = 0;
+    u8* c = (u8*)self + 0x120;
+    s32 i;
+    if (h) {
+        if (h->f4) node = (Node_157320*)*h->f4;
+    }
+    if (!node) {
+        node = func_0019E040((u8*)D_00275710, AT(s32, c, 0xC4));
+        if (!node) return;
+        if (h) {
+            if (h->f4) *h->f4 = (s32)node;
+        }
+        func_0019E158(node, self);
+        if (h) {
+            if (h->f8) {
+                typedef void (*F)(Node_157320*, s32);
+                (*(F*)(AT(u8*, node, 0) + 0x6C))(node, h->f8);
+            }
+        }
+    }
+    if (node) {
+    for (i = 0; i < n; i++) {
+        Item_157320* it = func_0019EA78(AT(s32, c, 0x90), node);
+        if (!it) break;
+        Q_157320* s1 = pos + i;
+        u8* cls = AT(u8*, it, 0);
+        f32 f = func_001EAAE0(AT(f32, c, 0xB0), AT(f32, c, 0xB4));
+        typedef void (*F0)(Item_157320*, Q_157320*, s32, f32);
+        (*(F0*)cls)(it, s1, AT(s32, c, 0xC0), f);
+        f32 f1 = AT(f32, c, 0xA4);
+        if (f1 != 0.0f || AT(f32, c, 0xA8) != 0.0f) {
+            AT(f32, it, 0x34) = f1;
+            AT(f32, it, 0x38) = AT(f32, c, 0xA8);
+        }
+        AT(Q_157320, it, 0xA0) = q2[i];
+        AT(f32, it, 0x18) = v5[i];
+        AT(f32, it, 0x1C) = v6[i] - v5[i];
+        AT(Q_157320, it, 0x40) = AT(Q_157320, self, 0x110);
+        func_001583E8((Item_157320*)((u8*)it + 0xB0), self);
+        if (AT(s32, c, 0xB8)) AT(s32, it, 0x20) = AT(s32, c, 0xB8);
+        if (s7) {
+            AT(Q_157320, it, 0x50) = AT(Q_157320, s7, 0x110);
+            AT(Q_157320, it, 0x60) = AT(Q_157320, s7, 0x120);
+            AT(Q_157320, it, 0x70) = AT(Q_157320, s7, 0x130);
+        }
+        if (AT(s32, c, 0x94) != -1) {
+            Node_157320* o = (Node_157320*)func_0019EA78(AT(s32, c, 0x94), 0);
+            if (!o) break;
+            typedef void (*F1)(f32, Node_157320*, void*, s32);
+            F1 fn = *(F1*)(*(u8**)o);
+            fn(AT(f32, it, 0x30) * 0.5f, o, (u8*)it + 0x80, 0);
+            func_001A0338(o, 1, it);
+        }
+        {
+            u8* cl = AT(u8*, it, 0);
+            VFn* p = (VFn*)(cl + 4);
+            if (*p) ((void (*)(Item_157320*, Self_157320*))*p)(it, self);
+        }
+    }
+    if (func_00152720((u8*)node + 0x558)) {
+        typedef void (*F2)(Node_157320*);
+        (*(F2*)(AT(u8*, node, 0) + 0x1C))(node);
+    }
+    }
+}

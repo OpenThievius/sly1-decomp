@@ -873,3 +873,58 @@ void func_001B28A8(Obj_1B28A8* self, void* other)
     }
     func_00182F78(self, other);
 }
+
+struct Ent_1B01B0 {
+    u8 pad0[0x24];
+    s32 count;
+    s32 e[1][2];
+};
+struct Obj_1B01B0;
+struct VT_1B01B0 {
+    void* pad[7];
+    void (*slot1C)(Obj_1B01B0*);
+};
+struct Obj_1B01B0 {
+    VT_1B01B0* vt;
+    u8 pad4[0x550];
+    s32 f554;
+    s32 state;
+};
+
+extern s32 D_002744D0;
+s32 func_001BFCD8(Obj_1B01B0* a0, s32 a1, Obj_1B01B0* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BF788(s32 a, s32 n);
+void func_001AECE8(Obj_1B01B0* self, s32 s);
+void func_00155F90(s32 p);
+
+void func_001B01B0(Obj_1B01B0* self, s32 s)
+{
+    u8* b = (u8*)self;
+    s32 st = self->state;
+    if (st == s) return;
+    if (st == -1 || st == 8) {
+        f32 z = 0.0f;
+        f32 a = 1000.0f, c = 100.0f, d = 0.4f;
+        (void)func_001BFCD8((Obj_1B01B0*)0x1A, (s32)(b + 0x5C4), self, 0, a, c, d, z, z, 0, 0);
+    }
+    switch (s) {
+    case 3:
+    case 7:
+        for (s32 i = 0; i < *(s32*)(b + 0x5D4); i++) {
+            Ent_1B01B0* e = (Ent_1B01B0*)(b + (i * 0x50 + 0x5E0));
+            for (s32 j = 0; j < e->count; j++) func_00155F90(e->e[j][0]);
+        }
+        break;
+    case 8: {
+        f32 v;
+        if (self->f554 == 0) v = *(f32*)(b + 0x5BC); else v = *(f32*)(b + 0xAEC);
+        func_001BF788(*(s32*)(b + 0x5C4), (s32)v * 1000);
+        self->vt->slot1C(self);
+        D_002744D0 = 1;
+        break;
+    }
+    default:
+        break;
+    }
+    func_001AECE8(self, s);
+}

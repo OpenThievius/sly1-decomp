@@ -493,3 +493,91 @@ void func_001C7520(Obj_001C7520* self)
     self->fBFC = D_0024D654;
     self->fC00 = D_0024D654;
 }
+
+struct Self_1C72A0;
+struct Sub_1C72A0;
+struct SubVt_1C72A0 { u8 pad[0x1C]; void (*fn1c)(Sub_1C72A0* s); };
+struct Sub_1C72A0 {
+    SubVt_1C72A0* vtbl;
+    u8 pad[0x534];
+    u64 f538;
+};
+struct Ent_1C72A0 { s32 id; Sub_1C72A0* obj; s32 pad; };
+struct Vt_1C72A0 { u8 pad[0xE0]; void (*fnE0)(Self_1C72A0* s, s32 a, s32 b); };
+struct Slot_1C72A0 { s32 v; s32 w; };
+struct Self_1C72A0 {
+    Vt_1C72A0* vtbl;
+    u8 pad4[0x10];
+    void* f14;
+    u8 pad18[0x6C4];
+    s32 f6dc;
+    u8 pad6e0[0x20];
+    f32 f700;
+    u8 pad704[0x1C];
+    s32 f720;
+    u8 pad724[0x150];
+    Slot_1C72A0 f874[17];
+    u8 pad8fc[0x17C];
+    s32 fa78;
+    Ent_1C72A0 fa7c[1];
+    u8 padA88[0x7C];
+    s32 fb04;
+    s32 fb08;
+    s32 fb0c;
+    s32 fb10;
+};
+
+void func_001C44F0(Self_1C72A0* self);
+void func_00124DF8(Self_1C72A0* self, s32 n, void* table);
+void* func_001CB5B8(void* host);
+void func_001CB648(void* list, Self_1C72A0* self);
+void func_001CA7C0(Self_1C72A0* self);
+s32 func_0015A418(void* host, s32 a1, s32 a2, Self_1C72A0* ctx);
+void* func_0015A838(void* host, s32 a1, s32 a2, Self_1C72A0* ctx);
+void func_001C5EA8(Self_1C72A0* self, f32 f);
+void func_001C8F20(Self_1C72A0* self, s32 a, s32 b);
+s32 func_00141008(void* table, s32 v);
+void func_001DBCC8(void* owner, void* fn, Self_1C72A0* arg, s32 a3, s32 a4);
+s32 func_001C7278(Self_1C72A0* self);
+extern u8 D_00274C30[];
+extern u8 D_00261420[];
+
+void func_001C72A0(Self_1C72A0* self)
+{
+    func_001C44F0(self);
+    func_00124DF8(self, 2, D_00274C30);
+    if (self->f720 == 0) {
+        void* l = func_001CB5B8(self->f14);
+        self->f720 = (s32)l;
+        func_001CB648(l, self);
+    }
+    func_001CA7C0(self);
+    for (s32 i = 0; i <= 16; i++) {
+        s32 v = self->f874[i].v;
+        if (v) {
+            self->f6dc = v;
+            self->f874[16].w = v;
+            self->vtbl->fnE0(self, v, 1);
+            break;
+        }
+    }
+    for (s32 i = 0; i < self->fa78; i++) {
+        Ent_1C72A0* e = &self->fa7c[i];
+        Sub_1C72A0* o = (Sub_1C72A0*)func_0015A418(self->f14, 0x101, e->id, self);
+        e->obj = o;
+        if (o) {
+            o->f538 |= 0x80000000000ULL;
+            e->obj->vtbl->fn1c(e->obj);
+        }
+    }
+    if (self->fb04) {
+        s32 v = self->fb08;
+        if (v != -1) self->fb0c = func_0015A418(self->f14, 0x101, v, self);
+    } else {
+        self->fb0c = (s32)func_0015A838(self->f14, 0x101, 0x8C, self);
+    }
+    func_001C5EA8(self, self->f700);
+    func_001C8F20(self, 0, 0);
+    if (func_00141008(D_00261420, self->fb10))
+        func_001DBCC8(self->f14, (void*)(s32 (*)(Self_1C72A0*))func_001C7278, self, 0, 0);
+}

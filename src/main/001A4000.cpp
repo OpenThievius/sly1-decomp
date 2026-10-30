@@ -1191,3 +1191,76 @@ void func_001A4718(Obj_1A4718* self)
     self->f34C = k146;
     self->f340 = 0;
 }
+
+struct Obj_1A4070 {
+    u8 pad0[0x610];
+    s32 f610;
+    u8 pad614[0x644 - 0x614];
+    void* f644;
+    s32* f648;
+    u8 pad64C[0x668 - 0x64C];
+    s32 f668;
+    void* f66C[4];
+    void* f67C;
+    void* f680;
+    s32 f684;
+};
+enum Kind_1A4070 { K_1A4070_0 };
+
+void func_001F4408(Obj_1A4070* a, s32 n);
+void func_00155F90(void* p);
+void func_00155FA0(void* p);
+void func_001B6628(void* p, s32 n);
+void func_001B64D8(void* p, s32 n);
+void func_0012C7B0(void* a, Obj_1A4070* self, s32 c, s32* out, f32 fa, f32 fb);
+void func_001BF788(s32* p, s32 n);
+void func_001BFCD8(Kind_1A4070 a0, s32** a1, Obj_1A4070* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+void func_001A4070(Obj_1A4070* self, s32 n)
+{
+    s32 old = self->f610;
+    if (old == n) return;
+    void* h = 0;
+    self->f610 = n;
+    s32 snd = -1;
+    s32 flag = 0;
+    s32 kind = 0x14D;
+    switch (n) {
+    case 0:
+        snd = 0x28F;
+        flag = 1;
+        kind = -1;
+        break;
+    case 1:
+        snd = 0x290;
+        break;
+    case 2:
+        snd = 0x290;
+        h = self->f680;
+        break;
+    case 3:
+        snd = 0x290;
+        h = self->f67C;
+        func_001F4408(0, 1);
+        break;
+    }
+    for (s32 i = 0; i < self->f668; i++) {
+        if (flag) func_00155F90(self->f66C[i]);
+        else func_00155FA0(self->f66C[i]);
+    }
+    if (self->f644) {
+        if (old == -1) func_001B6628(self->f644, snd);
+        else func_001B64D8(self->f644, snd);
+    }
+    if (h) {
+        func_0012C7B0(h, self, 1, &self->f684, 0.0f, 1.0f);
+    }
+    if (self->f648) {
+        if (kind == *self->f648) return;
+        func_001BF788(self->f648, 0);
+        self->f648 = 0;
+    }
+    if (kind != -1) {
+        func_001BFCD8((Kind_1A4070)kind, &self->f648, self, 0, 10000.0f, 6000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
+    }
+}

@@ -812,3 +812,79 @@ void func_00160918(void)
     func_00160880();
     func_001F0428((Obj_160918*)D_00247AB0, -1, 0);
 }
+
+// eu: not checkable (check.py: D_00247AB0 has no address in eu)
+
+struct Val_160948 { u8 pad0[8]; s32 f8; u8 pad0C[0xC]; s32 f18; };
+struct Ctx_160948 { u8 pad0[0xC]; f32 fC; u8 pad10[0x19C8]; s32 f19D8; s32 f19DC; u8 pad19E0[0xC]; s32 f19EC; };
+struct Q_160948 { u8 pad0[0x30]; s32 f30; };
+struct Frame_160948 { s32 list; s32 cursor; s32 link; s32 prev; };
+struct Item_160948 { u8 pad0[4]; };
+struct Host_160948 { u8 pad0[0x6C]; Item_160948* head; u8 pad70[4]; s32 link; };
+
+extern u8 D_002623D8[];
+extern u8 D_00247AB0[];
+extern u8 D_00275B04[];
+extern u8 D_00275BC0[];
+extern s32 D_00275F84;
+extern s32 D_0027B314;
+
+Val_160948* func_00160180(s32 key);
+void func_00160CC8(u8* p);
+void func_001F0428(Val_160948* v, s32 a, s32 b);
+void func_001C0760(s32 f);
+void func_001C0790(s32 f);
+Host_160948* func_0015A418(u8* host, s32 a, s32 b, s32 c);
+void func_0012E760(Item_160948* i);
+void func_001E96F8(u8* obj, s32 mode);
+
+static inline s32 same_160948(Val_160948* a, Val_160948* b)
+{
+    if (a == b) return 1;
+    if (a == 0) return 0;
+    if (b == 0) return 0;
+    return ((a->f8 ^ a->f18) ^ (b->f8 ^ b->f18)) == 0;
+}
+
+void func_00160948(void)
+{
+    Val_160948* v = func_00160180((((Ctx_160948*)D_002623C0)->f19D8 << 8) | ((Ctx_160948*)D_002623C0)->f19DC);
+    if (v == 0) v = (Val_160948*)D_00247AB0;
+    func_00160CC8(D_002623D8);
+    if (((Q_160948*)D_00275BC0)->f30 != 1 || ((Ctx_160948*)D_002623C0)->fC != 0.0f || !same_160948(v, (Val_160948*)D_00275B04)) {
+        func_001F0428(v, -1, 1);
+        return;
+    }
+    {
+        if (((Q_160948*)D_00275BC0)->f30 == 1 && D_00275F84 == 0) {
+            func_001C0760(((Ctx_160948*)D_002623C0)->f19EC & 0x80);
+            func_001C0790(((Ctx_160948*)D_002623C0)->f19EC & 0x40);
+            Host_160948* h = func_0015A418((u8*)D_00275710, 0x105, 0x494, 0);
+            if (h != 0) {
+                Frame_160948 fr;
+                s32 e = (s32)&h->head;
+                fr.cursor = e;
+                fr.list = e;
+                s32 old = D_0027B314;
+                s32 link = *(s32*)(e + 8);
+                fr.prev = old;
+                fr.link = link;
+                D_0027B314 = (s32)&fr;
+                s32 hd = *(s32*)e;
+                fr.cursor = hd + link;
+                s32 n = hd;
+                while (n != 0) {
+                    Item_160948* node = (Item_160948*)n;
+                    func_0012E760(node);
+                    s32 nx = *(s32*)fr.cursor;
+                    s32 lk = fr.link;
+                    fr.cursor = nx + lk;
+                    n = nx;
+                }
+                D_0027B314 = fr.prev;
+            }
+            ((Q_160948*)D_00275BC0)->f30 = -1;
+            func_001E96F8(D_00275BC0, 3);
+        }
+    }
+}

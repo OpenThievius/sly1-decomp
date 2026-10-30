@@ -963,3 +963,87 @@ void func_0016D928(Self_0016D928* self)
     func_001BE728((Slot_0016D928*)(D_002482D8 + (r << 5)));
     self->f5CC = 1;
 }
+
+struct Obj_16EC98 { u8 pad0[0x28]; s32 f28; f32 f2C_unused; f32 f30; f32 f34; u8 pad1[8]; f32 f40; f32 f44; f32 f48; u8 pad2[0x5C]; u16 fA8; u16 fAA; };
+
+void func_0016EC20(Obj_16EC98* self, s32 mask);
+extern f32 D_00261858[];
+extern f32 D_00261868[];
+
+s32 func_0016EC98(Obj_16EC98* self)
+{
+    f32 c;
+    f32 base;
+    if (self->f28 == 0) {
+        u16 fl = self->fAA;
+        if (fl & 0x8000) {
+            func_0016EC20(self, 0x8000);
+            self->f28 = -1;
+        } else if (fl & 0x2000) {
+            func_0016EC20(self, 0x2000);
+            self->f28 = 1;
+        } else if (0.8f <= self->f48) {
+            f32 a = fabsf(self->f40);
+            f32 b = fabsf(self->f44);
+            if (b < a) {
+                if (self->f40 < 0.0f) {
+                    self->f28 = -1;
+                } else {
+                    self->f28 = 1;
+                }
+            }
+        }
+        if (self->f28 == 0) {
+            goto done;
+        }
+        c = 0.33329999446868896f;
+        self->f34 = c;
+        base = D_00261868[0];
+    } else {
+        s32 v1 = 0;
+        if (self->f28 < 0) {
+            if (self->fA8 & 0x8000) {
+                v1 = 1;
+            } else if (0.25f <= self->f48) {
+                f32 a = fabsf(self->f40);
+                f32 b = fabsf(self->f44);
+                if (b < a) {
+                    if (self->f40 < 0.0f) v1 = 1;
+                }
+            }
+        } else {
+            if (self->fA8 & 0x2000) {
+                v1 = 1;
+            } else if (0.25f <= self->f48) {
+                f32 a = fabsf(self->f40);
+                f32 b = fabsf(self->f44);
+                if (b < a) {
+                    if (0.0f < self->f40) v1 = 1;
+                }
+            }
+        }
+        if (v1 == 0) {
+            self->f28 = 0;
+            goto done;
+        }
+        if (self->f30 <= D_00261858[4]) {
+            f32 lo = 0.1f;
+            f32 hi = 0.33329999446868896f;
+            f32 t = (self->f34 + self->f34) * 0.33333334f;
+            if (t < lo) {
+                c = lo;
+            } else if (hi < t) {
+                c = hi;
+            } else {
+                c = t;
+            }
+            self->f34 = c;
+            base = D_00261858[4];
+        } else {
+            return 0;
+        }
+    }
+    self->f30 = base + c;
+done:
+    return self->f28;
+}

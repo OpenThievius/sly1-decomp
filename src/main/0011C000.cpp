@@ -1480,3 +1480,50 @@ void func_0011EDA8(Obj_11EDA8* self)
         } while (--i != 0);
     }
 }
+
+struct Q_11D968;
+extern s32* D_0025C340;
+extern s32 D_0025C3C0[];
+extern u8 D_0025C400[];
+extern u8 D_0027B4C8[];
+extern u8 D_002494E8[];
+extern s32 D_0025C380;
+extern s32 D_0025C360;
+extern s32 D_0025C384;
+s32 func_0011CE30(void);
+void func_001F6C20(s32 a);
+void func_0011D110(s32* ptr, s32 count);
+void func_001E1F10(Q_11D968* x);
+s32 func_001F8480(Q_11D968* x);
+s32 func_001F8290(Q_11D968* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, s32 h, s32 i);
+s32 func_0011D078(void);
+void func_0011DE18(void);
+
+s32 func_0011D968(s32 id, s32 size, u8* data)
+{
+    s32 i;
+    for (i = 0; i < size; i++)
+        D_0025C400[i] = data[i];
+    while (D_0025C340) {
+        func_0011CE30();
+        func_001F6C20(0);
+    }
+    func_0011D110(D_0025C3C0, 1);
+    while (func_001F8480((Q_11D968*)D_0027B4C8)) {
+        func_001E1F10((Q_11D968*)D_002494E8);
+        func_0011CE30();
+        func_001F6C20(0);
+    }
+    if (size) {
+        func_001F8290((Q_11D968*)D_0027B4C8, id, 1, D_0025C400, size, D_0025C3C0, 12, 0, 0);
+    } else {
+        func_001F8290((Q_11D968*)D_0027B4C8, id, 1, 0, 0, D_0025C3C0, 12, 0, 0);
+    }
+    while (!func_0011D078()) {
+    }
+    s32 r = D_0025C3C0[1];
+    s32* p = (s32*)(&D_0025C360)[D_0025C380];
+    if (*p && !D_0025C384)
+        func_0011DE18();
+    return r;
+}
