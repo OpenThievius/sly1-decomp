@@ -559,3 +559,10 @@ void func_00154880(s32 count, u8* data, f32* values, f32* out)
         out[i] = *(f32*)(loc.items + i * 0x60 + 0x34);
     func_0018D6F0();
 }
+
+struct Self_155F90 { u8 pad0[0x340]; f32 f340; };
+
+void func_00155F90(Self_155F90* self)
+{
+    self->f340 = 3.4028234663852886e+38f;
+}
