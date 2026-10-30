@@ -1007,3 +1007,64 @@ void func_00168B68(f32 t)
         } while (i < n);
     }
 }
+
+struct Ent1_1690C0 { s32 flags; u8 pad0[2]; u16 f6; s32 f8; s32 fC; u8 pad1[8]; };
+struct Ent2_1690C0 { u8 pad0[4]; s32 flags4; u8 f8; u8 pad1; u16 fA; u8 pad2[4]; s32 f10; s32 f14; u8 pad3[8]; };
+struct Ctl_1690C0 { u8 pad0[4]; s32 f4; };
+struct Ctx_1690C0 { u8 pad0[0xC]; s32 fC; };
+
+extern s32 D_00274500;
+extern Ent2_1690C0* D_00274504;
+extern s32 D_00274508;
+extern Ent1_1690C0* D_0027450C;
+
+s32 func_00168D88(void* self, s32 size);
+void func_00168E78(void* e, s32 v);
+void func_00168F48(void* e, s32 v, void* ctx);
+void func_00152B80(void* self, s32 lo, s32 hi);
+void func_00168FB0(void* e, s32 v);
+void func_00169088(void* e, s32 v, void* ctx);
+
+s32 func_001690C0(s32 mask, Ctl_1690C0* b, Ctx_1690C0* c)
+{
+    s32 saved;
+
+    if (c != 0) {
+        saved = c->fC;
+    } else {
+        saved = 0;
+    }
+    for (s32 i = 0; i < D_00274508; i++) {
+        Ent1_1690C0* e = &D_0027450C[i];
+        if ((e->flags & mask) == mask) {
+            s32 v = func_00168D88(b, e->f6);
+            func_00168E78(e, v);
+            if (c != 0) {
+                func_00168F48(e, v, c);
+                func_00152B80(c, e->fC, e->f8);
+            }
+        }
+    }
+    if ((b->f4 & 0x7F) != 0) {
+        func_00168D88(b, 0x80 - (b->f4 & 0x7F));
+    }
+    for (s32 i = 0; i < D_00274500; i++) {
+        Ent2_1690C0* e = &D_00274504[i];
+        if ((e->flags4 & mask) == mask) {
+            s32 v;
+            if (e->f8 == 0 && (b->f4 & 0x1F) != 0) {
+                func_00168D88(b, 0x20 - (b->f4 & 0x1F));
+            }
+            v = func_00168D88(b, e->fA);
+            func_00168FB0(e, v);
+            if (c != 0) {
+                func_00169088(e, v, c);
+                func_00152B80(c, e->f14, e->f10);
+            }
+        }
+    }
+    if (c == 0) {
+        return 0;
+    }
+    return (c->fC ^ saved) != 0;
+}

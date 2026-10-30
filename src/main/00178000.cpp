@@ -709,3 +709,20 @@ one:
 zero:
     return 0;
 }
+
+struct Pair_1781E0 { s32 a, b; };
+
+void func_001B6598(void* ptr, s32* out);
+void func_001B6568(void* ptr, s32* out);
+
+void func_001781E0(u8* self, u8* other)
+{
+    Pair_1781E0 r;
+    if (*(s32*)(self + 0x2220) != 9) {
+        func_001B6598(*(void**)(other + 0x2D8), &r.a);
+        func_001B6568(*(void**)(other + 0x2D8), &r.b);
+        if (r.a == 0x22E && (r.b == r.a || r.b == -1)) {
+            *(u8**)(self + 0x2BE0) = other;
+        }
+    }
+}

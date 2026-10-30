@@ -764,3 +764,25 @@ s32 func_0016EED0(Obj_16EED0* self)
 done:
     return self->f2C;
 }
+
+extern u16 D_00262D18;
+
+void func_0016F188(Timer_16F1F8* node)
+{
+    Timer_16F1F8* p = D_00262DFC;
+    if (p != 0) {
+        do {
+            if (node == p) {
+                return;
+            }
+            p = p->f18;
+        } while (p != 0);
+    }
+    node->f18 = D_00262DFC;
+    D_00262DFC = node;
+    if (D_00262D18 == *(u16*)node->f0) {
+        node->f10 = 1;
+    } else {
+        node->f10 = 0;
+    }
+}

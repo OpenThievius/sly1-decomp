@@ -1133,3 +1133,120 @@ void func_0019B188(void* self)
     func_0019C1C0(self, 1);
     o->q650 = o->q140;
 }
+
+typedef void (*VFn1_19AD68)(void* self);
+typedef void (*VFn2_19AD68)(void* self, void* arg);
+
+struct Obj1_19AD68 { VFn1_19AD68* vtbl; };
+struct Obj2_19AD68 { VFn2_19AD68* vtbl; };
+
+struct Inner_19AD68 {
+    u8 pad0[0x1CE4];
+    s32 f1CE4;
+};
+
+struct Actor_19AD68 {
+    u8 pad0[0x14];
+    Inner_19AD68* f14;
+    u8 pad1[0x614 - 0x18];
+    void* f614;
+    u8 pad2[0x650 - 0x618];
+    Obj2_19AD68* f650;
+    u8 pad3[0x760 - 0x654];
+    s32 f760;
+    s32 f764;
+    void* arr768[28];
+    s32 f7D8;
+    void* arr7DC[1];
+};
+
+struct Ctx_002623C4 {
+    u8 pad0[0x43C];
+    s32 f43C;
+};
+
+struct Glob_002623C0 {
+    u8 pad0[0x19EC];
+    s32 f19EC;
+    s32 f19F0;
+};
+
+struct Ctl_002623C8 {
+    s32 f0;
+};
+
+extern Ctx_002623C4* D_002623C4;
+extern s32 D_00270454;
+extern u8 D_00264A40[];
+
+void func_001B64D8(void* a, s32 b);
+void func_001E9570(void* q);
+s32 func_001602A0(void);
+void func_001604B8(s32 mode);
+void func_0018C7F8(void* p);
+void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+void func_0019AD68(Actor_19AD68* self)
+{
+    s32 sel;
+    s32 idx;
+    s32 n;
+    s32 v;
+    void* item;
+    Obj1_19AD68* r;
+
+    func_001B64D8(self->f614, 0x38E);
+    if (self->f650 == 0) {
+        self->f7D8 = 0;
+    } else {
+        self->f650->vtbl[28](self->f650, self);
+        self->f650 = 0;
+        self->f7D8 = 0;
+    }
+
+    if (D_00270454 != 0) {
+        func_001E9570((void*)&D_00275BC0);
+    }
+    if ((self->f760 & (s64)0xF000FFFF) != 0) {
+        Ctx_002623C4* ctx = D_002623C4;
+        Glob_002623C0* g = (Glob_002623C0*)D_002623C0;
+        Ctl_002623C8* ctl = (Ctl_002623C8*)D_002623C8;
+
+        ctx->f43C = ctx->f43C + 1;
+        g->f19F0 = g->f19F0 | self->f760;
+        self->f14->f1CE4 = 0;
+        ctl->f0 = ctl->f0 | 4;
+
+        v = g->f19EC;
+        if ((v & 8) == 0) {
+            g->f19EC = v | 8;
+        } else if ((v & 0x10) == 0) {
+            g->f19EC = v | 0x10;
+        }
+
+        if (func_001602A0() & 4) {
+            func_001604B8(4);
+        }
+
+        sel = 0x37E;
+        if (self->f760 != 1) {
+            sel = 0x37F;
+            func_0018C7F8(D_00264A40);
+        }
+
+        r = (Obj1_19AD68*)func_0015A418(self->f14, 0x101, sel, self);
+        if (r != 0) {
+            r->vtbl[6](r);
+        }
+
+        idx = self->f764;
+        if (idx >= 0) {
+            item = self->arr768[idx];
+            if (item != 0) {
+                n = self->f7D8;
+                self->arr7DC[n] = item;
+                self->f7D8 = n + 1;
+            }
+        }
+    }
+}
