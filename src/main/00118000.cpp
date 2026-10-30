@@ -1220,3 +1220,56 @@ void* func_00119970(void* self, Owner_119970* owner, s32 c)
     func_0011B060(&q, 2);
     return self;
 }
+
+// Fixed by merging the two flag tests into one "kind != 0x1B || p != 0".
+
+struct __attribute__((aligned(16))) Quad_119310 { s32 kind; void* p; s32 w[2]; };
+struct Node_119310 { s32 kind; Node_119310* f4; Node_119310* f8; };
+
+s32 func_0011B008(Quad_119310* q);
+void func_0011B018(void* out, Quad_119310* q);
+void func_0011B060(Quad_119310* q, s32 mode);
+void func_0011B0A8(Quad_119310* a, Quad_119310* b);
+void func_0011B538(Quad_119310* q, s32 n);
+void func_0011A080(Quad_119310* t, Node_119310* n, s32 c);
+
+void* func_00119310(void* self, Node_119310* x, s32 c)
+{
+    Quad_119310 q, r, t;
+    func_0011B008(&q);
+    func_0011B008(&r);
+    func_0011B538(&q, 0x22);
+    Node_119310* n = x->f4->f8;
+    while (n) {
+        Node_119310* e = n->f4;
+        s32 flag;
+        if (e->kind == 10) {
+            flag = 1;
+        } else {
+            func_0011A080(&t, e, c);
+            flag = 0;
+            func_0011B0A8(&r, &t);
+            func_0011B060(&t, 2);
+            if (r.kind != 0x1B || r.p != 0)
+                flag = 1;
+            if (flag && e->f8 == 0)
+                func_0011B0A8(&q, &r);
+        }
+        if (flag) {
+            e = e->f8;
+            while (e) {
+                func_0011A080(&t, e, c);
+                func_0011B0A8(&q, &t);
+                func_0011B060(&t, 2);
+                e = e->f8;
+            }
+            n = 0;
+        } else {
+            n = n->f8;
+        }
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&r, 2);
+    func_0011B060(&q, 2);
+    return self;
+}

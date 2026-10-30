@@ -526,3 +526,39 @@ void func_0013A3A0(Obj_13A3A0* self)
     if (hit == 0)
         self->vtbl[7](self);
 }
+
+// NEAR: frame and loop shape right; retail tests the call condition as a 0/1 value (li a0,1 / beqzl) and orders registers differently
+
+struct Sub_13B430 { u8 pad0[0xC]; s32 next_0C; };
+struct Node_13B430 { u8 pad0[0x380]; Sub_13B430* sub_380; u8 pad1[0x630 - 0x384]; Node_13B430* next_630; };
+struct Root_13B430 { u8 pad0[0x1CB4]; Node_13B430* first_1CB4; };
+
+extern u8* D_00275710;
+
+void func_0013A008(Node_13B430* node);
+
+void func_0013B430(s32 mask)
+{
+    Node_13B430* node;
+    s32 v;
+    s32 go;
+    s32 scratch[4];
+
+    (void)scratch;
+    if (mask != 0) {
+        node = ((Root_13B430*)D_00275710)->first_1CB4;
+        if (node != 0) {
+            do {
+                v = node->sub_380->next_0C;
+                go = 0;
+                if ((v & 0x10000000) != 0 || (mask & v) == mask) {
+                    go = 1;
+                }
+                if (go) {
+                    func_0013A008(node);
+                }
+                node = node->next_630;
+            } while (node != 0);
+        }
+    }
+}

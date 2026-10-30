@@ -577,3 +577,47 @@ void func_0012D448(Obj_12D448* self, s32 v)
     }
     self->state = (s8)v;
 }
+
+struct Set_12FA88 {
+    u8 pad0[0x550];
+    s32 flag550;
+    s32 count554;
+    s32 items558[4];
+    s32 count568;
+    s32 items56C[1];
+};
+
+s32 func_001B8A08(void* self, void* key);
+s32 func_001833F0(void* key, s32 item);
+s32 func_001300E8(void* key, s32 kind);
+
+s32 func_0012FA88(Set_12FA88* self, void* key)
+{
+    s32 hit;
+    s32 i;
+    s32 j;
+
+    if (func_001B8A08(self, key) != 0) {
+        return 1;
+    }
+    for (i = 0; i < self->count554; i++) {
+        if (func_001833F0(key, self->items558[i]) != 0) {
+            break;
+        }
+    }
+    if (i < self->count554) {
+        hit = 1;
+        goto tail;
+    }
+    for (j = 0; j < self->count568; j++) {
+        if (func_001300E8(key, self->items56C[j]) != 0) {
+            break;
+        }
+    }
+    hit = j < self->count568;
+tail:
+    if (self->flag550 != 0) {
+        return hit;
+    }
+    return hit ^ 1;
+}

@@ -1253,3 +1253,134 @@ lookup:
     if (o->f764 >= 0x1C)
         o->f764 = -1;
 }
+
+struct Actor_1982A0 { u8 pad0[0x724]; s32 kind; u8 pad1[0xC10 - 0x728]; s32 fC10; };
+
+s32 func_001C96B8(void* self);
+s32 func_001C8010(void* self);
+
+s32 func_001982A0(void* self)
+{
+    Actor_1982A0* actor = (Actor_1982A0*)self;
+    s32 r;
+
+    switch (actor->kind) {
+    case 2:
+        if (func_001C96B8(self) == 0) {
+            r = 4;
+            break;
+        }
+        r = func_001C8010(self);
+        break;
+    case 0x10:
+        r = 0x10;
+        if (actor->fC10 != 0) {
+            r = 0;
+        }
+        break;
+    default:
+        r = func_001C8010(self);
+        break;
+    }
+    return r;
+}
+
+struct Actor_199218 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x2D0 - 0x18];
+    s32 n2D0;
+    void* f2D4;
+    void* f2D8;
+    s32 n2DC;
+    s32 arr2E0[8];
+    s32 n300;
+    void* arr304[8];
+};
+
+struct Elem_199218 {
+    u8 pad0[0x2D0];
+    void* f2D0;
+    void* f2D4;
+};
+
+struct Gl_199218 {
+    u8 pad0[0x448];
+    s32 n448;
+};
+
+
+void func_00124A48(void* self);
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void* func_001B6290(void* a, void* b, s32 c, s32 d);
+void func_001B64D8(void* p, s32 n);
+
+void func_00199218(Actor_199218* self)
+{
+    func_00124A48(self);
+    self->n300 = func_0015A4F0(self->f14, 1, 0x5C, self, 8, self->arr304);
+    s32 i;
+    Elem_199218* e;
+    for (i = 0; i < self->n2DC; i++) {
+        e = (Elem_199218*)func_0015A418(self->f14, 4, self->arr2E0[i], self);
+        if (e != 0) {
+            u32 k = self->n300;
+            if (k < 8) {
+                self->arr304[k] = (void*)e;
+                self->n300 = k + 1;
+            }
+        }
+    }
+    s32 s4 = (((Gl_199218*)D_002623C4)->n448 & self->n2D0) ? 0x22F : 0x22E;
+    for (i = 0; i < self->n300; i++) {
+        e = (Elem_199218*)self->arr304[i];
+        e->f2D4 = func_001B6290(e->f2D0, e, -1, 0);
+        func_001B64D8(e->f2D4, s4);
+    }
+    self->f2D8 = func_001B6290(self->f2D4, self, -1, 0);
+    func_001B64D8(self->f2D8, s4);
+}
+
+// NEAR: global kept in $a1 not $t0 and the mask shift scheduled early; call and loop sequence match
+
+typedef void (*VFn_199B18)(void* self);
+
+struct Actor_199B18 {
+    VFn_199B18* vtbl;
+    u8 pad0[0x570 - 4];
+    s32 n570;
+    void* arr574[1];
+    u8 pad1[0x5A0 - 0x578];
+    s32 n5A0;
+};
+
+struct Mgr_199B18 {
+    u8 pad0[0x64];
+    s32 n64;
+    u8 bits[1];
+};
+
+
+void* func_0012C8F8(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb);
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+
+void func_00199B18(Actor_199B18* self)
+{
+    self->vtbl[7](self);
+    s32 n = self->n5A0;
+    Mgr_199B18* m = (Mgr_199B18*)D_002623C8;
+    s32 idx = n / 8;
+    u8 cur = m->bits[idx];
+    s32 mask = 1 << (n & 7);
+    if (!(cur & mask)) {
+        m->bits[idx] = cur | mask;
+        m->n64 = m->n64 + 1;
+    }
+    s32 i = self->n570;
+    i--;
+    while (i >= 0) {
+        func_0012C8F8(self->arr574[i], 0, 1, 0, 0.0f, 1.0f);
+        i--;
+    }
+    func_001837E0(self, 2, 0, 0);
+}

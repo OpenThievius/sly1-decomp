@@ -836,3 +836,19 @@ void func_001A8208(Self_1A8208* self)
         }
     }
 }
+
+struct Obj_1AAAC8 { u8 pad[0x250]; s32 mode; };
+
+s32 func_001AAAC8(Obj_1AAAC8* a, Obj_1AAAC8* b)
+{
+    s32 r = 0;
+    s32 am = a->mode;
+    if ((u32)(am - 1) < 2) { if ((u32)(b->mode - 1) < 2) goto yes; }
+    if (am == 3) { if (b->mode == 3) goto yes; }
+    if (b->mode == 3) { if (am == 2) goto yes; }
+    goto done;
+yes:
+    r = 1;
+done:
+    return r;
+}

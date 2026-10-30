@@ -423,3 +423,50 @@ s32 func_00146D10(void* unused, Obj_146D10* self)
     }
     return 1;
 }
+
+// NEAR: only a0/a1 saved regs swapped (s0/s1) and the four loads use the other base; stores/frame match
+
+struct __attribute__((aligned(16))) Quad_1442C8 { s32 w[4]; };
+struct Mat_1442C8 { f32 m[16]; };
+
+void func_001885E0(void* self);
+void func_00189AF0(void* a0, void* a1);
+void func_00188668(void* out, void* b, void* in);
+
+void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
+{
+    Mat_1442C8 m;
+    Mat_1442C8 v;
+    Quad_1442C8 r[4];
+    f32* d0;
+    f32* d1;
+    f32* d2;
+    f32* d3;
+    func_001885E0(&m);
+    f32* pb = b;
+    f32* pa = a;
+    d3 = m.m + 12;
+    d2 = m.m + 8;
+    d1 = m.m + 4;
+    d0 = m.m;
+    s32 n = 2;
+    do {
+        n--;
+        f32 w = *pb;
+        f32 x = -pa[4];
+        f32 y = -pa[8];
+        f32 z = pa[0];
+        *d0++ = x;
+        *d1++ = y;
+        *d2++ = z;
+        *d3++ = w;
+        pb++;
+        pa++;
+    } while (n >= 0);
+    func_00189AF0(&m, &v);
+    func_00188668(r, c, &v);
+    out[0] = r[0];
+    out[1] = r[1];
+    out[2] = r[2];
+    out[3] = r[3];
+}

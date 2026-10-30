@@ -689,3 +689,79 @@ s32 func_001BB800(Obj_1BB800* obj, s32* outCount, void*** outArr)
     *outCount = cnt;
     return cnt;
 }
+
+// Matched by indexing the end as (u32)e + (i << 6).
+
+struct Obj_1BB9D0;
+struct Edge_1BB9D0 {
+    struct End { Obj_1BB9D0* o; Obj_1BB9D0* other; u8 pad[0x38]; } e[2];
+    u8 pad80[0x50];
+    Edge_1BB9D0* next;
+};
+struct Out_1BB9D0 { Edge_1BB9D0* first; Out_1BB9D0* next; };
+struct OutHead_1BB9D0 { Out_1BB9D0* head; };
+struct Mem_1BB9D0 { Obj_1BB9D0* value; Mem_1BB9D0* next; };
+struct Core_1BB9D0 { u8 pad[0x480]; OutHead_1BB9D0* outs; };
+struct Obj_1BB9D0 {
+    u8 pad0[0x14]; void* pool;
+    u8 pad18[0x38]; Core_1BB9D0* core;
+    u8 pad54[0x4EC]; Mem_1BB9D0* mem;
+};
+
+s32 func_001BB9A0(Mem_1BB9D0* m, Obj_1BB9D0* v);
+void func_001837E0(Obj_1BB9D0* self, s32 a, s32 b, void* c);
+void func_001DC108(void* pool, Mem_1BB9D0* m);
+Mem_1BB9D0* func_001DC0C8(void* pool);
+
+void func_001BB9D0(Obj_1BB9D0* self)
+{
+    Core_1BB9D0* core = self->core;
+    Out_1BB9D0* o;
+    Edge_1BB9D0* e;
+    Mem_1BB9D0* m;
+    Mem_1BB9D0* prev;
+    Obj_1BB9D0* other;
+    void* args;
+    for (o = core->outs->head; o != 0; o = o->next) {
+        for (e = o->first; e != 0; e = e->next) {
+            s32 i = e->e[0].o != (Obj_1BB9D0*)core;
+            if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
+                other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
+                if (!func_001BB9A0(self->mem, other)) {
+                    args = &other;
+                    func_001837E0(self, 6, 1, &args);
+                }
+            }
+        }
+    }
+    for (m = self->mem; m != 0; m = m->next) {
+        s32 found = 0;
+        for (o = core->outs->head; o != 0 && !found; o = o->next) {
+            for (e = o->first; e != 0 && !found; e = e->next) {
+                s32 i = e->e[0].o != (Obj_1BB9D0*)core;
+                if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
+                    other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
+                    if (other == m->value) found = 1;
+                }
+            }
+        }
+        if (!found) {
+            args = m;
+            func_001837E0(self, 7, 1, &args);
+        }
+    }
+    func_001DC108(self->pool, self->mem);
+    self->mem = 0;
+    for (o = core->outs->head; o != 0; o = o->next) {
+        for (e = o->first; e != 0; e = e->next) {
+            s32 i = e->e[0].o != (Obj_1BB9D0*)core;
+            if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
+                other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
+                Mem_1BB9D0* n = func_001DC0C8(self->pool);
+                n->value = other;
+                if (self->mem != 0) prev->next = n; else self->mem = n;
+                prev = n;
+            }
+        }
+    }
+}

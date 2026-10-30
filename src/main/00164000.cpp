@@ -183,3 +183,65 @@ void func_00165FE0(Owner_165FE0* self, Sub_165FE0* sub, f32 f)
         func_001F3408(e->f0C);
     }
 }
+
+struct Node_165920 { s32 tag; Node_165920* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; Node_165920* next; u8 pad84[0xC]; };
+struct Sub_165920 { u8 pad[0x10]; u32 flags; };
+struct Rec_165920 { u8 pad[0x38]; Sub_165920* a; u8 pad3C[0x18]; void* b; };
+struct Obj_165920 { s32 n0; void* p4; u8 pad8[4]; s32 count; Rec_165920* recs; void* p14; u8 pad18[0x28]; s32 n40; void* p44; u8 pad48[4]; Node_165920* head; s32 f50; };
+
+void func_0018D800(Obj_165920* dst, void* src, s32 n);
+void* func_0018D5C0(s32 n);
+void* func_0018D568(s32 size, void* src);
+void func_00165AE8(Obj_165920* o, void* a, void* b);
+void func_00162810(Obj_165920* o);
+
+void func_00165920(Obj_165920* self, s32 arg, void* src)
+{
+    s32 i = 0;
+    Node_165920** link;
+    func_0018D800(self, src, 0x58);
+    self->f50 = 0;
+    self->p4 = func_0018D5C0(self->n0 * 0x90);
+    self->p44 = func_0018D568(self->n40 << 2, self->p44);
+    self->p14 = func_0018D568(self->count * 0x28, self->p14);
+    Rec_165920* old = self->recs;
+    for (; i < self->count; i++) {
+        Rec_165920* r = (Rec_165920*)((u8*)self->recs + i * 0x70);
+        if ((r->a && (r->a->flags & 4)) || r->b) {
+            self->recs = (Rec_165920*)func_0018D568(self->count * 0x70, self->recs);
+            break;
+        }
+    }
+    link = &self->head;
+    Node_165920* s = self->head;
+    if (s) {
+        do {
+            Node_165920* n = (Node_165920*)func_0018D568(0x90, s);
+            n->tag = arg;
+            Node_165920** pf = &n->p4;
+            u32 sz = self->count * 0x70;
+            u32 nb = (u32)self->recs;
+            if (pf) {
+                u32 v = (u32)n->p4;
+                if (!(v < (u32)old) && v < (u32)old + sz)
+                    n->p4 = (Node_165920*)(v + (nb - (u32)old));
+            }
+            ((Rec_165920*)n->p4)->b = n;
+            *link = n;
+            link = &n->next;
+            s = n->next;
+        } while (s);
+    }
+    *link = 0;
+    i = 0;
+    if (self->count > 0) {
+        s32 b = 0, a = 0;
+        do {
+            i++;
+            func_00165AE8(self, (u8*)self->recs + a, (u8*)self->p14 + b);
+            a += 0x70;
+            b += 0x28;
+        } while (i < self->count);
+    }
+    func_00162810(self);
+}

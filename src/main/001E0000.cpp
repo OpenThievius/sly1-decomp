@@ -412,3 +412,31 @@ void func_001E00B0(Obj_1E00B0* self)
     break;
     }
 }
+
+s32 func_001E08F8(s8* s, s32* out)
+{
+    s8* p = s;
+    s32 sign = 1;
+    s32 value = 0;
+    s32 count = 0;
+    u8 c;
+
+    if (*p == 0x2D) {
+        sign = -1;
+    }
+    if (sign == -1) {
+        p++;
+        count = 1;
+    }
+    c = *p;
+    if ((u32)(c - 0x30) < 10) {
+        do {
+            value = value * 10 + ((s8)c - 0x30);
+            p++;
+            c = *p;
+            count++;
+        } while ((u32)(c - 0x30) < 10);
+    }
+    *out = value * sign;
+    return count;
+}

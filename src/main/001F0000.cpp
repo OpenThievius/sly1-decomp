@@ -554,3 +554,28 @@ void func_001F1A08(Obj_1F1A08* self, Obj_1F1A08* t)
     }
     self->f27C = func_001EA4B8((Q3_1F1A08*)D_00276278, 0, self->f27C, self->f280, D_00261858[5]);
 }
+
+// EXACT: callee declared s32, called as (void)
+
+struct Cfg_1F2688 { u8 pad0[4]; u8 kind; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 f18; };
+
+extern u8 D_00276620[];
+extern f32 D_00276648;
+extern f32 D_00276650;
+
+s32 func_001F5C0C(Cfg_1F2688* p, s32 zero, s32 size);
+
+void func_001F2688(s32 a0, s32 a1)
+{
+    if (a1 != 0xFFFF) return;
+    if (a0 == 0) return;
+    Cfg_1F2688* c = (Cfg_1F2688*)D_00276620;
+    (void)func_001F5C0C(c, 0, 0x1C);
+    c->f18 = (s32)0xFF7D4B00;
+    D_00276650 = D_00276648 * 0.75f;
+    c->f8 = 2.0f;
+    c->fC = 1.0f;
+    c->f10 = 0.3f;
+    c->f14 = 0.3f;
+    c->kind = 0x3D;
+}

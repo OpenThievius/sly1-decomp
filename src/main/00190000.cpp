@@ -981,3 +981,26 @@ void func_001916D0(Obj_1916D0* o, Stream_1916D0* in)
     }
     func_001919F8(m);
 }
+
+void* func_001925F0(void);
+
+struct Obj_00192620 {
+    u8 pad[0x550];
+    s32 f550;
+};
+
+void* func_00192620(void)
+{
+    void* r = func_001925F0();
+    if (r == 0) {
+        Obj_00192620* q = (Obj_00192620*)D_00262E10;
+        if (q != 0) {
+            s32 t = q->f550;
+            if (t != 0) r = q;
+        }
+    }
+    if (r == 0 && D_00269C90 != 0) {
+        r = D_00269C98[0];
+    }
+    return r;
+}

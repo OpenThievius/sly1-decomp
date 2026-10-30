@@ -648,3 +648,26 @@ void func_001C25B0(s32 first, ...) {
     r = &D_002748F0[1 - D_00274990];
     if (r->f4C == 3) r->f4C = 0;
 }
+
+// (if/else with the small path first moved $s0/$s1)
+struct Quad_1C21A0 { s32 a, b, c, d; };
+struct Obj_1C21A0 { u8 pad[4]; void* f4; };
+void func_001C15D8(void* self, void* a, s32 r);
+s32 func_0011BE90(void* head, s32 key, void* arg);
+void func_0011B008(Quad_1C21A0* q);
+void func_0011B018(void* self, Quad_1C21A0* q);
+void func_0011B060(Quad_1C21A0* q, s32 mode);
+void* func_001C21A0(void* self, Obj_1C21A0* p, s32 n)
+{
+    if (n < 0x495) {
+        s32 r = (s32)func_001C14C0(p, n);
+        func_001C15D8(self, p, r);
+    } else {
+        Quad_1C21A0 q;
+        func_0011B008(&q);
+        func_0011BE90(p->f4, n, &q);
+        func_0011B018(self, &q);
+        func_0011B060(&q, 2);
+    }
+    return self;
+}

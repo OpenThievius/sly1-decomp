@@ -798,3 +798,22 @@ f32 func_001EA798(f32 f12, f32 f13, f32 f14, f32 f15, void* self, s32 a1)
     f32 r = func_001EA620(0.0f, f13, t, f15, self, a1);
     return func_001EA408(f12 + r);
 }
+
+struct Obj_1EA0A8 { u8 pad[0x234C]; f32 f234C; f32 f2350; };
+
+extern u8 D_00275C18[];
+extern u8 D_00275C28[];
+
+f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
+
+void func_001EA0A8(void* self, f32 x)
+{
+    Obj_1EA0A8* o = (Obj_1EA0A8*)self;
+    f32 a = o->f234C;
+    f32 b = o->f2350;
+    if (b < a) {
+        o->f234C = func_001EA4B8(D_00275C18, 0, a, b, x);
+    } else if (a < b) {
+        o->f234C = func_001EA4B8(D_00275C28, 0, a, b, x);
+    }
+}

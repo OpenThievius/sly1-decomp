@@ -382,3 +382,15 @@ void func_001D51A0(Obj_1D51A0* self)
         func_001BFCD8(0x49, 0, 0, 0, z, z, x, D_00275068[0], z, 0, 0);
     }
 }
+
+struct Obj_1D7040 { u8 pad[0x694]; s32 f694; };
+struct Ref_1D7040 { void* f0; Obj_1D7040* f4; };
+void func_0013B708(Obj_1D7040* self, s32 kind, Ref_1D7040* ref);
+
+void func_001D7040(Obj_1D7040* self, s32 kind, Ref_1D7040* ref)
+{
+    func_0013B708(self, kind, ref);
+    if (kind == 10 && ref->f4 == self) {
+        ref->f4->f694 = 0;
+    }
+}

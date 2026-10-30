@@ -1100,3 +1100,17 @@ void func_001834A0(Self_1834A0* self, s32 key, Item_1834A0* list)
     func_0011B060(&q1, 2);
     func_0011B060(&q0, 2);
 }
+
+typedef void (*Cb_183350)(s32 ctx, void* a, void* b);
+typedef void (*VFn_183350)(void* self, void* a, void* b);
+struct Node_183350 { Cb_183350 f0; s32 f4; u8 pad0[8]; Node_183350* f10; };
+struct Mgr_183350 { void** vtbl; u8 pad0[0x24]; Node_183350* head; };
+
+void func_00183350(Mgr_183350* self, void* a1, void* a2)
+{
+    if (self->vtbl[17] != 0) {
+        ((VFn_183350)self->vtbl[17])(self, a1, a2);
+    }
+    Node_183350* n = self->head;
+    while (n) { s32 c = n->f4; Cb_183350 f = n->f0; n = n->f10; f(c, a1, a2); }
+}

@@ -1014,3 +1014,116 @@ void func_0015CF70(Self_15CF70* self, s8 key, u32 color, Strm_15CF70* s, f32 x, 
         }
     }
 }
+
+struct Dispatch_15C4E8 {
+    u8 pad0[0x18];
+    s16 off;
+    u8 pad1A[2];
+    void* fn;
+};
+
+struct Obj_15C4E8 {
+    u8 pad0[0x4C];
+    Dispatch_15C4E8* tbl;
+};
+
+s32 func_0015C4E8(Obj_15C4E8* self, u8* s, f32 w)
+{
+    s32 count = 1;
+    s8* cur = (s8*)s;
+    f32 acc = 0.0f;
+    while (*cur != 0) {
+        s32 c = (s8)(s32)*(u8*)cur;
+        if (c == 10) {
+            acc = 0.0f;
+            count++;
+        } else {
+            Dispatch_15C4E8* t = self->tbl;
+            acc += ((f32 (*)(void*, s32))t->fn)((u8*)self + t->off, c);
+        }
+        if (w != 0.0f && w < acc) {
+            s8* p = cur;
+            while (p >= (s8*)s) {
+                s8 c2 = *p;
+                if (c2 == 10) {
+                    break;
+                }
+                if (c2 == 32 || c2 == 9) {
+                    cur = p;
+                    acc = 0.0f;
+                    *cur = 10;
+                    count++;
+                    break;
+                }
+                p--;
+            }
+            if (acc != 0.0f) {
+                *cur = 10;
+                count++;
+                acc = 0.0f;
+            }
+        }
+        cur++;
+    }
+    return count;
+}
+
+// NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
+
+struct Sub_15E810 { u8 pad[0xC]; };
+struct Rec_15E810 {
+    u8 p0[4];
+    u8* a4;
+    u8 p8[4];
+    u8* aC;
+    u8* a10;
+    u8 p14[0xC];
+    Sub_15E810 s20;
+    Sub_15E810 s2C;
+    Sub_15E810 s38;
+    u8 p44[4];
+};
+extern Rec_15E810 D_00262320[];
+extern u8 D_002C3B00[], D_003C3B00[], D_005C3B00[];
+extern void* D_002623B0;
+extern void* D_002623B4;
+extern void* D_00275958[];
+void func_00152438(Sub_15E810* self, s32 value);
+void func_001F6950(s32 a0, void (*fn)(void), s32 a2);
+void func_001F6DA8(s32 a0);
+void* func_001E2268(s32 a, s32 b);
+void func_001F6A20(void* a, s32 b);
+void func_0015E678(void);
+
+void func_0015E810(void)
+{
+    for (u32 i = 0; i < 2; i++) {
+        Rec_15E810* r = &D_00262320[i];
+        r->a4 = D_002C3B00 + i * 0x80000;
+        r->aC = D_003C3B00 + i * 0x100000;
+        r->a10 = D_005C3B00 + i * 0x10600;
+        func_00152438(&r->s20, 0x630);
+        func_00152438(&r->s2C, 0x1090);
+        func_00152438(&r->s38, 0xB8);
+    }
+    func_00152438((Sub_15E810*)&D_002622E0, 0x630);
+    func_00152438((Sub_15E810*)&D_002622F0, 0x1090);
+    func_00152438((Sub_15E810*)&D_00262300, 0xB8);
+    func_001F6950(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
+    func_001F6DA8(5);
+    D_002623B0 = func_001E2268(0, 2);
+    D_002623B4 = func_001E2268(2, 2);
+    u32* tab = (u32*)D_002C3B00;
+    s32 n = 0;
+    do {
+        u32 c = n;
+        s32 off = n * 4;
+        for (s32 k = 7; k >= 0; k--) {
+            if (c & 1) c = (c >> 1) ^ 0xEDB88320;
+            else c >>= 1;
+        }
+        *(u32*)((u8*)tab + off) = c;
+        n++;
+    } while (n < 256);
+    func_001F6A20(D_00275958[1], 0);
+}

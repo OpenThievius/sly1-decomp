@@ -730,3 +730,60 @@ void func_001B2640(Obj_1B2640* o)
 done:
     ;
 }
+
+struct Obj_1B0BE0 {
+    u8 pad_0[0x50];
+    s32 f50;
+    u8 pad_54[0x2CC - 0x54];
+    u32 f2CC;
+    u8 pad_2D0[0x538 - 0x2D0];
+    u64 f538;
+};
+
+s32 func_001925F0(void);
+s32 func_001AEE50(void* self, void* other);
+
+s32 func_001B0BE0(Obj_1B0BE0* self, Obj_1B0BE0* other)
+{
+    if ((other->f538 & (1UL << 43)) != 0 || other->f50 == func_001925F0() || other->f50 == self->f50 || func_001AEE50(self, other) != 0) {
+        return 0;
+    }
+    s64 t = (s64)other->f2CC;
+    return ((s32)t ^ 1) & 1;
+}
+
+// Matched by a switch on f558 (cases 1 and 5).
+
+typedef void (*VFn_1B1698)(void* self, s32 arg);
+
+struct Vtbl_1B1698 {
+    u8 pad0[0x144];
+    VFn_1B1698 fn144;
+};
+
+struct Obj_1B1698 {
+    Vtbl_1B1698* vt;
+    u8 pad0[0x554 - 0x4];
+    s32 f554;
+    s32 f558;
+    u8 pad1[0x608 - 0x55C];
+    f32 f608;
+    u8 pad2[0x618 - 0x60C];
+    s32 f618;
+};
+
+void func_001B1698(Obj_1B1698* self)
+{
+    self->f554 = 1;
+    if (self->f608 < 0.0f) {
+        self->f618 = 0;
+        switch (self->f558) {
+        case 1:
+            self->vt->fn144(self, 3);
+            break;
+        case 5:
+            self->vt->fn144(self, 7);
+            break;
+        }
+    }
+}

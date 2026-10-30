@@ -607,3 +607,47 @@ void func_001AE758(Obj_1AE758* self)
     self->vtbl[8](self, &fl);
     self->f8 = 0;
 }
+
+struct Obj_1AC9E0 { u8 pad[0x260]; s32 f260; };
+
+s32 func_001AAAC8(Obj_1AC9E0* self);
+
+s32 func_001AC9E0(Obj_1AC9E0* self)
+{
+    s32 r = 0;
+    if (func_001AAAC8(self) != 0 || self->f260 != 0) {
+        r = 1;
+    }
+    return r;
+}
+
+s32 func_001AEE50(void* self, void* key);
+s32 func_00160D10();
+struct Obj_1AFAF8 {
+    u8 pad0[0x50];
+    s32 x50;
+    u8 pad1[0x2CC - 0x54];
+    u32 x2CC;
+    u8 pad2[0x538 - 0x2D0];
+    u64 f538;
+    u8 pad3[0x2220 - 0x540];
+    s32 x2220;
+    u8 pad4[0x239C - 0x2224];
+    s32 x239C;
+};
+s32 func_001AFAF8(Obj_1AFAF8* a0, Obj_1AFAF8* a1)
+{
+    u64 m = 0x8000;
+    m <<= 28;
+    if ((a1->f538 & m) != 0 || a1->x50 == a0->x50 || func_001AEE50(a0, a1) != 0) {
+        return 0;
+    }
+    if ((void*)a1 == (void*)D_00262E10 && a1->x2220 == 6 && a1->x239C == 3) {
+        if ((func_00160D10() & 0x12000) != 0) {
+            return 0;
+        }
+    }
+    s64 t = (s64)a1->x2CC;
+    return ((s32)t ^ 1) & 1;
+
+}
