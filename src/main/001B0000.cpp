@@ -785,3 +785,29 @@ void func_001B0120(Obj_1B0120* self)
     }
     self->vtbl[0x144 / 4](self, m);
 }
+
+struct Obj_1B2090 {
+    u8 kind_0;
+    u8 pad_1[0xB];
+    u32 flags_C;
+};
+
+s32 func_001B2090(Obj_1B2090** self, u32 bits)
+{
+    s32 r = 0;
+    if (*self != 0) {
+        u32 flags = (*self)->flags_C;
+        u8* g = *(u8**)D_00261990;
+        u32 mask = *(u32*)(g + 0x21C);
+        s32 ok = 0;
+        if ((flags & 0x10000000) != 0 || (mask & flags) == mask) {
+            ok = 1;
+        }
+        if (ok != 0) {
+            if (((bits & 1) != 0 && (*self)->kind_0 == 2) || ((bits & 2) != 0 && (*self)->kind_0 == 3)) {
+                r = 1;
+            }
+        }
+    }
+    return r;
+}

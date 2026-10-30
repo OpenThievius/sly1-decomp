@@ -914,3 +914,21 @@ s32 func_001CBCB8(Self_CBCB8* self)
     }
     return 1;
 }
+
+struct Inner_1C84E8 { u8 pad[8]; u32 flags; };
+struct Obj_1C84E8 { Inner_1C84E8* inner; u8 pad0[0x50 - 4]; void* p50; u8 pad1[0x360 - 0x54]; f32 f360; u8 pad2[0x538 - 0x364]; u64 f538; };
+
+s32 func_001300E8(void* node, s32 kind);
+
+s32 func_001C84E8(void* unused, Obj_1C84E8* self)
+{
+    if ((self->f538 & (1ULL << 43)) != 0) {
+        if ((self->inner->flags & 0x80) == 0)
+            return 0;
+        if (self->f360 == 0.0f)
+            return 0;
+    }
+    if (func_001300E8(self->p50, 5) != 0 || func_001300E8(self->p50, 0x40) != 0 || func_001300E8(self->p50, 0x41) != 0)
+        return 0;
+    return 1;
+}

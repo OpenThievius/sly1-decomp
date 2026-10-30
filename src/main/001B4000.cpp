@@ -1489,3 +1489,24 @@ void func_001B61F0(Bank_1B61F0* self)
     }
     func_001B6290(self, r, -1, 0);
 }
+
+struct Data_1B5200 { u8 pad0[0x20]; s32 count; };
+struct Node_1B5200 {
+    u8 pad0[0x10]; s32 flags; Data_1B5200* data; u8 pad1[4];
+    f32 f1C; f32 f20; u8 pad2[8];
+    f32 f2C; f32 f30; f32 f34; f32 f38; f32 f3C; f32 f40;
+};
+struct Src_1B5200 { u8 pad0[4]; f32 f4; f32 f8; f32 fC; f32 f10; };
+
+void func_001B4AA0(void* a, void* b);
+void func_001B5200(Node_1B5200* p, Src_1B5200* s)
+{
+    func_001B4AA0(p, s);
+    p->f2C = s->f4;
+    p->f30 = s->f8;
+    p->f34 = s->fC;
+    p->f38 = s->f10;
+    p->f40 = 1.0f;
+    p->f3C = 1.0f;
+    p->flags = (p->flags & ~1) | 2;
+}

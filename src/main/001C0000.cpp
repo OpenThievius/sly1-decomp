@@ -742,3 +742,25 @@ void func_001C0EC0(void)
         func_001BFCD8(0x77, 0, 0, 0, 0.0f, 0.0f, 0.5f, scale * 0.083333336f, 0.0f, 0, 0);
     }
 }
+
+struct Quad_1C23B0 { s32 f0; s32 f4; s32 f8; s32 fC; };
+
+void func_001C1BF8(Quad_1C23B0* t, s32 n, s32 c, void* z, s32* arr);
+
+Quad_1C23B0* func_001C23B0(Quad_1C23B0* t, s32 n, s32 c, void* z, ...)
+{
+    s32 arr[32];
+    void* ap = (char*)__builtin_next_arg(z) - 32;
+    if (n > 0) {
+        s32* d = arr;
+        s32 i = n;
+        do {
+            ap = (char*)ap + 8;
+            *d = *(s32*)((char*)ap - 8);
+            d++;
+            i--;
+        } while (i != 0);
+    }
+    func_001C1BF8(t, n, c, z, arr);
+    return t;
+}

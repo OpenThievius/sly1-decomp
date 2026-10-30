@@ -623,3 +623,101 @@ void func_001A3A18(void* self_, f32 scale)
         *(f32*)(self + 0x128) = nv;
     } while (1.0f <= nv);
 }
+
+typedef int V128_1A0258 __attribute__((mode(TI)));
+struct __attribute__((aligned(16))) Quad_1A0258 { s32 a, b, c, d; };
+
+struct Obj_1A0258 {
+    u8 pad00[0x1C];
+    f32 f1C;
+    s32 i20;
+    u8 pad24[0x0C];
+    u8 pad30[0x10];
+    Quad_1A0258 q40;
+    u8 pad50[0x60];
+    f32 fB0;
+};
+
+void func_0019EB28(Obj_1A0258* self, f32 f);
+void func_00118CF0(void* out, f32 f);
+void func_00118D10(void* out, void* in);
+V128_1A0258 func_00118D30(V128_1A0258 a, V128_1A0258 b);
+void func_00118D20(void* dst, V128_1A0258 v);
+extern u8* D_00275710;
+extern Quad_1A0258 D_0026B570;
+extern u8 D_0026B580[];
+
+void func_001A0258(Obj_1A0258* self, f32 f)
+{
+    func_0019EB28(self, f);
+    u8* sub = (u8*)self + 0x30;
+    u8* p = D_0026B580;
+    s32 v = *(s32*)(D_00275710 + 0x1D04);
+    self->fB0 = -15.0f;
+    self->i20 = v;
+    self->q40 = D_0026B570;
+    self->f1C = 0.35f;
+    V128_1A0258 t;
+    func_00118CF0(&t, f);
+    V128_1A0258 tv = t;
+    V128_1A0258 u;
+    func_00118D10(&u, p);
+    func_00118D20(sub, func_00118D30(tv, u));
+}
+
+struct __attribute__((aligned(16))) Quad_1A04A0 { s32 a, b, c, d; };
+struct Obj_1A04A0;
+typedef void (*VFn_1A04A0)(void* self, f32 f, void* p, s32 n);
+
+struct Obj_1A04A0 {
+    VFn_1A04A0* vtbl;
+    u8 pad04[0x14];
+    f32 f18;
+    f32 f1C;
+    s32 i20;
+    u8 pad24[0xC];
+    f32 m30[3];
+    u8 pad3C[0x4];
+    Quad_1A04A0 q40;
+    u8 pad50[0x60];
+    f32 fB0;
+    u8 padB4[0x6C];
+    s32 i120;
+    Obj_1A04A0* p124;
+    Obj_1A04A0* p128;
+};
+
+void* func_0019EA78(s32 a, s32 b);
+void func_001A0338(void* self, s32 kind, void* extra);
+extern f32 D_0026185C;
+
+void func_001A04A0(Obj_1A04A0* self)
+{
+    Obj_1A04A0* d = (Obj_1A04A0*)func_0019EA78(10, 0);
+    if (d != 0) {
+        d->vtbl[0](d, 0.0f, (u8*)self + 0x80, 0);
+        d->i20 = self->i20;
+        d->fB0 = self->fB0;
+        d->q40 = self->q40;
+        d->f1C = self->f1C;
+        Obj_1A04A0* p;
+        if (self->i120 == 1) {
+            p = self->p124;
+            f32* m = (f32*)((u8*)p + 0x30);
+            f32 q = (self->f18 - p->f18) / p->f1C;
+            f32 den = p->m30[0] + q * (m[1] + q * m[2]);
+            f32 res = self->m30[0] / den;
+            q = (D_0026185C - p->f18) / p->f1C;
+            res = res * (p->m30[0] + q * (m[1] + q * m[2]));
+            d->m30[0] = res;
+            d->m30[1] = -res;
+        } else {
+            *(Quad_1A04A0*)&d->m30[0] = *(Quad_1A04A0*)&self->m30[0];
+            p = self->p128;
+        }
+        func_001A0338(d, self->i120, p);
+        func_001A0338(self, 3, d);
+    } else {
+        func_001A0338(self, 0, 0);
+    }
+}

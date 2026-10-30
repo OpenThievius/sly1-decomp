@@ -521,3 +521,62 @@ void func_001C6890(Obj_1C6890* s)
         func_0019D338(s, s->f21C4, s->f2208, s->blk220C);
     }
 }
+
+struct Frame_1C6D00 { f32 x; f32 y; f32 z; u8 pad[4]; s32 n; };
+struct Out_1C6D00 { f32 a; u8 pad[0xC - 4]; f32 b; };
+struct Obj_1C6D00 {
+    u8 pad0[0x638];
+    f32 f638;
+    u8 pad1[0x2200 - 0x63C];
+    s32 f2200;
+    s32 f2204;
+    s32 f2208;
+    u8 pad2[0x2220 - 0x220C];
+    s32 f2220;
+};
+
+extern u8 D_00274BE0[];
+extern f32 D_00274BD8;
+
+void func_001C6AA8(Obj_1C6D00* self, s32 mode, void* tbl, s32* nOut, Frame_1C6D00* f, f32 a, f32 b);
+void func_001399F8(void* ctx, s32 n, s32 m, Out_1C6D00* out);
+f32 func_00205778(f32 a, f32 b);
+void func_001C5D58(Obj_1C6D00* self);
+
+void func_001C6D00(Obj_1C6D00* s, Out_1C6D00* out, void* ctx)
+{
+    Frame_1C6D00 fr;
+    f32 k = 1.60000002f;
+    if (s->f2220 == 0) {
+        k = 3.1500001f;
+    }
+    func_001C6AA8(s, 2, D_00274BE0, &fr.n, &fr, 0.150000006f, k);
+    f32 t;
+    if (fr.n != 0) {
+        f32 v = (fr.z - -50.0f) * 0.0090909088f;
+        f32 hi = 1.0f;
+        f32 lo = 0.0f;
+        if (v < lo) {
+            t = lo;
+        } else if (hi < v) {
+            t = 1.0f;
+        } else {
+            t = v;
+        }
+    } else {
+        t = 1.0f;
+    }
+    if (D_00274BD8 >= 0.0f) {
+        t = D_00274BD8;
+    }
+    out->a = 1.0f - t;
+    out->b = t;
+    func_001399F8(ctx, 0xC, 2, out);
+    s->f2204 = 0;
+    s->f2200 = fr.n;
+    s->f2208 = 0;
+    if (fr.n != 0 && s->f2220 == 0) {
+        s->f638 = func_00205778(fr.y, fr.x);
+        func_001C5D58(s);
+    }
+}

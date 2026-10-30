@@ -1357,3 +1357,54 @@ void func_001999D0(void* p)
     }
     func_00198DA8(self);
 }
+
+struct Owner_199850 { u8 pad0[0x5A0]; s32 n5A0; };
+struct Ctx_199850 { u8 pad0[0x64]; s32 n64; u8 bits[1]; };
+struct Glob_199850 { u8 pad0[0x19EC]; s32 n19EC; };
+struct Host_199850 { u8 pad0[0x2300]; s32 n2300; };
+
+
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001518B8(s32 x);
+
+void func_00199850(Owner_199850* self)
+{
+    f32 zf;
+    Ctx_199850* ctx = (Ctx_199850*)D_002623C8;
+    zf = 0.0f;
+    s32 n = self->n5A0;
+    u8* p = ctx->bits;
+    s32 byte = n / 8;
+    p += byte;
+    s32 b = *p;
+    s32 mask = 1 << (n & 7);
+    if ((b & mask) == 0) {
+        *p = (u8)(b | mask);
+        ctx->n64++;
+    }
+    s32 count = ((Ctx_199850*)D_002623C8)->n64;
+    s32 s0 = -1;
+    s32 s1 = 0;
+    if (((((Glob_199850*)D_002623C0)->n19EC ^ 1) & 1) != 0) {
+        if (count > 0) {
+            s0 = 0x348;
+            s1 = 1;
+        }
+    } else if ((((Glob_199850*)D_002623C0)->n19EC & 4) == 0) {
+        if (count < ((Host_199850*)D_00275710)->n2300) {
+            goto L980;
+        }
+        s0 = 0x34A;
+        s1 = 4;
+    }
+    if (count < ((Host_199850*)D_00275710)->n2300) {
+        goto L980;
+    }
+    func_001BFCD8(0x6A, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+L980:
+    ((Glob_199850*)D_002623C0)->n19EC = ((Glob_199850*)D_002623C0)->n19EC | s1;
+    s32 r = (s32)func_0015A418((void*)D_00275710, 1, s0, 0);
+    if (r != 0) {
+        func_001518B8(r);
+    }
+}

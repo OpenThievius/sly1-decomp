@@ -678,3 +678,22 @@ s32 func_001AED78(Obj_001AED78* self, s32 value)
     }
     return 0;
 }
+
+struct Obj_1AEF00 {
+    u8 pad_0[0x564];
+    s32 f564;
+    s32 f568;
+    u8 pad_56C[0x58C - 0x56C];
+    s32 f58C;
+    u8 pad_590[0x5B4 - 0x590];
+    s32 f5B4;
+};
+
+s32 func_001833F0(void* a, s32 b);
+
+s32 func_001AEF00(Obj_1AEF00* o, void* p)
+{
+    if (p == 0) return 0;
+    if (o->f5B4 == 0 && o->f564 == 1 && o->f58C == 0 && func_001833F0(p, o->f568) != 0) return 1;
+    return 0;
+}

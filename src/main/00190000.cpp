@@ -871,3 +871,16 @@ void func_00192380(u8* self, u8* out, f32 a)
     }
     *(Quad_192380*)(self + 0x560) = *(Quad_192380*)(out + 0x10);
 }
+
+extern s32 D_00269C90;
+
+s32 func_00192688(s32 key)
+{
+    s32 i;
+    for (i = 0; i < D_00269C90; i++) {
+        if (key == (s32)D_00269C98[i]) {
+            return i;
+        }
+    }
+    return -1;
+}

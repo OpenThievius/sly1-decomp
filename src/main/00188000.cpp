@@ -682,3 +682,46 @@ s32 func_0018A910(Self_18A910* self, void* a1, void* a2)
     func_0018D6F0();
     return r != 0;
 }
+
+// Hoisting 1.0f into a local `one` matched the constant scheduling.
+struct Sub_18B460 { u8 pad[0xC]; f32 value; };
+struct Obj_18B460 { u8 pad[0xE10]; void* inner; };
+
+extern Sub_18B460* D_002623C8;
+
+void func_001B6598(void* a, s32* out);
+
+void func_0018B460(Obj_18B460* a0, f32* a1)
+{
+    s32 kind;
+    func_001B6598(a0->inner, &kind);
+    switch (kind) {
+    case 0x43A:
+        {
+            f32 v = D_002623C8->value * 1.3f - 0.3f;
+            f32 one = 1.0f;
+            if (v < 0.0f) {
+                v = 0.0f;
+            } else if (one < v) {
+                v = one;
+            }
+            *a1 = v;
+        }
+        break;
+    case 0x43C:
+        {
+            f32 v = D_002623C8->value * 1.3f - 0.3f;
+            f32 one = 1.0f;
+            if (v < 0.0f) {
+                v = 0.0f;
+            } else if (one < v) {
+                v = one;
+            }
+            *a1 = v;
+        }
+        break;
+    default:
+        *a1 = D_002623C8->value * D_002623C8->value;
+        break;
+    }
+}
