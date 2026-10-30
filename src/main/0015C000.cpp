@@ -1040,3 +1040,22 @@ void func_0015EDB8(void)
         D_00262310 = 1;
     }
 }
+
+typedef f32 (*Fn_15C418)(void* self, s8 ch);
+struct Node_15C418 { u8 pad0[0x18]; s16 off; u8 pad1[2]; Fn_15C418 fn; };
+struct Obj_15C418 { u8 pad0[0x4C]; Node_15C418* node; };
+f32 func_0015C418(Obj_15C418* self, s8* s)
+{
+    f32 acc;
+    s8* p;
+    if (s == 0) {
+        return 0.0f;
+    }
+    p = s;
+    acc = 0.0f;
+    while (*p != 0) {
+        Node_15C418* n = self->node;
+        acc = acc + n->fn((u8*)self + n->off, (u8)*p++);
+    }
+    return acc;
+}

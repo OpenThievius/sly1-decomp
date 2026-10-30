@@ -1220,3 +1220,27 @@ void* func_00119970(void* self, Owner_119970* owner, s32 c)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct Node_11BD28 { s32 key; Value_11B008 value; Node_11BD28* next; };
+struct List_11BD28 { Node_11BD28* head; };
+
+void func_0011B008(Value_11B008* v);
+void func_0011B018(Value_11B008* dst, Value_11B008* src);
+void func_0011B060(Value_11B008* v, int mode);
+Value_11B008* func_0011B0A8(Value_11B008* dst, Value_11B008* src);
+void func_0011B538(Value_11B008* v, s32 tag);
+
+Value_11B008* func_0011BD28(Value_11B008* self, List_11BD28* list, s32 key, Value_11B008* value)
+{
+    Value_11B008 tmp;
+    func_0011B008(&tmp);
+    Node_11BD28* node = (Node_11BD28*)func_0011C498();
+    node->key = key;
+    (void)func_0011B0A8(&node->value, value);
+    node->next = list->head;
+    list->head = node;
+    func_0011B538(&tmp, 0x22);
+    func_0011B018(self, &tmp);
+    func_0011B060(&tmp, 2);
+    return self;
+}

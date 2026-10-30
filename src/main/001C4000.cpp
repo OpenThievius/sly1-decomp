@@ -480,3 +480,44 @@ void func_001C72A0(Self_1C72A0* self)
         func_001DBCC8(self->host14, (void*)func_001C7278, self, 0, 0);
     }
 }
+
+struct Obj_1C6890 {
+    u8 pad0[0x21C4];
+    s32 f21C4;
+    u8 pad1[0x2200 - 0x21C8];
+    void* p2200;
+    s32 f2204;
+    s32 f2208;
+    u8 blk220C[0x14];
+    u8 pad2[0x223C - 0x2220];
+    s32 f223C;
+};
+
+s32 func_00182FC8(void* p);
+void func_001C61E0(Obj_1C6890* self, s32 mode);
+void func_0019D2A8(Obj_1C6890* self, s32 v, void* p);
+void func_0019D338(Obj_1C6890* self, s32 v, s32 w, void* blk);
+
+void func_001C6890(Obj_1C6890* s)
+{
+    if (s->p2200 != 0 && func_00182FC8(s->p2200) == 0) {
+        s32 v = s->f223C;
+        s->p2200 = 0;
+        s->f2204 = 0;
+        if (v != 0) {
+            return;
+        }
+        func_001C61E0(s, -1);
+    }
+    if (s->f223C != 0) {
+        return;
+    }
+    void* p = s->p2200;
+    if (p != 0) {
+        func_0019D2A8(s, s->f21C4, p);
+        return;
+    }
+    if (s->f2208 != 0) {
+        func_0019D338(s, s->f21C4, s->f2208, s->blk220C);
+    }
+}

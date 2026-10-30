@@ -51,7 +51,7 @@ struct Vec4Init_1885E0 {
     f32 f3C;
 };
 
-void func_001F5C0C(void* p, s32 v, s32 n);
+void* func_001F5C0C(void* p, s32 v, s32 n);
 
 void func_001885E0(Vec4Init_1885E0* self)
 {
@@ -361,7 +361,7 @@ struct Dst_18B780 {
     u8 f58;
 };
 
-void func_001F5C0C(void* p, int c, int n);
+void* func_001F5C0C(void* p, int c, int n);
 void func_001E2138(void* dst, void* src);
 
 void func_0018B780(Src_18B780* s, Dst_18B780* d)
@@ -637,4 +637,21 @@ void func_0018B5C0(Slot_18B5C0* self)
 {
     s32 r = func_001E2268(1, 1);
     self->f00 = r; self->f04 = -1; self->f10 = 0x22;
+}
+
+struct Obj_18BD58 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; u8 pad18[0x4F44 - 0x18]; s32 f4F44; s32 f4F48; };
+
+void* func_001F5C0C(void* p, s32 zero, s32 size);
+void func_0018C178(void* self, s32 value);
+
+void func_0018BD58(Obj_18BD58* self, s32 a, s32 b)
+{
+    func_001F5C0C(self, 0, 0x4F50);
+    self->fC = -1;
+    self->f14 = 0;
+    func_0018C178(self, 0);
+    self->f4 = a;
+    self->f8 = b;
+    self->f4F48 = 0;
+    self->f4F44 = 0;
 }

@@ -595,3 +595,31 @@ void func_001A3598(Obj_1A3598* self, f32 x)
     self->f34 = 1.0f - x;
     self->i38 = 0;
 }
+
+struct Quad_1A3A18 { s32 a, b, c, d; } __attribute__((aligned(16)));
+struct Buf_1A3A18 { s32 n; u8 pad[0x1C]; Quad_1A3A18 q; u8 tail[0x20]; };
+typedef void (*Fn_1A3A18)(void* self, void* arg);
+
+void func_0019F560(void* self, f32 s);
+
+void func_001A3A18(void* self_, f32 scale)
+{
+    u8* self = (u8*)self_;
+    func_0019F560(self, scale);
+    if (*(void**)(self + 0x120) == 0) return;
+    f32 t = scale * *(f32*)(self + 0x124);
+    f32 v = *(f32*)(self + 0x128) + t;
+    *(f32*)(self + 0x128) = v;
+    if (!(1.0f <= v)) return;
+    f32 nv;
+    do {
+        Buf_1A3A18 buf;
+        buf.n = 4;
+        buf.q = *(Quad_1A3A18*)(self + 0x80);
+        void* obj = *(void**)(self + 0x120);
+        Fn_1A3A18* vt = *(Fn_1A3A18**)obj;
+        vt[31](obj, &buf);
+        nv = *(f32*)(self + 0x128) - 1.0f;
+        *(f32*)(self + 0x128) = nv;
+    } while (1.0f <= nv);
+}

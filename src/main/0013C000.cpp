@@ -882,3 +882,26 @@ s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
     }
     return more;
 }
+
+struct Actor_13DD78 {
+    u8 pad0[0x550];
+    s32 state_550;
+    f32 stamp_554;
+    f32 limit_558;
+    f32 param_55C;
+};
+
+extern f32 D_0026185C;
+s32 func_00126D60(f32 value);
+
+void func_0013DD78(Actor_13DD78* self, s32 state)
+{
+    if (state != self->state_550) {
+        *(s32*)((u8*)self + 0x550) = state;
+        f32 t = D_0026185C;
+        self->stamp_554 = t;
+        if (state == 2) {
+            (void)func_00126D60(self->param_55C);
+        }
+    }
+}

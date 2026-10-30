@@ -744,3 +744,24 @@ void func_001DB110(Pool_1DB110* self, void* item)
         }
     }
 }
+
+struct Ctl_1DB110 {
+    u8 pad0[0xB34];
+    s32 fB34;
+    f32 fB38;
+};
+
+extern f32 D_0026185C;
+void* func_001925F0(void);
+void func_001929D0(void* self);
+
+void func_001DB238(Ctl_1DB110* self, s32 mode)
+{
+    if (mode != self->fB34) {
+        *(s32*)((u8*)self + 0xB34) = mode;
+        *(f32*)((u8*)self + 0xB38) = D_0026185C;
+        if (mode == 2 && self != func_001925F0()) {
+            func_001929D0(self);
+        }
+    }
+}
