@@ -1168,3 +1168,33 @@ skip:
         } while (node != 0);
     }
 }
+
+struct Entry_141B48 { u8 pad[0x538]; u64 bits; };
+
+s32 func_00141C28(void* a0, void* a1, void* a2, s32 a3, s32 a4);
+s32 func_001429F8(s32 a0, s32 a1);
+
+s32 func_00141B48(void* a0, void* a1, s32 count, Entry_141B48** list, s32 a4, s32 a5)
+{
+    s32 result = 0;
+    if (count > 0) {
+        const u64 mask = 0xC000ULL << 28;
+        Entry_141B48** p = list;
+        s32 n = count;
+        do {
+            Entry_141B48* e = *p;
+            if ((e->bits & mask) == 0) {
+                s32 r = func_00141C28(e, a0, a1, a4 - result, a5 + result * 0x70);
+                if (r != 0) {
+                    if (result != 0) {
+                        r = func_001429F8(result + r, a5);
+                    }
+                    result = r;
+                }
+            }
+            n--;
+            p++;
+        } while (n != 0);
+    }
+    return result;
+}

@@ -230,7 +230,7 @@ void func_00162810(Owner_162810* owner)
     }
 }
 
-void func_001F5C0C(void* p, s32 value, s32 size);
+void* func_001F5C0C(void* p, s32 value, s32 size);
 
 void func_00160CC8(void* p)
 {
@@ -672,4 +672,34 @@ void func_00163938(s32 mode, void* obj)
         func_001EE3F0(obj, D_000018F8);
         break;
     }
+}
+
+struct Obj_001605E8
+{
+    s32 a;
+    s32 b;
+    u8 pad0[0x19D8 - 8];
+    s32 c;
+    u8 pad1[0x19DC - 0x19D8 - 4];
+    s32 d;
+    s32 e;
+    u8 pad2[0x19F0 - 0x19E0 - 4];
+    s32 f;
+    u8 pad3[0x19FC - 0x19F0 - 4];
+    s32 g;
+};
+
+void func_001A7E90(void* self);
+
+void func_001605E8(Obj_001605E8* self)
+{
+    func_001F5C0C(self, 0, 0x1A00);
+    self->a = 0x12;
+    self->c = 0;
+    self->f = 0;
+    self->b = 0x1A00;
+    self->d = 3;
+    self->e = 5;
+    self->g = -1;
+    func_001A7E90(self);
 }

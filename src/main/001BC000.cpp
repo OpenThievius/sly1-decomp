@@ -894,3 +894,40 @@ void func_001BE998(void)
     D_0027472C = 0;
     D_00274730 = 0;
 }
+
+struct Obj_1BD790 {
+    u8 pad0[0x90]; s32 save90; s32 save94; u8 pad1[0xC0 - 0x98]; u64 saved;
+    u8 pad2[0x450 - 0xC8]; s32 f450; u8 pad3[0x470 - 0x454]; s32 f470;
+    u8 pad4[0x538 - 0x474]; u64 flags;
+};
+
+void func_001BD790(Obj_1BD790* obj, s32 mode)
+{
+    if (mode) {
+        u64 f = obj->flags;
+        u64 sv = obj->saved;
+        sv &= ~(u64)1;
+        sv |= (f >> 54) & 1;
+        sv &= ~(u64)2;
+        u64 b55 = (f >> 55) & 1;
+        f |= (u64)1 << 54;
+        s32 a = obj->f450;
+        s32 b = obj->f470;
+        f |= (u64)1 << 55;
+        sv |= b55 << 1;
+        obj->save90 = a;
+        obj->save94 = b;
+        obj->saved = sv;
+        obj->f450 = 3;
+        obj->f470 = 3;
+        obj->flags = f;
+    } else {
+        u64 bit0 = (s32)obj->saved & 1;
+        u64 bit1 = (u64)((s32)(obj->saved >> 1) & 1);
+        s32 a = obj->save90;
+        s32 b = obj->save94;
+        obj->f450 = a;
+        obj->f470 = b;
+        obj->flags = ((obj->flags & ~((u64)1 << 54)) | (bit0 << 54)) & ~((u64)1 << 55) | (bit1 << 55);
+    }
+}

@@ -393,3 +393,46 @@ void func_00185AC8()
     func_00202C38(*(void**)D_00261F18, 0, 0);
     (*(Flags_185AC8**)D_00261F18)->flags &= ~0x40;
 }
+
+struct Self_186450 {
+    u8 pad0[0x3AC];
+    u8* base;
+    u8 pad1[0x3B8 - 0x3B0];
+    s32 count;
+    u8* table;
+};
+
+struct Entry_186450 {
+    s16 x;
+    s16 y;
+    u8 pad0[0x10 - 4];
+};
+
+struct Out_186450 {
+    u8 pad0[0x58];
+    Entry_186450* link;
+    u8 pad1[0x70 - 0x5C];
+};
+
+s32 func_0013DFD8(void* a, u8* b, u8* c, s32 d, s32 e, Out_186450* f);
+
+s32 func_00186450(s32 unused, Self_186450* self, u8* ctx, s32 cap, Out_186450* out)
+{
+    s32 i = self->count;
+    i--;
+    s32 total = 0;
+    s32 filled = 0;
+    Entry_186450* table = (Entry_186450*)self->table;
+    u8* base = self->base;
+
+    while (i >= 0) {
+        Entry_186450* e = &table[i];
+        total += func_0013DFD8(ctx, base + e->x * 16, base + e->y * 16, 0, cap - total, &out[total]);
+        if (filled < total) {
+            for (; filled < total; filled++)
+                out[filled].link = e;
+        }
+        i--;
+    }
+    return total;
+}

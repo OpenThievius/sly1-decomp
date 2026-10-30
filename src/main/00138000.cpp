@@ -636,3 +636,57 @@ void func_0013B610(Self_13B610* self)
         self->f68C = (s32)func_0018D500(0xC0);
     }
 }
+
+extern u8 D_002622E0[];
+
+void func_00139D28(void* a);
+void func_00152600(u8* a, void* b);
+void func_00152470(u8* a, void* b);
+void func_001243E0(void* self);
+
+struct Node_139EC8 {
+    s32 next;
+};
+
+struct Obj_139EC8 {
+    u8 pad0[0x14];
+    u8* p14;
+    u8 pad1[0x624 - 0x18];
+    s32 head;
+    u8 pad2[4];
+    s32 link;
+};
+
+struct Frame_139EC8 {
+    s32 list;
+    s32 cursor;
+    s32 link;
+    s32 prev;
+};
+
+void func_00139EC8(void* self)
+{
+    Obj_139EC8* obj = (Obj_139EC8*)self;
+    Frame_139EC8 fr;
+    s32 e = (s32)&obj->head;
+    fr.list = e;
+    fr.cursor = e;
+    s32 old = *(s32*)&D_0027B314;
+    s32 link = *(s32*)(e + 8);
+    fr.prev = old;
+    fr.link = link;
+    *(s32*)&D_0027B314 = (s32)&fr;
+    s32 head = obj->head;
+    fr.cursor = head + fr.link;
+    s32 node = head;
+    while (node != 0) {
+        func_00139D28((void*)node);
+        s32 nx = *(s32*)fr.cursor;
+        fr.cursor = nx + fr.link;
+        node = nx;
+    }
+    func_00152600(obj->p14 + 0x1CB4, self);
+    func_00152470(D_002622E0, self);
+    func_001243E0(self);
+    *(s32*)&D_0027B314 = fr.prev;
+}
