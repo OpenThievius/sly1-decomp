@@ -841,3 +841,28 @@ void func_0017B648(Obj_17B648* self)
         }
     }
 }
+
+typedef void (*Fn_0017B308)(void* self);
+
+struct Mgr_0017B308 { Fn_0017B308* vtbl; };
+struct Obj_0017B308 { u8 pad[0x550]; s32 mode; };
+
+extern s32 D_00270458;
+extern s32 D_00270B54;
+extern s32 D_002717CC;
+s32 func_001E9970(void* self);
+
+void func_0017B308(Obj_0017B308* self)
+{
+    s32 busy = 0;
+    s32 mode = self->mode;
+    if (mode < 2) {
+        if (mode >= 0) {
+            if (func_001E9970(self) != 0) {
+                if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
+            }
+        }
+    }
+    if (busy) ((Mgr_0017B308*)D_0026E248)->vtbl[0x38 / 4](D_0026E248);
+    else ((Mgr_0017B308*)D_0026E248)->vtbl[0x3C / 4](D_0026E248);
+}

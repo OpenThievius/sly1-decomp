@@ -1000,3 +1000,22 @@ void func_0014CDC8(Mgr_14CDC8* self, Arg_14CDC8* arg)
     }
     self->f454 = self->f454 - 1;
 }
+
+struct Obj_14ED98 { void** vtbl; };
+typedef f32 (*Slot6_14ED98)(void* self);
+typedef void (*Slot11_14ED98)(void* self, s32 p1, f32 x, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
+
+void func_0014ED98(Obj_14ED98* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6)
+{
+    s32 q4 = p4;
+    s32 q3 = p3;
+    s32 q2 = p2;
+    s32 q1 = p1;
+    s32 q6 = p6;
+    s32 q5 = p5;
+    f32 r = ((Slot6_14ED98)self->vtbl[6])(self);
+    Slot11_14ED98 fn = (Slot11_14ED98)self->vtbl[11];
+    if (fn != 0) {
+        fn(self, q1, r, q2, q3, q4, q5, q6);
+    }
+}

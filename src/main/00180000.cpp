@@ -1117,3 +1117,20 @@ s32 func_00181A98(Obj_181A98* self)
     if (self->fBB0 != 1 || self->fBF0 != 0 || func_001DDA80(self->f14) != 0) return 1;
     return 0;
 }
+
+extern u8 D_002640A0[];
+extern u8 D_00264098[];
+
+void func_00180E38(s32 flag, s32 code)
+{
+    if (code == 0xFFFF && flag != 0) {
+        D_00264098[0] = 0xBF;
+        D_00264098[1] = 0xBF;
+        D_00264098[2] = 0xBF;
+        D_00264098[3] = 0x7F;
+        D_002640A0[0] = 0;
+        D_002640A0[1] = 0x87;
+        D_002640A0[2] = 0xFF;
+        D_002640A0[3] = 0x7F;
+    }
+}

@@ -1129,3 +1129,64 @@ void func_0015F930(Items_15F930* list, s32* arr, s32 value)
     (void)func_001F5B08(arr, arr + 1, (list->count - i) * 4 - 4);
     list->count--;
 }
+
+struct Local_15D8A8 {
+    u16 u0;
+    u16 u2;
+    u8 b4;
+    u8 b5;
+    u8 b6;
+    u8 b7;
+    f32 f8;
+    u16 uC;
+    u16 padE;
+};
+
+struct Obj_15D8A8 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    u8 pad0C[0x44 - 0x0C];
+    f32 f44;
+    f32 f48;
+    s32 f4C;
+    s32 f50;
+    void* f54;
+    void* f58;
+    u8 pad5C[0x78 - 0x5C];
+    s32 f78;
+    void* f7C;
+};
+
+extern u8* D_00274504;
+extern u8* D_0027450C;
+
+void func_00137A60(void* src, s32 n, void* dst);
+void* func_0018D500(s32 n);
+
+void func_0015D8A8(Obj_15D8A8* obj, void* src)
+{
+    Local_15D8A8 l;
+    func_00137A60(src, 0x10, &l);
+    s32 idx = l.b7;
+    obj->f50 = idx;
+    D_00262268[idx] = (s32)obj;
+    obj->f54 = D_00274504 + l.u0 * 32;
+    void* t;
+    if (l.u2 != 0xFFFF) {
+        t = D_0027450C + l.u2 * 24;
+    } else {
+        t = 0;
+    }
+    obj->f58 = t;
+    s32 n = l.uC;
+    s32 A = l.b4, B = l.b5, C = l.b6; f32 F = l.f8;
+    obj->f0 = A;
+    obj->f44 = F;
+    obj->f78 = n;
+    obj->f8 = C;
+    obj->f4 = B;
+    obj->f48 = F;
+    obj->f7C = func_0018D500(n << 3);
+    func_00137A60(src, obj->f78 << 3, obj->f7C);
+}

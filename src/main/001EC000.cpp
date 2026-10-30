@@ -51,31 +51,25 @@ void func_001ED558(void* self, s32 p, s32 val)
     func_001ED4C8(self, 0, p)->fC = val;
 }
 
-
-
 void func_001ED588(void* self, s32 p, s32 val)
 {
     func_001ED4C8(self, 1, p)->fC = val;
 }
-
 
 void func_001ED5B8(void* self, s32 p)
 {
     func_001ED4C8(self, 2, p);
 }
 
-
 void func_001ED5D8(void* self, s32 p)
 {
     func_001ED4C8(self, 3, p);
 }
 
-
 void func_001ED5F8(void* self, s32 p)
 {
     func_001ED4C8(self, 4, p);
 }
-
 
 void func_001ED618(void* self, s32 p)
 {
@@ -1053,4 +1047,18 @@ void func_001EE668(void* s, void* a1, s32 size, u32* src, void* a4)
             dst += 4;
         } while (i < full);
     }
+}
+
+struct Mask_1EE9D0 { u8 pad[0x3C]; s32 count; s32* table; };
+
+s32 func_001EE9D0(Mask_1EE9D0* self, s32 bits)
+{
+    s32 acc;
+    bits &= 0x7FFFFFFF;
+    if (bits == 0) return 0;
+    acc = -1;
+    for (s32 i = 0; i < self->count; i++) {
+        if ((bits >> i) & 1) acc &= self->table[i];
+    }
+    return acc | bits;
 }

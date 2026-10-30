@@ -896,3 +896,36 @@ void func_001524D8(Pair_1524D8* self, u32 value)
         self->first = value;
     }
 }
+
+struct Obj_151D28 { u8 pad0[0x2C]; f32 f2C; s32 f30; f32 f34; s32 f38; };
+struct Mgr_151D28 { u8 pad0[0xC]; f32 fC; };
+struct Glob_151D28 { u8 pad0[0x19E4]; s32 f19E4; };
+struct Self_151D28 { u8 pad0[0x1C]; Obj_151D28* field_1C; s32 field_20; };
+
+extern s32 D_00275B00;
+extern void* D_00275710;
+void func_00160C48(s32 value);
+f32 func_001EB0F8(void*, f32);
+void func_00152410(void*, f32);
+void func_00148CE0(void*);
+
+void func_00151D28(Self_151D28* self)
+{
+    if (D_00275B00 & 8) {
+                if (self->field_1C->f2C <= ((Mgr_151D28*)D_002623C8)->fC && ((Mgr_151D28*)D_002623C8)->fC < self->field_1C->f34) {
+            if (((Glob_151D28*)D_002623C0)->f19E4 < self->field_1C->f30) {
+                func_00160C48(self->field_1C->f30);
+                self->field_20 = 1;
+            }
+        } else if (self->field_1C->f34 <= ((Mgr_151D28*)D_002623C8)->fC) {
+            if (((Glob_151D28*)D_002623C0)->f19E4 < self->field_1C->f38) {
+                func_00160C48(self->field_1C->f38);
+                self->field_20 = 1;
+            }
+        }
+    } else {
+        f32 v = func_001EB0F8((u8*)self->field_1C + 8, ((Mgr_151D28*)D_002623C8)->fC);
+        func_00152410(self, v);
+    }
+    func_00148CE0(D_00275710);
+}

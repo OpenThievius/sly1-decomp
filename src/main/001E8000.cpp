@@ -875,3 +875,30 @@ tail:
     }
     return res;
 }
+
+struct Obj_1E88D0 {
+    u8 pad0[0xC10];
+    f32 fC10;
+    f32 fC14;
+    u8 pad1[0xC20 - 0xC18];
+    f32 fC20;
+    f32 fC24;
+    s32 fC28;
+    f32 fC2C;
+    u8 pad2[0xC58 - 0xC30];
+    s32 fC58;
+};
+
+void func_00167D68(void* self);
+
+void func_001E88D0(Obj_1E88D0* self)
+{
+    func_00167D68(self);
+    self->fC58 = 0x2D8;
+    self->fC14 = 30000.0f;
+    self->fC10 = 30000000.0f;
+    self->fC20 = 3000000.0f;
+    self->fC24 = 3000000.0f;
+    self->fC28 = 0;
+    self->fC2C = 6.2831855f;
+}

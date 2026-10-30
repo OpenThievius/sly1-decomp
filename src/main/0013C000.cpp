@@ -981,3 +981,33 @@ void func_0013EB68(void* a, s32 b)
         func_0013F070(self, 0);
     }
 }
+
+struct Child_DD08 {
+    u8 pad0[0x694];
+    s32 f694;
+};
+
+struct Node_DD08 {
+    u8 pad0[0x560];
+    Child_DD08* child;
+    s32 f564;
+};
+
+struct Src_DD08 {
+    u8 pad0[0x538];
+    u64 f538;
+};
+
+s32 func_001300E8(Src_DD08* src, s32 kind);
+s32 func_0013DD08(Node_DD08* node, Src_DD08* src)
+{
+    s32 r;
+    if (src->f538 & (1ULL << 55)) return 0;
+    if (node->f564 != 0) return 1;
+    Child_DD08* c = node->child;
+    if (c == 0 || c->f694 == 0) {
+        r = func_001300E8(src, 0x27);
+        if (r != 0) return 0;
+    }
+    return 1;
+}
