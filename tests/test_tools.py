@@ -179,6 +179,16 @@ class BlockerTest(unittest.TestCase):
         self.assertEqual(todo.blocker({"calls", "data"}), "none")
 
 
+class DecodedListingTest(unittest.TestCase):
+    def test_raw_sqrt_word_is_named(self):
+        # sqrt.s $f0, $f0 is 0x46000004 (little-endian bytes 04 00 00 46 in the listing)
+        self.assertEqual(todo.decoded("    /* 1 2 04000046 */  c1         0x4").split()[0], "sqrt.s")
+        self.assertEqual(todo.decoded("    /* 1 2 00000046 */  c1         0x0").split()[0], "c1")
+
+    def test_other_lines_are_unchanged(self):
+        self.assertEqual(todo.decoded("    /* 1 2 00000000 */  nop"), "nop")
+
+
 class DefinitionTest(unittest.TestCase):
     def names(self, text):
         return [m.group(1) for m in todo.DEFINITION.finditer(text)]

@@ -99,6 +99,20 @@ def functions():
     return rows
 
 
+COP1_SQRT_S = 0x46000004  # sqrt.s: COP1, fmt S (0x10), funct 4; the register fields vary
+
+
+def decoded(line):
+    """A listing line's text, with a raw COP1 sqrt.s word (listed as c1) given its mnemonic."""
+    text = line.split("*/", 1)[-1].strip()
+    match = re.search(r"/\*\s*\S+\s+\S+\s+([0-9A-Fa-f]{8})\s*\*/", line)
+    if match and text.split()[:1] == ["c1"]:
+        word = int.from_bytes(bytes.fromhex(match.group(1))[::-1], "big")
+        if word & 0xFFE0003F == COP1_SQRT_S:
+            return "sqrt.s" + text[len("c1"):]
+    return text
+
+
 def bodies():
     out, current = {}, None
     for line in (ROOT / "asm" / "us" / "text.s").read_text().splitlines():
@@ -106,7 +120,7 @@ def bodies():
             current = line.split()[1].rstrip(",")
             out[current] = []
         elif current and line.lstrip().startswith(("/*", "jlabel", ".L")):
-            out[current].append(line.split("*/", 1)[-1].strip())
+            out[current].append(decoded(line))
     return out
 
 
