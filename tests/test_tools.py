@@ -179,6 +179,16 @@ class BlockerTest(unittest.TestCase):
         self.assertEqual(todo.blocker({"calls", "data"}), "none")
 
 
+class StructReturnTest(unittest.TestCase):
+    def test_struct_pointer_return_is_a_definition(self):
+        text = "struct Node_2003F8 *func_002003F8(struct Node_2003F8 *self, s32 a1) {\n    return self;\n}\n"
+        self.assertEqual([m.group(1) for m in todo.DEFINITION.finditer(text)], ["func_002003F8"])
+
+    def test_struct_definitions_are_not(self):
+        text = "struct Node_2003F8 {\n    s32 f0;\n};\nstruct Pad_1 *func_00100000(void);\n"
+        self.assertEqual([m.group(1) for m in todo.DEFINITION.finditer(text)], [])
+
+
 class DecodedListingTest(unittest.TestCase):
     def test_raw_sqrt_word_is_named(self):
         # sqrt.s $f0, $f0 is 0x46000004 (little-endian bytes 04 00 00 46 in the listing)
