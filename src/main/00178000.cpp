@@ -793,3 +793,51 @@ void func_0017B410(Obj_17B410* self, s32 mode)
 done:
     return;
 }
+
+struct Sub_17B648 {
+    u8 pad0[0x18];
+    f32 f18;
+};
+
+struct Obj_17B648 {
+    u8 pad0[0x550];
+    s32 f550;
+    f32 f554;
+    u8 pad1[0x568 - 0x558];
+    Sub_17B648* f568;
+};
+
+extern s32 D_00263E2C;
+extern s32 D_00263E30;
+extern f32 D_00263E04;
+extern f32 D_0026185C;
+
+void func_001B93F8(void* self);
+void func_0012E760(void* p);
+void func_0017B8C0(void* self, s32 state);
+void func_00160578(s32 n);
+
+void func_0017B648(Obj_17B648* self)
+{
+    Sub_17B648* p;
+
+    func_001B93F8(self);
+    p = self->f568;
+    if (p != 0) {
+        if (p->f18 == 0.0f) {
+            func_0012E760(p);
+            self->f568 = 0;
+        }
+    }
+    if (D_00263E2C != -1) {
+        func_0017B8C0(self, D_00263E2C);
+    }
+    if (self->f550 == 2) {
+        if (D_00263E04 < D_0026185C - self->f554) {
+            if (D_00263E30 == 0) {
+                D_00263E30 = 1;
+                func_00160578(2);
+            }
+        }
+    }
+}

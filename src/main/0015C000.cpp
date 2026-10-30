@@ -509,7 +509,6 @@ void func_0015EBF0(void* obj, void* a, s32 b)
     func_001529E0(obj, a, b);
 }
 
-
 void func_0015EB20(void* list, void* a, s32 b);
 void func_0015EBF0(void* obj, void* a, s32 b);
 void func_00152440(void* p);
@@ -1100,4 +1099,33 @@ void func_0015F210(s32 flag)
     } while (p < end);
     func_00191EB0(3);
     D_0026231C = 0;
+}
+
+struct Items_15F930
+{
+    s32 count;
+};
+
+void* func_001F5B08(void* dst, void* src, s32 bytes);
+
+void func_0015F930(Items_15F930* list, s32* arr, s32 value)
+{
+    s32 i = list->count;
+    s32* p = (s32*)(((s32)i << 2) + (s32)arr);
+    i--;
+    for (;;)
+    {
+        if (i < 0)
+        {
+            return;
+        }
+        p--;
+        if (*p == value)
+        {
+            break;
+        }
+        i--;
+    }
+    (void)func_001F5B08(arr, arr + 1, (list->count - i) * 4 - 4);
+    list->count--;
 }

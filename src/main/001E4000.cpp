@@ -455,3 +455,39 @@ s32 func_001E5888(Ctx_1E5888* self, Node_1E5888* node)
     }
     return 1;
 }
+
+extern u8* D_00262E10;
+
+typedef void (*VFn_56A0)(void* self, f32 t, void* buf);
+
+void func_001E5938(void);
+void func_0016EC20(void* obj, s32 n);
+void func_001E5C78(void* self);
+s32 func_00182FC8(void);
+void func_001F5C0C(void* p, s32 v, s32 n);
+
+void func_001E56A0(void* self, void* obj, f32 t)
+{
+    u8 buf[0xC4];
+    u8* o;
+
+    func_001E5938();
+    if (*(u16*)((u8*)obj + 0xAA) & 0xC0) {
+        func_0016EC20(obj, 0xC0);
+        func_001E5C78(self);
+    }
+    o = D_00262E10;
+    if (o != 0) {
+        if (*(s32*)(o + 0x2740) != 0) {
+            if (func_00182FC8()) {
+                VFn_56A0 fn;
+                func_001F5C0C(buf, 0, 0xC4);
+                o = D_00262E10;
+                fn = *(VFn_56A0*)(*(u8**)o + 0x134);
+                if (fn != 0) {
+                    fn(o, t, buf);
+                }
+            }
+        }
+    }
+}

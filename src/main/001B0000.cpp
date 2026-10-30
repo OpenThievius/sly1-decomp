@@ -769,3 +769,19 @@ void func_001B2790(Owner_1B2790* self, void* a1, s32 max, s32* outCount, Node_1B
     }
     *outCount = count;
 }
+
+typedef void (*VFn_1B0120)(void* self, s32 arg);
+
+struct Obj_1B0120 { VFn_1B0120* vtbl; u8 pad_4[0x554 - 4]; s32 f554; s32 f558; };
+
+void func_001B0120(Obj_1B0120* self)
+{
+    if (self->f558 == 8) {
+        return;
+    }
+    s32 m = 7;
+    if (!self->f554) {
+        m = 3;
+    }
+    self->vtbl[0x144 / 4](self, m);
+}

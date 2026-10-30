@@ -731,3 +731,14 @@ s32 func_001C1A28(List_1C1A28* self, s32 value)
     self->tail = n;
     return 1;
 }
+
+extern s32 D_002748EC;
+s32 func_001C0CF0(void);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001C0EC0(void)
+{
+    if (D_002748EC != 0) {
+        f32 scale = (f32)func_001C0CF0();
+        func_001BFCD8(0x77, 0, 0, 0, 0.0f, 0.0f, 0.5f, scale * 0.083333336f, 0.0f, 0, 0);
+    }
+}

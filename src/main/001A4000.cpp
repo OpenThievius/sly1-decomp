@@ -1116,3 +1116,53 @@ void func_001A7998(void* self_, s32 idx)
         if (s2 != 0) func_0012C7B0(s2, self, 0, self + 0x564, 0.0f, 1.0f);
     }
 }
+
+struct Ctrl_1A42C8 { u8 pad0[0x614]; s32 mode614; u8 pad1[0x3C]; void* ptr654; void* ptr658; };
+
+void func_001B6628(void* p, s32 a);
+void func_001B64D8(void* p, s32 a);
+void func_001BF788(void* p, s32 flag);
+void func_001BFCD8(s32 a0, void* a1, void* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+void func_001A42C8(Ctrl_1A42C8* self, s32 state)
+{
+    s32 old = self->mode614;
+    if (old == state) {
+        return;
+    }
+    self->mode614 = state;
+    s32 a2;
+    s32 s1;
+    switch (state) {
+    case 0:
+        a2 = 0x293;
+        s1 = -1;
+        break;
+    case 1:
+        a2 = 0x294;
+        s1 = 0x150;
+        break;
+    }
+    if (self->ptr654 != 0) {
+        if (old == -1) {
+            func_001B6628(self->ptr654, a2);
+        } else {
+            func_001B64D8(self->ptr654, a2);
+        }
+    }
+    s32 cur = -1;
+    if (self->ptr658 != 0) {
+        cur = *(s32*)self->ptr658;
+        if (s1 == cur) {
+            return;
+        }
+        func_001BF788(self->ptr658, 0);
+        self->ptr658 = 0;
+        cur = -1;
+    }
+    if (s1 == cur) {
+        return;
+    }
+    f32 zero = 0.0f;
+    func_001BFCD8(s1, &self->ptr658, self, 0, 10000.0f, 6000.0f, 1.0f, zero, zero, 0, 0);
+}

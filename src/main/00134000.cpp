@@ -458,3 +458,70 @@ void func_00137F08(void* self, u8* p)
     *(s32*)(b + 0xC) = 0;
     *(f32*)(c + 0xC) = 1.0f;
 }
+
+extern u8 D_00261858[];
+
+struct Scratch_00136408 {
+    u8 bytes[0xB0];
+};
+
+struct Entry_00136408 {
+    u8 pad0[4];
+    s32 f04;
+    u8 name08[0x258];
+    s32 f260;
+    u8 pad264[4];
+    f32 f268;
+    s32 f26C;
+    s32 list270[16];
+};
+
+s32 func_001E2100(const char* s);
+void func_001E2138(void* dst, const char* src);
+void func_0015C8B8(s32 a, f32 x, f32 y);
+void func_0015DB28(void* buf, void* p, s32 v);
+void func_0015E068(void* buf, f32 x);
+void func_0015C900(s32 v);
+void func_0015DB80(void* buf);
+s32 func_0015DBE0(void* buf);
+
+void func_00136408(Entry_00136408* self, const char* name)
+{
+    Scratch_00136408 buf;
+    s32 s1;
+    s32 r;
+    s32 idx;
+    f32 scale;
+    f32 lim;
+    f32* tab;
+
+    self->f26C = 0;
+    if (name == 0) goto fail;
+    if (func_001E2100(name) == 0) goto fail;
+    func_001E2138(self->name08, name);
+    s1 = 4;
+    scale = 1.0f;
+    if ((r = self->f260) == s1) scale = 0.8f;
+    func_0015C8B8(self->f04, scale, scale);
+    func_0015DB28(&buf, self->name08, self->f04);
+    lim = 280.0f;
+    if ((r = self->f260) == s1) lim = 380.0f;
+    s1 = 0;
+    func_0015E068(&buf, lim);
+    func_0015C900(self->f04);
+    func_0015DB80(&buf);
+    while ((r = func_0015DBE0(&buf)) != 0) {
+        if (r == 10) {
+            idx = self->f26C;
+            self->list270[idx] = s1;
+            self->f26C = idx + 1;
+        }
+        s1++;
+    }
+    goto tail;
+fail:
+    self->name08[0] = 0;
+tail:
+    tab = (f32*)D_00261858;
+    self->f268 = tab[1];
+}
