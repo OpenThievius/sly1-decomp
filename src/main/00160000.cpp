@@ -815,7 +815,19 @@ void func_00160918(void)
 
 // eu: not checkable (check.py: D_00247AB0 has no address in eu)
 
-struct Val_160948 { u8 pad0[8]; s32 f8; u8 pad0C[0xC]; s32 f18; };
+struct Val_160948 {
+    u8 pad0[8];
+    s32 f8;
+    u8 pad0C[0xC];
+    s32 f18;
+    s32 same(Val_160948* b)
+    {
+        if (this == b) return 1;
+        if (this == 0) return 0;
+        if (b == 0) return 0;
+        return ((f8 ^ f18) ^ (b->f8 ^ b->f18)) == 0;
+    }
+};
 struct Ctx_160948 { u8 pad0[0xC]; f32 fC; u8 pad10[0x19C8]; s32 f19D8; s32 f19DC; u8 pad19E0[0xC]; s32 f19EC; };
 struct Q_160948 { u8 pad0[0x30]; s32 f30; };
 struct Frame_160948 { s32 list; s32 cursor; s32 link; s32 prev; };
@@ -838,20 +850,12 @@ Host_160948* func_0015A418(u8* host, s32 a, s32 b, s32 c);
 void func_0012E760(Item_160948* i);
 void func_001E96F8(u8* obj, s32 mode);
 
-static inline s32 same_160948(Val_160948* a, Val_160948* b)
-{
-    if (a == b) return 1;
-    if (a == 0) return 0;
-    if (b == 0) return 0;
-    return ((a->f8 ^ a->f18) ^ (b->f8 ^ b->f18)) == 0;
-}
-
 void func_00160948(void)
 {
     Val_160948* v = func_00160180((((Ctx_160948*)D_002623C0)->f19D8 << 8) | ((Ctx_160948*)D_002623C0)->f19DC);
     if (v == 0) v = (Val_160948*)D_00247AB0;
     func_00160CC8(D_002623D8);
-    if (((Q_160948*)D_00275BC0)->f30 != 1 || ((Ctx_160948*)D_002623C0)->fC != 0.0f || !same_160948(v, (Val_160948*)D_00275B04)) {
+    if (((Q_160948*)D_00275BC0)->f30 != 1 || ((Ctx_160948*)D_002623C0)->fC != 0.0f || !v->same((Val_160948*)D_00275B04)) {
         func_001F0428(v, -1, 1);
         return;
     }
