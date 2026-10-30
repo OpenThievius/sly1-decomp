@@ -1456,3 +1456,89 @@ void func_0011ECB8(Ctx_11ECB8* self, void* a1, void* a2)
         } while (--i != 0);
     }
 }
+
+struct Entry_11CE30 { s32 fn; s32 pad; u64 arg; };
+struct Pend_11CE30 { s32 fn; s32 pad; u64 arg; };
+typedef s32 (*Cb_11CE30)(s32 ctx, u64 arg);
+typedef void (*Cb1_11CE30)(s32 a0);
+
+extern s32 D_0025C35C;
+extern s32 D_0025C380;
+extern s32 D_0025C384;
+extern s32 D_0025C388;
+extern s32 D_0025C354;
+extern s32 D_0025C358;
+extern s32 D_0025C350;
+extern s32 D_0025C3A0;
+extern s32 D_0025C3C4;
+extern u64 D_0025C3A8;
+extern s32 D_0025C360;
+extern s32 D_0025C370;
+extern s32 D_0025C378;
+extern s32 D_00260E00;
+extern Pend_11CE30 D_0025C390;
+
+s32 func_0011D078(void);
+void func_0011DE18(void);
+s32 func_0011E1F8(s32 flag);
+void func_001F6C20(s32 a0);
+
+s32 func_0011CE30(void)
+{
+    s32 i;
+    s32 idx;
+    s32 k;
+    Cb_11CE30 f;
+    if (D_0025C340 != 0 && func_0011D078() != 0) {
+        if (D_0025C35C != 0) {
+            if (D_0025C3A0 != 0)
+                ((Cb_11CE30)D_0025C3A0)(D_0025C3C4, D_0025C3A8);
+            D_0025C3A0 = 0;
+            D_0025C35C = 0;
+        } else {
+            idx = D_0025C380 != 1;
+            i = 0;
+            if (((s32*)(&D_0025C360)[idx])[0] > 0) {
+                do {
+                    Entry_11CE30* e = (Entry_11CE30*)(i * 16 + (s32)(s32*)(&D_0025C370)[idx]);
+                    if (e->fn != 0)
+                        ((Cb_11CE30)e->fn)(((s32*)(&D_0025C378)[idx])[i + 1], e->arg);
+                    i++;
+                } while (i < ((s32*)(&D_0025C360)[idx])[0]);
+            }
+        }
+    }
+    if (D_0025C388 != 0) {
+        func_001F6C20(0);
+        k = D_00260E00;
+        if ((u32)k != 0xFFFFFFFFu) {
+            if (D_0025C390.fn != 0) {
+                u64 a = D_0025C390.arg;
+                Cb_11CE30 g = (Cb_11CE30)D_0025C390.fn;
+                D_0025C390.fn = 0;
+                D_0025C390.arg = 0;
+                g(k, a);
+            }
+            D_00260E00 = 0;
+            D_0025C388 = 0;
+        }
+    }
+    if (D_0025C340 == 0) {
+        s32* p = (s32*)(&D_0025C360)[D_0025C380];
+        if (p[0] != 0 && D_0025C384 == 0)
+            func_0011DE18();
+    }
+    if (D_0025C354 != 0) {
+        func_0011E1F8(1);
+        if (D_0025C358 != 0) {
+            D_0025C354 = 0;
+            f = (Cb_11CE30)D_0025C350;
+            D_0025C358 = 0;
+            if (f != 0)
+                ((Cb1_11CE30)f)(1);
+        }
+    }
+    if (D_0025C340 != 0 || D_0025C388 != 0)
+        return 1;
+    return 0;
+}

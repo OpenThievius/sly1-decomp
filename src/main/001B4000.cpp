@@ -1510,3 +1510,49 @@ void func_001B5200(Node_1B5200* p, Src_1B5200* s)
     p->f3C = 1.0f;
     p->flags = (p->flags & ~1) | 2;
 }
+
+u16 func_001B5B58(u8 ch);
+s32 func_001E2100(void* p);
+
+void func_001B5C40(u8* src, u16* dst)
+{
+    s32 n = func_001E2100(src);
+    s32 i;
+    for (i = 0; i < n; i++) {
+        u32 r = func_001B5B58(src[i]);
+        u32 lo = (r & 0xFF) << 8;
+        u32 hi = (r >> 8) & 0xFF;
+        dst[i] = (u16)(hi | lo);
+    }
+    dst[i] = 0;
+}
+
+struct Inner_1B6CF0 { u8 pad[0x34]; f32 f34; };
+struct Item_1B6CF0 {
+    u8 pad[0x8];
+    Inner_1B6CF0* inner;
+    u8 pad2[0x14 - 0x0C];
+    f32 f14;
+};
+struct Node_1B6CF0 { u8 pad[0x24]; s32 f24; };
+
+f32 func_001B6C68(Node_1B6CF0* self);
+void func_001B66A0(Node_1B6CF0* self);
+void func_0012F0A0(void* a, f32 b, f32 c, s32 d);
+
+void func_001B6CF0(Node_1B6CF0* self, f32 t)
+{
+    f32 rem = t;
+    Item_1B6CF0* item = (Item_1B6CF0*)self->f24;
+    while (item) {
+        f32 diff = item->inner->f34 - item->f14;
+        if (rem < diff) {
+            func_0012F0A0(item, rem, 1.0f, 1);
+            break;
+        }
+        rem = rem - diff;
+        (void)func_001B6C68(self);
+        func_001B66A0(self);
+        item = (Item_1B6CF0*)self->f24;
+    }
+}

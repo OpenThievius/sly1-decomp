@@ -246,3 +246,31 @@ void func_001D32D8(Self_D32D8* self, void* v, s32 flag)
     func_001837E0(self, 2, 0, 0);
     ((VFnB_D32D8*)self->vtbl)[7](self);
 }
+
+// NEAR: logic and float selection match; the lui of D_00261858 is still hoisted out of the loop (extra s4 save, frame 0x460 vs 0x450); C is 192 bytes vs 188.
+
+struct Item_1D31D0 { u8 pad[0x7E0]; void* obj; };
+struct Obj_1D31D0 { u8 pad0[0x14]; void* f14; u8 pad1[0x2758 - 0x18]; f32 f2758; s32 f275C; };
+
+struct T_1D31D0 { f32 a; f32 b; };
+extern T_1D31D0 D_00261858;
+
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
+
+void func_001D31D0(Obj_1D31D0* self, s32 value)
+{
+    void* buf[0x100];
+    if (value == self->f275C) {
+        return;
+    }
+    s32 n = func_0015A4F0(self->f14, 0x105, 8, 0, 0x100, buf);
+    for (s32 i = 0; i < n; i++) {
+        Item_1D31D0* item = (Item_1D31D0*)buf[i];
+        if (item->obj != 0) {
+            func_0012F0A0(item->obj, 1, 0.0f, value != 0 ? 0.0f : 1.0f);
+        }
+    }
+    self->f275C = value;
+    self->f2758 = D_00261858.b;
+}

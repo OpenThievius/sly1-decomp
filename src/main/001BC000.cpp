@@ -872,3 +872,25 @@ done:
     }
     return n;
 }
+
+extern s32 D_00274744;
+extern s32 D_0027472C;
+extern s32 D_00274730;
+
+void func_0011D600(s32 handle);
+s32 func_0011D708(s32 handle);
+
+void func_001BE998(void)
+{
+    s32 r;
+    if (D_00274744 != 0) return;
+    if (D_0027472C == 0) return;
+    func_0011D600(D_0027472C);
+    while ((r = func_0011D708(D_0027472C)) != 0) {
+        r = 0x4E20;
+        while (--r >= 0) {
+        }
+    }
+    D_0027472C = 0;
+    D_00274730 = 0;
+}

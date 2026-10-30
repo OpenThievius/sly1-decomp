@@ -1186,3 +1186,23 @@ void func_0016BDD0(Mgr_16BDD0* self, s32 flag)
     }
     self->x25C = flag;
 }
+
+struct Bits_169B18 { u8 pad[0x18]; u64 bits; };
+void func_001613C0(void* p, s32 a, s32 b, s32 c);
+void func_00161708(void* p, s32 a, u64 b);
+
+void func_00169B18(Bits_169B18* src, void* dst)
+{
+    s32 w = 1 << (s32)((src->bits >> 26) & 0xF);
+    s32 cap = 64;
+    if (cap < w) cap = w;
+    s32 f = (s32)(src->bits & 0x3FFF) >> 5;
+    s32 m = 1 << (s32)((src->bits >> 30) & 0xF);
+    func_001613C0(dst, 0x200, 1, 0xE);
+    func_00161708(dst, 0x4D, (u64)(cap / 64) << 16 | (u64)f);
+    func_00161708(dst, 0x4F, 0x30000000 | (u64)f | (u64)0x8000 << 17);
+    func_00161708(dst, 0x19, 0);
+    func_00161708(dst, 0x41, (u64)(w - 1) << 16 | (u64)(m - 1) << 48);
+    func_00161708(dst, 0x48, 0x31001);
+    func_00161708(dst, 0x43, 0x44);
+}

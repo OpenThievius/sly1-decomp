@@ -423,3 +423,47 @@ void func_001E22F8(Tally_1E22F8* self)
         self->count++;
     }
 }
+
+struct Field_001E0E18 {
+    u8 pad0[0x20];
+    s32 kind;
+    u8 pad1[0x8];
+    u8 mode;
+};
+
+s32 func_001E0E18(Field_001E0E18* self, void* dst)
+{
+    s32 ret = 0;
+    if (self->kind != 1) {
+        if (self->kind < 2) {
+            if (self->kind == 0) {
+                *(u32*)((u8*)dst + 4) = 0;
+            }
+        }
+    } else {
+        *(u64*)dst = *(u16*)dst;
+    }
+    if (self->mode == 'd' || self->mode == 'i') {
+        switch (self->kind) {
+        case 0:
+            if (*(s32*)dst < 0) {
+                *(s32*)dst = -*(s32*)dst;
+                ret = 1;
+            }
+            break;
+        case 1:
+            if (*(s16*)dst < 0) {
+                *(s16*)dst = -*(u16*)dst;
+                ret = 1;
+            }
+            break;
+        case 2:
+            if (*(s64*)dst < 0) {
+                *(s64*)dst = -*(s64*)dst;
+                ret = 1;
+            }
+            break;
+        }
+    }
+    return ret;
+}

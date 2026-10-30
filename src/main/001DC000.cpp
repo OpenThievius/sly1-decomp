@@ -159,7 +159,6 @@ void func_001DDBF8(void* self, void* p)
     func_001BEEF8(p);
 }
 
-
 struct Obj_DDCB0 {
     u8 pad[0x19E4];
     s32 f19E4;
@@ -291,7 +290,6 @@ void func_001DDC90(Flags_001DDC90* self, s32 bit)
     m <<= bit;
     self->bits &= ~m;
 }
-
 
 void func_001DDCC8(void* unused, s32* out)
 {
@@ -879,4 +877,58 @@ void func_001DC828(Owner_1DC828* owner, Node_1DC828* handle)
     handle->self = 0;
     func_001DC710(handle, hb);
     func_001DC7B0(handle, &owner->listA);
+}
+
+typedef u64 Q_1DD3E0 __attribute__((mode(TI)));
+struct __attribute__((aligned(16))) Quad_001DD3E0 { f32 x, y, z, w; };
+struct __attribute__((packed)) Word_001DD3E0 { s32 v; };
+struct Vec3_001DD3E0 { f32 x, y, z; };
+struct Locals_001DD3E0 { Quad_001DD3E0 buf[4]; Word_001DD3E0 tmp; };
+
+extern Vec3_001DD3E0 D_0026ABF0;
+extern Vec3_001DD3E0 D_0026AC00;
+
+Q_1DD3E0 func_00188740(u8* self, Q_1DD3E0 q);
+s32 func_001DD218(Quad_001DD3E0* out);
+void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, void* tmp, s32 k);
+
+void func_001DD3E0(Quad_001DD3E0* a, Quad_001DD3E0* b, Word_001DD3E0* c, u8* obj, s32 k)
+{
+    Locals_001DD3E0 L;
+    Quad_001DD3E0* base;
+    Quad_001DD3E0* p;
+    s32 n;
+
+    base = &L.buf[2];
+
+    L.buf[0] = *a;
+    L.buf[0].w = 1.0f;
+    L.buf[1] = *b;
+    L.buf[1].w = 1.0f;
+
+    p = base;
+    n = 1;
+    do {
+        *(Q_1DD3E0*)p = func_00188740(obj + 0x100, *(Q_1DD3E0*)(p - 2));
+        n--;
+        p++;
+    } while (n >= 0);
+
+    if (func_001DD218(base) != 0) {
+        void* tp = &L.tmp;
+        Quad_001DD3E0* q = base;
+        n = 1;
+        do {
+            f32 r = 1.0f / q->w;
+            q->x = q->x * r * D_0026ABF0.x + D_0026AC00.x;
+            q->y = q->y * r * D_0026ABF0.y + D_0026AC00.y;
+            q->z = q->z * r * D_0026ABF0.z + D_0026AC00.z;
+            n--;
+            q++;
+        } while (n >= 0);
+        L.tmp = *c;
+        func_001AE3B8(*(s32*)&L.buf[2].x, *(s32*)&L.buf[2].y, *(s32*)&L.buf[2].z,
+                      *(s32*)&L.buf[3].x, *(s32*)&L.buf[3].y, *(s32*)&L.buf[3].z,
+                      tp, k);
+    }
 }

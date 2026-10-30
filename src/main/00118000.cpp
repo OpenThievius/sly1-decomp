@@ -1280,3 +1280,26 @@ Cursor_119218 func_00119218(Args_119218* a1, void* a2)
     }
     return L;
 }
+
+Value_11B008* func_0011BDD0(Value_11B008* out, List_11BD28* list, s32 key, Value_11B008* value)
+{
+    Value_11B008 tmp;
+    Node_11BD28* node = list->head;
+    while (node != 0) {
+        if (node->key == key) {
+            func_0011B008(&tmp);
+            (void)func_0011B0A8(&node->value, value);
+            func_0011B538(&tmp, 0x22);
+            func_0011B018(out, &tmp);
+            func_0011B060(&tmp, 2);
+            goto done;
+        }
+        node = node->next;
+    }
+    func_0011B008(&tmp);
+    func_0011B538(&tmp, 0x22);
+    func_0011B018(out, &tmp);
+    func_0011B060(&tmp, 2);
+done:
+    return out;
+}
