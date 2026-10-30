@@ -822,3 +822,56 @@ f32 func_001EAAE0(f32 a, f32 b)
     }
     return r;
 }
+
+struct Coeffs_1EA4B8 { f32 p0; f32 p1; f32 p2; };
+
+void func_001EACA0(f32* roots, f32 a, f32 b, f32 c);
+
+f32 func_001EA4B8(Coeffs_1EA4B8* k, f32* out, f32 x, f32 y, f32 z)
+{
+    f32 roots[4];
+    s32 flip = 0;
+    f32 d = x - y;
+    f32 c = z;
+    f32 half;
+    f32 t;
+    f32 res;
+    f32 r;
+    if (d < 0.0f) {
+        flip = 1;
+        d = -d;
+    }
+    half = (k->p1 + k->p0) * k->p2 * 0.5f;
+    if (half <= d) {
+        f32 u = (d - half) / k->p0;
+        if (c <= u) {
+            res = d - k->p0 * c;
+            t = -k->p0;
+            goto tail;
+        }
+        c = c - u;
+        d = half;
+    }
+    func_001EACA0(roots, (k->p0 - k->p1) / (k->p2 + k->p2), k->p1, -d);
+    r = roots[0] - c;
+    if (0.0f < r) {
+        res = (k->p0 - k->p1) * r * r / (k->p2 + k->p2) + k->p1 * r;
+        t = -(k->p1 + (k->p0 - k->p1) * r / k->p2);
+    } else {
+        t = -k->p1;
+        res = 0.0f;
+    }
+tail:
+    if (flip) {
+        res = y - res;
+        if (out) {
+            *out = -t;
+        }
+    } else {
+        res = res + y;
+        if (out) {
+            *out = t;
+        }
+    }
+    return res;
+}

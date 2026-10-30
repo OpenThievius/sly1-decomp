@@ -1001,3 +1001,15 @@ void func_001EE7D0(Cursor_1EE7D0* self, s32 n, void* buf, s32 flag)
     *p = (u32)n | w;
     func_00152CE0(self, n, (s32)buf);
 }
+
+struct Obj_1EFA30 { void* vtbl; };
+
+extern u8 D_002505C0[];
+void* func_0018D5C0(u32 n);
+
+void* func_001EFA30(void)
+{
+    Obj_1EFA30* p = (Obj_1EFA30*)func_0018D5C0(48);
+    p->vtbl = D_002505C0;
+    return p;
+}

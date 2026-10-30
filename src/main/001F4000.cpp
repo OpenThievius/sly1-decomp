@@ -222,3 +222,43 @@ void func_001F5868(List_1F5868* self, Ev_1F5868* e) {
         }
     }
 }
+
+struct Obj_1F4378 { u8 pad[0x2D0]; s32 f2D0; };
+
+extern void* D_00275710;
+
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+
+Obj_1F4378* func_001F4378(void)
+{
+    void* arr[64];
+    Obj_1F4378* found = 0;
+    s32 n = func_0015A4F0(D_00275710, 0x205, 0x7D, 0, 0x100, arr);
+    s32 cap = 0x40;
+    s32 lim = 0x3F;
+    n = (lim < n) ? cap : n;
+    for (s32 i = 0; i < n; i++) {
+        Obj_1F4378* o = (Obj_1F4378*)arr[i];
+        if (o->f2D0 != 0) {
+            found = o;
+            break;
+        }
+    }
+    return found;
+}
+
+struct Self_57E0 { void* f0; s32 f4; };
+struct Out_57E0 { s32 f0; s32 f4; Self_57E0* f8; void* fC; };
+
+void func_001837E0(void* self, s32 a, s32 b, s32 c);
+void func_001F56D8(void);
+
+void func_001F57E0(Self_57E0* self, void* a1, Out_57E0* out)
+{
+    func_001925F0();
+    s32 v = self->f4;
+    out->f8 = self;
+    out->f0 = v;
+    out->fC = (void*)func_001F56D8;
+    func_001837E0(self->f0, 2, 0, 0);
+}

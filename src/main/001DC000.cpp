@@ -787,3 +787,39 @@ void func_001DC9A0(Obj_1DC9A0* self)
         p->vtbl[33](p, D_00275680);
     }
 }
+
+struct Obj_1DFA40 { void** vtbl; u8 pad0[0x72C - 4]; f32 f72C; };
+struct Out_1DFA40 { u8 pad0[0x94]; f32 f94; s32 f98; };
+
+typedef s32 (*Pred_1DFA40)(void* self, void* out);
+
+extern f32 D_0026185C;
+extern f32 D_002758B0;
+extern f32 D_002758C0[];
+
+void func_001DFA40(void* self, void* out)
+{
+    Obj_1DFA40* obj = (Obj_1DFA40*)self;
+    Out_1DFA40* o = (Out_1DFA40*)out;
+
+    if (((Pred_1DFA40)obj->vtbl[0x168 / 4])(self, out)) {
+        f32 d = D_0026185C - obj->f72C;
+        f32 lo = ((f32*)D_00275C60)[0];
+        f32 hi = ((f32*)D_00275C60)[1];
+        f32 v = D_002758C0[0] + d * (D_002758C0[1] + d * D_002758C0[2]);
+        f32 r;
+        if (v < lo) {
+            r = lo;
+        } else if (hi < v) {
+            r = hi;
+        } else {
+            r = v;
+        }
+        f32 k = D_002758B0;
+        o->f98 = 0;
+        o->f94 = r * k;
+    } else {
+        o->f94 = 0.0f;
+        o->f98 = 0;
+    }
+}
