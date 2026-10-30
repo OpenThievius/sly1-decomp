@@ -1124,3 +1124,110 @@ void func_00159D00(Obj_159D00* self)
     }
     func_0019D410(&q);
 }
+
+struct Entry_158198 {
+    s32 a;
+    s32 b;
+    f32 c;
+    f32 d;
+    f32 e;
+    f32 f;
+    u8 pad0[0x10];
+};
+
+struct Emitter_158198 {
+    s32 kind;
+    u8 pad0[0xC];
+    s32 count;
+    Entry_158198* entries;
+};
+
+void* func_0018D5C0(s32 bytes);
+
+void func_00158198(Emitter_158198* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f14, f32 f15)
+{
+    self->kind = 3;
+    if (self->entries == 0) {
+        self->entries = (Entry_158198*)func_0018D5C0(0x500);
+    }
+    if (self->count < 0x20) {
+        s32 n = self->count;
+        Entry_158198* e = self->entries + n;
+        self->count = n + 1;
+        e->a = a1;
+        e->b = a2;
+        e->c = f13;
+        if (0.0f <= f15) {
+            e->d = f15;
+        } else {
+            e->d = f13;
+        }
+        e->e = f12;
+        if (0.0f <= f14) {
+            e->f = f14;
+        } else {
+            e->f = f12;
+        }
+    }
+}
+
+typedef void (*Fn0_1587C8)(void* self);
+typedef void (*Fn1_1587C8)(void* self, void* arg);
+
+struct Link_1587C8 { void* item; u8 pad0[4]; Link_1587C8* next; };
+struct Ctx_1587C8;
+struct Node_1587C8 { void** vtbl; u8 pad0[0x7C]; Ctx_1587C8* owner; u8 pad1[0x24C]; Link_1587C8* list; };
+struct Ctx_1587C8 { u8 pad0[0x14]; void* f14; void* f18; u8 pad1[0x90 - 0x1C]; u32 count; void* items[8]; };
+
+s32 func_00137D10(void* src);
+s32 func_001300E8(void* node, s32 kind);
+void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
+void func_001F3A40(void* self, void* other);
+
+void func_001587C8(Ctx_1587C8* self, void* src)
+{
+    void* arr[8];
+    s32 total;
+    s32 i;
+    func_001F3A40(self, src);
+    total = func_00137D10(src);
+    for (i = 0; i < total; i++) {
+        s32 r1 = func_00137D10(src);
+        s32 r2 = func_00137D10(src);
+        s32 r3 = func_00137D10(src);
+        Node_1587C8* obj = (Node_1587C8*)func_0011E580(r1, self->f14, self->f18, r2, r3);
+        s32 n;
+        ((Fn1_1587C8)obj->vtbl[14])(obj, src);
+        if (((u32*)obj->vtbl)[2] & 0x100) {
+            Link_1587C8* p = obj->list;
+            n = 0;
+            while (p != 0) {
+                if ((u32)n < 8) {
+                    arr[n] = p->item;
+                    n++;
+                }
+                p = p->next;
+            }
+        } else {
+            arr[0] = obj;
+            n = 1;
+        }
+        if (n > 0) {
+            void** dst = self->items;
+            void** s = arr;
+            s32 j;
+            for (j = n; j != 0; j--, s++) {
+                Node_1587C8* o = (Node_1587C8*)*s;
+                if (func_001300E8(o, 0x78) != 0 || func_001300E8(o, 0x7A) != 0) {
+                    ((Fn0_1587C8)o->vtbl[7])(o);
+                    u32 c = self->count;
+                    if (c < 8) {
+                        *(void**)((u8*)dst + (c << 2)) = o;
+                        self->count = c + 1;
+                        o->owner = self;
+                    }
+                }
+            }
+        }
+    }
+}

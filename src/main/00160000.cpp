@@ -613,3 +613,24 @@ extern u8 D_00000FA0[];
 extern u8 D_00000FD8[];
 
 void func_001EE3F0(void* s, s32 n);
+
+typedef void (*Fn_1612F8)(void* self, s32 zero);
+struct Sub_1612F8 { u8 pad0[8]; s16 off8; u8 pad1[2]; Fn_1612F8 fnC; };
+struct Out_1612F8 { u8 pad0[0xC]; u8* cur0C; u8 pad1[0x18 - 0x10]; Sub_1612F8* sub18; };
+
+void func_001612F8(void* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out)
+{
+    Out_1612F8* w = (Out_1612F8*)self;
+    Sub_1612F8* sub = w->sub18;
+    sub->fnC((u8*)self + sub->off8, 0);
+
+    u8* p = w->cur0C;
+    u64 tag = (prim << 47) | (1ULL << 46) | (u64)nloop | ((u64)nreg << 60);
+    w->cur0C = p + 16;
+    *(u64*)(p + 8) = data;
+    *(u64*)p = tag;
+    if (out != 0) {
+        *out = (s32)w->cur0C;
+    }
+    w->cur0C = w->cur0C + nloop * nreg * 16;
+}

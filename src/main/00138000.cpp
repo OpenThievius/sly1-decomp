@@ -526,3 +526,27 @@ void func_0013A3A0(Obj_13A3A0* self)
     if (hit == 0)
         self->vtbl[7](self);
 }
+
+struct Frame_139B70 { u8 buf[0x30]; };
+
+void func_001611B8(Frame_139B70* f);
+void func_001528F0(Frame_139B70* f, s32 n);
+void func_001613C0(Frame_139B70* f, s32 a, s32 b, s32 c);
+void func_00161708(Frame_139B70* f, s32 a, u64 b);
+void func_001612F8(Frame_139B70* f, s32 a, s32 b, s32 c, u64 d, s32 e);
+void func_00152D70(Frame_139B70* f);
+void func_001529E0(Frame_139B70* f, s32 a, void* b);
+
+void func_00139B70(s32 idx, void* arg)
+{
+    Frame_139B70 f;
+
+    func_001611B8(&f);
+    func_001528F0(&f, 4);
+    func_001613C0(&f, 0, 1, 0xE);
+    func_00161708(&f, 0x47, 0x7180B);
+    func_00161708(&f, 0x42, ((u64)(s64)idx << 2) | 0x40);
+    func_001612F8(&f, 0x54, 0, 0xA, 0x424242412EULL, 0);
+    func_00152D70(&f);
+    func_001529E0(&f, 0, arg);
+}

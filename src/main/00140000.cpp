@@ -986,3 +986,46 @@ s32 func_00141C90(Self_141C90* self, void* a1, void* a2, void* a3, s32 a4, void*
     }
     return 0;
 }
+
+void func_001249A8(void* self);
+void* func_0015A448(void* host, s32 id, void* ctx);
+
+struct Obj_141338 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x550 - 0x18];
+    s32 f550;
+    s32 f554[4];
+    s32 f564;
+    void* f568[4];
+    s32 f578;
+    s32 f57C[4];
+    s32 f58C;
+    void* f590[4];
+};
+
+void func_00141338(void* selfp)
+{
+    Obj_141338* self = (Obj_141338*)selfp;
+    func_001249A8(self);
+    s32 i = 0;
+    while (i < self->f550) {
+        void* r = func_0015A448(self->f14, self->f554[i], self);
+        if (r != 0) {
+            s32 k = self->f564;
+            self->f568[k] = r;
+            self->f564 = k + 1;
+        }
+        i++;
+    }
+    i = 0;
+    while (i < self->f578) {
+        void* r = func_0015A448(self->f14, self->f57C[i], self);
+        if (r != 0) {
+            s32 k = self->f58C;
+            self->f590[k] = r;
+            self->f58C = k + 1;
+        }
+        i++;
+    }
+}

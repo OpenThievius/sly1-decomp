@@ -1288,3 +1288,26 @@ s32 func_0014BCE8(Obj_14BCE8* self)
     self->field_C20 = 0;
     return 1;
 }
+
+struct __attribute__((aligned(16))) Quad_1493C8 { s32 a, b, c, d; };
+struct Obj_1493C8 { u8 pad[0x5C]; void* f5C; };
+
+extern u8 D_00261990[];
+extern f32 D_00261BF8;
+void func_001920B0(void* n, void* out);
+
+Quad_1493C8 func_001493C8(Obj_1493C8* self)
+{
+    Quad_1493C8 r;
+    if (self->f5C != 0) {
+        func_001920B0(self->f5C, &r);
+    } else {
+        if (func_001925F0() != 0) {
+            r = *(Quad_1493C8*)((u8*)func_001925F0() + 0x140);
+            *(f32*)&r.c = *(f32*)&r.c + D_00261BF8;
+        } else {
+            r = *(Quad_1493C8*)(*(u8**)D_00261990 + 0x40);
+        }
+    }
+    return r;
+}

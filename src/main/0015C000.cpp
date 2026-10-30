@@ -931,3 +931,67 @@ f32 func_0015CD18(f32 x, f32 y, Self_15CD18* self, s8 key, u32 color, Stream_15C
     }
     return (f32)self->m4 * self->f44;
 }
+
+struct Params_15E290 { u8 pad0[8]; s32 count; u8 pad1[0x3C]; f32 scale; };
+struct __attribute__((aligned(4))) Owner_15E290 { u8 pad0[0xC]; Params_15E290* params; };
+
+s32 func_0015E068(void* self, f32 f);
+f32 func_0015E1F0(void* self);
+
+void func_0015E290(void* self, f32 f, f32* out1, f32* out2)
+{
+    s32 n = func_0015E068(self, f);
+    f32 g = func_0015E1F0(self);
+    Owner_15E290* o = (Owner_15E290*)self;
+    f32 k = (f32)o->params->count * o->params->scale;
+    f32 t = (f32)n * k;
+    if (out1 != 0) {
+        *out1 = g;
+    }
+    if (out2 != 0) {
+        *out2 = t;
+    }
+}
+
+struct Item_15F7D8 { u8 pad[0x54]; void* f54; };
+struct Group_15F7D8 { u8 pad[8]; s32 count; Item_15F7D8** items; };
+
+s32 func_00182FC8(void* p);
+void func_0015F6C0(void* ctx, void* a, void* b);
+
+void func_0015F7D8(void* self, Group_15F7D8* group)
+{
+    s32 i = 0;
+    while (i < group->count) {
+        if (func_00182FC8(group->items[i]) != 0) {
+            break;
+        }
+        i++;
+    }
+    s32 first = i;
+    for (; i < group->count; i++) {
+        if (func_00182FC8(group->items[i]) != 0) {
+            func_0015F6C0(self, group->items[first]->f54, group->items[i]->f54);
+        }
+    }
+}
+
+struct Item_15F8B0 { u8 pad[0x6C]; s32 count6C; void* items70[4]; };
+struct Group_15F8B0 { u8 pad[8]; s32 count; Item_15F8B0** items; };
+
+void func_0015F7D8(void* self, Group_15F8B0* group);
+
+void func_0015F8B0(void* self, Group_15F8B0* group)
+{
+    if (group->count >= 2) {
+        for (s32 i = 0; i < group->count; i++) {
+            Item_15F8B0* item = group->items[i];
+            u32 n = item->count6C;
+            if (n < 4) {
+                item->items70[n] = group;
+                item->count6C = n + 1;
+            }
+        }
+        func_0015F7D8(self, group);
+    }
+}
