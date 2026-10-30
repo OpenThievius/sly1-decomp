@@ -1119,3 +1119,75 @@ void func_001A6498(Self_001A6498* self)
     self->f588 = 2.5f;
     func_001B9AE0(self, 1, D_00248D20, 2, D_00248D20);
 }
+
+// Matched: float stores in retail's order with constants loaded as locals; int stores 0x2D0..0x2DC, 0x64C, 0x650 in that order.
+
+struct __attribute__((aligned(16))) Quad_1A4718 {
+    s32 a, b, c, d;
+};
+
+struct __attribute__((aligned(16))) Table_1A4718 {
+    Quad_1A4718 q[12];
+};
+
+struct Obj_1A4718 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+    s32 f2D4;
+    s32 f2D8;
+    s32 f2DC;
+    u8 pad1[0x340 - 0x2E0];
+    s32 f340;
+    f32 f344;
+    f32 f348;
+    f32 f34C;
+    f32 f350;
+    u8 pad2[0x3B8 - 0x354];
+    s32 f3B8;
+    u8 pad3[0x3D0 - 0x3BC];
+    Quad_1A4718 f3D0;
+    u8 pad4[0x64C - 0x3E0];
+    s32 f64C;
+    s32 f650;
+};
+
+extern Table_1A4718 D_0024C9D0;
+extern Quad_1A4718 D_00275C50;
+
+void func_00123ED0(Obj_1A4718* self);
+void func_00152438(void* self, s32 value);
+void func_0018D800(void* dst, void* src, s32 count);
+
+void func_001A4718(Obj_1A4718* self)
+{
+    Table_1A4718 tmp;
+
+    func_00123ED0(self);
+    func_00152438((u8*)self + 0x35C, 0x5A0);
+    func_00152438((u8*)self + 0x368, 0x5A0);
+    func_00152438((u8*)self + 0x374, 0x5A0);
+    func_00152438((u8*)self + 0x384, 0x5B0);
+    func_00152438((u8*)self + 0x390, 0x5B0);
+    func_00152438((u8*)self + 0x3A0, 0x568);
+    func_00152438((u8*)self + 0x3AC, 0x568);
+    self->f2D0 = -1;
+    self->f2D4 = -1;
+    self->f2D8 = -1;
+    self->f2DC = -1;
+    self->f64C = -1;
+    self->f650 = -1;
+    self->f3B8 = 0x28;
+    tmp = D_0024C9D0;
+    func_0018D800((u8*)self + 0x3E0, &tmp, 0xC0);
+    func_0018D800((u8*)self + 0x4A0, &tmp, 0xC0);
+    self->f3D0 = D_00275C50;
+    f32 k2300 = 2300.0f;
+    f32 k1500 = 1500.0f;
+    f32 k146 = 1.46f;
+    f32 k3000 = 3000.0f;
+    self->f350 = k3000;
+    self->f348 = k2300;
+    self->f344 = k1500;
+    self->f34C = k146;
+    self->f340 = 0;
+}

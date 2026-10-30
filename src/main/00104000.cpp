@@ -1525,3 +1525,511 @@ void* func_00107F70(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+// Matched: the out-pointer call is declared s32 and called as (void); the copy stays where it is.
+
+struct Quad_00104220 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pair_00104220 { s32 a, b; };
+struct Frame_00104220 { Quad_00104220 q; Pair_00104220 p; s32 pad[2]; Quad_00104220 t; s32 out1; s32 out2; };
+struct Callee_00104220;
+
+extern u8 D_00248EB8[];
+
+void func_0011B008(Quad_00104220* q);
+void func_0011B018(void* dst, Quad_00104220* src);
+void func_0011B060(Quad_00104220* q, int mode);
+void func_0011B0A8(Quad_00104220* a, Quad_00104220* b);
+void func_0011B538(Quad_00104220* q, int n);
+s32 func_001C23B0(Quad_00104220* t, int mode, int c, void* z, void* z2, void* z3);
+void func_001DBAC0(Callee_00104220* self, s32 a, s32 b);
+
+void* func_00104220(void* self, void* x, int unused, int c)
+{
+    Frame_00104220 f;
+    func_0011B008(&f.q);
+    f.p = *(Pair_00104220*)&D_00248EB8;
+    (void)func_001C23B0(&f.t, 2, c, &f.p, &f.out1, &f.out2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001DBAC0((Callee_00104220*)x, f.out1, f.out2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Frame, the call with the sp-relative out-pointers (void-call) and the copy after the address forms.
+
+struct Quad_001043A0 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pair_001043A0 { s32 a, b; };
+struct Frame_001043A0 { Quad_001043A0 q; Pair_001043A0 p; s32 pad[2]; Quad_001043A0 t; s32 out1; s32 out2; };
+struct Callee_001043A0;
+
+extern u8 D_00248EC0[];
+
+void func_0011B008(Quad_001043A0* q);
+void func_0011B018(void* dst, Quad_001043A0* src);
+void func_0011B060(Quad_001043A0* q, int mode);
+void func_0011B0A8(Quad_001043A0* a, Quad_001043A0* b);
+void func_0011B538(Quad_001043A0* q, int n);
+s32 func_001C23B0(Quad_001043A0* t, int mode, int c, void* z, void* z2, void* z3);
+void func_001DBB00(Callee_001043A0* self, s32 a, s32 b);
+
+void* func_001043A0(void* self, void* x, int unused, int c)
+{
+    Frame_001043A0 f;
+    Pair_001043A0* pp;
+    s32* o1;
+    s32* o2;
+    func_0011B008(&f.q);
+    pp = &f.p;
+    o1 = &f.out1;
+    o2 = &f.out2;
+    f.p = *(Pair_001043A0*)&D_00248EC0;
+    (void)func_001C23B0(&f.t, 2, c, pp, o1, o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001DBB00((Callee_001043A0*)x, f.out1, f.out2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_104900 { s32 a, b, c, d; };
+struct Trip_104900 { s32 a, b, c; };
+struct Frame_104900 { Quad_104900 q; Trip_104900 n; s32 pad; Quad_104900 t; s32 o0; f32 o1; f32 o2; };
+struct Obj_104900;
+
+void func_0011B008(Quad_104900* q);
+void func_0011B018(void* dst, Quad_104900* src);
+void func_0011B060(Quad_104900* q, s32 mode);
+void func_0011B0A8(Quad_104900* a, Quad_104900* b);
+void func_0011B538(Quad_104900* q, s32 n);
+s32 func_001C23B0(Quad_104900* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
+void func_00146018(Obj_104900* obj, s32 value, f32 first, f32 second);
+
+extern u8 D_00248EC8[];
+
+void* func_00104900(void* self, Obj_104900* x, s32 unused, s32 c)
+{
+    Frame_104900 f;
+    func_0011B008(&f.q);
+    f.n = *(Trip_104900*)D_00248EC8;
+    func_001C23B0(&f.t, 3, c, &f.n, &f.o0, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_00146018((Obj_104900*)x, f.o0, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Matched with func_001C23B0 declared s32 and called as (void); the copy stays before the call.
+
+struct Quad_00104E80 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pair_00104E80 { s32 a, b; };
+struct Frame_00104E80 { Quad_00104E80 q; Pair_00104E80 p; s32 pad[2]; Quad_00104E80 t; s32 out1; s32 out2; };
+struct Callee_00104E80;
+
+extern u8 D_00248EE8[];
+
+void func_0011B008(Quad_00104E80* q);
+void func_0011B018(void* dst, Quad_00104E80* src);
+void func_0011B060(Quad_00104E80* q, int mode);
+void func_0011B0A8(Quad_00104E80* a, Quad_00104E80* b);
+void func_0011B538(Quad_00104E80* q, int n);
+s32 func_001C23B0(Quad_00104E80* t, int mode, int c, void* z, void* z2, void* z3);
+void func_001CA608(Callee_00104E80* self, s32 a, s32 b);
+
+void* func_00104E80(void* self, void* x, int unused, int c)
+{
+    Frame_00104E80 f;
+    func_0011B008(&f.q);
+    f.p = *(Pair_00104E80*)&D_00248EE8;
+    (void)func_001C23B0(&f.t, 2, c, &f.p, &f.out1, &f.out2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001CA608((Callee_00104E80*)x, f.out1, f.out2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_00104F50 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pair_00104F50 { s32 a, b; };
+struct Frame_00104F50 { Quad_00104F50 q; Pair_00104F50 p; s32 pad[2]; Quad_00104F50 t; s32 out1; s32 out2; };
+struct Callee_00104F50;
+
+extern u8 D_00248EE8[];
+
+void func_0011B008(Quad_00104F50* q);
+void func_0011B018(void* dst, Quad_00104F50* src);
+void func_0011B060(Quad_00104F50* q, int mode);
+void func_0011B0A8(Quad_00104F50* a, Quad_00104F50* b);
+void func_0011B538(Quad_00104F50* q, int n);
+s32 func_001C23B0(Quad_00104F50* t, int mode, int c, void* z, void* z2, void* z3);
+void func_001CA658(Callee_00104F50* self, s32 a, s32 b);
+
+void* func_00104F50(void* self, void* x, int unused, int c)
+{
+    Frame_00104F50 f;
+    func_0011B008(&f.q);
+    f.p = *(Pair_00104F50*)&D_00248EE8;
+    func_001C23B0(&f.t, 2, c, &f.p, &f.out1, &f.out2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001CA658((Callee_00104F50*)x, f.out1, f.out2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// EXACT: func_001C23B0 declared s32 and called as (void); the copy from D_00248E38 then follows the three out-pointer addiu.
+
+struct Quad_001051C0 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pair_001051C0 { s32 a, b; };
+struct Frame_001051C0 { Quad_001051C0 q; Pair_001051C0 p; s32 pad[2]; Quad_001051C0 t; s32 out1; s32 out2; };
+struct Callee_001051C0;
+
+extern u8 D_00248E38[];
+
+void func_0011B008(Quad_001051C0* q);
+void func_0011B018(void* dst, Quad_001051C0* src);
+void func_0011B060(Quad_001051C0* q, int mode);
+void func_0011B0A8(Quad_001051C0* a, Quad_001051C0* b);
+void func_0011B538(Quad_001051C0* q, int n);
+s32 func_001C23B0(Quad_001051C0* t, int mode, int c, void* z, void* z2, void* z3);
+void func_001CA960(Callee_001051C0* self, s32 a, s32 b);
+
+void* func_001051C0(void* self, void* x, int unused, int c)
+{
+    Frame_001051C0 f;
+    func_0011B008(&f.q);
+    f.p = *(Pair_001051C0*)&D_00248E38;
+    (void)func_001C23B0(&f.t, 2, c, &f.p, &f.out1, &f.out2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001CA960((Callee_001051C0*)x, f.out1, f.out2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Matched: the out-pointer call is declared s32 and called as (void); the copy stays where it is.
+struct __attribute__((aligned(16))) Quad_00105360 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_00105360 { u8 b[8]; };
+struct Frame_00105360 { Quad_00105360 q; Key8_00105360 k; Quad_00105360 t; s32 o1; s32 o2; };
+struct Arg_00105360;
+extern Key8_00105360 D_00248EB0;
+
+void func_0011B008(Quad_00105360* q);
+void func_0011B018(void* dst, Quad_00105360* q);
+void func_0011B060(Quad_00105360* q, int mode);
+void func_0011B0A8(Quad_00105360* a, Quad_00105360* b);
+void func_0011B538(Quad_00105360* q, int n);
+s32 func_001C23B0(Quad_00105360* t, int mode, int c, void* k, void* o1, void* o2);
+void func_001C8FD0(Arg_00105360* p, s32 a, s32 b);
+
+void* func_00105360(void* self, Arg_00105360* p, int unused, int c)
+{
+    Frame_00105360 f;
+    func_0011B008(&f.q);
+    f.k = D_00248EB0;
+    (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001C8FD0(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Frame, the constant copy after the frame addresses are formed, and the call with the out-pointers.
+
+struct __attribute__((aligned(16))) Quad_00105430 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_00105430 { u8 b[8]; };
+struct Frame_00105430 { Quad_00105430 q; Key8_00105430 k; Quad_00105430 t; s32 o1; s32 o2; };
+struct Arg_00105430;
+
+void func_0011B008(Quad_00105430* q);
+void func_0011B018(void* dst, Quad_00105430* q);
+void func_0011B060(Quad_00105430* q, int mode);
+void func_0011B0A8(Quad_00105430* a, Quad_00105430* b);
+void func_0011B538(Quad_00105430* q, int n);
+s32 func_001C23B0(Quad_00105430* t, int mode, int c, void* k, void* o1, void* o2);
+void func_001CA898(Arg_00105430* p, s32 a, s32 b);
+
+void* func_00105430(void* self, Arg_00105430* p, int unused, int c)
+{
+    Frame_00105430 f;
+    Key8_00105430* kp;
+    s32* o1;
+    s32* o2;
+    func_0011B008(&f.q);
+    kp = &f.k;
+    o1 = &f.o1;
+    o2 = &f.o2;
+    f.k = *(Key8_00105430*)&D_00248EE8;
+    (void)func_001C23B0(&f.t, 2, c, kp, o1, o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001CA898(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Matched with the callee declared s32 and called as (void); the copy stays before the call.
+struct __attribute__((aligned(16))) Quad_00105658 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_00105658 { u8 b[8]; };
+struct Frame_00105658 { Quad_00105658 q; Key8_00105658 k; Quad_00105658 t; s32 o1; s32 o2; };
+struct Arg_00105658;
+
+void func_0011B008(Quad_00105658* q);
+void func_0011B018(void* dst, Quad_00105658* q);
+void func_0011B060(Quad_00105658* q, int mode);
+void func_0011B0A8(Quad_00105658* a, Quad_00105658* b);
+void func_0011B538(Quad_00105658* q, int n);
+s32 func_001C23B0(Quad_00105658* t, int mode, int c, void* k, void* o1, void* o2);
+void func_001B70B0(Arg_00105658* p, s32 a, s32 b);
+
+void* func_00105658(void* self, Arg_00105658* p, int unused, int c)
+{
+    Frame_00105658 f;
+    func_0011B008(&f.q);
+    f.k = *(Key8_00105658*)&D_00248EE8;
+    (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001B70B0(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Frame, the seven-argument call and the tail; the out-pointer args are formed before the copy from D_00248ED8.
+
+struct Quad_105878 { s32 a, b, c, d; };
+struct Key_105878 { s32 a, b, c; };
+struct Frame_105878 { Quad_105878 q; Key_105878 k; s32 pad; s32 out[4]; Quad_105878 t; f32 fx; f32 fy; };
+
+void func_0011B008(Quad_105878* q);
+void func_0011B018(void* dst, Quad_105878* src);
+void func_0011B060(Quad_105878* q, int mode);
+void func_0011B0A8(Quad_105878* a, Quad_105878* b);
+void func_0011B538(Quad_105878* q, int n);
+s32 func_001C23B0(Quad_105878* t, int mode, int c, void* z, void* z2, void* z3, void* z4);
+void func_00171F28(void* self, void* v, f32 x, f32 y);
+extern u8 D_00248ED8[];
+
+void* func_00105878(void* self, void* p, int unused, int c)
+{
+    Frame_105878 f;
+    Key_105878* kp;
+    s32* o1;
+    f32* fxp;
+    f32* fyp;
+    func_0011B008(&f.q);
+    kp = &f.k;
+    o1 = f.out;
+    fxp = &f.fx;
+    fyp = &f.fy;
+    f.k = *(Key_105878*)D_00248ED8;
+    (void)func_001C23B0(&f.t, 3, c, kp, o1, fxp, fyp);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_00171F28(p, &f.out, f.fx, f.fy);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// EXACT: func_001C23B0 declared s32 and called as (void); the 12-byte copy of D_00248F00 then follows the argument addiu.
+
+struct Quad_105F70 { s32 a, b, c, d; };
+struct Trip_105F70 { s32 a, b, c; };
+struct Frame_105F70 { Quad_105F70 q; Trip_105F70 n; s32 pad; Quad_105F70 t; f32 o0; f32 o1; f32 o2; };
+struct Obj_105F70;
+
+void func_0011B008(Quad_105F70* q);
+void func_0011B018(void* dst, Quad_105F70* src);
+void func_0011B060(Quad_105F70* q, s32 mode);
+void func_0011B0A8(Quad_105F70* a, Quad_105F70* b);
+void func_0011B538(Quad_105F70* q, s32 n);
+s32 func_001C23B0(Quad_105F70* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
+void func_0019CE28(Obj_105F70* value, f32 x, f32 y, f32 z);
+
+extern u8 D_00248F00[];
+
+void* func_00105F70(void* self, Obj_105F70* x, s32 unused, s32 c)
+{
+    Frame_105F70 f;
+    func_0011B008(&f.q);
+    f.n = *(Trip_105F70*)D_00248F00;
+    (void)func_001C23B0(&f.t, 3, c, &f.n, &f.o0, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0019CE28((Obj_105F70*)x, f.o0, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Matched: the out-pointer call is declared s32 and called as (void); the 12-byte copy stays where it is.
+
+struct Quad_106048 { s32 a, b, c, d; };
+struct Trip_106048 { s32 a, b, c; };
+struct Frame_106048 { Quad_106048 q; Trip_106048 n; s32 pad; Quad_106048 t; f32 o0; f32 o1; f32 o2; };
+struct Obj_106048;
+
+void func_0011B008(Quad_106048* q);
+void func_0011B018(void* dst, Quad_106048* src);
+void func_0011B060(Quad_106048* q, s32 mode);
+void func_0011B0A8(Quad_106048* a, Quad_106048* b);
+void func_0011B538(Quad_106048* q, s32 n);
+s32 func_001C23B0(Quad_106048* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
+void func_0019CE38(Obj_106048* self, f32 x, f32 y, f32 z);
+
+extern u8 D_00248F00[];
+
+void* func_00106048(void* self, Obj_106048* x, s32 unused, s32 c)
+{
+    Frame_106048 f;
+    func_0011B008(&f.q);
+    f.n = *(Trip_106048*)D_00248F00;
+    (void)func_001C23B0(&f.t, 3, c, &f.n, &f.o0, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_0019CE38((Obj_106048*)x, f.o0, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct __attribute__((aligned(16))) Quad_00106850 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_00106850 { u8 b[8]; };
+struct Frame_00106850 { Quad_00106850 q; Key8_00106850 k; Quad_00106850 t; s32 o1; s32 o2; };
+struct Arg_00106850;
+extern Key8_00106850 D_00248F20;
+
+void func_0011B008(Quad_00106850* q);
+void func_0011B018(void* dst, Quad_00106850* q);
+void func_0011B060(Quad_00106850* q, int mode);
+void func_0011B0A8(Quad_00106850* a, Quad_00106850* b);
+void func_0011B538(Quad_00106850* q, int n);
+s32 func_001C23B0(Quad_00106850* t, int mode, int c, void* k, void* o1, void* o2);
+void func_001A87E0(Arg_00106850* p, s32 a, s32 b);
+
+void* func_00106850(void* self, Arg_00106850* p, int unused, int c)
+{
+    Frame_00106850 f;
+    func_0011B008(&f.q);
+    f.k = D_00248F20;
+    func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001A87E0(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// EXACT: func_001C23B0 declared s32 and called as (void); the constant copy into f.k then follows the three frame-address addiu.
+struct __attribute__((aligned(16))) Quad_00106D90 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_00106D90 { u8 b[8]; };
+struct Frame_00106D90 { Quad_00106D90 q; Key8_00106D90 k; Quad_00106D90 t; s32 o1; s32 o2; };
+struct Arg_00106D90;
+extern Key8_00106D90 D_00248EA8;
+
+void func_0011B008(Quad_00106D90* q);
+void func_0011B018(void* dst, Quad_00106D90* q);
+void func_0011B060(Quad_00106D90* q, int mode);
+void func_0011B0A8(Quad_00106D90* a, Quad_00106D90* b);
+void func_0011B538(Quad_00106D90* q, int n);
+s32 func_001C23B0(Quad_00106D90* t, int mode, int c, void* k, void* o1, void* o2);
+void func_001519E0(Arg_00106D90* p, s32 a, s32 b);
+
+void* func_00106D90(void* self, Arg_00106D90* p, int unused, int c)
+{
+    Frame_00106D90 f;
+    func_0011B008(&f.q);
+    f.k = D_00248EA8;
+    (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001519E0(p, f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+// Matched with func_001C23B0 declared s32 and called as (void); the copy stays before the call.
+
+struct Quad_107180 { s32 a, b, c, d; };
+struct Key_107180 { s32 a, b, c, d; };
+struct Frame_107180 { Quad_107180 q; Key_107180 k; Quad_107180 t; f32 x; f32 y; f32 z; f32 w; };
+
+void func_0011B008(Quad_107180* q);
+void func_0011B018(void* dst, Quad_107180* src);
+void func_0011B060(Quad_107180* q, int mode);
+void func_0011B0A8(Quad_107180* a, Quad_107180* b);
+void func_0011B538(Quad_107180* q, int n);
+s32 func_001C23B0(Quad_107180* t, int mode, int c, void* z, void* z2, void* z3, void* z4, void* z5);
+void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d);
+extern u8 D_00248F28[];
+
+void* func_00107180(void* self, void* p, int unused, int c)
+{
+    Frame_107180 f;
+    func_0011B008(&f.q);
+    f.k = *(Key_107180*)D_00248F28;
+    (void)func_001C23B0(&f.t, 4, c, &f.k, &f.x, &f.y, &f.z, &f.w);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001F3928(p, f.x, f.y, f.z, f.w);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
+
+struct Quad_107268 { s32 a, b, c, d; };
+struct Key_107268 { s32 a, b, c, d; };
+struct Frame_107268 { Quad_107268 q; Key_107268 k; Quad_107268 t; f32 x; f32 y; f32 z; f32 w; };
+
+void func_0011B008(Quad_107268* q);
+void func_0011B018(void* dst, Quad_107268* src);
+void func_0011B060(Quad_107268* q, int mode);
+void func_0011B0A8(Quad_107268* a, Quad_107268* b);
+void func_0011B538(Quad_107268* q, int n);
+s32 func_001C23B0(Quad_107268* t, int mode, int c, void* z, void* z2, void* z3, void* z4, void* z5);
+void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d);
+extern u8 D_00248F28[];
+
+void* func_00107268(void* self, void* p, int unused, int c)
+{
+    Frame_107268 f;
+    func_0011B008(&f.q);
+    f.k = *(Key_107268*)D_00248F28;
+    func_001C23B0(&f.t, 4, c, &f.k, &f.x, &f.y, &f.z, &f.w);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001F3990(p, f.x, f.y, f.z, f.w);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}
