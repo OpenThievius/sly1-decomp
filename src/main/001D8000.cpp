@@ -789,3 +789,12 @@ void func_001DB4C8(Self_1DB4C8* self)
     self->f2354 = 1;
     self->f235C = 0xF03FFFFF;
 }
+
+typedef s32 Id_1DBAE0;
+
+s32 func_001C0C50(Id_1DBAE0 index);
+
+s32 func_001DBAE0(s32 unused, Id_1DBAE0 index)
+{
+    return func_001C0C50(index);
+}

@@ -389,3 +389,10 @@ void func_001C4A80(Obj_1C4A80* self, f32* p, f32 f) {
     func_001BFCD8(idx, 0, 0, self->f140, 0, 0, 1000.0f, 200.0f, ang, 0.0f, 0.0f);
     func_001C0EC0();
 }
+
+void func_001B93D8(void);
+
+void func_001C49C8(void)
+{
+    func_001B93D8();
+}

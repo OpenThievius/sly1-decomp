@@ -579,3 +579,12 @@ void func_001F2688(s32 a0, s32 a1)
     c->f14 = 0.3f;
     c->kind = 0x3D;
 }
+
+struct Obj_1F3810;
+
+void* func_001F37D8(Obj_1F3810* self, s32 mode, s32 flag);
+
+void* func_001F3810(Obj_1F3810* self, s32 mode)
+{
+    return func_001F37D8(self, mode, 0);
+}
