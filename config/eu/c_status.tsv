@@ -316,6 +316,7 @@ func_00119970	func_00119970	match
 func_00119A58	func_00119A58	match	
 func_00119AF8	func_00119AF8	match	
 func_00119FA0	func_00119FA0	match	
+func_0011A080	func_0011A080	match	rodata
 func_0011A328	func_0011A328	match	
 func_0011A338	func_0011A338	match	
 func_0011A358	func_0011A358	match	
@@ -353,6 +354,7 @@ func_0011B018	func_0011B018	match
 func_0011B060	func_0011B060	match	
 func_0011B0A8	func_0011B0A8	match	
 func_0011B0F8	func_0011B0F8	match	rodata
+func_0011B258	func_0011B258	match	rodata
 func_0011B418	func_0011B418	match	rodata
 func_0011B4A8	func_0011B4A8	match	rodata
 func_0011B538	func_0011B538	match	
@@ -372,6 +374,7 @@ func_0011B8A8	func_0011B8A8	match
 func_0011B8E8	func_0011B8E8	match	
 func_0011B928	func_0011B928	match	
 func_0011B9A8	func_0011B9A8	match	
+func_0011BA28	func_0011BA28	match	rodata
 func_0011BD28	func_0011BD28	match	
 func_0011BDD0	func_0011BDD0	match	
 func_0011BE90	func_0011BE90	match	
@@ -874,6 +877,7 @@ func_0013CCE8	func_0013CFE8	match
 func_0013CCF8	func_0013CFF8	match	
 func_0013CD80	func_0013D080	match	
 func_0013CE40	func_0013D140	match	
+func_0013CE80	func_0013D180	match	rodata
 func_0013D068	func_0013D368	match	
 func_0013D820	func_0013DB20	match	
 func_0013D868	func_0013DB68	match	
@@ -1158,14 +1162,16 @@ func_00150408	func_001506B8	match
 func_00150418	func_001506C8	match	
 func_001504E0	func_00150790	match	
 func_00150528	func_001507D8	match	
-func_00150570	func_00150820	differs	the .rodata literal at +0x0 is not retail's constant at 0x24C850
+func_00150570	func_00150820	differs	rodata
 func_001506F0	func_001509A0	match	
 func_00150750	func_00150A00	match	
 func_00150760	func_00150A10	match	
 func_00150770	func_00150A20	match	
 func_00150780	func_00150A30	match	
 func_00150790	func_00150A40	error	a reference to D_00261D38, which has no address in this version
+func_00150AE8	func_00150D98	error	a reference to D_00275F84, which has no address in this version
 func_001512A8	func_00151560	match	
+func_00151300	func_001515B8	error	a reference to D_00261D08, which has no address in this version
 func_001516C0	func_00151978	match	rodata
 func_001517C0	func_00151A78	match	
 func_00151860	func_00151B18	differs	
@@ -1214,6 +1220,7 @@ func_00152E18	func_001530D0	match
 func_00153328	func_001535E0	match	
 func_00153528	func_001537E0	match	
 func_00153608	func_001538C0	match	
+func_00153A50	func_00153D08	match	rodata
 func_00153EC0	func_00154178	match	
 func_00154880	func_00154B38	match	
 func_00154C10	func_00154EC8	match	
@@ -1895,6 +1902,7 @@ func_00193300	func_00193E88	match
 func_00193598	func_00194120	error	a reference to D_0026A068, which has no address in this version
 func_00193660	func_00194398	match	
 func_00193E58	func_00194A40	error	a call to func_001AA268__FPv, which has no address in this version
+func_00193EE8	func_00194AD0	differs	the .rodata literal at +0x0 is not retail's constant at 0x24DA70
 func_00194278	func_00194E90	match	
 func_00194398	func_00194FB0	error	a reference to D_00247AB0, which has no address in this version
 func_00194D30	func_001959A0	differs	
@@ -2080,6 +2088,7 @@ func_001A4B30	func_001A5878	match
 func_001A4C48	func_001A5990	match	rodata
 func_001A4D60	func_001A5AA8	match	
 func_001A4DC0	func_001A5B08	match	rodata
+func_001A4EF0	func_001A5C38	differs	rodata
 func_001A54F8	func_001A6240	match	rodata
 func_001A5B28	func_001A6870	match	
 func_001A5C38	func_001A6980	match	
@@ -2183,6 +2192,7 @@ func_001AAEC0	func_001ABCB8	match
 func_001AAF58	func_001ABD50	differs	
 func_001AAF88	func_001ABD80	error	a call to func_001AA268__FP10Obj_1AAF88, which has no address in this version
 func_001AB198	func_001ABF98	error	a call to func_0015DB28__FPvT0i, which has no address in this version
+func_001AB2B8	func_001AC0D0	error	a reference to D_0024CC78, which has no address in this version
 func_001AB5D8	func_001AC3F0	match	
 func_001AB600	func_001AC418	error	a call to func_001AA268__FP13Self_001AB600, which has no address in this version
 func_001AB660	func_001AC478	differs	
@@ -2247,6 +2257,7 @@ func_001B0470	func_001B1160	match
 func_001B0488	func_001B1178	match	
 func_001B04A0	func_001B1190	match	
 func_001B04D0	func_001B11C0	match	
+func_001B0578	func_001B1268	match	rodata
 func_001B0BD8	func_001B18C8	match	
 func_001B0BE0	func_001B18D0	match	
 func_001B0EA8	func_001B1B98	match	
@@ -2255,6 +2266,7 @@ func_001B0F70	func_001B1C60	match
 func_001B0FC0	func_001B1CB0	match	rodata
 func_001B1158	func_001B1E48	match	
 func_001B11A0	func_001B1E90	match	
+func_001B1238	func_001B1F28	match	rodata
 func_001B15D0	func_001B22C0	match	
 func_001B1608	func_001B22F8	match	
 func_001B1698	func_001B2388	match	
@@ -2496,6 +2508,7 @@ func_001C14C0	func_001C21B8	match
 func_001C1530	func_001C2228	match	
 func_001C1A28	func_001C2720	match	
 func_001C1AD8	func_001C27D0	match	rodata
+func_001C1BF8	func_001C28F0	match	rodata
 func_001C1E48	func_001C2B40	match	
 func_001C21A0	func_001C2E98	match	
 func_001C2238	func_001C2F30	match	
@@ -2549,6 +2562,7 @@ func_001C74E8	func_001C81E0	match
 func_001C7520	func_001C8218	match	
 func_001C7AE0	func_001C87D8	match	
 func_001C7B60	func_001C8858	match	
+func_001C8010	func_001C8D08	match	rodata
 func_001C84C0	func_001C91B8	match	
 func_001C84E8	func_001C91E0	match	
 func_001C8BC0	func_001C98B8	match	
@@ -2557,6 +2571,7 @@ func_001C8D40	func_001C9A38	match
 func_001C8D78	func_001C9A70	match	
 func_001C8E28	func_001C9B20	match	rodata
 func_001C8FD0	func_001C9CC8	match	
+func_001C9008	func_001C9D00	match	rodata
 func_001C96B8	func_001CA3B0	match	
 func_001C9990	func_001CA688	match	
 func_001C9A48	func_001CA740	match	
@@ -2766,6 +2781,7 @@ func_001E08F8	func_001E1720	differs	the C is 124 bytes, retail's function 120
 func_001E0E18	func_001E1C20	match	
 func_001E0EF8	func_001E1D00	differs	the .rodata literal at +0x0 is not retail's constant at 0xF5E00000
 func_001E0F58	func_001E1D58	match	
+func_001E1028	func_001E1E28	error	a reference to D_0024E3E8, which has no address in this version
 func_001E1DB8	func_001E2BB8	differs	
 func_001E1EB0	func_001E2CB0	match	
 func_001E1F10	func_001E2D10	match	
@@ -2846,6 +2862,7 @@ func_001E9570	func_001EA5E8	match
 func_001E9648	func_001EA6C0	match	
 func_001E9668	func_001EA6E0	match	
 func_001E9688	func_001EA700	match	
+func_001E96F8	func_001EA770	match	rodata
 func_001E98E8	func_001EA960	match	
 func_001E9A10	func_001EAA88	error	a reference to D_00275F84, which has no address in this version
 func_001E9A68	func_001EAAE0	error	a reference to D_00275F84, which has no address in this version
@@ -2896,6 +2913,7 @@ func_001ED168	func_001EE1E0	match
 func_001ED198	func_001EE210	match	
 func_001ED1D8	func_001EE250	match	
 func_001ED210	func_001EE288	match	
+func_001ED318	func_001EE390	match	rodata
 func_001ED558	func_001EE5D0	match	
 func_001ED588	func_001EE600	match	
 func_001ED5B8	func_001EE630	match	
