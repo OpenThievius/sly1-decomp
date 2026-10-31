@@ -1138,3 +1138,90 @@ void func_0013FA10(Obj_0013FA10* self, f32 t)
         break;
     }
 }
+
+extern u8 D_00261420[];
+extern u8 D_0027B314[];
+
+struct Frame_13CE80 { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
+struct Ent_13CE80 { s32 kind; s32 key; s32 node; };
+struct Node_13CE80;
+struct Cls_13CE80 { u8 pad0[0x1C]; void (*fn1C)(Node_13CE80* self); };
+struct Node_13CE80 { Cls_13CE80* cls; u8 pad4[0x55C]; Node_13CE80* f560; };
+struct Self_13CE80 {
+    u8 pad0[0x34];
+    s32 head34;
+    u8 pad38[4];
+    s32 link3C;
+    u8 pad40[0x510];
+    s32 count;
+    Ent_13CE80 ent[1];
+    u8 pad[0x678 - 0x560];
+    s32 f678;
+    u8 pad67C[0xC];
+    s32 id;
+};
+
+s32 func_00141008(Frame_13CE80* t, s32 v);
+s32 func_001300E8(Node_13CE80* n, s32 kind);
+void func_00199C10(Node_13CE80* n, s32* out);
+s32 func_001833F0(Node_13CE80* n, s32 key);
+
+void func_0013CE80(Self_13CE80* self)
+{
+    Frame_13CE80 fr;
+    Node_13CE80* n;
+    s32 i;
+    Ent_13CE80* e;
+    if (func_00141008((Frame_13CE80*)D_00261420, self->id)) self->f678 = 1;
+    s32 l = (s32)&self->head34;
+    fr.cursor = l;
+    fr.list = l;
+    s32 old = *(s32*)D_0027B314;
+    s32 link = *(s32*)(l + 8);
+    *(s32*)D_0027B314 = (s32)&fr;
+    fr.prev = old;
+    s32 h = self->head34;
+    fr.link = link;
+    fr.cursor = h + link;
+    n = (Node_13CE80*)h;
+    while (n != 0) {
+        if (self->f678) {
+            if (!func_001300E8(n, 0x2E)) goto next;
+            func_00199C10(n, &fr.out);
+            if (fr.out) goto next;
+        }
+        if (func_001300E8(n, 0x75)) goto next;
+        if (func_001300E8(n, 0x7A)) goto next;
+        if (func_001300E8(n, 0x53)) goto next;
+        if (func_001300E8(n, 0x27)) n->f560 = (Node_13CE80*)self;
+        for (i = 0; i < self->count; i++) {
+            e = &self->ent[i];
+            if (func_001833F0(n, e->key)) {
+                e->node = (s32)n;
+                switch (e->kind) {
+                case 0:
+                case 1:
+                case 3:
+                    goto next;
+                case 2:
+                case 4:
+                default:
+                    break;
+                }
+                break;
+            }
+        }
+        if (i >= self->count) {
+            e = &self->ent[self->count];
+            self->count = self->count + 1;
+            e->kind = 4;
+            e->node = (s32)n;
+        }
+        n->cls->fn1C(n);
+    next:
+        s32 nx = *(s32*)fr.cursor;
+        fr.cursor = nx + fr.link;
+        n = (Node_13CE80*)nx;
+    }
+    *(s32*)D_0027B314 = fr.prev;
+}

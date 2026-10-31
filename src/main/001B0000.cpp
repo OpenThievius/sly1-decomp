@@ -1126,3 +1126,197 @@ void func_001B1710(Obj_1B1710* self, s32 n)
         self->f55C = self->f614;
     }
 }
+
+struct Obj_001B0578;
+struct VT_001B0578 {
+    u8 pad0[0x130];
+    void (*f130)(Obj_001B0578* self, s32* st);
+    u8 pad1[0x10];
+    void (*f144)(Obj_001B0578* self, s32 st);
+};
+struct Obj_001B0578 {
+    VT_001B0578* vt;
+    u8 pad0[0x550];
+    s32 i554; s32 i558; f32 f55C; u8 pad1[0x58];
+    f32 f5B8, f5BC; s32 i5C0; u8 pad2[0x10];
+    s32 i5D4, i5D8; f32 f5DC, f5E0, f5E4, f5E8;
+};
+struct Dev_001B0578;
+struct DevVT_001B0578 {
+    u8 pad[0x13C];
+    s32 (*f13C)(Dev_001B0578* d, s32 n);
+    s32 (*f140)(Dev_001B0578* d, void* b);
+};
+struct Dev_001B0578 { DevVT_001B0578* vt; };
+extern Dev_001B0578* D_00262E10;
+extern f32 D_0026185C;
+
+void func_001AEFA0(Obj_001B0578* self);
+void func_001AEF68(Obj_001B0578* self);
+void func_001B1070(Obj_001B0578* self, s32 n);
+void func_001D7098(void* buf, s32 n, Obj_001B0578* self);
+
+void func_001B0578(Obj_001B0578* self) {
+    s32 st;
+    s32 s1;
+    func_001AEFA0(self);
+    st = self->i558;
+    switch (self->i558) {
+    case 0:
+        if (self->f5B8 < D_0026185C - self->f55C) st = 1;
+        break;
+    case 2:
+        st = 3;
+        break;
+    case 3:
+        if (self->f5BC < D_0026185C - self->f55C) st = 8;
+        break;
+    case 4:
+        if (self->f5B8 < D_0026185C - self->f55C) st = 5;
+        break;
+    case 1:
+    case 5:
+        if (self->vt->f130) {
+            self->vt->f130(self, &st);
+        }
+        goto tail;
+    case 6:
+        s1 = self->i5D8;
+        switch (s1) {
+        case 0:
+            if (D_00262E10 && D_00262E10->vt->f13C(D_00262E10, 2)) {
+                s1 = 2;
+            } else if (self->f5E0 < D_0026185C - self->f5DC) {
+                if (D_00262E10) {
+                    u8 buf[16];
+                    func_001D7098(buf, 2, self);
+                    if (D_00262E10->vt->f140(D_00262E10, buf)) {
+                        s1 = 1;
+                        func_001AEF68(self);
+                    }
+                } else {
+                    s1 = 1;
+                }
+            }
+            break;
+        case 1:
+            if (self->f5E4 < D_0026185C - self->f5DC) s1 = 2;
+            break;
+        case 2:
+            if (self->f5E8 < D_0026185C - self->f5DC) {
+                s1 = -1;
+                st = 5;
+            }
+            break;
+        }
+        func_001B1070(self, s1);
+        goto tail;
+    case 7:
+        if (self->f5BC < D_0026185C - self->f55C) st = 8;
+        break;
+    case 8:
+        if (self->i5C0 == 0) {
+            switch (self->i554) {
+            case 0: st = 0; break;
+            case 1: st = 4; break;
+            }
+        }
+        goto tail;
+    }
+tail:
+    self->vt->f144(self, st);
+}
+
+struct Obj_1B1238;
+struct VT_1B1238 {
+    u8 pad0[0x130];
+    void (*f130)(Obj_1B1238* self, s32* state);
+    u8 pad1[0x144 - 0x134];
+    void (*f144)(Obj_1B1238* self, s32 state);
+};
+struct Obj_1B1238 {
+    VT_1B1238* vt;
+    u8 pad0[0x554 - 4];
+    s32 f554;
+    s32 f558;
+    f32 f55c;
+    u8 pad1[0x5B8 - 0x560];
+    f32 f5b8;
+    f32 f5bc;
+    s32 f5c0;
+    u8 pad2[0x608 - 0x5C4];
+    f32 f608;
+    f32 f60c;
+};
+
+extern f32 D_0026185C;
+void func_001AEFA0(Obj_1B1238* self);
+void func_001B1898(Obj_1B1238* self);
+
+void func_001B1238(Obj_1B1238* self)
+{
+    s32 state;
+
+    func_001AEFA0(self);
+    state = self->f558;
+    switch (state) {
+    case 0:
+        if (self->f5b8 < D_0026185C - self->f55c) {
+            state = 1;
+        }
+        break;
+    case 1:
+        if (0.0f <= self->f608) {
+            if (self->f608 < D_0026185C - self->f55c) {
+                state = 3;
+                break;
+            }
+        }
+        if (self->vt->f130 != 0) {
+            self->vt->f130(self, &state);
+        }
+        break;
+    case 3:
+        if (self->f5bc < D_0026185C - self->f55c) {
+            state = 8;
+        }
+        break;
+    case 4:
+        if (self->f5b8 < D_0026185C - self->f55c) {
+            state = 5;
+        }
+        break;
+    case 5:
+        if (0.0f <= self->f608) {
+            if (self->f608 < D_0026185C - self->f55c) {
+                state = 7;
+                break;
+            }
+        }
+        if (self->vt->f130 != 0) {
+            self->vt->f130(self, &state);
+        }
+        break;
+    case 7:
+        if (self->f5bc < D_0026185C - self->f55c) {
+            state = 8;
+        }
+        break;
+    case 8:
+        if (self->f5c0 == 0) {
+            if (self->f60c < D_0026185C - self->f55c) {
+                switch (self->f554) {
+                case 0:
+                    state = 0;
+                    break;
+                case 1:
+                    state = 4;
+                    break;
+                }
+            }
+        }
+        break;
+    }
+    self->vt->f144(self, state);
+    func_001B1898(self);
+}

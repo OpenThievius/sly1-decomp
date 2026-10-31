@@ -1018,3 +1018,79 @@ void func_001EB550(Blk_1EB550* a0)
     a0->c = ((Blk_1EB550*)D_00262E10)->c;
     a0->f604 = ((Blk_1EB550*)D_00262E10)->f604;
 }
+
+struct Obj_1E96F8 { u8 pad0[4]; s32 f4; f32 f8; u8 pad1[0x24]; s32 f30; };
+struct Vt_1E96F8;
+struct O_1E96F8 { u8 pad0[0x38]; };
+struct Vtbl_1E96F8 { u8 pad[0x38]; void (*f38)(Vt_1E96F8*); void (*f3C)(Vt_1E96F8*); };
+struct Vt_1E96F8 { Vtbl_1E96F8* vt; };
+struct Cam_1E96F8 { u8 pad[0x18]; s32 f18; };
+
+extern Vt_1E96F8 D_00272930;
+extern Vt_1E96F8 D_00272B98;
+extern Vt_1E96F8 D_0026C6C8;
+extern Vt_1E96F8 D_0026C948;
+extern Vt_1E96F8 D_0026CBC8;
+extern Vt_1E96F8 D_0026CE48;
+extern Cam_1E96F8 D_00264A40;
+extern u8 D_00275F80[];
+extern void* D_00275710;
+extern s32 D_00274738;
+extern f32 D_00261868[];
+
+void func_001E98E8(Obj_1E96F8* a, f32 f);
+void func_0018C178(Cam_1E96F8* a, s32 v);
+void func_001F0220(u8* a, s32 v);
+void func_001DDA50(void* a);
+void func_001DDA20(void* a);
+void func_001A7E70();
+
+void func_001E96F8(Obj_1E96F8* self, s32 state)
+{
+    if (state == 3) {
+        s32 t = self->f30;
+        if (t != -1) state = t;
+    }
+    if (self->f4 != state) {
+        if (self->f4 != 0) {
+            if (self->f4 == 1) {
+                D_00272930.vt->f3C(&D_00272930);
+                D_00272B98.vt->f3C(&D_00272B98);
+                func_001DDA50(D_00275710);
+            }
+        }
+        self->f4 = state;
+    self->f8 = D_00261868[0];
+    switch (state) {
+    case 0:
+        if (D_00264A40.f18 == 0) func_0018C178(&D_00264A40, 1);
+        func_001F0220(D_00275F80, 0);
+        func_001E98E8(self, 1.0f);
+        break;
+    case 1:
+        func_001E98E8(self, 1.0f);
+        D_00272930.vt->f38(&D_00272930);
+        D_00272B98.vt->f38(&D_00272B98);
+        func_001DDA20(D_00275710);
+        func_001A7E70();
+        break;
+    case 2:
+        func_001E98E8(self, 1.0f);
+        break;
+    case 3:
+        func_001E98E8(self, 1.0f);
+        D_00274738 = -100;
+        break;
+    case 5:
+    case 7:
+        func_001E98E8(self, 0.0f);
+        break;
+    case 8:
+        D_0026C6C8.vt->f3C(&D_0026C6C8);
+        D_0026C948.vt->f3C(&D_0026C948);
+        D_0026CBC8.vt->f3C(&D_0026CBC8);
+        D_0026CE48.vt->f3C(&D_0026CE48);
+        break;
+    }
+    }
+}

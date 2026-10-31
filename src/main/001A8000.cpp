@@ -1564,3 +1564,99 @@ void func_001AAF88(Obj_1AAF88* self)
         break;
     }
 }
+
+struct A_1AB2B8 { u8 pad0[0x19D8]; s32 f19D8; };
+struct B_1AB2B8 { u8 pad0[0x2354]; s32 f2354; };
+struct Self_1AB2B8 {
+    u8 pad0[8];
+    char buf[0x200];
+    s32 f208[3];
+    s32 f214;
+    u8 pad218[0x260 - 0x218];
+    s32 f260;
+    u8 pad264[4];
+    s32* f268;
+};
+
+s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
+void func_001AA5A0(Self_1AB2B8* self);
+extern char D_0024CC78[];
+extern char D_0024CC80[];
+extern char D_0024CC88[];
+extern char D_0024CC90[];
+extern char D_0024CC98[];
+extern char D_0024CCA8[];
+extern char D_0024CCB0[];
+extern char D_0024CCB8[];
+extern s32 D_002751D4;
+
+void func_001AB2B8(Self_1AB2B8* self)
+{
+    switch (self->f214) {
+    case 3:
+        func_001E20B8(self->buf, 0x200, D_0024CC78, 0x4C, self->f260);
+        break;
+    case 4:
+        if (*self->f268 != 0) {
+            func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268,
+                          self->f260 < *self->f268 ? 0x3F : 0x21);
+        } else {
+            self->buf[0] = 0;
+        }
+        break;
+    case 5:
+        if ((u32)(((A_1AB2B8*)D_002623C0)->f19D8 - 1) < 4) {
+            func_001E20B8(self->buf, 0x200, D_0024CC88, self->f260, 0x4B);
+        } else {
+            self->buf[0] = 0;
+        }
+        break;
+    case 6:
+        if (((B_1AB2B8*)D_00275710)->f2354 != 0) {
+            func_001E20B8(self->buf, 0x200, D_0024CC78, 0x43, self->f260);
+        } else {
+            self->buf[0] = 0;
+        }
+        break;
+    case 7:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x56);
+        break;
+    case 8:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x4E);
+        break;
+    case 9:
+        func_001E20B8(self->buf, 0x200, D_0024CC90, 0x46, self->f260, *self->f268);
+        break;
+    case 10:
+        func_001E20B8(self->buf, 0x200, D_0024CC78, 0x4E, self->f260);
+        break;
+    case 11:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x56);
+        break;
+    case 28:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, D_002751D4, 0x56);
+        break;
+    case 29:
+        func_001E20B8(self->buf, 0x200, D_0024CC90, 0x4E, self->f260, D_002751D4);
+        break;
+    case 12:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x64);
+        break;
+    case 13:
+        func_001E20B8(self->buf, 0x200, D_0024CC98, 's',
+                      self->f260 >= 1 ? 'b' : 'm', self->f260 >= 2 ? 'b' : 'm',
+                      self->f260 >= 3 ? 'b' : 'm', self->f260 >= 4 ? 'b' : 'm',
+                      self->f260 >= 5 ? 'b' : 'm');
+        break;
+    case 14:
+        func_001E20B8(self->buf, 0x200, D_0024CCA8);
+        break;
+    case 15:
+        func_001E20B8(self->buf, 0x200, D_0024CCB0, 0x46, self->f260);
+        break;
+    case 36:
+        func_001E20B8(self->buf, 0x200, D_0024CCB8, self->f260);
+        break;
+    }
+    func_001AA5A0(self);
+}

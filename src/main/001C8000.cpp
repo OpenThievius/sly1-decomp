@@ -1326,3 +1326,380 @@ ret1:
 ret0:
     return 0;
 }
+
+struct Obj_1C8010;
+struct VT_1C8010 {
+    u8 pad0[0x184];
+    s32 (*f184)(Obj_1C8010* self);
+};
+struct Obj_1C8010 {
+    VT_1C8010* vt;
+    u8 pad0[0x2C8 - 4];
+    u64 f2C8;
+    u8 pad1[0x724 - 0x2D0];
+    s32 state;
+    u8 pad2[0x754 - 0x728];
+    s32 f754;
+    u8 pad3[0x7AC - 0x758];
+    s32 f7AC;
+    u8 pad4[0x7BC - 0x7B0];
+    s32 f7BC;
+    u8 pad5[0x7C4 - 0x7C0];
+    s32 f7C4;
+    u8 pad6[0x7CC - 0x7C8];
+    s32 f7CC;
+    u8 pad7[0x7E0 - 0x7D0];
+    s32 f7E0;
+    u8 pad8[0xA60 - 0x7E4];
+    s32 fA60;
+    u8 pad9[0xBF4 - 0xA64];
+    f32 fBF4;
+    f32 fBF8;
+    f32 fBFC;
+    f32 fC00;
+};
+
+extern f32 D_00261858[];
+s32 func_001C96B8(Obj_1C8010* self);
+s32 func_001C84C0(Obj_1C8010* self);
+
+s32 func_001C8010(Obj_1C8010* self)
+{
+    s32 s = self->state;
+    s32 m = func_001C96B8(self);
+
+    if (self->fBFC < D_00261858[1]) {
+        if (self->state != 0xB && self->state != 0x10) {
+            if (self->f7AC != 0) {
+                s = 0xA;
+                goto done;
+            }
+        }
+    }
+
+    switch (self->state) {
+    case 0:
+        switch (m) {
+        case 1:
+            s = 5;
+            break;
+        case 0:
+            s = 4;
+            break;
+        case 2:
+            s = 7;
+            break;
+        }
+        break;
+    case 1:
+        switch (m) {
+        case 1:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 5;
+            }
+            break;
+        case 0:
+            if (self->f754 != 0) {
+                if ((self->f2C8 & 0xC0000000) == 0x40000000) {
+                    s = 2;
+                }
+            } else {
+                s = 2;
+            }
+            break;
+        case 2:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 7;
+            }
+            break;
+        }
+        break;
+    case 2:
+        switch (m) {
+        case 1:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 5;
+            }
+            break;
+        case 0:
+            if (self->f754 != 0) {
+                if ((self->f2C8 & 0xC0000000) == 0) {
+                    s = 1;
+                }
+            }
+            break;
+        case 2:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 7;
+            }
+            break;
+        }
+        break;
+    case 3:
+        switch (m) {
+        case 0:
+            break;
+        case 1:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 5;
+            }
+            break;
+        case 2:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 7;
+            }
+            break;
+        }
+        break;
+    case 5:
+        switch (m) {
+        case 1:
+            if (func_001C84C0(self)) {
+                s = 6;
+            }
+            break;
+        case 0:
+            s = 9;
+            break;
+        case 2:
+            s = 7;
+            break;
+        }
+        break;
+    case 6:
+        switch (m) {
+        case 0:
+            if (self->fBF4 < D_00261858[1]) {
+                s = 9;
+            }
+            break;
+        case 1:
+            if (self->fA60 == 0) {
+                s = 5;
+            }
+            break;
+        case 2:
+            s = 7;
+            break;
+        }
+        break;
+    case 4:
+        switch (m) {
+        case 0:
+            if (func_001C84C0(self)) {
+                s = 1;
+            }
+            break;
+        case 1:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 5;
+            }
+            break;
+        case 2:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 7;
+            }
+            break;
+        }
+        break;
+    case 9:
+        switch (m) {
+        case 1:
+            s = 5;
+            break;
+        case 0:
+            if (self->f7E0 == 0) {
+                s = 4;
+            }
+            break;
+        case 2:
+            if (self->fBF8 < D_00261858[1]) {
+                s = 7;
+            }
+            break;
+        }
+        break;
+    case 8:
+    case 10:
+    case 16:
+        if (self->f7E0 == 0) {
+            s = 0;
+        }
+        break;
+    case 12:
+        if (m < 0) {
+            break;
+        }
+        if (m < 2) {
+            goto c83D0;
+        } else if (m == 2) {
+            if (self->f7E0 == 0) {
+                s = 0xD;
+                break;
+            } else {
+                if (self->f7CC != 0) {
+                    if (self->vt->f184(self) != 0) {
+                        s = 0xE;
+                        break;
+                    }
+                }
+                if (func_001C84C0(self) != 0) {
+                    if (self->f7C4 != 0) {
+                        s = 0xD;
+                    }
+                }
+            }
+        }
+        break;
+    case 13:
+        if (m < 0) {
+            break;
+        }
+        if (m < 2) {
+            goto c83D0;
+        } else if (m == 2) {
+            if (self->f7CC != 0) {
+                if (self->vt->f184(self) != 0) {
+                    s = 0xE;
+                    break;
+                }
+            }
+            if (self->fA60 == 0) {
+                if (self->f7BC != 0) {
+                    s = 0xC;
+                }
+            }
+        }
+        break;
+    case 14:
+        if (m < 0) {
+            break;
+        }
+        if (m < 2) {
+            goto c83D0;
+        } else if (m == 2) {
+            goto c7;
+        }
+        break;
+c83D0:
+        if (self->fC00 < D_00261858[1]) {
+            s = 8;
+        }
+        break;
+    case 7:
+c7:
+        if (self->f7E0 == 0) {
+            s = 0xC;
+        }
+        break;
+    }
+done:
+    return s;
+}
+
+struct Vt_1C9008 {
+    u8 pad0[0x1C];
+    void (*f1C)(void* self);
+    u8 pad20[0x70 - 0x20];
+    void (*f70)(void* self, void* other);
+};
+struct Sub_1C9008 { Vt_1C9008* vt; };
+struct Inner_1C9008 { u8 pad0[0x34]; f32 f34; };
+struct Link_1C9008 { u8 pad0[8]; Inner_1C9008* inner; u8 pad0C[8]; f32 f14; f32 f18; };
+struct Slot_1C9008 { Sub_1C9008* obj; s32 b; s32 c; };
+struct Self_1C9008 {
+    u8 pad0[0x724];
+    s32 f724;
+    u8 pad728[4];
+    s32 f72C;
+    u8 pad730[0x10];
+    f32 f740;
+    f32 f744;
+    f32 f748;
+    u8 pad74C[8];
+    Link_1C9008* f754;
+    u8 pad758[0x7E0 - 0x758];
+    Link_1C9008* f7E0;
+    u8 pad7E4[0x86C - 0x7E4];
+    f32 f86C;
+    u8 pad870[0x914 - 0x870];
+    f32 f914;
+    f32 f918;
+    f32 f91C;
+    u8 pad920[0xA74 - 0x920];
+    Sub_1C9008* fA74;
+    s32 fA78;
+    u8 padA7C[4];
+    Slot_1C9008 fA80[1];
+    u8 padA8C[0xB78 - 0xA8C];
+    s32 fB78;
+    s32 fB7C;
+    u8 padB80[4];
+    s32 fB84;
+    u8 padB88[4];
+    s32 fB8C;
+    u8 padB90[0xC00 - 0xB90];
+    f32 fC00;
+    s32 fC04;
+};
+
+void func_0012E760(Link_1C9008* p);
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001EF900(Sub_1C9008* p, s32 z);
+void func_00138F28(void* world, Self_1C9008* self);
+extern f32 D_0026185C;
+extern f32 D_0024D754;
+
+void func_001C9008(Self_1C9008* self, s32 mode)
+{
+    s32 i;
+    if (self->f7E0 != 0) {
+        self->f86C = self->f7E0->f14 / self->f7E0->inner->f34;
+    }
+    self->fB78 = 0;
+    self->fB7C = 0;
+    self->fB84 = 0;
+    self->fB8C = 0;
+    for (i = 0; i < self->fA78; i++) {
+        self->fA80[i].obj->vt->f1C(self->fA80[i].obj);
+    }
+    switch (self->f724) {
+    case 1:
+        if (self->f754 != 0 && mode != 2) {
+            self->f918 = self->f754->f14;
+            self->f91C = self->f754->f18;
+            func_0012E760(self->f754);
+            self->f754 = 0;
+        }
+        break;
+    case 3:
+        if (self->f754 != 0) {
+            func_0012E760(self->f754);
+            self->f754 = 0;
+        }
+        self->fA74->vt->f70(self->fA74, self);
+        func_001EF900(self->fA74, 0);
+        self->fA74 = 0;
+        if (mode == 1) {
+            self->f914 = self->f918;
+        }
+        break;
+    case 14:
+        self->f748 = D_0026185C + func_001EAAE0(self->f740, self->f744);
+        break;
+    case 11:
+        self->f724 = mode;
+        func_00138F28((void*)D_00275710, self);
+    case 16:
+        self->fC04 = 0;
+        break;
+    case 8:
+        self->fC00 = D_0024D754;
+        break;
+    }
+    if (self->f7E0 != 0) {
+        func_0012E760(self->f7E0);
+        self->f7E0 = 0;
+        self->f72C &= ~2;
+    }
+}

@@ -1170,3 +1170,82 @@ void func_00192230(Obj_192230* self, s32 kind, void* msg)
     }
     }
 }
+
+struct Obj_193EE8 {
+    void** vt;
+};
+struct Self_193EE8 {
+    u8 pad[0x288];
+    s32 f288;
+};
+struct Dev_193EE8 {
+    u8 pad[0x18];
+    union {
+        struct {
+            u32 x : 12;
+        } a;
+        s64 q18;
+    };
+};
+
+extern Obj_193EE8 D_0026EC70;
+extern Obj_193EE8 D_0026C6C8;
+extern Obj_193EE8 D_0026C948;
+extern Obj_193EE8 D_0026CBC8;
+extern Obj_193EE8 D_0026CE48;
+extern Obj_193EE8 D_00274118;
+extern Dev_193EE8 D_00262490;
+extern f32 D_0026A700;
+extern f32 D_0026A704;
+extern f32 D_0026A708;
+extern f32 D_0026A70C;
+
+void func_001BE998(void);
+void func_001AA8B8(Obj_193EE8* self, f32 v);
+void func_001AA788(Obj_193EE8* self, f32 v);
+
+typedef void (*VFn_193EE8)(Obj_193EE8*);
+
+void func_00193EE8(Self_193EE8* self, s32 a, s32 b)
+{
+    if (a == b) {
+        return;
+    }
+    if (self->f288 != 0) {
+        func_001BE998();
+        self->f288 = 0;
+    }
+    if (a == 11) {
+        goto call;
+    }
+    if (a > 10) {
+        if (a < 18) {
+            if (a > 15) {
+            call:
+                ((VFn_193EE8)D_0026EC70.vt[15])(&D_0026EC70);
+            }
+        }
+    }
+    switch (b) {
+    case 11:
+    case 16:
+    case 17: {
+        Obj_193EE8* o = &D_0026EC70;
+        func_001AA8B8(o, 0.0f);
+        func_001AA788(o, 0.6f);
+        break;
+    }
+    case 24: {
+        D_0026A700 = D_0026A708 = (f32)(u32)D_00262490.a.x;
+        D_0026A704 = D_0026A70C = (f32)((u32)(D_00262490.q18 >> 12) & 0x7FF);
+        break;
+    }
+    case -1:
+        ((VFn_193EE8)D_0026C6C8.vt[15])(&D_0026C6C8);
+        ((VFn_193EE8)D_0026C948.vt[15])(&D_0026C948);
+        ((VFn_193EE8)D_0026CBC8.vt[15])(&D_0026CBC8);
+        ((VFn_193EE8)D_0026CE48.vt[15])(&D_0026CE48);
+        ((VFn_193EE8)D_00274118.vt[15])(&D_00274118);
+        break;
+    }
+}

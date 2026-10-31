@@ -1135,3 +1135,93 @@ s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val) {
     func_0011B060(&q, 2);
     return 0;
 }
+
+struct __attribute__((aligned(16))) Quad_1C1BF8 {
+    s32 type;
+    union { s32 i; f32 f; void* p; } u;
+    s32 c, d;
+};
+struct __attribute__((aligned(16))) Blob_1C1BF8 { Quad_1C1BF8 q[3]; };
+struct W8_1C1BF8 { s32 a, b; };
+struct W12_1C1BF8 { s32 a, b, c; };
+
+void func_0011B008(Quad_1C1BF8* q);
+void func_0011B018(Quad_1C1BF8* out, Quad_1C1BF8* q);
+void func_0011B060(Quad_1C1BF8* q, s32 mode);
+void func_0011B0A8(Quad_1C1BF8* a, void* b);
+void func_0011B538(Quad_1C1BF8* q, s32 n);
+void func_0011B928(Quad_1C1BF8* a, Quad_1C1BF8* b);
+void func_0011B9A8(Quad_1C1BF8* a, Quad_1C1BF8* b);
+
+Quad_1C1BF8* func_001C1BF8(Quad_1C1BF8* out, s32 n, u8* src, u32* types, void** dsts)
+{
+    Quad_1C1BF8 q;
+    Quad_1C1BF8 a;
+    Quad_1C1BF8 b;
+    Quad_1C1BF8 c;
+    s32 i;
+    func_0011B008(&q);
+    for (i = 0; i < n; i++) {
+        func_0011B0A8(&q, src + i * 8);
+        u32 t = types[i];
+        void* d = dsts[i];
+        switch (t) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+        case 20:
+            if (q.type == 0x14) {
+                goto store;
+            }
+            func_0011B008(&a);
+            func_0011B928(&b, &q);
+            func_0011B0A8(&a, &b);
+            func_0011B060(&b, 2);
+            *(s32*)d = a.u.i;
+            func_0011B060(&a, 2);
+            break;
+        case 1:
+            if (q.type == 0x15) {
+                *(f32*)d = q.u.f;
+            } else {
+                func_0011B008(&a);
+                func_0011B9A8(&c, &q);
+                func_0011B0A8(&a, &c);
+                func_0011B060(&c, 2);
+                *(f32*)d = a.u.f;
+                func_0011B060(&a, 2);
+            }
+            break;
+        case 4:
+            *(Blob_1C1BF8*)d = *(Blob_1C1BF8*)q.u.p;
+            break;
+        case 2:
+        case 9:
+            *(Quad_1C1BF8*)d = *(Quad_1C1BF8*)q.u.p;
+            break;
+        case 10:
+            *(W8_1C1BF8*)d = *(W8_1C1BF8*)q.u.p;
+            break;
+        case 11:
+            *(W12_1C1BF8*)d = *(W12_1C1BF8*)q.u.p;
+            break;
+        default:
+            if (t & 0x1000) {
+                goto store;
+            }
+            if (t & 0x2000) {
+                goto store;
+            }
+            break;
+        case 0:
+        store:
+            *(s32*)d = q.u.i;
+            break;
+        case 13:
+            break;
+        }
+    }
+    func_0011B538(&q, 0x22);
+    func_0011B018(out, &q);
+    func_0011B060(&q, 2);
+    return out;
+}
