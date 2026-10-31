@@ -1133,3 +1133,40 @@ void func_00191F08(Obj_191F08* self)
     self->f5C = D_0024B650;
     self->f64 = -1;
 }
+
+// kind==0x10 loop test at the top (retail tests it with the first slot peeled) and
+// keeps one more register (frame 64 bytes as retail, but a different loop shape).
+
+struct Obj_192230;
+struct Sub_192230;
+
+void func_00127378(Obj_192230* self, s32 kind, void* msg);
+void func_001BF788(Sub_192230* self, s32 n);
+
+struct Obj_192230 {
+    u8 pad0[0x574];
+    Sub_192230* f574;
+    u8 pad578[0x5AC - 0x578];
+    void* slots[9];
+    s32 f5D0;
+};
+
+void func_00192230(Obj_192230* self, s32 kind, void* msg)
+{
+    func_00127378(self, kind, msg);
+    switch (kind) {
+    case 0xB:
+        func_001BF788(self->f574, 0);
+        break;
+    case 0x10: {
+        s32 i;
+        for (i = 0; i < self->f5D0; i++) {
+            if (self->slots[i] == msg) {
+                self->slots[i] = 0;
+                break;
+            }
+        }
+        break;
+    }
+    }
+}

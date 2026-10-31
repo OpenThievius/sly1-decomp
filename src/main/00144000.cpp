@@ -561,3 +561,18 @@ void func_00144B70(Eng_144B70* self, Vec_144B70* arg)
     func_00144978(arg, &self->f40, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
     self->f2D0 = *arg;
 }
+
+struct Elem_146298 { u8 pad0[8]; s32 tag; u8 pad1[0x20]; f32 x; f32 y; };
+struct Obj_146298 { u8 pad0[0x27C]; s32 count; Elem_146298** list; u8 pad1[0x550 - 0x284]; f32 f550; f32 f554; f32 f558; };
+
+void func_00146298(Obj_146298* self)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        if (self->list[i]->tag == 6) {
+            Elem_146298* e = self->list[i];
+            e->x = -(self->f550 * self->f554);
+            e->y = -(self->f550 * self->f558);
+            break;
+        }
+    }
+}

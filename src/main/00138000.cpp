@@ -850,3 +850,49 @@ void func_001385A0(World_1385A0* w, s32 a, s32 b, u8 set, u8 clr) {
         func_001B5F28((u8*)w + 0x1AF0, n2);
     }
 }
+
+struct Obj_139600 { u8 pad0[0x34]; f32 f34; };
+struct Elem_139600 { s32 w0; Obj_139600* p4; };
+struct Pair_139600 { f32 a; f32 b; };
+
+f32 func_0012CCC0(Obj_139600* a, s32 b);
+
+void func_00139600(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* vals)
+{
+    s32 i;
+    for (i = 0; i < count; i++) {
+        Elem_139600* e = (Elem_139600*)(base + i * stride);
+        if (e->p4 == 0) {
+            continue;
+        }
+        Pair_139600* s1 = (Pair_139600*)((u8*)e + off);
+        Pair_139600* s5 = s1;
+        s32 n;
+        s32 bytes = count2 * 8;
+        if (count2 > 0) {
+            s32* v = vals;
+            n = count2;
+            do {
+                n--;
+                s1->a = func_0012CCC0(e->p4, *v);
+                v++;
+                s1++;
+            } while (n != 0);
+        }
+        s1 = s5;
+        Pair_139600* prev = (Pair_139600*)((u8*)s1 + (bytes - 8));
+        if (count2 > 0) {
+            n = count2;
+            do {
+                f32 d = s1->a - prev->a;
+                prev->b = d;
+                if (d < 0.0f) {
+                    prev->b = d + e->p4->f34;
+                }
+                prev = s1;
+                n--;
+                s1++;
+            } while (n != 0);
+        }
+    }
+}

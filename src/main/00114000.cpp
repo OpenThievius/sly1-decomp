@@ -1783,3 +1783,70 @@ void* func_00117668(void* ret, s32 limit, Src_117668* src)
     func_0011B060(&r, 2);
     return ret;
 }
+
+struct __attribute__((aligned(16))) Quad_1149F0 { s32 a, b, c, d; };
+struct Pair_1149F0 { s32 a, b; };
+struct Frame_1149F0 {
+    Quad_1149F0 A;
+    Quad_1149F0 B;
+    Pair_1149F0 C[2];
+    Quad_1149F0 D;
+};
+struct Node_1149F0 { s32 pad0; s32 pad1; Node_1149F0* next; };
+struct Src_1149F0 { s32 pad0; s32 pad1; s32 kind; Node_1149F0* head; };
+
+void func_0011B008(Pair_1149F0* obj);
+void func_0011B008(Quad_1149F0* obj);
+s32 func_0011B5F0(Quad_1149F0* q, s32 flag);
+void func_0011B0A8(Pair_1149F0* a, void* b);
+void func_0011B0A8(Quad_1149F0* a, void* b);
+void func_00113E48(Quad_1149F0* a, s32 mode, Pair_1149F0* b, void* c);
+void func_0011B018(void* dst, Quad_1149F0* src);
+void func_0011B060(Pair_1149F0* obj, s32 n);
+void func_0011B060(Quad_1149F0* obj, s32 n);
+
+void* func_001149F0(void* ret, s32 unused, Src_1149F0* src, void* arg3)
+{
+    Frame_1149F0 f;
+    s32 n;
+    Node_1149F0* cur;
+
+    func_0011B008(&f.A);
+    func_0011B008(&f.B);
+    Pair_1149F0* q = f.C;
+    n = 1;
+    do {
+        func_0011B008(q);
+        n--;
+        q++;
+    } while (n != -1);
+    (void)func_0011B5F0(&f.A, 0);
+    if (src->kind == 0x1E) {
+        func_0011B0A8(f.C, src);
+        cur = src->head;
+        while (cur != 0) {
+            func_0011B0A8(&f.C[1], cur);
+            func_00113E48(&f.D, 2, f.C, arg3);
+            func_0011B0A8(&f.B, &f.D);
+            func_0011B060(&f.D, 2);
+            if (f.B.a == 0x1B) {
+                if (f.B.b != 0) {
+                    (void)func_0011B5F0(&f.A, 1);
+                    break;
+                }
+            }
+            cur = cur->next;
+        }
+    }
+    func_0011B018(ret, &f.A);
+    q = (Pair_1149F0*)&f.D;
+    if (f.C != q) {
+        do {
+            q--;
+            func_0011B060(q, 0);
+        } while (f.C != q);
+    }
+    func_0011B060(&f.B, 2);
+    func_0011B060(&f.A, 2);
+    return ret;
+}

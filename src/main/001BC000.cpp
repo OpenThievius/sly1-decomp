@@ -1192,3 +1192,64 @@ void func_001BEF88(void)
     }
     *(s32*)D_0027B314 = f.fC;
 }
+
+// NEAR: 23 diff lines, register allocation only: queue index in t1 (retail) vs v1 (ours), mask built in a0 vs a2, cleanup counter in t1 vs a0
+
+struct Obj_1BD678;
+struct Node_1BD678;
+
+struct Holder_1BD678 {
+    Node_1BD678* head;
+};
+
+struct Node_1BD678 {
+    Obj_1BD678* list0;
+    Node_1BD678* next4;
+    u8 pad[4];
+    Obj_1BD678* owner;
+};
+
+struct Obj_1BD678 {
+    u8 pad0[0x480];
+    Holder_1BD678* holder480;
+    u8 pad1[0x538 - 0x484];
+    u64 flags;
+};
+
+void func_001BD678(Obj_1BD678* self, s32* outQueued, Obj_1BD678** queue, s32* outFlagged, Obj_1BD678** list)
+{
+    s32 nq = 1;
+    s32 nl = 0;
+    queue[0] = self;
+    self->flags |= (u64)1 << 57;
+    s32 qi;
+    for (qi = 0; qi < nq; qi++) {
+        Obj_1BD678* x = queue[qi];
+        Node_1BD678* node = x->holder480->head;
+        while (node != 0) {
+            Obj_1BD678* y = node->owner;
+            if ((y->flags & ((u64)1 << 57)) == 0 && node->list0 != 0) {
+                if (y->flags & ((u64)1 << 55)) {
+                    list[nl] = y;
+                    nl++;
+                } else {
+                    queue[nq] = y;
+                    nq++;
+                }
+                y->flags |= (u64)1 << 57;
+            }
+            node = node->next4;
+        }
+    }
+    if (nl > 0) {
+        qi = nl;
+        Obj_1BD678** p = list;
+        do {
+            Obj_1BD678* z = *p;
+            p++;
+            z->flags &= ~((u64)1 << 57);
+        } while (--qi != 0);
+    }
+    *outQueued = nq;
+    *outFlagged = nl;
+}

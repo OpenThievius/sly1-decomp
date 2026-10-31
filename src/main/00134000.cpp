@@ -711,3 +711,64 @@ void func_00135F48(Self_135F48* self)
         func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)D_00275710)->f1D54, k);
     }
 }
+
+// NEAR: control flow and the calls match; the compiler picks s0 for self and s1 for n (retail: s1, s0),
+// and keeps the loaded count in $a2 where retail uses $v1.
+struct Stream_137A60 {
+    s32 flags;      // 0x00
+    u8 pad04[0x14];
+    s32 ptr;        // 0x18
+    s32 count;      // 0x1C
+    s32 nextPtr;    // 0x20
+    s32 nextCount;  // 0x24
+};
+
+struct Dst_137A60;
+
+void func_001378A0(Stream_137A60* self);
+void func_00137820(Stream_137A60* self);
+void func_0018D800(Dst_137A60* dst, void* src, s32 count);
+
+void func_00137A60(Stream_137A60* self, s32 remaining, Dst_137A60* dst)
+{
+    if (self->count < 0) {
+        return;
+    }
+    if (remaining <= 0) {
+        return;
+    }
+    do {
+        s32 cnt = self->count;
+        if (cnt == 0) {
+            if (self->flags & 4) {
+                func_001378A0(self);
+            } else {
+                func_00137820(self);
+                s32 nc = self->nextCount;
+                s32 np = self->nextPtr;
+                self->count = nc;
+                self->ptr = np;
+                self->nextPtr = np + nc;
+                self->nextCount = 0;
+            }
+            cnt = self->count;
+            if (cnt == 0) {
+                self->count = -1;
+                return;
+            }
+        }
+        s32 n;
+        if (remaining < cnt) {
+            n = remaining;
+        } else {
+            n = cnt;
+        }
+        if (dst != 0) {
+            func_0018D800(dst, (void*)self->ptr, n);
+            dst = (Dst_137A60*)((u8*)dst + n);
+        }
+        remaining -= n;
+        self->ptr += n;
+        self->count -= n;
+    } while (remaining > 0);
+}

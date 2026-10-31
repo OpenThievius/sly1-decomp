@@ -682,3 +682,43 @@ void* func_00108BE8(void* self, void* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct __attribute__((packed)) Pair_00108128 { s32 a, b; };
+struct Rod_00108128 { Pair_00108128 p; s32 c; };
+struct __attribute__((aligned(16))) Quad_00108128 { s32 w[4]; };
+struct __attribute__((aligned(16))) Frame_00108128 {
+    Quad_00108128 q;
+    Rod_00108128 rod;
+    s32 pad0;
+    Quad_00108128 b;
+    s32 o1;
+    f32 o2;
+    s32 o3;
+};
+
+struct Obj_00108128;
+
+extern u8 D_00248F70[];
+
+void func_0011B008(Quad_00108128* q);
+void func_0011B018(void* dst, Quad_00108128* src);
+void func_0011B060(Quad_00108128* q, s32 mode);
+void func_0011B0A8(Quad_00108128* a, Quad_00108128* b);
+void func_0011B538(Quad_00108128* q, s32 n);
+s32 func_001C23B0(Quad_00108128* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
+void func_0017D148(Obj_00108128* self, s32 a, s32 b, f32 value);
+
+void* func_00108128(void* self, void* x, s32 unused, s32 c)
+{
+    Frame_00108128 f;
+    func_0011B008(&f.q);
+    f.rod = *(Rod_00108128*)D_00248F70;
+    (void)func_001C23B0(&f.b, 3, c, &f.rod, &f.o1, &f.o2, &f.o3);
+    func_0011B0A8(&f.q, &f.b);
+    func_0011B060(&f.b, 2);
+    func_0017D148((Obj_00108128*)x, f.o1, f.o3, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

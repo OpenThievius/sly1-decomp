@@ -2320,3 +2320,31 @@ void* func_00103A60(void* self, void* x, s32 unused, s32 c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+void func_0011B008(Quad_102B10* q);
+void func_0011B018(void* out, Quad_102B10* q);
+void func_0011B060(Quad_102B10* q, int mode);
+void func_0011B0A8(Quad_102B10* a, Quad_102B10* b);
+void func_0011B538(Quad_102B10* q, int n);
+s32 func_001C23B0(Quad_102B10* t, int mode, int c, Blob_102B10* z, s32* i0, s32* i1, f32* f0, f32* f1, f32* f2, f32* f3);
+void func_00158D40(void* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w);
+extern u8 D_00248E40[];
+
+void* func_00102C28(void* self, void* x, int unused, int c)
+{
+    Quad_102B10 q;
+    Blob_102B10 blob;
+    Quad_102B10 t;
+    s32 i0, i1;
+    f32 f0, f1, f2, f3;
+    func_0011B008(&q);
+    blob = *(Blob_102B10*)D_00248E40;
+    (void)func_001C23B0(&t, 6, c, &blob, &i0, &i1, &f0, &f1, &f2, &f3);
+    func_0011B0A8(&q, &t);
+    func_0011B060(&t, 2);
+    func_00158D40(x, i0, i1, f0, f1, f2, f3);
+    func_0011B538(&q, 0x22);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

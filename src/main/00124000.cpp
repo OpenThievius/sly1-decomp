@@ -832,3 +832,33 @@ void func_00127048(Obj_127048* self, Obj_127048* src)
     if (self->f214 != D_00260E90) self->f214 = (u8*)func_0018D568(0x10, self->f214);
     if (self->f218 != D_00260EA0) self->f218 = (u8*)func_0018D568(0x10, self->f218);
 }
+
+// NEAR: the branches and the 0x40-byte copy loop match; retail loads both quads of a pair before
+// storing them (and computes the loop end in $v0), ours interleaves load and store.
+
+struct __attribute__((aligned(16))) Quad_00125B70 { s32 w[4]; };
+struct Self_00125B70 { s32 pad; };
+struct Dst_00125B70 {
+    Quad_00125B70 q[4];
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    f32 f4c;
+};
+
+extern u8 D_00248D40[];
+
+void func_00188C10(Self_00125B70* a, Self_00125B70* b, u8* c, void* d);
+
+void func_00125B70(Self_00125B70* self, Quad_00125B70* src, Dst_00125B70* dst)
+{
+    if (src != 0) {
+        if (src != (Quad_00125B70*)dst) {
+            *dst = *(Dst_00125B70*)src;
+        }
+    } else {
+        func_00188C10((Self_00125B70*)((u8*)self + 0x140), (Self_00125B70*)((u8*)self + 0x110), D_00248D40, dst);
+        dst->f44 = 1.0f;
+        dst->f40 = 1.0f;
+    }
+}

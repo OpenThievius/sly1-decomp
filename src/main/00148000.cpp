@@ -1592,3 +1592,26 @@ void func_00148298(void* self, s32 mode)
         func_00147AB0(self, mode);
     }
 }
+
+struct Ent_0014ABD0 {
+    void* link;
+    u8 pad0[0x260 - 4];
+};
+typedef void (*VFn_0014ABD0)(Ent_0014ABD0* self, s32 n);
+
+extern VFn_0014ABD0 D_00218330[];
+
+void func_001AA1F0(Ent_0014ABD0* self, s32 index);
+
+void func_0014ABD0(Ent_0014ABD0* self)
+{
+    u32 n;
+
+    func_001AA1F0(self, 0x20);
+    self = (Ent_0014ABD0*)((u8*)self + 0x264);
+    for (n = 0; n < 4; n++) {
+        self->link = (void*)D_00218330;
+        D_00218330[0](self, 0x12);
+        self = (Ent_0014ABD0*)((u8*)self + 0x260);
+    }
+}

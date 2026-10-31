@@ -1164,3 +1164,25 @@ void func_00153EC0(Obj_153EC0* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32
         func_00153A50(self, sel);
     }
 }
+
+struct Elem_153608 { u8 pad0[0x34]; f32 f34; f32 f38; u8 pad1[0x4C - 0x3C]; u8 f4C[8]; };
+struct Self_153608 { u8 pad0[4]; s32 count; u8* items; u8 f0C[0xC]; u8 f18[0xC]; u8 f24[0xC]; u8 f30[0xC]; s32 f3C; };
+
+void func_00152440(void* p);
+void func_00152470(void* list, void* item);
+
+void func_00153608(Self_153608* self)
+{
+    s32 i;
+    self->f3C = 0;
+    func_00152440(self->f0C);
+    func_00152440(self->f18);
+    func_00152440(self->f24);
+    func_00152440(self->f30);
+    for (i = 0; i < self->count; i++) {
+        Elem_153608* e = (Elem_153608*)(self->items + i * 0x60);
+        e->f34 = e->f38 = 0.0f;
+        (void)func_001F5C0C(e->f4C, 0, 8);
+        func_00152470(self->f30, e);
+    }
+}

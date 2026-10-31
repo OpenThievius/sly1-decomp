@@ -1279,3 +1279,56 @@ void func_00183CC8(Obj_183CC8* self)
     func_00184A70(self);
     func_00123ED0(self);
 }
+
+// EXACT: switch (mode) for the call dispatch; flag tail as mode==0, mode<0, mode>=4, mode>=2 chain
+
+struct Obj_181DA8 { u8 pad0[0x580]; s32 f580; u8 pad584[0xBB0 - 0x584]; s32 fBB0; f32 fBB4; u8 padBB8[4]; void* fBBC; u8 padBC0[0xBF8 - 0xBC0]; f32 fBF8; };
+
+extern f32 D_00261858[];
+extern f32 D_0024B168;
+void func_001B64D8(void* p, s32 n);
+void func_001B6628(void* p, s32 n);
+
+void func_00181DA8(Obj_181DA8* self, s32 mode)
+{
+    s32 old;
+
+    if (mode == self->fBB0) {
+        return;
+    }
+    old = self->fBB0;
+    if (old < 4) {
+        if (old >= 2) {
+            self->fBF8 = D_00261858[1];
+        }
+    }
+    switch (mode) {
+    case 0:
+        func_001B64D8(self->fBBC, 0x35E);
+        break;
+    case 1:
+        func_001B64D8(self->fBBC, 0x35F);
+        break;
+    case 2:
+        func_001B6628(self->fBBC, 0x361);
+        self->fBF8 = D_0024B168;
+        break;
+    case 3:
+        func_001B6628(self->fBBC, 0x362);
+        self->fBF8 = D_0024B168;
+        break;
+    }
+    if (mode == 0) {
+        self->f580 = 0;
+    } else if (mode < 0) {
+        self->f580 = 1;
+    } else if (mode >= 4) {
+        self->f580 = 1;
+    } else if (mode >= 2) {
+        self->f580 = 0;
+    } else {
+        self->f580 = 1;
+    }
+    self->fBB0 = mode;
+    self->fBB4 = D_00261858[1];
+}
