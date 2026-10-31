@@ -1225,3 +1225,195 @@ Quad_1C1BF8* func_001C1BF8(Quad_1C1BF8* out, s32 n, u8* src, u32* types, void** 
     func_0011B060(&q, 2);
     return out;
 }
+
+struct __attribute__((aligned(16))) Quad_1C15D8 { s32 a, b, c, d; };
+struct Desc_1C15D8;
+typedef void (*Get_1C15D8)(void* obj, void* out);
+typedef void* (*Base_1C15D8)(void* obj, s32 z);
+struct Desc_1C15D8 {
+    s32 kind;
+    u32 flags;
+    s32 pad8;
+    s32 off;
+    s32 imm;
+    s32 imm2;
+    s32 pad18;
+    Base_1C15D8 base;
+};
+struct Rec3_1C15D8 { s32 a, b, c; };
+struct __attribute__((aligned(16))) Q16_1C15D8 { s32 a, b, c, d; };
+struct D8_1C15D8 { s32 a, b; };
+
+extern void func_0011B008(Quad_1C15D8* q);
+extern void* func_0011AE78(void);
+extern void func_0011B8E8(Quad_1C15D8* q, void* v);
+extern void func_0011B570(Quad_1C15D8* q, s32 v);
+extern void func_0011B5B0(Quad_1C15D8* q, f32 v);
+extern void func_0011B5F0(Quad_1C15D8* q, s32 v);
+extern void* func_0011C508(void);
+extern void func_0011B740(Quad_1C15D8* q, void* v);
+extern void* func_0011C618(void);
+extern void func_001884E0(void* d, void* s);
+extern void func_001884C0(void* d);
+extern void func_0011B788(Quad_1C15D8* q, void* v);
+extern void* func_0011C748(void);
+extern void func_0011B7D0(Quad_1C15D8* q, void* v);
+extern void* func_0011C858(void);
+extern void func_0011B818(Quad_1C15D8* q, void* v);
+extern void* func_0011C968(void);
+extern void func_0011B860(Quad_1C15D8* q, void* v);
+extern void func_0011B8A8(Quad_1C15D8* q, s32 v);
+extern void func_001C1530(Quad_1C15D8* out, void* base, s32 v, Get_1C15D8 cb);
+extern void func_0011B0A8(Quad_1C15D8* a, Quad_1C15D8* b);
+extern void func_0011B018(void* out, Quad_1C15D8* q);
+extern void func_0011B060(Quad_1C15D8* q, s32 mode);
+
+void* func_001C15D8(void* out, void* base, Desc_1C15D8* d)
+{
+    Quad_1C15D8 q;
+    Quad_1C15D8 q2;
+    s32 t20, t28, t2c, t30;
+    f32 t24;
+    char* p;
+    Get_1C15D8 fn;
+    func_0011B008(&q);
+    if (d->flags & 1) {
+        s32* r = (s32*)func_0011AE78();
+        r[0] = (s32)base;
+        r[1] = d->imm;
+        r[2] = d->imm2;
+        func_0011B8E8(&q, r);
+    } else if (d->flags & 2) {
+        if (d->flags & 0x1000) {
+            p = (char*)d->base(base, 0) + d->off;
+        } else {
+            p = (char*)base + d->off;
+        }
+        switch (d->kind) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+            func_0011B570(&q, *(s32*)p);
+            break;
+        case 1:
+            func_0011B5B0(&q, *(f32*)p);
+            break;
+        case 0:
+            func_0011B5F0(&q, *(s32*)p);
+            break;
+        case 2: {
+            Q16_1C15D8* r = (Q16_1C15D8*)func_0011C508();
+            *r = *(Q16_1C15D8*)p;
+            func_0011B740(&q, r);
+            break;
+        }
+        case 4: {
+            void* r = func_0011C618();
+            func_001884E0(r, p);
+            func_0011B788(&q, r);
+            break;
+        }
+        case 9: {
+            Q16_1C15D8* r = (Q16_1C15D8*)func_0011C748();
+            *r = *(Q16_1C15D8*)p;
+            func_0011B7D0(&q, r);
+            break;
+        }
+        case 10: {
+            D8_1C15D8* r = (D8_1C15D8*)func_0011C858();
+            *r = *(D8_1C15D8*)p;
+            func_0011B818(&q, r);
+            break;
+        }
+        case 11: {
+            Rec3_1C15D8* r = (Rec3_1C15D8*)func_0011C968();
+            *r = *(Rec3_1C15D8*)p;
+            func_0011B860(&q, r);
+            break;
+        }
+        case 13:
+            break;
+        default:
+            if (d->kind & 0x1000) {
+                func_0011B570(&q, *(s32*)p);
+            } else if (d->kind & 0x2000) {
+                func_0011B8A8(&q, *(s32*)p);
+            }
+            break;
+        }
+    } else {
+        if (d->flags & 0x1000) {
+            p = (char*)d->base(base, 0);
+        } else {
+            p = (char*)base;
+        }
+        if (d->flags & 4) {
+            fn = (Get_1C15D8)d->off;
+        } else {
+            fn = *(Get_1C15D8*)(*(char**)base + d->off);
+        }
+        switch (d->kind) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+            fn(p, &t20);
+            func_0011B570(&q, t20);
+            break;
+        case 1:
+            fn(p, &t24);
+            func_0011B5B0(&q, t24);
+            break;
+        case 0:
+            fn(p, &t28);
+            func_0011B5F0(&q, t28);
+            break;
+        case 2: {
+            void* r = func_0011C508();
+            fn(p, r);
+            func_0011B740(&q, r);
+            break;
+        }
+        case 4: {
+            void* r = func_0011C618();
+            fn(p, r);
+            func_001884C0(r);
+            func_0011B788(&q, r);
+            break;
+        }
+        case 9: {
+            void* r = func_0011C748();
+            fn(p, r);
+            func_0011B7D0(&q, r);
+            break;
+        }
+        case 10: {
+            void* r = func_0011C858();
+            fn(p, r);
+            func_0011B818(&q, r);
+            break;
+        }
+        case 11: {
+            void* r = func_0011C968();
+            fn(p, r);
+            func_0011B860(&q, r);
+            break;
+        }
+        case 13:
+            break;
+        default:
+            if (d->kind < 0) {
+                func_001C1530(&q2, base, d->kind & 0x7fffffff, fn);
+                func_0011B0A8(&q, &q2);
+                func_0011B060(&q2, 2);
+            } else if (d->kind & 0x1000) {
+                fn(p, &t2c);
+                func_0011B570(&q, t2c);
+            } else if (d->kind & 0x2000) {
+                fn(p, &t30);
+                func_0011B8A8(&q, t30);
+            }
+            break;
+        }
+    }
+    func_0011B018(out, &q);
+    func_0011B060(&q, 2);
+    return out;
+}

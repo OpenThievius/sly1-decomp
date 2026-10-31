@@ -1854,3 +1854,258 @@ Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
     r->f00->f10(r);
     return r;
 }
+
+// EXACT: dtor of the temp called before e = rp; array dtor written as while (buf != e) { e--; dtor(e,0); }
+
+struct W_11E680 { s32 a, b; };
+struct Rd_11E680 { s32 x; };
+struct Dsc_11E680 {
+    s32 type;
+    u32 flags;
+    u8 pad8[4];
+    void (*fC)(W_11E680* ret, void* obj, s32 n, W_11E680* args);
+    u8 pad10[4];
+    s32 count;
+    s32 off;
+    void* (*f1C)(void* obj, s32 one);
+};
+typedef void (*Fn_11E680)(void);
+union Sc_11E680 { W_11E680 buf[32]; f32 f[8]; s32 i[2]; };
+
+void func_0011B008(W_11E680* q);
+void func_0011B060(W_11E680* q, s32 mode);
+s32 func_00137D10(Rd_11E680* r);
+s32 func_00137B90(Rd_11E680* r);
+s32 func_00137D78(Rd_11E680* r);
+s32 func_00137C40(Rd_11E680* r);
+f32 func_00137DF8(Rd_11E680* r);
+void func_0011B5F0(W_11E680* w, s32 v);
+void func_0011B5B0(W_11E680* w, f32 v);
+void func_0011B570(W_11E680* w, s32 v);
+void func_0011B7D0(W_11E680* w, f32* p);
+void func_0011B818(W_11E680* w, f32* p);
+void func_0011B740(W_11E680* w, f32* p);
+void func_00188978(f32* in, f32* out);
+
+void func_0011E680(void* obj, Dsc_11E680* d, Rd_11E680* r)
+{
+    Sc_11E680 sc;
+    W_11E680 ret;
+    u32 flags = d->flags;
+    if (flags & 0x400) {
+        W_11E680* p = sc.buf;
+        W_11E680* rp;
+        s32 i;
+        s32 n;
+        s32 k;
+        W_11E680* e;
+        i = 31;
+        rp = &ret;
+        for (; i != -1; i--) {
+            func_0011B008(p);
+            p++;
+        }
+        n = d->count;
+        for (k = 0; k < n; k++) {
+            u32 t = func_00137D10(r);
+            switch (t) {
+            case 0:
+                { s32 v = func_00137B90(r); func_0011B5F0(&sc.buf[k], v); }
+                break;
+            case 5:
+                { s32 v = func_00137D78(r); func_0011B570(&sc.buf[k], v); }
+                break;
+            case 1:
+                { f32 v = func_00137DF8(r); func_0011B5B0(&sc.buf[k], v); }
+                break;
+            case 6:
+            case 7:
+            case 14:
+            case 15:
+            case 16:
+            case 17:
+            case 20:
+            {
+                s32 v = func_00137D10(r);
+                func_0011B570(&sc.buf[k], v);
+                break;
+            }
+            case 9: {
+                f32* v = (f32*)func_0011C748();
+                v[0] = func_00137DF8(r);
+                v[1] = func_00137DF8(r);
+                v[2] = func_00137DF8(r);
+                func_0011B7D0(&sc.buf[k], v);
+                break;
+            }
+            case 10: {
+                f32* v = (f32*)func_0011C858();
+                v[0] = func_00137DF8(r);
+                v[1] = func_00137DF8(r);
+                func_0011B818(&sc.buf[k], v);
+                break;
+            }
+            case 2: {
+                f32* v = (f32*)func_0011C508();
+                v[0] = func_00137DF8(r);
+                v[1] = func_00137DF8(r);
+                v[2] = func_00137DF8(r);
+                func_0011B740(&sc.buf[k], v);
+                break;
+            }
+            default:
+                if (((t & 0x7FFFFFFF) >> 12) == 1) {
+                    s32 v = func_00137D10(r);
+                    func_0011B570(&sc.buf[k], v);
+                }
+                break;
+            }
+        }
+        d->fC(rp, obj, n, sc.buf);
+        func_0011B060(rp, 2);
+        e = rp;
+        while (sc.buf != e) {
+            e--;
+            func_0011B060(e, 0);
+        }
+    } else if (flags & 0x80) {
+        u8* dst;
+        if (flags & 0x1000) {
+            dst = (u8*)d->f1C(obj, 1) + d->off;
+        } else {
+            dst = (u8*)obj + d->off;
+        }
+        switch (d->type) {
+        case 0:
+            *dst = func_00137B90(r);
+            break;
+        case 5:
+            *(s32*)dst = func_00137D78(r);
+            break;
+        case 1:
+            *(f32*)dst = func_00137DF8(r);
+            break;
+        case 10:
+            ((f32*)dst)[0] = func_00137DF8(r);
+            ((f32*)dst)[1] = func_00137DF8(r);
+            break;
+        case 2:
+        case 9:
+        case 11:
+            ((f32*)dst)[0] = func_00137DF8(r);
+            ((f32*)dst)[1] = func_00137DF8(r);
+            ((f32*)dst)[2] = func_00137DF8(r);
+            break;
+        case 3:
+        case 12:
+            ((f32*)dst)[0] = func_00137DF8(r);
+            ((f32*)dst)[1] = func_00137DF8(r);
+            ((f32*)dst)[2] = func_00137DF8(r);
+            ((f32*)dst)[3] = func_00137DF8(r);
+            break;
+        case 13:
+            *(s32*)dst = func_00137C40(r);
+            break;
+        case 4: {
+            f32* t = sc.f;
+            t[0] = func_00137DF8(r);
+            t[1] = func_00137DF8(r);
+            t[2] = func_00137DF8(r);
+            func_00188978(t, (f32*)dst);
+            break;
+        }
+        case 6:
+        case 7:
+        case 8:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        default:
+            *(s32*)dst = func_00137D10(r);
+            break;
+        }
+    } else {
+        void* tgt;
+        Fn_11E680 fn;
+        if (flags & 0x100) {
+            fn = (Fn_11E680)(d->off);
+            if (flags & 0x1000) {
+                tgt = d->f1C(obj, 1);
+            } else {
+                tgt = obj;
+            }
+        } else {
+            fn = *(Fn_11E680*)(*(s32*)obj + d->off);
+            tgt = obj;
+        }
+        switch (d->type) {
+        case 0:
+            ((void (*)(void*, s32))fn)(tgt, func_00137B90(r));
+            break;
+        case 5:
+            ((void (*)(void*, s32))fn)(tgt, func_00137D78(r));
+            break;
+        case 1:
+            ((void (*)(void*, f32))fn)(tgt, func_00137DF8(r));
+            break;
+        case 10: {
+            f32* t = sc.f;
+            t[0] = func_00137DF8(r);
+            t[1] = func_00137DF8(r);
+            ((void (*)(void*, f32*))fn)(tgt, t);
+            break;
+        }
+        case 2:
+        case 9:
+        case 11: {
+            f32* t = sc.f;
+            t[0] = func_00137DF8(r);
+            t[1] = func_00137DF8(r);
+            t[2] = func_00137DF8(r);
+            ((void (*)(void*, f32*))fn)(tgt, t);
+            break;
+        }
+        case 3:
+        case 12: {
+            f32* t = sc.f;
+            t[0] = func_00137DF8(r);
+            t[1] = func_00137DF8(r);
+            t[2] = func_00137DF8(r);
+            t[3] = func_00137DF8(r);
+            ((void (*)(void*, f32*))fn)(tgt, t);
+            break;
+        }
+        case 13: {
+            s32* t = sc.i;
+            t[0] = func_00137C40(r);
+            ((void (*)(void*, s32*))fn)(tgt, t);
+            break;
+        }
+        case 4: {
+            f32* t = sc.f;
+            f32* o;
+            t[0] = func_00137DF8(r);
+            t[1] = func_00137DF8(r);
+            t[2] = func_00137DF8(r);
+            o = sc.f + 4;
+            func_00188978(t, o);
+            ((void (*)(void*, f32*))fn)(tgt, o);
+            break;
+        }
+        case 6:
+        case 7:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+            ((void (*)(void*, s32))fn)(tgt, func_00137D10(r));
+            break;
+        default:
+            ((void (*)(void*, s32))fn)(tgt, func_00137D10(r));
+            break;
+        }
+    }
+}
