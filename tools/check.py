@@ -178,7 +178,7 @@ def jump_table(obj, index, start, resolver):
     """A jump table in .rodata at `start`, as retail would hold it: the address of each case label.
 
     The words are R_MIPS_32 relocations against the function sections (content = offset). Returns the
-    run of consecutive words from `start`, or None if there is no relocation at `start`.
+    run of consecutive words from `start` that point into one function, or None if there is no relocation at `start`.
     """
     words = {}
     for off, rtype, rsym in obj.relocations(obj.sections[index]["name"]):
@@ -187,7 +187,8 @@ def jump_table(obj, index, start, resolver):
     if start not in words:
         return None
     section, out, at = obj.contents(obj.sections[index]), b"", start
-    while at in words:
+    first = words[start]["shndx"]
+    while at in words and words[at]["shndx"] == first:      # a table belongs to one function
         name = obj.sections[words[at]["shndx"]]["name"]
         base = resolver.address(name[len(".text."):]) if name.startswith(".text.") else None
         if base is None:
