@@ -1052,3 +1052,441 @@ void func_001C1190(Obj_1C1190* self, void* arg) {
     }
     func_0011B060(&q0, 2);
 }
+
+// NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
+
+struct Quad_1C13E8 { u8 pad0[16]; };
+struct Ent_1C13E8 { s32 a; s32 b; };
+struct Ctx_1C13E8 { u8 pad0[0x1EF4]; s32 ents; };
+
+s32 func_0011B008(Quad_1C13E8* q);
+s32 func_0011A630(void);
+void func_0011A080(Quad_1C13E8* t, s32 a, s32 b);
+void func_0011B0A8(Quad_1C13E8* a, Quad_1C13E8* b);
+void func_0011B538(Quad_1C13E8* q, s32 n);
+void func_0011B018(void* dst, Quad_1C13E8* src);
+void func_0011B060(Quad_1C13E8* q, s32 mode);
+
+void* func_001C13E8(void* self, s32 index, Ctx_1C13E8* ctx)
+{
+    s32 off = index << 3;
+    Quad_1C13E8 q;
+    Ent_1C13E8* e;
+    (void)func_0011B008(&q);
+    e = (Ent_1C13E8*)(off + ctx->ents);
+    if (e->a != 0 && e->b == 0) {
+        Quad_1C13E8 t;
+        ((Ent_1C13E8*)(off + ctx->ents))->b = func_0011A630();
+        func_0011A080(&t, ((Ent_1C13E8*)(off + ctx->ents))->a, ((Ent_1C13E8*)(off + ctx->ents))->b);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+    }
+    func_0011B538(&q, 0x22);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct __attribute__((aligned(16))) Quad_1C1AD8 { s32 a, b, c, d; };
+struct Link_1C1AD8 { u32 pad0; u32 pad4; Link_1C1AD8* next; };
+struct Cmd_1C1AD8 { u32 kind; Link_1C1AD8* list; };
+
+extern void func_0011B008(Quad_1C1AD8* q);
+extern void func_0011B060(Quad_1C1AD8* q, s32 mode);
+extern s32 func_0011B0F8(Link_1C1AD8* l, Quad_1C1AD8* q);
+extern void func_0011B570(Quad_1C1AD8* q, s32 v);
+extern void func_0011B5B0(Quad_1C1AD8* q, f32 v);
+extern void func_0011B5F0(Quad_1C1AD8* q, s32 v);
+extern void func_0011B8A8(Quad_1C1AD8* q, s32 v);
+
+s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val) {
+    Quad_1C1AD8 q;
+    Link_1C1AD8* l;
+    func_0011B008(&q);
+    l = cmd->list;
+    if (l) {
+        switch (cmd->kind) {
+        case 1:
+            func_0011B5B0(&q, *(f32*)val);
+            break;
+        case 0:
+            func_0011B5F0(&q, *val);
+            break;
+        case 2: case 4: case 9: case 10: case 11: case 13:
+            break;
+        default:
+            if (cmd->kind & 0x1000) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+                func_0011B570(&q, *val);
+            } else if (cmd->kind & 0x2000) {
+                func_0011B8A8(&q, *val);
+            }
+            break;
+        }
+        while (l) {
+            if (func_0011B0F8(l, &q)) {
+                func_0011B060(&q, 2);
+                return 1;
+            }
+            l = l->next;
+        }
+    }
+    func_0011B060(&q, 2);
+    return 0;
+}
+
+struct __attribute__((aligned(16))) Quad_1C1BF8 {
+    s32 type;
+    union { s32 i; f32 f; void* p; } u;
+    s32 c, d;
+};
+struct __attribute__((aligned(16))) Blob_1C1BF8 { Quad_1C1BF8 q[3]; };
+struct W8_1C1BF8 { s32 a, b; };
+struct W12_1C1BF8 { s32 a, b, c; };
+
+void func_0011B008(Quad_1C1BF8* q);
+void func_0011B018(Quad_1C1BF8* out, Quad_1C1BF8* q);
+void func_0011B060(Quad_1C1BF8* q, s32 mode);
+void func_0011B0A8(Quad_1C1BF8* a, void* b);
+void func_0011B538(Quad_1C1BF8* q, s32 n);
+void func_0011B928(Quad_1C1BF8* a, Quad_1C1BF8* b);
+void func_0011B9A8(Quad_1C1BF8* a, Quad_1C1BF8* b);
+
+Quad_1C1BF8* func_001C1BF8(Quad_1C1BF8* out, s32 n, u8* src, u32* types, void** dsts)
+{
+    Quad_1C1BF8 q;
+    Quad_1C1BF8 a;
+    Quad_1C1BF8 b;
+    Quad_1C1BF8 c;
+    s32 i;
+    func_0011B008(&q);
+    for (i = 0; i < n; i++) {
+        func_0011B0A8(&q, src + i * 8);
+        u32 t = types[i];
+        void* d = dsts[i];
+        switch (t) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+        case 20:
+            if (q.type == 0x14) {
+                goto store;
+            }
+            func_0011B008(&a);
+            func_0011B928(&b, &q);
+            func_0011B0A8(&a, &b);
+            func_0011B060(&b, 2);
+            *(s32*)d = a.u.i;
+            func_0011B060(&a, 2);
+            break;
+        case 1:
+            if (q.type == 0x15) {
+                *(f32*)d = q.u.f;
+            } else {
+                func_0011B008(&a);
+                func_0011B9A8(&c, &q);
+                func_0011B0A8(&a, &c);
+                func_0011B060(&c, 2);
+                *(f32*)d = a.u.f;
+                func_0011B060(&a, 2);
+            }
+            break;
+        case 4:
+            *(Blob_1C1BF8*)d = *(Blob_1C1BF8*)q.u.p;
+            break;
+        case 2:
+        case 9:
+            *(Quad_1C1BF8*)d = *(Quad_1C1BF8*)q.u.p;
+            break;
+        case 10:
+            *(W8_1C1BF8*)d = *(W8_1C1BF8*)q.u.p;
+            break;
+        case 11:
+            *(W12_1C1BF8*)d = *(W12_1C1BF8*)q.u.p;
+            break;
+        default:
+            if (t & 0x1000) {
+                goto store;
+            }
+            if (t & 0x2000) {
+                goto store;
+            }
+            break;
+        case 0:
+        store:
+            *(s32*)d = q.u.i;
+            break;
+        case 13:
+            break;
+        }
+    }
+    func_0011B538(&q, 0x22);
+    func_0011B018(out, &q);
+    func_0011B060(&q, 2);
+    return out;
+}
+
+struct __attribute__((aligned(16))) Quad_1C15D8 { s32 a, b, c, d; };
+struct Desc_1C15D8;
+typedef void (*Get_1C15D8)(void* obj, void* out);
+typedef void* (*Base_1C15D8)(void* obj, s32 z);
+struct Desc_1C15D8 {
+    s32 kind;
+    u32 flags;
+    s32 pad8;
+    s32 off;
+    s32 imm;
+    s32 imm2;
+    s32 pad18;
+    Base_1C15D8 base;
+};
+struct Rec3_1C15D8 { s32 a, b, c; };
+struct __attribute__((aligned(16))) Q16_1C15D8 { s32 a, b, c, d; };
+struct D8_1C15D8 { s32 a, b; };
+
+extern void func_0011B008(Quad_1C15D8* q);
+extern void* func_0011AE78(void);
+extern void func_0011B8E8(Quad_1C15D8* q, void* v);
+extern void func_0011B570(Quad_1C15D8* q, s32 v);
+extern void func_0011B5B0(Quad_1C15D8* q, f32 v);
+extern void func_0011B5F0(Quad_1C15D8* q, s32 v);
+extern void* func_0011C508(void);
+extern void func_0011B740(Quad_1C15D8* q, void* v);
+extern void* func_0011C618(void);
+extern void func_001884E0(void* d, void* s);
+extern void func_001884C0(void* d);
+extern void func_0011B788(Quad_1C15D8* q, void* v);
+extern void* func_0011C748(void);
+extern void func_0011B7D0(Quad_1C15D8* q, void* v);
+extern void* func_0011C858(void);
+extern void func_0011B818(Quad_1C15D8* q, void* v);
+extern void* func_0011C968(void);
+extern void func_0011B860(Quad_1C15D8* q, void* v);
+extern void func_0011B8A8(Quad_1C15D8* q, s32 v);
+extern void func_001C1530(Quad_1C15D8* out, void* base, s32 v, Get_1C15D8 cb);
+extern void func_0011B0A8(Quad_1C15D8* a, Quad_1C15D8* b);
+extern void func_0011B018(void* out, Quad_1C15D8* q);
+extern void func_0011B060(Quad_1C15D8* q, s32 mode);
+
+void* func_001C15D8(void* out, void* base, Desc_1C15D8* d)
+{
+    Quad_1C15D8 q;
+    Quad_1C15D8 q2;
+    s32 t20, t28, t2c, t30;
+    f32 t24;
+    char* p;
+    Get_1C15D8 fn;
+    func_0011B008(&q);
+    if (d->flags & 1) {
+        s32* r = (s32*)func_0011AE78();
+        r[0] = (s32)base;
+        r[1] = d->imm;
+        r[2] = d->imm2;
+        func_0011B8E8(&q, r);
+    } else if (d->flags & 2) {
+        if (d->flags & 0x1000) {
+            p = (char*)d->base(base, 0) + d->off;
+        } else {
+            p = (char*)base + d->off;
+        }
+        switch (d->kind) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+            func_0011B570(&q, *(s32*)p);
+            break;
+        case 1:
+            func_0011B5B0(&q, *(f32*)p);
+            break;
+        case 0:
+            func_0011B5F0(&q, *(s32*)p);
+            break;
+        case 2: {
+            Q16_1C15D8* r = (Q16_1C15D8*)func_0011C508();
+            *r = *(Q16_1C15D8*)p;
+            func_0011B740(&q, r);
+            break;
+        }
+        case 4: {
+            void* r = func_0011C618();
+            func_001884E0(r, p);
+            func_0011B788(&q, r);
+            break;
+        }
+        case 9: {
+            Q16_1C15D8* r = (Q16_1C15D8*)func_0011C748();
+            *r = *(Q16_1C15D8*)p;
+            func_0011B7D0(&q, r);
+            break;
+        }
+        case 10: {
+            D8_1C15D8* r = (D8_1C15D8*)func_0011C858();
+            *r = *(D8_1C15D8*)p;
+            func_0011B818(&q, r);
+            break;
+        }
+        case 11: {
+            Rec3_1C15D8* r = (Rec3_1C15D8*)func_0011C968();
+            *r = *(Rec3_1C15D8*)p;
+            func_0011B860(&q, r);
+            break;
+        }
+        case 13:
+            break;
+        default:
+            if (d->kind & 0x1000) {
+                func_0011B570(&q, *(s32*)p);
+            } else if (d->kind & 0x2000) {
+                func_0011B8A8(&q, *(s32*)p);
+            }
+            break;
+        }
+    } else {
+        if (d->flags & 0x1000) {
+            p = (char*)d->base(base, 0);
+        } else {
+            p = (char*)base;
+        }
+        if (d->flags & 4) {
+            fn = (Get_1C15D8)d->off;
+        } else {
+            fn = *(Get_1C15D8*)(*(char**)base + d->off);
+        }
+        switch (d->kind) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+            fn(p, &t20);
+            func_0011B570(&q, t20);
+            break;
+        case 1:
+            fn(p, &t24);
+            func_0011B5B0(&q, t24);
+            break;
+        case 0:
+            fn(p, &t28);
+            func_0011B5F0(&q, t28);
+            break;
+        case 2: {
+            void* r = func_0011C508();
+            fn(p, r);
+            func_0011B740(&q, r);
+            break;
+        }
+        case 4: {
+            void* r = func_0011C618();
+            fn(p, r);
+            func_001884C0(r);
+            func_0011B788(&q, r);
+            break;
+        }
+        case 9: {
+            void* r = func_0011C748();
+            fn(p, r);
+            func_0011B7D0(&q, r);
+            break;
+        }
+        case 10: {
+            void* r = func_0011C858();
+            fn(p, r);
+            func_0011B818(&q, r);
+            break;
+        }
+        case 11: {
+            void* r = func_0011C968();
+            fn(p, r);
+            func_0011B860(&q, r);
+            break;
+        }
+        case 13:
+            break;
+        default:
+            if (d->kind < 0) {
+                func_001C1530(&q2, base, d->kind & 0x7fffffff, fn);
+                func_0011B0A8(&q, &q2);
+                func_0011B060(&q2, 2);
+            } else if (d->kind & 0x1000) {
+                fn(p, &t2c);
+                func_0011B570(&q, t2c);
+            } else if (d->kind & 0x2000) {
+                fn(p, &t30);
+                func_0011B8A8(&q, t30);
+            }
+            break;
+        }
+    }
+    func_0011B018(out, &q);
+    func_0011B060(&q, 2);
+    return out;
+}
+
+// EXACT: callee func_001EA728 declared with float params first
+
+struct Obj_1C3FC8;
+struct Vt_1C3FC8 {
+    u8 pad[0x94];
+    void (*f94)(Obj_1C3FC8* self, void* q);
+};
+struct __attribute__((aligned(16))) Quad_1C3FC8 { f32 v[4]; };
+struct Obj_1C3FC8 {
+    Vt_1C3FC8* vt;
+};
+
+extern f32 D_00261858[];
+extern Quad_1C3FC8 D_00248D30;
+extern u8 D_00274AA8[];
+extern s32 D_0026E228;
+extern u8 D_00261EF0[];
+extern u8 D_0026FF68[];
+extern f32 D_0024D560;
+
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA408(f32 a);
+void func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
+void func_00151E20(u8* a, f32 b);
+void func_00194D30(u8* a, s32 b, s32 c);
+void func_0012C918(void* a, Obj_1C3FC8* b, s32 c, void* d, f32 e, f32 f);
+
+#define F(o, off) (*(f32*)((u8*)(o) + (off)))
+#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+#define P(o, off) (*(void**)((u8*)(o) + (off)))
+
+void func_001C3FC8(Obj_1C3FC8* self, s32 state)
+{
+    void* s2;
+    f32 f12;
+    if (state == W(self, 0x610)) return;
+    if (W(self, 0x610) == 2) {
+        f32 t = D_00261858[1];
+        W(self, 0x694) = 3;
+        F(self, 0x640) = t;
+    }
+    W(self, 0x670) = 0;
+    if (state < 4) if (state >= 2) {
+        Quad_1C3FC8 q;
+        f32 a = func_00205778(F(self, 0x154), F(self, 0x150));
+        f32 b = func_001EA408(a + 3.14159274f);
+        F(self, 0x644) = b;
+        F(self, 0x648) = b;
+        q = D_00248D30;
+        f32 r = func_00205778(F(self, 0xD4), F(self, 0xD0));
+        func_001EA728(r, F(self, 0x644), 0.0f, D_00274AA8, (u8*)&q + 8);
+        self->vt->f94(self, &q);
+        W(self, 0x694) = 0;
+        D_0026E228 = -1;
+        if (state == 3) func_00151E20(D_00261EF0, 1.0f);
+    }
+    f12 = 0.0f;
+    switch (state) {
+    case 0: s2 = P(self, 0x618); break;
+    case 1: s2 = P(self, 0x61C); break;
+    case 2: s2 = P(self, 0x620); F(self, 0x640) = D_0024D560; break;
+    case 3: s2 = P(self, 0x624); break;
+    case 4:
+        func_00194D30(D_0026FF68, 0, 0x1A);
+        s2 = P(self, 0x624);
+        f12 = F(s2, 0x34);
+        break;
+    }
+    func_0012C918(s2, self, 1, (u8*)self + 0x628, f12, 1.0f);
+    W(self, 0x610) = state;
+    F(self, 0x614) = D_00261858[1];
+}

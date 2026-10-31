@@ -1783,3 +1783,157 @@ void* func_00117668(void* ret, s32 limit, Src_117668* src)
     func_0011B060(&r, 2);
     return ret;
 }
+
+struct __attribute__((aligned(16))) Quad_1149F0 { s32 a, b, c, d; };
+struct Pair_1149F0 { s32 a, b; };
+struct Frame_1149F0 {
+    Quad_1149F0 A;
+    Quad_1149F0 B;
+    Pair_1149F0 C[2];
+    Quad_1149F0 D;
+};
+struct Node_1149F0 { s32 pad0; s32 pad1; Node_1149F0* next; };
+struct Src_1149F0 { s32 pad0; s32 pad1; s32 kind; Node_1149F0* head; };
+
+void func_0011B008(Pair_1149F0* obj);
+void func_0011B008(Quad_1149F0* obj);
+s32 func_0011B5F0(Quad_1149F0* q, s32 flag);
+void func_0011B0A8(Pair_1149F0* a, void* b);
+void func_0011B0A8(Quad_1149F0* a, void* b);
+void func_00113E48(Quad_1149F0* a, s32 mode, Pair_1149F0* b, void* c);
+void func_0011B018(void* dst, Quad_1149F0* src);
+void func_0011B060(Pair_1149F0* obj, s32 n);
+void func_0011B060(Quad_1149F0* obj, s32 n);
+
+void* func_001149F0(void* ret, s32 unused, Src_1149F0* src, void* arg3)
+{
+    Frame_1149F0 f;
+    s32 n;
+    Node_1149F0* cur;
+
+    func_0011B008(&f.A);
+    func_0011B008(&f.B);
+    Pair_1149F0* q = f.C;
+    n = 1;
+    do {
+        func_0011B008(q);
+        n--;
+        q++;
+    } while (n != -1);
+    (void)func_0011B5F0(&f.A, 0);
+    if (src->kind == 0x1E) {
+        func_0011B0A8(f.C, src);
+        cur = src->head;
+        while (cur != 0) {
+            func_0011B0A8(&f.C[1], cur);
+            func_00113E48(&f.D, 2, f.C, arg3);
+            func_0011B0A8(&f.B, &f.D);
+            func_0011B060(&f.D, 2);
+            if (f.B.a == 0x1B) {
+                if (f.B.b != 0) {
+                    (void)func_0011B5F0(&f.A, 1);
+                    break;
+                }
+            }
+            cur = cur->next;
+        }
+    }
+    func_0011B018(ret, &f.A);
+    q = (Pair_1149F0*)&f.D;
+    if (f.C != q) {
+        do {
+            q--;
+            func_0011B060(q, 0);
+        } while (f.C != q);
+    }
+    func_0011B060(&f.B, 2);
+    func_0011B060(&f.A, 2);
+    return ret;
+}
+
+struct Quad_117C48 { s32 a, b, c, d; };
+struct In_117C48 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+
+extern void* D_00275710;
+
+s32 func_0011B008(Quad_117C48* q);
+void func_00117AF0(Quad_117C48* t, s32 a, void* b);
+s32 func_0011B0A8(Quad_117C48* a, Quad_117C48* b);
+s32 func_0011B060(Quad_117C48* q, int mode);
+s32 func_0011B018(void* dst, Quad_117C48* src);
+s32 func_0015A198(void* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
+
+void* func_00117C48(void* out, s32 unused, In_117C48* in)
+{
+    Quad_117C48 q;
+    u8 buf[0x100];
+    Quad_117C48 t;
+    (void)func_0011B008(&q);
+    s32 r = func_0015A198(D_00275710, in->wc ? 0x101 : 0x105, in->w4, (void*)in->wc, 0x40, buf);
+    func_00117AF0(&t, r, buf);
+    (void)func_0011B0A8(&q, &t);
+    (void)func_0011B060(&t, 2);
+    (void)func_0011B018(out, &q);
+    (void)func_0011B060(&q, 2);
+    return out;
+}
+
+struct __attribute__((aligned(16))) Quad_1159B8 { s32 a, b, c, d; };
+struct Idx_1159B8 { s32 f0; s32 f4; Idx_1159B8* f8; };
+struct __attribute__((aligned(16))) Arr_1159B8 { f32 v[4]; };
+struct Mat_1159B8 { Arr_1159B8 row[4]; };
+struct Src_1159B8 { s32 type; f32* f4; s32 f8; Idx_1159B8* fC; };
+
+void func_0011B008(Quad_1159B8* q);
+void func_0011B018(Quad_1159B8* out, Quad_1159B8* q);
+void func_0011B060(Quad_1159B8* q, s32 mode);
+void func_0011B5B0(Quad_1159B8* q, f32 x);
+void func_0011B740(Quad_1159B8* q, Arr_1159B8* c);
+
+Quad_1159B8* func_001159B8(Quad_1159B8* out, s32 mode, Src_1159B8* s)
+{
+    Quad_1159B8 q;
+    func_0011B008(&q);
+    Idx_1159B8* ix = s->fC;
+    switch (s->type) {
+    case 0x16:
+        func_0011B5B0(&q, ((Arr_1159B8*)s->f4)->v[ix->f4]);
+        break;
+    case 0x17: {
+        s32 i = ix->f4;
+        Arr_1159B8* v;
+        if (mode == 2) {
+            v = (Arr_1159B8*)func_0011C508();
+            *v = ((Arr_1159B8*)s->f4)[i];
+            func_0011B740(&q, v);
+        } else {
+            ix = ix->f8;
+            v = &((Mat_1159B8*)s->f4)->row[i];
+            func_0011B5B0(&q, v->v[ix->f4]);
+        }
+        break;
+    }
+    case 0x18:
+        func_0011B5B0(&q, ((Arr_1159B8*)s->f4)->v[ix->f4]);
+        break;
+    case 0x19:
+        func_0011B5B0(&q, ix->f4 == 0 ? s->f4[0] : s->f4[1]);
+        break;
+    case 0x1A:
+        switch (ix->f4) {
+        case 0:
+            func_0011B5B0(&q, s->f4[0]);
+            break;
+        case 1:
+            func_0011B5B0(&q, s->f4[1]);
+            break;
+        case 2:
+            func_0011B5B0(&q, s->f4[2]);
+            break;
+        }
+        break;
+    }
+    func_0011B018(out, &q);
+    func_0011B060(&q, 2);
+    return out;
+}

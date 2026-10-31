@@ -755,3 +755,121 @@ void func_001C7520(Obj_001C7520* self)
     self->fBFC = D_0024D654;
     self->fC00 = D_0024D654;
 }
+
+extern f32 D_00275C60[];
+
+struct Poly_1C5438 { f32 a; f32 b; f32 c; };
+
+struct Ctx_1C5438 {
+    u8 pad0[0xD0];
+    f32 fD0;
+    f32 fD4;
+    u8 pad1[0x638 - 0xD8];
+    f32 f638;
+    f32 f63C;
+    u8 pad2[0x6F0 - 0x640];
+    Poly_1C5438 f6F0;
+};
+
+void func_001B89B8(Ctx_1C5438* self);
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA408(f32 a);
+
+void func_001C5438(Ctx_1C5438* self)
+{
+    func_001B89B8(self);
+    f32 t = func_00205778(self->fD4, self->fD0);
+    f32 ay = __builtin_fabsf(func_001EA408(self->f638 - t));
+    f32* lim = D_00275C60;
+    Poly_1C5438* p = &self->f6F0;
+    f32 v = self->f6F0.a + ay * (p->b + ay * p->c);
+    f32 lo = lim[0];
+    f32 hi = lim[1];
+    if (v < lo) {
+        v = lo;
+    } else if (hi < v) {
+        v = hi;
+    }
+    self->f63C = v;
+}
+
+struct Other_1C6928 { u8 pad[0xAA]; u16 flags; };
+struct Self_1C6928 {
+    u8 pad0[0x21C8];
+    f32 f21C8;
+    u8 pad1[0x2220 - 0x21CC];
+    s32 mode;
+    u8 pad2[0x223C - 0x2224];
+    s32 state;
+    u8 pad3[0x2248 - 0x2240];
+    s32 f2248;
+    u8 pad4[0x239C - 0x224C];
+    s32 f239C;
+    u8 pad5[0x2590 - 0x23A0];
+    s32 f2590;
+    u8 pad6[0x25AC - 0x2594];
+    s32 f25AC;
+};
+
+void func_00175170(Self_1C6928* self, s32 a, s32 b);
+void func_001C61E0(Self_1C6928* self, s32 state);
+
+void func_001C6928(Self_1C6928* self, Other_1C6928* other)
+{
+    s32 flag = 1;
+    s32 held = other->flags & 0x80;
+    switch (self->mode) {
+    case 3:
+        if (held == 0) goto tail;
+        flag = 0;
+        func_00175170(self, 2, 2);
+        break;
+    case 6:
+        if (self->f239C < 6) {
+            if (self->f239C >= 4) break;
+        }
+        flag = 0;
+        break;
+    case 2:
+    case 4:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+        flag = 0;
+        break;
+    case 0:
+        if (self->f2590 != 0 && self->f25AC != 0) {
+            switch (self->state) {
+            case 4:
+                func_001C61E0(self, 6);
+                break;
+            case 5:
+                func_001C61E0(self, 7);
+                break;
+            }
+        }
+        break;
+    }
+    if (held != 0)
+        self->f21C8 = D_0026185C[0];
+tail:
+    s32 st = self->state;
+    if (st == -1) {
+        if (flag != 0) {
+            if (D_0026185C[0] - self->f21C8 < 0.35f) st = 3;
+        }
+    } else if (st >= -1) {
+        if (st < 8) {
+            if (st >= 4) {
+                if (flag != 0 && self->f2248 != 0) {
+                    if (D_0026185C[0] - self->f21C8 < 0.35f) st = 3;
+                }
+            }
+        }
+    }
+    func_001C61E0(self, st);
+}

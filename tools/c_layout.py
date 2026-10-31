@@ -105,6 +105,25 @@ def placements(objects):
     return placed, aliases
 
 
+LABEL = re.compile(r"\.word\s+(\.L([0-9A-Fa-f]{8}))\b")
+
+
+def case_labels(placed):
+    """{.LXXXXXXXX: address} of the jump-table targets that fall inside a C function.
+
+    The disassembly's tables name the labels of its own text; with that text replaced by C, the link
+    gets them as absolute symbols at the same addresses.
+    """
+    spans = [(a, a + size) for a, size, *_ in placed]
+    out = {}
+    for path in (ROOT / "asm" / "us" / "data").glob("*.s"):
+        for m in LABEL.finditer(path.read_text()):
+            addr = int(m.group(2), 16)
+            if any(lo <= addr < hi for lo, hi in spans):
+                out[m.group(1)] = addr
+    return out
+
+
 def split_text(key):
     """The header lines of asm/<key>/text.s and {function: its lines}, in address order."""
     lines = (ROOT / "asm" / key / "text.s").read_text().splitlines()
@@ -219,6 +238,9 @@ def layout(ld_script, objects):
     if not marker.search(text):
         raise LayoutError("%s has no text.s object to replace" % ld_script.relative_to(ROOT))
     text = marker.sub(lambda m: "\n".join(entries) if m.group(1) == ".text" else "", text)
+    labels = case_labels(placed)
+    if labels:
+        text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(labels.items())) + "\n"
     if aliases:
         text += "\n" + "\n".join("PROVIDE(%s = %s);" % (a, b) for a, b in sorted(aliases.items())) + "\n"
     out = ld_script.with_name(ld_script.name.replace(".splat.ld", ".ld"))

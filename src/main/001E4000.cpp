@@ -602,3 +602,41 @@ void func_001E5278(s32 mode)
     }
     func_001E4E80((Blk_1E5278*)D_00275AF0, D_00275AF0 + 0x14, -1, -1, n);
 }
+
+struct Node_1E7460;
+struct Obj_1E7460;
+void func_00126BC0(Node_1E7460* node, Obj_1E7460* self);
+extern s32 D_00270458;
+
+struct Node_1E7460 {
+    void** vtable;
+    u8 pad4[0x2C8 - 4];
+    unsigned long f2C8;
+};
+struct Obj_1E7460 {
+    u8 pad0[0x270];
+    Node_1E7460* f270;
+    Node_1E7460* f274;
+    Node_1E7460* f278;
+};
+
+void func_001E7460(Obj_1E7460* self)
+{
+    Node_1E7460* cur = self->f274;
+    if (self->f270 == cur) {
+        return;
+    }
+    if (cur != 0) {
+        if (!(D_00270458 == 4 && cur == self->f278)) {
+            ((void (*)(Node_1E7460*))cur->vtable[7])(cur);
+        }
+    }
+    self->f274 = self->f270;
+    if (self->f274 != 0) {
+        ((void (*)(Node_1E7460*))self->f274->vtable[6])(self->f274);
+        if (D_00270458 != 4) {
+            func_00126BC0(self->f274, self);
+        }
+        self->f274->f2C8 |= 0x100000000UL;
+    }
+}

@@ -939,3 +939,121 @@ void func_0019C470(Obj_19C470* o, Stream_19C470* in)
     o->fE0 = func_00137DF8(in);
     func_0011EC40(o, in);
 }
+
+// NEAR: 3 lines: prologue schedules "li t0,17" before the two addiu sp addresses (retail after them)
+
+struct Item_19D4B0 { s32 f0; s32 f4; s32 f8; u8 pad[0x74]; };
+
+
+void func_001BE0A8(Item_19D4B0** base, s32 count, s32 size, void* cmp);
+void func_0019D468(void);
+
+s32 func_0019D4B0(s32 n, Item_19D4B0* items, Item_19D4B0** out)
+{
+    s32 start[18];
+    s32 pos[18];
+    s32 cnt[18];
+    s32 j;
+    s32 i;
+    for (i = 0; i < 18; i++) cnt[i] = 0;
+    for (j = 0; j < n; j++) cnt[items[j].f8]++;
+    pos[0] = 0;
+    if (cnt[0] > 0 && ((Item_19D4B0*)D_0026AC30)[0].f0 != 0) {
+        out[0] = &((Item_19D4B0*)D_0026AC30)[0];
+        pos[0] = 1;
+        cnt[0]++;
+    }
+    start[0] = pos[0];
+    for (i = 1; i < 18; i++) {
+        pos[i] = cnt[i - 1];
+        if (cnt[i] > 0 && ((Item_19D4B0*)D_0026AC30)[i].f0 != 0) {
+            out[pos[i]] = &((Item_19D4B0*)D_0026AC30)[i];
+            pos[i]++;
+        }
+        cnt[i] += pos[i];
+        start[i] = pos[i];
+    }
+    for (j = 0; j < n; j++, items++) {
+        s32 b = items->f8;
+        out[start[b]++] = items;
+    }
+    {
+        s32 c = cnt[4] - pos[4];
+        func_001BE0A8(&out[pos[4]], c, 4, (void*)func_0019D468);
+    }
+    {
+        s32 c = cnt[8] - pos[8];
+        func_001BE0A8(&out[pos[8]], c, 4, (void*)func_0019D468);
+    }
+    {
+        s32 c = cnt[13] - pos[13];
+        func_001BE0A8(&out[pos[13]], c, 4, (void*)func_0019D468);
+    }
+    {
+        s32 c = cnt[1] - pos[1];
+        func_001BE0A8(&out[pos[1]], c, 4, (void*)func_0019D468);
+    }
+    return cnt[17];
+}
+
+extern u8 D_00219C20[];
+extern u8 D_00219C40[];
+extern u8 D_00219C60[];
+extern u8 D_00219C80[];
+extern u8 D_00219CA0[];
+extern u8 D_00219CC0[];
+extern u8 D_00219CE0[];
+extern u8 D_00219D00[];
+extern u8 D_00219D20[];
+extern u8 D_00219D40[];
+extern u8 D_00219D60[];
+extern u8 D_00219D80[];
+extern u8 D_00219DA0[];
+extern u8 D_00219DC0[];
+extern u8 D_00219DE0[];
+extern u8 D_00219E00[];
+extern u8 D_00219E20[];
+extern u8 D_00219E40[];
+extern u8 D_00219E60[];
+extern u8 D_00219E80[];
+extern u8 D_00219EA0[];
+extern u8 D_00219EC0[];
+extern u8 D_00219EE0[];
+extern u8 D_00219F00[];
+extern u8 D_00219F20[];
+extern u8 D_00219F40[];
+extern u8 D_00219F60[];
+
+u8* func_0019E908(u32 n)
+{
+    switch (n) {
+    case 0: return D_00219C20;
+    case 2: return D_00219C40;
+    case 3: return D_00219C60;
+    case 4: return D_00219C80;
+    case 5: return D_00219CA0;
+    case 6: return D_00219CC0;
+    case 7: return D_00219CE0;
+    case 8: return D_00219D00;
+    case 9: return D_00219D20;
+    case 10: return D_00219D40;
+    case 11: return D_00219D60;
+    case 12: return D_00219D80;
+    case 13: return D_00219DA0;
+    case 14: return D_00219DC0;
+    case 15: return D_00219DE0;
+    case 16: return D_00219E00;
+    case 17: return D_00219E20;
+    case 18: return D_00219E40;
+    case 19: return D_00219E60;
+    case 20: return D_00219E80;
+    case 21: return D_00219EA0;
+    case 22: return D_00219EC0;
+    case 23: return D_00219EE0;
+    case 24: return D_00219F00;
+    case 25: return D_00219F20;
+    case 26: return D_00219F40;
+    case 27: return D_00219F60;
+    default: return 0;
+    }
+}

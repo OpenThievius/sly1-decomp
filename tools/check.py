@@ -174,6 +174,30 @@ def literal_width(insn, section, start):
     return LOAD_WIDTH.get(op, 4)
 
 
+def jump_table(obj, index, start, resolver):
+    """A jump table in .rodata at `start`, as retail would hold it: the address of each case label.
+
+    The words are R_MIPS_32 relocations against the function sections (content = offset). Returns the
+    run of consecutive words from `start` that point into one function, or None if there is no relocation at `start`.
+    """
+    words = {}
+    for off, rtype, rsym in obj.relocations(obj.sections[index]["name"]):
+        if rtype == elf.R_MIPS_32 and rsym["type"] == elf.STT_SECTION:
+            words[off] = rsym
+    if start not in words:
+        return None
+    section, out, at = obj.contents(obj.sections[index]), b"", start
+    first = words[start]["shndx"]
+    while at in words and words[at]["shndx"] == first:      # a table belongs to one function
+        name = obj.sections[words[at]["shndx"]]["name"]
+        base = resolver.address(name[len(".text."):]) if name.startswith(".text.") else None
+        if base is None:
+            return None
+        out += (base + int.from_bytes(section[at:at + 4], "little")).to_bytes(4, "little")
+        at += 4
+    return out
+
+
 def s16(x):
     return x - 0x10000 if x & 0x8000 else x
 
@@ -255,6 +279,9 @@ def check_function(obj, name, key, resolver, image):
                 start = addend + rsym["value"]
                 width = literal_width(insn, section, start)
                 lit = section[start:start + width]
+                table = jump_table(obj, rsym["shndx"], start, resolver)
+                if table is not None:
+                    lit, width = table, len(table)
                 try:
                     theirs = image.read_vaddr(full, len(lit))
                 except ValueError:

@@ -1153,3 +1153,206 @@ void func_001EE8D0(Obj_1EE8D0* a0, Obj_1EE8D0* a1) {
     u32 span = a1->fC - a1->f4;
     func_001EE7D0(a0, span >> 4, (void*)a1->f4, 0);
 }
+
+// EXACT: callee declared s32 and called as (void)
+
+struct Self_1EE318 { u8 pad0[0x10]; s32 f10; u8 pad1[0x18 - 0x14]; u8* f18; s32 f1C; s32 f20; };
+
+extern u8 D_0024A0E0[];
+s32 func_00152888(Self_1EE318* self);
+
+Self_1EE318* func_001EE318(Self_1EE318* self)
+{
+    (void)func_00152888(self);
+    self->f10 = 1;
+    self->f18 = D_0024A0E0;
+    self->f1C = 0;
+    self->f20 = 0;
+    return self;
+}
+
+struct Obj_1EECE0;
+struct Link_1EECE0;
+extern Link_1EECE0* D_0027B314;
+struct Link_1EECE0 {
+    s32* a; s32* b; s32 c; Link_1EECE0* prev;
+    Link_1EECE0(s32* p) : a(p), b(p), c(p[2]), prev(D_0027B314) {}
+    ~Link_1EECE0() { D_0027B314 = prev; }
+};
+struct Obj_1EECE0 { void (**vtbl)(Obj_1EECE0*); };
+
+void func_00124A48(Obj_1EECE0* self);
+void func_001F55A8(void* self);
+void* func_0018D500(s32 size);
+
+extern Link_1EECE0* D_0027B314;
+
+void func_001EECE0(Obj_1EECE0* self)
+{
+    Link_1EECE0 fr((s32*)((u8*)self + 0x34));
+    D_0027B314 = &fr;
+    func_00124A48(self);
+    func_001F55A8((u8*)self + 0x590);
+    *(void**)((u8*)self + 0x560) = func_0018D500(0x80);
+    if (*(s32*)((u8*)self + 0x278) != 0) {
+        self->vtbl[0x36](self);
+    }
+}
+
+struct Obj_1EF900;
+struct Mgr_1EF900;
+typedef void (*VFn_1EF900)(Obj_1EF900* self, s32 id, void* evt);
+
+struct Obj_1EF900 {
+    VFn_1EF900* vtbl;
+    u8 pad0[0x2CC];
+    s32 state;
+    f32 timer;
+    u8 pad1[0xC];
+    s32 f2E4;
+    u8 f2E8[1];
+};
+
+struct Evt_1EF900 {
+    void* self;
+    s32 old;
+    s32 cur;
+};
+
+extern f32 D_0026185C[];
+
+void func_0013ECB0(Mgr_1EF900* mgr, s32 a, void* b, Obj_1EF900* self, s32 c);
+
+void func_001EF900(Obj_1EF900* self, s32 state)
+{
+    if (self->state != state) {
+        if (state != 0) {
+            if (state == 2)
+                func_0013ECB0((Mgr_1EF900*)D_00275710, self->f2E4, self->f2E8, self, 1);
+        } else {
+            if (self->state == 2)
+                func_0013ECB0((Mgr_1EF900*)D_00275710, self->f2E4, self->f2E8, self, 0);
+        }
+        Evt_1EF900 evt;
+        evt.old = self->state;
+        evt.self = self;
+        evt.cur = state;
+        self->state = state;
+        self->timer = D_0026185C[0];
+        self->vtbl[18](self, 0x16, &evt);
+    }
+}
+
+struct Obj_1EC0D8 {
+    u8 pad0[0xC20];
+    s32 fC20;
+    u8 pad1[0x30];
+    s32 fC54;
+    u8 pad2[0x3C];
+    s32 fC94;
+};
+void func_001B6598(s32 sub, s32* out);
+
+s32 func_001EC0D8(Obj_1EC0D8* self)
+{
+    s32 r[4];
+    func_001B6598(self->fC54, r);
+    switch (r[0]) {
+    case 0x4ED:
+    case 0x4F0:
+    case 0x4F3:
+    case 0x4F6:
+        if (self->fC20 == 0) goto zero;
+    yes:
+        return 1;
+    case 0x4EE:
+    case 0x4F1:
+    case 0x4F4:
+    case 0x4F7:
+        if (self->fC94 == 1) goto zero;
+        if (self->fC94 < 2) {
+            if (self->fC94 == 0) goto set;
+            return 0;
+        }
+        if (self->fC94 == 2) goto yes;
+        return 0;
+    set:
+        self->fC94 = 1;
+    }
+zero:
+    return 0;
+}
+
+struct Chain_1ED318 {
+    u8 pad[0x680];
+    s32 f680;
+    s32 pad2;
+    s32 f688;
+};
+struct Owner_1ED318 {
+    u8 pad[0x40];
+    u8 pad40[0x4];
+};
+struct Inner_1ED318 {
+    u8 pad[0xC3C];
+    Chain_1ED318* fC3C;
+    u8 pad2[0xC4C - 0xC40];
+    s32 fC4C;
+};
+struct Self_1ED318 {
+    u8 pad[0x40];
+    Inner_1ED318* f40;
+};
+struct Msg_1ED318 {
+    s32 kind;
+    s32 pad[2];
+    s32 f0C;
+};
+struct Obj_1ED318 {
+    void** vt;
+};
+
+extern Obj_1ED318 D_00273C50;
+extern Obj_1ED318 D_002739F0;
+extern u8 D_00262C70[];
+
+void func_001EC7A8(Inner_1ED318* p);
+void func_001837E0(Self_1ED318* self, s32 a, s32 b, s32* c);
+void func_0016EC88(void* p);
+void func_001BFCD8(s32 a0, Self_1ED318* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+typedef void (*VFn_1ED318)(Obj_1ED318*, s32);
+
+void func_001ED318(Self_1ED318* self, Msg_1ED318* msg)
+{
+    switch (msg->kind) {
+    case 0:
+        func_001EC7A8(self->f40);
+        break;
+    case 1: {
+        s32* loc = &msg->f0C;
+        func_001837E0(self, 0x1B, 1, (s32*)&loc);
+        break;
+    }
+    case 2:
+        self->f40->fC3C->f680 = 1;
+        ((VFn_1ED318)D_00273C50.vt[16])(&D_00273C50, 2);
+        func_0016EC88(D_00262C70);
+        func_001BFCD8(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, 0.5f, 0.0f, 0, 0);
+        break;
+    case 3:
+        self->f40->fC3C->f680 = 0;
+        self->f40->fC3C->f688 = 0;
+        ((VFn_1ED318)D_00273C50.vt[16])(&D_00273C50, 0);
+        break;
+    case 4:
+        self->f40->fC4C = 1;
+        ((VFn_1ED318)D_002739F0.vt[16])(&D_002739F0, 2);
+        func_001BFCD8(0, 0, 0, 0, 80000.0f, 70000.0f, 1.5f, -0.25f, 0.0f, 0, 0);
+        break;
+    case 5:
+        self->f40->fC4C = 0;
+        ((VFn_1ED318)D_002739F0.vt[16])(&D_002739F0, 0);
+        break;
+    }
+}

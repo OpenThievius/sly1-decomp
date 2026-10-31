@@ -220,7 +220,7 @@ void* func_0014C820(Table_14C820* self)
     return (u8*)self + (self->f690 * 0xB0 + 0x480);
 }
 
-extern f32 D_0026185C;
+extern f32 D_0026185C[];
 
 f32 func_001EAAE0(f32 a, f32 b);
 
@@ -238,7 +238,7 @@ struct Mgr_14CD70 {
 void func_0014CD70(Mgr_14CD70* self)
 {
     if (self->f458 == self->f450) {
-        self->f45C = D_0026185C + func_001EAAE0(self->f43C, self->f440);
+        self->f45C = D_0026185C[0] + func_001EAAE0(self->f43C, self->f440);
     }
     self->f458 = self->f458 - 1;
 }
@@ -920,7 +920,7 @@ void func_0014C138(Obj_14C138* self)
 }
 
 extern u8 D_0026E760[];
-extern f32 D_0026185C;
+extern f32 D_0026185C[];
 
 struct Arg_14CDC8 {
     u8 pad_00[0xC24];
@@ -996,7 +996,7 @@ void func_0014CDC8(Mgr_14CDC8* self, Arg_14CDC8* arg)
     }
     func_0014C2F0(self);
     if (self->f454 == self->f44C) {
-        self->f460 = D_0026185C + func_001EAAE0(self->f434, self->f438);
+        self->f460 = D_0026185C[0] + func_001EAAE0(self->f434, self->f438);
     }
     self->f454 = self->f454 - 1;
 }
@@ -1035,7 +1035,7 @@ struct Self_14F110 {
 
 struct Sub_14F110;
 
-extern f32 D_0026185C;
+extern f32 D_0026185C[];
 
 s32 func_00126D60(Sub_14F110* sub, f32 value);
 
@@ -1051,7 +1051,7 @@ void func_0014F110(Self_14F110* self, s32 state)
             self->f588 = 0;
             self->f550 = state;
         }
-        self->f554 = D_0026185C;
+        self->f554 = D_0026185C[0];
         if (state == 5) {
             (void)func_00126D60((Sub_14F110*)self, self->f564);
         }
@@ -1104,4 +1104,231 @@ Obj_14D9A8* func_0014D9A8(s32 kind)
         p->kind = kind;
     }
     return p;
+}
+
+// NEAR: the calls and branches match; the store of 1 into the inner object comes before the
+// float load of D_0026185C in retail, ours schedules the float load first (5 instructions).
+struct Inner_14FDA8 { u8 pad[0x1C]; s32 f1C; };
+struct Mid_14FDA8 { u8 pad[0x200]; Inner_14FDA8* inner; };
+struct Obj_14FDA8 { u8 pad[0x550]; s32 state; };
+struct Self_14FDA8 {
+    u8 pad0[0x6D0];
+    f32 f6D0;
+    u8 pad1[4];
+    f32 f6D8;
+    u8 pad2[4];
+    Obj_14FDA8* p6E0;
+    u8 pad3[0x734 - 0x6E4];
+    Mid_14FDA8* p734;
+};
+
+extern u8 D_00248D30[];
+
+s32 func_0014FEC0(Self_14FDA8* self);
+Obj_14FDA8* func_00150338(Self_14FDA8* self);
+s32 func_00182FC8(Obj_14FDA8* p);
+void func_001853F0(Inner_14FDA8* a, Obj_14FDA8* b, u8* c);
+
+void func_0014FDA8(Self_14FDA8* self, s32* state)
+{
+    if (*state == 0x2B8) {
+        self->p734->inner->f1C = 0;
+        if (self->f6D0 < D_0026185C[0] - self->f6D8) {
+            if (func_0014FEC0(self)) {
+                *state = 0x2BA;
+            }
+        }
+        return;
+    }
+    if (self->p6E0 == 0 || func_00182FC8(self->p6E0) == 0
+        || self->p6E0->state == 3 || self->p6E0->state == 4) {
+        self->p6E0 = func_00150338(self);
+    }
+    if (self->p6E0 == 0) {
+        return;
+    }
+    func_001853F0(self->p734->inner, self->p6E0, D_00248D30);
+    if (self->f6D0 < D_0026185C[0] - self->f6D8) {
+        if (func_0014FEC0(self)) {
+            *state = 0x2BB;
+        }
+    }
+}
+
+// NEAR: the tail stores differ in order and register: retail does sw f6C8, then lui v1 / li v0,1 / lwc1 v1, we do lui v0 before the sw and use v0 for the address.
+
+struct Vtbl_14FEC0 {
+    void* slot[64];
+};
+
+struct Sub_14FEC0 {
+    Vtbl_14FEC0* vt;
+    u8 p04[0x588 - 4];
+    void* f588;
+};
+
+struct Ctx_14FEC0 {
+    u8 p00[0x1C78];
+    Sub_14FEC0* f1C78;
+};
+
+struct Obj_14FEC0 {
+    u8 p00[0x14];
+    Ctx_14FEC0* f14;
+    u8 p18[0x6C8 - 0x18];
+    Sub_14FEC0* f6C8;
+    u8* f6CC;
+    u8 p6D0[0x6D8 - 0x6D0];
+    f32 f6D8;
+};
+
+extern u8 D_00248D30[];
+
+s32 func_00152720(Obj_14FEC0* p);
+void func_00150298(Obj_14FEC0* self);
+void func_001B9AE0(Sub_14FEC0* o, s32 a, s32 b, s32 c, s32 d);
+void func_0014F110(Sub_14FEC0* self, s32 value);
+
+s32 func_0014FEC0(Obj_14FEC0* self) {
+    Sub_14FEC0* s0;
+
+    if (self->f6C8 != 0) {
+        return 1;
+    }
+    if (self->f6CC != 0) {
+        if (*(s32*)(self->f6CC + 0x550) != 5) {
+            self->f6CC = 0;
+        }
+    }
+    if (func_00152720((Obj_14FEC0*)((u8*)self->f14 + 0x1C78)) != 0 || self->f6CC != 0) {
+        func_00150298(self);
+        return 0;
+    }
+    s0 = self->f14->f1C78;
+    s0->f588 = self;
+    ((void (*)(Sub_14FEC0*))s0->vt->slot[6])(s0);
+    ((void (*)(Sub_14FEC0*, void*))s0->vt->slot[25])(s0, *(void**)((u8*)self + 0x730));
+    func_001B9AE0(s0, 3, 0, 3, 0);
+    ((void (*)(Sub_14FEC0*, void*))s0->vt->slot[33])(s0, (u8*)self + 0x6F0);
+    ((void (*)(Sub_14FEC0*, void*))s0->vt->slot[34])(s0, (u8*)self + 0x700);
+    ((void (*)(Sub_14FEC0*, void*))s0->vt->slot[36])(s0, D_00248D30);
+    ((void (*)(Sub_14FEC0*, void*))s0->vt->slot[37])(s0, D_00248D30);
+    func_0014F110(s0, 1);
+    self->f6C8 = s0;
+    self->f6D8 = D_0026185C[0];
+    return 1;
+}
+
+// NEAR: the search index is kept in a0 where retail uses a2, and hi is saved in s3 before the call in retail; the loop shape is otherwise the same.
+
+struct Tab_14D1A0;
+
+f32 func_0014D138(Tab_14D1A0* count, f32* table, void* wrap, f32 x);
+
+s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi)
+{
+    f32 r = (f32)func_0014D138((Tab_14D1A0*)n, arr, p2, x);
+    s32 i = 1;
+    while (i < n && !(r < arr[i])) i++;
+    if (i >= n) i--;
+    i--;
+    if (lo) *lo = r - arr[i];
+    if (hi) *hi = arr[i + 1] - arr[i];
+    return i;
+}
+
+struct Obj_14F058 {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1[0x550 - 0x1C];
+    s32 state;
+    f32 f554;
+    u8 pad2[0x568 - 0x558];
+    f32 f568;
+};
+
+void func_001B93F8(Obj_14F058* self);
+void func_0014F270(Obj_14F058* self, f32 f);
+void func_0014F110(Obj_14F058* self, s32 n);
+
+void func_0014F058(Obj_14F058* self, f32 f)
+{
+    func_001B93F8(self);
+    switch (self->state) {
+    case 0:
+    case 1:
+    case 3:
+    case 5:
+        break;
+    case 2:
+        func_0014F270(self, f);
+        break;
+    case 4:
+        if (self->f568 < D_0026185C[0] - self->f554) {
+            if (D_00262E10 == 0 || self->f18 != *(s32*)(D_00262E10 + 0x23B0))
+                func_0014F110(self, 5);
+        }
+        break;
+    }
+}
+
+struct Obj_14FA88 {
+    u8 pad000[0x680];
+    s32 f680;
+    u8 pad684[0x58];
+    s32 f6DC;
+    u8 pad6E0[0x60];
+    void* f740;
+    u8 pad744[0x48];
+    s32 f78C;
+    u8 pad790[0x20];
+    s32 f7B0;
+};
+
+void func_0013D068(Obj_14FA88* self);
+void func_001B6598(void* p, s32* out);
+void func_001B6568(void* p, s32* out);
+void func_0014FDA8(Obj_14FA88* self, s32* state);
+void func_00150008(Obj_14FA88* self);
+void func_0014FCE8(Obj_14FA88* self, s32 state);
+
+void func_0014FA88(Obj_14FA88* self)
+{
+    s32 st[2];
+    func_0013D068(self);
+    if (self->f680 == 0 && self->f6DC != 0 && self->f740 != 0) {
+        func_001B6598(self->f740, &st[0]);
+        func_001B6568(self->f740, &st[1]);
+        if (st[1] == -1) st[1] = st[0];
+        if (st[0] == st[1]) {
+            switch (st[0]) {
+            case 0x2B7:
+                if (self->f7B0 != 0) st[1] = 0x2B8;
+                else if (self->f78C > 0) st[1] = 0x2B9;
+                break;
+            case 0x2B8:
+                if (self->f7B0 == 0) {
+                    if (self->f78C > 0) st[1] = 0x2B9;
+                    else st[1] = 0x2B7;
+                } else {
+                    func_0014FDA8(self, &st[1]);
+                }
+                break;
+            case 0x2B9:
+                if (self->f7B0 != 0) st[1] = 0x2B8;
+                else if (self->f78C <= 0) st[1] = 0x2B7;
+                else func_0014FDA8(self, &st[1]);
+                break;
+            case 0x2BA:
+                func_00150008(self);
+                st[1] = 0x2B8;
+                break;
+            case 0x2BB:
+                func_00150008(self);
+                st[1] = 0x2B9;
+                break;
+            }
+            if (st[1] != st[0]) func_0014FCE8(self, st[1]);
+        }
+    }
 }

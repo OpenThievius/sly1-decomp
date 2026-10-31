@@ -153,3 +153,110 @@ void func_00177F98(Obj_177F98* self, Node_177F98* node)
         self->flags = f | 1;
     }
 }
+
+struct Node_177838;
+struct VT_177838 {
+    u32 pad0;
+    u32 pad4;
+    u32 flags;
+    u8 pad[0xB8];
+    s32 (*f_c4)(Node_177838* self, void* q);
+};
+struct Node_177838 {
+    VT_177838* vt;
+    u8 pad4[0x14];
+    Node_177838* next;
+    u8 pad1c[0x294];
+    u8 b2B0;
+    u8 b2B1;
+    u8 b2B2;
+    u8 b2B3;
+    u8 b2B4;
+};
+struct Head_177838 { u32 pad0; u32 pad4; u32 flags; };
+struct Hold_177838 {
+    Head_177838* head;
+    u8 pad4[0x14];
+    Node_177838* first;
+};
+struct Q_177838 {
+    s32 pad0;
+    Node_177838* hold;
+    s32 pad8;
+    s32 out;
+    s32 kind;
+};
+
+Node_177838* func_00177838(Q_177838* q, s32 n, Node_177838** list) {
+    Node_177838* node;
+    if (q->hold->vt->flags & 1) {
+        node = q->hold;
+    } else {
+        node = q->hold->next;
+    }
+    for (; node != 0; node = node->next) {
+        s32 i;
+        for (i = 0; i < n; i++) {
+            if (node == list[i]) return 0;
+        }
+        switch (q->kind) {
+        case 2: q->out = node->b2B0; break;
+        case 8: q->out = node->b2B1; break;
+        case 4: q->out = node->b2B2; break;
+        case 16: q->out = node->b2B3; break;
+        case 32: q->out = node->b2B4; break;
+        default: q->out = 0; break;
+        }
+        if (node->vt->f_c4(node, q)) return node;
+    }
+    return node;
+}
+
+struct Self_177EE0 { u8 pad0[0x2220]; s32 mode; u8 pad1[0x2BD0 - 0x2224]; s32 f2BD0; };
+struct Other_177EE0 { u8 pad0[0x2D0]; s32 f2D0; };
+extern s32 D_00275BC4;
+
+void func_00177EE0(Self_177EE0* self, Other_177EE0* other, s32* out)
+{
+    s32 v;
+    switch (self->mode) {
+    case 0:
+    case 1:
+    case 5:
+        v = 1;
+        goto both;
+    case 2:
+    case 8:
+    case 10:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+        out[0] = 1;
+        out[1] = other->f2D0 == 1;
+        break;
+    case 3:
+    case 6:
+    case 7:
+        v = other->f2D0 == 1;
+    both:
+        out[0] = v;
+        out[1] = v;
+        break;
+    case 12:
+        out[0] = 0;
+        out[1] = self->f2BD0 == (s32)other;
+        break;
+    case 4:
+    case 9:
+        out[0] = 0;
+        out[1] = other->f2D0 == 1;
+        break;
+    case 11:
+        out[0] = 0;
+        out[1] = 1;
+        break;
+    }
+    if (D_00275BC4 != 3)
+        out[0] = 0;
+}

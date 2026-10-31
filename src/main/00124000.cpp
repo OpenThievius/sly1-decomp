@@ -832,3 +832,72 @@ void func_00127048(Obj_127048* self, Obj_127048* src)
     if (self->f214 != D_00260E90) self->f214 = (u8*)func_0018D568(0x10, self->f214);
     if (self->f218 != D_00260EA0) self->f218 = (u8*)func_0018D568(0x10, self->f218);
 }
+
+// NEAR: the branches and the 0x40-byte copy loop match; retail loads both quads of a pair before
+// storing them (and computes the loop end in $v0), ours interleaves load and store.
+
+struct __attribute__((aligned(16))) Quad_00125B70 { s32 w[4]; };
+struct Self_00125B70 { s32 pad; };
+struct Dst_00125B70 {
+    Quad_00125B70 q[4];
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    f32 f4c;
+};
+
+extern u8 D_00248D40[];
+
+void func_00188C10(Self_00125B70* a, Self_00125B70* b, u8* c, void* d);
+
+void func_00125B70(Self_00125B70* self, Quad_00125B70* src, Dst_00125B70* dst)
+{
+    if (src != 0) {
+        if (src != (Quad_00125B70*)dst) {
+            *dst = *(Dst_00125B70*)src;
+        }
+    } else {
+        func_00188C10((Self_00125B70*)((u8*)self + 0x140), (Self_00125B70*)((u8*)self + 0x110), D_00248D40, dst);
+        dst->f44 = 1.0f;
+        dst->f40 = 1.0f;
+    }
+}
+
+struct Host_124DF8 { u8 pad[0x14]; void* f14; };
+struct Item_124DF8 { u32 flags; u32 id; u32 off8; };
+struct Self_124DF8 { u8 pad0[0x14]; void* f14; };
+
+void* func_0015A418(Host_124DF8* host, s32 kind, u32 id, Self_124DF8* ctx);
+void func_00182ED8(void* node);
+void func_001832F0(void* node, Self_124DF8* ctx);
+
+void func_00124DF8(Self_124DF8* self, s32 count, Item_124DF8* item)
+{
+    void* host = self->f14;
+    if (count <= 0) {
+        return;
+    }
+    Item_124DF8* it = item;
+    s32 n = count;
+    do {
+        u32 f = it->flags;
+        s32 kind = (f & 1) ? 5 : 1;
+        if (f & 0x20) {
+            kind |= 0x100;
+        }
+        void* node = func_0015A418((Host_124DF8*)host, kind, it->id, self);
+        if (node) {
+            if (!(it->flags & 8)) {
+                *(void**)((u8*)self + it->off8) = node;
+            }
+            if (!(it->flags & 4)) {
+                func_00182ED8(node);
+            }
+            if (it->flags & 0x10) {
+                func_001832F0(node, self);
+            }
+        }
+        n--;
+        it++;
+    } while (n != 0);
+}

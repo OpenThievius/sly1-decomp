@@ -15,8 +15,9 @@ Whether the literal is retail's is not decided here: tools/check.py compares the
 bytes at the address retail's instruction forms, and tools/build.py prints MATCH
 only when the whole image equals retail.
 
-A relocation inside .rodata (a jump table) and any rodata relocation that is not a
-%hi or %lo are refused.
+A jump table (R_MIPS_32 words inside .rodata that point into the function) goes with the
+section: the pair is baked like any literal, so it reaches retail's own table. Any other
+relocation inside .rodata, and any rodata relocation that is not a %hi or %lo, is refused.
 """
 
 import shutil
@@ -57,8 +58,14 @@ def patch(data, image, resolver, label="object"):
             continue
         target = obj.sections[rel["info"]]
         if target["index"] in rodata:
-            raise RodataError("%s has a relocation inside %s (a jump table?): not supported yet"
-                              % (label, target["name"]))
+            # A jump table: words aimed at the function's own case labels. They go with the
+            # section; retail's table at the address the %hi/%lo pair forms is the one used.
+            for i in range(rel["size"] // 8):
+                _, info = struct.unpack_from("<II", data, rel["offset"] + i * 8)
+                rsym, rtype = obj.symbols[info >> 8], info & 0xFF
+                if rtype != elf.R_MIPS_32 or not obj.sections[rsym["shndx"]]["name"].startswith(".text"):
+                    raise RodataError("%s: %s has a relocation that is not a jump-table word" % (label, target["name"]))
+            continue
         for i in range(rel["size"] // 8):
             at = rel["offset"] + i * 8
             offset, info = struct.unpack_from("<II", data, at)

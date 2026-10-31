@@ -1055,3 +1055,102 @@ void func_001AE510(Obj_1AE510* self)
     self->f238 = (f32)in->f8 * in->f48;
     func_0015C900(self->f4);
 }
+
+struct Mixer_001AF5C8;
+struct MixVt_001AF5C8 {
+    u8 pad0[0x130];
+    void (*hook)(Mixer_001AF5C8*, s32*);
+    u8 pad1[0x144 - 0x134];
+    void (*done)(Mixer_001AF5C8*, s32);
+};
+struct Mixer_001AF5C8 {
+    MixVt_001AF5C8* vt;
+    u8 pad4[0x554 - 4];
+    s32 f554;
+    s32 state;
+    f32 f55C;
+    u8 pad560[0x5B8 - 0x560];
+    f32 f5B8;
+    f32 f5BC;
+    u8 pad5C0[0xAEC - 0x5C0];
+    f32 fAEC;
+    u8 padAF0[0xB04 - 0xAF0];
+    f32 fB04;
+    f32 fB08;
+};
+
+extern s32 D_002744D0;
+extern f32 D_0026185C;
+void func_001AEFA0(Mixer_001AF5C8* self, f32 a);
+void func_001AF508();
+
+void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
+{
+    s32 cmd;
+    f32 v;
+    f32 hi;
+    f32 lo;
+
+    func_001AEFA0(self, amount);
+    v = self->fB04 + amount * self->fB08;
+    hi = 1.0f;
+    lo = 0.0f;
+    if (v < lo)
+        v = lo;
+    else if (hi < v)
+        v = hi;
+    self->fB04 = v;
+    if (D_002744D0)
+        func_001AF508();
+    cmd = self->state;
+    switch (cmd) {
+    case 0:
+        if (self->f5B8 < D_0026185C - self->f55C)
+            cmd = 1;
+        if (self->vt->hook)
+            self->vt->hook(self, &cmd);
+        break;
+    case 2:
+        cmd = 3;
+        if (self->vt->hook)
+            self->vt->hook(self, &cmd);
+        break;
+    case 3:
+        if (self->f5BC < D_0026185C - self->f55C) {
+            if (self->f554 == 0) {
+                cmd = 8;
+                break;
+            }
+            if (self->f554 != 1)
+                break;
+            cmd = 4;
+            if (self->vt->hook)
+                self->vt->hook(self, &cmd);
+            break;
+        }
+        if (self->vt->hook)
+            self->vt->hook(self, &cmd);
+        break;
+    case 4:
+        if (self->f5B8 < D_0026185C - self->f55C)
+            cmd = 5;
+        if (self->vt->hook)
+            self->vt->hook(self, &cmd);
+        break;
+    case 1:
+    case 5:
+    case 6:
+        if (self->vt->hook)
+            self->vt->hook(self, &cmd);
+        break;
+    case 7:
+        if (self->fAEC < D_0026185C - self->f55C)
+            cmd = 8;
+        else if (self->vt->hook)
+            self->vt->hook(self, &cmd);
+        break;
+    case 8:
+        break;
+    }
+    self->vt->done(self, cmd);
+}

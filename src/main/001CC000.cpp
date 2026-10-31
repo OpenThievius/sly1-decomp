@@ -126,3 +126,53 @@ void func_001CC410(void* a0, Obj_1CC410* a1, void** a2)
         *a2 = tmp;
     }
 }
+
+typedef void (*VFn_1CEE30)(void* self, void* out, s32 x);
+
+struct Obj_1CEE30 {
+    VFn_1CEE30* vtbl;
+};
+
+struct Node_1CEE30 {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1C[0x34 - 0x1C];
+    Obj_1CEE30* f34;
+};
+
+struct Self_1CEE30 {
+    s32 f0;
+    Node_1CEE30* node;
+};
+
+struct __attribute__((aligned(16))) Quad_1CEE30 {
+    s32 a, b, c, d;
+};
+
+struct Locals_1CEE30 {
+    Quad_1CEE30 a;
+    s32 b[2];
+    u8 pad18[8];
+    Quad_1CEE30 c;
+    f32 out;
+};
+
+void func_001CEDF8(void);
+void func_001EB168(f32 f12, f32 f13, f32 f14, f32 f15, void* fn, void* b, s32 c, void* out);
+
+f32 func_001CEE30(Self_1CEE30* self)
+{
+    Locals_1CEE30 l;
+    Node_1CEE30* n = self->node;
+    Obj_1CEE30* o = n->f34;
+    if (o->vtbl[2] != 0) {
+        o->vtbl[2](o, &l.a, 0);
+    }
+    f32 q = 0.25f;
+    l.b[0] = self->f0;
+    l.b[1] = n->f18;
+    l.c = l.a;
+    
+    func_001EB168(0.5f, q, q, 3.0f, (void*)func_001CEDF8, l.b, 0, &l.out);
+    return l.out;
+}

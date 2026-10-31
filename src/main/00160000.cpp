@@ -1024,3 +1024,70 @@ void func_00160918(void)
     func_00160880();
     func_001F0428((Obj_160918*)&D_00247AB0, -1, 0);
 }
+
+struct Self_1611B8 { u8 pad0[0x14]; s32 f14; void* f18; s32 f1C; s32 f20; s32 f24; };
+extern u8 D_0024A6F8[];
+s32 func_00152888(Self_1611B8* a);
+
+Self_1611B8* func_001611B8(Self_1611B8* self)
+{
+    (void)func_00152888(self);
+    self->f14 = 1;
+    self->f18 = D_0024A6F8;
+    self->f1C = 0;
+    self->f20 = 0;
+    self->f24 = 0;
+    return self;
+}
+
+void func_00160340(s32 n)
+{
+    switch (n) {
+    case 1: D_002623C0->f19F4 |= 0x10; break;
+    case 2: D_002623C0->f19F4 |= 0x40; break;
+    case 3: D_002623C0->f19F4 |= 0x100; break;
+    case 4: D_002623C0->f19F4 |= 0x400; break;
+    case 5: D_002623C0->f19F4 |= 0x1000; break;
+    }
+}
+
+struct Rec_1603E8 { s32 flags; u8 pad[0x448]; };
+struct Glob_1603E8 { u8 pad0[0x458]; Rec_1603E8 recs[1]; };
+void func_001604B8(s32 mode);
+
+void func_001603E8(s32 n)
+{
+    ((Glob_1603E8*)D_002623C0)->recs[n].flags |= 0x20;
+    switch (n) {
+    case 1:
+        D_002623C0->f19F4 |= 0x20;
+        break;
+    case 2:
+        D_002623C0->f19F4 |= 0x80;
+        break;
+    case 3:
+        D_002623C0->f19F4 |= 0x200;
+        D_002623C0->mask |= 0x10000;
+        break;
+    case 4:
+        D_002623C0->f19F4 |= 0x800;
+        break;
+    case 5:
+        func_001604B8(2);
+        break;
+    }
+}
+
+void func_00160D30(u32* out)
+{
+    s32 m;
+    switch (D_002623C0->f19D8) {
+    case 4: m = 0x10000000; break;
+    case 1: m = 0x20000000; break;
+    case 2: m = 0x40000000; break;
+    case 3: m = 0x80000000; break;
+    case 0:
+    case 5: m = 0; break;
+    }
+    if (out) *out = m;
+}

@@ -1139,3 +1139,180 @@ void* func_001DFE80(s32 key)
     } while (p < end);
     return 0;
 }
+
+// EXACT: literal 1 stores (no `one` local), `||` condition, D_00262E10 as s32[]
+
+struct Base_1DE808 { void** vtbl; };
+typedef void (*Fn3_1DE808)(void* self, void* a1, s32 a2);
+typedef void (*Fn0_1DE808)(void* self);
+struct Obj_1DE808 {
+    void** vtbl;
+    u8 pad0[0x594 - 4];
+    f32 f594;
+    void* f598;
+    u8 pad1[0x6DC - 0x59C];
+    void* f6DC;
+    u8 pad2[0x73C - 0x6E0];
+    s32 f73C;
+    u8 pad3[0x748 - 0x740];
+    void* f748;
+    void* f74C;
+    void* f750;
+    void* f754;
+    void* f758;
+    void* f75C;
+};
+
+extern s32 D_00262E10[];
+extern u8 D_00275750[];
+
+void func_001C44F0(void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+void func_00129D00(void* a, s32 b, void* c);
+void* func_001B6290(void* a, void* b, s32 c, s32 d);
+void func_001DFBE0(void* self, s32 flag);
+
+void func_001DE808(void* self)
+{
+    Obj_1DE808* s = (Obj_1DE808*)self;
+    s32 flag;
+
+    func_001C44F0(self);
+    func_00124DF8(self, 9, D_00275750);
+    ((Fn3_1DE808)s->vtbl[56])(self, s->f6DC, 1);
+    func_00129D00(s->f748, 5, &s->f74C);
+    ((u8*)s->f74C)[0x10] = 1;
+    ((u8*)s->f74C)[0x11] = 1;
+    ((Fn0_1DE808)((Base_1DE808*)s->f748)->vtbl[47])(s->f748);
+    func_00129D00(s->f750, 5, &s->f754);
+    ((u8*)s->f754)[0x11] = 1;
+    ((Fn0_1DE808)((Base_1DE808*)s->f750)->vtbl[47])(s->f750);
+    s->f75C = func_001B6290(s->f758, self, -1, 1);
+    if (s->f73C == 0 || D_00262E10[0] == 0) {
+        flag = 1;
+    } else {
+        flag = 0;
+    }
+    func_001DFBE0(self, flag);
+    s->f598 = self;
+    s->f594 = 150.0f;
+}
+
+// NEAR: the call sequence, the list walk and the frame (0xC0) match; the scale constant D_002757D0 is held in s8 in retail but the C here addresses it through a pointer, so the register numbering of the constants 1 and 4 and the float tail differ (40 differing lines).
+
+struct Obj_1DE910;
+struct Loc_1DE910 { s32 v[4]; };
+struct Child_1DE910;
+struct Pa_1DE910;
+struct Pb_1DE910;
+struct ListNode_1DE910;
+typedef s32 (*VFnChild_1DE910)(void* self, void* a1, void* a2);
+typedef void (*VFnObj_1DE910)(void* self, void* a1);
+struct Child_1DE910 {
+    VFnChild_1DE910* vtbl;
+    u8 pad0[0x18 - 4];
+    Child_1DE910* next18;
+    u8 pad1[0x4E0 - 0x1C];
+    s32 f4E0;
+};
+struct Slot_1DE910 {
+    void* owner;
+    Child_1DE910* head;
+    u8 pad[0x40 - 8];
+};
+struct ListNode_1DE910 {
+    Slot_1DE910 slot[2];
+    u8 pad[0xD0 - 0x80];
+    ListNode_1DE910* next;
+};
+struct Obj_1DE910 {
+    VFnObj_1DE910* vtbl;
+    u8 pad0[0x14 - 4];
+    void* f14;
+    u8 pad1[0x720 - 0x18];
+    s32 f720;
+    s32 f724;
+    s32 f728;
+    f32 f72C;
+    f32 f730;
+    u8 pad2[0x740 - 0x734];
+    ListNode_1DE910* f740;
+    Pa_1DE910* f744;
+    Pb_1DE910* f748;
+};
+
+extern f32 D_00261858[];
+extern f32 D_002757C0[];
+extern f32 D_002757D0[];
+extern f32 D_002757D4;
+
+void func_001C4ED0(void);
+s32 func_00128230(Obj_1DE910* self);
+void func_001DEB30(Obj_1DE910* self);
+void func_001D7098(Loc_1DE910* l, s32 zero, Child_1DE910* c);
+void func_001861E8(Pa_1DE910* a0, ListNode_1DE910* a1);
+void func_00129E10(Pb_1DE910* a, f32 v);
+void func_00129FB0(Pb_1DE910* a, f32 v);
+
+void func_001DE910(Obj_1DE910* self)
+{
+    Loc_1DE910 loc;
+    f32 f20;
+    ListNode_1DE910* s1;
+    Child_1DE910* s0;
+    s32 v;
+    s32 idx;
+
+    func_001C4ED0();
+    if (func_00128230(self) != 0) {
+        func_001DEB30(self);
+    }
+    ListNode_1DE910* head = self->f740;
+    if (head != 0) {
+        s1 = head;
+        do {
+            idx = (s1->slot[0].owner != self);
+            s0 = s1->slot[1 - idx].head;
+            while (s0 != 0 && s0->f4E0 == 0) {
+                s0 = s0->next18;
+            }
+            if (s0 != 0) {
+                v = s0->f4E0;
+                if (v == 1 || v == 4) {
+                    func_001D7098(&loc, 0, s0);
+                    while (s0 != 0) {
+                        if (s0->vtbl[75](s0, s1, &loc)) {
+                            break;
+                        }
+                        s0 = s0->next18;
+                    }
+                    self->vtbl[80](self, &loc);
+                }
+            }
+            s1 = s1->next;
+        } while (s1 != 0);
+        func_001861E8((Pa_1DE910*)self->f14, self->f740);
+        self->f740 = 0;
+    }
+    {
+        f32 d = D_00261858[1] - self->f72C;
+        f32 x = D_002757C0[0] + d * (D_002757C0[1] + d * D_002757C0[2]);
+        f32 c0 = ((f32*)D_00275C60)[0];
+        f32 c1 = ((f32*)D_00275C60)[1];
+        if (x < c0) {
+            f20 = c0;
+        } else if (c1 < x) {
+            f20 = c1;
+        } else {
+            f20 = x;
+        }
+    }
+    func_00129E10(self->f748, f20 * D_002757D0[0]);
+    func_00129FB0(self->f748, f20 * D_002757D4);
+    if (self->f728 != 0 && self->f720 != 2) {
+        f32 e = D_00261858[1] - self->f730;
+        if (2.0f < e) {
+            self->f728 = 0;
+        }
+    }
+}

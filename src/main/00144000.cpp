@@ -561,3 +561,65 @@ void func_00144B70(Eng_144B70* self, Vec_144B70* arg)
     func_00144978(arg, &self->f40, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
     self->f2D0 = *arg;
 }
+
+struct Elem_146298 { u8 pad0[8]; s32 tag; u8 pad1[0x20]; f32 x; f32 y; };
+struct Obj_146298 { u8 pad0[0x27C]; s32 count; Elem_146298** list; u8 pad1[0x550 - 0x284]; f32 f550; f32 f554; f32 f558; };
+
+void func_00146298(Obj_146298* self)
+{
+    for (s32 i = 0; i < self->count; i++) {
+        if (self->list[i]->tag == 6) {
+            Elem_146298* e = self->list[i];
+            e->x = -(self->f550 * self->f554);
+            e->y = -(self->f550 * self->f558);
+            break;
+        }
+    }
+}
+
+extern u8 D_00261420[];
+
+struct Lst_146340;
+struct Self_146340;
+struct Ptr_146340;
+
+struct Self_146340 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad18[0x2B0 - 0x18];
+    u8 f2B0;
+    u8 f2B1;
+    u8 f2B2;
+    u8 f2B3;
+    u8 pad2B4[0x2D0 - 0x2B4];
+    s32 f2D0;
+    u8 pad2D4[0x2D8 - 0x2D4];
+    s32 f2D8;
+    s32 f2DC;
+    u8 pad2E0[0x340 - 0x2E0];
+    s32 f340;
+    u8 pad344[0x37C - 0x344];
+    s32 f37C;
+    u8 pad380[0x388 - 0x380];
+    f32 f388;
+};
+
+void func_00123ED0(Self_146340* self);
+void func_00152470(Lst_146340* list, Self_146340* item);
+s32 func_00140FF8(Ptr_146340* p);
+
+void func_00146340(Self_146340* self)
+{
+    self->f2D8 = 0;
+    self->f388 = 30.0f;
+    self->f2D0 = self->f2DC = -1;
+    func_00123ED0(self);
+    func_00152470((Lst_146340*)(self->f14 + 0x1C54), self);
+    s32 v = func_00140FF8((Ptr_146340*)D_00261420);
+    self->f37C = v;
+    self->f2B2 = 0x10;
+    self->f2B1 = 0x10;
+    self->f2B0 = 0x10;
+    self->f2B3 = 0x10;
+    self->f340 = 1;
+}

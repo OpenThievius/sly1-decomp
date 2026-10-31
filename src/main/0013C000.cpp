@@ -1138,3 +1138,201 @@ void func_0013FA10(Obj_0013FA10* self, f32 t)
         break;
     }
 }
+
+extern u8 D_00261420[];
+extern u8 D_0027B314[];
+
+struct Frame_13CE80 { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
+struct Ent_13CE80 { s32 kind; s32 key; s32 node; };
+struct Node_13CE80;
+struct Cls_13CE80 { u8 pad0[0x1C]; void (*fn1C)(Node_13CE80* self); };
+struct Node_13CE80 { Cls_13CE80* cls; u8 pad4[0x55C]; Node_13CE80* f560; };
+struct Self_13CE80 {
+    u8 pad0[0x34];
+    s32 head34;
+    u8 pad38[4];
+    s32 link3C;
+    u8 pad40[0x510];
+    s32 count;
+    Ent_13CE80 ent[1];
+    u8 pad[0x678 - 0x560];
+    s32 f678;
+    u8 pad67C[0xC];
+    s32 id;
+};
+
+s32 func_00141008(Frame_13CE80* t, s32 v);
+s32 func_001300E8(Node_13CE80* n, s32 kind);
+void func_00199C10(Node_13CE80* n, s32* out);
+s32 func_001833F0(Node_13CE80* n, s32 key);
+
+void func_0013CE80(Self_13CE80* self)
+{
+    Frame_13CE80 fr;
+    Node_13CE80* n;
+    s32 i;
+    Ent_13CE80* e;
+    if (func_00141008((Frame_13CE80*)D_00261420, self->id)) self->f678 = 1;
+    s32 l = (s32)&self->head34;
+    fr.cursor = l;
+    fr.list = l;
+    s32 old = *(s32*)D_0027B314;
+    s32 link = *(s32*)(l + 8);
+    *(s32*)D_0027B314 = (s32)&fr;
+    fr.prev = old;
+    s32 h = self->head34;
+    fr.link = link;
+    fr.cursor = h + link;
+    n = (Node_13CE80*)h;
+    while (n != 0) {
+        if (self->f678) {
+            if (!func_001300E8(n, 0x2E)) goto next;
+            func_00199C10(n, &fr.out);
+            if (fr.out) goto next;
+        }
+        if (func_001300E8(n, 0x75)) goto next;
+        if (func_001300E8(n, 0x7A)) goto next;
+        if (func_001300E8(n, 0x53)) goto next;
+        if (func_001300E8(n, 0x27)) n->f560 = (Node_13CE80*)self;
+        for (i = 0; i < self->count; i++) {
+            e = &self->ent[i];
+            if (func_001833F0(n, e->key)) {
+                e->node = (s32)n;
+                switch (e->kind) {
+                case 0:
+                case 1:
+                case 3:
+                    goto next;
+                case 2:
+                case 4:
+                default:
+                    break;
+                }
+                break;
+            }
+        }
+        if (i >= self->count) {
+            e = &self->ent[self->count];
+            self->count = self->count + 1;
+            e->kind = 4;
+            e->node = (s32)n;
+        }
+        n->cls->fn1C(n);
+    next:
+        s32 nx = *(s32*)fr.cursor;
+        fr.cursor = nx + fr.link;
+        n = (Node_13CE80*)nx;
+    }
+    *(s32*)D_0027B314 = fr.prev;
+}
+
+struct Self_13FD20;
+struct Ent_13FD20 { Self_13FD20* a; Self_13FD20* b; u8 pad[0x38]; };
+struct Node_13FD20 { Ent_13FD20 e[2]; u8 pad[0xD0 - 0x80]; Node_13FD20* next; };
+struct List_13FD20 { Node_13FD20* head; List_13FD20* next; };
+struct Self_13FD20 { u8 pad; };
+
+extern u8* D_00262E10;
+extern f32 D_0026185C;
+
+void func_001B93F8(Self_13FD20* self);
+void func_0013F6F8(Self_13FD20* self, s32 v);
+s32 func_0013F8A0(Self_13FD20* self, f32* out);
+s32 func_0013F940(Self_13FD20* self, f32* out);
+s32 func_0013F718(Self_13FD20* self, void* p);
+void func_00129DF8(Self_13FD20* self);
+
+#define F(o, off) (*(f32*)((u8*)(o) + (off)))
+#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+#define P(o, off) (*(void**)((u8*)(o) + (off)))
+
+void func_0013FD20(Self_13FD20* self)
+{
+    func_001B93F8(self);
+    switch (W(self, 0x680)) {
+    case 2: {
+        u8* g = D_00262E10;
+        f32 t;
+        if (g) {
+            if (W(g, 0x2220) == 3 && W(g, 0x2204) == W(self, 0x880)) F(self, 0x678) = D_0026185C;
+        }
+        t = F(self, 0x67C);
+        if (0.0f <= t) {
+            if (t < D_0026185C - F(self, 0x678)) func_0013F6F8(self, 4);
+        }
+        break;
+    }
+    case 3:
+        break;
+    case 4: {
+        s32 r = -1;
+        switch (W(self, 0x550)) {
+        case 0: if (!func_0013F8A0(self, 0)) r = 1; break;
+        case 1: if (!func_0013F940(self, 0)) r = 1; break;
+        case 2:
+        case 4: r = 1; break;
+        case 3: r = 0; break;
+        }
+        if (r != -1) func_0013F6F8(self, r);
+        break;
+    }
+    case 0:
+    case 1: {
+        s32 r = W(self, 0x680);
+        s32 st = W(self, 0x550);
+        switch (st) {
+        case 3:
+            break;
+        case 4: {
+            u8* g = D_00262E10;
+            r = 0;
+            if (g) {
+                if (W(g, 0x2220) == 3) r = W(g, 0x2204) == W(self, 0x880);
+            }
+            break;
+        }
+        case 2: {
+            void* s4 = P(self, 0x50);
+            List_13FD20* l = *(List_13FD20**)((u8*)P(s4, 0x480));
+            r = 0;
+            for (; l; l = l->next) {
+                Node_13FD20* n = l->head;
+                for (; n; n = n->next) {
+                    s32 k = n->e[0].a != s4;
+                    if (((Ent_13FD20*)((u8*)n + (k << 6)))->b == self) {
+                        if (func_0013F718(self, n->e[1 - k].a)) { r = 1; goto done; }
+                    }
+                }
+            }
+            break;
+        }
+        default: {
+            f32 v[2];
+            s32 s0;
+            s32 lt;
+            s32 mode = W(self, 0x680);
+            r = mode;
+            if (st == 0) {
+                s0 = func_0013F8A0(self, &v[0]);
+                lt = v[0] < 2.0f;
+            } else {
+                s0 = func_0013F940(self, &v[1]);
+                lt = v[1] < 0.1f;
+            }
+            if (lt) {
+                if (s0 == 0 && mode == 1) r = 0;
+                else if (s0 == 1 && !mode) r = 1;
+            }
+            if (W(self, 0x7B0) != s0) {
+                func_00129DF8(self);
+                W(self, 0x7B0) = s0;
+            }
+            break;
+        }
+        }
+    done:
+        func_0013F6F8(self, r);
+        break;
+    }
+    }
+}

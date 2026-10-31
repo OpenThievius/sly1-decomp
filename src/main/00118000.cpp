@@ -1608,3 +1608,468 @@ void func_0011AB58(World_11AB58* w) {
     func_0011C2E8(D_0025C2B0);
     func_0011C2E8(D_0025C2D0);
 }
+
+struct __attribute__((aligned(16))) Quad_1196C8 { s32 w[4]; };
+struct Node_1196C8 { s32 kind; Node_1196C8* f4; Node_1196C8* f8; };
+
+s32 func_0011B008(Quad_1196C8* q);
+void func_0011B018(void* out, Quad_1196C8* q);
+void func_0011B060(Quad_1196C8* q, s32 mode);
+void func_0011B0A8(Quad_1196C8* a, Quad_1196C8* b);
+void func_0011A080(Quad_1196C8* t, Node_1196C8* n, void* c);
+void* func_0011A630(void);
+void func_0011A358(Quad_1196C8* t, void* owner, Node_1196C8* kind, Quad_1196C8* body);
+void func_0011A328(void* slot, void* c);
+
+void* func_001196C8(void* self, Node_1196C8* x, void* c)
+{
+    Quad_1196C8 q, r, u, t;
+    func_0011B008(&q);
+    func_0011B008(&r);
+    func_0011B008(&u);
+    Node_1196C8* p = x->f4->f8;
+    void* d;
+    Node_1196C8* n;
+    if (p->kind == 0x1E) {
+        d = func_0011A630();
+        Node_1196C8* l = p->f4;
+        if (l) {
+            do {
+                Node_1196C8* e = l->f4;
+                Quad_1196C8* pr = &r;
+                func_0011A080(&t, e->f8, c);
+                func_0011B0A8(pr, &t);
+                func_0011B060(&t, 2);
+                func_0011A358(&t, d, e->f4, pr);
+                func_0011B0A8(&u, &t);
+                func_0011B060(&t, 2);
+                l = l->f8;
+            } while (l);
+        }
+        func_0011A328(d, c);
+    } else {
+        d = c;
+    }
+    n = p->f8;
+    while (n) {
+        func_0011A080(&t, n, d);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+        n = n->f8;
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&u, 2);
+    func_0011B060(&r, 2);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct Val_11B0F8 {
+    s32 type;
+    union {
+        s32 i;
+        f32 f;
+        f32* v;
+        void* p;
+    } u;
+};
+
+s32 func_001F59C4(void* a, void* b, s32 n);
+
+s32 func_0011B0F8(Val_11B0F8* a, Val_11B0F8* b)
+{
+    if (a->type != b->type)
+        return 0;
+    switch (a->type) {
+    case 0x15:
+        return a->u.f == b->u.f;
+    case 0x1B: {
+        s32 r = 0;
+        if (a->u.p == 0) {
+            if (b->u.p == 0)
+                goto yes;
+            goto out;
+        }
+        if (b->u.p != 0) {
+        yes:
+            r = 1;
+        }
+    out:
+        return r;
+    }
+    case 0x17:
+        return func_001F59C4(a->u.p, b->u.p, 0x40) == 0;
+    case 0x19: {
+        f32* pa = a->u.v;
+        f32* pb = b->u.v;
+        s32 r = 0;
+        if (pa[0] == pb[0] && pa[1] == pb[1])
+            r = 1;
+        return r;
+    }
+    case 0x16:
+    case 0x18:
+    case 0x1A: {
+        f32* pa = a->u.v;
+        f32* pb = b->u.v;
+        s32 r = 0;
+        if (pa[0] == pb[0] && pa[1] == pb[1] && pa[2] == pb[2])
+            r = 1;
+        return r;
+    }
+    case 0x14:
+    case 0x1C:
+    case 0x1D:
+    case 0x1E:
+    case 0x1F:
+    case 0x20:
+    case 0x21:
+        return a->u.i == b->u.i;
+    }
+    return 1;
+}
+
+struct Arg_11B418;
+struct Op_11B418 { s32 kind; Arg_11B418* arg; };
+void func_0011C5B0(Arg_11B418* a);
+void func_0011C6C0(Arg_11B418* a);
+void func_0011C7F0(Arg_11B418* a);
+void func_0011C900(Arg_11B418* a);
+void func_0011CA20(Arg_11B418* a);
+
+void func_0011B418(Op_11B418* op)
+{
+    switch (op->kind) {
+    case 0x16: func_0011C5B0(op->arg); break;
+    case 0x17: func_0011C6C0(op->arg); break;
+    case 0x18: func_0011C7F0(op->arg); break;
+    case 0x19: func_0011C900(op->arg); break;
+    case 0x1A: func_0011CA20(op->arg); break;
+    }
+}
+
+struct Cmd_11B4A8 {
+    s32 op;
+    u32 arg;
+};
+
+
+void func_0011B4A8(Cmd_11B4A8* c)
+{
+    switch (c->op) {
+    case 0x16: func_0011C580(c->arg); break;
+    case 0x17: func_0011C690(c->arg); break;
+    case 0x18: func_0011C7C0(c->arg); break;
+    case 0x19: func_0011C8D0(c->arg); break;
+    case 0x1A: func_0011C9E0(c->arg); break;
+    }
+}
+
+struct Tmp_11A080 { s32 w[4]; };
+struct Inner_11A080 { s32 type; s32 f4; s32 f8; };
+struct In_11A080 { s32 kind; Inner_11A080* inner; };
+struct Ret_11A080;
+
+void func_0011B008(Tmp_11A080* t);
+void func_0011B018(Ret_11A080* dst, Tmp_11A080* src);
+void func_0011B060(Tmp_11A080* t, s32 mode);
+void func_0011B0A8(Tmp_11A080* dst, void* src);
+void func_00118D48(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00118DB8(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00118E80(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00118F48(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119030(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119128(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119218(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119310(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_001194A8(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_001196C8(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119878(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119970(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119AF8(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119BB0(Tmp_11A080* o, In_11A080* a, s32 b);
+void func_00119FA0(Tmp_11A080* o, In_11A080* a, s32 b);
+
+Ret_11A080* func_0011A080(Ret_11A080* ret, In_11A080* in, s32 arg)
+{
+    Tmp_11A080 t;
+    Tmp_11A080 u;
+    void* src;
+    Inner_11A080* p;
+    func_0011B008(&t);
+    switch (in->kind) {
+    case 0:
+    case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27:
+    case 29:
+    case 32: case 33:
+        src = in;
+        goto copy;
+    case 28:
+        func_00118D48(&u, in, arg);
+        goto tail;
+    case 30:
+        p = in->inner;
+        switch (p->type) {
+        case 1: func_00118DB8(&u, in, arg); goto tail;
+        case 2: func_00118E80(&u, in, arg); goto tail;
+        case 5: func_00118F48(&u, in, arg); goto tail;
+        case 6: func_00119030(&u, in, arg); goto tail;
+        case 7: func_00119128(&u, in, arg); goto tail;
+        case 8: func_00119218(&u, in, arg); goto tail;
+        case 9: func_00119310(&u, in, arg); goto tail;
+        case 11: func_001194A8(&u, in, arg); goto tail;
+        case 12: func_001196C8(&u, in, arg); goto tail;
+        case 13: func_00119878(&u, in, arg); goto tail;
+        case 15: func_00119AF8(&u, in, arg); goto tail;
+        case 14: func_00119970(&u, in, arg); goto tail;
+        case 17:
+            src = (void*)p->f8;
+        copy:
+            func_0011B0A8(&t, src);
+            goto end;
+        case 16:
+            func_00119FA0(&u, in, arg);
+        tail:
+            func_0011B0A8(&t, &u);
+            func_0011B060(&u, 2);
+            goto end;
+        default:
+            func_00119BB0(&u, in, arg);
+            func_0011B0A8(&t, &u);
+            func_0011B060(&u, 2);
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+end:
+    func_0011B018(ret, &t);
+    func_0011B060(&t, 2);
+    return ret;
+}
+
+struct Val_11B258 { s32 tag; void* val; };
+struct __attribute__((aligned(16))) Q16_11B258 { s32 w[4]; };
+struct __attribute__((aligned(16))) Q64_11B258 { Q16_11B258 q[4]; };
+struct __attribute__((packed)) D8_11B258 { s32 a, b; };
+struct D12_11B258 { D8_11B258 a; s32 c; };
+struct Node_11B258 { s32 pad; };
+
+void func_0011AEB8(Val_11B258* src, Node_11B258* dst, void* arg);
+void* func_0011C748(void);
+void* func_0011C858(void);
+void* func_0011C968(void);
+s32 func_0011C580(Q16_11B258* p);
+s32 func_0011C690(Q64_11B258* p);
+s32 func_0011C7C0(Q16_11B258* p);
+s32 func_0011C8D0(D8_11B258* p);
+s32 func_0011C9E0(D12_11B258* p);
+void func_0011AF98(Val_11B258* src, Node_11B258* dst, void* arg);
+
+void func_0011B258(Val_11B258* in, Val_11B258* out, void* arg)
+{
+    out->tag = in->tag;
+    switch (in->tag) {
+    case 0x1E: {
+        Node_11B258* n = (Node_11B258*)func_0011AF28();
+        func_0011AEB8((Val_11B258*)in->val, n, arg);
+        out->val = n;
+        break;
+    }
+    case 0x16: {
+        Q16_11B258* p = (Q16_11B258*)func_0011C508();
+        *p = *(Q16_11B258*)in->val;
+        (void)func_0011C580(p);
+        out->val = p;
+        break;
+    }
+    case 0x17: {
+        Q64_11B258* p = (Q64_11B258*)func_0011C618();
+        *p = *(Q64_11B258*)in->val;
+        (void)func_0011C690(p);
+        out->val = p;
+        break;
+    }
+    case 0x18: {
+        Q16_11B258* p = (Q16_11B258*)func_0011C748();
+        *p = *(Q16_11B258*)in->val;
+        (void)func_0011C7C0(p);
+        out->val = p;
+        break;
+    }
+    case 0x19: {
+        D8_11B258* p = (D8_11B258*)func_0011C858();
+        *p = *(D8_11B258*)in->val;
+        (void)func_0011C8D0(p);
+        out->val = p;
+        break;
+    }
+    case 0x1A: {
+        D12_11B258* p = (D12_11B258*)func_0011C968();
+        *p = *(D12_11B258*)in->val;
+        (void)func_0011C9E0(p);
+        out->val = p;
+        break;
+    }
+    case 0x1F: {
+        Node_11B258* n = (Node_11B258*)func_0011AFC8();
+        func_0011AF98((Val_11B258*)in->val, n, arg);
+        out->val = n;
+        break;
+    }
+    default:
+        out->val = in->val;
+        break;
+    }
+}
+
+struct Rd_11BA28;
+struct Node_11BA28 {
+    s32 kind;
+    s32 w4;
+    Node_11BA28* child;
+};
+
+extern s32 D_00275714;
+
+s32 func_00137B90(Rd_11BA28* r);
+void func_00137BE0(Rd_11BA28* r);
+s32 func_00137D78(Rd_11BA28* r);
+f32 func_00137DF8(Rd_11BA28* r);
+s32 func_00137C40(Rd_11BA28* r);
+void func_0011B570(Node_11BA28* n, s32 v);
+void func_0011B5B0(Node_11BA28* n, f32 v);
+void func_0011B5F0(Node_11BA28* n, s32 v);
+void func_0011B8A8(Node_11BA28* n, s32 v);
+void func_0011B640(Node_11BA28* n, s32 v);
+void func_0011B680(Node_11BA28* n, s32 v);
+void func_0011B740(Node_11BA28* n, f32* p);
+void func_0011B788(Node_11BA28* n, f32* p);
+void func_0011B7D0(Node_11BA28* n, f32* p);
+void func_0011B818(Node_11BA28* n, f32* p);
+void func_0011B860(Node_11BA28* n, f32* p);
+void func_0011B6C0(Node_11BA28* n, Node_11BA28* c);
+
+Node_11BA28* func_0011BA28(Rd_11BA28* rd)
+{
+    s32 tag = func_00137B90(rd);
+    if (tag == 0xFF) {
+        return 0;
+    }
+    s32 flag = tag & 0x80;
+    Node_11BA28* n = (Node_11BA28*)func_0011AF28();
+    n->kind = tag & 0x7F;
+    if (D_00275714) {
+        func_00137BE0(rd);
+        func_00137BE0(rd);
+        func_00137BE0(rd);
+        func_00137BE0(rd);
+        func_00137BE0(rd);
+    }
+    switch (n->kind) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+        break;
+    case 20:
+        func_0011B570(n, func_00137D78(rd));
+        break;
+    case 21:
+        func_0011B5B0(n, func_00137DF8(rd));
+        break;
+    case 27:
+        func_0011B5F0(n, func_00137C40(rd));
+        break;
+    case 32:
+        func_0011B8A8(n, func_00137C40(rd));
+        break;
+    case 28:
+        func_0011B640(n, func_00137C40(rd));
+        break;
+    case 29:
+        func_0011B680(n, func_00137C40(rd));
+        break;
+    case 22:
+    {
+        s32 i = 2;
+        f32* buf = (f32*)func_0011C508();
+        f32* p = buf;
+        do {
+            *p++ = func_00137DF8(rd);
+        } while (--i >= 0);
+        n->kind = -1;
+        func_0011B740(n, buf);
+    }
+        break;
+    case 23:
+    {
+        s32 i = 15;
+        f32* buf = (f32*)func_0011C618();
+        f32* p = buf;
+        do {
+            *p++ = func_00137DF8(rd);
+        } while (--i >= 0);
+        n->kind = -1;
+        func_0011B788(n, buf);
+    }
+        break;
+    case 24:
+    {
+        s32 i = 2;
+        f32* buf = (f32*)func_0011C748();
+        f32* p = buf;
+        do {
+            *p++ = func_00137DF8(rd);
+        } while (--i >= 0);
+        n->kind = -1;
+        func_0011B7D0(n, buf);
+    }
+        break;
+    case 25:
+    {
+        f32* p = (f32*)func_0011C858();
+        p[0] = func_00137DF8(rd);
+        p[1] = func_00137DF8(rd);
+        n->kind = -1;
+        func_0011B818(n, p);
+    }
+        break;
+    case 26:
+    {
+        f32* p = (f32*)func_0011C968();
+        p[0] = func_00137DF8(rd);
+        p[1] = func_00137DF8(rd);
+        p[2] = func_00137DF8(rd);
+        n->kind = -1;
+        func_0011B860(n, p);
+    }
+        break;
+    case 30:
+        func_0011B6C0(n, func_0011BA28(rd));
+        break;
+    }
+    if (flag) {
+        n->child = func_0011BA28(rd);
+    } else {
+        n->child = 0;
+    }
+    return n;
+}

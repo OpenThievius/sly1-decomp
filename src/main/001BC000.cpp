@@ -1066,18 +1066,18 @@ s32 func_001BE810(void)
 
 struct Ent_1BE4A8 { u8 pad[0]; };
 
-extern u8 D_00245020[];
+struct Ent_1BFAF8 { s32 a; s32 b; };
+extern Ent_1BFAF8 D_00245020[];
 void func_001BE268(Ent_1BE4A8* e);
 
 void func_001BE4A8(s32 idx)
 {
-    func_001BE268(*(Ent_1BE4A8**)(D_00245020 + idx * 8));
+    func_001BE268(*(Ent_1BE4A8**)((u8*)D_00245020 + idx * 8));
 }
 
 struct Sel_1BE568;
 struct Pair_1BE568 { s32 key; s32 w4; };
 
-extern u8 D_00245020[];
 extern u8 D_006047B0[];
 extern u8 D_006047D0[];
 void func_001BE4A8(Sel_1BE568* self);
@@ -1090,4 +1090,219 @@ s32 func_001BE568(s32 idx)
         func_001BE4A8((Sel_1BE568*)idx);
     }
     return ((s32*)D_006047D0)[idx];
+}
+
+// NEAR: the lui of D_0026185C is scheduled before the sw of self->idx; retail stores idx first. Otherwise every instruction matches.
+
+struct Idx_1BFAF8;
+struct Link_1BFAF8;
+struct Node_1BFAF8 {
+    s32 idx;            // 0x00
+    u8 pad04[0x04];
+    s32 link;           // 0x08
+    u8 pad0c[0x04];
+    f32 f10;            // 0x10
+    u8 pad14[0x04];
+    s32 f18;            // 0x18
+    u8 pad1c[0x24];
+    s32 f40;            // 0x40
+    u8 pad44[0x0C];
+    f32 f50;            // 0x50
+    u8 pad54[0x04];
+    f32 f58;            // 0x58
+    u8 pad5c[0x1C];
+    f32 f78;            // 0x78
+};
+
+extern f32 D_0026185C[];
+extern s32 D_0027472C;
+
+s32 func_001BE4A8(Idx_1BFAF8* idx);
+s32 func_0011D598(Link_1BFAF8* a, s32 b, s32 c, s32 d, s32 e, s32 f);
+void func_001BF428(Node_1BFAF8* self);
+void func_001BF7F8(Node_1BFAF8* self, f32 x);
+void func_001BE860(Node_1BFAF8* self);
+
+void func_001BFAF8(Node_1BFAF8* self, s32 idx)
+{
+    s32 link;
+    s32 v3;
+    if (idx != -2) {
+        link = func_001BE4A8((Idx_1BFAF8*)idx);
+        v3 = D_00245020[idx].b;
+        self->link = link;
+    }
+    self->idx = idx;
+    self->f10 = D_0026185C[0];
+    if (idx == -2) {
+        v3 = D_0027472C;
+        self->f40 = 0;
+        self->f18 = v3;
+        return;
+    }
+    if (self->f50 != 0.0f && self->f78 < 0.0f) {
+        s32 r = func_0011D598((Link_1BFAF8*)link, v3, 0, 0, 0, 0);
+        self->f40 = 0;
+        self->f18 = r;
+        func_001BF428(self);
+        func_001BF7F8(self, self->f58);
+        func_001BE860(self);
+    } else {
+        self->f18 = 0;
+        self->f40 = 1;
+    }
+}
+
+// NEAR: first load of the chain pointer lands in $v1 and the sum in $v0, retail has them in $v0/$v1; one instruction short so the final branch targets 0x1BF028 instead of 0x1BF02C
+
+struct Frame_1BEF88 { s32 f0; s32 f4; s32 f8; s32 fC; };
+
+extern s32 D_00274734;
+
+s32 func_00152720(Frame_1BEF88* p);
+
+void func_001BEF88(void)
+{
+    Frame_1BEF88 f;
+    s32 P = (s32)D_00275710 + 0x1BC4;
+    s32 x;
+    f.f0 = P;
+    f.f4 = P;
+    f.f8 = *(s32*)(P + 8);
+    f.fC = *(s32*)D_0027B314;
+    *(s32*)D_0027B314 = (s32)&f;
+    if (func_00152720((Frame_1BEF88*)P) != 0) {
+        D_00274734 = 0;
+    } else {
+        D_00274734 = -20;
+        s32 x0 = *(s32*)f.f4;
+        f.f4 = x0 + f.f8;
+        x = x0;
+        if (x != 0) {
+            do {
+                s32 v = *(s32*)x;
+                if (D_00274734 < v) {
+                    D_00274734 = v;
+                }
+                s32 y = *(s32*)f.f4;
+                f.f4 = y + f.f8;
+                x = y;
+            } while (x != 0);
+        }
+    }
+    *(s32*)D_0027B314 = f.fC;
+}
+
+// NEAR: 23 diff lines, register allocation only: queue index in t1 (retail) vs v1 (ours), mask built in a0 vs a2, cleanup counter in t1 vs a0
+
+struct Obj_1BD678;
+struct Node_1BD678;
+
+struct Holder_1BD678 {
+    Node_1BD678* head;
+};
+
+struct Node_1BD678 {
+    Obj_1BD678* list0;
+    Node_1BD678* next4;
+    u8 pad[4];
+    Obj_1BD678* owner;
+};
+
+struct Obj_1BD678 {
+    u8 pad0[0x480];
+    Holder_1BD678* holder480;
+    u8 pad1[0x538 - 0x484];
+    u64 flags;
+};
+
+void func_001BD678(Obj_1BD678* self, s32* outQueued, Obj_1BD678** queue, s32* outFlagged, Obj_1BD678** list)
+{
+    s32 nq = 1;
+    s32 nl = 0;
+    queue[0] = self;
+    self->flags |= (u64)1 << 57;
+    s32 qi;
+    for (qi = 0; qi < nq; qi++) {
+        Obj_1BD678* x = queue[qi];
+        Node_1BD678* node = x->holder480->head;
+        while (node != 0) {
+            Obj_1BD678* y = node->owner;
+            if ((y->flags & ((u64)1 << 57)) == 0 && node->list0 != 0) {
+                if (y->flags & ((u64)1 << 55)) {
+                    list[nl] = y;
+                    nl++;
+                } else {
+                    queue[nq] = y;
+                    nq++;
+                }
+                y->flags |= (u64)1 << 57;
+            }
+            node = node->next4;
+        }
+    }
+    if (nl > 0) {
+        qi = nl;
+        Obj_1BD678** p = list;
+        do {
+            Obj_1BD678* z = *p;
+            p++;
+            z->flags &= ~((u64)1 << 57);
+        } while (--qi != 0);
+    }
+    *outQueued = nq;
+    *outFlagged = nl;
+}
+
+struct Ent_1BF7F8 {
+    s32 idx;
+    s32 f4;
+    s32 f8;
+    u8 pad0C[0xC];
+    s32 f18;
+    u8 pad1C[0x14];
+    s32 f30;
+    u8 pad34[0x24];
+    f32 f58;
+    f32 f5C;
+    s32 f60;
+    u8 pad64[8];
+    s32 flag6C;
+    s32 f70;
+    s32 clampv(s32 v, s32 lo, s32 hi)
+    {
+        if (v < lo) {
+            return lo;
+        }
+        if (hi < v) {
+            return hi;
+        }
+        return v;
+    }
+};
+
+s32 func_0011D7D8(s32 a, s32 b);
+void func_0011D810(s32 x, s32 y);
+
+void func_001BF7F8(Ent_1BF7F8* p, f32 a)
+{
+    if (p == 0) {
+        return;
+    }
+    if (a == p->f58) {
+        if (p->f30 == 0) {
+            return;
+        }
+        if (!(0.0001f < p->f5C)) {
+            return;
+        }
+    }
+    s32 v0 = p->flag6C;
+    p->f58 = a;
+    if (v0 == 0) {
+        p->f70 = func_0011D7D8(p->f8, D_00245020[p->idx].b);
+        p->flag6C = 1;
+    }
+    s32 v = p->f70 + (s32)(p->f58 * 1524.0f) + p->f60;
+    func_0011D810(p->f18, p->clampv(v, -0x8000, 0x7FFF));
 }

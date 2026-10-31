@@ -949,3 +949,54 @@ s32 func_0012E9E0(Obj_12E9E0* o, f32* pos, f32* vel)
     }
     return r;
 }
+
+struct Elem_12D2A8 { u64 q0 __attribute__((packed)); u64 q1 __attribute__((packed)); u64 q2 __attribute__((packed)); s32 w3; };
+struct Self_12D2A8 { u8 pad0[0x38]; s32 f38; Elem_12D2A8* f3C; u8 pad1[0x9C - 0x40]; Elem_12D2A8* f9C; };
+
+void func_001F5B08(Elem_12D2A8* dst, Elem_12D2A8* src, s32 bytes);
+
+void func_0012D2A8(Self_12D2A8* self, Elem_12D2A8* p)
+{
+    Elem_12D2A8 tmp = *p;
+    s32 idx = p - self->f3C;
+    self->f38 = self->f38 - 1;
+    if (idx < self->f38) {
+        func_001F5B08(p, p + 1, (self->f38 - idx) * 0x1C);
+    }
+    p = self->f3C + self->f38;
+    *p = tmp;
+    self->f9C = p;
+}
+
+struct Item_12E4E0 { f32 t; s32 type; s32 w2; s32 w3; };
+struct Sub_12E4E0 { u8 pad[0x5C]; s32 cnt; Item_12E4E0* items; };
+struct Self_12E4E0 { u8 pad0[0x14]; f32 time; s32 f18; s32 f1C; s32 idx; };
+void func_0012D5D0(Self_12E4E0* self, Item_12E4E0* item, s32* out);
+
+void func_0012E4E0(Self_12E4E0* self, Sub_12E4E0* sub, s32* out)
+{
+    f32 limit = self->time + 0.0001f;
+    if (sub->cnt != 0) {
+    while (self->idx < sub->cnt && sub->items[self->idx].t < limit) {
+        Item_12E4E0* it = &sub->items[self->idx++];
+        switch (it->type) {
+        case 8:
+            self->time = it->t;
+            self->f18 = 0;
+            *out = 1;
+            return;
+        case 9:
+        case 10:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 28:
+        case 39:
+            func_0012D5D0(self, it, out);
+            break;
+        }
+    }
+    }
+}

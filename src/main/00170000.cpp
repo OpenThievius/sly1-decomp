@@ -513,3 +513,70 @@ void func_001727B0(Obj_1727B0* self)
         }
     }
 }
+
+// NEAR: frame, saves, the vtable call and the branch tree match; the 0xD path loads its two floats into $f1/$f0 where retail uses $f0/$f1, so the shared store tail differs
+
+struct Obj_170410;
+typedef s32 (*VFn_170410)(Obj_170410* self, void* out);
+struct Sub_170410 { u8 pad0[0x40]; s32 f40; };
+struct Obj_170410 {
+    VFn_170410* vtbl;
+    u8 pad1[0x700 - 0x4];
+    f32 f700;
+    u8 pad2[0x2220 - 0x704];
+    s32 f2220;
+    u8 pad3[0x2228 - 0x2224];
+    s32 f2228;
+    u8 pad4[0x239C - 0x222C];
+    s32 f239C;
+    u8 pad5[0x23BC - 0x23A0];
+    Sub_170410* f23BC;
+};
+struct Out_170410 { u8 pad0[0x94]; f32 f94; f32 f98; };
+
+extern f32 D_00262E34;
+extern f32 D_00262E38;
+extern f32 D_002637B0;
+extern f32 D_002637B4;
+extern f32 D_002637B8;
+
+void func_00170410(Obj_170410* self, Out_170410* out)
+{
+    f32 a;
+    f32 b;
+    if (self->f2220 == 0xD) {
+        a = D_00262E34;
+        b = D_00262E38;
+    } else if (self->f2220 == 7) {
+        goto zero_both;
+    } else if (self->vtbl[90](self, out) != 0) {
+        if (self->f2220 == 6 && self->f239C == 4 && self->f23BC->f40 != 0) {
+            goto zero_both;
+        }
+        a = D_002637B8;
+        out->f98 = 0.0f;
+        out->f94 = a;
+        goto divide;
+    } else {
+        if (self->f2220 != 4) {
+            goto zero_both;
+        }
+        s32 v = self->f2228;
+        if (v == 0x28 || v == 0x31) {
+            a = D_002637B0;
+            out->f98 = 0.0f;
+            out->f94 = a;
+            goto divide;
+        }
+        a = D_002637B0;
+        b = D_002637B4;
+    }
+    out->f94 = a;
+    out->f98 = b;
+    goto divide;
+zero_both:
+    out->f94 = 0.0f;
+    out->f98 = 0.0f;
+divide:
+    out->f94 = out->f94 / self->f700;
+}

@@ -1421,3 +1421,197 @@ s32 func_00148AC0(Self_148AC0* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
     func_0018D6F0();
     return count;
 }
+
+// NEAR: every instruction matches except the setup of the last call: retail loads obj into $a1 and derives $a2 from it, we load it into $a2 and derive $a1
+
+struct Self_148038 {
+    u8 pad0[0x1EC4];
+    void* p1EC4;
+};
+
+struct Glob_148038 {
+    u8 pad0[0x19E4];
+    s32 f19E4;
+};
+
+struct Obj_148038 {
+    void** vtbl;
+    u8 pad0[0x2A8 - 4];
+    f32 f2A8;
+};
+
+struct __attribute__((aligned(16))) Quad_148038 {
+    s32 a, b, c, d;
+};
+
+struct Ctx_148038;
+
+typedef void (*Fn0_148038)(void* self);
+typedef void (*Fn1_148038)(void* self, void* a);
+typedef void (*Fn1s_148038)(void* self, s32 a);
+
+extern u8 D_00261AB0[];
+extern u8 D_002483D0[];
+extern u8 D_00248D30[];
+extern Quad_148038 D_00261AC0;
+
+s32 func_00148938(Self_148038* self, s32 a1, s32 a2, void** out);
+s32 func_00160D98(void);
+void func_00144128(Ctx_148038* a, void* b, void* c);
+s32 func_001EEB60(Ctx_148038* self, f32 x, void* vec, void* out);
+
+void func_00148038(Self_148038* self)
+{
+    void* obj;
+    s32 buf[4];
+    Glob_148038* g;
+    s32 n;
+    s32 c;
+
+    if (func_00148938(self, 0x56, 1, &obj) == 0) {
+        g = (Glob_148038*)D_002623C0;
+        n = func_00160D98();
+        c = g->f19E4 + 1;
+        c = (c < n) ? c : n;
+        ((Glob_148038*)D_002623C0)->f19E4 = c;
+    } else {
+        ((Fn0_148038)((Obj_148038*)obj)->vtbl[6])(obj);
+        ((Fn1s_148038)((Obj_148038*)obj)->vtbl[25])(obj, 0);
+        func_00144128(*(Ctx_148038**)D_00261990, D_00261AB0, buf);
+        ((Fn1_148038)((Obj_148038*)obj)->vtbl[33])(obj, buf);
+        ((Fn1_148038)((Obj_148038*)obj)->vtbl[34])(obj, D_002483D0);
+        ((Fn1_148038)((Obj_148038*)obj)->vtbl[36])(obj, D_00248D30);
+        ((Fn1_148038)((Obj_148038*)obj)->vtbl[37])(obj, D_00248D30);
+        ((Fn1s_148038)((Obj_148038*)obj)->vtbl[51])(obj, 4);
+        *(Quad_148038*)((u8*)obj + 0x300) = D_00261AC0;
+        func_001EEB60((Ctx_148038*)self->p1EC4, ((Obj_148038*)obj)->f2A8, (u8*)obj + 0x140, (u8*)obj + 0x88);
+    }
+}
+
+// EXACT: callee declared with a4,a5 after the float parameters
+
+struct __attribute__((aligned(16))) Quad_148298 {
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 d;
+};
+
+struct Self_148298 {
+    u8 pad0[0x110];
+    Quad_148298 q110;
+    Quad_148298 q120;
+    Quad_148298 q130;
+    u8 pad140[0x2D0 - 0x140];
+    s32 f2D0;
+    u8 pad2D4[0x338 - 0x2D4];
+    s32 f338;
+    u8 pad33C[0x380 - 0x33C];
+    void* p380;
+    u8 pad384[0x390 - 0x384];
+    f32 f390;
+    f32 f394;
+    f32 f398;
+};
+
+typedef void (*VFnA_148298)(void* self);
+typedef void (*VFnB_148298)(void* self, s32* args);
+typedef void (*VFnC_148298)(void* self, void* a, s32 b, f32 f);
+
+struct VObjA_148298 {
+    VFnA_148298* vtbl;
+};
+
+struct VObjB_148298 {
+    VFnB_148298* vtbl;
+};
+
+struct New_148298 {
+    VFnC_148298* vtbl;
+    u8 pad4[0x20 - 0x4];
+    void* p20;
+    u8 pad24[0x50 - 0x24];
+    Quad_148298 q50;
+    Quad_148298 q60;
+    Quad_148298 q70;
+    u8 pad80[0x130 - 0x80];
+    void* p130;
+    void* p134;
+};
+
+struct Locals_148298 {
+    s32 args[2];
+    s32 scratch[16];
+};
+
+extern u8 D_0026CE48[];
+extern u8 D_00261AD0[];
+
+void* func_0019EA78(s32 a, s32 b);
+void func_001481A0(void* self);
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_00147AB0(void* self, s32 mode);
+
+void func_00148298(void* self, s32 mode)
+{
+    Self_148298* s = (Self_148298*)self;
+    if (s->f2D0 != mode) {
+        switch (mode) {
+        case 0:
+            if (s->f338 != 0) {
+                s->f398 = func_001EAAE0(s->f390, s->f394);
+            }
+            break;
+        case 1:
+                void* p = func_0019EA78(0x10, 0);
+                if (p != 0) {
+                    New_148298* n = (New_148298*)p;
+                    n->p130 = D_00261AD0;
+                    n->p134 = self;
+                    n->vtbl[0](n, s->pad140, 0, 1.0f);
+                    n->p20 = self;
+                    n->q50 = s->q110;
+                    n->q60 = s->q120;
+                    n->q70 = s->q130;
+                } else {
+                    func_001481A0(self);
+                }
+                ((VObjA_148298*)D_0026CE48)->vtbl[14](D_0026CE48);
+                f32 z = 0.0f;
+                func_001BFCD8(0x78, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
+                if (s->p380 != 0) {
+                    Locals_148298 l;
+                    l.args[0] = 1;
+                    l.args[1] = (s32)self;
+                    ((VObjB_148298*)s->p380)->vtbl[31](s->p380, l.args);
+                }
+                mode = 2;
+            break;
+        }
+        func_00147AB0(self, mode);
+    }
+}
+
+struct Ent_0014ABD0 {
+    void* link;
+    u8 pad0[0x260 - 4];
+};
+typedef void (*VFn_0014ABD0)(Ent_0014ABD0* self, s32 n);
+
+extern VFn_0014ABD0 D_00218330[];
+
+void func_001AA1F0(Ent_0014ABD0* self, s32 index);
+
+void func_0014ABD0(Ent_0014ABD0* self)
+{
+    u32 n;
+
+    func_001AA1F0(self, 0x20);
+    self = (Ent_0014ABD0*)((u8*)self + 0x264);
+    for (n = 0; n < 4; n++) {
+        self->link = (void*)D_00218330;
+        D_00218330[0](self, 0x12);
+        self = (Ent_0014ABD0*)((u8*)self + 0x260);
+    }
+}

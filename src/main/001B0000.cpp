@@ -1039,3 +1039,801 @@ void func_001B01B0(Obj_1B01B0* self, s32 s)
     }
     func_001AECE8(self, s);
 }
+
+struct Self_1B0FC0 {
+    u8 pad0[0x558];
+    s32 state;
+    u8 pad55C[0x5C0 - 0x55C];
+    s32 f5C0;
+};
+void func_001B1070(Self_1B0FC0* self, s32 v);
+void func_001AECE8(Self_1B0FC0* self, s32 s);
+
+void func_001B0FC0(Self_1B0FC0* self, s32 s)
+{
+    if (self->state != s) {
+        switch (self->state) {
+        case -1: case 0: case 1: case 2: case 3: case 4: case 5: case 7:
+            break;
+        case 6:
+            func_001B1070(self, -1);
+            break;
+        case 8:
+            self->f5C0 = 0;
+            break;
+        }
+        switch (s) {
+        case 6:
+            func_001B1070(self, 0);
+            break;
+        case 0: case 1: case 2: case 3: case 4: case 5: case 7: case 8:
+            break;
+        }
+        func_001AECE8(self, s);
+    }
+}
+
+struct Obj_1B1710 {
+    u8 pad0[0x558];
+    s32 state;
+    f32 f55C;
+    u8 pad1[0x5C0 - 0x560];
+    s32 f5C0;
+    void* f5C4;
+    u8 pad2[0x614 - 0x5C8];
+    f32 f614;
+    s32 f618;
+};
+
+struct Tgt_1B1710;
+void func_001BF788(Tgt_1B1710* t, s32 n);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001AECE8(Obj_1B1710* self, s32 n);
+
+void func_001B1710(Obj_1B1710* self, s32 n)
+{
+    if (self->state == n) return;
+    switch (self->state) {
+    case 1:
+    case 5:
+        func_001BF788((Tgt_1B1710*)self->f5C4, 0);
+        self->f614 = self->f55C;
+        break;
+    case 8:
+        self->f5C0 = 0;
+        self->f618 = 0;
+        break;
+    }
+    switch (n) {
+    case 1:
+        func_001BFCD8(15, &self->f5C4, (s32)self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        break;
+    case 2:
+    case 6:
+        self->f618 = 1;
+        break;
+    case 3:
+    case 4:
+    case 7:
+        break;
+    case 5:
+        func_001BFCD8(27, &self->f5C4, (s32)self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        break;
+    }
+    func_001AECE8(self, n);
+    if (self->f618 != 0 && (n == 2 || n == 6)) {
+        self->state = (n == 2) ? 1 : 5;
+        self->f55C = self->f614;
+    }
+}
+
+struct Obj_001B0578;
+struct VT_001B0578 {
+    u8 pad0[0x130];
+    void (*f130)(Obj_001B0578* self, s32* st);
+    u8 pad1[0x10];
+    void (*f144)(Obj_001B0578* self, s32 st);
+};
+struct Obj_001B0578 {
+    VT_001B0578* vt;
+    u8 pad0[0x550];
+    s32 i554; s32 i558; f32 f55C; u8 pad1[0x58];
+    f32 f5B8, f5BC; s32 i5C0; u8 pad2[0x10];
+    s32 i5D4, i5D8; f32 f5DC, f5E0, f5E4, f5E8;
+};
+struct Dev_001B0578;
+struct DevVT_001B0578 {
+    u8 pad[0x13C];
+    s32 (*f13C)(Dev_001B0578* d, s32 n);
+    s32 (*f140)(Dev_001B0578* d, void* b);
+};
+struct Dev_001B0578 { DevVT_001B0578* vt; };
+extern Dev_001B0578* D_00262E10;
+extern f32 D_0026185C;
+
+void func_001AEFA0(Obj_001B0578* self);
+void func_001AEF68(Obj_001B0578* self);
+void func_001B1070(Obj_001B0578* self, s32 n);
+void func_001D7098(void* buf, s32 n, Obj_001B0578* self);
+
+void func_001B0578(Obj_001B0578* self) {
+    s32 st;
+    s32 s1;
+    func_001AEFA0(self);
+    st = self->i558;
+    switch (self->i558) {
+    case 0:
+        if (self->f5B8 < D_0026185C - self->f55C) st = 1;
+        break;
+    case 2:
+        st = 3;
+        break;
+    case 3:
+        if (self->f5BC < D_0026185C - self->f55C) st = 8;
+        break;
+    case 4:
+        if (self->f5B8 < D_0026185C - self->f55C) st = 5;
+        break;
+    case 1:
+    case 5:
+        if (self->vt->f130) {
+            self->vt->f130(self, &st);
+        }
+        goto tail;
+    case 6:
+        s1 = self->i5D8;
+        switch (s1) {
+        case 0:
+            if (D_00262E10 && D_00262E10->vt->f13C(D_00262E10, 2)) {
+                s1 = 2;
+            } else if (self->f5E0 < D_0026185C - self->f5DC) {
+                if (D_00262E10) {
+                    u8 buf[16];
+                    func_001D7098(buf, 2, self);
+                    if (D_00262E10->vt->f140(D_00262E10, buf)) {
+                        s1 = 1;
+                        func_001AEF68(self);
+                    }
+                } else {
+                    s1 = 1;
+                }
+            }
+            break;
+        case 1:
+            if (self->f5E4 < D_0026185C - self->f5DC) s1 = 2;
+            break;
+        case 2:
+            if (self->f5E8 < D_0026185C - self->f5DC) {
+                s1 = -1;
+                st = 5;
+            }
+            break;
+        }
+        func_001B1070(self, s1);
+        goto tail;
+    case 7:
+        if (self->f5BC < D_0026185C - self->f55C) st = 8;
+        break;
+    case 8:
+        if (self->i5C0 == 0) {
+            switch (self->i554) {
+            case 0: st = 0; break;
+            case 1: st = 4; break;
+            }
+        }
+        goto tail;
+    }
+tail:
+    self->vt->f144(self, st);
+}
+
+struct Obj_1B1238;
+struct VT_1B1238 {
+    u8 pad0[0x130];
+    void (*f130)(Obj_1B1238* self, s32* state);
+    u8 pad1[0x144 - 0x134];
+    void (*f144)(Obj_1B1238* self, s32 state);
+};
+struct Obj_1B1238 {
+    VT_1B1238* vt;
+    u8 pad0[0x554 - 4];
+    s32 f554;
+    s32 f558;
+    f32 f55c;
+    u8 pad1[0x5B8 - 0x560];
+    f32 f5b8;
+    f32 f5bc;
+    s32 f5c0;
+    u8 pad2[0x608 - 0x5C4];
+    f32 f608;
+    f32 f60c;
+};
+
+extern f32 D_0026185C;
+void func_001AEFA0(Obj_1B1238* self);
+void func_001B1898(Obj_1B1238* self);
+
+void func_001B1238(Obj_1B1238* self)
+{
+    s32 state;
+
+    func_001AEFA0(self);
+    state = self->f558;
+    switch (state) {
+    case 0:
+        if (self->f5b8 < D_0026185C - self->f55c) {
+            state = 1;
+        }
+        break;
+    case 1:
+        if (0.0f <= self->f608) {
+            if (self->f608 < D_0026185C - self->f55c) {
+                state = 3;
+                break;
+            }
+        }
+        if (self->vt->f130 != 0) {
+            self->vt->f130(self, &state);
+        }
+        break;
+    case 3:
+        if (self->f5bc < D_0026185C - self->f55c) {
+            state = 8;
+        }
+        break;
+    case 4:
+        if (self->f5b8 < D_0026185C - self->f55c) {
+            state = 5;
+        }
+        break;
+    case 5:
+        if (0.0f <= self->f608) {
+            if (self->f608 < D_0026185C - self->f55c) {
+                state = 7;
+                break;
+            }
+        }
+        if (self->vt->f130 != 0) {
+            self->vt->f130(self, &state);
+        }
+        break;
+    case 7:
+        if (self->f5bc < D_0026185C - self->f55c) {
+            state = 8;
+        }
+        break;
+    case 8:
+        if (self->f5c0 == 0) {
+            if (self->f60c < D_0026185C - self->f55c) {
+                switch (self->f554) {
+                case 0:
+                    state = 0;
+                    break;
+                case 1:
+                    state = 4;
+                    break;
+                }
+            }
+        }
+        break;
+    }
+    self->vt->f144(self, state);
+    func_001B1898(self);
+}
+
+// NEAR: float regs: case 0 wants t=$f4 zero=$f2 m=$f3; ours t=$f3 zero=$f4 m=$f2 (8 lines differ); delay-slot load of m fixed via local m
+
+struct Cfg_1B0360 {
+    f32 pad0;
+    f32 f4;
+    f32 f8;
+};
+
+struct Obj_1B0360 {
+    u8 pad0[0x554];
+    s32 i554;
+    s32 mode;
+    f32 f55C;
+    u8 pad560[0x5B8 - 0x560];
+    f32 f5B8;
+    f32 f5BC;
+    u8 pad5C0[0xAEC - 0x5C0];
+    f32 fAEC;
+    u8 padAF0[0xB04 - 0xAF0];
+    f32 fB04;
+};
+
+extern f32 D_0026185C;
+
+f32 func_001B0360(Obj_1B0360* o, Cfg_1B0360* c)
+{
+    f32 s = c->f4;
+    f32 r;
+    f32 m;
+    f32 t;
+    switch (o->mode) {
+    case 0:
+    case 4: {
+        f32 t0 = o->f5B8;
+        if (t0 == 0.0f) {
+            r = o->fB04;
+        } else {
+            f32 q = (D_0026185C - o->f55C) / t0;
+            m = o->fB04;
+            if (q < 0.0f)
+                r = 0.0f;
+            else if (m < q)
+                r = m;
+            else
+                r = q;
+        }
+        break;
+    }
+    case 1:
+    case 2:
+    case 5:
+    case 6:
+        r = o->fB04;
+        break;
+    case 3:
+    case 7:
+        t = o->i554 == 0 ? o->f5BC : o->fAEC;
+        if (t == 0.0f) {
+            r = 0.0f;
+        } else {
+            f32 m = o->fB04;
+            r = 1.0f - (D_0026185C - o->f55C) / t;
+            if (r < 0.0f)
+                r = 0.0f;
+            else if (m < r)
+                r = m;
+        }
+        s = c->f8;
+        break;
+    case 8:
+        r = 0.0f;
+        break;
+    }
+    return s * r;
+}
+
+// EXACT (us)
+
+struct Rec_1B3040;
+struct Ent_1B3040 {
+    s32 type;
+    s32 data;
+};
+struct Elem_1B3040 {
+    u8 pad0[4];
+    u8 f4;
+    u8 pad5[3];
+    Rec_1B3040* f8;
+    u8 pad0C[8];
+};
+struct ObjVt_1B3040 {
+    void* slot0;
+    void (*fn1)(void* self);
+};
+struct Obj_1B3040 {
+    ObjVt_1B3040* vt;
+    u8 pad4[0x10];
+    Rec_1B3040* f14;
+};
+struct Rec_1B3040 {
+    u8 kind;
+    u8 f1;
+    u8 pad2[0x11];
+    u8 f13;
+    Elem_1B3040* f14;
+    s32 f18;
+    Ent_1B3040* f1C;
+    s32 f20;
+    Obj_1B3040* f24;
+};
+struct Frame_1B3040 {
+    s32 w[4];
+};
+
+extern s32 D_002744F8;
+extern Rec_1B3040* D_002744FC;
+extern s32 D_0027453C;
+extern Obj_1B3040** D_00274540;
+extern s32 D_00274520[];
+extern s32 D_00274538;
+extern u8 D_002626D8[];
+
+void func_001B2BA8(void* self);
+void func_001B2CF8(void* self);
+void* func_0018D5C0(s32 bytes);
+void func_00137A60(void* self, s32 key, Rec_1B3040* out);
+Obj_1B3040* func_001B4A10(void* self);
+void func_001B2F00(void* self, Elem_1B3040* e);
+void func_001B2DF8(void* self);
+void func_00168D68(Frame_1B3040* p, s32 a, s32 b);
+s32 func_001690C0(s32 mask, Frame_1B3040* arg, s32 f);
+void func_001B3510(s32 mask);
+void func_0015E5F0(void);
+void func_001A9F78(void);
+s32 func_00169780(s32 mask);
+s32 func_001693A8(s32 mask);
+
+void func_001B3040(void* self)
+{
+    s32 i;
+    s32 j;
+    Rec_1B3040* rec;
+    Obj_1B3040** out;
+    Frame_1B3040 f;
+
+    func_001B2BA8(self);
+    func_001B2CF8(self);
+    D_002744F8 = func_00137BE0(self);
+    D_002744FC = (Rec_1B3040*)func_0018D5C0(D_002744F8 * 0x28);
+    D_0027453C = func_00137BE0(self);
+    D_00274540 = (Obj_1B3040**)func_0018D5C0(D_0027453C * 4);
+    out = D_00274540;
+    for (i = 0; i < D_002744F8; i++) {
+        rec = &D_002744FC[i];
+        func_00137A60(self, 0x14, rec);
+        rec->f24 = func_001B4A10(self);
+        if (rec->f24) {
+            rec->f24->f14 = rec;
+            *out++ = rec->f24;
+        }
+        rec->f14 = (Elem_1B3040*)func_0018D5C0(rec->f13 * 0x14);
+        for (j = 0; j < rec->f13; j++) {
+            Elem_1B3040* e = (Elem_1B3040*)((u8*)rec->f14 + j * 0x14);
+            func_001B2F00(self, e);
+            e->f8 = rec;
+        }
+        rec->f20 = rec->f14->f4;
+        switch (rec->kind) {
+        case 0:
+            rec->f18 = 3;
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            rec->f18 = 1;
+            break;
+        case 4:
+            rec->f18 = 4;
+            break;
+        }
+        rec->f1C = (Ent_1B3040*)func_0018D5C0(rec->f18 * 8);
+        Ent_1B3040* arr = rec->f1C;
+        Ent_1B3040* e;
+        switch (rec->kind) {
+        case 1:
+        case 6:
+        case 7:
+        case 8:
+        case 10:
+            arr[0].type = 8;
+            arr[0].data = (s32)func_0018D5C0(rec->f20 << 7);
+            break;
+        case 4: {
+            s32 n = (rec->f1 & 2) ? 3 : 0;
+            n += 5;
+            e = arr + 1;
+            arr[0].type = n;
+            arr[0].data = (s32)func_0018D5C0((rec->f20 * arr[0].type) << 4);
+            e->type = 5;
+            e->data = (s32)func_0018D5C0((rec->f20 * e->type) << 4);
+            e = arr + 2;
+            e->type = 7;
+            e->data = (s32)func_0018D5C0((rec->f20 * e->type) << 4);
+            e = arr + 3;
+            e->type = 4;
+            e->data = (s32)func_0018D5C0(rec->f20 << 6);
+            break;
+        }
+        case 2:
+        case 3:
+            arr[0].type = 6;
+            arr[0].data = (s32)func_0018D5C0((rec->f20 * arr[0].type) << 4);
+            break;
+        case 0:
+            e = arr + 1;
+            arr[0].type = 8;
+            arr[0].data = (s32)func_0018D5C0(rec->f20 << 7);
+            e->type = 8;
+            e->data = (s32)func_0018D5C0(rec->f20 << 7);
+            e = arr + 2;
+            e->type = 8;
+            e->data = (s32)func_0018D5C0(rec->f20 << 7);
+            break;
+        case 5:
+            arr[0].type = 7;
+            arr[0].data = (s32)func_0018D5C0((rec->f20 * arr[0].type) << 4);
+            break;
+        case 9:
+            arr[0].type = 4;
+            arr[0].data = (s32)func_0018D5C0(0x40);
+            break;
+        }
+    }
+    func_001B2DF8(self);
+    for (s32 k = 0; k < D_0027453C; k++) {
+        D_00274540[k]->vt->fn1(D_00274540[k]);
+    }
+    func_00168D68(&f, 0x1E00, 0x4000);
+    func_001690C0(0x10000000, &f, 0);
+    func_001B3510(0x10000000);
+    func_00168D68((Frame_1B3040*)D_002626D8, f.w[1], 0x4000);
+    func_0015E5F0();
+    func_001A9F78();
+    for (s32 m = 0; m < 6; m++) {
+        D_00274520[m] = func_00169780((1 << m) | 0x40000000);
+    }
+    D_00274538 = func_001693A8(0x20000000);
+}
+
+struct Buf_1B3510 {
+    u8 bytes[0x30];
+};
+struct Quad_1B3510 {
+    u32 w[4];
+};
+struct Ent_1B3510 {
+    s32 type;
+    Quad_1B3510* data;
+};
+struct Elem_1B3510;
+struct Rec_1B3510 {
+    u8 kind;
+    u8 f1;
+    u8 pad2[6];
+    u8 col[4];
+    u32 mask;
+    s16 f10;
+    u8 pad12[2];
+    Elem_1B3510* f14;
+    s32 f18;
+    Ent_1B3510* f1C;
+    s32 f20;
+    void* f24;
+};
+struct Found_1B3510 {
+    u8 pad0[0x14];
+    Elem_1B3510* f14;
+};
+struct Glob_1B3510 {
+    u8 pad0[0x204];
+    u32 f204;
+};
+
+#define TEST_1B3510(ate, atst, aref, afail, date, datm, zte, ztst) \
+    ((u64)(ate) | ((u64)(atst) << 1) | ((u64)(aref) << 4) | ((u64)(afail) << 12) | ((u64)(date) << 14) | \
+     ((u64)(datm) << 15) | ((u64)(zte) << 16) | ((u64)(ztst) << 17))
+#define ALPHA_1B3510(a, b, c, d, fix) \
+    ((u64)(a) | ((u64)(b) << 2) | ((u64)(c) << 4) | ((u64)(d) << 6) | ((u64)(fix) << 32))
+
+extern s32 D_002744F8;
+
+void func_001611B8(Buf_1B3510* b);
+void func_001529C8(Buf_1B3510* b, s32 n, Quad_1B3510* q);
+void func_001612F8(Buf_1B3510* b, s32 a, s32 c, s32 d, s32 e, s32 f);
+void func_001613C0(Buf_1B3510* b, s32 a, s32 c, u64 d);
+void func_00161708(Buf_1B3510* b, s32 reg, u64 v);
+void func_001B29E0(Elem_1B3510* e, s32 j, s32 pass, s32 kind, Buf_1B3510* b);
+void func_00152D70(Buf_1B3510* b);
+void func_001528C8(Buf_1B3510* b);
+void func_00161278(Buf_1B3510* b, s32 n);
+void func_00161520(Buf_1B3510* b, f32 x, f32 y, f32 z);
+void func_00161458(Buf_1B3510* b, u32 c);
+void* func_001B4688(s32 key);
+
+void func_001B3510(s32 mask)
+{
+    Buf_1B3510 buf;
+    u8 col[4];
+    s32 i;
+    s32 j;
+    Rec_1B3510* rec;
+    Ent_1B3510* ents;
+    u64 test;
+    u64 sel;
+
+    if (mask == 0) {
+        return;
+    }
+    for (i = 0; i < D_002744F8; i++) {
+        rec = &((Rec_1B3510*)D_002744FC)[i];
+        if ((rec->mask & mask) != (u32)mask) {
+            continue;
+        }
+        for (j = 0; j < rec->f20; j++) {
+            ents = rec->f1C;
+            switch (rec->kind) {
+            case 1:
+            case 6:
+            case 7:
+            case 8:
+            case 10:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 3, 0x412, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                if (rec->kind == 10) {
+                    func_00161708(&buf, 0x47, 0x53001);
+                    func_00161708(&buf, 0x42, 0x11);
+                } else if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x47, 0x7001B);
+                    func_00161708(&buf, 0x42, 0);
+                } else if (rec->f1 & 0x20) {
+                    test = (rec->f1 & 4) ? 0x13001 : 0x11001;
+                    test |= (rec->kind != 1) ? 0x20000 : 0x60000;
+                    func_00161708(&buf, 0x47, test);
+                    func_00161708(&buf, 0x42, 0);
+                } else if (rec->f1 & 0x10) {
+                    test = TEST_1B3510(1, (rec->kind == 1) ? 5 : 0, 0x7E, (rec->f1 & 4) ? 3 : 1, 0, 0, 1, (rec->kind == 1) ? 3 : 1);
+                    func_00161708(&buf, 0x47, test);
+                    sel = (rec->f1 & 1) ? 2 : 0;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(1, sel, 0, 0, 0));
+                } else {
+                    test = TEST_1B3510(1, (rec->kind == 1) ? 5 : 0, 0x7E, (rec->f1 & 4) ? 3 : 1, 0, 0, 1, (rec->kind == 1) ? 3 : 1);
+                    func_00161708(&buf, 0x47, test);
+                    sel = (rec->f1 & 1) ? 2 : 1;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                }
+                func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00152D70(&buf);
+                break;
+            case 4:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                if (rec->f1 & 2) {
+                    func_001612F8(&buf, 0x7C, 0, 3, 0x412, 0);
+                    func_001613C0(&buf, 0, 1, 0xE);
+                    func_00161708(&buf, 0x47, 0x71001);
+                    sel = (rec->f1 & 1) ? 2 : 1;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                    func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                    func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                } else {
+                    func_001612F8(&buf, 0x4C, 0, 3, 0x4FF, 0);
+                    func_001613C0(&buf, 0, 1, 0xE);
+                    func_00161708(&buf, 0x47, 0x71001);
+                    func_00161708(&buf, 0x42, 0x6A);
+                    func_00161708(&buf, 1, 0x100000020);
+                }
+                ents++;
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                ents++;
+                func_001612F8(&buf, 0x4C, 0, 3, 0x4FF, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x71001);
+                func_00161708(&buf, 0x42, 0x6A);
+                func_00161708(&buf, 1, 0x180002000);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                ents++;
+                func_001612F8(&buf, 0x6C, 0, 3, 0x4FF, 0);
+                func_001613C0(&buf, 0, 5, 0x12EEE);
+                func_00161708(&buf, 0x47, 0x75001);
+                sel = (rec->f1 & 1) ? 2 : 1;
+                func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                func_00161520(&buf, 0.0f, 0.0f, 1.0f);
+                col[0] = (rec->col[0] + 1) >> 1;
+                col[1] = (rec->col[1] + 1) >> 1;
+                col[2] = (rec->col[2] + 1) >> 1;
+                col[3] = (rec->col[3] + 1) >> 1;
+                func_00161458(&buf, *(u32*)col);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                if (rec->f1 & 2) {
+                    func_001612F8(&buf, 0x7D, 0, 3, 0x412, 0);
+                } else {
+                    func_001612F8(&buf, 0x4D, 0, 3, 0x4FF, 0);
+                }
+                func_001612F8(&buf, 0x6D, 0, 3, 0x4FF, 0);
+                if (rec->f1 & 2) {
+                    func_001612F8(&buf, 0x5D, 0, 1, 4, 0);
+                } else {
+                    func_001612F8(&buf, 0x4D, 0, 1, 4, 0);
+                }
+                func_001612F8(&buf, 0x4D, 0, 1, 4, 0);
+                func_00152D70(&buf);
+                break;
+            case 2:
+            case 3:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x5F001);
+                if (rec->kind == 2) {
+                    func_00161708(&buf, 0x42, 0x44);
+                } else {
+                    func_00161708(&buf, 0x42, 0x49);
+                }
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00161278(&buf, 1);
+                break;
+            case 0: {
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 4, 0x4F12, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x47, 0x70000);
+                    func_00161708(&buf, 0x42, 0);
+                } else {
+                    func_00161708(&buf, 0x47, (rec->f1 & 4) ? 0x737EB : 0x717EB);
+                    sel = (rec->f1 & 1) ? 2 : 1;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                }
+                ents++;
+                func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 4, 0x41F2, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x53001);
+                if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x42, 0x8000000068);
+                } else {
+                    func_00161708(&buf, 0x42, 0x48);
+                }
+                ents++;
+                func_00161708(&buf, 0x3D, 0);
+                func_001B29E0(rec->f14, j, 1, rec->kind, &buf);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 4, 0x4F12, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x53001);
+                if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x42, 0x8000000068);
+                } else {
+                    func_00161708(&buf, 0x42, 0x48);
+                }
+                func_00161708(&buf, 0x3D, 0);
+                Found_1B3510* found = (Found_1B3510*)func_001B4688(rec->f10);
+                if (found) {
+                    func_001B29E0(found->f14, j, 0, rec->kind, &buf);
+                } else {
+                    func_001B29E0(rec->f14, j, 2, rec->kind, &buf);
+                }
+                func_00152D70(&buf);
+                break;
+            }
+            case 5:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x24C, 0, 3, 0x412, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x48, 0x31001);
+                func_00161708(&buf, 0x43, 0x44);
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00152D70(&buf);
+                break;
+            case 9:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x4C, 0, 3, 0x41F, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x51001);
+                func_00161708(&buf, 0x42, 0x6A);
+                func_00152D70(&buf);
+                break;
+            }
+        }
+    }
+}

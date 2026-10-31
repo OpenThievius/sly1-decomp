@@ -424,3 +424,57 @@ void func_001F56D8(Ctx_1F56D8* ctx, Obj_1F56D8* self)
         func_00178598(self, f.a, f.f60);
     }
 }
+
+typedef void (*Fn_1F4500)(void* self);
+typedef void (*Fn2_1F4500)(void* self, void* s3);
+
+struct Obj_1F4500 {
+    Fn_1F4500* vtbl;
+    Fn2_1F4500* vtbl2() { return (Fn2_1F4500*)vtbl; }
+    u8 pad04[0x10];
+    s32 f14;
+    s32 f18;
+    u8 pad1C[0x2E4 - 0x1C];
+    s32 f2E4;
+    u8 pad2E8[0x310 - 0x2E8];
+    s32 count;
+    Obj_1F4500** items;
+};
+
+void func_00138550(void* a, void* b);
+void func_00137EB0(void* a, void* b);
+void func_00137E70(void* a, void* b);
+s32 func_001E4C48(void* a, void* b, void* c, void* d, void* e);
+void func_0011EC40(void* a, void* b);
+s32 func_00137D10(void* a);
+void* func_0018D500(s32 size);
+void* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
+
+void func_001F4500(void* self_, void* s3)
+{
+    Obj_1F4500* self = (Obj_1F4500*)self_;
+    func_00138550(s3, (u8*)self + 0x2FC);
+    func_00138550(s3, (u8*)self + 0x308);
+    func_00137EB0(s3, (u8*)self + 0xD0);
+    func_00137E70(s3, (u8*)self + 0x100);
+    Fn_1F4500 f = self->vtbl[22];
+    if (f != 0) {
+        f(self);
+    }
+    self->f2E4 = 0;
+    func_001E4C48(s3, (u8*)self + 0x2EC, (u8*)self + 0x2F0, (u8*)self + 0x2F4, (u8*)self + 0x2F8);
+    s32 i = 0;
+    func_0011EC40(self, s3);
+    s32 n = func_00137D10(s3);
+    self->count = n;
+    self->items = (Obj_1F4500**)func_0018D500(n * 4);
+    while (i < self->count) {
+        s32 a = func_00137D10(s3);
+        s32 b = func_00137D10(s3);
+        s32 c = func_00137D10(s3);
+        Obj_1F4500* o = (Obj_1F4500*)func_0011E580(a, self->f14, self->f18, b, c);
+        self->items[i++] = o;
+        o->vtbl2()[14](o, s3);
+        o->vtbl[7](o);
+    }
+}

@@ -884,3 +884,184 @@ void func_001BA130(Obj_1BA130* self, Obj_1BA130* other)
     self->f540 = 0;
     self->f538 |= 0x20000000000ULL;
 }
+
+// NEAR: 14 lines: retail preloads f400/f40C into s0 (lw s0 before loop and in the bnel delay slot), we load into v1; f408 loop test reload; last loop pointer s2 vs index
+
+struct In_1BAC30 { u8 pad[4]; };
+struct Blk_1BAC30 {
+    u64 q0 __attribute__((packed));
+    u64 q1 __attribute__((packed));
+    u64 q2 __attribute__((packed));
+    u64 q3 __attribute__((packed));
+    s32 w8;
+};
+struct Self_1BAC30;
+typedef void (*VFn_1BAC30)(Self_1BAC30* self);
+struct VT_1BAC30 {
+    u8 pad_00[0xD8];
+    VFn_1BAC30 vD8;
+    u8 pad_DC[0x120 - 0xDC];
+    VFn_1BAC30 v120;
+};
+struct Pair_1BAC30 { s32 a; s32 b; };
+struct Self_1BAC30 {
+    VT_1BAC30* vtbl;
+    u8 pad_04[0x10];
+    void* f14;
+    s32 f18;
+    u8 pad_1C[0x2C8 - 0x1C];
+    u64 flags;
+    u8 pad_2D0[0x2F0 - 0x2D0];
+    u8 f2F0[0x368 - 0x2F0];
+    f32 f368;
+    u8 pad_36C[0x380 - 0x36C];
+    Blk_1BAC30 f380;
+    Blk_1BAC30 f3A4;
+    u8 pad_3C8[4];
+    f32 f3CC;
+    f32 f3D0;
+    u8 pad_3D4[0x3F0 - 0x3D4];
+    u8 f3F0[0xC];
+    s32 f3FC;
+    Pair_1BAC30* f400;
+    s32* f404;
+    s32 f408;
+    Pair_1BAC30* f40C;
+    s32* f410;
+    u8 pad_414[0x4D0 - 0x414];
+    u8 f4D0[0x18];
+    Blk_1BAC30 f4E8;
+    Blk_1BAC30 f50C;
+    u8 f530[0xC];
+};
+
+s32 func_00137B90(In_1BAC30* in);
+void func_00137FB0(In_1BAC30* in, Blk_1BAC30* p);
+void func_00160EA0(Blk_1BAC30* a, s32 b, Blk_1BAC30* c);
+void func_00138278(In_1BAC30* in, Blk_1BAC30* a, u8* out);
+f32 func_00137DF8(In_1BAC30* in);
+void func_00137EB0(In_1BAC30* in, u8* p);
+void func_00137E70(In_1BAC30* in, u8* p);
+void func_001B9448(Self_1BAC30* self, f32 x);
+s32 func_00137BE0(In_1BAC30* in);
+void* func_0018D500(s32 size);
+s32 func_00137D10(In_1BAC30* in);
+s32 func_00137C40(In_1BAC30* in);
+void func_001289C0(Self_1BAC30* self, In_1BAC30* in);
+void func_001B7C40(Self_1BAC30* self, s32 x);
+void func_00138F28(void* a, Self_1BAC30* b);
+
+void func_001BAC30(Self_1BAC30* self, In_1BAC30* in)
+{
+    s32 i;
+    s32 j;
+    s32 n;
+    Pair_1BAC30* e;
+    u8 flag = func_00137B90(in) & 1;
+    self->flags = (self->flags & ~(1ULL << 33)) | ((u64)flag << 33);
+    func_00137FB0(in, &self->f380);
+    self->f3D0 = *(f32*)&self->f380;
+    self->f3CC = *(f32*)&self->f380;
+    if (self->flags & (1ULL << 33)) {
+        self->f3A4 = self->f380;
+    } else {
+        func_00160EA0(&self->f380, 0, &self->f3A4);
+    }
+    func_00138278(in, &self->f3A4, self->f3F0);
+    i = 0;
+    self->f368 = func_00137DF8(in);
+    func_00137EB0(in, self->f2F0);
+    func_00137E70(in, self->f4D0);
+    func_001B9448(self, 1.0f);
+    self->f3FC = func_00137BE0(in);
+    self->f400 = (Pair_1BAC30*)func_0018D500(self->f3FC << 3);
+    if (self->f3FC > 0) {
+        do {
+            e = self->f400;
+            e += i++;
+            e->a = func_00137D10(in);
+            e->b = func_00137BE0(in);
+        } while (i < self->f3FC);
+    }
+    n = func_00137C40(in);
+    j = 0;
+    self->f404 = (s32*)func_0018D500(n << 2);
+    if (n > 0) {
+        do {
+            s32 v = func_00137D10(in);
+            self->f404[j] = v;
+            j++;
+        } while (j < n);
+    }
+    self->f408 = func_00137C40(in);
+    i = 0;
+    self->f40C = (Pair_1BAC30*)func_0018D500(self->f408 << 3);
+    while (i < self->f408) {
+        e = self->f40C;
+        e += i++;
+        e->a = func_00137D10(in);
+        e->b = func_00137D10(in);
+    }
+    if (self->f408 > 0) {
+        j = 0;
+        self->f410 = (s32*)func_0018D500((*(s32*)((u8*)&self->f3A4 + 12) + 1) << 2);
+        if (*(s32*)((u8*)&self->f3A4 + 12) >= 0) {
+            do {
+                s32 v = func_00137D10(in);
+                self->f410[j] = v;
+                j++;
+            } while (*(s32*)((u8*)&self->f3A4 + 12) >= j);
+        }
+    }
+    func_00137FB0(in, &self->f4E8);
+    if (self->flags & (1ULL << 33)) {
+        self->f50C = self->f4E8;
+    } else {
+        func_00160EA0(&self->f4E8, 0, &self->f50C);
+    }
+    func_00138278(in, &self->f50C, self->f530);
+    func_001289C0(self, in);
+    func_001B7C40(self, 1);
+    self->vtbl->v120(self);
+    if (self->f18 == 0) {
+        self->vtbl->vD8(self);
+        func_00138F28(self->f14, self);
+    }
+}
+
+struct Quad_1B9F30 { f32 v[4]; } __attribute__((aligned(16)));
+struct Sub_1B9F30 { s32 pad; };
+struct Self_1B9F30 {
+    u8 pad[0x110];
+    Sub_1B9F30 sub;
+    u8 pad114[0x2C];
+    Quad_1B9F30 q140;
+    Quad_1B9F30 q150;
+};
+struct Out_1B9F30 {
+    s32 f00;
+    u8 pad04[0x0C];
+    Quad_1B9F30 q10;
+    Quad_1B9F30 q20;
+    f32 f30;
+    f32 f34;
+    f32 f38;
+    s32 f3C;
+};
+
+void func_00189378(Sub_1B9F30* sub, s32 zero, Quad_1B9F30* out);
+f32 func_00205778(f32 a, f32 b);
+extern f32 D_0026185C[];
+
+void func_001B9F30(Self_1B9F30* self, Out_1B9F30* out)
+{
+    Quad_1B9F30 tmp[3];
+    out->q10 = self->q140;
+    out->q20 = self->q150;
+    func_00189378(&self->sub, 0, &tmp[0]);
+    out->f30 = func_00205778(-tmp[0].v[1], -tmp[0].v[0]);
+    out->f34 = 100.0f;
+    out->f00 = 0;
+    out->f38 = D_0026185C[0];
+    out->f3C = 0;
+}

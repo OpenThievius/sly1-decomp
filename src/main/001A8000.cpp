@@ -1403,3 +1403,260 @@ void func_001AB890(Obj_001AB890* self, f32 x)
     func_001AB980(self, 0.0f);
     self->vtbl[14](self);
 }
+
+// NEAR: (fixed: indexed loop gave EXACT)
+// allocator puts the count in $s1 and the pointer in $s0; retail is the other way round.
+
+typedef void (*VFn_001AA178)(void* self);
+struct Obj_001AA178 {
+    VFn_001AA178* vtbl;
+    u8 pad0[0x250 - 4];
+    void* f250;
+};
+
+extern u8 D_00275F80[];
+void func_001EFEE0(u8* a);
+void func_001AE820(u8* a);
+
+void func_001AA178(void)
+{
+    s32 i;
+    for (i = 0; i < 0x25; i++) {
+        Obj_001AA178* p = ((Obj_001AA178**)D_002486B0)[i];
+        if (p->f250 != 0) {
+            p->vtbl[9](p);
+        }
+    }
+    func_001EFEE0(D_00275F80);
+    func_001AE820((u8*)&D_00273EB0);
+}
+
+struct Obj_1AA298;
+struct VT_1AA298 {
+    u8 p0[0x2C];
+    f32 (*f2C)(Obj_1AA298*);
+    f32 (*f30)(Obj_1AA298*);
+    f32 (*f34)(Obj_1AA298*);
+    u8 p38[8];
+    void (*f40)(Obj_1AA298*, s32);
+};
+struct Obj_1AA298 {
+    VT_1AA298* vt;
+    u8 p4[0x21C - 4];
+    f32 f21C, f220, f224, f228, f22C, f230;
+    u8 p234[0x23C - 0x234];
+    f32 f23C;
+    u8 p240[0x24C - 0x240];
+    f32 f24C;
+    s32 f250;
+    f32 f254;
+    f32* f258;
+};
+
+void func_001AAEC0(Obj_1AA298* self);
+extern f32 D_002743A0[];
+
+void func_001AA298(Obj_1AA298* self) {
+    f32 t = *self->f258;
+    s32 s = self->f250;
+    switch (s) {
+    case 2: {
+        f32 d = self->vt->f30(self);
+        if (d != 0.0f) {
+            if (d <= t - self->f254) s = 3;
+        }
+        break; }
+    case 1: {
+        f32 d = self->vt->f2C(self);
+        f32 zero = 0.0f;
+        f32 x;
+        if (d != zero) {
+            f32 one = 1.0f;
+            x = (t - self->f254 + self->f24C) / d;
+            if (x < zero) x = zero;
+            else if (one < x) x = one;
+            self->f23C = x;
+        }
+        if (self->f23C >= 1.0f) s = 2;
+        break; }
+    case 3: {
+        f32 d = self->vt->f34(self);
+        f32 zero = 0.0f;
+        f32 x;
+        if (d != zero) {
+            f32 one = 1.0f;
+            x = (t - self->f254 + self->f24C) / d;
+            f32 y = x < zero ? zero : (one < x ? one : x);
+            self->f23C = 1.0f - y;
+        }
+        if (self->f23C <= 0.0f) s = 0;
+        break; }
+    }
+    if (s == self->f250) {
+        f32 p = self->f23C;
+        f32 k = D_002743A0[0] + p * (D_002743A0[1] + p * D_002743A0[2]);
+        self->f21C = self->f22C + k * (self->f224 - self->f22C);
+        self->f220 = self->f230 + k * (self->f228 - self->f230);
+        func_001AAEC0(self);
+    }
+    self->vt->f40(self, s);
+}
+
+struct Entry_1A8150 { s32 f0; s32 f4; u8 pad[8]; s32 f10; };
+struct Table_1A8150 { u8 pad[0x34]; s32 count; Entry_1A8150* items; };
+
+void* func_0018D5C0(u32 n);
+
+void func_001A8150(Table_1A8150* self, s32 a1, s32 a2, s32 a3, s32 a4)
+{
+    if (self->items == 0) {
+        self->items = (Entry_1A8150*)func_0018D5C0(0x50);
+    }
+    Entry_1A8150* e = &self->items[self->count++];
+    e->f0 = a1;
+    e->f4 = a2;
+    e->f10 = ((((e->f10 & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
+}
+
+struct Obj_1AAF88 {
+    u8 pad000[4];
+    u32 f004;
+    u8 pad008[0x20C];
+    s32 f214;
+    u8 pad218[0x48];
+    s32 f260;
+    void* f264;
+    void* f268;
+    f32 f26C;
+};
+
+extern u8* D_002623C0;
+extern u8* D_002623C4;
+extern u8* D_002623C8;
+extern u8* D_00275710;
+
+void func_001AA268(Obj_1AAF88* self);
+
+void func_001AAF88(Obj_1AAF88* self)
+{
+    func_001AA268(self);
+    self->f004 = (u32)func_0015C1C0(2);
+    self->f260 = -1;
+    self->f26C = 6000.0f;
+    switch (self->f214) {
+    case 3:
+        self->f264 = D_002623C0 + 0x19E0;
+        break;
+    case 4:
+        self->f264 = D_002623C8 + 0x64;
+        self->f268 = D_00275710 + 0x2300;
+        break;
+    case 5:
+        self->f264 = D_002623C4 + 0x438;
+        break;
+    case 6:
+        self->f264 = D_002623C0 + 0x19E8;
+        break;
+    case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+    case 28: case 29:
+    case 36:
+        self->f264 = &self->f260;
+        break;
+    }
+}
+
+struct A_1AB2B8 { u8 pad0[0x19D8]; s32 f19D8; };
+struct B_1AB2B8 { u8 pad0[0x2354]; s32 f2354; };
+struct Self_1AB2B8 {
+    u8 pad0[8];
+    char buf[0x200];
+    s32 f208[3];
+    s32 f214;
+    u8 pad218[0x260 - 0x218];
+    s32 f260;
+    u8 pad264[4];
+    s32* f268;
+};
+
+s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
+void func_001AA5A0(Self_1AB2B8* self);
+extern char D_0024CC78[];
+extern char D_0024CC80[];
+extern char D_0024CC88[];
+extern char D_0024CC90[];
+extern char D_0024CC98[];
+extern char D_0024CCA8[];
+extern char D_0024CCB0[];
+extern char D_0024CCB8[];
+extern s32 D_002751D4;
+
+void func_001AB2B8(Self_1AB2B8* self)
+{
+    switch (self->f214) {
+    case 3:
+        func_001E20B8(self->buf, 0x200, D_0024CC78, 0x4C, self->f260);
+        break;
+    case 4:
+        if (*self->f268 != 0) {
+            func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268,
+                          self->f260 < *self->f268 ? 0x3F : 0x21);
+        } else {
+            self->buf[0] = 0;
+        }
+        break;
+    case 5:
+        if ((u32)(((A_1AB2B8*)D_002623C0)->f19D8 - 1) < 4) {
+            func_001E20B8(self->buf, 0x200, D_0024CC88, self->f260, 0x4B);
+        } else {
+            self->buf[0] = 0;
+        }
+        break;
+    case 6:
+        if (((B_1AB2B8*)D_00275710)->f2354 != 0) {
+            func_001E20B8(self->buf, 0x200, D_0024CC78, 0x43, self->f260);
+        } else {
+            self->buf[0] = 0;
+        }
+        break;
+    case 7:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x56);
+        break;
+    case 8:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x4E);
+        break;
+    case 9:
+        func_001E20B8(self->buf, 0x200, D_0024CC90, 0x46, self->f260, *self->f268);
+        break;
+    case 10:
+        func_001E20B8(self->buf, 0x200, D_0024CC78, 0x4E, self->f260);
+        break;
+    case 11:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x56);
+        break;
+    case 28:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, D_002751D4, 0x56);
+        break;
+    case 29:
+        func_001E20B8(self->buf, 0x200, D_0024CC90, 0x4E, self->f260, D_002751D4);
+        break;
+    case 12:
+        func_001E20B8(self->buf, 0x200, D_0024CC80, self->f260, *self->f268, 0x64);
+        break;
+    case 13:
+        func_001E20B8(self->buf, 0x200, D_0024CC98, 's',
+                      self->f260 >= 1 ? 'b' : 'm', self->f260 >= 2 ? 'b' : 'm',
+                      self->f260 >= 3 ? 'b' : 'm', self->f260 >= 4 ? 'b' : 'm',
+                      self->f260 >= 5 ? 'b' : 'm');
+        break;
+    case 14:
+        func_001E20B8(self->buf, 0x200, D_0024CCA8);
+        break;
+    case 15:
+        func_001E20B8(self->buf, 0x200, D_0024CCB0, 0x46, self->f260);
+        break;
+    case 36:
+        func_001E20B8(self->buf, 0x200, D_0024CCB8, self->f260);
+        break;
+    }
+    func_001AA5A0(self);
+}

@@ -478,3 +478,260 @@ void func_001D4C98(Obj_1D4C98* self)
         func_00175170(self, 2, 2);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1D4D08 { s32 a, b, c, d; };
+struct Ev_1D4D08 { s32 kind; s32 arg; s32 data; s32 fn; };
+struct Obj_1D4D08;
+typedef void (*Cb_1D4D08)(s32 data, Obj_1D4D08* self);
+typedef s32 (*VFnA_1D4D08)(Obj_1D4D08* self, s32 k);
+typedef void (*VFnB_1D4D08)(Obj_1D4D08* self, void* p);
+typedef void (*VFnC_1D4D08)(Obj_1D4D08* self, s32 id, void* p);
+struct Vt_1D4D08 {
+    u8 pad0[0x48];
+    VFnC_1D4D08 f48;
+    u8 pad4C[0x90 - 0x4C];
+    VFnB_1D4D08 f90;
+    VFnB_1D4D08 f94;
+    u8 pad98[0x13C - 0x98];
+    VFnA_1D4D08 f13C;
+};
+struct Obj_1D4D08 {
+    Vt_1D4D08* vt;
+    u8 pad4[0x10];
+    s32 f14;
+    u8 pad18[0x150 - 0x18];
+    union {
+        Quad_1D4D08 f150;
+        struct { f32 f150a; f32 f154; f32 f158; f32 f15C; };
+    };
+    Quad_1D4D08 f160;
+    u8 pad170[0x2220 - 0x170];
+    s32 f2220;
+    u8 pad2224[0x239C - 0x2224];
+    s32 f239C;
+    u8 pad23A0[0x23B0 - 0x23A0];
+    s32 f23B0;
+    u8 pad23B4[0x26B4 - 0x23B4];
+    Ev_1D4D08 ev;
+    s32 f26C4;
+    f32 f26C8;
+    u8 pad26CC[0x2730 - 0x26CC];
+    s32 f2730;
+    u8 pad2734[0x2BB0 - 0x2734];
+    Quad_1D4D08 f2BB0;
+    Quad_1D4D08 f2BC0;
+};
+struct Msg_1D4D08 { Obj_1D4D08* self; s32 v; };
+
+void func_001837E0(s32 target, s32 a, s32 b, Ev_1D4D08** c);
+void func_00175170(Obj_1D4D08* self, s32 a, s32 b);
+void func_001D4C90(Obj_1D4D08* self, s32 value);
+s32 func_001DDA80(s32 p);
+s32 func_00160D10(void);
+s32 func_00160C58(void);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+extern u32 D_00262C64;
+extern f32 D_0026185C[];
+extern u8 D_00248D30[];
+extern u8 D_00275040[];
+
+s32 func_001D4D08(Obj_1D4D08* self, Ev_1D4D08* msg)
+{
+    if (self->vt->f13C(self, msg->kind) != 0) {
+        return 0;
+    }
+    if (self->f2220 == 6 && self->f239C == 2) {
+        Ev_1D4D08* tmp = msg;
+        func_001837E0(self->f23B0, 0x13, 1, &tmp);
+        func_00175170(self, 2, 5);
+        return 0;
+    }
+    self->ev = *msg;
+    if (self->f2220 != 4 && self->f2220 != 0xB && self->f26C4 == 0 && (D_00262C64 & 1) == 0 &&
+        func_001DDA80(self->f14) == 0) {
+        s32 c;
+        switch (self->ev.kind) {
+        case 3:
+            c = func_00160D10() & 0x100;
+            break;
+        case 5:
+            c = func_00160D10() & 0x4000;
+            break;
+        default:
+            self->f2730 = 1;
+            goto check;
+        }
+        if (c == 0) {
+            self->f2730 = 1;
+        }
+    check:
+        if (self->f2730 != 0) {
+            if (func_00160C58() != 0) {
+                self->f26C4 = 1;
+                self->f26C8 = D_0026185C[0];
+            }
+        }
+    }
+    func_001D4C90(self, 0);
+    switch (msg->kind) {
+    case 0:
+        func_001BFCD8(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        {
+            Cb_1D4D08 fn = (Cb_1D4D08)self->ev.fn;
+            if (fn != 0) {
+                self->ev.fn = 0;
+                fn(self->ev.data, self);
+            } else {
+                func_00175170(self, 4, 0x2B);
+            }
+        }
+        func_001D4C90(self, (s32)func_001D51A0);
+        break;
+    case 6:
+        {
+            Cb_1D4D08 fn = (Cb_1D4D08)self->ev.fn;
+            if (fn != 0) {
+                self->ev.fn = 0;
+                fn(self->ev.data, self);
+            } else {
+                func_00175170(self, 4, 0x2B);
+            }
+        }
+        if (400.0f < self->f158) {
+            func_001BFCD8(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        }
+        func_001D4C90(self, (s32)func_001D5398);
+        break;
+    case 1:
+    case 2: {
+        s32 id;
+        if (self->f2220 == 0xD) {
+            self->f2BB0 = self->f2BC0 = *(Quad_1D4D08*)D_00248D30;
+        } else {
+            self->f2BB0 = self->f150;
+            self->f2BC0 = self->f160;
+        }
+        self->vt->f90(self, D_00248D30);
+        self->vt->f94(self, D_00248D30);
+        switch (msg->kind) {
+        case 1:
+            id = 0x25;
+            break;
+        case 2:
+            id = 0x26;
+            break;
+        }
+        func_00175170(self, 4, id);
+        func_001D4C90(self, (s32)func_001D5468);
+        break;
+    }
+    case 3:
+        if (self->f2730 == 0 || func_00160C58() != 0) {
+            func_00175170(self, 4, 0x27);
+            func_001D4C90(self, (s32)func_001D6608);
+        } else {
+            func_00175170(self, 4, 0x2F);
+        }
+        break;
+    case 4:
+        self->vt->f90(self, D_00275040);
+        if (func_00160C58() != 0) {
+            func_00175170(self, 4, 0x28);
+            func_001D4C90(self, (s32)func_001D6608);
+        } else {
+            func_00175170(self, 4, 0x31);
+        }
+        break;
+    case 5:
+        if (self->f2730 == 0 || func_00160C58() != 0) {
+            func_00175170(self, 4, 0x29);
+            func_001D4C90(self, (s32)func_001D6608);
+        } else {
+            func_00175170(self, 4, 0x30);
+        }
+        break;
+    }
+    if (self->f2730 != 0) {
+        Msg_1D4D08 m;
+        m.self = self;
+        m.v = msg->arg;
+        self->vt->f48(self, 0x17, &m);
+    }
+    return self->f2730;
+}
+
+struct Obj_1D54E0 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x2220 - 0x18];
+    s32 f2220;
+    u8 pad2[4];
+    s32 f2228;
+    u8 pad3[0x239C - 0x222C];
+    s32 f239C;
+    u8 pad4[0x26C4 - 0x23A0];
+    s32 f26C4;
+};
+
+struct Key_1D54E0;
+s32 func_001DDA80(Key_1D54E0* k);
+extern u32 D_00262C64;
+
+s32 func_001D54E0(Obj_1D54E0* self, s32 n)
+{
+    s32 v;
+    s32 k;
+    if (n == 3 || n == 5) {
+        switch (self->f2220) {
+        case 4:
+            switch (self->f2228) {
+            case 0x27:
+            case 0x29:
+            case 0x2C:
+            case 0x2F:
+            case 0x30:
+                return 1;
+            case 0x28:
+            case 0x2A:
+            case 0x2B:
+            case 0x2D:
+            case 0x2E:
+            default:
+                return 0;
+            }
+        case 6:
+            k = self->f239C;
+            if (k != 3) { if (k != 6) return 1; }
+            return 0;
+        case 2:
+            if (self->f2228 < 16) {
+                if (!(self->f2228 < 9)) return 1;
+            }
+        case 5:
+        default: {
+            s32 r = 0;
+            if (self->f2220 == 11) goto set;
+            if (func_001DDA80((Key_1D54E0*)self->f14) != 0) {
+set:
+                r = 1;
+            }
+            return r;
+        }
+        case 3:
+        case 7:
+        case 8:
+            goto one;
+        }
+    }
+    v = self->f2220;
+    if (v == 4) goto one;
+    if (v == 11) goto one;
+    if (self->f26C4 != 0) goto one;
+    if ((D_00262C64 & 1) != 0) goto one;
+    if (func_001DDA80((Key_1D54E0*)self->f14) != 0) goto one;
+    goto zero;
+one:
+    return 1;
+zero:
+    return 0;
+}

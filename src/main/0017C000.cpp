@@ -340,3 +340,102 @@ s32 func_0017E6D0(Obj_17E6D0* self)
     } else r = 0;
     return r;
 }
+
+// NEAR: only li s8,12 / ori s7 (pre-loop hoist order) swapped; the rest matches
+
+struct Reader_17FEC0;
+
+struct Pt_17FEC0 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+};
+
+struct Ent_17FEC0 {
+    s32 a;
+    s32 b;
+    s32 c;
+};
+
+struct Col_17FEC0 {
+    u8 c[4];
+};
+
+struct Rec_17FEC0 {
+    Col_17FEC0 col;
+    s32 n;
+    Ent_17FEC0* ents;
+};
+
+struct Obj_17FEC0 {
+    u8 pad0[0x34];
+    s32 f34;
+    Pt_17FEC0* f38;
+    u8 pad3C[4];
+    f32 f40;
+    f32 f44;
+    u8 pad48[4];
+    f32 f4C;
+    f32 f50;
+    f32 f54;
+    u8 pad58[4];
+    f32 f5C;
+    f32 f60;
+    u8 pad64[0x64 - 0x64];
+    Rec_17FEC0 recs[5];
+};
+
+void func_0011EC40(Obj_17FEC0* o, Reader_17FEC0* r);
+s32 func_00137BE0(Reader_17FEC0* r);
+f32 func_00137DF8(Reader_17FEC0* r);
+Pt_17FEC0* func_0018D5C0(s32 bytes);
+Ent_17FEC0* func_0018D500(s32 bytes);
+Col_17FEC0* func_001B4688(s32 key);
+
+void func_0017FEC0(Obj_17FEC0* self, Reader_17FEC0* rd)
+{
+    s32 i;
+    s32 m;
+    s32 j;
+    s32 k;
+
+    func_0011EC40(self, rd);
+    self->f34 = func_00137BE0(rd);
+    self->f38 = func_0018D5C0(self->f34 << 4);
+    for (i = 0; i < self->f34; i++) {
+        self->f38[i].x = func_00137DF8(rd);
+        self->f38[i].y = -func_00137DF8(rd);
+        self->f38[i].w = 1.0f;
+    }
+    self->f40 = func_00137DF8(rd);
+    self->f44 = func_00137DF8(rd);
+    self->f4C = 1.0f;
+    self->f50 = func_00137DF8(rd);
+    self->f54 = func_00137DF8(rd);
+    self->f60 = self->f50 - self->f40;
+    self->f5C = 1.0f;
+    m = 0;
+    for (; m < 5; m++) {
+        Col_17FEC0* p = func_001B4688(m + 0x48E);
+        Rec_17FEC0* r = &self->recs[m];
+        if (p != 0) {
+            r->col = p[1];
+            for (k = 0; k < 4; k++) {
+                r->col.c[k] = (r->col.c[k] + 1) >> 1;
+            }
+        } else {
+            Col_17FEC0 d;
+            *(u32*)&d = 0x80808080;
+            r->col = d;
+        }
+        r->n = func_00137BE0(rd);
+        r->ents = func_0018D500(r->n * 12);
+        for (j = 0; j < r->n; j++) {
+            Ent_17FEC0* e = &r->ents[j];
+            e->a = func_00137BE0(rd);
+            e->b = func_00137BE0(rd);
+            e->c = func_00137BE0(rd);
+        }
+    }
+}
