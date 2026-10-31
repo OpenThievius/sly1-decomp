@@ -16,7 +16,13 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
 - nonc: max.s, min.s, sqrt.s
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)
 - handwritten: spimdisasm says it was not made by the compiler
-- fragment: no `jr $ra` in its listing, or a positive stack adjustment first: not a whole function
+- fragment: no `jr $ra` in its listing, or a positive stack adjustment first: not a whole function.
+  Measured on the US build: 84 are lone 4-byte words after a return (an `addiu $sp` or a
+  delay-slot copy, then a padding nop), 54 start with a positive `addiu $sp` and are runs of
+  such copies, 40 are tail calls (they end in `j`), 6 are short mixed runs of instruction and
+  nop pairs. All are residue the assembler left after a function's return; the build keeps
+  their bytes from the disassembly, and no C function can produce them. Only func_001000C0
+  is a real function glued to a syscall stub, and splitting it would change the shared layout.
 
 What stops a function from being matched, the blocker column:
 
