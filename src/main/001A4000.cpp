@@ -1564,3 +1564,121 @@ void func_001A4070(Obj_1A4070* self, s32 n)
         func_001BFCD8((s32)(Kind_1A4070)kind, (void*)&self->f648, (void*)self, 0, 10000.0f, 6000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
     }
 }
+
+extern u8 D_00248D20[];
+
+struct Obj_1A6F88 {
+    u8 pad0[0x550];
+    s32 f550;
+    u8 pad554[0x568 - 0x554];
+    s32 f568;
+    f32 f56C;
+    f32 f570;
+    u8 pad574[0x590 - 0x574];
+    f32 f590;
+    s32 f594;
+    s32 f598;
+};
+void func_001B7968(Obj_1A6F88* self);
+void func_001B9AE0(Obj_1A6F88* self, s32 a, void* b, s32 c, s32 d);
+void func_001A6F88(Obj_1A6F88* self)
+{
+    s32* z;
+    func_001B7968(self);
+    func_001B9AE0(self, 2, D_00248D20, 3, 0);
+    f32 one = 1.0f;
+    f32 pt2 = 0.2f;
+    z = (s32*)&self->f590;
+self->f56C = one;
+self->f590 = one;
+self->f568 = 8;
+self->f550 = -1;
+self->f570 = pt2;
+z[1]=0;z[2]=0;
+}
+
+struct Obj_1A7F50 { u8 pad[0x19EC]; s32 flags; };
+
+void func_001A7F50(Obj_1A7F50* self)
+{
+    s32 g = D_0026C3DC;
+    switch (g) {
+    case 1: self->flags = self->flags ^ 0x20; break;
+    case 2: self->flags = self->flags | 0x20; break;
+    case 3: self->flags = self->flags & 0xFFFFFFDF; break;
+    }
+    if (self->flags & 0x20) {
+        D_0026C3DC = 3;
+        return;
+    }
+    D_0026C3DC = 2;
+}
+
+extern u8 D_002483D0[];
+extern f32 D_0024CBC4;
+
+struct __attribute__((aligned(16))) Quad_1A7FE8 {
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 d;
+};
+
+struct V_1A7FE8 { s32 a; f32 b; s32 c; };
+
+struct Obj_1A7FE8 {
+    u8 p00[0x14];
+    s32 f14;
+    u8 p18[0x34];
+    s32 f4C;
+    s32 f50;
+    s32 f54;
+    s32 f58;
+    u8 q60[0x7C];
+    f32 fD8;
+    u8 pDC[0x34];
+    V_1A7FE8 v110;
+    u8 p11C[0x4];
+    s32 f120;
+    f32 f124;
+    u8 p128[0x1C];
+    f32 f144;
+    u8 p148[0x8];
+    u8 p150[0x18];
+    s32 f168;
+};
+
+void func_00182C18(Obj_1A7FE8* self);
+struct Buf_1A7FE8 { u8 b[1]; };
+s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
+struct Own_1A7FE8 { u8 b[1]; };
+void func_001DBCC8(Own_1A7FE8* owner, void* fn, void* arg, s32 a3, s32 a4);
+void func_001A8208(Obj_1A7FE8* self);
+
+void func_001A7FE8(Obj_1A7FE8* self)
+{
+    func_00182C18(self);
+    u8* s1 = (u8*)self + 0x60;
+    self->f4C = -1;
+    self->f50 = -1;
+    self->f54 = -1;
+    self->f58 = -1;
+    (void)func_001F5C0C((Buf_1A7FE8*)s1, 0, 0x80);
+    Quad_1A7FE8* src = (Quad_1A7FE8*)D_002483D0;
+    *(Quad_1A7FE8*)(s1 + 0x20) = src[0];
+    *(Quad_1A7FE8*)(s1 + 0x30) = src[1];
+    *(Quad_1A7FE8*)(s1 + 0x40) = src[2];
+    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
+    V_1A7FE8* p = &self->v110;
+    p->a = 0;
+    p->b = 1.0f;
+    p->c = 0;
+    self->f120 = 0;
+    self->f124 = 20000.0f;
+    (void)func_001F5C0C((Buf_1A7FE8*)self->p150, 0, 0x18);
+    f32 d = D_0024CBC4;
+    self->fD8 = 5.0f;
+    self->f168 = 0;
+    self->f144 = d;
+    func_001DBCC8((Own_1A7FE8*)self->f14, (void*)func_001A8208, self, 0, 0);
+}

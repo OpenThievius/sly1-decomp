@@ -1501,3 +1501,19 @@ void func_001AA298(Obj_1AA298* self) {
     }
     self->vt->f40(self, s);
 }
+
+struct Entry_1A8150 { s32 f0; s32 f4; u8 pad[8]; s32 f10; };
+struct Table_1A8150 { u8 pad[0x34]; s32 count; Entry_1A8150* items; };
+
+void* func_0018D5C0(u32 n);
+
+void func_001A8150(Table_1A8150* self, s32 a1, s32 a2, s32 a3, s32 a4)
+{
+    if (self->items == 0) {
+        self->items = (Entry_1A8150*)func_0018D5C0(0x50);
+    }
+    Entry_1A8150* e = &self->items[self->count++];
+    e->f0 = a1;
+    e->f4 = a2;
+    e->f10 = ((((e->f10 & -2) | (a3 & 1)) & -3) | ((a4 & 1) << 1));
+}

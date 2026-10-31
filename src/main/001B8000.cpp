@@ -1028,3 +1028,40 @@ void func_001BAC30(Self_1BAC30* self, In_1BAC30* in)
         func_00138F28(self->f14, self);
     }
 }
+
+struct Quad_1B9F30 { f32 v[4]; } __attribute__((aligned(16)));
+struct Sub_1B9F30 { s32 pad; };
+struct Self_1B9F30 {
+    u8 pad[0x110];
+    Sub_1B9F30 sub;
+    u8 pad114[0x2C];
+    Quad_1B9F30 q140;
+    Quad_1B9F30 q150;
+};
+struct Out_1B9F30 {
+    s32 f00;
+    u8 pad04[0x0C];
+    Quad_1B9F30 q10;
+    Quad_1B9F30 q20;
+    f32 f30;
+    f32 f34;
+    f32 f38;
+    s32 f3C;
+};
+
+void func_00189378(Sub_1B9F30* sub, s32 zero, Quad_1B9F30* out);
+f32 func_00205778(f32 a, f32 b);
+extern f32 D_0026185C[];
+
+void func_001B9F30(Self_1B9F30* self, Out_1B9F30* out)
+{
+    Quad_1B9F30 tmp[3];
+    out->q10 = self->q140;
+    out->q20 = self->q150;
+    func_00189378(&self->sub, 0, &tmp[0]);
+    out->f30 = func_00205778(-tmp[0].v[1], -tmp[0].v[0]);
+    out->f34 = 100.0f;
+    out->f00 = 0;
+    out->f38 = D_0026185C[0];
+    out->f3C = 0;
+}

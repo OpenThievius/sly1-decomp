@@ -1850,3 +1850,30 @@ void* func_001149F0(void* ret, s32 unused, Src_1149F0* src, void* arg3)
     func_0011B060(&f.A, 2);
     return ret;
 }
+
+struct Quad_117C48 { s32 a, b, c, d; };
+struct In_117C48 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+
+extern void* D_00275710;
+
+s32 func_0011B008(Quad_117C48* q);
+void func_00117AF0(Quad_117C48* t, s32 a, void* b);
+s32 func_0011B0A8(Quad_117C48* a, Quad_117C48* b);
+s32 func_0011B060(Quad_117C48* q, int mode);
+s32 func_0011B018(void* dst, Quad_117C48* src);
+s32 func_0015A198(void* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
+
+void* func_00117C48(void* out, s32 unused, In_117C48* in)
+{
+    Quad_117C48 q;
+    u8 buf[0x100];
+    Quad_117C48 t;
+    (void)func_0011B008(&q);
+    s32 r = func_0015A198(D_00275710, in->wc ? 0x101 : 0x105, in->w4, (void*)in->wc, 0x40, buf);
+    func_00117AF0(&t, r, buf);
+    (void)func_0011B0A8(&q, &t);
+    (void)func_0011B060(&t, 2);
+    (void)func_0011B018(out, &q);
+    (void)func_0011B060(&q, 2);
+    return out;
+}

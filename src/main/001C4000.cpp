@@ -755,3 +755,40 @@ void func_001C7520(Obj_001C7520* self)
     self->fBFC = D_0024D654;
     self->fC00 = D_0024D654;
 }
+
+extern f32 D_00275C60[];
+
+struct Poly_1C5438 { f32 a; f32 b; f32 c; };
+
+struct Ctx_1C5438 {
+    u8 pad0[0xD0];
+    f32 fD0;
+    f32 fD4;
+    u8 pad1[0x638 - 0xD8];
+    f32 f638;
+    f32 f63C;
+    u8 pad2[0x6F0 - 0x640];
+    Poly_1C5438 f6F0;
+};
+
+void func_001B89B8(Ctx_1C5438* self);
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA408(f32 a);
+
+void func_001C5438(Ctx_1C5438* self)
+{
+    func_001B89B8(self);
+    f32 t = func_00205778(self->fD4, self->fD0);
+    f32 ay = __builtin_fabsf(func_001EA408(self->f638 - t));
+    f32* lim = D_00275C60;
+    Poly_1C5438* p = &self->f6F0;
+    f32 v = self->f6F0.a + ay * (p->b + ay * p->c);
+    f32 lo = lim[0];
+    f32 hi = lim[1];
+    if (v < lo) {
+        v = lo;
+    } else if (hi < v) {
+        v = hi;
+    }
+    self->f63C = v;
+}

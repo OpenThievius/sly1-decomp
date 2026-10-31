@@ -1565,3 +1565,13 @@ void* func_0015DAB8(Table_15DAB8* self, u8 key)
     }
     return 0;
 }
+
+struct A_0015C058 { u8 pad[0x50]; s32 f50; };
+struct B_0015C058 { u8 pad0[0x50]; s32 f50; u8 pad1[0x278]; u32 f2CC; u8 pad2[0x268]; u64 f538; };
+
+s32 func_0015C058(A_0015C058* a0, B_0015C058* a1)
+{
+    if ((a1->f538 & 0x80000000000ULL) || a1->f50 == a0->f50) return 0;
+    u64 v = a1->f2CC;
+    return ((s32)v ^ 1) & 1;
+}

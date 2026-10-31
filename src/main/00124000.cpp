@@ -862,3 +862,42 @@ void func_00125B70(Self_00125B70* self, Quad_00125B70* src, Dst_00125B70* dst)
         dst->f40 = 1.0f;
     }
 }
+
+struct Host_124DF8 { u8 pad[0x14]; void* f14; };
+struct Item_124DF8 { u32 flags; u32 id; u32 off8; };
+struct Self_124DF8 { u8 pad0[0x14]; void* f14; };
+
+void* func_0015A418(Host_124DF8* host, s32 kind, u32 id, Self_124DF8* ctx);
+void func_00182ED8(void* node);
+void func_001832F0(void* node, Self_124DF8* ctx);
+
+void func_00124DF8(Self_124DF8* self, s32 count, Item_124DF8* item)
+{
+    void* host = self->f14;
+    if (count <= 0) {
+        return;
+    }
+    Item_124DF8* it = item;
+    s32 n = count;
+    do {
+        u32 f = it->flags;
+        s32 kind = (f & 1) ? 5 : 1;
+        if (f & 0x20) {
+            kind |= 0x100;
+        }
+        void* node = func_0015A418((Host_124DF8*)host, kind, it->id, self);
+        if (node) {
+            if (!(it->flags & 8)) {
+                *(void**)((u8*)self + it->off8) = node;
+            }
+            if (!(it->flags & 4)) {
+                func_00182ED8(node);
+            }
+            if (it->flags & 0x10) {
+                func_001832F0(node, self);
+            }
+        }
+        n--;
+        it++;
+    } while (n != 0);
+}

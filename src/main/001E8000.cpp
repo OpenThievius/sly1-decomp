@@ -1008,3 +1008,13 @@ s32 func_001E8D58(Self_1E8D58* self)
     }
     return a1;
 }
+
+struct __attribute__((aligned(16))) Chunk_1EB550 { u8 b[0x80]; };
+struct Blk_1EB550 { u8 pad0[0x580]; Chunk_1EB550 c; u8 pad1[4]; s32 f604; };
+
+
+void func_001EB550(Blk_1EB550* a0)
+{
+    a0->c = ((Blk_1EB550*)D_00262E10)->c;
+    a0->f604 = ((Blk_1EB550*)D_00262E10)->f604;
+}

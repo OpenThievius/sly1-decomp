@@ -1724,3 +1724,60 @@ void func_001989B0(Obj_1989B0* self)
     }
     *(s32*)D_0027B314 = fr.prev;
 }
+
+extern s32 D_0026A720;
+extern f32 D_0024C868;
+extern f32 D_0026A838;
+
+struct Obj_198760 {
+    u8 pad000[0x640];
+    void* f640;
+    u8 pad644[0x67C - 0x644];
+    s32 f67C;
+    u8 pad680[0x698 - 0x680];
+    f32 f698;
+};
+
+struct Tmp_198760 {
+    void* f00;
+    void* f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    u8 pad14[0x40 - 0x14];
+};
+
+void* func_001925F0(Obj_198760* self, f32 f);
+s32 func_001300E8(void* key, s32 kind);
+s32 func_00182FC8(void* p);
+s32 func_00141170(void* self, void* value);
+s32 func_00177838(Tmp_198760* f, s32 a, s32 b);
+void func_001C7CB8(Obj_198760* self, f32 f);
+
+void func_00198760(Obj_198760* s1, f32 f)
+{
+    Obj_198760* s0 = (Obj_198760*)func_001925F0(s1, f);
+    if (func_001300E8(s0, 0x18) != 0) {
+        if (s0->f640 != 0) {
+            if (func_00182FC8(s0->f640) != 0) {
+                if (func_00141170(s0->f640, (u8*)s1 + 0x140) != 0) {
+                    Tmp_198760 t;
+                    t.f00 = s1;
+                    t.f10 = 2;
+                    t.f04 = s1;
+                    if (func_00177838(&t, 0, 0) != 0) {
+                        s32 n = s0->f67C + 1;
+                        if (!(n < D_0026A720)) {
+                            n = D_0026A720;
+                        }
+                        s0->f67C = n;
+                        if (s0->f698 == D_0024C868) {
+                            s0->f698 = D_0026185C[0] + D_0026A838;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    func_001C7CB8(s1, f);
+}

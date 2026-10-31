@@ -1170,3 +1170,75 @@ Self_1EE318* func_001EE318(Self_1EE318* self)
     self->f20 = 0;
     return self;
 }
+
+struct Obj_1EECE0;
+struct Link_1EECE0;
+extern Link_1EECE0* D_0027B314;
+struct Link_1EECE0 {
+    s32* a; s32* b; s32 c; Link_1EECE0* prev;
+    Link_1EECE0(s32* p) : a(p), b(p), c(p[2]), prev(D_0027B314) {}
+    ~Link_1EECE0() { D_0027B314 = prev; }
+};
+struct Obj_1EECE0 { void (**vtbl)(Obj_1EECE0*); };
+
+void func_00124A48(Obj_1EECE0* self);
+void func_001F55A8(void* self);
+void* func_0018D500(s32 size);
+
+extern Link_1EECE0* D_0027B314;
+
+void func_001EECE0(Obj_1EECE0* self)
+{
+    Link_1EECE0 fr((s32*)((u8*)self + 0x34));
+    D_0027B314 = &fr;
+    func_00124A48(self);
+    func_001F55A8((u8*)self + 0x590);
+    *(void**)((u8*)self + 0x560) = func_0018D500(0x80);
+    if (*(s32*)((u8*)self + 0x278) != 0) {
+        self->vtbl[0x36](self);
+    }
+}
+
+struct Obj_1EF900;
+struct Mgr_1EF900;
+typedef void (*VFn_1EF900)(Obj_1EF900* self, s32 id, void* evt);
+
+struct Obj_1EF900 {
+    VFn_1EF900* vtbl;
+    u8 pad0[0x2CC];
+    s32 state;
+    f32 timer;
+    u8 pad1[0xC];
+    s32 f2E4;
+    u8 f2E8[1];
+};
+
+struct Evt_1EF900 {
+    void* self;
+    s32 old;
+    s32 cur;
+};
+
+extern f32 D_0026185C[];
+
+void func_0013ECB0(Mgr_1EF900* mgr, s32 a, void* b, Obj_1EF900* self, s32 c);
+
+void func_001EF900(Obj_1EF900* self, s32 state)
+{
+    if (self->state != state) {
+        if (state != 0) {
+            if (state == 2)
+                func_0013ECB0((Mgr_1EF900*)D_00275710, self->f2E4, self->f2E8, self, 1);
+        } else {
+            if (self->state == 2)
+                func_0013ECB0((Mgr_1EF900*)D_00275710, self->f2E4, self->f2E8, self, 0);
+        }
+        Evt_1EF900 evt;
+        evt.old = self->state;
+        evt.self = self;
+        evt.cur = state;
+        self->state = state;
+        self->timer = D_0026185C[0];
+        self->vtbl[18](self, 0x16, &evt);
+    }
+}

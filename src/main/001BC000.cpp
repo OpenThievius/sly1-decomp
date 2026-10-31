@@ -1253,3 +1253,56 @@ void func_001BD678(Obj_1BD678* self, s32* outQueued, Obj_1BD678** queue, s32* ou
     *outQueued = nq;
     *outFlagged = nl;
 }
+
+struct Ent_1BF7F8 {
+    s32 idx;
+    s32 f4;
+    s32 f8;
+    u8 pad0C[0xC];
+    s32 f18;
+    u8 pad1C[0x14];
+    s32 f30;
+    u8 pad34[0x24];
+    f32 f58;
+    f32 f5C;
+    s32 f60;
+    u8 pad64[8];
+    s32 flag6C;
+    s32 f70;
+    s32 clampv(s32 v, s32 lo, s32 hi)
+    {
+        if (v < lo) {
+            return lo;
+        }
+        if (hi < v) {
+            return hi;
+        }
+        return v;
+    }
+};
+
+s32 func_0011D7D8(s32 a, s32 b);
+void func_0011D810(s32 x, s32 y);
+
+void func_001BF7F8(Ent_1BF7F8* p, f32 a)
+{
+    if (p == 0) {
+        return;
+    }
+    if (a == p->f58) {
+        if (p->f30 == 0) {
+            return;
+        }
+        if (!(0.0001f < p->f5C)) {
+            return;
+        }
+    }
+    s32 v0 = p->flag6C;
+    p->f58 = a;
+    if (v0 == 0) {
+        p->f70 = func_0011D7D8(p->f8, D_00245020[p->idx].b);
+        p->flag6C = 1;
+    }
+    s32 v = p->f70 + (s32)(p->f58 * 1524.0f) + p->f60;
+    func_0011D810(p->f18, p->clampv(v, -0x8000, 0x7FFF));
+}

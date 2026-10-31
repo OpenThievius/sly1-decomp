@@ -949,3 +949,21 @@ s32 func_0012E9E0(Obj_12E9E0* o, f32* pos, f32* vel)
     }
     return r;
 }
+
+struct Elem_12D2A8 { u64 q0 __attribute__((packed)); u64 q1 __attribute__((packed)); u64 q2 __attribute__((packed)); s32 w3; };
+struct Self_12D2A8 { u8 pad0[0x38]; s32 f38; Elem_12D2A8* f3C; u8 pad1[0x9C - 0x40]; Elem_12D2A8* f9C; };
+
+void func_001F5B08(Elem_12D2A8* dst, Elem_12D2A8* src, s32 bytes);
+
+void func_0012D2A8(Self_12D2A8* self, Elem_12D2A8* p)
+{
+    Elem_12D2A8 tmp = *p;
+    s32 idx = p - self->f3C;
+    self->f38 = self->f38 - 1;
+    if (idx < self->f38) {
+        func_001F5B08(p, p + 1, (self->f38 - idx) * 0x1C);
+    }
+    p = self->f3C + self->f38;
+    *p = tmp;
+    self->f9C = p;
+}

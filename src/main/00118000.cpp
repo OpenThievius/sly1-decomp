@@ -1608,3 +1608,58 @@ void func_0011AB58(World_11AB58* w) {
     func_0011C2E8(D_0025C2B0);
     func_0011C2E8(D_0025C2D0);
 }
+
+struct __attribute__((aligned(16))) Quad_1196C8 { s32 w[4]; };
+struct Node_1196C8 { s32 kind; Node_1196C8* f4; Node_1196C8* f8; };
+
+s32 func_0011B008(Quad_1196C8* q);
+void func_0011B018(void* out, Quad_1196C8* q);
+void func_0011B060(Quad_1196C8* q, s32 mode);
+void func_0011B0A8(Quad_1196C8* a, Quad_1196C8* b);
+void func_0011A080(Quad_1196C8* t, Node_1196C8* n, void* c);
+void* func_0011A630(void);
+void func_0011A358(Quad_1196C8* t, void* owner, Node_1196C8* kind, Quad_1196C8* body);
+void func_0011A328(void* slot, void* c);
+
+void* func_001196C8(void* self, Node_1196C8* x, void* c)
+{
+    Quad_1196C8 q, r, u, t;
+    func_0011B008(&q);
+    func_0011B008(&r);
+    func_0011B008(&u);
+    Node_1196C8* p = x->f4->f8;
+    void* d;
+    Node_1196C8* n;
+    if (p->kind == 0x1E) {
+        d = func_0011A630();
+        Node_1196C8* l = p->f4;
+        if (l) {
+            do {
+                Node_1196C8* e = l->f4;
+                Quad_1196C8* pr = &r;
+                func_0011A080(&t, e->f8, c);
+                func_0011B0A8(pr, &t);
+                func_0011B060(&t, 2);
+                func_0011A358(&t, d, e->f4, pr);
+                func_0011B0A8(&u, &t);
+                func_0011B060(&t, 2);
+                l = l->f8;
+            } while (l);
+        }
+        func_0011A328(d, c);
+    } else {
+        d = c;
+    }
+    n = p->f8;
+    while (n) {
+        func_0011A080(&t, n, d);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+        n = n->f8;
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&u, 2);
+    func_0011B060(&r, 2);
+    func_0011B060(&q, 2);
+    return self;
+}

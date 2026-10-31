@@ -1088,7 +1088,8 @@ struct Rec_16B190 {
 };
 
 extern u8* D_002623C0;
-extern s32 D_00262860[][2];
+struct Tab_16B300 { s32 a; s32 b; };
+extern Tab_16B300 D_00262860[];
 extern u8 D_00275BC0[];
 
 void* func_00160180(s32 key);
@@ -1140,7 +1141,7 @@ void func_0016B190(Obj_16B190* self)
             void* h = self->f2F8;
             callB = 0;
             if (h != 0) {
-                { func_001B64D8(h, D_00262860[idx][1]); }
+                { func_001B64D8(h, D_00262860[idx].b); }
             }
         }
         }
@@ -1685,4 +1686,66 @@ void func_0016A580(Obj_16A580* self, f32 t)
     }
     func_00189378((Sub_16A580*)((u8*)self + 0xD0), 0, &buf);
     func_001B91A8(self, &buf, self->w214, D_00248D30, self->w218, t);
+}
+
+// NEAR: only the order of `addiu v0,s5,lo(D_00261858)` vs `sw s4,0x2D4(s3)` differs (2 instrs swapped)
+
+struct Glob_16B300 { u8 pad[0x19EC]; s32 f19EC; };
+struct Self_16B300 {
+    u8 pad0[0x2D0]; s32 f2D0; s32 f2D4; f32 f2D8; u8 pad1[4]; void* f2E0;
+    u8 pad2[0x300 - 0x2E4]; s32 f300;
+};
+struct Slot_16B300 { u8 pad[0x20]; };
+
+struct Tm_16B300 { f32 f0; f32 f4; };
+extern Tm_16B300 D_00261858;
+extern f32 D_00262970;
+struct Gl_16B300 { u8 pad[0x268]; f32 f268; };
+extern u8 D_00262890[];
+extern u8 D_00262950[];
+extern s32 D_0026FCF4;
+void func_001BE728(Slot_16B300* s);
+s32 func_001BE980(void);
+void func_001B6628(void* h, s32 arg);
+void func_001B64D8(void* h, s32 arg);
+
+void func_0016B300(Self_16B300* self, s32 a, s32 b)
+{
+    if (a == self->f2D0 && b == self->f2D4) return;
+    if (a != self->f300 && a > 0) {
+        Slot_16B300* slot = 0;
+        u8* ent = (u8*)D_002623C0 + a * 0x44C;
+        if (*(s32*)(ent + 0x458) & 1) {
+            s32 fl = ((Glob_16B300*)D_002623C0)->f19EC;
+            if (!(fl & 2)) {
+                ((Glob_16B300*)D_002623C0)->f19EC = fl | 2;
+                slot = (Slot_16B300*)D_00262950;
+            }
+        } else {
+            Gl_16B300* gp = (Gl_16B300*)D_0026FA90;
+            f32 t = D_00261858.f4;
+            if (D_00262970 <= t - gp->f268) {
+                gp->f268 = t;
+                slot = (Slot_16B300*)(D_00262890 + (a << 5));
+            }
+        }
+        if (slot) {
+            func_001BE728(slot);
+            D_0026FCF4 = func_001BE980();
+        }
+    }
+    void* h = self->f2E0;
+    if (h) {
+        if (self->f2D0 == -1) {
+            if (a != 0) {
+                func_001B6628(h, D_00262860[a].b);
+                func_001B64D8(self->f2E0, D_00262860[a].a);
+            }
+        } else {
+            func_001B64D8(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
+        }
+    }
+    self->f2D0 = a;
+    self->f2D4 = b;
+    self->f2D8 = D_00261858.f4;
 }
