@@ -1077,3 +1077,17 @@ void func_001603E8(s32 n)
         break;
     }
 }
+
+void func_00160D30(u32* out)
+{
+    s32 m;
+    switch (D_002623C0->f19D8) {
+    case 4: m = 0x10000000; break;
+    case 1: m = 0x20000000; break;
+    case 2: m = 0x40000000; break;
+    case 3: m = 0x80000000; break;
+    case 0:
+    case 5: m = 0; break;
+    }
+    if (out) *out = m;
+}

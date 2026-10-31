@@ -1417,3 +1417,76 @@ void* func_001C15D8(void* out, void* base, Desc_1C15D8* d)
     func_0011B060(&q, 2);
     return out;
 }
+
+// EXACT: callee func_001EA728 declared with float params first
+
+struct Obj_1C3FC8;
+struct Vt_1C3FC8 {
+    u8 pad[0x94];
+    void (*f94)(Obj_1C3FC8* self, void* q);
+};
+struct __attribute__((aligned(16))) Quad_1C3FC8 { f32 v[4]; };
+struct Obj_1C3FC8 {
+    Vt_1C3FC8* vt;
+};
+
+extern f32 D_00261858[];
+extern Quad_1C3FC8 D_00248D30;
+extern u8 D_00274AA8[];
+extern s32 D_0026E228;
+extern u8 D_00261EF0[];
+extern u8 D_0026FF68[];
+extern f32 D_0024D560;
+
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA408(f32 a);
+void func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
+void func_00151E20(u8* a, f32 b);
+void func_00194D30(u8* a, s32 b, s32 c);
+void func_0012C918(void* a, Obj_1C3FC8* b, s32 c, void* d, f32 e, f32 f);
+
+#define F(o, off) (*(f32*)((u8*)(o) + (off)))
+#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+#define P(o, off) (*(void**)((u8*)(o) + (off)))
+
+void func_001C3FC8(Obj_1C3FC8* self, s32 state)
+{
+    void* s2;
+    f32 f12;
+    if (state == W(self, 0x610)) return;
+    if (W(self, 0x610) == 2) {
+        f32 t = D_00261858[1];
+        W(self, 0x694) = 3;
+        F(self, 0x640) = t;
+    }
+    W(self, 0x670) = 0;
+    if (state < 4) if (state >= 2) {
+        Quad_1C3FC8 q;
+        f32 a = func_00205778(F(self, 0x154), F(self, 0x150));
+        f32 b = func_001EA408(a + 3.14159274f);
+        F(self, 0x644) = b;
+        F(self, 0x648) = b;
+        q = D_00248D30;
+        f32 r = func_00205778(F(self, 0xD4), F(self, 0xD0));
+        func_001EA728(r, F(self, 0x644), 0.0f, D_00274AA8, (u8*)&q + 8);
+        self->vt->f94(self, &q);
+        W(self, 0x694) = 0;
+        D_0026E228 = -1;
+        if (state == 3) func_00151E20(D_00261EF0, 1.0f);
+    }
+    f12 = 0.0f;
+    switch (state) {
+    case 0: s2 = P(self, 0x618); break;
+    case 1: s2 = P(self, 0x61C); break;
+    case 2: s2 = P(self, 0x620); F(self, 0x640) = D_0024D560; break;
+    case 3: s2 = P(self, 0x624); break;
+    case 4:
+        func_00194D30(D_0026FF68, 0, 0x1A);
+        s2 = P(self, 0x624);
+        f12 = F(s2, 0x34);
+        break;
+    }
+    func_0012C918(s2, self, 1, (u8*)self + 0x628, f12, 1.0f);
+    W(self, 0x610) = state;
+    F(self, 0x614) = D_00261858[1];
+}
