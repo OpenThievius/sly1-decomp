@@ -201,3 +201,167 @@ void func_001303F0(f32* p0, f32* p1, f32* p2, f32 dur, f32 t, f32 e, f32 a, f32 
         *p2 = ((s1 + s2) + s3) * ee;
     }
 }
+
+struct Rgba_133B58
+{
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a;
+    Rgba_133B58() {}
+    Rgba_133B58(const Rgba_133B58& o) { *this = o; }
+};
+struct Gs_133B58;
+struct Span_133B58;
+struct Self_133B58
+{
+    u8 pad000[0x30C];
+    f32 phase;
+};
+
+extern Rgba_133B58 D_002610E0;
+extern Rgba_133B58 D_002610D8;
+extern Span_133B58 D_00261280;
+extern Span_133B58 D_002612B0;
+
+f32 func_00205210(f32 x);
+f32 func_00131000(Span_133B58* s, s32 x);
+void func_001613C0(Gs_133B58* gs, s32 a, s32 b, s32 c);
+void func_00161458(Gs_133B58* gs, u32 c);
+void func_00161670(Gs_133B58* gs, s32 x, s32 y, s32 a3, s32 a4);
+void func_001615F0(Gs_133B58* gs, s32 x, s32 y, s32 a3, s32 a4);
+
+struct Lerp_133B58
+{
+    static s32 Channel(s32 a, s32 b, f32 t)
+    {
+        if (a == b)
+        {
+            return b;
+        }
+        if (a < b)
+        {
+            return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
+        }
+        return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
+    }
+
+    static Rgba_133B58 Mix(Rgba_133B58 a, Rgba_133B58 b, f32 t)
+    {
+        Rgba_133B58 c;
+        c.r = Channel(a.r, b.r, t);
+        c.g = Channel(a.g, b.g, t);
+        c.b = Channel(a.b, b.b, t);
+        c.a = Channel(a.a, b.a, t);
+        return c;
+    }
+};
+
+void func_00133B58(Self_133B58* self, Gs_133B58* gs)
+{
+    Rgba_133B58 c0;
+    Rgba_133B58 c1;
+    Rgba_133B58 c2;
+    f32 step = 1.0f / 24.0f;
+    f32 t;
+    t = 0.5f - func_00205210(self->phase) * 0.5f;
+    c0 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    t = 0.5f - func_00205210(self->phase + 1.5707964f) * 0.5f;
+    c1 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    t = 0.5f - func_00205210(self->phase + 3.1415927f) * 0.5f;
+    c2 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    s32 i;
+    f32 x;
+
+    func_001613C0(gs, 0x8C, 2, 0x41);
+
+    func_00161458(gs, *(u32*)&c2);
+    func_00161670(gs, 0x6C00, 0x7B45, 0, 0);
+    func_00161458(gs, *(u32*)&c1);
+    func_00161670(gs, 0x6C00, 0x7B62, 0, 0);
+    x = 1.0f / 24.0f;
+    for (i = 1; i < 24; i++)
+    {
+        f32 v = func_00131000(&D_00261280, i);
+        f32 sx = x * 640.0f;
+        f32 v2 = v + 4.0f;
+        func_00161458(gs, *(u32*)&c2);
+        s32 px = (s32)((sx + 1728.0f) * 16.0f);
+        x += step;
+        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        func_00161458(gs, *(u32*)&c1);
+        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    }
+    func_00161458(gs, *(u32*)&c2);
+    func_001615F0(gs, 0x9400, 0x7B45, 0, 0);
+    func_00161458(gs, *(u32*)&c1);
+    func_001615F0(gs, 0x9400, 0x7B62, 0, 0);
+
+    func_00161458(gs, *(u32*)&c2);
+    func_00161670(gs, 0x6C00, 0x80FA, 0, 0);
+    func_00161458(gs, *(u32*)&c1);
+    func_00161670(gs, 0x6C00, 0x80DD, 0, 0);
+    x = 1.0f / 24.0f;
+    for (i = 1; i < 24; i++)
+    {
+        f32 v = func_00131000(&D_002612B0, i);
+        f32 sx = x * 640.0f;
+        f32 v2 = v - 4.0f;
+        func_00161458(gs, *(u32*)&c2);
+        s32 px = (s32)((sx + 1728.0f) * 16.0f);
+        x += step;
+        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        func_00161458(gs, *(u32*)&c1);
+        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    }
+    func_00161458(gs, *(u32*)&c2);
+    func_001615F0(gs, 0x9400, 0x80FA, 0, 0);
+    func_00161458(gs, *(u32*)&c1);
+    func_001615F0(gs, 0x9400, 0x80DD, 0, 0);
+
+    func_00161458(gs, *(u32*)&c1);
+    func_00161670(gs, 0x6C00, 0x7B62, 0, 0);
+    func_00161458(gs, *(u32*)&c0);
+    func_00161670(gs, 0x6C00, 0x7B80, 0, 0);
+    x = 1.0f / 24.0f;
+    for (i = 1; i < 24; i++)
+    {
+        f32 r = func_00131000(&D_00261280, i);
+        f32 sx = x * 640.0f;
+        f32 v = r + 4.0f;
+        f32 v2 = v + 4.0f;
+        func_00161458(gs, *(u32*)&c1);
+        s32 px = (s32)((sx + 1728.0f) * 16.0f);
+        x += step;
+        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        func_00161458(gs, *(u32*)&c0);
+        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    }
+    func_00161458(gs, *(u32*)&c1);
+    func_001615F0(gs, 0x9400, 0x7B62, 0, 0);
+    func_00161458(gs, *(u32*)&c0);
+    func_001615F0(gs, 0x9400, 0x7B80, 0, 0);
+
+    func_00161458(gs, *(u32*)&c1);
+    func_00161670(gs, 0x6C00, 0x80DD, 0, 0);
+    func_00161458(gs, *(u32*)&c0);
+    func_00161670(gs, 0x6C00, 0x80C0, 0, 0);
+    x = 1.0f / 24.0f;
+    for (i = 1; i < 24; i++)
+    {
+        f32 r = func_00131000(&D_002612B0, i);
+        f32 sx = x * 640.0f;
+        f32 v = r - 4.0f;
+        f32 v2 = v - 4.0f;
+        func_00161458(gs, *(u32*)&c1);
+        s32 px = (s32)((sx + 1728.0f) * 16.0f);
+        x += step;
+        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        func_00161458(gs, *(u32*)&c0);
+        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    }
+    func_00161458(gs, *(u32*)&c1);
+    func_001615F0(gs, 0x9400, 0x80DD, 0, 0);
+    func_00161458(gs, *(u32*)&c0);
+    func_001615F0(gs, 0x9400, 0x80C0, 0, 0);
+}

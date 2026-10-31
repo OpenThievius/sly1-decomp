@@ -1135,3 +1135,180 @@ s32 func_0016EC98(Obj_16EC98* self)
 done:
     return self->f28;
 }
+
+struct Stream_16E238
+{
+    u8 pad00[0x4];
+    s32 f04;
+    s32 f08;
+    u8 pad0C[0x8];
+    s32 f14;
+    s32 f18;
+    f32 f1C;
+    u8 pad20[0x9C];
+    void* fBC;
+    s32 fC0;
+};
+
+extern f32 D_00261858[];
+
+s32 func_00204590(s32 a, s32 b);
+s32 func_002047F8(s32 a, s32 b, s32 c, s32 d);
+s32 func_00204930(s32 a, s32 b, s32 c, s32 d);
+s32 func_002046D0(s32 a, s32 b, s32 c, s32 d);
+void func_001F5C0C(u8* p, s32 value, s32 size);
+s32 func_00204AA8(s32 a, s32 b, u8* buf);
+s32 func_00204CE8(s32 a, s32 b);
+s32 func_00204D48(s32 a, s32 b);
+s32 func_00204678(s32 a, s32 b);
+s32 func_0016E940(Stream_16E238* self);
+void func_001A7B88(void* p);
+void func_0016E630(Stream_16E238* self, s32 mode, s32 n);
+
+void func_0016E238(Stream_16E238* self)
+{
+    u8 buf[16];
+    if (self->f14 == 0)
+    {
+        return;
+    }
+    s32 ready = 0;
+    s32 r = func_00204590(self->f04, self->f08);
+    if (r == 6 || r == 2)
+    {
+        ready = 1;
+    }
+    s32 cur = self->f18;
+    if (self->f14 != 3 && cur != 0 && 2.0f <= D_00261858[4] - self->f1C)
+    {
+        r = 0;
+    }
+    if (cur != 0 && r == 0)
+    {
+        func_0016E630(self, 1, 0);
+    }
+    if (!ready)
+    {
+        return;
+    }
+    s32 two = 2;
+    s32 mode = self->f14;
+    s32 n = self->f18;
+    switch (mode)
+    {
+    case 1:
+        switch (n)
+        {
+        case 0:
+        {
+            s32 a = func_002047F8(self->f04, self->f08, 1, 0);
+            if (a != 0)
+            {
+                s32 b = func_002047F8(self->f04, self->f08, 2, 0);
+                if (b > 0)
+                {
+                    a = b;
+                }
+                if (a == 4 || a == 7)
+                {
+                    n = 1;
+                    mode = 3;
+                    if (b != 0)
+                    {
+                        mode = n;
+                    }
+                }
+            }
+            break;
+        }
+        case 1:
+            mode = (func_00204930(self->f04, self->f08, 1, 3) == 1) ? two : n;
+            break;
+        case 2:
+        {
+            s32 count = func_002046D0(self->f04, self->f08, -1, 0);
+            if (count != n
+                || func_002046D0(self->f04, self->f08, 0, 1) != mode
+                || func_002046D0(self->f04, self->f08, 0, 2) != n
+                || func_002046D0(self->f04, self->f08, 0, 3) != 0
+                || func_002046D0(self->f04, self->f08, 1, 1) != mode
+                || func_002046D0(self->f04, self->f08, 1, 2) != mode
+                || func_002046D0(self->f04, self->f08, 1, 3) != mode)
+            {
+                mode = 3;
+                break;
+            }
+            func_001F5C0C(buf, 0xFF, 6);
+            for (s32 i = 0; i < count; i++)
+            {
+                buf[i] = i;
+            }
+            if (func_00204AA8(self->f04, self->f08, buf) == 1)
+            {
+                mode = 2;
+            }
+            break;
+        }
+        case 3:
+            if (func_00204CE8(self->f04, self->f08) != mode)
+            {
+                mode = 3;
+                break;
+            }
+            if (func_00204D48(self->f04, self->f08) == 1)
+            {
+                mode = two;
+            }
+            break;
+        }
+        break;
+    case 2:
+        switch (func_00204678(self->f04, self->f08))
+        {
+        case 0:
+            switch (self->f18)
+            {
+            case 1:
+                n = 2;
+                mode = 1;
+                break;
+            case 2:
+                n = 3;
+                mode = 1;
+                break;
+            case 3:
+                n = 4;
+                mode = 3;
+                break;
+            default:
+                n = 0;
+                break;
+            }
+            break;
+        case 1:
+            mode = 1;
+            break;
+        case 2:
+            break;
+        default:
+            n = 0;
+            break;
+        }
+        break;
+    case 3:
+        if (func_0016E940(self) != 0)
+        {
+            if (self->fC0 != 0 && self->f18 >= 3)
+            {
+                func_001A7B88(self->fBC);
+            }
+        }
+        else
+        {
+            mode = 1;
+            n = 0;
+        }
+        break;
+    }
+    func_0016E630(self, mode, n);
+}
