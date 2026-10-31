@@ -1674,3 +1674,53 @@ void func_0019AF00(Self_19AF00* self)
     self->s54 = -1;
     self->f4C = D_0024C8C4;
 }
+
+struct List_1989B0 { s32 head; s32 x; s32 link; };
+extern u8 D_0027B314[];
+struct Frame_1989B0 {
+    s32 list; s32 cursor; s32 link; s32 prev;
+    Frame_1989B0(List_1989B0* l) {
+        cursor = (s32)l;
+        list = (s32)l;
+        link = l->link;
+        prev = *(s32*)D_0027B314;
+        *(s32*)D_0027B314 = (s32)this;
+    }
+};
+struct Cls_1989B0 { u8 pad0[8]; s32 flags; };
+struct Node_1989B0 { Cls_1989B0* cls; };
+struct Obj_1989B0 {
+    u8 pad0[0x34];
+    List_1989B0 lst;
+    u8 pad1[0x570 - 0x40];
+    s32 count;
+    Node_1989B0* arr[4];
+    u8 sub584[1];
+};
+
+extern u8 D_0027B314[];
+
+void func_001BAC30(Obj_1989B0* self);
+void func_00159478(void* sub, Obj_1989B0* self);
+void func_00182ED8(Node_1989B0* n);
+
+void func_001989B0(Obj_1989B0* self)
+{
+    func_001BAC30(self);
+    func_00159478(&self->sub584, self);
+    Frame_1989B0 fr(&self->lst);
+    fr.cursor = self->lst.head + fr.link;
+    Node_1989B0* p = (Node_1989B0*)self->lst.head;
+    while (p != 0) {
+        if (p->cls->flags & 0x40) {
+            s32 i = self->count;
+            self->arr[i] = p;
+            self->count = i + 1;
+            func_00182ED8(p);
+        }
+        s32 nx = *(s32*)fr.cursor;
+        fr.cursor = nx + fr.link;
+        p = (Node_1989B0*)nx;
+    }
+    *(s32*)D_0027B314 = fr.prev;
+}

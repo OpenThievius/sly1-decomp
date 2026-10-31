@@ -649,3 +649,36 @@ void* func_00109000(void* self, Obj_00109000* x, int unused, int c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+// NEAR: the 12-byte copy of D_00248FA0 is scheduled before the three out-pointer addiu (sp+48/52/56); retail computes those first. Only instruction order differs.
+
+struct __attribute__((aligned(16))) Quad_00108BE8 { s32 a, b, c, d; };
+struct __attribute__((packed)) Key8_00108BE8 { u64 v; };
+struct Key_00108BE8 { Key8_00108BE8 v; s32 w; };
+struct Frame_00108BE8 { Quad_00108BE8 q; Key_00108BE8 k; Quad_00108BE8 t; s32 o0, o1, o2; };
+struct Obj_00108BE8;
+
+extern u8 D_00248FA0[];
+
+void func_0011B008(Quad_00108BE8* q);
+void func_0011B018(void* out, Quad_00108BE8* q);
+void func_0011B060(Quad_00108BE8* q, int mode);
+void func_0011B0A8(Quad_00108BE8* a, Quad_00108BE8* b);
+void func_0011B538(Quad_00108BE8* q, int n);
+s32 func_001C23B0(Quad_00108BE8* t, int mode, int c, void* z, s32* o0, s32* o1, s32* o2);
+void func_001ED558(Obj_00108BE8* self, s32 p, f32 f, s32 q);
+
+void* func_00108BE8(void* self, void* x, int unused, int c)
+{
+    Frame_00108BE8 f;
+    func_0011B008(&f.q);
+    f.k = *(Key_00108BE8*)D_00248FA0;
+    (void)func_001C23B0(&f.t, 3, c, &f.k, &f.o0, &f.o1, &f.o2);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    func_001ED558((Obj_00108BE8*)x, f.o0, *(f32*)&f.o1, f.o2);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

@@ -1430,3 +1430,74 @@ void func_001AA178(void)
     func_001EFEE0(D_00275F80);
     func_001AE820((u8*)&D_00273EB0);
 }
+
+struct Obj_1AA298;
+struct VT_1AA298 {
+    u8 p0[0x2C];
+    f32 (*f2C)(Obj_1AA298*);
+    f32 (*f30)(Obj_1AA298*);
+    f32 (*f34)(Obj_1AA298*);
+    u8 p38[8];
+    void (*f40)(Obj_1AA298*, s32);
+};
+struct Obj_1AA298 {
+    VT_1AA298* vt;
+    u8 p4[0x21C - 4];
+    f32 f21C, f220, f224, f228, f22C, f230;
+    u8 p234[0x23C - 0x234];
+    f32 f23C;
+    u8 p240[0x24C - 0x240];
+    f32 f24C;
+    s32 f250;
+    f32 f254;
+    f32* f258;
+};
+
+void func_001AAEC0(Obj_1AA298* self);
+extern f32 D_002743A0[];
+
+void func_001AA298(Obj_1AA298* self) {
+    f32 t = *self->f258;
+    s32 s = self->f250;
+    switch (s) {
+    case 2: {
+        f32 d = self->vt->f30(self);
+        if (d != 0.0f) {
+            if (d <= t - self->f254) s = 3;
+        }
+        break; }
+    case 1: {
+        f32 d = self->vt->f2C(self);
+        f32 zero = 0.0f;
+        f32 x;
+        if (d != zero) {
+            f32 one = 1.0f;
+            x = (t - self->f254 + self->f24C) / d;
+            if (x < zero) x = zero;
+            else if (one < x) x = one;
+            self->f23C = x;
+        }
+        if (self->f23C >= 1.0f) s = 2;
+        break; }
+    case 3: {
+        f32 d = self->vt->f34(self);
+        f32 zero = 0.0f;
+        f32 x;
+        if (d != zero) {
+            f32 one = 1.0f;
+            x = (t - self->f254 + self->f24C) / d;
+            f32 y = x < zero ? zero : (one < x ? one : x);
+            self->f23C = 1.0f - y;
+        }
+        if (self->f23C <= 0.0f) s = 0;
+        break; }
+    }
+    if (s == self->f250) {
+        f32 p = self->f23C;
+        f32 k = D_002743A0[0] + p * (D_002743A0[1] + p * D_002743A0[2]);
+        self->f21C = self->f22C + k * (self->f224 - self->f22C);
+        self->f220 = self->f230 + k * (self->f228 - self->f230);
+        func_001AAEC0(self);
+    }
+    self->vt->f40(self, s);
+}

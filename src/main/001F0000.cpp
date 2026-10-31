@@ -1101,3 +1101,11 @@ void func_001F3768(Obj_001F3768* self)
     e->f88 = 0.5f;
     self->n3C = self->n3C + 1;
 }
+
+f32 func_001F31F8(s32 a0)
+{
+    s32 n = a0;
+    n ^= n << 13;
+    n = n * (n * n * 0x3D73 + 0xC0AE5) + 0x5208DD0D & 0x7FFFFFFF;
+    return (f32)n * 4.656612873077393e-10f;
+}

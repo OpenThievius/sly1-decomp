@@ -2243,3 +2243,80 @@ void* func_00100B48(void* self, void* x, s32 unused, s32 c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+// NEAR: call sequence, frame and the 24-byte blob copy match; retail computes &sp[0x74] and the blob-copy addresses earlier, so about 18 lines of instruction order differ
+
+struct Quad_102FB0 { s32 a; s32 b; s32 c; s32 d; };
+struct Blob_102FB0 { u8 bytes[24]; };
+struct Tail_102FB0 { s32 i0; s32 i1; f32 f0; f32 f1; };
+struct Obj_102FB0 { u8 pad0[4]; };
+
+extern u8 D_00248E58[];
+void func_0011B008(Quad_102FB0* q);
+void func_0011B060(Quad_102FB0* q, s32 mode);
+void func_0011B0A8(Quad_102FB0* a, Quad_102FB0* b);
+void func_0011B018(void* out, Quad_102FB0* src);
+void func_0011B538(Quad_102FB0* q, s32 n);
+s32 func_001C23B0(Quad_102FB0* t, s32 mode, s32 c, Blob_102FB0* z, s32* p4, s32* p5, Quad_102FB0* p6, Quad_102FB0* p7, f32* p8, f32* p9);
+void func_00158778(Obj_102FB0* a0, s32 a1, s32 a2, Quad_102FB0* a3, Quad_102FB0* a4, f32 x, f32 y);
+
+void* func_00102FB0(void* out, Obj_102FB0* self, s32 unused, s32 c)
+{
+    Quad_102FB0 r;
+    Blob_102FB0 blob;
+    Quad_102FB0 q40;
+    Quad_102FB0 q50;
+    Quad_102FB0 q60;
+    Tail_102FB0 t;
+
+    func_0011B008(&r);
+    blob = *(Blob_102FB0*)D_00248E58;
+    (void)func_001C23B0(&q60, 6, c, &blob, &t.i0, &t.i1, &q40, &q50, &t.f0, &t.f1);
+    func_0011B0A8(&r, &q60);
+    func_0011B060(&q60, 2);
+    func_00158778(self, t.i0, t.i1, &q40, &q50, t.f0, t.f1);
+    func_0011B538(&r, 0x22);
+    func_0011B018(out, &r);
+    func_0011B060(&r, 2);
+    return out;
+}
+
+struct __attribute__((packed)) Pair_00103A60 { s32 a, b; };
+struct Rod_00103A60 { Pair_00103A60 p; s32 c; };
+struct __attribute__((aligned(16))) Quad_00103A60 { s32 w[4]; };
+struct __attribute__((aligned(16))) Frame_00103A60 {
+    Quad_00103A60 q;
+    Rod_00103A60 rod;
+    s32 pad0;
+    Quad_00103A60 b;
+    s32 o1;
+    s32 o2;
+    s32 o3;
+};
+
+struct Obj_00103A60;
+
+extern u8 D_00248E98[];
+
+void func_0011B008(Quad_00103A60* q);
+void func_0011B018(void* dst, Quad_00103A60* src);
+void func_0011B060(Quad_00103A60* q, s32 mode);
+void func_0011B0A8(Quad_00103A60* a, Quad_00103A60* b);
+s32 func_001C23B0(Quad_00103A60* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
+void func_001DD7E8(Obj_00103A60* self, void* obj, s32 key, s32 value);
+void func_0011B538(Quad_00103A60* q, s32 n);
+
+void* func_00103A60(void* self, void* x, s32 unused, s32 c)
+{
+    Frame_00103A60 f;
+    func_0011B008(&f.q);
+    f.rod = *(Rod_00103A60*)D_00248E98;
+    (void)func_001C23B0(&f.b, 3, c, &f.rod, &f.o1, &f.o2, &f.o3);
+    func_0011B0A8(&f.q, &f.b);
+    func_0011B060(&f.b, 2);
+    func_001DD7E8((Obj_00103A60*)x, (void*)f.o1, f.o2, f.o3);
+    func_0011B538(&f.q, 0x22);
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

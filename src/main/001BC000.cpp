@@ -1152,3 +1152,43 @@ void func_001BFAF8(Node_1BFAF8* self, s32 idx)
         self->f40 = 1;
     }
 }
+
+// NEAR: first load of the chain pointer lands in $v1 and the sum in $v0, retail has them in $v0/$v1; one instruction short so the final branch targets 0x1BF028 instead of 0x1BF02C
+
+struct Frame_1BEF88 { s32 f0; s32 f4; s32 f8; s32 fC; };
+
+extern s32 D_00274734;
+
+s32 func_00152720(Frame_1BEF88* p);
+
+void func_001BEF88(void)
+{
+    Frame_1BEF88 f;
+    s32 P = (s32)D_00275710 + 0x1BC4;
+    s32 x;
+    f.f0 = P;
+    f.f4 = P;
+    f.f8 = *(s32*)(P + 8);
+    f.fC = *(s32*)D_0027B314;
+    *(s32*)D_0027B314 = (s32)&f;
+    if (func_00152720((Frame_1BEF88*)P) != 0) {
+        D_00274734 = 0;
+    } else {
+        D_00274734 = -20;
+        s32 x0 = *(s32*)f.f4;
+        f.f4 = x0 + f.f8;
+        x = x0;
+        if (x != 0) {
+            do {
+                s32 v = *(s32*)x;
+                if (D_00274734 < v) {
+                    D_00274734 = v;
+                }
+                s32 y = *(s32*)f.f4;
+                f.f4 = y + f.f8;
+                x = y;
+            } while (x != 0);
+        }
+    }
+    *(s32*)D_0027B314 = f.fC;
+}

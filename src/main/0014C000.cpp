@@ -1218,3 +1218,21 @@ s32 func_0014FEC0(Obj_14FEC0* self) {
     self->f6D8 = D_0026185C[0];
     return 1;
 }
+
+// NEAR: the search index is kept in a0 where retail uses a2, and hi is saved in s3 before the call in retail; the loop shape is otherwise the same.
+
+struct Tab_14D1A0;
+
+f32 func_0014D138(Tab_14D1A0* count, f32* table, void* wrap, f32 x);
+
+s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi)
+{
+    f32 r = (f32)func_0014D138((Tab_14D1A0*)n, arr, p2, x);
+    s32 i = 1;
+    while (i < n && !(r < arr[i])) i++;
+    if (i >= n) i--;
+    i--;
+    if (lo) *lo = r - arr[i];
+    if (hi) *hi = arr[i + 1] - arr[i];
+    return i;
+}
