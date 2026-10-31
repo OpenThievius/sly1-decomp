@@ -1911,3 +1911,62 @@ void func_0018F198(Self_18F198* self, Key_18F198* key)
     func_00191EB0(4);
     func_0012FD30(&loc, 2);
 }
+
+struct Ent_18C420 {
+    u8 a[0x1A00];
+    u8 b[0x5C];
+};
+
+struct Self_18C420 {
+    u8 p00[4];
+    void* f4;
+    void* f8;
+    u8 p0C[0x14 - 0x0C];
+    s32 f14;
+    u8 p18[0x30 - 0x18];
+    Ent_18C420 ent[3];
+};
+
+struct Buf_18C420 {
+    u8 raw[0x50];
+};
+
+extern u8 D_0024B348[];
+extern u8 D_0024B3A0[];
+extern u8 D_0024B3B0[];
+extern u8 D_0024B3C8[];
+
+s32 func_00209E48(void* a, void* b, void* c, s32 d, s32 e, void* f);
+s32 func_0018BD00(s32 v, s32 code, s32* out);
+s32 func_0018D168(Self_18C420* a0, s32* a1);
+s32 func_001E1FD0(Buf_18C420* dst, const char* fmt, ...);
+s32 func_0018CDD8(Self_18C420* self, Buf_18C420* buf, u8* a, u8* b);
+
+s32 func_0018C420(Self_18C420* self) {
+    Buf_18C420 buf;
+    s32 r;
+    s32 n;
+    Ent_18C420* e;
+    s32 local50;
+    s32 local54;
+
+    r = func_0018BD00(func_00209E48(self->f4, self->f8, D_0024B348, 0, -1, 0), 0xD, &local50);
+    if (local50 <= 0) {
+        func_0018D168(self, &local54);
+        if (local54 <= 0xC3FF) {
+            self->f14 = 4;
+        }
+        return 0xE;
+    }
+    n = 0;
+    if (r == 0) {
+        for (; r == 0 && n < 3; n++) {
+            func_001E1FD0(&buf, (const char*)D_0024B3A0, D_0024B3B0, D_0024B3C8, n + 1);
+            (void)func_0018CDD8(self, &buf, self->ent[n].a, self->ent[n].b);
+        }
+        if (r == 0 && self->f14 < 5) {
+            self->f14 = 5;
+        }
+    }
+    return r;
+}

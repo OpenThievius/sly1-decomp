@@ -1367,3 +1367,44 @@ void func_001ADFF0(struct Node_1ADFF0 *self)
     }
     func_0015C900(self->handle);
 }
+
+struct Buf_1AD1E8;
+struct Self_1AD1E8 { void** vtbl; };
+struct Sub_1AD1E8 {
+    u8 pad0[0x438];
+    s32 f438;
+    s32 f43C;
+    s32 f440;
+    u8 pad444[0x8];
+};
+struct Mgr_1AD1E8 {
+    u8 pad0[0x10];
+    Sub_1AD1E8 ents[1];
+};
+
+extern char* D_00274430[];
+extern char D_0024CE80[];
+extern char D_0024CEA0[];
+extern char D_0024CEC0[];
+
+void func_00160208(s32 key, s32* a1, s32* a2, s32* a3);
+char* func_001E2138(Buf_1AD1E8* dst, const char* src);
+s32 func_001E2100(void* p);
+s32 func_001E1FD0(Buf_1AD1E8* dst, const char* fmt, ...);
+
+void func_001AD1E8(Self_1AD1E8* self, s32 idx)
+{
+    char buf[0x200];
+    s32 a, b, c;
+    func_00160208(idx, &a, &b, &c);
+    Sub_1AD1E8* s1 = &(*(Mgr_1AD1E8**)&D_002623C0)->ents[idx];
+    func_001E2138((Buf_1AD1E8*)buf, D_00274430[idx]);
+    char* d = buf + func_001E2100(buf);
+    if (a)
+        d += func_001E1FD0((Buf_1AD1E8*)d, D_0024CE80, s1->f438, a);
+    if (b)
+        d += func_001E1FD0((Buf_1AD1E8*)d, D_0024CEA0, a ? ((char*)&D_0024CE18) : ((char*)&D_0024CD68), s1->f43C, b);
+    if (c)
+        func_001E1FD0((Buf_1AD1E8*)d, D_0024CEC0, (a || b) ? ((char*)&D_0024CE18) : ((char*)&D_0024CD68), s1->f440, c);
+    ((void (*)(Self_1AD1E8*, char*))self->vtbl[8])(self, buf);
+}

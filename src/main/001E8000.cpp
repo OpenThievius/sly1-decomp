@@ -1440,3 +1440,45 @@ void func_001EB748(Self_1EB748* self, In_1EB748* in)
         }
     }
 }
+
+extern s32 D_00275C34;
+extern u32* D_006256D0;
+extern s32 D_006256D4;
+extern u32 D_006256D8;
+extern u8 D_00148D7C[];
+extern u32 D_002476A0[];
+
+struct Crc_1E9B30 {
+    static u32 Step(u32 h, u8 b) { return D_002476A0[(h ^ b) & 0xFF] ^ (h >> 8); }
+};
+
+void func_001E9B30(void) {
+    if (D_00275C34 == 0) {
+        if (D_006256D4 == 0) {
+            D_006256D0 = (u32*)0x100004;
+            D_006256D4 = (s32)D_00148D7C;
+            D_006256D8 = 0xFFFFFFFF;
+        }
+    }
+    if (D_006256D4 == 0) {
+        return;
+    }
+    u32* p = D_006256D0;
+    s32 cnt = D_006256D4;
+    u32 h = D_006256D8;
+    for (s32 i = 0; i < 32 && cnt > 0; i++) {
+        u32 w = *p;
+        cnt -= 4;
+        p++;
+        h = Crc_1E9B30::Step(h, w);
+        h = Crc_1E9B30::Step(h, w >> 8);
+        h = Crc_1E9B30::Step(h, w >> 16);
+        h = Crc_1E9B30::Step(h, w >> 24);
+    }
+    D_006256D0 = p;
+    D_006256D8 = h;
+    D_006256D4 = cnt;
+    if (cnt == 0 && h != 0) {
+        D_00275C34 = 1;
+    }
+}
