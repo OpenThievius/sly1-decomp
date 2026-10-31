@@ -792,6 +792,7 @@ func_00136408	func_00136568	error	a call to func_0015DB28__FPvT0i, which has no 
 func_00136530	func_00136640	error	a call to func_0015DB28__FPvT0i, which has no address in this version
 func_001365A0	func_001366B8	differs	
 func_001365A8	func_001366C0	differs	
+func_001365F0	func_00136708	differs	rodata
 func_00136EC8	func_00137138	differs	
 func_00136EF8	func_00137168	differs	
 func_00136FA8	func_00137218	differs	
