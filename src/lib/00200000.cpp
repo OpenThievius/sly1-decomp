@@ -177,3 +177,21 @@ void func_00200D38(struct Node_200D38 *self, s32 a1) {
         self->vtbl = D_0024F3C8;
     }
 }
+
+extern u8 D_0024F418[];
+
+struct Node_200CB0 {
+    s32 field0;
+    void *vtbl;
+    s32 field2;
+    s32 field3;
+};
+
+void func_00200CB0(struct Node_200CB0 *self, s32 a1, s32 a2, s32 a3) {
+    if (self != 0) {
+        self->field0 = a1;
+        self->vtbl = D_0024F418;
+        self->field2 = a3;
+        self->field3 = a2;
+    }
+}
