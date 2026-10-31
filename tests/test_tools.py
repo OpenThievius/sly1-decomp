@@ -181,6 +181,22 @@ class BlockerTest(unittest.TestCase):
         self.assertEqual(todo.blocker({"calls", "data"}), "none")
 
 
+class CompilerBlockerTest(unittest.TestCase):
+    def test_a_64_bit_save_in_the_prologue_is_the_compiler_blocker(self):
+        lines = ["addiu $sp, $sp, -0x20", "sd $ra, 0x18($sp)", "sd $s0, 0x10($sp)", "jal func_00100000", "jr $ra"]
+        self.assertIn("compiler", todo.tags_of(lines, "function"))
+        self.assertEqual(todo.blocker(todo.tags_of(lines, "function")), "compiler")
+
+    def test_an_sq_save_or_a_late_sd_is_not_the_compiler_blocker(self):
+        self.assertNotIn("compiler", todo.tags_of(["addiu $sp, $sp, -0x10", "sq $ra, 0x0($sp)", "jr $ra"], "function"))
+        late = ["nop"] * todo.PROLOGUE + ["sd $ra, 0x18($sp)"]
+        self.assertNotIn("compiler", todo.tags_of(late, "function"))
+
+    def test_the_permanent_blockers_win_over_it(self):
+        self.assertEqual(todo.blocker({"compiler", "rodata", "jtbl"}), "compiler")
+        self.assertEqual(todo.blocker({"compiler", "vu"}), "vu")
+
+
 class StructReturnTest(unittest.TestCase):
     def test_struct_pointer_return_is_a_definition(self):
         text = "struct Node_2003F8 *func_002003F8(struct Node_2003F8 *self, s32 a1) {\n    return self;\n}\n"

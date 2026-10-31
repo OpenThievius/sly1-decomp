@@ -896,3 +896,161 @@ void func_00139600(s32 stride, s32 count, u8* base, s32 off, s32 count2, s32* va
         }
     }
 }
+
+struct Track_139038 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; };
+struct Grp_139038 {
+    s32 key; Track_139038* a; Track_139038* b; s32 fC; Track_139038* c; s32 n; Track_139038** d;
+};
+struct Src_139038 {
+    u8 pad0[0x38]; s32 count; Grp_139038* grps; u8 pad40[4]; s32 f44;
+    u8 pad48[0x54 - 0x48]; s32 f54; s32 f58; s32 f5C; s32 f60; s32 f64; s32 f68;
+    u8 pad6C[0x78 - 0x6C]; s32 f78; f32 f7C;
+};
+struct Item_139038 { s32 f0; Src_139038* src; };
+struct Key_139038 { s32 f0; s32 f4; void* f8; };
+struct Anim_139038;
+typedef void (*VFn_139038)(Anim_139038*);
+struct Anim_139038 {
+    VFn_139038* vtbl; u8 pad4[0x34]; s32 count; Grp_139038* grps; u8 pad40[4]; s32 f44;
+    u8 pad48[0x54 - 0x48]; s32 f54; s32 f58; s32 f5C; s32 f60; s32 f64; s32 f68;
+    u8 pad6C[0x78 - 0x6C]; s32 f78; f32 f7C;
+    u8 pad80[0xB0 - 0x80]; s32 stride; s32 nitems; void* data; s32 nkeys; Key_139038* keys;
+};
+struct Ctx_139038 { u8 pad0[0x14]; s32 f14; };
+
+void func_0018D608(void);
+void func_0018D6F0(void);
+Anim_139038* func_0011E580(s32 kind, s32 a, Ctx_139038* ctx, s32 b, s32 c);
+void* func_0018D500(s32 size);
+void* func_0018D5C0(s32 size);
+Grp_139038* func_0018D6A8(s32 size);
+Grp_139038* func_0018D568(s32 size, Grp_139038* src);
+Track_139038* func_00120FB0(s32 kind);
+Track_139038* func_00121050(s32 kind);
+Track_139038* func_00121160(s32 kind);
+void func_00138FF0(s32 a, s32 b, s32 c, s32 d);
+
+void func_00139038(Ctx_139038* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, Anim_139038** out)
+{
+    s32 i;
+    Item_139038* item;
+    Grp_139038* buf;
+    for (i = 0; ; i++) {
+        if (i >= count) {
+            *out = 0;
+            return;
+        }
+        item = (Item_139038*)(items + i * stride);
+        if (item->src != 0) break;
+    }
+    Src_139038* src = item->src;
+    func_0018D608();
+    Anim_139038* anim = func_0011E580(0x84, ctx->f14, ctx, -1, -1);
+    anim->vtbl[7](anim);
+    anim->nitems = count;
+    anim->stride = stride;
+    anim->data = func_0018D500(count * stride);
+    anim->nkeys = nkeys;
+    anim->keys = (Key_139038*)func_0018D500(nkeys * 12);
+    for (s32 k = 0; k < nkeys; k++) {
+        Key_139038* key = &anim->keys[k];
+        key->f0 = keyA[k];
+        key->f4 = keyB[k];
+        key->f8 = func_0018D500(key->f4 << 3);
+    }
+    s32 total = 0;
+    for (i = 0; i < count; i++) {
+        item = (Item_139038*)(items + i * stride);
+        if (item->src != 0) total += item->src->count;
+    }
+    buf = func_0018D6A8(total * 0x1C);
+    s32 used = 0;
+    for (i = 0; i < count; i++) {
+        item = (Item_139038*)(items + i * stride);
+        if (item->src == 0) continue;
+        for (s32 j = 0; j < item->src->count; j++) {
+            Grp_139038* g = &item->src->grps[j];
+            if (g->a == 0 && g->b == 0 && g->c == 0 && g->d == 0) continue;
+            Grp_139038* e;
+            for (s32 m = 0; m < used; m++) {
+                e = &buf[m];
+                if (g->key == e->key) goto have;
+            }
+            e = &buf[used++];
+            e->key = g->key;
+        have:
+            if (g->a != 0) {
+                if (e->a == 0) {
+                    Track_139038* t = func_00120FB0(2);
+                    t->fC = (s32)anim;
+                    t->f10 = (s32)anim->keys;
+                    t->f14 = (s32)func_0018D5C0(count << 2);
+                    t->f8 = 1;
+                    e->a = t;
+                }
+                if (g->a->f8 == 0) e->a->f8 = 0;
+                ((Track_139038**)e->a->f14)[i] = g->a;
+            }
+            if (g->b != 0) {
+                if (e->b == 0) {
+                    Track_139038* t = func_00121050(2);
+                    t->fC = (s32)anim;
+                    t->f10 = (s32)anim->keys;
+                    t->f14 = (s32)func_0018D5C0(count << 2);
+                    t->f8 = 1;
+                    e->b = t;
+                }
+                if (g->b->f8 == 0) e->b->f8 = 0;
+                ((Track_139038**)e->b->f14)[i] = g->b;
+            }
+            if (g->c != 0) {
+                if (e->c == 0) {
+                    Track_139038* t = func_00121160(3);
+                    t->f8 = (s32)anim;
+                    t->fC = (s32)anim->keys;
+                    t->f10 = (s32)func_0018D5C0(count << 2);
+                    e->c = t;
+                }
+                ((Track_139038**)e->c->f10)[i] = g->c;
+            }
+            if (g->d != 0) {
+                if (e->d == 0) {
+                    e->n = g->n;
+                    e->d = (Track_139038**)func_0018D5C0(g->n << 2);
+                }
+                for (s32 q = 0; q < g->n; q++) {
+                    Track_139038* v = g->d[q];
+                    if (v != 0) {
+                        Track_139038* t = e->d[q];
+                        if (t == 0) {
+                            Track_139038* nt = func_00121160(4);
+                            nt->f8 = (s32)anim;
+                            nt->fC = (s32)anim->keys;
+                            nt->f10 = (s32)func_0018D5C0(count << 2);
+                            nt->f14 = q;
+                            e->d[q] = nt;
+                            t = nt;
+                        }
+                        ((Track_139038**)t->f10)[i] = v;
+                    }
+                }
+            }
+        }
+    }
+    anim->count = used;
+    anim->grps = func_0018D568(used * 0x1C, buf);
+    anim->f44 = src->f44;
+    anim->f78 = src->f78;
+    anim->f7C = src->f7C;
+    anim->f54 = src->f54;
+    anim->f58 = src->f58;
+    anim->f64 = src->f64;
+    anim->f68 = src->f68;
+    if (nkeys == 0) {
+        anim->f5C = src->f5C;
+        anim->f60 = src->f60;
+        func_00138FF0(anim->f5C, anim->f60, src->f5C, src->f60);
+    }
+    *out = anim;
+    func_0018D6F0();
+}

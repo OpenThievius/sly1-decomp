@@ -388,14 +388,14 @@ void func_001E9648(void)
     func_001AA178();
 }
 
-extern float D_0026185C;
+extern float D_0026185C[];
 
 void func_001C06A0(int a, int b, float t);
 void func_00142ED0(float x);
 
 void func_001E98E8(float x)
 {
-    if (0.0f < D_0026185C) {
+    if (0.0f < D_0026185C[0]) {
         float t = (1.0f - x) * 0.6f + x;
         func_001C06A0(4, 1, t);
         func_001C06A0(4, 0, t);
@@ -1262,4 +1262,223 @@ void func_001E9108(Obj_1E9108* obj)
     }
     func_001409E0();
     func_001A9FD0();
+}
+
+struct Pos_1EB748 { f32 v[4]; };
+struct Mat_1EB748 { f32 m[12]; };
+struct Msg_1EB748 { s32 a; s32 b; s32 c; void (*fC)(void); };
+struct Ent_1EB748 { s32 dir; f32 t; };
+struct Item_1EB748 { s32 type; s32 a; f32 b; s32 c; };
+struct List_1EB748 { u8 pad[0x34]; s32 n; Item_1EB748* items; s32 cur; };
+struct Grid_1EB748 {
+    u8 pad0[0xC38];
+    List_1EB748* list;
+    u8 pad1[0xC70 - 0xC3C];
+    s32 row;
+    u8 pad2[0xC7C - 0xC74];
+    f32 base;
+    u8 pad3[0xC88 - 0xC80];
+    f32 scale;
+};
+struct Self_1EB748;
+typedef s32 (*Fn_1EB748)(Self_1EB748* self, void* arg);
+struct Self_1EB748 {
+    Fn_1EB748* vtbl;
+    u8 pad0[0x10];
+    void* f14;
+    u8 pad1[0x614 - 0x18];
+    void* f614;
+    u8 pad2[0x628 - 0x618];
+    void* f628;
+    s32 f62C;
+    s32 f630;
+    Ent_1EB748 ents[8];
+    f32 f674;
+    s32 f678;
+    void* f67C;
+    s32 f680;
+    f32 f684;
+    s32 f688;
+    Grid_1EB748* f68C;
+};
+struct G_1EB748;
+typedef void (*GFn_1EB748)(G_1EB748* g, void* arg);
+struct G_1EB748 {
+    GFn_1EB748* vtbl;
+    u8 pad[0x26C4 - 4];
+    s32 f26C4;
+    f32 f26C8;
+    f32 f26CC;
+    f32 f26D0;
+};
+struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
+struct Obj_1EB748 { u8 pad[0xBFC]; f32 fBFC; };
+
+extern s32 D_00275CD8[];
+extern s32 D_00275CE8[];
+
+void func_001F3BD8(void* a, Pos_1EB748* out);
+void func_001F3C08(void* a, Mat_1EB748* out);
+void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001B64D8(void* a, s32 b);
+s32 func_00160C58(void);
+void func_001929D0(G_1EB748* g);
+void func_001D7098(Msg_1EB748* out, s32 mode, Self_1EB748* self);
+void func_001EB698(void);
+void func_001ED020(Obj_1EB748* o);
+void func_001C0C08(s32 a, s32 b);
+void func_0017CE20(void* a, G_1EB748* g);
+
+void func_001EB748(Self_1EB748* self, In_1EB748* in)
+{
+    if (self->f67C != 0 && ((G_1EB748*)D_00262E10) != 0) {
+        Pos_1EB748 pos;
+        Mat_1EB748 mat;
+        func_001F3BD8(self->f67C, &pos);
+        func_001F3C08(self->f67C, &mat);
+        ((G_1EB748*)D_00262E10)->vtbl[0x84 / 4](((G_1EB748*)D_00262E10), &pos);
+        ((G_1EB748*)D_00262E10)->vtbl[0x88 / 4](((G_1EB748*)D_00262E10), &mat);
+        self->vtbl[0x84 / 4](self, &pos);
+        self->vtbl[0x88 / 4](self, &mat);
+    }
+    if (self->f680 != 0) {
+        u32 f = in->fAA;
+        if (f & 0xF0) {
+            s32 dir;
+            s32 ok;
+            f32 at;
+            if (f & 0x80) {
+                dir = 0;
+            } else if (f & 0x10) {
+                dir = 1;
+            } else if (f & 0x20) {
+                dir = 2;
+            } else if (f & 0x40) {
+                dir = 3;
+            }
+            ok = 0;
+            if (self->f62C < self->f630) {
+                Ent_1EB748* e = &self->ents[self->f62C];
+                if (e->dir == dir) {
+                    Grid_1EB748* g = self->f68C;
+                    at = (f32)g->row * 4.0f + g->base;
+                    if (__builtin_fabsf(e->t - at) < self->f684 * 0.5f) {
+                        ok = 1;
+                    }
+                }
+            }
+            if (ok) {
+                self->f678 = dir;
+                self->f674 = at;
+            } else {
+                func_001BFCD8(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+        }
+    }
+    if (self->f62C < self->f630) {
+        Ent_1EB748* e = &self->ents[self->f62C];
+        Grid_1EB748* g = self->f68C;
+        f32 at = (f32)g->row * 4.0f + g->base;
+        f32 win = self->f684;
+        if (self->f678 == e->dir && __builtin_fabsf(e->t - self->f674) < win * 0.5f) {
+            func_001B64D8(self->f614, D_00275CD8[self->f678]);
+            func_001BFCD8(D_00275CE8[self->f678], 0, 0, 0, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0, 0);
+        } else {
+            if (!(at - e->t > win * 0.5f)) {
+                return;
+            }
+            func_001BFCD8(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
+            if (func_00160C58() == 0 && self->vtbl[0x13C / 4](self, 0) == 0) {
+                Msg_1EB748 msg;
+                Obj_1EB748* o;
+                func_001929D0(((G_1EB748*)D_00262E10));
+                func_001D7098(&msg, 0, self);
+                msg.fC = func_001EB698;
+                ((s32 (*)(G_1EB748*, Msg_1EB748*))((G_1EB748*)D_00262E10)->vtbl[0x140 / 4])(((G_1EB748*)D_00262E10), &msg);
+                o = (Obj_1EB748*)func_0015A838(self->f14, 5, 0x13, 0);
+                func_001ED020(o);
+                o->fBFC = D_0026185C[0];
+                func_001C0C08(2, 1);
+                goto next;
+            }
+            if (self->vtbl[0x13C / 4](self, 0) == 0) {
+                List_1EB748* l;
+                ((void (*)(Self_1EB748*))self->vtbl[0x150 / 4])(self);
+                G_1EB748* gl = ((G_1EB748*)D_00262E10);
+                self->f688 = 1;
+                gl->f26C4 = 1;
+                f32 v = D_0026185C[0];
+                gl->f26CC = v;
+                gl->f26C8 = v;
+                l = self->f68C->list;
+                gl->f26D0 = 2.0f;
+                if (l != 0) {
+                    s32 j = l->cur;
+                    while (j < l->n) {
+                        Item_1EB748* p = &l->items[j];
+                        if (p->type == 3) break;
+                        j++;
+                    }
+                    if (j < l->n) {
+                        Item_1EB748* it = &l->items[j];
+                        Grid_1EB748* gg = self->f68C;
+                        ((G_1EB748*)D_00262E10)->f26D0 = ((f32)it->a * 4.0f + it->b - ((f32)gg->row * 4.0f + gg->base)) * gg->scale;
+                    }
+                }
+            }
+        }
+        if (e->dir == 3) {
+            func_001929D0(((G_1EB748*)D_00262E10));
+            func_0017CE20(self->f628, ((G_1EB748*)D_00262E10));
+            self->f628 = 0;
+        }
+    next:
+        self->f62C++;
+        if (self->f62C == self->f630) {
+            self->f62C = 0;
+            self->f630 = 0;
+        }
+    }
+}
+
+extern s32 D_00275C34;
+extern u32* D_006256D0;
+extern s32 D_006256D4;
+extern u32 D_006256D8;
+extern u8 D_00148D7C[];
+extern u32 D_002476A0[];
+
+struct Crc_1E9B30 {
+    static u32 Step(u32 h, u8 b) { return D_002476A0[(h ^ b) & 0xFF] ^ (h >> 8); }
+};
+
+void func_001E9B30(void) {
+    if (D_00275C34 == 0) {
+        if (D_006256D4 == 0) {
+            D_006256D0 = (u32*)0x100004;
+            D_006256D4 = (s32)D_00148D7C;
+            D_006256D8 = 0xFFFFFFFF;
+        }
+    }
+    if (D_006256D4 == 0) {
+        return;
+    }
+    u32* p = D_006256D0;
+    s32 cnt = D_006256D4;
+    u32 h = D_006256D8;
+    for (s32 i = 0; i < 32 && cnt > 0; i++) {
+        u32 w = *p;
+        cnt -= 4;
+        p++;
+        h = Crc_1E9B30::Step(h, w);
+        h = Crc_1E9B30::Step(h, w >> 8);
+        h = Crc_1E9B30::Step(h, w >> 16);
+        h = Crc_1E9B30::Step(h, w >> 24);
+    }
+    D_006256D0 = p;
+    D_006256D8 = h;
+    D_006256D4 = cnt;
+    if (cnt == 0 && h != 0) {
+        D_00275C34 = 1;
+    }
 }

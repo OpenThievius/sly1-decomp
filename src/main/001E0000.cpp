@@ -1132,3 +1132,90 @@ void func_001E1A08(Spec_001E1A08* sp, Ctx_001E1A08* c, u8** va, const char* fmt,
         return;
     }
 }
+
+struct Ctx_1E0CD0;
+s32 func_001D7190(Ctx_1E0CD0* ctx, const char* p, s32 n);
+struct Ctx_1E0CD0 {
+    void Pad(u8 ch, s32 count)
+    {
+        u8 buf = ch;
+        while (count-- > 0) {
+            if (func_001D7190(this, (const char*)&buf, 1) != 1) {
+                break;
+            }
+        }
+    }
+};
+struct Str_1E0CD0;
+
+struct Obj_1E0CD0 {
+    s32 f00;
+    u8 p04[0x10 - 0x04];
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+};
+
+extern u8 D_0024E2E0[];
+
+s32 func_001E2100(Str_1E0CD0* p);
+
+
+void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
+    s32 n;
+    s32 right;
+    s32 left;
+    u8 pad;
+
+    if (str == 0) {
+        str = (const char*)D_0024E2E0;
+    }
+    right = 0;
+    n = func_001E2100((Str_1E0CD0*)str);
+    left = 0;
+    if (self->f1C != 0 && self->f1C < n) {
+        n = self->f1C;
+    } else if (self->f14 != 0) {
+        n = 0;
+    }
+    if (n < self->f18) {
+        pad = (self->f10 != 0) ? 0x30 : 0x20;
+        s32 d = self->f18 - n;
+        if (self->f00 != 0) {
+            right = d;
+        } else {
+            left = d;
+        }
+    }
+    ctx->Pad(pad, left);
+    func_001D7190(ctx, str, n);
+    ctx->Pad(0x20, right);
+}
+
+struct Obj_1E13D0 { u8 pad; };
+
+
+f32 func_00205C78(f32 a, f32 b);
+Obj_1E13D0* func_001FCDE0(Obj_1E13D0* self, u64 v);
+Obj_1E13D0* func_001FCDE0(Obj_1E13D0* self, double v); // soft-float double in a1
+Obj_1E13D0* func_001EAE78(Obj_1E13D0* self);
+Obj_1E13D0* func_001FCD78(Obj_1E13D0* self, Obj_1E13D0* v);
+s32 func_001FD410(Obj_1E13D0* self);
+
+s8 func_001E13D0(Obj_1E13D0* self0, s32 a, s32 b)
+{
+    Obj_1E13D0* self = self0;
+    s32 idx;
+    if (a < b || a - 15 >= b) {
+        idx = 0;
+    } else {
+        f32 t = func_00205C78(10.0f, (f32)(-b));
+        Obj_1E13D0* p = func_001FCDE0(self, (u64)func_001FD868(t));
+        self = func_001EAE78(p);
+        p = func_001EAE78(func_001FCDE0(self, 0.1));
+        p = func_001FCDE0(p, (u64)0x4024000000000000ULL);
+        idx = func_001FD410(func_001FCD78(self, p));
+    }
+    return ((s8*)&D_00275940)[idx];
+}

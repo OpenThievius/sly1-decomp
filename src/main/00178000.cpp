@@ -1016,3 +1016,132 @@ tail:
     func_001B9058(self, &a, f, D_00263C20, &b, D_00263C30);
     func_001B9D10(self, f, (u8*)self + 0x620, D_00263C40);
 }
+
+struct Self_178D98;
+struct Q_178D98 {
+    u8 b[16];
+} __attribute__((aligned(16)));
+struct Hit_178D98 {
+    Q_178D98 q0;
+    Q_178D98 q1;
+};
+struct Node_178D98;
+struct Vt_178D98;
+struct Sub_178D98 {
+    Vt_178D98* vt;
+};
+struct Vt_178D98 {
+    u8 pad00[0x28];
+    void (*f28)(Sub_178D98* self, Q_178D98* a, s32 b, s32 c, s32 d, s32 e, f32* out);
+};
+struct Node_178D98 {
+    u8 pad00[0x18];
+    void* f18;
+    u8 pad1C[0x34 - 0x1C];
+    Sub_178D98* f34;
+};
+struct Entry_178D98 {
+    Node_178D98* node;
+    f32 f4;
+    u8 pad08[8];
+    u8 f10[16];
+};
+struct Slot_178D98 {
+    Node_178D98* node;
+    u8 pad04[0x1C];
+};
+struct Self_178D98 {
+    u8 pad00[0x14];
+    void* f14;
+    u8 pad18[0x140 - 0x18];
+    Q_178D98 f140;
+    u8 pad150[0x2768 - 0x150];
+    s32 f2768;
+    u8 pad276C[4];
+    Slot_178D98 f2770[1];
+};
+
+extern f32 D_0024AFA4;
+s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void func_0018D608(void);
+Entry_178D98* func_0018D6A8(s32 size);
+void func_0018D6F0(void);
+s32 func_00182FC8(Node_178D98* p);
+s32 func_001300E8(Node_178D98* n, s32 kind);
+void func_00128018(void* a, void* b, Q_178D98* c, Q_178D98* d);
+void func_001782C0(Self_178D98* self, Entry_178D98* e, f32 f, void* a2, void* a3, void* a4);
+s32 func_00178D18(Entry_178D98* a, Entry_178D98* b);
+void func_001F5CD0(Entry_178D98* base, s32 n, s32 size, s32 (*cmp)(Entry_178D98*, Entry_178D98*));
+f32 func_001788F0(Self_178D98* self, void* e, s32 v, void* a3, Hit_178D98* a4, f32* a5);
+void func_001F5C0C(void* dst, s32 value, s32 size);
+
+void func_00178D98(Self_178D98* self, s32 n, Node_178D98** items, Hit_178D98* out, f32* outf)
+{
+    u8 scratch[0x80];
+    Hit_178D98 hit;
+    Q_178D98 tmp;
+    f32 dist;
+    f32 r;
+    s32 v;
+    Entry_178D98* buf;
+    f32 best;
+    s32 cnt = 0;
+
+    v = func_0015A4F0(self->f14, 5, 8, 0, 0x20, scratch);
+    func_0018D608();
+    buf = func_0018D6A8(n << 5);
+    for (s32 i = 0; i < n; i++) {
+        Node_178D98* node = items[i];
+        if (func_00182FC8(node) != 0) {
+            Entry_178D98* e = buf + cnt;
+            cnt = cnt + 1;
+            e->node = node;
+            if (func_001300E8(node, 0x6E) != 0) {
+                func_00128018(0, node->f18, &self->f140, &tmp);
+                Sub_178D98* s = node->f34;
+                if (s->vt->f28 != 0) {
+                    s->vt->f28(s, &tmp, 0, 0, 0, 0, &e->f4);
+                }
+            } else {
+                e->f4 = 0;
+            }
+            func_001782C0(self, e, 0.7f, 0, e->f10, 0);
+        }
+    }
+    func_001F5CD0(buf, cnt, 0x20, func_00178D18);
+    best = D_0024AFA4;
+    for (s32 i = 0; i < cnt; i++) {
+        r = func_001788F0(self, &buf[i], v, scratch, &hit, &dist);
+        if (r < best) {
+            best = r;
+            *out = hit;
+            *outf = dist;
+            if (best == 0.0f)
+                goto done;
+        }
+    }
+    if (best <= 1000.0f)
+        goto done;
+    for (s32 i = 0; i < self->f2768; i++) {
+        Slot_178D98* q = &self->f2770[i];
+        if (q->node == 0 || func_00182FC8(q->node) != 0) {
+            r = func_001788F0(self, q, v, scratch, &hit, &dist);
+            if (r < best) {
+                best = r;
+                *out = hit;
+                *outf = dist;
+                if (best == 0.0f)
+                    goto done;
+            }
+        }
+    }
+    if (best == D_0024AFA4) {
+        func_001F5C0C(out, 0, 0x20);
+        *(s32*)out = 0;
+        out->q1 = self->f140;
+        ((f32*)out)[6] -= 75.0f;
+        *outf = 0.75f;
+    }
+done:
+    func_0018D6F0();
+}

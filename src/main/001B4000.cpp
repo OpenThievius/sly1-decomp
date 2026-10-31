@@ -1795,3 +1795,167 @@ void* func_001B4980(s32 n)
     }
     return 0;
 }
+
+struct Hdr_1B6F50;
+struct Elem_1B6F50;
+struct Sub_1B6F50 { u8 p0[0x11]; u8 f11; u8 p1[0x0A]; s32 f1C; u8 p2[0x60]; s32 f80; s32 f84; };
+typedef void (*VFn_1B6F50)(void* self);
+struct Elem_1B6F50 { VFn_1B6F50* vtbl; };
+struct Ent_1B6F50 { s32 key; void* val; };
+struct Obj_1B6F50 {
+    u8 p0[0x14];
+    void* f14;
+    u8 p1[0xBF0 - 0x18];
+    s32 fBF0;
+    u8 p2[0xC10 - 0xBF4];
+    s32 fC10;
+    s32 fC14;
+    u8 p3[0xC34 - 0xC18];
+    Sub_1B6F50* fC34;
+    Ent_1B6F50 ents[17];
+};
+
+extern u8 D_0021A790[];
+void* func_0015A448(Hdr_1B6F50* obj, s32 id, Obj_1B6F50* flags);
+s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, Obj_1B6F50* a3, s32 a4, void* a5);
+s32 func_001833F0(Elem_1B6F50* a, s32 b);
+void func_0018D608(void);
+void func_0018D6F0(void);
+void* func_0018D658(u32 bytes);
+void* func_00121228(Hdr_1B6F50* root, s32 value, void* table);
+void func_001299E0(Hdr_1B6F50* self, void* src);
+
+void func_001B6F50(Obj_1B6F50* self)
+{
+    s32 best = -1;
+    s32 j = 16;
+    Ent_1B6F50* e = self->ents;
+    do {
+        s32 key = e->key;
+        if (key == best) {
+            e->val = 0;
+        } else {
+            e->val = func_0015A448((Hdr_1B6F50*)self->f14, key, self);
+        }
+        e++;
+        j--;
+    } while (j >= 0);
+
+    func_0018D608();
+    best = 0;
+    s32 count = func_0015A4F0((Hdr_1B6F50*)self->f14, 0x201, 0x60, self, 0, 0);
+    Elem_1B6F50** list = (Elem_1B6F50**)func_0018D658(count << 2);
+    count = func_0015A4F0((Hdr_1B6F50*)self->f14, 0x201, 0x60, self, count, list);
+    if (count > 0) {
+        do {
+            if (func_001833F0(*list, self->fC10) != 0) {
+                best = (s32)*list;
+            } else {
+                (*list)->vtbl[7](*list);
+            }
+            list++;
+            count--;
+        } while (count != 0);
+    }
+    self->fC14 = best;
+    func_0018D6F0();
+    if (self->fC14 != 0) {
+        self->fC34 = (Sub_1B6F50*)func_00121228((Hdr_1B6F50*)self->f14, self->fC14, D_0021A790);
+        self->fC34->f11 = 2;
+        self->fC34->f1C = 1;
+        self->fC34->f84 = self->fC34->f80 = 0;
+        func_001299E0((Hdr_1B6F50*)self->fC14, self->fC34);
+        self->fBF0 = self->fC14;
+    }
+}
+
+extern u8 D_002746A0[];
+extern u8 D_00248D30[];
+
+struct Quad_1B7638 {
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 d;
+} __attribute__((aligned(16)));
+
+struct Sub_1B7638 {
+    u8 pad0[0x2F0];
+    f32 f2F0;
+};
+
+struct Node_1B7638 {
+    void *vtbl;
+    u8 pad0[0xC14 - 4];
+    struct Sub_1B7638 *fieldC14;
+    u8 pad1[0xC30 - 0xC18];
+    void *fieldC30;
+    void *fieldC34;
+};
+
+struct Target_1B7638 {
+    u8 pad0[0x24];
+    void *field24;
+    u8 pad1[0x30 - 0x28];
+    struct Quad_1B7638 quad30;
+};
+
+typedef s32 (*VFn_1B7638)(struct Node_1B7638 *self);
+
+s32 func_001C96B8(struct Node_1B7638 *self);
+s32 func_001CB578(struct Node_1B7638 *self);
+
+void func_001B7638(struct Node_1B7638 *self) {
+    struct Target_1B7638 *t;
+    s32 r;
+    s32 res;
+    f32 f;
+
+    if (self->fieldC14 == 0) {
+        return;
+    }
+    t = (struct Target_1B7638 *)self->fieldC34;
+    r = func_001C96B8(self);
+    switch (r) {
+    case 0:
+    case 1:
+        if (self->fieldC30 != 0) {
+            t->field24 = self->fieldC30;
+            t->quad30 = *(struct Quad_1B7638 *)D_00248D30;
+        } else {
+            t->field24 = self;
+            t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+        }
+        f = 1.3f;
+        if (r == 0) {
+            f = 1.0f;
+        }
+        break;
+    case 2:
+        if (self->fieldC30 != 0) {
+            t->field24 = self->fieldC30;
+            t->quad30 = *(struct Quad_1B7638 *)D_00248D30;
+        } else if (func_001CB578(self) != 0) {
+            t->field24 = self;
+            t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+        } else {
+            VFn_1B7638 *vt = (VFn_1B7638 *)self->vtbl;
+            res = vt[0x66](self);
+            if (res != 0) {
+                t->field24 = (void *)res;
+                t->quad30 = *(struct Quad_1B7638 *)D_00248D30;
+            } else {
+                t->field24 = self;
+                t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+            }
+        }
+        f = 1.3f;
+        break;
+    case 3:
+        t->field24 = self;
+        t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+        f = 0.1f;
+        break;
+    }
+    self->fieldC14->f2F0 = f;
+}

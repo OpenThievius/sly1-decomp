@@ -1091,3 +1091,186 @@ void func_00160D30(u32* out)
     }
     if (out) *out = m;
 }
+
+// EXACT: self->block store ahead of self->f20 store.
+
+typedef void (*Fn_1613C0)(void* self, s32 mode);
+
+struct Desc_1613C0 {
+    u8 pad0[8];
+    s16 adj;
+    u8 pad1[2];
+    Fn_1613C0 fn;
+};
+
+struct Ctx_1613C0 {
+    u8 pad0[0xC];
+    u8* cur;
+    u8 pad1[8];
+    Desc_1613C0* desc;
+    u8* block;
+    s32 f20;
+    s32 f24;
+};
+
+void func_001613C0(Ctx_1613C0* self, s32 a1, s32 a2, s32 a3)
+{
+    Desc_1613C0* d = self->desc;
+    d->fn((u8*)self + d->adj, 0);
+    u8* blk = self->cur;
+    s64 lo = ((s64)a2 << 60) | ((s64)1 << 46);
+    s64 hdr = ((s64)a1 << 47) | lo;
+    self->cur = blk + 0x10;
+    *(s64*)blk = hdr;
+    *(s64*)(blk + 8) = (s64)a3;
+    self->block = blk;
+    self->f20 = a2;
+    self->f24 = 0;
+}
+
+struct Pkt_1639E8;
+struct Frame_1639E8
+{
+    s32 f0;
+    u8* f4;
+    u8 pad08[0x28];
+};
+struct Hdr_1639E8
+{
+    u16* p;
+    s32 count;
+};
+struct Vec3_1639E8
+{
+    f32 x;
+    f32 y;
+    f32 z;
+};
+struct Ent_1639E8
+{
+    u16* idx;
+    s32 pad;
+};
+struct Self_1639E8
+{
+    u8 pad00[0x40];
+    s32 f40;
+};
+struct Rgba_1639E8
+{
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a;
+};
+
+extern Rgba_1639E8 D_002623E0;
+extern s32 D_002623E8[];
+extern s32 D_00262400[];
+extern u8 D_00001298[];
+extern u8 D_00001368[];
+extern u8 D_00000ED8[];
+
+void func_001EE5C8(Pkt_1639E8* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+void* func_001F5C0C(void* p, s32 value, s32 size);
+void func_001611B8(Frame_1639E8* f);
+void func_00152980(Frame_1639E8* f, s32 size);
+void func_001613C0(Frame_1639E8* f, s32 a, s32 b, s32 c);
+void func_00161708(Frame_1639E8* f, s32 a, u64 b);
+void func_00161278(Frame_1639E8* f, s32 n);
+void func_001EE668(Pkt_1639E8* s, s32 a, s32 b, void* data, s32 flags);
+void func_001528E0(Frame_1639E8* f);
+void func_001615F0(Frame_1639E8* f, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_001EE4C0(Pkt_1639E8* s, u32* src);
+void func_001EE528(Pkt_1639E8* s, s32 value);
+void func_001EE3F0(Pkt_1639E8* s, void* data);
+void func_001EE480(Pkt_1639E8* s);
+void func_00163990(s32 mode, Pkt_1639E8* obj);
+
+struct Zero_1639E8
+{
+    static void Clear(u32* q)
+    {
+        func_001F5C0C(q, 0, 0x10);
+    }
+};
+
+void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_1639E8* vecs, s32 extra,
+                   void* extraData, Ent_1639E8* ents, Vec3_1639E8* verts, void* data, Pkt_1639E8* pkt)
+{
+    Frame_1639E8 f;
+    u32 buf[4];
+    s32 i;
+    Vec3_1639E8* out;
+    s32 off = 0x2B;
+
+    func_001EE5C8(pkt, 0xD, 2, 0x16, 0, hdr);
+    func_001F5C0C(hdr->p, 0, 0x10);
+    func_001611B8(&f);
+    func_00152980(&f, 8);
+    func_001613C0(&f, 0, 1, 0xE);
+    func_00161708(&f, 0x42, 0x44);
+    func_00161708(&f, 1, (u64)D_002623E0.r | ((u64)D_002623E0.g << 8) | ((u64)D_002623E0.b << 16)
+                             | ((u64)D_002623E0.a << 24) | (1ULL << 32));
+    func_00161278(&f, 1);
+    func_001EE668(pkt, 0xC, 2, f.f4, 0x18);
+    func_001528E0(&f);
+    func_001613C0(&f, 0xC1, 3, 0x44E);
+    func_00161708(&f, 0x47, 0x70000);
+    func_001615F0(&f, 0, 0, 0, 0);
+    func_001615F0(&f, 0, 0, 0, 0);
+    func_00161278(&f, 0);
+    func_001613C0(&f, 1, 3, 0x44E);
+    func_00161708(&f, 0x47, 0x72001);
+    func_001615F0(&f, 0, 0, 0, 0);
+    func_001615F0(&f, 0, 0, 0, 0);
+    func_00161278(&f, 1);
+    func_001EE668(pkt, 0xC, 2, f.f4, 0x1B);
+    func_001EE668(pkt, 0xC, 2, f.f4 + 0x40, 0x1F);
+    func_001EE668(pkt, 0xC, 2, f.f4, 0x23);
+    func_001EE668(pkt, 0xC, 2, f.f4 + 0x40, 0x27);
+
+    hdr->p[0] = off;
+    off += n;
+    hdr->p[1] = off;
+    func_001EE668(pkt, 8, n, vecs, hdr->p[0]);
+    if (hdr->count > 0)
+    {
+        hdr->p[4] = off;
+        off += hdr->count * 4;
+        hdr->p[5] = off;
+        Zero_1639E8::Clear(buf);
+        off += n;
+        func_001EE4C0(pkt, buf);
+        func_001EE528(pkt, D_002623E8[hdr->count]);
+        func_001EE668(pkt, D_00262400[hdr->count], n, data, hdr->p[5]);
+        func_001EE528(pkt, 0);
+    }
+    s32 end = off + extra;
+    if (self->f40 != 0)
+    {
+        hdr->p[5] = off;
+        hdr->p[6] = self->f40 + off;
+        for (i = 0; i < self->f40; i++)
+        {
+            func_001EE668(pkt, 0, 1, &i, 0x1D);
+            func_001EE5C8(pkt, 8, n, hdr->p[6], 0, &out);
+            u16* idx = ents[i].idx;
+            for (s32 k = 0; k < n; k++)
+            {
+                Vec3_1639E8* v = &verts[idx[k]];
+                out[k].x = v->x - vecs[k].x;
+                out[k].y = v->y - vecs[k].y;
+                out[k].z = v->z - vecs[k].z;
+            }
+            func_001EE3F0(pkt, D_00001298);
+            func_001EE480(pkt);
+        }
+    }
+    hdr->p[2] = off;
+    hdr->p[3] = end;
+    func_001EE668(pkt, 0xE, extra, extraData, hdr->p[2]);
+    func_00163990(mode, pkt);
+    func_001EE3F0(pkt, D_00001368);
+    func_001EE3F0(pkt, D_00000ED8);
+}

@@ -788,3 +788,255 @@ void func_00189350(Obj_189350* self, void* value)
 {
     func_00189C28(self, D_00248D20, value);
 }
+
+// was NEAR: 2 lines: retail has addiu s2 (self+0xE30) before the first call and li s3,2 in its delay slot; ours swaps them. About 20 rewrites (for/do-while, init placement, decl order, cast offsets) all give the same two swapped lines.
+extern u8 D_00264928[];
+extern u8 D_00264950[];
+extern u8 D_00264960[];
+
+void func_001C72A0(void* self);
+void func_001DDC38(void* sub, void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+void func_001D36F0(void* self, void* a, void* b);
+void* func_001B6290(void* a, void* b, s32 c, s32 d);
+s32 func_001CA758(void* self, s32 id);
+u8* func_0018D568(s32 size, void* src);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+struct Ent_18A3F0 { s32 key; s32 pad4; s32 value; };
+
+struct Self_18A3F0 {
+    u8 pad0[0x14]; void* host; u8 pad1[0x7BC - 0x18]; s32 f7BC; u8 pad2[0xE00 - 0x7C0];
+    s32 fE00; u8 pad3[8]; void* fE0C; void* fE10; u8 pad4[0xE20 - 0xE14]; s32 count; Ent_18A3F0* tbl; u8 pad5[8]; s32 ids[3];
+};
+
+void func_0018A3F0(Self_18A3F0* self)
+{
+    s32 n;
+    s32 i;
+
+    func_001C72A0(self);
+    func_001DDC38(self->host, self);
+    func_00124DF8(self, 3, D_00264928);
+    func_001D36F0(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
+    self->f7BC = self->fE00;
+    self->fE10 = func_001B6290(self->fE0C, 0, 0x438, 0);
+    for (n = 0; n < 3; n++)
+        self->ids[n] = func_001CA758(self, ((s32*)D_00264950)[n]);
+    self->count = 6;
+    self->tbl = (Ent_18A3F0*)func_0018D568(0x48, D_00264960);
+    for (i = 0; i < self->count; i++) {
+        Ent_18A3F0* e = self->tbl + i;
+        e->value = func_0015A418(self->host, 1, e->key, self);
+    }
+}
+
+struct Tail_18B988
+{
+    static s32 Get(s32 b, s32 v, s32 lim)
+    {
+        s32 r = v;
+        if (b >= lim) r = 31;
+        return r;
+    }
+};
+
+s32 func_0018B988(s32 a, s32 b)
+{
+    s32 r;
+    switch (a) {
+    case 1:
+        switch (b) {
+        case 0: return 0;
+        case -1: return 9;
+        case -2: return 10;
+        case -5: return 11;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 2:
+        switch (b) {
+        case -2: return 12;
+        case -3: return 1;
+        case -4: return 13;
+        case -5: return 6;
+        case -7: return 25;
+        }
+        if (b >= 0) return 0;
+        return Tail_18B988::Get(b, 11, -9);
+    case 3:
+        switch (b) {
+        case 0: return 0;
+        case -2: return 12;
+        case -4: return 16;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 4:
+        switch (b) {
+        case -2: return 12;
+        case -4: return 16;
+        }
+        if (b >= 0) return 0;
+        return Tail_18B988::Get(b, 11, -9);
+    case 5:
+        switch (b) {
+        case -2: return 12;
+        case -4: return 16;
+        case -5: return 17;
+        }
+        if (b >= 0) return 0;
+        return Tail_18B988::Get(b, 11, -9);
+    case 6:
+        switch (b) {
+        case -2: return 12;
+        case -3: return 1;
+        case -4: return 16;
+        case -5: return 18;
+        case -8: return 26;
+        }
+        if (b >= 0) return 0;
+        return Tail_18B988::Get(b, 11, -9);
+    case 10:
+        switch (b) {
+        case 0: return 0;
+        case -2: return 12;
+        case -4: return 16;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 11:
+        switch (b) {
+        case 0: return 0;
+        case -2: return 12;
+        case -3: return 1;
+        case -4: return 24;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 12:
+        switch (b) {
+        case 0: return 0;
+        case -2: return 12;
+        case -4: return 21;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 13:
+        switch (b) {
+        case -2: return 12;
+        case -4: return 21;
+        }
+        if (b >= 0) return 0;
+        return Tail_18B988::Get(b, 11, -9);
+    case 14:
+        switch (b) {
+        case 0: return 0;
+        case -2: return 12;
+        case -4: return 22;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 15:
+        switch (b) {
+        case 0: return 0;
+        case -2: return 12;
+        case -4: return 14;
+        case -5: return 19;
+        case -6: return 23;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 16:
+        r = 0;
+        if (b != 0) return Tail_18B988::Get(b, 4, 0);
+        break;
+    case 17:
+        r = 0;
+        if (b != 0) return Tail_18B988::Get(b, 5, 0);
+        break;
+    case 18:
+        switch (b) {
+        case -2: return 12;
+        }
+        if (b >= 0) return 0;
+        return Tail_18B988::Get(b, 11, -9);
+    case 19:
+        switch (b) {
+        case 0: return 0;
+        case -2: return 12;
+        case -4: return 22;
+        }
+        return Tail_18B988::Get(b, 11, -9);
+    case 20:
+        switch (b) {
+        case 0: return 0;
+        case -403: return 35;
+        }
+        return 31;
+    case 21:
+        if (b >= 0) return 0;
+        if ((u32)(b + 100) < 100) return 31;
+        return Tail_18B988::Get(b, 30, -99);
+    default:
+        r = 31;
+        break;
+    }
+    return r;
+}
+
+struct __attribute__((aligned(16))) Mat_1897F0 { f32 f[3][4]; };
+
+extern Mat_1897F0 D_002483D0;
+
+s32 func_001897F0(Mat_1897F0* in, Mat_1897F0* out)
+{
+    Mat_1897F0 m;
+    s32 i, j, k;
+    f32 t;
+    s32 ok = 0;
+    m = *in;
+    *out = D_002483D0;
+    for (i = 0; i < 3; i++) {
+        j = i;
+        f32 best = __builtin_fabsf(m.f[i][j]);
+        for (k = i + 1; k < 3; k++) {
+            t = __builtin_fabsf(m.f[i][k]);
+            if (best < t) {
+                best = t;
+                j = k;
+            }
+        }
+        if (best == 0.0f) goto done;
+        if (j != i) {
+            for (k = 0; k < 3; k++) {
+                f32 a = m.f[k][j];
+                f32 b = out->f[k][j];
+                f32 c = m.f[k][i];
+                f32 d = out->f[k][i];
+                m.f[k][i] = a;
+                out->f[k][i] = b;
+                m.f[k][j] = c;
+                out->f[k][j] = d;
+            }
+        }
+        for (j = i + 1; j < 3; j++) {
+            t = m.f[i][j] / m.f[i][i];
+            for (k = 0; k < 3; k++) {
+                m.f[k][j] -= t * m.f[k][i];
+                out->f[k][j] -= t * out->f[k][i];
+            }
+        }
+    }
+    for (i = 2; i >= 0; i--) {
+        for (j = 0; j < i; j++) {
+            t = m.f[i][j] / m.f[i][i];
+            for (k = 0; k < 3; k++) {
+                m.f[k][j] -= t * m.f[k][i];
+                out->f[k][j] -= t * out->f[k][i];
+            }
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        t = m.f[i][i];
+        for (j = 0; j < 3; j++) {
+            out->f[j][i] /= t;
+        }
+    }
+    ok = 1;
+done:
+    return ok;
+}

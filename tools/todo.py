@@ -30,11 +30,15 @@ What stops a function from being matched, the blocker column:
   assembler left after a return, or a tail call; no C function can produce it
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
 - nonc: max.s, min.s, sqrt.s: no plain C form in this compiler
+- compiler: a 64-bit `sd` save of a register in the prologue: retail's library code (Sony's
+  2.9-ee-991111); the fixed default compiler saves with `sq`
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; write the switch in C (the table stays retail's, tools/rodata.py)
 - rodata: refers to named .rodata. C reads the constant through an extern
   (extern u8 D_00219718[];), so the object keeps no .rodata of its own
+- compiler: saves registers with 8-byte sd in its prologue (Sony's 2.9-ee-991111 libraries,
+  docs/TOOLCHAIN.md); the default compiler saves with sq, so it cannot match
 - none: nothing blocks it
 
 A function is finished when src/ defines it (tools/progress.py reads the same
@@ -54,6 +58,8 @@ ROOT = versions.ROOT
 WINDOW = 0x4000
 RODATA = (0x217380, 0x250580)          # US .rodata (docs/VERSIONS.md)
 DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b(?![^\n]*\bfunc_))[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
+PROLOGUE = 12  # instructions from the top of a listing that a register save may be in
+SAVE64 = re.compile(r"^sd\s+\$(ra|s\d|fp)\b")
 VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
 SYSTEM = {"syscall", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "eret", "ei", "di", "break"}
 NONC = {"max.s", "min.s", "sqrt.s"}  # no plain C form in this compiler
@@ -139,6 +145,8 @@ def tags_of(lines, kind):
     first = next((line.split() for line in lines if line.split()), [])
     if len(first) >= 4 and first[:3] == ["addiu", "$sp,", "$sp,"] and not first[3].startswith("-"):
         tags.add("fragment")  # a positive stack adjustment first: the end of the function before
+    if any(SAVE64.match(line) for line in lines[:PROLOGUE]):
+        tags.add("compiler")
     for line in lines:
         if line.startswith("jlabel"):
             tags.add("jtbl")
@@ -170,7 +178,7 @@ def tags_of(lines, kind):
     return tags
 
 
-PERMANENT = ("fragment", "vu", "system", "handwritten", "mmi", "nonc")
+PERMANENT = ("fragment", "vu", "system", "handwritten", "mmi", "nonc", "compiler")
 
 
 def blocker(tags):
@@ -221,7 +229,7 @@ def main(argv=None):
             n, total = counts.get(key, (0, 0))
             counts[key] = (n + 1, total + size)
         print("blocker\tfunctions\tbytes")
-        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten", "mmi", "nonc"):
+        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten", "mmi", "nonc", "compiler"):
             if key in counts:
                 print("%s\t%d\t%d" % (key, counts[key][0], counts[key][1]))
         return 0

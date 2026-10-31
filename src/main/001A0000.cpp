@@ -814,3 +814,51 @@ void func_001A3C40(Obj_1A3C40* self, Src_1A3C40* src)
     func_00128150(0, self, f.buf, f.buf);
     self->inner->vtbl[34](self->inner, f.buf);
 }
+
+struct __attribute__((aligned(16))) Quad_1A1DF0 { s32 a; s32 b; s32 c; s32 d; };
+struct Obj_1A1DF0 { u8 pad0[0x18]; f32 f18; f32 f1C; u8 pad20[0x20]; Quad_1A1DF0 f40; u8 pad50[0xD0]; s32 f120; };
+
+extern f32 D_00261858[];
+extern f32 D_0024C9B8;
+extern u8 D_0026B6A0[];
+extern u8 D_0026B6B0[];
+
+void func_001A1DF0(Obj_1A1DF0* self, s32 mode)
+{
+    f32 t;
+    f32 x;
+
+    if (mode == self->f120) {
+        return;
+    }
+    f32 one = 1.0f;
+    x = (D_00261858[1] - self->f18) / self->f1C;
+    if (x < 0.0f) {
+        t = 0.0f;
+    } else if (one < x) {
+        t = one;
+    } else {
+        t = x;
+    }
+    switch (mode) {
+    case 0:
+        self->f40 = *(Quad_1A1DF0*)D_0026B6A0;
+        self->f1C = 0.25f;
+        break;
+    case 1:
+        self->f40 = *(Quad_1A1DF0*)((u8*)&D_00275C50);
+        self->f1C = D_0024C9B8;
+        break;
+    case 2:
+        self->f40 = *(Quad_1A1DF0*)D_0026B6B0;
+        self->f1C = 0.5f;
+        break;
+    }
+    if ((mode == 0 || mode == 2) && (self->f120 == 0 || self->f120 == 2)) {
+        t = 1.0f - t;
+    } else {
+        t = 0.0f;
+    }
+    self->f18 = D_00261858[1] - t * self->f1C;
+    self->f120 = mode;
+}

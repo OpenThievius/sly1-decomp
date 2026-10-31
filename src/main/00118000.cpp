@@ -2073,3 +2073,145 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
     }
     return n;
 }
+
+struct V_119BB0 { s32 type; void* p; };
+struct Node_119BB0 { s32 f0; void* f4; Node_119BB0* f8; };
+typedef void (*Fn1D_119BB0)(V_119BB0* ret, s32 n, V_119BB0* args, void* ctx);
+struct Ent_119BB0 { Fn1D_119BB0 f0; s32 f4; s32 f8; };
+typedef void (*Fn21_119BB0)(V_119BB0* ret, void* a, s32 n, V_119BB0* args);
+struct O21_119BB0 { void* f0; Fn21_119BB0 f4; s32 f8; };
+struct Def_119BB0 { s32 f0; Node_119BB0* f4; s32 f8; s32 fC; s32 f10; };
+
+V_119BB0* func_0011B008(V_119BB0* q);
+void func_0011B060(V_119BB0* q, s32 mode);
+void func_0011B0A8(V_119BB0* a, V_119BB0* b);
+void func_0011B018(V_119BB0* dst, V_119BB0* src);
+void func_0011A080(V_119BB0* ret, Node_119BB0* n, void* ctx);
+void func_0011B6C0(V_119BB0* q, V_119BB0* head);
+void func_0011B538(V_119BB0* q, s32 n);
+void* func_0011A630(void);
+void func_0011A328(void* s, s32 v);
+void func_0011A358(V_119BB0* ret, void* s, void* x, V_119BB0* arg);
+void func_00119A58(V_119BB0* ret, s32 v, void* s);
+extern Ent_119BB0 D_00259958[];
+
+V_119BB0* func_00119BB0(V_119BB0* ret, Node_119BB0* self, void* ctx)
+{
+    Node_119BB0* node;
+    V_119BB0 a;
+    V_119BB0 b;
+    V_119BB0 arr[32];
+    V_119BB0 t;
+    V_119BB0 u;
+    s32 total;
+    Ent_119BB0* ent;
+    O21_119BB0* o21;
+    Def_119BB0* d;
+    s32 n;
+    s32 last;
+    s32 count;
+    s32 i;
+    V_119BB0* p;
+
+    func_0011B008(&a);
+    func_0011B008(&b);
+    p = arr;
+    for (s32 k = 31; k != -1; k--) {
+        func_0011B008(p);
+        p++;
+    }
+    Node_119BB0* first = (Node_119BB0*)self->f4;
+    func_0011A080(&t, first, ctx);
+    func_0011B0A8(&a, &t);
+    func_0011B060(&t, 2);
+    if (a.type == 0x1D) {
+        ent = &D_00259958[(s32)a.p];
+        n = ent->f4;
+        last = ent->f8;
+    } else if (a.type == 0x21) {
+        o21 = (O21_119BB0*)a.p;
+        last = 0;
+        n = o21->f8;
+    } else {
+        d = (Def_119BB0*)a.p;
+        n = d->f8;
+        last = d->fC;
+    }
+    node = first->f8;
+    total = n + (last != 0);
+    count = n;
+    for (i = 0; i < n; i++) {
+        V_119BB0* bp = &b;
+        func_0011A080(&t, node, ctx);
+        func_0011B0A8(bp, &t);
+        func_0011B060(&t, 2);
+        func_0011B0A8(&arr[i], bp);
+        node = node->f8;
+    }
+    if (last) {
+        V_119BB0* tail = 0;
+        V_119BB0* head = 0;
+        Node_119BB0* m;
+        for (m = node; m; m = m->f8) {
+            V_119BB0* e = (V_119BB0*)func_0011AF28();
+            func_0011A080(&t, m, ctx);
+            func_0011B0A8(e, &t);
+            func_0011B060(&t, 2);
+            if (tail) {
+                ((Node_119BB0*)tail)->f8 = (Node_119BB0*)e;
+                tail = e;
+            } else {
+                tail = e;
+                head = e;
+            }
+            count++;
+        }
+        if (head) {
+            func_0011B6C0(&arr[i], head);
+        } else {
+            func_0011B538(&arr[i], 0);
+        }
+    }
+    switch (a.type) {
+    case 0x1D:
+        ent->f0(&t, count, arr, ctx);
+        func_0011B0A8(&b, &t);
+        func_0011B060(&t, 2);
+        break;
+    case 0x1F: {
+        d = (Def_119BB0*)a.p;
+        void* s = func_0011A630();
+        func_0011A328(s, d->f0);
+        Node_119BB0* q = d->f4;
+        for (i = 0; i < total; i++) {
+            func_0011B008(&t);
+            if (0x13 == q->f0) {
+                q = q->f8;
+            }
+            func_0011A358(&u, s, q->f4, &arr[i]);
+            func_0011B0A8(&t, &u);
+            func_0011B060(&u, 2);
+            q = q->f8;
+            func_0011B060(&t, 2);
+        }
+        func_00119A58(&t, d->f10, s);
+        func_0011B0A8(&b, &t);
+        func_0011B060(&t, 2);
+        break;
+    }
+    case 0x21:
+        o21->f4(&t, o21->f0, count, arr);
+        func_0011B0A8(&b, &t);
+        func_0011B060(&t, 2);
+        break;
+    }
+    func_0011B018(ret, &b);
+    p = &t;
+    while (arr != p) {
+        p--;
+        func_0011B060(p, 0);
+    }
+    func_0011B060(&b, 2);
+    func_0011B060(&a, 2);
+    return ret;
+}

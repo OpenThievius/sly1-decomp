@@ -1904,3 +1904,18 @@ Obj_121160* func_00121160(u32 kind)
         o->kind = kind;
     return o;
 }
+
+struct Quad_121508 { u8 b[16]; } __attribute__((aligned(16)));
+struct Triple_121508 { Quad_121508 q[3]; } __attribute__((aligned(16)));
+struct Vt_121508 { u8 pad[0xB4]; void (*fn)(void*, void*, void*); };
+struct Sub_121508 { Vt_121508* vt; u8 pad[0x1A0 - 4]; Triple_121508 t; };
+struct Node_121508 { u8 pad0[4]; Sub_121508* sub; };
+
+extern u8 D_00248D30[];
+
+void func_00121508(Node_121508* self, void* out1, void* out2)
+{
+    *(Triple_121508*)out1 = self->sub->t;
+    *(Quad_121508*)out2 = *(Quad_121508*)D_00248D30;
+    self->sub->vt->fn(self->sub, out1, out2);
+}

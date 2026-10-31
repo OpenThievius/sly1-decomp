@@ -1899,3 +1899,216 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
         break;
     }
 }
+
+struct Range_152010 { f32 threshold; s32 lo; s32 hi; };
+struct Table_152010 {
+    u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28;
+    u8 pad2C[0x44 - 0x2C]; f32 f44; f32 f48;
+    u8 pad4C[0x54 - 0x4C]; s32 count; Range_152010* ranges;
+};
+struct Self_152010 {
+    u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; Table_152010* table;
+};
+struct Mgr_152010 { u8 pad0[0x2354]; s32 active; };
+struct Clock_152010 { u8 pad0[0xC]; f32 fC; f32 f10; };
+
+extern u8 D_00275C60[];
+s32 func_001EAA70(s32 lo, s32 hi);
+f32 func_001EB0F8(void* p, f32 v);
+s32 func_00148AC0(Mgr_152010* mgr, s32 kind, void* p, s32 n, void* arr);
+
+struct Lerp_152010
+{
+    static s32 Get(s32 lo, s32 hi)
+    {
+        f32 s = ((Clock_152010*)(void*)D_002623C8)->fC;
+        if (lo == hi) return hi;
+        if (lo < hi) return lo + (s32)(s * ((f32)hi + 0.999f - (f32)lo));
+        return hi + (s32)((1.0f - s) * ((f32)lo + 0.999f - (f32)hi));
+    }
+};
+
+void func_00152010(Self_152010* self, void* p, s32 n, s32 flag)
+{
+    s32 did = 0;
+    if (((Mgr_152010*)(void*)D_00275710)->active != 0 && n != 0) {
+        if (!flag) {
+            self->f18--;
+            self->f14--;
+        }
+        if (n > 0) {
+            func_00148AC0((Mgr_152010*)D_00275710, 0x58, p, n, 0);
+        } else {
+            if (self->f18 < 0) {
+                if (((Clock_152010*)(void*)D_002623C8)->f10 != 0.0f) {
+                    did = 1;
+                    ((Clock_152010*)(void*)D_002623C8)->f10 = func_001EB0F8(D_00275C60, ((Clock_152010*)(void*)D_002623C8)->f10 + self->table->f44);
+                }
+                s32 i = 0;
+                Range_152010* r = 0;
+                while (i < self->table->count) {
+                    r = &self->table->ranges[i];
+                    if (((Clock_152010*)(void*)D_002623C8)->f10 >= r->threshold) break;
+                    i++;
+                }
+                self->f18 = func_001EAA70(r->lo, r->hi);
+            }
+            if (!flag) {
+                for (s32 i = 0; i < self->table->count - 1; i++) {
+                    if (self->table->ranges[i].threshold <= ((Clock_152010*)(void*)D_002623C8)->f10) {
+                        s32 v = func_001EAA70(self->table->ranges[i].lo, self->table->ranges[i].hi);
+                        self->f18 = (self->f18 < v) ? self->f18 : v;
+                        goto done;
+                    }
+                }
+            done:;
+            }
+            if (did) {
+                func_00148AC0((Mgr_152010*)D_00275710, 0x57, p, 1, 0);
+            } else {
+                s32 a, b;
+                if (self->f14 < 0) {
+                    a = self->f4;
+                    b = self->f8;
+                    self->f14 = func_001EAA70(Lerp_152010::Get(self->table->f1C, self->table->f24), Lerp_152010::Get(self->table->f20, self->table->f28));
+                } else {
+                    a = self->fC;
+                    b = self->f10;
+                }
+                n = func_001EAA70(a, b);
+                if (n) func_00148AC0((Mgr_152010*)D_00275710, 0x58, p, n, 0);
+            }
+        }
+    }
+    if (!flag) {
+        ((Clock_152010*)(void*)D_002623C8)->f10 = func_001EB0F8(D_00275C60, ((Clock_152010*)(void*)D_002623C8)->f10 + self->table->f48);
+    }
+}
+
+struct Pkt_152E48 { u8 buf[0x30]; };
+struct Vec_152E48 { f32 x, y, z, w; };
+struct Q_152E48 { s32 a, b, c, d; };
+struct Tex_152E48 { u16 w; u16 h; u8 pad[0x14]; u64 f18; };
+struct C_152E48 { u8 pad[0xC]; Tex_152E48** tex; };
+struct B_152E48 { u8 pad[0x14]; C_152E48* c; };
+struct A_152E48 { B_152E48* b; };
+struct Self_152E48 {
+    u8 pad[0x2D0];
+    A_152E48* f2D0;
+    s32 f2D4;
+    s32 f2D8;
+    s32 f2DC;
+    s32 f2E0;
+};
+
+void func_001611B8(Pkt_152E48* p);
+void func_001EE318(Pkt_152E48* p);
+void func_0018D608(void);
+void func_00152980(Pkt_152E48* p, s32 size);
+void func_001EE480(Pkt_152E48* p);
+void func_00169B18(Tex_152E48* t, Pkt_152E48* p);
+void func_001613C0(Pkt_152E48* p, s32 a, s32 b, u64 c);
+void func_00161458(Pkt_152E48* p, s32 a);
+void func_00161588(Pkt_152E48* p, s32 a, s32 b, u64 c);
+void func_00161708(Pkt_152E48* p, s32 a, u64 v);
+void func_00161200(Pkt_152E48* p);
+void func_001EE8D0(Pkt_152E48* p, Pkt_152E48* q);
+void func_001EE3B8(Pkt_152E48* p, s32 a, s32 b);
+void func_001EE668(Pkt_152E48* p, s32 size, s32 count, void* data, s32 flags);
+void func_001528C8(Pkt_152E48* p);
+void func_001529C8(Pkt_152E48* p, s32 n, Q_152E48* q);
+void func_001612F8(Pkt_152E48* p, s32 a, s32 b, s32 c, u64 d, s32 e);
+void func_00152A50(Pkt_152E48* p, s32* a, s32 b, s32* c, s32 d);
+void func_0018D6F0(void);
+void func_001614C8(Pkt_152E48* p, s32 a, s32 b);
+void func_001EE450(Pkt_152E48* p);
+
+void func_00152E48(Self_152E48* self, A_152E48* a)
+{
+    Pkt_152E48 pa;
+    Pkt_152E48 pb;
+    Vec_152E48 v0;
+    Vec_152E48 v1;
+    Q_152E48 q;
+    Tex_152E48* tex;
+    s32 i;
+    u64 bits;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+
+    self->f2D0 = a;
+    if (a == 0) {
+        return;
+    }
+    tex = *a->b->c->tex;
+    func_001611B8(&pa);
+    func_001EE318(&pb);
+    func_0018D608();
+    func_00152980(&pa, 0x40);
+    func_00152980(&pb, 0x40);
+    func_001EE480(&pb);
+    func_00169B18(tex, &pa);
+    func_001613C0(&pa, 0x246, 3, 0x551);
+    func_00161458(&pa, 0);
+    func_00161588(&pa, 0, 0, 0);
+    func_00161588(&pa, tex->w << 4, tex->h << 4, 0);
+    func_001613C0(&pa, 0x200, 1, 0xE);
+    func_00161708(&pa, 0x41, ((u64)(tex->w - 2) << 16) | (((u64)(tex->h - 2) << 48) | 0x100000001ULL));
+    func_00161200(&pa);
+    func_001EE8D0(&pb, &pa);
+    v0.x = (f32)((tex->w - 1) * 8) * 1024.0f;
+    v0.y = (f32)((tex->h - 1) * 8) * 1024.0f;
+    v0.z = 0;
+    v1.x = (f32)(tex->w * 8) * 1024.0f + 8589934592.0f;
+    v1.y = (f32)(tex->h * 8) * 1024.0f + 8589934592.0f;
+    v1.z = 0;
+    func_001EE3B8(&pb, 0, 0);
+    func_001EE668(&pb, 8, 1, &v0, 0);
+    func_001EE668(&pb, 8, 1, &v1, 1);
+    func_001528C8(&pa);
+    func_001529C8(&pa, 1, &q);
+    func_001612F8(&pa, 0x24D, 0, 3, 0x412, 0);
+    func_001EE668(&pb, 0xC, 1, &q, 0xC);
+    func_00152A50(&pb, &self->f2D4, 0, &self->f2D8, 0x13);
+    func_0018D6F0();
+    func_0018D608();
+    func_001528C8(&pa);
+    func_001528C8(&pb);
+    func_00152980(&pa, 0x80);
+    func_00152980(&pb, 0x80);
+    bits = (tex->f18 & ~0x1800000000ULL) | 0x800000000ULL;
+    func_001613C0(&pa, 0x200, 1, 0xE);
+    func_00161708(&pa, 0x3F, 0);
+    func_00161708(&pa, 7, bits);
+    func_00161708(&pa, 0x15, 0x61);
+    func_00161708(&pa, 0x48, 0x31001);
+    func_001613C0(&pa, 0x316, 5, 0xE5353);
+    x0 = tex->w << 4;
+    y0 = tex->h << 4;
+    x1 = x0 + 8;
+    y1 = y0 + 8;
+    for (i = 1; i >= 0; i--) {
+        func_001614C8(&pa, 0x10, 8);
+        func_00161588(&pa, 0, 0, 0);
+        func_001614C8(&pa, x0 + 0x10, y1);
+        func_00161588(&pa, x0, y0, 0);
+        func_00161708(&pa, 0x3F, 0);
+        func_001614C8(&pa, 8, 0x10);
+        func_00161588(&pa, 0, 0, 0);
+        func_001614C8(&pa, x1, y0 + 0x10);
+        func_00161588(&pa, x0, y0, 0);
+        func_00161708(&pa, 0x3F, 0);
+        func_001614C8(&pa, 8, 8);
+        func_00161588(&pa, 8, 8, 0);
+        func_001614C8(&pa, x1, y1);
+        func_00161588(&pa, x1, y1, 0);
+        func_00161708(&pa, 0x3F, 0);
+    }
+    func_00161200(&pa);
+    func_001EE450(&pb);
+    func_001EE8D0(&pb, &pa);
+    func_00152A50(&pb, &self->f2DC, 0, &self->f2E0, 0x13);
+    func_0018D6F0();
+}

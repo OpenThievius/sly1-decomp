@@ -1356,3 +1356,121 @@ void func_001ED318(Self_1ED318* self, Msg_1ED318* msg)
         break;
     }
 }
+
+// NEAR: only the order of `lw s0,56(a0)` (items) and `sll v0,v1,4` (count*16) differs; retail loads items first, GCC schedules the shift first
+
+struct Pool_1ED4C8 { u8 pad000[0x34]; s32 count; u8* items; };
+struct Entry_1ED4C8 { s32 f00; s32 f04; f32 f08; s32 pad0C; };
+extern u8 D_00625760[];
+s32 func_001F5C0C(Entry_1ED4C8* dst, s32 value, s32 size);
+
+void* func_001ED4C8(Pool_1ED4C8* self, s32 a, s32 b, f32 c)
+{
+    if (self->count >= 0xC0) return D_00625760;
+    Entry_1ED4C8* e = (Entry_1ED4C8*)(self->items + self->count * 16);
+    self->count = self->count + 1;
+    (void)func_001F5C0C(e, 0, 16);
+    e->f00 = a;
+    e->f04 = b;
+    e->f08 = c;
+    return e;
+}
+
+// The dead "li v0,2" after the func_001ED090 call is the compare constant of an
+// "if (n == 2)" whose two arms compile identically: jump2 cross-jumps the arms after
+// reload, deletes the branch and leaves the constant load.
+
+struct Inner_1EC570 { u8 pad[0x34]; f32 f34; };
+struct Sub_1EC570 { u8 pad0[0x8]; Inner_1EC570* inner; u8 pad1[8]; f32 f14; f32 f18; };
+struct Self_1EC570 {
+    u8 pad0[0x724];
+    s32 state;
+    u8 pad1[0x7E0 - 0x728];
+    Sub_1EC570* sub;
+    u8 pad2[0xC04 - 0x7E4];
+    s32 c04;
+    u8 pad3[0xC20 - 0xC08];
+    s32 c20;
+    u8 pad4[0xC54 - 0xC24];
+    void* c54;
+    u8 pad5[0xC7C - 0xC58];
+    f32 c7c;
+    u8 pad6[0xC88 - 0xC80];
+    f32 c88;
+};
+
+struct Obj_1ECDF8;
+extern Obj_1ECDF8 D_0026E248;  // as declared in src/main/001EC000.cpp
+extern u8 D_00264A40[];
+void func_001B6598(void* sub, s32* out);
+void func_001C91C8(Self_1EC570* self, s32 a, s32 b);
+void func_001ED090(Self_1EC570* self, Sub_1EC570* a, s32 b);
+void func_001AC060(void* p);
+void func_001603E8(s32 n);
+void func_0018C7F8(void* p);
+
+void func_001EC570(Self_1EC570* self, s32 a, s32 b)
+{
+    s32 r[3];
+    switch (self->state) {
+    case 0xE:
+        func_001B6598(self->c54, &r[0]);
+        switch (r[0]) {
+        case 0x4ED:
+        case 0x4F0:
+        case 0x4F3:
+        case 0x4F6:
+            b = self->c20;
+            self->c20 = 0;
+            break;
+        }
+        break;
+    case 0x10:
+        func_001AC060(&D_0026E248);
+        break;
+    case 0xB:
+        func_001AC060(&D_0026E248);
+        func_001603E8(3);
+        func_0018C7F8(D_00264A40);
+        break;
+    }
+    func_001C91C8(self, a, b);
+    switch (self->state) {
+    case 14: {
+        func_001B6598(self->c54, &r[1]);
+        f32 q;
+        switch (r[1]) {
+        case 0x4EE:
+            q = 0.083333336f;
+            self->sub->f18 = self->sub->inner->f34 / (self->c88 + self->c88);
+            break;
+        case 0x4F1:
+        case 0x4F4:
+        case 0x4F7:
+            q = 0.083333336f;
+            self->sub->f18 = self->sub->inner->f34 / (self->c88 * 4.0f);
+            break;
+        default:
+            return;
+        }
+        self->sub->f14 = q;
+        break;
+    }
+    case 2:
+    case 13: {
+        s32 n = 4;
+        func_001B6598(self->c54, &r[2]);
+        if (r[2] < 0x4EF) {
+            if (r[2] >= 0x4EC) n = 2;
+        }
+        func_001ED090(self, self->sub, n);
+        if (n == 2) self->sub->f14 = self->sub->inner->f34 * (self->c7c / (f32)n);
+        else self->sub->f14 = self->sub->inner->f34 * (self->c7c / (f32)n);
+        break;
+    }
+    case 11:
+    case 16:
+        self->c04 = 0;
+        break;
+    }
+}

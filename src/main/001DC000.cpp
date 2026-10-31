@@ -1316,3 +1316,134 @@ void func_001DE910(Obj_1DE910* self)
         }
     }
 }
+
+struct __attribute__((packed)) Pk16_001DCD28 { u64 a; u64 b; };
+struct Pair_001DCD28 { s32 key; s32 count; };
+
+struct Desc_001DCD28 { s32 pad0; s32 key; };
+
+struct Obj_001DCD28;
+typedef void (*VFn_001DCD28)(Obj_001DCD28* self);
+struct Obj_001DCD28 { VFn_001DCD28* vtbl; u8 pad[0x2D8 - 4]; s32 f2D8; };
+
+struct Node_001DCD28 {
+    Desc_001DCD28* desc;
+    u8 pad0[0x334 - 4];
+    s32 flag334;
+    u8 pad1[0x374 - 0x338];
+    Node_001DCD28* next;
+};
+
+struct Self_001DCD28 {
+    u8 pad0[0x1C54];
+    Node_001DCD28* head;
+};
+
+extern u8 D_0024DC98[];
+
+Obj_001DCD28* func_00183058(Node_001DCD28* node, Self_001DCD28* self, void* z);
+
+void func_001DCD28(Self_001DCD28* self)
+{
+    Pair_001DCD28 pairs[2];
+    *(Pk16_001DCD28*)&pairs[0] = *(Pk16_001DCD28*)D_0024DC98;
+    u32 i;
+    for (i = 0; i < 2; i++) {
+        Node_001DCD28* n;
+        for (n = self->head; n != 0; n = n->next) {
+            if (n->flag334 == 0 && n->desc->key == pairs[i].key) {
+                break;
+            }
+        }
+        if (n == 0) {
+            continue;
+        }
+        for (s32 k = 0; k < pairs[i].count; k++) {
+            Obj_001DCD28* o = func_00183058(n, self, 0);
+            o->f2D8 = 2;
+            if (o->vtbl[19] != 0) {
+                o->vtbl[19](o);
+            }
+            o->vtbl[20](o);
+        }
+    }
+}
+
+extern f32 D_00261858[];
+extern f32 D_0024DCA8;
+extern u8 D_00248D20[];
+extern u8 D_00248D30[];
+
+struct __attribute__((aligned(16))) Quad_1DFBE0 { s32 a, b, c, d; };
+
+struct Obj_1DFBE0 {
+    u8 pad0[0x4E0];
+    s32 f4E0;
+    u8 pad1[0x580 - 0x4E4];
+    s32 f580;
+    u8 pad2[0x638 - 0x584];
+    f32 f638;
+    u8 pad3[0x640 - 0x63C];
+    Quad_1DFBE0 f640;
+    u8 pad4[0x720 - 0x650];
+    s32 f720;
+    f32 f724;
+    u8 pad5[0x730 - 0x728];
+    f32 f730;
+    u8 pad6[0x75C - 0x734];
+    void* f75C;
+};
+
+struct Handle_1DFBE0 { s32 x; };
+struct Tab_1DFBE0 { s32 x; };
+
+void func_001B64D8(struct Handle_1DFBE0* h, s32 b);
+void func_001B6628(struct Handle_1DFBE0* h, s32 b);
+void func_00188850(struct Tab_1DFBE0* tab, void* out, f32 v);
+
+void func_001DFBE0(struct Obj_1DFBE0* self, s32 mode)
+{
+    s32 old = self->f720;
+    if (mode != old) {
+        switch (old) {
+        case 2:
+            self->f730 = D_00261858[1];
+            break;
+        case 3:
+            self->f4E0 = 0;
+            self->f730 = D_00261858[1];
+            break;
+        }
+        switch (mode) {
+        case 0:
+            func_001B64D8((struct Handle_1DFBE0*)self->f75C, 0x351);
+            break;
+        case 1:
+            func_001B64D8((struct Handle_1DFBE0*)self->f75C, 0x352);
+            break;
+        case 2:
+            func_001B6628((struct Handle_1DFBE0*)self->f75C, 0x354);
+            self->f730 = D_0024DCA8;
+            break;
+        case 3:
+            func_001B6628((struct Handle_1DFBE0*)self->f75C, 0x355);
+            self->f4E0 = mode;
+            self->f730 = D_0024DCA8;
+            break;
+        }
+        switch (mode) {
+        case 0:
+        case 2:
+        case 3:
+            self->f640 = *(struct Quad_1DFBE0*)D_00248D30;
+            func_00188850((struct Tab_1DFBE0*)D_00248D20, (u8*)self + 0x660, self->f638);
+            self->f580 = 0;
+            break;
+        default:
+            self->f580 = 1;
+            break;
+        }
+        self->f720 = mode;
+        self->f724 = D_00261858[1];
+    }
+}

@@ -1332,3 +1332,169 @@ void func_0014FA88(Obj_14FA88* self)
         }
     }
 }
+
+struct Slot_14CBA8 {
+    void* p0;
+    void* obj;
+    void* p8;
+    void* pc;
+    s32 flag;
+};
+struct Ctl_14CBA8;
+struct VT_14CBA8 {
+    u8 pad[0x84];
+    void (*f84)(Ctl_14CBA8* self, f32* v);
+    void (*f88)(Ctl_14CBA8* self, f32* v);
+    void (*f8c)(Ctl_14CBA8* self, f32* v);
+    void (*f90)(Ctl_14CBA8* self, u8* v);
+    void (*f94)(Ctl_14CBA8* self, u8* v);
+};
+struct Ctl_14CBA8 {
+    VT_14CBA8* vt;
+    u8 pad[0xC24];
+    Slot_14CBA8* cur;
+};
+struct Holder_14CBA8 {
+    u8 pad0[0x48];
+    Ctl_14CBA8* ctl;
+};
+struct Obj_14CBA8 {
+    u8 pad0[0x2DC];
+    s32 count;
+    Slot_14CBA8 slots[1];
+    u8 pad1[0x130];
+    Holder_14CBA8* holder;
+    u8 pad2[0xC];
+    f32 fa;
+    f32 fb;
+    u8 pad3[0x10];
+    s32 limit;
+    u8 pad4[4];
+    s32 step;
+    u8 pad5[8];
+    f32 timer;
+};
+extern f32 D_00249FB8;
+extern u8 D_00248D30[];
+
+void func_001A8AF8(Holder_14CBA8* p);
+s32 func_001EAA70(s32 a, s32 b);
+s32 func_001A8C90(Holder_14CBA8* h, s32 v);
+void func_001F3BD8(void* p, f32* out);
+void func_001F3C08(void* p, f32* out);
+void func_0012C7B0(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
+void func_0012F810(void* a, Obj_14CBA8* self);
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_0014CBA8(Obj_14CBA8* self)
+{
+    Slot_14CBA8* list[16];
+    f32 v0[4];
+    f32 v1[12];
+    if (self->step >= self->limit) {
+        self->timer = D_00249FB8;
+        return;
+    }
+    func_001A8AF8(self->holder);
+    if (!self->holder->ctl) return;
+    s32 n = 0;
+    for (s32 i = 0; i < self->count; i++) {
+        Slot_14CBA8* s = &self->slots[i];
+        if (!s->flag && !s->pc) list[n++] = s;
+    }
+    if (n <= 0) return;
+    s32 idx = func_001EAA70(0, n - 1);
+    Holder_14CBA8* h = self->holder;
+    Ctl_14CBA8* c = h->ctl;
+    Slot_14CBA8* s = list[idx];
+    (void)func_001A8C90(h, 0);
+    func_001F3BD8(s->obj, v0);
+    func_001F3C08(s->obj, v1);
+    c->vt->f84(c, v0);
+    c->vt->f88(c, v1);
+    c->vt->f90(c, D_00248D30);
+    c->vt->f94(c, D_00248D30);
+    func_0012C7B0(s->p8, s->p0, 0, &s->pc, 0.0f, 1.0f);
+    func_0012F810(s->pc, self);
+    self->step = self->step + 1;
+    f32 r = func_001EAAE0(self->fa, self->fb);
+    self->timer = (*(f32*)&D_0026185C) + r;
+    c->cur = s;
+    s->flag = 1;
+}
+
+struct Obj_14DBD0 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
+struct Ctx_14DBD0 { Obj_14DBD0* self; s32 a1; s32 a2; s32 pad; };
+struct Out_14DBD0 { f32 f; s32 p1; s32 p2; s32 p3; };
+
+extern f32 D_00249FC0;
+extern f32 D_00249FC4;
+void func_0014DB70(void);
+struct Step_14DBD0;
+void func_001EB168(Step_14DBD0* fn, f32 f12, f32 f13, f32 f14, f32 f15, Ctx_14DBD0* ctx, Out_14DBD0* out, s32 a3);
+
+void func_0014DBD0(Obj_14DBD0* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
+{
+    Ctx_14DBD0 ctx;
+    Out_14DBD0 out;
+    f32 f13;
+    f32 f14;
+    void* fn;
+
+    ctx.self = self;
+    ctx.a1 = a1;
+    ctx.a2 = a2;
+    f14 = self->f10[0];
+    f13 = (self->f10[1] - f14) * 0.1f;
+    func_001EB168((Step_14DBD0*)((u8*)func_0014DB70 + 8), f12, f13, self->f8 ? D_00249FC0 : f14, self->f8 ? D_00249FC4 : self->f10[self->fC - 1], &ctx, &out, 0);
+    if (a3 != 0 || a4 != 0) {
+        fn = self->vt[1];
+        if (fn != 0) {
+            ((void (*)(Obj_14DBD0*, s32, s32, f32))fn)(self, a3, a4, out.f);
+        }
+    }
+    if (a5 != 0) {
+        *a5 = out.f;
+    }
+    if (a6 != 0) {
+        *a6 = ((f32 (*)(Obj_14DBD0*, f32))self->vt[5])(self, out.f);
+    }
+}
+
+struct Obj_14EC70 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
+struct Ctx_14EC70 { Obj_14EC70* self; s32 a1; s32 a2; s32 pad; };
+struct Out_14EC70 { f32 f; s32 p1; s32 p2; s32 p3; };
+
+extern f32 D_00249FCC;
+extern f32 D_00249FD0;
+void func_0014DA98(void);
+struct Step_14EC70;
+void func_001EB168(Step_14EC70* fn, f32 f12, f32 f13, f32 f14, f32 f15, Ctx_14EC70* ctx, Out_14EC70* out, s32 a3);
+
+void func_0014EC70(Obj_14EC70* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
+{
+    Ctx_14EC70 ctx;
+    Out_14EC70 out;
+    f32 f13;
+    f32 f14;
+    void* fn;
+
+    ctx.self = self;
+    ctx.a1 = a1;
+    ctx.a2 = a2;
+    f14 = self->f10[0];
+    f13 = (self->f10[1] - f14) * 0.1f;
+    func_001EB168((Step_14EC70*)func_0014DA98, f12, f13, self->f8 ? D_00249FCC : f14, self->f8 ? D_00249FD0 : self->f10[self->fC - 1], &ctx, &out, 0);
+    if (a3 != 0 || a4 != 0) {
+        fn = self->vt[1];
+        if (fn != 0) {
+            ((void (*)(Obj_14EC70*, s32, s32, f32))fn)(self, a3, a4, out.f);
+        }
+    }
+    if (a5 != 0) {
+        *a5 = out.f;
+    }
+    if (a6 != 0) {
+        *a6 = ((f32 (*)(Obj_14EC70*, f32))self->vt[5])(self, out.f);
+    }
+}

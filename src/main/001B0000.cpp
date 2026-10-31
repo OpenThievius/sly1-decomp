@@ -1837,3 +1837,38 @@ void func_001B3510(s32 mask)
         }
     }
 }
+
+struct Ctx_1B2DF8;
+
+extern u8 D_0024A220[];
+void* func_001FD8A8(s32 size);
+
+struct Ent_1B2DF8 {
+    u8 pad00[0x4C];
+    void* p4c;
+    u8 pad50[0x30];
+    s32 v80;
+    u8 pad84[0x04];
+
+    Ent_1B2DF8() { p4c = D_0024A220; }
+    void* operator new[](__SIZE_TYPE__ size) { return func_001FD8A8(size); }
+};
+
+extern s32 D_00262260;
+extern Ent_1B2DF8* D_00262264;
+extern s32 D_0026227C;
+
+s32 func_00137BE0(Ctx_1B2DF8* src);
+void func_0015D8A8(Ent_1B2DF8* e, Ctx_1B2DF8* self);
+s32 func_0015C1C0(s32 n);
+
+void func_001B2DF8(Ctx_1B2DF8* self)
+{
+    D_00262260 = func_00137BE0(self);
+    D_00262264 = new Ent_1B2DF8[D_00262260];
+    for (s32 i = 0; i < D_00262260; i++) {
+        func_0015D8A8(&D_00262264[i], self);
+        D_00262264[i].v80 = 1 << i;
+    }
+    D_0026227C = func_0015C1C0(0);
+}
