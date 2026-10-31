@@ -788,3 +788,45 @@ void func_00189350(Obj_189350* self, void* value)
 {
     func_00189C28(self, D_00248D20, value);
 }
+
+// was NEAR: 2 lines: retail has addiu s2 (self+0xE30) before the first call and li s3,2 in its delay slot; ours swaps them. About 20 rewrites (for/do-while, init placement, decl order, cast offsets) all give the same two swapped lines.
+extern u8 D_00264928[];
+extern u8 D_00264950[];
+extern u8 D_00264960[];
+
+void func_001C72A0(void* self);
+void func_001DDC38(void* sub, void* self);
+void func_00124DF8(void* self, s32 n, void* table);
+void func_001D36F0(void* self, void* a, void* b);
+void* func_001B6290(void* a, void* b, s32 c, s32 d);
+s32 func_001CA758(void* self, s32 id);
+u8* func_0018D568(s32 size, void* src);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+struct Ent_18A3F0 { s32 key; s32 pad4; s32 value; };
+
+struct Self_18A3F0 {
+    u8 pad0[0x14]; void* host; u8 pad1[0x7BC - 0x18]; s32 f7BC; u8 pad2[0xE00 - 0x7C0];
+    s32 fE00; u8 pad3[8]; void* fE0C; void* fE10; u8 pad4[0xE20 - 0xE14]; s32 count; Ent_18A3F0* tbl; u8 pad5[8]; s32 ids[3];
+};
+
+void func_0018A3F0(Self_18A3F0* self)
+{
+    s32 n;
+    s32 i;
+
+    func_001C72A0(self);
+    func_001DDC38(self->host, self);
+    func_00124DF8(self, 3, D_00264928);
+    func_001D36F0(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
+    self->f7BC = self->fE00;
+    self->fE10 = func_001B6290(self->fE0C, 0, 0x438, 0);
+    for (n = 0; n < 3; n++)
+        self->ids[n] = func_001CA758(self, ((s32*)D_00264950)[n]);
+    self->count = 6;
+    self->tbl = (Ent_18A3F0*)func_0018D568(0x48, D_00264960);
+    for (i = 0; i < self->count; i++) {
+        Ent_18A3F0* e = self->tbl + i;
+        e->value = func_0015A418(self->host, 1, e->key, self);
+    }
+}

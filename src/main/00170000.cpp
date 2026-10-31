@@ -580,3 +580,130 @@ zero_both:
 divide:
     out->f94 = out->f94 / self->f700;
 }
+
+// EXACT: callee func_001300E8 declared with a third parameter and called with k, which puts k in a2
+
+struct __attribute__((aligned(16))) Quad_172898 { s32 a, b, c, d; };
+struct Self_172898;
+struct Side_172898 { void* f0; void* f4; u8 pad[0x38]; };
+struct Link_172898;
+struct Link_172898 {
+    Side_172898 side[2];
+    u8 pad0[0x9C - 0x80];
+    s32 f9C;
+    u8 pad1[0xD0 - 0xA0];
+    Link_172898* fD0;
+};
+struct Row_172898 { Link_172898* f0; Row_172898* f4; Link_172898** f8; };
+struct Rows_172898 { Row_172898* head; };
+struct Vt_172898 { u8 pad[0x168]; s32 (*f168)(Self_172898*, Link_172898*); };
+struct Aux_172898 { u8 pad0[0x50]; void* f50; u8 pad1[0x554 - 0x54]; Link_172898* f554; };
+struct Self_172898 {
+    Vt_172898* vt;
+    u8 pad0[0x14 - 4];
+    void* f14;
+    u8 pad1[0x480 - 0x18];
+    Rows_172898* f480;
+    u8 pad2[0x690 - 0x484];
+    s32 f690;
+    f32 f694;
+    u8 pad3[0x6A0 - 0x698];
+    u8 f6A0[0x10];
+    Quad_172898 q6B0;
+    void* f6C0;
+    u8 pad4[0x151C - 0x6C4];
+    u8 f151C[1];
+    u8 pad5[0x2220 - 0x151D];
+    s32 f2220;
+    u8 pad6[0x23B0 - 0x2224];
+    void* f23B0;
+    u8 pad7[0x24A0 - 0x23B4];
+    Aux_172898* f24A0;
+    u8 pad8[0x24B0 - 0x24A4];
+    u8 f24B0[1];
+    u8 pad9[0x2750 - 0x24B1];
+    Aux_172898* f2750;
+};
+
+void func_001BC4D8(Self_172898* a, void* b);
+s32 func_001300E8(void* key, s32 kind, s32 extra);
+void func_001C57C8(Self_172898* a);
+void func_00128018(Aux_172898* a, s32 b, void* c, void* d);
+void func_001861E8(void* a, Link_172898* b);
+extern f32 D_0026185C[];
+extern Quad_172898 D_00248D20;
+
+void func_00172898(Self_172898* self)
+{
+    Row_172898* row;
+    Link_172898** slot;
+    Link_172898* n;
+    Link_172898* head = 0;
+    func_001BC4D8(self, self->f151C);
+    row = self->f480->head;
+    if (row) {
+        do {
+            slot = &row->f0;
+            n = row->f0;
+            if (n) {
+                do {
+                    s32 k = (n->side[0].f0 != self);
+                    if (*(void**)((u8*)n + (k << 6) + 4) == self->f23B0) {
+                        void* other = n->side[1 - k].f0;
+                        if (other == 0 || func_001300E8(other, 0x46, k) == 0) {
+                            *slot = n->fD0;
+                            n->fD0 = head;
+                            head = n;
+                        } else {
+                            slot = &n->fD0;
+                        }
+                    } else if (n->side[1 - k].f0 == self->f2750 && self->vt->f168(self, n)) {
+                        *slot = n->fD0;
+                        n->fD0 = self->f2750->f554;
+                        self->f2750->f554 = n;
+                    } else {
+                        slot = &n->fD0;
+                    }
+                    n = *slot;
+                } while (n);
+            }
+            *row->f8 = row->f0;
+            row = row->f4;
+        } while (row);
+    }
+    func_001C57C8(self);
+    if (self->f2220 == 8) {
+        self->f690 = 1;
+        self->f694 = D_0026185C[0];
+        func_00128018(self->f24A0, 0, self->f24B0, self->f6A0);
+        self->q6B0 = D_00248D20;
+        self->f6C0 = self->f24A0;
+        row = self->f480->head;
+        if (row) {
+            do {
+                slot = &row->f0;
+                n = row->f0;
+                if (n) {
+                    do {
+                        s32 k = (self != n->side[0].f0);
+                        if (n->f9C == 0xB) {
+                            slot = &n->fD0;
+                        } else {
+                            if (n->side[1 - k].f0 == self->f24A0->f50) {
+                                *slot = n->fD0;
+                                n->fD0 = head;
+                                head = n;
+                            } else {
+                                slot = &n->fD0;
+                            }
+                        }
+                        n = *slot;
+                    } while (n);
+                }
+                *row->f8 = row->f0;
+                row = row->f4;
+            } while (row);
+        }
+    }
+    func_001861E8(self->f14, head);
+}

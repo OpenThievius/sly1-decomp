@@ -1091,3 +1091,39 @@ void func_00160D30(u32* out)
     }
     if (out) *out = m;
 }
+
+// EXACT: self->block store ahead of self->f20 store.
+
+typedef void (*Fn_1613C0)(void* self, s32 mode);
+
+struct Desc_1613C0 {
+    u8 pad0[8];
+    s16 adj;
+    u8 pad1[2];
+    Fn_1613C0 fn;
+};
+
+struct Ctx_1613C0 {
+    u8 pad0[0xC];
+    u8* cur;
+    u8 pad1[8];
+    Desc_1613C0* desc;
+    u8* block;
+    s32 f20;
+    s32 f24;
+};
+
+void func_001613C0(Ctx_1613C0* self, s32 a1, s32 a2, s32 a3)
+{
+    Desc_1613C0* d = self->desc;
+    d->fn((u8*)self + d->adj, 0);
+    u8* blk = self->cur;
+    s64 lo = ((s64)a2 << 60) | ((s64)1 << 46);
+    s64 hdr = ((s64)a1 << 47) | lo;
+    self->cur = blk + 0x10;
+    *(s64*)blk = hdr;
+    *(s64*)(blk + 8) = (s64)a3;
+    self->block = blk;
+    self->f20 = a2;
+    self->f24 = 0;
+}

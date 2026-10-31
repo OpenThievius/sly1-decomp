@@ -1000,3 +1000,51 @@ void func_0012E4E0(Self_12E4E0* self, Sub_12E4E0* sub, s32* out)
     }
     }
 }
+
+// was NEAR: call result is stored directly (retail copies v0 to v1 first, then s1=v1 for the out pointer); 5 lines differ
+
+struct Entry_12D1B0 { s32 f0; s32 type; s32 f8; s32 fC; };
+struct Obj_12D1B0 {
+    u8 pad0[0x14];
+    void* host;
+    u8 pad1[0x5C - 0x18];
+    s32 count;
+    Entry_12D1B0* items;
+};
+
+void* func_0018D658(s32 size);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+
+void func_0012D1B0(Obj_12D1B0* self, void* ctx, s32* outCount, s32** outArr)
+{
+    s32 n = 0;
+    s32 i;
+    u8* p;
+    if (self->count > 0) {
+        i = self->count;
+        p = (u8*)self->items + 4;
+        do {
+            if (*(s32*)p == 0x29) n++;
+            p += 16;
+        } while (--i != 0);
+    }
+    if (outCount != 0) {
+        *outCount = n;
+    }
+    if (outArr != 0) {
+        s32* res = (s32*)func_0018D658(n * 4);
+        *outArr = res;
+        i = 0;
+        if (i < self->count) {
+            s32* out = res;
+            do {
+                Entry_12D1B0* e = (Entry_12D1B0*)(i * 16 + (u8*)self->items);
+                if (e->type == 0x29) {
+                    *out = func_0015A418(self->host, 0x104, e->f8, ctx);
+                    out++;
+                }
+                i++;
+            } while (i < self->count);
+        }
+    }
+}

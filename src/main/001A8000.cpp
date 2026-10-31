@@ -1660,3 +1660,58 @@ void func_001AB2B8(Self_1AB2B8* self)
     }
     func_001AA5A0(self);
 }
+
+// EXACT: dst built as i*4 + (u32)items
+
+struct Rec_1A8AF8 { s32 f0; s32 count; s32* items; s32 f0C; s32 flags; };
+struct Node_1A8AF8 { s32 f0; s32 f4; s32 f8; s32 base; s32 f10; };
+struct Self_1A8AF8 {
+    u8 pad0[0x34];
+    s32 f34;
+    Rec_1A8AF8* recs;
+    Node_1A8AF8* node;
+    s32 f40;
+    s32 idx;
+    s32 f48;
+};
+
+void func_001A89E8(Self_1A8AF8* self);
+s32 func_001A88A0(Self_1A8AF8* self, s32 item);
+void func_001F5B08(s32* dst, s32* src, s32 size);
+
+void func_001A8AF8(Self_1A8AF8* self)
+{
+    s32 s5 = 0;
+    s32 s4 = 0;
+    if (self->f34 != 0) {
+        if (self->f40 == 0) {
+            func_001A89E8(self);
+        }
+        Rec_1A8AF8* rec = &self->recs[self->idx];
+        if (rec->flags & 2) {
+            s32 i = 0;
+            if (rec->count > 0) {
+                do {
+                    if (func_001A88A0(self, rec->items[i]) != 0) {
+                        s4 = rec->items[i];
+                        if (self->node != 0 && self->node->f4 != 0) {
+                            s5 = self->node->base + (self->idx << 5);
+                        }
+                        if (rec->flags & 1) {
+                        } else {
+                            rec->count = rec->count - 1;
+                            s32* p = (s32*)((u8*)0 + i * 4 + (u32)rec->items);
+                            func_001F5B08(p, p + 1, (rec->count - i) * 4);
+                        }
+                        break;
+                    }
+                    i++;
+                } while (i < rec->count);
+            }
+        }
+    }
+    self->f48 = s4;
+    if (self->node != 0 && self->node->f4 != 0) {
+        self->node->f10 = s5;
+    }
+}

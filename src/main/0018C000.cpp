@@ -1497,3 +1497,53 @@ s32 func_0018D0A0(Obj_18D0A0* o)
     o->f20 = D_00261868[0] + 0.3f;
     return r;
 }
+
+// EXACT: i declared before blocks, assigned inside the if(size != 0)
+
+void func_0018D780(void* dst, void* src, u32 count);
+
+void func_0018D800(u8* dst, u8* src, u32 size)
+{
+    u32 any = (u32)dst | (u32)src | size;
+    if (any & 3) {
+        u32 i = 0;
+        if (size != 0) {
+            do {
+                *dst++ = *src++;
+                i++;
+            } while (i < size);
+        }
+    } else if (any & 0xF) {
+        s32 words = size >> 2;
+        u32* wd = (u32*)dst;
+        size = words & 3;
+        u32* ws = (u32*)src;
+        s32 i;
+        s32 blocks = words - size;
+        if (size != 0) {
+            i = size;
+            do {
+                *wd++ = *ws++;
+                i--;
+            } while (i != 0);
+        }
+        if (blocks > 0) {
+            i = 0;
+            do {
+                u32 a = ws[0];
+                i += 4;
+                u32 b = ws[1];
+                u32 c = ws[2];
+                u32 d = ws[3];
+                wd[0] = a;
+                ws += 4;
+                wd[1] = b;
+                wd[2] = c;
+                wd[3] = d;
+                wd += 4;
+            } while (i < blocks);
+        }
+    } else {
+        func_0018D780(dst, src, size >> 4);
+    }
+}

@@ -1154,3 +1154,58 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
     }
     self->vt->done(self, cmd);
 }
+
+struct Info_1ACEE0 {
+    u32 flags;
+    u32 pad;
+    f32 time;
+};
+
+extern s32 func_001E1FD0(char*, const char*, ...);
+extern s32 func_001E2180(char*, const char*);
+extern char D_0024CD88[];
+extern char D_0024CD90[];
+extern char D_0024CD98[];
+extern char D_0024CDA0[];
+extern char D_0024CDA8[];
+extern char D_0024CDB0[];
+extern char D_0024CDB8[];
+extern char D_0024CDC0[];
+extern char D_0024CDC8[];
+extern char D_0024CDE0[];
+extern char D_0024CDF8[];
+
+void func_001ACEE0(char* buf, Info_1ACEE0* info, u32 mask)
+{
+    u32 flags = info->flags;
+    *buf = 0;
+    if (mask & 2) {
+        buf += func_001E1FD0(buf, D_0024CD88, (flags & 2) ? D_0024CD90 : D_0024CD98);
+    }
+    if (mask & 4) {
+        if (mask & 2) {
+            *buf++ = ' ';
+        }
+        buf += func_001E1FD0(buf, D_0024CD88, (flags & 4) ? D_0024CDA0 : D_0024CDA8);
+    }
+    if (mask & 8) {
+        u32 f8;
+        if (mask & 6) {
+            *buf++ = ' ';
+        }
+        f8 = flags & 8;
+        buf += func_001E1FD0(buf, D_0024CDB0, f8 ? D_0024CDB8 : D_0024CDC0);
+        if (f8) {
+            f32 t = info->time;
+            if (t < 1.0f) {
+                (void)func_001E1FD0(buf, D_0024CDC8, (s32)(t * 10.0f));
+            } else {
+                s32 s = (s32)t;
+                s32 m = s / 60;
+                s32 r = s % 60;
+                (void)func_001E1FD0(buf, D_0024CDE0, m, r);
+            }
+        }
+        func_001E2180(buf, D_0024CDF8);
+    }
+}

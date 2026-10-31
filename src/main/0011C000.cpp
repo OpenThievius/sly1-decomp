@@ -2109,3 +2109,35 @@ void func_0011E680(void* obj, Dsc_11E680* d, Rd_11E680* r)
         }
     }
 }
+
+extern s32 D_0025C344;
+extern u8 D_00249460[];
+extern u8 D_0027B4C8[];
+
+struct Arg_0011D078;
+
+void func_001F6C20(Arg_0011D078* a);
+s32 func_001F8480(Arg_0011D078* a);
+void func_001E1F10(Arg_0011D078* a);
+
+s32 func_0011D078(void)
+{
+    u32* table;
+
+    func_001F6C20(0);
+    if (D_0025C340 == 0) {
+        return 1;
+    }
+    if (func_001F8480((Arg_0011D078*)D_0027B4C8) != 0) {
+        return 0;
+    }
+    table = (u32*)D_0025C340;
+    if (table[0] == 0xFFFFFFFF) {
+        if (table[D_0025C344 + 1] == table[0]) {
+            D_0025C340 = 0;
+            return 1;
+        }
+    }
+    func_001E1F10((Arg_0011D078*)D_00249460);
+    return 0;
+}

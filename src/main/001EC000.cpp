@@ -1356,3 +1356,22 @@ void func_001ED318(Self_1ED318* self, Msg_1ED318* msg)
         break;
     }
 }
+
+// NEAR: only the order of `lw s0,56(a0)` (items) and `sll v0,v1,4` (count*16) differs; retail loads items first, GCC schedules the shift first
+
+struct Pool_1ED4C8 { u8 pad000[0x34]; s32 count; u8* items; };
+struct Entry_1ED4C8 { s32 f00; s32 f04; f32 f08; s32 pad0C; };
+extern u8 D_00625760[];
+s32 func_001F5C0C(Entry_1ED4C8* dst, s32 value, s32 size);
+
+void* func_001ED4C8(Pool_1ED4C8* self, s32 a, s32 b, f32 c)
+{
+    if (self->count >= 0xC0) return D_00625760;
+    Entry_1ED4C8* e = (Entry_1ED4C8*)(self->items + self->count * 16);
+    self->count = self->count + 1;
+    (void)func_001F5C0C(e, 0, 16);
+    e->f00 = a;
+    e->f04 = b;
+    e->f08 = c;
+    return e;
+}
