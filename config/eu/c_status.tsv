@@ -1770,6 +1770,7 @@ func_0018B770	func_0018BDD8	match
 func_0018B780	func_0018BDE8	match	
 func_0018B910	func_0018BF78	match	
 func_0018B930	func_0018BF98	match	
+func_0018B988	func_0018BFF0	match	rodata
 func_0018BC90	func_0018C2F8	match	
 func_0018BD00	func_0018C368	match	
 func_0018BD58	func_0018C3C0	match	
@@ -1931,6 +1932,7 @@ func_00194E60	func_00195AD0	differs
 func_00194F00	func_00195B70	differs	
 func_00194F38	func_00195BA8	differs	
 func_00195928	func_001965E8	differs	
+func_00195958	func_00196618	error	a reference to D_00269D50, which has no address in this version
 func_001961C0	func_00196F00	differs	the .rodata literal at +0x10 is not retail's constant at 0x24DCA0
 func_00196330	func_00197078	match	
 func_001963D8	func_00197120	match	
@@ -2940,6 +2942,7 @@ func_001EC188	func_001ED200	match
 func_001EC380	func_001ED3F8	match	
 func_001EC478	func_001ED4F0	match	
 func_001EC528	func_001ED5A0	differs	
+func_001EC570	func_001ED5E8	match	rodata
 func_001ECBC8	func_001EDC40	match	
 func_001ECDF8	func_001EDE70	match	
 func_001ECE98	func_001EDF10	match	
