@@ -962,3 +962,57 @@ void func_0017A788(Obj_17A788* self, void* s, void* out)
     func_00126A48(self, *(u32*)&res);
     func_00125C90(self, s, out);
 }
+
+// NEAR: last call (func_001B9D10) loads a2 before $f12 is moved; retail moves $f12 first. Otherwise every instruction matches.
+
+struct __attribute__((aligned(16))) Quad_179590 { s32 v[4]; };
+struct Sub_179590;
+struct Node_179590 {
+    u8 pad000[0x100];
+    Quad_179590 q100;           // 0x100
+    u8 pad110[0x500];
+    s32 mode;                   // 0x610
+    u8 pad614[0x54];
+    Sub_179590* sub668;         // 0x668
+};
+
+extern u8 D_00248D30[];
+extern u8 D_00263C20[];
+extern u8 D_00263C30[];
+extern u8 D_00263C40[];
+
+void func_001B9338(Node_179590* self, f32 t);
+void func_001794E0(Node_179590* self, Quad_179590* a, Quad_179590* b);
+void func_00127E60(Sub_179590* obj, s32 a1, void* a2, s32 a3, void* a4, s32 a5);
+void func_001B9058(Node_179590* self, void* buf, f32 f, void* d1, void* d2, void* d3);
+void func_001B9D10(Node_179590* self, f32 scale, void* out, void* data);
+
+void func_00179590(Node_179590* self, f32 f)
+{
+    Quad_179590 a;
+    Quad_179590 b;
+    s32 mode = self->mode;
+    if (mode < 2) {
+        goto single;
+    }
+    if (mode < 4) {
+        goto path2;
+    }
+    if (mode == 4) {
+        goto path3;
+    }
+single:
+    func_001B9338(self, f);
+    return;
+path2:
+    func_001794E0(self, &a, &b);
+    b = *(Quad_179590*)D_00248D30;
+    func_00127E60(self->sub668, 0, &a, 0, &b, 0);
+    goto tail;
+path3:
+    a = self->q100;
+    b = *(Quad_179590*)D_00248D30;
+tail:
+    func_001B9058(self, &a, f, D_00263C20, &b, D_00263C30);
+    func_001B9D10(self, f, (u8*)self + 0x620, D_00263C40);
+}

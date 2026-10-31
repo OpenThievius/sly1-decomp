@@ -1024,3 +1024,18 @@ void func_00160918(void)
     func_00160880();
     func_001F0428((Obj_160918*)&D_00247AB0, -1, 0);
 }
+
+struct Self_1611B8 { u8 pad0[0x14]; s32 f14; void* f18; s32 f1C; s32 f20; s32 f24; };
+extern u8 D_0024A6F8[];
+s32 func_00152888(Self_1611B8* a);
+
+Self_1611B8* func_001611B8(Self_1611B8* self)
+{
+    (void)func_00152888(self);
+    self->f14 = 1;
+    self->f18 = D_0024A6F8;
+    self->f1C = 0;
+    self->f20 = 0;
+    self->f24 = 0;
+    return self;
+}

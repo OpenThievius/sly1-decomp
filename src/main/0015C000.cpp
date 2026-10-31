@@ -1527,3 +1527,41 @@ void func_0015FBB8(Self_15FBB8* self, s32 flag)
         }
     }
 }
+
+// EXACT: element address written as off + (u32)entries
+
+struct Entry_15DAB8 {
+    u16 key;
+    u8 pad[6];
+};
+
+struct Table_15DAB8 {
+    u8 pad0[0x78];
+    s32 count;
+    Entry_15DAB8* entries;
+};
+
+void* func_0015DAB8(Table_15DAB8* self, u8 key)
+{
+    s32 lo = 0;
+    s32 hi = self->count - 1;
+
+    if (hi >= 0) {
+        do {
+            s32 mid = (hi + lo) / 2;
+            s32 off = mid * 8;
+            Entry_15DAB8* e = (Entry_15DAB8*)(off + (u32)self->entries);
+            s32 d = key - e->key;
+
+            if (d == 0) {
+                return e;
+            }
+            if (d > 0) {
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        } while (!(hi < lo));
+    }
+    return 0;
+}

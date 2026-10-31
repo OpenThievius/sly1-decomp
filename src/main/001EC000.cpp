@@ -1153,3 +1153,20 @@ void func_001EE8D0(Obj_1EE8D0* a0, Obj_1EE8D0* a1) {
     u32 span = a1->fC - a1->f4;
     func_001EE7D0(a0, span >> 4, (void*)a1->f4, 0);
 }
+
+// EXACT: callee declared s32 and called as (void)
+
+struct Self_1EE318 { u8 pad0[0x10]; s32 f10; u8 pad1[0x18 - 0x14]; u8* f18; s32 f1C; s32 f20; };
+
+extern u8 D_0024A0E0[];
+s32 func_00152888(Self_1EE318* self);
+
+Self_1EE318* func_001EE318(Self_1EE318* self)
+{
+    (void)func_00152888(self);
+    self->f10 = 1;
+    self->f18 = D_0024A0E0;
+    self->f1C = 0;
+    self->f20 = 0;
+    return self;
+}

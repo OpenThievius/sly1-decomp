@@ -1066,18 +1066,18 @@ s32 func_001BE810(void)
 
 struct Ent_1BE4A8 { u8 pad[0]; };
 
-extern u8 D_00245020[];
+struct Ent_1BFAF8 { s32 a; s32 b; };
+extern Ent_1BFAF8 D_00245020[];
 void func_001BE268(Ent_1BE4A8* e);
 
 void func_001BE4A8(s32 idx)
 {
-    func_001BE268(*(Ent_1BE4A8**)(D_00245020 + idx * 8));
+    func_001BE268(*(Ent_1BE4A8**)((u8*)D_00245020 + idx * 8));
 }
 
 struct Sel_1BE568;
 struct Pair_1BE568 { s32 key; s32 w4; };
 
-extern u8 D_00245020[];
 extern u8 D_006047B0[];
 extern u8 D_006047D0[];
 void func_001BE4A8(Sel_1BE568* self);
@@ -1090,4 +1090,65 @@ s32 func_001BE568(s32 idx)
         func_001BE4A8((Sel_1BE568*)idx);
     }
     return ((s32*)D_006047D0)[idx];
+}
+
+// NEAR: the lui of D_0026185C is scheduled before the sw of self->idx; retail stores idx first. Otherwise every instruction matches.
+
+struct Idx_1BFAF8;
+struct Link_1BFAF8;
+struct Node_1BFAF8 {
+    s32 idx;            // 0x00
+    u8 pad04[0x04];
+    s32 link;           // 0x08
+    u8 pad0c[0x04];
+    f32 f10;            // 0x10
+    u8 pad14[0x04];
+    s32 f18;            // 0x18
+    u8 pad1c[0x24];
+    s32 f40;            // 0x40
+    u8 pad44[0x0C];
+    f32 f50;            // 0x50
+    u8 pad54[0x04];
+    f32 f58;            // 0x58
+    u8 pad5c[0x1C];
+    f32 f78;            // 0x78
+};
+
+extern f32 D_0026185C[];
+extern s32 D_0027472C;
+
+s32 func_001BE4A8(Idx_1BFAF8* idx);
+s32 func_0011D598(Link_1BFAF8* a, s32 b, s32 c, s32 d, s32 e, s32 f);
+void func_001BF428(Node_1BFAF8* self);
+void func_001BF7F8(Node_1BFAF8* self, f32 x);
+void func_001BE860(Node_1BFAF8* self);
+
+void func_001BFAF8(Node_1BFAF8* self, s32 idx)
+{
+    s32 link;
+    s32 v3;
+    if (idx != -2) {
+        link = func_001BE4A8((Idx_1BFAF8*)idx);
+        v3 = D_00245020[idx].b;
+        self->link = link;
+    }
+    self->idx = idx;
+    self->f10 = D_0026185C[0];
+    if (idx == -2) {
+        v3 = D_0027472C;
+        self->f40 = 0;
+        self->f18 = v3;
+        return;
+    }
+    if (self->f50 != 0.0f && self->f78 < 0.0f) {
+        s32 r = func_0011D598((Link_1BFAF8*)link, v3, 0, 0, 0, 0);
+        self->f40 = 0;
+        self->f18 = r;
+        func_001BF428(self);
+        func_001BF7F8(self, self->f58);
+        func_001BE860(self);
+    } else {
+        self->f18 = 0;
+        self->f40 = 1;
+    }
 }

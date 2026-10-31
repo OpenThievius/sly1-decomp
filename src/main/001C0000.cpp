@@ -1052,3 +1052,37 @@ void func_001C1190(Obj_1C1190* self, void* arg) {
     }
     func_0011B060(&q0, 2);
 }
+
+// NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
+
+struct Quad_1C13E8 { u8 pad0[16]; };
+struct Ent_1C13E8 { s32 a; s32 b; };
+struct Ctx_1C13E8 { u8 pad0[0x1EF4]; s32 ents; };
+
+s32 func_0011B008(Quad_1C13E8* q);
+s32 func_0011A630(void);
+void func_0011A080(Quad_1C13E8* t, s32 a, s32 b);
+void func_0011B0A8(Quad_1C13E8* a, Quad_1C13E8* b);
+void func_0011B538(Quad_1C13E8* q, s32 n);
+void func_0011B018(void* dst, Quad_1C13E8* src);
+void func_0011B060(Quad_1C13E8* q, s32 mode);
+
+void* func_001C13E8(void* self, s32 index, Ctx_1C13E8* ctx)
+{
+    s32 off = index << 3;
+    Quad_1C13E8 q;
+    Ent_1C13E8* e;
+    (void)func_0011B008(&q);
+    e = (Ent_1C13E8*)(off + ctx->ents);
+    if (e->a != 0 && e->b == 0) {
+        Quad_1C13E8 t;
+        ((Ent_1C13E8*)(off + ctx->ents))->b = func_0011A630();
+        func_0011A080(&t, ((Ent_1C13E8*)(off + ctx->ents))->a, ((Ent_1C13E8*)(off + ctx->ents))->b);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+    }
+    func_0011B538(&q, 0x22);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

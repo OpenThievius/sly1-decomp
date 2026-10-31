@@ -1403,3 +1403,30 @@ void func_001AB890(Obj_001AB890* self, f32 x)
     func_001AB980(self, 0.0f);
     self->vtbl[14](self);
 }
+
+// NEAR: (fixed: indexed loop gave EXACT)
+// allocator puts the count in $s1 and the pointer in $s0; retail is the other way round.
+
+typedef void (*VFn_001AA178)(void* self);
+struct Obj_001AA178 {
+    VFn_001AA178* vtbl;
+    u8 pad0[0x250 - 4];
+    void* f250;
+};
+
+extern u8 D_00275F80[];
+void func_001EFEE0(u8* a);
+void func_001AE820(u8* a);
+
+void func_001AA178(void)
+{
+    s32 i;
+    for (i = 0; i < 0x25; i++) {
+        Obj_001AA178* p = ((Obj_001AA178**)D_002486B0)[i];
+        if (p->f250 != 0) {
+            p->vtbl[9](p);
+        }
+    }
+    func_001EFEE0(D_00275F80);
+    func_001AE820((u8*)&D_00273EB0);
+}

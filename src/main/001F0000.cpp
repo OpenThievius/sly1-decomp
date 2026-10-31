@@ -1059,3 +1059,45 @@ void func_001F39F8(Self_1F39F8* self)
     u8* dst = (u8*)self + 0x50;
     *(Blk_1F39F8*)dst = *(Blk_1F39F8*)D_002483D0;
 }
+
+// NEAR: the two counter increments (0x38 and 0x6D0) are computed in the reverse
+// order of retail (addiu v0 before addiu v1); no statement order tried changed it.
+
+struct __attribute__((aligned(16))) Quad_001F3768 { s32 w[4]; };
+struct Entry_001F3768 {
+    s32 a;
+    u8 pad0[0x0C];
+    Quad_001F3768 q10;
+    Quad_001F3768 q20;
+    u8 pad1[0x08];
+    f32 f38;
+    u8 pad2[0x4C];
+    f32 f88;
+};
+struct Obj_001F3768 {
+    u8 pad0[0x38];
+    s32 n38;
+    s32 n3C;
+    u8 pad1[0x6D0 - 0x40];
+    s32 n6D0;
+};
+
+extern Quad_001F3768 D_00248D10;
+extern Quad_001F3768 D_00248D20;
+
+void func_001F3768(Obj_001F3768* self)
+{
+    s32 n6 = self->n6D0;
+    s32 idx = self->n38;
+    Entry_001F3768* e = (Entry_001F3768*)((u8*)self + 0x50 + 0xD0 * idx);
+    n6 = n6 + 1;
+    idx = idx + 1;
+    self->n38 = idx;
+    self->n6D0 = n6;
+    e->a = 1;
+    e->q10 = D_00248D10;
+    e->q20 = D_00248D20;
+    e->f38 = 0.5f;
+    e->f88 = 0.5f;
+    self->n3C = self->n3C + 1;
+}

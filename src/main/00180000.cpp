@@ -1239,3 +1239,43 @@ void func_001837E0(Obj_1837E0* self, s32 idx, s32 flag, void* out)
 done:
     ;
 }
+
+struct __attribute__((aligned(16))) Quad_183CC8 { s32 a, b, c, d; };
+struct Obj_183CC8 {
+    u8 p0[0x2C8];
+    u64 w2c8;
+    s32 w2d0;
+    u8 p1[0x2F8 - 0x2D4];
+    f32 f2f8;
+    f32 f2fc;
+    f32 f300;
+    u8 p2[0x320 - 0x304];
+    Quad_183CC8 q320;
+    f32 f330;
+    f32 f334;
+    f32 f338;
+    u8 p3[0x340 - 0x33C];
+    Quad_183CC8 q340;
+};
+
+extern Quad_183CC8 D_00248D20;
+extern Quad_183CC8 D_00248D10;
+
+void func_00184A70(Obj_183CC8* self);
+void func_00123ED0(Obj_183CC8* self);
+
+void func_00183CC8(Obj_183CC8* self)
+{
+    self->w2c8 = (self->w2c8 & ~(0x3ULL << 40)) | ((u64)0x8000 << 25);
+    self->w2d0 = 0;
+    self->q320 = D_00248D20;
+    self->q340 = D_00248D10;
+    self->f330 = 200.0f;
+    self->f334 = 2000.0f;
+    self->f2fc = 240.0f;
+    self->f2f8 = 180.0f;
+    self->f300 = 180.0f;
+    self->f338 = 60.0f;
+    func_00184A70(self);
+    func_00123ED0(self);
+}

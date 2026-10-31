@@ -1738,3 +1738,119 @@ void func_0011EDA8(Obj_11EDA8* self)
         } while (--i != 0);
     }
 }
+
+struct Ptr_11D140 { s32 field0; };
+
+extern s32 D_0025C348;
+extern s32 D_0025C388;
+extern s32 D_00260E00;
+extern s32 D_00260E40[];
+extern u8 D_00249570[];
+extern u8 D_002495A0[];
+extern u8 D_002495C0[];
+extern u8 D_002494E8[];
+extern u8 D_0027B4F0[];
+
+s32 func_0011E1F8(s32 flag);
+s32 func_001E1F10(struct Ptr_11D140 *fmt, ...);
+s32 func_0011CE30(void);
+void func_001F6C20(s32 a0);
+s32 func_001F8480(struct Ptr_11D140 *p);
+s32 func_001F8290(struct Ptr_11D140 *a, s32 b, s32 c, s32 *d, s32 e, s32 *f, s32 g, s32 h, s32 i);
+
+s32 func_0011D140(s32 a0, s32 a1)
+{
+    s32 v;
+    s32 w;
+    s32 v1;
+    u32 m;
+
+    D_0025C348 = 0;
+    if (D_0025C388 != 0) {
+        func_001E1F10((struct Ptr_11D140 *)D_00249570);
+        return 0;
+    }
+    v = func_0011E1F8(1);
+    if (v == 1) {
+        func_001E1F10((struct Ptr_11D140 *)D_002495A0);
+        return 0;
+    }
+    s32* p = &D_00260E00;
+    m = 0xFFFFFFFFu;
+    *p = (s32)m;
+    D_00260E40[1] = a1;
+    D_00260E40[0] = a0;
+    while (func_001F8480((struct Ptr_11D140 *)D_0027B4F0)) {
+        func_001E1F10((struct Ptr_11D140 *)D_002494E8);
+        func_0011CE30();
+        func_001F6C20(0);
+    }
+    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, D_00260E40, 8, &D_00260E00, 4, 0, 0);
+    v1 = D_00260E00;
+    if (w < 0) {
+        func_001E1F10((struct Ptr_11D140 *)D_002495C0);
+        D_0025C348 = 0x106;
+        return 0;
+    }
+    if ((u32)v1 == 0xFFFFFFFFu) {
+        do {
+            func_001F6C20(0);
+        } while ((u32)D_00260E00 == 0xFFFFFFFFu);
+    }
+    return D_00260E00;
+}
+
+// EXACT: reuse parameter a1 directly instead of a local copy
+
+extern u8 D_00247448[];
+
+struct Owner_11E580 {
+    u8 pad00[0x0C];
+    s32 f0C;
+    void (*f10)(void*);
+};
+
+struct Rec_11E580 {
+    Owner_11E580* f00;
+    s32 f04;
+    s32 f08;
+    u8 pad0C[8];
+    void* f14;
+    s32 f18;
+    u8 pad1C[8];
+    void* f24;
+    u8 pad28[4];
+    void* f2C;
+};
+
+struct Arg_11E580 { s32 v; };
+
+void* func_0018D5C0(s32 bytes);
+void func_001DB480(void* self);
+void* func_001C1390(Arg_11E580* id, void* ctx);
+void* func_00159F20(void* base, s32 n);
+void func_00152470(void* list, void* item);
+
+Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
+{
+    s32 off = index << 2;
+    Owner_11E580* owner = *(Owner_11E580**)((u8*)D_00247448 + off);
+    Rec_11E580* r = (Rec_11E580*)func_0018D5C0(owner->f0C);
+    r->f00 = owner;
+    r->f08 = a3;
+    if (index == 0x6C) {
+        a1 = r;
+        func_001DB480(r);
+    }
+    r->f18 = a2;
+    r->f14 = a1;
+    Arg_11E580* id = (Arg_11E580*)a4;
+    r->f2C = func_001C1390(id, a1);
+    func_00152470(func_00159F20(r->f14, r->f08), r);
+    u8* base = (u8*)r->f14 + 0x1884;
+    void** slot = (void**)(base + off);
+    r->f24 = *slot;
+    *slot = r;
+    r->f00->f10(r);
+    return r;
+}
