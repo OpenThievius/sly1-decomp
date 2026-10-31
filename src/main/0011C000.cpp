@@ -2171,3 +2171,46 @@ void func_0011DE18(void)
     *D_0025C360[n] = 0;
     D_0025C368[n] = 0xFFC;
 }
+
+struct Ctx_0011D2A8;
+
+extern s32 D_0025C348;
+extern s32 D_0025C388;
+struct Pair_11D2A8 { s32 a; s32 b; };
+struct Args_11D2A8 { s32 a; s32 pad; s64 c; };
+extern u8 D_00249570[];
+extern u8 D_002495A0[];
+extern u8 D_002494E8[];
+extern u8 D_0027B4F0[];
+
+s32 func_0011E1F8(s32 flag);
+s32 func_001E1F10(Ctx_0011D2A8* p);
+s32 func_0011CE30(void);
+s32 func_001F8480(Ctx_0011D2A8* p);
+void func_001F6C20(s32 a);
+void func_001F8290(Ctx_0011D2A8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5, s32 a6, s32 a7, s32 a8);
+
+void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
+{
+    D_0025C348 = 0;
+    if (D_0025C388 != 0) {
+        func_001E1F10((Ctx_0011D2A8*)D_00249570);
+        return;
+    }
+    if (func_0011E1F8(1) == 1) {
+        func_001E1F10((Ctx_0011D2A8*)D_002495A0);
+        return;
+    }
+    (*(u32*)&D_00260E00) = 0xFFFFFFFF;
+    (*(Pair_11D2A8*)&D_00260E40).a = (s32)a0;
+    (*(Pair_11D2A8*)&D_00260E40).b = a1;
+    (*(Args_11D2A8*)&D_0025C390).a = a2;
+    (*(Args_11D2A8*)&D_0025C390).c = a3;
+    while (func_001F8480((Ctx_0011D2A8*)D_0027B4F0)) {
+        func_001E1F10((Ctx_0011D2A8*)D_002494E8);
+        func_0011CE30();
+        func_001F6C20(0);
+    }
+    D_0025C388 = 1;
+    func_001F8290((Ctx_0011D2A8*)D_0027B4F0, 3, 1, ((Pair_11D2A8*)&D_00260E40), 8, ((u32*)&D_00260E00), 4, 0, 0);
+}

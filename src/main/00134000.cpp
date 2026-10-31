@@ -806,3 +806,81 @@ f32 func_00136648(S_136648* s) {
         return func_001AA8A8(s);
     }
 }
+
+struct Tri_136040 { u64 a __attribute__((packed)); u32 b; };
+typedef u64 Quad_136040 __attribute__((mode(TI)));
+struct __attribute__((aligned(16))) Vec_136040 { f32 x, y, z, w; };
+struct Pad_136040 {
+    u8 pad_00[0x40];
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    u8 pad_4C[0x74 - 0x4C];
+    f32 f74;
+    u8 pad_78[4];
+    f32 f7C;
+};
+struct Self_136040 {
+    u8 pad_000[0x260];
+    s32 f260;
+    u8 pad_264[0x304 - 0x264];
+    f32 f304;
+    f32 f308;
+    u8 pad_30C[8];
+    f32 f314;
+};
+struct Glob_136040 {
+    u8 pad[0x19EC];
+    u32 flags;
+};
+
+extern u8 D_00249D00[];
+extern u8 D_00249D10[];
+extern Glob_136040* D_002623C0;
+
+Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, Tri_136040* c, s32 d, f32 f12);
+f32 func_001EAFE0(f32 x, f32 y);
+void func_00135F48(Self_136040* self, Pad_136040* p);
+
+void func_00136040(Self_136040* self, Pad_136040* p)
+{
+    switch (self->f260) {
+    case 1: {
+        Vec_136040 va;
+        Vec_136040 vb;
+        Vec_136040 r;
+        f32 lo = -1.0f;
+        f32 hi = 1.0f;
+        f32 sum = p->f40 + p->f74;
+        Tri_136040 t0 = *(Tri_136040*)D_00249D00;
+        Tri_136040 t1 = *(Tri_136040*)D_00249D10;
+        f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
+        f32 v = p->f44;
+        f32 lo2 = -1.0f;
+        f32 hi2 = 1.0f;
+        if (v < lo2) {
+            v = lo2;
+        } else if (hi2 < v) {
+            v = hi2;
+        }
+        if (D_002623C0->flags & 0x200) v = -v;
+        va.x = self->f304;
+        va.y = self->f308;
+        va.z = 0;
+        vb.x = u * 50.0f;
+        vb.y = v * 50.0f;
+        vb.z = 0;
+        f32* g = ((f32*)D_00261858);
+        *(Quad_136040*)&r = func_001EA818(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
+        self->f314 += u * -0.08f;
+        self->f304 = r.x;
+        self->f308 = r.y;
+        self->f314 = func_001EAFE0(self->f314, 1.0f);
+        break;
+    }
+    case 5:
+        self->f308 = 50.0f;
+        break;
+    }
+    func_00135F48(self, p);
+}

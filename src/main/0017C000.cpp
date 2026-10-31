@@ -439,3 +439,51 @@ void func_0017FEC0(Obj_17FEC0* self, Reader_17FEC0* rd)
         }
     }
 }
+
+struct __attribute__((aligned(16))) Quad_17DE88 { s32 w[4]; };
+struct Coll_17DE88 { u8 pad0[0x2D8]; struct Coll_17DE88* f2D8; u8 pad1[0x2E4 - 0x2DC]; struct Coll_17DE88* f2E4; u8 pad2[0x538 - 0x2E8]; u64 f538; };
+struct Node_17DE88 { Coll_17DE88* f0; Node_17DE88* f4; u8 pad[4]; Coll_17DE88* fC; };
+struct List_17DE88 { Node_17DE88* head; };
+struct Obj_17DE88 { u8 pad[0x480]; List_17DE88* f480; };
+struct Ctx_17DE88 { u8 pad[1]; };
+struct Mat_17DE88 { f32 m[16]; };
+
+void func_001ED780(Quad_17DE88* q, void* out, u8* a, u8* b);
+void func_00188B08(Ctx_17DE88* a, Quad_17DE88* b, void* out);
+void func_00188700(Mat_17DE88* a, f32 w, void* b, void* c);
+s32 func_00141C28(Coll_17DE88* self, void* a1, void* a2, s32 a3, void* a4);
+extern u8 D_00248D20[];
+extern u8 D_00263EC0[];
+
+s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad_17DE88* src)
+{
+    u8 buf[0x100] __attribute__((aligned(16)));
+    Quad_17DE88& q = *(Quad_17DE88*)buf;
+    q = *src;
+    s32 hits = 0;
+    func_001ED780(&q, buf + 0x10, D_00248D20, D_00248D20);
+    func_00188B08(ctx, &q, buf + 0x30);
+    for (s32 i = 0; (u32)i < 0x16; i += 2) {
+        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, D_00263EC0 + i * 16, buf + 0x70);
+        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, D_00263EC0 + i * 16 + 16, buf + 0x80);
+        Node_17DE88* n = self->f480->head;
+        while (n) {
+            Coll_17DE88* a = n->fC;
+            if (!(a->f538 & 0x40000000000ULL)) {
+                Coll_17DE88* c = a->f2D8;
+                while (c) {
+                    if (!(c->f538 & 0x80000000000ULL)) {
+                        if (func_00141C28(c, buf + 0x70, buf + 0x80, 1, buf + 0x90) > 0) {
+                            if (i < 4) return 0;
+                            if (*(f32*)(buf + 0xD0) == 0.0f) return 0;
+                            if (0.7f < *(f32*)(buf + 0xB8)) hits++;
+                        }
+                    }
+                    c = c->f2E4;
+                }
+            }
+            n = n->f4;
+        }
+    }
+    return hits >= 2;
+}

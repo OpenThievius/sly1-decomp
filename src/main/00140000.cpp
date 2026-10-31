@@ -1300,3 +1300,120 @@ void func_00143648(struct Self_00143648* self)
     func_00149398((struct Sub_00143648*)(s + 0x520), self);
     func_00143A60(self, 1);
 }
+
+extern u8 D_002701B8[];
+extern u8 D_00247AA4[];
+extern u8 D_00247AA8[];
+extern u8 D_00247AA0[];
+extern u8 D_0026FF68[];
+extern u8 D_0027B800[];
+extern u32 D_002476A0[];
+
+s32 func_00203EE0(s32 a0, s32* out);
+s32 func_00140968(void);
+s32 func_00140D68(s32 value);
+void func_00194D30(void* self, s32 a, s32 b);
+s32 func_0011E138(s32 a0, s32 a1, void* a2, void* a3);
+
+void func_001409E0(void)
+{
+    s32 tmp[1];
+    s32 s1;
+    switch (D_002613EC) {
+    case 3:
+        if (func_00203EE0(2, tmp) != 0) {
+            if (tmp[0] != 0) {
+                if (func_00140968() == 0) {
+                    func_00194D30(D_0026FF68, 2, 0x16);
+                    D_002613EC = 1;
+                }
+            }
+        }
+        break;
+    case 1:
+        s1 = *(s32*)D_002701B8;
+        if (s1 == 2) {
+            if (func_00140968() != 0) {
+                if (func_0011E138(*(s32*)D_00247AA4, 1, D_0027B800, D_00247AA0) == 1) {
+                    D_002613EC = s1;
+                }
+            }
+        }
+        break;
+    case 2:
+        if (func_00140D68(0) != 0) {
+            u8* p = D_0027B800;
+            u32* tbl = D_002476A0;
+            u32 crc = 0xFFFFFFFF;
+            s32 n = 0x7FF;
+            do {
+                crc = *(u32*)((u8*)tbl + (((crc ^ *p) & 0xFF) << 2)) ^ (crc >> 8);
+                p++;
+                n--;
+            } while (n != -1);
+            if ((s32)crc != *(s32*)D_00247AA8) {
+                D_002613EC = 1;
+            } else {
+                func_00194D30(D_0026FF68, 2, -1);
+                D_002613EC = 3;
+            }
+        }
+        break;
+    }
+}
+
+struct Buf_140B60 { char b[256]; };
+struct Obj_140B60 { u8 pad; };
+
+extern u16 D_00249E20;
+extern u8 D_00249E28[];
+extern u8 D_00249E30[];
+extern u8 D_00249E38[];
+
+void* func_001E2180(Buf_140B60* dst, void* src);
+s32 func_001407A8(Buf_140B60* p);
+s32 func_001E2100(Buf_140B60* p);
+s32 func_001E1FD0(Obj_140B60* dst, const char* fmt, ...);
+
+void func_00140B60(void* self, void* a1, s32 flag)
+{
+    char buf[256];
+    *(u16*)buf = D_00249E20;
+    func_001E2180((Buf_140B60*)buf, a1);
+    s32 n = func_001407A8((Buf_140B60*)buf);
+    char* p = buf;
+    for (s32 i = 1; i < n; i++) {
+        p[func_001E2100((Buf_140B60*)p)] = 0x5C;
+    }
+    func_001E1FD0((Obj_140B60*)self, (const char*)D_00249E28,
+                  flag ? (void*)D_00249E30 : (void*)D_00249E38, buf);
+}
+
+struct Obj_1419E8;
+struct __attribute__((aligned(16))) Rec_1419E8 { u8 pad[0x40]; f32 key; u8 rest[0x2C]; };
+
+extern f32 D_00249E44;
+s32 func_00141C28(Obj_1419E8* self, void* a1, void* a2, s32 a3, Rec_1419E8* out);
+
+Obj_1419E8* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Obj_1419E8** list, Rec_1419E8* out)
+{
+    f32 bestKey = D_00249E44;
+    Obj_1419E8* best = 0;
+    Rec_1419E8 buf[2];
+    for (s32 i = 0; i < count; i++) {
+        Obj_1419E8* obj = list[i];
+        s32 n = func_00141C28(obj, a1, a2, 2, buf);
+        s32 idx = 0;
+        if (n > 0 && buf[0].key == 0.0f) {
+            if (flags & 1) idx = 1;
+        }
+        if (idx < n && buf[idx].key < bestKey) {
+            bestKey = buf[idx].key;
+            best = obj;
+            if (out != 0) {
+                *out = buf[idx];
+            }
+        }
+    }
+    return best;
+}

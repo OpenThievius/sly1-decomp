@@ -873,3 +873,60 @@ tail:
     }
     func_001C61E0(self, st);
 }
+
+struct Self_1C6F48 { u8 pad[4]; };
+extern u8 D_00261420[];
+extern f32 D_0024D650;
+void func_001C4458(Self_1C6F48* self);
+struct Tbl_1C6F48;
+s32 func_00140FF8(Tbl_1C6F48* p);
+void func_00192990(Self_1C6F48* self, s32 a);
+
+#define F(T, o) (*(T*)((u8*)self + (o)))
+
+void func_001C6F48(Self_1C6F48* self)
+{
+    func_001C4458(self);
+    f32 c300 = 300.0f;
+    F(s32, 0x724) = -1;
+    F(s32, 0x924) = -1;
+    F(u64, 0x538) = (F(u64, 0x538) & ~((u64)0xF0 << 32)) | ((u64)1 << 37);
+    F(f32, 0x73C) = c300;
+    F(f32, 0x740) = 0.2f;
+    F(f32, 0x744) = 0.5f;
+    F(f32, 0x74C) = 0.17453294f;
+    F(s32, 0x738) = 0;
+    s32 i;
+    for (i = 16; i >= 0; i--) F(s32, 0x758 + i * 8) = -1;
+    f32* s3 = (f32*)((u8*)self + 0xB9C);
+    f32* s4 = (f32*)((u8*)self + 0xBE0);
+    s32 m = -1;
+    for (i = 16; i >= 0; i--) F(s32, 0x870 + i * 8) = m;
+    f32 one = 1.0f;
+    s32 r = func_00140FF8((Tbl_1C6F48*)D_00261420);
+    s32 s1 = 1;
+    s32 s0 = -1;
+    F(s32, 0xB10) = r;
+    F(u64, 0x538) = (F(u64, 0x538) & ~((u64)0xF0 << 32)) | ((u64)1 << 37);
+    F(s32, 0xB14) = s1;
+    F(s32, 0xB4C) = s0;
+    F(f32, 0xB30) = one;
+    F(s32, 0xB58) = s0;
+    func_00192990(self, 0);
+    f32 d = D_0024D650;
+    F(f32, 0x700) = 1.5f;
+    F(f32, 0xB18) = -1.0f;
+    F(f32, 0xB9C) = one;
+    F(void*, 0xB74) = self;
+    F(f32, 0xBFC) = d;
+    F(f32, 0xC00) = d;
+    F(u8, 0x2B3) = 0x20;
+    s3[1] = 2.5f;
+    F(s32, 0xBE0) = 0;
+    s4[1] = 0.8f;
+    F(s32, 0xBEC) = s0;
+    F(f32, 0xBD0) = one;
+    F(s32, 0xBD4) = s1;
+    F(f32, 0xBE8) = 1.25f;
+    F(s32, 0xBDC) = s1;
+}

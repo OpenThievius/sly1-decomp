@@ -1336,3 +1336,22 @@ void func_0013FD20(Self_13FD20* self)
     }
     }
 }
+
+struct Self_13CC00 { u8 pad[4]; };
+struct Arg_13CC00 { void* vt; void* a4; void* a8; s32 aC; void* a10; };
+extern u8 D_00249D98[];
+s32 func_0013C9D0(Self_13CC00* self, void* a1, Arg_13CC00* arg);
+
+s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
+{
+    if (a1 != 0) {
+        Arg_13CC00 arg;
+        arg.vt = D_00249D98;
+        arg.a4 = a2;
+        arg.a10 = a1;
+        arg.a8 = a1;
+        arg.aC = 0;
+        return func_0013C9D0(self, a1, &arg);
+    }
+    return 0;
+}

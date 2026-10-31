@@ -735,3 +735,52 @@ one:
 zero:
     return 0;
 }
+
+struct Obj_1D72C8 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    u8 f18[0x80];
+};
+
+extern u8 D_0024DC90[];
+
+void func_0018D800(void* dst, void* src, s32 bytes);
+void func_001F7B88(void* a, void* b);
+void func_001F9028(s32 a, void* b, s32 n);
+
+void func_001D72C8(Obj_1D72C8* self)
+{
+    u8 buf[0x90];
+    s32 done;
+    u8* p;
+    s32 chunk;
+    s32 rem;
+
+    if (self->f14 == 0) {
+        return;
+    }
+    if (self->f0 != 0) {
+        return;
+    }
+    if (self->fC < 0) {
+        p = self->f18;
+        for (done = 0; done < self->f14; done += chunk) {
+            rem = self->f14 - done;
+            chunk = 0x80;
+            if (!(rem > 0x7F)) {
+                chunk = rem;
+            }
+            func_0018D800(buf, p, chunk);
+            p += chunk;
+            buf[chunk] = 0;
+            func_001F7B88(D_0024DC90, buf);
+        }
+    } else {
+        func_001F9028(self->fC, self->f18, self->f14);
+    }
+    self->f14 = 0;
+}

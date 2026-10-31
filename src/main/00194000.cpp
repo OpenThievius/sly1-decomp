@@ -1009,3 +1009,74 @@ void func_00195958(Menu_195958* self)
     }
     }
 }
+
+struct Self_001969F8 {
+    u8 pad0[0x14];
+    void* p14;
+    u8 pad1[0xD0 - 0x18];
+    f32 fD0;
+    f32 fD4;
+    u8 pad2[0x610 - 0xD8];
+    void* p610;
+    void* p614;
+    f32 f618;
+    u8 pad3[0x65C - 0x61C];
+    void* p65C;
+    void* p660;
+    void* p664;
+    u8 pad4[0x690 - 0x668];
+    s32 n690;
+    void* p694;
+    u8 pad5[0x69C - 0x698];
+    u8 list69C[0x6B4 - 0x69C];
+    void* p6B4;
+    void* p6B8;
+};
+
+struct __attribute__((aligned(16))) Quad_001969F8 { s32 a, b, c, d; };
+struct Root_001969F8 { u8 pad[0x11]; u8 b11; };
+struct Table_001969F8 { u8 pad[0x10]; };
+struct Item_001969F8 { u8 pad[0x24]; void* p24; };
+
+struct Any_001969F8;
+
+extern u8 D_0026A738[];
+extern u8 D_0021A790[];
+extern u8 D_00248D30[];
+
+void func_00124A48(Self_001969F8* self);
+void func_00124DF8(Self_001969F8* self, s32 n, void* table);
+f32 func_00205778(f32 a, f32 b);
+void* func_001B6290(Any_001969F8* a, void* b, s32 c, s32 d);
+void* func_00121228(Root_001969F8* root, void* value, Table_001969F8* table);
+void func_001299E0(Any_001969F8* a, void* b);
+s32 func_0015A4F0(Any_001969F8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
+void* func_0018D500(s32 size);
+void func_00152470(Any_001969F8* list, void* item);
+void func_001B6DF8(Any_001969F8* a, void* b);
+
+void func_001969F8(Self_001969F8* self)
+{
+    s32 arr[32];
+    func_00124A48(self);
+    func_00124DF8(self, 0xD, D_0026A738);
+    self->f618 = func_00205778(self->fD4, self->fD0);
+    self->p614 = func_001B6290((Any_001969F8*)self->p610, self, -1, 1);
+    self->p664 = func_00121228((Root_001969F8*)self->p14, self->p65C, (Table_001969F8*)D_0021A790);
+    ((Root_001969F8*)self->p664)->b11 = 2;
+    func_001299E0((Any_001969F8*)self->p65C, self->p664);
+    ((s32*)self->p664)[7] = 1;
+    ((Item_001969F8*)self->p664)->p24 = self->p660;
+    *(Quad_001969F8*)((u8*)self->p664 + 0x30) = *(Quad_001969F8*)D_00248D30;
+    s32 n1 = func_0015A4F0((Any_001969F8*)self->p14, 0x305, 0xF, 0, 0, 0);
+    self->n690 = n1;
+    void* buf = func_0018D500(n1 * 4);
+    self->p694 = buf;
+    self->n690 = func_0015A4F0((Any_001969F8*)self->p14, 0x105, 0xF, 0, self->n690, buf);
+    s32 cnt = func_0015A4F0((Any_001969F8*)self->p14, 5, 0x44, 0, 0x20, arr);
+    for (s32 i = 0; i < cnt; i++) {
+        func_00152470((Any_001969F8*)self->list69C, (void*)arr[i]);
+    }
+    self->p6B8 = func_001B6290((Any_001969F8*)self->p6B4, 0, -1, 0);
+    func_001B6DF8((Any_001969F8*)self->p6B8, self);
+}

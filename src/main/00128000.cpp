@@ -2304,3 +2304,48 @@ void func_0012BC38(void* unused, Rd_12BC38* r, s32 flag, s32* count, Rec_12BC38*
         }
     }
 }
+
+struct Obj_12B2F8 { void** vt; u8 pad4[0x10]; void* f14; u8 pad18[0x2A0]; s32 f2B8; struct Entry_12B2F8* f2BC; struct St_12B2F8* f2C0; };
+struct Entry_12B2F8 { s32 key; s32 val; };
+struct St_12B2F8 {
+    u8 pad0[0x13]; s8 f13; u8 pad14[0x24]; void* f38; s32 f3C;
+    s32 Set(s32 v) { s32 o = f13; f13 = v; return o != v; }
+};
+struct Root_12B2F8 { u8 pad0[0x10]; };
+struct Cb_12B2F8 { u8 pad0[0x10]; };
+
+extern u8 D_002195B0[];
+void* func_00121228(Root_12B2F8* root, void* value, Cb_12B2F8* cb);
+void func_001299E0(Obj_12B2F8* self, void* src);
+
+void func_0012B2F8(Obj_12B2F8* self, s32 key)
+{
+    s32 callVt = 0;
+    s32 i;
+    St_12B2F8* st;
+
+    if (key == -1) {
+        st = self->f2C0;
+        if (st != 0) {
+            callVt = st->Set(-1);
+        }
+    } else {
+        for (i = 0; i < self->f2B8; i++) {
+            if (self->f2BC[i].key == key) {
+                break;
+            }
+        }
+        if (i < self->f2B8) {
+            if (self->f2C0 == 0) {
+                self->f2C0 = (St_12B2F8*)func_00121228((Root_12B2F8*)self->f14, self, (Cb_12B2F8*)D_002195B0);
+                func_001299E0(self, self->f2C0);
+            }
+            callVt = self->f2C0->Set(3);
+            self->f2C0->f38 = (u8*)self + 0x26C;
+            self->f2C0->f3C = self->f2BC[i].val;
+        }
+    }
+    if (callVt != 0) {
+        ((void (*)(Obj_12B2F8*))self->vt[0xBC / 4])(self);
+    }
+}

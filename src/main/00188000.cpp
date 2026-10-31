@@ -977,3 +977,66 @@ s32 func_0018B988(s32 a, s32 b)
     }
     return r;
 }
+
+struct __attribute__((aligned(16))) Mat_1897F0 { f32 f[3][4]; };
+
+extern Mat_1897F0 D_002483D0;
+
+s32 func_001897F0(Mat_1897F0* in, Mat_1897F0* out)
+{
+    Mat_1897F0 m;
+    s32 i, j, k;
+    f32 t;
+    s32 ok = 0;
+    m = *in;
+    *out = D_002483D0;
+    for (i = 0; i < 3; i++) {
+        j = i;
+        f32 best = __builtin_fabsf(m.f[i][j]);
+        for (k = i + 1; k < 3; k++) {
+            t = __builtin_fabsf(m.f[i][k]);
+            if (best < t) {
+                best = t;
+                j = k;
+            }
+        }
+        if (best == 0.0f) goto done;
+        if (j != i) {
+            for (k = 0; k < 3; k++) {
+                f32 a = m.f[k][j];
+                f32 b = out->f[k][j];
+                f32 c = m.f[k][i];
+                f32 d = out->f[k][i];
+                m.f[k][i] = a;
+                out->f[k][i] = b;
+                m.f[k][j] = c;
+                out->f[k][j] = d;
+            }
+        }
+        for (j = i + 1; j < 3; j++) {
+            t = m.f[i][j] / m.f[i][i];
+            for (k = 0; k < 3; k++) {
+                m.f[k][j] -= t * m.f[k][i];
+                out->f[k][j] -= t * out->f[k][i];
+            }
+        }
+    }
+    for (i = 2; i >= 0; i--) {
+        for (j = 0; j < i; j++) {
+            t = m.f[i][j] / m.f[i][i];
+            for (k = 0; k < 3; k++) {
+                m.f[k][j] -= t * m.f[k][i];
+                out->f[k][j] -= t * out->f[k][i];
+            }
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        t = m.f[i][i];
+        for (j = 0; j < 3; j++) {
+            out->f[j][i] /= t;
+        }
+    }
+    ok = 1;
+done:
+    return ok;
+}
