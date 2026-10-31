@@ -26,8 +26,8 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
 
 What stops a function from being matched, the blocker column:
 
-- fragment: no `jr $ra` in its listing, or a positive stack adjustment first (the end of the
-  function before): a piece of a function, or a tail call, not a whole function
+- fragment: no `jr $ra` in its listing, or a positive stack adjustment first: residue the
+  assembler left after a return, or a tail call; no C function can produce it
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
 - nonc: max.s, min.s, sqrt.s: no plain C form in this compiler
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
