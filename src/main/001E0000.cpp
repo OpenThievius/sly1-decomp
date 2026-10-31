@@ -849,3 +849,286 @@ void func_001E1028(Fmt_1E1028* self, Sink_1E1028* sink, u64 value)
         }
     }
 }
+
+struct Spec_1E0978 {
+    s32 left;       // 0x00
+    s32 plus;       // 0x04
+    s32 space;      // 0x08
+    s32 alt;        // 0x0C
+    s32 zero;       // 0x10
+    s32 noprec;     // 0x14
+    s32 width;      // 0x18
+    s32 prec;       // 0x1C
+    s32 length;     // 0x20
+    s32 f24;        // 0x24
+    s32 f28;        // 0x28
+    s8 conv;        // 0x2C
+    s8 pad2D[3];
+    s32 upper;      // 0x30
+};
+
+void func_001F5C0C(Spec_1E0978* dst, s32 value, s32 size);
+s32 func_001E08F8(s8* s, s32* out);
+extern u8 D_0024E879[];
+
+s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
+{
+    s32 state = 0;
+    s8* p = at;
+    s32 next;
+
+    func_001F5C0C(spec, 0, 0x34);
+    if (*at != 0) {
+        for (;;) {
+            s32 adv = 0;
+            next = state;
+            switch (state) {
+            case 0: {
+                s8 c = *p;
+                if (c != 0x25) {
+                    next = 6;
+                } else {
+                    s8 d = p[1];
+                    next = 1;
+                    if (d == c) {
+                        spec->conv = d;
+                        next = 6;
+                        adv = 2;
+                    } else {
+                        adv = 1;
+                    }
+                }
+                break;
+            }
+            case 1:
+                switch ((s8)((u8)*p - 0x20)) {
+                case 13:
+                    spec->left = 1;
+                    adv = 1;
+                    break;
+                case 11:
+                    spec->plus = 1;
+                    adv = 1;
+                    break;
+                case 0:
+                    spec->space = 1;
+                    adv = 1;
+                    break;
+                case 3:
+                    spec->alt = 1;
+                    adv = 1;
+                    break;
+                case 16:
+                    spec->zero = 1;
+                    adv = 1;
+                    break;
+                default:
+                    next = 2;
+                    break;
+                }
+                break;
+            case 2:
+                if (*p == 0x2A) {
+                    s32* ap = *va;
+                    s32 w;
+                    *va = ap + 2;
+                    w = *ap;
+                    spec->width = w;
+                    if (w < 0) {
+                        w = (w < 0) ? -w : w;
+                        spec->left = 1;
+                        spec->width = w;
+                    }
+                    adv = 1;
+                } else {
+                    adv = func_001E08F8(p, &spec->width);
+                }
+                if (p[adv] == 0x2E) {
+                    next = 3;
+                    adv++;
+                } else {
+                    next = 4;
+                }
+                break;
+            case 3:
+                if (*p == 0x2A) {
+                    s32* ap = *va;
+                    s32 w;
+                    *va = ap + 2;
+                    w = *ap;
+                    adv = 1;
+                    w = (w < 0) ? -w : w;
+                    spec->prec = w;
+                } else {
+                    adv = func_001E08F8(p, &spec->prec);
+                }
+                spec->noprec = spec->prec == 0;
+                next = 4;
+                break;
+            case 4: {
+                switch ((s8)((u8)*p - 0x4C)) {
+                case 28:
+                    spec->length = 1;
+                    adv = 1;
+                    break;
+                case 32:
+                    adv = 1;
+                    if (p[1] != 0x6C) {
+                        spec->length = 2;
+                        break;
+                    }
+                    // fall through
+                case 0:
+                case 37:
+                    spec->length = 2;
+                    adv++;
+                    break;
+                case 1:
+                case 10:
+                case 33:
+                case 42: {
+                    s32 a = 3;
+                    s32 r = 1;
+                    s32 d;
+                    s32 l;
+                    if (D_0024E879[(s8)(u8)*p] & 1) {
+                        a = 4;
+                    }
+                    spec->f24 = a;
+                    d = *p;
+                    l = (D_0024E879[d] & 1) ? d + 0x20 : d;
+                    if (l ^ 0x76) {
+                        r = a;
+                    }
+                    spec->f28 = r;
+                    adv = 1;
+                    break;
+                }
+                default:
+                    break;
+                }
+                next = 5;
+                break;
+            }
+            case 5:
+                if (*p != 0x25) {
+                    s32 e = *p;
+                    s32 f;
+                    s32 l;
+                    spec->upper = D_0024E879[e] & 1;
+                    f = *p;
+                    l = (D_0024E879[f] & 1) ? f + 0x20 : f;
+                    spec->conv = l;
+                }
+                adv = 1;
+                next = 6;
+                break;
+            default:
+                return p - at;
+            }
+            p += adv;
+            state = next;
+            if (*p == 0 || next == 6) {
+                break;
+            }
+        }
+    }
+    return p - at;
+}
+
+struct Ctx_001E1A08 { u8 pad[0x10]; s32 count; };
+struct Spec_001E1A08 {
+    u8 pad0[0x1C]; s32 i1C; s32 i20; s32 i24; s32 i28; u8 ch;
+};
+extern char D_0024E478[]; extern char D_0024E480[]; extern char D_0024E488[];
+extern char D_0024E490[]; extern char D_0024E498[];
+
+s32 func_001E2100(const char* s);
+s32 func_001D7190(Ctx_001E1A08* c, const char* s, s32 n);
+void func_001E0CD0(Spec_001E1A08* sp, Ctx_001E1A08* c, const char* s);
+void func_001E1028(Spec_001E1A08* sp, Ctx_001E1A08* c, u64 v);
+void func_001E17A8(Spec_001E1A08* sp, Ctx_001E1A08* c, s64 s);
+s64 func_001FD868(f32 f);
+
+void func_001E1A08(Spec_001E1A08* sp, Ctx_001E1A08* c, u8** va, const char* fmt, s32 len) {
+    u64 v;
+    switch (sp->ch) {
+    case '%':
+        func_001D7190(c, (const char*)sp + 0x2C, 1);
+        return;
+    case 'c': {
+        signed char buf[16];
+        u8* p = *va;
+        *va = p + 8;
+        s32 ch = *(s8*)p;
+        buf[0] = ch;
+        func_001D7190(c, (const char*)buf, 1);
+        return;
+    }
+    case 's': {
+        u8* p = *va;
+        *va = p + 8;
+        func_001E0CD0(sp, c, *(const char**)p);
+        return;
+    }
+    case 'p':
+        sp->i1C = 8;
+        sp->ch = 'x';
+        sp->i20 = 0;
+    case 'b': case 'd': case 'i': case 'o': case 'u': case 'x':
+        switch (sp->i20) {
+        case 0: case 1: { u8* p = *va; *va = p + 8; v = *(u32*)p; break; }
+        case 2: { u8* p = *va; *va = p + 8; v = *(u64*)p; break; }
+        }
+        func_001E1028(sp, c, v);
+        return;
+    case 'e': case 'f': case 'g':
+        if (sp->i24 != 0) {
+            const char* s4 = D_0024E478;
+            u8* a = *va;
+            const char* s8 = D_0024E480;
+            const char* s7 = D_0024E488;
+            *va = a + 8;
+            const char* s5 = D_0024E490;
+            const char* s6 = D_0024E498;
+            f32* fp = *(f32**)a;
+            if (sp->i28 >= 2) {
+                func_001D7190(c, s4, func_001E2100(s4));
+            }
+            for (s32 i = 0; i < sp->i28; ) {
+                s32 next;
+                if (i != 0) {
+                    func_001D7190(c, s8, func_001E2100(s8));
+                }
+                next = i + 1;
+                func_001D7190(c, s7, func_001E2100(s7));
+                for (s32 j = 0; j < sp->i24; j++) {
+                    if (j != 0) {
+                        func_001D7190(c, s5, func_001E2100(s5));
+                    }
+                    func_001E17A8(sp, c, func_001FD868(*fp++));
+                }
+                func_001D7190(c, s6, func_001E2100(s6));
+                i = next;
+            }
+            if (sp->i28 >= 2) {
+                func_001D7190(c, s4, func_001E2100(s4));
+            }
+        } else {
+            u8* p = *va;
+            *va = p + 8;
+            func_001E17A8(sp, c, *(s64*)p);
+        }
+        return;
+    case 'n':
+        switch (sp->i20) {
+        case 0: { u8* p = *va; *va = p + 8; **(s32**)p = c->count; break; }
+        case 1: { u8* p = *va; *va = p + 8; s16* q = *(s16**)p; s32 n = c->count; *q = n; break; }
+        case 2: { u8* p = *va; *va = p + 8; **(s64**)p = c->count; break; }
+        }
+        return;
+    default:
+        func_001D7190(c, fmt, len);
+        return;
+    }
+}

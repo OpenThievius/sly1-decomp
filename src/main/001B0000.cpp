@@ -1575,3 +1575,265 @@ void func_001B3040(void* self)
     }
     D_00274538 = func_001693A8(0x20000000);
 }
+
+struct Buf_1B3510 {
+    u8 bytes[0x30];
+};
+struct Quad_1B3510 {
+    u32 w[4];
+};
+struct Ent_1B3510 {
+    s32 type;
+    Quad_1B3510* data;
+};
+struct Elem_1B3510;
+struct Rec_1B3510 {
+    u8 kind;
+    u8 f1;
+    u8 pad2[6];
+    u8 col[4];
+    u32 mask;
+    s16 f10;
+    u8 pad12[2];
+    Elem_1B3510* f14;
+    s32 f18;
+    Ent_1B3510* f1C;
+    s32 f20;
+    void* f24;
+};
+struct Found_1B3510 {
+    u8 pad0[0x14];
+    Elem_1B3510* f14;
+};
+struct Glob_1B3510 {
+    u8 pad0[0x204];
+    u32 f204;
+};
+
+#define TEST_1B3510(ate, atst, aref, afail, date, datm, zte, ztst) \
+    ((u64)(ate) | ((u64)(atst) << 1) | ((u64)(aref) << 4) | ((u64)(afail) << 12) | ((u64)(date) << 14) | \
+     ((u64)(datm) << 15) | ((u64)(zte) << 16) | ((u64)(ztst) << 17))
+#define ALPHA_1B3510(a, b, c, d, fix) \
+    ((u64)(a) | ((u64)(b) << 2) | ((u64)(c) << 4) | ((u64)(d) << 6) | ((u64)(fix) << 32))
+
+extern s32 D_002744F8;
+
+void func_001611B8(Buf_1B3510* b);
+void func_001529C8(Buf_1B3510* b, s32 n, Quad_1B3510* q);
+void func_001612F8(Buf_1B3510* b, s32 a, s32 c, s32 d, s32 e, s32 f);
+void func_001613C0(Buf_1B3510* b, s32 a, s32 c, u64 d);
+void func_00161708(Buf_1B3510* b, s32 reg, u64 v);
+void func_001B29E0(Elem_1B3510* e, s32 j, s32 pass, s32 kind, Buf_1B3510* b);
+void func_00152D70(Buf_1B3510* b);
+void func_001528C8(Buf_1B3510* b);
+void func_00161278(Buf_1B3510* b, s32 n);
+void func_00161520(Buf_1B3510* b, f32 x, f32 y, f32 z);
+void func_00161458(Buf_1B3510* b, u32 c);
+void* func_001B4688(s32 key);
+
+void func_001B3510(s32 mask)
+{
+    Buf_1B3510 buf;
+    u8 col[4];
+    s32 i;
+    s32 j;
+    Rec_1B3510* rec;
+    Ent_1B3510* ents;
+    u64 test;
+    u64 sel;
+
+    if (mask == 0) {
+        return;
+    }
+    for (i = 0; i < D_002744F8; i++) {
+        rec = &((Rec_1B3510*)D_002744FC)[i];
+        if ((rec->mask & mask) != (u32)mask) {
+            continue;
+        }
+        for (j = 0; j < rec->f20; j++) {
+            ents = rec->f1C;
+            switch (rec->kind) {
+            case 1:
+            case 6:
+            case 7:
+            case 8:
+            case 10:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 3, 0x412, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                if (rec->kind == 10) {
+                    func_00161708(&buf, 0x47, 0x53001);
+                    func_00161708(&buf, 0x42, 0x11);
+                } else if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x47, 0x7001B);
+                    func_00161708(&buf, 0x42, 0);
+                } else if (rec->f1 & 0x20) {
+                    test = (rec->f1 & 4) ? 0x13001 : 0x11001;
+                    test |= (rec->kind != 1) ? 0x20000 : 0x60000;
+                    func_00161708(&buf, 0x47, test);
+                    func_00161708(&buf, 0x42, 0);
+                } else if (rec->f1 & 0x10) {
+                    test = TEST_1B3510(1, (rec->kind == 1) ? 5 : 0, 0x7E, (rec->f1 & 4) ? 3 : 1, 0, 0, 1, (rec->kind == 1) ? 3 : 1);
+                    func_00161708(&buf, 0x47, test);
+                    sel = (rec->f1 & 1) ? 2 : 0;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(1, sel, 0, 0, 0));
+                } else {
+                    test = TEST_1B3510(1, (rec->kind == 1) ? 5 : 0, 0x7E, (rec->f1 & 4) ? 3 : 1, 0, 0, 1, (rec->kind == 1) ? 3 : 1);
+                    func_00161708(&buf, 0x47, test);
+                    sel = (rec->f1 & 1) ? 2 : 1;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                }
+                func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00152D70(&buf);
+                break;
+            case 4:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                if (rec->f1 & 2) {
+                    func_001612F8(&buf, 0x7C, 0, 3, 0x412, 0);
+                    func_001613C0(&buf, 0, 1, 0xE);
+                    func_00161708(&buf, 0x47, 0x71001);
+                    sel = (rec->f1 & 1) ? 2 : 1;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                    func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                    func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                } else {
+                    func_001612F8(&buf, 0x4C, 0, 3, 0x4FF, 0);
+                    func_001613C0(&buf, 0, 1, 0xE);
+                    func_00161708(&buf, 0x47, 0x71001);
+                    func_00161708(&buf, 0x42, 0x6A);
+                    func_00161708(&buf, 1, 0x100000020);
+                }
+                ents++;
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                ents++;
+                func_001612F8(&buf, 0x4C, 0, 3, 0x4FF, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x71001);
+                func_00161708(&buf, 0x42, 0x6A);
+                func_00161708(&buf, 1, 0x180002000);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                ents++;
+                func_001612F8(&buf, 0x6C, 0, 3, 0x4FF, 0);
+                func_001613C0(&buf, 0, 5, 0x12EEE);
+                func_00161708(&buf, 0x47, 0x75001);
+                sel = (rec->f1 & 1) ? 2 : 1;
+                func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                func_00161520(&buf, 0.0f, 0.0f, 1.0f);
+                col[0] = (rec->col[0] + 1) >> 1;
+                col[1] = (rec->col[1] + 1) >> 1;
+                col[2] = (rec->col[2] + 1) >> 1;
+                col[3] = (rec->col[3] + 1) >> 1;
+                func_00161458(&buf, *(u32*)col);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                if (rec->f1 & 2) {
+                    func_001612F8(&buf, 0x7D, 0, 3, 0x412, 0);
+                } else {
+                    func_001612F8(&buf, 0x4D, 0, 3, 0x4FF, 0);
+                }
+                func_001612F8(&buf, 0x6D, 0, 3, 0x4FF, 0);
+                if (rec->f1 & 2) {
+                    func_001612F8(&buf, 0x5D, 0, 1, 4, 0);
+                } else {
+                    func_001612F8(&buf, 0x4D, 0, 1, 4, 0);
+                }
+                func_001612F8(&buf, 0x4D, 0, 1, 4, 0);
+                func_00152D70(&buf);
+                break;
+            case 2:
+            case 3:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x5F001);
+                if (rec->kind == 2) {
+                    func_00161708(&buf, 0x42, 0x44);
+                } else {
+                    func_00161708(&buf, 0x42, 0x49);
+                }
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00161278(&buf, 1);
+                break;
+            case 0: {
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 4, 0x4F12, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x47, 0x70000);
+                    func_00161708(&buf, 0x42, 0);
+                } else {
+                    func_00161708(&buf, 0x47, (rec->f1 & 4) ? 0x737EB : 0x717EB);
+                    sel = (rec->f1 & 1) ? 2 : 1;
+                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                }
+                ents++;
+                func_00161708(&buf, 0x3D, (*(Glob_1B3510**)D_00261990)->f204);
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 4, 0x41F2, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x53001);
+                if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x42, 0x8000000068);
+                } else {
+                    func_00161708(&buf, 0x42, 0x48);
+                }
+                ents++;
+                func_00161708(&buf, 0x3D, 0);
+                func_001B29E0(rec->f14, j, 1, rec->kind, &buf);
+                func_00152D70(&buf);
+                func_001528C8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x7C, 0, 4, 0x4F12, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x53001);
+                if (rec->f1 & 8) {
+                    func_00161708(&buf, 0x42, 0x8000000068);
+                } else {
+                    func_00161708(&buf, 0x42, 0x48);
+                }
+                func_00161708(&buf, 0x3D, 0);
+                Found_1B3510* found = (Found_1B3510*)func_001B4688(rec->f10);
+                if (found) {
+                    func_001B29E0(found->f14, j, 0, rec->kind, &buf);
+                } else {
+                    func_001B29E0(rec->f14, j, 2, rec->kind, &buf);
+                }
+                func_00152D70(&buf);
+                break;
+            }
+            case 5:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x24C, 0, 3, 0x412, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x48, 0x31001);
+                func_00161708(&buf, 0x43, 0x44);
+                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                func_00152D70(&buf);
+                break;
+            case 9:
+                func_001611B8(&buf);
+                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                func_001612F8(&buf, 0x4C, 0, 3, 0x41F, 0);
+                func_001613C0(&buf, 0, 1, 0xE);
+                func_00161708(&buf, 0x47, 0x51001);
+                func_00161708(&buf, 0x42, 0x6A);
+                func_00152D70(&buf);
+                break;
+            }
+        }
+    }
+}

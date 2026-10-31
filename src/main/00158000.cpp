@@ -1248,3 +1248,89 @@ s32 func_0015A4B8(s32 index, s32 value)
     }
     return 0;
 }
+
+struct Type_159F48 { u8 pad0[8]; u32 flags; };
+struct Link_159F48 { u8 pad0[4]; s32 f4; };
+struct Obj_159F48 {
+    Type_159F48* type;
+    u8 pad4[0x14];
+    Obj_159F48* parent;
+    u8 pad1C[0x14];
+    Link_159F48* link;
+    u8 pad34[0x2C8 - 0x34];
+    union { u64 flags; struct { u64 lo : 42; u64 level : 4; } b; };
+};
+
+s32 func_00182FC8(Obj_159F48* o);
+
+void func_00159F48(Obj_159F48* self, s32 mode, s32 a2, s32 a3, Obj_159F48* a4, s32 cap,
+                   s32* count, Obj_159F48** arr, s32* lvlp)
+{
+    Obj_159F48* a0;
+    Obj_159F48* prev;
+    switch (mode) {
+    case 2:
+        if (self->link != 0 && a3 == 0) return;
+        if (self->parent == a4) goto add;
+        return;
+    case 1:
+        if (self->link != 0 && a3 == 0) return;
+        a0 = self->parent;
+        if (a0 == 0) return;
+        do {
+            u64 lvl = a0->b.level;
+            if (lvl != 0) {
+                if (lvl == 1) goto add;
+                return;
+            }
+            if (a0->link != 0) return;
+            a0 = a0->parent;
+        } while (a0 != 0);
+        return;
+    case 3:
+        if (self->type->flags & 1) {
+            if (self->flags & ((u64)0xF000 << 30)) goto add;
+        }
+        return;
+    case 4:
+        prev = 0;
+        a0 = self;
+        if ((self->type->flags & 1) == 0) a0 = self->parent;
+        while (a0 != 0) {
+            u64 f = a0->flags;
+            if (f & ((u64)0xF000 << 30)) {
+                s32 lvl = (s32)(a0->flags >> 42) & 0xF;
+                u32 cur = *lvlp;
+                if (!(cur < lvl)) {
+                    if (!(lvl < cur)) goto add;
+                    *lvlp = lvl;
+                    *count = 0;
+                    *arr = 0;
+                    goto add;
+                }
+            }
+            if (a0 == prev) return;
+            if (a0->link != 0 && (a0 != self || a3 == 0)) {
+                s32 want = -1;
+                if (a4 != 0) {
+                    for (Obj_159F48* v = a4; v; v = v->parent) {
+                        if (v->link != 0) { want = v->link->f4; break; }
+                    }
+                }
+                if (a0->link->f4 != want) return;
+                prev = a0->parent;
+            }
+            a0 = a0->parent;
+        }
+        if (*lvlp != 0x7FFFFFFF) return;
+        goto add;
+    case 5:
+    add:
+        if (a2 == 0 && func_00182FC8(self) == 0) return;
+        if (*count < cap) arr[*count] = self;
+        (*count)++;
+        return;
+    default:
+        return;
+    }
+}

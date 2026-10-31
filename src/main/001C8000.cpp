@@ -1703,3 +1703,282 @@ void func_001C9008(Self_1C9008* self, s32 mode)
         self->f72C &= ~2;
     }
 }
+
+struct Obj_1C91C8;
+
+struct Tgt_1C91C8 {
+    u8 pad0[0x8];
+    s32 id;
+    u8 pad1[0x10 - 0xC];
+    u8 f10;
+    u8 f11;
+    u8 pad2[0x34 - 0x12];
+    f32 f34;
+};
+struct Sub_1C91C8 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+};
+struct VT_1C91C8 {
+    u8 pad0[0x188];
+    void (*f188)(Obj_1C91C8* self, s32 on);
+};
+struct HookVT_1C91C8;
+struct Hook_1C91C8 {
+    HookVT_1C91C8* vt;
+};
+struct HookVT_1C91C8 {
+    u8 pad0[0x70];
+    void (*f70)(Hook_1C91C8* hook, Obj_1C91C8* owner);
+};
+struct Slot_1C91C8 {
+    s32 f0;
+    Tgt_1C91C8* tgt;
+};
+struct SlotB_1C91C8 {
+    Tgt_1C91C8* tgt;
+    s32 f4;
+};
+struct Group_1C91C8 {
+    s32 ids[4];
+};
+struct Vec_1C91C8 {
+    s32 v[4];
+};
+
+struct Obj_1C91C8 {
+    VT_1C91C8* vt;
+    u8 pad0[0x1D8 - 0x4];
+    f32 f1D8;
+    u8 pad1[0x1EC - 0x1DC];
+    Tgt_1C91C8* f1EC;
+    Tgt_1C91C8* f1F0;
+    u8 pad2[0x724 - 0x1F4];
+    s32 state;
+    u8 pad3[0x750 - 0x728];
+    Tgt_1C91C8* f750;
+    Tgt_1C91C8* f754;
+    Slot_1C91C8 slotA[17];
+    s32 f7E0;
+    s32 groupCount;
+    Group_1C91C8 groups[8];
+    Tgt_1C91C8* cur;
+    f32 curWeight;
+    s32 f870;
+    SlotB_1C91C8 slotB[16];
+    s32 f8F4;
+    Tgt_1C91C8* f8F8;
+    u8 pad5[0x910 - 0x8FC];
+    f32 f910;
+    f32 f914;
+    f32 f918;
+    f32 f91C;
+    u8 pad6[0xA68 - 0x920];
+    s32 fA68;
+    s32 fA6C;
+    f32 fA70;
+    Sub_1C91C8* fA74;
+    u8 pad7[0xB10 - 0xA78];
+    s32 fB10;
+    s32 fB14;
+    f32 fB18;
+    u8 pad8[0xB54 - 0xB1C];
+    Hook_1C91C8* fB54;
+    s32 fB58;
+    s32 fB5C;
+    u8 fB60[0x10];
+    s32 fB70;
+    u8 pad9[0xBD4 - 0xB74];
+    s32 fBD4;
+    u8 pad10[0xBEC - 0xBD8];
+    s32 fBEC;
+    s32 fBF0;
+    f32 fBF4;
+    f32 fBF8;
+    f32 fBFC;
+    s32 fC00;
+    s32 fC04;
+};
+
+void func_001C4D60(Obj_1C91C8* self, Tgt_1C91C8* t, s32 z);
+void func_0012F6B0(Tgt_1C91C8* t, f32 x);
+void func_001C7AE0(Obj_1C91C8* self, f32 x, f32 y);
+void func_001C8D78(Obj_1C91C8* self);
+void func_0012C7B0(Tgt_1C91C8* t, Obj_1C91C8* self, s32 mode, void* out, f32 x, f32 y);
+void func_0012C288(Tgt_1C91C8* t, Obj_1C91C8* self, s32 one, s32* p, s32 mode, void* out, f32 x, f32 y);
+s32 func_00183458(Obj_1C91C8* self);
+Tgt_1C91C8* func_0012D570(Tgt_1C91C8* t, s32 q);
+void func_00128018(Obj_1C91C8* self, s32 z, u8* p, Vec_1C91C8* out);
+void func_00152010(u8* p, Vec_1C91C8* v, s32 a, s32 b);
+void func_00138F28(s32 p, Obj_1C91C8* self);
+void func_0018D608(void);
+void func_0018D6F0(void);
+void func_0012D1B0(Tgt_1C91C8* t, Obj_1C91C8* self, s32* count, Tgt_1C91C8*** list);
+void func_001EFA88(s32 x, Tgt_1C91C8* t);
+void func_00141040(u8* p, s32 x);
+void func_00126D60(Obj_1C91C8* self, f32 x);
+f32 func_001EAAE0(f32 x, f32 y);
+void func_001C8920(Obj_1C91C8* self);
+void func_001C8BC0(Obj_1C91C8* self);
+
+extern u8 D_00261420[];
+extern u8 D_00261EF0[];
+extern f32 D_0024D7A0;
+
+void func_001C91C8(Obj_1C91C8* self, s32 evt, Tgt_1C91C8* arg)
+{
+    Tgt_1C91C8* tgt;
+    Tgt_1C91C8* t;
+
+    if (arg != 0) {
+        tgt = arg;
+    } else {
+        tgt = self->slotA[self->state].tgt;
+    }
+    t = self->slotB[self->state].tgt;
+    if (t == 0) {
+        t = self->f8F8;
+    }
+    func_001C4D60(self, t, 0);
+    self->vt->f188(self, 1);
+
+    switch (self->state) {
+    case 2:
+        if (self->f754 != 0) {
+            func_0012F6B0(self->f754, 1.0f);
+        } else {
+            func_001C7AE0(self, self->f1D8, 0.0f);
+        }
+        break;
+    case 3:
+        if (self->fA74->f2D0 == 2) {
+            func_001C8D78(self);
+        }
+        break;
+    case 1:
+        if (self->f750 != 0 && evt != 2) {
+            Tgt_1C91C8* v;
+            func_0012C7B0(self->f750, self, 1, &self->f754, self->f914, self->f91C);
+            v = func_0012D570(self->f754, func_00183458(self));
+            if (v == self->f1EC) {
+                v->f10 = 5;
+            }
+            if (v == self->f1F0) {
+                v->f11 = 5;
+            }
+        }
+        break;
+    case 11: {
+        Vec_1C91C8 vec;
+        s32 count;
+        Tgt_1C91C8** list;
+        func_00128018(self, 0, self->fB60, &vec);
+        func_00152010(D_00261EF0, &vec, self->fB58, self->fB70);
+        func_00138F28((s32)D_00275710, self);
+        if (self->f750 != 0) {
+            s32 i;
+            func_0018D608();
+            i = 0;
+            func_0012D1B0(self->f750, self, &count, &list);
+            while (i < count) {
+                Tgt_1C91C8* e = list[i++];
+                func_001EFA88(*(s32*)((u8*)e + 0x328), e);
+            }
+            func_0018D6F0();
+        }
+        func_00141040(D_00261420, self->fB10);
+        if (self->fB54 != 0) {
+            self->fB54->vt->f70(self->fB54, self);
+            self->fB54 = 0;
+        }
+        if (self->fBD4 != 0) {
+            f32 f = self->fA70;
+            if (tgt != 0) {
+                f += tgt->f34;
+            }
+            func_00126D60(self, f);
+        }
+        self->fC04 = 1;
+        break;
+    }
+    case 16:
+        self->fC04 = 1;
+        self->fA68--;
+        break;
+    case 6:
+        self->fBF4 = D_0024D7A0;
+        func_001C7AE0(self, self->f910, 0.0f);
+        break;
+    case 7:
+        self->fBF8 = D_0024D7A0;
+        break;
+    case 10:
+        self->fBFC = D_0024D7A0;
+        break;
+    }
+
+    if (tgt != 0) {
+        f32 w;
+        s32 mode;
+        if (self->state == 2 && self->fB14 != 0) {
+            f32 t = self->fB18;
+            w = (0.0f <= t) ? t : func_001EAAE0(0.0f, 1.0f);
+        } else {
+            Tgt_1C91C8* cur = self->cur;
+            if (cur == 0) {
+                w = 0.0f;
+            } else if (tgt == cur) {
+                w = self->curWeight;
+            } else {
+                s32 i;
+                w = 0.0f;
+                for (i = 0; i < self->groupCount; i++) {
+                    Group_1C91C8* g = &self->groups[i];
+                    u32 j;
+                    for (j = 0; j < 4; j++) {
+                        if (self->cur->id == g->ids[j]) {
+                            break;
+                        }
+                    }
+                    if (j < 4) {
+                        for (j = 0; j < 4; j++) {
+                            if (tgt->id == g->ids[j]) {
+                                break;
+                            }
+                        }
+                        if (j < 4) {
+                            w = self->curWeight;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        mode = (w != 0.0f) ? 3 : 1;
+        if ((evt ^ 0xB) == 0) {
+            mode |= 4;
+        }
+        if (self->fBEC == -1 || self->fBF0 == 0) {
+            func_0012C7B0(tgt, self, mode, &self->f7E0, w * tgt->f34, 1.0f);
+        } else {
+            func_0012C288(tgt, self, 1, &self->fBEC, mode, &self->f7E0, w * tgt->f34, 1.0f);
+        }
+        self->cur = tgt;
+        self->curWeight = 0.0f;
+    }
+
+    switch (self->state) {
+    case 1:
+    case 4:
+    case 5:
+    case 12:
+        func_001C8920(self);
+        break;
+    case 7:
+    case 10:
+    case 13:
+    case 14:
+        func_001C8BC0(self);
+        break;
+    }
+}

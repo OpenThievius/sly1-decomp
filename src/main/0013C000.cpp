@@ -1225,3 +1225,114 @@ void func_0013CE80(Self_13CE80* self)
     }
     *(s32*)D_0027B314 = fr.prev;
 }
+
+struct Self_13FD20;
+struct Ent_13FD20 { Self_13FD20* a; Self_13FD20* b; u8 pad[0x38]; };
+struct Node_13FD20 { Ent_13FD20 e[2]; u8 pad[0xD0 - 0x80]; Node_13FD20* next; };
+struct List_13FD20 { Node_13FD20* head; List_13FD20* next; };
+struct Self_13FD20 { u8 pad; };
+
+extern u8* D_00262E10;
+extern f32 D_0026185C;
+
+void func_001B93F8(Self_13FD20* self);
+void func_0013F6F8(Self_13FD20* self, s32 v);
+s32 func_0013F8A0(Self_13FD20* self, f32* out);
+s32 func_0013F940(Self_13FD20* self, f32* out);
+s32 func_0013F718(Self_13FD20* self, void* p);
+void func_00129DF8(Self_13FD20* self);
+
+#define F(o, off) (*(f32*)((u8*)(o) + (off)))
+#define W(o, off) (*(s32*)((u8*)(o) + (off)))
+#define P(o, off) (*(void**)((u8*)(o) + (off)))
+
+void func_0013FD20(Self_13FD20* self)
+{
+    func_001B93F8(self);
+    switch (W(self, 0x680)) {
+    case 2: {
+        u8* g = D_00262E10;
+        f32 t;
+        if (g) {
+            if (W(g, 0x2220) == 3 && W(g, 0x2204) == W(self, 0x880)) F(self, 0x678) = D_0026185C;
+        }
+        t = F(self, 0x67C);
+        if (0.0f <= t) {
+            if (t < D_0026185C - F(self, 0x678)) func_0013F6F8(self, 4);
+        }
+        break;
+    }
+    case 3:
+        break;
+    case 4: {
+        s32 r = -1;
+        switch (W(self, 0x550)) {
+        case 0: if (!func_0013F8A0(self, 0)) r = 1; break;
+        case 1: if (!func_0013F940(self, 0)) r = 1; break;
+        case 2:
+        case 4: r = 1; break;
+        case 3: r = 0; break;
+        }
+        if (r != -1) func_0013F6F8(self, r);
+        break;
+    }
+    case 0:
+    case 1: {
+        s32 r = W(self, 0x680);
+        s32 st = W(self, 0x550);
+        switch (st) {
+        case 3:
+            break;
+        case 4: {
+            u8* g = D_00262E10;
+            r = 0;
+            if (g) {
+                if (W(g, 0x2220) == 3) r = W(g, 0x2204) == W(self, 0x880);
+            }
+            break;
+        }
+        case 2: {
+            void* s4 = P(self, 0x50);
+            List_13FD20* l = *(List_13FD20**)((u8*)P(s4, 0x480));
+            r = 0;
+            for (; l; l = l->next) {
+                Node_13FD20* n = l->head;
+                for (; n; n = n->next) {
+                    s32 k = n->e[0].a != s4;
+                    if (((Ent_13FD20*)((u8*)n + (k << 6)))->b == self) {
+                        if (func_0013F718(self, n->e[1 - k].a)) { r = 1; goto done; }
+                    }
+                }
+            }
+            break;
+        }
+        default: {
+            f32 v[2];
+            s32 s0;
+            s32 lt;
+            s32 mode = W(self, 0x680);
+            r = mode;
+            if (st == 0) {
+                s0 = func_0013F8A0(self, &v[0]);
+                lt = v[0] < 2.0f;
+            } else {
+                s0 = func_0013F940(self, &v[1]);
+                lt = v[1] < 0.1f;
+            }
+            if (lt) {
+                if (s0 == 0 && mode == 1) r = 0;
+                else if (s0 == 1 && !mode) r = 1;
+            }
+            if (W(self, 0x7B0) != s0) {
+                func_00129DF8(self);
+                W(self, 0x7B0) = s0;
+            }
+            break;
+        }
+        }
+    done:
+        func_0013F6F8(self, r);
+        break;
+    }
+    }
+}

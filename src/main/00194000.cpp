@@ -554,3 +554,73 @@ void func_00196938(Obj_196938* self)
     func_00152438((Sub_196938*)((u8*)self + 0x69C), 0x568);
     *(Obj_196938**)&D_0026A904 = self;
 }
+
+struct Self_1961C0 {
+    u8 pad0[0x260];
+    s32 state;
+};
+// The register at +0x18 is described with 32-bit bit-fields, the one at +0x40 with 64-bit ones;
+// the mixed types are what give retail's copy of the masked value.
+struct Reg_1961C0 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
+struct RegA_1961C0 { u32 lo : 12; u32 mid : 11; u32 rest : 9; u32 hi; } __attribute__((aligned(8)));
+struct Gs_1961C0 {
+    u8 pad0[0x18];
+    RegA_1961C0 f18;
+    u8 pad20[0x20];
+    Reg_1961C0 f40;
+};
+extern Gs_1961C0 D_00262490;
+extern s32 D_00275BF0;
+extern f32 D_0026A708;
+extern f32 D_0026A70C;
+void func_00194D30(Self_1961C0* self, s32 a, s32 b);
+s32 func_001FD7A0(f32 x);
+
+void func_001961C0(Self_1961C0* self)
+{
+    switch (self->state) {
+    case 0:
+        func_00194D30(self, 0, -1);
+        break;
+    case 23:
+        if ((u32)(D_00275BF0 - 1) < 2) {
+            func_00194D30(self, 0, -1);
+            break;
+        }
+        func_00194D30(self, 0, 0);
+        break;
+    case 24: {
+        Gs_1961C0* g = &D_00262490;
+        s32 v = func_001FD7A0(D_0026A708);
+        Reg_1961C0 a = g->f40;
+        RegA_1961C0 b = g->f18;
+        a.lo = v;
+        b.lo = v;
+        g->f40 = a;
+        g->f18 = b;
+        s32 w = func_001FD7A0(D_0026A70C);
+        a.mid = w;
+        b.mid = w;
+        g->f40 = a;
+        g->f18 = b;
+        func_00194D30(self, 0, 0x17);
+        break;
+    }
+    case 2:
+        func_00194D30(self, 0, 0);
+        break;
+    case 13:
+        func_00194D30(self, 1, -1);
+        break;
+    case 11:
+    case 16:
+    case 17:
+    case 31:
+        func_00194D30(self, 0, 0x17);
+        break;
+    case 14:
+    case 18:
+        func_00194D30(self, 1, -1);
+        break;
+    }
+}
