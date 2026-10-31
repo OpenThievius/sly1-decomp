@@ -1039,3 +1039,90 @@ void func_001B01B0(Obj_1B01B0* self, s32 s)
     }
     func_001AECE8(self, s);
 }
+
+struct Self_1B0FC0 {
+    u8 pad0[0x558];
+    s32 state;
+    u8 pad55C[0x5C0 - 0x55C];
+    s32 f5C0;
+};
+void func_001B1070(Self_1B0FC0* self, s32 v);
+void func_001AECE8(Self_1B0FC0* self, s32 s);
+
+void func_001B0FC0(Self_1B0FC0* self, s32 s)
+{
+    if (self->state != s) {
+        switch (self->state) {
+        case -1: case 0: case 1: case 2: case 3: case 4: case 5: case 7:
+            break;
+        case 6:
+            func_001B1070(self, -1);
+            break;
+        case 8:
+            self->f5C0 = 0;
+            break;
+        }
+        switch (s) {
+        case 6:
+            func_001B1070(self, 0);
+            break;
+        case 0: case 1: case 2: case 3: case 4: case 5: case 7: case 8:
+            break;
+        }
+        func_001AECE8(self, s);
+    }
+}
+
+struct Obj_1B1710 {
+    u8 pad0[0x558];
+    s32 state;
+    f32 f55C;
+    u8 pad1[0x5C0 - 0x560];
+    s32 f5C0;
+    void* f5C4;
+    u8 pad2[0x614 - 0x5C8];
+    f32 f614;
+    s32 f618;
+};
+
+struct Tgt_1B1710;
+void func_001BF788(Tgt_1B1710* t, s32 n);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001AECE8(Obj_1B1710* self, s32 n);
+
+void func_001B1710(Obj_1B1710* self, s32 n)
+{
+    if (self->state == n) return;
+    switch (self->state) {
+    case 1:
+    case 5:
+        func_001BF788((Tgt_1B1710*)self->f5C4, 0);
+        self->f614 = self->f55C;
+        break;
+    case 8:
+        self->f5C0 = 0;
+        self->f618 = 0;
+        break;
+    }
+    switch (n) {
+    case 1:
+        func_001BFCD8(15, &self->f5C4, (s32)self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        break;
+    case 2:
+    case 6:
+        self->f618 = 1;
+        break;
+    case 3:
+    case 4:
+    case 7:
+        break;
+    case 5:
+        func_001BFCD8(27, &self->f5C4, (s32)self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        break;
+    }
+    func_001AECE8(self, n);
+    if (self->f618 != 0 && (n == 2 || n == 6)) {
+        self->state = (n == 2) ? 1 : 5;
+        self->f55C = self->f614;
+    }
+}

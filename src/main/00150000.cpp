@@ -1186,3 +1186,107 @@ void func_00153608(Self_153608* self)
         func_00152470(self->f30, e);
     }
 }
+
+struct Rd_150570 { s32 pad; };
+struct Ent_150570 {
+    s32 type;
+    s32 w4;
+    s32 w8;
+    s32 wC;
+    s32 w10;
+    s32 w14[1];
+    s32 w18;
+    s32 w1C;
+    s32 w20;
+    s32 w24;
+};
+
+s32 func_00137CC0(Rd_150570* r);
+void* func_0018D5C0(s32 n);
+void func_00138550(Rd_150570* r, void* out);
+s32 func_00137D10(Rd_150570* r);
+f32 func_00137DF8(Rd_150570* r);
+s32 func_00137B90(Rd_150570* r);
+void func_001384A0(Rd_150570* r, void* out);
+
+void func_00150570(void* unused, Rd_150570* rd, s32* outCount, Ent_150570** outArr)
+{
+    s32 i = 0;
+    *outCount = func_00137CC0(rd);
+    *outArr = (Ent_150570*)func_0018D5C0(*outCount * 0x28);
+    for (i = 0; i < *outCount; i++) {
+        Ent_150570* e = (Ent_150570*)((u8*)*outArr + i * 0x28);
+        e->type = func_00137CC0(rd);
+        switch (e->type) {
+        case 0:
+        case 7:
+            func_00138550(rd, &e->w4);
+            break;
+        case 1:
+        case 2:
+            e->w4 = func_00137D10(rd);
+            e->w8 = func_00137D10(rd);
+            break;
+        case 3:
+            *(f32*)&e->w4 = func_00137DF8(rd);
+            *(f32*)&e->w8 = func_00137DF8(rd);
+            e->wC = func_00137B90(rd);
+            e->w10 = func_00137B90(rd);
+            e->w18 = func_00137D10(rd);
+            e->w1C = func_00137D10(rd);
+            e->w20 = func_00137D10(rd);
+            e->w24 = func_00137D10(rd);
+            func_001384A0(rd, e->w14);
+            break;
+        case 4:
+            e->w4 = func_00137D10(rd);
+            break;
+        }
+    }
+}
+
+struct Item_1516C0 { s32 kind; s32 data[9]; };
+struct Self_1516C0 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad18[0x2D0 - 0x18];
+    s32 f2D0;
+    s32 f2D4;
+    u8 pad2D8[4];
+    s32 count;
+    Item_1516C0* items;
+    s32 index;
+};
+extern u8 D_00275BC0[];
+void func_001837E0(Self_1516C0* self, s32 a, s32 b, s32* c);
+void func_001DDB58(void* a);
+void func_001DDBB8(void* a);
+void func_001E9570(void* p);
+
+void func_001516C0(Self_1516C0* self)
+{
+    if (self->f2D4 != 4) {
+        if (self->index < self->count) {
+            for (self->index++; self->index < self->count; self->index++) {
+                Item_1516C0* it = &self->items[self->index];
+                switch (it->kind) {
+                case 0: case 1: case 2: case 3: case 7:
+                    break;
+                case 4: {
+                    s32* p = it->data;
+                    func_001837E0(self, 0x10, 1, (s32*)&p);
+                    break;
+                }
+                case 5:
+                    func_001DDB58(self->f14);
+                    break;
+                case 6:
+                    func_001DDBB8(self->f14);
+                    break;
+                }
+            }
+        }
+        if (self->f2D0 == 2)
+            func_001E9570(D_00275BC0);
+    }
+}

@@ -690,3 +690,21 @@ void func_001E2218(s8* p)
         p++;
     }
 }
+
+s32 func_001E0EF8(s8 c)
+{
+    switch (c) {
+    case 0x64:
+    case 0x69:
+    case 0x75:
+        return 10;
+    case 0x42:
+    case 0x62:
+        return 2;
+    case 0x6F:
+        return 8;
+    case 0x78:
+        return 16;
+    }
+    return 10;
+}

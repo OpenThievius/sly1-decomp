@@ -1236,3 +1236,99 @@ s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi)
     if (hi) *hi = arr[i + 1] - arr[i];
     return i;
 }
+
+struct Obj_14F058 {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1[0x550 - 0x1C];
+    s32 state;
+    f32 f554;
+    u8 pad2[0x568 - 0x558];
+    f32 f568;
+};
+
+void func_001B93F8(Obj_14F058* self);
+void func_0014F270(Obj_14F058* self, f32 f);
+void func_0014F110(Obj_14F058* self, s32 n);
+
+void func_0014F058(Obj_14F058* self, f32 f)
+{
+    func_001B93F8(self);
+    switch (self->state) {
+    case 0:
+    case 1:
+    case 3:
+    case 5:
+        break;
+    case 2:
+        func_0014F270(self, f);
+        break;
+    case 4:
+        if (self->f568 < D_0026185C[0] - self->f554) {
+            if (D_00262E10 == 0 || self->f18 != *(s32*)(D_00262E10 + 0x23B0))
+                func_0014F110(self, 5);
+        }
+        break;
+    }
+}
+
+struct Obj_14FA88 {
+    u8 pad000[0x680];
+    s32 f680;
+    u8 pad684[0x58];
+    s32 f6DC;
+    u8 pad6E0[0x60];
+    void* f740;
+    u8 pad744[0x48];
+    s32 f78C;
+    u8 pad790[0x20];
+    s32 f7B0;
+};
+
+void func_0013D068(Obj_14FA88* self);
+void func_001B6598(void* p, s32* out);
+void func_001B6568(void* p, s32* out);
+void func_0014FDA8(Obj_14FA88* self, s32* state);
+void func_00150008(Obj_14FA88* self);
+void func_0014FCE8(Obj_14FA88* self, s32 state);
+
+void func_0014FA88(Obj_14FA88* self)
+{
+    s32 st[2];
+    func_0013D068(self);
+    if (self->f680 == 0 && self->f6DC != 0 && self->f740 != 0) {
+        func_001B6598(self->f740, &st[0]);
+        func_001B6568(self->f740, &st[1]);
+        if (st[1] == -1) st[1] = st[0];
+        if (st[0] == st[1]) {
+            switch (st[0]) {
+            case 0x2B7:
+                if (self->f7B0 != 0) st[1] = 0x2B8;
+                else if (self->f78C > 0) st[1] = 0x2B9;
+                break;
+            case 0x2B8:
+                if (self->f7B0 == 0) {
+                    if (self->f78C > 0) st[1] = 0x2B9;
+                    else st[1] = 0x2B7;
+                } else {
+                    func_0014FDA8(self, &st[1]);
+                }
+                break;
+            case 0x2B9:
+                if (self->f7B0 != 0) st[1] = 0x2B8;
+                else if (self->f78C <= 0) st[1] = 0x2B7;
+                else func_0014FDA8(self, &st[1]);
+                break;
+            case 0x2BA:
+                func_00150008(self);
+                st[1] = 0x2B8;
+                break;
+            case 0x2BB:
+                func_00150008(self);
+                st[1] = 0x2B9;
+                break;
+            }
+            if (st[1] != st[0]) func_0014FCE8(self, st[1]);
+        }
+    }
+}

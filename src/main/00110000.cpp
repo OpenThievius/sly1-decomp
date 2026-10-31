@@ -186,3 +186,38 @@ void* func_00113888(void* self, Entry_113888* e, s32 mode)
     func_0011B060(&obj, 2);
     return self;
 }
+
+struct Quad_113AA8 { s32 a, b, c, d; };
+struct Ent_113AA8 { s32 kind; s32 val; };
+
+s32 func_0011B008(Quad_113AA8* q);
+s32 func_0011B5F0(Quad_113AA8* q, s32 flag);
+void func_0011B018(void* dst, Quad_113AA8* src);
+void func_0011B060(Quad_113AA8* q, s32 mode);
+
+void* func_00113AA8(void* self, void* unused, Ent_113AA8* k)
+{
+    Quad_113AA8 q;
+    s32 r;
+    func_0011B008(&q);
+    Ent_113AA8* p = k + 1;
+    if (k->kind != p->kind) {
+        r = 0;
+    } else {
+        switch (k->kind) {
+        case 20:
+        case 27: case 28: case 29: case 30: case 31: case 32: case 33:
+            r = (k->val == p->val);
+            break;
+        case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9:
+        case 10: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19:
+        case 34:
+            r = 1;
+            break;
+        }
+    }
+    func_0011B5F0(&q, r);
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

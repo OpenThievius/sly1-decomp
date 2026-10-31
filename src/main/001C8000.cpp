@@ -1157,3 +1157,172 @@ void func_001CBEE8(Obj_1CBEE8* self, s32 ns)
     self->f50 = ns;
     self->f54 = D_00261858[1];
 }
+
+struct Self_1C8C08;
+struct __attribute__((aligned(16))) Quad_1C8C08 { s32 a, b, c, d; };
+struct Tgt_1C8C08;
+typedef void (*TFn_1C8C08)(Tgt_1C8C08* t, Self_1C8C08* s, f32 x, f32 y, s32 z, void* out, s32 w);
+struct Tgt_1C8C08 { TFn_1C8C08* vtbl; };
+struct Res_1C8C08 { s32 pad0; Tgt_1C8C08* t; };
+typedef s32 (*VFn_1C8C08)(Self_1C8C08* s);
+struct Self_1C8C08 {
+    VFn_1C8C08* vtbl;
+    u8 pad004[0x18C];
+    Quad_1C8C08 f190;
+    u8 pad1A0[0x584];
+    s32 f724;
+    u8 pad728[0x28];
+    void* f750;
+    u8 pad754[0x1C0];
+    f32 f914;
+    f32 f918;
+    f32 f91C;
+    s32 f920;
+};
+
+void func_001C8418(Self_1C8C08* self, void* p);
+void func_0012C9E8(f32 c, void* a, Self_1C8C08* b, void* d, void* e, void* f, s32 g);
+Res_1C8C08* func_0012CCE8(void* a, Self_1C8C08* b);
+
+void func_001C8C08(Self_1C8C08* self, s32 flag)
+{
+    Quad_1C8C08 q;
+    switch (self->f724) {
+    case 7:
+    case 10:
+    case 12:
+    case 13:
+    case 14: {
+        s32 v = self->vtbl[0x198 / 4](self);
+        if (v != 0) func_001C8418(self, (u8*)v + 0x140);
+        break;
+    }
+    case 4:
+        if (flag != 0) {
+            if (self->f750 != 0) {
+                switch (self->f920) {
+                case 0:
+                    func_0012C9E8(self->f918, self->f750, self, (u8*)self + 0x140, (u8*)self + 0x914, &q, 0);
+                    break;
+                case 1: {
+                    self->f914 = self->f918;
+                    Tgt_1C8C08* t = func_0012CCE8(self->f750, self)->t;
+                    t->vtbl[0](t, self, self->f914, 1.0f, 0, &q, 0);
+                    break;
+                }
+                }
+                self->f91C = 1.0f;
+            } else {
+                q = self->f190;
+            }
+            func_001C8418(self, &q);
+        }
+        break;
+    case 5:
+        if (flag != 0) func_001C8418(self, (u8*)self + 0x900);
+        break;
+    }
+}
+
+struct Obj_1C8E28;
+typedef s32 (*VFn_1C8E28)(Obj_1C8E28*);
+struct Obj_1C8E28 {
+    VFn_1C8E28* vtbl;
+    u8 pad4[0x638 - 4];
+    f32 f638;
+    u8 pad63C[0x724 - 0x63C];
+    s32 mode;
+    u8 pad728[0x754 - 0x728];
+    s32 i754;
+    u8 pad758[0xA74 - 0x758];
+    u8* p74;
+    u8 padA78[0xB1C - 0xA78];
+    s32 iB1C;
+};
+
+extern f32 D_00261860;
+s32 func_00128230(Obj_1C8E28* self);
+void func_001C7BE8(Obj_1C8E28* self);
+void func_00128598(f32 a, f32 b, Obj_1C8E28* self, s32 c, s32 d, f32* e, f32* f, f32* g);
+void func_001C7AE0(Obj_1C8E28* self, f32 x, f32 y);
+void func_001EFC98(void* n);
+void func_001C8920(Obj_1C8E28* self);
+void func_001C8BC0(Obj_1C8E28* self);
+
+void func_001C8E28(Obj_1C8E28* self)
+{
+    self->vtbl[102](self);
+    switch (self->mode) {
+    case 0:
+    case 16:
+        break;
+    case 1:
+    case 2:
+        if (func_00128230(self) != 0)
+            func_001C7BE8(self);
+        break;
+    case 3:
+        if (self->i754 != 0) {
+            f32 out[3];
+            f32 zero = 0.0f;
+            out[1] = zero;
+            func_00128598(D_00261860, self->f638, self, 0, 0, &out[0], self->iB1C ? &out[1] : 0, &out[2]);
+            f32 y = out[1];
+            func_001C7AE0(self, out[0], y);
+        }
+        func_001EFC98(*(void**)(self->p74 + 0x328));
+        break;
+    case 4:
+    case 5:
+    case 12:
+        func_001C8920(self);
+        break;
+    case 7:
+    case 10:
+    case 13:
+    case 14:
+        func_001C8BC0(self);
+        break;
+    }
+}
+
+struct Other_1C9D50 { u8 pad0[0x50]; s32 f50; };
+struct Self_1C9D50 {
+    u8 pad0[0x50];
+    s32 f50;
+    u8 pad54[0x724 - 0x54];
+    s32 mode;
+    u8 pad728[0xB0C - 0x728];
+    void* fB0C;
+    u8 padB10[0xB54 - 0xB10];
+    s32 fB54;
+};
+s32 func_001A8820(void* p, Other_1C9D50* v);
+
+s32 func_001C9D50(Self_1C9D50* self, s32 key, Other_1C9D50* other)
+{
+    if (key != self->fB54)
+        return 0;
+    switch (self->mode) {
+    case 10:
+    case 11:
+    case 16:
+        goto ret0;
+    case 12:
+    case 13:
+    case 14:
+        goto ret1;
+    }
+    if (!other)
+        goto ret0;
+    if (other->f50 == self->f50)
+        goto ret1;
+    if (!self->fB0C)
+        goto ret0;
+    if (!func_001A8820(self->fB0C, other))
+        goto ret0;
+ret1:
+    return 1;
+ret0:
+    return 0;
+}

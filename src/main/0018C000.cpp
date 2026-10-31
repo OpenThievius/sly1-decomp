@@ -1453,3 +1453,47 @@ void func_0018F940(void* self, s32 key)
         }
     }
 }
+
+struct Obj_18D0A0 {
+    s32 pad0;
+    void* p4;
+    void* p8;
+    u8 padC[0x8];
+    s32 f14;
+    u8 pad18[0x8];
+    f32 f20;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+};
+
+s32 func_00209CB8(void* a, void* b, s32* c, s32* d, s32* e);
+s32 func_0018BD00(s32 v, s32 code, s32 extra);
+
+s32 func_0018D0A0(Obj_18D0A0* o)
+{
+    s32 r = func_0018BD00(func_00209CB8(o->p4, o->p8, &o->f24, &o->f28, &o->f2C), 1, 0);
+    switch (r) {
+    case 9:
+    case 11:
+        o->f14 = 1;
+        r = 11;
+        break;
+    case 10:
+    case 12:
+        o->f14 = 2;
+        r = 12;
+        break;
+    case 0:
+        if (o->f2C != 0) {
+            if (o->f14 < 3)
+                o->f14 = 3;
+            else
+                break;
+        } else
+            o->f14 = 2;
+        break;
+    }
+    o->f20 = D_00261868[0] + 0.3f;
+    return r;
+}

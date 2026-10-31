@@ -1750,3 +1750,48 @@ Obj_1B6290* func_001B6290(Self_1B6290* self, s32 a1, s32 a2, s32 a3)
     func_001837E0(self, 0x11, 1, (void*)&pp);
     return obj;
 }
+
+s32 func_001B4920(s32 k)
+{
+    switch (k) {
+    case 1:
+    case 2:
+        return 0x4C;
+    case 3:
+    case 4:
+        return 0x38;
+    case 5:
+        return 0x78;
+    case 6:
+        return 0x44;
+    case 7:
+        return 0x3C;
+    case 8:
+        return 0x50;
+    }
+    return 0;
+}
+
+extern u8 D_0021E358[];
+extern u8 D_0021E378[];
+extern u8 D_0021E398[];
+extern u8 D_0021E3B8[];
+extern u8 D_0021E438[];
+extern u8 D_0021E3D8[];
+extern u8 D_0021E3F8[];
+extern u8 D_0021E418[];
+
+void* func_001B4980(s32 n)
+{
+    switch (n) {
+    case 1: return D_0021E358;
+    case 2: return D_0021E378;
+    case 3: return D_0021E398;
+    case 4: return D_0021E3B8;
+    case 5: return D_0021E438;
+    case 6: return D_0021E3D8;
+    case 7: return D_0021E3F8;
+    case 8: return D_0021E418;
+    }
+    return 0;
+}

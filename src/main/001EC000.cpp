@@ -1242,3 +1242,43 @@ void func_001EF900(Obj_1EF900* self, s32 state)
         self->vtbl[18](self, 0x16, &evt);
     }
 }
+
+struct Obj_1EC0D8 {
+    u8 pad0[0xC20];
+    s32 fC20;
+    u8 pad1[0x30];
+    s32 fC54;
+    u8 pad2[0x3C];
+    s32 fC94;
+};
+void func_001B6598(s32 sub, s32* out);
+
+s32 func_001EC0D8(Obj_1EC0D8* self)
+{
+    s32 r[4];
+    func_001B6598(self->fC54, r);
+    switch (r[0]) {
+    case 0x4ED:
+    case 0x4F0:
+    case 0x4F3:
+    case 0x4F6:
+        if (self->fC20 == 0) goto zero;
+    yes:
+        return 1;
+    case 0x4EE:
+    case 0x4F1:
+    case 0x4F4:
+    case 0x4F7:
+        if (self->fC94 == 1) goto zero;
+        if (self->fC94 < 2) {
+            if (self->fC94 == 0) goto set;
+            return 0;
+        }
+        if (self->fC94 == 2) goto yes;
+        return 0;
+    set:
+        self->fC94 = 1;
+    }
+zero:
+    return 0;
+}

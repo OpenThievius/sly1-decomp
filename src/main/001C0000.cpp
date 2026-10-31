@@ -1086,3 +1086,52 @@ void* func_001C13E8(void* self, s32 index, Ctx_1C13E8* ctx)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct __attribute__((aligned(16))) Quad_1C1AD8 { s32 a, b, c, d; };
+struct Link_1C1AD8 { u32 pad0; u32 pad4; Link_1C1AD8* next; };
+struct Cmd_1C1AD8 { u32 kind; Link_1C1AD8* list; };
+
+extern void func_0011B008(Quad_1C1AD8* q);
+extern void func_0011B060(Quad_1C1AD8* q, s32 mode);
+extern s32 func_0011B0F8(Link_1C1AD8* l, Quad_1C1AD8* q);
+extern void func_0011B570(Quad_1C1AD8* q, s32 v);
+extern void func_0011B5B0(Quad_1C1AD8* q, f32 v);
+extern void func_0011B5F0(Quad_1C1AD8* q, s32 v);
+extern void func_0011B8A8(Quad_1C1AD8* q, s32 v);
+
+s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val) {
+    Quad_1C1AD8 q;
+    Link_1C1AD8* l;
+    func_0011B008(&q);
+    l = cmd->list;
+    if (l) {
+        switch (cmd->kind) {
+        case 1:
+            func_0011B5B0(&q, *(f32*)val);
+            break;
+        case 0:
+            func_0011B5F0(&q, *val);
+            break;
+        case 2: case 4: case 9: case 10: case 11: case 13:
+            break;
+        default:
+            if (cmd->kind & 0x1000) {
+        case 5: case 6: case 7: case 8:
+        case 14: case 15: case 16: case 17:
+                func_0011B570(&q, *val);
+            } else if (cmd->kind & 0x2000) {
+                func_0011B8A8(&q, *val);
+            }
+            break;
+        }
+        while (l) {
+            if (func_0011B0F8(l, &q)) {
+                func_0011B060(&q, 2);
+                return 1;
+            }
+            l = l->next;
+        }
+    }
+    func_0011B060(&q, 2);
+    return 0;
+}

@@ -1109,3 +1109,42 @@ f32 func_001F31F8(s32 a0)
     n = n * (n * n * 0x3D73 + 0xC0AE5) + 0x5208DD0D & 0x7FFFFFFF;
     return (f32)n * 4.656612873077393e-10f;
 }
+
+struct Obj_1F0660 {
+    u8 pad0[8];
+    s32 id;
+    u8 pad0c[0x2C8 - 0xC];
+    u64 flags;
+    u8 pad2d0[0x2F4 - 0x2D0];
+    s32 slot;
+};
+struct Glob_1F0660 {
+    u8 pad[0x19D8];
+    s32 val;
+};
+struct __attribute__((packed)) Ptr_1F0660 { Obj_1F0660* p; };
+struct Tab_1F0660 {
+    u8 pad[0x260];
+    Ptr_1F0660 cur;
+    Obj_1F0660* list[1];
+};
+
+extern void func_00124A48(Obj_1F0660* o);
+
+void func_001F0660(Obj_1F0660* o) {
+    func_00124A48(o);
+    o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
+    if (((Glob_1F0660*)D_002623C0)->val) {
+        u8* t = (u8*)&D_0026F808;
+        ((Ptr_1F0660*)(t + 0x260))->p = o;
+    }
+    switch (o->id) {
+    case 0x1C7: o->slot = 1; break;
+    case 0x1C8: o->slot = 2; break;
+    case 0x1C9: o->slot = 3; break;
+    case 0x1C6: o->slot = 4; break;
+    case 0x1CA: o->slot = 5; break;
+    default: o->slot = ((Glob_1F0660*)D_002623C0)->val; break;
+    }
+    D_0026F808.f264[o->slot] = o;
+}

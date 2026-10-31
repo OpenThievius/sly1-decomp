@@ -1663,3 +1663,104 @@ void* func_001196C8(void* self, Node_1196C8* x, void* c)
     func_0011B060(&q, 2);
     return self;
 }
+
+struct Val_11B0F8 {
+    s32 type;
+    union {
+        s32 i;
+        f32 f;
+        f32* v;
+        void* p;
+    } u;
+};
+
+s32 func_001F59C4(void* a, void* b, s32 n);
+
+s32 func_0011B0F8(Val_11B0F8* a, Val_11B0F8* b)
+{
+    if (a->type != b->type)
+        return 0;
+    switch (a->type) {
+    case 0x15:
+        return a->u.f == b->u.f;
+    case 0x1B: {
+        s32 r = 0;
+        if (a->u.p == 0) {
+            if (b->u.p == 0)
+                goto yes;
+            goto out;
+        }
+        if (b->u.p != 0) {
+        yes:
+            r = 1;
+        }
+    out:
+        return r;
+    }
+    case 0x17:
+        return func_001F59C4(a->u.p, b->u.p, 0x40) == 0;
+    case 0x19: {
+        f32* pa = a->u.v;
+        f32* pb = b->u.v;
+        s32 r = 0;
+        if (pa[0] == pb[0] && pa[1] == pb[1])
+            r = 1;
+        return r;
+    }
+    case 0x16:
+    case 0x18:
+    case 0x1A: {
+        f32* pa = a->u.v;
+        f32* pb = b->u.v;
+        s32 r = 0;
+        if (pa[0] == pb[0] && pa[1] == pb[1] && pa[2] == pb[2])
+            r = 1;
+        return r;
+    }
+    case 0x14:
+    case 0x1C:
+    case 0x1D:
+    case 0x1E:
+    case 0x1F:
+    case 0x20:
+    case 0x21:
+        return a->u.i == b->u.i;
+    }
+    return 1;
+}
+
+struct Arg_11B418;
+struct Op_11B418 { s32 kind; Arg_11B418* arg; };
+void func_0011C5B0(Arg_11B418* a);
+void func_0011C6C0(Arg_11B418* a);
+void func_0011C7F0(Arg_11B418* a);
+void func_0011C900(Arg_11B418* a);
+void func_0011CA20(Arg_11B418* a);
+
+void func_0011B418(Op_11B418* op)
+{
+    switch (op->kind) {
+    case 0x16: func_0011C5B0(op->arg); break;
+    case 0x17: func_0011C6C0(op->arg); break;
+    case 0x18: func_0011C7F0(op->arg); break;
+    case 0x19: func_0011C900(op->arg); break;
+    case 0x1A: func_0011CA20(op->arg); break;
+    }
+}
+
+struct Cmd_11B4A8 {
+    s32 op;
+    u32 arg;
+};
+
+
+void func_0011B4A8(Cmd_11B4A8* c)
+{
+    switch (c->op) {
+    case 0x16: func_0011C580(c->arg); break;
+    case 0x17: func_0011C690(c->arg); break;
+    case 0x18: func_0011C7C0(c->arg); break;
+    case 0x19: func_0011C8D0(c->arg); break;
+    case 0x1A: func_0011C9E0(c->arg); break;
+    }
+}

@@ -1861,3 +1861,46 @@ void func_00122A18(Obj_122A18* self)
     d2[1] = src[1];
     d2[2] = src[2];
 }
+
+struct Obj_121160 {
+    void* vt;
+    s32 kind;
+};
+extern u8 D_00219668[];
+extern u8 D_00219678[];
+extern u8 D_00219688[];
+extern u8 D_00219698[];
+extern u8 D_002196A8[];
+void* func_0018D5C0(Obj_121160* n);
+
+Obj_121160* func_00121160(u32 kind)
+{
+    Obj_121160* o;
+    switch (kind) {
+    case 0:
+        o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
+        o->vt = D_00219668;
+        break;
+    case 1:
+        o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
+        o->vt = D_00219678;
+        break;
+    case 3:
+        o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x14);
+        o->vt = D_00219698;
+        break;
+    case 4:
+        o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x18);
+        o->vt = D_002196A8;
+        break;
+    case 2:
+        o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
+        o->vt = D_00219688;
+        break;
+    default:
+        o = 0;
+    }
+    if (o)
+        o->kind = kind;
+    return o;
+}

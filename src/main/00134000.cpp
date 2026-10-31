@@ -790,3 +790,19 @@ f32 func_001365F0(Obj_1365F0* self)
         return func_001AA898(self);
     }
 }
+
+struct S_136648 { u8 pad[0x260]; s32 mode; };
+extern f32 func_001AA8A8(S_136648* s);
+
+f32 func_00136648(S_136648* s) {
+    switch (s->mode) {
+    case 1:
+    case 2:
+    case 5:
+        return 0.0f;
+    case 3:
+    case 4:
+    default:
+        return func_001AA8A8(s);
+    }
+}
