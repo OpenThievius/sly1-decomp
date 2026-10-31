@@ -772,3 +772,21 @@ void func_00137A60(Stream_137A60* self, s32 remaining, Dst_137A60* dst)
         self->count -= n;
     } while (remaining > 0);
 }
+
+struct Obj_1365F0 { u8 pad0[0x260]; s32 state; };
+
+f32 func_001AA898(Obj_1365F0* self);
+
+f32 func_001365F0(Obj_1365F0* self)
+{
+    switch (self->state) {
+    case 1:
+    case 2:
+    case 5:
+        return 0.0f;
+    case 3:
+    case 4:
+    default:
+        return func_001AA898(self);
+    }
+}

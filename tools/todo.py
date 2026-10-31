@@ -32,7 +32,7 @@ What stops a function from being matched, the blocker column:
 - nonc: max.s, min.s, sqrt.s: no plain C form in this compiler
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
-- jtbl: a jump table; its .rodata must be placed from C first
+- jtbl: a jump table; write the switch in C (the table stays retail's, tools/rodata.py)
 - rodata: refers to named .rodata. C reads the constant through an extern
   (extern u8 D_00219718[];), so the object keeps no .rodata of its own
 - none: nothing blocks it

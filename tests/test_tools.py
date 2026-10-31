@@ -235,6 +235,21 @@ class AbsoluteAliasTest(unittest.TestCase):
         self.assertEqual(c_layout.absolute_aliases(text), {"D_00000010": "D_10", "D_00000FA0": "D_FA0"})
 
 
+class CaseLabelTest(unittest.TestCase):
+    def test_only_labels_inside_c_functions_are_provided(self):
+        with tempfile.TemporaryDirectory() as d:
+            data = Path(d) / "asm" / "us" / "data"
+            data.mkdir(parents=True)
+            (data / "rodata.s").write_text(".word .L00136628\n.word .L00200000\n")
+            old = c_layout.ROOT
+            c_layout.ROOT = Path(d)
+            try:
+                got = c_layout.case_labels([(0x1365F0, 0x58)])
+            finally:
+                c_layout.ROOT = old
+        self.assertEqual(got, {".L00136628": 0x136628})
+
+
 class RunAlignmentTest(unittest.TestCase):
     def test_a_run_needs_only_the_alignment_its_directives_ask_for(self):
         self.assertEqual(c_layout.run_alignment(["glabel a", "nop"]), 4)

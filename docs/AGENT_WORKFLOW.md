@@ -36,9 +36,9 @@ Sort by size with `tools/todo.py`, and match by tier:
 - **Opus**: over 1,000 bytes, complex ones, near misses in `nonmatching/`, and leading (the full
   build, landing, the reports).
 
-Start with `--untried --exclude vu,jtbl,system,handwritten`. `vu`, `system` and `handwritten` are
-permanent for C (no inline asm: AGENTS.md), and `jtbl` needs a jump table placed from C
-(docs/ROADMAP.md). `tools/todo.py --untried --summary` counts each blocker. A `rodata` function is
+Start with `--untried --exclude vu,system,handwritten`. `vu`, `system` and `handwritten` are
+permanent for C (no inline asm: AGENTS.md). A `jtbl` function is a C `switch`; tools/check.py
+compares its table with retail's. `tools/todo.py --untried --summary` counts each blocker. A `rodata` function is
 fine, and its constant can be written two ways: read through an extern at the address retail loads
 (`extern f32 D_00219718[];`, the object then keeps no `.rodata` and the relocation reaches retail's
 address by name), or as a plain literal in C (a float, or a string), which the build links with
