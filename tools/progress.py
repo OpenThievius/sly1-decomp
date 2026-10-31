@@ -13,8 +13,14 @@ Everything comes from committed tables, so CI can regenerate it with no disc
 and no compiler: the functions of each version (config/<version>/functions.tsv),
 what src/ defines (a US function is finished when src/ defines it and the build
 links it), and PAL's check of that C (config/eu/c_status.tsv, from
-tools/version_check.py), and what each part of the executable is
-(config/<version>/layout.tsv).
+tools/version_check.py), what each part of the executable is
+(config/<version>/layout.tsv), and which functions are original assembly
+(config/us/original_asm.tsv, tools/classify_asm.py).
+
+A function that is original assembly counts as finished too: it was not made from C, so
+there is nothing to match, and the build keeps its bytes from the disassembly. The exact C
+matches are counted apart (exact_c() and the README table), as OpenRAC does. A PAL function
+is original assembly when its US counterpart (config/eu/map.tsv) is.
 
 Units follow that layout. Code units are the source files: one per 16 KiB
 window of game code (game/<window>, src/main/) and of the libraries
@@ -31,6 +37,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import classify_asm  # noqa: E402
 import todo  # noqa: E402
 import version_check  # noqa: E402
 import versions  # noqa: E402
@@ -48,14 +55,31 @@ def functions(key):
     return rows
 
 
-def finished(key):
-    """Names of the version's functions that count as matched."""
+def exact_c(key):
+    """Names of the version's functions whose C builds the retail bytes."""
     done = set(version_check.defined_in_src())
     if key == "us":
         return done
     status = version_check.read_status()
     done |= set(version_check.only_eu())    # functions only PAL has, defined in src/versions/eu/
     return {eu for us, (eu, s, _) in status.items() if s == "match" and us in done}
+
+
+def original_asm(key):
+    """Names of the version's functions that are original assembly (config/us/original_asm.tsv)."""
+    listed = classify_asm.read_table()
+    if key == "us":
+        return set(listed)
+    return {eu for us, eu in version_check.eu_names().items() if us in listed}
+
+
+def finished(key):
+    """Names of the version's functions that count as matched: exact C, or original assembly."""
+    both = set(version_check.defined_in_src()) & set(classify_asm.read_table())
+    if both:
+        raise SystemExit("error: %s is in config/us/original_asm.tsv and defined in src/; "
+                         "a function is one or the other" % ", ".join(sorted(both)))
+    return exact_c(key) | original_asm(key)
 
 
 def measures(funcs, done, linked, data=0):
@@ -165,13 +189,17 @@ def readme_table(reports):
     for key, r in reports.items():
         v = versions.get(key)
         m = r["measures"]
-        lines.append("| v1.00 | %s | `%s` | %s | %s | %s of %s functions, %.2f%% of code |" % (
+        asm = len(original_asm(key))
+        lines.append("| v1.00 | %s | `%s` | %s | %s | %s of %s functions, %.2f%% of code (%s exact C, %s original assembly) |" % (
             v["region"], v["serial"],
             badge(v["serial"], "Code", "matched_code_percent"), badge(v["serial"], "Functions", "matched_functions"),
-            format(m["matched_functions"], ","), format(m["total_functions"], ","), m["matched_code_percent"]))
+            format(m["matched_functions"], ","), format(m["total_functions"], ","), m["matched_code_percent"],
+            format(len(exact_c(key)), ","), format(asm, ",")))
     lines.append("")
     lines.append("A US function counts when the build links its C and still prints `MATCH`; a PAL function "
-                 "when that same C also builds PAL's bytes at its counterpart (`tools/version_check.py`).")
+                 "when that same C also builds PAL's bytes at its counterpart (`tools/version_check.py`). "
+                 "Original assembly (hand-written code and the linker's leftovers, `docs/ASM_CLASSIFICATION.md`) "
+                 "counts as finished too and is shown apart from the exact C.")
     lines.append(END)
     return "\n".join(lines)
 

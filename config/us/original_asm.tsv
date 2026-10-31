@@ -1,0 +1,671 @@
+name	address	size	kind	why
+func_00100008	00100008	172	handwritten	marked handwritten by the disassembler
+func_001000C0	001000C0	184	handwritten	marked handwritten by the disassembler
+func_00112698	00112698	716	handwritten	VU0 macro instruction
+func_00112968	00112968	716	handwritten	VU0 macro instruction
+func_00112C38	00112C38	1544	handwritten	VU0 macro instruction
+func_00113240	00113240	1264	handwritten	VU0 macro instruction
+func_00115F70	00115F70	132	handwritten	VU0 macro instruction
+func_00115FF8	00115FF8	132	handwritten	VU0 macro instruction
+func_00116080	00116080	136	handwritten	VU0 macro instruction
+func_00116108	00116108	240	handwritten	VU0 macro instruction
+func_001161F8	001161F8	216	handwritten	VU0 macro instruction
+func_001162D0	001162D0	300	handwritten	VU0 macro instruction
+func_00116400	00116400	140	handwritten	VU0 macro instruction
+func_00116490	00116490	144	handwritten	VU0 macro instruction
+func_00116840	00116840	308	handwritten	VU0 macro instruction
+func_00116BC8	00116BC8	184	handwritten	VU0 macro instruction
+func_00117FE0	00117FE0	224	handwritten	VU0 macro instruction
+func_00118698	00118698	132	handwritten	VU0 macro instruction
+func_00118D30	00118D30	20	handwritten	VU0 macro instruction
+func_0011C610	0011C610	4	remnant	stripped-function leftover
+func_0011C850	0011C850	4	remnant	stripped-function leftover
+func_0011C960	0011C960	4	remnant	stripped-function leftover
+func_0011D060	0011D060	20	remnant	stripped-function leftover
+func_0011D138	0011D138	4	remnant	stripped-function leftover
+func_0011D3E8	0011D3E8	52	remnant	stripped-function leftover
+func_0011D510	0011D510	12	remnant	stripped-function leftover
+func_0011D5D8	0011D5D8	36	remnant	stripped-function leftover
+func_0011D630	0011D630	12	remnant	stripped-function leftover
+func_0011D6A0	0011D6A0	4	remnant	stripped-function leftover
+func_0011D790	0011D790	4	remnant	stripped-function leftover
+func_0011D808	0011D808	4	remnant	stripped-function leftover
+func_0011D848	0011D848	20	remnant	stripped-function leftover
+func_0011D8A0	0011D8A0	12	remnant	stripped-function leftover
+func_0011D920	0011D920	4	remnant	stripped-function leftover
+func_0011D958	0011D958	12	remnant	stripped-function leftover
+func_0011E040	0011E040	4	remnant	stripped-function leftover
+func_0011E0A8	0011E0A8	4	remnant	stripped-function leftover
+func_0011E3D8	0011E3D8	76	remnant	stripped-function leftover
+func_0011E488	0011E488	12	remnant	stripped-function leftover
+func_0011E520	0011E520	20	remnant	stripped-function leftover
+func_0011F6B0	0011F6B0	228	handwritten	VU0 macro instruction
+func_0011FC90	0011FC90	292	handwritten	VU0 macro instruction
+func_0011FE40	0011FE40	152	handwritten	VU0 macro instruction
+func_00120470	00120470	656	handwritten	VU0 macro instruction
+func_00120700	00120700	936	handwritten	VU0 macro instruction
+func_00121760	00121760	348	handwritten	VU0 macro instruction
+func_001218C0	001218C0	904	handwritten	VU0 macro instruction
+func_00121C48	00121C48	404	handwritten	VU0 macro instruction
+func_00121DE0	00121DE0	1700	handwritten	VU0 macro instruction
+func_00122550	00122550	128	handwritten	VU0 macro instruction
+func_001225D0	001225D0	264	handwritten	VU0 macro instruction
+func_00122A80	00122A80	172	handwritten	VU0 macro instruction
+func_00122B30	00122B30	280	handwritten	VU0 macro instruction
+func_00122CB0	00122CB0	220	handwritten	VU0 macro instruction
+func_00122DE0	00122DE0	324	handwritten	VU0 macro instruction
+func_00123DC0	00123DC0	64	handwritten	VU0 macro instruction
+func_00123E00	00123E00	68	handwritten	VU0 macro instruction
+func_00123E48	00123E48	64	handwritten	VU0 macro instruction
+func_00123E88	00123E88	68	handwritten	VU0 macro instruction
+func_001245A8	001245A8	700	handwritten	VU0 macro instruction
+func_00124868	00124868	316	handwritten	VU0 macro instruction
+func_00125138	00125138	764	handwritten	VU0 macro instruction
+func_00125440	00125440	780	handwritten	VU0 macro instruction
+func_00125750	00125750	644	handwritten	VU0 macro instruction
+func_001259D8	001259D8	408	handwritten	VU0 macro instruction
+func_00125BF0	00125BF0	160	handwritten	128-bit MMI instruction
+func_00125C90	00125C90	1324	handwritten	VU0 macro instruction
+func_00126270	00126270	1604	handwritten	VU0 macro instruction
+func_001268B8	001268B8	396	handwritten	VU0 macro instruction
+func_00126AC8	00126AC8	244	handwritten	VU0 macro instruction
+func_00126DE8	00126DE8	400	handwritten	VU0 macro instruction
+func_00127628	00127628	76	handwritten	VU0 macro instruction
+func_00127678	00127678	68	handwritten	VU0 macro instruction
+func_001278A8	001278A8	632	handwritten	VU0 macro instruction
+func_00127B20	00127B20	828	handwritten	VU0 macro instruction
+func_00127E60	00127E60	440	handwritten	VU0 macro instruction
+func_00128018	00128018	164	handwritten	VU0 macro instruction
+func_001280C0	001280C0	144	handwritten	VU0 macro instruction
+func_00128150	00128150	224	handwritten	VU0 macro instruction
+func_00128330	00128330	616	handwritten	VU0 macro instruction
+func_00128598	00128598	852	handwritten	VU0 macro instruction
+func_00128E88	00128E88	328	handwritten	VU0 macro instruction
+func_00128FD0	00128FD0	228	handwritten	VU0 macro instruction
+func_001290B8	001290B8	40	handwritten	VU0 macro instruction
+func_001290E0	001290E0	40	handwritten	VU0 macro instruction
+func_0012B6A0	0012B6A0	188	handwritten	VU0 macro instruction
+func_0012C9E8	0012C9E8	508	handwritten	VU0 macro instruction
+func_0012CD78	0012CD78	1080	handwritten	VU0 macro instruction
+func_0012D5C8	0012D5C8	4	remnant	stripped-function leftover
+func_0012EBD8	0012EBD8	1220	handwritten	VU0 macro instruction
+func_0012F210	0012F210	1180	handwritten	VU0 macro instruction
+func_0012FB68	0012FB68	328	handwritten	VU0 macro instruction
+func_0012FD98	0012FD98	4	remnant	stripped-function leftover
+func_00130540	00130540	516	handwritten	VU0 macro instruction
+func_00130748	00130748	1024	handwritten	VU0 macro instruction
+func_00134AA0	00134AA0	164	handwritten	VU0 macro instruction
+func_00134B48	00134B48	1756	handwritten	VU0 macro instruction
+func_001358D0	001358D0	1360	handwritten	VU0 macro instruction
+func_00135E70	00135E70	4	remnant	stripped-function leftover
+func_00137CB8	00137CB8	4	remnant	stripped-function leftover
+func_00137DF0	00137DF0	4	remnant	stripped-function leftover
+func_00137FB0	00137FB0	708	handwritten	VU0 macro instruction
+func_00138510	00138510	4	remnant	stripped-function leftover
+func_001399F0	001399F0	4	remnant	stripped-function leftover
+func_0013A128	0013A128	632	handwritten	128-bit MMI instruction
+func_0013A498	0013A498	384	handwritten	VU0 macro instruction
+func_0013A618	0013A618	804	handwritten	VU0 macro instruction
+func_0013A940	0013A940	964	handwritten	VU0 macro instruction
+func_0013AD80	0013AD80	1708	handwritten	VU0 macro instruction
+func_0013B778	0013B778	172	handwritten	VU0 macro instruction
+func_0013B828	0013B828	432	handwritten	VU0 macro instruction
+func_0013BA70	0013BA70	300	handwritten	VU0 macro instruction
+func_0013BBA0	0013BBA0	220	handwritten	VU0 macro instruction
+func_0013BC80	0013BC80	384	handwritten	VU0 macro instruction
+func_0013BE18	0013BE18	332	handwritten	VU0 macro instruction
+func_0013BF68	0013BF68	2532	handwritten	VU0 macro instruction
+func_0013CCF0	0013CCF0	4	remnant	stripped-function leftover
+func_0013D0B0	0013D0B0	456	handwritten	VU0 macro instruction
+func_0013D278	0013D278	1448	handwritten	VU0 macro instruction
+func_0013DFD8	0013DFD8	1108	handwritten	VU0 macro instruction
+func_0013E430	0013E430	544	handwritten	VU0 macro instruction
+func_0013E658	0013E658	108	handwritten	VU0 macro instruction
+func_0013F290	0013F290	1072	handwritten	VU0 macro instruction
+func_0013F8A0	0013F8A0	156	handwritten	VU0 macro instruction
+func_0013FAE8	0013FAE8	568	handwritten	VU0 macro instruction
+func_00140258	00140258	760	handwritten	VU0 macro instruction
+func_00140D88	00140D88	4	remnant	stripped-function leftover
+func_00140D90	00140D90	128	handwritten	128-bit MMI instruction
+func_00141690	00141690	352	handwritten	VU0 macro instruction
+func_00141D88	00141D88	444	handwritten	VU0 macro instruction
+func_00141F48	00141F48	548	handwritten	VU0 macro instruction
+func_00142170	00142170	260	handwritten	VU0 macro instruction
+func_00142278	00142278	1816	handwritten	VU0 macro instruction
+func_00142B78	00142B78	844	handwritten	VU0 macro instruction
+func_00142EC8	00142EC8	4	remnant	stripped-function leftover
+func_001430C8	001430C8	44	handwritten	marked handwritten by the disassembler
+func_001430F8	001430F8	68	handwritten	marked handwritten by the disassembler
+func_00143180	00143180	136	handwritten	VU0 macro instruction
+func_00143208	00143208	472	handwritten	VU0 macro instruction
+func_001433E0	001433E0	56	handwritten	VU0 macro instruction
+func_00143418	00143418	172	handwritten	VU0 macro instruction
+func_00143BE0	00143BE0	604	handwritten	VU0 macro instruction
+func_00144008	00144008	284	handwritten	VU0 macro instruction
+func_00144128	00144128	152	handwritten	VU0 macro instruction
+func_001441C0	001441C0	172	handwritten	VU0 macro instruction
+func_001443C8	001443C8	372	handwritten	VU0 macro instruction
+func_00144540	00144540	772	handwritten	VU0 macro instruction
+func_00144978	00144978	292	handwritten	VU0 macro instruction
+func_00144AA0	00144AA0	204	handwritten	VU0 macro instruction
+func_00144BE8	00144BE8	1036	handwritten	VU0 macro instruction
+func_00145080	00145080	4	remnant	stripped-function leftover
+func_001453B0	001453B0	136	handwritten	VU0 macro instruction
+func_00145438	00145438	168	handwritten	VU0 macro instruction
+func_001454E0	001454E0	224	handwritten	VU0 macro instruction
+func_00145610	00145610	264	handwritten	VU0 macro instruction
+func_00145718	00145718	248	handwritten	VU0 macro instruction
+func_00145950	00145950	536	handwritten	VU0 macro instruction
+func_00145B68	00145B68	624	handwritten	VU0 macro instruction
+func_00145DE8	00145DE8	128	handwritten	VU0 macro instruction
+func_00145E68	00145E68	332	handwritten	VU0 macro instruction
+func_00146038	00146038	128	handwritten	VU0 macro instruction
+func_001461A8	001461A8	148	handwritten	VU0 macro instruction
+func_00146518	00146518	2040	handwritten	VU0 macro instruction
+func_00146DB0	00146DB0	1020	handwritten	VU0 macro instruction
+func_001471B0	001471B0	556	handwritten	VU0 macro instruction
+func_00147428	00147428	1220	handwritten	VU0 macro instruction
+func_001478F0	001478F0	448	handwritten	128-bit MMI instruction
+func_00147AB0	00147AB0	908	handwritten	VU0 macro instruction
+func_00148938	00148938	388	handwritten	VU0 macro instruction
+func_00149190	00149190	520	handwritten	VU0 macro instruction
+func_00149458	00149458	176	handwritten	VU0 macro instruction
+func_00149760	00149760	4184	handwritten	VU0 macro instruction
+func_0014A8F8	0014A8F8	404	handwritten	VU0 macro instruction
+func_0014AAA0	0014AAA0	304	handwritten	VU0 macro instruction
+func_0014B6A8	0014B6A8	1120	handwritten	VU0 macro instruction
+func_0014BB08	0014BB08	480	handwritten	VU0 macro instruction
+func_0014C858	0014C858	848	handwritten	VU0 macro instruction
+func_0014D0A8	0014D0A8	140	handwritten	VU0 macro instruction
+func_0014D280	0014D280	292	handwritten	VU0 macro instruction
+func_0014D3A8	0014D3A8	724	handwritten	VU0 macro instruction
+func_0014D680	0014D680	692	handwritten	VU0 macro instruction
+func_0014DA98	0014DA98	168	handwritten	VU0 macro instruction
+func_0014DCF8	0014DCF8	4	remnant	stripped-function leftover
+func_0014E5B8	0014E5B8	240	handwritten	VU0 macro instruction
+func_0014E710	0014E710	280	handwritten	VU0 macro instruction
+func_0014E828	0014E828	228	handwritten	VU0 macro instruction
+func_0014EB10	0014EB10	352	handwritten	VU0 macro instruction
+func_0014F168	0014F168	260	handwritten	VU0 macro instruction
+func_0014F270	0014F270	1232	handwritten	VU0 macro instruction
+func_00150008	00150008	656	handwritten	VU0 macro instruction
+func_001525F8	001525F8	4	remnant	stripped-function leftover
+func_00152B30	00152B30	4	remnant	stripped-function leftover
+func_001536C8	001536C8	184	handwritten	VU0 macro instruction
+func_00153780	00153780	716	handwritten	VU0 macro instruction
+func_00154088	00154088	744	handwritten	VU0 macro instruction
+func_00154370	00154370	1292	handwritten	VU0 macro instruction
+func_00154C80	00154C80	604	handwritten	VU0 macro instruction
+func_00155868	00155868	580	handwritten	VU0 macro instruction
+func_00155AB0	00155AB0	1140	handwritten	VU0 macro instruction
+func_00156288	00156288	1084	handwritten	VU0 macro instruction
+func_00156718	00156718	2028	handwritten	VU0 macro instruction
+func_00156F08	00156F08	192	handwritten	VU0 macro instruction
+func_00157098	00157098	428	handwritten	VU0 macro instruction
+func_00157248	00157248	216	handwritten	VU0 macro instruction
+func_001575D8	001575D8	980	handwritten	VU0 macro instruction
+func_001579B0	001579B0	472	handwritten	VU0 macro instruction
+func_00157B88	00157B88	632	handwritten	VU0 macro instruction
+func_00157FF0	00157FF0	4	remnant	stripped-function leftover
+func_00158288	00158288	352	handwritten	VU0 macro instruction
+func_001583E8	001583E8	148	handwritten	VU0 macro instruction
+func_00158630	00158630	256	handwritten	VU0 macro instruction
+func_001590A0	001590A0	984	handwritten	VU0 macro instruction
+func_00159668	00159668	120	handwritten	VU0 macro instruction
+func_0015AA50	0015AA50	144	handwritten	VU0 macro instruction
+func_0015AF50	0015AF50	472	handwritten	VU0 macro instruction
+func_0015B7B8	0015B7B8	1216	handwritten	VU0 macro instruction
+func_0015BC78	0015BC78	208	handwritten	VU0 macro instruction
+func_0015BD48	0015BD48	420	handwritten	VU0 macro instruction
+func_0015BEF0	0015BEF0	204	handwritten	VU0 macro instruction
+func_0015BFC0	0015BFC0	152	handwritten	VU0 macro instruction
+func_0015C630	0015C630	4	remnant	stripped-function leftover
+func_0015E678	0015E678	404	handwritten	marked handwritten by the disassembler
+func_0015FCD8	0015FCD8	156	handwritten	VU0 macro instruction
+func_0015FD78	0015FD78	476	handwritten	VU0 macro instruction
+func_00160090	00160090	12	remnant	stripped-function leftover
+func_00160178	00160178	4	remnant	stripped-function leftover
+func_001601D0	001601D0	4	remnant	stripped-function leftover
+func_00160C90	00160C90	12	remnant	stripped-function leftover
+func_00160EA0	00160EA0	388	handwritten	VU0 macro instruction
+func_00161760	00161760	4	remnant	stripped-function leftover
+func_00161858	00161858	4	remnant	stripped-function leftover
+func_00161950	00161950	4	remnant	stripped-function leftover
+func_001626A0	001626A0	4	remnant	stripped-function leftover
+func_00167F10	00167F10	544	handwritten	VU0 macro instruction
+func_001682C0	001682C0	244	handwritten	marked handwritten by the disassembler
+func_00168698	00168698	80	handwritten	marked handwritten by the disassembler
+func_00169E20	00169E20	416	handwritten	VU0 macro instruction
+func_0016A240	0016A240	224	handwritten	VU0 macro instruction
+func_0016A320	0016A320	136	handwritten	VU0 macro instruction
+func_0016A910	0016A910	260	handwritten	VU0 macro instruction
+func_0016C528	0016C528	2260	handwritten	VU0 macro instruction
+func_0016D128	0016D128	184	handwritten	VU0 macro instruction
+func_0016D1E0	0016D1E0	528	handwritten	VU0 macro instruction
+func_0016D490	0016D490	756	handwritten	VU0 macro instruction
+func_0016D828	0016D828	256	handwritten	VU0 macro instruction
+func_0016DAC0	0016DAC0	556	handwritten	VU0 macro instruction
+func_0016DE20	0016DE20	272	handwritten	VU0 macro instruction
+func_0016EC80	0016EC80	4	remnant	stripped-function leftover
+func_0016F1F0	0016F1F0	4	remnant	stripped-function leftover
+func_0016F608	0016F608	424	handwritten	128-bit MMI instruction
+func_0016F810	0016F810	1376	handwritten	VU0 macro instruction
+func_0016FD70	0016FD70	1088	handwritten	VU0 macro instruction
+func_001701B0	001701B0	604	handwritten	VU0 macro instruction
+func_00170660	00170660	300	handwritten	VU0 macro instruction
+func_00170820	00170820	316	handwritten	VU0 macro instruction
+func_00170960	00170960	2076	handwritten	VU0 macro instruction
+func_00171180	00171180	184	handwritten	VU0 macro instruction
+func_00171238	00171238	1968	handwritten	VU0 macro instruction
+func_001719E8	001719E8	660	handwritten	VU0 macro instruction
+func_00171C80	00171C80	340	handwritten	VU0 macro instruction
+func_00172078	00172078	308	handwritten	VU0 macro instruction
+func_001721B0	001721B0	892	handwritten	VU0 macro instruction
+func_00172EE0	00172EE0	1240	handwritten	VU0 macro instruction
+func_001733B8	001733B8	844	handwritten	VU0 macro instruction
+func_00173750	00173750	308	handwritten	VU0 macro instruction
+func_00173888	00173888	3964	handwritten	VU0 macro instruction
+func_00174808	00174808	1556	handwritten	VU0 macro instruction
+func_00174E20	00174E20	300	handwritten	VU0 macro instruction
+func_00175170	00175170	9860	handwritten	VU0 macro instruction
+func_00177990	00177990	1164	handwritten	VU0 macro instruction
+func_00178068	00178068	376	handwritten	VU0 macro instruction
+func_001782A8	001782A8	20	handwritten	VU0 macro instruction
+func_001782C0	001782C0	728	handwritten	VU0 macro instruction
+func_00178678	00178678	628	handwritten	VU0 macro instruction
+func_001788F0	001788F0	1064	handwritten	VU0 macro instruction
+func_00178D18	00178D18	128	handwritten	VU0 macro instruction
+func_001790B8	001790B8	772	handwritten	VU0 macro instruction
+func_001794E0	001794E0	176	handwritten	128-bit MMI instruction
+func_001796D0	001796D0	920	handwritten	VU0 macro instruction
+func_00179A68	00179A68	3176	handwritten	VU0 macro instruction
+func_0017A700	0017A700	132	handwritten	128-bit MMI instruction
+func_0017ABE8	0017ABE8	360	handwritten	128-bit MMI instruction
+func_0017AF38	0017AF38	972	handwritten	VU0 macro instruction
+func_0017BB78	0017BB78	164	handwritten	VU0 macro instruction
+func_0017BCD0	0017BCD0	1880	handwritten	VU0 macro instruction
+func_0017C428	0017C428	568	handwritten	VU0 macro instruction
+func_0017C718	0017C718	1680	handwritten	VU0 macro instruction
+func_0017D248	0017D248	912	handwritten	VU0 macro instruction
+func_0017D5D8	0017D5D8	1796	handwritten	VU0 macro instruction
+func_0017DCE0	0017DCE0	424	handwritten	VU0 macro instruction
+func_0017E088	0017E088	828	handwritten	VU0 macro instruction
+func_0017E3C8	0017E3C8	772	handwritten	VU0 macro instruction
+func_0017E710	0017E710	1496	handwritten	VU0 macro instruction
+func_0017ECE8	0017ECE8	812	handwritten	VU0 macro instruction
+func_0017F018	0017F018	2728	handwritten	VU0 macro instruction
+func_00181078	00181078	972	handwritten	VU0 macro instruction
+func_00181658	00181658	292	handwritten	VU0 macro instruction
+func_00181780	00181780	152	handwritten	128-bit MMI instruction
+func_00181ED0	00181ED0	736	handwritten	VU0 macro instruction
+func_001821B0	001821B0	704	handwritten	VU0 macro instruction
+func_00182548	00182548	512	handwritten	VU0 macro instruction
+func_00182748	00182748	512	handwritten	VU0 macro instruction
+func_00182948	00182948	716	handwritten	VU0 macro instruction
+func_00183050	00183050	4	remnant	stripped-function leftover
+func_001841D0	001841D0	1428	handwritten	VU0 macro instruction
+func_001848B8	001848B8	172	handwritten	VU0 macro instruction
+func_00184B58	00184B58	376	handwritten	VU0 macro instruction
+func_00185150	00185150	516	handwritten	VU0 macro instruction
+func_00185498	00185498	156	handwritten	VU0 macro instruction
+func_00185538	00185538	540	handwritten	VU0 macro instruction
+func_00185D20	00185D20	552	handwritten	VU0 macro instruction
+func_00185F48	00185F48	348	handwritten	VU0 macro instruction
+func_001860A8	001860A8	320	handwritten	VU0 macro instruction
+func_00186230	00186230	240	handwritten	VU0 macro instruction
+func_00186320	00186320	300	handwritten	VU0 macro instruction
+func_00186568	00186568	608	handwritten	VU0 macro instruction
+func_00186BA8	00186BA8	1716	handwritten	VU0 macro instruction
+func_00187260	00187260	1888	handwritten	VU0 macro instruction
+func_00187A88	00187A88	216	handwritten	VU0 macro instruction
+func_00187B60	00187B60	200	handwritten	VU0 macro instruction
+func_00187D08	00187D08	384	handwritten	VU0 macro instruction
+func_00187F40	00187F40	812	handwritten	VU0 macro instruction
+func_00188520	00188520	188	handwritten	VU0 macro instruction
+func_00188628	00188628	60	handwritten	VU0 macro instruction
+func_00188668	00188668	144	handwritten	VU0 macro instruction
+func_001886F8	001886F8	4	remnant	stripped-function leftover
+func_00188700	00188700	64	handwritten	VU0 macro instruction
+func_00188740	00188740	44	handwritten	VU0 macro instruction
+func_00188848	00188848	4	remnant	stripped-function leftover
+func_00188978	00188978	168	handwritten	VU0 macro instruction
+func_00188B48	00188B48	196	handwritten	VU0 macro instruction
+func_00188CC8	00188CC8	20	remnant	stripped-function leftover
+func_00188D28	00188D28	676	handwritten	128-bit MMI instruction
+func_00188FD0	00188FD0	4	remnant	stripped-function leftover
+func_001890A0	001890A0	176	handwritten	VU0 macro instruction
+func_00189150	00189150	108	handwritten	VU0 macro instruction
+func_001892A0	001892A0	176	handwritten	VU0 macro instruction
+func_00189378	00189378	184	handwritten	VU0 macro instruction
+func_00189430	00189430	4	remnant	stripped-function leftover
+func_00189B18	00189B18	272	handwritten	VU0 macro instruction
+func_00189C28	00189C28	272	handwritten	VU0 macro instruction
+func_00189D38	00189D38	544	handwritten	VU0 macro instruction
+func_0018A008	0018A008	52	handwritten	128-bit MMI instruction
+func_0018A160	0018A160	552	handwritten	VU0 macro instruction
+func_0018A628	0018A628	148	handwritten	VU0 macro instruction
+func_0018AE38	0018AE38	1196	handwritten	VU0 macro instruction
+func_0018C9F8	0018C9F8	20	remnant	stripped-function leftover
+func_0018D2E0	0018D2E0	4	remnant	stripped-function leftover
+func_0018D408	0018D408	4	remnant	stripped-function leftover
+func_0018D4F0	0018D4F0	4	remnant	stripped-function leftover
+func_0018DA40	0018DA40	220	handwritten	128-bit MMI instruction
+func_0018DDD8	0018DDD8	152	handwritten	VU0 macro instruction
+func_0018DE70	0018DE70	116	handwritten	VU0 macro instruction
+func_0018DEE8	0018DEE8	344	handwritten	VU0 macro instruction
+func_0018E040	0018E040	976	handwritten	VU0 macro instruction
+func_0018F938	0018F938	4	remnant	stripped-function leftover
+func_0018F9D8	0018F9D8	1312	handwritten	VU0 macro instruction
+func_00190258	00190258	404	handwritten	VU0 macro instruction
+func_00190810	00190810	176	handwritten	VU0 macro instruction
+func_001908C0	001908C0	236	handwritten	VU0 macro instruction
+func_001909F0	001909F0	1084	handwritten	VU0 macro instruction
+func_00190EB8	00190EB8	624	handwritten	VU0 macro instruction
+func_00191290	00191290	732	handwritten	VU0 macro instruction
+func_00191570	00191570	348	handwritten	VU0 macro instruction
+func_001919F8	001919F8	108	handwritten	VU0 macro instruction
+func_00191AC8	00191AC8	428	handwritten	VU0 macro instruction
+func_00191C78	00191C78	500	handwritten	VU0 macro instruction
+func_001925C0	001925C0	48	handwritten	VU0 macro instruction
+func_00192988	00192988	4	remnant	stripped-function leftover
+func_00192DD0	00192DD0	736	handwritten	VU0 macro instruction
+func_00196B78	00196B78	716	handwritten	VU0 macro instruction
+func_00196EB0	00196EB0	776	handwritten	VU0 macro instruction
+func_001971B8	001971B8	540	handwritten	VU0 macro instruction
+func_001974F8	001974F8	652	handwritten	VU0 macro instruction
+func_00197A88	00197A88	1156	handwritten	VU0 macro instruction
+func_001980B0	001980B0	492	handwritten	VU0 macro instruction
+func_00198318	00198318	412	handwritten	VU0 macro instruction
+func_00198570	00198570	376	handwritten	VU0 macro instruction
+func_00198860	00198860	188	handwritten	VU0 macro instruction
+func_00198BD8	00198BD8	460	handwritten	VU0 macro instruction
+func_00199698	00199698	440	handwritten	VU0 macro instruction
+func_00199D08	00199D08	556	handwritten	VU0 macro instruction
+func_0019B298	0019B298	220	handwritten	VU0 macro instruction
+func_0019B378	0019B378	1944	handwritten	VU0 macro instruction
+func_0019BB10	0019BB10	124	handwritten	VU0 macro instruction
+func_0019BB90	0019BB90	172	handwritten	VU0 macro instruction
+func_0019BC40	0019BC40	456	handwritten	VU0 macro instruction
+func_0019BE80	0019BE80	488	handwritten	VU0 macro instruction
+func_0019C1C0	0019C1C0	528	handwritten	VU0 macro instruction
+func_0019C9C8	0019C9C8	580	handwritten	VU0 macro instruction
+func_0019CE50	0019CE50	112	handwritten	VU0 macro instruction
+func_0019CEC0	0019CEC0	168	handwritten	VU0 macro instruction
+func_0019CF68	0019CF68	372	handwritten	VU0 macro instruction
+func_0019D0E0	0019D0E0	452	handwritten	VU0 macro instruction
+func_0019E220	0019E220	504	handwritten	VU0 macro instruction
+func_0019EB28	0019EB28	188	handwritten	VU0 macro instruction
+func_0019ED58	0019ED58	1588	handwritten	VU0 macro instruction
+func_0019F390	0019F390	460	handwritten	VU0 macro instruction
+func_0019F620	0019F620	564	handwritten	VU0 macro instruction
+func_0019FA98	0019FA98	108	handwritten	VU0 macro instruction
+func_0019FB08	0019FB08	480	handwritten	VU0 macro instruction
+func_0019FE50	0019FE50	204	handwritten	VU0 macro instruction
+func_0019FF20	0019FF20	252	handwritten	VU0 macro instruction
+func_001A00A0	001A00A0	276	handwritten	VU0 macro instruction
+func_001A0338	001A0338	356	handwritten	VU0 macro instruction
+func_001A05D8	001A05D8	380	handwritten	VU0 macro instruction
+func_001A0758	001A0758	500	handwritten	VU0 macro instruction
+func_001A0C98	001A0C98	196	handwritten	128-bit MMI instruction
+func_001A0DF0	001A0DF0	404	handwritten	VU0 macro instruction
+func_001A1028	001A1028	404	handwritten	VU0 macro instruction
+func_001A11C0	001A11C0	468	handwritten	VU0 macro instruction
+func_001A1398	001A1398	120	handwritten	VU0 macro instruction
+func_001A15D8	001A15D8	2072	handwritten	VU0 macro instruction
+func_001A1F40	001A1F40	304	handwritten	VU0 macro instruction
+func_001A2070	001A2070	600	handwritten	VU0 macro instruction
+func_001A22E0	001A22E0	160	handwritten	VU0 macro instruction
+func_001A2380	001A2380	624	handwritten	VU0 macro instruction
+func_001A2770	001A2770	188	handwritten	128-bit MMI instruction
+func_001A2830	001A2830	568	handwritten	VU0 macro instruction
+func_001A2B48	001A2B48	484	handwritten	VU0 macro instruction
+func_001A2D88	001A2D88	224	handwritten	VU0 macro instruction
+func_001A2E68	001A2E68	412	handwritten	VU0 macro instruction
+func_001A3008	001A3008	284	handwritten	VU0 macro instruction
+func_001A31A0	001A31A0	80	handwritten	VU0 macro instruction
+func_001A3250	001A3250	836	handwritten	VU0 macro instruction
+func_001A35F0	001A35F0	320	handwritten	VU0 macro instruction
+func_001A3730	001A3730	444	handwritten	VU0 macro instruction
+func_001A3AC8	001A3AC8	84	handwritten	VU0 macro instruction
+func_001A3D40	001A3D40	512	handwritten	VU0 macro instruction
+func_001A4538	001A4538	124	handwritten	VU0 macro instruction
+func_001A5120	001A5120	984	handwritten	VU0 macro instruction
+func_001A6090	001A6090	216	handwritten	VU0 macro instruction
+func_001A6238	001A6238	236	handwritten	VU0 macro instruction
+func_001A6328	001A6328	208	handwritten	VU0 macro instruction
+func_001A65C8	001A65C8	444	handwritten	VU0 macro instruction
+func_001A6788	001A6788	624	handwritten	VU0 macro instruction
+func_001A69F8	001A69F8	488	handwritten	VU0 macro instruction
+func_001A7800	001A7800	408	handwritten	VU0 macro instruction
+func_001A8C90	001A8C90	1848	handwritten	VU0 macro instruction
+func_001A95D0	001A95D0	500	handwritten	VU0 macro instruction
+func_001A9868	001A9868	144	handwritten	VU0 macro instruction
+func_001A9AE8	001A9AE8	368	handwritten	VU0 macro instruction
+func_001AA890	001AA890	4	remnant	stripped-function leftover
+func_001AF108	001AF108	688	handwritten	VU0 macro instruction
+func_001AF820	001AF820	728	handwritten	VU0 macro instruction
+func_001AFBB0	001AFBB0	1332	handwritten	VU0 macro instruction
+func_001B0838	001B0838	924	handwritten	VU0 macro instruction
+func_001B0C68	001B0C68	576	handwritten	VU0 macro instruction
+func_001B1AC8	001B1AC8	108	handwritten	VU0 macro instruction
+func_001B1BF8	001B1BF8	252	handwritten	VU0 macro instruction
+func_001B1DE0	001B1DE0	232	handwritten	128-bit MMI instruction
+func_001B1EC8	001B1EC8	232	handwritten	128-bit MMI instruction
+func_001B2140	001B2140	536	handwritten	VU0 macro instruction
+func_001B2358	001B2358	744	handwritten	VU0 macro instruction
+func_001B26F8	001B26F8	152	handwritten	VU0 macro instruction
+func_001B4180	001B4180	4	remnant	stripped-function leftover
+func_001B4188	001B4188	420	handwritten	128-bit MMI instruction
+func_001B4330	001B4330	592	handwritten	128-bit MMI instruction
+func_001B4600	001B4600	108	handwritten	VU0 macro instruction
+func_001B4670	001B4670	20	remnant	stripped-function leftover
+func_001B55C0	001B55C0	1416	handwritten	VU0 macro instruction
+func_001B5B48	001B5B48	12	remnant	stripped-function leftover
+func_001B5E98	001B5E98	4	remnant	stripped-function leftover
+func_001B7280	001B7280	904	handwritten	VU0 macro instruction
+func_001B7D00	001B7D00	628	handwritten	VU0 macro instruction
+func_001B7F78	001B7F78	464	handwritten	VU0 macro instruction
+func_001B8148	001B8148	724	handwritten	VU0 macro instruction
+func_001B8420	001B8420	284	handwritten	VU0 macro instruction
+func_001B8540	001B8540	732	handwritten	VU0 macro instruction
+func_001B8820	001B8820	320	handwritten	VU0 macro instruction
+func_001B8B30	001B8B30	92	handwritten	VU0 macro instruction
+func_001B8B90	001B8B90	1100	handwritten	VU0 macro instruction
+func_001B8FE0	001B8FE0	4	handwritten	VU0 macro instruction
+func_001B8FE8	001B8FE8	108	handwritten	VU0 macro instruction
+func_001B9058	001B9058	332	handwritten	VU0 macro instruction
+func_001B91A8	001B91A8	396	handwritten	VU0 macro instruction
+func_001B9448	001B9448	168	handwritten	VU0 macro instruction
+func_001B9690	001B9690	332	handwritten	VU0 macro instruction
+func_001B9860	001B9860	212	handwritten	VU0 macro instruction
+func_001B9938	001B9938	184	handwritten	VU0 macro instruction
+func_001B99F0	001B99F0	180	handwritten	VU0 macro instruction
+func_001B9AA8	001B9AA8	4	remnant	stripped-function leftover
+func_001B9AB0	001B9AB0	20	handwritten	VU0 macro instruction
+func_001B9AC8	001B9AC8	20	handwritten	VU0 macro instruction
+func_001B9C80	001B9C80	136	handwritten	VU0 macro instruction
+func_001B9D08	001B9D08	4	remnant	stripped-function leftover
+func_001B9D10	001B9D10	536	handwritten	VU0 macro instruction
+func_001B9F28	001B9F28	4	remnant	stripped-function leftover
+func_001BA2E8	001BA2E8	324	handwritten	VU0 macro instruction
+func_001BA430	001BA430	208	handwritten	VU0 macro instruction
+func_001BA5B0	001BA5B0	1656	handwritten	VU0 macro instruction
+func_001BB058	001BB058	108	handwritten	VU0 macro instruction
+func_001BB0C8	001BB0C8	108	handwritten	VU0 macro instruction
+func_001BBC38	001BBC38	640	handwritten	VU0 macro instruction
+func_001BBEB8	001BBEB8	460	handwritten	VU0 macro instruction
+func_001BC0E0	001BC0E0	384	handwritten	VU0 macro instruction
+func_001BC368	001BC368	364	handwritten	VU0 macro instruction
+func_001BC670	001BC670	160	handwritten	VU0 macro instruction
+func_001BC7F8	001BC7F8	44	handwritten	VU0 macro instruction
+func_001BC828	001BC828	336	handwritten	VU0 macro instruction
+func_001BC978	001BC978	900	handwritten	VU0 macro instruction
+func_001BCD00	001BCD00	2132	handwritten	VU0 macro instruction
+func_001BE990	001BE990	4	remnant	stripped-function leftover
+func_001BF1E8	001BF1E8	4	remnant	stripped-function leftover
+func_001BF200	001BF200	224	handwritten	VU0 macro instruction
+func_001BF2E0	001BF2E0	184	handwritten	VU0 macro instruction
+func_001BF398	001BF398	56	handwritten	VU0 macro instruction
+func_001BF428	001BF428	332	handwritten	VU0 macro instruction
+func_001BFBF8	001BFBF8	224	handwritten	VU0 macro instruction
+func_001C0F30	001C0F30	192	handwritten	128-bit MMI instruction
+func_001C27A8	001C27A8	4	remnant	stripped-function leftover
+func_001C29F8	001C29F8	1580	handwritten	VU0 macro instruction
+func_001C3028	001C3028	192	handwritten	VU0 macro instruction
+func_001C3B40	001C3B40	192	handwritten	VU0 macro instruction
+func_001C3C98	001C3C98	144	handwritten	VU0 macro instruction
+func_001C3EB0	001C3EB0	180	handwritten	VU0 macro instruction
+func_001C41A0	001C41A0	692	handwritten	VU0 macro instruction
+func_001C4618	001C4618	376	handwritten	VU0 macro instruction
+func_001C4848	001C4848	380	handwritten	VU0 macro instruction
+func_001C4C20	001C4C20	320	handwritten	VU0 macro instruction
+func_001C4D60	001C4D60	364	handwritten	VU0 macro instruction
+func_001C4FF8	001C4FF8	288	handwritten	VU0 macro instruction
+func_001C5148	001C5148	252	handwritten	VU0 macro instruction
+func_001C54D0	001C54D0	756	handwritten	VU0 macro instruction
+func_001C57C8	001C57C8	1060	handwritten	VU0 macro instruction
+func_001C5C10	001C5C10	324	handwritten	VU0 macro instruction
+func_001C5DB8	001C5DB8	152	handwritten	VU0 macro instruction
+func_001C5EA8	001C5EA8	112	handwritten	VU0 macro instruction
+func_001C5F18	001C5F18	272	handwritten	VU0 macro instruction
+func_001C6028	001C6028	440	handwritten	VU0 macro instruction
+func_001C61E0	001C61E0	1712	handwritten	VU0 macro instruction
+func_001C6AA8	001C6AA8	596	handwritten	VU0 macro instruction
+func_001C75B0	001C75B0	1196	handwritten	VU0 macro instruction
+func_001C7A60	001C7A60	124	handwritten	VU0 macro instruction
+func_001C7BE8	001C7BE8	204	handwritten	VU0 macro instruction
+func_001C7CB8	001C7CB8	856	handwritten	VU0 macro instruction
+func_001C8418	001C8418	168	handwritten	VU0 macro instruction
+func_001C8590	001C8590	908	handwritten	VU0 macro instruction
+func_001C8920	001C8920	668	handwritten	VU0 macro instruction
+func_001C96D8	001C96D8	692	handwritten	VU0 macro instruction
+func_001C9AF8	001C9AF8	508	handwritten	VU0 macro instruction
+func_001C9DE0	001C9DE0	1660	handwritten	VU0 macro instruction
+func_001CA468	001CA468	372	handwritten	VU0 macro instruction
+func_001CAB10	001CAB10	280	handwritten	VU0 macro instruction
+func_001CAF38	001CAF38	1008	handwritten	VU0 macro instruction
+func_001CB3D0	001CB3D0	420	handwritten	VU0 macro instruction
+func_001CC120	001CC120	724	handwritten	VU0 macro instruction
+func_001CC3F8	001CC3F8	20	handwritten	VU0 macro instruction
+func_001CC490	001CC490	904	handwritten	VU0 macro instruction
+func_001CC818	001CC818	1916	handwritten	VU0 macro instruction
+func_001CCF98	001CCF98	240	handwritten	VU0 macro instruction
+func_001CD0C8	001CD0C8	1524	handwritten	VU0 macro instruction
+func_001CD6C0	001CD6C0	288	handwritten	VU0 macro instruction
+func_001CD870	001CD870	696	handwritten	VU0 macro instruction
+func_001CDB70	001CDB70	548	handwritten	VU0 macro instruction
+func_001CDD98	001CDD98	476	handwritten	VU0 macro instruction
+func_001CDFB8	001CDFB8	1496	handwritten	VU0 macro instruction
+func_001CE590	001CE590	624	handwritten	VU0 macro instruction
+func_001CE800	001CE800	488	handwritten	VU0 macro instruction
+func_001CEB18	001CEB18	732	handwritten	VU0 macro instruction
+func_001CEEC8	001CEEC8	624	handwritten	VU0 macro instruction
+func_001CF158	001CF158	3704	handwritten	VU0 macro instruction
+func_001CFFD0	001CFFD0	2896	handwritten	VU0 macro instruction
+func_001D0B20	001D0B20	340	handwritten	VU0 macro instruction
+func_001D0F20	001D0F20	736	handwritten	VU0 macro instruction
+func_001D12F0	001D12F0	388	handwritten	VU0 macro instruction
+func_001D1630	001D1630	1100	handwritten	VU0 macro instruction
+func_001D1A80	001D1A80	304	handwritten	VU0 macro instruction
+func_001D1BB0	001D1BB0	2404	handwritten	VU0 macro instruction
+func_001D2518	001D2518	680	handwritten	VU0 macro instruction
+func_001D2830	001D2830	408	handwritten	VU0 macro instruction
+func_001D2BB8	001D2BB8	1352	handwritten	VU0 macro instruction
+func_001D3398	001D3398	216	handwritten	VU0 macro instruction
+func_001D35A8	001D35A8	208	handwritten	VU0 macro instruction
+func_001D36F0	001D36F0	752	handwritten	VU0 macro instruction
+func_001D39E0	001D39E0	88	handwritten	VU0 macro instruction
+func_001D3A38	001D3A38	288	handwritten	VU0 macro instruction
+func_001D3B58	001D3B58	268	handwritten	VU0 macro instruction
+func_001D4148	001D4148	512	handwritten	VU0 macro instruction
+func_001D4348	001D4348	848	handwritten	VU0 macro instruction
+func_001D4698	001D4698	432	handwritten	VU0 macro instruction
+func_001D48E8	001D48E8	432	handwritten	VU0 macro instruction
+func_001D5678	001D5678	2348	handwritten	VU0 macro instruction
+func_001D62E0	001D62E0	760	handwritten	VU0 macro instruction
+func_001D66A8	001D66A8	876	handwritten	VU0 macro instruction
+func_001D6A18	001D6A18	256	handwritten	VU0 macro instruction
+func_001D6B18	001D6B18	404	handwritten	VU0 macro instruction
+func_001D6DD8	001D6DD8	572	handwritten	VU0 macro instruction
+func_001D70E8	001D70E8	20	handwritten	VU0 macro instruction
+func_001D7778	001D7778	3316	handwritten	VU0 macro instruction
+func_001D87C8	001D87C8	1032	handwritten	VU0 macro instruction
+func_001D8BD0	001D8BD0	444	handwritten	VU0 macro instruction
+func_001D8E40	001D8E40	1196	handwritten	VU0 macro instruction
+func_001D9678	001D9678	1104	handwritten	VU0 macro instruction
+func_001D9AC8	001D9AC8	464	handwritten	VU0 macro instruction
+func_001DA320	001DA320	956	handwritten	VU0 macro instruction
+func_001DA6E0	001DA6E0	252	handwritten	VU0 macro instruction
+func_001DA7E0	001DA7E0	568	handwritten	VU0 macro instruction
+func_001DAA18	001DAA18	516	handwritten	VU0 macro instruction
+func_001DAD28	001DAD28	236	handwritten	VU0 macro instruction
+func_001DB448	001DB448	20	handwritten	VU0 macro instruction
+func_001DB460	001DB460	32	handwritten	VU0 macro instruction
+func_001DBA90	001DBA90	44	handwritten	128-bit MMI instruction
+func_001DC238	001DC238	660	handwritten	VU0 macro instruction
+func_001DC4D0	001DC4D0	576	handwritten	VU0 macro instruction
+func_001DDBF0	001DDBF0	4	remnant	stripped-function leftover
+func_001DDD18	001DDD18	372	handwritten	VU0 macro instruction
+func_001DDE90	001DDE90	2260	handwritten	VU0 macro instruction
+func_001DEB30	001DEB30	132	handwritten	128-bit MMI instruction
+func_001DEBE8	001DEBE8	1700	handwritten	VU0 macro instruction
+func_001DF520	001DF520	128	handwritten	VU0 macro instruction
+func_001DF600	001DF600	256	handwritten	VU0 macro instruction
+func_001DF700	001DF700	780	handwritten	VU0 macro instruction
+func_001E0820	001E0820	4	remnant	stripped-function leftover
+func_001E20B0	001E20B0	4	remnant	stripped-function leftover
+func_001E20F8	001E20F8	4	remnant	stripped-function leftover
+func_001E2210	001E2210	4	remnant	stripped-function leftover
+func_001E22B8	001E22B8	4	remnant	stripped-function leftover
+func_001E2438	001E2438	232	handwritten	VU0 macro instruction
+func_001E2A00	001E2A00	496	handwritten	VU0 macro instruction
+func_001E2BF0	001E2BF0	632	handwritten	VU0 macro instruction
+func_001E2E68	001E2E68	564	handwritten	VU0 macro instruction
+func_001E30E8	001E30E8	264	handwritten	VU0 macro instruction
+func_001E31F0	001E31F0	4996	handwritten	VU0 macro instruction
+func_001E4578	001E4578	776	handwritten	VU0 macro instruction
+func_001E4888	001E4888	956	handwritten	VU0 macro instruction
+func_001E4DC0	001E4DC0	120	handwritten	VU0 macro instruction
+func_001E5938	001E5938	832	handwritten	VU0 macro instruction
+func_001E7C60	001E7C60	1144	handwritten	VU0 macro instruction
+func_001E89F0	001E89F0	96	handwritten	VU0 macro instruction
+func_001E8A50	001E8A50	772	handwritten	VU0 macro instruction
+func_001EA720	001EA720	4	remnant	stripped-function leftover
+func_001EA818	001EA818	256	handwritten	VU0 macro instruction
+func_001EA918	001EA918	340	handwritten	VU0 macro instruction
+func_001EB698	001EB698	172	handwritten	VU0 macro instruction
+func_001EBD10	001EBD10	188	handwritten	VU0 macro instruction
+func_001EBDD0	001EBDD0	220	handwritten	VU0 macro instruction
+func_001EC3D8	001EC3D8	156	handwritten	VU0 macro instruction
+func_001EC828	001EC828	752	handwritten	VU0 macro instruction
+func_001ECF10	001ECF10	260	handwritten	VU0 macro instruction
+func_001ED638	001ED638	20	handwritten	VU0 macro instruction
+func_001ED738	001ED738	72	handwritten	VU0 macro instruction
+func_001ED780	001ED780	188	handwritten	VU0 macro instruction
+func_001ED840	001ED840	192	handwritten	VU0 macro instruction
+func_001ED900	001ED900	4	remnant	stripped-function leftover
+func_001ED908	001ED908	372	handwritten	VU0 macro instruction
+func_001EDA80	001EDA80	392	handwritten	VU0 macro instruction
+func_001EDC08	001EDC08	424	handwritten	VU0 macro instruction
+func_001EDEF0	001EDEF0	416	handwritten	VU0 macro instruction
+func_001EE090	001EE090	512	handwritten	VU0 macro instruction
+func_001EE2B0	001EE2B0	100	handwritten	VU0 macro instruction
+func_001EE360	001EE360	4	remnant	stripped-function leftover
+func_001EEA40	001EEA40	284	handwritten	VU0 macro instruction
+func_001EEBB0	001EEBB0	172	handwritten	VU0 macro instruction
+func_001EED68	001EED68	228	handwritten	VU0 macro instruction
+func_001EEF90	001EEF90	1044	handwritten	VU0 macro instruction
+func_001EF5B8	001EF5B8	428	handwritten	VU0 macro instruction
+func_001EF768	001EF768	156	handwritten	VU0 macro instruction
+func_001EFCE0	001EFCE0	4	remnant	stripped-function leftover
+func_001F0218	001F0218	4	remnant	stripped-function leftover
+func_001F17A0	001F17A0	268	handwritten	VU0 macro instruction
+func_001F20A8	001F20A8	1504	handwritten	VU0 macro instruction
+func_001F2840	001F2840	1712	handwritten	VU0 macro instruction
+func_001F2EF0	001F2EF0	592	handwritten	VU0 macro instruction
+func_001F3140	001F3140	184	handwritten	VU0 macro instruction
+func_001F3408	001F3408	736	handwritten	VU0 macro instruction
+func_001F3B48	001F3B48	144	handwritten	VU0 macro instruction
+func_001F4008	001F4008	712	handwritten	VU0 macro instruction
+func_001F4AE0	001F4AE0	824	handwritten	VU0 macro instruction
+func_001F5268	001F5268	808	handwritten	VU0 macro instruction

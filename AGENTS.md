@@ -24,6 +24,7 @@ procedure; read it before you match anything.
 | `config/<version>/layout.tsv` | what each part of the executable is: game code, libraries, data sections | by hand |
 | `config/cflags.tsv` | the compiler, and the flags of each source file | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
+| `config/us/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md) | `tools/classify_asm.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
 | `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with Sony's 2.9-ee-991111, which `config/cflags.tsv` names per file (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |
@@ -52,6 +53,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/version_src.py todo` | the functions only PAL has, not yet defined, with their tags and file |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
 | `python3 tools/inventory.py [--check]` | the function tables and PAL's pairing |
+| `python3 tools/classify_asm.py [--check]` | which game-code functions are original assembly (needs `asm/us/`) |
 | `python3 -m unittest discover -s tests` | the tools' unit tests (CI) |
 | `python3 tools/proprietary.py` | scans what git would commit for game data and proprietary material |
 | `python3 tests/check_repository.py` | `proprietary.py`, licence headers (CI) |
