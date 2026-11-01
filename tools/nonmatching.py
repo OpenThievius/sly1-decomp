@@ -32,6 +32,7 @@ THIRD_PARTY_NOTICES.md); the tool is ours.
 """
 
 import argparse
+import concurrent.futures
 import datetime
 import glob
 import re
@@ -97,7 +98,7 @@ def score(path, key, func):
         obj_path = Path(tmp) / "unit.o"
         try:
             if key == "us":
-                cc.compile_file(path, obj_path)
+                cc.compile_file(path, obj_path, source=check.source_for(path, func))
             else:
                 shared = unit_of(path)
                 unit, _ = version_src.unit(shared, key, {func: Path(path).resolve()})
@@ -182,21 +183,21 @@ def cmd_check():
     return 0
 
 
-def cmd_stage(pattern, most, key):
+def cmd_stage(pattern, most, key, jobs=6):
     """Stage each function's closest attempt among the files the pattern finds."""
     import version_check
     defined = set(version_check.defined_in_src())
     day = datetime.date.today().isoformat()
     best = {}
-    for f in sorted(glob.glob(pattern)):
-        func = Path(f).stem
-        if key == "us" and func in defined:
-            continue
-        status, matching, ours, size = score(f, key, func)
-        if status != "DIFFER" or ours != size or not size or 1 - matching / size > most:
-            continue
-        if func not in best or matching > best[func][1]:
-            best[func] = (f, matching, ours, size)
+    files = [f for f in sorted(glob.glob(pattern)) if not (key == "us" and Path(f).stem in defined)]
+    with concurrent.futures.ThreadPoolExecutor(jobs) as pool:
+        scored = pool.map(lambda f: (f, score(f, key, Path(f).stem)), files)
+        for f, (status, matching, ours, size) in scored:
+            func = Path(f).stem
+            if status != "DIFFER" or ours != size or not size or 1 - matching / size > most:
+                continue
+            if func not in best or matching > best[func][1]:
+                best[func] = (f, matching, ours, size)
     added = 0
     for func, (f, matching, ours, size) in sorted(best.items()):
         dest = (DIR if key == "us" else DIR / "eu") / (func + ".cpp")
@@ -240,13 +241,14 @@ def main(argv=None):
     p.add_argument("pattern")
     p.add_argument("--max", type=float, default=0.15, help="the largest share of retail's bytes that may differ")
     p.add_argument("--version", default="us", choices=["us", "eu"])
+    p.add_argument("--jobs", type=int, default=6)
     args = parser.parse_args(argv)
     if args.check:
         return check_current()
     if args.cmd == "check":
         return cmd_check()
     if args.cmd == "stage":
-        return cmd_stage(args.pattern, args.max, args.version)
+        return cmd_stage(args.pattern, args.max, args.version, args.jobs)
     parser.print_help()
     return 2
 
