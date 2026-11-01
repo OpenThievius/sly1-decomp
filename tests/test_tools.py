@@ -15,6 +15,7 @@ import todo  # noqa: E402
 import c_layout  # noqa: E402
 import check  # noqa: E402
 import rodata  # noqa: E402
+import version_src  # noqa: E402
 import versions  # noqa: E402
 
 BOOT = b"\x7fELF" + bytes(range(256)) * 20
@@ -188,6 +189,48 @@ class TranslationTest(unittest.TestCase):
     def test_an_offset_that_reaches_the_next_datum_is_refused(self):
         r = self.resolver({0x247AA8: 0x248FA8, 0x247AF0: 0x248FB0})
         self.assertIsNone(r.address("D_00247AD0"))
+
+
+class VersionSourceTest(unittest.TestCase):
+    """A version's own definition takes the shared one's place in the shared file's unit."""
+
+    SHARED = (
+        '#include "common.h"\n'
+        "void func_00100010(s32* p);\n"
+        "void func_00100010(s32* p)\n"
+        "{\n"
+        '    const char* s = "}"; /* } */\n'
+        "    if (p) { *p = 1; }\n"
+        "}\n"
+        "s32 func_00100020(void) { return 2; }\n"
+    )
+
+    def test_the_definition_is_replaced_and_the_rest_kept(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shared, own = Path(tmp) / "shared.cpp", Path(tmp) / "func_00100010.cpp"
+            shared.write_text(self.SHARED)
+            own.write_text("void func_00100010(s32* p)\n{\n    *p = 3;\n}\n")
+            text = version_src.unit_text(shared, {"func_00100010": own})
+        self.assertIn("*p = 3;", text)
+        self.assertNotIn("*p = 1;", text)
+        self.assertIn("void func_00100010(s32* p);", text)
+        self.assertIn("s32 func_00100020(void) { return 2; }", text)
+
+    def test_a_version_file_names_its_version_and_shared_file(self):
+        path = versions.ROOT / "src" / "versions" / "eu" / "main" / "00140000" / "func_00142F10.cpp"
+        self.assertEqual(version_src.version_of(path),
+                         ("eu", versions.ROOT / "src" / "main" / "00140000.cpp"))
+        self.assertIsNone(version_src.version_of(versions.ROOT / "src" / "main" / "00140000.cpp"))
+
+    def test_the_shared_sources_leave_the_versions_out(self):
+        self.assertFalse(any("versions" in p.parts for p in versions.sources()))
+
+    def test_a_name_with_a_version_reaches_that_version_alone(self):
+        r = check.Resolver.__new__(check.Resolver)
+        r.functions, r.symbols, r.translation, r.paired, r.key = {}, {}, {}, None, "eu"
+        self.assertEqual(r.address("func_eu_001387C8"), 0x1387C8)
+        r.key = "us"
+        self.assertIsNone(r.address("func_eu_001387C8"))
 
 
 class BlockerTest(unittest.TestCase):

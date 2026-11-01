@@ -5,8 +5,10 @@
 
 Each file of src/ is compiled once, as the US build compiles it, and each
 function it defines is compared with PAL's at its counterpart
-(config/eu/map.tsv), every address translated as tools/check.py does. The
-results go to config/eu/c_status.tsv, one row per C function: `match`,
+(config/eu/map.tsv), every address translated as tools/check.py does. A
+function with a PAL definition of its own (src/versions/eu/,
+tools/version_src.py) is checked as that definition builds in its shared
+file's unit, and noted `version-specific`. The results go to config/eu/c_status.tsv, one row per C function: `match`,
 `differs` (PAL's bytes are not what this C builds), `absent` (PAL has no
 counterpart) or `error` (the check could not place it). tools/progress.py
 counts PAL's finished functions from it.
@@ -22,6 +24,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import version_src  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -43,7 +46,7 @@ def defined_in_src():
     """{function name: source file} for every function src/ defines."""
     import todo
     out = {}
-    for path in sorted((ROOT / "src").rglob("*.cpp")) if (ROOT / "src").exists() else []:
+    for path in versions.sources():
         for m in todo.DEFINITION.finditer(path.read_text()):
             out[m.group(1)] = path
     return out
@@ -73,7 +76,7 @@ def run():
     for path, funcs in sorted(by_file.items()):
         with tempfile.TemporaryDirectory(prefix="sly1-vc-") as tmp:
             obj_path = Path(tmp) / "unit.o"
-            cc.compile_file(path, obj_path)
+            own = version_src.compile_unit(path, "eu", obj_path)
             obj = elf.Elf(obj_path.read_bytes())
         for name in sorted(funcs):
             if name not in names:
@@ -85,7 +88,8 @@ def run():
                 rows[name] = (names[name], "error", str(e).strip("'\""))
                 continue
             status = {"EXACT": "match", "DIFFER": "differs"}.get(r["status"], "error")
-            rows[name] = (names[name], status, r.get("note", ""))
+            note = ", ".join(n for n in ("version-specific" if name in own else "", r.get("note", "")) if n)
+            rows[name] = (names[name], status, note)
     text = HEADER + "\n" + "".join("%s\t%s\t%s\t%s\n" % (n, *rows[n]) for n in sorted(rows))
     STATUS.write_text(text)
     counts = {}
@@ -100,6 +104,8 @@ def check_current():
     rows = set(read_status())
     problems = ["%s has no row in config/eu/c_status.tsv (run tools/version_check.py)" % n for n in sorted(defined - rows)]
     problems += ["config/eu/c_status.tsv has %s, which src/ no longer defines" % n for n in sorted(rows - defined)]
+    problems += ["%s defines %s, which its shared file does not" % (p.relative_to(ROOT), n)
+                 for n, p in version_src.overrides("eu").items() if n not in defined]
     for p in problems:
         print("stale: " + p)
     return 1 if problems else 0

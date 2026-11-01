@@ -33,3 +33,35 @@ Notes:
 - PAL's `.text` is 0x14C0 bytes longer than US's, so PAL needs its own map.
   Code that is the same is one source, checked against both.
 - The US split finds 4,766 functions in `.text` (`tools/setup_asm.py`).
+
+## PAL's own C
+
+Every function has one C source, its file in `src/`, checked against both versions
+(`tools/version_check.py`, `config/eu/c_status.tsv`). Where PAL's bytes differ and one source
+cannot give both, PAL gets a definition of its own:
+
+    src/versions/eu/<path of the shared file without .cpp>/<function>.cpp
+
+holding that function alone, under its US name, with any declaration only it needs. It is built
+in the shared file's translation unit, in place of the shared definition, with the shared file's
+flags (`tools/version_src.py`): PAL never builds a function with options or a context its object
+did not have. The US build and `tools/todo.py` never see these files.
+
+    python3 tools/check.py src/versions/eu/main/00140000/func_00142F10.cpp func_00142F10
+    python3 tools/version_check.py      # c_status.tsv notes these rows `version-specific`
+
+What makes PAL differ, from the first `differs` rows read one by one:
+
+- **50 Hz.** Times and rates: func_00142F10 clamps the frame step to 1/50 to 1/25 of a second,
+  where US has 1/60 to 1/30.
+- **Field offsets.** Some objects are laid out differently (a field at 0x590 where US has it at
+  0x304): the PAL definition uses a struct of its own.
+- **Unsigned bytes.** PAL's string and character functions read `u8` where US reads `s8`.
+- **Other calls and arguments.** A call to a function only PAL has, or one more argument.
+
+Code and data only PAL has are named `func_eu_XXXXXXXX` and `D_eu_XXXXXXXX`, and reach that PAL
+address alone (`tools/check.py`).
+
+A definition counts only when it is EXACT in PAL, and the shared C stays EXACT in US. This
+layout follows OpenRAC's (rac1-decomp, `docs/VERSIONS.md`; credited in
+[THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)); the tools are ours.

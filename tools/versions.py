@@ -34,6 +34,14 @@ def get(key):
     return table[key]
 
 
+def sources():
+    """The shared C of src/, every version's: src/versions/ holds what one version builds instead."""
+    src = ROOT / "src"
+    if not src.exists():
+        return []
+    return sorted(p for p in src.rglob("*.cpp") if (src / "versions") not in p.parents)
+
+
 def boot_path(key):
     return BASEROM / key / get(key)["boot"]["name"]
 

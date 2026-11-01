@@ -15,7 +15,9 @@ padding.
 
 Prints EXACT, or DIFFER with both disassemblies side by side (--diff shows
 them for EXACT too). With --version eu the function is checked at its PAL
-counterpart (config/eu/map.tsv), with every address translated to PAL's.
+counterpart (config/eu/map.tsv), with every address translated to PAL's. A
+file of src/versions/eu/ (tools/version_src.py) is checked in PAL, built in
+its shared file's unit.
 
 A function that uses a .rodata literal of its own (a float or a string written in C) is EXACT here
 and marked `rodata`: the literal, for as many bytes as the instruction reaches (a string, up to its
@@ -36,9 +38,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import compile as cc  # noqa: E402
 import elf  # noqa: E402
+import version_src  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
+VERSION_NAME = re.compile(r"^(?:func|D|jtbl)_([a-z]+)_([0-9A-Fa-f]{8})(?:__|$)")  # func_eu_00138718
 ADDR_NAME = re.compile(r"^(?:func|D|jtbl|L)_([0-9A-Fa-f]{6,8})(?:__|$)")
 LOAD_ADDRESS = 0x100000  # where the executable starts, in every version
 SYMBOL_LINE = re.compile(r"^\s*([^\s=]+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;")
@@ -108,6 +112,10 @@ class Resolver:
         return None
 
     def address(self, sym):
+        m = VERSION_NAME.match(sym)
+        if m:
+            # Code or data only one version has (tools/version_src.py): its own address, there alone.
+            return int(m.group(2), 16) if m.group(1) == self.key else None
         a = self.us_address(sym)
         if a is None or self.translation is None:
             return a
@@ -410,10 +418,18 @@ def main(argv=None):
     parser.add_argument("--diff", action="store_true", help="show the disassembly for EXACT too")
     args = parser.parse_args(argv)
 
+    own = version_src.version_of(args.src)
+    if own and args.version == "us":
+        args.version = own[0]       # a version's own definition is checked in that version
     with tempfile.TemporaryDirectory(prefix="sly1-check-") as tmp:
         out = Path(tmp) / "unit.o"
         try:
-            cc.compile_file(args.src, out, args.flags.split() if args.flags else None)
+            if own:
+                # Built in its shared file's unit, in place of the shared definition.
+                path, _ = version_src.unit(own[1], own[0])
+                cc.compile_file(path, out, args.flags.split() if args.flags else cc.flags_for(own[1]))
+            else:
+                cc.compile_file(args.src, out, args.flags.split() if args.flags else None)
         except cc.CompileError as e:
             print("ERROR: does not compile:\n%s" % e)
             return 2
