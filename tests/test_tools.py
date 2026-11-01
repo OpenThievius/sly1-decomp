@@ -298,6 +298,29 @@ class ClassifyAsmTest(unittest.TestCase):
         self.assertEqual(sorted(n for n in got if got[n][0] == "remnant"), ["a", "b"])
 
 
+class SystemEvidenceTest(unittest.TestCase):
+    """The #18 rules: kernel and system instructions, and stores before the frame, as OpenRAC's."""
+
+    def test_a_kernel_instruction_is_original_assembly(self):
+        self.assertIn("syscall", classify_asm.handwritten(["addiu", "syscall", "jr", "nop"], "code"))
+        self.assertIn("max.s", classify_asm.handwritten(["max.s", "jr", "nop"], "code"))
+
+    def test_what_the_compiler_emits_is_not(self):
+        self.assertIsNone(classify_asm.handwritten(["sqrt.s", "jr", "nop"], "code"))
+        self.assertIsNone(classify_asm.handwritten(["div", "break", "mflo", "jr", "nop"], "code"))
+
+    def test_stores_before_the_frame(self):
+        lines = ["swc1 $f12, 0x0($a0)", "nop", "addiu $sp, $sp, -0x10", "sd $ra, 0x0($sp)", "jr $ra", "nop"]
+        self.assertIn("frame", classify_asm.handwritten(classify_asm.ops_of(lines), "code", lines))
+        normal = ["addiu $sp, $sp, -0x10", "sd $ra, 0x0($sp)", "nop", "sw $a0, 0x4($sp)", "jr $ra", "nop"]
+        self.assertIsNone(classify_asm.handwritten(classify_asm.ops_of(normal), "code", normal))
+
+    def test_the_divide_trap_and_sqrt_do_not_block(self):
+        self.assertNotIn("system", todo.tags_of(["div $zero, $a0, $a1", "break 0, 7", "mflo $v0", "jr $ra"], "code"))
+        self.assertIn("system", todo.tags_of(["break 1023, 1023", "jr $ra"], "code"))
+        self.assertNotIn("nonc", todo.tags_of(["sqrt.s $f0, $f12", "jr $ra"], "code"))
+
+
 class OriginalAsmTableTest(unittest.TestCase):
     """The committed config/us/original_asm.tsv, which CI reads without a disc."""
 
@@ -305,10 +328,9 @@ class OriginalAsmTableTest(unittest.TestCase):
         self.table = classify_asm.read_table()
         self.funcs = {n: (a, s) for n, a, s, _k in todo.functions()}
 
-    def test_every_row_is_a_game_code_function(self):
+    def test_every_row_is_a_function(self):
         for name in self.table:
             self.assertIn(name, self.funcs, name)
-            self.assertTrue(todo.source_of(self.funcs[name][0]).startswith("src/main"), name)
 
     def test_the_kinds_are_known(self):
         self.assertLessEqual(set(self.table.values()), {"handwritten", "remnant"})

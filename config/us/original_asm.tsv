@@ -69,6 +69,8 @@ func_00125C90	00125C90	1324	handwritten	VU0 macro instruction
 func_00126270	00126270	1604	handwritten	VU0 macro instruction
 func_001268B8	001268B8	396	handwritten	VU0 macro instruction
 func_00126AC8	00126AC8	244	handwritten	VU0 macro instruction
+func_00126CB8	00126CB8	168	handwritten	kernel or system instruction (max.s)
+func_00126D60	00126D60	132	handwritten	kernel or system instruction (min.s)
 func_00126DE8	00126DE8	400	handwritten	VU0 macro instruction
 func_00127628	00127628	76	handwritten	VU0 macro instruction
 func_00127678	00127678	68	handwritten	VU0 macro instruction
@@ -80,6 +82,7 @@ func_001280C0	001280C0	144	handwritten	VU0 macro instruction
 func_00128150	00128150	224	handwritten	VU0 macro instruction
 func_00128330	00128330	616	handwritten	VU0 macro instruction
 func_00128598	00128598	852	handwritten	VU0 macro instruction
+func_001289C0	001289C0	592	handwritten	kernel or system instruction (min.s)
 func_00128E88	00128E88	328	handwritten	VU0 macro instruction
 func_00128FD0	00128FD0	228	handwritten	VU0 macro instruction
 func_001290B8	001290B8	40	handwritten	VU0 macro instruction
@@ -94,10 +97,12 @@ func_0012FB68	0012FB68	328	handwritten	VU0 macro instruction
 func_0012FD98	0012FD98	4	remnant	stripped-function leftover
 func_00130540	00130540	516	handwritten	VU0 macro instruction
 func_00130748	00130748	1024	handwritten	VU0 macro instruction
+func_00131198	00131198	1356	handwritten	kernel or system instruction (max.s)
 func_00134AA0	00134AA0	164	handwritten	VU0 macro instruction
 func_00134B48	00134B48	1756	handwritten	VU0 macro instruction
 func_001358D0	001358D0	1360	handwritten	VU0 macro instruction
 func_00135E70	00135E70	4	remnant	stripped-function leftover
+func_001366A0	001366A0	2088	handwritten	kernel or system instruction (max.s, min.s)
 func_00137CB8	00137CB8	4	remnant	stripped-function leftover
 func_00137DF0	00137DF0	4	remnant	stripped-function leftover
 func_00137FB0	00137FB0	708	handwritten	VU0 macro instruction
@@ -140,6 +145,7 @@ func_00143180	00143180	136	handwritten	VU0 macro instruction
 func_00143208	00143208	472	handwritten	VU0 macro instruction
 func_001433E0	001433E0	56	handwritten	VU0 macro instruction
 func_00143418	00143418	172	handwritten	VU0 macro instruction
+func_00143560	00143560	228	handwritten	kernel or system instruction (max.s)
 func_00143BE0	00143BE0	604	handwritten	VU0 macro instruction
 func_00144008	00144008	284	handwritten	VU0 macro instruction
 func_00144128	00144128	152	handwritten	VU0 macro instruction
@@ -173,6 +179,7 @@ func_00149458	00149458	176	handwritten	VU0 macro instruction
 func_00149760	00149760	4184	handwritten	VU0 macro instruction
 func_0014A8F8	0014A8F8	404	handwritten	VU0 macro instruction
 func_0014AAA0	0014AAA0	304	handwritten	VU0 macro instruction
+func_0014AF38	0014AF38	388	handwritten	kernel or system instruction (max.s)
 func_0014B6A8	0014B6A8	1120	handwritten	VU0 macro instruction
 func_0014BB08	0014BB08	480	handwritten	VU0 macro instruction
 func_0014C858	0014C858	848	handwritten	VU0 macro instruction
@@ -196,6 +203,7 @@ func_00153780	00153780	716	handwritten	VU0 macro instruction
 func_00154088	00154088	744	handwritten	VU0 macro instruction
 func_00154370	00154370	1292	handwritten	VU0 macro instruction
 func_00154C80	00154C80	604	handwritten	VU0 macro instruction
+func_00155270	00155270	1032	handwritten	kernel or system instruction (max.s)
 func_00155868	00155868	580	handwritten	VU0 macro instruction
 func_00155AB0	00155AB0	1140	handwritten	VU0 macro instruction
 func_00156288	00156288	1084	handwritten	VU0 macro instruction
@@ -220,6 +228,7 @@ func_0015BD48	0015BD48	420	handwritten	VU0 macro instruction
 func_0015BEF0	0015BEF0	204	handwritten	VU0 macro instruction
 func_0015BFC0	0015BFC0	152	handwritten	VU0 macro instruction
 func_0015C630	0015C630	4	remnant	stripped-function leftover
+func_0015E1F0	0015E1F0	156	handwritten	kernel or system instruction (max.s)
 func_0015E678	0015E678	404	handwritten	marked handwritten by the disassembler
 func_0015FCD8	0015FCD8	156	handwritten	VU0 macro instruction
 func_0015FD78	0015FD78	476	handwritten	VU0 macro instruction
@@ -232,6 +241,7 @@ func_00161760	00161760	4	remnant	stripped-function leftover
 func_00161858	00161858	4	remnant	stripped-function leftover
 func_00161950	00161950	4	remnant	stripped-function leftover
 func_001626A0	001626A0	4	remnant	stripped-function leftover
+func_00162890	00162890	4264	handwritten	kernel or system instruction (min.s)
 func_00167F10	00167F10	544	handwritten	VU0 macro instruction
 func_001682C0	001682C0	244	handwritten	marked handwritten by the disassembler
 func_00168698	00168698	80	handwritten	marked handwritten by the disassembler
@@ -239,6 +249,7 @@ func_00169E20	00169E20	416	handwritten	VU0 macro instruction
 func_0016A240	0016A240	224	handwritten	VU0 macro instruction
 func_0016A320	0016A320	136	handwritten	VU0 macro instruction
 func_0016A910	0016A910	260	handwritten	VU0 macro instruction
+func_0016C440	0016C440	48	handwritten	stores and nops before the stack frame is set up
 func_0016C528	0016C528	2260	handwritten	VU0 macro instruction
 func_0016D128	0016D128	184	handwritten	VU0 macro instruction
 func_0016D1E0	0016D1E0	528	handwritten	VU0 macro instruction
@@ -294,6 +305,10 @@ func_0017E3C8	0017E3C8	772	handwritten	VU0 macro instruction
 func_0017E710	0017E710	1496	handwritten	VU0 macro instruction
 func_0017ECE8	0017ECE8	812	handwritten	VU0 macro instruction
 func_0017F018	0017F018	2728	handwritten	VU0 macro instruction
+func_0017FAC0	0017FAC0	180	handwritten	kernel or system instruction (max.s)
+func_0017FB78	0017FB78	204	handwritten	kernel or system instruction (max.s)
+func_0017FC48	0017FC48	128	handwritten	kernel or system instruction (max.s)
+func_0017FCC8	0017FCC8	128	handwritten	kernel or system instruction (max.s)
 func_00181078	00181078	972	handwritten	VU0 macro instruction
 func_00181658	00181658	292	handwritten	VU0 macro instruction
 func_00181780	00181780	152	handwritten	128-bit MMI instruction
@@ -369,6 +384,8 @@ func_00191C78	00191C78	500	handwritten	VU0 macro instruction
 func_001925C0	001925C0	48	handwritten	VU0 macro instruction
 func_00192988	00192988	4	remnant	stripped-function leftover
 func_00192DD0	00192DD0	736	handwritten	VU0 macro instruction
+func_001936A0	001936A0	1972	handwritten	kernel or system instruction (max.s)
+func_001963A8	001963A8	48	handwritten	stores and nops before the stack frame is set up
 func_00196B78	00196B78	716	handwritten	VU0 macro instruction
 func_00196EB0	00196EB0	776	handwritten	VU0 macro instruction
 func_001971B8	001971B8	540	handwritten	VU0 macro instruction
@@ -400,6 +417,7 @@ func_0019F390	0019F390	460	handwritten	VU0 macro instruction
 func_0019F620	0019F620	564	handwritten	VU0 macro instruction
 func_0019FA98	0019FA98	108	handwritten	VU0 macro instruction
 func_0019FB08	0019FB08	480	handwritten	VU0 macro instruction
+func_0019FD08	0019FD08	100	handwritten	kernel or system instruction (min.s)
 func_0019FE50	0019FE50	204	handwritten	VU0 macro instruction
 func_0019FF20	0019FF20	252	handwritten	VU0 macro instruction
 func_001A00A0	001A00A0	276	handwritten	VU0 macro instruction
@@ -407,6 +425,7 @@ func_001A0338	001A0338	356	handwritten	VU0 macro instruction
 func_001A05D8	001A05D8	380	handwritten	VU0 macro instruction
 func_001A0758	001A0758	500	handwritten	VU0 macro instruction
 func_001A0C98	001A0C98	196	handwritten	128-bit MMI instruction
+func_001A0D60	001A0D60	144	handwritten	kernel or system instruction (max.s)
 func_001A0DF0	001A0DF0	404	handwritten	VU0 macro instruction
 func_001A1028	001A1028	404	handwritten	VU0 macro instruction
 func_001A11C0	001A11C0	468	handwritten	VU0 macro instruction
@@ -429,6 +448,7 @@ func_001A3730	001A3730	444	handwritten	VU0 macro instruction
 func_001A3AC8	001A3AC8	84	handwritten	VU0 macro instruction
 func_001A3D40	001A3D40	512	handwritten	VU0 macro instruction
 func_001A4538	001A4538	124	handwritten	VU0 macro instruction
+func_001A48C0	001A48C0	620	handwritten	kernel or system instruction (max.s)
 func_001A5120	001A5120	984	handwritten	VU0 macro instruction
 func_001A6090	001A6090	216	handwritten	VU0 macro instruction
 func_001A6238	001A6238	236	handwritten	VU0 macro instruction
@@ -442,6 +462,9 @@ func_001A95D0	001A95D0	500	handwritten	VU0 macro instruction
 func_001A9868	001A9868	144	handwritten	VU0 macro instruction
 func_001A9AE8	001A9AE8	368	handwritten	VU0 macro instruction
 func_001AA890	001AA890	4	remnant	stripped-function leftover
+func_001AE220	001AE220	404	handwritten	kernel or system instruction (min.s)
+func_001AE5E0	001AE5E0	372	handwritten	kernel or system instruction (max.s)
+func_001AEC80	001AEC80	48	handwritten	stores and nops before the stack frame is set up
 func_001AF108	001AF108	688	handwritten	VU0 macro instruction
 func_001AF820	001AF820	728	handwritten	VU0 macro instruction
 func_001AFBB0	001AFBB0	1332	handwritten	VU0 macro instruction
@@ -495,6 +518,7 @@ func_001BB0C8	001BB0C8	108	handwritten	VU0 macro instruction
 func_001BBC38	001BBC38	640	handwritten	VU0 macro instruction
 func_001BBEB8	001BBEB8	460	handwritten	VU0 macro instruction
 func_001BC0E0	001BC0E0	384	handwritten	VU0 macro instruction
+func_001BC260	001BC260	192	handwritten	kernel or system instruction (max.s)
 func_001BC368	001BC368	364	handwritten	VU0 macro instruction
 func_001BC670	001BC670	160	handwritten	VU0 macro instruction
 func_001BC7F8	001BC7F8	44	handwritten	VU0 macro instruction
@@ -512,12 +536,14 @@ func_001C0F30	001C0F30	192	handwritten	128-bit MMI instruction
 func_001C27A8	001C27A8	4	remnant	stripped-function leftover
 func_001C29F8	001C29F8	1580	handwritten	VU0 macro instruction
 func_001C3028	001C3028	192	handwritten	VU0 macro instruction
+func_001C39A0	001C39A0	416	handwritten	kernel or system instruction (max.s)
 func_001C3B40	001C3B40	192	handwritten	VU0 macro instruction
 func_001C3C98	001C3C98	144	handwritten	VU0 macro instruction
 func_001C3EB0	001C3EB0	180	handwritten	VU0 macro instruction
 func_001C41A0	001C41A0	692	handwritten	VU0 macro instruction
 func_001C4618	001C4618	376	handwritten	VU0 macro instruction
 func_001C4848	001C4848	380	handwritten	VU0 macro instruction
+func_001C49E8	001C49E8	152	handwritten	kernel or system instruction (max.s)
 func_001C4C20	001C4C20	320	handwritten	VU0 macro instruction
 func_001C4D60	001C4D60	364	handwritten	VU0 macro instruction
 func_001C4FF8	001C4FF8	288	handwritten	VU0 macro instruction
@@ -563,6 +589,7 @@ func_001CEEC8	001CEEC8	624	handwritten	VU0 macro instruction
 func_001CF158	001CF158	3704	handwritten	VU0 macro instruction
 func_001CFFD0	001CFFD0	2896	handwritten	VU0 macro instruction
 func_001D0B20	001D0B20	340	handwritten	VU0 macro instruction
+func_001D0C78	001D0C78	676	handwritten	kernel or system instruction (max.s)
 func_001D0F20	001D0F20	736	handwritten	VU0 macro instruction
 func_001D12F0	001D12F0	388	handwritten	VU0 macro instruction
 func_001D1630	001D1630	1100	handwritten	VU0 macro instruction
@@ -577,12 +604,14 @@ func_001D36F0	001D36F0	752	handwritten	VU0 macro instruction
 func_001D39E0	001D39E0	88	handwritten	VU0 macro instruction
 func_001D3A38	001D3A38	288	handwritten	VU0 macro instruction
 func_001D3B58	001D3B58	268	handwritten	VU0 macro instruction
+func_001D3E00	001D3E00	668	handwritten	kernel or system instruction (min.s)
 func_001D4148	001D4148	512	handwritten	VU0 macro instruction
 func_001D4348	001D4348	848	handwritten	VU0 macro instruction
 func_001D4698	001D4698	432	handwritten	VU0 macro instruction
 func_001D48E8	001D48E8	432	handwritten	VU0 macro instruction
 func_001D5678	001D5678	2348	handwritten	VU0 macro instruction
 func_001D62E0	001D62E0	760	handwritten	VU0 macro instruction
+func_001D6608	001D6608	160	handwritten	kernel or system instruction (max.s)
 func_001D66A8	001D66A8	876	handwritten	VU0 macro instruction
 func_001D6A18	001D6A18	256	handwritten	VU0 macro instruction
 func_001D6B18	001D6B18	404	handwritten	VU0 macro instruction
@@ -594,6 +623,7 @@ func_001D8BD0	001D8BD0	444	handwritten	VU0 macro instruction
 func_001D8E40	001D8E40	1196	handwritten	VU0 macro instruction
 func_001D9678	001D9678	1104	handwritten	VU0 macro instruction
 func_001D9AC8	001D9AC8	464	handwritten	VU0 macro instruction
+func_001D9D78	001D9D78	1012	handwritten	kernel or system instruction (min.s)
 func_001DA320	001DA320	956	handwritten	VU0 macro instruction
 func_001DA6E0	001DA6E0	252	handwritten	VU0 macro instruction
 func_001DA7E0	001DA7E0	568	handwritten	VU0 macro instruction
@@ -613,6 +643,7 @@ func_001DF520	001DF520	128	handwritten	VU0 macro instruction
 func_001DF600	001DF600	256	handwritten	VU0 macro instruction
 func_001DF700	001DF700	780	handwritten	VU0 macro instruction
 func_001E0820	001E0820	4	remnant	stripped-function leftover
+func_001E08C8	001E08C8	48	handwritten	stores and nops before the stack frame is set up
 func_001E20B0	001E20B0	4	remnant	stripped-function leftover
 func_001E20F8	001E20F8	4	remnant	stripped-function leftover
 func_001E2210	001E2210	4	remnant	stripped-function leftover
@@ -627,12 +658,17 @@ func_001E4578	001E4578	776	handwritten	VU0 macro instruction
 func_001E4888	001E4888	956	handwritten	VU0 macro instruction
 func_001E4DC0	001E4DC0	120	handwritten	VU0 macro instruction
 func_001E5938	001E5938	832	handwritten	VU0 macro instruction
+func_001E6600	001E6600	1564	handwritten	kernel or system instruction (max.s, min.s)
 func_001E7C60	001E7C60	1144	handwritten	VU0 macro instruction
+func_001E80D8	001E80D8	772	handwritten	kernel or system instruction (max.s, min.s)
+func_001E83E0	001E83E0	764	handwritten	kernel or system instruction (max.s, min.s)
 func_001E89F0	001E89F0	96	handwritten	VU0 macro instruction
 func_001E8A50	001E8A50	772	handwritten	VU0 macro instruction
 func_001EA720	001EA720	4	remnant	stripped-function leftover
 func_001EA818	001EA818	256	handwritten	VU0 macro instruction
 func_001EA918	001EA918	340	handwritten	VU0 macro instruction
+func_001EAC68	001EAC68	56	handwritten	kernel or system instruction (max.s)
+func_001EB168	001EB168	748	handwritten	kernel or system instruction (max.s, min.s)
 func_001EB698	001EB698	172	handwritten	VU0 macro instruction
 func_001EBD10	001EBD10	188	handwritten	VU0 macro instruction
 func_001EBDD0	001EBDD0	220	handwritten	VU0 macro instruction
@@ -661,6 +697,7 @@ func_001EFCE0	001EFCE0	4	remnant	stripped-function leftover
 func_001F0218	001F0218	4	remnant	stripped-function leftover
 func_001F17A0	001F17A0	268	handwritten	VU0 macro instruction
 func_001F20A8	001F20A8	1504	handwritten	VU0 macro instruction
+func_001F2728	001F2728	48	handwritten	stores and nops before the stack frame is set up
 func_001F2840	001F2840	1712	handwritten	VU0 macro instruction
 func_001F2EF0	001F2EF0	592	handwritten	VU0 macro instruction
 func_001F3140	001F3140	184	handwritten	VU0 macro instruction
@@ -669,3 +706,178 @@ func_001F3B48	001F3B48	144	handwritten	VU0 macro instruction
 func_001F4008	001F4008	712	handwritten	VU0 macro instruction
 func_001F4AE0	001F4AE0	824	handwritten	VU0 macro instruction
 func_001F5268	001F5268	808	handwritten	VU0 macro instruction
+func_001F59C4	001F59C4	148	handwritten	assembled from a .S source (the toolchain's libc.a)
+func_001F5A58	001F5A58	176	handwritten	assembled from a .S source (the toolchain's libc.a)
+func_001F5B08	001F5B08	260	handwritten	assembled from a .S source (the toolchain's libc.a)
+func_001F5C0C	001F5C0C	192	handwritten	assembled from a .S source (the toolchain's libc.a)
+func_001F6738	001F6738	324	handwritten	assembled from a .S source (the toolchain's libc.a)
+func_001F6900	001F6900	16	handwritten	marked handwritten by the disassembler
+func_001F6910	001F6910	16	handwritten	marked handwritten by the disassembler
+func_001F6920	001F6920	16	handwritten	marked handwritten by the disassembler
+func_001F6930	001F6930	16	handwritten	marked handwritten by the disassembler
+func_001F6940	001F6940	16	handwritten	marked handwritten by the disassembler
+func_001F6950	001F6950	16	handwritten	marked handwritten by the disassembler
+func_001F6960	001F6960	16	handwritten	marked handwritten by the disassembler
+func_001F6970	001F6970	16	handwritten	marked handwritten by the disassembler
+func_001F6980	001F6980	16	handwritten	marked handwritten by the disassembler
+func_001F6990	001F6990	16	handwritten	marked handwritten by the disassembler
+func_001F69A0	001F69A0	16	handwritten	marked handwritten by the disassembler
+func_001F69B0	001F69B0	16	handwritten	marked handwritten by the disassembler
+func_001F69C0	001F69C0	16	handwritten	marked handwritten by the disassembler
+func_001F69D0	001F69D0	16	handwritten	marked handwritten by the disassembler
+func_001F69E0	001F69E0	16	handwritten	marked handwritten by the disassembler
+func_001F69F0	001F69F0	16	handwritten	marked handwritten by the disassembler
+func_001F6A00	001F6A00	16	handwritten	marked handwritten by the disassembler
+func_001F6A10	001F6A10	16	handwritten	marked handwritten by the disassembler
+func_001F6A20	001F6A20	16	handwritten	marked handwritten by the disassembler
+func_001F6A30	001F6A30	16	handwritten	marked handwritten by the disassembler
+func_001F6A40	001F6A40	16	handwritten	marked handwritten by the disassembler
+func_001F6A50	001F6A50	16	handwritten	marked handwritten by the disassembler
+func_001F6A60	001F6A60	16	handwritten	marked handwritten by the disassembler
+func_001F6A70	001F6A70	16	handwritten	marked handwritten by the disassembler
+func_001F6A80	001F6A80	16	handwritten	marked handwritten by the disassembler
+func_001F6A90	001F6A90	16	handwritten	marked handwritten by the disassembler
+func_001F6AA0	001F6AA0	16	handwritten	marked handwritten by the disassembler
+func_001F6AB0	001F6AB0	16	handwritten	marked handwritten by the disassembler
+func_001F6AC0	001F6AC0	16	handwritten	marked handwritten by the disassembler
+func_001F6AD0	001F6AD0	16	handwritten	marked handwritten by the disassembler
+func_001F6AE0	001F6AE0	16	handwritten	marked handwritten by the disassembler
+func_001F6AF0	001F6AF0	16	handwritten	marked handwritten by the disassembler
+func_001F6B00	001F6B00	16	handwritten	marked handwritten by the disassembler
+func_001F6B10	001F6B10	16	handwritten	marked handwritten by the disassembler
+func_001F6B20	001F6B20	16	handwritten	marked handwritten by the disassembler
+func_001F6B30	001F6B30	16	handwritten	marked handwritten by the disassembler
+func_001F6B40	001F6B40	16	handwritten	marked handwritten by the disassembler
+func_001F6B50	001F6B50	16	handwritten	marked handwritten by the disassembler
+func_001F6B60	001F6B60	16	handwritten	marked handwritten by the disassembler
+func_001F6B70	001F6B70	16	handwritten	marked handwritten by the disassembler
+func_001F6B80	001F6B80	16	handwritten	marked handwritten by the disassembler
+func_001F6B90	001F6B90	16	handwritten	marked handwritten by the disassembler
+func_001F6BA0	001F6BA0	16	handwritten	marked handwritten by the disassembler
+func_001F6BB0	001F6BB0	16	handwritten	marked handwritten by the disassembler
+func_001F6BC0	001F6BC0	16	handwritten	marked handwritten by the disassembler
+func_001F6BD0	001F6BD0	16	handwritten	marked handwritten by the disassembler
+func_001F6BE0	001F6BE0	16	handwritten	marked handwritten by the disassembler
+func_001F6BF0	001F6BF0	16	handwritten	marked handwritten by the disassembler
+func_001F6C00	001F6C00	16	handwritten	marked handwritten by the disassembler
+func_001F6C10	001F6C10	16	handwritten	marked handwritten by the disassembler
+func_001F6C20	001F6C20	16	handwritten	marked handwritten by the disassembler
+func_001F6C30	001F6C30	16	handwritten	marked handwritten by the disassembler
+func_001F6C40	001F6C40	16	handwritten	marked handwritten by the disassembler
+func_001F6C50	001F6C50	16	handwritten	marked handwritten by the disassembler
+func_001F6C60	001F6C60	16	handwritten	marked handwritten by the disassembler
+func_001F6C70	001F6C70	16	handwritten	marked handwritten by the disassembler
+func_001F6C80	001F6C80	16	handwritten	marked handwritten by the disassembler
+func_001F6C90	001F6C90	16	handwritten	marked handwritten by the disassembler
+func_001F6CA0	001F6CA0	16	handwritten	marked handwritten by the disassembler
+func_001F6CB0	001F6CB0	16	handwritten	marked handwritten by the disassembler
+func_001F6CC0	001F6CC0	16	handwritten	marked handwritten by the disassembler
+func_001F6CD0	001F6CD0	16	handwritten	marked handwritten by the disassembler
+func_001F6CE0	001F6CE0	16	handwritten	marked handwritten by the disassembler
+func_001F6CF0	001F6CF0	16	handwritten	marked handwritten by the disassembler
+func_001F6D00	001F6D00	16	handwritten	marked handwritten by the disassembler
+func_001F6D10	001F6D10	16	handwritten	marked handwritten by the disassembler
+func_001F6D20	001F6D20	16	handwritten	marked handwritten by the disassembler
+func_001F6D30	001F6D30	16	handwritten	marked handwritten by the disassembler
+func_001F6D40	001F6D40	104	handwritten	marked handwritten by the disassembler
+func_001F6DA8	001F6DA8	104	handwritten	marked handwritten by the disassembler
+func_001F6E10	001F6E10	104	handwritten	marked handwritten by the disassembler
+func_001F6E78	001F6E78	104	handwritten	marked handwritten by the disassembler
+func_001F6EE0	001F6EE0	16	handwritten	marked handwritten by the disassembler
+func_001F6EF0	001F6EF0	16	handwritten	marked handwritten by the disassembler
+func_001F6F38	001F6F38	16	handwritten	marked handwritten by the disassembler
+func_001F71D0	001F71D0	148	handwritten	marked handwritten by the disassembler
+func_001F7268	001F7268	4	remnant	stripped-function leftover
+func_001F84C0	001F84C0	20	remnant	stripped-function leftover
+func_001F89F8	001F89F8	44	handwritten	marked handwritten by the disassembler
+func_001F8BF0	001F8BF0	4	remnant	stripped-function leftover
+func_001F8C30	001F8C30	4	remnant	stripped-function leftover
+func_001F9638	001F9638	84	remnant	stripped-function leftover
+func_001F9858	001F9858	12	remnant	stripped-function leftover
+func_001F9AB0	001F9AB0	36	remnant	stripped-function leftover
+func_001F9D60	001F9D60	72	handwritten	marked handwritten by the disassembler
+func_001F9DA8	001F9DA8	24	handwritten	marked handwritten by the disassembler
+func_001F9E40	001F9E40	16	handwritten	marked handwritten by the disassembler
+func_001F9E90	001F9E90	16	handwritten	marked handwritten by the disassembler
+func_001F9EA0	001F9EA0	4	remnant	stripped-function leftover
+func_001F9EE8	001F9EE8	16	handwritten	marked handwritten by the disassembler
+func_001F9EF8	001F9EF8	16	handwritten	marked handwritten by the disassembler
+func_001F9F40	001F9F40	16	handwritten	marked handwritten by the disassembler
+func_001FA070	001FA070	4	remnant	stripped-function leftover
+func_001FA0B0	001FA0B0	36	remnant	stripped-function leftover
+func_001FA108	001FA108	52	remnant	stripped-function leftover
+func_001FA1D8	001FA1D8	12	remnant	stripped-function leftover
+func_001FA6B0	001FA6B0	296	handwritten	marked handwritten by the disassembler
+func_001FA7D8	001FA7D8	172	handwritten	marked handwritten by the disassembler
+func_001FA890	001FA890	16	handwritten	marked handwritten by the disassembler
+func_001FA8D8	001FA8D8	16	handwritten	marked handwritten by the disassembler
+func_001FA8E8	001FA8E8	16	handwritten	marked handwritten by the disassembler
+func_001FA9B0	001FA9B0	16	handwritten	marked handwritten by the disassembler
+func_001FAA00	001FAA00	500	handwritten	marked handwritten by the disassembler
+func_001FAC00	001FAC00	536	handwritten	128-bit MMI instruction
+func_001FD770	001FD770	44	remnant	stripped-function leftover
+func_001FE890	001FE890	96	handwritten	128-bit MMI instruction
+func_00201570	00201570	4	remnant	stripped-function leftover
+func_00201690	00201690	12	remnant	stripped-function leftover
+func_00201720	00201720	444	handwritten	assembled from a .S source (the toolchain's libc.a)
+func_002018E0	002018E0	4	remnant	stripped-function leftover
+func_002018E8	002018E8	160	handwritten	VU0 macro instruction
+func_00201988	00201988	140	handwritten	VU0 macro instruction
+func_00202140	00202140	624	handwritten	128-bit MMI instruction
+func_00202478	00202478	484	handwritten	kernel or system instruction (sync)
+func_00202660	00202660	260	handwritten	kernel or system instruction (sync)
+func_00202B58	00202B58	12	remnant	stripped-function leftover
+func_00202C30	00202C30	4	remnant	stripped-function leftover
+func_00202D00	00202D00	44	handwritten	marked handwritten by the disassembler
+func_002030B8	002030B8	4	remnant	stripped-function leftover
+func_00203FD0	00203FD0	276	handwritten	128-bit MMI instruction
+func_002042C8	002042C8	484	handwritten	128-bit MMI instruction
+func_002044B0	002044B0	96	handwritten	128-bit MMI instruction
+func_00204510	00204510	124	handwritten	128-bit MMI instruction
+func_00204590	00204590	120	handwritten	128-bit MMI instruction
+func_00204608	00204608	4	remnant	stripped-function leftover
+func_00204610	00204610	100	handwritten	128-bit MMI instruction
+func_00204678	00204678	80	handwritten	128-bit MMI instruction
+func_002046C8	002046C8	4	remnant	stripped-function leftover
+func_002046D0	002046D0	288	handwritten	128-bit MMI instruction
+func_002047F0	002047F0	4	remnant	stripped-function leftover
+func_002047F8	002047F8	312	handwritten	128-bit MMI instruction
+func_002049E8	002049E8	192	handwritten	128-bit MMI instruction
+func_00204B80	00204B80	180	handwritten	128-bit MMI instruction
+func_00204CE8	00204CE8	92	handwritten	128-bit MMI instruction
+func_00204D48	00204D48	84	handwritten	128-bit MMI instruction
+func_00204DA0	00204DA0	20	remnant	stripped-function leftover
+func_00204E20	00204E20	164	handwritten	marked handwritten by the disassembler
+func_00204EC8	00204EC8	124	handwritten	marked handwritten by the disassembler
+func_00204F48	00204F48	28	remnant	stripped-function leftover
+func_002095A8	002095A8	4	remnant	stripped-function leftover
+func_00209B10	00209B10	36	handwritten	marked handwritten by the disassembler
+func_00209E40	00209E40	4	remnant	stripped-function leftover
+func_00209FA0	00209FA0	4	remnant	stripped-function leftover
+func_0020A070	0020A070	4	remnant	stripped-function leftover
+func_0020A218	0020A218	4	remnant	stripped-function leftover
+func_0020B050	0020B050	4	remnant	stripped-function leftover
+func_0020B0A0	0020B0A0	12	remnant	stripped-function leftover
+func_0020B208	0020B208	52	remnant	stripped-function leftover
+func_0020CF18	0020CF18	540	handwritten	128-bit MMI instruction
+func_0020D138	0020D138	116	handwritten	128-bit MMI instruction
+func_0020D1B0	0020D1B0	148	handwritten	128-bit MMI instruction
+func_0020D248	0020D248	180	handwritten	128-bit MMI instruction
+func_0020D300	0020D300	204	handwritten	128-bit MMI instruction
+func_0020D3D0	0020D3D0	172	handwritten	128-bit MMI instruction
+func_0020D480	0020D480	184	handwritten	128-bit MMI instruction
+func_0020D538	0020D538	248	handwritten	128-bit MMI instruction
+func_0020D630	0020D630	252	handwritten	128-bit MMI instruction
+func_0020D730	0020D730	156	handwritten	128-bit MMI instruction
+func_0020D7D0	0020D7D0	172	handwritten	128-bit MMI instruction
+func_0020D880	0020D880	220	handwritten	128-bit MMI instruction
+func_0020D960	0020D960	228	handwritten	128-bit MMI instruction
+func_0020DA48	0020DA48	212	handwritten	128-bit MMI instruction
+func_0020DB20	0020DB20	208	handwritten	128-bit MMI instruction
+func_0020DBF0	0020DBF0	288	handwritten	128-bit MMI instruction
+func_0020DD10	0020DD10	276	handwritten	128-bit MMI instruction
+func_0020DE28	0020DE28	92	handwritten	128-bit MMI instruction
+func_0020DE88	0020DE88	96	handwritten	128-bit MMI instruction
+func_00210548	00210548	624	handwritten	128-bit MMI instruction
+func_00210C38	00210C38	340	handwritten	kernel or system instruction (sync)
+func_00210F18	00210F18	372	handwritten	marked handwritten by the disassembler

@@ -113,6 +113,10 @@ build. A worker's EXACT is not a match until `tools/build.py` prints `MATCH` wit
   hardware documentation. Take nothing from anyone else: no code, symbol maps, splits, names or
   notes from other decompilations or ports of this game, and no third-party code. Never Sony's
   SDK source, samples or headers, or leaked or NDA material, not even as a reference.
+- **The toolchain's archives, one use.** As OpenRAC does, `tools/classify_asm.py` reads the
+  source-file name a member of the toolchain's `libc.a` or `libm.a` records (`.S` or `.c`) to
+  classify a function as original assembly (docs/ASM_CLASSIFICATION.md). Nothing else is read
+  from them, and nothing from them goes into the repository.
 - **OpenRAC is the exception.** Its own work (tools, build code, docs, toolchain research) may be
   used, openly credited: name it in the commit body and list it in THIRD_PARTY_NOTICES.md
   (LEGAL.md, "OpenRAC"). Not what OpenRAC took from others, and no Ratchet & Clank game code.

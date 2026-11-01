@@ -33,14 +33,35 @@ hidden by it.
 `--check` (both need `asm/us/`; CI only reads the committed table). Columns: name, address,
 size, kind, why.
 
+Game code and Sony's libraries are both classified; a function matched in C is C and is left
+out. Counts are of `config/us/original_asm.tsv` as written on 2026-11-01.
+
 ### handwritten
 
-The function holds an instruction the compiler cannot emit:
+The function holds an instruction the compiler cannot emit, or other evidence says it was
+written as assembly:
 
-- a VU0 macro-mode instruction (COP2: `vaddx`, `lqc2`, `ctc2`, ...): 561 functions;
-- a 128-bit multimedia (MMI) instruction that no function matched in C contains: 21;
-- the disassembler's own "handwritten" mark: 7, among them the crt0 entry (func_00100008) and
-  func_001000C0 at the start of game code.
+- a VU0 macro-mode instruction (COP2: `vaddx`, `lqc2`, `ctc2`, ...): 563 functions;
+- a 128-bit multimedia (MMI) instruction that no function matched in C contains: 57;
+- the disassembler's own "handwritten" mark: 103, among them the crt0 entry (func_00100008),
+  func_001000C0 at the start of game code and the library's kernel call stubs;
+- a kernel, cache or system-control instruction (`syscall`, `ei`, `di`, `eret`, `mfc0`, `mtc0`,
+  `cache`, `sync`), a paired-pipeline instruction (`mult1`, `mtsa`, ...) or `max.s`/`min.s`:
+  35. No function matched in C holds one, and neither compiler emits them from plain C;
+- stores and `nop`s before the stack frame is set up (`swc1`, `nop`, then `addiu $sp`): 5.
+  Neither compiler ever schedules a store before its prologue, and no function matched in C
+  does;
+- a function whose code is, word for word apart from its relocations, a member of the
+  toolchain's `libc.a` that was assembled from a `.S` source: 6 (the library's block copy and
+  fill routines). The member's `.mdebug` section names its source file; only whether it ends
+  in `.S` or `.c` is read, never its code, names or anything else (`sdk_assembly()`).
+
+These rules follow OpenRAC's (rac1-decomp, `docs/reference/ASM_CLASSIFICATION.md`: kernel
+instructions such as `ei`, hand-placed nops, `max.s`/`min.s` in delay slots, and the source
+names in the SDK's `libc.a`), as the maintainers decided on #18. Two things OpenRAC also
+weighs are measured here and do not count: `sqrt.s` (both compilers emit it for
+`__builtin_sqrtf`) and a `nop` outside a delay slot (462 functions matched in C have one).
+`break 0, 7`, the compiler's divide-by-zero trap after a division, is plain C as well.
 
 The MMI rule is evidence-based. Six functions that are matched in C contain `por`, the
 compiler's 128-bit `|`, so `por` proves nothing and is in `COMPILER_EMITS`. An instruction is
@@ -57,19 +78,13 @@ A run of words the linker left of a function it stripped. It counts when:
    delay slot, a tail `j`, or the start of game code.
 
 Fragments that fail a test stay unmatched, with the `fragment` blocker in `tools/todo.py`, as
-a boundary for a person to look at. 81 remnants (636 bytes) pass.
+a boundary for a person to look at. 113 remnants pass.
 
 ## What is not classified
 
-- **Sony's libraries** (`src/lib`, 0x1F59C4 and up) are matched in C with Sony's own compiler
-  (docs/TOOLCHAIN.md, "The libraries"), so nothing in that range is classified here. Their
-  hand-written routines stay unmatched with their blockers until the same rules are applied
-  to them.
-- **Kernel and cache instructions** (`syscall`, `mfc0`, `cache`, `ei`, ...) and
-  **`max.s`/`min.s`/`sqrt.s`**: the compiler may not emit them, but they are not in the rule
-  above, and a function can use them in a plain wrapper. They stay `system` and `nonc` in
-  `tools/todo.py` until a function's other evidence (hand-placed nops, `$at` as a working
-  register, a branch into the middle of a function) says it was written as assembly.
+- **Multimedia instructions the compiler emits** (`por`, `pref`): 9 functions hold only those;
+  they are C.
+- **`break 1023, 1023`**: one function; not the divide trap, left for a person to look at.
 
 ## Keeping it right
 
