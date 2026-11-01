@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BROKEN, checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ADE38.cpp func_eu_001ADE38 --unit src/main/001AC000.cpp
 // Still differs: Builds key/record, calls helpers and virtual slot 8; only the delay-slot order of move a0,sp / move a1,v0 before the call to func_eu_001E3050 differs.
 // Looks up a record and a text by two keys, builds two local buffers from them, and passes the first to the object's virtual at slot 8.

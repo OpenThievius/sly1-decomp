@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 120/136, checked 2026-11-01
 // NEAR: This candidate is 144 bytes versus retail 136; save width and
 //        register assignment differ.
 #include "common.h"

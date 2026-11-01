@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 428/480 (89.2%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AB370.cpp func_eu_001AB370 --unit src/main/001A8000.cpp
 // Still differs: Re-encodes a string into a local buffer (escape codes for missing glyphs, wraps /digits runs); only the s0/s1 roles (cur vs source pointer) and lui order differ.
 // Rewrites a string into a local buffer: characters the font lacks become escape codes and "/digits" runs get wrapped, then hands it to func_eu_001AB238.

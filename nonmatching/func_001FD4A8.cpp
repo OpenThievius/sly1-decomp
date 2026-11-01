@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 164/160, checked 2026-11-01
 // Near match: return-address save and branch/shift sequence differ from retail.
 #include "common.h"
 

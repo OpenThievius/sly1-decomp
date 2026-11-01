@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 92/108 (85.2%), checked 2026-11-01
 // NEAR: The callback is close; instruction scheduling around the result store
 //        and global flag still differs.
 #include "common.h"

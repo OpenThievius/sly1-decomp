@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 168/180, checked 2026-11-01
 // NEAR: the body mostly matches, but loop branch/delay-slot shape and saved-register opcodes differ from retail.
 #include "common.h"
 extern u32 D_00277D30[];

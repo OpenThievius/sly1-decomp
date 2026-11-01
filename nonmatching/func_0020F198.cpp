@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 144/176, checked 2026-11-01
 // Near match: the volatile status polling and timeout helper are modeled, but
 // GCC removes retail's saved-register frame and emits a shorter polling shape.
 // Artificial register pins and barriers are prohibited by the workflow.

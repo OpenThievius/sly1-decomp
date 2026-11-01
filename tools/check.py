@@ -189,6 +189,24 @@ def operand_symbols(key):
     return out
 
 
+def source_for(path, name):
+    """The file whose config/cflags.tsv row builds `path`: itself inside src/, or else (a worker's
+    copy, a near miss) the src/ file that holds the function, so that Sony's library code is built
+    with Sony's compiler wherever its C is kept."""
+    path = Path(path).resolve()
+    if (ROOT / "src") in path.parents:
+        return path
+    try:
+        addr = target_of("us", name)[0]
+    except KeyError:
+        return path
+    import todo
+    try:
+        return ROOT / todo.source_of(addr)
+    except KeyError:
+        return path
+
+
 def retail_image(key):
     return elf.Elf(versions.boot_path(key).read_bytes())
 
@@ -445,7 +463,8 @@ def main(argv=None):
                 path, _ = version_src.unit(own[1], own[0], trying)
                 cc.compile_file(path, out, args.flags.split() if args.flags else None, source=own[1])
             else:
-                cc.compile_file(args.src, out, args.flags.split() if args.flags else None)
+                cc.compile_file(args.src, out, args.flags.split() if args.flags else None,
+                                source=source_for(args.src, args.funcs[0]))
         except cc.CompileError as e:
             print("ERROR: does not compile:\n%s" % e)
             return 2

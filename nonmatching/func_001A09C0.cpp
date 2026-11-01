@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BROKEN, checked 2026-11-01
 // Near miss: the frame and helper-call sequence match, but the compiler saves
 // the constant-data register after the constructor call and orders the prologue
 // and scale store differently from retail.

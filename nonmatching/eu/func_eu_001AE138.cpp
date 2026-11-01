@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 732/708, checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AE138.cpp func_eu_001AE138 --unit src/main/001AC000.cpp
 // Still differs: Label draw with slide-in offset and backdrop box; ours 24 bytes longer (732 vs 708): &L still cached in extra saved registers (s0/s4) where retail recomputes addiu a0,sp,16.
 // Draws a label with a slide-in offset; when the owner is absent also draws a translucent backdrop box, then the text.

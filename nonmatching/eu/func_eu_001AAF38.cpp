@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 96/116 (82.8%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AAF38.cpp func_eu_001AAF38 --unit src/main/001A8000.cpp
 // Still differs: Sets table, index, 0.25 constants and calls func_001AAB20; retail has the 0.25 store at +0x550 before the +0x568 store and different v1/a2 roles, ours moves it after.
 // Sets the table entry and index for slot a1 (20-byte elements of D_eu_0026D810), calls func_001AAB20 with the two floats at +0x544 and +0x548, then copies the pair at +0x53C to +0x52C.

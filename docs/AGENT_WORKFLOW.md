@@ -201,6 +201,14 @@ functions wait for a `stdarg.h` written for this project. If `check.py` says "th
 retail's function M", fix the size first: something is extra or missing. Put the attempt in `nonmatching/func_XXXXXXXX.cpp` with a comment at the
 top saying what still differs, and move on.
 
+The lead keeps the closest attempt per function in `nonmatching/` (PAL's own definitions in
+`nonmatching/eu/`): `python3 tools/nonmatching.py stage 'build/swarm/*/func_*.cpp'` adds every
+attempt within 15% of retail's bytes, and `python3 tools/nonmatching.py check` re-scores them all,
+writes each file's verdict line (`// BYTES n/size (p%), checked DATE`) and the index
+`nonmatching/README.md`. The progress report credits a near miss with its share of retail's bytes
+as `fuzzy_match_percent`; matched functions and code still count EXACT functions only. Landing a
+function removes its staged file.
+
 ## 5. Land
 
 A worker's `EXACT` is not a match: the full build is. The lead (or you, alone):

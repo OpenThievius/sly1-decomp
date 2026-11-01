@@ -1937,3 +1937,42 @@ Quad_1159B8* func_001159B8(Quad_1159B8* out, s32 mode, Src_1159B8* s)
     func_0011B060(&q, 2);
     return out;
 }
+
+struct Quad_117AF0 { u8 pad0[16]; };
+struct Node_117AF0 { u8 pad0[8]; Node_117AF0* next; };
+
+void func_0011B008(Quad_117AF0* q);
+void func_0011B6C0(Quad_117AF0* q, Node_117AF0* n);
+void func_0011B8A8(Node_117AF0* n, s32 v);
+void func_0011B538(Quad_117AF0* q, s32 n);
+void func_0011B018(void* dst, Quad_117AF0* src);
+void func_0011B060(Quad_117AF0* q, s32 mode);
+
+void* func_00117AF0(void* self, s32 count, s32* values)
+{
+    Quad_117AF0 q;
+    func_0011B008(&q);
+    if (count != 0) {
+        Node_117AF0* prev = 0;
+        if (count > 0) {
+            s32* v = values;
+            s32 n = count;
+            do {
+                Node_117AF0* node = (Node_117AF0*)func_0011AF28();
+                if (prev) {
+                    prev->next = node;
+                } else {
+                    func_0011B6C0(&q, node);
+                }
+                func_0011B8A8(node, *v);
+                prev = node;
+                v++;
+            } while (--n != 0);
+        }
+    } else {
+        func_0011B538(&q, 0);
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

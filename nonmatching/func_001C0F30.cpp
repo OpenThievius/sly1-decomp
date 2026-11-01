@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 164/192, checked 2026-11-01
 // NEAR: check.py reports DIFFER; candidate scalar initialization does not reproduce retail pextlw/pcpyld MMI vector construction and sq stores.
 #include "common.h"
 

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 44/200, checked 2026-11-01
 // NEAR: the high-level behavior is modeled, but GCC removes retail dimension calculations and the MMI multiply as dead code.
 // NEAR: GCC reduces this to a short mode return and removes the dimension calculations and MMI multiply seen in retail.
 #include "common.h"

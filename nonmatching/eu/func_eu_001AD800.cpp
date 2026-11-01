@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 760/780, checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AD800.cpp func_eu_001AD800 --unit src/main/001A8000.cpp
 // Still differs: Per-character fade-in text draw; now matches through the first division (lenF as (f32)n twice) but the clamp shape (retail: f0 result then mov f1,f0) and float/saved register allocation still differ (145 lines).
 // Draws a string character by character with a per-character fade: positions interpolate between two corners by the fade phase.

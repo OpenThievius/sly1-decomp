@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 176/160, checked 2026-11-01
 // Near match: retail uses 64-bit saves, schedules two field stores around calls,
 // and tail-jumps to func_0020F9C8; this C emits a call and full epilogue.
 #include "common.h"

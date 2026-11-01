@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 164/184, checked 2026-11-01
 // NEAR: helper behavior is modeled, but control flow, register allocation, and frame size differ from retail.
 // NEAR: helper calls and return value are modeled; control flow, register allocation, and frame layout differ.
 #include "common.h"

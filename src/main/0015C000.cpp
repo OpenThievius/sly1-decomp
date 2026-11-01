@@ -1575,3 +1575,22 @@ s32 func_0015C058(A_0015C058* a0, B_0015C058* a1)
     u64 v = a1->f2CC;
     return ((s32)v ^ 1) & 1;
 }
+
+struct Sub_15FF88 { u8 pad0[8]; s32 count; s32* arr; };
+struct Self_15FF88 { u8 pad0[0x14]; void* f14; void* f18; u8 pad1[0x18]; s32 f34; s32 items[8]; Sub_15FF88 sub; };
+void func_00182C58(Self_15FF88* self);
+void* func_0018D500(s32 size);
+s32 func_0015A480(Sub_15FF88* a, s32 item, void* c);
+void func_0015F8B0(Sub_15FF88* a, Sub_15FF88* sub);
+void func_0015FF88(Self_15FF88* self)
+{
+    func_00182C58(self);
+    Sub_15FF88* cur = (Sub_15FF88*)self->f14;
+    Sub_15FF88* sub = &self->sub;
+    sub->arr = (s32*)func_0018D500(self->f34 * 4);
+    for (s32 i = 0; i < self->f34; i++) {
+        s32 r = func_0015A480(cur, self->items[i], self->f18);
+        if (r != 0) { s32 n = sub->count; sub->arr[n] = r; sub->count = n + 1; }
+    }
+    func_0015F8B0(cur, &self->sub);
+}

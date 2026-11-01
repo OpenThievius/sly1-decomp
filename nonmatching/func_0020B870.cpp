@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 196/188, checked 2026-11-01
 // Near match: the MMIO register writes are modeled in retail order, but GCC
 // schedules the object field stores and helper argument setup differently,
 // leaving a 12-byte size difference.

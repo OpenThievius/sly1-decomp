@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 722/728 (99.2%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0015E7E0.cpp func_eu_0015E7E0 --unit src/main/0015C000.cpp
 // Still differs: Word-wrapped text draw; down to 6 lines: halign in v0 vs v1 and lineStart in a2 vs v0 in the per-line alignment block.
 // Draws a word-wrapped string aligned inside a box, one character at a time through the font's virtual calls.

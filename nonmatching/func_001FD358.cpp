@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 192/184, checked 2026-11-01
 // SKIP: this function is in the documented double-precision runtime section, where the retail sd/ld saves require the unsupported Sony 2.9-ee-991111 compiler.
 #include "common.h"
 u64 func_001FC910(void*);

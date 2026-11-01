@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 150/172 (87.2%), checked 2026-11-01
 // NEAR: The size matches, but floating-point register allocation and
 //        arithmetic/store order differ.
 #include "common.h"

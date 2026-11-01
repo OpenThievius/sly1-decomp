@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 184/188, checked 2026-11-01
 // Near miss: both synchronization paths and the message payload are modeled.
 // The compiler allocates the persistent registers differently and uses a
 // 112-byte frame; retail uses a 96-byte frame.

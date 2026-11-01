@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 155/180 (86.1%), checked 2026-11-01
 // SKIP: this library function saves its registers with 8-byte sd/ld pairs;
 // the current build tooling cannot select the separate compiler needed for
 // this library code on a per-file basis.

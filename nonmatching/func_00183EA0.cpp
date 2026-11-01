@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 144/160, checked 2026-11-01
 // NEAR: remaining differences include a 64-byte candidate frame versus retail 80 bytes, register allocation, and unaligned-copy local placement.
 #include "common.h"
 

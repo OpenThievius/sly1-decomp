@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 625/628 (99.5%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0015C778.cpp func_eu_0015C778 --unit src/main/0015C000.cpp
 // Still differs: Draws a multi-line string aligned in a box; 3 lines differ: the load of halign before the ==2 compare uses v1/v0 swapped versus retail.
 // Draws a multi-line string aligned inside a box, glyph by glyph through the font's virtual calls.

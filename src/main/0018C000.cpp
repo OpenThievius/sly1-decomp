@@ -1970,3 +1970,38 @@ s32 func_0018C420(Self_18C420* self) {
     }
     return r;
 }
+
+// EXACT: f04,f08,f10,f0C,f14 store order; func_001F5C0C declared s32, called as (void)
+
+extern u8 D_00269A00[];
+extern u8 D_002C2B00[];
+extern u8 D_002832F0[];
+extern s32 D_00275964;
+
+struct Glob_18E5E8 { u8 pad0[0xC]; s32 f0C; u8 pad1[0x120]; s32 f130; };
+struct Init_18E5E8 { s32 f00; void (*f04)(void); s32 f08; s32 f0C; s32 f10; s32 f14; u8 pad[0x18]; };
+struct Mgr_18E5E8 { s32 f00; };
+
+void func_0018E558(void);
+s32 func_001E2268(Init_18E5E8* a, void* b);
+s32 func_001F5C0C(Init_18E5E8* p, s32 zero, s32 size);
+s32 func_001F6A10(Init_18E5E8* p);
+void func_001F6A20(Mgr_18E5E8* m, s32 b);
+
+void func_0018E5E8(void)
+{
+    Init_18E5E8 l;
+    s32 v;
+
+    ((Glob_18E5E8*)D_00269A00)->f130 = func_001E2268((Init_18E5E8*)0, (void*)1);
+    ((Glob_18E5E8*)D_00269A00)->f0C = 0;
+    (void)func_001F5C0C(&l, 0, sizeof(l));
+    l.f04 = func_0018E558;
+    l.f08 = (s32)D_002C2B00;
+    l.f10 = (s32)D_002832F0;
+    l.f0C = 0x1000;
+    l.f14 = 2;
+    v = func_001F6A10(&l);
+    D_00275964 = v;
+    func_001F6A20((Mgr_18E5E8*)v, 0);
+}

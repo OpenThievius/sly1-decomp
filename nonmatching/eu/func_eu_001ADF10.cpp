@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 328/340 (96.5%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ADF10.cpp func_eu_001ADF10 --unit src/main/001AC000.cpp
 // Still differs: Formats up to three texts into buf1 then names into buf2 and calls virtual slot 8; still differs in t0 vs v0 for the b/c tests and a0/a1 move order before func_eu_001E3050 (6 lines).
 // Formats up to three PAL-only texts from record id of the table at D_002623C0 (0x44C apart, from +0x10) into buf1, then the name of id goes through func_eu_001DDAB0 into buf2 and self's virtual slot 8 receives it.

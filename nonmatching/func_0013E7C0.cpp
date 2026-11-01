@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 156/164, checked 2026-11-01
 // NEAR: list iteration is modeled, but loop setup, register allocation, and frame layout differ.
 #include "common.h"
 

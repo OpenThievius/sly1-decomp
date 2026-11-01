@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 168/160, checked 2026-11-01
 // Near match: retail emits max.s for the float field; the source comparison
 // emits a branch instead.
 #include "common.h"

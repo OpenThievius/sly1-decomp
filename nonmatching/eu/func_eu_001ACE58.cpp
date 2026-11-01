@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 77/132 (58.3%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACE58.cpp func_eu_001ACE58 --unit src/main/001A8000.cpp
 // Still differs: Timer countdown and ratio store; retail loads/converts the 0x578 divisor early and loads the 0x58C constant after the 0x588 store, ours hoists the constant load.
 // Counts down a timer at 0x580 with the reload at 0x574 and the stage at 0x57C, then stores a ratio of the count to 0x578 and a constant at 0x58C.

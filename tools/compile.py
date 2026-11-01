@@ -19,6 +19,7 @@ own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
 import argparse
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -38,6 +39,9 @@ CPP_DEFINES = ["-lang-c++", "-undef", "-D__GNUC__=2", "-D__GNUC_MINOR__=9", "-D_
                "-D__LANGUAGE_C", "-D_LANGUAGE_C", "-DLANGUAGE_C",
                "-I", "include", "-I", "src"]
 LAYOUT_FLAGS = ["-ffunction-sections"]
+# A compile takes a second or two; a run under the Windows runner can hang for good (seen with
+# wibo), so every step gives up after this many seconds and the file counts as not compiling.
+TIMEOUT = int(os.environ.get("SLY1_COMPILE_TIMEOUT", "120"))
 
 
 class CompileError(Exception):
@@ -100,6 +104,28 @@ def tools(release=None):
     return run, cc1plus.parent / "cpp.exe", cc1plus, ee_as
 
 
+def run_step(cmd, **kw):
+    """Run one step with the time limit; a hung step is killed and raises CompileError.
+
+    The step writes to files, not pipes, and runs in its own process group: a Windows tool that
+    hangs under its runner can leave a child stuck in the kernel, which no signal removes and
+    which would hold a pipe open for good. On timeout the group is killed and nothing waits on it.
+    """
+    with tempfile.TemporaryFile("w+") as out, tempfile.TemporaryFile("w+") as err:
+        proc = subprocess.Popen(cmd, stdout=out, stderr=err, text=True, start_new_session=True, **kw)
+        try:
+            proc.wait(timeout=TIMEOUT)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except OSError:
+                pass
+            raise CompileError("%s did not finish in %d seconds" % (Path(cmd[0]).name, TIMEOUT))
+        out.seek(0)
+        err.seek(0)
+        return subprocess.CompletedProcess(cmd, proc.returncode, out.read(), err.read())
+
+
 def compile_file(src, out, flags=None, keep_asm=None, source=None):
     """Compile `src` to the object `out`. Returns the cc1plus assembly text.
 
@@ -114,15 +140,14 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None):
         # The Windows tools get paths relative to the repository root, where they run.
         for cmd in (run + [str(cpp)] + CPP_DEFINES + [os.path.relpath(src, ROOT), str(ii)],
                     run + [str(cc1plus), "-quiet"] + flags + LAYOUT_FLAGS + [str(ii), "-o", str(s)]):
-            proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+            proc = run_step(cmd, cwd=ROOT)
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
                 raise CompileError((proc.stderr or proc.stdout).strip() or "%s failed" % Path(cmd[len(run)]).name)
         asm = s.read_text()
         if keep_asm:
             Path(keep_asm).write_text(asm)
         as_flags = [f for f in flags if f.startswith(("-G", "-O"))] + os.environ.get("SLY1_ASFLAGS", "").split()
-        proc = subprocess.run(run + [str(ee_as)] + as_flags + [str(s), "-o", str(Path(tmp) / "unit.o")],
-                              cwd=ROOT, capture_output=True, text=True)
+        proc = run_step(run + [str(ee_as)] + as_flags + [str(s), "-o", str(Path(tmp) / "unit.o")], cwd=ROOT)
         if not proc.returncode:
             # ee-as (1999) leaves local symbols after the symbol table's sh_info, which modern ld
             # refuses; objcopy writes the same sections and code back with the table in order.

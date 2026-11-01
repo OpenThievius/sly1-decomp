@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 148/160, checked 2026-11-01
 // Near miss: helper calls and the frame match, but the early-return paths, argument register ordering, and range-selection code still differ.
 #include "common.h"
 

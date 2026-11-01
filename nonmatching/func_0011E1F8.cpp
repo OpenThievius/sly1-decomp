@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 164/168, checked 2026-11-01
 // Near miss: the readiness polling and flag return paths are modeled. The
 // compiler keeps an extra saved register for the two globals and grows the
 // function to 176 bytes instead of retail's 168.

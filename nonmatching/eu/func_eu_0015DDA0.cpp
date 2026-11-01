@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 72/76 (94.7%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0015DDA0.cpp func_eu_0015DDA0 --unit src/main/0015C000.cpp
 // Still differs: Mode-dependent copy then packed lwl/lwr shift of tail words; first lwl/lwr copy still uses v1 where retail uses v0 (6 variants tried).
 // Only in PAL: shifts a block of values in its object (mode-dependent copy, then the tail words move down by one word).

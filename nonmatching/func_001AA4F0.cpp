@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 180/172, checked 2026-11-01
 // NEAR: candidate frame is 0x120 versus retail 0xF0, with differing saved-register allocation and call sequence.
 #include "common.h"
 struct Obj_1AA4F0 { u8 pad[8]; void* data; u8 pad0C[0x200]; f32 scale; };

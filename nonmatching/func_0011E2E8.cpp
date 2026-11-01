@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 52/60, checked 2026-11-01
 // Near miss: The global field load folds the address offset; retail materializes
 // the base first. The shared epilogue layout also differs.
 #include "common.h"

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 162/168 (96.4%), checked 2026-11-01
 // NEAR: the output pointer is now passed in the call delay slot; the two remaining argument moves are reversed around func_00117AF0.
 #include "common.h"
 extern u8* D_00275710;

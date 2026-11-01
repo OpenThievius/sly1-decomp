@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 import classify_asm  # noqa: E402
 import disc  # noqa: E402
 import progress  # noqa: E402
+import nonmatching  # noqa: E402
 import todo  # noqa: E402
 import c_layout  # noqa: E402
 import check  # noqa: E402
@@ -351,6 +352,38 @@ class CompilerTagTest(unittest.TestCase):
         for path in sorted((versions.ROOT / "src" / "lib").glob("*.cpp")):
             self.assertEqual(cc.row_for(path)[1], "2.9-ee-991111", path.name)
         self.assertEqual(cc.row_for(versions.ROOT / "src" / "main" / "00100000.cpp")[1], "2.95.3")
+
+
+class NonmatchingTest(unittest.TestCase):
+    """A near miss's verdict line, and the share of retail's bytes the report credits it with."""
+
+    def verdict(self, line):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "func_00100000.cpp"
+            path.write_text(nonmatching.SPDX + "\n" + line + "\nvoid func_00100000(void) {}\n")
+            return nonmatching.verdict(path), nonmatching.share(path)
+
+    def test_bytes_give_their_share(self):
+        self.assertEqual(self.verdict("// BYTES 196/208 (94.2%), checked 2026-11-01"),
+                         ((196, 208, "2026-11-01"), 100.0 * 196 / 208))
+
+    def test_another_size_or_a_broken_file_gives_nothing(self):
+        self.assertEqual(self.verdict("// SIZE 216/208, checked 2026-11-01")[1], 0.0)
+        self.assertEqual(self.verdict("// BROKEN, checked 2026-11-01")[1], 0.0)
+
+    def test_a_near_miss_stays_below_a_match(self):
+        self.assertLess(self.verdict("// BYTES 208/208 (100.0%), checked 2026-11-01")[1], 100.0)
+
+    def test_no_verdict_line(self):
+        self.assertEqual(self.verdict("// some note"), (None, 0.0))
+
+    def test_writing_a_verdict_replaces_the_old_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "func_00100000.cpp"
+            path.write_text(nonmatching.SPDX + "\n// BYTES 1/8 (12.5%), checked 2026-10-01\n// note\n")
+            nonmatching.write_verdict(path, "// BYTES 6/8 (75.0%), checked 2026-11-01")
+            self.assertEqual(path.read_text().splitlines(),
+                             [nonmatching.SPDX, "// BYTES 6/8 (75.0%), checked 2026-11-01", "// note"])
 
 
 class StructReturnTest(unittest.TestCase):

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 59/76 (77.6%), checked 2026-11-01
 // Near miss: alignment calculation registers and field-store order differ.
 #include "common.h"
 struct Obj_137290 { s32 f0; s32 f4; s32 f8; s32 fC; u8 pad10[8]; s32 f18; s32 f1C; s32 f20; s32 f24; s32 f28; s32 f2C; s32 f30; };

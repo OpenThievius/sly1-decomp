@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 180/168, checked 2026-11-01
 // NEAR: stack frame, register allocation, and control-flow scheduling still differ from retail.
 #include "common.h"
 extern u32 D_0027B314;
