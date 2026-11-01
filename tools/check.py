@@ -25,6 +25,7 @@ object then has no .rodata, and the relocation reaches retail's address by name.
 """
 
 import argparse
+import bisect
 import json
 import re
 import subprocess
@@ -39,6 +40,7 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 ADDR_NAME = re.compile(r"^(?:func|D|jtbl|L)_([0-9A-Fa-f]{6,8})(?:__|$)")
+LOAD_ADDRESS = 0x100000  # where the executable starts, in every version
 SYMBOL_LINE = re.compile(r"^\s*([^\s=]+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;")
 
 
@@ -88,6 +90,7 @@ class Resolver:
         self.functions = load_functions("us")
         self.symbols = load_symbols("us")
         self.translation = translation(key) if key != "us" else None
+        self.paired = None
 
     def us_address(self, sym):
         if sym in self.symbols:
@@ -108,7 +111,27 @@ class Resolver:
         a = self.us_address(sym)
         if a is None or self.translation is None:
             return a
-        return self.translation.get(a)
+        if a in self.translation:
+            return self.translation[a]
+        if a < LOAD_ADDRESS:
+            return a    # an absolute address below the executable (D_00000FA0) is the same in every version
+        return self.inside(a)
+
+    def inside(self, a):
+        """The address of a byte inside a paired datum: the datum's own, plus the same offset.
+
+        Only when the offset stays short of the next paired address in both versions. A wrong
+        guess cannot pass: a function is EXACT only when the version's own code holds the address.
+        """
+        if self.paired is None:
+            self.paired = sorted(self.translation)
+        i = bisect.bisect_right(self.paired, a) - 1
+        if i < 0 or i + 1 >= len(self.paired):
+            return None
+        lo, hi = self.paired[i], self.paired[i + 1]
+        if self.translation[lo] + (a - lo) < self.translation[hi]:
+            return self.translation[lo] + (a - lo)
+        return None
 
 
 def translation(key):
@@ -127,6 +150,16 @@ def translation(key):
         if how == "fingerprint":
             for a, b in zip(bodies_us.get(us_name, []), bodies_v.get(eu_name, [])):
                 if a is not None and b is not None:
+                    pairs.setdefault(a, b)
+    # Functions paired by their order give their data too, when every instruction lines up: the same
+    # count, and an address in the same places. The fingerprint pairs above come first.
+    for eu_name, eu_addr, size, us_name, us_addr, how in rows:
+        if us_name == "-" or how == "fingerprint":
+            continue
+        a_ops, b_ops = bodies_us.get(us_name, []), bodies_v.get(eu_name, [])
+        if len(a_ops) == len(b_ops) and [a is None for a in a_ops] == [b is None for b in b_ops]:
+            for a, b in zip(a_ops, b_ops):
+                if a is not None:
                     pairs.setdefault(a, b)
     cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(pairs))

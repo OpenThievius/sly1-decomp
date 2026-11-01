@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 import disc  # noqa: E402
 import todo  # noqa: E402
 import c_layout  # noqa: E402
+import check  # noqa: E402
 import rodata  # noqa: E402
 import versions  # noqa: E402
 
@@ -167,6 +168,26 @@ class ProprietaryTest(unittest.TestCase):
         line = b", ".join(b"0x%02X" % i for i in range(16)) + b"\n"
         self.assertTrue(self.check("src/table.c", line * 8))
         self.assertEqual(self.check("src/table.c", line * 7), [])
+
+
+class TranslationTest(unittest.TestCase):
+    """How a US address reaches PAL's when the pairing does not name it."""
+
+    def resolver(self, translation):
+        r = check.Resolver.__new__(check.Resolver)
+        r.functions, r.symbols, r.translation, r.paired = {}, {}, translation, None
+        return r
+
+    def test_an_address_below_the_executable_is_the_same(self):
+        self.assertEqual(self.resolver({0x200000: 0x201000}).address("D_00000FA0"), 0xFA0)
+
+    def test_a_byte_inside_a_paired_datum_keeps_its_offset(self):
+        r = self.resolver({0x247AA8: 0x248FA8, 0x247AF0: 0x2490F0})
+        self.assertEqual(r.address("D_00247AD0"), 0x248FD0)
+
+    def test_an_offset_that_reaches_the_next_datum_is_refused(self):
+        r = self.resolver({0x247AA8: 0x248FA8, 0x247AF0: 0x248FB0})
+        self.assertIsNone(r.address("D_00247AD0"))
 
 
 class BlockerTest(unittest.TestCase):
