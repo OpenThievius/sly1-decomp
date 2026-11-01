@@ -1249,3 +1249,60 @@ void func_00193EE8(Self_193EE8* self, s32 a, s32 b)
         break;
     }
 }
+
+// NEAR: the frame, calls and branch shape match; the saved registers are swapped (retail keeps the input base in $s2 and the moving "last" pointer in $s3, ours the other way round), which changes 18 lines.
+
+void func_0018D608(void);
+s32* func_0018D658(s32 bytes);
+void func_0018D800(void* dst, void* src, s32 bytes);
+void func_0018D6F0(void);
+s32 func_00190E30(void* self, s32 a, s32 b);
+
+void func_00191128(void* a0, s32* a1, s32* a2)
+{
+    s32 count;
+    s32* out;
+    s32* end;
+    s32* last;
+    s32* base;
+    s32* q;
+    s32* p;
+    s32 n;
+    s32 val;
+
+    last = a2;
+    base = a2;
+    p = base + 1;
+    q = base + 2;
+    func_0018D608();
+    n = *a1;
+    out = func_0018D658(n << 2);
+    end = base + n;
+    out[0] = base[0];
+    count = 1;
+    if (q < end) {
+        do {
+            if (func_00190E30(a0, *last, *q) != 0) {
+                val = *p;
+                last = p;
+                p = q;
+                q++;
+                out[count] = val;
+                count++;
+            } else {
+                p = q;
+                q++;
+            }
+        } while (q < end);
+    }
+    out[count] = base[n - 1];
+    count++;
+    if (count < n) {
+        if (count >= 3) {
+            func_00191128(a0, &count, out);
+        }
+    }
+    func_0018D800(base, out, count * 4);
+    *a1 = count;
+    func_0018D6F0();
+}

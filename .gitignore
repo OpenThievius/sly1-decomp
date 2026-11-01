@@ -22,6 +22,9 @@
 /include/macro.inc
 /include/labels.inc
 
+# Tools each contributor fetches for themselves, never distributed (decomp-permuter).
+/tools/ext/
+
 # Python and editors
 venv/
 .venv/

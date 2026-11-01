@@ -201,6 +201,25 @@ functions wait for a `stdarg.h` written for this project. If `check.py` says "th
 retail's function M", fix the size first: something is extra or missing. Put the attempt in `nonmatching/func_XXXXXXXX.cpp` with a comment at the
 top saying what still differs, and move on.
 
+When only the order of some statements is left (a run of stores, the arguments set up before a
+call), do not try orders by hand: mark the lines with `/*P*/` and run
+`python3 tools/permute.py FILE FUNC`, which compiles every order and stops at an EXACT one
+(`--auto` marks each run of simple statements itself; `--write OUT` keeps the best). Its result
+counts like any other once `tools/check.py` prints `EXACT`.
+
+For a register-allocation or scheduling tie that no reordering moves, use decomp-permuter
+(https://github.com/simonlindholm/decomp-permuter, MIT). It is never committed: fetch it once into
+`tools/ext/`, which is gitignored, with its own Python environment:
+
+    git clone https://github.com/simonlindholm/decomp-permuter tools/ext/decomp-permuter
+    python3 -m venv tools/ext/venv && tools/ext/venv/bin/pip install toml Levenshtein
+
+Then `python3 tools/permuter_setup.py FILE FUNC` writes `build/permuter/FUNC/` (retail's function
+assembled as `target.o`, the C as `base.c`, a `compile.sh` through `tools/compile.py` with the
+function's own compiler) and prints the command that runs the permuter on it. A score of 0 is a
+lead: copy the candidate back and check it with `tools/check.py`. Its C must still follow every
+rule here (plain C++, no barriers).
+
 The lead keeps the closest attempt per function in `nonmatching/` (PAL's own definitions in
 `nonmatching/eu/`): `python3 tools/nonmatching.py stage 'build/swarm/*/func_*.cpp'` adds every
 attempt within 15% of retail's bytes, and `python3 tools/nonmatching.py check` re-scores them all,

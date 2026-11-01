@@ -14,6 +14,7 @@ import classify_asm  # noqa: E402
 import disc  # noqa: E402
 import progress  # noqa: E402
 import nonmatching  # noqa: E402
+import permute  # noqa: E402
 import todo  # noqa: E402
 import c_layout  # noqa: E402
 import check  # noqa: E402
@@ -406,6 +407,21 @@ class NonmatchingTest(unittest.TestCase):
             nonmatching.write_verdict(path, "// BYTES 6/8 (75.0%), checked 2026-11-01")
             self.assertEqual(path.read_text().splitlines(),
                              [nonmatching.SPDX, "// BYTES 6/8 (75.0%), checked 2026-11-01", "// note"])
+
+
+class PermuteTest(unittest.TestCase):
+    LINES = ["void f(S* s)", "{", "    s->a = 1; /*P*/", "    s->b = 2; /*P*/", "    g(s);", "    s->c = 3;",
+             "    s->d = 4;", "    if (s->a) {", "        return;", "    }", "}"]
+
+    def test_marked_lines_form_runs(self):
+        self.assertEqual(permute.groups(self.LINES, auto=False), [[2, 3]])
+
+    def test_auto_takes_runs_of_simple_statements(self):
+        self.assertEqual(permute.groups(self.LINES, auto=True), [[2, 3, 4, 5, 6]])
+
+    def test_every_order_is_tried(self):
+        got = {tuple(c[2:4]) for c in permute.orders(self.LINES, [[2, 3]])}
+        self.assertEqual(got, {("    s->a = 1; /*P*/", "    s->b = 2; /*P*/"), ("    s->b = 2; /*P*/", "    s->a = 1; /*P*/")})
 
 
 class StructReturnTest(unittest.TestCase):
