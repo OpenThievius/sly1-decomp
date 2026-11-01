@@ -33,7 +33,7 @@ class LayoutError(Exception):
 
 
 def sources():
-    return sorted((ROOT / "src").rglob("*.cpp")) if (ROOT / "src").exists() else []
+    return versions.sources()
 
 
 def compile_sources(jobs):

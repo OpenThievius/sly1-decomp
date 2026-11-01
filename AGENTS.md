@@ -27,6 +27,7 @@ procedure; read it before you match anything.
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
 | `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with the default compiler until a file can name its own (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |
+| `src/versions/eu/<file>/<function>.cpp` | PAL's own definition of a function whose PAL bytes differ, built in its shared file's unit (docs/VERSIONS.md) | you |
 | `nonmatching/` | near misses, never linked | you |
 | `progress/<version>/report.json`, the README table | what ByteMatch shows | `tools/progress.py` |
 | `tools/`, `tests/` | setup, split, checks | by hand |
@@ -47,6 +48,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/todo.py [--max-size N] [--exclude vu,jtbl,...]` | the functions still to match, with their tags |
 | `python3 tools/check.py FILE.cpp FUNC [--version eu]` | compiles one file and compares one function with retail |
 | `python3 tools/version_check.py` | every C function at its PAL counterpart: `config/eu/c_status.tsv` |
+| `python3 tools/check.py src/versions/eu/FILE/FUNC.cpp FUNC` | PAL's own definition, built in its shared file's unit, against PAL |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
 | `python3 tools/inventory.py [--check]` | the function tables and PAL's pairing |
 | `python3 -m unittest discover -s tests` | the tools' unit tests (CI) |

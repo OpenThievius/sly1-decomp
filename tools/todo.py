@@ -97,7 +97,7 @@ def source_of(addr):
 def finished():
     """Names of the US functions src/ defines (by their address name or symbol_addrs name)."""
     names = set()
-    for path in sorted((ROOT / "src").rglob("*.cpp")) if (ROOT / "src").exists() else []:
+    for path in versions.sources():
         for m in DEFINITION.finditer(path.read_text()):
             names.add(m.group(1))
     return names

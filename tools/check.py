@@ -15,7 +15,10 @@ padding.
 
 Prints EXACT, or DIFFER with both disassemblies side by side (--diff shows
 them for EXACT too). With --version eu the function is checked at its PAL
-counterpart (config/eu/map.tsv), with every address translated to PAL's.
+counterpart (config/eu/map.tsv), with every address translated to PAL's. A
+file of src/versions/eu/ (tools/version_src.py) is checked in PAL, built in
+its shared file's unit; --unit SHARED.cpp does the same for a definition kept
+anywhere else (a worker's folder).
 
 A function that uses a .rodata literal of its own (a float or a string written in C) is EXACT here
 and marked `rodata`: the literal, for as many bytes as the instruction reaches (a string, up to its
@@ -25,6 +28,7 @@ object then has no .rodata, and the relocation reaches retail's address by name.
 """
 
 import argparse
+import bisect
 import json
 import re
 import subprocess
@@ -35,10 +39,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import compile as cc  # noqa: E402
 import elf  # noqa: E402
+import version_src  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
+VERSION_NAME = re.compile(r"^(?:func|D|jtbl)_([a-z]+)_([0-9A-Fa-f]{8})(?:__|$)")  # func_eu_00138718
 ADDR_NAME = re.compile(r"^(?:func|D|jtbl|L)_([0-9A-Fa-f]{6,8})(?:__|$)")
+LOAD_ADDRESS = 0x100000  # where the executable starts, in every version
 SYMBOL_LINE = re.compile(r"^\s*([^\s=]+)\s*=\s*(0x[0-9A-Fa-f]+)\s*;")
 
 
@@ -88,6 +95,7 @@ class Resolver:
         self.functions = load_functions("us")
         self.symbols = load_symbols("us")
         self.translation = translation(key) if key != "us" else None
+        self.paired = None
 
     def us_address(self, sym):
         if sym in self.symbols:
@@ -105,10 +113,34 @@ class Resolver:
         return None
 
     def address(self, sym):
+        m = VERSION_NAME.match(sym)
+        if m:
+            # Code or data only one version has (tools/version_src.py): its own address, there alone.
+            return int(m.group(2), 16) if m.group(1) == self.key else None
         a = self.us_address(sym)
         if a is None or self.translation is None:
             return a
-        return self.translation.get(a)
+        if a in self.translation:
+            return self.translation[a]
+        if a < LOAD_ADDRESS:
+            return a    # an absolute address below the executable (D_00000FA0) is the same in every version
+        return self.inside(a)
+
+    def inside(self, a):
+        """The address of a byte inside a paired datum: the datum's own, plus the same offset.
+
+        Only when the offset stays short of the next paired address in both versions. A wrong
+        guess cannot pass: a function is EXACT only when the version's own code holds the address.
+        """
+        if self.paired is None:
+            self.paired = sorted(self.translation)
+        i = bisect.bisect_right(self.paired, a) - 1
+        if i < 0 or i + 1 >= len(self.paired):
+            return None
+        lo, hi = self.paired[i], self.paired[i + 1]
+        if self.translation[lo] + (a - lo) < self.translation[hi]:
+            return self.translation[lo] + (a - lo)
+        return None
 
 
 def translation(key):
@@ -127,6 +159,16 @@ def translation(key):
         if how == "fingerprint":
             for a, b in zip(bodies_us.get(us_name, []), bodies_v.get(eu_name, [])):
                 if a is not None and b is not None:
+                    pairs.setdefault(a, b)
+    # Functions paired by their order give their data too, when every instruction lines up: the same
+    # count, and an address in the same places. The fingerprint pairs above come first.
+    for eu_name, eu_addr, size, us_name, us_addr, how in rows:
+        if us_name == "-" or how == "fingerprint":
+            continue
+        a_ops, b_ops = bodies_us.get(us_name, []), bodies_v.get(eu_name, [])
+        if len(a_ops) == len(b_ops) and [a is None for a in a_ops] == [b is None for b in b_ops]:
+            for a, b in zip(a_ops, b_ops):
+                if a is not None:
                     pairs.setdefault(a, b)
     cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(pairs))
@@ -375,12 +417,25 @@ def main(argv=None):
     parser.add_argument("--version", default="us", choices=["us", "eu"])
     parser.add_argument("--flags", help="override the file's flags (to explore only: matches count with its own)")
     parser.add_argument("--diff", action="store_true", help="show the disassembly for EXACT too")
+    parser.add_argument("--unit", metavar="SHARED.cpp",
+                        help="FILE is a version's own definition of FUNC, kept elsewhere: build it in SHARED's unit")
     args = parser.parse_args(argv)
 
+    own = version_src.version_of(args.src)
+    if args.unit:
+        own = (args.version if args.version != "us" else "eu", Path(args.unit).resolve())
+    if own and args.version == "us":
+        args.version = own[0]       # a version's own definition is checked in that version
     with tempfile.TemporaryDirectory(prefix="sly1-check-") as tmp:
         out = Path(tmp) / "unit.o"
         try:
-            cc.compile_file(args.src, out, args.flags.split() if args.flags else None)
+            if own:
+                # Built in its shared file's unit, in place of the shared definition.
+                trying = {f: Path(args.src).resolve() for f in args.funcs} if args.unit else None
+                path, _ = version_src.unit(own[1], own[0], trying)
+                cc.compile_file(path, out, args.flags.split() if args.flags else cc.flags_for(own[1]))
+            else:
+                cc.compile_file(args.src, out, args.flags.split() if args.flags else None)
         except cc.CompileError as e:
             print("ERROR: does not compile:\n%s" % e)
             return 2
