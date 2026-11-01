@@ -37,7 +37,7 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 OUT = ROOT / "build" / "permuter"
-STRUCT = re.compile(r"\b(struct|union)\s+([A-Za-z_]\w*)\s*[{;]")
+STRUCT = re.compile(r"\b(struct|union)\s+(?:__attribute__\s*\(\(.*?\)\)\s*)?([A-Za-z_]\w*)\s*[{;]")
 
 
 def target(func, dest):
