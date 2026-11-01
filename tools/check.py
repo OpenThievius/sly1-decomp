@@ -443,7 +443,7 @@ def main(argv=None):
                 # Built in its shared file's unit, in place of the shared definition.
                 trying = {f: Path(args.src).resolve() for f in args.funcs} if args.unit else None
                 path, _ = version_src.unit(own[1], own[0], trying)
-                cc.compile_file(path, out, args.flags.split() if args.flags else cc.flags_for(own[1]))
+                cc.compile_file(path, out, args.flags.split() if args.flags else None, source=own[1])
             else:
                 cc.compile_file(args.src, out, args.flags.split() if args.flags else None)
         except cc.CompileError as e:

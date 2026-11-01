@@ -85,9 +85,22 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    0x1FB618–0x1FD6E0 makes tail calls and saves registers in 8 bytes, and
    five of its functions (`func_001FBDF8`, `func_001FCD20`, `func_001FCD78`,
    `func_001FD308`, `func_001FD548`) are EXACT with Sony's `2.9-ee-991111`,
-   none with the SN builds. Those files need their own compiler row in
-   config/cflags.tsv (and, being C, the release's `cc1`); tools/compile.py
-   does not support a compiler per file yet, so they are not landed.
+   none with the SN builds.
+
+   **The whole library is Sony's 2.9-ee-991111** (measured on 2026-11-01).
+   Every one of the 340 library functions that saves a register saves it
+   with `sd`, none with `sq`; 52 of the 619 library functions end in a tail
+   jump to a function, against 2 of the 4,151 in game code; and 49 of the 51
+   library functions matched with 2.95.3 are EXACT with 2.9-ee-991111 as
+   well (the other two sit among `sd`-saving functions and were rewritten).
+   config/cflags.tsv names 2.9-ee-991111 in the third column of every
+   `src/lib` file's row, and tools/compile.py runs that release's
+   `cc1plus.exe`. This is how OpenRAC builds its SDK objects (rac1-decomp,
+   `docs/reference/TOOLCHAIN.md`: Sony's 2.9-ee for the `ee29` objects).
+   Unlike OpenRAC, which builds libgcc from GCC's own sources, nothing here
+   comes from GCC's sources: the runtime's functions (the double-precision
+   float support among them) are decompiled from retail like the rest
+   (LEGAL.md).
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.

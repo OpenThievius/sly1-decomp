@@ -155,7 +155,7 @@ def compile_unit(shared, key, obj):
     """Compile the version's unit for a shared file to `obj`, with the shared file's flags. Returns its own functions."""
     import compile as cc
     path, mine = unit(shared, key)
-    cc.compile_file(path, obj, flags=cc.flags_for(shared))
+    cc.compile_file(path, obj, source=shared)
     return mine
 
 

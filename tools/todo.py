@@ -30,15 +30,14 @@ What stops a function from being matched, the blocker column:
   assembler left after a return, or a tail call; no C function can produce it
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
 - nonc: max.s, min.s, sqrt.s: no plain C form in this compiler
-- compiler: a 64-bit `sd` save of a register in the prologue: retail's library code (Sony's
-  2.9-ee-991111); the fixed default compiler saves with `sq`
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; write the switch in C (the table stays retail's, tools/rodata.py)
 - rodata: refers to named .rodata. C reads the constant through an extern
   (extern u8 D_00219718[];), so the object keeps no .rodata of its own
-- compiler: saves registers with 8-byte sd in its prologue (Sony's 2.9-ee-991111 libraries,
-  docs/TOOLCHAIN.md); the default compiler saves with sq, so it cannot match
+- compiler: saves registers with 8-byte sd in its prologue: Sony's library code, built with
+  Sony's 2.9-ee-991111, which config/cflags.tsv names for every src/lib file (docs/TOOLCHAIN.md).
+  Not a blocker: write it in its src/lib file as any other
 - none: nothing blocks it
 
 A function is finished when src/ defines it (tools/progress.py reads the same
@@ -178,7 +177,7 @@ def tags_of(lines, kind):
     return tags
 
 
-PERMANENT = ("fragment", "vu", "system", "handwritten", "mmi", "nonc", "compiler")
+PERMANENT = ("fragment", "vu", "system", "handwritten", "mmi", "nonc")
 
 
 def blocker(tags):
@@ -229,7 +228,7 @@ def main(argv=None):
             n, total = counts.get(key, (0, 0))
             counts[key] = (n + 1, total + size)
         print("blocker\tfunctions\tbytes")
-        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten", "mmi", "nonc", "compiler"):
+        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten", "mmi", "nonc"):
             if key in counts:
                 print("%s\t%d\t%d" % (key, counts[key][0], counts[key][1]))
         return 0

@@ -25,7 +25,7 @@ procedure; read it before you match anything.
 | `config/cflags.tsv` | the compiler, and the flags of each source file | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
-| `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with the default compiler until a file can name its own (docs/TOOLCHAIN.md) | you |
+| `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with Sony's 2.9-ee-991111, which `config/cflags.tsv` names per file (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |
 | `src/versions/eu/<file>/<function>.cpp` | PAL's own definition of a function whose PAL bytes differ, built in its shared file's unit (docs/VERSIONS.md) | you |
 | `nonmatching/` | near misses, never linked | you |

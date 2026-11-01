@@ -4,13 +4,16 @@
     python3 tools/compile.py FILE.cpp OUT.o [--flags "-O2 ..."]
 
 The pipeline is the compiler driver's, run step by step: the toolchain's
-cpp.exe with the driver's predefined macros, cc1plus.exe (Sony's
-2.9-ee-991111b, docs/TOOLCHAIN.md), then the same release's ee-as.exe with the
+cpp.exe with the driver's predefined macros, the release's cc1plus.exe
+(docs/TOOLCHAIN.md), then ee/bin/as.exe (GNU as 2.9-ee-991111b) with the
 options the driver gives it (-G and -O from the file's flags). Retail's
 assembler matters: it expands `move` to `daddu`, where a modern GNU as writes
-`or`. A file's flags come from config/cflags.tsv (the `default` row, or the
-file's own row); every file also gets -ffunction-sections, so that the build
-can place each function at its address (tools/build.py).
+`or`. A file's flags and compiler come from config/cflags.tsv: its own row
+(`file<TAB>flags<TAB>compiler`, the compiler optional), or the `default` row
+and the `compiler` row. The game is SN GCC 2.95.3; Sony's libraries are Sony's
+own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
+-ffunction-sections, so that the build can place each function at its address
+(tools/build.py).
 """
 
 import argparse
@@ -49,28 +52,39 @@ def compiler_release():
     raise CompileError("config/cflags.tsv has no compiler row")
 
 
-def flags_for(path):
-    """The flags config/cflags.tsv gives a source file."""
+def row_for(path):
+    """(flags, compiler) config/cflags.tsv gives a source file: its own row, or the defaults."""
     rel = str(Path(path).resolve().relative_to(ROOT)) if Path(path).resolve().is_relative_to(ROOT) else None
     default = None
     for line in CFLAGS.read_text().splitlines():
         if not line.strip() or line.startswith(("#", "compiler\t")):
             continue
-        name, flags = line.split("\t", 1)
+        name, rest = line.split("\t", 1)
+        flags, _, compiler = rest.partition("\t")
         if name == "default":
             default = flags.split()
         elif rel and name == rel:
-            return flags.split()
+            return flags.split(), compiler.strip() or compiler_release()
     if default is None:
         raise CompileError("config/cflags.tsv has no default row")
-    return default
+    return default, compiler_release()
 
 
-def tools():
+def flags_for(path):
+    """The flags config/cflags.tsv gives a source file."""
+    return row_for(path)[0]
+
+
+def compiler_for(path):
+    """The compiler release (a gcc-lib/ee/ folder) that builds a source file; SLY1_COMPILER overrides it."""
+    return os.environ.get("SLY1_COMPILER") or row_for(path)[1]
+
+
+def tools(release=None):
     root = toolchain.toolchain_dir()
     if root is None:
         raise CompileError("no toolchain: set SLY1_TOOLCHAIN or link ./toolchain (docs/TOOLCHAIN.md)")
-    release = os.environ.get("SLY1_COMPILER") or compiler_release()
+    release = release or os.environ.get("SLY1_COMPILER") or compiler_release()
     cc1plus = root / "lib" / "gcc-lib" / "ee" / release / "cc1plus.exe"
     if not cc1plus.exists():
         raise CompileError("no lib/gcc-lib/ee/%s/cc1plus.exe in %s" % (release, root))
@@ -86,11 +100,15 @@ def tools():
     return run, cc1plus.parent / "cpp.exe", cc1plus, ee_as
 
 
-def compile_file(src, out, flags=None, keep_asm=None):
-    """Compile `src` to the object `out`. Returns the cc1plus assembly text."""
-    run, cpp, cc1plus, ee_as = tools()
+def compile_file(src, out, flags=None, keep_asm=None, source=None):
+    """Compile `src` to the object `out`. Returns the cc1plus assembly text.
+
+    source: the file whose config/cflags.tsv row applies (a version's unit takes its shared file's).
+    """
     src = Path(src).resolve()
-    flags = flags if flags is not None else flags_for(src)
+    source = Path(source).resolve() if source else src
+    run, cpp, cc1plus, ee_as = tools(compiler_for(source))
+    flags = flags if flags is not None else flags_for(source)
     with tempfile.TemporaryDirectory(prefix="sly1-cc-") as tmp:
         ii, s = Path(tmp) / "unit.ii", Path(tmp) / "unit.s"
         # The Windows tools get paths relative to the repository root, where they run.

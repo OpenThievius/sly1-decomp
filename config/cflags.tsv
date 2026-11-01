@@ -1,6 +1,16 @@
 # The compiler and the flags of each source file (docs/TOOLCHAIN.md).
 # `compiler` names the folder under the toolchain's lib/gcc-lib/ee/ whose cc1plus
 # builds the game. Flags are one row per file, never per function; `default`
-# applies to every file without a row of its own.
+# applies to every file without a row of its own. A file's row may name its own
+# compiler in a third column: Sony's libraries were built with Sony's
+# 2.9-ee-991111, as OpenRAC builds its SDK objects (docs/TOOLCHAIN.md).
 compiler	2.95.3
 default	-O2 -G0 -fno-exceptions
+src/lib/001F4000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/001F8000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/001FC000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/00200000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/00204000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/00208000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/0020C000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/00210000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
