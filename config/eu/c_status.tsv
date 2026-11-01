@@ -1517,7 +1517,7 @@ func_0016AED8	func_0016B4C0	match
 func_0016AF80	func_0016B568	match	version-specific
 func_0016B0F8	func_0016B6F0	match	
 func_0016B190	func_0016B788	match	
-func_0016B300	func_0016B8F8	error	a reference to D_00262950, which has no address in this version
+func_0016B300	func_0016B8F8	match	version-specific
 func_0016B520	func_0016BB38	match	version-specific
 func_0016B560	func_0016BB78	match	
 func_0016B7A8	func_0016BDC0	match	version-specific
@@ -1845,7 +1845,7 @@ func_0018DD50	func_0018E3E0	match
 func_0018DD78	func_0018E408	match	
 func_0018DDA0	func_0018E430	match	
 func_0018E410	func_0018EAA0	match	
-func_0018E480	func_0018EB10	error	a reference to D_0024B588, which has no address in this version
+func_0018E480	func_0018EB10	match	version-specific
 func_0018E4C0	func_0018EB50	match	
 func_0018E4F0	func_0018EB80	match	
 func_0018E558	-	absent	
@@ -1861,7 +1861,7 @@ func_0018EAF8	func_0018F530	match	version-specific
 func_0018EB98	func_0018F620	match	version-specific
 func_0018EC40	func_0018F6F0	match	
 func_0018EC80	func_0018F730	match	
-func_0018ECA8	func_0018F758	error	a reference to D_0024B598, which has no address in this version
+func_0018ECA8	func_0018F758	match	version-specific
 func_0018ED78	func_0018F838	match	version-specific
 func_0018EDA0	func_0018F870	match	
 func_0018EF78	func_0018FA48	match	version-specific
@@ -2283,7 +2283,7 @@ func_001ADF28	-	absent
 func_001ADFF0	-	absent	
 func_001AE130	-	absent	
 func_001AE178	-	absent	
-func_001AE510	func_001AF250	error	a reference to D_0024CF98, which has no address in this version
+func_001AE510	func_001AF250	match	version-specific
 func_001AE758	func_001AF438	match	version-specific
 func_001AE7F8	func_001AF4D8	match	version-specific
 func_001AE820	func_001AF500	match	version-specific, rodata
@@ -3072,7 +3072,7 @@ func_001F18B0	func_001F2938	match
 func_001F1960	func_001F29E8	match	version-specific
 func_001F1A08	func_001F2A50	match	version-specific
 func_001F1C90	func_001F2CD8	match	version-specific
-func_001F2688	func_001F36E0	error	a reference to D_00276648, which has no address in this version
+func_001F2688	func_001F36E0	match	version-specific
 func_001F2758	func_001F3748	match	
 func_001F2798	func_001F3788	match	
 func_001F31F8	func_001F41E8	match	
@@ -3182,3 +3182,67 @@ func_0020DEE8	func_0020F3A8	match
 func_0020F0C0	func_00210580	match	
 func_002107B8	func_00211C78	match	
 func_002117A0	func_00212C60	match	
+func_eu_0011E5F8	func_0011E5F8	match	only in PAL
+func_eu_0011E628	func_0011E628	match	only in PAL
+func_eu_001374E0	func_001374E0	match	only in PAL
+func_eu_0015C698	func_0015C698	match	only in PAL
+func_eu_0015DBE8	func_0015DBE8	match	only in PAL
+func_eu_0015DC58	func_0015DC58	match	only in PAL
+func_eu_0015DCB8	func_0015DCB8	match	only in PAL
+func_eu_0015DD18	func_0015DD18	match	only in PAL
+func_eu_0015DDF0	func_0015DDF0	match	only in PAL
+func_eu_0015DE18	func_0015DE18	match	only in PAL
+func_eu_0015DE58	func_0015DE58	match	only in PAL
+func_eu_0015DEA0	func_0015DEA0	match	only in PAL
+func_eu_0015DEE0	func_0015DEE0	match	only in PAL
+func_eu_0015E3E0	func_0015E3E0	match	only in PAL
+func_eu_0015E438	func_0015E438	match	only in PAL
+func_eu_00160538	func_00160538	match	only in PAL
+func_eu_00160568	func_00160568	match	only in PAL
+func_eu_00160718	func_00160718	match	only in PAL
+func_eu_00160750	func_00160750	match	only in PAL
+func_eu_00160788	func_00160788	match	only in PAL
+func_eu_001607C8	func_001607C8	match	only in PAL
+func_eu_00160800	func_00160800	match	only in PAL
+func_eu_00160830	func_00160830	match	only in PAL
+func_eu_001608C8	func_001608C8	match	only in PAL
+func_eu_0018ED38	func_0018ED38	match	only in PAL
+func_eu_0018EDE8	func_0018EDE8	match	only in PAL
+func_eu_001AAE58	func_001AAE58	match	only in PAL
+func_eu_001AAEC0	func_001AAEC0	match	only in PAL
+func_eu_001AAFB0	func_001AAFB0	match	only in PAL
+func_eu_001AAFE0	func_001AAFE0	match	only in PAL
+func_eu_001AB238	func_001AB238	match	only in PAL
+func_eu_001AB550	func_001AB550	match	only in PAL
+func_eu_001AD3C0	func_001AD3C0	match	only in PAL
+func_eu_001AD5E0	func_001AD5E0	match	only in PAL
+func_eu_001AD668	func_001AD668	match	only in PAL
+func_eu_001AD6E8	func_001AD6E8	match	only in PAL
+func_eu_001AD788	func_001AD788	match	only in PAL
+func_eu_001AD7C0	func_001AD7C0	match	only in PAL
+func_eu_001ADB10	func_001ADB10	match	only in PAL
+func_eu_001ADBA8	func_001ADBA8	match	only in PAL
+func_eu_001ADDF8	func_001ADDF8	match	only in PAL
+func_eu_001AE068	func_001AE068	match	only in PAL
+func_eu_001AE0C0	func_001AE0C0	match	only in PAL
+func_eu_001AE0F8	func_001AE0F8	match	only in PAL
+func_eu_001AE400	func_001AE400	match	only in PAL
+func_eu_001AE468	func_001AE468	match	only in PAL
+func_eu_001AE500	func_001AE500	match	only in PAL
+func_eu_001AE6A0	func_001AE6A0	match	only in PAL
+func_eu_001AE6D0	func_001AE6D0	match	only in PAL
+func_eu_001AE9C0	func_001AE9C0	match	only in PAL
+func_eu_001AEA90	func_001AEA90	match	only in PAL
+func_eu_001AED58	func_001AED58	match	only in PAL
+func_eu_001AEEA0	func_001AEEA0	match	only in PAL
+func_eu_001DDAB0	func_001DDAB0	match	only in PAL
+func_eu_001DE018	func_001DE018	match	only in PAL
+func_eu_001E3018	func_001E3018	match	only in PAL
+func_eu_001E3050	func_001E3050	match	only in PAL
+func_eu_001E30A0	func_001E30A0	match	only in PAL
+func_eu_001E3100	func_001E3100	match	only in PAL
+func_eu_001E3140	func_001E3140	match	only in PAL
+func_eu_001E3178	func_001E3178	match	only in PAL
+func_eu_001E31E0	func_001E31E0	match	only in PAL
+func_eu_001E3210	func_001E3210	match	only in PAL
+func_eu_001E3248	func_001E3248	match	only in PAL

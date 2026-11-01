@@ -61,6 +61,11 @@ def eu_names():
     return out
 
 
+def only_eu():
+    """{func_eu_XXXXXXXX: file} for the functions only PAL has that src/versions/eu/ defines."""
+    return {n: p for n, p in version_src.overrides("eu").items() if version_src.OWN_NAME.match(n)}
+
+
 def run():
     import check
     import compile as cc
@@ -73,6 +78,10 @@ def run():
     by_file = {}
     for name, path in defined.items():
         by_file.setdefault(path, []).append(name)
+    for name, path in only_eu().items():
+        # Functions only PAL has: no US name; their PAL name is their address name.
+        by_file.setdefault(version_src.version_of(path)[1], []).append(name)
+        names[name] = "func_" + name[len("func_eu_"):]
     for path, funcs in sorted(by_file.items()):
         with tempfile.TemporaryDirectory(prefix="sly1-vc-") as tmp:
             obj_path = Path(tmp) / "unit.o"
@@ -88,7 +97,8 @@ def run():
                 rows[name] = (names[name], "error", str(e).strip("'\""))
                 continue
             status = {"EXACT": "match", "DIFFER": "differs"}.get(r["status"], "error")
-            note = ", ".join(n for n in ("version-specific" if name in own else "", r.get("note", "")) if n)
+            mark = "only in PAL" if version_src.OWN_NAME.match(name) else "version-specific" if name in own else ""
+            note = ", ".join(n for n in (mark, r.get("note", "")) if n)
             rows[name] = (names[name], status, note)
     text = HEADER + "\n" + "".join("%s\t%s\t%s\t%s\n" % (n, *rows[n]) for n in sorted(rows))
     STATUS.write_text(text)
@@ -100,12 +110,15 @@ def run():
 
 
 def check_current():
-    defined = set(defined_in_src())
+    own_files = {"func_eu_%08X" % a: shared for _, a, _, shared in version_src.only_here("eu")}
+    defined = set(defined_in_src()) | set(only_eu())
     rows = set(read_status())
     problems = ["%s has no row in config/eu/c_status.tsv (run tools/version_check.py)" % n for n in sorted(defined - rows)]
     problems += ["config/eu/c_status.tsv has %s, which src/ no longer defines" % n for n in sorted(rows - defined)]
     problems += ["%s defines %s, which its shared file does not" % (p.relative_to(ROOT), n)
                  for n, p in version_src.overrides("eu").items() if n not in defined]
+    problems += ["%s defines %s, which is not where PAL has a function of its own" % (p.relative_to(ROOT), n)
+                 for n, p in only_eu().items() if version_src.version_of(p)[1] != own_files.get(n)]
     for p in problems:
         print("stale: " + p)
     return 1 if problems else 0

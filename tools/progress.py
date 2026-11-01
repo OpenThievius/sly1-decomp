@@ -54,6 +54,7 @@ def finished(key):
     if key == "us":
         return done
     status = version_check.read_status()
+    done |= set(version_check.only_eu())    # functions only PAL has, defined in src/versions/eu/
     return {eu for us, (eu, s, _) in status.items() if s == "match" and us in done}
 
 

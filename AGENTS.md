@@ -49,6 +49,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/check.py FILE.cpp FUNC [--version eu]` | compiles one file and compares one function with retail |
 | `python3 tools/version_check.py` | every C function at its PAL counterpart: `config/eu/c_status.tsv` |
 | `python3 tools/check.py src/versions/eu/FILE/FUNC.cpp FUNC` | PAL's own definition, built in its shared file's unit, against PAL |
+| `python3 tools/version_src.py todo` | the functions only PAL has, not yet defined, with their tags and file |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
 | `python3 tools/inventory.py [--check]` | the function tables and PAL's pairing |
 | `python3 -m unittest discover -s tests` | the tools' unit tests (CI) |

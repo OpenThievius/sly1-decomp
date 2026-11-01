@@ -216,6 +216,15 @@ class VersionSourceTest(unittest.TestCase):
         self.assertIn("void func_00100010(s32* p);", text)
         self.assertIn("s32 func_00100020(void) { return 2; }", text)
 
+    def test_a_function_only_the_version_has_is_added_at_the_end(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shared, own = Path(tmp) / "shared.cpp", Path(tmp) / "func_eu_00100030.cpp"
+            shared.write_text(self.SHARED)
+            own.write_text("void func_eu_00100030(void)\n{\n}\n")
+            text = version_src.unit_text(shared, {"func_eu_00100030": own})
+        self.assertTrue(text.startswith(self.SHARED.rstrip("\n")))
+        self.assertTrue(text.rstrip().endswith("void func_eu_00100030(void)\n{\n}"))
+
     def test_a_version_file_names_its_version_and_shared_file(self):
         path = versions.ROOT / "src" / "versions" / "eu" / "main" / "00140000" / "func_00142F10.cpp"
         self.assertEqual(version_src.version_of(path),
