@@ -64,6 +64,8 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   own, not a masked comparison, not a model's claim. Report exactly what you ran and what it
   printed.
 - **Plain C++.** No inline assembly in functions, no register pins, no artificial barriers.
+  `volatile` is one only where it stops the compiler: it is allowed for a hardware register
+  (an access to a fixed address such as `*(volatile u32*)0x10002010`), which is what it is for.
 - **One flag set per source file**, never per function.
 - **Globals are `extern`** until the data layout is modelled.
 - **Our own names and types.** Retail is stripped: every function, type, field and file name

@@ -99,3 +99,52 @@ s64 func_00211700(Self_211700* self)
     func_00211618((Bits_211700*)self, 1);
     return r;
 }
+
+struct Ctx_211988 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+};
+struct Arg_211988 { u32 v; };
+
+extern void func_002117D0(Arg_211988* a);
+extern void func_00211838(Arg_211988* a);
+
+void func_00211988(Ctx_211988* s0)
+{
+    u32 v = (u32)s0->f1C;
+    u32 s3 = v & 0x7Fu;
+    u32 t = ((v >> 16) & 3u) + ((v >> 8) & 0xFu);
+    s32 s1 = s0->f0 - (s32)(t << 4);
+    s32 s2 = s0->f8 + (s32)t;
+
+    if (s0->f10 != 0) {
+        if (s0->f14 != 0) {
+            *(volatile u32*)0x1000B010 = s0->f10;
+            *(volatile u32*)0x1000B020 = s0->f14;
+            func_002117D0((Arg_211988*)(u32)(s0->f18 | 0x100));
+        }
+    }
+    while (*(volatile s32*)0x10002010 < 0) {
+        ;
+    }
+    *(volatile u32*)0x10002000 = s3;
+    while (*(volatile s32*)0x10002010 < 0) {
+        ;
+    }
+    if (s1 == 0) {
+        return;
+    }
+    if (s2 == 0) {
+        return;
+    }
+    *(volatile u32*)0x1000B410 = s1;
+    *(volatile u32*)0x1000B430 = s0->f4;
+    *(volatile u32*)0x1000B420 = s2;
+    func_00211838((Arg_211988*)(u32)(s0->fC | 0x100));
+}

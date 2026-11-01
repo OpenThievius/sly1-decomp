@@ -3306,6 +3306,7 @@ func_00210160	func_00211620	match
 func_002107B8	func_00211C78	match	
 func_00211700	func_00212BC0	match	
 func_002117A0	func_00212C60	match	
+func_00211988	func_00212E48	match	
 func_eu_0011E5F8	func_0011E5F8	match	only in PAL
 func_eu_0011E628	func_0011E628	match	only in PAL
 func_eu_001374E0	func_001374E0	match	only in PAL
