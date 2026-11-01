@@ -28,3 +28,74 @@ u32 func_002117A0(Stream_2117A0* stream, s32 amount)
     }
     return position;
 }
+
+// NEAR: retail saves s0 and ra with 8-byte sd/ld, the default compiler with 16-byte sq/lq. Otherwise identical
+
+struct Node_210160 {
+    u8 pad000[0xF8];
+    s32 f0F8;
+    u8 pad0FC[0x54];
+    s32 f150;
+    u8 pad154[0x20];
+    s32 f174;
+    u8 pad178[0x40];
+    s32 f1B8;
+    u8 pad1BC[0x8];
+    s32 f1C4;
+    s32 f1C8;
+    u8 pad1CC[0x8];
+    s32 f1D4;
+    s32 f1D8;
+    u8 pad1DC[0x8];
+    s32 f1E4;
+};
+
+void func_00210970(struct Node_210160* a, s32 b, s32 c);
+void func_00210A80(struct Node_210160* a, s32 b, s32 c, s32 d);
+
+void func_00210160(struct Node_210160* self, s32 count, s32 flag)
+{
+    s32 n = count;
+    if (flag != 0) {
+        if (self->f174 == 3) {
+            s32 x;
+            if (self->f150 == 3) {
+                x = self->f1C4;
+            } else {
+                x = self->f1B8;
+            }
+            func_00210970(self, x, n - 1);
+        } else {
+            s32 x;
+            s32 y;
+            if (self->f150 == 3) {
+                x = self->f1D4;
+                y = self->f1E4;
+            } else {
+                x = self->f1C8;
+                y = self->f1D8;
+            }
+            n = n - 1;
+            func_00210A80(self, x, y, n);
+        }
+    }
+    if (self->f0F8 == 1) {
+        self->f0F8 = 2;
+    }
+}
+
+// NEAR: body matches; the only difference is the prologue and epilogue, where retail saves s0, s1 and ra with sd/ld (8 bytes) as Sony's library code does, and SN GCC emits sq/lq.
+
+struct Self_211700 { s64 bits; u8 pad0[0x8]; s32 f10; };
+struct Peek_211700 { s64 bits; };
+struct Bits_211700 { s64 bits; };
+
+s64 func_002115F8(Peek_211700* p, s32 n);
+void func_00211618(Bits_211700* p, s32 n);
+
+s64 func_00211700(Self_211700* self)
+{
+    s64 r = func_002115F8((Peek_211700*)self, 1);
+    func_00211618((Bits_211700*)self, 1);
+    return r;
+}
