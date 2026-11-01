@@ -430,3 +430,105 @@ void func_0020BF78(struct Obj_20BF78 *self)
     self->field134 += s5 << 18;
     self->field138 += s2 << 10;
 }
+
+struct Obj_00208FE8 { u8 pad[8]; s64 f8; };
+typedef s64 Key_00208FE8;
+s32 func_001FD308(Key_00208FE8 a, Key_00208FE8 b);
+
+s32 func_00208FE8(Obj_00208FE8* obj)
+{
+    Key_00208FE8 v = obj->f8;
+    (void)func_001FD308(v, v);
+    return 0;
+}
+
+struct Hdl_209720 { s32 v; };
+struct Elt_209720 { u8 pad[0x24]; s32 f24; };
+struct Slot_209720 { s32 v; };
+
+extern u8 D_0062AD40[];
+extern u8 D_0062C300[];
+extern s32 D_0027AEC8;
+
+s32 func_001F6B70(Hdl_209720* h);
+s32 func_001F6B40(Hdl_209720* h);
+s32 func_001F8290(Elt_209720* a, s32 b, s32 c, Slot_209720* d, s32 e, void* f, s32 g, s32 h, s32 i);
+
+s32 func_00209720(s32 value)
+{
+    s32 r;
+    Elt_209720* elt;
+    if (func_001F6B70((*(Hdl_209720**)&D_0027AECC)) < 0) {
+        return -200;
+    }
+    elt = (Elt_209720*)D_0062AD40;
+    if (elt->f24 == 0) {
+        (void)func_001F6B40((*(Hdl_209720**)&D_0027AECC));
+        return -100;
+    }
+    (*(Slot_209720*)&D_0062ADC0).v = value;
+    r = func_001F8290(elt, 3, 1, ((Slot_209720*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    if (r == 0) {
+        D_0027AEC8 = 3;
+    } else {
+        (void)func_001F6B40((*(Hdl_209720**)&D_0027AECC));
+    }
+    return r;
+}
+
+struct Pool_209FA8 { u8 pad[0x24]; s32 busy; };
+struct Req_209FA8 { s32 f0; s32 a; s32 b; };
+struct Handle_209FA8 { s32 h; };
+
+extern u8 D_0062C300[];
+
+extern s32 func_001F6B70(Handle_209FA8* h);
+extern void func_001F6B40(Handle_209FA8* h);
+extern s32 func_001F8290(Pool_209FA8* p, s32 a1, s32 a2, Req_209FA8* q, s32 a4, u8* a5, s32 a6, s32 a7, s32 a8);
+
+s32 func_00209FA8(s32 a, s32 b)
+{
+    s32 r = func_001F6B70((Handle_209FA8*)(*(u32*)&D_0027AECC));
+    s32 res;
+    if (r < 0) {
+        return -200;
+    }
+    if (((Pool_209FA8*)D_0062AD40)->busy == 0) {
+        func_001F6B40((Handle_209FA8*)(*(u32*)&D_0027AECC));
+        return -100;
+    }
+    (*(Req_209FA8*)&D_0062ADC0).b = b;
+    (*(Req_209FA8*)&D_0062ADC0).a = a;
+    res = func_001F8290(((Pool_209FA8*)&D_0062AD40), 0x10, 1, ((Req_209FA8*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    if (res == 0) {
+        (*(u32*)&D_0027AEC8) = 0x10;
+    } else {
+        func_001F6B40((Handle_209FA8*)(*(u32*)&D_0027AECC));
+    }
+    return res;
+}
+
+struct Obj_20B058 { u8 pad[0x40]; u8* state; };
+
+s32 func_0020B2E8(Obj_20B058* obj);
+
+s32 func_0020B058(Obj_20B058* obj, u32 a1, s32 a2)
+{
+    u8* st = obj->state;
+    *(s32*)(st + 0xB0) = 1;
+    *(u32*)(st + 0xD8) = (a1 & 0xFFFFFFFu) | 0x20000000u;
+    *(s32*)(st + 0xE4) = a2;
+    *(s32*)(st + 0xE0) = 0;
+    *(s32*)(st + 0xDC) = 0;
+    return func_0020B2E8(obj);
+}
+
+struct Q_0020B1E0;
+s32 func_0020B190(Q_0020B1E0* q, s32* out);
+
+s32 func_0020B1E0(Q_0020B1E0* q)
+{
+    s32 flag[8];
+    flag[0] = 1;
+    return func_0020B190(q, flag);
+}

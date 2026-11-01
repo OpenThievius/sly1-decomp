@@ -341,3 +341,195 @@ void func_001FAE18(void)
 		func_001FAD68();
 	}
 }
+
+struct Node_001F8200 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    s32 f34;
+    s32 f38;
+    s32 f3C;
+    Node_001F8200* f40;
+};
+
+struct Ctx_001F8200 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+    s32 f20;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    Node_001F8200* f34;
+};
+
+void func_001F71D0(Node_001F8200* a);
+
+void func_001F8200(Ctx_001F8200* self)
+{
+    Node_001F8200* n = self->f34;
+    Node_001F8200* list = n->f40;
+    if (list->f0C == 0) {
+        list->f0C = (s32)n;
+    } else {
+        ((Node_001F8200*)list->f10)->f3C = (s32)n;
+    }
+    list->f10 = (s32)n;
+    s32 a = self->f14;
+    s32 b = self->f1C;
+    n->f20 = a;
+    n->f1C = b;
+    n->f24 = self->f20;
+    n->f0C = self->f24;
+    n->f28 = self->f28;
+    n->f2C = self->f2C;
+    n->f30 = self->f30;
+    n->f34 = self->f10;
+    if (list->f00 < 0) {
+        return;
+    }
+    if (list->f04 != 0) {
+        return;
+    }
+    func_001F71D0((Node_001F8200*)list->f00);
+}
+
+struct Mgr_1F8538 { s32 v; };
+
+extern u8 D_00628940[];
+
+s32 func_001F6B60(Mgr_1F8538* m);
+s32 func_001F6B40(Mgr_1F8538* m);
+
+s32 func_001F8538(s32 a0)
+{
+    s32 s = a0;
+    (void)func_001F84D8();
+    (void)func_001F6B60((*(Mgr_1F8538**)&D_002771C0));
+    if ((u32)a0 >= 0x20u) {
+        (void)func_001F6B40((*(Mgr_1F8538**)&D_002771C0));
+        return 0;
+    }
+    s32 t = s << 4;
+    t += (s32)D_00628940;
+    (void)func_001F6B40((*(Mgr_1F8538**)&D_002771C0));
+    return t;
+}
+
+struct Blob_1F9868 { u8 b[0xFC]; };
+struct Buf_1F9868 { s32 f0; s32 f4; Blob_1F9868 name; Blob_1F9868 data; };
+extern Buf_1F9868 D_00628C00;
+extern u8 D_00628E00[];
+
+s32 func_001F9690(void);
+s32 func_001F9790(void);
+void func_00201720(Blob_1F9868* dst, Blob_1F9868* src, s32 n);
+void func_001F5A58(Blob_1F9868* dst, Blob_1F9868* src, s32 n);
+s32 func_001F8290(u8* a, s32 b, s32 c, Buf_1F9868* d, s32 e, Buf_1F9868* f, s32 g, s32 h, s32 i);
+
+s32 func_001F9868(Blob_1F9868* src, s32 size, Blob_1F9868* data, s32* out, s32 cmd)
+{
+    if (func_001F9690() < 0) {
+        return -0x10000;
+    }
+    if (func_001F9790() != 0) {
+        return -0x10004;
+    }
+    Blob_1F9868* p = &D_00628C00.name;
+    func_00201720(p, src, 0xFC);
+    Buf_1F9868* q = (Buf_1F9868*)((u8*)p - 8);
+    q->name.b[0xFB] = 0;
+    if (data != 0) {
+        if (size >= 0xFD) {
+            q->data = *data;
+            D_00628C00.f0 = 0xFC;
+        } else {
+            func_001F5A58(&q->data, data, size);
+            q->f0 = size;
+        }
+    } else {
+        q->data.b[0] = 0;
+        q->f0 = 0;
+    }
+    Buf_1F9868* buf = &D_00628C00;
+    if (func_001F8290(D_00628E00, cmd, 0, buf, 0x200, buf, 8, 0, 0) < 0) {
+        return -0x10001;
+    }
+    s32 v = buf->f4;
+    s32 ret = D_00628C00.f0;
+    *out = v;
+    return ret;
+}
+
+struct Frame_001F9DC0 { s32 w[16]; };
+
+s32 func_001F6B20(Frame_001F9DC0* q);
+extern s32 D_002771E4;
+extern s32 D_002771E8;
+
+void func_001F9DC0(void)
+{
+    Frame_001F9DC0 f;
+    f.w[1] = 1;
+    f.w[2] = 1;
+    f.w[9] = 1;
+    f.w[10] = 1;
+    D_002771E4 = func_001F6B20(&f);
+    D_002771E8 = func_001F6B20((Frame_001F9DC0*)&f.w[8]);
+}
+
+extern s32 D_00629394;
+extern s32 D_002779B8;
+
+s32 func_001F6E10(s32 a0);
+s32 func_001F6990(s32 a0, s32 a1);
+
+void func_001FA468(void)
+{
+    (void)func_001F6E10(5);
+    (void)func_001F6990(5, D_00629394);
+    D_002779B8 = 0;
+}
+
+extern s32 D_006293A4;
+extern s32 D_006293AC;
+
+void func_001FA4D0(s32 index)
+{
+    s32 off = index << 3;
+    if (index < 0) {
+        index = D_006293A4;
+    } else {
+        index = D_006293AC;
+    }
+    off += index;
+    *(s32*)off = 0;
+}
+
+s32 func_001F6D20(void);
+s32 func_001F6D30(void);
+s32 func_001FAA00(void);
+
+s32 func_001FA9C0(void)
+{
+    if (func_001F6D20() == 0x2000000) {
+        return func_001FAA00();
+    }
+    return func_001F6D30();
+}

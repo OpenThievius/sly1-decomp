@@ -751,3 +751,115 @@ s32 func_00203D90(void)
     func_001F6B40(D_0027942C);
     return v;
 }
+
+extern u8 D_0024F0D8[];
+
+s32 func_0018D778(void* self);
+
+s32 func_00200050(void* self, s32 flags)
+{
+    void* v = D_0024F0D8;
+    *(void**)self = v;
+    if (flags & 1) {
+        return func_0018D778(self);
+    }
+    return (s32)v;
+}
+
+struct Ctx_002004F8;
+s32 func_00200080(Ctx_002004F8* ctx);
+
+s32 func_002004F8(Ctx_002004F8* ctx)
+{
+    return func_00200080(ctx);
+}
+
+extern s32 func_00200080(void);
+s32 func_00200580(void)
+{
+    return func_00200080();
+}
+
+struct Obj_002005A0 { u8* f0; };
+
+s32 func_0018D778(Obj_002005A0* self);
+extern u8 D_0024F0D8[];
+
+u8* func_002005A0(Obj_002005A0* self, s32 flag)
+{
+    u8* value = D_0024F0D8;
+    self->f0 = value;
+    if (flag & 1) {
+        return (u8*)func_0018D778(self);
+    }
+    return value;
+}
+
+extern u8 D_0024F0D8[];
+
+s32 func_0018D778(void* self);
+
+s32 func_00200638(void* self, s32 flags)
+{
+    void* v = D_0024F0D8;
+    *(void**)self = v;
+    if (flags & 1) {
+        return func_0018D778(self);
+    }
+    return (s32)v;
+}
+
+s32 func_00200080(void);
+
+s32 func_00201210(void)
+{
+    return func_00200080();
+}
+
+struct Ctx_002004F8;
+s32 func_00200080(Ctx_002004F8* ctx);
+
+s32 func_002012F0(Ctx_002004F8* ctx)
+{
+    return func_00200080(ctx);
+}
+
+extern s32 func_00200080(void);
+s32 func_00201360(void)
+{
+    return func_00200080();
+}
+
+s32 func_00200080(void);
+
+s32 func_002013D0(void)
+{
+    return func_00200080();
+}
+
+s32 func_00200080(void);
+
+s32 func_00201440(void)
+{
+    return func_00200080();
+}
+
+struct Cfg_00202120;
+s32 func_001F6C60(Cfg_00202120* c);
+
+s32 func_00202120(Cfg_00202120* c)
+{
+    return func_001F6C60(c);
+}
+
+void func_00202768(u8* p, s32 n)
+{
+    s32 i = n - 1;
+    if (n != 0) {
+        do {
+            *p = 0;
+            i--;
+            p++;
+        } while (i != -1);
+    }
+}

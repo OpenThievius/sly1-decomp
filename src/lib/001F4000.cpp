@@ -110,3 +110,76 @@ after:
     func_001F7E58((Ref_1F7EA8*)s0->f0);
     s0->f0 = 0;
 }
+
+struct Ctx_1F70F8 { s32 f0; void* f4; void* f8; s32 fC; void* f10; s32 f14; };
+struct Init_1F70F8 { s32 a; s32 b; s32 c; };
+struct Blk_1F70F8 { s32 a; s32 b; };
+struct Frame_1F70F8 { Ctx_1F70F8 ctx; u8 pad[0x18]; Init_1F70F8 init; u8 pad2[0x14]; };
+
+extern s32 D_00277128;
+extern s32 D_00625B70;
+extern Blk_1F70F8 D_00625B78;
+extern u8 D_00625770[];
+extern u8 D_002832F0[];
+
+s32 func_001F6B20(Init_1F70F8* p);
+s32 func_001F6A10(Ctx_1F70F8* p);
+void func_001F6B30(s32 h);
+void func_001F6A20(s32 h, Blk_1F70F8* b);
+s32 func_001F6A90(void);
+void func_001F6A50(s32 h, s32 v);
+void func_001F7020(void);
+
+s32 func_001F70F8(void)
+{
+    Frame_1F70F8 f;
+    if (D_00277128 > 0) {
+        return -1;
+    }
+    f.init.c = 0;
+    f.init.b = 0xFF;
+    D_00625B70 = func_001F6B20(&f.init);
+    if (D_00625B70 < 0) {
+        return -1;
+    }
+    f.ctx.f4 = (void*)func_001F7020;
+    f.ctx.f8 = D_00625770;
+    f.ctx.fC = 0x400;
+    f.ctx.f10 = D_002832F0;
+    f.ctx.f14 = 0;
+    D_00277128 = func_001F6A10(&f.ctx);
+    if (D_00277128 < 0) {
+        func_001F6B30(D_00625B70);
+        return -1;
+    }
+    D_00625B78.a = 0;
+    D_00625B78.b = 0;
+    func_001F6A20(D_00277128, &D_00625B78);
+    func_001F6A50(func_001F6A90(), 1);
+    return D_00277128;
+}
+
+struct Buf_1F72A8;
+void func_001FA140(Buf_1F72A8* b);
+extern u8 D_00625F80[];
+extern s32 D_0027712C;
+
+void func_001F72A8(s32 c)
+{
+    s32 pos = D_0027712C;
+    if (pos >= 0x7E) {
+        D_0027712C = 0;
+        D_00625F80[0x7F] = 0;
+        func_001FA140((Buf_1F72A8*)D_00625F80);
+        pos = D_0027712C;
+    }
+    if (c == 0xA) {
+        D_0027712C = 0;
+        D_00625F80[pos] = (u8)c;
+        D_00625F80[pos + 1] = 0;
+        func_001FA140((Buf_1F72A8*)D_00625F80);
+        return;
+    }
+    D_0027712C = pos + 1;
+    D_00625F80[pos] = (u8)c;
+}
