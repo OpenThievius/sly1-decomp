@@ -19,6 +19,7 @@ own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
 import argparse
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -104,11 +105,25 @@ def tools(release=None):
 
 
 def run_step(cmd, **kw):
-    """subprocess.run with the time limit: a hung step is killed and raises CompileError."""
-    try:
-        return subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT, **kw)
-    except subprocess.TimeoutExpired:
-        raise CompileError("%s did not finish in %d seconds" % (Path(cmd[0]).name, TIMEOUT))
+    """Run one step with the time limit; a hung step is killed and raises CompileError.
+
+    The step writes to files, not pipes, and runs in its own process group: a Windows tool that
+    hangs under its runner can leave a child stuck in the kernel, which no signal removes and
+    which would hold a pipe open for good. On timeout the group is killed and nothing waits on it.
+    """
+    with tempfile.TemporaryFile("w+") as out, tempfile.TemporaryFile("w+") as err:
+        proc = subprocess.Popen(cmd, stdout=out, stderr=err, text=True, start_new_session=True, **kw)
+        try:
+            proc.wait(timeout=TIMEOUT)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except OSError:
+                pass
+            raise CompileError("%s did not finish in %d seconds" % (Path(cmd[0]).name, TIMEOUT))
+        out.seek(0)
+        err.seek(0)
+        return subprocess.CompletedProcess(cmd, proc.returncode, out.read(), err.read())
 
 
 def compile_file(src, out, flags=None, keep_asm=None, source=None):
