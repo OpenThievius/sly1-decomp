@@ -60,7 +60,9 @@ What makes PAL differ, from the first `differs` rows read one by one:
 - **Other calls and arguments.** A call to a function only PAL has, or one more argument.
 
 Code and data only PAL has are named `func_eu_XXXXXXXX` and `D_eu_XXXXXXXX`, and reach that PAL
-address alone (`tools/check.py`).
+address alone (`tools/check.py`). So is a datum both versions have when the tools cannot pair its
+PAL address with the US one (no paired code names both): the comment of the definition says
+which US datum it is.
 
 A function only PAL has (a `config/eu/map.tsv` row with `-` as its US name) is defined the same
 way, as `src/versions/eu/<shared file>/func_eu_XXXXXXXX.cpp`, in the shared file whose code it
