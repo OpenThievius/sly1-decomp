@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 132/144 (91.7%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_00160680.cpp func_eu_00160680 --unit src/main/00160000.cpp
 // Still differs: Scans record entries for a0; only the v0/v1 register choice for the match flag and the two xor temporaries differs (9 lines).
 // Searches the five entries of each 0xAC-byte record in D_eu_002490F0 for a0 (or one with the same two words) and returns the record, or 0.

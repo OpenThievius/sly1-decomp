@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1200/1248 (96.2%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACEE0.cpp func_eu_001ACEE0 --unit src/main/001A8000.cpp
 // Still differs: Gauge box with lerped bar colour and shaking glyph; 15 lines differ in last block only: retail loads f52C before f5A4 and schedules the 2-byte string stores after the rect stores.
 // PAL: draws a gauge box (dark frame, a bar fading from red to grey), then one glyph over it that shakes while the timer runs.

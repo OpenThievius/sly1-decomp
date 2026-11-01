@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 116/172, checked 2026-11-01
 // NEAR: stack-chain setup/restore and prologue/frame sequence still differ from retail.
 #include "common.h"
 struct StackNode_1BEE48 { StackNode_1BEE48* next; };

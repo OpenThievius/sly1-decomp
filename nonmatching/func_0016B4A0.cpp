@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 107/124 (86.3%), checked 2026-11-01
 // Near match: calls and field values match, but GCC schedules the final zero
 // stores and floating constant load in a different order than retail.
 #include "common.h"

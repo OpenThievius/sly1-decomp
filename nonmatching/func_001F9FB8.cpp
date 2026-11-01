@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 168/172, checked 2026-11-01
 // NEAR: helper call flow largely aligns, but loop pointer stride/branch and save/load sequence differ (candidate +4 versus retail +8).
 #include "common.h"
 struct Table_1F9FB8 { void* first; void* second; void* third; void* fourth; u8 data[0x20]; };

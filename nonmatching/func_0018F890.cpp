@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 152/168, checked 2026-11-01
 // NEAR: remaining differences include frame/register allocation and call operand scheduling in the data-read path.
 #include "common.h"
 struct Buffer_18F890 { u8 pad00[0x18]; s32 read; s32 end; s32 size; };

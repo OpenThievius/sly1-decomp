@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 192/200, checked 2026-11-01
 // NEAR: step-based list traversal and node updates are modeled, but frame, spills, register scheduling, and loop sequencing differ.
 #include "common.h"
 extern void* D_0027B314;

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 172/148, checked 2026-11-01
 // NEAR: entry search and callback semantics are modeled, but frame size, argument scheduling, and branch layout differ.
 #include "common.h"
 

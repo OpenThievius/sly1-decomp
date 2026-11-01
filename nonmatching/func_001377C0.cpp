@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 84/96, checked 2026-11-01
 // Near miss: register allocation and conditional state-update sequence differ.
 #include "common.h"
 extern s32 func_001F8DB8(void*, s32, s32);

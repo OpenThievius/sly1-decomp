@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 236/196, checked 2026-11-01
 // Near miss: the array-search behavior is modeled, but the result is 40 bytes too large and both float-search loops compile differently.
 #include "common.h"
 

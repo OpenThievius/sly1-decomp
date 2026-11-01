@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 68/60, checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0015DF18.cpp func_eu_0015DF18 --unit src/main/0015C000.cpp
 // Still differs: Adds n or 2n to the word at +8 by kind (0 or 1), else returns 1 (switch form); only the return-1 path differs: ours branches to a shared epilogue, retail has its own jr ra.
 // Adds n (kind 0) or 2n (kind 1) to the position at +8 and returns it; any other kind returns 1.

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 78/84 (92.9%), checked 2026-11-01
 // NEAR: The body is close; register-save width and one zero-value instruction
 //        still differ.
 #include "common.h"

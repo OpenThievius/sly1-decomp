@@ -38,6 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import classify_asm  # noqa: E402
+import nonmatching  # noqa: E402
 import todo  # noqa: E402
 import version_check  # noqa: E402
 import versions  # noqa: E402
@@ -82,14 +83,39 @@ def finished(key):
     return exact_c(key) | original_asm(key)
 
 
-def measures(funcs, done, linked, data=0):
-    """objdiff's measures of some functions and some bytes of data (none of it matched yet)."""
+def fuzzy(key):
+    """{function name in the version's report: share of retail's bytes} of its staged near misses.
+
+    tools/nonmatching.py writes the verdicts; a near miss stays below 100 and a matched function's
+    staged file is left over, not counted.
+    """
+    names = {us: eu for us, (eu, _, _) in version_check.read_status().items()}
+    out = {}
+    for (version, func), path in nonmatching.staged().items():
+        if version != key or nonmatching.matched(version, func):
+            continue
+        name = func if key == "us" else (
+            "func_" + func[len("func_eu_"):] if func.startswith("func_eu_") else names.get(func))
+        if name:
+            out[name] = nonmatching.share(path)
+    return out
+
+
+def measures(funcs, done, linked, data=0, near=None):
+    """objdiff's measures of some functions and some bytes of data (none of it matched yet).
+
+    fuzzy_match_percent also credits each near miss (near: {name: share}) with its share of bytes;
+    `_fuzzy_code` carries those bytes to the totals and is not written.
+    """
+    near = near or {}
     total = sum(s for _, _, s in funcs)
     matched = sum(s for n, _, s in funcs if n in done)
     count = sum(1 for n, _, _ in funcs if n in done)
+    close = matched + sum(s * near[n] / 100.0 for n, _, s in funcs if n not in done and n in near)
     pct = lambda a, b: (100.0 * a / b) if b else 100.0
     return {
-        "fuzzy_match_percent": pct(matched, total),
+        "_fuzzy_code": close,
+        "fuzzy_match_percent": pct(close, total),
         "total_code": str(total),
         "matched_code": str(matched),
         "matched_code_percent": pct(matched, total),
@@ -106,17 +132,21 @@ def measures(funcs, done, linked, data=0):
     }
 
 
-def add(into, m):
+def add(into, m, close):
     """Sums one unit's measures into a total (percentages are recomputed by finish())."""
     for k in ("total_code", "matched_code", "total_data", "matched_data", "complete_code", "complete_data"):
         into[k] = str(int(into.get(k, "0")) + int(m[k]))
+    into["_fuzzy_code"] = into.get("_fuzzy_code", 0.0) + close
     for k in ("total_functions", "matched_functions", "total_units", "complete_units"):
         into[k] = into.get(k, 0) + m[k]
 
 
 def finish(m):
     pct = lambda a, b: (100.0 * int(a) / int(b)) if int(b) else 100.0
-    m["matched_code_percent"] = m["fuzzy_match_percent"] = pct(m["matched_code"], m["total_code"])
+    close = m.pop("_fuzzy_code", None)
+    m["matched_code_percent"] = pct(m["matched_code"], m["total_code"])
+    m["fuzzy_match_percent"] = (100.0 * close / int(m["total_code"]) if int(m["total_code"]) else 100.0) \
+        if close is not None else m["matched_code_percent"]
     m["matched_data_percent"] = pct(m["matched_data"], m["total_data"])
     m["matched_functions_percent"] = pct(m["matched_functions"], m["total_functions"])
     m["complete_code_percent"] = pct(m["complete_code"], m["total_code"])
@@ -131,12 +161,13 @@ def report(key):
     funcs = functions(key)
     done = finished(key)
     linked = key == versions.primary()
+    near = fuzzy(key)
     units = []
     for kind, name, start, end, category, folder in todo.layout(key):
         if kind == "data":
             m = measures([], done, linked, end - start)
             m["total_units"], m["complete_units"] = 1, 0
-            units.append((category, {"name": "data/%s" % name, "measures": m,
+            units.append((category, m.pop("_fuzzy_code"), {"name": "data/%s" % name, "measures": m,
                                      "metadata": {"complete": False, "progress_categories": [category]}}))
             continue
         windows = {}
@@ -145,29 +176,30 @@ def report(key):
                 windows.setdefault(todo.window_of(f[1]), []).append(f)
         for window in sorted(windows):
             members = windows[window]
-            m = measures(members, done, linked)
+            m = measures(members, done, linked, near=near)
+            close = m.pop("_fuzzy_code")
             complete = linked and all(n in done for n, _, _ in members)
             m["total_units"], m["complete_units"] = 1, 1 if complete else 0
             meta = {"complete": complete, "progress_categories": [category]}
             source = "%s/%08X.cpp" % (folder, window)
             if (ROOT / source).exists():
                 meta["source_path"] = source
-            units.append((category, {
+            units.append((category, close, {
                 "name": "%s/%08X" % (name, window),
                 "measures": m,
-                "functions": [{"name": n, "size": str(s), "fuzzy_match_percent": 100.0 if n in done else 0.0,
+                "functions": [{"name": n, "size": str(s), "fuzzy_match_percent": 100.0 if n in done else near.get(n, 0.0),
                                "address": str(a - members[0][1]), "metadata": {"virtual_address": str(a)}}
                               for n, a, s in members],
                 "metadata": meta,
             }))
-    placed = sum(len(u.get("functions", [])) for _, u in units)
+    placed = sum(len(u.get("functions", [])) for _, _, u in units)
     if placed != len(funcs):
         raise SystemExit("error: config/%s/layout.tsv places %d of %d functions" % (key, placed, len(funcs)))
     top, cats = {}, {c: {} for c in CATEGORIES}
-    for category, u in units:
-        add(top, u["measures"])
-        add(cats[category], u["measures"])
-    return {"measures": finish(dict(measures([], done, linked), **top)), "units": [u for _, u in units],
+    for category, close, u in units:
+        add(top, u["measures"], close)
+        add(cats[category], u["measures"], close)
+    return {"measures": finish(dict(measures([], done, linked), **top)), "units": [u for _, _, u in units],
             "version": 2,
             "categories": [{"id": c, "name": CATEGORIES[c], "measures": finish(dict(measures([], done, linked), **cats[c]))}
                            for c in CATEGORIES]}
@@ -211,6 +243,8 @@ def main(argv=None):
 
     problems = 0
     if version_check.check_current():
+        problems += 1
+    if args.check and nonmatching.check_current():
         problems += 1
     keys = [k for k, v in versions.versions().items() if v["role"] != "reference"]
     reports = {k: report(k) for k in keys}

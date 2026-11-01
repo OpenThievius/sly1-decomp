@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 139/200 (69.5%), checked 2026-11-01
 // NEAR: resource open and cleanup are modeled, but fixed-table addressing, request-store scheduling, and saved-register opcodes differ from retail.
 // NEAR: the resource open and cleanup are modeled. GCC folds the fixed table base into a load displacement, schedules request stores differently, and uses sq/lq instead of sd/ld.
 #include "common.h"

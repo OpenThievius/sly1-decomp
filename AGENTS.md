@@ -29,7 +29,7 @@ procedure; read it before you match anything.
 | `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with Sony's 2.9-ee-991111, which `config/cflags.tsv` names per file (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |
 | `src/versions/eu/<file>/<function>.cpp` | PAL's own definition of a function whose PAL bytes differ, built in its shared file's unit (docs/VERSIONS.md) | you |
-| `nonmatching/` | near misses, never linked | you |
+| `nonmatching/` | near misses, never linked, each with its verdict line; `README.md` is the index | you; verdicts and index by `tools/nonmatching.py` |
 | `progress/<version>/report.json`, the README table | what ByteMatch shows | `tools/progress.py` |
 | `tools/`, `tests/` | setup, split, checks | by hand |
 | `docs/` | research notes and decisions | by hand |
@@ -51,6 +51,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/version_check.py` | every C function at its PAL counterpart: `config/eu/c_status.tsv` |
 | `python3 tools/check.py src/versions/eu/FILE/FUNC.cpp FUNC` | PAL's own definition, built in its shared file's unit, against PAL |
 | `python3 tools/version_src.py todo` | the functions only PAL has, not yet defined, with their tags and file |
+| `python3 tools/nonmatching.py check` | re-scores the near misses in `nonmatching/` and writes the index (`--check` in CI) |
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
 | `python3 tools/inventory.py [--check]` | the function tables and PAL's pairing |
 | `python3 tools/classify_asm.py [--check]` | which game-code functions are original assembly (needs `asm/us/`) |

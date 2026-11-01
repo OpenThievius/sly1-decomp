@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 188/180, checked 2026-11-01
 // NEAR: This candidate is 188 bytes versus retail 180; nested-loop pointer
 //        and control-flow layout differ.
 #include "common.h"

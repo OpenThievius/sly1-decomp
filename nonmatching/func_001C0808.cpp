@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 188/164, checked 2026-11-01
 // NEAR: check.py reports DIFFER (188-byte candidate vs 164-byte retail); guard frame is 96 bytes vs retail 64, and loop layout differs.
 #include "common.h"
 extern s32 D_00275710, D_0027B314;

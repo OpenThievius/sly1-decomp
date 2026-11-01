@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 164/168, checked 2026-11-01
 // NEAR: check.py reports DIFFER; retail uses 8-byte saved-register slots, while configured compiler emits sq/lq; loop and delay-slot scheduling differ.
 #include "common.h"
 

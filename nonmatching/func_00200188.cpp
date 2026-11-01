@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 134/148 (90.5%), checked 2026-11-01
 // NEAR: The body and control flow match, but the configured compiler saves
 //        registers with sq/lq instead of retail sd/ld.
 #include "common.h"

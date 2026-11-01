@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 1076/1084 (99.3%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0015DF58.cpp func_eu_0015DF58 --unit src/main/0015C000.cpp
 // Still differs: Reads next text character after markup codes; only s5/s6 swapped (retail keeps 0x2E in s5 and constant 1 in s6).
 // PAL: reads the next character of a text, first applying the markup codes before it (~colour, &font, ^size).

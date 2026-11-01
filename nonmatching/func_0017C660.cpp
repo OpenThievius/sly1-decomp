@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 176/180, checked 2026-11-01
 // NEAR: field offsets and prologue match closely; remaining differences are branch/CFG layout and loop/call scheduling.
 #include "common.h"
 

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 261/308 (84.7%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0018EE08.cpp func_eu_0018EE08 --unit src/main/0018C000.cpp
 // Still differs: Strided chunk copy for kind 0x10; only saved-register numbering differs (self s3 vs s4, chunk s1 vs s2, etc.), ~34 lines.
 // Copies a block of len bytes through a chunk buffer of cols << 10 bytes, in strided rows, when the object's kind is 0x10 and it has more than one column.

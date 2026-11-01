@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 424/420, checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AD438.cpp func_eu_001AD438 --unit src/main/001A8000.cpp
 // Still differs: Draws a fading label; now 424 bytes vs 420 (stack slot sharing fixed), ours keeps &L in an extra saved register s4 and swaps s1/s2 and f20/f21.
 // Draws a fading label: builds a transform/colour block, lets the attached object draw into it, then draws the text.

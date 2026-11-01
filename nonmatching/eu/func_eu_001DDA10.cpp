@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 86/160 (53.8%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001DDA10.cpp func_eu_001DDA10 --unit src/main/001DC000.cpp
 // Still differs: Stores a count into D_eu_0027EE8C, allocates words into D_eu_0027ED80 (declared s32* as in the landed func_eu_001DDAB0) and fills each; retail keeps the index in s2 from the prologue and two extra saved registers (s5 for the count address), ours has frame 96 vs 112.
 // Takes a count from func_00137BE0 into D_eu_0027EE8C, allocates that many words into D_eu_0027ED80 and fills each through func_eu_001387C8; returns the buffer.

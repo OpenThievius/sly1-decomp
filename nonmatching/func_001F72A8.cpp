@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 152/176, checked 2026-11-01
 // Near match: register allocation and the newline path's tail jump differ.
 #include "common.h"
 

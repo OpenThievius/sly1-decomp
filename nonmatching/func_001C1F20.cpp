@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 628/640 (98.1%), checked 2026-11-01
 // Near match: the code is the same as retail except which variable gets s3 and which gets s4
 // (target and setter swapped). GCC gives the saved register to the variable with the higher
 // allocation priority (uses weighted by live length); here the setter wins by a small margin.

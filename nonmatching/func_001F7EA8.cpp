@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 152/180, checked 2026-11-01
 // Near match: the behavior is modelled, but retail keeps the input in $s1,
 // uses a 48-byte frame, and has distinct branch-likely control flow. The
 // current C forms did not reproduce that allocation or branch layout.

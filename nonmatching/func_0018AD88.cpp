@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 148/176, checked 2026-11-01
 // NEAR: the candidate uses a 0x30-byte frame versus retail's 0x40-byte frame; entry and return branch layout differ.
 #include "common.h"
 struct Object_18AD88 { u8 pad000[0x724]; s32 state; u8 pad728[0x6E8]; void* alternate; u8 padE14[4]; void* primary; };

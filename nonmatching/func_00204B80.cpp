@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 164/180, checked 2026-11-01
 // NEAR: state checks and value assembly are modeled, but table-multiply order, branch sequence, and saved-register opcodes differ from retail.
 // NEAR: the state checks and 32-bit value assembly are modeled. GCC keeps the table multiplies in the opposite order, emits a different branch sequence, and saves registers with sq/lq instead of sd/ld.
 #include "common.h"

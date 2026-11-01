@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 139/176 (79.0%), checked 2026-11-01
 // NEAR: check.py reports DIFFER; register allocation and ordering around the state compare and first virtual call differ.
 #include "common.h"
 

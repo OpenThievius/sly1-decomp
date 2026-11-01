@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 488/492, checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACC68.cpp func_eu_001ACC68 --unit src/main/001A8000.cpp
 // Still differs: Menu object init; only the multiply differs (retail mult v0,v1 + mflo a0 with the store later, ours 3-operand mult a0,v0,v1; moving the statement or s64/u32 casts did not help).
 // Initialises a menu object: sets up its font, grid size from the mode and the label sizes.

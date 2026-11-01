@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 208/188, checked 2026-11-01
 // Near match: corrected argument flow gives retail's 0x60 frame, but the
 // attempt remains 20 bytes longer and differs in constant materialization,
 // floating-register allocation, and arithmetic scheduling.

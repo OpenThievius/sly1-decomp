@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 28/120 (23.3%), checked 2026-11-01
 // Near miss: the clamped linear interpolation is modeled, but the compiler
 // reverses the boundary branch and assigns the float temporaries differently.
 #include "common.h"

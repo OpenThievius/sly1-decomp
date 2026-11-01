@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 124/144 (86.1%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0018ECA8.cpp func_eu_0018ECA8 --unit src/main/0018C000.cpp
 // Still differs: Fills a 0x30-byte record with callback and two tables and registers it; only scheduling differs (li a2 vs sw f144 order, lui order and a0 move around the record stores).
 // Only in PAL: sets up two words of a global record, clears a 0x30-byte record, fills it with a callback and two tables, and registers it.

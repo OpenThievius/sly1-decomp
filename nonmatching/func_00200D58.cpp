@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 119/172 (69.2%), checked 2026-11-01
 // NEAR: the callback flow is modeled, but register allocation and sq/lq saves differ from retail sd/ld.
 // NEAR: body and callback arguments line up; allocator and SN sq/lq saves differ from retail sd/ld.
 #include "common.h"

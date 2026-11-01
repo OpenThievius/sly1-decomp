@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// BYTES 265/300 (88.3%), checked 2026-11-01
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AB558.cpp func_eu_001AB558 --unit src/main/001A8000.cpp
 // Still differs: Rect record from owner fields, virtual call, font scale, buffer builders; matches except self/record-pointer s1/s2 swap (retail self in s2) and load order of f544/f548 vs lui.
 // Builds a rect record from the owner's fields, lets the +0x520 object fill it through a virtual call, scales the font and draws via the buffer builders.

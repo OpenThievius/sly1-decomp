@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 200/196, checked 2026-11-01
 // NEAR: field updates and helper calls are modeled, but argument setup, branch register, and saved-register opcodes differ from retail.
 // NEAR: the field updates and helper calls are modeled. GCC emits one extra argument setup before the tail call, uses a different unsigned-branch register, and saves registers with sq/lq instead of sd/ld (three attempts).
 #include "common.h"

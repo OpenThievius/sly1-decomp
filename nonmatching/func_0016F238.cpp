@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 160/164, checked 2026-11-01
 // NEAR: loop body matches; remaining differences are top-level register/load ordering, folded float-global address arithmetic, and a store-base register.
 #include "common.h"
 

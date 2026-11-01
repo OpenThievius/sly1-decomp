@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 144/164, checked 2026-11-01
 // NEAR: the hardware-status poll and timeout callback are modeled, but loop-counter scheduling, register allocation, and frame size differ from retail.
 // NEAR: the hardware-status poll and timeout callback are modeled in plain C++. The loop counter schedule, register allocation, and frame size differ from retail.
 #include "common.h"

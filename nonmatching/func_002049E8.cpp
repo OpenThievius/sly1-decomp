@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// SIZE 188/192, checked 2026-11-01
 // NEAR: the input copy and callback are modeled, but loop/store scheduling, table address register order, and saved-register opcodes differ from retail.
 // NEAR: the input copy and callback are modeled. The loop store/branch schedule, table address register order, and saved-register opcodes still differ from retail.
 #include "common.h"
