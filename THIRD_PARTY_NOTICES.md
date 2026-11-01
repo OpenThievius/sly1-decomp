@@ -17,6 +17,7 @@ maintainers, used here under the AGPL-3.0-or-later.
 | `.github/workflows/checks.yml` | rac3-decomp's `checks.yml` | this repository's checks |
 | `docs/TOOLCHAIN.md` | OpenRAC's `docs/decomp/TOOLCHAINS.md` and `toolchains/README.md` | what is known of Sony's 2.9-ee-991111 builds and where the mirror is, for this game |
 | `src/versions/`, `tools/version_src.py`, docs/VERSIONS.md ("PAL's own C") | the layout of rac1-decomp's version-specific C (its `docs/VERSIONS.md`) | the layout and the rule (built in the shared file's unit, with its flags) only; the tools written anew, no code copied |
+| `config/cflags.tsv` (a compiler per file), docs/TOOLCHAIN.md ("The libraries") | rac1-decomp's choice of Sony's 2.9-ee-991111 for its SDK objects (its `docs/reference/TOOLCHAIN.md`) | the choice only, measured anew on this game's library; no file, code or list of objects of theirs, and none of the GCC sources they build libgcc from |
 | `.gitignore`, `baserom/README.md` | OpenRAC's and rac3-decomp's | this repository's paths |
 
 ## Tools

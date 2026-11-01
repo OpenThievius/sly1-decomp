@@ -254,20 +254,28 @@ class BlockerTest(unittest.TestCase):
         self.assertEqual(todo.blocker({"calls", "data"}), "none")
 
 
-class CompilerBlockerTest(unittest.TestCase):
-    def test_a_64_bit_save_in_the_prologue_is_the_compiler_blocker(self):
+class CompilerTagTest(unittest.TestCase):
+    """`compiler` marks Sony's library code; config/cflags.tsv builds it with Sony's compiler."""
+
+    def test_a_64_bit_save_in_the_prologue_is_tagged_and_does_not_block(self):
         lines = ["addiu $sp, $sp, -0x20", "sd $ra, 0x18($sp)", "sd $s0, 0x10($sp)", "jal func_00100000", "jr $ra"]
         self.assertIn("compiler", todo.tags_of(lines, "function"))
-        self.assertEqual(todo.blocker(todo.tags_of(lines, "function")), "compiler")
+        self.assertEqual(todo.blocker(todo.tags_of(lines, "function")), "none")
 
     def test_an_sq_save_or_a_late_sd_is_not_the_compiler_blocker(self):
         self.assertNotIn("compiler", todo.tags_of(["addiu $sp, $sp, -0x10", "sq $ra, 0x0($sp)", "jr $ra"], "function"))
         late = ["nop"] * todo.PROLOGUE + ["sd $ra, 0x18($sp)"]
         self.assertNotIn("compiler", todo.tags_of(late, "function"))
 
-    def test_the_permanent_blockers_win_over_it(self):
-        self.assertEqual(todo.blocker({"compiler", "rodata", "jtbl"}), "compiler")
+    def test_its_other_tags_decide(self):
+        self.assertEqual(todo.blocker({"compiler", "rodata", "jtbl"}), "jtbl")
         self.assertEqual(todo.blocker({"compiler", "vu"}), "vu")
+
+    def test_the_library_files_name_sonys_compiler(self):
+        import compile as cc
+        for path in sorted((versions.ROOT / "src" / "lib").glob("*.cpp")):
+            self.assertEqual(cc.row_for(path)[1], "2.9-ee-991111", path.name)
+        self.assertEqual(cc.row_for(versions.ROOT / "src" / "main" / "00100000.cpp")[1], "2.95.3")
 
 
 class StructReturnTest(unittest.TestCase):

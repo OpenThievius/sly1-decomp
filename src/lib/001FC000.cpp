@@ -72,20 +72,18 @@ s32 func_001FE928(s32 value)
     return previous;
 }
 
-struct Node_1FFBE0 { s32 first; s32 second; s32 value; s32 link; s32 flag; s32 previous; };
+struct Node_1FFBE0 { s32 first; s32 second; s32 value; s32 link; s32 flag; Node_1FFBE0* previous; };
 extern Node_1FFBE0* D_0062A7B8;
 
 void func_001FFBE0(s32 value, Node_1FFBE0* item)
 {
-    item->link = value;
-    item->previous = (s32)D_0062A7B8;
-    D_0062A7B8 = item;
     item->value = value;
     item->second = 0;
-    item->flag = 0;
     item->first = 0;
     item->flag = 0;
-    item->second = 0;
+    item->link = value;
+    item->previous = D_0062A7B8;
+    D_0062A7B8 = item;
 }
 
 extern s32 D_002789D8;
@@ -109,9 +107,7 @@ void func_001FF490(Cur_1FF490* cur, List_1FF490* list, s32* lo, s32* hi)
             if (cur->f4 == 0) goto next;
             if (cur->f8 == 0) goto next;
             {
-                s32 n = list->count;
-                list->items[n] = cur;
-                list->count = n + 1;
+                list->items[list->count++] = cur;
                 {
                     s32 x = cur->f8;
                     s32 e = x + cur->fC;
