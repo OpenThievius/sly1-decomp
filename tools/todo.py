@@ -13,7 +13,7 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
   a literal links through tools/rodata.py, a jump table does not yet)
 - jtbl: has a jump table;  vu: uses the vector unit (VU0 macro mode, COP2)
 - float: uses the FPU;  mmi: uses 128-bit multimedia instructions
-- nonc: max.s, min.s, sqrt.s
+- nonc: max.s, min.s
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)
 - handwritten: spimdisasm says it was not made by the compiler
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: not a whole function.
@@ -34,7 +34,8 @@ What stops a function from being matched, the blocker column:
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: residue the
   assembler left after a return, or a tail call; no C function can produce it
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
-- nonc: max.s, min.s, sqrt.s: no plain C form in this compiler
+- nonc: max.s, min.s: no plain C form in this compiler (sqrt.s is: __builtin_sqrtf; and
+  `break 0, 7` after a division is the compiler's divide-by-zero trap, not system code)
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; write the switch in C (the table stays retail's, tools/rodata.py)
@@ -66,7 +67,8 @@ PROLOGUE = 12  # instructions from the top of a listing that a register save may
 SAVE64 = re.compile(r"^sd\s+\$(ra|s\d|fp)\b")
 VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
 SYSTEM = {"syscall", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "eret", "ei", "di", "break"}
-NONC = {"max.s", "min.s", "sqrt.s"}  # no plain C form in this compiler
+DIVIDE_TRAP = "0, 7"  # `break 0, 7` after a division: the compiler's divide-by-zero trap, plain C
+NONC = {"max.s", "min.s"}  # no plain C form in this compiler (sqrt.s is __builtin_sqrtf)
 MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu1|madd1|maddu1|mfsa|mtsa)")
 
 
@@ -181,7 +183,7 @@ def tags_of(lines, kind):
             tags.add("jtbl")
         if VU.match(op):
             tags.add("vu")
-        if op in SYSTEM:
+        if op in SYSTEM and not (op == "break" and rest.strip() == DIVIDE_TRAP):
             tags.add("system")
         if op.endswith((".s", ".w")) or op in ("lwc1", "swc1", "mtc1", "mfc1"):
             tags.add("float")

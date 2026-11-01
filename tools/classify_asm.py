@@ -10,8 +10,7 @@ come from. This follows OpenRAC's classification (rac1-decomp, docs/ASM_CLASSIFI
 credited in THIRD_PARTY_NOTICES.md): the rules below are ours, from the evidence in the
 bytes, and the table they write is committed so that CI needs no disc.
 
-Two kinds, game code only (config/us/layout.tsv): Sony's libraries are matched in C with
-Sony's own compiler instead (docs/TOOLCHAIN.md), so they are not classified here.
+Two kinds, over game code and Sony's libraries; a function matched in C is C and is left out.
 
 - handwritten: the function holds an instruction the compiler cannot emit, so it was not
   made from C. A VU0 macro-mode instruction (COP2), a 128-bit multimedia instruction
@@ -49,6 +48,13 @@ OWN_LINES = ("nonmatching", "glabel", "endlabel", "dlabel", "enddlabel")
 # matched in C (por is the 128-bit |), so seeing it proves nothing. Add an instruction here only
 # with such a function; a function in the table that src/ defines is an error (tests/test_tools.py).
 COMPILER_EMITS = {"por", "pref"}
+# Kernel, cache and system-control instructions, and the paired-pipeline and max/min floats: no
+# function matched in C holds one, and neither compiler emits them from plain C (docs/
+# ASM_CLASSIFICATION.md, "Kernel and system code"). sqrt.s is not here: __builtin_sqrtf gives it.
+SYSTEM = {"syscall", "eret", "ei", "di", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "mtsa", "mfsa",
+          "mult1", "multu1", "div1", "divu1", "mfhi1", "mflo1", "mthi1", "mtlo1", "max.s", "min.s"}
+FRAME = re.compile(r"^addiu\s+\$sp, \$sp, -0x")
+STORES = {"sw", "swc1", "sd", "sq", "sh", "sb"}
 
 
 def ops_of(lines):
@@ -74,7 +80,17 @@ def ends_finished(ops):
     return False
 
 
-def handwritten(ops, kind):
+def stores_before_frame(lines):
+    """True when the stack frame is set up after a store and a nop: hand-scheduled, never compiled."""
+    ins = [l for l in lines if l.split() and not l.startswith(("jlabel", ".L"))]
+    for i, line in enumerate(ins):
+        if FRAME.match(line):
+            before = [x.split()[0] for x in ins[:i]]
+            return "nop" in before and any(o in STORES for o in before)
+    return False
+
+
+def handwritten(ops, kind, lines=()):
     """Why a function is original assembly, or None."""
     if any(todo.VU.match(o) for o in ops):
         return "VU0 macro instruction"
@@ -82,22 +98,29 @@ def handwritten(ops, kind):
         return "128-bit MMI instruction"
     if kind == "handwritten":
         return "marked handwritten by the disassembler"
+    hit = sorted({o for o in ops if o in SYSTEM})
+    if hit:
+        return "kernel or system instruction (%s)" % ", ".join(hit)
+    if stores_before_frame(lines):
+        return "stores and nops before the stack frame is set up"
     return None
 
 
-def classify(funcs, bodies, references):
-    """[(name, addr, size, kind, why)] for game-code functions.
+def classify(funcs, bodies, references, sdk=None):
+    """[(name, addr, size, kind, why)] for the functions given.
 
-    funcs: (name, addr, size, kind) in any order, game code only; bodies: {name: listing lines};
-    references: {name: how many times the asm outside its own labels names it}.
+    funcs: (name, addr, size, kind) in any order; bodies: {name: listing lines};
+    references: {name: how many times the asm outside its own labels names it};
+    sdk: {name: why} for functions the toolchain's own archives say were assembled (sdk_assembly()).
     """
+    sdk = sdk or {}
     out = []
     ok = True  # the code before is finished: true at the start of game code
     for name, addr, size, kind in sorted(funcs, key=lambda f: f[1]):
         lines = bodies.get(name, [])
         tags = todo.tags_of(lines, kind)
         ops = ops_of(lines)
-        why = handwritten(ops, kind)
+        why = sdk.get(name) or handwritten(ops, kind, lines)
         if why:
             out.append((name, addr, size, "handwritten", why))
             ok = ends_finished(ops)
@@ -124,11 +147,63 @@ def references_of(names):
     return counts
 
 
+ARCHIVES = ("libc.a", "libm.a")  # the toolchain's ee/lib archives the game links
+
+
+def sdk_assembly(funcs):
+    """{name: why} for the functions whose code is a member of the toolchain's libc.a or libm.a that
+    was assembled from a .S file, as that member's debug section (.mdebug) names its source.
+
+    The member's code is compared with retail's word for word, apart from the fields its
+    relocations fill in. Only the .S or .c of the source is used, as OpenRAC does (rac1-decomp,
+    docs/reference/ASM_CLASSIFICATION.md): no code, name or header of the archive is taken.
+    """
+    import subprocess
+    import tempfile
+    import check
+    import elf
+    import toolchain
+    root = toolchain.toolchain_dir()
+    if root is None:
+        return {}
+    image = check.retail_image("us")
+    by_size = {}
+    for name, addr, size, _kind in funcs:
+        by_size.setdefault(size, []).append((name, addr))
+    out = {}
+    for archive in ARCHIVES:
+        path = root / "ee" / "lib" / archive
+        if not path.exists():
+            continue
+        with tempfile.TemporaryDirectory(prefix="sly1-sdk-") as tmp:
+            subprocess.run(["mips-linux-gnu-ar", "x", str(path)], cwd=tmp, check=True)
+            for member in sorted(Path(tmp).glob("*.o")):
+                obj = elf.Elf(member.read_bytes())
+                debug = next((obj.contents(s) for s in obj.sections if s["name"] == ".mdebug"), b"")
+                m = re.search(rb"([\w./+-]+\.([Sc]))\x00", debug)    # the member's source file
+                if not m or m.group(2) != b"S":
+                    continue
+                for text in (s for s in obj.sections if s["name"].startswith(".text") and s["size"]):
+                    code = obj.contents(text)
+                    masks = {}
+                    for off, rtype, _sym in obj.relocations(text["name"]):
+                        masks[off] = 0x03FFFFFF if rtype == elf.R_MIPS_26 else 0xFFFF
+                    for name, addr in by_size.get(len(code), []):
+                        theirs = image.read_vaddr(addr, len(code))
+                        same = all(((int.from_bytes(code[i:i + 4], "little") ^ int.from_bytes(theirs[i:i + 4], "little"))
+                                    & ~masks.get(i, 0) & 0xFFFFFFFF) == 0 for i in range(0, len(code), 4))
+                        if same:
+                            out[name] = "assembled from a .S source (the toolchain's %s)" % archive
+    return out
+
+
 def derive():
     bodies = todo.bodies()
-    funcs = [f for f in todo.functions() if todo.source_of(f[1]).startswith("src/main")]
+    done = todo.finished()
+    funcs = todo.functions()
     refs = references_of([f[0] for f in funcs])
-    return classify(funcs, bodies, refs)
+    # Every function takes part, so a remnant sees the code before it; one matched in C is C.
+    return [r for r in classify(funcs, bodies, refs, sdk_assembly(funcs)) if r[0] not in done]
 
 
 def render(rows):

@@ -27,12 +27,11 @@ splits are taken from other projects or from the prototype
    object's `.rodata`, the code takes retail's table address, and `tools/check.py` compares the
    table's case-label addresses with retail's (functions tagged `jtbl`). `.data` still comes from
    the disassembly.
-3. **Original assembly.** The game-code functions that were not made from C (VU0 and multimedia
-   instructions, the disassembler's own mark) and the linker's leftovers are listed in
-   `config/us/original_asm.tsv` and counted as finished, apart from the exact C matches
-   (docs/ASM_CLASSIFICATION.md). Sony's libraries are matched in C with Sony's own compiler
-   instead (docs/TOOLCHAIN.md). Kernel and cache instructions, `max.s`/`min.s`/`sqrt.s` and the
-   fragments that contain a jump are for a person to classify (#18).
+3. **Original assembly.** The functions that were not made from C (VU0 and multimedia
+   instructions, kernel and system instructions, code scheduled by hand, the disassembler's own
+   mark, the toolchain's own `.S` routines) and the linker's leftovers, in game code and in Sony's
+   libraries, are listed in `config/us/original_asm.tsv` and counted as finished, apart from the
+   exact C matches (docs/ASM_CLASSIFICATION.md; #18).
 4. **File boundaries, found in retail.** Where one source file ends and the next begins, from
    retail's own code: which functions share static data, how `.rodata` and `.data` group, and
    compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of
