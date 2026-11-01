@@ -25,6 +25,10 @@ maintainers, used here under the AGPL-3.0-or-later.
 
 ## Tools
 
+decomp-permuter (MIT) is fetched by each contributor into `tools/ext/` and is never part of the
+repository; `tools/permuter_setup.py` and `tools/permuter_compile.py`, which connect it to this
+build, are ours, after OpenRAC's setup (rac1-decomp, `docs/agents/PERMUTER.md`).
+
 The Python packages in `tools/requirements.txt` (splat64, spimdisasm, rabbitizer, PyYAML) are
 installed by each contributor and are not distributed with the repository. The compiler is
 proprietary and never part of it ([docs/TOOLCHAIN.md](docs/TOOLCHAIN.md)).
