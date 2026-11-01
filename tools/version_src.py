@@ -16,13 +16,18 @@ shared file's flags: the version never builds a function with options or a conte
 object did not have. The US build never sees these files (versions.sources()).
 
 Code and data only a version has are named with its key, func_eu_XXXXXXXX and
-D_eu_XXXXXXXX, and reach that address in that version alone (tools/check.py).
+D_eu_XXXXXXXX, and reach that address in that version alone (tools/check.py). A
+function only the version has is defined the same way, in the shared file whose
+code it sits among (`todo` names it: the file of the closest function before it
+that both versions have); having no shared definition to replace, it is added at
+the end of that file's unit.
 
 The layout follows OpenRAC's (rac1-decomp, docs/VERSIONS.md; credited in
 THIRD_PARTY_NOTICES.md); the code is ours.
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -31,6 +36,7 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 VERSIONS = ROOT / "src" / "versions"
+OWN_NAME = re.compile(r"^func_([a-z]+)_([0-9A-F]{8})$")  # a function only that version has: func_eu_001387C8
 
 
 class VersionSourceError(Exception):
@@ -95,12 +101,37 @@ def definition_span(text, name):
 
 
 def unit_text(shared, definitions):
-    """The shared file's text with each function of `definitions` ({name: file}) defined by its file."""
+    """The shared file's text with each function of `definitions` ({name: file}) defined by its file.
+
+    A function only the version has (OWN_NAME) replaces nothing: it is added at the end, in name order.
+    """
     text = Path(shared).read_text()
-    spans = sorted(((definition_span(text, name), path) for name, path in definitions.items()), reverse=True)
+    own = sorted(n for n in definitions if OWN_NAME.match(n))
+    spans = sorted(((definition_span(text, name), path) for name, path in definitions.items() if name not in own),
+                   reverse=True)
     for (start, end), path in spans:
         text = text[:start] + Path(path).read_text().rstrip() + "\n" + text[end:]
+    for name in own:
+        text = text.rstrip("\n") + "\n\n" + Path(definitions[name]).read_text().rstrip() + "\n"
     return text
+
+
+def only_here(key):
+    """[(version's name, address, size, shared file)] of the game-code functions only the version has.
+
+    The shared file is the one that holds the closest function before it that both versions have.
+    """
+    import todo
+    rows = [l.split("\t") for l in (ROOT / "config" / key / "map.tsv").read_text().splitlines()[1:]]
+    game = [(r[2], r[3]) for r in todo.layout(key) if r[0] == "code" and r[5] == "src/main"]
+    out, before = [], None
+    for name, addr, size, us_name, us_addr, how in sorted(rows, key=lambda r: int(r[1], 16)):
+        a = int(addr, 16)
+        if us_name != "-":
+            before = int(us_addr, 16)
+        elif before is not None and any(s <= a < e for s, e in game):
+            out.append((name, a, int(size), ROOT / todo.source_of(before)))
+    return out
 
 
 def unit(shared, key, trying=None):
@@ -135,14 +166,25 @@ def main(argv=None):
     p.add_argument("path")
     p = sub.add_parser("list", help="the version's own definitions")
     p.add_argument("--version", default="eu")
+    p = sub.add_parser("todo", help="the functions only the version has, not yet defined, with their tags")
+    p.add_argument("--version", default="eu")
     args = parser.parse_args(argv)
     if args.cmd == "unit":
         key, shared = version_of(args.path)
         out, mine = unit(shared, key)
         print("%s: %s" % (out.relative_to(ROOT), ", ".join(mine)))
-    else:
+    elif args.cmd == "list":
         for name, path in overrides(args.version).items():
             print("%s\t%s" % (name, path.relative_to(ROOT)))
+    else:
+        import todo
+        bodies = todo.bodies(args.version)
+        done = overrides(args.version)
+        for name, addr, size, shared in only_here(args.version):
+            own = "func_%s_%08X" % (args.version, addr)
+            if own not in done:
+                tags = ",".join(sorted(todo.tags_of(bodies.get(name, []), "code"))) or "none"
+                print("%s\t%d\t%s\t%s" % (own, size, tags, shared.relative_to(ROOT)))
     return 0
 
 

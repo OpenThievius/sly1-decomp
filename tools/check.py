@@ -195,6 +195,16 @@ def retail_image(key):
 
 def target_of(key, name):
     """(address, size) of FUNC in the version."""
+    m = VERSION_NAME.match(name)
+    if m:
+        # A function only that version has (tools/version_src.py): its address is in its name.
+        if m.group(1) != key:
+            raise KeyError("%s is only in the %s version" % (name, m.group(1)))
+        addr = int(m.group(2), 16)
+        size = next((s for a, s, _ in load_functions(key).values() if a == addr), None)
+        if size is None:
+            raise KeyError("config/%s/functions.tsv has no function at 0x%X" % (key, addr))
+        return addr, size
     us = load_functions("us")
     symbols = load_symbols("us")
     if name in us:

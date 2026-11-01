@@ -125,9 +125,9 @@ def decoded(line):
     return text
 
 
-def bodies():
+def bodies(key="us"):
     out, current = {}, None
-    for line in (ROOT / "asm" / "us" / "text.s").read_text().splitlines():
+    for line in (ROOT / "asm" / key / "text.s").read_text().splitlines():
         if line.startswith("nonmatching "):
             current = line.split()[1].rstrip(",")
             out[current] = []
