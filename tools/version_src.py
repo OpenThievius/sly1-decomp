@@ -103,12 +103,16 @@ def unit_text(shared, definitions):
     return text
 
 
-def unit(shared, key):
-    """The translation unit the version builds for a shared file: written under build/<version>/versions/."""
+def unit(shared, key, trying=None):
+    """The translation unit the version builds for a shared file: written under build/<version>/versions/.
+
+    trying: {function: file}, definitions kept elsewhere (a worker's folder) that take their place too.
+    """
     shared = Path(shared).resolve()
     rel = shared.relative_to(ROOT / "src")
     mine = {n: p for n, p in overrides(key).items() if version_of(p)[1] == shared}
-    out = ROOT / "build" / key / "versions" / rel
+    mine.update(trying or {})
+    out = ROOT / "build" / key / "versions" / ("try" if trying else "") / rel
     out.parent.mkdir(parents=True, exist_ok=True)
     text = unit_text(shared, mine)
     if not out.exists() or out.read_text() != text:

@@ -17,7 +17,8 @@ Prints EXACT, or DIFFER with both disassemblies side by side (--diff shows
 them for EXACT too). With --version eu the function is checked at its PAL
 counterpart (config/eu/map.tsv), with every address translated to PAL's. A
 file of src/versions/eu/ (tools/version_src.py) is checked in PAL, built in
-its shared file's unit.
+its shared file's unit; --unit SHARED.cpp does the same for a definition kept
+anywhere else (a worker's folder).
 
 A function that uses a .rodata literal of its own (a float or a string written in C) is EXACT here
 and marked `rodata`: the literal, for as many bytes as the instruction reaches (a string, up to its
@@ -416,9 +417,13 @@ def main(argv=None):
     parser.add_argument("--version", default="us", choices=["us", "eu"])
     parser.add_argument("--flags", help="override the file's flags (to explore only: matches count with its own)")
     parser.add_argument("--diff", action="store_true", help="show the disassembly for EXACT too")
+    parser.add_argument("--unit", metavar="SHARED.cpp",
+                        help="FILE is a version's own definition of FUNC, kept elsewhere: build it in SHARED's unit")
     args = parser.parse_args(argv)
 
     own = version_src.version_of(args.src)
+    if args.unit:
+        own = (args.version if args.version != "us" else "eu", Path(args.unit).resolve())
     if own and args.version == "us":
         args.version = own[0]       # a version's own definition is checked in that version
     with tempfile.TemporaryDirectory(prefix="sly1-check-") as tmp:
@@ -426,7 +431,8 @@ def main(argv=None):
         try:
             if own:
                 # Built in its shared file's unit, in place of the shared definition.
-                path, _ = version_src.unit(own[1], own[0])
+                trying = {f: Path(args.src).resolve() for f in args.funcs} if args.unit else None
+                path, _ = version_src.unit(own[1], own[0], trying)
                 cc.compile_file(path, out, args.flags.split() if args.flags else cc.flags_for(own[1]))
             else:
                 cc.compile_file(args.src, out, args.flags.split() if args.flags else None)
