@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 77/176 (43.8%), checked 2026-11-01
+// SIZE 172/176, checked 2026-11-01
 // Near match: retail uses 64-bit saves, a likely branch, and a tail jump.
 #include "common.h"
 

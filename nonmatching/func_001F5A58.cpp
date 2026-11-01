@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 156/176, checked 2026-11-01
+// SIZE 164/176, checked 2026-11-01
 // NEAR: aligned 16-byte and 8-byte copies are expressed, but bulk/tail loop control, pointer updates, and return scheduling differ.
 #include "common.h"
 struct __attribute__((aligned(16))) Quad_1F5A58 { u64 lo, hi; };

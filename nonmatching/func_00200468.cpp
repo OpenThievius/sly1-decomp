@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 26/28 (92.9%), checked 2026-11-01
+// SIZE 8/28, checked 2026-11-01
 // NEAR: The body matches; only the configured compiler’s sq/lq save of ra
 //        differs from retail sd/ld.
 #include "common.h"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 204/196, checked 2026-11-01
+// SIZE 220/196, checked 2026-11-01
 // NEAR: the callback and parameter flow are modeled, but the candidate is 204 bytes versus retail 196 and list traversal/register/frame choices differ.
 // NEAR: best C build is 204 bytes vs retail 196; list traversal and saved-register setup still differ.
 #include "common.h"
