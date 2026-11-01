@@ -10,7 +10,8 @@ the source only loosely: retail's order is often one particular order of the sam
 Mark the lines to reorder with a /*P*/ comment; consecutive marked lines form one group, and the
 groups are permuted together (at most --limit orders in all). --auto marks every run of two to
 seven consecutive simple statements (an assignment or a call ending in `;`) instead, and then
-permutes one run at a time, keeping the best order of each before the next.
+permutes one run at a time, keeping the best order of each before the next; a run with more
+orders than --limit is taken in overlapping windows that fit it.
 
 Each candidate is compiled the way the function lands (its src/ file's compiler and flags,
 check.source_for(); with --unit, in that shared file's unit as PAL's own definitions are) and
@@ -162,7 +163,11 @@ def main(argv=None):
         args.func, "?" if start is None else start, len(runs), "/".join(str(len(r)) for r in runs)))
     best = (start, lines)
     if args.auto:
-        for run in runs:       # one run at a time, each from the best so far
+        # One run at a time, each from the best so far; a run with more orders than --limit is
+        # taken in overlapping windows of as many lines as the limit allows.
+        k = max(n for n in range(2, 8) if math.factorial(n) <= args.limit)
+        runs = [r[i:i + k] for r in runs for i in range(0, max(1, len(r) - 1), k - 1) if len(r[i:i + k]) >= 2]
+        for run in runs:
             s, cand = search(scorer, best[1], [run], args.jobs, args.limit)
             if s is not None and (best[0] is None or s < best[0]):
                 best = (s, cand)
