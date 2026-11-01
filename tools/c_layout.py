@@ -243,6 +243,9 @@ def layout(ld_script, objects):
         text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(labels.items())) + "\n"
     if aliases:
         text += "\n" + "\n".join("PROVIDE(%s = %s);" % (a, b) for a, b in sorted(aliases.items())) + "\n"
+    libcalls = check.load_libcalls("us")
+    if libcalls:
+        text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(libcalls.items())) + "\n"
     out = ld_script.with_name(ld_script.name.replace(".splat.ld", ".ld"))
     write_if_changed(out, text)
     return out, runs, placed
