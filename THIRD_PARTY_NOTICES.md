@@ -20,6 +20,7 @@ maintainers, used here under the AGPL-3.0-or-later.
 | `config/cflags.tsv` (a compiler per file), docs/TOOLCHAIN.md ("The libraries") | rac1-decomp's choice of Sony's 2.9-ee-991111 for its SDK objects (its `docs/reference/TOOLCHAIN.md`) | the choice only, measured anew on this game's library; no file, code or list of objects of theirs, and none of the GCC sources they build libgcc from |
 | `docs/ASM_CLASSIFICATION.md`, `tools/classify_asm.py`, `config/us/original_asm.tsv` | the policy and evidence described in rac1-decomp's `docs/reference/ASM_CLASSIFICATION.md` (original assembly and linker leftovers counted as finished, apart from the exact C matches; kernel instructions, hand-placed code, and the source names in the SDK's `libc.a` as evidence) | the rules, the tool and the table written anew from this game's bytes; no file or code of rac1-decomp's was copied |
 | `tools/nonmatching.py`, `nonmatching/README.md`, the report's `fuzzy_match_percent` | the near-miss staging of rac1-decomp (its `docs/reference/NONMATCHING.md`: a best attempt per function with a verdict, a generated index, the byte share as fuzzy progress) | the scheme only; the tool written anew, with verdicts kept in each file so CI needs no compiler |
+| `tools/permute.py` | rac1-decomp's `tools/permute.py` (its `docs/agents/PERMUTER.md`: every order of the lines marked `/*P*/`) | the idea and the marker only; written anew for this build, with `--auto` |
 | `.gitignore`, `baserom/README.md` | OpenRAC's and rac3-decomp's | this repository's paths |
 
 ## Tools
