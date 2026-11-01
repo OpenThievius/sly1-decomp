@@ -51,8 +51,21 @@ def load_functions(key):
     return rows
 
 
-def load_symbols(key):
+def load_libcalls(key):
+    """{libcall name: address}: the soft-float routines the compiler calls by name (config/<version>/libcalls.tsv)."""
+    path = ROOT / "config" / key / "libcalls.tsv"
+    if not path.exists():
+        return {}
+    functions = load_functions(key)
     out = {}
+    for line in path.read_text().splitlines()[1:]:
+        name, function = line.split("\t")[:2]
+        out[name] = functions[function][0]
+    return out
+
+
+def load_symbols(key):
+    out = load_libcalls(key)
     path = ROOT / "config" / key / "symbol_addrs.txt"
     if path.exists():
         for line in path.read_text().splitlines():

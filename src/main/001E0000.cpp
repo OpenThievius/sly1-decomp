@@ -1038,7 +1038,8 @@ s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
 
 struct Ctx_001E1A08 { u8 pad[0x10]; s32 count; };
 struct Spec_001E1A08 {
-    u8 pad0[0x1C]; s32 i1C; s32 i20; s32 i24; s32 i28; u8 ch;
+    s32 f00; s32 f04; s32 f08; u8 pad0C[4]; s32 f10; s32 f14; s32 f18;
+    s32 i1C; s32 i20; s32 i24; s32 i28; u8 ch; u8 pad2D[3]; s32 f30;
 };
 extern char D_0024E478[]; extern char D_0024E480[]; extern char D_0024E488[];
 extern char D_0024E490[]; extern char D_0024E498[];
@@ -1048,6 +1049,9 @@ s32 func_001D7190(Ctx_001E1A08* c, const char* s, s32 n);
 void func_001E0CD0(Spec_001E1A08* sp, Ctx_001E1A08* c, const char* s);
 void func_001E1028(Spec_001E1A08* sp, Ctx_001E1A08* c, u64 v);
 void func_001E17A8(Spec_001E1A08* sp, Ctx_001E1A08* c, s64 s);
+void func_001E17A8(Spec_001E1A08* sp, Ctx_001E1A08* c, double value);
+s32 func_001E1498(char* buf, s32 n, Spec_001E1A08* sp, double value);
+void func_001E2218(char* p);
 s64 func_001FD868(f32 f);
 
 void func_001E1A08(Spec_001E1A08* sp, Ctx_001E1A08* c, u8** va, const char* fmt, s32 len) {
@@ -1161,6 +1165,64 @@ extern u8 D_0024E2E0[];
 
 s32 func_001E2100(Str_1E0CD0* p);
 
+
+void func_001E17A8(Spec_001E1A08* spec, Ctx_001E1A08* ctx, double value)
+{
+    char buf[0x1C0];
+    char sign[16];
+    char padc[16];
+    s32 zeros = 0;
+    s32 left;
+    s32 lead;
+    s32 n;
+    s32 len;
+    s32 slen;
+    s32 width;
+    s32 total;
+    s32 neg;
+    if (spec->i1C == 0 && spec->f14 == 0) {
+        spec->i1C = 6;
+    } else if (spec->f14 != 0 && spec->ch == 0x67) {
+        spec->i1C = 1;
+    }
+    neg = value < 0.0;
+    if (neg) value = 0.0 - value;
+    sign[0] = 0;
+    if (neg) *(u16*)sign = D_0024E3D0;
+    else if (spec->f04) *(u16*)sign = D_0024E3D8;
+    else if (spec->f08) *(u16*)sign = D_0024E3E0;
+    slen = func_001E2100(sign);
+    len = func_001E1498(buf, 0x1B5, spec, value);
+    buf[len] = 0;
+    if (spec->f30) func_001E2218(buf);
+    width = spec->f18;
+    total = slen + len;
+    lead = 0;
+    left = 0;
+    if (total < width) {
+        s32 pad = width - total;
+        if (spec->f00) left = pad;
+        else if (spec->f10 && len != 0) zeros = pad;
+        else lead = pad;
+    }
+    padc[0] = ' ';
+    n = lead;
+    while (n-- > 0) {
+        if (func_001D7190(ctx, padc, 1) != 1) break;
+    }
+    n = zeros;
+    func_001D7190(ctx, sign, slen);
+    padc[0] = '0';
+    while (n-- > 0) {
+        if (func_001D7190(ctx, padc, 1) != 1) break;
+    }
+    func_001D7190(ctx, buf, len);
+    n = left;
+    padc[0] = ' ';
+    while (n-- > 0) {
+        if (func_001D7190(ctx, padc, 1) != 1) break;
+    }
+}
 
 void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
     s32 n;
