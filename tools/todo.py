@@ -26,6 +26,11 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
 
 What stops a function from being matched, the blocker column:
 
+- asm: original assembly, tracked in config/us/original_asm.tsv (tools/classify_asm.py): the
+  function holds an instruction the compiler cannot emit, or is a run of words the linker
+  left of a stripped function. It is not C waiting to be matched, and tools/progress.py
+  counts it as finished, apart from the exact C matches.
+
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: residue the
   assembler left after a return, or a tail call; no C function can produce it
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
@@ -100,6 +105,18 @@ def finished():
         for m in DEFINITION.finditer(path.read_text()):
             names.add(m.group(1))
     return names
+
+
+def classified():
+    """{name: kind} of the functions config/us/original_asm.tsv lists as original assembly."""
+    path = ROOT / "config" / "us" / "original_asm.tsv"
+    if not path.exists():
+        return {}
+    rows = {}
+    for line in path.read_text().splitlines()[1:]:
+        name, _addr, _size, kind, _why = line.split("\t")
+        rows[name] = kind
+    return rows
 
 
 def functions():
@@ -177,7 +194,7 @@ def tags_of(lines, kind):
     return tags
 
 
-PERMANENT = ("fragment", "vu", "system", "handwritten", "mmi", "nonc")
+PERMANENT = ("asm", "fragment", "vu", "system", "handwritten", "mmi", "nonc")
 
 
 def blocker(tags):
@@ -197,11 +214,15 @@ def attempted():
 def todo():
     done = finished()
     body = bodies()
+    asm = classified()
     out = []
     for name, addr, size, kind in functions():
         if name in done:
             continue
-        out.append((name, addr, size, source_of(addr), sorted(tags_of(body.get(name, []), kind))))
+        tags = tags_of(body.get(name, []), kind)
+        if name in asm:
+            tags.add("asm")
+        out.append((name, addr, size, source_of(addr), sorted(tags)))
     return out
 
 
@@ -228,7 +249,7 @@ def main(argv=None):
             n, total = counts.get(key, (0, 0))
             counts[key] = (n + 1, total + size)
         print("blocker\tfunctions\tbytes")
-        for key in ("none", "rodata", "jtbl", "fragment", "vu", "system", "handwritten", "mmi", "nonc"):
+        for key in ("none", "rodata", "jtbl", "asm", "fragment", "vu", "system", "handwritten", "mmi", "nonc"):
             if key in counts:
                 print("%s\t%d\t%d" % (key, counts[key][0], counts[key][1]))
         return 0

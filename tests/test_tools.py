@@ -10,7 +10,9 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+import classify_asm  # noqa: E402
 import disc  # noqa: E402
+import progress  # noqa: E402
 import todo  # noqa: E402
 import c_layout  # noqa: E402
 import check  # noqa: E402
@@ -252,6 +254,79 @@ class BlockerTest(unittest.TestCase):
         self.assertEqual(todo.blocker({"jtbl", "rodata"}), "jtbl")
         self.assertEqual(todo.blocker({"data", "rodata", "float"}), "rodata")
         self.assertEqual(todo.blocker({"calls", "data"}), "none")
+
+
+class ClassifyAsmTest(unittest.TestCase):
+    RET = ["addiu $sp, $sp, -0x10", "jr $ra", "nop"]
+
+    def classify(self, listings, refs=None):
+        funcs = [(n, a, 4 * len(b), k) for n, a, k, b in listings]
+        return {r[0]: (r[3], r[4]) for r in classify_asm.classify(funcs, {n: b for n, _a, _k, b in listings}, refs or {})}
+
+    def test_a_vu0_instruction_makes_a_function_handwritten(self):
+        got = self.classify([("f", 0x100000, "code", ["vaddx.xyzw $vf1, $vf2, $vf3", "jr $ra", "nop"])])
+        self.assertEqual(got["f"][0], "handwritten")
+
+    def test_a_multimedia_instruction_does_too_unless_the_compiler_emits_it(self):
+        got = self.classify([("mmi", 0x100000, "code", ["pcpyld $v0, $a0, $a1", "jr $ra", "nop"]),
+                             ("por", 0x100010, "code", ["por $v0, $a0, $a1", "jr $ra", "nop"])])
+        self.assertIn("mmi", got)
+        self.assertNotIn("por", got)
+
+    def test_the_disassemblers_mark_counts(self):
+        got = self.classify([("f", 0x100000, "handwritten", self.RET)])
+        self.assertEqual(got["f"][0], "handwritten")
+
+    def test_a_leftover_word_after_a_return_is_a_remnant(self):
+        got = self.classify([("f", 0x100000, "code", self.RET), ("r", 0x100010, "code", ["addiu $sp, $sp, 0x10"])])
+        self.assertEqual(got["r"][0], "remnant")
+        self.assertNotIn("f", got)
+
+    def test_a_remnant_needs_its_conditions(self):
+        base = ("f", 0x100000, "code", self.RET)
+        frag = ["addiu $sp, $sp, 0x10"]
+        self.assertNotIn("r", self.classify([base, ("r", 0x100014, "code", frag)]))               # not on 8 bytes
+        self.assertNotIn("r", self.classify([base, ("r", 0x100010, "code", ["j func_00100000", "nop"])]))  # a jump
+        self.assertNotIn("r", self.classify([base, ("r", 0x100010, "code", frag)], {"r": 1}))     # reached
+        before = ("g", 0x100000, "code", ["jr $ra", "nop", "addiu $v0, $zero, 1"])                  # ends on code
+        self.assertNotIn("r", self.classify([before, ("r", 0x100010, "code", frag)]))
+
+    def test_the_chain_stays_finished_across_remnants(self):
+        got = self.classify([("f", 0x100000, "code", self.RET), ("a", 0x100010, "code", ["addiu $sp, $sp, 0x10"]),
+                             ("b", 0x100018, "code", ["addiu $sp, $sp, 0x20"])])
+        self.assertEqual(sorted(n for n in got if got[n][0] == "remnant"), ["a", "b"])
+
+
+class OriginalAsmTableTest(unittest.TestCase):
+    """The committed config/us/original_asm.tsv, which CI reads without a disc."""
+
+    def setUp(self):
+        self.table = classify_asm.read_table()
+        self.funcs = {n: (a, s) for n, a, s, _k in todo.functions()}
+
+    def test_every_row_is_a_game_code_function(self):
+        for name in self.table:
+            self.assertIn(name, self.funcs, name)
+            self.assertTrue(todo.source_of(self.funcs[name][0]).startswith("src/main"), name)
+
+    def test_the_kinds_are_known(self):
+        self.assertLessEqual(set(self.table.values()), {"handwritten", "remnant"})
+
+    def test_no_function_is_both_original_assembly_and_c(self):
+        self.assertEqual(sorted(set(self.table) & todo.finished()), [])
+
+
+class ProgressCountTest(unittest.TestCase):
+    def test_original_assembly_counts_as_finished_but_not_as_exact_c(self):
+        asm = progress.original_asm("us")
+        self.assertTrue(asm)
+        self.assertEqual(progress.finished("us"), progress.exact_c("us") | asm)
+        self.assertEqual(progress.exact_c("us") & asm, set())
+
+    def test_a_pal_function_follows_its_us_counterpart(self):
+        pal = progress.original_asm("eu")
+        self.assertTrue(pal)
+        self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
 
 class CompilerTagTest(unittest.TestCase):
