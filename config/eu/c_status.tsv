@@ -803,24 +803,24 @@ func_001303F0	func_00130520	match
 func_00130C20	func_00130D50	match	
 func_00130F48	func_00131078	match	
 func_00131000	func_00131130	match	
-func_00131140	func_00131270	differs	
+func_00131140	func_00131270	match	version-specific
 func_00133B58	func_00133CF0	differs	
-func_001356C0	func_00135820	differs	
+func_001356C0	func_00135820	match	version-specific
 func_001357F0	func_00135950	match	
 func_00135858	func_001359B8	match	
-func_00135E78	func_00135FD8	differs	
-func_00135F48	func_001360A8	differs	
-func_00136040	func_001361A0	differs	
-func_001363D0	func_00136530	differs	
+func_00135E78	func_00135FD8	match	version-specific
+func_00135F48	func_001360A8	match	version-specific
+func_00136040	func_001361A0	match	version-specific
+func_001363D0	func_00136530	match	version-specific
 func_00136408	func_00136568	differs	the C is 292 bytes, retail's function 216
 func_00136530	func_00136640	differs	
-func_001365A0	func_001366B8	differs	
-func_001365A8	func_001366C0	differs	
-func_001365F0	func_00136708	differs	rodata
-func_00136648	func_00136760	differs	rodata
+func_001365A0	func_001366B8	match	version-specific
+func_001365A8	func_001366C0	match	version-specific
+func_001365F0	func_00136708	match	version-specific, rodata
+func_00136648	func_00136760	match	version-specific, rodata
 func_00136EC8	func_00137138	differs	
-func_00136EF8	func_00137168	differs	
-func_00136FA8	func_00137218	differs	
+func_00136EF8	func_00137168	match	version-specific
+func_00136FA8	func_00137218	match	version-specific
 func_00137228	func_00137498	match	
 func_00137238	func_001374A8	match	
 func_00137248	func_001374B8	match	
@@ -1059,7 +1059,7 @@ func_00147EF8	func_001481F8	match
 func_00147FB0	func_001482B0	match	
 func_00148038	func_00148338	match	
 func_00148178	func_00148478	match	
-func_001481A0	func_001484A0	differs	
+func_001481A0	func_001484A0	match	version-specific
 func_00148298	func_00148598	match	
 func_00148400	func_00148700	match	
 func_00148470	func_00148770	match	
@@ -1078,7 +1078,7 @@ func_00148D90	func_00149080	match
 func_00148E18	func_00149108	match	
 func_00148E40	func_00149130	match	
 func_00148EF8	func_001491E8	match	
-func_00148F80	func_00149270	differs	
+func_00148F80	func_00149270	match	version-specific
 func_00148FF0	func_001492E0	match	
 func_00149168	func_00149458	match	
 func_00149398	func_00149688	match	
@@ -1097,12 +1097,12 @@ func_0014A888	func_0014AB78	match
 func_0014A8D0	func_0014ABC0	match	
 func_0014AA90	func_0014AD80	match	
 func_0014AA98	func_0014AD88	match	
-func_0014ABD0	func_0014AEC0	differs	
+func_0014ABD0	func_0014AEC0	match	version-specific
 func_0014AC48	func_0014AF38	differs	the C is 180 bytes, retail's function 160
-func_0014AD00	func_0014AFD8	differs	
-func_0014AD70	func_0014B048	differs	
-func_0014ADE0	func_0014B0B8	differs	
-func_0014AEA0	func_0014B178	differs	
+func_0014AD00	func_0014AFD8	match	version-specific
+func_0014AD70	func_0014B048	match	version-specific
+func_0014ADE0	func_0014B0B8	match	version-specific
+func_0014AEA0	func_0014B178	match	version-specific
 func_0014AF10	func_0014B1E8	match	
 func_0014B3E0	func_0014B690	match	
 func_0014B550	func_0014B800	match	
@@ -1192,15 +1192,15 @@ func_00150750	func_00150A00	match
 func_00150760	func_00150A10	match	
 func_00150770	func_00150A20	match	
 func_00150780	func_00150A30	match	
-func_00150790	func_00150A40	differs	
-func_00150AE8	func_00150D98	differs	rodata
+func_00150790	func_00150A40	match	version-specific
+func_00150AE8	func_00150D98	match	version-specific, rodata
 func_00150DC0	func_00151070	differs	the .rodata literal at +0xC0 is not retail's constant at 0x24C8B0
 func_001512A8	func_00151560	match	
-func_00151300	func_001515B8	differs	rodata
+func_00151300	func_001515B8	match	version-specific, rodata
 func_001516C0	func_00151978	match	rodata
 func_001517C0	func_00151A78	match	
-func_00151860	func_00151B18	differs	
-func_001518B8	func_00151B70	differs	
+func_00151860	func_00151B18	match	version-specific
+func_001518B8	func_00151B70	match	version-specific
 func_001519A8	func_00151C60	match	
 func_001519E0	func_00151C98	match	
 func_00151A58	func_00151D10	match	
@@ -1465,9 +1465,9 @@ func_00167EF0	func_00168550	match
 func_001683B8	func_00168A18	match	
 func_001683E8	func_00168A48	match	
 func_001684E8	func_00168B48	match	
-func_001685B8	func_00168C18	differs	
+func_001685B8	func_00168C18	match	version-specific
 func_001686E8	func_00168D48	match	
-func_001688B8	func_00168F18	differs	
+func_001688B8	func_00168F18	match	version-specific
 func_00168A48	func_001690A8	match	
 func_00168AF8	func_00169158	match	
 func_00168B68	func_001691C8	differs	the C is 404 bytes, retail's function 396
@@ -1518,11 +1518,11 @@ func_0016AF80	func_0016B568	differs	the .rodata literal at +0x8 is not retail's 
 func_0016B0F8	func_0016B6F0	match	
 func_0016B190	func_0016B788	match	
 func_0016B300	func_0016B8F8	error	a reference to D_00262950, which has no address in this version
-func_0016B520	func_0016BB38	differs	
+func_0016B520	func_0016BB38	match	version-specific
 func_0016B560	func_0016BB78	match	
-func_0016B7A8	func_0016BDC0	differs	
+func_0016B7A8	func_0016BDC0	match	version-specific
 func_0016BB78	func_0016C1A0	match	
-func_0016BDD0	func_0016C3F8	differs	
+func_0016BDD0	func_0016C3F8	match	version-specific
 func_0016C360	func_0016C9A8	match	
 func_0016C470	func_0016CAB8	match	rodata
 func_0016C4B8	func_0016CB00	match	
@@ -1592,7 +1592,7 @@ func_00177968	func_00177FC8	match
 func_00177E20	func_00178480	match	
 func_00177E70	func_001784D0	match	
 func_00177EE0	func_00178540	match	rodata
-func_00177F98	func_001785F8	differs	
+func_00177F98	func_001785F8	match	version-specific
 func_00178008	func_00178668	match	
 func_00178038	func_00178698	match	
 func_001781E0	func_00178840	match	
@@ -1601,7 +1601,7 @@ func_00178280	func_001788E0	match
 func_00178598	func_00178BF8	match	
 func_00178D98	func_001793F8	match	
 func_001793C0	func_00179A20	match	
-func_001793F0	func_00179A50	differs	
+func_001793F0	func_00179A50	match	version-specific
 func_00179590	func_00179BF0	match	
 func_00179690	func_00179CF0	match	
 func_0017A6D0	func_0017AD30	match	
@@ -1615,7 +1615,7 @@ func_0017ADD0	func_0017B430	match
 func_0017AE00	func_0017B460	match	
 func_0017B308	func_0017B968	match	
 func_0017B3A8	func_0017BA08	match	
-func_0017B410	func_0017BA70	differs	
+func_0017B410	func_0017BA70	match	version-specific
 func_0017B510	func_0017BB70	match	
 func_0017B550	func_0017BBB0	match	
 func_0017B598	func_0017BBF8	match	
@@ -1661,7 +1661,7 @@ func_00180EB0	func_00181510	match
 func_00180EE8	func_00181548	match	
 func_00180F20	func_00181580	match	
 func_00180F68	func_001815C8	match	
-func_00180F98	func_001815F8	differs	rodata
+func_00180F98	func_001815F8	match	version-specific, rodata
 func_00181448	func_00181AA8	match	
 func_00181A58	func_001820B8	match	
 func_00181A98	func_001820F8	match	
@@ -1791,17 +1791,17 @@ func_0018B988	func_0018BFF0	match	rodata
 func_0018BC90	func_0018C2F8	match	
 func_0018BD00	func_0018C368	match	
 func_0018BD58	func_0018C3C0	match	
-func_0018BDC8	func_0018C430	differs	
+func_0018BDC8	func_0018C430	match	version-specific
 func_0018BFA8	func_0018C610	match	
 func_0018C028	func_0018C690	match	
 func_0018C178	func_0018C7E0	match	
 func_0018C1A8	func_0018C810	match	
 func_0018C1E8	func_0018C850	match	
-func_0018C250	func_0018C8B8	differs	the .rodata literal at +0x8 is not retail's constant at 0x24D788
+func_0018C250	func_0018C8B8	match	version-specific, rodata
 func_0018C420	func_0018CA88	match	
 func_0018C638	func_0018CCA0	match	
 func_0018C770	func_0018CDD8	match	
-func_0018C7F8	func_0018CE60	differs	
+func_0018C7F8	func_0018CE60	match	version-specific
 func_0018C888	func_0018CEF0	match	
 func_0018C9C0	func_0018D028	match	
 func_0018CA10	func_0018D078	match	
@@ -1856,7 +1856,7 @@ func_0018E8C0	func_0018F328	match
 func_0018E938	func_0018F3A0	match	
 func_0018E940	func_0018F3A8	differs	the C is 264 bytes, retail's function 204
 func_0018EA48	func_0018F478	differs	
-func_0018EAA0	func_0018F4D8	differs	
+func_0018EAA0	func_0018F4D8	match	version-specific
 func_0018EAF8	func_0018F530	differs	
 func_0018EB98	func_0018F620	differs	
 func_0018EC40	func_0018F6F0	match	
@@ -1864,12 +1864,12 @@ func_0018EC80	func_0018F730	match
 func_0018ECA8	func_0018F758	error	a reference to D_0024B598, which has no address in this version
 func_0018ED78	func_0018F838	differs	
 func_0018EDA0	func_0018F870	match	
-func_0018EF78	func_0018FA48	differs	
+func_0018EF78	func_0018FA48	match	version-specific
 func_0018F0E8	func_0018FBB8	match	
 func_0018F148	func_0018FC18	match	
 func_0018F198	func_0018FC68	differs	
-func_0018F610	func_00190150	differs	
-func_0018F7D0	func_00190310	differs	
+func_0018F610	func_00190150	match	version-specific
+func_0018F7D0	func_00190310	match	version-specific
 func_0018F940	func_001904C8	match	
 func_0018F968	func_001904F0	match	
 func_0018F988	func_00190510	match	
@@ -1934,7 +1934,7 @@ func_00192990	func_00193518	match
 func_001929D0	func_00193558	match	
 func_001929F8	func_00193580	match	
 func_00192A28	func_001935B0	match	
-func_00192A38	func_001935C0	differs	
+func_00192A38	func_001935C0	match	version-specific
 func_00192A70	func_001935F8	match	
 func_00192C58	func_001937E0	match	
 func_001930B0	func_00193C38	match	
@@ -1945,15 +1945,15 @@ func_00193288	func_00193E10	match
 func_00193300	func_00193E88	match	
 func_00193598	func_00194120	differs	
 func_00193660	func_00194398	match	
-func_00193E58	func_00194A40	differs	
+func_00193E58	func_00194A40	match	version-specific
 func_00193EE8	func_00194AD0	differs	the .rodata literal at +0x0 is not retail's constant at 0x24DA70
 func_00194278	func_00194E90	match	
 func_00194398	func_00194FB0	differs	
-func_00194D30	func_001959A0	differs	
-func_00194E60	func_00195AD0	differs	
-func_00194F00	func_00195B70	differs	
-func_00194F38	func_00195BA8	differs	
-func_00195928	func_001965E8	differs	
+func_00194D30	func_001959A0	match	version-specific
+func_00194E60	func_00195AD0	match	version-specific
+func_00194F00	func_00195B70	match	version-specific
+func_00194F38	func_00195BA8	match	version-specific
+func_00195928	func_001965E8	match	version-specific
 func_00195958	func_00196618	differs	the .rodata literal at +0x90 is not retail's constant at 0x24DB60
 func_001961C0	func_00196F00	differs	the .rodata literal at +0x10 is not retail's constant at 0x24DCA0
 func_00196330	func_00197078	match	
@@ -1970,7 +1970,7 @@ func_00197788	func_001984D0	match
 func_00197848	func_00198590	match	rodata
 func_00197A08	func_00198750	match	
 func_00197A68	func_001987B0	match	
-func_00197F10	func_00198C58	differs	
+func_00197F10	func_00198C58	match	version-specific
 func_00198090	func_00198DD8	match	
 func_001982A0	func_00198FE8	match	
 func_001984B8	func_00199200	match	
@@ -2136,7 +2136,7 @@ func_001A4B30	func_001A5878	match
 func_001A4C48	func_001A5990	match	rodata
 func_001A4D60	func_001A5AA8	match	
 func_001A4DC0	func_001A5B08	match	rodata
-func_001A4EF0	func_001A5C38	differs	rodata
+func_001A4EF0	func_001A5C38	match	version-specific, rodata
 func_001A54F8	func_001A6240	match	rodata
 func_001A5B28	func_001A6870	match	
 func_001A5C38	func_001A6980	match	
@@ -2227,32 +2227,32 @@ func_001AA298	-	absent
 func_001AA5A0	-	absent	
 func_001AA788	-	absent	
 func_001AA790	-	absent	
-func_001AA898	func_001AB690	differs	
-func_001AA8A0	func_001AB698	differs	
-func_001AA8A8	func_001AB6A0	differs	
-func_001AA8B0	func_001AB6A8	differs	
-func_001AA8B8	func_001AB6B0	differs	
-func_001AA8C0	func_001AB6B8	differs	
+func_001AA898	func_001AB690	match	version-specific
+func_001AA8A0	func_001AB698	match	version-specific
+func_001AA8A8	func_001AB6A0	match	version-specific
+func_001AA8B0	func_001AB6A8	match	version-specific
+func_001AA8B8	func_001AB6B0	match	version-specific
+func_001AA8C0	func_001AB6B8	match	version-specific
 func_001AA8C8	func_001AB6C0	match	
-func_001AA8F0	func_001AB6E8	differs	
-func_001AA958	func_001AB750	differs	
-func_001AAAC8	func_001AB8C0	differs	
-func_001AAB20	func_001AB918	differs	
+func_001AA8F0	func_001AB6E8	match	version-specific
+func_001AA958	func_001AB750	match	version-specific
+func_001AAAC8	func_001AB8C0	match	version-specific
+func_001AAB20	func_001AB918	match	version-specific
 func_001AAEC0	func_001ABCB8	match	
-func_001AAF58	func_001ABD50	differs	
-func_001AAF88	func_001ABD80	differs	rodata
+func_001AAF58	func_001ABD50	match	version-specific
+func_001AAF88	func_001ABD80	match	version-specific, rodata
 func_001AB198	func_001ABF98	differs	
 func_001AB2B8	func_001AC0D0	differs	rodata
 func_001AB5D8	func_001AC3F0	match	
-func_001AB600	func_001AC418	differs	
-func_001AB660	func_001AC478	differs	
+func_001AB600	func_001AC418	match	version-specific
+func_001AB660	func_001AC478	match	version-specific
 func_001AB710	func_001AC528	differs	
-func_001AB890	func_001AC6C0	differs	
-func_001AB920	func_001AC750	differs	
-func_001AB928	func_001AC758	differs	
+func_001AB890	func_001AC6C0	match	version-specific
+func_001AB920	func_001AC750	match	version-specific
+func_001AB928	func_001AC758	match	version-specific
 func_001AB938	func_001AC768	match	
-func_001AB958	func_001AC788	differs	
-func_001ABE20	func_001ACC18	differs	
+func_001AB958	func_001AC788	match	version-specific
+func_001ABE20	func_001ACC18	match	version-specific
 func_001ABE40	func_001ACC38	match	
 func_001ABE50	func_001ACC48	match	
 func_001ABE60	func_001ACC58	match	
@@ -2285,7 +2285,7 @@ func_001AE130	-	absent
 func_001AE178	-	absent	
 func_001AE510	func_001AF250	error	a reference to D_0024CF98, which has no address in this version
 func_001AE758	func_001AF438	differs	
-func_001AE7F8	func_001AF4D8	differs	
+func_001AE7F8	func_001AF4D8	match	version-specific
 func_001AE820	func_001AF500	differs	the .rodata literal at +0x0 is not retail's constant at 0x202D0025
 func_001AECB0	func_001AF9A0	match	
 func_001AECE0	func_001AF9D0	match	
@@ -2540,7 +2540,7 @@ func_001BFCD8	func_001C09D0	match
 func_001BFFC8	func_001C0CC0	match	
 func_001C0000	func_001C0CF8	match	
 func_001C0070	func_001C0D68	match	
-func_001C05D0	func_001C12C8	differs	
+func_001C05D0	func_001C12C8	match	version-specific
 func_001C0600	func_001C12F8	match	
 func_001C06A0	func_001C1398	match	
 func_001C06D8	func_001C13D0	match	
@@ -2586,7 +2586,7 @@ func_001C29C8	func_001C36C0	match
 func_001C29E8	func_001C36E0	match	
 func_001C30E8	func_001C3DE0	match	
 func_001C3390	func_001C4088	match	
-func_001C33C8	func_001C40C0	differs	
+func_001C33C8	func_001C40C0	match	version-specific
 func_001C34C8	func_001C41C0	match	
 func_001C3928	func_001C4620	match	
 func_001C3C00	func_001C48F8	match	
@@ -2753,8 +2753,8 @@ func_001DAC20	func_001DB908	match
 func_001DACB0	func_001DB998	match	
 func_001DAE18	func_001DBB00	match	
 func_001DAE48	func_001DBB30	match	
-func_001DAE68	func_001DBB50	differs	
-func_001DAF08	func_001DBBF0	differs	
+func_001DAE68	func_001DBB50	match	version-specific
+func_001DAF08	func_001DBBF0	match	version-specific
 func_001DAFB8	func_001DBCA0	match	
 func_001DB0C8	func_001DBDB0	match	
 func_001DB110	func_001DBDF8	match	
@@ -2817,7 +2817,7 @@ func_001DDA90	func_001DE8C0	match
 func_001DDAB8	func_001DE8E8	match	
 func_001DDAC8	func_001DE8F8	match	
 func_001DDAD0	func_001DE900	match	
-func_001DDB20	func_001DE950	differs	
+func_001DDB20	func_001DE950	match	version-specific
 func_001DDB58	func_001DE988	match	
 func_001DDBB8	func_001DE9E8	match	
 func_001DDBF8	func_001DEA28	match	
@@ -2847,7 +2847,7 @@ func_001DFD90	func_001E0BC0	match
 func_001DFDC8	func_001E0BF8	match	
 func_001DFE00	func_001E0C30	match	
 func_001DFE38	func_001E0C68	match	
-func_001DFE80	func_001E0CB0	differs	
+func_001DFE80	func_001E0CB0	match	version-specific
 func_001DFEB8	func_001E0CE8	differs	the .rodata literal at +0x0 is not retail's constant at 0xF8090001
 func_001E00B0	func_001E0EB0	differs	the C is 532 bytes, retail's function 524
 func_001E0828	func_001E1650	match	
@@ -2912,16 +2912,16 @@ func_001E5DA8	func_001E6DD8	match
 func_001E5E08	func_001E6E38	match	
 func_001E5E50	func_001E6E80	match	
 func_001E5E60	func_001E6E90	match	
-func_001E6188	func_001E71B8	differs	
+func_001E6188	func_001E71B8	match	version-specific
 func_001E6268	func_001E7298	differs	
 func_001E73B8	func_001E83E8	match	
-func_001E7440	func_001E8470	differs	
-func_001E7460	func_001E8490	differs	
+func_001E7440	func_001E8470	match	version-specific
+func_001E7460	func_001E8490	match	version-specific
 func_001E76E0	func_001E8710	differs	
 func_001E77C0	func_001E87F0	differs	
 func_001E86E0	func_001E9710	differs	the C is 272 bytes, retail's function 264
-func_001E87F0	func_001E9818	differs	
-func_001E8840	func_001E9868	differs	
+func_001E87F0	func_001E9818	match	version-specific
+func_001E8840	func_001E9868	match	version-specific
 func_001E8878	func_001E98A0	match	
 func_001E88B0	func_001E98D8	match	
 func_001E88D0	func_001E98F8	match	
@@ -2946,9 +2946,9 @@ func_001E9668	func_001EA6E0	match
 func_001E9688	func_001EA700	match	
 func_001E96F8	func_001EA770	match	rodata
 func_001E98E8	func_001EA960	match	
-func_001E9A10	func_001EAA88	differs	
-func_001E9A68	func_001EAAE0	differs	
-func_001E9AD8	func_001EAB50	differs	
+func_001E9A10	func_001EAA88	match	version-specific
+func_001E9A68	func_001EAAE0	match	version-specific
+func_001E9AD8	func_001EAB50	match	version-specific
 func_001E9B30	func_001EABA8	match	
 func_001E9E30	func_001EAEA8	match	
 func_001EA0A8	func_001EB120	match	
@@ -2984,7 +2984,7 @@ func_001EC0D8	func_001ED150	match	rodata
 func_001EC188	func_001ED200	match	
 func_001EC380	func_001ED3F8	match	
 func_001EC478	func_001ED4F0	match	
-func_001EC528	func_001ED5A0	differs	
+func_001EC528	func_001ED5A0	match	version-specific
 func_001EC570	func_001ED5E8	match	rodata
 func_001ECBC8	func_001EDC40	match	
 func_001ECDF8	func_001EDE70	match	
@@ -3060,7 +3060,7 @@ func_001F0220	func_001F1298	differs
 func_001F0428	func_001F14A8	match	
 func_001F0468	func_001F14E8	match	
 func_001F0580	func_001F1608	match	
-func_001F0660	func_001F16E8	differs	rodata
+func_001F0660	func_001F16E8	match	version-specific, rodata
 func_001F0878	func_001F1900	match	
 func_001F08F0	func_001F1978	match	
 func_001F0EB8	func_001F1F40	differs	
@@ -3070,8 +3070,8 @@ func_001F1590	func_001F2618	match
 func_001F1610	func_001F2698	match	
 func_001F18B0	func_001F2938	match	
 func_001F1960	func_001F29E8	differs	the C is 164 bytes, retail's function 100
-func_001F1A08	func_001F2A50	differs	
-func_001F1C90	func_001F2CD8	differs	
+func_001F1A08	func_001F2A50	match	version-specific
+func_001F1C90	func_001F2CD8	match	version-specific
 func_001F2688	func_001F36E0	error	a reference to D_00276648, which has no address in this version
 func_001F2758	func_001F3748	match	
 func_001F2798	func_001F3788	match	
