@@ -55,8 +55,21 @@ def compile_sources(jobs):
                 raise LayoutError("%s: %s" % (src.relative_to(ROOT), e))
         return src, obj
 
+    # A file whose compiler is a Linux build the toolchain lacks (the math library's) stays
+    # assembly: the Windows build of that release cannot give its functions, and the image
+    # still matches with them taken from the disassembly.
+    missing = {}
+    for src in sources():
+        release = cc.compiler_for(src)
+        if release in cc.LINUX_COMPANION and cc.linux_cc1plus(release) is None:
+            missing.setdefault(release, []).append(src)
+    for release, srcs in missing.items():
+        print("note: no Linux %s (docs/TOOLCHAIN.md): %s stay assembly"
+              % (release, ", ".join(str(s.relative_to(ROOT)) for s in srcs)))
+    skipped = {s for srcs in missing.values() for s in srcs}
+
     with ThreadPoolExecutor(jobs) as pool:
-        for src, obj in pool.map(one, sources()):
+        for src, obj in pool.map(one, [s for s in sources() if s not in skipped]):
             out[src] = obj
     return out
 

@@ -133,10 +133,12 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    assembler stay the Windows 2.9-ee-991111 ones. On x86 Linux the program
    runs as it is; elsewhere it runs in an `i386/busybox:1.36` container
    (`docker run --platform linux/386`, OrbStack or Docker Desktop on macOS),
-   or under `SLY1_LINUX_RUNNER`. Without the Linux build the Windows
-   2.9-ee-991111 builds these files, as rac1-decomp falls back: the build
-   still matches, but a `div.s` function cannot. `python3 tools/toolchain.py`
-   reports which is found. The three math functions matched before this
+   or under `SLY1_LINUX_RUNNER`. Without the Linux build, tools/build.py
+   leaves `src/libm/` out and takes the library from the disassembly: the
+   image still matches, with fewer functions from C, and it says so.
+   `tools/check.py` falls back to the Windows 2.9-ee-991111 for these files,
+   as rac1-decomp does, which cannot match a `div.s` function.
+   `python3 tools/toolchain.py` reports which is found. The three math functions matched before this
    (func_00205318, func_00205578, func_00208FE8) are EXACT with both builds,
    in US and PAL. The first pass with it (2026-11-02) matched six more,
    func_002082F8 (2,380 bytes) among them.
