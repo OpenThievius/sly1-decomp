@@ -74,8 +74,10 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   (`FLOAT_TO_BITS`, `BITS_TO_FLOAT`, and `DOUBLE_TO_WORDS`, `WORDS_TO_DOUBLE`, `DOUBLE_HIGH`,
   `SET_DOUBLE_HIGH` for a double's words, in include/float_bits.h): retail's math library was
   written with macros of that form, as its 8-byte-aligned labels show (docs/TOOLCHAIN.md).
-  src/libm uses them for a float's bits and a double's words; nothing else writes
-  `do { } while (0)`.
+  src/libm uses them for a float's bits and a double's words. In game code it is allowed
+  only where it is what the original developers wrote: a macro of a group of statements, in
+  the form C macros take (`#define NAME(...) do { ... } while (0)`), that the original
+  plausibly had and retail's code needs. Never a wrapper written only to move instructions.
 - **One flag set per source file**, never per function.
 - **Globals are `extern`** until the data layout is modelled.
 - **Our own names and types.** Retail is stripped: every function, type, field and file name
