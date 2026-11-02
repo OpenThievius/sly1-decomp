@@ -117,8 +117,53 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    it, a near miss of func_00206298 (written for 2.9-ee-991111) comes out at
    1,064 bytes against retail's 1,072, with 89% of its instructions in line,
    against 1,016 bytes with 2.9-ee-991111; `-O2` is the right level
-   (`-O1` or no scheduling is far worse). Using it needs tools/compile.py
-   to run a Linux compiler for the math library's files; not done yet.
+   (`-O1` or no scheduling is far worse).
+
+   **The math library builds with it** (2026-11-02), as OpenRAC's
+   rac1-decomp builds the objects Sony built with 2.9-ee-991111-01 (its
+   `Makefile.sn` and `config/core_text.objects`). The library is
+   0x204F68–0x2093F0 (PAL 0x2062A8–0x20A8B8): from the first function that
+   pads `div.s` to the last one only the library calls, func_002093C0;
+   func_002093F0 after it is called from game code. config/us/layout.tsv
+   gives it its own folder, `src/libm/`, and config/cflags.tsv names
+   `2.9-ee-991111-01` for its files. tools/compile.py runs that release's
+   Linux `cc1plus` through its own loader (`lib/ld-2.3.6.so`), from
+   `ee-gcc-2.9-991111-01/` or `ee-gcc-2.9-dtls13010/` in the toolchain
+   directory or from `SLY1_LINUX_TOOLCHAIN`; the preprocessor and the
+   assembler stay the Windows 2.9-ee-991111 ones. On x86 Linux the program
+   runs as it is; elsewhere it runs in an `i386/busybox:1.36` container
+   (`docker run --platform linux/386`, OrbStack or Docker Desktop on macOS),
+   or under `SLY1_LINUX_RUNNER`. Without the Linux build, tools/build.py
+   leaves `src/libm/` out and takes the library from the disassembly: the
+   image still matches, with fewer functions from C, and it says so.
+   `tools/check.py` falls back to the Windows 2.9-ee-991111 for these files,
+   as rac1-decomp does, which cannot match a `div.s` function.
+   `python3 tools/toolchain.py` reports which is found. The three math functions matched before this
+   (func_00205318, func_00205578, func_00208FE8) are EXACT with both builds,
+   in US and PAL. The first pass with it (2026-11-02) matched six more,
+   func_002082F8 (2,380 bytes) among them.
+
+   **Its bit-access macros** (2026-11-02). Two forms recur in its near
+   misses:
+   - a `nop` after a `b` or `jr` and its delay slot, putting the next label
+     on an 8-byte boundary (0x204FB4, 0x2062EC, 0x20730C, 0x208DC4 and
+     others), where this compiler aligns jump targets to 4;
+   - a float argument's bits copied out (`mfc1`, `move`) and the frame set
+     up before any constant is loaded, where ours loads the constants first.
+   No flag or tool gives them (`-O1`, `-O3`, `-G2`, `-fno-schedule-insns`,
+   `-fno-schedule-insns2`, `-fno-delayed-branch`, `-mips3`, `-mcpu=r4000` and
+   `r5000`, C with the Linux `cc1`, the Linux `ee/bin/as.bin`), and
+   `-malign-jumps=3` pads every jump target, not some. The compiler aligns
+   the first label after the start of a loop to 8 (`-malign-loops=3`, its
+   default), and a `do { } while (0)` is a loop to it: reading the float's
+   bits inside one gives both forms. func_00204F68, func_00205210 and
+   func_00209210 are EXACT that way and with nothing else. Retail's library
+   was written with such macros, so include/float_bits.h defines a pair,
+   `FLOAT_TO_BITS` and `BITS_TO_FLOAT` (our names), which src/libm uses for
+   a float's bits, and the same for a double's words (`DOUBLE_TO_WORDS`,
+   `WORDS_TO_DOUBLE`, `DOUBLE_HIGH`, `SET_DOUBLE_HIGH`), which func_00209010
+   needs; AGENTS.md allows `do { } while (0)` there and nowhere else. With
+   them all 33 functions of the library match.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.

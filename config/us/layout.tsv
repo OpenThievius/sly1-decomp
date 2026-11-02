@@ -1,11 +1,15 @@
 # What each part of SCUS_971.98 is, for the reports (tools/progress.py) and the source tree.
 # Code: game code is what SN's GCC 2.95.3 built (it saves $ra with sq); the libraries,
 # from 0x1F59C4 to the end of .text, are what Sony's 2.9-ee-991111 built (sd saves) and
-# the hand-tuned block copies just before them (docs/TOOLCHAIN.md). Data: the sections
-# with bytes in the file, without their trailing padding.
+# the hand-tuned block copies just before them, apart from the math library, which Sony's
+# Linux 2.9-ee-991111-01 built (nop; nop before div.s) and src/libm/ holds
+# (docs/TOOLCHAIN.md). Data: the sections with bytes in the file, without their trailing
+# padding.
 kind	name	start	end	category	source
 code	game	00100000	001F59C4	game	src/main
-code	lib	001F59C4	00211E0C	lib	src/lib
+code	lib	001F59C4	00204F68	lib	src/lib
+code	libm	00204F68	002093F0	lib	src/libm
+code	lib	002093F0	00211E0C	lib	src/lib
 data	vutext	00211E10	00217360	data	-
 data	rodata	00217380	0025053B	data	-
 data	data	00250580	0027B1B4	data	-

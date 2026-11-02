@@ -27,6 +27,7 @@ procedure; read it before you match anything.
 | `config/us/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md) | `tools/classify_asm.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
 | `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with Sony's 2.9-ee-991111, which `config/cflags.tsv` names per file (docs/TOOLCHAIN.md) | you |
+| `src/libm/XXXXXXXX.cpp` | the math library (0x204F68–0x2093F0), by the same windows; built with Sony's Linux 2.9-ee-991111-01 when the toolchain has it (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |
 | `src/versions/eu/<file>/<function>.cpp` | PAL's own definition of a function whose PAL bytes differ, built in its shared file's unit (docs/VERSIONS.md) | you |
 | `nonmatching/` | near misses, never linked, each with its verdict line; `README.md` is the index | you; verdicts and index by `tools/nonmatching.py` |
@@ -69,6 +70,12 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 - **Plain C++.** No inline assembly in functions, no register pins, no artificial barriers.
   `volatile` is one only where it stops the compiler: it is allowed for a hardware register
   (an access to a fixed address such as `*(volatile u32*)0x10002010`), which is what it is for.
+  `do { } while (0)` is one too, except in the math library's bit-access macros
+  (`FLOAT_TO_BITS`, `BITS_TO_FLOAT`, and `DOUBLE_TO_WORDS`, `WORDS_TO_DOUBLE`, `DOUBLE_HIGH`,
+  `SET_DOUBLE_HIGH` for a double's words, in include/float_bits.h): retail's math library was
+  written with macros of that form, as its 8-byte-aligned labels show (docs/TOOLCHAIN.md).
+  src/libm uses them for a float's bits and a double's words; nothing else writes
+  `do { } while (0)`.
 - **One flag set per source file**, never per function.
 - **Globals are `extern`** until the data layout is modelled.
 - **Our own names and types.** Retail is stripped: every function, type, field and file name

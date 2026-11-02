@@ -14,10 +14,17 @@ and the `compiler` row. The game is SN GCC 2.95.3; Sony's libraries are Sony's
 own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
 -ffunction-sections, so that the build can place each function at its address
 (tools/build.py).
+
+A compiler that only exists as Sony's Linux build (2.9-ee-991111-01, the math
+library's) runs the way OpenRAC's rac1-decomp runs it: its own 32-bit Linux
+cc1plus with its own loader, from a folder of the toolchain directory, inside an
+i386 Linux container where the machine is not x86 Linux. Its preprocessor and
+assembler are the Windows ones of the same release.
 """
 
 import argparse
 import os
+import platform
 import shutil
 import signal
 import subprocess
@@ -42,6 +49,12 @@ LAYOUT_FLAGS = ["-ffunction-sections"]
 # A compile takes a second or two; a run under the Windows runner can hang for good (seen with
 # wibo), so every step gives up after this many seconds and the file counts as not compiling.
 TIMEOUT = int(os.environ.get("SLY1_COMPILE_TIMEOUT", "120"))
+# Sony's Linux compiler builds: the folder of the toolchain directory each may be unpacked to
+# (decomp.me's compilers release, as OpenRAC fetches them), and the Windows release whose
+# preprocessor and assembler go with it.
+LINUX_TREES = ("ee-gcc-2.9-991111-01", "ee-gcc-2.9-dtls13010")
+LINUX_COMPANION = {"2.9-ee-991111-01": "2.9-ee-991111"}
+LINUX_IMAGE = "i386/busybox:1.36"
 
 
 class CompileError(Exception):
@@ -104,6 +117,36 @@ def tools(release=None):
     return run, cc1plus.parent / "cpp.exe", cc1plus, ee_as
 
 
+def linux_cc1plus(release):
+    """(command, tree) running a Linux release's cc1plus through its own loader, or None.
+
+    SLY1_LINUX_TOOLCHAIN names the folder; else the toolchain directory's LINUX_TREES."""
+    env = os.environ.get("SLY1_LINUX_TOOLCHAIN")
+    root = toolchain.toolchain_dir()
+    trees = [Path(env).expanduser()] if env else [root / t for t in LINUX_TREES] if root else []
+    for tree in trees:
+        cc1plus = tree / "lib" / "gcc-lib" / "ee" / release / "cc1plus.bin"
+        if cc1plus.exists():
+            tree = tree.resolve()
+            lib = tree / "lib"
+            return [str(lib / "ld-2.3.6.so"), "--library-path", str(lib), str(cc1plus.resolve())], tree
+    return None
+
+
+def linux_runner(mounts):
+    """What runs a 32-bit Linux program here: nothing on x86 Linux, else a container that sees
+    each of `mounts` at its own path. SLY1_LINUX_RUNNER overrides it."""
+    env = os.environ.get("SLY1_LINUX_RUNNER")
+    if env is not None:
+        return env.split()
+    if sys.platform.startswith("linux") and platform.machine() in ("x86_64", "i386", "i686"):
+        return []
+    cmd = ["docker", "run", "--rm", "--platform", "linux/386"]
+    for path in mounts:
+        cmd += ["-v", "%s:%s" % (path, path)]
+    return cmd + ["-w", str(ROOT.resolve()), LINUX_IMAGE]
+
+
 def run_step(cmd, **kw):
     """Run one step with the time limit; a hung step is killed and raises CompileError.
 
@@ -133,16 +176,25 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None):
     """
     src = Path(src).resolve()
     source = Path(source).resolve() if source else src
-    run, cpp, cc1plus, ee_as = tools(compiler_for(source))
+    release = compiler_for(source)
+    # Without the Linux build, its Windows companion builds the file, as rac1-decomp does: the
+    # build still works, but what only the Linux build gives cannot match.
+    linux = linux_cc1plus(release) if release in LINUX_COMPANION else None
+    run, cpp, cc1plus, ee_as = tools(LINUX_COMPANION.get(release, release))
     flags = flags if flags is not None else flags_for(source)
     with tempfile.TemporaryDirectory(prefix="sly1-cc-") as tmp:
-        ii, s = Path(tmp) / "unit.ii", Path(tmp) / "unit.s"
+        ii, s = Path(tmp).resolve() / "unit.ii", Path(tmp).resolve() / "unit.s"
+        if linux:
+            command, tree = linux
+            compiler = linux_runner([ROOT.resolve(), tree, ii.parent]) + command
+        else:
+            compiler = run + [str(cc1plus)]
         # The Windows tools get paths relative to the repository root, where they run.
-        for cmd in (run + [str(cpp)] + CPP_DEFINES + [os.path.relpath(src, ROOT), str(ii)],
-                    run + [str(cc1plus), "-quiet"] + flags + LAYOUT_FLAGS + [str(ii), "-o", str(s)]):
+        for cmd, name in ((run + [str(cpp)] + CPP_DEFINES + [os.path.relpath(src, ROOT), str(ii)], "cpp"),
+                          (compiler + ["-quiet"] + flags + LAYOUT_FLAGS + [str(ii), "-o", str(s)], "cc1plus")):
             proc = run_step(cmd, cwd=ROOT)
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
-                raise CompileError((proc.stderr or proc.stdout).strip() or "%s failed" % Path(cmd[len(run)]).name)
+                raise CompileError((proc.stderr or proc.stdout).strip() or "%s failed" % name)
         asm = s.read_text()
         if keep_asm:
             Path(keep_asm).write_text(asm)
