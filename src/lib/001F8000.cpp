@@ -533,3 +533,58 @@ s32 func_001FA9C0(void)
     }
     return func_001F6D30();
 }
+
+struct Obj_1F8480 {
+    u8 pad0[0x10];
+    s32 flags;
+    u8 pad1[4];
+    s32 id;
+};
+struct Ref_1F8480 {
+    Obj_1F8480* obj;
+    s32 key;
+};
+
+s32 func_001F8480(Ref_1F8480* self)
+{
+    Obj_1F8480* o = self->obj;
+    if (o != 0 && self->key == o->id) {
+        u32 f = o->flags & 1;
+        if (f != 0) goto yes;
+    }
+    return 0;
+yes:
+    return 1;
+}
+
+// func_001F9FB8: structure as in the earlier attempt, but with the globals as an array of slots and one if instead of goto.
+struct Slot_1F9FB8 { s32 key; s32 value; };
+extern Slot_1F9FB8 D_00277998[];
+extern u8 D_002771F0[];
+s32 func_001F9F50(void);
+void func_001F9EE8(s32 a, s32 b);
+void func_001F9EF8(s32 a, void* b, s32 c);
+void func_001F6C20(s32 a);
+s32 func_001F9F40(s32 key);
+
+void func_001F9FB8(void)
+{
+    Slot_1F9FB8* q;
+    u32 i;
+    if (func_001F9F50() != 0) {
+        func_001F9EE8(D_00277998[0].key, D_00277998[0].value);
+        func_001F9EF8(0x80074000, D_002771F0, 0x7A8);
+        func_001F6C20(0);
+        func_001F6C20(2);
+        func_001F9EE8(D_00277998[1].key, D_00277998[1].value);
+        q = &D_00277998[2];
+        i = 2;
+        do {
+            s32 v;
+            i++;
+            v = func_001F9F40(q->key);
+            func_001F9EE8(q->key, v);
+            q++;
+        } while (i < 3);
+    }
+}

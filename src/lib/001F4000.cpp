@@ -183,3 +183,19 @@ void func_001F72A8(s32 c)
     D_0027712C = pos + 1;
     D_00625F80[pos] = (u8)c;
 }
+
+struct Ring_001F7E78 {
+    u8 pad_00[0x14];
+    s32 base;
+    s32 count;
+    u8 pad_1c[0x08];
+    s32 cursor;
+};
+
+s32 func_001F7E78(Ring_001F7E78* r)
+{
+    s32 index = r->cursor % r->count;
+    s32 off = index << 6;
+    r->cursor = index + 1;
+    return r->base + off;
+}

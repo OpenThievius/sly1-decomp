@@ -634,3 +634,136 @@ s32 func_001FEFC0(void* self, s32 flags)
     }
     return (s32)v;
 }
+
+struct Node_001FD990 { s32 f0; u8* f4; s32 f8; s32 fc; s32 f10; s32 f14; };
+
+Node_001FD990* func_0018D740(s32 size);
+void func_001FD930(void);
+void* func_001F5C0C(Node_001FD990* p, s32 value, u32 size);
+
+Node_001FD990* func_001FD990(void)
+{
+    Node_001FD990* p = (Node_001FD990*)func_0018D740(0x18);
+    if (p == 0) {
+        func_001FD930();
+    }
+    (void)func_001F5C0C(p, 0, 0x18);
+    p->f4 = (u8*)p + 0x10;
+    return p;
+}
+
+struct Range_1FDDD8 { u32 lo; u32 hi; s32 value; };
+
+s32 func_001FDDD8(u32 key, Range_1FDDD8* t)
+{
+    s32 best, i;
+    if (t == 0) goto none;
+    best = -1;
+    i = 0;
+    if (t[0].lo == 0xFFFFFFFF) goto check;
+    do {
+        if (key >= t[i].lo && key < t[i].hi) {
+            if (best == -1 || (t[best].hi >= t[i].hi && t[best].lo <= t[i].lo)) best = i;
+        } else if (best >= 0 && key < t[i].lo) {
+            break;
+        }
+        i++;
+    } while (t[i].lo != 0xFFFFFFFF);
+check:
+    if (best == -1) goto none;
+    return t[best].value;
+none:
+    return 0;
+}
+
+struct Arg_1FE080 { u8 pad[4]; };
+struct Dst_1FE080 { u8 pad[4]; };
+
+extern u32 func_001FDFF8(Arg_1FE080* a, u32 b, s32 c);
+extern s32 func_001F5A58(Dst_1FE080* dst, Arg_1FE080* src, s32 n);
+
+s32 func_001FE080(s32 a0, u32 a1, u32 a2)
+{
+    u32 r1 = func_001FDFF8((Arg_1FE080*)a0, a1, 0);
+    u32 r2 = func_001FDFF8((Arg_1FE080*)a0, a2, 0);
+    s32 n;
+    if (a0 >= 0x1F) {
+        n = 8;
+        if (!(0x3F < a0)) {
+            n = 4;
+        }
+    } else {
+        n = 16;
+    }
+    return func_001F5A58((Dst_1FE080*)r2, (Arg_1FE080*)r1, n);
+}
+
+// NEAR: retail saves with sd/ld (ours sq/lq); jalr's delay slot is a nop in retail, ours moves a0 there
+
+struct Node_001FEA18 {
+    u8 pad0[8];
+    s32 f8;
+    s32 fC;
+    u8 pad1[0x18];
+    s32 f28;
+};
+
+struct Hdr_001FEA18 {
+    u8 pad0[4];
+    s16 kind;
+};
+
+struct Res_001FEA18;
+
+typedef s32 (*Fn_001FEA18)();
+
+s32 func_00200778(Res_001FEA18* a, s32 b, s32 c);
+
+s32 func_001FEA18(Node_001FEA18* self, void* fn, Hdr_001FEA18* a2)
+{
+    if (a2 != 0 && a2->kind != 4) {
+        return 0;
+    }
+    if (fn == (void*)-1) {
+        return self->f8;
+    }
+    s32 r = ((Fn_001FEA18)fn)();
+    r = func_00200778((Res_001FEA18*)r, self->fC, self->f28);
+    if (r != 0) {
+        self->f8 = r;
+    }
+    return r;
+}
+
+struct Node_1FEBE0 { u8 pad[0x14]; s32 flag; };
+struct Head_1FEBE0 { Node_1FEBE0* node; };
+
+extern void func_001FE8F0(void) __attribute__((noreturn));
+
+void func_001FEBE0(void)
+{
+    Node_1FEBE0* n = ((Head_1FEBE0*)func_001FDA10())->node;
+    if (n == 0)
+        func_001FE8F0();
+    n->flag = 0;
+}
+
+struct Chain_1FF448 { s32 next; s32 a; s32 b; };
+s32 func_001FF448(Chain_1FF448* p)
+{
+    s32 n = 0;
+    s32 off = p->next;
+    s32 nx;
+    if (off != 0) {
+        goto body;
+        for (;;) {
+            off = nx;
+        body:
+            if (p->a != 0 && p->b != 0) n++;
+            p = (Chain_1FF448*)((u8*)p + off + 4);
+            nx = p->next;
+            if (nx == 0) break;
+        }
+    }
+    return n;
+}

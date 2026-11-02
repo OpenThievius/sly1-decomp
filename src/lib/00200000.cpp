@@ -885,3 +885,153 @@ void func_00201BB8(void* self)
         *(volatile u64*)0x120000E0 = *(u64*)((u8*)self + 0x20);
     }
 }
+
+extern u8 D_0024F2A8[];
+struct Obj_200080 { void* f0; void* f4; };
+u8* func_0018D778(struct Obj_200080* self);
+u8* func_00200080(struct Obj_200080* self, s32 flag)
+{
+    u8* p = D_0024F2A8;
+    self->f4 = p;
+    if ((flag & 1) != 0) return func_0018D778(self);
+    return p;
+}
+
+struct Key_2000B0;
+s32 func_001F6738(Key_2000B0* p, s32 v);
+
+s32 func_002000B0(s32* a, s32* b)
+{
+    s32 r = 0;
+    if (b == a || func_001F6738((Key_2000B0*)*a, *b) == 0)
+        r = 1;
+    return r;
+}
+
+extern s32 func_002000B0(void*, void*);
+struct VTable {
+    u8 pad[0x10];
+    s16 offset;
+    u8 pad2[2];
+    s32 (*method)(void*, void*, void*, void*, void*, void*);
+};
+struct Object { u8 pad[4]; VTable* vtable; };
+struct Handler { u8 pad[8]; Object* object; };
+s32 func_00200188(Handler* handler, void* first, void* second, s32 fallback,
+                  void* arg4, void* last)
+{
+    if (func_002000B0(handler, first)) {
+        return fallback;
+    }
+    Object* object = handler->object;
+    VTable* vtable = object->vtable;
+    void* self = (u8*)object + vtable->offset;
+    return vtable->method(self, first, second, (void*)fallback, arg4, last);
+}
+
+struct Callee_200468 { u8 pad[4]; s32 f4; };
+
+s32 func_00200080(Callee_200468* self, s32 flag);
+
+s32 func_00200468(Callee_200468* self, s32 flag) {
+    return func_00200080(self, flag);
+}
+
+// func_00200D58: the callee pointers keep their order; the offset is read as an s32 local before the two calls.
+typedef void* (*Factory_200D58)(void);
+typedef s32 (*Value_200D58)(void);
+typedef void (*Apply_200D58)(void*, s32, s32, s32, s32, s32);
+
+void func_00200D58(Factory_200D58 factory, Value_200D58 firstValue, s32 arg2, s32 arg3, Value_200D58 secondValue, s32 arg5)
+{
+    void* object = factory();
+    u8* state = *(u8**)((u8*)object + 4);
+    s32 off = *(s16*)(state + 0x10);
+    state += 0x10;
+    object = (u8*)object + off;
+    s32 first = firstValue();
+    s32 second = secondValue();
+    Apply_200D58 apply = *(Apply_200D58*)(state + 4);
+    apply(object, first, arg2, arg3, second, arg5);
+}
+
+struct Callee_201280 { u8 pad[4]; s32 f4; };
+
+s32 func_00200080(Callee_201280* self, s32 flag);
+
+s32 func_00201280(Callee_201280* self, s32 flag) {
+    return func_00200080(self, flag);
+}
+
+struct Obj_002014B0 { void* f0; void* f4; };
+s32 func_00200080(struct Obj_002014B0* self, s32 flag);
+
+s32 func_002014B0(struct Obj_002014B0* self, s32 flag)
+{
+    return func_00200080(self, flag);
+}
+
+struct Obj_201500 { u8 pad[0x1D4]; s32 buf; };
+s32 func_0018D748(Obj_201500* o, s32 size);
+s32 func_00201500(Obj_201500* o)
+{
+    if (o->buf == 0) {
+        s32 r = func_0018D748(o, 0x80);
+        o->buf = r;
+        if (r == 0) return -1;
+        s32* p = (s32*)r + 31;
+        for (s32 i = 31; i >= 0; i--) *p-- = 0;
+    }
+    return 0;
+}
+
+struct Ctx_201668;
+s32 func_00201578(Ctx_201668* ctx, s32 value);
+extern s32 D_0027696C;
+
+s32 func_00201668(s32 value)
+{
+    return func_00201578((Ctx_201668*)D_0027696C, value);
+}
+
+struct Elem_201FF8;
+
+struct Obj_201FF8 {
+    u8 pad0[0x50];
+};
+
+s32 func_00201BB8(Elem_201FF8* p);
+s32 func_00201C78(Elem_201FF8* p);
+
+s32 func_00201FF8(Obj_201FF8* self, s32 flag)
+{
+    u8* base = (u8*)self;
+    s32 idx = flag & 1;
+    s32 r;
+    (void)func_00201BB8((Elem_201FF8*)(base + idx * 0x28));
+    if (idx != 0) {
+        r = func_00201C78((Elem_201FF8*)(base + 0x140));
+    } else {
+        r = func_00201C78((Elem_201FF8*)(base + 0x50));
+    }
+    return r;
+}
+
+extern s32 D_00279424;
+extern s32 D_0027943C;
+
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+s32 func_001FA4A0(s32 index, void* first, s32 second);
+void func_00203008(void);
+
+s32 func_00203050(void)
+{
+    D_00279424 = 1;
+    func_001F9D60();
+    func_001FA4A0(0x80000012, (u8*)func_00203008 + 8, 0);
+    func_001F9DA8();
+    D_00279424 = 0;
+    D_0027943C = 1;
+    return 1;
+}
