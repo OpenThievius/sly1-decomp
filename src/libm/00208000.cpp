@@ -210,3 +210,37 @@ u32 func_00209210(f32 x)
     FLOAT_TO_BITS(bits, x);
     return (u32)((bits & 0x7FFFFFFF) + 0x80800000) >> 31;
 }
+
+f32 func_00208C48(s32 flag, f32 x, f32 y)
+{
+    s32 hx;
+    s32 ix;
+    FLOAT_TO_BITS(hx, x);
+    ix = hx & 0x7FFFFFFF;
+    if (ix <= 0x31FFFFFF && (s32)x == 0)
+        return x;
+    f32 z = x * x;
+    f32 v = z * x;
+    f32 r = z * (z * (z * (z * 1.58969102e-10f + -2.50507597e-08f) + 2.75573143e-06f) + -0.000198412701f) + 0.00833333377f;
+    if (flag == 0)
+        return x + v * (z * r + -0.166666672f);
+    return x - ((z * (y * 0.5f - v * r) - y) - v * -0.166666672f);
+}
+
+u32 func_00209238(f32 x)
+{
+    s32 ix;
+    FLOAT_TO_BITS(ix, x);
+    ix &= 0x7FFFFFFF;
+    ix = 0x7F800000 - ix;
+    return (u32)ix >> 31;
+}
+
+f32 func_002093C0(f32 mag, f32 sign)
+{
+    s32 m, s;
+    FLOAT_TO_BITS(m, mag);
+    FLOAT_TO_BITS(s, sign);
+    BITS_TO_FLOAT(mag, (m & 0x7FFFFFFF) | (s & 0x80000000));
+    return mag;
+}
