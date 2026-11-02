@@ -909,3 +909,440 @@ f32 func_002073F8(f32 x, f32 y)
     }
     return s * z;
 }
+
+struct Exc_205778 {
+    s32 type;
+    const char* name;
+    double arg1;
+    double arg2;
+    double ret;
+    s32 err;
+};
+
+extern const s32 D_0024FF78;
+extern u8 D_0024F900[];
+f32 func_00206A68(f32 y, f32 x);
+s32 func_00209238(f32 x);
+double func_001FD868(f32 x);
+s32 func_00208FE8(Exc_205778* e);
+s32* func_002014F0();
+f32 func_001FD578(double v);
+
+f32 func_00205778(f32 a, f32 b)
+{
+    f32 r = func_00206A68(a, b);
+    s32 mode = D_0024FF78;
+    if (mode != -1 && func_00209238(b) == 0 && func_00209238(a) == 0 && b == 0.0f && a == 0.0f) {
+        Exc_205778 e;
+        e.arg1 = func_001FD868(a);
+        e.arg2 = func_001FD868(b);
+        e.type = 1;
+        e.name = (const char*)D_0024F900;
+        e.ret = 0.0;
+        e.err = 0;
+        if (mode == 2 || func_00208FE8(&e) == 0) {
+            *func_002014F0() = 0x21;
+        }
+        if (e.err != 0) {
+            *func_002014F0() = e.err;
+        }
+        return func_001FD578(e.ret);
+    }
+    return r;
+}
+
+struct Exc_206180 {
+    s32 type;
+    const char* name;
+    double a;
+    double b;
+    double r;
+    s32 err;
+};
+
+extern const s32 D_0024FF78;
+extern char D_0024F958[];
+extern const double D_0024F960;
+
+f32 func_00208068(f32 x);
+s32 func_00209238(f32 x);
+double func_001FD868(f32 x);
+s32 func_00208FE8(Exc_206180* e);
+s32* func_002014F0(void);
+f32 func_001FD578(double v);
+
+f32 func_00206180(f32 x)
+{
+    f32 r = func_00208068(x);
+    s32 mode = D_0024FF78;
+    if (mode != -1 && func_00209238(x) == 0 && x < 0.0f) {
+        Exc_206180 e;
+        e.type = 1;
+        e.name = D_0024F958;
+        e.err = 0;
+        e.a = e.b = func_001FD868(x);
+        if (mode == 0)
+            e.r = 0.0;
+        else
+            e.r = D_0024F960;
+        if (D_0024FF78 == 2 || func_00208FE8(&e) == 0) {
+            *func_002014F0() = 0x21;
+        }
+        if (e.err != 0) {
+            *func_002014F0() = e.err;
+        }
+        return func_001FD578(e.r);
+    }
+    return r;
+}
+
+f32 func_00204F68(f32 x);
+f32 func_002052F8(f32 x);
+
+f32 func_00206A68(f32 y, f32 x)
+{
+    s32 hx, hy, ix, iy;
+    FLOAT_TO_BITS(hx, x);
+    ix = hx & 0x7FFFFFFF;
+    FLOAT_TO_BITS(hy, y);
+    iy = hy & 0x7FFFFFFF;
+    if (ix > 0x7F800000 || iy > 0x7F800000) {
+        return x + y;
+    }
+    if (hx == 0x3F800000) {
+        return func_00204F68(y);
+    }
+    s32 m = ((u32)hy >> 31) | ((hx >> 30) & 2);
+    if (iy == 0) {
+        switch (m) {
+        case 0:
+        case 1:
+            return y;
+        case 2:
+            return 3.1415925f;
+        case 3:
+            return -3.1415925f;
+        }
+    }
+    if (ix == 0) {
+        return hy < 0 ? -1.57079637f : 1.57079637f;
+    }
+    if (ix == 0x7F800000) {
+        if (iy == ix) {
+            switch (m) {
+            case 0:
+                return 0.785398185f;
+            case 1:
+                return -0.785398185f;
+            case 2:
+                return 2.3561945f;
+            case 3:
+                return -2.3561945f;
+            }
+        } else {
+            switch (m) {
+            case 0:
+                return 0.0f;
+            case 1:
+                return -0.0f;
+            case 2:
+                return 3.1415925f;
+            case 3:
+                return -3.1415925f;
+            }
+        }
+    }
+    if (iy == 0x7F800000) {
+        return hy < 0 ? -1.57079637f : 1.57079637f;
+    }
+    s32 k = (iy - ix) >> 23;
+    f32 z;
+    if (k > 60) {
+        z = 1.57079649f;
+    } else if (hx < 0 && k < -60) {
+        z = 0.0f;
+    } else {
+        z = func_00204F68(func_002052F8(y / x));
+    }
+    switch (m) {
+    case 0:
+        return z;
+    case 1:
+        {
+            s32 iz;
+            FLOAT_TO_BITS(iz, z);
+            BITS_TO_FLOAT(z, iz ^ 0x80000000);
+        }
+        return z;
+    case 2:
+        return 3.1415925f - (z - 1.50995788e-07f);
+    default:
+        return (z - 1.50995788e-07f) - 3.1415925f;
+    }
+}
+
+extern const f32 D_0024FA00[];
+
+f32 func_00206D50(f32 x, f32 y) {
+    s32 hx, hy;
+    FLOAT_TO_BITS(hx, x);
+    FLOAT_TO_BITS(hy, y);
+    s32 sx = hx & 0x80000000;
+    s32 ix, iy, i;
+    u32 n;
+    hy &= 0x7FFFFFFF;
+    hx ^= sx;
+    if (hy == 0 || hx > 0x7F7FFFFF || hy > 0x7F800000) {
+        f32 t = x * y;
+        return t / t;
+    }
+    if (hx < hy) return x;
+    if (hx == hy) return D_0024FA00[(u32)sx >> 31];
+    if (hx < 0x00800000) {
+        ix = -126;
+        for (s32 j = hx << 8; j > 0; j <<= 1) ix -= 1;
+    } else {
+        ix = (hx >> 23) - 127;
+    }
+    if (hy < 0x00800000) {
+        iy = -126;
+        for (s32 j = hy << 8; j >= 0; j <<= 1) iy -= 1;
+    } else {
+        iy = (hy >> 23) - 127;
+    }
+    if (ix >= -126) hx = (hx & 0x007FFFFF) | 0x00800000;
+    else { n = -126 - ix; hx = hx << n; }
+    if (iy >= -126) hy = (hy & 0x007FFFFF) | 0x00800000;
+    else { n = -126 - iy; hy = hy << n; }
+    n = ix - iy;
+    while (n-- > 0) {
+        i = hx - hy;
+        if (i < 0) hx = hx + hx;
+        else {
+            if (i == 0) return D_0024FA00[(u32)sx >> 31];
+            hx = i + i;
+        }
+    }
+    i = hx - hy;
+    if (i >= 0) hx = i;
+    if (hx == 0) return D_0024FA00[(u32)sx >> 31];
+    while (hx < 0x00800000) {
+        hx = hx + hx;
+        iy -= 1;
+    }
+    if (iy >= -126) {
+        hx = (hx - 0x00800000) | ((iy + 127) << 23);
+        BITS_TO_FLOAT(x, hx | sx);
+    } else {
+        n = -126 - iy;
+        hx = hx >> n;
+        BITS_TO_FLOAT(x, hx | sx);
+    }
+    return x;
+}
+
+f32 func_002052F8(f32 x);
+s32 func_002082F8(f32* x, f32* y, s32 e0, s32 nx, s32 prec, const s32* table);
+
+extern const s32 D_0024FDF0[];
+extern const s32 D_0024FAD8[];
+
+s32 func_00207C88(f32 x, f32* y)
+{
+    s32 hx, ix, hy, n, i, j, e0, nx;
+    f32 z, r, w, t, fn, tx[3];
+
+    FLOAT_TO_BITS(hx, x);
+    ix = hx & 0x7FFFFFFF;
+    if (ix <= 0x3F490FD8) {
+        y[0] = x;
+        y[1] = 0.0f;
+        return 0;
+    }
+    if (ix <= 0x4016CBE3) {
+        if (hx > 0) {
+            z = x - 1.5707855224609375f;
+            if ((ix & 0xFFFFFFF0) != 0x3FC90FD0) {
+                y[0] = z - 1.0804334124259185e-05f;
+                y[1] = (z - y[0]) - 1.0804334124259185e-05f;
+            } else {
+                z -= 1.0804273188114166e-05f;
+                y[0] = z - 6.07709993438732e-11f;
+                y[1] = (z - y[0]) - 6.07709993438732e-11f;
+            }
+            return 1;
+        } else {
+            z = x + 1.5707855224609375f;
+            if ((ix & 0xFFFFFFF0) != 0x3FC90FD0) {
+                y[0] = z + 1.0804334124259185e-05f;
+                y[1] = (z - y[0]) + 1.0804334124259185e-05f;
+            } else {
+                z += 1.0804273188114166e-05f;
+                y[0] = z + 6.07709993438732e-11f;
+                y[1] = (z - y[0]) + 6.07709993438732e-11f;
+            }
+            return -1;
+        }
+    }
+    if (ix <= 0x43490F80) {
+        t = func_002052F8(x);
+        n = (s32)(t * 0.6366198062896729f + 0.5f);
+        fn = (f32)n;
+        r = t - fn * 1.5707855224609375f;
+        w = fn * 1.0804334124259185e-05f;
+        if (n < 32 && (ix & 0xFFFFFF00) != D_0024FDF0[n - 1]) {
+            y[0] = r - w;
+        } else {
+            y[0] = r - w;
+            j = ix >> 23;
+            FLOAT_TO_BITS(hy, y[0]);
+            i = j - (((u32)hy >> 23) & 0xFF);
+            if (i > 8) {
+                t = r;
+                w = fn * 1.0804273188114166e-05f;
+                r = t - w;
+                w = fn * 6.07709993438732e-11f - ((t - r) - w);
+                y[0] = r - w;
+                FLOAT_TO_BITS(hy, y[0]);
+                i = j - (((u32)hy >> 23) & 0xFF);
+                if (i > 25) {
+                    t = r;
+                    w = fn * 6.077094383272197e-11f;
+                    r = t - w;
+                    w = fn * 6.123234262925839e-17f - ((t - r) - w);
+                    y[0] = r - w;
+                }
+            }
+        }
+        y[1] = (r - y[0]) - w;
+        if (hx < 0) {
+            y[0] = -y[0];
+            y[1] = -y[1];
+            return -n;
+        }
+        return n;
+    }
+    if (ix > 0x7F7FFFFF) {
+        y[0] = y[1] = x - x;
+        return 0;
+    }
+    e0 = (ix >> 23) - 134;
+    BITS_TO_FLOAT(z, ix - (e0 << 23));
+    for (i = 0; i < 2; i++) {
+        tx[i] = (f32)(s32)z;
+        z = (z - tx[i]) * 256.0f;
+    }
+    tx[2] = z;
+    nx = 3;
+    while (tx[nx - 1] == 0.0f) {
+        nx--;
+    }
+    n = func_002082F8(tx, y, e0, nx, 2, D_0024FAD8);
+    if (hx < 0) {
+        y[0] = -y[0];
+        y[1] = -y[1];
+        return -n;
+    }
+    return n;
+}
+
+extern const f32 D_0024FA34;
+
+f32 func_00206FA0(f32 x)
+{
+    s32 ix;
+    s32 k = 0;
+    f32 f, hfsq, s, z, R, w, t1, t2, dk;
+    s32 i, j;
+    FLOAT_TO_BITS(ix, x);
+    if (ix < 0x00800000) {
+        if ((ix & 0x7FFFFFFF) == 0) {
+            return D_0024FA34;
+        }
+        if (ix < 0) {
+            return (x - x) / 0.0f;
+        }
+        k -= 25;
+        x *= 33554432.0f;
+        FLOAT_TO_BITS(ix, x);
+    }
+    if (ix >= 0x7F800000) {
+        return x + x;
+    }
+    k += (ix >> 23) - 127;
+    ix &= 0x007FFFFF;
+    i = (ix + (0x95F64 << 3)) & 0x800000;
+    BITS_TO_FLOAT(x, ix | (i ^ 0x3F800000));
+    k += (i >> 23);
+    f = x - 1.0f;
+    if ((0x007FFFFF & (15 + ix)) < 16) {
+        if (f == 0.0f) {
+            if (k == 0) {
+                return 0.0f;
+            }
+            dk = (f32)k;
+            return dk * 0.6931381225585938f + dk * 9.05800061445916e-06f;
+        }
+        R = f * f * (0.5f - 0.3333333432674408f * f);
+        if (k == 0) {
+            return f - R;
+        }
+        dk = (f32)k;
+        return dk * 0.6931381225585938f - ((R - dk * 9.05800061445916e-06f) - f);
+    }
+    s = f / (2.0f + f);
+    dk = (f32)k;
+    z = s * s;
+    i = ix - (0x6147A << 3);
+    w = z * z;
+    j = (0x6B851 << 3) - ix;
+    t1 = w * (0.4000000059604645f + w * (0.2222219854593277f + w * 0.15313838422298431f));
+    t2 = z * (0.6666666865348816f + w * (0.2857142984867096f + w * (0.18183572590351105f + w * 0.14798198640346527f)));
+    i |= j;
+    R = t2 + t1;
+    if (i > 0) {
+        hfsq = 0.5f * f * f;
+        if (k == 0) {
+            return f - (hfsq - s * (hfsq + R));
+        }
+        return dk * 0.6931381225585938f - ((hfsq - (s * (hfsq + R) + dk * 9.05800061445916e-06f)) - f);
+    }
+    if (k == 0) {
+        return f - s * (f - R);
+    }
+    return dk * 0.6931381225585938f - ((s * (f - R) - dk * 9.05800061445916e-06f) - f);
+}
+
+extern const f32 D_0024FA4C;
+
+f32 func_00206FA0(f32 x);
+
+f32 func_002072C8(f32 x)
+{
+    s32 ix;
+    s32 k;
+    s32 neg;
+    f32 dk;
+    FLOAT_TO_BITS(ix, x);
+    k = 0;
+    if (ix < 0x00800000) {
+        if ((ix & 0x7FFFFFFF) == 0) {
+            return D_0024FA4C;
+        }
+        if (ix < 0) {
+            return (x - x) / 0.0f;
+        }
+        k -= 25;
+        x *= 33554432.0f;
+        FLOAT_TO_BITS(ix, x);
+    }
+    if (ix >= 0x7F800000) {
+        return x + x;
+    }
+    k += (ix >> 23) - 127;
+    neg = (u32)k >> 31;
+    ix = (ix & 0x007FFFFF) | ((127 - neg) << 23);
+    dk = (f32)(k + neg);
+    BITS_TO_FLOAT(x, ix);
+    return (dk * 7.90341517e-07f + func_00206FA0(x) * 0.434294492f) + dk * 0.301029205f;
+}

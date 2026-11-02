@@ -244,3 +244,162 @@ f32 func_002093C0(f32 mag, f32 sign)
     BITS_TO_FLOAT(mag, (m & 0x7FFFFFFF) | (s & 0x80000000));
     return mag;
 }
+
+f32 func_00208068(f32 x)
+{
+    s32 hx;
+    FLOAT_TO_BITS(hx, x);
+    if ((hx & 0x7F800000) == 0x7F800000)
+        return x * x + x;
+    if (hx <= 0) {
+        if ((hx & 0x7FFFFFFF) == 0)
+            return x;
+        if (hx < 0)
+            return (x - x) / (x - x);
+    }
+    s32 ix = hx >> 23;
+    s32 i;
+    if (ix == 0) {
+        for (i = 0; (hx & 0x800000) == 0; i++)
+            hx <<= 1;
+        ix -= i - 1;
+    }
+    ix -= 127;
+    hx = (hx & 0x7FFFFF) | 0x800000;
+    hx <<= ix & 1;
+    hx <<= 1;
+    ix >>= 1;
+    s32 s = 0;
+    s32 r = 0;
+    s32 t;
+    s32 m = 0x1000000;
+    while (m != 0) {
+        t = s + m;
+        if (t <= hx) {
+            s = t + m;
+            hx -= t;
+            r += m;
+        }
+        hx <<= 1;
+        m = (u32)m >> 1;
+    }
+    if (hx != 0)
+        r += r & 1;
+    hx = (r >> 1) + 0x3F000000;
+    f32 res;
+    BITS_TO_FLOAT(res, hx + (ix << 23));
+    return res;
+}
+
+f32 func_002081A0(f32 x, f32 y)
+{
+    s32 hx;
+    s32 ix;
+    FLOAT_TO_BITS(hx, x);
+    ix = hx & 0x7FFFFFFF;
+    if (ix <= 0x31FFFFFF && (s32)x == 0)
+        return 1.0f;
+    f32 z = x * x;
+    f32 r = z * (z * (z * (z * (z * -1.13596476e-11f + 2.08757234e-09f) + -2.75573143e-07f) + 2.48015876e-05f) + -0.00138888892f) + 0.0416666679f;
+    f32 v = z * r;
+    if (ix <= 0x3E999999)
+        return 1.0f - (0.5f * z - (z * v - x * y));
+    f32 qs;
+    if (ix > 0x3F480000)
+        qs = 0.28125f;
+    else
+        BITS_TO_FLOAT(qs, ix - 0x01000000);
+    return (1.0f - qs) - ((0.5f * z - qs) - (z * v - x * y));
+}
+
+f32 func_002093C0(f32 scale, f32 value);
+
+f32 func_00209260(f32 x, s32 n)
+{
+    s32 ix, hx, k;
+
+    FLOAT_TO_BITS(ix, x);
+    hx = ix;
+    k = (hx & 0x7F800000) >> 23;
+    if (k == 0) {
+        if ((hx & 0x7FFFFFFF) == 0) return x;
+        x *= 33554432.0f;
+        FLOAT_TO_BITS(ix, x);
+        hx = ix;
+        k = ((hx & 0x7F800000) >> 23) - 25;
+        if (n < -50000) return 1e-30f * x;
+    }
+    if (k == 0xFF) return x + x;
+    k = k + n;
+    if (k > 0xFE) {
+        return func_002093C0(1e30f, x) * 1e30f;
+    }
+    if (k > 0) {
+        BITS_TO_FLOAT(x, (hx & 0x807FFFFF) | (k << 23));
+        return x;
+    }
+    if (k < -24) {
+        if (n > 50000) return func_002093C0(1e30f, x) * 1e30f;
+        return func_002093C0(1e-30f, x) * 1e-30f;
+    }
+    k += 25;
+    BITS_TO_FLOAT(x, (hx & 0x807FFFFF) | (k << 23));
+    return x * 2.9802322387695312e-08f;
+}
+
+f32 func_002052F8(f32 x);
+
+extern const f32 D_0024FF38[];
+
+f32 func_00208D50(f32 x, f32 y, s32 k)
+{
+    s32 hx, ix, zb;
+    f32 z, w, r, v, s, t, a;
+
+    FLOAT_TO_BITS(hx, x);
+    ix = hx & 0x7FFFFFFF;
+    if (ix <= 0x317FFFFF) {
+        if ((s32)x == 0) {
+            if ((ix | (k + 1)) == 0) {
+                return 1.0f / func_002052F8(x);
+            }
+            if (k != 1) {
+                return -1.0f / x;
+            }
+            return x;
+        }
+    }
+    if (ix > 0x3F2CA13F) {
+        if (hx < 0) {
+            x = -x;
+            y = -y;
+        }
+        z = 0.7853981256484985f - x;
+        w = 3.774894707930798e-08f - y;
+        x = z + w;
+        y = 0.0f;
+    }
+    z = x * x;
+    w = z * z;
+    r = D_0024FF38[1] + w * (D_0024FF38[3] + w * (D_0024FF38[5] + w * (D_0024FF38[7] + w * (D_0024FF38[9] + w * D_0024FF38[11]))));
+    v = z * (D_0024FF38[2] + w * (D_0024FF38[4] + w * (D_0024FF38[6] + w * (D_0024FF38[8] + w * (D_0024FF38[10] + w * D_0024FF38[12])))));
+    s = z * x;
+    r = y + z * (s * (r + v) + y);
+    r += D_0024FF38[0] * s;
+    w = x + r;
+    if (ix > 0x3F2CA13F) {
+        v = (f32)k;
+        return (f32)(1 - ((hx >> 30) & 2)) * (v - 2.0f * (x - (w * w / (w + v) - r)));
+    }
+    if (k == 1) {
+        return w;
+    }
+    FLOAT_TO_BITS(zb, w);
+    BITS_TO_FLOAT(z, zb & 0xFFFFF000);
+    v = r - (z - x);
+    t = -1.0f / w;
+    FLOAT_TO_BITS(zb, t);
+    BITS_TO_FLOAT(a, zb & 0xFFFFF000);
+    s = 1.0f + a * z;
+    return a + t * (s + a * v);
+}
