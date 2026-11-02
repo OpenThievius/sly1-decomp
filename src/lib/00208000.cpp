@@ -560,3 +560,22 @@ s32 func_0020B278(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 al
     (void)func_0020B978(owner, D_00250098);
     return 0;
 }
+
+struct Ctx_0020B190;
+typedef s32 (*Fn_0020B190)(Ctx_0020B190*, s32*, s32);
+struct Ent_0020B190 { Fn_0020B190 fn; s32 arg; };
+struct Tab_0020B190 { u8 pad[0xC]; Ent_0020B190 e[1]; };
+struct Ctx_0020B190 { u8 pad[0x40]; Tab_0020B190* table; };
+s32 func_0020B190(Ctx_0020B190* p, s32* idx) {
+    s32 r = 0;
+    if (p != 0) {
+        Tab_0020B190* t = p->table;
+        if (t != 0) {
+            Fn_0020B190 fn = t->e[*idx].fn;
+            if (fn != 0) {
+                r = fn(p, idx, t->e[*idx].arg);
+            }
+        }
+    }
+    return r;
+}
