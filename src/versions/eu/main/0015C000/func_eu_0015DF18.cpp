@@ -11,14 +11,14 @@ struct Step_eu_0015DF18 {
 
 s32 func_eu_0015DF18(Step_eu_0015DF18* self, s32 n)
 {
+    s32 r = 1;
     switch (self->kind) {
     case 0:
-        self->pos += n;
-        return self->pos;
+        r = self->pos += n;
+        break;
     case 1:
-        self->pos += n * 2;
-        return self->pos;
-    default:
-        return 1;
+        r = self->pos += n * 2;
+        break;
     }
+    return r;
 }
