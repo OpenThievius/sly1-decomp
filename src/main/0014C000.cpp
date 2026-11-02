@@ -1498,3 +1498,64 @@ void func_0014EC70(Obj_14EC70* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f3
         *a6 = ((f32 (*)(Obj_14EC70*, f32))self->vt[5])(self, out.f);
     }
 }
+
+struct Pair_0014C018 {
+    f32 a;
+    f32 b;
+    void Set(f32 x, f32 y)
+    {
+        a = x;
+        b = y;
+    }
+};
+struct __attribute__((aligned(16))) Params_0014C018 { s32 w[0x11]; Pair_0014C018 p44; Pair_0014C018 p4C; s32 rest[0x17]; };
+struct Timer_0014C018 {
+    s32 state;
+    f32 scale;
+    s32 count;
+    void Init()
+    {
+        state = 0;
+        scale = 1.0f;
+        count = 0;
+    }
+};
+
+struct Self_0014C018 {
+    u8 pad0[0x2D4];
+    s32 f2D4;
+    f32 f2D8;
+    u8 pad1[0x450 - 0x2DC];
+    s32 f450;
+    u8 pad2[0x45C - 0x454];
+    f32 f45C;
+    u8 pad3[0x464 - 0x460];
+    s32 f464;
+    u8 pad4[0x470 - 0x468];
+    Timer_0014C018 timer;
+    u8 pad5[0x480 - 0x47C];
+    Params_0014C018 params0;
+    Params_0014C018 params1;
+};
+
+extern const Params_0014C018 D_00249F00;
+extern const f32 D_00249FB0;
+
+void func_00123ED0(Self_0014C018* self);
+
+void func_0014C018(Self_0014C018* self)
+{
+    func_00123ED0(self);
+    self->f2D4 = 50;
+    self->f2D8 = 90.0f;
+    Params_0014C018 params = D_00249F00;
+    self->params0 = params;
+    self->params1 = params;
+    self->params1.p44.Set(12.0f, 12.0f);
+    self->params1.p4C.Set(12.0f, 12.0f);
+    self->timer.Init();
+    self->f45C = D_00249FB0;
+    self->f450 = 2;
+    self->f464 = 0;
+    D_0027C00C = (Mgr_14C668*)self;
+}

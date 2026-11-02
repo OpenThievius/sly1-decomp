@@ -225,3 +225,35 @@ void func_002118A0(Out_002118A0* out)
     out->w1C = *(volatile u32*)0x10002020;
     out->w20 = *(volatile u32*)0x10002010;
 }
+
+struct Node_2104A8 {
+    u8 pad0[0xDC];
+    s32 fDC;
+    s32 fE0;
+    s32 fE4;
+};
+
+struct Rec_2104A8 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+};
+
+s32 func_001E1FD0(char *dst, const char *fmt, ...);
+void func_0020B978(struct Node_2104A8 *self, char *buf);
+
+s32 func_002104A8(struct Node_2104A8 *self, struct Rec_2104A8 *rec) {
+    char buf[0x100];
+    s32 flag;
+    if (self->fE0 != 0)
+        flag = self->fDC >= rec->f4 && self->fE0 >= rec->f8;
+    else
+        flag = self->fE4 >= rec->fC * rec->f10;
+    if (flag == 0) {
+        func_001E1FD0(buf, "Too small buffer size for %dx%d picture\n", rec->f4, rec->f8);
+        func_0020B978(self, buf);
+    }
+    return flag;
+}

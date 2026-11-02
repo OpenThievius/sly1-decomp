@@ -945,3 +945,52 @@ s32 func_0020E8A0(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s32* 
     }
     return 1;
 }
+
+struct Queue_20DF10;
+struct Obj_20DF10 { u8 pad0[0x838]; s32 f838; s32 f83C; u8 pad840[0x18]; Queue_20DF10* f858; };
+struct Msg_20DF10 { s32 cmd; s32 pad[7]; };
+
+void func_0020F0F0(Obj_20DF10* o);
+void func_0020B190(Queue_20DF10* q, Msg_20DF10* m);
+void func_0020B978(Obj_20DF10* o, const char* msg);
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+s32 func_0020DF10(Obj_20DF10* o)
+{
+    Msg_20DF10 m;
+    Msg_20DF10 n;
+    s32 result = 1;
+    func_0020F0F0(o);
+    while (*(volatile u32*)0x1000B020 != 0 && (*(volatile u32*)0x10002010 & 0x4000) == 0) {
+        if (*(volatile u32*)0x1000B420 == 0 && (*(volatile u32*)0x1000B400 & 0x100) == 0) {
+            m.cmd = 1;
+            func_0020B190(o->f858, &m);
+        }
+    }
+    u32 bp = *(volatile u32*)0x10002020;
+    s64 top = *(s64*)0x10002030;
+    o->f838 = (s32)top;
+    if (top < 0) {
+        u32 frac = bp & 0x1F;
+        o->f83C = frac != 0 ? 0x20 - frac : 0;
+    } else {
+        o->f83C = 0x20;
+    }
+    if ((*(volatile u32*)0x10002010 & 0x4000) != 0) {
+        result = 0;
+        func_0020B978(o, "Error code detected(BDEC)");
+        n.cmd = 2;
+        func_0020B190(o->f858, &n);
+        *(volatile u32*)0x10002010 = 0x40000000;
+        n.cmd = 3;
+        func_0020B190(o->f858, &n);
+        func_001F9D60();
+        *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
+        *(volatile u32*)0x1000B000 = 0;
+        *(u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
+        func_001F9DA8();
+        *(volatile u32*)0x1000B020 = 0;
+    }
+    return result;
+}

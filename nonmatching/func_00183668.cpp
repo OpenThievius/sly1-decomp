@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 329/376 (87.5%), checked 2026-11-01
+// BYTES 334/376 (88.8%), checked 2026-11-02
 // Near match: the same instructions and block layout as retail; only registers differ.
 // Retail reloads n->key for the tag test through a copy ($v1), which GCC CSE does not do here
 // because CSE follows the key-test branch into the tag test. An empty do { } while (0) after the
 // key-match return stops that and matches EXACT, but it is an artificial barrier (AGENTS.md),
 // so it is not kept here. Not linked.
 #include "common.h"
+// NEAR (p58b): 34 lines, all register numbering; retail's `move v1,v0` copy of n->key for the tag test needs CSE to stop following the key-test branch. func_00183668_assert.cpp puts a compiled-out ASSERT macro (do {} while (0)) before the tag test: every register then matches, but GCC aligns one label (.p2align 3) and inserts one nop, so the branches after it are 4 bytes off. Only the do {} while (0) after `return 1` (dead code) is EXACT.
 
 struct Self_183668;
 struct Node_183668;
@@ -65,7 +66,7 @@ s32 func_00183668(Self_183668* self, s32 key, void* unused, s32** p)
         if (n->fn == func_001834A0 && n->owner == self) {
             if (n->key == key) {
                 if (key >= 8) return 1;
-                if (key >= 6) return *p[0] == n->data->f4;
+                if (key >= 6) { s32* q = p[0]; return n->data->f4 == *q; }
                 return 1;
             }
             if (n->key == tag) {

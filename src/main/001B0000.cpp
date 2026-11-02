@@ -1872,3 +1872,106 @@ void func_001B2DF8(Ctx_1B2DF8* self)
     }
     D_0026227C = func_0015C1C0(0);
 }
+
+struct Anim_001B1898 {
+    s32 first;
+    s32 last;
+    f32 duration;
+    s32 mode;
+};
+
+struct Obj_001B1898 {
+    u8 pad0[0x558];
+    s32 state;
+    f32 startTime;
+    u8 pad560[0x5D0 - 0x560];
+    Anim_001B1898 animB;
+    Anim_001B1898 animC;
+    Anim_001B1898 animA;
+    s32 blinkFrame;
+    f32 blinkRate;
+    u8 pad608[0x610 - 0x608];
+    s32 target;
+    f32 blinkStart;
+};
+
+extern f32 D_0026185C;
+void func_001B46E0(s32 a, s32 frame);
+
+void func_001B1898(Obj_001B1898* self)
+{
+    s32 first, last, mode, frame;
+    f32 duration, start;
+
+    switch (self->state) {
+    case 0:
+    case 4:
+    case 8:
+        first = self->animA.first;
+        last = self->animA.last;
+        duration = self->animA.duration;
+        mode = self->animA.mode;
+        start = self->startTime;
+        break;
+    case 1:
+        first = self->animB.first;
+        last = self->animB.last;
+        duration = self->animB.duration;
+        mode = self->animB.mode;
+        start = self->startTime;
+        break;
+    case 3:
+        frame = (s32)((D_0026185C - self->startTime) / (1.0f / self->blinkRate)) % 2;
+        if (frame != 0) {
+            first = self->animB.first;
+            last = self->animB.last;
+            duration = self->animB.duration;
+            mode = self->animB.mode;
+            start = self->blinkStart;
+        } else {
+            first = self->blinkFrame;
+            last = first;
+        }
+        break;
+    case 7:
+        frame = (s32)((D_0026185C - self->startTime) / (1.0f / self->blinkRate)) % 2;
+        if (frame != 0) {
+            first = self->animC.first;
+            last = self->animC.last;
+            duration = self->animC.duration;
+            mode = self->animC.mode;
+            start = self->blinkStart;
+        } else {
+            first = self->blinkFrame;
+            last = first;
+        }
+        break;
+    case 5:
+        first = self->animC.first;
+        last = self->animC.last;
+        duration = self->animC.duration;
+        mode = self->animC.mode;
+        start = self->startTime;
+        break;
+    }
+
+    s32 count = last - first + 1;
+    if (count == 1 || duration <= 0.0f) {
+        frame = first;
+    } else {
+        switch (mode) {
+        case 0:
+            frame = (s32)((D_0026185C - start) / (duration / (f32)count)) % count;
+            break;
+        case 1: {
+            s32 period = count * 2 - 2;
+            frame = (s32)((D_0026185C - start) / (duration / (f32)period)) % period;
+            if (frame >= count)
+                frame -= (frame - count + 1) * 2;
+            break;
+        }
+        }
+        frame += first;
+    }
+    func_001B46E0(self->target + 0x10, frame);
+}

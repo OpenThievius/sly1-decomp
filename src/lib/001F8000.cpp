@@ -781,3 +781,39 @@ s32 func_001F9AD8(s8* text, void* q)
     }
     return 0;
 }
+
+s32 func_001F7B88(const char *fmt, ...);
+void func_001F7BE8(s32 a);
+void func_001F7D88(void);
+s32 func_001F9AD8(char *text, void *q);
+
+extern char D_0024EB90[];
+extern char D_0024EBA0[];
+
+s32 func_001F9C50(char *arg) {
+    char buf[80];
+    char *e = arg;
+    const char *pre = D_0024EB90;
+    char *d;
+    char *base;
+
+    while (*e != 0) {
+        e++;
+    }
+    base = arg - 11;
+    if ((u32)(e - base) > 80) {
+        func_001F7B88(D_0024EBA0, arg);
+        return 0;
+    }
+    func_001F7BE8(0);
+    func_001F7D88();
+    d = buf;
+    while (*pre != 0) {
+        *d++ = *pre++;
+    }
+    while (*arg != 0) {
+        *d++ = *arg++;
+    }
+    *d = 0;
+    return func_001F9AD8(buf, 0);
+}

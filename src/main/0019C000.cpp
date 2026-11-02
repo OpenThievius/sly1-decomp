@@ -1057,3 +1057,87 @@ u8* func_0019E908(u32 n)
     default: return 0;
     }
 }
+
+// The loop walks an intrusive list with an iterator that registers itself on a global stack
+// (D_0027B314) for its lifetime and unregisters in its destructor.
+
+extern u8 D_00248D20[];
+extern u8 D_00248D30[];
+
+typedef void (*VFn_19C068)(void *self);
+typedef void (*VFn2_19C068)(void *self, void *x);
+
+struct List_19C068 { s32 head; s32 pad; s32 step; };
+
+struct Obj_19C068 {
+    VFn_19C068 *vtbl;
+    u8 pad4[0x10];
+    void *mgr;
+    u8 pad18[0x2D8 - 0x18];
+    struct List_19C068 list;
+    u8 pad2E4[0x5FC - 0x2E4];
+    void *o5FC;
+    u8 pad600[0x660 - 0x600];
+    void *o660;
+};
+
+struct Frame_19C068;
+struct Frame_19C068 {
+    List_19C068 *list;
+    s32 *cur;
+    s32 step;
+    Frame_19C068 *prev;
+    Frame_19C068(List_19C068 *l)
+    {
+        list = l;
+        cur = &l->head;
+        step = l->step;
+        prev = *(Frame_19C068**)D_0027B314;
+        *(Frame_19C068**)D_0027B314 = this;
+    }
+    ~Frame_19C068() { *(Frame_19C068**)D_0027B314 = prev; }
+    s32 Next()
+    {
+        s32 n = *cur;
+        cur = (s32 *)(n + step);
+        return n;
+    }
+};
+
+struct Mgr_19C068 {
+    s32 field0;
+};
+
+struct Ob_19C068 {
+    VFn_19C068 *vtbl;
+};
+
+void func_00152600(struct Mgr_19C068 *a, struct Obj_19C068 *b);
+void func_00152470(struct Mgr_19C068 *a, struct Obj_19C068 *b);
+struct Buf_19C068 { s32 w[4]; };
+void func_00128018(struct Mgr_19C068 *a, s32 b, void *c, struct Buf_19C068 *d);
+void func_001B9860(struct Obj_19C068 *a, struct Buf_19C068 *b, void *c);
+void func_001B7C40(struct Obj_19C068 *self, s32 flag);
+
+void func_0019C068(struct Obj_19C068 *self, s32 a1) {
+    if (a1 != 0) {
+        func_00152600((struct Mgr_19C068 *)((u8 *)self->mgr + 0x1C60), self);
+        ((struct Ob_19C068 *)self->o5FC)->vtbl[7](self->o5FC);
+    } else {
+        struct Buf_19C068 buf;
+        func_00152470((struct Mgr_19C068 *)((u8 *)self->mgr + 0x1C60), self);
+        ((struct Ob_19C068 *)self->o5FC)->vtbl[6](self->o5FC);
+        func_00128018((struct Mgr_19C068 *)*(void **)((u8 *)self->o660 + 0x18), 0,
+                      (u8 *)self->o660 + 0x40, &buf);
+        func_001B9860(self, &buf, D_00248D20);
+    }
+    func_001B7C40(self, a1 == 0);
+    Frame_19C068 it(&self->list);
+    s32 node = it.Next();
+    while (node != 0) {
+        func_001B7C40((struct Obj_19C068 *)node, a1 == 0);
+        node = it.Next();
+    }
+    ((VFn2_19C068 *)self->vtbl)[0x90 / 4](self, D_00248D30);
+    ((VFn2_19C068 *)self->vtbl)[0x94 / 4](self, D_00248D30);
+}

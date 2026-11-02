@@ -1306,3 +1306,26 @@ void func_00191128(void* a0, s32* a1, s32* a2)
     *a1 = count;
     func_0018D6F0();
 }
+
+struct Obj_1935B0 {
+    u8 pad0[0xC];
+    f32 fC;
+    u8 pad1[0x19D8 - 0x10];
+    s32 f19D8;
+    s32 f19DC;
+};
+struct Dst_1935B0 { char c; };
+
+extern u8 D_0024C418[];
+void* func_00160B28(Obj_1935B0* p);
+s32 func_00160148(s32 v);
+s32 func_001E1FD0(Dst_1935B0* dst, const char* fmt, ...);
+
+void func_001935B0(Obj_1935B0* self, Dst_1935B0* dst)
+{
+    void* a = func_00160B28(self);
+    s32 b = func_00160148((self->f19D8 << 8) | self->f19DC);
+    s32 v = (s32)(self->fC * (1.0f / 60.0f));
+    s32 t = v > 0 ? v : 1;
+    func_001E1FD0(dst, (const char*)D_0024C418, a, b, t / 60, t % 60);
+}
