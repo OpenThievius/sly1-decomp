@@ -10,6 +10,7 @@ tools/compile.py with the compiler and flags of the src/ file that holds FUNC.
 
 import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -38,7 +39,23 @@ def main(argv=None):
         return 1
     finally:
         copy.unlink()
+    plain_names(out)
     return 0
+
+
+def plain_names(obj_path):
+    """Rename each C++ mangled symbol to its plain name (func_X__FPv -> func_X), as retail's target.o
+    has them: otherwise the permuter counts every label and call as a difference and never reaches 0."""
+    import check
+    import elf
+    obj = elf.Elf(Path(obj_path).read_bytes())
+    renames = sorted({(s["name"], check.base_name(s["name"])) for s in obj.symbols
+                      if s["name"] and check.base_name(s["name"]) != s["name"]})
+    if not renames:
+        return
+    args = [a for old, new in renames for a in ("--redefine-sym", "%s=%s" % (old, new))]
+    objcopy = shutil.which(os.environ.get("MIPS_PREFIX", "mips-linux-gnu-") + "objcopy")
+    subprocess.run([objcopy] + args + [str(obj_path)], check=True)
 
 
 if __name__ == "__main__":
