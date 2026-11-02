@@ -431,17 +431,6 @@ void func_0020BF78(struct Obj_20BF78 *self)
     self->field138 += s2 << 10;
 }
 
-struct Obj_00208FE8 { u8 pad[8]; s64 f8; };
-typedef s64 Key_00208FE8;
-s32 func_001FD308(Key_00208FE8 a, Key_00208FE8 b);
-
-s32 func_00208FE8(Obj_00208FE8* obj)
-{
-    Key_00208FE8 v = obj->f8;
-    (void)func_001FD308(v, v);
-    return 0;
-}
-
 struct Hdl_209720 { s32 v; };
 struct Elt_209720 { u8 pad[0x24]; s32 f24; };
 struct Slot_209720 { s32 v; };

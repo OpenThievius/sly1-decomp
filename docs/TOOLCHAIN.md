@@ -117,8 +117,28 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    it, a near miss of func_00206298 (written for 2.9-ee-991111) comes out at
    1,064 bytes against retail's 1,072, with 89% of its instructions in line,
    against 1,016 bytes with 2.9-ee-991111; `-O2` is the right level
-   (`-O1` or no scheduling is far worse). Using it needs tools/compile.py
-   to run a Linux compiler for the math library's files; not done yet.
+   (`-O1` or no scheduling is far worse).
+
+   **The math library builds with it** (2026-11-02), as OpenRAC's
+   rac1-decomp builds the objects Sony built with 2.9-ee-991111-01 (its
+   `Makefile.sn` and `config/core_text.objects`). The library is
+   0x204F68–0x2093F0 (PAL 0x2062A8–0x20A8B8): from the first function that
+   pads `div.s` to the last one only the library calls, func_002093C0;
+   func_002093F0 after it is called from game code. config/us/layout.tsv
+   gives it its own folder, `src/libm/`, and config/cflags.tsv names
+   `2.9-ee-991111-01` for its files. tools/compile.py runs that release's
+   Linux `cc1plus` through its own loader (`lib/ld-2.3.6.so`), from
+   `ee-gcc-2.9-991111-01/` or `ee-gcc-2.9-dtls13010/` in the toolchain
+   directory or from `SLY1_LINUX_TOOLCHAIN`; the preprocessor and the
+   assembler stay the Windows 2.9-ee-991111 ones. On x86 Linux the program
+   runs as it is; elsewhere it runs in an `i386/busybox:1.36` container
+   (`docker run --platform linux/386`, OrbStack or Docker Desktop on macOS),
+   or under `SLY1_LINUX_RUNNER`. Without the Linux build the Windows
+   2.9-ee-991111 builds these files, as rac1-decomp falls back: the build
+   still matches, but a `div.s` function cannot. `python3 tools/toolchain.py`
+   reports which is found. The three math functions matched before this
+   (func_00205318, func_00205578, func_00208FE8) are EXACT with both builds,
+   in US and PAL.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.

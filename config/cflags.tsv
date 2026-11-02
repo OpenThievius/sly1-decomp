@@ -3,7 +3,9 @@
 # builds the game. Flags are one row per file, never per function; `default`
 # applies to every file without a row of its own. A file's row may name its own
 # compiler in a third column: Sony's libraries were built with Sony's
-# 2.9-ee-991111, as OpenRAC builds its SDK objects (docs/TOOLCHAIN.md).
+# 2.9-ee-991111, as OpenRAC builds its SDK objects, and the math library with its
+# Linux build 2.9-ee-991111-01, as OpenRAC's rac1-decomp builds those objects
+# (docs/TOOLCHAIN.md).
 compiler	2.95.3
 default	-O2 -G0 -fno-exceptions
 src/lib/001F4000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
@@ -14,3 +16,5 @@ src/lib/00204000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/00208000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/0020C000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/00210000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/libm/00204000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111-01
+src/libm/00208000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111-01

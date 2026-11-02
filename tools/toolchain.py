@@ -92,6 +92,11 @@ def main():
         if EXPECTED_BANNER not in (banner[0] if banner else ""):
             print("warning: this is not %s, the compiler retail was built with" % EXPECTED_BANNER)
             return 1
+    import compile as cc
+    for release in cc.LINUX_COMPANION:
+        found = cc.linux_cc1plus(release)
+        print("linux:     %s" % (found[1] if found else
+                                 "no %s (optional: the math library needs it; docs/TOOLCHAIN.md)" % release))
     print("ok: the compiler runs and is %s" % EXPECTED_BANNER)
     return 0
 
