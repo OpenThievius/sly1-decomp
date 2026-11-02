@@ -1982,6 +1982,7 @@ func_00195958	func_00196618	match	version-specific, rodata
 func_001961C0	func_00196F00	match	version-specific, rodata
 func_00196330	func_00197078	match	
 func_001963D8	func_00197120	match	
+func_00196410	func_00197158	match	
 func_00196900	func_00197648	match	
 func_00196938	func_00197680	match	
 func_001969C0	func_00197708	match	
