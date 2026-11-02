@@ -5,3 +5,26 @@ func_001858F8 = 0x001858F8; // type:func
 func_0018E5E8 = 0x0018E5E8; // type:func
 func_001FEE48 = 0x001FEE48; // type:func
 func_001FEEC8 = 0x001FEEC8; // type:func
+
+// Function starts behind the linker's leftovers: each follows 8-byte runs of words the linker left
+// of stripped functions (an `addiu $sp` or a store, then a nop) and begins with its own frame; code
+// takes its address as func_X + N, or nothing reaches it. Without a name splat joins it to the
+// leftovers, which then look like a fragment of a function. Named by us.
+func_001000C8 = 0x001000C8; // type:func
+func_00127478 = 0x00127478; // type:func
+func_00135E30 = 0x00135E30; // type:func
+func_00135E48 = 0x00135E48; // type:func
+func_00142998 = 0x00142998; // type:func
+func_0014DB78 = 0x0014DB78; // type:func
+func_0015A8B8 = 0x0015A8B8; // type:func
+func_0015E6A8 = 0x0015E6A8; // type:func
+func_0016C4E8 = 0x0016C4E8; // type:func
+func_0016F478 = 0x0016F478; // type:func
+func_001E2398 = 0x001E2398; // type:func
+func_001EB460 = 0x001EB460; // type:func
+func_001FA190 = 0x001FA190; // type:func
+func_00202D08 = 0x00202D08; // type:func
+func_00202DA0 = 0x00202DA0; // type:func
+func_00202E50 = 0x00202E50; // type:func
+func_00203010 = 0x00203010; // type:func
+func_002097E0 = 0x002097E0; // type:func
