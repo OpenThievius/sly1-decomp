@@ -1417,6 +1417,7 @@ func_00160880	func_00160EB8	match
 func_001608E0	func_00160F18	match	
 func_00160918	func_00160F50	match	version-specific
 func_00160948	func_00160F90	match	version-specific
+func_00160B28	func_00161188	match	version-specific
 func_00160C48	func_001612A8	match	
 func_00160C58	func_001612B8	match	
 func_00160CA0	func_00161300	match	
@@ -3150,6 +3151,7 @@ func_001F6708	func_001F7708	match
 func_001F6F00	func_001F7F00	match	
 func_001F70F8	func_001F80F8	match	
 func_001F72A8	func_001F82A8	match	
+func_001F7588	func_001F8588	match	rodata
 func_001F7B50	func_001F8B50	match	
 func_001F7B88	func_001F8B88	match	
 func_001F7D88	func_001F8D88	match	
@@ -3282,6 +3284,23 @@ func_00200CF8	func_002020B8	match
 func_00200D18	func_002020D8	match	
 func_00200D38	func_002020F8	match	
 func_00200D58	func_00202118	match	
+func_00200E08	func_002021C8	match	
+func_00200E40	func_00202200	match	
+func_00200E78	func_00202238	match	
+func_00200EB0	func_00202270	match	
+func_00200EE8	func_002022A8	match	
+func_00200F20	func_002022E0	match	
+func_00200F58	func_00202318	match	
+func_00200F90	func_00202350	match	
+func_00200FC8	func_00202388	match	
+func_00201000	func_002023C0	match	
+func_00201038	func_002023F8	match	
+func_00201070	func_00202430	match	
+func_002010A8	func_00202468	match	
+func_002010E0	func_002024A0	match	
+func_00201118	func_002024D8	match	
+func_00201150	func_00202510	match	
+func_00201188	func_00202548	match	
 func_002011C0	func_00202580	match	
 func_00201210	func_002025D0	match	
 func_00201230	func_002025F0	match	
@@ -3321,6 +3340,7 @@ func_00203A20	func_00204D60	match
 func_00203AE8	func_00204E28	match	
 func_00203CF8	func_00205038	match	
 func_00203D90	func_002050D0	match	
+func_002040E8	func_00205428	match	
 func_00204930	func_00205C70	match	
 func_00204AA8	func_00205DE8	match	
 func_00204DB8	func_002060F8	match	
@@ -3357,6 +3377,7 @@ func_00209210	func_0020A550	match
 func_00209238	func_0020A578	match	
 func_00209260	func_0020A5A0	match	
 func_002093C0	func_0020A700	match	
+func_002093F0	func_0020A8B8	match	
 func_002095B0	func_0020AA78	match	version-specific
 func_002096E8	func_0020ABB0	match	
 func_00209720	func_0020ABE8	match	
