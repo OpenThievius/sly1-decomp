@@ -1040,3 +1040,36 @@ s32 func_001897F0(Mat_1897F0* in, Mat_1897F0* out)
 done:
     return ok;
 }
+
+extern u8 D_00269990[];
+extern u8 D_00275960[];
+
+struct Obj_18B600;
+
+void func_001F6B60(Obj_18B600* a);
+void func_001F6B40(Obj_18B600* a);
+s32 func_001F6A30();
+
+typedef s32 (*Fn_18B600)(void* a);
+
+struct Obj_18B600 {
+    void* f0;
+    s32 f4;
+    Fn_18B600 f8;
+    void* fC;
+    s32 f10;
+};
+
+void func_0018B600()
+{
+    func_001F6B60(*(Obj_18B600**)D_00269990);
+    Obj_18B600* o = (Obj_18B600*)D_00269990;
+    s32 r = o->f8(o->fC);
+    o->f10 = r;
+    *(s32*)D_00275960 = -1;
+    o->f4 = -1;
+    o->fC = 0;
+    o->f8 = 0;
+    func_001F6B40(*(Obj_18B600**)D_00269990);
+    func_001F6A30();
+}

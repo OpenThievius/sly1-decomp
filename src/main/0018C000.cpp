@@ -2018,3 +2018,48 @@ struct Ring_0018E838 {
 
 s32 func_0011E4F8(Ring_0018E838* self);
 void func_0018E838(Ring_0018E838* self) { s32 raw = func_0011E4F8(self); s32 x = (raw & 0xFFFFFF) - self->f4; x = x - self->fC; x = x - 0x400; x = x + self->f8; self->f14 = x; self->f14 = x % self->f8; s32 d = self->f8 - self->f14; self->f18 = d; s32 y = self->fC - d; y += self->f8; self->f10 = y; self->f10 = y % self->f8; }
+
+struct Frame_18EDA8 { u8 buf[0x30]; };
+
+Frame_18EDA8* func_001611B8(Frame_18EDA8* f);
+void func_001529C8(Frame_18EDA8* f, s32 a, void* b);
+void func_00152B38(Frame_18EDA8* f);
+void func_001613C0(Frame_18EDA8* f, s32 a, s32 b, s32 c);
+void func_00161708(Frame_18EDA8* f, s32 a, u64 b);
+void func_00161958(Frame_18EDA8* f, s32 a);
+void func_00152B80(Frame_18EDA8* f, s32 a, s32 b);
+void func_00161200(Frame_18EDA8* f);
+void func_00152D30(Frame_18EDA8* f);
+void func_001529E0(Frame_18EDA8* f, s32 a, s32 b);
+
+void func_0018EDA8(void* p, s32 addr, s32 w, s32 h)
+{
+    s32 ny = w / 16;
+    s32 nx = h / 16;
+    s32 x;
+    s32 y;
+    Frame_18EDA8 f;
+
+    func_001611B8(&f);
+    func_001529C8(&f, 0x1C28, p);
+    func_00152B38(&f);
+    func_001613C0(&f, 0, 1, 0xE);
+    func_00161708(&f, 0x50, (u64)0xA1E0 << 36);
+    func_00161708(&f, 0x52, ((u64)0x10 << 32) | 0x10);
+    for (y = 0; y < ny; y++) {
+        for (x = 0; x < nx; x++) {
+            func_001613C0(&f, 0, 1, 0xE);
+            func_00161708(&f, 0x51, ((u64)(y << 4) << 32) | ((u64)(x << 4) << 48));
+            func_00161708(&f, 0x53, 0);
+            func_00161958(&f, 0x40);
+            func_00152B80(&f, 0x40, addr & 0xFFFFFFF);
+            addr += 0x400;
+        }
+    }
+    func_001613C0(&f, 0, 1, 0xE);
+    func_00161708(&f, 0x3F, 0);
+    func_00161708(&f, 0x61, 0);
+    func_00161200(&f);
+    func_00152D30(&f);
+    func_001529E0(&f, 0, 0);
+}

@@ -1749,3 +1749,109 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
     self->f2D4 = b;
     self->f2D8 = D_00261858.f4;
 }
+
+struct Arg_16B580 { u8 pad0[0x14]; s32 f14; u8 pad18[0xAA - 0x18]; u16 flags; };
+struct Sub_16B580 { u8 pad0[0x28]; s32 f28; s32 f2C; s32 f30; };
+struct Obj_16B580 {
+    u8 pad0[0x250];
+    s32 f250;
+    u8 pad254[0xC];
+    Obj_16B580* p260;
+    s32 f264;
+    u8 pad268[0x2D0 - 0x268];
+    s32 f2D0;
+    s32 f2D4;
+    f32 f2D8;
+    u8 pad2DC[4];
+    Sub_16B580* f2E0;
+    u8 pad2E4[0x308 - 0x2E4];
+    void* f308;
+    u8 pad30C[0x33C - 0x30C];
+    void* f33C;
+};
+
+extern s32 D_00272420;
+extern s32 D_0027051C;
+extern f32 D_0026185C[];
+extern u8 D_00264A40[];
+extern u8 D_0026F808[];
+extern u8 D_0026FD00[];
+extern u8 D_00275BC0[];
+extern u8 D_0026FF68[];
+
+s32 func_001BE810(void);
+s32 func_0011CE30(void);
+s32 func_001BE980(void);
+void func_0018C7F8(u8* p);
+void func_001518B8(void* p);
+void func_0016AF80(Obj_16B580* o);
+void func_001E9498(u8* a, u8* b);
+void func_0016EC20(Arg_16B580* a, s32 mask);
+void func_00194D30(u8* a, s32 b, s32 c);
+void func_0016B190(Obj_16B580* o);
+void func_0016B0F8(Obj_16B580* o, Arg_16B580* a);
+
+void func_0016B580(Obj_16B580* self, Arg_16B580* arg)
+{
+    if (self->p260 == 0) {
+        return;
+    }
+    if (self->p260->f2E0 == 0) {
+        return;
+    }
+    if (self->f264 != 0) {
+        if (func_001BE810() != 0) {
+            func_0011CE30();
+        }
+        self->f264 = func_001BE980();
+    }
+    if (D_00272420 != 0) {
+        return;
+    }
+    if (D_0027051C != 0) {
+        return;
+    }
+    self = self->p260;
+    Sub_16B580* p = self->f2E0;
+    if (self->f308 != 0) {
+        if (self->f308 == self->f33C) {
+            func_0018C7F8(D_00264A40);
+        }
+        func_001518B8(self->f308);
+        self->f308 = 0;
+    }
+    func_0016AF80(self);
+    f32 delay = 0.3f;
+    if (self->f2D4 == 1 && (p->f28 == p->f30 || delay <= D_0026185C[0] - self->f2D8)) {
+        s32 idx = self->f2D0;
+        if (idx == 0) {
+            Obj_16B580* g = (Obj_16B580*)D_0026FD00;
+            if (g->f250 != 0) {
+                return;
+            }
+            func_001E9498(D_00275BC0, D_0026FD00);
+            return;
+        }
+        Obj_16B580* g = (Obj_16B580*)D_0026F808;
+        if (g->f250 != 0) {
+            return;
+        }
+        g->p260 = *(Obj_16B580**)(D_0026F808 + idx * 4 + 0x264);
+        func_001E9498(D_00275BC0, D_0026F808);
+        return;
+    }
+    if (p->f28 != p->f30) {
+        return;
+    }
+    if ((arg->flags & 0x800) || (arg->f14 == 1 && 5.0f <= D_0026185C[0])) {
+        func_0016EC20(arg, 0x800);
+        func_00194D30(D_0026FF68, 0, 0x17);
+        return;
+    }
+    if ((arg->flags & 0x140) != 0) {
+        func_0016EC20(arg, 0x140);
+        func_0016B190(self);
+        return;
+    }
+    func_0016B0F8(self, arg);
+}

@@ -1189,3 +1189,41 @@ void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
         return;
     }
 }
+
+struct Buf_2027C8 { u8 bytes[0x14]; };
+struct Slot_2027C8 { s32 w00; u8 pad04[0x0C]; s32 w10; u8 pad14[0x1C]; s32 w30; u8 pad34[0x0C]; s32 w40; u8 pad44[0x0C]; s32 w50; u8 pad54[0x2C]; s32 w80; };
+
+extern s32 D_00279380[];
+extern Slot_2027C8* D_00279340[];
+
+void func_00202768(Buf_2027C8* b, s32 n);
+s32 func_002028A8(Buf_2027C8* b);
+
+s32 func_002027C8(s32 mode)
+{
+    Buf_2027C8 buf;
+    s32 flag = *(volatile u32*)0x1000E000 & 1;
+    s32 i;
+
+    for (i = 0; i < 10; i++) {
+        if (D_00279380[i] != 0) {
+            Slot_2027C8* p = D_00279340[i];
+            p->w00 = 0;
+            p->w30 = 0;
+            p->w10 = 0;
+            p->w50 = 0;
+            p->w40 = 0;
+            p->w80 = 0;
+        }
+    }
+    *(volatile u32*)0x1000E010 = 0xFF1F;
+    u32 m = *(volatile u32*)0x1000E010 & 0xFF1F0000;
+    *(u32*)0x1000E010 = m;
+    func_00202768(&buf, 0x14);
+    func_002028A8(&buf);
+    if (mode == 1) {
+        volatile u32* p = (volatile u32*)0x1000E000;
+        *p |= 1;
+    }
+    return flag;
+}

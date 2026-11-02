@@ -859,3 +859,186 @@ s32 func_0020B2E8(Self_20B2E8* self)
     }
     return 1;
 }
+
+struct Ctx_20A7F0;
+
+struct Bits_20A7F0
+{
+    u8 pad00[0x18];
+    s64 pos;
+};
+
+struct Hdr_20A7F0
+{
+    u64 id;
+    s32 len;
+    s32 scramble;
+    s64 pts;
+    s64 dts;
+    s32 start;
+    s32 size;
+    s32 at;
+};
+
+struct Table_20A7F0
+{
+    u8 bits[16];
+};
+
+extern Table_20A7F0 D_00250028;
+extern char D_00250038[];
+
+u32 func_002116B0(Bits_20A7F0* bs, s32 n);
+void func_00211700(Bits_20A7F0* bs);
+void func_00211748(Bits_20A7F0* bs, s32 n);
+void func_0020B978(Ctx_20A7F0* ctx, char* msg);
+
+s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
+{
+    Table_20A7F0 tbl;
+    s32 flags;
+    s32 escr;
+    s32 opt;
+    s32 ext;
+    s32 hdrlen;
+    s32 start;
+    s32 n;
+    s32 skip;
+    s32 rest;
+
+    hdr->at = bs->pos;
+    tbl = D_00250028;
+    func_002116B0(bs, 0x18);
+    hdr->id = (u64)func_002116B0(bs, 8) << 32;
+    hdr->len = func_002116B0(bs, 16);
+    hdr->dts = -1;
+    hdr->pts = -1;
+    if (hdr->id != (u64)0xBC << 32 && hdr->id != (u64)0xBE << 32 && hdr->id != (u64)0xBF << 32
+        && hdr->id != (u64)0xF0 << 32 && hdr->id != (u64)0xF1 << 32 && hdr->id != (u64)0xFF << 32
+        && hdr->id != (u64)0xF2 << 32 && hdr->id != (u64)0xF8 << 32)
+    {
+        func_002116B0(bs, 2);
+        hdr->scramble = func_002116B0(bs, 2);
+        func_002116B0(bs, 4);
+        flags = func_002116B0(bs, 2);
+        escr = func_002116B0(bs, 1);
+        opt = func_002116B0(bs, 4);
+        ext = func_002116B0(bs, 1);
+        hdrlen = func_002116B0(bs, 8);
+        start = bs->pos;
+        if (flags & 2)
+        {
+            u32 a, b, c;
+            func_002116B0(bs, 4);
+            a = func_002116B0(bs, 3);
+            func_00211700(bs);
+            b = func_002116B0(bs, 15);
+            func_00211700(bs);
+            c = func_002116B0(bs, 15);
+            func_00211700(bs);
+            hdr->pts = ((u64)((a >> 2) & 1) << 32) | (u32)((a << 30) | (b << 15) | c);
+        }
+        if (flags == 3)
+        {
+            u32 a, b, c;
+            func_002116B0(bs, 4);
+            a = func_002116B0(bs, 3);
+            func_00211700(bs);
+            b = func_002116B0(bs, 15);
+            func_00211700(bs);
+            c = func_002116B0(bs, 15);
+            func_00211700(bs);
+            hdr->dts = ((u64)((a >> 2) & 1) << 32) | (u32)((a << 30) | (b << 15) | c);
+        }
+        if (escr == 1)
+        {
+            func_002116B0(bs, 0x30);
+        }
+        if (opt != 0)
+        {
+            func_002116B0(bs, tbl.bits[opt]);
+        }
+        if (ext == 1)
+        {
+            s32 priv = func_002116B0(bs, 1);
+            s32 pack = func_002116B0(bs, 1);
+            s32 seq = func_002116B0(bs, 1);
+            s32 pstd = func_002116B0(bs, 1);
+            s32 ext2;
+            func_002116B0(bs, 3);
+            ext2 = func_002116B0(bs, 1);
+            if (priv == 1)
+            {
+                func_002116B0(bs, 0x30);
+                func_002116B0(bs, 0x30);
+                func_002116B0(bs, 0x20);
+            }
+            if (pack == 1)
+            {
+                func_0020B978(ctx, D_00250038);
+                return 0;
+            }
+            if (seq == 1)
+            {
+                func_002116B0(bs, 0x10);
+            }
+            if (pstd == 1)
+            {
+                func_002116B0(bs, 0x10);
+            }
+            if (ext2 == 1)
+            {
+                u32 i;
+                u32 count;
+                func_00211700(bs);
+                count = func_002116B0(bs, 7);
+                for (i = 0; i < count; i++)
+                {
+                    func_002116B0(bs, 8);
+                }
+            }
+        }
+        skip = hdrlen - (s32)((bs->pos - start) >> 3);
+        if (skip != 0)
+        {
+            func_00211748(bs, skip);
+        }
+        rest = hdr->len - hdrlen;
+        n = rest - 3;
+        hdr->size = n;
+        hdr->start = bs->pos;
+        if (hdr->id == (u64)0xBD << 32)
+        {
+            hdr->id |= func_002116B0(bs, 32);
+            n = rest - 7;
+        }
+        if (n != 0)
+        {
+            func_00211748(bs, n);
+        }
+    } else {
+    if (hdr->id == (u64)0xBC << 32 || hdr->id == (u64)0xBF << 32 || hdr->id == (u64)0xF0 << 32
+        || hdr->id == (u64)0xF1 << 32 || hdr->id == (u64)0xFF << 32 || hdr->id == (u64)0xF2 << 32
+        || hdr->id == (u64)0xF8 << 32)
+    {
+        s32 m = hdr->len;
+        if (hdr->id == (u64)0xBF << 32)
+        {
+            hdr->id |= func_002116B0(bs, 32);
+            m -= 4;
+        }
+        if (m != 0)
+        {
+            func_00211748(bs, m);
+        }
+    }
+    else if (hdr->id == (u64)0xBE << 32)
+    {
+        if (hdr->len != 0)
+        {
+            func_00211748(bs, hdr->len);
+        }
+    }
+    }
+    return 1;
+}
