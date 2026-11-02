@@ -1,42 +1,31 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 849/864 (98.3%), checked 2026-11-02
-#include "common.h"
-// NEAR: 8 lines: loop preheader order/registers. Retail hoists 0.0 after the constants 1,2 (second loop pass) and gives D_002486B0->s6, D_0026C3E0->s5, 1->s7; ours combines the four 0.0 loads and hoists them in the first loop pass, so 1->s5, D_002486B0->s7, D_0026C3E0->s6.
-// j40o04 (loop dump): pass 1 sees 60 insns; the four 0.0 loads match (savings 4, life 4) and move
-// in pass 1 ahead of 1/2, which only move in pass 2. Retail needs 1 and 2 moved before 0.0: either
-// pass 1 with <= ~54 insns, or 0.0 left to pass 2. A 'f32 z = 0.0f;' inside the if(m48) block
-// (57 insns) gives retail's s5/s6/s7/s8 exactly but z is then never hoisted (set in another block
-// after the call branch: unsafe for loop.c), so mtc1 zero stays in the loop and float regs shift.
-// Also tried: if (o->f234), 0.0f on the left, 0.0 double (soft-float), while/goto/continue shapes,
-// z per case block, z at the top of the body (moved in pass 1 before 1).
-
-struct Self_1AAB60;
-struct Vt_1AAB60 { u8 p[0x48]; s32 (*m48)(Self_1AAB60*, Self_1AAB60*); };
-struct Rec_1AAB60 { f32 f0; f32 f4; s32 f8; s32 fC; s32 f10; };
-struct Self_1AAB60 {
-    Vt_1AAB60* vt;
-    u8 p0[0x218 - 4];
+// PAL: the fields from 0x218 on sit 0x310 bytes further on, and the screen's height and its
+// scale are PAL's (468.6 for 492.8, 1.0926 and 0.9153 for 0.9091 and 1.1).
+struct Self_1AAB60_eu;
+struct Vt_1AAB60_eu { u8 p[0x48]; s32 (*m48)(Self_1AAB60_eu*, Self_1AAB60_eu*); };
+struct Self_1AAB60_eu {
+    Vt_1AAB60_eu* vt;
+    u8 p0[0x218 + 0x310 - 4];
     Rec_1AAB60* f218;
     f32 f21C; f32 f220; f32 f224; f32 f228; f32 f22C; f32 f230; f32 f234; f32 f238;
     u8 p1[0x250 - 0x23C];
     s32 f250;
 };
 
-extern Self_1AAB60* D_002486B0[];
-extern Rec_1AAB60 D_0026C3E0[];
-f32 func_001EAF28(f32 x);
-void func_001AAEC0(Self_1AAB60* self);
+void func_001AAEC0(Self_1AAB60_eu* self);
 
-void func_001AAB60(Self_1AAB60* self) {
+void func_001AAB60(Self_1AAB60_eu* self) {
     Rec_1AAB60* r = self->f218;
     f32 x0 = 0.0f;
     f32 x1 = 640.0f;
-    f32 y1 = 492.80002f;
+    f32 y1 = 468.61016845703125f;
     f32 y0 = x0;
 
     if (r->fC != -1) {
+        Self_1AAB60_eu** objs = (Self_1AAB60_eu**)D_002486B0;
+        Rec_1AAB60* recs = (Rec_1AAB60*)D_0026C3E0;
         do {
-            Self_1AAB60* o = D_002486B0[r->fC];
+            Self_1AAB60_eu* o = objs[r->fC];
             if (o->vt->m48(o, self)) {
                 switch (r->f10) {
                 case 0:
@@ -54,7 +43,7 @@ void func_001AAB60(Self_1AAB60* self) {
                 }
                 break;
             }
-            r = &D_0026C3E0[r->fC];
+            r = &recs[r->fC];
         } while (r->fC != -1);
     }
     f32 a = self->f218->f0;
@@ -73,7 +62,7 @@ void func_001AAB60(Self_1AAB60* self) {
     } else {
         self->f228 = y1 + b - self->f238;
     }
-    f32 t = func_001EAF28(self->f228 * 0.9090909f) * 1.1f;
+    f32 t = func_001EAF28(self->f228 * 1.0925925970077515f) * 0.9152542352676392f;
     self->f22C = self->f224;
     self->f228 = t;
     self->f230 = t;
@@ -81,7 +70,7 @@ void func_001AAB60(Self_1AAB60* self) {
     case 0: self->f22C = -self->f234; break;
     case 1: self->f22C = 640.0f; break;
     case 2: self->f230 = -self->f238; break;
-    case 3: self->f230 = 492.80002f; break;
+    case 3: self->f230 = 468.61016845703125f; break;
     }
     s32 m = self->f250;
     if (m != 0) {

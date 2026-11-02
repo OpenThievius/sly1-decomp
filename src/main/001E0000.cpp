@@ -471,7 +471,7 @@ void func_001F5C0C(void* p, s32 zero, s32 size);
 
 struct VT_1E00B0 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
 struct Obj_1E00B0 { VT_1E00B0* vt; u8 pad04[0x25C]; s32 f260; u8 pad264[4]; f32 f268; s32 f26C; };
-struct Glob_1E00B0 { u8 pad[0x2310]; s32 f2310; void* f2314; };
+struct Glob_1E00B0 { u8 pad[0x230C]; f32 f230C; s32 f2310; void* f2314; };
 struct Cam_1E00B0 { s32 flags; u8 pad[4]; f32 f08; };
 struct Pool_1E00B0 { u8 pad[0xAA]; u16 fAA; };
 extern Obj_1E00B0 D_0026E760;
@@ -1052,7 +1052,7 @@ void func_001E17A8(Spec_001E1A08* sp, Ctx_001E1A08* c, s64 s);
 void func_001E17A8(Spec_001E1A08* sp, Ctx_001E1A08* c, double value);
 s32 func_001E1498(char* buf, s32 n, Spec_001E1A08* sp, double value);
 void func_001E2218(char* p);
-s64 func_001FD868(f32 f);
+double func_001FD868(f32 f);
 
 void func_001E1A08(Spec_001E1A08* sp, Ctx_001E1A08* c, u8** va, const char* fmt, s32 len) {
     u64 v;
@@ -1273,11 +1273,226 @@ s8 func_001E13D0(Obj_1E13D0* self0, s32 a, s32 b)
         idx = 0;
     } else {
         f32 t = func_00205C78(10.0f, (f32)(-b));
-        Obj_1E13D0* p = func_001FCDE0(self, (u64)func_001FD868(t));
+        Obj_1E13D0* p = func_001FCDE0(self, func_001FD868(t));
         self = func_001EAE78(p);
         p = func_001EAE78(func_001FCDE0(self, 0.1));
         p = func_001FCDE0(p, (u64)0x4024000000000000ULL);
         idx = func_001FD410(func_001FCD78(self, p));
     }
     return ((s8*)&D_00275940)[idx];
+}
+
+struct VT_1E02C8 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
+struct Obj_1E02C8 { VT_1E02C8* vt; u8 pad04[0x254]; f32* f258; s32 f25C_pad; s32 f260; f32 f264; s32 f268; s32 f26C; };
+struct Cnt_1E02C8 { u8 pad[0x440]; s32 f440; };
+struct Buf_1E02C8 { char c[1]; };
+struct X_1E02C8 { u8 pad[4]; };
+struct Y_1E02C8 { u8 pad[4]; };
+
+extern Cnt_1E02C8* D_002623C4;
+extern s32 D_002623DC;
+extern Buf_1E02C8 D_00275900;
+extern X_1E02C8 D_00264A40;
+extern Y_1E02C8 D_0026FF68;
+
+void func_001AB958(Obj_1E00B0* o);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_00160C48(s32 v);
+void func_001DDAD0(Glob_1E00B0* g);
+void func_001AB890(Obj_1E00B0* o, f32 v);
+f32 func_00205C78(f32 a, f32 b);
+void func_001AB920(Obj_1E00B0* o, f32 v);
+void func_001AB928(Obj_1E00B0* o, f32 v, void* fn);
+void func_001AB938(Obj_1E00B0* o);
+s32 func_001E1FD0(Buf_1E02C8* dst, const char* fmt, ...);
+void func_001AA8B8(Obj_1E02C8* o, f32 v);
+void func_0018C7F8(X_1E02C8* x);
+s32 func_001602A0(void);
+void func_001604B8(s32 m);
+void func_00194D30(Y_1E02C8* y, s32 a, s32 b);
+void func_00148CE0(Glob_1E00B0* g);
+
+void func_001E02C8(Obj_1E02C8* self, s32 n)
+{
+    if (self->f260 == n) {
+        return;
+    }
+    switch (self->f260) {
+    case 1:
+        if (self->f26C != 0) {
+            self->vt->m3C(self);
+            self->f26C = 0;
+        }
+        break;
+    case 2:
+        func_001AB958(&D_0026E760);
+        D_0026E760.vt->m3C(&D_0026E760);
+        self->vt->m3C(self);
+        break;
+    }
+    switch (n) {
+    case 2: {
+        f32 zero = 0.0f;
+        f32 one = 1.0f;
+        func_001BFCD8(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
+        func_00160C48(0);
+        func_001DDAD0(D_00275710);
+        func_001AB890(&D_0026E760, D_00275710->f230C + 0.99f);
+        func_001AB920(&D_0026E760, -func_00205C78(2.0f, (f32)D_002623DC));
+        func_001AB928(&D_0026E760, zero, 0);
+        func_001AB938(&D_0026E760);
+        Cam_1E00B0* cam = D_002623C8;
+        if (cam->flags & 8) {
+            f32 t = cam->f08;
+            if (t < one) {
+                func_001E1FD0(&D_00275900, "Best time: &10.%d", (s32)(t * 10.0f));
+            } else {
+                s32 s = (s32)t;
+                s32 minutes = s / 60;
+                s32 seconds = s % 60;
+                func_001E1FD0(&D_00275900, "Best time: &1%d:%02d", minutes, seconds);
+            }
+            func_001AA8B8(self, zero);
+            self->vt->m20(self, &D_00275900);
+        } else {
+            func_001AA8B8(self, 5.0f);
+            self->vt->m20(self, (void*)"Beginning Master Thief Sprint!");
+        }
+        self->vt->m38(self);
+        break;
+    }
+    case 3: {
+        Obj_1E00B0* o = &D_0026E760;
+        s32 id;
+        f32 t = o->f268;
+        if (0.0f < t) {
+            Cam_1E00B0* cam = D_002623C8;
+            if (cam->flags & 8) {
+                if (cam->f08 < t) {
+                    cam->f08 = t;
+                    id = 0x1D;
+                    func_0018C7F8(&D_00264A40);
+                } else {
+                    id = 0x1E;
+                }
+            } else {
+                id = 0x1B;
+                cam->flags |= 8;
+                cam->f08 = o->f268;
+                D_002623C4->f440 = D_002623C4->f440 + 1;
+                if (func_001602A0() & 8) {
+                    func_001604B8(8);
+                    func_0018C7F8(&D_00264A40);
+                }
+            }
+        } else {
+            id = 0x1C;
+            if (D_002623C8->flags & 8) {
+                id = 0x1E;
+            }
+        }
+        func_00194D30(&D_0026FF68, 0, id);
+        break;
+    }
+    }
+    self->f260 = n;
+    self->f264 = *self->f258;
+    if (n == 2) {
+        func_00148CE0(D_00275710);
+    }
+    self->f268 = (self->f260 != 0);
+}
+
+struct Spec_1E1498 {
+    u8 pad0[0x14];
+    s32 noPoint;
+    u8 pad1[4];
+    s32 prec;
+    u8 pad2[0xC];
+    u8 conv;
+};
+
+extern u8 D_00275940[];
+extern char D_0024E468[];
+extern char D_0024E470[];
+
+void func_001E2138(char* dst, char* src);
+s32 func_001E2100(char* p);
+s32 func_001E1330(double v);
+u8 func_001E13D0(double v, s32 e, s32 i);
+f32 func_00205C78(f32 a, f32 b);
+double func_001FD868(f32 f);
+double func_001FCDE0(double a, double b);
+double func_001FCD20(double a, double b);
+
+union Bits_001E1498 {
+    double d;
+    u64 u;
+};
+
+s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
+{
+    Bits_001E1498 bits;
+    bits.d = v;
+    if ((bits.u & 0x7FF0000000000000UL) == 0x7FF0000000000000UL) {
+        char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? D_0024E468 : D_0024E470;
+        func_001E2138(buf, s);
+        return func_001E2100(buf);
+    }
+    char* out = buf;
+    s32 e = func_001E1330(v);
+    s32 isE = sp->conv == 'e';
+    if (sp->conv == 'g') {
+        if (e < -4 || e >= sp->prec) {
+            isE = 1;
+            sp->prec = sp->prec - 1;
+        }
+    }
+    s32 base = 0;
+    if (isE) base = e;
+    s32 prec = sp->prec;
+    f32 p = func_00205C78(10.0f, (f32)(base - prec));
+    double r = func_001FCD20(v, func_001FCDE0(func_001FD868(p), 0.5));
+    s32 e2 = func_001E1330(r);
+    if (e < func_001E1330(r)) e = e2;
+    s32 n, i;
+    if (isE) {
+        n = 1;
+        i = e;
+    } else if (e >= 0) {
+        i = e;
+        n = e + 1;
+    } else {
+        n = 1;
+        i = 0;
+    }
+    while (n-- > 0) {
+        *out++ = func_001E13D0(r, e, i--);
+    }
+    if (sp->noPoint == 0) {
+        *out++ = '.';
+        n = sp->prec;
+        while (n-- > 0) {
+            *out++ = func_001E13D0(r, e, i--);
+        }
+        if (sp->conv == 'g' && buf < out) {
+            while (buf < out && out[-1] == '0') out--;
+            if (buf < out && out[-1] == '.') out--;
+        }
+    }
+    if (isE) {
+        *out++ = 'e';
+        if (e < 0) {
+            *out++ = '-';
+            e = -e;
+        } else {
+            *out++ = '+';
+        }
+        s32 d = (s32)func_00205C78(10.0f, 2.0f);
+        for (s32 k = 2; k >= 0; k--) {
+            *out++ = D_00275940[e / d];
+            e = (e % d) * 10;
+        }
+    }
+    return out - buf;
 }

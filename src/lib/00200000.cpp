@@ -1429,3 +1429,103 @@ TypeName_200E08* func_00201188(void)
     }
     return &D_00278E80;
 }
+
+// An EE DMA channel's register block (CHCR at 0x00, QWC at 0x20, TADR at 0x30; bit 8 of CHCR
+// is STR), passed in by pointer: CHCR is a hardware register, read again at every use.
+struct DmaChan_202A80 {
+    volatile s32 chcr;
+    u8 pad4[0x1C];
+    s32 qwc;
+    u8 pad24[0xC];
+    u32 tadr;
+};
+
+extern "C" int func_001E1F10(const char* fmt, ...);
+
+void func_00202A80(DmaChan_202A80* ch, u32 tadr)
+{
+    s32 timeout = 0x1000000;
+    while (ch->chcr & 0x100) {
+        if (--timeout < 0) {
+            func_001E1F10("libdma: sync timeout\n");
+            s32 cur = ch->chcr;
+            s32 next;
+            if (((u32)cur >> 8) & 1) {
+                while (((u32)cur >> 8) & 1) {
+                    next = cur & ~0x100;
+                    cur = next;
+                }
+                ch->chcr = next;
+            }
+        }
+    }
+    if (ch->tadr != 0xFFFFFFFF) {
+        ch->tadr = tadr;
+    }
+    ch->qwc = 0;
+    ch->chcr = (ch->chcr & ~0xC) | 0x105;
+}
+
+// The EE DMA channel's register block (CHCR at 0x00, QWC at 0x20; bit 8 of CHCR is STR),
+// passed in by pointer: volatile as a hardware register, which retail re-reads at every use.
+struct DmaChan_202B68 {
+    volatile s32 chcr;
+    u8 pad4[0x1C];
+    s32 qwc;
+};
+
+extern "C" int func_001E1F10(const char* fmt, ...);
+
+void func_00202B68(DmaChan_202B68* ch)
+{
+    s32 timeout = 0x1000000;
+    while (ch->chcr & 0x100) {
+        if (--timeout < 0) {
+            func_001E1F10("libdma: sync timeout\n");
+            s32 cur = ch->chcr;
+            s32 next;
+            if (((u32)cur >> 8) & 1) {
+                while (((u32)cur >> 8) & 1) {
+                    next = cur & ~0x100;
+                    cur = next;
+                }
+                ch->chcr = next;
+            }
+        }
+    }
+    ch->qwc = 0;
+    ch->chcr = ((((ch->chcr & ~0xC) | 0x4) & ~0x1) | 0x100);
+}
+
+// The EE DMA channel's register block (CHCR at 0x00; bit 8 of CHCR is STR), passed in by
+// pointer: volatile as a hardware register, which retail re-reads at every use.
+struct DmaChan_202C38 {
+    volatile s32 chcr;
+};
+
+extern "C" int func_001E1F10(const char* fmt, ...);
+
+s32 func_00202C38(DmaChan_202C38* ch, s32 mode, s32 timeout)
+{
+    if (mode == 1) {
+        return ((u32)ch->chcr >> 8) & 1;
+    }
+    if (timeout == 0) {
+        timeout = 0x1000000;
+    }
+    while (ch->chcr & 0x100) {
+        if (--timeout < 0) {
+            func_001E1F10("libdma: sync timeout\n");
+            s32 cur = ch->chcr;
+            s32 next;
+            if (((u32)cur >> 8) & 1) {
+                while (((u32)cur >> 8) & 1) {
+                    next = cur & ~0x100;
+                    cur = next;
+                }
+                ch->chcr = next;
+            }
+        }
+    }
+    return 0;
+}

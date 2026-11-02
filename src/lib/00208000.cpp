@@ -1109,3 +1109,155 @@ s32 func_002093F0(void)
     }
     return ((Info_2093F0*)D_0062C300)->f0;
 }
+
+struct Outer_20AE40 {
+    s32 f0; s32 f4; s32 f8; s32 pad0C;
+    s64 f10; s64 f18; s64 f20; s64 f28; s64 f30; s64 f38;
+    s32 f40;
+};
+struct Plane_20AE40 { u8 data[0x68]; };
+struct Ring_20AE40 { u8* start; u32 size; u8* head; u8* tail; };
+struct Inner_20AE40 {
+    s32 f00; s32 f04; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; s32 f1C;
+    s32 f20; s32 f24; s32 f28; s32 f2C; s32 f30; s32 f34; s32 f38; s32 f3C;
+    s32 f40; s32 f44; s32 f48; s32 f4C; s32 f50; s32 f54; s32 f58; s32 f5C;
+    s32 f60; s32 f64; s32 f68; s32 f6C; s32 f70; s32 pad74; s64 f78; s32 f80; s32 pad84;
+    s64 f88; s32 f90; s32 f94; s32 f98; s32 f9C; s32 fA0; s32 fA4; s32 fA8; s32 fAC;
+    s32 fB0; s32 fB4; s32 fB8; s32 fBC; s32 fC0; s32 fC4; s32 fC8; s32 fCC;
+    s32 fD0; s32 fD4; s32 fD8; s32 fDC; s32 fE0; s32 fE4; s32 fE8; s32 fEC;
+    s64 fF0; s32 fF8; s32 fFC; s32 f100; s32 f104;
+    Ring_20AE40 ring;
+    u8 pad118[0x1B8 - 0x118];
+    Plane_20AE40* planes[3][4];
+    Plane_20AE40 plane[9];
+    u8 pad590[0x81C - 0x590];
+    s32 f81C;
+    u8 pad820[0x84C - 0x820];
+    s32 f84C;
+    s32 f850;
+    s32 f854;
+    Outer_20AE40* f858;
+};
+
+void* func_001F5C0C(s32 dst, s32 c, u32 n);
+void func_0020B978(Inner_20AE40* a, const char* msg);
+void func_0020B240(Ring_20AE40* r, u8* start, u32 size);
+s32 func_0020B278(Inner_20AE40* a, Ring_20AE40* r, u32 size, u32 align);
+void func_0020B810(Inner_20AE40* a);
+void func_0020B0C0(Outer_20AE40* a);
+s32 func_0020B110(Outer_20AE40* a);
+void func_0020B258(Ring_20AE40* r);
+void func_0020C178(void);
+void func_0020C188(void);
+
+s32 func_0020AE40(Outer_20AE40* out, s32 mem, u32 size)
+{
+    func_001F5C0C(mem, 0, size);
+    Inner_20AE40* in = (Inner_20AE40*)(((u32)(mem + 3) >> 2) << 2);
+    s32 diff = (s32)in - mem;
+    u32 rest = size - diff;
+    if (rest < 0x10C0) {
+        func_0020B978(in, "The size of work area is too small");
+        return 0;
+    }
+    out->f40 = (s32)in;
+    rest -= 0x10C0;
+    func_0020B240(&in->ring, (u8*)in + 0x10C0, rest);
+    out->f0 = 0;
+    out->f4 = 0;
+    out->f8 = 0;
+    out->f10 = -1;
+    out->f18 = -1;
+    out->f20 = 0;
+    out->f28 = -1;
+    out->f30 = -1;
+    out->f38 = 0;
+    in->fB4 = 0;
+    in->fB8 = 0;
+    in->fBC = 0;
+    in->fC0 = 0;
+    in->fC4 = 0;
+    in->fC8 = 0;
+    in->fCC = 0;
+    in->fD0 = 0;
+    in->fD4 = 0;
+    in->fD8 = 0;
+    in->fDC = 0;
+    in->fE0 = 0;
+    in->fE4 = 0;
+    in->fE8 = 0;
+    in->fF8 = 0;
+    in->f0C = 0;
+    in->f14 = 0;
+    in->f2C = 0;
+    in->f34 = 0;
+    in->f3C = 0;
+    in->fF0 = -1;
+    in->f1C = (s32)func_0020C178;
+    in->f24 = (s32)func_0020C188;
+    s32 r278 = func_0020B278(in, &in->ring, 0x600, 8);
+    in->f48 = 0;
+    in->fFC = 0;
+    in->f100 = 0;
+    in->f104 = 0;
+    in->f70 = 0;
+    in->f78 = 0;
+    in->f80 = -1;
+    in->f88 = 0;
+    in->f90 = 0;
+    in->fAC = 0;
+    in->f94 = -1;
+    in->f98 = -1;
+    in->f9C = -1;
+    in->f858 = out;
+    in->f44 = r278;
+    in->fB0 = 1;
+    func_0020B810(in);
+    func_0020B0C0(out);
+    func_0020B110(out);
+    in->planes[0][0] = &in->plane[0];
+    in->planes[0][1] = &in->plane[1];
+    in->planes[0][3] = &in->plane[2];
+    in->planes[1][0] = &in->plane[3];
+    in->planes[1][1] = &in->plane[4];
+    in->planes[1][3] = &in->plane[5];
+    in->planes[2][0] = &in->plane[6];
+    in->planes[2][1] = &in->plane[7];
+    in->planes[2][3] = &in->plane[8];
+    func_0020B258(&in->ring);
+    in->f850 = -1;
+    in->f854 = 0;
+    in->f84C = 0;
+    in->f81C = 0x70003600;
+}
+
+struct Obj_0020B790 {
+    u8 pad000[0x118];
+    s32 f118;
+    s32 f11C;
+    s32 f120;
+    u8 pad124[0x174 - 0x124];
+    s32 f174;
+    u8 pad178[0x1BC - 0x178];
+    s32 f1BC;
+    u8 pad1C0[0x1CC - 0x1C0];
+    s32 f1CC;
+    u8 pad1D0[0x1DC - 0x1D0];
+    s32 f1DC;
+};
+
+void func_0020B978(struct Obj_0020B790 *self, const char *msg);
+void func_00210970(struct Obj_0020B790 *self, s32 a1, s32 a2);
+void func_00210A80(struct Obj_0020B790 *self, s32 a1, s32 a2, s32 a3);
+
+void func_0020B790(struct Obj_0020B790 *self)
+{
+    s32 n = self->f118;
+    if (self->f120 != 0)
+        func_0020B978(self, "the second field is missing");
+    else if (self->f174 == 3)
+        func_00210970(self, self->f1BC, n - 1);
+    else
+        func_00210A80(self, self->f1CC, self->f1DC, n - 1);
+    self->f120 = 0;
+}

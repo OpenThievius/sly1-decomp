@@ -961,3 +961,198 @@ void func_001FF518(Obj_1FF518* self)
     self->f0 = acc.lo;
     self->f4 = acc.hi;
 }
+
+struct Cie_1FF740;
+
+struct Fde_1FF740 {
+    s32 length;
+    s32 cieOffset;
+    Cie_1FF740* Cie()
+    {
+        return (Cie_1FF740*)((char*)&cieOffset - cieOffset);
+    }
+};
+
+struct Cie_1FF740 {
+    s32 length;
+    s32 id;
+    s8 version;
+    char augmentation[1];
+};
+
+struct __attribute__((packed)) Unaligned_1FF740 {
+    s32 v;
+};
+
+struct Info_1FF740 {
+    char *augmentation;
+    s32 ehPtr;
+    s32 codeAlign;
+    s32 dataAlign;
+    s32 raReg;
+};
+
+s32 func_001F6738(const char *a, const char *b);
+s32 func_001E2100(const char *s);
+u8 *func_001FF048(u8 *p, s32 *out);
+u8 *func_001FF090(u8 *p, s32 *out);
+
+u8 *func_001FF740(struct Fde_1FF740 *fde, struct Info_1FF740 *info) {
+    struct Cie_1FF740 *cie = fde->Cie();
+    u8 *p;
+    s32 len;
+
+    info->augmentation = cie->augmentation;
+    if (func_001F6738(cie->augmentation, "") != 0 &&
+        func_001F6738(info->augmentation, "eh") != 0 &&
+        info->augmentation[0] != 'z') {
+        return 0;
+    }
+    p = (u8 *)info->augmentation + func_001E2100(info->augmentation) + 1;
+    if (func_001F6738(info->augmentation, "eh") == 0) {
+        info->ehPtr = ((struct Unaligned_1FF740 *)p)->v;
+        p += 4;
+    } else {
+        info->ehPtr = 0;
+    }
+    p = func_001FF048(p, &info->codeAlign);
+    p = func_001FF090(p, &info->dataAlign);
+    info->raReg = *p++;
+    if (info->augmentation[0] == 'z') {
+        p = func_001FF048(p, &len);
+        p += len;
+    }
+    return p;
+}
+
+struct RuleSet_1FF848 {
+    u8 pad0[8];
+    s64 cfaOffset;
+    s64 cfaReg;
+    s64 value[0x50];
+    u16 retColumn;
+    u8 pad29A[2];
+    u8 how[0x54];
+    struct RuleSet_1FF848 *saved;
+    u8 pad2F4[4];
+};
+
+struct Cie_1FF848 {
+    u8 pad0[8];
+    s32 codeAlign;
+    s32 dataAlign;
+};
+
+struct __attribute__((packed)) U16_1FF848 {
+    u16 v;
+};
+
+struct __attribute__((packed)) U32_1FF848 {
+    u32 v;
+};
+
+u8 *func_001FF048(u8 *p, u32 *out);
+void func_002014D0(void);
+struct RuleSet_1FF848 *func_0018D740(u32 size);
+void func_0018D750(struct RuleSet_1FF848 *p);
+
+u8 *func_001FF848(u8 *p, struct RuleSet_1FF848 *rs, struct Cie_1FF848 *cie, u32 *pc) {
+    s32 offset;
+    u32 reg;
+    u32 reg2;
+    u8 op = *p++;
+
+    if (op & 0x40) {
+        *pc += (op & 0x3F) * cie->codeAlign;
+    } else if (op & 0x80) {
+        reg = op & 0x3F;
+        p = func_001FF048(p, (u32 *)&offset);
+        offset *= cie->dataAlign;
+        rs->how[reg] = 1;
+        rs->value[reg] = offset;
+    } else if (op & 0xC0) {
+        reg = op & 0x3F;
+        rs->how[reg] = 0;
+    } else {
+        switch (op) {
+        case 0:
+            break;
+        case 1:
+            *pc = ((struct U32_1FF848 *)p)->v;
+            p += 4;
+            break;
+        case 2:
+            *pc += *p;
+            p += 1;
+            break;
+        case 3:
+            *pc += ((struct U16_1FF848 *)p)->v;
+            p += 2;
+            break;
+        case 4:
+            *pc += ((struct U32_1FF848 *)p)->v;
+            p += 4;
+            break;
+        case 5:
+            p = func_001FF048(p, &reg);
+            p = func_001FF048(p, (u32 *)&offset);
+            offset *= cie->dataAlign;
+            rs->how[reg] = 1;
+            rs->value[reg] = offset;
+            break;
+        case 6:
+            p = func_001FF048(p, &reg);
+            rs->how[reg] = 0;
+            break;
+        case 7:
+        case 8:
+            break;
+        case 9:
+            p = func_001FF048(p, &reg);
+            p = func_001FF048(p, &reg2);
+            rs->how[reg] = 2;
+            rs->value[reg] = reg2;
+            break;
+        case 12:
+            p = func_001FF048(p, &reg);
+            p = func_001FF048(p, (u32 *)&offset);
+            rs->retColumn = reg;
+            rs->cfaOffset = offset;
+            break;
+        case 13:
+            p = func_001FF048(p, &reg);
+            rs->retColumn = reg;
+            break;
+        case 14:
+            p = func_001FF048(p, (u32 *)&offset);
+            rs->cfaOffset = offset;
+            break;
+        case 10: {
+            struct RuleSet_1FF848 *copy = func_0018D740(sizeof(struct RuleSet_1FF848));
+            *copy = *rs;
+            rs->saved = copy;
+            break;
+        }
+        case 11: {
+            struct RuleSet_1FF848 *copy = rs->saved;
+            *rs = *copy;
+            func_0018D750(copy);
+            break;
+        }
+        case 45:
+            for (reg = 16; reg < 32; reg++) {
+                rs->how[reg] = 1;
+                rs->value[reg] = (reg - 16) * 4;
+            }
+            break;
+        case 46:
+            p = func_001FF048(p, (u32 *)&offset);
+            rs->cfaReg = offset;
+            break;
+        default:
+            func_002014D0();
+            break;
+        }
+    }
+    return p;
+}
