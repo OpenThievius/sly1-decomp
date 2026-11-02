@@ -1482,3 +1482,16 @@ void func_001E9B30(void) {
         D_00275C34 = 1;
     }
 }
+
+
+s32 func_001EAA70(s32 a, s32 b)
+{
+    if (a == b) {
+        return a;
+    }
+    s32 r = (s32)(u32)func_001F6708();
+    s32 span = b - a + 1;
+    r = r % 0x95675;
+    r = r % span;
+    return a + r;
+}

@@ -2214,3 +2214,41 @@ void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
     D_0025C388 = 1;
     func_001F8290((Ctx_0011D2A8*)D_0027B4F0, 3, 1, ((Pair_11D2A8*)&D_00260E40), 8, ((u32*)&D_00260E00), 4, 0, 0);
 }
+
+extern s32 D_0062C59C;
+extern u8* D_0027B310;
+
+s32 func_0011C9E0(u32 offset)
+{
+    u32 n = 12;
+    u8* p = D_0027B310 + (offset - D_0062C59C) / n;
+    s32 v = *p + 1;
+    *p = v;
+    return v;
+}
+
+struct Table_0011CA20 {
+    s32 pad_00;
+    u32 origin;
+};
+
+extern u8* D_0027B310;
+
+void func_001B5F28(Table_0011CA20* t, u8* item);
+
+void func_0011CA20(u8* p)
+{
+    Table_0011CA20* t = (Table_0011CA20*)((u8*)&D_0062C598);
+    u32 index = ((u32)p - t->origin) / 12;
+    u8* cell = D_0027B310 + index;
+    *cell = (u8)(*cell - 1);
+    if (*cell != 0) {
+        return;
+    }
+    func_001B5F28(t, p);
+}
+
+s32 func_0011E538(s32 a0)
+{
+    return (a0 * 0x5F4) / 0x2E5;
+}

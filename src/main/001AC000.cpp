@@ -584,9 +584,9 @@ void func_001AA8C0(void* self, f32 v);
 void func_001AA8B8(void* self, f32 v);
 void* func_0015C1C0(s32 k);
 void func_001AA788(void* self, f32 v);
-s32 func_001AEA08(void);
 extern u8 D_002744AC[];
 
+s8 func_001AEA08(void);
 void func_001AE758(Obj_1AE758* self)
 {
     f32 k = 0.25f;
@@ -793,7 +793,6 @@ void func_00137238(void* out, f32 x, f32 y);
 void func_00137248(void* out, s32* value);
 void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
-s32 func_001AEA08(void);
 void* func_00160B28(void* p);
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 void func_0015C8B8(void* handle, f32 a, f32 b);
@@ -1407,4 +1406,20 @@ void func_001AD1E8(Self_1AD1E8* self, s32 idx)
     if (c)
         func_001E1FD0((Buf_1AD1E8*)d, D_0024CEC0, (a || b) ? ((char*)&D_0024CE18) : ((char*)&D_0024CD68), s1->f440, c);
     ((void (*)(Self_1AD1E8*, char*))self->vtbl[8])(self, buf);
+}
+
+struct Table_001AEA08 {
+    s32 pad_00;
+};
+
+extern f32 D_00261868;
+extern s8* D_002744B0;
+
+u32 func_001E2100(Table_001AEA08* t);
+
+s8 func_001AEA08(void)
+{
+    s32 scaled = (s32)(D_00261868 * 5.0f);
+    u32 divisor = func_001E2100((Table_001AEA08*)D_002744B0);
+    return D_002744B0[(u32)scaled % divisor];
 }

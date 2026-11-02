@@ -1274,3 +1274,35 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     func_001EE3F0(pkt, D_00001368);
     func_001EE3F0(pkt, D_00000ED8);
 }
+
+struct Frame_161278 {
+    u8 pad0[0xC];
+    u32 fC;
+    u8 pad10[0xC];
+    u32* f1C;
+    u32 f20;
+    u32 f24;
+};
+
+void func_00161278(Frame_161278* f, s32 n)
+{
+    if (f->f1C == 0)
+        return;
+    u32 q = f->f24 / f->f20;
+    u32 a2 = f->fC;
+    if (a2 & 0xF) {
+        f->fC = a2 + 8;
+        *(u64*)a2 = 0;
+    }
+    u32* p = f->f1C;
+    u32 w;
+    if (n) {
+        w = *p;
+        w |= 0x8000;
+    } else {
+        w = *p;
+    }
+    w |= q;
+    *p = w;
+    f->f1C = 0;
+}

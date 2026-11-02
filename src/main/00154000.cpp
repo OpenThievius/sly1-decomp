@@ -652,3 +652,20 @@ void func_00157320(Self_157320* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157
     }
     }
 }
+
+struct Span_00156FC8 {
+    f32 lo;
+    f32 hi;
+};
+
+struct Slot_00156FC8 {
+    s32 count;
+    f32 step;
+    f32 rate;
+    f32 phase;
+    f32 out10;
+};
+
+f32 func_001EA408(f32 x);
+f32 func_001EAAE0(f32 a, f32 b);
+void func_00156FC8(s32 n, Span_00156FC8* span, s32 k, Slot_00156FC8* out) { if (n > 0) { out->count = n < k ? n : k; } else { out->count = k; } s32 steps = k - 1; steps += out->count; steps = steps / out->count; f32 w = func_001EA408(span->hi - span->lo); f32 rate = 6.2831855f / (f32)out->count; f32 step = w / (f32)steps; out->rate = rate; out->step = step; out->phase = span->lo + step * 0.5f; out->out10 = func_001EAAE0(0.0f, 6.2831855f); }

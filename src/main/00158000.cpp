@@ -1334,3 +1334,136 @@ void func_00159F48(Obj_159F48* self, s32 mode, s32 a2, s32 a3, Obj_159F48* a4, s
         return;
     }
 }
+
+typedef int V128_15B128 __attribute__((mode(TI)));
+
+struct Self_15B128 {
+    u8 pad[1];
+};
+
+struct Node_15B128 {
+    s32 flag;
+    Node_15B128* next;
+};
+
+extern f32 D_00261858[];
+
+void func_001B93F8(Self_15B128* self);
+void func_0015B7B8(Self_15B128* self, s32 mode);
+s32 func_0015BEF0(Self_15B128* self);
+s32 func_0015BD48(Self_15B128* self, V128_15B128* out);
+void func_0015BC78(Self_15B128* self);
+s32 func_0015C0A0(Self_15B128* self);
+s32 func_0015BFC0(Self_15B128* self);
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+#define S32(o) (*(s32*)((u8*)self + (o)))
+#define F32(o) (*(f32*)((u8*)self + (o)))
+
+void func_0015B128(Self_15B128* self)
+{
+    func_001B93F8(self);
+    if (F32(0x55C) <= D_00261858[1]) {
+        s32 a1 = S32(0x554);
+        switch (a1) {
+        case 0:
+        case 3:
+            func_0015B7B8(self, -1);
+            a1 = 0;
+            break;
+        case 1:
+            a1 = 2;
+            break;
+        case 5:
+            a1 = func_0015BEF0(self);
+            break;
+        case 6:
+            a1 = 0;
+            break;
+        default:
+            break;
+        }
+        func_0015B7B8(self, a1);
+    }
+    s32 st = S32(0x554);
+    switch (st) {
+    case 0:
+    case 3:
+    case 5: {
+        s32 sub = S32(0x550);
+        switch (sub) {
+        case 0:
+            if (S32(0x5E4) == 0) {
+                func_001BFCD8(0x41, (u8*)self + 0x5E4, (s32)self, 0, 700.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+            S32(0x568) = (S32(0x568) + 1) % S32(0x564);
+            break;
+        case 1:
+            if (st == 0) {
+                if (F32(0x688) <= D_00261858[1]) {
+                    V128_15B128 tmp;
+                    if (func_0015BD48(self, &tmp)) {
+                        *(V128_15B128*)((u8*)self + 0x5F0) = tmp;
+                        func_0015B7B8(self, 5);
+                    } else {
+                        F32(0x688) = D_00261858[1] + func_001EAAE0(F32(0x63C), F32(0x640));
+                    }
+                }
+            }
+            if (F32(0x648) <= D_00261858[1]) {
+                s32 n = S32(0x564);
+                if (n >= 2) {
+                    s32 v = S32(0x568) + S32(0x68C);
+                    S32(0x568) = v;
+                    if (v >= n) {
+                        S32(0x568) = n - 2;
+                        S32(0x68C) = -1;
+                    } else if (v < 0) {
+                        S32(0x568) = 1;
+                        S32(0x68C) = 1;
+                    }
+                    F32(0x648) = D_00261858[1] + F32(0x644);
+                }
+            }
+            break;
+        }
+        if (0.15f < D_00261858[1] - F32(0x558)) {
+            Node_15B128* n = **(Node_15B128***)((u8*)self + 0x480);
+            if (n != 0) {
+                for (; n != 0; n = n->next) {
+                    if (n->flag != 0) {
+                        F32(0x55C) = D_00261858[1];
+                        break;
+                    }
+                }
+            }
+        }
+        break;
+    }
+    case 6:
+        if (func_0015C0A0(self) || func_0015BFC0(self)) {
+            func_0015B7B8(self, 0);
+        } else if (F32(0x668) <= D_00261858[1]) {
+            s32 idx = (S32(0x568) + 1) % S32(0x5AC);
+            S32(0x568) = idx;
+            F32(0x668) = D_00261858[1];
+            f32 x, y;
+            if (idx == 0) {
+                x = F32(0x660);
+                y = F32(0x664);
+            } else {
+                x = F32(0x658);
+                y = F32(0x65C);
+            }
+            F32(0x668) += func_001EAAE0(x, y);
+        }
+        break;
+    }
+    if (S32(0x550) == 1) {
+        s32 s = S32(0x554);
+        if (s == 0 || s == 5) {
+            func_0015BC78(self);
+        }
+    }
+}

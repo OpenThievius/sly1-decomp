@@ -1959,3 +1959,41 @@ void func_001B7638(struct Node_1B7638 *self) {
     }
     self->fieldC14->f2F0 = f;
 }
+
+struct Lo_1B4FC0 { s32 v; };
+struct Pad_1B4FC0 { s32 v; };
+struct Cfg_1B4FC0 { u8 pad0[0x20]; s32 f20; };
+struct Self_1B4FC0 {
+    u8 pad0[0x10];
+    Pad_1B4FC0 f10;
+    Cfg_1B4FC0* f14;
+    s32 f18;
+    u8 pad1C[0x10];
+    f32 f2C;
+    f32 f30;
+    f32 f34;
+};
+
+s32 func_001EAA70(Lo_1B4FC0 lo, s32 hi);
+void func_001B46E0(Pad_1B4FC0* p, s32 rem);
+f32 func_001EAAE0(f32 a, f32 b);
+
+void func_001B4FC0(Self_1B4FC0* self, f32 x)
+{
+    Cfg_1B4FC0* p = self->f14;
+    if (p == 0)
+        return;
+    s32 count = p->f20;
+    if (count < 2)
+        return;
+    if (0.0f < self->f34) {
+        self->f34 = self->f34 - x;
+        return;
+    }
+    Lo_1B4FC0 lo;
+    lo.v = 1;
+    s32 v = func_001EAA70(lo, count - 1);
+    s32 rem = (self->f18 + v) % self->f14->f20;
+    func_001B46E0(&self->f10, rem);
+    self->f34 = func_001EAAE0(self->f2C, self->f30);
+}

@@ -1715,3 +1715,202 @@ void func_001A8AF8(Self_1A8AF8* self)
         self->node->f10 = s5;
     }
 }
+
+struct Rec_001A89E8 {
+    s32 f00;
+    s32 f04;
+    s32* f08;
+    s32 f0C;
+    s32 f10;
+};
+
+struct Self_001A89E8 {
+    u8 pad0[0x34];
+    s32 f34;
+    Rec_001A89E8* f38;
+    s32 f3C;
+    s32 f40;
+    s32 f44;
+};
+
+s32 func_001A88A0(Self_001A89E8* self, s32 item);
+
+void func_001A89E8(Self_001A89E8* self)
+{
+    s32 i;
+    s32 pos;
+    s32 k;
+
+    if (self->f34 == 0) {
+        return;
+    }
+    i = 1;
+    pos = (self->f44 + 1) % self->f34;
+    if (!(i < self->f34)) {
+        return;
+    }
+    do {
+        Rec_001A89E8* rec = &self->f38[pos];
+        if ((rec->f10 & 2) != 0) {
+            for (k = 0; k < rec->f04; k++) {
+                if (func_001A88A0(self, rec->f08[k]) != 0) {
+                    goto found;
+                }
+            }
+        }
+        pos = (pos + 1) % self->f34;
+        i++;
+    } while (i < self->f34);
+found:
+    if (i < self->f34) {
+        self->f44 = pos;
+    }
+}
+
+struct Font_1AB980
+{
+    u8 pad0[8];
+    s32 n;
+    u8 padC[0x3C];
+    f32 scale;
+};
+struct Clock_1AB980;
+typedef void (*Cb_1AB980)(Clock_1AB980* self, s32 arg);
+struct Clock_1AB980
+{
+    u8 pad0[4];
+    Font_1AB980* font;
+    char buf[0x204];
+    f32 size;
+    u8 pad210[0x50];
+    s32 mode;
+    f32 start;
+    f32 time;
+    f32 rate;
+    s32 lastSec;
+    s32 lastTenth;
+    f32 warn;
+    u8 pad27C[4];
+    Cb_1AB980 onWarn;
+    s32 warned;
+    f32 limit;
+    Cb_1AB980 onEnd;
+};
+struct Clock_00261858 { s32 on; f32 now; f32 wait; };
+
+extern f32 D_0024CD6C;
+extern char D_0024CD50[];
+extern char D_0024CD60[];
+extern char D_0024CD68[];
+
+void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001ABE20(Clock_1AB980* self, s32 state);
+s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
+void func_0015C8B8(Font_1AB980* h, f32 a, f32 b);
+f32 func_0015C418(Font_1AB980* h, char* buf);
+void func_001AAB20(Clock_1AB980* self, f32 x, f32 y);
+void func_0015C900(Font_1AB980* h);
+
+void func_001AB980(Clock_1AB980* self, f32 dt)
+{
+    f32 t = __builtin_fabsf(self->time);
+    s32 sec = (s32)t;
+    s32 hund = (s32)(t * 10.0f);
+    s32 tenth = (s32)((t - (f32)sec) * 10.0f);
+
+    if (self->mode == 2)
+    {
+        f32 rate = self->rate;
+        if (rate != 0.0f)
+        {
+            if (rate < 0.0f && 0.0f <= self->time && self->time < 10.0f)
+            {
+                if (tenth != self->lastTenth)
+                {
+                    if (tenth == 9)
+                        func_001BFCD8(0x7E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                    else if (tenth == 4)
+                        func_001BFCD8(0x7F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                }
+            }
+            else if (sec != self->lastSec)
+            {
+                func_001BFCD8((sec & 1) ? 0x72 : 0x73, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+        }
+    }
+    self->lastTenth = tenth;
+    self->lastSec = sec;
+
+    if ((*(Clock_00261858*)&D_00261858).on != 0 && self->mode == 2 && (*(s32*)D_00262C68 & 2))
+    {
+        s32 warn = 0;
+        s32 end = 0;
+        f32 rate = self->rate;
+        self->time = self->time + dt * rate;
+        if (rate < 0.0f)
+        {
+            if (self->warn != D_0024CD6C && self->time <= self->warn)
+                warn = 1;
+            if (self->time <= self->limit)
+                end = 1;
+        }
+        else if (rate > 0.0f)
+        {
+            if (self->warn != D_0024CD6C && self->warn <= self->time)
+                warn = 1;
+            if (self->time >= self->limit)
+                end = 1;
+        }
+        if (warn && self->warned == 0)
+        {
+            self->warned = 1;
+            if (self->onWarn != 0)
+                self->onWarn(self, 0);
+        }
+        if (end)
+        {
+            self->time = self->limit;
+            func_001BFCD8(1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            func_001ABE20(self, 0);
+            if (self->onEnd != 0)
+                self->onEnd(self, 1);
+        }
+        t = __builtin_fabsf(self->time);
+    }
+
+    s32 show = 0;
+    s32 tenths = 0;
+    s32 hi;
+    s32 lo;
+    s32 sep;
+    s32 h;
+    if (t < 10.0f && (h = (s32)(t * 10.0f)) != hund)
+    {
+        hi = h / 10;
+        lo = h % 10;
+        sep = '.';
+        tenths = 1;
+        show = 1;
+    }
+    else
+    {
+        s32 s = (s32)t;
+        if (s != sec || (self->mode == 1 && (*(Clock_00261858*)&D_00261858).now - self->start <= (*(Clock_00261858*)&D_00261858).wait))
+        {
+            hi = s / 60;
+            lo = s % 60;
+            sep = ':';
+            show = 1;
+        }
+    }
+    if (show)
+    {
+        func_001E20B8(self->buf, 0x200, D_0024CD50, 0x54, hi, sep, (lo < 10 && !tenths) ? D_0024CD60 : D_0024CD68, lo);
+        func_0015C8B8(self->font, self->size, self->size);
+        f32 w = func_0015C418(self->font, self->buf);
+        Font_1AB980* f = self->font;
+        func_001AAB20(self, w, (f32)f->n * f->scale);
+        func_0015C900(self->font);
+    }
+}
