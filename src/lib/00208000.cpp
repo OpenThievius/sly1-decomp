@@ -1031,3 +1031,81 @@ s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
     }
     return 1;
 }
+
+struct Req_2093F0 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+};
+struct Sema_2093F0 {
+    u8 pad00[0x24];
+    s32 f24;
+};
+struct Info_2093F0 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+};
+
+extern s32 D_0027AECC;
+extern u8 D_0062ADC0[];
+extern u8 D_0024FFA0[];
+extern u8 D_0024FFB8[];
+extern u8 D_0024FFE0[];
+
+s32 func_001F6B20(Req_2093F0* r);
+void func_00209B80(s32 a, s32 b, s32 c);
+void func_001F6B60(s32 sema);
+void func_001F7BE8(s32 a);
+s32 func_001F80C0(Sema_2093F0* p, u32 flags, s32 z);
+void func_001E1F10(u8* msg);
+s32 func_001F8290(Sema_2093F0* p, s32 a1, s32 a2, u8* a3, s32 a4, Info_2093F0* a5, s32 a6, s32 a7, s32 a8);
+void func_001F6B40(s32 sema);
+
+s32 func_002093F0(void)
+{
+    if (D_0027AECC < 0) {
+        Req_2093F0 req;
+        req.f14 = 0;
+        req.f08 = 1;
+        req.f04 = 1;
+        D_0027AECC = func_001F6B20(&req);
+    }
+    func_00209B80(0, 0, 0);
+    func_001F6B60(D_0027AECC);
+    func_001F7BE8(0);
+    for (;;) {
+        if (func_001F80C0((Sema_2093F0*)D_0062AD40, 0x80000400, 0) < 0) {
+            func_001E1F10(D_0024FFA0);
+            for (;;) {
+            }
+        }
+        if (((Sema_2093F0*)D_0062AD40)->f24 != 0) {
+            break;
+        }
+        for (s32 i = 0x100000; i != 0; i--) {
+        }
+    }
+    s32 r = func_001F8290((Sema_2093F0*)D_0062AD40, 0xFE, 0, D_0062ADC0, 0x30, (Info_2093F0*)D_0062C300, 0xC, 0, 0);
+    func_001F6B40(D_0027AECC);
+    if (r < 0) {
+        ((Sema_2093F0*)D_0062AD40)->f24 = 0;
+        return r - 100;
+    }
+    if (((Info_2093F0*)D_0062C300)->f4 < 0x20A) {
+        func_001E1F10(D_0024FFB8);
+        ((Sema_2093F0*)D_0062AD40)->f24 = 0;
+        return -0x78;
+    }
+    if (((Info_2093F0*)D_0062C300)->f8 < 0x20E) {
+        func_001E1F10(D_0024FFE0);
+        ((Sema_2093F0*)D_0062AD40)->f24 = 0;
+        return -0x79;
+    }
+    return ((Info_2093F0*)D_0062C300)->f0;
+}
