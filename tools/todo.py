@@ -34,8 +34,9 @@ What stops a function from being matched, the blocker column:
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: residue the
   assembler left after a return, or a tail call; no C function can produce it
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
-- nonc: max.s, min.s: no plain C form in this compiler (sqrt.s is: __builtin_sqrtf; and
-  `break 0, 7` after a division is the compiler's divide-by-zero trap, not system code)
+- nonc: max.s, min.s, or a bare sqrt.s: no plain C form with the file's flags. A sqrt.s with
+  the NaN check after it (c.eq.s and a call to sqrtf) is __builtin_sqrtf, plain C; and
+  `break 0, 7` after a division is the compiler's divide-by-zero trap, not system code
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
 - jtbl: a jump table; write the switch in C (the table stays retail's, tools/rodata.py)
@@ -68,7 +69,9 @@ SAVE64 = re.compile(r"^sd\s+\$(ra|s\d|fp)\b")
 VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
 SYSTEM = {"syscall", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "eret", "ei", "di", "break"}
 DIVIDE_TRAP = "0, 7"  # `break 0, 7` after a division: the compiler's divide-by-zero trap, plain C
-NONC = {"max.s", "min.s"}  # no plain C form in this compiler (sqrt.s is __builtin_sqrtf)
+NONC = {"max.s", "min.s"}  # no plain C form in this compiler
+# sqrt.s is plain C only with the NaN check __builtin_sqrtf emits after it (c.eq.s, then a call to
+# sqrtf for errno); a bare sqrt.s needs other flags than the file's, so it blocks like the above.
 MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu1|madd1|maddu1|mfsa|mtsa)")
 
 
@@ -189,8 +192,14 @@ def tags_of(lines, kind):
             tags.add("float")
         if op in NONC:
             tags.add("nonc")
+        if op == "sqrt.s":
+            tags.add("sqrt")
         if MMI.match(op) and op != "pref":
             tags.add("mmi")
+    if "sqrt" in tags:
+        tags.discard("sqrt")
+        if not any(l.split() and l.split()[0] == "c.eq.s" for l in lines):
+            tags.add("nonc")
     if "calls" not in tags:
         tags.add("leaf")
     return tags

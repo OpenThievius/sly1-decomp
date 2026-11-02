@@ -319,7 +319,9 @@ class SystemEvidenceTest(unittest.TestCase):
     def test_the_divide_trap_and_sqrt_do_not_block(self):
         self.assertNotIn("system", todo.tags_of(["div $zero, $a0, $a1", "break 0, 7", "mflo $v0", "jr $ra"], "code"))
         self.assertIn("system", todo.tags_of(["break 1023, 1023", "jr $ra"], "code"))
-        self.assertNotIn("nonc", todo.tags_of(["sqrt.s $f0, $f12", "jr $ra"], "code"))
+        checked = ["sqrt.s $f0, $f12", "c.eq.s $f0, $f0", "bc1t .L1", "jal sqrtf", "jr $ra"]
+        self.assertNotIn("nonc", todo.tags_of(checked, "code"))
+        self.assertIn("nonc", todo.tags_of(["sqrt.s $f0, $f12", "jr $ra"], "code"))
 
 
 class OriginalAsmTableTest(unittest.TestCase):
