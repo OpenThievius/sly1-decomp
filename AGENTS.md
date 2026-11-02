@@ -68,8 +68,11 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   own, not a masked comparison, not a model's claim. Report exactly what you ran and what it
   printed.
 - **Plain C++.** No inline assembly in functions, no register pins, no artificial barriers.
-  `volatile` is one only where it stops the compiler: it is allowed for a hardware register
-  (an access to a fixed address such as `*(volatile u32*)0x10002010`), which is what it is for.
+  `volatile` is one only where it stops the compiler. It is allowed where it is what the
+  original had: a hardware register, at a fixed address (`*(volatile u32*)0x10002010`) or
+  through a pointer to a register block (a DMA channel's), and data shared with hardware, an
+  interrupt handler or another thread (a library's semaphore ids and state flags, a field an
+  interrupt handler sets), where retail's code reads and writes it as volatile.
   `do { } while (0)` is one too, except in the math library's bit-access macros
   (`FLOAT_TO_BITS`, `BITS_TO_FLOAT`, and `DOUBLE_TO_WORDS`, `WORDS_TO_DOUBLE`, `DOUBLE_HIGH`,
   `SET_DOUBLE_HIGH` for a double's words, in include/float_bits.h): retail's math library was
