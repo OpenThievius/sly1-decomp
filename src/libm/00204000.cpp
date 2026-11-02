@@ -638,3 +638,274 @@ f32 func_00206298(f32 x)
         return 2.0f * (head + (ratio * root + tail));
     }
 }
+
+f32 func_002052F8(f32 x);
+f32 func_00208068(f32 x);
+
+f32 func_002066C8(f32 x)
+{
+    s32 hx;
+    FLOAT_TO_BITS(hx, x);
+    s32 ix = hx & 0x7FFFFFFF;
+    f32 t, w, p, q, s, r, c;
+    if (ix == 0x3F800000) {
+        return x * 1.57079625129699707f + x * 7.5497894159e-08f;
+    }
+    if (ix > 0x3F800000) {
+        return (x - x) / (x - x);
+    }
+    if (ix < 0x3F000000) {
+        if (ix < 0x32000000) {
+            if (1.0e30f + x > 1.0f) {
+                return x;
+            }
+        } else {
+            t = x * x;
+        }
+        p = t * (0.16666667163372040f + t * (-0.32556581497192383f + t * (0.20121252536773682f + t * (-0.040055535733699799f + t * (7.9153501428663731e-04f + t * 3.4793309169013e-05f)))));
+        q = 1.0f + t * (-2.4033949375152588f + t * (2.0209457874298096f + t * (-0.68828397989273071f + t * 0.07703815400600433f)));
+        w = p / q;
+        return x + x * w;
+    }
+    w = 1.0f - func_002052F8(x);
+    t = w * 0.5f;
+    p = t * (0.16666667163372040f + t * (-0.32556581497192383f + t * (0.20121252536773682f + t * (-0.040055535733699799f + t * (7.9153501428663731e-04f + t * 3.4793309169013e-05f)))));
+    q = 1.0f + t * (-2.4033949375152588f + t * (2.0209457874298096f + t * (-0.68828397989273071f + t * 0.07703815400600433f)));
+    s = func_00208068(t);
+    if (ix >= 0x3F79999A) {
+        w = p / q;
+        t = 1.57079625129699707f - (2.0f * (s + s * w) - 7.5497894159e-08f);
+    } else {
+        s32 sb;
+        FLOAT_TO_BITS(sb, s);
+        sb &= 0xFFFFF000;
+        BITS_TO_FLOAT(w, sb);
+        c = (t - w * w) / (s + w);
+        r = p / q;
+        p = 2.0f * s * r - (7.5497894159e-08f - 2.0f * c);
+        q = 0.78539818525314331f - 2.0f * w;
+        t = 0.78539818525314331f - (p - q);
+    }
+    if (hx > 0) {
+        return t;
+    }
+    return -t;
+}
+
+extern const f32 D_0024FA50[];
+extern const f32 D_0024FA58[];
+extern const f32 D_0024FA60[];
+
+f32 func_00208068(f32 x);
+f32 func_002052F8(f32 x);
+f32 func_00209260(f32 x, s32 n);
+
+f32 func_002073F8(f32 x, f32 y)
+{
+    f32 z, ax, z_h, z_l, p_h, p_l;
+    f32 y1, t1, t2, r, s, t, u, v, w;
+    s32 i, j, k, yisint, n;
+    s32 hx, hy, ix, iy, is;
+
+    FLOAT_TO_BITS(hx, x);
+    FLOAT_TO_BITS(hy, y);
+    ix = hx & 0x7fffffff;
+    iy = hy & 0x7fffffff;
+
+    if (iy == 0) {
+        return 1.0f;
+    }
+    if (ix > 0x7f800000 || iy > 0x7f800000) {
+        return x + y;
+    }
+
+    yisint = 0;
+    if (hx < 0) {
+        if (iy > 0x4b7fffff) {
+            yisint = 2;
+        } else if (iy > 0x3f7fffff) {
+            k = (iy >> 23) - 0x7f;
+            j = iy >> (23 - k);
+            if ((j << (23 - k)) == iy) {
+                yisint = 2 - (j & 1);
+            }
+        }
+    }
+
+    if (iy == 0x7f800000) {
+        if (ix == 0x3f800000) {
+            return y - y;
+        } else if (ix > 0x3f800000) {
+            return (hy >= 0) ? y : 0.0f;
+        } else {
+            return (hy < 0) ? -y : 0.0f;
+        }
+    }
+    if (iy == 0x3f800000) {
+        if (hy < 0) {
+            return 1.0f / x;
+        }
+        return x;
+    }
+    if (hy == 0x40000000) {
+        return x * x;
+    }
+    if (hy == 0x3f000000 && hx >= 0) {
+        return func_00208068(x);
+    }
+
+    ax = func_002052F8(x);
+    if (ix == 0x7f800000 || ix == 0 || ix == 0x3f800000) {
+        z = ax;
+        if (hy < 0) {
+            z = 1.0f / z;
+        }
+        if (hx < 0) {
+            if (((ix - 0x3f800000) | yisint) == 0) {
+                z = (z - z) / (z - z);
+            } else if (yisint == 1) {
+                z = -z;
+            }
+        }
+        return z;
+    }
+
+    if (((((u32)hx >> 31) - 1) | yisint) == 0) {
+        return (x - x) / (x - x);
+    }
+
+    if (iy > 0x4d000000) {
+        if (ix < 0x3f7ffff8) {
+            return (hy < 0) ? 1.0e30f * 1.0e30f : 1.0e-30f * 1.0e-30f;
+        }
+        if (ix > 0x3f800007) {
+            return (hy > 0) ? 1.0e30f * 1.0e30f : 1.0e-30f * 1.0e-30f;
+        }
+        t = x - 1.0f;
+        w = (t * t) * (0.5f - t * (0.333333343f - t * 0.25f));
+        u = 1.44268798828125f * t;
+        v = t * 7.05260754e-06f - w * 1.44269502f;
+        t1 = u + v;
+        FLOAT_TO_BITS(is, t1);
+        is &= 0xfffff000;
+        BITS_TO_FLOAT(t1, is);
+        t2 = v - (t1 - u);
+    } else {
+        f32 s2, s_h, s_l, t_h, t_l;
+        n = 0;
+        if (ix < 0x800000) {
+            ax *= 16777216.0f;
+            n -= 24;
+            FLOAT_TO_BITS(ix, ax);
+        }
+        n += (ix >> 23) - 0x7f;
+        j = ix & 0x7fffff;
+        ix = j | 0x3f800000;
+        if (j <= 0x1cc471) {
+            k = 0;
+        } else if (j < 0x5db3d7) {
+            k = 1;
+        } else {
+            k = 0;
+            n += 1;
+            ix -= 0x800000;
+        }
+        BITS_TO_FLOAT(ax, ix);
+
+        u = ax - D_0024FA50[k];
+        v = 1.0f / (ax + D_0024FA50[k]);
+        s = u * v;
+        s_h = s;
+        FLOAT_TO_BITS(is, s_h);
+        is &= 0xfffff000;
+        BITS_TO_FLOAT(s_h, is);
+        is = ((ix >> 1) | 0x20000000) + 0x40000 + (k << 21);
+        BITS_TO_FLOAT(t_h, is);
+        t_l = ax - (t_h - D_0024FA50[k]);
+        s_l = v * ((u - s_h * t_h) - s_h * t_l);
+        s2 = s * s;
+        r = s2 * s2 * (0.600000024f + s2 * (0.428571433f + s2 * (0.333333343f + s2 * (0.272728115f + s2 * (0.230660751f + s2 * 0.206975013f)))));
+        r += s_l * (s_h + s);
+        s2 = s_h * s_h;
+        t_h = 3.0f + s2 + r;
+        FLOAT_TO_BITS(is, t_h);
+        is &= 0xfffff000;
+        BITS_TO_FLOAT(t_h, is);
+        t_l = r - ((t_h - 3.0f) - s2);
+        u = s_h * t_h;
+        v = s_l * t_h + t_l * s;
+        p_h = u + v;
+        FLOAT_TO_BITS(is, p_h);
+        is &= 0xfffff000;
+        BITS_TO_FLOAT(p_h, is);
+        p_l = v - (p_h - u);
+        z_h = 0.961791992f * p_h;
+        z_l = 4.70173836e-06f * p_h + p_l * 0.961796701f + D_0024FA60[k];
+        t = (f32)n;
+        t1 = ((z_h + z_l) + D_0024FA58[k]) + t;
+        FLOAT_TO_BITS(is, t1);
+        is &= 0xfffff000;
+        BITS_TO_FLOAT(t1, is);
+        t2 = z_l - (((t1 - t) - D_0024FA58[k]) - z_h);
+    }
+
+    s = 1.0f;
+    if (((((u32)hx >> 31) - 1) | (yisint - 1)) == 0) {
+        s = -1.0f;
+    }
+
+    FLOAT_TO_BITS(is, y);
+    is &= 0xfffff000;
+    BITS_TO_FLOAT(y1, is);
+    p_l = (y - y1) * t1 + y * t2;
+    p_h = y1 * t1;
+    z = p_l + p_h;
+    FLOAT_TO_BITS(j, z);
+    if (j > 0x43000000) {
+        return s * 1.0e30f * 1.0e30f;
+    } else if (j == 0x43000000) {
+        if (p_l + 4.29956657e-08f > z - p_h) {
+            return s * 1.0e30f * 1.0e30f;
+        }
+    } else if ((j & 0x7fffffff) > 0x43160000) {
+        return s * 1.0e-30f * 1.0e-30f;
+    } else if ((u32)j == 0xc3160000) {
+        if (p_l <= z - p_h) {
+            return s * 1.0e-30f * 1.0e-30f;
+        }
+    }
+
+    i = j & 0x7fffffff;
+    k = (i >> 23) - 0x7f;
+    n = 0;
+    if (i > 0x3f000000) {
+        n = j + (0x800000 >> (k + 1));
+        k = ((n & 0x7fffffff) >> 23) - 0x7f;
+        BITS_TO_FLOAT(t, n & ~(0x7fffff >> k));
+        n = ((n & 0x7fffff) | 0x800000) >> (23 - k);
+        if (j < 0) {
+            n = -n;
+        }
+        p_h -= t;
+    }
+    t = p_l + p_h;
+    FLOAT_TO_BITS(is, t);
+    is &= 0xfffff000;
+    BITS_TO_FLOAT(t, is);
+    u = t * 0.693145752f;
+    v = (p_l - (t - p_h)) * 0.693147182f + t * 1.42860654e-06f;
+    z = u + v;
+    w = v - (z - u);
+    t = z * z;
+    t1 = z - t * (0.166666672f + t * (-0.00277777785f + t * (6.61375598e-05f + t * (-1.65339022e-06f + t * 4.13813679e-08f))));
+    r = (z * t1) / (t1 - 2.0f) - (w + z * w);
+    z = 1.0f - (r - z);
+    FLOAT_TO_BITS(j, z);
+    j += n << 23;
+    if ((j >> 23) <= 0) {
+        z = func_00209260(z, n);
+    } else {
+        BITS_TO_FLOAT(z, j);
+    }
+    return s * z;
+}
