@@ -64,6 +64,17 @@ ROOT = versions.ROOT
 WINDOW = 0x4000
 RODATA = (0x217380, 0x250580)          # US .rodata (docs/VERSIONS.md)
 DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b(?![^\n]*\bfunc_))[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
+
+
+def definitions(text):
+    """The DEFINITION matches of `text` that open a body: a signature that runs over several
+    lines is a definition only if a `{` comes before any `;` (else it is a declaration)."""
+    for m in DEFINITION.finditer(text):
+        brace, semi = text.find("{", m.start()), text.find(";", m.start())
+        if brace >= 0 and (semi < 0 or brace < semi):
+            yield m
+
+
 PROLOGUE = 12  # instructions from the top of a listing that a register save may be in
 SAVE64 = re.compile(r"^sd\s+\$(ra|s\d|fp)\b")
 VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
@@ -107,7 +118,7 @@ def finished():
     """Names of the US functions src/ defines (by their address name or symbol_addrs name)."""
     names = set()
     for path in versions.sources():
-        for m in DEFINITION.finditer(path.read_text()):
+        for m in definitions(path.read_text()):
             names.add(m.group(1))
     return names
 

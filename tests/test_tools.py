@@ -471,6 +471,16 @@ class DefinitionTest(unittest.TestCase):
         # definition with statements in its body is one.
         self.assertEqual(self.names(text), ["func_00100010", "func_00100018", "func_0010001C", "func_00100020"])
 
+    def test_declaration_over_several_lines_is_not_a_definition(self):
+        text = ("void func_0020CAF8(void* self, s32 a, s32 b,\n"
+                "                   s32 c, s32 d);\n"
+                "void func_0020C3F0(void* self,\n"
+                "                   s32 n)\n"
+                "{\n"
+                "    func_0020CAF8(self, n, 0, 0, 0);\n"
+                "}\n")
+        self.assertEqual([m.group(1) for m in todo.definitions(text)], ["func_0020C3F0"])
+
 
 class AbsoluteAliasTest(unittest.TestCase):
     def test_short_names_get_their_eight_digit_spelling(self):

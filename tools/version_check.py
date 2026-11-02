@@ -47,7 +47,7 @@ def defined_in_src():
     import todo
     out = {}
     for path in versions.sources():
-        for m in todo.DEFINITION.finditer(path.read_text()):
+        for m in todo.definitions(path.read_text()):
             out[m.group(1)] = path
     return out
 
