@@ -579,3 +579,158 @@ s32 func_0020B190(Ctx_0020B190* p, s32* idx) {
     }
     return r;
 }
+
+struct Ent_20A538 { u64 key; u64 data; s32 value; s32 extra; };
+struct Ctx_20A538 { u8 pad[0x44]; struct Ent_20A538* ents; s32 count; };
+struct Obj_20A538 { u8 pad[0x40]; struct Ctx_20A538* ctx; };
+struct Pair_20A538 { u64 a; u64 b; };
+extern Pair_20A538 D_0027AED0[];
+u64 func_0020A190(s32 idx, u64 key);
+
+s32 func_0020A538(struct Obj_20A538* self, s32 idx, u64 key, s32 a3, s32 a4)
+{
+    s32 result = 0;
+    struct Ctx_20A538* ctx = self->ctx;
+    struct Ent_20A538* ents = ctx->ents;
+    u64 k = func_0020A190(idx, key);
+    s32 count = ctx->count;
+    s32 i;
+    for (i = 0; i < count; i++) {
+        if (k == ents[i].key) {
+            result = ents[i].value;
+            break;
+        }
+    }
+    if (i < 0x40) {
+        struct Ent_20A538* e = &ents[i];
+        ctx->count = count + 1;
+        e->key = k;
+        e->extra = a4;
+        e->value = a3;
+        e->data = D_0027AED0[idx].b;
+    }
+    return result;
+}
+
+// EXACT: o->w8 and o->w4 computed straight from a (no v temp), the byte loop as a for
+struct Reader_0020A630 { u8 pad[0x10]; };
+struct Out_0020A630 { s32 w0; s32 w4; s32 w8; s32 wC; };
+
+s32 func_002116B0(Reader_0020A630* r, s32 bits);
+void func_00211700(Reader_0020A630* r);
+s32 func_002115F8(Reader_0020A630* r, s32 bits);
+void func_0020A780(Reader_0020A630* r, Out_0020A630* o);
+
+s32 func_0020A630(Reader_0020A630* r, Out_0020A630* o)
+{
+    u32 i; u32 n; u32 a; u32 b; u32 c;
+    i = 0;
+    (void)func_002116B0(r, 0x22);
+    a = func_002116B0(r, 3);
+    func_00211700(r);
+    b = func_002116B0(r, 0xF);
+    func_00211700(r);
+    c = func_002116B0(r, 0xF);
+    func_00211700(r);
+    o->w0 = func_002116B0(r, 9);
+    (void)func_002116B0(r, 0x1E);
+    n = func_002116B0(r, 3);
+    o->w8 = (a >> 2) & 1;
+    o->w4 = (a << 30) | (b << 15) | c;
+    for (i = 0; i < n; i++) {
+        (void)func_002116B0(r, 8);
+    }
+    if (func_002115F8(r, 0x20) == 0x1BB) {
+        o->wC = 1;
+        func_0020A780(r, o);
+    } else {
+        o->wC = 0;
+    }
+    return 1;
+}
+
+struct Sub_20B5B8 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    u8 pad0C[0xA0];
+    s32 fAC;
+    u8 pad1[0x24];
+    s32 fD4;
+    u8 pad2[0x40];
+    s32 f118;
+    s32 f11C;
+    s32 f120;
+    u8 pad3[0x50];
+    s32 f174;
+};
+
+struct Ctx_20B5B8 {
+    u8 pad0[0x8];
+    s32 f8;
+    u8 pad1[0x34];
+    Sub_20B5B8* sub;
+};
+
+s32 func_002101F0(Sub_20B5B8* sub, s32 flag);
+s32 func_00210090(Sub_20B5B8* sub);
+s32 func_0020F7F0(Sub_20B5B8* sub);
+s32 func_0020B718(Ctx_20B5B8* ctx);
+void func_00210160(Sub_20B5B8* sub, s32 a1, s32 a2);
+void func_0020B1E0(Ctx_20B5B8* ctx);
+
+s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
+{
+    s32 s3 = 0;
+    Sub_20B5B8* s0;
+    s32 s1;
+    s32 s4;
+    s32 t;
+    s32 r;
+
+    s0 = self->sub;
+    s0->f120 = 0;
+    if (a2 == -1 || a1 < a2) {
+        s3 = 1;
+    }
+    if (s0->f8 == 0) {
+        self->f8 = 0;
+        s0->f8 = 1;
+    }
+    if (func_002101F0(s0, 0) != 0) {
+        if (s3 != 0) {
+            (void)func_00210090(s0);
+        }
+    }
+    s1 = 1;
+    s0->f120 = s1;
+    if (func_0020F7F0(s0) == 0) {
+        (void)func_0020B718(self);
+        s0->f0 = s1;
+        return 0;
+    }
+    t = (s0->fD4 ^ 1) != 0 ? s1 : 2;
+    if (s0->f174 != t) {
+        return -1;
+    }
+    r = func_002101F0(s0, 1);
+    s32 u = 0;
+    if (r != 0) {
+        u = s1;
+    }
+    s4 = 0;
+    if (u != 0) {
+        if (s3 != 0) {
+            s4 = (func_00210090(s0) != 0) ? s1 : 0;
+        }
+    }
+    func_00210160(s0, s0->f118, s0->f4);
+    s0->f120 = 0;
+    self->f8 = s0->f118 - s0->fAC;
+    s0->f118 = s0->f118 + 1;
+    s0->f4 = s0->f4 + 1;
+    if (s3 == 0) {
+        func_0020B1E0(self);
+    }
+    return s4;
+}

@@ -32,11 +32,11 @@ void func_eu_001AAF38(Obj_eu_001AAF38* self, s32 a1)
     f32 i1;
 
     f32 q = 0.25f;
-    self->f568 = D_eu_00262B68;
     self->table = D_eu_0026D810 + a1 * 20;
-    self->f550 = q;
-    self->index = a1;
     self->f558 = q;
+    self->f550 = q;
+    self->f568 = D_eu_00262B68;
+    self->index = a1;
     func_001AAB20(self, self->x, self->y);
     i0 = self->in0;
     i1 = self->in1;

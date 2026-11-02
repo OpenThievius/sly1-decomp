@@ -1035,3 +1035,111 @@ s32 func_00203050(void)
     D_0027943C = 1;
     return 1;
 }
+
+// EXACT: n++ inside the compare (old value tested, increment in the delay slot)
+
+extern u8 D_0024F4E0[];
+
+struct Fmt_201C78 { s32 field0; };
+s32 func_001E1F10(struct Fmt_201C78 *fmt, ...);
+
+s32 func_00201C78(void *self) {
+    u32 n = 0;
+    if (*(volatile u32 *)0x1000A000 & 0x100) {
+        do {
+            if (n++ > 0x1000000) {
+                func_001E1F10((struct Fmt_201C78 *)D_0024F4E0);
+                return -1;
+            }
+        } while (*(volatile u32 *)0x1000A000 & 0x100);
+    }
+    *(volatile u32 *)0x1000A020 = (s32)(*(s64 *)self & 0x7FFF) + 1;
+    if (((u32)self & 0x70000000) == 0x70000000) {
+        *(volatile u32 *)0x1000A010 = ((u32)self & 0x0FFFFFFF) | 0x80000000;
+    } else {
+        *(volatile u32 *)0x1000A010 = (u32)self & 0x0FFFFFFF;
+    }
+    *(volatile u32 *)0x1000A000 = 0x101;
+    return 0;
+}
+
+u64* func_00201BA8();
+s32 func_002023B0(s16 px, s16 py, s16 pz)
+{
+    u64* bits = func_00201BA8();
+    s32 yS = (py + 63) / 64;
+    s32 c;
+    if (px & 2) {
+        c = (pz + 63) / 64;
+    } else {
+        c = (pz + 31) / 32;
+    }
+    if ((*bits & 0x0000FFFF0000FFFFULL) == 1) {
+        return ((yS * c) << 16) >> 16;
+    }
+    return ((yS * c) << 17) >> 16;
+}
+
+struct Q_203230;
+struct Dev_203230;
+extern u8 D_00279480[];
+extern u8 D_0027A5D0[];
+extern s32 D_00279428;
+s32 func_002030C0(Q_203230* q);
+s32 func_001F8290(Q_203230* q, s32 a1, s32 a2, s32 a3, s32 a4, u8* a5, s32 a6, s32 a7, s32 stack0);
+s32 func_001F6B40(Dev_203230* d);
+
+s32 func_00203230(void)
+{
+    if (func_002030C0((Q_203230*)2) == 0) {
+        return 0;
+    }
+    u32 s0 = (u32)D_00279480;
+    s32 r = func_001F8290((Q_203230*)D_0027A5D0, 0xE, 0, 0, 0, (u8*)s0, 4, 0, 0);
+    if (r < 0) {
+        (void)func_001F6B40((Dev_203230*)D_00279428);
+        return 0;
+    }
+    s0 = *(u32*)(s0 | 0x20000000u);
+    (void)func_001F6B40((Dev_203230*)D_00279428);
+    return (s32)s0;
+}
+
+// NEAR: register roles ($s0/$s1/$s2) and branch layout after the first call differ; frame matches in size class.
+
+struct Slot_203A20 { u32 value; };
+struct Code_203A20 { u32 code; };
+struct Hdl_203A20 { u32 h; };
+struct Req_203A20 { u32 a; };
+
+extern u32 D_0027AA40;
+extern u8 D_0027A600[];
+extern u8 D_0027AE48[];
+
+extern s32 func_002033D8(Code_203A20* c);
+extern void func_001FA7D8(Slot_203A20* q, s32 n);
+extern s32 func_001F8290(Req_203A20* p, s32 a1, s32 a2, Slot_203A20* q, s32 a4, u8* a5, s32 a6, s32 a7, s32 a8);
+extern void func_001F6B40(Hdl_203A20* h);
+
+u32 func_00203A20(u32 a0)
+{
+    Slot_203A20* s2 = (Slot_203A20*)&D_0027AA40;
+    u32 s0;
+    s32 r;
+
+    if (func_002033D8((Code_203A20*)0x22) != 0) {
+        D_0027AA40 = a0;
+    } else {
+        return 0;
+    }
+    func_001FA7D8(s2, 4);
+    s0 = (u32)D_0027A600;
+    r = func_001F8290((Req_203A20*)D_0027AE48, 0x22, 0, s2, 4, D_0027A600, 4, 0, 0);
+    if (r < 0) {
+        func_001F6B40((Hdl_203A20*)(*(u32*)&D_0027942C));
+        return 0;
+    }
+    s0 = *(u32*)(s0 | 0x20000000);
+    func_001F6B40((Hdl_203A20*)(*(u32*)&D_0027942C));
+    return s0;
+}

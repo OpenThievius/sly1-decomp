@@ -455,3 +455,226 @@ void func_0020F708(Obj_0020F708* self)
         func_0020F4C8(self, 8);
     }
 }
+
+extern u8 D_00250320[];
+
+struct Node_20E2A8 {
+    u8 pad0[0x11C];
+    s32 field11C;
+    u8 pad1[0x848 - 0x120];
+    s32 field848;
+};
+
+s32 func_0020F248(struct Node_20E2A8 *self, s32 a1);
+s32 func_0020F3C0(struct Node_20E2A8 *self, s32 a1);
+void func_0020F4C8(struct Node_20E2A8 *self, s32 a1);
+void func_0020B940(struct Node_20E2A8 *self, u8 *a1, s32 a2);
+
+s32 func_0020E2A8(struct Node_20E2A8 *self) {
+    s32 total = 0;
+    s32 again;
+    do {
+        s32 tok = func_0020F248(self, 0);
+        switch ((u32)tok) {
+        case 0x22:
+            again = 1;
+            break;
+        case 0x23:
+            again = 1;
+            total += 0x21;
+            break;
+        case 0: {
+            s32 v3 = func_0020F3C0(self, 0xB);
+            if (self->field848 != 0 && v3 == 0xF) {
+                func_0020F4C8(self, 0xB);
+                again = 1;
+            } else {
+                func_0020B940(self, D_00250320, tok);
+                self->field11C = 1;
+                return 1;
+            }
+            break;
+        }
+        default:
+            total += tok;
+            again = 0;
+            break;
+        }
+    } while (again);
+    return total;
+}
+
+// EXACT: the first compare cast to s32 on both sides so the return constant shares the compare's register
+
+struct Dev_0020F0F0;
+
+struct Obj_0020F0F0 {
+    u8 pad_000[0x858];     // 0x000
+    s32 dev;               // 0x858
+};
+
+void func_0020B1E0(Dev_0020F0F0* d);
+
+s32 func_0020F0F0(Obj_0020F0F0* self)
+{
+    s32 n = 0;
+    if ((s32)(*(volatile u32*)0x10002010 & 0x80004000) == (s32)0x80000000) {
+        do {
+            s32 c = n;
+            n = c + 1;
+            if (c >= 0x1389) {
+                func_0020B1E0((Dev_0020F0F0*)self->dev);
+                n = 0;
+            }
+        } while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000);
+        return n;
+    }
+    return 0x80000000;
+}
+
+// EXACT: do-while behind a duplicated first test, i = 0 before the first read
+
+struct Dev_0020F198;
+struct Ctx_0020F198 { u8 pad[0x858]; Dev_0020F198* dev; };
+void func_0020B1E0(Dev_0020F198* a);
+
+s64 func_0020F198(Ctx_0020F198* p) {
+    s32 i = 0;
+    s64 v = *(volatile s64*)0x10002000;
+    if (v < 0 && (*(volatile u32*)0x10002010 & 0x4000) == 0) {
+        do {
+            s32 old = i;
+            i++;
+            if (old >= 5001) {
+                func_0020B1E0(p->dev);
+                i = 0;
+            }
+            v = *(volatile s64*)0x10002000;
+        } while (v < 0 && (*(volatile u32*)0x10002010 & 0x4000) == 0);
+    }
+    return v;
+}
+
+struct Ctx_20F4C8 {
+    u8 pad0[0x818];
+    s32 f818;
+    u8 pad1[0x838 - 0x81C];
+    s32 f838;
+    s32 f83C;
+    u8 pad2[0x858 - 0x840];
+    s32 f858;
+};
+struct Arg_20F4C8 { u32 v; };
+
+extern u32 D_0027B040[];
+extern s32 func_0020B1E0(Arg_20F4C8* a);
+extern s64 func_0020F198(Ctx_20F4C8* c, u32* v);
+
+void func_0020F4C8(Ctx_20F4C8* s0, u32 s1)
+{
+    s32 cnt = 0;
+    u32 v;
+    u32* p;
+
+    while ((*(volatile u32*)0x10002010 & 0x80004000u) == 0x80000000u) {
+        if (cnt++ > 0x1388) {
+            func_0020B1E0((Arg_20F4C8*)s0->f858);
+            cnt = 0;
+        }
+    }
+    v = s1 | 0x40000000u;
+    *(volatile u32*)0x10002000 = v;
+    p = &D_0027B040[v >> 28];
+    s0->f818 = *p;
+    s0->f838 = func_0020F198(s0, p);
+    s0->f83C = 0x20;
+}
+
+// EXACT: while ((r = f()) == kB || r == kA) loop, limit declared before the loop, table as a union with Fn fn[11] indexed t.fn[idx].
+
+struct Self_0020F9C8;
+
+typedef void (*Fn_0020F9C8)(struct Self_0020F9C8* self);
+
+struct __attribute__((packed)) Pack_0020F9C8 {
+    u64 a[5];
+};
+
+struct Tbl_0020F9C8 {
+    struct Pack_0020F9C8 p;
+    Fn_0020F9C8 last;
+};
+
+union TblU_0020F9C8 {
+    struct Tbl_0020F9C8 t;
+    Fn_0020F9C8 fn[11];
+};
+
+void func_0020F708(struct Self_0020F9C8* self);
+void func_0020F4C8(struct Self_0020F9C8* self, s32 a1);
+s32 func_0020F5B8(struct Self_0020F9C8* self, s32 a1);
+s32 func_0020F3C0(struct Self_0020F9C8* self, s32 a1);
+
+extern u8 D_00250430[];
+
+void func_0020F9C8(struct Self_0020F9C8* self)
+{
+    s32 kA = 0x1B2;
+    union TblU_0020F9C8 t;
+    t.t = *(struct Tbl_0020F9C8*)D_00250430;
+    s32 kB = 0x1B5;
+    s32 r;
+
+    func_0020F708(self);
+    u32 limit = 10;
+    while ((r = func_0020F3C0(self, 0x20)) == kB || r == kA) {
+        if (r == kB) {
+            func_0020F4C8(self, 0x20);
+            u32 idx = (u32)func_0020F5B8(self, 4);
+            if (limit < idx) {
+                idx = 0;
+            }
+            t.fn[idx](self);
+            func_0020F708(self);
+        } else {
+            func_0020F4C8(self, 0x20);
+            func_0020F708(self);
+        }
+    }
+}
+
+// EXACT: lim/neg locals, one if with f150 != 3 && a1 != 0, neg = (u32)f854 < 1 (not goto form).
+struct Obj_20FD28 {
+    u8 pad0[0x150];
+    s32 f150;
+    u8 pad1[0x1AC - 0x154];
+    s32 f1AC;
+    u8 pad2[0x84C - 0x1B0];
+    s32 f84C;
+    s32 f850;
+    s32 f854;
+};
+
+s32 func_0020FD28(Obj_20FD28* self, s32 a1)
+{
+    s32 lim = 0;
+    s32 neg = 0;
+    if (self->f150 != 3 && a1 != 0) {
+        if (a1 < 0) {
+            neg = (u32)self->f854 < 1;
+        }
+        self->f854 = 0;
+        lim = a1;
+    }
+    s32 v1 = self->f84C + a1;
+    self->f1AC = v1;
+    if (neg && lim >= a1) {
+        self->f1AC = v1 + 0x400;
+    }
+    s32 v0 = self->f850;
+    if (v0 < self->f1AC) {
+        v0 = self->f1AC;
+    }
+    self->f850 = v0;
+    return v0;
+}

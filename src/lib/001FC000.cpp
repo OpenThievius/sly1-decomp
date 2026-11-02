@@ -767,3 +767,197 @@ s32 func_001FF448(Chain_1FF448* p)
     }
     return n;
 }
+
+struct Cmp_1FD1F0 {
+    s32 tag;
+    s32 ptr;
+    s32 f8;
+    s32 padC;
+    u64 f10;
+};
+
+s32 func_001FD1F0(Cmp_1FD1F0* a, Cmp_1FD1F0* b)
+{
+    if ((u32)a->tag < 2) {
+        return 1;
+    }
+    if ((u32)b->tag < 2) {
+        return 1;
+    }
+    if ((a->tag ^ 4) == 0) {
+        if ((b->tag ^ 4) == 0) {
+            return b->ptr - a->ptr;
+        }
+        return a->ptr != 0 ? -1 : 1;
+    }
+    if ((b->tag ^ 4) == 0) {
+        return b->ptr != 0 ? 1 : -1;
+    }
+    if ((a->tag ^ 2) == 0) {
+        if ((b->tag ^ 2) == 0) {
+            return 0;
+        }
+        return b->ptr == 0 ? -1 : 1;
+    }
+    if ((b->tag ^ 2) == 0) {
+        return a->ptr != 0 ? -1 : 1;
+    }
+    if (a->ptr != b->ptr) {
+        return a->ptr != 0 ? -1 : 1;
+    }
+    if (a->f8 > b->f8) {
+        return a->ptr != 0 ? -1 : 1;
+    }
+    if (a->f8 < b->f8) {
+        return a->ptr != 0 ? 1 : -1;
+    }
+    if (a->f10 > b->f10) {
+        return a->ptr != 0 ? -1 : 1;
+    }
+    if (a->f10 < b->f10) {
+        return a->ptr != 0 ? 1 : -1;
+    }
+    return 0;
+}
+
+struct Parts_1FD358 {
+    u32 kind;
+    u32 sign;
+    s32 exponent;
+    u32 pad;
+    u64 mantissa;
+    u32 tail[2];
+};
+
+u64 func_001FC910(Parts_1FD358* p);
+
+u64 func_001FD358(s32 value)
+{
+    Parts_1FD358 parts;
+    parts.kind = 3;
+    parts.sign = (u32)value >> 31;
+    if (value == 0) {
+        parts.kind = 2;
+    } else {
+        parts.exponent = 0x3C;
+        if (parts.sign != 0) {
+            if (value == (s32)0x80000000) {
+                return 0xC1E0000000000000ULL;
+            }
+            parts.mantissa = (s32)-value;
+        } else {
+            parts.mantissa = value;
+        }
+        u64 m = parts.mantissa;
+        if (m <= 0x0FFFFFFFFFFFFFFFULL) {
+            s32 e = parts.exponent;
+            u64 n;
+            do {
+                n = m << 1;
+                e--;
+                m = n;
+            } while (n <= 0x0FFFFFFFFFFFFFFFULL);
+            parts.exponent = e;
+            parts.mantissa = m;
+        }
+    }
+    return func_001FC910(&parts);
+}
+
+// EXACT: u32 return (-1 as lui/ori) and (kind ^ N) == 0 compares give retail xori/beqz.
+
+struct Double_001FD4A8 {
+    u32 kind;          // 0x00
+    s32 sign;          // 0x04
+    s32 exponent;      // 0x08
+    u8 pad_0C[4];      // 0x0C
+    u64 mantissa;      // 0x10
+};
+
+struct Bits_001FD4A8 {
+    u64 v;             // 0x00
+};
+
+void func_001FCA40(Bits_001FD4A8* src, Double_001FD4A8* out);
+
+u32 func_001FD4A8(u64 value)
+{
+    Double_001FD4A8 d;
+    Bits_001FD4A8 b;
+    b.v = value;
+    func_001FCA40(&b, &d);
+    if ((d.kind ^ 2) == 0) {
+        return 0;
+    }
+    if ((u32)d.kind < 2) {
+        return 0;
+    }
+    if (d.sign != 0) {
+        return 0;
+    }
+    if ((d.kind ^ 4) == 0) {
+        return 0xFFFFFFFF;
+    }
+    if (d.exponent < 0) {
+        return 0;
+    }
+    if (d.exponent >= 0x20) {
+        return 0xFFFFFFFF;
+    }
+    s32 e = d.exponent;
+    if (e >= 0x3D) {
+        return (u32)(d.mantissa << (e - 0x3C));
+    }
+    return (u32)(d.mantissa >> (0x3C - e));
+}
+
+// EXACT: func_001FF1E0 takes (acc, count) so count lives in s4; f0 stored before f4.
+
+struct Obj_1FF518 { s32 f0; s32 f4; s32 f8; s32* f0C; s32 f10; };
+struct Acc_1FF518 { s32* items; s32 count; s32* other; s32 unused; u32 lo; s32 hi; };
+struct Cur_1FF518 { s32 pad[1]; };
+
+s32 func_001FF448(Cur_1FF518* cur);
+void func_001FF490(Cur_1FF518* cur, Acc_1FF518* list, u32* lo, s32* hi);
+s32 func_001FF1E0(Acc_1FF518* acc, s32 n);
+
+void func_001FF518(Obj_1FF518* self)
+{
+    s32 count;
+    s32* p;
+    Acc_1FF518 acc;
+
+    if (self->f0C != 0) {
+        p = self->f0C;
+        count = 0;
+        if (*p != 0) {
+            do {
+                count += func_001FF448((Cur_1FF518*)*p);
+                p++;
+            } while (*p != 0);
+        }
+    } else {
+        count = func_001FF448((Cur_1FF518*)self->f8);
+    }
+    self->f10 = count;
+    acc.items = (s32*)func_0018D740(count << 2);
+    acc.other = (s32*)func_0018D740(count << 2);
+    acc.lo = 0xFFFFFFFF;
+    acc.count = 0;
+    acc.unused = 0;
+    acc.hi = 0;
+    if (self->f0C != 0) {
+        p = self->f0C;
+        if (*p != 0) {
+            do {
+                func_001FF490((Cur_1FF518*)*p, &acc, &acc.lo, &acc.hi);
+                p++;
+            } while (*p != 0);
+        }
+    } else {
+        func_001FF490((Cur_1FF518*)self->f8, &acc, &acc.lo, &acc.hi);
+    }
+    self->f0C = (s32*)func_001FF1E0(&acc, count);
+    self->f0 = acc.lo;
+    self->f4 = acc.hi;
+}

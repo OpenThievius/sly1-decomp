@@ -15,10 +15,10 @@ void func_eu_001AB558(Actor_eu_001AB558* self)
 {
     Local_eu_001AB558 L;
     u8 buf[0xC0];
-    u8* rt = (u8*)self + 0x408;
     if (self->f08 != 0) {
-        f32 f548 = self->f548;
+        u8* rt = (u8*)self + 0x408;
         f32 f544 = self->f544;
+        f32 f548 = self->f548;
         s32 s0v = self->f518;
         func_00137228(&L, self->f52C, self->f530);
         func_00137238(&L, f544, f548);
