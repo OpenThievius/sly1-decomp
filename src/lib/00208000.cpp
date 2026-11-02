@@ -532,3 +532,31 @@ s32 func_0020B1E0(Q_0020B1E0* q)
     flag[0] = 1;
     return func_0020B190(q, flag);
 }
+
+struct Owner_0020B278;
+
+struct Pool_0020B278 {
+    u32 f00;
+    u32 f04;
+    u32 f08;
+};
+
+extern u8 D_00250098[];
+
+s32 func_0020B978(Owner_0020B278* owner, u8* p);
+
+s32 func_0020B278(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 align)
+{
+    u32 base;
+    u32 end;
+
+    base = (pool->f08 + align - 1) / align;
+    base = base * align;
+    end = base + offset;
+    if (pool->f00 + pool->f04 >= end) {
+        pool->f08 = end;
+        return base;
+    }
+    (void)func_0020B978(owner, D_00250098);
+    return 0;
+}

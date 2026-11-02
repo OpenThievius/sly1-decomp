@@ -2005,3 +2005,16 @@ void func_0018E5E8(void)
     D_00275964 = v;
     func_001F6A20((Mgr_18E5E8*)v, 0);
 }
+
+struct Ring_0018E838 {
+    u8 pad_00[0x04];
+    s32 f4;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+};
+
+s32 func_0011E4F8(Ring_0018E838* self);
+void func_0018E838(Ring_0018E838* self) { s32 raw = func_0011E4F8(self); s32 x = (raw & 0xFFFFFF) - self->f4; x = x - self->fC; x = x - 0x400; x = x + self->f8; self->f14 = x; self->f14 = x % self->f8; s32 d = self->f8 - self->f14; self->f18 = d; s32 y = self->fC - d; y += self->f8; self->f10 = y; self->f10 = y % self->f8; }

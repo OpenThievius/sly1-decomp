@@ -1080,3 +1080,365 @@ void func_001969F8(Self_001969F8* self)
     self->p6B8 = func_001B6290((Any_001969F8*)self->p6B4, 0, -1, 0);
     func_001B6DF8((Any_001969F8*)self->p6B8, self);
 }
+
+struct Self_1943E8 {
+    u8 pad0[0x250];
+    s32 f250;
+    f32 f254;
+    u8 pad258[0x260 - 0x258];
+    s32 f260;
+    s32 f264;
+    u8 pad268[0x274 - 0x268];
+    s32 f274;
+    u8 pad278[0x27C - 0x278];
+    s32 f27C;
+    u8 pad280[0x288 - 0x280];
+    s32 f288;
+};
+struct Glob_1943E8 {
+    u8 pad0[0x19D8];
+    s32 f19D8;
+    s32 f19DC;
+};
+struct Row_1943E8 {
+    void* f0;
+    u8 pad4[0xC - 0x4];
+    s32 fC;
+    s32 f10;
+    s32* items;
+};
+struct Obj_1943E8 {
+    void** vt;
+};
+struct Hud_1943E8 {
+    void** vt;
+    u8 pad4[0x264 - 0x4];
+    s32* f264;
+    u8 pad268[0x27C - 0x268];
+    s32 f27C;
+};
+struct Pad_1943E8 {
+    u8 pad0[0xAA];
+    u16 fAA;
+};
+struct Pool_1943E8 {
+    u8 pad0[0x10];
+    s32 f10;
+};
+struct Ent_1943E8 {
+    u8 pad0[0xC];
+    f32 fC;
+    u8 pad10[0x1A5C - 0x10];
+};
+struct Item_1943E8 {
+    u8 pad0[2];
+    u8 f2;
+};
+struct Reg_1943E8 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
+struct RegA_1943E8 { u32 lo : 12; u32 mid : 11; u32 rest : 9; u32 hi; } __attribute__((aligned(8)));
+struct Gs_1943E8 {
+    u8 pad0[0x18];
+    RegA_1943E8 f18;
+    u8 pad20[0x20];
+    Reg_1943E8 f40;
+};
+
+typedef void (*VFn_1943E8)(void* self);
+typedef void (*VFnS_1943E8)(void* self, const char* s);
+
+extern Obj_1943E8 D_0026C6C8;
+extern Obj_1943E8 D_0026C948;
+extern Obj_1943E8 D_0026CBC8;
+extern Obj_1943E8 D_0026CE48;
+extern Hud_1943E8 D_00274118;
+extern Obj_1943E8 D_0026EC70;
+extern f32 D_00261868;
+extern Pad_1943E8 D_00262C70;
+extern Ent_1943E8* D_0026998C;
+extern s32 D_00264A58;
+extern s32 D_00264A4C;
+extern u8 D_0026FF68[];
+extern f32 D_0026A22C;
+extern f32 D_0026A230;
+extern f32 D_0026A700;
+extern f32 D_0026A704;
+extern char D_0024C588[];
+extern char D_0024C5A0[];
+extern char D_0024C5B8[];
+extern char D_0024C5D0[];
+extern char D_0024C600[];
+extern char D_0024C618[];
+
+s32 func_00160B28(Glob_1943E8* g);
+s32 func_001BE810(void);
+s32 func_0011CE30(void);
+s32 func_001BE980(void);
+s32 func_0016EED0(Pad_1943E8* p);
+s32 func_0016EC98(Pad_1943E8* p);
+void func_0016EC20(Pad_1943E8* p, s32 mask);
+f32 func_0016F108(Pad_1943E8* p, s32 idx);
+void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_00194D30(Self_1943E8* self, s32 a, s32 b);
+void func_00195958(Self_1943E8* self);
+void func_001961C0(Self_1943E8* self);
+void func_00194398(void);
+s32 func_0018B770(Pool_1943E8* p);
+void func_0018B670(Pool_1943E8* p, void* fn, void* arg);
+void func_0018C250(void* arg);
+Item_1943E8* func_001F6880(void* a, const char* name);
+s32 func_001AEA08(void);
+s32 func_001FD7A0(f32 x);
+
+struct Clamp_1943E8 {
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        if (x < lo) {
+            return lo;
+        }
+        if (hi < x) {
+            return hi;
+        }
+        return x;
+    }
+};
+
+void func_001943E8(Self_1943E8* self)
+{
+    Glob_1943E8* g = (*(Glob_1943E8**)&D_002623C0);
+    Row_1943E8* row = &((Row_1943E8*)&D_00269D50)[self->f260];
+    s32 on;
+    s32 n;
+    Pad_1943E8* pad;
+
+    on = 0;
+    switch ((g->f19D8 << 8) | g->f19DC) {
+    case 0x106:
+    case 0x204:
+    case 0x304:
+    case 0x307:
+    case 0x407:
+    case 0x502:
+    case 0x504:
+        break;
+    default:
+        on = self->f260 == 0;
+        break;
+    }
+    if (on) {
+        ((VFn_1943E8)D_0026C6C8.vt[14])(&D_0026C6C8);
+        ((VFn_1943E8)D_0026C948.vt[14])(&D_0026C948);
+        ((VFn_1943E8)D_0026CBC8.vt[14])(&D_0026CBC8);
+        ((VFn_1943E8)D_0026CE48.vt[14])(&D_0026CE48);
+    } else {
+        ((VFn_1943E8)D_0026C6C8.vt[15])(&D_0026C6C8);
+        ((VFn_1943E8)D_0026C948.vt[15])(&D_0026C948);
+        ((VFn_1943E8)D_0026CBC8.vt[15])(&D_0026CBC8);
+        ((VFn_1943E8)D_0026CE48.vt[15])(&D_0026CE48);
+    }
+    switch (self->f260) {
+    case 0:
+    case 11:
+    case 17:
+        D_00274118.f27C = func_00160B28((*(Glob_1943E8**)&D_002623C0));
+        D_00274118.f264 = &D_00274118.f27C;
+        ((VFn_1943E8)D_00274118.vt[14])(&D_00274118);
+        break;
+    default:
+        ((VFn_1943E8)D_00274118.vt[15])(&D_00274118);
+        break;
+    }
+    if (self->f288 != 0) {
+        if (func_001BE810() != 0) {
+            func_0011CE30();
+        }
+        self->f288 = func_001BE980();
+    }
+    s32 ready = 1;
+    if (self->f274 != 0 || self->f250 != 2 || !(0.1f < D_00261868 - self->f254)) {
+        ready = 0;
+    }
+    pad = &D_00262C70;
+    if (row->f10 == 0) {
+        n = 0;
+    } else if (row->fC != 0) {
+        n = func_0016EED0(pad);
+    } else {
+        n = func_0016EC98(pad);
+    }
+    if (n > 0) {
+        self->f264 = (self->f264 + 1) % row->f10;
+        func_001BFCD8(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        return;
+    }
+    if (n < 0) {
+        self->f264 = (self->f264 + row->f10 - 1) % row->f10;
+        func_001BFCD8(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        return;
+    }
+    if (!ready) {
+        return;
+    }
+    if (pad->fAA & 0x810) {
+        func_0016EC20(&D_00262C70, 0x810);
+        func_001961C0(self);
+        return;
+    }
+    if (pad->fAA & 0x80) {
+        func_0016EC20(&D_00262C70, 0x80);
+        if (self->f260 == 11 || self->f260 == 16) {
+            Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[row->items[self->f264]];
+            if (e->fC != 0.0f) {
+                D_0026998C = e;
+                func_00194D30(self, 1, 0x12);
+            }
+        }
+        return;
+    }
+    if (pad->fAA & 0x40) {
+        func_0016EC20(&D_00262C70, 0x40);
+        func_00195958(self);
+        return;
+    }
+    switch (self->f260) {
+    case 24: {
+        f32 a = func_0016F108(pad, 0);
+        f32 dx = a - func_0016F108(pad, 1);
+        f32 b = func_0016F108(pad, 3);
+        f32 dy = b - func_0016F108(pad, 2);
+        f32 v;
+        if (dx == 0.0f && dy == 0.0f) {
+            return;
+        }
+        D_0026A700 = Clamp_1943E8::Of(D_0026A700 + dx * D_0026A22C, 424.0f, 848.0f);
+        v = Clamp_1943E8::Of(D_0026A704 + dy * D_0026A230, 10.0f, 90.0f);
+        D_0026A704 = v;
+        {
+            Gs_1943E8* gs = ((Gs_1943E8*)&D_00262490);
+            s32 h = func_001FD7A0(D_0026A700);
+            Reg_1943E8 ra = gs->f40;
+            RegA_1943E8 rb = gs->f18;
+            ra.lo = h;
+            rb.lo = h;
+            gs->f40 = ra;
+            gs->f18 = rb;
+            s32 w = func_001FD7A0(v);
+            ra.mid = w & ~1;
+            rb.mid = w & 0x7FE;
+            gs->f40 = ra;
+            gs->f18 = rb;
+        }
+        break;
+    }
+    case 11:
+    case 16:
+    case 17:
+        if (D_00264A58 != 1) {
+            func_001961C0(self);
+            return;
+        } else {
+            s32 id = row->items[self->f264];
+            if ((u32)(id - 10) < 3) {
+                Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[id];
+                if (self->f260 == 16) {
+                    if (e->fC != 0.0f) {
+                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, D_0024C588);
+                    } else {
+                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, D_0024C5A0);
+                    }
+                } else if (self->f260 == 17) {
+                    if (e->fC != 0.0f) {
+                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, D_0024C5B8);
+                    } else {
+                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, D_0024C5A0);
+                    }
+                } else {
+                    if (e->fC != 0.0f) {
+                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, D_0024C5D0);
+                    } else {
+                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, D_0024C600);
+                    }
+                }
+                ((VFn_1943E8)D_0026EC70.vt[14])(&D_0026EC70);
+            } else {
+                ((VFn_1943E8)D_0026EC70.vt[15])(&D_0026EC70);
+            }
+        }
+        break;
+    case 18:
+        if (D_00264A58 != 1) {
+            func_001961C0(self);
+        }
+        break;
+    case 20: {
+        Item_1943E8* it;
+        if (D_00264A58 != 1) {
+            func_001961C0(self);
+        }
+        it = func_001F6880(row->f0, D_0024C618);
+        if (it != 0) {
+            it->f2 = func_001AEA08();
+        }
+        break;
+    }
+    case 3:
+    case 4:
+    case 7:
+    case 10:
+    case 32:
+        if (D_00264A4C == 5) {
+            func_00194D30((Self_1943E8*)D_0026FF68, 1, -1);
+        }
+        break;
+    case 5: {
+        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        if (func_0018B770(p) == 0) {
+            if (p->f10 == 0) {
+                func_0018B670(p, (void*)(void (*)(Boot_195958*))func_0018C250, ((u8*)&D_00264A40));
+                func_00194D30(self, 1, 8);
+            } else {
+                func_00194D30(self, 1, 6);
+            }
+        }
+        break;
+    }
+    case 8: {
+        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        if (func_0018B770(p) == 0) {
+            if (p->f10 == 0) {
+                func_00194D30(self, 1, -1);
+            } else {
+                func_00194D30(self, 1, 9);
+            }
+        }
+        break;
+    }
+    case 12: {
+        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        if (func_0018B770(p) == 0) {
+            if (p->f10 == 0) {
+                func_00194D30(self, 1, -1);
+                if (self->f27C == 2) {
+                    func_00194398();
+                }
+            } else {
+                func_00194D30(self, 0, 0x17);
+                func_00194D30(self, 1, 0xF);
+            }
+        }
+        break;
+    }
+    case 19: {
+        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        if (func_0018B770(p) == 0) {
+            D_0026998C = 0;
+            if (p->f10 == 0) {
+                func_00194D30(self, 1, -1);
+            } else {
+                func_00194D30(self, 0, 0x17);
+                func_00194D30(self, 1, 0xF);
+            }
+        }
+        break;
+    }
+    }
+}

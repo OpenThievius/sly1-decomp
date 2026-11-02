@@ -1781,3 +1781,69 @@ void func_00198760(Obj_198760* s1, f32 f)
     }
     func_001C7CB8(s1, f);
 }
+
+struct Slot_19AB78 { u8 pad[0x304]; s32* f304; };
+
+struct Slot_19AB78;
+struct Ent_19AB78 { u8 pad[0x14]; s32 f14; Slot_19AB78* f18[4]; s32 f28; };
+struct Self_19AB78 {
+    u8 pad[0x650];
+    s32 f650;
+    s32 f654;
+    u8 pad2[0x658 - 0x658 + 0x100 - 0x100];
+};
+struct Vt_19AB78 { s32* vt; };
+struct Obj_19AB78 { void** vt; };
+typedef void (*VFn_19AB78)(Obj_19AB78*);
+struct Ms_19AB78 { u8 pad[0x64]; s32 f64; };
+struct Vi_19AB78 { u8 pad[0x239C]; s32 f239C; u8 p2[0x2C]; void* f23CC; };
+struct Gx_19AB78 { u8 pad[0x2300]; s32 f2300; };
+struct Gy_19AB78 { u8 pad[0x19F0]; u32 f19F0; };
+
+
+void func_00192230(void* self, s32 code, s32* rec);
+void func_00175170(void* self, s32 a, s32 b);
+s32 func_0019A000(s32 bits);
+void func_001518B8(Slot_19AB78* s);
+
+void func_0019AB78(Self_19AB78* self, s32 msg, s32* rec)
+{
+    func_00192230(self, msg, rec);
+    if (msg == 12 && rec[1] == self->f650) {
+        if (self->f654 != 0 && D_00262E10 != 0) {
+            ((Vi_19AB78*)D_00262E10)->f23CC = self;
+            ((Vi_19AB78*)D_00262E10)->f239C = 7;
+            func_00175170((Vi_19AB78*)D_00262E10, 6, 16);
+        } else {
+            s32 k;
+            s32 a;
+            s32 b;
+            ((VFn_19AB78)(*(Obj_19AB78*)&D_0026C948).vt[0x38 / 4])(((Obj_19AB78*)&D_0026C948));
+            a = (*(Ms_19AB78**)&D_002623C8)->f64;
+            b = (*(Gx_19AB78**)&D_00275710)->f2300;
+            k = -1;
+            if (a == b) {
+                k = func_0019A000(*(s32*)((u8*)self + 0x760)) ? 5 : 4;
+            } else if (((*(Gy_19AB78**)&D_002623C0)->f19F0 & 0xF0000000) == 0) {
+                if (a == b - 1) {
+                    k = 3;
+                } else {
+                    f32 r = (f32)a / (f32)b;
+                    if (r < 0.5f) {
+                        k = 0;
+                    } else if (r < 0.8f) {
+                        k = 1;
+                    } else {
+                        k = 2;
+                    }
+                }
+            }
+            if (k != -1) {
+                Ent_19AB78* e = (Ent_19AB78*)((u8*)self + (k * 0x2C + 0x658));
+                e->f18[e->f28]->f304[0] = 0;
+                func_001518B8(e->f18[e->f28]);
+                e->f28 = (e->f28 + 1) % e->f14;
+            }
+        }
+    }
+}
