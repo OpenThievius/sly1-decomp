@@ -102,6 +102,24 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    float support among them) are decompiled from retail like the rest
    (LEGAL.md).
 
+   **The math library is another build** (measured on 2026-11-01). Its range,
+   0x204F68-0x208F90 (26 functions unmatched), puts two `nop`s before every
+   `div.s` that uses a value computed just before, and sets up its frame
+   before the body. None of the toolchain's compilers (2.95.3, 2.96-ee-001003-1,
+   2.95.2, 2.9-ee-991111) with any of its assemblers (`ee/bin/as.exe`,
+   `bin/ee-as.exe`, `ee/bin/ps2eeas.exe`) gives that, whatever the scheduling
+   flags. Sony's own build `2.9-ee-991111-01` does: its compiler writes
+   `nop; nop; div.s` itself. It comes in the archive OpenRAC uses for its
+   DTL-S13010 assembler (decompme/compilers `ee-gcc2.9-991111-01-dtls13010.tar.gz`,
+   SHA-256 `3ab52a7ea962100f2a7df3e04d3e7a758aad669eb365251682e769b755d9d586`;
+   kept in the toolchain folder, never committed), as 32-bit Linux programs
+   with their own loader: on macOS they run in a Linux container. Built with
+   it, a near miss of func_00206298 (written for 2.9-ee-991111) comes out at
+   1,064 bytes against retail's 1,072, with 89% of its instructions in line,
+   against 1,016 bytes with 2.9-ee-991111; `-O2` is the right level
+   (`-O1` or no scheduling is far worse). Using it needs tools/compile.py
+   to run a Linux compiler for the math library's files; not done yet.
+
 Record every result here: the function, the compiler, the flags, and whether
 it matched.
 
