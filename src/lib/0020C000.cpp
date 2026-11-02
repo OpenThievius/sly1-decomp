@@ -678,3 +678,270 @@ s32 func_0020FD28(Obj_20FD28* self, s32 a1)
     self->f850 = v0;
     return v0;
 }
+
+struct Chan_20C1A0 {
+    s32 f00;
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    u8 pad14[0x140 - 0x14];
+};
+
+struct Blk_20C1A0 {
+    s32 f00;
+    u8 pad04[0x0C];
+    s32 f10;
+};
+
+struct Dev_20C1A0 {
+    u8 pad000[0x11C];
+    s32 f11C;
+    u8 pad120[0x12C - 0x120];
+    s32 f12C;
+    u8 pad130[0x174 - 0x130];
+    s32 f174;
+    u8 pad178[0x1C0 - 0x178];
+    Blk_20C1A0* f1C0;
+    u8 pad1C4[0x1D0 - 0x1C4];
+    Blk_20C1A0* f1D0;
+    u8 pad1D4[0x1E0 - 0x1D4];
+    Blk_20C1A0* f1E0;
+    u8 pad1E4[0x6B8 - 0x1E4];
+    Chan_20C1A0 chan[1];
+    u8 pad_after[0x810 - 0x6B8 - 0x140];
+    s32 f810;
+};
+
+extern u8 D_00250260[];
+void func_0020B940(Dev_20C1A0* d, u8* msg, s32 code);
+void func_0020C3F0(Dev_20C1A0* d, s32 a, s32 b, s32 flags);
+void func_00210C38(Dev_20C1A0* d);
+
+s32 func_0020C1A0(Dev_20C1A0* d, s32 n, s32 mode, s32 flags, s32 code)
+{
+    s32 dir = flags & 1;
+    s32 q = n / d->f12C;
+    s32 r = n % d->f12C;
+    s32 rx = r << 4;
+    s32 qx = q << 4;
+
+    if (dir) {
+        while ((*(volatile u32*)0x1000D400 >> 8) & 1) {
+        }
+        d->chan[d->f810].f10 = 0;
+    } else {
+        if ((u32)(code - 1) >= 3) {
+            func_0020B940(d, D_00250260, code);
+            d->f11C = 1;
+            return 0;
+        }
+        func_0020C3F0(d, rx, qx, flags);
+        while ((*(volatile u32*)0x1000D400 >> 8) & 1) {
+        }
+        func_00210C38(d);
+        d->chan[d->f810].f10 = 1;
+    }
+    if (mode == 1 && (flags & 2)) {
+        d->chan[d->f810].f0C = mode;
+    } else {
+        d->chan[d->f810].f0C = 0;
+    }
+    d->chan[d->f810].f08 = dir;
+    if (d->f174 == 3) {
+        Blk_20C1A0* b3 = d->f1C0;
+        d->chan[d->f810].f00 = b3->f00 + (r * b3->f10 + q) * 0x180;
+    } else {
+        Blk_20C1A0* b = d->f174 == 2 ? d->f1E0 : d->f1D0;
+        d->chan[d->f810].f00 = b->f00 + (r * b->f10 + q) * 0x180;
+    }
+    return 1;
+}
+
+struct Mode_E120 { u8 pad[0x174]; s32 mode; s32 flag; };
+
+void func_0020E120(Mode_E120* self, s32* out, s32* in, s32 x, s32 y)
+{
+    if (self->mode == 3) {
+        if (self->flag != 0) {
+            out[0] = ((x > 0 ? x + 1 : x) >> 1) + in[0];
+            out[1] = ((y > 0 ? y + 1 : y) >> 1) + in[1] - 1;
+            { s32 gx = x * 3;
+            out[2] = ((x > 0 ? gx + 1 : gx) >> 1) + in[0]; }
+            { s32 gy = y * 3;
+            out[3] = ((y > 0 ? gy + 1 : gy) >> 1) + in[1] + 1; }
+        } else {
+            { s32 gx = x * 3;
+            out[0] = ((x > 0 ? gx + 1 : gx) >> 1) + in[0]; }
+            { s32 gy = y * 3;
+            out[1] = ((y > 0 ? gy + 1 : gy) >> 1) + in[1] - 1; }
+            out[2] = ((x > 0 ? x + 1 : x) >> 1) + in[0];
+            out[3] = ((y > 0 ? y + 1 : y) >> 1) + in[1] + 1;
+        }
+        return;
+    }
+    out[0] = ((x > 0 ? x + 1 : x) >> 1) + in[0];
+    s32 r = ((y > 0 ? y + 1 : y) >> 1) + in[1];
+    out[1] = r;
+    if (self->mode == 1) {
+        out[1] = r - 1;
+    } else {
+        out[1] = r + 1;
+    }
+}
+
+struct Self_20E8A0 {
+    u8 pad0[0x11C];
+    s32 f11C;
+    u8 pad1[0x150 - 0x120];
+    s32 f150;
+    s32 f154;
+    s32 f158;
+    s32 f15C;
+    s32 f160;
+    s32 f164;
+    s32 f168;
+    s32 f16C;
+    s32 f170;
+    s32 f174;
+    u8 pad2[4];
+    s32 f17C;
+    s32 f180;
+    u8 pad3[0x1B0 - 0x184];
+    s32 f1B0;
+    s32 f1B4;
+    u8 pad4[0x810 - 0x1B8];
+    s32 f810;
+    u8 pad5[0x848 - 0x814];
+    s32 f848;
+};
+
+extern u8 D_00250410[];
+
+s16 func_0020F248(Self_20E8A0* self, s32 mode);
+void func_0020B978(Self_20E8A0* self, u8* msg);
+s32 func_0020F5B8(Self_20E8A0* self, s32 n);
+s32 func_0020F4C8(Self_20E8A0* self, s32 n);
+void func_0020F0F0(Self_20E8A0* self);
+void func_0020F0C0(Self_20E8A0* self, s32 v);
+void func_00210D90(s32 a, s32 b);
+s32 func_0020EDD0(Self_20E8A0* self, s32* b1, s32* b2, s32* o5, s32 a4, s32 a5, s32 a6, s32 a7, s32 s0, s32 s8, s32 s10);
+s32 func_0020EF70(Self_20E8A0* self, s32* b1, s32* b2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
+
+s32 func_0020E8A0(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s32* o5, s32* b2)
+{
+    s32 m3, m4, m7, mfp;
+    s32 v;
+
+    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xF8FFFFFF) | (self->f150 << 24);
+    v = func_0020F248(self, 1);
+    *st = v;
+    if (v == 0) {
+        func_0020B978(self, D_00250410);
+        self->f11C = 1;
+        return 0;
+    }
+    if (v & 0xC) {
+        if (self->f174 == 3 && self->f17C != 0) {
+            *mode = 2;
+        } else {
+            *mode = func_0020F5B8(self, 2);
+        }
+    } else if (v & 1) {
+        if (self->f180 != 0) {
+            *mode = (self->f174 == 3) ? 2 : 1;
+        }
+    }
+    if (self->f174 == 3) {
+        m3 = (*mode == 1) ? 2 : 1;
+        m4 = (*mode == 2);
+    } else {
+        m4 = 0;
+        m3 = (*mode == 2) ? 2 : 1;
+    }
+    mfp = (*mode == 3);
+    m7 = 0;
+    if (m4 == 0) {
+        m7 = (self->f174 == 3);
+    }
+    s32 w;
+    if (self->f174 == 3 && self->f17C == 0) {
+        if ((*st & 3) != 0) {
+            w = func_0020F5B8(self, 1);
+        } else {
+            w = 0;
+        }
+    } else {
+        w = 0;
+    }
+    *o3 = w;
+    if (*st & 0x10) {
+        self->f1B4 = func_0020F5B8(self, 5);
+    }
+    if ((*st & 8) || ((*st & 1) && self->f180)) {
+        if (self->f848) {
+            func_0020EDD0(self, b1, b2, o5, 0, m3, m4, self->f164 - 1, self->f168 - 1, mfp, m7);
+        } else {
+            s32 t = self->f158 - 1;
+            func_0020EF70(self, b1, b2, t, t, 0, 0, self->f154);
+        }
+    }
+    if (self->f11C) {
+        return 0;
+    }
+    if (*st & 4) {
+        if (self->f848) {
+            func_0020EDD0(self, b1, b2, o5, 1, m3, m4, self->f16C - 1, self->f170 - 1, 0, m7);
+        } else {
+            s32 t = self->f160 - 1;
+            func_0020EF70(self, b1 + 2, b2, t, t, 0, 0, self->f15C);
+        }
+    }
+    if (self->f11C) {
+        return 0;
+    }
+    if ((*st & 1) && self->f180) {
+        func_0020F4C8(self, 1);
+    }
+    if (*st & 3) {
+        func_00210D90(*(s32*)((u8*)self + self->f810 * 0x140 + 0x594), 0x300);
+        func_0020F0F0(self);
+        s32 x = ((*st & 1) << 27) | (self->f1B4 << 16);
+        s32 y = (self->f1B0 << 26) | 0x20000000;
+        s32 z = *o3 << 25;
+        func_0020F0C0(self, x | y | z);
+    } else {
+        *(s32*)((u8*)self + self->f810 * 0x140 + 0x6CC) = 1;
+    }
+    self->f1B0 = 0;
+    if (self->f11C) {
+        return 0;
+    }
+    if ((*st & 1) == 0) {
+        self->f1B0 = 1;
+    }
+    if ((*st & 1) && self->f180 == 0) {
+        b1[5] = 0;
+        b1[4] = 0;
+        b1[1] = 0;
+        b1[0] = 0;
+        b1[7] = 0;
+        b1[6] = 0;
+        b1[3] = 0;
+        b1[2] = 0;
+    }
+    s32 d = self->f150;
+    if (d == 2 && (*st & 9) == 0) {
+        b1[5] = 0;
+        b1[4] = 0;
+        b1[1] = 0;
+        b1[0] = 0;
+        if (self->f174 == 3) {
+            *mode = d;
+        } else {
+            *mode = 1;
+            *o5 = (self->f174 == 2);
+        }
+    }
+    return 1;
+}
