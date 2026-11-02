@@ -60,8 +60,9 @@ These rules follow OpenRAC's (rac1-decomp, `docs/reference/ASM_CLASSIFICATION.md
 instructions such as `ei`, hand-placed nops, `max.s`/`min.s` in delay slots, and the source
 names in the SDK's `libc.a`), as the maintainers decided on #18. Two things OpenRAC also
 weighs are measured here and do not count: `sqrt.s` (both compilers emit it for
-`__builtin_sqrtf`, followed by a NaN check that calls `sqrtf`; a bare `sqrt.s` stays blocked as
-`nonc` in `tools/todo.py`) and a `nop` outside a delay slot (462 functions matched in C have one).
+`__builtin_sqrtf`, so it is no proof of assembly; but always followed by a NaN check that calls
+`sqrtf`, which no retail function has, so `tools/todo.py` keeps it blocked as `nonc`) and a `nop`
+outside a delay slot (462 functions matched in C have one).
 `break 0, 7`, the compiler's divide-by-zero trap after a division, is plain C as well.
 
 The MMI rule is evidence-based. Six functions that are matched in C contain `por`, the
