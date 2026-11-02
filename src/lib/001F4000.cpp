@@ -41,15 +41,16 @@ s32 func_001F7B50(Out_1F7B50* out, ...)
 
 // NEAR: frame layout and a1..a7 spill match; ours adds swc1 spills of f12..f18 (varargs floats) and saves s0/s1/ra with sq instead of sd
 
-extern s32 D_00277130;
-void func_001F72A8(void);
+typedef void (*PutChar_1F7588)(s32 c);
+extern PutChar_1F7588 D_00277130;
+void func_001F72A8(s32 c);
 s32 func_001F7588(void* self, void* ap);
 
 s32 func_001F7B88(void* self, ...)
 {
     void* ap = (char*)__builtin_next_arg(self) - 56;
-    s32 saved = D_00277130;
-    D_00277130 = (s32)func_001F72A8;
+    PutChar_1F7588 saved = D_00277130;
+    D_00277130 = func_001F72A8;
     s32 r = func_001F7588(self, ap);
     D_00277130 = saved;
     return r;
@@ -198,4 +199,273 @@ s32 func_001F7E78(Ring_001F7E78* r)
     s32 off = index << 6;
     r->cursor = index + 1;
     return r->base + off;
+}
+
+// A small formatter: %c %d %u %o %x %s %e %f, the length modifiers l and h and a
+// zero-padded width of one or two digits, written one character at a time through
+// the output hook. Arguments come from 8-byte slots.
+
+typedef void (*PutChar_1F7588)(s32 c);
+extern PutChar_1F7588 D_00277130;
+
+void func_001F7420(double value);
+
+#define NEXT_ARG_1F7588(ap, T) (ap += 8, *(T*)(ap - 8))
+
+void func_001F7588(const char* fmt, char* ap)
+{
+    char buf[32];
+    char* p;
+    u64 val;
+    char* pad;
+    s32 mod;
+    s32 width;
+    char c;
+
+    for (; *fmt; fmt++)
+    {
+        pad = 0;
+        mod = 0;
+        if (*fmt == '%')
+        {
+        next:
+            fmt++;
+            switch (*fmt)
+            {
+            case '0':
+                width = fmt[1] - '0';
+                c = fmt[2];
+                if ((u8)width < 10)
+                {
+                    if ((u32)(c - '0') < 10)
+                    {
+                        width = width * 10 + (c - '0');
+                        if (width >= 32)
+                        {
+                            width = 31;
+                        }
+                        fmt += 2;
+                    }
+                    else
+                    {
+                        fmt += 1;
+                    }
+                    pad = &buf[31 - width];
+                    for (; width > 0; width--)
+                    {
+                        buf[31 - width] = '0';
+                    }
+                }
+                goto next;
+            case 'l':
+                mod = 'l';
+                goto next;
+            case 'h':
+                mod = 'h';
+                goto next;
+            case 'o':
+                if (mod == 'l')
+                {
+                    val = NEXT_ARG_1F7588(ap, u64);
+                }
+                else if (mod == 'h')
+                {
+                    val = NEXT_ARG_1F7588(ap, u16);
+                }
+                else
+                {
+                    val = NEXT_ARG_1F7588(ap, u32);
+                }
+                p = &buf[31];
+                *p = 0;
+                if (val == 0)
+                {
+                    *--p = '0';
+                }
+                else
+                {
+                    while (val)
+                    {
+                        *--p = (val & 7) + '0';
+                        val >>= 3;
+                    }
+                }
+                if (pad && pad < p)
+                {
+                    p = pad;
+                }
+                while (*p)
+                {
+                    D_00277130(*p++);
+                }
+                break;
+            case 'x':
+                if (mod == 'l')
+                {
+                    val = NEXT_ARG_1F7588(ap, u64);
+                }
+                else if (mod == 'h')
+                {
+                    val = NEXT_ARG_1F7588(ap, u16);
+                }
+                else
+                {
+                    val = NEXT_ARG_1F7588(ap, u32);
+                }
+                p = &buf[31];
+                *p = 0;
+                if (val == 0)
+                {
+                    *--p = '0';
+                }
+                else
+                {
+                    while (val)
+                    {
+                        u64 digit = val & 15;
+                        if (digit < 10)
+                        {
+                            *--p = digit + '0';
+                        }
+                        else
+                        {
+                            *--p = digit + 'a' - 10;
+                        }
+                        val >>= 4;
+                    }
+                }
+                if (pad && pad < p)
+                {
+                    p = pad;
+                }
+                while (*p)
+                {
+                    D_00277130(*p++);
+                }
+                break;
+            case 'd':
+                if (mod == 'l')
+                {
+                    val = NEXT_ARG_1F7588(ap, s64);
+                }
+                else if (mod == 'h')
+                {
+                    val = NEXT_ARG_1F7588(ap, s16);
+                }
+                else
+                {
+                    val = NEXT_ARG_1F7588(ap, s32);
+                }
+                p = &buf[31];
+                *p = 0;
+                if (val == 0)
+                {
+                    *--p = '0';
+                }
+                else
+                {
+                    if ((s64)val < 0)
+                    {
+                        val = -val;
+                        D_00277130('-');
+                    }
+                    while (val)
+                    {
+                        *--p = (s64)val % 10 + '0';
+                        val = (s64)val / 10;
+                    }
+                }
+                if (pad && pad < p)
+                {
+                    p = pad;
+                }
+                while (*p)
+                {
+                    D_00277130(*p++);
+                }
+                break;
+            case 'u':
+                if (mod == 'l')
+                {
+                    val = NEXT_ARG_1F7588(ap, u64);
+                }
+                else if (mod == 'h')
+                {
+                    val = NEXT_ARG_1F7588(ap, u16);
+                }
+                else
+                {
+                    val = NEXT_ARG_1F7588(ap, u32);
+                }
+                p = &buf[31];
+                *p = 0;
+                if (val == 0)
+                {
+                    *--p = '0';
+                }
+                else
+                {
+                    while (val)
+                    {
+                        *--p = val % 10 + '0';
+                        val /= 10;
+                    }
+                }
+                if (pad && pad < p)
+                {
+                    p = pad;
+                }
+                while (*p)
+                {
+                    D_00277130(*p++);
+                }
+                break;
+            case 'e':
+            case 'f':
+            {
+                f32 f = NEXT_ARG_1F7588(ap, f32);
+                if (f == 0.0f)
+                {
+                    D_00277130('0');
+                    }
+                else
+                {
+                        func_001F7420(f);
+                }
+                break;
+            }
+            case 's':
+            {
+                char* str = NEXT_ARG_1F7588(ap, char*);
+                if (*str == 0)
+                {
+                    D_00277130('(');
+                    D_00277130('n');
+                    D_00277130('u');
+                    D_00277130('l');
+                    D_00277130('l');
+                    D_00277130(')');
+                }
+                else
+                {
+                    p = str;
+                    while (*p)
+                    {
+                        D_00277130(*p);
+                        p++;
+                    }
+                }
+                break;
+            }
+            case 'c':
+                val = NEXT_ARG_1F7588(ap, char);
+                D_00277130(val);
+                break;
+            }
+        }
+        else
+        {
+            D_00277130(*fmt);
+        }
+    }
 }

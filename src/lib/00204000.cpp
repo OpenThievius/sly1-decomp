@@ -8,7 +8,11 @@ struct Lock_204AA8;
 struct Ctx_204AA8 { s32 kind; void* a; void* b; u8 bytes[6]; u8 pad1A[2]; s32 state; };
 
 extern Ctx_204AA8 D_0062ACC0;
-extern u8 D_0062AA80[];
+struct Sema_2040E8 {
+    u8 pad00[0x24];
+    s32 f24;
+};
+extern Sema_2040E8 D_0062AA80[];
 
 s32 func_001F8290(Lock_204AA8* l, s32 a, s32 b, Ctx_204AA8* c, s32 d, Ctx_204AA8* e, s32 f, s32 g, s32 h);
 void func_00204610(Obj_204AA8* o, void* q, s32 n);
@@ -33,7 +37,6 @@ s32 func_00204AA8(Obj_204AA8* p, void* q, u8* src)
 
 struct Obj_204930 { u32 mode; u32 a; u32 b; u32 c; u32 d; u32 result; };
 
-extern u8 D_0062AA80[];
 
 s32 func_001F8290(u8* p0, s32 a1, s32 a2, Obj_204930* a3, s32 a4, Obj_204930* a5, s32 a6, s32 a7, s32 a8);
 s32 func_00204610(Obj_204930* obj, s32 a1, s32 a2);
@@ -49,7 +52,7 @@ s32 func_00204930(s32 a0, s32 a1, s32 a2, s32 a3)
     obj->mode = 6;
     obj->a = a0;
     obj->b = a1;
-    r = func_001F8290(D_0062AA80, 1, 0, obj, 0x80, obj, 0x80, 0, 0);
+    r = func_001F8290((u8*)D_0062AA80, 1, 0, obj, 0x80, obj, 0x80, 0, 0);
     if (r < 0) {
         return 0;
     }
@@ -63,7 +66,6 @@ s32 func_00204930(s32 a0, s32 a1, s32 a2, s32 a3)
 
 struct Ctx_00204DB8 { s32 f00; u8 pad[8]; s32 f0C; };
 struct Q_00204DB8;
-extern u8 D_0062AA80[];
 s32 func_001F8290(Q_00204DB8* q, s32 a, s32 b, Ctx_00204DB8* c, s32 d, Ctx_00204DB8* e, s32 f, s32 g, s32 h);
 
 s32 func_00204DB8(void)
@@ -77,3 +79,40 @@ s32 func_00204DB8(void)
     return ctx->f0C;
 }
 
+
+extern s32 D_0027AE80;
+extern s32 D_0027AE84;
+extern u8 D_0024F780[];
+extern u8 D_0024F7A8[];
+
+s32 func_001F80C0(Sema_2040E8* s, u32 flags, s32 arg);
+s32 func_00204DB8(void);
+s32 func_00204228(void* arg);
+void func_001E1F10(const u8* fmt, ...);
+
+s32 func_002040E8(void* arg)
+{
+    D_0027AE80 = 1;
+    while (func_001F80C0(&D_0062AA80[0], 0x80000100, 0), D_0062AA80[0].f24 == 0) {
+        for (s32 i = 0x10000; i != -1; i--) {
+        }
+    }
+    for (;;) {
+        func_001F80C0(&D_0062AA80[1], 0x80000101, 0);
+        if (D_0062AA80[1].f24 != 0) {
+            break;
+        }
+        for (s32 i = 0x10000; i != -1; i--) {
+        }
+    }
+    s32 r = func_00204DB8();
+    s32 hi = r >> 8;
+    if (hi != 4) {
+        if (D_0027AE84 != 0) {
+            func_001E1F10(D_0024F780);
+            func_001E1F10(D_0024F7A8, 4, 0, hi, r & 0xFF);
+        }
+        return 0;
+    }
+    return func_00204228(arg);
+}

@@ -1227,3 +1227,205 @@ s32 func_002027C8(s32 mode)
     }
     return flag;
 }
+
+// The runtime's type names of the built-in types: each function builds its object in place
+// the first time it is asked for, and returns it.
+extern const void* const D_0024F408[];
+
+struct TypeName_200E08 {
+    const char* name;
+    const void* vtbl;
+    TypeName_200E08(const char* n)
+    {
+        vtbl = D_0024F408;
+        name = n;
+    }
+    static void* operator new(unsigned int, void* p) throw() { return p; }
+};
+
+extern TypeName_200E08 D_00278E00;
+extern const char D_0024F340[];
+
+TypeName_200E08* func_00200E08(void)
+{
+    if (D_00278E00.name == 0) {
+        new (&D_00278E00) TypeName_200E08(D_0024F340);
+    }
+    return &D_00278E00;
+}
+
+extern TypeName_200E08 D_00278E08;
+extern const char D_0024F348[];
+
+TypeName_200E08* func_00200E40(void)
+{
+    if (D_00278E08.name == 0) {
+        new (&D_00278E08) TypeName_200E08(D_0024F348);
+    }
+    return &D_00278E08;
+}
+
+extern TypeName_200E08 D_00278E10;
+extern const char D_0024F350[];
+
+TypeName_200E08* func_00200E78(void)
+{
+    if (D_00278E10.name == 0) {
+        new (&D_00278E10) TypeName_200E08(D_0024F350);
+    }
+    return &D_00278E10;
+}
+
+extern TypeName_200E08 D_00278E18;
+extern const char D_0024F358[];
+
+TypeName_200E08* func_00200EB0(void)
+{
+    if (D_00278E18.name == 0) {
+        new (&D_00278E18) TypeName_200E08(D_0024F358);
+    }
+    return &D_00278E18;
+}
+
+extern TypeName_200E08 D_00278E20;
+extern const char D_0024F360[];
+
+TypeName_200E08* func_00200EE8(void)
+{
+    if (D_00278E20.name == 0) {
+        new (&D_00278E20) TypeName_200E08(D_0024F360);
+    }
+    return &D_00278E20;
+}
+
+extern TypeName_200E08 D_00278E28;
+extern const char D_0024F368[];
+
+TypeName_200E08* func_00200F20(void)
+{
+    if (D_00278E28.name == 0) {
+        new (&D_00278E28) TypeName_200E08(D_0024F368);
+    }
+    return &D_00278E28;
+}
+
+extern TypeName_200E08 D_00278E30;
+extern const char D_0024F370[];
+
+TypeName_200E08* func_00200F58(void)
+{
+    if (D_00278E30.name == 0) {
+        new (&D_00278E30) TypeName_200E08(D_0024F370);
+    }
+    return &D_00278E30;
+}
+
+extern TypeName_200E08 D_00278E38;
+extern const char D_0024F378[];
+
+TypeName_200E08* func_00200F90(void)
+{
+    if (D_00278E38.name == 0) {
+        new (&D_00278E38) TypeName_200E08(D_0024F378);
+    }
+    return &D_00278E38;
+}
+
+extern TypeName_200E08 D_00278E40;
+extern const char D_0024F380[];
+
+TypeName_200E08* func_00200FC8(void)
+{
+    if (D_00278E40.name == 0) {
+        new (&D_00278E40) TypeName_200E08(D_0024F380);
+    }
+    return &D_00278E40;
+}
+
+extern TypeName_200E08 D_00278E48;
+extern const char D_0024F388[];
+
+TypeName_200E08* func_00201000(void)
+{
+    if (D_00278E48.name == 0) {
+        new (&D_00278E48) TypeName_200E08(D_0024F388);
+    }
+    return &D_00278E48;
+}
+
+extern TypeName_200E08 D_00278E50;
+extern const char D_0024F390[];
+
+TypeName_200E08* func_00201038(void)
+{
+    if (D_00278E50.name == 0) {
+        new (&D_00278E50) TypeName_200E08(D_0024F390);
+    }
+    return &D_00278E50;
+}
+
+extern TypeName_200E08 D_00278E58;
+extern const char D_0024F398[];
+
+TypeName_200E08* func_00201070(void)
+{
+    if (D_00278E58.name == 0) {
+        new (&D_00278E58) TypeName_200E08(D_0024F398);
+    }
+    return &D_00278E58;
+}
+
+extern TypeName_200E08 D_00278E60;
+extern const char D_0024F3A0[];
+
+TypeName_200E08* func_002010A8(void)
+{
+    if (D_00278E60.name == 0) {
+        new (&D_00278E60) TypeName_200E08(D_0024F3A0);
+    }
+    return &D_00278E60;
+}
+
+extern TypeName_200E08 D_00278E68;
+extern const char D_0024F3A8[];
+
+TypeName_200E08* func_002010E0(void)
+{
+    if (D_00278E68.name == 0) {
+        new (&D_00278E68) TypeName_200E08(D_0024F3A8);
+    }
+    return &D_00278E68;
+}
+
+extern TypeName_200E08 D_00278E70;
+extern const char D_0024F3B0[];
+
+TypeName_200E08* func_00201118(void)
+{
+    if (D_00278E70.name == 0) {
+        new (&D_00278E70) TypeName_200E08(D_0024F3B0);
+    }
+    return &D_00278E70;
+}
+
+extern TypeName_200E08 D_00278E78;
+extern const char D_0024F3B8[];
+
+TypeName_200E08* func_00201150(void)
+{
+    if (D_00278E78.name == 0) {
+        new (&D_00278E78) TypeName_200E08(D_0024F3B8);
+    }
+    return &D_00278E78;
+}
+
+extern TypeName_200E08 D_00278E80;
+extern const char D_0024F3C0[];
+
+TypeName_200E08* func_00201188(void)
+{
+    if (D_00278E80.name == 0) {
+        new (&D_00278E80) TypeName_200E08(D_0024F3C0);
+    }
+    return &D_00278E80;
+}

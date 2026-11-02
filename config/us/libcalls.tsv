@@ -1,3 +1,8 @@
 name	function	what
 dpcmp	func_001FD308	double compare
 dpsub	func_001FCD78	double subtract
+__divdi3	func_001FAE38	64-bit signed divide
+__moddi3	func_001FB790	64-bit signed remainder
+__udivdi3	func_001FBE00	64-bit unsigned divide
+__umoddi3	func_001FC3D0	64-bit unsigned remainder
+fptodp	func_001FD868	float to double
