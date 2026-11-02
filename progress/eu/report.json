@@ -1,15 +1,15 @@
 {
  "measures": {
-  "fuzzy_match_percent": 79.85743067459195,
+  "fuzzy_match_percent": 79.91182459392434,
   "total_code": "1117772",
-  "matched_code": "886424",
-  "matched_code_percent": 79.30275583929459,
+  "matched_code": "887032",
+  "matched_code_percent": 79.35714975862699,
   "total_data": "464563",
   "matched_data": "0",
   "matched_data_percent": 0.0,
   "total_functions": 4795,
-  "matched_functions": 4330,
-  "matched_functions_percent": 90.30239833159541,
+  "matched_functions": 4333,
+  "matched_functions_percent": 90.36496350364963,
   "complete_code": "0",
   "complete_code_percent": 0.0,
   "complete_data": "0",
@@ -41739,16 +41739,16 @@
   {
    "name": "lib/00200000",
    "measures": {
-    "fuzzy_match_percent": 61.44208642290974,
+    "fuzzy_match_percent": 65.3285604704679,
     "total_code": "15644",
-    "matched_code": "9612",
-    "matched_code_percent": 61.44208642290974,
+    "matched_code": "10220",
+    "matched_code_percent": 65.3285604704679,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 132,
-    "matched_functions": 115,
-    "matched_functions_percent": 87.12121212121212,
+    "matched_functions": 118,
+    "matched_functions_percent": 89.39393939393939,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -42903,7 +42903,7 @@
     {
      "name": "func_00203DC0",
      "size": "216",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15288",
      "metadata": {
       "virtual_address": "2112960"
@@ -42921,7 +42921,7 @@
     {
      "name": "func_00203EA8",
      "size": "196",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15520",
      "metadata": {
       "virtual_address": "2113192"
@@ -42939,7 +42939,7 @@
     {
      "name": "func_00203F78",
      "size": "196",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "15728",
      "metadata": {
       "virtual_address": "2113400"
@@ -45440,16 +45440,16 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 57.5984796129924,
+    "fuzzy_match_percent": 58.123704215618524,
     "total_code": "115760",
-    "matched_code": "66676",
-    "matched_code_percent": 57.5984796129924,
+    "matched_code": "67284",
+    "matched_code_percent": 58.123704215618524,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 623,
-    "matched_functions": 474,
-    "matched_functions_percent": 76.08346709470305,
+    "matched_functions": 477,
+    "matched_functions_percent": 76.56500802568219,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",

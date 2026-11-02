@@ -3341,6 +3341,9 @@ func_002023B0	func_002036F0	match
 func_00202768	func_00203AA8	match	
 func_002027A0	func_00203AE0	match	
 func_002027C8	func_00203B08	match	
+func_00202A80	func_00203DC0	match	rodata
+func_00202B68	func_00203EA8	match	rodata
+func_00202C38	func_00203F78	match	rodata
 func_00202D30	func_00204070	match	
 func_00203050	func_00204390	match	
 func_00203230	func_00204570	match	
