@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "float_bits.h"
 
 f32 func_00205318(f32 x)
 {
@@ -431,4 +432,93 @@ f32 func_00205C78(f32 x, f32 y)
         return func_001FD578(e.ret);
     }
     return z;
+}
+
+extern f32 D_0024F890[];
+extern f32 D_0024F8A0[];
+extern f32 D_0024F8B0[];
+f32 func_002052F8(f32 x);
+
+f32 func_00204F68(f32 x)
+{
+    s32 hx;
+    FLOAT_TO_BITS(hx, x);
+    s32 ix = hx & 0x7FFFFFFF;
+    s32 id;
+    if (ix >= 0x50800000) {
+        if (ix > 0x7F800000) {
+            return x + x;
+        }
+        if (hx > 0) {
+            return D_0024F890[3] + D_0024F8A0[3];
+        }
+        return -D_0024F890[3] - D_0024F8A0[3];
+    }
+    if (ix < 0x3EE00000) {
+        if (ix < 0x31000000) {
+            if (1.0e30f + x > 1.0f) {
+                return x;
+            }
+        }
+        id = -1;
+    } else {
+        x = func_002052F8(x);
+        if (ix < 0x3F980000) {
+            if (ix < 0x3F300000) {
+                id = 0;
+                x = (2.0f * x - 1.0f) / (2.0f + x);
+            } else {
+                id = 1;
+                x = (x - 1.0f) / (x + 1.0f);
+            }
+        } else {
+            if (ix < 0x401C0000) {
+                id = 2;
+                x = (x - 1.5f) / (1.0f + 1.5f * x);
+            } else {
+                id = 3;
+                x = -1.0f / x;
+            }
+        }
+    }
+    f32 z = x * x;
+    f32 w = z * z;
+    f32 s1 = z * (D_0024F8B0[0] + w * (D_0024F8B0[2] + w * (D_0024F8B0[4] + w * (D_0024F8B0[6] + w * (D_0024F8B0[8] + w * D_0024F8B0[10])))));
+    f32 s2 = w * (D_0024F8B0[1] + w * (D_0024F8B0[3] + w * (D_0024F8B0[5] + w * (D_0024F8B0[7] + w * D_0024F8B0[9]))));
+    if (id < 0) {
+        return x - x * (s1 + s2);
+    }
+    z = D_0024F890[id] - ((x * (s1 + s2) - D_0024F8A0[id]) - x);
+    return hx < 0 ? -z : z;
+}
+
+s32 func_00207C88(f32 x, f32* y);
+f32 func_002081A0(f32 x, f32 y);
+f32 func_00208C48(s32 iy, f32 x, f32 y);
+
+f32 func_00205210(f32 x)
+{
+    f32 y[2];
+    s32 n;
+    s32 ix;
+    FLOAT_TO_BITS(ix, x);
+    ix = ix & 0x7fffffff;
+
+    if (ix <= 0x3F490FD8) {
+        return func_002081A0(x, 0.0f);
+    }
+    if (ix > 0x7F7FFFFF) {
+        return x - x;
+    }
+    n = func_00207C88(x, y);
+    switch (n & 3) {
+    case 0:
+        return func_002081A0(y[0], y[1]);
+    case 1:
+        return -func_00208C48(1, y[0], y[1]);
+    case 2:
+        return -func_002081A0(y[0], y[1]);
+    default:
+        return func_00208C48(1, y[0], y[1]);
+    }
 }

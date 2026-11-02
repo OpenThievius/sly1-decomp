@@ -141,18 +141,25 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    in US and PAL. The first pass with it (2026-11-02) matched six more,
    func_002082F8 (2,380 bytes) among them.
 
-   **Still unexplained in the math library.** Two forms recur in its near
-   misses and no source change, flag or tool tried gives them:
+   **Its bit-access macros** (2026-11-02). Two forms recur in its near
+   misses:
    - a `nop` after a `b` or `jr` and its delay slot, putting the next label
      on an 8-byte boundary (0x204FB4, 0x2062EC, 0x20730C, 0x208DC4 and
-     others), where this compiler aligns labels to 4;
+     others), where this compiler aligns jump targets to 4;
    - a float argument's bits copied out (`mfc1`, `move`) and the frame set
      up before any constant is loaded, where ours loads the constants first.
-   Tried without effect: `-O1`, `-O3`, `-G2`, `-fno-schedule-insns`,
+   No flag or tool gives them (`-O1`, `-O3`, `-G2`, `-fno-schedule-insns`,
    `-fno-schedule-insns2`, `-fno-delayed-branch`, `-mips3`, `-mcpu=r4000` and
-   `r5000`; compiling as C with the Linux `cc1`; assembling with the Linux
-   `ee/bin/as.bin`, which gives the same object as `ee/bin/as.exe`. Another
-   build of Sony's compiler may be the cause.
+   `r5000`, C with the Linux `cc1`, the Linux `ee/bin/as.bin`), and
+   `-malign-jumps=3` pads every jump target, not some. The compiler aligns
+   the first label after the start of a loop to 8 (`-malign-loops=3`, its
+   default), and a `do { } while (0)` is a loop to it: reading the float's
+   bits inside one gives both forms. func_00204F68, func_00205210 and
+   func_00209210 are EXACT that way and with nothing else. Retail's library
+   was written with such macros, so include/float_bits.h defines a pair,
+   `FLOAT_TO_BITS` and `BITS_TO_FLOAT` (our names), which src/libm uses for
+   a float's bits; AGENTS.md allows `do { } while (0)` there and nowhere
+   else.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.

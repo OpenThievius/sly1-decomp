@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "float_bits.h"
 
 f32 func_00209260(f32 x, s32 exp);
 f32 func_00205318(f32 x);
@@ -201,4 +202,11 @@ s32 func_00208FE8(Obj_00208FE8* obj)
     Key_00208FE8 v = obj->f8;
     (void)func_001FD308(v, v);
     return 0;
+}
+
+u32 func_00209210(f32 x)
+{
+    s32 bits;
+    FLOAT_TO_BITS(bits, x);
+    return (u32)((bits & 0x7FFFFFFF) + 0x80800000) >> 31;
 }
