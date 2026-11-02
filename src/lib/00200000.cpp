@@ -1143,3 +1143,49 @@ u32 func_00203A20(u32 a0)
     func_001F6B40((Hdl_203A20*)(*(u32*)&D_0027942C));
     return s0;
 }
+
+struct Rec_201A18 { s16 x; s16 y; s16 flag; s16 ext; s32 f8; s32 fC; };
+
+s32 func_001F6C70(u64 value);
+void func_001F6D40(s32 n);
+void func_001F6960(s32 n, s32 ptr);
+void func_001F6910(s32 a, s32 b, s32 c);
+
+void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
+{
+    Rec_201A18* p;
+    u16 ext;
+
+    switch (mode) {
+    case 0:
+        p = (Rec_201A18*)(u32)func_00201BA8();
+        *(volatile u64*)0x12001000 = 0x200;
+        p->x = x;
+        ext = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
+        p->y = y;
+        p->ext = ext;
+        func_001F6C70(0xFF00);
+        p->flag = (flag != 0);
+        if (p->f8 != 0) {
+            func_001F6D40(2);
+            func_001F6960(2, p->fC);
+            p->f8 = 0;
+            p->fC = 0;
+        }
+        func_001F6910(x & 1, (u8)y, flag & 1);
+        return;
+    case 1:
+        *(volatile u64*)0x12001000 = 0x100;
+        return;
+    case 5:
+        p = (Rec_201A18*)(u32)func_00201BA8();
+        p->flag = (flag != 0);
+        p->x = x;
+        p->y = y;
+        p->ext = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
+        func_001F6910(x & 1, (u8)y, flag & 1);
+        return;
+    default:
+        return;
+    }
+}
