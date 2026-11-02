@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2281/2448 (93.2%), checked 2026-11-02
+// BYTES 2336/2448 (95.4%), checked 2026-11-02
 #include "common.h"
-// NEAR (m59f): 93 lines differ (was 163). Two changes: (1) the morph inner loop is
-// `i = 0; if (n > 0) do { ... } while (++i < n);` -- a do-while is not reversed by the second
-// loop pass (the for/while forms all are), so the counter now counts up in a2-like position as in
-// retail; (2) one function-level `i` shared by the weights, morph and tint loops (retail gives
-// all of them the same register a2), with the first loop keeping its own `for (s32 i ...)`
-// (all 16 shared/separate combinations scored: this one is best). Still differs, register
-// choice only: the shared i gets a3 instead of a2 because local-alloc gives the morph loop's
-// `slt` (insn `(lt i n)`) a2, since its `c = r++` copy takes a1 (retail: c in a3, slt in a1);
-// loop 1 still lacks retail's `move a3,a1` copy of &recs[i] for the uv loads, which shifts
-// t0/t1/t2 there. Tried on top: `r = c + 1`, `&recs[i]`, `recs[i]` direct, `*idx++`,
-// `Vec3* d = &dOut[i]`, shared j, i declared first, uv via `Uv* uv`/`u8 uv` (same or worse).
-
+// NEAR (r60d): 47 aligned lines differ (51 marked by check.py; was 93). Two source changes
+// on top of m59f: (1) one function-level `Rec_163ED8* r` assigned `r = &recs[i]` in every loop
+// (loop 1 before `if (hasUv)`, the weights, morph and tint loops); retail keeps r in a3 in all
+// four. Because r is now used after loop 1 ends, loop.c records it as a non-replaceable giv: its
+// insn becomes the copy `r = reduced giv` and the uv loads go through r, which is retail's
+// `move a3,a1`. (2) the morph inner loop is a plain `for (i = 0; i < n; i++) { r = &recs[i]; ...}`
+// (the m59f `c = r++` do-while is no longer needed: the copy `a3 = a6` and `a6 = a3 + 4` of
+// retail come out by themselves). Loop 1 and the morph loop now match exactly.
+// Still differs, register choice only: in the weights loop i+1 lands in t2 (retail t1) and recs
+// in t3 (retail t2); in the morph section `off` is reloaded from 64(sp) where retail keeps it in
+// t3; in the tint loop the inner j's get a1/t0 where retail gives both a2 (i's register: i is
+// dead there since i+1 is precomputed into t1) and the color pointer a2/t3 (retail a1/t2), which
+// shifts 127/510 by one register. Tried: function-level j shared by all inner loops (83), by the
+// tint loops only (78), by the weights loop only (47, same), loop 1 on the shared i (98).
 struct Pkt_163ED8;
 struct Vec3_163ED8 {
     f32 x;
@@ -141,6 +143,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     void* head;
     Node_163ED8* node;
     s32 i;
+    Rec_163ED8* r;
 
     if (obj->f54 != 0) {
         func_00152B38(pkt);
@@ -200,8 +203,8 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         e->f0 = (s32)posOut;
     }
     for (s32 i = 0; i < n; i++) {
+        r = &recs[i];
         if (hasUv) {
-            Rec_163ED8* r = &recs[i];
             if (r->uv == 0xFF) {
                 uvOut[0] = uvOut[1] = 0.0f;
             } else {
@@ -243,7 +246,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         func_001EE5C8(pkt, D_00262430[hdr->count], n, hdr->p[3], 0, &wOut);
         func_001EE528(pkt, 0);
         for (i = 0; i < n; i++) {
-            Rec_163ED8* r = &recs[i];
+            r = &recs[i];
             for (s32 j = 0; j < hdr->count; j++) {
                 *wOut++ = weights[r->pos * hdr->count + j];
             }
@@ -261,16 +264,12 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
             func_001EE668(pkt, 0, 1, &k, 0x16);
             func_001EE5C8(pkt, 8, n, hdr->p[7], 0, &dOut);
             u16* idx = ents[k].idx;
-            Rec_163ED8* r = recs;
-            i = 0;
-            if (n > 0) {
-                do {
-                    Rec_163ED8* c = r++;
-                    Vec3_163ED8* v = &verts[idx[i]];
-                    dOut[i].x = v->x - vecs[c->pos].x;
-                    dOut[i].y = v->y - vecs[c->pos].y;
-                    dOut[i].z = v->z - vecs[c->pos].z;
-                } while (++i < n);
+            for (i = 0; i < n; i++) {
+                r = &recs[i];
+                Vec3_163ED8* v = &verts[idx[i]];
+                dOut[i].x = v->x - vecs[r->pos].x;
+                dOut[i].y = v->y - vecs[r->pos].y;
+                dOut[i].z = v->z - vecs[r->pos].z;
             }
             func_001EE3F0(pkt, D_000023B8);
         }
@@ -300,7 +299,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         func_001EE5C8(pkt, 0xE, n, hdr->p[0] + 1, 0, &cOut);
         func_001EE498(pkt, 1, 1);
         for (i = 0; i < n; i++) {
-            Rec_163ED8* r = &recs[i];
+            r = &recs[i];
             if ((r->flags & 0x7F) == 0x7F) {
                 for (s32 j = 0; j < 4; j++) {
                     cOut[j] = (mesh->color[j] + 1) >> 1;

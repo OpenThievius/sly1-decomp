@@ -1,6 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 682/736 (92.7%), checked 2026-11-02
+// BYTES 690/736 (93.8%), checked 2026-11-02
 #include "common.h"
+// NEAR (r60f): 26 lines, same as m59e but with D_0062A7D0 stored from a local after
+// D_00279424 = 1 (retail stores 424 before 62A7D0; the C++ front end otherwise computes
+// %hi(D_0062A7D0) before the call, in $s0). Init block: sched2 issues li 1 / lui 424 (prio 6)
+// before lw D_00279450 (prio 5) at the first cycle after the call; retail issues the lw first.
+// BLOCKED regardless: this needs D_00279424/28/2C volatile, and measured in this TU
+// func_00203050 (sw D_00279424 in a jal slot), func_00203230 (lw D_00279428 in a jal slot),
+// func_00203CF8 and func_00203A20 (lw D_0027942C in a jal slot) all stop matching when those
+// words are volatile, so retail's 203548 must use them plain. With every word plain (n548.cpp)
+// 95 lines differ: %hi(D_00279424) is CSE'd/hoisted into $s8 and %hi(D_0027A600) is not.
+// The source shape that keeps hi(424) unshared while plain was not found.
+// (m59e) unchanged from p58f. Tried every combination of volatile on D_00279424, D_0062A7D0,
+// D_00279450 and the case-5 words, with and without storing D_0062A7D0 after D_00279424
+// through a local: best stays 26 lines (sched2 picks sw D_00279424 before lw D_00279450).
 
 // NEAR (26 lines): the loop, the RPC, the status decode and the switch match; what still
 // differs is the init block's scheduling: retail loads D_00279450 first and stores
@@ -55,8 +68,9 @@ s32 func_00203548(s32 mode)
         return 0;
     }
     func_001F7BE8(0);
-    D_0062A7D0 = func_001F6A90();
+    s32 id = func_001F6A90();
     D_00279424 = 1;
+    D_0062A7D0 = id;
     D_0027943C = -1;
     D_00279440 = -1;
     D_00279438 = -1;

@@ -14,7 +14,8 @@ another address has the same fingerprint. It holds no retail bytes.
 map.tsv pairs each PAL function with its US counterpart by aligning the two
 versions' fingerprints in address order: equal runs pair by fingerprint, a
 run replaced by one of the same length pairs by position. Unpaired functions
-are PAL's own.
+are PAL's own. config/eu/map_fixes.tsv corrects the pairs position gets wrong
+where PAL moved a function (`fixed`), each with retail's evidence.
 
 Reads asm/<version>/, which tools/setup_asm.py writes; --check reads only the
 committed tables and the asm when it is there.
@@ -117,6 +118,29 @@ def pair(eu, us):
     return result
 
 
+FIXES = ROOT / "config" / "eu" / "map_fixes.tsv"
+
+
+def apply_fixes(pairs, us, fixes=None):
+    """`pairs` with the pairings config/eu/map_fixes.tsv corrects: where PAL moved a function,
+    position pairs the wrong ones, and retail's callers and strings show the right ones (`fixed`).
+    A US function may end up paired once only."""
+    if fixes is None:
+        fixes = {}
+        if FIXES.exists():
+            for line in FIXES.read_text().splitlines()[1:]:
+                if line.strip() and not line.startswith("#"):
+                    eu_name, us_name = line.split("\t")[:2]
+                    fixes[eu_name] = us_name
+    by_name = {r[0]: r for r in us}
+    out = [(e, by_name[fixes[e[0]]], "fixed") if e[0] in fixes else (e, u, how) for e, u, how in pairs]
+    seen = [u[0] for _, u, _ in out if u]
+    twice = sorted({n for n in seen if seen.count(n) > 1})
+    if twice:
+        raise SystemExit("error: config/eu/map_fixes.tsv pairs %s twice" % ", ".join(twice))
+    return out
+
+
 def write_map(pairs):
     path = ROOT / "config" / "eu" / "map.tsv"
     lines = ["eu_name\teu_address\tsize\tus_name\tus_address\thow"]
@@ -140,7 +164,8 @@ def main(argv=None):
             continue
         outputs = [write_functions(key, functions_from_asm(key))]
         if key == "eu":
-            outputs.append(write_map(pair(functions_from_asm("eu"), functions_from_asm("us"))))
+            us_funcs = functions_from_asm("us")
+            outputs.append(write_map(apply_fixes(pair(functions_from_asm("eu"), us_funcs), us_funcs)))
         for path, text in outputs:
             if args.check:
                 if not path.exists() or path.read_text() != text:
