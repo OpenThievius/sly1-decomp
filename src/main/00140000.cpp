@@ -1483,3 +1483,15 @@ s32 func_001407A8(s8* path)
     }
     return count;
 }
+
+struct Key_142998 { f32 f; s32 i; };
+
+s32 func_00142998(Key_142998* a, Key_142998* b)
+{
+    f32 d = a->f - b->f;
+    if (d < -0.0001f)
+        return -1;
+    if (0.0001f < d)
+        return 1;
+    return a->i - b->i;
+}

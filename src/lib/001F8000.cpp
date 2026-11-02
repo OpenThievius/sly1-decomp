@@ -914,3 +914,33 @@ void func_001F85A8(void) {
         func_001F6B50(sema);
     }
 }
+
+extern s32 D_002771BC;
+void func_001F6B40(s32 a);
+void func_001F89E8() { func_001F6B40(D_002771BC); }
+
+void func_001F9DC0(); void func_001F6F48(); void func_001F70F8(); void func_001F9FB8(); void func_001FA8F8();
+void func_001F9EA8()
+{
+    func_001F9DC0();
+    func_001F9E50();
+    func_001F6F48();
+    func_001F70F8();
+    func_001F9FB8();
+    func_001FA8F8();
+}
+
+void func_001FA068();
+void func_001F6920(s32 a);
+void func_001FA078(s32 a)
+{
+    func_001FA068();
+    func_001F6920(a);
+}
+
+struct A_1FA190 { u8 p[0x10]; s32 i; s32 v; };
+struct B_1FA190 { u8 p[0x1C]; s32* t; };
+void func_001FA190(A_1FA190* a, B_1FA190* b) { b->t[a->i] = a->v; }
+
+void func_001FD930();
+void func_001FBDF8() { func_001FD930(); }

@@ -1467,3 +1467,18 @@ void func_0015B128(Self_15B128* self)
         }
     }
 }
+
+struct Obj_15A8B8 { u8 pad0[0x2E0]; f32 v[2]; f32 f2e8; f32 f2ec; f32 f2f0; };
+
+void func_00123ED0(void* self);
+
+void func_0015A8B8(Obj_15A8B8* self)
+{
+    func_00123ED0(self);
+    f32* v = self->v;
+    self->f2f0 = 1.0f;
+    self->f2ec = 1.0f;
+    self->v[0] = 1.0f;
+    v[1] = 0.2f;
+    v[2] = 0.1f;
+}

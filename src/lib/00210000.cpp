@@ -257,3 +257,85 @@ s32 func_002104A8(struct Node_2104A8 *self, struct Rec_2104A8 *rec) {
     }
     return flag;
 }
+
+struct Bits_210000;
+u32 func_0020F5B8(Bits_210000* self, u32 n);
+
+void func_00210000(Bits_210000* self)
+{
+    func_0020F5B8(self, 1);
+    func_0020F5B8(self, 8);
+    func_0020F5B8(self, 1);
+    func_0020F5B8(self, 7);
+    func_0020F5B8(self, 1);
+    func_0020F5B8(self, 0x14);
+    func_0020F5B8(self, 1);
+    func_0020F5B8(self, 0x16);
+    func_0020F5B8(self, 1);
+    func_0020F5B8(self, 0x16);
+}
+
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+void func_00210D90(u32 a, s32 b)
+{
+    func_001F9D60();
+    *(volatile u32*)0x1000B010 = (a & 0xFFFFFFF) | 0x80000000;
+    *(volatile u32*)0x1000B020 = b >> 4;
+    *(volatile u32*)0x1000B000 = 0x100;
+    func_001F9DA8();
+}
+
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+void func_002117D0(u32 value)
+{
+    func_001F9D60();
+    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
+    *(volatile u32*)0x1000B000 = value;
+    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
+    func_001F9DA8();
+}
+
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+void func_00211838(u32 value)
+{
+    func_001F9D60();
+    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
+    *(volatile u32*)0x1000B400 = value;
+    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
+    func_001F9DA8();
+}
+
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+void func_00211B40(u32 value)
+{
+    func_001F9D60();
+    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
+    *(volatile u32*)0x1000B400 = value;
+    *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
+    func_001F9DA8();
+}
+
+extern u8 D_0027B198[];
+extern u8 D_0062C540[];
+void func_001FFBE0(u8* a, u8* b);
+
+void func_00211DE0(void)
+{
+    func_001FFBE0(D_0027B198, D_0062C540);
+}
+
+extern u8 D_0027B198[];
+void func_001FFC08(u8* a);
+
+void func_00211DF8(void)
+{
+    func_001FFC08(D_0027B198);
+}

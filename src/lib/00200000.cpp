@@ -1529,3 +1529,53 @@ s32 func_00202C38(DmaChan_202C38* ch, s32 mode, s32 timeout)
     }
     return 0;
 }
+
+struct Pkt_202E50 {
+    s32 n0;
+    s32 n1;
+    u8* dst0;
+    u8* dst1;
+    u8 src0[0x40];
+    u8 src1[0x40];
+};
+
+extern s32 D_00279454;
+void func_00202DA0(s32* code);
+
+void func_00202E50(Pkt_202E50* p) {
+    Pkt_202E50* q = (Pkt_202E50*)((u32)p | 0x20000000);
+    if (q->n0 > 0) {
+        u8* d = q->dst0;
+        for (s32 i = 0; i < q->n0; i++) {
+            d[i] = q->src0[i];
+        }
+    }
+    if (q->n1 > 0) {
+        u8* d = q->dst1;
+        for (s32 i = 0; i < q->n1; i++) {
+            d[i] = q->src1[i];
+        }
+    }
+    func_00202DA0(&D_00279454);
+}
+
+extern void (*D_0062A7C4)(s32);
+extern s32 D_0062A7C8;
+extern s32 D_00279424;
+
+void func_00203010(void) {
+    if (D_0062A7C4 && !D_00279424) {
+        D_0062A7C4(D_0062A7C8);
+    }
+}
+
+s32 func_00201668(s32 value);
+void func_001000B8(s32 value);
+
+void func_002014D0(void)
+{
+    for (;;) {
+        func_00201668(6);
+        func_001000B8(1);
+    }
+}

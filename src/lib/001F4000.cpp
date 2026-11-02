@@ -469,3 +469,73 @@ void func_001F7588(const char* fmt, char* ap)
         }
     }
 }
+
+void func_001F7270(s32 c);
+void func_001F7358(s32 c)
+{
+    if (c == 10) {
+        func_001F7270(13);
+        func_001F7270(10);
+    } else {
+        func_001F7270(c);
+    }
+}
+
+typedef void (*PutChar_1F7420)(s32 c);
+extern PutChar_1F7420 D_00277130;
+
+s32 func_001FD308(double a, double b);
+double func_001FCD78(double a, double b);
+double func_001FCDE0(double a, double b);
+double func_001FD088(double a, double b);
+double func_001FB528(double a);
+s32 func_001F7390(double a);
+extern const char D_0024E9B0[];
+extern const char D_0024E9B8[];
+extern const char D_0024E9C0[];
+s32 func_001F7B50(const char* fmt, ...);
+
+void func_001F7420(double value)
+{
+    s32 exp10 = 0;
+    if (func_001FD308(value, 0.0) < 0) {
+        value = func_001FCD78(0.0, value);
+        D_00277130('-');
+    }
+    if (func_001FD308(value, 0.1) < 0) {
+        while (func_001FD308(value, 0.1) < 0) {
+            value = func_001FCDE0(value, 10.0);
+            exp10--;
+        }
+    } else if (func_001FD308(value, 1.0) >= 0) {
+        while (func_001FD308(value, 1.0) >= 0) {
+            exp10++;
+            value = func_001FD088(value, 10.0);
+        }
+    }
+    s32 digits = func_001F7390(func_001FB528(func_001FCDE0(value, 1000000.0)));
+    func_001F7B50(D_0024E9B0, digits);
+    if (exp10 >= 0)
+        func_001F7B50(D_0024E9B8, exp10);
+    else
+        func_001F7B50(D_0024E9C0, exp10);
+}
+
+struct Ring_1F7F60;
+struct Msg_1F7F60 { u8 p0[0x14]; s32 f14; u8 p18[4]; s32 f1C; u32 f20; };
+struct Src_1F7F60 { u8 p0[0x14]; s32 f14; u8 p18[4]; s32 f1C; s32 f20; s32 f24; s32 f28; };
+struct Ctx_1FA670;
+
+Msg_1F7F60* func_001F7E78(Ring_1F7F60* r);
+s32 func_001FA670(Ctx_1FA670* a, Msg_1F7F60* b, s32 c, s32 d, s32 e, s32 f);
+
+void func_001F7F60(Src_1F7F60* src, Ring_1F7F60* ring)
+{
+    Msg_1F7F60* m = func_001F7E78(ring);
+    s32 a = src->f14;
+    s32 b = src->f1C;
+    m->f14 = a;
+    m->f1C = b;
+    m->f20 = 0x8000000C;
+    func_001FA670((Ctx_1FA670*)0x80000008, m, 0x40, src->f20, src->f24, src->f28);
+}

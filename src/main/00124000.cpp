@@ -901,3 +901,31 @@ void func_00124DF8(Self_124DF8* self, s32 count, Item_124DF8* item)
         it++;
     } while (n != 0);
 }
+
+struct __attribute__((aligned(16))) Mat_127478 { s32 v[12]; };
+struct Obj_127478;
+struct VT_127478 {
+    void* slot[18];
+    void (*f48)(Obj_127478* self, s32 a, Obj_127478* b);
+    void* slot2[3];
+    void (*f58)(Obj_127478* self);
+};
+struct Obj_127478 {
+    VT_127478* vt;
+    char pad0[0xCC];
+    Mat_127478 m;
+    char pad1[0x1F0 - 0x100];
+    void* link;
+};
+
+void func_001226D8(void* p);
+
+void func_00127478(Obj_127478* self, Mat_127478* src)
+{
+    self->m = *src;
+    if (self->vt->f58)
+        self->vt->f58(self);
+    if (self->link)
+        func_001226D8(self->link);
+    self->vt->f48(self, 4, self);
+}
