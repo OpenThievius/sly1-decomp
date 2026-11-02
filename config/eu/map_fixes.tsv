@@ -1,0 +1,3 @@
+eu_name	us_name	why
+func_00194120	func_001935B0	PAL formats the percentage ("%d%% - ", D_0024D940; US D_0024C418 "%d%% - %s - %d:%02d") and appends the level's name: the same function, rewritten
+func_00194190	func_00193598	PAL's text lookup, a switch over languages (516 bytes; US 24): its three callers sit where US's three callers of func_00193598 do

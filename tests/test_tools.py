@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 import classify_asm  # noqa: E402
 import disc  # noqa: E402
+import inventory  # noqa: E402
 import progress  # noqa: E402
 import nonmatching  # noqa: E402
 import permute  # noqa: E402
@@ -567,3 +568,22 @@ class RodataBakeTest(unittest.TestCase):
     def test_a_rodata_relocation_that_is_not_hi_or_lo_is_refused(self):
         with self.assertRaises(rodata.RodataError):
             rodata.patch(tiny_object(rtypes=(5, 2)), self.Image(), self.Resolver())
+
+
+class MapFixesTest(unittest.TestCase):
+    US = [("func_A", 0x100, 24, "code", "a"), ("func_B", 0x118, 172, "code", "b")]
+    EU = [("func_C", 0x200, 112, "code", "c"), ("func_D", 0x270, 516, "code", "d")]
+
+    def test_a_fix_swaps_two_pairs_that_position_got_wrong(self):
+        pairs = inventory.pair(self.EU, self.US)
+        self.assertEqual([(e[0], u[0], how) for e, u, how in pairs],
+                         [("func_C", "func_A", "order-size"), ("func_D", "func_B", "order-size")])
+        fixed = inventory.apply_fixes(pairs, self.US, {"func_C": "func_B", "func_D": "func_A"})
+        self.assertEqual([(e[0], u[0], how) for e, u, how in fixed],
+                         [("func_C", "func_B", "fixed"), ("func_D", "func_A", "fixed")])
+
+    def test_a_us_function_paired_twice_is_refused(self):
+        pairs = inventory.pair(self.EU, self.US)
+        with self.assertRaises(SystemExit):
+            inventory.apply_fixes(pairs, self.US, {"func_C": "func_B"})
+
