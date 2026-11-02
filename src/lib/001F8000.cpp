@@ -588,3 +588,133 @@ void func_001F9FB8(void)
         } while (i < 3);
     }
 }
+
+struct Node_1F80C0;
+struct Ctx_1F80C0 { Node_1F80C0* f0; s32 f4; s32 f8; s32 pad_c; s32 f10; u8 pad14[0x10]; s32 f24; };
+struct Node_1F80C0 { u8 pad0[0x14]; Node_1F80C0* f14; s32 f18; Ctx_1F80C0* f1C; s32 f20; };
+struct Ring_1F80C0;
+struct Args_1F80C0 { s32 a; s32 b; s32 c; };
+typedef s32 Kind_1F80C0;
+typedef s32 Code_1F80C0;
+
+extern u8 D_00627800[];
+
+Node_1F80C0* func_001F7DB0(Ring_1F80C0* r);
+s32 func_001F6B20(Args_1F80C0* a);
+void func_001F7E58(Node_1F80C0* n);
+s32 func_001FA630(Kind_1F80C0 k, Node_1F80C0* n, s32 sz, s32 a3, s32 a4, s32 a5);
+void func_001F6B60(Code_1F80C0 c);
+void func_001F6B30(Code_1F80C0 c);
+
+s32 func_001F80C0(Ctx_1F80C0* self, s32 a1, s32 a2)
+{
+    Args_1F80C0 args;
+    Node_1F80C0* node;
+    s32 r;
+    s32 scratch[4];
+    (void)scratch;
+
+    self->f10 = 0;
+    self->f24 = 0;
+    node = func_001F7DB0((Ring_1F80C0*)D_00627800);
+    if (node == 0) return -1;
+    self->f0 = node;
+    self->f4 = node->f18;
+    node->f20 = a1;
+    node->f14 = node;
+    node->f1C = self;
+    if ((a2 & 1) == 0) {
+        args.c = 0;
+        args.b = 1;
+        r = func_001F6B20(&args);
+        self->f8 = r;
+        if (r < 0) {
+            func_001F7E58(node);
+            return -3;
+        }
+        if (func_001FA630(0x80000009, node, 0x40, 0, 0, 0) == 0) {
+            func_001F7E58(node);
+            func_001F6B30(self->f8);
+            return -2;
+        }
+        func_001F6B60(self->f8);
+        func_001F6B30(self->f8);
+        return 0;
+    }
+    self->f8 = -1;
+    if (func_001FA630(0x80000009, node, 0x40, 0, 0, 0) != 0) {
+        return 0;
+    }
+    func_001F7E58(node);
+    return -2;
+}
+
+struct Obj_1FA4F8 { s32 w0; s32 w4; s32 w8; };
+struct Rec_1FA4F8 { s32 w0; s32 w4; s32 w8; s32 wC; };
+struct Ctx_1FA4F8 { s32 pad; };
+
+extern s32 D_006293A0[];
+
+void func_001FA7D8(Ctx_1FA4F8* ctx, s32 a1);
+void func_001FA7D8(Obj_1FA4F8* o, s32 a1);
+s32 func_001F6CB0(Rec_1FA4F8* recs, s32 n);
+s32 func_001F6CA0(Rec_1FA4F8* recs, s32 n);
+
+s32 func_001FA4F8(s32 p1, s32 flags, Obj_1FA4F8* obj, s32 p4, Ctx_1FA4F8* p5, s32 p6, s32 count, s32 p8)
+{
+    Rec_1FA4F8 recs[2];
+    s32 n;
+    s32 result;
+
+    if ((u32)(p4 - 0x10) >= 0x61u) {
+        return 0;
+    }
+    n = 0;
+    if (count > 0) {
+        u8 lo = ((u8*)obj)[0];
+        n = 1;
+        recs[0].w0 = (s32)p5;
+        recs[0].w4 = p6;
+        obj->w4 = p6;
+        obj->w0 = lo | (count << 8);
+        recs[0].w8 = count;
+        recs[0].wC = 0;
+        if (flags & 4) {
+            func_001FA7D8(p5, count);
+        }
+    } else {
+        obj->w4 = 0;
+        obj->w0 = ((u8*)obj)[0];
+    }
+    recs[n].w0 = (s32)obj;
+    recs[n].w4 = D_006293A0[0];
+    recs[n].w8 = p4;
+    obj->w8 = p1;
+    ((u8*)obj)[0] = (u8)p4;
+    recs[n].wC = 0x44;
+    func_001FA7D8(obj, p4);
+    n++;
+    if (flags & 1) {
+        result = func_001F6CB0(recs, n);
+    } else {
+        result = func_001F6CA0(recs, n);
+    }
+    return result;
+}
+
+double func_001FD358(s64 a);
+double func_001FCDE0(double a, double b);
+double func_001FCD20(double a, double b);
+
+double func_001FB618(u64 x)
+{
+    double k = 65536.0;
+    double t = func_001FCDE0(func_001FD358((s32)((s64)x >> 32)), k);
+    double c = func_001FCDE0(t, k);
+    s64 lo = (s32)(x & 0xFFFFFFFFULL);
+    double u = func_001FD358(lo);
+    if (lo < 0) {
+        u = func_001FCD20(u, 4294967296.0);
+    }
+    return func_001FCD20(c, u);
+}

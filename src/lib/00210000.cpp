@@ -148,3 +148,80 @@ void func_00211988(Ctx_211988* s0)
     *(volatile u32*)0x1000B420 = s2;
     func_00211838((Arg_211988*)(u32)(s0->fC | 0x100));
 }
+
+extern u8 D_002504B8[];
+extern u8 D_002504D8[];
+
+struct Sub_210090 { u8 pad[0x28]; s32 f28; };
+struct Obj_210090 {
+    u8 pad0[0x120];
+    s32 f120;
+    u8 pad1[0x50];
+    s32 f174;
+    u8 pad2[0x48];
+    Sub_210090* f1C0;
+    u8 pad3[0xC];
+    Sub_210090* f1D0;
+    u8 pad4[0xC];
+    Sub_210090* f1E0;
+};
+
+void func_0020B978(Obj_210090* self, void* a1);
+s32 func_0020E3B8(Obj_210090* self);
+
+s32 func_00210090(Obj_210090* self)
+{
+    Sub_210090* s1;
+    s32 v;
+    s32 mode = self->f174;
+    if (mode == 3 && self->f120 != 0) {
+        func_0020B978(self, D_002504B8);
+        self->f120 = 0;
+        mode = self->f174;
+    }
+    switch (mode) {
+    case 3:
+        s1 = self->f1C0;
+        break;
+    case 1:
+        s1 = self->f1D0;
+        break;
+    case 2:
+        s1 = self->f1E0;
+        break;
+    default:
+        s1 = self->f1C0;
+        func_0020B978(self, D_002504D8);
+        break;
+    }
+    v = func_0020E3B8(self);
+    if (v != 0) {
+        s1->f28 = 1;
+    }
+    return v;
+}
+
+// EXACT: hardware registers read through volatile u32 pointers (lui/ori into a register, lw 0).
+
+struct Out_002118A0 { u32 w00; u32 w04; u32 w08; u32 w0C; u32 w10; u32 w14; u32 w18; u32 w1C; u32 w20; };
+struct Q_002118A0;
+void func_00211838(Q_002118A0* q);
+void func_002117D0(Q_002118A0* q);
+
+void func_002118A0(Out_002118A0* out)
+{
+    func_00211838((Q_002118A0*)1);
+    volatile u32* a = (volatile u32*)0x1000B410;
+    out->w00 = *a;
+    out->w04 = *(volatile u32*)0x1000B430;
+    out->w08 = *(volatile u32*)0x1000B420;
+    out->w0C = *(volatile u32*)0x1000B400;
+    while ((*(volatile u32*)0x10002010 & 0xF0) != 0) {
+    }
+    func_002117D0((Q_002118A0*)0);
+    out->w10 = *(volatile u32*)0x1000B010;
+    out->w14 = *(volatile u32*)0x1000B020;
+    out->w18 = *(volatile u32*)0x1000B000;
+    out->w1C = *(volatile u32*)0x10002020;
+    out->w20 = *(volatile u32*)0x10002010;
+}
