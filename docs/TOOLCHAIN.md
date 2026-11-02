@@ -158,8 +158,10 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    func_00209210 are EXACT that way and with nothing else. Retail's library
    was written with such macros, so include/float_bits.h defines a pair,
    `FLOAT_TO_BITS` and `BITS_TO_FLOAT` (our names), which src/libm uses for
-   a float's bits; AGENTS.md allows `do { } while (0)` there and nowhere
-   else.
+   a float's bits, and the same for a double's words (`DOUBLE_TO_WORDS`,
+   `WORDS_TO_DOUBLE`, `DOUBLE_HIGH`, `SET_DOUBLE_HIGH`), which func_00209010
+   needs; AGENTS.md allows `do { } while (0)` there and nowhere else. With
+   them all 33 functions of the library match.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.

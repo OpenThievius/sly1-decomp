@@ -403,3 +403,50 @@ f32 func_00208D50(f32 x, f32 y, s32 k)
     s = 1.0f + a * z;
     return a + t * (s + a * v);
 }
+
+extern const double D_0024FF80[];
+double func_001FCD20(double a, double b);
+double func_001FCD78(double a, double b);
+
+double func_00209010(double x)
+{
+    s32 hi, lo, e, sign;
+    u32 m;
+    double t;
+
+    DOUBLE_TO_WORDS(hi, lo, x);
+    sign = (u32)hi >> 31;
+    e = ((hi >> 20) & 0x7FF) - 0x3FF;
+    if (e < 20) {
+        if (e < 0) {
+            if (((hi & 0x7FFFFFFF) | lo) == 0) return x;
+            lo |= hi & 0xFFFFF;
+            hi &= 0xFFFE0000;
+            hi |= ((u32)(lo | -lo) >> 12) & 0x80000;
+            SET_DOUBLE_HIGH(x, hi);
+            double w = D_0024FF80[sign];
+            double y = func_001FCD78(func_001FCD20(w, x), w);
+            DOUBLE_HIGH(hi, y);
+            SET_DOUBLE_HIGH(y, (hi & 0x7FFFFFFF) | (sign << 31));
+            return y;
+        }
+        m = 0xFFFFF >> e;
+        if (((hi & m) | lo) == 0) return x;
+        m >>= 1;
+        if (((hi & m) | lo) != 0) {
+            if (e == 19) lo = 0x40000000;
+            else hi = (hi & ~m) | (0x20000 >> e);
+        }
+    } else if (e >= 52) {
+        if (e == 0x400) return func_001FCD20(x, x);
+        return x;
+    } else {
+        m = 0xFFFFFFFFu >> (e - 20);
+        if ((lo & m) == 0) return x;
+        m >>= 1;
+        if ((lo & m) != 0) lo = (lo & ~m) | (0x40000000 >> (e - 20));
+    }
+    WORDS_TO_DOUBLE(x, hi, lo);
+    t = D_0024FF80[sign];
+    return func_001FCD78(func_001FCD20(t, x), t);
+}
