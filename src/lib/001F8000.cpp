@@ -817,3 +817,100 @@ s32 func_001F9C50(char *arg) {
     *d = 0;
     return func_001F9AD8(buf, 0);
 }
+
+#define UNCACHED_1F85A8(p) ((void *)((u32)(p) | 0x20000000))
+
+struct __attribute__((packed)) Word_1F85A8 {
+    u32 v;
+    static void Read(void* dst, void* src) { *(Word_1F85A8*)dst = *(Word_1F85A8*)UNCACHED_1F85A8(src); }
+};
+
+struct Bytes_1F85A8 {
+    s32 count0;
+    s32 count1;
+    u8 *dst0;
+    u8 *dst1;
+    u8 buf0[0x40];
+    u8 buf1[0x40];
+};
+
+struct Block144_1F85A8 {
+    u8 b[0x144];
+};
+
+struct Block40_1F85A8 {
+    u8 b[0x40];
+};
+
+extern u8 D_00628500[];
+extern volatile s32 D_00277138[];
+
+void *func_001F5A58(void *dst, const void *src, s32 n);
+void func_001F6B50(s32 sema);
+
+void func_001F85A8(void) {
+    s32 sema;
+    s32 type;
+    void *dst;
+    s32 size;
+    void *pdst;
+    u32 psize;
+    s32 i;
+
+    Word_1F85A8::Read(&sema, D_00628500);
+    Word_1F85A8::Read(&type, D_00628500 + 4);
+    Word_1F85A8::Read(&dst, D_00628500 + 8);
+    Word_1F85A8::Read(&size, D_00628500 + 12);
+    if (sema >= 0) {
+        func_001F5A58(dst, UNCACHED_1F85A8(D_00628500 + 16), size);
+    }
+    switch (type) {
+    case 2: {
+        struct Bytes_1F85A8 *b = (struct Bytes_1F85A8 *)UNCACHED_1F85A8(D_00628500 + 20);
+        if (b->count0 > 0) {
+            u8 *d = b->dst0;
+            for (i = 0; i < b->count0; i++) {
+                d[i] = b->buf0[i];
+            }
+        }
+        if (b->count1 > 0) {
+            u8 *d = b->dst1;
+            for (i = 0; i < b->count1; i++) {
+                d[i] = b->buf1[i];
+            }
+        }
+        break;
+    }
+    case 11:
+        Word_1F85A8::Read(&pdst, D_00628500 + 20);
+        *(struct Block144_1F85A8 *)pdst = *(struct Block144_1F85A8 *)UNCACHED_1F85A8(D_00628500 + 24);
+        break;
+    case 12:
+        Word_1F85A8::Read(&pdst, D_00628500 + 20);
+        *(struct Block40_1F85A8 *)pdst = *(struct Block40_1F85A8 *)UNCACHED_1F85A8(D_00628500 + 24);
+        break;
+    case 23:
+    case 25:
+    case 26:
+        Word_1F85A8::Read(&pdst, D_00628500 + 20);
+        Word_1F85A8::Read(&psize, D_00628500 + 24);
+        if (psize > 0x400) {
+            psize = 0x400;
+        }
+        func_001F5A58(pdst, UNCACHED_1F85A8(D_00628500 + 28), psize);
+        break;
+    }
+    if (sema < 0) {
+        sema = -sema;
+        i = 0;
+        for (;;) {
+            if (D_00277138[i] == sema) {
+                D_00277138[i] = -1;
+                break;
+            }
+            if (++i >= 32) return;
+        }
+    } else {
+        func_001F6B50(sema);
+    }
+}

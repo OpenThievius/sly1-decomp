@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2082/2448 (85.0%), checked 2026-11-02
+// BYTES 2281/2448 (93.2%), checked 2026-11-02
 #include "common.h"
-// NEAR: structure, calls, frame and stack slots match; the morph-target loop (self->f40) is
-// reversed into a down-counter where retail counts up, the first loop lacks retail's copy of the
-// record pointer, and a few temporaries land in other registers (about 160 lines).
-// r57o3 (163 lines): one shared `i` for all loops still reverses the morph loop and moves i into
-// s1 (216); `*idx++`, `&recs[i]` or `Vec3* d = &dOut[i]` in the morph loop are worse (166-297);
-// `Rec* r = &recs[i]` before `if (hasUv)` reverses the first loop as well (290). Retail's
-// unconditional `move a3,a1` in loop 1 and its unreversed counters are still unexplained.
+// NEAR (m59f): 93 lines differ (was 163). Two changes: (1) the morph inner loop is
+// `i = 0; if (n > 0) do { ... } while (++i < n);` -- a do-while is not reversed by the second
+// loop pass (the for/while forms all are), so the counter now counts up in a2-like position as in
+// retail; (2) one function-level `i` shared by the weights, morph and tint loops (retail gives
+// all of them the same register a2), with the first loop keeping its own `for (s32 i ...)`
+// (all 16 shared/separate combinations scored: this one is best). Still differs, register
+// choice only: the shared i gets a3 instead of a2 because local-alloc gives the morph loop's
+// `slt` (insn `(lt i n)`) a2, since its `c = r++` copy takes a1 (retail: c in a3, slt in a1);
+// loop 1 still lacks retail's `move a3,a1` copy of &recs[i] for the uv loads, which shifts
+// t0/t1/t2 there. Tried on top: `r = c + 1`, `&recs[i]`, `recs[i]` direct, `*idx++`,
+// `Vec3* d = &dOut[i]`, shared j, i declared first, uv via `Uv* uv`/`u8 uv` (same or worse).
 
 struct Pkt_163ED8;
 struct Vec3_163ED8 {
@@ -136,6 +140,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     void* tail;
     void* head;
     Node_163ED8* node;
+    s32 i;
 
     if (obj->f54 != 0) {
         func_00152B38(pkt);
@@ -237,7 +242,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         func_001EE528(pkt, D_00262418[hdr->count]);
         func_001EE5C8(pkt, D_00262430[hdr->count], n, hdr->p[3], 0, &wOut);
         func_001EE528(pkt, 0);
-        for (s32 i = 0; i < n; i++) {
+        for (i = 0; i < n; i++) {
             Rec_163ED8* r = &recs[i];
             for (s32 j = 0; j < hdr->count; j++) {
                 *wOut++ = weights[r->pos * hdr->count + j];
@@ -257,12 +262,15 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
             func_001EE5C8(pkt, 8, n, hdr->p[7], 0, &dOut);
             u16* idx = ents[k].idx;
             Rec_163ED8* r = recs;
-            for (s32 i = 0; i < n; i++) {
-                Rec_163ED8* c = r++;
-                Vec3_163ED8* v = &verts[idx[i]];
-                dOut[i].x = v->x - vecs[c->pos].x;
-                dOut[i].y = v->y - vecs[c->pos].y;
-                dOut[i].z = v->z - vecs[c->pos].z;
+            i = 0;
+            if (n > 0) {
+                do {
+                    Rec_163ED8* c = r++;
+                    Vec3_163ED8* v = &verts[idx[i]];
+                    dOut[i].x = v->x - vecs[c->pos].x;
+                    dOut[i].y = v->y - vecs[c->pos].y;
+                    dOut[i].z = v->z - vecs[c->pos].z;
+                } while (++i < n);
             }
             func_001EE3F0(pkt, D_000023B8);
         }
@@ -291,7 +299,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         func_001EE498(pkt, 1, 3);
         func_001EE5C8(pkt, 0xE, n, hdr->p[0] + 1, 0, &cOut);
         func_001EE498(pkt, 1, 1);
-        for (s32 i = 0; i < n; i++) {
+        for (i = 0; i < n; i++) {
             Rec_163ED8* r = &recs[i];
             if ((r->flags & 0x7F) == 0x7F) {
                 for (s32 j = 0; j < 4; j++) {

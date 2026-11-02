@@ -1417,3 +1417,69 @@ Obj_1419E8* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Obj_1419E8**
     }
     return best;
 }
+
+void func_001E2218(s8* p);
+s32 func_001E2100(const s8* s);
+void* func_001E2180(s8* dst, const char* src);
+
+s32 func_001407A8(s8* path)
+{
+    func_001E2218(path);
+    s32 len = func_001E2100(path);
+    if (len != 0) {
+        s8 last = path[len - 1];
+        if (last != '\\' && last != '/') {
+            func_001E2180(path, ";1");
+            len = func_001E2100(path);
+        }
+    }
+    s8* end = path + len;
+    s8* out = path;
+    s8* in = path;
+    s32 count = 0;
+    s32 n = 0;
+    s32 max = 8;
+    while (in < end) {
+        switch (*in) {
+        case '/':
+        case '\\':
+            if (n != 0) {
+                *out++ = 0;
+                n = 0;
+                max = 8;
+                count++;
+            }
+            break;
+        case '.':
+            if (n != 0 && max == 8) {
+                *out++ = *in;
+                n = 0;
+                max = 3;
+            }
+            break;
+        case ';':
+            if (n != 0 && in == end - 2 && in[1] == '1') {
+                *out++ = *in++;
+                *out++ = *in;
+                n += 2;
+                break;
+            }
+        default:
+            if (n < max) {
+                if ((u8)(*in - 'A') < 26 || (u8)(*in - '0') < 10) {
+                    *out++ = *in;
+                } else {
+                    *out++ = '_';
+                }
+                n++;
+            }
+            break;
+        }
+        in++;
+    }
+    if (n != 0) {
+        *out = 0;
+        count++;
+    }
+    return count;
+}
