@@ -17,12 +17,12 @@ libraries, config/us/layout.tsv) and tags read from its disassembly:
 - system: kernel or cache instructions (syscall, mfc0, cache, sync, eret)
 - handwritten: spimdisasm says it was not made by the compiler
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: not a whole function.
-  Measured on the US build: 84 are lone 4-byte words after a return (an `addiu $sp` or a
-  delay-slot copy, then a padding nop), 54 start with a positive `addiu $sp` and are runs of
-  such copies, 40 are tail calls (they end in `j`), 6 are short mixed runs of instruction and
-  nop pairs. All are residue the assembler left after a function's return; the build keeps
-  their bytes from the disassembly, and no C function can produce them. Only func_001000C0
-  is a real function glued to a syscall stub, and splitting it would change the shared layout.
+  Most are the linker's leftovers of stripped functions (an `addiu $sp` or a store, then a nop),
+  which tools/classify_asm.py counts as remnants. A listing that ends in a tail jump to another
+  function (Sony's 2.9-ee writes them), a branch back into itself or a call that never returns
+  is a whole function, not a fragment; so is a function behind leftovers, once
+  config/us/symbol_addrs.txt names its start (code takes its address as func_X + N). On the US
+  build only func_00100000 is left: the nop at the start of the code.
 
 What stops a function from being matched, the blocker column:
 
@@ -32,7 +32,9 @@ What stops a function from being matched, the blocker column:
   counts it as finished, apart from the exact C matches.
 
 - fragment: no `jr $ra` in its listing, or a positive stack adjustment first: residue the
-  assembler left after a return, or a tail call; no C function can produce it
+  assembler left after a return; no C function can produce it. A listing that ends in a tail
+  jump to another function (Sony's 2.9-ee writes them), a branch back into itself or a call
+  that never returns is a whole function, not a fragment
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
 - nonc: max.s, min.s, sqrt.s: no plain C form with the files' flags (__builtin_sqrtf adds a NaN
   check and a call to sqrtf that retail never has); `break 0, 7` after a division is the
@@ -168,11 +170,26 @@ def bodies(key="us"):
     return out
 
 
+def ends_whole(lines):
+    """True when a listing without a `jr` still ends as a whole function: its last instruction
+    before the delay slot is a tail jump to another function (Sony's 2.9-ee writes them), a
+    branch back into itself (it never returns) or a call to a function that never returns."""
+    ins = [line.split() for line in lines if line.split() and not line.startswith(("jlabel", ".L"))]
+    while ins and ins[-1][0] == "nop":
+        ins.pop()  # alignment padding, or a delay slot that holds nothing
+    if not ins:
+        return False
+    last = ins[-1] if ins[-1][0] in ("j", "b", "jal") else ins[-2] if len(ins) > 1 else ins[-1]
+    op, target = last[0], last[-1]
+    return (op == "j" and target.startswith("func_")) or (op in ("b", "j") and target.startswith(".L")) \
+        or op == "jal"
+
+
 def tags_of(lines, kind):
     tags = set()
     if kind == "handwritten":
         tags.add("handwritten")
-    if lines and not any(line.split(None, 1)[:1] == ["jr"] for line in lines):
+    if lines and not any(line.split(None, 1)[:1] == ["jr"] for line in lines) and not ends_whole(lines):
         tags.add("fragment")
     first = next((line.split() for line in lines if line.split()), [])
     if len(first) >= 4 and first[:3] == ["addiu", "$sp,", "$sp,"] and not first[3].startswith("-"):
