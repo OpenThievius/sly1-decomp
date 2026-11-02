@@ -138,7 +138,21 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    still matches, but a `div.s` function cannot. `python3 tools/toolchain.py`
    reports which is found. The three math functions matched before this
    (func_00205318, func_00205578, func_00208FE8) are EXACT with both builds,
-   in US and PAL.
+   in US and PAL. The first pass with it (2026-11-02) matched six more,
+   func_002082F8 (2,380 bytes) among them.
+
+   **Still unexplained in the math library.** Two forms recur in its near
+   misses and no source change, flag or tool tried gives them:
+   - a `nop` after a `b` or `jr` and its delay slot, putting the next label
+     on an 8-byte boundary (0x204FB4, 0x2062EC, 0x20730C, 0x208DC4 and
+     others), where this compiler aligns labels to 4;
+   - a float argument's bits copied out (`mfc1`, `move`) and the frame set
+     up before any constant is loaded, where ours loads the constants first.
+   Tried without effect: `-O1`, `-O3`, `-G2`, `-fno-schedule-insns`,
+   `-fno-schedule-insns2`, `-fno-delayed-branch`, `-mips3`, `-mcpu=r4000` and
+   `r5000`; compiling as C with the Linux `cc1`; assembling with the Linux
+   `ee/bin/as.bin`, which gives the same object as `ee/bin/as.exe`. Another
+   build of Sony's compiler may be the cause.
 
 Record every result here: the function, the compiler, the flags, and whether
 it matched.
