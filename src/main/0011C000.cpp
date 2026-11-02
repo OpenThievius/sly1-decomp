@@ -2252,3 +2252,67 @@ s32 func_0011E538(s32 a0)
 {
     return (a0 * 0x5F4) / 0x2E5;
 }
+
+struct Rpc_0011CBB8 { u8 pad[0x24]; s32 f24; };
+struct Packet_0011CBB8 { s32 f00; u8 pad[0xC]; s32 f10; };
+
+extern s32* D_0025C360[2];
+extern s32 D_0025C368[2];
+extern s32* D_0025C378[2];
+extern s32 D_0025C388;
+extern s32 D_00260E00;
+extern volatile Packet_0011CBB8 D_00260DC0;
+extern s32 D_0025C540[];
+extern s32 D_0025D540[];
+extern s32 D_0025E540[];
+extern s32 D_0025F540[];
+extern s32 D_00260540[];
+extern s32 D_00260980[];
+extern const char D_00249428[];
+extern const char D_00249450[];
+
+void func_001F7BE8(s32 mode);
+s32 func_001F80C0(Rpc_0011CBB8* rpc, u32 id, s32 mode);
+s32 func_0011D968(s32 id, s32 size, void* data);
+
+#define ASSERT_0011CBB8(cond, line) \
+    if (!(cond)) { \
+        func_001E1F10(D_00249428, D_00249450, line); \
+        for (;;) { \
+        } \
+    }
+
+void func_0011CBB8(void)
+{
+    s32 n;
+
+    D_0025C360[0] = (s32*)D_0025C540;
+    D_0025C360[1] = (s32*)D_0025D540;
+    D_0025C378[0] = D_00260540;
+    D_0025C378[1] = D_00260980;
+    ((s32**)&D_0025C370)[0] = D_0025E540;
+    ((s32**)&D_0025C370)[1] = D_0025F540;
+    func_001F7BE8(0);
+    do {
+        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4C8, 0x123456, 0) >= 0, 0x6E);
+        for (n = 10000; --n != -1;) {
+        }
+    } while (((Rpc_0011CBB8*)D_0027B4C8)->f24 == 0);
+    D_0025C388 = 0;
+    D_0025C390.fn = 0;
+    D_0025C390.arg = 0;
+    D_00260E00 = 0;
+    do {
+        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4F0, 0x123457, 0) >= 0, 0x83);
+        for (n = 10000; --n != -1;) {
+        }
+    } while (((Rpc_0011CBB8*)D_0027B4F0)->f24 == 0);
+    D_00260DC0.f00 = 0;
+    D_0025C540[0] = 0;
+    D_0025D540[0] = 0;
+    D_0025C368[0] = 0xFFC;
+    D_0025C368[1] = 0xFFC;
+    D_00260DC0.f10 = 0;
+    n = (s32)&D_00260DC0;
+    func_0011D968(0, 4, &n);
+}

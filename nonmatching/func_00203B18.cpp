@@ -1,9 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 434/480 (90.4%), checked 2026-11-02
+// BYTES 439/480 (91.5%), checked 2026-11-02
 #include "common.h"
-// NEAR: 14 lines differ: retail has "b; nop" for the default switch arm (ours fills the slot with the join's lw), 0x279454 store order in the call setup, and in the failure path the lw of the argument sits in the jal delay slot (ours the sw).
-// NEAR: frame/prologue now match (size initialised from the p14 value, no longer live across calls); still differs: retail has p10 in a0, p14/size in a1, const 1 in a2; ours swaps a0/a1 and copies size to a3; arm layout of the t==1/2 chain differs (retail puts the 0x918 arm out of line).
-
+// NEAR (r60f): 12 lines differ (m59e's all-volatile version: 26 with the nop shift). Only
+// D_00279434 is volatile here (not declared anywhere else in src/; it is the mode word the
+// RPC end callback func_00202E40 updates, and retail rereads it after calls without CSE,
+// and its join load is not stolen into the default arm's "b" slot, which is what volatile does).
+// D_00279454/30/28 are plain. What still differs is only sched1 order of the two flag stores
+// (call setup and failure path). Retail's order (sw 454, lui, sw 430, lw 428; and sw 454 first
+// in the call setup) is exactly the order haifa gives when the three memory references form a
+// dependence chain (sw454 -> sw430 -> lw428): v_all.cpp (all four volatile) reproduces it
+// instruction for instruction, but reorg rejects a volatile load for the jal slot (nop).
+// So retail's lw 428 is plain yet depends on the stores; with three distinct symbols
+// base_alias_check always separates them, and a struct over 0x279410 (one base) is rejected
+// by retail's separate %hi/%lo per word (sA-sD tried: base CSE'd into one register).
+// TU facts measured: func_002032C8 stays EXACT with D_00279430 as `volatile s32`, but
+// func_00203050/203230/203CF8/203A20 break if D_00279424/28/2C are volatile (they need the
+// plain access in a delay slot), so D_00279428 must stay plain.
 struct Req_203B18 {
     s32 a;
     s32 b;
@@ -15,7 +27,7 @@ struct Req_203B18 {
 struct Mode_203B18 { u8 b0, b1, b2; };
 
 extern Req_203B18 D_00279500;
-extern s32 D_00279434;
+extern volatile s32 D_00279434;
 extern u8 D_0027A500[];
 extern u8 D_0027A5C0[];
 extern u8 D_0027A5D0[];
