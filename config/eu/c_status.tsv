@@ -770,6 +770,7 @@ func_0012D3F0	func_0012D520	match
 func_0012D3F8	func_0012D528	match	
 func_0012D448	func_0012D578	match	version-specific
 func_0012D570	func_0012D6A0	match	
+func_0012D5D0	func_0012D700	match	rodata
 func_0012E4E0	func_0012E610	match	rodata
 func_0012E710	func_0012E840	match	
 func_0012E760	func_0012E890	match	
@@ -3426,6 +3427,7 @@ func_0020B9D0	func_0020CE98	match
 func_0020BF78	func_0020D440	match	
 func_0020C0A8	func_0020D570	match	
 func_0020C1A0	func_0020D660	match	
+func_0020C3F0	func_0020D8B0	match	
 func_0020DEE8	func_0020F3A8	match	
 func_0020DF10	func_0020F3D0	match	rodata
 func_0020E100	func_0020F5C0	match	
