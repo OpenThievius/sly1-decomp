@@ -1072,3 +1072,60 @@ void func_001D8D90(Obj_1D8D90* self)
         }
     }
 }
+
+extern s32 D_00269C90;
+extern s32 D_00262E10;
+extern s32 D_00262C6C;
+extern void* D_00261990;
+extern u8 D_00275BC0[];
+extern s32 D_002640A4;
+extern f32 D_00261854;
+extern s32 D_00261D38;
+
+void func_00192880(s32 index);
+void func_0016E148(void);
+void func_00143AF0(void* obj);
+void func_001DFD70(void);
+void func_0017FD70(void);
+void func_00191EE8(void);
+void func_00169CA0(void);
+void func_001C07B0(void);
+void func_001B40C8(void);
+void func_0011C040(void);
+void func_001E9688(void* a);
+void func_0018D550(void);
+
+struct __attribute__((packed)) Word_1DB838 { s32 v; };
+extern u8 D_0026E760[];
+extern u8 D_0026CE48[];
+
+void func_001DB838(s32 a0)
+{
+    if (a0 != 0) {
+        func_00192880(-1);
+        D_00269C90 = 0;
+        D_00262E10 = 0;
+        D_00262C6C = 0;
+        func_0016E148();
+        func_00143AF0(D_00261990);
+        func_001DFD70();
+        func_0017FD70();
+        func_00191EE8();
+        func_00169CA0();
+        func_001C07B0();
+        func_001B40C8();
+        func_0011C040();
+        func_001E9688(D_00275BC0);
+        func_0018D550();
+        u8* c = D_0026CE48;
+        u8* e = D_0026E760;
+        D_00261990 = 0;
+        D_002640A4 = 0;
+        D_00261854 = 1.0f;
+        ((Word_1DB838*)(c + 0x274))->v = 0;
+        ((Word_1DB838*)(e + 0x280))->v = 0;
+        D_00261D38 = 0;
+        *(s32*)(c + 0x278) = 0;
+        *(s32*)(e + 0x28C) = 0;
+    }
+}
