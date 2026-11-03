@@ -5,9 +5,7 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 
 | Function | Version | Match | Checked |
 |---|---|---:|---|
-| [func_eu_0015C778](eu/func_eu_0015C778.cpp) | eu | 99.5% | 2026-11-01 |
 | [func_eu_0015DF58](eu/func_eu_0015DF58.cpp) | eu | 99.3% | 2026-11-01 |
-| [func_eu_0015E7E0](eu/func_eu_0015E7E0.cpp) | eu | 99.2% | 2026-11-01 |
 | [func_001B1438](func_001B1438.cpp) | us | 98.5% | 2026-11-02 |
 | [func_00136408](eu/func_00136408.cpp) | eu | 98.1% | 2026-11-01 |
 | [func_001C1F20](func_001C1F20.cpp) | us | 98.1% | 2026-11-01 |
@@ -17,16 +15,13 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_00117F28](func_00117F28.cpp) | us | 96.7% | 2026-11-01 |
 | [func_eu_001ADF10](eu/func_eu_001ADF10.cpp) | eu | 96.5% | 2026-11-01 |
 | [func_00117D78](func_00117D78.cpp) | us | 96.4% | 2026-11-01 |
-| [func_eu_001ACEE0](eu/func_eu_001ACEE0.cpp) | eu | 96.2% | 2026-11-01 |
 | [func_0016E738](func_0016E738.cpp) | us | 95.6% | 2026-11-02 |
-| [func_eu_0015C6F0](eu/func_eu_0015C6F0.cpp) | eu | 95.5% | 2026-11-01 |
 | [func_eu_0015DDA0](eu/func_eu_0015DDA0.cpp) | eu | 94.7% | 2026-11-01 |
 | [func_00203548](func_00203548.cpp) | us | 93.8% | 2026-11-02 |
 | [func_002049E8](func_002049E8.cpp) | us | 93.8% | 2026-11-01 |
 | [func_eu_0015C5C0](eu/func_eu_0015C5C0.cpp) | eu | 92.5% | 2026-11-01 |
 | [func_eu_001AB2B0](eu/func_eu_001AB2B0.cpp) | eu | 91.5% | 2026-11-01 |
 | [func_00203B18](func_00203B18.cpp) | us | 91.5% | 2026-11-02 |
-| [func_eu_001AE860](eu/func_eu_001AE860.cpp) | eu | 90.3% | 2026-11-01 |
 | [func_eu_001AEC90](eu/func_eu_001AEC90.cpp) | eu | 90.3% | 2026-11-01 |
 | [func_eu_001AB370](eu/func_eu_001AB370.cpp) | eu | 89.2% | 2026-11-01 |
 | [func_00183668](func_00183668.cpp) | us | 88.8% | 2026-11-02 |
@@ -43,7 +38,6 @@ the share is of retail's bytes (0 when the size differs). See tools/nonmatching.
 | [func_eu_001ACC68](eu/func_eu_001ACC68.cpp) | eu | size differs | 2026-11-01 |
 | [func_eu_001AD438](eu/func_eu_001AD438.cpp) | eu | size differs | 2026-11-01 |
 | [func_eu_001AD800](eu/func_eu_001AD800.cpp) | eu | size differs | 2026-11-01 |
-| [func_eu_001ADE38](eu/func_eu_001ADE38.cpp) | eu | does not compile | 2026-11-01 |
 | [func_eu_001AE138](eu/func_eu_001AE138.cpp) | eu | size differs | 2026-11-01 |
 | [func_eu_001DDC68](eu/func_eu_001DDC68.cpp) | eu | size differs | 2026-11-01 |
 | [func_0011E138](func_0011E138.cpp) | us | size differs | 2026-11-01 |
