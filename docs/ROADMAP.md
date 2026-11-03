@@ -42,6 +42,10 @@ splits are taken from other projects or from the prototype
    `src/main/` then give way to real files, with names that are ours. A file is proved by
    building it whole, as the original was, and linking each of its sections in one piece
    (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
+   A file whose range holds original assembly includes those functions at their place
+   (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
+   (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
+   after its first address until what it was is known.
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)).

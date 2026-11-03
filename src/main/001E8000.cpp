@@ -53,102 +53,6 @@ void func_001EBCD8(List_1EBCD8* list, const Entry8_1EBCD8* src)
     *dst = *src;
 }
 
-struct Obj_1E86E0 {
-    u8 pad0[0x268];
-    s32 f268;
-    u8 pad1[0x270 - 0x26C];
-    s32 f270;
-};
-
-struct Mgr_1E86E0 {
-    void** vtbl;
-    u8 pad[0x260 - 4];
-    s32 f260;
-};
-
-extern Mgr_1E86E0 D_002701F8;
-void func_001E7460(void* self);
-void func_001E7440(void* self, s32 v);
-void func_001E7518(void* self, s32 mode);
-void func_001E87F0(void* self, void* a1);
-
-void func_001E86E0(Obj_1E86E0* self, s32 value)
-{
-    if (value == self->f270) return;
-    if (self->f270 == 0) {
-        void** vt = D_002701F8.vtbl;
-        ((void (*)(void*, s32))vt[8])(&D_002701F8, 0);
-    }
-    self->f270 = value;
-    if (D_002701F8.f260 == 4) {
-        func_001E7460(self);
-        if (self->f270 != 0) {
-            void** vt = *(void***)self;
-            ((void (*)(void*, s32))vt[16])(self, 2);
-            func_001E7518(self, 1);
-            func_001E7440(self, 0);
-        } else {
-            void** vt = *(void***)self;
-            ((void (*)(void*, s32))vt[16])(self, 0);
-            func_001E7518(self, 3);
-            func_001E7440(self, 0);
-            func_001E87F0(self, 0);
-        }
-    } else {
-        s32 st = self->f268;
-        if (st >= 2) return;
-        if (st < 0) return;
-        func_001E7518(self, 2);
-    }
-}
-
-struct Obj_1E87F0 {
-    u8 pad0[0x278];
-    Obj_1E87F0* f278;
-    u8 pad1[0x2C8 - 0x27C];
-    u64 f2C8;
-};
-
-void func_001E87F0(Obj_1E87F0* self, Obj_1E87F0* a1)
-{
-    Obj_1E87F0* old = self->f278;
-    if (old != 0) {
-        old->f2C8 &= ~(1ULL << 32);
-    }
-    self->f278 = a1;
-    if (a1 != 0) {
-        a1->f2C8 |= (1ULL << 32);
-    }
-}
-
-struct Obj_1E8840 {
-    u8 pad0[0x268];
-    s32 f268;
-    s32 pad1;
-    s32 f270;
-    s32 f274;
-    u8 pad2[0xC70 - 0x278];
-    s32 fC70;
-};
-
-void func_001AA8C8(void* self);
-
-void func_001E8840(Obj_1E8840* self)
-{
-    func_001AA8C8(self);
-    self->fC70 = 0;
-    self->f274 = 0;
-    self->f270 = 0;
-    self->f268 = 3;
-}
-
-s32 func_001E8878(s32 a0, s32 a1);
-
-void func_001E88B0(void)
-{
-    func_001E8878(1, 0xFFFF);
-}
-
 struct Obj_1EB598 { u8 pad0[0x14]; void* f14; u8 pad1[0x610 - 0x18]; void* f610; void* f614; };
 
 struct Entry_275CA0 { s32 a; s32 b; s32 c; };
@@ -562,9 +466,6 @@ void func_001E8EF8(Obj_1E8EF8* self)
         break;
     }
 }
-
-extern u8 D_00275B50[];
-void func_001E8878(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
 
 struct Obj_1E8FA8 { u8 pad0[0x724]; s32 f724; };
 
