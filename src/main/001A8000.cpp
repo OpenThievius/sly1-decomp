@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 void func_00182ED0(void* self);
 void func_001A93C8(void* self);
@@ -2247,7 +2248,6 @@ void func_001AB058(Obj_1AB058* self)
     }
 }
 
-extern void* D_0027B314;
 
 struct Key_1A88A0 { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
 struct Ent_1A88A0;
@@ -2278,7 +2278,7 @@ struct Begin_1A88A0 {
         it->link = (u8*)list;
         it->offset = list->offset;
         it->prev = (Iter_1A88A0*)D_0027B314;
-        D_0027B314 = it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -2294,7 +2294,7 @@ struct Next_1A88A0 {
 struct End_1A88A0 {
     static void Of(Iter_1A88A0* it)
     {
-        D_0027B314 = it->prev;
+        D_0027B314 = (ListFrame*)it->prev;
     }
 };
 

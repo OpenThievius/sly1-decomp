@@ -1167,7 +1167,7 @@ s32 func_0018C250(Card_18C250* self)
     return r;
 }
 
-extern u8 D_00269A00[];
+extern u32 D_00269A00[];
 extern s32 D_00261F1C;
 
 void func_001F6B60(s32 a);
@@ -1383,7 +1383,7 @@ u8* func_0018E480(s32 index)
 
 struct Ctl_18E4C0 { u8 pad[0]; };
 
-extern u8 D_00269A00[];
+extern u32 D_00269A00[];
 extern u8 D_002484B0[];
 void func_0018F0E8(Ctl_18E4C0* self, void* p);
 
@@ -1975,7 +1975,7 @@ s32 func_0018C420(Self_18C420* self) {
 
 // EXACT: f04,f08,f10,f0C,f14 store order; func_001F5C0C declared s32, called as (void)
 
-extern u8 D_00269A00[];
+extern u32 D_00269A00[];
 extern u8 D_002C2B00[];
 extern u8 D_002832F0[];
 extern s32 D_00275964;
@@ -2293,4 +2293,71 @@ s32 func_0018CDD8(void* a0, void* a1, Img_18CDD8* out, Info_18CDD8* info)
     }
     func_0018D2B0(a0, handle);
     return r;
+}
+
+struct Obj_18F448 {
+    u8 pad0[0xC];
+    s32 fC;
+    u8 pad1[0x48];
+    void* f58;
+    void* f5C;
+    u8 pad2[0xB4];
+    void* f114;
+    void* f118;
+};
+
+extern u8 D_002D7B40[];
+extern u8 D_0045AAC0[];
+extern u8 D_0042AAC0[];
+extern u8 D_00586AC0[];
+extern u8 D_005A2D40[];
+extern s32 D_002626CC;
+extern u8 D_00148D68[];
+
+void func_0013C988(Obj_18F448* self, s32 a, s32 b);
+s32 func_0018E940(Obj_18F448* self);
+void func_0020ADA0(void);
+void func_0020AE40(Obj_18F448* self, void* a, s32 b);
+void func_0020A538(Obj_18F448* self, s32 a, s32 b, void* fn, Obj_18F448* arg);
+void func_0020B168(Obj_18F448* self, s32 a, void* fn, Obj_18F448* arg);
+s32 func_0018F890(Obj_18F448* self, s32 flag);
+
+void func_0018F448(Obj_18F448* self, s32 v)
+{
+    s32 i;
+
+    self->fC = v;
+    self->f58 = D_002D7B40;
+    self->f5C = D_0045AAC0;
+    func_0013C988((Obj_18F448*)((u8*)self + 0x60), 0x30000, (s32)D_0042AAC0 | 0x20000000);
+    func_0018E940((Obj_18F448*)((u8*)self + 0x80));
+    func_0020ADA0();
+    func_0020AE40((Obj_18F448*)((u8*)self + 0x10), self->f58, 0x152F68);
+    func_0020A538((Obj_18F448*)((u8*)self + 0x10), 0, 0, (void*)func_0018EC40, self);
+    func_0020A538((Obj_18F448*)((u8*)self + 0x10), 2, 0, (void*)func_0018EC80, self);
+    func_0020B168((Obj_18F448*)((u8*)self + 0x10), 1, (void*)func_0018ECA8, self);
+    func_0020B168((Obj_18F448*)((u8*)self + 0x10), 4, (void*)func_0018ED78, self);
+    func_0020B168((Obj_18F448*)((u8*)self + 0x10), 0, (void*)func_0018EDA0, self);
+    while (func_0018F890(self, 1) != 0) {
+    }
+    self->f114 = D_00586AC0;
+    self->f118 = D_005A2D40;
+    D_002626CC = 0;
+    D_00269A00[0x4F] = 0x100010;
+    D_00269A00[0x50] = (s32)D_00148D68;
+    D_00269A00[0x4E] = 0xFFFFFFFF;
+    u8* tb = D_005A2E60;
+    i = 0;
+    s32 j;
+    do {
+        u32 c = i;
+        s32 k;
+        s32 off = c * 4;
+        j = c + 1;
+        for (k = 7; k >= 0; k--) {
+            if (c & 1) c = (c >> 1) ^ 0xEDB88320; else c = c >> 1;
+        }
+        *(u32*)(tb + off) = c;
+        i = j;
+    } while (j < 256);
 }

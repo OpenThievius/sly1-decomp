@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Slot_13C950 { u8 pad[0x680]; s32 slot; };
 
@@ -1140,7 +1141,6 @@ void func_0013FA10(Obj_0013FA10* self, f32 t)
 }
 
 extern u8 D_00261420[];
-extern u8 D_0027B314[];
 
 struct Frame_13CE80 { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
 struct Ent_13CE80 { s32 kind; s32 key; s32 node; };
@@ -1176,9 +1176,9 @@ void func_0013CE80(Self_13CE80* self)
     s32 l = (s32)&self->head34;
     fr.cursor = l;
     fr.list = l;
-    s32 old = *(s32*)D_0027B314;
+    s32 old = *(s32*)&D_0027B314;
     s32 link = *(s32*)(l + 8);
-    *(s32*)D_0027B314 = (s32)&fr;
+    *(s32*)&D_0027B314 = (s32)&fr;
     fr.prev = old;
     s32 h = self->head34;
     fr.link = link;
@@ -1223,7 +1223,7 @@ void func_0013CE80(Self_13CE80* self)
         fr.cursor = nx + fr.link;
         n = (Node_13CE80*)nx;
     }
-    *(s32*)D_0027B314 = fr.prev;
+    *(s32*)&D_0027B314 = fr.prev;
 }
 
 struct Self_13FD20;
@@ -1417,7 +1417,6 @@ struct Self_13E950 {
 
 struct Call_13E950;
 
-extern u8 D_0027B314[];
 
 s32 func_0013E868(Call_13E950* set, void* key);
 void func_0013E8D8(Call_13E950* queue, void* value);
@@ -1437,8 +1436,8 @@ struct Begin_13E950 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = *(Iter_13E950**)D_0027B314;
-        *(Iter_13E950**)D_0027B314 = it;
+        it->saved = ((Iter_13E950*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1457,7 +1456,7 @@ void func_0013E950(Self_13E950* self, Owner_13E950* a1)
             }
         }
     }
-    *(Iter_13E950**)D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
 typedef s32 (*Fn_0013C9D0)(void* self, s32 count, u8* dst);

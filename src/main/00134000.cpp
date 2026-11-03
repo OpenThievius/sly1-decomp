@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Node_1363D0 { u8 pad0[0x324]; void* child; };
 
@@ -942,7 +943,6 @@ struct Group_135550 { u8 pad0[0x6C]; List_135550 list; };
 struct Obj_135550 { u8 pad0[0x250]; s32 f250; };
 struct Host_135550;
 
-extern Iter_135550* D_0027B314;
 
 struct Next_135550 {
     static Item_135550* Of(Iter_135550* it)
@@ -959,8 +959,8 @@ struct Begin_135550 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = D_0027B314;
-        D_0027B314 = it;
+        it->saved = (Iter_135550*)D_0027B314;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -982,7 +982,7 @@ void func_00135550(Obj_135550* self, s32 value)
             while ((obj = Next_135550::Of(&it)) != 0) {
                 func_0012F6B0(obj, 0.0f);
             }
-            D_0027B314 = it.saved;
+            D_0027B314 = (ListFrame*)it.saved;
         }
     }
     if (value == 0) {
@@ -994,7 +994,7 @@ void func_00135550(Obj_135550* self, s32 value)
             while ((obj = Next_135550::Of(&it)) != 0) {
                 func_0012F6B0(obj, 1.0f);
             }
-            D_0027B314 = it.saved;
+            D_0027B314 = (ListFrame*)it.saved;
         }
     }
     func_001AA998(self, value);

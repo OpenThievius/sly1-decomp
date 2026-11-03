@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
@@ -1484,7 +1485,6 @@ void func_0015A8B8(Obj_15A8B8* self)
 }
 
 struct Iter_00159588;
-extern Iter_00159588* D_0027B314;
 extern f32 D_00261858[];
 
 struct Node_00159588 { void* f0; u8 pad4[0xC]; u8 body[0x50]; f32 f60; };
@@ -1511,8 +1511,8 @@ struct Begin_00159588 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = D_0027B314;
-        D_0027B314 = it;
+        it->saved = (Iter_00159588*)D_0027B314;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1528,7 +1528,7 @@ void func_00159588(Self_00159588* self)
             func_001B5F28(self->set, node);
         }
     }
-    D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
 struct Actor_15AC08 {

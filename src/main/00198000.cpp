@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Actor_198980 { u8 pad0[0x554]; s32 flag554; };
 
@@ -1676,15 +1677,14 @@ void func_0019AF00(Self_19AF00* self)
 }
 
 struct List_1989B0 { s32 head; s32 x; s32 link; };
-extern u8 D_0027B314[];
 struct Frame_1989B0 {
     s32 list; s32 cursor; s32 link; s32 prev;
     Frame_1989B0(List_1989B0* l) {
         cursor = (s32)l;
         list = (s32)l;
         link = l->link;
-        prev = *(s32*)D_0027B314;
-        *(s32*)D_0027B314 = (s32)this;
+        prev = *(s32*)&D_0027B314;
+        *(s32*)&D_0027B314 = (s32)this;
     }
 };
 struct Cls_1989B0 { u8 pad0[8]; s32 flags; };
@@ -1698,7 +1698,6 @@ struct Obj_1989B0 {
     u8 sub584[1];
 };
 
-extern u8 D_0027B314[];
 
 void func_001BAC30(Obj_1989B0* self);
 void func_00159478(void* sub, Obj_1989B0* self);
@@ -1722,7 +1721,7 @@ void func_001989B0(Obj_1989B0* self)
         fr.cursor = nx + fr.link;
         p = (Node_1989B0*)nx;
     }
-    *(s32*)D_0027B314 = fr.prev;
+    *(s32*)&D_0027B314 = fr.prev;
 }
 
 extern s32 D_0026A720;

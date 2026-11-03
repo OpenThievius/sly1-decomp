@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 #include "fpu.h"
 
 struct Obj_E8E08 { u8 pad[0xC58]; s32 f58; s32 f5C; };
@@ -1675,7 +1676,6 @@ struct Obj_1E9EE8 {
     List_1E9EE8 c;
 };
 
-extern Iter_1E9EE8* D_0027B314;
 
 struct Begin_1E9EE8 {
     static void Of(Iter_1E9EE8* it, List_1E9EE8* list)
@@ -1683,8 +1683,8 @@ struct Begin_1E9EE8 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        Iter_1E9EE8* prev = D_0027B314;
-        D_0027B314 = it;
+        Iter_1E9EE8* prev = (Iter_1E9EE8*)D_0027B314;
+        D_0027B314 = (ListFrame*)it;
         it->prev = prev;
     }
 };
@@ -1697,7 +1697,7 @@ struct Next_1E9EE8 {
     }
 };
 struct End_1E9EE8 {
-    static void Of(Iter_1E9EE8* it) { D_0027B314 = it->prev; }
+    static void Of(Iter_1E9EE8* it) { D_0027B314 = (ListFrame*)it->prev; }
 };
 
 void func_00124EE8(Node_1E9EE8* n, f32 dt);
@@ -1745,7 +1745,7 @@ struct Begin_1E9C78 {
         it->link = (u8**)list;
         it->offset = list->offset;
         it->prev = (Iter_1E9C78*)D_0027B314;
-        D_0027B314 = (Iter_1E9EE8*)it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 struct Next_1E9C78 {
@@ -1759,7 +1759,7 @@ struct Next_1E9C78 {
 struct End_1E9C78 {
     static void Of(Iter_1E9C78* it)
     {
-        D_0027B314 = (Iter_1E9EE8*)it->prev;
+        D_0027B314 = (ListFrame*)it->prev;
     }
 };
 
@@ -1885,7 +1885,7 @@ struct Begin_1EA118 {
         it->link = (u8*)list;
         it->offset = list->offset;
         it->saved = ((Iter_1EA118*)D_0027B314);
-        D_0027B314 = (Iter_1E9EE8*)it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1921,7 +1921,7 @@ void func_001EA118(World_1EA118* self)
                 obj->vtable->update(obj, clock->dt);
             }
         }
-        D_0027B314 = (Iter_1E9EE8*)it.saved;
+        D_0027B314 = (ListFrame*)it.saved;
         func_00138C00(self, 1);
         func_001BDD00(self, 6, ((Clock_1EA118*)D_00261858)->dt);
         Begin_1EA118::Of(&it, &self->list60);
@@ -1934,7 +1934,7 @@ void func_001EA118(World_1EA118* self)
                 }
             }
         }
-        D_0027B314 = (Iter_1E9EE8*)it.saved;
+        D_0027B314 = (ListFrame*)it.saved;
         Begin_1EA118::Of(&it, &self->list6C);
         for (Actor_1EA118* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
             obj->vtable->post(obj);
@@ -1942,7 +1942,7 @@ void func_001EA118(World_1EA118* self)
                 func_001BB9D0(obj);
             }
         }
-        D_0027B314 = (Iter_1E9EE8*)it.saved;
+        D_0027B314 = (ListFrame*)it.saved;
         func_001DBEC8(self, ((Clock_1EA118*)D_00261858)->dt);
         func_001DBE48(self);
         func_001B4878(((Clock_1EA118*)D_00261858)->dt);
@@ -1952,7 +1952,7 @@ void func_001EA118(World_1EA118* self)
     for (Actor_1EA118* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
         func_0012E710(obj);
     }
-    D_0027B314 = (Iter_1E9EE8*)it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
     func_00143E40(D_00261990, 1, ((Clock_1EA118*)D_00261858)->dt);
     func_001EA0A8(self, ((Clock_1EA118*)D_00261858)->real);
 }

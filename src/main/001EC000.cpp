@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 #include "fpu.h"
 
 struct Obj_1ED198 { u8 pad0[0x14]; void* f14; u8 pad1[0x28]; s32 f40; };
@@ -1174,11 +1175,10 @@ Self_1EE318* func_001EE318(Self_1EE318* self)
 
 struct Obj_1EECE0;
 struct Link_1EECE0;
-extern Link_1EECE0* D_0027B314;
 struct Link_1EECE0 {
     s32* a; s32* b; s32 c; Link_1EECE0* prev;
-    Link_1EECE0(s32* p) : a(p), b(p), c(p[2]), prev(D_0027B314) {}
-    ~Link_1EECE0() { D_0027B314 = prev; }
+    Link_1EECE0(s32* p) : a(p), b(p), c(p[2]), prev((Link_1EECE0*)D_0027B314) {}
+    ~Link_1EECE0() { D_0027B314 = (ListFrame*)prev; }
 };
 struct Obj_1EECE0 { void (**vtbl)(Obj_1EECE0*); };
 
@@ -1186,12 +1186,11 @@ void func_00124A48(Obj_1EECE0* self);
 void func_001F55A8(void* self);
 void* func_0018D500(s32 size);
 
-extern Link_1EECE0* D_0027B314;
 
 void func_001EECE0(Obj_1EECE0* self)
 {
     Link_1EECE0 fr((s32*)((u8*)self + 0x34));
-    D_0027B314 = &fr;
+    D_0027B314 = (ListFrame*)&fr;
     func_00124A48(self);
     func_001F55A8((u8*)self + 0x590);
     *(void**)((u8*)self + 0x560) = func_0018D500(0x80);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 extern u8 D_00247AA0[];
 s32 D_002613F4;
@@ -1113,7 +1114,6 @@ struct Obj_141210 {
 };
 
 struct Frame_141210;
-extern Frame_141210* D_0027B314;
 
 struct Frame_141210 {
     void* list;
@@ -1125,10 +1125,10 @@ struct Frame_141210 {
         list = l;
         cursor = l;
         next_off = l->next_off;
-        prev = D_0027B314;
-        D_0027B314 = this;
+        prev = (Frame_141210*)D_0027B314;
+        D_0027B314 = (ListFrame*)this;
     }
-    ~Frame_141210() { D_0027B314 = prev; }
+    ~Frame_141210() { D_0027B314 = (ListFrame*)prev; }
 };
 
 extern u8 D_00261410[];
@@ -1551,8 +1551,8 @@ struct Begin_141438 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_141438*)(*(void**)&D_0027B314);
-        (*(void**)&D_0027B314) = it;
+        it->saved = (Iter_141438*)((void*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1585,7 +1585,7 @@ void func_00141438(Obj_141438* self)
                 self->f5A4 = obj;
             }
         }
-        (*(void**)&D_0027B314) = it.saved;
+        D_0027B314 = (ListFrame*)it.saved;
     } else {
         self->f5A4 = (u8*)func_0015A448(self->f14, self->f5A0, self);
     }

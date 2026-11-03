@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Obj_1BC748 { u8 pad[0x538]; u64 flags; };
 
@@ -932,7 +933,6 @@ void func_001BD790(Obj_1BD790* obj, s32 mode)
     }
 }
 
-extern u8 D_0027B314[];
 extern f32 D_00261858[];
 
 struct Frame_1BDD00 { s32 list; s32 cursor; s32 link; s32 prev; };
@@ -994,9 +994,9 @@ void func_001BDD00(Obj_1BDD00* self, s32 flags, f32 f)
         s32 e = (s32)&self->list60;
         fr.cursor = e;
         fr.list = e;
-        s32 old = *(s32*)D_0027B314;
+        s32 old = (s32)D_0027B314;
         s32 link = *(s32*)(e + 8);
-        *(s32*)D_0027B314 = (s32)&fr;
+        D_0027B314 = (ListFrame*)&fr;
         fr.prev = old;
         s32 h = *(s32*)e;
         fr.link = link;
@@ -1013,7 +1013,7 @@ void func_001BDD00(Obj_1BDD00* self, s32 flags, f32 f)
             fr.cursor = nx + fr.link;
             p = nx;
         }
-        *(s32*)D_0027B314 = fr.prev;
+        D_0027B314 = (ListFrame*)fr.prev;
     }
     for (s = self->head6C; s != 0; s = (Node_1BDD00*)((Item_1BDD00*)s)->next) {
         if (s->flags538 & (1ULL << 57)) continue;
@@ -1169,8 +1169,8 @@ void func_001BEF88(void)
     f.f0 = P;
     f.f4 = P;
     f.f8 = *(s32*)(P + 8);
-    f.fC = *(s32*)D_0027B314;
-    *(s32*)D_0027B314 = (s32)&f;
+    f.fC = (s32)D_0027B314;
+    D_0027B314 = (ListFrame*)&f;
     if (func_00152720((Frame_1BEF88*)P) != 0) {
         D_00274734 = 0;
     } else {
@@ -1190,7 +1190,7 @@ void func_001BEF88(void)
             } while (x != 0);
         }
     }
-    *(s32*)D_0027B314 = f.fC;
+    D_0027B314 = (ListFrame*)f.fC;
 }
 
 // NEAR: 23 diff lines, register allocation only: queue index in t1 (retail) vs v1 (ours), mask built in a0 vs a2, cleanup counter in t1 vs a0
@@ -1476,8 +1476,8 @@ struct Begin_1BEE48 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (*(Iter_1BEE48**)&D_0027B314);
-        (*(Iter_1BEE48**)&D_0027B314) = it;
+        it->saved = ((Iter_1BEE48*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 void func_001BEE48(void)
@@ -1490,7 +1490,7 @@ void func_001BEE48(void)
     }
     func_0011D928(0x14);
     D_002748EC = 0;
-    (*(Iter_1BEE48**)&D_0027B314) = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
     D_00274738 = 0;
     D_00274734 = 0;
 
@@ -1658,8 +1658,8 @@ struct Begin_1BDA50 {
         it->list = list;
         it->link = (u8**)list;
         it->offset = list->offset;
-        it->prev = (*(Frame_1BDA50**)D_0027B314);
-        (*(Frame_1BDA50**)D_0027B314) = it;
+        it->prev = ((Frame_1BDA50*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 struct Next_1BDA50 {
@@ -1671,7 +1671,7 @@ struct Next_1BDA50 {
     }
 };
 struct End_1BDA50 {
-    static void Of(Frame_1BDA50* it) { (*(Frame_1BDA50**)D_0027B314) = it->prev; }
+    static void Of(Frame_1BDA50* it) { D_0027B314 = (ListFrame*)it->prev; }
 };
 
 s32 func_001BD558(s32 n, Item_1BDA50** arr, s32 cap, Buf_1BDA50* buf);

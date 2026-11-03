@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Owned { u8 pad[0x14]; void* owner; };
 
@@ -2390,7 +2391,6 @@ struct Object_001288F0 { u8 pad0[0x34]; };
 struct Context_001288F0;
 struct List_001288F0 { u8* head; u8 pad4[4]; s32 offset; };
 struct Iter_001288F0 { List_001288F0* list; u8* link; s32 offset; Iter_001288F0* saved; };
-extern Iter_001288F0* D_0027B314;
 s32 func_001C1A28(Context_001288F0* context, Object_001288F0** obj);
 
 struct Next_001288F0 {
@@ -2408,8 +2408,8 @@ struct Begin_001288F0 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = D_0027B314;
-        D_0027B314 = it;
+        it->saved = (Iter_001288F0*)D_0027B314;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -2420,11 +2420,11 @@ s32 func_001288F0(Object_001288F0* self, Context_001288F0* context)
     Object_001288F0* obj;
     for (obj = Next_001288F0::Of(&it); obj != 0; obj = Next_001288F0::Of(&it)) {
         if (func_001C1A28(context, &obj) == 0) {
-            D_0027B314 = it.saved;
+            D_0027B314 = (ListFrame*)it.saved;
             return 0;
         }
     }
-    D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
     return 1;
 }
 
@@ -2444,8 +2444,8 @@ struct Begin_129A58 {
         it->list = (List_001288F0*)list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = D_0027B314;
-        D_0027B314 = it;
+        it->saved = (Iter_001288F0*)D_0027B314;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -2477,5 +2477,5 @@ void func_00129A58(Obj_129A58* self)
         func_00152540(&self->list, c, node);
     }
     self->vt[0xBC / 4](self);
-    D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 void func_001451F0(u32, int, int, void*, int, void*);
 void func_00125C90();
@@ -479,7 +480,6 @@ void func_001F4500(void* self_, void* s3)
     }
 }
 
-extern void* D_0027B314;
 
 struct Kind_1F55A8 { s32 f0; s32 type; };
 struct Node_1F55A8 { Kind_1F55A8* kind; };
@@ -512,7 +512,7 @@ struct Begin_1F55A8 {
         it->link = (u8*)list;
         it->offset = list->offset;
         it->saved = (Iter_1F55A8*)D_0027B314;
-        D_0027B314 = it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -540,7 +540,7 @@ void func_001F55A8(Obj_1F55A8* self)
             func_001F5868(self, n);
         }
     }
-    D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
 struct Q_1F5008 {

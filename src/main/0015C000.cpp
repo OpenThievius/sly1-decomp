@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 extern void* D_0024A220;
 struct Render_15C930 { u8 pad[0x44]; f32 x; f32 y; void* callback; };
@@ -1658,7 +1659,6 @@ struct Node_15F710 {
     List_15F710 list;
 };
 
-extern Iter_15F710* D_0027B314;
 void func_00152600(List_15F710* list, Node_15F710* node);
 void func_0015F678(void* self, Node_15F710* node);
 
@@ -1668,8 +1668,8 @@ struct Begin_15F710 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = D_0027B314;
-        D_0027B314 = it;
+        it->prev = (Iter_15F710*)D_0027B314;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1696,7 +1696,7 @@ void func_0015F710(void* self, Node_15F710* owner)
         }
         func_0015F678(self, node);
     }
-    D_0027B314 = it.prev;
+    D_0027B314 = (ListFrame*)it.prev;
 }
 
 struct List_15EFE8 {
@@ -1740,8 +1740,8 @@ struct Begin_15EFE8 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->prev = (*(Iter_15EFE8**)&D_0027B314);
-        (*(Iter_15EFE8**)&D_0027B314) = it;
+        it->prev = ((Iter_15EFE8*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1765,7 +1765,7 @@ void func_0015EFE8(Obj_15EFE8* self)
             func_00152470(n->f14 + 0x1CC0, n);
         }
         func_00152440(&self->l0);
-        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+        D_0027B314 = (ListFrame*)it.prev;
     }
     if (func_00152720(&self->l1) == 0) {
         Begin_15EFE8::Of(&it, &self->l1);
@@ -1777,7 +1777,7 @@ void func_0015EFE8(Obj_15EFE8* self)
             func_001B5F28(D_00275710 + 0x1B40, n);
         }
         func_00152440(&self->l1);
-        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+        D_0027B314 = (ListFrame*)it.prev;
     }
     if (func_00152720(&self->l2) == 0) {
         Begin_15EFE8::Of(&it, &self->l2);
@@ -1785,7 +1785,7 @@ void func_0015EFE8(Obj_15EFE8* self)
             func_00152600(&self->l2, n);
             func_001B5F28(D_00275710 + 0x1BF4, n);
         }
-        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+        D_0027B314 = (ListFrame*)it.prev;
     }
 }
 
