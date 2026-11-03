@@ -1666,3 +1666,116 @@ void func_0015B4D0(Self_15B4D0* self, void* a1, void* a2)
     }
     }
 }
+
+struct Vt_15A4F0 {
+    u8 pad0[8];
+    s32 grf;
+};
+
+struct Lo_15A4F0 {
+    Vt_15A4F0* pvt;
+    u8 pad4[0x14];
+    Lo_15A4F0* pnext;   // 0x18
+    Lo_15A4F0* psib;    // 0x1C
+    u8 pad20[4];
+    Lo_15A4F0* pchain;  // 0x24
+    u8 pad28[0xC];
+    Lo_15A4F0* pchild;  // 0x34
+    u8 pad38[0x2C8 - 0x38];
+    u64 unk0 : 42;      // 0x2C8
+    u64 imark : 4;
+    u64 unk1 : 18;
+};
+
+struct Sw_15A4F0 {
+    u8 pad[0x1884];
+    Lo_15A4F0* aplo[0x95];
+};
+
+s32 func_001300E8(Lo_15A4F0* plo, s32 id);
+s32 func_00182FC8(Lo_15A4F0* plo);
+s32 func_0015A4B8(u32 i, s32 id);
+void func_00159F48(Lo_15A4F0* plo, s32 kind, s32 fAll, s32 zero, Lo_15A4F0* ploRoot, s32 cmax,
+                   s32* pc, Lo_15A4F0** aplo, s32* pmin);
+
+s32 func_0015A4F0(Sw_15A4F0* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax, Lo_15A4F0** aplo)
+{
+    s32 c;
+    s32 min;
+    s32 kind;
+    Lo_15A4F0* plo;
+    Lo_15A4F0* ploMark;
+    Lo_15A4F0* p;
+    s32 n;
+    u32 i;
+
+    if (id == -1) {
+        return 0;
+    }
+    if (ploRoot == 0 && (grf & 5) == 0) {
+        return 0;
+    }
+    kind = grf & 0xFF;
+    c = 0;
+    if (kind == 3) {
+        // Retail reads plo here before anything sets it (lw 0($s0) with $s0 unset).
+        if (!(plo->pvt->grf & 1)) {
+            plo = plo->pnext;
+        }
+        for (; plo != 0; plo = plo->pnext) {
+            if (func_001300E8(plo, id) != 0 && ((grf & 0x100) || func_00182FC8(plo) != 0)) {
+                if (c < cmax) {
+                    aplo[c] = plo;
+                }
+                c++;
+            }
+        }
+    } else if (kind == 2 && !(grf & 0x100)) {
+        if (!(ploRoot->pvt->grf & 1)) {
+            return 0;
+        }
+        for (plo = ploRoot->pchild; plo != 0; plo = plo->psib) {
+            if (func_001300E8(plo, id) == 0) {
+                continue;
+            }
+            if (c < cmax) {
+                aplo[c] = plo;
+            }
+            c++;
+        }
+    } else {
+        switch (kind) {
+        case 1:
+        case 3:
+        case 4:
+            ploMark = ploRoot;
+            if (ploMark != 0 && !(ploMark->pvt->grf & 1)) {
+                ploMark = ploMark->pnext;
+            }
+            p = ploMark;
+            n = 0;
+            while (p != 0) {
+                n++;
+                p->imark = n;
+                p = p->pnext;
+            }
+            min = 0x7FFFFFFF;
+            break;
+        default:
+            ploMark = 0;
+            break;
+        }
+        for (i = id; i < 0x95 && func_0015A4B8(i, id); i++) {
+            for (plo = psw->aplo[i]; plo != 0; plo = plo->pchain) {
+                func_00159F48(plo, kind, grf & 0x100, 0, ploRoot, cmax, &c, aplo, &min);
+            }
+        }
+        for (p = ploMark; p != 0; p = p->pnext) {
+            p->imark = 0;
+        }
+    }
+    if (!(grf & 0x200) && cmax < c) {
+        c = cmax;
+    }
+    return c;
+}
