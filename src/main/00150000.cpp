@@ -688,7 +688,8 @@ struct Frame_153328 {
     u8 pad1[0x1C];
 };
 
-extern u8 func_001533A8[];
+struct Self_1533A8;
+void func_001533A8(Self_1533A8* self);
 s32 func_001F5C0C(void* p, s32 zero, s32 size);
 void func_00125B70(void* obj, void* c, void* out);
 void func_0019D410(void* p);
@@ -2111,4 +2112,89 @@ void func_00152E48(Self_152E48* self, A_152E48* a)
     func_001EE8D0(&pb, &pa);
     func_00152A50(&pb, &self->f2DC, 0, &self->f2E0, 0x13);
     func_0018D6F0();
+}
+
+struct __attribute__((aligned(16))) Quad_1533A8 { s32 w[4]; };
+
+struct Sub_1533A8 {
+    u8 pad0[0x238];
+    s32 f238;
+    void* f23C;
+    u8 pad1[0x2D0 - 0x240];
+    void* f2D0;
+    s32 f2D4;
+    s32 f2D8;
+    s32 f2DC;
+    s32 f2E0;
+};
+
+struct Block_1533A8 { Quad_1533A8 q[5]; };
+
+struct Self_1533A8 {
+    u8 pad0[0x10];
+    Block_1533A8 copy;
+    Sub_1533A8* f60;
+};
+
+struct Frame_1533A8 {
+    void* fn;
+    u8 pad0[4];
+    s32 f08;
+    u8 pad1[0x10 - 0x0C];
+    Block_1533A8 copy;
+    u8 pad2[0x70 - 0x60];
+    Sub_1533A8* f70;
+    void* f74;
+    void* f78;
+    u8 pad3[0x80 - 0x7C];
+    Quad_1533A8 q80[4];
+    Quad_1533A8 qC0[4];
+};
+
+struct Gfx_1533A8;
+extern u8 D_002622A8[];
+extern u8 D_00261F30[];
+
+void func_00152B80(Gfx_1533A8* obj, s32 a, s32 b);
+void func_001F5C0C(Frame_1533A8* p, s32 zero, s32 size);
+void func_00188668(Quad_1533A8* out, void* b, void* in);
+void func_00152B38(Gfx_1533A8* self);
+void func_001EE3B8(Gfx_1533A8* obj, s32 a, s32 b);
+void func_001EE668(Gfx_1533A8* obj, s32 a, s32 b, void* c, s32 d);
+void func_00152D70(Gfx_1533A8* self);
+void func_00166690(Frame_1533A8* frame);
+
+void func_001533A8(Self_1533A8* self)
+{
+    Frame_1533A8 f;
+    s32 i;
+    u8* base = D_002622A8;
+    Sub_1533A8* s1 = self->f60;
+    func_00152B80((Gfx_1533A8*)base, s1->f2D4, s1->f2D8);
+    func_001F5C0C(&f, 0, 0x80);
+    f.f08 = 3;
+    f.fn = (void*)func_00166690;
+    f.copy = self->copy;
+    f.f70 = s1;
+    f.f74 = (u8*)s1 + 0x22C;
+    i = 0;
+    func_00188668(f.qC0, D_00261F30, (u8*)s1->f2D0 + 0x70);
+    f.q80[0] = f.qC0[0];
+    f.q80[1] = f.qC0[1];
+    f.q80[2] = f.qC0[2];
+    f.q80[3] = f.qC0[3];
+    func_00152B38((Gfx_1533A8*)D_002622A8);
+    func_001EE3B8((Gfx_1533A8*)D_002622A8, 0, 0);
+    func_001EE668((Gfx_1533A8*)D_002622A8, 0xC, 4, f.q80, 4);
+    func_00152D70((Gfx_1533A8*)D_002622A8);
+    if (s1->f238 > 0) {
+        s32 off = 0;
+        do {
+            i++;
+            f.f78 = (u8*)s1->f23C + off;
+            func_00166690(&f);
+            off += 0x70;
+        } while (i < s1->f238);
+    }
+    func_00152B80((Gfx_1533A8*)D_002622A8, s1->f2DC, s1->f2E0);
 }

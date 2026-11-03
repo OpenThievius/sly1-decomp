@@ -1595,3 +1595,80 @@ void func_00141438(Obj_141438* self)
             func_001B64D8(self->f5AC, 0x547);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_1429F8 { s32 a, b, c, d; };
+
+struct Event_1429F8 {
+    f32 time;
+    s32 end;
+    u8 pad0[8];
+    Quad_1429F8 q10;
+    Quad_1429F8 q20;
+};
+
+struct Span_1429F8 {
+    Quad_1429F8 q[4];
+    f32 time[2];
+    s32 f48;
+    u8 pad0[0x70 - 0x4C];
+};
+
+void func_0018D608(void);
+Event_1429F8* func_0018D658(s32 size);
+void func_0018D6F0(void);
+void func_001F5CD0(Event_1429F8* base, s32 n, s32 size, s32 (*cmp)(const void*, const void*));
+s32 func_00142998(const void* a, const void* b);
+
+s32 func_001429F8(s32 count, Span_1429F8* spans)
+{
+    Event_1429F8* mem;
+    Event_1429F8* rec;
+    Event_1429F8* end;
+    Span_1429F8* dst;
+    s32 i;
+    s32 j;
+    s32 depth;
+
+    func_0018D608();
+    mem = func_0018D658(count * 0x60);
+    rec = mem;
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < 2; j++) {
+            rec->end = j;
+            rec->time = spans[i].time[j];
+            rec->q10 = spans[i].q[j];
+            rec->q20 = spans[i].q[j + 2];
+            rec++;
+        }
+    }
+
+    func_001F5CD0(mem, count * 2, 0x30, func_00142998);
+
+    dst = spans;
+    end = rec;
+    rec = mem;
+    depth = 0;
+    while (rec < end) {
+        if (rec->end == 0) {
+            depth++;
+            if (depth == 1) {
+                dst->time[0] = rec->time;
+                dst->q[0] = rec->q10;
+                dst->q[2] = rec->q20;
+                dst->f48 = 4;
+            }
+        } else {
+            depth--;
+            if (depth == 0) {
+                dst->time[1] = rec->time;
+                dst->q[1] = rec->q10;
+                dst->q[3] = rec->q20;
+                dst++;
+            }
+        }
+        rec++;
+    }
+
+    func_0018D6F0();
+    return dst - spans;
+}

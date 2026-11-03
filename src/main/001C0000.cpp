@@ -1857,3 +1857,65 @@ void func_001C0808(void* item)
     }
     func_0011CE30();
 }
+
+struct Tag_1C2430 { u64 lo; u64 hi; };
+
+struct Slot_1C2430 {
+    Tag_1C2430* tags;
+    u32 base;
+    u32 addrs[8];
+    s32 sizes[8];
+    s32 count;
+    s32 state;
+};
+
+struct Chan_1C2430 {
+    u32 f0;
+    u8 pad4[0x7C];
+    u32 f80;
+};
+
+extern s32 D_00274990;
+extern Chan_1C2430* D_00261F24;
+
+typedef char* VaList_1C2430;
+#define VA_ARG_1C2430(ap, T) (*(T*)((ap += 8) - 8))
+
+void func_00202C38(void* p, s32 a, s32 b);
+void func_00202A80(Chan_1C2430* c, u32 addr);
+
+void func_001C2430(s32 size, ...)
+{
+    VaList_1C2430 ap;
+    Slot_1C2430* e = &((Slot_1C2430*)D_002748F0)[1 - D_00274990];
+    s32 n = 0;
+    ap = (VaList_1C2430)__builtin_next_arg(size) - (8 - __builtin_args_info(0)) * 8;
+    u32 addr = e->base;
+    if (e->state == 3) {
+        func_00202C38((*(void**)&D_00261F20), 0, 0);
+    }
+    e->state = 1;
+    s32 data = VA_ARG_1C2430(ap, s32);
+    if (size != 0) {
+        do {
+            s32 nsize = VA_ARG_1C2430(ap, s32);
+            size = (size + 15) & ~15;
+            addr += 16;
+            e->sizes[n] = size;
+            e->addrs[n] = addr;
+            addr += size;
+            s32 ndata = VA_ARG_1C2430(ap, s32);
+            if (data != 0) {
+                e->tags[n].lo = (u64)(size >> 4) | ((u64)(ndata != 0 ? 3 : 0) << 28) | ((u64)data << 32);
+            }
+            data = ndata;
+            size = nsize;
+            n++;
+        } while (size != 0);
+    }
+    e->count = n;
+    Chan_1C2430* c = D_00261F24;
+    c->f0 |= 0x40;
+    c->f80 = (e->base & 0x0FFFFFFF) | 0x80000000;
+    func_00202A80(c, (u32)e->tags & 0x0FFFFFFF);
+}

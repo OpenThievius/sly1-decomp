@@ -1651,3 +1651,71 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
     ((void (**)(Self_196410*))self->vt)[0x1C / 4](self);
     ((void (**)(Self_196410*))self->vt)[0x18 / 4](self);
 }
+
+struct Obj_1940E8 {
+    void** vtbl;
+    u8 pad_004[0x25C - 4];
+    s32 f25C;
+    s32 f260;
+};
+
+typedef void (*VFn_1940E8)(Obj_1940E8* self);
+
+enum Bits_1940E8 {
+    BITS_1940E8_ZERO = 0
+};
+
+struct Pool_1940E8 {
+    u8 pad[1];
+};
+
+extern u8 D_00275BC0[];
+extern u8* D_0027051C;
+
+void func_001BED48(void);
+void func_001BED70(void);
+void func_001E96F8(Obj_1940E8* self, s32 mode);
+void func_00193EE8(Obj_1940E8* self, s32 a, s32 b);
+void func_0016E0F0(Bits_1940E8 bits);
+void func_0016E118(Bits_1940E8 n);
+void func_0016EC88(Pool_1940E8* p);
+
+void func_001940E8(Obj_1940E8* self, s32 mode) {
+    if (self->f25C == mode) return;
+    if (mode != 0) {
+        s32 key = (*(u32*)((*(u8**)&D_002623C0) + 0x19D8) << 8) | *(u32*)((*(u8**)&D_002623C0) + 0x19DC);
+        if (key == 0x308) {
+            func_001BED48();
+            func_001E96F8((Obj_1940E8*)D_00275BC0, 5);
+        } else if (D_0027051C != 0) {
+            func_001E96F8((Obj_1940E8*)D_00275BC0, 5);
+        } else {
+            u8* base = D_00275BC0;
+            if (((s32*)base)[1] == 3) {
+                func_001E96F8((Obj_1940E8*)base, 4);
+            } else {
+                func_001E96F8((Obj_1940E8*)base, 5);
+            }
+        }
+        func_00193EE8(self, -1, self->f260);
+        ((VFn_1940E8)self->vtbl[14])(self);
+        func_0016E0F0((Bits_1940E8)1);
+        func_0016EC88((Pool_1940E8*)((u8*)&D_00262C70));
+    } else {
+        s32 key = (*(u32*)((*(u8**)&D_002623C0) + 0x19D8) << 8) | *(u32*)((*(u8**)&D_002623C0) + 0x19DC);
+        if (key == 0x308) {
+            func_001BED70();
+            func_001E96F8((Obj_1940E8*)D_00275BC0, 3);
+        } else if (D_0027051C != 0) {
+            func_001E96F8((Obj_1940E8*)D_00275BC0, 3);
+        } else if (self->f260 != 0) {
+            func_001E96F8((Obj_1940E8*)D_00275BC0, 3);
+        } else {
+            func_001E96F8((Obj_1940E8*)D_00275BC0, 6);
+        }
+        func_00193EE8(self, self->f260, -1);
+        ((VFn_1940E8)self->vtbl[15])(self);
+        func_0016E118((Bits_1940E8)1);
+    }
+    self->f25C = mode;
+}

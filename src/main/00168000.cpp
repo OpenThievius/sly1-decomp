@@ -1994,3 +1994,39 @@ void func_0016BA40(Self_16BA40* self)
     func_0015C900(s0);
     func_001AAB20(self, f21, f20);
 }
+
+struct Pm_168130 { u32 en1 : 1; u32 rest : 31; u32 hi : 32; };
+struct Fb_168130 { u32 fbp : 9; u32 fbw : 6; u32 psm : 5; u32 pad0 : 12; u32 dbx : 11; u32 dby : 11; u32 pad1 : 10; };
+struct Disp_168130 { u32 dx : 12; u32 dy : 11; u32 magh : 4; u32 magv : 2; u32 pad0 : 3; u32 dw : 12; u32 dh : 11; u32 pad1 : 9; };
+struct Rec_168130 { Pm_168130 pmode; u64 pad; Fb_168130 dispfb; Disp_168130 display; u64 pad2; };
+struct Gs_168130 {
+    Pm_168130 pmode; u8 pad0[0x70 - 8];
+    Fb_168130 dispfb2; u8 pad1[8];
+    Disp_168130 display2; u8 pad2[0x1000 - 0x88];
+    u32 csr;
+};
+
+extern s32 D_002626C0;
+extern s32 D_002626C8;
+
+void func_00168130(void)
+{
+    s32 i = D_002626C0 & 1;
+    s32 field = D_002626C8;
+    Pm_168130 pm = ((Rec_168130*)&D_00262490)[i].pmode;
+
+    if (field != (s32)((((Gs_168130*)0x12000000)->csr >> 13) & 1)) {
+        Disp_168130 d = ((Rec_168130*)&D_00262490)[i].display;
+        Fb_168130 fb = ((Rec_168130*)&D_00262490)[i].dispfb;
+        d.dh = d.dh - 1;
+        if (field != 0) {
+            d.dy = d.dy + 1;
+        } else {
+            fb.dby = fb.dby + 1;
+        }
+        ((Gs_168130*)0x12000000)->display2 = d;
+        ((Gs_168130*)0x12000000)->dispfb2 = fb;
+        pm.en1 = 1;
+    }
+    ((Gs_168130*)0x12000000)->pmode = pm;
+}

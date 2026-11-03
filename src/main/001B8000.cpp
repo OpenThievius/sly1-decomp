@@ -1109,3 +1109,93 @@ void func_001B9AE0(Obj_001B9AE0* self, s32 a1, Quad_001B9AE0* a2, s32 a3, Quad_0
         }
     }
 }
+
+struct Sub_1B94F0 {
+    void* key;
+    void* f4;
+    u8 pad_08[0x40 - 8];
+};
+
+struct Item_1B94F0 {
+    Sub_1B94F0 sub0;
+    Sub_1B94F0 sub1;
+    u8 pad_80[0x9C - 0x80];
+    s32 f9C;
+    u8 padA0[0xD0 - 0xA0];
+    Item_1B94F0* next;
+};
+
+struct Outer_1B94F0 {
+    Item_1B94F0* head;
+    Outer_1B94F0* next;
+    Item_1B94F0** link;
+};
+
+struct Ctx_1B94F0 {
+    u8 pad_000[0x480];
+    Outer_1B94F0** f480;
+    u8 pad_484[0x4B8 - 0x484];
+    s32 f4B8;
+};
+
+struct Obj_1B94F0 {
+    u8 pad_000[0x14];
+    void* f14;
+    u8 pad_018[0x50 - 0x18];
+    Ctx_1B94F0* f50;
+};
+
+struct Callee_1B94F0;
+struct Pool_1B94F0;
+
+s32 func_00182F40(Callee_1B94F0* e, Obj_1B94F0* b);
+void func_001861E8(Pool_1B94F0* a, Item_1B94F0* head);
+
+void func_001B94F0(Obj_1B94F0* self, s32 mode)
+{
+    Ctx_1B94F0* ctx = self->f50;
+    if (ctx == 0) {
+        return;
+    }
+    if (mode != 0) {
+        Item_1B94F0* freed = 0;
+        for (Outer_1B94F0* o = *ctx->f480; o != 0; o = o->next) {
+            Item_1B94F0** pp = &o->head;
+            Item_1B94F0* it;
+            while ((it = *pp) != 0) {
+                s32 other = it->sub0.key != ctx;
+                Sub_1B94F0* p = &(&it->sub0)[other];
+                s32 hit;
+                switch (mode) {
+                case 1:
+                    hit = func_00182F40((Callee_1B94F0*)p->f4, self);
+                    break;
+                case 2:
+                    hit = p->f4 == (void*)self;
+                    break;
+                case 3:
+                    hit = 0;
+                    if (p->f4 == (void*)self && other == 0) {
+                        if (it->f9C >= 8 && it->f9C <= 9) {
+                            hit = 1;
+                        }
+                    }
+                    break;
+                default:
+                    hit = 0;
+                    break;
+                }
+                if (hit != 0) {
+                    *pp = it->next;
+                    it->next = freed;
+                    freed = it;
+                } else {
+                    pp = &it->next;
+                }
+            }
+            *o->link = o->head;
+        }
+        func_001861E8((Pool_1B94F0*)self->f14, freed);
+    }
+    ctx->f4B8 = 0;
+}

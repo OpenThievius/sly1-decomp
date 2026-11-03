@@ -1390,3 +1390,115 @@ void Obj_161958::func_00161958(s32 count)
     p[0] = (u64)count | ((u64)2 << 58);
     p[1] = 0;
 }
+
+struct Self_162508 { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
+struct Stream_162508 { u8 pad0[0xC]; u8* f0C; };
+
+extern Stream_162508 D_002622A8;
+extern u8 D_000018C0[];
+
+void func_00166658(void);
+s32 func_001EE560(Stream_162508* s, s32 a, s32 b, s32 c);
+void func_001EE3F0(Stream_162508* s, u8* p);
+void func_00161B80(Self_162508* self);
+void func_00161C00(Self_162508* self);
+void func_00161F70(Self_162508* self);
+
+struct Copy_162508 {
+    static void Words(s32* dst, s32* src, s32 n)
+    {
+        s32 rem = n & 3;
+        s32 bulk = n - rem;
+        s32 i;
+        for (i = 0; i < rem; i++) {
+            *dst++ = *src++;
+        }
+        for (i = 0; i < bulk; i += 4) {
+            s32 a = src[0];
+            s32 b = src[1];
+            s32 c = src[2];
+            s32 d = src[3];
+            dst[0] = a;
+            dst[1] = b;
+            dst[2] = c;
+            dst[3] = d;
+            src += 4;
+            dst += 4;
+        }
+    }
+};
+
+void func_00162508(Self_162508* self)
+{
+    if (self->f0F8 == 0) {
+        return;
+    }
+    if (self->f124 < 3) {
+        func_00161B80(self);
+        return;
+    }
+    {
+        func_00166658();
+        Stream_162508* s = &D_002622A8;
+        s32 size = func_001EE560(s, 12, 11, 0);
+        Copy_162508::Words((s32*)s->f0C, (s32*)self, size >> 2);
+        s->f0C += size;
+        func_001EE3F0(&D_002622A8, D_000018C0);
+        switch (*self->f0F8) {
+        case 1:
+        case 6:
+        case 7:
+        case 8:
+            func_00161C00(self);
+            break;
+        case 0:
+            func_00161F70(self);
+            break;
+        }
+    }
+    func_00161B80(self);
+}
+
+struct __attribute__((packed)) Rec_1626D8 {
+    u64 q0;
+    u64 q8;
+    u64 q10;
+    u64 q18;
+    s32 f20;
+    s32 value;
+    Rec_1626D8() {}
+};
+
+struct Obj_1626D8 {
+    u8 pad0[0xF8];
+    u8* pF8;
+    Rec_1626D8 cur;
+    s32 count;
+    Rec_1626D8 recs[1];
+};
+
+void func_0018D800(Rec_1626D8* dst, const void* src, s32 size);
+void func_00162508(Obj_1626D8* self);
+void func_00161BB0(Obj_1626D8* self, u8* value);
+
+void func_001626D8(Obj_1626D8* self, s32 value)
+{
+    s32 n;
+    s64 max;
+
+    self->cur.value = value;
+    n = self->count;
+    max = (*self->pF8 == 0) ? 0x50 : 0x94;
+    self->recs[n] = self->cur;
+    n++;
+    self->count = n;
+    if (n == max) {
+        Rec_1626D8 tmp[2];
+        u8* p = self->pF8;
+        func_0018D800(tmp, &self->recs[self->count - 2], sizeof(tmp));
+        func_00162508(self);
+        func_00161BB0(self, p);
+        func_0018D800(self->recs, tmp, sizeof(tmp));
+        self->count = 2;
+    }
+}

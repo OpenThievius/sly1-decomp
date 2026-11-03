@@ -1563,3 +1563,65 @@ s32 func_0013CAD8(Self_13CAD8* self, s32 n, Obj_13CAD8* o)
     }
     return total;
 }
+
+struct Obj_13F718 {
+    u8 pad0[0x720];
+    s32 countA;
+    s32 arrA[8];
+    s32 countC;
+    s32 arrC[8];
+    s32 countB;
+    s32 arrB[8];
+    s32 countD;
+    s32 arrD[8];
+};
+
+s32 func_001833F0(void* node, s32 key);
+s32 func_001300E8(void* node, s32 kind);
+
+s32 func_0013F718(Obj_13F718* self, void* arg)
+{
+    if (self->countA > 0) {
+        s32 i;
+        for (i = 0; i < self->countA; i++) {
+            if (func_001833F0(arg, self->arrA[i]) != 0) {
+                break;
+            }
+        }
+        if (i >= self->countA) {
+            return 0;
+        }
+    } else if (self->countC > 0) {
+        s32 i;
+        for (i = 0; i < self->countC; i++) {
+            if (func_001833F0(arg, self->arrC[i]) != 0) {
+                break;
+            }
+        }
+        if (i < self->countC) {
+            return 0;
+        }
+    }
+    if (self->countB > 0) {
+        s32 i;
+        for (i = 0; i < self->countB; i++) {
+            if (func_001300E8(arg, self->arrB[i]) != 0) {
+                break;
+            }
+        }
+        if (i >= self->countB) {
+            return 0;
+        }
+    } else if (self->countD > 0) {
+        s32 i;
+        for (i = 0; i < self->countD; i++) {
+            if (func_001300E8(arg, self->arrD[i]) != 0) {
+                break;
+            }
+        }
+        if (i < self->countD) {
+            return 0;
+        }
+    }
+    return 1;
+}
