@@ -1400,3 +1400,125 @@ void func_0019C728(Obj_19C728* self)
     }
     self->f50 = 1;
 }
+
+struct List_19E558 { u8* first; s32 pad4; s32 offset; };
+struct Iter_19E558 { List_19E558* list; u8* link; s32 offset; Iter_19E558* prev; };
+
+
+struct Begin_19E558 {
+    static void Of(Iter_19E558* it, List_19E558* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = (Iter_19E558*)D_0027B314;
+        D_0027B314 = (ListFrame*)it;
+    }
+};
+
+struct Next_19E558 {
+    static u8* Of(Iter_19E558* it)
+    {
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
+        return obj;
+    }
+};
+
+struct End_19E558 {
+    static void Of(Iter_19E558* it)
+    {
+        D_0027B314 = (ListFrame*)it->prev;
+    }
+};
+
+struct Hit_19E558 { u8 pad0[0x40]; f32 weight; u8 pad44[0x2C]; };
+struct Meta_19E558 { u8 pad0[8]; u32 flags; };
+struct Obj_19E558;
+struct Node_19E558;
+typedef s32 (*VFn_19E558)(Node_19E558* self, Obj_19E558* o, void* a2, void* a3);
+struct Node_19E558 { VFn_19E558* vtbl; u8 pad4[0x14]; f32 f18; };
+struct Obj_19E558 {
+    Meta_19E558* meta;
+    u8 pad4[0x2D4];
+    List_19E558 list2D8;
+    u8 pad2E4[0x10C];
+    s32 f3F0; s32 f3F4; u8* f3F8;
+    u8 pad3FC[0x13C];
+    u64 f538;
+};
+struct Link_19E558 { s32 pad0; Link_19E558* next; s32 pad8; Obj_19E558* obj; };
+struct Self_19E558 {
+    void** vtbl;
+    u8 pad4[0x13C];
+    u8 f140[0x290];
+    f32 f3D0;
+    u8 pad3D4[0xAC];
+    Link_19E558** f480;
+    u8 pad484[0xCC];
+    s32 f550;
+    u8 pad554[4];
+    List_19E558 f558;
+};
+
+extern f32 D_00261858[];
+
+void func_0018D608(void);
+void* func_0018D658(s32 size);
+void func_0018D6F0(void);
+s32 func_0013E430(u8* a0, u8* a1, void** a2, f32 scale);
+s32 func_00141C90(Obj_19E558* self, void* a1, void* a2, void* a3, s32 a4, Hit_19E558* a5);
+u32 func_00152720(List_19E558* p);
+
+void func_0019E558(Self_19E558* self)
+{
+    if (self->f550 != 1) return;
+    Link_19E558* l;
+    for (l = *self->f480; l != 0; l = l->next) {
+        Iter_19E558 it0;
+        Begin_19E558::Of(&it0, &l->obj->list2D8);
+        if (l->obj->f538 & ((u64)0x8000 << 27)) {
+            End_19E558::Of(&it0);
+            continue;
+        }
+        Obj_19E558* s2;
+        for (s2 = (Obj_19E558*)Next_19E558::Of(&it0); s2 != 0; s2 = (Obj_19E558*)Next_19E558::Of(&it0)) {
+            Iter_19E558 it1;
+            void* buf;
+            Hit_19E558 hits[4];
+            Begin_19E558::Of(&it1, &self->f558);
+            if ((s2->f538 & ((u64)0x8000 << 28)) && (s2->meta->flags & 0x80) == 0) {
+                End_19E558::Of(&it1);
+                continue;
+            }
+            func_0018D608();
+            if (s2->f3F0 > 0) {
+                buf = func_0018D658(s2->f3F4 * 12);
+                if (func_0013E430(s2->f3F8, self->f140, &buf, self->f3D0) != 2) goto skip;
+                buf = (u8*)buf - 12;
+            } else {
+                buf = 0;
+            }
+            {
+                Node_19E558* n;
+                for (n = (Node_19E558*)Next_19E558::Of(&it1); n != 0; n = (Node_19E558*)Next_19E558::Of(&it1)) {
+                    if (n->f18 >= D_00261858[1]) continue;
+                    s32 cnt = func_00141C90(s2, buf, (u8*)n + 0x90, (u8*)n + 0x80, 4, hits);
+                    s32 i;
+                    for (i = 0; i < cnt; i++) {
+                        Hit_19E558* h = &hits[i];
+                        if (h->weight == 0.0f) continue;
+                        if (n->vtbl[7](n, s2, h, (u8*)h + 0x20) != 0) break;
+                    }
+                }
+            }
+        skip:
+            func_0018D6F0();
+            End_19E558::Of(&it1);
+        }
+        End_19E558::Of(&it0);
+    }
+    if (func_00152720(&self->f558) != 0) {
+        ((void (*)(Self_19E558*))self->vtbl[7])(self);
+    }
+}
