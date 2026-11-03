@@ -1202,3 +1202,116 @@ void func_00135228(Obj_135228* self, Q_135228* q)
         }
     }
 }
+
+struct Strm_137490 {
+    s32 flags;      // 0x00
+    s32 f04;
+    s32 base;       // 0x08
+    s32 total;      // 0x0C
+    u8 pad10[0x10];
+    s32 pos;        // 0x20
+    s32 rem;        // 0x24
+    u8 pad28[0x10];
+    s32 done;       // 0x38
+    s32 size;       // 0x3C
+    s32 left;       // 0x40
+    s32 start;      // 0x44
+    s32 sector;     // 0x48
+    s32 count;      // 0x4C
+    s32 cur;        // 0x50
+    s32 readIdx;    // 0x54
+    s32 writeIdx;   // 0x58
+};
+
+struct Min_137490 {
+    static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
+};
+
+s32 func_00203AE8(void);
+s32 func_002032C8(s32 a);
+s32 func_0011E1F8(s32 a);
+s32 func_00203D90(void);
+s32 func_0011E2E8(void);
+void func_00140CC8(s32 a, s32 b, s32 c);
+void func_00140C28(s32 a, s32 b, s32 c);
+
+struct Io_137490 {
+    static void Read(Strm_137490* self, s32 sector, s32 len, s32 dst)
+    {
+        if (self->flags & 2) func_00140CC8(sector, len, dst);
+        else func_00140C28(sector, len, dst);
+    }
+};
+
+void func_00137490(Strm_137490* self)
+{
+    self->pos += self->rem;
+    self->rem = 0;
+    s32 chunk = (self->total / self->count) & -0x800;
+    if (self->cur > 0) {
+        s32 n = self->readIdx + 1;
+        if (self->pos == self->base + n * chunk) {
+            n = n % self->count;
+            self->cur--;
+            self->readIdx = n;
+            self->pos = n * chunk + self->base;
+        }
+    }
+    do {
+        if (self->size > 0) {
+            s32 got;
+            if (self->flags & 2) got = func_00203AE8();
+            else got = 0;
+            got = Min_137490::Of(got + self->start, self->size);
+            if (self->done < got) {
+                self->done = got;
+            } else {
+                s32 busy;
+                if (self->flags & 2) busy = func_002032C8(1);
+                else busy = func_0011E1F8(1);
+                if (busy == 0) {
+                    s32 err;
+                    if (self->flags & 2) err = func_00203D90();
+                    else err = func_0011E2E8();
+                    if (err == 0) {
+                        s32 size = self->size;
+                        self->done = size;
+                        self->sector += size / 0x800;
+                        self->left -= size;
+                        self->size = 0;
+                        self->start = 0;
+                    } else {
+                        s32 done = self->done;
+                        s32 dst = self->base + self->writeIdx * chunk + done;
+                        s32 len = ((self->size - done + 0x7FF) & -0x800) / 0x800;
+                        self->start = done;
+                        s32 sector = self->sector + done / 0x800;
+                        Io_137490::Read(self, sector, len, dst);
+                    }
+                }
+            }
+        }
+        s32 cur = self->cur;
+        if (cur < self->count && self->size == 0 && self->left > 0) {
+            s32 size = Min_137490::Of(self->left, chunk);
+            self->done = 0;
+            self->size = size;
+            s32 n = (self->writeIdx + 1) % self->count;
+            self->cur = cur + 1;
+            s32 len = ((size + 0x7FF) & -0x800) / 0x800;
+            s32 dst = self->base + n * chunk;
+            s32 sector = self->sector;
+            self->writeIdx = n;
+            Io_137490::Read(self, sector, len, dst);
+        }
+        if (self->cur == 0) {
+            self->rem = 0;
+        } else {
+            s32 singleBuffer = 1; // only the buffer being read is queued: it may still be loading
+            s32 lim = chunk;
+            if (self->cur == singleBuffer) lim = self->done;
+            s32 avail = lim - (self->pos - (self->base + self->readIdx * chunk));
+            self->rem = Min_137490::Of(avail, 0x8000);
+        }
+    } while (self->rem == 0 && self->left > 0);
+}
