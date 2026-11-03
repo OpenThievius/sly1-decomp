@@ -1518,3 +1518,80 @@ extern const Fn_Table D_002173B0[6] = { (Fn_Table)func_001496C0, (Fn_Table)func_
 extern const Fn_Table D_002173C8[6] = { (Fn_Table)func_0014A8D0, 0, 0, 0, (Fn_Table)func_0014A8F8, 0 };
 extern const Fn_Table D_002173E0[6] = { (Fn_Table)func_0014AA90, (Fn_Table)func_0014AA98, 0, 0, (Fn_Table)func_0014AAA0, 0 };
 extern const Fn_Table D_002173F8[6] = { (Fn_Table)func_001E2E68, (Fn_Table)func_001E30A0, (Fn_Table)func_001E30D8, (Fn_Table)func_001E30E0, (Fn_Table)func_001E31F0, 0 };
+
+struct Obj_141438 {
+    u8 pad0[0x14];
+    void* f14;
+    u8 pad1[0x1C];
+    s32 f34;
+    u8 pad2[0x52C];
+    s32 cnt564;
+    s32 arr568[9];
+    s32 cnt58C;
+    s32 arr590[4];
+    s32 f5A0;
+    u8* f5A4;
+    s32 f5A8;
+    s32 f5AC;
+    s32 f5B0;
+};
+struct List_141438 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_141438 { List_141438* list; u8* link; s32 offset; Iter_141438* saved; };
+struct Next_141438 {
+    static u8* Of(Iter_141438* it)
+    {
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
+        return obj;
+    }
+};
+struct Begin_141438 {
+    static void Of(Iter_141438* it, List_141438* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_141438*)(*(void**)&D_0027B314);
+        (*(void**)&D_0027B314) = it;
+    }
+};
+
+extern u8 D_00261420[];
+void func_00124A48(Obj_141438* self);
+void func_00182ED8(s32 a);
+s32 func_001300E8(u8* node, s32 kind);
+s32 func_00183438(u8* node);
+s32 func_0015A448(void* a, s32 b, Obj_141438* c);
+s32 func_001B6290(s32 a, Obj_141438* b, s32 c, s32 d);
+s32 func_00141008(u8* t, s32 v);
+void func_001B64D8(s32 a, s32 b);
+
+void func_00141438(Obj_141438* self)
+{
+    func_00124A48(self);
+    for (s32 i = 0; i < self->cnt564; i++)
+        func_00182ED8(self->arr568[i]);
+    for (s32 i = 0; i < self->cnt58C; i++)
+        func_00182ED8(self->arr590[i]);
+    if (self->f5A0 == -1) {
+        Iter_141438 it;
+        u8* obj;
+        Begin_141438::Of(&it, (List_141438*)&self->f34);
+        while ((obj = Next_141438::Of(&it)) != 0) {
+            if (func_001300E8(obj, 0x74) != 0) {
+                self->f5A0 = func_00183438(obj);
+                if (self->f5A0 == -1)
+                    self->f5A0 = *(s32*)(obj + 8);
+                self->f5A4 = obj;
+            }
+        }
+        (*(void**)&D_0027B314) = it.saved;
+    } else {
+        self->f5A4 = (u8*)func_0015A448(self->f14, self->f5A0, self);
+    }
+    if (self->f5A8 != 0) {
+        self->f5AC = func_001B6290(self->f5A8, self, 0x546, 0);
+        if (func_00141008(D_00261420, self->f5B0) != 0)
+            func_001B64D8(self->f5AC, 0x547);
+    }
+}

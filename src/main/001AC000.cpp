@@ -1487,3 +1487,71 @@ void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32
     func_001615F0((Ctx_1AE3B8*)D_00262280, a3, a4, a5, 0);
     func_00161278((Ctx_1AE3B8*)D_00262280, 0);
 }
+
+typedef void (*VFn_1AD970)(void* self, s32 a);
+struct VTab_1AD970 { u8 pad0[0x40]; VFn_1AD970 fn; };
+struct Obj_1AD970 {
+    VTab_1AD970* vt;
+    u8 pad0[0x250 - 4];
+    s32 f250;
+    u8 pad1[0x260 - 0x254];
+    s32 f260;
+    u8 pad2[0x464 - 0x264];
+    s32 f464;
+};
+struct Glob_1AD970 { u8 pad0[0x19D8]; s32 f19d8; s32 f19dc; };
+
+struct Game_1AD970 { s32 f0; s32 mode; static s32 Mode(Game_1AD970* g) { return g->mode; } };
+extern Game_1AD970 D_00275F80;
+extern u8 D_00275B00[];
+extern void* D_002623C0;
+extern u8 D_0026F138[];
+extern u8 D_00273EB0[];
+extern s32 D_0027051C;
+
+void func_001AA998(void* self, s32 v);
+void func_001AD0D0(void* list, s32 a, s32 b);
+void func_001AA8B8(void* self, f32 v);
+
+void func_001AD970(Obj_1AD970* self, s32 newval)
+{
+    Obj_1AD970* g;
+    Glob_1AD970* gg;
+
+    if (self->f250 != newval) {
+        if (Game_1AD970::Mode(&D_00275F80) == 1) {
+            if (newval == 3 || newval == 0) {
+                newval = self->f250;
+            }
+        }
+        if (Game_1AD970::Mode(&D_00275F80) == 3) {
+            if ((u32)(newval - 1) < 2) {
+                newval = 0;
+                if ((*(s32*)D_00275B00 & 8) == 0) {
+                    newval = 2;
+                    if (((Glob_1AD970*)D_002623C0)->f19d8 != 0 && D_0027051C == 0) {
+                        g = (Obj_1AD970*)D_0026F138;
+                        g->f260 = 0;
+                        g->vt->fn(g, 0);
+                        gg = (Glob_1AD970*)D_002623C0;
+                        func_001AD0D0(g, gg->f19d8, gg->f19dc);
+                        g->f464 = 1;
+                        func_001AA8B8(g, 0.0f);
+                        g->vt->fn(g, 2);
+                    }
+                }
+            }
+        }
+        if (self->f250 != newval && newval == 0) {
+            Obj_1AD970* a = (Obj_1AD970*)D_0026F138;
+            if (a->f464 != 0) {
+                a->vt->fn(a, 0);
+            }
+            Obj_1AD970* b = (Obj_1AD970*)D_00273EB0;
+            if (b->f260 != 0) {
+                b->vt->fn(b, 0);
+            }
+        }
+    }
+    func_001AA998(self, newval);
+}

@@ -999,3 +999,65 @@ void func_00135550(Obj_135550* self, s32 value)
     }
     func_001AA998(self, value);
 }
+
+struct Obj_136238;
+struct VT_136238 { u8 pad0[0x40]; void (*f40)(Obj_136238*, s32); };
+struct Obj_136238 {
+    VT_136238* vt;
+    u8 pad4[0x25C - 4];
+    s32 f25C;
+    u8 pad260[0x320 - 0x260];
+    s32 f320;
+    struct Sub_136238* f324;
+    s32 f328;
+    s32 f32C;
+};
+struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
+struct In_136238 { s32 a; };
+
+extern s32 D_00261120[];
+extern u8 D_00275710[];
+
+void func_001BEA50(void);
+void func_001BEA28(void);
+void func_00160D30(In_136238* p);
+s32 func_00160D10(void);
+void func_00135E78(Obj_136238* self, s32 state, s32 flag);
+s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
+void func_00192190(void* p);
+
+struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
+
+void func_00136238(Obj_136238* self, s32 on)
+{
+    In_136238 in;
+    void* arr[0x100];
+    s32 n;
+    if ((on != 0) != (self->f25C == 0)) return;
+    if (self->f324 != 0 && self->f324->f2D4 == 3) {
+        if (on != 0) func_001BEA50();
+        else func_001BEA28();
+    }
+    self->f25C = on;
+    self->f320 = 0;
+    if (on != 0) {
+        self->vt->f40(self, 2);
+        func_00160D30(&in);
+        if (func_00160D10() & in.a) {
+            if (func_00160D10() & D_00261120[self->f32C]) func_00135E78(self, self->f32C, 1);
+        }
+        if (func_00160D10() & 0x800) {
+            n = func_0015A4F0(*(s32*)D_00275710, 0x205, 0x82, 0, 0x100, arr);
+            n = Min_136238::Of(n, 0x100);
+            if (n > 0) {
+                void** p = arr;
+                s32 i = n;
+                do { i--; func_00192190(*p); p++; } while (i != 0);
+            }
+        }
+    } else {
+        self->vt->f40(self, 0);
+        self->f32C = self->f328;
+        func_00135E78(self, 0, 1);
+    }
+}

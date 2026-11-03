@@ -1495,3 +1495,79 @@ void func_001BEE48(void)
     D_00274734 = 0;
 
 }
+
+struct Ent_1BC4D8;
+struct Side_1BC4D8 { Ent_1BC4D8* e; u8 pad[0x3C]; };
+struct __attribute__((aligned(16))) Node_1BC4D8 {
+    Ent_1BC4D8* owner;
+    Side_1BC4D8 side[2];
+    u8 pad1[0x4C];
+    Node_1BC4D8* next;
+    u8 tail[0x0C];
+};
+struct Ent_1BC4D8 {
+    u8 pad0[0x14];
+    u8* ctx;
+    Ent_1BC4D8* link;
+    u8 pad[0x4C4];
+    s32 kind;
+};
+struct Head_1BC4D8 {
+    Node_1BC4D8* first;
+    Head_1BC4D8* next;
+    Node_1BC4D8** prev;
+};
+struct Big_1BC4D8 {
+    u8 pad0[0x14];
+    u8* ctx;
+    u8 pad1[0x38];
+    Big_1BC4D8* self;
+    u8 pad2[0x42C];
+    Head_1BC4D8** heads;
+};
+Node_1BC4D8* func_001B5EC0(u8* p);
+void func_001861E8(u8* a, Node_1BC4D8* b);
+
+void func_001BC4D8(Big_1BC4D8* self, Node_1BC4D8** out)
+{
+    Node_1BC4D8* freed = 0;
+    if (self->self == self) {
+        Head_1BC4D8* h = *self->heads;
+        if (h) {
+            do {
+                Node_1BC4D8** pp = (Node_1BC4D8**)h;
+                Node_1BC4D8* n;
+                while ((n = *pp) != 0) {
+                    int k = (n->owner != (Ent_1BC4D8*)self);
+                    Ent_1BC4D8* e = n->side[1 - k].e;
+                    while (e && !e->kind) e = e->link;
+                    if (e) {
+                        switch (e->kind) {
+                        case 1: {
+                            Node_1BC4D8* c = func_001B5EC0(self->ctx + 0x1AFC);
+                            *c = *n;
+                            c->next = *out;
+                            *out = c;
+                            break;
+                        }
+                        case 3:
+                            *pp = n->next;
+                            n->next = freed;
+                            freed = n;
+                            continue;
+                        case 4:
+                            *pp = n->next;
+                            n->next = *out;
+                            *out = n;
+                            continue;
+                        }
+                    }
+                    pp = &n->next;
+                }
+                *h->prev = h->first;
+                h = h->next;
+            } while (h);
+        }
+        func_001861E8(self->ctx, freed);
+    }
+}
