@@ -1921,3 +1921,102 @@ void func_0015C638(Obj_15C638 *self, char *str, Par_15C638 *par, s32 a3, s32 a4)
 
   self->f4C->fn3C((Obj_15C638 *) (((u8 *) self) + self->f4C->adj38), a3, a4);
 }
+
+struct __attribute__((packed)) U4_15E318 { u32 v; };
+class Font_15E318 {
+public:
+    u8 pad[0x4C];
+    virtual void V0();
+    virtual void V1();
+    virtual f32 Width(s32 c);
+    virtual void Begin(s32 x, s32 y);
+    virtual void Flush(s32 y);
+    virtual f32 Draw(f32 left, f32 top, s32 c, s32 d, s32 y);
+    virtual void End(s32 x, s32 y);
+};
+struct Line_15E318 { u8 pad[8]; s32 w; u8 pad2[0x3C]; f32 h; };
+struct Self_15E318 {
+    u8 pad0[8];
+    Font_15E318* font;
+    Line_15E318* line;
+    u8 pad10[0x88];
+    s32 f98;
+    s32 f9c;
+};
+struct P_15E318 {
+    f32 f0, f4, f8, fC;
+    U4_15E318 f10;
+    s32 f14;
+    s32 f18;
+};
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+void func_0015DB80(Self_15E318* self);
+s32 func_0015DBE0(Self_15E318* self);
+void func_0015DBB8(Self_15E318* self, U4_15E318* p);
+
+void func_0015E318(Self_15E318* self, P_15E318* p, s32 x, s32 y)
+{
+    f32 f[64];
+    U4_15E318 u;
+    s32 first = 1;
+    s32 n = 0;
+    f32 top;
+    f32 left;
+    s32 c;
+    func_001F5C0C(f, 0, 0x100);
+    func_0015DB80(self);
+    while ((c = func_0015DBE0(self)) != 0) {
+        if (c == 10) {
+            n++;
+        } else {
+            f[n] += self->font->Width(c);
+        }
+    }
+    c = p->f18;
+    if (c == 0) {
+        top = p->f4;
+    } else {
+        f32 tot = (f32)(n + 1) * ((f32)self->line->w * self->line->h);
+        if (c == 2)
+            top = (p->f4 + p->fC) - tot;
+        else
+            top = p->f4 + (p->fC - tot) * 0.5f;
+    }
+    u = p->f10;
+    func_0015DBB8(self, &u);
+    Font_15E318* started = 0;
+    f32 half = 0.5f;
+    func_0015DB80(self);
+    s32 right = 2;
+    f32* fp = f;
+    while ((n = func_0015DBE0(self)) != 0) {
+        if (n == 10) {
+            first = 1;
+            fp++;
+            top += (f32)self->line->w * self->line->h;
+            continue;
+        }
+        if (first) {
+            if (p->f14 == 0) {
+                left = p->f0;
+            } else {
+                f32 g = *fp;
+                if (p->f14 == right)
+                    left = (p->f0 + p->f8) - g;
+                else
+                    left = p->f0 + (p->f8 - g) * half;
+            }
+            first = 0;
+        }
+        if (started == 0) {
+            self->font->Begin(x, y);
+            started = self->font;
+        } else if (self->f98 != 0) {
+            self->font->Flush(y);
+            self->f98 = 0;
+        }
+        left += self->font->Draw(left, top, n, self->f9c, y);
+    }
+    self->font->End(x, y);
+}
