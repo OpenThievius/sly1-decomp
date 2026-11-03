@@ -1866,11 +1866,24 @@ struct Obj_121160 {
     void* vt;
     s32 kind;
 };
-extern u8 D_00219668[];
-extern u8 D_00219678[];
-extern u8 D_00219688[];
-extern u8 D_00219698[];
-extern u8 D_002196A8[];
+// The dispatch tables func_00121160 gives each kind of object: three functions, or one and a
+// shared one, each slot followed by a zero word.
+typedef void (*Fn_121160)();
+void func_0011F0C8();
+void func_0011EFC8();
+void func_0011F180();
+void func_0011F320();
+void func_0011F210();
+void func_0011F3E8();
+void func_0011F478();
+void func_0011F568();
+void func_0011F620();
+void func_0011EFB0();
+extern const Fn_121160 D_00219668[4] = { func_0011F0C8, func_0011EFC8, func_0011F180, 0 };
+extern const Fn_121160 D_00219678[4] = { func_0011F320, func_0011F210, func_0011F3E8, 0 };
+extern const Fn_121160 D_00219688[4] = { func_0011F478, func_0011F568, func_0011F620, 0 };
+extern const Fn_121160 D_00219698[4] = { (Fn_121160)func_00120AA8, 0, func_0011EFB0, 0 };
+extern const Fn_121160 D_002196A8[4] = { (Fn_121160)func_00120D58, 0, func_0011EFB0, 0 };
 void* func_0018D5C0(Obj_121160* n);
 
 Obj_121160* func_00121160(u32 kind)
@@ -1879,23 +1892,23 @@ Obj_121160* func_00121160(u32 kind)
     switch (kind) {
     case 0:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
-        o->vt = D_00219668;
+        o->vt = (void*)D_00219668;
         break;
     case 1:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
-        o->vt = D_00219678;
+        o->vt = (void*)D_00219678;
         break;
     case 3:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x14);
-        o->vt = D_00219698;
+        o->vt = (void*)D_00219698;
         break;
     case 4:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x18);
-        o->vt = D_002196A8;
+        o->vt = (void*)D_002196A8;
         break;
     case 2:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
-        o->vt = D_00219688;
+        o->vt = (void*)D_00219688;
         break;
     default:
         o = 0;

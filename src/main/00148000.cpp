@@ -697,7 +697,7 @@ void func_001C7188(void*, void*);
 void func_0014B5C0(Obj_0014B5C0* self, void* other) { Pack_0014B5C0 save=self->value; func_001C7188(self,other); self->value=save; }
 
 void func_001C6F48(void*);
-extern s32 D_0027C008;
+static s32 D_0027C008;  // a running count, reset by func_0014B608
 void func_0014B608(u8* self) { func_001C6F48(self); *(s32*)(self+0xC24)=1; D_0027C008=0; }
 
 void func_001C72A0(void*);
