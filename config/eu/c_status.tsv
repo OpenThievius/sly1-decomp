@@ -778,6 +778,7 @@ func_0012BC38	func_0012BD58	match	version-specific, rodata
 func_0012C140	func_0012C270	match	
 func_0012C160	func_0012C290	match	
 func_0012C208	func_0012C338	match	
+func_0012C288	func_0012C3B8	match	
 func_0012C7B0	func_0012C8E0	match	
 func_0012C7D8	func_0012C908	match	
 func_0012C808	func_0012C938	match	
