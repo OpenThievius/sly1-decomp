@@ -1073,3 +1073,72 @@ void func_00126F78(Object_00126F78* self, u8* owner)
     }
     D_0027B314 = it.saved;
 }
+
+struct Object_124FC0;
+struct Vtable_124FC0 {
+    u8 pad0[0xC];
+    void (*update)(Object_124FC0*, f32);
+};
+struct Object_124FC0 { Vtable_124FC0* vtable; };
+struct List_124FC0 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_124FC0 { List_124FC0* list; u8* link; s32 offset; Iter_124FC0* saved; };
+struct Sub_124FC0 { u8 pad[1]; };
+struct Res_124FC0 { u8 pad[1]; };
+struct Self_124FC0 {
+    u8 pad0[0x1E0];
+    List_124FC0 list1E0;
+    u8 pad1[0x22C - 0x1EC];
+    Sub_124FC0 sub22C;
+    u8 pad2[0x284 - 0x22D];
+    Res_124FC0* f284;
+    void* f288;
+};
+
+
+struct Next_124FC0 {
+    static Object_124FC0* Of(Iter_124FC0* it)
+    {
+        Object_124FC0* obj = *(Object_124FC0**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_124FC0 {
+    static void Of(Iter_124FC0* it, List_124FC0* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (*(Iter_124FC0**)&D_0027B314);
+        (*(Iter_124FC0**)&D_0027B314) = it;
+    }
+};
+
+void func_00165FE0(Sub_124FC0* sub, Self_124FC0* self, f32 f);
+void func_001B2140(Res_124FC0* p, f32 f);
+void func_00126AC8(Self_124FC0* self, f32 f);
+void func_001837E0(Self_124FC0* self, s32 a, s32 b, void** args);
+
+void func_00124FC0(Self_124FC0* self, f32 f)
+{
+    func_00165FE0(&self->sub22C, self, f);
+    if (self->f284 != 0) {
+        func_001B2140(self->f284, f);
+    }
+    if (self->f288 != 0) {
+        func_00126AC8(self, f);
+    }
+    Iter_124FC0 it;
+    Begin_124FC0::Of(&it, &self->list1E0);
+    Object_124FC0* obj;
+    while ((obj = Next_124FC0::Of(&it)) != 0) {
+        if (obj->vtable->update != 0) {
+            obj->vtable->update(obj, f);
+        }
+    }
+    (*(Iter_124FC0**)&D_0027B314) = it.saved;
+    void* args[1];
+    args[0] = &f;
+    func_001837E0(self, 1, 1, args);
+}

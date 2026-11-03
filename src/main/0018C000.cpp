@@ -2206,3 +2206,46 @@ void func_0018F6E8(Obj_18F6E8* self)
     func_001F6B40(self->f130);
     func_0018EB98(s1);
 }
+
+struct Ring_0018E6C0 {
+    u8 pad0[8];
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+};
+
+s32 func_0018E7C0(Ring_0018E6C0* self, s32 count, u8* dst);
+
+s32 func_0018E6C0(Ring_0018E6C0* self, s32 count, u8* dst)
+{
+    s32 n = count;
+    s32 total = 0;
+    s32 left = n;
+    s32 r;
+
+    if (left <= 0 || self->f14 < left) {
+        left = self->f14;
+    }
+    left &= -0x400;
+    while (left != 0) {
+        s32 avail = self->f08 - self->f0C;
+        r = func_0018E7C0(self, left < avail ? left : avail, dst + total);
+        if (r == 0) {
+            break;
+        }
+        total += r;
+        left -= r;
+        self->f0C += r;
+        self->f0C = self->f0C % self->f08;
+        self->f18 += r;
+        self->f14 -= r;
+        self->f1C += r;
+        if (n <= 0) {
+            break;
+        }
+    }
+    return total;
+}

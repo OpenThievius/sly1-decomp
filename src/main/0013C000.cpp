@@ -1459,3 +1459,54 @@ void func_0013E950(Self_13E950* self, Owner_13E950* a1)
     }
     *(Iter_13E950**)D_0027B314 = it.saved;
 }
+
+typedef s32 (*Fn_0013C9D0)(void* self, s32 count, u8* dst);
+
+struct Cls_0013C9D0 {
+    u8 pad_00[0x08];
+    s16 off08;
+    u8 pad_0a[0x02];
+    Fn_0013C9D0 fn0c;
+};
+
+struct Port_0013C9D0 {
+    Cls_0013C9D0* cls;
+};
+
+struct Ring_0013C9D0 {
+    u8* buf;
+    s32 size;
+    s32 pos;
+    u8 pad_0c[0x04];
+    s32 avail;
+    s32 f14;
+    u8 pad_18[0x04];
+    s32 f1c;
+};
+s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, Port_0013C9D0* port)
+{
+    s32 total = 0;
+    s32 rem = n;
+    if (n <= 0 || self->avail < n) {
+        rem = self->avail;
+    }
+    while (rem != 0) {
+        s32 avail = self->size - self->pos;
+        s32 cnt = rem < avail ? rem : avail;
+        s32 r = port->cls->fn0c((u8*)port + port->cls->off08, cnt, self->buf + self->pos);
+        if (r == 0) {
+            break;
+        }
+        total += r;
+        rem -= r;
+        self->pos += r;
+        self->pos %= self->size;
+        self->f14 += r;
+        self->avail -= r;
+        self->f1c += r;
+        if (n <= 0) {
+            break;
+        }
+    }
+    return total;
+}

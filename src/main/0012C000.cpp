@@ -1917,3 +1917,75 @@ Rec_12CBE8* func_0012CBE8(Obj_12CBE8* self, s32 key) {
     }
     return 0;
 }
+
+struct Obj_12F8C8;
+struct VT_12F8C8 {
+    u8 pad[0x1C];
+    void (*fn1C)(Obj_12F8C8* self);
+};
+struct Obj_12F8C8 { VT_12F8C8* vt; };
+struct List_12F8C8 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_12F8C8 { List_12F8C8* list; u8* link; s32 offset; Iter_12F8C8* saved; };
+
+struct Self_12F8C8 {
+    u8 pad0[0x14];
+    s32 f14;
+    u8 pad18[0x1C];
+    List_12F8C8 list;
+    u8 pad40[0x540];
+    s32 f580;
+    u8 pad584[0xC];
+    s32 f590;
+};
+
+extern u8 D_0027B314[];
+
+struct Next_12F8C8 {
+    static Obj_12F8C8* Of(Iter_12F8C8* it)
+    {
+        Obj_12F8C8* obj = *(Obj_12F8C8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_12F8C8 {
+    static void Of(Iter_12F8C8* it, List_12F8C8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = *(Iter_12F8C8**)D_0027B314;
+        *(Iter_12F8C8**)D_0027B314 = it;
+    }
+};
+
+void func_00124A48(Self_12F8C8* self);
+s32 func_0015A448(s32 a, s32 b, Self_12F8C8* c);
+s32 func_001300E8(Obj_12F8C8* n, s32 kind);
+void func_00128018(Self_12F8C8* a, s32 b, u8* c, s32* d);
+
+void func_0012F8C8(Self_12F8C8* self)
+{
+    func_00124A48(self);
+    if (self->f590 != -1) {
+        self->f590 = func_0015A448(self->f14, self->f590, self);
+        self->f580 = 2;
+        return;
+    }
+    Iter_12F8C8 it;
+    Begin_12F8C8::Of(&it, &self->list);
+    Obj_12F8C8* n = Next_12F8C8::Of(&it);
+    if (n == 0 || func_001300E8(n, 0x7E) == 0) {
+        *(Iter_12F8C8**)D_0027B314 = it.saved;
+        return;
+    }
+    if (Next_12F8C8::Of(&it) != 0) {
+        *(Iter_12F8C8**)D_0027B314 = it.saved;
+        return;
+    }
+    func_00128018(self, 0, (u8*)n + 0x40, &self->f590);
+    self->f580 = 1;
+    n->vt->fn1C(n);
+    *(Iter_12F8C8**)D_0027B314 = it.saved;
+}
