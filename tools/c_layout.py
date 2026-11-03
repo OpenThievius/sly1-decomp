@@ -131,6 +131,9 @@ def placements(objects):
                 m = DATA_NAME.match(sec["name"])
                 if m:
                     addr = int(m.group(1)[2:], 16)
+                    if sec["align"] > 1 and addr % sec["align"]:
+                        raise LayoutError("%s: %s is aligned to %d, which its address is not: retail's "
+                                          "global is not that type" % (src.relative_to(ROOT), m.group(1), sec["align"]))
                     if addr in {d[0] for d in data}:
                         raise LayoutError("two definitions of the global %s" % m.group(1))
                     data.append((addr, sec["size"], rel, sec["name"], m.group(1)))
