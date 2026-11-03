@@ -1627,3 +1627,33 @@ fail:
 ok:
     return 1;
 }
+
+union Bits_1EAE78 {
+    double d;
+    u64 u;
+};
+
+double func_001FCD20(double a, double b);
+
+double func_001EAE78(double x)
+{
+    Bits_1EAE78 v;
+    v.d = x;
+    s32 e = ((u16)(v.u >> 52) & 0x7FF) - 0x3FF;
+    if (e < 0) {
+        return 0.0;
+    }
+    if (e < 0x34) {
+        u64 frac = ((u64)1 << (0x34 - e)) - 1;
+        u64 mant = v.u & ((u64)-1 >> 12);
+        if ((mant & frac) == frac) {
+            v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
+            x = v.d;
+            x = func_001FCD20(x, 1.0);
+        } else {
+            v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
+            x = v.d;
+        }
+    }
+    return x;
+}

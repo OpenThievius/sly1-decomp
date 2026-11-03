@@ -1020,3 +1020,56 @@ void func_00124338(Object_00124338* self)
     self->vtable->finish(self, 2, self);
     D_0027B314 = it.saved;
 }
+
+extern void* D_0027B314;
+
+struct Object_00126F78;
+struct Vtable_00126F78 {
+    u8 pad0[0x8];
+    s32 flags;
+    u8 padC[0x28];
+    void (*attach)(Object_00126F78*, u8*);
+};
+struct Object_00126F78 { Vtable_00126F78* vtable; u8 pad4[0x10]; void* f14; s32 f18; };
+struct List_00126F78 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_00126F78 { List_00126F78* list; u8* link; s32 offset; Iter_00126F78* saved; };
+
+struct Item_00126F78;
+struct Next_00126F78 {
+    static Item_00126F78* Of(Iter_00126F78* it)
+    {
+        Item_00126F78* obj = *(Item_00126F78**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_00126F78 {
+    static void Of(Iter_00126F78* it, List_00126F78* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_00126F78*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+void* func_00183058(Item_00126F78* item, void* x, Object_00126F78* self);
+void func_001BB580(Object_00126F78* self);
+
+void func_00126F78(Object_00126F78* self, u8* owner)
+{
+    Iter_00126F78 it;
+    Begin_00126F78::Of(&it, (List_00126F78*)(owner + 0x34));
+    self->vtable->attach(self, owner);
+    Item_00126F78* obj = Next_00126F78::Of(&it);
+    while (obj != 0) {
+        (void)func_00183058(obj, self->f14, self);
+        obj = Next_00126F78::Of(&it);
+    }
+    if ((self->vtable->flags & 2) && self->f18 == 0) {
+        func_001BB580(self);
+    }
+    D_0027B314 = it.saved;
+}

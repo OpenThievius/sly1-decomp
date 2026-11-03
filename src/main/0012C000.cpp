@@ -1876,3 +1876,44 @@ void func_0012D4A8(Cursor_12D4A8* self)
         self->index = i + 1;
     }
 }
+
+struct Rec_12CBE8 {
+    u32 f0;
+    s32 f4;
+    s32 f8;
+    u32 fC;
+};
+
+struct Obj_12CBE8 {
+    u8 pad0[0x54];
+    s32 f54;
+    Rec_12CBE8* f58;
+    s32 f5C;
+    Rec_12CBE8* f60;
+    s32 f64;
+    Rec_12CBE8* f68;
+};
+
+Rec_12CBE8* func_0012CBE8(Obj_12CBE8* self, s32 key) {
+    s32 i;
+    Rec_12CBE8* p;
+    for (i = 0; i < self->f54; i++) {
+        p = &self->f58[i];
+        if (p->f4 == 0x27 && p->f8 == key) {
+            return p;
+        }
+    }
+    for (i = 0; i < self->f5C; i++) {
+        p = &self->f60[i];
+        if (p->f4 == 0x27 && p->f8 == key) {
+            return p;
+        }
+    }
+    for (i = 0; i < self->f64; i++) {
+        p = &self->f68[i];
+        if (p->f4 == 0x27 && p->f8 == key) {
+            return p;
+        }
+    }
+    return 0;
+}

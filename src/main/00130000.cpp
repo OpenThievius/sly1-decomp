@@ -383,3 +383,19 @@ void func_001310F0(Obj_1310F0* self, s32 a1)
     self->f2F4 = 0x80FFFFFF;
     func_001AA1F0(self, a1);
 }
+
+struct Self_130B48;
+struct Out_130B48 { u8 pad0[16]; };
+
+void func_00130540(f32 f12, Self_130B48* a, u8* b, u8* c, u8* d, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
+
+void func_00130B48(f32 k, Self_130B48* self, u8* a1, u8* a2, u8* a3, s32 count, Out_130B48* out, f32 start, f32 end)
+{
+    f32 step = (end - start) / (f32)(count - 1);
+    f32 cur = start;
+    s32 i;
+    for (i = 0; i < count; i++) {
+        func_00130540(k, self, a1, a2, a3, cur, 1.0f, (s32)(out + i), 0, 0);
+        cur += step;
+    }
+}

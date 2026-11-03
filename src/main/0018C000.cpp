@@ -2139,3 +2139,19 @@ s32 func_0018F890(Object_18F890* self, s32 wait)
     func_001300D8(self->buffer, result);
     return result;
 }
+
+struct Data_18C568 { u8 b[0x1A00]; };
+struct Self_18C568 { u8 pad0[0x4F44]; Data_18C568* p4F44; };
+
+
+void func_001A7E90(Data_18C568* ctx);
+
+s32 func_0018C568(Self_18C568* self)
+{
+    if (self->p4F44 == 0) {
+        return 0x2C;
+    }
+    *(*(Data_18C568**)&D_002623C0) = *self->p4F44;
+    func_001A7E90((*(Data_18C568**)&D_002623C0));
+    return 0;
+}
