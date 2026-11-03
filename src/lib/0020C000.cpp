@@ -1286,3 +1286,36 @@ void func_0020FF08(Self_0020FF08* self)
         func_0020F5B8(self, 1);
     }
 }
+
+struct Obj_20F3C0 {
+    u8 pad0[0x818];
+    s32 f818;
+    u8 pad81C[0x838 - 0x81C];
+    s32 f838;
+    s32 f83C;
+    u8 pad840[0x858 - 0x840];
+    u8* f858;
+};
+
+s64 func_0020F198(Obj_20F3C0* obj);
+void func_0020B1E0(u8* p);
+
+extern u32 D_0027B040[];
+
+s32 func_0020F3C0(Obj_20F3C0* obj, s32 a1)
+{
+    if (obj->f818 != 0 || obj->f83C < a1) {
+        s32 cnt = 0;
+        while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
+            if (cnt++ > 0x1388) {
+                func_0020B1E0(obj->f858);
+                cnt = 0;
+            }
+        }
+        *(volatile u32*)0x10002000 = 0x40000000;
+        obj->f818 = D_0027B040[4];
+        obj->f838 = func_0020F198(obj);
+        obj->f83C = 0x20;
+    }
+    return (u32)obj->f838 >> (32 - a1);
+}

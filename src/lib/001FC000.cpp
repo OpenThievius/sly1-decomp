@@ -1432,3 +1432,76 @@ void func_001FF0E0(Arr_001FF0E0* self, Arr_001FF0E0* other)
         self->count = n1 + other->count;
     }
 }
+
+struct Packed_1FD5D0 {
+    u32 kind;
+    u32 sign;
+    s32 exp;
+    u32 mant;
+};
+
+union Bits_1FD5D0 {
+    f32 f;
+    struct {
+        u32 mant : 23;
+        u32 expo : 8;
+        u32 sign : 1;
+    } b;
+};
+
+struct Class_1FD5D0 {
+    static s32 IsNan(Packed_1FD5D0* p) { return p->kind < 2; }
+    static s32 IsInf(Packed_1FD5D0* p) { return p->kind == 4; }
+    static s32 IsZero(Packed_1FD5D0* p) { return p->kind == 2; }
+};
+
+f32 func_001FD5D0(Packed_1FD5D0* p)
+{
+    Bits_1FD5D0 bits;
+    u32 mant = p->mant;
+    s32 expo = 0;
+    u32 sign = p->sign;
+
+    if (Class_1FD5D0::IsNan(p)) {
+        expo = 0xFF;
+        mant = mant | 0x100000;
+    } else if (Class_1FD5D0::IsInf(p)) {
+        expo = 0xFF;
+        mant = 0;
+    } else if (Class_1FD5D0::IsZero(p)) {
+        mant = 0;
+    } else if (mant != 0) {
+        s32 e = p->exp;
+        if (e < -0x7E) {
+            s32 sh = -0x7E - e;
+            if (sh > 0x19) {
+                mant = 0;
+            } else {
+                mant = mant >> sh;
+            }
+            mant = mant >> 7;
+        } else if (e >= 0x80) {
+            expo = 0xFF;
+            mant = 0;
+        } else {
+            expo = e + 0x7F;
+            if ((mant & 0x7F) == 0x40) {
+                if ((mant & 0x80) != 0) {
+                    mant = mant + 0x40;
+                }
+            } else {
+                mant = mant + 0x3F;
+            }
+            if ((s32)mant < 0) {
+                mant = mant >> 1;
+                expo = expo + 1;
+            }
+            mant = mant >> 7;
+        }
+    }
+
+    bits.b.mant = mant;
+    bits.b.expo = expo;
+    bits.b.sign = sign;
+    return bits.f;
+}

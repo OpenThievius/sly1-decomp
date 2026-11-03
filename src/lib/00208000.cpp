@@ -1505,3 +1505,25 @@ s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
     }
     return ok;
 }
+
+void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14)
+{
+    u32 mask = 0x0FFFFFFF;
+    u32 bits = 0x20000000;
+    s32 n = (p13 * p14) / 512;
+    *a0 = (p10 & mask) | bits;
+    *a1 = (p11 & mask) | bits;
+    *a2 = (p12 & mask) | bits;
+    *a3 = (p10 & mask) | bits;
+    *a4 = (p11 & mask) | bits;
+    *a5 = (p12 & mask) | bits;
+    u32 y2 = n * 0x180;
+    y2 = ((y2 + p10) & mask) | bits;
+    u32 u2 = n * 0x180;
+    u2 = ((u2 + p11) & mask) | bits;
+    u32 v2 = n * 0x180;
+    v2 = ((v2 + p12) & mask) | bits;
+    *a6 = y2;
+    *a7 = u2;
+    *p9 = v2;
+}
