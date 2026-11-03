@@ -713,3 +713,26 @@ s32 func_002101F0(Obj_2101F0* p, s32 flag)
     o->f60 = p->f14C;
     return ok;
 }
+
+struct Hdl_210E00;
+struct Obj_210E00 { u8 pad[0x858]; Hdl_210E00* f858; };
+
+void func_0020F0C0(Obj_210E00* obj, u32 value);
+void func_0020B190(Hdl_210E00* h, s32* p);
+
+void func_00210E00(Obj_210E00* self, u32 a1, u32 a2)
+{
+
+    s32 tmp[8];
+    while (*(volatile s32*)0x10002010 < 0) { }
+    (void)func_001F9D60();
+    *(volatile u32*)0x1000B010 = a1 & 0x0FFFFFFF;
+    *(volatile u32*)0x1000B020 = a2 << 6;
+    *(volatile u32*)0x1000B000 = 0x100;
+    (void)func_001F9DA8();
+    func_0020F0C0(self, a2 | 0x70000000);
+    tmp[0] = 4;
+    func_0020B190(self->f858, tmp);
+    while ((*(volatile u32*)0x1000B000 >> 8) & 1) { }
+    while (*(volatile s32*)0x10002010 < 0) { }
+}

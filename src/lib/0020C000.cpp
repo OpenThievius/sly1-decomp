@@ -1453,3 +1453,39 @@ s16 func_0020F248(Self_20F248* self, s32 mode)
     self->f11C = ((s32)st == 0);
     return (s16)st;
 }
+
+struct Ctx_20FAF0 {
+    u8 pad0[0xD4];
+    s32 f_d4;
+    u8 pad1[0x164 - 0xD8];
+    s32 f164, f168, f16c, f170, f174, f178, f17c, f180, f184, f188;
+};
+
+s32 func_0020F5B8(Ctx_20FAF0* c, s32 n);
+
+void func_0020FAF0(Ctx_20FAF0* c)
+{
+    c->f164 = func_0020F5B8(c, 4);
+    c->f168 = func_0020F5B8(c, 4);
+    c->f16c = func_0020F5B8(c, 4);
+    c->f170 = func_0020F5B8(c, 4);
+    *(u32*)0x10002010 = (*(u32*)0x10002010 & 0xFFFCFFFF) | (func_0020F5B8(c, 2) << 16);
+    s32 v = func_0020F5B8(c, 2);
+    c->f174 = v;
+    if (c->f_d4 == 0) c->f_d4 = v;
+    c->f178 = func_0020F5B8(c, 1);
+    c->f17c = func_0020F5B8(c, 1);
+    c->f180 = func_0020F5B8(c, 1);
+    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFBFFFFF) | (func_0020F5B8(c, 1) << 22);
+    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFDFFFFF) | (func_0020F5B8(c, 1) << 21);
+    *(volatile u32*)0x10002010 = (*(volatile u32*)0x10002010 & 0xFFEFFFFF) | (func_0020F5B8(c, 1) << 20);
+    c->f184 = func_0020F5B8(c, 1);
+    func_0020F5B8(c, 1);
+    c->f188 = func_0020F5B8(c, 1);
+    if (func_0020F5B8(c, 1) == 0) return;
+    func_0020F5B8(c, 1);
+    func_0020F5B8(c, 3);
+    func_0020F5B8(c, 1);
+    func_0020F5B8(c, 7);
+    func_0020F5B8(c, 8);
+}
