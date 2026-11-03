@@ -767,3 +767,67 @@ s32 func_00211240(s32 unused, Xfer_00211240* p)
     }
     return 0;
 }
+
+struct Queue_211090;
+struct Self_211090 {
+    u8 pad000[0x858];
+    Queue_211090* f858;
+};
+
+struct Msg_211090 {
+    s32 cmd;
+    s32 pad04[7];
+};
+
+struct Xfer_211090 {
+    volatile s32 done;
+    s32 error;
+    s32 size;
+    s32 addr;
+    s32 total;
+};
+
+s32 func_001F6980(s32 channel, s32 (*handler)(s32, void*), s32 next, void* arg);
+s32 func_001F6990(s32 channel, s32 id);
+s32 func_001F6E10(s32 channel);
+s32 func_001F6E78(s32 channel);
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+s32 func_00210F18(s32 channel, void* arg);
+void func_0020B190(Queue_211090* q, Msg_211090* m);
+void func_0020B978(Self_211090* self, u8* msg);
+extern u8 D_00250528[];
+
+void func_00211090(Self_211090* self, s32 addr, s32 size)
+{
+    s32 chunk = 0x3FF;
+    Msg_211090 msg;
+    Xfer_211090 xfer;
+    xfer.total = size / chunk + 1;
+    xfer.addr = (addr + 0xFFC00) & 0xFFFFFFF;
+    xfer.size = size;
+    xfer.error = 0;
+    xfer.done = 0;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    s32 id = func_001F6980(3, func_00210F18, 0, &xfer);
+    *(volatile u32*)0x1000E010 = 8;
+    func_001F6E78(3);
+    func_001F9D60();
+    *(volatile u32*)0x1000B010 = addr & 0xFFFFFFF;
+    *(volatile u32*)0x1000B020 = chunk << 6;
+    *(volatile u32*)0x1000B000 = 0x100;
+    func_001F9DA8();
+    *(volatile u32*)0x10002000 = chunk | 0x70000000;
+    msg.cmd = 4;
+    func_0020B190(self->f858, &msg);
+    while (xfer.done < xfer.total) {
+    }
+    if (xfer.error != 0) {
+        func_0020B978(self, D_00250528);
+    }
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    func_001F6E10(3);
+    func_001F6990(3, id);
+}
