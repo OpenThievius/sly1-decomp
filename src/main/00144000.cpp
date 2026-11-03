@@ -658,3 +658,74 @@ s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, 
     if (hi != 0) *hi = f1;
     return 1;
 }
+
+struct Tgt_1451F0;
+typedef void (*Fn_1451F0)(Tgt_1451F0* self, s32 a);
+struct Tgt_1451F0 { Fn_1451F0* vtbl; };
+struct Ent_1451F0 {
+    s32 f0;
+    Tgt_1451F0* f4;
+    s32 f8;
+    s32 fC;
+};
+struct Self_1451F0 {
+    u8 pad0[0x364];
+    f32 f364;
+    u8 pad368[0x3D0 - 0x368];
+    s32 f3D0;
+    Ent_1451F0 f3D4[1];
+};
+struct Self2_1451F0 {
+    u8 pad0[0x364];
+    f32 f364;
+    u8 pad368[0x3D0 - 0x368];
+    s32 f3D0;
+    u8 pad3D4[4];
+    Tgt_1451F0* f3D8;
+    u8 pad3DC[4];
+    s32 f3E0;
+};
+
+extern f32 D_0026185C;
+
+void func_001451F0(Self_1451F0* self, s32 flags, s32 k0, Tgt_1451F0* k1, s32 k2, s32 k3)
+{
+    s32 s5 = 0;
+    Tgt_1451F0* s4 = 0;
+    s32 i = 0;
+    Ent_1451F0* w = self->f3D4;
+    Ent_1451F0* r = w;
+    for (; i < self->f3D0; i++, r++) {
+        if ((!(flags & 1) || k0 == r->f0) && (!(flags & 2) || k1 == r->f4) &&
+            (!(flags & 4) || k2 == r->f8) && (!(flags & 8) || k3 == r->fC)) {
+            if (i == 0) {
+                s5 = r->fC;
+                s4 = r->f4;
+            }
+            Tgt_1451F0* o = r->f4;
+            Fn_1451F0 fn = o->vtbl[3];
+            if (fn != 0) {
+                fn(o, r->fC);
+            }
+        } else {
+            *w = *r;
+            w++;
+        }
+    }
+    self->f3D0 = w - self->f3D4;
+    if (s4 != 0) {
+        Fn_1451F0 fn = s4->vtbl[1];
+        if (fn != 0) {
+            fn(s4, s5);
+        }
+        if (self->f3D0 > 0) {
+            Self2_1451F0* t = (Self2_1451F0*)self;
+            t->f364 = D_0026185C;
+            Tgt_1451F0* o = t->f3D8;
+            Fn_1451F0 fn2 = o->vtbl[0];
+            if (fn2 != 0) {
+                fn2(o, t->f3E0);
+            }
+        }
+    }
+}

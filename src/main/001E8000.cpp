@@ -1723,3 +1723,115 @@ void func_001E9EE8(Obj_1E9EE8* self, f32 dt)
     End_1E9EE8::Of(&it);
     func_001DBE48(self);
 }
+
+struct List_1E9C78 {
+    u8* first;
+    s32 pad04;
+    s32 offset;
+};
+struct Iter_1E9C78 {
+    List_1E9C78* list;
+    u8** link;
+    s32 offset;
+    Iter_1E9C78* prev;
+};
+
+extern u8 D_00262C70[];
+
+struct Begin_1E9C78 {
+    static void Of(Iter_1E9C78* it, List_1E9C78* list)
+    {
+        it->list = list;
+        it->link = (u8**)list;
+        it->offset = list->offset;
+        it->prev = (Iter_1E9C78*)D_0027B314;
+        D_0027B314 = (Iter_1E9EE8*)it;
+    }
+};
+struct Next_1E9C78 {
+    static u8* Of(Iter_1E9C78* it)
+    {
+        u8* obj = *it->link;
+        it->link = (u8**)(obj + it->offset);
+        return obj;
+    }
+};
+struct End_1E9C78 {
+    static void Of(Iter_1E9C78* it)
+    {
+        D_0027B314 = (Iter_1E9EE8*)it->prev;
+    }
+};
+
+struct Holder_1E9C78;
+struct Vt_1E9C78 {
+    u8 pad0[0x134];
+    void (*fn134)(Holder_1E9C78* self, f32 dt, u8* arg);
+};
+struct Holder_1E9C78 {
+    Vt_1E9C78* vt;
+};
+
+struct Obj_1E9C78 {
+    u8 pad0[0x60];
+    List_1E9C78 l60;
+    u8 pad6c[0x1B64 - 0x6C];
+    List_1E9C78 l1B64;
+    u8 pad1b70[0x1C24 - 0x1B70];
+    List_1E9C78 l1C24;
+};
+
+void func_001E9B30(void);
+Holder_1E9C78* func_001925F0(void);
+void func_0015FF58(Obj_1E9C78* self);
+void func_00124EE8(u8* n, f32 dt);
+void func_0012EBD8(u8* n, f32 dt);
+void func_00159AD0(u8* n, f32 dt);
+void func_00159588(Obj_1E9C78* self);
+void func_001C0070(void);
+void func_001DBE48(Obj_1E9C78* self);
+
+void func_001E9C78(Obj_1E9C78* self, f32 dt)
+{
+    func_001E9B30();
+    Holder_1E9C78* h = func_001925F0();
+    if (h != 0) {
+        Vt_1E9C78* vt = h->vt;
+        if (vt->fn134 != 0) {
+            u8* a;
+            if ((*(s32*)&D_00262C68) & 2)
+                a = D_00262C70;
+            else
+                a = ((u8*)&D_00262D38);
+            vt->fn134(h, dt, a);
+        }
+    }
+    func_0015FF58(self);
+    {
+        Iter_1E9C78 it;
+        Begin_1E9C78::Of(&it, &self->l60);
+        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+            func_00124EE8(n, dt);
+        }
+        End_1E9C78::Of(&it);
+    }
+    {
+        Iter_1E9C78 it;
+        Begin_1E9C78::Of(&it, &self->l1B64);
+        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+            func_0012EBD8(n, dt);
+        }
+        End_1E9C78::Of(&it);
+    }
+    {
+        Iter_1E9C78 it;
+        Begin_1E9C78::Of(&it, &self->l1C24);
+        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+            func_00159AD0(n, dt);
+        }
+        End_1E9C78::Of(&it);
+    }
+    func_00159588(self);
+    func_001C0070();
+    func_001DBE48(self);
+}

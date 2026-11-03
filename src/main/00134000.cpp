@@ -1061,3 +1061,76 @@ void func_00136238(Obj_136238* self, s32 on)
         func_00135E78(self, 0, 1);
     }
 }
+
+struct Dec_1378A0 {
+    u8 pad0[0x18];
+    u8* f18;
+    s32 f1C;
+    u8* f20;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+};
+
+void func_00137820(Dec_1378A0* d);
+void func_001F5A58(void* dst, void* src, s32 n);
+
+void func_001378A0(Dec_1378A0* d)
+{
+    u8* base = (u8*)0x70000000;
+    s32 pos = 0;
+    s32 n = d->f24;
+    u8* p = d->f20;
+    s32 flags = d->f28;
+    s32 more;
+    s32 carry = d->f2C;
+    if (carry > 0) {
+        func_001F5A58((void*)0x70000000, (void*)0x70002000, carry);
+        pos = d->f2C;
+    }
+    while ((more = pos < 0x2000) != 0) {
+        flags >>= 1;
+        if (!(flags & 0x100)) {
+            if (--n < 0) {
+                func_00137820(d);
+                if (d->f24 <= 0) break;
+                p = d->f20;
+                n = d->f24 - 1;
+            }
+            flags = *p++ + 0xFF00;
+        }
+        if (--n < 0) {
+            func_00137820(d);
+            if (d->f24 <= 0) break;
+            p = d->f20;
+            n = d->f24 - 1;
+        }
+        s32 b = *p++;
+        if (flags & 1) {
+            base[pos++] = b;
+        } else {
+            if (--n < 0) {
+                func_00137820(d);
+                p = d->f20;
+                n = d->f24 - 1;
+            }
+            u32 v = b + (*p++ << 8);
+            s32 cnt = ((s32)v >> 13) + 2;
+            s32 src = v & 0x1FFF;
+            for (; cnt >= 0; cnt--) {
+                base[pos++] = base[src++ & 0x1FFF];
+            }
+        }
+    }
+    d->f18 = base;
+    if (more == 0) {
+        d->f1C = 0x2000;
+        d->f2C = pos - 0x2000;
+    } else {
+        d->f1C = pos;
+        d->f2C = 0;
+    }
+    d->f20 = p;
+    d->f24 = n;
+    d->f28 = flags;
+}
