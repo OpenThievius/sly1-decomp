@@ -1760,3 +1760,21 @@ void func_0012D5D0(Self_12D5D0* self, Msg_12D5D0* msg, s32* out)
     }
     }
 }
+
+struct Range_12E968 { u32 field0; f32 minimum; f32 maximum; };
+struct Obj_12E968 { u8 pad0[8]; Range_12E968* range; };
+
+f32 func_0012E968(Obj_12E968* self, f32 value)
+{
+    Range_12E968* range = self->range;
+    f32 r;
+    if (value < range->minimum) {
+        r = 1.0f;
+    } else if (range->maximum <= value) {
+        r = 0.15f;
+    } else {
+        r = (value - range->maximum) / (range->minimum - range->maximum);
+        r = r * 0.85f + 0.15f;
+    }
+    return r;
+}

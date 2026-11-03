@@ -573,3 +573,28 @@ void func_001F7020(Queue_1F7020* q)
         }
     }
 }
+
+char* func_001F6880(char* s, char* t)
+{
+    int i;
+    if (*s == 0) {
+        if (*t) {
+            return 0;
+        }
+        return s;
+    }
+    while (*s) {
+        i = 0;
+        while (1) {
+            if (t[i] == 0) {
+                return s;
+            }
+            if (t[i] != s[i]) {
+                break;
+            }
+            i++;
+        }
+        s++;
+    }
+    return 0;
+}

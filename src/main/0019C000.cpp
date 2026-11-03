@@ -1225,3 +1225,15 @@ extern const Fn_Table D_00219F00[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))fu
 extern const Fn_Table D_00219F20[8] = { (Fn_Table)func_001A31F0, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A3250, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219F40[8] = { (Fn_Table)func_001A3598, 0, 0, (Fn_Table)func_001A3730, (Fn_Table)func_001A38F0, (Fn_Table)func_001A3990, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A39C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A3A18, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+
+struct Entry_19D410 { u32 w[32]; } __attribute__((aligned(16)));
+
+// D_0026AC10 points at the next free 128-byte entry of D_005E4700 (1024 of them).
+void func_0019D410(Entry_19D410* src)
+{
+    Entry_19D410* cur = *(Entry_19D410**)D_0026AC10;
+    if ((u32)(cur - (Entry_19D410*)D_005E4700) < 0x400) {
+        *(Entry_19D410**)D_0026AC10 = cur + 1;
+        *(Entry_19D410*)((u32)cur | 0x20000000) = *src;
+    }
+}

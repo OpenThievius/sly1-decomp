@@ -1336,3 +1336,18 @@ s32 func_001FD578(Bits_1FD578 bits)
     if ((u.fraction & 0x3FFFFFFFULL) == 0) fraction = (s32)(u.fraction >> 30);
     return func_001FD838(u.kind, u.sign, u.exponent, fraction);
 }
+
+// The exception an allocation failure throws (its typeinfo function is func_00200000).
+class Fault_1FD8A8 {
+public:
+    virtual ~Fault_1FD8A8();
+};
+
+struct Arg_001FD8A8;
+
+void* func_0018D758(Arg_001FD8A8* q);
+
+void* func_001FD8A8(Arg_001FD8A8* a) throw(Fault_1FD8A8)
+{
+    return func_0018D758(a);
+}

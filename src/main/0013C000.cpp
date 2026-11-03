@@ -1360,3 +1360,17 @@ s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 extern const Fn_Table D_00249D98[6] = { 0, 0, 0, (Fn_Table)func_0013CC80, 0, 0 };
+
+struct Obj_13CDE8 { u8 pad0[0x688]; s32 f688; u8 pad1[0x28]; void* f6B4; };
+
+void func_001BA130(Obj_13CDE8* self, Obj_13CDE8* other);
+void* func_0018D568(s32 size, void* owner);
+
+void func_0013CDE8(Obj_13CDE8* self, Obj_13CDE8* other)
+{
+    s32 saved = self->f688;
+    func_001BA130(self, other);
+    self->f688 = saved;
+    if (other->f6B4)
+        self->f6B4 = func_0018D568(0x24, other->f6B4);
+}

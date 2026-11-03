@@ -382,3 +382,19 @@ s64 func_002116B0(Bits_2116B0* self, s32 n)
     func_00211618(self, n);
     return r;
 }
+
+u32 func_00211AD8(s32 mode)
+{
+    u32 result = 0;
+    switch (mode) {
+    case 0:
+        while (*(volatile s32*)0x10002010 < 0) {
+        }
+        result = 0;
+        break;
+    case 1:
+        result = *(volatile u32*)0x10002010 >> 31;
+        break;
+    }
+    return result;
+}

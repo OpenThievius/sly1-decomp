@@ -1444,3 +1444,27 @@ s32 func_0020B570(Owner_0020B570* self, s32 a, s32 b)
     }
     return func_0020B458(self, a, b);
 }
+
+struct Dev_20B810 {
+    u8 pad0[0x590];
+    u8* f590;
+    u8* f594;
+    u8 pad1[0x6D0 - 0x598];
+    u8* f6D0;
+    u8* f6D4;
+    u8 pad2[0x810 - 0x6D8];
+    u32 f810;
+};
+
+void func_0020DEE8(s32 a);
+
+void func_0020B810(Dev_20B810* self)
+{
+    u8* spr = (u8*)0x70000000;
+    func_0020DEE8(1);
+    self->f590 = spr;
+    self->f594 = spr + 0x1800;
+    self->f6D0 = spr + 0x1B00;
+    self->f6D4 = spr + 0x3300;
+    self->f810 = 0;
+}

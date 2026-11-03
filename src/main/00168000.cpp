@@ -1855,3 +1855,35 @@ void func_0016B580(Obj_16B580* self, Arg_16B580* arg)
     }
     func_0016B0F8(self, arg);
 }
+
+struct Obj_16B4A0 {
+    u8 pad0[0x208];
+    u8 f208[4];
+    u8 pad20C[4];
+    s32* f210;
+    u8 pad214[0x260 - 0x214];
+    s32 f260;
+    s32 f264;
+    f32 f268;
+};
+
+extern s32 D_00262988[];
+extern f32 D_00262970;
+void func_001AA268(Obj_16B4A0* self);
+s32 func_0015C188(s32 index);
+s32 func_0015C1C0(s32 index);
+void func_001AA8B8(Obj_16B4A0* self, f32 zero);
+
+void func_0016B4A0(Obj_16B4A0* self)
+{
+    func_001AA268(self);
+    if (func_0015C188(2)) {
+        self->f210 = D_00262988;
+        *self->f210 = func_0015C1C0(2);
+    }
+    func_001AA8B8(self, 0.0f);
+    self->f260 = 0;
+    *(u32*)self->f208 = 0xDF7F7F7F;
+    self->f264 = 0;
+    self->f268 = -D_00262970;
+}
