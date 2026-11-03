@@ -398,3 +398,63 @@ u32 func_00211AD8(s32 mode)
     }
     return result;
 }
+
+struct Blk_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; s32 f28; u8 p2C[0xC]; u64 f38; };
+struct Src_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0x14]; s32 f28; u8 p2C[0x18]; s32 f44; s32 f48; u8 p4C[4]; s32 f50; s32 f54; u8 p58[4]; s32 f5C; s32 f60; };
+struct Ctx_210A80 {
+    u8 p0[0x80]; s32 f80; u8 p84[4]; union { u64 d; u32 w[2]; } f88; u8 p90[0x20]; s32 fB0; s32 fB4; s32 fB8; u8 pBC[4]; s32 fC0; s32 fC4; u8 pC8[4]; s32 fCC; s32 fD0;
+    u8 pD4[0x174 - 0xD4]; s32 f174; u8 p178[0x858 - 0x178]; Blk_210A80* f858;
+};
+
+s32 func_002107E0(Ctx_210A80* c, Src_210A80* s, void* a, void* b, void* d);
+s32 func_002104A8(Ctx_210A80* c, Src_210A80* s);
+s32 func_00211348(Ctx_210A80* c, Src_210A80* s);
+s32 func_00210548(Ctx_210A80* c, Src_210A80* s);
+s32 func_002107B8(Ctx_210A80* c);
+
+void func_00210A80(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
+{
+    Src_210A80* s3;
+    Src_210A80* s4;
+    s32 s6 = 0;
+    if (c->f174 == 2) {
+        s3 = a;
+        s4 = b;
+        s6 = 0x40;
+    } else {
+        s3 = b;
+        s4 = a;
+    }
+    (void)func_002107E0(c, s3, (u8*)c->f858 + 0x10, (u8*)c->f858 + 0x18, (u8*)c->f858 + 0x20);
+    c->f80 = c->f858->f10;
+    c->f88.d = 1;
+    (void)func_002107E0(c, s4, (u8*)c->f858 + 0x28, (u8*)c->f858 + 0x30, (u8*)c->f858 + 0x38);
+    c->f80 = c->f858->f28;
+    c->f88.d = 1;
+    Blk_210A80* p = c->f858;
+    u64 v0 = p->f20 | (s64)s6;
+    s32 a2 = s3->f5C;
+    u64 v1 = p->f38 | (s64)s6;
+    c->fCC = a2;
+    p->f20 = v0;
+    s32 a2b = s3->f60;
+    p->f38 = v1;
+    c->fD0 = a2b;
+    c->fB4 = s3->f44;
+    c->fB8 = s4->f48;
+    c->fC0 = s3->f50;
+    c->fC4 = s4->f54;
+    if (func_002104A8(c, a)) {
+        if (a->f28 == 1 && b->f28 == 1) {
+            a->f10 <<= 1;
+            if (c->fB0) {
+                func_00211348(c, a);
+            } else {
+                func_00210548(c, a);
+            }
+            a->f10 >>= 1;
+            func_002107B8(c);
+        }
+    }
+
+}

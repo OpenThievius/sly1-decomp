@@ -2397,3 +2397,48 @@ void func_0011CA90(void)
     Init_11CA90::Load(D_0062C588, 0x08, &D_0025C2FC, &D_0027B30C);
     Init_11CA90::Load(((u8*)&D_0062C598), 0x0C, &D_0025C300, &D_0027B310);
 }
+
+struct Obj_11F850;
+typedef void (*VFn_11F850)(Obj_11F850* self, s32* count, f32** data);
+struct Obj_11F850 { VFn_11F850* vtbl; };
+
+void func_0018D800(f32* dst, f32* src, s32 n);
+void func_001F5CD0(f32* base, s32 n, s32 size, void* cmp);
+extern u8 func_001EB128[];
+
+void func_0011F850(Obj_11F850** objs, s32* outCount, f32** outArr)
+{
+    s32 counts[3];
+    f32* ptrs[3];
+    s32 i;
+    for (i = 0; i < 3; i++) {
+        if (objs[i]) {
+            objs[i]->vtbl[2](objs[i], &counts[i], &ptrs[i]);
+        } else {
+            counts[i] = 0;
+            ptrs[i] = 0;
+        }
+    }
+    s32 total = counts[0] + counts[1] + counts[2];
+    if (total == 0) {
+        *outCount = 0;
+        if (outArr) *outArr = 0;
+        return;
+    }
+    s32 last = total - 1;
+    f32* arr = (f32*)func_0018D658(total * 4);
+    f32* w = arr;
+    for (i = 0; i < 3; i++) {
+        func_0018D800(w, ptrs[i], counts[i] * 4);
+        w += counts[i];
+    }
+    w = arr + 1;
+    func_001F5CD0(arr, total, 4, func_001EB128);
+    f32* r = w;
+    for (total = last - 1; total >= 0; total--) {
+        if (*r != w[-1]) { *w = *r; w++; }
+        r++;
+    }
+    *outCount = w - arr;
+    if (outArr) *outArr = arr;
+}

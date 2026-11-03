@@ -1657,3 +1657,69 @@ double func_001EAE78(double x)
     }
     return x;
 }
+
+struct Node_1E9EE8;
+struct Vtbl_1E9EE8 {
+    u8 pad0[0x7C];
+    void (*update)(Node_1E9EE8*, s32, f32);
+};
+struct Node_1E9EE8 { Vtbl_1E9EE8* vtbl; };
+struct List_1E9EE8 { Node_1E9EE8* head; s32 p4; s32 offset; };
+struct Iter_1E9EE8 { List_1E9EE8* list; u8* link; s32 offset; Iter_1E9EE8* prev; };
+struct Obj_1E9EE8 {
+    u8 pad0[0x78];
+    List_1E9EE8 a;
+    u8 pad1[0x1B70 - 0x84];
+    List_1E9EE8 b;
+    u8 pad2[0x1C30 - 0x1B7C];
+    List_1E9EE8 c;
+};
+
+extern Iter_1E9EE8* D_0027B314;
+
+struct Begin_1E9EE8 {
+    static void Of(Iter_1E9EE8* it, List_1E9EE8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        Iter_1E9EE8* prev = D_0027B314;
+        D_0027B314 = it;
+        it->prev = prev;
+    }
+};
+struct Next_1E9EE8 {
+    static Node_1E9EE8* Of(Iter_1E9EE8* it)
+    {
+        Node_1E9EE8* obj = *(Node_1E9EE8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+struct End_1E9EE8 {
+    static void Of(Iter_1E9EE8* it) { D_0027B314 = it->prev; }
+};
+
+void func_00124EE8(Node_1E9EE8* n, f32 dt);
+void func_0012EBD8(Node_1E9EE8* n, f32 dt);
+void func_00159AD0(Node_1E9EE8* n, f32 dt);
+void func_001DBE48(Obj_1E9EE8* self);
+
+void func_001E9EE8(Obj_1E9EE8* self, f32 dt)
+{
+    if (dt == 0.0f) return;
+    Iter_1E9EE8 it;
+    Begin_1E9EE8::Of(&it, &self->a);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00124EE8(obj, dt);
+    End_1E9EE8::Of(&it);
+    Begin_1E9EE8::Of(&it, &self->b);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_0012EBD8(obj, dt);
+    End_1E9EE8::Of(&it);
+    Begin_1E9EE8::Of(&it, &self->c);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00159AD0(obj, dt);
+    End_1E9EE8::Of(&it);
+    Begin_1E9EE8::Of(&it, &self->a);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) obj->vtbl->update(obj, 0, dt);
+    End_1E9EE8::Of(&it);
+    func_001DBE48(self);
+}

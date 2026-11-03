@@ -1362,3 +1362,36 @@ s32 func_0020F5B8(Obj_20F5B8* obj, s32 a1)
     Cmd_20F5B8::Send(obj, a1 | 0x40000000);
     return v;
 }
+
+struct Ctx_20EDD0;
+s32 func_0020F5B8(Ctx_20EDD0* c, s32 n);
+void func_0020EF70(Ctx_20EDD0* c, u8* p, s32 a2, s32 a3, s32 a4, s32 a5, s32* a6, s32 a7);
+
+void func_0020EDD0(Ctx_20EDD0* c, u8* arr, s32 a2, s32* out, s32 i, s32 mode, s32 a6, s32 a7, s32 s6, s32 s3, s32* fp)
+{
+    s32 v;
+    s32* o;
+
+    if (mode == 1) {
+        if (a6 == 0 && s3 == 0) {
+            v = func_0020F5B8(c, 1);
+            out[i] = v;
+            out[i + 2] = v;
+        }
+        i <<= 3;
+        func_0020EF70(c, arr + i, a2, a7, s6, s3, fp, 0);
+        u32* q = (u32*)(arr + i);
+        u32 x = q[0];
+        u32 y = q[1];
+        q[4] = x;
+        q[5] = y;
+    } else {
+        s32 j = i << 3;
+        v = func_0020F5B8(c, 1);
+        out[i] = v;
+        o = out + i;
+        func_0020EF70(c, arr + j, a2, a7, s6, s3, fp, 0);
+        o[2] = func_0020F5B8(c, 1);
+        func_0020EF70(c, arr + (j + 16), a2, a7, s6, s3, fp, 0);
+    }
+}

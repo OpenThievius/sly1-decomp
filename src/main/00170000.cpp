@@ -707,3 +707,92 @@ void func_00172898(Self_172898* self)
     }
     func_001861E8(self->f14, head);
 }
+
+struct Ent_172CF0
+{
+    u8 pad0[0x18];
+    Ent_172CF0* f18;
+    u8 pad1C[0x3CC - 0x1C];
+    f32 f3CC;
+    u8 pad3D0[0x3F0 - 0x3D0];
+    s32 f3F0;
+    u8 pad3F4[4];
+    s32 f3F8;
+    u8 pad3FC[0x538 - 0x3FC];
+    u64 f538;
+};
+
+struct Self_172CF0
+{
+    u8 pad0[0x1190];
+    u8 f1190[0x100];
+    u8 f1290[0x100];
+    u8 pad1390[0x2220 - 0x1390];
+    s32 f2220;
+    u8 pad2224[4];
+    s32 f2228;
+    u8 pad222C[0x2670 - 0x222C];
+    u8 f2670[0x2BD8 - 0x2670];
+    s32 f2BD8;
+};
+
+void func_001C5C10(Self_172CF0* a, Ent_172CF0* b, void* c, void* d);
+void func_001C4790(Self_172CF0* a, Ent_172CF0* b, void* c, void* d);
+Ent_172CF0* func_00172BF8(Self_172CF0* a, s32* out);
+void func_001879C0(Ent_172CF0* a, f32 f, void* b, void* c, s32 d, s32 e, s32 g, void* h);
+void func_00186BA8(void* a, Ent_172CF0* b, void* c, void* d, void* e, void* f);
+
+void func_00172CF0(Self_172CF0* self, Ent_172CF0* a1, void* a2, void* a3, void* a4, void* a5)
+{
+    s32 idx;
+    Ent_172CF0* v;
+    Ent_172CF0* cur;
+
+    switch (self->f2220)
+    {
+    case 4:
+        if (self->f2BD8 == 0)
+        {
+            switch (self->f2228)
+            {
+            case 0x24:
+            case 0x2A:
+            case 0x2B:
+                func_001C5C10(self, a1, a4, a5);
+                break;
+            }
+        }
+        break;
+    case 3:
+    case 7:
+    case 0xD:
+        break;
+    default:
+        if (self->f2BD8 == 0)
+        {
+            func_001C5C10(self, a1, a4, a5);
+        }
+        break;
+    }
+    func_001C4790(self, a1, a4, self->f1190);
+    func_001C4790(self, a1, a4, self->f1290);
+    v = func_00172BF8(self, &idx);
+    if (v)
+    {
+        for (cur = a1; cur; cur = cur->f18)
+        {
+            if (*((u8*)cur + idx + 0x2B0))
+            {
+                if (a1->f538 & (1ULL << 40))
+                {
+                    func_001879C0(a1, a1->f3CC, (u8*)a1 + 0x140, v, v->f3F0, v->f3F8, 0, self->f2670);
+                }
+                else if (a3)
+                {
+                    func_00186BA8(v, a1, a2, a3, a4, self->f2670);
+                }
+                return;
+            }
+        }
+    }
+}

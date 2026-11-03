@@ -542,3 +542,107 @@ void func_001F55A8(Obj_1F55A8* self)
     }
     D_0027B314 = it.saved;
 }
+
+struct Q_1F5008 {
+    u32 w[4] __attribute__((aligned(16)));
+};
+struct Obj_1F5008 {
+    u8 pad0[0x550];
+    s32 f550;
+};
+struct Self_1F5008;
+struct Item_1F5008 {
+    Self_1F5008* ref;
+    Obj_1F5008* obj0;
+    u8 pad0[8];
+    Q_1F5008 q10;
+    u8 pad1[0x30];
+    Q_1F5008 q50;
+    u8 pad3[0x20];
+    Q_1F5008 q80;
+    u8 pad4[0x40];
+    Item_1F5008* next;
+};
+struct Grp_1F5008 {
+    Item_1F5008* items;
+    Grp_1F5008* next;
+};
+struct Hold_1F5008 {
+    Grp_1F5008* head;
+};
+struct Owner_1F5008 {
+    u8 pad[0x480];
+    Hold_1F5008* hold;
+};
+struct Slot_1F5008 {
+    Obj_1F5008* obj;
+    u8 pad[0xC];
+    Q_1F5008 q10;
+    Q_1F5008 q20;
+};
+struct Self_1F5008 {
+    u8 pad0[0x50];
+    Owner_1F5008* owner;
+    u8 pad1[0x61C];
+    Slot_1F5008 slots[10];
+    s32 count;
+};
+struct Tmp_1F5008 {
+    Self_1F5008* self;
+    Obj_1F5008* obj;
+    u8 pad[0x18];
+    Q_1F5008 q20;
+    Q_1F5008 q30;
+};
+
+s32 func_001B93F8(Self_1F5008* self);
+s32 func_00182F40(Obj_1F5008* o, Self_1F5008* self);
+s32 func_001300E8(Obj_1F5008* o, s32 kind);
+s32 func_001F5C0C(Tmp_1F5008* p, s32 a, s32 b);
+s32 func_00177838(Tmp_1F5008* t, s32 a, s32 b);
+
+struct Add_1F5008 {
+    static void Of(Self_1F5008* self, Obj_1F5008* p, Q_1F5008* a, Q_1F5008* b)
+    {
+        s32 c = self->count;
+        if ((u32)c < 10) {
+            if (p->f550 != 3) {
+                Slot_1F5008* s = &self->slots[c];
+                self->count = c + 1;
+                s->obj = p;
+                s->q10 = *a;
+                s->q20 = *b;
+            }
+        }
+    }
+};
+void func_001F5008(Self_1F5008* self) {
+    Tmp_1F5008 tmp;
+    Obj_1F5008* p;
+    func_001B93F8(self);
+    self->count = 0;
+    Owner_1F5008* owner = self->owner;
+    for (Grp_1F5008* g = owner->hold->head; g; g = g->next) {
+        for (Item_1F5008* it = g->items; it; it = it->next) {
+            s32 side = (owner != (Owner_1F5008*)it->ref);
+            Obj_1F5008* near = *(Obj_1F5008**)((u8*)it + (side << 6) + 4);
+            if (func_00182F40(near, self)) {
+                u8* far = (u8*)it + ((1 - side) << 6);
+                Obj_1F5008* o = *(Obj_1F5008**)(far + 4);
+                if (func_001300E8(o, 0x41)) {
+                    p = o; Add_1F5008::Of(self, p, (Q_1F5008*)(far + 0x10), &it->q80);
+                }
+            }
+        }
+    }
+    func_001F5C0C(&tmp, 0, 0x40);
+    for (s32 i = 0; i < self->count; i++) {
+        Slot_1F5008* s = &self->slots[i];
+        p = s->obj;
+        tmp.self = self;
+        tmp.obj = p;
+        tmp.q20 = *(Q_1F5008*)((u8*)p + 0x140);
+        tmp.q30 = *(Q_1F5008*)((u8*)p + 0x150);
+        func_00177838(&tmp, 0, 0);
+    }
+}
