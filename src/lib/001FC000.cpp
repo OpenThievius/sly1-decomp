@@ -1829,3 +1829,120 @@ Fp_1FCAE0* func_001FCAE0(Fp_1FCAE0* a, Fp_1FCAE0* b, Fp_1FCAE0* tmp)
     }
     return tmp;
 }
+
+union Frac_1FCDE0 { u64 ll; u32 l[2]; };
+struct Sf_1FCDE0 { u32 cls; s32 sign; s32 exp; u8 pad[4]; Frac_1FCDE0 mant; u8 tail[8]; };
+struct Pk_1FCDE0 { u64 bits; };
+
+void func_001FCA40(Pk_1FCDE0* src, Sf_1FCDE0* dst);
+u64 func_001FC910(Sf_1FCDE0* src);
+u64 func_001FE890(u64 a, u64 b);
+
+struct Mul_1FCDE0 {
+    static s32 IsNan(Sf_1FCDE0* x) { return x->cls < 2; }
+    static s32 IsZero(Sf_1FCDE0* x) { return x->cls == 2; }
+    static s32 IsInf(Sf_1FCDE0* x) { return x->cls == 4; }
+
+    static Sf_1FCDE0* Parts(Sf_1FCDE0* a, Sf_1FCDE0* b, Sf_1FCDE0* tmp)
+    {
+        u64 high;
+        u64 low;
+
+        if (IsNan(a)) {
+            a->sign = a->sign != b->sign;
+            return a;
+        }
+        if (IsNan(b)) {
+            b->sign = a->sign != b->sign;
+            return b;
+        }
+        if (IsInf(a)) {
+            if (IsZero(b)) {
+                return ((Sf_1FCDE0*)&D_0062A770);
+            }
+            a->sign = a->sign != b->sign;
+            return a;
+        }
+        if (IsInf(b)) {
+            if (IsZero(a)) {
+                return ((Sf_1FCDE0*)&D_0062A770);
+            }
+            b->sign = a->sign != b->sign;
+            return b;
+        }
+        if (IsZero(a)) {
+            a->sign = a->sign != b->sign;
+            return a;
+        }
+        if (IsZero(b)) {
+            b->sign = a->sign != b->sign;
+            return b;
+        }
+        {
+            u64 alo = a->mant.ll & 0xFFFFFFFF;
+            u64 ahi = a->mant.ll >> 32;
+            u64 blo = b->mant.ll & 0xFFFFFFFF;
+            u64 bhi = b->mant.ll >> 32;
+            u64 p0 = func_001FE890(blo, alo);
+            u64 p1 = func_001FE890(bhi, alo);
+            u64 p2 = func_001FE890(blo, ahi);
+            u64 p3 = func_001FE890(bhi, ahi);
+            u64 mid = p1 + p2;
+            u64 hi = 0;
+            if (mid < p1) {
+                hi += (u64)1 << 32;
+            }
+            u64 lo = p0 + (mid << 32);
+            if (lo < p0) {
+                hi++;
+            }
+            hi += ((mid >> 32) & 0xFFFFFFFF) + p3;
+            high = hi;
+            low = lo;
+        }
+        tmp->exp = a->exp + b->exp;
+        tmp->sign = a->sign != b->sign;
+        tmp->exp += 4;
+        while (high > (~(u64)0 >> 3)) {
+            tmp->exp++;
+            if (high & 1) {
+                low >>= 1;
+                low |= 0x8000000000000000ull;
+            }
+            high >>= 1;
+        }
+        while (high <= (~(u64)0 >> 4)) {
+            tmp->exp--;
+            high <<= 1;
+            if (low & 0x8000000000000000ull) {
+                high |= 1;
+            }
+            low <<= 1;
+        }
+        if ((high & 0xFF) == 0x80) {
+            if (high & 0x100) {
+                high += 0x80;
+            } else if (low) {
+                high += 0x80;
+            }
+        }
+        tmp->mant.ll = high;
+        tmp->cls = 3;
+        return tmp;
+    }
+};
+
+u64 func_001FCDE0(u64 x, u64 y)
+{
+    Sf_1FCDE0 a;
+    Sf_1FCDE0 b;
+    Sf_1FCDE0 tmp;
+    Pk_1FCDE0 xa;
+    Pk_1FCDE0 xb;
+
+    xa.bits = x;
+    xb.bits = y;
+    func_001FCA40(&xa, &a);
+    func_001FCA40(&xb, &b);
+    return func_001FC910(Mul_1FCDE0::Parts(&a, &b, &tmp));
+}
