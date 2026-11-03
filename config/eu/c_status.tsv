@@ -2009,6 +2009,7 @@ func_0018EF78	func_0018FA48	match	version-specific
 func_0018F0E8	func_0018FBB8	match	
 func_0018F148	func_0018FC18	match	
 func_0018F198	func_0018FC68	match	version-specific
+func_0018F448	func_0018FF20	differs	
 func_0018F610	func_00190150	match	version-specific
 func_0018F6E8	func_00190228	differs	
 func_0018F7D0	func_00190310	match	version-specific
