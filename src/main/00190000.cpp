@@ -1511,3 +1511,72 @@ void func_00192B58(Self_192B58* self)
         func_00192DD0(self);
     }
 }
+
+struct __attribute__((packed)) Col_193318 { u8 r, g, b, a; };
+struct Obj_193318 {
+    u8 pad0[4];
+    s32 h;
+    s32 w;
+    s32 x;
+    s32 cnt;
+    u8 r, g, b, pad1;
+    Col_193318 c0;
+    Col_193318 c1;
+    Col_193318 c2;
+};
+struct Frame_193318 { u8 bytes[0x30]; };
+struct Buf_193318 { u8 bytes[0x400]; Frame_193318 f; };
+
+void func_001611B8(Frame_193318* f);
+void func_001529C8(Frame_193318* f, s32 n, Buf_193318* b);
+void func_00152B38(Frame_193318* f);
+f32 func_001EAF28(f32 x);
+void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, Frame_193318* e, f32 x, f32 y, f32 z, f32 w);
+void func_00161200(Frame_193318* f);
+void func_00152D30(Frame_193318* f);
+void func_00152D70(Frame_193318* f);
+void func_001529E0(Frame_193318* f, s32 a, s32 b);
+void func_00168A48(Buf_193318* b);
+
+void func_00193318(Obj_193318* o)
+{
+    Buf_193318 buf;
+    s32 n1;
+    s32 n2;
+    Col_193318 c;
+
+    n1 = (s32)((f32)o->w * 620.0f / (f32)o->h);
+    n2 = (s32)((f32)n1 * (f32)(o->w - o->x) / (f32)o->w);
+    func_001611B8(&buf.f);
+    func_001529C8(&buf.f, 0x40, &buf);
+    func_00152B38(&buf.f);
+    {
+        u8 r = o->r;
+        u8 g = o->g;
+        u8 b = o->b;
+        f32 y = func_001EAF28(412.909088f) * 1.1f;
+        f32 z = (f32)(n2 + 10);
+        func_0019DDA0(r, g, b, 255, &buf.f, 10.0f, y, z, func_001EAF28(412.909088f) * 1.1f + 6.6000004f);
+    }
+    if (o->cnt <= 0) {
+        c = o->c0;
+    } else if (o->cnt == 1) {
+        c = o->c1;
+    } else {
+        c = o->c2;
+    }
+    {
+        u8 r = c.r;
+        u8 g = c.g;
+        u8 b = c.b;
+        f32 x = (f32)(n2 + 10);
+        f32 y = func_001EAF28(412.909088f) * 1.1f;
+        f32 z = (f32)(n1 + 10);
+        func_0019DDA0(r, g, b, 255, &buf.f, x, y, z, func_001EAF28(412.909088f) * 1.1f + 6.6000004f);
+    }
+    func_00161200(&buf.f);
+    func_00152D30(&buf.f);
+    func_00152D70(&buf.f);
+    func_001529E0(&buf.f, 0, 0);
+    func_00168A48(&buf);
+}
