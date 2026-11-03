@@ -790,3 +790,103 @@ done:
     }
     return n;
 }
+
+struct __attribute__((aligned(16))) Row_1867C8 {
+    f32 v[4];
+};
+
+struct Pair_1867C8 {
+    s16 v[2];
+};
+
+struct Edge_1867C8 {
+    Row_1867C8 r0;
+    Row_1867C8 r1;
+    Row_1867C8 r2;
+    Row_1867C8 r3;
+    f32 f40;
+    f32 f44;
+    u8 pad48[0x50 - 0x48];
+    s32 i50;
+    s32 i54;
+    Pair_1867C8* idx58;
+    s32 slot5C;
+    Edge_1867C8* next;
+};
+
+void func_001F5B08(void* dst, void* src, s32 size);
+
+void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_1867C8** groups, Edge_1867C8** head)
+{
+    Edge_1867C8* single = 0;
+    s32 n = 0;
+    s32 i;
+    s32 j;
+    Edge_1867C8* e;
+    *head = 0;
+    for (i = 0; i < count; i++) {
+        e = &base[i];
+        if (e->i50) {
+            if (e->i54) {
+                e->next = *head;
+                *head = e;
+                continue;
+            }
+        } else if (!e->i54) {
+            e->next = single;
+            single = e;
+            continue;
+        }
+        if (!e->i54) {
+            Row_1867C8 t;
+            t = e->r0;
+            e->r0 = e->r1;
+            e->r1 = t;
+            t = e->r2;
+            e->r2 = e->r3;
+            e->r3 = t;
+            s32 x = e->i50;
+            s32 y = e->i54;
+            f32 fa = e->f40;
+            f32 fb = e->f44;
+            e->i50 = y;
+            e->i54 = x;
+            e->f40 = fb;
+            e->f44 = fa;
+            e->slot5C = 1;
+        }
+        for (j = 0; j < n; j++) {
+            if (e->idx58->v[e->slot5C] == keys[j]) {
+                break;
+            }
+        }
+        if (j >= n) {
+            keys[j] = e->idx58->v[e->slot5C];
+            n++;
+        } else {
+            e->next = groups[j];
+        }
+        groups[j] = e;
+    }
+    for (j = 0; j < n; j++) {
+        if (groups[j]->next == 0) {
+            e = single;
+            while (e) {
+                Pair_1867C8* r = e->idx58;
+                if (r->v[0] == keys[j] || r->v[1] == keys[j]) {
+                    goto next;
+                }
+                e = e->next;
+            }
+            groups[j]->next = *head;
+            *head = groups[j];
+            s32 bytes = (n - j) * 4 - 4;
+            func_001F5B08(groups + j, groups + j + 1, bytes);
+            func_001F5B08(keys + j, keys + j + 1, bytes);
+            j--;
+            n--;
+        }
+    next:;
+    }
+    *outCount = n;
+}
