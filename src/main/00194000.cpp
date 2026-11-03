@@ -1719,3 +1719,259 @@ void func_001940E8(Obj_1940E8* self, s32 mode) {
     }
     self->f25C = mode;
 }
+
+// func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
+
+struct Rgba_194F80 { u8 r, g, b, a; };
+struct Out_194F80 { u8 b[0x20]; };
+struct Col_194F80 { s32 v[4]; };
+struct Buf_194F80 { u8 b[0xB0]; };
+struct Font_194F80 { u8 pad0[4]; s32 f4; s32 f8; u8 pad1[0x44 - 0xC]; f32 f44; f32 f48; };
+struct Owner_194F80;
+struct VEnt_194F80 { s16 delta; s16 idx; void (*fn)(void* self, Owner_194F80* o, Out_194F80* out, void* d); };
+struct Hook_194F80 { u8 pad[0x4C]; VEnt_194F80* vt; };
+struct Owner_194F80 { Hook_194F80* f0; u8 pad[0x14]; Rgba_194F80 f18; };
+struct Menu_194F80 { void* title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
+struct Self_194F80 {
+    u8 pad0[4];
+    Font_194F80* f4;
+    u8 pad1[0x210 - 8];
+    Owner_194F80* f210;
+    u8 pad2[0x224 - 0x214];
+    f32 f224;
+    f32 f228;
+    u8 pad3[0x234 - 0x22C];
+    f32 f234;
+    f32 f238;
+    f32 f23C;
+    u8 pad4[0x250 - 0x240];
+    s32 f250;
+    u8 pad5[0x260 - 0x254];
+    s32 f260;
+    s32 f264;
+    u8 pad6[0x284 - 0x268];
+    f32 f284;
+};
+
+extern f32 D_00261858[];
+extern s32 D_00275BEC;
+extern f32 D_00262CEC;
+extern u8 D_00260ED0[];
+extern u8 D_00262280[];
+extern Rgba_194F80 D_0026A228;
+
+f32 func_00205400(f32 x);
+f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
+void func_00137228(Out_194F80* out, f32 x, f32 y);
+void func_00137238(Out_194F80* out, f32 x, f32 y);
+void func_00137248(Out_194F80* out, Col_194F80* value);
+void func_00137260(Out_194F80* out, s32 flag);
+void func_00137268(Out_194F80* out, s32 flag);
+void func_0015C8B8(Font_194F80* font, f32 a, f32 b);
+Buf_194F80* func_0015DB28(Buf_194F80* out, void* str, Font_194F80* font);
+void func_0015E318(Buf_194F80* buf, Out_194F80* out, s32 zero, void* data);
+f32 func_0015E1B0(Buf_194F80* buf, f32 w);
+void func_0015C900(Font_194F80* font);
+f32 func_0015DFF8(Buf_194F80* buf);
+void* func_00193598(s32 id);
+void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba_194F80* c, s32 k);
+
+struct Setup_194F80 { static void Do(Out_194F80* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
+{
+    func_00137228(out, x, y);
+    func_00137238(out, w, h);
+    Col_194F80 tmp;
+    tmp.v[0] = color;
+    func_00137248(out, &tmp);
+    func_00137260(out, flag);
+    func_00137268(out, 0);
+} };
+
+struct CallHook_194F80 { static void Do(Owner_194F80* o, Out_194F80* out, void* d)
+{
+    Hook_194F80* hk = o->f0;
+    if (hk != 0) {
+        hk->vt[9].fn((u8*)hk + hk->vt[9].delta, o, out, d);
+    }
+} };
+
+struct LerpChan_194F80 { static s32 Do(s32 a, s32 b, f32 t)
+{
+    if (a == b) {
+        return b;
+    }
+    if (a < b) {
+        return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
+    }
+    return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
+} };
+
+struct Lerp_194F80 { static void Do(Rgba_194F80* out, Rgba_194F80 a, Rgba_194F80 b, f32 t)
+{
+    Rgba_194F80 r;
+    r.r = LerpChan_194F80::Do(a.r, b.r, t);
+    r.g = LerpChan_194F80::Do(a.g, b.g, t);
+    r.b = LerpChan_194F80::Do(a.b, b.b, t);
+    r.a = LerpChan_194F80::Do(a.a, b.a, t);
+    *out = r;
+} };
+
+void func_00194F80(Self_194F80* self)
+{
+    f32 cx;
+    f32 cy;
+    f32 h;
+    f32 w;
+    f32 pulse;
+    f32 fade;
+    s32 alpha;
+    Menu_194F80* menu;
+    f32 lineH;
+    f32 base;
+    f32 x;
+    s32 i;
+
+    if (self->f250 == 0) {
+        return;
+    }
+    {
+        f32 ww = self->f234;
+        f32 hh = self->f238;
+        f32 s = self->f23C;
+        f32 x0 = self->f224 + ww * 0.5f; 
+        f32 y0 = self->f228 + hh * 0.5f; 
+        w = ww * s; 
+        cx = self->f224 * s + x0 * (1.0f - s); 
+        cy = self->f228 * s + y0 * (1.0f - s); 
+        h = hh * s; 
+    }
+    pulse = func_00205400(D_00261858[4] * 10.0f) * 0.5f + 0.5f;
+    menu = &((Menu_194F80*)&D_00269D50)[self->f260];
+    fade = 1.0f;
+    if (self->f260 == 0 && D_00275BEC == 2) {
+        fade = 1.0f - D_00262CEC;
+    }
+    self->f284 = func_001EA4B8(D_00260ED0, 0, self->f284, fade, D_00261858[5]);
+    alpha = (u8)(s32)(self->f284 * 255.0f);
+    if (self->f210 != 0) {
+        Out_194F80 out;
+        s32 backColor = 0xFF808080;
+        func_00137228(&out, cx, cy);
+        func_00137238(&out, w, h);
+        {
+            Col_194F80 tmp;
+            tmp.v[0] = backColor;
+            func_00137248(&out, &tmp);
+        }
+        func_00137260(&out, 0);
+        func_00137268(&out, 0);
+        Rgba_194F80 saved = self->f210->f18;
+        {
+            Rgba_194F80 t = saved;
+            t.a = alpha;
+            self->f210->f18 = t;
+        }
+        if (menu->count == 0) {
+            Owner_194F80* cur = self->f210;
+            Rgba_194F80 gray;
+            gray.r = 0x6F; 
+            gray.g = 0x6F; 
+            gray.b = 0x6F; 
+            gray.a = alpha; 
+            Rgba_194F80 res;
+            Lerp_194F80::Do(&res, cur->f18, gray, pulse * pulse);
+            cur->f18 = res;
+        }
+        CallHook_194F80::Do(self->f210, &out, D_00262280);
+        self->f210->f18 = saved;
+    }
+    if (menu->title != 0) {
+        Buf_194F80 buf;
+        Out_194F80 out;
+        Rgba_194F80 c;
+        f32 sc = menu->titleScale * self->f23C;
+        func_0015C8B8(self->f4, sc, sc);
+        func_0015DB28(&buf, menu->title, self->f4);
+        c.r = 0x7F;
+        c.g = 0x7F;
+        c.b = 0x7F;
+        c.a = alpha;
+        Setup_194F80::Do(&out, cx, cy, w, h, *(s32*)&c, 1);
+        func_0015E318(&buf, &out, 0, D_00262280);
+        cy += func_0015E1B0(&buf, 500.0f);
+        func_0015C900(self->f4);
+    }
+    base = cy + -1.0f;
+    {
+        f32 sc = menu->itemScale * self->f23C;
+        func_0015C8B8(self->f4, sc, sc);
+    }
+    lineH = (f32)self->f4->f8 * self->f4->f48;
+    if (menu->vertical == 0) {
+        f32 total = 0.0f;
+        for (s32 k = 0; k < menu->count; k++) {
+            Buf_194F80 buf;
+            if (k != 0) {
+                total += (f32)self->f4->f4 * self->f4->f44 + (f32)self->f4->f4 * self->f4->f44;
+            }
+            void* str = func_00193598(menu->items[k]);
+            func_0015DB28(&buf, str, self->f4);
+            total += func_0015DFF8(&buf);
+        }
+        x = cx + (w - total) * 0.5f;
+    }
+    for (i = 0; i < menu->count; i++) {
+        Rgba_194F80 col;
+        f32 grow;
+        f32 width;
+        void* str;
+        f32 th;
+        if (i == self->f264) {
+            Rgba_194F80 c;
+            c.r = 0x6F;
+            c.g = 0x6F;
+            c.b = (s32)(pulse * 64.0f) + 0x2F;
+            c.a = alpha;
+            col = c;
+            grow = (1.0f - pulse) * 0.1f + 1.0f;
+        } else {
+            Rgba_194F80 c;
+            c.r = 0x5F;
+            c.g = 0x5F;
+            c.b = 0x5F;
+            c.a = alpha;
+            col = c;
+            grow = 1.0f;
+        }
+        Buf_194F80 buf;
+        str = func_00193598(menu->items[i]);
+        func_0015DB28(&buf, str, self->f4);
+        width = func_0015DFF8(&buf);
+        if (menu->vertical != 0) {
+            x = cx + (w - width) * 0.5f;
+        }
+        {
+            f32 sc = menu->itemScale * self->f23C * grow;
+            func_0015C8B8(self->f4, sc, sc);
+        }
+        func_0015DB28(&buf, str, self->f4);
+        f32 width2 = func_0015DFF8(&buf);
+        th = (f32)self->f4->f8 * self->f4->f48;
+        Out_194F80 out;
+        Setup_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0);
+        func_0015E318(&buf, &out, 0, D_00262280);
+        func_0015C900(self->f4);
+        if (menu->vertical != 0) {
+            cy += (f32)self->f4->f8 * self->f4->f48;
+        } else {
+            x += width + ((f32)self->f4->f4 * self->f4->f44 + (f32)self->f4->f4 * self->f4->f44);
+        }
+    }
+    func_0015C900(self->f4);
+    if (menu->title != 0 && menu->count != 0) {
+        Rgba_194F80 c = D_0026A228;
+        c.a = alpha;
+        s32 y = (s32)((base * 0.45454547f + 1936.0f) * 16.0f);
+        func_001AE3B8((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);
+    }
+}

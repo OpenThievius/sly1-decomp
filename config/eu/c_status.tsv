@@ -2102,6 +2102,7 @@ func_00194D30	func_001959A0	match	version-specific
 func_00194E60	func_00195AD0	match	version-specific
 func_00194F00	func_00195B70	match	version-specific
 func_00194F38	func_00195BA8	match	version-specific
+func_00194F80	func_00195BF0	differs	
 func_00195928	func_001965E8	match	version-specific
 func_00195958	func_00196618	match	version-specific, rodata
 func_001961C0	func_00196F00	match	version-specific, rodata
