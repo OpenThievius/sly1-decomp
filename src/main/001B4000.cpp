@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Data_1B4BC8 { u8 pad0[0x20]; s32 count; };
 struct Node_1B4BC8 {
@@ -1050,8 +1051,7 @@ struct Owner_1B6388 {
 
 void* func_001B6388(Owner_1B6388* self, s32 key)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     Node_1B6388* node = self->head;
     if (node != 0) {
         do {

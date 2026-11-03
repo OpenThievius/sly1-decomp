@@ -46,13 +46,12 @@ s32 func_001833F0(void* a, void* b);
 
 Node_12D570* func_0012D570(Obj_12D570* a0, void* a1)
 {
-    s32 scratch[4];
+    ListFrame frame;
     Node_12D570* n = a0->head;
     while (n) {
         if (func_001833F0(n->item, a1)) return n;
         n = n->next;
     }
-    (void)scratch;
     return 0;
 }
 
@@ -63,13 +62,12 @@ void func_00121648(void* n, void* b);
 
 void func_0012F190(Obj_12F190* a0, void* a1)
 {
-    s32 scratch[4];
+    ListFrame frame;
     Node_12F190* n = a0->head;
     while (n) {
         func_00121648(n, a1);
         n = n->next;
     }
-    (void)scratch;
 }
 
 struct Mid_12F7E0 { u8 pad[0x14]; void* p14; };
@@ -218,8 +216,7 @@ struct Owner_0012C808 {
 
 Node_0012C808* func_0012C808(Owner_0012C808* self, s32 key)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     Node_0012C808* node = self->head;
     if (node != 0) {
         do {
@@ -313,8 +310,7 @@ void func_001226D8(Item_0012F1D8* item);
 
 void func_0012F1D8(Owner_0012F1D8* self)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     for (Item_0012F1D8* p = self->items; p != 0; p = p->next) {
         func_001226D8(p);
     }

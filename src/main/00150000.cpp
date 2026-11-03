@@ -10,8 +10,7 @@ Node_150298* func_0016A820(Node_150298*);
 void func_0014F110(Node_150298*, s32);
 void func_00150298(State_150298* self)
 {
-	s32 scratch[4];
-	(void)scratch;
+	ListFrame frame;
 	if (self->selected != 0) return;
 	Node_150298* current = D_00262708;
 	Node_150298* best = 0;
@@ -1121,8 +1120,7 @@ extern f32 D_BC23D70A;
 void func_00153EC0(Obj_153EC0* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
 {
     Frame_153EC0 fr;
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     s32 e = (s32)&self->head;
     fr.cursor = e;
     fr.list = e;

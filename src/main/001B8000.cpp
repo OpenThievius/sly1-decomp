@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 typedef void (*VFn_1B89B8)(void* self);
 
@@ -139,8 +140,7 @@ struct Obj_1BB4A0 {
 
 void func_001BB4A0(Obj_1BB4A0* self)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     Info_1BB4A0* info = self->info;
     if (info->f114 != 0 || info->f100 != 0 || info->f104 != 0) {
         self->f4e4 = self;
@@ -206,8 +206,7 @@ void func_00138F28(void* a, void* b);
 
 void func_001BB580(Obj_1BB580* self)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     s32 flag = 0;
     if (self->f450 == 3) {
         flag = (self->f470 == 3);

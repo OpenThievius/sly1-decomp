@@ -633,8 +633,7 @@ void func_001A76A0(void* node, s32 flag);
 
 void func_001A75D0(Obj_1A75D0* self)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     func_00124A48(self);
     if (self->f55C != 0) {
         self->f560 = (void*)func_001B6290(self->f55C, self, -1, 1);
@@ -1928,7 +1927,7 @@ void func_001A4EF0(Obj_1A4EF0* self, s32 state)
 {
     Obj_1A4EF0* o;
     s32 v;
-    s32 scratch[4]; (void)scratch;
+    ListFrame frame;
     if (W(self, 0x650) == state) return;
     W(self, 0x650) = state;
     F(self, 0x654) = D_0026185C[0];

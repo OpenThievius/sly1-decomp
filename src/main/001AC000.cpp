@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Obj_1AC638 {
     u8 pad0[4];
@@ -494,8 +495,7 @@ struct Node_1AF508 {
 
 void func_001AF508()
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     s32 count = 0;
     Node_1AF508* n = *(Node_1AF508**)(D_00275710 + 0x1CA8);
     while (n != 0) {

@@ -251,8 +251,7 @@ struct Obj_1BC760 { u8 pad0[0x34]; Item_1BC760* head; u8 pad1[0x4C0 - 0x38]; s32
 
 void func_001BC760(Obj_1BC760* self, s32* index, Obj_1BC760** list)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     self->count = *index;
     list[*index] = self;
     (*index)++;

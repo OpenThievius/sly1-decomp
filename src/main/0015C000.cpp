@@ -712,8 +712,7 @@ struct Node_0015FB28 { Class_0015FB28* cls; u8 pad0[0x18]; Node_0015FB28* next; 
 
 void func_0015FB28(Node_0015FB28* self, void* arg)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     if (self->cls->visit != 0)
         self->cls->visit(self, arg);
     Node_0015FB28* node = self->child;
@@ -757,8 +756,7 @@ void func_00152730(void* dst, void* src);
 
 void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     if (self != other) {
         Elem_15F6C0* e = other->head;
         if (e != 0) {

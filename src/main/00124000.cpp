@@ -404,8 +404,7 @@ struct Obj_1249A8 {
 
 void func_001249A8(Obj_1249A8* self)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     func_00128DB8(self);
     func_00124540(self);
     Sub_1249A8* sub = self->f200;

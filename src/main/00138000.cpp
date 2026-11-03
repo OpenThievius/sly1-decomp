@@ -706,9 +706,8 @@ void func_0013B430(s32 mask)
     Node_13B430* node;
     s32 v;
     s32 go;
-    s32 scratch[4];
+    ListFrame frame;
 
-    (void)scratch;
     if (mask != 0) {
         node = ((Root_13B430*)D_00275710)->first_1CB4;
         if (node != 0) {
