@@ -2085,3 +2085,49 @@ void func_001A6BE0(Obj_1A6BE0* self, s32 mode)
     if (h) func_0012C288(0.0f, 1.0f, h, self, w - buf, buf, 1, &self->p59C);
     if (s3) self->p5A8 = func_001B6290(s3, self, -1, 1);
 }
+
+extern f32 D_00261858[];
+
+struct Entry_1A7B88 { s32 f0; u8 b[2]; u8 pad[2]; f32 delay; };
+struct Table_1A7B88 { s32 count; Entry_1A7B88 entries[1]; };
+struct Obj_1A7B88 { u8 pad0[0x4]; void* owner; s32 channel; s32 state; Table_1A7B88* table; s32 index; f32 f18; f32 f1C; };
+
+void func_001A7D98(void* self, s32 mode);
+void func_001A7E40(Obj_1A7B88* self);
+s32 func_002049E8(void* owner, s32 channel, u8* bytes);
+
+void func_001A7B88(Obj_1A7B88* s)
+{
+    f32 dt = D_00261858[5];
+    switch (s->state) {
+    case 2:
+        if (*(s32*)D_00261858 != 0 && s->f18 > 0.0f) {
+            s->f1C -= dt;
+            if (s->f1C <= 0.0f) {
+                s->index++;
+                if (s->index >= s->table->count) {
+                    s->index = 0;
+                }
+                u8 bytes[2];
+                Entry_1A7B88* e = (Entry_1A7B88*)((u8*)s->table + (s->index << 3));
+                bytes[0] = e->b[0];
+                bytes[1] = e->b[1];
+                func_002049E8(s->owner, s->channel, bytes);
+                s->f1C = ((Entry_1A7B88*)((u8*)s->table + (s->index << 3)))->delay;
+            }
+            s->f18 -= dt;
+        } else {
+            func_001A7D98(s, 3);
+        }
+        break;
+    case 3:
+    case 4:
+        if (s->f1C > 0.0f) {
+            func_001A7E40(s);
+            s->f1C -= dt;
+        } else {
+            func_001A7D98(s, s->state == 3);
+        }
+        break;
+    }
+}

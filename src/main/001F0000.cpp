@@ -1595,3 +1595,31 @@ Ent_1F3C38* func_001F3C38(s32 id, s32 parent)
     }
     return found;
 }
+
+struct Ent_1F1648 { s32 f0; u8 rest[0x30]; };
+struct Obj_1F1648 { u8 pad0[0x2DC]; s32 f2DC; u8 pad1[0x2F4 - 0x2E0]; s32 f2F4; u8 pad2[0x314 - 0x2F8]; Ent_1F1648 ents[1]; };
+
+extern s32 (*D_00276608[])[4];
+
+void func_001F1590(Obj_1F1648* self, s32 e, s32 n);
+enum Sound_1F1648 { SOUND_1F1648_OK = 0x79, SOUND_1F1648_FAIL = 0x7B };
+void func_001BFCD8(Sound_1F1648 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+void func_001F1648(Obj_1F1648* self, s32 idx)
+{
+    s32 (*table)[4] = D_00276608[self->f2F4];
+    if (table == 0) {
+        func_001BFCD8(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        return;
+    }
+    s32 e = table[self->f2DC][idx];
+    while (e != -1 && self->ents[e].f0 == 0) {
+        e = table[e][idx];
+    }
+    if (e != -1 && self->ents[e].f0 != 0) {
+        func_001F1590(self, e, 2);
+        func_001BFCD8(SOUND_1F1648_OK, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    } else {
+        func_001BFCD8(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    }
+}

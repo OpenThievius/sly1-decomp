@@ -1072,3 +1072,64 @@ void func_0013B9D8(Object_13B9D8* self, s32 key, s32 a2, s32 a3, s32 a4, void* a
         }
     }
 }
+
+struct __attribute__((aligned(16))) Entry_13A008 {
+    u64 value;
+    s32 tag;
+    s32 pad;
+};
+
+struct StateB_13A008 {
+    u8 pad0[0x4];
+    u8 bits4;
+};
+
+struct StateA_13A008 {
+    u8 pad0[0x14];
+    StateB_13A008* p14;
+};
+
+struct Ctx_13A008 {
+    u8 pad0[0x380];
+    StateA_13A008* p380;
+    s32 a384;
+    u8 pad388[0x8];
+    Entry_13A008 entries[1];
+};
+
+u64 func_001B2988(void* t, s32 i, s32 j);
+
+void func_0013A008(Ctx_13A008* self)
+{
+    StateB_13A008* blk = self->p380->p14;
+    s32 a = 1;
+    s32 s4 = 0;
+    s32 t = blk->bits4 >> 1;
+    s32 b;
+    s32 i;
+    Entry_13A008* e;
+
+    while (t != 0) {
+        t >>= 1;
+        a <<= 1;
+    }
+    a = a << (a < blk->bits4);
+    while (a >= 0x20) {
+        a >>= 1;
+    }
+    b = blk->bits4;
+    if (b < a) {
+        s4 = a - blk->bits4;
+    }
+    self->a384 = a;
+    e = self->entries;
+    for (i = 0; i < b; i++) {
+        e->value = func_001B2988(blk, i, 0);
+        e->tag = 6;
+        if (i < s4) {
+            e[1] = *e;
+            e++;
+        }
+        e++;
+    }
+}

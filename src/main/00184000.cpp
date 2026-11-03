@@ -734,3 +734,59 @@ void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
     y = y + y * y * y;
     func_00183F40(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
 }
+
+struct Pair_00186A70 { u8 pad0[4]; s16 k1; s16 k2; };
+struct Grp_00186A70 { u8 pad0[0x58]; Pair_00186A70* pair; u8 pad1[4]; Grp_00186A70* next; };
+struct Item_00186A70 { u8 pad0[0x1C]; u16 flags; u8 pad1[2]; };
+struct Rec_00186A70 { Rec_00186A70* parent; Grp_00186A70* node; s32 id; };
+
+s32 func_00186A70(Item_00186A70* base, s32 key, s32 target, Grp_00186A70* head, Grp_00186A70** out)
+{
+    Rec_00186A70 recs[64];
+    s32 n;
+    s32 nrec;
+    s32 i;
+
+    recs[0].parent = 0;
+    recs[0].node = 0;
+    recs[0].id = key;
+    for (i = 0, nrec = 1; i < nrec; i++) {
+        Rec_00186A70* rc = &recs[i];
+        Grp_00186A70* g;
+        for (g = head; g != 0; g = g->next) {
+            Pair_00186A70* p = g->pair;
+            s32 id;
+            if (p->k1 == rc->id) {
+                id = p->k2;
+            } else if (p->k2 == rc->id) {
+                id = p->k1;
+            } else {
+                continue;
+            }
+            if (id == target) {
+                out[0] = g;
+                n = 1;
+                while (rc->node != 0) {
+                    out[n] = rc->node;
+                    n++;
+                    rc = rc->parent;
+                }
+                goto done;
+            }
+            Item_00186A70* it = &base[id];
+            if ((it->flags & 4) == 0) {
+                it->flags |= 4;
+                Rec_00186A70* r = &recs[nrec++];
+                r->parent = rc;
+                r->node = g;
+                r->id = id;
+            }
+        }
+    }
+    n = 0;
+done:
+    for (i = 0; i < nrec; i++) {
+        base[recs[i].id].flags &= ~4;
+    }
+    return n;
+}

@@ -1442,3 +1442,48 @@ void func_001AECE8(Obj_1AECE8* self, s32 state)
     self->state = state;
     self->f55C = D_0026185C[0];
 }
+
+struct Ctx_1ADB00;
+extern u8 D_00262280[];
+
+struct Obj_1ADB00 { u8 pad0[0x23C]; f32 f23C; };
+
+void func_001613C0(Ctx_1ADB00* p, s32 a, s32 b, u64 c);
+void func_00161708(Ctx_1ADB00* p, u64 a, u64 b);
+void func_00161458(Ctx_1ADB00* p, u32 value);
+void func_001615F0(Ctx_1ADB00* p, s32 a1, s32 a2, s32 a3, s32 a4);
+
+void func_001ADB00(Obj_1ADB00* self)
+{
+    f32 x = self->f23C * 66.40001f;
+    f32 y = 492.80002f - x;
+    func_001613C0((Ctx_1ADB00*)D_00262280, 6, 7, 0x044441EE);
+    func_00161708((Ctx_1ADB00*)D_00262280, 0x47, 0x30000);
+    func_00161708((Ctx_1ADB00*)D_00262280, 0x42, 0x44);
+    func_00161458((Ctx_1ADB00*)D_00262280, 0x80000000);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x6C00, 0x7900, 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x9400, (s32)((x * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x6C00, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x9400, 0x8700, 0x0FFFFFF0, 0);
+}
+
+struct Ctx_1AE3B8;
+extern u8 D_00262280[];
+
+void func_001613C0(Ctx_1AE3B8* p, s32 a, s32 b, u64 c);
+void func_00161708(Ctx_1AE3B8* p, u64 a, u64 b);
+void func_00161458(Ctx_1AE3B8* p, u32 value);
+void func_001615F0(Ctx_1AE3B8* p, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_00161278(Ctx_1AE3B8* p, s32 a);
+
+void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
+{
+    func_001613C0((Ctx_1AE3B8*)D_00262280, rgba[3] < 0xFF ? 0x41 : 1, 4, 0x441E);
+
+    func_00161708((Ctx_1AE3B8*)D_00262280, 0x47, (u64)(flag ? 0x11001 : 0x11000) | (flag ? 0x60000 : 0x20000));
+
+    func_00161458((Ctx_1AE3B8*)D_00262280, ((u32)((rgba[3] + 1) & 0x1FE) << 23) | (rgba[2] << 16) | (rgba[1] << 8) | rgba[0]);
+    func_001615F0((Ctx_1AE3B8*)D_00262280, a0, a1, a2, 0);
+    func_001615F0((Ctx_1AE3B8*)D_00262280, a3, a4, a5, 0);
+    func_00161278((Ctx_1AE3B8*)D_00262280, 0);
+}
