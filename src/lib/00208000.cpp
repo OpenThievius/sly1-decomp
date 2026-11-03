@@ -1831,3 +1831,32 @@ s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
     }
     return result;
 }
+
+struct Obj_20BEA0 { u8 pad000[0x858]; u32 field858; };
+struct Handle_20BEA0;
+struct Req_20BEA0 { s32 mode; s32 pad[7]; };
+s32 func_0020B190(Handle_20BEA0* h, Req_20BEA0* out);
+void func_0020F0F0(Obj_20BEA0* self);
+void func_0020F0C0(Obj_20BEA0* self, u32 value);
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+void func_0020BEA0(Obj_20BEA0* obj, u32 value, u32 mask)
+{
+    Req_20BEA0 req;
+    req.mode = 2;
+
+    func_0020B190((Handle_20BEA0*)obj->field858, &req);
+    func_0020F0F0(obj);
+    *(volatile u32*)0x10002000 = 0;
+    func_0020F0F0(obj);
+    (void)func_001F9D60();
+    *(volatile u32*)0x1000B410 = mask & 0x0FFFFFFF;
+    *(volatile u32*)0x1000B420 = 4;
+    *(volatile u32*)0x1000B400 = 0x101;
+    (void)func_001F9DA8();
+    func_0020F0C0(obj, value);
+    func_0020F0F0(obj);
+    req.mode = 3;
+    func_0020B190((Handle_20BEA0*)obj->field858, &req);
+}
