@@ -2039,3 +2039,144 @@ s32 func_001FDD80(void* type)
     }
     return match(info, type, 0) != 0;
 }
+
+struct Tag_1FE198 {
+    u32 word;
+};
+
+struct __attribute__((aligned(8))) Frame_1FE198 {
+    s32 f0;
+    Tag_1FE198* f4;
+    s32 f8;
+    s32 fC;
+    s32 f10[0xA2];
+    u16 f298;
+    u16 f29A;
+    s8 f29C[0x54];
+};
+
+struct Obj_1FE198 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+};
+
+struct Pc_1FE198;
+Frame_1FE198* func_001FE100(Pc_1FE198* pc, Frame_1FE198* f, Frame_1FE198* prev);
+s32 func_001FDEB0(s32 a, Tag_1FE198* t, s32 c, s32 d, s32* e);
+s32 func_001FDDD8(Pc_1FE198* pc, Tag_1FE198* t);
+s64* func_001FDFF8(u16 idx, Frame_1FE198* f, Frame_1FE198* g);
+void func_001FE080(s32 idx, Frame_1FE198* f, Frame_1FE198* g);
+void func_001FE190(void);
+void func_001FD930(void);
+
+struct ReturnAddr_1FE198 {
+    static Pc_1FE198* Of(Frame_1FE198* f, Frame_1FE198* g)
+    {
+        s64 w = *func_001FDFF8(f->f29A, f, g);
+        return (Pc_1FE198*)(s32)w;
+    }
+};
+
+struct RegWindow_1FE198 {
+    static s32 In(s32 i, Frame_1FE198* f) { return 0; }
+};
+
+s32 func_001FE198(Obj_1FE198* obj, Pc_1FE198* pc, Frame_1FE198* fb, Frame_1FE198** pout)
+{
+    Frame_1FE198 sub;
+    Frame_1FE198 saved;
+    Frame_1FE198* udata = *pout;
+    Frame_1FE198* subp = &sub;
+    Pc_1FE198* startPc = pc;
+    s32 res = 0;
+    s32 pending = obj->fC != 0;
+    s32 a8 = obj->f8;
+    s32 cleanup;
+    s32 savedRes;
+    Pc_1FE198* savedPc;
+    s32 onlyCleanup;
+    s32 savedState;
+    s32 i;
+
+    onlyCleanup = 0;
+    savedState = 0;
+    cleanup = 0;
+    for (;;) {
+        Frame_1FE198* p = udata;
+        s32 isNew;
+        udata = func_001FE100(pc, udata, subp);
+        subp = p;
+        if (udata == 0) {
+            break;
+        }
+        if (udata->f4 == 0) {
+            isNew = 0;
+        } else {
+            isNew = udata->f4->word == 0xFFFFFFFEu;
+        }
+        if (pending) {
+            pending = 0;
+            res = func_001FDEB0(obj->fC, udata->f4, a8, 1, &cleanup);
+            obj->fC = 0;
+        } else if (isNew) {
+            res = func_001FDEB0((s32)pc, udata->f4, a8, 0, &cleanup);
+        } else {
+            res = func_001FDDD8(pc, udata->f4);
+        }
+        if (res != 0) {
+            if (cleanup != 0) {
+                if (savedState == 0) {
+                    saved = *udata;
+                    savedPc = pc;
+                    savedRes = res;
+                    savedState = 1;
+                    onlyCleanup = 1;
+                }
+            } else {
+                onlyCleanup = 0;
+                break;
+            }
+        }
+        pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198::Of(udata, subp) - 1);
+    }
+    if (savedState != 0) {
+        udata = &saved;
+        res = savedRes;
+        pc = savedPc;
+        if (onlyCleanup != 0) {
+            func_001FE190();
+        }
+    }
+    if (res == 0) {
+        func_001FD930();
+    }
+    obj->f0 = res;
+    if (pc == startPc) {
+        udata = fb;
+    } else {
+        Pc_1FE198* handlerPc = pc;
+        pc = startPc;
+        *udata = *fb;
+        while (pc != handlerPc) {
+            Frame_1FE198* p = udata;
+            udata = func_001FE100(pc, udata, subp);
+            subp = p;
+            for (i = 0; i < 0x4F; i++) {
+                if (i != udata->f29A && udata->f29C[i] != 0) {
+                    func_001FE080(i, udata, fb);
+                }
+            }
+            pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198::Of(udata, subp) - 1);
+        }
+        if (udata->f29C[udata->f29A] == 2) {
+            i = udata->f10[udata->f29A];
+            if (RegWindow_1FE198::In(i, udata)) {
+                func_001FE080(i, udata, fb);
+            }
+        }
+    }
+    *pout = udata;
+    return res;
+}
