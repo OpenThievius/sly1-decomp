@@ -2011,3 +2011,54 @@ void func_001C8F20(Self_1C8F20* self, s32 state, void* context)
     frame.stateSlot = &self->state;
     func_001837E0(self, 15, 2, &frame);
 }
+
+struct Key_1CBB88;
+struct Obj_1CBB88;
+s32 func_001300E8(Key_1CBB88* key, s32 kind);
+s32 func_001CBD58(Obj_1CBB88* self);
+void func_001BFCD8(Key_1CBB88* a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+struct Obj_1CBB88 {
+    u8 pad0[0x50];
+    s32 f50;
+    s32 f54;
+    s32 f58;
+    void* f5C[75];
+    u8 pad1[0x188 - 0x5C - 75 * 4];
+    s32 f188;
+};
+
+s32 func_001CBB88(Obj_1CBB88* self)
+{
+    s32 state = self->f50;
+    s32 i;
+
+    switch (state) {
+    case 0:
+        if (self->f188 != 0) {
+            for (i = 0; i < self->f58; i++) {
+                if (func_001300E8((Key_1CBB88*)self->f5C[i], 9) == 0) {
+                    break;
+                }
+            }
+            if (i >= self->f58) {
+                func_001BFCD8((Key_1CBB88*)0x3F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            }
+            state = 2;
+        }
+        break;
+    case 1:
+        if (self->f188 != 0) {
+            state = 2;
+        } else if (func_001CBD58(self) != 0) {
+            state = 0;
+        }
+        break;
+    case 2:
+        if (self->f188 == 0) {
+            state = 1;
+        }
+        break;
+    }
+    return state;
+}

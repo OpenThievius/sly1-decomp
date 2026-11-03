@@ -1989,3 +1989,50 @@ void func_0012F8C8(Self_12F8C8* self)
     n->vt->fn1C(n);
     *(Iter_12F8C8**)D_0027B314 = it.saved;
 }
+
+struct Entry_12E5D0 {
+    f32 key;
+    s32 a4;
+    s32 a8;
+    s32 aC;
+};
+
+struct List_12E5D0 {
+    u8 pad0[0x5C];
+    s32 count;
+    Entry_12E5D0* entries;
+};
+
+struct Self_12E5D0 {
+    u8 pad0[0x14];
+    f32 f14;
+    f32 f18;
+    u8 pad1C[4];
+    s32 idx;
+};
+
+void func_0012D5D0(Self_12E5D0* self, Entry_12E5D0* entry, s32* out);
+
+void func_0012E5D0(Self_12E5D0* self, List_12E5D0* list, s32* out)
+{
+    if (list->count == 0) return;
+    for (;;) {
+        if (self->idx < list->count) {
+            if (list->entries[self->idx].key < self->f14 || (self->f14 == list->entries[self->idx].key && 0.0f < self->f18)) {
+                Entry_12E5D0* e = &list->entries[self->idx];
+                self->idx = self->idx + 1;
+                func_0012D5D0(self, e, out);
+                if (*out != 0) return;
+                continue;
+            }
+        }
+        if (self->idx <= 0) return;
+        if (self->f14 < list->entries[self->idx - 1].key || (self->f14 == list->entries[self->idx - 1].key && self->f18 < 0.0f)) {
+            self->idx = self->idx - 1;
+            func_0012D5D0(self, &list->entries[self->idx], out);
+            if (*out != 0) return;
+            continue;
+        }
+        return;
+    }
+}

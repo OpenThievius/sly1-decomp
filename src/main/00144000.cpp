@@ -623,3 +623,38 @@ void func_00146340(Self_146340* self)
     self->f2B3 = 0x10;
     self->f340 = 1;
 }
+
+struct Shape_145810;
+struct Obj_145810 { u8 pad0[0x538]; Shape_145810* p538; };
+struct Rec_145810 { u8 pad0[0x40]; f32 f40; f32 f44; u8 pad1[0x28]; };
+
+s32 func_0013DFD8(Shape_145810* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 func_001429F8(s32 n, void* recs);
+
+s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
+{
+    Rec_145810 recs[64];
+    s32 total = 0;
+    s32 i;
+    s32 k;
+    s32 j;
+    f32 f2;
+    f32 f1;
+    for (i = 0; i < count; i++) {
+        total += func_0013DFD8(objs[i]->p538, a2, a3, 0, 0x40 - total, &recs[total]);
+    }
+    total = func_001429F8(total, recs);
+    j = 0;
+    for (k = 0;; k++) {
+        if (total < k) return 0;
+        f2 = 0.0f;
+        if (k > 0) f2 = recs[j - 1].f44;
+        if (k < total) f1 = recs[j].f40;
+        else f1 = 1.0f;
+        j++;
+        if (thresh < f1 - f2) break;
+    }
+    if (lo != 0) *lo = f2;
+    if (hi != 0) *hi = f1;
+    return 1;
+}

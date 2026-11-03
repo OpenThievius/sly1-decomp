@@ -1142,3 +1142,61 @@ void func_00124FC0(Self_124FC0* self, f32 f)
     args[0] = &f;
     func_001837E0(self, 1, 1, args);
 }
+
+struct Node_124CC0 { u8 pad0[0x34]; f32 f34; u8 pad1[0x40 - 0x38]; s32 f40; };
+struct Ctx_124CC0 { Node_124CC0* node; void* key; s32 mode; f32 value; f32 f10; };
+struct Self_124CC0 { u8 pad0[0x14]; void* f14; u8 pad1[0x2A0 - 0x18]; Ctx_124CC0* ctx; };
+struct Frame_124CC0 { s32 w0; Self_124CC0* self; u8 pad0[8]; f32 tmp; };
+
+Node_124CC0* func_0015A418(void* a, s32 b, void* c, Self_124CC0* d);
+void func_0012C9E8(Node_124CC0* a, Self_124CC0* b, f32 c, void* d, f32* e, s32 f, s32 g);
+void func_0012C288(Node_124CC0* a, Self_124CC0* b, s32 c, Frame_124CC0* d, f32 e, f32 f, s32 g, s32 h);
+
+struct Clamp_124CC0 {
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        if (x < lo) {
+            return lo;
+        }
+        if (hi < x) {
+            return hi;
+        }
+        return x;
+    }
+};
+
+struct Find_124CC0 {
+    static Node_124CC0* Of(Self_124CC0* self, Ctx_124CC0* ctx)
+    {
+        if (ctx->node != 0) {
+            return ctx->node;
+        }
+        return func_0015A418(self->f14, 0x104, ctx->key, self);
+    }
+};
+
+void func_00124CC0(Self_124CC0* self)
+{
+    Ctx_124CC0* ctx = self->ctx;
+    Node_124CC0* node = Find_124CC0::Of(self, ctx);
+    if (node == 0) {
+        return;
+    }
+    Frame_124CC0 fr;
+    switch (ctx->mode) {
+    case 0:
+        fr.tmp = ctx->value;
+        break;
+    case 1:
+        fr.tmp = Clamp_124CC0::Of(ctx->value, 0.0f, 1.0f) * node->f34;
+        break;
+    case 2:
+        func_0012C9E8(node, self, 0.0f, (u8*)self + 0x100, &fr.tmp, 0, 0);
+        break;
+    default:
+        return;
+    }
+    fr.w0 = node->f40;
+    fr.self = self;
+    func_0012C288(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
+}

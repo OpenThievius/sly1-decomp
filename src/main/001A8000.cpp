@@ -2168,3 +2168,81 @@ void func_001AA4F0(Obj_1AA4F0* self, const char* arg)
     func_0015C900(self->ctx);
 
 }
+
+extern f32 D_00261860;
+
+typedef void (*Callback_1AB058)(void* arg);
+
+struct Handle_1AB058 { u8 pad0[8]; s32 count; u8 padC[0x3C]; f32 scale; };
+struct Loc_1AB058 { u8 pad0[0xB0]; };
+
+struct Obj_1AB058 {
+    s32 f0;
+    Handle_1AB058* handle;
+    s8 flag;
+    u8 pad1[0x20C - 9];
+    f32 f20c;
+    f32 f210;
+    u8 pad2[0x260 - 0x214];
+    s32 f260;
+    s32* f264;
+    f32 f268;
+    f32 f26c;
+    f32 f270;
+    Callback_1AB058 f274;
+    void* f278;
+};
+
+void func_001AA298(Obj_1AB058* self);
+void func_001AB2B8(Obj_1AB058* self);
+void func_0015C8B8(Handle_1AB058* handle, f32 a, f32 b);
+void func_0015DB28(Loc_1AB058* out, s8* flag, Handle_1AB058* handle);
+f32 func_0015DFF8(Loc_1AB058* loc);
+void func_001AAB20(Obj_1AB058* self, f32 x, f32 y);
+void func_0015C900(Handle_1AB058* handle);
+
+void func_001AB058(Obj_1AB058* self)
+{
+    Loc_1AB058 loc;
+    f32 frac;
+    s32 n;
+    s32 first;
+    s32* p;
+
+    func_001AA298(self);
+    p = self->f264;
+    if (self->f260 == *p) {
+        return;
+    }
+    if (self->f260 >= 0) {
+        frac = D_00261860 * self->f26c + self->f270;
+        n = (s32)frac;
+        self->f270 = frac - (f32)n;
+        first = *self->f264;
+        if (first < self->f260) {
+            s32 lo = self->f260 - n;
+            self->f260 = first < lo ? lo : first;
+        } else {
+            s32 hi = self->f260 + n;
+            self->f260 = hi < first ? hi : first;
+        }
+    } else {
+        self->f260 = *p;
+    }
+    if (self->f260 == *self->f264 && self->f274 != 0) {
+        self->f274(self->f278);
+        self->f274 = 0;
+        self->f278 = 0;
+    }
+    func_001AB2B8(self);
+    if (self->flag != 0) {
+        func_0015C8B8(self->handle, self->f20c, self->f20c);
+        func_0015DB28(&loc, &self->flag, self->handle);
+        f32 x = func_0015DFF8(&loc);
+        f32 y = (f32)self->handle->count * self->handle->scale;
+        func_001AAB20(self, x, y);
+        func_0015C900(self->handle);
+    } else {
+        func_001AAB20(self, 0.0f, 0.0f);
+    }
+}
