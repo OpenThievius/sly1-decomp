@@ -15,7 +15,8 @@ Two kinds, over game code and Sony's libraries; a function matched in C is C and
 - handwritten: the function holds an instruction the compiler cannot emit, so it was not
   made from C. A VU0 macro-mode instruction (COP2), a 128-bit multimedia instruction
   (MMI) that no function matched in C contains (COMPILER_EMITS), or the disassembler's own
-  "handwritten" mark.
+  "handwritten" mark; or, in game code, a tail jump to another function, which SN GCC 2.95.3
+  never writes (OpenRAC finds the same: a tail jump means not SN 2.95.3).
 - remnant: a run of words the linker left of a stripped function. It starts on an
   8-byte boundary, has no jump or branch in it, nothing refers to it (no instruction
   or data names it), and the code before it is finished: going back over earlier
@@ -106,6 +107,21 @@ def handwritten(ops, kind, lines=()):
     return None
 
 
+def game_tail_jump(addr, lines):
+    """Why a game-code function that ends in a tail jump is original assembly, or None: SN GCC
+    2.95.3, which builds the game, never turns a call into a jump (Sony's 2.9-ee, which builds
+    the libraries, does)."""
+    if addr >= todo.code_range_of(addr)[3] or todo.code_range_of(addr)[5] != "src/main":
+        return None
+    ins = [line.split() for line in lines if line.split() and not line.startswith(("jlabel", ".L"))]
+    while ins and ins[-1][0] == "nop":
+        ins.pop()
+    last = ins[-1] if ins and ins[-1][0] == "j" else ins[-2] if len(ins) > 1 else None
+    if last and last[0] == "j" and last[-1].startswith("func_"):
+        return "a tail jump, which the game's compiler never writes"
+    return None
+
+
 def classify(funcs, bodies, references, sdk=None):
     """[(name, addr, size, kind, why)] for the functions given.
 
@@ -120,7 +136,7 @@ def classify(funcs, bodies, references, sdk=None):
         lines = bodies.get(name, [])
         tags = todo.tags_of(lines, kind)
         ops = ops_of(lines)
-        why = sdk.get(name) or handwritten(ops, kind, lines)
+        why = sdk.get(name) or handwritten(ops, kind, lines) or game_tail_jump(addr, lines)
         if why:
             out.append((name, addr, size, "handwritten", why))
             ok = ends_finished(ops)

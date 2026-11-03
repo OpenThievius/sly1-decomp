@@ -1,5 +1,6 @@
 name	address	size	kind	why
 func_00100008	00100008	172	handwritten	marked handwritten by the disassembler
+func_001000B8	001000B8	8	handwritten	a tail jump, which the game's compiler never writes
 func_001000C0	001000C0	8	handwritten	marked handwritten by the disassembler
 func_00112698	00112698	716	handwritten	VU0 macro instruction
 func_00112968	00112968	716	handwritten	VU0 macro instruction
