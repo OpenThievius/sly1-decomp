@@ -1433,6 +1433,7 @@ func_0015CC80	func_0015CDB0	match
 func_0015CD18	func_0015CE48	match	version-specific
 func_0015CF70	func_0015D0A0	match	version-specific
 func_0015D338	func_0015D468	match	version-specific
+func_0015D4E0	func_0015D610	differs	
 func_0015D8A8	func_0015D9D8	match	
 func_0015D998	func_0015DAC8	match	
 func_0015DAB8	-	absent	
