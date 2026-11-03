@@ -2121,3 +2121,115 @@ void func_0016B860(Obj_16B860* self)
         func_0015C900(self->f4);
     }
 }
+
+struct Span_169780 { s32 a; s32 b; s32 c; };
+struct Q_169780 { u64 lo; u64 hi; };
+struct Frame_169780 { u8 pad0[0xC]; s32 cursor; u8 pad10[0x20]; };
+struct EntA_169780 { u32 flags; u8 pad4[2]; u16 h6; s32 f8; s32 fC; s32 f10; s32 f14; };
+struct EntB_169780 { s32 f0; u32 flags; u8 pad8[2]; u16 hA; u8 padC[4]; s32 f10; s32 f14; u8 pad18[8]; };
+
+extern s32 D_00274508;
+extern s32 D_00274500;
+extern s32 D_00274514;
+extern s32 D_00274510;
+
+void func_00168D68(Span_169780* p, s32 a, s32 b);
+void func_001611B8(Frame_169780* f);
+void func_001EE318(Frame_169780* f);
+void func_0018D608(void);
+void func_00152980(Frame_169780* f, s32 size);
+void func_00152B38(Frame_169780* f);
+void func_001EE450(Frame_169780* f);
+void func_001528E0(Frame_169780* f);
+void func_001529C8(Frame_169780* f, s32 n, u8* buf);
+s32 func_00168D88(Span_169780* p, s32 size);
+void func_00168E78(EntA_169780* e, s32 v);
+void func_00168F48(EntA_169780* e, s32 v, Frame_169780* f);
+void func_00168FB0(EntB_169780* e, s32 v);
+void func_00169088(EntB_169780* e, s32 v, Frame_169780* f);
+void func_001529E0(Frame_169780* f, s32* o0, s32* o1);
+void func_001EE7D0(Frame_169780* f, s32 a, s32 b, s32 c);
+void func_001EE850(Frame_169780* f, s32 a, s32 b, s32 c);
+void func_001613C0(Frame_169780* f, s32 a, s32 b, s32 c);
+void func_00161708(Frame_169780* f, s32 a, s32 b);
+void func_00161200(Frame_169780* f);
+void func_00152D70(Frame_169780* f);
+void func_00152A50(Frame_169780* f, s32 a, s32 b, s32* out, s32 c);
+void func_001B3510(u32 mask);
+void func_0018D6F0(void);
+
+s32 func_00169780(u32 mask)
+{
+    Span_169780 span;
+    Frame_169780 fa;
+    Frame_169780 fb;
+    u8 buf[0xA0];
+    s32 o0;
+    s32 o1;
+    s32 res;
+    s32 i;
+
+    func_00168D68(&span, 0x1400, 0x1E00);
+    func_001611B8(&fa);
+    res = 0;
+    func_001EE318(&fb);
+    func_0018D608();
+    func_00152980(&fb, (D_00274514 * 2 + D_00274514 + D_00274510) * 10 + 4);
+    func_00152B38(&fb);
+    func_001EE450(&fb);
+    for (i = 0; i < D_00274508; i++) {
+        EntA_169780* e = (EntA_169780*)((*(u8**)&D_0027450C) + i * 0x18);
+        if ((e->flags & mask) == mask) {
+            func_001528E0(&fa);
+            func_001529C8(&fa, 0xA, buf);
+            s32 n = func_00168D88(&span, e->h6);
+            func_00168E78(e, n);
+            func_00168F48(e, n, &fa);
+            *(u64*)(fa.cursor - 0x10) |= 0x8000;
+            func_001529E0(&fa, &o0, &o1);
+            func_001EE7D0(&fb, o0, o1, 0);
+            func_001EE850(&fb, e->fC, e->f8, 0);
+            if (e->flags & 0x40000000) {
+                e->flags = 0x40000000;
+            }
+        }
+    }
+    if (D_00274500 > 0) {
+        i = 0;
+        do {
+            EntB_169780* e = (EntB_169780*)((*(u8**)&D_00274504) + i * 0x20);
+            if ((e->flags & mask) == mask) {
+                func_001528E0(&fa);
+                func_001529C8(&fa, 0xA, buf);
+                s32 n = func_00168D88(&span, e->hA);
+                func_00168FB0(e, n);
+                func_00169088(e, n, &fa);
+                *(u64*)(fa.cursor - 0x10) |= 0x8000;
+                func_001529E0(&fa, &o0, &o1);
+                func_001EE7D0(&fb, o0, o1, 0);
+                func_001EE850(&fb, e->f14, e->f10, 0);
+                if (e->flags & 0x40000000) {
+                    e->flags = 0x40000000;
+                }
+            }
+            i++;
+        } while (i < D_00274500);
+    }
+    if (span.b > span.a) {
+        func_001528E0(&fa);
+        func_001529C8(&fa, 0xA, buf);
+        func_001613C0(&fa, 0, 1, 0xE);
+        func_00161708(&fa, 0x3F, 0);
+        func_00161200(&fa);
+        func_001529E0(&fa, &o0, &o1);
+        func_001EE7D0(&fb, o0, o1, 0);
+        func_001EE450(&fb);
+        func_00152D70(&fb);
+        *(u64*)fb.cursor = 0x60000000;
+        fb.cursor += 0x10;
+        func_00152A50(&fb, 0, 0, &res, 7);
+        func_001B3510(mask);
+    }
+    func_0018D6F0();
+    return res;
+}
