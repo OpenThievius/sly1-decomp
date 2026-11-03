@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Buf_19DF48 { u8 raw[0x30]; };
 typedef void (*Fn_19DF48)(void);
@@ -416,7 +417,6 @@ void func_0019FD70(Obj_19FD70* self)
     self->i20 = v;
 }
 
-extern u8 D_0027B314[];
 extern f32 D_00261858[];
 
 typedef void (*VFn_19E848)(void* self, void* arg);
@@ -451,9 +451,9 @@ void func_0019E848(Obj_19E848* self, void* arg)
     s32 e = (s32)&self->list;
     fr.cursor = e;
     fr.list = e;
-    s32 old = *(s32*)D_0027B314;
+    s32 old = (s32)D_0027B314;
     s32 link = *(s32*)(e + 8);
-    *(s32*)D_0027B314 = (s32)&fr;
+    D_0027B314 = (ListFrame*)&fr;
     fr.prev = old;
     s32 h = *(s32*)e;
     fr.link = link;
@@ -470,7 +470,7 @@ void func_0019E848(Obj_19E848* self, void* arg)
         fr.cursor = nx + lk;
         n = nx;
     }
-    *(s32*)D_0027B314 = fr.prev;
+    D_0027B314 = (ListFrame*)fr.prev;
 }
 
 struct __attribute__((aligned(16))) Quad_19FDC0 { s32 a, b, c, d; };
@@ -496,7 +496,6 @@ void func_0019FDC0(Obj_19FDC0* self)
     self->f38 = -1.0f;
 }
 
-extern u8 D_0027B314[];
 extern u8 D_0026AC10[];
 extern u8 D_005E4700[];
 
@@ -528,10 +527,10 @@ void func_0019D6C0(Obj_19D6C0* self, void* arg)
     s32 e = (s32)self + 0x60;
     f1.cursor = e;
     f1.list = e;
-    s32 old = *(s32*)D_0027B314;
+    s32 old = (s32)D_0027B314;
     s32 link = *(s32*)(e + 8);
     *(s32*)D_0026AC10 = (s32)D_005E4700;
-    *(s32*)D_0027B314 = (s32)&f1;
+    D_0027B314 = (ListFrame*)&f1;
     f1.prev = old;
     f1.link = link;
     s32 h = *(s32*)e;
@@ -545,11 +544,11 @@ void func_0019D6C0(Obj_19D6C0* self, void* arg)
         n = nx;
     }
     s32 e2 = (s32)self + 0x78;
-    s32 old2 = *(s32*)D_0027B314;
+    s32 old2 = (s32)D_0027B314;
     f2.cursor = e2;
     f2.list = e2;
     s32 link2 = *(s32*)(e2 + 8);
-    *(s32*)D_0027B314 = (s32)&f2;
+    D_0027B314 = (ListFrame*)&f2;
     f2.prev = old2;
     s32 h2 = *(s32*)((s32)self + 0x78);
     f2.link = link2;
@@ -563,10 +562,10 @@ void func_0019D6C0(Obj_19D6C0* self, void* arg)
         n = nx;
     }
     s32 e3 = (s32)self + 0x1CD8;
-    s32 old3 = *(s32*)D_0027B314;
+    s32 old3 = (s32)D_0027B314;
     s32 link3 = *(s32*)(e3 + 8);
     f3.prev = old3;
-    *(s32*)D_0027B314 = (s32)&f3;
+    D_0027B314 = (ListFrame*)&f3;
     f3.list = e3;
     s32 h3 = *(s32*)((s32)self + 0x1CD8);
     f3.link = link3;
@@ -578,7 +577,7 @@ void func_0019D6C0(Obj_19D6C0* self, void* arg)
         f3.cursor = nx + f3.link;
         n = nx;
     }
-    *(s32*)D_0027B314 = f1.prev;
+    D_0027B314 = (ListFrame*)f1.prev;
 }
 
 extern u8 D_0060478C[];
@@ -808,8 +807,8 @@ struct Cursor_19E168 {
         link = l;
         at = (u8*)l;
         stride = ((s32*)l)[2];
-        prev = *(Cursor_19E168**)D_0027B314;
-        *(Cursor_19E168**)D_0027B314 = this;
+        prev = ((Cursor_19E168*)D_0027B314);
+        D_0027B314 = (ListFrame*)this;
     }
     Node_19E168* first() {
         Node_19E168* n = *(Node_19E168**)link;
@@ -821,7 +820,7 @@ struct Cursor_19E168 {
         at = (u8*)n + stride;
         return n;
     }
-    ~Cursor_19E168() { *(Cursor_19E168**)D_0027B314 = prev; }
+    ~Cursor_19E168() { D_0027B314 = (ListFrame*)prev; }
 };
 
 
@@ -1094,10 +1093,10 @@ struct Frame_19C068 {
         list = l;
         cur = &l->head;
         step = l->step;
-        prev = *(Frame_19C068**)D_0027B314;
-        *(Frame_19C068**)D_0027B314 = this;
+        prev = ((Frame_19C068*)D_0027B314);
+        D_0027B314 = (ListFrame*)this;
     }
-    ~Frame_19C068() { *(Frame_19C068**)D_0027B314 = prev; }
+    ~Frame_19C068() { D_0027B314 = (ListFrame*)prev; }
     s32 Next()
     {
         s32 n = *cur;
@@ -1255,7 +1254,6 @@ void func_0019CD90(Self_19CD90* self, s32 p, f32* out0, f32* out1, f32* out2)
     *out2 = (f32)s / (f32)self->f48;
 }
 
-extern u8 D_0027B314[];
 extern f32 D_00261858[];
 
 struct Node_19E420;
@@ -1304,8 +1302,8 @@ struct Begin_19E420 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = *(Iter_19E420**)D_0027B314;
-        *(Iter_19E420**)D_0027B314 = it;
+        it->saved = ((Iter_19E420*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1330,7 +1328,7 @@ void func_0019E420(Obj_19E420* self, f32 t)
         func_0019E558(self);
     }
     func_00129DF8(self);
-    *(Iter_19E420**)D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
 struct __attribute__((aligned(16))) Quad_19C728 { s32 a, b, c, d; };

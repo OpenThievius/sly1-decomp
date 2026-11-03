@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Obj_1389C8 { u8 pad[0x1AEC]; s32 field; };
 
@@ -576,18 +577,17 @@ void func_0013AD08(void* owner, s32 unused, Src_13AD08* src)
 
 struct List_13B610 { s32 head; s32 pad; s32 off; };
 struct Frame_13B610;
-extern Frame_13B610* D_0027B314;
 struct Frame_13B610 {
     void* base; void* cur; s32 off; Frame_13B610* prev;
     Frame_13B610(List_13B610* l) {
         cur = l;
         base = l;
-        Frame_13B610* p = D_0027B314;
+        Frame_13B610* p = (Frame_13B610*)D_0027B314;
         off = l->off;
-        D_0027B314 = this;
+        D_0027B314 = (ListFrame*)this;
         prev = p;
     }
-    ~Frame_13B610() { D_0027B314 = prev; }
+    ~Frame_13B610() { D_0027B314 = (ListFrame*)prev; }
 };
 
 struct Self_13B610 {

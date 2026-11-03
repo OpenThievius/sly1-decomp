@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 s32 func_0012C288(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
 
@@ -807,7 +808,6 @@ struct Obj_12E760 {
 struct Frame_12E760 { s32 f00; s32 f04; s32 f08; s32 f0C; };
 struct Tmp_12E760 { s32 a; s32 b; };
 
-extern u8 D_0027B314[];
 void func_0012D5D0(Obj_12E760* self, Item_12E760* item, Tmp_12E760* out);
 void func_0012F760(Obj_12E760* self, s32 a, Obj_12E760* b);
 void func_001DBC18(u8* self, s32 node);
@@ -849,8 +849,8 @@ void func_0012E760(Obj_12E760* self)
     fr.f04 = e;
     fr.f00 = e;
     s32 link = *(s32*)(e + 8);
-    fr.f0C = *(s32*)D_0027B314;
-    *(s32*)D_0027B314 = (s32)&fr;
+    fr.f0C = (s32)D_0027B314;
+    D_0027B314 = (ListFrame*)&fr;
     fr.f08 = link;
     s32 head = *(s32*)e;
     fr.f04 = head + fr.f08;
@@ -868,7 +868,7 @@ void func_0012E760(Obj_12E760* self)
         func_001BF718(&self->f50);
     tmp.b = s0;
     func_001837E0(sub, 0xB, 1, &tmp.b);
-    *(s32*)D_0027B314 = fr.f0C;
+    D_0027B314 = (ListFrame*)fr.f0C;
 }
 
 struct Lim_12E9E0 {
@@ -1938,7 +1938,6 @@ struct Self_12F8C8 {
     s32 f590;
 };
 
-extern u8 D_0027B314[];
 
 struct Next_12F8C8 {
     static Obj_12F8C8* Of(Iter_12F8C8* it)
@@ -1955,8 +1954,8 @@ struct Begin_12F8C8 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = *(Iter_12F8C8**)D_0027B314;
-        *(Iter_12F8C8**)D_0027B314 = it;
+        it->saved = ((Iter_12F8C8*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1977,17 +1976,17 @@ void func_0012F8C8(Self_12F8C8* self)
     Begin_12F8C8::Of(&it, &self->list);
     Obj_12F8C8* n = Next_12F8C8::Of(&it);
     if (n == 0 || func_001300E8(n, 0x7E) == 0) {
-        *(Iter_12F8C8**)D_0027B314 = it.saved;
+        D_0027B314 = (ListFrame*)it.saved;
         return;
     }
     if (Next_12F8C8::Of(&it) != 0) {
-        *(Iter_12F8C8**)D_0027B314 = it.saved;
+        D_0027B314 = (ListFrame*)it.saved;
         return;
     }
     func_00128018(self, 0, (u8*)n + 0x40, &self->f590);
     self->f580 = 1;
     n->vt->fn1C(n);
-    *(Iter_12F8C8**)D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
 struct Entry_12E5D0 {

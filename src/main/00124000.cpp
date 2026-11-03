@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 typedef void (*VFn_1243E0)(void* self, s32 a);
 struct Self_1243E0 {
@@ -274,7 +275,6 @@ void func_001275F0(Obj_001275F0* self, f32 x, f32 y, f32 z)
     self->vtbl[37](self, v);
 }
 
-extern void* D_0027B314;  // the innermost iterator frame (a chain on the stack)
 
 typedef void (*VFn0_124EE8)(void* self);
 
@@ -644,13 +644,13 @@ void func_00124A48(Self_124A48* self)
     Frame_124A48 fr;
     Key_124A48* k;
     Self_124A48* s0;
-    s32 old = *(s32*)&D_0027B314;
+    s32 old = (s32)D_0027B314;
     s32 e = (s32)self->f34;
     fr.f00 = e;
     fr.f04 = e;
     fr.f08 = *(s32*)(e + 8);
     fr.f0C = old;
-    *(s32*)&D_0027B314 = (s32)&fr;
+    D_0027B314 = (ListFrame*)&fr;
     func_00182C58(self);
     if (self->f2A0 != 0) {
         if (self->f2A0->a != 0 || self->f2A0->b != -1) {
@@ -710,7 +710,7 @@ void func_00124A48(Self_124A48* self)
             p = nx;
         }
     }
-    *(s32*)&D_0027B314 = fr.f0C;
+    D_0027B314 = (ListFrame*)fr.f0C;
 }
 
 struct A8_127048 { u32 a, b; } __attribute__((packed));
@@ -958,7 +958,7 @@ struct Begin_00124050 {
         it->link = (u8*)list;
         it->offset = list->offset;
         it->saved = (Iter_00124050*)D_0027B314;
-        D_0027B314 = it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -972,7 +972,7 @@ void func_00124050(Object_00124050* self)
         obj->vtable->visit(obj);
     }
     self->vtable->finish(self, 1, self);
-    D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
 struct Object_00124338;
@@ -1004,7 +1004,7 @@ struct Begin_00124338 {
         it->link = (u8*)list;
         it->offset = list->offset;
         it->saved = (Iter_00124338*)D_0027B314;
-        D_0027B314 = it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1018,10 +1018,9 @@ void func_00124338(Object_00124338* self)
         obj->vtable->visit(obj);
     }
     self->vtable->finish(self, 2, self);
-    D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
-extern void* D_0027B314;
 
 struct Object_00126F78;
 struct Vtable_00126F78 {
@@ -1051,7 +1050,7 @@ struct Begin_00126F78 {
         it->link = (u8*)list;
         it->offset = list->offset;
         it->saved = (Iter_00126F78*)D_0027B314;
-        D_0027B314 = it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1071,7 +1070,7 @@ void func_00126F78(Object_00126F78* self, u8* owner)
     if ((self->vtable->flags & 2) && self->f18 == 0) {
         func_001BB580(self);
     }
-    D_0027B314 = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
 }
 
 struct Object_124FC0;
@@ -1110,8 +1109,8 @@ struct Begin_124FC0 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (*(Iter_124FC0**)&D_0027B314);
-        (*(Iter_124FC0**)&D_0027B314) = it;
+        it->saved = ((Iter_124FC0*)D_0027B314);
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1137,7 +1136,7 @@ void func_00124FC0(Self_124FC0* self, f32 f)
             obj->vtable->update(obj, f);
         }
     }
-    (*(Iter_124FC0**)&D_0027B314) = it.saved;
+    D_0027B314 = (ListFrame*)it.saved;
     void* args[1];
     args[0] = &f;
     func_001837E0(self, 1, 1, args);

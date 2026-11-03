@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Obj_1C2320 { u8 pad[4]; void* f4; };
 void func_00130110(void* p);
@@ -1634,7 +1635,6 @@ struct Ent_1C0070 {
 struct Pair_1C0070 { s32 a; s32 b; };
 
 extern u8* D_00275710;
-extern Frame_1C0070* D_0027B314;
 extern Frame_1C0070* D_0027472C;
 extern s32 D_00274744;
 extern s32 D_00274730;
@@ -1673,12 +1673,12 @@ void func_001C0070(void)
     void* v4 = func_001BF3D0();
     Fn_1C0070 v5 = func_001BF578();
     u8* P = D_00275710 + 0x1BAC;
-    Frame_1C0070* saved = D_0027B314;
+    Frame_1C0070* saved = (Frame_1C0070*)D_0027B314;
     f.f0 = P;
     f.f4 = P;
     f.f8 = *(s32*)(P + 8);
     f.fC = saved;
-    D_0027B314 = &f;
+    D_0027B314 = (ListFrame*)&f;
     if (D_0027472C != 0 && func_0011D708(D_0027472C) == 0) {
         if (D_00274744 != 0) {
             func_001C06A0(8, 1, 1.0f);
@@ -1797,7 +1797,7 @@ void func_001C0070(void)
         }
     }
     func_0011CE30();
-    D_0027B314 = f.fC;
+    D_0027B314 = (ListFrame*)f.fC;
 }
 
 struct List_1C0808 {
@@ -1824,7 +1824,7 @@ struct Begin_1C0808 {
         it->link = (u8**)list;
         it->offset = list->offset;
         it->prev = (Iter_1C0808*)D_0027B314;
-        D_0027B314 = (Frame_1C0070*)it;
+        D_0027B314 = (ListFrame*)it;
     }
 };
 
@@ -1840,7 +1840,7 @@ struct Next_1C0808 {
 struct End_1C0808 {
     static void Of(Iter_1C0808* it)
     {
-        D_0027B314 = (Frame_1C0070*)it->prev;
+        D_0027B314 = (ListFrame*)it->prev;
     }
 };
 

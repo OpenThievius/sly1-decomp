@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 void func_001AA8F0(void* self);
 
@@ -1495,7 +1496,6 @@ struct Frame_196410 {
     Frame_196410* prev;
 };
 extern const f32 D_0024C860 = 3.4028235e+38f;
-extern Frame_196410* D_0027B314;
 
 void func_00152438(u8* a, s32 v);
 void func_00137EB0(Rd_196410* r, u8* out);
@@ -1631,9 +1631,9 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
         if (func_00152720(list) == 0)
         {
             fr.list = list;
-            fr.prev = D_0027B314;
+            fr.prev = (Frame_196410*)D_0027B314;
             fr.link = list->link;
-            D_0027B314 = &fr;
+            D_0027B314 = (ListFrame*)&fr;
             c = arr[0];
             h = *(Nd_196410**)list;
             fr.cursor = (u8*)h + fr.link;
@@ -1645,7 +1645,7 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
                 fr.cursor = (u8*)nx + fr.link;
                 x = nx;
             }
-            D_0027B314 = fr.prev;
+            D_0027B314 = (ListFrame*)fr.prev;
         }
     }
     ((void (**)(Self_196410*))self->vt)[0x1C / 4](self);

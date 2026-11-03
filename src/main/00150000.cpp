@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 struct Node_150298 { u8 pad[0x554]; f32 value554; u8 pad2[0x558 - 0x558]; Node_150298* next; };
 struct State_150298 { u8 pad[0x6CC]; Node_150298* selected; };
@@ -743,13 +744,12 @@ have:
 
 struct Link_00152600 { s32 f0; s32 f4; };
 struct Entry_00152600 { u8 pad0[4]; s32 f4; u8 pad1[4]; Entry_00152600* next; };
-extern Entry_00152600* D_0027B314;
 void* func_00152460(void* a, void* b);
 
 void func_00152600(u8* a, void* b)
 {
     Link_00152600* link = (Link_00152600*)func_00152460(a, b);
-    Entry_00152600* e = D_0027B314;
+    Entry_00152600* e = (Entry_00152600*)D_0027B314;
     while (e != 0) {
         if (e->f4 != (s32)link) {
             e = e->next;
@@ -1125,9 +1125,9 @@ void func_00153EC0(Obj_153EC0* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32
     s32 e = (s32)&self->head;
     fr.cursor = e;
     fr.list = e;
-    s32 old = *(s32*)&D_0027B314;
+    s32 old = (s32)D_0027B314;
     s32 link = *(s32*)(e + 8);
-    *(s32*)&D_0027B314 = (s32)&fr;
+    D_0027B314 = (ListFrame*)&fr;
     fr.prev = old;
     s32 h = *(s32*)e;
     fr.link = link;
@@ -1148,7 +1148,7 @@ void func_00153EC0(Obj_153EC0* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32
         node = nx;
     }
     func_00153A50(self, 0);
-    *(s32*)&D_0027B314 = fr.prev;
+    D_0027B314 = (ListFrame*)fr.prev;
     for (;;) {
         f32 best = -0.01f;
         Node_153EC0* sel = 0;

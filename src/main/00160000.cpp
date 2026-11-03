@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 extern u8 D_002623D0[];
 
@@ -725,7 +726,6 @@ struct Key_160948 {
 };
 
 struct Frame_160948;
-extern Frame_160948* D_0027B314;
 
 struct Lst_160948 {
     void* head;
@@ -743,10 +743,10 @@ struct Frame_160948 {
         list = l;
         cursor = l;
         next_off = l->next_off;
-        prev = D_0027B314;
-        D_0027B314 = this;
+        prev = (Frame_160948*)D_0027B314;
+        D_0027B314 = (ListFrame*)this;
     }
-    ~Frame_160948() { D_0027B314 = prev; }
+    ~Frame_160948() { D_0027B314 = (ListFrame*)prev; }
     void* Next()
     {
         void* n = *(void**)cursor;

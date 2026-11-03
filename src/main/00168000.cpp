@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "list_iter.h"
 
 extern u8 D_00262708[];
 
@@ -1231,7 +1232,6 @@ void func_00168E78(Ctx_168E78* self, u32 a1){
  self->bits.f20 = (self->n4 <= 0x10) ? 0x14 : 0x13;
  self->bits.r51=0; self->bits.r55=0; self->bits.r56=0; self->bits.f61=1;}
 
-extern void* D_0027B314;
 
 void* func_001300E8(void* node, s32 flags);
 
@@ -1253,9 +1253,9 @@ struct Walk_16A758 {
         iter = i;
         link = i->link;
         prev = D_0027B314;
-        D_0027B314 = this;
+        D_0027B314 = (ListFrame*)this;
     }
-    ~Walk_16A758() { D_0027B314 = prev; }
+    ~Walk_16A758() { D_0027B314 = (ListFrame*)prev; }
     void* First()
     {
         void* n = *(void**)cursor;
@@ -1422,7 +1422,6 @@ void func_0016A5F0(Obj_16A5F0* self, s32 v)
     self->f554 = D_0026185C[0];
 }
 
-extern void* D_0027B314;
 void* func_001300E8(void* node, s32 flags);
 
 struct Iter_16A820 {
@@ -1443,9 +1442,9 @@ struct Walk_16A820 {
         iter = i;
         link = i->link;
         prev = D_0027B314;
-        D_0027B314 = this;
+        D_0027B314 = (ListFrame*)this;
     }
-    ~Walk_16A820() { D_0027B314 = prev; }
+    ~Walk_16A820() { D_0027B314 = (ListFrame*)prev; }
     void* First()
     {
         void* n = *(void**)cursor;
