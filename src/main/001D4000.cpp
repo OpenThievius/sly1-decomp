@@ -342,9 +342,9 @@ s32 func_001CF158(Obj_1D51A0* o, void* p);
 void func_001D4C90(Obj_1D51A0* o, s32 value);
 void func_001D6608(void);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-extern f32 D_00275050[];
-extern f32 D_00275060[];
-extern f32 D_00275068[];
+f32 D_00275050[4] = { -0.5f, -0.0025f, 0.0f, 0.0f };
+f32 D_00275060[2] = { 0.0f, 0.7f };
+f32 D_00275068[1];
 
 void func_001D51A0(Obj_1D51A0* self)
 {

@@ -1265,8 +1265,8 @@ struct Bits_002623C8 {
 };
 
 extern s32 D_00275C34;
-extern f32 D_0026A958[];
-extern f32 D_0026A960[];
+f32 D_0026A958[2] = { 0.8f, 1.2f };
+f32 D_0026A960[2] = { 0.9f, 1.1f };
 
 void func_00198B28(void* self);
 f32 func_001EAAE0(f32 a, f32 b);
@@ -1437,7 +1437,7 @@ struct Pad_19A1E0 { u32 flags; u8 pad[0x74]; };
 struct Flags_19A1E0 { u32 flags; };
 
 extern u8 D_0026AA50[];
-extern s32 D_0026A9E0[];
+s32 D_0026A9E0[28] = { 2, 4, 8, 16, 65536, 32, 64, 128, 256, 512, 131072, 1024, 2048, 8192, 4096, 16384, 32768, 0, 0, 0, 0, 0, 0, 268435456, 536870912, 1073741824, (-2147483647 - 1), 1 };
 
 void func_00124A48(Obj_19A1E0* o);
 void func_00124DF8(Obj_19A1E0* o, s32 n, u8* t);

@@ -22,3 +22,4 @@ _vt$12Fault_1FEDC8	D_0024F290	vtable of the exception func_001FEDC8 throws
 _$_12Fault_1FEDC8	func_00200638	its destructor
 _vt$12Fault_1FEE48	D_0024F278	vtable of the exception func_001FEE48 throws
 _$_12Fault_1FEE48	func_002005A0	its destructor
+memset	func_001F5C0C	fill memory (the compiler clears an aggregate with it)

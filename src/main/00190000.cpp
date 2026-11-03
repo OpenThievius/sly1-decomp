@@ -24,7 +24,7 @@ void func_00192498(Obj_192498* self, s32* out)
     *out = ((s32 (*)(Obj_192498*, s32*))self->vtbl[0x144 / 4])(self, out);
 }
 
-extern s32 D_00269BCC;
+s32 D_00269BCC = -1;
 extern void* D_00269C98[];
 
 void* func_001925F0()

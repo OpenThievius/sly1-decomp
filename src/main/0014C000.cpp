@@ -1079,8 +1079,10 @@ void func_0014C5E8(Cfg_14C5E8* self)
 
 struct Obj_14D9A8 { void* vt; s32 kind; };
 
-extern u8 D_002176D0[];
-extern u8 D_00217708[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_002176D0[];
+extern const Fn_Table D_00217708[];
 
 void* func_0018D5C0(u32 n);
 
@@ -1090,11 +1092,11 @@ Obj_14D9A8* func_0014D9A8(s32 kind)
     switch (kind) {
     case 0:
         p = (Obj_14D9A8*)func_0018D5C0(0x1C);
-        p->vt = (void*)D_002176D0;
+        p->vt = (void*)((u8*)D_002176D0);
         break;
     case 1:
         p = (Obj_14D9A8*)func_0018D5C0(0x1D0);
-        p->vt = (void*)D_00217708;
+        p->vt = (void*)((u8*)D_00217708);
         break;
     default:
         p = 0;
@@ -1374,7 +1376,7 @@ struct Obj_14CBA8 {
     u8 pad5[8];
     f32 timer;
 };
-extern f32 D_00249FB8;
+extern const f32 D_00249FB8 = 3.4028235e+38f;
 extern u8 D_00248D30[];
 
 void func_001A8AF8(Holder_14CBA8* p);
@@ -1427,8 +1429,8 @@ struct Obj_14DBD0 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
 struct Ctx_14DBD0 { Obj_14DBD0* self; s32 a1; s32 a2; s32 pad; };
 struct Out_14DBD0 { f32 f; s32 p1; s32 p2; s32 p3; };
 
-extern f32 D_00249FC0;
-extern f32 D_00249FC4;
+extern const f32 D_00249FC0 = -3.4028235e+38f;
+extern const f32 D_00249FC4 = 3.4028235e+38f;
 void func_0014DB70(void);
 struct Step_14DBD0;
 void func_001EB168(Step_14DBD0* fn, f32 f12, f32 f13, f32 f14, f32 f15, Ctx_14DBD0* ctx, Out_14DBD0* out, s32 a3);
@@ -1465,7 +1467,7 @@ struct Obj_14EC70 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
 struct Ctx_14EC70 { Obj_14EC70* self; s32 a1; s32 a2; s32 pad; };
 struct Out_14EC70 { f32 f; s32 p1; s32 p2; s32 p3; };
 
-extern f32 D_00249FCC;
+extern const f32 D_00249FCC = -3.4028235e+38f;
 extern f32 D_00249FD0;
 void func_0014DA98(void);
 struct Step_14EC70;
@@ -1539,7 +1541,7 @@ struct Self_0014C018 {
 };
 
 extern const Params_0014C018 D_00249F00;
-extern const f32 D_00249FB0;
+extern const f32 D_00249FB0 = 3.4028235e+38f;
 
 void func_00123ED0(Self_0014C018* self);
 
@@ -1585,3 +1587,11 @@ f32 func_0014DB78(Obj_14DB78* self)
     func_00186320(&p, self->a, self->b, &o1, &o2);
     return o2;
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_0014E5B8();
+void func_0014E710();
+void func_0014E828();
+void func_0014EB10();
+extern const Fn_Table D_002176D0[14] = { (Fn_Table)func_0014DD28, (Fn_Table)func_0014DE08, (Fn_Table)func_0014DE40, (Fn_Table)func_0014DE78, (Fn_Table)func_0014DF68, (Fn_Table)func_0014DF98, (Fn_Table)func_0014E000, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014E068, (Fn_Table)func_0014E090, (Fn_Table)func_0014E170, (Fn_Table)func_0014E2A0, 0 };
+extern const Fn_Table D_00217708[14] = { (Fn_Table)func_0014E3D0, (Fn_Table)func_0014E5B8, (Fn_Table)func_0014E6A8, (Fn_Table)func_0014E710, (Fn_Table)func_0014E828, (Fn_Table)func_0014E910, (Fn_Table)func_0014E990, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014EA48, (Fn_Table)func_0014EB10, (Fn_Table)func_0014EC70, (Fn_Table)func_0014ED98, 0 };

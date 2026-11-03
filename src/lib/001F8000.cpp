@@ -183,7 +183,7 @@ s32 func_001F9C18(void)
 
 struct Ctx_1F9E50;
 
-extern s32 D_002771D8[];
+s32 D_002771D8[3] = { 131, 2072072, 0 };
 
 void func_001F9E90(Ctx_1F9E50* a, s32 b);
 s32 func_001F9E40(s32 fn);
@@ -304,7 +304,7 @@ s32 func_001FA8A0(Words_001FA8A0* dst, Words_001FA8A0* src, u32 bytes)
 // NEAR: body EXACT; only the save/restore ops differ: retail sd/ld, default flags give sq/lq
 
 struct Blk_1FA8F8;
-extern u32 D_00277D30[];
+u32 D_00277D30[16] = { 0x5A, 0x1FA8A0, 0x5B, 0x80075000, 0x54, 0x1FAC40, 0x55, 0, 0x56, 0, 0x57, 0, 0x58, 0, 0x59, 0 };
 extern u8 D_002779C0[];
 u32 func_001FA8D8(Blk_1FA8F8* a);
 void func_001FA8E8(Blk_1FA8F8* a, u32 b);
@@ -480,7 +480,7 @@ s32 func_001F9868(Blob_1F9868* src, s32 size, Blob_1F9868* data, s32* out, s32 c
 struct Frame_001F9DC0 { s32 w[16]; };
 
 s32 func_001F6B20(Frame_001F9DC0* q);
-extern s32 D_002771E4;
+s32 D_002771E4;
 extern s32 D_002771E8;
 
 void func_001F9DC0(void)

@@ -793,7 +793,7 @@ typedef s32 (*Pred_1DFA40)(void* self, void* out);
 
 extern f32 D_0026185C;
 extern f32 D_002758B0;
-extern f32 D_002758C0[];
+f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
 void func_001DFA40(void* self, void* out)
 {
@@ -1242,8 +1242,8 @@ struct Obj_1DE910 {
 };
 
 extern f32 D_00261858[];
-extern f32 D_002757C0[];
-extern f32 D_002757D0[];
+f32 D_002757C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 D_002757D0[1] = { 6.0f };
 extern f32 D_002757D4;
 
 void func_001C4ED0(void);

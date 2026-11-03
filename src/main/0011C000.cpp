@@ -11,7 +11,9 @@ void func_0011C720(void* item)
 
 // D_0025C360 and D_0025C378 are arrays of buffer pointers, one per IOP command buffer.
 extern s32 D_0025C380;
-extern s32* D_0025C360[];
+extern s32 D_0025C540[];
+extern s32 D_0025D540[];
+s32* D_0025C360[2] = { D_0025C540, D_0025D540 };
 extern s32* D_0025C378[];
 s32 func_0011CE30(void);
 
@@ -1151,7 +1153,7 @@ s32 func_0011C8D0(u32 addr)
 }
 
 extern s32* D_0025C340;
-extern s32 D_0025C344;
+s32 D_0025C344 = 0;
 void func_0011D110(s32* ptr, s32 count)
 {
     D_0025C344 = count;
@@ -1463,13 +1465,13 @@ struct Pend_11CE30 { s32 fn; s32 pad; u64 arg; };
 typedef s32 (*Cb_11CE30)(s32 ctx, u64 arg);
 typedef void (*Cb1_11CE30)(s32 a0);
 
-extern s32 D_0025C35C;
+s32 D_0025C35C;
 extern s32 D_0025C380;
 extern s32 D_0025C384;
 extern s32 D_0025C388;
 extern s32 D_0025C354;
 extern s32 D_0025C358;
-extern s32 D_0025C350;
+s32 D_0025C350;
 extern s32 D_0025C3A0;
 extern s32 D_0025C3C4;
 extern u64 D_0025C3A8;
@@ -1743,7 +1745,7 @@ struct Ptr_11D140 { s32 field0; };
 extern s32 D_0025C348;
 extern s32 D_0025C388;
 extern s32 D_00260E00;
-extern s32 D_00260E40[];
+s32 D_00260E40[8];
 extern u8 D_00249570[];
 extern u8 D_002495A0[];
 extern u8 D_002495C0[];
@@ -2264,10 +2266,10 @@ extern s32 D_00260E00;
 extern volatile Packet_0011CBB8 D_00260DC0;
 extern s32 D_0025C540[];
 extern s32 D_0025D540[];
-extern s32 D_0025E540[];
-extern s32 D_0025F540[];
-extern s32 D_00260540[];
-extern s32 D_00260980[];
+s32 D_0025E540[1024];
+s32 D_0025F540[1024];
+s32 D_00260540[272];
+s32 D_00260980[272];
 extern const char D_00249428[];
 extern const char D_00249450[];
 

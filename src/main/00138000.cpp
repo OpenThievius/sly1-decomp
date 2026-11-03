@@ -779,7 +779,7 @@ struct Obj_13B4C0 {
 
 void func_001B7968(Obj_13B4C0* self);
 
-extern f32 D_00249D74;
+extern const f32 D_00249D74 = 3.4028235e+38f;
 extern u8 D_00261320[];
 extern u8 D_00261330[];
 extern u8 D_00261340[];

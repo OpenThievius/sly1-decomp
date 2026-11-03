@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: every field from f208 on sits 784 (0x310) bytes further on than in US.
-extern f32 D_0024CD4C;
+extern const f32 D_0024CD4C;
 
 struct Obj_001AB890_eu;
 typedef void (*VFn_001AB890_eu)(Obj_001AB890_eu* self);

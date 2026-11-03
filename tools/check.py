@@ -39,6 +39,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import compile as cc  # noqa: E402
 import elf  # noqa: E402
+import rodata  # noqa: E402
 import version_src  # noqa: E402
 import versions  # noqa: E402
 
@@ -307,12 +308,18 @@ def check_function(obj, name, key, resolver, image):
                     key=lambda r: r[0])
 
     def target(rsym, addend_bits):
-        """The address a relocated field reaches, or None: by name, or for a section symbol by its function."""
+        """The address a relocated field reaches, or None: by name, or for a section symbol by its
+        function or global (-ffunction-sections, -fdata-sections)."""
         if rsym["type"] == elf.STT_SECTION and rsym["shndx"] < len(obj.sections):
             secname = obj.sections[rsym["shndx"]]["name"]
-            if secname.startswith(".text."):
-                base = resolver.address(secname[len(".text."):])
+            if secname.startswith((".text.", ".data.", ".rodata.")):
+                base = resolver.address(secname.split(".", 2)[2])
                 return None if base is None else base + addend_bits
+            if secname == ".bss":
+                # A file's static variables, each named D_XXXXXXXX at its offset (tools/c_layout.py).
+                named = [s for s in obj.symbols if s["shndx"] == rsym["shndx"] and s["name"]]
+                base = resolver.address(named[0]["name"]) if named else None
+                return None if base is None else base - named[0]["value"] + addend_bits
             return None
         t = resolver.address(rsym["name"])
         return None if t is None else t + addend_bits
@@ -326,7 +333,8 @@ def check_function(obj, name, key, resolver, image):
         insn = words(code, i)
         key_sym = (rsym["name"], rsym["shndx"])
         in_rodata = rsym["shndx"] not in (elf.SHN_UNDEF,) and rsym["shndx"] < len(obj.sections) \
-            and obj.sections[rsym["shndx"]]["name"].startswith(".rodata")
+            and obj.sections[rsym["shndx"]]["name"].startswith(".rodata") \
+            and not rodata.GLOBAL.match(obj.sections[rsym["shndx"]]["name"])
         if rtype == elf.R_MIPS_26:
             t = target(rsym, (insn & 0x3FFFFFF) << 2)
             if t is None:

@@ -72,8 +72,8 @@ function:
    - A field is a member of a struct with padding before it (`u8 pad[0x708];`).
    - A function it calls is declared with the arguments it is given:
      `void func_001B5F28(void* list, void* item);`.
-   - Data it refers to is `extern` with its address name: `extern u8 D_0062C568[];`. Never define
-     a variable.
+   - Data it refers to is `extern` with its address name: `extern u8 D_0062C568[];`. A worker
+     never defines a variable; defining a global is the lead's step (below, "A global defined in C").
 3. `python3 tools/check.py your.cpp func_0011A338` until it prints `EXACT`. Read the `*` lines:
    they are the instructions that differ.
 4. Then `python3 tools/check.py your.cpp func_0011A338 --version eu`. PAL usually has the same
@@ -187,6 +187,29 @@ Measured on this compiler; add to this list when you learn something.
   starts; re-run `tools/setup_asm.py` and `tools/inventory.py`. The same holds for a function
   behind the linker's leftovers (8-byte runs of an `addiu $sp` or a store, then a nop): code
   takes its address as `func_X + N`, and without a name splat joins it to them.
+- **A global defined in C.** A `.data` global (from 0x250580 in US) may be defined in the
+  one file that owns it, with its initial value: `s32* D_0025C360[2] = { D_0025C540, D_0025D540 };`.
+  A `.rodata` one (0x217380 to 0x250580) is a `const`, written `extern const` so that it keeps
+  its name (`extern const Fn D_00219668[4] = { func_0011F0C8, ... };`): a namespace-scope
+  `const` is file-local in C++, and dropped when nothing uses it.
+  Every other file keeps it `extern`. Each global gets its own section (`-fdata-sections`), and
+  `tools/c_layout.py` puts it at the address its name gives, in place of the disassembly's labels it
+  covers, which stay defined at their addresses. It must start at a label of
+  `asm/us/data/<section>.<section>.s` and end where a later label (or jump table) starts. The full build is the check: a
+  wrong value makes it `DIFFER` at that global's offset. With GCC 2.95, a C++ global goes to
+  `.data` even with no initialiser (`= 0` too); only a file's `static` variables go to `.bss`.
+  So a `.bss` label (from 0x27B300) is a `static` of the one file that uses it, named
+  `D_XXXXXXXX` and defined before its first use: all of a file's statics share its `.bss`, and
+  each must sit at its address's offset from the first. `.bss` is not in the image, but every
+  instruction that addresses it is.
+- **A global built at startup.** A global whose initialiser is not constant (it copies another
+  global, or calls a function) makes the compiler write a static initialiser
+  (`__static_initialization_and_destruction_0`) and a constructor that calls it
+  (`_GLOBAL_$I$`, named after the file's first public definition), which retail's constructor
+  list in `.data` calls. `config/us/generated.tsv` gives them retail's names
+  (`_GLOBAL_$I$*` for whichever the constructor is); `tools/compile.py` renames them, and they
+  are checked and counted like any function of the file. The object's own `.ctors` entry is
+  discarded: retail's list comes from the disassembly.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.

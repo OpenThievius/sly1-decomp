@@ -79,7 +79,23 @@ def build_run(src):
         # GNU as aligns a MIPS .text to 16; a run starts wherever its first function does
         # (8-byte aligned, or 4 in the libraries), so its section asks for no more than that.
         start = int(src.stem.split("_")[-1], 16)
-        run([tool("objcopy"), "--set-section-alignment", ".text=%d" % (8 if start % 8 == 0 else 4), str(out)])
+        section = "." + src.parent.name if src.parent.name in ("rodata", "data", "bss") else ".text"
+        # Data runs can start at any label: 8, 4, 2 or 1, whatever its address allows.
+        align = next(a for a in (8, 4, 2, 1) if start % a == 0) if section != ".text" else (8 if start % 8 == 0 else 4)
+        run([tool("objcopy"), "--set-section-alignment", "%s=%d" % (section, align), str(out)])
+
+
+def write_c_data(key, data_placed):
+    """config/<key>/c_data.tsv: every global a C file defines, in a build that printed MATCH
+    (tools/progress.py counts their bytes as matched data)."""
+    rows = ["name\taddress\tsize\tsection\tsource"]
+    for addr, size, obj, section, name in sorted(data_placed):
+        source = Path(obj).relative_to(Path("build") / key).with_suffix(".cpp").as_posix()
+        rows.append("%s\t%08X\t%d\t%s\t%s" % (name, addr, size, section, source))
+    path = ROOT / "config" / key / "c_data.tsv"
+    text = "\n".join(rows) + "\n"
+    if not path.exists() or path.read_text() != text:
+        path.write_text(text)
 
 
 def first_difference(a, b):
@@ -104,13 +120,14 @@ def main(argv=None):
         print("error: %s is missing; run python3 tools/setup_asm.py --version %s" % (ld_script.relative_to(ROOT), key))
         return 1
 
-    placed = []
+    placed, data_placed = [], []
     try:
         if key == versions.primary():
             import c_layout
             objects = c_layout.compile_sources(args.jobs)
-            ld_script, runs, placed = c_layout.layout(ld_script, objects)
-        objs = [o for o in objects_of(ld_script) if not o.startswith(("build/%s/src/" % key, "build/%s/text/" % key))]
+            ld_script, runs, placed, data_placed = c_layout.layout(ld_script, objects)
+        objs = [o for o in objects_of(ld_script) if not o.startswith(("build/%s/src/" % key, "build/%s/text/" % key, "build/%s/data/" % key,
+                                                                "build/%s/bss/" % key, "build/%s/rodata/" % key))]
         with ThreadPoolExecutor(args.jobs) as pool:
             list(pool.map(lambda o: build_object(o, key), objs))
             if key == versions.primary():
@@ -136,7 +153,11 @@ def main(argv=None):
     sha1 = hashlib.sha1(built).hexdigest()
     rel = flat.relative_to(ROOT)
     linked = (" with %d function%s from C" % (len(placed), "" if len(placed) == 1 else "s")) if placed else ""
+    if data_placed:
+        linked += " and %d global%s" % (len(data_placed), "" if len(data_placed) == 1 else "s")
     if sha1 == v["boot"]["sha1"]:
+        if key == versions.primary():
+            write_c_data(key, data_placed)
         print("MATCH: %s sha1 %s%s" % (rel, sha1, linked))
         return 0
     retail = versions.boot_path(key).read_bytes()

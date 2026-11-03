@@ -80,7 +80,7 @@ s32 func_00204DB8(void)
 }
 
 
-extern s32 D_0027AE80;
+s32 D_0027AE80;
 extern s32 D_0027AE84;
 extern u8 D_0024F780[];
 extern u8 D_0024F7A8[];

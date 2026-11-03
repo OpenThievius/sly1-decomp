@@ -18,6 +18,7 @@ import nonmatching  # noqa: E402
 import permute  # noqa: E402
 import todo  # noqa: E402
 import c_layout  # noqa: E402
+import compile  # noqa: E402
 import check  # noqa: E402
 import rodata  # noqa: E402
 import version_src  # noqa: E402
@@ -517,6 +518,69 @@ class RunAlignmentTest(unittest.TestCase):
         self.assertEqual(c_layout.run_alignment(["glabel a", "nop"]), 4)
         self.assertEqual(c_layout.run_alignment([".align 3", "glabel a", ".align 2", "nop"]), 8)
         self.assertEqual(c_layout.run_alignment(["  .align 4"]), 16)
+
+
+class DataPlanTest(unittest.TestCase):
+    CHUNKS = [("D_00000100", 0x100, ["a"]), ("D_00000104", 0x104, ["b"]), ("D_00000108", 0x108, ["c"]),
+              ("D_00000110", 0x110, ["d"])]
+
+    def test_a_c_global_replaces_the_labels_it_covers(self):
+        d = (0x104, 12, "x.o", ".data.D_00000104", "D_00000104")
+        plan, covered = c_layout.data_plan(self.CHUNKS, [d])
+        self.assertEqual([k for k, _ in plan], ["run", "c", "run"])
+        self.assertEqual(plan[1][1], d)
+        self.assertEqual([c[0] for c in plan[2][1]], ["D_00000110"])
+        self.assertEqual(covered, {"D_00000104": 0x104, "D_00000108": 0x108})
+
+    def test_a_c_global_must_start_and_end_at_labels(self):
+        with self.assertRaises(c_layout.LayoutError):
+            c_layout.data_plan(self.CHUNKS, [(0x102, 2, "x.o", ".data.D_00000102", "D_00000102")])
+        with self.assertRaises(c_layout.LayoutError):
+            c_layout.data_plan(self.CHUNKS, [(0x104, 6, "x.o", ".data.D_00000104", "D_00000104")])
+
+
+class RodataGlobalTest(unittest.TestCase):
+    def test_a_named_constant_is_linked_and_a_literal_pool_baked(self):
+        self.assertTrue(rodata.GLOBAL.match(".rodata.D_00219668"))
+        self.assertFalse(rodata.GLOBAL.match(".rodata"))
+        self.assertFalse(rodata.GLOBAL.match(".rodata.str1"))
+
+
+class GeneratedNameTest(unittest.TestCase):
+    ASM = ("\t.section .text.__static_initialization_and_destruction_0,\"ax\",@progbits\n"
+           "__static_initialization_and_destruction_0:\n"
+           "\t.globl\t_GLOBAL_$I$func_00193288__FP12State_193288i\n"
+           "\tjal\t__static_initialization_and_destruction_0\n")
+
+    def test_the_compilers_names_and_sections_take_retails(self):
+        got = compile.rename_generated(self.ASM, {"__static_initialization_and_destruction_0": "func_001930B8",
+                                                  "_GLOBAL_$I$*": "func_001931F0"})
+        self.assertIn(".section .text.func_001930B8,", got)
+        self.assertIn("jal\tfunc_001930B8\n", got)
+        self.assertIn(".globl\tfunc_001931F0\n", got)
+        self.assertNotIn("_GLOBAL_", got)
+
+    def test_a_name_the_compiler_did_not_make_is_an_error(self):
+        with self.assertRaises(compile.CompileError):
+            compile.rename_generated(self.ASM, {"_GLOBAL_$D$*": "func_00100000"})
+
+
+class BssPlacementTest(unittest.TestCase):
+    def obj(self, symbols):
+        class Obj:
+            pass
+        o = Obj()
+        o.symbols = [{"shndx": 7, "name": n, "value": v} for n, v in symbols]
+        return o
+
+    def test_statics_sit_at_their_addresses_offsets(self):
+        sec = {"index": 7, "size": 0x84}
+        got = c_layout.bss_placement(self.obj([("D_00604780", 0x80), ("D_00604700", 0)]), sec, "x.o", c_layout.ROOT / "x.cpp")
+        self.assertEqual(got, (0x604700, 0x84, "x.o", ".bss", "D_00604700"))
+        with self.assertRaises(c_layout.LayoutError):
+            c_layout.bss_placement(self.obj([("D_00604700", 0), ("D_00604790", 0x80)]), sec, "x.o", c_layout.ROOT / "x.cpp")
+        with self.assertRaises(c_layout.LayoutError):
+            c_layout.bss_placement(self.obj([("counter", 0)]), sec, "x.o", c_layout.ROOT / "x.cpp")
 
 
 def tiny_object(rtypes=(5, 6), text_words=(0x3C020000, 0x8C420000)):

@@ -429,7 +429,7 @@ struct Self_1DB928 { s32 f0; s32 f4; u8 pad_08[0xC]; s32 f14; };
 extern s32 D_00275718;
 extern s32 D_0027571C;
 extern s32 D_00275720;
-extern s32 D_00275724;
+s32 D_00275724;
 extern s32 D_00275728;
 
 s32 func_00137480(void* self, s32 n);
@@ -634,7 +634,7 @@ struct Obj_1D8578 {
 };
 
 extern f32 D_00261858[];
-extern f32 D_002754A0[];
+f32 D_002754A0[4] = { 1.5f, 2.5f, 0.0f, 0.0f };
 extern u8 D_00275490[];
 
 void* func_001925F0(void);

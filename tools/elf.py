@@ -28,7 +28,8 @@ class Elf:
         self.sections = []
         for i, (name, typ, flags, addr, off, size, link, info, align, entsize) in enumerate(raw):
             self.sections.append({"index": i, "name": self._str(names, name), "type": typ, "flags": flags,
-                                  "addr": addr, "offset": off, "size": size, "link": link, "info": info})
+                                  "addr": addr, "offset": off, "size": size, "link": link, "info": info,
+                                  "align": align})
         self.symbols = []
         for s in self.sections:
             if s["type"] == SHT_SYMTAB:

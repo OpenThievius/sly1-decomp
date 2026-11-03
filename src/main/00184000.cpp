@@ -444,7 +444,7 @@ struct Cfg_275F80 { s32 a; s32 mode; };
 struct Flag_269A00 { s32 a; s32 on; };
 struct Tm_261858 { s32 a; s32 b; f32 dt; };
 
-extern s32 D_00264834;
+s32 D_00264834;
 extern s32 D_00264838;
 extern Flag_269A00 D_00269A00;
 extern Cfg_275F80 D_00275F80;
@@ -519,7 +519,9 @@ void func_00185758(s32 a, s32 b)
 struct Frame_185B38 { s32 w[28]; };
 typedef void (*Fn_185B38)(void);
 
-extern u8 D_002647C0[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern Fn_Table D_002647C0[];
 
 s32 func_00193210(void* a, void* b, void* c, void* d, void* e);
 void func_00191E70(s32 value);
@@ -543,7 +545,7 @@ void func_00185B38(void)
     idx = 0x1A;
     func_00191E70(1);
     func_00193270(&fr);
-    tbl = (Fn_185B38*)D_002647C0;
+    tbl = (Fn_185B38*)((u8*)D_002647C0);
     i = 0;
     do {
         if ((s32)i >= 3) {
@@ -690,3 +692,32 @@ void func_00184A70(Obj_184A70* self)
     self->f358 = Fpu::Sqrt(self->f360);
     self->f35C = 1.0f;
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_0011E560();
+void func_0012B868();
+void func_00139C38();
+void func_00140790();
+void func_001409D8();
+void func_001430C8();
+void func_00143140();
+void func_00152810();
+void func_0015C178();
+void func_0015E810();
+void func_00160070();
+void func_001688B8();
+void func_00169C58();
+void func_0016E0B8();
+void func_0016F588();
+void func_0017FD48();
+void func_0018B580();
+void func_0018D430();
+void func_0018E5E8();
+void func_00191EC0();
+void func_0019DF48();
+void func_001A9C68();
+void func_001BF130();
+void func_001DFD48();
+void func_001E2398();
+void func_001E9088();
+extern Fn_Table D_002647C0[29] = { (Fn_Table)func_0012B868, (Fn_Table)func_0018D430, (Fn_Table)func_00152810, (Fn_Table)func_001E2398, (Fn_Table)func_001688B8, (Fn_Table)func_001858F8, (Fn_Table)func_001409D8, (Fn_Table)func_00140790, (Fn_Table)func_0016E0B8, (Fn_Table)func_0016F588, (Fn_Table)func_0015E810, (Fn_Table)func_0015C178, (Fn_Table)func_0011E560, (Fn_Table)func_00143140, (Fn_Table)func_001BF130, (Fn_Table)func_001A9C68, (Fn_Table)func_001E9088, (Fn_Table)func_001DFD48, (Fn_Table)func_0017FD48, (Fn_Table)func_00191EC0, (Fn_Table)func_00169C58, (Fn_Table)func_00185A58, (Fn_Table)func_00185AC8, (Fn_Table)func_00139C38, (Fn_Table)func_0019DF48, (Fn_Table)func_001430C8, (Fn_Table)func_0018B580, (Fn_Table)func_00160070, (Fn_Table)func_0018E5E8 };

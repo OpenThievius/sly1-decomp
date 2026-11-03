@@ -27,15 +27,15 @@ void func_00143648(struct Self_00143648* self)
     *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(D_002483D0 + 0x10);
     *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(D_002483D0 + 0x20);
     func_00143560(self);
-    *(void**)(s + 0x454) = D_00217398;
+    *(void**)(s + 0x454) = ((u8*)D_00217398);
     func_00149398((struct Sub_00143648*)(s + 0x454), self);
-    *(void**)(s + 0x460) = D_002173B0;
+    *(void**)(s + 0x460) = ((u8*)D_002173B0);
     func_00149660((struct Sub_00143648*)(s + 0x460), self);
-    *(void**)(s + 0x4C0) = D_002173C8;
+    *(void**)(s + 0x4C0) = ((u8*)D_002173C8);
     func_0014A888((struct Sub_00143648*)(s + 0x4C0), self);
-    *(void**)(s + 0x510) = D_002173E0;
+    *(void**)(s + 0x510) = ((u8*)D_002173E0);
     func_00149398((struct Sub_00143648*)(s + 0x510), self);
-    *(void**)(s + 0x520) = D_002173F8;
+    *(void**)(s + 0x520) = ((u8*)D_002173F8);
     func_00149398((struct Sub_00143648*)(s + 0x520), self);
     func_00143A60(self, 1);
 }

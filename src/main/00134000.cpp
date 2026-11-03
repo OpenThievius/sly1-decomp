@@ -674,7 +674,7 @@ void func_001356C0(Obj_1356C0* self, s32 mode)
 extern u8 D_00275710[];
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
-extern f32 D_00249CFC;
+extern const f32 D_00249CFC = 3.4028235e+38f;
 
 struct Self_135F48 {
     u8 pad000[0x328];

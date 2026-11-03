@@ -11,7 +11,7 @@ struct Self_001AB600_eu {
     s32 f290;
 };
 
-extern f32 D_0024CD48;
+extern const f32 D_0024CD48;
 void func_001AA268(Self_001AB600_eu* self);
 void func_001ABE20(Self_001AB600_eu* self, s32 state);
 

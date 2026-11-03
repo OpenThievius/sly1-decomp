@@ -2,7 +2,7 @@
 #include "common.h"
 
 extern u8 D_00247AA0[];
-extern s32 D_002613F4;
+s32 D_002613F4;
 extern s32 D_002613F8;
 s32 func_0011E138(void*, void*, void*, void*);
 s32 func_0011E1F8(s32);
@@ -1252,13 +1252,15 @@ void func_00143A60(struct Self_00143648* self, s32 a1);
 extern u8 D_002618B8[];
 extern u8 D_002618B0[];
 extern u8 D_002483D0[];
-extern u8 D_00217398[];
-extern u8 D_002173B0[];
-extern u8 D_002173C8[];
-extern u8 D_002173E0[];
-extern u8 D_002173F8[];
-extern f32 D_002618A0;
-extern f32 D_002618A4;
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_00217398[];
+extern const Fn_Table D_002173B0[];
+extern const Fn_Table D_002173C8[];
+extern const Fn_Table D_002173E0[];
+extern const Fn_Table D_002173F8[];
+f32 D_002618A0 = 5e+02f;
+f32 D_002618A4 = 2e+04f;
 extern f32 D_002618A8;
 
 void func_00143648(struct Self_00143648* self)
@@ -1288,15 +1290,15 @@ void func_00143648(struct Self_00143648* self)
     *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(D_002483D0 + 0x10);
     *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(D_002483D0 + 0x20);
     func_00143560(self);
-    *(void**)(s + 0x454) = D_00217398;
+    *(void**)(s + 0x454) = ((u8*)D_00217398);
     func_00149398((struct Sub_00143648*)(s + 0x454), self);
-    *(void**)(s + 0x460) = D_002173B0;
+    *(void**)(s + 0x460) = ((u8*)D_002173B0);
     func_00149660((struct Sub_00143648*)(s + 0x460), self);
-    *(void**)(s + 0x4C0) = D_002173C8;
+    *(void**)(s + 0x4C0) = ((u8*)D_002173C8);
     func_0014A888((struct Sub_00143648*)(s + 0x4C0), self);
-    *(void**)(s + 0x510) = D_002173E0;
+    *(void**)(s + 0x510) = ((u8*)D_002173E0);
     func_00149398((struct Sub_00143648*)(s + 0x510), self);
-    *(void**)(s + 0x520) = D_002173F8;
+    *(void**)(s + 0x520) = ((u8*)D_002173F8);
     func_00149398((struct Sub_00143648*)(s + 0x520), self);
     func_00143A60(self, 1);
 }
@@ -1495,3 +1497,24 @@ s32 func_00142998(Key_142998* a, Key_142998* b)
         return 1;
     return a->i - b->i;
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_001493C0();
+void func_001496C0();
+void func_00149760();
+void func_0014A7B8();
+void func_0014A8D0();
+void func_0014A8F8();
+void func_0014AA90();
+void func_0014AA98();
+void func_0014AAA0();
+void func_001E2E68();
+void func_001E30A0();
+void func_001E30D8();
+void func_001E30E0();
+void func_001E31F0();
+extern const Fn_Table D_00217398[6] = { 0, 0, 0, 0, (Fn_Table)func_001493C0, 0 };
+extern const Fn_Table D_002173B0[6] = { (Fn_Table)func_001496C0, (Fn_Table)func_0014A7B8, 0, 0, (Fn_Table)func_00149760, 0 };
+extern const Fn_Table D_002173C8[6] = { (Fn_Table)func_0014A8D0, 0, 0, 0, (Fn_Table)func_0014A8F8, 0 };
+extern const Fn_Table D_002173E0[6] = { (Fn_Table)func_0014AA90, (Fn_Table)func_0014AA98, 0, 0, (Fn_Table)func_0014AAA0, 0 };
+extern const Fn_Table D_002173F8[6] = { (Fn_Table)func_001E2E68, (Fn_Table)func_001E30A0, (Fn_Table)func_001E30D8, (Fn_Table)func_001E30E0, (Fn_Table)func_001E31F0, 0 };

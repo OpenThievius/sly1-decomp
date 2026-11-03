@@ -12,8 +12,10 @@ assembler matters: it expands `move` to `daddu`, where a modern GNU as writes
 (`file<TAB>flags<TAB>compiler`, the compiler optional), or the `default` row
 and the `compiler` row. The game is SN GCC 2.95.3; Sony's libraries are Sony's
 own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
--ffunction-sections, so that the build can place each function at its address
-(tools/build.py).
+-ffunction-sections and -fdata-sections, so that the build can place each
+function and each global it defines at its address (tools/build.py). The
+functions the compiler makes for a file (a static initialiser, the constructor
+that calls it) take retail's names from config/us/generated.tsv.
 
 A compiler that only exists as Sony's Linux build (2.9-ee-991111-01, the math
 library's) runs the way OpenRAC's rac1-decomp runs it: its own 32-bit Linux
@@ -25,6 +27,7 @@ assembler are the Windows ones of the same release.
 import argparse
 import os
 import platform
+import re
 import shutil
 import signal
 import subprocess
@@ -45,7 +48,7 @@ CPP_DEFINES = ["-lang-c++", "-undef", "-D__GNUC__=2", "-D__GNUC_MINOR__=9", "-D_
                "-D__mips_single_float", "-D__SIZE_TYPE__=unsigned", "-D__PTRDIFF_TYPE__=int",
                "-D__LANGUAGE_C", "-D_LANGUAGE_C", "-DLANGUAGE_C",
                "-I", "include", "-I", "src"]
-LAYOUT_FLAGS = ["-ffunction-sections"]
+LAYOUT_FLAGS = ["-ffunction-sections", "-fdata-sections"]
 # A compile takes a second or two; a run under the Windows runner can hang for good (seen with
 # wibo), so every step gives up after this many seconds and the file counts as not compiling.
 TIMEOUT = int(os.environ.get("SLY1_COMPILE_TIMEOUT", "120"))
@@ -55,6 +58,31 @@ TIMEOUT = int(os.environ.get("SLY1_COMPILE_TIMEOUT", "120"))
 LINUX_TREES = ("ee-gcc-2.9-991111-01", "ee-gcc-2.9-dtls13010")
 LINUX_COMPANION = {"2.9-ee-991111-01": "2.9-ee-991111"}
 LINUX_IMAGE = "i386/busybox:1.36"
+
+
+def generated_names(source):
+    """{compiler's symbol: function name} of what the compiler makes for `source`
+    (config/us/generated.tsv: file, symbol, function)."""
+    path = ROOT / "config" / "us" / "generated.tsv"
+    if not path.exists():
+        return {}
+    rel = os.path.relpath(source, ROOT)
+    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
+    return {sym: func for f, sym, func in rows if f == rel}
+
+
+def rename_generated(asm, names):
+    """The assembly with each compiler-made symbol under its function name. A name ending in `*`
+    stands for any rest: `_GLOBAL_$I$*` is the file's constructor, which GCC names after the
+    file's first public definition."""
+    for sym, func in names.items():
+        rest = r"[\w$.]*" if sym.endswith("*") else ""
+        # Its own section (.text.SYMBOL, -ffunction-sections) takes the name too.
+        pattern = re.compile(r"(?<![\w$])%s%s(?![\w$.])" % (re.escape(sym.rstrip("*")), rest))
+        if not pattern.search(asm):
+            raise CompileError("config/us/generated.tsv names %s, which the compiler did not make" % sym)
+        asm = pattern.sub(func, asm)
+    return asm
 
 
 class CompileError(Exception):
@@ -196,6 +224,10 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None):
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
                 raise CompileError((proc.stderr or proc.stdout).strip() or "%s failed" % name)
         asm = s.read_text()
+        names = generated_names(source)
+        if names:
+            asm = rename_generated(asm, names)
+            s.write_text(asm)
         if keep_asm:
             Path(keep_asm).write_text(asm)
         as_flags = [f for f in flags if f.startswith(("-G", "-O"))] + os.environ.get("SLY1_ASFLAGS", "").split()

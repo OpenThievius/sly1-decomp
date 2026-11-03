@@ -1026,14 +1026,16 @@ void func_00160918(void)
 }
 
 struct Self_1611B8 { u8 pad0[0x14]; s32 f14; void* f18; s32 f1C; s32 f20; s32 f24; };
-extern u8 D_0024A6F8[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_0024A6F8[];
 s32 func_00152888(Self_1611B8* a);
 
 Self_1611B8* func_001611B8(Self_1611B8* self)
 {
     (void)func_00152888(self);
     self->f14 = 1;
-    self->f18 = D_0024A6F8;
+    self->f18 = ((u8*)D_0024A6F8);
     self->f1C = 0;
     self->f20 = 0;
     self->f24 = 0;
@@ -1165,8 +1167,8 @@ struct Rgba_1639E8
 };
 
 extern Rgba_1639E8 D_002623E0;
-extern s32 D_002623E8[];
-extern s32 D_00262400[];
+s32 D_002623E8[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
+s32 D_00262400[6] = { -1, 0, 4, 8, 12, 0 };
 extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
@@ -1350,3 +1352,6 @@ s32 func_00160B28(u8* p)
     if (done == total) return 100;
     return Clamp_160B28::Of(done * 100 / total, 1, 99);
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+extern const Fn_Table D_0024A6F8[6] = { 0, 0, 0, (Fn_Table)(void (*)(Frame_161278* f, s32 n))func_00161278, 0, 0 };

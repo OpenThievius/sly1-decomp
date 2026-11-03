@@ -702,7 +702,7 @@ struct Out_1CAC30 {
 };
 
 extern f32 D_00274CF4[];
-extern f32 D_00274CF8[];
+f32 D_00274CF8[1];
 
 void func_001CAC30(Obj_1CAC30* self, Out_1CAC30* out)
 {
@@ -1077,9 +1077,9 @@ struct Obj_1CBEE8 {
 };
 
 extern f32 D_00261858[];
-extern f32 D_00274D18[];
-extern f32 D_00274D08[];
-extern f32 D_00274D10[];
+f32 D_00274D18[2] = { 0.0f, 0.3f };
+f32 D_00274D08[2] = { 0.0f, 4.0f };
+f32 D_00274D10[2] = { 0.0f, 1.5f };
 
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001BF0D8(void* p);

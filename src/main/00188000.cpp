@@ -504,8 +504,8 @@ one:
     return 1;
 }
 
-extern s32 D_002649D8[];
-extern s32 D_002649E8[];
+s32 D_002649D8[4] = { 16, 16, 11, 0 };
+s32 D_002649E8[6] = { 1083, 1085, 1087, 0, 0, 0 };
 
 struct Obj_0018AC58 {
     u8 pad0[0xE28];
@@ -669,7 +669,7 @@ void func_0018D608(void* self, void* a1, void* a2);
 void func_001DC238(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
 s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f);
 void func_0018D6F0(void);
-extern f32 D_002649C4;
+f32 D_002649C4 = 1.5e+02f;
 
 s32 func_0018A910(Self_18A910* self, void* a1, void* a2)
 {

@@ -1314,9 +1314,11 @@ struct Obj_120FB0 {
     s32 kind;
 };
 
-extern u8 D_002196B8[];
-extern u8 D_002196C8[];
-extern u8 D_002196D8[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_002196B8[];
+extern const Fn_Table D_002196C8[];
+extern const Fn_Table D_002196D8[];
 void* func_0018D5C0(s32 bytes);
 
 Obj_120FB0* func_00120FB0(s32 kind)
@@ -1325,15 +1327,15 @@ Obj_120FB0* func_00120FB0(s32 kind)
     switch (kind) {
     case 0:
         p = (Obj_120FB0*)func_0018D5C0(0x30);
-        p->vtbl = (void**)D_002196B8;
+        p->vtbl = (void**)((u8*)D_002196B8);
         break;
     case 1:
         p = (Obj_120FB0*)func_0018D5C0(0x14);
-        p->vtbl = (void**)D_002196C8;
+        p->vtbl = (void**)((u8*)D_002196C8);
         break;
     case 2:
         p = (Obj_120FB0*)func_0018D5C0(0x18);
-        p->vtbl = (void**)D_002196D8;
+        p->vtbl = (void**)((u8*)D_002196D8);
         break;
     default:
         p = 0;
@@ -1680,9 +1682,9 @@ void func_00121338(Slot_00121338* self, s32 value)
 	self->b10 = m;
 }
 
-extern u8 D_002196E8[];
-extern u8 D_002196F8[];
-extern u8 D_00219708[];
+extern const Fn_Table D_002196E8[];
+extern const Fn_Table D_002196F8[];
+extern const Fn_Table D_00219708[];
 void* func_0018D5C0(s32 bytes);
 
 struct Obj_121050 {
@@ -1695,15 +1697,15 @@ Obj_121050* func_00121050(s32 kind) {
     switch (kind) {
     case 0:
         p = (Obj_121050*)func_0018D5C0(0x30);
-        p->vt = D_002196E8;
+        p->vt = ((u8*)D_002196E8);
         break;
     case 1:
         p = (Obj_121050*)func_0018D5C0(0x14);
-        p->vt = D_002196F8;
+        p->vt = ((u8*)D_002196F8);
         break;
     case 2:
         p = (Obj_121050*)func_0018D5C0(0x1C);
-        p->vt = D_00219708;
+        p->vt = ((u8*)D_00219708);
         break;
     default:
         p = 0;
@@ -1716,8 +1718,8 @@ Obj_121050* func_00121050(s32 kind) {
 }
 
 struct Obj_1210F0 { void* vt; s32 kind; };
-extern u8 D_00219718[];
-extern u8 D_00219728[];
+extern const Fn_Table D_00219718[];
+extern const Fn_Table D_00219728[];
 void* func_0018D5C0(u32 n);
 Obj_1210F0* func_001210F0(s32 kind)
 {
@@ -1725,11 +1727,11 @@ Obj_1210F0* func_001210F0(s32 kind)
     switch (kind) {
     case 0:
         p = (Obj_1210F0*)func_0018D5C0(0x30);
-        p->vt = (void*)D_00219718;
+        p->vt = (void*)((u8*)D_00219718);
         break;
     case 1:
         p = (Obj_1210F0*)func_0018D5C0(0x10);
-        p->vt = (void*)D_00219728;
+        p->vt = (void*)((u8*)D_00219728);
         break;
     default:
         p = 0;
@@ -1866,11 +1868,24 @@ struct Obj_121160 {
     void* vt;
     s32 kind;
 };
-extern u8 D_00219668[];
-extern u8 D_00219678[];
-extern u8 D_00219688[];
-extern u8 D_00219698[];
-extern u8 D_002196A8[];
+// The dispatch tables func_00121160 gives each kind of object: three functions, or one and a
+// shared one, each slot followed by a zero word.
+typedef void (*Fn_121160)();
+void func_0011F0C8();
+void func_0011EFC8();
+void func_0011F180();
+void func_0011F320();
+void func_0011F210();
+void func_0011F3E8();
+void func_0011F478();
+void func_0011F568();
+void func_0011F620();
+void func_0011EFB0();
+extern const Fn_121160 D_00219668[4] = { func_0011F0C8, func_0011EFC8, func_0011F180, 0 };
+extern const Fn_121160 D_00219678[4] = { func_0011F320, func_0011F210, func_0011F3E8, 0 };
+extern const Fn_121160 D_00219688[4] = { func_0011F478, func_0011F568, func_0011F620, 0 };
+extern const Fn_121160 D_00219698[4] = { (Fn_121160)func_00120AA8, 0, func_0011EFB0, 0 };
+extern const Fn_121160 D_002196A8[4] = { (Fn_121160)func_00120D58, 0, func_0011EFB0, 0 };
 void* func_0018D5C0(Obj_121160* n);
 
 Obj_121160* func_00121160(u32 kind)
@@ -1879,23 +1894,23 @@ Obj_121160* func_00121160(u32 kind)
     switch (kind) {
     case 0:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
-        o->vt = D_00219668;
+        o->vt = (void*)D_00219668;
         break;
     case 1:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
-        o->vt = D_00219678;
+        o->vt = (void*)D_00219678;
         break;
     case 3:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x14);
-        o->vt = D_00219698;
+        o->vt = (void*)D_00219698;
         break;
     case 4:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x18);
-        o->vt = D_002196A8;
+        o->vt = (void*)D_002196A8;
         break;
     case 2:
         o = (Obj_121160*)func_0018D5C0((Obj_121160*)0x10);
-        o->vt = D_00219688;
+        o->vt = (void*)D_00219688;
         break;
     default:
         o = 0;
@@ -1956,7 +1971,7 @@ struct Self_00123ED0 {
     void SetB2CA(s32 value) { b2CA = value; }
 };
 
-extern const f32 D_002499F0;
+extern const f32 D_002499F0 = 3.4028235e+38f;
 extern u8 D_00260E70[];
 extern u8 D_00260E80[];
 extern u8 D_00260E90[];
@@ -1996,3 +2011,27 @@ void func_00123ED0(Self_00123ED0* self)
     self->block1A0.CopyFrom((const Block_00123ED0*)D_002483D0);
     func_00152438(self->list1E0, 8);
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_0011FC20();
+void func_0011FC90();
+void func_0011FDB8();
+void func_0011FDD8();
+void func_0011FE40();
+void func_0011FED8();
+void func_0011EF48();
+void func_00120470();
+void func_0011FF08();
+void func_0011FFA8();
+void func_0011FFD8();
+void func_0011EF68();
+void func_0011EF70();
+void func_00120700();
+extern const Fn_Table D_002196B8[4] = { (Fn_Table)func_0011FC20, (Fn_Table)func_0011FC90, (Fn_Table)func_0011FDB8, 0 };
+extern const Fn_Table D_002196C8[4] = { (Fn_Table)func_0011FDD8, (Fn_Table)func_0011FE40, (Fn_Table)func_0011FED8, 0 };
+extern const Fn_Table D_002196D8[4] = { (Fn_Table)func_00120470, 0, (Fn_Table)func_0011EF48, 0 };
+extern const Fn_Table D_002196E8[4] = { (Fn_Table)func_0011FF08, (Fn_Table)func_0011FFA8, (Fn_Table)func_0011FFD8, (Fn_Table)func_00120110 };
+extern const Fn_Table D_002196F8[4] = { (Fn_Table)func_00120130, (Fn_Table)func_001201D0, (Fn_Table)func_001201F0, (Fn_Table)func_001202C0 };
+extern const Fn_Table D_00219708[4] = { (Fn_Table)func_00120700, (Fn_Table)func_0011EF68, 0, (Fn_Table)func_0011EF70 };
+extern const Fn_Table D_00219718[4] = { (Fn_Table)func_001202F0, (Fn_Table)func_00120360, (Fn_Table)func_00120388, 0 };
+extern const Fn_Table D_00219728[4] = { (Fn_Table)func_001203A8, (Fn_Table)func_00120418, (Fn_Table)func_00120440, 0 };

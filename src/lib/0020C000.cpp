@@ -615,13 +615,15 @@ void func_0020F4C8(struct Self_0020F9C8* self, s32 a1);
 s32 func_0020F5B8(struct Self_0020F9C8* self, s32 a1);
 s32 func_0020F3C0(struct Self_0020F9C8* self, s32 a1);
 
-extern u8 D_00250430[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_00250430[];
 
 void func_0020F9C8(struct Self_0020F9C8* self)
 {
     s32 kA = 0x1B2;
     union TblU_0020F9C8 t;
-    t.t = *(struct Tbl_0020F9C8*)D_00250430;
+    t.t = *(struct Tbl_0020F9C8*)((u8*)D_00250430);
     s32 kB = 0x1B5;
     s32 r;
 
@@ -1242,3 +1244,10 @@ void func_0020FDA0(Obj_0020FDA0* self)
     self->f1A8 = func_0020F5B8(self, 1);
     func_0020F9C8(self);
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_0020BF78();
+void func_0020FAF0();
+void func_0020FF08();
+void func_00210000();
+extern const Fn_Table D_00250430[12] = { (Fn_Table)func_0020C148, (Fn_Table)func_0020BF78, (Fn_Table)func_0020C0A8, (Fn_Table)func_0020FE40, (Fn_Table)func_00210000, (Fn_Table)func_0020C138, (Fn_Table)func_0020C148, (Fn_Table)func_0020FF08, (Fn_Table)func_0020FAF0, (Fn_Table)func_0020C158, (Fn_Table)func_0020C168, 0 };

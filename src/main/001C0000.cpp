@@ -827,14 +827,14 @@ struct Obj_1C34C8 {
     f32 f68C; s32 s690; s32 s694;
 };
 
-extern f32 D_00274A50[];
-extern f32 D_00274A70[];
-extern f32 D_00274A80[];
+f32 D_00274A50[4] = { 0.2f, 0.0f, 0.0f, 0.0f };
+f32 D_00274A70[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
+f32 D_00274A80[4] = { 0.7f, 0.3f, 0.0f, 0.0f };
 extern f32 D_00275C60[];
 extern f32 D_00261854;
 extern f32 D_00261858[];
 extern f32 D_00274A44;
-extern f32 D_00274A60[];
+f32 D_00274A60[4] = { 4e+01f, 0.0f, 0.3f, 0.0f };
 extern u8 D_00248D20[];
 extern s32 D_0026E228;
 
@@ -1640,9 +1640,9 @@ extern s32 D_00274744;
 extern s32 D_00274730;
 extern s32 D_00274738;
 extern s32 D_00274734;
-extern s32 D_00274754;
+s32 D_00274754 = 3;
 extern s32 D_002748EC;
-extern f32 D_00274750;
+f32 D_00274750 = -2.0f;
 extern f32 D_00261858[];
 extern Pair_1C0070 D_00245024[];
 

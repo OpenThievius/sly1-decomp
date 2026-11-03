@@ -362,7 +362,7 @@ struct Obj_1C4A80 {
 };
 
 extern f32 D_0026185C[];
-extern f32 D_00274B60[];
+f32 D_00274B60[1] = { 0.1f };
 extern s32 D_00605548;
 f32 func_001EAFE0(f32 x, f32 y);
 s32 func_001EAA70(s32 a, s32 b);
@@ -877,7 +877,7 @@ tail:
 
 struct Self_1C6F48 { u8 pad[4]; };
 extern u8 D_00261420[];
-extern f32 D_0024D650;
+extern const f32 D_0024D650 = 3.4028235e+38f;
 void func_001C4458(Self_1C6F48* self);
 struct Tbl_1C6F48;
 s32 func_00140FF8(Tbl_1C6F48* p);

@@ -101,8 +101,18 @@ def fuzzy(key):
     return out
 
 
-def measures(funcs, done, linked, data=0, near=None):
-    """objdiff's measures of some functions and some bytes of data (none of it matched yet).
+def c_data(key):
+    """[(address, size)] of the globals C defines, from the last build that printed MATCH
+    (config/<key>/c_data.tsv, written by tools/build.py). Only the primary version links them."""
+    path = ROOT / "config" / key / "c_data.tsv"
+    if key != versions.primary() or not path.exists():
+        return []
+    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
+    return [(int(a, 16), int(s)) for _n, a, s, _sec, _o in rows]
+
+
+def measures(funcs, done, linked, data=0, near=None, data_done=0):
+    """objdiff's measures of some functions and some bytes of data (data_done of them matched).
 
     fuzzy_match_percent also credits each near miss (near: {name: share}) with its share of bytes;
     `_fuzzy_code` carries those bytes to the totals and is not written.
@@ -120,15 +130,15 @@ def measures(funcs, done, linked, data=0, near=None):
         "matched_code": str(matched),
         "matched_code_percent": pct(matched, total),
         "total_data": str(data),
-        "matched_data": "0",
-        "matched_data_percent": pct(0, data),
+        "matched_data": str(data_done),
+        "matched_data_percent": pct(data_done, data),
         "total_functions": len(funcs),
         "matched_functions": count,
         "matched_functions_percent": pct(count, len(funcs)),
         "complete_code": str(matched if linked else 0),
         "complete_code_percent": pct(matched if linked else 0, total),
-        "complete_data": "0",
-        "complete_data_percent": pct(0, data),
+        "complete_data": str(data_done if linked else 0),
+        "complete_data_percent": pct(data_done if linked else 0, data),
     }
 
 
@@ -162,11 +172,13 @@ def report(key):
     done = finished(key)
     linked = key == versions.primary()
     near = fuzzy(key)
+    globals_ = c_data(key)
     units = []
     for kind, name, start, end, category, folder in todo.layout(key):
         if kind == "data":
-            m = measures([], done, linked, end - start)
-            m["total_units"], m["complete_units"] = 1, 0
+            mine = sum(s for a, s in globals_ if start <= a < end)
+            m = measures([], done, linked, end - start, data_done=mine)
+            m["total_units"], m["complete_units"] = 1, 1 if linked and mine == end - start else 0
             units.append((category, m.pop("_fuzzy_code"), {"name": "data/%s" % name, "measures": m,
                                      "metadata": {"complete": False, "progress_categories": [category]}}))
             continue

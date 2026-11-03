@@ -484,7 +484,7 @@ struct Tmp_1496C0 {
     s32 w[4];
 };
 
-extern f32 D_00261BF0;
+f32 D_00261BF0;
 
 void func_00189230(void* a, void* b, void* c);
 void func_001493C8(void* out, void* self);
@@ -697,7 +697,7 @@ void func_001C7188(void*, void*);
 void func_0014B5C0(Obj_0014B5C0* self, void* other) { Pack_0014B5C0 save=self->value; func_001C7188(self,other); self->value=save; }
 
 void func_001C6F48(void*);
-extern s32 D_0027C008;
+static s32 D_0027C008;  // a running count, reset by func_0014B608
 void func_0014B608(u8* self) { func_001C6F48(self); *(s32*)(self+0xC24)=1; D_0027C008=0; }
 
 void func_001C72A0(void*);
@@ -1292,7 +1292,7 @@ struct __attribute__((aligned(16))) Quad_1493C8 { s32 a, b, c, d; };
 struct Obj_1493C8 { u8 pad[0x5C]; void* f5C; };
 
 extern u8 D_00261990[];
-extern f32 D_00261BF8;
+f32 D_00261BF8 = 7e+01f;
 void func_001920B0(void* n, void* out);
 
 Quad_1493C8 func_001493C8(Obj_1493C8* self)
@@ -1369,8 +1369,8 @@ struct Self_148AC0 {
 extern u8 D_002483D0[];
 extern u8 D_00248D30[];
 extern f32 D_00261B40;
-extern f32 D_00261B48[];
-extern f32 D_00261B50[];
+f32 D_00261B48[2] = { 75.0f, 1e+02f };
+f32 D_00261B50[4] = { 1e+03f, 1.3e+03f, 0.0f, 0.0f };
 
 void func_0018D608(void);
 Obj_148AC0** func_0018D658(s32 size);

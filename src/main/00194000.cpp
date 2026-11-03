@@ -171,8 +171,8 @@ void func_00194278(void* a0, s32 a1, s32 a2)
     }
 }
 
-extern f32 D_0026A83C;
-extern f32 D_0026A840;
+f32 D_0026A83C = 0.2f;
+f32 D_0026A840 = 0.1f;
 
 struct Pair_00197A68 { u8 pad[0x94]; f32 f94; f32 f98; };
 
@@ -1158,7 +1158,7 @@ extern Ent_1943E8* D_0026998C;
 extern s32 D_00264A58;
 extern s32 D_00264A4C;
 extern u8 D_0026FF68[];
-extern f32 D_0026A22C;
+f32 D_0026A22C = 5.0f;
 extern f32 D_0026A230;
 extern f32 D_0026A700;
 extern f32 D_0026A704;
@@ -1494,7 +1494,7 @@ struct Frame_196410 {
     s32 link;
     Frame_196410* prev;
 };
-extern const f32 D_0024C860;
+extern const f32 D_0024C860 = 3.4028235e+38f;
 extern Frame_196410* D_0027B314;
 
 void func_00152438(u8* a, s32 v);
