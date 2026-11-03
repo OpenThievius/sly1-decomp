@@ -109,10 +109,11 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    does func_001FD920: with exceptions on the compiler makes no tail calls,
    and a call to a function that never returns keeps retail's frame and
    `jal`. All 53 functions matched in that file stay EXACT without
-   `-fno-exceptions`. But the object then carries exception tables in
-   `.data` (1,668 bytes), which the build cannot link from C yet, so the
-   file keeps `-fno-exceptions` until data comes from C (docs/ROADMAP.md,
-   item 2). The throw functions also need the runtime's helpers named for
+   `-fno-exceptions`, which config/cflags.tsv no longer gives it. The object
+   then carries frame (unwind) tables in `.data` (1,668 bytes) that no code
+   refers to; retail's are in the disassembly's `.data`, and
+   tools/c_layout.py takes them out of the object (drop_frame_tables). The
+   throw functions also need the runtime's helpers named for
    the compiler (`__eh_alloc` 0x1FE9D0, `__cp_push_exception` 0x1FEA88,
    `__throw` 0x1FE4C8, `__start_cp_handler` 0x1FE998, `__uncatch_exception`
    0x1FEBE0, `__cp_pop_exception` 0x1FEB18, `terminate__Fv` 0x1FE8F0) and

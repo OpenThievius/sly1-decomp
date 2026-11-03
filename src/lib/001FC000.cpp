@@ -1156,3 +1156,10 @@ u8 *func_001FF848(u8 *p, struct RuleSet_1FF848 *rs, struct Cie_1FF848 *cie, u32 
     }
     return p;
 }
+
+void func_002014D0(void) __attribute__((noreturn));
+
+void func_001FD920(void)
+{
+    func_002014D0();
+}

@@ -9,10 +9,14 @@ between them (build/us/text/), and splat's linker script gets the runs and the
 C functions in address order in place of the one .text object.
 
 A C file may hold only code for now: an object with .data, .rodata or .bss is
-refused, since that data is still placed from the disassembly.
+refused, since that data is still placed from the disassembly. Two kinds of data
+are taken out of the object instead: .rodata literals (tools/rodata.py), and the
+frame tables a file built with exceptions on carries in .data, which no code
+refers to and whose retail copy is in the disassembly's .data.
 """
 
 import re
+import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -49,6 +53,7 @@ def compile_sources(jobs):
             try:
                 cc.compile_file(src, obj)
                 rodata.bake(obj, image, resolver)
+                drop_frame_tables(obj)
             except cc.CompileError as e:
                 raise LayoutError("%s does not compile:\n%s" % (src.relative_to(ROOT), e))
             except rodata.RodataError as e:
@@ -72,6 +77,35 @@ def compile_sources(jobs):
         for src, obj in pool.map(one, [s for s in sources() if s not in skipped]):
             out[src] = obj
     return out
+
+
+FRAME_SYMBOLS = ("__FRAME_BEGIN__", "_GLOBAL_$F$")
+
+
+def drop_frame_tables(path):
+    """Remove an object's .data when it holds only the compiler's frame (unwind) tables, which a
+    file built with exceptions on carries and no code refers to: retail's own tables are in the
+    .data that comes from the disassembly. Returns True if it removed them."""
+    obj = elf.Elf(Path(path).read_bytes())
+    data = obj.section(".data")
+    if data is None or not data["size"]:
+        return False
+    inside = [s for s in obj.symbols if s["shndx"] == data["index"]]
+    names = [s["name"] for s in inside if s["name"]]
+    if not names or not all(n.startswith(FRAME_SYMBOLS) for n in names):
+        return False
+    for sec in obj.sections:
+        if sec["name"].startswith(".text") and sec["size"]:
+            if any(sym["shndx"] == data["index"] for _, _, sym in obj.relocations(sec["name"])):
+                return False
+    tmp = Path(str(path) + ".frames")
+    tmp.write_bytes(obj.data)
+    cmd = [rodata._objcopy(), "--remove-section=.data", "--remove-section=.rel.data", str(tmp), str(path)]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    tmp.unlink()
+    if proc.returncode:
+        raise LayoutError("objcopy: " + (proc.stderr or proc.stdout).strip())
+    return True
 
 
 def placements(objects):
