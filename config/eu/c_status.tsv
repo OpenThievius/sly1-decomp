@@ -3724,6 +3724,7 @@ func_0020FF08	func_002113C8	match
 func_00210000	func_002114C0	match	
 func_00210090	func_00211550	match	
 func_00210160	func_00211620	match	
+func_002101F0	func_002116B0	match	
 func_002104A8	func_00211968	match	rodata
 func_002107B8	func_00211C78	match	
 func_002107E0	func_00211CA0	match	

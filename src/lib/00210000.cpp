@@ -577,3 +577,139 @@ void func_00211BA8(void)
     while (*(volatile s32*)0x10002010 < 0) {
     }
 }
+
+struct Sub_2101F0 {
+    u8 pad00[0x18];
+    u64 f18;
+    u64 f20;
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    s32 f34;
+    s32 f38;
+    s32 f3C;
+    s32 f40;
+    s32 f44;
+    s32 f48;
+    s32 f4C;
+    s32 f50;
+    s32 f54;
+    s32 f58;
+    s32 f5C;
+    s32 f60;
+};
+
+struct Obj_2101F0 {
+    u8 pad000[0xA0];
+    s32 fA0;
+    s32 fA4;
+    u8 pad0A8[0xE8 - 0xA8];
+    s32 fE8;
+    u8 pad0EC[0x13C - 0xEC];
+    s32 f13C;
+    u8 pad140[0x148 - 0x140];
+    s32 f148;
+    s32 f14C;
+    s32 f150;
+    u8 pad154[0x174 - 0x154];
+    s32 f174;
+    s32 f178;
+    u8 pad17C[0x184 - 0x17C];
+    s32 f184;
+    s32 f188;
+    s32 f18C;
+    s32 f190;
+    s32 f194;
+    s32 f198;
+    s32 f19C;
+    s32 f1A0;
+    s32 f1A4;
+    s32 f1A8;
+    u8 pad1AC[0x1B8 - 0x1AC];
+    Sub_2101F0* f1B8;
+    Sub_2101F0* f1BC;
+    Sub_2101F0* f1C0;
+    Sub_2101F0* f1C4;
+    Sub_2101F0* f1C8;
+    Sub_2101F0* f1CC;
+    Sub_2101F0* f1D0;
+    Sub_2101F0* f1D4;
+    Sub_2101F0* f1D8;
+    Sub_2101F0* f1DC;
+    Sub_2101F0* f1E0;
+    Sub_2101F0* f1E4;
+    u8 pad1E8[0x828 - 0x1E8];
+    u64 f828;
+    u64 f830;
+};
+
+s32 func_002101F0(Obj_2101F0* p, s32 flag)
+{
+    Sub_2101F0* o = 0;
+    s32 ok = 0;
+    s32 lim = p->f174 == 3 ? 2 : 4;
+
+    if (p->f150 == 3) {
+        p->f1C0 = p->f1C4;
+        p->f1D0 = p->f1D4;
+        p->f1E0 = p->f1E4;
+        if (p->fA0 + p->fA4 >= lim) {
+            p->fE8 = 0;
+            p->f1A8 = 0;
+            p->f1A4 = 0;
+        }
+        if ((p->fE8 || p->f1A8) && !p->f1A4) {
+            p->f1B8->f28 = 0;
+            p->f1C8->f28 = 0;
+            p->f1D8->f28 = 0;
+        }
+        p->fE8 = 0;
+        p->f1A8 = 0;
+        if (p->f174 == 3) {
+            if ((p->f1B8->f28 == 1 || p->f1A4) && p->f1BC->f28 == 1) ok = 1;
+        } else {
+            if (((p->f1C8->f28 == 1 && p->f1D8->f28 == 1) || p->f1A4) && p->f1CC->f28 == 1 && p->f1DC->f28 == 1) ok = 1;
+        }
+    } else {
+        if (flag == 0) {
+            Sub_2101F0* t;
+            t = p->f1B8; p->f1B8 = p->f1BC; p->f1BC = t;
+            t = p->f1C8; p->f1C8 = p->f1CC; p->f1CC = t;
+            t = p->f1D8; p->f1D8 = p->f1DC; p->f1DC = t;
+        }
+        p->f1C0 = p->f1BC;
+        p->f1D0 = p->f1CC;
+        p->f1E0 = p->f1DC;
+        if (p->f174 == 3) {
+            if (p->f150 != 2 || p->f1B8->f28 == 1) ok = 1;
+        } else {
+            Sub_2101F0* x = p->f174 == 1 ? p->f1DC : p->f1CC;
+            if (p->f150 != 2) ok = 1;
+            else if ((flag && x->f28 == 1) || (p->f1C8->f28 == 1 && p->f1D8->f28 == 1)) ok = 1;
+        }
+    }
+
+    switch (p->f174) {
+    case 2: o = p->f1E0; break;
+    case 1: o = p->f1D0; break;
+    case 3: o = p->f1C0; break;
+    }
+    o->f28 = 0;
+    o->f18 = p->f828;
+    o->f2C = p->f150;
+    o->f20 = p->f830;
+    o->f30 = p->f174;
+    o->f34 = p->f13C;
+    o->f38 = p->f188;
+    o->f3C = p->f178;
+    o->f40 = p->f184;
+    o->f44 = p->f18C;
+    o->f48 = p->f190;
+    o->f4C = p->f194;
+    o->f50 = p->f198;
+    o->f54 = p->f19C;
+    o->f58 = p->f1A0;
+    o->f5C = p->f148;
+    o->f60 = p->f14C;
+    return ok;
+}
