@@ -1972,3 +1972,116 @@ void func_001ACAA8(Obj_1ACAA8* self)
     }
     self->f4->End(0, D_00262280);
 }
+
+struct Rgba_1AC0E8 { u8 c[4]; };
+struct Col_1AC0E8 { s32 v[4]; };
+struct Rect_1AC0E8 { f32 x; f32 y; f32 w; f32 h; s32 f10; s32 f14; s32 f18; s32 f1C; };
+struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, s32 a, s32 b, void* c); };
+struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
+struct Self_1AC0E8 {
+    u8 pad0[4]; Text_1AC0E8* text;
+    u8 pad1[0x20C - 8]; f32 f20C;
+    u8 pad2[0x21C - 0x210]; f32 f21C; f32 f220;
+    u8 pad3[0x26C - 0x224]; u8 f26C;
+    u8 pad4[0x274 - 0x26D]; f32 f274; f32 f278; f32 f27C; f32 f280; f32 f284; f32 f288; f32 f28C; f32 f290; f32 f294;
+};
+struct Q3_1AC0E8;
+
+extern f32 D_00261858[];
+extern Q3_1AC0E8 D_002743C0;
+extern u8 D_00262280[];
+
+f32 func_001EA4B8(Q3_1AC0E8* p, s32 a1, f32 f12, f32 f13, f32 f14);
+void func_00137228(Rect_1AC0E8* out, f32 x, f32 y);
+void func_00137238(Rect_1AC0E8* out, f32 x, f32 y);
+void func_00137248(Rect_1AC0E8* out, Col_1AC0E8* value);
+void func_00137260(Rect_1AC0E8* out, s32 flag);
+void func_00137268(Rect_1AC0E8* out, s32 flag);
+void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, u8* d);
+void func_0015C8B8(Text_1AC0E8* handle, f32 a, f32 b);
+void func_0015C638(Text_1AC0E8* handle, char* str, Rect_1AC0E8* r, s32 zero, u8* d);
+void func_0015C900(Text_1AC0E8* handle);
+f32 func_00205400(f32 x);
+f32 func_00205210(f32 x);
+
+struct Lerp_1AC0E8 {
+    static u8 Of(s32 a, s32 b, f32 t)
+    {
+        if (a == b) return b;
+        if (a < b) return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
+        return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
+    }
+};
+
+struct LerpRgba_1AC0E8 {
+    static void Do(Rgba_1AC0E8* out, Rgba_1AC0E8* a, Rgba_1AC0E8* b, f32 t)
+    {
+        Rgba_1AC0E8 r;
+        r.c[0] = Lerp_1AC0E8::Of(a->c[0], b->c[0], t);
+        r.c[1] = Lerp_1AC0E8::Of(a->c[1], b->c[1], t);
+        r.c[2] = Lerp_1AC0E8::Of(a->c[2], b->c[2], t);
+        r.c[3] = Lerp_1AC0E8::Of(a->c[3], b->c[3], t);
+        *out = r;
+    }
+};
+
+void func_001AC0E8(Self_1AC0E8* self)
+{
+    Rect_1AC0E8 out;
+    f32 t = 0.0f;
+    s32 flag = 0;
+    if (self->f27C != t) {
+        f32 d = D_00261858[1] - self->f27C;
+        if (d < 0.5f) t = 1.0f - (d + d);
+        flag = d < 0.75f;
+    }
+    u32 grey = 0xFF808080;
+    self->f274 = func_001EA4B8(&D_002743C0, 0, self->f274, self->f278, D_00261858[2]);
+    f32 y = self->f28C;
+    f32 h = self->f274 * y;
+    y -= h;
+    f32 w = self->f288;
+    func_00137228(&out, self->f21C + self->f280, self->f220 + self->f284);
+    func_00137238(&out, w, y);
+    {
+        Col_1AC0E8 tmp;
+        tmp.v[0] = grey;
+        func_00137248(&out, &tmp);
+    }
+    func_00137260(&out, 0);
+    func_00137268(&out, 0);
+    {
+    Rgba_1AC0E8 col;
+    col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;
+    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, D_00262280);
+    {
+        out.x = self->f21C + self->f280;
+        out.y = self->f220 + self->f284 + y;
+        out.w = self->f288;
+        out.h = h;
+        Rgba_1AC0E8 a, b;
+        a.c[0] = 0x60; a.c[1] = 0; a.c[2] = 0; a.c[3] = 0xC0;
+        b.c[0] = 0xC0; b.c[1] = 0xC0; b.c[2] = 0xC0; b.c[3] = 0xFF;
+        LerpRgba_1AC0E8::Do(&col, &a, &b, t);
+    }
+    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], D_00262280);
+    }
+    func_0015C8B8(self->text, self->f20C, self->f20C);
+    VEnt_1AC0E8* ve = &self->text->vtbl[8];
+    ve->fn((u8*)self->text + ve->delta, self->f21C, self->f220, 0x7A, out.f10, D_00262280);
+    f32 dx = 0.0f;
+    f32 dy = dx;
+    if (flag) {
+        dx = func_00205400(D_00261858[4] * 40.0f) * 8.0f;
+        dy = func_00205210(D_00261858[4] * 15.0f) * 4.0f;
+    }
+    out.x = self->f21C + self->f290 + dx;
+    out.y = self->f220 + self->f294 + dy;
+    out.w = 0.0f;
+    out.h = 0.0f;
+    out.f14 = 1;
+    out.f18 = 1;
+    char str[2] = { self->f26C + 0x72, 0 };
+    func_0015C638(self->text, str, &out, 0, D_00262280);
+    func_0015C900(self->text);
+}
