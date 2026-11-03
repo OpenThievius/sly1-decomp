@@ -2233,3 +2233,133 @@ s32 func_00169780(u32 mask)
     func_0018D6F0();
     return res;
 }
+
+struct Obj_16AB38;
+struct VT_16AB38 {
+    u8 pad[0x18];
+    void (*f18)(Obj_16AB38* o);
+};
+struct Obj_16AB38 {
+    VT_16AB38* vt;
+};
+struct Cand_16AB38 {
+    u8 pad[0x304];
+    s32* flagp;
+};
+struct Ent_16AB38 {
+    u32 flags;
+    u8 pad[0x448];
+};
+struct Tbl_16AB38 {
+    u8 pad0[0x458];
+    Ent_16AB38 e[1];
+};
+struct Tbl2_16AB38 {
+    u8 pad0[0x1588];
+    u32 f1588;
+    u8 pad1[0x448];
+    u32 f19D4;
+};
+struct Pair_16AB38 {
+    Obj_16AB38* src;
+    Obj_16AB38* dst;
+};
+struct Self_16AB38 {
+    u8 pad0[0x2DC];
+    Pair_16AB38 p[4];
+    s32 cur;
+    s32 sel;
+    u8 pad1[4];
+    Cand_16AB38* chosen;
+    u8 pad2[4];
+    Obj_16AB38* objs[5];
+    u8 pad3[0x18];
+    Cand_16AB38* cands[4];
+};
+struct SelEnt_16AB38 {
+    s32 id;
+    s32 pad;
+};
+
+extern s32 D_002623CC;
+extern u8 D_00275BC0[];
+extern u8 D_0026FA90[];
+
+Obj_16AB38* func_001B6290(Obj_16AB38* o, s32 a, s32 b, s32 c);
+s32 func_001602A0();
+void func_0016B300(Self_16AB38* self, s32 idx, s32 z);
+void func_001B6628(Obj_16AB38* o, s32 id);
+void func_001E9498(u8* a, u8* b);
+
+void func_0016AB38(Self_16AB38* self)
+{
+    if (self->p[0].src) self->p[0].dst = func_001B6290(self->p[0].src, 0, -1, 0);
+    if (self->p[1].src) self->p[1].dst = func_001B6290(self->p[1].src, 0, -1, 0);
+    if (self->p[2].src) self->p[2].dst = func_001B6290(self->p[2].src, 0, -1, 0);
+    if (self->p[3].src) self->p[3].dst = func_001B6290(self->p[3].src, 0, -1, 1);
+    self->cur = 5;
+    for (;;) {
+        s32 c = self->cur;
+        if (c < 3) break;
+        if ((*(Tbl_16AB38**)&D_002623C0)->e[c - 2].flags & 0x20) break;
+        s32 d = c - 1;
+        if ((*(Tbl_16AB38**)&D_002623C0)->e[d].flags & 1) break;
+        self->cur = d;
+    }
+    for (s32 i = 1; i <= self->cur; i++) {
+        Obj_16AB38* o = self->objs[i - 1];
+        if (o && ((*(Tbl_16AB38**)&D_002623C0)->e[i].flags & 1)) o->vt->f18(o);
+    }
+    self->chosen = 0;
+    for (s32 i = 0; i < 4; i++) {
+        Cand_16AB38* c = self->cands[i];
+        if (c && *c->flagp == 0) {
+            s32 v = 0;
+            switch (i) {
+            case 0: v = 1; break;
+            case 1: v = func_001602A0() >> 1; goto mask;
+            case 2: v = func_001602A0() >> 2; goto mask;
+            case 3: v = func_001602A0() >> 3;
+            mask: v &= 1; break;
+            default: break;
+            }
+            if (v) {
+                self->chosen = c;
+                break;
+            }
+        }
+    }
+    s32 idx;
+    if (self->chosen) {
+        idx = 0;
+    } else {
+        s32 a = D_002623CC;
+        if (a != -1 && ((*(Tbl_16AB38**)&D_002623C0)->e[a].flags & 1)) {
+            idx = a;
+        } else {
+            s32 c = self->cur;
+            if (((*(Tbl_16AB38**)&D_002623C0)->e[c - 1].flags & 1) == 0) {
+                idx = c - 2;
+            } else if (((*(Tbl_16AB38**)&D_002623C0)->e[c].flags & 1) == 0) {
+                idx = c - 1;
+            } else {
+                idx = c;
+            }
+        }
+    }
+    func_0016B300(self, idx, 0);
+    if (self->p[2].dst || self->p[3].dst) {
+        idx = self->cur;
+        if (idx != 5) {
+            self->sel = idx;
+        } else {
+            Tbl2_16AB38* t = (Tbl2_16AB38*)(*(Tbl_16AB38**)&D_002623C0);
+            if (t->f1588 & 0x20) self->sel = 0;
+            else if (t->f19D4 & 1) self->sel = 0;
+            else self->sel = idx;
+        }
+        if (self->p[2].dst) func_001B6628(self->p[2].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
+        if (self->p[3].dst) func_001B6628(self->p[3].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
+    }
+    func_001E9498(D_00275BC0, D_0026FA90);
+}

@@ -1611,6 +1611,7 @@ func_0016A5F0	func_0016AC48	match
 func_0016A758	func_0016ADB0	match	
 func_0016A820	func_0016AE78	match	rodata
 func_0016AA18	func_0016B070	match	
+func_0016AB38	func_0016B190	differs	the C is 924 bytes, retail's function 812
 func_0016AED8	func_0016B4C0	match	
 func_0016AF80	func_0016B568	match	version-specific
 func_0016B0F8	func_0016B6F0	match	
