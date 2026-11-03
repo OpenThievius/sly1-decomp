@@ -3657,6 +3657,7 @@ func_00209CB8	func_0020B180	match
 func_00209E48	func_0020B310	match	version-specific
 func_00209FA8	func_0020B470	match	
 func_0020A078	func_0020B540	differs	
+func_0020A220	func_0020B6E8	match	
 func_0020A518	func_0020B9E0	match	
 func_0020A538	func_0020BA00	match	
 func_0020A630	func_0020BAF8	match	

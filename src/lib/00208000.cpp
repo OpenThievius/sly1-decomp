@@ -1697,3 +1697,137 @@ s32 func_00209990(s32 self, u32 src, s32 n)
     }
     return r;
 }
+
+struct Ctx_20A220;
+enum Kind_20A220 { KIND_6_20A220 = 6 };
+struct Args_20A220 {
+    Kind_20A220 f0;
+    u8* f4;
+    u8* f8;
+    s32 fC;
+    u64 f10;
+    u64 f18;
+};
+typedef s32 (*Handler_20A220)(Ctx_20A220* ctx, Args_20A220* args, void* arg);
+struct Ent_20A220 {
+    u64 f0;
+    u64 f8;
+    Handler_20A220 f10;
+    void* f14;
+};
+struct Prog_20A220 {
+    u8 pad[0x44];
+    Ent_20A220* f44;
+    s32 f48;
+};
+struct Ctx_20A220 {
+    u8 pad[0x40];
+    Prog_20A220* f40;
+};
+struct Bits_20A220 {
+    u64 f0;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    u64 f18;
+    s32 f20;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+};
+struct Rec_20A220 {
+    u8 pad[0x18];
+    u64 f18;
+    u64 f20;
+    u64 f28;
+    u64 f30;
+    s32 f38;
+    s32 f3C;
+    s32 f40;
+    s32 f44;
+    s32 f48;
+    s32 f4C;
+};
+
+void func_002115C0(Bits_20A220* s, s32 a1, s32 a2, s32 a3);
+s32 func_002115F8(Bits_20A220* s, s32 n);
+u8* func_002117A0(Bits_20A220* s, s32 n);
+void func_0020A630(Bits_20A220* s, Rec_20A220* r);
+s32 func_0020A7F0(Prog_20A220* p, Bits_20A220* s, u64* r);
+
+s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
+{
+    Bits_20A220 bits;
+    Rec_20A220 rec;
+    Args_20A220 args;
+    Bits_20A220* s;
+    Rec_20A220* r;
+    Handler_20A220 handler;
+    void* handlerArg;
+    Ent_20A220* table;
+    s32 result;
+    Prog_20A220* prog;
+    s32 ok;
+    Kind_20A220 kind;
+    s32 i;
+
+    r = &rec;
+    prog = ctx->f40;
+    handler = 0;
+    handlerArg = 0;
+    ok = 1;
+    i = 0;
+    table = prog->f44;
+    func_002115C0(&bits, a1, a3, a4);
+    s = &bits;
+    result = 0;
+    for (; handler == 0 && i < prog->f48; i++) {
+        if (table[i].f0 == 0xBDFF000000ULL) {
+            handler = table[i].f10;
+            handlerArg = table[i].f14;
+        }
+    }
+    for (;;) {
+        if (func_002115F8(s, 0x20) == 0x1BA) {
+            func_0020A630(s, r);
+        }
+        kind = KIND_6_20A220;
+        while (func_002115F8(s, 0x18) == 1 && func_002115F8(s, 0x20) != 0x1BA &&
+               func_002115F8(s, 0x20) != 0x1B9 && s->f18 < count * 8 && ok != 0) {
+            (void)func_0020A7F0(prog, s, &r->f18);
+            if (s->f18 > count * 8) {
+                continue;
+            }
+            for (i = 0; i < prog->f48; i++) {
+                Ent_20A220* e = &table[i];
+                if (e->f0 == (r->f18 & e->f8)) {
+                    args.f0 = kind;
+                    args.f4 = func_002117A0(s, r->f40);
+                    args.f8 = func_002117A0(s, r->f38);
+                    args.f10 = r->f28;
+                    args.fC = r->f3C;
+                    args.f18 = r->f30;
+                    ok = e->f10(ctx, &args, e->f14);
+                    break;
+                }
+            }
+            if (i == prog->f48 && handler != 0) {
+                args.f0 = kind;
+                args.f4 = func_002117A0(s, r->f40);
+                args.f8 = func_002117A0(s, r->f38);
+                args.f10 = r->f28;
+                args.fC = r->f3C;
+                args.f18 = r->f30;
+                ok = handler(ctx, &args, handlerArg);
+            }
+            if (ok != 0) {
+                result = (s32)(s->f18 >> 3);
+            }
+        }
+        if (s->f18 > count * 8 || func_002115F8(s, 0x20) != 0x1BA) {
+            break;
+        }
+    }
+    return result;
+}
