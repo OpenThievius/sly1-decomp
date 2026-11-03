@@ -1698,3 +1698,93 @@ void func_0015F710(void* self, Node_15F710* owner)
     }
     D_0027B314 = it.prev;
 }
+
+struct List_15EFE8 {
+    u8* head;
+    u8* tail;
+    s32 offset;
+};
+
+struct Iter_15EFE8 {
+    List_15EFE8* list;
+    u8* link;
+    s32 offset;
+    Iter_15EFE8* prev;
+};
+
+struct Node_15EFE8 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad18[0x1088 - 0x18];
+    void* f1088;
+};
+
+struct Obj_15EFE8 {
+    u8 pad0[0x20];
+    List_15EFE8 l0;
+    List_15EFE8 l1;
+    List_15EFE8 l2;
+};
+
+extern u8* D_00275710;
+
+s32 func_00152720(List_15EFE8* l);
+void func_00152600(List_15EFE8* l, Node_15EFE8* n);
+void func_00152470(u8* l, Node_15EFE8* n);
+void func_00152440(List_15EFE8* l);
+void func_001B5F28(u8* l, void* n);
+
+struct Begin_15EFE8 {
+    static void Of(Iter_15EFE8* it, List_15EFE8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = (*(Iter_15EFE8**)&D_0027B314);
+        (*(Iter_15EFE8**)&D_0027B314) = it;
+    }
+};
+
+struct Next_15EFE8 {
+    static Node_15EFE8* Of(Iter_15EFE8* it)
+    {
+        Node_15EFE8* obj = *(Node_15EFE8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+void func_0015EFE8(Obj_15EFE8* self)
+{
+    Iter_15EFE8 it;
+    Node_15EFE8* n;
+    if (func_00152720(&self->l0) == 0) {
+        Begin_15EFE8::Of(&it, &self->l0);
+        while ((n = Next_15EFE8::Of(&it)) != 0) {
+            func_00152600(&self->l0, n);
+            func_00152470(n->f14 + 0x1CC0, n);
+        }
+        func_00152440(&self->l0);
+        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+    }
+    if (func_00152720(&self->l1) == 0) {
+        Begin_15EFE8::Of(&it, &self->l1);
+        while ((n = Next_15EFE8::Of(&it)) != 0) {
+            if (n->f1088 != 0) {
+                func_001B5F28(D_00275710 + 0x1B4C, n->f1088);
+            }
+            func_00152600(&self->l1, n);
+            func_001B5F28(D_00275710 + 0x1B40, n);
+        }
+        func_00152440(&self->l1);
+        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+    }
+    if (func_00152720(&self->l2) == 0) {
+        Begin_15EFE8::Of(&it, &self->l2);
+        while ((n = Next_15EFE8::Of(&it)) != 0) {
+            func_00152600(&self->l2, n);
+            func_001B5F28(D_00275710 + 0x1BF4, n);
+        }
+        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+    }
+}

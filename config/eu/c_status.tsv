@@ -240,6 +240,7 @@ func_001148B8	func_001148B8	match
 func_00114950	func_00114950	match	
 func_001149F0	func_001149F0	match	
 func_00114B80	func_00114B80	match	
+func_00114D18	func_00114D18	match	
 func_001151C0	func_001151C0	match	
 func_00115398	func_00115398	match	
 func_00115440	func_00115440	match	
@@ -1442,6 +1443,7 @@ func_0015ED50	func_0015F218	match
 func_0015EDB8	func_0015F280	match	
 func_0015EE80	func_0015F348	match	
 func_0015EF88	func_0015F450	match	
+func_0015EFE8	func_0015F4B0	match	
 func_0015F210	func_0015F6D8	match	
 func_0015F618	func_0015FAE0	match	
 func_0015F658	func_0015FB20	match	
@@ -3301,6 +3303,7 @@ func_001F4408	func_001F53F8	match	version-specific
 func_001F4500	func_001F5500	match	
 func_001F4660	func_001F5660	match	
 func_001F4760	func_001F5760	match	
+func_001F4808	func_001F5808	differs	
 func_001F4A30	func_001F5A30	match	
 func_001F4E18	func_001F5E18	match	
 func_001F4E48	func_001F5E48	match	
@@ -3475,6 +3478,7 @@ func_00200118	func_002014D8	match
 func_00200138	func_002014F8	match	
 func_00200158	func_00201518	match	
 func_00200188	func_00201548	match	
+func_00200220	func_002015E0	match	
 func_002003F8	func_002017B8	match	
 func_00200418	func_002017D8	match	
 func_00200468	func_00201828	match	
@@ -3553,6 +3557,7 @@ func_002023B0	func_002036F0	match
 func_00202768	func_00203AA8	match	
 func_002027A0	func_00203AE0	match	
 func_002027C8	func_00203B08	match	
+func_002028A8	func_00203BE8	match	
 func_00202A80	func_00203DC0	match	rodata
 func_00202B68	func_00203EA8	match	rodata
 func_00202C38	func_00203F78	match	rodata

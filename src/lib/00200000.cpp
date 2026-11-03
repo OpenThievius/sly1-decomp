@@ -1739,3 +1739,101 @@ s32 func_00203EE0(Q_00203EE0 self, s32* out)
     func_001F6B40((*(volatile s32*)&D_0027942C));
     return base;
 }
+
+struct Obj_200220;
+struct VT_200220 { s16 pad[8]; s16 delta; s16 pad2; s32 (*fn)(Obj_200220* self, s32 a, s32 b, s32 c, s32 d, s32 e); };
+struct Obj_200220 { s32 x0; VT_200220* vt; };
+struct Ent_200220 { Obj_200220* obj; u32 w; };
+struct Tab_200220 { s32 p0; s32 p4; Ent_200220* ents; u32 count; };
+
+s32 func_002000B0(Tab_200220* a, Obj_200220* b);
+
+s32 func_00200220(Tab_200220* self, Obj_200220* o, s32 flag, u8* base, s32 p, s32 q)
+{
+    s32 res;
+    u32 i;
+
+    if (func_002000B0(self, o)) {
+        return (s32)base;
+    }
+    res = 0;
+    for (i = 0; i < self->count; i++) {
+        s32 r;
+        Obj_200220* ob;
+        if (flag && (self->ents[i].w >> 30) != 1) {
+            continue;
+        }
+        r = (s32)(base + (self->ents[i].w & 0x1FFFFFFF));
+        if ((self->ents[i].w >> 29) & 1) {
+            r = *(s32*)r;
+        }
+        ob = self->ents[i].obj;
+        r = ob->vt->fn((Obj_200220*)((u8*)ob + ob->vt->delta), (s32)o, flag, r, p, q);
+        if (r != 0) {
+            if (res == 0) {
+                res = r;
+            } else if (res != r) {
+                if (p != 0) {
+                    s32 a, b;
+                    a = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, res, 0, 0);
+                    b = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, r, 0, 0);
+                    if (a == b) {
+                    } else if (a == q) {
+                        continue;
+                    } else if (b == q) {
+                        res = r;
+                        continue;
+                    }
+                }
+                return 0;
+            }
+        }
+    }
+    return res;
+}
+
+struct Cfg_2028A8 {
+    u8 a, b, c, d;
+    u16 e, f;
+    u16 g, h;
+    void* i;
+    u32 j;
+};
+
+extern u8 D_002793A8[];
+extern u8 D_002793B8[];
+extern u8 D_002793C8[];
+extern Cfg_2028A8 D_002793D8;
+
+s32 func_002028A8(Cfg_2028A8* c)
+{
+    u32 r = *(volatile u32*)0x1000E000;
+    u32 w20 = *(volatile u32*)0x1000E020;
+    u32 w30 = *(volatile u32*)0x1000E030;
+    u32 w50 = *(volatile u32*)0x1000E050;
+    u32 w40 = *(volatile u32*)0x1000E040;
+    if (c->a >= 10) return -1;
+    if (c->b >= 10) return -2;
+    if (c->c >= 10) return -3;
+    if (c->d >= 7) return -4;
+    r = (r & ~0x30u) | (D_002793A8[c->a] << 4);
+    r = (r & ~0xC0u) | (D_002793B8[c->b] << 6);
+    r = (r & ~0xCu) | (D_002793C8[c->c] << 2);
+    if (c->d) {
+        r |= 2;
+        r = (r & ~0x300u) | ((c->d - 1) << 8);
+    } else {
+        r &= ~2u;
+    }
+    w20 = (c->e << 16) | c->f;
+    w30 = (c->h << 16) | c->g;
+    w40 = c->j;
+    *(volatile u32*)0x1000E000 = r;
+    *(volatile u32*)0x1000E020 = w20;
+    w50 = (u32)c->i;
+    *(volatile u32*)0x1000E030 = w30;
+    *(volatile u32*)0x1000E050 = w50;
+    *(volatile u32*)0x1000E040 = w40;
+    D_002793D8 = *c;
+    return 0;
+}

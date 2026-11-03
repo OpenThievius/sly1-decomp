@@ -2153,3 +2153,74 @@ Val_1151C0 func_001151C0(s32 unused, Obj_1151C0* obj, s32 c)
     q.tag = 0x22;
     return q;
 }
+
+struct Val_114D18;
+
+void func_0011B008(Val_114D18* v);
+void func_0011B018(Val_114D18* dst, const Val_114D18* src);
+void func_0011B060(Val_114D18* v, s32 mode);
+Val_114D18& func_0011B0A8(Val_114D18* dst, const Val_114D18& src);
+void func_0011B6C0(Val_114D18* v, Val_114D18* target);
+
+struct Val_114D18 {
+    s32 tag;
+    Val_114D18* f4;
+    Val_114D18* f8;
+    Val_114D18() { func_0011B008(this); }
+    Val_114D18(const Val_114D18& o) { func_0011B018(this, &o); }
+    ~Val_114D18() { func_0011B060(this, 2); }
+};
+
+struct Cell_114D18 : Val_114D18 {
+    Cell_114D18() { tag = -1; }
+};
+
+struct Obj_114D18 {
+    s32 f0;
+    s32 f4;
+    Val_114D18 m;
+};
+
+Val_114D18 func_0011A080(Val_114D18* expr, s32 c);
+
+Val_114D18 func_00114D18(s32 unused, Obj_114D18* obj, s32 c)
+{
+    Val_114D18 q;
+    Cell_114D18 arr[5];
+    if (obj->m.tag == 0) {
+        func_0011B0A8(&q, obj->m);
+    } else {
+        Val_114D18* list = (struct Val_114D18 *)func_0011AF28();
+        Val_114D18* p[2];
+        Val_114D18* last;
+        list->tag = 0x1E;
+        for (u32 i = 0; i < 2; i++) {
+            p[i] = (struct Val_114D18 *)func_0011AF28();
+        }
+        func_0011B6C0(&arr[0], &arr[1]);
+        arr[0].f8 = 0;
+        func_0011B6C0(&arr[1], &arr[3]);
+        arr[1].f8 = &arr[2];
+        func_0011B6C0(&arr[2], &arr[4]);
+        arr[2].f8 = 0;
+        arr[3].tag = 0x11;
+        arr[3].f8 = p[0];
+        func_0011B0A8(p[0], *(Val_114D18*)obj);
+        arr[4].tag = 0x11;
+        arr[4].f8 = p[1];
+        Val_114D18* m = &obj->m;
+        for (Val_114D18* l = m->f4; l != 0; l = l->f8) {
+            Val_114D18* e = (struct Val_114D18 *)func_0011AF28();
+            func_0011B0A8(p[1], *l);
+            func_0011B0A8(e, func_0011A080(&arr[0], c));
+            if (list->f4 == 0) {
+                func_0011B6C0(list, e);
+            } else {
+                last->f8 = e;
+            }
+            last = e;
+        }
+        func_0011B6C0(&q, list->f4);
+    }
+    return q;
+}

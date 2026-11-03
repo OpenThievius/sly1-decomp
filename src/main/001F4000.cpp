@@ -646,3 +646,86 @@ void func_001F5008(Self_1F5008* self) {
         func_00177838(&tmp, 0, 0);
     }
 }
+
+struct Item_1F4808 { u8 pad[0x34]; f32 f34; };
+struct Obj_1F4808 {
+    u8 pad0[0x2D4];
+    s32 f2D4;
+    s32 f2D8;
+    u8 pad2DC[4];
+    s32 f2E0;
+    u8 pad2E4[0x2FC - 0x2E4];
+    s32 f2FC;
+    u8 pad300[0x310 - 0x300];
+    s32 f310;
+    Item_1F4808** f314;
+    s32 f318;
+    f32 f31C;
+    u8 pad320[4];
+    f32 f324;
+};
+struct Glob_1F4808 { u8 pad[0x19DC]; s32 f19DC; };
+
+struct Gl_1F4808 { u8 pad[0x260]; s32 f260; };
+extern Gl_1F4808 D_0026E9F8;
+
+s32 func_001601A0(s32 a);
+void func_001E0828(Gl_1F4808* g);
+void func_001F4760(Obj_1F4808* self, s32 state);
+void func_001E02C8(Gl_1F4808* g, s32 n);
+void func_001F4408(s32 flag, s32 n);
+s32 func_001300E8(Item_1F4808* key, s32 kind);
+void func_001451F0(u8* a0, s32 a1, s32 a2, u8* a3, s32 a4, s32 a5);
+void func_0012C7B0(Item_1F4808* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
+s32 func_0012C9A8(Item_1F4808* node);
+void func_001837E0(Obj_1F4808* self, s32 a, s32 b, s32 c);
+
+void func_001F4808(Obj_1F4808* self)
+{
+    Item_1F4808* key;
+    s32 i;
+    s32 found = 0;
+    s32 next;
+    Item_1F4808* it;
+
+    key = (struct Item_1F4808 *)func_001925F0();
+    if (D_0026E9F8.f260 == 2
+        && (self->f2E0 != 0 || self->f2D4 != 0
+            || ((*(Glob_1F4808**)&D_002623C0)->f19DC == 0 && (u8)func_001601A0(self->f2FC) == 1))) {
+        func_001E0828(&D_0026E9F8);
+        func_001F4760(self, 2);
+        goto tail;
+    }
+    if (D_0026E9F8.f260 >= 2) {
+        func_001E02C8(&D_0026E9F8, 4);
+    }
+    if (self->f2D8 != 0) {
+        func_001F4408(1, self->f318);
+        func_001F4760(self, 0);
+        return;
+    }
+    if (key == 0 || func_001300E8(key, 0x16) == 0) {
+        func_001451F0((*(u8**)&D_00261990), 2, 0, (*(u8**)&D_00261990) + 0x460, 0, 0);
+    }
+    func_001F4760(self, 5);
+    for (i = 0; i < self->f310; i++) {
+        it = self->f314[i];
+        func_0012C7B0(it, 0, 0, 0, 0.0f, 1.0f);
+        next = 0;
+        if (found != 0 || func_0012C9A8(it) != 0) {
+            next = 1;
+        }
+        found = next;
+    }
+    if (found == 0) {
+        if (self->f324 > 0.0f) {
+            self->f31C = ((f32*)&D_0026185C)[0] + self->f324;
+        } else if (self->f310 > 0) {
+            self->f31C = ((f32*)&D_0026185C)[0] + self->f314[0]->f34;
+        } else {
+            self->f31C = ((f32*)&D_0026185C)[0];
+        }
+    }
+tail:
+    func_001837E0(self, 2, 0, 0);
+}
