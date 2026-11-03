@@ -197,10 +197,12 @@ def run_step(cmd, **kw):
         return subprocess.CompletedProcess(cmd, proc.returncode, out.read(), err.read())
 
 
-def compile_file(src, out, flags=None, keep_asm=None, source=None):
+def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     """Compile `src` to the object `out`. Returns the cc1plus assembly text.
 
     source: the file whose config/cflags.tsv row applies (a version's unit takes its shared file's).
+    whole: compile it as the original was, without -ffunction-sections and -fdata-sections (a
+    whole file of config/us/files.tsv, linked as one object).
     """
     src = Path(src).resolve()
     source = Path(source).resolve() if source else src
@@ -219,7 +221,7 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None):
             compiler = run + [str(cc1plus)]
         # The Windows tools get paths relative to the repository root, where they run.
         for cmd, name in ((run + [str(cpp)] + CPP_DEFINES + [os.path.relpath(src, ROOT), str(ii)], "cpp"),
-                          (compiler + ["-quiet"] + flags + LAYOUT_FLAGS + [str(ii), "-o", str(s)], "cc1plus")):
+                          (compiler + ["-quiet"] + flags + ([] if whole else LAYOUT_FLAGS) + [str(ii), "-o", str(s)], "cc1plus")):
             proc = run_step(cmd, cwd=ROOT)
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
                 raise CompileError((proc.stderr or proc.stdout).strip() or "%s failed" % name)

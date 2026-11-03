@@ -30,6 +30,7 @@ import todo  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
+WHOLE = todo.whole_files()
 DATA_SECTIONS = (".data", ".rodata", ".bss", ".sdata", ".sbss", ".lit4", ".lit8")
 DATA_NAME = re.compile(r"^\.(?:data|rodata)\.(D_[0-9A-F]{8})$")
 ADDR_LABEL = re.compile(r"^D_[0-9A-F]{8}$")
@@ -53,11 +54,14 @@ def compile_sources(jobs):
         obj = ROOT / "build" / "us" / "src" / src.relative_to(ROOT / "src").with_suffix(".o")
         obj.parent.mkdir(parents=True, exist_ok=True)
         deps = [src, ROOT / "config" / "cflags.tsv"] + sorted((ROOT / "include").rglob("*.h"))
+        whole = str(src.relative_to(ROOT)) in WHOLE
+        deps.append(ROOT / "config" / "us" / "files.tsv")
         if not obj.exists() or obj.stat().st_mtime < max(d.stat().st_mtime for d in deps if d.exists()):
             try:
-                cc.compile_file(src, obj)
-                rodata.bake(obj, image, resolver)
-                drop_frame_tables(obj)
+                cc.compile_file(src, obj, whole=whole)
+                if not whole:  # a whole file's .rodata is linked where retail has it
+                    rodata.bake(obj, image, resolver)
+                    drop_frame_tables(obj)
             except cc.CompileError as e:
                 raise LayoutError("%s does not compile:\n%s" % (src.relative_to(ROOT), e))
             except rodata.RodataError as e:
@@ -123,7 +127,18 @@ def placements(objects):
     for src, path in objects.items():
         obj = elf.Elf(path.read_bytes())
         rel = path.relative_to(ROOT)
-        for sec in obj.sections:
+        w = WHOLE.get(str(src.relative_to(ROOT)))
+        if w is not None:
+            p, d = whole_placements(obj, w, rel, src, resolver, starts)
+            for f in p:
+                if f[0] in {q[0] for q in placed}:
+                    raise LayoutError("two definitions of the function at 0x%X (%s)" % (f[0], f[4]))
+                if starts[f[0]] != f[4]:
+                    aliases[starts[f[0]]] = f[4]
+                defined.add(f[4])
+            placed += p
+            data += d
+        for sec in obj.sections if w is None else []:
             if sec["name"].startswith(DATA_SECTIONS) and sec["size"]:
                 if sec["name"] == ".bss":
                     data.append(bss_placement(obj, sec, rel, src))
@@ -143,7 +158,7 @@ def placements(objects):
                                   "A constant retail loads from .rodata is read through an extern "
                                   "(extern f32 D_00219718[];), not written as a literal"
                                   % (src.relative_to(ROOT), sec["name"], sec["size"]))
-        for sym in obj.symbols:
+        for sym in obj.symbols if w is None else []:
             if sym["type"] != elf.STT_FUNC or sym["shndx"] in (elf.SHN_UNDEF,) or sym["shndx"] >= len(obj.sections):
                 continue
             section = obj.sections[sym["shndx"]]["name"]
@@ -174,6 +189,36 @@ def placements(objects):
         if a[0] == b[0]:
             raise LayoutError("two definitions of the global at 0x%X (%s, %s)" % (a[0], a[4], b[4]))
     return placed, aliases, data
+
+
+def whole_placements(obj, w, rel, src, resolver, starts):
+    """The functions and data of a whole file (config/us/files.tsv): its .text at its start, each
+    function where retail has it (source order is retail's order), and its .rodata, .data and .bss
+    each in one piece at their addresses. A function after the first has no section of its own to
+    place (section "")."""
+    name = src.relative_to(ROOT)
+    placed, data = [], []
+    for sec in obj.sections:
+        kind = sec["name"][1:]
+        if sec["name"] in (".text", ".rodata", ".data", ".bss") and sec["size"] and w.get(kind) is None:
+            raise LayoutError("%s has %s (%d bytes), which config/us/files.tsv gives no address"
+                              % (name, sec["name"], sec["size"]))
+    text = obj.section(".text")
+    funcs = sorted((s["value"], s["name"], s["size"]) for s in obj.symbols
+                   if s["type"] == elf.STT_FUNC and text is not None and s["shndx"] == text["index"])
+    for i, (off, fname, size) in enumerate(funcs):
+        addr = w["text"] + off
+        if resolver.us_address(fname) != addr or addr not in starts:
+            raise LayoutError("%s: %s lands at 0x%X, where retail has %s: a whole file defines its "
+                              "functions in retail's order" % (name, fname, addr, starts.get(addr, "no function")))
+        placed.append((addr, size, rel, ".text" if i == 0 else "", fname))
+    if text is not None and text["size"] and w["text"] + text["size"] > w["end"]:
+        raise LayoutError("%s: its .text ends at 0x%X, past 0x%X" % (name, w["text"] + text["size"], w["end"]))
+    for kind in ("rodata", "data", "bss"):
+        sec = obj.section("." + kind)
+        if sec is not None and sec["size"]:
+            data.append((w[kind], sec["size"], rel, "." + kind, "D_%08X" % w[kind]))
+    return placed, data
 
 
 def bss_placement(obj, sec, rel, src):
@@ -274,9 +319,12 @@ def data_plan(chunks, data_placed):
         if d:
             covered[name] = addr  # defined by C unless the C variable is a static
             end = addr + d[1]
-            if end not in {a for _, a, _ in chunks[i + 1:]}:
+            later = [a for _, a, _ in chunks[i + 1:] if a >= end]
+            # A whole file's section can end in the padding before the next object's (zeros).
+            if not later or later[0] - end >= 8 or (later[0] - end and d[3].count(".") > 1):
                 raise LayoutError("%s (%d bytes) does not end where a label of .data starts"
                                   % (d[4], d[1]))
+            end = later[0]
             plan.append(("c", d))
         elif plan and plan[-1][0] == "run" and not aligned(lines):
             plan[-1][1].append((name, addr, lines))
@@ -391,6 +439,8 @@ def layout(ld_script, objects):
             flush()
             if p[1] > size:
                 raise LayoutError("%s is %d bytes, more than retail's %d at 0x%X" % (p[4], p[1], size, addr))
+            if not p[3]:
+                continue  # inside a whole file's .text, placed with its first function
             entries.append("        . = 0x%X;" % (addr - text_start))
             entries.append("        %s(%s);" % (p[2], p[3]))
         else:
@@ -406,7 +456,7 @@ def layout(ld_script, objects):
         raise LayoutError("%s has no text.s object to replace" % ld_script.relative_to(ROOT))
     text = marker.sub(lambda m: "\n".join(entries) if m.group(1) == ".text" else "", text)
     for kind in ("rodata", "data", "bss"):
-        mine = [d for d in data_placed if d[3] == ".bss" and kind == "bss" or d[3].startswith("." + kind + ".")]
+        mine = [d for d in data_placed if d[3].split(".")[1] == kind]
         if not mine:
             continue
         # .main starts with .rodata, then .data; .main_bss with the first label of .bss.

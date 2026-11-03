@@ -28,6 +28,7 @@ procedure; read it before you match anything.
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/us/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md) | `tools/classify_asm.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
+| `src/main/<name>.cpp`, `config/us/files.tsv` | a real source file, found in retail and proved by building it whole (docs/AGENT_WORKFLOW.md); the table gives its code range and where its data starts | you, by hand |
 | `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with Sony's 2.9-ee-991111, which `config/cflags.tsv` names per file (docs/TOOLCHAIN.md) | you |
 | `src/libm/XXXXXXXX.cpp` | the math library (0x204F68–0x2093F0), by the same windows; built with Sony's Linux 2.9-ee-991111-01 when the toolchain has it (docs/TOOLCHAIN.md) | you |
 | `include/` | the project's own headers | by hand |

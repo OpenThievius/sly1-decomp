@@ -111,8 +111,29 @@ def code_range_of(addr, key="us"):
     raise KeyError("0x%X is in no code range of config/%s/layout.tsv" % (addr, key))
 
 
+def whole_files():
+    """{source path: {"text", "end", "rodata", "data", "bss": address or None}} of the files
+    config/us/files.tsv lists: real source files, compiled and linked whole as the original's
+    were (tools/c_layout.py), in place of their 16 KiB windows."""
+    path = ROOT / "config" / "us" / "files.tsv"
+    if not path.exists():
+        return {}
+    out = {}
+    for line in path.read_text().splitlines()[1:]:
+        if not line.strip():
+            continue
+        f, *cols = line.split("\t")
+        out[f] = dict(zip(("text", "end", "rodata", "data", "bss"),
+                          (None if c in ("-", "") else int(c, 16) for c in cols)))
+    return out
+
+
 def source_of(addr):
-    """The source file that holds a US function: its code range's folder, its 16 KiB window."""
+    """The source file that holds a US function: a whole file of config/us/files.tsv, or else
+    its code range's folder, its 16 KiB window."""
+    for f, w in whole_files().items():
+        if w["text"] <= addr < w["end"]:
+            return f
     return "%s/%08X.cpp" % (code_range_of(addr)[5], window_of(addr))
 
 
