@@ -713,3 +713,121 @@ s32 func_002101F0(Obj_2101F0* p, s32 flag)
     o->f60 = p->f14C;
     return ok;
 }
+
+struct Hdl_210E00;
+struct Obj_210E00 { u8 pad[0x858]; Hdl_210E00* f858; };
+
+void func_0020F0C0(Obj_210E00* obj, u32 value);
+void func_0020B190(Hdl_210E00* h, s32* p);
+
+void func_00210E00(Obj_210E00* self, u32 a1, u32 a2)
+{
+
+    s32 tmp[8];
+    while (*(volatile s32*)0x10002010 < 0) { }
+    (void)func_001F9D60();
+    *(volatile u32*)0x1000B010 = a1 & 0x0FFFFFFF;
+    *(volatile u32*)0x1000B020 = a2 << 6;
+    *(volatile u32*)0x1000B000 = 0x100;
+    (void)func_001F9DA8();
+    func_0020F0C0(self, a2 | 0x70000000);
+    tmp[0] = 4;
+    func_0020B190(self->f858, tmp);
+    while ((*(volatile u32*)0x1000B000 >> 8) & 1) { }
+    while (*(volatile s32*)0x10002010 < 0) { }
+}
+
+struct Xfer_00211240 { u32 size; u32 addr; };
+
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+s32 func_00211240(s32 unused, Xfer_00211240* p)
+{
+    *(volatile u32*)0x1000E010 = 0x10;
+    if (p->size == 0) {
+        return 1;
+    }
+    u32 max = 0xFFFF;
+    if (p->size > max) {
+        (void)func_001F9D60();
+        *(volatile u32*)0x1000B410 = p->addr;
+        *(volatile u32*)0x1000B420 = max;
+        *(volatile u32*)0x1000B400 = 0x101;
+        (void)func_001F9DA8();
+        p->size = p->size - max;
+        p->addr = (p->addr + 0xFFFF0) & 0xFFFFFFF;
+    } else {
+        (void)func_001F9D60();
+        *(volatile u32*)0x1000B410 = p->addr;
+        *(volatile u32*)0x1000B420 = p->size;
+        *(volatile u32*)0x1000B400 = 0x101;
+        (void)func_001F9DA8();
+        p->size = 0;
+    }
+    return 0;
+}
+
+struct Queue_211090;
+struct Self_211090 {
+    u8 pad000[0x858];
+    Queue_211090* f858;
+};
+
+struct Msg_211090 {
+    s32 cmd;
+    s32 pad04[7];
+};
+
+struct Xfer_211090 {
+    volatile s32 done;
+    s32 error;
+    s32 size;
+    s32 addr;
+    s32 total;
+};
+
+s32 func_001F6980(s32 channel, s32 (*handler)(s32, void*), s32 next, void* arg);
+s32 func_001F6990(s32 channel, s32 id);
+s32 func_001F6E10(s32 channel);
+s32 func_001F6E78(s32 channel);
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+s32 func_00210F18(s32 channel, void* arg);
+void func_0020B190(Queue_211090* q, Msg_211090* m);
+void func_0020B978(Self_211090* self, u8* msg);
+extern u8 D_00250528[];
+
+void func_00211090(Self_211090* self, s32 addr, s32 size)
+{
+    s32 chunk = 0x3FF;
+    Msg_211090 msg;
+    Xfer_211090 xfer;
+    xfer.total = size / chunk + 1;
+    xfer.addr = (addr + 0xFFC00) & 0xFFFFFFF;
+    xfer.size = size;
+    xfer.error = 0;
+    xfer.done = 0;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    s32 id = func_001F6980(3, func_00210F18, 0, &xfer);
+    *(volatile u32*)0x1000E010 = 8;
+    func_001F6E78(3);
+    func_001F9D60();
+    *(volatile u32*)0x1000B010 = addr & 0xFFFFFFF;
+    *(volatile u32*)0x1000B020 = chunk << 6;
+    *(volatile u32*)0x1000B000 = 0x100;
+    func_001F9DA8();
+    *(volatile u32*)0x10002000 = chunk | 0x70000000;
+    msg.cmd = 4;
+    func_0020B190(self->f858, &msg);
+    while (xfer.done < xfer.total) {
+    }
+    if (xfer.error != 0) {
+        func_0020B978(self, D_00250528);
+    }
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    func_001F6E10(3);
+    func_001F6990(3, id);
+}

@@ -37,6 +37,14 @@ What else was measured:
 
   Then GNU objcopy rewrites the object's symbol table in the order modern ld
   wants, without touching code.
+- **Sony's libraries had another assembler.** Sony's 2.9-ee-991111 never puts a
+  volatile store in a delay slot: it marks it with `.set volatile` (kept as a
+  comment) and leaves the `jal` after it to the assembler, in reorder mode.
+  Ours fills that slot with a `nop`; retail's assembler moved the store into it,
+  keeping a store macro's `lui $at` before the `jal` (func_0020FAF0,
+  func_00210E00, func_00211348). tools/volatile_slots.py writes out what that
+  assembler did for every file built with 2.9-ee-991111, after OpenRAC's
+  rac1-decomp: every library function matched before stays EXACT with it.
 - **`-fno-exceptions`.** Without it every file gets C++ exception frame records
   in `.data`; retail has only four such records, all in library code.
 - **`-ffunction-sections`** is added to every file so that the build can put
