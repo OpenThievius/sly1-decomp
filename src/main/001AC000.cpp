@@ -1700,3 +1700,132 @@ void func_001ADD28(Obj_1ADD28* self)
         func_001AA790(self);
     }
 }
+
+extern u8 D_002701F8[];
+extern u8 D_0026F808[];
+extern u8 D_00262280[];
+
+struct __attribute__((packed)) Word_1AD3F0 {
+    s32 v;
+};
+
+struct Out_1AD3F0;
+struct Strm_1AD3F0 { u8 d[1]; };
+struct Buf_1AD3F0 { u8 d[0xB0]; };
+
+struct Glob_1AD3F0 {
+    u8 pad0[0x250];
+    s32 f250;
+    u8 pad1[0x25C - 0x254];
+    s32 f25C;
+    s32 f260;
+};
+
+struct Inner_1AD3F0 {
+    u8 pad[0x2D0];
+    s32 f2D0;
+};
+
+struct Obj_1AD3F0 {
+    u8 pad0[4];
+    s32 f4;
+    s8 f8;
+    u8 pad1[0x208 - 9];
+    Word_1AD3F0 f208;
+    f32 f20c;
+    u8 pad2[0x224 - 0x210];
+    f32 f224;
+    f32 f228;
+    u8 pad3[0x234 - 0x22C];
+    f32 f234;
+    f32 f238;
+    f32 f23c;
+    u8 pad4[0x464 - 0x240];
+    s32 f464;
+};
+
+void func_00137228(Out_1AD3F0* out, f32 x, f32 y);
+void func_00137238(Out_1AD3F0* out, f32 x, f32 y);
+void func_00137248(Out_1AD3F0* out, s32* value);
+void func_00137260(Out_1AD3F0* out, s32 flag);
+void func_00137268(Out_1AD3F0* out, s32 flag);
+struct Out_1AD3F0 {
+    u8 d[0x20];
+    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
+    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
+    void Color(s32* c) { func_00137248(this, c); }
+    void FlagA(s32 f) { func_00137260(this, f); }
+    void FlagB(s32 f) { func_00137268(this, f); }
+};
+void func_001613C0(Strm_1AD3F0* f, s32 a, s32 b, u64 c);
+void func_00161708(Strm_1AD3F0* f, u64 a, u64 b);
+void func_00161458(Strm_1AD3F0* f, u32 v);
+void func_001615F0(Strm_1AD3F0* f, s32 a, s32 b, s32 c, s32 d);
+void func_0015C8B8(s32 handle, f32 a, f32 b);
+void func_0015DB28(Buf_1AD3F0* out, void* p, s32 handle);
+void func_0015E318(Buf_1AD3F0* buf, Out_1AD3F0* out, s32 zero, void* data);
+void func_0015C900(s32 handle);
+
+void func_001AD3F0(Obj_1AD3F0* self)
+{
+    Word_1AD3F0 packed;
+    Out_1AD3F0 out;
+    Word_1AD3F0 slot;
+    Buf_1AD3F0 buf;
+    f32 scale;
+    f32 off;
+    f32 px;
+    f32 py;
+    s32 held;
+    Glob_1AD3F0* g;
+
+    if (self->f8 == 0) {
+        return;
+    }
+    g = (Glob_1AD3F0*)D_002701F8;
+    if (g->f250 != 0 && (u32)(g->f260 - 1) < 2) {
+        return;
+    }
+    if (self->f464 != 0) {
+        scale = 1.0f;
+        off = (1.0f - ((f32*)&D_0027240C)[0]) * 66.40001f;
+    } else {
+        scale = self->f23c;
+        off = 0.0f;
+    }
+    packed = self->f208;
+    ((u8*)&packed)[3] = (u8)(s32)((f32)((u8*)&packed)[3] * scale);
+    held = packed.v;
+    px = self->f234;
+    py = self->f238;
+    out.Pos(self->f224, self->f228 + off);
+    out.Size(px, py);
+    slot.v = held;
+    out.Color(&slot.v);
+    out.FlagA(0);
+    out.FlagB(0);
+    if (self->f464 == 0) {
+        Glob_1AD3F0* g2 = (Glob_1AD3F0*)D_0026F808;
+        Strm_1AD3F0* s = (Strm_1AD3F0*)D_00262280;
+        f32 sc = scale;
+        f32 y;
+        if (g2->f25C != 0 && g2->f260 != 0 && ((Inner_1AD3F0*)g2->f260)->f2D0 == 2) {
+            sc = 1.0f;
+        }
+        ((u8*)&slot)[0] = 0;
+        ((u8*)&slot)[1] = 0;
+        ((u8*)&slot)[2] = 0;
+        ((u8*)&slot)[3] = (u8)(s32)(sc * 64.0f);
+        y = off + 492.80002f - 66.40001f;
+        func_001613C0(s, 0x46, 5, 0x441EE);
+        func_00161708(s, 0x47, 0x30000);
+        func_00161708(s, 0x42, 0x44);
+        func_00161458(s, (u32)slot.v);
+        func_001615F0(s, 0x6C00, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0xFFFFFF0, 0);
+        func_001615F0(s, 0x9400, 0x8700, 0xFFFFFF0, 0);
+    }
+    func_0015C8B8(self->f4, self->f20c, self->f20c);
+    func_0015DB28(&buf, &self->f8, self->f4);
+    func_0015E318(&buf, &out, 0, D_00262280);
+    func_0015C900(self->f4);
+}

@@ -1788,3 +1788,136 @@ void func_0015EFE8(Obj_15EFE8* self)
         (*(Iter_15EFE8**)&D_0027B314) = it.prev;
     }
 }
+
+typedef struct Obj_15C638 Obj_15C638;
+typedef struct Par_15C638 Par_15C638;
+typedef struct VT_15C638 VT_15C638;
+typedef signed char s8;
+typedef unsigned char u8;
+typedef signed short s16;
+typedef unsigned short u16;
+typedef signed int s32;
+typedef unsigned int u32;
+typedef signed long s64;
+typedef unsigned long u64;
+typedef float f32;
+struct Obj_15C638;
+typedef void (*FnA_15C638)(Obj_15C638 *self, s32 a, s32 b);
+typedef f32 (*FnW_15C638)(Obj_15C638 *self, s32 ch);
+typedef f32 (*FnD_15C638)(f32 x, f32 y, Obj_15C638 *self, s32 ch, s32 p, s32 q);
+struct VT_15C638
+{
+  u8 pad0[0x18];
+  s16 adj18;
+  u16 pad1A;
+  FnW_15C638 fn1C;
+  s16 adj20;
+  u16 pad22;
+  FnA_15C638 fn24;
+  u8 pad28[0x30 - 0x28];
+  s16 adj30;
+  u16 pad32;
+  FnD_15C638 fn34;
+  s16 adj38;
+  u16 pad3A;
+  FnA_15C638 fn3C;
+};
+struct Obj_15C638
+{
+  u8 pad0[8];
+  s32 f8;
+  u8 pad0C[0x48 - 0x0C];
+  f32 f48;
+  VT_15C638 *f4C;
+};
+struct Par_15C638
+{
+  f32 f0;
+  f32 f4;
+  f32 f8;
+  f32 fC;
+  s32 f10;
+  s32 f14;
+  s32 f18;
+};
+void func_0015C638(Obj_15C638 *self, char *str, Par_15C638 *par, s32 a3, s32 a4)
+{
+  char *p;
+  char *next;
+  s32 pending = 1;
+  f32 x;
+  f32 y;
+  self->f4C->fn24((Obj_15C638 *) (((u8 *) self) + self->f4C->adj20), a3, a4);
+  if (par->f18 == 0)
+  {
+    y = par->f4;
+  }
+  else
+  {
+    f32 sc = self->f48;
+    f32 h = ((f32) self->f8) * sc;
+    char *q = str;
+    if ((*q) != 0)
+    {
+      do
+      {
+        if ((*(q++)) == '\n')
+        {
+          h += ((f32) self->f8) * sc;
+        }
+      }
+      while ((*q) != 0);
+    }
+    if (par->f18 == 2)
+    {
+      y = (par->f4 + par->fC) - h;
+    }
+    else
+    {
+      y = par->f4 + ((par->fC - h) * 0.5f);
+    }
+  }
+  for (p = str; (*p) != 0; p = next)
+  {
+    f32 half = 0.5f;
+    s32 right = 2;
+    char c = *((u8 *) p);
+    next = p + 1;
+    if (c == '\n')
+    {
+      pending = 1;
+      y += ((f32) self->f8) * self->f48;
+    }
+    else
+    {
+      if (pending != 0)
+      {
+        if (par->f14 == 0)
+        {
+          x = par->f0;
+        }
+        else
+        {
+          char *q;
+          x = 0.0f;
+          for (q = p; (*q != 0) && (*q != '\n'); q++)
+          {
+            x += self->f4C->fn1C((Obj_15C638 *) (((u8 *) self) + self->f4C->adj18), *q);
+          }
+          if (par->f14 == right)
+          {
+            x = (par->f0 + par->f8) - x;
+          }
+          else
+          {
+            x = par->f0 + ((par->f8 - x) * half);
+          }
+        }
+        pending = 0;
+      }
+      x += self->f4C->fn34(x, y, (Obj_15C638 *) (((u8 *) self) + self->f4C->adj30), *p, par->f10, a4);
+    }
+  }
+
+  self->f4C->fn3C((Obj_15C638 *) (((u8 *) self) + self->f4C->adj38), a3, a4);
+}
