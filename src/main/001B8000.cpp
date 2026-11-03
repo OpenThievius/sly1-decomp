@@ -1065,3 +1065,137 @@ void func_001B9F30(Self_1B9F30* self, Out_1B9F30* out)
     out->f38 = D_0026185C[0];
     out->f3C = 0;
 }
+
+struct __attribute__((aligned(16))) Quad_001B9AE0 {
+    s32 a, b, c, d;
+};
+
+struct Sub_001B9AE0;
+
+struct Obj_001B9AE0 {
+    u8 pad0[0x50];
+    Sub_001B9AE0* f50;
+    u8 pad1[0x3EC];
+    Quad_001B9AE0 f440;
+    s32 f450;
+    u8 pad2[0xC];
+    Quad_001B9AE0 f460;
+    s32 f470;
+    u8 pad3[0xC4];
+    u64 f538;
+};
+
+void func_001BB580(Sub_001B9AE0* p);
+
+void func_001B9AE0(Obj_001B9AE0* self, s32 a1, Quad_001B9AE0* a2, s32 a3, Quad_001B9AE0* a4)
+{
+    self->f450 = a1;
+    u64 flag = (self->f538 >> 54) & 1;
+    if (a2 != 0) {
+        self->f440 = *a2;
+    }
+    self->f470 = a3;
+    if (a4 != 0) {
+        self->f460 = *a4;
+    }
+    Sub_001B9AE0* sub = self->f50;
+    if (sub != 0) {
+        s32 f2 = 0;
+        if (a1 == 3) {
+            f2 = (a3 == 3);
+        }
+        if (flag != f2) {
+            func_001BB580(sub);
+        }
+    }
+}
+
+struct Sub_1B94F0 {
+    void* key;
+    void* f4;
+    u8 pad_08[0x40 - 8];
+};
+
+struct Item_1B94F0 {
+    Sub_1B94F0 sub0;
+    Sub_1B94F0 sub1;
+    u8 pad_80[0x9C - 0x80];
+    s32 f9C;
+    u8 padA0[0xD0 - 0xA0];
+    Item_1B94F0* next;
+};
+
+struct Outer_1B94F0 {
+    Item_1B94F0* head;
+    Outer_1B94F0* next;
+    Item_1B94F0** link;
+};
+
+struct Ctx_1B94F0 {
+    u8 pad_000[0x480];
+    Outer_1B94F0** f480;
+    u8 pad_484[0x4B8 - 0x484];
+    s32 f4B8;
+};
+
+struct Obj_1B94F0 {
+    u8 pad_000[0x14];
+    void* f14;
+    u8 pad_018[0x50 - 0x18];
+    Ctx_1B94F0* f50;
+};
+
+struct Callee_1B94F0;
+struct Pool_1B94F0;
+
+s32 func_00182F40(Callee_1B94F0* e, Obj_1B94F0* b);
+void func_001861E8(Pool_1B94F0* a, Item_1B94F0* head);
+
+void func_001B94F0(Obj_1B94F0* self, s32 mode)
+{
+    Ctx_1B94F0* ctx = self->f50;
+    if (ctx == 0) {
+        return;
+    }
+    if (mode != 0) {
+        Item_1B94F0* freed = 0;
+        for (Outer_1B94F0* o = *ctx->f480; o != 0; o = o->next) {
+            Item_1B94F0** pp = &o->head;
+            Item_1B94F0* it;
+            while ((it = *pp) != 0) {
+                s32 other = it->sub0.key != ctx;
+                Sub_1B94F0* p = &(&it->sub0)[other];
+                s32 hit;
+                switch (mode) {
+                case 1:
+                    hit = func_00182F40((Callee_1B94F0*)p->f4, self);
+                    break;
+                case 2:
+                    hit = p->f4 == (void*)self;
+                    break;
+                case 3:
+                    hit = 0;
+                    if (p->f4 == (void*)self && other == 0) {
+                        if (it->f9C >= 8 && it->f9C <= 9) {
+                            hit = 1;
+                        }
+                    }
+                    break;
+                default:
+                    hit = 0;
+                    break;
+                }
+                if (hit != 0) {
+                    *pp = it->next;
+                    it->next = freed;
+                    freed = it;
+                } else {
+                    pp = &it->next;
+                }
+            }
+            *o->link = o->head;
+        }
+        func_001861E8((Pool_1B94F0*)self->f14, freed);
+    }
+    ctx->f4B8 = 0;
+}

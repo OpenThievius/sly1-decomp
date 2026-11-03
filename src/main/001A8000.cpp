@@ -2120,3 +2120,294 @@ extern const Fn_Table D_002210F0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func
 extern const Fn_Table D_002212E0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_0016B4A0, (Fn_Table)func_0016B560, (Fn_Table)func_0016B7A8, (Fn_Table)func_0016B580, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_0016B860, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00221330[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_0016BA40, (Fn_Table)(void (*)(Obj_1AA298* self))func_001AA298, (Fn_Table)func_0016BDD0, (Fn_Table)func_0016BBA8, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_0016BEA0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00221380[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001DFEB8, (Fn_Table)func_001E00B0, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001E0678, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+
+struct Entry_001A8718 {
+    s32 key;
+    u8 rest[0x10];
+};
+
+struct Table_001A8718 {
+    u8 pad0[0x34];
+    s32 count;
+    Entry_001A8718* entries;
+};
+
+Entry_001A8718* func_001A8718(Table_001A8718* self, s32 key)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        if (self->entries[i].key == key) break;
+    }
+    if (i < self->count) return &self->entries[i];
+    return 0;
+}
+
+struct Ctx_1AA4F0;
+struct Mtx_1AA4F0 { u8 data[0xB0]; };
+struct Obj_1AA4F0 { u8 pad00[4]; Ctx_1AA4F0* ctx; char name[0x204]; f32 scale; };
+s32 func_001E2100(const char*);
+void func_001E2138(char*, const char*);
+void func_0015C8B8(Ctx_1AA4F0*, f32, f32);
+void func_0015DB28(Mtx_1AA4F0*, char*, Ctx_1AA4F0*);
+void func_0015E290(Mtx_1AA4F0*, f32, f32*, f32*);
+void func_001AAB20(Obj_1AA4F0*, f32, f32);
+void func_0015C900(Ctx_1AA4F0*);
+void func_001AA4F0(Obj_1AA4F0* self, const char* arg)
+{
+    if (arg && func_001E2100(arg)) {
+        func_001E2138(self->name, arg);
+    } else {
+        self->name[0] = 0;
+    }
+    func_0015C8B8(self->ctx, self->scale, self->scale);
+    Mtx_1AA4F0 m;
+    func_0015DB28(&m, self->name, self->ctx);
+    f32 x, y;
+    func_0015E290(&m, 0.0f, &x, &y);
+    func_001AAB20(self, x, y);
+    func_0015C900(self->ctx);
+
+}
+
+extern f32 D_00261860;
+
+typedef void (*Callback_1AB058)(void* arg);
+
+struct Handle_1AB058 { u8 pad0[8]; s32 count; u8 padC[0x3C]; f32 scale; };
+struct Loc_1AB058 { u8 pad0[0xB0]; };
+
+struct Obj_1AB058 {
+    s32 f0;
+    Handle_1AB058* handle;
+    s8 flag;
+    u8 pad1[0x20C - 9];
+    f32 f20c;
+    f32 f210;
+    u8 pad2[0x260 - 0x214];
+    s32 f260;
+    s32* f264;
+    f32 f268;
+    f32 f26c;
+    f32 f270;
+    Callback_1AB058 f274;
+    void* f278;
+};
+
+void func_001AA298(Obj_1AB058* self);
+void func_001AB2B8(Obj_1AB058* self);
+void func_0015C8B8(Handle_1AB058* handle, f32 a, f32 b);
+void func_0015DB28(Loc_1AB058* out, s8* flag, Handle_1AB058* handle);
+f32 func_0015DFF8(Loc_1AB058* loc);
+void func_001AAB20(Obj_1AB058* self, f32 x, f32 y);
+void func_0015C900(Handle_1AB058* handle);
+
+void func_001AB058(Obj_1AB058* self)
+{
+    Loc_1AB058 loc;
+    f32 frac;
+    s32 n;
+    s32 first;
+    s32* p;
+
+    func_001AA298(self);
+    p = self->f264;
+    if (self->f260 == *p) {
+        return;
+    }
+    if (self->f260 >= 0) {
+        frac = D_00261860 * self->f26c + self->f270;
+        n = (s32)frac;
+        self->f270 = frac - (f32)n;
+        first = *self->f264;
+        if (first < self->f260) {
+            s32 lo = self->f260 - n;
+            self->f260 = first < lo ? lo : first;
+        } else {
+            s32 hi = self->f260 + n;
+            self->f260 = hi < first ? hi : first;
+        }
+    } else {
+        self->f260 = *p;
+    }
+    if (self->f260 == *self->f264 && self->f274 != 0) {
+        self->f274(self->f278);
+        self->f274 = 0;
+        self->f278 = 0;
+    }
+    func_001AB2B8(self);
+    if (self->flag != 0) {
+        func_0015C8B8(self->handle, self->f20c, self->f20c);
+        func_0015DB28(&loc, &self->flag, self->handle);
+        f32 x = func_0015DFF8(&loc);
+        f32 y = (f32)self->handle->count * self->handle->scale;
+        func_001AAB20(self, x, y);
+        func_0015C900(self->handle);
+    } else {
+        func_001AAB20(self, 0.0f, 0.0f);
+    }
+}
+
+extern void* D_0027B314;
+
+struct Key_1A88A0 { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
+struct Ent_1A88A0;
+struct List_1A88A0 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_1A88A0 { List_1A88A0* list; u8* link; s32 offset; Iter_1A88A0* prev; };
+struct Ent_1A88A0 {
+    u8 pad0[0x3C];
+    Ent_1A88A0* f3C;
+    u8 pad40[8];
+    Key_1A88A0* f48;
+};
+struct Group_1A88A0 {
+    u8 pad0[4];
+    s32 f4;
+    s32 kind;
+    u8 padC[8];
+    Ent_1A88A0* f14;
+};
+struct Self_1A88A0 { u8 pad0[0x3C]; Group_1A88A0* group; };
+
+s32 func_00182FC8(Key_1A88A0* p);
+s32 func_001300E8(Key_1A88A0* p, s32 kind);
+
+struct Begin_1A88A0 {
+    static void Of(Iter_1A88A0* it, List_1A88A0* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = (Iter_1A88A0*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+struct Next_1A88A0 {
+    static u8* Of(Iter_1A88A0* it)
+    {
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
+        return obj;
+    }
+};
+
+struct End_1A88A0 {
+    static void Of(Iter_1A88A0* it)
+    {
+        D_0027B314 = it->prev;
+    }
+};
+
+s32 func_001A88A0(Self_1A88A0* self, Key_1A88A0* key)
+{
+    Group_1A88A0* group = self->group;
+
+    if (group != 0 && group->f4 != 0) {
+        List_1A88A0* list;
+        Ent_1A88A0* skip;
+        Iter_1A88A0 it;
+        u8* obj;
+
+        switch (group->kind) {
+        case 1:
+            list = (List_1A88A0*)&group->f14;
+            skip = 0;
+            break;
+        case 2: {
+            Ent_1A88A0* e = group->f14;
+            skip = (Ent_1A88A0*)self;
+            if (e->f48 == key) {
+                return 0;
+            }
+            list = (List_1A88A0*)((u8*)e->f3C + 0x14);
+            break;
+        }
+        }
+        Begin_1A88A0::Of(&it, list);
+        for (obj = Next_1A88A0::Of(&it); obj != 0; obj = Next_1A88A0::Of(&it)) {
+            Ent_1A88A0* e = *(Ent_1A88A0**)obj;
+            if (e != skip && e->f48 == key) {
+                End_1A88A0::Of(&it);
+                return 0;
+            }
+        }
+        End_1A88A0::Of(&it);
+    }
+    if (func_00182FC8(key) != 0) {
+        return 0;
+    }
+    if (func_001300E8(key, 0x3B) != 0 && key->f678 == 0) {
+        return 0;
+    }
+    if (func_001300E8(key, 0x20) != 0 && key->f680 != 0) {
+        return 0;
+    }
+    return 1;
+}
+
+struct Obj_1AA998;
+struct Vt_1AA998 {
+    void* s[11];
+    f32 (*m2C)(Obj_1AA998* self);
+    void* s12;
+    f32 (*m34)(Obj_1AA998* self);
+};
+void func_001AAB60(Obj_1AA998* self);
+
+struct Obj_1AA998 {
+    Vt_1AA998* vt;
+    u8 pad0[0x21C - 4];
+    f32 f21C;
+    f32 f220;
+    f32 f224;
+    f32 f228;
+    f32 f22C;
+    f32 f230;
+    u8 pad1[0x23C - 0x234];
+    f32 f23C;
+    u8 pad2[0x24C - 0x240];
+    f32 f24C;
+    s32 f250;
+    f32 f254;
+    void* f258;
+};
+
+void func_001AA998(Obj_1AA998* self, s32 mode)
+{
+    if (self->f250 == mode) {
+        return;
+    }
+    s32 notify = 0;
+    switch (mode) {
+    case 1:
+    case 3:
+        if (mode == 1) {
+            self->f24C = self->f23C * self->vt->m2C(self);
+        } else {
+            self->f24C = (1.0f - self->f23C) * self->vt->m34(self);
+        }
+        if (self->f250 == 0 || self->f250 == 2) {
+            notify = 1;
+        }
+        break;
+    case 2:
+        notify = 1;
+        self->f21C = self->f224;
+        self->f220 = self->f228;
+        self->f23C = 1.0f;
+        self->f24C = 0.0f;
+        break;
+    case 0:
+        notify = 1;
+        self->f21C = self->f22C;
+        self->f220 = self->f230;
+        self->f23C = 0.0f;
+        self->f24C = 0.0f;
+        break;
+    }
+    self->f250 = mode;
+    self->f254 = *(f32*)self->f258;
+    if (notify) {
+        func_001AAB60(self);
+    }
+}

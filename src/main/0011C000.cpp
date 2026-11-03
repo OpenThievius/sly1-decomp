@@ -2290,3 +2290,155 @@ void func_0011CBB8(void)
     n = (s32)&D_00260DC0;
     func_0011D968(0, 4, &n);
 }
+
+// D_00260DC0 is the RPC packet shared with the IOP, declared volatile above; the volatile
+// access keeps lui+addiu+lw 16(base).
+s32 func_00203D90();
+
+s32 func_0011E2E8()
+{
+    if (D_0025C34C == 0)
+        return func_00203D90();
+    return D_00260DC0.f10;
+}
+
+extern s32 D_0025C34C;
+s32 func_002032C8(s32 value);
+void func_001F6C20(s32 value);
+s32 func_0011CE30(void);
+
+s32 func_0011E1F8(s32 flag)
+{
+    if (D_0025C34C == 0) {
+        return func_002032C8(flag);
+    }
+    func_001F6C20(0);
+    u32 ready = (*(volatile u32*)&D_00260DC0) < 1;
+    (*(u32*)&D_0025C358) = ready;
+    if (ready == 1) {
+        return 0;
+    }
+    if (flag == 1) {
+        return 1;
+    }
+    while ((*(u32*)&D_0025C358) == 0) {
+        func_0011CE30();
+        func_001F6C20(0);
+        (*(u32*)&D_0025C358) = (*(volatile u32*)&D_00260DC0) < 1;
+    }
+    return 0;
+}
+
+// The RPC completion flag: func_0011E1F8 waits for another thread to clear it.
+struct Sync_11E138 {
+    s32 busy;
+    s32 pad[3];
+    s32 result;
+};
+
+extern s32 D_0025C34C;
+extern s32 D_0025C354;
+extern s32 D_0025C358;
+s32 func_00203B18(s32 a0, s32 a1, s32 a2, u8* a3);
+s32 func_0011E1F8(s32 flag);
+void func_0011DB00(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
+
+s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
+{
+    if (D_0025C34C == 0) {
+        return func_00203B18(a0, a1, a2, a3);
+    }
+    if (func_0011E1F8(1) == 1) {
+        return 0;
+    }
+    s32 args[3];
+    args[0] = a0;
+    (*(volatile Sync_11E138*)&D_00260DC0).busy = 1;
+    (*(volatile Sync_11E138*)&D_00260DC0).result = 0;
+    args[1] = a1;
+    args[2] = a2;
+    func_0011DB00(0x38, 0xC, args, 0, 0);
+    D_0025C354 = 1;
+    D_0025C358 = 0;
+    return 1;
+}
+
+struct Dst_11CA90 { u8 pad[4]; };
+
+extern u8 D_0062C568[];
+extern u8 D_0062C578[];
+extern u8 D_0062C588[];
+extern s32 D_0025C2F0;
+extern s32 D_0025C2F4;
+extern s32 D_0025C2F8;
+extern s32 D_0025C2FC;
+extern s32 D_0025C300;
+extern u8* D_0027B300[];
+extern u8* D_0027B304;
+extern u8* D_0027B308;
+extern u8* D_0027B30C;
+extern u8* D_0027B310;
+
+void func_001B5DD0(Dst_11CA90* p, s32 size, s32 val);
+
+struct Init_11CA90 {
+    static void Load(void* buf, s32 size, s32* id, u8** out)
+    {
+        func_001B5DD0((Dst_11CA90*)buf, size, *id);
+        *out = (u8*)func_0018D5C0(*id);
+    }
+};
+
+void func_0011CA90(void)
+{
+    Init_11CA90::Load(((u8*)&D_0062C558), 0x10, &D_0025C2F0, &D_0027B300[0]);
+    Init_11CA90::Load(D_0062C568, 0x40, &D_0025C2F4, &D_0027B304);
+    Init_11CA90::Load(D_0062C578, 0x10, &D_0025C2F8, &D_0027B308);
+    Init_11CA90::Load(D_0062C588, 0x08, &D_0025C2FC, &D_0027B30C);
+    Init_11CA90::Load(((u8*)&D_0062C598), 0x0C, &D_0025C300, &D_0027B310);
+}
+
+struct Obj_11F850;
+typedef void (*VFn_11F850)(Obj_11F850* self, s32* count, f32** data);
+struct Obj_11F850 { VFn_11F850* vtbl; };
+
+void func_0018D800(f32* dst, f32* src, s32 n);
+void func_001F5CD0(f32* base, s32 n, s32 size, void* cmp);
+extern u8 func_001EB128[];
+
+void func_0011F850(Obj_11F850** objs, s32* outCount, f32** outArr)
+{
+    s32 counts[3];
+    f32* ptrs[3];
+    s32 i;
+    for (i = 0; i < 3; i++) {
+        if (objs[i]) {
+            objs[i]->vtbl[2](objs[i], &counts[i], &ptrs[i]);
+        } else {
+            counts[i] = 0;
+            ptrs[i] = 0;
+        }
+    }
+    s32 total = counts[0] + counts[1] + counts[2];
+    if (total == 0) {
+        *outCount = 0;
+        if (outArr) *outArr = 0;
+        return;
+    }
+    s32 last = total - 1;
+    f32* arr = (f32*)func_0018D658(total * 4);
+    f32* w = arr;
+    for (i = 0; i < 3; i++) {
+        func_0018D800(w, ptrs[i], counts[i] * 4);
+        w += counts[i];
+    }
+    w = arr + 1;
+    func_001F5CD0(arr, total, 4, func_001EB128);
+    f32* r = w;
+    for (total = last - 1; total >= 0; total--) {
+        if (*r != w[-1]) { *w = *r; w++; }
+        r++;
+    }
+    *outCount = w - arr;
+    if (outArr) *outArr = arr;
+}

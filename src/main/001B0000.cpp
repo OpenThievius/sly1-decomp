@@ -1975,3 +1975,61 @@ void func_001B1898(Obj_001B1898* self)
     }
     func_001B46E0(self->target + 0x10, frame);
 }
+
+struct Node_1B1070 {
+    u8 pad0[0x44];
+    s32 f44;
+};
+
+struct Snd_1B1070;
+enum Kind_1B1070 { KIND_1B1070_1B = 0x1B };
+
+struct Obj_1B1070 {
+    u8 pad0[0x200];
+    Node_1B1070* f200;
+    u8 pad1[0x5C4 - 0x204];
+    Snd_1B1070* f5C4;
+    u8 pad2[0x5D8 - 0x5C8];
+    s32 f5D8;
+    f32 f5DC;
+};
+
+struct Clk_1B1070 { f32 t; };
+
+void func_001BF788(Snd_1B1070* p, s32 n);
+void func_001BFCD8(Kind_1B1070 a0, Snd_1B1070** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+
+void func_001B1070(Obj_1B1070* self, s32 arg)
+{
+    if (self->f5D8 == arg) return;
+    switch (self->f5D8) {
+    case -1:
+        break;
+    case 0:
+        break;
+    case 1:
+        func_001BF788(self->f5C4, 0);
+        break;
+    case 2:
+        break;
+    }
+    switch (arg) {
+    case -1:
+        break;
+    case 0:
+        if (self->f200 != 0) {
+            self->f200->f44 = 4;
+        }
+        break;
+    case 1:
+        func_001BFCD8(KIND_1B1070_1B, &self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        break;
+    case 2:
+        if (self->f200 != 0) {
+            self->f200->f44 = 0;
+        }
+        break;
+    }
+    self->f5D8 = arg;
+    self->f5DC = (*(Clk_1B1070*)&D_0026185C).t;
+}

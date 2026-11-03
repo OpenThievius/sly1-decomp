@@ -1595,3 +1595,178 @@ void func_0014E828();
 void func_0014EB10();
 extern const Fn_Table D_002176D0[14] = { (Fn_Table)func_0014DD28, (Fn_Table)func_0014DE08, (Fn_Table)func_0014DE40, (Fn_Table)func_0014DE78, (Fn_Table)func_0014DF68, (Fn_Table)func_0014DF98, (Fn_Table)func_0014E000, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014E068, (Fn_Table)func_0014E090, (Fn_Table)func_0014E170, (Fn_Table)func_0014E2A0, 0 };
 extern const Fn_Table D_00217708[14] = { (Fn_Table)func_0014E3D0, (Fn_Table)func_0014E5B8, (Fn_Table)func_0014E6A8, (Fn_Table)func_0014E710, (Fn_Table)func_0014E828, (Fn_Table)func_0014E910, (Fn_Table)func_0014E990, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014EA48, (Fn_Table)func_0014EB10, (Fn_Table)func_0014EC70, (Fn_Table)func_0014ED98, 0 };
+
+typedef void (*VFn_14CF30)(void* self);
+typedef void (*Cb_14CF30)(void* self);
+
+struct Glob_14CF30 {
+    VFn_14CF30* vtbl;
+    u8 pad0[0x264 - 4];
+    void* f264;
+    void* f268;
+};
+
+struct Elem_14CF30 {
+    void* key;
+    u8 pad0[0x14 - 4];
+};
+
+struct Obj_14CF30 {
+    u8 pad0[0x14];
+    void* p14;
+    u8 pad1[0x2D0 - 0x18];
+    u8 f2D0[4];
+    u8 f2D4[4];
+    f32 f2D8;
+    s32 n2DC;
+    u8 pad2[0x2EC - 0x2E0];
+    Elem_14CF30 elems[1];
+    u8 pad3[0x42C - 0x300];
+    void* f42C;
+    s32 f430;
+};
+
+
+void func_00127378(Obj_14CF30* self, s32 kind, void* key);
+void func_001B6598(void* key, s32* out);
+void func_001DDC38(void* sub, Obj_14CF30* self);
+void func_001AB890(Glob_14CF30* self, f32 v);
+void func_001AB928(Glob_14CF30* self, f32 v, Cb_14CF30 cb);
+void func_001AB938(Glob_14CF30* self);
+void func_0014C668(void* self);
+
+void func_0014CF30(Obj_14CF30* self, s32 kind, void* key)
+{
+    func_00127378(self, kind, key);
+    switch (kind) {
+    case 6: {
+        s32 i;
+        for (i = 0; i < self->n2DC; i++) {
+            if (self->elems[i].key == key) {
+                break;
+            }
+        }
+        if (i < self->n2DC) {
+            self->elems[i].key = 0;
+        }
+        break;
+    }
+    case 0x14:
+        if (key == self->f42C) {
+            s32 out;
+            func_001B6598(key, &out);
+            if (out == 0x3FD) {
+                (*(Glob_14CF30*)&D_0026D348).f264 = self->f2D0;
+                (*(Glob_14CF30*)&D_0026D348).f268 = self->f2D4;
+                func_001DDC38(self->p14, self);
+                func_001AB890(((Glob_14CF30*)&D_0026E760), self->f2D8);
+                func_001AB928(((Glob_14CF30*)&D_0026E760), 0.0f, func_0014C668);
+                func_001AB938(((Glob_14CF30*)&D_0026E760));
+            }
+            if (self->f430 == 0x3FD) {
+                (*(Glob_14CF30*)&D_0026D348).vtbl[15](((Glob_14CF30*)&D_0026D348));
+                (*(Glob_14CF30*)&D_0026E760).vtbl[15](((Glob_14CF30*)&D_0026E760));
+                func_001DDC38(self->p14, 0);
+            }
+            self->f430 = out;
+        }
+        break;
+    }
+}
+
+struct Clq_14C2F0 {
+    f32 a;
+    f32 b;
+    f32 c;
+};
+
+struct Util_14C2F0 {
+    static f32 Eval(Clq_14C2F0* q, f32 t) { return q->a + t * (q->b + t * q->c); }
+    static f32 Limit(f32 g, f32 lo, f32 hi)
+    {
+        if (g < lo) return lo;
+        if (hi < g) return hi;
+        return g;
+    }
+    static f32 Lerp(f32 s, f32 a, f32 b) { return (1.0f - s) * a + s * b; }
+};
+
+struct Params_14C2F0 {
+    f32 f00;
+    f32 f04;
+    u8 pad08[8];
+    Clq_14C2F0 q10;
+    u8 pad1C[4];
+    f32 f20;
+    f32 f24;
+    f32 f28;
+    f32 f2C;
+    Clq_14C2F0 q30;
+    u8 pad3C[4];
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    f32 f4C;
+    f32 f50;
+    u8 pad54[0xC];
+    Clq_14C2F0 q60;
+    u8 pad6C[4];
+    f32 f70;
+    f32 f74;
+    u8 pad78[8];
+    Clq_14C2F0 q80;
+    u8 pad8C[4];
+    f32 f90;
+    f32 f94;
+    u8 pad98[8];
+    Clq_14C2F0 qA0;
+};
+
+struct Obj_14C2F0 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+    s32 f2D4;
+    u8 pad2D8[0x434 - 0x2D8];
+    f32 f434;
+    f32 f438;
+    f32 f43C;
+    f32 f440;
+    f32 f444;
+    f32 f448;
+    s32 f44C;
+    u8 pad450[0x45C - 0x450];
+    f32 f45C;
+    u8 pad460[4];
+    s32 f464;
+    u8 pad468[0x5E0 - 0x468];
+    Params_14C2F0 params;
+};
+
+extern f32 D_00275C60[];
+extern f32 D_00261858[];
+
+void func_0014C2F0(Obj_14C2F0* o)
+{
+    f32 t = Util_14C2F0::Limit((f32)o->f2D0 / (f32)o->f2D4, 0.0f, 1.0f);
+    Params_14C2F0* p = &o->params;
+    f32 s;
+
+    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q30, t), D_00275C60[0], D_00275C60[1]);
+    o->f434 = Util_14C2F0::Lerp(s, p->f20, p->f28);
+    o->f438 = Util_14C2F0::Lerp(s, p->f24, p->f2C);
+
+    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q60, t), D_00275C60[0], D_00275C60[1]);
+    o->f43C = Util_14C2F0::Lerp(s, p->f44, p->f4C);
+    o->f440 = Util_14C2F0::Lerp(s, p->f48, p->f50);
+
+    o->f444 = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q80, t), D_00275C60[0], D_00275C60[1]), p->f70, p->f74);
+
+    o->f448 = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->qA0, t), D_00275C60[0], D_00275C60[1]), p->f90, p->f94);
+
+    o->f44C = (s32)Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q10, t), D_00275C60[0], D_00275C60[1]), p->f00, p->f04);
+
+    if (p->f40 < t && o->f464 == 0) {
+        o->f464 = 1;
+        o->f45C = D_00261858[1];
+    }
+}

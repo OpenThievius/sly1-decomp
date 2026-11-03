@@ -1360,3 +1360,268 @@ s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 extern const Fn_Table D_00249D98[6] = { 0, 0, 0, (Fn_Table)func_0013CC80, 0, 0 };
+
+struct Obj_13CDE8 { u8 pad0[0x688]; s32 f688; u8 pad1[0x28]; void* f6B4; };
+
+void func_001BA130(Obj_13CDE8* self, Obj_13CDE8* other);
+void* func_0018D568(s32 size, void* owner);
+
+void func_0013CDE8(Obj_13CDE8* self, Obj_13CDE8* other)
+{
+    s32 saved = self->f688;
+    func_001BA130(self, other);
+    self->f688 = saved;
+    if (other->f6B4)
+        self->f6B4 = func_0018D568(0x24, other->f6B4);
+}
+
+struct IntList_13E7C0 { s32 count; void* items[1]; };
+void* func_0015A418(void*, s32, void*, void*);
+void func_0013E8D8(IntList_13E7C0*, void*);
+void func_00182ED8(void*);
+
+void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
+{
+    s32 n = list->count;
+    void** items = list->items;
+    for (s32 i = 0; i < n; i++) {
+        void* object = func_0015A418(self, 0x104, items[i], context);
+        if (object) {
+            func_0013E8D8(list, object);
+            func_00182ED8(object);
+        }
+    }
+}
+
+struct Desc_13E950 {
+    u8 pad0[8];
+    u32 f8;
+};
+
+struct Node_13E950 {
+    Desc_13E950* f0;
+};
+
+struct List_13E950 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_13E950 { List_13E950* list; u8* link; s32 offset; Iter_13E950* saved; };
+
+struct Owner_13E950 {
+    u8 pad0[0x34];
+    List_13E950 list;
+};
+
+struct Self_13E950 {
+    u8 pad0[4];
+    Owner_13E950* f4;
+};
+
+struct Call_13E950;
+
+extern u8 D_0027B314[];
+
+s32 func_0013E868(Call_13E950* set, void* key);
+void func_0013E8D8(Call_13E950* queue, void* value);
+
+struct Next_13E950 {
+    static Node_13E950* Of(Iter_13E950* it)
+    {
+        Node_13E950* obj = *(Node_13E950**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_13E950 {
+    static void Of(Iter_13E950* it, List_13E950* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = *(Iter_13E950**)D_0027B314;
+        *(Iter_13E950**)D_0027B314 = it;
+    }
+};
+
+void func_0013E950(Self_13E950* self, Owner_13E950* a1)
+{
+    Iter_13E950 it;
+    Begin_13E950::Of(&it, &a1->list);
+    self->f4 = a1;
+    Node_13E950* node;
+    while ((node = Next_13E950::Of(&it)) != 0) {
+        if (node->f0->f8 & 0x40) {
+            if (func_0013E868((Call_13E950*)((u8*)self + 0x90), node) == 0) {
+                if (func_0013E868((Call_13E950*)((u8*)self + 8), node) == 0) {
+                    func_0013E8D8((Call_13E950*)((u8*)self + 8), node);
+                }
+            }
+        }
+    }
+    *(Iter_13E950**)D_0027B314 = it.saved;
+}
+
+typedef s32 (*Fn_0013C9D0)(void* self, s32 count, u8* dst);
+
+struct Cls_0013C9D0 {
+    u8 pad_00[0x08];
+    s16 off08;
+    u8 pad_0a[0x02];
+    Fn_0013C9D0 fn0c;
+};
+
+struct Port_0013C9D0 {
+    Cls_0013C9D0* cls;
+};
+
+struct Ring_0013C9D0 {
+    u8* buf;
+    s32 size;
+    s32 pos;
+    u8 pad_0c[0x04];
+    s32 avail;
+    s32 f14;
+    u8 pad_18[0x04];
+    s32 f1c;
+};
+s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, Port_0013C9D0* port)
+{
+    s32 total = 0;
+    s32 rem = n;
+    if (n <= 0 || self->avail < n) {
+        rem = self->avail;
+    }
+    while (rem != 0) {
+        s32 avail = self->size - self->pos;
+        s32 cnt = rem < avail ? rem : avail;
+        s32 r = port->cls->fn0c((u8*)port + port->cls->off08, cnt, self->buf + self->pos);
+        if (r == 0) {
+            break;
+        }
+        total += r;
+        rem -= r;
+        self->pos += r;
+        self->pos %= self->size;
+        self->f14 += r;
+        self->avail -= r;
+        self->f1c += r;
+        if (n <= 0) {
+            break;
+        }
+    }
+    return total;
+}
+
+struct Self_13CAD8 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+};
+typedef s32 (*FnA_13CAD8)(void* self, s32 a1, s32 a2);
+typedef s32 (*FnB_13CAD8)(void* self);
+struct Vt_13CAD8 {
+    u8 pad0[8];
+    s16 adj8;
+    u8 pad1[2];
+    FnA_13CAD8 fn0C;
+    s16 adj10;
+    u8 pad2[2];
+    FnB_13CAD8 fn14;
+};
+struct Obj_13CAD8 {
+    Vt_13CAD8* vt;
+};
+
+s32 func_0013CAD8(Self_13CAD8* self, s32 n, Obj_13CAD8* o)
+{
+    s32 total = 0;
+    s32 rem = n;
+    if (rem <= 0 || self->f14 < rem)
+        rem = self->f14;
+    for (;;) {
+        if (rem == 0)
+            break;
+        s32 chunk = self->f4 - self->fC;
+        if (rem < chunk)
+            chunk = rem;
+        s32 s0 = o->vt->fn0C((u8*)o + o->vt->adj8, chunk, self->f0 + self->fC);
+        if (s0 == 0)
+            break;
+        self->fC = (self->fC += s0) % self->f4;
+        self->f14 -= s0;
+        if (o->vt->fn14((u8*)o + o->vt->adj10) != 0)
+            self->f18 += s0;
+        else
+            self->f10 += s0;
+        rem -= s0;
+        total += s0;
+        if (n <= 0)
+            break;
+    }
+    return total;
+}
+
+struct Obj_13F718 {
+    u8 pad0[0x720];
+    s32 countA;
+    s32 arrA[8];
+    s32 countC;
+    s32 arrC[8];
+    s32 countB;
+    s32 arrB[8];
+    s32 countD;
+    s32 arrD[8];
+};
+
+s32 func_001833F0(void* node, s32 key);
+s32 func_001300E8(void* node, s32 kind);
+
+s32 func_0013F718(Obj_13F718* self, void* arg)
+{
+    if (self->countA > 0) {
+        s32 i;
+        for (i = 0; i < self->countA; i++) {
+            if (func_001833F0(arg, self->arrA[i]) != 0) {
+                break;
+            }
+        }
+        if (i >= self->countA) {
+            return 0;
+        }
+    } else if (self->countC > 0) {
+        s32 i;
+        for (i = 0; i < self->countC; i++) {
+            if (func_001833F0(arg, self->arrC[i]) != 0) {
+                break;
+            }
+        }
+        if (i < self->countC) {
+            return 0;
+        }
+    }
+    if (self->countB > 0) {
+        s32 i;
+        for (i = 0; i < self->countB; i++) {
+            if (func_001300E8(arg, self->arrB[i]) != 0) {
+                break;
+            }
+        }
+        if (i >= self->countB) {
+            return 0;
+        }
+    } else if (self->countD > 0) {
+        s32 i;
+        for (i = 0; i < self->countD; i++) {
+            if (func_001300E8(arg, self->arrD[i]) != 0) {
+                break;
+            }
+        }
+        if (i < self->countD) {
+            return 0;
+        }
+    }
+    return 1;
+}

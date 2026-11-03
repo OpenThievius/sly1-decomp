@@ -867,8 +867,8 @@ void func_001617E8(Strm_15D338* s, u32 tag, f32 value);
 void func_00161860(Strm_15D338* s, s32 a, s32 b);
 void func_001618C0(Strm_15D338* s, s32 a, s32 b, u32 c, u32 d);
 
-void func_0015D338(Self_15D338* self, u32 color, Strm_15D338* s, f32 x0, f32 y0, f32 x1, f32 y1,
-                   f32 u0, f32 v0, f32 u1, f32 v1)
+void func_0015D338(Self_15D338* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
+                   f32 u0, f32 v0, f32 u1, f32 v1, Strm_15D338* s)
 {
     color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
     func_001617E8(s, color, 0.0f);
@@ -1635,5 +1635,607 @@ void func_0015EE80(void)
         func_001F6B40(D_002623B4);
         func_001683E8();
         D_002626CC = 1;
+    }
+}
+
+struct List_15F710 {
+    u8* head;
+    u8* tail;
+    s32 offset;
+};
+
+struct Iter_15F710 {
+    List_15F710* list;
+    u8* link;
+    s32 offset;
+    Iter_15F710* prev;
+};
+
+struct Node_15F710 {
+    u8 pad0[0x54];
+    Node_15F710* f54;
+    u8 pad58[8];
+    List_15F710 list;
+};
+
+extern Iter_15F710* D_0027B314;
+void func_00152600(List_15F710* list, Node_15F710* node);
+void func_0015F678(void* self, Node_15F710* node);
+
+struct Begin_15F710 {
+    static void Of(Iter_15F710* it, List_15F710* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+struct Next_15F710 {
+    static Node_15F710* Of(Iter_15F710* it)
+    {
+        Node_15F710* obj = *(Node_15F710**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+void func_0015F710(void* self, Node_15F710* owner)
+{
+    Iter_15F710 it;
+    Node_15F710* node;
+    Begin_15F710::Of(&it, &owner->list);
+    while ((node = Next_15F710::Of(&it)) != 0) {
+        if (node != owner) {
+            func_00152600(&owner->list, node);
+            node->f54 = node;
+            node->list.tail = (u8*)node;
+            node->list.head = (u8*)node;
+        }
+        func_0015F678(self, node);
+    }
+    D_0027B314 = it.prev;
+}
+
+struct List_15EFE8 {
+    u8* head;
+    u8* tail;
+    s32 offset;
+};
+
+struct Iter_15EFE8 {
+    List_15EFE8* list;
+    u8* link;
+    s32 offset;
+    Iter_15EFE8* prev;
+};
+
+struct Node_15EFE8 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad18[0x1088 - 0x18];
+    void* f1088;
+};
+
+struct Obj_15EFE8 {
+    u8 pad0[0x20];
+    List_15EFE8 l0;
+    List_15EFE8 l1;
+    List_15EFE8 l2;
+};
+
+extern u8* D_00275710;
+
+s32 func_00152720(List_15EFE8* l);
+void func_00152600(List_15EFE8* l, Node_15EFE8* n);
+void func_00152470(u8* l, Node_15EFE8* n);
+void func_00152440(List_15EFE8* l);
+void func_001B5F28(u8* l, void* n);
+
+struct Begin_15EFE8 {
+    static void Of(Iter_15EFE8* it, List_15EFE8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = (*(Iter_15EFE8**)&D_0027B314);
+        (*(Iter_15EFE8**)&D_0027B314) = it;
+    }
+};
+
+struct Next_15EFE8 {
+    static Node_15EFE8* Of(Iter_15EFE8* it)
+    {
+        Node_15EFE8* obj = *(Node_15EFE8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+void func_0015EFE8(Obj_15EFE8* self)
+{
+    Iter_15EFE8 it;
+    Node_15EFE8* n;
+    if (func_00152720(&self->l0) == 0) {
+        Begin_15EFE8::Of(&it, &self->l0);
+        while ((n = Next_15EFE8::Of(&it)) != 0) {
+            func_00152600(&self->l0, n);
+            func_00152470(n->f14 + 0x1CC0, n);
+        }
+        func_00152440(&self->l0);
+        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+    }
+    if (func_00152720(&self->l1) == 0) {
+        Begin_15EFE8::Of(&it, &self->l1);
+        while ((n = Next_15EFE8::Of(&it)) != 0) {
+            if (n->f1088 != 0) {
+                func_001B5F28(D_00275710 + 0x1B4C, n->f1088);
+            }
+            func_00152600(&self->l1, n);
+            func_001B5F28(D_00275710 + 0x1B40, n);
+        }
+        func_00152440(&self->l1);
+        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+    }
+    if (func_00152720(&self->l2) == 0) {
+        Begin_15EFE8::Of(&it, &self->l2);
+        while ((n = Next_15EFE8::Of(&it)) != 0) {
+            func_00152600(&self->l2, n);
+            func_001B5F28(D_00275710 + 0x1BF4, n);
+        }
+        (*(Iter_15EFE8**)&D_0027B314) = it.prev;
+    }
+}
+
+typedef struct Obj_15C638 Obj_15C638;
+typedef struct Par_15C638 Par_15C638;
+typedef struct VT_15C638 VT_15C638;
+typedef signed char s8;
+typedef unsigned char u8;
+typedef signed short s16;
+typedef unsigned short u16;
+typedef signed int s32;
+typedef unsigned int u32;
+typedef signed long s64;
+typedef unsigned long u64;
+typedef float f32;
+struct Obj_15C638;
+typedef void (*FnA_15C638)(Obj_15C638 *self, s32 a, s32 b);
+typedef f32 (*FnW_15C638)(Obj_15C638 *self, s32 ch);
+typedef f32 (*FnD_15C638)(f32 x, f32 y, Obj_15C638 *self, s32 ch, s32 p, s32 q);
+struct VT_15C638
+{
+  u8 pad0[0x18];
+  s16 adj18;
+  u16 pad1A;
+  FnW_15C638 fn1C;
+  s16 adj20;
+  u16 pad22;
+  FnA_15C638 fn24;
+  u8 pad28[0x30 - 0x28];
+  s16 adj30;
+  u16 pad32;
+  FnD_15C638 fn34;
+  s16 adj38;
+  u16 pad3A;
+  FnA_15C638 fn3C;
+};
+struct Obj_15C638
+{
+  u8 pad0[8];
+  s32 f8;
+  u8 pad0C[0x48 - 0x0C];
+  f32 f48;
+  VT_15C638 *f4C;
+};
+struct Par_15C638
+{
+  f32 f0;
+  f32 f4;
+  f32 f8;
+  f32 fC;
+  s32 f10;
+  s32 f14;
+  s32 f18;
+};
+void func_0015C638(Obj_15C638 *self, char *str, Par_15C638 *par, s32 a3, s32 a4)
+{
+  char *p;
+  char *next;
+  s32 pending = 1;
+  f32 x;
+  f32 y;
+  self->f4C->fn24((Obj_15C638 *) (((u8 *) self) + self->f4C->adj20), a3, a4);
+  if (par->f18 == 0)
+  {
+    y = par->f4;
+  }
+  else
+  {
+    f32 sc = self->f48;
+    f32 h = ((f32) self->f8) * sc;
+    char *q = str;
+    if ((*q) != 0)
+    {
+      do
+      {
+        if ((*(q++)) == '\n')
+        {
+          h += ((f32) self->f8) * sc;
+        }
+      }
+      while ((*q) != 0);
+    }
+    if (par->f18 == 2)
+    {
+      y = (par->f4 + par->fC) - h;
+    }
+    else
+    {
+      y = par->f4 + ((par->fC - h) * 0.5f);
+    }
+  }
+  for (p = str; (*p) != 0; p = next)
+  {
+    f32 half = 0.5f;
+    s32 right = 2;
+    char c = *((u8 *) p);
+    next = p + 1;
+    if (c == '\n')
+    {
+      pending = 1;
+      y += ((f32) self->f8) * self->f48;
+    }
+    else
+    {
+      if (pending != 0)
+      {
+        if (par->f14 == 0)
+        {
+          x = par->f0;
+        }
+        else
+        {
+          char *q;
+          x = 0.0f;
+          for (q = p; (*q != 0) && (*q != '\n'); q++)
+          {
+            x += self->f4C->fn1C((Obj_15C638 *) (((u8 *) self) + self->f4C->adj18), *q);
+          }
+          if (par->f14 == right)
+          {
+            x = (par->f0 + par->f8) - x;
+          }
+          else
+          {
+            x = par->f0 + ((par->f8 - x) * half);
+          }
+        }
+        pending = 0;
+      }
+      x += self->f4C->fn34(x, y, (Obj_15C638 *) (((u8 *) self) + self->f4C->adj30), *p, par->f10, a4);
+    }
+  }
+
+  self->f4C->fn3C((Obj_15C638 *) (((u8 *) self) + self->f4C->adj38), a3, a4);
+}
+
+struct __attribute__((packed)) U4_15E318 { u32 v; };
+class Font_15E318 {
+public:
+    u8 pad[0x4C];
+    virtual void V0();
+    virtual void V1();
+    virtual f32 Width(s32 c);
+    virtual void Begin(s32 x, s32 y);
+    virtual void Flush(s32 y);
+    virtual f32 Draw(f32 left, f32 top, s32 c, s32 d, s32 y);
+    virtual void End(s32 x, s32 y);
+};
+struct Line_15E318 { u8 pad[8]; s32 w; u8 pad2[0x3C]; f32 h; };
+struct Self_15E318 {
+    u8 pad0[8];
+    Font_15E318* font;
+    Line_15E318* line;
+    u8 pad10[0x88];
+    s32 f98;
+    s32 f9c;
+};
+struct P_15E318 {
+    f32 f0, f4, f8, fC;
+    U4_15E318 f10;
+    s32 f14;
+    s32 f18;
+};
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+void func_0015DB80(Self_15E318* self);
+s32 func_0015DBE0(Self_15E318* self);
+void func_0015DBB8(Self_15E318* self, U4_15E318* p);
+
+void func_0015E318(Self_15E318* self, P_15E318* p, s32 x, s32 y)
+{
+    f32 f[64];
+    U4_15E318 u;
+    s32 first = 1;
+    s32 n = 0;
+    f32 top;
+    f32 left;
+    s32 c;
+    func_001F5C0C(f, 0, 0x100);
+    func_0015DB80(self);
+    while ((c = func_0015DBE0(self)) != 0) {
+        if (c == 10) {
+            n++;
+        } else {
+            f[n] += self->font->Width(c);
+        }
+    }
+    c = p->f18;
+    if (c == 0) {
+        top = p->f4;
+    } else {
+        f32 tot = (f32)(n + 1) * ((f32)self->line->w * self->line->h);
+        if (c == 2)
+            top = (p->f4 + p->fC) - tot;
+        else
+            top = p->f4 + (p->fC - tot) * 0.5f;
+    }
+    u = p->f10;
+    func_0015DBB8(self, &u);
+    Font_15E318* started = 0;
+    f32 half = 0.5f;
+    func_0015DB80(self);
+    s32 right = 2;
+    f32* fp = f;
+    while ((n = func_0015DBE0(self)) != 0) {
+        if (n == 10) {
+            first = 1;
+            fp++;
+            top += (f32)self->line->w * self->line->h;
+            continue;
+        }
+        if (first) {
+            if (p->f14 == 0) {
+                left = p->f0;
+            } else {
+                f32 g = *fp;
+                if (p->f14 == right)
+                    left = (p->f0 + p->f8) - g;
+                else
+                    left = p->f0 + (p->f8 - g) * half;
+            }
+            first = 0;
+        }
+        if (started == 0) {
+            self->font->Begin(x, y);
+            started = self->font;
+        } else if (self->f98 != 0) {
+            self->font->Flush(y);
+            self->f98 = 0;
+        }
+        left += self->font->Draw(left, top, n, self->f9c, y);
+    }
+    self->font->End(x, y);
+}
+
+// Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
+struct __attribute__((packed)) Col_15DBE0 { u8 r, g, b, a; };
+struct Font_15DBE0 {
+    u8 pad0[8];
+    s32 f8;
+    u8 pad0C[0x38];
+    f32 f44;
+    f32 f48;
+};
+struct Parser_15DBE0 {
+    u8 pad0[4];
+    char* cur;
+    Font_15DBE0* font;
+    Font_15DBE0* deffont;
+    u8 inl[0x44];
+    f32 f54;
+    f32 f58;
+    u8 pad5C[0x3C];
+    s32 fontChanged;
+    Col_15DBE0 c9C;
+    Col_15DBE0 cA0;
+    Col_15DBE0 cA4;
+    Col_15DBE0 cA8;
+};
+
+s32 func_0015C200(s32 id);
+void func_0015C9B0(Font_15DBE0* font, Font_15DBE0* out);
+void func_0015C900(Font_15DBE0* font);
+void func_0015C8B8(Font_15DBE0* font, f32 a, f32 b);
+
+s32 func_0015DBE0(Parser_15DBE0* self)
+{
+    s32 done = 0;
+    s32 changed = 1;
+    Font_15DBE0* inl = (Font_15DBE0*)self->inl;
+    do {
+        char* p = self->cur;
+        switch (*p) {
+        case '~':
+            if (p[1] == '~') {
+                self->cur = p + 1;
+                done = 1;
+            } else if (p[1] == '.') {
+                self->cA0 = self->cA4;
+                self->c9C = self->cA0;
+                self->cur += 2;
+            } else {
+                char* q = p + 1;
+                u32 acc = 0;
+                while (*q != 0 && q - self->cur < 7) {
+                    u32 ch = (u8)*q;
+                    u32 d;
+                    if (ch - '0' < 10)
+                        d = (s8)ch - '0';
+                    else if (ch - 'A' < 6)
+                        d = (s8)ch - 55;
+                    else if (ch - 'a' < 6)
+                        d = (s8)ch - 87;
+                    else
+                        break;
+                    q++;
+                    acc = (acc << 4) + d;
+                }
+                if (q - self->cur >= 7) {
+                    self->cA0.r = ((acc >> 16) & 0xFF) + 1 >> 1;
+                    self->cA0.g = ((acc & 0xFF00) >> 8) + 1 >> 1;
+                    self->cA0.b = (acc & 0xFF) + 1 >> 1;
+                    self->c9C = self->cA0;
+                    self->cur += 7;
+                } else {
+                    self->font = self->deffont;
+                    self->c9C = self->cA4;
+                    done = 1;
+                }
+            }
+            break;
+        case '&':
+            if (p[1] == '&') {
+                self->cur = p + 1;
+                done = 1;
+            } else if (p[1] == '.') {
+                self->font = self->deffont;
+                self->c9C = self->cA0;
+                self->fontChanged = changed;
+                self->cur += 2;
+            } else {
+                Font_15DBE0* nf = (Font_15DBE0*)func_0015C200(p[1]);
+                if (nf != 0) {
+                    func_0015C9B0(nf, inl);
+                    self->cur += 2;
+                    Font_15DBE0* d = self->deffont;
+                    f32 ratio = ((f32)d->f8 * d->f48) / ((f32)inl->f8 * inl->f48);
+                    self->font = inl;
+                    u8 al = self->c9C.a;
+                    self->f54 *= ratio;
+                    self->f58 *= ratio;
+                    Col_15DBE0 t = self->cA8;
+                    t.a = al;
+                    self->c9C = t;
+                    self->fontChanged = changed;
+                } else {
+                    self->font = self->deffont;
+                    done = 1;
+                    self->c9C = self->cA4;
+                    self->fontChanged = changed;
+                }
+            }
+            break;
+        case '^':
+            if (p[1] == '^') {
+                self->cur = p + 1;
+                done = 1;
+            } else if (p[1] == '.') {
+                func_0015C900(self->font);
+                self->cur += 2;
+            } else {
+                f32 a = (f32)(p[1] - '0') + (f32)(p[2] - '0') * 0.1f;
+                Font_15DBE0* f = self->font;
+                func_0015C8B8(f, a * f->f44, a * f->f48);
+                self->cur += 3;
+            }
+            break;
+        default:
+            done = 1;
+            break;
+        }
+    } while (done == 0);
+    char* e = self->cur;
+    char r = *e;
+    self->cur = e + 1;
+    return r;
+}
+
+typedef void (*Fn_15D4E0)(void* at, s32 a, void* b);
+struct Disp_15D4E0 {
+    u8 pad[0x20];
+    s16 offA;
+    u8 padA[2];
+    Fn_15D4E0 fnA;
+    u8 padB[0x38 - 0x28];
+    s16 offB;
+    u8 padC[2];
+    Fn_15D4E0 fnB;
+};
+struct Self_15D4E0 {
+    u8 p0[8];
+    s32 m8;
+    u8 p0c[0x44 - 0x0C];
+    f32 f44;
+    f32 f48;
+    Disp_15D4E0* disp;
+    u8 p50[0x60 - 0x50];
+    u64 m60;
+};
+struct Font_15D4E0;
+struct Item_15D4E0 {
+    Font_15D4E0* f0;
+    s8 key;
+    u8 p5[3];
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    u32 color;
+};
+struct Rect_15D4E0 { f32 x, y, w, h; };
+struct Entry_15D4E0 { u8 p0[2]; u16 a2; u16 a4; u16 a6; };
+struct Strm_15D4E0 { u8 pad[4]; };
+
+Entry_15D4E0* func_0015DAB8(Self_15D4E0* self, s8 key);
+void func_0015C8B8(Font_15D4E0* p, f32 a, f32 b);
+void func_0015C900(Font_15D4E0* p);
+void func_0015D338(Self_15D4E0* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
+                   f32 u0, f32 v0, f32 u1, f32 v1, Strm_15D4E0* s);
+
+void func_0015D4E0(Self_15D4E0* self, Item_15D4E0* item, Rect_15D4E0* r, Strm_15D4E0* s)
+{
+    Entry_15D4E0* e = func_0015DAB8(self, item->key);
+    if (e != 0) {
+        func_0015C8B8(item->f0, item->f10, item->f14);
+        f32 top = r->y;
+        f32 sx = self->f44;
+        f32 left = r->x;
+        s32 u2i = e->a2 + e->a6;
+        f32 x2 = left + r->w + item->f8 * sx;
+        f32 cw = (f32)e->a6 * sx;
+        f32 x1 = left - item->f8 * sx;
+        s32 sz = 1 << (s32)((self->m60 >> 30) & 0xF);
+        s32 height = self->m8;
+        f32 sy = self->f48;
+        s32 v0i = sz - e->a4;
+        f32 x0 = x1 - cw;
+        s32 v2i = sz - (e->a4 + height);
+        f32 u1 = (f32)((e->a2 + u2i) / 2);
+        f32 v1 = (f32)((v0i + v2i) / 2);
+        f32 u0 = (f32)e->a2;
+        f32 y1 = top - item->fC * sy;
+        f32 v0 = (f32)v0i;
+        f32 x3 = x2 + cw;
+        f32 y2 = top + r->h + item->fC * sy;
+        f32 y0 = y1 - (f32)height * sy;
+        f32 y3 = y2 + (f32)height * sy;
+        self->disp->fnA((u8*)self + self->disp->offA, 0, s);
+        f32 v2 = (f32)v2i;
+        f32 u2 = (f32)u2i;
+        func_0015D338(self, item->color, x0, y0, x1, y1, u0, v0, u1, v1, s);
+        func_0015D338(self, item->color, x2, y0, x3, y1, u1, v0, u2, v1, s);
+        func_0015D338(self, item->color, x0, y2, x1, y3, u0, v1, u1, v2, s);
+        func_0015D338(self, item->color, x2, y2, x3, y3, u1, v1, u2, v2, s);
+        func_0015D338(self, item->color, x1, y0, x2, y1, u1, v0, u1, v1, s);
+        func_0015D338(self, item->color, x1, y2, x2, y3, u1, v1, u1, v2, s);
+        func_0015D338(self, item->color, x0, y1, x1, y2, u0, v1, u1, v1, s);
+        func_0015D338(self, item->color, x2, y1, x3, y2, u1, v1, u2, v1, s);
+        func_0015D338(self, item->color, x1, y1, x2, y2, u1, v1, u1, v1, s);
+        func_0015C900(item->f0);
+        self->disp->fnB((u8*)self + self->disp->offB, 0, s);
     }
 }

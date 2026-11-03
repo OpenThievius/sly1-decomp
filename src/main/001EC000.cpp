@@ -1490,3 +1490,170 @@ void func_001EDDB0(Vec3_1EDDB0* v, f32* a1, f32* a2)
         *a2 = func_001EA408(func_00205778(v->z, r));
     }
 }
+
+struct Entry_1ED0D8 { s32 key; s32 val; };
+
+struct Obj_1ED0D8 {
+    u8 pad0[0xC68];
+    s32 count;
+    Entry_1ED0D8* table;
+};
+
+void func_0018D800(Entry_1ED0D8* dst, Entry_1ED0D8* src, s32 bytes);
+
+void func_001ED0D8(Obj_1ED0D8* self, s32 key)
+{
+    s32 i = 0;
+    if (self->count > 0) {
+        Entry_1ED0D8* p = self->table;
+        while (p->key != key) {
+            i++;
+            if (i >= self->count)
+                return;
+            p++;
+        }
+        if (i < self->count) {
+            Entry_1ED0D8* e = self->table + i;
+            func_0018D800(e, e + 1, (self->count - i - 1) * 8);
+            self->count = self->count - 1;
+        }
+    }
+}
+
+struct Entry_1ED278 { s32 f0; s32 f4; f32 f8; s32 fC; };
+struct Inner_1ED278 { u8 pad[0xC70]; s32 fC70; u8 pad2[0xC7C - 0xC74]; f32 fC7C; };
+struct Obj_1ED278 {
+    u8 pad0[0x34];
+    s32 f34;
+    Entry_1ED278* f38;
+    s32 f3C;
+    Inner_1ED278* f40;
+    s32 f44;
+    Entry_1ED278* Cur() { return &f38[f3C]; }
+};
+void func_001ED318(Obj_1ED278* self, Entry_1ED278* e);
+
+void func_001ED278(Obj_1ED278* self)
+{
+    Entry_1ED278* e;
+    s32 v;
+    while (self->f3C < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(self->f40->fC70 < v))) {
+        if (v == self->f40->fC70 && self->f40->fC7C < e->f8) return;
+        func_001ED318(self, e);
+        self->f3C++;
+    }
+}
+
+struct List_1EFA88 { s32 pad0; s32 count; s32 items[1]; };
+
+void* func_001F5B08(void* dst, void* src, s32 size);
+
+// An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
+// Moves n bytes of the item list down over a removed item.
+struct Shift_1EFA88 {
+    static void Of(s32* dst, s32* src, s32 n)
+    {
+        func_001F5B08(dst, src, n);
+    }
+};
+
+void func_001EFA88(List_1EFA88* self, s32 value)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        if (self->items[i] == value) break;
+    }
+    if (i < self->count) {
+        Shift_1EFA88::Of(&self->items[i], &self->items[i + 1], (self->count - i) * 4 - 4);
+        self->count--;
+    }
+}
+
+
+struct Sub_1ECB18 { u8 pad0[0x34]; f32 f34; };
+struct Obj_1ECB18 {
+    u8 pad0[8];
+    Sub_1ECB18* f8;
+    u8 pad0C[8];
+    f32 f14;
+    f32 f18;
+};
+struct Ent_1ECB18 { Obj_1ECB18* f0; s32 f4; };
+struct Self_1ECB18 {
+    u8 pad0[0xC68];
+    s32 fC68;
+    Ent_1ECB18* fC6C;
+    u8 pad1[4];
+    s32 fC74;
+    u8 pad2[0xC];
+    f32 fC84;
+};
+
+void func_001ECB18(Self_1ECB18* self)
+{
+    f32 den = self->fC84 - (*(f32*)&D_0026185C);
+    for (s32 k = 0; k < self->fC68; k++) {
+        Ent_1ECB18* e = &self->fC6C[k];
+        Obj_1ECB18* o = e->f0;
+        f32 len = o->f8->f34;
+        f32 start = o->f14;
+        f32 t = len / (f32)e->f4 * (f32)((self->fC74 + 1) % e->f4);
+        if (t <= start)
+            t += len;
+        o->f18 = (t - start) / den;
+    }
+
+}
+
+extern u8* D_0027051C;
+extern u8 D_00275B04[];
+
+struct Glob_1EFFA0 { u8 pad0[0x2D0]; s32 f2D0; };
+struct Text_1EFFA0 { u8 pad0[8]; s32 f08; u8 pad1[0xC]; s32 f18; };
+struct Args_1EFFA0 { s32 kind; Text_1EFFA0* text; s32 x; s32 y; s32 z; };
+struct Dst_1EFFA0 { s32 f00; s32 f04; u8 pad08[8]; Args_1EFFA0 args; s32 f24; };
+struct Call_1EFFA0 { s32 f00; };
+
+void func_001DDAD0(Call_1EFFA0* x);
+void func_001F0220(Dst_1EFFA0* o, s32 mode);
+
+struct Match_1EFFA0 {
+    static s32 Of(Text_1EFFA0* t)
+    {
+        Text_1EFFA0* p;
+        p = (Text_1EFFA0*)D_00275B04;
+        if (t == p) {
+            return 1;
+        }
+        if (p == 0) {
+            return 0;
+        }
+        return ((p->f08 ^ p->f18) ^ (t->f08 ^ t->f18)) == 0;
+    }
+};
+
+void func_001EFFA0(Dst_1EFFA0* dst, Args_1EFFA0* args, s32 count)
+{
+    Text_1EFFA0* p;
+    s32 mode;
+
+    if (dst->f04 == 0) {
+        if (D_0027051C != 0) {
+            if (((Glob_1EFFA0*)D_0027051C)->f2D0 != 2) {
+                func_001DDAD0((Call_1EFFA0*)D_00275710);
+            }
+        }
+        if (args->text == 0 || Match_1EFFA0::Of(args->text)) {
+            args->z |= 8;
+        } else {
+            args->z &= ~8;
+        }
+        dst->args = *args;
+        dst->f24 = count;
+        mode = 2;
+        if (D_00275710 != 0) {
+            mode = 1;
+        }
+        func_001F0220(dst, mode);
+    }
+}

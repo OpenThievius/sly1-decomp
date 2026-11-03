@@ -1482,3 +1482,300 @@ void func_0015A8B8(Obj_15A8B8* self)
     v[1] = 0.2f;
     v[2] = 0.1f;
 }
+
+struct Iter_00159588;
+extern Iter_00159588* D_0027B314;
+extern f32 D_00261858[];
+
+struct Node_00159588 { void* f0; u8 pad4[0xC]; u8 body[0x50]; f32 f60; };
+struct List_00159588 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_00159588 { List_00159588* list; u8* link; s32 offset; Iter_00159588* saved; };
+struct Self_00159588 { u8 pad0[0x1BD0]; u8 set[0xC]; List_00159588 list; };
+
+void func_001590A0(void* a, void* b);
+void func_00152600(List_00159588* list, Node_00159588* node);
+void func_001B5F28(u8* set, Node_00159588* node);
+
+struct Next_00159588 {
+    static Node_00159588* Of(Iter_00159588* it)
+    {
+        Node_00159588* obj = *(Node_00159588**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_00159588 {
+    static void Of(Iter_00159588* it, List_00159588* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+void func_00159588(Self_00159588* self)
+{
+    Iter_00159588 it;
+    Begin_00159588::Of(&it, &self->list);
+    Node_00159588* node;
+    while ((node = Next_00159588::Of(&it)) != 0) {
+        if (!(D_00261858[1] < node->f60)) {
+            func_001590A0(node->f0, node->body);
+            func_00152600(&self->list, node);
+            func_001B5F28(self->set, node);
+        }
+    }
+    D_0027B314 = it.saved;
+}
+
+struct Actor_15AC08 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad1[0x550 - 0x18];
+    s32 f550;
+    u8 pad2[0x564 - 0x554];
+    s32 f564;
+    s32 pad568;
+    s32 f56C[16];
+    s32 f5AC;
+    s32 f5B0[8];
+    u8 pad4[0x5D4 - 0x5D0];
+    u8 f5D4[0x630 - 0x5D4];
+    s32 f630;
+    s32 f634;
+};
+
+extern u8 D_002621C8[];
+
+void func_001BAC30(Actor_15AC08* self, void* arg);
+void func_00124DF8(Actor_15AC08* self, s32 n, void* table);
+void func_00159478(u8* sub, Actor_15AC08* self);
+s32 func_0015A480(u8* self, s32 kind, Actor_15AC08* arg);
+void func_00182ED8(s32 a);
+s32 func_001526D0(u8* sub, Actor_15AC08* self);
+void func_00152600(u8* data, Actor_15AC08* self);
+
+void func_0015AC08(Actor_15AC08* self, void* arg)
+{
+    u32 i;
+    func_001BAC30(self, arg);
+    func_00124DF8(self, 2, D_002621C8);
+    func_00159478(self->f5D4, self);
+    for (i = 0; i < 16; i++) {
+        s32 kind = i + 0x23C;
+        s32 p = func_0015A480(self->f14, kind, self);
+        if (!p)
+            continue;
+        func_00182ED8(p);
+        if (self->f550 == 1) {
+            if (self->f630 == kind)
+                self->f634 = self->f564;
+        }
+        self->f56C[self->f564++] = p;
+    }
+    if (self->f550 == 1) {
+        for (i = 0; i < 8; i++) {
+            s32 p = func_0015A480(self->f14, i + 0x24D, self);
+            if (p) {
+                func_00182ED8(p);
+                self->f5B0[self->f5AC++] = p;
+            }
+        }
+    }
+    if (self->f550) {
+        if (func_001526D0(self->f14 + 0x1C48, self))
+            func_00152600(self->f14 + 0x1C48, self);
+    }
+}
+
+struct Obj_15B4D0;
+struct VT_15B4D0 { u8 pad[0xA0]; void (*fn)(Obj_15B4D0* o, void* a, void* out); };
+struct Obj_15B4D0 { VT_15B4D0* vt; };
+struct Out_15B4D0 { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
+struct Self_15B4D0 {
+    u8 pad0[0x550];
+    s32 f550;
+    s32 state;
+    f32 f558;
+    f32 f55C;
+    u8 pad560[8];
+    s32 f568;
+    Obj_15B4D0* objs56C[16];
+    s32 pad5AC;
+    Obj_15B4D0* f5B0[8];
+    Obj_15B4D0* f5D0;
+    u8 pad5D4[0x630 - 0x5D4];
+    s32 f630;
+    s32 f634;
+    f32 f638;
+};
+extern f32 D_0026185C;
+extern f32 D_00262230[];
+extern f32 D_00262240[];
+extern f32 D_00275C60[];
+void func_00125B70(Self_15B4D0* self, void* c, void* out);
+
+void func_0015B4D0(Self_15B4D0* self, void* a1, void* a2)
+{
+    Out_15B4D0 out;
+    func_00125B70(self, a2, &out);
+    switch (self->state) {
+    case 1: {
+        f32 base = self->f558;
+        f32 num = D_0026185C - base;
+        f32 den = self->f55C - base;
+        f32 t = num / den;
+        f32 v = D_00262230[0] + t * (D_00262230[1] + t * D_00262230[2]);
+        f32 lo = D_00275C60[0];
+        f32 hi = D_00275C60[1];
+        if (v < lo) v = lo;
+        else if (hi < v) v = hi;
+        out.scale = out.scale * v;
+        self->f5D0->vt->fn(self->f5D0, a1, &out);
+        break;
+    }
+    case 3: {
+        f32 base = self->f558;
+        f32 num = D_0026185C - base;
+        f32 den = self->f55C - base;
+        f32 t = num / den;
+        f32 v = D_00262240[0] + t * (D_00262240[1] + t * D_00262240[2]);
+        f32 lo = D_00275C60[0];
+        f32 hi = D_00275C60[1];
+        if (v < lo) v = lo;
+        else if (hi < v) v = hi;
+        out.scale = out.scale * v;
+        self->objs56C[self->f568]->vt->fn(self->objs56C[self->f568], a1, &out);
+        break;
+    }
+    case 6: {
+        self->f5B0[self->f568]->vt->fn(self->f5B0[self->f568], a1, &out);
+        break;
+    }
+    default: {
+        s32 idx = self->f568;
+        if (self->f550 == 1 && self->f630 != -1) {
+            f32 t = (D_0026185C - self->f558) / (self->f55C - self->f558);
+            if (1.0f - self->f638 < t) idx = self->f634;
+        }
+        self->objs56C[idx]->vt->fn(self->objs56C[idx], a1, &out);
+        break;
+    }
+    }
+}
+
+struct Vt_15A4F0 {
+    u8 pad0[8];
+    s32 grf;
+};
+
+struct Lo_15A4F0 {
+    Vt_15A4F0* pvt;
+    u8 pad4[0x14];
+    Lo_15A4F0* pnext;   // 0x18
+    Lo_15A4F0* psib;    // 0x1C
+    u8 pad20[4];
+    Lo_15A4F0* pchain;  // 0x24
+    u8 pad28[0xC];
+    Lo_15A4F0* pchild;  // 0x34
+    u8 pad38[0x2C8 - 0x38];
+    u64 unk0 : 42;      // 0x2C8
+    u64 imark : 4;
+    u64 unk1 : 18;
+};
+
+struct Sw_15A4F0 {
+    u8 pad[0x1884];
+    Lo_15A4F0* aplo[0x95];
+};
+
+s32 func_001300E8(Lo_15A4F0* plo, s32 id);
+s32 func_00182FC8(Lo_15A4F0* plo);
+s32 func_0015A4B8(u32 i, s32 id);
+void func_00159F48(Lo_15A4F0* plo, s32 kind, s32 fAll, s32 zero, Lo_15A4F0* ploRoot, s32 cmax,
+                   s32* pc, Lo_15A4F0** aplo, s32* pmin);
+
+s32 func_0015A4F0(Sw_15A4F0* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax, Lo_15A4F0** aplo)
+{
+    s32 c;
+    s32 min;
+    s32 kind;
+    Lo_15A4F0* plo;
+    Lo_15A4F0* ploMark;
+    Lo_15A4F0* p;
+    s32 n;
+    u32 i;
+
+    if (id == -1) {
+        return 0;
+    }
+    if (ploRoot == 0 && (grf & 5) == 0) {
+        return 0;
+    }
+    kind = grf & 0xFF;
+    c = 0;
+    if (kind == 3) {
+        // Retail reads plo here before anything sets it (lw 0($s0) with $s0 unset).
+        if (!(plo->pvt->grf & 1)) {
+            plo = plo->pnext;
+        }
+        for (; plo != 0; plo = plo->pnext) {
+            if (func_001300E8(plo, id) != 0 && ((grf & 0x100) || func_00182FC8(plo) != 0)) {
+                if (c < cmax) {
+                    aplo[c] = plo;
+                }
+                c++;
+            }
+        }
+    } else if (kind == 2 && !(grf & 0x100)) {
+        if (!(ploRoot->pvt->grf & 1)) {
+            return 0;
+        }
+        for (plo = ploRoot->pchild; plo != 0; plo = plo->psib) {
+            if (func_001300E8(plo, id) == 0) {
+                continue;
+            }
+            if (c < cmax) {
+                aplo[c] = plo;
+            }
+            c++;
+        }
+    } else {
+        switch (kind) {
+        case 1:
+        case 3:
+        case 4:
+            ploMark = ploRoot;
+            if (ploMark != 0 && !(ploMark->pvt->grf & 1)) {
+                ploMark = ploMark->pnext;
+            }
+            p = ploMark;
+            n = 0;
+            while (p != 0) {
+                n++;
+                p->imark = n;
+                p = p->pnext;
+            }
+            min = 0x7FFFFFFF;
+            break;
+        default:
+            ploMark = 0;
+            break;
+        }
+        for (i = id; i < 0x95 && func_0015A4B8(i, id); i++) {
+            for (plo = psw->aplo[i]; plo != 0; plo = plo->pchain) {
+                func_00159F48(plo, kind, grf & 0x100, 0, ploRoot, cmax, &c, aplo, &min);
+            }
+        }
+        for (p = ploMark; p != 0; p = p->pnext) {
+            p->imark = 0;
+        }
+    }
+    if (!(grf & 0x200) && cmax < c) {
+        c = cmax;
+    }
+    return c;
+}

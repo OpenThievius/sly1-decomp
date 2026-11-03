@@ -405,3 +405,105 @@ void func_001D3678(Self_001D3678* self, s32 kind, Msg_001D3678* msg)
         func_00185D20(0.0f, self, (void*)msg->value, (u8*)self + 0x140, D_00248D20, 10, 0, 0, (u8*)self + 0x554);
     }
 }
+
+struct Self_1D3100 { u8 pad[0xAA]; u16 flags; };
+void func_0016EC20(Self_1D3100* self, s32 mask);
+s32 func_00160D10(void);
+
+s32 func_001D3100(Self_1D3100* self, s32 start, s32 count, s32* table)
+{
+    s32 step;
+    s32 left;
+    s32 idx;
+
+    if ((self->flags & 3) == 0) {
+        return start;
+    }
+    step = (self->flags & 1) ? -1 : 1;
+    func_0016EC20(self, 3);
+    idx = start;
+    left = count;
+    do {
+        if (--left < 0) {
+            return start;
+        }
+        idx += step;
+        if (idx < 0) {
+            idx = count - 1;
+        } else if (idx >= count) {
+            idx = 0;
+        }
+    } while (!(func_00160D10() & table[idx]));
+    return idx;
+}
+
+struct Vt_1D29C8 { u8 pad0[0x20]; void (*fn20)(void* self, s32 a); u8 pad24[0x14]; void (*fn38)(void* self); };
+struct Obj_1D29C8 { Vt_1D29C8* vt; };
+struct Sub_1D29C8;
+struct Ctx_1D29C8 {
+    u8 pad0[0x1518];
+    Sub_1D29C8* f1518;
+    u8 pad151C[0xD04];
+    s32 f2220;
+    u8 pad2224[0x52C];
+    Sub_1D29C8* f2750;
+};
+struct Glob_1D29C8 {
+    u8 pad0[0x19FC];
+    u32 f19FC;
+};
+
+extern s32 D_00274F74;
+extern Glob_1D29C8* D_002623C0;
+extern f32 D_00261854;
+extern Obj_1D29C8 D_0026EC70;
+extern s32 D_00274F58[];
+
+void func_00175170(Ctx_1D29C8* self, s32 a, s32 b);
+s32 func_00182FC8(Sub_1D29C8* self);
+void func_00126D60(Sub_1D29C8* self, f32 v);
+void func_001D32D8(Sub_1D29C8* self, Ctx_1D29C8* a, s32 b);
+void func_001D31D0(Ctx_1D29C8* self, s32 a);
+void* func_001925F0(void);
+void func_001AA8B8(Obj_1D29C8* self, f32 v);
+void func_001AA788(Obj_1D29C8* self, f32 v);
+
+void func_001D29C8(u32 mode)
+{
+    switch (D_00274F74) {
+    case 1:
+        if ((*(Ctx_1D29C8**)&D_00262E10) == 0)
+            goto tail;
+        if ((*(Ctx_1D29C8**)&D_00262E10)->f2220 == 0xD)
+            func_00175170((*(Ctx_1D29C8**)&D_00262E10), 0, -1);
+        break;
+    case 3:
+        if ((*(Ctx_1D29C8**)&D_00262E10) == 0)
+            goto tail;
+        if ((*(Ctx_1D29C8**)&D_00262E10)->f1518 != 0) {
+            if (func_00182FC8((*(Ctx_1D29C8**)&D_00262E10)->f1518) != 0)
+                func_00126D60((*(Ctx_1D29C8**)&D_00262E10)->f1518, 0.5f);
+        }
+        break;
+    }
+    if ((*(Ctx_1D29C8**)&D_00262E10) != 0) {
+        D_00261854 = 1.0f;
+        if ((*(Ctx_1D29C8**)&D_00262E10)->f2750 != 0) {
+            if (func_00182FC8((*(Ctx_1D29C8**)&D_00262E10)->f2750) != 0)
+                func_001D32D8((*(Ctx_1D29C8**)&D_00262E10)->f2750, (*(Ctx_1D29C8**)&D_00262E10), 1);
+        }
+        func_001D31D0((*(Ctx_1D29C8**)&D_00262E10), 0);
+        if ((*(Ctx_1D29C8**)&D_00262E10) != 0) {
+            if ((void*)(*(Ctx_1D29C8**)&D_00262E10) == func_001925F0())
+                D_00274F74 = mode;
+        }
+    }
+tail:
+    if (mode != D_002623C0->f19FC && mode < 7) {
+        func_001AA8B8(&D_0026EC70, ((*(Ctx_1D29C8**)&D_00262E10) != 0 && (void*)(*(Ctx_1D29C8**)&D_00262E10) == func_001925F0()) ? 3.0f : 8.0f);
+        func_001AA788(&D_0026EC70, 0.6f);
+        D_0026EC70.vt->fn20(&D_0026EC70, D_00274F58[mode]);
+        D_0026EC70.vt->fn38(&D_0026EC70);
+        D_002623C0->f19FC = mode;
+    }
+}

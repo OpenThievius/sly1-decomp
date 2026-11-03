@@ -487,3 +487,30 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad_17DE88* src)
     }
     return hits >= 2;
 }
+
+struct Entry_17C660 { u8 pad[8]; s32 state; u8 tail[8]; };
+struct Object_17C660 {
+    u8 pad00[0x34];
+    s32 limit;
+    Entry_17C660* entries;
+    u8 pad3C[4];
+    s32 index;
+    u8 pad44[4];
+    void* pending;
+};
+void func_0017BCD0(Object_17C660* self);
+s32 func_0017C428(Object_17C660* self, void* item);
+
+void func_0017C660(Object_17C660* self)
+{
+    if (self->index < 0 && self->limit > 0)
+        func_0017BCD0(self);
+    while (self->index < self->limit) {
+        Entry_17C660* entry = &self->entries[self->index];
+        if (entry->state == 0 && !func_0017C428(self, entry))
+            break;
+        func_0017BCD0(self);
+    }
+    if (self->pending && func_0017C428(self, self->pending))
+        self->pending = 0;
+}

@@ -1661,3 +1661,273 @@ V_119BB0* func_00119BB0(V_119BB0* ret, Node_119BB0* self, void* ctx)
     func_0011B060(&a, 2);
     return ret;
 }
+
+struct __attribute__((aligned(16))) Quad_119030 { s32 w[4]; };
+struct Node_119030 { s32 pad0; Node_119030* f4; Node_119030* f8; };
+
+void func_0011B008(Quad_119030* q);
+void func_0011B018(void* out, Quad_119030* q);
+void func_0011B060(Quad_119030* q, s32 mode);
+void func_0011B0A8(Quad_119030* a, Quad_119030* b);
+void func_0011B538(Quad_119030* q, s32 n);
+void func_0011A080(Quad_119030* t, Node_119030* n, s32 c);
+
+void* func_00119030(void* self, Node_119030* x, s32 c)
+{
+    Quad_119030 q;
+    Quad_119030 t;
+    Node_119030* m;
+    Node_119030* n2;
+    Node_119030* n3;
+    func_0011B008(&q);
+    m = x->f4->f8;
+    n2 = m->f8;
+    n3 = n2->f8;
+    func_0011A080(&t, m, c);
+    func_0011B0A8(&q, &t);
+    func_0011B060(&t, 2);
+    if (q.w[1] == 1) {
+        func_0011A080(&t, n2, c);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+    } else if (n3 != 0) {
+        func_0011A080(&t, n3, c);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+    } else {
+        func_0011B538(&q, 0x22);
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}
+
+struct __attribute__((aligned(16))) Quad_118198 { s32 type; struct Node_118198* head; s32 w2; s32 w3; };
+struct Ent_118198;
+struct Node_118198 { s32 f0; Ent_118198* f4; Node_118198* f8; };
+struct Pair_118198 { s32 a; s32 b; };
+struct Src_118198 {
+    s32 type;
+    Node_118198* head;
+    Pair_118198 p0;
+    Pair_118198 p1;
+};
+struct Hit_118198 { Quad_118198 q[7]; };
+
+struct Val_118198;
+Val_118198* func_0011B008(Val_118198* q);
+void func_0011B018(Val_118198* dst, const Val_118198* src);
+void func_0011B060(Val_118198* q, s32 mode);
+struct __attribute__((aligned(16))) Val_118198 {
+    s32 type;
+    Node_118198* head;
+    s32 w2;
+    s32 w3;
+    Val_118198() { func_0011B008(this); }
+    Val_118198(const Val_118198& o) { func_0011B018(this, &o); }
+    ~Val_118198() { func_0011B060(this, 2); }
+};
+void func_0011B0A8(Val_118198* a, Src_118198* b);
+s32 func_001419E8(Quad_118198* z, s32 a, s32 b, s32 c, Ent_118198** d, Hit_118198* e);
+void func_0011B8A8(Node_118198* n, Ent_118198* e);
+void func_0011B740(Node_118198* n, Quad_118198* q);
+void func_0011B6C0(void* q, Node_118198* n);
+
+Val_118198 func_00118198(s32 id, s32 unused, Src_118198* src)
+{
+    Val_118198 l0;
+    Hit_118198 hit;
+    Ent_118198* slot;
+    if (src->type == 0) {
+        func_0011B0A8(&l0, src);
+    } else {
+        s32 kind = 0x71;
+        Node_118198* head = 0;
+        Node_118198* tail;
+        Node_118198* it;
+        for (it = src->head; it != 0; it = it->f8) {
+            Pair_118198* pa = &src->p0;
+            Pair_118198* pb = &src->p1;
+            Node_118198* n1;
+            Node_118198* n2;
+            Node_118198* n3;
+            Quad_118198* v;
+            Ent_118198* e = it->f4;
+            if (e == 0)
+                continue;
+            slot = e;
+            if (func_001419E8(0, pa->b, pb->b, 1, &slot, &hit) == 0)
+                continue;
+            if (id == kind) {
+                n1 = (struct Node_118198 *)func_0011AF28();
+                n2 = (struct Node_118198 *)func_0011AF28();
+                n3 = (struct Node_118198 *)func_0011AF28();
+                func_0011B8A8(n1, e);
+                n1->f8 = n2;
+                v = (struct Quad_118198 *)func_0011C508();
+                *v = hit.q[0];
+                func_0011B740(n2, v);
+                n2->f8 = n3;
+                v = (struct Quad_118198 *)func_0011C508();
+                *v = hit.q[1];
+                func_0011B740(n3, v);
+                n3 = (struct Node_118198 *)func_0011AF28();
+                func_0011B6C0(n3, n1);
+                if (head != 0)
+                    tail->f8 = n3;
+                else
+                    head = n3;
+                tail = n3;
+            } else {
+                n1 = (struct Node_118198 *)func_0011AF28();
+                n2 = (struct Node_118198 *)func_0011AF28();
+                func_0011B8A8(n1, e);
+                n1->f8 = n2;
+                v = (struct Quad_118198 *)func_0011C508();
+                *v = hit.q[1];
+                func_0011B740(n2, v);
+                func_0011B6C0(&l0, n1);
+                return l0;
+            }
+        }
+        if (head != 0)
+            func_0011B6C0(&l0, head);
+        else
+            l0.type = 0;
+    }
+    return l0;
+}
+
+struct Stk_11A850;
+
+// One generic record: a queued event is { type, object, next }; the lists
+// and the object table use the same words.
+struct Obj_11A850 {
+    s32 f0;
+    Obj_11A850* f4;
+    Obj_11A850* f8;
+    Obj_11A850* fC;
+    Obj_11A850* f10;
+    Obj_11A850* f14;
+};
+
+// What func_0011A7D8 returns: a queue of records and two objects.
+struct Batch_11A850 {
+    Obj_11A850* f0;
+    Obj_11A850* f4;
+    s32 f8;
+    s32 fC;
+    Obj_11A850* f10;
+};
+
+Obj_11A850* func_0011A748(Stk_11A850* s);
+void func_0011A770(Stk_11A850* s, Obj_11A850* o);
+void func_0011A7B8(Stk_11A850* s, Obj_11A850* o);
+void func_0011A728(Stk_11A850* s, Obj_11A850* o);
+Batch_11A850* func_0011A7D8(Stk_11A850* s);
+Obj_11A850* func_0011A790(Stk_11A850* s);
+void func_0011C3F0(Obj_11A850* o);
+s32 func_0011C3C8(Obj_11A850* o);
+
+void func_0011A850(Stk_11A850* self)
+{
+    Obj_11A850* obj;
+    Obj_11A850* other;
+    Obj_11A850* group;
+    for (;;) {
+        group = func_0011A748(self);
+        if (group) {
+            Obj_11A850* link = group->f14;
+            if (link) {
+                do {
+                    func_0011C3F0(link);
+                    Obj_11A850* ev = (Obj_11A850*)&link->f4;
+                    switch (ev->f0) {
+                    case 0x1E:
+                        obj = ev->f4;
+                        if (func_0011C3C8(obj)) {
+                            func_0011C3F0(obj);
+                            func_0011A770(self, obj);
+                        }
+                        break;
+                    case 0x1F:
+                        other = ev->f4;
+                        if (func_0011C3C8(other)) {
+                            func_0011C3F0(other);
+                            func_0011A7B8(self, other);
+                        }
+                        break;
+                    case 0x21:
+                        func_0011C3F0(ev->f4);
+                        break;
+                    }
+                    link = link->fC;
+                } while (link);
+            }
+            if (group->f0 > 0) {
+                s32 i = 0;
+                Obj_11A850** p = &group->f4;
+                do {
+                    obj = *p;
+                    if (func_0011C3C8(obj)) {
+                        func_0011C3F0(obj);
+                        func_0011A728(self, obj);
+                    }
+                    i++;
+                    p++;
+                } while (i < group->f0);
+            }
+            continue;
+        }
+        Batch_11A850* b = func_0011A7D8(self);
+        if (b) {
+            obj = b->f4;
+            if (obj) {
+                do {
+                    func_0011C3F0(obj);
+                    obj = obj->f8;
+                } while (obj);
+            }
+            obj = b->f10;
+            if (func_0011C3C8(obj)) {
+                func_0011C3F0(obj);
+                func_0011A770(self, obj);
+            }
+            group = b->f0;
+            if (func_0011C3C8(group)) {
+                func_0011C3F0(group);
+                func_0011A728(self, group);
+            }
+            continue;
+        }
+        obj = func_0011A790(self);
+        if (!obj)
+            return;
+        switch (obj->f0) {
+        case 0x1E:
+            other = obj->f4;
+            if (func_0011C3C8(other)) {
+                func_0011C3F0(other);
+                func_0011A770(self, other);
+            }
+            break;
+        case 0x1F:
+            other = obj->f4;
+            if (func_0011C3C8(other)) {
+                func_0011C3F0(other);
+                func_0011A7B8(self, other);
+            }
+            break;
+        case 0x21:
+            func_0011C3F0(obj->f4);
+            break;
+        }
+        obj = obj->f8;
+        if (obj) {
+            if (func_0011C3C8(obj)) {
+                func_0011C3F0(obj);
+                func_0011A770(self, obj);
+            }
+        }
+    }
+}

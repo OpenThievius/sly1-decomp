@@ -1246,3 +1246,937 @@ void func_001FEE48()
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 extern const Fn_Table D_0024F0C0[6] = { 0, (Fn_Table)func_001FEF70, 0, (Fn_Table)func_001FEF28, 0, (Fn_Table)func_001FEF00 };
+
+struct Vec_001FD868
+{
+	s32 w0;
+	s32 w1;
+	s32 w2;
+	u32 w3;
+};
+
+void func_001FD6E0(f32* in, Vec_001FD868* out);
+s32 func_001FD548(s32 a, s32 b, s32 c, u64 d);
+
+s32 func_001FD868(f32 x)
+{
+	Vec_001FD868 v;
+	func_001FD6E0(&x, &v);
+	return func_001FD548(v.w0, v.w1, v.w2, (u64)v.w3 << 30);
+}
+
+typedef void (*Handler_001FE8F0)(void) __attribute__((noreturn));
+
+void func_001FE8F0(void) __attribute__((noreturn));
+
+void func_001FE8F0(void)
+{
+	((Handler_001FE8F0)D_00278048)();
+}
+
+void func_001FE908(void) __attribute__((noreturn));
+
+void func_001FE908(void)
+{
+	func_001FE8F0();
+}
+
+Handler_001FE8F0 func_001FE918(Handler_001FE8F0 handler)
+{
+	Handler_001FE8F0 old = (Handler_001FE8F0)D_00278048;
+	D_00278048 = (void (*)())handler;
+	return old;
+}
+
+typedef void (*Handler_001FE938)(void) __attribute__((noreturn));
+
+void func_001FE938(void) __attribute__((noreturn));
+
+void func_001FE938(void)
+{
+	((Handler_001FE938)D_00278640)();
+}
+
+s32 func_001FE950(void)
+{
+	return *(s32*)func_001FDA10() + 8;
+}
+
+struct Arg_1FE9D0;
+s32 func_0018D740(Arg_1FE9D0* size);
+extern void func_001FE8F0(void) __attribute__((noreturn));
+
+s32 func_001FE9D0(Arg_1FE9D0* size)
+{
+    s32 p = func_0018D740(size);
+    if (p == 0)
+        func_001FE8F0();
+    return p;
+}
+
+// The unpacked form of a double: class, sign, exponent and fraction.
+struct Unpacked_1FD578 {
+    s32 kind;
+    s32 sign;
+    s32 exponent;
+    u32 pad;
+    u64 fraction;
+};
+
+struct Bits_1FD578 { u64 bits; };
+
+void func_001FCA40(Bits_1FD578* bits, Unpacked_1FD578* out);
+s32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3);  // defined earlier in src/lib/001FC000.cpp
+
+s32 func_001FD578(Bits_1FD578 bits)
+{
+    Unpacked_1FD578 u;
+    func_001FCA40(&bits, &u);
+    s32 fraction = (s32)(u.fraction >> 30) | 1;
+    if ((u.fraction & 0x3FFFFFFFULL) == 0) fraction = (s32)(u.fraction >> 30);
+    return func_001FD838(u.kind, u.sign, u.exponent, fraction);
+}
+
+// The exception an allocation failure throws (its typeinfo function is func_00200000).
+class Fault_1FD8A8 {
+public:
+    virtual ~Fault_1FD8A8();
+};
+
+struct Arg_001FD8A8;
+
+void* func_0018D758(Arg_001FD8A8* q);
+
+void* func_001FD8A8(Arg_001FD8A8* a) throw(Fault_1FD8A8)
+{
+    return func_0018D758(a);
+}
+
+struct Obj_1FDFF8 { u8* f0; u8 pad[0x14]; s64 tbl[80]; s32 pad2; s8 st[64]; };
+
+void func_002014D0(void);
+
+u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
+{
+    while (self->st[idx] == 2) {
+        idx = self->tbl[idx];
+    }
+    if (self->st[idx] == 1) {
+        return self->f0 + self->tbl[idx];
+    }
+    func_002014D0();
+}
+
+struct Handle_1FEB18 {
+    u8 pad_00[0x8];
+    void* object;
+    void* data;
+    void (*callback)(void*, s32);
+    s32 state;
+    Handle_1FEB18* next;
+    u8 pad_1C[4];
+    s64 refs;
+    void* buf;
+};
+
+extern void func_001FE8F0(void) __attribute__((noreturn));
+void func_001FE9F8(void*);
+s32 func_00200C40(void*);
+
+void func_001FEB18(Handle_1FEB18* self)
+{
+    Handle_1FEB18** link = (Handle_1FEB18**)func_001FDA10();
+    if (--self->refs != 0) {
+        return;
+    }
+    if (self == *link && self->state == 0) {
+        return;
+    }
+    for (; *link != 0; link = &(*link)->next) {
+        if (*link == self) {
+            break;
+        }
+    }
+    if (*link == 0) {
+        func_001FE8F0();
+    }
+    *link = self->next;
+    if (self->callback != 0) {
+        self->callback(self->object, 2);
+    }
+    if (func_00200C40(self->data) == 0) {
+        func_001FE9F8(self->buf);
+    }
+    func_001FE9F8(self);
+}
+
+struct Elem_001FF0E0 { s32 a; s32 b; s32 key; };
+struct Arr_001FF0E0 { Elem_001FF0E0** data; s32 count; };
+
+void func_001FF0E0(Arr_001FF0E0* self, Arr_001FF0E0* other)
+{
+    s32 j = other->count;
+    if (j != 0) {
+        s32 n1 = self->count;
+        s32 i = n1;
+        do {
+            Elem_001FF0E0* x = other->data[--j];
+            if (i != 0 && self->data[i - 1]->key - x->key > 0) {
+                do {
+                    self->data[i + j] = self->data[i - 1];
+                    i--;
+                } while (i != 0 && self->data[i - 1]->key - x->key > 0);
+            }
+            self->data[i + j] = x;
+        } while (j != 0);
+        self->count = n1 + other->count;
+    }
+}
+
+struct Packed_1FD5D0 {
+    u32 kind;
+    u32 sign;
+    s32 exp;
+    u32 mant;
+};
+
+union Bits_1FD5D0 {
+    f32 f;
+    struct {
+        u32 mant : 23;
+        u32 expo : 8;
+        u32 sign : 1;
+    } b;
+};
+
+struct Class_1FD5D0 {
+    static s32 IsNan(Packed_1FD5D0* p) { return p->kind < 2; }
+    static s32 IsInf(Packed_1FD5D0* p) { return p->kind == 4; }
+    static s32 IsZero(Packed_1FD5D0* p) { return p->kind == 2; }
+};
+
+f32 func_001FD5D0(Packed_1FD5D0* p)
+{
+    Bits_1FD5D0 bits;
+    u32 mant = p->mant;
+    s32 expo = 0;
+    u32 sign = p->sign;
+
+    if (Class_1FD5D0::IsNan(p)) {
+        expo = 0xFF;
+        mant = mant | 0x100000;
+    } else if (Class_1FD5D0::IsInf(p)) {
+        expo = 0xFF;
+        mant = 0;
+    } else if (Class_1FD5D0::IsZero(p)) {
+        mant = 0;
+    } else if (mant != 0) {
+        s32 e = p->exp;
+        if (e < -0x7E) {
+            s32 sh = -0x7E - e;
+            if (sh > 0x19) {
+                mant = 0;
+            } else {
+                mant = mant >> sh;
+            }
+            mant = mant >> 7;
+        } else if (e >= 0x80) {
+            expo = 0xFF;
+            mant = 0;
+        } else {
+            expo = e + 0x7F;
+            if ((mant & 0x7F) == 0x40) {
+                if ((mant & 0x80) != 0) {
+                    mant = mant + 0x40;
+                }
+            } else {
+                mant = mant + 0x3F;
+            }
+            if ((s32)mant < 0) {
+                mant = mant >> 1;
+                expo = expo + 1;
+            }
+            mant = mant >> 7;
+        }
+    }
+
+    bits.b.mant = mant;
+    bits.b.expo = expo;
+    bits.b.sign = sign;
+    return bits.f;
+}
+
+struct Packed_1FC910 {
+    u32 kind;
+    u32 sign;
+    s32 exp;
+    u32 pad;
+    u64 mant;
+};
+
+union Bits_1FC910 {
+    double d;
+    struct {
+        u64 mant : 52;
+        u64 expo : 11;
+        u64 sign : 1;
+    } b;
+};
+
+struct Class_1FC910 {
+    static s32 IsNan(Packed_1FC910* p) { return p->kind < 2; }
+    static s32 IsInf(Packed_1FC910* p) { return p->kind == 4; }
+    static s32 IsZero(Packed_1FC910* p) { return p->kind == 2; }
+};
+
+double func_001FC910(Packed_1FC910* p)
+{
+    Bits_1FC910 bits;
+    u64 mant = p->mant;
+    s32 expo = 0;
+    u32 sign = p->sign;
+
+    if (Class_1FC910::IsNan(p)) {
+        expo = 0x7FF;
+        mant = mant | ((u64)1 << 51);
+    } else if (Class_1FC910::IsInf(p)) {
+        expo = 0x7FF;
+        mant = 0;
+    } else if (Class_1FC910::IsZero(p)) {
+        mant = 0;
+    } else if (mant != 0) {
+        s32 e = p->exp;
+        if (e < -0x3FE) {
+            s32 sh = -0x3FE - e;
+            if (sh > 0x38) {
+                mant = 0;
+            } else {
+                mant = mant >> sh;
+            }
+            mant = mant >> 8;
+        } else if (e >= 0x400) {
+            expo = 0x7FF;
+            mant = 0;
+        } else {
+            expo = e + 0x3FF;
+            if ((mant & 0xFF) == 0x80) {
+                if ((mant & 0x100) != 0) {
+                    mant = mant + 0x80;
+                }
+            } else {
+                mant = mant + 0x7F;
+            }
+            if (mant > 0x1FFFFFFFFFFFFFFFull) {
+                mant = mant >> 1;
+                expo = expo + 1;
+            }
+            mant = mant >> 8;
+        }
+    }
+
+    bits.b.mant = mant;
+    bits.b.expo = expo;
+    bits.b.sign = sign;
+    return bits.d;
+}
+
+struct Span_001FDEB0 { u32 lo; u32 hi; s32 value; void* cb; };
+struct Ctx_001FDEB0 { void* fn; };
+struct Cur_001FDEB0 { s32 pad0; s32 count; };
+
+s32 func_001FDEB0(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
+{
+    s32 result = 0;
+    s32 key = a0;
+    Span_001FDEB0* base;
+    s32 idx;
+    s32 r;
+
+    *a4 = 1;
+    if (a1 != 0) {
+        idx = 0;
+        base = (Span_001FDEB0*)((u8*)a1 + 8);
+        if (a3 != 0) {
+            idx = ((u8*)a0 - (u8*)base) >> 4;
+            key = ((Cur_001FDEB0*)a0)->count - 1;
+            if (base[idx].lo != 0xFFFFFFFF) {
+                idx++;
+            }
+        } else {
+            key = key - 1;
+        }
+        while (base[idx].lo != 0xFFFFFFFF) {
+            if ((u32)key >= base[idx].lo && (u32)key < base[idx].hi) {
+                if (base[idx].cb != 0) {
+                    if (a2->fn != 0) {
+                        r = ((s32 (*)(Ctx_001FDEB0*, void*, void*))a2->fn)(a2, base[idx].cb, a1);
+                        if (r != 0) {
+                            if (result == 0) {
+                                result = base[idx].value;
+                            }
+                            *a4 = 0;
+                            return result;
+                        }
+                    }
+                } else {
+                    if (result == 0) {
+                        result = base[idx].value;
+                    }
+                }
+            }
+            idx++;
+        }
+    }
+    return result;
+}
+
+struct Sf_1FD088 { u32 cls; s32 sign; s32 exp; u8 pad[4]; u64 mant; u8 tail[8]; };
+struct Pk_1FD088 { u64 bits; };
+
+void func_001FCA40(Pk_1FD088* src, Sf_1FD088* dst);
+u64 func_001FC910(Sf_1FD088* src);
+extern Sf_1FD088 D_0062A770;
+
+struct Div_1FD088 {
+    static s32 IsNan(Sf_1FD088* p) { return p->cls < 2; }
+    static s32 IsInf(Sf_1FD088* p) { return p->cls == 4; }
+    static s32 IsZero(Sf_1FD088* p) { return p->cls == 2; }
+    static Sf_1FD088* Parts(Sf_1FD088* a, Sf_1FD088* b)
+    {
+        u64 rem;
+        u64 div;
+        u64 bit;
+        u64 quo;
+
+        if (IsNan(a)) {
+            return a;
+        }
+        if (IsNan(b)) {
+            return b;
+        }
+        a->sign ^= b->sign;
+        if (IsInf(a) || IsZero(a)) {
+            if (a->cls == b->cls) {
+                return &D_0062A770;
+            }
+            return a;
+        }
+        if (IsInf(b)) {
+            a->mant = 0;
+            a->exp = 0;
+            return a;
+        }
+        if (IsZero(b)) {
+            a->cls = 4;
+            return a;
+        }
+        a->exp = a->exp - b->exp;
+        rem = a->mant;
+        div = b->mant;
+        if (rem < div) {
+            a->exp--;
+            rem <<= 1;
+        }
+        bit = (u64)1 << 60;
+        quo = 0;
+        while (bit) {
+            if (rem >= div) {
+                quo |= bit;
+                rem -= div;
+            }
+            bit >>= 1;
+            rem <<= 1;
+        }
+        if ((quo & 0xFF) == 0x80) {
+            if (quo & 0x100) {
+                quo += 0x80;
+            } else if (rem) {
+                quo += 0x80;
+            }
+        }
+        a->mant = quo;
+        return a;
+    }
+};
+
+u64 func_001FD088(u64 x, u64 y)
+{
+    Sf_1FD088 pa;
+    Sf_1FD088 pb;
+
+    func_001FCA40((Pk_1FD088*)&x, &pa);
+    func_001FCA40((Pk_1FD088*)&y, &pb);
+    return func_001FC910(Div_1FD088::Parts(&pa, &pb));
+}
+
+struct Node_1FFE58 { s32 a; s32 b; s32 key; };
+struct List_1FFE58 { Node_1FFE58** data; u32 count; };
+
+void func_001FFE58(List_1FFE58* self, List_1FFE58* out)
+{
+    u32 n = self->count;
+    u32 next[n];
+    u32 head = 0xFFFFFFFFu;
+    u32 i;
+    u32 cur;
+    for (i = 0; i < n; i++) {
+        for (cur = head; cur != 0xFFFFFFFFu; cur = next[cur]) {
+            if (self->data[i]->key - self->data[cur]->key >= 0) break;
+            out->data[out->count++] = self->data[cur];
+            self->data[cur] = 0;
+        }
+        head = i;
+        next[i] = cur;
+    }
+    cur = 0;
+    for (i = 0; i < n; i++) {
+        Node_1FFE58* x = self->data[i];
+        if (x != 0) {
+            self->data[cur++] = x;
+        }
+    }
+    self->count = cur;
+}
+
+struct Fp_1FCAE0 {
+    u32 cls;
+    s32 sign;
+    s32 exp;
+    s32 pad;
+    u64 frac;
+};
+
+
+struct Add_1FCAE0 {
+    static s32 IsNan(Fp_1FCAE0* p) { return p->cls < 2; }
+    static s32 IsInf(Fp_1FCAE0* p) { return p->cls == 4; }
+    static s32 IsZero(Fp_1FCAE0* p) { return p->cls == 2; }
+};
+
+Fp_1FCAE0* func_001FCAE0(Fp_1FCAE0* a, Fp_1FCAE0* b, Fp_1FCAE0* tmp)
+{
+    s32 ae, be;
+    u64 af, bf;
+    s64 tf;
+
+    if (Add_1FCAE0::IsNan(a)) return a;
+    if (Add_1FCAE0::IsNan(b)) return b;
+    if (Add_1FCAE0::IsInf(a)) {
+        if (Add_1FCAE0::IsInf(b) && a->sign != b->sign) return ((Fp_1FCAE0*)&D_0062A770);
+        return a;
+    }
+    if (Add_1FCAE0::IsInf(b)) return b;
+    if (Add_1FCAE0::IsZero(b)) {
+        if (Add_1FCAE0::IsZero(a)) {
+            *tmp = *a;
+            tmp->sign = a->sign & b->sign;
+            return tmp;
+        }
+        return a;
+    }
+    if (Add_1FCAE0::IsZero(a)) return b;
+
+    ae = a->exp;
+    be = b->exp;
+    af = a->frac;
+    bf = b->frac;
+    {
+        s32 diff = ae - be;
+        if (diff < 0) diff = -diff;
+        if (diff < 64) {
+            while (ae > be) {
+                be++;
+                bf = (bf & 1) | (bf >> 1);
+            }
+            while (be > ae) {
+                ae++;
+                af = (af & 1) | (af >> 1);
+            }
+        } else {
+            if (ae > be) {
+                bf = 0;
+            } else {
+                ae = be;
+                af = 0;
+            }
+        }
+    }
+    if (a->sign != b->sign) {
+        if (a->sign) tf = -af + bf;
+        else tf = af - bf;
+        if (tf >= 0) {
+            tmp->sign = 0;
+            tmp->exp = ae;
+            tmp->frac = tf;
+        } else {
+            tmp->sign = 1;
+            tmp->exp = ae;
+            tmp->frac = -tf;
+        }
+        while (tmp->frac < 0x1000000000000000ULL && tmp->frac) {
+            tmp->frac <<= 1;
+            tmp->exp--;
+        }
+    } else {
+        tmp->sign = a->sign;
+        tmp->exp = ae;
+        tmp->frac = af + bf;
+    }
+    tmp->cls = 3;
+    if (tmp->frac >= 0x2000000000000000ULL) {
+        tmp->frac = (tmp->frac & 1) | (tmp->frac >> 1);
+        tmp->exp++;
+    }
+    return tmp;
+}
+
+union Frac_1FCDE0 { u64 ll; u32 l[2]; };
+struct Sf_1FCDE0 { u32 cls; s32 sign; s32 exp; u8 pad[4]; Frac_1FCDE0 mant; u8 tail[8]; };
+struct Pk_1FCDE0 { u64 bits; };
+
+void func_001FCA40(Pk_1FCDE0* src, Sf_1FCDE0* dst);
+u64 func_001FC910(Sf_1FCDE0* src);
+u64 func_001FE890(u64 a, u64 b);
+
+struct Mul_1FCDE0 {
+    static s32 IsNan(Sf_1FCDE0* x) { return x->cls < 2; }
+    static s32 IsZero(Sf_1FCDE0* x) { return x->cls == 2; }
+    static s32 IsInf(Sf_1FCDE0* x) { return x->cls == 4; }
+
+    static Sf_1FCDE0* Parts(Sf_1FCDE0* a, Sf_1FCDE0* b, Sf_1FCDE0* tmp)
+    {
+        u64 high;
+        u64 low;
+
+        if (IsNan(a)) {
+            a->sign = a->sign != b->sign;
+            return a;
+        }
+        if (IsNan(b)) {
+            b->sign = a->sign != b->sign;
+            return b;
+        }
+        if (IsInf(a)) {
+            if (IsZero(b)) {
+                return ((Sf_1FCDE0*)&D_0062A770);
+            }
+            a->sign = a->sign != b->sign;
+            return a;
+        }
+        if (IsInf(b)) {
+            if (IsZero(a)) {
+                return ((Sf_1FCDE0*)&D_0062A770);
+            }
+            b->sign = a->sign != b->sign;
+            return b;
+        }
+        if (IsZero(a)) {
+            a->sign = a->sign != b->sign;
+            return a;
+        }
+        if (IsZero(b)) {
+            b->sign = a->sign != b->sign;
+            return b;
+        }
+        {
+            u64 alo = a->mant.ll & 0xFFFFFFFF;
+            u64 ahi = a->mant.ll >> 32;
+            u64 blo = b->mant.ll & 0xFFFFFFFF;
+            u64 bhi = b->mant.ll >> 32;
+            u64 p0 = func_001FE890(blo, alo);
+            u64 p1 = func_001FE890(bhi, alo);
+            u64 p2 = func_001FE890(blo, ahi);
+            u64 p3 = func_001FE890(bhi, ahi);
+            u64 mid = p1 + p2;
+            u64 hi = 0;
+            if (mid < p1) {
+                hi += (u64)1 << 32;
+            }
+            u64 lo = p0 + (mid << 32);
+            if (lo < p0) {
+                hi++;
+            }
+            hi += ((mid >> 32) & 0xFFFFFFFF) + p3;
+            high = hi;
+            low = lo;
+        }
+        tmp->exp = a->exp + b->exp;
+        tmp->sign = a->sign != b->sign;
+        tmp->exp += 4;
+        while (high > (~(u64)0 >> 3)) {
+            tmp->exp++;
+            if (high & 1) {
+                low >>= 1;
+                low |= 0x8000000000000000ull;
+            }
+            high >>= 1;
+        }
+        while (high <= (~(u64)0 >> 4)) {
+            tmp->exp--;
+            high <<= 1;
+            if (low & 0x8000000000000000ull) {
+                high |= 1;
+            }
+            low <<= 1;
+        }
+        if ((high & 0xFF) == 0x80) {
+            if (high & 0x100) {
+                high += 0x80;
+            } else if (low) {
+                high += 0x80;
+            }
+        }
+        tmp->mant.ll = high;
+        tmp->cls = 3;
+        return tmp;
+    }
+};
+
+u64 func_001FCDE0(u64 x, u64 y)
+{
+    Sf_1FCDE0 a;
+    Sf_1FCDE0 b;
+    Sf_1FCDE0 tmp;
+    Pk_1FCDE0 xa;
+    Pk_1FCDE0 xb;
+
+    xa.bits = x;
+    xb.bits = y;
+    func_001FCA40(&xa, &a);
+    func_001FCA40(&xb, &b);
+    return func_001FC910(Mul_1FCDE0::Parts(&a, &b, &tmp));
+}
+
+// The runtime's exception context: the handler chain at +4, the active exception at +8.
+struct Ctx_1FDAF0 {
+    s32 f0;
+    void** chain;
+    void* active;
+};
+
+typedef Ctx_1FDAF0* (*GetCtx_1FDAF0)(void);
+extern void* D_0027804C;
+
+void func_001FD930();
+void func_001FDAF0(void) __attribute__((noreturn));
+
+// Throws: runs the cleanups registered in the top handler, then jumps to that handler.
+void func_001FDAF0(void)
+{
+    Ctx_1FDAF0* ctx = ((GetCtx_1FDAF0)D_0027804C)();
+    void*** chain = &ctx->chain;
+    void*** cleanups = (void***)&(*chain)[1];
+
+    if (cleanups[0] != 0) {
+        double space[200];
+        void** frame = (void**)space;
+        frame[1] = 0;
+        frame[0] = *chain;
+        if (!__builtin_setjmp(&frame[2])) {
+            *chain = frame;
+            while (cleanups[0] != 0) {
+                void (*fn)(void*, s32) = (void (*)(void*, s32))cleanups[0][1];
+                void* arg = cleanups[0][2];
+                cleanups[0] = (void**)cleanups[0][0];
+                fn(arg, 2);
+            }
+            *chain = (void**)frame[0];
+        } else {
+            func_001FD930();
+        }
+    }
+
+    if (ctx->active == 0 || (*chain)[0] == 0) {
+        func_001FD930();
+    }
+
+    void* buf = &(*chain)[2];
+    *chain = (void**)(*chain)[0];
+    __builtin_longjmp(buf, 1);
+}
+
+// Pops the top handler after running its cleanups, then throws again.
+void func_001FDC68(void)
+{
+    Ctx_1FDAF0* ctx = ((GetCtx_1FDAF0)D_0027804C)();
+    void*** chain = &ctx->chain;
+    void*** cleanups = (void***)&(*chain)[1];
+
+    if (cleanups[0] != 0) {
+        double space[200];
+        void** frame = (void**)space;
+        frame[1] = 0;
+        frame[0] = *chain;
+        if (!__builtin_setjmp(&frame[2])) {
+            *chain = frame;
+            while (cleanups[0] != 0) {
+                void (*fn)(void*, s32) = (void (*)(void*, s32))cleanups[0][1];
+                void* arg = cleanups[0][2];
+                cleanups[0] = (void**)cleanups[0][0];
+                fn(arg, 2);
+            }
+            *chain = (void**)frame[0];
+        } else {
+            func_001FD930();
+        }
+    }
+
+    *chain = (void**)(*chain)[0];
+    func_001FDAF0();
+}
+
+// The active exception, asked whether it matches a runtime type through its matcher.
+struct Info_1FDD80 {
+    void* (*match)(Info_1FDD80* info, void* type, void* extra);
+};
+
+s32 func_001FDD80(void* type)
+{
+    Info_1FDD80* info = *(struct Info_1FDD80 **)func_001FDA10();
+    void* (*match)(Info_1FDD80*, void*, void*) = info->match;
+    if (match == 0) {
+        return 0;
+    }
+    return match(info, type, 0) != 0;
+}
+
+struct Tag_1FE198 {
+    u32 word;
+};
+
+struct __attribute__((aligned(8))) Frame_1FE198 {
+    s32 f0;
+    Tag_1FE198* f4;
+    s32 f8;
+    s32 fC;
+    s32 f10[0xA2];
+    u16 f298;
+    u16 f29A;
+    s8 f29C[0x54];
+};
+
+struct Obj_1FE198 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+};
+
+struct Pc_1FE198;
+Frame_1FE198* func_001FE100(Pc_1FE198* pc, Frame_1FE198* f, Frame_1FE198* prev);
+s32 func_001FDEB0(s32 a, Tag_1FE198* t, s32 c, s32 d, s32* e);
+s32 func_001FDDD8(Pc_1FE198* pc, Tag_1FE198* t);
+s64* func_001FDFF8(u16 idx, Frame_1FE198* f, Frame_1FE198* g);
+void func_001FE080(s32 idx, Frame_1FE198* f, Frame_1FE198* g);
+void func_001FE190(void);
+void func_001FD930(void);
+
+struct ReturnAddr_1FE198 {
+    static Pc_1FE198* Of(Frame_1FE198* f, Frame_1FE198* g)
+    {
+        s64 w = *func_001FDFF8(f->f29A, f, g);
+        return (Pc_1FE198*)(s32)w;
+    }
+};
+
+struct RegWindow_1FE198 {
+    static s32 In(s32 i, Frame_1FE198* f) { return 0; }
+};
+
+s32 func_001FE198(Obj_1FE198* obj, Pc_1FE198* pc, Frame_1FE198* fb, Frame_1FE198** pout)
+{
+    Frame_1FE198 sub;
+    Frame_1FE198 saved;
+    Frame_1FE198* udata = *pout;
+    Frame_1FE198* subp = &sub;
+    Pc_1FE198* startPc = pc;
+    s32 res = 0;
+    s32 pending = obj->fC != 0;
+    s32 a8 = obj->f8;
+    s32 cleanup;
+    s32 savedRes;
+    Pc_1FE198* savedPc;
+    s32 onlyCleanup;
+    s32 savedState;
+    s32 i;
+
+    onlyCleanup = 0;
+    savedState = 0;
+    cleanup = 0;
+    for (;;) {
+        Frame_1FE198* p = udata;
+        s32 isNew;
+        udata = func_001FE100(pc, udata, subp);
+        subp = p;
+        if (udata == 0) {
+            break;
+        }
+        if (udata->f4 == 0) {
+            isNew = 0;
+        } else {
+            isNew = udata->f4->word == 0xFFFFFFFEu;
+        }
+        if (pending) {
+            pending = 0;
+            res = func_001FDEB0(obj->fC, udata->f4, a8, 1, &cleanup);
+            obj->fC = 0;
+        } else if (isNew) {
+            res = func_001FDEB0((s32)pc, udata->f4, a8, 0, &cleanup);
+        } else {
+            res = func_001FDDD8(pc, udata->f4);
+        }
+        if (res != 0) {
+            if (cleanup != 0) {
+                if (savedState == 0) {
+                    saved = *udata;
+                    savedPc = pc;
+                    savedRes = res;
+                    savedState = 1;
+                    onlyCleanup = 1;
+                }
+            } else {
+                onlyCleanup = 0;
+                break;
+            }
+        }
+        pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198::Of(udata, subp) - 1);
+    }
+    if (savedState != 0) {
+        udata = &saved;
+        res = savedRes;
+        pc = savedPc;
+        if (onlyCleanup != 0) {
+            func_001FE190();
+        }
+    }
+    if (res == 0) {
+        func_001FD930();
+    }
+    obj->f0 = res;
+    if (pc == startPc) {
+        udata = fb;
+    } else {
+        Pc_1FE198* handlerPc = pc;
+        pc = startPc;
+        *udata = *fb;
+        while (pc != handlerPc) {
+            Frame_1FE198* p = udata;
+            udata = func_001FE100(pc, udata, subp);
+            subp = p;
+            for (i = 0; i < 0x4F; i++) {
+                if (i != udata->f29A && udata->f29C[i] != 0) {
+                    func_001FE080(i, udata, fb);
+                }
+            }
+            pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198::Of(udata, subp) - 1);
+        }
+        if (udata->f29C[udata->f29A] == 2) {
+            i = udata->f10[udata->f29A];
+            if (RegWindow_1FE198::In(i, udata)) {
+                func_001FE080(i, udata, fb);
+            }
+        }
+    }
+    *pout = udata;
+    return res;
+}

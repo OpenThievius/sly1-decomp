@@ -2071,3 +2071,226 @@ void func_0018E8C8();
 void func_0018E6C0();
 extern const Fn_Table D_0024B598[8] = { 0, 0, 0, (Fn_Table)func_0018E8C8, 0, (Fn_Table)func_0018E938, 0, 0 };
 extern const Fn_Table D_0024B5B8[10] = { 0, 0, 0, (Fn_Table)func_0018E6C0, 0, (Fn_Table)func_0018E8C0, 0, 0, 0, 0 };
+
+extern u8 D_0064C70F[];
+extern s32 D_002699A4;
+extern s32 D_002699A8;
+extern s32 D_002C2A10;
+extern s32 D_002C2A24;
+extern u8 D_002C2A28[];
+extern s32 D_002C2A34;
+void func_001E22C0(void* self);
+
+void func_0018D430(void)
+{
+    D_002699A4 = (s32)D_0064C70F & -16;
+    D_002699A8 = 0x2000000;
+    // The heap's pointers (u8* elsewhere in this file), written as words.
+    D_002C2A10 = *(s32*)&D_002C2A14 = *(s32*)&D_002C2A18 = *(s32*)&D_002C2A1C = D_002699A4;
+    *(s32*)&D_002C2A20 = D_002C2A24 = D_002699A8;
+    D_002C2A34 = -1;
+    func_001E22C0(D_002C2A28);
+}
+
+struct Obj_18D9B8 {
+    u8 pad0[0xD0];
+    u8 fD0[0x80];
+    u8 f150[0x9C];
+    s32 f1EC;
+    s32 f1F0;
+    u8 pad1[0x6B8 - 0x1F4];
+    s32 f6B8;
+};
+void func_00189350(u8* a, u8* b);
+s32 func_001BC088(Obj_18D9B8* self, f32 x, void* b);
+void func_0018D9B8(Obj_18D9B8* self, void* b, f32 x)
+{
+    if (self->f6B8 != 0) {
+        func_00189350(self->f150, self->fD0);
+    }
+    s32 s1 = self->f1EC;
+    s32 s0 = self->f1F0;
+    self->f1EC = 0;
+    self->f1F0 = 0;
+    func_001BC088(self, x, b);
+    self->f1EC = s1;
+    self->f1F0 = s0;
+}
+
+struct Buffer_18F890 { u8 pad00[0x18]; s32 head; s32 base; s32 tail; };
+struct Object_18F890 { u8 pad00[0x0C]; Buffer_18F890* buffer; u8 pad10[4]; };
+struct Empty_18F890 {
+    static bool Of(Buffer_18F890* b) { return b->head == b->tail; }
+};
+void func_00130070(Buffer_18F890*);
+void func_001F6C20(s32);
+s32 func_0020A518(void*, s32, s32);
+void func_001300D8(Buffer_18F890*, s32);
+s32 func_0018F890(Object_18F890* self, s32 wait)
+{
+    while (Empty_18F890::Of(self->buffer)) {
+        func_00130070(self->buffer);
+        if (Empty_18F890::Of(self->buffer) && !wait) return 0;
+    }
+    func_001F6C20(0);
+    Buffer_18F890* buffer = self->buffer;
+    s32 count = buffer->head - buffer->tail;
+    s32 result = func_0020A518(self->pad10, buffer->base + buffer->tail, count);
+    func_001300D8(self->buffer, result);
+    return result;
+}
+
+struct Data_18C568 { u8 b[0x1A00]; };
+struct Self_18C568 { u8 pad0[0x4F44]; Data_18C568* p4F44; };
+
+
+void func_001A7E90(Data_18C568* ctx);
+
+s32 func_0018C568(Self_18C568* self)
+{
+    if (self->p4F44 == 0) {
+        return 0x2C;
+    }
+    *(*(Data_18C568**)&D_002623C0) = *self->p4F44;
+    func_001A7E90((*(Data_18C568**)&D_002623C0));
+    return 0;
+}
+
+struct Obj_18F6E8 {
+    u8 pad0[0x10];
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    u8 pad1[0x5C - 0x1C];
+    s32 f5C;
+    u8 pad2[0x114 - 0x60];
+    s32 f114;
+    s32 f118;
+    u8 pad3[0x130 - 0x11C];
+    s32 f130;
+    volatile s32 f134;  // state another thread changes: func_0018F7D0 busy-waits on it
+};
+
+s32 func_0018F890(Obj_18F6E8* self, s32 flag);
+void func_0018F610(Obj_18F6E8* self);
+s32 func_0020B058(void* a, s32 b, s32 c);
+void func_0018EDA8(s32 a, s32 b, s32 c, s32 d);
+void func_0018EF78(s32 a, s32 b, s32 c);
+void func_001F6C20(s32 a);
+void func_001F6B40(s32 a);
+void func_0018EB98(void* a);
+
+void func_0018F6E8(Obj_18F6E8* self)
+{
+    void* s1;
+    if (self->f134 == 1) {
+        do {
+            (void)func_0018F890(self, 0);
+        } while (self->f134 == 1);
+    }
+    if (func_0020B058((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
+        return;
+    }
+    if (self->f18 == 0) {
+        func_0018EDA8(self->f114, self->f5C, self->f10, self->f14);
+        func_0018EF78(self->f118, self->f10, self->f14);
+        func_001F6C20(0);
+    }
+    s1 = (u8*)self + 0x80;
+    if (self->f134 != 0) {
+        do {
+            (void)func_0018F890(self, 0);
+            func_0018F610(self);
+        } while (self->f134 != 0);
+    }
+    func_001F6B40(self->f130);
+    func_0018EB98(s1);
+}
+
+struct Ring_0018E6C0 {
+    u8 pad0[8];
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    s32 f1C;
+};
+
+s32 func_0018E7C0(Ring_0018E6C0* self, s32 count, u8* dst);
+
+s32 func_0018E6C0(Ring_0018E6C0* self, s32 count, u8* dst)
+{
+    s32 n = count;
+    s32 total = 0;
+    s32 left = n;
+    s32 r;
+
+    if (left <= 0 || self->f14 < left) {
+        left = self->f14;
+    }
+    left &= -0x400;
+    while (left != 0) {
+        s32 avail = self->f08 - self->f0C;
+        r = func_0018E7C0(self, left < avail ? left : avail, dst + total);
+        if (r == 0) {
+            break;
+        }
+        total += r;
+        left -= r;
+        self->f0C += r;
+        self->f0C = self->f0C % self->f08;
+        self->f18 += r;
+        self->f14 -= r;
+        self->f1C += r;
+        if (n <= 0) {
+            break;
+        }
+    }
+    return total;
+}
+
+struct Img_18CDD8 { s32 type; s32 size; s32 handle; u8 data[0x1A00 - 12]; };
+struct Info_18CDD8 { u8 pad0[0x44]; s32 f44; s32 f48; u8 pad4C[0x60 - 0x4C]; };
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+void func_001605E8(Img_18CDD8* img);
+s32 func_00160650(Img_18CDD8* img);
+s32 func_0018C9C0(void* a, void* b, Info_18CDD8* info);
+s32 func_0018D268(void* a, void* b, s32 c, s32* h);
+s32 func_0018D2E8(void* a, s32 h, Img_18CDD8* buf, s32 size, s32* got);
+void func_0018D2B0(void* a, s32 h);
+
+s32 func_0018CDD8(void* a0, void* a1, Img_18CDD8* out, Info_18CDD8* info)
+{
+    Info_18CDD8 local;
+    Img_18CDD8 buf;
+    s32 handle = -1;
+    s32 got;
+    s32 r;
+    s32 size;
+    if (info == 0) info = &local;
+    func_001F5C0C(info, 0, 0x5C);
+    func_001605E8(out);
+    r = func_0018C9C0(a0, a1, info);
+    if (r != 0) return r;
+    if ((info->f48 & 0xD4) != 4) return 20;
+    size = info->f44;
+    if (size != 0x1A00) return 28;
+    r = func_0018D268(a0, a1, 1, &handle);
+    if (r != 0) return r;
+    r = func_0018D2E8(a0, handle, &buf, 0x1A00, &got);
+    if (r == 0) {
+        r = 8;
+        if (got == size) {
+            if (buf.type != 18 || buf.size != got) r = 28;
+            else if (buf.handle != func_00160650(&buf)) r = 27;
+            else {
+                *out = buf;
+                r = 0;
+            }
+        }
+    }
+    func_0018D2B0(a0, handle);
+    return r;
+}

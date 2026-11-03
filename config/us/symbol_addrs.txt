@@ -32,3 +32,10 @@ func_002097E0 = 0x002097E0; // type:func
 // A throw function that splat joins to the exception-specification check before it, after that
 // function's padding: nothing calls it directly. Named by us.
 func_001FEDC8 = 0x001FEDC8; // type:func
+// Functions that splat joins to the one before them: each follows a call to a function that never
+// returns, so nothing ends the one before. Named by us.
+func_001FE908 = 0x001FE908; // type:func
+func_001FE918 = 0x001FE918; // type:func
+func_001FE950 = 0x001FE950; // type:func
+func_001FDC68 = 0x001FDC68; // type:func
+func_001FDD80 = 0x001FDD80; // type:func

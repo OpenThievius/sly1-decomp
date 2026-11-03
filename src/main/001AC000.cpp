@@ -913,7 +913,7 @@ void func_001AECB0(Obj_1AECB0* a0) {
     a0->f558 = -1;
 }
 
-extern f32 D_0026185C;
+extern f32 D_0026185C[];
 
 struct Obj_1AC060 {
     u8 pad[0x264];
@@ -947,7 +947,7 @@ void func_001AC060(Obj_1AC060* self)
     s32 b = self->f270;
     v0 = (-1 < v0) ? v0 : 0;
     self->f278 = (f32)(v0 * a + b) / d;
-    self->f27C = *(f32*)&D_0026185C;
+    self->f27C = D_0026185C[0];
 }
 
 typedef void (*VFn_1AD088)(void* self, void* arg);
@@ -1079,7 +1079,7 @@ struct Mixer_001AF5C8 {
 };
 
 extern s32 D_002744D0;
-extern f32 D_0026185C;
+extern f32 D_0026185C[];
 void func_001AEFA0(Mixer_001AF5C8* self, f32 a);
 void func_001AF508();
 
@@ -1104,7 +1104,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
     cmd = self->state;
     switch (cmd) {
     case 0:
-        if (self->f5B8 < D_0026185C - self->f55C)
+        if (self->f5B8 < D_0026185C[0] - self->f55C)
             cmd = 1;
         if (self->vt->hook)
             self->vt->hook(self, &cmd);
@@ -1115,7 +1115,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
             self->vt->hook(self, &cmd);
         break;
     case 3:
-        if (self->f5BC < D_0026185C - self->f55C) {
+        if (self->f5BC < D_0026185C[0] - self->f55C) {
             if (self->f554 == 0) {
                 cmd = 8;
                 break;
@@ -1131,7 +1131,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
             self->vt->hook(self, &cmd);
         break;
     case 4:
-        if (self->f5B8 < D_0026185C - self->f55C)
+        if (self->f5B8 < D_0026185C[0] - self->f55C)
             cmd = 5;
         if (self->vt->hook)
             self->vt->hook(self, &cmd);
@@ -1143,7 +1143,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
             self->vt->hook(self, &cmd);
         break;
     case 7:
-        if (self->fAEC < D_0026185C - self->f55C)
+        if (self->fAEC < D_0026185C[0] - self->f55C)
             cmd = 8;
         else if (self->vt->hook)
             self->vt->hook(self, &cmd);
@@ -1422,4 +1422,553 @@ s8 func_001AEA08(void)
     s32 scaled = (s32)(D_00261868 * 5.0f);
     u32 divisor = func_001E2100((Table_001AEA08*)D_002744B0);
     return D_002744B0[(u32)scaled % divisor];
+}
+
+struct Sub_1AECE8;
+struct Obj_1AECE8 { u8 pad[0x550]; Sub_1AECE8* f550; u8 pad2[4]; s32 state; f32 f55C; };
+void func_00123AB0(Sub_1AECE8* object, s32 mode);
+void func_001837E0(Obj_1AECE8* self, s32 a, s32 b, s32 c);
+extern f32 D_0026185C[];
+void func_001AECE8(Obj_1AECE8* self, s32 state)
+{
+    if (self->state == state) return;
+    if (self->state == 1 && state == 2) {
+        if (self->f550 != 0) {
+            func_00123AB0(self->f550, 0);
+            if (self->state != 1) state = self->state;
+        }
+        func_001837E0(self, 2, 0, 0);
+    }
+    self->state = state;
+    self->f55C = D_0026185C[0];
+}
+
+struct Ctx_1ADB00;
+extern u8 D_00262280[];
+
+struct Obj_1ADB00 { u8 pad0[0x23C]; f32 f23C; };
+
+void func_001613C0(Ctx_1ADB00* p, s32 a, s32 b, u64 c);
+void func_00161708(Ctx_1ADB00* p, u64 a, u64 b);
+void func_00161458(Ctx_1ADB00* p, u32 value);
+void func_001615F0(Ctx_1ADB00* p, s32 a1, s32 a2, s32 a3, s32 a4);
+
+void func_001ADB00(Obj_1ADB00* self)
+{
+    f32 x = self->f23C * 66.40001f;
+    f32 y = 492.80002f - x;
+    func_001613C0((Ctx_1ADB00*)D_00262280, 6, 7, 0x044441EE);
+    func_00161708((Ctx_1ADB00*)D_00262280, 0x47, 0x30000);
+    func_00161708((Ctx_1ADB00*)D_00262280, 0x42, 0x44);
+    func_00161458((Ctx_1ADB00*)D_00262280, 0x80000000);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x6C00, 0x7900, 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x9400, (s32)((x * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x6C00, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)D_00262280, 0x9400, 0x8700, 0x0FFFFFF0, 0);
+}
+
+struct Ctx_1AE3B8;
+extern u8 D_00262280[];
+
+void func_001613C0(Ctx_1AE3B8* p, s32 a, s32 b, u64 c);
+void func_00161708(Ctx_1AE3B8* p, u64 a, u64 b);
+void func_00161458(Ctx_1AE3B8* p, u32 value);
+void func_001615F0(Ctx_1AE3B8* p, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_00161278(Ctx_1AE3B8* p, s32 a);
+
+void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
+{
+    func_001613C0((Ctx_1AE3B8*)D_00262280, rgba[3] < 0xFF ? 0x41 : 1, 4, 0x441E);
+
+    func_00161708((Ctx_1AE3B8*)D_00262280, 0x47, (u64)(flag ? 0x11001 : 0x11000) | (flag ? 0x60000 : 0x20000));
+
+    func_00161458((Ctx_1AE3B8*)D_00262280, ((u32)((rgba[3] + 1) & 0x1FE) << 23) | (rgba[2] << 16) | (rgba[1] << 8) | rgba[0]);
+    func_001615F0((Ctx_1AE3B8*)D_00262280, a0, a1, a2, 0);
+    func_001615F0((Ctx_1AE3B8*)D_00262280, a3, a4, a5, 0);
+    func_00161278((Ctx_1AE3B8*)D_00262280, 0);
+}
+
+typedef void (*VFn_1AD970)(void* self, s32 a);
+struct VTab_1AD970 { u8 pad0[0x40]; VFn_1AD970 fn; };
+struct Obj_1AD970 {
+    VTab_1AD970* vt;
+    u8 pad0[0x250 - 4];
+    s32 f250;
+    u8 pad1[0x260 - 0x254];
+    s32 f260;
+    u8 pad2[0x464 - 0x264];
+    s32 f464;
+};
+struct Glob_1AD970 { u8 pad0[0x19D8]; s32 f19d8; s32 f19dc; };
+
+struct Game_1AD970 { s32 f0; s32 mode; static s32 Mode(Game_1AD970* g) { return g->mode; } };
+extern Game_1AD970 D_00275F80;
+extern u8 D_00275B00[];
+extern void* D_002623C0;
+extern u8 D_0026F138[];
+extern u8 D_00273EB0[];
+extern s32 D_0027051C;
+
+void func_001AA998(void* self, s32 v);
+void func_001AD0D0(void* list, s32 a, s32 b);
+void func_001AA8B8(void* self, f32 v);
+
+void func_001AD970(Obj_1AD970* self, s32 newval)
+{
+    Obj_1AD970* g;
+    Glob_1AD970* gg;
+
+    if (self->f250 != newval) {
+        if (Game_1AD970::Mode(&D_00275F80) == 1) {
+            if (newval == 3 || newval == 0) {
+                newval = self->f250;
+            }
+        }
+        if (Game_1AD970::Mode(&D_00275F80) == 3) {
+            if ((u32)(newval - 1) < 2) {
+                newval = 0;
+                if ((*(s32*)D_00275B00 & 8) == 0) {
+                    newval = 2;
+                    if (((Glob_1AD970*)D_002623C0)->f19d8 != 0 && D_0027051C == 0) {
+                        g = (Obj_1AD970*)D_0026F138;
+                        g->f260 = 0;
+                        g->vt->fn(g, 0);
+                        gg = (Glob_1AD970*)D_002623C0;
+                        func_001AD0D0(g, gg->f19d8, gg->f19dc);
+                        g->f464 = 1;
+                        func_001AA8B8(g, 0.0f);
+                        g->vt->fn(g, 2);
+                    }
+                }
+            }
+        }
+        if (self->f250 != newval && newval == 0) {
+            Obj_1AD970* a = (Obj_1AD970*)D_0026F138;
+            if (a->f464 != 0) {
+                a->vt->fn(a, 0);
+            }
+            Obj_1AD970* b = (Obj_1AD970*)D_00273EB0;
+            if (b->f260 != 0) {
+                b->vt->fn(b, 0);
+            }
+        }
+    }
+    func_001AA998(self, newval);
+}
+
+struct __attribute__((packed)) Pk4_1AC700 { s32 v; };
+typedef void (*VFn_1AC700)(void* self, void* handle, void* out, void* tbl);
+struct VTab_1AC700 { u8 pad0[0x48]; s16 adj; u8 pad1[0x4C - 0x4A]; VFn_1AC700 fn; };
+struct Out_1AC700;
+void func_00137228(Out_1AC700* out, f32 x, f32 y);
+void func_00137238(Out_1AC700* out, f32 x, f32 y);
+void func_00137248(Out_1AC700* out, s32* value);
+void func_00137260(Out_1AC700* out, s32 flag);
+void func_00137268(Out_1AC700* out, s32 flag);
+struct Out_1AC700 {
+    u8 b[32];
+    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
+    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
+    void Color(s32* c) { func_00137248(this, c); }
+    void FlagA(s32 f) { func_00137260(this, f); }
+    void FlagB(s32 f) { func_00137268(this, f); }
+};
+struct Hd_1AC700 {
+    static void Draw(void* h, Out_1AC700* out, void* tbl)
+    {
+        if (*(void**)h != 0) {
+            VTab_1AC700* vt = *(VTab_1AC700**)((u8*)*(void**)h + 0x4C);
+            vt->fn((u8*)*(void**)h + vt->adj, h, out, tbl);
+        }
+    }
+};
+struct Obj_1AC700 {
+    u8 pad0[4];
+    s32 f4;
+    s8 f8;
+    u8 pad9[0x208 - 9];
+    Pk4_1AC700 f208;
+    f32 f20c;
+    void* f210;
+    u8 pad214[0x21C - 0x214];
+    f32 f21c;
+    f32 f220;
+    u8 pad224[0x234 - 0x224];
+    f32 f234;
+    f32 f238;
+    f32 f23c;
+};
+
+extern u8 D_00262280[];
+void func_0015C8B8(s32 handle, f32 a, f32 b);
+void func_0015DB28(void* out, void* p, s32 handle);
+void func_0015E318(void* a, void* b, s32 c, void* d);
+void func_0015C900(s32 handle);
+
+void func_001AC700(Obj_1AC700* self)
+{
+    Pk4_1AC700 tmp;
+    Out_1AC700 out;
+    Pk4_1AC700 slot;
+    u8 loc[0xB0];
+
+    if (self->f8 != 0) {
+        tmp = self->f208;
+        ((u8*)&tmp)[3] = (u8)((f32)((u8*)&tmp)[3] * self->f23c);
+        f32 p = self->f234;
+        f32 q = self->f238;
+        s32 held = tmp.v;
+        out.Pos(self->f21c, self->f220);
+        out.Size(p, q);
+        slot.v = held;
+        out.Color(&slot.v);
+        out.FlagA(0);
+        out.FlagB(0);
+
+        u8* h = (u8*)self->f210;
+        if (h != 0) {
+            slot = *(Pk4_1AC700*)(h + 0x18);
+            h[0x1B] = (u8)((f32)h[0x1B] * self->f23c);
+            Hd_1AC700::Draw(self->f210, &out, D_00262280);
+            *(Pk4_1AC700*)((u8*)self->f210 + 0x18) = slot;
+        }
+        func_0015C8B8(self->f4, self->f20c, self->f20c);
+        func_0015DB28(loc, &self->f8, self->f4);
+        func_0015E318(loc, &out, 0, D_00262280);
+        func_0015C900(self->f4);
+    }
+}
+
+struct Ctx_1ADD28;
+
+struct Pair_1ADD28 {
+    u16 a;
+    u16 b;
+};
+
+struct Sub_1ADD28 {
+    u8 pad0[0xC];
+    Pair_1ADD28** p0c;
+};
+
+struct Hold_1ADD28 {
+    u8 pad0[0x14];
+    Sub_1ADD28* p14;
+};
+
+struct Obj_1ADD28 {
+    u8 pad0[0x21C];
+    f32 f21c;
+    f32 f220;
+    u8 pad224[0x234 - 0x224];
+    f32 f234;
+    f32 f238;
+    u8 pad23c[0x260 - 0x23c];
+    Hold_1ADD28* h260;
+};
+
+extern u8 D_00262280[];
+
+void func_001613C0(Ctx_1ADD28* p, s32 a, s32 b, u64 c);
+void func_00161708(Ctx_1ADD28* p, u64 a, u64 b);
+void func_00161458(Ctx_1ADD28* p, u32 rgba);
+void func_001614C8(Ctx_1ADD28* p, s32 a, s32 b);
+void func_001615F0(Ctx_1ADD28* p, s32 a, s32 b, s32 c, s32 d);
+u64 func_001B2988(Sub_1ADD28* t, s32 i, s32 j);
+void func_001AA790(Obj_1ADD28* o);
+
+void func_001ADD28(Obj_1ADD28* self)
+{
+    if (self->h260 != 0) {
+        Sub_1ADD28* sub = self->h260->p14;
+        Pair_1ADD28* pr = *sub->p0c;
+        u64 v = func_001B2988(sub, 0, 0);
+        u8 rgba[4];
+        func_001613C0((Ctx_1ADD28*)D_00262280, 0x156, 0xA, 0x43431EEEEEULL);
+        func_00161708((Ctx_1ADD28*)D_00262280, 0x47, 0x33001);
+        func_00161708((Ctx_1ADD28*)D_00262280, 0x42, 0x44);
+        func_00161708((Ctx_1ADD28*)D_00262280, 6, v);
+        func_00161708((Ctx_1ADD28*)D_00262280, 0x14, 0x60);
+        func_00161708((Ctx_1ADD28*)D_00262280, 8, 5);
+        *(u32*)rgba = 0x80808080;
+        func_00161458((Ctx_1ADD28*)D_00262280, *(u32*)rgba);
+        func_001614C8((Ctx_1ADD28*)D_00262280, 0, pr->b << 4);
+        func_001615F0((Ctx_1ADD28*)D_00262280, (s32)((self->f21c + 1728.0f) * 16.0f), (s32)((self->f220 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        func_001614C8((Ctx_1ADD28*)D_00262280, pr->a << 4, 0);
+        func_001615F0((Ctx_1ADD28*)D_00262280, (s32)((self->f21c + self->f234 + 1728.0f) * 16.0f), (s32)(((self->f220 + self->f238) * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    } else {
+        func_001AA790(self);
+    }
+}
+
+extern u8 D_002701F8[];
+extern u8 D_0026F808[];
+extern u8 D_00262280[];
+
+struct __attribute__((packed)) Word_1AD3F0 {
+    s32 v;
+};
+
+struct Out_1AD3F0;
+struct Strm_1AD3F0 { u8 d[1]; };
+struct Buf_1AD3F0 { u8 d[0xB0]; };
+
+struct Glob_1AD3F0 {
+    u8 pad0[0x250];
+    s32 f250;
+    u8 pad1[0x25C - 0x254];
+    s32 f25C;
+    s32 f260;
+};
+
+struct Inner_1AD3F0 {
+    u8 pad[0x2D0];
+    s32 f2D0;
+};
+
+struct Obj_1AD3F0 {
+    u8 pad0[4];
+    s32 f4;
+    s8 f8;
+    u8 pad1[0x208 - 9];
+    Word_1AD3F0 f208;
+    f32 f20c;
+    u8 pad2[0x224 - 0x210];
+    f32 f224;
+    f32 f228;
+    u8 pad3[0x234 - 0x22C];
+    f32 f234;
+    f32 f238;
+    f32 f23c;
+    u8 pad4[0x464 - 0x240];
+    s32 f464;
+};
+
+void func_00137228(Out_1AD3F0* out, f32 x, f32 y);
+void func_00137238(Out_1AD3F0* out, f32 x, f32 y);
+void func_00137248(Out_1AD3F0* out, s32* value);
+void func_00137260(Out_1AD3F0* out, s32 flag);
+void func_00137268(Out_1AD3F0* out, s32 flag);
+struct Out_1AD3F0 {
+    u8 d[0x20];
+    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
+    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
+    void Color(s32* c) { func_00137248(this, c); }
+    void FlagA(s32 f) { func_00137260(this, f); }
+    void FlagB(s32 f) { func_00137268(this, f); }
+};
+void func_001613C0(Strm_1AD3F0* f, s32 a, s32 b, u64 c);
+void func_00161708(Strm_1AD3F0* f, u64 a, u64 b);
+void func_00161458(Strm_1AD3F0* f, u32 v);
+void func_001615F0(Strm_1AD3F0* f, s32 a, s32 b, s32 c, s32 d);
+void func_0015C8B8(s32 handle, f32 a, f32 b);
+void func_0015DB28(Buf_1AD3F0* out, void* p, s32 handle);
+void func_0015E318(Buf_1AD3F0* buf, Out_1AD3F0* out, s32 zero, void* data);
+void func_0015C900(s32 handle);
+
+void func_001AD3F0(Obj_1AD3F0* self)
+{
+    Word_1AD3F0 packed;
+    Out_1AD3F0 out;
+    Word_1AD3F0 slot;
+    Buf_1AD3F0 buf;
+    f32 scale;
+    f32 off;
+    f32 px;
+    f32 py;
+    s32 held;
+    Glob_1AD3F0* g;
+
+    if (self->f8 == 0) {
+        return;
+    }
+    g = (Glob_1AD3F0*)D_002701F8;
+    if (g->f250 != 0 && (u32)(g->f260 - 1) < 2) {
+        return;
+    }
+    if (self->f464 != 0) {
+        scale = 1.0f;
+        off = (1.0f - ((f32*)&D_0027240C)[0]) * 66.40001f;
+    } else {
+        scale = self->f23c;
+        off = 0.0f;
+    }
+    packed = self->f208;
+    ((u8*)&packed)[3] = (u8)(s32)((f32)((u8*)&packed)[3] * scale);
+    held = packed.v;
+    px = self->f234;
+    py = self->f238;
+    out.Pos(self->f224, self->f228 + off);
+    out.Size(px, py);
+    slot.v = held;
+    out.Color(&slot.v);
+    out.FlagA(0);
+    out.FlagB(0);
+    if (self->f464 == 0) {
+        Glob_1AD3F0* g2 = (Glob_1AD3F0*)D_0026F808;
+        Strm_1AD3F0* s = (Strm_1AD3F0*)D_00262280;
+        f32 sc = scale;
+        f32 y;
+        if (g2->f25C != 0 && g2->f260 != 0 && ((Inner_1AD3F0*)g2->f260)->f2D0 == 2) {
+            sc = 1.0f;
+        }
+        ((u8*)&slot)[0] = 0;
+        ((u8*)&slot)[1] = 0;
+        ((u8*)&slot)[2] = 0;
+        ((u8*)&slot)[3] = (u8)(s32)(sc * 64.0f);
+        y = off + 492.80002f - 66.40001f;
+        func_001613C0(s, 0x46, 5, 0x441EE);
+        func_00161708(s, 0x47, 0x30000);
+        func_00161708(s, 0x42, 0x44);
+        func_00161458(s, (u32)slot.v);
+        func_001615F0(s, 0x6C00, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0xFFFFFF0, 0);
+        func_001615F0(s, 0x9400, 0x8700, 0xFFFFFF0, 0);
+    }
+    func_0015C8B8(self->f4, self->f20c, self->f20c);
+    func_0015DB28(&buf, &self->f8, self->f4);
+    func_0015E318(&buf, &out, 0, D_00262280);
+    func_0015C900(self->f4);
+}
+
+extern u8 D_00262280[];
+
+struct Out_1ACAA8;
+void func_00137228(Out_1ACAA8* out, f32 x, f32 y);
+void func_00137238(Out_1ACAA8* out, f32 x, f32 y);
+void func_00137248(Out_1ACAA8* out, s32* value);
+void func_00137260(Out_1ACAA8* out, s32 flag);
+void func_00137268(Out_1ACAA8* out, s32 flag);
+struct Out_1ACAA8 {
+    u8 d[0x20];
+    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
+    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
+    void Color(s32 c) { func_00137248(this, &c); }
+    void FlagA(s32 f) { func_00137260(this, f); }
+    void FlagB(s32 f) { func_00137268(this, f); }
+};
+
+struct Hnd_1ACAA8;
+typedef void (*Draw_1ACAA8)(void* a, void* h, Out_1ACAA8* out, void* d);
+typedef void (*Mode_1ACAA8)(void* a, s32 b, void* d);
+typedef void (*Chr_1ACAA8)(void* a, s32 ch, s32 color, void* d, f32 x, f32 y);
+typedef f32 (*Adv_1ACAA8)(void* a, s32 ch);
+
+struct Vt_1ACAA8 {
+    u8 pad0[0x18];
+    s16 adj18;
+    s16 pad1a;
+    Adv_1ACAA8 f1c;
+    s16 adj20;
+    s16 pad22;
+    Mode_1ACAA8 f24;
+    u8 pad28[0x30 - 0x28];
+    s16 adj30;
+    s16 pad32;
+    Chr_1ACAA8 f34;
+    s16 adj38;
+    s16 pad3a;
+    Mode_1ACAA8 f3c;
+    u8 pad40[0x48 - 0x40];
+    s16 adj48;
+    s16 pad4a;
+    Draw_1ACAA8 f4c;
+};
+
+struct Hnd_1ACAA8 {
+    u8 pad[0x4C];
+    Vt_1ACAA8* vt;
+    f32 Advance(s32 ch) { return vt->f1c((u8*)this + vt->adj18, ch); }
+    void Begin(s32 a, void* d) { vt->f24((u8*)this + vt->adj20, a, d); }
+    void Glyph(s32 ch, s32 color, void* d, f32 x, f32 y) { vt->f34((u8*)this + vt->adj30, ch, color, d, x, y); }
+    void End(s32 a, void* d) { vt->f3c((u8*)this + vt->adj38, a, d); }
+};
+
+struct Ref_1ACAA8 {
+    Hnd_1ACAA8* obj;
+};
+
+struct Obj_1ACAA8 {
+    u8 pad0[4];
+    Hnd_1ACAA8* f4;
+    s8 f8[0x200];
+    s32 f208;
+    u8 pad2[0x210 - 0x20C];
+    Ref_1ACAA8* f210;
+    u8 pad3[0x220 - 0x214];
+    f32 f220;
+    f32 f224;
+    f32 f228;
+    f32 f22c;
+    u8 pad4[0x234 - 0x230];
+    f32 f234;
+    f32 f238;
+    f32 f23c;
+    u8 pad5[0x250 - 0x240];
+    s32 f250;
+};
+
+void func_001AA790(Obj_1ACAA8* self);
+s32 func_001E2100(s8* s);
+
+struct Clamp_1ACAA8 {
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        return x < lo ? lo : (hi < x ? hi : x);
+    }
+};
+
+void func_001ACAA8(Obj_1ACAA8* self)
+{
+    Out_1ACAA8 out;
+    s32 n;
+    s32 i;
+    f32 c;
+    f32 rest;
+    f32 x;
+    f32 y;
+
+    switch (self->f250) {
+    case 2:
+        func_001AA790(self);
+        return;
+    case 1:
+    case 3:
+        break;
+    default:
+        return;
+    }
+    n = func_001E2100(self->f8);
+    if (n == 0) {
+        return;
+    }
+    x = self->f224;
+    y = self->f22c;
+    c = Clamp_1ACAA8::Of(self->f23c / (1.0f / (f32)n), 0.0f, 1.0f);
+    rest = 1.0f - c;
+    if (self->f210 != 0) {
+        s32 grey = 0xFF808080;
+        f32 w = x * self->f23c + y * (1.0f - self->f23c) + self->f234;
+        f32 h = self->f238;
+        out.Pos(x * c + y * rest, self->f220);
+        out.Size(w, h);
+        out.Color(grey);
+        out.FlagA(0);
+        out.FlagB(0);
+        Hnd_1ACAA8* o = self->f210->obj;
+        if (o != 0) {
+            o->vt->f4c((u8*)o + o->vt->adj48, self->f210, &out, D_00262280);
+        }
+    }
+    self->f4->Begin(0, D_00262280);
+    for (i = 0; i < n; i++) {
+        s32 ch = self->f8[i];
+        f32 d;
+        c = Clamp_1ACAA8::Of(self->f23c / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
+        rest = 1.0f - c;
+        self->f4->Glyph(ch, self->f208, D_00262280, c * x + rest * y, self->f228);
+        d = self->f4->Advance(ch);
+        x += d;
+        y += d;
+    }
+    self->f4->End(0, D_00262280);
 }

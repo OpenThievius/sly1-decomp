@@ -721,3 +721,172 @@ void func_001DFD48();
 void func_001E2398();
 void func_001E9088();
 extern Fn_Table D_002647C0[29] = { (Fn_Table)func_0012B868, (Fn_Table)func_0018D430, (Fn_Table)func_00152810, (Fn_Table)func_001E2398, (Fn_Table)func_001688B8, (Fn_Table)func_001858F8, (Fn_Table)func_001409D8, (Fn_Table)func_00140790, (Fn_Table)func_0016E0B8, (Fn_Table)func_0016F588, (Fn_Table)func_0015E810, (Fn_Table)func_0015C178, (Fn_Table)func_0011E560, (Fn_Table)func_00143140, (Fn_Table)func_001BF130, (Fn_Table)func_001A9C68, (Fn_Table)func_001E9088, (Fn_Table)func_001DFD48, (Fn_Table)func_0017FD48, (Fn_Table)func_00191EC0, (Fn_Table)func_00169C58, (Fn_Table)func_00185A58, (Fn_Table)func_00185AC8, (Fn_Table)func_00139C38, (Fn_Table)func_0019DF48, (Fn_Table)func_001430C8, (Fn_Table)func_0018B580, (Fn_Table)func_00160070, (Fn_Table)func_0018E5E8 };
+
+struct Out_1840F0;
+f32 func_00205210(f32 value);
+void func_00183F40(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1);
+
+void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
+{
+    f32 x = func_00205210(a * 0.0087266471f);
+    x = x + x * x * x;
+    f32 y = func_00205210(c * 0.0087266471f);
+    y = y + y * y * y;
+    func_00183F40(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
+}
+
+struct Pair_00186A70 { u8 pad0[4]; s16 k1; s16 k2; };
+struct Grp_00186A70 { u8 pad0[0x58]; Pair_00186A70* pair; u8 pad1[4]; Grp_00186A70* next; };
+struct Item_00186A70 { u8 pad0[0x1C]; u16 flags; u8 pad1[2]; };
+struct Rec_00186A70 { Rec_00186A70* parent; Grp_00186A70* node; s32 id; };
+
+s32 func_00186A70(Item_00186A70* base, s32 key, s32 target, Grp_00186A70* head, Grp_00186A70** out)
+{
+    Rec_00186A70 recs[64];
+    s32 n;
+    s32 nrec;
+    s32 i;
+
+    recs[0].parent = 0;
+    recs[0].node = 0;
+    recs[0].id = key;
+    for (i = 0, nrec = 1; i < nrec; i++) {
+        Rec_00186A70* rc = &recs[i];
+        Grp_00186A70* g;
+        for (g = head; g != 0; g = g->next) {
+            Pair_00186A70* p = g->pair;
+            s32 id;
+            if (p->k1 == rc->id) {
+                id = p->k2;
+            } else if (p->k2 == rc->id) {
+                id = p->k1;
+            } else {
+                continue;
+            }
+            if (id == target) {
+                out[0] = g;
+                n = 1;
+                while (rc->node != 0) {
+                    out[n] = rc->node;
+                    n++;
+                    rc = rc->parent;
+                }
+                goto done;
+            }
+            Item_00186A70* it = &base[id];
+            if ((it->flags & 4) == 0) {
+                it->flags |= 4;
+                Rec_00186A70* r = &recs[nrec++];
+                r->parent = rc;
+                r->node = g;
+                r->id = id;
+            }
+        }
+    }
+    n = 0;
+done:
+    for (i = 0; i < nrec; i++) {
+        base[recs[i].id].flags &= ~4;
+    }
+    return n;
+}
+
+struct __attribute__((aligned(16))) Row_1867C8 {
+    f32 v[4];
+};
+
+struct Pair_1867C8 {
+    s16 v[2];
+};
+
+struct Edge_1867C8 {
+    Row_1867C8 r0;
+    Row_1867C8 r1;
+    Row_1867C8 r2;
+    Row_1867C8 r3;
+    f32 f40;
+    f32 f44;
+    u8 pad48[0x50 - 0x48];
+    s32 i50;
+    s32 i54;
+    Pair_1867C8* idx58;
+    s32 slot5C;
+    Edge_1867C8* next;
+};
+
+void func_001F5B08(void* dst, void* src, s32 size);
+
+void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_1867C8** groups, Edge_1867C8** head)
+{
+    Edge_1867C8* single = 0;
+    s32 n = 0;
+    s32 i;
+    s32 j;
+    Edge_1867C8* e;
+    *head = 0;
+    for (i = 0; i < count; i++) {
+        e = &base[i];
+        if (e->i50) {
+            if (e->i54) {
+                e->next = *head;
+                *head = e;
+                continue;
+            }
+        } else if (!e->i54) {
+            e->next = single;
+            single = e;
+            continue;
+        }
+        if (!e->i54) {
+            Row_1867C8 t;
+            t = e->r0;
+            e->r0 = e->r1;
+            e->r1 = t;
+            t = e->r2;
+            e->r2 = e->r3;
+            e->r3 = t;
+            s32 x = e->i50;
+            s32 y = e->i54;
+            f32 fa = e->f40;
+            f32 fb = e->f44;
+            e->i50 = y;
+            e->i54 = x;
+            e->f40 = fb;
+            e->f44 = fa;
+            e->slot5C = 1;
+        }
+        for (j = 0; j < n; j++) {
+            if (e->idx58->v[e->slot5C] == keys[j]) {
+                break;
+            }
+        }
+        if (j >= n) {
+            keys[j] = e->idx58->v[e->slot5C];
+            n++;
+        } else {
+            e->next = groups[j];
+        }
+        groups[j] = e;
+    }
+    for (j = 0; j < n; j++) {
+        if (groups[j]->next == 0) {
+            e = single;
+            while (e) {
+                Pair_1867C8* r = e->idx58;
+                if (r->v[0] == keys[j] || r->v[1] == keys[j]) {
+                    goto next;
+                }
+                e = e->next;
+            }
+            groups[j]->next = *head;
+            *head = groups[j];
+            s32 bytes = (n - j) * 4 - 4;
+            func_001F5B08(groups + j, groups + j + 1, bytes);
+            func_001F5B08(keys + j, keys + j + 1, bytes);
+            j--;
+            n--;
+        }
+    next:;
+    }
+    *outCount = n;
+}

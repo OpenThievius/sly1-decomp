@@ -176,3 +176,32 @@ f32 func_001CEE30(Self_1CEE30* self)
     func_001EB168(0.5f, q, q, 3.0f, (void*)func_001CEDF8, l.b, 0, &l.out);
     return l.out;
 }
+
+// func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
+// function passes its own float parameter straight through.
+struct Obj_1CEDF8 { s32 a; s32 b; s32 pad[2]; s32 c[4]; };
+void func_001CEB18(f32 t, s32 a, s32 b, s32* c, f32* out, s32 d, s32 e);
+
+f32 func_001CEDF8(Obj_1CEDF8* o, f32 t)
+{
+    f32 out;
+    func_001CEB18(t, o->a, o->b, o->c, &out, 0, 0);
+    return out;
+}
+
+struct Self_1CDF78 {
+    u8 pad[0x2220];
+    s32 state;
+};
+
+void func_001225D0(Self_1CDF78* self, f32 t, void* out, void* extra);
+void func_001C5DB8(Self_1CDF78* self, f32 t, void* out, void* extra);
+
+void func_001CDF78(Self_1CDF78* self, f32 t, void* out, void* extra)
+{
+    if (self->state == 3) {
+        func_001225D0(self, t, out, extra);
+    } else {
+        func_001C5DB8(self, t, out, extra);
+    }
+}

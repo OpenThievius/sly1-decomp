@@ -478,3 +478,254 @@ void func_001F4500(void* self_, void* s3)
         o->vtbl[7](o);
     }
 }
+
+extern void* D_0027B314;
+
+struct Kind_1F55A8 { s32 f0; s32 type; };
+struct Node_1F55A8 { Kind_1F55A8* kind; };
+struct List_1F55A8 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_1F55A8 { List_1F55A8* list; u8* link; s32 offset; Iter_1F55A8* saved; };
+struct Ctx_1F55A8 { u8 pad0[0x14]; void* f14; };
+struct Owner_1F55A8 { u8 pad0[0x14]; Ctx_1F55A8* ctx; u8 pad18[0x1C]; List_1F55A8 list; };
+struct Obj_1F55A8 {
+    Owner_1F55A8* owner;
+    u8 pad4[0xC];
+    s32 count;
+    void* keys[32];
+    u32 found;
+    Node_1F55A8* nodes[32];
+};
+
+struct Next_1F55A8 {
+    static Node_1F55A8* Of(Iter_1F55A8* it)
+    {
+        Node_1F55A8* obj = *(Node_1F55A8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_1F55A8 {
+    static void Of(Iter_1F55A8* it, List_1F55A8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_1F55A8*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+Node_1F55A8* func_0015A418(Ctx_1F55A8* a, s32 b, void* c, Owner_1F55A8* d);
+void func_001F5868(Obj_1F55A8* self, Node_1F55A8* n);
+
+void func_001F55A8(Obj_1F55A8* self)
+{
+    Iter_1F55A8 it;
+    Node_1F55A8* n;
+    s32 i;
+
+    Begin_1F55A8::Of(&it, &self->owner->list);
+    while ((n = Next_1F55A8::Of(&it)) != 0) {
+        s32 t = n->kind->type;
+        if (t == 0x7E || t == 0x6E) {
+            if (self->found < 0x20) {
+                self->nodes[self->found++] = n;
+            }
+        }
+    }
+    for (i = 0; i < self->count; i++) {
+        n = func_0015A418(self->owner->ctx, 0x104, self->keys[i], self->owner);
+        if (n != 0) {
+            func_001F5868(self, n);
+        }
+    }
+    D_0027B314 = it.saved;
+}
+
+struct Q_1F5008 {
+    u32 w[4] __attribute__((aligned(16)));
+};
+struct Obj_1F5008 {
+    u8 pad0[0x550];
+    s32 f550;
+};
+struct Self_1F5008;
+struct Item_1F5008 {
+    Self_1F5008* ref;
+    Obj_1F5008* obj0;
+    u8 pad0[8];
+    Q_1F5008 q10;
+    u8 pad1[0x30];
+    Q_1F5008 q50;
+    u8 pad3[0x20];
+    Q_1F5008 q80;
+    u8 pad4[0x40];
+    Item_1F5008* next;
+};
+struct Grp_1F5008 {
+    Item_1F5008* items;
+    Grp_1F5008* next;
+};
+struct Hold_1F5008 {
+    Grp_1F5008* head;
+};
+struct Owner_1F5008 {
+    u8 pad[0x480];
+    Hold_1F5008* hold;
+};
+struct Slot_1F5008 {
+    Obj_1F5008* obj;
+    u8 pad[0xC];
+    Q_1F5008 q10;
+    Q_1F5008 q20;
+};
+struct Self_1F5008 {
+    u8 pad0[0x50];
+    Owner_1F5008* owner;
+    u8 pad1[0x61C];
+    Slot_1F5008 slots[10];
+    s32 count;
+};
+struct Tmp_1F5008 {
+    Self_1F5008* self;
+    Obj_1F5008* obj;
+    u8 pad[0x18];
+    Q_1F5008 q20;
+    Q_1F5008 q30;
+};
+
+s32 func_001B93F8(Self_1F5008* self);
+s32 func_00182F40(Obj_1F5008* o, Self_1F5008* self);
+s32 func_001300E8(Obj_1F5008* o, s32 kind);
+s32 func_001F5C0C(Tmp_1F5008* p, s32 a, s32 b);
+s32 func_00177838(Tmp_1F5008* t, s32 a, s32 b);
+
+struct Add_1F5008 {
+    static void Of(Self_1F5008* self, Obj_1F5008* p, Q_1F5008* a, Q_1F5008* b)
+    {
+        s32 c = self->count;
+        if ((u32)c < 10) {
+            if (p->f550 != 3) {
+                Slot_1F5008* s = &self->slots[c];
+                self->count = c + 1;
+                s->obj = p;
+                s->q10 = *a;
+                s->q20 = *b;
+            }
+        }
+    }
+};
+void func_001F5008(Self_1F5008* self) {
+    Tmp_1F5008 tmp;
+    Obj_1F5008* p;
+    func_001B93F8(self);
+    self->count = 0;
+    Owner_1F5008* owner = self->owner;
+    for (Grp_1F5008* g = owner->hold->head; g; g = g->next) {
+        for (Item_1F5008* it = g->items; it; it = it->next) {
+            s32 side = (owner != (Owner_1F5008*)it->ref);
+            Obj_1F5008* near = *(Obj_1F5008**)((u8*)it + (side << 6) + 4);
+            if (func_00182F40(near, self)) {
+                u8* far = (u8*)it + ((1 - side) << 6);
+                Obj_1F5008* o = *(Obj_1F5008**)(far + 4);
+                if (func_001300E8(o, 0x41)) {
+                    p = o; Add_1F5008::Of(self, p, (Q_1F5008*)(far + 0x10), &it->q80);
+                }
+            }
+        }
+    }
+    func_001F5C0C(&tmp, 0, 0x40);
+    for (s32 i = 0; i < self->count; i++) {
+        Slot_1F5008* s = &self->slots[i];
+        p = s->obj;
+        tmp.self = self;
+        tmp.obj = p;
+        tmp.q20 = *(Q_1F5008*)((u8*)p + 0x140);
+        tmp.q30 = *(Q_1F5008*)((u8*)p + 0x150);
+        func_00177838(&tmp, 0, 0);
+    }
+}
+
+struct Item_1F4808 { u8 pad[0x34]; f32 f34; };
+struct Obj_1F4808 {
+    u8 pad0[0x2D4];
+    s32 f2D4;
+    s32 f2D8;
+    u8 pad2DC[4];
+    s32 f2E0;
+    u8 pad2E4[0x2FC - 0x2E4];
+    s32 f2FC;
+    u8 pad300[0x310 - 0x300];
+    s32 f310;
+    Item_1F4808** f314;
+    s32 f318;
+    f32 f31C;
+    u8 pad320[4];
+    f32 f324;
+};
+struct Glob_1F4808 { u8 pad[0x19DC]; s32 f19DC; };
+
+struct Gl_1F4808 { u8 pad[0x260]; s32 f260; };
+extern Gl_1F4808 D_0026E9F8;
+
+s32 func_001601A0(s32 a);
+void func_001E0828(Gl_1F4808* g);
+void func_001F4760(Obj_1F4808* self, s32 state);
+void func_001E02C8(Gl_1F4808* g, s32 n);
+void func_001F4408(s32 flag, s32 n);
+s32 func_001300E8(Item_1F4808* key, s32 kind);
+void func_001451F0(u8* a0, s32 a1, s32 a2, u8* a3, s32 a4, s32 a5);
+void func_0012C7B0(Item_1F4808* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
+s32 func_0012C9A8(Item_1F4808* node);
+void func_001837E0(Obj_1F4808* self, s32 a, s32 b, s32 c);
+
+void func_001F4808(Obj_1F4808* self)
+{
+    Item_1F4808* key;
+    s32 i;
+    s32 found = 0;
+    s32 next;
+    Item_1F4808* it;
+
+    key = (struct Item_1F4808 *)func_001925F0();
+    if (D_0026E9F8.f260 == 2
+        && (self->f2E0 != 0 || self->f2D4 != 0
+            || ((*(Glob_1F4808**)&D_002623C0)->f19DC == 0 && (u8)func_001601A0(self->f2FC) == 1))) {
+        func_001E0828(&D_0026E9F8);
+        func_001F4760(self, 2);
+        goto tail;
+    }
+    if (D_0026E9F8.f260 >= 2) {
+        func_001E02C8(&D_0026E9F8, 4);
+    }
+    if (self->f2D8 != 0) {
+        func_001F4408(1, self->f318);
+        func_001F4760(self, 0);
+        return;
+    }
+    if (key == 0 || func_001300E8(key, 0x16) == 0) {
+        func_001451F0((*(u8**)&D_00261990), 2, 0, (*(u8**)&D_00261990) + 0x460, 0, 0);
+    }
+    func_001F4760(self, 5);
+    for (i = 0; i < self->f310; i++) {
+        it = self->f314[i];
+        func_0012C7B0(it, 0, 0, 0, 0.0f, 1.0f);
+        next = 0;
+        if (found != 0 || func_0012C9A8(it) != 0) {
+            next = 1;
+        }
+        found = next;
+    }
+    if (found == 0) {
+        if (self->f324 > 0.0f) {
+            self->f31C = ((f32*)&D_0026185C)[0] + self->f324;
+        } else if (self->f310 > 0) {
+            self->f31C = ((f32*)&D_0026185C)[0] + self->f314[0]->f34;
+        } else {
+            self->f31C = ((f32*)&D_0026185C)[0];
+        }
+    }
+tail:
+    func_001837E0(self, 2, 0, 0);
+}

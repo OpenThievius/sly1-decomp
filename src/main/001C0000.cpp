@@ -1799,3 +1799,123 @@ void func_001C0070(void)
     func_0011CE30();
     D_0027B314 = f.fC;
 }
+
+struct List_1C0808 {
+    u8* first;
+    s32 pad04;
+    s32 offset;
+};
+struct Iter_1C0808 {
+    List_1C0808* list;
+    u8** link;
+    s32 offset;
+    Iter_1C0808* prev;
+};
+struct World_1C0808 {
+    u8 pad0000[0x1BAC];
+    List_1C0808 list;
+};
+void func_001BF788(u8* obj, void* item);
+
+struct Begin_1C0808 {
+    static void Of(Iter_1C0808* it, List_1C0808* list)
+    {
+        it->list = list;
+        it->link = (u8**)list;
+        it->offset = list->offset;
+        it->prev = (Iter_1C0808*)D_0027B314;
+        D_0027B314 = (Frame_1C0070*)it;
+    }
+};
+
+struct Next_1C0808 {
+    static u8* Of(Iter_1C0808* it)
+    {
+        u8* obj = *it->link;
+        it->link = (u8**)(obj + it->offset);
+        return obj;
+    }
+};
+
+struct End_1C0808 {
+    static void Of(Iter_1C0808* it)
+    {
+        D_0027B314 = (Frame_1C0070*)it->prev;
+    }
+};
+
+void func_001C0808(void* item)
+{
+    if (D_00275710) {
+        Iter_1C0808 it;
+        u8* obj;
+        Begin_1C0808::Of(&it, &((World_1C0808*)D_00275710)->list);
+        for (obj = Next_1C0808::Of(&it); obj; obj = Next_1C0808::Of(&it)) {
+            func_001BF788(obj, item);
+        }
+        End_1C0808::Of(&it);
+    }
+    func_0011CE30();
+}
+
+struct Tag_1C2430 { u64 lo; u64 hi; };
+
+struct Slot_1C2430 {
+    Tag_1C2430* tags;
+    u32 base;
+    u32 addrs[8];
+    s32 sizes[8];
+    s32 count;
+    s32 state;
+};
+
+struct Chan_1C2430 {
+    u32 f0;
+    u8 pad4[0x7C];
+    u32 f80;
+};
+
+extern s32 D_00274990;
+extern Chan_1C2430* D_00261F24;
+
+typedef char* VaList_1C2430;
+#define VA_ARG_1C2430(ap, T) (*(T*)((ap += 8) - 8))
+
+void func_00202C38(void* p, s32 a, s32 b);
+void func_00202A80(Chan_1C2430* c, u32 addr);
+
+void func_001C2430(s32 size, ...)
+{
+    VaList_1C2430 ap;
+    Slot_1C2430* e = &((Slot_1C2430*)D_002748F0)[1 - D_00274990];
+    s32 n = 0;
+    ap = (VaList_1C2430)__builtin_next_arg(size) - (8 - __builtin_args_info(0)) * 8;
+    u32 addr = e->base;
+    if (e->state == 3) {
+        func_00202C38((*(void**)&D_00261F20), 0, 0);
+    }
+    e->state = 1;
+    s32 data = VA_ARG_1C2430(ap, s32);
+    if (size != 0) {
+        do {
+            s32 nsize = VA_ARG_1C2430(ap, s32);
+            size = (size + 15) & ~15;
+            addr += 16;
+            e->sizes[n] = size;
+            e->addrs[n] = addr;
+            addr += size;
+            s32 ndata = VA_ARG_1C2430(ap, s32);
+            if (data != 0) {
+                e->tags[n].lo = (u64)(size >> 4) | ((u64)(ndata != 0 ? 3 : 0) << 28) | ((u64)data << 32);
+            }
+            data = ndata;
+            size = nsize;
+            n++;
+        } while (size != 0);
+    }
+    e->count = n;
+    Chan_1C2430* c = D_00261F24;
+    c->f0 |= 0x40;
+    c->f80 = (e->base & 0x0FFFFFFF) | 0x80000000;
+    func_00202A80(c, (u32)e->tags & 0x0FFFFFFF);
+}

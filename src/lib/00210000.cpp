@@ -370,3 +370,346 @@ void func_00211748(Str_211748* self, s32 bytes)
     }
     func_00211618(self, 0);
 }
+
+struct Bits_2116B0 { u64 bits; };
+
+s64 func_002115F8(Bits_2116B0* self, s32 n);
+void func_00211618(Bits_2116B0* self, s32 n);
+
+s64 func_002116B0(Bits_2116B0* self, s32 n)
+{
+    s64 r = func_002115F8(self, n);
+    func_00211618(self, n);
+    return r;
+}
+
+u32 func_00211AD8(s32 mode)
+{
+    u32 result = 0;
+    switch (mode) {
+    case 0:
+        while (*(volatile s32*)0x10002010 < 0) {
+        }
+        result = 0;
+        break;
+    case 1:
+        result = *(volatile u32*)0x10002010 >> 31;
+        break;
+    }
+    return result;
+}
+
+struct Blk_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0xC]; u64 f20; s32 f28; u8 p2C[0xC]; u64 f38; };
+struct Src_210A80 { u8 p0[0x10]; s32 f10; u8 p14[0x14]; s32 f28; u8 p2C[0x18]; s32 f44; s32 f48; u8 p4C[4]; s32 f50; s32 f54; u8 p58[4]; s32 f5C; s32 f60; };
+struct Ctx_210A80 {
+    u8 p0[0x80]; s32 f80; u8 p84[4]; union { u64 d; u32 w[2]; } f88; u8 p90[0x20]; s32 fB0; s32 fB4; s32 fB8; u8 pBC[4]; s32 fC0; s32 fC4; u8 pC8[4]; s32 fCC; s32 fD0;
+    u8 pD4[0x174 - 0xD4]; s32 f174; u8 p178[0x858 - 0x178]; Blk_210A80* f858;
+};
+
+s32 func_002107E0(Ctx_210A80* c, Src_210A80* s, void* a, void* b, void* d);
+s32 func_002104A8(Ctx_210A80* c, Src_210A80* s);
+s32 func_00211348(Ctx_210A80* c, Src_210A80* s);
+s32 func_00210548(Ctx_210A80* c, Src_210A80* s);
+s32 func_002107B8(Ctx_210A80* c);
+
+void func_00210A80(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
+{
+    Src_210A80* s3;
+    Src_210A80* s4;
+    s32 s6 = 0;
+    if (c->f174 == 2) {
+        s3 = a;
+        s4 = b;
+        s6 = 0x40;
+    } else {
+        s3 = b;
+        s4 = a;
+    }
+    (void)func_002107E0(c, s3, (u8*)c->f858 + 0x10, (u8*)c->f858 + 0x18, (u8*)c->f858 + 0x20);
+    c->f80 = c->f858->f10;
+    c->f88.d = 1;
+    (void)func_002107E0(c, s4, (u8*)c->f858 + 0x28, (u8*)c->f858 + 0x30, (u8*)c->f858 + 0x38);
+    c->f80 = c->f858->f28;
+    c->f88.d = 1;
+    Blk_210A80* p = c->f858;
+    u64 v0 = p->f20 | (s64)s6;
+    s32 a2 = s3->f5C;
+    u64 v1 = p->f38 | (s64)s6;
+    c->fCC = a2;
+    p->f20 = v0;
+    s32 a2b = s3->f60;
+    p->f38 = v1;
+    c->fD0 = a2b;
+    c->fB4 = s3->f44;
+    c->fB8 = s4->f48;
+    c->fC0 = s3->f50;
+    c->fC4 = s4->f54;
+    if (func_002104A8(c, a)) {
+        if (a->f28 == 1 && b->f28 == 1) {
+            a->f10 <<= 1;
+            if (c->fB0) {
+                func_00211348(c, a);
+            } else {
+                func_00210548(c, a);
+            }
+            a->f10 >>= 1;
+            func_002107B8(c);
+        }
+    }
+
+}
+
+struct Node_2107E0 {
+    u8 pad0[0x18];
+    s64 f18;
+    s64 f20;
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    s32 f34;
+    s32 f38;
+    s32 f3C;
+    s32 f40;
+};
+
+struct Obj_2107E0 {
+    u8 pad0[0x70];
+    s32 f70;
+    u8 pad1[0x4];
+    s64 f78;
+    s32 f80;
+    u8 pad2[0x4];
+    s64 f88;
+    s32 f90;
+    u8 pad3[0x5C];
+    s64 fF0;
+    s32 fF8;
+};
+
+s64 func_001FE890(s64 a, s64 b);
+
+void func_002107E0(Obj_2107E0* self, Node_2107E0* node, s64* out1, s64* out3, s64* out4)
+{
+    s32 s0;
+    s32 s1;
+    s32 s2;
+    s32 s6;
+    s32 s7;
+    s64 v;
+    s64 t88;
+
+    if (self->f70 != 0) {
+        v = node->f18;
+        if (v >= 0) {
+            *out1 = v;
+        } else {
+            s7 = self->f80;
+            if (s7 < 0) {
+                *out1 = v;
+            } else {
+                t88 = self->f88;
+                s0 = (s32)t88;
+                s2 = s0 & 1;
+                v = func_001FE890(s2, self->f78 & 1);
+                s6 = self->f90;
+                v = func_001FE890(v, s6 & 1);
+                s1 = (s32)v;
+                *out1 = (s64)(s7 + ((s32)(func_001FE890(self->f78, s0) >> 1) + s1));
+                if (func_001FE890(s2, self->f78 & 1)) {
+                    self->f90 = s6 + 1;
+                }
+            }
+        }
+    } else {
+        *out1 = node->f18;
+    }
+    if (self->fF8 == 2) {
+        if (self->fF0 >= 0) {
+            *out1 = self->fF0;
+            self->fF8 = 0;
+            self->fF0 = -1;
+        }
+    }
+    *out3 = node->f20;
+    *out4 = ((s64)node->f34 << 8) | (node->f2C | ((s64)node->f38 << 7) | ((s64)node->f3C << 6) | ((s64)node->f40 << 5) | ((s64)node->f30 << 3));
+}
+
+typedef u64 Quad_211BA8 __attribute__((mode(TI)));
+extern volatile Quad_211BA8 D_0027B0C0[];
+extern Quad_211BA8 D_0027B110[];
+void func_00211B40(u32 value);
+
+void func_00211BA8(void)
+{
+    func_00211B40(1);
+    *(volatile u32*)0x10002010 = 0x40000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[0];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[1];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[2];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[3];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile u32*)0x10002000 = 0x50000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0x58000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B110[0];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B110[1];
+    *(volatile u32*)0x10002000 = 0x60000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0x90000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002010 = 0x40000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+}
+
+struct Sub_2101F0 {
+    u8 pad00[0x18];
+    u64 f18;
+    u64 f20;
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    s32 f34;
+    s32 f38;
+    s32 f3C;
+    s32 f40;
+    s32 f44;
+    s32 f48;
+    s32 f4C;
+    s32 f50;
+    s32 f54;
+    s32 f58;
+    s32 f5C;
+    s32 f60;
+};
+
+struct Obj_2101F0 {
+    u8 pad000[0xA0];
+    s32 fA0;
+    s32 fA4;
+    u8 pad0A8[0xE8 - 0xA8];
+    s32 fE8;
+    u8 pad0EC[0x13C - 0xEC];
+    s32 f13C;
+    u8 pad140[0x148 - 0x140];
+    s32 f148;
+    s32 f14C;
+    s32 f150;
+    u8 pad154[0x174 - 0x154];
+    s32 f174;
+    s32 f178;
+    u8 pad17C[0x184 - 0x17C];
+    s32 f184;
+    s32 f188;
+    s32 f18C;
+    s32 f190;
+    s32 f194;
+    s32 f198;
+    s32 f19C;
+    s32 f1A0;
+    s32 f1A4;
+    s32 f1A8;
+    u8 pad1AC[0x1B8 - 0x1AC];
+    Sub_2101F0* f1B8;
+    Sub_2101F0* f1BC;
+    Sub_2101F0* f1C0;
+    Sub_2101F0* f1C4;
+    Sub_2101F0* f1C8;
+    Sub_2101F0* f1CC;
+    Sub_2101F0* f1D0;
+    Sub_2101F0* f1D4;
+    Sub_2101F0* f1D8;
+    Sub_2101F0* f1DC;
+    Sub_2101F0* f1E0;
+    Sub_2101F0* f1E4;
+    u8 pad1E8[0x828 - 0x1E8];
+    u64 f828;
+    u64 f830;
+};
+
+s32 func_002101F0(Obj_2101F0* p, s32 flag)
+{
+    Sub_2101F0* o = 0;
+    s32 ok = 0;
+    s32 lim = p->f174 == 3 ? 2 : 4;
+
+    if (p->f150 == 3) {
+        p->f1C0 = p->f1C4;
+        p->f1D0 = p->f1D4;
+        p->f1E0 = p->f1E4;
+        if (p->fA0 + p->fA4 >= lim) {
+            p->fE8 = 0;
+            p->f1A8 = 0;
+            p->f1A4 = 0;
+        }
+        if ((p->fE8 || p->f1A8) && !p->f1A4) {
+            p->f1B8->f28 = 0;
+            p->f1C8->f28 = 0;
+            p->f1D8->f28 = 0;
+        }
+        p->fE8 = 0;
+        p->f1A8 = 0;
+        if (p->f174 == 3) {
+            if ((p->f1B8->f28 == 1 || p->f1A4) && p->f1BC->f28 == 1) ok = 1;
+        } else {
+            if (((p->f1C8->f28 == 1 && p->f1D8->f28 == 1) || p->f1A4) && p->f1CC->f28 == 1 && p->f1DC->f28 == 1) ok = 1;
+        }
+    } else {
+        if (flag == 0) {
+            Sub_2101F0* t;
+            t = p->f1B8; p->f1B8 = p->f1BC; p->f1BC = t;
+            t = p->f1C8; p->f1C8 = p->f1CC; p->f1CC = t;
+            t = p->f1D8; p->f1D8 = p->f1DC; p->f1DC = t;
+        }
+        p->f1C0 = p->f1BC;
+        p->f1D0 = p->f1CC;
+        p->f1E0 = p->f1DC;
+        if (p->f174 == 3) {
+            if (p->f150 != 2 || p->f1B8->f28 == 1) ok = 1;
+        } else {
+            Sub_2101F0* x = p->f174 == 1 ? p->f1DC : p->f1CC;
+            if (p->f150 != 2) ok = 1;
+            else if ((flag && x->f28 == 1) || (p->f1C8->f28 == 1 && p->f1D8->f28 == 1)) ok = 1;
+        }
+    }
+
+    switch (p->f174) {
+    case 2: o = p->f1E0; break;
+    case 1: o = p->f1D0; break;
+    case 3: o = p->f1C0; break;
+    }
+    o->f28 = 0;
+    o->f18 = p->f828;
+    o->f2C = p->f150;
+    o->f20 = p->f830;
+    o->f30 = p->f174;
+    o->f34 = p->f13C;
+    o->f38 = p->f188;
+    o->f3C = p->f178;
+    o->f40 = p->f184;
+    o->f44 = p->f18C;
+    o->f48 = p->f190;
+    o->f4C = p->f194;
+    o->f50 = p->f198;
+    o->f54 = p->f19C;
+    o->f58 = p->f1A0;
+    o->f5C = p->f148;
+    o->f60 = p->f14C;
+    return ok;
+}

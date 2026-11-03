@@ -260,3 +260,71 @@ void func_00177EE0(Self_177EE0* self, Other_177EE0* other, s32* out)
     if (D_00275BC4 != 3)
         out[0] = 0;
 }
+
+extern s32 D_00263930[];
+
+struct Obj_174F50 {
+    u8 pad0[0x1390];
+    void* f1390[0x11];
+    void* f13D4[0x11];
+    void* f1418[0x15];
+    void* f146C;
+    u8 pad1[0x2220 - 0x1470];
+    s32 state;
+    u8 pad2[4];
+    s32 f2228;
+    u8 pad3[0x239C - 0x222C];
+    s32 f239C;
+};
+
+void func_001C4D60(Obj_174F50* self, void* a1, s32 zero);
+
+void func_00174F50(Obj_174F50* self, void* node)
+{
+    switch (self->state) {
+    case 6: {
+        s32 m = self->f239C;
+        if ((m == 0 && self->f2228 == 0x15) || m == 7) {
+            node = self->f146C;
+        } else {
+            node = self->f13D4[m];
+        }
+        break;
+    }
+    case 4: {
+        s32 i = self->f2228;
+        if (i != -1) {
+            node = self->f1418[i];
+            if (node == 0) {
+                do {
+                    s32 k = D_00263930[i - 0x24];
+                    if (k == -1) {
+                        break;
+                    }
+                    node = self->f1418[k];
+                    i = k;
+                } while (node == 0);
+            }
+        }
+        break;
+    }
+    case 2: {
+        s32 i = self->f2228;
+        if (i < 0xE) {
+            if (i >= 0xC) {
+                node = self->f146C;
+                break;
+            }
+        }
+    }
+    default:
+        node = self->f1390[self->state];
+        break;
+    case 0xD:
+        return;
+    }
+    if (node == 0) {
+        node = self->f1390[0];
+    }
+    func_001C4D60(self, node, 0);
+}

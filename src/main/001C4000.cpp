@@ -951,3 +951,58 @@ void func_001C5E50(Obj_1C5E50* self, f32 s)
     self->y *= s;
     self->z *= 1.0f / Fpu::Sqrt(s);
 }
+
+struct Self_1C7140 { u8 pad0[1]; };
+
+void func_001BAC30(Self_1C7140* self, void* a1);
+void func_00124DF8(Self_1C7140* self, s32 a1, void* a2);
+void func_001CA7C0(Self_1C7140* self);
+void func_001CA8E8(Self_1C7140* self);
+extern u8 D_00274C20[];
+
+void func_001C7140(Self_1C7140* self, void* a1)
+{
+    func_001BAC30(self, a1);
+    func_00124DF8(self, 1, (void*)D_00274C20);
+    func_001CA7C0(self);
+    func_001CA8E8(self);
+}
+
+struct Self_1C5248 { u8 pad0[0x6D4]; s32 f6D4; u8 pad1[0x6DC - 0x6D8]; s32 f6DC; };
+struct Arg_1C5248 { u8 pad0[0x88]; f32 f88; u8 pad1[0x9C - 0x8C]; s32 f9C; s32 fA0; s32 fA4; };
+extern f32 D_00274AD0[];
+
+s32 func_001C5248(Self_1C5248* self, Arg_1C5248* a, s32 idx)
+{
+    if (self->f6DC == 0) {
+        return 0;
+    }
+    if (a->f88 * D_00274AD0[idx] < 0.7f) {
+        return 0;
+    }
+    s32 kind = a->f9C;
+    switch (kind) {
+    case 1: {
+        s32 r = 0;
+        if (idx == 0 && a->fA0 == self->f6D4) {
+            r = 1;
+        }
+        return r;
+    }
+    case 4: {
+        s32 r = 0;
+        if (idx == 1 && a->fA4 == self->f6D4) {
+            r = 1;
+        }
+        return r;
+    }
+    case 10: {
+        s32 r = 0;
+        if (idx == 0) {
+            r = a->fA0 == self->f6D4;
+        }
+        return r;
+    }
+    }
+    return 0;
+}

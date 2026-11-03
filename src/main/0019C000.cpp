@@ -1225,3 +1225,180 @@ extern const Fn_Table D_00219F00[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))fu
 extern const Fn_Table D_00219F20[8] = { (Fn_Table)func_001A31F0, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A3250, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219F40[8] = { (Fn_Table)func_001A3598, 0, 0, (Fn_Table)func_001A3730, (Fn_Table)func_001A38F0, (Fn_Table)func_001A3990, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A39C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A3A18, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+
+struct Entry_19D410 { u32 w[32]; } __attribute__((aligned(16)));
+
+// D_0026AC10 points at the next free 128-byte entry of D_005E4700 (1024 of them).
+void func_0019D410(Entry_19D410* src)
+{
+    Entry_19D410* cur = *(Entry_19D410**)D_0026AC10;
+    if ((u32)(cur - (Entry_19D410*)D_005E4700) < 0x400) {
+        *(Entry_19D410**)D_0026AC10 = cur + 1;
+        *(Entry_19D410*)((u32)cur | 0x20000000) = *src;
+    }
+}
+
+struct Self_19CD90 {
+    u8 pad0[0x48];
+    s32 f48;
+};
+
+void func_0019CD90(Self_19CD90* self, s32 p, f32* out0, f32* out1, f32* out2)
+{
+    s32 n = self->f48;
+    s32 q = p / ((n + 1) * (3 * n + 1));
+    s32 r = p - q * (n + 1) * (3 * n + 1);
+    s32 m = r / (3 * n + 1);
+    s32 s = r - m * (3 * n + 1);
+    *out0 = (f32)(q - n) / (f32)self->f48;
+    *out1 = (f32)m / (f32)self->f48;
+    *out2 = (f32)s / (f32)self->f48;
+}
+
+extern u8 D_0027B314[];
+extern f32 D_00261858[];
+
+struct Node_19E420;
+struct Obj_19E420;
+void func_0019EC20(Node_19E420* node);
+void func_0019EC30(Node_19E420* node);
+s32 func_00152720(void* list);
+void func_0019E558(Obj_19E420* self);
+void func_00129DF8(Obj_19E420* self);
+
+struct NodeVt_19E420 {
+    u8 pad0[0x10];
+    void (*update)(Node_19E420* node, f32 t);
+};
+struct Node_19E420 {
+    NodeVt_19E420* vtbl;
+    u8 pad4[0x14];
+    f32 f18;
+};
+struct List_19E420 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_19E420 { List_19E420* list; u8* link; s32 offset; Iter_19E420* saved; };
+struct ObjVt_19E420 {
+    u8 pad0[0x1C];
+    void (*f1C)(Obj_19E420* self);
+};
+struct Obj_19E420 {
+    ObjVt_19E420* vtbl;
+    u8 pad4[0x2C4];
+    s64 f2C8;
+    u8 pad2D0[0x288];
+    List_19E420 list;
+};
+
+struct Next_19E420 {
+    static Node_19E420* Of(Iter_19E420* it)
+    {
+        Node_19E420* obj = *(Node_19E420**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_19E420 {
+    static void Of(Iter_19E420* it, List_19E420* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = *(Iter_19E420**)D_0027B314;
+        *(Iter_19E420**)D_0027B314 = it;
+    }
+};
+
+void func_0019E420(Obj_19E420* self, f32 t)
+{
+    Iter_19E420 it;
+    Begin_19E420::Of(&it, &self->list);
+    Node_19E420* node;
+    while ((node = Next_19E420::Of(&it)) != 0) {
+        if (node->f18 >= D_00261858[1]) {
+            continue;
+        }
+        func_0019EC20(node);
+        node->vtbl->update(node, t);
+        func_0019EC30(node);
+    }
+    s64 m = 0x8000;
+    m <<= 23;
+    if ((self->f2C8 & m) != 0 || func_00152720(&self->list) != 0) {
+        self->vtbl->f1C(self);
+    } else {
+        func_0019E558(self);
+    }
+    func_00129DF8(self);
+    *(Iter_19E420**)D_0027B314 = it.saved;
+}
+
+struct __attribute__((aligned(16))) Quad_19C728 { s32 a, b, c, d; };
+struct Fl_19C728 { u8 pad[8]; f32 f8; };
+struct In_19C728 { u8 pad[8]; Fl_19C728* p8; };
+struct Gr_19C728 { u8 pad[0x78]; s32 f78; u8 pad7C[0x44]; In_19C728* pC0; };
+struct Node_19C728;
+typedef void (*VFn_19C728)(Node_19C728* n);
+struct Node_19C728 { VFn_19C728* vtbl; };
+struct Slot_19C728 { u8 pad0[4]; Node_19C728* n4; u8 pad8[4]; s32 fC; u8 pad10[0x10]; };
+struct Obj_19C728 {
+    u8 pad0[0x14]; void* f14; u8 pad18[0x1C];
+    s32 f34; s32 f38; void* f3C; void* f40; u8 pad44[0xC]; s32 f50; f32 f54; f32 f58; f32 f5C; f32 f60;
+    u8 pad64[0xC]; Quad_19C728 q70; s32 f80; f32 f84; f32 f88; f32 f8C; Quad_19C728 q90; u8 pad_a0[0x44];
+    Slot_19C728 slots[24]; Gr_19C728* f3E4;
+};
+
+void func_00182C58(void* self);
+void* func_0015A448(void* a, s32 b, void* c);
+void* func_0015A480(void* a, s32 b, void* c);
+void func_00139600(s32 a, s32 b, void* c, s32 d, s32 e, void* f);
+void func_00139038(void* self, s32 a, s32 b, void* c, s32 d, void* e, void* f, void* g);
+void func_00139B38(void* g, void* n);
+void func_0019CC10(Obj_19C728* self, f32* out, f32 a, f32 b, f32 c);
+void func_001399F8(void* g, s32 a, s32 b, void* c);
+void func_0012CD78(f32 a, f32 b, Gr_19C728* g, void* r1, void* r2, s32 r3, void* r4, s32 r5, s32 r6, s32 r7);
+
+extern u8 D_0026ABD0[];
+extern u8 D_0026ABE0[];
+extern u8 D_0026ABD8[];
+
+void func_0019C728(Obj_19C728* self)
+{
+    Slot_19C728* s;
+    s32 i;
+    func_00182C58(self);
+    self->f3C = func_0015A448(self->f14, self->f34, self);
+    if (self->f3C == 0) return;
+    self->f40 = func_0015A480(self->f14, self->f38, self->f3C);
+    if (self->f40 == 0) return;
+    for (i = 0; i < 24; i++) {
+        s = &self->slots[i];
+        Node_19C728* n = (Node_19C728*)func_0015A480(self->f14, s->fC, self->f3C);
+        s->n4 = n;
+        if (n != 0) n->vtbl[7](n);
+    }
+    func_00139600(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
+    func_00139038(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
+    if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
+    void* nd = func_0015A480(self->f14, 0x36, self->f3C);
+    if (nd != 0) func_00139B38(self->f3E4, nd);
+    f32 buf[24];
+    func_0019CC10(self, buf, self->f54, self->f58, self->f5C);
+    Slot_19C728* d = self->slots;
+    f32* src = buf;
+    for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
+    func_001399F8(self->f3E4, 0x20, 0x18, self->slots);
+    func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q70, 0, 0, 0);
+    self->f60 = self->f3E4->pC0->p8->f8;
+    if (self->f80 != 0) {
+        func_0019CC10(self, buf, self->f84, self->f88, self->f8C);
+        d = self->slots;
+        src = buf;
+        for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
+        func_001399F8(self->f3E4, 0x20, 0x18, self->slots);
+        func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q90, 0, 0, 0);
+    } else {
+        self->q90 = self->q70;
+    }
+    self->f50 = 1;
+}

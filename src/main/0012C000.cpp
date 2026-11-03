@@ -1760,3 +1760,433 @@ void func_0012D5D0(Self_12D5D0* self, Msg_12D5D0* msg, s32* out)
     }
     }
 }
+
+struct Range_12E968 { u32 field0; f32 minimum; f32 maximum; };
+struct Obj_12E968 { u8 pad0[8]; Range_12E968* range; };
+
+f32 func_0012E968(Obj_12E968* self, f32 value)
+{
+    Range_12E968* range = self->range;
+    f32 r;
+    if (value < range->minimum) {
+        r = 1.0f;
+    } else if (range->maximum <= value) {
+        r = 0.15f;
+    } else {
+        r = (value - range->maximum) / (range->minimum - range->maximum);
+        r = r * 0.85f + 0.15f;
+    }
+    return r;
+}
+
+struct Ptr_12FE70 { u8 pad[0x4]; };
+struct Obj_12FE70 {
+    s32 f0;
+    Ptr_12FE70* f4;
+    Ptr_12FE70* f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    u8 pad1[4];
+    s32 f1C;
+    u8 pad2[4];
+    s32 f24;
+};
+
+s32 func_0012FF10(Obj_12FE70* self);
+void func_001F8DB8(Ptr_12FE70* p, s32 a, s32 b);
+void func_00140CC8(Ptr_12FE70* p, s32 n, s32 base);
+
+void func_0012FE70(Obj_12FE70* self)
+{
+    if (func_0012FF10(self) != 0) {
+        return;
+    }
+    s32 size = self->f24;
+    if (size == 0) {
+        return;
+    }
+    s32 clamp = 0x4000;
+    if (!(size > 0x3FFF)) {
+        clamp = size;
+    }
+    s32 base = self->f14;
+    if (self->f1C == base) {
+        base += 0x4000;
+    }
+    self->fC = clamp;
+    self->f10 = base;
+    switch (self->f0) {
+    case 0:
+        func_001F8DB8(self->f4, base, clamp);
+        break;
+    case 1:
+        func_00140CC8(self->f8, (s32)((u32)(clamp + 0x7FF) >> 11), base);
+        break;
+    }
+}
+
+struct Key_12D4A8 {
+    f32 time;
+    u8 pad[12];
+};
+
+struct Track_12D4A8 {
+    u8 pad[0x5C];
+    s32 count;
+    Key_12D4A8* keys;
+};
+
+struct Cursor_12D4A8 {
+    u8 pad0[8];
+    Track_12D4A8* track;
+    u8 pad0C[8];
+    f32 time;
+    f32 rate;
+    u32 pad1C;
+    s32 index;
+};
+
+void func_0012D4A8(Cursor_12D4A8* self)
+{
+    Track_12D4A8* track = self->track;
+    s32 n = track->count;
+    s32 i;
+    if (n == 0) {
+        return;
+    }
+    if (self->rate >= 0.0f) {
+        i = 0;
+        if (n > 0) {
+            Key_12D4A8* keys = track->keys;
+            for (i = 0; i < track->count; i++) {
+                if (keys[i].time >= self->time) {
+                    break;
+                }
+            }
+        }
+        self->index = i;
+    } else {
+        for (i = n - 1; i >= 0; i--) {
+            Key_12D4A8* k = &track->keys[i];
+            if (k->time <= self->time) {
+                break;
+            }
+        }
+        self->index = i + 1;
+    }
+}
+
+struct Rec_12CBE8 {
+    u32 f0;
+    s32 f4;
+    s32 f8;
+    u32 fC;
+};
+
+struct Obj_12CBE8 {
+    u8 pad0[0x54];
+    s32 f54;
+    Rec_12CBE8* f58;
+    s32 f5C;
+    Rec_12CBE8* f60;
+    s32 f64;
+    Rec_12CBE8* f68;
+};
+
+Rec_12CBE8* func_0012CBE8(Obj_12CBE8* self, s32 key) {
+    s32 i;
+    Rec_12CBE8* p;
+    for (i = 0; i < self->f54; i++) {
+        p = &self->f58[i];
+        if (p->f4 == 0x27 && p->f8 == key) {
+            return p;
+        }
+    }
+    for (i = 0; i < self->f5C; i++) {
+        p = &self->f60[i];
+        if (p->f4 == 0x27 && p->f8 == key) {
+            return p;
+        }
+    }
+    for (i = 0; i < self->f64; i++) {
+        p = &self->f68[i];
+        if (p->f4 == 0x27 && p->f8 == key) {
+            return p;
+        }
+    }
+    return 0;
+}
+
+struct Obj_12F8C8;
+struct VT_12F8C8 {
+    u8 pad[0x1C];
+    void (*fn1C)(Obj_12F8C8* self);
+};
+struct Obj_12F8C8 { VT_12F8C8* vt; };
+struct List_12F8C8 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_12F8C8 { List_12F8C8* list; u8* link; s32 offset; Iter_12F8C8* saved; };
+
+struct Self_12F8C8 {
+    u8 pad0[0x14];
+    s32 f14;
+    u8 pad18[0x1C];
+    List_12F8C8 list;
+    u8 pad40[0x540];
+    s32 f580;
+    u8 pad584[0xC];
+    s32 f590;
+};
+
+extern u8 D_0027B314[];
+
+struct Next_12F8C8 {
+    static Obj_12F8C8* Of(Iter_12F8C8* it)
+    {
+        Obj_12F8C8* obj = *(Obj_12F8C8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_12F8C8 {
+    static void Of(Iter_12F8C8* it, List_12F8C8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = *(Iter_12F8C8**)D_0027B314;
+        *(Iter_12F8C8**)D_0027B314 = it;
+    }
+};
+
+void func_00124A48(Self_12F8C8* self);
+s32 func_0015A448(s32 a, s32 b, Self_12F8C8* c);
+s32 func_001300E8(Obj_12F8C8* n, s32 kind);
+void func_00128018(Self_12F8C8* a, s32 b, u8* c, s32* d);
+
+void func_0012F8C8(Self_12F8C8* self)
+{
+    func_00124A48(self);
+    if (self->f590 != -1) {
+        self->f590 = func_0015A448(self->f14, self->f590, self);
+        self->f580 = 2;
+        return;
+    }
+    Iter_12F8C8 it;
+    Begin_12F8C8::Of(&it, &self->list);
+    Obj_12F8C8* n = Next_12F8C8::Of(&it);
+    if (n == 0 || func_001300E8(n, 0x7E) == 0) {
+        *(Iter_12F8C8**)D_0027B314 = it.saved;
+        return;
+    }
+    if (Next_12F8C8::Of(&it) != 0) {
+        *(Iter_12F8C8**)D_0027B314 = it.saved;
+        return;
+    }
+    func_00128018(self, 0, (u8*)n + 0x40, &self->f590);
+    self->f580 = 1;
+    n->vt->fn1C(n);
+    *(Iter_12F8C8**)D_0027B314 = it.saved;
+}
+
+struct Entry_12E5D0 {
+    f32 key;
+    s32 a4;
+    s32 a8;
+    s32 aC;
+};
+
+struct List_12E5D0 {
+    u8 pad0[0x5C];
+    s32 count;
+    Entry_12E5D0* entries;
+};
+
+struct Self_12E5D0 {
+    u8 pad0[0x14];
+    f32 f14;
+    f32 f18;
+    u8 pad1C[4];
+    s32 idx;
+};
+
+void func_0012D5D0(Self_12E5D0* self, Entry_12E5D0* entry, s32* out);
+
+void func_0012E5D0(Self_12E5D0* self, List_12E5D0* list, s32* out)
+{
+    if (list->count == 0) return;
+    for (;;) {
+        if (self->idx < list->count) {
+            if (list->entries[self->idx].key < self->f14 || (self->f14 == list->entries[self->idx].key && 0.0f < self->f18)) {
+                Entry_12E5D0* e = &list->entries[self->idx];
+                self->idx = self->idx + 1;
+                func_0012D5D0(self, e, out);
+                if (*out != 0) return;
+                continue;
+            }
+        }
+        if (self->idx <= 0) return;
+        if (self->f14 < list->entries[self->idx - 1].key || (self->f14 == list->entries[self->idx - 1].key && self->f18 < 0.0f)) {
+            self->idx = self->idx - 1;
+            func_0012D5D0(self, &list->entries[self->idx], out);
+            if (*out != 0) return;
+            continue;
+        }
+        return;
+    }
+}
+
+struct Pair_12C288 { s32 key; struct Host_12C288* val; };
+struct Host_12C288 {
+    u8 pad0[0x18]; Host_12C288* parent;
+    u8 pad1[0x50 - 0x1C]; Host_12C288* root;
+    u8 pad2[0x2C8 - 0x54]; u64 flags;
+};
+struct Node_12C288 {
+    u8 pad0[0x10]; s32 f10 : 8; s32 f11 : 8; s32 f12 : 8; s32 f13 : 8; s32 f14;
+    u8 pad1[0x1C - 0x18]; struct Obj_12C288* f1C;
+    u8 pad2[0x28 - 0x20]; s32 f28;
+};
+struct Obj_12C288 {
+    u8 pad0[8]; struct Self_12C288* f8; struct Self_12C288* fC;
+    u8 pad1[0x14 - 0x10]; f32 f14;
+    u8 pad2[0x1C - 0x18]; f32 f1C;
+    u8 pad3[0x44 - 0x20]; u8 f44[0x10];
+    u8 f54[8]; s32 f5C; Host_12C288** f60;
+};
+struct Elem_12C288 { s32 key; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; };
+struct Item_12C288 { u8 pad[0x10]; };
+struct World_12C288 { u8 pad[0x1B20]; u8 f1B20[0x44]; u8 f1B64[0xC]; u8 f1B70[0xC]; };
+struct Self_12C288 {
+    u8 pad0[0x14]; World_12C288* world;
+    u8 pad1[0x38 - 0x18]; s32 nelems; Elem_12C288* elems;
+    u8 pad2[0x4C - 0x40]; s32 f4C; s32 f50; s32 nitems; Item_12C288* items;
+    u8 pad3[0x6C - 0x5C]; u8 f6C[0xC]; s32 f78; f32 f7C;
+    u8 pad4[0x9C - 0x80]; s32 f9C; s32 nkeys; s32* keys;
+};
+
+Obj_12C288* func_0012D3F8(World_12C288* w);
+void func_0012F6B0(Obj_12C288* o, f32 x);
+void func_00152470(u8* list, Obj_12C288* o);
+void func_00152470(u8* list, Node_12C288* n);
+void func_0018D608(void);
+void* func_0018D658(s32 size);
+Host_12C288* func_0015A418(World_12C288* w, s32 kind, s32 key, void* ctx);
+Node_12C288* func_00128998(Host_12C288* h);
+void func_001B5F28(u8* list, Node_12C288* n);
+void func_001215C0(Node_12C288* n);
+void func_001299E0(Host_12C288* h, Node_12C288* n);
+void func_0018D6F0(void);
+void func_0015F8B0(World_12C288* w, u8* p);
+void func_0012D448(Obj_12C288* o, s32 v);
+void func_0012D5D0(Obj_12C288* o, Item_12C288* item, s32* out);
+void func_0012F190(Obj_12C288* o, s32 flag);
+void func_0012E4E0(Obj_12C288* o, Self_12C288* self, s32* out);
+void func_0012D4A8(Obj_12C288* o);
+void func_001837E0(Self_12C288* self, s32 a, s32 b, Obj_12C288*** c);
+
+void func_0012C288(Self_12C288* self, Self_12C288* alt, s32 npairs, Pair_12C288* pairs, s32 flags, Obj_12C288** out, f32 fa, f32 fb)
+{
+    s32 tmp;
+    Obj_12C288* obj;
+    Obj_12C288** pobj;
+    World_12C288* world = self->world;
+    obj = func_0012D3F8(world);
+    if (out != 0) *out = obj;
+    obj->f14 = fa;
+    obj->f8 = self;
+    obj->fC = alt;
+    obj->f1C = self->f7C;
+    func_0012F6B0(obj, fb);
+    func_00152470(self->f6C, obj);
+    if (self->f50 != 0) {
+        func_00152470(world->f1B70, obj);
+    } else {
+        func_00152470(world->f1B64, obj);
+    }
+    func_0018D608();
+    Self_12C288* ctx;
+    if (alt == 0) ctx = self; else ctx = alt;
+    Host_12C288** hosts = (Host_12C288**)func_0018D658(self->nkeys * 4);
+    s32 i;
+    for (i = 0; i < self->nkeys; i++) {
+        hosts[i] = func_0015A418(world, 4, self->keys[i], ctx);
+    }
+    s32 count = self->nelems + (self->f9C != 0);
+    for (s32 k = 0; k < count; k++) {
+        Elem_12C288* e = &self->elems[k];
+        s32 key = e->key;
+        Host_12C288* h;
+        s32 j;
+        for (j = 0; j < npairs; j++) {
+            if (key == pairs[j].key) {
+                h = pairs[j].val;
+                goto found;
+            }
+        }
+        h = func_0015A418(world, 4, key, ctx);
+        if (h == 0) {
+            for (i = 0; i < self->nkeys; i++) {
+                h = func_0015A418(world, 1, key, hosts[i]);
+                if (h != 0) break;
+            }
+            if (h == 0) {
+                h = func_0015A418(world, 0x104, key, ctx);
+                if (h == 0) continue;
+            }
+        }
+    found:
+        Node_12C288* n = func_00128998(h);
+        n->f28 = k;
+        n->f1C = obj;
+        n->f14 = self->f78;
+        if (k >= self->nelems) {
+            if (e->fC == 0 && e->f18 == 0) {
+                func_001B5F28(self->world->f1B20, n);
+                continue;
+            }
+        } else {
+            if (flags & 1) {
+                n->f10 = n->f11 = 3;
+            } else {
+                func_001215C0(n);
+            }
+            if (e->f4 == 0) n->f10 = -1;
+            if (e->f8 == 0 && e->f10 == 0) n->f11 = -1;
+        }
+        if (e->fC != 0) n->f12 = 2;
+        if (e->f18 != 0) n->f13 = 2;
+        func_00152470(obj->f44, n);
+        func_001299E0(h, n);
+        Host_12C288* r = h->root;
+        if (r == 0) {
+            r = h;
+            while (r->parent != 0) r = r->parent;
+        }
+        if (!(r->flags & 0x400000000000)) {
+            if ((u32)obj->f5C < 0x20) {
+                r->flags |= 0x400000000000;
+                obj->f60[obj->f5C++] = r;
+            }
+        }
+    }
+    func_0018D6F0();
+    for (s32 j = 0; j < obj->f5C; j++) {
+        obj->f60[j]->flags &= ~0x400000000000;
+    }
+    func_0015F8B0(world, obj->f54);
+    if (self->f4C != 0) func_0012D448(obj, 1);
+    tmp = 0;
+    for (s32 m = 0; m < self->nitems; m++) {
+        func_0012D5D0(obj, &self->items[m], &tmp);
+    }
+    func_0012F190(obj, flags & 4);
+    if (flags & 2) {
+        func_0012E4E0(obj, self, &tmp);
+    } else {
+        func_0012D4A8(obj);
+    }
+    pobj = &obj;
+    func_001837E0(self, 9, 1, &pobj);
+}

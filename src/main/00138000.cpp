@@ -1054,3 +1054,256 @@ void func_00139038(Ctx_139038* ctx, s32 stride, s32 count, u8* items, s32 nkeys,
     *out = anim;
     func_0018D6F0();
 }
+
+struct Entry_13B9D8 { u8 pad000[0x10]; void* data; u8 pad014[0x0C]; f32 value; s32 key; u8 pad028[8]; };
+struct Object_13B9D8 { u8 pad000[0x684]; void* active; s32 count; Entry_13B9D8* entries; };
+void func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
+
+void func_0013B9D8(Object_13B9D8* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
+{
+    s32 i;
+    if (self->active) {
+        for (i = 0; i < self->count; i++) {
+            if (self->entries[i].key == key) break;
+        }
+        if (i < self->count) {
+            Entry_13B9D8* e = &self->entries[i];
+            func_00185D20(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
+        }
+    }
+}
+
+struct __attribute__((aligned(16))) Entry_13A008 {
+    u64 value;
+    s32 tag;
+    s32 pad;
+};
+
+struct StateB_13A008 {
+    u8 pad0[0x4];
+    u8 bits4;
+};
+
+struct StateA_13A008 {
+    u8 pad0[0x14];
+    StateB_13A008* p14;
+};
+
+struct Ctx_13A008 {
+    u8 pad0[0x380];
+    StateA_13A008* p380;
+    s32 a384;
+    u8 pad388[0x8];
+    Entry_13A008 entries[1];
+};
+
+u64 func_001B2988(void* t, s32 i, s32 j);
+
+void func_0013A008(Ctx_13A008* self)
+{
+    StateB_13A008* blk = self->p380->p14;
+    s32 a = 1;
+    s32 s4 = 0;
+    s32 t = blk->bits4 >> 1;
+    s32 b;
+    s32 i;
+    Entry_13A008* e;
+
+    while (t != 0) {
+        t >>= 1;
+        a <<= 1;
+    }
+    a = a << (a < blk->bits4);
+    while (a >= 0x20) {
+        a >>= 1;
+    }
+    b = blk->bits4;
+    if (b < a) {
+        s4 = a - blk->bits4;
+    }
+    self->a384 = a;
+    e = self->entries;
+    for (i = 0; i < b; i++) {
+        e->value = func_001B2988(blk, i, 0);
+        e->tag = 6;
+        if (i < s4) {
+            e[1] = *e;
+            e++;
+        }
+        e++;
+    }
+}
+
+struct Obj_138C00;
+struct Child_138C00;
+
+struct Vtbl_138C00
+{
+    u8 pad0[0x10C];
+    void (*f10C)(Child_138C00* c);
+    void (*f110)(Child_138C00* c);
+};
+
+struct Child_138C00
+{
+    Vtbl_138C00* vt;
+    u8 pad[0x2E4 - 4];
+    Child_138C00* next;
+};
+
+struct Item_138C00
+{
+    u8 padD0[0xD0];
+    Item_138C00* fD0;
+};
+
+struct Pair_138C00
+{
+    Item_138C00* prev;
+    Item_138C00* it;
+};
+
+struct Slot_138C00
+{
+    Item_138C00* f0;
+};
+
+struct Node_138C00
+{
+    Item_138C00* f0;
+    Node_138C00* f4;
+    Slot_138C00* f8;
+    Obj_138C00* fC;
+};
+
+struct List_138C00
+{
+    Node_138C00* head;
+};
+
+struct Obj_138C00
+{
+    u8 pad0[0x2C8];
+    u64 bits2C8;
+    u8 pad1[0x2D8 - 0x2D0];
+    Child_138C00* children;
+    u8 pad2[0x414 - 0x2DC];
+    Obj_138C00* next;
+    u8 pad3[0x480 - 0x418];
+    List_138C00* list;
+    u8 pad4[0x4B8 - 0x484];
+    s32 kind;
+    u8 pad5[0x538 - 0x4BC];
+    u64 bits538;
+};
+
+struct World_138C00
+{
+    u8 pad0[0x6C];
+    Obj_138C00* first;
+};
+
+void func_001389D0(World_138C00* w);
+void func_001861E8(World_138C00* w, Item_138C00* item);
+Item_138C00* func_00188270(World_138C00* w, Obj_138C00** pair, s32 arg);
+void func_001860A8(World_138C00* w, s32 one, Item_138C00** item);
+void func_00129DF8(Obj_138C00* o);
+
+void func_00138C00(World_138C00* w, s32 arg)
+{
+    Obj_138C00* pair[2];
+    Obj_138C00* o;
+    Child_138C00* ch;
+    func_001389D0(w);
+    for (o = w->first; o; o = o->next)
+    {
+        pair[0] = o;
+        if (o->kind == 7)
+        {
+            continue;
+        }
+        if (o->bits538 & (0x8000ull << 27))
+        {
+            continue;
+        }
+        o->bits538 |= 0x8000ull << 46;
+        Node_138C00* node = pair[0]->list->head;
+        for (; node; node = node->f4)
+        {
+            s32 dead = 7;
+            u64 linked = 0x8000ull << 22;
+            u64 visited = 0x8000ull << 27;
+            u64 marked = 0x8000ull << 46;
+            pair[1] = node->fC;
+            if (pair[1] < pair[0] && pair[1]->kind != dead && (pair[1]->bits2C8 & linked))
+            {
+                continue;
+            }
+            if (pair[1]->bits538 & visited)
+            {
+                continue;
+            }
+            pair[1]->bits538 |= marked;
+            if (((pair[0]->kind ^ 1) & 1) || ((pair[1]->kind ^ 1) & 1))
+            {
+                Item_138C00* old = node->f0;
+                if (old)
+                {
+                    func_001861E8(w, old);
+                }
+                Item_138C00* nw = func_00188270(w, pair, arg);
+                node->f0 = nw;
+                node->f8->f0 = nw;
+                if ((old == 0) != (node->f0 == 0))
+                {
+                    if (!(pair[0]->bits538 & (0x8000ull << 40)))
+                    {
+                        func_00129DF8(pair[0]);
+                    }
+                    if (!(pair[1]->bits538 & (0x8000ull << 40)))
+                    {
+                        func_00129DF8(pair[1]);
+                    }
+                }
+            }
+            else
+            {
+                Pair_138C00 p;
+                for (p.it = node->f0; p.it; p.it = p.it->fD0)
+                {
+                    func_001860A8(w, 1, &p.it);
+                }
+            }
+        }
+    }
+    for (o = w->first; o; o = o->next)
+    {
+        if (o->kind & 4)
+        {
+            continue;
+        }
+        for (ch = o->children; ch; ch = ch->next)
+        {
+            if (ch->vt->f110)
+            {
+                ch->vt->f110(ch);
+            }
+        }
+        o->bits538 |= 0x8000ull << 46;
+    }
+    for (o = w->first; o; o = o->next)
+    {
+        if (o->bits538 & (0x8000ull << 46))
+        {
+            for (ch = o->children; ch; ch = ch->next)
+            {
+                if (ch->vt->f10C)
+                {
+                    ch->vt->f10C(ch);
+                }
+            }
+            o->bits538 &= ~(0x8000ull << 46);
+        }
+        o->kind = 7;
+    }
+}

@@ -1412,3 +1412,96 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
         }
     }
 }
+
+struct __attribute__((packed)) Pair_183EA0 { s32 a; s32 b; };
+struct State_183EA0 { u8 pad00[0x304]; s32 value; u8 pad308[0x410 - 0x308]; Pair_183EA0 saved; };
+s32 func_00182FC8(State_183EA0*);
+void func_00183DC0(State_183EA0*);
+void func_00127048(State_183EA0*, State_183EA0*);
+void func_00183DF8(State_183EA0*);
+
+void func_00183EA0(State_183EA0* self, State_183EA0* other)
+{
+    s32 changed = 0;
+    if (func_00182FC8(self)) {
+        changed = self->value != other->value;
+    }
+    if (changed) {
+        func_00183DC0(self);
+    }
+    Pair_183EA0 keep = self->saved;
+    func_00127048(self, other);
+    self->saved = keep;
+    if (changed) {
+        func_00183DF8(self);
+    }
+}
+
+struct Obj_181818 {
+    u8 pad0[0xBB0];
+    s32 mode;
+    u8 pad1[0xBF0 - 0xBB4];
+    s32 active;
+    f32 timeA;
+    f32 timeB;
+};
+
+struct Color_181818 {
+    u8 r, g, b, a;
+};
+
+struct Clamp_181818
+{
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        if (x < lo)
+        {
+            return lo;
+        }
+        if (hi < x)
+        {
+            return hi;
+        }
+        return x;
+    }
+};
+
+extern f32 D_00261858[];
+extern f32 D_00264160[];
+extern f32 D_00264170[];
+extern f32 D_00275C60[];
+extern Color_181818 D_002623E0[];
+
+f32 func_00205210(f32 x);
+void func_00126A48(Obj_181818* o, u32 c);
+void func_00125C90(Obj_181818* o, void* a, void* b);
+
+void func_00181818(Obj_181818* o, void* a, void* b)
+{
+    Color_181818 c;
+    u8 from[4];
+    *(u32*)from = 0x800000A0;
+    if (o->active) {
+        f32 t;
+        if (o->mode != 2) {
+            t = (D_00261858[1] - o->timeB) * 0.5f;
+        } else {
+            t = 0.0f;
+        }
+        f32 s = func_00205210((D_00261858[1] - o->timeA) * 10.0f);
+        f32 p = D_00264160[0] + t * (D_00264160[1] + t * D_00264160[2]);
+        f32 x = Clamp_181818::Of(p, D_00275C60[0], D_00275C60[1]);
+        f32 q = D_00264170[0] + s * (D_00264170[1] + s * D_00264170[2]);
+        f32 y = Clamp_181818::Of(q, D_00275C60[0], D_00275C60[1]);
+        f32 w = x * y;
+        f32 u = 1.0f - w;
+        c.r = (u8)(u * D_002623E0[0].r + w * from[0]);
+        c.g = (u8)(u * D_002623E0[0].g + w * from[1]);
+        c.b = (u8)(u * D_002623E0[0].b + w * from[2]);
+        c.a = D_002623E0[0].a;
+    } else {
+        c = D_002623E0[0];
+    }
+    func_00126A48(o, *(u32*)&c);
+    func_00125C90(o, a, b);
+}

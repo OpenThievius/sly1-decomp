@@ -1598,3 +1598,361 @@ void func_001EAD88(f32* sinOut, f32* cosOut, f32 angle)
     }
     *sinOut = s;
 }
+
+struct Ptr_1E9970 { u8 pad[0x1]; };
+struct Obj_1E9970 {
+    u8 pad[0x250];
+    s32 f250;
+    u8 pad2[0x08];
+    s32 f25C;
+    s32 f260;
+};
+
+extern s32 D_00275F84;
+extern s32 D_00270458;
+s32 func_001DDA80(Ptr_1E9970* p);
+
+s32 func_001E9970(void)
+{
+    if (D_00275F84 != 0) goto fail;
+    if (func_001DDA80((Ptr_1E9970*)D_00275710) != 0) goto fail;
+    if (((Obj_1E9970*)D_0026FF68)->f25C != 0 && ((Obj_1E9970*)D_0026FF68)->f260 != 0) goto fail;
+    if (((Obj_1E9970*)D_0026F808)->f25C != 0) goto fail;
+    if (((Obj_1E9970*)D_0026F808)->f250 != 0) goto fail;
+    if (D_00270458 == 2) goto fail;
+    if (D_00270458 == 1) goto fail;
+    if (D_00270458 != 4) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}
+
+union Bits_1EAE78 {
+    double d;
+    u64 u;
+};
+
+double func_001FCD20(double a, double b);
+
+double func_001EAE78(double x)
+{
+    Bits_1EAE78 v;
+    v.d = x;
+    s32 e = ((u16)(v.u >> 52) & 0x7FF) - 0x3FF;
+    if (e < 0) {
+        return 0.0;
+    }
+    if (e < 0x34) {
+        u64 frac = ((u64)1 << (0x34 - e)) - 1;
+        u64 mant = v.u & ((u64)-1 >> 12);
+        if ((mant & frac) == frac) {
+            v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
+            x = v.d;
+            x = func_001FCD20(x, 1.0);
+        } else {
+            v.u = (v.u & ((u64)0xFFF0 << 48)) | (mant & ~frac & ((u64)-1 >> 12));
+            x = v.d;
+        }
+    }
+    return x;
+}
+
+struct Node_1E9EE8;
+struct Vtbl_1E9EE8 {
+    u8 pad0[0x7C];
+    void (*update)(Node_1E9EE8*, s32, f32);
+};
+struct Node_1E9EE8 { Vtbl_1E9EE8* vtbl; };
+struct List_1E9EE8 { Node_1E9EE8* head; s32 p4; s32 offset; };
+struct Iter_1E9EE8 { List_1E9EE8* list; u8* link; s32 offset; Iter_1E9EE8* prev; };
+struct Obj_1E9EE8 {
+    u8 pad0[0x78];
+    List_1E9EE8 a;
+    u8 pad1[0x1B70 - 0x84];
+    List_1E9EE8 b;
+    u8 pad2[0x1C30 - 0x1B7C];
+    List_1E9EE8 c;
+};
+
+extern Iter_1E9EE8* D_0027B314;
+
+struct Begin_1E9EE8 {
+    static void Of(Iter_1E9EE8* it, List_1E9EE8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        Iter_1E9EE8* prev = D_0027B314;
+        D_0027B314 = it;
+        it->prev = prev;
+    }
+};
+struct Next_1E9EE8 {
+    static Node_1E9EE8* Of(Iter_1E9EE8* it)
+    {
+        Node_1E9EE8* obj = *(Node_1E9EE8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+struct End_1E9EE8 {
+    static void Of(Iter_1E9EE8* it) { D_0027B314 = it->prev; }
+};
+
+void func_00124EE8(Node_1E9EE8* n, f32 dt);
+void func_0012EBD8(Node_1E9EE8* n, f32 dt);
+void func_00159AD0(Node_1E9EE8* n, f32 dt);
+void func_001DBE48(Obj_1E9EE8* self);
+
+void func_001E9EE8(Obj_1E9EE8* self, f32 dt)
+{
+    if (dt == 0.0f) return;
+    Iter_1E9EE8 it;
+    Begin_1E9EE8::Of(&it, &self->a);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00124EE8(obj, dt);
+    End_1E9EE8::Of(&it);
+    Begin_1E9EE8::Of(&it, &self->b);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_0012EBD8(obj, dt);
+    End_1E9EE8::Of(&it);
+    Begin_1E9EE8::Of(&it, &self->c);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00159AD0(obj, dt);
+    End_1E9EE8::Of(&it);
+    Begin_1E9EE8::Of(&it, &self->a);
+    for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) obj->vtbl->update(obj, 0, dt);
+    End_1E9EE8::Of(&it);
+    func_001DBE48(self);
+}
+
+struct List_1E9C78 {
+    u8* first;
+    s32 pad04;
+    s32 offset;
+};
+struct Iter_1E9C78 {
+    List_1E9C78* list;
+    u8** link;
+    s32 offset;
+    Iter_1E9C78* prev;
+};
+
+extern u8 D_00262C70[];
+
+struct Begin_1E9C78 {
+    static void Of(Iter_1E9C78* it, List_1E9C78* list)
+    {
+        it->list = list;
+        it->link = (u8**)list;
+        it->offset = list->offset;
+        it->prev = (Iter_1E9C78*)D_0027B314;
+        D_0027B314 = (Iter_1E9EE8*)it;
+    }
+};
+struct Next_1E9C78 {
+    static u8* Of(Iter_1E9C78* it)
+    {
+        u8* obj = *it->link;
+        it->link = (u8**)(obj + it->offset);
+        return obj;
+    }
+};
+struct End_1E9C78 {
+    static void Of(Iter_1E9C78* it)
+    {
+        D_0027B314 = (Iter_1E9EE8*)it->prev;
+    }
+};
+
+struct Holder_1E9C78;
+struct Vt_1E9C78 {
+    u8 pad0[0x134];
+    void (*fn134)(Holder_1E9C78* self, f32 dt, u8* arg);
+};
+struct Holder_1E9C78 {
+    Vt_1E9C78* vt;
+};
+
+struct Obj_1E9C78 {
+    u8 pad0[0x60];
+    List_1E9C78 l60;
+    u8 pad6c[0x1B64 - 0x6C];
+    List_1E9C78 l1B64;
+    u8 pad1b70[0x1C24 - 0x1B70];
+    List_1E9C78 l1C24;
+};
+
+void func_001E9B30(void);
+Holder_1E9C78* func_001925F0(void);
+void func_0015FF58(Obj_1E9C78* self);
+void func_00124EE8(u8* n, f32 dt);
+void func_0012EBD8(u8* n, f32 dt);
+void func_00159AD0(u8* n, f32 dt);
+void func_00159588(Obj_1E9C78* self);
+void func_001C0070(void);
+void func_001DBE48(Obj_1E9C78* self);
+
+void func_001E9C78(Obj_1E9C78* self, f32 dt)
+{
+    func_001E9B30();
+    Holder_1E9C78* h = func_001925F0();
+    if (h != 0) {
+        Vt_1E9C78* vt = h->vt;
+        if (vt->fn134 != 0) {
+            u8* a;
+            if ((*(s32*)&D_00262C68) & 2)
+                a = D_00262C70;
+            else
+                a = ((u8*)&D_00262D38);
+            vt->fn134(h, dt, a);
+        }
+    }
+    func_0015FF58(self);
+    {
+        Iter_1E9C78 it;
+        Begin_1E9C78::Of(&it, &self->l60);
+        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+            func_00124EE8(n, dt);
+        }
+        End_1E9C78::Of(&it);
+    }
+    {
+        Iter_1E9C78 it;
+        Begin_1E9C78::Of(&it, &self->l1B64);
+        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+            func_0012EBD8(n, dt);
+        }
+        End_1E9C78::Of(&it);
+    }
+    {
+        Iter_1E9C78 it;
+        Begin_1E9C78::Of(&it, &self->l1C24);
+        for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
+            func_00159AD0(n, dt);
+        }
+        End_1E9C78::Of(&it);
+    }
+    func_00159588(self);
+    func_001C0070();
+    func_001DBE48(self);
+}
+
+struct Actor_1EA118;
+typedef void (*Update_1EA118)(Actor_1EA118* self, f32 dt);
+typedef void (*Post_1EA118)(Actor_1EA118* self);
+
+struct Vtable_1EA118 {
+    u8 pad0[0x118];
+    Update_1EA118 update;
+    Post_1EA118 post;
+};
+
+struct Actor_1EA118 {
+    Vtable_1EA118* vtable;
+    u8 pad4[0x224];
+    s32 tries;
+    u8 pad22C[0x30C];
+    u64 flags;
+};
+
+struct List_1EA118 { Actor_1EA118* head; u8 pad4[4]; s32 offset; };
+struct Iter_1EA118 { List_1EA118* list; u8* link; s32 offset; Iter_1EA118* saved; };
+
+struct World_1EA118 {
+    u8 pad0[0x60];
+    List_1EA118 list60;
+    List_1EA118 list6C;
+    u8 pad78[0x1B7C - 0x78];
+    List_1EA118 list1B7C;
+};
+
+struct Clock_1EA118 { f32 f0; f32 f4; f32 dt; f32 fC; f32 f10; f32 real; };
+
+extern s32 D_00261990;
+
+struct Next_1EA118 {
+    static Actor_1EA118* Of(Iter_1EA118* it)
+    {
+        Actor_1EA118* obj = *(Actor_1EA118**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_1EA118 {
+    static void Of(Iter_1EA118* it, List_1EA118* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = ((Iter_1EA118*)D_0027B314);
+        D_0027B314 = (Iter_1E9EE8*)it;
+    }
+};
+
+void func_001E9EE8(World_1EA118* self, f32 t);
+void func_001E9C78(World_1EA118* self, f32 t);
+void func_001E9E30(World_1EA118* self);
+void func_00138C00(World_1EA118* self, s32 a);
+void func_001BDD00(World_1EA118* self, s32 a, f32 t);
+s32 func_00129D70(Actor_1EA118* n);
+void func_00129DF8(Actor_1EA118* n);
+void func_001BB9D0(Actor_1EA118* n);
+void func_001DBEC8(World_1EA118* self, f32 t);
+void func_001DBE48(World_1EA118* self);
+void func_001B4878(f32 t);
+void func_001DDC40(World_1EA118* self);
+void func_0012E710(Actor_1EA118* n);
+void func_00143E40(s32 a, s32 b, f32 t);
+void func_001EA0A8(World_1EA118* self, f32 t);
+
+void func_001EA118(World_1EA118* self)
+{
+    Iter_1EA118 it;
+    Clock_1EA118* clock = ((Clock_1EA118*)D_00261858);
+    func_001E9EE8(self, clock->real);
+    if (clock->dt != 0.0f) {
+        func_001E9C78(self, clock->dt);
+        func_001E9E30(self);
+        func_00138C00(self, 0);
+        func_001BDD00(self, 1, clock->dt);
+        Begin_1EA118::Of(&it, &self->list6C);
+        for (Actor_1EA118* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+            if (obj->vtable->update != 0) {
+                obj->vtable->update(obj, clock->dt);
+            }
+        }
+        D_0027B314 = (Iter_1E9EE8*)it.saved;
+        func_00138C00(self, 1);
+        func_001BDD00(self, 6, ((Clock_1EA118*)D_00261858)->dt);
+        Begin_1EA118::Of(&it, &self->list60);
+        for (Actor_1EA118* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+            if (obj->tries < 2) {
+                if (func_00129D70(obj) != 0) {
+                    obj->tries++;
+                } else {
+                    func_00129DF8(obj);
+                }
+            }
+        }
+        D_0027B314 = (Iter_1E9EE8*)it.saved;
+        Begin_1EA118::Of(&it, &self->list6C);
+        for (Actor_1EA118* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+            obj->vtable->post(obj);
+            if (obj->flags & 0x8000000000000000ULL) {
+                func_001BB9D0(obj);
+            }
+        }
+        D_0027B314 = (Iter_1E9EE8*)it.saved;
+        func_001DBEC8(self, ((Clock_1EA118*)D_00261858)->dt);
+        func_001DBE48(self);
+        func_001B4878(((Clock_1EA118*)D_00261858)->dt);
+    }
+    func_001DDC40(self);
+    Begin_1EA118::Of(&it, &self->list1B7C);
+    for (Actor_1EA118* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
+        func_0012E710(obj);
+    }
+    D_0027B314 = (Iter_1E9EE8*)it.saved;
+    func_00143E40(D_00261990, 1, ((Clock_1EA118*)D_00261858)->dt);
+    func_001EA0A8(self, ((Clock_1EA118*)D_00261858)->real);
+}

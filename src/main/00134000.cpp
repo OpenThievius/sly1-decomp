@@ -459,7 +459,7 @@ void func_00137F08(void* self, u8* p)
     *(f32*)(c + 0xC) = 1.0f;
 }
 
-extern u8 D_00261858[];
+extern f32 D_00261858[];
 
 struct Scratch_00136408 {
     u8 bytes[0xB0];
@@ -903,4 +903,415 @@ void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out)
 {
     *out = self->v;
     func_001A1F40(out, 1);
+}
+
+struct Obj_137290 { s32 f0; s32 f4; s32 f8; s32 fC; u8 pad10[8]; s32 f18; s32 f1C; s32 f20; s32 f24; s32 f28; s32 f2C; s32 f30; };
+Obj_137290* func_00137290(Obj_137290* self, s32 a1, s32 a2, s32 a3)
+{
+    s32 align = (a2 + 0x3F) & -0x40;
+    self->f4 = -1;
+    self->f0 = a3;
+    self->f20 = 0;
+    self->f18 = 0;
+    self->f24 = 0;
+    self->f1C = 0;
+    self->f30 = 0;
+    self->f28 = 0;
+    self->f2C = 0;
+    self->f8 = align;
+    self->fC = a1 - (align - a2);
+    return self;
+}
+
+extern s32 func_001F8DB8(void*, s32, s32);
+struct Obj_1377C0 { u8 pad0[8]; s32 f8; s32 fC; u8 pad10[4]; s32 f14; u8 pad18[8]; s32 f20; s32 f24; u8 pad28[0xC]; void* f34; };
+struct Min_1377C0 { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
+void func_001377C0(Obj_1377C0* self)
+{
+    s32 size = self->fC;
+    s32 limit = self->f14;
+    self->f20 = self->f8;
+    size = (size > 0x8000) ? Min_1377C0::Of(0x8000, limit) : Min_1377C0::Of(size, limit);
+    self->f24 = func_001F8DB8(self->f34, self->f20, size);
+}
+
+struct Item_135550;
+struct List_135550 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_135550 { List_135550* list; u8* link; s32 offset; Iter_135550* saved; };
+struct Group_135550 { u8 pad0[0x6C]; List_135550 list; };
+struct Obj_135550 { u8 pad0[0x250]; s32 f250; };
+struct Host_135550;
+
+extern Iter_135550* D_0027B314;
+
+struct Next_135550 {
+    static Item_135550* Of(Iter_135550* it)
+    {
+        Item_135550* obj = *(Item_135550**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_135550 {
+    static void Of(Iter_135550* it, List_135550* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+Group_135550* func_0015A418(Host_135550* host, s32 a1, s32 a2, void* ctx);
+void func_0012F6B0(Item_135550* item, f32 x);
+void func_001AA998(Obj_135550* self, s32 value);
+
+void func_00135550(Obj_135550* self, s32 value)
+{
+    if (value == self->f250) {
+        return;
+    }
+    if (self->f250 == 0) {
+        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        if (g != 0) {
+            Iter_135550 it;
+            Begin_135550::Of(&it, &g->list);
+            Item_135550* obj;
+            while ((obj = Next_135550::Of(&it)) != 0) {
+                func_0012F6B0(obj, 0.0f);
+            }
+            D_0027B314 = it.saved;
+        }
+    }
+    if (value == 0) {
+        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        if (g != 0) {
+            Iter_135550 it;
+            Begin_135550::Of(&it, &g->list);
+            Item_135550* obj;
+            while ((obj = Next_135550::Of(&it)) != 0) {
+                func_0012F6B0(obj, 1.0f);
+            }
+            D_0027B314 = it.saved;
+        }
+    }
+    func_001AA998(self, value);
+}
+
+struct Obj_136238;
+struct VT_136238 { u8 pad0[0x40]; void (*f40)(Obj_136238*, s32); };
+struct Obj_136238 {
+    VT_136238* vt;
+    u8 pad4[0x25C - 4];
+    s32 f25C;
+    u8 pad260[0x320 - 0x260];
+    s32 f320;
+    struct Sub_136238* f324;
+    s32 f328;
+    s32 f32C;
+};
+struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
+struct In_136238 { s32 a; };
+
+extern s32 D_00261120[];
+extern u8 D_00275710[];
+
+void func_001BEA50(void);
+void func_001BEA28(void);
+void func_00160D30(In_136238* p);
+s32 func_00160D10(void);
+void func_00135E78(Obj_136238* self, s32 state, s32 flag);
+s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
+void func_00192190(void* p);
+
+struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
+
+void func_00136238(Obj_136238* self, s32 on)
+{
+    In_136238 in;
+    void* arr[0x100];
+    s32 n;
+    if ((on != 0) != (self->f25C == 0)) return;
+    if (self->f324 != 0 && self->f324->f2D4 == 3) {
+        if (on != 0) func_001BEA50();
+        else func_001BEA28();
+    }
+    self->f25C = on;
+    self->f320 = 0;
+    if (on != 0) {
+        self->vt->f40(self, 2);
+        func_00160D30(&in);
+        if (func_00160D10() & in.a) {
+            if (func_00160D10() & D_00261120[self->f32C]) func_00135E78(self, self->f32C, 1);
+        }
+        if (func_00160D10() & 0x800) {
+            n = func_0015A4F0(*(s32*)D_00275710, 0x205, 0x82, 0, 0x100, arr);
+            n = Min_136238::Of(n, 0x100);
+            if (n > 0) {
+                void** p = arr;
+                s32 i = n;
+                do { i--; func_00192190(*p); p++; } while (i != 0);
+            }
+        }
+    } else {
+        self->vt->f40(self, 0);
+        self->f32C = self->f328;
+        func_00135E78(self, 0, 1);
+    }
+}
+
+struct Dec_1378A0 {
+    u8 pad0[0x18];
+    u8* f18;
+    s32 f1C;
+    u8* f20;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+};
+
+void func_00137820(Dec_1378A0* d);
+void func_001F5A58(void* dst, void* src, s32 n);
+
+void func_001378A0(Dec_1378A0* d)
+{
+    u8* base = (u8*)0x70000000;
+    s32 pos = 0;
+    s32 n = d->f24;
+    u8* p = d->f20;
+    s32 flags = d->f28;
+    s32 more;
+    s32 carry = d->f2C;
+    if (carry > 0) {
+        func_001F5A58((void*)0x70000000, (void*)0x70002000, carry);
+        pos = d->f2C;
+    }
+    while ((more = pos < 0x2000) != 0) {
+        flags >>= 1;
+        if (!(flags & 0x100)) {
+            if (--n < 0) {
+                func_00137820(d);
+                if (d->f24 <= 0) break;
+                p = d->f20;
+                n = d->f24 - 1;
+            }
+            flags = *p++ + 0xFF00;
+        }
+        if (--n < 0) {
+            func_00137820(d);
+            if (d->f24 <= 0) break;
+            p = d->f20;
+            n = d->f24 - 1;
+        }
+        s32 b = *p++;
+        if (flags & 1) {
+            base[pos++] = b;
+        } else {
+            if (--n < 0) {
+                func_00137820(d);
+                p = d->f20;
+                n = d->f24 - 1;
+            }
+            u32 v = b + (*p++ << 8);
+            s32 cnt = ((s32)v >> 13) + 2;
+            s32 src = v & 0x1FFF;
+            for (; cnt >= 0; cnt--) {
+                base[pos++] = base[src++ & 0x1FFF];
+            }
+        }
+    }
+    d->f18 = base;
+    if (more == 0) {
+        d->f1C = 0x2000;
+        d->f2C = pos - 0x2000;
+    } else {
+        d->f1C = pos;
+        d->f2C = 0;
+    }
+    d->f20 = p;
+    d->f24 = n;
+    d->f28 = flags;
+}
+
+struct Obj_135228
+{
+    u8 pad0[0x260];
+    s32 f260;
+    u8 pad1[0x330 - 0x264];
+    s32 f330[4];
+    f32 f340[4];
+};
+
+struct Q_135228
+{
+    u8 pad[4];
+};
+
+extern f32 D_00261260[];
+extern f32 D_002611E0[][4];
+extern f32 D_00261220[][4];
+
+void func_00160D30(u32* out);
+void func_00134B48(Obj_135228* self, Q_135228* q);
+f32 func_00205210(f32 x);
+f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
+void func_001613C0(Q_135228* q, s32 a, s32 b, u64 c);
+void func_00161458(Q_135228* q, u32 v);
+void func_001615F0(Q_135228* q, s32 a, s32 b, s32 c, s32 d);
+
+void func_00135228(Obj_135228* self, Q_135228* q)
+{
+    if (self->f260 == 1)
+    {
+        if ((u32)func_00160D10() & 0x800)
+        {
+            func_00134B48(self, q);
+        }
+        u32 mask;
+        func_00160D30(&mask);
+        if ((u32)func_00160D10() & mask)
+        {
+            u8 c0[4];
+            u8 c1[4];
+            u8 c2[4];
+            u8 out[4];
+            *(u32*)c0 = 0xFF408080;
+            *(u32*)c1 = 0xFF406060;
+            *(u32*)c2 = 0xFF404040;
+            f32 t = func_00205210(D_00261858[1] * D_00261260[0]) * 0.5f + 0.5f;
+            for (u32 i = 0; i < 4; i++)
+            {
+                f32 r = func_001EA4B8(self->f340[i], self->f330[i] ? 1.0f : 0.0f, D_00261858[2], &D_00261260[2], 0);
+                self->f340[i] = r;
+                for (s32 j = 0; j < 4; j++)
+                {
+                    out[j] = (s32)((1.0f - r) * (f32)c2[j] + r * t * (f32)c1[j] + r * (1.0f - t) * (f32)c0[j]);
+                }
+                out[3] = (out[3] + 1) >> 1;
+                func_001613C0(q, 0x4D, 5, 0x44441);
+                func_00161458(q, *(u32*)out);
+                for (s32 k = 0; k < 4; k++)
+                {
+                    s32 xi = (s32)(((D_002611E0[i][k] + 320.0f) + 1728.0f) * 16.0f);
+                    s32 yi = (s32)(((D_00261220[i][k] + 415.8000183f) * 0.45454547f + 1936.0f) * 16.0f);
+                    func_001615F0(q, xi, yi, 0, 0);
+                }
+            }
+        }
+    }
+}
+
+struct Strm_137490 {
+    s32 flags;      // 0x00
+    s32 f04;
+    s32 base;       // 0x08
+    s32 total;      // 0x0C
+    u8 pad10[0x10];
+    s32 pos;        // 0x20
+    s32 rem;        // 0x24
+    u8 pad28[0x10];
+    s32 done;       // 0x38
+    s32 size;       // 0x3C
+    s32 left;       // 0x40
+    s32 start;      // 0x44
+    s32 sector;     // 0x48
+    s32 count;      // 0x4C
+    s32 cur;        // 0x50
+    s32 readIdx;    // 0x54
+    s32 writeIdx;   // 0x58
+};
+
+struct Min_137490 {
+    static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
+};
+
+s32 func_00203AE8(void);
+s32 func_002032C8(s32 a);
+s32 func_0011E1F8(s32 a);
+s32 func_00203D90(void);
+s32 func_0011E2E8(void);
+void func_00140CC8(s32 a, s32 b, s32 c);
+void func_00140C28(s32 a, s32 b, s32 c);
+
+struct Io_137490 {
+    static void Read(Strm_137490* self, s32 sector, s32 len, s32 dst)
+    {
+        if (self->flags & 2) func_00140CC8(sector, len, dst);
+        else func_00140C28(sector, len, dst);
+    }
+};
+
+void func_00137490(Strm_137490* self)
+{
+    self->pos += self->rem;
+    self->rem = 0;
+    s32 chunk = (self->total / self->count) & -0x800;
+    if (self->cur > 0) {
+        s32 n = self->readIdx + 1;
+        if (self->pos == self->base + n * chunk) {
+            n = n % self->count;
+            self->cur--;
+            self->readIdx = n;
+            self->pos = n * chunk + self->base;
+        }
+    }
+    do {
+        if (self->size > 0) {
+            s32 got;
+            if (self->flags & 2) got = func_00203AE8();
+            else got = 0;
+            got = Min_137490::Of(got + self->start, self->size);
+            if (self->done < got) {
+                self->done = got;
+            } else {
+                s32 busy;
+                if (self->flags & 2) busy = func_002032C8(1);
+                else busy = func_0011E1F8(1);
+                if (busy == 0) {
+                    s32 err;
+                    if (self->flags & 2) err = func_00203D90();
+                    else err = func_0011E2E8();
+                    if (err == 0) {
+                        s32 size = self->size;
+                        self->done = size;
+                        self->sector += size / 0x800;
+                        self->left -= size;
+                        self->size = 0;
+                        self->start = 0;
+                    } else {
+                        s32 done = self->done;
+                        s32 dst = self->base + self->writeIdx * chunk + done;
+                        s32 len = ((self->size - done + 0x7FF) & -0x800) / 0x800;
+                        self->start = done;
+                        s32 sector = self->sector + done / 0x800;
+                        Io_137490::Read(self, sector, len, dst);
+                    }
+                }
+            }
+        }
+        s32 cur = self->cur;
+        if (cur < self->count && self->size == 0 && self->left > 0) {
+            s32 size = Min_137490::Of(self->left, chunk);
+            self->done = 0;
+            self->size = size;
+            s32 n = (self->writeIdx + 1) % self->count;
+            self->cur = cur + 1;
+            s32 len = ((size + 0x7FF) & -0x800) / 0x800;
+            s32 dst = self->base + n * chunk;
+            s32 sector = self->sector;
+            self->writeIdx = n;
+            Io_137490::Read(self, sector, len, dst);
+        }
+        if (self->cur == 0) {
+            self->rem = 0;
+        } else {
+            s32 singleBuffer = 1; // only the buffer being read is queued: it may still be loading
+            s32 lim = chunk;
+            if (self->cur == singleBuffer) lim = self->done;
+            s32 avail = lim - (self->pos - (self->base + self->readIdx * chunk));
+            self->rem = Min_137490::Of(avail, 0x8000);
+        }
+    } while (self->rem == 0 && self->left > 0);
 }

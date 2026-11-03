@@ -1251,3 +1251,205 @@ void func_0020FAF0();
 void func_0020FF08();
 void func_00210000();
 extern const Fn_Table D_00250430[12] = { (Fn_Table)func_0020C148, (Fn_Table)func_0020BF78, (Fn_Table)func_0020C0A8, (Fn_Table)func_0020FE40, (Fn_Table)func_00210000, (Fn_Table)func_0020C138, (Fn_Table)func_0020C148, (Fn_Table)func_0020FF08, (Fn_Table)func_0020FAF0, (Fn_Table)func_0020C158, (Fn_Table)func_0020C168, 0 };
+
+struct Self_0020FF08 {
+    u8 pad0[0x13C];
+    s32 f13C;
+    u8 pad1[0x174 - 0x140];
+    s32 f174;
+    s32 f178;
+    u8 pad2[0x184 - 0x17C];
+    s32 f184;
+    u8 pad3[0x18C - 0x188];
+    s32 a[3];
+    s32 b[3];
+};
+
+s32 func_0020F5B8(Self_0020FF08* self, s32 k);
+
+void func_0020FF08(Self_0020FF08* self)
+{
+    s32 n;
+    s32 i;
+    if (self->f13C != 0) {
+        if (self->f184 != 0) n = (self->f178 != 0) ? 3 : 2;
+        else n = 1;
+    } else if (self->f174 != 3) {
+        n = 1;
+    } else {
+        n = (self->f184 != 0) ? 3 : 2;
+    }
+    for (i = 0; i < n; i++) {
+        self->a[i] = func_0020F5B8(self, 0x10);
+        func_0020F5B8(self, 1);
+        self->b[i] = func_0020F5B8(self, 0x10);
+        func_0020F5B8(self, 1);
+    }
+}
+
+struct Obj_20F3C0 {
+    u8 pad0[0x818];
+    s32 f818;
+    u8 pad81C[0x838 - 0x81C];
+    s32 f838;
+    s32 f83C;
+    u8 pad840[0x858 - 0x840];
+    u8* f858;
+};
+
+s64 func_0020F198(Obj_20F3C0* obj);
+void func_0020B1E0(u8* p);
+
+extern u32 D_0027B040[];
+
+s32 func_0020F3C0(Obj_20F3C0* obj, s32 a1)
+{
+    if (obj->f818 != 0 || obj->f83C < a1) {
+        s32 cnt = 0;
+        while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
+            if (cnt++ > 0x1388) {
+                func_0020B1E0(obj->f858);
+                cnt = 0;
+            }
+        }
+        *(volatile u32*)0x10002000 = 0x40000000;
+        obj->f818 = D_0027B040[4];
+        obj->f838 = func_0020F198(obj);
+        obj->f83C = 0x20;
+    }
+    return (u32)obj->f838 >> (32 - a1);
+}
+
+struct Obj_20F5B8 {
+    u8 pad0[0x818];
+    s32 f818;
+    u8 pad81C[0x838 - 0x81C];
+    s32 f838;
+    s32 f83C;
+    u8 pad840[0x858 - 0x840];
+    u8* f858;
+};
+
+s64 func_0020F198(Obj_20F5B8* obj);
+void func_0020B1E0(u8* p);
+
+extern u32 D_0027B040[];
+
+struct Cmd_20F5B8 {
+    static void Send(Obj_20F5B8* obj, u32 cmd)
+    {
+        *(volatile u32*)0x10002000 = cmd;
+        obj->f818 = D_0027B040[cmd >> 28];
+        obj->f838 = func_0020F198(obj);
+    }
+};
+
+s32 func_0020F5B8(Obj_20F5B8* obj, s32 a1)
+{
+    s32 cnt = 0;
+    u32 v;
+    while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
+        if (cnt++ > 0x1388) {
+            func_0020B1E0(obj->f858);
+            cnt = 0;
+        }
+    }
+    if (obj->f818 != 0 || obj->f83C < a1) {
+        Cmd_20F5B8::Send(obj, 0x40000000);
+    }
+    v = (u32)obj->f838 >> (32 - a1);
+    obj->f83C = 0x20;
+    Cmd_20F5B8::Send(obj, a1 | 0x40000000);
+    return v;
+}
+
+struct Ctx_20EDD0;
+s32 func_0020F5B8(Ctx_20EDD0* c, s32 n);
+void func_0020EF70(Ctx_20EDD0* c, u8* p, s32 a2, s32 a3, s32 a4, s32 a5, s32* a6, s32 a7);
+
+void func_0020EDD0(Ctx_20EDD0* c, u8* arr, s32 a2, s32* out, s32 i, s32 mode, s32 a6, s32 a7, s32 s6, s32 s3, s32* fp)
+{
+    s32 v;
+    s32* o;
+
+    if (mode == 1) {
+        if (a6 == 0 && s3 == 0) {
+            v = func_0020F5B8(c, 1);
+            out[i] = v;
+            out[i + 2] = v;
+        }
+        i <<= 3;
+        func_0020EF70(c, arr + i, a2, a7, s6, s3, fp, 0);
+        u32* q = (u32*)(arr + i);
+        u32 x = q[0];
+        u32 y = q[1];
+        q[4] = x;
+        q[5] = y;
+    } else {
+        s32 j = i << 3;
+        v = func_0020F5B8(c, 1);
+        out[i] = v;
+        o = out + i;
+        func_0020EF70(c, arr + j, a2, a7, s6, s3, fp, 0);
+        o[2] = func_0020F5B8(c, 1);
+        func_0020EF70(c, arr + (j + 16), a2, a7, s6, s3, fp, 0);
+    }
+}
+
+extern u32 D_0027B040[];
+
+struct Sub_20F248;
+struct Self_20F248 {
+    u8 pad0[0x11C];
+    s32 f11C;
+    u8 pad1[0x6F8];
+    s32 f818;
+    u8 pad2[0x1C];
+    s32 f838;
+    s32 f83C;
+    u8 pad3[0x18];
+    Sub_20F248* f858;
+};
+
+void func_0020B1E0(Sub_20F248* s);
+
+s16 func_0020F248(Self_20F248* self, s32 mode)
+{
+    s32 m = 0;
+    s32 n = 0;
+    s32 cmd;
+    s64 st;
+    s64 hw;
+
+    if ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
+        do {
+            if (n++ >= 5001) {
+                func_0020B1E0(self->f858);
+                n = 0;
+            }
+        } while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000);
+    }
+    cmd = (mode << 26) | 0x30000000;
+    *(volatile u32*)0x10002000 = cmd;
+    self->f818 = D_0027B040[cmd >> 28];
+    st = *(volatile s64*)0x10002000;
+    if (st < 0) {
+        do {
+            if (m++ >= 5001) {
+                func_0020B1E0(self->f858);
+                m = 0;
+            }
+            st = *(volatile s64*)0x10002000;
+        } while (st < 0);
+    }
+    u32 cnt = *(volatile u32*)0x10002020;
+    hw = *(s64*)0x10002030;
+    self->f838 = (s32)hw;
+    if (hw < 0) {
+        self->f83C = (-(cnt & 0x1F)) & 0x1F;
+    } else {
+        self->f83C = 0x20;
+    }
+    self->f11C = ((s32)st == 0);
+    return (s16)st;
+}

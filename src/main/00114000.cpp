@@ -1989,3 +1989,320 @@ void func_00205578();
 void func_00205678();
 void func_00206180();
 extern Fn_Table D_00259938[8] = { (Fn_Table)func_00206180, (Fn_Table)func_00205400, (Fn_Table)func_00205210, (Fn_Table)func_002054F0, (Fn_Table)func_00205678, (Fn_Table)func_00205578, (Fn_Table)func_00204F68, (Fn_Table)func_001EA408 };
+
+struct Quad_117D78 { s32 a, b, c, d; };
+struct In_117D78 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+struct Host_117D78;
+
+extern void* D_00275710;
+
+s32 func_0011B008(Quad_117D78* q);
+void func_00117AF0(Quad_117D78* t, s32 a, void* b);
+s32 func_0011B0A8(Quad_117D78* a, Quad_117D78* b);
+s32 func_0011B060(Quad_117D78* q, int mode);
+s32 func_0011B018(void* dst, Quad_117D78* src);
+s32 func_0015A198(Host_117D78* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
+
+void* func_00117D78(void* out, s32 unused, In_117D78* in)
+{
+    Quad_117D78 q;
+    u8 buf[0x100];
+    Quad_117D78 t;
+    (void)func_0011B008(&q);
+    s32 r = func_0015A198((Host_117D78*)D_00275710, 0x104, in->w4, (void*)in->wc, 0x40, buf);
+    func_00117AF0(&t, r, buf);
+    (void)func_0011B0A8(&q, &t);
+    (void)func_0011B060(&t, 2);
+    (void)func_0011B018(out, &q);
+    (void)func_0011B060(&q, 2);
+    return out;
+}
+
+struct Quad_117F28 { s32 a, b, c, d; };
+struct In_117F28 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+struct Host_117F28;
+
+extern void* D_00275710;
+
+s32 func_0011B008(Quad_117F28* q);
+void func_00117AF0(Quad_117F28* t, s32 a, void* b);
+s32 func_0011B0A8(Quad_117F28* a, Quad_117F28* b);
+s32 func_0011B060(Quad_117F28* q, int mode);
+s32 func_0011B018(void* dst, Quad_117F28* src);
+s32 func_0015A4F0(Host_117F28* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
+
+void* func_00117F28(void* out, s32 unused, In_117F28* in)
+{
+    Quad_117F28 q;
+    u8 buf[0x400];
+    Quad_117F28 t;
+    (void)func_0011B008(&q);
+    s32 r = func_0015A4F0((Host_117F28*)D_00275710, in->wc ? 0x101 : 0x105, in->w4, (void*)in->wc, 0x100, buf);
+    func_00117AF0(&t, r, buf);
+    (void)func_0011B0A8(&q, &t);
+    (void)func_0011B060(&t, 2);
+    (void)func_0011B018(out, &q);
+    (void)func_0011B060(&q, 2);
+    return out;
+}
+
+struct Quad_117910 { u8 b[16]; };
+struct Src_117910 { u8 pad0[4]; s32 f4; u8 pad8[4]; s32 fC; u8 f10[4]; };
+struct Sub_117910 { u8 pad[1]; };
+
+void func_0011B008(Quad_117910* q);
+void func_0011B018(void* dst, Quad_117910* src);
+void func_0011B060(Quad_117910* q, s32 mode);
+void func_0011B0A8(Quad_117910* a, Quad_117910* b);
+void* func_001C2238(Sub_117910* self, s32 a1, s32 a2, void* a3);
+void* func_001C2320(Sub_117910* self, s32 a1, s32 a2, void* a3);
+void* func_001C22B8(Sub_117910* self, s32 a1, s32 a2, void* a3);
+void* func_001C21A0(Sub_117910* self, s32 a1, s32 a2);
+
+void* func_00117910(void* a0, void* a1, Src_117910* a2, void* a3, s32 a4)
+{
+    Quad_117910 q1;
+    Quad_117910 q2;
+
+    func_0011B008(&q1);
+    s32 x1 = a2->f4;
+    s32 x2 = a2->fC;
+    switch (a4) {
+    case 0x63:
+        func_001C22B8((Sub_117910*)&q2, x1, x2, &a2->f10);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    case 0x64:
+        func_001C2320((Sub_117910*)&q2, x1, x2, &a2->f10);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    case 0x65:
+        func_001C2238((Sub_117910*)&q2, x1, x2, &a2->f10);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    case 0x66:
+        func_001C21A0((Sub_117910*)&q2, x1, x2);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    }
+    func_0011B018(a0, &q1);
+    func_0011B060(&q1, 2);
+    return a0;
+}
+
+struct Val_1151C0;
+struct Obj_1151C0;
+
+void func_0011B008(Val_1151C0* v);
+void func_0011B018(Val_1151C0* dst, const Val_1151C0* src);
+void func_0011B060(Val_1151C0* v, s32 mode);
+Val_1151C0& func_0011B0A8(Val_1151C0* dst, const Val_1151C0& src);
+void func_0011B6C0(Val_1151C0* v, Val_1151C0* target);
+
+struct Val_1151C0 {
+    s32 tag;
+    Val_1151C0* f4;
+    Val_1151C0* f8;
+    Val_1151C0() { func_0011B008(this); }
+    Val_1151C0(const Val_1151C0& o) { func_0011B018(this, &o); }
+    ~Val_1151C0() { func_0011B060(this, 2); }
+};
+
+struct Cell_1151C0 : Val_1151C0 {
+    Cell_1151C0() { tag = -1; }
+};
+
+struct Obj_1151C0 {
+    s32 f0;
+    s32 f4;
+    Val_1151C0 m;
+};
+
+Val_1151C0 func_0011A080(Val_1151C0* expr, s32 c);
+
+Val_1151C0 func_001151C0(s32 unused, Obj_1151C0* obj, s32 c)
+{
+    Val_1151C0 q;
+    Cell_1151C0 arr[5];
+    if (obj->m.tag == 0x1E) {
+        Val_1151C0* p[2];
+        for (u32 i = 0; i < 2; i++) {
+            p[i] = (struct Val_1151C0 *)func_0011AF28();
+        }
+        func_0011B6C0(&arr[0], &arr[1]);
+        arr[0].f8 = 0;
+        func_0011B6C0(&arr[1], &arr[3]);
+        arr[1].f8 = &arr[2];
+        func_0011B6C0(&arr[2], &arr[4]);
+        arr[2].f8 = 0;
+        arr[3].tag = 0x11;
+        arr[3].f8 = p[0];
+        func_0011B0A8(p[0], *(Val_1151C0*)obj);
+        arr[4].tag = 0x11;
+        arr[4].f8 = p[1];
+        Val_1151C0* m = &obj->m;
+        for (Val_1151C0* l = m->f4; l != 0; l = l->f8) {
+            func_0011B0A8(p[1], *l);
+            func_0011B0A8(&q, func_0011A080(&arr[0], c));
+        }
+    }
+    q.tag = 0x22;
+    return q;
+}
+
+struct Val_114D18;
+
+void func_0011B008(Val_114D18* v);
+void func_0011B018(Val_114D18* dst, const Val_114D18* src);
+void func_0011B060(Val_114D18* v, s32 mode);
+Val_114D18& func_0011B0A8(Val_114D18* dst, const Val_114D18& src);
+void func_0011B6C0(Val_114D18* v, Val_114D18* target);
+
+struct Val_114D18 {
+    s32 tag;
+    Val_114D18* f4;
+    Val_114D18* f8;
+    Val_114D18() { func_0011B008(this); }
+    Val_114D18(const Val_114D18& o) { func_0011B018(this, &o); }
+    ~Val_114D18() { func_0011B060(this, 2); }
+};
+
+struct Cell_114D18 : Val_114D18 {
+    Cell_114D18() { tag = -1; }
+};
+
+struct Obj_114D18 {
+    s32 f0;
+    s32 f4;
+    Val_114D18 m;
+};
+
+Val_114D18 func_0011A080(Val_114D18* expr, s32 c);
+
+Val_114D18 func_00114D18(s32 unused, Obj_114D18* obj, s32 c)
+{
+    Val_114D18 q;
+    Cell_114D18 arr[5];
+    if (obj->m.tag == 0) {
+        func_0011B0A8(&q, obj->m);
+    } else {
+        Val_114D18* list = (struct Val_114D18 *)func_0011AF28();
+        Val_114D18* p[2];
+        Val_114D18* last;
+        list->tag = 0x1E;
+        for (u32 i = 0; i < 2; i++) {
+            p[i] = (struct Val_114D18 *)func_0011AF28();
+        }
+        func_0011B6C0(&arr[0], &arr[1]);
+        arr[0].f8 = 0;
+        func_0011B6C0(&arr[1], &arr[3]);
+        arr[1].f8 = &arr[2];
+        func_0011B6C0(&arr[2], &arr[4]);
+        arr[2].f8 = 0;
+        arr[3].tag = 0x11;
+        arr[3].f8 = p[0];
+        func_0011B0A8(p[0], *(Val_114D18*)obj);
+        arr[4].tag = 0x11;
+        arr[4].f8 = p[1];
+        Val_114D18* m = &obj->m;
+        for (Val_114D18* l = m->f4; l != 0; l = l->f8) {
+            Val_114D18* e = (struct Val_114D18 *)func_0011AF28();
+            func_0011B0A8(p[1], *l);
+            func_0011B0A8(e, func_0011A080(&arr[0], c));
+            if (list->f4 == 0) {
+                func_0011B6C0(list, e);
+            } else {
+                last->f8 = e;
+            }
+            last = e;
+        }
+        func_0011B6C0(&q, list->f4);
+    }
+    return q;
+}
+
+struct Val_114F48;
+
+void func_0011B008(Val_114F48* v);
+void func_0011B018(Val_114F48* dst, const Val_114F48* src);
+void func_0011B060(Val_114F48* v, s32 mode);
+Val_114F48& func_0011B0A8(Val_114F48* dst, const Val_114F48& src);
+void func_0011B6C0(Val_114F48* v, Val_114F48* target);
+struct Node_116600;
+Node_116600* func_0011AF28(void);
+
+struct Val_114F48 {
+    s32 tag;
+    Val_114F48* f4;
+    Val_114F48* f8;
+    Val_114F48();
+    Val_114F48(const Val_114F48& o) { func_0011B018(this, &o); }
+    ~Val_114F48();
+};
+
+struct Cell_114F48 {
+    Val_114F48 v;
+    Cell_114F48() { v.tag = -1; }
+};
+
+struct Obj_114F48 {
+    s32 f0;
+    s32 f4;
+    Val_114F48 m;
+};
+
+Val_114F48 func_0011A080(Val_114F48* expr, s32 c);
+
+Val_114F48 func_00114F48(s32 unused, Obj_114F48* obj, s32 c)
+{
+    Val_114F48 q;
+    Cell_114F48 arr[5];
+    Val_114F48* p[2];
+    Val_114F48 r;
+    if (obj->m.tag == 0) {
+        func_0011B0A8(&q, obj->m);
+    } else {
+        Val_114F48* list = 0;
+        Val_114F48* last;
+        for (u32 i = 0; i < 2; i++) {
+            p[i] = (Val_114F48*)func_0011AF28();
+        }
+        func_0011B6C0(&arr[0].v, &arr[1].v);
+        arr[0].v.f8 = 0;
+        func_0011B6C0(&arr[1].v, &arr[3].v);
+        arr[1].v.f8 = &arr[2].v;
+        func_0011B6C0(&arr[2].v, &arr[4].v);
+        arr[2].v.f8 = 0;
+        arr[3].v.tag = 0x11;
+        arr[3].v.f8 = p[0];
+        func_0011B0A8(p[0], *(Val_114F48*)obj);
+        arr[4].v.tag = 0x11;
+        arr[4].v.f8 = p[1];
+        Val_114F48* m = &obj->m;
+        for (Val_114F48* l = m->f4; l != 0; l = l->f8) {
+            func_0011B0A8(p[1], *l);
+            func_0011B0A8(&r, func_0011A080(&arr[0].v, c));
+            if (r.tag == 0x1B && r.f4 != 0) {
+                Val_114F48* e = (Val_114F48*)func_0011AF28();
+                func_0011B0A8(e, *l);
+                if (list == 0) {
+                    list = (Val_114F48*)func_0011AF28();
+                    func_0011B6C0(list, e);
+                } else {
+                    last->f8 = e;
+                }
+                last = e;
+            }
+        }
+        if (list != 0) {
+            func_0011B6C0(&q, list->f4);
+        } else {
+            q.tag = 0;
+        }
+    }
+    return q;
+}

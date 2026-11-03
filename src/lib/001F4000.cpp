@@ -573,3 +573,92 @@ void func_001F7020(Queue_1F7020* q)
         }
     }
 }
+
+char* func_001F6880(char* s, char* t)
+{
+    int i;
+    if (*s == 0) {
+        if (*t) {
+            return 0;
+        }
+        return s;
+    }
+    while (*s) {
+        i = 0;
+        while (1) {
+            if (t[i] == 0) {
+                return s;
+            }
+            if (t[i] != s[i]) {
+                break;
+            }
+            i++;
+        }
+        s++;
+    }
+    return 0;
+}
+
+struct Item_1F7DB0 { u8 pad00[0x10]; u32 flags; Item_1F7DB0* next; s32 state; };
+struct Owner_1F7DB0 { s32 index; Item_1F7DB0* items; s32 count; };
+s32 func_001F9D60(Owner_1F7DB0*);
+void func_001F9DA8(void);
+
+Item_1F7DB0* func_001F7DB0(Owner_1F7DB0* self)
+{
+    func_001F9D60(self);
+    s32 count = self->count;
+    s32 index = 0;
+    Item_1F7DB0* item = self->items;
+    if (count > 0) {
+        do {
+            if ((item->flags & 1) == 0) {
+                item->flags = (index << 16) | 5;
+                s32 state;
+                self->index++;
+                if (self->index == 1) {
+                    state = self->index++;
+                } else {
+                    state = self->index;
+                }
+                item->next = item;
+                item->state = state;
+                func_001F9DA8();
+                return item;
+            }
+            index++;
+            item = (Item_1F7DB0*)((u8*)item + 0x40);
+        } while (index < count);
+    }
+    func_001F9DA8();
+    return 0;
+}
+
+struct Slot_1F6F48 {
+    s32 key;
+    s32 value;
+};
+
+extern Slot_1F6F48 D_002770E8[];
+extern u8 D_00276980[];
+extern u8 D_002770C0[];
+void func_001F6EE0(s32 a, s32 b);
+void func_001F6EF0(u32 a, void* b, s32 c);
+void func_001F6C20(s32 a);
+s32 func_001F6F38(s32 key);
+
+void func_001F6F48(void)
+{
+    if ((*(volatile u32*)0x10001810 & 0x100) != 0) {
+        return;
+    }
+    func_001F6EE0(D_002770E8[0].key, D_002770E8[0].value);
+    func_001F6EF0(0x80076000, D_00276980, 0x740);
+    func_001F6EF0(0x82000, D_002770C0, 0x28);
+    func_001F6C20(0);
+    func_001F6C20(2);
+    func_001F6EE0(D_002770E8[1].key, D_002770E8[1].value);
+    for (u32 i = 2; i < 8; i++) {
+        func_001F6EE0(D_002770E8[i].key, func_001F6F38(D_002770E8[i].key));
+    }
+}

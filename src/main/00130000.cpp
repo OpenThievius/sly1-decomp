@@ -365,3 +365,95 @@ void func_00133B58(Self_133B58* self, Gs_133B58* gs)
     func_00161458(gs, *(u32*)&c0);
     func_001615F0(gs, 0x9400, 0x80C0, 0, 0);
 }
+
+struct Obj_1310F0 {
+    u8 pad0[0x234];
+    f32 f234;
+    f32 f238;
+    u8 pad1[0x2F0 - 0x23C];
+    f32 f2F0;
+    u32 f2F4;
+};
+void func_001AA1F0(Obj_1310F0* self, s32 a1);
+void func_001310F0(Obj_1310F0* self, s32 a1)
+{
+    self->f234 = 640.0f;
+    self->f238 = 492.800018f;
+    self->f2F0 = 15.0f;
+    self->f2F4 = 0x80FFFFFF;
+    func_001AA1F0(self, a1);
+}
+
+struct Self_130B48;
+struct Out_130B48 { u8 pad0[16]; };
+
+void func_00130540(f32 f12, Self_130B48* a, u8* b, u8* c, u8* d, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
+
+void func_00130B48(f32 k, Self_130B48* self, u8* a1, u8* a2, u8* a3, s32 count, Out_130B48* out, f32 start, f32 end)
+{
+    f32 step = (end - start) / (f32)(count - 1);
+    f32 cur = start;
+    s32 i;
+    for (i = 0; i < count; i++) {
+        func_00130540(k, self, a1, a2, a3, cur, 1.0f, (s32)(out + i), 0, 0);
+        cur += step;
+    }
+}
+
+void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero)
+{
+    f32 c[4];
+    if (diff < 0.0001f) {
+        diff = 0.0f;
+    } else if (delta - diff < 0.0001f) {
+        diff = 1.0f;
+    } else {
+        f32 d3 = (delta - p2C) * 3.0f;
+        f32 g3 = p18 * 3.0f;
+        f32 lo = 0.0f;
+        f32 hi = 1.0f;
+        s32 k = 0;
+        c[2] = g3;
+        c[3] = -diff;
+        f32 a = g3 - d3;
+        f32 b = d3 - g3;
+        b = b - g3;
+        a = a + delta;
+        c[1] = b;
+        c[0] = a;
+        do {
+            f32 m = lo + 1.0f / (f32)(1 << (k + 1));
+            f32 v = m * (m * (m * c[0] + c[1]) + c[2]) + c[3];
+            if (v < 0.0f) {
+                lo = m;
+            } else if (0.0f < v) {
+                hi = m;
+            } else {
+                break;
+            }
+        } while (++k < 16);
+        diff = (lo + hi) * 0.5f;
+    }
+    if (outF != 0) {
+        f32 a3 = p1C * 3.0f;
+        f32 b3 = p30 * 3.0f;
+        c[3] = p4;
+        c[0] = a3 - p4 - b3 + p24;
+        c[1] = p4 * 3.0f - p1C * 6.0f + b3;
+        c[2] = p4 * -3.0f + a3;
+        *outF = diff * (diff * (diff * c[0] + c[1]) + c[2]) + p4;
+    }
+    if (outI != 0) {
+        c[0] = p4 * -3.0f + p1C * 9.0f - p30 * 9.0f + p24 * 3.0f;
+        c[1] = p4 * 6.0f - p1C * 12.0f + p30 * 6.0f;
+        c[2] = p4 * -3.0f + p1C * 3.0f;
+        f32 num = diff * (diff * c[0] + c[1]) + c[2];
+        f32 d3 = (delta - p2C) * 3.0f;
+        f32 g3 = p18 * 3.0f;
+        c[2] = g3;
+        c[0] = g3 * 3.0f - d3 * 3.0f + delta * 3.0f;
+        c[1] = g3 * -4.0f + (d3 + d3);
+        f32 den = diff * (diff * c[0] + c[1]) + c[2];
+        *outI = num * scale / den;
+    }
+}

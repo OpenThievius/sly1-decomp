@@ -274,7 +274,7 @@ void func_001275F0(Obj_001275F0* self, f32 x, f32 y, f32 z)
     self->vtbl[37](self, v);
 }
 
-extern u8 D_0027B314[];
+extern void* D_0027B314;  // the innermost iterator frame (a chain on the stack)
 
 typedef void (*VFn0_124EE8)(void* self);
 
@@ -324,11 +324,11 @@ void func_00124EE8(void* self, f32 f)
     s32 e = (s32)&obj->list;
     fr.list = e;
     fr.cursor = e;
-    s32 old = *(s32*)D_0027B314;
+    s32 old = *(s32*)&D_0027B314;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
     fr.link = link;
-    *(s32*)D_0027B314 = (s32)&fr;
+    *(s32*)&D_0027B314 = (s32)&fr;
     s32 head = obj->list.head;
     fr.cursor = head + fr.link;
     Node_124EE8* node = (Node_124EE8*)head;
@@ -340,7 +340,7 @@ void func_00124EE8(void* self, f32 f)
         fr.cursor = nx + fr.link;
         node = (Node_124EE8*)nx;
     }
-    *(s32*)D_0027B314 = fr.prev;
+    *(s32*)&D_0027B314 = fr.prev;
 }
 
 typedef void (*VFn_1261C0)(void* self, void* b, void* m);
@@ -623,7 +623,6 @@ struct Frame_124A48 {
     s32 f0C;
 };
 
-extern u8 D_0027B314[];
 void func_00182C58(Self_124A48* self);
 void func_00124CC0(Self_124A48* self);
 void func_001DBCC8(void* owner, void* fn, Self_124A48* arg, s32 a3, s32 a4);
@@ -645,13 +644,13 @@ void func_00124A48(Self_124A48* self)
     Frame_124A48 fr;
     Key_124A48* k;
     Self_124A48* s0;
-    s32 old = *(s32*)D_0027B314;
+    s32 old = *(s32*)&D_0027B314;
     s32 e = (s32)self->f34;
     fr.f00 = e;
     fr.f04 = e;
     fr.f08 = *(s32*)(e + 8);
     fr.f0C = old;
-    *(s32*)D_0027B314 = (s32)&fr;
+    *(s32*)&D_0027B314 = (s32)&fr;
     func_00182C58(self);
     if (self->f2A0 != 0) {
         if (self->f2A0->a != 0 || self->f2A0->b != -1) {
@@ -711,7 +710,7 @@ void func_00124A48(Self_124A48* self)
             p = nx;
         }
     }
-    *(s32*)D_0027B314 = fr.f0C;
+    *(s32*)&D_0027B314 = fr.f0C;
 }
 
 struct A8_127048 { u32 a, b; } __attribute__((packed));
@@ -928,4 +927,391 @@ void func_00127478(Obj_127478* self, Mat_127478* src)
     if (self->link)
         func_001226D8(self->link);
     self->vt->f48(self, 4, self);
+}
+
+struct Object_00124050;
+struct Vtable_00124050 {
+    u8 pad0[0x20];
+    void (*visit)(Object_00124050*);
+    u8 pad24[0x4];
+    void (*begin)(Object_00124050*);
+    u8 pad2C[0x1C];
+    void (*finish)(Object_00124050*, s32, Object_00124050*);
+};
+struct Object_00124050 { Vtable_00124050* vtable; };
+struct List_00124050 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_00124050 { List_00124050* list; u8* link; s32 offset; Iter_00124050* saved; };
+
+struct Next_00124050 {
+    static Object_00124050* Of(Iter_00124050* it)
+    {
+        Object_00124050* obj = *(Object_00124050**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_00124050 {
+    static void Of(Iter_00124050* it, List_00124050* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_00124050*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+void func_00124050(Object_00124050* self)
+{
+    Iter_00124050 it;
+    Begin_00124050::Of(&it, (List_00124050*)((u8*)self + 0x34));
+    self->vtable->begin(self);
+    Object_00124050* obj;
+    while ((obj = Next_00124050::Of(&it)) != 0) {
+        obj->vtable->visit(obj);
+    }
+    self->vtable->finish(self, 1, self);
+    D_0027B314 = it.saved;
+}
+
+struct Object_00124338;
+struct Vtable_00124338 {
+    u8 pad0[0x24];
+    void (*visit)(Object_00124338*);
+    u8 pad28[0x4];
+    void (*begin)(Object_00124338*);
+    u8 pad30[0x18];
+    void (*finish)(Object_00124338*, s32, Object_00124338*);
+};
+struct Object_00124338 { Vtable_00124338* vtable; };
+struct List_00124338 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_00124338 { List_00124338* list; u8* link; s32 offset; Iter_00124338* saved; };
+
+struct Next_00124338 {
+    static Object_00124338* Of(Iter_00124338* it)
+    {
+        Object_00124338* obj = *(Object_00124338**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_00124338 {
+    static void Of(Iter_00124338* it, List_00124338* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_00124338*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+void func_00124338(Object_00124338* self)
+{
+    Iter_00124338 it;
+    Begin_00124338::Of(&it, (List_00124338*)((u8*)self + 0x34));
+    self->vtable->begin(self);
+    Object_00124338* obj;
+    while ((obj = Next_00124338::Of(&it)) != 0) {
+        obj->vtable->visit(obj);
+    }
+    self->vtable->finish(self, 2, self);
+    D_0027B314 = it.saved;
+}
+
+extern void* D_0027B314;
+
+struct Object_00126F78;
+struct Vtable_00126F78 {
+    u8 pad0[0x8];
+    s32 flags;
+    u8 padC[0x28];
+    void (*attach)(Object_00126F78*, u8*);
+};
+struct Object_00126F78 { Vtable_00126F78* vtable; u8 pad4[0x10]; void* f14; s32 f18; };
+struct List_00126F78 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_00126F78 { List_00126F78* list; u8* link; s32 offset; Iter_00126F78* saved; };
+
+struct Item_00126F78;
+struct Next_00126F78 {
+    static Item_00126F78* Of(Iter_00126F78* it)
+    {
+        Item_00126F78* obj = *(Item_00126F78**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_00126F78 {
+    static void Of(Iter_00126F78* it, List_00126F78* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_00126F78*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+void* func_00183058(Item_00126F78* item, void* x, Object_00126F78* self);
+void func_001BB580(Object_00126F78* self);
+
+void func_00126F78(Object_00126F78* self, u8* owner)
+{
+    Iter_00126F78 it;
+    Begin_00126F78::Of(&it, (List_00126F78*)(owner + 0x34));
+    self->vtable->attach(self, owner);
+    Item_00126F78* obj = Next_00126F78::Of(&it);
+    while (obj != 0) {
+        (void)func_00183058(obj, self->f14, self);
+        obj = Next_00126F78::Of(&it);
+    }
+    if ((self->vtable->flags & 2) && self->f18 == 0) {
+        func_001BB580(self);
+    }
+    D_0027B314 = it.saved;
+}
+
+struct Object_124FC0;
+struct Vtable_124FC0 {
+    u8 pad0[0xC];
+    void (*update)(Object_124FC0*, f32);
+};
+struct Object_124FC0 { Vtable_124FC0* vtable; };
+struct List_124FC0 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_124FC0 { List_124FC0* list; u8* link; s32 offset; Iter_124FC0* saved; };
+struct Sub_124FC0 { u8 pad[1]; };
+struct Res_124FC0 { u8 pad[1]; };
+struct Self_124FC0 {
+    u8 pad0[0x1E0];
+    List_124FC0 list1E0;
+    u8 pad1[0x22C - 0x1EC];
+    Sub_124FC0 sub22C;
+    u8 pad2[0x284 - 0x22D];
+    Res_124FC0* f284;
+    void* f288;
+};
+
+
+struct Next_124FC0 {
+    static Object_124FC0* Of(Iter_124FC0* it)
+    {
+        Object_124FC0* obj = *(Object_124FC0**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_124FC0 {
+    static void Of(Iter_124FC0* it, List_124FC0* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (*(Iter_124FC0**)&D_0027B314);
+        (*(Iter_124FC0**)&D_0027B314) = it;
+    }
+};
+
+void func_00165FE0(Sub_124FC0* sub, Self_124FC0* self, f32 f);
+void func_001B2140(Res_124FC0* p, f32 f);
+void func_00126AC8(Self_124FC0* self, f32 f);
+void func_001837E0(Self_124FC0* self, s32 a, s32 b, void** args);
+
+void func_00124FC0(Self_124FC0* self, f32 f)
+{
+    func_00165FE0(&self->sub22C, self, f);
+    if (self->f284 != 0) {
+        func_001B2140(self->f284, f);
+    }
+    if (self->f288 != 0) {
+        func_00126AC8(self, f);
+    }
+    Iter_124FC0 it;
+    Begin_124FC0::Of(&it, &self->list1E0);
+    Object_124FC0* obj;
+    while ((obj = Next_124FC0::Of(&it)) != 0) {
+        if (obj->vtable->update != 0) {
+            obj->vtable->update(obj, f);
+        }
+    }
+    (*(Iter_124FC0**)&D_0027B314) = it.saved;
+    void* args[1];
+    args[0] = &f;
+    func_001837E0(self, 1, 1, args);
+}
+
+struct Node_124CC0 { u8 pad0[0x34]; f32 f34; u8 pad1[0x40 - 0x38]; s32 f40; };
+struct Ctx_124CC0 { Node_124CC0* node; void* key; s32 mode; f32 value; f32 f10; };
+struct Self_124CC0 { u8 pad0[0x14]; void* f14; u8 pad1[0x2A0 - 0x18]; Ctx_124CC0* ctx; };
+struct Frame_124CC0 { s32 w0; Self_124CC0* self; u8 pad0[8]; f32 tmp; };
+
+Node_124CC0* func_0015A418(void* a, s32 b, void* c, Self_124CC0* d);
+void func_0012C9E8(Node_124CC0* a, Self_124CC0* b, f32 c, void* d, f32* e, s32 f, s32 g);
+void func_0012C288(Node_124CC0* a, Self_124CC0* b, s32 c, Frame_124CC0* d, f32 e, f32 f, s32 g, s32 h);
+
+struct Clamp_124CC0 {
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        if (x < lo) {
+            return lo;
+        }
+        if (hi < x) {
+            return hi;
+        }
+        return x;
+    }
+};
+
+struct Find_124CC0 {
+    static Node_124CC0* Of(Self_124CC0* self, Ctx_124CC0* ctx)
+    {
+        if (ctx->node != 0) {
+            return ctx->node;
+        }
+        return func_0015A418(self->f14, 0x104, ctx->key, self);
+    }
+};
+
+void func_00124CC0(Self_124CC0* self)
+{
+    Ctx_124CC0* ctx = self->ctx;
+    Node_124CC0* node = Find_124CC0::Of(self, ctx);
+    if (node == 0) {
+        return;
+    }
+    Frame_124CC0 fr;
+    switch (ctx->mode) {
+    case 0:
+        fr.tmp = ctx->value;
+        break;
+    case 1:
+        fr.tmp = Clamp_124CC0::Of(ctx->value, 0.0f, 1.0f) * node->f34;
+        break;
+    case 2:
+        func_0012C9E8(node, self, 0.0f, (u8*)self + 0x100, &fr.tmp, 0, 0);
+        break;
+    default:
+        return;
+    }
+    fr.w0 = node->f40;
+    fr.self = self;
+    func_0012C288(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
+}
+
+struct Self_1276C0;
+struct Fl_1276C0;
+struct Node_1276C0;
+
+struct Info_1276C0 {
+    u8 pad0[8];
+    s32 flags;
+};
+struct Hit_1276C0 {
+    Info_1276C0* info;
+};
+
+typedef void (*Fn_1276C0)(Self_1276C0* self, void* p);
+struct Vt_1276C0 {
+    u8 pad0[0x84];
+    Fn_1276C0 f84;
+    Fn_1276C0 f88;
+    void (*f8C)(Node_1276C0* n, Hit_1276C0* h);
+    Fn_1276C0 f90;
+    Fn_1276C0 f94;
+};
+
+struct Node_1276C0 {
+    union {
+        Vt_1276C0* vt;
+        Info_1276C0* info;
+    };
+    u8 pad4[4];
+    s32 f8;
+    u8 padC[0x10];
+    Node_1276C0* next;
+    u8 pad20[0x204];
+    Fl_1276C0* f224;
+};
+
+struct Fl_1276C0 {
+    u8 pad0[0x90];
+    f32 f90;
+    f32 f94;
+    u8 pad98[0xB0 - 0x98];
+    s32 fB0;
+};
+
+struct Other_1276C0 {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1c[0x110 - 0x1C];
+    u8 f110[0x10];
+    u8 pad120[0x20];
+    u8 f140[0x10];
+    u8 f150[0x10];
+    u8 f160[0x10];
+    u8 pad170[0x224 - 0x170];
+    Fl_1276C0* f224;
+};
+
+struct Self_1276C0 {
+    Vt_1276C0* vt;
+    u8 pad4[0x10];
+    void* f14;
+    s32 f18;
+    u8 pad1c[0x34 - 0x1C];
+    Node_1276C0* head;
+    u8 pad38[0x224 - 0x38];
+    Fl_1276C0* f224;
+};
+
+struct Locals_1276C0 {
+    u8 a20[16];
+    u8 a30[16];
+    u8 a40[16];
+    u8 a50[16];
+    u8 pad60[0x30];
+};
+
+void func_00128018(Self_1276C0* z, s32 id, u8* c, u8* d);
+void func_00128150(Self_1276C0* z, s32 id, u8* c, u8* d);
+void func_00128330(Self_1276C0* a, s32 b, u8* c, u8* d, u8* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k);
+Hit_1276C0* func_0015A418(void* host, s32 a1, s32 a2, Other_1276C0* ctx);
+
+void func_001276C0(Self_1276C0* self, Other_1276C0* other)
+{
+    Locals_1276C0 L;
+    func_00128018(0, self->f18, other->f140, L.a20);
+    func_00128150(0, self->f18, other->f110, L.a50);
+    func_00128330((Self_1276C0*)other->f18, self->f18, other->f140, other->f150, other->f160, 0, 0, L.a30, L.a40, 0, 0);
+    self->vt->f84(self, L.a20);
+    self->vt->f88(self, L.a50);
+    self->vt->f90(self, L.a30);
+    self->vt->f94(self, L.a40);
+    Fl_1276C0* a = self->f224;
+    if (a != 0 && (a->fB0 & 0x20)) {
+        Fl_1276C0* b = other->f224;
+        if (b != 0 && (b->fB0 & 0x20)) {
+            a->f90 = b->f90;
+            self->f224->f94 = other->f224->f94;
+        }
+    }
+    Node_1276C0* n = self->head;
+    if (n != 0) {
+        do {
+            if ((n->info->flags ^ 1) & 1)
+                continue;
+            Hit_1276C0* h = func_0015A418(self->f14, 2, n->f8, other);
+            if (h == 0)
+                continue;
+            if ((h->info->flags ^ 1) & 1)
+                continue;
+            if (n->f224 != 0 && (n->f224->fB0 & 0xC))
+                continue;
+            n->vt->f8C(n, h);
+        } while ((n = n->next) != 0);
+    }
 }

@@ -23,3 +23,11 @@ _$_12Fault_1FEDC8	func_00200638	its destructor
 _vt$12Fault_1FEE48	D_0024F278	vtable of the exception func_001FEE48 throws
 _$_12Fault_1FEE48	func_002005A0	its destructor
 memset	func_001F5C0C	fill memory (the compiler clears an aggregate with it)
+__check_eh_spec	func_001FEC10	the exception-specification check the compiler calls
+__tf12Fault_1FD8A8	func_00200000	the type-information function of the allocation-failure exception (our class name)
+litodp	func_001FD358	long to double
+dpmul	func_001FCDE0	double multiply
+dpadd	func_001FCD20	double add
+dptofp	func_001FD578	double to float
+__10Val_114F48	func_0011B008	constructor of the value func_00114F48 builds
+_$_10Val_114F48	func_0011B060	its destructor

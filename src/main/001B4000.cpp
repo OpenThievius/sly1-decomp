@@ -2009,3 +2009,250 @@ extern const Fn_Table D_0021E3B8[8] = { (Fn_Table)func_001B5060, (Fn_Table)func_
 extern const Fn_Table D_0021E3D8[8] = { (Fn_Table)func_001B5200, (Fn_Table)(void (*)(Node_1B4AD0* node))func_001B4AD0, (Fn_Table)func_001B5278, (Fn_Table)func_001B5308, 0, (Fn_Table)func_001B4B48, 0, 0 };
 extern const Fn_Table D_0021E3F8[8] = { (Fn_Table)func_001B5398, (Fn_Table)(void (*)(Node_1B4AD0* node))func_001B4AD0, (Fn_Table)func_001B5400, (Fn_Table)func_001B5488, 0, (Fn_Table)func_001B4B48, 0, 0 };
 extern const Fn_Table D_0021E418[8] = { (Fn_Table)func_001B54D0, (Fn_Table)(void (*)(Node_1B4AD0* node))func_001B4AD0, 0, (Fn_Table)func_001B4B38, (Fn_Table)func_001B55C0, (Fn_Table)func_001B4B48, (Fn_Table)func_001B5568, 0 };
+
+struct Track_1B66A0
+{
+    u8 pad00[0x34];
+    f32 f34;
+};
+struct Edge_1B66A0
+{
+    Track_1B66A0* track;
+    s32 a;
+    s32 b;
+    u32 flags;
+    f32 weight;
+};
+struct Link_1B66A0
+{
+    s32 f0;
+    s32 next;
+};
+struct Graph_1B66A0
+{
+    u8 pad00[0x34];
+    s32 nodeCount;
+    Link_1B66A0* links;
+    s32 edgeCount;
+    Edge_1B66A0* edges;
+};
+struct Mover_1B66A0
+{
+    u8 pad00[0x18];
+    Graph_1B66A0* graph;
+    s32 f1C;
+    s32 f20;
+    void* f24;
+    s32 cur;
+    s32 f2C;
+    s32 target;
+    Edge_1B66A0* edge;
+    f32 f38;
+};
+
+void func_0018D608(void);
+void* func_0018D658(s32 size);
+void func_0018D6F0(void);
+f32 func_001EAAE0(f32 a, f32 b);
+void func_001B6E28(Mover_1B66A0* self, s32 a, s32 b);
+void func_0012C7B0(Track_1B66A0* track, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
+void func_0012F7E0(void* obj, void (*fn)(Mover_1B66A0*, s32, s32), Mover_1B66A0* self);
+void func_001B6CA8(Mover_1B66A0* self, s32 a, s32 b);
+void func_0012F190(void* obj, s32 zero);
+void func_0012E760(void* obj);
+void func_001B6D78(Mover_1B66A0* self, s32 a, Mover_1B66A0* b);
+
+void func_001B66A0(Mover_1B66A0* self)
+{
+    Graph_1B66A0* g = self->graph;
+    func_0018D608();
+    if (self->target == self->cur)
+    {
+        self->target = g->links[self->target].next;
+    }
+    s32 target = self->target;
+    if (target == -1)
+    {
+        goto fail;
+    }
+    {
+        s32 cur = self->cur;
+        s32* dist = (s32*)func_0018D658(g->nodeCount * 4);
+        s32 i;
+        s32 j;
+        Edge_1B66A0* p;
+        for (i = 0; i < g->nodeCount; i++)
+        {
+            dist[i] = (i == cur) ? 0 : -1;
+        }
+        s32 level = 1;
+        for (;;)
+        {
+            s32 changed = 0;
+            for (j = 0; j < g->edgeCount; j++)
+            {
+                p = &g->edges[j];
+                if (dist[p->a] == level - 1 && dist[p->b] < 0)
+                {
+                    dist[p->b] = level;
+                    changed = 1;
+                }
+                if ((p->flags & 1) && dist[p->b] == level - 1 && dist[p->a] < 0)
+                {
+                    dist[p->a] = level;
+                    changed = 1;
+                }
+            }
+            if (level == 1)
+            {
+                for (j = 0; j < g->edgeCount; j++)
+                {
+                    p = &g->edges[j];
+                    if (p->a == cur && p->b == cur)
+                    {
+                        dist[cur] = 1;
+                        changed = 1;
+                    }
+                }
+            }
+            if (!changed)
+            {
+                break;
+            }
+            if (dist[target] > 0)
+            {
+                goto found;
+            }
+            level++;
+        }
+        if (dist[target] < 0)
+        {
+            self->target = -1;
+            goto fail;
+        }
+    found:
+        for (i = 0; i < g->nodeCount; i++)
+        {
+            if (i != target && dist[i] == level)
+            {
+                dist[i] = -1;
+            }
+        }
+        for (s32 m = level; m > 1; m--)
+        {
+            level++;
+            for (j = 0; j < g->edgeCount; j++)
+            {
+                p = &g->edges[j];
+                if (dist[p->b] == level - 1 && dist[p->a] == m - 1)
+                {
+                    dist[p->a] = level;
+                }
+                if ((p->flags & 1) && dist[p->a] == level - 1 && dist[p->b] == m - 1)
+                {
+                    dist[p->b] = level;
+                }
+            }
+        }
+        Edge_1B66A0** cand = (Edge_1B66A0**)func_0018D658(g->edgeCount * 4);
+        Edge_1B66A0* e;
+        for (;;)
+        {
+            s32 n = 0;
+            for (j = 0; j < g->edgeCount; j++)
+            {
+                Edge_1B66A0* c = &g->edges[j];
+                if (dist[c->b] == level && c->a == cur)
+                {
+                    cand[n++] = c;
+                }
+                else if ((c->flags & 1) && dist[c->a] == level && c->b == cur)
+                {
+                    cand[n++] = c;
+                }
+            }
+            f32 sum = 0.0f;
+            for (i = 0; i < n; i++)
+            {
+                sum += cand[i]->weight;
+            }
+            f32 r = func_001EAAE0(0.0f, sum);
+            for (i = 0; i < n; i++)
+            {
+                r -= cand[i]->weight;
+                if (r < 0.0f)
+                {
+                    break;
+                }
+            }
+            e = cand[i];
+            if (e->track != 0)
+            {
+                break;
+            }
+            if (e->a == cur)
+            {
+                func_001B6E28(self, self->cur, e->b);
+                self->cur = cur = e->b;
+            }
+            else
+            {
+                func_001B6E28(self, self->cur, e->a);
+                self->cur = cur = e->a;
+            }
+            if (cur == target)
+            {
+                goto arrived;
+            }
+            level--;
+        }
+        {
+            f32 fa;
+            f32 fb;
+            if (e->a == cur)
+            {
+                self->f2C = e->b;
+                fa = 0.0f;
+                fb = self->f38;
+            }
+            else
+            {
+                self->f2C = e->a;
+                fb = -self->f38;
+                fa = e->track->f34;
+            }
+            void* old = self->f24;
+            self->edge = e;
+            self->f24 = 0;
+            if (e->track != 0)
+            {
+                func_0012C7B0(e->track, self->f1C, self->f20, &self->f24, fa, fb);
+                if (self->f24 != 0)
+                {
+                    func_0012F7E0(self->f24, func_001B6CA8, self);
+                }
+            }
+            if (old != 0)
+            {
+                func_0012F190(old, 0);
+                func_0012E760(old);
+            }
+            goto done;
+        }
+    }
+arrived:
+    func_001B66A0(self);
+    func_0018D6F0();
+    return;
+fail:
+    self->edge = 0;
+    if (self->f24 != 0)
+    {
+        func_0012F190(self->f24, 0);
+        func_0012E760(self->f24);
+        self->f24 = 0;
+    }
+done:
+    func_0018D6F0();
+    func_001B6D78(self, 0x14, self);
+}

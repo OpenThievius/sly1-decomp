@@ -1052,3 +1052,80 @@ void func_001DBC60(Obj_1DBC60* self, s32 a1, s32 a2, s32 a3, s32 a4)
     }
     func_001DBCC8(self, a1, a2, a3, a4);
 }
+
+struct Slot_1D8D90 { u8 pad0[0x50]; f32 v; u8 pad1[0xC]; };
+struct Obj_1D8D90 { u8 pad0[0xD0]; f32 fD0; f32 fD4; u8 pad1[0x610 - 0xD8]; f32 f610; f32 f614; u8 pad2[0x694 - 0x618]; f32 f694; f32 f698; f32 f69C; u8 pad3[0x6B0 - 0x6A0]; Slot_1D8D90 slots[4]; };
+extern f32 D_002754F8; extern f32 D_002754F4; extern f32 D_00261860; extern u8 D_002754E8[];
+f32 func_00205778(f32 a, f32 b); f32 func_001EA408(f32 a); f32 func_001EA480(f32 a, f32 b); f32 func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
+void func_001D8D90(Obj_1D8D90* self)
+{
+    f32 a = func_00205778(self->fD4, self->fD0);
+    f32 b = func_001EA408(self->f694 - a);
+    f32 c = func_001EA480(D_002754F8 * b, D_002754F4);
+    self->f69C = func_001EA728(D_002754E8, 0, self->f69C, c, D_00261860);
+    for (u32 i = 0; i < 4; i++) {
+        Slot_1D8D90* s = &self->slots[i];
+        if ((s32)i < 2) {
+            s->v = self->f698 / self->f610;
+        } else {
+            s->v = self->f698 / self->f614;
+        }
+    }
+}
+
+extern s32 D_00269C90;
+extern s32 D_00262E10;
+extern s32 D_00262C6C;
+extern void* D_00261990;
+extern u8 D_00275BC0[];
+extern s32 D_002640A4;
+extern f32 D_00261854;
+extern s32 D_00261D38;
+
+void func_00192880(s32 index);
+void func_0016E148(void);
+void func_00143AF0(void* obj);
+void func_001DFD70(void);
+void func_0017FD70(void);
+void func_00191EE8(void);
+void func_00169CA0(void);
+void func_001C07B0(void);
+void func_001B40C8(void);
+void func_0011C040(void);
+void func_001E9688(void* a);
+void func_0018D550(void);
+
+struct __attribute__((packed)) Word_1DB838 { s32 v; };
+extern u8 D_0026E760[];
+extern u8 D_0026CE48[];
+
+void func_001DB838(s32 a0)
+{
+    if (a0 != 0) {
+        func_00192880(-1);
+        D_00269C90 = 0;
+        D_00262E10 = 0;
+        D_00262C6C = 0;
+        func_0016E148();
+        func_00143AF0(D_00261990);
+        func_001DFD70();
+        func_0017FD70();
+        func_00191EE8();
+        func_00169CA0();
+        func_001C07B0();
+        func_001B40C8();
+        func_0011C040();
+        func_001E9688(D_00275BC0);
+        func_0018D550();
+        u8* c = D_0026CE48;
+        u8* e = D_0026E760;
+        D_00261990 = 0;
+        D_002640A4 = 0;
+        D_00261854 = 1.0f;
+        ((Word_1DB838*)(c + 0x274))->v = 0;
+        ((Word_1DB838*)(e + 0x280))->v = 0;
+        D_00261D38 = 0;
+        *(s32*)(c + 0x278) = 0;
+        *(s32*)(e + 0x28C) = 0;
+    }
+}

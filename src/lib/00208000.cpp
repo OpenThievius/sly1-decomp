@@ -1427,3 +1427,407 @@ void func_0020B870(Chan_20B870* c) {
     *(volatile u32*)0x10002010 = 0x40000000;
     func_00211AD8(0, 0);
 }
+
+struct Child_0020B570 { u8 pad[0x174]; s32 kind; };
+struct Owner_0020B570 {
+    u8 pad[0x40];
+    Child_0020B570* child;
+};
+
+s32 func_0020B458(Owner_0020B570* self, s32 a, s32 b);
+s32 func_0020B5B8(Owner_0020B570* self, s32 a, s32 b);
+
+s32 func_0020B570(Owner_0020B570* self, s32 a, s32 b)
+{
+    if (self->child->kind != 3) {
+        return func_0020B5B8(self, a, b);
+    }
+    return func_0020B458(self, a, b);
+}
+
+struct Dev_20B810 {
+    u8 pad0[0x590];
+    u8* f590;
+    u8* f594;
+    u8 pad1[0x6D0 - 0x598];
+    u8* f6D0;
+    u8* f6D4;
+    u8 pad2[0x810 - 0x6D8];
+    u32 f810;
+};
+
+void func_0020DEE8(s32 a);
+
+void func_0020B810(Dev_20B810* self)
+{
+    u8* spr = (u8*)0x70000000;
+    func_0020DEE8(1);
+    self->f590 = spr;
+    self->f594 = spr + 0x1800;
+    self->f6D0 = spr + 0x1B00;
+    self->f6D4 = spr + 0x3300;
+    self->f810 = 0;
+}
+
+struct Obj_209B80;
+struct Q_209B80;
+struct Dev_209B80;
+extern s32 D_0027AEC8;
+extern s32 D_0027AECC;
+extern u8 D_0062AD40[];
+s32 func_001F8480(Q_209B80* q);
+s32 func_00209B38(Obj_209B80* o);
+s32 func_001F6B40(Dev_209B80* d);
+
+s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
+{
+    s32 ok;
+    if (D_0027AEC8 == 0) {
+        return -1;
+    }
+    ok = func_001F8480((Q_209B80*)D_0062AD40);
+    if (a0 == 0 && ok != 0) {
+        while (func_001F8480((Q_209B80*)D_0062AD40) != 0) {
+            (void)func_00209B38((Obj_209B80*)60);
+        }
+        ok = 0;
+    }
+    ok = (ok == 0);
+    if (a1 != 0) {
+        *a1 = D_0027AEC8;
+    }
+    if (ok != 0) {
+        D_0027AEC8 = 0;
+        if (a2 != 0) {
+            *a2 = (*(s32*)&D_0062C300);
+        }
+        (void)func_001F6B40((Dev_209B80*)D_0027AECC);
+    }
+    return ok;
+}
+
+void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6, u32* a7, u32* p9, u32 p10, u32 p11, u32 p12, s32 p13, s32 p14)
+{
+    u32 mask = 0x0FFFFFFF;
+    u32 bits = 0x20000000;
+    s32 n = (p13 * p14) / 512;
+    *a0 = (p10 & mask) | bits;
+    *a1 = (p11 & mask) | bits;
+    *a2 = (p12 & mask) | bits;
+    *a3 = (p10 & mask) | bits;
+    *a4 = (p11 & mask) | bits;
+    *a5 = (p12 & mask) | bits;
+    u32 y2 = n * 0x180;
+    y2 = ((y2 + p10) & mask) | bits;
+    u32 u2 = n * 0x180;
+    u2 = ((u2 + p11) & mask) | bits;
+    u32 v2 = n * 0x180;
+    v2 = ((v2 + p12) & mask) | bits;
+    *a6 = y2;
+    *a7 = u2;
+    *p9 = v2;
+}
+
+struct Reg_0020A078 {
+    u8 pad0[0x24];
+    s32 f24;
+};
+
+struct Buf_0020A078 {
+    s32 f0;
+    s32 f4;
+    u8 pad8[0xC];
+    s8 text14[0x400];
+};
+
+s32 func_001F6B70(s32 v);
+void func_001F6B40(s32 v);
+void func_00201720(s8* dst, s8* src, s32 n);
+Buf_0020A078* func_001F8290(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
+
+extern s32 D_0027AECC;
+extern s32 D_0027AEC8;
+
+s32 func_0020A078(s32 a0, s32 a1, s8* a2)
+{
+    Reg_0020A078* reg;
+    Buf_0020A078* buf;
+    Buf_0020A078* res;
+
+    if (func_001F6B70(D_0027AECC) < 0) {
+        return -200;
+    }
+    reg = ((Reg_0020A078*)&D_0062AD40);
+    if (reg->f24 == 0) {
+        func_001F6B40(D_0027AECC);
+        return -100;
+    }
+    if (a2 == 0 || *a2 == 0) {
+        func_001F6B40(D_0027AECC);
+        return -210;
+    }
+    buf = ((Buf_0020A078*)&D_0062ADF0);
+    buf->f0 = a0;
+    buf->f4 = a1;
+    func_00201720(buf->text14, a2, 0x3FF);
+    buf->text14[0x3FF] = 0;
+    res = func_001F8290(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
+    if (res == 0) {
+        D_0027AEC8 = 0x12;
+    } else {
+        func_001F6B40(D_0027AECC);
+    }
+    return (s32)res;
+}
+
+struct Ent_20B458 {
+    u8 pad0[0x4];
+    s32 f4;
+    s32 f8;
+    u8 pad1[0xAC - 0xC];
+    s32 fAC;
+    u8 pad2[0x118 - 0xB0];
+    s32 f118;
+    s32 f11C;
+    s32 f120;
+    u8 pad3[0x174 - 0x124];
+    s32 f174;
+};
+struct Ctx_20B458 {
+    u8 pad0[0x8];
+    s32 f8;
+    u8 pad1[0x40 - 0xC];
+    Ent_20B458* f40;
+};
+struct Ent_arg_20B458 { u32 v; };
+
+extern s32 func_002101F0(Ent_20B458* e, u32 a1);
+extern s32 func_00210090(Ent_20B458* e);
+extern void func_00210160(Ent_20B458* e, s32 a1, s32 a2);
+extern s32 func_0020B1E0(Ctx_20B458* c);
+
+struct Ent_ops_20B458 {
+    static s8 Ready(Ent_20B458* e)
+    {
+        s32 t = func_002101F0(e, 0);
+        s8 r = 0;
+        if (t != 0) {
+            r = func_00210090(e) != 0;
+        }
+        return r;
+    }
+};
+
+s32 func_0020B458(Ctx_20B458* s1, s32 a1, s32 a2)
+{
+    s32 s2;
+    Ent_20B458* s0 = s1->f40;
+    s32 s3 = 0;
+
+    if (a2 == -1 || a1 < a2) {
+        if (s0->f8 == 0) {
+            s1->f8 = 0;
+            s0->f8 = 1;
+        }
+        s2 = Ent_ops_20B458::Ready(s0);
+    } else {
+        s2 = func_002101F0(s0, 0);
+        s3 = 1;
+        (void)func_0020B1E0(s1);
+    }
+    func_00210160(s0, s0->f118, s0->f4);
+    if (s0->f174 == 3) {
+        ;
+    } else if (s3 == 0) {
+        s0->f120 = (s0->f120 == 0);
+    }
+    s1->f8 = s0->f118 - s0->fAC;
+    if (s0->f120 == 0) {
+        s0->f118 = s0->f118 + 1;
+        s0->f4 = s0->f4 + 1;
+    }
+    return s2;
+}
+
+struct Pool_209990 { u8 pad000[0x24]; s32 f24; };
+struct Obj_209990 { u8 pad000[0x20]; };
+struct Ctx_209990 { s32 f00; u8 p04[8]; s32 f0C; u8 p10[4]; u32 f14; s32 f18; u8 p1C[4]; u8 buf[16]; };
+extern s32 D_0027AEC8;
+extern u8 D_0062C300[];
+
+s32 func_001F6B70(Obj_209990* a);
+void func_001F6B40(Obj_209990* a);
+void func_001F6C20(s32 a);
+s32 func_001F8290(Pool_209990* p, s32 a1, s32 a2, Ctx_209990* a3, s32 a4, u8* a5, s32 a6, s32 a7, s32 stk);
+
+s32 func_00209990(s32 self, u32 src, s32 n)
+{
+    s32 r;
+    if (func_001F6B70((*(Obj_209990**)&D_0027AECC)) < 0) {
+        return -200;
+    }
+    if ((*(Pool_209990*)&D_0062AD40).f24 == 0) {
+        func_001F6B40((*(Obj_209990**)&D_0027AECC));
+        return -100;
+    }
+    (*(Ctx_209990*)&D_0062ADC0).f00 = self;
+    if (n < 17) {
+        (*(Ctx_209990*)&D_0062ADC0).f14 = n;
+        (*(Ctx_209990*)&D_0062ADC0).f0C = 0;
+        (*(Ctx_209990*)&D_0062ADC0).f18 = 0;
+    } else {
+        u32 lo = src - 16;
+        s32 off = ((src - 1) & ~0xF) - lo;
+        (*(Ctx_209990*)&D_0062ADC0).f0C = n - off;
+        (*(Ctx_209990*)&D_0062ADC0).f14 = off;
+        (*(Ctx_209990*)&D_0062ADC0).f18 = src + off;
+    }
+    {
+        u32 i;
+        for (i = 0; i < (*(Ctx_209990*)&D_0062ADC0).f14; i++) {
+            (*(Ctx_209990*)&D_0062ADC0).buf[i] = ((u8*)src)[i];
+        }
+    }
+    func_001F6C20(0);
+    r = func_001F8290(((Pool_209990*)&D_0062AD40), 6, 1, ((Ctx_209990*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    if (r == 0) {
+        D_0027AEC8 = 6;
+    } else {
+        func_001F6B40((*(Obj_209990**)&D_0027AECC));
+    }
+    return r;
+}
+
+struct Ctx_20A220;
+enum Kind_20A220 { KIND_6_20A220 = 6 };
+struct Args_20A220 {
+    Kind_20A220 f0;
+    u8* f4;
+    u8* f8;
+    s32 fC;
+    u64 f10;
+    u64 f18;
+};
+typedef s32 (*Handler_20A220)(Ctx_20A220* ctx, Args_20A220* args, void* arg);
+struct Ent_20A220 {
+    u64 f0;
+    u64 f8;
+    Handler_20A220 f10;
+    void* f14;
+};
+struct Prog_20A220 {
+    u8 pad[0x44];
+    Ent_20A220* f44;
+    s32 f48;
+};
+struct Ctx_20A220 {
+    u8 pad[0x40];
+    Prog_20A220* f40;
+};
+struct Bits_20A220 {
+    u64 f0;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    u64 f18;
+    s32 f20;
+    s32 f24;
+    s32 f28;
+    s32 f2C;
+};
+struct Rec_20A220 {
+    u8 pad[0x18];
+    u64 f18;
+    u64 f20;
+    u64 f28;
+    u64 f30;
+    s32 f38;
+    s32 f3C;
+    s32 f40;
+    s32 f44;
+    s32 f48;
+    s32 f4C;
+};
+
+void func_002115C0(Bits_20A220* s, s32 a1, s32 a2, s32 a3);
+s32 func_002115F8(Bits_20A220* s, s32 n);
+u8* func_002117A0(Bits_20A220* s, s32 n);
+void func_0020A630(Bits_20A220* s, Rec_20A220* r);
+s32 func_0020A7F0(Prog_20A220* p, Bits_20A220* s, u64* r);
+
+s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)
+{
+    Bits_20A220 bits;
+    Rec_20A220 rec;
+    Args_20A220 args;
+    Bits_20A220* s;
+    Rec_20A220* r;
+    Handler_20A220 handler;
+    void* handlerArg;
+    Ent_20A220* table;
+    s32 result;
+    Prog_20A220* prog;
+    s32 ok;
+    Kind_20A220 kind;
+    s32 i;
+
+    r = &rec;
+    prog = ctx->f40;
+    handler = 0;
+    handlerArg = 0;
+    ok = 1;
+    i = 0;
+    table = prog->f44;
+    func_002115C0(&bits, a1, a3, a4);
+    s = &bits;
+    result = 0;
+    for (; handler == 0 && i < prog->f48; i++) {
+        if (table[i].f0 == 0xBDFF000000ULL) {
+            handler = table[i].f10;
+            handlerArg = table[i].f14;
+        }
+    }
+    for (;;) {
+        if (func_002115F8(s, 0x20) == 0x1BA) {
+            func_0020A630(s, r);
+        }
+        kind = KIND_6_20A220;
+        while (func_002115F8(s, 0x18) == 1 && func_002115F8(s, 0x20) != 0x1BA &&
+               func_002115F8(s, 0x20) != 0x1B9 && s->f18 < count * 8 && ok != 0) {
+            (void)func_0020A7F0(prog, s, &r->f18);
+            if (s->f18 > count * 8) {
+                continue;
+            }
+            for (i = 0; i < prog->f48; i++) {
+                Ent_20A220* e = &table[i];
+                if (e->f0 == (r->f18 & e->f8)) {
+                    args.f0 = kind;
+                    args.f4 = func_002117A0(s, r->f40);
+                    args.f8 = func_002117A0(s, r->f38);
+                    args.f10 = r->f28;
+                    args.fC = r->f3C;
+                    args.f18 = r->f30;
+                    ok = e->f10(ctx, &args, e->f14);
+                    break;
+                }
+            }
+            if (i == prog->f48 && handler != 0) {
+                args.f0 = kind;
+                args.f4 = func_002117A0(s, r->f40);
+                args.f8 = func_002117A0(s, r->f38);
+                args.f10 = r->f28;
+                args.fC = r->f3C;
+                args.f18 = r->f30;
+                ok = handler(ctx, &args, handlerArg);
+            }
+            if (ok != 0) {
+                result = (s32)(s->f18 >> 3);
+            }
+        }
+        if (s->f18 > count * 8 || func_002115F8(s, 0x20) != 0x1BA) {
+            break;
+        }
+    }
+    return result;
+}

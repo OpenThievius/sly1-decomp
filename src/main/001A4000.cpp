@@ -2085,3 +2085,119 @@ void func_001A6BE0(Obj_1A6BE0* self, s32 mode)
     if (h) func_0012C288(0.0f, 1.0f, h, self, w - buf, buf, 1, &self->p59C);
     if (s3) self->p5A8 = func_001B6290(s3, self, -1, 1);
 }
+
+extern f32 D_00261858[];
+
+struct Entry_1A7B88 { s32 f0; u8 b[2]; u8 pad[2]; f32 delay; };
+struct Table_1A7B88 { s32 count; Entry_1A7B88 entries[1]; };
+struct Obj_1A7B88 { u8 pad0[0x4]; void* owner; s32 channel; s32 state; Table_1A7B88* table; s32 index; f32 f18; f32 f1C; };
+
+void func_001A7D98(void* self, s32 mode);
+void func_001A7E40(Obj_1A7B88* self);
+s32 func_002049E8(void* owner, s32 channel, u8* bytes);
+
+void func_001A7B88(Obj_1A7B88* s)
+{
+    f32 dt = D_00261858[5];
+    switch (s->state) {
+    case 2:
+        if (*(s32*)D_00261858 != 0 && s->f18 > 0.0f) {
+            s->f1C -= dt;
+            if (s->f1C <= 0.0f) {
+                s->index++;
+                if (s->index >= s->table->count) {
+                    s->index = 0;
+                }
+                u8 bytes[2];
+                Entry_1A7B88* e = (Entry_1A7B88*)((u8*)s->table + (s->index << 3));
+                bytes[0] = e->b[0];
+                bytes[1] = e->b[1];
+                func_002049E8(s->owner, s->channel, bytes);
+                s->f1C = ((Entry_1A7B88*)((u8*)s->table + (s->index << 3)))->delay;
+            }
+            s->f18 -= dt;
+        } else {
+            func_001A7D98(s, 3);
+        }
+        break;
+    case 3:
+    case 4:
+        if (s->f1C > 0.0f) {
+            func_001A7E40(s);
+            s->f1C -= dt;
+        } else {
+            func_001A7D98(s, s->state == 3);
+        }
+        break;
+    }
+}
+
+struct Self_1A5760 { u8 pad[1]; };
+#define F(o) (*(f32*)((u8*)self + (o)))
+#define I(o) (*(s32*)((u8*)self + (o)))
+
+struct Poly_1A5760 { f32 a, b, c; };
+struct Range_1A5760 { f32 lo, hi; };
+f32 func_001EAAE0(f32 a, f32 b);
+
+struct Curve_1A5760 {
+    static f32 Eval(const Poly_1A5760* p, f32 t)
+    {
+        return p->a + t * (p->b + t * p->c);
+    }
+    static void Clamp(f32& c, f32 v, const Range_1A5760* r)
+    {
+        f32 lo = r->lo;
+        f32 hi = r->hi;
+        if (v < lo) {
+            c = lo;
+        } else if (hi < v) {
+            c = hi;
+        } else {
+            c = v;
+        }
+    }
+    static void Get(f32& c, const Poly_1A5760* p, f32 t)
+    {
+        Clamp(c, Eval(p, t), ((Range_1A5760*)&D_00275C60));
+    }
+};
+
+#define P(o) ((const Poly_1A5760*)((u8*)self + (o)))
+
+void func_001A5760(Self_1A5760* self, f32 dt)
+{
+    f32 t0;
+    Curve_1A5760::Get(t0, P(0x5B0), dt);
+    F(0x62C) = (1.0f - t0) * F(0x5A0) + t0 * F(0x5A8);
+    F(0x630) = (1.0f - t0) * F(0x5A4) + t0 * F(0x5AC);
+
+    f32 t1;
+    Curve_1A5760::Get(t1, P(0x5D0), dt);
+    F(0x638) = (1.0f - t1) * F(0x5C0) + t1 * F(0x5C8);
+    F(0x63C) = (1.0f - t1) * F(0x5C4) + t1 * F(0x5CC);
+
+    f32 t2;
+    Curve_1A5760::Get(t2, P(0x5F0), dt);
+    F(0x644) = (1.0f - t2) * F(0x5E0) + t2 * F(0x5E4);
+
+    f32 t3;
+    Curve_1A5760::Get(t3, P(0x610), dt);
+    F(0x648) = (1.0f - t3) * F(0x600) + t3 * F(0x604);
+
+    f32 t4;
+    Curve_1A5760::Get(t4, P(0x570), dt);
+    s32 n = (s32)((1.0f - t4) * F(0x560) + t4 * F(0x564));
+    if (I(0x624) < n && I(0x380) == I(0x624)) {
+        F(0x634) = (*(f32*)&D_0026185C) + func_001EAAE0(F(0x62C), F(0x630));
+    }
+    I(0x624) = n;
+
+    f32 t5;
+    Curve_1A5760::Get(t5, P(0x590), dt);
+    n = (s32)((1.0f - t5) * F(0x580) + t5 * F(0x584));
+    if (I(0x628) < n && I(0x39C) == I(0x628)) {
+        F(0x640) = (*(f32*)&D_0026185C) + func_001EAAE0(F(0x638), F(0x63C));
+    }
+    I(0x628) = n;
+}

@@ -395,7 +395,7 @@ struct Obj_00200C40 {
 };
 
 s32 func_00200D58(void* a0, void* a1, s32 a2, void* a3, void* a4, struct Obj_00200C40* a5);
-s32 func_00201460(void);
+void* func_00201460(void);
 
 s32 func_00200C40(struct Obj_00200C40* p) {
     s32 r = 0;
@@ -1615,3 +1615,372 @@ extern const Fn_Table D_0024F3E8[4] = { 0, (Fn_Table)func_002012A0, 0, (Fn_Table
 extern const Fn_Table D_0024F3F8[4] = { 0, (Fn_Table)func_00201310, 0, (Fn_Table)func_00201360 };
 extern const Fn_Table D_0024F418[4] = { 0, (Fn_Table)func_002013F0, 0, (Fn_Table)func_00201440 };
 extern const Fn_Table D_0024F428[4] = { 0, (Fn_Table)(void* (*)(struct Self_00201460* a0))func_00201460, 0, (Fn_Table)func_002014B0 };
+
+struct Obj_202098 { u8 pad0[0x20]; u64 out; u8 pad1[0x8]; u64 in; };
+
+void func_00202098(struct Obj_202098* self, s16 a1, s16 a2, s16 a3)
+{
+    u64 v = self->in;
+    s64 y = (u64)((s32)((v >> 48) & 0x7FF) + 1) >> 1;
+    s64 b2 = a2;
+    s64 b1 = a1;
+    s64 x = (u64)((s32)((v >> 16) & 0x7FF) + 1) >> 1;
+    b2 -= y;
+    b1 -= x;
+    s64 t = b2 << 4;
+    u64 lo = b1 << 4;
+    u64 hi;
+    if (a3 != 0) {
+        hi = (u64)(t + 8) << 32;
+    } else {
+        hi = (u64)t << 32;
+    }
+    self->out = lo | hi;
+}
+
+extern u8 D_0027AE48[];
+extern u8 D_0027A600[];
+s32 func_002033D8(s32);
+s32 func_001F8290(void*, s32, s32, s32, s32, void*, s32, s32, s32);
+
+s32 func_00203E28(void)
+{
+    if (func_002033D8(0x1E) == 0) {
+        return 0;
+    }
+    (*(volatile s32*)&D_00279454) = 8;
+    if (func_001F8290(D_0027AE48, 0x16, 0, 0, 0, D_0027A600, 4, 0, 0) < 0) {
+        func_001F6B40((*(volatile s32*)&D_0027942C));
+        (*(volatile s32*)&D_00279454) = 0;
+        return 0;
+    }
+    (*(volatile s32*)&D_00279454) = 0;
+    s32 r = *(s32*)((u32)D_0027A600 | 0x20000000);
+    func_001F6B40((*(volatile s32*)&D_0027942C));
+    return r;
+}
+
+struct Obj_00201578 {
+    s32 err;
+    u8 pad4[0x1D0];
+    s32* table;
+};
+
+typedef void (*Fn_00201578)(u32 index);
+
+s32 func_00201500(Obj_00201578* self);
+u32 func_00201700(Obj_00201578* self);
+s32 func_002016A0(Obj_00201578* self, u32 entry, u32 index);
+
+s32 func_00201578(Obj_00201578* self, u32 index)
+{
+    s32 ret = 0;
+    Fn_00201578 fn;
+
+    if (index >= 0x20) {
+        self->err = 0x16;
+        return -1;
+    }
+    if (self->table == 0) {
+        if (func_00201500(self) != 0) {
+            return -1;
+        }
+    }
+    switch (self->table[index]) {
+    case 0:
+        return func_002016A0(self, func_00201700(self), index);
+    case 1:
+        break;
+    case -1:
+        self->err = 0x16;
+        ret = 1;
+        break;
+    default:
+        fn = (Fn_00201578)self->table[index];
+        self->table[index] = 0;
+        fn(index);
+        break;
+    }
+    return ret;
+}
+
+typedef s32 Q_00203EE0;
+
+extern u8 D_0027A600[];
+extern u8 D_0027AE48[];
+
+s32 func_002033D8(Q_00203EE0 code);
+void func_001FA7D8(Q_00203EE0* p, s32 n);
+s32 func_001F8290(Q_00203EE0* a0, s32 a1, s32 a2, Q_00203EE0* a3, s32 a4, Q_00203EE0* a5, s32 a6, s32 a7, s32 a8);
+void func_001F6B40(Q_00203EE0 code);
+
+s32 func_00203EE0(Q_00203EE0 self, s32* out)
+{
+    s32 base;
+    s32 r;
+    Q_00203EE0* g = (Q_00203EE0*)((s32*)&D_0027AA40);
+
+    if (func_002033D8(0x1A) != 0) {
+        (*(s32*)&D_0027AA40) = self;
+    } else {
+        return -1;
+    }
+    func_001FA7D8(g, 4);
+    base = (s32)D_0027A600;
+    r = func_001F8290((Q_00203EE0*)D_0027AE48, 5, 0, g, 4, (Q_00203EE0*)base, 8, 0, 0);
+    if (r < 0) {
+        func_001F6B40((*(volatile s32*)&D_0027942C));
+        return -1;
+    }
+    if (out != 0) {
+        *out = *(s32*)((u32)(base + 4) | 0x20000000);
+    }
+    base = *(s32*)((u32)base | 0x20000000);
+    func_001F6B40((*(volatile s32*)&D_0027942C));
+    return base;
+}
+
+struct Obj_200220;
+struct VT_200220 { s16 pad[8]; s16 delta; s16 pad2; s32 (*fn)(Obj_200220* self, s32 a, s32 b, s32 c, s32 d, s32 e); };
+struct Obj_200220 { s32 x0; VT_200220* vt; };
+struct Ent_200220 { Obj_200220* obj; u32 w; };
+struct Tab_200220 { s32 p0; s32 p4; Ent_200220* ents; u32 count; };
+
+s32 func_002000B0(Tab_200220* a, Obj_200220* b);
+
+s32 func_00200220(Tab_200220* self, Obj_200220* o, s32 flag, u8* base, s32 p, s32 q)
+{
+    s32 res;
+    u32 i;
+
+    if (func_002000B0(self, o)) {
+        return (s32)base;
+    }
+    res = 0;
+    for (i = 0; i < self->count; i++) {
+        s32 r;
+        Obj_200220* ob;
+        if (flag && (self->ents[i].w >> 30) != 1) {
+            continue;
+        }
+        r = (s32)(base + (self->ents[i].w & 0x1FFFFFFF));
+        if ((self->ents[i].w >> 29) & 1) {
+            r = *(s32*)r;
+        }
+        ob = self->ents[i].obj;
+        r = ob->vt->fn((Obj_200220*)((u8*)ob + ob->vt->delta), (s32)o, flag, r, p, q);
+        if (r != 0) {
+            if (res == 0) {
+                res = r;
+            } else if (res != r) {
+                if (p != 0) {
+                    s32 a, b;
+                    a = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, res, 0, 0);
+                    b = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, r, 0, 0);
+                    if (a == b) {
+                    } else if (a == q) {
+                        continue;
+                    } else if (b == q) {
+                        res = r;
+                        continue;
+                    }
+                }
+                return 0;
+            }
+        }
+    }
+    return res;
+}
+
+struct Cfg_2028A8 {
+    u8 a, b, c, d;
+    u16 e, f;
+    u16 g, h;
+    void* i;
+    u32 j;
+};
+
+extern u8 D_002793A8[];
+extern u8 D_002793B8[];
+extern u8 D_002793C8[];
+extern Cfg_2028A8 D_002793D8;
+
+s32 func_002028A8(Cfg_2028A8* c)
+{
+    u32 r = *(volatile u32*)0x1000E000;
+    u32 w20 = *(volatile u32*)0x1000E020;
+    u32 w30 = *(volatile u32*)0x1000E030;
+    u32 w50 = *(volatile u32*)0x1000E050;
+    u32 w40 = *(volatile u32*)0x1000E040;
+    if (c->a >= 10) return -1;
+    if (c->b >= 10) return -2;
+    if (c->c >= 10) return -3;
+    if (c->d >= 7) return -4;
+    r = (r & ~0x30u) | (D_002793A8[c->a] << 4);
+    r = (r & ~0xC0u) | (D_002793B8[c->b] << 6);
+    r = (r & ~0xCu) | (D_002793C8[c->c] << 2);
+    if (c->d) {
+        r |= 2;
+        r = (r & ~0x300u) | ((c->d - 1) << 8);
+    } else {
+        r &= ~2u;
+    }
+    w20 = (c->e << 16) | c->f;
+    w30 = (c->h << 16) | c->g;
+    w40 = c->j;
+    *(volatile u32*)0x1000E000 = r;
+    *(volatile u32*)0x1000E020 = w20;
+    w50 = (u32)c->i;
+    *(volatile u32*)0x1000E030 = w30;
+    *(volatile u32*)0x1000E050 = w50;
+    *(volatile u32*)0x1000E040 = w40;
+    D_002793D8 = *c;
+    return 0;
+}
+
+struct Obj_200778;
+typedef void* (*Fn_200778)(Obj_200778* self, Obj_200778* want, s32 boff, void* obj, void* sub, void* subobj);
+struct Slot_200778
+{
+    s16 off;
+    s16 idx;
+    void* fn;
+};
+struct Obj_200778
+{
+    const char* name;
+    Slot_200778* vtbl;
+    Obj_200778* type;
+    s32 attr;
+};
+
+s32 func_002000B0(Obj_200778* a, Obj_200778* b);
+void* func_00200D58(void* a0, void* a1, s32 a2, void* a3, void* a4, Obj_200778* a5);
+void* func_00200530(void);
+void* func_00200710(void);
+void* func_00201460(void);
+void* func_002013F0(void);
+void* func_00201310(void);
+
+template <void* (*TF)(void)> struct Cast_200778
+{
+    static Obj_200778* To(Obj_200778* p)
+    {
+        if (p == 0)
+            return 0;
+        return (Obj_200778*)func_00200D58(p->vtbl->fn, (void*)TF, 1, (u8*)p + p->vtbl->off, (void*)(void* (*)(void))func_00200710, p);
+    }
+};
+
+void* func_00200778(Obj_200778* want, Obj_200778* have, void* obj)
+{
+    void* ret;
+    Obj_200778* p;
+
+    if (func_002000B0(want, have) != 0)
+        return obj;
+    ret = 0;
+    p = Cast_200778<func_00200530>::To(have);
+    if (p != 0)
+    {
+        Slot_200778* s = &p->vtbl[2];
+        ret = ((Fn_200778)s->fn)((Obj_200778*)((u8*)p + s->off), want, 1, obj, 0, 0);
+    }
+    else
+    {
+        Obj_200778* fr = Cast_200778<func_00201460>::To(have);
+        if (fr != 0)
+        {
+            Obj_200778* to = Cast_200778<func_00201460>::To(want);
+            if (to != 0)
+            {
+                Obj_200778* subfr = fr->type;
+                Obj_200778* subto = to->type;
+                s32 cvfrom;
+                s32 cvto;
+                Obj_200778* at = Cast_200778<func_002013F0>::To(subfr);
+                if (at != 0)
+                {
+                    cvfrom = at->attr;
+                    subfr = at->type;
+                }
+                else
+                    cvfrom = 0;
+                at = Cast_200778<func_002013F0>::To(subto);
+                if (at != 0)
+                {
+                    cvto = at->attr;
+                    subto = at->type;
+                }
+                else
+                    cvto = 0;
+                if ((cvfrom & 1) <= (cvto & 1) && (cvfrom & 2) <= (cvto & 2))
+                {
+                    if (func_002000B0(subto, subfr) != 0)
+                        ret = obj;
+                    else if (func_002000B0(subto, (Obj_200778*)func_00200E08()) != 0
+                             && (subfr == 0 || Cast_200778<func_00201310>::To(subfr) == 0))
+                        ret = obj;
+                    else if ((p = Cast_200778<func_00200530>::To(subfr)) != 0)
+                    {
+                        Slot_200778* s = &p->vtbl[2];
+                        ret = ((Fn_200778)s->fn)((Obj_200778*)((u8*)p + s->off), subto, 1, obj, 0, 0);
+                    }
+                    else
+                    {
+                        Obj_200778* pfr = Cast_200778<func_00201460>::To(subfr);
+                        if (pfr != 0)
+                        {
+                            Obj_200778* pto;
+                            pto = Cast_200778<func_00201460>::To(subto);
+                            if (pto != 0)
+                            {
+                                s32 constp = cvto & 1;
+                                subto = pto->type;
+                                subfr = pfr->type;
+                                for (;;)
+                                {
+                                    at = Cast_200778<func_002013F0>::To(subfr);
+                                    if (at != 0)
+                                    {
+                                        cvfrom = at->attr;
+                                        subfr = at->type;
+                                    }
+                                    else
+                                        cvfrom = 0;
+                                    at = Cast_200778<func_002013F0>::To(subto);
+                                    if (at != 0)
+                                    {
+                                        cvto = at->attr;
+                                        subto = at->type;
+                                    }
+                                    else
+                                        cvto = 0;
+                                    if ((cvfrom & 1) > (cvto & 1) || (cvfrom & 2) > (cvto & 2))
+                                        goto done;
+                                    if (!constp && ((cvfrom & 1) < (cvto & 1) || (cvfrom & 2) < (cvto & 2)))
+                                        goto done;
+                                    if (func_002000B0(subto, subfr) != 0)
+                                    {
+                                        ret = obj;
+                                        break;
+                                    }
+                                    pto = Cast_200778<func_00201460>::To(subto);
+                                    pfr = Cast_200778<func_00201460>::To(subfr);
+                                    if (pto == 0 || pfr == 0)
+                                        goto done;
+                                    if (!(cvto & 1))
+                                        constp = 0;
+                                    subto = pto->type;
+                                    subfr = pfr->type;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+done:
+    return ret;
+}

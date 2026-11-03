@@ -1084,3 +1084,286 @@ void func_00189230(Vec3_189230* v, f32* a1, f32* a2)
     *a1 = func_00205778(v->y, v->x);
     *a2 = func_00205778(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
 }
+
+struct State_189F58 {
+    f32 f00;
+    u8 pad04[0x10];
+    f32 f14;
+    u8 pad18[8];
+    f32 f20;
+    f32 f24;
+    f32 f28;
+    f32 f2C;
+    u8 pad30[8];
+    f32 f38;
+};
+extern void func_001F5C0C(State_189F58* p, s32 v, s32 n);
+
+void func_00189F58(State_189F58* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
+{
+    func_001F5C0C(self, 0, 0x40);
+    f32 value = (e + f) / (e - f);
+    self->f00 = a;
+    self->f20 = c;
+    self->f14 = b;
+    self->f24 = d;
+    self->f28 = value;
+    self->f38 = e * (1.0f - value);
+    self->f2C = 1.0f;
+}
+
+void func_00188C10(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
+{
+    s32 i;
+    s32 j;
+    f32* trans = out[3];
+    f32* col = &out[0][3];
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++)
+            out[i][j] = rot[i][j] * scale[i];
+    }
+    for (i = 0; i < 3; i++)
+        trans[i] = pos[i];
+    for (i = 2; i >= 0; i--)
+        col[i * 4] = 0.0f;
+    out[3][3] = 1.0f;
+}
+
+void func_001EAD88(f32 angle, f32* a, f32* b);
+
+void func_00188A20(f32* in, f32* out)
+{
+    f32 sc[6];
+    func_001EAD88(in[0], &sc[0], &sc[1]);
+    func_001EAD88(in[1], &sc[2], &sc[3]);
+    func_001EAD88(in[2], &sc[4], &sc[5]);
+    f32 sa = sc[0], ca = sc[1], sb = sc[2], cb = sc[3], cg = sc[5], sg = sc[4];
+    f32 sasb = sa * sb;
+    f32 casb = ca * sb;
+    out[0] = cb * cg;
+    out[1] = cb * sg;
+    out[2] = -sb;
+    out[4] = sasb * cg - ca * sg;
+    out[5] = sasb * sg + ca * cg;
+    out[6] = sa * cb;
+    out[8] = casb * cg + sa * sg;
+    out[9] = casb * sg - sa * cg;
+    out[10] = ca * cb;
+}
+
+extern s32 D_002649B0[];
+struct Sub_18A830;
+s32 func_001300E8(Sub_18A830* a, s32 b);
+s32 func_001833F0(Sub_18A830* a, s32 b);
+
+typedef s32 (*VFn_18A830)(Sub_18A830* self, void* arg);
+struct Type_18A830 { u8 pad[4]; s32 kind; };
+struct Sub_18A830 { VFn_18A830* vt; };
+struct Rec_18A830 { u8 pad[0x50]; Sub_18A830* sub; };
+
+s32 func_0018A830(void* self, Rec_18A830* rec)
+{
+    s32* e = D_002649B0;
+    u32 i;
+    for (i = 0; i < 5; e++, i++) {
+        if (func_001300E8(rec->sub, *e) != 0) {
+            break;
+        }
+    }
+    if (i < 5) {
+        return 0;
+    }
+    if (((Type_18A830*)rec->sub->vt)->kind == 3) {
+        return 0;
+    }
+    if (func_001300E8(rec->sub, 0x34) != 0) {
+        if (rec->sub->vt[60](rec->sub, self) == 0) {
+            return 0;
+        }
+    }
+    if (func_001833F0(rec->sub, 0x449) != 0 || func_001833F0(rec->sub, 0x44A) != 0) {
+        return 0;
+    }
+    return 1;
+}
+
+struct Mat_188850 {
+    f32 m[4][4];
+};
+
+void func_001EAD88(f32 angle, f32* s, f32* c);
+
+void func_00188850(f32* axis, Mat_188850* mat, f32 angle)
+{
+    f32 s;
+    f32 c;
+    s32 i;
+    s32 j;
+    f32 t;
+
+    func_001EAD88(angle, &s, &c);
+    t = 1.0f - c;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            mat->m[i][j] = t * axis[i] * axis[j];
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        mat->m[i][i] += c;
+    }
+    t = s * axis[2];
+    mat->m[0][1] += t;
+    mat->m[1][0] -= t;
+    t = s * axis[1];
+    mat->m[0][2] -= t;
+    mat->m[2][0] += t;
+    t = s * axis[0];
+    mat->m[1][2] += t;
+    mat->m[2][1] -= t;
+}
+
+struct __attribute__((aligned(16))) Quad_18B340 { s32 w[4]; };
+
+struct Key_18B340 {
+    s32 a;
+    s32 pad0;
+    s32 b;
+};
+
+struct Self_18B340 {
+    u8 pad0[0x148];
+    f32 f148;
+    u8 pad1[0x7E0 - 0x14C];
+    s32 f7E0;
+    u8 pad2[0xE10 - 0x7E4];
+    void* fE10;
+    void* fE14;
+    void* fE18;
+    void* fE1C;
+    u8 pad3[0xE2C - 0xE20];
+    s32 fE2C;
+    u8 pad4[0xE40 - 0xE30];
+    Quad_18B340 fE40;
+};
+
+struct Obj_18B340 {
+    u8 pad0[0xF0];
+    Quad_18B340 fF0;
+};
+
+void func_001A8C90(void* obj, s32 v);
+void func_001C9DE0(void* self, s32 code, void* req);
+void func_001B6598(void* dev, s32* out);
+extern f32 D_00264A34;
+extern f32 D_00264A38;
+
+void func_0018B340(Self_18B340* self, s32 a1, Key_18B340* key)
+{
+    if (a1 == 0x13 && key->a == self->f7E0) {
+        switch (key->b) {
+        case 0x442:
+        case 0x443: {
+            Obj_18B340* obj;
+            if (key->b == 0x442) {
+                obj = (Obj_18B340*)self->fE18;
+            } else {
+                obj = (Obj_18B340*)self->fE1C;
+            }
+            s32 kind;
+            func_001B6598(self->fE10, &kind);
+            switch (kind) {
+            case 0x43A:
+            case 0x43C:
+                obj->fF0 = self->fE40;
+                *(f32*)((u8*)obj + 0xF8) = self->f148 + D_00264A34;
+                break;
+            case 0x43E:
+                obj->fF0 = self->fE40;
+                *(f32*)((u8*)obj + 0xF8) = *(f32*)((u8*)obj + 0xF8) + D_00264A38;
+                break;
+            }
+            func_001A8C90(obj, 1);
+            return;
+        }
+        case 0x444:
+            self->fE2C = 1;
+            break;
+        case 0x445:
+            self->fE2C = 0;
+            break;
+        }
+    }
+    func_001C9DE0(self, a1, key);
+}
+
+void func_0018D608(void);
+void* func_0018D658(s32 size);
+void func_0018D800(void* dst, void* src, s32 count);
+void func_0018D6F0(void);
+
+// Inverts the n-by-n matrix a into b by Gauss-Jordan elimination with partial
+// pivoting, on a scratch copy; returns 0 when a is singular.
+s32 func_00189438(s32 n, f32* a, f32* b)
+{
+    s32 ok = 0;
+    func_0018D608();
+    s32 size = n * n * 4;
+    f32* m = (f32*)func_0018D658(size);
+    func_0018D800(m, a, size);
+    s32 i, j, k;
+    f32 r;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            f32* p = &b[i * n + j];
+            if (i == j) *p = 1.0f;
+            else *p = 0;
+        }
+    }
+    for (i = 0; i < n; i++) {
+        s32 piv = i;
+        s32 row = i * n;
+        f32 mx = __builtin_fabsf(m[row + i]);
+        for (k = i + 1; k < n; k++) {
+            r = __builtin_fabsf(m[row + k]);
+            if (mx < r) {
+                piv = k;
+                mx = r;
+            }
+        }
+        if (mx == 0.0f) goto done;
+        if (piv != i) {
+            for (k = 0; k < n; k++) {
+                f32 t = m[k * n + i];
+                m[k * n + i] = m[k * n + piv];
+                m[k * n + piv] = t;
+                f32 u = b[k * n + i];
+                b[k * n + i] = b[k * n + piv];
+                b[k * n + piv] = u;
+            }
+        }
+        for (j = i + 1; j < n; j++) {
+            r = m[i * n + j] / m[i * n + i];
+            for (k = 0; k < n; k++) {
+                m[k * n + j] -= r * m[k * n + i];
+                b[k * n + j] -= r * b[k * n + i];
+            }
+        }
+    }
+    for (i = n - 1; i >= 0; i--) {
+        for (j = 0; j < i; j++) {
+            r = m[i * n + j] / m[i * n + i];
+            for (k = 0; k < n; k++) {
+                m[k * n + j] -= r * m[k * n + i];
+                b[k * n + j] -= r * b[k * n + i];
+            }
+        }
+    }
+    for (i = 0; i < n; i++) {
+        r = m[i * n + i];
+        for (j = 0; j < n; j++) b[j * n + i] /= r;
+    }
+    ok = 1;
+done:
+    func_0018D6F0();
+    return ok;
+}

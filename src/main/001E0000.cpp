@@ -1524,3 +1524,108 @@ void func_001E2398(void)
     l.f04 = func_0015EE80;
     D_00275958.f4 = func_001F6A10(&l);
 }
+
+s32 func_001FD308(double a, double b);
+f32 func_001FD578(double a);
+f32 func_00205B28(f32 x);
+double func_001FD868(f32 x);
+s32 func_001FD410(double a);
+double func_001FD358(s32 a);
+
+s32 func_001E1330(double v)
+{
+    s32 i;
+    if (func_001FD308(v, 0.0) > 0) {
+        double l = func_001FD868(func_00205B28(func_001FD578(v)));
+        i = func_001FD410(l);
+        if (func_001FD308(l, 0.0) < 0 && func_001FD308(l, func_001FD358(i)) != 0)
+            i--;
+    } else {
+        i = 0;
+    }
+    return i;
+}
+
+struct __attribute__((packed)) Pk4_1E0678 { s32 v; };
+typedef void (*VFn_1E0678)(void* self, void* handle, void* out, void* tbl);
+struct VTab_1E0678 { u8 pad0[0x48]; s16 adj; u8 pad1[0x4C - 0x4A]; VFn_1E0678 fn; };
+struct Out_1E0678;
+void func_00137228(Out_1E0678* out, f32 x, f32 y);
+void func_00137238(Out_1E0678* out, f32 x, f32 y);
+void func_00137248(Out_1E0678* out, s32* value);
+void func_00137260(Out_1E0678* out, s32 flag);
+void func_00137268(Out_1E0678* out, s32 flag);
+struct Out_1E0678 {
+    u8 b[32];
+    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
+    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
+    void Color(s32* c) { func_00137248(this, c); }
+    void FlagA(s32 f) { func_00137260(this, f); }
+    void FlagB(s32 f) { func_00137268(this, f); }
+};
+struct Hd_1E0678 {
+    static void Draw(void* h, Out_1E0678* out, void* tbl)
+    {
+        if (*(void**)h != 0) {
+            VTab_1E0678* vt = *(VTab_1E0678**)((u8*)*(void**)h + 0x4C);
+            vt->fn((u8*)*(void**)h + vt->adj, h, out, tbl);
+        }
+    }
+};
+struct Obj_1E0678 {
+    u8 pad0[4];
+    s32 f4;
+    s8 f8;
+    u8 pad9[0x208 - 9];
+    Pk4_1E0678 f208;
+    f32 f20c;
+    void* f210;
+    u8 pad214[0x224 - 0x214];
+    f32 f224;
+    f32 f228;
+    u8 pad22c[0x234 - 0x22C];
+    f32 f234;
+    f32 f238;
+    f32 f23c;
+};
+
+extern u8 D_00262280[];
+extern f32 D_0027240C;
+void func_0015C8B8(s32 handle, f32 a, f32 b);
+void func_0015DB28(void* out, void* p, s32 handle);
+void func_0015E318(void* a, void* b, s32 c, void* d);
+void func_0015C900(s32 handle);
+
+void func_001E0678(Obj_1E0678* self)
+{
+    Pk4_1E0678 tmp;
+    Out_1E0678 out;
+    Pk4_1E0678 slot;
+    u8 loc[0xB0];
+
+    if (self->f8 != 0) {
+        func_0015C8B8(self->f4, self->f20c, self->f20c);
+        tmp = self->f208;
+        ((u8*)&tmp)[3] = (u8)((f32)((u8*)&tmp)[3] * self->f23c);
+        f32 p = self->f234;
+        f32 q = self->f238;
+        s32 held = tmp.v;
+        out.Pos(self->f224, self->f228 - D_0027240C * 66.40000915527344f);
+        out.Size(p, q);
+        slot.v = held;
+        out.Color(&slot.v);
+        out.FlagA(0);
+        out.FlagB(0);
+
+        u8* h = (u8*)self->f210;
+        if (h != 0) {
+            slot = *(Pk4_1E0678*)(h + 0x18);
+            h[0x1B] = (u8)((f32)h[0x1B] * self->f23c);
+            Hd_1E0678::Draw(self->f210, &out, D_00262280);
+            *(Pk4_1E0678*)((u8*)self->f210 + 0x18) = slot;
+        }
+        func_0015DB28(loc, &self->f8, self->f4);
+        func_0015E318(loc, &out, 0, D_00262280);
+        func_0015C900(self->f4);
+    }
+}
