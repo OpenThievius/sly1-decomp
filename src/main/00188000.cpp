@@ -1295,3 +1295,75 @@ void func_0018B340(Self_18B340* self, s32 a1, Key_18B340* key)
     }
     func_001C9DE0(self, a1, key);
 }
+
+void func_0018D608(void);
+void* func_0018D658(s32 size);
+void func_0018D800(void* dst, void* src, s32 count);
+void func_0018D6F0(void);
+
+// Inverts the n-by-n matrix a into b by Gauss-Jordan elimination with partial
+// pivoting, on a scratch copy; returns 0 when a is singular.
+s32 func_00189438(s32 n, f32* a, f32* b)
+{
+    s32 ok = 0;
+    func_0018D608();
+    s32 size = n * n * 4;
+    f32* m = (f32*)func_0018D658(size);
+    func_0018D800(m, a, size);
+    s32 i, j, k;
+    f32 r;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            f32* p = &b[i * n + j];
+            if (i == j) *p = 1.0f;
+            else *p = 0;
+        }
+    }
+    for (i = 0; i < n; i++) {
+        s32 piv = i;
+        s32 row = i * n;
+        f32 mx = __builtin_fabsf(m[row + i]);
+        for (k = i + 1; k < n; k++) {
+            r = __builtin_fabsf(m[row + k]);
+            if (mx < r) {
+                piv = k;
+                mx = r;
+            }
+        }
+        if (mx == 0.0f) goto done;
+        if (piv != i) {
+            for (k = 0; k < n; k++) {
+                f32 t = m[k * n + i];
+                m[k * n + i] = m[k * n + piv];
+                m[k * n + piv] = t;
+                f32 u = b[k * n + i];
+                b[k * n + i] = b[k * n + piv];
+                b[k * n + piv] = u;
+            }
+        }
+        for (j = i + 1; j < n; j++) {
+            r = m[i * n + j] / m[i * n + i];
+            for (k = 0; k < n; k++) {
+                m[k * n + j] -= r * m[k * n + i];
+                b[k * n + j] -= r * b[k * n + i];
+            }
+        }
+    }
+    for (i = n - 1; i >= 0; i--) {
+        for (j = 0; j < i; j++) {
+            r = m[i * n + j] / m[i * n + i];
+            for (k = 0; k < n; k++) {
+                m[k * n + j] -= r * m[k * n + i];
+                b[k * n + j] -= r * b[k * n + i];
+            }
+        }
+    }
+    for (i = 0; i < n; i++) {
+        r = m[i * n + i];
+        for (j = 0; j < n; j++) b[j * n + i] /= r;
+    }
+    ok = 1;
+done:
+    func_0018D6F0();
+    return ok;
+}
