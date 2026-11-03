@@ -1579,3 +1579,72 @@ s32 func_0020A078(s32 a0, s32 a1, s8* a2)
     }
     return (s32)res;
 }
+
+struct Ent_20B458 {
+    u8 pad0[0x4];
+    s32 f4;
+    s32 f8;
+    u8 pad1[0xAC - 0xC];
+    s32 fAC;
+    u8 pad2[0x118 - 0xB0];
+    s32 f118;
+    s32 f11C;
+    s32 f120;
+    u8 pad3[0x174 - 0x124];
+    s32 f174;
+};
+struct Ctx_20B458 {
+    u8 pad0[0x8];
+    s32 f8;
+    u8 pad1[0x40 - 0xC];
+    Ent_20B458* f40;
+};
+struct Ent_arg_20B458 { u32 v; };
+
+extern s32 func_002101F0(Ent_20B458* e, u32 a1);
+extern s32 func_00210090(Ent_20B458* e);
+extern void func_00210160(Ent_20B458* e, s32 a1, s32 a2);
+extern s32 func_0020B1E0(Ctx_20B458* c);
+
+struct Ent_ops_20B458 {
+    static s8 Ready(Ent_20B458* e)
+    {
+        s32 t = func_002101F0(e, 0);
+        s8 r = 0;
+        if (t != 0) {
+            r = func_00210090(e) != 0;
+        }
+        return r;
+    }
+};
+
+s32 func_0020B458(Ctx_20B458* s1, s32 a1, s32 a2)
+{
+    s32 s2;
+    Ent_20B458* s0 = s1->f40;
+    s32 s3 = 0;
+
+    if (a2 == -1 || a1 < a2) {
+        if (s0->f8 == 0) {
+            s1->f8 = 0;
+            s0->f8 = 1;
+        }
+        s2 = Ent_ops_20B458::Ready(s0);
+    } else {
+        s2 = func_002101F0(s0, 0);
+        s3 = 1;
+        (void)func_0020B1E0(s1);
+    }
+    func_00210160(s0, s0->f118, s0->f4);
+    if (s0->f174 == 3) {
+        ;
+    } else if (s3 == 0) {
+        s0->f120 = (s0->f120 == 0);
+    }
+    s1->f8 = s0->f118 - s0->fAC;
+    if (s0->f120 == 0) {
+        s0->f118 = s0->f118 + 1;
+        s0->f4 = s0->f4 + 1;
+    }
+    return s2;
+}

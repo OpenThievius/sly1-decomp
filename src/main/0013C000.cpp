@@ -1510,3 +1510,56 @@ s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, Port_0013C9D0* port)
     }
     return total;
 }
+
+struct Self_13CAD8 {
+    s32 f0;
+    s32 f4;
+    s32 f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+};
+typedef s32 (*FnA_13CAD8)(void* self, s32 a1, s32 a2);
+typedef s32 (*FnB_13CAD8)(void* self);
+struct Vt_13CAD8 {
+    u8 pad0[8];
+    s16 adj8;
+    u8 pad1[2];
+    FnA_13CAD8 fn0C;
+    s16 adj10;
+    u8 pad2[2];
+    FnB_13CAD8 fn14;
+};
+struct Obj_13CAD8 {
+    Vt_13CAD8* vt;
+};
+
+s32 func_0013CAD8(Self_13CAD8* self, s32 n, Obj_13CAD8* o)
+{
+    s32 total = 0;
+    s32 rem = n;
+    if (rem <= 0 || self->f14 < rem)
+        rem = self->f14;
+    for (;;) {
+        if (rem == 0)
+            break;
+        s32 chunk = self->f4 - self->fC;
+        if (rem < chunk)
+            chunk = rem;
+        s32 s0 = o->vt->fn0C((u8*)o + o->vt->adj8, chunk, self->f0 + self->fC);
+        if (s0 == 0)
+            break;
+        self->fC = (self->fC += s0) % self->f4;
+        self->f14 -= s0;
+        if (o->vt->fn14((u8*)o + o->vt->adj10) != 0)
+            self->f18 += s0;
+        else
+            self->f10 += s0;
+        rem -= s0;
+        total += s0;
+        if (n <= 0)
+            break;
+    }
+    return total;
+}

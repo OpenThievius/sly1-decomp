@@ -1629,3 +1629,111 @@ s32 func_001FDEB0(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
     }
     return result;
 }
+
+struct Sf_1FD088 { u32 cls; s32 sign; s32 exp; u8 pad[4]; u64 mant; u8 tail[8]; };
+struct Pk_1FD088 { u64 bits; };
+
+void func_001FCA40(Pk_1FD088* src, Sf_1FD088* dst);
+u64 func_001FC910(Sf_1FD088* src);
+extern Sf_1FD088 D_0062A770;
+
+struct Div_1FD088 {
+    static s32 IsNan(Sf_1FD088* p) { return p->cls < 2; }
+    static s32 IsInf(Sf_1FD088* p) { return p->cls == 4; }
+    static s32 IsZero(Sf_1FD088* p) { return p->cls == 2; }
+    static Sf_1FD088* Parts(Sf_1FD088* a, Sf_1FD088* b)
+    {
+        u64 rem;
+        u64 div;
+        u64 bit;
+        u64 quo;
+
+        if (IsNan(a)) {
+            return a;
+        }
+        if (IsNan(b)) {
+            return b;
+        }
+        a->sign ^= b->sign;
+        if (IsInf(a) || IsZero(a)) {
+            if (a->cls == b->cls) {
+                return &D_0062A770;
+            }
+            return a;
+        }
+        if (IsInf(b)) {
+            a->mant = 0;
+            a->exp = 0;
+            return a;
+        }
+        if (IsZero(b)) {
+            a->cls = 4;
+            return a;
+        }
+        a->exp = a->exp - b->exp;
+        rem = a->mant;
+        div = b->mant;
+        if (rem < div) {
+            a->exp--;
+            rem <<= 1;
+        }
+        bit = (u64)1 << 60;
+        quo = 0;
+        while (bit) {
+            if (rem >= div) {
+                quo |= bit;
+                rem -= div;
+            }
+            bit >>= 1;
+            rem <<= 1;
+        }
+        if ((quo & 0xFF) == 0x80) {
+            if (quo & 0x100) {
+                quo += 0x80;
+            } else if (rem) {
+                quo += 0x80;
+            }
+        }
+        a->mant = quo;
+        return a;
+    }
+};
+
+u64 func_001FD088(u64 x, u64 y)
+{
+    Sf_1FD088 pa;
+    Sf_1FD088 pb;
+
+    func_001FCA40((Pk_1FD088*)&x, &pa);
+    func_001FCA40((Pk_1FD088*)&y, &pb);
+    return func_001FC910(Div_1FD088::Parts(&pa, &pb));
+}
+
+struct Node_1FFE58 { s32 a; s32 b; s32 key; };
+struct List_1FFE58 { Node_1FFE58** data; u32 count; };
+
+void func_001FFE58(List_1FFE58* self, List_1FFE58* out)
+{
+    u32 n = self->count;
+    u32 next[n];
+    u32 head = 0xFFFFFFFFu;
+    u32 i;
+    u32 cur;
+    for (i = 0; i < n; i++) {
+        for (cur = head; cur != 0xFFFFFFFFu; cur = next[cur]) {
+            if (self->data[i]->key - self->data[cur]->key >= 0) break;
+            out->data[out->count++] = self->data[cur];
+            self->data[cur] = 0;
+        }
+        head = i;
+        next[i] = cur;
+    }
+    cur = 0;
+    for (i = 0; i < n; i++) {
+        Node_1FFE58* x = self->data[i];
+        if (x != 0) {
+            self->data[cur++] = x;
+        }
+    }
+    self->count = cur;
+}

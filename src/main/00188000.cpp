@@ -1186,3 +1186,38 @@ s32 func_0018A830(void* self, Rec_18A830* rec)
     }
     return 1;
 }
+
+struct Mat_188850 {
+    f32 m[4][4];
+};
+
+void func_001EAD88(f32 angle, f32* s, f32* c);
+
+void func_00188850(f32* axis, Mat_188850* mat, f32 angle)
+{
+    f32 s;
+    f32 c;
+    s32 i;
+    s32 j;
+    f32 t;
+
+    func_001EAD88(angle, &s, &c);
+    t = 1.0f - c;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            mat->m[i][j] = t * axis[i] * axis[j];
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        mat->m[i][i] += c;
+    }
+    t = s * axis[2];
+    mat->m[0][1] += t;
+    mat->m[1][0] -= t;
+    t = s * axis[1];
+    mat->m[0][2] -= t;
+    mat->m[2][0] += t;
+    t = s * axis[0];
+    mat->m[1][2] += t;
+    mat->m[2][1] -= t;
+}

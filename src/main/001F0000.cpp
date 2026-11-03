@@ -1474,3 +1474,72 @@ s32 func_001F0490(Obj_1F0490* self, s32 kind, s32* outA, s32* outB)
     }
     return flag;
 }
+
+extern void* D_0027B314;
+extern u8 D_00275FE0[];
+
+struct Obj_1F0758;
+struct Node_1F0758;
+struct List_1F0758 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_1F0758 { List_1F0758* list; u8* link; s32 offset; Iter_1F0758* saved; };
+
+struct Elem_1F0758 { u8 pad0[0x24]; f32 f24; f32 f28; f32 f2C; f32 f30; };
+
+struct Obj_1F0758 {
+    u8 pad0[0x34];
+    List_1F0758 list;
+    u8 pad2[0x2F8 - 0x40];
+    Elem_1F0758 elems[11];
+    s32 f534;
+};
+
+void func_001249A8(Obj_1F0758* self);
+void func_00124DF8(Obj_1F0758* self, s32 n, void* table);
+void func_00182ED8(Node_1F0758* node);
+f32 func_001EAAE0(f32 a, f32 b);
+
+struct Next_1F0758 {
+    static Node_1F0758* Of(Iter_1F0758* it)
+    {
+        Node_1F0758* obj = *(Node_1F0758**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_1F0758 {
+    static void Of(Iter_1F0758* it, List_1F0758* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_1F0758*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+void func_001F0758(Obj_1F0758* self)
+{
+    Iter_1F0758 it;
+    Node_1F0758* node;
+    Elem_1F0758* el;
+    s32 i;
+
+    func_001249A8(self);
+    func_00124DF8(self, 0x34, D_00275FE0);
+    Begin_1F0758::Of(&it, &self->list);
+    while ((node = Next_1F0758::Of(&it)) != 0) {
+        func_00182ED8(node);
+    }
+    el = self->elems;
+    for (i = 0; i < 11; i++) {
+        f32 zero = 0.0f;
+        el->f28 = zero;
+        el->f24 = zero;
+        el->f2C = func_001EAAE0(zero, 6.2831855f);
+        el->f30 = func_001EAAE0(0.5f, 0.7f);
+        el++;
+    }
+    self->f534 = -1;
+    D_0027B314 = it.saved;
+}

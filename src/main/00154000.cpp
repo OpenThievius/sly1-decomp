@@ -718,3 +718,28 @@ void func_00157FF8(void* self, void* obj, f32 x)
         e->vtbl[31](e, &frame);
     }
 }
+
+struct __attribute__((aligned(16))) Quad_157EF8 { s32 a, b, c, d; };
+struct __attribute__((aligned(16))) Blk_157EF8 { Quad_157EF8 q[8]; };
+struct __attribute__((aligned(16))) Tail_157EF8 { Quad_157EF8 q[4]; };
+void* func_001F5C0C(void* p, s32 v, u32 n);
+struct Pair_157EF8 { s32 z; s32 b; s32 c; Pair_157EF8() { func_001F5C0C(this, 0, sizeof(*this)); } };
+struct __attribute__((aligned(16))) Frame_157EF8 { u8 pad0[0x20]; Quad_157EF8 self_copy; u8 pad1[0x30]; Quad_157EF8 a1_copy; u8 pad2[0x30]; Blk_157EF8 blk; s32 f120; u8 pad3[0x8C]; Tail_157EF8 tail; u8 pad4[0x10]; };
+
+void func_001549C8(void* mem);
+void func_00157E00(void* a, void* b, void* c);
+
+void func_00157EF8(Quad_157EF8* self, Quad_157EF8* a1, void* a2, Tail_157EF8* a3, Blk_157EF8* a4, s32 a5, s32 a6)
+{
+    Frame_157EF8 f;
+    func_001549C8(&f);
+    Pair_157EF8 p;
+    f.self_copy = *self;
+    f.a1_copy = *a1;
+    f.blk = *a4;
+    p.b = a5;
+    p.c = a6;
+    f.f120 = 1;
+    f.tail = *a3;
+    func_00157E00(a2, &f, &p);
+}

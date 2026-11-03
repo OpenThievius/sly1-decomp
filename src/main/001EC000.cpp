@@ -1604,3 +1604,56 @@ void func_001ECB18(Self_1ECB18* self)
     }
 
 }
+
+extern u8* D_0027051C;
+extern u8 D_00275B04[];
+
+struct Glob_1EFFA0 { u8 pad0[0x2D0]; s32 f2D0; };
+struct Text_1EFFA0 { u8 pad0[8]; s32 f08; u8 pad1[0xC]; s32 f18; };
+struct Args_1EFFA0 { s32 kind; Text_1EFFA0* text; s32 x; s32 y; s32 z; };
+struct Dst_1EFFA0 { s32 f00; s32 f04; u8 pad08[8]; Args_1EFFA0 args; s32 f24; };
+struct Call_1EFFA0 { s32 f00; };
+
+void func_001DDAD0(Call_1EFFA0* x);
+void func_001F0220(Dst_1EFFA0* o, s32 mode);
+
+struct Match_1EFFA0 {
+    static s32 Of(Text_1EFFA0* t)
+    {
+        Text_1EFFA0* p;
+        p = (Text_1EFFA0*)D_00275B04;
+        if (t == p) {
+            return 1;
+        }
+        if (p == 0) {
+            return 0;
+        }
+        return ((p->f08 ^ p->f18) ^ (t->f08 ^ t->f18)) == 0;
+    }
+};
+
+void func_001EFFA0(Dst_1EFFA0* dst, Args_1EFFA0* args, s32 count)
+{
+    Text_1EFFA0* p;
+    s32 mode;
+
+    if (dst->f04 == 0) {
+        if (D_0027051C != 0) {
+            if (((Glob_1EFFA0*)D_0027051C)->f2D0 != 2) {
+                func_001DDAD0((Call_1EFFA0*)D_00275710);
+            }
+        }
+        if (args->text == 0 || Match_1EFFA0::Of(args->text)) {
+            args->z |= 8;
+        } else {
+            args->z &= ~8;
+        }
+        dst->args = *args;
+        dst->f24 = count;
+        mode = 2;
+        if (D_00275710 != 0) {
+            mode = 1;
+        }
+        func_001F0220(dst, mode);
+    }
+}
