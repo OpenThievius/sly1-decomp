@@ -1505,3 +1505,127 @@ f32 func_001FD5D0(Packed_1FD5D0* p)
     bits.b.sign = sign;
     return bits.f;
 }
+
+struct Packed_1FC910 {
+    u32 kind;
+    u32 sign;
+    s32 exp;
+    u32 pad;
+    u64 mant;
+};
+
+union Bits_1FC910 {
+    double d;
+    struct {
+        u64 mant : 52;
+        u64 expo : 11;
+        u64 sign : 1;
+    } b;
+};
+
+struct Class_1FC910 {
+    static s32 IsNan(Packed_1FC910* p) { return p->kind < 2; }
+    static s32 IsInf(Packed_1FC910* p) { return p->kind == 4; }
+    static s32 IsZero(Packed_1FC910* p) { return p->kind == 2; }
+};
+
+double func_001FC910(Packed_1FC910* p)
+{
+    Bits_1FC910 bits;
+    u64 mant = p->mant;
+    s32 expo = 0;
+    u32 sign = p->sign;
+
+    if (Class_1FC910::IsNan(p)) {
+        expo = 0x7FF;
+        mant = mant | ((u64)1 << 51);
+    } else if (Class_1FC910::IsInf(p)) {
+        expo = 0x7FF;
+        mant = 0;
+    } else if (Class_1FC910::IsZero(p)) {
+        mant = 0;
+    } else if (mant != 0) {
+        s32 e = p->exp;
+        if (e < -0x3FE) {
+            s32 sh = -0x3FE - e;
+            if (sh > 0x38) {
+                mant = 0;
+            } else {
+                mant = mant >> sh;
+            }
+            mant = mant >> 8;
+        } else if (e >= 0x400) {
+            expo = 0x7FF;
+            mant = 0;
+        } else {
+            expo = e + 0x3FF;
+            if ((mant & 0xFF) == 0x80) {
+                if ((mant & 0x100) != 0) {
+                    mant = mant + 0x80;
+                }
+            } else {
+                mant = mant + 0x7F;
+            }
+            if (mant > 0x1FFFFFFFFFFFFFFFull) {
+                mant = mant >> 1;
+                expo = expo + 1;
+            }
+            mant = mant >> 8;
+        }
+    }
+
+    bits.b.mant = mant;
+    bits.b.expo = expo;
+    bits.b.sign = sign;
+    return bits.d;
+}
+
+struct Span_001FDEB0 { u32 lo; u32 hi; s32 value; void* cb; };
+struct Ctx_001FDEB0 { void* fn; };
+struct Cur_001FDEB0 { s32 pad0; s32 count; };
+
+s32 func_001FDEB0(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
+{
+    s32 result = 0;
+    s32 key = a0;
+    Span_001FDEB0* base;
+    s32 idx;
+    s32 r;
+
+    *a4 = 1;
+    if (a1 != 0) {
+        idx = 0;
+        base = (Span_001FDEB0*)((u8*)a1 + 8);
+        if (a3 != 0) {
+            idx = ((u8*)a0 - (u8*)base) >> 4;
+            key = ((Cur_001FDEB0*)a0)->count - 1;
+            if (base[idx].lo != 0xFFFFFFFF) {
+                idx++;
+            }
+        } else {
+            key = key - 1;
+        }
+        while (base[idx].lo != 0xFFFFFFFF) {
+            if ((u32)key >= base[idx].lo && (u32)key < base[idx].hi) {
+                if (base[idx].cb != 0) {
+                    if (a2->fn != 0) {
+                        r = ((s32 (*)(Ctx_001FDEB0*, void*, void*))a2->fn)(a2, base[idx].cb, a1);
+                        if (r != 0) {
+                            if (result == 0) {
+                                result = base[idx].value;
+                            }
+                            *a4 = 0;
+                            return result;
+                        }
+                    }
+                } else {
+                    if (result == 0) {
+                        result = base[idx].value;
+                    }
+                }
+            }
+            idx++;
+        }
+    }
+    return result;
+}
