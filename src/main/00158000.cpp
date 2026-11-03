@@ -1590,3 +1590,79 @@ void func_0015AC08(Actor_15AC08* self, void* arg)
             func_00152600(self->f14 + 0x1C48, self);
     }
 }
+
+struct Obj_15B4D0;
+struct VT_15B4D0 { u8 pad[0xA0]; void (*fn)(Obj_15B4D0* o, void* a, void* out); };
+struct Obj_15B4D0 { VT_15B4D0* vt; };
+struct Out_15B4D0 { u8 pad[0x40]; f32 scale; u8 pad2[0x10 - 4]; };
+struct Self_15B4D0 {
+    u8 pad0[0x550];
+    s32 f550;
+    s32 state;
+    f32 f558;
+    f32 f55C;
+    u8 pad560[8];
+    s32 f568;
+    Obj_15B4D0* objs56C[16];
+    s32 pad5AC;
+    Obj_15B4D0* f5B0[8];
+    Obj_15B4D0* f5D0;
+    u8 pad5D4[0x630 - 0x5D4];
+    s32 f630;
+    s32 f634;
+    f32 f638;
+};
+extern f32 D_0026185C;
+extern f32 D_00262230[];
+extern f32 D_00262240[];
+extern f32 D_00275C60[];
+void func_00125B70(Self_15B4D0* self, void* c, void* out);
+
+void func_0015B4D0(Self_15B4D0* self, void* a1, void* a2)
+{
+    Out_15B4D0 out;
+    func_00125B70(self, a2, &out);
+    switch (self->state) {
+    case 1: {
+        f32 base = self->f558;
+        f32 num = D_0026185C - base;
+        f32 den = self->f55C - base;
+        f32 t = num / den;
+        f32 v = D_00262230[0] + t * (D_00262230[1] + t * D_00262230[2]);
+        f32 lo = D_00275C60[0];
+        f32 hi = D_00275C60[1];
+        if (v < lo) v = lo;
+        else if (hi < v) v = hi;
+        out.scale = out.scale * v;
+        self->f5D0->vt->fn(self->f5D0, a1, &out);
+        break;
+    }
+    case 3: {
+        f32 base = self->f558;
+        f32 num = D_0026185C - base;
+        f32 den = self->f55C - base;
+        f32 t = num / den;
+        f32 v = D_00262240[0] + t * (D_00262240[1] + t * D_00262240[2]);
+        f32 lo = D_00275C60[0];
+        f32 hi = D_00275C60[1];
+        if (v < lo) v = lo;
+        else if (hi < v) v = hi;
+        out.scale = out.scale * v;
+        self->objs56C[self->f568]->vt->fn(self->objs56C[self->f568], a1, &out);
+        break;
+    }
+    case 6: {
+        self->f5B0[self->f568]->vt->fn(self->f5B0[self->f568], a1, &out);
+        break;
+    }
+    default: {
+        s32 idx = self->f568;
+        if (self->f550 == 1 && self->f630 != -1) {
+            f32 t = (D_0026185C - self->f558) / (self->f55C - self->f558);
+            if (1.0f - self->f638 < t) idx = self->f634;
+        }
+        self->objs56C[idx]->vt->fn(self->objs56C[idx], a1, &out);
+        break;
+    }
+    }
+}

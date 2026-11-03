@@ -1397,6 +1397,7 @@ func_0015AD80	func_0015B038	match
 func_0015AE38	func_0015B0F0	match	
 func_0015AEB0	func_0015B168	match	
 func_0015B128	func_0015B3E0	match	rodata
+func_0015B4D0	func_0015B788	match	
 func_0015B720	func_0015B9D8	match	
 func_0015C058	func_0015C310	match	
 func_0015C0A0	func_0015C358	match	
