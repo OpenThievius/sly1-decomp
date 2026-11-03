@@ -36,8 +36,8 @@ What stops a function from being matched, the blocker column:
   jump to another function (Sony's 2.9-ee writes them), a branch back into itself or a call
   that never returns is a whole function, not a fragment
 - mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
-- nonc: max.s, min.s, sqrt.s: no plain C form with the files' flags (__builtin_sqrtf adds a NaN
-  check and a call to sqrtf that retail never has); `break 0, 7` after a division is the
+- nonc: max.s, min.s: no plain C form with the files' flags. A bare sqrt.s is not one: it is
+  written with include/fpu.h's Fpu::Sqrt (AGENTS.md); `break 0, 7` after a division is the
   compiler's divide-by-zero trap, plain C, not system code
 - vu, system, handwritten: permanent for C: VU microcode, kernel instructions and
   hand-written library assembly (AGENTS.md: no inline asm)
@@ -82,9 +82,9 @@ SAVE64 = re.compile(r"^sd\s+\$(ra|s\d|fp)\b")
 VU = re.compile(r"^(v[a-z]|lqc2|sqc2|qmtc2|qmfc2|ctc2|cfc2|vcallms)")
 SYSTEM = {"syscall", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "eret", "ei", "di", "break"}
 DIVIDE_TRAP = "0, 7"  # `break 0, 7` after a division: the compiler's divide-by-zero trap, plain C
-# No plain C form with the files' flags. __builtin_sqrtf gives sqrt.s followed by a NaN check that
-# calls sqrtf for errno; no retail function has that check, so a sqrt.s blocks like max.s and min.s.
-NONC = {"max.s", "min.s", "sqrt.s"}
+# No plain C form with the files' flags. (A bare sqrt.s is written with include/fpu.h's Fpu::Sqrt:
+# __builtin_sqrtf adds a NaN check and a call to sqrtf that retail never has.)
+NONC = {"max.s", "min.s"}
 MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu1|madd1|maddu1|mfsa|mtsa)")
 
 

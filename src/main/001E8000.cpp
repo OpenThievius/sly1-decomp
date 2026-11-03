@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "fpu.h"
 
 struct Obj_E8E08 { u8 pad[0xC58]; s32 f58; s32 f5C; };
 void func_001C9AF8(void);
@@ -825,7 +826,7 @@ f32 func_001EAAE0(f32 a, f32 b)
 
 struct Coeffs_1EA4B8 { f32 p0; f32 p1; f32 p2; };
 
-void func_001EACA0(f32* roots, f32 a, f32 b, f32 c);
+s32 func_001EACA0(f32* roots, f32 a, f32 b, f32 c);
 
 f32 func_001EA4B8(Coeffs_1EA4B8* k, f32* out, f32 x, f32 y, f32 z)
 {
@@ -1522,4 +1523,78 @@ void func_001EB460(Obj_1EB460* self)
         c = x;
     }
     self->f684 = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
+}
+
+f32 func_001EAAE0(f32 lo, f32 hi);
+f32 func_002059E0(f32 x);
+
+f32 func_001EAB48(f32 mean, f32 deviation, f32 limit)
+{
+    f32 x;
+    f32 y;
+    f32 r;
+    do {
+        x = func_001EAAE0(-1.0f, 1.0f);
+        y = func_001EAAE0(-1.0f, 1.0f);
+        r = x * x + y * y;
+    } while (r > 1.0f || r == 0.0f);
+    f32 v = mean + deviation * y * Fpu::Sqrt(func_002059E0(r) * -2.0f / r);
+    if (limit != 0.0f) {
+        f32 lo = mean - limit;
+        f32 hi = mean + limit;
+        if (v < lo) {
+            v = lo;
+        } else if (hi < v) {
+            v = hi;
+        }
+    }
+    return v;
+}
+
+s32 func_001EACA0(f32* roots, f32 a, f32 b, f32 c)
+{
+    f32 disc = b * b - a * (4.0f * c);
+    if (disc < 0.0f) {
+        return 0;
+    }
+    a = a + a;
+    disc = Fpu::Sqrt(disc) / a;
+    b = b / a;
+    if (__builtin_fabsf(disc) < 0.0001f) {
+        roots[0] = -b;
+        return 1;
+    }
+    roots[0] = -b + disc;
+    roots[1] = -b - disc;
+    return 2;
+}
+
+void func_001EAD88(f32* sinOut, f32* cosOut, f32 angle)
+{
+    f32 t = (angle + 1.5707964f) * 0.31830987f;
+    s32 n = (s32)t;
+    if (t < 0.0f) {
+        n--;
+    }
+    angle -= (f32)n * 3.1415927f;
+    if (n & 1) {
+        angle = -angle;
+    }
+    f32 x2 = angle * angle;
+    f32 s = angle;
+    angle *= x2;
+    s += angle * -0.166666567f;
+    angle *= x2;
+    s += angle * 0.00833302550f;
+    angle *= x2;
+    s += angle * -0.000198074136f;
+    angle *= x2;
+    s += angle * 2.60188699e-06f;
+    f32 c = Fpu::Sqrt(1.0f - s * s);
+    if (n & 1) {
+        *cosOut = -c;
+    } else {
+        *cosOut = c;
+    }
+    *sinOut = s;
 }

@@ -68,6 +68,9 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   own, not a masked comparison, not a model's claim. Report exactly what you ran and what it
   printed.
 - **Plain C++.** No inline assembly in functions, no register pins, no artificial barriers.
+  The one exception is the square root of include/fpu.h (`Fpu::Sqrt`): retail's bare `sqrt.s`
+  behaves as an inline-assembly helper, which no C form reproduces (docs/TOOLCHAIN.md); a
+  function computes a bare square root through it, and nothing else writes inline assembly.
   `volatile` is one only where it stops the compiler. It is allowed where it is what the
   original had: a hardware register, at a fixed address (`*(volatile u32*)0x10002010`) or
   through a pointer to a register block (a DMA channel's), and data shared with hardware, an

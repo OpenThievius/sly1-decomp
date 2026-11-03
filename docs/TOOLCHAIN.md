@@ -200,3 +200,11 @@ wave match at their PAL counterparts, while `func_001365A0` differs there.
 Progress reported US 1785/4766 functions (13.38%) and PAL 1709/4791 (12.62%).
 Unit tests printed `OK` (11 tests), and
 `python3 tests/check_repository.py` printed `ok: 0 problem(s)`.
+
+**The square root (2026-11-03).** Nine game functions hold a bare `sqrt.s`. `__builtin_sqrtf`
+adds a NaN check and a call to `sqrtf` that retail never has. `-ffast-math` gives a bare
+`sqrt.s`, but its result lands in its input's register and the compiler schedules code around
+it, where retail never does either: retail's `sqrt.s` behaves as an inline-assembly helper,
+fixed in place, with an early-clobbered result. include/fpu.h is that helper, `Fpu::Sqrt`, the
+one inline assembly AGENTS.md allows; with it, under the files' own flags, the functions match
+(func_001EDDB0 first). OpenRAC's RAC3 keeps a `sqrt.s` helper for the same reason.

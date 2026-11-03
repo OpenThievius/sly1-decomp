@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "fpu.h"
 
 struct Obj_1C4180 { u8 pad[0x698]; s32 count; s32 items[1]; };
 
@@ -929,4 +930,24 @@ void func_001C6F48(Self_1C6F48* self)
     F(s32, 0xBD4) = s1;
     F(f32, 0xBE8) = 1.25f;
     F(s32, 0xBDC) = s1;
+}
+
+struct __attribute__((packed)) Pk8_1C5E50 { u32 a; u32 b; };
+struct Vec_1C5E50 { Pk8_1C5E50 xy; u32 z; };
+
+struct Obj_1C5E50 {
+    u8 pad0[0x6E0];
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+extern Vec_1C5E50 D_00274B80;
+
+void func_001C5E50(Obj_1C5E50* self, f32 s)
+{
+    *(Vec_1C5E50*)&self->x = D_00274B80;
+    self->x *= s;
+    self->y *= s;
+    self->z *= 1.0f / Fpu::Sqrt(s);
 }
