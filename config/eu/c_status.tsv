@@ -1631,6 +1631,7 @@ func_0016B7A8	func_0016BDC0	match	version-specific
 func_0016B860	func_0016BE78	differs	
 func_0016BA40	func_0016C068	differs	
 func_0016BB78	func_0016C1A0	match	
+func_0016BBA8	func_0016C1D0	differs	
 func_0016BDD0	func_0016C3F8	match	version-specific
 func_0016C360	func_0016C9A8	match	
 func_0016C470	func_0016CAB8	match	rodata

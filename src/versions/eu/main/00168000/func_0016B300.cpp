@@ -20,9 +20,9 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
             }
         } else {
             Gl_eu_16B300* gp = (Gl_eu_16B300*)D_0026FA90;
-            if (D_00262970 <= D_00261858.f4 - gp->f578) {
+            if (D_00262970 <= D_00261858[1] - gp->f578) {
                 slot = func_eu_001DE018(D_eu_00263BC0[a]);
-                gp->f578 = D_00261858.f4;
+                gp->f578 = D_00261858[1];
             }
         }
         if (slot) {
@@ -43,5 +43,5 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
     }
     self->f2D0 = a;
     self->f2D4 = b;
-    self->f2D8 = D_00261858.f4;
+    self->f2D8 = D_00261858[1];
 }
