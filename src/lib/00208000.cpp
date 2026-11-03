@@ -1468,3 +1468,40 @@ void func_0020B810(Dev_20B810* self)
     self->f6D4 = spr + 0x3300;
     self->f810 = 0;
 }
+
+struct Obj_209B80;
+struct Q_209B80;
+struct Dev_209B80;
+extern s32 D_0027AEC8;
+extern s32 D_0027AECC;
+extern u8 D_0062AD40[];
+s32 func_001F8480(Q_209B80* q);
+s32 func_00209B38(Obj_209B80* o);
+s32 func_001F6B40(Dev_209B80* d);
+
+s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
+{
+    s32 ok;
+    if (D_0027AEC8 == 0) {
+        return -1;
+    }
+    ok = func_001F8480((Q_209B80*)D_0062AD40);
+    if (a0 == 0 && ok != 0) {
+        while (func_001F8480((Q_209B80*)D_0062AD40) != 0) {
+            (void)func_00209B38((Obj_209B80*)60);
+        }
+        ok = 0;
+    }
+    ok = (ok == 0);
+    if (a1 != 0) {
+        *a1 = D_0027AEC8;
+    }
+    if (ok != 0) {
+        D_0027AEC8 = 0;
+        if (a2 != 0) {
+            *a2 = (*(s32*)&D_0062C300);
+        }
+        (void)func_001F6B40((Dev_209B80*)D_0027AECC);
+    }
+    return ok;
+}

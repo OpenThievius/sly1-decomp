@@ -1637,3 +1637,25 @@ void func_00202098(struct Obj_202098* self, s16 a1, s16 a2, s16 a3)
     }
     self->out = lo | hi;
 }
+
+extern u8 D_0027AE48[];
+extern u8 D_0027A600[];
+s32 func_002033D8(s32);
+s32 func_001F8290(void*, s32, s32, s32, s32, void*, s32, s32, s32);
+
+s32 func_00203E28(void)
+{
+    if (func_002033D8(0x1E) == 0) {
+        return 0;
+    }
+    (*(volatile s32*)&D_00279454) = 8;
+    if (func_001F8290(D_0027AE48, 0x16, 0, 0, 0, D_0027A600, 4, 0, 0) < 0) {
+        func_001F6B40((*(volatile s32*)&D_0027942C));
+        (*(volatile s32*)&D_00279454) = 0;
+        return 0;
+    }
+    (*(volatile s32*)&D_00279454) = 0;
+    s32 r = *(s32*)((u32)D_0027A600 | 0x20000000);
+    func_001F6B40((*(volatile s32*)&D_0027942C));
+    return r;
+}

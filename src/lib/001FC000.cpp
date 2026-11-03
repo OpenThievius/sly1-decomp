@@ -1366,3 +1366,46 @@ u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
     }
     func_002014D0();
 }
+
+struct Handle_1FEB18 {
+    u8 pad_00[0x8];
+    void* object;
+    void* data;
+    void (*callback)(void*, s32);
+    s32 state;
+    Handle_1FEB18* next;
+    u8 pad_1C[4];
+    s64 refs;
+    void* buf;
+};
+
+extern void func_001FE8F0(void) __attribute__((noreturn));
+void func_001FE9F8(void*);
+s32 func_00200C40(void*);
+
+void func_001FEB18(Handle_1FEB18* self)
+{
+    Handle_1FEB18** link = (Handle_1FEB18**)func_001FDA10();
+    if (--self->refs != 0) {
+        return;
+    }
+    if (self == *link && self->state == 0) {
+        return;
+    }
+    for (; *link != 0; link = &(*link)->next) {
+        if (*link == self) {
+            break;
+        }
+    }
+    if (*link == 0) {
+        func_001FE8F0();
+    }
+    *link = self->next;
+    if (self->callback != 0) {
+        self->callback(self->object, 2);
+    }
+    if (func_00200C40(self->data) == 0) {
+        func_001FE9F8(self->buf);
+    }
+    func_001FE9F8(self);
+}

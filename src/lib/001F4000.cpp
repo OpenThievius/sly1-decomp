@@ -633,3 +633,32 @@ Item_1F7DB0* func_001F7DB0(Owner_1F7DB0* self)
     func_001F9DA8();
     return 0;
 }
+
+struct Slot_1F6F48 {
+    s32 key;
+    s32 value;
+};
+
+extern Slot_1F6F48 D_002770E8[];
+extern u8 D_00276980[];
+extern u8 D_002770C0[];
+void func_001F6EE0(s32 a, s32 b);
+void func_001F6EF0(u32 a, void* b, s32 c);
+void func_001F6C20(s32 a);
+s32 func_001F6F38(s32 key);
+
+void func_001F6F48(void)
+{
+    if ((*(volatile u32*)0x10001810 & 0x100) != 0) {
+        return;
+    }
+    func_001F6EE0(D_002770E8[0].key, D_002770E8[0].value);
+    func_001F6EF0(0x80076000, D_00276980, 0x740);
+    func_001F6EF0(0x82000, D_002770C0, 0x28);
+    func_001F6C20(0);
+    func_001F6C20(2);
+    func_001F6EE0(D_002770E8[1].key, D_002770E8[1].value);
+    for (u32 i = 2; i < 8; i++) {
+        func_001F6EE0(D_002770E8[i].key, func_001F6F38(D_002770E8[i].key));
+    }
+}

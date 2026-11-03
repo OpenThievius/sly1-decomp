@@ -721,3 +721,16 @@ void func_001DFD48();
 void func_001E2398();
 void func_001E9088();
 extern Fn_Table D_002647C0[29] = { (Fn_Table)func_0012B868, (Fn_Table)func_0018D430, (Fn_Table)func_00152810, (Fn_Table)func_001E2398, (Fn_Table)func_001688B8, (Fn_Table)func_001858F8, (Fn_Table)func_001409D8, (Fn_Table)func_00140790, (Fn_Table)func_0016E0B8, (Fn_Table)func_0016F588, (Fn_Table)func_0015E810, (Fn_Table)func_0015C178, (Fn_Table)func_0011E560, (Fn_Table)func_00143140, (Fn_Table)func_001BF130, (Fn_Table)func_001A9C68, (Fn_Table)func_001E9088, (Fn_Table)func_001DFD48, (Fn_Table)func_0017FD48, (Fn_Table)func_00191EC0, (Fn_Table)func_00169C58, (Fn_Table)func_00185A58, (Fn_Table)func_00185AC8, (Fn_Table)func_00139C38, (Fn_Table)func_0019DF48, (Fn_Table)func_001430C8, (Fn_Table)func_0018B580, (Fn_Table)func_00160070, (Fn_Table)func_0018E5E8 };
+
+struct Out_1840F0;
+f32 func_00205210(f32 value);
+void func_00183F40(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1);
+
+void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
+{
+    f32 x = func_00205210(a * 0.0087266471f);
+    x = x + x * x * x;
+    f32 y = func_00205210(c * 0.0087266471f);
+    y = y + y * y * y;
+    func_00183F40(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
+}

@@ -1825,3 +1825,54 @@ void func_0012FE70(Obj_12FE70* self)
         break;
     }
 }
+
+struct Key_12D4A8 {
+    f32 time;
+    u8 pad[12];
+};
+
+struct Track_12D4A8 {
+    u8 pad[0x5C];
+    s32 count;
+    Key_12D4A8* keys;
+};
+
+struct Cursor_12D4A8 {
+    u8 pad0[8];
+    Track_12D4A8* track;
+    u8 pad0C[8];
+    f32 time;
+    f32 rate;
+    u32 pad1C;
+    s32 index;
+};
+
+void func_0012D4A8(Cursor_12D4A8* self)
+{
+    Track_12D4A8* track = self->track;
+    s32 n = track->count;
+    s32 i;
+    if (n == 0) {
+        return;
+    }
+    if (self->rate >= 0.0f) {
+        i = 0;
+        if (n > 0) {
+            Key_12D4A8* keys = track->keys;
+            for (i = 0; i < track->count; i++) {
+                if (keys[i].time >= self->time) {
+                    break;
+                }
+            }
+        }
+        self->index = i;
+    } else {
+        for (i = n - 1; i >= 0; i--) {
+            Key_12D4A8* k = &track->keys[i];
+            if (k->time <= self->time) {
+                break;
+            }
+        }
+        self->index = i + 1;
+    }
+}

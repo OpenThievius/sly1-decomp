@@ -1637,3 +1637,64 @@ void func_0015EE80(void)
         D_002626CC = 1;
     }
 }
+
+struct List_15F710 {
+    u8* head;
+    u8* tail;
+    s32 offset;
+};
+
+struct Iter_15F710 {
+    List_15F710* list;
+    u8* link;
+    s32 offset;
+    Iter_15F710* prev;
+};
+
+struct Node_15F710 {
+    u8 pad0[0x54];
+    Node_15F710* f54;
+    u8 pad58[8];
+    List_15F710 list;
+};
+
+extern Iter_15F710* D_0027B314;
+void func_00152600(List_15F710* list, Node_15F710* node);
+void func_0015F678(void* self, Node_15F710* node);
+
+struct Begin_15F710 {
+    static void Of(Iter_15F710* it, List_15F710* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+struct Next_15F710 {
+    static Node_15F710* Of(Iter_15F710* it)
+    {
+        Node_15F710* obj = *(Node_15F710**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+void func_0015F710(void* self, Node_15F710* owner)
+{
+    Iter_15F710 it;
+    Node_15F710* node;
+    Begin_15F710::Of(&it, &owner->list);
+    while ((node = Next_15F710::Of(&it)) != 0) {
+        if (node != owner) {
+            func_00152600(&owner->list, node);
+            node->f54 = node;
+            node->list.tail = (u8*)node;
+            node->list.head = (u8*)node;
+        }
+        func_0015F678(self, node);
+    }
+    D_0027B314 = it.prev;
+}

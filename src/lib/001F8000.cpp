@@ -1083,3 +1083,15 @@ s32* func_001F9E08(s32 value)
         p++;
     return p;
 }
+
+f32 func_001FB6B0(s64 x)
+{
+    if ((u64)(x + 0x1FFFFFFFFFFFFFL) > 0x3FFFFFFFFFFFFEUL) {
+        if ((s32)x & 0x7FF) x |= 0x800;
+    }
+    double f = (s32)(x >> 32);
+    f *= 65536.0;
+    f *= 65536.0;
+    f += (u32)(x & 0xFFFFFFFFUL);
+    return (f32)f;
+}

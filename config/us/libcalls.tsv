@@ -25,3 +25,7 @@ _$_12Fault_1FEE48	func_002005A0	its destructor
 memset	func_001F5C0C	fill memory (the compiler clears an aggregate with it)
 __check_eh_spec	func_001FEC10	the exception-specification check the compiler calls
 __tf12Fault_1FD8A8	func_00200000	the type-information function of the allocation-failure exception (our class name)
+litodp	func_001FD358	long to double
+dpmul	func_001FCDE0	double multiply
+dpadd	func_001FCD20	double add
+dptofp	func_001FD578	double to float

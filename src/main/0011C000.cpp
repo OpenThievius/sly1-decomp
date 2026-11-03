@@ -2328,3 +2328,37 @@ s32 func_0011E1F8(s32 flag)
     }
     return 0;
 }
+
+// The RPC completion flag: func_0011E1F8 waits for another thread to clear it.
+struct Sync_11E138 {
+    s32 busy;
+    s32 pad[3];
+    s32 result;
+};
+
+extern s32 D_0025C34C;
+extern s32 D_0025C354;
+extern s32 D_0025C358;
+s32 func_00203B18(s32 a0, s32 a1, s32 a2, u8* a3);
+s32 func_0011E1F8(s32 flag);
+void func_0011DB00(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
+
+s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
+{
+    if (D_0025C34C == 0) {
+        return func_00203B18(a0, a1, a2, a3);
+    }
+    if (func_0011E1F8(1) == 1) {
+        return 0;
+    }
+    s32 args[3];
+    args[0] = a0;
+    (*(volatile Sync_11E138*)&D_00260DC0).busy = 1;
+    (*(volatile Sync_11E138*)&D_00260DC0).result = 0;
+    args[1] = a1;
+    args[2] = a2;
+    func_0011DB00(0x38, 0xC, args, 0, 0);
+    D_0025C354 = 1;
+    D_0025C358 = 0;
+    return 1;
+}
