@@ -1502,3 +1502,94 @@ void func_001626D8(Obj_1626D8* self, s32 value)
         self->count = 2;
     }
 }
+
+struct Pair_161C00 { s32 f0; u8* f4; };
+struct Q_161C00 { u8 pad[0x18]; s32 f18; };
+struct P_161C00 { u8 pad[4]; u8 f4[4]; u8 pad2[0x10]; s32 f18; Pair_161C00* f1C; u8 pad3[4]; Q_161C00* f24; };
+struct V3_161C00 { f32 x; f32 y; f32 z; };
+struct V4_161C00 { V3_161C00 v; f32 w; };
+struct Elem_161C00 { V3_161C00 v; u8 pad[0xC]; u8 rgba[4]; f32 f1C; f32 f20; s32 f24; };
+struct Self_161C00 {
+    u8 pad[0x80];
+    f32 f80;
+    u8 pad2[0xF8 - 0x84];
+    P_161C00* fF8;
+    u8 pad3[0x124 - 0xFC];
+    s32 f124;
+    Elem_161C00 e[1];
+};
+struct Hd_161C00 { u16 f0; u16 f2; u8 pad[4]; u16 f8[4]; u16 f10; u8 pad3[6]; };
+struct Gif_161C00 { u8 raw[1]; };
+struct Packet_161C00 { u32 w[8]; };
+
+void func_001EE5C8(Gif_161C00* gif, s32 a, s32 b, s32 c, s32* count, void* out);
+void func_001F5C0C(Hd_161C00* p, s32 v, s32 n);
+void func_001EE498(Gif_161C00* gif, s32 a, s32 b);
+extern u8 D_00001A50[];
+extern u8 D_000002F8[];
+void func_001EE3F0(Gif_161C00* gif, u8* a);
+void func_001EE420(Gif_161C00* gif, u8* a);
+void func_0018D800(Packet_161C00* dst, u8* src, s32 n);
+
+void func_00161C00(Self_161C00* self)
+{
+    Hd_161C00* hd;
+    f32* out1;
+    V4_161C00* out2;
+    u8* out3;
+    s32 count;
+    Packet_161C00* dst;
+    s32 base;
+    s32 i;
+    s32 k;
+    Elem_161C00* c;
+
+    base = 0x24;
+    func_001EE5C8(((Gif_161C00*)&D_002622A8), 0xD, 3, 0xB, 0, &hd);
+    func_001F5C0C(hd, 0, 0x18);
+    hd->f10 = 3;
+    hd->f0 = base;
+    base = self->f124 * 3 + 0x24;
+    hd->f2 = base;
+    func_001EE498(((Gif_161C00*)&D_002622A8), 1, 3);
+    func_001EE5C8(((Gif_161C00*)&D_002622A8), 8, self->f124, hd->f0, 0, &out1);
+    func_001EE5C8(((Gif_161C00*)&D_002622A8), 0xC, self->f124, hd->f0 + 2, 0, &out2);
+    func_001EE498(((Gif_161C00*)&D_002622A8), 1, 1);
+    for (i = 0; i < self->f124; i++) {
+        c = &self->e[i];
+        out1[0] = c->f1C;
+        out1[1] = c->f20;
+        out1[2] = 1.0f;
+        out2->v = c->v;
+        out2->w = c->f24 != 0 ? self->f80 + 32768.0f : self->f80;
+        out1 += 3;
+        out2++;
+    }
+    func_001EE3F0(((Gif_161C00*)&D_002622A8), D_00001A50);
+    func_001EE498(((Gif_161C00*)&D_002622A8), 1, 3);
+    func_001EE5C8(((Gif_161C00*)&D_002622A8), 0xE, self->f124, hd->f0 + 1, 0, &out3);
+    func_001EE498(((Gif_161C00*)&D_002622A8), 1, 1);
+    for (i = 0; i < self->f124; i++) {
+        s32 j;
+        c = &self->e[i];
+        for (j = 0; j < 4; j++) {
+            out3[j] = (self->fF8->f4[j] * c->rgba[j] + 0x100) / 0x1FE;
+        }
+        out3 += 4;
+    }
+    for (k = 0; k < self->fF8->f18; k++) {
+        Pair_161C00* pair = &self->fF8->f1C[k];
+        s32 frame;
+        func_001EE5C8(((Gif_161C00*)&D_002622A8), 0xC, pair->f0, base, &count, &dst);
+        frame = 0;
+        if (self->fF8->f24 != 0) {
+            frame = self->fF8->f24->f18;
+        }
+        func_0018D800(dst, pair->f4 + ((frame * pair->f0) << 4), count);
+        dst->w[0] |= 0x8000 | self->f124;
+        dst->w[4] |= 0x8000;
+        hd->f8[k] = base;
+        base += pair->f0;
+    }
+    func_001EE420(((Gif_161C00*)&D_002622A8), D_000002F8);
+}
