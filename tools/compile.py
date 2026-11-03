@@ -36,6 +36,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import asm_func  # noqa: E402
 import toolchain  # noqa: E402
 import versions  # noqa: E402
 import volatile_slots  # noqa: E402
@@ -213,6 +214,9 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     linux = linux_cc1plus(release) if release in LINUX_COMPANION else None
     run, cpp, cc1plus, ee_as = tools(LINUX_COMPANION.get(release, release))
     flags = flags if flags is not None else flags_for(source)
+    # The original assembly functions the file includes (include/asm_func.h), written from the
+    # disassembly before the assembler reads them.
+    asm_func.write(asm_func.included(src.read_text()))
     with tempfile.TemporaryDirectory(prefix="sly1-cc-") as tmp:
         ii, s = Path(tmp).resolve() / "unit.ii", Path(tmp).resolve() / "unit.s"
         if linux:

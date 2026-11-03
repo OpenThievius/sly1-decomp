@@ -23,6 +23,7 @@ import check  # noqa: E402
 import rodata  # noqa: E402
 import version_src  # noqa: E402
 import versions  # noqa: E402
+import asm_func  # noqa: E402
 import volatile_slots  # noqa: E402
 
 BOOT = b"\x7fELF" + bytes(range(256)) * 20
@@ -709,3 +710,38 @@ class VolatileSlotTest(unittest.TestCase):
         apart = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tmove\t$4,$0\n\tjal\tf"
         self.assertEqual(volatile_slots.fill(apart), apart)
 
+
+class AsmFuncTest(unittest.TestCase):
+    @staticmethod
+    def line(addr, word, text):
+        # a listing line as splat writes it; the words are invented, not the game's
+        return "    /" + "* %X %08X %s *" % (addr - 0xFF000, addr, word) + "/  " + text
+
+    def setUp(self):
+        self.listing = "\n".join([
+            ".align 3", "nonmatching func_00100010, 0x10", "", "glabel func_00100010",
+            self.line(0x100010, "11111111", "lw         $v0, 0x10($a0)"),
+            self.line(0x100014, "22222222", "addiu      $t0, $zero, 0x1"),
+            self.line(0x100018, "11223344", "vsub.xyzw  $vf1, $vf0, $vf0"),
+            self.line(0x10001C, "33333333", "jr         $ra"),
+            "endlabel func_00100010", self.line(0x100020, "00000000", "nop"), ""])
+
+    def test_the_function_is_its_label_to_its_size(self):
+        lines, size = asm_func.function_lines(self.listing, "func_00100010")
+        self.assertEqual(size, 16)
+        self.assertEqual(len(lines), 4)
+
+    def test_registers_are_numbers_with_the_64_bit_names(self):
+        out = asm_func.source(self.listing, "func_00100010")
+        self.assertIn("lw         $2, 0x10($4)", out)
+        self.assertIn("addiu      $12, $0, 0x1", out)
+        self.assertIn("jr         $31", out)
+        self.assertIn("\t.size\tfunc_00100010, 16", out)
+
+    def test_a_vu0_instruction_is_written_as_its_word(self):
+        out = asm_func.source(self.listing, "func_00100010")
+        self.assertIn(".word\t0x44332211", out)
+
+    def test_included_names_come_from_the_source(self):
+        self.assertEqual(asm_func.included("INCLUDE_ASM(func_00100010);\nvoid f();\n INCLUDE_ASM( func_00100020 );"),
+                         ["func_00100010", "func_00100020"])

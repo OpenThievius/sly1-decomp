@@ -26,6 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import classify_asm  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -152,7 +153,11 @@ def main(argv=None):
     built = flat.read_bytes()
     sha1 = hashlib.sha1(built).hexdigest()
     rel = flat.relative_to(ROOT)
-    linked = (" with %d function%s from C" % (len(placed), "" if len(placed) == 1 else "s")) if placed else ""
+    # A whole file also holds the original assembly functions inside its range (include/asm_func.h):
+    # they are placed with it, but they are not C.
+    asm = set(classify_asm.read_table())
+    from_c = [p for p in placed if p[-1] not in asm]
+    linked = (" with %d function%s from C" % (len(from_c), "" if len(from_c) == 1 else "s")) if from_c else ""
     if data_placed:
         linked += " and %d global%s" % (len(data_placed), "" if len(data_placed) == 1 else "s")
     if sha1 == v["boot"]["sha1"]:

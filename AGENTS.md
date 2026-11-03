@@ -74,6 +74,9 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   The one exception is the square root of include/fpu.h (`Fpu::Sqrt`): retail's bare `sqrt.s`
   behaves as an inline-assembly helper, which no C form reproduces (docs/TOOLCHAIN.md); a
   function computes a bare square root through it, and nothing else writes inline assembly.
+  A whole file (`config/us/files.tsv`) holds the original assembly functions inside its range
+  (`config/us/original_asm.tsv`) at file scope, `INCLUDE_ASM(func_X);` (include/asm_func.h),
+  their bytes taken from the disassembly: that is not inline assembly in a function.
   `volatile` is one only where it stops the compiler. It is allowed where it is what the
   original had: a hardware register, at a fixed address (`*(volatile u32*)0x10002010`) or
   through a pointer to a register block (a DMA channel's), and data shared with hardware, an
