@@ -1615,3 +1615,75 @@ void func_0014ABD0(Ent_0014ABD0* self)
         self = (Ent_0014ABD0*)((u8*)self + 0x260);
     }
 }
+
+void func_0014B0C0(s32 n, f32* a, f32* l)
+{
+    s32 i;
+    s32 j;
+    s32 k;
+    f32 sum;
+
+    if (n == 0)
+    {
+        return;
+    }
+    for (i = 0; i < n; i++)
+    {
+        l[i] = a[i];
+    }
+    if (__builtin_fabsf(l[0]) < 1e-8f)
+    {
+        for (j = 0; j < n; j++)
+        {
+            l[j * n] = 0.0f;
+        }
+    }
+    else
+    {
+        for (j = 1; j < n; j++)
+        {
+            l[j * n] = a[j * n] / l[0];
+        }
+    }
+    for (j = 1; j < n - 1; j++)
+    {
+        for (i = j; i < n; i++)
+        {
+            sum = 0.0f;
+            for (k = 0; k < j; k++)
+            {
+                sum += l[i + k * n] * l[j * n + k];
+            }
+            l[j * n + i] = a[j * n + i] - sum;
+        }
+        if (__builtin_fabsf(l[j * n + j]) < 1e-8f)
+        {
+            for (k = j; k < n; k++)
+            {
+                l[k * n + j] = 0.0f;
+            }
+        }
+        else
+        {
+            for (k = j + 1; k < n; k++)
+            {
+                sum = 0.0f;
+                for (i = 0; i < j; i++)
+                {
+                    sum += l[j + i * n] * l[k * n + i];
+                }
+                l[k * n + j] = (a[k * n + j] - sum) / l[j * n + j];
+            }
+        }
+    }
+    sum = 0.0f;
+    for (k = 0; k < n - 1; k++)
+    {
+        sum += l[(n - 1) + k * n] * l[(n - 1) * n + k];
+    }
+    l[(n - 1) * n + (n - 1)] = a[(n - 1) * n + (n - 1)] - sum;
+    if (__builtin_fabsf(l[(n - 1) * n + (n - 1)]) < 1e-8f)
+    {
+        l[(n - 1) * n + (n - 1)] = 0.0f;
+    }
+}
