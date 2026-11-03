@@ -2290,3 +2290,14 @@ void func_0011CBB8(void)
     n = (s32)&D_00260DC0;
     func_0011D968(0, 4, &n);
 }
+
+// D_00260DC0 is the RPC packet shared with the IOP, declared volatile above; the volatile
+// access keeps lui+addiu+lw 16(base).
+s32 func_00203D90();
+
+s32 func_0011E2E8()
+{
+    if (D_0025C34C == 0)
+        return func_00203D90();
+    return D_00260DC0.f10;
+}

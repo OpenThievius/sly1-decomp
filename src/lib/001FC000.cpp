@@ -1246,3 +1246,70 @@ void func_001FEE48()
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 extern const Fn_Table D_0024F0C0[6] = { 0, (Fn_Table)func_001FEF70, 0, (Fn_Table)func_001FEF28, 0, (Fn_Table)func_001FEF00 };
+
+struct Vec_001FD868
+{
+	s32 w0;
+	s32 w1;
+	s32 w2;
+	u32 w3;
+};
+
+void func_001FD6E0(f32* in, Vec_001FD868* out);
+s32 func_001FD548(s32 a, s32 b, s32 c, u64 d);
+
+s32 func_001FD868(f32 x)
+{
+	Vec_001FD868 v;
+	func_001FD6E0(&x, &v);
+	return func_001FD548(v.w0, v.w1, v.w2, (u64)v.w3 << 30);
+}
+
+typedef void (*Handler_001FE8F0)(void) __attribute__((noreturn));
+
+void func_001FE8F0(void) __attribute__((noreturn));
+
+void func_001FE8F0(void)
+{
+	((Handler_001FE8F0)D_00278048)();
+}
+
+void func_001FE908(void) __attribute__((noreturn));
+
+void func_001FE908(void)
+{
+	func_001FE8F0();
+}
+
+Handler_001FE8F0 func_001FE918(Handler_001FE8F0 handler)
+{
+	Handler_001FE8F0 old = (Handler_001FE8F0)D_00278048;
+	D_00278048 = (void (*)())handler;
+	return old;
+}
+
+typedef void (*Handler_001FE938)(void) __attribute__((noreturn));
+
+void func_001FE938(void) __attribute__((noreturn));
+
+void func_001FE938(void)
+{
+	((Handler_001FE938)D_00278640)();
+}
+
+s32 func_001FE950(void)
+{
+	return *(s32*)func_001FDA10() + 8;
+}
+
+struct Arg_1FE9D0;
+s32 func_0018D740(Arg_1FE9D0* size);
+extern void func_001FE8F0(void) __attribute__((noreturn));
+
+s32 func_001FE9D0(Arg_1FE9D0* size)
+{
+    s32 p = func_0018D740(size);
+    if (p == 0)
+        func_001FE8F0();
+    return p;
+}

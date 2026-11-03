@@ -1075,3 +1075,11 @@ void func_001FA1E8(void)
     D_00629380.fC = 0;
     func_001FA630(0x80000002, &D_00629380, 0x14, 0, 0, 0);
 }
+
+s32* func_001F9E08(s32 value)
+{
+    s32* p = (s32*)0x80000000;
+    while (*p != value)
+        p++;
+    return p;
+}
