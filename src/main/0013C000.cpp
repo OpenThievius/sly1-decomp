@@ -1392,3 +1392,70 @@ void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
         }
     }
 }
+
+struct Desc_13E950 {
+    u8 pad0[8];
+    u32 f8;
+};
+
+struct Node_13E950 {
+    Desc_13E950* f0;
+};
+
+struct List_13E950 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_13E950 { List_13E950* list; u8* link; s32 offset; Iter_13E950* saved; };
+
+struct Owner_13E950 {
+    u8 pad0[0x34];
+    List_13E950 list;
+};
+
+struct Self_13E950 {
+    u8 pad0[4];
+    Owner_13E950* f4;
+};
+
+struct Call_13E950;
+
+extern u8 D_0027B314[];
+
+s32 func_0013E868(Call_13E950* set, void* key);
+void func_0013E8D8(Call_13E950* queue, void* value);
+
+struct Next_13E950 {
+    static Node_13E950* Of(Iter_13E950* it)
+    {
+        Node_13E950* obj = *(Node_13E950**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_13E950 {
+    static void Of(Iter_13E950* it, List_13E950* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = *(Iter_13E950**)D_0027B314;
+        *(Iter_13E950**)D_0027B314 = it;
+    }
+};
+
+void func_0013E950(Self_13E950* self, Owner_13E950* a1)
+{
+    Iter_13E950 it;
+    Begin_13E950::Of(&it, &a1->list);
+    self->f4 = a1;
+    Node_13E950* node;
+    while ((node = Next_13E950::Of(&it)) != 0) {
+        if (node->f0->f8 & 0x40) {
+            if (func_0013E868((Call_13E950*)((u8*)self + 0x90), node) == 0) {
+                if (func_0013E868((Call_13E950*)((u8*)self + 8), node) == 0) {
+                    func_0013E8D8((Call_13E950*)((u8*)self + 8), node);
+                }
+            }
+        }
+    }
+    *(Iter_13E950**)D_0027B314 = it.saved;
+}

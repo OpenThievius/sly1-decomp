@@ -1128,3 +1128,61 @@ void func_00188C10(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
         col[i * 4] = 0.0f;
     out[3][3] = 1.0f;
 }
+
+void func_001EAD88(f32 angle, f32* a, f32* b);
+
+void func_00188A20(f32* in, f32* out)
+{
+    f32 sc[6];
+    func_001EAD88(in[0], &sc[0], &sc[1]);
+    func_001EAD88(in[1], &sc[2], &sc[3]);
+    func_001EAD88(in[2], &sc[4], &sc[5]);
+    f32 sa = sc[0], ca = sc[1], sb = sc[2], cb = sc[3], cg = sc[5], sg = sc[4];
+    f32 sasb = sa * sb;
+    f32 casb = ca * sb;
+    out[0] = cb * cg;
+    out[1] = cb * sg;
+    out[2] = -sb;
+    out[4] = sasb * cg - ca * sg;
+    out[5] = sasb * sg + ca * cg;
+    out[6] = sa * cb;
+    out[8] = casb * cg + sa * sg;
+    out[9] = casb * sg - sa * cg;
+    out[10] = ca * cb;
+}
+
+extern s32 D_002649B0[];
+struct Sub_18A830;
+s32 func_001300E8(Sub_18A830* a, s32 b);
+s32 func_001833F0(Sub_18A830* a, s32 b);
+
+typedef s32 (*VFn_18A830)(Sub_18A830* self, void* arg);
+struct Type_18A830 { u8 pad[4]; s32 kind; };
+struct Sub_18A830 { VFn_18A830* vt; };
+struct Rec_18A830 { u8 pad[0x50]; Sub_18A830* sub; };
+
+s32 func_0018A830(void* self, Rec_18A830* rec)
+{
+    s32* e = D_002649B0;
+    u32 i;
+    for (i = 0; i < 5; e++, i++) {
+        if (func_001300E8(rec->sub, *e) != 0) {
+            break;
+        }
+    }
+    if (i < 5) {
+        return 0;
+    }
+    if (((Type_18A830*)rec->sub->vt)->kind == 3) {
+        return 0;
+    }
+    if (func_001300E8(rec->sub, 0x34) != 0) {
+        if (rec->sub->vt[60](rec->sub, self) == 0) {
+            return 0;
+        }
+    }
+    if (func_001833F0(rec->sub, 0x449) != 0 || func_001833F0(rec->sub, 0x44A) != 0) {
+        return 0;
+    }
+    return 1;
+}

@@ -1401,3 +1401,25 @@ void func_001F3EE0(Tbl_1F3EE0* self, Tbl_1F3EE0* other)
         self->arr[i] = func_00183058(other->arr[i], self->f14, 0);
     }
 }
+
+extern f32 D_0026185C;
+
+f32 func_001F31F8(s32 i);
+
+f32 func_001F3250(f32 x, f32 y, f32 z)
+{
+    f32 t = (x + x) * D_0026185C + y;
+    s32 i = (s32)t;
+    f32 a = func_001F31F8(i);
+    f32 b = func_001F31F8(i + 1);
+    if (i & 1) {
+        a = a * z;
+        b = z * (b - 1.0f) + 1.0f;
+    } else {
+        b = b * z;
+        a = z * (a - 1.0f) + 1.0f;
+    }
+    f32 u = t - (f32)i;
+    u = (u * u) * (3.0f - (u + u));
+    return a + u * (b - a);
+}

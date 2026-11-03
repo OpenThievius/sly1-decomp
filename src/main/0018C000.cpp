@@ -2155,3 +2155,54 @@ s32 func_0018C568(Self_18C568* self)
     func_001A7E90((*(Data_18C568**)&D_002623C0));
     return 0;
 }
+
+struct Obj_18F6E8 {
+    u8 pad0[0x10];
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    u8 pad1[0x5C - 0x1C];
+    s32 f5C;
+    u8 pad2[0x114 - 0x60];
+    s32 f114;
+    s32 f118;
+    u8 pad3[0x130 - 0x11C];
+    s32 f130;
+    volatile s32 f134;  // state another thread changes: func_0018F7D0 busy-waits on it
+};
+
+s32 func_0018F890(Obj_18F6E8* self, s32 flag);
+void func_0018F610(Obj_18F6E8* self);
+s32 func_0020B058(void* a, s32 b, s32 c);
+void func_0018EDA8(s32 a, s32 b, s32 c, s32 d);
+void func_0018EF78(s32 a, s32 b, s32 c);
+void func_001F6C20(s32 a);
+void func_001F6B40(s32 a);
+void func_0018EB98(void* a);
+
+void func_0018F6E8(Obj_18F6E8* self)
+{
+    void* s1;
+    if (self->f134 == 1) {
+        do {
+            (void)func_0018F890(self, 0);
+        } while (self->f134 == 1);
+    }
+    if (func_0020B058((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
+        return;
+    }
+    if (self->f18 == 0) {
+        func_0018EDA8(self->f114, self->f5C, self->f10, self->f14);
+        func_0018EF78(self->f118, self->f10, self->f14);
+        func_001F6C20(0);
+    }
+    s1 = (u8*)self + 0x80;
+    if (self->f134 != 0) {
+        do {
+            (void)func_0018F890(self, 0);
+            func_0018F610(self);
+        } while (self->f134 != 0);
+    }
+    func_001F6B40(self->f130);
+    func_0018EB98(s1);
+}
