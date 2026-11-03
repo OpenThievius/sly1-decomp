@@ -23,6 +23,8 @@ procedure; read it before you match anything.
 | `config/<version>/functions.tsv`, `config/eu/map.tsv` | every function, and PAL's pairing with US | `tools/inventory.py` |
 | `config/<version>/layout.tsv` | what each part of the executable is: game code, libraries, data sections | by hand |
 | `config/cflags.tsv` | the compiler, and the flags of each source file | by hand |
+| `config/us/c_data.tsv` | every global the C defines, from the last full build that printed `MATCH` (counted as matched data) | `tools/build.py` |
+| `config/us/generated.tsv` | the functions the compiler makes for a file (a static initialiser, the constructor that calls it), under retail's names | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/us/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md) | `tools/classify_asm.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |

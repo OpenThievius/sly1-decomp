@@ -43,9 +43,9 @@ def read_status():
 
 
 def defined_in_src():
-    """{function name: source file} for every function src/ defines."""
+    """{function name: source file} for every function src/ defines or the compiler makes for it."""
     import todo
-    out = {}
+    out = dict(todo.generated())
     for path in versions.sources():
         for m in todo.definitions(path.read_text()):
             out[m.group(1)] = path

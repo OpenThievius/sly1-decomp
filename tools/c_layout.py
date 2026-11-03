@@ -31,7 +31,8 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 DATA_SECTIONS = (".data", ".rodata", ".bss", ".sdata", ".sbss", ".lit4", ".lit8")
-DATA_NAME = re.compile(r"^\.data\.(D_[0-9A-F]{8})$")
+DATA_NAME = re.compile(r"^\.(?:data|rodata)\.(D_[0-9A-F]{8})$")
+ADDR_LABEL = re.compile(r"^D_[0-9A-F]{8}$")
 
 
 class LayoutError(Exception):
@@ -123,6 +124,9 @@ def placements(objects):
         rel = path.relative_to(ROOT)
         for sec in obj.sections:
             if sec["name"].startswith(DATA_SECTIONS) and sec["size"]:
+                if sec["name"] == ".bss":
+                    data.append(bss_placement(obj, sec, rel, src))
+                    continue
                 m = DATA_NAME.match(sec["name"])
                 if m:
                     addr = int(m.group(1)[2:], 16)
@@ -162,7 +166,25 @@ def placements(objects):
             aliases.pop(name)
     placed.sort()
     data.sort()
+    for a, b in zip(data, data[1:]):
+        if a[0] == b[0]:
+            raise LayoutError("two definitions of the global at 0x%X (%s, %s)" % (a[0], a[4], b[4]))
     return placed, aliases, data
+
+
+def bss_placement(obj, sec, rel, src):
+    """A C file's .bss (its static variables, which -fdata-sections leaves in one section) as one
+    placement: each variable is named D_XXXXXXXX and sits at its address's offset from the first."""
+    inside = sorted((s["value"], s["name"]) for s in obj.symbols if s["shndx"] == sec["index"] and s["name"])
+    if not inside or any(not ADDR_LABEL.match(n) for _, n in inside):
+        raise LayoutError("%s has .bss variables not named D_XXXXXXXX (%s)"
+                          % (src.relative_to(ROOT), ", ".join(n for _, n in inside) or "unnamed"))
+    base = int(inside[0][1][2:], 16) - inside[0][0]
+    for off, n in inside:
+        if int(n[2:], 16) != base + off:
+            raise LayoutError("%s: %s is at .bss+0x%X, not at its address's place from %s"
+                              % (src.relative_to(ROOT), n, off, inside[0][1]))
+    return (base, sec["size"], rel, ".bss", inside[0][1])
 
 
 LABEL = re.compile(r"\.word\s+(\.L([0-9A-Fa-f]{8}))\b")
@@ -206,17 +228,17 @@ def split_text(key):
     return header, chunks
 
 
-def split_data(key):
-    """The header lines of asm/<key>/data/data.data.s and [(label, address, its lines)] in order."""
-    lines = (ROOT / "asm" / key / "data" / "data.data.s").read_text().splitlines()
-    starts = [i for i, l in enumerate(lines) if l.startswith("nonmatching D_")]
+def split_data(key, kind="data"):
+    """The header lines of asm/<key>/data/<kind>.<kind>.s and [(label, address, its lines)] in order."""
+    lines = (ROOT / "asm" / key / "data" / ("%s.%s.s" % (kind, kind))).read_text().splitlines()
+    starts = [i for i, l in enumerate(lines) if l.startswith("nonmatching ")]
     if not starts:
-        raise LayoutError("asm/%s/data/data.data.s has no labels" % key)
+        raise LayoutError("asm/%s/data/%s.%s.s has no labels" % (key, kind, kind))
     header = lines[:starts[0]]
     chunks = []
     for n, i in enumerate(starts):
-        name = lines[i].split()[1].rstrip(",")
-        chunks.append((name, int(name[2:], 16), lines[i:starts[n + 1] if n + 1 < len(starts) else len(lines)]))
+        name = lines[i].split()[1].rstrip(",")  # D_XXXXXXXX, or a jump table's jtbl_XXXXXXXX
+        chunks.append((name, int(name.rsplit("_", 1)[1], 16), lines[i:starts[n + 1] if n + 1 < len(starts) else len(lines)]))
     return header, chunks
 
 
@@ -234,6 +256,7 @@ def data_plan(chunks, data_placed):
             continue
         d = at.get(addr)
         if d:
+            covered[name] = addr  # defined by C unless the C variable is a static
             end = addr + d[1]
             if end not in {a for _, a, _ in chunks[i + 1:]}:
                 raise LayoutError("%s (%d bytes) does not end where a label of .data starts"
@@ -246,15 +269,15 @@ def data_plan(chunks, data_placed):
     return plan, covered
 
 
-def data_entries(data_placed, main_start):
-    """The linker-script lines for .data with the C globals placed, the run sources, and the labels
-    a C global covers (PROVIDEd at their addresses)."""
-    header, chunks = split_data("us")
+def data_entries(data_placed, main_start, kind="data"):
+    """The linker-script lines for .data (or .bss) with the C globals placed, the run sources, and
+    the labels a C global covers (PROVIDEd at their addresses). main_start: the output section's."""
+    header, chunks = split_data("us", kind)
     plan, covered = data_plan(chunks, data_placed)
-    data_dir = ROOT / "build" / "us" / "data"
+    data_dir = ROOT / "build" / "us" / kind
     entries, runs = [], []
-    for kind, item in plan:
-        if kind == "c":
+    for what, item in plan:
+        if what == "c":
             entries.append("        . = 0x%X;" % (item[0] - main_start))
             entries.append("        %s(%s);" % (item[2], item[3]))
             continue
@@ -263,7 +286,7 @@ def data_entries(data_placed, main_start):
         write_if_changed(path, "\n".join(header + [l for _, _, ls in item for l in ls]) + "\n")
         runs.append(path)
         entries.append("        . = 0x%X;" % (start - main_start))
-        entries.append("        %s(.data);" % path.relative_to(ROOT).with_suffix(".s.o"))
+        entries.append("        %s(.%s);" % (path.relative_to(ROOT).with_suffix(".s.o"), kind))
     for stale in data_dir.glob("run_*.s"):
         if stale not in runs:
             stale.unlink()
@@ -362,16 +385,20 @@ def layout(ld_script, objects):
     if not marker.search(text):
         raise LayoutError("%s has no text.s object to replace" % ld_script.relative_to(ROOT))
     text = marker.sub(lambda m: "\n".join(entries) if m.group(1) == ".text" else "", text)
-    if data_placed:
-        main_start = next(r[2] for r in todo.layout("us") if r[1] == "rodata")
-        data_lines, data_runs, covered = data_entries(data_placed, main_start)
-        dmarker = re.compile(r"^\s*build/us/asm/us/data/data\.data\.s\.o\(\.data\);$", re.M)
+    for kind in ("rodata", "data", "bss"):
+        mine = [d for d in data_placed if d[3] == ".bss" and kind == "bss" or d[3].startswith("." + kind + ".")]
+        if not mine:
+            continue
+        # .main starts with .rodata, then .data; .main_bss with the first label of .bss.
+        start = (next(r[2] for r in todo.layout("us") if r[1] == "rodata") if kind != "bss"
+                 else split_data("us", "bss")[1][0][1])
+        data_lines, data_runs, covered = data_entries(mine, start, kind)
+        dmarker = re.compile(r"^\s*build/us/asm/us/data/%s\.%s\.s\.o\(\.%s\);$" % (kind, kind, kind), re.M)
         if not dmarker.search(text):
-            raise LayoutError("%s has no data.data.s object to replace" % ld_script.relative_to(ROOT))
+            raise LayoutError("%s has no %s.%s.s object to replace" % (ld_script.relative_to(ROOT), kind, kind))
         text = dmarker.sub(lambda m: "\n".join(data_lines), text)
         runs += data_runs
-        if covered:
-            text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(covered.items())) + "\n"
+        text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(covered.items())) + "\n"
     labels = case_labels(placed)
     if labels:
         text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(labels.items())) + "\n"
@@ -382,4 +409,4 @@ def layout(ld_script, objects):
         text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(libcalls.items())) + "\n"
     out = ld_script.with_name(ld_script.name.replace(".splat.ld", ".ld"))
     write_if_changed(out, text)
-    return out, runs, placed
+    return out, runs, placed, data_placed

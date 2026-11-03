@@ -116,9 +116,20 @@ def source_of(addr):
     return "%s/%08X.cpp" % (code_range_of(addr)[5], window_of(addr))
 
 
+def generated():
+    """{function name: source file} of the functions the compiler makes for a file, which
+    config/us/generated.tsv names (tools/compile.py gives them those names)."""
+    path = ROOT / "config" / "us" / "generated.tsv"
+    if not path.exists():
+        return {}
+    rows = [l.split("\t") for l in path.read_text().splitlines()[1:] if l]
+    return {func: ROOT / f for f, _sym, func in rows if (ROOT / f).exists()}
+
+
 def finished():
-    """Names of the US functions src/ defines (by their address name or symbol_addrs name)."""
-    names = set()
+    """Names of the US functions src/ defines (by their address name or symbol_addrs name), and
+    those the compiler makes for a file of src/."""
+    names = set(generated())
     for path in versions.sources():
         for m in definitions(path.read_text()):
             names.add(m.group(1))

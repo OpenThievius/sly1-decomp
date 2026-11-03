@@ -20,6 +20,7 @@ section: the pair is baked like any literal, so it reaches retail's own table. A
 relocation inside .rodata, and any rodata relocation that is not a %hi or %lo, is refused.
 """
 
+import re
 import shutil
 import struct
 import subprocess
@@ -30,6 +31,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import elf  # noqa: E402
 
 R_MIPS_NONE = 0
+# A constant a C file defines under its address name has its own section (-fdata-sections), which
+# tools/c_layout.py places at that address: it is linked, not baked.
+GLOBAL = re.compile(r"^\.rodata\.D_[0-9A-F]{8}$")
 
 
 class RodataError(Exception):
@@ -48,7 +52,8 @@ def patch(data, image, resolver, label="object"):
     """(patched bytes, [rodata section names], relocations baked) for an object's bytes."""
     data = bytearray(data)
     obj = elf.Elf(bytes(data))
-    rodata = {s["index"]: s["name"] for s in obj.sections if s["name"].startswith(".rodata") and s["size"]}
+    rodata = {s["index"]: s["name"] for s in obj.sections
+              if s["name"].startswith(".rodata") and s["size"] and not GLOBAL.match(s["name"])}
     if not rodata:
         return bytes(data), [], 0
     functions = {s["shndx"]: s for s in obj.symbols if s["type"] == elf.STT_FUNC and s["shndx"] in range(len(obj.sections))}
