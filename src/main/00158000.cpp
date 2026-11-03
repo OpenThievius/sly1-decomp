@@ -1530,3 +1530,63 @@ void func_00159588(Self_00159588* self)
     }
     D_0027B314 = it.saved;
 }
+
+struct Actor_15AC08 {
+    u8 pad0[0x14];
+    u8* f14;
+    u8 pad1[0x550 - 0x18];
+    s32 f550;
+    u8 pad2[0x564 - 0x554];
+    s32 f564;
+    s32 pad568;
+    s32 f56C[16];
+    s32 f5AC;
+    s32 f5B0[8];
+    u8 pad4[0x5D4 - 0x5D0];
+    u8 f5D4[0x630 - 0x5D4];
+    s32 f630;
+    s32 f634;
+};
+
+extern u8 D_002621C8[];
+
+void func_001BAC30(Actor_15AC08* self, void* arg);
+void func_00124DF8(Actor_15AC08* self, s32 n, void* table);
+void func_00159478(u8* sub, Actor_15AC08* self);
+s32 func_0015A480(u8* self, s32 kind, Actor_15AC08* arg);
+void func_00182ED8(s32 a);
+s32 func_001526D0(u8* sub, Actor_15AC08* self);
+void func_00152600(u8* data, Actor_15AC08* self);
+
+void func_0015AC08(Actor_15AC08* self, void* arg)
+{
+    u32 i;
+    func_001BAC30(self, arg);
+    func_00124DF8(self, 2, D_002621C8);
+    func_00159478(self->f5D4, self);
+    for (i = 0; i < 16; i++) {
+        s32 kind = i + 0x23C;
+        s32 p = func_0015A480(self->f14, kind, self);
+        if (!p)
+            continue;
+        func_00182ED8(p);
+        if (self->f550 == 1) {
+            if (self->f630 == kind)
+                self->f634 = self->f564;
+        }
+        self->f56C[self->f564++] = p;
+    }
+    if (self->f550 == 1) {
+        for (i = 0; i < 8; i++) {
+            s32 p = func_0015A480(self->f14, i + 0x24D, self);
+            if (p) {
+                func_00182ED8(p);
+                self->f5B0[self->f5AC++] = p;
+            }
+        }
+    }
+    if (self->f550) {
+        if (func_001526D0(self->f14 + 0x1C48, self))
+            func_00152600(self->f14 + 0x1C48, self);
+    }
+}

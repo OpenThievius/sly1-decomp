@@ -2344,3 +2344,70 @@ s32 func_001A88A0(Self_1A88A0* self, Key_1A88A0* key)
     }
     return 1;
 }
+
+struct Obj_1AA998;
+struct Vt_1AA998 {
+    void* s[11];
+    f32 (*m2C)(Obj_1AA998* self);
+    void* s12;
+    f32 (*m34)(Obj_1AA998* self);
+};
+void func_001AAB60(Obj_1AA998* self);
+
+struct Obj_1AA998 {
+    Vt_1AA998* vt;
+    u8 pad0[0x21C - 4];
+    f32 f21C;
+    f32 f220;
+    f32 f224;
+    f32 f228;
+    f32 f22C;
+    f32 f230;
+    u8 pad1[0x23C - 0x234];
+    f32 f23C;
+    u8 pad2[0x24C - 0x240];
+    f32 f24C;
+    s32 f250;
+    f32 f254;
+    void* f258;
+};
+
+void func_001AA998(Obj_1AA998* self, s32 mode)
+{
+    if (self->f250 == mode) {
+        return;
+    }
+    s32 notify = 0;
+    switch (mode) {
+    case 1:
+    case 3:
+        if (mode == 1) {
+            self->f24C = self->f23C * self->vt->m2C(self);
+        } else {
+            self->f24C = (1.0f - self->f23C) * self->vt->m34(self);
+        }
+        if (self->f250 == 0 || self->f250 == 2) {
+            notify = 1;
+        }
+        break;
+    case 2:
+        notify = 1;
+        self->f21C = self->f224;
+        self->f220 = self->f228;
+        self->f23C = 1.0f;
+        self->f24C = 0.0f;
+        break;
+    case 0:
+        notify = 1;
+        self->f21C = self->f22C;
+        self->f220 = self->f230;
+        self->f23C = 0.0f;
+        self->f24C = 0.0f;
+        break;
+    }
+    self->f250 = mode;
+    self->f254 = *(f32*)self->f258;
+    if (notify) {
+        func_001AAB60(self);
+    }
+}

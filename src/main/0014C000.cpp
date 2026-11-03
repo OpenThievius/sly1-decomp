@@ -1595,3 +1595,81 @@ void func_0014E828();
 void func_0014EB10();
 extern const Fn_Table D_002176D0[14] = { (Fn_Table)func_0014DD28, (Fn_Table)func_0014DE08, (Fn_Table)func_0014DE40, (Fn_Table)func_0014DE78, (Fn_Table)func_0014DF68, (Fn_Table)func_0014DF98, (Fn_Table)func_0014E000, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014E068, (Fn_Table)func_0014E090, (Fn_Table)func_0014E170, (Fn_Table)func_0014E2A0, 0 };
 extern const Fn_Table D_00217708[14] = { (Fn_Table)func_0014E3D0, (Fn_Table)func_0014E5B8, (Fn_Table)func_0014E6A8, (Fn_Table)func_0014E710, (Fn_Table)func_0014E828, (Fn_Table)func_0014E910, (Fn_Table)func_0014E990, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014EA48, (Fn_Table)func_0014EB10, (Fn_Table)func_0014EC70, (Fn_Table)func_0014ED98, 0 };
+
+typedef void (*VFn_14CF30)(void* self);
+typedef void (*Cb_14CF30)(void* self);
+
+struct Glob_14CF30 {
+    VFn_14CF30* vtbl;
+    u8 pad0[0x264 - 4];
+    void* f264;
+    void* f268;
+};
+
+struct Elem_14CF30 {
+    void* key;
+    u8 pad0[0x14 - 4];
+};
+
+struct Obj_14CF30 {
+    u8 pad0[0x14];
+    void* p14;
+    u8 pad1[0x2D0 - 0x18];
+    u8 f2D0[4];
+    u8 f2D4[4];
+    f32 f2D8;
+    s32 n2DC;
+    u8 pad2[0x2EC - 0x2E0];
+    Elem_14CF30 elems[1];
+    u8 pad3[0x42C - 0x300];
+    void* f42C;
+    s32 f430;
+};
+
+
+void func_00127378(Obj_14CF30* self, s32 kind, void* key);
+void func_001B6598(void* key, s32* out);
+void func_001DDC38(void* sub, Obj_14CF30* self);
+void func_001AB890(Glob_14CF30* self, f32 v);
+void func_001AB928(Glob_14CF30* self, f32 v, Cb_14CF30 cb);
+void func_001AB938(Glob_14CF30* self);
+void func_0014C668(void* self);
+
+void func_0014CF30(Obj_14CF30* self, s32 kind, void* key)
+{
+    func_00127378(self, kind, key);
+    switch (kind) {
+    case 6: {
+        s32 i;
+        for (i = 0; i < self->n2DC; i++) {
+            if (self->elems[i].key == key) {
+                break;
+            }
+        }
+        if (i < self->n2DC) {
+            self->elems[i].key = 0;
+        }
+        break;
+    }
+    case 0x14:
+        if (key == self->f42C) {
+            s32 out;
+            func_001B6598(key, &out);
+            if (out == 0x3FD) {
+                (*(Glob_14CF30*)&D_0026D348).f264 = self->f2D0;
+                (*(Glob_14CF30*)&D_0026D348).f268 = self->f2D4;
+                func_001DDC38(self->p14, self);
+                func_001AB890(((Glob_14CF30*)&D_0026E760), self->f2D8);
+                func_001AB928(((Glob_14CF30*)&D_0026E760), 0.0f, func_0014C668);
+                func_001AB938(((Glob_14CF30*)&D_0026E760));
+            }
+            if (self->f430 == 0x3FD) {
+                (*(Glob_14CF30*)&D_0026D348).vtbl[15](((Glob_14CF30*)&D_0026D348));
+                (*(Glob_14CF30*)&D_0026E760).vtbl[15](((Glob_14CF30*)&D_0026E760));
+                func_001DDC38(self->p14, 0);
+            }
+            self->f430 = out;
+        }
+        break;
+    }
+}
