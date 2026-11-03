@@ -477,6 +477,21 @@ def layout(ld_script, objects):
     libcalls = check.load_libcalls("us")
     if libcalls:
         text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(libcalls.items())) + "\n"
+    # A global C names by its address that the disassembly has no label for (an address inside
+    # another label): defined at that address, unless something else defines it.
+    named = address_names(objects)
+    if named:
+        text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(named.items())) + "\n"
     out = ld_script.with_name(ld_script.name.replace(".splat.ld", ".ld"))
     write_if_changed(out, text)
     return out, runs, placed, data_placed
+
+
+def address_names(objects):
+    """{D_XXXXXXXX: address} of every global the C objects refer to by its address name."""
+    out = {}
+    for path in objects.values():
+        for sym in elf.Elf(path.read_bytes()).symbols:
+            if sym["shndx"] == elf.SHN_UNDEF and ADDR_LABEL.match(sym["name"]):
+                out[sym["name"]] = int(sym["name"][2:], 16)
+    return out
