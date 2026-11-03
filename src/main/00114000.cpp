@@ -1989,3 +1989,59 @@ void func_00205578();
 void func_00205678();
 void func_00206180();
 extern Fn_Table D_00259938[8] = { (Fn_Table)func_00206180, (Fn_Table)func_00205400, (Fn_Table)func_00205210, (Fn_Table)func_002054F0, (Fn_Table)func_00205678, (Fn_Table)func_00205578, (Fn_Table)func_00204F68, (Fn_Table)func_001EA408 };
+
+struct Quad_117D78 { s32 a, b, c, d; };
+struct In_117D78 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+struct Host_117D78;
+
+extern void* D_00275710;
+
+s32 func_0011B008(Quad_117D78* q);
+void func_00117AF0(Quad_117D78* t, s32 a, void* b);
+s32 func_0011B0A8(Quad_117D78* a, Quad_117D78* b);
+s32 func_0011B060(Quad_117D78* q, int mode);
+s32 func_0011B018(void* dst, Quad_117D78* src);
+s32 func_0015A198(Host_117D78* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
+
+void* func_00117D78(void* out, s32 unused, In_117D78* in)
+{
+    Quad_117D78 q;
+    u8 buf[0x100];
+    Quad_117D78 t;
+    (void)func_0011B008(&q);
+    s32 r = func_0015A198((Host_117D78*)D_00275710, 0x104, in->w4, (void*)in->wc, 0x40, buf);
+    func_00117AF0(&t, r, buf);
+    (void)func_0011B0A8(&q, &t);
+    (void)func_0011B060(&t, 2);
+    (void)func_0011B018(out, &q);
+    (void)func_0011B060(&q, 2);
+    return out;
+}
+
+struct Quad_117F28 { s32 a, b, c, d; };
+struct In_117F28 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
+struct Host_117F28;
+
+extern void* D_00275710;
+
+s32 func_0011B008(Quad_117F28* q);
+void func_00117AF0(Quad_117F28* t, s32 a, void* b);
+s32 func_0011B0A8(Quad_117F28* a, Quad_117F28* b);
+s32 func_0011B060(Quad_117F28* q, int mode);
+s32 func_0011B018(void* dst, Quad_117F28* src);
+s32 func_0015A4F0(Host_117F28* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
+
+void* func_00117F28(void* out, s32 unused, In_117F28* in)
+{
+    Quad_117F28 q;
+    u8 buf[0x400];
+    Quad_117F28 t;
+    (void)func_0011B008(&q);
+    s32 r = func_0015A4F0((Host_117F28*)D_00275710, in->wc ? 0x101 : 0x105, in->w4, (void*)in->wc, 0x100, buf);
+    func_00117AF0(&t, r, buf);
+    (void)func_0011B0A8(&q, &t);
+    (void)func_0011B060(&t, 2);
+    (void)func_0011B018(out, &q);
+    (void)func_0011B060(&q, 2);
+    return out;
+}

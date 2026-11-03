@@ -370,3 +370,15 @@ void func_00211748(Str_211748* self, s32 bytes)
     }
     func_00211618(self, 0);
 }
+
+struct Bits_2116B0 { u64 bits; };
+
+s64 func_002115F8(Bits_2116B0* self, s32 n);
+void func_00211618(Bits_2116B0* self, s32 n);
+
+s64 func_002116B0(Bits_2116B0* self, s32 n)
+{
+    s64 r = func_002115F8(self, n);
+    func_00211618(self, n);
+    return r;
+}

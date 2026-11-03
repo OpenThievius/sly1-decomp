@@ -188,3 +188,20 @@ f32 func_001CEDF8(Obj_1CEDF8* o, f32 t)
     func_001CEB18(t, o->a, o->b, o->c, &out, 0, 0);
     return out;
 }
+
+struct Self_1CDF78 {
+    u8 pad[0x2220];
+    s32 state;
+};
+
+void func_001225D0(Self_1CDF78* self, f32 t, void* out, void* extra);
+void func_001C5DB8(Self_1CDF78* self, f32 t, void* out, void* extra);
+
+void func_001CDF78(Self_1CDF78* self, f32 t, void* out, void* extra)
+{
+    if (self->state == 3) {
+        func_001225D0(self, t, out, extra);
+    } else {
+        func_001C5DB8(self, t, out, extra);
+    }
+}

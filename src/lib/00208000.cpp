@@ -1427,3 +1427,20 @@ void func_0020B870(Chan_20B870* c) {
     *(volatile u32*)0x10002010 = 0x40000000;
     func_00211AD8(0, 0);
 }
+
+struct Child_0020B570 { u8 pad[0x174]; s32 kind; };
+struct Owner_0020B570 {
+    u8 pad[0x40];
+    Child_0020B570* child;
+};
+
+s32 func_0020B458(Owner_0020B570* self, s32 a, s32 b);
+s32 func_0020B5B8(Owner_0020B570* self, s32 a, s32 b);
+
+s32 func_0020B570(Owner_0020B570* self, s32 a, s32 b)
+{
+    if (self->child->kind != 3) {
+        return func_0020B5B8(self, a, b);
+    }
+    return func_0020B458(self, a, b);
+}

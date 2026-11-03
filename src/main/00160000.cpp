@@ -1355,3 +1355,20 @@ s32 func_00160B28(u8* p)
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 extern const Fn_Table D_0024A6F8[6] = { 0, 0, 0, (Fn_Table)(void (*)(Frame_161278* f, s32 n))func_00161278, 0, 0 };
+
+struct Save_160650 {
+    s32 type;
+    s32 size;
+    s32 sum;
+    u8 data[0x19F4];
+};
+
+s32 func_00160650(Save_160650* s)
+{
+    u8* p = s->data;
+    s32 sum = 0;
+    for (s32 i = 0; i < (u8*)(s + 1) - s->data; i++) {
+        sum += *p++;
+    }
+    return sum;
+}

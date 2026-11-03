@@ -1442,3 +1442,13 @@ void func_001BFCD8(s32 id, Buf_1BFCD8** out, s32 p2, s32 p3,
         func_0011D598((Id_1BFCD8)v, D_00245020[id].b, (s32)(fc * 1024.0f), 0, (s32)(fd * 1524.0f), 0);
     }
 }
+
+struct Arg_1BF5E0;
+struct Obj_1BF5E0;
+typedef f32 (*Fn_1BF5E0)(Obj_1BF5E0* self, Arg_1BF5E0* arg);
+
+f32 func_001BF5E0(Arg_1BF5E0* arg)
+{
+    Obj_1BF5E0* obj = (Obj_1BF5E0*)func_001BF3D0();
+    return ((Fn_1BF5E0)func_001BF578())(obj, arg);
+}

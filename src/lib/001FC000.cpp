@@ -1313,3 +1313,26 @@ s32 func_001FE9D0(Arg_1FE9D0* size)
         func_001FE8F0();
     return p;
 }
+
+// The unpacked form of a double: class, sign, exponent and fraction.
+struct Unpacked_1FD578 {
+    s32 kind;
+    s32 sign;
+    s32 exponent;
+    u32 pad;
+    u64 fraction;
+};
+
+struct Bits_1FD578 { u64 bits; };
+
+void func_001FCA40(Bits_1FD578* bits, Unpacked_1FD578* out);
+s32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3);  // defined earlier in src/lib/001FC000.cpp
+
+s32 func_001FD578(Bits_1FD578 bits)
+{
+    Unpacked_1FD578 u;
+    func_001FCA40(&bits, &u);
+    s32 fraction = (s32)(u.fraction >> 30) | 1;
+    if ((u.fraction & 0x3FFFFFFFULL) == 0) fraction = (s32)(u.fraction >> 30);
+    return func_001FD838(u.kind, u.sign, u.exponent, fraction);
+}

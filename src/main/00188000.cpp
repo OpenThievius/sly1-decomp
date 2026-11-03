@@ -1084,3 +1084,30 @@ void func_00189230(Vec3_189230* v, f32* a1, f32* a2)
     *a1 = func_00205778(v->y, v->x);
     *a2 = func_00205778(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
 }
+
+struct State_189F58 {
+    f32 f00;
+    u8 pad04[0x10];
+    f32 f14;
+    u8 pad18[8];
+    f32 f20;
+    f32 f24;
+    f32 f28;
+    f32 f2C;
+    u8 pad30[8];
+    f32 f38;
+};
+extern void func_001F5C0C(State_189F58* p, s32 v, s32 n);
+
+void func_00189F58(State_189F58* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
+{
+    func_001F5C0C(self, 0, 0x40);
+    f32 value = (e + f) / (e - f);
+    self->f00 = a;
+    self->f20 = c;
+    self->f14 = b;
+    self->f24 = d;
+    self->f28 = value;
+    self->f38 = e * (1.0f - value);
+    self->f2C = 1.0f;
+}
