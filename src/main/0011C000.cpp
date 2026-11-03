@@ -11,7 +11,9 @@ void func_0011C720(void* item)
 
 // D_0025C360 and D_0025C378 are arrays of buffer pointers, one per IOP command buffer.
 extern s32 D_0025C380;
-extern s32* D_0025C360[];
+extern s32 D_0025C540[];
+extern s32 D_0025D540[];
+s32* D_0025C360[2] = { D_0025C540, D_0025D540 };
 extern s32* D_0025C378[];
 s32 func_0011CE30(void);
 
@@ -1151,7 +1153,7 @@ s32 func_0011C8D0(u32 addr)
 }
 
 extern s32* D_0025C340;
-extern s32 D_0025C344;
+s32 D_0025C344 = 0;
 void func_0011D110(s32* ptr, s32 count)
 {
     D_0025C344 = count;
