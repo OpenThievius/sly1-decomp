@@ -6,3 +6,19 @@ __moddi3	func_001FB790	64-bit signed remainder
 __udivdi3	func_001FBE00	64-bit unsigned divide
 __umoddi3	func_001FC3D0	64-bit unsigned remainder
 fptodp	func_001FD868	float to double
+__eh_alloc	func_001FE9D0	allocate an exception object
+__cp_push_exception	func_001FEA88	push a thrown C++ exception
+__throw	func_001FE4C8	throw the current exception
+__rethrow	func_001FE4C8	rethrow it (the same routine)
+__start_cp_handler	func_001FE998	enter a catch handler
+__uncatch_exception	func_001FEBE0	leave a handler without catching
+__cp_pop_exception	func_001FEB18	pop the caught exception
+__terminate	func_001FE8F0	terminate
+terminate__Fv	func_001FE8F0	terminate
+_vt$12Error_1FEC10	D_0024F0D8	vtable of the runtime's exception base class
+_vt$15Unlisted_1FEC10	D_0024F0C0	vtable of the exception func_001FEC10 throws
+_$_15Unlisted_1FEC10	func_001FEF28	its destructor
+_vt$12Fault_1FEDC8	D_0024F290	vtable of the exception func_001FEDC8 throws
+_$_12Fault_1FEDC8	func_00200638	its destructor
+_vt$12Fault_1FEE48	D_0024F278	vtable of the exception func_001FEE48 throws
+_$_12Fault_1FEE48	func_002005A0	its destructor

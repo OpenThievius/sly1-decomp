@@ -289,7 +289,8 @@ class ClassifyAsmTest(unittest.TestCase):
         base = ("f", 0x100000, "code", self.RET)
         frag = ["addiu $sp, $sp, 0x10"]
         self.assertNotIn("r", self.classify([base, ("r", 0x100014, "code", frag)]))               # not on 8 bytes
-        self.assertNotIn("r", self.classify([base, ("r", 0x100010, "code", ["j func_00100000", "nop"])]))  # a jump
+        got = self.classify([base, ("r", 0x100010, "code", ["j func_00100000", "nop"])])  # a jump
+        self.assertNotEqual(got.get("r", ("",))[0], "remnant")  # (a game-code tail jump is handwritten)
         self.assertNotIn("r", self.classify([base, ("r", 0x100010, "code", frag)], {"r": 1}))     # reached
         before = ("g", 0x100000, "code", ["jr $ra", "nop", "addiu $v0, $zero, 1"])                  # ends on code
         self.assertNotIn("r", self.classify([before, ("r", 0x100010, "code", frag)]))
@@ -306,6 +307,11 @@ class SystemEvidenceTest(unittest.TestCase):
     def test_a_kernel_instruction_is_original_assembly(self):
         self.assertIn("syscall", classify_asm.handwritten(["addiu", "syscall", "jr", "nop"], "code"))
         self.assertIn("max.s", classify_asm.handwritten(["max.s", "jr", "nop"], "code"))
+
+    def test_a_tail_jump_in_game_code_is_original_assembly(self):
+        lines = ["j          func_001FA078", "daddu     $a0, $zero, $zero", "nop"]
+        self.assertIn("tail jump", classify_asm.game_tail_jump(0x1000B8, lines))
+        self.assertIsNone(classify_asm.game_tail_jump(0x20C138, lines))  # the library writes them
 
     def test_what_the_compiler_emits_is_not(self):
         self.assertIsNone(classify_asm.handwritten(["sqrt.s", "jr", "nop"], "code"))

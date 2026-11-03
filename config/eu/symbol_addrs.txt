@@ -23,3 +23,6 @@ func_002040E0 = 0x002040E0; // type:func
 func_00204190 = 0x00204190; // type:func
 func_00204350 = 0x00204350; // type:func
 func_0020ACA8 = 0x0020ACA8; // type:func
+
+// The same throw function, at PAL's address.
+func_00200188 = 0x00200188; // type:func
