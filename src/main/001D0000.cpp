@@ -405,3 +405,34 @@ void func_001D3678(Self_001D3678* self, s32 kind, Msg_001D3678* msg)
         func_00185D20(0.0f, self, (void*)msg->value, (u8*)self + 0x140, D_00248D20, 10, 0, 0, (u8*)self + 0x554);
     }
 }
+
+struct Self_1D3100 { u8 pad[0xAA]; u16 flags; };
+void func_0016EC20(Self_1D3100* self, s32 mask);
+s32 func_00160D10(void);
+
+s32 func_001D3100(Self_1D3100* self, s32 start, s32 count, s32* table)
+{
+    s32 step;
+    s32 left;
+    s32 idx;
+
+    if ((self->flags & 3) == 0) {
+        return start;
+    }
+    step = (self->flags & 1) ? -1 : 1;
+    func_0016EC20(self, 3);
+    idx = start;
+    left = count;
+    do {
+        if (--left < 0) {
+            return start;
+        }
+        idx += step;
+        if (idx < 0) {
+            idx = count - 1;
+        } else if (idx >= count) {
+            idx = 0;
+        }
+    } while (!(func_00160D10() & table[idx]));
+    return idx;
+}

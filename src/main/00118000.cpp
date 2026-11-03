@@ -1661,3 +1661,43 @@ V_119BB0* func_00119BB0(V_119BB0* ret, Node_119BB0* self, void* ctx)
     func_0011B060(&a, 2);
     return ret;
 }
+
+struct __attribute__((aligned(16))) Quad_119030 { s32 w[4]; };
+struct Node_119030 { s32 pad0; Node_119030* f4; Node_119030* f8; };
+
+void func_0011B008(Quad_119030* q);
+void func_0011B018(void* out, Quad_119030* q);
+void func_0011B060(Quad_119030* q, s32 mode);
+void func_0011B0A8(Quad_119030* a, Quad_119030* b);
+void func_0011B538(Quad_119030* q, s32 n);
+void func_0011A080(Quad_119030* t, Node_119030* n, s32 c);
+
+void* func_00119030(void* self, Node_119030* x, s32 c)
+{
+    Quad_119030 q;
+    Quad_119030 t;
+    Node_119030* m;
+    Node_119030* n2;
+    Node_119030* n3;
+    func_0011B008(&q);
+    m = x->f4->f8;
+    n2 = m->f8;
+    n3 = n2->f8;
+    func_0011A080(&t, m, c);
+    func_0011B0A8(&q, &t);
+    func_0011B060(&t, 2);
+    if (q.w[1] == 1) {
+        func_0011A080(&t, n2, c);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+    } else if (n3 != 0) {
+        func_0011A080(&t, n3, c);
+        func_0011B0A8(&q, &t);
+        func_0011B060(&t, 2);
+    } else {
+        func_0011B538(&q, 0x22);
+    }
+    func_0011B018(self, &q);
+    func_0011B060(&q, 2);
+    return self;
+}

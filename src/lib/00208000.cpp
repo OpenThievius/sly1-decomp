@@ -1527,3 +1527,55 @@ void func_0020BDC0(u32* a0, u32* a1, u32* a2, u32* a3, u32* a4, u32* a5, u32* a6
     *a7 = u2;
     *p9 = v2;
 }
+
+struct Reg_0020A078 {
+    u8 pad0[0x24];
+    s32 f24;
+};
+
+struct Buf_0020A078 {
+    s32 f0;
+    s32 f4;
+    u8 pad8[0xC];
+    s8 text14[0x400];
+};
+
+s32 func_001F6B70(s32 v);
+void func_001F6B40(s32 v);
+void func_00201720(s8* dst, s8* src, s32 n);
+Buf_0020A078* func_001F8290(Reg_0020A078* self, s32 a1, s32 a2, Buf_0020A078* a3, s32 a4, u32* a5, s32 a6, s32 a7, s32 a8);
+
+extern s32 D_0027AECC;
+extern s32 D_0027AEC8;
+
+s32 func_0020A078(s32 a0, s32 a1, s8* a2)
+{
+    Reg_0020A078* reg;
+    Buf_0020A078* buf;
+    Buf_0020A078* res;
+
+    if (func_001F6B70(D_0027AECC) < 0) {
+        return -200;
+    }
+    reg = ((Reg_0020A078*)&D_0062AD40);
+    if (reg->f24 == 0) {
+        func_001F6B40(D_0027AECC);
+        return -100;
+    }
+    if (a2 == 0 || *a2 == 0) {
+        func_001F6B40(D_0027AECC);
+        return -210;
+    }
+    buf = ((Buf_0020A078*)&D_0062ADF0);
+    buf->f0 = a0;
+    buf->f4 = a1;
+    func_00201720(buf->text14, a2, 0x3FF);
+    buf->text14[0x3FF] = 0;
+    res = func_001F8290(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
+    if (res == 0) {
+        D_0027AEC8 = 0x12;
+    } else {
+        func_001F6B40(D_0027AECC);
+    }
+    return (s32)res;
+}
