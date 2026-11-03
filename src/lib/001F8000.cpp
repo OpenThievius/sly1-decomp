@@ -944,3 +944,34 @@ void func_001FA190(A_1FA190* a, B_1FA190* b) { b->t[a->i] = a->v; }
 
 void func_001FD930();
 void func_001FBDF8() { func_001FD930(); }
+
+struct Ring_1F8010;
+struct Node_1F8010 { u8 p0[8]; s32 f8; u8 pC[8]; s32 f14; };
+struct Msg_1F8010 { u8 p0[0x14]; s32 f14; u8 p18[4]; s32 f1C; u32 f20; s32 f24; s32 f28; s32 f2C; };
+struct Src_1F8010 { u8 p0[0x14]; s32 f14; u8 p18[4]; s32 f1C; s32 f20; };
+struct Ctx_1FA670;
+
+Msg_1F8010* func_001F7E78(Ring_1F8010* r);
+Node_1F8010* func_001F7FC0(s32 key, Ring_1F8010* r);
+s32 func_001FA670(Ctx_1FA670* a, Msg_1F8010* b, s32 c, s32 d, s32 e, s32 f);
+
+void func_001F8010(Src_1F8010* src, Ring_1F8010* ring)
+{
+    Msg_1F8010* m = func_001F7E78(ring);
+    s32 a = src->f14;
+    s32 b = src->f1C;
+    m->f14 = a;
+    m->f1C = b;
+    m->f20 = 0x80000009;
+    Node_1F8010* n = func_001F7FC0(src->f20, ring);
+    if (n == 0) {
+        m->f24 = 0;
+        m->f28 = 0;
+        m->f2C = 0;
+    } else {
+        m->f24 = (s32)n;
+        m->f28 = n->f8;
+        m->f2C = n->f14;
+    }
+    func_001FA670((Ctx_1FA670*)0x80000008, m, 0x40, 0, 0, 0);
+}

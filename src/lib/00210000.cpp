@@ -339,3 +339,34 @@ void func_00211DF8(void)
 {
     func_001FFC08(D_0027B198);
 }
+
+struct Str_2115C0 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
+void func_00211618(Str_2115C0* self, s32 n);
+
+void func_002115C0(Str_2115C0* self, u32 buf, u32 a, u32 b)
+{
+    self->f8 = buf;
+    self->fC = buf;
+    self->w0 = 0;
+    self->f10 = 0;
+    self->w18 = 0;
+    self->f20 = a;
+    self->f24 = a + b;
+    self->f28 = b;
+    func_00211618(self, 0);
+}
+
+struct Str_211748 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
+void func_00211618(Str_211748* self, s32 n);
+
+void func_00211748(Str_211748* self, s32 bytes)
+{
+    self->w0 = 0;
+    self->f10 = 0;
+    self->w18 += bytes << 3;
+    self->fC = self->f8 + (s32)(self->w18 >> 3);
+    if (self->fC >= self->f24) {
+        self->fC -= self->f28;
+    }
+    func_00211618(self, 0);
+}
