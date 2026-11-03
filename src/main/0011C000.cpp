@@ -2362,3 +2362,38 @@ s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
     D_0025C358 = 0;
     return 1;
 }
+
+struct Dst_11CA90 { u8 pad[4]; };
+
+extern u8 D_0062C568[];
+extern u8 D_0062C578[];
+extern u8 D_0062C588[];
+extern s32 D_0025C2F0;
+extern s32 D_0025C2F4;
+extern s32 D_0025C2F8;
+extern s32 D_0025C2FC;
+extern s32 D_0025C300;
+extern u8* D_0027B300[];
+extern u8* D_0027B304;
+extern u8* D_0027B308;
+extern u8* D_0027B30C;
+extern u8* D_0027B310;
+
+void func_001B5DD0(Dst_11CA90* p, s32 size, s32 val);
+
+struct Init_11CA90 {
+    static void Load(void* buf, s32 size, s32* id, u8** out)
+    {
+        func_001B5DD0((Dst_11CA90*)buf, size, *id);
+        *out = (u8*)func_0018D5C0(*id);
+    }
+};
+
+void func_0011CA90(void)
+{
+    Init_11CA90::Load(((u8*)&D_0062C558), 0x10, &D_0025C2F0, &D_0027B300[0]);
+    Init_11CA90::Load(D_0062C568, 0x40, &D_0025C2F4, &D_0027B304);
+    Init_11CA90::Load(D_0062C578, 0x10, &D_0025C2F8, &D_0027B308);
+    Init_11CA90::Load(D_0062C588, 0x08, &D_0025C2FC, &D_0027B30C);
+    Init_11CA90::Load(((u8*)&D_0062C598), 0x0C, &D_0025C300, &D_0027B310);
+}

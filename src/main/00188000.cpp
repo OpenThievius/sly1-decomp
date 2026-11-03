@@ -1221,3 +1221,77 @@ void func_00188850(f32* axis, Mat_188850* mat, f32 angle)
     mat->m[1][2] += t;
     mat->m[2][1] -= t;
 }
+
+struct __attribute__((aligned(16))) Quad_18B340 { s32 w[4]; };
+
+struct Key_18B340 {
+    s32 a;
+    s32 pad0;
+    s32 b;
+};
+
+struct Self_18B340 {
+    u8 pad0[0x148];
+    f32 f148;
+    u8 pad1[0x7E0 - 0x14C];
+    s32 f7E0;
+    u8 pad2[0xE10 - 0x7E4];
+    void* fE10;
+    void* fE14;
+    void* fE18;
+    void* fE1C;
+    u8 pad3[0xE2C - 0xE20];
+    s32 fE2C;
+    u8 pad4[0xE40 - 0xE30];
+    Quad_18B340 fE40;
+};
+
+struct Obj_18B340 {
+    u8 pad0[0xF0];
+    Quad_18B340 fF0;
+};
+
+void func_001A8C90(void* obj, s32 v);
+void func_001C9DE0(void* self, s32 code, void* req);
+void func_001B6598(void* dev, s32* out);
+extern f32 D_00264A34;
+extern f32 D_00264A38;
+
+void func_0018B340(Self_18B340* self, s32 a1, Key_18B340* key)
+{
+    if (a1 == 0x13 && key->a == self->f7E0) {
+        switch (key->b) {
+        case 0x442:
+        case 0x443: {
+            Obj_18B340* obj;
+            if (key->b == 0x442) {
+                obj = (Obj_18B340*)self->fE18;
+            } else {
+                obj = (Obj_18B340*)self->fE1C;
+            }
+            s32 kind;
+            func_001B6598(self->fE10, &kind);
+            switch (kind) {
+            case 0x43A:
+            case 0x43C:
+                obj->fF0 = self->fE40;
+                *(f32*)((u8*)obj + 0xF8) = self->f148 + D_00264A34;
+                break;
+            case 0x43E:
+                obj->fF0 = self->fE40;
+                *(f32*)((u8*)obj + 0xF8) = *(f32*)((u8*)obj + 0xF8) + D_00264A38;
+                break;
+            }
+            func_001A8C90(obj, 1);
+            return;
+        }
+        case 0x444:
+            self->fE2C = 1;
+            break;
+        case 0x445:
+            self->fE2C = 0;
+            break;
+        }
+    }
+    func_001C9DE0(self, a1, key);
+}

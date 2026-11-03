@@ -934,3 +934,68 @@ void func_001377C0(Obj_1377C0* self)
     size = (size > 0x8000) ? Min_1377C0::Of(0x8000, limit) : Min_1377C0::Of(size, limit);
     self->f24 = func_001F8DB8(self->f34, self->f20, size);
 }
+
+struct Item_135550;
+struct List_135550 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_135550 { List_135550* list; u8* link; s32 offset; Iter_135550* saved; };
+struct Group_135550 { u8 pad0[0x6C]; List_135550 list; };
+struct Obj_135550 { u8 pad0[0x250]; s32 f250; };
+struct Host_135550;
+
+extern Iter_135550* D_0027B314;
+
+struct Next_135550 {
+    static Item_135550* Of(Iter_135550* it)
+    {
+        Item_135550* obj = *(Item_135550**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_135550 {
+    static void Of(Iter_135550* it, List_135550* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+Group_135550* func_0015A418(Host_135550* host, s32 a1, s32 a2, void* ctx);
+void func_0012F6B0(Item_135550* item, f32 x);
+void func_001AA998(Obj_135550* self, s32 value);
+
+void func_00135550(Obj_135550* self, s32 value)
+{
+    if (value == self->f250) {
+        return;
+    }
+    if (self->f250 == 0) {
+        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        if (g != 0) {
+            Iter_135550 it;
+            Begin_135550::Of(&it, &g->list);
+            Item_135550* obj;
+            while ((obj = Next_135550::Of(&it)) != 0) {
+                func_0012F6B0(obj, 0.0f);
+            }
+            D_0027B314 = it.saved;
+        }
+    }
+    if (value == 0) {
+        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        if (g != 0) {
+            Iter_135550 it;
+            Begin_135550::Of(&it, &g->list);
+            Item_135550* obj;
+            while ((obj = Next_135550::Of(&it)) != 0) {
+                func_0012F6B0(obj, 1.0f);
+            }
+            D_0027B314 = it.saved;
+        }
+    }
+    func_001AA998(self, value);
+}

@@ -2045,3 +2045,51 @@ void* func_00117F28(void* out, s32 unused, In_117F28* in)
     (void)func_0011B060(&q, 2);
     return out;
 }
+
+struct Quad_117910 { u8 b[16]; };
+struct Src_117910 { u8 pad0[4]; s32 f4; u8 pad8[4]; s32 fC; u8 f10[4]; };
+struct Sub_117910 { u8 pad[1]; };
+
+void func_0011B008(Quad_117910* q);
+void func_0011B018(void* dst, Quad_117910* src);
+void func_0011B060(Quad_117910* q, s32 mode);
+void func_0011B0A8(Quad_117910* a, Quad_117910* b);
+void* func_001C2238(Sub_117910* self, s32 a1, s32 a2, void* a3);
+void* func_001C2320(Sub_117910* self, s32 a1, s32 a2, void* a3);
+void* func_001C22B8(Sub_117910* self, s32 a1, s32 a2, void* a3);
+void* func_001C21A0(Sub_117910* self, s32 a1, s32 a2);
+
+void* func_00117910(void* a0, void* a1, Src_117910* a2, void* a3, s32 a4)
+{
+    Quad_117910 q1;
+    Quad_117910 q2;
+
+    func_0011B008(&q1);
+    s32 x1 = a2->f4;
+    s32 x2 = a2->fC;
+    switch (a4) {
+    case 0x63:
+        func_001C22B8((Sub_117910*)&q2, x1, x2, &a2->f10);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    case 0x64:
+        func_001C2320((Sub_117910*)&q2, x1, x2, &a2->f10);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    case 0x65:
+        func_001C2238((Sub_117910*)&q2, x1, x2, &a2->f10);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    case 0x66:
+        func_001C21A0((Sub_117910*)&q2, x1, x2);
+        func_0011B0A8(&q1, &q2);
+        func_0011B060(&q2, 2);
+        break;
+    }
+    func_0011B018(a0, &q1);
+    func_0011B060(&q1, 2);
+    return a0;
+}
