@@ -1797,3 +1797,137 @@ Val_118198 func_00118198(s32 id, s32 unused, Src_118198* src)
     }
     return l0;
 }
+
+struct Stk_11A850;
+
+// One generic record: a queued event is { type, object, next }; the lists
+// and the object table use the same words.
+struct Obj_11A850 {
+    s32 f0;
+    Obj_11A850* f4;
+    Obj_11A850* f8;
+    Obj_11A850* fC;
+    Obj_11A850* f10;
+    Obj_11A850* f14;
+};
+
+// What func_0011A7D8 returns: a queue of records and two objects.
+struct Batch_11A850 {
+    Obj_11A850* f0;
+    Obj_11A850* f4;
+    s32 f8;
+    s32 fC;
+    Obj_11A850* f10;
+};
+
+Obj_11A850* func_0011A748(Stk_11A850* s);
+void func_0011A770(Stk_11A850* s, Obj_11A850* o);
+void func_0011A7B8(Stk_11A850* s, Obj_11A850* o);
+void func_0011A728(Stk_11A850* s, Obj_11A850* o);
+Batch_11A850* func_0011A7D8(Stk_11A850* s);
+Obj_11A850* func_0011A790(Stk_11A850* s);
+void func_0011C3F0(Obj_11A850* o);
+s32 func_0011C3C8(Obj_11A850* o);
+
+void func_0011A850(Stk_11A850* self)
+{
+    Obj_11A850* obj;
+    Obj_11A850* other;
+    Obj_11A850* group;
+    for (;;) {
+        group = func_0011A748(self);
+        if (group) {
+            Obj_11A850* link = group->f14;
+            if (link) {
+                do {
+                    func_0011C3F0(link);
+                    Obj_11A850* ev = (Obj_11A850*)&link->f4;
+                    switch (ev->f0) {
+                    case 0x1E:
+                        obj = ev->f4;
+                        if (func_0011C3C8(obj)) {
+                            func_0011C3F0(obj);
+                            func_0011A770(self, obj);
+                        }
+                        break;
+                    case 0x1F:
+                        other = ev->f4;
+                        if (func_0011C3C8(other)) {
+                            func_0011C3F0(other);
+                            func_0011A7B8(self, other);
+                        }
+                        break;
+                    case 0x21:
+                        func_0011C3F0(ev->f4);
+                        break;
+                    }
+                    link = link->fC;
+                } while (link);
+            }
+            if (group->f0 > 0) {
+                s32 i = 0;
+                Obj_11A850** p = &group->f4;
+                do {
+                    obj = *p;
+                    if (func_0011C3C8(obj)) {
+                        func_0011C3F0(obj);
+                        func_0011A728(self, obj);
+                    }
+                    i++;
+                    p++;
+                } while (i < group->f0);
+            }
+            continue;
+        }
+        Batch_11A850* b = func_0011A7D8(self);
+        if (b) {
+            obj = b->f4;
+            if (obj) {
+                do {
+                    func_0011C3F0(obj);
+                    obj = obj->f8;
+                } while (obj);
+            }
+            obj = b->f10;
+            if (func_0011C3C8(obj)) {
+                func_0011C3F0(obj);
+                func_0011A770(self, obj);
+            }
+            group = b->f0;
+            if (func_0011C3C8(group)) {
+                func_0011C3F0(group);
+                func_0011A728(self, group);
+            }
+            continue;
+        }
+        obj = func_0011A790(self);
+        if (!obj)
+            return;
+        switch (obj->f0) {
+        case 0x1E:
+            other = obj->f4;
+            if (func_0011C3C8(other)) {
+                func_0011C3F0(other);
+                func_0011A770(self, other);
+            }
+            break;
+        case 0x1F:
+            other = obj->f4;
+            if (func_0011C3C8(other)) {
+                func_0011C3F0(other);
+                func_0011A7B8(self, other);
+            }
+            break;
+        case 0x21:
+            func_0011C3F0(obj->f4);
+            break;
+        }
+        obj = obj->f8;
+        if (obj) {
+            if (func_0011C3C8(obj)) {
+                func_0011C3F0(obj);
+                func_0011A770(self, obj);
+            }
+        }
+    }
+}
