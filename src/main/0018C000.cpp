@@ -1416,7 +1416,9 @@ struct Obj_18ECA8 { u8 pad0[0x60]; u8 sub[0x14]; s32 f74; };
 struct Sub_18ECA8 { u8 b[0x14]; };
 struct Buf_18ECA8 { void* f0; u8 rest[0x3C]; };
 
-extern u8 D_0024B598[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_0024B598[];
 
 s32 func_0018F890(Obj_18ECA8* self, s32 flag);
 void func_001F5C0C(void* dst, s32 value, s32 size);
@@ -1436,20 +1438,20 @@ s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self)
             break;
         }
     }
-    buf.f0 = (void*)D_0024B598;
+    buf.f0 = (void*)((u8*)D_0024B598);
     func_0013CC48((Sub_18ECA8*)&self->sub, 0);
     func_0013CAD8((Sub_18ECA8*)&self->sub, 0, &buf);
     return 1;
 }
 
-extern u8 D_0024B5B8[];
+extern const Fn_Table D_0024B5B8[];
 extern void* D_00269AEC;
 
 void func_0018F940(void* self, s32 key)
 {
     if (key == 0xFFFF) {
         if (self != 0) {
-            D_00269AEC = D_0024B5B8;
+            D_00269AEC = ((u8*)D_0024B5B8);
         }
     }
 }
@@ -2063,3 +2065,9 @@ void func_0018EDA8(void* p, s32 addr, s32 w, s32 h)
     func_00152D30(&f);
     func_001529E0(&f, 0, 0);
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_0018E8C8();
+void func_0018E6C0();
+extern const Fn_Table D_0024B598[8] = { 0, 0, 0, (Fn_Table)func_0018E8C8, 0, (Fn_Table)func_0018E938, 0, 0 };
+extern const Fn_Table D_0024B5B8[10] = { 0, 0, 0, (Fn_Table)func_0018E6C0, 0, (Fn_Table)func_0018E8C0, 0, 0, 0, 0 };

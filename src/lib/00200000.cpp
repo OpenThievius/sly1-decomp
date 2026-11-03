@@ -106,7 +106,9 @@ void* func_002006F8(void* self, void* value)
     return self;
 }
 
-extern u8 D_0024F428[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_0024F428[];
 
 struct Node_200C90 {
     s32 field0;
@@ -118,11 +120,11 @@ void func_00200C90(struct Node_200C90 *self, s32 a1, s32 a2) {
     if (self != 0) {
         self->field2 = a2;
         self->field0 = a1;
-        self->vtbl = D_0024F428;
+        self->vtbl = ((u8*)D_0024F428);
     }
 }
 
-extern u8 D_0024F3F8[];
+extern const Fn_Table D_0024F3F8[];
 
 struct Node_200CD8 {
     s32 field0;
@@ -132,11 +134,11 @@ struct Node_200CD8 {
 void func_00200CD8(struct Node_200CD8 *self, s32 a1) {
     if (self != 0) {
         self->field0 = a1;
-        self->vtbl = D_0024F3F8;
+        self->vtbl = ((u8*)D_0024F3F8);
     }
 }
 
-extern u8 D_0024F3E8[];
+extern const Fn_Table D_0024F3E8[];
 
 struct Node_200CF8 {
     s32 field0;
@@ -146,11 +148,11 @@ struct Node_200CF8 {
 void func_00200CF8(struct Node_200CF8 *self, s32 a1) {
     if (self != 0) {
         self->field0 = a1;
-        self->vtbl = D_0024F3E8;
+        self->vtbl = ((u8*)D_0024F3E8);
     }
 }
 
-extern u8 D_0024F3D8[];
+extern const Fn_Table D_0024F3D8[];
 
 struct Node_200D18 {
     s32 field0;
@@ -160,11 +162,11 @@ struct Node_200D18 {
 void func_00200D18(struct Node_200D18 *self, s32 a1) {
     if (self != 0) {
         self->field0 = a1;
-        self->vtbl = D_0024F3D8;
+        self->vtbl = ((u8*)D_0024F3D8);
     }
 }
 
-extern u8 D_0024F3C8[];
+extern const Fn_Table D_0024F3C8[];
 
 struct Node_200D38 {
     s32 field0;
@@ -174,11 +176,11 @@ struct Node_200D38 {
 void func_00200D38(struct Node_200D38 *self, s32 a1) {
     if (self != 0) {
         self->field0 = a1;
-        self->vtbl = D_0024F3C8;
+        self->vtbl = ((u8*)D_0024F3C8);
     }
 }
 
-extern u8 D_0024F418[];
+extern const Fn_Table D_0024F418[];
 
 struct Node_200CB0 {
     s32 field0;
@@ -190,7 +192,7 @@ struct Node_200CB0 {
 void func_00200CB0(struct Node_200CB0 *self, s32 a1, s32 a2, s32 a3) {
     if (self != 0) {
         self->field0 = a1;
-        self->vtbl = D_0024F418;
+        self->vtbl = ((u8*)D_0024F418);
         self->field2 = a3;
         self->field3 = a2;
     }
@@ -1605,3 +1607,11 @@ void func_00202F88(void) {
     func_001FA4D0(0x80000012);
     func_001F9DA8();
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+extern const Fn_Table D_0024F3C8[4] = { 0, (Fn_Table)func_002011C0, 0, (Fn_Table)func_00201210 };
+extern const Fn_Table D_0024F3D8[4] = { 0, (Fn_Table)func_00201230, 0, (Fn_Table)func_00201280 };
+extern const Fn_Table D_0024F3E8[4] = { 0, (Fn_Table)func_002012A0, 0, (Fn_Table)func_002012F0 };
+extern const Fn_Table D_0024F3F8[4] = { 0, (Fn_Table)func_00201310, 0, (Fn_Table)func_00201360 };
+extern const Fn_Table D_0024F418[4] = { 0, (Fn_Table)func_002013F0, 0, (Fn_Table)func_00201440 };
+extern const Fn_Table D_0024F428[4] = { 0, (Fn_Table)(void* (*)(struct Self_00201460* a0))func_00201460, 0, (Fn_Table)func_002014B0 };

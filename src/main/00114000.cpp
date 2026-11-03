@@ -1083,7 +1083,9 @@ union Cell_115CA0 { f32 f; s32 i; };
 struct Tagged_115CA0 { s32 tag; Cell_115CA0 cell; };
 struct Frame_115CA0 { s32 w[4]; };
 typedef f32 (*FloatFn_115CA0)(f32 v);
-extern FloatFn_115CA0 D_00259938[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern Fn_Table D_00259938[];
 
 void func_0011B008(Frame_115CA0* f);
 void func_0011B018(void* dst, Frame_115CA0* src);
@@ -1100,7 +1102,7 @@ void* func_00115CA0(void* self, Tagged_115CA0* src, s32 index)
     } else {
         v = (f32)src->cell.i;
     }
-    f32 r = D_00259938[index](v);
+    f32 r = ((FloatFn_115CA0*)D_00259938)[index](v);
     func_0011B5B0(&f, r);
     func_0011B018(self, &f);
     func_0011B060(&f, 2);
@@ -1976,3 +1978,14 @@ void* func_00117AF0(void* self, s32 count, s32* values)
     func_0011B060(&q, 2);
     return self;
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_001EA408();
+void func_00204F68();
+void func_00205210();
+void func_00205400();
+void func_002054F0();
+void func_00205578();
+void func_00205678();
+void func_00206180();
+extern Fn_Table D_00259938[8] = { (Fn_Table)func_00206180, (Fn_Table)func_00205400, (Fn_Table)func_00205210, (Fn_Table)func_002054F0, (Fn_Table)func_00205678, (Fn_Table)func_00205578, (Fn_Table)func_00204F68, (Fn_Table)func_001EA408 };

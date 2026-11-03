@@ -167,11 +167,13 @@ void func_001FD6E0(struct Src_1FD6E0* src, struct Parts_1FD6E0* out)
     out->f0C = (mant << 7) | 0x40000000;
 }
 
-extern u8 D_0024F0C0[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_0024F0C0[];
 
 void* func_001FEF58(void* self)
 {
-    *(void**)self = D_0024F0C0;
+    *(void**)self = ((u8*)D_0024F0C0);
     return self;
 }
 
@@ -1241,3 +1243,6 @@ void func_001FEE48()
 {
     throw Fault_1FEE48();
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+extern const Fn_Table D_0024F0C0[6] = { 0, (Fn_Table)func_001FEF70, 0, (Fn_Table)func_001FEF28, 0, (Fn_Table)func_001FEF00 };

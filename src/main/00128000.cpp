@@ -1947,7 +1947,9 @@ struct Root_129D00;
 struct Node_129D00 { u8 pad0[0x14]; void* w14; };
 struct Obj_129D00 { u8 pad0[0x14]; Root_129D00* root; };
 
-extern u8 D_002195D8[];
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+extern const Fn_Table D_002195D8[];
 Node_129D00* func_00121228(Root_129D00* root, Obj_129D00* value, void* table);
 void func_001299E0(Obj_129D00* self, Node_129D00* n);
 
@@ -1956,7 +1958,7 @@ void func_00129D00(Obj_129D00* self, void* v, Node_129D00** out)
     Node_129D00* n;
 
     if (self != 0) {
-        n = func_00121228(self->root, self, D_002195D8);
+        n = func_00121228(self->root, self, ((u8*)D_002195D8));
         n->w14 = v;
         func_001299E0(self, n);
         *out = n;
@@ -1975,7 +1977,7 @@ void func_0012A860(Obj_12A860* self, void* b)
     func_001853F0(self->inner, b, D_00248D30);
 }
 
-extern u8 D_00219600[];
+extern const Fn_Table D_00219600[];
 
 struct Root_0012A8D8;
 struct Obj_0012A8D8;
@@ -2005,7 +2007,7 @@ void func_001299E0(Obj_0012A8D8* self, Inner_0012A8D8* src);
 void func_0012A8D8(Obj_0012A8D8* self, s32 a1, f32 x, f32 y)
 {
     if (self->f204 == 0) {
-        Inner_0012A8D8* r = func_00121228(self->f14, self, (Tab_0012A8D8*)D_00219600);
+        Inner_0012A8D8* r = func_00121228(self->f14, self, (Tab_0012A8D8*)((u8*)D_00219600));
         self->f204 = r;
         func_001299E0(self, r);
     }
@@ -2314,7 +2316,7 @@ struct St_12B2F8 {
 struct Root_12B2F8 { u8 pad0[0x10]; };
 struct Cb_12B2F8 { u8 pad0[0x10]; };
 
-extern u8 D_002195B0[];
+extern const Fn_Table D_002195B0[];
 void* func_00121228(Root_12B2F8* root, void* value, Cb_12B2F8* cb);
 void func_001299E0(Obj_12B2F8* self, void* src);
 
@@ -2337,7 +2339,7 @@ void func_0012B2F8(Obj_12B2F8* self, s32 key)
         }
         if (i < self->f2B8) {
             if (self->f2C0 == 0) {
-                self->f2C0 = (St_12B2F8*)func_00121228((Root_12B2F8*)self->f14, self, (Cb_12B2F8*)D_002195B0);
+                self->f2C0 = (St_12B2F8*)func_00121228((Root_12B2F8*)self->f14, self, (Cb_12B2F8*)((u8*)D_002195B0));
                 func_001299E0(self, self->f2C0);
             }
             callVt = self->f2C0->Set(3);
@@ -2349,3 +2351,37 @@ void func_0012B2F8(Obj_12B2F8* self, s32 key)
         ((void (*)(Obj_12B2F8*))self->vt[0xBC / 4])(self);
     }
 }
+
+// Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
+void func_001212D8();
+void func_00121358();
+void func_00122890();
+void func_00122920();
+void func_00122968();
+void func_001229C0();
+void func_001229E0();
+void func_00122A00();
+void func_00122A18();
+void func_00122A80();
+void func_00122B30();
+void func_00122C48();
+void func_00122CB0();
+void func_00122D90();
+void func_0011EF40();
+void func_0011EF48();
+void func_0011EF60();
+void func_0011EF68();
+void func_0011EF70();
+void func_0011EF88();
+void func_0011EF90();
+void func_0011EFA8();
+void func_0011EFB0();
+void func_001214B8();
+void func_00121568();
+void func_00121580();
+void func_001215A8();
+void func_00122DA0();
+void func_00122DE0();
+extern const Fn_Table D_002195B0[10] = { (Fn_Table)func_00122890, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0, (Fn_Table)func_00122920, (Fn_Table)func_00122968, (Fn_Table)func_001229C0, (Fn_Table)func_001229E0, (Fn_Table)func_00122A00, 0 };
+extern const Fn_Table D_002195D8[10] = { (Fn_Table)func_00122A18, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0, (Fn_Table)func_00122A80, (Fn_Table)func_00122B30, (Fn_Table)func_00122C48, (Fn_Table)func_00122CB0, (Fn_Table)func_00122D90, 0 };
+extern const Fn_Table D_00219600[26] = { (Fn_Table)func_00122DA0, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0, (Fn_Table)func_001214B8, (Fn_Table)func_00122DE0, (Fn_Table)func_00121568, (Fn_Table)func_00121580, (Fn_Table)func_001215A8, 0, (Fn_Table)func_0011EF40, 0, (Fn_Table)func_0011EF48, 0, (Fn_Table)func_0011EF60, (Fn_Table)func_0011EF68, 0, (Fn_Table)func_0011EF70, (Fn_Table)func_0011EF88, 0, (Fn_Table)func_0011EF90, 0, (Fn_Table)func_0011EFA8, 0, (Fn_Table)func_0011EFB0, 0 };

@@ -482,7 +482,7 @@ void func_001F7358(s32 c)
 }
 
 typedef void (*PutChar_1F7420)(s32 c);
-extern PutChar_1F7420 D_00277130;
+PutChar_1F7420 D_00277130 = func_001F7358;  // where formatted output sends each character
 
 s32 func_001FD308(double a, double b);
 double func_001FCD78(double a, double b);
