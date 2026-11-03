@@ -1593,3 +1593,161 @@ void func_00161C00(Self_161C00* self)
     }
     func_001EE420(((Gif_161C00*)&D_002622A8), D_000002F8);
 }
+
+struct Pkt_161F70 { u8 pad[4]; };
+struct Mem_161F70 { u8 b[1]; };
+struct Hd_161F70 { u16 f0; u16 f2; u8 pad4[4]; u16 f8[3]; u16 fE; u16 f10; u8 pad12[6]; };
+struct Vec3_161F70 { f32 x, y, z; };
+struct Out4_161F70 { Vec3_161F70 v; f32 w; };
+struct Out3_161F70 { f32 x, y, z; };
+struct Mat_161F70 { f32 m[4][4]; };
+struct Vert_161F70
+{
+    Vec3_161F70 pos;
+    f32 nx, ny, nz;
+    u8 col[4];
+    f32 u, v;
+    s32 flag;
+};
+struct Sub_161F70 { u8 pad[0x18]; s32 n; };
+struct Ent_161F70 { s32 n; u8* data; };
+struct Mesh_161F70
+{
+    u8 pad0[4];
+    u8 col[4];
+    u8 pad8[0x10];
+    s32 count;
+    Ent_161F70* ents;
+    u8 pad20[4];
+    Sub_161F70* sub;
+};
+struct Tex_161F70 { u8 pad[0x418]; s32 n; u8 pad41C[4]; u8 data[1]; };
+struct Self_161F70
+{
+    u8 pad0[0x80];
+    f32 base;
+    u8 pad84[0x30];
+    s32 texCount;
+    Tex_161F70* tex[16];
+    Mesh_161F70* mesh;
+    u8 padFC[0x28];
+    s32 n;
+    Vert_161F70 verts[1];
+};
+
+extern u8 D_00000288[];
+extern u8 D_00001210[];
+extern u8 D_00001AB0[];
+extern u8 D_00000010[];
+
+void func_001EE5C8(Pkt_161F70* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
+Mem_161F70* func_001F5C0C(Mem_161F70* p, s32 value, s32 size);
+void func_001EE498(Pkt_161F70* s, u32 x, u32 y);
+void func_001EE3F0(Pkt_161F70* s, void* data);
+void func_001EE420(Pkt_161F70* s, void* data);
+void func_001EE480(Pkt_161F70* s);
+void func_00152D70(Pkt_161F70* s);
+void func_00152B80(Pkt_161F70* s, s32 n, void* data);
+void func_00152B38(Pkt_161F70* s);
+void func_0018D800(Mem_161F70* dst, void* src, s32 count);
+
+void func_00161F70(Self_161F70* self)
+{
+    Hd_161F70* hdr;
+    Out4_161F70* p4;
+    Mat_161F70* p8;
+    u8* pC;
+    Out3_161F70* p10;
+    s32 size;
+    u32* dst;
+    s32 off = 0x24;
+    s32 j;
+    s32 i;
+    Vert_161F70* v;
+
+    func_001EE5C8(((Pkt_161F70*)&D_002622A8), 0xD, 3, 0xB, 0, &hdr);
+    func_001F5C0C((Mem_161F70*)hdr, 0, 0x18);
+    hdr->f10 = 4;
+    hdr->f0 = off;
+    off += self->n * 4;
+    hdr->f2 = off;
+    off += (((self->n + 3) & ~3) - self->n) * 4;
+    hdr->fE = off;
+    off += self->n;
+    func_001EE498(((Pkt_161F70*)&D_002622A8), 1, 4);
+    func_001EE5C8(((Pkt_161F70*)&D_002622A8), 0xC, self->n, hdr->f0 + 3, 0, &p4);
+    func_001EE498(((Pkt_161F70*)&D_002622A8), 1, 1);
+    for (i = 0; i < self->n; i++)
+    {
+        v = &self->verts[i];
+        p4->v = v->pos;
+        if (v->flag != 0)
+            p4->w = self->base + 32768.0f;
+        else
+            p4->w = self->base + 28672.0f;
+        p4++;
+    }
+    func_001EE498(((Pkt_161F70*)&D_002622A8), 1, 4);
+    func_001EE5C8(((Pkt_161F70*)&D_002622A8), 0xC, (self->n + 3) & ~3, hdr->f0, 0, &p8);
+    func_001EE5C8(((Pkt_161F70*)&D_002622A8), 0xE, self->n, hdr->f0 + 1, 0, &pC);
+    func_001EE498(((Pkt_161F70*)&D_002622A8), 1, 1);
+    func_001EE3F0(((Pkt_161F70*)&D_002622A8), D_00000288);
+    for (i = 0; i < self->n; i += 4)
+    {
+        for (j = 0; j < 4; j++)
+        {
+            if (i + j < self->n)
+            {
+                p8->m[0][j] = self->verts[i + j].nx;
+                p8->m[1][j] = self->verts[i + j].ny;
+                p8->m[2][j] = self->verts[i + j].nz;
+            }
+            else
+            {
+                p8->m[0][j] = p8->m[1][j] = p8->m[2][j] = 0.0f;
+            }
+        }
+        func_001F5C0C((Mem_161F70*)p8->m[3], 0, 0x10);
+        p8++;
+    }
+    for (i = 0; i < self->n; i++)
+    {
+        v = &self->verts[i];
+        for (s32 m = 0; m < 4; m++)
+            pC[m] = (self->mesh->col[m] * v->col[m] + 0x100) / 0x1FE;
+        pC += 4;
+    }
+    func_00152D70(((Pkt_161F70*)&D_002622A8));
+    for (s32 t = 0; t < self->texCount; t++)
+        func_00152B80(((Pkt_161F70*)&D_002622A8), self->tex[t]->n, self->tex[t]->data);
+    func_00152B38(((Pkt_161F70*)&D_002622A8));
+    func_001EE3F0(((Pkt_161F70*)&D_002622A8), D_00001210);
+    func_001EE480(((Pkt_161F70*)&D_002622A8));
+    func_001EE498(((Pkt_161F70*)&D_002622A8), 1, 4);
+    func_001EE5C8(((Pkt_161F70*)&D_002622A8), 8, self->n, hdr->f0, 0, &p10);
+    func_001EE498(((Pkt_161F70*)&D_002622A8), 1, 1);
+    func_001EE3F0(((Pkt_161F70*)&D_002622A8), D_00001AB0);
+    for (i = 0; i < self->n; i++)
+    {
+        v = &self->verts[i];
+        p10->x = v->u;
+        p10->y = v->v;
+        p10->z = 1.0f;
+        p10++;
+    }
+    s32 k = 0;
+    for (s32 t = 0; t < self->mesh->count; t++)
+    {
+        Ent_161F70* e = &self->mesh->ents[t];
+        func_001EE5C8(((Pkt_161F70*)&D_002622A8), 0xC, e->n, off, &size, &dst);
+        Sub_161F70* sub = self->mesh->sub;
+        s32 m = sub ? sub->n : 0;
+        func_0018D800((Mem_161F70*)dst, e->data + m * e->n * 16, size);
+        dst[0] |= 0x8000 | self->n;
+        dst[4] |= 0x8000;
+        hdr->f8[k] = off;
+        k++;
+        off += e->n;
+    }
+    func_001EE420(((Pkt_161F70*)&D_002622A8), D_00000010);
+}
