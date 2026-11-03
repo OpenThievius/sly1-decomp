@@ -2071,3 +2071,48 @@ void func_0018E8C8();
 void func_0018E6C0();
 extern const Fn_Table D_0024B598[8] = { 0, 0, 0, (Fn_Table)func_0018E8C8, 0, (Fn_Table)func_0018E938, 0, 0 };
 extern const Fn_Table D_0024B5B8[10] = { 0, 0, 0, (Fn_Table)func_0018E6C0, 0, (Fn_Table)func_0018E8C0, 0, 0, 0, 0 };
+
+extern u8 D_0064C70F[];
+extern s32 D_002699A4;
+extern s32 D_002699A8;
+extern s32 D_002C2A10;
+extern s32 D_002C2A24;
+extern u8 D_002C2A28[];
+extern s32 D_002C2A34;
+void func_001E22C0(void* self);
+
+void func_0018D430(void)
+{
+    D_002699A4 = (s32)D_0064C70F & -16;
+    D_002699A8 = 0x2000000;
+    // The heap's pointers (u8* elsewhere in this file), written as words.
+    D_002C2A10 = *(s32*)&D_002C2A14 = *(s32*)&D_002C2A18 = *(s32*)&D_002C2A1C = D_002699A4;
+    *(s32*)&D_002C2A20 = D_002C2A24 = D_002699A8;
+    D_002C2A34 = -1;
+    func_001E22C0(D_002C2A28);
+}
+
+struct Obj_18D9B8 {
+    u8 pad0[0xD0];
+    u8 fD0[0x80];
+    u8 f150[0x9C];
+    s32 f1EC;
+    s32 f1F0;
+    u8 pad1[0x6B8 - 0x1F4];
+    s32 f6B8;
+};
+void func_00189350(u8* a, u8* b);
+s32 func_001BC088(Obj_18D9B8* self, f32 x, void* b);
+void func_0018D9B8(Obj_18D9B8* self, void* b, f32 x)
+{
+    if (self->f6B8 != 0) {
+        func_00189350(self->f150, self->fD0);
+    }
+    s32 s1 = self->f1EC;
+    s32 s0 = self->f1F0;
+    self->f1EC = 0;
+    self->f1F0 = 0;
+    func_001BC088(self, x, b);
+    self->f1EC = s1;
+    self->f1F0 = s0;
+}

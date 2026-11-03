@@ -1351,3 +1351,18 @@ void* func_001FD8A8(Arg_001FD8A8* a) throw(Fault_1FD8A8)
 {
     return func_0018D758(a);
 }
+
+struct Obj_1FDFF8 { u8* f0; u8 pad[0x14]; s64 tbl[80]; s32 pad2; s8 st[64]; };
+
+void func_002014D0(void);
+
+u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
+{
+    while (self->st[idx] == 2) {
+        idx = self->tbl[idx];
+    }
+    if (self->st[idx] == 1) {
+        return self->f0 + self->tbl[idx];
+    }
+    func_002014D0();
+}

@@ -1887,3 +1887,22 @@ void func_0016B4A0(Obj_16B4A0* self)
     self->f264 = 0;
     self->f268 = -D_00262970;
 }
+
+struct Obj_168F48 {
+    u8 pad0[4];
+    u16 f4;
+    u8 pad6[6];
+    s32 fC;
+};
+struct Dbp_168F48 { s32 v; };
+
+void func_00168D98(Dbp_168F48 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx);
+
+void func_00168F48(Obj_168F48* e, s32 v, void* ctx)
+{
+    s32 step = (e->f4 > 16) ? 16 : 8;
+    s32 n = e->f4 - 1;
+    Dbp_168F48 p;
+    p.v = v;
+    func_00168D98(p, 1, 0, step, ((n + step) & -step) / step, e->fC, ctx);
+}

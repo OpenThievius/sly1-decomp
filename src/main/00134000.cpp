@@ -922,3 +922,15 @@ Obj_137290* func_00137290(Obj_137290* self, s32 a1, s32 a2, s32 a3)
     self->fC = a1 - (align - a2);
     return self;
 }
+
+extern s32 func_001F8DB8(void*, s32, s32);
+struct Obj_1377C0 { u8 pad0[8]; s32 f8; s32 fC; u8 pad10[4]; s32 f14; u8 pad18[8]; s32 f20; s32 f24; u8 pad28[0xC]; void* f34; };
+struct Min_1377C0 { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
+void func_001377C0(Obj_1377C0* self)
+{
+    s32 size = self->fC;
+    s32 limit = self->f14;
+    self->f20 = self->f8;
+    size = (size > 0x8000) ? Min_1377C0::Of(0x8000, limit) : Min_1377C0::Of(size, limit);
+    self->f24 = func_001F8DB8(self->f34, self->f20, size);
+}

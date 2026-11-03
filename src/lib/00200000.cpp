@@ -1615,3 +1615,25 @@ extern const Fn_Table D_0024F3E8[4] = { 0, (Fn_Table)func_002012A0, 0, (Fn_Table
 extern const Fn_Table D_0024F3F8[4] = { 0, (Fn_Table)func_00201310, 0, (Fn_Table)func_00201360 };
 extern const Fn_Table D_0024F418[4] = { 0, (Fn_Table)func_002013F0, 0, (Fn_Table)func_00201440 };
 extern const Fn_Table D_0024F428[4] = { 0, (Fn_Table)(void* (*)(struct Self_00201460* a0))func_00201460, 0, (Fn_Table)func_002014B0 };
+
+struct Obj_202098 { u8 pad0[0x20]; u64 out; u8 pad1[0x8]; u64 in; };
+
+void func_00202098(struct Obj_202098* self, s16 a1, s16 a2, s16 a3)
+{
+    u64 v = self->in;
+    s64 y = (u64)((s32)((v >> 48) & 0x7FF) + 1) >> 1;
+    s64 b2 = a2;
+    s64 b1 = a1;
+    s64 x = (u64)((s32)((v >> 16) & 0x7FF) + 1) >> 1;
+    b2 -= y;
+    b1 -= x;
+    s64 t = b2 << 4;
+    u64 lo = b1 << 4;
+    u64 hi;
+    if (a3 != 0) {
+        hi = (u64)(t + 8) << 32;
+    } else {
+        hi = (u64)t << 32;
+    }
+    self->out = lo | hi;
+}
