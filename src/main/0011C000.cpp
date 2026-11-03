@@ -95,10 +95,6 @@ s32 func_0011E2A0()
 
 s32 func_0011C0A8(s32 a, s32 b);
 
-s32 func_0011C0E8(void)
-{
-    return func_0011C0A8(1, 0xFFFF);
-}
 
 struct Stride_11C288 { s32 stride; s32 pad4; s32 base; };
 
@@ -386,16 +382,6 @@ void func_0011A6B8(void* p);
 void func_0011C1D0(void* p);
 void func_0011CBB0(void);
 
-void func_0011C040(void)
-{
-    func_0011C1D0(D_0025C250);
-    func_0011C1D0(D_0025C270);
-    func_0011C1D0(D_0025C290);
-    func_0011C1D0(D_0025C2B0);
-    func_0011CBB0();
-    func_0011C1D0(D_0025C2D0);
-    func_0011A6B8(D_00259F38);
-}
 
 extern u8 D_0062C568[];
 extern u8 D_00259F38[];
@@ -529,16 +515,6 @@ extern s32 D_0025C2A8;
 extern s32 D_0025C2C8;
 extern s32 D_0025C2E8;
 
-void func_0011C0A8(s32 a, u32 b)
-{
-    if (b == 0xFFFF && a != 0) {
-        D_0025C268 = 0;
-        D_0025C288 = 0;
-        D_0025C2A8 = 0;
-        D_0025C2C8 = 0;
-        D_0025C2E8 = 0;
-    }
-}
 
 struct Node_11C418 { s32 f0; s32 f4; s32 f8; s32 fC; };
 
@@ -705,10 +681,6 @@ void func_0011F210(Table_11F210* self, void* src)
 
 s32 func_0011C0A8(void* p, s32 mask);
 
-void func_0011C108(void)
-{
-    (void)func_0011C0A8(0, 0xFFFF);
-}
 
 struct Pool_11C128 {
     s32 slots;

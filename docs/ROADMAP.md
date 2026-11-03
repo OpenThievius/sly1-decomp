@@ -39,7 +39,9 @@ splits are taken from other projects or from the prototype
 4. **File boundaries, found in retail.** Where one source file ends and the next begins, from
    retail's own code: which functions share static data, how `.rodata` and `.data` group, and
    compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of
-   `src/main/` then give way to real files, with names that are ours.
+   `src/main/` then give way to real files, with names that are ours. A file is proved by
+   building it whole, as the original was, and linking each of its sections in one piece
+   (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)).

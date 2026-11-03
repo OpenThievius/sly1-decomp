@@ -1,1 +1,4 @@
 file	symbol	function
+src/main/value.cpp	__static_initialization_and_destruction_0	func_0011C0A8
+src/main/value.cpp	_GLOBAL_$I$*	func_0011C0E8
+src/main/value.cpp	_GLOBAL_$D$*	func_0011C108
