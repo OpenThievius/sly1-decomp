@@ -736,3 +736,34 @@ void func_00210E00(Obj_210E00* self, u32 a1, u32 a2)
     while ((*(volatile u32*)0x1000B000 >> 8) & 1) { }
     while (*(volatile s32*)0x10002010 < 0) { }
 }
+
+struct Xfer_00211240 { u32 size; u32 addr; };
+
+s32 func_001F9D60(void);
+s32 func_001F9DA8(void);
+
+s32 func_00211240(s32 unused, Xfer_00211240* p)
+{
+    *(volatile u32*)0x1000E010 = 0x10;
+    if (p->size == 0) {
+        return 1;
+    }
+    u32 max = 0xFFFF;
+    if (p->size > max) {
+        (void)func_001F9D60();
+        *(volatile u32*)0x1000B410 = p->addr;
+        *(volatile u32*)0x1000B420 = max;
+        *(volatile u32*)0x1000B400 = 0x101;
+        (void)func_001F9DA8();
+        p->size = p->size - max;
+        p->addr = (p->addr + 0xFFFF0) & 0xFFFFFFF;
+    } else {
+        (void)func_001F9D60();
+        *(volatile u32*)0x1000B410 = p->addr;
+        *(volatile u32*)0x1000B420 = p->size;
+        *(volatile u32*)0x1000B400 = 0x101;
+        (void)func_001F9DA8();
+        p->size = 0;
+    }
+    return 0;
+}
