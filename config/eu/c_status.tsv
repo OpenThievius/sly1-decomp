@@ -1180,6 +1180,7 @@ func_0014BEF8	func_0014C1A8	match
 func_0014BF88	func_0014C238	match	
 func_0014C018	func_0014C2C8	match	rodata
 func_0014C138	func_0014C3E8	match	
+func_0014C2F0	func_0014C5A0	match	
 func_0014C5E8	func_0014C898	match	
 func_0014C668	func_0014C918	match	
 func_0014C6E0	func_0014C990	match	

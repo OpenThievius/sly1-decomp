@@ -1673,3 +1673,100 @@ void func_0014CF30(Obj_14CF30* self, s32 kind, void* key)
         break;
     }
 }
+
+struct Clq_14C2F0 {
+    f32 a;
+    f32 b;
+    f32 c;
+};
+
+struct Util_14C2F0 {
+    static f32 Eval(Clq_14C2F0* q, f32 t) { return q->a + t * (q->b + t * q->c); }
+    static f32 Limit(f32 g, f32 lo, f32 hi)
+    {
+        if (g < lo) return lo;
+        if (hi < g) return hi;
+        return g;
+    }
+    static f32 Lerp(f32 s, f32 a, f32 b) { return (1.0f - s) * a + s * b; }
+};
+
+struct Params_14C2F0 {
+    f32 f00;
+    f32 f04;
+    u8 pad08[8];
+    Clq_14C2F0 q10;
+    u8 pad1C[4];
+    f32 f20;
+    f32 f24;
+    f32 f28;
+    f32 f2C;
+    Clq_14C2F0 q30;
+    u8 pad3C[4];
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    f32 f4C;
+    f32 f50;
+    u8 pad54[0xC];
+    Clq_14C2F0 q60;
+    u8 pad6C[4];
+    f32 f70;
+    f32 f74;
+    u8 pad78[8];
+    Clq_14C2F0 q80;
+    u8 pad8C[4];
+    f32 f90;
+    f32 f94;
+    u8 pad98[8];
+    Clq_14C2F0 qA0;
+};
+
+struct Obj_14C2F0 {
+    u8 pad0[0x2D0];
+    s32 f2D0;
+    s32 f2D4;
+    u8 pad2D8[0x434 - 0x2D8];
+    f32 f434;
+    f32 f438;
+    f32 f43C;
+    f32 f440;
+    f32 f444;
+    f32 f448;
+    s32 f44C;
+    u8 pad450[0x45C - 0x450];
+    f32 f45C;
+    u8 pad460[4];
+    s32 f464;
+    u8 pad468[0x5E0 - 0x468];
+    Params_14C2F0 params;
+};
+
+extern f32 D_00275C60[];
+extern f32 D_00261858[];
+
+void func_0014C2F0(Obj_14C2F0* o)
+{
+    f32 t = Util_14C2F0::Limit((f32)o->f2D0 / (f32)o->f2D4, 0.0f, 1.0f);
+    Params_14C2F0* p = &o->params;
+    f32 s;
+
+    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q30, t), D_00275C60[0], D_00275C60[1]);
+    o->f434 = Util_14C2F0::Lerp(s, p->f20, p->f28);
+    o->f438 = Util_14C2F0::Lerp(s, p->f24, p->f2C);
+
+    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q60, t), D_00275C60[0], D_00275C60[1]);
+    o->f43C = Util_14C2F0::Lerp(s, p->f44, p->f4C);
+    o->f440 = Util_14C2F0::Lerp(s, p->f48, p->f50);
+
+    o->f444 = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q80, t), D_00275C60[0], D_00275C60[1]), p->f70, p->f74);
+
+    o->f448 = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->qA0, t), D_00275C60[0], D_00275C60[1]), p->f90, p->f94);
+
+    o->f44C = (s32)Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q10, t), D_00275C60[0], D_00275C60[1]), p->f00, p->f04);
+
+    if (p->f40 < t && o->f464 == 0) {
+        o->f464 = 1;
+        o->f45C = D_00261858[1];
+    }
+}
