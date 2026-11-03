@@ -1459,3 +1459,63 @@ s32 func_001DD710(Arg_001DD710* a0, Arg_001DD710* a1)
     if (m & 2) r = (((Flags_001DD710*)D_002623C8)->flags & 1) ? one : 0;
     return r;
 }
+
+struct Self_1DF2C8 {
+    u8 pad0[0x2C8];
+    u64 f2C8;
+    u8 pad2D0[0x720 - 0x2D0];
+    s32 f720;
+    u8 pad724[4];
+    s32 f728;
+    f32 f72C;
+    f32 f730;
+};
+struct Rgba_1DF2C8 { u8 r, g, b, a; };
+
+extern f32 D_00261858[];
+extern f32 D_00275870[];
+extern f32 D_00275880[];
+extern Rgba_1DF2C8 D_002623E0;
+
+struct Clamp_1DF2C8 {
+    static f32 Of(f32 v, f32 lo, f32 hi)
+    {
+        return v < lo ? lo : (hi < v ? hi : v);
+    }
+};
+
+f32 func_00205210(f32 x);
+void func_00126A48(Self_1DF2C8* s, u32 c);
+void func_00125C90(Self_1DF2C8* s, void* a, void* b);
+
+void func_001DF2C8(Self_1DF2C8* self, void* a1, void* a2)
+{
+    Rgba_1DF2C8 out;
+    Rgba_1DF2C8 col;
+    f32 t;
+    if (!(self->f2C8 & 0x100000000UL)) {
+        *(u32*)&col = 0x800000A0;
+        if (self->f728 != 0) {
+            if (self->f720 != 2) {
+                t = (D_00261858[1] - self->f730) * 0.5f;
+            } else {
+                t = 0.0f;
+            }
+            f32 r = func_00205210((D_00261858[1] - self->f72C) * 10.0f);
+            f32 a = D_00275870[0] + t * (D_00275870[1] + t * D_00275870[2]);
+            a = Clamp_1DF2C8::Of(a, ((f32*)&D_00275C60)[0], ((f32*)&D_00275C60)[1]);
+            f32 b = D_00275880[0] + r * (D_00275880[1] + r * D_00275880[2]);
+            b = Clamp_1DF2C8::Of(b, ((f32*)&D_00275C60)[0], ((f32*)&D_00275C60)[1]);
+            f32 k = a * b;
+            f32 inv = 1.0f - k;
+            out.r = (s32)(inv * D_002623E0.r + k * col.r);
+            out.g = (s32)(inv * D_002623E0.g + k * col.g);
+            out.b = (s32)(inv * D_002623E0.b + k * col.b);
+            out.a = D_002623E0.a;
+        } else {
+            out = D_002623E0;
+        }
+        func_00126A48(self, *(u32*)&out);
+        func_00125C90(self, a1, a2);
+    }
+}

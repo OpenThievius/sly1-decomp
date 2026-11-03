@@ -1737,3 +1737,95 @@ void func_001FFE58(List_1FFE58* self, List_1FFE58* out)
     }
     self->count = cur;
 }
+
+struct Fp_1FCAE0 {
+    u32 cls;
+    s32 sign;
+    s32 exp;
+    s32 pad;
+    u64 frac;
+};
+
+
+struct Add_1FCAE0 {
+    static s32 IsNan(Fp_1FCAE0* p) { return p->cls < 2; }
+    static s32 IsInf(Fp_1FCAE0* p) { return p->cls == 4; }
+    static s32 IsZero(Fp_1FCAE0* p) { return p->cls == 2; }
+};
+
+Fp_1FCAE0* func_001FCAE0(Fp_1FCAE0* a, Fp_1FCAE0* b, Fp_1FCAE0* tmp)
+{
+    s32 ae, be;
+    u64 af, bf;
+    s64 tf;
+
+    if (Add_1FCAE0::IsNan(a)) return a;
+    if (Add_1FCAE0::IsNan(b)) return b;
+    if (Add_1FCAE0::IsInf(a)) {
+        if (Add_1FCAE0::IsInf(b) && a->sign != b->sign) return ((Fp_1FCAE0*)&D_0062A770);
+        return a;
+    }
+    if (Add_1FCAE0::IsInf(b)) return b;
+    if (Add_1FCAE0::IsZero(b)) {
+        if (Add_1FCAE0::IsZero(a)) {
+            *tmp = *a;
+            tmp->sign = a->sign & b->sign;
+            return tmp;
+        }
+        return a;
+    }
+    if (Add_1FCAE0::IsZero(a)) return b;
+
+    ae = a->exp;
+    be = b->exp;
+    af = a->frac;
+    bf = b->frac;
+    {
+        s32 diff = ae - be;
+        if (diff < 0) diff = -diff;
+        if (diff < 64) {
+            while (ae > be) {
+                be++;
+                bf = (bf & 1) | (bf >> 1);
+            }
+            while (be > ae) {
+                ae++;
+                af = (af & 1) | (af >> 1);
+            }
+        } else {
+            if (ae > be) {
+                bf = 0;
+            } else {
+                ae = be;
+                af = 0;
+            }
+        }
+    }
+    if (a->sign != b->sign) {
+        if (a->sign) tf = -af + bf;
+        else tf = af - bf;
+        if (tf >= 0) {
+            tmp->sign = 0;
+            tmp->exp = ae;
+            tmp->frac = tf;
+        } else {
+            tmp->sign = 1;
+            tmp->exp = ae;
+            tmp->frac = -tf;
+        }
+        while (tmp->frac < 0x1000000000000000ULL && tmp->frac) {
+            tmp->frac <<= 1;
+            tmp->exp--;
+        }
+    } else {
+        tmp->sign = a->sign;
+        tmp->exp = ae;
+        tmp->frac = af + bf;
+    }
+    tmp->cls = 3;
+    if (tmp->frac >= 0x2000000000000000ULL) {
+        tmp->frac = (tmp->frac & 1) | (tmp->frac >> 1);
+        tmp->exp++;
+    }
+    return tmp;
+}

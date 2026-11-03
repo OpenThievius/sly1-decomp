@@ -533,3 +533,47 @@ void func_002107E0(Obj_2107E0* self, Node_2107E0* node, s64* out1, s64* out3, s6
     *out3 = node->f20;
     *out4 = ((s64)node->f34 << 8) | (node->f2C | ((s64)node->f38 << 7) | ((s64)node->f3C << 6) | ((s64)node->f40 << 5) | ((s64)node->f30 << 3));
 }
+
+typedef u64 Quad_211BA8 __attribute__((mode(TI)));
+extern volatile Quad_211BA8 D_0027B0C0[];
+extern Quad_211BA8 D_0027B110[];
+void func_00211B40(u32 value);
+
+void func_00211BA8(void)
+{
+    func_00211B40(1);
+    *(volatile u32*)0x10002010 = 0x40000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[0];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[1];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[2];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[3];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile u32*)0x10002000 = 0x50000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0x58000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B110[0];
+    *(volatile Quad_211BA8*)0x10007010 = D_0027B110[1];
+    *(volatile u32*)0x10002000 = 0x60000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0x90000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002010 = 0x40000000;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+    *(volatile u32*)0x10002000 = 0;
+    while (*(volatile s32*)0x10002010 < 0) {
+    }
+}
