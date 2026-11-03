@@ -38,6 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import toolchain  # noqa: E402
 import versions  # noqa: E402
+import volatile_slots  # noqa: E402
 
 ROOT = versions.ROOT
 CFLAGS = ROOT / "config" / "cflags.tsv"
@@ -229,6 +230,11 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
         names = generated_names(source)
         if names:
             asm = rename_generated(asm, names)
+        if release == "2.9-ee-991111":
+            # The assembler that built Sony's libraries put a volatile store into the slot of
+            # the call after it; ours leaves the slot empty (tools/volatile_slots.py).
+            asm = volatile_slots.fill(asm)
+        if names or release == "2.9-ee-991111":
             s.write_text(asm)
         if keep_asm:
             Path(keep_asm).write_text(asm)

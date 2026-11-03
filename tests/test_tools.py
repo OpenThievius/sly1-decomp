@@ -23,6 +23,7 @@ import check  # noqa: E402
 import rodata  # noqa: E402
 import version_src  # noqa: E402
 import versions  # noqa: E402
+import volatile_slots  # noqa: E402
 
 BOOT = b"\x7fELF" + bytes(range(256)) * 20
 
@@ -681,4 +682,22 @@ class MapFixesTest(unittest.TestCase):
         pairs = inventory.pair(self.EU, self.US)
         with self.assertRaises(SystemExit):
             inventory.apply_fixes(pairs, self.US, {"func_C": "func_B"})
+
+
+class VolatileSlotTest(unittest.TestCase):
+    def test_a_based_store_moves_into_the_call_slot(self):
+        asm = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tjal\tf\n\tlw\t$4,0($sp)"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out[2:6], ["\t.set\tnoreorder", "\tjal\tf", "\tsw\t$3,0($2)", "\t.set\treorder"])
+
+    def test_a_store_to_a_symbol_keeps_its_lui_before_the_call(self):
+        asm = "\t#.set\tvolatile\n\tsw\t$3,D_00100000\n\t#.set\tnovolatile\n\tjal\tf"
+        out = volatile_slots.fill(asm).split("\n")
+        self.assertEqual(out[3:6], ["\tlui\t$1,%hi(D_00100000)", "\tjal\tf", "\tsw\t$3,%lo(D_00100000)($1)"])
+
+    def test_a_plain_store_or_a_store_before_other_code_stays(self):
+        plain = "\tsw\t$3,0($2)\n\tjal\tf"
+        self.assertEqual(volatile_slots.fill(plain), plain)
+        apart = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tmove\t$4,$0\n\tjal\tf"
+        self.assertEqual(volatile_slots.fill(apart), apart)
 
