@@ -546,6 +546,29 @@ class RodataGlobalTest(unittest.TestCase):
         self.assertFalse(rodata.GLOBAL.match(".rodata.str1"))
 
 
+class WholeFileTest(unittest.TestCase):
+    def test_a_whole_section_may_end_in_the_padding_before_the_next_label(self):
+        chunks = [("jtbl_002492F0", 0x2492F0, ["a"]), ("D_00249428", 0x249428, ["b"])]
+        whole = (0x2492F0, 0x134, "value.o", ".rodata", "D_002492F0")
+        plan, covered = c_layout.data_plan(chunks, [whole])
+        self.assertEqual([k for k, _ in plan], ["c", "run"])
+        with self.assertRaises(c_layout.LayoutError):  # a global of its own may not
+            c_layout.data_plan(chunks, [(0x2492F0, 0x134, "x.o", ".rodata.D_002492F0", "D_002492F0")])
+
+    def test_an_address_in_a_whole_file_belongs_to_it(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "config" / "us").mkdir(parents=True)
+            (Path(d) / "config" / "us" / "files.tsv").write_text(
+                "file\ttext\tend\trodata\tdata\tbss\nsrc/main/value.cpp\t0011AE78\t0011C128\t002492F0\t0025C250\t-\n")
+            old = todo.ROOT
+            todo.ROOT = Path(d)
+            try:
+                self.assertEqual(todo.whole_files()["src/main/value.cpp"]["bss"], None)
+                self.assertEqual(todo.source_of(0x11C0A8), "src/main/value.cpp")
+            finally:
+                todo.ROOT = old
+
+
 class GeneratedNameTest(unittest.TestCase):
     ASM = ("\t.section .text.__static_initialization_and_destruction_0,\"ax\",@progbits\n"
            "__static_initialization_and_destruction_0:\n"

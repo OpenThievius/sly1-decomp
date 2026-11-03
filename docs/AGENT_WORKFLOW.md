@@ -210,6 +210,14 @@ Measured on this compiler; add to this list when you learn something.
   (`_GLOBAL_$I$*` for whichever the constructor is); `tools/compile.py` renames them, and they
   are checked and counted like any function of the file. The object's own `.ctors` entry is
   discarded: retail's list comes from the disassembly.
+- **A real source file.** A 16 KiB window is our cut, not the original's. Where retail shows one
+  of the original files (a static initialiser ends a file; data used together sits together, in
+  code order), its functions move to a file of their own, `src/main/<name>.cpp`, in retail's
+  order, and `config/us/files.tsv` gives its code range and the addresses of its `.rodata`,
+  `.data` and `.bss`. Such a file is compiled whole, as the original was (no
+  `-ffunction-sections` or `-fdata-sections`, no literal baking), and each of its sections is
+  linked in one piece: the full build's `MATCH` proves the boundary. Its globals with
+  constructors bring the compiler's initialiser functions, named in `config/us/generated.tsv`.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.
