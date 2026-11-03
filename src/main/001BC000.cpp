@@ -1638,3 +1638,80 @@ void func_001BF920(Obj_1BF920* self, Obj_1BF920* parent, s32 a2, u8* a3, Q16_1BF
     func_001BF620(q, &self->f50, &self->f54, f14, f12, f13);
     func_001BF428(self);
 }
+
+struct Frame_1BDA50;
+
+struct Ctx_1BDA50;
+struct Buf_1BDA50 { u8 b[0x100]; };
+struct List_1BDA50 { u8* first; s32 pad04; s32 offset; };
+struct Frame_1BDA50 { List_1BDA50* list; u8** link; s32 offset; Frame_1BDA50* prev; };
+struct Item_1BDA50 {
+    u8 pad0[0x2D8];
+    List_1BDA50 list;
+    u8 pad2E4[0x254];
+    u64 flags;
+};
+
+struct Begin_1BDA50 {
+    static void Of(Frame_1BDA50* it, List_1BDA50* list)
+    {
+        it->list = list;
+        it->link = (u8**)list;
+        it->offset = list->offset;
+        it->prev = (*(Frame_1BDA50**)D_0027B314);
+        (*(Frame_1BDA50**)D_0027B314) = it;
+    }
+};
+struct Next_1BDA50 {
+    static u8* Of(Frame_1BDA50* it)
+    {
+        u8* obj = *it->link;
+        it->link = (u8**)(obj + it->offset);
+        return obj;
+    }
+};
+struct End_1BDA50 {
+    static void Of(Frame_1BDA50* it) { (*(Frame_1BDA50**)D_0027B314) = it->prev; }
+};
+
+s32 func_001BD558(s32 n, Item_1BDA50** arr, s32 cap, Buf_1BDA50* buf);
+void func_001BCD00(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, s32 v, Buf_1BDA50* buf, f32 f, s32 ex);
+void func_001BD888(s32 n, Item_1BDA50** arr);
+void func_001BD790(u8* node, s32 flag);
+
+void func_001BDA50(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, f32 f, s32 ex)
+{
+    Buf_1BDA50 buf;
+    Frame_1BDA50 it;
+    s32 v = func_001BD558(n, arr, 0x40, &buf);
+    if (v < 0x40 || n < 2) {
+        func_001BCD00(ctx, n, arr, v, &buf, f, ex);
+        return;
+    }
+    func_001BD888(n, arr);
+    s32 half = n / 2;
+    s32 i;
+    u8* p;
+    for (i = 0; i < half; i++) {
+        arr[i]->flags |= 1ULL << 58;
+    }
+    func_001BDA50(ctx, n - half, arr + half, f, ex);
+    for (i = 0; i < half; i++) {
+        arr[i]->flags &= ~(1ULL << 58);
+    }
+    for (i = half; i < n; i++) {
+        Begin_1BDA50::Of(&it, &arr[i]->list);
+        for (p = Next_1BDA50::Of(&it); p; p = Next_1BDA50::Of(&it)) {
+            func_001BD790(p, 1);
+        }
+        End_1BDA50::Of(&it);
+    }
+    func_001BDA50(ctx, half, arr, f, ex);
+    for (i = half; i < n; i++) {
+        Begin_1BDA50::Of(&it, &arr[i]->list);
+        for (p = Next_1BDA50::Of(&it); p; p = Next_1BDA50::Of(&it)) {
+            func_001BD790(p, 0);
+        }
+        End_1BDA50::Of(&it);
+    }
+}
