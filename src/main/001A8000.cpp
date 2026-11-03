@@ -2246,3 +2246,101 @@ void func_001AB058(Obj_1AB058* self)
         func_001AAB20(self, 0.0f, 0.0f);
     }
 }
+
+extern void* D_0027B314;
+
+struct Key_1A88A0 { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
+struct Ent_1A88A0;
+struct List_1A88A0 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_1A88A0 { List_1A88A0* list; u8* link; s32 offset; Iter_1A88A0* prev; };
+struct Ent_1A88A0 {
+    u8 pad0[0x3C];
+    Ent_1A88A0* f3C;
+    u8 pad40[8];
+    Key_1A88A0* f48;
+};
+struct Group_1A88A0 {
+    u8 pad0[4];
+    s32 f4;
+    s32 kind;
+    u8 padC[8];
+    Ent_1A88A0* f14;
+};
+struct Self_1A88A0 { u8 pad0[0x3C]; Group_1A88A0* group; };
+
+s32 func_00182FC8(Key_1A88A0* p);
+s32 func_001300E8(Key_1A88A0* p, s32 kind);
+
+struct Begin_1A88A0 {
+    static void Of(Iter_1A88A0* it, List_1A88A0* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->prev = (Iter_1A88A0*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+struct Next_1A88A0 {
+    static u8* Of(Iter_1A88A0* it)
+    {
+        u8* obj = *(u8**)it->link;
+        it->link = obj + it->offset;
+        return obj;
+    }
+};
+
+struct End_1A88A0 {
+    static void Of(Iter_1A88A0* it)
+    {
+        D_0027B314 = it->prev;
+    }
+};
+
+s32 func_001A88A0(Self_1A88A0* self, Key_1A88A0* key)
+{
+    Group_1A88A0* group = self->group;
+
+    if (group != 0 && group->f4 != 0) {
+        List_1A88A0* list;
+        Ent_1A88A0* skip;
+        Iter_1A88A0 it;
+        u8* obj;
+
+        switch (group->kind) {
+        case 1:
+            list = (List_1A88A0*)&group->f14;
+            skip = 0;
+            break;
+        case 2: {
+            Ent_1A88A0* e = group->f14;
+            skip = (Ent_1A88A0*)self;
+            if (e->f48 == key) {
+                return 0;
+            }
+            list = (List_1A88A0*)((u8*)e->f3C + 0x14);
+            break;
+        }
+        }
+        Begin_1A88A0::Of(&it, list);
+        for (obj = Next_1A88A0::Of(&it); obj != 0; obj = Next_1A88A0::Of(&it)) {
+            Ent_1A88A0* e = *(Ent_1A88A0**)obj;
+            if (e != skip && e->f48 == key) {
+                End_1A88A0::Of(&it);
+                return 0;
+            }
+        }
+        End_1A88A0::Of(&it);
+    }
+    if (func_00182FC8(key) != 0) {
+        return 0;
+    }
+    if (func_001300E8(key, 0x3B) != 0 && key->f678 == 0) {
+        return 0;
+    }
+    if (func_001300E8(key, 0x20) != 0 && key->f680 != 0) {
+        return 0;
+    }
+    return 1;
+}

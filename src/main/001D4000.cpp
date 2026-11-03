@@ -784,3 +784,44 @@ void func_001D72C8(Obj_1D72C8* self)
     }
     self->f14 = 0;
 }
+
+struct Ring_1D7190 { u8* f0; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; };
+void func_0018D800(void* dst, void* src, s32 count);
+void func_001D72C8(Ring_1D7190* self);
+
+s32 func_001D7190(Ring_1D7190* self, void* src, s32 size)
+{
+    s32 n = size;
+    s32 done = 0;
+
+    if (self->f0 != 0 && self->f4 != 0 && n != 0) {
+        s32 avail = self->f4 - self->f8;
+        if (avail < n) {
+            n -= avail;
+        }
+    }
+    if (n == 0) {
+        return 0;
+    }
+    if (self->f0 != 0) {
+        func_0018D800(self->f0 + self->f8, src, n);
+        self->f8 += n;
+        done = n;
+    } else if (n > 0) {
+        do {
+            s32 room = 0x400 - self->f14;
+            s32 rem = n - done;
+            s32 take = (room < rem) ? room : rem;
+            if (take != 0) {
+                func_0018D800((u8*)self + (self->f14 + 0x18), (u8*)src + done, take);
+                done += take;
+                self->f14 += take;
+            }
+            if (self->f14 == 0x400) {
+                func_001D72C8(self);
+            }
+        } while (done < n);
+    }
+    self->f10 += done;
+    return n;
+}

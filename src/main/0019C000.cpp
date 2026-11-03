@@ -1254,3 +1254,81 @@ void func_0019CD90(Self_19CD90* self, s32 p, f32* out0, f32* out1, f32* out2)
     *out1 = (f32)m / (f32)self->f48;
     *out2 = (f32)s / (f32)self->f48;
 }
+
+extern u8 D_0027B314[];
+extern f32 D_00261858[];
+
+struct Node_19E420;
+struct Obj_19E420;
+void func_0019EC20(Node_19E420* node);
+void func_0019EC30(Node_19E420* node);
+s32 func_00152720(void* list);
+void func_0019E558(Obj_19E420* self);
+void func_00129DF8(Obj_19E420* self);
+
+struct NodeVt_19E420 {
+    u8 pad0[0x10];
+    void (*update)(Node_19E420* node, f32 t);
+};
+struct Node_19E420 {
+    NodeVt_19E420* vtbl;
+    u8 pad4[0x14];
+    f32 f18;
+};
+struct List_19E420 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_19E420 { List_19E420* list; u8* link; s32 offset; Iter_19E420* saved; };
+struct ObjVt_19E420 {
+    u8 pad0[0x1C];
+    void (*f1C)(Obj_19E420* self);
+};
+struct Obj_19E420 {
+    ObjVt_19E420* vtbl;
+    u8 pad4[0x2C4];
+    s64 f2C8;
+    u8 pad2D0[0x288];
+    List_19E420 list;
+};
+
+struct Next_19E420 {
+    static Node_19E420* Of(Iter_19E420* it)
+    {
+        Node_19E420* obj = *(Node_19E420**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_19E420 {
+    static void Of(Iter_19E420* it, List_19E420* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = *(Iter_19E420**)D_0027B314;
+        *(Iter_19E420**)D_0027B314 = it;
+    }
+};
+
+void func_0019E420(Obj_19E420* self, f32 t)
+{
+    Iter_19E420 it;
+    Begin_19E420::Of(&it, &self->list);
+    Node_19E420* node;
+    while ((node = Next_19E420::Of(&it)) != 0) {
+        if (node->f18 >= D_00261858[1]) {
+            continue;
+        }
+        func_0019EC20(node);
+        node->vtbl->update(node, t);
+        func_0019EC30(node);
+    }
+    s64 m = 0x8000;
+    m <<= 23;
+    if ((self->f2C8 & m) != 0 || func_00152720(&self->list) != 0) {
+        self->vtbl->f1C(self);
+    } else {
+        func_0019E558(self);
+    }
+    func_00129DF8(self);
+    *(Iter_19E420**)D_0027B314 = it.saved;
+}

@@ -478,3 +478,67 @@ void func_001F4500(void* self_, void* s3)
         o->vtbl[7](o);
     }
 }
+
+extern void* D_0027B314;
+
+struct Kind_1F55A8 { s32 f0; s32 type; };
+struct Node_1F55A8 { Kind_1F55A8* kind; };
+struct List_1F55A8 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_1F55A8 { List_1F55A8* list; u8* link; s32 offset; Iter_1F55A8* saved; };
+struct Ctx_1F55A8 { u8 pad0[0x14]; void* f14; };
+struct Owner_1F55A8 { u8 pad0[0x14]; Ctx_1F55A8* ctx; u8 pad18[0x1C]; List_1F55A8 list; };
+struct Obj_1F55A8 {
+    Owner_1F55A8* owner;
+    u8 pad4[0xC];
+    s32 count;
+    void* keys[32];
+    u32 found;
+    Node_1F55A8* nodes[32];
+};
+
+struct Next_1F55A8 {
+    static Node_1F55A8* Of(Iter_1F55A8* it)
+    {
+        Node_1F55A8* obj = *(Node_1F55A8**)it->link;
+        it->link = (u8*)obj + it->offset;
+        return obj;
+    }
+};
+
+struct Begin_1F55A8 {
+    static void Of(Iter_1F55A8* it, List_1F55A8* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (Iter_1F55A8*)D_0027B314;
+        D_0027B314 = it;
+    }
+};
+
+Node_1F55A8* func_0015A418(Ctx_1F55A8* a, s32 b, void* c, Owner_1F55A8* d);
+void func_001F5868(Obj_1F55A8* self, Node_1F55A8* n);
+
+void func_001F55A8(Obj_1F55A8* self)
+{
+    Iter_1F55A8 it;
+    Node_1F55A8* n;
+    s32 i;
+
+    Begin_1F55A8::Of(&it, &self->owner->list);
+    while ((n = Next_1F55A8::Of(&it)) != 0) {
+        s32 t = n->kind->type;
+        if (t == 0x7E || t == 0x6E) {
+            if (self->found < 0x20) {
+                self->nodes[self->found++] = n;
+            }
+        }
+    }
+    for (i = 0; i < self->count; i++) {
+        n = func_0015A418(self->owner->ctx, 0x104, self->keys[i], self->owner);
+        if (n != 0) {
+            func_001F5868(self, n);
+        }
+    }
+    D_0027B314 = it.saved;
+}

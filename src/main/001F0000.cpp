@@ -1543,3 +1543,55 @@ void func_001F0758(Obj_1F0758* self)
     self->f534 = -1;
     D_0027B314 = it.saved;
 }
+
+struct Ent_1F3C38 { u8 pad0[0x90]; s32 f90; s32 f94; u8 pad98[0xB0 - 0x98]; s32 fB0; };
+struct Mode_1F3C38 { u8 pad0[4]; s32 f4; u8 pad8[0x24 - 8]; s32 f24; };
+struct Host_1F3C38;
+
+
+Ent_1F3C38* func_0015A418(Host_1F3C38* host, s32 kind, s32 id, Ent_1F3C38* ctx);
+s32 func_0015A4F0(Host_1F3C38* host, s32 kind, s32 a2, s32 a3, s32 max, Ent_1F3C38** out);
+
+struct Min_1F3C38 {
+    static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
+};
+
+Ent_1F3C38* func_001F3C38(s32 id, s32 parent)
+{
+    Ent_1F3C38* found = 0;
+    Ent_1F3C38* buf[64];
+    Ent_1F3C38* other;
+    Ent_1F3C38* any;
+    s32 n;
+    s32 i;
+
+    if (id != -1) {
+        found = func_0015A418((*(Host_1F3C38**)&D_00275710), 0x101, id, func_0015A418((*(Host_1F3C38**)&D_00275710), 0x101, parent, 0));
+    }
+    if (found == 0) {
+        any = 0;
+        other = 0;
+        n = func_0015A4F0((*(Host_1F3C38**)&D_00275710), 0x205, 0x74, 0, 0x100, buf);
+        n = Min_1F3C38::Of(n, 0x40);
+        for (i = 0; i < n; i++) {
+            Ent_1F3C38* e = buf[i];
+            if (id != -1 && id == e->fB0) {
+                found = e;
+                break;
+            }
+            if ((*(Mode_1F3C38*)&D_00275F80).f4 != 0 && (*(Mode_1F3C38*)&D_00275F80).f24 == 2 && e->f94 != 0) {
+                other = e;
+            }
+            if (e->f90 != 0) {
+                any = e;
+            }
+        }
+        if (found == 0) {
+            found = other;
+        }
+        if (found == 0) {
+            found = any;
+        }
+    }
+    return found;
+}
