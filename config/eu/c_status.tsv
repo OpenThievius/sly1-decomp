@@ -1276,6 +1276,7 @@ func_001519A8	func_00151C60	match
 func_001519E0	func_00151C98	match	
 func_00151A58	func_00151D10	match	
 func_00151A68	func_00151D20	match	
+func_00151A88	func_00151D40	match	
 func_00151D28	func_00151FE0	match	
 func_00151E18	func_001520D0	match	
 func_00151E20	func_001520D8	match	

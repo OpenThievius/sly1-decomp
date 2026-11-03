@@ -126,7 +126,8 @@ void func_00150528(void* self, void* arg)
     func_00150570(self, arg, (u8*)self + 0x2DC, (u8*)self + 0x2E0);
 }
 
-extern void* D_002623C8;
+struct Mgr_151A88;
+extern Mgr_151A88* D_002623C8;
 void func_00124A48(void* self);
 void* func_00160CA0(void* base, s32 index);
 
@@ -273,7 +274,7 @@ void func_00151E18(void* self)
 }
 
 extern void func_00152410(void*, f32);
-extern void* D_002623C8;
+extern Mgr_151A88* D_002623C8;
 extern void* D_002623C0;
 extern u8 D_00275C60[];
 struct Object_151E20 { u8 pad[0x1C]; void* field_1C; };
@@ -2197,4 +2198,52 @@ void func_001533A8(Self_1533A8* self)
         } while (i < s1->f238);
     }
     func_00152B80((Gfx_1533A8*)D_002622A8, s1->f2DC, s1->f2E0);
+}
+
+struct Elem_151A88 { f32 key; s32 a; s32 b; };
+struct Tab_151A88 { u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 count; Elem_151A88* list; };
+struct Mgr_151A88 { u32 flags; u8 pad[8]; f32 t; f32 u; };
+struct Self_151A88 { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; Tab_151A88* tab; s32 f20; };
+struct Glob_151A88 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; };
+extern u8 D_00261E90[];
+extern u8 D_00261D70[];
+extern u8 D_00261E30[];
+void func_00152410(Self_151A88* s, f32 t);
+s32 func_001EAA70(s32 a, s32 b);
+
+void func_00151A88(Self_151A88* self)
+{
+    self->f4 = 4;
+    self->f8 = 6;
+    self->fC = 1;
+    self->f10 = 3;
+    Glob_151A88* g = ((Glob_151A88*)D_002623C0);
+    if (g->f19D8 == 0 || g->f19D8 == 5 || g->f19DC == 1) self->tab = (Tab_151A88*)D_00261E90;
+    else if (!(D_002623C8->flags & 2)) self->tab = (Tab_151A88*)D_00261D70;
+    else self->tab = (Tab_151A88*)D_00261E30;
+    func_00152410(self, D_002623C8->t);
+    s32 a = self->tab->f1C;
+    s32 b = self->tab->f24;
+    f32 t = D_002623C8->t;
+    s32 ra;
+    if (a == b) ra = b;
+    else if (a < b) ra = a + (s32)(t * ((f32)b + 0.99900001f - (f32)a));
+    else ra = b + (s32)((1.0f - t) * ((f32)a + 0.99900001f - (f32)b));
+    s32 c = self->tab->f20;
+    s32 d = self->tab->f28;
+    t = D_002623C8->t;
+    s32 rc;
+    if (c == d) rc = d;
+    else if (c < d) rc = c + (s32)(t * ((f32)d + 0.99900001f - (f32)c));
+    else rc = d + (s32)((1.0f - t) * ((f32)c + 0.99900001f - (f32)d));
+    s32 r = func_001EAA70(ra, rc);
+    s32 i = 0;
+    Elem_151A88* e = 0;
+    self->f14 = r;
+    for (; i < self->tab->count; i++) {
+        e = &self->tab->list[i];
+        if (e->key <= D_002623C8->u) break;
+    }
+    self->f18 = func_001EAA70(e->a, e->b);
+    self->f20 = 0;
 }
