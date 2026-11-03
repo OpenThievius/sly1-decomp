@@ -2020,3 +2020,136 @@ void func_0015E318(Self_15E318* self, P_15E318* p, s32 x, s32 y)
     }
     self->font->End(x, y);
 }
+
+// Inline text codes: ~RRGGBB / ~. colour, &<id> / &. font, ^<d><d> / ^. scale.
+struct __attribute__((packed)) Col_15DBE0 { u8 r, g, b, a; };
+struct Font_15DBE0 {
+    u8 pad0[8];
+    s32 f8;
+    u8 pad0C[0x38];
+    f32 f44;
+    f32 f48;
+};
+struct Parser_15DBE0 {
+    u8 pad0[4];
+    char* cur;
+    Font_15DBE0* font;
+    Font_15DBE0* deffont;
+    u8 inl[0x44];
+    f32 f54;
+    f32 f58;
+    u8 pad5C[0x3C];
+    s32 fontChanged;
+    Col_15DBE0 c9C;
+    Col_15DBE0 cA0;
+    Col_15DBE0 cA4;
+    Col_15DBE0 cA8;
+};
+
+s32 func_0015C200(s32 id);
+void func_0015C9B0(Font_15DBE0* font, Font_15DBE0* out);
+void func_0015C900(Font_15DBE0* font);
+void func_0015C8B8(Font_15DBE0* font, f32 a, f32 b);
+
+s32 func_0015DBE0(Parser_15DBE0* self)
+{
+    s32 done = 0;
+    s32 changed = 1;
+    Font_15DBE0* inl = (Font_15DBE0*)self->inl;
+    do {
+        char* p = self->cur;
+        switch (*p) {
+        case '~':
+            if (p[1] == '~') {
+                self->cur = p + 1;
+                done = 1;
+            } else if (p[1] == '.') {
+                self->cA0 = self->cA4;
+                self->c9C = self->cA0;
+                self->cur += 2;
+            } else {
+                char* q = p + 1;
+                u32 acc = 0;
+                while (*q != 0 && q - self->cur < 7) {
+                    u32 ch = (u8)*q;
+                    u32 d;
+                    if (ch - '0' < 10)
+                        d = (s8)ch - '0';
+                    else if (ch - 'A' < 6)
+                        d = (s8)ch - 55;
+                    else if (ch - 'a' < 6)
+                        d = (s8)ch - 87;
+                    else
+                        break;
+                    q++;
+                    acc = (acc << 4) + d;
+                }
+                if (q - self->cur >= 7) {
+                    self->cA0.r = ((acc >> 16) & 0xFF) + 1 >> 1;
+                    self->cA0.g = ((acc & 0xFF00) >> 8) + 1 >> 1;
+                    self->cA0.b = (acc & 0xFF) + 1 >> 1;
+                    self->c9C = self->cA0;
+                    self->cur += 7;
+                } else {
+                    self->font = self->deffont;
+                    self->c9C = self->cA4;
+                    done = 1;
+                }
+            }
+            break;
+        case '&':
+            if (p[1] == '&') {
+                self->cur = p + 1;
+                done = 1;
+            } else if (p[1] == '.') {
+                self->font = self->deffont;
+                self->c9C = self->cA0;
+                self->fontChanged = changed;
+                self->cur += 2;
+            } else {
+                Font_15DBE0* nf = (Font_15DBE0*)func_0015C200(p[1]);
+                if (nf != 0) {
+                    func_0015C9B0(nf, inl);
+                    self->cur += 2;
+                    Font_15DBE0* d = self->deffont;
+                    f32 ratio = ((f32)d->f8 * d->f48) / ((f32)inl->f8 * inl->f48);
+                    self->font = inl;
+                    u8 al = self->c9C.a;
+                    self->f54 *= ratio;
+                    self->f58 *= ratio;
+                    Col_15DBE0 t = self->cA8;
+                    t.a = al;
+                    self->c9C = t;
+                    self->fontChanged = changed;
+                } else {
+                    self->font = self->deffont;
+                    done = 1;
+                    self->c9C = self->cA4;
+                    self->fontChanged = changed;
+                }
+            }
+            break;
+        case '^':
+            if (p[1] == '^') {
+                self->cur = p + 1;
+                done = 1;
+            } else if (p[1] == '.') {
+                func_0015C900(self->font);
+                self->cur += 2;
+            } else {
+                f32 a = (f32)(p[1] - '0') + (f32)(p[2] - '0') * 0.1f;
+                Font_15DBE0* f = self->font;
+                func_0015C8B8(f, a * f->f44, a * f->f48);
+                self->cur += 3;
+            }
+            break;
+        default:
+            done = 1;
+            break;
+        }
+    } while (done == 0);
+    char* e = self->cur;
+    char r = *e;
+    self->cur = e + 1;
+    return r;
+}
