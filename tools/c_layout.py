@@ -114,6 +114,7 @@ def placements(objects):
     functions = check.load_functions("us")
     starts = {a: n for n, (a, s, k) in functions.items()}
     placed, aliases, defined = [], {}, set()
+    libcalls = check.load_libcalls("us")  # named by address in the script: no alias for them
     for src, path in objects.items():
         obj = elf.Elf(path.read_bytes())
         rel = path.relative_to(ROOT)
@@ -140,7 +141,7 @@ def placements(objects):
             if starts[addr] != sym["name"]:
                 aliases[starts[addr]] = sym["name"]       # the disassembly calls it by its splat name
         for sym in obj.symbols:
-            if sym["shndx"] == elf.SHN_UNDEF and sym["name"]:
+            if sym["shndx"] == elf.SHN_UNDEF and sym["name"] and sym["name"] not in libcalls:
                 base = check.base_name(sym["name"])
                 if base != sym["name"]:
                     aliases.setdefault(sym["name"], base)  # C calls func_X__Fi; the disassembly defines func_X

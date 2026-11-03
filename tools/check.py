@@ -59,15 +59,17 @@ def load_functions(key):
 
 
 def load_libcalls(key):
-    """{libcall name: address}: the soft-float routines the compiler calls by name (config/<version>/libcalls.tsv)."""
+    """{name: address}: what the compiler refers to by a fixed name (config/<version>/libcalls.tsv):
+    the runtime routines it calls, and the vtables a class with `#pragma interface` uses. The
+    second column is a function of the table, or a data address (D_XXXXXXXX)."""
     path = ROOT / "config" / key / "libcalls.tsv"
     if not path.exists():
         return {}
     functions = load_functions(key)
     out = {}
     for line in path.read_text().splitlines()[1:]:
-        name, function = line.split("\t")[:2]
-        out[name] = functions[function][0]
+        name, target = line.split("\t")[:2]
+        out[name] = functions[target][0] if target in functions else int(target[2:], 16)
     return out
 
 
