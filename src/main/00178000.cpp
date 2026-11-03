@@ -809,7 +809,7 @@ struct Obj_17B648 {
 
 extern s32 D_00263E2C;
 extern s32 D_00263E30;
-extern f32 D_00263E04;
+f32 D_00263E04 = 3.0f;
 extern f32 D_0026185C;
 
 void func_001B93F8(void* self);
@@ -903,8 +903,8 @@ struct Rgba_17A788 {
 };
 
 extern f32 D_00261858[];
-extern f32 D_00263D30[];
-extern f32 D_00263D40[];
+f32 D_00263D30[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
+f32 D_00263D40[6] = { 0.7f, 0.3f, 0.0f, 0.0f, 7e+02f, 6.5e+02f };
 extern f32 D_00275C60[];
 extern Rgba_17A788 D_002623E0;
 

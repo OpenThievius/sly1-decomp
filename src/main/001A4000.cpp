@@ -1045,7 +1045,7 @@ done:
     return *(s32*)(p + 0xC) != 0;
 }
 
-extern s32 D_0026B898[];
+s32 D_0026B898[2] = { 688, 689 };
 
 void func_001B6628(void* a, s32 b);
 void func_001B64D8(void* a, s32 b);

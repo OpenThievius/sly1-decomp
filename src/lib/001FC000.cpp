@@ -89,7 +89,7 @@ void func_001FFBE0(s32 value, Node_1FFBE0* item)
     D_0062A7B8 = item;
 }
 
-extern s32 D_002789D8;
+s32 D_002789D8;
 
 s32 func_001FFFD0(s32 value)
 {

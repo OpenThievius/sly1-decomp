@@ -1971,7 +1971,7 @@ struct Self_00123ED0 {
     void SetB2CA(s32 value) { b2CA = value; }
 };
 
-extern const f32 D_002499F0;
+extern const f32 D_002499F0 = 3.4028235e+38f;
 extern u8 D_00260E70[];
 extern u8 D_00260E80[];
 extern u8 D_00260E90[];

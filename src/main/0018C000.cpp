@@ -1851,7 +1851,7 @@ extern Key_18F198 D_00248490;
 extern u8 D_002C3B00[];
 extern Dev_18F198 D_00262C70;
 extern u8 D_00275F80[];
-extern s32 D_00269B4C;
+s32 D_00269B4C;
 extern s32 D_002613EC;
 
 void func_00191E70(s32 v);

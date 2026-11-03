@@ -1537,7 +1537,7 @@ void func_0012AF38(Host_0012AF38* self, void* value, Rec_0012AF38* src, f32 x, f
 // NEAR: same bytes except the prologue order: retail loads the crc word and the table base before the n > 0 test (lw v0, addiu t1, then blez); ours tests first
 struct Obj_0012B760 { u8 pad[0x2D0]; u32 crc; u32* cursor; s32 remaining; u32 table[256]; };
 
-extern s32 D_00261080[];
+s32 D_00261080[4];
 
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 

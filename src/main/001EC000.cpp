@@ -421,7 +421,7 @@ void func_001EE528(Packer_1EE528* self, s32 value)
 
 struct Packer_1EE560 { u8 pad0[0xC]; u32* cursor; u8 pad1[0xC]; s32 last; };
 
-extern s32 D_00275DD0[];
+s32 D_00275DD0[16] = { 4, 2, 1, -1, 8, 4, 2, -1, 12, 6, 3, -1, 16, 8, 4, 2 };
 
 s32 func_001EE560(Packer_1EE560* self, s32 a, s32 b, s32 c)
 {

@@ -992,7 +992,7 @@ void func_001EA0A8(void* self, f32 x)
 
 struct Self_1E8D58 { u8 p0[0x724]; s32 v724; u8 p1[0x7E0 - 0x728]; s32 v7E0; u8 p2[0xBFC - 0x7E4]; f32 fBFC; u8 p3[0xC5C - 0xC00]; s32 vC5C; };
 
-extern f32 D_0024E66C;
+extern const f32 D_0024E66C = 3.4028235e+38f;
 s32 func_001C8010(Self_1E8D58* self);
 
 s32 func_001E8D58(Self_1E8D58* self)
@@ -1315,8 +1315,8 @@ struct G_1EB748 {
 struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
 struct Obj_1EB748 { u8 pad[0xBFC]; f32 fBFC; };
 
-extern s32 D_00275CD8[];
-extern s32 D_00275CE8[];
+s32 D_00275CD8[4] = { 1228, 1230, 1229, 1231 };
+s32 D_00275CE8[4] = { 574, 576, 575, 577 };
 
 void func_001F3BD8(void* a, Pos_1EB748* out);
 void func_001F3C08(void* a, Mat_1EB748* out);
@@ -1501,9 +1501,9 @@ struct Obj_1EB460 { u8 pad0[0x684]; f32 f684; };
 struct Time_1EB460 { u8 pad0[0xC]; f32 fC; };
 
 extern Time_1EB460* D_002623C8;
-extern f32 D_00275C80[];
+f32 D_00275C80[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 extern f32 D_00275C60[];
-extern f32 D_00275C70[];
+f32 D_00275C70[4] = { 0.5f, 0.8f, 0.0f, 0.0f };
 
 void func_001921A8(Obj_1EB460* self);
 

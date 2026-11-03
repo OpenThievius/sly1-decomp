@@ -1195,7 +1195,7 @@ void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
 struct Buf_2027C8 { u8 bytes[0x14]; };
 struct Slot_2027C8 { s32 w00; u8 pad04[0x0C]; s32 w10; u8 pad14[0x1C]; s32 w30; u8 pad34[0x0C]; s32 w40; u8 pad44[0x0C]; s32 w50; u8 pad54[0x2C]; s32 w80; };
 
-extern s32 D_00279380[];
+s32 D_00279380[10] = { 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
 extern Slot_2027C8* D_00279340[];
 
 void func_00202768(Buf_2027C8* b, s32 n);

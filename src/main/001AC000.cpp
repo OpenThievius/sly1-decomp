@@ -613,7 +613,7 @@ struct Obj_1ADF28 { u8 pad0[0x4C]; struct VTab_1ADF28* vt; };
 struct VTab_1ADF28 { s32 w0; s32 w1; s16 delta; s16 w2; void* (*fn)(void* self, f32 sx, f32 sy); };
 struct Node_1ADF28 { u8 pad0[4]; Obj_1ADF28* obj; u8 pad1[0x210 - 8]; void** slot; u8 pad2[0x260 - 0x214]; s32 f260; s32 f264; };
 
-extern f32 D_0027446C;
+f32 D_0027446C = 0.7f;
 extern f32 D_00274470;
 extern u8 D_00274488[];
 extern s32 D_00262C84;
@@ -997,8 +997,8 @@ struct Tbl_1ADC60 { u8 pad0[8]; s16 off; u8 pad1[2]; FnA_1ADC60 fn; };
 struct Inner_1ADC60 { u8 pad0[0x4C]; Tbl_1ADC60* tbl; };
 struct Obj_1ADC60 { VFn_1ADC60* vt; void* f4; u8 pad0[0x210 - 8]; void** f210; u8 pad1[0x4C]; void* f260; };
 
-extern f32 D_00274448;
-extern f32 D_0027444C;
+f32 D_00274448 = 0.9f;
+f32 D_0027444C = 0.9f;
 extern u8 D_00274450[];
 extern u8 D_0024CEF0[];
 

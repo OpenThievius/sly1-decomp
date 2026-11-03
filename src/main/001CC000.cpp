@@ -98,7 +98,7 @@ f32 func_001CEAB8(Obj_001CEA58* self)
 
 struct Obj_001CF138 { u8 pad0[0x2BDC]; s32 key; };
 
-extern f32 D_00274E3C;
+f32 D_00274E3C = 1e+03f;
 
 f32 func_001CF138(Obj_001CF138* self, s32 id, f32 a, f32 b)
 {

@@ -862,7 +862,7 @@ struct Obj_16AED8 { u8 pad0[0x14]; void* f14; u8 pad1[0x2B0]; u64 f2C8; s32 f2D0
 
 struct Obj_16AED8Glob { u8 pad0[0x30]; s32 f30; };
 
-extern s32 D_0026FCF0;
+s32 D_0026FCF0;
 extern u8 D_00262788[];
 extern u8 D_00275BC0[];
 
@@ -1626,7 +1626,7 @@ void func_001686E8(Self_1686E8* self, void* b)
 
 struct Self_16A100 { u8 pad0[0x60]; s32 f60; u8 pad1[0x68 - 0x64]; s32 f68; u8 pad2[0x70 - 0x6C]; f32 f70; };
 
-extern f32 D_0024A798;
+extern const f32 D_0024A798 = 3.4028235e+38f;
 void func_00182C18(Self_16A100* self);
 
 void func_0016A100(Self_16A100* self)

@@ -1348,7 +1348,7 @@ void func_001AAEC0(s32 key)
 
 struct Self_001AB600 { u8 p0[4]; void* p4; u8 p8[0x270 - 8]; s32 f270; s32 f274; f32 f278; u8 p27C[0x290 - 0x27C]; s32 f290; };
 
-extern f32 D_0024CD48;
+extern const f32 D_0024CD48 = 3.4028235e+38f;
 void func_001AA268(Self_001AB600* self);
 void func_001ABE20(Self_001AB600* self, s32 state);
 
@@ -1362,7 +1362,7 @@ void func_001AB600(Self_001AB600* self)
     func_001ABE20(self, 0);
 }
 
-extern f32 D_0024CD4C;
+extern const f32 D_0024CD4C = 3.4028235e+38f;
 
 struct Obj_001AB890;
 typedef void (*VFn_001AB890)(Obj_001AB890* self);
@@ -1456,7 +1456,7 @@ struct Obj_1AA298 {
 };
 
 void func_001AAEC0(Obj_1AA298* self);
-extern f32 D_002743A0[];
+f32 D_002743A0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
 
 void func_001AA298(Obj_1AA298* self) {
     f32 t = *self->f258;
@@ -1800,7 +1800,7 @@ struct Clock_1AB980
 };
 struct Clock_00261858 { s32 on; f32 now; f32 wait; };
 
-extern f32 D_0024CD6C;
+extern const f32 D_0024CD6C = 3.4028235e+38f;
 extern char D_0024CD50[];
 extern char D_0024CD60[];
 extern char D_0024CD68[];

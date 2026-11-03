@@ -63,7 +63,7 @@ void func_00173708(void* a, void* b)
     func_001D29C8(id);
 }
 
-extern f32 D_002637BC;
+f32 D_002637BC = 2.0f;
 extern f32 D_002637C0;
 
 void func_001C53A8(void* self, s32 flags, void* out);
@@ -534,11 +534,11 @@ struct Obj_170410 {
 };
 struct Out_170410 { u8 pad0[0x94]; f32 f94; f32 f98; };
 
-extern f32 D_00262E34;
-extern f32 D_00262E38;
-extern f32 D_002637B0;
-extern f32 D_002637B4;
-extern f32 D_002637B8;
+f32 D_00262E34 = 0.8f;
+f32 D_00262E38 = 0.5f;
+f32 D_002637B0 = 1.0f;
+f32 D_002637B4 = 0.3f;
+f32 D_002637B8 = 1.5f;
 
 void func_00170410(Obj_170410* self, Out_170410* out)
 {

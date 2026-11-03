@@ -1376,7 +1376,7 @@ struct Obj_14CBA8 {
     u8 pad5[8];
     f32 timer;
 };
-extern f32 D_00249FB8;
+extern const f32 D_00249FB8 = 3.4028235e+38f;
 extern u8 D_00248D30[];
 
 void func_001A8AF8(Holder_14CBA8* p);
@@ -1429,8 +1429,8 @@ struct Obj_14DBD0 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
 struct Ctx_14DBD0 { Obj_14DBD0* self; s32 a1; s32 a2; s32 pad; };
 struct Out_14DBD0 { f32 f; s32 p1; s32 p2; s32 p3; };
 
-extern f32 D_00249FC0;
-extern f32 D_00249FC4;
+extern const f32 D_00249FC0 = -3.4028235e+38f;
+extern const f32 D_00249FC4 = 3.4028235e+38f;
 void func_0014DB70(void);
 struct Step_14DBD0;
 void func_001EB168(Step_14DBD0* fn, f32 f12, f32 f13, f32 f14, f32 f15, Ctx_14DBD0* ctx, Out_14DBD0* out, s32 a3);
@@ -1467,7 +1467,7 @@ struct Obj_14EC70 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
 struct Ctx_14EC70 { Obj_14EC70* self; s32 a1; s32 a2; s32 pad; };
 struct Out_14EC70 { f32 f; s32 p1; s32 p2; s32 p3; };
 
-extern f32 D_00249FCC;
+extern const f32 D_00249FCC = -3.4028235e+38f;
 extern f32 D_00249FD0;
 void func_0014DA98(void);
 struct Step_14EC70;
@@ -1541,7 +1541,7 @@ struct Self_0014C018 {
 };
 
 extern const Params_0014C018 D_00249F00;
-extern const f32 D_00249FB0;
+extern const f32 D_00249FB0 = 3.4028235e+38f;
 
 void func_00123ED0(Self_0014C018* self);
 

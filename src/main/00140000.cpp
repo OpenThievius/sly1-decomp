@@ -2,7 +2,7 @@
 #include "common.h"
 
 extern u8 D_00247AA0[];
-extern s32 D_002613F4;
+s32 D_002613F4;
 extern s32 D_002613F8;
 s32 func_0011E138(void*, void*, void*, void*);
 s32 func_0011E1F8(s32);
@@ -1259,8 +1259,8 @@ extern const Fn_Table D_002173B0[];
 extern const Fn_Table D_002173C8[];
 extern const Fn_Table D_002173E0[];
 extern const Fn_Table D_002173F8[];
-extern f32 D_002618A0;
-extern f32 D_002618A4;
+f32 D_002618A0 = 5e+02f;
+f32 D_002618A4 = 2e+04f;
 extern f32 D_002618A8;
 
 void func_00143648(struct Self_00143648* self)

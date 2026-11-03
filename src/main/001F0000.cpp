@@ -485,7 +485,7 @@ typedef s32 Id_1F1A08;
 extern f32 D_00261858[];
 extern u8 D_00262C70[];
 extern u8 D_00275BC0[];
-extern f32 D_00275FC0[];
+f32 D_00275FC0[2] = { 0.5f, 0.0f };
 extern u8 D_00276278[];
 
 s32 func_001F0490(Sub_1F1A08* o, s32 n, s32* a, s32* b);

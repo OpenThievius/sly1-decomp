@@ -995,8 +995,8 @@ struct Ch_181448 {
 };
 
 extern f32 D_00261858[];
-extern f32 D_00264140[];
-extern f32 D_00264150[];
+f32 D_00264140[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 D_00264150[1] = { 6.0f };
 extern f32 D_00264154[];
 extern f32 D_00275C60[];
 
@@ -1200,7 +1200,7 @@ struct Quad_1837E0 { s32 a; s32 b; s32 c; s32 d; };
 struct Obj_1837E0 { u8 pad0[0x14]; void* f14; u8 pad18[0x2C - 0x18]; void* f2C; };
 
 extern u8 D_00259F38[];
-extern s32 D_00244EC0[];
+extern const s32 D_00244EC0[32] = { 0, 1, 3, 4, 5, 6, 7, 9, 11, 12, 14, 17, 19, 20, 22, 26, 29, 31, 33, 34, 36, 38, 39, 40, 41, 43, 44, 45, 47, 48, 50, 0 };
 extern s32 D_00244DFC[];
 void func_0011B008(Quad_1837E0* q);
 void func_0011B060(Quad_1837E0* q, s32 mode);
@@ -1285,7 +1285,7 @@ void func_00183CC8(Obj_183CC8* self)
 struct Obj_181DA8 { u8 pad0[0x580]; s32 f580; u8 pad584[0xBB0 - 0x584]; s32 fBB0; f32 fBB4; u8 padBB8[4]; void* fBBC; u8 padBC0[0xBF8 - 0xBC0]; f32 fBF8; };
 
 extern f32 D_00261858[];
-extern f32 D_0024B168;
+extern const f32 D_0024B168 = 3.4028235e+38f;
 void func_001B64D8(void* p, s32 n);
 void func_001B6628(void* p, s32 n);
 

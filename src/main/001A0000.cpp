@@ -155,8 +155,8 @@ void func_001A1498(void)
 struct Ctrl_1A14A0 { u8 pad0[0x18]; f32 a18; f32 b1C; u8 pad1[0x100]; s32 mode120; f32 phase124; };
 
 extern f32 D_0026185C;
-extern f32 D_0026B600[];
-extern f32 D_0026B610[];
+f32 D_0026B600[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+f32 D_0026B610[4] = { 1.0f, -0.7f, 0.0f, 0.0f };
 void func_001A1DF0(void* self, s32 n);
 void func_0019EBE8(void* self);
 
@@ -819,7 +819,7 @@ struct __attribute__((aligned(16))) Quad_1A1DF0 { s32 a; s32 b; s32 c; s32 d; };
 struct Obj_1A1DF0 { u8 pad0[0x18]; f32 f18; f32 f1C; u8 pad20[0x20]; Quad_1A1DF0 f40; u8 pad50[0xD0]; s32 f120; };
 
 extern f32 D_00261858[];
-extern f32 D_0024C9B8;
+extern const f32 D_0024C9B8 = 3.4028235e+38f;
 extern u8 D_0026B6A0[];
 extern u8 D_0026B6B0[];
 

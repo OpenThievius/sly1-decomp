@@ -163,7 +163,7 @@ s32 func_001F70F8(void)
 struct Buf_1F72A8;
 void func_001FA140(Buf_1F72A8* b);
 extern u8 D_00625F80[];
-extern s32 D_0027712C;
+s32 D_0027712C;
 
 void func_001F72A8(s32 c)
 {

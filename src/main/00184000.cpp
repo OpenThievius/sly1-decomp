@@ -444,7 +444,7 @@ struct Cfg_275F80 { s32 a; s32 mode; };
 struct Flag_269A00 { s32 a; s32 on; };
 struct Tm_261858 { s32 a; s32 b; f32 dt; };
 
-extern s32 D_00264834;
+s32 D_00264834;
 extern s32 D_00264838;
 extern Flag_269A00 D_00269A00;
 extern Cfg_275F80 D_00275F80;

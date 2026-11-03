@@ -484,7 +484,7 @@ s32 func_0015C0A0(Obj_15C0A0* self)
 
 void func_00152B80(void* list, u32 count, s32 value);
 
-extern s32 D_0026230C;
+s32 D_0026230C;
 
 void func_0015EAE0(void* list, s32 value, s32 end)
 {
@@ -1238,8 +1238,8 @@ struct Self_15CF70 {
 struct Entry_15CF70 { u8 p0[2]; u16 a2; u16 a4; u16 a6; };
 struct Strm_15CF70 { u8 pad[4]; };
 
-extern s32 D_00262258;
-extern s32 D_0026225C;
+s32 D_00262258 = -8;
+s32 D_0026225C = -8;
 extern u8 D_00262280[];
 
 Entry_15CF70* func_0015DAB8(Self_15CF70* self, s8 key);
@@ -1599,7 +1599,7 @@ struct Frame_15EE80 { u8 pad0[0x4]; s32 f4; u8 pad8[0x4]; s32 fC; u8 pad10[0x38]
 
 extern void* D_002623B0;
 extern void* D_002623B4;
-extern u32 D_00262314;
+u32 D_00262314;
 extern s32 D_00261F18;
 extern s32 D_00261F1C;
 extern s32 D_002626CC;
