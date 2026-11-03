@@ -11,4 +11,9 @@
     __asm__(".section .text\n\t.set noat\n\t.set noreorder\n\t.include \"build/us/asm_func/" #NAME \
             ".s\"\n\t.set reorder\n\t.set at")
 
+// The read-only data at a label that only original assembly uses (a jump table into an assembly
+// function, a constant it loads), included in the whole file's .rodata in retail's order.
+#define INCLUDE_RODATA(LABEL)                                                                \
+    __asm__(".section .rodata\n\t.include \"build/us/asm_func/" #LABEL ".s\"\n\t.section .text")
+
 #endif

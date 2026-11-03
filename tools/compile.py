@@ -216,7 +216,9 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     flags = flags if flags is not None else flags_for(source)
     # The original assembly functions the file includes (include/asm_func.h), written from the
     # disassembly before the assembler reads them.
-    asm_func.write(asm_func.included(src.read_text()))
+    text = src.read_text()
+    asm_func.write(asm_func.included(text))
+    asm_func.write_rodata(asm_func.included_rodata(text))
     with tempfile.TemporaryDirectory(prefix="sly1-cc-") as tmp:
         ii, s = Path(tmp).resolve() / "unit.ii", Path(tmp).resolve() / "unit.s"
         if linux:

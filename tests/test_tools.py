@@ -745,3 +745,19 @@ class AsmFuncTest(unittest.TestCase):
     def test_included_names_come_from_the_source(self):
         self.assertEqual(asm_func.included("INCLUDE_ASM(func_00100010);\nvoid f();\n INCLUDE_ASM( func_00100020 );"),
                          ["func_00100010", "func_00100020"])
+
+    def test_a_jump_table_target_is_a_plain_label(self):
+        self.assertEqual(asm_func.numeric("  jlabel .L00100014"), "  .L00100014:")
+
+    def test_read_only_data_keeps_its_case_labels_and_writes_other_words(self):
+        listing = "\n".join([
+            ".align 3", "nonmatching jtbl_00200000", "", "dlabel jtbl_00200000",
+            "    /" + "* 100000 00200000 14001000 *" + "/ .word .L00100014",
+            "    /" + "* 100004 00200004 0000803F *" + "/ .float 1",
+            "enddlabel jtbl_00200000", ""])
+        out = asm_func.rodata_source(listing, "jtbl_00200000")
+        self.assertIn("\t.align\t3", out)
+        self.assertIn("\t.word\t.L00100014", out)
+        self.assertIn("\t.word\t0x3F800000", out)
+        self.assertIn("\t.size\tjtbl_00200000, 8", out)
+

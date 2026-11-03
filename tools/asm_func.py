@@ -58,6 +58,9 @@ def numeric(line):
     """A line with the general registers as numbers. A VU0 macro instruction (a v* mnemonic) is
     written as its word from the listing: that assembler does not read their $ACC, $Q and
     broadcast operands, and they take no relocation."""
+    j = re.match(r"^(\s*)jlabel\s+(\S+)\s*$", line)
+    if j:  # a jump table's target: a plain label
+        return "%s%s:" % j.groups()
     m = ENCODED.match(line)
     if m and m.group(3).startswith("v"):
         b = m.group(2)
@@ -75,6 +78,42 @@ def source(listing, name):
     return "\n".join(head + [numeric(line) for line in lines] + ["\t.size\t%s, %d" % (name, size), ""])
 
 
+INCLUDE_RODATA = re.compile(r"^\s*INCLUDE_RODATA\(\s*((?:D|jtbl)_[0-9A-F]{8})\s*\)", re.M)
+DATA_WORD = re.compile(r"^\s*/\*\s*[0-9A-F]+ [0-9A-F]{8} ([0-9A-F]{8}) \*/\s*\.(\w+)\s+(.*?)\s*$")
+
+
+def included_rodata(text):
+    """The read-only data labels a C source includes with INCLUDE_RODATA, in order."""
+    return INCLUDE_RODATA.findall(text)
+
+
+def rodata_source(listing, label):
+    """The assembly file for the read-only data at `label`: the alignment before it, then its words.
+    A word that names a label (a jump table's case) stays symbolic; any other is written from the
+    listing's bytes, so that assembler never reads a float."""
+    m = re.search(r"^(?:\.align (\d+)\n)?nonmatching %s\n\n?dlabel %s\n(.*?)^enddlabel %s$"
+                  % (label, label, label), listing, re.M | re.S)
+    if m is None:
+        raise KeyError("%s is not a label of the read-only data listing" % label)
+    out = ["\t.align\t%s" % (m.group(1) or "2"), "\t.globl\t%s" % label, "\t.type\t%s, @object" % label,
+           "%s:" % label]
+    size = 0
+    for line in m.group(2).split("\n"):
+        w = DATA_WORD.match(line)
+        if not line.strip():
+            continue
+        if w is None:
+            raise KeyError("%s: a line this tool does not write: %s" % (label, line.strip()))
+        b, kind, operand = w.groups()
+        if kind == "word" and re.match(r"^[.A-Za-z_]", operand):
+            out.append("\t.word\t%s" % operand)
+        else:
+            out.append("\t.word\t0x%s%s%s%s" % (b[6:8], b[4:6], b[2:4], b[0:2]))
+        size += 4
+    out.append("\t.size\t%s, %d" % (label, size))
+    return "\n".join(out) + "\n"
+
+
 def write(names, key="us"):
     """Write build/<key>/asm_func/<name>.s for each name where it is missing or older than the
     listing; returns the paths."""
@@ -88,6 +127,22 @@ def write(names, key="us"):
                 listing = text.read_text()
             out_dir.mkdir(parents=True, exist_ok=True)
             path.write_text(source(listing, name))
+        paths.append(path)
+    return paths
+
+
+def write_rodata(labels, key="us"):
+    """Write build/<key>/asm_func/<label>.s for each read-only data label, as write() does."""
+    text = ROOT / "asm" / key / "data" / "rodata.rodata.s"
+    out_dir = ROOT / "build" / key / "asm_func"
+    paths, listing = [], None
+    for label in labels:
+        path = out_dir / ("%s.s" % label)
+        if not path.exists() or path.stat().st_mtime < text.stat().st_mtime:
+            if listing is None:
+                listing = text.read_text()
+            out_dir.mkdir(parents=True, exist_ok=True)
+            path.write_text(rodata_source(listing, label))
         paths.append(path)
     return paths
 
