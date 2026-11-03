@@ -3436,6 +3436,9 @@ func_001FDA10	func_001FEDD0	match
 func_001FDA38	func_001FEDF8	match	
 func_001FDA60	func_001FEE20	match	
 func_001FDAC8	func_001FEE88	match	
+func_001FDAF0	func_001FEEB0	match	
+func_001FDC68	func_001FF028	match	
+func_001FDD80	func_001FF140	match	
 func_001FDDC8	func_001FF188	match	
 func_001FDDD0	func_001FF190	match	
 func_001FDDD8	func_001FF198	match	

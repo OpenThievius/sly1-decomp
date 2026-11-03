@@ -1946,3 +1946,96 @@ u64 func_001FCDE0(u64 x, u64 y)
     func_001FCA40(&xb, &b);
     return func_001FC910(Mul_1FCDE0::Parts(&a, &b, &tmp));
 }
+
+// The runtime's exception context: the handler chain at +4, the active exception at +8.
+struct Ctx_1FDAF0 {
+    s32 f0;
+    void** chain;
+    void* active;
+};
+
+typedef Ctx_1FDAF0* (*GetCtx_1FDAF0)(void);
+extern void* D_0027804C;
+
+void func_001FD930();
+void func_001FDAF0(void) __attribute__((noreturn));
+
+// Throws: runs the cleanups registered in the top handler, then jumps to that handler.
+void func_001FDAF0(void)
+{
+    Ctx_1FDAF0* ctx = ((GetCtx_1FDAF0)D_0027804C)();
+    void*** chain = &ctx->chain;
+    void*** cleanups = (void***)&(*chain)[1];
+
+    if (cleanups[0] != 0) {
+        double space[200];
+        void** frame = (void**)space;
+        frame[1] = 0;
+        frame[0] = *chain;
+        if (!__builtin_setjmp(&frame[2])) {
+            *chain = frame;
+            while (cleanups[0] != 0) {
+                void (*fn)(void*, s32) = (void (*)(void*, s32))cleanups[0][1];
+                void* arg = cleanups[0][2];
+                cleanups[0] = (void**)cleanups[0][0];
+                fn(arg, 2);
+            }
+            *chain = (void**)frame[0];
+        } else {
+            func_001FD930();
+        }
+    }
+
+    if (ctx->active == 0 || (*chain)[0] == 0) {
+        func_001FD930();
+    }
+
+    void* buf = &(*chain)[2];
+    *chain = (void**)(*chain)[0];
+    __builtin_longjmp(buf, 1);
+}
+
+// Pops the top handler after running its cleanups, then throws again.
+void func_001FDC68(void)
+{
+    Ctx_1FDAF0* ctx = ((GetCtx_1FDAF0)D_0027804C)();
+    void*** chain = &ctx->chain;
+    void*** cleanups = (void***)&(*chain)[1];
+
+    if (cleanups[0] != 0) {
+        double space[200];
+        void** frame = (void**)space;
+        frame[1] = 0;
+        frame[0] = *chain;
+        if (!__builtin_setjmp(&frame[2])) {
+            *chain = frame;
+            while (cleanups[0] != 0) {
+                void (*fn)(void*, s32) = (void (*)(void*, s32))cleanups[0][1];
+                void* arg = cleanups[0][2];
+                cleanups[0] = (void**)cleanups[0][0];
+                fn(arg, 2);
+            }
+            *chain = (void**)frame[0];
+        } else {
+            func_001FD930();
+        }
+    }
+
+    *chain = (void**)(*chain)[0];
+    func_001FDAF0();
+}
+
+// The active exception, asked whether it matches a runtime type through its matcher.
+struct Info_1FDD80 {
+    void* (*match)(Info_1FDD80* info, void* type, void* extra);
+};
+
+s32 func_001FDD80(void* type)
+{
+    Info_1FDD80* info = *(struct Info_1FDD80 **)func_001FDA10();
+    void* (*match)(Info_1FDD80*, void*, void*) = info->match;
+    if (match == 0) {
+        return 0;
+    }
+    return match(info, type, 0) != 0;
+}
