@@ -1111,3 +1111,20 @@ void func_00189F58(State_189F58* self, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f)
     self->f38 = e * (1.0f - value);
     self->f2C = 1.0f;
 }
+
+void func_00188C10(f32* pos, f32 (*rot)[4], f32* scale, f32 (*out)[4])
+{
+    s32 i;
+    s32 j;
+    f32* trans = out[3];
+    f32* col = &out[0][3];
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++)
+            out[i][j] = rot[i][j] * scale[i];
+    }
+    for (i = 0; i < 3; i++)
+        trans[i] = pos[i];
+    for (i = 2; i >= 0; i--)
+        col[i * 4] = 0.0f;
+    out[3][3] = 1.0f;
+}

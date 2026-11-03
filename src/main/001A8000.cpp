@@ -2141,3 +2141,30 @@ Entry_001A8718* func_001A8718(Table_001A8718* self, s32 key)
     if (i < self->count) return &self->entries[i];
     return 0;
 }
+
+struct Ctx_1AA4F0;
+struct Mtx_1AA4F0 { u8 data[0xB0]; };
+struct Obj_1AA4F0 { u8 pad00[4]; Ctx_1AA4F0* ctx; char name[0x204]; f32 scale; };
+s32 func_001E2100(const char*);
+void func_001E2138(char*, const char*);
+void func_0015C8B8(Ctx_1AA4F0*, f32, f32);
+void func_0015DB28(Mtx_1AA4F0*, char*, Ctx_1AA4F0*);
+void func_0015E290(Mtx_1AA4F0*, f32, f32*, f32*);
+void func_001AAB20(Obj_1AA4F0*, f32, f32);
+void func_0015C900(Ctx_1AA4F0*);
+void func_001AA4F0(Obj_1AA4F0* self, const char* arg)
+{
+    if (arg && func_001E2100(arg)) {
+        func_001E2138(self->name, arg);
+    } else {
+        self->name[0] = 0;
+    }
+    func_0015C8B8(self->ctx, self->scale, self->scale);
+    Mtx_1AA4F0 m;
+    func_0015DB28(&m, self->name, self->ctx);
+    f32 x, y;
+    func_0015E290(&m, 0.0f, &x, &y);
+    func_001AAB20(self, x, y);
+    func_0015C900(self->ctx);
+
+}

@@ -1568,3 +1568,39 @@ void func_001EFA88(List_1EFA88* self, s32 value)
         self->count--;
     }
 }
+
+
+struct Sub_1ECB18 { u8 pad0[0x34]; f32 f34; };
+struct Obj_1ECB18 {
+    u8 pad0[8];
+    Sub_1ECB18* f8;
+    u8 pad0C[8];
+    f32 f14;
+    f32 f18;
+};
+struct Ent_1ECB18 { Obj_1ECB18* f0; s32 f4; };
+struct Self_1ECB18 {
+    u8 pad0[0xC68];
+    s32 fC68;
+    Ent_1ECB18* fC6C;
+    u8 pad1[4];
+    s32 fC74;
+    u8 pad2[0xC];
+    f32 fC84;
+};
+
+void func_001ECB18(Self_1ECB18* self)
+{
+    f32 den = self->fC84 - (*(f32*)&D_0026185C);
+    for (s32 k = 0; k < self->fC68; k++) {
+        Ent_1ECB18* e = &self->fC6C[k];
+        Obj_1ECB18* o = e->f0;
+        f32 len = o->f8->f34;
+        f32 start = o->f14;
+        f32 t = len / (f32)e->f4 * (f32)((self->fC74 + 1) % e->f4);
+        if (t <= start)
+            t += len;
+        o->f18 = (t - start) / den;
+    }
+
+}

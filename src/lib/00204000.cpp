@@ -145,3 +145,28 @@ s32 func_00204228(void)
     }
     return (*(Ctx_204228*)&D_0062ACC0).result;
 }
+
+
+struct Request_204C38 { s32 count; s32 owner; s32 channel; s32 data; s32 state; };
+struct Lock_204C38;
+struct Owner_204C38;
+s32 func_001F8290(Lock_204C38* l, s32 a, s32 b, Request_204C38* c, s32 d, Request_204C38* e, s32 f, s32 g, s32 h);
+s32 func_00204610(Owner_204C38* owner, s32 channel, s32 n);
+
+s32 func_00204C38(Owner_204C38* owner, s32 channel, s32 data)
+{
+    Request_204C38* request = (Request_204C38*)&D_0062ACC0;
+    request->data = data;
+    request->count = 10;
+    request->owner = (s32)owner;
+    request->channel = channel;
+    s32 status = func_001F8290((Lock_204C38*)D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0);
+    if (status < 0)
+        return 0;
+    s32 state = request->state;
+    if (state == 1) {
+        func_00204610(owner, channel, 2);
+        state = request->state;
+    }
+    return state;
+}

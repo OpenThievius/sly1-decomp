@@ -2116,3 +2116,26 @@ void func_0018D9B8(Obj_18D9B8* self, void* b, f32 x)
     self->f1EC = s1;
     self->f1F0 = s0;
 }
+
+struct Buffer_18F890 { u8 pad00[0x18]; s32 head; s32 base; s32 tail; };
+struct Object_18F890 { u8 pad00[0x0C]; Buffer_18F890* buffer; u8 pad10[4]; };
+struct Empty_18F890 {
+    static bool Of(Buffer_18F890* b) { return b->head == b->tail; }
+};
+void func_00130070(Buffer_18F890*);
+void func_001F6C20(s32);
+s32 func_0020A518(void*, s32, s32);
+void func_001300D8(Buffer_18F890*, s32);
+s32 func_0018F890(Object_18F890* self, s32 wait)
+{
+    while (Empty_18F890::Of(self->buffer)) {
+        func_00130070(self->buffer);
+        if (Empty_18F890::Of(self->buffer) && !wait) return 0;
+    }
+    func_001F6C20(0);
+    Buffer_18F890* buffer = self->buffer;
+    s32 count = buffer->head - buffer->tail;
+    s32 result = func_0020A518(self->pad10, buffer->base + buffer->tail, count);
+    func_001300D8(self->buffer, result);
+    return result;
+}

@@ -1452,3 +1452,46 @@ f32 func_001BF5E0(Arg_1BF5E0* arg)
     Obj_1BF5E0* obj = (Obj_1BF5E0*)func_001BF3D0();
     return ((Fn_1BF5E0)func_001BF578())(obj, arg);
 }
+
+struct Node_1BEE48;
+struct List_1BEE48 { u8* head; u8 pad4[4]; s32 offset; };
+struct Iter_1BEE48 { List_1BEE48* list; u8* link; s32 offset; Iter_1BEE48* saved; };
+struct World_1BEE48 { u8 pad[0x1BC4]; List_1BEE48 list; };
+extern s32 D_002748EC;
+extern s32 D_00274738;
+extern s32 D_00274734;
+void func_001BEDF8(Node_1BEE48* node);
+void func_0011D928(s32 a);
+struct Next_1BEE48 {
+    static Node_1BEE48* Of(Iter_1BEE48* it)
+    {
+        Node_1BEE48* node = *(Node_1BEE48**)it->link;
+        it->link = (u8*)node + it->offset;
+        return node;
+    }
+};
+struct Begin_1BEE48 {
+    static void Of(Iter_1BEE48* it, List_1BEE48* list)
+    {
+        it->list = list;
+        it->link = (u8*)list;
+        it->offset = list->offset;
+        it->saved = (*(Iter_1BEE48**)&D_0027B314);
+        (*(Iter_1BEE48**)&D_0027B314) = it;
+    }
+};
+void func_001BEE48(void)
+{
+    Iter_1BEE48 it;
+    Begin_1BEE48::Of(&it, &(*(World_1BEE48**)&D_00275710)->list);
+    Node_1BEE48* node;
+    for (node = Next_1BEE48::Of(&it); node != 0; node = Next_1BEE48::Of(&it)) {
+        func_001BEDF8(node);
+    }
+    func_0011D928(0x14);
+    D_002748EC = 0;
+    (*(Iter_1BEE48**)&D_0027B314) = it.saved;
+    D_00274738 = 0;
+    D_00274734 = 0;
+
+}
