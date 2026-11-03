@@ -3268,6 +3268,9 @@ func_001FE9F8	func_001FFDB8	match
 func_001FEA18	func_001FFDD8	match	
 func_001FEA88	func_001FFE48	match	
 func_001FEBE0	func_001FFFA0	match	
+func_001FEC10	func_001FFFD0	match	
+func_001FEDC8	func_00200188	match	
+func_001FEE48	func_00200208	match	
 func_001FEEC8	func_00200288	match	
 func_001FEF00	func_002002C0	match	
 func_001FEF28	func_002002E8	match	
