@@ -80,7 +80,9 @@ def build_run(src):
         # (8-byte aligned, or 4 in the libraries), so its section asks for no more than that.
         start = int(src.stem.split("_")[-1], 16)
         section = "." + src.parent.name if src.parent.name in ("rodata", "data", "bss") else ".text"
-        run([tool("objcopy"), "--set-section-alignment", "%s=%d" % (section, 8 if start % 8 == 0 else 4), str(out)])
+        # Data runs can start at any label: 8, 4, 2 or 1, whatever its address allows.
+        align = next(a for a in (8, 4, 2, 1) if start % a == 0) if section != ".text" else (8 if start % 8 == 0 else 4)
+        run([tool("objcopy"), "--set-section-alignment", "%s=%d" % (section, align), str(out)])
 
 
 def write_c_data(key, data_placed):

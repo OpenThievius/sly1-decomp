@@ -33,6 +33,7 @@ ROOT = versions.ROOT
 DATA_SECTIONS = (".data", ".rodata", ".bss", ".sdata", ".sbss", ".lit4", ".lit8")
 DATA_NAME = re.compile(r"^\.(?:data|rodata)\.(D_[0-9A-F]{8})$")
 ADDR_LABEL = re.compile(r"^D_[0-9A-F]{8}$")
+ALIGN = re.compile(r"^\s*\.align\s+\d+\s*$")
 
 
 class LayoutError(Exception):
@@ -238,8 +239,20 @@ def split_data(key, kind="data"):
     chunks = []
     for n, i in enumerate(starts):
         name = lines[i].split()[1].rstrip(",")  # D_XXXXXXXX, or a jump table's jtbl_XXXXXXXX
-        chunks.append((name, int(name.rsplit("_", 1)[1], 16), lines[i:starts[n + 1] if n + 1 < len(starts) else len(lines)]))
-    return header, chunks
+        chunks.append([name, int(name.rsplit("_", 1)[1], 16), lines[i:starts[n + 1] if n + 1 < len(starts) else len(lines)]])
+    # An .align between two labels aligns the next one: it goes with it.
+    for prev, nxt in zip(chunks, chunks[1:]):
+        body = prev[2]
+        while body and (not body[-1].strip() or ALIGN.match(body[-1])):
+            line = body.pop()
+            if line.strip():
+                nxt[2].insert(0, line)
+    return header, [tuple(c) for c in chunks]
+
+
+def aligned(lines):
+    """True if a chunk starts with an .align: its run starts with it, placed at its address."""
+    return bool(lines) and bool(ALIGN.match(lines[0]))
 
 
 def data_plan(chunks, data_placed):
@@ -262,7 +275,7 @@ def data_plan(chunks, data_placed):
                 raise LayoutError("%s (%d bytes) does not end where a label of .data starts"
                                   % (d[4], d[1]))
             plan.append(("c", d))
-        elif plan and plan[-1][0] == "run":
+        elif plan and plan[-1][0] == "run" and not aligned(lines):
             plan[-1][1].append((name, addr, lines))
         else:
             plan.append(("run", [(name, addr, lines)]))
@@ -283,7 +296,11 @@ def data_entries(data_placed, main_start, kind="data"):
             continue
         start = item[0][1]
         path = data_dir / ("run_%08X.s" % start)
-        write_if_changed(path, "\n".join(header + [l for _, _, ls in item for l in ls]) + "\n")
+        first = list(item[0][2])
+        while first and ALIGN.match(first[0]):
+            first.pop(0)  # its own alignment: the run is placed at its address already
+        body = first + [l for _, _, ls in item[1:] for l in ls]
+        write_if_changed(path, "\n".join(header + body) + "\n")
         runs.append(path)
         entries.append("        . = 0x%X;" % (start - main_start))
         entries.append("        %s(.%s);" % (path.relative_to(ROOT).with_suffix(".s.o"), kind))
