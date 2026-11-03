@@ -820,8 +820,7 @@ struct Object_00126A48 {
 
 void func_00126A48(Object_00126A48* object, u32 value)
 {
-    u32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     Object_00126A48* child = object->child;
     object->state = value;
     object->state_flags |= 2;
@@ -846,8 +845,7 @@ struct Record_00126BC0 { u8 pad0[0x14]; s32 type; u8 pad1[0x54]; s32 value; };
 
 void func_00126BC0(Object_00126BC0* object, s32 value)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     for (s32 i = 0; i < object->count; i++) {
         Record_00126BC0* record = (Record_00126BC0*)(object->records + i * 0x70);
         record->type = 2;

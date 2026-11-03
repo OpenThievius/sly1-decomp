@@ -87,6 +87,11 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   only where it is what the original developers wrote: a macro of a group of statements, in
   the form C macros take (`#define NAME(...) do { ... } while (0)`), that the original
   plausibly had and retail's code needs. Never a wrapper written only to move instructions.
+- **An unused local only as a type the original plausibly declared.** GCC 2.95 gives an unused
+  struct local a stack slot, so retail's frames show where the original declared one. A list
+  walk whose frame has an unused 16-byte gap declares the walk's frame, `ListFrame frame;`
+  (include/list_iter.h). A padding array (`s32 scratch[4];`), an invented type or a field that
+  exists only to size the frame is not allowed.
 - **One flag set per source file**, never per function.
 - **A global is defined in C** only where its initial value matches retail's bytes at its address:
   one file defines it, under its eight-digit `D_XXXXXXXX` name, and every other file declares it

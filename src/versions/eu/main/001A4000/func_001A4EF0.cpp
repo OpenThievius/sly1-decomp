@@ -8,7 +8,7 @@ void func_001A4EF0(Obj_1A4EF0* self, s32 state)
 {
     Obj_1A4EF0* o;
     s32 v;
-    s32 scratch[4]; (void)scratch;
+    ListFrame frame;
     if (W(self, 0x650) == state) return;
     W(self, 0x650) = state;
     F(self, 0x654) = D_0026185C[0];

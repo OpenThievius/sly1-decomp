@@ -932,7 +932,7 @@ s32 func_001833F0(void* key, s32 item);
 
 Node_129C20* func_00129C20(Obj_129C20* self, s32 key)
 {
-    s32 scratch[4];
+    ListFrame frame;
     Node_129C20* n = self->f14->f1B94;
     while (n != 0) {
         if (n->f1C == self) {
@@ -941,7 +941,6 @@ Node_129C20* func_00129C20(Obj_129C20* self, s32 key)
         }
         n = n->f10;
     }
-    (void)scratch;
     return 0;
 }
 
@@ -1208,7 +1207,7 @@ void func_00129598(void* self, Quad_129598* out)
 
 Node_129B98* func_00129B98(Obj_129B98* self, s32 key)
 {
-    s32 scratch[4];
+    ListFrame frame;
     Node_129B98* node = self->owner->head;
     while (node != 0) {
         if (node->owner == self) {
@@ -1217,7 +1216,6 @@ Node_129B98* func_00129B98(Obj_129B98* self, s32 key)
         }
         node = node->next;
     }
-    (void)scratch;
     return 0;
 }
 
@@ -1328,7 +1326,7 @@ struct State_0012AAE8 { s32* table; u8 pad[0x18]; State_0012AAE8* next; u8 gap[0
 void func_00159A00(void* part, f32 value);
 void func_0012AAE8(State_0012AAE8* self, f32 value)
 {
-    s32 scratch[4];
+    ListFrame frame;
     for (s32 i = 0; i < self->count; i++) {
         Part_0012AA50* p = self->parts[i];
         if (p->kind == 5) func_00159A00(p, value);
@@ -1367,9 +1365,8 @@ void func_00152540(void* list, Node_1299E0* before, Node_1299E0* value);
 
 void func_001299E0(Obj_1299E0* self, Node_1299E0* src)
 {
-    s32 scratch[4];
+    ListFrame frame;
     Node_1299E0* node = self->head;
-    (void)scratch;
     if (node != 0 && node->key > src->key) {
         node = node->next;
         while (node != 0 && node->key > src->key) {

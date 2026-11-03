@@ -464,7 +464,7 @@ extern void func_001A76A0(void* node, s32 flag);
 
 void func_00197848(Self_197848* self)
 {
-    s32 scratch[4];
+    ListFrame frame;
     if (D_00261858[1] < self->time) return;
     s32 i = 0;
     for (; i < self->count; i++) {

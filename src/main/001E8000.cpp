@@ -593,8 +593,7 @@ struct Node_1E9E30 {
 
 void func_001E9E30(void* self)
 {
-    s32 scratch[4];
-    (void)scratch;
+    ListFrame frame;
     Node_1E9E30* s1 = ((Node_1E9E30*)self)->f6C;
     if (s1 != 0) {
         do {
