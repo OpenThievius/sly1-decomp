@@ -1374,3 +1374,21 @@ void func_0013CDE8(Obj_13CDE8* self, Obj_13CDE8* other)
     if (other->f6B4)
         self->f6B4 = func_0018D568(0x24, other->f6B4);
 }
+
+struct IntList_13E7C0 { s32 count; void* items[1]; };
+void* func_0015A418(void*, s32, void*, void*);
+void func_0013E8D8(IntList_13E7C0*, void*);
+void func_00182ED8(void*);
+
+void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
+{
+    s32 n = list->count;
+    void** items = list->items;
+    for (s32 i = 0; i < n; i++) {
+        void* object = func_0015A418(self, 0x104, items[i], context);
+        if (object) {
+            func_0013E8D8(list, object);
+            func_00182ED8(object);
+        }
+    }
+}

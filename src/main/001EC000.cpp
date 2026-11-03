@@ -1519,3 +1519,52 @@ void func_001ED0D8(Obj_1ED0D8* self, s32 key)
         }
     }
 }
+
+struct Entry_1ED278 { s32 f0; s32 f4; f32 f8; s32 fC; };
+struct Inner_1ED278 { u8 pad[0xC70]; s32 fC70; u8 pad2[0xC7C - 0xC74]; f32 fC7C; };
+struct Obj_1ED278 {
+    u8 pad0[0x34];
+    s32 f34;
+    Entry_1ED278* f38;
+    s32 f3C;
+    Inner_1ED278* f40;
+    s32 f44;
+    Entry_1ED278* Cur() { return &f38[f3C]; }
+};
+void func_001ED318(Obj_1ED278* self, Entry_1ED278* e);
+
+void func_001ED278(Obj_1ED278* self)
+{
+    Entry_1ED278* e;
+    s32 v;
+    while (self->f3C < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(self->f40->fC70 < v))) {
+        if (v == self->f40->fC70 && self->f40->fC7C < e->f8) return;
+        func_001ED318(self, e);
+        self->f3C++;
+    }
+}
+
+struct List_1EFA88 { s32 pad0; s32 count; s32 items[1]; };
+
+void* func_001F5B08(void* dst, void* src, s32 size);
+
+// An array-move helper: its parameter copies give retail its (i * 4 + self) base shared by both pointers.
+// Moves n bytes of the item list down over a removed item.
+struct Shift_1EFA88 {
+    static void Of(s32* dst, s32* src, s32 n)
+    {
+        func_001F5B08(dst, src, n);
+    }
+};
+
+void func_001EFA88(List_1EFA88* self, s32 value)
+{
+    s32 i;
+    for (i = 0; i < self->count; i++) {
+        if (self->items[i] == value) break;
+    }
+    if (i < self->count) {
+        Shift_1EFA88::Of(&self->items[i], &self->items[i + 1], (self->count - i) * 4 - 4);
+        self->count--;
+    }
+}

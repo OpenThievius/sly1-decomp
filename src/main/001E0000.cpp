@@ -1524,3 +1524,24 @@ void func_001E2398(void)
     l.f04 = func_0015EE80;
     D_00275958.f4 = func_001F6A10(&l);
 }
+
+s32 func_001FD308(double a, double b);
+f32 func_001FD578(double a);
+f32 func_00205B28(f32 x);
+double func_001FD868(f32 x);
+s32 func_001FD410(double a);
+double func_001FD358(s32 a);
+
+s32 func_001E1330(double v)
+{
+    s32 i;
+    if (func_001FD308(v, 0.0) > 0) {
+        double l = func_001FD868(func_00205B28(func_001FD578(v)));
+        i = func_001FD410(l);
+        if (func_001FD308(l, 0.0) < 0 && func_001FD308(l, func_001FD358(i)) != 0)
+            i--;
+    } else {
+        i = 0;
+    }
+    return i;
+}

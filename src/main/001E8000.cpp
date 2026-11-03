@@ -1598,3 +1598,32 @@ void func_001EAD88(f32* sinOut, f32* cosOut, f32 angle)
     }
     *sinOut = s;
 }
+
+struct Ptr_1E9970 { u8 pad[0x1]; };
+struct Obj_1E9970 {
+    u8 pad[0x250];
+    s32 f250;
+    u8 pad2[0x08];
+    s32 f25C;
+    s32 f260;
+};
+
+extern s32 D_00275F84;
+extern s32 D_00270458;
+s32 func_001DDA80(Ptr_1E9970* p);
+
+s32 func_001E9970(void)
+{
+    if (D_00275F84 != 0) goto fail;
+    if (func_001DDA80((Ptr_1E9970*)D_00275710) != 0) goto fail;
+    if (((Obj_1E9970*)D_0026FF68)->f25C != 0 && ((Obj_1E9970*)D_0026FF68)->f260 != 0) goto fail;
+    if (((Obj_1E9970*)D_0026F808)->f25C != 0) goto fail;
+    if (((Obj_1E9970*)D_0026F808)->f250 != 0) goto fail;
+    if (D_00270458 == 2) goto fail;
+    if (D_00270458 == 1) goto fail;
+    if (D_00270458 != 4) goto ok;
+fail:
+    return 0;
+ok:
+    return 1;
+}

@@ -1054,3 +1054,21 @@ void func_00139038(Ctx_139038* ctx, s32 stride, s32 count, u8* items, s32 nkeys,
     *out = anim;
     func_0018D6F0();
 }
+
+struct Entry_13B9D8 { u8 pad000[0x10]; void* data; u8 pad014[0x0C]; f32 value; s32 key; u8 pad028[8]; };
+struct Object_13B9D8 { u8 pad000[0x684]; void* active; s32 count; Entry_13B9D8* entries; };
+void func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
+
+void func_0013B9D8(Object_13B9D8* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
+{
+    s32 i;
+    if (self->active) {
+        for (i = 0; i < self->count; i++) {
+            if (self->entries[i].key == key) break;
+        }
+        if (i < self->count) {
+            Entry_13B9D8* e = &self->entries[i];
+            func_00185D20(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
+        }
+    }
+}
