@@ -365,3 +365,21 @@ void func_00133B58(Self_133B58* self, Gs_133B58* gs)
     func_00161458(gs, *(u32*)&c0);
     func_001615F0(gs, 0x9400, 0x80C0, 0, 0);
 }
+
+struct Obj_1310F0 {
+    u8 pad0[0x234];
+    f32 f234;
+    f32 f238;
+    u8 pad1[0x2F0 - 0x23C];
+    f32 f2F0;
+    u32 f2F4;
+};
+void func_001AA1F0(Obj_1310F0* self, s32 a1);
+void func_001310F0(Obj_1310F0* self, s32 a1)
+{
+    self->f234 = 640.0f;
+    self->f238 = 492.800018f;
+    self->f2F0 = 15.0f;
+    self->f2F4 = 0x80FFFFFF;
+    func_001AA1F0(self, a1);
+}

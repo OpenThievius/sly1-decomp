@@ -1447,3 +1447,15 @@ void func_001DFBE0(struct Obj_1DFBE0* self, s32 mode)
         self->f724 = D_00261858[1];
     }
 }
+
+struct Flags_001DD710 { s32 flags; };
+struct Arg_001DD710 { s32 pad; };
+u32 func_001601D8(Arg_001DD710* a);
+s32 func_001DD710(Arg_001DD710* a0, Arg_001DD710* a1)
+{
+    s32 one = 1;
+    u32 m = func_001601D8(a1);
+    s32 r = 0;
+    if (m & 2) r = (((Flags_001DD710*)D_002623C8)->flags & 1) ? one : 0;
+    return r;
+}

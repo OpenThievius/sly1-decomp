@@ -951,3 +951,19 @@ void func_001C5E50(Obj_1C5E50* self, f32 s)
     self->y *= s;
     self->z *= 1.0f / Fpu::Sqrt(s);
 }
+
+struct Self_1C7140 { u8 pad0[1]; };
+
+void func_001BAC30(Self_1C7140* self, void* a1);
+void func_00124DF8(Self_1C7140* self, s32 a1, void* a2);
+void func_001CA7C0(Self_1C7140* self);
+void func_001CA8E8(Self_1C7140* self);
+extern u8 D_00274C20[];
+
+void func_001C7140(Self_1C7140* self, void* a1)
+{
+    func_001BAC30(self, a1);
+    func_00124DF8(self, 1, (void*)D_00274C20);
+    func_001CA7C0(self);
+    func_001CA8E8(self);
+}

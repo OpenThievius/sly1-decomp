@@ -1237,3 +1237,20 @@ void func_0019D410(Entry_19D410* src)
         *(Entry_19D410*)((u32)cur | 0x20000000) = *src;
     }
 }
+
+struct Self_19CD90 {
+    u8 pad0[0x48];
+    s32 f48;
+};
+
+void func_0019CD90(Self_19CD90* self, s32 p, f32* out0, f32* out1, f32* out2)
+{
+    s32 n = self->f48;
+    s32 q = p / ((n + 1) * (3 * n + 1));
+    s32 r = p - q * (n + 1) * (3 * n + 1);
+    s32 m = r / (3 * n + 1);
+    s32 s = r - m * (3 * n + 1);
+    *out0 = (f32)(q - n) / (f32)self->f48;
+    *out1 = (f32)m / (f32)self->f48;
+    *out2 = (f32)s / (f32)self->f48;
+}

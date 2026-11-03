@@ -1372,3 +1372,21 @@ s32 func_00160650(Save_160650* s)
     }
     return sum;
 }
+
+class Obj_161958 {
+public:
+    u8 pad0[0xC];
+    u64* cursor;
+    u8 pad1[0x8];
+    virtual void Begin(s32 arg);
+    void func_00161958(s32 count);
+};
+
+void Obj_161958::func_00161958(s32 count)
+{
+    Begin(0);
+    u64* p = cursor;
+    cursor = p + 2;
+    p[0] = (u64)count | ((u64)2 << 58);
+    p[1] = 0;
+}

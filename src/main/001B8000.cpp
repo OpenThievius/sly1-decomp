@@ -1065,3 +1065,47 @@ void func_001B9F30(Self_1B9F30* self, Out_1B9F30* out)
     out->f38 = D_0026185C[0];
     out->f3C = 0;
 }
+
+struct __attribute__((aligned(16))) Quad_001B9AE0 {
+    s32 a, b, c, d;
+};
+
+struct Sub_001B9AE0;
+
+struct Obj_001B9AE0 {
+    u8 pad0[0x50];
+    Sub_001B9AE0* f50;
+    u8 pad1[0x3EC];
+    Quad_001B9AE0 f440;
+    s32 f450;
+    u8 pad2[0xC];
+    Quad_001B9AE0 f460;
+    s32 f470;
+    u8 pad3[0xC4];
+    u64 f538;
+};
+
+void func_001BB580(Sub_001B9AE0* p);
+
+void func_001B9AE0(Obj_001B9AE0* self, s32 a1, Quad_001B9AE0* a2, s32 a3, Quad_001B9AE0* a4)
+{
+    self->f450 = a1;
+    u64 flag = (self->f538 >> 54) & 1;
+    if (a2 != 0) {
+        self->f440 = *a2;
+    }
+    self->f470 = a3;
+    if (a4 != 0) {
+        self->f460 = *a4;
+    }
+    Sub_001B9AE0* sub = self->f50;
+    if (sub != 0) {
+        s32 f2 = 0;
+        if (a1 == 3) {
+            f2 = (a3 == 3);
+        }
+        if (flag != f2) {
+            func_001BB580(sub);
+        }
+    }
+}

@@ -1490,3 +1490,32 @@ void func_001EDDB0(Vec3_1EDDB0* v, f32* a1, f32* a2)
         *a2 = func_001EA408(func_00205778(v->z, r));
     }
 }
+
+struct Entry_1ED0D8 { s32 key; s32 val; };
+
+struct Obj_1ED0D8 {
+    u8 pad0[0xC68];
+    s32 count;
+    Entry_1ED0D8* table;
+};
+
+void func_0018D800(Entry_1ED0D8* dst, Entry_1ED0D8* src, s32 bytes);
+
+void func_001ED0D8(Obj_1ED0D8* self, s32 key)
+{
+    s32 i = 0;
+    if (self->count > 0) {
+        Entry_1ED0D8* p = self->table;
+        while (p->key != key) {
+            i++;
+            if (i >= self->count)
+                return;
+            p++;
+        }
+        if (i < self->count) {
+            Entry_1ED0D8* e = self->table + i;
+            func_0018D800(e, e + 1, (self->count - i - 1) * 8);
+            self->count = self->count - 1;
+        }
+    }
+}

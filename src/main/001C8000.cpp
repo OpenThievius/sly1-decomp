@@ -1982,3 +1982,32 @@ void func_001C91C8(Obj_1C91C8* self, s32 evt, Tgt_1C91C8* arg)
         break;
     }
 }
+
+typedef void (*Method0_1C8F20)(void*, s32, void*);
+typedef void (*Method2_1C8F20)(void*, s32, void*);
+struct Vtbl_1C8F20 { u8 pad[0x17c]; Method0_1C8F20 m95; Method2_1C8F20 m96; };
+struct Self_1C8F20 {
+    Vtbl_1C8F20* vt;
+    u8 pad04[0x720];
+    s32 state;
+    f32 value;
+    s32 flags;
+};
+struct Frame_1C8F20 { s32* oldSlot; s32* stateSlot; };
+extern f32 D_00261858[];
+void func_001837E0(void*, s32, s32, void*);
+
+void func_001C8F20(Self_1C8F20* self, s32 state, void* context)
+{
+    self->flags &= -2;
+    if (self->state == state) return;
+    s32 old = self->state;
+    self->vt->m95(self, state, context);
+    self->state = state;
+    self->value = D_00261858[1];
+    self->vt->m96(self, old, context);
+    Frame_1C8F20 frame;
+    frame.oldSlot = &old;
+    frame.stateSlot = &self->state;
+    func_001837E0(self, 15, 2, &frame);
+}

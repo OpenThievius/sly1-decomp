@@ -913,7 +913,7 @@ void func_001AECB0(Obj_1AECB0* a0) {
     a0->f558 = -1;
 }
 
-extern f32 D_0026185C;
+extern f32 D_0026185C[];
 
 struct Obj_1AC060 {
     u8 pad[0x264];
@@ -947,7 +947,7 @@ void func_001AC060(Obj_1AC060* self)
     s32 b = self->f270;
     v0 = (-1 < v0) ? v0 : 0;
     self->f278 = (f32)(v0 * a + b) / d;
-    self->f27C = *(f32*)&D_0026185C;
+    self->f27C = D_0026185C[0];
 }
 
 typedef void (*VFn_1AD088)(void* self, void* arg);
@@ -1079,7 +1079,7 @@ struct Mixer_001AF5C8 {
 };
 
 extern s32 D_002744D0;
-extern f32 D_0026185C;
+extern f32 D_0026185C[];
 void func_001AEFA0(Mixer_001AF5C8* self, f32 a);
 void func_001AF508();
 
@@ -1104,7 +1104,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
     cmd = self->state;
     switch (cmd) {
     case 0:
-        if (self->f5B8 < D_0026185C - self->f55C)
+        if (self->f5B8 < D_0026185C[0] - self->f55C)
             cmd = 1;
         if (self->vt->hook)
             self->vt->hook(self, &cmd);
@@ -1115,7 +1115,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
             self->vt->hook(self, &cmd);
         break;
     case 3:
-        if (self->f5BC < D_0026185C - self->f55C) {
+        if (self->f5BC < D_0026185C[0] - self->f55C) {
             if (self->f554 == 0) {
                 cmd = 8;
                 break;
@@ -1131,7 +1131,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
             self->vt->hook(self, &cmd);
         break;
     case 4:
-        if (self->f5B8 < D_0026185C - self->f55C)
+        if (self->f5B8 < D_0026185C[0] - self->f55C)
             cmd = 5;
         if (self->vt->hook)
             self->vt->hook(self, &cmd);
@@ -1143,7 +1143,7 @@ void func_001AF5C8(Mixer_001AF5C8* self, f32 amount)
             self->vt->hook(self, &cmd);
         break;
     case 7:
-        if (self->fAEC < D_0026185C - self->f55C)
+        if (self->fAEC < D_0026185C[0] - self->f55C)
             cmd = 8;
         else if (self->vt->hook)
             self->vt->hook(self, &cmd);
@@ -1422,4 +1422,23 @@ s8 func_001AEA08(void)
     s32 scaled = (s32)(D_00261868 * 5.0f);
     u32 divisor = func_001E2100((Table_001AEA08*)D_002744B0);
     return D_002744B0[(u32)scaled % divisor];
+}
+
+struct Sub_1AECE8;
+struct Obj_1AECE8 { u8 pad[0x550]; Sub_1AECE8* f550; u8 pad2[4]; s32 state; f32 f55C; };
+void func_00123AB0(Sub_1AECE8* object, s32 mode);
+void func_001837E0(Obj_1AECE8* self, s32 a, s32 b, s32 c);
+extern f32 D_0026185C[];
+void func_001AECE8(Obj_1AECE8* self, s32 state)
+{
+    if (self->state == state) return;
+    if (self->state == 1 && state == 2) {
+        if (self->f550 != 0) {
+            func_00123AB0(self->f550, 0);
+            if (self->state != 1) state = self->state;
+        }
+        func_001837E0(self, 2, 0, 0);
+    }
+    self->state = state;
+    self->f55C = D_0026185C[0];
 }
