@@ -1579,3 +1579,29 @@ void func_002014D0(void)
         func_001000B8(1);
     }
 }
+
+extern s32 D_00279414;
+extern s32 D_00279454;
+extern s32 D_00279420;
+extern s32 D_00279428;
+extern s32 D_0027942C;
+
+s32 func_001F6B30(s32 a);
+s32 func_001F9D60(void);
+s32 func_001FA4D0(u32 a);
+s32 func_001F9DA8(void);
+
+void func_00202F88(void) {
+    if (D_00279414) {
+        // A bare do/while(0), allowed for this function alone by the project's decision: retail stores
+        // -1 here before loading D_00279420, and only this keeps the compiler from moving the load first.
+        do { D_00279454 = -1; } while (0);
+        func_001F6B40(D_00279420);
+    }
+    func_001F6B30(D_00279428);
+    func_001F6B30(D_0027942C);
+    func_001F6B30(D_00279420);
+    func_001F9D60();
+    func_001FA4D0(0x80000012);
+    func_001F9DA8();
+}
