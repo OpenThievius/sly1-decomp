@@ -395,7 +395,7 @@ struct Obj_00200C40 {
 };
 
 s32 func_00200D58(void* a0, void* a1, s32 a2, void* a3, void* a4, struct Obj_00200C40* a5);
-s32 func_00201460(void);
+void* func_00201460(void);
 
 s32 func_00200C40(struct Obj_00200C40* p) {
     s32 r = 0;
@@ -1836,4 +1836,151 @@ s32 func_002028A8(Cfg_2028A8* c)
     *(volatile u32*)0x1000E040 = w40;
     D_002793D8 = *c;
     return 0;
+}
+
+struct Obj_200778;
+typedef void* (*Fn_200778)(Obj_200778* self, Obj_200778* want, s32 boff, void* obj, void* sub, void* subobj);
+struct Slot_200778
+{
+    s16 off;
+    s16 idx;
+    void* fn;
+};
+struct Obj_200778
+{
+    const char* name;
+    Slot_200778* vtbl;
+    Obj_200778* type;
+    s32 attr;
+};
+
+s32 func_002000B0(Obj_200778* a, Obj_200778* b);
+void* func_00200D58(void* a0, void* a1, s32 a2, void* a3, void* a4, Obj_200778* a5);
+void* func_00200530(void);
+void* func_00200710(void);
+void* func_00201460(void);
+void* func_002013F0(void);
+void* func_00201310(void);
+
+template <void* (*TF)(void)> struct Cast_200778
+{
+    static Obj_200778* To(Obj_200778* p)
+    {
+        if (p == 0)
+            return 0;
+        return (Obj_200778*)func_00200D58(p->vtbl->fn, (void*)TF, 1, (u8*)p + p->vtbl->off, (void*)(void* (*)(void))func_00200710, p);
+    }
+};
+
+void* func_00200778(Obj_200778* want, Obj_200778* have, void* obj)
+{
+    void* ret;
+    Obj_200778* p;
+
+    if (func_002000B0(want, have) != 0)
+        return obj;
+    ret = 0;
+    p = Cast_200778<func_00200530>::To(have);
+    if (p != 0)
+    {
+        Slot_200778* s = &p->vtbl[2];
+        ret = ((Fn_200778)s->fn)((Obj_200778*)((u8*)p + s->off), want, 1, obj, 0, 0);
+    }
+    else
+    {
+        Obj_200778* fr = Cast_200778<func_00201460>::To(have);
+        if (fr != 0)
+        {
+            Obj_200778* to = Cast_200778<func_00201460>::To(want);
+            if (to != 0)
+            {
+                Obj_200778* subfr = fr->type;
+                Obj_200778* subto = to->type;
+                s32 cvfrom;
+                s32 cvto;
+                Obj_200778* at = Cast_200778<func_002013F0>::To(subfr);
+                if (at != 0)
+                {
+                    cvfrom = at->attr;
+                    subfr = at->type;
+                }
+                else
+                    cvfrom = 0;
+                at = Cast_200778<func_002013F0>::To(subto);
+                if (at != 0)
+                {
+                    cvto = at->attr;
+                    subto = at->type;
+                }
+                else
+                    cvto = 0;
+                if ((cvfrom & 1) <= (cvto & 1) && (cvfrom & 2) <= (cvto & 2))
+                {
+                    if (func_002000B0(subto, subfr) != 0)
+                        ret = obj;
+                    else if (func_002000B0(subto, (Obj_200778*)func_00200E08()) != 0
+                             && (subfr == 0 || Cast_200778<func_00201310>::To(subfr) == 0))
+                        ret = obj;
+                    else if ((p = Cast_200778<func_00200530>::To(subfr)) != 0)
+                    {
+                        Slot_200778* s = &p->vtbl[2];
+                        ret = ((Fn_200778)s->fn)((Obj_200778*)((u8*)p + s->off), subto, 1, obj, 0, 0);
+                    }
+                    else
+                    {
+                        Obj_200778* pfr = Cast_200778<func_00201460>::To(subfr);
+                        if (pfr != 0)
+                        {
+                            Obj_200778* pto;
+                            pto = Cast_200778<func_00201460>::To(subto);
+                            if (pto != 0)
+                            {
+                                s32 constp = cvto & 1;
+                                subto = pto->type;
+                                subfr = pfr->type;
+                                for (;;)
+                                {
+                                    at = Cast_200778<func_002013F0>::To(subfr);
+                                    if (at != 0)
+                                    {
+                                        cvfrom = at->attr;
+                                        subfr = at->type;
+                                    }
+                                    else
+                                        cvfrom = 0;
+                                    at = Cast_200778<func_002013F0>::To(subto);
+                                    if (at != 0)
+                                    {
+                                        cvto = at->attr;
+                                        subto = at->type;
+                                    }
+                                    else
+                                        cvto = 0;
+                                    if ((cvfrom & 1) > (cvto & 1) || (cvfrom & 2) > (cvto & 2))
+                                        goto done;
+                                    if (!constp && ((cvfrom & 1) < (cvto & 1) || (cvfrom & 2) < (cvto & 2)))
+                                        goto done;
+                                    if (func_002000B0(subto, subfr) != 0)
+                                    {
+                                        ret = obj;
+                                        break;
+                                    }
+                                    pto = Cast_200778<func_00201460>::To(subto);
+                                    pfr = Cast_200778<func_00201460>::To(subfr);
+                                    if (pto == 0 || pfr == 0)
+                                        goto done;
+                                    if (!(cvto & 1))
+                                        constp = 0;
+                                    subto = pto->type;
+                                    subfr = pfr->type;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+done:
+    return ret;
 }
