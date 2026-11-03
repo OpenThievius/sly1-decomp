@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The runtime's exception classes keep their vtables where retail has them (config/us/libcalls.tsv):
+// with `#pragma interface` the compiler refers to them by name instead of writing its own.
+#pragma interface
 #include "common.h"
 
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -1162,4 +1165,79 @@ void func_002014D0(void) __attribute__((noreturn));
 void func_001FD920(void)
 {
     func_002014D0();
+}
+
+struct Info_001FEC10 {
+    u8 pad[8];
+    void* value;
+    void* type;
+};
+
+extern void func_001FE938() __attribute__((noreturn));
+
+// The runtime's exceptions: a base class with a description, and the classes thrown below.
+class Error_1FEC10 {
+public:
+    Error_1FEC10() {}
+    virtual ~Error_1FEC10() {}
+    virtual const char* Describe() const;
+};
+
+class Unlisted_1FEC10 : public Error_1FEC10 {
+public:
+    Unlisted_1FEC10() {}
+    virtual ~Unlisted_1FEC10() {}
+};
+
+class Fault_1FEDC8 : public Error_1FEC10 {
+public:
+    Fault_1FEDC8() {}
+    virtual ~Fault_1FEDC8() {}
+};
+
+class Fault_1FEE48 : public Error_1FEC10 {
+public:
+    Fault_1FEE48() {}
+    virtual ~Fault_1FEE48() {}
+};
+
+void func_001FEC10(s32 count, void** allowed)
+{
+    Info_001FEC10* info = *(Info_001FEC10**)func_001FDA10();
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        if (func_00200778((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
+            throw;
+        }
+    }
+    try {
+        func_001FE938();
+    } catch (...) {
+        if (info != (Info_001FEC10*)__exception_info) {
+            info = (Info_001FEC10*)__exception_info;
+            for (i = 0; i < count; i++) {
+                if (func_00200778((Res_001FEA18*)allowed[i], (s32)info->type, (s32)info->value)) {
+                    throw;
+                }
+            }
+        }
+        void* type = func_001FEF70();
+        for (i = 0; i < count; i++) {
+            if (func_00200778((Res_001FEA18*)allowed[i], (s32)type, (s32)info->value)) {
+                throw Unlisted_1FEC10();
+            }
+        }
+        func_001FE8F0();
+    }
+}
+
+void func_001FEDC8()
+{
+    throw Fault_1FEDC8();
+}
+
+void func_001FEE48()
+{
+    throw Fault_1FEE48();
 }
