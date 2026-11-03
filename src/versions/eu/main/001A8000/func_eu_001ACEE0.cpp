@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1200/1248 (96.2%), checked 2026-11-01
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACEE0.cpp func_eu_001ACEE0 --unit src/main/001A8000.cpp
-// Still differs: Gauge box with lerped bar colour and shaking glyph; 15 lines differ in last block only: retail loads f52C before f5A4 and schedules the 2-byte string stores after the rect stores.
 // PAL: draws a gauge box (dark frame, a bar fading from red to grey), then one glyph over it that shakes while the timer runs.
-// NEAR: 15 lines differ, last block only: retail stores the two string bytes (sb 0x30/0x31) after the rect stores and the text load, and loads f52C before f5A4.
 
 struct Rgba_eu_1ACEE0 { u8 c[4]; };
 struct Rect_eu_1ACEE0 { f32 x; f32 y; f32 w; f32 h; s32 f10; s32 f14; s32 f18; s32 f1C; };
@@ -18,14 +14,14 @@ struct Self_eu_1ACEE0 {
 };
 struct Q3_eu_1ACEE0;
 struct Clock_eu_1ACEE0 { f32 f0; f32 f4; f32 f8; f32 fC; f32 f10; };
-struct Str2_eu_1ACEE0 { s8 c[2]; };
+struct Col_eu_1ACEE0 { s32 v[4]; };
 
 extern Q3_eu_1ACEE0 D_eu_0027DB10;
 
 f32 func_001EA4B8(Q3_eu_1ACEE0* p, s32 a1, f32 f12, f32 f13, f32 f14);
 void func_00137228(Rect_eu_1ACEE0* out, f32 x, f32 y);
 void func_00137238(Rect_eu_1ACEE0* out, f32 x, f32 y);
-void func_00137248(Rect_eu_1ACEE0* out, Rgba_eu_1ACEE0* value);
+void func_00137248(Rect_eu_1ACEE0* out, Col_eu_1ACEE0* value);
 void func_00137260(Rect_eu_1ACEE0* out, s32 flag);
 void func_00137268(Rect_eu_1ACEE0* out, s32 flag);
 void func_eu_001374E0(Rect_eu_1ACEE0* out, s32 flag);
@@ -36,18 +32,30 @@ void func_0015C900(Text_eu_1ACEE0* handle);
 f32 func_00205400(f32 x);
 f32 func_00205210(f32 x);
 
-static inline u8 Lerp_eu_1ACEE0(s32 a, s32 b, f32 t)
-{
-    if (a == b) return b;
-    if (a < b) return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
-    return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
-}
+struct Lerp_eu_1ACEE0 {
+    static u8 Of(s32 a, s32 b, f32 t)
+    {
+        if (a == b) return b;
+        if (a < b) return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
+        return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
+    }
+};
+
+struct LerpRgba_eu_1ACEE0 {
+    static void Do(Rgba_eu_1ACEE0* out, Rgba_eu_1ACEE0* a, Rgba_eu_1ACEE0* b, f32 t)
+    {
+        Rgba_eu_1ACEE0 r;
+        r.c[0] = Lerp_eu_1ACEE0::Of(a->c[0], b->c[0], t);
+        r.c[1] = Lerp_eu_1ACEE0::Of(a->c[1], b->c[1], t);
+        r.c[2] = Lerp_eu_1ACEE0::Of(a->c[2], b->c[2], t);
+        r.c[3] = Lerp_eu_1ACEE0::Of(a->c[3], b->c[3], t);
+        *out = r;
+    }
+};
 
 void func_eu_001ACEE0(Self_eu_1ACEE0* self)
 {
-
     Rect_eu_1ACEE0 out;
-    Rgba_eu_1ACEE0 col;
     f32 t = 0.0f;
     s32 flag = 0;
     if (self->f58C != t) {
@@ -63,11 +71,16 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     f32 w = self->f598;
     func_00137228(&out, self->f52C + self->f590, self->f530 + self->f594);
     func_00137238(&out, w, y);
-    *(u32*)&col = grey;
-    func_00137248(&out, &col);
+    {
+        Col_eu_1ACEE0 tmp;
+        tmp.v[0] = grey;
+        func_00137248(&out, &tmp);
+    }
     func_00137260(&out, 0);
     func_00137268(&out, 0);
     func_eu_001374E0(&out, 0);
+    {
+    Rgba_eu_1ACEE0 col;
     col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;
     func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, D_00262280);
     {
@@ -75,16 +88,13 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
         out.y = self->f530 + self->f594 + y;
         out.w = self->f598;
         out.h = h;
-        Rgba_eu_1ACEE0 a, b, r;
+        Rgba_eu_1ACEE0 a, b;
         a.c[0] = 0x60; a.c[1] = 0; a.c[2] = 0; a.c[3] = 0xC0;
         b.c[0] = 0xC0; b.c[1] = 0xC0; b.c[2] = 0xC0; b.c[3] = 0xFF;
-        r.c[0] = Lerp_eu_1ACEE0(a.c[0], b.c[0], t);
-        r.c[1] = Lerp_eu_1ACEE0(a.c[1], b.c[1], t);
-        r.c[2] = Lerp_eu_1ACEE0(a.c[2], b.c[2], t);
-        r.c[3] = Lerp_eu_1ACEE0(a.c[3], b.c[3], t);
-        col = r;
+        LerpRgba_eu_1ACEE0::Do(&col, &a, &b, t);
     }
     func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], D_00262280);
+    }
     func_0015C8B8(self->text, self->f51C, self->f51C);
     VEnt_eu_1ACEE0* ve = &self->text->vtbl[8];
     ve->fn((u8*)self->text + ve->delta, self->f52C, self->f530, 0x7A, out.f10, D_00262280);
@@ -100,12 +110,7 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     out.h = 0.0f;
     out.f18 = 1;
     out.f1C = 1;
-    {
-        Str2_eu_1ACEE0 s;
-        s.c[0] = self->f57C + 0x72;
-        s.c[1] = 0;
-        *(Str2_eu_1ACEE0*)&col = s;
-    }
-    func_eu_0015C778(self->text, (char*)&col, &out, 0, D_00262280);
+    char str[2] = { self->f57C + 0x72, 0 };
+    func_eu_0015C778(self->text, str, &out, 0, D_00262280);
     func_0015C900(self->text);
 }

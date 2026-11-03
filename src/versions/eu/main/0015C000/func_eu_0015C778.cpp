@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 625/628 (99.5%), checked 2026-11-01
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_0015C778.cpp func_eu_0015C778 --unit src/main/0015C000.cpp
 // Still differs: Draws a multi-line string aligned in a box; 3 lines differ: the load of halign before the ==2 compare uses v1/v0 swapped versus retail.
 // Draws a multi-line string aligned inside a box, glyph by glyph through the font's virtual calls.
 struct Vt_eu_15C778 {
@@ -23,6 +22,7 @@ void func_eu_0015C778(Font_eu_15C778* self, u8* str, Box_eu_15C778* box, s32 a, 
     f32 x;
     f32 y;
     s32 first = 1;
+    s32 right = 2;
     self->vt->f24((u8*)self + self->vt->o20, a, b);
     if (box->valign == 0) {
         y = box->y;
@@ -62,7 +62,7 @@ void func_eu_0015C778(Font_eu_15C778* self, u8* str, Box_eu_15C778* box, s32 a, 
                             x += f->vt->f1C((u8*)self + f->vt->o18, *q++);
                         } while (*q != 0 && *q != 10);
                     }
-                    if (box->halign == 2) {
+                    if (box->halign == right) {
                         x = (box->x + box->w) - x;
                     } else {
                         x = box->x + (box->w - x) * half;
