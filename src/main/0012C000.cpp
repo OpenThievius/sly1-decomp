@@ -1778,3 +1778,50 @@ f32 func_0012E968(Obj_12E968* self, f32 value)
     }
     return r;
 }
+
+struct Ptr_12FE70 { u8 pad[0x4]; };
+struct Obj_12FE70 {
+    s32 f0;
+    Ptr_12FE70* f4;
+    Ptr_12FE70* f8;
+    s32 fC;
+    s32 f10;
+    s32 f14;
+    u8 pad1[4];
+    s32 f1C;
+    u8 pad2[4];
+    s32 f24;
+};
+
+s32 func_0012FF10(Obj_12FE70* self);
+void func_001F8DB8(Ptr_12FE70* p, s32 a, s32 b);
+void func_00140CC8(Ptr_12FE70* p, s32 n, s32 base);
+
+void func_0012FE70(Obj_12FE70* self)
+{
+    if (func_0012FF10(self) != 0) {
+        return;
+    }
+    s32 size = self->f24;
+    if (size == 0) {
+        return;
+    }
+    s32 clamp = 0x4000;
+    if (!(size > 0x3FFF)) {
+        clamp = size;
+    }
+    s32 base = self->f14;
+    if (self->f1C == base) {
+        base += 0x4000;
+    }
+    self->fC = clamp;
+    self->f10 = base;
+    switch (self->f0) {
+    case 0:
+        func_001F8DB8(self->f4, base, clamp);
+        break;
+    case 1:
+        func_00140CC8(self->f8, (s32)((u32)(clamp + 0x7FF) >> 11), base);
+        break;
+    }
+}

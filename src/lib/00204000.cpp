@@ -116,3 +116,32 @@ s32 func_002040E8(void* arg)
     }
     return func_00204228(arg);
 }
+
+struct Slot_204228 { s32 a; s32 b; s32 c; u8 pad[0x10]; };
+struct Table_204228 { u8 pad[0x10]; Slot_204228 lo[4]; Slot_204228 hi[4]; };
+struct Ctx_204228 { s32 kind; u8 pad[8]; s32 result; s32 f10; };
+struct Lock_204228;
+
+extern Table_204228 D_0062AAD0;
+
+s32 func_001F8290(Lock_204228* l, s32 a, s32 b, Ctx_204228* c, s32 d, Ctx_204228* e, s32 f, s32 g, s32 h);
+
+s32 func_00204228(void)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        D_0062AAD0.lo[i].a = 0;
+        D_0062AAD0.lo[i].c = 0;
+        D_0062AAD0.lo[i].b = 0;
+        D_0062AAD0.hi[i].a = 0;
+        D_0062AAD0.hi[i].c = 0;
+        D_0062AAD0.hi[i].b = 0;
+    }
+    (*(Ctx_204228*)&D_0062ACC0).kind = 0x10;
+    (*(Ctx_204228*)&D_0062ACC0).f10 = 0;
+    if (func_001F8290((Lock_204228*)((u8*)&D_0062AA80), 1, 0, ((Ctx_204228*)&D_0062ACC0), 0x80, ((Ctx_204228*)&D_0062ACC0), 0x80, 0, 0) < 0) {
+        return 0;
+    }
+    return (*(Ctx_204228*)&D_0062ACC0).result;
+}

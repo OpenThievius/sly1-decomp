@@ -2301,3 +2301,30 @@ s32 func_0011E2E8()
         return func_00203D90();
     return D_00260DC0.f10;
 }
+
+extern s32 D_0025C34C;
+s32 func_002032C8(s32 value);
+void func_001F6C20(s32 value);
+s32 func_0011CE30(void);
+
+s32 func_0011E1F8(s32 flag)
+{
+    if (D_0025C34C == 0) {
+        return func_002032C8(flag);
+    }
+    func_001F6C20(0);
+    u32 ready = (*(volatile u32*)&D_00260DC0) < 1;
+    (*(u32*)&D_0025C358) = ready;
+    if (ready == 1) {
+        return 0;
+    }
+    if (flag == 1) {
+        return 1;
+    }
+    while ((*(u32*)&D_0025C358) == 0) {
+        func_0011CE30();
+        func_001F6C20(0);
+        (*(u32*)&D_0025C358) = (*(volatile u32*)&D_00260DC0) < 1;
+    }
+    return 0;
+}

@@ -1412,3 +1412,27 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
         }
     }
 }
+
+struct __attribute__((packed)) Pair_183EA0 { s32 a; s32 b; };
+struct State_183EA0 { u8 pad00[0x304]; s32 value; u8 pad308[0x410 - 0x308]; Pair_183EA0 saved; };
+s32 func_00182FC8(State_183EA0*);
+void func_00183DC0(State_183EA0*);
+void func_00127048(State_183EA0*, State_183EA0*);
+void func_00183DF8(State_183EA0*);
+
+void func_00183EA0(State_183EA0* self, State_183EA0* other)
+{
+    s32 changed = 0;
+    if (func_00182FC8(self)) {
+        changed = self->value != other->value;
+    }
+    if (changed) {
+        func_00183DC0(self);
+    }
+    Pair_183EA0 keep = self->saved;
+    func_00127048(self, other);
+    self->saved = keep;
+    if (changed) {
+        func_00183DF8(self);
+    }
+}

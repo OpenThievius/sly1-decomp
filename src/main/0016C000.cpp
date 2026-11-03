@@ -1357,3 +1357,50 @@ void func_0016F478(void)
         }
     }
 }
+
+struct Node_16F238 {
+    u16* values;
+    s32 length;
+    u8 pad08[8];
+    s32 cursor;
+    u8 pad14[4];
+    Node_16F238* next;
+};
+struct Clock_16F238 {
+    u8 pad00[0x10];
+    f32 time;
+};
+struct Actor_16F238 {
+    u8 pad00[0xA8];
+    u16 key;
+};
+extern f32 D_00262E00;
+
+struct Advance_16F238 {
+    static void Of(Node_16F238* node)
+    {
+        do {
+            s32 index = node->cursor;
+            if (index < node->length) {
+                if ((*(Actor_16F238*)&D_00262C70).key == node->values[index])
+                    node->cursor = index + 1;
+                else
+                    node->cursor = 0;
+            }
+            node = node->next;
+        } while (node);
+    }
+};
+
+void func_0016F238(Actor_16F238* self, s32 value)
+{
+    u16 id = (u16)value;
+    Node_16F238* head = (*(Node_16F238**)&D_00262DFC);
+    if (head == 0) return;
+    if (self != (Actor_16F238*)&D_00262C70) return;
+    u16 previous = self->key;
+    if (id == previous || previous == 0) return;
+    Advance_16F238::Of(head);
+    Clock_16F238* clock = (Clock_16F238*)&D_00261858;
+    D_00262E00 = clock->time + 1.0f;
+}

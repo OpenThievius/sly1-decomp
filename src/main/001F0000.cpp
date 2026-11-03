@@ -1387,3 +1387,17 @@ Lz:
     next = 0;
     goto L154C;
 }
+
+struct Tbl_1F3EE0 { u8 pad0[0x14]; s32 f14; u8 pad1[0xA0 - 0x18]; s32 count; s32* arr; };
+
+void func_001830D8(Tbl_1F3EE0* self, Tbl_1F3EE0* other);
+s32 func_00183058(s32 a, s32 b, s32 c);
+
+void func_001F3EE0(Tbl_1F3EE0* self, Tbl_1F3EE0* other)
+{
+    func_001830D8(self, other);
+    self->arr = (s32*)func_0018D500(self->count << 2);
+    for (s32 i = 0; i < self->count; i++) {
+        self->arr[i] = func_00183058(other->arr[i], self->f14, 0);
+    }
+}

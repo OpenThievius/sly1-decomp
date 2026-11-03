@@ -1799,3 +1799,61 @@ void func_001C0070(void)
     func_0011CE30();
     D_0027B314 = f.fC;
 }
+
+struct List_1C0808 {
+    u8* first;
+    s32 pad04;
+    s32 offset;
+};
+struct Iter_1C0808 {
+    List_1C0808* list;
+    u8** link;
+    s32 offset;
+    Iter_1C0808* prev;
+};
+struct World_1C0808 {
+    u8 pad0000[0x1BAC];
+    List_1C0808 list;
+};
+void func_001BF788(u8* obj, void* item);
+
+struct Begin_1C0808 {
+    static void Of(Iter_1C0808* it, List_1C0808* list)
+    {
+        it->list = list;
+        it->link = (u8**)list;
+        it->offset = list->offset;
+        it->prev = (Iter_1C0808*)D_0027B314;
+        D_0027B314 = (Frame_1C0070*)it;
+    }
+};
+
+struct Next_1C0808 {
+    static u8* Of(Iter_1C0808* it)
+    {
+        u8* obj = *it->link;
+        it->link = (u8**)(obj + it->offset);
+        return obj;
+    }
+};
+
+struct End_1C0808 {
+    static void Of(Iter_1C0808* it)
+    {
+        D_0027B314 = (Frame_1C0070*)it->prev;
+    }
+};
+
+void func_001C0808(void* item)
+{
+    if (D_00275710) {
+        Iter_1C0808 it;
+        u8* obj;
+        Begin_1C0808::Of(&it, &((World_1C0808*)D_00275710)->list);
+        for (obj = Next_1C0808::Of(&it); obj; obj = Next_1C0808::Of(&it)) {
+            func_001BF788(obj, item);
+        }
+        End_1C0808::Of(&it);
+    }
+    func_0011CE30();
+}
