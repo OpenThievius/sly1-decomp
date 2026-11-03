@@ -1200,3 +1200,118 @@ void func_00124CC0(Self_124CC0* self)
     fr.self = self;
     func_0012C288(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
 }
+
+struct Self_1276C0;
+struct Fl_1276C0;
+struct Node_1276C0;
+
+struct Info_1276C0 {
+    u8 pad0[8];
+    s32 flags;
+};
+struct Hit_1276C0 {
+    Info_1276C0* info;
+};
+
+typedef void (*Fn_1276C0)(Self_1276C0* self, void* p);
+struct Vt_1276C0 {
+    u8 pad0[0x84];
+    Fn_1276C0 f84;
+    Fn_1276C0 f88;
+    void (*f8C)(Node_1276C0* n, Hit_1276C0* h);
+    Fn_1276C0 f90;
+    Fn_1276C0 f94;
+};
+
+struct Node_1276C0 {
+    union {
+        Vt_1276C0* vt;
+        Info_1276C0* info;
+    };
+    u8 pad4[4];
+    s32 f8;
+    u8 padC[0x10];
+    Node_1276C0* next;
+    u8 pad20[0x204];
+    Fl_1276C0* f224;
+};
+
+struct Fl_1276C0 {
+    u8 pad0[0x90];
+    f32 f90;
+    f32 f94;
+    u8 pad98[0xB0 - 0x98];
+    s32 fB0;
+};
+
+struct Other_1276C0 {
+    u8 pad0[0x18];
+    s32 f18;
+    u8 pad1c[0x110 - 0x1C];
+    u8 f110[0x10];
+    u8 pad120[0x20];
+    u8 f140[0x10];
+    u8 f150[0x10];
+    u8 f160[0x10];
+    u8 pad170[0x224 - 0x170];
+    Fl_1276C0* f224;
+};
+
+struct Self_1276C0 {
+    Vt_1276C0* vt;
+    u8 pad4[0x10];
+    void* f14;
+    s32 f18;
+    u8 pad1c[0x34 - 0x1C];
+    Node_1276C0* head;
+    u8 pad38[0x224 - 0x38];
+    Fl_1276C0* f224;
+};
+
+struct Locals_1276C0 {
+    u8 a20[16];
+    u8 a30[16];
+    u8 a40[16];
+    u8 a50[16];
+    u8 pad60[0x30];
+};
+
+void func_00128018(Self_1276C0* z, s32 id, u8* c, u8* d);
+void func_00128150(Self_1276C0* z, s32 id, u8* c, u8* d);
+void func_00128330(Self_1276C0* a, s32 b, u8* c, u8* d, u8* e, s32 f, s32 g, u8* h, u8* i, s32 j, s32 k);
+Hit_1276C0* func_0015A418(void* host, s32 a1, s32 a2, Other_1276C0* ctx);
+
+void func_001276C0(Self_1276C0* self, Other_1276C0* other)
+{
+    Locals_1276C0 L;
+    func_00128018(0, self->f18, other->f140, L.a20);
+    func_00128150(0, self->f18, other->f110, L.a50);
+    func_00128330((Self_1276C0*)other->f18, self->f18, other->f140, other->f150, other->f160, 0, 0, L.a30, L.a40, 0, 0);
+    self->vt->f84(self, L.a20);
+    self->vt->f88(self, L.a50);
+    self->vt->f90(self, L.a30);
+    self->vt->f94(self, L.a40);
+    Fl_1276C0* a = self->f224;
+    if (a != 0 && (a->fB0 & 0x20)) {
+        Fl_1276C0* b = other->f224;
+        if (b != 0 && (b->fB0 & 0x20)) {
+            a->f90 = b->f90;
+            self->f224->f94 = other->f224->f94;
+        }
+    }
+    Node_1276C0* n = self->head;
+    if (n != 0) {
+        do {
+            if ((n->info->flags ^ 1) & 1)
+                continue;
+            Hit_1276C0* h = func_0015A418(self->f14, 2, n->f8, other);
+            if (h == 0)
+                continue;
+            if ((h->info->flags ^ 1) & 1)
+                continue;
+            if (n->f224 != 0 && (n->f224->fB0 & 0xC))
+                continue;
+            n->vt->f8C(n, h);
+        } while ((n = n->next) != 0);
+    }
+}

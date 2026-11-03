@@ -321,3 +321,54 @@ void func_00165920(Obj_165920* self, s32 arg, void* src)
     }
     func_00162810(self);
 }
+
+// Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
+struct __attribute__((aligned(16))) Quad_1660E8 { s32 a, b, c, d; };
+struct Mat_1660E8 { Quad_1660E8 q[4]; };
+struct Obj_1660E8;
+typedef void (*VFn_1660E8)(Obj_1660E8* self);
+struct VT_1660E8 { u8 pad[0xC0]; VFn_1660E8 f; };
+struct Link_1660E8 { u8 pad0[0x60]; Mat_1660E8 m60; u8 pad[4]; s32 a4; u8 pad2[8]; u32 flags; };
+struct Obj_1660E8 { VT_1660E8* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xA4]; Link_1660E8* link; };
+struct Elem_1660E8 { Obj_1660E8* obj; u8 pad[0xC]; Quad_1660E8 q10[4]; Mat_1660E8 m50;  };
+struct List_1660E8 { s32 count; Elem_1660E8* items; };
+struct Par_1660E8 { u8 pad[0x30]; };
+struct Self_1660E8 { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xAC]; List_1660E8 list; };
+
+void func_00188B48(void* a, void* b, void* out);
+void func_00188B08(void* a, void* b, void* out);
+Mat_1660E8 func_00188668(Mat_1660E8 a, void* q);
+
+void func_001660E8(Self_1660E8* self, Par_1660E8* par)
+{
+    Mat_1660E8 a;
+    Mat_1660E8 b;
+    Mat_1660E8 c;
+    Mat_1660E8 e;
+    s32 i;
+    List_1660E8* l = &self->list;
+
+    if (l->count > 0) {
+        func_00188B48(self->sub140, self->sub110, &a);
+        if (par != 0) {
+            func_00188B48((u8*)par + 0x30, par, &b);
+        } else {
+            b = a;
+        }
+        for (i = 0; i < l->count; i++) {
+            Elem_1660E8* el = (Elem_1660E8*)((u8*)l->items + (i << 4) * 9);
+            if (el->obj != 0) {
+                el->obj->vt->f(el->obj);
+                Link_1660E8* t = el->obj->link;
+                if (t != 0 && (t->flags & 0x80) && t->a4 != 0) {
+                    c = t->m60;
+                    e = func_00188668(b, &c);
+                } else {
+                    func_00188B08(el->obj->sub140, el->obj->sub110, &c);
+                    e = func_00188668(a, &c);
+                }
+                el->m50 = func_00188668(e, &el->q10);
+            }
+        }
+    }
+}

@@ -2249,3 +2249,48 @@ s32 func_0018E6C0(Ring_0018E6C0* self, s32 count, u8* dst)
     }
     return total;
 }
+
+struct Img_18CDD8 { s32 type; s32 size; s32 handle; u8 data[0x1A00 - 12]; };
+struct Info_18CDD8 { u8 pad0[0x44]; s32 f44; s32 f48; u8 pad4C[0x60 - 0x4C]; };
+
+void func_001F5C0C(void* p, s32 v, s32 n);
+void func_001605E8(Img_18CDD8* img);
+s32 func_00160650(Img_18CDD8* img);
+s32 func_0018C9C0(void* a, void* b, Info_18CDD8* info);
+s32 func_0018D268(void* a, void* b, s32 c, s32* h);
+s32 func_0018D2E8(void* a, s32 h, Img_18CDD8* buf, s32 size, s32* got);
+void func_0018D2B0(void* a, s32 h);
+
+s32 func_0018CDD8(void* a0, void* a1, Img_18CDD8* out, Info_18CDD8* info)
+{
+    Info_18CDD8 local;
+    Img_18CDD8 buf;
+    s32 handle = -1;
+    s32 got;
+    s32 r;
+    s32 size;
+    if (info == 0) info = &local;
+    func_001F5C0C(info, 0, 0x5C);
+    func_001605E8(out);
+    r = func_0018C9C0(a0, a1, info);
+    if (r != 0) return r;
+    if ((info->f48 & 0xD4) != 4) return 20;
+    size = info->f44;
+    if (size != 0x1A00) return 28;
+    r = func_0018D268(a0, a1, 1, &handle);
+    if (r != 0) return r;
+    r = func_0018D2E8(a0, handle, &buf, 0x1A00, &got);
+    if (r == 0) {
+        r = 8;
+        if (got == size) {
+            if (buf.type != 18 || buf.size != got) r = 28;
+            else if (buf.handle != func_00160650(&buf)) r = 27;
+            else {
+                *out = buf;
+                r = 0;
+            }
+        }
+    }
+    func_0018D2B0(a0, handle);
+    return r;
+}
