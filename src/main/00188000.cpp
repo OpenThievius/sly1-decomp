@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "fpu.h"
 
 struct Quad_001891C0 { s32 a, b, c, d; } __attribute__((aligned(16)));
 
@@ -1072,4 +1073,14 @@ void func_0018B600()
     o->f8 = 0;
     func_001F6B40(*(Obj_18B600**)D_00269990);
     func_001F6A30();
+}
+
+struct Vec3_189230 { f32 x; f32 y; f32 z; };
+
+f32 func_00205778(f32 a, f32 b);
+
+void func_00189230(Vec3_189230* v, f32* a1, f32* a2)
+{
+    *a1 = func_00205778(v->y, v->x);
+    *a2 = func_00205778(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
 }

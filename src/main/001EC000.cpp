@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "fpu.h"
 
 struct Obj_1ED198 { u8 pad0[0x14]; void* f14; u8 pad1[0x28]; s32 f40; };
 
@@ -1472,5 +1473,20 @@ void func_001EC570(Self_1EC570* self, s32 a, s32 b)
     case 16:
         self->c04 = 0;
         break;
+    }
+}
+
+struct Vec3_1EDDB0 { f32 x; f32 y; f32 z; };
+
+f32 func_00205778(f32 a, f32 b);
+f32 func_001EA408(f32 a);
+
+void func_001EDDB0(Vec3_1EDDB0* v, f32* a1, f32* a2)
+{
+    if (a1)
+        *a1 = func_001EA408(func_00205778(v->y, v->x));
+    if (a2) {
+        f32 r = Fpu::Sqrt(v->x * v->x + v->y * v->y);
+        *a2 = func_001EA408(func_00205778(v->z, r));
     }
 }

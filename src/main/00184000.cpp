@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "fpu.h"
 
 struct Vec2_1840B8 { f32 x; f32 y; };
 
@@ -645,4 +646,47 @@ void func_001858F8()
         while (func_001F9A90(buf, 0, 0) < 0) {
         }
     }
+}
+
+struct Obj_184A70 {
+    u8 pad0[0x338];
+    f32 in0;
+    f32 in1;
+    u8 pad1[0x350 - 0x340];
+    f32 s0;
+    f32 s1;
+    f32 f358;
+    f32 f35C;
+    f32 f360;
+    f32 f364;
+    f32 f368;
+    f32 f36C;
+};
+
+f32 func_002054F0(f32 a);
+
+struct Clamp_184A70 {
+    static f32 Of(f32 v, f32 lo, f32 hi)
+    {
+        if (v < lo)
+            return lo;
+        if (hi < v)
+            return hi;
+        return v;
+    }
+};
+
+void func_00184A70(Obj_184A70* self)
+{
+    f32 a = Clamp_184A70::Of(self->in0, 0.0f, 175.0f);
+    f32 b = Clamp_184A70::Of(self->in1, 0.0f, a);
+    f32 r = func_002054F0(a * 0.00872664712f);
+    self->s1 = r;
+    self->s0 = r;
+    f32 q = func_002054F0(b * 0.00872664712f);
+    self->f360 = q / self->s0;
+    self->f368 = q / self->s1;
+    self->f36C = self->f364 = 1.0f;
+    self->f358 = Fpu::Sqrt(self->f360);
+    self->f35C = 1.0f;
 }
