@@ -1329,3 +1329,185 @@ void func_001935B0(Obj_1935B0* self, Dst_1935B0* dst)
     s32 t = v > 0 ? v : 1;
     func_001E1FD0(dst, (const char*)D_0024C418, a, b, t / 60, t % 60);
 }
+
+struct Obj_190128 {
+    u8 pad0[0x724];
+    s32 kind;
+    u8 pad1[0x750 - 0x728];
+    s32 f750;
+    u8 pad2[0xC10 - 0x754];
+    s32 count;
+    void* items[4];
+    void* f24;
+    void* f28;
+};
+
+void func_001C8C08(Obj_190128* self);
+void func_001C8418(Obj_190128* self, void* p);
+s32 func_00182FC8(void* p);
+void func_001F3BD8(void* self, s32* arg);
+
+void func_00190128(Obj_190128* self, s32 flag)
+{
+    s32 tmp[4];
+
+    switch (self->kind) {
+    case 7:
+        if (flag != 0) {
+            s32 i;
+            void** slot;
+            for (i = 0, slot = self->items; i < self->count; slot++, i++) {
+                void* n = *slot;
+                if (func_00182FC8(n) != 0) {
+                    func_001C8418(self, (u8*)n + 0x140);
+                    break;
+                }
+            }
+        }
+        break;
+    case 4:
+        if (self->f750 == 0) {
+            if (self->f24 != 0) {
+                func_001F3BD8(self->f24, tmp);
+                func_001C8418(self, tmp);
+            } else {
+                func_001C8418(self, (u8*)self + 0x140);
+            }
+        } else {
+            func_001C8C08(self);
+        }
+        break;
+    case 12:
+    case 13:
+        if (self->f28 != 0) {
+            func_001F3BD8(self->f28, tmp);
+            func_001C8418(self, tmp);
+        }
+        break;
+    default:
+        func_001C8C08(self);
+        break;
+    }
+}
+
+struct Elem_190570 {
+    u8 pad0[0x724];
+    s32 kind;
+};
+
+struct Obj_190570 {
+    u8 pad0[0xC10];
+    s32 count;
+    Elem_190570* items[4];
+    u8 pad1[4];
+    s32 f28;
+};
+
+s32 func_001300E8(Elem_190570* node, s32 kind);
+s32 func_00182FC8(Elem_190570* p);
+
+s32 func_00190570(Obj_190570* self)
+{
+    s32 i;
+    if (self->f28 != 0) {
+        for (i = 0; i < self->count; i++) {
+            Elem_190570* n = self->items[i];
+            if (func_001300E8(n, 8) != 0) {
+                s32 k = n->kind;
+                if (k == 0xB) {
+                    continue;
+                }
+                if (func_001300E8(n, 9) == 0 && k == 0xA) {
+                    continue;
+                }
+            }
+            if (func_00182FC8(n) != 0) {
+                break;
+            }
+        }
+        if (i < self->count) {
+            return 1;
+        }
+        self->f28 = 0;
+    }
+    return 0;
+}
+
+struct Out_190E30 {
+    u8 pad0[0x40];
+    f32 f40;
+    f32 f44;
+    u8 pad1[0x98];
+};
+
+s32 func_001909F0(void* a, s32 b, s32 c, s32 d, Out_190E30* e);
+
+s32 func_00190E30(void* a, s32 b, s32 c)
+{
+    Out_190E30 out;
+    switch (func_001909F0(a, b, c, 2, &out)) {
+    case 0:
+        return 1;
+    case 1:
+        if (out.f40 == 0.0f && out.f44 == 1.0f) {
+            return 0;
+        }
+        return 1;
+    case 2:
+        return 1;
+    }
+    return 1;
+}
+
+struct Self_192B58;
+struct Ent_192B58;
+typedef void (*VFn_192B58)(void* self);
+
+struct Self_192B58 {
+    u8 pad00[0x2C8];
+    u64 flags;          // 0x2C8
+    u8 pad2D0[0x588 - 0x2D0];
+    void* ent[4];       // 0x588
+    u8 pad598[0x600 - 0x598];
+    s32 f600;           // 0x600
+};
+
+extern u8* D_002623C0;
+
+void func_001B93F8(Self_192B58* self);
+void func_00192DD0(Self_192B58* self);
+
+struct Clamp_192B58 {
+    static s32 Of(s32 v, s32 lo, s32 hi)
+    {
+        if (v < lo) return lo;
+        if (hi < v) return hi;
+        return v;
+    }
+};
+
+void func_00192B58(Self_192B58* self)
+{
+    func_001B93F8(self);
+
+    u8* ctx = D_002623C0;
+    s32 cnt = *(s32*)(ctx + 0x19E4);
+    s32 lim = Clamp_192B58::Of(cnt, 0, 2);
+
+    for (s32 i = 0; i < 3; i++) {
+        void* e = self->ent[i];
+        if ((self->flags & ((u64)1 << 32)) == 0 && i == lim) {
+            if (e != 0) {
+                (*(VFn_192B58**)e)[6](e);
+            }
+        } else {
+            if (e != 0) {
+                (*(VFn_192B58**)e)[7](e);
+            }
+        }
+    }
+
+    if (self->f600 == 1 || self->f600 == 3) {
+        func_00192DD0(self);
+    }
+}
