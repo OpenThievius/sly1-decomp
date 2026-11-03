@@ -1409,3 +1409,26 @@ void func_001FEB18(Handle_1FEB18* self)
     }
     func_001FE9F8(self);
 }
+
+struct Elem_001FF0E0 { s32 a; s32 b; s32 key; };
+struct Arr_001FF0E0 { Elem_001FF0E0** data; s32 count; };
+
+void func_001FF0E0(Arr_001FF0E0* self, Arr_001FF0E0* other)
+{
+    s32 j = other->count;
+    if (j != 0) {
+        s32 n1 = self->count;
+        s32 i = n1;
+        do {
+            Elem_001FF0E0* x = other->data[--j];
+            if (i != 0 && self->data[i - 1]->key - x->key > 0) {
+                do {
+                    self->data[i + j] = self->data[i - 1];
+                    i--;
+                } while (i != 0 && self->data[i - 1]->key - x->key > 0);
+            }
+            self->data[i + j] = x;
+        } while (j != 0);
+        self->count = n1 + other->count;
+    }
+}

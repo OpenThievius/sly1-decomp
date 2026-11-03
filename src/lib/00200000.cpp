@@ -1659,3 +1659,83 @@ s32 func_00203E28(void)
     func_001F6B40((*(volatile s32*)&D_0027942C));
     return r;
 }
+
+struct Obj_00201578 {
+    s32 err;
+    u8 pad4[0x1D0];
+    s32* table;
+};
+
+typedef void (*Fn_00201578)(u32 index);
+
+s32 func_00201500(Obj_00201578* self);
+u32 func_00201700(Obj_00201578* self);
+s32 func_002016A0(Obj_00201578* self, u32 entry, u32 index);
+
+s32 func_00201578(Obj_00201578* self, u32 index)
+{
+    s32 ret = 0;
+    Fn_00201578 fn;
+
+    if (index >= 0x20) {
+        self->err = 0x16;
+        return -1;
+    }
+    if (self->table == 0) {
+        if (func_00201500(self) != 0) {
+            return -1;
+        }
+    }
+    switch (self->table[index]) {
+    case 0:
+        return func_002016A0(self, func_00201700(self), index);
+    case 1:
+        break;
+    case -1:
+        self->err = 0x16;
+        ret = 1;
+        break;
+    default:
+        fn = (Fn_00201578)self->table[index];
+        self->table[index] = 0;
+        fn(index);
+        break;
+    }
+    return ret;
+}
+
+typedef s32 Q_00203EE0;
+
+extern u8 D_0027A600[];
+extern u8 D_0027AE48[];
+
+s32 func_002033D8(Q_00203EE0 code);
+void func_001FA7D8(Q_00203EE0* p, s32 n);
+s32 func_001F8290(Q_00203EE0* a0, s32 a1, s32 a2, Q_00203EE0* a3, s32 a4, Q_00203EE0* a5, s32 a6, s32 a7, s32 a8);
+void func_001F6B40(Q_00203EE0 code);
+
+s32 func_00203EE0(Q_00203EE0 self, s32* out)
+{
+    s32 base;
+    s32 r;
+    Q_00203EE0* g = (Q_00203EE0*)((s32*)&D_0027AA40);
+
+    if (func_002033D8(0x1A) != 0) {
+        (*(s32*)&D_0027AA40) = self;
+    } else {
+        return -1;
+    }
+    func_001FA7D8(g, 4);
+    base = (s32)D_0027A600;
+    r = func_001F8290((Q_00203EE0*)D_0027AE48, 5, 0, g, 4, (Q_00203EE0*)base, 8, 0, 0);
+    if (r < 0) {
+        func_001F6B40((*(volatile s32*)&D_0027942C));
+        return -1;
+    }
+    if (out != 0) {
+        *out = *(s32*)((u32)(base + 4) | 0x20000000);
+    }
+    base = *(s32*)((u32)base | 0x20000000);
+    func_001F6B40((*(volatile s32*)&D_0027942C));
+    return base;
+}

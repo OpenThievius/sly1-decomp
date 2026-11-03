@@ -1251,3 +1251,38 @@ void func_0020FAF0();
 void func_0020FF08();
 void func_00210000();
 extern const Fn_Table D_00250430[12] = { (Fn_Table)func_0020C148, (Fn_Table)func_0020BF78, (Fn_Table)func_0020C0A8, (Fn_Table)func_0020FE40, (Fn_Table)func_00210000, (Fn_Table)func_0020C138, (Fn_Table)func_0020C148, (Fn_Table)func_0020FF08, (Fn_Table)func_0020FAF0, (Fn_Table)func_0020C158, (Fn_Table)func_0020C168, 0 };
+
+struct Self_0020FF08 {
+    u8 pad0[0x13C];
+    s32 f13C;
+    u8 pad1[0x174 - 0x140];
+    s32 f174;
+    s32 f178;
+    u8 pad2[0x184 - 0x17C];
+    s32 f184;
+    u8 pad3[0x18C - 0x188];
+    s32 a[3];
+    s32 b[3];
+};
+
+s32 func_0020F5B8(Self_0020FF08* self, s32 k);
+
+void func_0020FF08(Self_0020FF08* self)
+{
+    s32 n;
+    s32 i;
+    if (self->f13C != 0) {
+        if (self->f184 != 0) n = (self->f178 != 0) ? 3 : 2;
+        else n = 1;
+    } else if (self->f174 != 3) {
+        n = 1;
+    } else {
+        n = (self->f184 != 0) ? 3 : 2;
+    }
+    for (i = 0; i < n; i++) {
+        self->a[i] = func_0020F5B8(self, 0x10);
+        func_0020F5B8(self, 1);
+        self->b[i] = func_0020F5B8(self, 0x10);
+        func_0020F5B8(self, 1);
+    }
+}
