@@ -12,8 +12,8 @@ assembler matters: it expands `move` to `daddu`, where a modern GNU as writes
 (`file<TAB>flags<TAB>compiler`, the compiler optional), or the `default` row
 and the `compiler` row. The game is SN GCC 2.95.3; Sony's libraries are Sony's
 own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
--ffunction-sections, so that the build can place each function at its address
-(tools/build.py).
+-ffunction-sections and -fdata-sections, so that the build can place each
+function and each global it defines at its address (tools/build.py).
 
 A compiler that only exists as Sony's Linux build (2.9-ee-991111-01, the math
 library's) runs the way OpenRAC's rac1-decomp runs it: its own 32-bit Linux
@@ -45,7 +45,7 @@ CPP_DEFINES = ["-lang-c++", "-undef", "-D__GNUC__=2", "-D__GNUC_MINOR__=9", "-D_
                "-D__mips_single_float", "-D__SIZE_TYPE__=unsigned", "-D__PTRDIFF_TYPE__=int",
                "-D__LANGUAGE_C", "-D_LANGUAGE_C", "-DLANGUAGE_C",
                "-I", "include", "-I", "src"]
-LAYOUT_FLAGS = ["-ffunction-sections"]
+LAYOUT_FLAGS = ["-ffunction-sections", "-fdata-sections"]
 # A compile takes a second or two; a run under the Windows runner can hang for good (seen with
 # wibo), so every step gives up after this many seconds and the file counts as not compiling.
 TIMEOUT = int(os.environ.get("SLY1_COMPILE_TIMEOUT", "120"))

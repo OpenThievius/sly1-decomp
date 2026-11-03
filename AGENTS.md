@@ -85,7 +85,9 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   the form C macros take (`#define NAME(...) do { ... } while (0)`), that the original
   plausibly had and retail's code needs. Never a wrapper written only to move instructions.
 - **One flag set per source file**, never per function.
-- **Globals are `extern`** until the data layout is modelled.
+- **A global is defined in C** only where its initial value matches retail's bytes at its address:
+  one file defines it, under its eight-digit `D_XXXXXXXX` name, and every other file declares it
+  `extern`. Until then it stays `extern` (its bytes come from the disassembly).
 - **Our own names and types.** Retail is stripped: every function, type, field and file name
   is chosen by us from what retail's code does.
 - If you get close but not exact, keep the attempt in `nonmatching/` with what still differs,

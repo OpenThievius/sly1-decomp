@@ -307,11 +307,12 @@ def check_function(obj, name, key, resolver, image):
                     key=lambda r: r[0])
 
     def target(rsym, addend_bits):
-        """The address a relocated field reaches, or None: by name, or for a section symbol by its function."""
+        """The address a relocated field reaches, or None: by name, or for a section symbol by its
+        function or global (-ffunction-sections, -fdata-sections)."""
         if rsym["type"] == elf.STT_SECTION and rsym["shndx"] < len(obj.sections):
             secname = obj.sections[rsym["shndx"]]["name"]
-            if secname.startswith(".text."):
-                base = resolver.address(secname[len(".text."):])
+            if secname.startswith((".text.", ".data.")):
+                base = resolver.address(secname.split(".", 2)[2])
                 return None if base is None else base + addend_bits
             return None
         t = resolver.address(rsym["name"])

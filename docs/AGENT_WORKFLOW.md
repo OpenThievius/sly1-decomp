@@ -72,8 +72,8 @@ function:
    - A field is a member of a struct with padding before it (`u8 pad[0x708];`).
    - A function it calls is declared with the arguments it is given:
      `void func_001B5F28(void* list, void* item);`.
-   - Data it refers to is `extern` with its address name: `extern u8 D_0062C568[];`. Never define
-     a variable.
+   - Data it refers to is `extern` with its address name: `extern u8 D_0062C568[];`. A worker
+     never defines a variable; defining a global is the lead's step (below, "A global defined in C").
 3. `python3 tools/check.py your.cpp func_0011A338` until it prints `EXACT`. Read the `*` lines:
    they are the instructions that differ.
 4. Then `python3 tools/check.py your.cpp func_0011A338 --version eu`. PAL usually has the same
@@ -187,6 +187,14 @@ Measured on this compiler; add to this list when you learn something.
   starts; re-run `tools/setup_asm.py` and `tools/inventory.py`. The same holds for a function
   behind the linker's leftovers (8-byte runs of an `addiu $sp` or a store, then a nop): code
   takes its address as `func_X + N`, and without a name splat joins it to them.
+- **A global defined in C.** A `.data` global (from 0x250580 in US) may be defined in the
+  one file that owns it, with its initial value: `s32* D_0025C360[2] = { D_0025C540, D_0025D540 };`.
+  Every other file keeps it `extern`. Each global gets its own section (`-fdata-sections`), and
+  `tools/c_layout.py` puts it at the address its name gives, in place of the disassembly's labels it
+  covers, which stay defined at their addresses. It must start at a label of
+  `asm/us/data/data.data.s` and end where a later one starts. Only `.data` can be defined so far
+  (not `.bss` or `.sdata`). The full build is the check: a wrong value makes it
+  `DIFFER` at that global's offset. With GCC 2.95, `= 0` stays in `.data`.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.

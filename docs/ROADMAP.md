@@ -25,8 +25,9 @@ splits are taken from other projects or from the prototype
    code takes retail's address for them and retail's bytes stay in the image (tools/rodata.py),
    which opens the functions tagged `rodata`. A C `switch` is linked too: its jump table goes with the
    object's `.rodata`, the code takes retail's table address, and `tools/check.py` compares the
-   table's case-label addresses with retail's (functions tagged `jtbl`). `.data` still comes from
-   the disassembly.
+   table's case-label addresses with retail's (functions tagged `jtbl`). A `.data` global can be
+   defined in C, at its address with its initial value (`-fdata-sections`, tools/c_layout.py);
+   the rest of `.data`, and all of `.bss` and `.sdata`, still comes from the disassembly.
 3. **Original assembly.** The functions that were not made from C (VU0 and multimedia
    instructions, kernel and system instructions, code scheduled by hand, the disassembler's own
    mark, the toolchain's own `.S` routines) and the linker's leftovers, in game code and in Sony's

@@ -26,10 +26,12 @@ import check  # noqa: E402
 import compile as cc  # noqa: E402
 import elf  # noqa: E402
 import rodata  # noqa: E402
+import todo  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
 DATA_SECTIONS = (".data", ".rodata", ".bss", ".sdata", ".sbss", ".lit4", ".lit8")
+DATA_NAME = re.compile(r"^\.data\.(D_[0-9A-F]{8})$")
 
 
 class LayoutError(Exception):
@@ -109,18 +111,27 @@ def drop_frame_tables(path):
 
 
 def placements(objects):
-    """[(address, size, object, section, symbol)] of every C function, and the aliases the link needs."""
+    """[(address, size, object, section, symbol)] of every C function, the aliases the link needs,
+    and the same list of every global a C file defines (.data.D_XXXXXXXX, -fdata-sections)."""
     resolver = check.Resolver("us")
     functions = check.load_functions("us")
     starts = {a: n for n, (a, s, k) in functions.items()}
-    placed, aliases, defined = [], {}, set()
+    placed, aliases, defined, data = [], {}, set(), []
     libcalls = check.load_libcalls("us")  # named by address in the script: no alias for them
     for src, path in objects.items():
         obj = elf.Elf(path.read_bytes())
         rel = path.relative_to(ROOT)
         for sec in obj.sections:
             if sec["name"].startswith(DATA_SECTIONS) and sec["size"]:
-                raise LayoutError("%s has %s data (%d bytes): only code can be linked from C for now. "
+                m = DATA_NAME.match(sec["name"])
+                if m:
+                    addr = int(m.group(1)[2:], 16)
+                    if addr in {d[0] for d in data}:
+                        raise LayoutError("two definitions of the global %s" % m.group(1))
+                    data.append((addr, sec["size"], rel, sec["name"], m.group(1)))
+                    continue
+                raise LayoutError("%s has %s data (%d bytes): a global defined in C is named "
+                                  "D_XXXXXXXX, at its retail address, and lives in .data (AGENTS.md). "
                                   "A constant retail loads from .rodata is read through an extern "
                                   "(extern f32 D_00219718[];), not written as a literal"
                                   % (src.relative_to(ROOT), sec["name"], sec["size"]))
@@ -150,7 +161,8 @@ def placements(objects):
         if aliases.get(name) and aliases[name] not in defined:
             aliases.pop(name)
     placed.sort()
-    return placed, aliases
+    data.sort()
+    return placed, aliases, data
 
 
 LABEL = re.compile(r"\.word\s+(\.L([0-9A-Fa-f]{8}))\b")
@@ -194,6 +206,70 @@ def split_text(key):
     return header, chunks
 
 
+def split_data(key):
+    """The header lines of asm/<key>/data/data.data.s and [(label, address, its lines)] in order."""
+    lines = (ROOT / "asm" / key / "data" / "data.data.s").read_text().splitlines()
+    starts = [i for i, l in enumerate(lines) if l.startswith("nonmatching D_")]
+    if not starts:
+        raise LayoutError("asm/%s/data/data.data.s has no labels" % key)
+    header = lines[:starts[0]]
+    chunks = []
+    for n, i in enumerate(starts):
+        name = lines[i].split()[1].rstrip(",")
+        chunks.append((name, int(name[2:], 16), lines[i:starts[n + 1] if n + 1 < len(starts) else len(lines)]))
+    return header, chunks
+
+
+def data_plan(chunks, data_placed):
+    """The order of .data: [("run", [(label, address, lines)]) or ("c", placement)], and the labels
+    a C global covers. A global starts at a label and ends where a later one starts."""
+    at = {d[0]: d for d in data_placed}
+    missing = sorted(set(at) - {a for _, a, _ in chunks})
+    if missing:
+        raise LayoutError("no label of .data starts at 0x%X, where a C global is defined" % missing[0])
+    plan, covered, end = [], {}, 0
+    for i, (name, addr, lines) in enumerate(chunks):
+        if addr < end:
+            covered[name] = addr  # inside a C global: its label stays defined at its address
+            continue
+        d = at.get(addr)
+        if d:
+            end = addr + d[1]
+            if end not in {a for _, a, _ in chunks[i + 1:]}:
+                raise LayoutError("%s (%d bytes) does not end where a label of .data starts"
+                                  % (d[4], d[1]))
+            plan.append(("c", d))
+        elif plan and plan[-1][0] == "run":
+            plan[-1][1].append((name, addr, lines))
+        else:
+            plan.append(("run", [(name, addr, lines)]))
+    return plan, covered
+
+
+def data_entries(data_placed, main_start):
+    """The linker-script lines for .data with the C globals placed, the run sources, and the labels
+    a C global covers (PROVIDEd at their addresses)."""
+    header, chunks = split_data("us")
+    plan, covered = data_plan(chunks, data_placed)
+    data_dir = ROOT / "build" / "us" / "data"
+    entries, runs = [], []
+    for kind, item in plan:
+        if kind == "c":
+            entries.append("        . = 0x%X;" % (item[0] - main_start))
+            entries.append("        %s(%s);" % (item[2], item[3]))
+            continue
+        start = item[0][1]
+        path = data_dir / ("run_%08X.s" % start)
+        write_if_changed(path, "\n".join(header + [l for _, _, ls in item for l in ls]) + "\n")
+        runs.append(path)
+        entries.append("        . = 0x%X;" % (start - main_start))
+        entries.append("        %s(.data);" % path.relative_to(ROOT).with_suffix(".s.o"))
+    for stale in data_dir.glob("run_*.s"):
+        if stale not in runs:
+            stale.unlink()
+    return entries, runs, covered
+
+
 def write_if_changed(path, text):
     if not path.exists() or path.read_text() != text:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -227,7 +303,7 @@ def run_alignment(lines):
 
 def layout(ld_script, objects):
     """Write the runs of disassembly and the linker script with the C placed. Returns (script, run sources)."""
-    placed, aliases = placements(objects)
+    placed, aliases, data_placed = placements(objects)
     syms = ld_script.with_name("undefined_syms_auto.txt")
     if syms.exists():
         aliases.update(absolute_aliases(syms.read_text()))
@@ -286,6 +362,16 @@ def layout(ld_script, objects):
     if not marker.search(text):
         raise LayoutError("%s has no text.s object to replace" % ld_script.relative_to(ROOT))
     text = marker.sub(lambda m: "\n".join(entries) if m.group(1) == ".text" else "", text)
+    if data_placed:
+        main_start = next(r[2] for r in todo.layout("us") if r[1] == "rodata")
+        data_lines, data_runs, covered = data_entries(data_placed, main_start)
+        dmarker = re.compile(r"^\s*build/us/asm/us/data/data\.data\.s\.o\(\.data\);$", re.M)
+        if not dmarker.search(text):
+            raise LayoutError("%s has no data.data.s object to replace" % ld_script.relative_to(ROOT))
+        text = dmarker.sub(lambda m: "\n".join(data_lines), text)
+        runs += data_runs
+        if covered:
+            text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(covered.items())) + "\n"
     labels = case_labels(placed)
     if labels:
         text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(labels.items())) + "\n"

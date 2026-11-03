@@ -519,6 +519,25 @@ class RunAlignmentTest(unittest.TestCase):
         self.assertEqual(c_layout.run_alignment(["  .align 4"]), 16)
 
 
+class DataPlanTest(unittest.TestCase):
+    CHUNKS = [("D_00000100", 0x100, ["a"]), ("D_00000104", 0x104, ["b"]), ("D_00000108", 0x108, ["c"]),
+              ("D_00000110", 0x110, ["d"])]
+
+    def test_a_c_global_replaces_the_labels_it_covers(self):
+        d = (0x104, 12, "x.o", ".data.D_00000104", "D_00000104")
+        plan, covered = c_layout.data_plan(self.CHUNKS, [d])
+        self.assertEqual([k for k, _ in plan], ["run", "c", "run"])
+        self.assertEqual(plan[1][1], d)
+        self.assertEqual([c[0] for c in plan[2][1]], ["D_00000110"])
+        self.assertEqual(covered, {"D_00000108": 0x108})
+
+    def test_a_c_global_must_start_and_end_at_labels(self):
+        with self.assertRaises(c_layout.LayoutError):
+            c_layout.data_plan(self.CHUNKS, [(0x102, 2, "x.o", ".data.D_00000102", "D_00000102")])
+        with self.assertRaises(c_layout.LayoutError):
+            c_layout.data_plan(self.CHUNKS, [(0x104, 6, "x.o", ".data.D_00000104", "D_00000104")])
+
+
 def tiny_object(rtypes=(5, 6), text_words=(0x3C020000, 0x8C420000)):
     """A little-endian ELF32 object: one function in .text.func_X, a .rodata and its .rel.text."""
     import struct

@@ -79,7 +79,8 @@ def build_run(src):
         # GNU as aligns a MIPS .text to 16; a run starts wherever its first function does
         # (8-byte aligned, or 4 in the libraries), so its section asks for no more than that.
         start = int(src.stem.split("_")[-1], 16)
-        run([tool("objcopy"), "--set-section-alignment", ".text=%d" % (8 if start % 8 == 0 else 4), str(out)])
+        section = ".data" if src.parent.name == "data" else ".text"
+        run([tool("objcopy"), "--set-section-alignment", "%s=%d" % (section, 8 if start % 8 == 0 else 4), str(out)])
 
 
 def first_difference(a, b):
@@ -110,7 +111,7 @@ def main(argv=None):
             import c_layout
             objects = c_layout.compile_sources(args.jobs)
             ld_script, runs, placed = c_layout.layout(ld_script, objects)
-        objs = [o for o in objects_of(ld_script) if not o.startswith(("build/%s/src/" % key, "build/%s/text/" % key))]
+        objs = [o for o in objects_of(ld_script) if not o.startswith(("build/%s/src/" % key, "build/%s/text/" % key, "build/%s/data/" % key))]
         with ThreadPoolExecutor(args.jobs) as pool:
             list(pool.map(lambda o: build_object(o, key), objs))
             if key == versions.primary():
