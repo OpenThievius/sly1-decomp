@@ -28,3 +28,7 @@ func_00202DA0 = 0x00202DA0; // type:func
 func_00202E50 = 0x00202E50; // type:func
 func_00203010 = 0x00203010; // type:func
 func_002097E0 = 0x002097E0; // type:func
+
+// A throw function that splat joins to the exception-specification check before it, after that
+// function's padding: nothing calls it directly. Named by us.
+func_001FEDC8 = 0x001FEDC8; // type:func
