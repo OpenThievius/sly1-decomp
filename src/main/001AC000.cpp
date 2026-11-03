@@ -1829,3 +1829,146 @@ void func_001AD3F0(Obj_1AD3F0* self)
     func_0015E318(&buf, &out, 0, D_00262280);
     func_0015C900(self->f4);
 }
+
+extern u8 D_00262280[];
+
+struct Out_1ACAA8;
+void func_00137228(Out_1ACAA8* out, f32 x, f32 y);
+void func_00137238(Out_1ACAA8* out, f32 x, f32 y);
+void func_00137248(Out_1ACAA8* out, s32* value);
+void func_00137260(Out_1ACAA8* out, s32 flag);
+void func_00137268(Out_1ACAA8* out, s32 flag);
+struct Out_1ACAA8 {
+    u8 d[0x20];
+    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
+    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
+    void Color(s32 c) { func_00137248(this, &c); }
+    void FlagA(s32 f) { func_00137260(this, f); }
+    void FlagB(s32 f) { func_00137268(this, f); }
+};
+
+struct Hnd_1ACAA8;
+typedef void (*Draw_1ACAA8)(void* a, void* h, Out_1ACAA8* out, void* d);
+typedef void (*Mode_1ACAA8)(void* a, s32 b, void* d);
+typedef void (*Chr_1ACAA8)(void* a, s32 ch, s32 color, void* d, f32 x, f32 y);
+typedef f32 (*Adv_1ACAA8)(void* a, s32 ch);
+
+struct Vt_1ACAA8 {
+    u8 pad0[0x18];
+    s16 adj18;
+    s16 pad1a;
+    Adv_1ACAA8 f1c;
+    s16 adj20;
+    s16 pad22;
+    Mode_1ACAA8 f24;
+    u8 pad28[0x30 - 0x28];
+    s16 adj30;
+    s16 pad32;
+    Chr_1ACAA8 f34;
+    s16 adj38;
+    s16 pad3a;
+    Mode_1ACAA8 f3c;
+    u8 pad40[0x48 - 0x40];
+    s16 adj48;
+    s16 pad4a;
+    Draw_1ACAA8 f4c;
+};
+
+struct Hnd_1ACAA8 {
+    u8 pad[0x4C];
+    Vt_1ACAA8* vt;
+    f32 Advance(s32 ch) { return vt->f1c((u8*)this + vt->adj18, ch); }
+    void Begin(s32 a, void* d) { vt->f24((u8*)this + vt->adj20, a, d); }
+    void Glyph(s32 ch, s32 color, void* d, f32 x, f32 y) { vt->f34((u8*)this + vt->adj30, ch, color, d, x, y); }
+    void End(s32 a, void* d) { vt->f3c((u8*)this + vt->adj38, a, d); }
+};
+
+struct Ref_1ACAA8 {
+    Hnd_1ACAA8* obj;
+};
+
+struct Obj_1ACAA8 {
+    u8 pad0[4];
+    Hnd_1ACAA8* f4;
+    s8 f8[0x200];
+    s32 f208;
+    u8 pad2[0x210 - 0x20C];
+    Ref_1ACAA8* f210;
+    u8 pad3[0x220 - 0x214];
+    f32 f220;
+    f32 f224;
+    f32 f228;
+    f32 f22c;
+    u8 pad4[0x234 - 0x230];
+    f32 f234;
+    f32 f238;
+    f32 f23c;
+    u8 pad5[0x250 - 0x240];
+    s32 f250;
+};
+
+void func_001AA790(Obj_1ACAA8* self);
+s32 func_001E2100(s8* s);
+
+struct Clamp_1ACAA8 {
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        return x < lo ? lo : (hi < x ? hi : x);
+    }
+};
+
+void func_001ACAA8(Obj_1ACAA8* self)
+{
+    Out_1ACAA8 out;
+    s32 n;
+    s32 i;
+    f32 c;
+    f32 rest;
+    f32 x;
+    f32 y;
+
+    switch (self->f250) {
+    case 2:
+        func_001AA790(self);
+        return;
+    case 1:
+    case 3:
+        break;
+    default:
+        return;
+    }
+    n = func_001E2100(self->f8);
+    if (n == 0) {
+        return;
+    }
+    x = self->f224;
+    y = self->f22c;
+    c = Clamp_1ACAA8::Of(self->f23c / (1.0f / (f32)n), 0.0f, 1.0f);
+    rest = 1.0f - c;
+    if (self->f210 != 0) {
+        s32 grey = 0xFF808080;
+        f32 w = x * self->f23c + y * (1.0f - self->f23c) + self->f234;
+        f32 h = self->f238;
+        out.Pos(x * c + y * rest, self->f220);
+        out.Size(w, h);
+        out.Color(grey);
+        out.FlagA(0);
+        out.FlagB(0);
+        Hnd_1ACAA8* o = self->f210->obj;
+        if (o != 0) {
+            o->vt->f4c((u8*)o + o->vt->adj48, self->f210, &out, D_00262280);
+        }
+    }
+    self->f4->Begin(0, D_00262280);
+    for (i = 0; i < n; i++) {
+        s32 ch = self->f8[i];
+        f32 d;
+        c = Clamp_1ACAA8::Of(self->f23c / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
+        rest = 1.0f - c;
+        self->f4->Glyph(ch, self->f208, D_00262280, c * x + rest * y, self->f228);
+        d = self->f4->Advance(ch);
+        x += d;
+        y += d;
+    }
+    self->f4->End(0, D_00262280);
+}
