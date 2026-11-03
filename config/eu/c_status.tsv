@@ -834,6 +834,7 @@ func_001300D8	func_00130208	match
 func_001300E8	func_00130218	match	
 func_00130110	func_00130240	match	
 func_00130158	func_00130288	match	
+func_00130168	func_00130298	match	
 func_001303F0	func_00130520	match	
 func_00130B48	func_00130C78	match	
 func_00130C20	func_00130D50	match	
