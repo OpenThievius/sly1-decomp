@@ -1123,3 +1123,71 @@ u64 func_001FB528(double a)
     }
     return v;
 }
+
+struct Node_001F8C38 { s32 f0; s32 f4; };
+struct Ctor_001F8C38 { s32 a0; s32 a1; s32 a2; s32 a3; s32 a4; s32 a5; };
+struct Glob_001F8C38 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; };
+struct Q_001F8C38 { u8 pad[4]; };
+
+extern u8 D_00627880[];
+extern u8 D_00628940[];
+extern u8 D_006284C0[];
+extern u8 D_00628B40[];
+
+s32 func_001F89B8(s32 a);
+void func_001F89E8(void);
+s32 func_001F6B20(Ctor_001F8C38* c);
+void func_001F6B30(s32 h);
+void func_001F6B60(s32 h);
+s32 func_001F8290(Q_001F8C38* a, s32 b, s32 c, Q_001F8C38* d, s32 e, u8* f, s32 g, s32 h, s32 i);
+
+struct Lock_1F8C38 { static s32 Ready(s32 n) { func_001F89B8(n); return ((s32*)&D_002771B8)[0]; } };
+struct Min_1F8C38 { static s32 Of(s32 a, s32 b) { return a < b ? a : b; } };
+
+s32 func_001F8C38(s32 a0)
+{
+    Glob_001F8C38* g = (Glob_001F8C38*)D_00627880;
+    Node_001F8C38* p;
+    s32 h;
+    s32 out;
+    s32 v;
+    Ctor_001F8C38 ctor;
+    u8* q;
+
+    p = (struct Node_001F8C38 *)func_001F8538(a0);
+    if (Lock_1F8C38::Ready(1) == 0) {
+        func_001F89E8();
+        return -1;
+    }
+    if (p == 0 || p->f4 == 0) {
+        func_001F89E8();
+        return -9;
+    }
+    g->fC = p->f0;
+    g->f10 = ((s32)p - (s32)D_00628940) >> 4;
+    ctor.a1 = 1;
+    ctor.a2 = 0;
+    ctor.a5 = 0;
+    h = func_001F6B20(&ctor);
+    g->f0 = h;
+    g->f4 = (s32)&out;
+    g->f8 = 4;
+    q = D_006284C0;
+    v = func_001F8290((Q_001F8C38*)D_00628B40, 1, 0, (Q_001F8C38*)g, 0x14, q, 4, 0, 0);
+    if (v >= 0) {
+        p->f4 = 0;
+    } else {
+        func_001F6B30(h);
+        func_001F89E8();
+        return -0xB;
+    }
+    v = *(s32*)((s32)q | 0x20000000);
+    func_001F89E8();
+    if (v == 0) {
+        func_001F6B30(h);
+        return -0xB;
+    }
+    func_001F6B60(h);
+    func_001F6B30(h);
+    return Min_1F8C38::Of(out, 0);
+}

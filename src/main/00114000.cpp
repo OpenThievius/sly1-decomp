@@ -2093,3 +2093,63 @@ void* func_00117910(void* a0, void* a1, Src_117910* a2, void* a3, s32 a4)
     func_0011B060(&q1, 2);
     return a0;
 }
+
+struct Val_1151C0;
+struct Obj_1151C0;
+
+void func_0011B008(Val_1151C0* v);
+void func_0011B018(Val_1151C0* dst, const Val_1151C0* src);
+void func_0011B060(Val_1151C0* v, s32 mode);
+Val_1151C0& func_0011B0A8(Val_1151C0* dst, const Val_1151C0& src);
+void func_0011B6C0(Val_1151C0* v, Val_1151C0* target);
+
+struct Val_1151C0 {
+    s32 tag;
+    Val_1151C0* f4;
+    Val_1151C0* f8;
+    Val_1151C0() { func_0011B008(this); }
+    Val_1151C0(const Val_1151C0& o) { func_0011B018(this, &o); }
+    ~Val_1151C0() { func_0011B060(this, 2); }
+};
+
+struct Cell_1151C0 : Val_1151C0 {
+    Cell_1151C0() { tag = -1; }
+};
+
+struct Obj_1151C0 {
+    s32 f0;
+    s32 f4;
+    Val_1151C0 m;
+};
+
+Val_1151C0 func_0011A080(Val_1151C0* expr, s32 c);
+
+Val_1151C0 func_001151C0(s32 unused, Obj_1151C0* obj, s32 c)
+{
+    Val_1151C0 q;
+    Cell_1151C0 arr[5];
+    if (obj->m.tag == 0x1E) {
+        Val_1151C0* p[2];
+        for (u32 i = 0; i < 2; i++) {
+            p[i] = (struct Val_1151C0 *)func_0011AF28();
+        }
+        func_0011B6C0(&arr[0], &arr[1]);
+        arr[0].f8 = 0;
+        func_0011B6C0(&arr[1], &arr[3]);
+        arr[1].f8 = &arr[2];
+        func_0011B6C0(&arr[2], &arr[4]);
+        arr[2].f8 = 0;
+        arr[3].tag = 0x11;
+        arr[3].f8 = p[0];
+        func_0011B0A8(p[0], *(Val_1151C0*)obj);
+        arr[4].tag = 0x11;
+        arr[4].f8 = p[1];
+        Val_1151C0* m = &obj->m;
+        for (Val_1151C0* l = m->f4; l != 0; l = l->f8) {
+            func_0011B0A8(p[1], *l);
+            func_0011B0A8(&q, func_0011A080(&arr[0], c));
+        }
+    }
+    q.tag = 0x22;
+    return q;
+}

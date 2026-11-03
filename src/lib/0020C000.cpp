@@ -1395,3 +1395,61 @@ void func_0020EDD0(Ctx_20EDD0* c, u8* arr, s32 a2, s32* out, s32 i, s32 mode, s3
         func_0020EF70(c, arr + (j + 16), a2, a7, s6, s3, fp, 0);
     }
 }
+
+extern u32 D_0027B040[];
+
+struct Sub_20F248;
+struct Self_20F248 {
+    u8 pad0[0x11C];
+    s32 f11C;
+    u8 pad1[0x6F8];
+    s32 f818;
+    u8 pad2[0x1C];
+    s32 f838;
+    s32 f83C;
+    u8 pad3[0x18];
+    Sub_20F248* f858;
+};
+
+void func_0020B1E0(Sub_20F248* s);
+
+s16 func_0020F248(Self_20F248* self, s32 mode)
+{
+    s32 m = 0;
+    s32 n = 0;
+    s32 cmd;
+    s64 st;
+    s64 hw;
+
+    if ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000) {
+        do {
+            if (n++ >= 5001) {
+                func_0020B1E0(self->f858);
+                n = 0;
+            }
+        } while ((*(volatile u32*)0x10002010 & 0x80004000) == 0x80000000);
+    }
+    cmd = (mode << 26) | 0x30000000;
+    *(volatile u32*)0x10002000 = cmd;
+    self->f818 = D_0027B040[cmd >> 28];
+    st = *(volatile s64*)0x10002000;
+    if (st < 0) {
+        do {
+            if (m++ >= 5001) {
+                func_0020B1E0(self->f858);
+                m = 0;
+            }
+            st = *(volatile s64*)0x10002000;
+        } while (st < 0);
+    }
+    u32 cnt = *(volatile u32*)0x10002020;
+    hw = *(s64*)0x10002030;
+    self->f838 = (s32)hw;
+    if (hw < 0) {
+        self->f83C = (-(cnt & 0x1F)) & 0x1F;
+    } else {
+        self->f83C = 0x20;
+    }
+    self->f11C = ((s32)st == 0);
+    return (s16)st;
+}

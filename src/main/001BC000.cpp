@@ -1571,3 +1571,70 @@ void func_001BC4D8(Big_1BC4D8* self, Node_1BC4D8** out)
         func_001861E8(self->ctx, freed);
     }
 }
+
+struct B8_1BF920 { u8 b[8]; };
+struct Q16_1BF920 { u64 a; u64 b; } __attribute__((aligned(16)));
+struct Obj_1BF920 {
+    u8 pad0[4];
+    s32 f04;
+    u8 pad8[4];
+    Obj_1BF920* f0C;
+    f32 f10;
+    f32 f14;
+    u8 pad18[8];
+    Q16_1BF920 f20;
+    u8* f30;
+    f32 f34;
+    f32 f38;
+    s32 f3C;
+    u8 pad40[4];
+    s32 f44;
+    s32 f48;
+    u8 f4C;
+    u8 pad4D[3];
+    f32 f50;
+    s32 f54;
+    f32 f58;
+    f32 f5C;
+    u8 pad60[4];
+    B8_1BF920 f64;
+    u8 pad6C[0xC];
+    union { B8_1BF920 v; f32 f; } f78;
+    union { B8_1BF920 v; f32 f; } f80;
+};
+
+extern s32 D_0027474C;
+void* func_001F5C0C(Obj_1BF920* p, s32 v, s32 n);
+s32 func_001EAA70(s32 a, s32 b);
+void func_001BF620(Q16_1BF920* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
+void func_001BF428(Obj_1BF920* self);
+
+void func_001BF920(Obj_1BF920* self, Obj_1BF920* parent, s32 a2, u8* a3, Q16_1BF920* q, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, B8_1BF920* p78, B8_1BF920* p80)
+{
+    B8_1BF920 keep = self->f64;
+    func_001F5C0C(self, 0, 0x90);
+    self->f64 = keep;
+    if (a3) q = (Q16_1BF920*)(a3 + 0x140);
+    self->f0C = parent;
+    if (parent) *(Obj_1BF920**)parent = self;
+    self->f58 = f15;
+    self->f5C = f16;
+    s32 id = D_0027474C;
+    self->f04 = id++;
+    self->f3C = a2;
+    self->f30 = a3;
+    self->f34 = f12;
+    self->f38 = f13;
+    self->f14 = f14;
+    self->f48 = 0;
+    D_0027474C = id;
+    self->f4C = func_001EAA70(0, 3);
+    if (p78) self->f78.v = *p78; else self->f78.f = -1.0f;
+    if (p80) self->f80.v = *p80; else self->f80.f = -1.0f;
+    if (q) self->f20 = *q;
+    s32 fl = 0;
+    if (q || self->f78.f >= 0.0f) fl = 1;
+    self->f44 = fl;
+    func_001BF620(q, &self->f50, &self->f54, f14, f12, f13);
+    func_001BF428(self);
+}

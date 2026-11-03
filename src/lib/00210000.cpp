@@ -458,3 +458,78 @@ void func_00210A80(Ctx_210A80* c, Src_210A80* a, Src_210A80* b)
     }
 
 }
+
+struct Node_2107E0 {
+    u8 pad0[0x18];
+    s64 f18;
+    s64 f20;
+    s32 f28;
+    s32 f2C;
+    s32 f30;
+    s32 f34;
+    s32 f38;
+    s32 f3C;
+    s32 f40;
+};
+
+struct Obj_2107E0 {
+    u8 pad0[0x70];
+    s32 f70;
+    u8 pad1[0x4];
+    s64 f78;
+    s32 f80;
+    u8 pad2[0x4];
+    s64 f88;
+    s32 f90;
+    u8 pad3[0x5C];
+    s64 fF0;
+    s32 fF8;
+};
+
+s64 func_001FE890(s64 a, s64 b);
+
+void func_002107E0(Obj_2107E0* self, Node_2107E0* node, s64* out1, s64* out3, s64* out4)
+{
+    s32 s0;
+    s32 s1;
+    s32 s2;
+    s32 s6;
+    s32 s7;
+    s64 v;
+    s64 t88;
+
+    if (self->f70 != 0) {
+        v = node->f18;
+        if (v >= 0) {
+            *out1 = v;
+        } else {
+            s7 = self->f80;
+            if (s7 < 0) {
+                *out1 = v;
+            } else {
+                t88 = self->f88;
+                s0 = (s32)t88;
+                s2 = s0 & 1;
+                v = func_001FE890(s2, self->f78 & 1);
+                s6 = self->f90;
+                v = func_001FE890(v, s6 & 1);
+                s1 = (s32)v;
+                *out1 = (s64)(s7 + ((s32)(func_001FE890(self->f78, s0) >> 1) + s1));
+                if (func_001FE890(s2, self->f78 & 1)) {
+                    self->f90 = s6 + 1;
+                }
+            }
+        }
+    } else {
+        *out1 = node->f18;
+    }
+    if (self->fF8 == 2) {
+        if (self->fF0 >= 0) {
+            *out1 = self->fF0;
+            self->fF8 = 0;
+            self->fF0 = -1;
+        }
+    }
+    *out3 = node->f20;
+    *out4 = ((s64)node->f34 << 8) | (node->f2C | ((s64)node->f38 << 7) | ((s64)node->f3C << 6) | ((s64)node->f40 << 5) | ((s64)node->f30 << 3));
+}

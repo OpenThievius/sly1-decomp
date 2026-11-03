@@ -1672,3 +1672,93 @@ s32 func_001429F8(s32 count, Span_1429F8* spans)
     func_0018D6F0();
     return dst - spans;
 }
+
+extern s32 D_00262C68;
+extern u8 D_00262C70[];
+extern u8 D_00262D38[];
+
+struct Ctl_143E40;
+typedef void (*VFn2_143E40)(void* self, void* a, void* b, f32 dt);
+struct Node_143E40 {
+    VFn2_143E40* vt;
+};
+
+f32 func_001EA620(f32 a, f32 b, f32 c, f32 d, void* p, void* q);
+void func_001433E0(Ctl_143E40* c, void* n, void* x);
+void func_00143208(Ctl_143E40* c, void* n, f32 dt, void* x);
+void func_00143940(Ctl_143E40* c, f32 v);
+void func_00143560(Ctl_143E40* c);
+
+struct Ctl_143E40 {
+    u8 pad0[0x1C4];
+    f32 f1C4;
+    f32 f1C8;
+    f32 f1CC;
+    f32 f1D0;
+    u8 pad1D4[0x220 - 0x1D4];
+    s32 i220;
+    s32 i224;
+    s32 i228;
+    u8 pad22C[0x2E0 - 0x22C];
+    void* p2E0;
+    u8 pad2E4[0x2F0 - 0x2E4];
+    u8 b2F0[0xE0];
+    s32 i3D0;
+    u8 pad3D4[4];
+    Node_143E40* p3D8;
+    void* p3DC;
+};
+
+typedef void (*VFn_143E40)(void* self, f32 dt, void* a);
+
+void func_00143E40(Ctl_143E40* self, s32 flag, f32 dt)
+{
+    if (self->i220 != 0) {
+        self->i220 = 0;
+        self->i224 = 1;
+        self->i228 = 0;
+    }
+    if (self->i3D0 > 0) {
+        Node_143E40* n = self->p3D8;
+        Node_143E40* prev = 0;
+        void* last = 0;
+        if (n != 0) {
+            do {
+                void* o = self->p3DC;
+                u8* x;
+                if (o != 0) {
+                    x = self->b2F0;
+                    if (o != last) {
+                        ((VFn_143E40)(*(void***)o)[0x124 / 4])(o, dt, x);
+                        if (prev != 0 || o != self->p2E0) {
+                            func_001433E0(self, o, x);
+                        }
+                        func_00143208(self, o, dt, x);
+                        self->p2E0 = o;
+                        last = o;
+                    }
+                } else {
+                    x = 0;
+                }
+                VFn2_143E40* vt = n->vt;
+                if (vt[4] != 0) {
+                    u8* t = (D_00262C68 & 1) ? D_00262C70 : D_00262D38;
+                    vt[4](n, x, t, dt);
+                }
+                prev = n;
+                if (self->i3D0 <= 0) break;
+                n = self->p3D8;
+            } while (n != prev);
+        }
+    }
+    if (self->i224 != 0) {
+        func_00143940(self, self->f1C8);
+    } else if (self->f1C4 != self->f1C8) {
+        self->f1C4 = func_001EA620(self->f1C4, self->f1CC, self->f1C8, dt, &self->f1D0, &self->f1CC);
+        func_00143560(self);
+    }
+    if (flag != 0) {
+        self->i228 = 0;
+        self->i224 = 0;
+    }
+}
