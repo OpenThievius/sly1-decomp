@@ -1140,3 +1140,101 @@ end:
     func_00191EB0(2);
     self->f0 = 0;
 }
+
+struct Rgba_1E6C20 { u8 c[4]; };
+struct Elem_1E6C20 { f32 f0; f32 f4; f32 f8; f32 fC; u8 pad[0x2C - 0x10]; };
+struct Self_1E6C20 {
+    u8 pad0[0x21C]; f32 f21C; f32 f220;
+    u8 pad1[0x260 - 0x224]; s32 f260; f32 f264;
+    u8 pad2[0x280 - 0x268]; Elem_1E6C20 elems[1];
+};
+struct Buf_1E6C20;
+
+extern f32 D_00261868;
+extern Rgba_1E6C20 D_002610D8;
+extern Rgba_1E6C20 D_002610E0;
+
+void func_001613C0(Buf_1E6C20* b, s32 a1, s32 a2, s32 a3);
+void func_00161458(Buf_1E6C20* b, u32 c);
+void func_001615F0(Buf_1E6C20* b, s32 x, s32 y, s32 a3, s32 a4);
+void func_001E6268(Self_1E6C20* self, s32* first, s32* last);
+
+struct Lerp_1E6C20 {
+    static u8 Of(s32 a, s32 b, f32 t)
+    {
+    if (a == b) return b;
+    if (a < b) return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
+    return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
+    }
+};
+
+#define SX_1E6C20(x) ((s32)(((x) + 1728.0f) * 16.0f))
+#define SY_1E6C20(y) ((s32)(((y) * 0.45454547f + 1936.0f) * 16.0f))
+
+struct Clamp_1E6C20 {
+    static f32 Of(f32 x, f32 lo, f32 hi)
+    {
+        if (x < lo) return lo;
+        if (hi < x) return hi;
+        return x;
+    }
+};
+
+void func_001E6C20(Self_1E6C20* self, Buf_1E6C20* buf)
+{
+    Rgba_1E6C20 c;
+    f32 t;
+    switch (self->f260) {
+    case 0:
+        t = Clamp_1E6C20::Of((D_00261868 - self->f264) * 5.0f, 0.0f, 1.0f);
+        break;
+    case 1:
+        t = Clamp_1E6C20::Of(1.0f - (D_00261868 - self->f264) * 5.0f, 0.0f, 1.0f);
+        break;
+    }
+    func_001613C0(buf, 0, 1, 1);
+    {
+        Rgba_1E6C20 a = D_002610D8;
+        Rgba_1E6C20 b = D_002610E0;
+        Rgba_1E6C20 r;
+        r.c[0] = Lerp_1E6C20::Of(a.c[0], b.c[0], t);
+        r.c[1] = Lerp_1E6C20::Of(a.c[1], b.c[1], t);
+        r.c[2] = Lerp_1E6C20::Of(a.c[2], b.c[2], t);
+        r.c[3] = Lerp_1E6C20::Of(a.c[3], b.c[3], t);
+        c = r;
+    }
+    func_00161458(buf, *(u32*)&c);
+    func_001613C0(buf, 0x44, 1, 4);
+    f32 x0 = self->f21C + *(f32*)((u8*)self + 0xC4C);
+    f32 y0 = self->f220 + 62.7f;
+    f32 xe = self->f21C + *(f32*)((u8*)self + 0xC50);
+    s32 first, last;
+    func_001E6268(self, &first, &last);
+    Elem_1E6C20* e = &self->elems[first];
+    f32 len = *(f32*)((u8*)self + 0xC54);
+    f32 xa = x0 + e->f0 * 62.7f;
+    f32 xb = x0 + (len + 62.7f) * e->f0;
+    f32 ya = y0 + e->f8 * 62.7f;
+    f32 yb = ya - len;
+    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
+    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
+    func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
+    func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+    for (s32 i = first; i < last; i++) {
+        e = &self->elems[i];
+        xa = x0 + e->f0 * 62.7f;
+        ya = y0 + e->f8 * 62.7f;
+        xb = x0 + (*(f32*)((u8*)self + 0xC54) + 62.7f) * e->f0;
+        yb = y0 + (*(f32*)((u8*)self + 0xC54) + 62.7f) * e->f8;
+        func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
+        func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+    }
+    xa = x0 + e->f4 * 62.7f;
+    ya = y0 + e->fC * 62.7f;
+    yb = ya + *(f32*)((u8*)self + 0xC54);
+    xb = x0 + (*(f32*)((u8*)self + 0xC54) + 62.7f) * e->f4;
+    func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
+    func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
+    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
+}

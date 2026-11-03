@@ -3127,6 +3127,7 @@ func_001E5E70	func_001E6EA0	differs
 func_001E6188	func_001E71B8	match	version-specific
 func_001E6268	func_001E7298	match	version-specific
 func_001E62A8	func_001E72D8	differs	
+func_001E6C20	func_001E7C50	differs	
 func_001E73B8	func_001E83E8	match	
 func_001E7440	func_001E8470	match	version-specific
 func_001E7460	func_001E8490	match	version-specific
