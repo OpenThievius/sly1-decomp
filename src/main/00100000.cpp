@@ -2389,3 +2389,28 @@ void* func_00101B80(void* self, void* x, s32 unused, s32 c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+struct Quad_1000C8 { s32 a, b, c, d; };
+struct Frame_1000C8 { Quad_1000C8 q; Quad_1000C8 t; s32 n; s32 out; };
+
+void func_0011B008(Quad_1000C8* q);
+void func_0011B018(void* dst, Quad_1000C8* src);
+void func_0011B060(Quad_1000C8* q, int mode);
+void func_0011B0A8(Quad_1000C8* a, Quad_1000C8* b);
+s32 func_0011B5F0(Quad_1000C8* q, s32 flag);
+void func_001C23B0(Quad_1000C8* t, int mode, int c, void* z, void* z2);
+s32 func_001300E8(void* list, s32 value);
+
+void* func_001000C8(void* self, void* x, int unused, int c)
+{
+    Frame_1000C8 f;
+    func_0011B008(&f.q);
+    f.n = 7;
+    func_001C23B0(&f.t, 1, c, &f.n, &f.out);
+    func_0011B0A8(&f.q, &f.t);
+    func_0011B060(&f.t, 2);
+    (void)func_0011B5F0(&f.q, func_001300E8(x, f.out));
+    func_0011B018(self, &f.q);
+    func_0011B060(&f.q, 2);
+    return self;
+}

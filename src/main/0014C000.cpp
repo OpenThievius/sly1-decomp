@@ -1559,3 +1559,29 @@ void func_0014C018(Self_0014C018* self)
     self->f464 = 0;
     D_0027C00C = (Mgr_14C668*)self;
 }
+
+struct __attribute__((aligned(16))) Vec_14DB78 { f32 v[4]; };
+struct Src_14DB78;
+struct VT_14DB78 {
+    void* slot0;
+    void (*f4)(Src_14DB78* self, Vec_14DB78* out, s32 flag);
+};
+struct Src_14DB78 { VT_14DB78* vt; };
+struct Obj_14DB78 {
+    Src_14DB78* src;
+    Vec_14DB78* a;
+    Vec_14DB78* b;
+};
+
+void func_00186320(Vec_14DB78* p, Vec_14DB78* a, Vec_14DB78* b, f32* o1, f32* o2);
+
+f32 func_0014DB78(Obj_14DB78* self)
+{
+    Vec_14DB78 p;
+    f32 o1;
+    f32 o2;
+    if (self->src->vt->f4)
+        self->src->vt->f4(self->src, &p, 0);
+    func_00186320(&p, self->a, self->b, &o1, &o2);
+    return o2;
+}

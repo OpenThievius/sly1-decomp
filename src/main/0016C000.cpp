@@ -1312,3 +1312,48 @@ void func_0016E238(Stream_16E238* self)
     }
     func_0016E630(self, mode, n);
 }
+
+void func_001B93D8(void);
+
+void func_0016C4E8(void)
+{
+    func_001B93D8();
+}
+
+struct Glob_16F478 { u8 pad0[0x19D8]; s32 f19D8; s32 f19DC; s32 f19E0; u8 pad1[4]; s32 f19E8; };
+struct Obj_16F478;
+struct Vt_16F478 { u8 pad0[0x20]; void (*f20)(Obj_16F478* self, char* text); u8 pad1[0x14]; void (*f38)(Obj_16F478* self); };
+struct Obj_16F478 { Vt_16F478* vt; };
+
+extern Glob_16F478* D_002623C0;
+extern Obj_16F478 D_0026EC70;
+extern u8 D_002483B8[];
+extern u8 D_0024A848[];
+
+s32 func_001602A0(void);
+void func_001E2138(char* dst, const u8* src);
+s32 func_001E1FD0(char* dst, const u8* fmt, ...);
+void func_001AA8B8(Obj_16F478* self, f32 v);
+
+void func_0016F478(void)
+{
+    char text[0x40];
+    char buf[0x10];
+
+    if ((D_002623C0->f19D8 << 8 | D_002623C0->f19DC) == 0x400) {
+        if ((func_001602A0() & 6) == 6) {
+            if (D_002623C0->f19E8 == 99 && D_002623C0->f19E0 == 0) {
+                char* p = buf;
+                func_001E2138(p, D_002483B8);
+                while (*p != 0) {
+                    *p ^= 0x23;
+                    p++;
+                }
+                func_001E1FD0(text, D_0024A848, buf);
+                D_0026EC70.vt->f20(&D_0026EC70, text);
+                func_001AA8B8(&D_0026EC70, 10.0f);
+                D_0026EC70.vt->f38(&D_0026EC70);
+            }
+        }
+    }
+}

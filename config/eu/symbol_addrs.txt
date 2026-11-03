@@ -3,3 +3,23 @@ func_00185F58 = 0x00185F58; // type:func
 func_0018ECA8 = 0x0018ECA8; // type:func
 func_00200208 = 0x00200208; // type:func
 func_00200288 = 0x00200288; // type:func
+
+// The same function starts behind the linker's leftovers, at PAL's addresses.
+func_001000C8 = 0x001000C8; // type:func
+func_00127598 = 0x00127598; // type:func
+func_00135F90 = 0x00135F90; // type:func
+func_00135FA8 = 0x00135FA8; // type:func
+func_00142C98 = 0x00142C98; // type:func
+func_0014DE28 = 0x0014DE28; // type:func
+func_0015AB70 = 0x0015AB70; // type:func
+func_0015EB70 = 0x0015EB70; // type:func
+func_0016CB30 = 0x0016CB30; // type:func
+func_0016FAD0 = 0x0016FAD0; // type:func
+func_001E33C0 = 0x001E33C0; // type:func
+func_001EC4D8 = 0x001EC4D8; // type:func
+func_001FB520 = 0x001FB520; // type:func
+func_00204048 = 0x00204048; // type:func
+func_002040E0 = 0x002040E0; // type:func
+func_00204190 = 0x00204190; // type:func
+func_00204350 = 0x00204350; // type:func
+func_0020ACA8 = 0x0020ACA8; // type:func

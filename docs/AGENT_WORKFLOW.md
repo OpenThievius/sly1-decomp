@@ -184,7 +184,9 @@ Measured on this compiler; add to this list when you learn something.
 - **A function that cannot match for its size.** If a function's code is byte-identical and the
   checker still says retail has more bytes after it, the function table gives it the size of the
   function entered through a pointer after it. `config/<version>/symbol_addrs.txt` names those
-  starts (four so far); re-run `tools/setup_asm.py` and `tools/inventory.py`.
+  starts; re-run `tools/setup_asm.py` and `tools/inventory.py`. The same holds for a function
+  behind the linker's leftovers (8-byte runs of an `addiu $sp` or a store, then a nop): code
+  takes its address as `func_X + N`, and without a name splat joins it to them.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.

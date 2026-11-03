@@ -1495,3 +1495,31 @@ s32 func_001EAA70(s32 a, s32 b)
     r = r % span;
     return a + r;
 }
+
+struct Obj_1EB460 { u8 pad0[0x684]; f32 f684; };
+struct Time_1EB460 { u8 pad0[0xC]; f32 fC; };
+
+extern Time_1EB460* D_002623C8;
+extern f32 D_00275C80[];
+extern f32 D_00275C60[];
+extern f32 D_00275C70[];
+
+void func_001921A8(Obj_1EB460* self);
+
+void func_001EB460(Obj_1EB460* self)
+{
+    func_001921A8(self);
+    f32 t = D_002623C8->fC;
+    f32 x = D_00275C80[0] + t * (D_00275C80[1] + t * D_00275C80[2]);
+    f32 lo = D_00275C60[0];
+    f32 hi = D_00275C60[1];
+    f32 c;
+    if (x < lo) {
+        c = lo;
+    } else if (hi < x) {
+        c = hi;
+    } else {
+        c = x;
+    }
+    self->f684 = (1.0f - c) * D_00275C70[0] + c * D_00275C70[1];
+}

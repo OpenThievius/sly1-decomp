@@ -1496,3 +1496,31 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     }
     return out - buf;
 }
+
+struct Init_1E2398 { s32 f00; void (*f04)(void); s32 f08; s32 f0C; s32 f10; s32 f14; u8 pad[0x18]; };
+
+extern u8 D_006056D0[];
+extern u8 D_002832F0[];
+struct Pair_1E2398 { s32 f0; s32 f4; };
+extern Pair_1E2398 D_00275958;
+
+void func_0015EE80(void);
+s32 func_001F6A90(void);
+void func_001F6A50(s32 a, s32 b);
+s32 func_001F5C0C(Init_1E2398* p, s32 zero, s32 size);
+s32 func_001F6A10(Init_1E2398* p);
+
+void func_001E2398(void)
+{
+    Init_1E2398 l;
+
+    D_00275958.f0 = func_001F6A90();
+    func_001F6A50(D_00275958.f0, 4);
+    (void)func_001F5C0C(&l, 0, sizeof(l));
+    l.f0C = 0x20000;
+    l.f08 = (s32)D_006056D0;
+    l.f14 = 2;
+    l.f10 = (s32)D_002832F0;
+    l.f04 = func_0015EE80;
+    D_00275958.f4 = func_001F6A10(&l);
+}

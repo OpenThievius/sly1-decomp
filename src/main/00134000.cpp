@@ -884,3 +884,23 @@ void func_00136040(Self_136040* self, Pad_136040* p)
     }
     func_00135F48(self, p);
 }
+
+struct __attribute__((aligned(16))) Vec_135E30 { s32 a, b, c, d; };
+struct Obj_135E30 { char pad[0x140]; Vec_135E30 v; };
+
+void func_00135E30(Obj_135E30* self, Vec_135E30* out, s32* flag)
+{
+    *out = self->v;
+    *flag = 0;
+}
+
+struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
+struct Obj_135E48 { char pad[0x140]; Vec_135E48 v; };
+
+void func_001A1F40(Vec_135E48* v, s32 mode);
+
+void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out)
+{
+    *out = self->v;
+    func_001A1F40(out, 1);
+}
