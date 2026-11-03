@@ -31,3 +31,5 @@ func_00200188 = 0x00200188; // type:func
 func_001FFCC8 = 0x001FFCC8; // type:func
 func_001FFCD8 = 0x001FFCD8; // type:func
 func_001FFD10 = 0x001FFD10; // type:func
+func_001FF028 = 0x001FF028; // type:func
+func_001FF140 = 0x001FF140; // type:func

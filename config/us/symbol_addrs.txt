@@ -37,3 +37,5 @@ func_001FEDC8 = 0x001FEDC8; // type:func
 func_001FE908 = 0x001FE908; // type:func
 func_001FE918 = 0x001FE918; // type:func
 func_001FE950 = 0x001FE950; // type:func
+func_001FDC68 = 0x001FDC68; // type:func
+func_001FDD80 = 0x001FDD80; // type:func
