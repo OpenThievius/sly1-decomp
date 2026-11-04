@@ -197,15 +197,12 @@ s32 func_00146D10(void* unused, Obj_146D10* self)
     return 1;
 }
 
-struct Elem_146298 { u8 pad0[8]; s32 tag; u8 pad1[0x20]; f32 x; f32 y; };
-// The element list the object keeps in the common block (0x27C, 0x280).
-struct List_146298 { s32 count; Elem_146298** list; };
 
 void func_00146298(C39* self)
 {
-    for (s32 i = 0; i < ((List_146298*)((u8*)self + 0x27C))->count; i++) {
-        if (((List_146298*)((u8*)self + 0x27C))->list[i]->tag == 6) {
-            Elem_146298* e = ((List_146298*)((u8*)self + 0x27C))->list[i];
+    for (s32 i = 0; i < self->elemCount; i++) {
+        if (self->elems[i]->kind == 6) {
+            Elem02* e = self->elems[i];
             e->x = -(self->scale * self->factorX);
             e->y = -(self->scale * self->factorY);
             break;

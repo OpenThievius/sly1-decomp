@@ -14,18 +14,10 @@
 
 #include "c03.h"
 
-// A list of up to four ids (func_0012FCB0 adds one to the first list, func_0012FCD0 to the
-// second): func_0012FA88 tests an object's id against the first (func_001833F0) and its kind
-// against the second (func_001300E8).
-struct Ids34 {
-    s32 count;              // 0x00
-    s32 items[4];           // 0x04
-};
-
 struct C34 : C03 {
     s32 accept;             // 0x550: 1 when the lists name what it reacts to, 0 when they name what it leaves out
-    Ids34 objects;          // 0x554: object ids
-    Ids34 kinds;            // 0x568: class ids
+    Ids03 objects;          // 0x554: object ids (func_0012FCB0)
+    Ids03 kinds;            // 0x568: class ids (func_0012FCD0)
     u8 pad57C[0x580 - 0x57C];
     s32 mode;               // 0x580: 1 when f590 holds a position taken from the one child, 2 when it holds the
                             // object that was found by id
@@ -40,7 +32,6 @@ struct C34 : C03 {
     u8 pad5A8[0x5B0 - 0x5A8];
 };
 
-typedef char check_Ids34[sizeof(Ids34) == 0x14 ? 1 : -1];
 typedef char check_C34[sizeof(C34) == 0x5B0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.

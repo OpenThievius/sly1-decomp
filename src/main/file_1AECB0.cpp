@@ -4,6 +4,7 @@
 
 #include "list_iter.h"
 #include "c30.h"
+#include "c6c.h"
 
 // An object of another class (the player): the state at +0x2220.
 struct Global_001AEFA0 { u8 pad0[0x2220]; s32 state; };
@@ -41,16 +42,9 @@ void* func_00183058(void* a, void* b, void* c);
 s32 func_001AEE50(C30* self, void* key);
 s32 func_00160D10();
 
-// Any object with a root and a flag doubleword, as func_001AFAF8 and func_001B0BE0 read it (0x2CC
-// is the upper word of C02's flags, read as a word).
-struct Obj_1AFAF8 {
-    u8 pad0[0x50];
-    s32 x50;
-    u8 pad1[0x2CC - 0x54];
-    u32 x2CC;
-    u8 pad2[0x538 - 0x2D0];
-    u64 f538;
-    u8 pad3[0x2220 - 0x540];
+// The player (D_00262E10) as func_001AFAF8 reads it past C03's fields.
+struct Player_1AFAF8 {
+    u8 pad0[0x2220];
     s32 x2220;
     u8 pad4[0x239C - 0x2224];
     s32 x239C;
@@ -67,13 +61,6 @@ struct Rec_1B0EE0 {
     f32 f554;
 };
 
-// What slot 17 of 0x33 reads of the object it is on, besides C33's fields: C02's list at +0x27C.
-struct View_1B11A0 {
-    u8 pad0[0x27C];
-    s32 count;
-    Item33** items;
-};
-
 struct Item_2744D8 { u32 flags, id, off8; };
 Item_2744D8 D_002744D8[2] = {
     { 2, 0x28C, 0x5D0 },
@@ -87,15 +74,6 @@ struct Sub_1B04D0 {
 };
 
 s32 func_001925F0(void);
-
-struct Obj_1B0BE0 {
-    u8 pad_0[0x50];
-    s32 f50;
-    u8 pad_54[0x2CC - 0x54];
-    u32 f2CC;
-    u8 pad_2D0[0x538 - 0x2D0];
-    u64 f538;
-};
 
 void func_001BF788(void* snd, s32 n);
 void func_001BFCD8(s32 kind, void* snd, void* owner, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -408,11 +386,11 @@ void func_001AF7A8(C31* self, void* p)
     func_0015FCD8(self, p);
     if (p != 0) {
         if (self->flagAF8 != 0) {
-            func_00152600((u8*)self->world + 0x1CA8, self);
+            func_00152600(&self->world->list1CA8, self);
             self->flagAF8 = 0;
         }
     } else {
-        func_00152470((u8*)self->world + 0x1CA8, self);
+        func_00152470(&self->world->list1CA8, self);
         self->flagAF8 = 1;
     }
     D_002744D0 = 1;
@@ -420,19 +398,19 @@ void func_001AF7A8(C31* self, void* p)
 
 ASM_FUNC(func_001AF820);
 
-s32 func_001AFAF8(Obj_1AFAF8* a0, Obj_1AFAF8* a1)
+s32 func_001AFAF8(C30* a0, C03* a1)
 {
     u64 m = 0x8000;
     m <<= 28;
-    if ((a1->f538 & m) != 0 || a1->x50 == a0->x50 || func_001AEE50((C30*)a0, a1) != 0) {
+    if ((a1->flags538 & m) != 0 || a1->root == a0->root || func_001AEE50(a0, a1) != 0) {
         return 0;
     }
-    if ((void*)a1 == (void*)D_00262E10 && a1->x2220 == 6 && a1->x239C == 3) {
+    if ((void*)a1 == (void*)D_00262E10 && ((Player_1AFAF8*)a1)->x2220 == 6 && ((Player_1AFAF8*)a1)->x239C == 3) {
         if ((func_00160D10() & 0x12000) != 0) {
             return 0;
         }
     }
-    s64 t = (s64)a1->x2CC;
+    s64 t = (s64)a1->flagsHi;
     return ((s32)t ^ 1) & 1;
 
 }
@@ -576,7 +554,7 @@ void func_001B04D0(C32* self)
         self->f5D0 = self;
     }
     if (self->f5D4 == 0) {
-        self->f5D4 = *(s32*)((u8*)self->world + 0x1D14);
+        self->f5D4 = self->world->f1D14;
     }
     if (self->f200 != 0) {
         ((Sub_1B04D0*)self->f200)->x44 = 0;
@@ -664,12 +642,12 @@ ASM_FUNC(func_001B0838);
 
 s32 func_001B0BD8() { return 1; }
 
-s32 func_001B0BE0(Obj_1B0BE0* self, Obj_1B0BE0* other)
+s32 func_001B0BE0(C30* self, C03* other)
 {
-    if ((other->f538 & (1UL << 43)) != 0 || other->f50 == func_001925F0() || other->f50 == self->f50 || func_001AEE50((C30*)self, other) != 0) {
+    if ((other->flags538 & (1UL << 43)) != 0 || (s32)other->root == func_001925F0() || other->root == self->root || func_001AEE50(self, other) != 0) {
         return 0;
     }
-    s64 t = (s64)other->f2CC;
+    s64 t = (s64)other->flagsHi;
     return ((s32)t ^ 1) & 1;
 }
 
@@ -783,11 +761,10 @@ void func_001B1158(C33* self)
 
 void func_001B11A0(C33* self)
 {
-    View_1B11A0* v = (View_1B11A0*)self;
     func_00124A48(self);
-    for (s32 i = 0; i < v->count; i++) {
-        Item33* it = v->items[i];
-        if (it->f08 == 1 && it->f14 != 0) {
+    for (s32 i = 0; i < self->elemCount; i++) {
+        Elem02* it = self->elems[i];
+        if (it->kind == 1 && it->f14 != 0) {
             self->f610 = it;
             break;
         }

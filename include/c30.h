@@ -15,15 +15,6 @@
 
 struct C30;
 
-// A list of up to four ids (func_001AF000 adds one to the first list, func_001AF028 to the
-// second, func_001AF050 to the third, func_001AF078 to the fourth): func_001AED78 and
-// func_001AEE50 test an object against the first and the second (object ids, func_001833F0), and
-// against the third and the fourth (class ids, func_001300E8).
-struct Ids30 {
-    s32 count;              // 0x00
-    s32 items[4];           // 0x04
-};
-
 // The record func_00129CA8 hands out (func_001AEF68 takes one): 0x18 holds a value that is given
 // back as the record is cleared (a float read, then zeroed as an integer).
 struct Node30 {
@@ -51,10 +42,10 @@ struct C30 : C03 {
     s32 state;              // 0x558: -1 at set-up
     f32 f55C;               // 0x55C: the time the state was entered
     s32 f560;               // 0x560: the state slot 77 is called with when the object is set up
-    Ids30 ids564;           // 0x564
-    Ids30 ids578;           // 0x578
-    Ids30 ids58C;           // 0x58C
-    Ids30 ids5A0;           // 0x5A0
+    Ids03 ids564;           // 0x564: object ids (func_001AF000)
+    Ids03 ids578;           // 0x578: object ids (func_001AF028)
+    Ids03 ids58C;           // 0x58C: class ids (func_001AF050)
+    Ids03 ids5A0;           // 0x5A0: class ids (func_001AF078)
     s32 f5B4;               // 0x5B4: when set, every object is accepted (func_001AED78)
     f32 f5B8;               // 0x5B8
     f32 f5BC;               // 0x5BC
@@ -120,14 +111,6 @@ struct Anim33 {
     s32 mode;               // 0x0C
 };
 
-// An entry of the list at +0x280 (func_001B11A0 looks for the first with kind 1 and a value).
-struct Item33 {
-    u8 pad00[0x08];
-    s32 f08;                // 0x08
-    u8 pad0C[0x14 - 0x0C];
-    s32 f14;                // 0x14
-};
-
 struct C33 : C30 {
     Anim33 animB;           // 0x5D0
     Anim33 animC;           // 0x5E0
@@ -136,7 +119,7 @@ struct C33 : C30 {
     f32 blinkRate;          // 0x604
     f32 f608;               // 0x608
     f32 f60C;               // 0x60C
-    Item33* f610;           // 0x610: an entry of C02's list at 0x280 (a frame target for func_001B1898)
+    Elem02* f610;           // 0x610: an entry of C02's list at 0x280 (a frame target for func_001B1898)
     f32 f614;               // 0x614
     s32 f618;               // 0x618
     u8 pad61C[0x620 - 0x61C];

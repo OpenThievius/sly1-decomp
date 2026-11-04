@@ -605,7 +605,7 @@ void func_001EBEB0(C13* self)
     self->fC74 = -1;
     self->fC60 = 8;
     *(s32*)((u8*)self + 0xC6C) = (s32)func_0018D500(0x400);
-    *(s32*)(*(u8**)((u8*)self + 0x14) + 0x2358) = 1;
+    self->world->f2358 = 1;
     func_001BEA78();
     *(s32*)D_00275DB8 = 2;
     *(s32*)D_00275DBC = 0;

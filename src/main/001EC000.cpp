@@ -1126,7 +1126,7 @@ void func_001EECE0(C1F* self)
     func_00124A48(self);
     func_001F55A8(&self->rec590);
     self->set554.items = (void**)func_0018D500(0x80);
-    if (*(s32*)((u8*)self + 0x278) != 0) {
+    if (self->f278 != 0) {
         self->desc03()->m32(self);
     }
 }

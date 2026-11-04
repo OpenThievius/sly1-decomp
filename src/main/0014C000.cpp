@@ -3,6 +3,7 @@
 #include "c68.h"
 #include "c46.h"
 #include "c20.h"
+#include "c6c.h"
 
 struct Item_14C838 { s32 value; s32 pad[4]; };
 struct List_14C838 { u8 pad0[0x2DC]; s32 count; Item_14C838 items[1]; };
@@ -54,7 +55,7 @@ s32 func_001300E8(void* a, s32 b);
 void func_0014EE70(C46* self)
 {
     func_001B7A98(self);
-    if (func_001526D0((u8*)self->world + 0x1C78, self)) func_00152600((u8*)self->world + 0x1C78, self);
+    if (func_001526D0(&self->world->list1C78, self)) func_00152600(&self->world->list1C78, self);
     if (self->parent != 0 && func_001300E8(self->parent, 0x3A) != 0) {
         self->flags538 |= (u64)0x8000 << 28;
     } else {
@@ -222,7 +223,7 @@ s32 func_001B8A08(void* self, void* obj);
 s32 func_0014FBE0(C23* self, C03* obj)
 {
     if (func_001300E8(obj, 0x46) != 0) {
-        if ((void*)((C46*)obj)->f588 == self) {
+        if (((C46*)obj)->f588 == self) {
             return 1;
         }
     }
@@ -434,7 +435,7 @@ void func_00152470(void*,void*);
 void func_0014EF00(C46* self)
 {
     func_00182D50(self);
-    func_00152470((u8*)self->world + 0x1C78, self);
+    func_00152470(&self->world->list1C78, self);
     func_0014F110(self, 0);
 }
 
@@ -815,12 +816,12 @@ s32 func_0014FEC0(C23* self) {
             self->p6CC = 0;
         }
     }
-    if (func_00152720((u8*)self->world + 0x1C78) != 0 || self->p6CC != 0) {
+    if (func_00152720(&self->world->list1C78) != 0 || self->p6CC != 0) {
         func_00150298(self);
         return 0;
     }
-    s0 = *(C46**)((u8*)self->world + 0x1C78);
-    s0->f588 = (s32)self;
+    s0 = (C46*)self->world->list1C78.head;
+    s0->f588 = self;
     s0->desc->m02(s0);
     s0->desc->m15(s0, self->f730);
     func_001B9AE0(s0, 3, 0, 3, 0);

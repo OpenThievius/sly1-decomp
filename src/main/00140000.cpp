@@ -4,6 +4,7 @@
 #include "c28.h"
 #include "c29.h"
 #include "c38.h"
+#include "c6c.h"
 
 extern const u32 D_00247AA0;
 s32 D_002613F4;
@@ -575,21 +576,16 @@ s32 func_00140FF8(void* p);
 void func_001B7968(C03* self);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 
-struct Inner_1411A8 {
-    u8 pad0[0x2304];
-    s32 f2304;
-};
-
 void func_001411A8(C38* self)
 {
     func_001B7968(self);
     self->f5B0 = func_00140FF8(D_00261420);
     self->f5A0 = -1;
-    Inner_1411A8* in = (Inner_1411A8*)self->world;
-    s32 n = in->f2304;
+    C6C* in = self->world;
+    s32 n = in->count2304;
     self->f5B4 = n;
     n = n + 1;
-    in->f2304 = n;
+    in->count2304 = n;
     func_001B9AE0(self, 3, 0, 3, 0);
 }
 

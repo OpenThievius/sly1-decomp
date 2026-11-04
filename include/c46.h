@@ -24,7 +24,7 @@ struct C46 : C03 {
     s32 f57C;               // 0x57C: zeroed when the state leaves 2
     s32 f580;               // 0x580
     s32 f584;               // 0x584
-    s32 f588;               // 0x588
+    void* f588;             // 0x588: the class 0x23 object that took it (func_0014FEC0; func_0014FBE0)
     void* member58C;        // 0x58C: the group or member func_00159478 finds (slot 10)
 };
 

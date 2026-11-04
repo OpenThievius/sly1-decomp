@@ -530,12 +530,12 @@ void func_001F5008(C36* self) {
     for (ContactRow03* g = owner->contacts->head; g; g = g->next) {
         for (Contact03* it = g->head; it; it = it->next) {
             s32 side = (owner != it->end[0].body);
-            Obj_1F5008* near = *(Obj_1F5008**)((u8*)it + (side << 6) + 4);
+            Obj_1F5008* near = (Obj_1F5008*)it->end[side].part;
             if (func_00182F40(near, self)) {
-                u8* far = (u8*)it + ((1 - side) << 6);
-                Obj_1F5008* o = *(Obj_1F5008**)(far + 4);
+                ContactEnd03* far = &it->end[1 - side];
+                Obj_1F5008* o = (Obj_1F5008*)far->part;
                 if (func_001300E8(o, 0x41)) {
-                    p = o; Add_1F5008::Of(self, p, (Vec02*)(far + 0x10), (Vec02*)((u8*)it + 0x80));
+                    p = o; Add_1F5008::Of(self, p, &far->v10, &it->v80);
                 }
             }
         }

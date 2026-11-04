@@ -2,6 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "c5e.h"
+#include "c6c.h"
 
 s32 func_00160850(void* obj);
 
@@ -326,18 +327,15 @@ void func_001DE768(C5E* self)
     func_001276C0(self);
 }
 
-struct Node_1DC7D0 { u8 pad[8]; Node_1DC7D0* next; Node_1DC7D0* prev; };
-struct Owner_1DC7D0 { u8 pad[0x1AE4]; Node_1DC7D0* listA; Node_1DC7D0* listB; };
+void func_001DC710(Contacts03* node, Contacts03** head);
+void func_001DC7B0(Contacts03* node, Contacts03** head);
 
-void func_001DC710(Node_1DC7D0* node, Node_1DC7D0** head);
-void func_001DC7B0(Node_1DC7D0* node, Node_1DC7D0** head);
-
-Node_1DC7D0* func_001DC7D0(Owner_1DC7D0* owner, void* self)
+Contacts03* func_001DC7D0(C6C* owner, C03* self)
 {
-    Node_1DC7D0* n = owner->listA;
-    func_001DC710(n, &owner->listA);
-    func_001DC7B0(n, &owner->listB);
-    *(void**)((u8*)n + 4) = self;
+    Contacts03* n = owner->freeTables;
+    func_001DC710(n, &owner->freeTables);
+    func_001DC7B0(n, &owner->usedTables);
+    n->owner = self;
     return n;
 }
 
@@ -788,51 +786,45 @@ void func_001DFA40(C14* self, void* out)
     }
 }
 
-struct Obj_1DC828;
-struct Elem_1DC828 { s32 word0; Elem_1DC828* next; u8 pad8[4]; Obj_1DC828* obj; };
-struct Obj_1DC828 { u8 pad0[0x480]; s32 handle480; u8 pad1[0x538 - 0x484]; u64 flags538; };
-struct Node_1DC828 { Elem_1DC828* elems; void* self; Node_1DC828* next; Node_1DC828* prev; };
-struct Owner_1DC828 { u8 pad0[0x1ADC]; u8* tab; Node_1DC828* base; Node_1DC828* listA; Node_1DC828* listB; };
-
-void func_001DC710(Node_1DC828* node, Node_1DC828** head);
-void func_001DC7B0(Node_1DC828* node, Node_1DC828** head);
-Elem_1DC828* func_00138788(void* owner, s32 h, Node_1DC828* handle);
-void func_001861E8(void* a, s32 b);
+void func_001DC710(Contacts03* node, Contacts03** head);
+void func_001DC7B0(Contacts03* node, Contacts03** head);
+ContactRow03* func_00138788(void* owner, Contacts03* h, Contacts03* handle);
+void func_001861E8(void* a, Contact03* b);
 void func_00129DF8(void* self);
 void func_001B5F28(void* list, void* item);
 
-void func_001DC828(Owner_1DC828* owner, Node_1DC828* handle)
+void func_001DC828(C6C* owner, Contacts03* handle)
 {
-    Elem_1DC828* e = handle->elems;
+    ContactRow03* e = handle->head;
     if (e != 0) {
-        void* freeList = (u8*)owner + 0x1AF0;
+        void* freeList = &owner->pool1AF0;
         do {
-            Elem_1DC828* next = e->next;
-            Elem_1DC828* s1 = func_00138788(owner, e->obj->handle480, handle);
-            if (e->word0 != 0) {
-                func_001861E8(owner, e->word0);
-                if (!(e->obj->flags538 & (1ULL << 55))) {
-                    func_00129DF8(e->obj);
+            ContactRow03* next = e->next;
+            ContactRow03* s1 = func_00138788(owner, e->other->contacts, handle);
+            if (e->head != 0) {
+                func_001861E8(owner, e->head);
+                if (!(e->other->flags538 & (1ULL << 55))) {
+                    func_00129DF8(e->other);
                 }
-                if (!(s1->obj->flags538 & (1ULL << 55))) {
-                    func_00129DF8(s1->obj);
+                if (!(s1->other->flags538 & (1ULL << 55))) {
+                    func_00129DF8(s1->other);
                 }
             }
-            s1->word0 = 0;
-            e->word0 = 0;
+            s1->head = 0;
+            e->head = 0;
             func_001B5F28(freeList, e);
             func_001B5F28(freeList, s1);
             e = next;
         } while (e != 0);
     }
-    handle->elems = 0;
-    Node_1DC828** hb = &owner->listB;
-    s32 a3 = handle - owner->base;
-    Node_1DC828* p = *hb;
+    handle->head = 0;
+    Contacts03** hb = &owner->usedTables;
+    s32 a3 = handle - owner->tables;
+    Contacts03* p = *hb;
     if (p != 0) {
         do {
-            s32 b = p - owner->base;
-            u8* tab = owner->tab;
+            s32 b = p - owner->tables;
+            u8* tab = (u8*)owner->buf1ADC;
             u8* r1 = tab + (a3 << 8);
             u8* r2 = tab + (b << 8);
             r2[a3] = 0;
@@ -840,9 +832,9 @@ void func_001DC828(Owner_1DC828* owner, Node_1DC828* handle)
             p = p->next;
         } while (p != 0);
     }
-    handle->self = 0;
+    handle->owner = 0;
     func_001DC710(handle, hb);
-    func_001DC7B0(handle, &owner->listA);
+    func_001DC7B0(handle, &owner->freeTables);
 }
 
 typedef u64 Q_1DD3E0 __attribute__((mode(TI)));

@@ -5,6 +5,7 @@
 #include "c03.h"
 #include "c88.h"
 #include "c54.h"
+#include "c6c.h"
 
 struct Data_1B4BC8 { u8 pad0[0x20]; s32 count; };
 struct Node_1B4BC8 {
@@ -594,12 +595,6 @@ void* func_001B5EE0(Pool_1B5EE0* pool)
     return p;
 }
 
-struct Owner_1B7A98 {
-    u8 pad0[0x34];
-    s32 count34;
-    s32 count38;
-};
-
 void func_00138828(void* owner, void* self);
 Contacts03* func_001DC7D0(void* owner, void* self);
 void func_00138F28(void* owner, void* self);
@@ -611,14 +606,14 @@ void func_001BB4A0(void* self);
 
 void func_001B7A98(C03* self)
 {
-    Owner_1B7A98* owner = (Owner_1B7A98*)self->world;
+    C6C* owner = self->world;
     owner->count34++;
     if (self->parent == 0) {
         func_00138828(owner, self);
         self->contacts = func_001DC7D0(owner, self);
         func_00138F28(owner, self);
         owner->count38++;
-        func_00152470((u8*)owner + 0x3C, self);
+        func_00152470(&owner->bodies, self);
     }
     func_001240F8(self);
     func_001B7C40(self, 1);
@@ -640,7 +635,7 @@ void func_001DC108(void* owner, Touch03* list);
 void func_001B7B78(C03* self)
 {
     C03* old50 = self->root03();
-    Owner_1B7A98* owner = (Owner_1B7A98*)self->world;
+    C6C* owner = self->world;
     func_001B7C40(self, 0);
     func_001243E0(self);
     owner->count34--;
@@ -648,7 +643,7 @@ void func_001B7B78(C03* self)
         func_001388A0(owner, self);
         func_001DC828(owner, self->contacts);
         owner->count38--;
-        func_00152600((u8*)owner + 0x3C, self);
+        func_00152600(&owner->bodies, self);
     }
     func_001DC108(owner, self->touching);
     u64 flags = self->flags538;
@@ -891,7 +886,7 @@ void func_001B7968(C03* self)
             self->flags538 |= (u64)0x8000 << 48;
         }
     }
-    self->gravity = *(Vec02*)((u8*)self->world + 0x1EE0);
+    self->gravity = self->world->gravity;
     func_001BB4A0(self);
     func_0011B060(&local, 2);
 }

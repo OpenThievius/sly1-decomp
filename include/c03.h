@@ -52,14 +52,18 @@ struct Pair03 {
 struct ContactEnd03 {
     C03* body;              // 0x00
     C03* part;              // 0x04
-    u8 pad08[0x40 - 0x08];
+    u8 pad08[0x10 - 0x08];
+    Vec02 v10;              // 0x10: handed on with v80 by func_001F5008
+    u8 pad20[0x40 - 0x20];
 };
 
-// A contact between two bodies (0xD4 bytes, from the world's pool; func_001861E8 gives a
-// chain of them back). Each body's table lists the contacts it is an end of.
+// A contact between two bodies (0xE0 bytes, the world's pool at +0x1AFC: func_001DB4C8 sets it
+// up for 0xE0-byte records, func_001BC4D8 copies one whole; func_001861E8 gives a chain of them
+// back). Each body's table lists the contacts it is an end of.
 struct Contact03 {
     ContactEnd03 end[2];    // 0x00
-    u8 pad80[0x9C - 0x80];
+    Vec02 v80;              // 0x80: func_001F5008
+    u8 pad90[0x9C - 0x90];
     s32 kind;               // 0x9C: 8 and 9 are dropped when a part stops colliding (func_001B94F0)
     u8 padA0[0xC4 - 0xA0];
     f32 timer;              // 0xC4: slot 67 tells both ends' slot 65 while it is positive
@@ -77,10 +81,21 @@ struct ContactRow03 {
 };
 
 // A body's contact table (+0x480): the world gives one to every body (func_001DC7D0) and
-// takes it back (func_001DC828); the rest of the record is the world's links.
+// takes it back (func_001DC828), moving it between its free and used lists (C6C +0x1AE4,
+// +0x1AE8; func_001DC710 takes one out, func_001DC7B0 puts one in).
 struct Contacts03 {
     ContactRow03* head;     // 0x00
     C03* owner;             // 0x04
+    Contacts03* next;       // 0x08: in the world's free or used list
+    Contacts03* prev;       // 0x0C
+};
+
+// A list of up to four ids (classes 0x30 and 0x34): func_001AF000/001AF028/001AF050/001AF078
+// and func_0012FCB0/0012FCD0 add one; func_001AED78, func_001AEE50 and func_0012FA88 test an
+// object's id (func_001833F0) or its class (func_001300E8) against them.
+struct Ids03 {
+    s32 count;              // 0x00
+    s32 items[4];           // 0x04
 };
 
 // A link between an object and a 0x03 object it is attached to (+0x4B0; func_001BA528 adds
@@ -159,8 +174,10 @@ struct C03 : C02 {
     Link02 link414;         // 0x414: kept by slot 9
     u8 pad41C[0x440 - 0x41C];
     Vec02 v440;             // 0x440: in the parent's frame (slot 21 carries it over)
-    s32 mode450;            // 0x450: a body sums up 3 and 3 in flag bit 54 (func_001B9AE0)
-    u8 pad454[0x460 - 0x454];
+    union {
+        s32 mode450;        // 0x450: a body sums up 3 and 3 in flag bit 54 (func_001B9AE0)
+        Vec02 q450;         // 0x450: class 0x15's func_001A4610 keeps it as one quad
+    };
     Vec02 v460;             // 0x460: in the parent's frame (slot 21 carries it over)
     s32 mode470;            // 0x470
     u8 pad474[0x480 - 0x474];
@@ -197,6 +214,8 @@ struct C03 : C02 {
 typedef char check_C03[sizeof(C03) == 0x550 ? 1 : -1];
 typedef char check_Desc03[sizeof(Desc03) == 0x130 ? 1 : -1];
 typedef char check_Mesh03[sizeof(Mesh03) == 0x24 ? 1 : -1];
-typedef char check_Contact03[sizeof(Contact03) == 0xD4 ? 1 : -1];
+typedef char check_Contact03[sizeof(Contact03) == 0xE0 ? 1 : -1];
+typedef char check_Contacts03[sizeof(Contacts03) == 0x10 ? 1 : -1];
+typedef char check_Ids03[sizeof(Ids03) == 0x14 ? 1 : -1];
 
 #endif

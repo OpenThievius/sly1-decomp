@@ -204,7 +204,7 @@ void func_0013DC38(C27* self)
     next = self->state;
     if (next != 0) {
         if (next == 1) {
-            if (*(s32*)((u8*)self + 0x228) >= 2 || self->limit < D_0026185C - self->stamp) {
+            if (self->tries >= 2 || self->limit < D_0026185C - self->stamp) {
                 next = 2;
             }
         }

@@ -231,7 +231,7 @@ Pk40 D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
 Pk40 D_002621C0 = { 0x4170000040A00000ULL };
 
 void func_001B7968(C03* self);
-void func_00152470(u8* a, C40* b);
+void func_00152470(List01* a, C40* b);
 
 void func_0015AAE0(C40* self)
 {
@@ -249,7 +249,7 @@ void func_0015AAE0(C40* self)
     self->p670.pk = D_002621C0;
     self->f68C = 1;
     self->f690 = -1;
-    func_00152470((u8*)self->world + 0x1C48, self);
+    func_00152470(&self->world->list1C48, self);
 }
 
 void* func_001556E8(void* x);
@@ -884,8 +884,8 @@ void func_0015AD80(C40* self)
     if (self->mode == 0) {
         func_001BFCD8(700.0f, 10.0f, 1.0f, 0.0f, 0x41, &self->handle, self, 0, 0.0f, 0, 0);
     } else {
-        if (func_001526D0((u8*)self->world + 0x1C48, self) != 0) {
-            func_00152600((u8*)self->world + 0x1C48, self);
+        if (func_001526D0(&self->world->list1C48, self) != 0) {
+            func_00152600(&self->world->list1C48, self);
         }
     }
 }
@@ -1361,8 +1361,8 @@ void func_00124DF8(C40* self, s32 n, void* table);
 void func_00159478(void** out, C40* self);
 s32 func_0015A480(u8* self, s32 kind, C40* arg);
 void func_00182ED8(s32 a);
-s32 func_001526D0(u8* sub, C40* self);
-void func_00152600(u8* data, C40* self);
+s32 func_001526D0(List01* sub, C40* self);
+void func_00152600(List01* data, C40* self);
 
 void func_0015AC08(C40* self, void* arg)
 {
@@ -1392,8 +1392,8 @@ void func_0015AC08(C40* self, void* arg)
         }
     }
     if (self->mode) {
-        if (func_001526D0((u8*)self->world + 0x1C48, self))
-            func_00152600((u8*)self->world + 0x1C48, self);
+        if (func_001526D0(&self->world->list1C48, self))
+            func_00152600(&self->world->list1C48, self);
     }
 }
 

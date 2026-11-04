@@ -1053,12 +1053,9 @@ void func_001294E0(void* self, f32* out)
     *out = ((Sub_1294E0*)func_00129400(self))->f40;
 }
 
-struct Sub_129DF8 { u8 pad[0x228]; s32 f228; };
-struct Obj_129DF8 { u8 pad[0x50]; Sub_129DF8* p50; };
-
-void func_00129DF8(Obj_129DF8* self)
+void func_00129DF8(C02* self)
 {
-    if (self->p50 != 0) self->p50->f228 = 0;
+    if (self->root != 0) self->root->tries = 0;
 }
 
 typedef u64 Quad_129E10 __attribute__((mode(TI)));
@@ -1315,28 +1312,25 @@ void func_00129E88(State_00129E88* self, Vec16_12A5D0* value)
     *self->value = *value;
 }
 
-struct Part_0012AA50 { u8 pad[8]; s32 kind; };
-struct State_0012AA50 { u8 pad[0x27C]; s32 count; Part_0012AA50** parts; };
 void func_001B5388(void* part, f32 a, f32 b);
-void func_0012AA50(State_0012AA50* self, f32 a, f32 b)
+void func_0012AA50(C02* self, f32 a, f32 b)
 {
-    for (s32 i = 0; i < self->count; i++) {
-        Part_0012AA50* p = self->parts[i];
+    for (s32 i = 0; i < self->elemCount; i++) {
+        Elem02* p = self->elems[i];
         if (p->kind == 6) func_001B5388(p, a, b);
     }
 }
 
-struct State_0012AAE8 { s32* table; u8 pad[0x18]; State_0012AAE8* next; u8 gap[0x14]; State_0012AAE8* child; u8 gap2[0x244]; s32 count; Part_0012AA50** parts; };
 void func_00159A00(void* part, f32 value);
-void func_0012AAE8(State_0012AAE8* self, f32 value)
+void func_0012AAE8(C02* self, f32 value)
 {
     ListFrame frame;
-    for (s32 i = 0; i < self->count; i++) {
-        Part_0012AA50* p = self->parts[i];
+    for (s32 i = 0; i < self->elemCount; i++) {
+        Elem02* p = self->elems[i];
         if (p->kind == 5) func_00159A00(p, value);
     }
-    for (State_0012AAE8* child = self->child; child; child = child->next) {
-        if (child->table[2] & 1) func_0012AAE8(child, value);
+    for (C02* child = (C02*)self->children.head; child; child = (C02*)child->next) {
+        if (child->desc->flags & 1) func_0012AAE8(child, value);
     }
 }
 

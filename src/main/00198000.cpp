@@ -242,11 +242,10 @@ void func_00199398(Queue_00199398* queue, void* item)
     }
 }
 
-struct Manager_001993F0 { u8 pad[0x2300]; s32 count; };
 void func_001993F0(C2E* obj)
 {
     func_00198980(obj);
-    obj->f5A0 = ((Manager_001993F0*)obj->world)->count++;
+    obj->f5A0 = obj->world->count2300++;
 }
 
 void func_001994C8(C2E* obj)
@@ -445,13 +444,13 @@ void func_0019AFF0(C71* self)
 void func_0019B1E0(C41* obj)
 {
     func_001B7A98(obj);
-    func_00152470((u8*)obj->world + 0x1C60, obj);
+    func_00152470(&obj->world->list1C60, obj);
 }
 
 void func_0019B218(C41* obj)
 {
     func_001B7B78(obj);
-    func_00152600((u8*)obj->world + 0x1C60, obj);
+    func_00152600(&obj->world->list1C60, obj);
 }
 
 struct Obj_0019C3D0 { u8 pad[0x14]; u8* owner; };
@@ -1195,7 +1194,6 @@ L980:
 }
 
 struct VObj_19A1E0 { s32 (**vtbl)(VObj_19A1E0*, C17*); };
-struct Sub_19A1E0 { u8 pad[0x1CE4]; C17* f1CE4; };
 struct Sys_19A1E0 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u8 pad1[0x10]; u32 f19F0; };
 struct Pad_19A1E0 { u32 flags; u8 pad[0x74]; };
 struct Flags_19A1E0 { u32 flags; };
@@ -1208,7 +1206,7 @@ void func_00124DF8(C17* o, s32 n, u8* t);
 void func_0019A178(void* p, s32 x);
 s32 func_001B6290(s32 a, C17* b, s32 c, s32 d);
 void func_001B64D8(s32 a, s32 b);
-VObj_19A1E0* func_0015A448(Sub_19A1E0* a, s32 b, C17* c);
+VObj_19A1E0* func_0015A448(C6C* a, s32 b, C17* c);
 s32 func_001EAA70(s32 a, s32 b);
 void func_00160D30(s32* p);
 
@@ -1226,11 +1224,11 @@ void func_0019A1E0(C17* o)
         func_001B64D8(h, 0x38F);
         return;
     }
-    ((Sub_19A1E0*)o->world)->f1CE4 = o;
+    o->world->f1CE4 = o;
     for (s32 e = 0; e < 6; e++) {
         Ent17* en = &o->f658[e];
         for (s32 k = 0; k < en->count; k++) {
-            VObj_19A1E0* r = func_0015A448(((Sub_19A1E0*)o->world), en->keys[k], o);
+            VObj_19A1E0* r = func_0015A448(o->world, en->keys[k], o);
             if (r) {
                 en->list[en->n++] = r;
             }
@@ -1238,8 +1236,8 @@ void func_0019A1E0(C17* o)
         if (en->n > 0)
             en->pick = func_001EAA70(0, en->n - 1);
     }
-    o->f648 = (void*)func_0015A448(((Sub_19A1E0*)o->world), o->f644, o);
-    o->f650 = func_0015A448(((Sub_19A1E0*)o->world), o->f64C, o);
+    o->f648 = (void*)func_0015A448(o->world, o->f644, o);
+    o->f650 = func_0015A448(o->world, o->f64C, o);
     if (((VObj_19A1E0*)o->f650))
         ((VObj_19A1E0*)o->f650)->vtbl[0x6C / 4](((VObj_19A1E0*)o->f650), o);
     if (((((Sys_19A1E0*)D_002623C0)->f19D8 << 8) | ((Sys_19A1E0*)D_002623C0)->f19DC) == 3) {

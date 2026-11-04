@@ -288,11 +288,6 @@ struct Node_0014BDC8 {
     Node_0014BDC8* next;
 };
 
-struct Owner_0014BDC8 {
-    u8 pad0[0x1CCC];
-    Node_0014BDC8* head;
-};
-
 struct Scratch_0014BDC8 {
     s32 words[8];
 };
@@ -314,7 +309,7 @@ s32 func_0014BDC8(C12* self)
         result = 0xB;
         n->vtbl[0x50](n, &buf);
     }
-    for (Node_0014BDC8* x = ((Owner_0014BDC8*)self->world)->head; x != 0; x = x->next) {
+    for (Node_0014BDC8* x = (Node_0014BDC8*)self->world->list1CCC.head; x != 0; x = x->next) {
         if ((void*)x != (void*)self && func_001300E8(x, 0x12) != 0 && func_001B9FB0(self, x) != 0) {
             func_001C8F20(x, 0xB, 0);
         }
@@ -612,7 +607,7 @@ void func_00152470(void* table, void* self);
 void func_0014B550(C10* self)
 {
     func_001C74E8(self);
-    func_00152470(((u8*)self->world) + 0x1CCC, self);
+    func_00152470(&self->world->list1CCC, self);
 }
 
 struct Obj_14AA90 { u8 pad[8]; s32 value; };
@@ -652,7 +647,7 @@ void func_0014B678(State_0014B678* self, f32 value)
 
 void func_001C7520(void*);
 void func_00152600(void*, void*);
-void func_0014B588(C10* self) { func_001C7520(self); func_00152600(*(u8**)((u8*)self+0x14)+0x1CCC,self); }
+void func_0014B588(C10* self) { func_001C7520(self); func_00152600(&self->world->list1CCC, self); }
 
 void func_001C7188(void*, void*);
 void func_0014B5C0(C10* self, void* other) { Pack10 save=self->fC10; func_001C7188(self,other); self->fC10=save; }

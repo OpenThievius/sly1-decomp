@@ -4,6 +4,7 @@
 #include "c6e.h"
 #include "c7e.h"
 #include "c8a.h"
+#include "c6c.h"
 
 struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
 void func_00168AF8(State_193288*);
@@ -234,7 +235,6 @@ s32 func_00192490(void)
     return 0;
 }
 
-struct __attribute__((aligned(16))) Quad_001924C8 { s32 a, b, c, d; };
 
 typedef void (*Init_001924C8)(void* self, void* table, s32 zero, f32 scale);
 
@@ -245,7 +245,7 @@ struct Node_001924C8 {
     f32 f1C;
     s32 f20;
     u8 pad1[0xC0 - 0x24];
-    Quad_001924C8 q0C0;
+    Vec02 q0C0;
     u8 pad2[0x134 - 0xD0];
     void* p134;
 };
@@ -272,7 +272,7 @@ void func_001924C8(C05* self, s32 mode, C02* other)
                 f32 r = func_0012CCC0(self->f5F0, 0x13F);
                 n->f1C = r;
                 n->f20 = self->f59C;
-                n->q0C0 = *(Quad_001924C8*)((u8*)other->world + 0x1EE0);
+                n->q0C0 = other->world->gravity;
                 n->p134 = other;
             }
         }
