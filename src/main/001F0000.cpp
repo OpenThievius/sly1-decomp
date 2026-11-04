@@ -1100,13 +1100,6 @@ f32 func_001F31F8(s32 a0)
     return (f32)n * 4.656612873077393e-10f;
 }
 
-// The common fields of class 0x02 that func_001F0660 reads (proposed for c02.h).
-struct Common_1F0660 {
-    u8 pad0[8];
-    s32 id;
-    u8 pad0c[0x2C8 - 0xC];
-    u64 flags;
-};
 struct Glob_1F0660 {
     u8 pad[0x19D8];
     s32 val;
@@ -1116,12 +1109,12 @@ extern void func_00124A48(C67* o);
 
 void func_001F0660(C67* o) {
     func_00124A48(o);
-    ((Common_1F0660*)o)->flags = (((Common_1F0660*)o)->flags & ~(3UL << 40)) | (1UL << 40);
+    o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (((Glob_1F0660*)D_002623C0)->val) {
         u8* t = (u8*)&D_0026F808;
         ((Ptr_1F0660*)(t + 0x260))->p = o;
     }
-    switch (((Common_1F0660*)o)->id) {
+    switch (o->id) {
     case 0x1C7: o->slot = 1; break;
     case 0x1C8: o->slot = 2; break;
     case 0x1C9: o->slot = 3; break;
@@ -1462,14 +1455,8 @@ struct Ent_275FE0 { s32 a, b, c; };
 extern Ent_275FE0 D_00275FE0[52];
 
 struct Node_1F0758;
-struct List_1F0758 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_1F0758 { List_1F0758* list; u8* link; s32 offset; Iter_1F0758* saved; };
+struct Iter_1F0758 { List01* list; u8* link; s32 offset; Iter_1F0758* saved; };
 
-// The common fields of class 0x02 that func_001F0758 reads (proposed for c02.h).
-struct Common_1F0758 {
-    u8 pad0[0x34];
-    List_1F0758 list;
-};
 
 void func_001249A8(C67* self);
 void func_00124DF8(C67* self, s32 n, void* table);
@@ -1486,7 +1473,7 @@ struct Next_1F0758 {
 };
 
 struct Begin_1F0758 {
-    static void Of(Iter_1F0758* it, List_1F0758* list)
+    static void Of(Iter_1F0758* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -1505,7 +1492,7 @@ void func_001F0758(C67* self)
 
     func_001249A8(self);
     func_00124DF8(self, 0x34, D_00275FE0);
-    Begin_1F0758::Of(&it, &((Common_1F0758*)self)->list);
+    Begin_1F0758::Of(&it, &self->children);
     while ((node = Next_1F0758::Of(&it)) != 0) {
         func_00182ED8(node);
     }

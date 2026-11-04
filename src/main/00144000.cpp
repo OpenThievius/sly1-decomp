@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "c55.h"
+#include "c6c.h"
 
 struct Item_2619A0 { u32 flags, id, off8; };
 extern Item_2619A0 D_002619A0[5];
@@ -52,14 +53,14 @@ void func_00146470(C55* self)
             self->f2D8 = 2;
         }
     }
-    ((const Desc55*)self->desc)->setState(self, self->f2D8);
+    self->desc02()->m2F(self, self->f2D8);
 }
 
 s32 func_001473E0(C55* self, Other55* b)
 {
     if (self->f340 != 0) {
         if (b->fC & 0x10) {
-            ((const Desc55*)self->desc)->setState(self, 1);
+            self->desc02()->m2F(self, 1);
         }
     }
     return 1;
@@ -86,7 +87,7 @@ void func_00147FB0(C58* self)
         self->f398 = self->f398 - D_00261860;
     }
     if (self->f398 <= 0.0f) {
-        ((const Desc55*)self->desc)->setState(self, 6);
+        self->desc02()->m2F(self, 6);
     }
 }
 
@@ -156,8 +157,6 @@ void func_001B6598(void* sub, s32* out);
 void func_001DBCC8(void* owner, void* fn, void* ctx, s32 a3, s32 a4);
 void func_00147ED0(void* self);
 
-struct Obj_147EF8 { void (**vtbl)(Obj_147EF8* self, void* args); };
-struct Mid_147EF8 { u8 pad0[0x1D60]; Obj_147EF8* p1D60; };
 struct Args_147EF8 { s32 flag; void* self; };
 
 void func_00147EF8(C58* self, s32 kind, void* target)
@@ -170,11 +169,11 @@ void func_00147EF8(C58* self, s32 kind, void* target)
     if (target != self->f2E8) return;
     func_001B6598(target, &code);
     if (code != 0x263) return;
-    Obj_147EF8* obj = ((Mid_147EF8*)self->world)->p1D60;
+    C01* obj = self->world->f1D60;
     if (obj != 0) {
         args.flag = 1;
         args.self = self;
-        obj->vtbl[31](obj, &args);
+        obj->desc->m1B(obj, &args);
     }
     func_001DBCC8(self->world, (void*)(void (*)(void*))func_00147ED0, self, 0, 0);
 }
@@ -235,11 +234,10 @@ void func_00146298(Obj_146298* self)
 
 extern u8 D_00261420[];
 
-struct Lst_146340;
 struct Ptr_146340;
 
 void func_00123ED0(C55* self);
-void func_00152470(Lst_146340* list, C55* item);
+void func_00152470(List01* list, C55* item);
 s32 func_00140FF8(Ptr_146340* p);
 
 void func_00146340(C55* self)
@@ -248,14 +246,13 @@ void func_00146340(C55* self)
     self->f388 = 30.0f;
     self->state = self->f2DC = -1;
     func_00123ED0(self);
-    func_00152470((Lst_146340*)((u8*)self->world + 0x1C54), self);
+    func_00152470(&self->world->list1C54, self);
     s32 v = func_00140FF8((Ptr_146340*)D_00261420);
     self->f37C = v;
-    C02View* hdr = (C02View*)self;
-    hdr->tint[2] = 0x10;
-    hdr->tint[1] = 0x10;
-    hdr->tint[0] = 0x10;
-    hdr->tint[3] = 0x10;
+    self->tint[2] = 0x10;
+    self->tint[1] = 0x10;
+    self->tint[0] = 0x10;
+    self->tint[3] = 0x10;
     self->f340 = 1;
 }
 

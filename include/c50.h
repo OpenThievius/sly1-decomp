@@ -4,8 +4,8 @@
 // for this project from what retail's code does (config/us/classes.tsv).
 //
 // Fields follow the parent's and end at the size the descriptor gives; the pads keep every
-// field at its retail offset. A float at 0x80 (class 0x02's range) is still read by offset
-// (see build/swarm/ty8/NOTES.md).
+// field at its retail offset. Class 0x4D's slot 23 also copies class 0x02's float at 0x80
+// (include/c02.h) from it.
 #ifndef C50_H
 #define C50_H
 

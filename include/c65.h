@@ -5,9 +5,8 @@
 // machine (func_00150AE8, every frame) moves it between idle, waiting, playing and finished.
 // Written for this project from what retail's code does (config/us/classes.tsv).
 //
-// Fields in the base classes that its methods read are reached through the object's address,
-// as before (NOTES.md proposes them for include/c01.h and include/c02.h): the flags word
-// at 0x2C8 and the id at 0x08.
+// Its methods also use the base classes' fields (include/c01.h, include/c02.h): the id at
+// 0x08 and the flags word at 0x2C8.
 #ifndef C65_H
 #define C65_H
 

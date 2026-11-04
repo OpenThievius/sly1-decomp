@@ -4,6 +4,7 @@
 #include "fpu.h"
 #include "c90.h"
 #include "c86.h"
+#include "c6c.h"
 #include "c62.h"
 
 void func_00182C58(void);
@@ -164,13 +165,12 @@ void func_001EE5C8(Stream_1EE5C8* s, void* unused1, s32 size, void* unused3, s32
     }
 }
 
-struct Owner_1EE900 { u8 pad[0x1EC4]; void* slot; };
 void func_00182C18(C01* self);
 
 void func_001EE900(C86* self)
 {
     func_00182C18(self);
-    ((Owner_1EE900*)self->world)->slot = self;
+    self->world->f1EC4 = self;
 }
 
 struct Obj_1EEE50 { u8 pad[0x538]; u64 flags; };

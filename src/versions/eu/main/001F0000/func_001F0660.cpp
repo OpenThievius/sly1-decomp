@@ -4,12 +4,12 @@ struct Tbl_1F0660_eu { u8 pad0[0x574]; void* f574[1]; };
 
 void func_001F0660(C67* o) {
     func_00124A48(o);
-    ((Common_1F0660*)o)->flags = (((Common_1F0660*)o)->flags & ~(3UL << 40)) | (1UL << 40);
+    o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
     if (((Glob_1F0660*)D_002623C0)->val) {
         u8* t = (u8*)&D_0026F808;
         ((Ptr_1F0660*)(t + 0x570))->p = o;
     }
-    switch (((Common_1F0660*)o)->id) {
+    switch (o->id) {
     case 0x1C7: o->slot = 1; break;
     case 0x1C8: o->slot = 2; break;
     case 0x1C9: o->slot = 3; break;

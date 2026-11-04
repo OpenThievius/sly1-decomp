@@ -411,8 +411,6 @@ void func_001F56D8(Ctx_1F56D8* ctx, Obj_1F56D8* self)
     }
 }
 
-typedef void (*Fn_1F4500)(C7D* self);
-
 void func_00138550(void* a, void* b);
 void func_00137EB0(void* a, void* b);
 void func_00137E70(void* a, void* b);
@@ -426,9 +424,9 @@ void func_001F4500(C7D* self, void* s3)
 {
     func_00138550(s3, (u8*)self + 0x2FC);
     func_00138550(s3, (u8*)self + 0x308);
-    func_00137EB0(s3, (u8*)self + 0xD0);
-    func_00137E70(s3, (u8*)self + 0x100);
-    Fn_1F4500 f = (Fn_1F4500)self->desc->m12;
+    func_00137EB0(s3, &self->rot);
+    func_00137E70(s3, &self->pos);
+    void (*f)(C01* self) = self->desc->m12;
     if (f != 0) {
         f(self);
     }

@@ -4,6 +4,7 @@
 #include "c5c.h"
 #include "c5d.h"
 #include "c8b.h"
+#include "c6c.h"
 #include "list_iter.h"
 
 struct Actor_198980 { u8 pad0[0x554]; s32 flag554; };
@@ -498,13 +499,13 @@ void func_0019AD30(List_0019AD30* list, u32 index, void* item)
 void func_0019AF38(C71* obj)
 {
     func_00182D48(obj);
-    func_00152470((u8*)obj->world + 0x1C90, obj);
+    func_00152470(&obj->world->list1C90, obj);
 }
 
 void func_0019AF70(C71* obj)
 {
     func_00182ED0(obj);
-    func_00152600((u8*)obj->world + 0x1C90, obj);
+    func_00152600(&obj->world->list1C90, obj);
 }
 
 void func_0019AFA8(C71* obj)

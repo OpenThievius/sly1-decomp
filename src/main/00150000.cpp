@@ -111,7 +111,7 @@ extern void func_00123ED0();
 void func_001504E0(C65* state)
 {
 	func_00123ED0();
-	*(u64*)((u8*)state + 0x2C8) |= ((u64)0x8000u << 17);
+	state->flags |= ((u64)0x8000u << 17);
 	state->second300 = -1;
 	state->first30C = -1;
 }
@@ -134,7 +134,7 @@ void func_001506F0(C65* self)
 {
     func_00124A48(self);
     if (self->first30C == -1) {
-        self->first30C = *(s32*)((u8*)self + 8);
+        self->first30C = self->id;
     }
     void* v = func_00160CA0(D_002623C8, self->first30C);
     self->target304 = v;
@@ -660,8 +660,6 @@ void func_001517C0(Ctl_001517C0* self)
     }
 }
 
-typedef void (*VFn_153328)(void* self, void* arg);
-
 struct Frame_153328 {
     void* fn;
     s32 f04;
@@ -682,7 +680,7 @@ void func_00153328(C61* self, s32 unused, void* a2)
 {
     (void)unused;
     if (self->f2D0 != 0) {
-        ((VFn_153328*)self->desc)[43](self, a2);
+        self->desc02()->m27(self, a2);
         Frame_153328 f;
         (void)func_001F5C0C(&f, 0, 0x80);
         f.fn = (void*)func_001533A8;

@@ -3,6 +3,7 @@
 #include "list_iter.h"
 #include "c83.h"
 #include "c6b.h"
+#include "c02.h"
 
 struct Owned { u8 pad[0x14]; void* owner; };
 
@@ -324,7 +325,7 @@ void func_0012B2A0(Obj_12B2A0* self, s32 v)
 
 struct Obj_12B2E8 { u8 pad[0xC]; u32 value; };
 
-s32 func_0012B2E8(void* a0, Obj_12B2E8* a1)
+s32 func_0012B2E8(C02* self, Obj_12B2E8* a1)
 {
     return a1->value != 0;
 }
@@ -2011,31 +2012,20 @@ struct Node_129780 {
     u8 pad20[8];
     s32 w28;
 };
-struct Self_129780 {
-    u8 pad0[0x1E0];
-    Node_129780* head;
-    u8 pad1E4[8];
-    Node_129780* f1EC;
-    Node_129780* f1F0;
-    Node_129780* f1F4;
-    Node_129780** f1F8;
-    u8 pad1FC[0x70];
-    s32 f26C;
-};
 
 
-void func_001F5C0C(Node_129780** p, s32 v, s32 n);
-void func_00129DF8(Self_129780* self);
+void func_001F5C0C(void** p, s32 v, s32 n);
+void func_00129DF8(C02* self);
 void func_001226D8(Node_129780* n);
 
-void func_00129780(Self_129780* self)
+void func_00129780(C02* self)
 {
     Node_129780* s3 = 0;
     Node_129780* s2 = 0;
     Node_129780* s1 = 0;
     s32 i;
     if (self->f1F8) func_001F5C0C(self->f1F8, 0, self->f26C << 2);
-    for (Node_129780* n = self->head; n != 0; n = n->next) {
+    for (Node_129780* n = (Node_129780*)self->list1E0.head; n != 0; n = n->next) {
         if (s1 == 0) if (n->b10 != -1) s1 = n;
         if (s2 == 0) if (n->b11 != -1) s2 = n;
         if (s3 == 0) if (n->b12 != -1) s3 = n;
@@ -2059,7 +2049,7 @@ void func_00129780(Self_129780* self)
     if (self->f1F8) {
         for (i = 0; i < self->f26C; i++) {
             if (self->f1F8[i] != 0) {
-                if (self->f1F8[i]->b13 == 0) self->f1F8[i] = 0;
+                if (((Node_129780*)self->f1F8[i])->b13 == 0) self->f1F8[i] = 0;
             }
         }
     }

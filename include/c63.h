@@ -3,9 +3,8 @@
 // on or off (a state at 0x394, set by func_001E2778) and draws a shape from a stream-loaded
 // record. Written for this project from what retail's code does (config/us/classes.tsv).
 //
-// Fields in the base classes that its methods read are reached through the object's address,
-// as before (NOTES.md proposes them for include/c02.h): the flags word at 0x2C8, and the two
-// vectors the loader reads at 0xD0 and 0x100.
+// Its methods also use class 0x02's fields (include/c02.h): the flags word at 0x2C8, and the
+// placement matrix and position the loader reads at 0xD0 and 0x100.
 #ifndef C63_H
 #define C63_H
 

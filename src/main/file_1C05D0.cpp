@@ -3,6 +3,7 @@
 #include "asm_func.h"
 #include "c7e.h"
 #include "c66.h"
+#include "c6c.h"
 extern const f32 D_0024D2A0[2] = { 3.4028235e38f, 0.0f };
 extern u8* D_00275710;
 #include "list_iter.h"
@@ -40,7 +41,7 @@ s32 func_0011D8F0(s32 a, s32 b);
 
 
 void func_00182ED0(void* self);
-void func_00152600(u8* table, void* self);
+void func_00152600(void* table, void* self);
 
 
 
@@ -72,7 +73,7 @@ s32 func_001B6290(s32 p, void* ctx, s32 a2, s32 a3);
 
 
 void func_00182D48(void* self);
-void func_00152470(u8* table, void* self);
+void func_00152470(void* table, void* self);
 
 
 
@@ -741,13 +742,13 @@ void func_001C10A8(C81* self)
 void func_001C10D8(C81* self)
 {
     func_00182D48(self);
-    func_00152470((u8*)self->world + 0x1C84, self);
+    func_00152470(&self->world->list1C84, self);
 }
 
 void func_001C1110(C81* self)
 {
     func_00182ED0(self);
-    func_00152600((u8*)self->world + 0x1C84, self);
+    func_00152600(&self->world->list1C84, self);
 }
 
 void func_001C1148(C81* self)

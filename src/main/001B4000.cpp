@@ -999,15 +999,12 @@ f32 func_001B5308(S_1B5308* p) { f32 result=0.0f; if (p->testA != 0.0f) result=(
 
 void func_001B5568(void* base, void** out) { out[0] = (u8*)base + 0x44; out[1] = (u8*)base + 0x4C; out[2] = (u8*)base + 0x48; }
 
-// The common field of class 0x02 that func_001B5CD8 reads (proposed for c02.h).
-struct Common_1B5CD8 { u8 pad0[0x2C8]; u64 flags; };
-
 void func_00124A48(void* self);
 
 void func_001B5CD8(C54* self)
 {
     func_00124A48(self);
-    ((Common_1B5CD8*)self)->flags = (((Common_1B5CD8*)self)->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
+    self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
 }
 
 struct Walk_1B5DD0 { s32 a; void* b; s32 c; };
@@ -1312,21 +1309,16 @@ void func_001B54D0(Node_1B54D0* self, Src_1B54D0* src)
 
 void func_00124FC0(void* self);
 
-struct __attribute__((aligned(16))) Quad_1B5D28 { s32 a, b; f32 c; s32 d; };
-
-typedef void (*VFn_1B5D28)(C54* self, void* p);
-// The common field of class 0x02 that func_001B5D28 reads (proposed for c02.h).
-struct Common_1B5D28 { u8 pad[0x148]; f32 f148; };
 
 void func_001B5D28(C54* self)
 {
     func_00124FC0(self);
-    Quad_1B5D28* src = (Quad_1B5D28*)((u8*)D_00261990 + 0x40);
-    Quad_1B5D28 q = *src;
+    Vec02* src = (Vec02*)((u8*)D_00261990 + 0x40);
+    Vec02 q = *src;
     if (self->f2D0 == 0) {
-        q.c = ((Common_1B5D28*)self)->f148;
+        q.z = self->v140.z;
     }
-    ((VFn_1B5D28*)self->desc)[33](self, &q);
+    self->desc02()->m1D(self, &q);
 }
 
 void func_001C6F48(void* self);

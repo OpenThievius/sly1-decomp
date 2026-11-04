@@ -48,7 +48,7 @@ struct C80 : C7E {
     u8 pad64[0x70 - 0x64];
 };
 
-// 0x81: registers itself in a table inside its level (world + 0x1C84, slots 6, 7).
+// 0x81: registers itself in a table inside its level (C6C::list1C84, slots 6, 7).
 struct C81 : C7E {
     Keep7E keep;            // 0x50
     f32 f58;                // 0x58: the largest float at setup

@@ -5,26 +5,13 @@
 // Written for this project from what retail's code does (config/us/classes.tsv).
 //
 // Each class's fields follow its parent's and end at the size its descriptor gives; the pads keep
-// every field at its retail offset. Class 0x55 sits under 0x02 (include/c02.h, still padding):
-// the fields its methods read inside 0x02's range are in C02View, a view for casts, and are
-// proposed for C02 in build/swarm/ty5/NOTES.md. Names may change at the naming step.
+// every field at its retail offset. Class 0x55 sits under 0x02 (include/c02.h), whose fields and
+// descriptor (Desc02: slot 47, 0xCC, sets the state) its methods use. Names may change at the
+// naming step.
 #ifndef C55_H
 #define C55_H
 
 #include "c02.h"
-
-struct __attribute__((aligned(16))) Quad55 { s32 a, b, c, d; };
-
-// 0x02's fields (offsets inside 0x00..0x2D0) read by this family's methods.
-struct C02View : C01 {
-    u8 pad34[0x110 - 0x34];
-    Quad55 q110;            // 0x110
-    Quad55 q120;            // 0x120
-    Quad55 q130;            // 0x130
-    u8 pad140[0x2B0 - 0x140];
-    u8 tint[4];             // 0x2B0: four bytes, set to 0x10 by func_00146340
-    u8 pad2B4[0x2D0 - 0x2B4];
-};
 
 // A thing that takes a message in its class's slot 31 (0x10 + 4 * 31 = 0x8C).
 struct Notify55 {
@@ -37,12 +24,6 @@ struct C55;
 struct Other55 {
     u8 pad0[0xC];
     s32 fC;
-};
-
-// Class descriptor of this family: slot 47 (0xCC) sets the object's state.
-struct Desc55 : Desc01 {
-    u8 pad80[0xCC - 0x80];
-    void (*setState)(C55* self, s32 state);     // 0xCC: func_00147AB0 (class 0x55), others override
 };
 
 // 0x55: a state, a few movement numbers set by each subclass's constructor.
@@ -107,7 +88,6 @@ typedef char check_C58[sizeof(C58) == 0x3A0 ? 1 : -1];
 typedef char check_C59[sizeof(C59) == 0x390 ? 1 : -1];
 typedef char check_C5A[sizeof(C5A) == 0x390 ? 1 : -1];
 typedef char check_C5B[sizeof(C5B) == 0x390 ? 1 : -1];
-typedef char check_Desc55[sizeof(Desc55) == 0xD0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void func_00146340(C55* self);                       // 0x55 slot 0

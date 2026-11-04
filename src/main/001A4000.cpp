@@ -1575,8 +1575,7 @@ struct __attribute__((aligned(16))) Quad_1A7FE8 {
 void func_00182C18(C8C* self);
 struct Buf_1A7FE8 { u8 b[1]; };
 s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
-struct Own_1A7FE8 { u8 b[1]; };
-void func_001DBCC8(Own_1A7FE8* owner, void* fn, void* arg, s32 a3, s32 a4);
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001A8208(C8C* self);
 
 void func_001A7FE8(C8C* self)
@@ -1604,7 +1603,7 @@ void func_001A7FE8(C8C* self)
     self->fD8 = 5.0f;
     self->f168 = 0;
     self->f144 = d;
-    func_001DBCC8((Own_1A7FE8*)self->world, (void*)func_001A8208, self, 0, 0);
+    func_001DBCC8(self->world, (void*)func_001A8208, self, 0, 0);
 }
 
 struct Link5F { u8 pad0[0x2D4]; s32 f2D4; };

@@ -4,8 +4,8 @@
 // a copy. Written for this project from what retail's code does (config/us/classes.tsv).
 //
 // Fields follow the parent's and end at the size the descriptor gives; the pads keep every
-// field at its retail offset. A 64-bit flag word at 0x2C8 (class 0x02's range) is still read
-// by offset (see build/swarm/ty8/NOTES.md).
+// field at its retail offset. Its set-up also uses class 0x02's flags word at 0x2C8
+// (include/c02.h).
 #ifndef C51_H
 #define C51_H
 

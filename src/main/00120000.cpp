@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c02.h"
 
 void func_0011F850(void* a, void* b);
 
@@ -1933,42 +1934,6 @@ void func_00121508(Node_121508* self, void* out1, void* out2)
     self->sub->vt->fn(self->sub, out1, out2);
 }
 
-struct __attribute__((aligned(16))) Quad_00123ED0 { s32 a, b, c, d; };
-struct Block_00123ED0 {
-    Quad_00123ED0 q[3];
-    void CopyFrom(const Block_00123ED0* src) { *this = *src; }
-};
-
-struct Self_00123ED0 {
-    u8 pad0[0x18];
-    s32 f18;
-    u8 pad1[0x80 - 0x1C];
-    f32 f80;
-    f32 f84;
-    s32 f88;
-    u8 pad2[0xD0 - 0x8C];
-    Block_00123ED0 blockD0;
-    u8 pad2b[0x110 - 0x100];
-    Block_00123ED0 block110;
-    u8 pad3[0x1A0 - 0x140];
-    Block_00123ED0 block1A0;
-    u8 pad4[0x1E0 - 0x1D0];
-    u8 list1E0[0x20C - 0x1E0];
-    void* p20C;
-    void* p210;
-    void* p214;
-    void* p218;
-    void* p21C;
-    void* p220;
-    u8 pad5[0x2C8 - 0x224];
-    u8 b2C8;
-    s8 b2C9;
-    s8 b2CA;
-    u64 m24 : 2;
-    u64 m26 : 2;
-    void SetB2CA(s32 value) { b2CA = value; }
-};
-
 extern const f32 D_002499F0 = 3.4028235e+38f;
 extern u8 D_00260E70[];
 extern u8 D_00260E80[];
@@ -1978,24 +1943,31 @@ extern u8 D_00260EB0[];
 extern u8 D_00260EC0[];
 
 void func_00152438(void* list, s32 n);
-void func_00182C18(Self_00123ED0* self);
+void func_00182C18(C01* self);
 
-void func_00123ED0(Self_00123ED0* self)
+// Two stores of the set-up written as small inline helpers, the shape that matches: a value
+// passed as an int, and a matrix copied through its own pointer (as each copy's own register).
+struct Init_00123ED0 {
+    static void SetB2CA(C02* o, s32 value) { o->b2CA = value; }
+    static void Copy(Mat02* dst, const Mat02* src) { *dst = *src; }
+};
+
+void func_00123ED0(C02* self)
 {
-    func_00152438((u8*)self + 0x34, 0x1C);
-    func_00152438((u8*)self + 0x60, 0x58);
-    if (self->f18 != 0) {
-        self->m24 = 1;
-        self->m26 = 0;
+    func_00152438(&self->children, 0x1C);
+    func_00152438(&self->list60, 0x58);
+    if (self->parent != 0) {
+        self->bits24 = 1;
+        self->bits26 = 0;
     } else {
-        self->m24 = 2;
-        self->m26 = 2;
+        self->bits24 = 2;
+        self->bits26 = 2;
     }
     func_00182C18(self);
     self->f80 = D_002499F0;
     self->f88 = 0x0FFFFFFF;
     self->f84 = D_002499F0;
-    self->SetB2CA(-1);
+    Init_00123ED0::SetB2CA(self, -1);
     self->b2C9 = -1;
     self->p20C = D_00260E70;
     self->p210 = D_00260E80;
@@ -2004,10 +1976,10 @@ void func_00123ED0(Self_00123ED0* self)
     self->p21C = D_00260EB0;
     self->p220 = D_00260EC0;
     self->b2C8 = 0;
-    self->blockD0.CopyFrom((const Block_00123ED0*)D_002483D0);
-    self->block110.CopyFrom((const Block_00123ED0*)D_002483D0);
-    self->block1A0.CopyFrom((const Block_00123ED0*)D_002483D0);
-    func_00152438(self->list1E0, 8);
+    Init_00123ED0::Copy(&self->rot, (const Mat02*)D_002483D0);
+    Init_00123ED0::Copy(&self->m110, (const Mat02*)D_002483D0);
+    Init_00123ED0::Copy(&self->m1A0, (const Mat02*)D_002483D0);
+    func_00152438(&self->list1E0, 8);
 }
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.

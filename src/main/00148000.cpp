@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "c55.h"
+#include "c6c.h"
 
 struct Glob_1481A0 {
     u8 pad0[0x19D8];
@@ -553,8 +554,6 @@ void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
 void func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
 
-struct Dev_148770 { void (**vtbl)(Dev_148770* self, void* arg); };
-struct Hub_148770 { u8 pad0[0x1D60]; Dev_148770* f1D60; };
 struct Note_148770 { s32 flag; void* owner; };
 struct Frame_148770 { Note_148770 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
 
@@ -566,23 +565,22 @@ void func_00148770(C5A* self, s32 kind, void* msg)
     if (msg != self->f2E8) return;
     func_001B6598(msg, &fr.code);
     if (fr.code != 0x263) return;
-    Dev_148770* dev = ((Hub_148770*)self->world)->f1D60;
+    C01* dev = self->world->f1D60;
     if (dev != 0) {
         fr.note.flag = 1;
         fr.note.owner = self;
-        dev->vtbl[31](dev, &fr.note);
+        dev->desc->m1B(dev, &fr.note);
     }
     func_001DBCC8(self->world, (void*)func_00148748, self, 0, 0);
 }
 
 extern f32 D_0026185C;
-struct Sub_148828 { u8 pad0[0x2308]; f32 f2308; };
 
 void func_00148828(C5A* self)
 {
     func_00147428(self);
     if (self->state != 0) return;
-    if (((Sub_148828*)self->world)->f2308 <= D_0026185C) ((const Desc55*)self->desc)->setState(self, 6);
+    if (self->world->f2308 <= D_0026185C) self->desc02()->m2F(self, 6);
 }
 
 struct Slot_1493B8 { u8 pad[0x8]; s32 value; };
@@ -752,8 +750,6 @@ void func_001B6598(void* dev, s32* out);
 void func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
 void func_00148E18(void* self);
 
-struct Dev_148E40 { void (**vtbl)(Dev_148E40* self, void* arg); };
-struct Hub_148E40 { u8 pad0[0x1D60]; Dev_148E40* f1D60; };
 struct Note_148E40 { s32 flag; void* owner; };
 struct Frame_148E40 { Note_148E40 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
 
@@ -765,11 +761,11 @@ void func_00148E40(C57* self, s32 kind, void* msg)
     if (msg != self->f2E8) return;
     func_001B6598(msg, &fr.code);
     if (fr.code != 0x263) return;
-    Dev_148E40* dev = ((Hub_148E40*)self->world)->f1D60;
+    C01* dev = self->world->f1D60;
     if (dev != 0) {
         fr.note.flag = 1;
         fr.note.owner = self;
-        dev->vtbl[31](dev, &fr.note);
+        dev->desc->m1B(dev, &fr.note);
     }
     func_001DBCC8(self->world, (void*)(void (*)(void*))func_00148E18, self, 0, 0);
 }
@@ -787,7 +783,7 @@ void func_00148EF8(C57* self)
         self->f398 = self->f398 - D_00261860;
     }
     if (self->f398 <= 0.0f) {
-        ((const Desc55*)self->desc)->setState(self, 6);
+        self->desc02()->m2F(self, 6);
     }
 }
 
@@ -967,9 +963,9 @@ struct Child_148FF0 {
     u8 pad004[0x20 - 0x004];
     void* f20;
     u8 pad024[0x50 - 0x024];
-    Quad55 f50;
-    Quad55 f60;
-    Quad55 f70;
+    Vec02 f50;
+    Vec02 f60;
+    Vec02 f70;
     u8 pad080[0x130 - 0x080];
     void* f130;
     void* f134;
@@ -1018,11 +1014,11 @@ one_case:
         if (c != 0) {
             c->f134 = self;
             c->f130 = (u8*)D_00261B60;
-            c->vtbl[0](c, 1.0f, (u8*)self + 0x140, 0);
+            c->vtbl[0](c, 1.0f, &self->v140, 0);
             c->f20 = self;
-            c->f50 = ((C02View*)self)->q110;
-            c->f60 = ((C02View*)self)->q120;
-            c->f70 = ((C02View*)self)->q130;
+            c->f50 = self->m110.r[0];
+            c->f60 = self->m110.r[1];
+            c->f70 = self->m110.r[2];
         } else {
             func_00148F80(self);
         }
@@ -1369,9 +1365,9 @@ struct New_148298 {
     u8 pad4[0x20 - 0x4];
     void* p20;
     u8 pad24[0x50 - 0x24];
-    Quad55 q50;
-    Quad55 q60;
-    Quad55 q70;
+    Vec02 q50;
+    Vec02 q60;
+    Vec02 q70;
     u8 pad80[0x130 - 0x80];
     void* p130;
     void* p134;
@@ -1406,11 +1402,11 @@ void func_00148298(C58* self, s32 mode)
                     New_148298* n = (New_148298*)p;
                     n->p130 = (u8*)D_00261AD0;
                     n->p134 = self;
-                    n->vtbl[0](n, (u8*)s + 0x140, 0, 1.0f);
+                    n->vtbl[0](n, &s->v140, 0, 1.0f);
                     n->p20 = self;
-                    n->q50 = ((C02View*)s)->q110;
-                    n->q60 = ((C02View*)s)->q120;
-                    n->q70 = ((C02View*)s)->q130;
+                    n->q50 = s->m110.r[0];
+                    n->q60 = s->m110.r[1];
+                    n->q70 = s->m110.r[2];
                 } else {
                     func_001481A0(self);
                 }

@@ -4,6 +4,7 @@
 extern f32 D_0026185C[];
 #include "list_iter.h"
 #include "c53.h"
+#include "c6c.h"
 
 // A four-float vector, aligned as the VU0 reads it.
 struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
@@ -239,30 +240,17 @@ struct Nd_196410 {
     u64 mode : 2;
     u64 b30 : 34;
 };
-struct List_196410 { Nd_196410* head; s32 pad4; s32 link; };
 struct Cell_196410 { Nd_196410* node; s32 link; };
-// The common fields of class 0x02 that func_00196410 reads (proposed for c02.h).
-struct Common_196410 {
-    u8 pad0[8];
-    s32 f08;
-    u8 pad0C[0x34 - 0xC];
-    List_196410 f34;
-    u8 pad40[0xD0 - 0x40];
-    u8 fD0[0x30];
-    u8 f100[0x2D0 - 0x100];
-};
-typedef void (*Fn58_196410)(Nd_196410*);
-typedef void (*Fn02_196410)(C53*);
 struct Frame_196410 {
-    List_196410* list;
+    List01* list;
     u8* cursor;
     s32 link;
     Frame_196410* prev;
 };
 
 void func_00152438(u8* a, s32 v);
-void func_00137EB0(Stream53* r, u8* out);
-void func_00137E70(Stream53* r, u8* out);
+void func_00137EB0(Stream53* r, void* out);
+void func_00137E70(Stream53* r, void* out);
 s32 func_00137B90(Stream53* r);
 s32 func_00137D10(Stream53* r);
 Nd_196410* func_001DC208(void* host, s32 a);
@@ -278,7 +266,7 @@ s32 func_00137CC0(Stream53* r);
 f32 func_00137DF8(Stream53* r);
 void func_0011EC40(Nd_196410* n, Stream53* r);
 void func_0011ECB8(void* host, C53* self, Stream53* r);
-s32 func_00152720(List_196410* list);
+s32 func_00152720(List01* list);
 
 // The id that names no object.
 struct Id_196410 {
@@ -291,7 +279,6 @@ struct Id_196410 {
 struct Cell_196810 { void* node; s32 link; };
 struct Elem_196810 { s32 f0; u8 pad4[4]; Elem_196810* next; };
 struct Item_196810 { u8 pad0[0x1C]; Item_196810* next; u8 pad20[0x10]; void* f30; };
-struct Head_196810 { u8 pad0[0x34]; Item_196810* f34; };
 void func_00127048(C53* self, C53* src);
 void func_00152440(List53* p);
 void func_00152470(List53* list, Cell_196810* c);
@@ -484,7 +471,7 @@ void func_00198920(Obj_198920* self);
 void func_001963D8(C53* self)
 {
     func_00123ED0(self);
-    func_00152470((u8*)self->world + 0x1C3C, self);
+    func_00152470(&self->world->list1C3C, self);
 }
 
 void func_00196410(C53* self, Stream53* rd)
@@ -502,12 +489,12 @@ void func_00196410(C53* self, Stream53* rd)
     Nd_196410* h;
 
     func_00152438((u8*)&self->cells, 8);
-    func_00137EB0(rd, ((Common_196410*)self)->fD0);
-    func_00137E70(rd, ((Common_196410*)self)->f100);
+    func_00137EB0(rd, &self->rot);
+    func_00137E70(rd, &self->pos);
     n = func_00137B90(rd);
     if (self->desc->m12 != 0)
     {
-        ((Fn58_196410)self->desc->m12)((Nd_196410*)self);
+        self->desc->m12(self);
     }
     for (i = 0; i < n; i++)
     {
@@ -526,7 +513,7 @@ void func_00196410(C53* self, Stream53* rd)
         }
         cell = func_0018D5C0(16);
         cell->node = c;
-        cell->link = ((Common_196410*)self)->f08;
+        cell->link = self->id;
         c->f30 = cell;
         func_00152470((u8*)&self->cells, cell);
         arr[i] = c;
@@ -591,13 +578,13 @@ void func_00196410(C53* self, Stream53* rd)
     }
     if (n == 1)
     {
-        List_196410* list = &((Common_196410*)self)->f34;
+        List01* list = &self->children;
         func_0011ECB8(self->world, self, rd);
         if (func_00152720(list) == 0)
         {
             fr.list = list;
             fr.prev = (Frame_196410*)D_0027B314;
-            fr.link = list->link;
+            fr.link = list->offset;
             D_0027B314 = (ListFrame*)&fr;
             c = arr[0];
             h = *(Nd_196410**)list;
@@ -614,7 +601,7 @@ void func_00196410(C53* self, Stream53* rd)
         }
     }
     self->desc->m03(self);
-    ((Fn02_196410)self->desc->m02)(self);
+    self->desc->m02(self);
 }
 
 void func_00196810(C53* self, C53* src)
@@ -627,12 +614,12 @@ void func_00196810(C53* self, C53* src)
     ListFrame frame;
     Elem_196810* e = (Elem_196810*)list.first;
     while (e != 0) {
-        Item_196810* it = ((Head_196810*)self->parent)->f34;
+        Item_196810* it = (Item_196810*)((C02*)self->parent)->children.head;
         for (; it != 0; it = it->next) {
             if (it->f30 == e) break;
         }
         Cell_196810* cell = (Cell_196810*)func_0018D5C0(16);
-        cell->link = ((Common_196410*)self)->f08;
+        cell->link = self->id;
         if (it != 0) {
             cell->node = it;
             it->f30 = cell;

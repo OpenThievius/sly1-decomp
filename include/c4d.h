@@ -4,8 +4,8 @@
 // what retail's code does (config/us/classes.tsv).
 //
 // Fields follow the parent's and end at the size the descriptor gives; the pads keep every
-// field at its retail offset. Two fields sit inside class 0x02's range and are still read
-// by offset (see build/swarm/ty8/NOTES.md): a float at 0x80 and a 64-bit flag word at 0x2C8.
+// field at its retail offset. Its methods also use two of class 0x02's fields (include/c02.h):
+// the float at 0x80 and the flags word at 0x2C8.
 #ifndef C4D_H
 #define C4D_H
 

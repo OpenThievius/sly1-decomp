@@ -3,6 +3,7 @@
 #include "list_iter.h"
 #include "c4d.h"
 #include "c50.h"
+#include "c6c.h"
 
 struct Obj_1389C8 { u8 pad[0x1AEC]; s32 field; };
 
@@ -132,10 +133,10 @@ void func_0013A418(C4D* self, C01* src)
     if (func_001300E8(src, 0x50) != 0) {
         C50* from = (C50*)src;
         self->owner = from;
-        *(f32*)((u8*)self + 0x80) = *(f32*)((u8*)from + 0x80);
+        self->f80 = from->f80;
         if (func_00152720(from->list314) == 0) {
-            *(u64*)((u8*)self + 0x2C8) &= 0xFFFFFFFFF3FFFFFFULL;
-            *(u64*)((u8*)self + 0x2C8) &= 0xFFFFFFFFCFFFFFFFULL;
+            self->flags &= 0xFFFFFFFFF3FFFFFFULL;
+            self->flags &= 0xFFFFFFFFCFFFFFFFULL;
         }
     }
 }
@@ -199,8 +200,8 @@ void func_001240F8(void* self);
 
 void func_00139E80(C4D* self)
 {
-    func_00152600((u8*)self->world + 0x1CC0, self);
-    func_00152470((u8*)self->world + 0x1CB4, self);
+    func_00152600(&self->world->list1CC0, self);
+    func_00152470(&self->world->list1CB4, self);
     func_001240F8(self);
 }
 
@@ -466,16 +467,16 @@ void func_00123ED0(void* self);
 
 void func_00139DE8(C4D* self)
 {
-    func_00152470((u8*)self->world + 0x1CC0, self);
+    func_00152470(&self->world->list1CC0, self);
     func_00123ED0(self);
     func_00152438(&self->list, 0x1090);
-    u64 b = *(u64*)((u8*)self + 0x2C8);
+    u64 b = self->flags;
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;
     b &= 0xFFFFFCFFFFFFFFFFull;
-    *(f32*)((u8*)self + 0x80) = 1e10f;
+    self->f80 = 1e10f;
     b |= 0x10000000000ull;
-    *(u64*)((u8*)self + 0x2C8) = b;
+    self->flags = b;
 }
 
 extern u8* D_00261990;
@@ -645,7 +646,7 @@ void func_00139EC8(C4D* self)
         fr.cursor = nx + fr.link;
         node = nx;
     }
-    func_00152600((u8*)obj->world + 0x1CB4, self);
+    func_00152600(&obj->world->list1CB4, self);
     func_00152470(D_002622E0, self);
     func_001243E0(self);
     *(s32*)&D_0027B314 = fr.prev;

@@ -1390,13 +1390,11 @@ ASM_FUNC(func_001E2438);
 
 void func_001E2520(C63* self)
 {
-    u8* p = (u8*)self;
-
     func_00123ED0(self);
     self->block2F0 = *(Block63*)D_00275980;
     self->f428 = 2.0f;
     self->f42C = 1.0f;
-    *(u64*)(p + 0x2C8) = (*(u64*)(p + 0x2C8) & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
+    self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
     self->f420 = 2.0f;
     self->f424 = 1.0f;
     self->f430 = -1;
@@ -1417,11 +1415,11 @@ void func_001E25F8(C63* self)
 
 void func_001E2648(C63* self, void* a1)
 {
-    func_00137EB0(a1, (u8*)self + 0xD0);
-    func_00137E70(a1, (u8*)self + 0x100);
-    void** vt = (void**)self->desc;
-    if (vt[22] != 0) {
-        ((void (*)(void*))vt[22])(self);
+    func_00137EB0(a1, &self->rot);
+    func_00137E70(a1, &self->pos);
+    const Desc01* vt = self->desc;
+    if (vt->m12 != 0) {
+        vt->m12(self);
     }
     func_001E4C48(a1, (u8*)self + 0x2D4, (u8*)self + 0x2D8, (u8*)self + 0x2DC, (u8*)self + 0x2E0);
     s32 idx = func_00137CC0(a1);

@@ -258,8 +258,8 @@ void func_0016AA18(C6A* self)
     func_00124A48(self);
     func_00124DF8(self, 9, &D_00262718);
 
-    if ((u32)(*(s32*)((u8*)self + 0x08) - 0x515) < 5) {
-        s32 t = *(s32*)((u8*)self + 0x08) - 0x514;
+    if ((u32)(self->id - 0x515) < 5) {
+        s32 t = self->id - 0x514;
         s32 s4 = t << 8;
         s32 s5 = t * 0x44C;
 
@@ -842,7 +842,7 @@ void func_0016AB38(void* self);
 void func_0016AED8(C69* self)
 {
     func_00124A48(self);
-    *(u64*)((u8*)self + 0x2C8) = (*(u64*)((u8*)self + 0x2C8) & ~(3ULL << 40)) | (1ULL << 40);
+    self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
     D_0026FCF0 = (s32)self;
     ((Obj_16AED8Glob*)D_00275BC0)->f30 = 2;
     func_001E96F8(D_00275BC0, 2);

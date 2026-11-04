@@ -3,6 +3,7 @@
 #include "list_iter.h"
 #include "c73.h"
 #include "c60.h"
+#include "c6c.h"
 
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
@@ -341,7 +342,7 @@ void func_00158F80(C7A* self, void* message)
     s32 done = 0;
 
     if (0.0f < self->delay) {
-        r = (Rec_158F80*)func_001B5EA0((u8*)self->world + 0x1BD0);
+        r = (Rec_158F80*)func_001B5EA0(&self->world->pool1BD0);
         if (r != 0) {
             r->owner = self;
             r->body = *(Body_158F80*)message;
@@ -349,7 +350,7 @@ void func_00158F80(C7A* self, void* message)
             k = (f32*)D_00261858;
             r->f60 = k[1] + self->delay;
             func_00152450((u8*)r + 0x64);
-            func_00152470((u8*)self->world + 0x1BDC, r);
+            func_00152470(&self->world->list1BDC, r);
         }
     }
     if (done == 0) {

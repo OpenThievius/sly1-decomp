@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c01.h"
 
 extern u8 D_0062C568[];
 void func_001B5F28(void* list, void* item);
@@ -1686,8 +1687,6 @@ Pool_11C968* func_0011C968(void)
     return p;
 }
 
-struct Hdr_11EDA8 { u8 pad0[4]; s32 idx; };
-struct Obj_11EDA8 { Hdr_11EDA8* f0; };
 struct Entry_11EDA8 { s32 count; u8* list; };
 struct Pair_11EDA8 { void* node; s32 pad; };
 struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
@@ -1697,13 +1696,13 @@ extern u8 D_00244950[];
 
 void func_00137290(Buf_11EDA8* self, s32 a, s32 b, s32 c);
 void func_00137398(Buf_11EDA8* self, s32 a1, u8* a2);
-void func_0011E680(Obj_11EDA8* self, Node_11EDA8* slot, Buf_11EDA8* obj);
+void func_0011E680(C01* self, Node_11EDA8* slot, Buf_11EDA8* obj);
 void func_001372E0(Buf_11EDA8* self, s32 flags);
 
-void func_0011EDA8(Obj_11EDA8* self)
+void func_0011EDA8(C01* self)
 {
     Buf_11EDA8 buf;
-    s32 off = self->f0->idx << 3;
+    s32 off = self->desc->id << 3;
     s32 n = *(s32*)(D_00244950 + off);
     u8* list = *(u8**)(D_00244950 + off + 4);
     if (n > 0) {
