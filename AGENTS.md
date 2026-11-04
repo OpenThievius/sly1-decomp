@@ -27,6 +27,7 @@ procedure; read it before you match anything.
 | `config/us/generated.tsv` | the functions the compiler makes for a file (a static initialiser, the constructor that calls it), under retail's names | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/us/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md) | `tools/classify_asm.py` |
+| `config/us/classes.tsv`, `methods.tsv`, `creators.tsv` | the game's class map from retail's class descriptors: each class's parent, id, flags, size and method slots (own or inherited), the classes each function is a method of, and the functions that create an object of a class | `tools/classes.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
 | `src/main/<name>.cpp`, `config/us/files.tsv` | a real source file, found in retail and proved by building it whole (docs/AGENT_WORKFLOW.md); the table gives its code range and where its data starts | you, by hand |
 | `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with Sony's 2.9-ee-991111, which `config/cflags.tsv` names per file (docs/TOOLCHAIN.md) | you |
@@ -61,6 +62,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
 | `python3 tools/inventory.py [--check]` | the function tables and PAL's pairing |
 | `python3 tools/classify_asm.py [--check]` | which game-code functions are original assembly (needs `asm/us/`) |
+| `python3 tools/classes.py [--check]` | the class map: classes, their methods and creators (needs `asm/us/`) |
 | `python3 -m unittest discover -s tests` | the tools' unit tests (CI) |
 | `python3 tools/proprietary.py` | scans what git would commit for game data and proprietary material |
 | `python3 tests/check_repository.py` | `proprietary.py`, licence headers (CI) |
