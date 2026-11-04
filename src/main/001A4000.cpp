@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 #include "list_iter.h"
 #include "c8c.h"
 #include "c5f.h"
@@ -337,20 +338,18 @@ s32 func_001A4258(Ctrl_1A4258* self)
     return r;
 }
 
-struct Ctrl_1A44E8 { u8 pad0[0x618]; f32 level618; };
-
 extern f32 D_00261860;
 extern f32 D_0026B7D8[4];
 
-void func_001B9338(Ctrl_1A44E8* self);
+void func_001B9338(C15* self);
 void func_001892A0(f32* out, f32 unused, f32 value);
-void func_001B9D10(Ctrl_1A44E8* self, f32* buf, u8* table, f32 scale);
+void func_001B9D10(C15* self, f32* buf, u8* table, f32 scale);
 
-void func_001A44E8(Ctrl_1A44E8* self)
+void func_001A44E8(C15* self)
 {
     f32 buf[12];
     func_001B9338(self);
-    func_001892A0(buf, self->level618, 0.0f);
+    func_001892A0(buf, self->f618, 0.0f);
     func_001B9D10(self, buf, D_0026B7D8, D_00261860);
 }
 
@@ -379,7 +378,7 @@ struct Obj_1A45B8 { u8 pad0[0x88]; f32 ratio; u8 pad1[8]; f32 value; };
 
 s32 func_00128230(void* ctx);
 
-void func_001A45B8(void* ctx, Obj_1A45B8* obj)
+void func_001A45B8(C15* ctx, Obj_1A45B8* obj)
 {
     if (func_00128230(ctx) != 0) {
         return;
@@ -855,16 +854,7 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, 
 void func_00155FA0(void* self);
 
 struct Rec_1A43C8 { u8 pad[8]; s32 kind; };
-struct Self_1A43C8 {
-    u8 pad[0x65C];
-    void* p65C;
-    void* p660;
-    u8 pad2[0x20];
-    void* p684;
-    s32 i688;
-};
-
-void func_001A43C8(Self_1A43C8* self, s32 code, Rec_1A43C8* rec)
+void func_001A43C8(C15* self, s32 code, Rec_1A43C8* rec)
 {
     func_00192230(self, code, rec);
     if (code == 5) {
@@ -882,15 +872,15 @@ void func_001A43C8(Self_1A43C8* self, s32 code, Rec_1A43C8* rec)
     return;
 kind295:
     func_001BFCD8(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
-    func_00155FA0(self->p65C);
+    func_00155FA0(self->f65C);
     return;
 kind296:
     func_001BFCD8(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
-    func_00155FA0(self->p660);
+    func_00155FA0(self->f660);
     return;
 code5:
-    if (rec == self->p684) {
-        self->i688 = 1;
+    if (rec == self->f684) {
+        self->f688 = 1;
     }
 }
 
@@ -1191,27 +1181,26 @@ void func_001A7480(Obj_1A7480* self, s32 value)
 }
 
 struct __attribute__((aligned(16))) Quad_1A4610 { s32 a, b, c, d; };
-struct Obj_1A4610 { u8 pad0[0x440]; Quad_1A4610 q440; Quad_1A4610 q450; };
 extern u8 D_00248D20[];
 s32 func_001300E8(void* node, s32 kind);
 void func_001BC828(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-void func_001A4610(Obj_1A4610* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void func_001A4610(C15* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     Quad_1A4610 s0;
     Quad_1A4610 s1;
     s32 n = *(s32*)(a2 + ((1 - a3) << 6));
-    s0 = self->q440;
-    s1 = self->q450;
+    s0 = *(Quad_1A4610*)&self->v440;
+    s1 = *(Quad_1A4610*)&self->mode450;
     if (n != 0) {
         if (func_001300E8((void*)n, 0x43) || func_001300E8((void*)n, 0x42)) {
-            self->q450.a = 1;
-            self->q440 = *(Quad_1A4610*)D_00248D20;
+            self->mode450 = 1;
+            *(Quad_1A4610*)&self->v440 = *(Quad_1A4610*)D_00248D20;
         }
     }
     func_001BC828(self, a1, a2, a3, a4, a5);
-    self->q440 = s0;
-    self->q450 = s1;
+    *(Quad_1A4610*)&self->v440 = s0;
+    *(Quad_1A4610*)&self->mode450 = s1;
 }
 
 struct Iter_1A54F8 {

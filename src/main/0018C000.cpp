@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 
 struct Obj_18C1A8 { u8 pad0[0x14]; s32 f14; };
 
@@ -307,30 +308,14 @@ void func_0018F988(Actor_0018F988* self)
     func_001B9AE0(self, 3, 0, 3, 0);
 }
 
-struct Actor_0018FEF8 {
-    u8 pad_000[0xBD0];
-    s32 field_BD0;
-    s32 field_BD4;
-};
-
 void func_001C6F48(void* self);
 
-void func_0018FEF8(Actor_0018FEF8* self)
+void func_0018FEF8(C0E* self)
 {
     func_001C6F48(self);
-    self->field_BD4 = 0;
-    self->field_BD0 = 0;
+    self->fBD4 = 0;
+    self->fBD0 = 0;
 }
-
-struct Obj_18FF28 {
-    u8 pad0[0x5F0];
-    s32 f5F0;
-    u8 pad1[0xC38 - 0x5F4];
-    s32 fC38;
-    s32 fC3C;
-    s32 fC40;
-    s32 fC44;
-};
 
 struct Ent_2699B0;
 extern Ent_2699B0 D_00269B60[2];
@@ -339,71 +324,50 @@ void func_001C72A0(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 s32 func_001CA758(void* self, s32 id);
 
-void func_0018FF28(Obj_18FF28* self)
+void func_0018FF28(C0E* self)
 {
     func_001C72A0(self);
     func_00124DF8(self, 2, D_00269B60);
-    self->f5F0 = func_001CA758(self, 0xEF);
+    self->f5F0 = (void*)func_001CA758(self, 0xEF);
     self->fC38 = func_001CA758(self, 0x16C);
     self->fC3C = func_001CA758(self, 0x16D);
     self->fC40 = func_001CA758(self, 0x16A);
     self->fC44 = func_001CA758(self, 0x16B);
 }
 
-struct Actor_0018FFB0 {
-    u8 pad_000[0x4];
-    s32 field_004;
-    u8 pad_008[0x720 - 0x008];
-    void* field_720_ptr;
-    s32 field_724;
-    u8 pad_728[0xC04 - 0x728];
-    s32 field_C04;
-    u8 pad_C08[0xC10 - 0xC08];
-    s32 field_C10;
-    u8 pad_C14[0xC28 - 0xC14];
-    s32 field_C28;
-    s32 field_C2C;
-    s32 field_C30;
-    s32 field_C34;
-    s32 field_C38;
-    s32 field_C3C;
-    s32 field_C40;
-    s32 field_C44;
-};
-
 void func_001CB6F8(void* a, void* b);
 void func_001C91C8(void* self, s32 a, s32 b);
 
-void func_0018FFB0(Actor_0018FFB0* self, s32 a1, s32 a2)
+void func_0018FFB0(C0E* self, s32 a1, s32 a2)
 {
     s32 a2v = a2;
-    switch (self->field_724) {
+    switch (self->f724) {
     case 4:
-        self->field_C28 = 0;
-        self->field_C10 = 0;
+        self->fC28 = 0;
+        self->fC10 = 0;
         break;
     case 0x10:
-        if (self->field_C30 == 4) {
-            a2v = self->field_C44;
+        if (self->fC30 == 4) {
+            a2v = self->fC44;
         } else {
-            a2v = self->field_C3C;
+            a2v = self->fC3C;
         }
         break;
     case 0xB:
-        if (self->field_C30 == 4) {
-            a2v = self->field_C40;
+        if (self->fC30 == 4) {
+            a2v = self->fC40;
         } else {
-            a2v = self->field_C38;
+            a2v = self->fC38;
         }
-        if (self->field_720_ptr != 0) {
-            func_001CB6F8(self->field_720_ptr, self);
+        if (self->f720 != 0) {
+            func_001CB6F8(self->f720, self);
         }
         break;
     }
     func_001C91C8(self, a1, a2v);
-    s32 kind = self->field_724;
+    s32 kind = self->f724;
     if (kind == 0xB || kind == 0x10) {
-        self->field_C04 = 0;
+        self->fC04 = 0;
     }
 }
 

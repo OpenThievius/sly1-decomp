@@ -8,7 +8,7 @@ struct Blk_eu_1D7440 {
 };
 struct __attribute__((packed)) BlkP_eu_1D7440 { u8 pad[0x58C]; s32 v; };
 
-void func_001D7440(Obj_1D7440* self)
+void func_001D7440(C19* self)
 {
     Ent_1D7440* buf[16];
     s32 id0;
@@ -16,9 +16,9 @@ void func_001D7440(Obj_1D7440* self)
     s32 id2;
     func_00124A48(self);
     func_00124DF8(self, 0x14, D_002752A0);
-    self->f694 = func_00205778(self->fD4, self->fD0);
-    if (self->fB44 != 0) {
-        Emit_1D7440* v = func_001B6290(self->fB44, self, -1, 0);
+    self->f694 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
+    if (((Snd_1D7440*)self->fB44) != 0) {
+        Emit_1D7440* v = func_001B6290(((Snd_1D7440*)self->fB44), self, -1, 0);
         self->fB48 = v;
         func_001B64D8(v, self->fB30 == 1 ? 0x484 : 0x384);
     }
@@ -58,7 +58,7 @@ void func_001D7440(Obj_1D7440* self)
         }
     }
     if (self->fB30 == 1) {
-        s32 n = func_0015A198(self->f14, 0x105, 0x426, 0, 0x10, buf);
+        s32 n = func_0015A198(((Grp_1D7440*)self->world), 0x105, 0x426, 0, 0x10, buf);
         for (s32 i = 0; i < n; i++) {
             buf[i]->vt->fn6C(buf[i], self);
         }
@@ -68,7 +68,7 @@ void func_001D7440(Obj_1D7440* self)
         ((Blk_eu_1D7440*)D_002726B0)->p574 = &((Blk_eu_1D7440*)D_002726B0)->f58C;
     }
     for (s32 k = 0; k < 4; k++) {
-        Slot_1D7440* s = &self->slots[k];
+        Slot_1D7440* s = (Slot_1D7440*)&self->f6B0[k];
         s->q = s->p->q;
     }
     func_001DB290(self);

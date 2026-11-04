@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 
 void func_0019EBE8(void* self);
 
@@ -37,11 +38,11 @@ void func_001A26B0(u8* self)
     }
 }
 
-void func_001BAC30(u8* self);
-void func_00124DF8(u8* self, s32 n, void* data);
+void func_001BAC30(void* self);
+void func_00124DF8(void* self, s32 n, void* data);
 extern s32 D_0026B778[6];
 
-void func_001A3B20(u8* self)
+void func_001A3B20(C15* self)
 {
     func_001BAC30(self);
     func_00124DF8(self, 2, (void*)D_0026B778);
@@ -481,21 +482,6 @@ void func_001A39C8(void* selfv, void* otherv)
 }
 
 typedef void (*VFn_1A3B58)(void* self);
-struct Obj_1A3B58 {
-    VFn_1A3B58* vtbl;
-    u8 pad_004[0x640 - 0x004];
-    void* f640;
-    void* f644;
-    u8 pad_648[0x650 - 0x648];
-    void* f650;
-    void* f654;
-    u8 pad_658[0x664 - 0x658];
-    void* f664;
-    s32 f668;
-    u8 f66C[0x678 - 0x66C];
-    s32 f678;
-};
-
 extern u8* D_00275710;
 extern s32 D_0026B790[18];
 
@@ -507,7 +493,7 @@ s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 s32 func_001A4070(void* self, s32 n);
 void func_001A42C8(void* self, s32 v);
 
-void func_001A3B58(Obj_1A3B58* self)
+void func_001A3B58(C15* self)
 {
     func_00124A48(self);
     if (self->f678 != 0) {
@@ -523,7 +509,7 @@ void func_001A3B58(Obj_1A3B58* self)
         func_001A4070(self, 2);
         func_001A42C8(self, 0);
     } else {
-        self->vtbl[7](self);
+        ((VFn_1A3B58*)self->desc)[7](self);
     }
 }
 
@@ -751,7 +737,6 @@ void func_001A01B8(Obj_1A01B8* self, f32 f)
     func_00118D20(sub, func_00118D30(tv, u));
 }
 
-struct Obj_1A3C40;
 struct Inner_1A3C40;
 struct Src_1A3C40;
 struct Ptr_1A3C40;
@@ -765,20 +750,6 @@ struct Inner_1A3C40 {
     f32 f110;           // 0x110
     f32 f114;           // 0x114
 };
-struct Obj_1A3C40 {
-    u8 pad000[0x618];
-    f32 f618;           // 0x618
-    f32 f61c;           // 0x61C
-    f32 f620;           // 0x620
-    u8 pad624[0x04];
-    f32 f628;           // 0x628
-    u8 pad62c[0x04];
-    u8 pad630[0x1C];
-    Inner_1A3C40* inner;    // 0x64C
-    u8 pad650[0x34];
-    Ptr_1A3C40* p684;   // 0x684
-    s32 s688;           // 0x688
-};
 struct Frame_1A3C40 {
     f32 buf[4];         // 0x00
     u8 pad10[0x20];
@@ -790,29 +761,29 @@ extern const f32 D_0024C9C0[4];
 extern f32 D_00261860;
 
 void func_0012E760(Ptr_1A3C40* obj);
-void func_001A3F40(Obj_1A3C40* self, Src_1A3C40* src);
+void func_001A3F40(C15* self, Src_1A3C40* src);
 void func_001ED650(Out_1A3C40* out, f32 unused, f32 scale, f32 z);
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA728(u8* p, s32 a, f32 b, f32 c, f32 d);
 void func_001892A0(f32* out, f32 unused, f32 value);
-void func_00128150(void* a0, Obj_1A3C40* a1, void* a2, void* a3);
+void func_00128150(void* a0, C15* a1, void* a2, void* a3);
 
-void func_001A3C40(Obj_1A3C40* self, Src_1A3C40* src)
+void func_001A3C40(C15* self, Src_1A3C40* src)
 {
     Frame_1A3C40 f;
-    if (self->s688 != 0) {
-        func_0012E760(self->p684);
-        self->p684 = 0;
-        self->s688 = 0;
+    if (self->f688 != 0) {
+        func_0012E760(((Ptr_1A3C40*)self->f684));
+        self->f684 = 0;
+        self->f688 = 0;
     }
     func_001A3F40(self, src);
-    func_001ED650((Out_1A3C40*)((u8*)self + 0x630), self->f618, self->f61c * self->f628, 0.0f);
+    func_001ED650((Out_1A3C40*)((u8*)self + 0x630), self->f618, self->f61C * self->f628, 0.0f);
     f.tri = *(Tri_1A3C40*)D_0024C9C0;
-    f32 r = func_00205778(self->inner->f114, self->inner->f110);
+    f32 r = func_00205778(((Inner_1A3C40*)self->f64C)->f114, ((Inner_1A3C40*)self->f64C)->f110);
     r = func_001EA728((u8*)&f.tri, 0, r, self->f620, D_00261860);
     func_001892A0(f.buf, r, 0.0f);
     func_00128150(0, self, f.buf, f.buf);
-    self->inner->vtbl[34](self->inner, f.buf);
+    ((Inner_1A3C40*)self->f64C)->vtbl[34](((Inner_1A3C40*)self->f64C), f.buf);
 }
 
 struct __attribute__((aligned(16))) Quad_1A1DF0 { s32 a; s32 b; s32 c; s32 d; };
@@ -887,7 +858,7 @@ struct Obj_1A3AE0 {
     f32 f628;
 };
 
-void func_001A3AE0(void* self)
+void func_001A3AE0(C15* self)
 {
     Obj_1A3AE0* o = (Obj_1A3AE0*)self;
     func_001921A8(self);

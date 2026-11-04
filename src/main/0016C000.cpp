@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 #include "c52.h"
 #include "c64.h"
 
@@ -40,8 +41,6 @@ void func_0016EC38(Obj_16EC38* self)
     if (self->f14 != 3) return;
     func_001A7CE8(self->fBC);
 }
-
-struct Obj_16F7B0 { u8 pad0[0x21C8]; f32 f21c8; u8 pad1[0x2284 - 0x21CC]; f32 f2284; };
 
 extern void* D_00262E10;
 struct Row_262E40 { s32 a; s32 b; s32 c; };
@@ -207,13 +206,13 @@ void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 id, void* table);
 void func_00159478(void* a, void* b);
 
-void func_0016F7B0(Obj_16F7B0* self)
+void func_0016F7B0(C07* self)
 {
     func_001BAC30(self);
     func_00124DF8(self, 0x97, &D_00262E40);
     func_00159478((u8*)self + 0x2428, self);
     self->f2284 = -1.0f;
-    self->f21c8 = -1.0f;
+    self->f21C8 = -1.0f;
     D_00262E10 = self;
 }
 
