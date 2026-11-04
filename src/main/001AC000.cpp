@@ -248,7 +248,8 @@ void func_001AF0A0(Unit_1AF0A0* self)
     self->scale = 1.0f;
 }
 
-extern u8 D_002744B8[];
+struct Entry_2744B8 { s32 a; s32 b; s32 c; };
+extern Entry_2744B8 D_002744B8[2];
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -584,7 +585,7 @@ void func_001AA8C0(void* self, f32 v);
 void func_001AA8B8(void* self, f32 v);
 void* func_0015C1C0(s32 k);
 void func_001AA788(void* self, f32 v);
-extern u8 D_002744AC[];
+extern f32 D_002744AC;
 
 s8 func_001AEA08(void);
 void func_001AE758(Obj_1AE758* self)
@@ -598,7 +599,7 @@ void func_001AE758(Obj_1AE758* self)
     func_001AA8C0(self, k);
     func_001AA8B8(self, 0.0f);
     void* r = func_0015C1C0(1);
-    f32 g = *(f32*)D_002744AC;
+    f32 g = D_002744AC;
     self->f4 = r;
     func_001AA788(self, g);
     v = func_001AEA08();
@@ -614,7 +615,8 @@ struct VTab_1ADF28 { s32 w0; s32 w1; s16 delta; s16 w2; void* (*fn)(void* self, 
 struct Node_1ADF28 { u8 pad0[4]; Obj_1ADF28* obj; u8 pad1[0x210 - 8]; void** slot; u8 pad2[0x260 - 0x214]; s32 f260; s32 f264; };
 
 f32 D_0027446C = 0.7f;
-extern f32 D_00274470;
+struct Pair_274470 { f32 a; f32 b; };
+extern Pair_274470 D_00274470;
 extern u8 D_00274488[];
 extern s32 D_00262C84;
 
@@ -628,7 +630,7 @@ void func_001ADF28(Node_1ADF28* self)
 
     func_001AA268(self);
     vt = self->obj->vt;
-    self->obj = (Obj_1ADF28*)vt->fn((u8*)self->obj + vt->delta, D_0027446C, D_00274470);
+    self->obj = (Obj_1ADF28*)vt->fn((u8*)self->obj + vt->delta, D_0027446C, D_00274470.a);
     if (func_0015C1C0(2)) {
         self->slot = (void**)D_00274488;
         *self->slot = func_0015C1C0(2);
@@ -953,7 +955,7 @@ void func_001AC060(Obj_1AC060* self)
 typedef void (*VFn_1AD088)(void* self, void* arg);
 struct Obj_1AD088 { VFn_1AD088* vtbl; };
 
-extern u8 D_0024CE00[];
+extern const char D_0024CE00[];
 void func_001AD0D0(Obj_1AD088* self, s32 hi, s32 lo);
 
 void func_001AD088(Obj_1AD088* self, s32 value)
@@ -961,7 +963,7 @@ void func_001AD088(Obj_1AD088* self, s32 value)
     if (value != -1) {
         func_001AD0D0(self, value >> 8, (u8)value);
     } else {
-        self->vtbl[8](self, D_0024CE00);
+        self->vtbl[8](self, (void*)D_0024CE00);
     }
 }
 
@@ -973,7 +975,7 @@ typedef void* (*VFn_1AD6A8)(void* self, f32 sx, f32 sy);
 struct VTab_1AD6A8 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1AD6A8 fn; };
 struct Obj_1AD6A8 { u8 pad0[0x4C]; VTab_1AD6A8* vt; };
 
-extern u8 D_0024CEE0[];
+extern const char D_0024CEE0[];
 void func_001AA268(Node_1AD6A8* self);
 void* func_0015C1C0(s32 k);
 
@@ -986,7 +988,7 @@ void func_001AD6A8(Node_1AD6A8* self)
     o = (Obj_1AD6A8*)func_0015C1C0(2);
     vt = o->vt;
     self->r = vt->fn((u8*)o + vt->delta, 1.0f, 1.0f);
-    self->vt->fn(self, D_0024CEE0);
+    self->vt->fn(self, (u8*)D_0024CEE0);
     self->flag = 0;
 }
 
@@ -1000,7 +1002,7 @@ struct Obj_1ADC60 { VFn_1ADC60* vt; void* f4; u8 pad0[0x210 - 8]; void** f210; u
 f32 D_00274448 = 0.9f;
 f32 D_0027444C = 0.9f;
 extern u8 D_00274450[];
-extern u8 D_0024CEF0[];
+extern const char D_0024CEF0[];
 
 void func_001AA268(Obj_1ADC60* self);
 void* func_0015C1C0(s32 k);
@@ -1020,7 +1022,7 @@ void func_001ADC60(Obj_1ADC60* self)
     if (self->f260 != 0) {
         func_001AAB20(self, 366.75f, 165.75f);
     } else {
-        self->vt[8](self, D_0024CEF0);
+        self->vt[8](self, (void*)D_0024CEF0);
     }
 }
 
@@ -1029,7 +1031,7 @@ struct Inner_1AE510 { u8 pad0[8]; s32 f8; u8 pad1[0x3C]; f32 f48; };
 
 extern u8 D_00273C50[];
 extern u8 D_002739F0[];
-extern u8 D_0024CF98[];
+extern const char D_0024CF98[];
 extern f32 D_002744A8;
 
 void func_001AA268(Obj_1AE510* self);
@@ -1162,17 +1164,17 @@ struct Info_1ACEE0 {
 
 extern s32 func_001E1FD0(char*, const char*, ...);
 extern s32 func_001E2180(char*, const char*);
-extern char D_0024CD88[];
-extern char D_0024CD90[];
-extern char D_0024CD98[];
-extern char D_0024CDA0[];
-extern char D_0024CDA8[];
-extern char D_0024CDB0[];
-extern char D_0024CDB8[];
-extern char D_0024CDC0[];
-extern char D_0024CDC8[];
-extern char D_0024CDE0[];
-extern char D_0024CDF8[];
+extern const char D_0024CD88[];
+extern const char D_0024CD90[];
+extern const char D_0024CD98[];
+extern const char D_0024CDA0[];
+extern const char D_0024CDA8[];
+extern const char D_0024CDB0[];
+extern const char D_0024CDB8[];
+extern const char D_0024CDC0[];
+extern const char D_0024CDC8[];
+extern const char D_0024CDE0[];
+extern const char D_0024CDF8[];
 
 void func_001ACEE0(char* buf, Info_1ACEE0* info, u32 mask)
 {
@@ -1216,8 +1218,8 @@ struct Obj_1AD0D0;
 typedef void (*VFn_1AD0D0)(void* self, void* a);
 struct Obj_1AD0D0 { VFn_1AD0D0* vtbl; };
 
-extern u8 D_0024CE10[];
-extern u8 D_0024CE18[];
+extern const char D_0024CE10[];
+extern const char D_0024CE18[];
 extern u8 D_0024CD68[];
 
 u32 func_001601D8(Idx_1AD0D0* idx);
@@ -1241,7 +1243,7 @@ void func_001AD0D0(Obj_1AD0D0* self, s32 a1, s32 a2)
     func_001ACEE0(&buf, p, func_001601D8((Idx_1AD0D0*)packed));
     if (func_001E2100(&buf)) {
         func_001E1FD0(&str, (const char*)D_0024CE10, func_00160148((Idx_1AD0D0*)packed),
-                      func_001E2100(&buf) ? D_0024CE18 : D_0024CD68, &buf);
+                      func_001E2100(&buf) ? (const char*)D_0024CE18 : (const char*)D_0024CD68, &buf);
     } else {
         func_001E2138(&str, func_00160148((Idx_1AD0D0*)packed));
     }
@@ -1267,7 +1269,7 @@ struct Node_001AD7B0 {
 struct Buf_001AD7B0 { u8 pad[0x30]; };
 
 extern f32 D_00261868;
-extern u8 D_0024CEE8[];
+extern const char D_0024CEE8[];
 extern u8 D_00262280[];
 
 void func_001AA790(Self_001AD7B0* self);
@@ -1293,7 +1295,7 @@ void func_001AD7B0(Self_001AD7B0* self)
     Node_001AD7B0* h = (Node_001AD7B0*)func_0015C1C0(1);
     f32 s2 = sc * 0.1f + half;
     func_0015C8B8(h, s2, s2);
-    f32 w = func_0015C418(h, D_0024CEE8);
+    f32 w = func_0015C418(h, (void*)D_0024CEE8);
     f32 ht = (f32)h->i8 * h->f48;
     func_00137228(&buf, self->f21C + 2.0f + self->f234 * half - w * half,
                   self->f220 + 14.0f + self->f238 * half - ht * half);
@@ -1302,13 +1304,13 @@ void func_001AD7B0(Self_001AD7B0* self)
     func_00137248(&buf, (s32*)((u8*)&buf + 0x20));
     func_00137260(&buf, 0);
     func_00137268(&buf, 0);
-    func_0015C638(h, D_0024CEE8, &buf, 0, D_00262280);
+    func_0015C638(h, (void*)D_0024CEE8, &buf, 0, D_00262280);
     func_0015C900(h);
 }
 
-extern u8 D_0024CF90[];
-extern u8 D_00274478[];
-extern u8 D_00274484[];
+extern const char D_0024CF90[];
+extern const char* D_00274478[];
+extern const char* D_00274484;
 
 struct Col_1ADFF0 { u8 col[4]; };
 struct Handle_1ADFF0 { u8 raw[4]; };
@@ -1346,7 +1348,7 @@ void func_001ADFF0(struct Node_1ADFF0 *self)
         loc.col.col[2] = 0x6F;
         loc.col.col[3] = 0xFF;
         self->color = loc.col;
-        u8 *tbl = D_00274478;
+        u8 *tbl = (u8*)D_00274478;
         s32 off = self->index ? 4 : 0;
         func_001E1FD0(&self->text, (const char *)D_0024CF90, *(s32 *)(tbl + off), *(s32 *)(tbl + 8));
     } else {
@@ -1355,7 +1357,7 @@ void func_001ADFF0(struct Node_1ADFF0 *self)
         loc.col.col[2] = 0x1F;
         loc.col.col[3] = 0xFF;
         self->color = loc.col;
-        func_001E2138(&self->text, (void *)((s32 *)D_00274484)[0]);
+        func_001E2138(&self->text, (void *)D_00274484);
     }
     func_0015C8B8(self->handle, self->scale, self->scale);
     func_0015DB28(&loc.obj, &self->text, self->handle);
@@ -1381,10 +1383,10 @@ struct Mgr_1AD1E8 {
     Sub_1AD1E8 ents[1];
 };
 
-extern char* D_00274430[];
-extern char D_0024CE80[];
-extern char D_0024CEA0[];
-extern char D_0024CEC0[];
+extern const char* D_00274430[];
+extern const char D_0024CE80[];
+extern const char D_0024CEA0[];
+extern const char D_0024CEC0[];
 
 void func_00160208(s32 key, s32* a1, s32* a2, s32* a3);
 char* func_001E2138(Buf_1AD1E8* dst, const char* src);
@@ -1413,15 +1415,17 @@ struct Table_001AEA08 {
 };
 
 extern f32 D_00261868;
-extern s8* D_002744B0;
+struct Ptr_2744B0 { s8* p; s32 pad; };
+extern Ptr_2744B0 D_002744B0;
+extern const char D_0024CFA0[];
 
 u32 func_001E2100(Table_001AEA08* t);
 
 s8 func_001AEA08(void)
 {
     s32 scaled = (s32)(D_00261868 * 5.0f);
-    u32 divisor = func_001E2100((Table_001AEA08*)D_002744B0);
-    return D_002744B0[(u32)scaled % divisor];
+    u32 divisor = func_001E2100((Table_001AEA08*)D_002744B0.p);
+    return D_002744B0.p[(u32)scaled % divisor];
 }
 
 struct Sub_1AECE8;
@@ -1985,7 +1989,7 @@ struct Self_1AC0E8 {
     u8 pad3[0x26C - 0x224]; u8 f26C;
     u8 pad4[0x274 - 0x26D]; f32 f274; f32 f278; f32 f27C; f32 f280; f32 f284; f32 f288; f32 f28C; f32 f290; f32 f294;
 };
-struct Q3_1AC0E8;
+struct Q3_1AC0E8 { f32 f0; f32 f4; f32 f8; f32 fC; };
 
 extern f32 D_00261858[];
 extern Q3_1AC0E8 D_002743C0;
@@ -2085,3 +2089,37 @@ void func_001AC0E8(Self_1AC0E8* self)
     func_0015C638(self->text, str, &out, 0, D_00262280);
     func_0015C900(self->text);
 }
+
+// Data defined here (retail .rodata / .data).
+extern const char D_0024CD88[8] = "&3%s&.";
+extern const char D_0024CD90[8] = "k";
+extern const char D_0024CD98[8] = "l";
+extern const char D_0024CDA0[8] = "v";
+extern const char D_0024CDA8[8] = "w";
+extern const char D_0024CDB0[8] = "&1%s";
+extern const char D_0024CDB8[8] = "h";
+extern const char D_0024CDC0[8] = "i";
+extern const char D_0024CDC8[24] = "^10~b2a83d0.%d~.^.";
+extern const char D_0024CDE0[24] = "^10~b2a83d%d:%02d~.^.";
+extern const char D_0024CDF8[8] = "&.";
+extern const char D_0024CE00[16] = "<unknown>";
+extern const char D_0024CE10[8] = "%s%s%s";
+extern const char D_0024CE18[104] = " \0\0\0\0\0\0\0Tide of Terror\0\0Sunset Snake Eyes\0\0\0\0\0\0\0Vicious Voodoo\0\0Fire in the Sky\0The Cold Heart of Hate";
+extern const char D_0024CE80[32] = " &1%d^10~b2a83d/%d~.^.&.&3k&.";
+extern const char D_0024CEA0[32] = "%s&1%d^10~b2a83d/%d~.^.&.&3v&.";
+extern const char D_0024CEC0[32] = "%s&1%d^10~b2a83d/%d~.^.h&.";
+extern const char D_0024CEE0[8] = "B";
+extern const char D_0024CEE8[8] = "L";
+extern const char D_0024CEF0[160] = "Sly Cooper\nand the Thievius Raccoonus\0\0\0Press START button for New Game\0Press START button to Resume Game\0\0\0\0\0\0\0Press SELECT button for Menu\0\0\0\0No Controller";
+extern const char D_0024CF90[8] = "%s\n%s";
+extern const char D_0024CF98[8] = "%c";
+extern const char D_0024CFA0[32] = "%c&1^07~b2a83d%d%%&.\0\0\0\0ab";
+const char* D_00274430[6] = { (const char*)D_0024CD68, D_0024CE18 + 0x08, D_0024CE18 + 0x18, D_0024CE18 + 0x30, D_0024CE18 + 0x40, D_0024CE18 + 0x50 };
+Pair_274470 D_00274470 = { 0.6f, 0.0f };
+const char* D_00274478[3] = { D_0024CEF0 + 0x28, D_0024CEF0 + 0x48, D_0024CEF0 + 0x70 };
+const char* D_00274484 = D_0024CEF0 + 0x90;
+f32 D_002744AC = 0.7f;
+Ptr_2744B0 D_002744B0 = { (s8*)(D_0024CFA0 + 0x18), 0 };
+Entry_2744B8 D_002744B8[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
+Q3_1AC0E8 D_002743C0 = { 0.5f, 0.25f, 0.2f, 0.0f };
+Node_001AE178* D_00269988 = 0;

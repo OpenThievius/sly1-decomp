@@ -2,9 +2,9 @@
 #include "common.h"
 #include "list_iter.h"
 
-extern u8 D_00247AA0[];
+extern const u32 D_00247AA0;
 s32 D_002613F4;
-extern s32 D_002613F8;
+extern s32 D_002613F8[6];
 s32 func_0011E138(void*, void*, void*, void*);
 s32 func_0011E1F8(s32);
 s32 func_0011E2E8(void);
@@ -12,9 +12,9 @@ void func_00140C28(void* a, void* b, void* c)
 {
 	s32 result;
 	do {
-		result = func_0011E138(a, b, c, D_00247AA0);
+		result = func_0011E138(a, b, c, (void*)&D_00247AA0);
 		D_002613F4 = result;
-		if (result != 1) { func_0011E1F8(0); D_002613F8 = func_0011E2E8(); }
+		if (result != 1) { func_0011E1F8(0); D_002613F8[0] = func_0011E2E8(); }
 	} while (result != 1);
 }
 
@@ -25,9 +25,9 @@ void func_00140CC8(void* a, void* b, void* c)
 {
 	s32 result;
 	do {
-		result = func_00203B18(a, b, c, D_00247AA0);
+		result = func_00203B18(a, b, c, (void*)&D_00247AA0);
 		D_002613F4 = result;
-		if (result != 1) { func_002032C8(0); D_002613F8 = func_00203D90(); }
+		if (result != 1) { func_002032C8(0); D_002613F8[0] = func_00203D90(); }
 	} while (result != 1);
 }
 
@@ -493,8 +493,8 @@ struct Ctl_143A60 {
     u8 f454[0x20];
 };
 
-extern u8 D_00261880[];
-extern u8 D_00261890[];
+extern f32 D_00261880[4];
+extern f32 D_00261890[4];
 void func_00144938(void* self, void* a, void* b);
 void func_001493B8(void* p, s32 zero);
 void func_00145088(void* self, s32 a1, void* a2, s32 a3, s32 a4);
@@ -1131,7 +1131,7 @@ struct Frame_141210 {
     ~Frame_141210() { D_0027B314 = (ListFrame*)prev; }
 };
 
-extern u8 D_00261410[];
+extern u32 D_00261410[4];
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 a, void* b);
 s32 func_001300E8(void* node, s32 kind);
@@ -1249,7 +1249,7 @@ void func_00149660(struct Sub_00143648* self, struct Self_00143648* owner);
 void func_0014A888(struct Sub_00143648* self, struct Self_00143648* owner);
 void func_00143A60(struct Self_00143648* self, s32 a1);
 
-extern u8 D_002618B8[];
+extern f32 D_002618B8[4];
 extern u8 D_002618B0[];
 extern u8 D_002483D0[];
 // An entry of a table of functions defined at the end of this file.
@@ -1261,7 +1261,7 @@ extern const Fn_Table D_002173E0[];
 extern const Fn_Table D_002173F8[];
 f32 D_002618A0 = 5e+02f;
 f32 D_002618A4 = 2e+04f;
-extern f32 D_002618A8;
+extern f32 D_002618A8[2];
 
 void func_00143648(struct Self_00143648* self)
 {
@@ -1276,7 +1276,7 @@ void func_00143648(struct Self_00143648* self)
     f32 k = 1.29870129f;
     f32 x = D_002618A0;
     f32 y = D_002618A4;
-    f32 z = D_002618A8;
+    f32 z = D_002618A8[0];
     f32 h = 100.0f;
     f32 t = 20000.0f;
     *(f32*)(s + 0x1E0) = k;
@@ -1304,9 +1304,9 @@ void func_00143648(struct Self_00143648* self)
 }
 
 extern u8 D_002701B8[];
-extern u8 D_00247AA4[];
-extern u8 D_00247AA8[];
-extern u8 D_00247AA0[];
+extern const u32 D_00247AA4;
+extern const u32 D_00247AA8[2];
+extern const u32 D_00247AA0;
 extern u8 D_0026FF68[];
 extern u8 D_0027B800[];
 extern u32 D_002476A0[];
@@ -1336,7 +1336,7 @@ void func_001409E0(void)
         s1 = *(s32*)D_002701B8;
         if (s1 == 2) {
             if (func_00140968() != 0) {
-                if (func_0011E138(*(s32*)D_00247AA4, 1, D_0027B800, D_00247AA0) == 1) {
+                if (func_0011E138((s32)D_00247AA4, 1, D_0027B800, (void*)&D_00247AA0) == 1) {
                     D_002613EC = s1;
                 }
             }
@@ -1353,7 +1353,7 @@ void func_001409E0(void)
                 p++;
                 n--;
             } while (n != -1);
-            if ((s32)crc != *(s32*)D_00247AA8) {
+            if ((s32)crc != (s32)D_00247AA8[0]) {
                 D_002613EC = 1;
             } else {
                 func_00194D30(D_0026FF68, 2, -1);
@@ -1367,10 +1367,10 @@ void func_001409E0(void)
 struct Buf_140B60 { char b[256]; };
 struct Obj_140B60 { u8 pad; };
 
-extern u16 D_00249E20;
-extern u8 D_00249E28[];
-extern u8 D_00249E30[];
-extern u8 D_00249E38[];
+extern const u16 D_00249E20[4];
+extern const char D_00249E28[8];
+extern const char D_00249E30[8];
+extern const char D_00249E38[4];
 
 void* func_001E2180(Buf_140B60* dst, void* src);
 s32 func_001407A8(Buf_140B60* p);
@@ -1380,14 +1380,14 @@ s32 func_001E1FD0(Obj_140B60* dst, const char* fmt, ...);
 void func_00140B60(void* self, void* a1, s32 flag)
 {
     char buf[256];
-    *(u16*)buf = D_00249E20;
+    *(u16*)buf = D_00249E20[0];
     func_001E2180((Buf_140B60*)buf, a1);
     s32 n = func_001407A8((Buf_140B60*)buf);
     char* p = buf;
     for (s32 i = 1; i < n; i++) {
         p[func_001E2100((Buf_140B60*)p)] = 0x5C;
     }
-    func_001E1FD0((Obj_140B60*)self, (const char*)D_00249E28,
+    func_001E1FD0((Obj_140B60*)self, D_00249E28,
                   flag ? (void*)D_00249E30 : (void*)D_00249E38, buf);
 }
 
@@ -1762,3 +1762,17 @@ void func_00143E40(Ctl_143E40* self, s32 flag, f32 dt)
         self->i224 = 0;
     }
 }
+
+u32 D_00261410[4] = { 2, 0x545, 0x5A8, 0 };
+f32 D_00261880[4] = { 0.0f, -2000.0f, 500.0f, 0.0f };
+f32 D_00261890[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+f32 D_002618A8[2] = { 0.5f, 0.0f };
+f32 D_002618B8[4] = { 0.5f, 0.0f, 0.1f, 10.0f };
+s32 D_002613F8[6] = { 0, 0, 0, 0, 0, 0 };
+extern const u32 D_00247AA0 = 0x17F;
+extern const u32 D_00247AA4 = 0x14E0EF;
+extern const u32 D_00247AA8[2] = { 0x2E774159, 0 };
+extern const u16 D_00249E20[4] = { 0x5C, 0, 0, 0 };
+extern const char D_00249E28[8] = "%s\\%s";
+extern const char D_00249E30[8] = "cdrom0:";
+extern const char D_00249E38[4] = "";

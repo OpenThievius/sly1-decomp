@@ -13,7 +13,7 @@ void func_0018F198(Self_18F198* self, Key_18F198* key)
             func_00143030(((u8*)D_00261858));
             func_0016E238(&D_00262C70);
             s32 flag = 0;
-            if (key->Same(&D_00248490)) flag = D_00269B4C != 0;
+            if (key->Same((Key_18F198*)&D_00248490)) flag = D_00269B4C != 0;
             u32 m;
             if (self->mode >= 16) m = 0;
             else m = 1u << self->mode;
@@ -32,7 +32,7 @@ void func_0018F198(Self_18F198* self, Key_18F198* key)
             if (D_002613EC != 3) break;
             func_0018F6E8(self);
         }
-        if (key->Same(&D_00248490)) D_00269B4C = 1;
+        if (key->Same((Key_18F198*)&D_00248490)) D_00269B4C = 1;
         func_0018F7D0(self);
         func_0012FDE8(&loc);
     } else {

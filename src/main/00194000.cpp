@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+extern const f32 D_0024C864;
 #include "list_iter.h"
 
 void func_001AA8F0(void* self);
@@ -59,7 +60,9 @@ void func_00196900(Obj_196900* self)
     ((void (*)(Obj_196900*))self->vtbl[7])(self);
 }
 
-extern u8 D_0026A728[];
+struct Rec_26A728 { s32 id; s32 off; s32 flags; };
+struct Tbl_26A728 { s32 f0; Rec_26A728 r[1]; };
+Tbl_26A728 D_0026A728 = { 0, { { 0x3D9, 0x610, 0 } } };
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -67,7 +70,7 @@ void func_00124DF8(void* self, s32 n, void* table);
 void func_001969C0(void* self)
 {
     func_001BAC30(self);
-    func_00124DF8(self, 1, D_0026A728);
+    func_00124DF8(self, 1, &D_0026A728);
 }
 
 struct Obj_196E48 { u8 pad0[0x50]; s32 f50; u8 pad1[0x538 - 0x54]; u64 bits538; };
@@ -471,7 +474,7 @@ void func_00197848(Self_197848* self)
         if (func_00182FC8(self->items[i]) == 0) break;
     }
     if (i >= self->count) {
-        self->time = 3.4028234663852886e+38f;
+        self->time = D_0024C864;
         return;
     }
     Obj_197848* o = self->items[i];
@@ -1041,7 +1044,22 @@ struct Item_001969F8 { u8 pad[0x24]; void* p24; };
 
 struct Any_001969F8;
 
-extern u8 D_0026A738[];
+struct Tbl_26A738 { s32 f0; Rec_26A728 r[13]; };
+Tbl_26A738 D_0026A738 = { 0x24, {
+    { 0x3DD, 0x640, 0x20 },
+    { 0x3DE, 0x648, 0x0 },
+    { 0x3E7, 0x64C, 0x0 },
+    { 0x3E8, 0x650, 0x0 },
+    { 0x3E9, 0x654, 0x0 },
+    { 0x3EA, 0x658, 0x0 },
+    { 0x3EC, 0x670, 0x4 },
+    { 0x3ED, 0x65C, 0x0 },
+    { 0x3EE, 0x668, 0x0 },
+    { 0x3F0, 0x66C, 0x4 },
+    { 0x3EF, 0x660, 0x24 },
+    { 0x3EB, 0x678, 0x1 },
+    { 0x3F1, 0x6B4, 0x0 },
+} };
 extern u8 D_0021A790[];
 extern u8 D_00248D30[];
 
@@ -1060,7 +1078,7 @@ void func_001969F8(Self_001969F8* self)
 {
     s32 arr[32];
     func_00124A48(self);
-    func_00124DF8(self, 0xD, D_0026A738);
+    func_00124DF8(self, 0xD, &D_0026A738);
     self->f618 = func_00205778(self->fD4, self->fD0);
     self->p614 = func_001B6290((Any_001969F8*)self->p610, self, -1, 1);
     self->p664 = func_00121228((Root_001969F8*)self->p14, self->p65C, (Table_001969F8*)D_0021A790);
@@ -1155,20 +1173,22 @@ extern Hud_1943E8 D_00274118;
 extern Obj_1943E8 D_0026EC70;
 extern f32 D_00261868;
 extern Pad_1943E8 D_00262C70;
-extern Ent_1943E8* D_0026998C;
-extern s32 D_00264A58;
+Ent_1943E8* D_0026998C = 0;
+struct Words6_264A58 { s32 v[6]; };
+Words6_264A58 D_00264A58 = { { 0, 0, 0, 0, 0, 0 } };
 extern s32 D_00264A4C;
 extern u8 D_0026FF68[];
 f32 D_0026A22C = 5.0f;
-extern f32 D_0026A230;
+struct Pair_26A230 { f32 f0; f32 f4; };
+Pair_26A230 D_0026A230 = { 2.0f, 0.0f };
 extern f32 D_0026A700;
 extern f32 D_0026A704;
-extern char D_0024C588[];
-extern char D_0024C5A0[];
-extern char D_0024C5B8[];
-extern char D_0024C5D0[];
-extern char D_0024C600[];
-extern char D_0024C618[];
+extern const char D_0024C588[];
+extern const char D_0024C5A0[];
+extern const char D_0024C5B8[];
+extern const char D_0024C5D0[];
+extern const char D_0024C600[];
+extern const char D_0024C618[];
 
 s32 func_00160B28(Glob_1943E8* g);
 s32 func_001BE810(void);
@@ -1311,7 +1331,7 @@ void func_001943E8(Self_1943E8* self)
             return;
         }
         D_0026A700 = Clamp_1943E8::Of(D_0026A700 + dx * D_0026A22C, 424.0f, 848.0f);
-        v = Clamp_1943E8::Of(D_0026A704 + dy * D_0026A230, 10.0f, 90.0f);
+        v = Clamp_1943E8::Of(D_0026A704 + dy * D_0026A230.f0, 10.0f, 90.0f);
         D_0026A704 = v;
         {
             Gs_1943E8* gs = ((Gs_1943E8*)&D_00262490);
@@ -1333,7 +1353,7 @@ void func_001943E8(Self_1943E8* self)
     case 11:
     case 16:
     case 17:
-        if (D_00264A58 != 1) {
+        if (D_00264A58.v[0] != 1) {
             func_001961C0(self);
             return;
         } else {
@@ -1366,13 +1386,13 @@ void func_001943E8(Self_1943E8* self)
         }
         break;
     case 18:
-        if (D_00264A58 != 1) {
+        if (D_00264A58.v[0] != 1) {
             func_001961C0(self);
         }
         break;
     case 20: {
         Item_1943E8* it;
-        if (D_00264A58 != 1) {
+        if (D_00264A58.v[0] != 1) {
             func_001961C0(self);
         }
         it = func_001F6880(row->f0, D_0024C618);
@@ -1758,7 +1778,7 @@ extern s32 D_00275BEC;
 extern f32 D_00262CEC;
 extern u8 D_00260ED0[];
 extern u8 D_00262280[];
-extern Rgba_194F80 D_0026A228;
+Rgba_194F80 D_0026A228 = { 0, 0, 0, 0 };
 
 f32 func_00205400(f32 x);
 f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
@@ -1975,3 +1995,11 @@ void func_00194F80(Self_194F80* self)
         func_001AE3B8((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);
     }
 }
+
+extern const char D_0024C588[24] = "&2S&. : Erase Game";
+extern const char D_0024C5A0[24] = "&2X&. : New Game";
+extern const char D_0024C5B8[24] = "&2X&. : Load Game";
+extern const char D_0024C5D0[48] = "&2X&. : Overwrite Game\n&2S&. : Erase Game";
+extern const char D_0024C600[24] = "&2X&. : Save Game";
+extern const char D_0024C618[8] = "&2";
+extern const f32 D_0024C864 = 3.4028235e+38f;

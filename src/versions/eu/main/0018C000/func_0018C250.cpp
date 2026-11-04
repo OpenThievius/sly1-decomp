@@ -7,7 +7,7 @@ s32 func_0018C250(Card_18C250* self)
     s32 r = func_0018BD00(func_0020A078(self->f4, self->f8, "/"), 0x12, info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
-    s32 sz = func_0018C1E8(D_00248470);
+    s32 sz = func_0018C1E8((void *)D_00248470);
     need += 5;
     need += (sz + 1023) / 1024;
     need += 0x15;

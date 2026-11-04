@@ -14,7 +14,7 @@ void func_001AE758(Obj_1AE758_eu* self)
     func_001AA8C0(self, k);
     func_001AA8B8(self, 0.0f);
     void* r = func_0015C1C0(1);
-    f32 g = *(f32*)D_002744AC;
+    f32 g = *(f32*)&D_002744AC;
     self->f4 = r;
     func_001AA788(self, g);
     v = func_001AEA08();
