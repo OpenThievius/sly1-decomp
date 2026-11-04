@@ -6,6 +6,8 @@
 #pragma implementation "layout_137228.h"
 #include "layout_137228.h"
 #include "t217d.h"
+#include "c65.h"
+#include "v24a0.h"
 
 struct Quad_130F48 {
     f32 c0, c1, c2, c3;
@@ -129,10 +131,8 @@ struct Gfx_132500 {
 void func_001AA8C8(void* self);
 s32 func_00150790(void* obj, s32 mode);
 
-struct Child_136EF8 { u8 pad0[0x2D0]; s32 kind; };
-
 void func_001356C0(T217D_440* self, s32 mode);
-void func_00150790(Child_136EF8* obj, s32 mode);
+void func_00150790(C65* obj, s32 mode);
 
 struct Entry_1357F0 {
     void* obj;
@@ -290,18 +290,13 @@ void func_00192190(void* p);
 
 struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
-struct Q_135228
-{
-    u8 pad[4];
-};
-
 void func_00160D30(u32* out);
-void func_00134B48(T217D_440* self, Q_135228* q);
+void func_00134B48(T217D_440* self, V24A0* q);
 f32 func_00205210(f32 x);
 f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
-void func_001613C0(Q_135228* q, s32 a, s32 b, u64 c);
-void func_00161458(Q_135228* q, u32 v);
-void func_001615F0(Q_135228* q, s32 a, s32 b, s32 c, s32 d);
+void func_001613C0(V24A0* q, s32 a, s32 b, u64 c);
+void func_00161458(V24A0* q, u32 v);
+void func_001615F0(V24A0* q, s32 a, s32 b, s32 c, s32 d);
 
 // The file's .data, in retail's order from 0x261090. The colours and the two styles are built
 // by the static initialiser (func_00136FE8); their bytes are zero until then.
@@ -390,7 +385,7 @@ void func_001310F0(T217D_440* self, s32 a1);
 void func_00131140(T217D_440* self);
 void func_00132500(T217D_440* self, Gs_132500* gs);
 void func_00133B58(T217D_440* self, Gs_133B58* gs);
-void func_00135228(T217D_440* self, Q_135228* q);
+void func_00135228(T217D_440* self, V24A0* q);
 void func_00135550(T217D_440* self, s32 value);
 void func_001356C0(T217D_440* self, s32 mode);
 s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b);
@@ -770,7 +765,7 @@ ASM_FUNC(func_00134AA0);
 INCLUDE_RODATA(D_00249CF8);
 ASM_FUNC(func_00134B48);
 
-void func_00135228(T217D_440* self, Q_135228* q)
+void func_00135228(T217D_440* self, V24A0* q)
 {
     if (self->state == 1)
     {
@@ -1154,7 +1149,7 @@ void func_00136EC8(T217D_440* self, f32* x, f32* y)
 void func_00136EF8(T217D_440* self)
 {
     if (self->child != 0) {
-        switch (((Child_136EF8*)self->child)->kind) {
+        switch (((C65*)self->child)->mode2D0) {
         case 0:
             func_001356C0(self, 2);
             break;
@@ -1165,7 +1160,7 @@ void func_00136EF8(T217D_440* self)
             func_001356C0(self, 4);
             break;
         }
-        func_00150790((Child_136EF8*)self->child, 3);
+        func_00150790((C65*)self->child, 3);
     } else {
         func_001356C0(self, 1);
     }

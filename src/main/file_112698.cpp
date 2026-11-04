@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "c6c.h"
 
 // The script machine's built-in functions (the table D_00259958, which func_00119BB0 calls through,
 // lists them from func_00112698 on), their helpers and the collector's mark stacks: one source
@@ -748,7 +749,6 @@ struct TQ_117668 { s32 a; f32 f4; s32 c, d; };
 struct Node_117668 { s32 type; Node_117668* head; Node_117668* next; };
 struct Ent_117668 { s32 pad0; Node_117668* node; };
 struct Src_117668 { Ent_117668 e[1]; };
-struct Self_117668 { u8 pad0[0x2C]; void* f2C; u8 pad30[0x1EF8 - 0x30]; s32 f1EF8; };
 
 void func_0011B008(QP_117668* q);
 void func_0011B060(QP_117668* q, s32 mode);
@@ -1451,7 +1451,6 @@ struct World_11AB58 {
     List_11AB58* lists[1];
 };
 struct Item_11AB58 { void* fn; u8 p[8]; Ent_11AB58* fC; Item_11AB58* f10; };
-struct Glob_11AB58 { u8 p[0x1EC8]; Item_11AB58* f1EC8; };
 
 extern u8 D_0025C250[];
 extern u8 D_0025C270[];
@@ -3322,12 +3321,12 @@ void* func_00117668(void* ret, s32 limit, Src_117668* src)
             } while (n);
         }
     }
-    func_0011A498(((Self_117668*)D_00275710)->f2C, ((Self_117668*)D_00275710)->f1EF8, 0, &r);
+    func_0011A498(((C6C*)D_00275710)->f2C, ((C6C*)D_00275710)->f1EF8, 0, &r);
     if (r.a == 0x1E) {
         a->next = (Node_117668*)r.b;
     }
     func_0011B6C0(&r, a);
-    func_0011A400(&t, ((Self_117668*)D_00275710)->f2C, ((Self_117668*)D_00275710)->f1EF8, &r);
+    func_0011A400(&t, ((C6C*)D_00275710)->f2C, ((C6C*)D_00275710)->f1EF8, &r);
     func_0011B060(&t, 2);
     func_0011B018(ret, &q);
     func_0011B060(&r, 2);
@@ -4685,7 +4684,7 @@ void func_0011AB58(World_11AB58* w) {
             n = n->fC;
         }
     }
-    for (Item_11AB58* it = ((Glob_11AB58*)D_00275710)->f1EC8; it; it = it->f10) {
+    for (Item_11AB58* it = (Item_11AB58*)((C6C*)D_00275710)->f1EC8; it; it = it->f10) {
         if (it->fn == (void*)func_001834A0) {
             Ent_11AB58* e = it->fC;
             if (e && func_0011C3C8(e)) {

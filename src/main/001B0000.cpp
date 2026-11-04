@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c6e.h"
+#include "t21e3.h"
+#include "c6c.h"
+#include "v24a0.h"
 #include "list_iter.h"
 
 typedef void (*VFn_1B0F70)(void* self, s32 arg);
@@ -378,11 +381,6 @@ typedef void (*VFn_1B0EE0)(void* self, s32 arg);
 
 extern f32 D_0026185C;
 
-struct Dma_1B2640 {
-    u8 pad0[0xC];
-    u8* f0C;
-};
-
 struct Sub_1B2640 {
     u8 pad0[0xC];
     s32 f0C;
@@ -428,11 +426,11 @@ void func_001B2640(Obj_1B2640* o)
                     goto done;
                 }
             }
-            Dma_1B2640* g = (Dma_1B2640*)D_002622A8;
+            V24A0* g = (V24A0*)D_002622A8;
             u64 hi = (u64)(u32)((u8*)o + 0xD0) << 32;
             u64 v = (u64)(s64)(o->fC0 | 0x40000000) | hi;
-            *(u64*)g->f0C = v;
-            g->f0C = g->f0C + 0x10;
+            *(u64*)g->cur = v;
+            g->cur = g->cur + 0x10;
         }
     }
 done:
@@ -452,17 +450,16 @@ void func_001B2068(void* self, Quad_1B2068* src)
 }
 
 struct Node_1B2790;
-struct Owner_1B2790 { u8 pad[0x1C00]; Node_1B2790* head; };
 struct Node_1B2790 { u8 pad[0xB8]; Node_1B2790* next; };
 
 s32 func_001B26F8(Node_1B2790* node, void* a1, f32 f);
 
-void func_001B2790(Owner_1B2790* self, void* a1, s32 max, s32* outCount, Node_1B2790** out, f32 f)
+void func_001B2790(C6C* self, void* a1, s32 max, s32* outCount, Node_1B2790** out, f32 f)
 {
     ListFrame frame;
     s32 count = 0;
     Node_1B2790* node;
-    for (node = self->head; node != 0; node = node->next) {
+    for (node = (Node_1B2790*)self->list1C00.head; node != 0; node = node->next) {
         if (func_001B26F8(node, a1, f) == 0) {
             continue;
         }
@@ -641,7 +638,6 @@ extern f32 D_0026185C;
 
 // EXACT (us)
 
-struct Rec_1B3040;
 struct Ent_1B3040 {
     s32 type;
     s32 data;
@@ -650,37 +646,17 @@ struct Elem_1B3040 {
     u8 pad0[4];
     u8 f4;
     u8 pad5[3];
-    Rec_1B3040* f8;
+    T21E3_Rec* f8;
     u8 pad0C[8];
-};
-struct ObjVt_1B3040 {
-    void* slot0;
-    void (*fn1)(void* self);
-};
-struct Obj_1B3040 {
-    ObjVt_1B3040* vt;
-    u8 pad4[0x10];
-    Rec_1B3040* f14;
-};
-struct Rec_1B3040 {
-    u8 kind;
-    u8 f1;
-    u8 pad2[0x11];
-    u8 f13;
-    Elem_1B3040* f14;
-    s32 f18;
-    Ent_1B3040* f1C;
-    s32 f20;
-    Obj_1B3040* f24;
 };
 struct Frame_1B3040 {
     s32 w[4];
 };
 
 extern s32 D_002744F8;
-extern Rec_1B3040* D_002744FC;
+extern T21E3_Rec* D_002744FC;
 extern s32 D_0027453C;
-extern Obj_1B3040** D_00274540;
+extern T21E3** D_00274540;
 extern s32 D_00274520[];
 extern s32 D_00274538;
 extern u8 D_002626D8[];
@@ -688,8 +664,8 @@ extern u8 D_002626D8[];
 void func_001B2BA8(void* self);
 void func_001B2CF8(void* self);
 void* func_0018D5C0(s32 bytes);
-void func_00137A60(void* self, s32 key, Rec_1B3040* out);
-Obj_1B3040* func_001B4A10(void* self);
+void func_00137A60(void* self, s32 key, T21E3_Rec* out);
+T21E3* func_001B4A10(void* self);
 void func_001B2F00(void* self, Elem_1B3040* e);
 void func_001B2DF8(void* self);
 void func_00168D68(Frame_1B3040* p, s32 a, s32 b);
@@ -704,32 +680,32 @@ void func_001B3040(void* self)
 {
     s32 i;
     s32 j;
-    Rec_1B3040* rec;
-    Obj_1B3040** out;
+    T21E3_Rec* rec;
+    T21E3** out;
     Frame_1B3040 f;
 
     func_001B2BA8(self);
     func_001B2CF8(self);
     D_002744F8 = func_00137BE0(self);
-    D_002744FC = (Rec_1B3040*)func_0018D5C0(D_002744F8 * 0x28);
+    D_002744FC = (T21E3_Rec*)func_0018D5C0(D_002744F8 * 0x28);
     D_0027453C = func_00137BE0(self);
-    D_00274540 = (Obj_1B3040**)func_0018D5C0(D_0027453C * 4);
+    D_00274540 = (T21E3**)func_0018D5C0(D_0027453C * 4);
     out = D_00274540;
     for (i = 0; i < D_002744F8; i++) {
         rec = &D_002744FC[i];
         func_00137A60(self, 0x14, rec);
-        rec->f24 = func_001B4A10(self);
-        if (rec->f24) {
-            rec->f24->f14 = rec;
-            *out++ = rec->f24;
+        rec->owner = func_001B4A10(self);
+        if (rec->owner) {
+            rec->owner->cur.rec = rec;
+            *out++ = rec->owner;
         }
-        rec->f14 = (Elem_1B3040*)func_0018D5C0(rec->f13 * 0x14);
-        for (j = 0; j < rec->f13; j++) {
-            Elem_1B3040* e = (Elem_1B3040*)((u8*)rec->f14 + j * 0x14);
+        rec->elems = func_0018D5C0(rec->nelem * 0x14);
+        for (j = 0; j < rec->nelem; j++) {
+            Elem_1B3040* e = (Elem_1B3040*)((u8*)rec->elems + j * 0x14);
             func_001B2F00(self, e);
             e->f8 = rec;
         }
-        rec->f20 = rec->f14->f4;
+        rec->count = ((Elem_1B3040*)rec->elems)->f4;
         switch (rec->kind) {
         case 0:
             rec->f18 = 3;
@@ -749,8 +725,8 @@ void func_001B3040(void* self)
             rec->f18 = 4;
             break;
         }
-        rec->f1C = (Ent_1B3040*)func_0018D5C0(rec->f18 * 8);
-        Ent_1B3040* arr = rec->f1C;
+        rec->ents = func_0018D5C0(rec->f18 * 8);
+        Ent_1B3040* arr = (Ent_1B3040*)rec->ents;
         Ent_1B3040* e;
         switch (rec->kind) {
         case 1:
@@ -759,42 +735,42 @@ void func_001B3040(void* self)
         case 8:
         case 10:
             arr[0].type = 8;
-            arr[0].data = (s32)func_0018D5C0(rec->f20 << 7);
+            arr[0].data = (s32)func_0018D5C0(rec->count << 7);
             break;
         case 4: {
-            s32 n = (rec->f1 & 2) ? 3 : 0;
+            s32 n = (rec->flags & 2) ? 3 : 0;
             n += 5;
             e = arr + 1;
             arr[0].type = n;
-            arr[0].data = (s32)func_0018D5C0((rec->f20 * arr[0].type) << 4);
+            arr[0].data = (s32)func_0018D5C0((rec->count * arr[0].type) << 4);
             e->type = 5;
-            e->data = (s32)func_0018D5C0((rec->f20 * e->type) << 4);
+            e->data = (s32)func_0018D5C0((rec->count * e->type) << 4);
             e = arr + 2;
             e->type = 7;
-            e->data = (s32)func_0018D5C0((rec->f20 * e->type) << 4);
+            e->data = (s32)func_0018D5C0((rec->count * e->type) << 4);
             e = arr + 3;
             e->type = 4;
-            e->data = (s32)func_0018D5C0(rec->f20 << 6);
+            e->data = (s32)func_0018D5C0(rec->count << 6);
             break;
         }
         case 2:
         case 3:
             arr[0].type = 6;
-            arr[0].data = (s32)func_0018D5C0((rec->f20 * arr[0].type) << 4);
+            arr[0].data = (s32)func_0018D5C0((rec->count * arr[0].type) << 4);
             break;
         case 0:
             e = arr + 1;
             arr[0].type = 8;
-            arr[0].data = (s32)func_0018D5C0(rec->f20 << 7);
+            arr[0].data = (s32)func_0018D5C0(rec->count << 7);
             e->type = 8;
-            e->data = (s32)func_0018D5C0(rec->f20 << 7);
+            e->data = (s32)func_0018D5C0(rec->count << 7);
             e = arr + 2;
             e->type = 8;
-            e->data = (s32)func_0018D5C0(rec->f20 << 7);
+            e->data = (s32)func_0018D5C0(rec->count << 7);
             break;
         case 5:
             arr[0].type = 7;
-            arr[0].data = (s32)func_0018D5C0((rec->f20 * arr[0].type) << 4);
+            arr[0].data = (s32)func_0018D5C0((rec->count * arr[0].type) << 4);
             break;
         case 9:
             arr[0].type = 4;
@@ -804,7 +780,7 @@ void func_001B3040(void* self)
     }
     func_001B2DF8(self);
     for (s32 k = 0; k < D_0027453C; k++) {
-        D_00274540[k]->vt->fn1(D_00274540[k]);
+        D_00274540[k]->vt->m01(D_00274540[k]);
     }
     func_00168D68(&f, 0x1E00, 0x4000);
     func_001690C0(0x10000000, &f, 0);
@@ -818,9 +794,6 @@ void func_001B3040(void* self)
     D_00274538 = func_001693A8(0x20000000);
 }
 
-struct Buf_1B3510 {
-    u8 bytes[0x30];
-};
 struct Quad_1B3510 {
     u32 w[4];
 };
@@ -843,10 +816,6 @@ struct Rec_1B3510 {
     s32 f20;
     void* f24;
 };
-struct Found_1B3510 {
-    u8 pad0[0x14];
-    Elem_1B3510* f14;
-};
 struct Glob_1B3510 {
     u8 pad0[0x204];
     u32 f204;
@@ -860,22 +829,22 @@ struct Glob_1B3510 {
 
 extern s32 D_002744F8;
 
-void func_001611B8(Buf_1B3510* b);
-void func_001529C8(Buf_1B3510* b, s32 n, Quad_1B3510* q);
-void func_001612F8(Buf_1B3510* b, s32 a, s32 c, s32 d, s32 e, s32 f);
-void func_001613C0(Buf_1B3510* b, s32 a, s32 c, u64 d);
-void func_00161708(Buf_1B3510* b, s32 reg, u64 v);
-void func_001B29E0(Elem_1B3510* e, s32 j, s32 pass, s32 kind, Buf_1B3510* b);
-void func_00152D70(Buf_1B3510* b);
-void func_001528C8(Buf_1B3510* b);
-void func_00161278(Buf_1B3510* b, s32 n);
-void func_00161520(Buf_1B3510* b, f32 x, f32 y, f32 z);
-void func_00161458(Buf_1B3510* b, u32 c);
+void func_001611B8(V24A0* b);
+void func_001529C8(V24A0* b, s32 n, Quad_1B3510* q);
+void func_001612F8(V24A0* b, s32 a, s32 c, s32 d, s32 e, s32 f);
+void func_001613C0(V24A0* b, s32 a, s32 c, u64 d);
+void func_00161708(V24A0* b, s32 reg, u64 v);
+void func_001B29E0(Elem_1B3510* e, s32 j, s32 pass, s32 kind, V24A0* b);
+void func_00152D70(V24A0* b);
+void func_001528C8(V24A0* b);
+void func_00161278(V24A0* b, s32 n);
+void func_00161520(V24A0* b, f32 x, f32 y, f32 z);
+void func_00161458(V24A0* b, u32 c);
 void* func_001B4688(s32 key);
 
 void func_001B3510(s32 mask)
 {
-    Buf_1B3510 buf;
+    V24A0 buf;
     u8 col[4];
     s32 i;
     s32 j;
@@ -1047,9 +1016,9 @@ void func_001B3510(s32 mask)
                     func_00161708(&buf, 0x42, 0x48);
                 }
                 func_00161708(&buf, 0x3D, 0);
-                Found_1B3510* found = (Found_1B3510*)func_001B4688(rec->f10);
+                T21E3_Rec* found = (T21E3_Rec*)func_001B4688(rec->f10);
                 if (found) {
-                    func_001B29E0(found->f14, j, 0, rec->kind, &buf);
+                    func_001B29E0((Elem_1B3510*)found->elems, j, 0, rec->kind, &buf);
                 } else {
                     func_001B29E0(rec->f14, j, 2, rec->kind, &buf);
                 }

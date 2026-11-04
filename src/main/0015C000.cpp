@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c01.h"
 #include "v24a0.h"
 #include "v24a2.h"
 
@@ -132,16 +133,13 @@ f32 func_0015CA60(V24A2* self, s8 key)
     return x * y;
 }
 
-struct __attribute__((packed)) Lo8_0015EC68 { u64 v; };
-struct Rec12_0015EC68 { Lo8_0015EC68 lo; s32 hi; };
-
 struct Slot_262320 {
     u8 pad00[0x18];
     u32 flags;
     u32 pad1C;
-    Rec12_0015EC68 r20;
-    Rec12_0015EC68 r2C;
-    Rec12_0015EC68 r38;
+    List01 r20;
+    List01 r2C;
+    List01 r38;
     s32 f44;
 };
 
@@ -354,9 +352,9 @@ s32 func_001F6B40(void* a);
 
 extern u8 D_002622A8[];
 extern u8 D_00262280[];
-extern Rec12_0015EC68 D_002622E0;
-extern Rec12_0015EC68 D_002622F0;
-extern Rec12_0015EC68 D_00262300;
+extern List01 D_002622E0;
+extern List01 D_002622F0;
+extern List01 D_00262300;
 extern s32 D_002622D0;
 extern void* D_002623B0;
 
@@ -824,22 +822,20 @@ void func_0015D8A8(V24A2* obj, void* src)
     func_00137A60(src, obj->glyphCount << 3, obj->glyphs);
 }
 
-struct Strm_15CF70 { u8 pad[4]; };
-
 s32 D_00262258 = -8;
 s32 D_0026225C = -8;
 extern u8 D_00262280[];
 
 V24A2_Glyph* func_0015DAB8(V24A2* self, s8 key);
-s32 func_0015CAB8(V24A2* self, Strm_15CF70* s);
-void func_001613C0(Strm_15CF70* s, s32 a, s32 b, s32 c);
-void func_00161708(Strm_15CF70* s, s32 a, u64 b);
-void func_00161768(Strm_15CF70* s, s32 a, u64 b);
-void func_001617E8(Strm_15CF70* s, u32 tag, f32 value);
-void func_00161860(Strm_15CF70* s, s32 a, s32 b);
-void func_001618C0(Strm_15CF70* s, s32 a, s32 b, s32 c, s32 d);
+s32 func_0015CAB8(V24A2* self, V24A0* s);
+void func_001613C0(V24A0* s, s32 a, s32 b, s32 c);
+void func_00161708(V24A0* s, s32 a, u64 b);
+void func_00161768(V24A0* s, s32 a, u64 b);
+void func_001617E8(V24A0* s, u32 tag, f32 value);
+void func_00161860(V24A0* s, s32 a, s32 b);
+void func_001618C0(V24A0* s, s32 a, s32 b, s32 c, s32 d);
 
-void func_0015CF70(V24A2* self, s8 key, u32 color, Strm_15CF70* s, f32 x, f32 y)
+void func_0015CF70(V24A2* self, s8 key, u32 color, V24A0* s, f32 x, f32 y)
 {
     V24A2_Glyph* e = func_0015DAB8(self, key);
     if (e != 0) {
@@ -932,7 +928,6 @@ s32 func_0015C4E8(V24A2* self, u8* s, f32 w)
 
 // NEAR: CRC table loop: retail keeps inner counter k in v1 and n*4 in a1; ours swaps them (5 insns)
 
-struct Sub_15E810 { u8 pad[0xC]; };
 struct Rec_15E810 {
     u8 p0[4];
     u8* a4;
@@ -940,16 +935,16 @@ struct Rec_15E810 {
     u8* aC;
     u8* a10;
     u8 p14[0xC];
-    Sub_15E810 s20;
-    Sub_15E810 s2C;
-    Sub_15E810 s38;
+    List01 s20;
+    List01 s2C;
+    List01 s38;
     u8 p44[4];
 };
 extern u8 D_003C3B00[], D_005C3B00[];
 extern void* D_002623B0;
 extern void* D_002623B4;
 extern void* D_00275958[];
-void func_00152438(Sub_15E810* self, s32 value);
+void func_00152438(List01* self, s32 value);
 void func_001F6950(s32 a0, void (*fn)(void), s32 a2);
 void func_001F6DA8(s32 a0);
 void* func_001E2268(s32 a, s32 b);
@@ -967,9 +962,9 @@ void func_0015E810(void)
         func_00152438(&r->s2C, 0x1090);
         func_00152438(&r->s38, 0xB8);
     }
-    func_00152438((Sub_15E810*)&D_002622E0, 0x630);
-    func_00152438((Sub_15E810*)&D_002622F0, 0x1090);
-    func_00152438((Sub_15E810*)&D_00262300, 0xB8);
+    func_00152438(&D_002622E0, 0x630);
+    func_00152438(&D_002622F0, 0x1090);
+    func_00152438(&D_00262300, 0xB8);
     func_001F6950(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
     func_001F6DA8(5);
     D_002623B0 = func_001E2268(0, 2);
@@ -1125,14 +1120,8 @@ void func_0015EE80(void)
     }
 }
 
-struct List_15EFE8 {
-    u8* head;
-    u8* tail;
-    s32 offset;
-};
-
 struct Iter_15EFE8 {
-    List_15EFE8* list;
+    List01* list;
     u8* link;
     s32 offset;
     Iter_15EFE8* prev;
@@ -1147,21 +1136,21 @@ struct Node_15EFE8 {
 
 struct Obj_15EFE8 {
     u8 pad0[0x20];
-    List_15EFE8 l0;
-    List_15EFE8 l1;
-    List_15EFE8 l2;
+    List01 l0;
+    List01 l1;
+    List01 l2;
 };
 
 extern u8* D_00275710;
 
-s32 func_00152720(List_15EFE8* l);
-void func_00152600(List_15EFE8* l, Node_15EFE8* n);
+s32 func_00152720(List01* l);
+void func_00152600(List01* l, Node_15EFE8* n);
 void func_00152470(u8* l, Node_15EFE8* n);
-void func_00152440(List_15EFE8* l);
+void func_00152440(List01* l);
 void func_001B5F28(u8* l, void* n);
 
 struct Begin_15EFE8 {
-    static void Of(Iter_15EFE8* it, List_15EFE8* list)
+    static void Of(Iter_15EFE8* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;

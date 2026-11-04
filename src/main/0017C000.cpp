@@ -1,26 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c7e.h"
+#include "c8f.h"
+#include "c05.h"
 
 struct Comp_17CE80 {
     u8 pad0[0x2740];
     s32 f2740;
-};
-
-struct Obj_17CE80 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x34 - 0x18];
-    s32 f34;
-    s32 f38;
-    Comp_17CE80* f3C;
-    s32 f40;
-    s32 f44;
-    s32 f48;
-    s32 f4C;
-    void* f50;
-    u8 pad2[0x68 - 0x54];
-    s32 f68;
 };
 
 void func_0017BC20(void* self, s32 n);
@@ -31,7 +17,7 @@ void func_001837E0(void* self, s32 a, s32 b, s32 c);
 void func_0016E118(s32 n);
 void func_001DDA50(void* p);
 
-void func_0017CE80(Obj_17CE80* self)
+void func_0017CE80(C8F* self)
 {
     if (self->f3C != 0) {
         func_0017BC20(self, 0);
@@ -44,12 +30,12 @@ void func_0017CE80(Obj_17CE80* self)
         self->f40 = self->f34;
         self->f4C = 0;
         self->f48 = 0;
-        self->f3C->f2740 = 0;
+        ((Comp_17CE80*)self->f3C)->f2740 = 0;
         self->f3C = 0;
         func_001837E0(self, 25, 0, 0);
-        if (self->f68 != 0) {
+        if (self->flag68 != 0) {
             func_0016E118(4);
-            func_001DDA50(self->f14);
+            func_001DDA50(self->world);
         }
     }
 }
@@ -111,17 +97,9 @@ void func_0017FDC8(C80* self)
     func_00152600(D_00264088, self);
 }
 
-struct Obj_17CDA8 {
-    u8 pad0[0x34];
-    s32 f34;
-    u8 pad1[0x3C - 0x38];
-    void* f3C;
-    s32 f40;
-};
+void func_0017C660(C8F* self);
 
-void func_0017C660(Obj_17CDA8* self);
-
-s32 func_0017CDA8(Obj_17CDA8* self)
+s32 func_0017CDA8(C8F* self)
 {
     func_0017C660(self);
     if (self->f34 > 0) {
@@ -130,17 +108,9 @@ s32 func_0017CDA8(Obj_17CDA8* self)
     return 0;
 }
 
-struct Obj_17CDE0 {
-    u8 pad0[0x34];
-    s32 f34;
-    u8 pad1[0x3C - 0x38];
-    void* f3C;
-    s32 f40;
-};
+void func_0017CE80(C8F* self);
 
-void func_0017CE80(Obj_17CDE0* self);
-
-void func_0017CDE0(Obj_17CDE0* self)
+void func_0017CDE0(C8F* self)
 {
     if (self->f3C != 0) {
         func_0017CE80(self);
@@ -155,16 +125,6 @@ void func_001837E0(void* self, s32 kind, s32 a, s32 b);
 void func_0016E0F0(s32 a);
 void func_001DDA20(void* a);
 
-struct Self_17CE20 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x3C - 0x18];
-    void* f3C;
-    s32 f40;
-    u8 pad2[0x68 - 0x44];
-    s32 f68;
-};
-
 struct Other_17CE20 {
     u8 pad[0x2740];
     void* f2740;
@@ -172,14 +132,14 @@ struct Other_17CE20 {
 
 void func_0017CE20(void* a0, void* a1)
 {
-    Self_17CE20* self = (Self_17CE20*)a0;
+    C8F* self = (C8F*)a0;
     ((Other_17CE20*)a1)->f2740 = self;
     self->f3C = a1;
     self->f40 = -1;
     func_001837E0(self, 0x17, 0, 0);
-    if (self->f68 != 0) {
+    if (self->flag68 != 0) {
         func_0016E0F0(4);
-        func_001DDA20(self->f14);
+        func_001DDA20(self->world);
     }
 }
 
@@ -256,19 +216,17 @@ void func_0017D1E8(void* self, f32 value)
     o->f0C = value;
 }
 
-struct Pool_17CF38 { u8 pad[0x34]; s32 count; u8* base; };
-
 extern u8 D_002BE478[];
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
-void* func_0017CF38(Pool_17CF38* pool, s32 a, s32 b, s32 c)
+void* func_0017CF38(C8F* pool, s32 a, s32 b, s32 c)
 {
-    if (pool->count >= 0x80) {
+    if (pool->f34 >= 0x80) {
         return D_002BE478;
     }
-    s32 n = pool->count;
-    u8* e = pool->base + n * 0x14;
-    pool->count = n + 1;
+    s32 n = pool->f34;
+    u8* e = (u8*)pool->buffer + n * 0x14;
+    pool->f34 = n + 1;
     func_001F5C0C(e, 0, 0x14);
     s32* f = (s32*)e;
     f[0] = a;
@@ -277,15 +235,7 @@ void* func_0017CF38(Pool_17CF38* pool, s32 a, s32 b, s32 c)
     return e;
 }
 
-struct Obj_17E6D0 {
-    u8 pad0[0x634];
-    f32 f634;
-    u8 pad1[0x900 - 0x638];
-    s32 f900;
-    u8 pad2[0xA10 - 0x904];
-    s32 fA10;
-};
-s32 func_0017E6D0(Obj_17E6D0* self)
+s32 func_0017E6D0(C07* self)
 {
     s32 r;
     if (0.0f < self->f634) {
@@ -348,30 +298,21 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad_17DE88* src)
 }
 
 struct Entry_17C660 { u8 pad[8]; s32 state; u8 tail[8]; };
-struct Object_17C660 {
-    u8 pad00[0x34];
-    s32 limit;
-    Entry_17C660* entries;
-    u8 pad3C[4];
-    s32 index;
-    u8 pad44[4];
-    void* pending;
-};
-void func_0017BCD0(Object_17C660* self);
-s32 func_0017C428(Object_17C660* self, void* item);
+void func_0017BCD0(C8F* self);
+s32 func_0017C428(C8F* self, void* item);
 
-void func_0017C660(Object_17C660* self)
+void func_0017C660(C8F* self)
 {
-    if (self->index < 0 && self->limit > 0)
+    if (self->f40 < 0 && self->f34 > 0)
         func_0017BCD0(self);
-    while (self->index < self->limit) {
-        Entry_17C660* entry = &self->entries[self->index];
+    while (self->f40 < self->f34) {
+        Entry_17C660* entry = &((Entry_17C660*)self->buffer)[self->f40];
         if (entry->state == 0 && !func_0017C428(self, entry))
             break;
         func_0017BCD0(self);
     }
-    if (self->pending && func_0017C428(self, self->pending))
-        self->pending = 0;
+    if (self->f48 && func_0017C428(self, (void*)self->f48))
+        self->f48 = 0;
 }
 
 Vec_263EC0 D_00263EC0[22] = {

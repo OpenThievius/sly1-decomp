@@ -4,6 +4,7 @@
 #include "c28.h"
 #include "c29.h"
 #include "c38.h"
+#include "c41.h"
 #include "c6c.h"
 
 extern const u32 D_00247AA0;
@@ -77,17 +78,11 @@ s32 func_00141008(u8* bits, s32 index)
     return (bits[0xC] & mask) != 0;
 }
 
-struct Obj_1419C0 {
-    u8 pad[0x550];
-    s32 count;
-    void* items[1];
-};
-
-void func_001419C0(Obj_1419C0* obj, void* item)
+void func_001419C0(C38* obj, void* item)
 {
-    s32 n = obj->count;
-    obj->items[n] = item;
-    obj->count = n + 1;
+    s32 n = obj->nIdsA;
+    obj->idsA[n] = (s32)item;
+    obj->nIdsA = n + 1;
 }
 
 void func_001430C0(void** dst, void* value)
@@ -331,15 +326,9 @@ void func_00141870(C38* self)
     }
 }
 
-struct Queue_1419A0 {
-    u8 pad[0x578];
-    s32 count;
-    s32 items[1];
-};
-
-void func_001419A0(Queue_1419A0* q, s32 value)
+void func_001419A0(C38* q, s32 value)
 {
-    q->items[q->count++] = value;
+    q->idsB[q->nIdsB++] = value;
 }
 
 void func_001406D0(C28* self, s32 value)
@@ -356,11 +345,9 @@ void func_001406F0(C28* self, s32 value)
     self->countKindsIn = n + 1;
 }
 
-struct Slot_1419E0 { u8 pad[0x5A0]; s32 value; };
-
-void func_001419E0(Slot_1419E0* self, s32 value)
+void func_001419E0(C38* self, s32 value)
 {
-    self->value = value;
+    self->f5A0 = value;
 }
 
 void func_00124A48(void* self);
@@ -522,15 +509,14 @@ void func_001405F0(u8* self, s32 value)
     func_001405D0(self + 0x554, self, value);
 }
 
-struct State_00141170 { u8 pad[0x8C]; void* child; };
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
 void func_001F3B48(void* self, void* value, void* out);
 s32 func_001E4DC0(void* self, void* value);
-s32 func_00141170(State_00141170* self, void* value)
+s32 func_00141170(C41* self, void* value)
 {
     Quad_00141170 local;
     func_001F3B48(self, value, &local);
-    return func_001E4DC0(self->child, &local);
+    return func_001E4DC0(self->f8C, &local);
 }
 
 

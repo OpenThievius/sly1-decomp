@@ -18,7 +18,7 @@ void func_001D7440(C19* self)
     func_00124DF8(self, 0x14, D_002752A0);
     self->f694 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     if (((Snd_1D7440*)self->fB44) != 0) {
-        Emit_1D7440* v = func_001B6290(((Snd_1D7440*)self->fB44), self, -1, 0);
+        C2F* v = func_001B6290(((Snd_1D7440*)self->fB44), self, -1, 0);
         self->fB48 = v;
         func_001B64D8(v, self->fB30 == 1 ? 0x484 : 0x384);
     }
@@ -58,7 +58,7 @@ void func_001D7440(C19* self)
         }
     }
     if (self->fB30 == 1) {
-        s32 n = func_0015A198(((Grp_1D7440*)self->world), 0x105, 0x426, 0, 0x10, buf);
+        s32 n = func_0015A198((self->world), 0x105, 0x426, 0, 0x10, buf);
         for (s32 i = 0; i < n; i++) {
             buf[i]->vt->fn6C(buf[i], self);
         }

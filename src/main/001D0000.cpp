@@ -1,29 +1,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-
-struct Obj_D27C0 {
-    u8 pad0[0x14];
-    void* owner;
-    u8 pad1[0x2718 - 0x18];
-    s32 state;
-};
+#include "c05.h"
+#include "c63.h"
 
 void func_001DDA20(void* a);
 void func_001DDB58(void* a);
 void func_001DDA50(void* a);
 void func_001DDBB8(void* a);
 
-void func_001D27C0(Obj_D27C0* a0, s32 a1)
+void func_001D27C0(C07* a0, s32 a1)
 {
-    if (a0->state != a1) {
-        if (a0->state == -1) {
-            func_001DDA20(a0->owner);
-            func_001DDB58(a0->owner);
+    if (a0->f2718 != a1) {
+        if (a0->f2718 == -1) {
+            func_001DDA20(a0->world);
+            func_001DDB58(a0->world);
         }
-        a0->state = a1;
+        a0->f2718 = a1;
         if (a1 == -1) {
-            func_001DDA50(a0->owner);
-            func_001DDBB8(a0->owner);
+            func_001DDA50(a0->world);
+            func_001DDBB8(a0->world);
         }
     }
 }
@@ -75,45 +70,23 @@ void func_001D1200(Thing_1D1200* self, s32 n)
 
 struct __attribute__((aligned(16))) Blob_274E60_1D1260 { f32 f[36]; };
 
-struct __attribute__((aligned(16))) Obj_1D1260 {
-    u8 p0[0x2D4];
-    s32 f2D4;
-    u8 p1[4];
-    s32 f2DC;
-    u8 p2[4];
-    s32 f2E4;
-    u8 p3[0x2F0 - 0x2E8];
-    Blob_274E60_1D1260 blob;
-    s32 f380;
-    s32 f384;
-    s32 f388;
-    u8 p4[0x390 - 0x38C];
-    s32 f390;
-    u8 p5[0x3A0 - 0x394];
-    s32 f3A0;
-    u8 p6[0x414 - 0x3A4];
-    s32 f414;
-    s32 f418;
-    s32 f41C;
-};
-
 struct Thing_1D1260 {
     u8 pad0[0x2678];
-    Obj_1D1260* f2678;
+    C63* f2678;
 };
 
 extern Blob_274E60_1D1260 D_00274E60;
 
-void func_001E2840(Obj_1D1260* o, s32 v);
+void func_001E2840(C63* o, s32 v);
 
 void func_001D1260(Thing_1D1260* self)
 {
-    Obj_1D1260* o = self->f2678;
-    o->f414 = 5;
+    C63* o = self->f2678;
+    o->i414 = 5;
     o->f2D4 = 0;
     o->f2DC = 0;
-    o->f2E4 = 0;
-    o->blob = D_00274E60;
+    o->obj = 0;
+    o->block2F0 = *(Block63*)&D_00274E60;
     o->f418 = 1;
     o->f388 = 3;
     o->f380 = 0;
@@ -124,13 +97,12 @@ void func_001D1260(Thing_1D1260* self)
     func_001E2840(o, 0);
 }
 
-struct Self_1D1478 { u8 pad[0x14]; void* f14; };
 struct Obj_1D1478 { u8 pad[0x50]; s32 f50; };
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-s32 func_001D1478(Self_1D1478* self)
+s32 func_001D1478(C07* self)
 {
     void* arr[64];
-    s32 n = func_0015A4F0(self->f14, 5, 0x89, 0, 0x40, arr);
+    s32 n = func_0015A4F0(self->world, 5, 0x89, 0, 0x40, arr);
     for (s32 i = 0; i < n; i++) {
         Obj_1D1478* o = (Obj_1D1478*)arr[i];
         s32 v = o->f50;
@@ -152,30 +124,13 @@ struct Entry_1D14F0 {
     f32 fC;
 };
 
-struct Self_1D14F0 {
-    u8 pad0[0x614];
-    void* f614;
-    void* f618;
-    u8 pad61C[0x103C - 0x61C];
-    Entry_1D14F0 entries[2];
-    u8 f105C[4];
-    u8 pad1060[4];
-    void* f1064;
-    u8 pad1068[0x23E0 - 0x1068];
-    f32 f23E0;
-    f32 f23E4;
-    u8 pad23E8[8];
-    f32 f23F0;
-    f32 f23F4;
-};
-
 void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 void func_0012CD78(f32 f12, f32 f13, void* a0, void* a1, void* a2, s32 a3, void* a4, s32 a5, void* a6, s32 a7);
 
-void func_001D14F0(Self_1D14F0* self)
+void func_001D14F0(C07* self)
 {
     f32 out[4];
-    Entry_1D14F0* e = self->entries;
+    Entry_1D14F0* e = (Entry_1D14F0*)self->f103C;
     s32 i = 1;
     do {
         func_0012CD78(0.0f, 1.0f, e->p4, self->f614, self, 1, 0, 0, out, 0);
@@ -183,7 +138,7 @@ void func_001D14F0(Self_1D14F0* self)
         e++;
         i--;
     } while (i >= 0);
-    func_00139038(self, 0x10, 2, self->entries, 0, 0, 0, &self->f105C);
+    func_00139038(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
     func_0012CD78(0.0f, 1.0f, self->f1064, self->f618, self, 1, &self->f23E0, 0, 0, 0);
     func_0012CD78(0.0f, 1.0f, self->f1064, self->f614, self, 1, &self->f23F0, 0, 0, 0);
     f32 avg = (self->f23E0 + self->f23F0) * 0.5f;

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "c4c.h"
+#include "c05.h"
 
 s32 D_00274F38[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
 const char* D_00274F58[7] = { "&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun" };
@@ -48,7 +49,6 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f3
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
 struct Item_1D31D0 { u8 pad[0x7E0]; void* obj; };
-struct Obj_1D31D0 { u8 pad0[0x14]; void* f14; u8 pad1[0x2758 - 0x18]; f32 f2758; s32 f275C; };
 
 struct T_1D31D0 { f32 a; f32 b; };
 extern T_1D31D0 D_00261858;
@@ -76,14 +76,6 @@ s32 func_00160D10(void);
 struct Vt_1D29C8 { u8 pad0[0x20]; void (*fn20)(void* self, s32 a); u8 pad24[0x14]; void (*fn38)(void* self); };
 struct Obj_1D29C8 { Vt_1D29C8* vt; };
 struct Sub_1D29C8;
-struct Ctx_1D29C8 {
-    u8 pad0[0x1518];
-    Sub_1D29C8* f1518;
-    u8 pad151C[0xD04];
-    s32 f2220;
-    u8 pad2224[0x52C];
-    Sub_1D29C8* f2750;
-};
 struct Glob_1D29C8 {
     u8 pad0[0x19FC];
     u32 f19FC;
@@ -93,18 +85,17 @@ extern Glob_1D29C8* D_002623C0;
 extern f32 D_00261854;
 extern Obj_1D29C8 D_0026EC70;
 
-void func_00175170(Ctx_1D29C8* self, s32 a, s32 b);
+void func_00175170(C07* self, s32 a, s32 b);
 s32 func_00182FC8(Sub_1D29C8* self);
 void func_00126D60(Sub_1D29C8* self, f32 v);
-void func_001D32D8(Sub_1D29C8* self, Ctx_1D29C8* a, s32 b);
-void func_001D31D0(Ctx_1D29C8* self, s32 a);
+void func_001D32D8(Sub_1D29C8* self, C07* a, s32 b);
+void func_001D31D0(C07* self, s32 a);
 void* func_001925F0(void);
 void func_001AA8B8(Obj_1D29C8* self, f32 v);
 void func_001AA788(Obj_1D29C8* self, f32 v);
 
 void func_001D29C8(u32 mode);
 s32 func_001D3100(Self_1D3100* self, s32 start, s32 count, s32* table);
-void func_001D31D0(Obj_1D31D0* self, s32 value);
 void func_001D32D8(C4C* self, void* v, s32 flag);
 void* func_001D3500(C4C* a0, Node_D3500* a1);
 void func_001D3678(C4C* self, s32 kind, Msg_001D3678* msg);
@@ -113,35 +104,35 @@ void func_001D29C8(u32 mode)
 {
     switch (D_00274F74) {
     case 1:
-        if ((*(Ctx_1D29C8**)&D_00262E10) == 0)
+        if ((*(C07**)&D_00262E10) == 0)
             goto tail;
-        if ((*(Ctx_1D29C8**)&D_00262E10)->f2220 == 0xD)
-            func_00175170((*(Ctx_1D29C8**)&D_00262E10), 0, -1);
+        if ((*(C07**)&D_00262E10)->f2220 == 0xD)
+            func_00175170((*(C07**)&D_00262E10), 0, -1);
         break;
     case 3:
-        if ((*(Ctx_1D29C8**)&D_00262E10) == 0)
+        if ((*(C07**)&D_00262E10) == 0)
             goto tail;
-        if ((*(Ctx_1D29C8**)&D_00262E10)->f1518 != 0) {
-            if (func_00182FC8((*(Ctx_1D29C8**)&D_00262E10)->f1518) != 0)
-                func_00126D60((*(Ctx_1D29C8**)&D_00262E10)->f1518, 0.5f);
+        if (((Sub_1D29C8*)(*(C07**)&D_00262E10)->f1518) != 0) {
+            if (func_00182FC8(((Sub_1D29C8*)(*(C07**)&D_00262E10)->f1518)) != 0)
+                func_00126D60(((Sub_1D29C8*)(*(C07**)&D_00262E10)->f1518), 0.5f);
         }
         break;
     }
-    if ((*(Ctx_1D29C8**)&D_00262E10) != 0) {
+    if ((*(C07**)&D_00262E10) != 0) {
         D_00261854 = 1.0f;
-        if ((*(Ctx_1D29C8**)&D_00262E10)->f2750 != 0) {
-            if (func_00182FC8((*(Ctx_1D29C8**)&D_00262E10)->f2750) != 0)
-                func_001D32D8((*(Ctx_1D29C8**)&D_00262E10)->f2750, (*(Ctx_1D29C8**)&D_00262E10), 1);
+        if (((Sub_1D29C8*)(*(C07**)&D_00262E10)->f2750) != 0) {
+            if (func_00182FC8(((Sub_1D29C8*)(*(C07**)&D_00262E10)->f2750)) != 0)
+                func_001D32D8(((Sub_1D29C8*)(*(C07**)&D_00262E10)->f2750), (*(C07**)&D_00262E10), 1);
         }
-        func_001D31D0((*(Ctx_1D29C8**)&D_00262E10), 0);
-        if ((*(Ctx_1D29C8**)&D_00262E10) != 0) {
-            if ((void*)(*(Ctx_1D29C8**)&D_00262E10) == func_001925F0())
+        func_001D31D0((*(C07**)&D_00262E10), 0);
+        if ((*(C07**)&D_00262E10) != 0) {
+            if ((void*)(*(C07**)&D_00262E10) == func_001925F0())
                 D_00274F74 = mode;
         }
     }
 tail:
     if (mode != D_002623C0->f19FC && mode < 7) {
-        func_001AA8B8(&D_0026EC70, ((*(Ctx_1D29C8**)&D_00262E10) != 0 && (void*)(*(Ctx_1D29C8**)&D_00262E10) == func_001925F0()) ? 3.0f : 8.0f);
+        func_001AA8B8(&D_0026EC70, ((*(C07**)&D_00262E10) != 0 && (void*)(*(C07**)&D_00262E10) == func_001925F0()) ? 3.0f : 8.0f);
         func_001AA788(&D_0026EC70, 0.6f);
         D_0026EC70.vt->fn20(&D_0026EC70, (s32)D_00274F58[mode]);
         D_0026EC70.vt->fn38(&D_0026EC70);
@@ -180,13 +171,13 @@ s32 func_001D3100(Self_1D3100* self, s32 start, s32 count, s32* table)
     return idx;
 }
 
-void func_001D31D0(Obj_1D31D0* self, s32 value)
+void func_001D31D0(C07* self, s32 value)
 {
     void* buf[0x100];
     if (value == self->f275C) {
         return;
     }
-    s32 n = func_0015A4F0(self->f14, 0x105, 8, 0, 0x100, buf);
+    s32 n = func_0015A4F0(self->world, 0x105, 8, 0, 0x100, buf);
     for (s32 i = 0; i < n; i++) {
         Item_1D31D0* item = (Item_1D31D0*)buf[i];
         if (item->obj != 0) {

@@ -7,6 +7,7 @@ extern f32 D_0026185C[];
 #include "c53.h"
 #include "c6c.h"
 #include "c48.h"
+#include "t2195.h"
 
 // A four-float vector, aligned as the VU0 reads it.
 struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
@@ -48,7 +49,6 @@ void func_001A76A0(void* node, s32 flag);
 void func_00152600(void* a, void* b);
 void func_00152470(void* a, void* b);
 
-struct Ctx_197A08 { u8 pad[0xC14]; void* fC14; };
 
 
 
@@ -89,22 +89,6 @@ void func_00197458(s32 unused, s32 flag);
 
 
 
-struct Obj_197848;
-struct VT_197848 {
-    u8 pad0[0x18];
-    void (*f18)(Obj_197848*);
-    u8 pad1[0x84 - 0x1C];
-    void (*f84)(Obj_197848*, void*);
-    void (*f88)(Obj_197848*, void*);
-    u8 pad2[0x90 - 0x8C];
-    void (*f90)(Obj_197848*, void*);
-    void (*f94)(Obj_197848*, void*);
-};
-struct Obj_197848 {
-    VT_197848* vt;
-    u8 pad[0xC14 - 4];
-    void* fC14;
-};
 struct Node_197848 {
     u8 pad[0x568];
     Node_197848* next;
@@ -112,14 +96,14 @@ struct Node_197848 {
 struct Self_197848 {
     u8 pad[0x690];
     s32 count;
-    Obj_197848** items;
+    C0F** items;
     f32 time;
     u8 list[4];
 };
 
 extern f32 D_00261858[];
 extern u8 D_00248D30[];
-extern Obj_197848* func_00182FC8(Obj_197848*);
+extern C0F* func_00182FC8(C0F*);
 extern s32 func_001527D8(void* list);
 extern s32 func_001EAA70(s32 a, s32 b);
 extern void func_00152600(void* a, void* b);
@@ -133,17 +117,14 @@ extern u8 D_00248D20[];
 
 struct __attribute__((aligned(16))) Quad_196938 { s32 a, b, c, d; };
 
-struct Sub_196938 { u8 bytes[0x568]; };
 
 
 void func_001921A8(C18* self);
-void func_00152438(Sub_196938* p, s32 value);
+void func_00152438(List01* p, s32 value);
 
 
 
 struct __attribute__((aligned(16))) Quad_001969F8 { s32 a, b, c, d; };
-struct Root_001969F8 { u8 pad[0x11]; u8 b11; };
-struct Table_001969F8 { u8 pad[0x10]; };
 struct Item_001969F8 { u8 pad[0x24]; void* p24; };
 
 struct Any_001969F8;
@@ -156,7 +137,7 @@ void func_00124A48(C18* self);
 void func_00124DF8(C18* self, s32 n, void* table);
 f32 func_00205778(f32 a, f32 b);
 void* func_001B6290(Any_001969F8* a, void* b, s32 c, s32 d);
-void* func_00121228(Root_001969F8* root, void* value, Table_001969F8* table);
+void* func_00121228(C6C* root, void* value, const T2195_Vt* table);
 void func_001299E0(Any_001969F8* a, void* b);
 s32 func_0015A4F0(Any_001969F8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void* func_0018D500(s32 size);
@@ -279,9 +260,6 @@ void func_001C72A0(void* self);
 
 
 
-struct __attribute__((aligned(16))) Quad_1984B8 { s32 a, b, c, d; };
-typedef void (*VFn_1984B8)(void* self, void* ctx);
-struct Actor_1984B8 { VFn_1984B8* vtbl; u8 pad0[0x150 - 4]; Quad_1984B8 q150; u8 pad1[0x724 - 0x160]; s32 kind; };
 
 void* func_001925F0(void);
 void func_00197A08(void* h, void* self);
@@ -289,7 +267,6 @@ void func_001C9008(void* self, void* arg);
 
 
 
-struct Actor_198530 { u8 pad0[0x724]; s32 kind; };
 
 void func_001C91C8(void* self);
 void func_001C8920(void* self);
@@ -305,7 +282,6 @@ void func_001C9DE0(void* self, s32 code, void* req);
 
 
 
-struct Actor_1982A0 { u8 pad0[0x724]; s32 kind; u8 pad1[0xC10 - 0x728]; s32 fC10; };
 
 s32 func_001C96B8(void* self);
 s32 func_001C8010(void* self);
@@ -402,7 +378,7 @@ void func_00197458(s32 unused, s32 flag);
 void func_001974D8(C18* a, void* b);
 void func_00197788(C18* self);
 void func_00197848(Self_197848* self);
-void func_00197A08(u8* self, Ctx_197A08* ctx);
+void func_00197A08(u8* self, C0F* ctx);
 void func_00197A68(C18* ctx, Pair_00197A68* out);
 void func_00197F10(C18* self, s32 kind, void* rec);
 void func_00198090(C0F* self);
@@ -591,8 +567,8 @@ void func_00196938(C18* self)
     self->f688 = 120.0f;
     self->f624 = D_0026A71C;
     self->f628 = D_0026A718;
-    func_00152438((Sub_196938*)&self->f6A8, 0x568);
-    func_00152438((Sub_196938*)&self->f69C, 0x568);
+    func_00152438(&self->f6A8, 0x568);
+    func_00152438(&self->f69C, 0x568);
     *(C18**)&D_0026A904 = self;
 }
 
@@ -609,8 +585,8 @@ void func_001969F8(C18* self)
     func_00124DF8(self, 0xD, &D_0026A738);
     self->f618 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     self->f614 = func_001B6290((Any_001969F8*)self->f610, self, -1, 1);
-    self->f664 = func_00121228((Root_001969F8*)self->world, self->f65C, (Table_001969F8*)D_0021A790);
-    ((Root_001969F8*)self->f664)->b11 = 2;
+    self->f664 = func_00121228(self->world, self->f65C, (const T2195_Vt*)D_0021A790);
+    ((T2195*)self->f664)->mode1 = 2;
     func_001299E0((Any_001969F8*)self->f65C, self->f664);
     ((s32*)self->f664)[7] = 1;
     ((Item_001969F8*)self->f664)->p24 = self->f660;
@@ -708,7 +684,7 @@ void func_00197848(Self_197848* self)
         self->time = 3.4028235e+38f;
         return;
     }
-    Obj_197848* o = self->items[i];
+    C0F* o = self->items[i];
     s32 n = func_001EAA70(0, func_001527D8(self->list) - 1);
     Node_197848* nd = *(Node_197848**)self->list;
     if (n > 0) {
@@ -719,18 +695,18 @@ void func_00197848(Self_197848* self)
     if (nd == 0) return;
     func_00152600(self->list, nd);
     func_00152470((u8*)self + 0x6A8, nd);
-    o->vt->f18(o);
-    o->vt->f84(o, (u8*)nd + 0x140);
-    o->vt->f88(o, (u8*)nd + 0x110);
-    o->vt->f90(o, D_00248D30);
-    o->vt->f94(o, D_00248D30);
+    o->desc->m02(o);
+    o->desc02()->m1D(o, (Vec02*)((u8*)nd + 0x140));
+    o->desc02()->m1E(o, (Mat02*)((u8*)nd + 0x110));
+    o->desc02()->m20(o, (Vec02*)D_00248D30);
+    o->desc02()->m21(o, (Vec02*)D_00248D30);
     func_001C8F20(o, 0x10, 0);
     o->fC14 = nd;
     func_001A76A0(nd, 1);
     self->time = D_00261858[1] + D_0026A838;
 }
 
-void func_00197A08(u8* self, Ctx_197A08* ctx)
+void func_00197A08(u8* self, C0F* ctx)
 {
     void* p = ctx->fC14;
     func_001A76A0(p, 0);
@@ -799,10 +775,9 @@ ASM_FUNC(func_001980B0);
 
 s32 func_001982A0(C0F* self)
 {
-    Actor_1982A0* actor = (Actor_1982A0*)self;
     s32 r;
 
-    switch (actor->kind) {
+    switch (self->f724) {
     case 2:
         if (func_001C96B8(self) == 0) {
             r = 4;
@@ -812,7 +787,7 @@ s32 func_001982A0(C0F* self)
         break;
     case 0x10:
         r = 0x10;
-        if (actor->fC10 != 0) {
+        if (self->fC10 != 0) {
             r = 0;
         }
         break;
@@ -827,22 +802,20 @@ ASM_FUNC(func_00198318);
 
 void func_001984B8(C0F* self, void* arg)
 {
-    Actor_1984B8* actor = (Actor_1984B8*)self;
-    if (actor->kind == 0x10) {
+    if (self->f724 == 0x10) {
         void* h = func_001925F0();
         func_00197A08(h, self);
-        Quad_1984B8 ctx = actor->q150;
-        ctx.c = 0;
-        actor->vtbl[36](self, &ctx);
+        Vec02 ctx = self->v150;
+        ctx.z = 0;
+        self->desc02()->m20(self, &ctx);
     }
     func_001C9008(self, arg);
 }
 
 void func_00198530(C0F* self)
 {
-    Actor_198530* actor = (Actor_198530*)self;
     func_001C91C8(self);
-    if (actor->kind == 0x10) {
+    if (self->f724 == 0x10) {
         func_001C8920(self);
     }
 }

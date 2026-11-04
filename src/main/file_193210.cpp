@@ -3,6 +3,7 @@
 #include "asm_func.h"
 #include "list_iter.h"
 #include "t217d.h"
+#include "v24a0.h"
 #include "v24a2.h"
 
 struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
@@ -66,18 +67,17 @@ struct Obj_193318 {
     Col_193318 c1;
     Col_193318 c2;
 };
-struct Frame_193318 { u8 bytes[0x30]; };
-struct Buf_193318 { u8 bytes[0x400]; Frame_193318 f; };
+struct Buf_193318 { u8 bytes[0x400]; V24A0 f; };
 
-void func_001611B8(Frame_193318* f);
-void func_001529C8(Frame_193318* f, s32 n, Buf_193318* b);
-void func_00152B38(Frame_193318* f);
+void func_001611B8(V24A0* f);
+void func_001529C8(V24A0* f, s32 n, Buf_193318* b);
+void func_00152B38(V24A0* f);
 f32 func_001EAF28(f32 x);
-void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, Frame_193318* e, f32 x, f32 y, f32 z, f32 w);
-void func_00161200(Frame_193318* f);
-void func_00152D30(Frame_193318* f);
-void func_00152D70(Frame_193318* f);
-void func_001529E0(Frame_193318* f, s32 a, s32 b);
+void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, V24A0* e, f32 x, f32 y, f32 z, f32 w);
+void func_00161200(V24A0* f);
+void func_00152D30(V24A0* f);
+void func_00152D70(V24A0* f);
+void func_001529E0(V24A0* f, s32 a, s32 b);
 void func_00168A48(Buf_193318* b);
 
 void func_001AA8F0(void* self);

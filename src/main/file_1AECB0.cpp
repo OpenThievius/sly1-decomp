@@ -4,6 +4,7 @@
 
 #include "list_iter.h"
 #include "c30.h"
+#include "c05.h"
 #include "c6c.h"
 
 // An object of another class (the player): the state at +0x2220.
@@ -41,14 +42,6 @@ void* func_00183058(void* a, void* b, void* c);
 
 s32 func_001AEE50(C30* self, void* key);
 s32 func_00160D10();
-
-// The player (D_00262E10) as func_001AFAF8 reads it past C03's fields.
-struct Player_1AFAF8 {
-    u8 pad0[0x2220];
-    s32 x2220;
-    u8 pad4[0x239C - 0x2224];
-    s32 x239C;
-};
 
 extern f32 D_0026185C[];
 void func_00123AB0(void* object, s32 mode);
@@ -405,7 +398,7 @@ s32 func_001AFAF8(C30* a0, C03* a1)
     if ((a1->flags538 & m) != 0 || a1->root == a0->root || func_001AEE50(a0, a1) != 0) {
         return 0;
     }
-    if ((void*)a1 == (void*)D_00262E10 && ((Player_1AFAF8*)a1)->x2220 == 6 && ((Player_1AFAF8*)a1)->x239C == 3) {
+    if ((void*)a1 == (void*)D_00262E10 && ((C07*)a1)->f2220 == 6 && ((C07*)a1)->f239C == 3) {
         if ((func_00160D10() & 0x12000) != 0) {
             return 0;
         }

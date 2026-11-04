@@ -4,7 +4,7 @@ V24A2_Glyph* func_0015DAB8(V24A2* self, u16 key);
 extern s32 D_eu_00263564;
 extern s32 D_eu_00263568;
 
-void func_0015CF70(V24A2* self, u16 key, u32 color, Strm_15CF70* s, f32 x, f32 y)
+void func_0015CF70(V24A2* self, u16 key, u32 color, V24A0* s, f32 x, f32 y)
 {
     V24A2_Glyph* e = func_0015DAB8(self, key);
     if (e != 0) {

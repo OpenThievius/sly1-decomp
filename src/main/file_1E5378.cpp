@@ -4,6 +4,7 @@
 #include "asm_func.h"
 #include "fpu.h"
 #include "list_iter.h"
+#include "v24a0.h"
 #include "t217d.h"
 extern u8* D_00262E10;
 extern u8* D_00275710;
@@ -23,19 +24,12 @@ void func_001E5378(C16* self)
     self->f654 = 0.7f;
 }
 
-struct Table_1E53F8 {
-    u8 pad0[0x638];
-    s32 count;
-    u8 pad1[4];
-    void** items;
-};
-
-void func_001E53F8(Table_1E53F8* self, void* value)
+void func_001E53F8(C16* self, void* value)
 {
-    s32 n = self->count;
+    s32 n = self->f638;
     if (n < 0x11) {
-        self->items[n] = value;
-        self->count = n + 1;
+        ((void**)self->f640)[n] = value;
+        self->f638 = n + 1;
     }
 }
 
@@ -257,14 +251,12 @@ s32 func_001E5888(Ctx_1E5888* self, Node_1E5888* node)
 
 ASM_FUNC(func_001E5938);
 
-struct Actor_1E5C78 { u8 pad[0x614]; void* f614; void* f618; };
-
 void func_001B6598(void* dev, s32* out);
 void func_001B6568(void* dev, s32* out);
 s32 func_001A8C50(void* a);
 void func_001B64D8(void* dev, s32 value);
 
-void func_001E5C78(Actor_1E5C78* self)
+void func_001E5C78(C16* self)
 {
     s32 a;
     s32 b;
@@ -324,22 +316,15 @@ s32 func_001E5DA8(C16* self, void* arg)
     return 0;
 }
 
-struct Obj_5E08 {
-    u8 pad0[0x624];
-    void* f624;
-};
-
 typedef void (*VFn_5E08)(void* self);
 
 void func_001924C8(void* self);
 
 void func_001E5E08(C16* self)
 {
-    Obj_5E08* o = (Obj_5E08*)self;
-
-    if (o->f624 != 0) {
-        VFn_5E08 fn = *(VFn_5E08*)(*(u8**)o->f624 + 0x148);
-        fn(o->f624);
+    if (self->f624 != 0) {
+        VFn_5E08 fn = *(VFn_5E08*)(*(u8**)self->f624 + 0x148);
+        fn(self->f624);
     } else {
         func_001924C8(self);
     }
@@ -479,12 +464,11 @@ void func_001E6188(T217D_3F0* self)
 
 void func_001E6268(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
-struct Ctx_1E62A8 { s32 x; };
 extern s32 D_00270458;
-void func_00161670(Ctx_1E62A8* c, s32 a, s32 b, s32 d, s32 e);
-void func_001615F0(Ctx_1E62A8* c, s32 a, s32 b, s32 d, s32 e);
+void func_00161670(V24A0* c, s32 a, s32 b, s32 d, s32 e);
+void func_001615F0(V24A0* c, s32 a, s32 b, s32 d, s32 e);
 
-void func_001E62A8(T217D_3F0* self, Ctx_1E62A8* c, s32 k)
+void func_001E62A8(T217D_3F0* self, V24A0* c, s32 k)
 {
     if (D_00270458 == 4) {
         f32 y = self->shownY;

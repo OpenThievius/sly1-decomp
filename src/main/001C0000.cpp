@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c01.h"
 #include "c05.h"
 #include "list_iter.h"
 
@@ -59,18 +60,17 @@ void func_001C3E80(C1D* self)
 }
 
 typedef void (*VFn_1C3F68)(void*, void*);
-struct Obj_1C3F68 { VFn_1C3F68* vtbl; };
 struct Local_1C3F68 { s32 pad[2]; s32 value; VFn_1C3F68 fn; };
 void func_001D7098(void* self, s32 a, s32 b);
 void func_001C3EB0(void* self, void* data);
 
-void func_001C3F68(Obj_1C3F68* self, s32 value)
+void func_001C3F68(C1D* self, s32 value)
 {
     Local_1C3F68 local;
     func_001D7098(&local, 0, value);
     local.value = value;
     local.fn = func_001C3EB0;
-    self->vtbl[80]((void*)self, (void*)&local);
+    self->desc05()->m4C(self, (void*)&local);
 }
 
 void func_001C06A0(s32 a, s32 b, f32 x);
@@ -288,16 +288,7 @@ void func_001C34C8(C1D* self, f32 t)
 
 // EXACT: callee func_001EA728 declared with float params first
 
-struct Obj_1C3FC8;
-struct Vt_1C3FC8 {
-    u8 pad[0x94];
-    void (*f94)(Obj_1C3FC8* self, void* q);
-};
 struct __attribute__((aligned(16))) Quad_1C3FC8 { f32 v[4]; };
-struct Obj_1C3FC8 {
-    Vt_1C3FC8* vt;
-};
-
 extern f32 D_00261858[];
 extern Quad_1C3FC8 D_00248D30;
 extern u8 D_00274AA8[];
@@ -311,13 +302,13 @@ f32 func_001EA408(f32 a);
 void func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
 void func_00151E20(u8* a, f32 b);
 void func_00194D30(u8* a, s32 b, s32 c);
-void func_0012C918(void* a, Obj_1C3FC8* b, s32 c, void* d, f32 e, f32 f);
+void func_0012C918(void* a, C02* b, s32 c, void* d, f32 e, f32 f);
 
 #define F(o, off) (*(f32*)((u8*)(o) + (off)))
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 #define P(o, off) (*(void**)((u8*)(o) + (off)))
 
-void func_001C3FC8(Obj_1C3FC8* self, s32 state)
+void func_001C3FC8(C02* self, s32 state)
 {
     void* s2;
     f32 f12;
@@ -337,7 +328,7 @@ void func_001C3FC8(Obj_1C3FC8* self, s32 state)
         q = D_00248D30;
         f32 r = func_00205778(F(self, 0xD4), F(self, 0xD0));
         func_001EA728(r, F(self, 0x644), 0.0f, D_00274AA8, (u8*)&q + 8);
-        self->vt->f94(self, &q);
+        self->desc02()->m21(self, (Vec02*)&q);
         W(self, 0x694) = 0;
         D_0026E228[0] = -1;
         if (state == 3) func_00151E20(D_00261EF0, 1.0f);
@@ -401,14 +392,11 @@ struct Frame_1C0070 {
     void* f0; u8* f4; s32 f8; Frame_1C0070* fC;
     Ent_1C0070* Next() { Ent_1C0070* n = *(Ent_1C0070**)f4; f4 = (u8*)n + f8; return n; }
 };
-struct Vt_1C0070;
-struct Owner_1C0070 { Vt_1C0070* vt; };
-struct Vt_1C0070 { u8 pad[0x48]; void (*f48)(Owner_1C0070* o, s32 a, void* e); };
 struct Ent_1C0070 {
     s32 f0; s32 f4; s32 f8; u8 pad0c[0x08]; f32 f14;
     s32 f18; u8 pad1c[0x04];
     u8 f20[0x10];
-    Owner_1C0070* f30; f32 f34; f32 f38; s32 f3C; s32 f40; s32 f44; s32 f48; u8 f4C;
+    C01* f30; f32 f34; f32 f38; s32 f3C; s32 f40; s32 f44; s32 f48; u8 f4C;
     u8 pad4d[3];
     s32 f50; s32 f54; f32 f58; u8 pad5c[0x18];
     f32 f74; f32 f78;
@@ -434,7 +422,7 @@ Fn_1C0070 func_001BF578(void);
 s32 func_0011D708(Frame_1C0070* h);
 void func_0011D928(s32 a);
 void func_001C06A0(s32 a, s32 b, f32 x);
-s32 func_00182FC8(Owner_1C0070* o);
+s32 func_00182FC8(C01* o);
 void func_0011D600(s32 h);
 void func_0011D730(s32 h, void (*fn)(void), s64 arg);
 void func_001BFFC8(void);
@@ -521,7 +509,7 @@ void func_001C0070(void)
                     if (0.0f <= e->f78) {
                         e->f18 = 0;
                     } else {
-                        if (e->f30 != 0) e->f30->vt->f48(e->f30, 9, e);
+                        if (e->f30 != 0) e->f30->desc->m0E(e->f30, 9, e);
                         if (e->f3C == 0) goto kill;
                         func_0011D600(e->f18);
                         e->f18 = 0;

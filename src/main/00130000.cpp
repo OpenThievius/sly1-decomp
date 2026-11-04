@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c01.h"
 
 struct Obj_1300D8 { u8 pad[0x20]; s32 f20; };
 
@@ -45,32 +46,27 @@ void func_00130070(Obj_130070* self)
     }
 }
 
-struct Node_1300E8 { Node_1300E8* next; s32 key; };
-struct List_1300E8 { Node_1300E8* head; };
-
-s32 func_001300E8(List_1300E8* list, s32 key)
+s32 func_001300E8(C01* list, s32 key)
 {
-    Node_1300E8* node = list->head;
+    const Desc01* node = list->desc;
     while (node != 0) {
-        if (node->key == key) {
+        if (node->id == key) {
             return 1;
         }
-        node = node->next;
+        node = (const Desc01*)node->parent;
     }
     return 0;
 }
-
-struct Obj_130110 { s32 pad0; s32 field4; };
 
 extern u8 D_00259F38[];
 s32 func_0011BF30(void);
 void func_0011A708(void* dst, s32 value);
 
-void func_00130110(Obj_130110* self)
+void func_00130110(C01* self)
 {
-    if (self->field4 == 0) {
+    if (self->f04 == 0) {
         s32 v = func_0011BF30();
-        self->field4 = v;
+        self->f04 = (void*)v;
         func_0011A708(D_00259F38, v);
     }
 }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "v24a0.h"
 
 struct __attribute__((aligned(16))) Quad_1C3FC8 { f32 v[4]; };
 extern f32 D_00275C60[];
@@ -51,14 +52,13 @@ struct Obj_1C30E8 {
     Rec_1C30E8* f60;
 };
 struct Obj2_1C30E8 { u8 pad0[0x2A8]; f32 f2A8; };
-struct Glob_1C30E8 { u8 pad[1]; };
 
 extern u8 D_002622A8[];
 extern u8 D_002483D0[];
 extern f32 D_00261858[];
 
 void func_001619C0(Builder_1C30E8* b);
-void func_00152B38(Glob_1C30E8* g);
+void func_00152B38(V24A0* g);
 void func_00161AB0(Builder_1C30E8* b, u8* a, u8* c);
 void func_00161BB0(Builder_1C30E8* b, s32 v);
 void func_00161B10(Builder_1C30E8* b, u8* a, f32 f);
@@ -67,7 +67,7 @@ void func_001626A8(Builder_1C30E8* b, Col_1C30E8* c);
 void func_00162680(Builder_1C30E8* b, void* v);
 void func_001626D8(Builder_1C30E8* b, s32 z);
 void func_00162508(Builder_1C30E8* b);
-void func_00152D70(Glob_1C30E8* g);
+void func_00152D70(V24A0* g);
 void func_00161A88(Builder_1C30E8* b, s32 f);
 
 u8 D_00274998[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
@@ -98,7 +98,7 @@ void func_001C30E8(Obj_1C30E8* self)
     u32 idx;
     func_001619C0(&b);
     *(u32*)&c = 0xFFFFFFFF;
-    func_00152B38((Glob_1C30E8*)D_002622A8);
+    func_00152B38((V24A0*)D_002622A8);
     b.f98 = 0;
     func_00161AB0(&b, ((u8*)&D_00248D30), D_002483D0);
     func_00161BB0(&b, r->f4);
@@ -141,6 +141,6 @@ void func_001C30E8(Obj_1C30E8* self)
     else
         r->f8 = r->fC;
     func_00162508(&b);
-    func_00152D70((Glob_1C30E8*)D_002622A8);
+    func_00152D70((V24A0*)D_002622A8);
     func_00161A88(&b, 2);
 }
