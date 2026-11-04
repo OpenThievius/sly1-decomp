@@ -775,3 +775,10 @@ class AsmFuncTest(unittest.TestCase):
         other = asm_func.rodata_source(listing.replace("jtbl_00200000", "D_00200000"), "D_00200000")
         self.assertIn("\t.align\t3", other)
 
+    def test_read_only_data_without_an_align_takes_gcc_s(self):
+        words = ["    /" + "* 100000 0020000%X 00000000 *" % i + "/ .word 0x00000000" for i in (0, 4)]
+        listing = "\n".join(["nonmatching D_00200008", "", "dlabel D_00200008"] + words + ["enddlabel D_00200008", ""])
+        self.assertIn("\t.align\t3", asm_func.rodata_source(listing, "D_00200008"))  # 8 bytes at 8
+        one = "\n".join(["nonmatching D_00200004", "", "dlabel D_00200004", words[0], "enddlabel D_00200004", ""])
+        self.assertIn("\t.align\t2", asm_func.rodata_source(one, "D_00200004"))
+

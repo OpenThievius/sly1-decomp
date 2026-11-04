@@ -96,7 +96,10 @@ def rodata_source(listing, label):
     if m is None:
         raise KeyError("%s is not a label of the read-only data listing" % label)
     # A jump table is aligned to 16, as GCC writes it; the listing's `.align` before it is splat's.
-    align = "4" if label.startswith("jtbl_") else (m.group(1) or "2")
+    # Without one, data of 8 bytes or more at an 8-aligned address is GCC's aggregate, aligned to 8.
+    words = len([l for l in m.group(2).split("\n") if DATA_WORD.match(l)])
+    address = int(label[-8:], 16)
+    align = "4" if label.startswith("jtbl_") else (m.group(1) or ("3" if words >= 2 and address % 8 == 0 else "2"))
     out = ["\t.align\t%s" % align, "\t.globl\t%s" % label, "\t.type\t%s, @object" % label,
            "%s:" % label]
     size = 0
