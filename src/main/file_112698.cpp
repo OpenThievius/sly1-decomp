@@ -2033,20 +2033,20 @@ Obj_11A850* func_0011A790(Stk_11A850* s);
 void func_0011C3F0(Obj_11A850* o);
 s32 func_0011C3C8(Obj_11A850* o);
 
-INCLUDE_ASM(func_00112698);
+ASM_FUNC(func_00112698);
 
-INCLUDE_ASM(func_00112968);
+ASM_FUNC(func_00112968);
 
 INCLUDE_RODATA(jtbl_00248FE0);
 INCLUDE_RODATA(jtbl_00249000);
 INCLUDE_RODATA(jtbl_00249020);
 INCLUDE_RODATA(jtbl_00249040);
-INCLUDE_ASM(func_00112C38);
+ASM_FUNC(func_00112C38);
 
 INCLUDE_RODATA(jtbl_00249060);
 INCLUDE_RODATA(jtbl_00249080);
 INCLUDE_RODATA(jtbl_002490A0);
-INCLUDE_ASM(func_00113240);
+ASM_FUNC(func_00113240);
 
 void* func_00113730(void* self);
 void* func_00113780(void* self);
@@ -3247,21 +3247,21 @@ void* func_00115EC8(void* self, s32 unused, Entry_115EC8* e)
     return self;
 }
 
-INCLUDE_ASM(func_00115F70);
+ASM_FUNC(func_00115F70);
 
-INCLUDE_ASM(func_00115FF8);
+ASM_FUNC(func_00115FF8);
 
-INCLUDE_ASM(func_00116080);
+ASM_FUNC(func_00116080);
 
-INCLUDE_ASM(func_00116108);
+ASM_FUNC(func_00116108);
 
-INCLUDE_ASM(func_001161F8);
+ASM_FUNC(func_001161F8);
 
-INCLUDE_ASM(func_001162D0);
+ASM_FUNC(func_001162D0);
 
-INCLUDE_ASM(func_00116400);
+ASM_FUNC(func_00116400);
 
-INCLUDE_ASM(func_00116490);
+ASM_FUNC(func_00116490);
 
 void* func_00116520(void* self, s32 unused, Src_116520* src)
 {
@@ -3338,7 +3338,7 @@ void* func_001167C0(void* ret, s32 unused, Src_1167C0* src)
     return ret;
 }
 
-INCLUDE_ASM(func_00116840);
+ASM_FUNC(func_00116840);
 
 void* func_00116978(void* ret, s32 unused, Src_116978* src)
 {
@@ -3396,7 +3396,7 @@ void* func_00116B08(void* ret, s32 unused, Src_116B08* src)
     return ret;
 }
 
-INCLUDE_ASM(func_00116BC8);
+ASM_FUNC(func_00116BC8);
 
 void* func_00116C80(void* ret, s32 unused, Src_116C80* src)
 {
@@ -3944,7 +3944,7 @@ void* func_00117F28(void* out, s32 unused, In_117F28* in)
     return out;
 }
 
-INCLUDE_ASM(func_00117FE0);
+ASM_FUNC(func_00117FE0);
 
 void* func_001180C0(void* out, s32 unused, In_1180C0* in)
 {
@@ -4090,7 +4090,7 @@ void* func_00118608(void* out, s32 unused, In_118608* in)
     return out;
 }
 
-INCLUDE_ASM(func_00118698);
+ASM_FUNC(func_00118698);
 
 void* func_00118720(void* out, s32 unused, In_118720* in)
 {
@@ -4163,7 +4163,7 @@ Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v)
     return out;
 }
 
-INCLUDE_ASM(func_00118D30);
+ASM_FUNC(func_00118D30);
 
 void* func_00118D48(void* ret, Src_118D48* src, void* ctx)
 {

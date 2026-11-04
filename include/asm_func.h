@@ -2,7 +2,8 @@
 // An original assembly function inside a whole file (config/us/files.tsv). Written for this
 // project. The function was not made from C (docs/ASM_CLASSIFICATION.md), but the original file
 // held it between its C functions, so the whole file's object holds it at its place:
-// `INCLUDE_ASM(func_X);` at file scope, in retail's order. tools/compile.py writes the included
+// `INCLUDE_ASM(func_X);` at file scope, in retail's order (`ASM_FUNC` and `LINKER_REMNANT` below
+// for the functions that stay assembly). tools/compile.py writes the included
 // file from the disassembly (tools/asm_func.py). This is not inline assembly in a function.
 // A function of the file's range that is not matched yet is included the same way until its C
 // matches; it counts as unmatched (tools/build.py, tools/progress.py).
@@ -12,6 +13,23 @@
 #define INCLUDE_ASM(NAME)                                                                   \
     __asm__(".section .text\n\t.set noat\n\t.set noreorder\n\t.include \"build/us/asm_func/" #NAME \
             ".s\"\n\t.set reorder\n\t.set at")
+
+// The same inclusion, for the two kinds of function that are final source, never replaced by C
+// (config/us/original_asm.tsv, docs/ASM_CLASSIFICATION.md), as OpenRAC's decompilations mark
+// them: ASM_FUNC for hand-written assembly, LINKER_REMNANT for the bytes the linker left of a
+// stripped function. INCLUDE_ASM itself then always means a function still to match; tools/build.py
+// checks that each marker agrees with the classification.
+#define ASM_FUNC(NAME) INCLUDE_ASM(NAME)
+
+#define LINKER_REMNANT(NAME) INCLUDE_ASM(NAME)
+
+// A remnant that sits, in retail, between the static initialiser GCC generates at the end of a
+// file and its _GLOBAL_$I$ (the linker left it of a function written out there). GCC emits a
+// file-scope asm where it reads it, before those two, so tools/compile.py moves a block marked
+// this way to just before _GLOBAL_$I$.
+#define LINKER_REMNANT_AFTER_INIT(NAME)                                                     \
+    __asm__("# linker remnant\n\t.section .text\n\t.set noat\n\t.set noreorder\n\t.include \"build/us/asm_func/" \
+            #NAME ".s\"\n\t.set reorder\n\t.set at")
 
 // The read-only data at a label that only original assembly uses (a jump table into an assembly
 // function, a constant it loads), included in the whole file's .rodata in retail's order.

@@ -298,3 +298,8 @@ void func_001E0678(Obj_1E0678* self)
     }
 }
 
+// _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.
+void func_001E08D8(void)
+{
+    func_001E0848((void*)1, 0xFFFF);
+}

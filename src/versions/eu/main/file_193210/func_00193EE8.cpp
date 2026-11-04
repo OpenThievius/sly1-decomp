@@ -49,8 +49,8 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
         self->f288 = func_001BE980();
         break;
     case 24: {
-        D_eu_0026BB30 = D_eu_0026BB38 = (f32)(u32)D_00262490.a.x;
-        D_eu_0026BB34 = D_eu_0026BB3C = (f32)((u32)(D_00262490.q18 >> 12) & 0x7FF);
+        D_eu_0026BB30 = D_eu_0026BB38 = (f32)(u32)((Dev_193EE8*)&D_00262490)->a.x;
+        D_eu_0026BB34 = D_eu_0026BB3C = (f32)((u32)(((Dev_193EE8*)&D_00262490)->q18 >> 12) & 0x7FF);
         break;
     }
     case -1:

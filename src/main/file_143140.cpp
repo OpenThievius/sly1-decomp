@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6d.h"
 #include "asm_func.h"
 extern void func_001439A8(void*);
 extern void func_001439C8(void*);
@@ -184,7 +185,6 @@ struct __attribute__((packed)) Value_00143A08 { u32 value; };
 
 // EXACT: float constants and .data floats as locals, 1.0f stores in source order 1C0,1C4,1C8
 
-struct Self_00143648;
 struct Sub_00143648;
 
 struct __attribute__((packed)) Pk16_00143648 {
@@ -203,12 +203,12 @@ struct __attribute__((aligned(16))) Quad_00143648 {
     s32 d;
 };
 
-void func_00182C18(struct Self_00143648* self);
-void func_00143560(struct Self_00143648* self);
-void func_00149398(struct Sub_00143648* self, struct Self_00143648* owner);
-void func_00149660(struct Sub_00143648* self, struct Self_00143648* owner);
-void func_0014A888(struct Sub_00143648* self, struct Self_00143648* owner);
-void func_00143A60(struct Self_00143648* self, s32 a1);
+void func_00182C18(C01* self);
+void func_00143560(C6D* self);
+void func_00149398(struct Sub_00143648* self, C6D* owner);
+void func_00149660(struct Sub_00143648* self, C6D* owner);
+void func_0014A888(struct Sub_00143648* self, C6D* owner);
+void func_00143A60(C6D* self, s32 a1);
 
 extern u8 D_002483D0[];
 // An entry of a table of functions defined at the end of this file.
@@ -449,7 +449,6 @@ extern f32 D_0026185C;
 void func_00143140(void);
 void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3);
 void func_001434C8(Scaler_001434C8* self, f32* out, f32 p);
-void func_00143648(struct Self_00143648* self);
 void func_001437C0(void);
 void func_001437E8(void);
 void func_00143810(void);
@@ -527,13 +526,13 @@ void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3)
     func_001ED650(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
 }
 
-INCLUDE_ASM(func_00143180);
+ASM_FUNC(func_00143180);
 
-INCLUDE_ASM(func_00143208);
+ASM_FUNC(func_00143208);
 
-INCLUDE_ASM(func_001433E0);
+ASM_FUNC(func_001433E0);
 
-INCLUDE_ASM(func_00143418);
+ASM_FUNC(func_00143418);
 
 void func_001434C8(Scaler_001434C8* self, f32* out, f32 p)
 {
@@ -548,9 +547,9 @@ void func_001434C8(Scaler_001434C8* self, f32* out, f32 p)
     out[3] = out[0] + 36864.0f;
 }
 
-INCLUDE_ASM(func_00143560);
+ASM_FUNC(func_00143560);
 
-void func_00143648(struct Self_00143648* self)
+void func_00143648(C6D* self)
 {
     u8* s = (u8*)self;
 
@@ -735,7 +734,7 @@ done:
     return r;
 }
 
-INCLUDE_ASM(func_00143BE0);
+ASM_FUNC(func_00143BE0);
 
 void func_00143E40(Ctl_143E40* self, s32 flag, f32 dt)
 {
@@ -789,11 +788,11 @@ void func_00143E40(Ctl_143E40* self, s32 flag, f32 dt)
     }
 }
 
-INCLUDE_ASM(func_00144008);
+ASM_FUNC(func_00144008);
 
-INCLUDE_ASM(func_00144128);
+ASM_FUNC(func_00144128);
 
-INCLUDE_ASM(func_001441C0);
+ASM_FUNC(func_001441C0);
 
 void func_00144270(Self_144270* self)
 {
@@ -850,9 +849,9 @@ void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
     out[3] = r[3];
 }
 
-INCLUDE_ASM(func_001443C8);
+ASM_FUNC(func_001443C8);
 
-INCLUDE_ASM(func_00144540);
+ASM_FUNC(func_00144540);
 
 void func_00144848(u8* self)
 {
@@ -887,9 +886,9 @@ void func_00144938(Ctx_144938* self, void* p, s32 q)
     func_00144BE8(self, 0, p, q, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-INCLUDE_ASM(func_00144978);
+ASM_FUNC(func_00144978);
 
-INCLUDE_ASM(func_00144AA0);
+ASM_FUNC(func_00144AA0);
 
 void func_00144B70(Eng_144B70* self, Vec_144B70* arg)
 {
@@ -899,7 +898,7 @@ void func_00144B70(Eng_144B70* self, Vec_144B70* arg)
     self->f2D0 = *arg;
 }
 
-INCLUDE_ASM(func_00144BE8);
+ASM_FUNC(func_00144BE8);
 
 void func_00144FF8(Pose_00144FF8* self, Probe_00144FF8* p, s32 mode, f32* out)
 {
@@ -927,7 +926,7 @@ store:
     *out = func_001EA408(t + func_00205778(self->x_84, self->y_80));
 }
 
-INCLUDE_ASM(func_00145080);
+LINKER_REMNANT(func_00145080);
 
 INCLUDE_ASM(func_00145088);
 
@@ -973,11 +972,11 @@ void func_001451F0(Self_1451F0* self, s32 flags, s32 k0, Tgt_1451F0* k1, s32 k2,
     }
 }
 
-INCLUDE_ASM(func_001453B0);
+ASM_FUNC(func_001453B0);
 
-INCLUDE_ASM(func_00145438);
+ASM_FUNC(func_00145438);
 
-INCLUDE_ASM(func_001454E0);
+ASM_FUNC(func_001454E0);
 
 void func_001455C0(Flags_1455C0* self, f32* src)
 {
@@ -998,9 +997,9 @@ void func_001455F0(void* p)
     func_001455C0(p, 0);
 }
 
-INCLUDE_ASM(func_00145610);
+ASM_FUNC(func_00145610);
 
-INCLUDE_ASM(func_00145718);
+ASM_FUNC(func_00145718);
 
 s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
 {
@@ -1030,18 +1029,18 @@ s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, 
     return 1;
 }
 
-INCLUDE_ASM(func_00145950);
+ASM_FUNC(func_00145950);
 
-INCLUDE_ASM(func_00145B68);
+ASM_FUNC(func_00145B68);
 
 s32 func_00145DD8(void* unused, State_00145DD8* other)
 {
     return other->value != 0;
 }
 
-INCLUDE_ASM(func_00145DE8);
+ASM_FUNC(func_00145DE8);
 
-INCLUDE_ASM(func_00145E68);
+ASM_FUNC(func_00145E68);
 
 void func_00145FB8(u8* self, s32 value)
 {
@@ -1062,6 +1061,6 @@ void func_00146018(Obj_146018* obj, s32 value, f32 first, f32 second) { obj->int
 
 void func_00146028(Obj_146028* obj) { obj->value = D_0026185C; }
 
-INCLUDE_ASM(func_00146038);
+ASM_FUNC(func_00146038);
 
 

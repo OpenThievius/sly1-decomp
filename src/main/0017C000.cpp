@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c7e.h"
 
 struct Comp_17CE80 {
     u8 pad0[0x2740];
@@ -88,7 +89,7 @@ extern u8 D_00264088[];
 void func_00182D48(void* self);
 void func_00152470(void* table, void* self);
 
-void func_0017FD90(void* self)
+void func_0017FD90(C80* self)
 {
     func_00182D48(self);
     func_00152470(D_00264088, self);
@@ -104,7 +105,7 @@ extern u8 D_00264088[];
 void func_00182ED0(void* self);
 void func_00152600(void* table, void* self);
 
-void func_0017FDC8(void* self)
+void func_0017FDC8(C80* self)
 {
     func_00182ED0(self);
     func_00152600(D_00264088, self);

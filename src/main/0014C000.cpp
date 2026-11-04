@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c68.h"
 
 struct Item_14C838 { s32 value; s32 pad[4]; };
 struct List_14C838 { u8 pad0[0x2DC]; s32 count; Item_14C838 items[1]; };
@@ -116,19 +117,11 @@ void* func_001925F0(void);
 typedef void (*VFn_14C6E0)(void* self);
 struct Obj_14C6E0 { VFn_14C6E0* vtbl; };
 
-struct Mgr_14C6E0 {
-    u8 pad_00[0x42C];
-    void* dev;
-    u8 pad_430[0x45C - 0x430];
-    f32 f45C;
-    f32 f460;
-};
-
-void func_0014C6E0(Mgr_14C6E0* self)
+void func_0014C6E0(C68* self)
 {
     s32 tag;
     func_00124FC0(self);
-    func_001B6598(self->dev, &tag);
+    func_001B6598(self->f42C, &tag);
     if (tag == 0x3FD) {
         if (self->f45C < D_00261858[1]) {
             func_0014C858(self);
@@ -145,20 +138,15 @@ void func_0014C6E0(Mgr_14C6E0* self)
 extern u8 D_0026D348[];
 extern u8 D_0026E760[];
 
-struct Mgr_14C788 {
-    u8 pad_00[0x42C];
-    void* dev;
-};
-
 typedef void (*VFn_14C788)(void* self);
 struct Obj_14C788 { VFn_14C788* vtbl; };
 
 void* func_001E9970(void* zero);
 
-void func_0014C788(Mgr_14C788* self)
+void func_0014C788(C68* self)
 {
     s32 tag;
-    func_001B6598(self->dev, &tag);
+    func_001B6598(self->f42C, &tag);
     void* p = 0;
     if (tag == 0x3FD) {
         p = func_001E9970(p);
@@ -645,59 +633,33 @@ struct Step_14C138 {
     f32 dt;
 };
 
-struct Slot_14C138 {
-    void* obj;
-    void* f4;
-    void* f8;
-    u8 padC[8];
-};
-
 struct Node_14C138 {
     u8 pad[0x14];
     void* f14;
-};
-
-struct Obj_14C138 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad18[0x2DC - 0x18];
-    s32 n2DC;
-    Slot_14C138 slots[1];
-    u8 pad2F4[0x428 - 0x2F4];
-    void* f428;
-    void* f42C;
-    u8 f430[0x1C];
-    s32 f44C;
-    u8 pad450[0x470 - 0x450];
-    f32 poly[3];
-    u8 pad47C[4];
-    f32 a480[44];
-    f32 b530[44];
-    f32 o5E0[44];
 };
 
 extern Step_14C138* D_002623C8;
 extern f32 D_00275C60[];
 Entry_261CA0 D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
-void func_00124A48(Obj_14C138* self);
-void func_00124DF8(Obj_14C138* self, s32 n, void* table);
+void func_00124A48(C68* self);
+void func_00124DF8(C68* self, s32 n, void* table);
 void* func_001B6290(void* a, s32 b, s32 c, s32 d);
 void func_001B6598(void* a, void* b);
 void func_001B6DF8(void* a, void* b);
-void func_0014C2F0(Obj_14C138* self);
+void func_0014C2F0(C68* self);
 
-void func_0014C138(Obj_14C138* self)
+void func_0014C138(C68* self)
 {
     s32 i = 0;
     func_00124A48(self);
     func_00124DF8(self, 3, D_00261CA0);
     self->f42C = func_001B6290(self->f428, 0, 0x3FB, 0);
-    func_001B6598(self->f42C, self->f430);
+    func_001B6598(self->f42C, self->buf430);
     func_001B6DF8(self->f42C, self);
     for (; i < self->n2DC; i++) {
-        Slot_14C138* s = &self->slots[i];
-        Node_14C138* n = (Node_14C138*)func_0015A448(self->f14, s->obj, self);
+        Slot68* s = &self->slots[i];
+        Node_14C138* n = (Node_14C138*)func_0015A448(self->world, s->obj, self);
         s->obj = n;
         s->f8 = func_0015A480(n->f14, 0x3F7, n);
         s->f4 = func_0015A480(n->f14, 0x3F6, n);
@@ -716,8 +678,8 @@ void func_0014C138(Obj_14C138* self)
         t = v;
     }
     f32 u = 1.0f - t;
-    f32* pa = self->a480;
-    f32* pb = self->b530;
+    f32* pa = (f32*)&self->params0;
+    f32* pb = (f32*)&self->params1;
     f32* po = self->o5E0;
     for (u32 k = 0; k < 44; k++) {
         *po++ = u * *pa++ + t * *pb++;
@@ -1209,56 +1171,17 @@ void func_001EB168(Step_14EC70* fn, f32 f12, f32 f13, f32 f14, f32 f15, Ctx_14EC
 
 
 
-struct Pair_0014C018 {
-    f32 a;
-    f32 b;
-    void Set(f32 x, f32 y)
-    {
-        a = x;
-        b = y;
-    }
-};
-struct __attribute__((aligned(16))) Params_0014C018 { s32 w[0x11]; Pair_0014C018 p44; Pair_0014C018 p4C; s32 rest[0x17]; };
-struct Timer_0014C018 {
-    s32 state;
-    f32 scale;
-    s32 count;
-    void Init()
-    {
-        state = 0;
-        scale = 1.0f;
-        count = 0;
-    }
-};
-
-struct Self_0014C018 {
-    u8 pad0[0x2D4];
-    s32 f2D4;
-    f32 f2D8;
-    u8 pad1[0x450 - 0x2DC];
-    s32 f450;
-    u8 pad2[0x45C - 0x454];
-    f32 f45C;
-    u8 pad3[0x464 - 0x460];
-    s32 f464;
-    u8 pad4[0x470 - 0x468];
-    Timer_0014C018 timer;
-    u8 pad5[0x480 - 0x47C];
-    Params_0014C018 params0;
-    Params_0014C018 params1;
-};
-
-extern const Params_0014C018 D_00249F00;
+extern const Params68 D_00249F00;
 extern const f32 D_00249FB0 = 3.4028235e+38f;
 
-void func_00123ED0(Self_0014C018* self);
+void func_00123ED0(C68* self);
 
-void func_0014C018(Self_0014C018* self)
+void func_0014C018(C68* self)
 {
     func_00123ED0(self);
     self->f2D4 = 50;
     self->f2D8 = 90.0f;
-    Params_0014C018 params = D_00249F00;
+    Params68 params = D_00249F00;
     self->params0 = params;
     self->params1 = params;
     self->params1.p44.Set(12.0f, 12.0f);
@@ -1326,48 +1249,27 @@ struct Glob_14CF30 {
     void* f268;
 };
 
-struct Elem_14CF30 {
-    void* key;
-    u8 pad0[0x14 - 4];
-};
-
-struct Obj_14CF30 {
-    u8 pad0[0x14];
-    void* p14;
-    u8 pad1[0x2D0 - 0x18];
-    u8 f2D0[4];
-    u8 f2D4[4];
-    f32 f2D8;
-    s32 n2DC;
-    u8 pad2[0x2EC - 0x2E0];
-    Elem_14CF30 elems[1];
-    u8 pad3[0x42C - 0x300];
-    void* f42C;
-    s32 f430;
-};
-
-
-void func_00127378(Obj_14CF30* self, s32 kind, void* key);
+void func_00127378(C68* self, s32 kind, void* key);
 void func_001B6598(void* key, s32* out);
-void func_001DDC38(void* sub, Obj_14CF30* self);
+void func_001DDC38(void* sub, C68* self);
 void func_001AB890(Glob_14CF30* self, f32 v);
 void func_001AB928(Glob_14CF30* self, f32 v, Cb_14CF30 cb);
 void func_001AB938(Glob_14CF30* self);
 void func_0014C668(void* self);
 
-void func_0014CF30(Obj_14CF30* self, s32 kind, void* key)
+void func_0014CF30(C68* self, s32 kind, void* key)
 {
     func_00127378(self, kind, key);
     switch (kind) {
     case 6: {
         s32 i;
         for (i = 0; i < self->n2DC; i++) {
-            if (self->elems[i].key == key) {
+            if (self->slots[i].key == key) {
                 break;
             }
         }
         if (i < self->n2DC) {
-            self->elems[i].key = 0;
+            self->slots[i].key = 0;
         }
         break;
     }
@@ -1376,19 +1278,19 @@ void func_0014CF30(Obj_14CF30* self, s32 kind, void* key)
             s32 out;
             func_001B6598(key, &out);
             if (out == 0x3FD) {
-                (*(Glob_14CF30*)&D_0026D348).f264 = self->f2D0;
-                (*(Glob_14CF30*)&D_0026D348).f268 = self->f2D4;
-                func_001DDC38(self->p14, self);
+                (*(Glob_14CF30*)&D_0026D348).f264 = &self->f2D0;
+                (*(Glob_14CF30*)&D_0026D348).f268 = &self->f2D4;
+                func_001DDC38(self->world, self);
                 func_001AB890(((Glob_14CF30*)&D_0026E760), self->f2D8);
                 func_001AB928(((Glob_14CF30*)&D_0026E760), 0.0f, func_0014C668);
                 func_001AB938(((Glob_14CF30*)&D_0026E760));
             }
-            if (self->f430 == 0x3FD) {
+            if (self->tag430 == 0x3FD) {
                 (*(Glob_14CF30*)&D_0026D348).vtbl[15](((Glob_14CF30*)&D_0026D348));
                 (*(Glob_14CF30*)&D_0026E760).vtbl[15](((Glob_14CF30*)&D_0026E760));
-                func_001DDC38(self->p14, 0);
+                func_001DDC38(self->world, 0);
             }
-            self->f430 = out;
+            self->tag430 = out;
         }
         break;
     }
@@ -1491,7 +1393,7 @@ void func_0014C2F0(Obj_14C2F0* o)
     }
 }
 
-extern const Params_0014C018 D_00249F00 = {
+extern const Params68 D_00249F00 = {
     { 0x41000000, 0x40C00000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A, 0x3F19999A, 0x3F4CCCCD, 0x3FA66666, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A },
     { 3.5f, 5.0f }, { 2.0f, 2.5f },
     { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F59999A, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F4CCCCD, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000 }

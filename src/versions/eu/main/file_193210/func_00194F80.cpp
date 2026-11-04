@@ -203,7 +203,7 @@ void func_00194F80(Self_eu_194F80* self)
     }
     func_0015C900(self->f4);
     if (menu->title != -1 && menu->count != 0) {
-        Rgba_194F80 c = D_0026A228;
+        Rgba_194F80 c = *(Rgba_194F80*)&D_0026A210.f18;
         c.a = alpha;
         s32 y = (s32)((base * 0.5462963f + 1920.0f) * 16.0f);
         func_001AE3B8((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);

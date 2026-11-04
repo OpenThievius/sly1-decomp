@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c88.h"
+#include "c54.h"
 
 struct Data_1B4BC8 { u8 pad0[0x20]; s32 count; };
 struct Node_1B4BC8 {
@@ -770,22 +772,16 @@ u8* func_001B4B48(Owner_1B4B48* owner, Key_1B4B48* key)
     return 0;
 }
 
-struct Actor_1B61A8 {
-    u8 pad_00[0x14];
-    void* owner_14;
-    u8 pad_18[0x2C];
-    s32 armed_44;
-};
 
 void func_00182C58(void* self);
 void func_001B61F0(void* self);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
-void func_001B61A8(Actor_1B61A8* self)
+void func_001B61A8(C88* self)
 {
     func_00182C58(self);
-    if (self->armed_44 != 0) {
-        func_001DBCC8(self->owner_14, (void*)func_001B61F0, self, 0, 0);
+    if (self->armed != 0) {
+        func_001DBCC8(self->world, (void*)func_001B61F0, self, 0, 0);
     }
 }
 
@@ -1003,11 +999,9 @@ f32 func_001B5308(S_1B5308* p) { f32 result=0.0f; if (p->testA != 0.0f) result=(
 
 void func_001B5568(void* base, void** out) { out[0] = (u8*)base + 0x44; out[1] = (u8*)base + 0x4C; out[2] = (u8*)base + 0x48; }
 
-struct Actor_1B5CD8 { u8 pad0[0x2C8]; u64 flags; };
-
 void func_00124A48(void* self);
 
-void func_001B5CD8(Actor_1B5CD8* self)
+void func_001B5CD8(C54* self)
 {
     func_00124A48(self);
     self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
@@ -1315,26 +1309,16 @@ void func_001B54D0(Node_1B54D0* self, Src_1B54D0* src)
 
 void func_00124FC0(void* self);
 
-struct __attribute__((aligned(16))) Quad_1B5D28 { s32 a, b; f32 c; s32 d; };
 
-typedef void (*VFn_1B5D28)(void* self, void* p);
-struct Node_1B5D28 {
-    VFn_1B5D28* vtbl;
-    u8 pad[0x148 - 4];
-    f32 f148;
-    u8 pad2[0x2D0 - 0x14C];
-    s32 f2D0;
-};
-
-void func_001B5D28(Node_1B5D28* self)
+void func_001B5D28(C54* self)
 {
     func_00124FC0(self);
-    Quad_1B5D28* src = (Quad_1B5D28*)((u8*)D_00261990 + 0x40);
-    Quad_1B5D28 q = *src;
+    Vec02* src = (Vec02*)((u8*)D_00261990 + 0x40);
+    Vec02 q = *src;
     if (self->f2D0 == 0) {
-        q.c = self->f148;
+        q.z = self->v140.z;
     }
-    self->vtbl[33](self, &q);
+    self->desc02()->m1D(self, &q);
 }
 
 void func_001C6F48(void* self);

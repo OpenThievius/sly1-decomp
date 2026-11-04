@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6c.h"
 
 void func_001B9F30(void);
 
@@ -910,53 +911,28 @@ f32 func_001D8470(s32 count, Span_1D8470* spans, f32 x)
     return best;
 }
 
-struct Self_1DB4C8 {
-    u8 pad0[0x1AD8];
-    void* f1AD8;
-    void* f1ADC;
-    u8 pad1AE0[0x1D64 - 0x1AE0];
-    u8 f1D64;
-    u8 f1D65;
-    u8 f1D66;
-    u8 pad1D67;
-    f32 f1D68;
-    u8 pad1D6C[4];
-    s32 f1D70;
-    s32 f1D74;
-    u8 pad1D78[0x1ED4 - 0x1D78];
-    void* f1ED4;
-    u8 pad1ED8[0x2308 - 0x1ED8];
-    f32 f2308;
-    f32 f230C;
-    u8 pad2310[0x234C - 0x2310];
-    f32 f234C;
-    f32 f2350;
-    s32 f2354;
-    u8 pad2358[4];
-    s32 f235C;
-};
 struct Sub_1DB4C8 { u8 b; };
 
 extern s32 D_00262C64;
 
-void func_00182C18(Self_1DB4C8* self);
-void func_001C09D8(Self_1DB4C8* self, s32 a, s32 b);
+void func_00182C18(C6C* self);
+void func_001C09D8(C6C* self, s32 a, s32 b);
 void* func_0018D5C0(s32 size);
-void func_001DC740(Self_1DB4C8* self);
+void func_001DC740(C6C* self);
 void func_001B5DD0(Sub_1DB4C8* p, s32 a, s32 b);
 void func_001B5E30(Sub_1DB4C8* p, s32 a, s32 b);
 void func_00152438(Sub_1DB4C8* p, s32 a);
-void func_001DBA90(Self_1DB4C8* self, f32 x);
+void func_001DBA90(C6C* self, f32 x);
 
 #define SUB(off) ((Sub_1DB4C8*)((u8*)self + (off)))
 
-void func_001DB4C8(Self_1DB4C8* self)
+void func_001DB4C8(C6C* self)
 {
     f32 x;
     func_00182C18(self);
     func_001C09D8(self, 0, 0);
-    self->f1AD8 = (void*)func_0018D500(0x4800);
-    self->f1ADC = func_0018D5C0(0x10000);
+    self->buf1AD8 = (void*)func_0018D500(0x4800);
+    self->buf1ADC = func_0018D5C0(0x10000);
     func_001DC740(self);
     func_001B5DD0(SUB(0x1AF0), 0x10, 0x400);
     func_001B5DD0(SUB(0x1AFC), 0xE0, 0x100);
@@ -974,7 +950,7 @@ void func_001DB4C8(Self_1DB4C8* self)
     func_001B5DD0(SUB(0x1BD0), 0x70, 0x20);
     func_001B5DD0(SUB(0x1C0C), 0x8, 0x80);
     func_001B5DD0(SUB(0x1C18), 0x14, 0x100);
-    self->f1ED4 = (void*)func_0018D500(0x1000);
+    self->buf1ED4 = (void*)func_0018D500(0x1000);
     func_00152438(SUB(0x48), 0x1C);
     func_00152438(SUB(0x54), 0x48);
     func_00152438(SUB(0x78), 0x48);

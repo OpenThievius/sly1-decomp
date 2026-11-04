@@ -24,6 +24,7 @@ struct Hud_1943E8_eu {
 void func_00194D30(Self_1943E8_eu* self, s32 a, s32 b);
 void func_00195958(Self_1943E8_eu* self);
 void func_001961C0(Self_1943E8_eu* self);
+extern Ent_195958 D_eu_00255538[];
 extern f32 D_eu_0026BB30;
 extern f32 D_eu_0026BB34;
 extern u8 D_eu_00263550[];

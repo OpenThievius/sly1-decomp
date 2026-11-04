@@ -222,7 +222,7 @@ s32 func_00184D78(Obj_184D78** a, Obj_184D78** b)
 
 INCLUDE_ASM(func_00184DE8);
 
-INCLUDE_ASM(func_00185150);
+ASM_FUNC(func_00185150);
 
 void func_00185358(Obj_00185358* self)
 {
@@ -257,9 +257,9 @@ s32 func_00185468(Obj_185468* a0) {
     return a0->f24;
 }
 
-INCLUDE_ASM(func_00185498);
+ASM_FUNC(func_00185498);
 
-INCLUDE_ASM(func_00185538);
+ASM_FUNC(func_00185538);
 
 void func_00185758(s32 a, s32 b)
 {

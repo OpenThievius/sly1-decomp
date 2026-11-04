@@ -27,6 +27,8 @@ procedure; read it before you match anything.
 | `config/us/generated.tsv` | the functions the compiler makes for a file (a static initialiser, the constructor that calls it), under retail's names | by hand |
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/us/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md) | `tools/classify_asm.py` |
+| `config/us/classes.tsv`, `methods.tsv`, `creators.tsv` | the game's class map from retail's class descriptors: each class's parent, id, flags, size and method slots (own or inherited), the classes each function is a method of, and the functions that create an object of a class | `tools/classes.py` |
+| `config/us/tables.tsv`, `members.tsv`, `installers.tsv`, `dispatch.tsv` | every other table of function pointers in retail's data (method tables, GCC vtables, callback records), the tables each function is in, the functions that install each table, and the calls through an object's table by slot | `tools/tables.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
 | `src/main/<name>.cpp`, `config/us/files.tsv` | a real source file, found in retail and proved by building it whole (docs/AGENT_WORKFLOW.md); the table gives its code range and where its data starts | you, by hand |
 | `src/lib/XXXXXXXX.cpp` | matched library code, by the same windows; built with Sony's 2.9-ee-991111, which `config/cflags.tsv` names per file (docs/TOOLCHAIN.md) | you |
@@ -61,6 +63,8 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/progress.py [--check]` | the ByteMatch reports and the README table |
 | `python3 tools/inventory.py [--check]` | the function tables and PAL's pairing |
 | `python3 tools/classify_asm.py [--check]` | which game-code functions are original assembly (needs `asm/us/`) |
+| `python3 tools/classes.py [--check]` | the class map: classes, their methods and creators (needs `asm/us/`) |
+| `python3 tools/tables.py [--check]` | the other function-pointer tables, their members and installers (needs `asm/us/`) |
 | `python3 -m unittest discover -s tests` | the tools' unit tests (CI) |
 | `python3 tools/proprietary.py` | scans what git would commit for game data and proprietary material |
 | `python3 tests/check_repository.py` | `proprietary.py`, licence headers (CI) |
@@ -75,11 +79,15 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   behaves as an inline-assembly helper, which no C form reproduces (docs/TOOLCHAIN.md); a
   function computes a bare square root through it, and nothing else writes inline assembly.
   A whole file (`config/us/files.tsv`) holds the original assembly functions inside its range
-  (`config/us/original_asm.tsv`) at file scope, `INCLUDE_ASM(func_X);` (include/asm_func.h),
-  their bytes taken from the disassembly: that is not inline assembly in a function. It holds a
-  function of its range that is not matched yet the same way, until its C matches: such a
-  function is never counted as matched (not in `config/us/original_asm.tsv`, not in the build's
-  count of functions from C), and its exact C replaces the line.
+  (`config/us/original_asm.tsv`) at file scope, their bytes taken from the disassembly: that is
+  not inline assembly in a function. As OpenRAC's decompilations mark them, hand-written assembly
+  is `ASM_FUNC(func_X);` and a linker's leftover `LINKER_REMNANT(func_X);` (include/asm_func.h),
+  both final source; `LINKER_REMNANT_AFTER_INIT(func_X);`, written after the file's last
+  definition, is a leftover retail has between the static initialiser GCC generates and its
+  `_GLOBAL_$I$`. A function of its range that is not matched yet is `INCLUDE_ASM(func_X);` until
+  its C matches: such a function is never counted as matched (not in `config/us/original_asm.tsv`,
+  not in the build's count of functions from C), and its exact C replaces the line. The build
+  fails when a marker disagrees with `config/us/original_asm.tsv`.
   `volatile` is one only where it stops the compiler. It is allowed where it is what the
   original had: a hardware register, at a fixed address (`*(volatile u32*)0x10002010`) or
   through a pointer to a register block (a DMA channel's), and data shared with hardware, an

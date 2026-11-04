@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c8b.h"
 
 struct Buf_19DF48 { u8 raw[0x30]; };
 typedef void (*Fn_19DF48)(void);
@@ -844,38 +845,16 @@ void func_0019E168(Obj_19E168* self)
 }
 
 struct Stream_19C470;
-struct Tri_19C470 { u8* a; u8* b; u8* c; };
-struct Edge_19C470 { u8* a; u8* b; };
-struct Rec_19C470 { s32 id; u8 pos[96]; };
-struct Obj_19C470 {
-    u8 pad0[0x48];
-    s32 f48;
-    u8 pad1[0xA0 - 0x4C];
-    u8 fA0[4];
-    s32 fA4;
-    u8 padA8[8];
-    u8* fB0;
-    u8 padB4[0xC4 - 0xB4];
-    Rec_19C470* fC4;
-    s32 fC8;
-    u8* fCC;
-    s32 fD0;
-    s32 fD4;
-    Tri_19C470* fD8;
-    Edge_19C470* fDC;
-    f32 fE0;
-};
-
 s32 func_00137D10(Stream_19C470* in);
 void func_00137FB0(Stream_19C470* in, void* p);
 void* func_0018D5C0(s32 n);
 s32 func_00137CC0(Stream_19C470* in);
-void func_0019CD90(Obj_19C470* o, s32 i, f32* x, f32* y, f32* z);
-void func_0019CC10(f32 x, f32 y, f32 z, Obj_19C470* o, void* p);
+void func_0019CD90(C8B* o, s32 i, f32* x, f32* y, f32* z);
+void func_0019CC10(f32 x, f32 y, f32 z, C8B* o, void* p);
 f32 func_00137DF8(Stream_19C470* in);
-void func_0011EC40(Obj_19C470* o, Stream_19C470* in);
+void func_0011EC40(C8B* o, Stream_19C470* in);
 
-void func_0019C470(Obj_19C470* o, Stream_19C470* in)
+void func_0019C470(C8B* o, Stream_19C470* in)
 {
     {
         s32 i = 0x17;
@@ -889,12 +868,12 @@ void func_0019C470(Obj_19C470* o, Stream_19C470* in)
     s32 i = 0;
     o->f48 = func_00137D10(in);
     func_00137FB0(in, o->fA0);
-    o->fC4 = (Rec_19C470*)func_0018D5C0(o->fA4 * 100);
+    o->fC4 = (Rec8B*)func_0018D5C0(o->fA4 * 100);
     for (i = 0; i < o->fA4; i++) {
         f32 x;
         f32 y;
         f32 z;
-        Rec_19C470* r = &o->fC4[i];
+        Rec8B* r = &o->fC4[i];
         o->fC4[i].id = func_00137CC0(in);
         func_0019CD90(o, i, &x, &y, &z);
         func_0019CC10(x, y, z, o, r->pos);
@@ -911,11 +890,11 @@ void func_0019C470(Obj_19C470* o, Stream_19C470* in)
         } while (j >= 0);
     }
     o->fD0 = o->fD4 = func_00137D10(in);
-    o->fD8 = (Tri_19C470*)func_0018D5C0(o->fD0 * 12);
-    o->fDC = (Edge_19C470*)func_0018D5C0(o->fD0 << 3);
+    o->fD8 = (Tri8B*)func_0018D5C0(o->fD0 * 12);
+    o->fDC = (Edge8B*)func_0018D5C0(o->fD0 << 3);
     for (s32 n = 0; n < o->fD0; n++) {
-        Tri_19C470* t = &o->fD8[n];
-        Edge_19C470* e = &o->fDC[n];
+        Tri8B* t = &o->fD8[n];
+        Edge8B* e = &o->fDC[n];
         s32 a = func_00137D10(in);
         s32 b = func_00137D10(in);
         s32 c = func_00137D10(in);
@@ -1237,12 +1216,7 @@ void func_0019D410(Entry_19D410* src)
     }
 }
 
-struct Self_19CD90 {
-    u8 pad0[0x48];
-    s32 f48;
-};
-
-void func_0019CD90(Self_19CD90* self, s32 p, f32* out0, f32* out1, f32* out2)
+void func_0019CD90(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
 {
     s32 n = self->f48;
     s32 q = p / ((n + 1) * (3 * n + 1));
@@ -1331,58 +1305,43 @@ void func_0019E420(Obj_19E420* self, f32 t)
     D_0027B314 = (ListFrame*)it.saved;
 }
 
-struct __attribute__((aligned(16))) Quad_19C728 { s32 a, b, c, d; };
-struct Fl_19C728 { u8 pad[8]; f32 f8; };
-struct In_19C728 { u8 pad[8]; Fl_19C728* p8; };
-struct Gr_19C728 { u8 pad[0x78]; s32 f78; u8 pad7C[0x44]; In_19C728* pC0; };
-struct Node_19C728;
-typedef void (*VFn_19C728)(Node_19C728* n);
-struct Node_19C728 { VFn_19C728* vtbl; };
-struct Slot_19C728 { u8 pad0[4]; Node_19C728* n4; u8 pad8[4]; s32 fC; u8 pad10[0x10]; };
-struct Obj_19C728 {
-    u8 pad0[0x14]; void* f14; u8 pad18[0x1C];
-    s32 f34; s32 f38; void* f3C; void* f40; u8 pad44[0xC]; s32 f50; f32 f54; f32 f58; f32 f5C; f32 f60;
-    u8 pad64[0xC]; Quad_19C728 q70; s32 f80; f32 f84; f32 f88; f32 f8C; Quad_19C728 q90; u8 pad_a0[0x44];
-    Slot_19C728 slots[24]; Gr_19C728* f3E4;
-};
-
 void func_00182C58(void* self);
 void* func_0015A448(void* a, s32 b, void* c);
 void* func_0015A480(void* a, s32 b, void* c);
 void func_00139600(s32 a, s32 b, void* c, s32 d, s32 e, void* f);
 void func_00139038(void* self, s32 a, s32 b, void* c, s32 d, void* e, void* f, void* g);
 void func_00139B38(void* g, void* n);
-void func_0019CC10(Obj_19C728* self, f32* out, f32 a, f32 b, f32 c);
+void func_0019CC10(C8B* self, f32* out, f32 a, f32 b, f32 c);
 void func_001399F8(void* g, s32 a, s32 b, void* c);
-void func_0012CD78(f32 a, f32 b, Gr_19C728* g, void* r1, void* r2, s32 r3, void* r4, s32 r5, s32 r6, s32 r7);
+void func_0012CD78(f32 a, f32 b, Gr8B* g, void* r1, void* r2, s32 r3, void* r4, s32 r5, s32 r6, s32 r7);
 
 extern s32 D_0026ABD0[];
 extern s32 D_0026ABE0[];
 extern s32 D_0026ABD8[];
 
-void func_0019C728(Obj_19C728* self)
+void func_0019C728(C8B* self)
 {
-    Slot_19C728* s;
+    Slot8B* s;
     s32 i;
     func_00182C58(self);
-    self->f3C = func_0015A448(self->f14, self->f34, self);
+    self->f3C = func_0015A448(self->world, self->first34, self);
     if (self->f3C == 0) return;
-    self->f40 = func_0015A480(self->f14, self->f38, self->f3C);
+    self->f40 = func_0015A480(self->world, self->second38, self->f3C);
     if (self->f40 == 0) return;
     for (i = 0; i < 24; i++) {
         s = &self->slots[i];
-        Node_19C728* n = (Node_19C728*)func_0015A480(self->f14, s->fC, self->f3C);
+        Node8B* n = (Node8B*)func_0015A480(self->world, s->fC, self->f3C);
         s->n4 = n;
         if (n != 0) n->vtbl[7](n);
     }
     func_00139600(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
     func_00139038(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
     if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
-    void* nd = func_0015A480(self->f14, 0x36, self->f3C);
+    void* nd = func_0015A480(self->world, 0x36, self->f3C);
     if (nd != 0) func_00139B38(self->f3E4, nd);
     f32 buf[24];
     func_0019CC10(self, buf, self->f54, self->f58, self->f5C);
-    Slot_19C728* d = self->slots;
+    Slot8B* d = self->slots;
     f32* src = buf;
     for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
     func_001399F8(self->f3E4, 0x20, 0x18, self->slots);

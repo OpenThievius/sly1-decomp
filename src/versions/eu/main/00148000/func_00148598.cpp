@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL always increments the counter at 0x438 (no D_00275C34 check).
-void func_00148598(void* self, s32 mode)
+void func_00148598(C59* self, s32 mode)
 {
-    if (((Obj_148598*)self)->f2D0 == mode) return;
+    if (self->state == mode) return;
     if (mode == 1) {
         Flags_148598* fl = D_002623C8;
         s32 bits = fl->flags;

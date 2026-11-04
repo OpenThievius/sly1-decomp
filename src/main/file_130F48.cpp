@@ -634,7 +634,7 @@ void func_00131140(Obj_131140* self)
     self->f314 = 0.4f;
 }
 
-INCLUDE_ASM(func_00131198);
+ASM_FUNC(func_00131198);
 
 INCLUDE_ASM(func_001316E8);
 
@@ -926,10 +926,10 @@ void func_00133B58(Self_133B58* self, Gs_133B58* gs)
     func_001615F0(gs, 0x9400, 0x80C0, 0, 0);
 }
 
-INCLUDE_ASM(func_00134AA0);
+ASM_FUNC(func_00134AA0);
 
 INCLUDE_RODATA(D_00249CF8);
-INCLUDE_ASM(func_00134B48);
+ASM_FUNC(func_00134B48);
 
 void func_00135228(Obj_135228* self, Q_135228* q)
 {
@@ -1067,9 +1067,9 @@ s32 func_00135858(Entry_135858* a, Entry_135858* b)
     return 1;
 }
 
-INCLUDE_ASM(func_001358D0);
+ASM_FUNC(func_001358D0);
 
-INCLUDE_ASM(func_00135E20);
+LINKER_REMNANT(func_00135E20);
 
 void func_00135E30(Obj_135E30* self, Vec_135E30* out, s32* flag)
 {
@@ -1077,7 +1077,7 @@ void func_00135E30(Obj_135E30* self, Vec_135E30* out, s32* flag)
     *flag = 0;
 }
 
-INCLUDE_ASM(func_00135E40);
+LINKER_REMNANT(func_00135E40);
 
 void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out)
 {
@@ -1085,7 +1085,7 @@ void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out)
     func_001A1F40(out, 1);
 }
 
-INCLUDE_ASM(func_00135E70);
+LINKER_REMNANT(func_00135E70);
 
 void func_00135E78(SlotBank_135E78* self, s32 state, s32 flag)
 {
@@ -1305,7 +1305,7 @@ f32 func_00136648(S_136648* s) {
 }
 
 INCLUDE_RODATA(D_00249D58);
-INCLUDE_ASM(func_001366A0);
+ASM_FUNC(func_001366A0);
 
 void func_00136EC8(State_00136EC8* self, f32* x, f32* y)
 {

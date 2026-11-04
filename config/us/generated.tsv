@@ -29,3 +29,5 @@ src/main/file_18D8E0.cpp	Put__11Ring_18E6C0iPUc	func_0018E6C0
 src/main/file_18D8E0.cpp	Idle__11Ring_18E6C0	func_0018E8C0
 src/main/file_18D8E0.cpp	Put__10Dma_18E8C8iPUc	func_0018E8C8
 src/main/file_18D8E0.cpp	Idle__10Dma_18E8C8	func_0018E938
+src/main/file_193210.cpp	__static_initialization_and_destruction_0	func_00196330
+src/main/file_193210.cpp	_GLOBAL_$I$*	func_001963B8

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c4e.h"
+#include "c7d.h"
 
 void func_001451F0(u32, int, int, void*, int, void*);
 void func_00125C90();
@@ -18,8 +20,7 @@ struct Obj_1F7E58 { u8 pad[0x10]; u32 flags; u8 pad2[4]; s32 field_18; };
 void func_001F7E58(Obj_1F7E58* self) { self->field_18 = 0; self->flags &= ~1u; }
 
 void func_00123ED0(void*);
-struct Obj_1F4E18 { u8 pad[0x2D0]; s32 value; };
-void func_001F4E18(Obj_1F4E18* self) { func_00123ED0(self); self->value = -1; }
+void func_001F4E18(C4E* self) { func_00123ED0(self); self->id = -1; }
 
 void func_001F57E0(void*);
 int func_001F51E8(void* self) { func_001F57E0((u8*)self + 0x550); return 1; }
@@ -83,41 +84,28 @@ done:
 
 extern u8 D_002623C8[];
 
-typedef void (*Fn_1F4660)(void* self);
-
-struct Node_1F4660 {
-    Fn_1F4660* vtbl;
-    u8 pad04[0x14];
-    Node_1F4660* next;
-    u8 pad1C[0x2D4 - 0x1C];
-    void* f2D4;
-    u8 pad2D8[0x310 - 0x2D8];
-    s32 count;
-    Node_1F4660** items;
-};
-
 void func_00124A48(void* self);
 
-void func_001F4660(Node_1F4660* self)
+void func_001F4660(C7D* self)
 {
     func_00124A48(self);
     for (s32 i = 0; i < self->count; i++) {
-        Node_1F4660* e = self->items[i];
-        Fn_1F4660* vt = e->vtbl;
-        if (vt[19] != 0) {
-            vt[19](e);
+        C01* e = self->items[i];
+        const Desc01* vt = e->desc;
+        if (vt->m0F != 0) {
+            vt->m0F(e);
         }
-        Node_1F4660* e2 = self->items[i];
-        e2->vtbl[20](e2);
+        C01* e2 = self->items[i];
+        e2->desc->m10(e2);
     }
     if (self->f2D4 != 0) {
         s32* g = (s32*)*(void**)D_002623C8;
         if ((g[0] & 2) == 0) {
-            Node_1F4660* a = self;
-            while (a->next != 0) {
-                a = a->next;
+            C01* a = self;
+            while (a->parent != 0) {
+                a = a->parent;
             }
-            a->vtbl[7](a);
+            a->desc->m03(a);
         }
     }
 }
@@ -175,23 +163,20 @@ void func_001F4A30(Obj_1F4A30* self)
     func_001EFFA0(D_00275F80, &m, self->f318);
 }
 
-struct Vt_1F4E48 { s32 pad[2]; s32 flags; };
-struct Ch_1F4E48 { Vt_1F4E48* vt; };
-struct Obj_1F4E48 { u8 pad[0x14]; void* host; u8 pad2[0x2D0 - 0x18]; s32 f2D0; Ch_1F4E48* f2D4; Ch_1F4E48* f2D8; };
-void func_00124A48(Obj_1F4E48* self);
-Ch_1F4E48* func_0015A418(void* host, s32 a1, s32 a2, Obj_1F4E48* ctx);
-s32 func_001300E8(Ch_1F4E48* n, s32 kind);
+void func_00124A48(C4E* self);
+C01* func_0015A418(void* host, s32 a1, s32 a2, C4E* ctx);
+s32 func_001300E8(C01* n, s32 kind);
 
-void func_001F4E48(Obj_1F4E48* self)
+void func_001F4E48(C4E* self)
 {
     func_00124A48(self);
-    if (self->f2D0 != -1) {
-        Ch_1F4E48* c = func_0015A418(self->host, 0x104, self->f2D0, self);
+    if (self->id != -1) {
+        C01* c = func_0015A418(self->world, 0x104, self->id, self);
         if (c) {
-            if (c->vt->flags & 1) {
-                self->f2D8 = c;
+            if (c->desc->flags & 1) {
+                self->found2D8 = c;
             } else if (func_001300E8(c, 0x7E)) {
-                self->f2D4 = c;
+                self->found2D4 = c;
             }
         }
     }
@@ -426,22 +411,6 @@ void func_001F56D8(Ctx_1F56D8* ctx, Obj_1F56D8* self)
     }
 }
 
-typedef void (*Fn_1F4500)(void* self);
-typedef void (*Fn2_1F4500)(void* self, void* s3);
-
-struct Obj_1F4500 {
-    Fn_1F4500* vtbl;
-    Fn2_1F4500* vtbl2() { return (Fn2_1F4500*)vtbl; }
-    u8 pad04[0x10];
-    s32 f14;
-    s32 f18;
-    u8 pad1C[0x2E4 - 0x1C];
-    s32 f2E4;
-    u8 pad2E8[0x310 - 0x2E8];
-    s32 count;
-    Obj_1F4500** items;
-};
-
 void func_00138550(void* a, void* b);
 void func_00137EB0(void* a, void* b);
 void func_00137E70(void* a, void* b);
@@ -451,32 +420,31 @@ s32 func_00137D10(void* a);
 void* func_0018D500(s32 size);
 void* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
 
-void func_001F4500(void* self_, void* s3)
+void func_001F4500(C7D* self, void* s3)
 {
-    Obj_1F4500* self = (Obj_1F4500*)self_;
     func_00138550(s3, (u8*)self + 0x2FC);
     func_00138550(s3, (u8*)self + 0x308);
-    func_00137EB0(s3, (u8*)self + 0xD0);
-    func_00137E70(s3, (u8*)self + 0x100);
-    Fn_1F4500 f = self->vtbl[22];
+    func_00137EB0(s3, &self->rot);
+    func_00137E70(s3, &self->pos);
+    void (*f)(C01* self) = self->desc->m12;
     if (f != 0) {
         f(self);
     }
     self->f2E4 = 0;
-    func_001E4C48(s3, (u8*)self + 0x2EC, (u8*)self + 0x2F0, (u8*)self + 0x2F4, (u8*)self + 0x2F8);
+    func_001E4C48(s3, &self->f2EC, &self->f2F0, &self->f2F4, &self->f2F8);
     s32 i = 0;
     func_0011EC40(self, s3);
     s32 n = func_00137D10(s3);
     self->count = n;
-    self->items = (Obj_1F4500**)func_0018D500(n * 4);
+    self->items = (C01**)func_0018D500(n * 4);
     while (i < self->count) {
         s32 a = func_00137D10(s3);
         s32 b = func_00137D10(s3);
         s32 c = func_00137D10(s3);
-        Obj_1F4500* o = (Obj_1F4500*)func_0011E580(a, self->f14, self->f18, b, c);
+        C01* o = (C01*)func_0011E580(a, (s32)self->world, (s32)self->parent, b, c);
         self->items[i++] = o;
-        o->vtbl2()[14](o, s3);
-        o->vtbl[7](o);
+        o->desc->m0A(o, s3);
+        o->desc->m03(o);
     }
 }
 

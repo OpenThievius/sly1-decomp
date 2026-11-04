@@ -303,7 +303,7 @@ s32 func_001E5888(Ctx_1E5888* self, Node_1E5888* node)
     return 1;
 }
 
-INCLUDE_ASM(func_001E5938);
+ASM_FUNC(func_001E5938);
 
 struct Actor_1E5C78 { u8 pad[0x614]; void* f614; void* f618; };
 
@@ -611,7 +611,7 @@ void func_001E62A8(Self_1E62A8* self, Ctx_1E62A8* c, s32 k)
     }
 }
 
-INCLUDE_ASM(func_001E6600);
+ASM_FUNC(func_001E6600);
 
 struct Rgba_1E6C20 { u8 c[4]; };
 struct Elem_1E6C20 { f32 f0; f32 f4; f32 f8; f32 fC; u8 pad[0x2C - 0x10]; };
@@ -1034,11 +1034,11 @@ void func_001E77C0(Obj_1E77C0* self)
     func_001E7518(self, sub);
 }
 
-INCLUDE_ASM(func_001E7C60);
+ASM_FUNC(func_001E7C60);
 
-INCLUDE_ASM(func_001E80D8);
+ASM_FUNC(func_001E80D8);
 
-INCLUDE_ASM(func_001E83E0);
+ASM_FUNC(func_001E83E0);
 
 struct Obj_1E86E0 {
     u8 pad0[0x268];

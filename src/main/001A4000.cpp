@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c8c.h"
+#include "c5f.h"
 
 struct Obj_1A5DD8 { u8 pad[0x560]; void* child; };
 
@@ -492,26 +494,6 @@ void func_001A4878(List_1A4878* list, s32 value)
     list->count = n + 1;
 }
 
-typedef void (*VFn_1A4B30)(void* self);
-
-struct Kin_1A4B30 {
-    f32 pos;
-    f32 vel;
-    f32 acc;
-};
-
-struct Blend_1A4B30 {
-    VFn_1A4B30* vtbl;
-    u8 pad0[0x3D0 - 4];
-    Kin_1A4B30 kin;
-    u8 pad1[0x3E0 - 0x3DC];
-    f32 a3e0[48];
-    f32 b4a0[48];
-    f32 out560[48];
-    u8 pad2[0x64C - 0x620];
-    s32 state64c;
-};
-
 struct Ctx_1A4B30 {
     u8 pad0[0xC];
     f32 dt;
@@ -525,14 +507,13 @@ s32 func_001A4898(void);
 void func_001A5760(void* self, f32 t);
 void func_001A4EF0(void* self, void* p);
 
-void func_001A4B30(void* self)
+void func_001A4B30(C5F* self)
 {
-    Blend_1A4B30* s = (Blend_1A4B30*)self;
     func_00124A48(self);
-    if (s->state64c != func_001A4898()) {
-        s->vtbl[7](self);
+    if (self->id64C != func_001A4898()) {
+        self->desc->m03(self);
     } else {
-        Kin_1A4B30* k = &s->kin;
+        Kin5F* k = &self->kin;
         f32 dt = D_002623C8->dt;
         f32 v = k->pos + dt * (k->vel + dt * k->acc);
         f32 lo = D_00275C60[0];
@@ -546,9 +527,9 @@ void func_001A4B30(void* self)
             t = v;
         }
         f32 u = 1.0f - t;
-        f32* pa = s->a3e0;
-        f32* pb = s->b4a0;
-        f32* po = s->out560;
+        f32* pa = self->poseA;
+        f32* pb = self->poseB;
+        f32* po = self->poseOut;
         for (u32 i = 0; i < 48; i++) {
             *po++ = u * *pa++ + t * *pb++;
         }
@@ -563,20 +544,14 @@ struct Mgr_1A4D60 {
     VFn_1A4D60* vtbl;
 };
 
-struct Node_1A4D60 {
-    u8 pad0[0x650];
-    s32 mode650;
-};
-
 extern Mgr_1A4D60 D_0026D0C8;
 
 void* func_001E9970(void* zero);
 
-void func_001A4D60(void* self)
+void func_001A4D60(C5F* self)
 {
-    Node_1A4D60* n = (Node_1A4D60*)self;
     void* p = 0;
-    if (n->mode650 == 2) {
+    if (self->state == 2) {
         p = func_001E9970(p);
     }
     if (p != 0) {
@@ -1420,74 +1395,49 @@ void func_001A6498(Self_001A6498* self)
 
 // Matched: float stores in retail's order with constants loaded as locals; int stores 0x2D0..0x2DC, 0x64C, 0x650 in that order.
 
-struct __attribute__((aligned(16))) Quad_1A4718 {
-    f32 a, b, c, d;
-};
-
 struct __attribute__((aligned(16))) Table_1A4718 {
-    Quad_1A4718 q[12];
-};
-
-struct Obj_1A4718 {
-    u8 pad0[0x2D0];
-    s32 f2D0;
-    s32 f2D4;
-    s32 f2D8;
-    s32 f2DC;
-    u8 pad1[0x340 - 0x2E0];
-    s32 f340;
-    f32 f344;
-    f32 f348;
-    f32 f34C;
-    f32 f350;
-    u8 pad2[0x3B8 - 0x354];
-    s32 f3B8;
-    u8 pad3[0x3D0 - 0x3BC];
-    Quad_1A4718 f3D0;
-    u8 pad4[0x64C - 0x3E0];
-    s32 f64C;
-    s32 f650;
+    Quad5F q[12];
 };
 
 extern const Table_1A4718 D_0024C9D0;
-extern Quad_1A4718 D_00275C50;
+extern Quad5F D_00275C50;
 
-void func_00123ED0(Obj_1A4718* self);
+void func_00123ED0(C5F* self);
 void func_00152438(void* self, s32 value);
 void func_0018D800(void* dst, void* src, s32 count);
 
-void func_001A4718(Obj_1A4718* self)
+void func_001A4718(C5F* self)
 {
     Table_1A4718 tmp;
 
     func_00123ED0(self);
-    func_00152438((u8*)self + 0x35C, 0x5A0);
-    func_00152438((u8*)self + 0x368, 0x5A0);
-    func_00152438((u8*)self + 0x374, 0x5A0);
-    func_00152438((u8*)self + 0x384, 0x5B0);
-    func_00152438((u8*)self + 0x390, 0x5B0);
-    func_00152438((u8*)self + 0x3A0, 0x568);
-    func_00152438((u8*)self + 0x3AC, 0x568);
-    self->f2D0 = -1;
-    self->f2D4 = -1;
-    self->f2D8 = -1;
-    self->f2DC = -1;
-    self->f64C = -1;
-    self->f650 = -1;
-    self->f3B8 = 0x28;
+    func_00152438(self->list35C, 0x5A0);
+    func_00152438(self->list368, 0x5A0);
+    func_00152438(self->list374, 0x5A0);
+    func_00152438(self->list384, 0x5B0);
+    func_00152438(self->list390, 0x5B0);
+    func_00152438(self->list3A0, 0x568);
+    func_00152438(self->list3AC, 0x568);
+    self->id2D0 = -1;
+    self->id2D4 = -1;
+    self->id2D8 = -1;
+    self->id2DC = -1;
+    self->id64C = -1;
+    self->state = -1;
+    self->limit3B8 = 0x28;
     tmp = D_0024C9D0;
-    func_0018D800((u8*)self + 0x3E0, &tmp, 0xC0);
-    func_0018D800((u8*)self + 0x4A0, &tmp, 0xC0);
-    self->f3D0 = D_00275C50;
+    func_0018D800(self->poseA, &tmp, 0xC0);
+    func_0018D800(self->poseB, &tmp, 0xC0);
+    self->q3D0 = D_00275C50;
     f32 k2300 = 2300.0f;
     f32 k1500 = 1500.0f;
     f32 k146 = 1.46f;
     f32 k3000 = 3000.0f;
-    self->f350 = k3000;
-    self->f348 = k2300;
-    self->f344 = k1500;
-    self->f34C = k146;
-    self->f340 = 0;
+    self->tune350 = k3000;
+    self->tune348 = k2300;
+    self->tune344 = k1500;
+    self->tune34C = k146;
+    self->mode340 = 0;
 }
 
 struct Obj_1A4070 {
@@ -1621,89 +1571,57 @@ struct __attribute__((aligned(16))) Quad_1A7FE8 {
     s32 d;
 };
 
-struct V_1A7FE8 { s32 a; f32 b; s32 c; };
 
-struct Obj_1A7FE8 {
-    u8 p00[0x14];
-    s32 f14;
-    u8 p18[0x34];
-    s32 f4C;
-    s32 f50;
-    s32 f54;
-    s32 f58;
-    u8 q60[0x7C];
-    f32 fD8;
-    u8 pDC[0x34];
-    V_1A7FE8 v110;
-    u8 p11C[0x4];
-    s32 f120;
-    f32 f124;
-    u8 p128[0x1C];
-    f32 f144;
-    u8 p148[0x8];
-    u8 p150[0x18];
-    s32 f168;
-};
-
-void func_00182C18(Obj_1A7FE8* self);
+void func_00182C18(C8C* self);
 struct Buf_1A7FE8 { u8 b[1]; };
 s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
-struct Own_1A7FE8 { u8 b[1]; };
-void func_001DBCC8(Own_1A7FE8* owner, void* fn, void* arg, s32 a3, s32 a4);
-void func_001A8208(Obj_1A7FE8* self);
+void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void func_001A8208(C8C* self);
 
-void func_001A7FE8(Obj_1A7FE8* self)
+void func_001A7FE8(C8C* self)
 {
     func_00182C18(self);
     u8* s1 = (u8*)self + 0x60;
-    self->f4C = -1;
-    self->f50 = -1;
-    self->f54 = -1;
-    self->f58 = -1;
+    self->id4C = -1;
+    self->id50 = -1;
+    self->id54 = -1;
+    self->id58 = -1;
     (void)func_001F5C0C((Buf_1A7FE8*)s1, 0, 0x80);
     Quad_1A7FE8* src = (Quad_1A7FE8*)D_002483D0;
     *(Quad_1A7FE8*)(s1 + 0x20) = src[0];
     *(Quad_1A7FE8*)(s1 + 0x30) = src[1];
     *(Quad_1A7FE8*)(s1 + 0x40) = src[2];
     (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
-    V_1A7FE8* p = &self->v110;
+    V8C* p = &self->v110;
     p->a = 0;
     p->b = 1.0f;
     p->c = 0;
     self->f120 = 0;
     self->f124 = 20000.0f;
-    (void)func_001F5C0C((Buf_1A7FE8*)self->p150, 0, 0x18);
+    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0x150), 0, 0x18);
     f32 d = D_0024CBC4;
     self->fD8 = 5.0f;
     self->f168 = 0;
     self->f144 = d;
-    func_001DBCC8((Own_1A7FE8*)self->f14, (void*)func_001A8208, self, 0, 0);
+    func_001DBCC8(self->world, (void*)func_001A8208, self, 0, 0);
 }
 
-struct Sub_1A4C48 { u8 pad0[0x2D4]; s32 f2D4; };
-struct Tgt_1A4C48 { u8 pad0[0x550]; s32 f550; };
-struct Obj_1A4C48 {
-    u8 pad0[0x358]; Tgt_1A4C48* f358;
-    u8 pad1[0x3B8 - 0x35C]; s32 f3B8; s32 f3BC;
-    u8 pad2[0x634 - 0x3C0]; f32 f634;
-    f32 f638; f32 f63C; f32 f640;
-    u8 pad4[0x650 - 0x644]; s32 f650;
-    u8 pad5[4]; Sub_1A4C48* f658;
-};
+struct Link5F { u8 pad0[0x2D4]; s32 f2D4; };
+struct Tgt5F { u8 pad0[0x550]; s32 f550; };
 extern f32 D_00261858[];
-void func_00124FC0(Obj_1A4C48* self);
-s32 func_001A4DC0(Obj_1A4C48* self);
-void func_001A4EF0(Obj_1A4C48* self, s32 mode);
-void func_001A5120(Obj_1A4C48* self);
-void func_001A54F8(Obj_1A4C48* self);
-void func_001A7998(Tgt_1A4C48* t, s32 flag);
+void func_00124FC0(C5F* self);
+s32 func_001A4DC0(C5F* self);
+void func_001A4EF0(C5F* self, s32 mode);
+void func_001A5120(C5F* self);
+void func_001A54F8(C5F* self);
+void func_001A7998(Tgt5F* t, s32 flag);
 
-void func_001A4C48(Obj_1A4C48* self)
+void func_001A4C48(C5F* self)
 {
-    Tgt_1A4C48* t;
+    Tgt5F* t;
     s32 st;
     func_00124FC0(self);
-    while ((st = func_001A4DC0(self)) != self->f650) {
+    while ((st = func_001A4DC0(self)) != self->state) {
         func_001A4EF0(self, st);
     }
     switch (st) {
@@ -1714,7 +1632,7 @@ void func_001A4C48(Obj_1A4C48* self)
     case 6:
         break;
     case 2:
-        if (self->f3BC < self->f3B8) {
+        if (self->count3BC < self->limit3B8) {
             if (self->f634 < D_00261858[1]) {
                 func_001A5120(self);
             }
@@ -1724,10 +1642,10 @@ void func_001A4C48(Obj_1A4C48* self)
         }
         break;
     case 5: {
-        t = self->f358;
+        t = self->target;
         if (t) {
             if (t->f550 == 0) {
-                Sub_1A4C48* s = self->f658;
+                Link5F* s = self->link;
                 if (s == 0 || s->f2D4 != 3) {
                     func_001A7998(t, 1);
                 }

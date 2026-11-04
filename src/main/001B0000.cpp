@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6e.h"
 #include "list_iter.h"
 
 struct Obj_1B04A0 {
@@ -480,26 +481,15 @@ struct Obj_1B0EA8 {
 
 
 
-typedef void (*Fn_1B2840)(void* self, void* other);
-
-struct Obj_1B2840 {
-    Fn_1B2840* vtbl;
-};
-
-struct Self_1B2840 {
-    u8 pad_0[0x34];
-    Obj_1B2840* f34;
-};
-
 s32 func_00137B90(void* src);
 void* func_0014D9A8(s32 index);
 void func_0011EC40(void* self, void* obj);
 
-void func_001B2840(Self_1B2840* self, void* obj)
+void func_001B2840(C6E* self, void* obj)
 {
-    Obj_1B2840* p = (Obj_1B2840*)func_0014D9A8(func_00137B90(obj));
-    self->f34 = p;
-    Fn_1B2840 fn = p->vtbl[0];
+    Hook6E* p = (Hook6E*)func_0014D9A8(func_00137B90(obj));
+    self->hook = p;
+    HookLoad6E fn = p->vtbl->load;
     if (fn != 0) {
         fn(p, obj);
     }
@@ -814,24 +804,19 @@ void func_001B3488(Obj_1B3488* self)
 
 struct __attribute__((aligned(16))) Quad_1B28A8 { s32 w[4]; };
 struct Dst_1B28A8 { Quad_1B28A8 q0, q1, q2, q3; };
-struct Obj_1B28A8 { u8 pad0[0x18]; void* f18; u8 pad1[0x34 - 0x1C]; void* f34; };
-
-typedef void (*VFn_1B28A8)(void* self, void* a, void* b);
-struct Vtbl_1B28A8 { void* slot[4]; VFn_1B28A8 fn4; };
-struct Hook_1B28A8 { Vtbl_1B28A8* vtbl; };
 
 extern u8 D_00248400[];
 
 void func_00188B08(void* a, void* b, Dst_1B28A8* dst);
-void func_00182F78(Obj_1B28A8* self, void* other);
+void func_00182F78(C01* self, void* other);
 
-void func_001B28A8(Obj_1B28A8* self, void* other)
+void func_001B28A8(C6E* self, C01* other)
 {
     Dst_1B28A8 a;
     Dst_1B28A8 b;
-    Hook_1B28A8* h;
-    if (self->f18) {
-        func_00188B08((u8*)self->f18 + 0x140, (u8*)self->f18 + 0x110, &a);
+    Hook6E* h;
+    if (self->parent) {
+        func_00188B08((u8*)self->parent + 0x140, (u8*)self->parent + 0x110, &a);
     } else {
         a = *(Dst_1B28A8*)D_00248400;
     }
@@ -840,9 +825,9 @@ void func_001B28A8(Obj_1B28A8* self, void* other)
     } else {
         b = *(Dst_1B28A8*)D_00248400;
     }
-    h = (Hook_1B28A8*)self->f34;
-    if (h->vtbl->fn4) {
-        h->vtbl->fn4(h, &a, &b);
+    h = self->hook;
+    if (h->vtbl->frames) {
+        h->vtbl->frames(h, &a, &b);
     }
     func_00182F78(self, other);
 }

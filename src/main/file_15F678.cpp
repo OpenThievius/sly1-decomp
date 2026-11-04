@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c87.h"
+#include "c02.h"
 #include "asm_func.h"
 #include "list_iter.h"
 
@@ -85,22 +87,6 @@ struct Ctx_15FBB8 {
     void* p1C;
     f32 f20;
 };
-typedef void (*VFn_15FBB8)(void* self, void* b);
-struct Self_15FBB8 {
-    VFn_15FBB8* vtbl;
-    u8 pad04[0x9C];
-    Quad_15FBB8 qA0;
-    Quad_15FBB8 qB0;
-    u8 pad0C0[0x90];
-    Quad_15FBB8 q150;
-    Quad_15FBB8 q160;
-    u8 pad170[0x29C - 0x170];
-    s32 s29C;
-    u8 pad2A0[0x2AC - 0x2A0];
-    Ctx_15FBB8* p2AC;
-    u8 pad2B0[0x2C8 - 0x2B0];
-    u64 u2C8;
-};
 
 extern u8 D_00248D30[];
 
@@ -109,12 +95,10 @@ void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32
 
 
 
-struct Sub_15FF88 { u8 pad0[8]; s32 count; s32* arr; };
-struct Self_15FF88 { u8 pad0[0x14]; void* f14; void* f18; u8 pad1[0x18]; s32 f34; s32 items[8]; Sub_15FF88 sub; };
-void func_00182C58(Self_15FF88* self);
+void func_00182C58(C01* self);
 void* func_0018D500(s32 size);
-s32 func_0015A480(Sub_15FF88* a, s32 item, void* c);
-void func_0015F8B0(Sub_15FF88* a, Sub_15FF88* sub);
+s32 func_0015A480(C6C* world, s32 item, void* c);
+void func_0015F8B0(C6C* world, List87* sub);
 
 
 struct List_15F710 {
@@ -1208,7 +1192,6 @@ struct Obj_1660E8 { VT_1660E8* vt; u8 pad0[0x10C]; u8 sub110[0x30]; u8 sub140[0x
 struct Elem_1660E8 { Obj_1660E8* obj; u8 pad[0xC]; Quad_1660E8 q10[4]; Mat_1660E8 m50;  };
 struct List_1660E8 { s32 count; Elem_1660E8* items; };
 struct Par_1660E8 { u8 pad[0x30]; };
-struct Self_1660E8 { u8 pad0[0x110]; u8 sub110[0x30]; u8 sub140[0x40]; u8 pad180[0xAC]; List_1660E8 list; };
 
 void func_00188B48(void* a, void* b, void* out);
 void func_00188B08(void* a, void* b, void* out);
@@ -1350,9 +1333,8 @@ void func_0015F9A0(void* self, Sub_15F9A0* s);
 void func_0015FA58(Self_15FA58* self);
 void func_0015FB28(Node_0015FB28* self, void* arg);
 s32 func_0015FBA0(Obj_0015FBA0* self, s32* out);
-void func_0015FBB8(Self_15FBB8* self, s32 flag);
+void func_0015FBB8(C02* self, s32 flag);
 void func_0015FF58(void* self);
-void func_0015FF88(Self_15FF88* self);
 void func_00160050(Obj_00160050* obj, s32 value);
 void func_00160070();
 Ent_1600A0* func_001600A0(Ent_1600A0* key);
@@ -1437,8 +1419,8 @@ void func_00165728(Self_165728* self, Ctx_165728* ctx);
 void func_00165828(Obj_165828* self, Ctx_165828* ctx);
 void func_00165920(Obj_165920* self, s32 arg, void* src);
 void func_00165FE0(Owner_165FE0* self, Sub_165FE0* sub, f32 f);
-void func_001660A0(u8* self);
-void func_001660E8(Self_1660E8* self, Par_1660E8* par);
+void func_001660A0(C02* self);
+void func_001660E8(C02* self, Par_1660E8* par);
 void func_00166658(void);
 
 void func_0015F678(Owner_15F678* owner, u8* obj)
@@ -1605,33 +1587,32 @@ s32 func_0015FBA0(Obj_0015FBA0* self, s32* out)
     return bit;
 }
 
-void func_0015FBB8(Self_15FBB8* self, s32 flag)
+void func_0015FBB8(C02* self, s32 flag)
 {
     if (flag != 0) {
-        self->qA0 = self->q150;
-        self->qB0 = self->q160;
-        self->s29C = 0;
-        if (self->p2AC != 0) {
-            func_001BF788((Obj_15FBB8*)self->p2AC->p1C, 0);
+        self->vA0 = self->v150;
+        self->vB0 = self->v160;
+        self->f29C = 0;
+        if (self->f2AC != 0) {
+            func_001BF788((Obj_15FBB8*)((Ctx_15FBB8*)self->f2AC)->p1C, 0);
         }
-        self->vtbl[36]((void*)self, D_00248D30);
-        self->vtbl[37]((void*)self, D_00248D30);
-        self->u2C8 |= (u64)1 << 38;
+        self->desc02()->m20(self, (Vec02*)D_00248D30);
+        self->desc02()->m21(self, (Vec02*)D_00248D30);
+        self->flags |= (u64)1 << 38;
     } else {
-        self->u2C8 &= ~((u64)1 << 38);
-        self->vtbl[36]((void*)self, &self->qA0);
-        self->vtbl[37]((void*)self, &self->qB0);
-        if (self->p2AC != 0) {
-            func_001BFCD8(self->p2AC->w0, &self->p2AC->p1C, (void*)self, 0,
-                          self->p2AC->f4, self->p2AC->f8, self->p2AC->fC,
-                          self->p2AC->f10, self->p2AC->f20, &self->p2AC->b14, 0);
+        self->flags &= ~((u64)1 << 38);
+        self->desc02()->m20(self, &self->vA0);
+        self->desc02()->m21(self, &self->vB0);
+        Ctx_15FBB8* c = (Ctx_15FBB8*)self->f2AC;
+        if (c != 0) {
+            func_001BFCD8(c->w0, &c->p1C, (void*)self, 0, c->f4, c->f8, c->fC, c->f10, c->f20, &c->b14, 0);
         }
     }
 }
 
-INCLUDE_ASM(func_0015FCD8);
+ASM_FUNC(func_0015FCD8);
 
-INCLUDE_ASM(func_0015FD78);
+ASM_FUNC(func_0015FD78);
 
 void func_0015FF58(void* self)
 {
@@ -1639,24 +1620,24 @@ void func_0015FF58(void* self)
     func_0015FD78(self);
 }
 
-void func_0015FF88(Self_15FF88* self)
+void func_0015FF88(C87* self)
 {
     func_00182C58(self);
-    Sub_15FF88* cur = (Sub_15FF88*)self->f14;
-    Sub_15FF88* sub = &self->sub;
-    sub->arr = (s32*)func_0018D500(self->f34 * 4);
-    for (s32 i = 0; i < self->f34; i++) {
-        s32 r = func_0015A480(cur, self->items[i], self->f18);
+    C6C* cur = self->world;
+    List87* sub = &self->found;
+    sub->arr = (s32*)func_0018D500(self->itemCount * 4);
+    for (s32 i = 0; i < self->itemCount; i++) {
+        s32 r = func_0015A480(cur, self->items[i], self->parent);
         if (r != 0) { s32 n = sub->count; sub->arr[n] = r; sub->count = n + 1; }
     }
-    func_0015F8B0(cur, &self->sub);
+    func_0015F8B0(cur, &self->found);
 }
 
 void func_00160050(Obj_00160050* obj, s32 value) { obj->values[obj->count++] = value; }
 
 void func_00160070() { func_00160918(); }
 
-INCLUDE_ASM(func_00160090);
+LINKER_REMNANT(func_00160090);
 
 Ent_1600A0* func_001600A0(Ent_1600A0* key)
 {
@@ -1707,7 +1688,7 @@ void* func_00160148()
     return *(void**)((u8*)p + 0x24);
 }
 
-INCLUDE_ASM(func_00160178);
+LINKER_REMNANT(func_00160178);
 
 s32 func_00160180(void)
 {
@@ -1723,7 +1704,7 @@ s32 func_001601A0(void)
     return v;
 }
 
-INCLUDE_ASM(func_001601D0);
+LINKER_REMNANT(func_001601D0);
 
 s32 func_001601D8(void* a0)
 {
@@ -2023,7 +2004,7 @@ s32 func_00160C58()
     return result;
 }
 
-INCLUDE_ASM(func_00160C90);
+LINKER_REMNANT(func_00160C90);
 
 void* func_00160CA0(u8* self,s32 index)
 {
@@ -2112,7 +2093,7 @@ void func_00160E80(Rec_160E80* self)
     self->f18 = 0;
 }
 
-INCLUDE_ASM(func_00160EA0);
+ASM_FUNC(func_00160EA0);
 
 s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_161028** out)
 {
@@ -2311,7 +2292,7 @@ void func_00161708(Stream_161708* self, u64 a1, u64 a2)
     p[1] = a1;
 }
 
-INCLUDE_ASM(func_00161760);
+LINKER_REMNANT(func_00161760);
 
 void func_00161768(Obj_161768* self, u32 a1, u64 a2)
 {
@@ -2337,7 +2318,7 @@ void func_001617E8(Stream_1617E8* self, s32 tag, f32 value)
     *p = lo | hi;
 }
 
-INCLUDE_ASM(func_00161858);
+LINKER_REMNANT(func_00161858);
 
 void func_00161860(Stream_161860* self, s32 a1, s32 a2)
 {
@@ -2358,7 +2339,7 @@ void func_001618C0(Stream_1618C0* self, s32 a1, s32 a2, u32 a3, u32 a4)
     *p = (lo | (mid << 32)) | ((u64)a4 << 56);
 }
 
-INCLUDE_ASM(func_00161950);
+LINKER_REMNANT(func_00161950);
 
 void Obj_161958::func_00161958(s32 count)
 {
@@ -2606,7 +2587,7 @@ void func_00162680(Body_162680* body, Vec3_162680* v)
     body->z = v->z;
 }
 
-INCLUDE_ASM(func_001626A0);
+LINKER_REMNANT(func_001626A0);
 
 void func_001626A8(u8* dst, u8* src)
 {
@@ -2652,7 +2633,7 @@ void func_00162810(Owner_162810* owner)
 }
 
 INCLUDE_RODATA(D_0024A710);
-INCLUDE_ASM(func_00162890);
+ASM_FUNC(func_00162890);
 
 void func_00163938(s32 mode, void* obj)
 {
@@ -3342,23 +3323,23 @@ void func_00165FE0(Owner_165FE0* self, Sub_165FE0* sub, f32 f)
     }
 }
 
-void func_001660A0(u8* self)
+void func_001660A0(C02* self)
 {
-    u8* p=*(u8**)(self+0x224);
+    u8* p=(u8*)self->f224;
     if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) func_0016C528(*(void**)(p+0x60));
 }
 
-void func_001660E8(Self_1660E8* self, Par_1660E8* par)
+void func_001660E8(C02* self, Par_1660E8* par)
 {
     Mat_1660E8 a;
     Mat_1660E8 b;
     Mat_1660E8 c;
     Mat_1660E8 e;
     s32 i;
-    List_1660E8* l = &self->list;
+    List_1660E8* l = (List_1660E8*)self->sub22C;
 
     if (l->count > 0) {
-        func_00188B48(self->sub140, self->sub110, &a);
+        func_00188B48(&self->v140, &self->m110, &a);
         if (par != 0) {
             func_00188B48((u8*)par + 0x30, par, &b);
         } else {
