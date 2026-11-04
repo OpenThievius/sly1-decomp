@@ -10,11 +10,7 @@
 #define C50_H
 
 #include "c02.h"
-
-// What func_0014D9A8 finds by index: its first table entry is called with the count.
-struct Hook50 {
-    void (**vtbl)(Hook50* self, s32 count);     // 0x00
-};
+#include "t2176.h"
 
 // The record the object points to (func_00154F98 makes it, func_00155778 makes it the object's
 // own before a change, func_001550E8 fills it from the ids).
@@ -24,7 +20,7 @@ struct Rec50 {
     s32 kind;               // 0x10: 3, 4 seen
     u8 pad14[0x20 - 0x14];
     union {
-        Hook50* hook20;     // 0x20: the object found by index (func_00154F98)
+        T2176* curve20;     // 0x20: the key-frame curve found by index (func_00154F98)
         s32 value20;        // 0x20: a value taken from another object (func_001550E8)
     };
     u8 pad24[0x7C - 0x24];

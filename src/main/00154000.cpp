@@ -213,7 +213,7 @@ void* func_0018D500(s32 size);
 void func_001549C8(void* mem);
 void func_001289C0(void* self, s32 count);
 s32 func_00137CC0(s32 count);
-void* func_0014D9A8(s32 index);
+T2176* func_0014D9A8(s32 kind);
 void func_00154C80(void* self, s32 count);
 s32 func_00137BE0(s32 count);
 void* func_00155778(void* self, s32 flag);
@@ -227,15 +227,15 @@ void func_00154F98(C50* self, s32 count)
     func_001289C0(self, count);
     s32 index = func_00137CC0(count);
     if (index != -1) {
-        Hook50* obj = (Hook50*)func_0014D9A8(index);
-        self->rec->hook20 = obj;
-        void (*fn)(Hook50* self, s32 count) = obj->vtbl[0];
+        T2176* obj = func_0014D9A8(index);
+        self->rec->curve20 = obj;
+        void (*fn)(T2176* self, void* stream) = obj->vt->m00;
         if (fn != 0) {
-            fn(obj, count);
+            fn(obj, (void*)count);
         }
     }
     if (self->rec->kind == 4) {
-        func_00154C80(&self->rec->hook20, count);
+        func_00154C80(&self->rec->curve20, count);
     }
     s32 n = func_00137BE0(count);
     if (n != 0) {

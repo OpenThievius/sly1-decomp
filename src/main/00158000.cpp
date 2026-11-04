@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c73.h"
+#include "t21e3.h"
 #include "c40.h"
 #include "c60.h"
 #include "c6c.h"
@@ -120,49 +122,32 @@ void func_00158F10(C7A* self, s32 kind, C01* other)
     }
 }
 
-struct Link_1596E0 {
-    u8 pad0[0x20];
-    s32 f20;
-    void* f24;
-};
-struct Obj_1596E0 {
-    u8 pad0[0x14];
-    Link_1596E0* f14;
-    u8 pad1[0x3C - 0x18];
-    void* f3C;
-    u8 pad2a[0x44 - 0x40];
-    Link_1596E0* f44;
-    u8 pad2[0x5C - 0x48];
-    s32 f5C;
-    s32 f60;
-};
+void func_001B4AD0(T21E3* self);
+T21E3_Rec* func_001B4688(s32 key);
+void func_00159770(T21E3_438* self, s32 mode);
 
-void func_001B4AD0(Obj_1596E0* self);
-Link_1596E0* func_001B4688(void* x);
-void func_00159770(Obj_1596E0* self, s32 n);
-
-void func_001596E0(Obj_1596E0* self)
+void func_001596E0(T21E3_438* self)
 {
     func_001B4AD0(self);
-    Link_1596E0* a = func_001B4688(self->f3C);
-    self->f44 = a;
+    T21E3_Rec* a = func_001B4688(self->id2);
+    self->cur2.rec = a;
     if (a != 0) {
-        if (a->f24 == 0) {
-            if (self->f14->f24 == self) {
-                a->f24 = self;
+        if (a->owner == 0) {
+            if (self->cur.rec->owner == self) {
+                a->owner = self;
             }
         }
     }
     s32 lo = 0;
-    if (self->f14 != 0) {
-        lo = self->f14->f20;
+    if (self->cur.rec != 0) {
+        lo = self->cur.rec->count;
     }
     s32 hi = 0;
-    if (self->f44 != 0) {
-        hi = self->f44->f20;
+    if (self->cur2.rec != 0) {
+        hi = self->cur2.rec->count;
     }
-    self->f60 = -1;
-    self->f5C = (hi < lo) ? lo : hi;
+    self->mode = -1;
+    self->count = (hi < lo) ? lo : hi;
     func_00159770(self, 0);
 }
 
@@ -435,26 +420,10 @@ tail_c:
     func_00158288(c, self);
 }
 
-struct Fader_159770 {
-    u8 pad0[0x2c];
-    f32 scale;
-    f32 lo;
-    f32 hi;
-    f32 limit;
-    u8 pad1[0x20];
-    s32 count;
-    s32 mode;
-    f32 value;
-    f32 level;
-    f32 step;
-    f32 pos;
-    f32 ratio;
-};
-
 extern f32 D_0026185C;
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_00159770(Fader_159770* s, s32 mode)
+void func_00159770(T21E3_438* s, s32 mode)
 {
     if (s->mode == mode) return;
     if (mode == 1) goto store;
@@ -496,15 +465,14 @@ store:
     s->mode = mode;
 
 tail:
-    s->value = D_0026185C;
+    s->stamp2 = D_0026185C;
 }
 
 extern f32 D_0026185C;
 f32 func_001EAAE0(f32 a, f32 b);
-void func_00159770(Fader_159770* s, s32 mode);
-void func_001B46E0(void* obj, s32 value);
+void func_001B46E0(T21E3_Cursor* cur, s32 idx);
 
-void func_00159890(Fader_159770* s, f32 dt)
+void func_00159890(T21E3_438* s, f32 dt)
 {
     s32 count = s->count;
     if (count < 2) return;
@@ -519,7 +487,7 @@ void func_00159890(Fader_159770* s, f32 dt)
     goto call;
 
 m0:
-    if (s->level <= D_0026185C - s->value) mode = 1;
+    if (s->level <= D_0026185C - s->stamp2) mode = 1;
     goto call;
 
 m1:
@@ -548,17 +516,15 @@ m3:
 
 call:
     func_00159770(s, mode);
-    func_001B46E0((u8*)s + 16, (s32)s->pos);
-    func_001B46E0((u8*)s + 64, (s32)s->pos);
+    func_001B46E0(&s->cur, (s32)s->pos);
+    func_001B46E0(&s->cur2, (s32)s->pos);
 }
 
-struct Node_158B30 { void** vtbl; };
-typedef void (*VFn_158B30)(void* self, void* a);
 
 void* func_0018D5C0(s32 size);
 void func_001549C8(void* p);
 s32 func_00137CC0(void* other);
-void* func_0014D9A8(s32 idx);
+T2176* func_0014D9A8(s32 kind);
 void* func_00137BE0(void* other);
 void func_00154C80(void* p, void* other);
 void func_00154EE0(void* a, void* b, void* c, void* d);
@@ -572,14 +538,14 @@ void func_00158B30(C79* self, void* stream)
     s32 idx = func_00137CC0(stream);
     if (idx != -1) {
         Rec79* n = func_00158DD8(self, 1);
-        n->obj20 = func_0014D9A8(idx);
-        if (((Node_158B30*)n->obj20)->vtbl[0] != 0) {
-            ((VFn_158B30)((Node_158B30*)n->obj20)->vtbl[0])(n->obj20, stream);
+        n->curve20 = func_0014D9A8(idx);
+        if (n->curve20->vt->m00 != 0) {
+            n->curve20->vt->m00(n->curve20, stream);
         }
     }
     Rec79* q = self->rec;
     if (q->kind == 4) {
-        func_00154C80(&q->obj20, stream);
+        func_00154C80(&q->curve20, stream);
     }
     void* t = func_00137BE0(stream);
     if (t != 0) {
@@ -594,30 +560,18 @@ void func_00158C28(C79* self)
     self->rec->uses += 1;
 }
 
-struct Self_159A00 {
-    u8 pad0[0x60];
-    s32 f60;
-    f32 f64;
-    f32 f68;
-    f32 f6C;
-    f32 f70;
-    f32 f74;
-};
 
-void func_00159770(void* self, s32 mode);
-void func_001B46E0(void* p, s32 v);
-
-void func_00159A00(Self_159A00* a0, f32 f12)
+void func_00159A00(T21E3_438* a0, f32 f12)
 {
-    a0->f74 = f12;
+    a0->ratio = f12;
     if (1.0f <= f12) {
         func_00159770(a0, 2);
     } else {
-        a0->f60 = -1;
+        a0->mode = -1;
         func_00159770(a0, 0);
     }
-    func_001B46E0((u8*)a0 + 0x10, (s32)a0->f70);
-    func_001B46E0((u8*)a0 + 0x40, (s32)a0->f70);
+    func_001B46E0(&a0->cur, (s32)a0->pos);
+    func_001B46E0(&a0->cur2, (s32)a0->pos);
 }
 
 
@@ -804,17 +758,14 @@ void func_0015A918(C60* self,void* other)
     func_001E4C48(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
-struct Rec_159A80 { u8 pad[0x3C]; s32 f3C; };
-struct Key_159A80 { u8 pad[0x2]; s16 f2; };
+T21E3_Cursor* func_001B4B48(T21E3* self, const T21E3_Rec* key);
 
-u8* func_001B4B48(void* owner, void* key);
-
-u8* func_00159A80(Rec_159A80* self, Key_159A80* key)
+T21E3_Cursor* func_00159A80(T21E3_438* self, const T21E3_Rec* key)
 {
-    u8* p = func_001B4B48(self, key);
+    T21E3_Cursor* p = func_001B4B48(self, key);
     if (p == 0) {
-        p = (u8*)self + 0x40;
-        if ((key->f2 ^ self->f3C) != 0) {
+        p = &self->cur2;
+        if ((key->key ^ self->id2) != 0) {
             p = 0;
         }
     }
@@ -1566,18 +1517,15 @@ s32 func_0015A4F0(Sw_15A4F0* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax,
     return c;
 }
 
-struct Obj_159680 { u8 pad0[0x10]; s32 f10; u8 pad14[0x18]; f32 f2C; f32 f30; f32 f34; f32 f38; s32 f3C; s32 f40; };
-struct Src_159680 { u8 pad0[4]; f32 f4; f32 f8; f32 fC; f32 f10; s16 f14; };
+void func_001B4AA0(T21E3* self, const T21E3_Src* src);
 
-void func_001B4AA0(void* a, void* b);
-
-void func_00159680(Obj_159680* self, Src_159680* src)
+void func_00159680(T21E3_438* self, T21E3_Src* src)
 {
     func_001B4AA0(self, src);
-    self->f40 = self->f10;
-    self->f3C = src->f14;
-    self->f2C = src->f4;
-    self->f30 = src->f8;
-    self->f34 = src->fC;
-    self->f38 = src->f10;
+    self->cur2.flags = self->cur.flags;
+    self->id2 = src->s14;
+    self->scale = src->f4;
+    self->lo = src->f8;
+    self->hi = src->fC;
+    self->limit = src->f10;
 }
