@@ -1,6 +1,6 @@
 {
  "measures": {
-  "fuzzy_match_percent": 91.91965955182233,
+  "fuzzy_match_percent": 91.92019891839024,
   "total_code": "1112416",
   "matched_code": "1015796",
   "matched_code_percent": 91.31440036820757,
@@ -45033,7 +45033,7 @@
   {
    "name": "lib/00210000",
    "measures": {
-    "fuzzy_match_percent": 95.8617971623752,
+    "fuzzy_match_percent": 95.94062007356806,
     "total_code": "7612",
     "matched_code": "6532",
     "matched_code_percent": 85.81187598528639,
@@ -45225,7 +45225,7 @@
     {
      "name": "func_00211618",
      "size": "152",
-     "fuzzy_match_percent": 93.42105263157895,
+     "fuzzy_match_percent": 97.36842105263158,
      "address": "5656",
      "metadata": {
       "virtual_address": "2168344"
@@ -45494,7 +45494,7 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 84.6146459002654,
+    "fuzzy_match_percent": 84.61988406201984,
     "total_code": "114544",
     "matched_code": "93948",
     "matched_code_percent": 82.01913675094286,
