@@ -139,13 +139,34 @@ level the objects end exactly where the texture data must start for it to end wh
 file's data does. The 26 to 747 bytes after the texture data repeat the bytes 0x1FFF
 before them and are never read.
 
+### Geometry
+
+The geometry block (0x162890) is 52% of all level bytes. It holds a model as a list of
+entries, each either an instance of an earlier entry or a set of meshes:
+
+| Part | Format |
+| --- | --- |
+| header | two u8 flags; u8 count of s16 bones; u8 count of f32 morph weights (channels); u16 entry count |
+| entry | u16 flags; for 0x1 an s16 entry index and a 4×3 matrix (an instance); fields selected by 0x2–0x200 (distances, a texture animation, an attachment); a bounding sphere; s16; three u8 |
+| meshes | u16 count; each a bounding sphere, five u8 counts, then at a multiple of 4 the positions (3 f32), normals (3 f32), RGBA colours, UVs (2 f32) and four-byte vertex records; u16 shader; u8; u8 count of bone indices and their weights (f32 per position and bone); with channels, morph target positions and normals and per vertex u16 indices into them |
+| line meshes | u16 count; each positions (3 f32), four-byte records of position indices, bones and weights, and morph targets |
+
+A vertex record holds the indices of its position, normal, UV (0xFF none) and colour
+(0x7F none), and in the colour byte's top bit the start of a triangle strip. The shader's
+first byte chooses between a lit conversion, which uses the normals, and an unlit one.
+Line meshes are drawn as GS lines. Instances (36,578 of 65,446 entries) read nothing
+after their sphere and bytes. The file holds plain arrays: the loader builds the VIF
+packets itself, copying only a line mesh's positions, records and weights unchanged.
+
+A standalone parser written from this reads every geometry block of the 46 US levels
+(23,944 blocks) exactly as retail's loader does, read for read.
+
 ## Next
 
-1. **Each format, from its reader.** Field by field: the geometry (0x162890) and its
-   meshes, class 0x03's collision meshes and the event lists (0x11FA88 and its
-   siblings), which hold most of a level's bytes; what each class is; PAL's levels.
-   Then models, textures and sound, documented here, and the extractor written in
-   OpenThievius, from the functions that parse them.
+1. **Each format, from its reader.** Field by field: class 0x03's collision meshes and the
+   event lists (0x11FA88 and its siblings), which hold most of a level's bytes; what each
+   class is; PAL's levels. Then models, textures and sound, documented here, and the
+   extractor written in OpenThievius, from the functions that parse them.
 2. **The remaining data.** The MPEG region of 172,705 sectors at 593,237 and the
    64-sector VAG at 454,000, which no record found yet names; and the object classes
    that read records (0x65, 0x7D, 0x83).
