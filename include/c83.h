@@ -42,9 +42,10 @@ struct C83 : C01 {
     s32 trackCount;         // 0x38
     Track83* tracks;        // 0x3C
     s32 id;                 // 0x40
-    u8 pad44[0x48 - 0x44];
+    s32 f44;                // 0x44
     s32 enabled;            // 0x48: func_0012C160 queues its callback while set
-    u8 pad4C[0x54 - 0x4C];
+    s32 f4C;                // 0x4C
+    s32 f50;                // 0x50
     s32 startCount;         // 0x54: the list that runs when it starts
     s32 startList;          // 0x58
     s32 timedCount;         // 0x5C: the timed list

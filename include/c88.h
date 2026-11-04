@@ -9,7 +9,9 @@
 #include "c01.h"
 
 struct C88 : C01 {
-    u8 pad34[0x44 - 0x34];
+    s32 f34;                // 0x34
+    void* f38;              // 0x38
+    u8 pad3C[0x44 - 0x3C];
     s32 armed;              // 0x44: nonzero once the graph has something to run
     u8 pad48[0x54 - 0x48];
 };

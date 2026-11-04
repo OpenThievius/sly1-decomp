@@ -57,7 +57,8 @@ struct C68 : C02 {
     f32 f2D8;               // 0x2D8: 90.0 at setup
     s32 n2DC;               // 0x2DC: slots in use
     Slot68 slots[16];       // 0x2E0
-    u8 pad420[0x428 - 0x420];
+    u8 pad420[0x424 - 0x420];
+    void* f424;             // 0x424
     void* f428;             // 0x428
     void* f42C;             // 0x42C: the device object (func_001B6290 makes it)
     union {
@@ -66,7 +67,8 @@ struct C68 : C02 {
     };
     s32 f44C;               // 0x44C
     s32 f450;               // 0x450: 2 at setup
-    u8 pad454[0x45C - 0x454];
+    s32 f454;               // 0x454
+    u8 pad458[0x45C - 0x458];
     f32 f45C;               // 0x45C: the largest float at setup (D_00249FB0)
     f32 f460;               // 0x460
     s32 f464;               // 0x464: 0 at setup

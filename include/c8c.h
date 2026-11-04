@@ -14,10 +14,11 @@
 
 // 0x3C: a record shared with the object this one was copied from (func_001A84C8).
 struct Sub8C {
-    u8 pad00[4];
+    s32 f0;                 // 0x0
     s32 f4;                 // 0x04: nonzero while the record is lent out
     s32 f8;                 // 0x08
-    u8 pad0C[8];
+    s32 fC;                 // 0xC
+    s32 f10;                // 0x10
     void* f14;              // 0x14: the object it was lent to
 };
 
@@ -32,7 +33,9 @@ struct C8C : C01 {
     s32 count;              // 0x34: number of 0x14-byte items (func_001A84C8)
     void* items;            // 0x38
     Sub8C* sub;             // 0x3C
-    u8 pad40[0x4C - 0x40];
+    s32 f40;                // 0x40
+    s32 f44;                // 0x44
+    u8 pad48[0x4C - 0x48];
     s32 id4C;               // 0x4C: object ids, -1 for none (set by func_001A7FE8,
     s32 id50;               // 0x50  looked up by func_001A8590)
     s32 id54;               // 0x54

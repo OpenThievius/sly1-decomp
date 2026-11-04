@@ -24,7 +24,20 @@ struct Rec8B { s32 id; u8 pos[96]; };
 
 struct Fl8B { u8 pad[8]; f32 f8; };
 struct In8B { u8 pad[8]; Fl8B* p8; };
-struct Gr8B { u8 pad[0x78]; s32 f78; u8 pad7C[0x44]; In8B* pC0; };
+struct Gr8B {
+    u8 pad0[0x34];
+    f32 f34;                // 0x34
+    s32 f38;                // 0x38
+    u8* f3C;                // 0x3C
+    u8 pad40[0x6C - 0x40];
+    void* f6C;              // 0x6C
+    u8 pad70[0x78 - 0x70];
+    s32 f78;                // 0x78
+    u8 pad7C[0xB8 - 0x7C];
+    void* fB8;              // 0xB8
+    s32 fBC;                // 0xBC
+    In8B* pC0;              // 0xC0
+};
 
 struct Slot8B {
     u8 pad0[4];

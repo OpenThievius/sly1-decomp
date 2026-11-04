@@ -27,13 +27,16 @@ struct C67 : C02 {
     u8 pad2D4[0x2DC - 0x2D4];
     s32 f2DC;               // 0x2DC
     s32 f2E0;               // 0x2E0
-    u8 pad2E4[0x2EC - 0x2E4];
+    void* f2E4;             // 0x2E4
+    void* f2E8;             // 0x2E8
     s32 f2EC;               // 0x2EC
     u8 pad2F0[0x2F4 - 0x2F0];
     s32 slot;               // 0x2F4: 1..5 by id, else the value in the global block at +0x19D8
     Elem67 elems[11];       // 0x2F8
     s32 f534;               // 0x534
-    u8 pad538[0x570 - 0x538];
+    u8 pad538[0x560 - 0x538];
+    s32 f560;               // 0x560
+    u8 pad564[0x570 - 0x564];
 };
 
 typedef char check_C67[sizeof(C67) == 0x570 ? 1 : -1];

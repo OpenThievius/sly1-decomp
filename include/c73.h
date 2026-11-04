@@ -72,7 +72,8 @@ struct C79 : C77 {
 
 // 0x7A: three more ids, a delay for messages, and two objects it holds.
 struct C7A : C79 {
-    u8 padA0[0xAC - 0xA0];
+    s32 fA0;                // 0xA0
+    u8 padA4[0xAC - 0xA4];
     s32 idAC;               // 0xAC
     s32 idB0;               // 0xB0
     s32 idB4;               // 0xB4

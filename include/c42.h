@@ -13,7 +13,10 @@ struct C42 : C03 {
     f32 f554;               // 0x554: the time of the last state change (func_001A6BE0)
     void* f558;             // 0x558: the object func_001A6BE0 hands to the state's functions
     void* f55C;             // 0x55C: an object (func_001A6DE0 tells its slot 31 when it is hit)
-    u8 pad560[0x584 - 0x560];
+    void* f560;             // 0x560
+    u8 pad564[0x574 - 0x564];
+    f32 f574;               // 0x574
+    u8 pad578[0x584 - 0x578];
     f32 f584;               // 0x584: 1.0 at set-up
     f32 f588;               // 0x588: 2.5 at set-up
     void* f58C;             // 0x58C: handles func_001A6BE0 starts by state (f58C..f5A8)

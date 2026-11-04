@@ -15,17 +15,27 @@
 struct C7D : C02 {
     u8 pad2D0[0x2D4 - 0x2D0];
     void* f2D4;             // 0x2D4: set means the object has something to do after its children
-    u8 pad2D8[0x2E4 - 0x2D8];
+    s32 f2D8;               // 0x2D8
+    u8 pad2DC[0x2E0 - 0x2DC];
+    s32 f2E0;               // 0x2E0
     s32 f2E4;               // 0x2E4: cleared by the load
-    u8 pad2E8[0x2EC - 0x2E8];
+    f32 f2E8;               // 0x2E8
     s32 f2EC;               // 0x2EC: four values func_001E4C48 reads from the stream
     s32 f2F0;               // 0x2F0
     s32 f2F4;               // 0x2F4
     s32 f2F8;               // 0x2F8
-    u8 pad2FC[0x310 - 0x2FC];
+    s32 f2FC;               // 0x2FC
+    s32 f300;               // 0x300
+    s32 f304;               // 0x304
+    s32 f308;               // 0x308
+    s32 f30C;               // 0x30C
     s32 count;              // 0x310: how many children
     C01** items;            // 0x314: the children, each created by func_0011E580
-    u8 pad318[0x330 - 0x318];
+    s32 f318;               // 0x318
+    f32 f31C;               // 0x31C
+    u8 pad320[0x324 - 0x320];
+    f32 f324;               // 0x324
+    u8 pad328[0x330 - 0x328];
 };
 
 typedef char check_C7D[sizeof(C7D) == 0x330 ? 1 : -1];

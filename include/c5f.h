@@ -31,13 +31,15 @@ struct C5F : C02 {
     s32 id2D4;              // 0x2D4
     s32 id2D8;              // 0x2D8
     s32 id2DC;              // 0x2DC
-    u8 pad2E0[0x340 - 0x2E0];
+    s32 f2E0;               // 0x2E0
+    s32 f2E4[1];            // 0x2E4
+    u8 pad2E8[0x340 - 0x2E8];
     s32 mode340;            // 0x340
     f32 tune344;            // 0x344
     f32 tune348;            // 0x348
     f32 tune34C;            // 0x34C
     f32 tune350;            // 0x350
-    u8 pad354[0x358 - 0x354];
+    void* f354;             // 0x354
     Tgt5F* target;          // 0x358
     u8 list35C[0x368 - 0x35C];  // lists (func_00152438 sets their element size)
     u8 list368[0x374 - 0x368];
@@ -48,7 +50,9 @@ struct C5F : C02 {
     u8 list3AC[0x3B8 - 0x3AC];
     s32 limit3B8;           // 0x3B8: 0x28 after setup
     s32 count3BC;           // 0x3BC
-    u8 pad3C0[0x3D0 - 0x3C0];
+    s32 f3C0;               // 0x3C0
+    s32 f3C4;               // 0x3C4
+    u8 pad3C8[0x3D0 - 0x3C8];
     union {
         Quad5F q3D0;        // 0x3D0: set from D_00275C50
         Kin5F kin;          // 0x3D0: the blend's weight, speed and acceleration
@@ -56,15 +60,19 @@ struct C5F : C02 {
     f32 poseA[48];          // 0x3E0
     f32 poseB[48];          // 0x4A0
     f32 poseOut[48];        // 0x560
-    u8 pad620[0x634 - 0x620];
+    s32 f620;               // 0x620
+    u8 pad624[0x628 - 0x624];
+    s32 f628;               // 0x628
+    u8 pad62C[0x634 - 0x62C];
     f32 f634;               // 0x634
     f32 f638;               // 0x638
     f32 f63C;               // 0x63C
     f32 f640;               // 0x640
-    u8 pad644[0x64C - 0x644];
+    f32 f644;               // 0x644
+    f32 f648;               // 0x648
     s32 id64C;              // 0x64C: -1 for none; the state func_001A4B30 compares
     s32 state;              // 0x650: -1 for none; the state machine's state
-    u8 pad654[0x658 - 0x654];
+    f32 f654;               // 0x654
     Link5F* link;           // 0x658
     u8 pad65C[0x660 - 0x65C];
 };

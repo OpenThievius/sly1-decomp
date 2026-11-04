@@ -10,7 +10,7 @@
 // 0x90: func_001ED168 allocates its 0xC00-byte buffer, func_001ED198 looks something up in
 // the level (+0x14) and keeps the result.
 struct C90 : C01 {
-    u8 pad34[0x38 - 0x34];
+    s32 f34;                // 0x34
     void* buffer;           // 0x38
     u8 pad3C[0x40 - 0x3C];
     s32 found;              // 0x40

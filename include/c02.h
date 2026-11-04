@@ -85,10 +85,11 @@ struct C02 : C01 {
     f32 f80;                // 0x80: FLT_MAX at set-up
     f32 f84;                // 0x84: FLT_MAX at set-up
     s32 f88;                // 0x88: 0x0FFFFFFF at set-up
-    u8 pad8C[0x90 - 0x8C];
+    void* f8C;              // 0x8C
     s32 save90;             // 0x90: C03::mode450 kept by func_001BD790
     s32 save94;             // 0x94: C03::mode470 kept by func_001BD790
-    u8 pad98[0xA0 - 0x98];
+    s32 f98[1];             // 0x98
+    u8 pad9C[0xA0 - 0x9C];
     Vec02 vA0;              // 0xA0: v150 kept by slot 20
     Vec02 vB0;              // 0xB0: v160 kept by slot 20
     u64 savedC0;            // 0xC0: bits 0, 1: C03::flags538 bits 54, 55 kept by func_001BD790
@@ -122,13 +123,15 @@ struct C02 : C01 {
     s32 tries;              // 0x228: as Actor6C::tries; func_0013DC38 tests it, func_00129DF8 clears the root's
     u8 sub22C[0x26C - 0x22C];   // 0x22C: a record func_00165728/165828/165920/165FE0 work on
     s32 f26C;               // 0x26C: the number of f1F8 entries
-    u8 pad270[0x278 - 0x270];
+    f32* f270;              // 0x270
+    u8 pad274[0x278 - 0x274];
     s32 f278;               // 0x278: func_001EECE0 calls slot 50 while it is set
     s32 elemCount;          // 0x27C
     Elem02** elems;         // 0x280: elemCount of them
     void* f284;             // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
     void* f288;             // 0x288: a 0x40-byte record
-    u8 pad28C[0x294 - 0x28C];
+    f32 f28C;               // 0x28C
+    f32 f290;               // 0x290
     s32 f294;               // 0x294: in the world's list at 0x78 instead of 0x54
     void* f298;             // 0x298
     s32 f29C;               // 0x29C
@@ -137,7 +140,11 @@ struct C02 : C01 {
     f32 f2A8;               // 0x2A8
     void* f2AC;             // 0x2AC: a 0x24-byte record
     u8 tint[4];             // 0x2B0: four bytes, set to 0x10 by func_00146340
-    u8 pad2B4[0x2C4 - 0x2B4];
+    u8 f2B4;                // 0x2B4
+    u8 pad2B5[0x2B8 - 0x2B5];
+    s32 f2B8;               // 0x2B8
+    void* f2BC;             // 0x2BC
+    void* f2C0;             // 0x2C0
     Key02* keys;            // 0x2C4: slot 16 resolves each and empties the list
     union {
         u64 flags;          // 0x2C8

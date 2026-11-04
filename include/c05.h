@@ -155,14 +155,14 @@ struct C05 : C03 {
 struct C06 : C05 {
     void* f610;             // 0x610
     void* f614;             // 0x614
-    u8 pad618[0x61C - 0x618];
+    void* f618;             // 0x618
     void* f61C;             // 0x61C
     void* f620;             // 0x620
     void* f624;             // 0x624
     void* f628;             // 0x628
     void* f62C;             // 0x62C
     f32 f630;               // 0x630
-    u8 pad634[0x638 - 0x634];
+    f32 f634;               // 0x634
     f32 f638;               // 0x638
     f32 f63C;               // 0x63C
     void* f640;             // 0x640
@@ -176,11 +176,16 @@ struct C06 : C05 {
     Vec02 v6A0;             // 0x6A0
     Vec02 v6B0;             // 0x6B0
     void* f6C0;             // 0x6C0
-    u8 pad6C4[0x6D4 - 0x6C4];
+    f32 f6C4;               // 0x6C4
+    f32 f6C8;               // 0x6C8
+    u8 pad6CC[0x6D4 - 0x6CC];
     s32 f6D4;               // 0x6D4
     u8 pad6D8[0x6DC - 0x6D8];
     void* f6DC;             // 0x6DC
-    u8 pad6E0[0x6F0 - 0x6E0];
+    f32 f6E0;               // 0x6E0
+    f32 f6E4;               // 0x6E4
+    f32 f6E8;               // 0x6E8
+    u8 pad6EC[0x6F0 - 0x6EC];
     Vec02 v6F0;             // 0x6F0
     f32 f700;               // 0x700
     s32 f704[3];            // 0x704
@@ -191,28 +196,55 @@ struct C06 : C05 {
 };
 
 struct C07 : C06 {
-    u8 pad720[0x1190 - 0x720];
+    u8 pad720[0x900 - 0x720];
+    s32 f900;               // 0x900
+    u8 pad904[0xA10 - 0x904];
+    s32 fA10;               // 0xA10
+    u8 padA14[0x103C - 0xA14];
+    u8 f103C[0x20];         // 0x103C
+    u8 f105C[4];            // 0x105C
+    u8 pad1060[0x1064 - 0x1060];
+    void* f1064;            // 0x1064
+    u8 pad1068[0x1188 - 0x1068];
+    void* f1188;            // 0x1188
+    s32 f118C;              // 0x118C
     Part07 f1190;           // 0x1190: given to func_001C4848/func_001C4618 with f610 (slot 37)
     Part07 f1290;           // 0x1290: the same with f614
-    u8 pad1390[0x151C - 0x1390];
+    u8 pad1390[0x1504 - 0x1390];
+    void* f1504;            // 0x1504
+    void* f1508[4];         // 0x1508
+    void* f1518;            // 0x1518
     u8 f151C[4];            // 0x151C: given to func_001BC4D8
     u8 f1520[0x21C0 - 0x1520];  // 0x1520: a record func_001C29E8 and func_001C3028 work on
     s32 f21C0;              // 0x21C0
-    u8 pad21C4[0x21C8 - 0x21C4];
+    s32 f21C4;              // 0x21C4
     f32 f21C8;              // 0x21C8
     s32 f21CC;              // 0x21CC
     Vec02 v21D0[3];         // 0x21D0
-    u8 pad2200[0x2220 - 0x2200];
+    void* f2200;            // 0x2200
+    s32 f2204;              // 0x2204
+    s32 f2208;              // 0x2208
+    u8 pad220C[0x2220 - 0x220C];
     s32 f2220;              // 0x2220
-    u8 pad2224[0x2228 - 0x2224];
+    s32 f2224;              // 0x2224
     s32 f2228;              // 0x2228
-    u8 pad222C[0x223C - 0x222C];
+    f32 f222C;              // 0x222C
+    u8 pad2230[0x2234 - 0x2230];
+    void* f2234;            // 0x2234
+    u8 pad2238[0x223C - 0x2238];
     s32 f223C;              // 0x223C
-    u8 pad2240[0x2254 - 0x2240];
+    u8 pad2240[0x2248 - 0x2240];
+    s32 f2248;              // 0x2248
+    s32 f224C;              // 0x224C
+    s32 f2250;              // 0x2250
     s32 f2254;              // 0x2254
     s32 f2258;              // 0x2258
     s32 f225C;              // 0x225C
-    u8 pad2260[0x2284 - 0x2260];
+    s32 f2260;              // 0x2260
+    s32 f2264;              // 0x2264
+    u8 pad2268[0x226C - 0x2268];
+    f32 f226C;              // 0x226C
+    u8 pad2270[0x2284 - 0x2270];
     f32 f2284;              // 0x2284
     u8 pad2288[0x22AC - 0x2288];
     void* f22AC;            // 0x22AC
@@ -224,32 +256,81 @@ struct C07 : C06 {
     void* f23BC;            // 0x23BC
     u8 pad23C0[0x23D4 - 0x23C0];
     void* f23D4;            // 0x23D4
-    u8 pad23D8[0x2420 - 0x23D8];
+    u8 pad23D8[0x23E0 - 0x23D8];
+    f32 f23E0;              // 0x23E0
+    f32 f23E4;              // 0x23E4
+    u8 pad23E8[0x23F0 - 0x23E8];
+    f32 f23F0;              // 0x23F0
+    f32 f23F4;              // 0x23F4
+    u8 pad23F8[0x2420 - 0x23F8];
     f32 f2420;              // 0x2420
-    u8 pad2424[0x2430 - 0x2424];
+    f32 f2424;              // 0x2424
+    u8 pad2428[0x242C - 0x2428];
+    f32 f242C;              // 0x242C
     f32 f2430;              // 0x2430
     f32 f2434;              // 0x2434
-    u8 pad2438[0x24A0 - 0x2438];
+    u8 pad2438[0x2498 - 0x2438];
+    s32 f2498;              // 0x2498
+    u8 pad249C[0x24A0 - 0x249C];
     void* f24A0;            // 0x24A0
     u8 pad24A4[0x24B0 - 0x24A4];
     u8 f24B0[0x10];         // 0x24B0: filled by func_00128018 (func_00172898)
-    u8 pad24C0[0x26B4 - 0x24C0];
+    u8 pad24C0[0x250C - 0x24C0];
+    s32 f250C;              // 0x250C
+    s32 f2510;              // 0x2510
+    void* f2514;            // 0x2514
+    u8 pad2518[0x2590 - 0x2518];
+    s32 f2590;              // 0x2590
+    u8 pad2594[0x25AC - 0x2594];
+    s32 f25AC;              // 0x25AC
+    u8 pad25B0[0x25D8 - 0x25B0];
+    void* f25D8[5];         // 0x25D8
+    u8 pad25EC[0x2674 - 0x25EC];
+    s32 f2674;              // 0x2674
+    u8 pad2678[0x2684 - 0x2678];
+    s32 f2684;              // 0x2684
+    f32 f2688;              // 0x2688
+    s32 f268C;              // 0x268C
+    u8 pad2690[0x26A0 - 0x2690];
+    s32 f26A0;              // 0x26A0
+    u8 pad26A4[0x26A8 - 0x26A4];
+    s32 f26A8;              // 0x26A8
+    void* f26AC;            // 0x26AC
+    u8 pad26B0[0x26B4 - 0x26B0];
     Ev07 f26B4;             // 0x26B4: the last message slot 75 took (func_001D4D08)
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
-    u8 pad26CC[0x2730 - 0x26CC];
+    u8 pad26CC[0x2718 - 0x26CC];
+    s32 f2718;              // 0x2718
+    u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730
     u8 pad2734[0x2750 - 0x2734];
     void* f2750;            // 0x2750
-    u8 pad2754[0x2768 - 0x2754];
+    u8 pad2754[0x2758 - 0x2754];
+    f32 f2758;              // 0x2758
+    s32 f275C;              // 0x275C
+    u8 pad2760[0x2768 - 0x2760];
     s32 f2768;              // 0x2768
-    u8 pad276C[0x2BB0 - 0x276C];
+    u8 pad276C[0x2770 - 0x276C];
+    u8 f2770[0x20];         // 0x2770
+    u8 pad2790[0x2B74 - 0x2790];
+    s32 f2B74;              // 0x2B74
+    s32 f2B78;              // 0x2B78
+    s32 f2B7C;              // 0x2B7C
+    s32 f2B80;              // 0x2B80
+    s32 f2B84;              // 0x2B84
+    s32 f2B88;              // 0x2B88
+    s32 f2B8C;              // 0x2B8C
+    u8 pad2B90[0x2BB0 - 0x2B90];
     Vec02 v2BB0;            // 0x2BB0
     Vec02 v2BC0;            // 0x2BC0
     void* f2BD0;            // 0x2BD0
     u8 pad2BD4[0x2BD8 - 0x2BD4];
     s32 f2BD8;              // 0x2BD8
-    u8 pad2BDC[0x2BF0 - 0x2BDC];
+    u8 pad2BDC[0x2BE4 - 0x2BDC];
+    void* f2BE4;            // 0x2BE4
+    void* f2BE8;            // 0x2BE8
+    u8 pad2BEC[0x2BF0 - 0x2BEC];
 };
 
 struct C08 : C06 {
@@ -304,7 +385,9 @@ struct C08 : C06 {
     s32 fB14;               // 0xB14
     f32 fB18;               // 0xB18
     s32 fB1C;               // 0xB1C
-    u8 padB20[0xB40 - 0xB20];
+    u8 fB20[4];             // 0xB20
+    f32 fB24;               // 0xB24
+    u8 padB28[0xB40 - 0xB28];
     void* fB40;             // 0xB40
     u8 padB44[0xB48 - 0xB44];
     void* fB48;             // 0xB48
@@ -318,9 +401,9 @@ struct C08 : C06 {
     s32 fB74;               // 0xB74
     s32 fB78;               // 0xB78
     s32 fB7C;               // 0xB7C
-    u8 padB80[0xB84 - 0xB80];
+    s32 fB80;               // 0xB80
     s32 fB84;               // 0xB84
-    u8 padB88[0xB8C - 0xB88];
+    s32 fB88;               // 0xB88
     s32 fB8C;               // 0xB8C
     u8 padB90[0xBA4 - 0xB90];
     s32 fBA4;               // 0xBA4
@@ -352,7 +435,8 @@ struct C09 : C08 {
     s32 fC28;               // 0xC28
     s32 fC2C;               // 0xC2C
     s32 fC30;               // 0xC30
-    u8 padC34[0xCC0 - 0xC34];
+    void* fC34;             // 0xC34
+    u8 fC38[0x88];          // 0xC38
     void* fCC0;             // 0xCC0
     s32 fCC4;               // 0xCC4
     u8 padCC8[0xCD4 - 0xCC8];
@@ -401,7 +485,7 @@ struct C0C : C08 {
     void* fE1C;             // 0xE1C
     s32 fE20;               // 0xE20
     void* fE24;             // 0xE24
-    u8 padE28[0xE2C - 0xE28];
+    s32 fE28;               // 0xE28
     s32 fE2C;               // 0xE2C
     s32 fE30[3];            // 0xE30
     s32 fE3C;               // 0xE3C
@@ -409,7 +493,11 @@ struct C0C : C08 {
 };
 
 struct C0D : C08 {
-    u8 padC10[0xC24 - 0xC10];
+    u8 padC10[0xC14 - 0xC10];
+    s32 fC14;               // 0xC14
+    s32 fC18;               // 0xC18
+    s32 fC1C;               // 0xC1C
+    u8 padC20[0xC24 - 0xC20];
     s32 fC24;               // 0xC24
     u8 padC28[0xC30 - 0xC28];
 };
@@ -431,7 +519,8 @@ struct C0E : C08 {
 
 struct C0F : C08 {
     s32 fC10;               // 0xC10
-    u8 padC14[0xC20 - 0xC14];
+    void* fC14;             // 0xC14
+    u8 padC18[0xC20 - 0xC18];
 };
 
 struct C10 : C08 {
@@ -463,7 +552,8 @@ struct C13 : C08 {
     u8 padC4C[0xC50 - 0xC4C];
     void* fC50;             // 0xC50
     void* fC54;             // 0xC54
-    u8 padC58[0xC60 - 0xC58];
+    u8 padC58[0xC5C - 0xC58];
+    s32 fC5C;               // 0xC5C
     s32 fC60;               // 0xC60
     f32 fC64;               // 0xC64
     s32 fC68;               // 0xC68: the number of fC6C entries (func_001ED090)
@@ -490,36 +580,41 @@ struct C14 : C06 {
     f32 f730;               // 0x730
     u8 pad734[0x738 - 0x734];
     s32 f738;               // 0x738
-    u8 pad73C[0x740 - 0x73C];
+    s32 f73C;               // 0x73C
     void* f740;             // 0x740
     void* f744;             // 0x744
     void* f748;             // 0x748
-    u8 pad74C[0x75C - 0x74C];
+    void* f74C;             // 0x74C
+    void* f750;             // 0x750
+    void* f754;             // 0x754
+    void* f758;             // 0x758
     void* f75C;             // 0x75C
 };
 
 struct C15 : C05 {
-    u8 pad610[0x618 - 0x610];
+    s32 f610;               // 0x610
+    s32 f614;               // 0x614
     f32 f618;               // 0x618
     f32 f61C;               // 0x61C
     f32 f620;               // 0x620
-    u8 pad624[0x628 - 0x624];
+    f32 f624;               // 0x624
     f32 f628;               // 0x628
     u8 pad62C[0x640 - 0x62C];
     void* f640;             // 0x640
     void* f644;             // 0x644
-    u8 pad648[0x64C - 0x648];
+    s32* f648;              // 0x648
     void* f64C;             // 0x64C
     void* f650;             // 0x650
     void* f654;             // 0x654
-    u8 pad658[0x65C - 0x658];
+    void* f658;             // 0x658
     void* f65C;             // 0x65C
     void* f660;             // 0x660
     void* f664;             // 0x664
     s32 f668;               // 0x668
     u8 f66C[0xC];           // 0x66C
     s32 f678;               // 0x678
-    u8 pad67C[0x684 - 0x67C];
+    void* f67C;             // 0x67C
+    void* f680;             // 0x680
     void* f684;             // 0x684
     s32 f688;               // 0x688
     u8 pad68C[0x690 - 0x68C];
@@ -560,7 +655,7 @@ struct C17 : C05 {
     Ent17 f658[6];          // 0x658
     s32 f760;               // 0x760
     s32 f764;               // 0x764
-    u8 pad768[0x7D8 - 0x768];
+    void* f768[28];         // 0x768
     s32 f7D8;               // 0x7D8
     void* f7DC[1];          // 0x7DC
     u8 pad7E0[0x800 - 0x7E0];
@@ -602,24 +697,50 @@ struct C19 : C05 {
     f32 f61C;               // 0x61C
     Vec02 v620;             // 0x620
     u8 f630[0x40];          // 0x630: 0x40 bytes slot 0 copies from D_00275250
-    u8 pad670[0x694 - 0x670];
+    f32 f670;               // 0x670
+    f32 f674;               // 0x674
+    f32 f678;               // 0x678
+    u8 pad67C[0x680 - 0x67C];
+    f32 f680;               // 0x680
+    f32 f684;               // 0x684
+    u8 pad688[0x694 - 0x688];
     f32 f694;               // 0x694
     s32 f698;               // 0x698
     u8 pad69C[0x6A0 - 0x69C];
     s32 f6A0;               // 0x6A0
     u8 pad6A4[0x6B0 - 0x6A4];
     Slot19 f6B0[4];         // 0x6B0
-    u8 pad830[0x850 - 0x830];
+    void* f830;             // 0x830
+    f32 f834;               // 0x834
+    u8 pad838[0x83C - 0x838];
+    f32 f83C;               // 0x83C
+    f32 f840;               // 0x840
+    f32 f844;               // 0x844
+    u8 pad848[0x850 - 0x848];
     f32 f850;               // 0x850
-    u8 pad854[0x864 - 0x854];
+    f32 f854;               // 0x854
+    s32 f858;               // 0x858
+    f32 f85C;               // 0x85C
+    f32 f860;               // 0x860
     f32 f864;               // 0x864
     f32 f868;               // 0x868
-    u8 pad86C[0xB04 - 0x86C];
+    u8 pad86C[0x870 - 0x86C];
+    s32 f870;               // 0x870
+    u8 f874[0x280];         // 0x874
+    void* fAF4;             // 0xAF4
+    void* fAF8;             // 0xAF8
+    u8 padAFC[0xB00 - 0xAFC];
+    s32 fB00;               // 0xB00
     s32 fB04;               // 0xB04
-    u8 padB08[0xB30 - 0xB08];
+    s32 fB08;               // 0xB08
+    s32 fB0C;               // 0xB0C
+    u8 padB10[0xB14 - 0xB10];
+    void* fB14;             // 0xB14
+    u8 padB18[0xB30 - 0xB18];
     s32 fB30;               // 0xB30
     s32 fB34;               // 0xB34
-    u8 padB38[0xB44 - 0xB38];
+    f32 fB38;               // 0xB38
+    u8 padB3C[0xB44 - 0xB3C];
     void* fB44;             // 0xB44
     void* fB48;             // 0xB48
     u8 padB4C[0xB78 - 0xB4C];
@@ -637,11 +758,12 @@ struct C19 : C05 {
 
 struct C1A : C19 {
     s32 fBB0;               // 0xBB0
-    u8 padBB4[0xBB8 - 0xBB4];
+    f32 fBB4;               // 0xBB4
     void* fBB8;             // 0xBB8
     void* fBBC;             // 0xBBC
     void* fBC0;             // 0xBC0
-    u8 padBC4[0xBCC - 0xBC4];
+    u8 padBC4[0xBC8 - 0xBC4];
+    void* fBC8;             // 0xBC8
     void* fBCC;             // 0xBCC
     void* fBD0;             // 0xBD0
     u8 padBD4[0xBF0 - 0xBD4];
@@ -729,7 +851,9 @@ struct C1D : C05 {
     f32 f68C;               // 0x68C
     s32 f690;               // 0x690
     s32 f694;               // 0x694
-    u8 pad698[0x71C - 0x698];
+    s32 f698;               // 0x698
+    s32 f69C[1];            // 0x69C
+    u8 pad6A0[0x71C - 0x6A0];
     s32 f71C;               // 0x71C
     void* f720[16];         // 0x720
 };

@@ -20,10 +20,13 @@ struct Msg62 {
 // message names the id at 0x2DC.
 struct C62 : C02 {
     s32 id2D0;              // 0x2D0: -1 for none
-    u8 pad2D4[0x2DC - 0x2D4];
+    f32 f2D4;               // 0x2D4
+    u8 pad2D8[0x2DC - 0x2D8];
     s32 id2DC;              // 0x2DC
     s32 id2E0;              // 0x2E0: -1 for none
-    u8 pad2E4[0x330 - 0x2E4];
+    s32 f2E4;               // 0x2E4
+    u8 f2E8[1];             // 0x2E8
+    u8 pad2E9[0x330 - 0x2E9];
 };
 
 typedef char check_C62[sizeof(C62) == 0x330 ? 1 : -1];

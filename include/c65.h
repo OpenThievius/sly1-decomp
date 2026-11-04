@@ -29,17 +29,22 @@ struct C65 : C02 {
     s32 count2DC;           // 0x2DC: number of steps (written by func_00150570)
     void* steps2E0;         // 0x2E0: the steps (written by func_00150570)
     s32 step2E4;            // 0x2E4: the step being played
-    u8 pad2E8[0x2F8 - 0x2E8];
+    s32 f2E8;               // 0x2E8
+    s32 f2EC;               // 0x2EC
+    u8 pad2F0[0x2F8 - 0x2F0];
     u32 value2F8;           // 0x2F8: cleared when message 6 brings it back (func_001512A8)
-    u8 pad2FC[0x300 - 0x2FC];
+    f32 f2FC;               // 0x2FC
     s32 second300;          // 0x300: -1 at load
     void* target304;        // 0x304: object found for id 30C, else the default at 0x308
     u8 fallback308[4];      // 0x308
     s32 first30C;           // 0x30C: -1 at load; then set from the id at +0x08
-    u8 pad310[0x324 - 0x310];
+    s32 f310;               // 0x310
+    void* f314[4];          // 0x314
     s32 f324;               // 0x324
     s32 f328;               // 0x328
-    u8 pad32C[0x340 - 0x32C];
+    s32 f32C;               // 0x32C
+    s32 f330;               // 0x330
+    u8 pad334[0x340 - 0x334];
 };
 
 typedef char check_C65[sizeof(C65) == 0x340 ? 1 : -1];

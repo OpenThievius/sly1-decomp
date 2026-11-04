@@ -106,7 +106,7 @@ struct C23 : C21 {
     s32 count768;           // 0x768
     void* items76C[8];      // 0x76C
     s32 f78C;               // 0x78C
-    u8 pad790[0x7B0 - 0x790];
+    void* f790[8];          // 0x790
     s32 f7B0;               // 0x7B0
     u8 pad7B4[0x7C0 - 0x7B4];
 };

@@ -136,9 +136,12 @@ void func_001ABE20(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
 struct T217D_2E0 : T217D {
-    u8 pad260[0x26C - 0x260];
+    u8 pad260[0x264 - 0x260];
+    s32 f264;               // 0x264
+    s32 f268;               // 0x268
     u8 letter;                  // 0x26C: the glyph to show, from 'r'
-    u8 pad26D[0x274 - 0x26D];
+    u8 pad26D[0x270 - 0x26D];
+    s32 f270;               // 0x270
     f32 fill;                   // 0x274: the filled part of the bar
     f32 fillTarget;             // 0x278
     f32 changedAt;              // 0x27C: the clock when the value last changed, 0 for never
@@ -255,7 +258,8 @@ struct T217D_440 : T217D {
     u8 pad2B0[0x2F0 - 0x2B0];
     f32 charsPerSecond;         // 0x2F0: 15.0 (func_001310F0), the typing speed (func_00136530)
     u32 highlight;              // 0x2F4: 0x80FFFFFF (func_001310F0)
-    u8 pad2F8[0x2FC - 0x2F8];
+    u8 f2F8;                // 0x2F8
+    u8 pad2F9[0x2FC - 0x2F9];
     s32 f2FC;                   // 0x2FC: set by func_001365A0
     f32 value;                  // 0x300: 0 to 1 (func_001365A8: a percent / 100)
     f32 stickX;                 // 0x304: the smoothed pad direction (func_00136040)

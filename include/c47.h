@@ -27,7 +27,8 @@ struct Entry47 {
 };
 
 struct List47 {
-    u8 pad00[0x3C];
+    u8 pad0[0x38];
+    u32 f38;                // 0x38
     s32 count;              // 0x3C
     Entry47* items;         // 0x40
 };

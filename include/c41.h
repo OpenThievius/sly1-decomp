@@ -28,13 +28,13 @@ struct C41 : C03 {
     void* f5AC[19];         // 0x5AC: those of ids 0x279..0x287
     void* f5F8;             // 0x5F8: the record func_00159478 sets up (slot 10); its first word is the
                             //        object func_0019BE08 sends a message to
-    u8 pad5FC[0x600 - 0x5FC];
+    void* f5FC;             // 0x5FC
     Pk8_41 q600;            // 0x600: kept by slot 9 (func_0019B250)
     f32 f608;               // 0x608: 0.5 at set-up
     f32 f60C;               // 0x60C: 1.0 at set-up
     u8 pad610[0x650 - 0x610];
     Vec02 v650;             // 0x650: v140, copied by slot 16
-    u8 pad660[0x664 - 0x660];
+    void* f660;             // 0x660
     s32 f664;               // 0x664: -1 at set-up
     u8 pad668[0x670 - 0x668];
 };
