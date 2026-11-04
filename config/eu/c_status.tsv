@@ -3390,6 +3390,7 @@ func_001F57E0	func_001F67E0	match
 func_001F5840	func_001F6840	match	
 func_001F5868	func_001F6868	match	
 func_001F5930	func_001F6930	match	
+func_001F5CD0	func_001F6CD0	match	
 func_001F66F8	func_001F76F8	match	
 func_001F6708	func_001F7708	match	
 func_001F6880	-	absent	
