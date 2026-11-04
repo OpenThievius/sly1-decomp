@@ -2050,3 +2050,9 @@ void func_00196810(Self_196810* self, Self_196810* src)
         e = e->next;
     }
 }
+
+// _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.
+void func_001963B8(void)
+{
+    func_00196330((void*)1, 0xFFFF);
+}

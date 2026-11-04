@@ -1858,3 +1858,10 @@ f32 D_002744AC = 0.7f;
 Ptr_2744B0 D_002744B0 = { (s8*)(D_0024CFA0 + 0x18), 0 };
 Q3_1AC0E8 D_002743C0 = { 0.5f, 0.25f, 0.2f, 0.0f };
 extern Node_001AE178* D_00269988;
+
+void func_001AEA70(s32 a, s32 b);
+// _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.
+void func_001AEC90(void)
+{
+    func_001AEA70(1, 0xFFFF);
+}

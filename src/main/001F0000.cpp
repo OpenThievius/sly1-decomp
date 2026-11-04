@@ -1795,3 +1795,9 @@ s32 D_00276250 = -1;
 s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
 Cfg_1F2688 D_00276620;
 extern const char D_0024E808[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";
+
+// _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.
+void func_001F2738(void)
+{
+    func_001F2688(1, 0xFFFF);
+}

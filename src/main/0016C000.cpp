@@ -1589,3 +1589,9 @@ void func_0016F238(Actor_16F238* self, s32 value)
     Clock_16F238* clock = (Clock_16F238*)&D_00261858;
     D_00262E00.time = clock->time + 1.0f;
 }
+
+// _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.
+void func_0016C450(void)
+{
+    func_0016C360(1, 0xFFFF);
+}
