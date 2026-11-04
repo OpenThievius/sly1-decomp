@@ -111,6 +111,37 @@ screen. Three object classes read records: lists of steps (0x150570) and of even
 1,355,898 of the 1,355,975 unlisted sectors; what remains is a 64-sector VAG at 454,000
 and 13 empty sectors.
 
+### Textures
+
+The texture tables (0x1B3040) say what the texture data at the end of the level holds and
+how the GS draws it. Each table is counted by a u16:
+
+| Table | Format | Reader |
+| --- | --- | --- |
+| CLUTs | 12 bytes: u32 load class; u16 colour count; u16 GS blocks; u32 offset in the data | 0x1B2B50 |
+| images | 20 bytes: u16 width, height; u32 load class; u8 PSM; u8 buffer width (TBW); u16 GS blocks; u32 byte size; u32 offset in the data | 0x1B2CA8 |
+| shaders | a u16 count of animated ones, then per shader 20 bytes (u8 type 0–10, u8 flags, s16 id, two RGBA colours, u32 load class, s16, u8, u8 set count), a texture animation (0x1B4A10) and its texture sets: u16, u16 clamp bits, u8 image count, u8 CLUT count, then u16 image and CLUT indices | 0x1B3040, 0x1B2F00 |
+| fonts | 16 bytes: u16 image, u16 CLUT, three u8, u8 slot, f32 scale, u16 glyph count; per glyph u16 character, x, y, width | 0x15D8A8 |
+
+Images are 4-bit (PSMT4, 11,003), 8-bit (PSMT8, 2,570) or 32-bit (41), of powers of two
+from 8 to 1,024 texels, their pixels in GS rows, low nibble first. A CLUT holds RGBA
+colours with alpha up to 0x80; up to 16 colours serve a 4-bit image, more an 8-bit one,
+stored in the GS's CSM1 order. The code builds each TEX0 from these fields (TBW, PSM,
+TW and TH as log2, CBP and TBP0 from its own GS memory allocator, CPSM 32-bit, CLD 1),
+and a shader's pass ORs the image's TEX0 with its CLUT's. Type-0 shaders, most of them,
+draw one image three times with three CLUTs, the last two added.
+
+The load class chooses when a texture goes to GS memory: 0x10000000 at level load, from
+block 0x1E00; zone bits 0–27 on request (0x1B3488); five groups and 0x20000000 into a
+swap area from 0x1400; 0x80000000 the fonts. The texture data holds every CLUT, then every
+image, in table order at multiples of 16, ending exactly at its size; it stays in memory
+and is sent in place, each texture as BITBLTBUF, TRXPOS, TRXREG and TRXDIR writes, an
+IMAGE GIFtag and a DMA reference to its bytes.
+
+A standalone parser written from this reads the texture tables of the 46 US levels
+(215,790 reads) exactly as retail's loader does, read for read; every index lies within
+its CLUT's colours, every offset and size within the data, every glyph within its image.
+
 ### Objects
 
 The objects are a tree. A list is an s16 count, then per object an s16 class (an index
