@@ -15,13 +15,8 @@ void func_0014C838(List_14C838* self, s32 value)
     self->items[i].value = value;
 }
 
-struct Obj_14DA68 { u8 pad0[0x8]; void* p8; s32 cnt; u8 pad1[4]; f32* p14; };
-
 s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
-
-
-struct Obj_14DD28 { void** vtbl; u8 pad0[4]; s32 a8; s32 cnt; f32* p10; f32* p14; void* p18; };
 typedef void (*Fn_14DD28)(void* self);
 
 s32 func_00137B90(void* src);
@@ -29,23 +24,11 @@ f32 func_00137DF8(void* src);
 void func_00137E70(void* src, void* dst);
 void* func_0018D500(s32 size);
 
-
-
-struct Obj_14DF98 { u8 pad0[0x14]; f32* p14; };
-
 s32 func_0014DA38(void* self, f32* a, f32* b);
-
-
-
-struct Obj_14E2A0 { u8 pad0[0x8]; s32 a8; s32 cnt; f32* p10; f32* p14; void* p18; };
 
 void func_0014D680(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
 
-
-
-struct Obj_14E910 { u8 pad0[0x14]; f32* p14; void* p18; void* p1C; void* p20; };
 f32 func_00130C20(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y);
-
 
 void func_001B7A98(C03* self);
 s32 func_001526D0(void* a, void* b);
@@ -217,7 +200,6 @@ void func_0014F850(C23* self)
     }
 }
 
-
 s32 func_001B8A08(void* self, void* obj);
 
 s32 func_0014FBE0(C23* self, C03* obj)
@@ -229,8 +211,6 @@ s32 func_0014FBE0(C23* self, C03* obj)
     }
     return func_001B8A08(self, obj);
 }
-
-
 
 typedef void (*VFn2_0014FC38)(void* self, s32 arg);
 
@@ -262,8 +242,6 @@ void func_0014FC38(C23* self)
     func_0013D278(self);
 }
 
-
-
 void func_001B6568(void* h, s32* out);
 void func_001B64D8(void* h, s32 code);
 
@@ -292,69 +270,18 @@ void func_0014FCE8(C23* self, s32 code)
     func_001B64D8(self->p740, code);
 }
 
-struct Span_0014DD00 { u8 pad0[0x10]; f32* p; };
-
-
-
-struct Frame_0014DE08 { u8 pad0[8]; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; };
-
 void func_0014D280(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-
-
-struct Frame_0014DE40 { u8 pad0[8]; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; };
-
 void func_0014D280(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
-
-
-
-struct __attribute__((aligned(16))) Quad_0014DE78 { s32 v[4]; };
-struct __attribute__((packed)) Pack4_0014DE78 { s32 v; };
-struct Table_0014DE78 { u8 pad0[8]; s32 f08; s32 f0C; s32 f10; s32 f14; s32 f18; };
 
 void func_00188700(void* a, void* b, void* c, f32 w);
 void func_001DD3E0(void* a, void* b, void* c, s32 d, s32 e);
 
-
-
-struct Obj_14E510 {
-    u8 pad0[0x10];
-    f32* p10;
-    u8 pad1[4];
-    u8* p18;
-    u8* p1C;
-    u8* p20;
-    u8 pad2[0xC];
-    u8 buf30[0x140];
-    u8 pad3[0x1C0 - 0x170];
-    s32 idx1C0;
-};
-
 void func_00130B48(void* a, void* b, void* c, void* d, f32 x, f32 y, f32 z, s32 n, void* buf);
 f32 func_0014D0A8(s32 n, void* buf, void* other);
 
-
-
-struct Obj_14E6A8 { void** vtbl; };
 typedef f32 (*Fn_14E6A8)(void* self);
 typedef void (*Fn2_14E6A8)(void* self, f32 t, s32 a1, void* a2);
-
-
-
-struct Obj_14EA48 {
-    u8 pad0[0xC];
-    s32 n;
-    f32* p10;
-    f32* p14;
-    u8* p18;
-    u8* p1C;
-    u8* p20;
-};
-
-
-
-
-
 
 void func_001B7968(C03* self);
 
@@ -364,26 +291,9 @@ void func_0014EE40(C46* self)
     func_0014F110(self, -1);
 }
 
-struct __attribute__((aligned(16))) Quad_14D938 { s32 w[4]; };
-
-void func_001891C0(void* self, void* arg, Quad_14D938* out);
 void func_00188700(void* a, void* b, void* c, f32 w);
 
-
-
-
-
-struct Obj_14E068 { u8 pad0[0xC]; s32 f0C; u8 pad1[4]; void* f14; void* f18; };
-
-
-
-
-struct Obj_14E090 { u8 pad0[0xC]; s32 f0C; f32* f10; f32* f14; void* f18; };
-struct Frac_14E090 { s32 idx; f32 t; };
-
 void func_0014D3A8(void* a0, void* a1, s32 count, void* a3, void* a4, void* a5, s32* outIdx, f32* outT);
-
-
 
 void func_0013DDB8(void* self);
 
@@ -393,22 +303,11 @@ void func_0014F740(C23* self)
     self->f6C0 = -1;
 }
 
-
-
-struct Obj_14DA38 { u8 pad0[0x8]; void* p8; s32 cnt; f32* p10; };
-
 s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
-
-
-
-struct Obj_14E170 { u8 pad0[0x8]; s32 a8; s32 cnt; f32* p10; f32* p14; void* p18; };
 
 s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 void func_0014D680(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
 
-
-
-struct Obj_14E3D0 { void** vtbl; u8 pad0[4]; s32 a8; s32 cnt; f32* p10; f32* p14; void* p18; void* p1C; void* p20; };
 typedef void (*Fn_14E3D0)(void* self);
 
 s32 func_00137B90(void* src);
@@ -416,19 +315,6 @@ f32 func_00137DF8(void* src);
 void func_00137E70(void* src, void* dst);
 void* func_0018D500(s32 size);
 void func_0014E500(void* self);
-
-
-
-struct Obj_14DB40 { u8 pad[0xC]; u32 index; u32 base; };
-
-
-struct Obj_14DB58 { u8 pad[0xC]; u32 index; u32 pad10; u32 base; };
-
-
-struct Obj_14E500 { u8 pad[0x1C0]; s32 value; };
-
-
-
 
 void func_00182D50(void*);
 void func_00152470(void*,void*);
@@ -496,19 +382,7 @@ void func_0014F770(C23* self, s32 kind, void* msg)
     }
 }
 
-struct Obj_14E000 { u8 pad0[0x10]; f32* p10; };
-
-s32 func_0014DA68(Obj_14E000* self, f32* a1, f32* a2);
-
-
-
-struct Obj_14E990 { u8 pad0[0x10]; f32* p10; u8 pad1[0x170 - 0x14]; f32 buf170[4]; };
-
-s32 func_0014DA68(Obj_14E990* self, f32* a1, f32* a2);
-void func_0014E510(Obj_14E990* self, s32 i);
 s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi);
-
-
 
 struct __attribute__((aligned(16))) Quad_14F920 { s32 a, b, c, d; };
 struct Elem_14F920 { void** vtbl; };
@@ -697,11 +571,8 @@ void func_0014CDC8(Mgr_14CDC8* self, Arg_14CDC8* arg)
     self->f454 = self->f454 - 1;
 }
 
-struct Obj_14ED98 { void** vtbl; };
 typedef f32 (*Slot6_14ED98)(void* self);
 typedef void (*Slot11_14ED98)(void* self, s32 p1, f32 x, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
-
-
 
 struct Sub_14F110;
 
@@ -747,16 +618,12 @@ void func_0014C5E8(Cfg_14C5E8* self)
     func_00151E20((Cfg_14C5E8*)D_00261EF0, 1.0f - c * 0.8f);
 }
 
-struct Obj_14D9A8 { void* vt; s32 kind; };
-
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_002176D0[];
 extern const Fn_Table D_00217708[];
 
 void* func_0018D5C0(u32 n);
-
-
 
 // NEAR: the calls and branches match; the store of 1 into the inner object comes before the
 // float load of D_0026185C in retail, ours schedules the float load first (5 instructions).
@@ -794,10 +661,6 @@ void func_0014FDA8(C23* self, s32* state)
 }
 
 // NEAR: the tail stores differ in order and register: retail does sw f6C8, then lui v1 / li v0,1 / lwc1 v1, we do lui v0 before the sw and use v0 for the address.
-
-
-
-
 
 extern u8 D_00248D30[];
 
@@ -840,8 +703,6 @@ s32 func_0014FEC0(C23* self) {
 struct Tab_14D1A0;
 
 f32 func_0014D138(Tab_14D1A0* count, f32* table, void* wrap, f32 x);
-
-
 
 void func_001B93F8(C03* self);
 void func_0014F270(C46* self, f32 f);
@@ -1006,24 +867,14 @@ void func_0014CBA8(Obj_14CBA8* self)
 }
 
 struct Obj_14DBD0 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
-struct Ctx_14DBD0 { Obj_14DBD0* self; s32 a1; s32 a2; s32 pad; };
-struct Out_14DBD0 { f32 f; s32 p1; s32 p2; s32 p3; };
 
 void func_0014DB70(void);
 struct Step_14DBD0;
-void func_001EB168(Step_14DBD0* fn, f32 f12, f32 f13, f32 f14, f32 f15, Ctx_14DBD0* ctx, Out_14DBD0* out, s32 a3);
-
-
 
 struct Obj_14EC70 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
-struct Ctx_14EC70 { Obj_14EC70* self; s32 a1; s32 a2; s32 pad; };
-struct Out_14EC70 { f32 f; s32 p1; s32 p2; s32 p3; };
 
 void func_0014DA98(void);
 struct Step_14EC70;
-void func_001EB168(Step_14EC70* fn, f32 f12, f32 f13, f32 f14, f32 f15, Ctx_14EC70* ctx, Out_14EC70* out, s32 a3);
-
-
 
 extern const Params68 D_00249F00;
 extern const f32 D_00249FB0 = 3.4028235e+38f;
@@ -1054,15 +905,8 @@ struct VT_14DB78 {
     void (*f4)(Src_14DB78* self, Vec_14DB78* out, s32 flag);
 };
 struct Src_14DB78 { VT_14DB78* vt; };
-struct Obj_14DB78 {
-    Src_14DB78* src;
-    Vec_14DB78* a;
-    Vec_14DB78* b;
-};
 
 void func_00186320(Vec_14DB78* p, Vec_14DB78* a, Vec_14DB78* b, f32* o1, f32* o2);
-
-
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 // Defined in src/main/file_14D0A8.cpp.

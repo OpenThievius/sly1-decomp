@@ -6,11 +6,6 @@
 #include "c8a.h"
 #include "c6c.h"
 
-struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
-void func_00168AF8(State_193288*);
-void func_00193318(State_193288*);
-
-
 struct Obj_192498 {
     void** vtbl;
 };
@@ -235,7 +230,6 @@ s32 func_00192490(void)
     return 0;
 }
 
-
 typedef void (*Init_001924C8)(void* self, void* table, s32 zero, f32 scale);
 
 // A node made by func_0019EA78: a hook table, a float at 0x1C and a quad at 0xC0.
@@ -249,7 +243,6 @@ struct Node_001924C8 {
     u8 pad2[0x134 - 0xD0];
     void* p134;
 };
-
 
 void* func_0019EA78(s32 kind, s32 zero);
 void func_0019F8E8(void* node, void* owner);
@@ -484,9 +477,6 @@ void func_001921E8(C05* self)
     func_00192990(self, 0);
 }
 
-struct Mgr_1922E8 { u8 pad0[0x224]; s32 f224; };
-
-
 void func_00145088(void* mgr, s32 a1, void* a2, C05* self, s32 a4);
 void func_001451F0(void* mgr, s32 a1, s32 a2, s32 a3, C05* self, s32 a5);
 
@@ -575,28 +565,11 @@ extern u8* D_00275710;
 
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-
-
 extern u8 D_0026A210[];
 
 void func_001AA268(void* self);
 s32 func_0015C188(s32 k);
 void* func_0015C1C0(s32 k);
-
-struct Obj_193E58 {
-    u8 pad0[0x210];
-    void** f210;
-    u8 pad1[0x4C];
-    s32 f260;
-    u8 pad2[0x4];
-    s32 arr268[3];
-    u8 pad3[0x8];
-    s32 f27C;
-    u8 pad4[0x4];
-    f32 f284;
-};
-
-
 
 struct Obj_191AA8 {
     u8 pad0[0x54];
@@ -637,12 +610,6 @@ s32 func_001931F0(void)
 struct S_190EA8 { u8 pad[4]; s32 value; };
 s32 func_00190EA8(S_190EA8* p, s32 x) { return (x - p->value) >> 5; }
 
-struct S_193270 { s32 a,b,c,d,e; };
-
-
-struct S_193300 { s32 a,b,c,d,e; };
-
-
 void func_001830D8(void* self);
 
 void func_00192020(C70* self)
@@ -652,14 +619,6 @@ void func_00192020(C70* self)
     func_001830D8(self);
     self->keep = tmp;
 }
-
-struct __attribute__((packed)) Word_193210 { u32 value; };
-struct Obj_193210 {
-    s32 f00; s32 f04; s32 f08; s32 f0C; s32 f10;
-    Word_193210 f14; Word_193210 f18; Word_193210 f1C; Word_193210 f20;
-};
-
-
 
 extern u8 D_00269BA8[];
 
@@ -699,8 +658,6 @@ void func_00191FA0(C70* self)
 }
 
 extern s32 D_0026A068[];
-
-
 
 // was NEAR: GCC folds the final return 1/return 0 into sltiu/xori; retail keeps li v0,16 + bne and a separate move v0,zero tail
 
@@ -949,7 +906,6 @@ void* func_00192620(void)
     return r;
 }
 
-
 extern u8 D_00248D00[];
 extern f32 D_0024B650;
 void func_00182C18(C01* self);
@@ -993,42 +949,12 @@ void func_00192230(C05* self, s32 kind, void* msg)
     }
 }
 
-struct Obj_193EE8 {
-    void** vt;
-};
-struct Self_193EE8 {
-    u8 pad[0x288];
-    s32 f288;
-};
-struct Dev_193EE8 {
-    u8 pad[0x18];
-    union {
-        struct {
-            u32 x : 12;
-        } a;
-        s64 q18;
-    };
-};
-
-extern Obj_193EE8 D_0026EC70;
-extern Obj_193EE8 D_0026C6C8;
-extern Obj_193EE8 D_0026C948;
-extern Obj_193EE8 D_0026CBC8;
-extern Obj_193EE8 D_0026CE48;
-extern Obj_193EE8 D_00274118;
-extern Dev_193EE8 D_00262490;
 extern f32 D_0026A700;
 extern f32 D_0026A704;
 extern f32 D_0026A708;
 extern f32 D_0026A70C;
 
 void func_001BE998(void);
-void func_001AA8B8(Obj_193EE8* self, f32 v);
-void func_001AA788(Obj_193EE8* self, f32 v);
-
-typedef void (*VFn_193EE8)(Obj_193EE8*);
-
-
 
 // NEAR: the frame, calls and branch shape match; the saved registers are swapped (retail keeps the input base in $s2 and the moving "last" pointer in $s3, ours the other way round), which changes 18 lines.
 
@@ -1087,20 +1013,7 @@ void func_00191128(void* a0, s32* a1, s32* a2)
     func_0018D6F0();
 }
 
-struct Obj_1935B0 {
-    u8 pad0[0xC];
-    f32 fC;
-    u8 pad1[0x19D8 - 0x10];
-    s32 f19D8;
-    s32 f19DC;
-};
-struct Dst_1935B0 { char c; };
-
-void* func_00160B28(Obj_1935B0* p);
 s32 func_00160148(s32 v);
-s32 func_001E1FD0(Dst_1935B0* dst, const char* fmt, ...);
-
-
 
 void func_001C8C08(C0E* self);
 void func_001C8418(C0E* self, void* p);
@@ -1254,33 +1167,7 @@ void func_00192B58(C05* self)
     }
 }
 
-struct __attribute__((packed)) Col_193318 { u8 r, g, b, a; };
-struct Obj_193318 {
-    u8 pad0[4];
-    s32 h;
-    s32 w;
-    s32 x;
-    s32 cnt;
-    u8 r, g, b, pad1;
-    Col_193318 c0;
-    Col_193318 c1;
-    Col_193318 c2;
-};
-struct Frame_193318 { u8 bytes[0x30]; };
-struct Buf_193318 { u8 bytes[0x400]; Frame_193318 f; };
-
-void func_001611B8(Frame_193318* f);
-void func_001529C8(Frame_193318* f, s32 n, Buf_193318* b);
-void func_00152B38(Frame_193318* f);
 f32 func_001EAF28(f32 x);
-void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, Frame_193318* e, f32 x, f32 y, f32 z, f32 w);
-void func_00161200(Frame_193318* f);
-void func_00152D30(Frame_193318* f);
-void func_00152D70(Frame_193318* f);
-void func_001529E0(Frame_193318* f, s32 a, s32 b);
-void func_00168A48(Buf_193318* b);
-
-
 
 f32 D_00269BC0[3] = { 1000.0f, 10.0f, 1.0f };
 Entry_269BD0 D_00269BD0 = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1.0f, 2.0f, 0, 0, 0, 1, 0, 0 };

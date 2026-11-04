@@ -3,8 +3,6 @@
 #include "c05.h"
 #include "fpu.h"
 
-struct Quad_001891C0 { s32 a, b, c, d; } __attribute__((aligned(16)));
-
 extern void func_001C7CB8(void);
 extern void func_001C6F48(void*);
 extern void func_001C7140(void*);
@@ -12,7 +10,6 @@ extern void func_00124DF8(void*, s32, void*);
 extern void* func_00189438(s32, void*, void*);
 extern void func_001EA480(f32, f32);
 extern void func_001884C0(void*);
-extern void func_00188B48(Quad_001891C0*, Quad_001891C0*, void*);
 extern void func_00188668(void*, void*, void*);
 extern s32 func_001B6598(s32, s32*);
 extern s32 func_001C96B8(void*);
@@ -170,7 +167,6 @@ void func_0018A388(C0C* self)
 	func_001C6F48(self);
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
-
 
 void func_001C7140(void* self);
 void func_00124DF8(void* self, s32 n, void* data);

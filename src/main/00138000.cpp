@@ -559,8 +559,6 @@ struct Frame_13B610 {
     ~Frame_13B610() { D_0027B314 = (ListFrame*)prev; }
 };
 
-
-
 void func_00124A48(void* self);
 s32 func_001300E8(void* node, s32 kind);
 void func_00182ED8(s32 a);
@@ -599,10 +597,6 @@ void func_00139D28(void* a);
 void func_00152600(u8* a, void* b);
 void func_00152470(u8* a, void* b);
 void func_001243E0(void* self);
-
-struct Node_139EC8 {
-    s32 next;
-};
 
 struct Frame_139EC8 {
     s32 list;
@@ -697,7 +691,6 @@ void func_00138F28(Self_138F28* self, Obj_138F28* obj)
         n = n->next;
     }
 }
-
 
 void func_001B7968(C03* self);
 

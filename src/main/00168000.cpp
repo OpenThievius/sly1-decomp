@@ -464,7 +464,6 @@ struct Pool_1694F8 { s32 f0; s32 f4; s32 f8; s32 fC; };
 struct Link_1694F8 { Src_1694F8* src; Pool_1694F8* dst; Link_1694F8* next; };
 struct Node_1694F8 { s32 flags; u8 pad4[4]; s32 idx; u8 pad0C[8]; Link_1694F8* links; };
 
-
 void func_001694A0(void* p);
 void* func_0018D5C0(u32 n);
 
@@ -533,7 +532,6 @@ store:
 struct Pool_169608 { s32 f0; s32 f4; s32 f8; s32 fC; };
 struct Link_169608 { s32 src; Pool_169608* dst; Link_169608* next; };
 struct Node_169608 { u8 pad0[0x14]; Link_169608* links; };
-
 
 void func_001694A0(void* p);
 void* func_0018D5C0(u32 n);
@@ -802,8 +800,6 @@ s32 func_001693A8(void* self)
     func_0018D6F0();
     return f.out;
 }
-
-struct Ent_169718 { s32 a; s32 b; s32 c; s32 d; };
 
 extern s32 D_002626D0;
 
@@ -1175,7 +1171,6 @@ void func_00168E78(Ctx_168E78* self, u32 a1){
  self->bits.f37 = a1;
  self->bits.f20 = (self->n4 <= 0x10) ? 0x14 : 0x13;
  self->bits.r51=0; self->bits.r55=0; self->bits.r56=0; self->bits.f61=1;}
-
 
 void* func_001300E8(void* node, s32 flags);
 
@@ -1954,7 +1949,6 @@ void func_0016B860(T217D_12E0* self)
 }
 
 struct Span_169780 { s32 a; s32 b; s32 c; };
-struct Q_169780 { u64 lo; u64 hi; };
 struct Frame_169780 { u8 pad0[0xC]; s32 cursor; u8 pad10[0x20]; };
 struct EntA_169780 { u32 flags; u8 pad4[2]; u16 h6; s32 f8; s32 fC; s32 f10; s32 f14; };
 struct EntB_169780 { s32 f0; u32 flags; u8 pad8[2]; u16 hA; u8 padC[4]; s32 f10; s32 f14; u8 pad18[8]; };

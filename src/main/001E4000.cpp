@@ -4165,7 +4165,6 @@ extern const u8 D_0026A0F8[];
 extern const u8 D_0026A100[];
 extern const u8 D_0026A108[];
 extern const u8 D_0026A110[];
-struct Ent_26A138 { s32 n; const void* p; };
 void func_00199850();
 struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
 struct Sjis_274588 { u16 code; u16 id; };
@@ -5060,21 +5059,8 @@ u8* D_0026F800 = 0;
 s32 D_0026FA64 = 0;
 
 // Globals typed by worker dz01, from retail's bytes and their readers.
-struct Quad_261280 {
-    f32 c0, c1, c2, c3;
-} __attribute__((aligned(16)));
 
 // The span func_00130F48 fills: head, then len/halfw/lo/mid/hi/p/q, padded to 16 by the quad's alignment.
-struct Span_261280 {
-    Quad_261280 head;
-    f32 len;
-    f32 halfw;
-    s32 lo;
-    s32 mid;
-    s32 hi;
-    f32 p;
-    f32 q;
-};
 
 // size: sizeof(Span_261280) == 0x30; func_00130F48 fills it (n = 0x18) and func_00131000 reads it
 // size: same Span type, 0x30, filled by func_00130F48 at 0x131418 and read by func_00131000
@@ -5121,8 +5107,6 @@ struct Obj_262C70 {
     void* fBC;
     s32 fC0;
 };
-struct Ent_264670 { void* f0; s32 f4; s32 f8; s16 fC; s16 fE; };
-struct Slot_264A70 { u8 pad0[0xC]; f32 fC; u8 pad10[0x1A5C - 0x10]; };
 struct Slot_269990 { s32 f00; s32 f04; u8 pad08[8]; s32 f10; };
 
 // size: func_00168D68 sets three words (a, b, c) of it
@@ -5211,7 +5195,6 @@ struct Obj_26EC70 {
 Obj_26EC70 D_0026EC70 = {0};
 
 // Globals typed by worker dz201, from retail's bytes and their readers.
-struct Obj_261990 { void* f0; u8 pad04[12]; };
 struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
 
 // 528 bytes, only its address is passed
@@ -5272,7 +5255,6 @@ struct Obj_26F388 { s32 head; u8 pad[532]; };
 struct Obj_26FA68 { void* head; u8 pad[36]; };
 struct Obj_2701B8 { s32 head; u8 pad[8]; };
 
-
 // object passed by address; size to next label
 u8 D_0026E760[664] = {0};
 
@@ -5300,7 +5282,6 @@ Obj_26FA68 D_0026FA68 = {};
 // object with vtable; size to next label
 u8 D_0026FA90[608] = {0};
 
-
 // object; size to next label
 u8 D_0026FD00[616] = {0};
 
@@ -5309,7 +5290,6 @@ u8 D_0026FF68[592] = {0};
 
 // word read at +0; size to next label
 Obj_2701B8 D_002701B8 = {};
-
 
 // object; size to next label
 u8 D_002701F8[592] = {0};

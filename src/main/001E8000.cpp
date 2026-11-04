@@ -876,7 +876,6 @@ s32 func_001E8D58(C0B* self)
 struct __attribute__((aligned(16))) Chunk_1EB550 { u8 b[0x80]; };
 struct Blk_1EB550 { u8 pad0[0x580]; Chunk_1EB550 c; u8 pad1[4]; s32 f604; };
 
-
 void func_001EB550(Blk_1EB550* a0)
 {
     a0->c = ((Blk_1EB550*)D_00262E10)->c;
@@ -885,7 +884,6 @@ void func_001EB550(Blk_1EB550* a0)
 
 struct Obj_1E96F8 { u8 pad0[4]; s32 f4; f32 f8; u8 pad1[0x24]; s32 f30; };
 struct Vt_1E96F8;
-struct O_1E96F8 { u8 pad0[0x38]; };
 struct Vtbl_1E96F8 { u8 pad[0x38]; void (*f38)(Vt_1E96F8*); void (*f3C)(Vt_1E96F8*); };
 struct Vt_1E96F8 { Vtbl_1E96F8* vt; };
 struct Cam_1E96F8 { u8 pad[0x18]; s32 f18; };
@@ -1326,7 +1324,6 @@ void func_001E9B30(void) {
     }
 }
 
-
 s32 func_001EAA70(s32 a, s32 b)
 {
     if (a == b) {
@@ -1515,7 +1512,6 @@ struct Obj_1E9EE8 {
     u8 pad2[0x1C30 - 0x1B7C];
     List_1E9EE8 c;
 };
-
 
 struct Begin_1E9EE8 {
     static void Of(Iter_1E9EE8* it, List_1E9EE8* list)

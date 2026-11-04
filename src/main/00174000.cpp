@@ -162,11 +162,6 @@ struct Node_177838 {
     u8 b2B4;
 };
 struct Head_177838 { u32 pad0; u32 pad4; u32 flags; };
-struct Hold_177838 {
-    Head_177838* head;
-    u8 pad4[0x14];
-    Node_177838* first;
-};
 struct Q_177838 {
     s32 pad0;
     Node_177838* hold;

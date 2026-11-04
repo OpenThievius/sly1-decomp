@@ -97,17 +97,6 @@ void func_00184968(Obj_184968* self, s32 v)
     }
 }
 
-struct Obj_184D78 {
-    u8 pad0[0x2C8];
-    u64 bits;
-    s32 f2D0;
-    u8 pad1[0x304 - 0x2D4];
-    s32 f304;
-    s32 f308;
-};
-
-
-
 struct __attribute__((packed)) Packed8_184990 { u64 v; };
 
 struct Obj_184990 {
@@ -201,24 +190,7 @@ void func_00184D58(u8* self)
     func_001B4580(self + 736);
 }
 
-struct __attribute__((aligned(16))) Quad_00185358 { s32 a, b, c, d; };
-struct __attribute__((packed)) Pk8_00185358 { u64 v; };
-
-struct __attribute__((aligned(16))) Obj_00185358 {
-    u8 pad0[32]; s32 f20; u8 pad1[28]; f32 f40; s32 f44; s32 f48; u8 pad2[4];
-    Quad_00185358 q50; Pk8_00185358 p60; u8 pad3[8]; Quad_00185358 q70; Pk8_00185358 p80;
-};
-
-struct __attribute__((aligned(16))) Vec4_264770 { f32 x, y, z, w; };
-struct Vec2_2647A0 { f32 a, b; };
-extern Vec4_264770 D_00264770;
-extern Vec4_264770 D_00264780;
-extern Vec4_264770 D_00264790;
-extern Vec2_2647A0 D_002647A0;
-
 void func_00121338(void* self);
-
-
 
 struct IndexPair_185C18 { s32 a; s32 b; };
 struct Weight_264840 { f32 a; f32 b; };
@@ -335,20 +307,12 @@ void func_001F6C20(s32 unused);
 void func_00202A80(void* dma, void* addr);
 void func_00202C38(void* dma, s32 b, s32 c);
 
-
-
 extern u8 D_00261F18[];
 extern u8 D_00212110[];
 
 void func_001F6C20(s32 a);
 void func_00202A80(void* a, void* b);
 void func_00202C38(void* a, s32 b, s32 c);
-
-struct Flags_185AC8 {
-    s32 flags;
-};
-
-
 
 struct Self_186450 {
     u8 pad0[0x3AC];
@@ -393,21 +357,11 @@ s32 func_00186450(s32 unused, Self_186450* self, u8* ctx, s32 cap, Out_186450* o
     return total;
 }
 
-struct VT_275710 { u8 pad[0x54]; void (*fn)(void* self, f32 x); };
-struct Obj_275710 { VT_275710* vt; };
-struct Cfg_275F80 { s32 a; s32 mode; };
-struct Flag_269A00 { s32 a; s32 on; };
-struct Tm_261858 { s32 a; s32 b; f32 dt; };
-
 extern s32 D_00264838;
-extern Flag_269A00 D_00269A00;
-extern Cfg_275F80 D_00275F80;
 extern s32 D_00275AF0;
 extern u8 D_00262C70[];
 extern u8 D_00275BC0[];
-extern Tm_261858 D_00261858;
 extern u8 D_00264A40[];
-extern Obj_275710* D_00275710;
 extern void* D_00261990;
 extern s32 D_002622CC;
 
@@ -424,15 +378,10 @@ void func_001607D0(f32 dt);
 void func_00144270(void* p);
 void func_0015E9F0(void);
 void func_00142F10(void* p);
-void func_0019D6C0(Obj_275710* o, void* a);
 void func_001E9668(void* p);
-void func_0019DC98(Obj_275710* o, void* a);
 void func_001E9648(void* p);
 void func_0015EC68(void);
 
-
-
-struct Frame_185B38 { s32 w[28]; };
 typedef void (*Fn_185B38)(void);
 
 // An entry of a table of functions defined at the end of this file.
@@ -446,32 +395,7 @@ void func_00193288(void* self, s32 value);
 void func_00193300(void* p);
 void func_00191EB0(s32 value);
 
-
-
-struct Obj_185468 {
-    u8 pad_00[0x1C];
-    s32 f1C;
-    u8 pad_20[0x4];
-    s32 f24;
-};
-
 s32 func_001925F0(void);
-
-
-
-struct __attribute__((aligned(16))) Quad_001853F0 { s32 w[4]; };
-struct Node_001853F0 {
-    u8 pad0[0x1C];
-    s32 f1C;
-    u8 pad1[0x04];
-    void* p24;
-    u8 pad2[0x08];
-    Quad_001853F0 q30;
-};
-
-extern Quad_001853F0 D_00248D30;
-
-
 
 extern const char D_0024B248[16];
 extern const u8* D_002647A8[6];
@@ -487,8 +411,6 @@ s32 func_001F9820();
 s32 func_00203828(s32 a);
 s32 func_00140D68(s32 a);
 s32 func_001F9A90(void* buf, s32 a, s32 b);
-
-
 
 struct Obj_184A70 {
     u8 pad0[0x338];

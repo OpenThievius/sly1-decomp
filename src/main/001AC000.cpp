@@ -71,21 +71,6 @@ void func_001AE130(T217D_4C0* self, s32 force)
     func_001AA998(self, force);
 }
 
-struct Queue_1AF078 {
-    u8 pad_0[0x5A0];
-    u32 count;
-    u32 items[4];
-};
-
-
-
-struct Obj_001AECE0 {
-    u8 pad0[0x550];
-    s32 f550;
-};
-
-
-
 struct Node_129CA8 {
     u8 pad0[0x18];
     union {
@@ -94,29 +79,10 @@ struct Node_129CA8 {
     } f18;
 };
 
-struct Obj_001AEF68 {
-    u8 pad0[0x5c8];
-    Node_129CA8* f5c8;
-    f32 f5cc;
-};
-
-Node_129CA8* func_00129CA8(Obj_001AEF68* self);
-
-
-
 struct Sink_001AEFA0 { u8 pad0[0x18]; f32 value; };
-struct Mixer_001AEFA0 { u8 pad0[0x5C8]; Sink_001AEFA0* sink; f32 pending; };
 struct Global_001AEFA0 { u8 pad0[0x2220]; s32 state; };
 
 extern Global_001AEFA0* D_00262E10;
-
-void func_001B93F8(Mixer_001AEFA0* self);
-
-
-
-struct Stack_001AF000 { u8 pad0[0x564]; u32 count; s32 items[4]; };
-
-
 
 typedef void* (*VFn_1AC5C0)(void* self, f32 sx, f32 sy);
 struct VTab_1AC5C0 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1AC5C0 fn; };
@@ -157,27 +123,10 @@ void func_001AC888(T217D_380* self)
     }
 }
 
-struct Queue_1AF028 { u8 pad[0x578]; s32 count; void* items[4]; };
-
-
-
-struct Queue_1AF050 { u8 pad[0x58C]; s32 count; void* items[4]; };
-
-
-
-struct Unit_1AF0A0 { u8 pad[0xB04]; f32 scale; };
-
 void func_001AECB0(void* self);
-
-
-
-struct Entry_2744B8 { s32 a; s32 b; s32 c; };
-extern Entry_2744B8 D_002744B8[2];
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
-
-
 
 s32 func_001F6738(const char* a, const char* b);
 
@@ -305,12 +254,8 @@ void func_001AE7F8(T217D_600* self, s32 flag)
     func_001AA998(self, flag);
 }
 
-struct Obj_1AEE50 { u8 pad0[0x578]; s32 count578; s32 items57C[9]; s32 count5A0; s32 items5A4[9]; };
-
 s32 func_001833F0(void* key, s32 item);
 s32 func_001300E8(void* key, s32 item);
-
-
 
 typedef void* (*VFn_1ACDA0)(void* self, f32 sx, f32 sy);
 struct VTab_1ACDA0 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1ACDA0 fn; };
@@ -339,30 +284,10 @@ extern u8* D_00275710;
 extern f32 D_00261858[];
 extern s32 D_002744D0;
 
-struct Node_1AF508 {
-    u8 pad0[0x558];
-    s32 x558;
-    u8 pad1[0xAF0 - 0x55C];
-    Node_1AF508* next;
-    u8 pad2[0xAFC - 0xAF4];
-    f32 fAFC;
-};
-
-
-
 extern s32 D_002744D0;
 void func_0015FCD8(void* self, void* p);
 void func_00152470(void* list, void* item);
 void func_00152600(void* list, void* item);
-
-struct Obj_1AF7A8 {
-    u8 pad0[0x14];
-    u8* p14;
-    u8 pad1[0xAF8 - 0x18];
-    s32 flag_AF8;
-};
-
-
 
 // NEAR: register and load order of D_00262C84 vs D_00269988 (retail keeps the x load in v1, ours in a0; xori placed differently)
 
@@ -447,34 +372,10 @@ void func_001ADF28(T217D_4C0* self)
     func_001ADFF0(self);
 }
 
-struct Obj_001AED78 {
-    u8 pad0[0x564];
-    s32 f564;
-    s32 f568[9];
-    s32 f58c;
-    s32 f590[9];
-    s32 f5b4;
-};
-
-s32 func_001AEE50(Obj_001AED78* self, s32 value);
 s32 func_001833F0(s32 value, s32 item);
 s32 func_001300E8(s32 value, s32 item);
 
-
-
-struct Obj_1AEF00 {
-    u8 pad_0[0x564];
-    s32 f564;
-    s32 f568;
-    u8 pad_56C[0x58C - 0x56C];
-    s32 f58C;
-    u8 pad_590[0x5B4 - 0x590];
-    s32 f5B4;
-};
-
 s32 func_001833F0(void* a, s32 b);
-
-
 
 typedef void (*VFn_1AF3B8)(void* self);
 
@@ -489,24 +390,8 @@ struct Group_1AF3B8 {
     Entry_1AF3B8 items[5];
 };
 
-struct Obj_1AF3B8 {
-    VFn_1AF3B8* vtbl;
-    u8 pad0[0x14 - 4];
-    void* f14;
-    u8 pad1[0x560 - 0x18];
-    void* f560;
-    u8 pad2[0x5D4 - 0x564];
-    s32 groupCount;
-    u8 pad3[0x5E0 - 0x5D8];
-    Group_1AF3B8 groups[1];
-    u8 pad4[0xB00 - 0x630];
-    s32 f_B00;
-};
-
 void func_00124A48(void* self);
 void* func_00183058(void* a, void* b, void* c);
-
-
 
 extern f32 D_00261868;
 extern f32 D_0027240C;
@@ -590,29 +475,6 @@ s32 func_001AC9E0(T217D_380* self, T217D* other)
 
 s32 func_001AEE50(void* self, void* key);
 s32 func_00160D10();
-struct Obj_1AFAF8 {
-    u8 pad0[0x50];
-    s32 x50;
-    u8 pad1[0x2CC - 0x54];
-    u32 x2CC;
-    u8 pad2[0x538 - 0x2D0];
-    u64 f538;
-    u8 pad3[0x2220 - 0x540];
-    s32 x2220;
-    u8 pad4[0x239C - 0x2224];
-    s32 x239C;
-};
-
-
-struct Obj_1AECB0 {
-    u8 pad_00[0x554];
-    s32 f554;
-    s32 f558;
-};
-
-void func_001B7968(Obj_1AECB0* self);
-
-
 
 extern f32 D_0026185C[];
 
@@ -758,8 +620,6 @@ extern s32 D_002744D0;
 extern f32 D_0026185C[];
 void func_001AEFA0(Mixer_001AF5C8* self, f32 a);
 void func_001AF508();
-
-
 
 struct Info_1ACEE0 {
     u32 flags;
@@ -991,15 +851,11 @@ s8 func_001AEA08(void)
 }
 
 struct Sub_1AECE8;
-struct Obj_1AECE8 { u8 pad[0x550]; Sub_1AECE8* f550; u8 pad2[4]; s32 state; f32 f55C; };
 void func_00123AB0(Sub_1AECE8* object, s32 mode);
-void func_001837E0(Obj_1AECE8* self, s32 a, s32 b, s32 c);
 extern f32 D_0026185C[];
-
 
 struct Ctx_1ADB00;
 extern u8 D_00262280[];
-
 
 void func_001613C0(Ctx_1ADB00* p, s32 a, s32 b, u64 c);
 void func_00161708(Ctx_1ADB00* p, u64 a, u64 b);

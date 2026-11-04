@@ -28,33 +28,8 @@ void func_001D27C0(Obj_D27C0* a0, s32 a1)
     }
 }
 
-struct Ref_D3500;
-
-struct Node_D3500 {
-    Ref_D3500* ref;
-    u8 pad0[0xC - 4];
-    s32 flags;
-};
-
-struct Ref_D3500 {
-    s32* vtbl;
-    u8 pad0[0x18 - 4];
-    Ref_D3500* f18;
-    u8 pad1[0x50 - 0x1C];
-    s32 f50;
-};
-
-struct Self_D3500 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x554 - 0x18];
-    s32 f554;
-};
-
 extern s32 D_00262E10;
 
-void* func_001BC320(Self_D3500* a);
-void func_001D32D8(Self_D3500* a, Ref_D3500* b, s32 c);
 void func_001861E8(void* a, s32 b);
 
 struct Thing_1D1200 {

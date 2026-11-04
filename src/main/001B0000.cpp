@@ -3,25 +3,7 @@
 #include "c6e.h"
 #include "list_iter.h"
 
-struct Obj_1B04A0 {
-    u8 pad_0[0x5D8];
-    s32 f5D8;
-};
-
-void func_001AECB0(Obj_1B04A0* o);
-
-
-
 typedef void (*VFn_1B0F70)(void* self, s32 arg);
-
-struct Obj_1B0F70 {
-    VFn_1B0F70* vtbl;
-    u8 pad_4[0x554 - 4];
-    s32 f554;
-    s32 f558;
-};
-
-
 
 struct Obj_1B1DA8 {
     s32 pad_0;
@@ -230,72 +212,11 @@ void func_00124A48(void* self);
 
 typedef void (*VFn_1B11A0)(void* self, s32 arg);
 
-struct Vtbl_1B11A0 {
-    u8 pad0[0x144];
-    VFn_1B11A0 fn144;
-};
-
-struct Item_1B11A0 {
-    u8 pad0[0x8];
-    s32 f08;
-    u8 pad1[0x14 - 0xC];
-    s32 f14;
-};
-
-struct Obj_1B11A0 {
-    Vtbl_1B11A0* vt;
-    u8 pad0[0x278];
-    s32 f27C;
-    Item_1B11A0** f280;
-    u8 pad1[0x560 - 0x284];
-    s32 f560;
-    u8 pad2[0x610 - 0x564];
-    Item_1B11A0* f610;
-};
-
-
-
 typedef void (*VFn_1B15D0)(void* self, s32 arg);
-
-struct Vtbl_1B15D0 {
-    u8 pad0[0x144];
-    VFn_1B15D0 fn144;
-};
-
-struct Obj_1B15D0 {
-    Vtbl_1B15D0* vt;
-    u8 pad0[0x554 - 0x4];
-    s32 f554;
-};
-
-
 
 extern f32 D_0026185C;
 
 typedef void (*VFn_1B1608)(void* self, s32 arg);
-
-struct Vtbl_1B1608 {
-    u8 pad0[0x144];
-    VFn_1B1608 fn144;
-};
-
-struct Rec_1B1608 {
-    u8 pad0[0x550];
-    s32 f550;
-    f32 f554;
-};
-
-struct Obj_1B1608 {
-    Vtbl_1B1608* vt;
-    u8 pad0[0x550 - 0x4];
-    Rec_1B1608* f550;
-    s32 f554;
-    s32 f558;
-    u8 pad1[0x5C0 - 0x55C];
-    s32 f5C0;
-};
-
-
 
 extern s32 D_002626D0;
 extern u8 D_0027DC20[];
@@ -381,27 +302,7 @@ void func_001B1D70(Pair_1B1D70* p, f32 v)
 
 typedef void (*VFn_1B00E8)(void* self, s32 arg);
 
-struct Obj_1B00E8 { VFn_1B00E8* vtbl; u8 pad_4[0x554 - 4]; s32 f554; s32 f558; };
-
-
-
-struct Obj_1B1158 {
-    u8 pad_0[0x5D0];
-    s32 f5D0;
-    s32 f5D4;
-    u8 pad_5D8[0x5E0 - 0x5D8];
-    s32 f5E0;
-    s32 f5E4;
-    u8 pad_5E8[0x5F0 - 0x5E8];
-    s32 f5F0;
-    s32 f5F4;
-    u8 pad_5F8[0x600 - 0x5F8];
-    s32 f600;
-};
-
 void func_001AECB0(void* self);
-
-
 
 struct Entry_1B2988 { u8 pad[0x18]; u64 tail; };
 struct Cell_1B2988 { u8 pad[0x10]; u64 value; };
@@ -419,22 +320,6 @@ u64 func_001B2988(Table_1B2988* t, s32 i, s32 j)
 }
 
 typedef void (*VFn_1B0160)(void* self, s32 arg);
-
-struct Obj_1B0160 {
-    VFn_1B0160* vtbl;
-    u8 pad_4[0x554 - 4];
-    s32 f554;
-    s32 f558;
-};
-
-
-
-struct Obj_1B0470 {
-    u8 pad_0[0xB08];
-    f32 fB08;
-};
-
-
 
 struct Obj_1B1FB0 {
     u8 pad_0[0x40];
@@ -466,20 +351,7 @@ void func_001B1FE0(Obj_1B1FE0* o, f32 v)
     func_001B1BF0(o);
 }
 
-struct S_1B0488 { u8 pad[0xB08]; f32 value; };
-
-
-
-
 typedef void (*VFn_1B0EA8)(void* self, s32 arg);
-
-struct Obj_1B0EA8 {
-    VFn_1B0EA8* vtbl;
-    u8 pad_4[0x554 - 4];
-    s32 f554;
-};
-
-
 
 s32 func_00137B90(void* src);
 T2176* func_0014D9A8(s32 kind);
@@ -496,62 +368,15 @@ void func_001B2840(C6E* self, void* obj)
     func_0011EC40(self, obj);
 }
 
-struct Item_2744D8 { u32 flags, id, off8; };
-extern Item_2744D8 D_002744D8[2];
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 
 typedef void (*VFn_1B04D0)(void* self, s32 v);
 
-struct Sub_1B04D0 {
-    u8 pad0[0x44];
-    s32 x44;
-};
-
-struct Obj_1B04D0 {
-    VFn_1B04D0* vtbl;
-    u8 pad0[0x14 - 4];
-    u8* p14;
-    u8 pad1[0x200 - 0x18];
-    Sub_1B04D0* p200;
-    u8 pad2[0x538 - 0x204];
-    u64 f538;
-    u8 pad3[0x560 - 0x540];
-    s32 x560;
-    u8 pad4[0x5D0 - 0x564];
-    Obj_1B04D0* x5D0;
-    s32 x5D4;
-};
-
-
-
 typedef void (*VFn_1B0EE0)(void* self, s32 arg);
 
-struct Vtbl_1B0EE0 {
-    u8 pad0[0x144];
-    VFn_1B0EE0 fn144;
-};
-
-struct Rec_1B0EE0 {
-    u8 pad0[0x550];
-    s32 f550;
-    f32 f554;
-};
-
-struct Obj_1B0EE0 {
-    Vtbl_1B0EE0* vt;
-    u8 pad0[0x550 - 0x4];
-    Rec_1B0EE0* f550;
-    s32 f554;
-    s32 f558;
-    u8 pad1[0x5C0 - 0x55C];
-    s32 f5C0;
-};
-
 extern f32 D_0026185C;
-
-
 
 struct Dma_1B2640 {
     u8 pad0[0xC];
@@ -654,10 +479,6 @@ void func_001B2790(Owner_1B2790* self, void* a1, s32 max, s32* outCount, Node_1B
 
 typedef void (*VFn_1B0120)(void* self, s32 arg);
 
-struct Obj_1B0120 { VFn_1B0120* vtbl; u8 pad_4[0x554 - 4]; s32 f554; s32 f558; };
-
-
-
 struct Obj_1B2090 {
     u8 kind_0;
     u8 pad_1[0xB];
@@ -693,7 +514,6 @@ struct Obj_1B2F00 {
     u32* ptr10;
 };
 
-
 void func_00137A60(void* self, s32 size, void* obj);
 u32* func_0018D500(s32 bytes);
 
@@ -720,41 +540,12 @@ void func_001B2F00(void* self, Obj_1B2F00* o)
     }
 }
 
-struct Obj_1B0BE0 {
-    u8 pad_0[0x50];
-    s32 f50;
-    u8 pad_54[0x2CC - 0x54];
-    u32 f2CC;
-    u8 pad_2D0[0x538 - 0x2D0];
-    u64 f538;
-};
-
 s32 func_001925F0(void);
 s32 func_001AEE50(void* self, void* other);
-
-
 
 // Matched by a switch on f558 (cases 1 and 5).
 
 typedef void (*VFn_1B1698)(void* self, s32 arg);
-
-struct Vtbl_1B1698 {
-    u8 pad0[0x144];
-    VFn_1B1698 fn144;
-};
-
-struct Obj_1B1698 {
-    Vtbl_1B1698* vt;
-    u8 pad0[0x554 - 0x4];
-    s32 f554;
-    s32 f558;
-    u8 pad1[0x608 - 0x55C];
-    f32 f608;
-    u8 pad2[0x618 - 0x60C];
-    s32 f618;
-};
-
-
 
 struct Obj_001B2010 {
     u8 pad0[4];
@@ -832,145 +623,21 @@ void func_001B28A8(C6E* self, C01* other)
     func_00182F78(self, other);
 }
 
-struct Ent_1B01B0 {
-    u8 pad0[0x24];
-    s32 count;
-    s32 e[1][2];
-};
-struct Obj_1B01B0;
-struct VT_1B01B0 {
-    void* pad[7];
-    void (*slot1C)(Obj_1B01B0*);
-};
-struct Obj_1B01B0 {
-    VT_1B01B0* vt;
-    u8 pad4[0x550];
-    s32 f554;
-    s32 state;
-};
-
 extern s32 D_002744D0;
-s32 func_001BFCD8(Obj_1B01B0* a0, s32 a1, Obj_1B01B0* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_001BF788(s32 a, s32 n);
-void func_001AECE8(Obj_1B01B0* self, s32 s);
 void func_00155F90(s32 p);
-
-
-
-struct Self_1B0FC0 {
-    u8 pad0[0x558];
-    s32 state;
-    u8 pad55C[0x5C0 - 0x55C];
-    s32 f5C0;
-};
-void func_001B1070(Self_1B0FC0* self, s32 v);
-void func_001AECE8(Self_1B0FC0* self, s32 s);
-
-
-
-struct Obj_1B1710 {
-    u8 pad0[0x558];
-    s32 state;
-    f32 f55C;
-    u8 pad1[0x5C0 - 0x560];
-    s32 f5C0;
-    void* f5C4;
-    u8 pad2[0x614 - 0x5C8];
-    f32 f614;
-    s32 f618;
-};
 
 struct Tgt_1B1710;
 void func_001BF788(Tgt_1B1710* t, s32 n);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_001AECE8(Obj_1B1710* self, s32 n);
-
-
-
-struct Obj_001B0578;
-struct VT_001B0578 {
-    u8 pad0[0x130];
-    void (*f130)(Obj_001B0578* self, s32* st);
-    u8 pad1[0x10];
-    void (*f144)(Obj_001B0578* self, s32 st);
-};
-struct Obj_001B0578 {
-    VT_001B0578* vt;
-    u8 pad0[0x550];
-    s32 i554; s32 i558; f32 f55C; u8 pad1[0x58];
-    f32 f5B8, f5BC; s32 i5C0; u8 pad2[0x10];
-    s32 i5D4, i5D8; f32 f5DC, f5E0, f5E4, f5E8;
-};
-struct Dev_001B0578;
-struct DevVT_001B0578 {
-    u8 pad[0x13C];
-    s32 (*f13C)(Dev_001B0578* d, s32 n);
-    s32 (*f140)(Dev_001B0578* d, void* b);
-};
-struct Dev_001B0578 { DevVT_001B0578* vt; };
-extern Dev_001B0578* D_00262E10;
-extern f32 D_0026185C;
-
-void func_001AEFA0(Obj_001B0578* self);
-void func_001AEF68(Obj_001B0578* self);
-void func_001B1070(Obj_001B0578* self, s32 n);
-void func_001D7098(void* buf, s32 n, Obj_001B0578* self);
-
-
-
-struct Obj_1B1238;
-struct VT_1B1238 {
-    u8 pad0[0x130];
-    void (*f130)(Obj_1B1238* self, s32* state);
-    u8 pad1[0x144 - 0x134];
-    void (*f144)(Obj_1B1238* self, s32 state);
-};
-struct Obj_1B1238 {
-    VT_1B1238* vt;
-    u8 pad0[0x554 - 4];
-    s32 f554;
-    s32 f558;
-    f32 f55c;
-    u8 pad1[0x5B8 - 0x560];
-    f32 f5b8;
-    f32 f5bc;
-    s32 f5c0;
-    u8 pad2[0x608 - 0x5C4];
-    f32 f608;
-    f32 f60c;
-};
 
 extern f32 D_0026185C;
-void func_001AEFA0(Obj_1B1238* self);
-void func_001B1898(Obj_1B1238* self);
 
-
+extern f32 D_0026185C;
 
 // NEAR: float regs: case 0 wants t=$f4 zero=$f2 m=$f3; ours t=$f3 zero=$f4 m=$f2 (8 lines differ); delay-slot load of m fixed via local m
 
-struct Cfg_1B0360 {
-    f32 pad0;
-    f32 f4;
-    f32 f8;
-};
-
-struct Obj_1B0360 {
-    u8 pad0[0x554];
-    s32 i554;
-    s32 mode;
-    f32 f55C;
-    u8 pad560[0x5B8 - 0x560];
-    f32 f5B8;
-    f32 f5BC;
-    u8 pad5C0[0xAEC - 0x5C0];
-    f32 fAEC;
-    u8 padAF0[0xB04 - 0xAF0];
-    f32 fB04;
-};
-
 extern f32 D_0026185C;
-
-
 
 // EXACT (us)
 
@@ -1448,55 +1115,12 @@ void func_001B2DF8(Ctx_1B2DF8* self)
     D_0026227C = func_0015C1C0(0);
 }
 
-struct Anim_001B1898 {
-    s32 first;
-    s32 last;
-    f32 duration;
-    s32 mode;
-};
-
-struct Obj_001B1898 {
-    u8 pad0[0x558];
-    s32 state;
-    f32 startTime;
-    u8 pad560[0x5D0 - 0x560];
-    Anim_001B1898 animB;
-    Anim_001B1898 animC;
-    Anim_001B1898 animA;
-    s32 blinkFrame;
-    f32 blinkRate;
-    u8 pad608[0x610 - 0x608];
-    s32 target;
-    f32 blinkStart;
-};
-
 extern f32 D_0026185C;
 void func_001B46E0(s32 a, s32 frame);
-
-
-
-struct Node_1B1070 {
-    u8 pad0[0x44];
-    s32 f44;
-};
 
 struct Snd_1B1070;
 enum Kind_1B1070 { KIND_1B1070_1B = 0x1B };
 
-struct Obj_1B1070 {
-    u8 pad0[0x200];
-    Node_1B1070* f200;
-    u8 pad1[0x5C4 - 0x204];
-    Snd_1B1070* f5C4;
-    u8 pad2[0x5D8 - 0x5C8];
-    s32 f5D8;
-    f32 f5DC;
-};
-
-struct Clk_1B1070 { f32 t; };
-
 void func_001BF788(Snd_1B1070* p, s32 n);
 void func_001BFCD8(Kind_1B1070 a0, Snd_1B1070** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-
-
 

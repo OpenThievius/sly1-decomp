@@ -2,24 +2,12 @@
 #include "common.h"
 #include "list_iter.h"
 
-struct Node_1363D0 { u8 pad0[0x324]; void* child; };
-
 void func_001AA8C8(void* self);
 s32 func_00150790(void* obj, s32 mode);
 
-
-
 struct Child_136EF8 { u8 pad0[0x2D0]; s32 kind; };
-struct Owner_136EF8 { u8 pad0[0x324]; Child_136EF8* child; };
 
-void func_001356C0(Owner_136EF8* self, s32 mode);
 void func_00150790(Child_136EF8* obj, s32 mode);
-
-
-
-struct Obj_137268 { u8 pad[0x18]; void* field18; };
-
-
 
 struct Pair_1373B0 { void* first; s32 second; };
 
@@ -43,23 +31,9 @@ void func_00137B60(Ring_137B60* self, s32 n)
     self->size -= delta;
 }
 
-struct Entry_1357F0 {
-    void* obj;
-    f32 key;
-};
-
 s32 func_00182FC8(void* obj);
 
-
-
-struct Entry_135858 {
-    void* obj;
-    f32 key;
-};
-
 void func_00199C10(void* obj, s32* out);
-
-
 
 struct Chan_1373D0 {
     s32 a00;
@@ -88,33 +62,9 @@ s32 func_00137480(Chan_1373D0* self, s32 n)
 
 struct SlotEntry_135E78 { void* handle; s32 extra; };
 
-struct SlotBank_135E78 {
-    u8 pad0[0x328];
-    s32 state;
-    u8 pad1[0x4];
-    u8 blockA[0x10];
-    u8 blockB[0x10];
-    s32 countA;
-    s32 count;
-    u8 pad2[0x4];
-    SlotEntry_135E78 entries[1];
-};
-
 void func_0019EBE8(void* handle);
 void func_001A1DF0(void* handle, s32 mode);
 void func_001F5C0C(void* block, s32 value, s32 size);
-
-
-
-struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
-
-s32 func_001356C0(Owner_136FA8* self, s32 mode);
-
-
-
-struct Pair_137228 { f32 x; f32 y; };
-
-
 
 struct Reader_137D10 { u8 pad0[0x18]; u8* cur_18; s32 remaining_1C; };
 
@@ -134,14 +84,6 @@ s32 func_00137D10(Reader_137D10* self)
     func_00137A60(self, 2, &tmp);
     return tmp;
 }
-
-struct Vec2_137238 { u8 pad0[0x8]; f32 x; f32 y; };
-
-
-
-struct __attribute__((packed)) Unaligned_137248 { u32 value; };
-
-
 
 struct Reader_137DF8 {
     u8 pad0[0x18];
@@ -174,19 +116,11 @@ void func_00137E70(void* src, void* dst)
 }
 
 // Newly matched US functions from the small-function wave.
-struct Obj_1365A0 { u8 pad[0x2FC]; s32 f2FC; };
-struct Obj_137260 { u8 pad[0x14]; s32 f14; };
 extern void func_00136FE8(s32, s32);
 extern void func_001373D0(void*);
 extern void func_0018D778(void*);
 struct Obj_137398 { u8 pad0[4]; s32 state; u8 pad8[0x10]; s32 f18; s32 f1C; };
 extern void func_00137A60(void*, s32, void*);
-
-
-
-
-
-
 
 void func_001372E0(void* self, s32 flags)
 {
@@ -212,10 +146,6 @@ struct State_001365A8 { u8 pad[0x300]; f32 value;
         value = x;
     }
 };
-
-
-struct State_00136EC8 { u8 pad[0x304]; f32 x; f32 y; };
-
 
 struct State_00137820 { s32 w[13]; s32 maximum(s32 a, s32 b) { return a < b ? b : a; } };
 void func_001377C0(void* self);
@@ -308,22 +238,10 @@ s32 func_00137D78(Reader_137D10* self)
     return value;
 }
 
-struct Obj_136530 {
-    u8 pad0[4];
-    s32 handle;
-    s8 flag;
-    u8 pad1[0x268 - 9];
-    f32 f268;
-    u8 pad2[0x2F0 - 0x26C];
-    f32 scale;
-};
-
 extern f32 D_0026185C;
 
 void func_0015DB28(void* out, void* p, s32 handle);
 s32 func_0015DF58(void* self);
-
-
 
 void func_00137A60(void* self, s32 size, void* obj);
 
@@ -345,21 +263,6 @@ void func_00137F08(void* self, u8* p)
 
 extern f32 D_00261858[];
 
-struct Scratch_00136408 {
-    u8 bytes[0xB0];
-};
-
-struct Entry_00136408 {
-    u8 pad0[4];
-    s32 f04;
-    u8 name08[0x258];
-    s32 f260;
-    u8 pad264[4];
-    f32 f268;
-    s32 f26C;
-    s32 list270[16];
-};
-
 s32 func_001E2100(const char* s);
 void func_001E2138(void* dst, const char* src);
 void func_0015C8B8(s32 a, f32 x, f32 y);
@@ -368,8 +271,6 @@ void func_0015E068(void* buf, f32 x);
 void func_0015C900(s32 v);
 void func_0015DB80(void* buf);
 s32 func_0015DBE0(void* buf);
-
-
 
 struct Chan_001373D0 {
     s32 a00;
@@ -472,46 +373,15 @@ s32 func_00137328(Ring_00137328* r, s32 a1, s32 a2)
 
 typedef void (*VFn_1356C0)(void* self);
 
-struct __attribute__((packed)) Tail_1356C0 { u8 pad0[0x464]; s32 v; };
-struct Global_1356C0 {
-    VFn_1356C0* vtbl;
-    u8 pad0[0x464 - 4];
-};
-
-struct Obj_1356C0 { u8 pad0[0x260]; s32 state; f32 timer; };
-
-extern Global_1356C0 D_0026F138;
 extern f32 D_0026185C;
 
-void func_00131140(Obj_1356C0* self);
 void func_001BFCD8(s32 a, s32 b, s32 c, s32 d, f32 g, f32 h, f32 i, f32 j, f32 k, s32 e, s32 f);
-
-
 
 extern u8 D_00275710[];
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
 
-struct Self_135F48 {
-    u8 pad000[0x328];
-    s32 f328;
-};
-
-struct Ctx_135F48 {
-    u8 pad000[0x1D44];
-    s32 f1D44;
-    u8 pad1D48[0x0C];
-    s32 f1D54;
-};
-
-struct Flag_135F48 { s32 v; };
-
-void func_00160D30(Flag_135F48* p);
 s32 func_00160D10(void);
-void func_00135E78(Self_135F48* self, s32 state, s32 flag);
-void func_001358D0(Self_135F48* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
-
-
 
 // NEAR: control flow and the calls match; the compiler picks s0 for self and s1 for n (retail: s1, s0),
 // and keeps the loaded count in $a2 where retail uses $v1.
@@ -574,65 +444,15 @@ void func_00137A60(Stream_137A60* self, s32 remaining, Dst_137A60* dst)
     } while (remaining > 0);
 }
 
-struct Obj_1365F0 { u8 pad0[0x260]; s32 state; };
-
-f32 func_001AA898(Obj_1365F0* self);
-
-
-
-struct S_136648 { u8 pad[0x260]; s32 mode; };
-extern f32 func_001AA8A8(S_136648* s);
-
-
-
-struct Tri_136040 { u64 a __attribute__((packed)); u32 b; };
 typedef u64 Quad_136040 __attribute__((mode(TI)));
-struct __attribute__((aligned(16))) Vec_136040 { f32 x, y, z, w; };
-struct Pad_136040 {
-    u8 pad_00[0x40];
-    f32 f40;
-    f32 f44;
-    f32 f48;
-    u8 pad_4C[0x74 - 0x4C];
-    f32 f74;
-    u8 pad_78[4];
-    f32 f7C;
-};
-struct Self_136040 {
-    u8 pad_000[0x260];
-    s32 f260;
-    u8 pad_264[0x304 - 0x264];
-    f32 f304;
-    f32 f308;
-    u8 pad_30C[8];
-    f32 f314;
-};
-struct Glob_136040 {
-    u8 pad[0x19EC];
-    u32 flags;
-};
 
-extern const Tri_136040 D_00249D00;
-extern const Tri_136040 D_00249D10;
-extern Glob_136040* D_002623C0;
-
-Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, Tri_136040* c, s32 d, f32 f12);
 f32 func_001EAFE0(f32 x, f32 y);
-void func_00135F48(Self_136040* self, Pad_136040* p);
-
-
 
 struct __attribute__((aligned(16))) Vec_135E30 { s32 a, b, c, d; };
-struct Obj_135E30 { char pad[0x140]; Vec_135E30 v; };
-
-
 
 struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
-struct Obj_135E48 { char pad[0x140]; Vec_135E48 v; };
 
 void func_001A1F40(Vec_135E48* v, s32 mode);
-
-
 
 struct Obj_137290 { s32 f0; s32 f4; s32 f8; s32 fC; u8 pad10[8]; s32 f18; s32 f1C; s32 f20; s32 f24; s32 f28; s32 f2C; s32 f30; };
 Obj_137290* func_00137290(Obj_137290* self, s32 a1, s32 a2, s32 a3)
@@ -667,10 +487,7 @@ void func_001377C0(Obj_1377C0* self)
 struct Item_135550;
 struct List_135550 { u8* head; u8 pad4[4]; s32 offset; };
 struct Iter_135550 { List_135550* list; u8* link; s32 offset; Iter_135550* saved; };
-struct Group_135550 { u8 pad0[0x6C]; List_135550 list; };
-struct Obj_135550 { u8 pad0[0x250]; s32 f250; };
 struct Host_135550;
-
 
 struct Next_135550 {
     static Item_135550* Of(Iter_135550* it)
@@ -692,11 +509,7 @@ struct Begin_135550 {
     }
 };
 
-Group_135550* func_0015A418(Host_135550* host, s32 a1, s32 a2, void* ctx);
 void func_0012F6B0(Item_135550* item, f32 x);
-void func_001AA998(Obj_135550* self, s32 value);
-
-
 
 struct Obj_136238;
 struct VT_136238 { u8 pad0[0x40]; void (*f40)(Obj_136238*, s32); };
@@ -710,22 +523,17 @@ struct Obj_136238 {
     s32 f328;
     s32 f32C;
 };
-struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
-struct In_136238 { s32 a; };
 
 extern u8 D_00275710[];
 
 void func_001BEA50(void);
 void func_001BEA28(void);
-void func_00160D30(In_136238* p);
 s32 func_00160D10(void);
 void func_00135E78(Obj_136238* self, s32 state, s32 flag);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 void func_00192190(void* p);
 
 struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
-
-
 
 struct Dec_1378A0 {
     u8 pad0[0x18];
@@ -800,30 +608,9 @@ void func_001378A0(Dec_1378A0* d)
     d->f28 = flags;
 }
 
-struct Obj_135228
-{
-    u8 pad0[0x260];
-    s32 f260;
-    u8 pad1[0x330 - 0x264];
-    s32 f330[4];
-    f32 f340[4];
-};
-
-struct Q_135228
-{
-    u8 pad[4];
-};
-
-
 void func_00160D30(u32* out);
-void func_00134B48(Obj_135228* self, Q_135228* q);
 f32 func_00205210(f32 x);
 f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
-void func_001613C0(Q_135228* q, s32 a, s32 b, u64 c);
-void func_00161458(Q_135228* q, u32 v);
-void func_001615F0(Q_135228* q, s32 a, s32 b, s32 c, s32 d);
-
-
 
 struct Strm_137490 {
     s32 flags;      // 0x00

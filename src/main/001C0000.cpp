@@ -3,11 +3,6 @@
 #include "c05.h"
 #include "list_iter.h"
 
-
-struct Obj_1C29E8 { u8 pad[8]; s32 f8; s32 fC; };
-
-
-
 void func_001921A8(void* self);
 
 void func_001C3390(C1D* self)
@@ -94,7 +89,6 @@ s32 func_001C3E50(C1D* self) { if (self->f610 < 5) { if (self->f610 >= 2) return
 
 struct __attribute__((packed)) Pk8_1C33C8 { u64 v; };
 struct __attribute__((packed)) Pp_1C33C8 { void* p; };
-
 
 extern char D_00274A40[4];
 extern s32 D_002749B0[36];
@@ -365,12 +359,6 @@ void func_001C3FC8(Obj_1C3FC8* self, s32 state)
     F(self, 0x614) = D_00261858[1];
 }
 
-struct Builder_1C30E8 {
-    u8 pad0[0x98];
-    s32 f98;
-    u8 rest[0x1850 - 0x9C];
-};
-struct __attribute__((packed)) Col_1C30E8 { u8 r, g, b, a; };
 struct Elem_1C30E8 { f32 f0; f32 f4; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
 struct Poly_1C30E8 {
     f32 c[3];
@@ -401,35 +389,12 @@ struct Rec_1C30E8 {
     u8 pad5C[4];
     Elem_1C30E8 elems[1];
 };
-struct Obj_1C30E8 {
-    u8 pad0[0x50];
-    f32 f50;
-    u8 pad54[0xC];
-    Rec_1C30E8* f60;
-};
-struct Obj2_1C30E8 { u8 pad0[0x2A8]; f32 f2A8; };
-struct Glob_1C30E8 { u8 pad[1]; };
 
 extern u8 D_002622A8[];
 extern u8 D_002483D0[];
 extern u8 D_00274998[8];
 extern u8 D_002749A0[16];
 extern f32 D_00261858[];
-
-void func_001619C0(Builder_1C30E8* b);
-void func_00152B38(Glob_1C30E8* g);
-void func_00161AB0(Builder_1C30E8* b, u8* a, u8* c);
-void func_00161BB0(Builder_1C30E8* b, s32 v);
-void func_00161B10(Builder_1C30E8* b, u8* a, f32 f);
-void func_001626C0(Builder_1C30E8* b, u8* src);
-void func_001626A8(Builder_1C30E8* b, Col_1C30E8* c);
-void func_00162680(Builder_1C30E8* b, void* v);
-void func_001626D8(Builder_1C30E8* b, s32 z);
-void func_00162508(Builder_1C30E8* b);
-void func_00152D70(Glob_1C30E8* g);
-void func_00161A88(Builder_1C30E8* b, s32 f);
-
-
 
 struct Ent_1C0070;
 struct Frame_1C0070 {

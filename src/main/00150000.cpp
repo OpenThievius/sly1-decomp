@@ -26,8 +26,6 @@ void func_00150298(State_150298* self)
 	if (best != 0) { func_0014F110(best, 5); self->selected = best; }
 }
 
-struct State_001503E0 { u8 pad[0x744]; u32 count; u32 items[8]; };
-
 struct Object_00150338 { u8 pad[0x550]; s32 status; };
 struct State_00150338 { u8 pad[0x78C]; s32 count; Object_00150338* items[8]; };
 extern Object_00150338* func_00182FC8(Object_00150338*);
@@ -266,7 +264,6 @@ extern void func_00152410(void*, f32);
 extern Mgr_151A88* D_002623C8;
 extern void* D_002623C0;
 extern u8 D_00275C60[];
-struct Object_151E20 { u8 pad[0x1C]; void* field_1C; };
 void func_00152410(void*, f32);
 f32 func_001EB0F8(void*, f32);
 void func_00151E20(void* self, f32 amount)
@@ -1694,7 +1691,6 @@ struct Msg_150DC0 {
     s8* f14;
     s32 f18, f1C, f20, f24;
 };
-struct Glob_150DC0 { u8 pad[0x4BC]; void* f4BC; };
 
 extern u8 D_002708E0[];
 extern u8 D_00271558[];

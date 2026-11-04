@@ -6,7 +6,6 @@
 #include "list_iter.h"
 #include "v24a0.h"
 
-
 struct Owner_15F678
 {
     u8 pad[0x1ED0];
@@ -14,12 +13,8 @@ struct Owner_15F678
     void** items;
 };
 
-
-
 void func_0015FA58(void* self);
 void func_0015FD78(void* self);
-
-
 
 struct Sub_15F9A0 { u8 pad0[8]; s32 count; void** items; };
 struct Obj_15F9A0 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C; void* items70[1]; };
@@ -27,23 +22,15 @@ struct Obj_15F9A0 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C;
 void func_0015F930(void* list, void* base, void* item);
 void func_0015F710(void* self, void* value);
 
-
-
 struct Class_0015FB28 { u8 pad0[8]; s32 flags; u8 pad1[0x54]; void (*visit)(void* self, void* arg); };
 struct Node_0015FB28 { Class_0015FB28* cls; u8 pad0[0x18]; Node_0015FB28* next; u8 pad1[0x14]; Node_0015FB28* child; };
 
-
-
 struct Obj_0015FBA0 { u8 pad[0x2C8]; u64 flags; };
-
-
 
 struct Elem_15F6C0 { u8 pad[0x54]; void* owner; Elem_15F6C0* next; };
 struct Owner_15F6C0 { u8 pad[0x60]; Elem_15F6C0* head; };
 
 void func_00152730(void* dst, void* src);
-
-
 
 struct Item_15F7D8 { u8 pad[0x54]; void* f54; };
 struct Group_15F7D8 { u8 pad[8]; s32 count; Item_15F7D8** items; };
@@ -51,14 +38,10 @@ struct Group_15F7D8 { u8 pad[8]; s32 count; Item_15F7D8** items; };
 s32 func_00182FC8(void* p);
 void func_0015F6C0(void* ctx, void* a, void* b);
 
-
-
 struct Item_15F8B0 { u8 pad[0x6C]; s32 count6C; void* items70[4]; };
 struct Group_15F8B0 { u8 pad[8]; s32 count; Item_15F8B0** items; };
 
 void func_0015F7D8(void* self, Group_15F8B0* group);
-
-
 
 struct Items_15F930
 {
@@ -67,16 +50,11 @@ struct Items_15F930
 
 void* func_001F5B08(void* dst, void* src, s32 bytes);
 
-
-
 struct Obj_15FA58 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C; void* items70[1]; u8 pad2[0x2C8 - 0x74]; u64 flags2C8; };
 struct Self_15FA58 { u8 pad0[0x1ED0]; s32 count; Obj_15FA58** items; };
 
 void func_0015F7D8(void* self, void* item);
 
-
-
-struct Quad_15FBB8 { s32 a, b, c, d; } __attribute__((aligned(16)));
 struct Obj_15FBB8;
 struct Ctx_15FBB8 {
     void* w0;
@@ -94,13 +72,10 @@ extern u8 D_00248D30[];
 void func_001BF788(Obj_15FBB8* self, s32 n);
 void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
 
-
-
 void func_00182C58(C01* self);
 void* func_0018D500(s32 size);
 s32 func_0015A480(C6C* world, s32 item, void* c);
 void func_0015F8B0(C6C* world, List87* sub);
-
 
 struct List_15F710 {
     u8* head;
@@ -145,23 +120,15 @@ struct Next_15F710 {
     }
 };
 
-
-
 void* func_00160110();
 
-
-
 s32* func_00160810();
-
-
 
 struct Refs_160D00
 {
     u8 pad[4];
     s32 refs;
 };
-
-
 
 struct Stream_161458 {
     u8 pad0[0xC];
@@ -170,38 +137,26 @@ struct Stream_161458 {
 
 void func_001612E8(void* self, s32 a1, s32 a2);
 
-
-
 struct Stream_161670 {
     u8 pad0[0xC];
     u32* cur;
 };
-
-
 
 struct Stream_1618C0 {
     u8 pad0[0xC];
     u64* cur;
 };
 
-
-
 struct __attribute__((packed)) Unaligned_1626A8 { u32 value; };
-
-
 
 struct Entry_001601D8 { u8 pad0[0x28]; s32 f28; };
 
 Entry_001601D8* func_00160110(void* a0);
 
-
-
 struct Glob_002623C0 { u8 pad0[0xC]; f32 fC; u8 pad1[0x19C8]; s32 f19D8; s32 f19DC; s32 f19E0; s32 f19E4; u8 pad2[8]; s32 mask; s32 f19F4; s32 f19F8; };
 extern Glob_002623C0* D_002623C0;
 
 s32 func_001602A0(void);
-
-
 
 struct Obj_002623C4 { u8 pad0[0x444]; f32 f444; s32 f448; };
 struct Blk_002623C8 { s32 f0; f32 f4; };
@@ -217,23 +172,15 @@ void func_00140F48(u8* p);
 void func_00140D90(u8* p);
 void func_00160880(void);
 
-
-
-
-
 struct Vec3_162680 { f32 x; f32 y; f32 z; };
 
 struct Body_162680 { u8 pad[0xFC]; f32 x; f32 y; f32 z; };
-
-
 
 struct __attribute__((packed)) U64_1626C0 { u64 v; };
 
 struct Src_1626C0 { U64_1626C0 head; };
 
 struct Dst_1626C0 { u8 pad[0x118]; U64_1626C0 tail; };
-
-
 
 void* func_0018D500(s32 size);
 
@@ -249,11 +196,7 @@ struct Owner_162810
     void** refs;
 };
 
-
-
 void* func_001F5C0C(void* p, s32 value, s32 size);
-
-
 
 struct Counter_160CE8
 {
@@ -261,15 +204,11 @@ struct Counter_160CE8
     s32 count;
 };
 
-
-
 struct Counter_160CF0
 {
     u8 pad[4];
     s32 count;
 };
-
-
 
 struct Ctx_160D10
 {
@@ -279,17 +218,11 @@ struct Ctx_160D10
 
 extern Ctx_160D10* D_00275710;
 
-
-
 void func_0018D778(void);
-
-
 
 void func_00162508(void* self);
 void func_00188B08(void* a, void* b, void* c);
 void func_00188B48(void* a, void* b, void* c);
-
-
 
 struct Obj_00161BB0 {
     u8 pad0[0xF8];
@@ -299,15 +232,9 @@ struct Obj_00161BB0 {
 void func_00162508(void* self);
 void func_001626A8(void* self, u32* value);
 
-
-
-
-
 struct Rec_1600A0 { u8 pad[0x20]; s32 value; };
 
 Rec_1600A0* func_001600A0(void);
-
-
 
 struct __attribute__((packed)) Word_269984 { u32 value; };
 
@@ -321,16 +248,12 @@ void func_00160CC8(void* self);
 void func_00151A68(void* self);
 void func_001608E0(void);
 
-
-
 void func_001612E8(void* self, s32 a1, s32 a2);
 
 struct Stream_1615F0 {
     u8 pad0[0xC];
     u32* cur;
 };
-
-
 
 void func_001612E8(void* self, s32 a1, s32 a2);
 
@@ -339,49 +262,21 @@ struct Stream_161708 {
     u64* cur;
 };
 
-
-
-
-
-
-
-
 struct Stream_1617E8 { u8 pad0[0xC]; u8* cur; };
 
 void func_001612E8(void* self, s32 a1, s32 a2);
 
-
-
-
-
 struct Rec_160E80 { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f18; };
-
-
-
 
 void func_001613C0(void* self, s32 a, s32 b, s32 c);
 
-
-
 struct Obj_00160050 { u8 pad[0x34]; s32 count; s32 values[1]; };
-
 
 struct Obj_1612E8 { u8 pad[0x24]; s32 value; };
 
-
 void func_00160918();
 
-
-
-
-
-
-
-
-
-
 typedef void* (*Fill_161B80)(void*,s32,s32);
-
 
 struct Stream_161588 {
     u8 pad0[0xC];
@@ -390,16 +285,12 @@ struct Stream_161588 {
 
 void func_001612E8(void* self, s32 a1, s32 a2);
 
-
-
 struct Stream_161860 {
     u8 pad0[0xC];
     u64* cur;
 };
 
 void func_001612E8(void* self, s32 a1, s32 a2);
-
-
 
 struct Ctx_161028 { u8 pad0[4]; s32 count; u8* base; };
 struct Entry_161028 { s16 k0; s16 k1; u8 pad[4]; Entry_161028* next; };
@@ -411,8 +302,6 @@ u8* func_0018D658(s32 size);
 void func_0018D6F0(void);
 s32 func_0013E430(u8* a0, u8* a1, s32* a2, f32 scale);
 
-
-
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
 
@@ -422,25 +311,16 @@ extern u8 D_00000FA0[];
 extern u8 D_00000FD8[];
 
 void func_001EE3F0(void* s, s32 n);
-
-
-
 
 extern u8 D_00000FA0[];
 extern u8 D_00000FD8[];
 
 void func_001EE3F0(void* obj, void* data);
 
-
-
-
-
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
 
 void func_001EE3F0(void* obj, void* text);
-
-
 
 struct Obj_001605E8
 {
@@ -458,8 +338,6 @@ struct Obj_001605E8
 };
 
 void func_001A7E90(void* self);
-
-
 
 struct Key_160948 {
     u8 pad_000[8];
@@ -541,8 +419,6 @@ Rec_160948* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_0012E760(void* obj);
 void func_001E96F8(void* obj, s32 mode);
 
-
-
 extern u8 D_000018C0[];
 extern u8 D_000018F8[];
 
@@ -557,8 +433,6 @@ struct Sys_1608E0;
 void func_00140D90(Sys_1608E0* p);
 
 extern u8 D_00261420[];
-
-
 
 struct Args_160DA0 {
     s32 f0;
@@ -582,8 +456,6 @@ void func_00140ED0(Call_160DA0* r);
 void func_00194D30(Call_160DA0* self, s32 a, s32 b);
 void func_00151E20(Call_160DA0* self, f32 amount);
 
-
-
 struct Ent_1600A0 {
     u8 pad0[8];
     s32 k0;
@@ -601,23 +473,10 @@ struct Entry_247AF0 {
 
 extern const Entry_247AF0 D_00247AF0[46];
 
-
-
-
-
-
-
-
-
 struct Entry_00160208 { u8 pad0[0x20]; s32 key; s32 pad24; s32 flags; };
-
-
-
 
 struct Key_1602A0;
 u32* func_00160810(Key_1602A0* key);
-
-
 
 struct Obj_160578 { s32 f0; };
 
@@ -626,36 +485,21 @@ extern u8 D_00247AD0[];
 void func_001F0428(Obj_160578* obj, s32 m, s32 n);
 void func_0018E4F0(s32 slot, u32 n);
 
-
-
 struct Obj_160918 { u8 pad[0]; };
 
 void func_00160880(void);
 void func_001F0428(Obj_160918* obj, s32 value, s32 count);
-
-
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_0024A6F8[];
 s32 func_00152888(V24A0* a);
 
-
-
-
-
 struct Rec_1603E8 { s32 flags; u8 pad[0x448]; };
 struct Glob_1603E8 { u8 pad0[0x458]; Rec_1603E8 recs[1]; };
 void func_001604B8(s32 mode);
 
-
-
-
-
 // EXACT: self->block store ahead of self->f20 store.
-
-
-
 
 struct Pkt_1639E8;
 struct Hdr_1639E8
@@ -730,13 +574,6 @@ struct Zero_1639E8
     }
 };
 
-
-
-
-
-
-
-
 struct Clamp_160B28 {
     static s32 Of(s32 v, s32 lo, s32 hi)
     {
@@ -745,8 +582,6 @@ struct Clamp_160B28 {
         return v;
     }
 };
-
-
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 
@@ -757,8 +592,6 @@ struct Save_160650 {
     u8 data[0x19F4];
 };
 
-
-
 class Obj_161958 {
 public:
     u8 pad0[0xC];
@@ -767,8 +600,6 @@ public:
     virtual void Begin(s32 arg);
     void func_00161958(s32 count);
 };
-
-
 
 struct Self_162508 { u8 pad0[0xF8]; u8* f0F8; u8 pad1[0x28]; s32 f124; };
 struct Stream_162508 { u8 pad0[0xC]; u8* f0C; };
@@ -807,8 +638,6 @@ struct Copy_162508 {
     }
 };
 
-
-
 struct __attribute__((packed)) Rec_1626D8 {
     u64 q0;
     u64 q8;
@@ -830,8 +659,6 @@ struct Obj_1626D8 {
 void func_0018D800(Rec_1626D8* dst, const void* src, s32 size);
 void func_00162508(Obj_1626D8* self);
 void func_00161BB0(Obj_1626D8* self, u8* value);
-
-
 
 struct Pair_161C00 { s32 f0; u8* f4; };
 struct Q_161C00 { u8 pad[0x18]; s32 f18; };
@@ -860,8 +687,6 @@ extern u8 D_000002F8[];
 void func_001EE3F0(Gif_161C00* gif, u8* a);
 void func_001EE420(Gif_161C00* gif, u8* a);
 void func_0018D800(Packet_161C00* dst, u8* src, s32 n);
-
-
 
 struct Pkt_161F70 { u8 pad[4]; };
 struct Mem_161F70 { u8 b[1]; };
@@ -919,8 +744,6 @@ void func_00152D70(Pkt_161F70* s);
 void func_00152B80(Pkt_161F70* s, s32 n, void* data);
 void func_00152B38(Pkt_161F70* s);
 void func_0018D800(Mem_161F70* dst, void* src, s32 count);
-
-
 
 struct Pkt_163ED8;
 struct Vec3_163ED8 {
@@ -1032,18 +855,9 @@ void func_00163938(s32 mode, Pkt_163ED8* pkt);
 void func_00169608(s32 a, s32 b, Node_163ED8* node);
 void func_001694F8(Mesh_163ED8* mesh, Strip_163ED8* strip, s32 a, s32 b, s32 n, Node_163ED8* node);
 
-
-
 void func_001EE3B8(void* obj, s32 size, s32 flags);
 
-
-
-
-
 void func_0016C528(void*);
-
-
-
 
 typedef void (*VFn_165728)(void* self);
 struct Obj_165728 { VFn_165728* vtbl; };
@@ -1054,8 +868,6 @@ struct Ctx_165728 { u8 pad0[0x14]; void* host14; };
 
 void func_001662A8(void* self, void* entry, void* sub, void* ctx);
 void func_001F2798(void* owner, void* unused, void* ctx);
-
-
 
 struct __attribute__((aligned(16))) Quad_165828 { s32 a, b, c, d; };
 struct Mat_165828 { Quad_165828 q[4]; };
@@ -1069,8 +881,6 @@ void* func_0015A448(void* a, s32 b, void* c);
 void func_00188B08(void* a, void* b, void* out);
 void func_00188B48(void* a, void* b, void* out);
 void func_00188668(void* out, void* b, void* in);
-
-
 
 struct Elem_165FE0;
 typedef void (*VFn_165FE0)(void* self, f32 f);
@@ -1097,8 +907,6 @@ struct Sub_165FE0 {
 s32 func_001B4B08(void* p);
 void func_001F3408(void* p);
 
-
-
 extern u8 D_00000010[];
 extern u8 D_000000F0[];
 
@@ -1114,8 +922,6 @@ void func_001EE5C8(void* s, u32 tag, s32 size, s32 a3, void* a4, void* a5);
 void func_001EE3F0(void* s, void* n);
 void func_001529E0(void* self, void* a, void* b);
 
-
-
 struct Node_165920 { s32 tag; Node_165920* p4; u8 pad8[0x48]; void* p50; void* p54; u8 pad58[0x28]; Node_165920* next; u8 pad84[0xC]; };
 struct Sub_165920 { u8 pad[0x10]; u32 flags; };
 struct Rec_165920 { u8 pad[0x38]; Sub_165920* a; u8 pad3C[0x18]; void* b; };
@@ -1126,8 +932,6 @@ void* func_0018D5C0(s32 n);
 void* func_0018D568(s32 size, void* src);
 void func_00165AE8(Obj_165920* o, void* a, void* b);
 void func_00162810(Obj_165920* o);
-
-
 
 // Index written (i << 4) * 9: a plain &items[i] gives a mult that loop.c does not strength-reduce (no s4 offset giv).
 struct __attribute__((aligned(16))) Quad_1660E8 { s32 a, b, c, d; };
@@ -1144,8 +948,6 @@ struct Par_1660E8 { u8 pad[0x30]; };
 void func_00188B48(void* a, void* b, void* out);
 void func_00188B08(void* a, void* b, void* out);
 Mat_1660E8 func_00188668(Mat_1660E8 a, void* q);
-
-
 
 struct Pkt_164868 {
     u8 pad[0x24];
@@ -3323,5 +3125,4 @@ void func_00166658(void)
 INCLUDE_RODATA(jtbl_0024A750);
 INCLUDE_RODATA(jtbl_0024A780);
 INCLUDE_ASM(func_00166690);
-
 

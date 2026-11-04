@@ -99,7 +99,6 @@ s32 func_0011E2A0()
 
 s32 func_0011C0A8(s32 a, s32 b);
 
-
 struct Stride_11C288 { s32 stride; s32 pad4; s32 base; };
 
 s32 func_0011C288(Stride_11C288* self, s32 index)
@@ -370,7 +369,6 @@ void func_0011A6B8(void* p);
 void func_0011C1D0(void* p);
 void func_0011CBB0(void);
 
-
 extern u8 D_0062C568[];
 extern u8 D_00259F38[];
 
@@ -494,7 +492,6 @@ extern s32 D_0025C288;
 extern s32 D_0025C2A8;
 extern s32 D_0025C2C8;
 extern s32 D_0025C2E8;
-
 
 struct Node_11C418 { s32 f0; s32 f4; s32 f8; s32 fC; };
 
@@ -654,7 +651,6 @@ void func_0011F210(T2196_678* self, Stream83* src)
 }
 
 s32 func_0011C0A8(void* p, s32 mask);
-
 
 struct Pool_11C128 {
     s32 slots;
@@ -1631,7 +1627,6 @@ Pool_11C968* func_0011C968(void)
     return p;
 }
 
-struct Entry_11EDA8 { s32 count; u8* list; };
 struct Pair_11EDA8 { void* node; s32 pad; };
 struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
 struct Buf_11EDA8 { u8 b[0x60]; };
@@ -1668,7 +1663,6 @@ void func_0011EDA8(C01* self)
 struct Ptr_11D140 { s32 field0; };
 
 s32 D_0025C348 = 0;
-
 
 s32 D_00260E40[8];
 extern const char D_00249570[48] = "snd_BankLoadByLoc: Load already in progress!\n";
@@ -2068,7 +2062,6 @@ s32 func_0011D078(void)
     return 0;
 }
 
-
 struct Sync_11DE18;
 struct Cfg_11DE18;
 
@@ -2186,7 +2179,6 @@ struct Packet_0011CBB8 { s32 f00; u8 pad[0xC]; s32 f10; u8 pad2[0x2C]; };
 extern s32* D_0025C360[2];
 extern s32 D_0025C368[2];
 extern s32* D_0025C378[2];
-
 
 volatile Packet_0011CBB8 D_00260DC0 = { 0 };
 extern s32 D_0025C540[];

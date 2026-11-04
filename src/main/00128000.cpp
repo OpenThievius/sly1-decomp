@@ -1287,8 +1287,6 @@ void func_00129540(void* self, f32* out)
     *out = value + value;
 }
 
-struct Sub_00129598 { u8 pad[0x30]; Vec16_12A5D0 value; };
-
 typedef void (*Call_0012A528)(void*);
 struct State_0012A528 { Call_0012A528* vtable; u8 pad[0x1FC]; u8* sub; };
 void func_0012A528(State_0012A528* self, s32 value)
@@ -1346,15 +1344,7 @@ void func_0012B040(void* ptr)
     }
 }
 
-struct Sub_0012B010 { u8 pad[0x1C]; void* value; };
-struct State_0012B010 { u8 pad[0x2AC]; Sub_0012B010* sub; };
 void func_001BF788(void* ptr, s32 value);
-
-struct Sub_0012B140 { u8 pad[0x10]; Vec16_12A5D0 value; };
-struct State_0012B140 { u8 pad[0x288]; Sub_0012B140* sub; };
-
-struct Sub_0012B1A0 { u8 pad[0x20]; Vec16_12A5D0 value; };
-struct State_0012B1A0 { u8 pad[0x288]; Sub_0012B1A0* sub; };
 
 struct Node_1299E0 { u8 pad0[8]; Node_1299E0* next; u8 pad1[8]; s32 key; };
 struct VT_1299E0 { u8 pad[0xBC]; void (*f_BC)(void* self); };
@@ -2348,7 +2338,6 @@ s32 func_001288F0(Object_001288F0* self, Context_001288F0* context)
     D_0027B314 = (ListFrame*)it.saved;
     return 1;
 }
-
 
 struct Node_129A58 { u8 pad0[8]; Node_129A58* next; u8 padC[8]; s32 key; };
 struct Obj_129A58;

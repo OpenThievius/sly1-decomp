@@ -523,13 +523,10 @@ s32 func_0012FD78(void* self, Pair_0012FD78* pair)
     return func_0012FDA0(self, pair->a, pair->b);
 }
 
-struct State_0012FCF0 { s32 w[11]; };
-
 struct Obj_12D448 {
     u8 pad0[0x24];
     s8 state;
 };
-
 
 void func_001DDA20(void* a);
 void func_001DDA50(void* a);

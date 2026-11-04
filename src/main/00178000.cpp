@@ -496,20 +496,10 @@ s32 func_0017B7A8(C4B* self, Msg_17B7A8* msg)
 
 struct __attribute__((aligned(16))) Quad_17B9D0 { f32 v[4]; };
 
-struct Link_17B9D0
-{
-    u8 pad0[0x28];
-    void* f28;
-};
 struct Vt_17B9D0
 {
     u8 pad0[0x28];
     void (*f28)(void* self, Quad_17B9D0* a, s32 b, Quad_17B9D0* c, Quad_17B9D0* d, s32 e, s32 f);
-};
-struct Obj_17B9D0
-{
-    u8 pad0[0x18];
-    void* f18;
 };
 
 struct Node_17B9D0
@@ -686,7 +676,6 @@ void func_0017B410(C4A* self, s32 mode)
 done:
     return;
 }
-
 
 extern s32 D_00263E2C;
 extern s32 D_00263E30;

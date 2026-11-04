@@ -1068,7 +1068,6 @@ struct Glob_1EC528 { u8 pad0[0x274]; f32 f274; f32 f278; };
 
 void func_001AC060(void* p);
 
-
 void func_001EC528(Self_1EC528* self)
 {
     Glob_1EC528* g = (Glob_1EC528*)&D_0026E248;
@@ -1117,7 +1116,6 @@ struct Link_1EECE0 {
 void func_00124A48(C1F* self);
 void func_001F55A8(void* self);
 void* func_0018D500(s32 size);
-
 
 void func_001EECE0(C1F* self)
 {
@@ -1212,10 +1210,6 @@ struct Chain_1ED318 {
     s32 f680;
     s32 pad2;
     s32 f688;
-};
-struct Owner_1ED318 {
-    u8 pad[0x40];
-    u8 pad40[0x4];
 };
 struct Inner_1ED318 {
     u8 pad[0xC3C];
@@ -1473,7 +1467,6 @@ void func_001EFA88(List_1EFA88* self, s32 value)
         self->count--;
     }
 }
-
 
 struct Sub_1ECB18 { u8 pad0[0x34]; f32 f34; };
 struct Obj_1ECB18 {

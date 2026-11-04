@@ -757,7 +757,6 @@ void func_001A7128(C43* self)
     }
 }
 
-
 s32 func_001A7420(C43* self)
 {
     s32 v = self->state;
@@ -941,7 +940,6 @@ void func_001A5DF8(Self_1A5DF8* self, Obj_1A5DF8* obj)
     func_001BFCD8(0x51, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
-
 struct __attribute__((aligned(16))) Quad_1A72B0 { s32 a; s32 b; f32 f; s32 d; };
 
 struct Msg_1A72B0 {
@@ -1020,7 +1018,6 @@ struct Quad_1A7998 { s32 a, b, c, d; } __attribute__((aligned(16)));
 struct Buf_1A7998 { s32 n; u8 pad[0x1C]; Quad_1A7998 q; u8 tail[0x20]; };
 typedef void (*FnP_1A7998)(void* self, void* arg);
 typedef void (*FnI_1A7998)(void* self, s32 arg);
-
 
 void func_0012E760(void* p);
 void func_0012C7B0(void* a, void* b, s32 c, void* d, f32 x, f32 y);
@@ -1203,17 +1200,6 @@ struct Frame_1A54F8 {
         cursor = (u8*)n + link;
         return n;
     }
-};
-
-struct Vt_1A54F8 {
-    void* slot[0x18 / 4];
-};
-
-struct Obj_1A54F8 {
-    u8 pad0[0x560];
-    void* f560;
-    f32 f564;
-    f32 f568;
 };
 
 struct Node_1A54F8 {
@@ -1517,7 +1503,6 @@ struct __attribute__((aligned(16))) Quad_1A7FE8 {
     s32 c;
     s32 d;
 };
-
 
 void func_00182C18(C8C* self);
 struct Buf_1A7FE8 { u8 b[1]; };

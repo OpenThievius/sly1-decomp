@@ -1,460 +1,115 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-struct Quad_1085E8 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_1085E8* q);
-void func_0011B018(void* out, Quad_1085E8* q);
-void func_0011B060(Quad_1085E8* q, int mode);
-void func_0011B0A8(Quad_1085E8* a, Quad_1085E8* b);
-void func_0011B538(Quad_1085E8* q, int n);
-void func_001C23B0(Quad_1085E8* t, int mode, int c, void* z);
 void func_00159ED0(void* x);
 
-
-
-struct Quad_108548 { s32 a, b, c, d; };
-struct Frame_108548 { Quad_108548 q; Quad_108548 t; };
-
-void func_0011B008(Quad_108548* q);
-void func_0011B018(void* dst, Quad_108548* src);
-void func_0011B060(Quad_108548* q, int mode);
-void func_0011B0A8(Quad_108548* a, Quad_108548* b);
-void func_0011B538(Quad_108548* q, int n);
-void func_001C23B0(Quad_108548* t, int mode, int c, void* z);
 void func_0017D220(void* x);
 
-
-
-struct Quad_108688 { s32 a, b, c, d; };
-struct Frame_108688 { Quad_108688 q; Quad_108688 t; };
-
-void func_0011B008(Quad_108688* q);
-void func_0011B018(void* dst, Quad_108688* src);
-void func_0011B060(Quad_108688* q, int mode);
-void func_0011B0A8(Quad_108688* a, Quad_108688* b);
-void func_0011B538(Quad_108688* q, int n);
-void func_001C23B0(Quad_108688* t, int mode, int c, void* z);
 void func_0017B598(void* x);
 
-
-
-struct Quad_1087D8 { s32 a, b, c, d; };
-struct Frame_1087D8 { Quad_1087D8 q; Quad_1087D8 t; };
-
-void func_0011B008(Quad_1087D8* q);
-void func_0011B018(void* dst, Quad_1087D8* src);
-void func_0011B060(Quad_1087D8* q, int mode);
-void func_0011B0A8(Quad_1087D8* a, Quad_1087D8* b);
-void func_0011B538(Quad_1087D8* q, int n);
-void func_001C23B0(Quad_1087D8* t, int mode, int c, void* z);
 void func_0017AD50(void* x);
 
-
-
-struct Quad_108928 { s32 a, b, c, d; };
-struct Frame_108928 { Quad_108928 q; Quad_108928 t; };
-
-void func_0011B008(Quad_108928* q);
-void func_0011B018(void* dst, Quad_108928* src);
-void func_0011B060(Quad_108928* q, int mode);
-void func_0011B0A8(Quad_108928* a, Quad_108928* b);
-void func_0011B538(Quad_108928* q, int n);
-void func_001C23B0(Quad_108928* t, int mode, int c, void* z);
 void func_001ED020(void* x);
 
-
-
-struct Quad_108728 { s32 a, b, c, d; };
-struct Frame_108728 { Quad_108728 q; Quad_108728 t; s32 n; s32 out; };
-
-void func_0011B008(Quad_108728* q);
-void func_0011B018(void* dst, Quad_108728* src);
-void func_0011B060(Quad_108728* q, int mode);
-void func_0011B0A8(Quad_108728* a, Quad_108728* b);
-void func_0011B538(Quad_108728* q, int n);
-void func_001C23B0(Quad_108728* t, int mode, int c, void* z, void* z2);
 s32 func_0017B550(void* self, s32 index);
 
-
-
-struct Quad_108878 { s32 a, b, c, d; };
-struct Frame_108878 { Quad_108878 q; Quad_108878 t; s32 n; s32 out; };
-
-void func_0011B008(Quad_108878* q);
-void func_0011B018(void* dst, Quad_108878* src);
-void func_0011B060(Quad_108878* q, int mode);
-void func_0011B0A8(Quad_108878* a, Quad_108878* b);
-void func_0011B538(Quad_108878* q, int n);
-void func_001C23B0(Quad_108878* t, int mode, int c, void* z, void* z2);
 s32 func_001ED018(void* self, s32 value);
 
-
-
-struct Quad_108A98 { s32 a, b, c, d; };
-struct Frame_108A98 { Quad_108A98 q; Quad_108A98 t; s32 n; s32 out; };
-
-void func_0011B008(Quad_108A98* q);
-void func_0011B018(void* dst, Quad_108A98* src);
-void func_0011B060(Quad_108A98* q, int mode);
-void func_0011B0A8(Quad_108A98* a, Quad_108A98* b);
-void func_0011B538(Quad_108A98* q, int n);
-void func_001C23B0(Quad_108A98* t, int mode, int c, void* z, void* z2);
 s32 func_001ED0D8(void* self, s32 value);
 
-
-
-struct Quad_108B48 { s32 a, b, c, d; };
-struct Frame_108B48 { Quad_108B48 q; Quad_108B48 t; };
-
-void func_0011B008(Quad_108B48* q);
-void func_0011B018(void* dst, Quad_108B48* src);
-void func_0011B060(Quad_108B48* q, int mode);
-void func_0011B0A8(Quad_108B48* a, Quad_108B48* b);
-void func_0011B538(Quad_108B48* q, int n);
-void func_001C23B0(Quad_108B48* t, int mode, int c, void* z);
 void func_001EC528(void* x);
 
-
-
-struct Quad_108498 { s32 a, b, c, d; };
-struct Frame_108498 { Quad_108498 q; Quad_108498 t; s32 n; f32 out; };
-
-void func_0011B008(Quad_108498* q);
-void func_0011B018(void* dst, Quad_108498* src);
-void func_0011B060(Quad_108498* q, int mode);
-void func_0011B0A8(Quad_108498* a, Quad_108498* b);
-void func_0011B538(Quad_108498* q, int n);
-int func_001C23B0(Quad_108498* t, int mode, int c, void* z, void* z2);
 void func_0017D1E8(void* x, f32 f);
 
-
-
 // NEAR: the 0x2000 store to the frame lands before the argument addresses (addiu a3, addiu t0); retail stores it after them. The 6 variant (func_00107EC0) matches.
 
-struct Quad_1091A8 { s32 a, b, c, d; };
-struct Frame_1091A8 { Quad_1091A8 q; Quad_1091A8 t; s32 n; s32 out; };
-
-void func_0011B008(Quad_1091A8* q);
-void func_0011B018(void* dst, Quad_1091A8* src);
-void func_0011B060(Quad_1091A8* q, int mode);
-void func_0011B0A8(Quad_1091A8* a, Quad_1091A8* b);
-void func_0011B538(Quad_1091A8* q, int n);
-s32 func_001C23B0(Quad_1091A8* t, int mode, int c, void* z, void* z2);
 void func_001C3F68(void* self, s32 value);
 
-
-
 // NEAR: the 0x2000 store to the frame lands before the argument addresses (addiu a3, addiu t0); retail stores it after them. The 6 variant (func_00107EC0) matches.
 
-struct Quad_109258 { s32 a, b, c, d; };
-struct Frame_109258 { Quad_109258 q; Quad_109258 t; s32 n; s32 out; };
-
-void func_0011B008(Quad_109258* q);
-void func_0011B018(void* dst, Quad_109258* src);
-void func_0011B060(Quad_109258* q, int mode);
-void func_0011B0A8(Quad_109258* a, Quad_109258* b);
-void func_0011B538(Quad_109258* q, int n);
-s32 func_001C23B0(Quad_109258* t, int mode, int c, void* z, void* z2);
 void func_001C4180(void* self, s32 value);
 
-
-
 // NEAR: the 0x2000 store to the frame lands before the argument addresses (addiu a3, addiu t0); retail stores it after them. The 6 variant (func_00107EC0) matches.
 
-struct Quad_109308 { s32 a, b, c, d; };
-struct Frame_109308 { Quad_109308 q; Quad_109308 t; s32 n; s32 out; };
-
-void func_0011B008(Quad_109308* q);
-void func_0011B018(void* dst, Quad_109308* src);
-void func_0011B060(Quad_109308* q, int mode);
-void func_0011B0A8(Quad_109308* a, Quad_109308* b);
-void func_0011B538(Quad_109308* q, int n);
-s32 func_001C23B0(Quad_109308* t, int mode, int c, void* z, void* z2);
 void func_001C41A0(void* self, s32 value);
 
-
-
-struct __attribute__((aligned(16))) Quad_001083C8 { s32 a, b, c, d; };
-struct __attribute__((packed)) Key8_001083C8 { u8 b[8]; };
-struct Frame_001083C8 { Quad_001083C8 q; Key8_001083C8 k; Quad_001083C8 t; s32 o1; s32 o2; };
 struct Arg_001083C8;
 extern const s32 D_00248F90[2];
 
-void func_0011B008(Quad_001083C8* q);
-void func_0011B018(void* dst, Quad_001083C8* q);
-void func_0011B060(Quad_001083C8* q, int mode);
-void func_0011B0A8(Quad_001083C8* a, Quad_001083C8* b);
-void func_0011B538(Quad_001083C8* q, int n);
-s32 func_001C23B0(Quad_001083C8* t, int mode, int c, void* k, void* o1, void* o2);
 void func_0017D0D8(Arg_001083C8* p, s32 a, s32 b);
 
-
-
-struct __attribute__((aligned(16))) Quad_001089C8 { s32 a, b, c, d; };
-struct __attribute__((packed)) Key8_001089C8 { u8 b[8]; };
-struct Frame_001089C8 { Quad_001089C8 q; Key8_001089C8 k; Quad_001089C8 t; s32 o1; s32 o2; };
 struct Arg_001089C8;
 extern const s32 D_00248F98[2];
 
-void func_0011B008(Quad_001089C8* q);
-void func_0011B018(void* dst, Quad_001089C8* q);
-void func_0011B060(Quad_001089C8* q, int mode);
-void func_0011B0A8(Quad_001089C8* a, Quad_001089C8* b);
-void func_0011B538(Quad_001089C8* q, int n);
-s32 func_001C23B0(Quad_001089C8* t, int mode, int c, void* k, void* o1, void* o2);
 void func_001ED090(Arg_001089C8* p, s32 a, s32 b);
-
-
 
 // Callee declared s32 and called as (void): schedules the three address adds before the 8-byte copy.
 
-struct Quad_00108DA8 { s32 a, b, c, d; };
-struct __attribute__((packed)) Pk_00108DA8 { u8 b[8]; };
-struct Frame_00108DA8 { Quad_00108DA8 q; Pk_00108DA8 k; u8 pad[8]; Quad_00108DA8 t; s32 n; f32 out; };
-struct Obj_00108DA8 { u8 pad[0x1]; };
-
 extern const s32 D_00248FC0[2];
-
-void func_0011B008(Quad_00108DA8* q);
-void func_0011B018(void* dst, Quad_00108DA8* src);
-void func_0011B060(Quad_00108DA8* q, int mode);
-void func_0011B0A8(Quad_00108DA8* a, Quad_00108DA8* b);
-void func_0011B538(Quad_00108DA8* q, int n);
-s32 func_001C23B0(Quad_00108DA8* t, int mode, int c, void* z, s32* n, f32* out);
-void func_001ED5B8(Obj_00108DA8* self, s32 p, f32 v);
-
-
-
-struct __attribute__((aligned(16))) Quad_1082E8 { s32 a, b, c, d; };
-struct __attribute__((packed)) Key8_1082E8 { u64 v; };
-struct Key_1082E8 { Key8_1082E8 v; s32 w; };
-struct Frame_1082E8 { Quad_1082E8 q; Key_1082E8 k; Quad_1082E8 t; s32 o0, o1, o2; };
 
 extern const s32 D_00248F80[4];
 
-void func_0011B008(Quad_1082E8* q);
-void func_0011B018(void* out, Quad_1082E8* q);
-void func_0011B060(Quad_1082E8* q, int mode);
-void func_0011B0A8(Quad_1082E8* a, Quad_1082E8* b);
-void func_0011B538(Quad_1082E8* q, int n);
-s32 func_001C23B0(Quad_1082E8* t, int mode, int c, void* z, s32* o0, s32* o1, s32* o2);
 void func_0017D1B8(void* self, s32 b, s32 c, s32 d);
-
-
 
 // EXACT: func_001C23B0 declared s32 and called as (void); the 12-byte copy of D_00248FB0 then follows the out-pointer addiu.
 
-struct __attribute__((aligned(16))) Quad_00108CC8 { s32 a, b, c, d; };
-struct __attribute__((packed)) Key8_00108CC8 { u64 v; };
-struct Key_00108CC8 { Key8_00108CC8 v; s32 w; };
-struct Frame_00108CC8 { Quad_00108CC8 q; Key_00108CC8 k; Quad_00108CC8 t; s32 o0, o1, o2; };
 struct Obj_00108CC8;
 
 extern const s32 D_00248FB0[4];
 
-void func_0011B008(Quad_00108CC8* q);
-void func_0011B018(void* out, Quad_00108CC8* q);
-void func_0011B060(Quad_00108CC8* q, int mode);
-void func_0011B0A8(Quad_00108CC8* a, Quad_00108CC8* b);
-void func_0011B538(Quad_00108CC8* q, int n);
-s32 func_001C23B0(Quad_00108CC8* t, int mode, int c, void* z, s32* o0, s32* o1, s32* o2);
 void func_001ED588(Obj_00108CC8* self, s32 p, f32 f, s32 q);
-
-
 
 // Matched: the out-pointer call is declared s32 and called as (void); the 12-byte copy of D_00248FC8 stays where it is.
 
-struct __attribute__((aligned(16))) Quad_001090C8 { s32 a, b, c, d; };
-struct __attribute__((packed)) Key8_001090C8 { u64 v; };
-struct Key_001090C8 { Key8_001090C8 v; s32 w; };
-struct Frame_001090C8 { Quad_001090C8 q; Key_001090C8 k; Quad_001090C8 t; s32 o0, o1, o2; };
 struct Obj_001090C8;
 
 extern const s32 D_00248FC8[4];
 
-void func_0011B008(Quad_001090C8* q);
-void func_0011B018(void* out, Quad_001090C8* q);
-void func_0011B060(Quad_001090C8* q, int mode);
-void func_0011B0A8(Quad_001090C8* a, Quad_001090C8* b);
-void func_0011B538(Quad_001090C8* q, int n);
-s32 func_001C23B0(Quad_001090C8* t, int mode, int c, void* z, s32* o0, s32* o1, s32* o2);
 void func_001A9C58(Obj_001090C8* self, s32 a, s32 b, s32 c);
-
-
 
 // Matched: the out-pointer call is declared s32 and called as (void); the 8-byte copy stays where it is.
 
-struct Quad_1093B8 { s32 a, b, c, d; };
-struct Pair_1093B8 { s32 a, b; };
-struct Frame_1093B8 { Quad_1093B8 q; Pair_1093B8 n; s32 pad[2]; Quad_1093B8 t; s32 o0; s32 o1; };
 struct Obj_1093B8;
 
-void func_0011B008(Quad_1093B8* q);
-void func_0011B018(void* dst, Quad_1093B8* src);
-void func_0011B060(Quad_1093B8* q, s32 mode);
-void func_0011B0A8(Quad_1093B8* a, Quad_1093B8* b);
-void func_0011B538(Quad_1093B8* q, s32 n);
-s32 func_001C23B0(Quad_1093B8* t, s32 mode, s32 c, void* z, void* z2, void* z3);
 void func_001D32D8(Obj_1093B8* self, s32 a, s32 b);
 
 extern const s32 D_00248FD8[2];
 
-
-
 // EXACT: func_001C23B0 declared s32 and called as (void)
 
-struct Quad_00108E70 { s32 a, b, c, d; };
-struct __attribute__((packed)) Pk_00108E70 { u8 b[8]; };
-struct Frame_00108E70 { Quad_00108E70 q; Pk_00108E70 k; u8 pad[8]; Quad_00108E70 t; s32 n; f32 out; };
-struct Obj_00108E70 { u8 pad[0x1]; };
-
 extern const s32 D_00248FC0[2];
 
-void func_0011B008(Quad_00108E70* q);
-void func_0011B018(void* dst, Quad_00108E70* src);
-void func_0011B060(Quad_00108E70* q, int mode);
-void func_0011B0A8(Quad_00108E70* a, Quad_00108E70* b);
-void func_0011B538(Quad_00108E70* q, int n);
-s32 func_001C23B0(Quad_00108E70* t, int mode, int c, void* z, s32* n, f32* out);
-void func_001ED5D8(Obj_00108E70* self, s32 p, f32 v);
-
-
-
-struct Quad_00108F38 { s32 a, b, c, d; };
-struct __attribute__((packed)) Pk_00108F38 { u8 b[8]; };
-struct Frame_00108F38 { Quad_00108F38 q; Pk_00108F38 k; u8 pad[8]; Quad_00108F38 t; s32 n; f32 out; };
-struct Obj_00108F38 { u8 pad[0x1]; };
-
 extern const s32 D_00248FC0[2];
-
-void func_0011B008(Quad_00108F38* q);
-void func_0011B018(void* dst, Quad_00108F38* src);
-void func_0011B060(Quad_00108F38* q, int mode);
-void func_0011B0A8(Quad_00108F38* a, Quad_00108F38* b);
-void func_0011B538(Quad_00108F38* q, int n);
-s32 func_001C23B0(Quad_00108F38* t, int mode, int c, void* z, s32* n, f32* out);
-void func_001ED5F8(Obj_00108F38* self, s32 p, f32 v);
-
-
 
 // NEAR: the 8-byte constant copy is scheduled after the address of its argument (retail computes the argument addresses first); same in all four siblings.
 
-struct Quad_00109000 { s32 a, b, c, d; };
-struct __attribute__((packed)) Pk_00109000 { u8 b[8]; };
-struct Frame_00109000 { Quad_00109000 q; Pk_00109000 k; u8 pad[8]; Quad_00109000 t; s32 n; f32 out; };
-struct Obj_00109000 { u8 pad[0x1]; };
-
 extern const s32 D_00248FC0[2];
-
-void func_0011B008(Quad_00109000* q);
-void func_0011B018(void* dst, Quad_00109000* src);
-void func_0011B060(Quad_00109000* q, int mode);
-void func_0011B0A8(Quad_00109000* a, Quad_00109000* b);
-void func_0011B538(Quad_00109000* q, int n);
-s32 func_001C23B0(Quad_00109000* t, int mode, int c, void* z, s32* n, f32* out);
-void func_001ED618(Obj_00109000* self, s32 p, f32 v);
-
-
 
 // NEAR: the 12-byte copy of D_00248FA0 is scheduled before the three out-pointer addiu (sp+48/52/56); retail computes those first. Only instruction order differs.
 
-struct __attribute__((aligned(16))) Quad_00108BE8 { s32 a, b, c, d; };
-struct __attribute__((packed)) Key8_00108BE8 { u64 v; };
-struct Key_00108BE8 { Key8_00108BE8 v; s32 w; };
-struct Frame_00108BE8 { Quad_00108BE8 q; Key_00108BE8 k; Quad_00108BE8 t; s32 o0, o1, o2; };
 struct Obj_00108BE8;
 
 extern const s32 D_00248FA0[4];
 
-void func_0011B008(Quad_00108BE8* q);
-void func_0011B018(void* out, Quad_00108BE8* q);
-void func_0011B060(Quad_00108BE8* q, int mode);
-void func_0011B0A8(Quad_00108BE8* a, Quad_00108BE8* b);
-void func_0011B538(Quad_00108BE8* q, int n);
-s32 func_001C23B0(Quad_00108BE8* t, int mode, int c, void* z, s32* o0, s32* o1, s32* o2);
 void func_001ED558(Obj_00108BE8* self, s32 p, f32 f, s32 q);
-
-
-
-struct __attribute__((packed)) Pair_00108128 { s32 a, b; };
-struct Rod_00108128 { Pair_00108128 p; s32 c; };
-struct __attribute__((aligned(16))) Quad_00108128 { s32 w[4]; };
-struct __attribute__((aligned(16))) Frame_00108128 {
-    Quad_00108128 q;
-    Rod_00108128 rod;
-    s32 pad0;
-    Quad_00108128 b;
-    s32 o1;
-    f32 o2;
-    s32 o3;
-};
 
 struct Obj_00108128;
 
 extern const s32 D_00248F70[4];
 
-void func_0011B008(Quad_00108128* q);
-void func_0011B018(void* dst, Quad_00108128* src);
-void func_0011B060(Quad_00108128* q, s32 mode);
-void func_0011B0A8(Quad_00108128* a, Quad_00108128* b);
-void func_0011B538(Quad_00108128* q, s32 n);
-s32 func_001C23B0(Quad_00108128* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
 void func_0017D148(Obj_00108128* self, s32 a, s32 b, f32 value);
 
-
-
-struct Quad_108038 { s32 a, b, c, d; };
-struct __attribute__((aligned(16))) Mat_108038 { s32 w[4]; };
-struct __attribute__((aligned(16))) Frame_108038 {
-    Mat_108038 q;
-    Quad_108038 rod;
-    Mat_108038 b;
-    s32 o1;
-    s32 o2;
-    s32 o3;
-    s32 o4;
-};
 struct Obj_108038;
 
 extern const s32 D_00248F60[4];
 
-void func_0011B008(Mat_108038* q);
-void func_0011B018(void* dst, Mat_108038* src);
-void func_0011B060(Mat_108038* q, s32 mode);
-void func_0011B0A8(Mat_108038* a, Mat_108038* b);
-void func_0011B538(Mat_108038* q, s32 n);
-s32 func_001C23B0(Mat_108038* t, s32 mode, s32 c, void* z, void* z1, void* z2, void* z3, void* z4);
 void func_0017D100(Obj_108038* self, s32 b, s32 c, s32 d, s32 e);
-
-
-
-struct Trip_00108208 { s32 a, b, c; };
-struct __attribute__((aligned(16))) Quad_00108208 { s32 w[4]; };
-struct __attribute__((aligned(16))) Frame_00108208 {
-    Quad_00108208 q;
-    Trip_00108208 rod;
-    s32 pad0;
-    Quad_00108208 b;
-    s32 o1;
-    f32 o2;
-    s32 o3;
-};
 
 struct Obj_00108208;
 
 extern const s32 D_00248F70[4];
 
-void func_0011B008(Quad_00108208* q);
-void func_0011B018(void* dst, Quad_00108208* src);
-void func_0011B060(Quad_00108208* q, s32 mode);
-void func_0011B0A8(Quad_00108208* a, Quad_00108208* b);
-void func_0011B538(Quad_00108208* q, s32 n);
-s32 func_001C23B0(Quad_00108208* t, s32 mode, s32 c, void* z, void* z2, void* z3, void* z4);
 void func_0017D180(Obj_00108208* self, s32 a, s32 b, f32 value);
-
-
-
 
 // The property registry: for each class (D_00244950, by class id), its count of properties and
 // its list of (id, descriptor). The descriptors are filled at startup.

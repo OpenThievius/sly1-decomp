@@ -82,12 +82,9 @@ void func_00168A48(Buf_193318* b);
 
 void func_001AA8F0(void* self);
 
-
 void func_001AA958(void* self);
 
-
 void func_001936A0(void* self, s32 v);
-
 
 struct Glob_194278 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; };
 struct Rec_194278 { s32 f0; void* f4; s32 f8; s32 fC; s32 f10; };
@@ -103,12 +100,9 @@ void* func_0015A838(void* a, s32 b, s32 c, s32 d);
 void func_001A4EF0(void* p, s32 mode);
 void func_001F4408(void* a, s32 b);
 
-
 void func_001936A0(T217D_6D0* self);
 void func_00195928(void* self, s32 v);
 void func_001AA998(void* self, s32 flag);
-
-
 
 extern u8 D_00275BC0[];
 
@@ -149,10 +143,6 @@ extern f32 D_0026A70C;
 void func_00194D30(T217D_6D0* self, s32 a, s32 b);
 s32 func_001FD7A0(f32 x);
 
-struct Row_195958 {
-    u8 pad0[0x14];
-    s32* items;
-};
 struct Glob_195958 {
     u8 pad0[0x19EC];
     u32 f19EC;
@@ -245,7 +235,6 @@ struct Gs_1943E8 {
     Reg_1943E8 f40;
 };
 
-
 extern f32 D_00261868;
 extern Pad_1943E8 D_00262C70;
 extern Ent_1943E8* D_0026998C;
@@ -289,8 +278,6 @@ struct Clamp_1943E8 {
         return x;
     }
 };
-
-
 
 enum Bits_1940E8 {
     BITS_1940E8_ZERO = 0

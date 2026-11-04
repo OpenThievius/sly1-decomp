@@ -57,9 +57,6 @@ struct Flags_00126AB0 { u8 pad[0x264]; u32 flags; u32 value; };
 
 extern void* func_00159BB0();
 extern s32 func_00182FC8(void*);
-struct State_00126C58 { u8 pad[0x298]; void* resource; };
-struct Resource_00126C58 { s32 unknown; f32 value; };
-
 
 extern void func_00188FD8(void*, void*);
 
@@ -72,7 +69,6 @@ void func_00124540(C02* object)
 	object->desc02()->m2A(object, &object->m1A0);
 	func_00188FD8(&object->m1A0, &object->v1D0);
 }
-
 
 void func_00125108(C02* self)
 {
@@ -142,7 +138,6 @@ void func_001273F0(C02* self, Vec02* src)
     self->desc->m0E(self, 3, &f);
 }
 
-
 void func_001226D8(void* p);
 s32 func_00123DC0(void* a);
 void func_00129DF8(void* self);
@@ -157,7 +152,6 @@ void func_001274F8(C02* self, Vec02* src)
         func_00129DF8(self);
     }
 }
-
 
 void func_001226D8(void* p);
 s32 func_00123E00(void* a);
@@ -199,7 +193,6 @@ void func_001275F0(Obj_001275F0* self, f32 x, f32 y, f32 z)
     v[2] = z;
     self->vtbl[37](self, v);
 }
-
 
 typedef void (*VFn0_124EE8)(void* self);
 
@@ -297,12 +290,10 @@ void* func_0015A448(void* a, s32 b, void* c);
 void func_0012A860(void* self, void* v);
 void func_00165828(void* a, void* b);
 
-
 struct Sub_1249A8 {
     u8 pad0[0x20];
     s32 f20;
 };
-
 
 void func_001249A8(C02* self)
 {
@@ -335,7 +326,6 @@ struct Sub_127378 {
     s32 f1C;
     f32 f20;
 };
-
 
 extern f32 D_0026185C;
 
@@ -534,7 +524,6 @@ void func_00124A48(C02* self)
     D_0027B314 = (ListFrame*)fr.f0C;
 }
 
-
 void func_001830D8(C01* self, C01* src);
 void func_00165920(u8* a, C02* self, u8* src);
 void* func_0018D568(s32 size, void* src);
@@ -679,7 +668,6 @@ void func_00124DF8(Self_124DF8* self, s32 count, Item_124DF8* item)
     } while (n != 0);
 }
 
-
 void func_001226D8(void* p);
 
 void func_00127478(C02* self, Mat02* src)
@@ -762,7 +750,6 @@ void func_00124338(C02* self)
     D_0027B314 = (ListFrame*)it.saved;
 }
 
-
 struct Iter_00126F78 { List01* list; u8* link; s32 offset; Iter_00126F78* saved; };
 
 struct Next_00126F78 {
@@ -811,7 +798,6 @@ struct Vtable_124FC0 {
 };
 struct Object_124FC0 { Vtable_124FC0* vtable; };
 struct Iter_124FC0 { List01* list; u8* link; s32 offset; Iter_124FC0* saved; };
-
 
 struct Next_124FC0 {
     static Object_124FC0* Of(Iter_124FC0* it)
@@ -919,8 +905,6 @@ void func_00124CC0(Self_124CC0* self)
     func_0012C288(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
 }
 
-
-
 struct Fl_1276C0 {
     u8 pad0[0x90];
     f32 f90;
@@ -928,8 +912,6 @@ struct Fl_1276C0 {
     u8 pad98[0xB0 - 0x98];
     s32 fB0;
 };
-
-
 
 struct Locals_1276C0 {
     u8 a20[16];

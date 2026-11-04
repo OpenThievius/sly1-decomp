@@ -45,7 +45,6 @@ struct Vt_1E5428 {
     VFn_1E5428* vtbl;
 };
 
-
 struct Peer_1E5428 {
     u8 pad0[0xC2C];
     C16* owner;
@@ -330,10 +329,6 @@ struct Obj_5E08 {
     void* f624;
 };
 
-struct Vtbl_5E08 {
-    void* slots[0x148 / 4];
-};
-
 typedef void (*VFn_5E08)(void* self);
 
 void func_001924C8(void* self);
@@ -359,7 +354,6 @@ void func_001E5E50(C16* a0, void* a1, Pair_1E5E50* out)
 }
 
 void* func_001E5E60(C16* self) { return self->f620 ? self->f620 : self; }
-
 
 // A view of the vertices that starts one vertex before the first (0x254): through it, the fields
 // of the vertex i are at 0x2C more (x at 0x2C, y at 0x34, the colours at 0x3C and 0x40, the
@@ -490,7 +484,6 @@ extern s32 D_00270458;
 void func_00161670(Ctx_1E62A8* c, s32 a, s32 b, s32 d, s32 e);
 void func_001615F0(Ctx_1E62A8* c, s32 a, s32 b, s32 d, s32 e);
 
-
 void func_001E62A8(T217D_3F0* self, Ctx_1E62A8* c, s32 k)
 {
     if (D_00270458 == 4) {
@@ -542,7 +535,6 @@ extern Rgba_1E6C20 D_002610E0;
 void func_001613C0(Buf_1E6C20* b, s32 a1, s32 a2, s32 a3);
 void func_00161458(Buf_1E6C20* b, u32 c);
 void func_001615F0(Buf_1E6C20* b, s32 x, s32 y, s32 a3, s32 a4);
-
 
 struct Lerp_1E6C20 {
     static u8 Of(s32 a, s32 b, f32 t)
@@ -744,9 +736,6 @@ done:
     self->phase = -1;
     func_001E7518(self, 3);
 }
-
-
-
 
 extern f32 D_00261858[];
 extern s32 D_00270448;
