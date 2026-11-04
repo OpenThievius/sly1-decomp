@@ -21,8 +21,6 @@ struct Obj_eu_1AD3C0 {
 
 void func_eu_001AAFB0(Obj_eu_1AD3C0* self);
 s32 func_0015C188(s32 a);
-struct In_1AA5A0;
-struct In_1AA5A0* func_0015C1C0(s32 a);
 
 void func_eu_001AD3C0(Obj_eu_1AD3C0* self)
 {

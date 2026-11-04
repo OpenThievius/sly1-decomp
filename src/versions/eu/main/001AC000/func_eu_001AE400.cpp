@@ -20,7 +20,6 @@ struct Obj_eu_1AE400 {
 };
 
 void func_eu_001AAFB0(Obj_eu_1AE400* self);
-void* func_0015C1C0(s32 a);
 void func_eu_001AB238(void* self, const char* s);
 
 void func_eu_001AE400(Obj_eu_1AE400* self)

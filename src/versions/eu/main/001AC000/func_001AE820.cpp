@@ -2,9 +2,10 @@
 extern f32 D_eu_0027939C;
 // PAL lays the object out 0x310 bytes later from f208 on, calls one more setter
 // (func_eu_001374E0), reads a PAL-only float, has a 0xC0 buffer, passes a fourth argument to func_0015DB28 and uses its own func_eu_0015E7E0.
+typedef void (*VFn_1AE820)(void* self);
 struct Obj_1AE820_eu {
     VFn_1AE820* vtbl;
-    void* f4;
+    V24A2* f4;
     u8 pad0[0x518 - 8];
     s32 f208;
     f32 f20c;

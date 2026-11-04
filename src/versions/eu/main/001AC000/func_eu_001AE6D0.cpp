@@ -13,6 +13,7 @@ extern Ui_eu_1AE6D0 D_eu_00273978;
 extern Ui_eu_1AE6D0 D_eu_0027CFE8;
 void func_eu_001ADE38(void* ui, s32 a, s32 b);
 void func_001AA8B8(void* self, f32 v);
+void func_001AA998(Obj_eu_1AE6D0* self, s32 flag);
 
 void func_eu_001AE6D0(Obj_eu_1AE6D0* self, s32 st)
 {
