@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c01.h"
+#include "t2196.h"
 
 extern u8 D_0062C568[];
 void func_001B5F28(void* list, void* item);
@@ -283,20 +283,7 @@ void func_0011EF88()
 
 void* func_0018D658(s32 size);
 
-struct Elem_11F180
-{
-    f32 value;
-    u8 pad[0x14];
-};
-
-struct Source_11F180
-{
-    u8 pad[8];
-    s32 count;
-    Elem_11F180* elems;
-};
-
-void func_0011F180(Source_11F180* src, s32* outCount, f32** outValues)
+void func_0011F180(T2196_668* src, s32* outCount, f32** outValues)
 {
     *outCount = src->count;
     if (outValues != 0)
@@ -304,33 +291,30 @@ void func_0011F180(Source_11F180* src, s32* outCount, f32** outValues)
         *outValues = (f32*)func_0018D658(*outCount << 2);
         for (s32 i = 0; i < *outCount; i++)
         {
-            (*outValues)[i] = src->elems[i].value;
+            (*outValues)[i] = src->keys[i].time;
         }
     }
 }
 
-struct Item_11F620 { f32 x; f32 y; };
-struct Set_11F620 { u8 pad0[8]; s32 count; Item_11F620* items; };
-
 void* func_0018D658(s32 size);
 
-void func_0011F620(Set_11F620* self, s32* count, f32** out)
+void func_0011F620(T2196_688* self, s32* count, f32** out)
 {
     s32 n = self->count;
     *count = n;
     if (out != 0) {
         *out = (f32*)func_0018D658(n * 4);
         for (s32 i = 0; i < *count; i++) {
-            (*out)[i] = self->items[i].x;
+            (*out)[i] = self->keys[i].time;
         }
     }
 }
 
-void func_0011F850(void* a, void* b);
+void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
 
-void func_0011FDB8(u8* self, void* p)
+void func_0011FDB8(T2196_6B8* self, s32* outCount, f32** outTimes)
 {
-    func_0011F850(self + 0x20, p);
+    func_0011F850(self->axis, outCount, outTimes);
 }
 
 void func_00109488(void);
@@ -363,7 +347,7 @@ void func_0011EF40(void)
 {
 }
 
-void func_0011EF48(void* unused, s32* a, s32* b)
+void func_0011EF48(T2196_Pos* unused, s32* a, s32* b)
 {
     *a = 0;
     if (b != 0) {
@@ -458,20 +442,18 @@ void func_0011E498(void)
     func_0011D968(0x3C, 0, 0);
 }
 
-struct Entry_11FB98 { f32 value; u8 rest[0x3C]; };
-
 void* func_0018D658(s32 size);
 
-void func_0011FB98(s32 count, Entry_11FB98* src, s32* outCount, f32** outArr)
+void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr)
 {
     *outCount = count;
     if (outArr) {
         *outArr = (f32*)func_0018D658(count * 4);
         s32 i = 0;
         if (*outCount > 0) {
-            Entry_11FB98* p = src;
+            Key2196_Vec* p = src;
             do {
-                (*outArr)[i] = p->value;
+                (*outArr)[i] = p->time;
                 p++;
                 i++;
             } while (i < *outCount);
@@ -479,38 +461,32 @@ void func_0011FB98(s32 count, Entry_11FB98* src, s32* outCount, f32** outArr)
     }
 }
 
-typedef void (*Hook_11FC20)(void* self, s32 a, s32 b);
-struct Owner_11FC20 { Hook_11FC20* vtbl; };
+// The owner's slot 44 (Desc02::m28) is told what was asked.
+typedef void (*Hook_11FC20)(C02* self, s32 a, s32 b);
 
-void func_0011F6B0(u8* a, Owner_11FC20* b, s32 c, u8* d, s32 e, s32 f, f32 g, f32 h);
+void func_0011F6B0(T2196_Weight** a, C02* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
 
-void func_0011FC20(u8* self, Owner_11FC20* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
+void func_0011FC20(T2196_6B8* self, C02* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
 {
-    func_0011F6B0(self + 0x20, other, c, self + 0x10, e, f, p12, p13);
-    if (other && other->vtbl[44])
-        other->vtbl[44](other, e, f);
+    func_0011F6B0(self->axis, other, c, &self->base, e, f, p12, p13);
+    if (other && other->desc02()->m28)
+        ((Hook_11FC20)other->desc02()->m28)(other, e, f);
 }
-
-typedef void (*Hook_11FDD8)(void* self, s32 a, s32 b);
-struct Owner_11FDD8 { Hook_11FDD8* vtbl; };
-struct Self_11FDD8 { u8 pad0[0xC]; s32 f0c; s32 f10; };
 
 void func_0011F9F8(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
 
-void func_0011FDD8(Self_11FDD8* self, Owner_11FDD8* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
+void func_0011FDD8(T2196_6C8* self, C02* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
 {
-    func_0011F9F8(self->f0c, self->f10, a2, a3, a4, p12, p13);
-    if (other && other->vtbl[44])
-        other->vtbl[44](other, a3, a4);
+    func_0011F9F8(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
+    if (other && other->desc02()->m28)
+        ((Hook_11FC20)other->desc02()->m28)(other, a3, a4);
 }
 
-struct Self_11FED8 { u8 pad0[0xC]; s32 count; u8* records; };
+void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr);
 
-void func_0011FB98(s32 count, u8* src, s32* outCount, f32** outArr);
-
-void func_0011FED8(Self_11FED8* self, s32* outCount, f32** outArr)
+void func_0011FED8(T2196_6C8* self, s32* outCount, f32** outArr)
 {
-    func_0011FB98(self->count, self->records, outCount, outArr);
+    func_0011FB98(self->count, self->keys, outCount, outArr);
 }
 
 extern s32 D_0025C268;
@@ -624,62 +600,56 @@ void func_0011D928(s32 a)
     func_0011DB00(0x27, 4, &w, 0, 0);
 }
 
-void func_0011EFB0(s32 unused, s32* a, s32* b)
+void func_0011EFB0(T2196_Weight* unused, s32* a, s32* b)
 {
     *a = 0;
     if (b != 0)
         *b = 0;
 }
 
-struct Sample_11EFC8 { f32 a; f32 b; s32 c; f32 d; s32 e; f32 f; };
-struct Table_11EFC8 { s32 pad[2]; s32 count; Sample_11EFC8* items; };
-
 s32 func_00137BE0(void* src);
 s32 func_00137D10(void* src);
 f32 func_00137DF8(void* src);
 s32 func_00137CC0(void* src);
 void* func_0018D500(s32 size);
 
-void func_0011EFC8(Table_11EFC8* self, void* src)
+void func_0011EFC8(T2196_668* self, Stream83* src)
 {
     self->count = func_00137BE0(src);
-    self->items = (Sample_11EFC8*)func_0018D500(0x18 * self->count);
+    self->keys = (Key2196_668*)func_0018D500(0x18 * self->count);
     for (s32 i = 0; i < self->count; i++) {
-        Sample_11EFC8* e = self->items + i;
-        e->a = (f32)func_00137D10(src) * 0.016666668f;
-        e->b = func_00137DF8(src);
+        Key2196_668* e = self->keys + i;
+        e->time = (f32)func_00137D10(src) * 0.016666668f;
+        e->value = func_00137DF8(src);
         e->c = func_00137CC0(src);
-        e->e = func_00137CC0(src);
+        e->kind = func_00137CC0(src);
         e->d = func_00137DF8(src);
         e->f = func_00137DF8(src);
     }
 }
 
-struct Elem_11F210 { f32 a; f32 b; s32 c; f32 d; f32 e; s32 f; f32 g; f32 h; };
-struct Table_11F210 { s32 pad[2]; s32 count; Elem_11F210* items; };
-
 s32 func_00137BE0(void* src);
 s32 func_00137D10(void* src);
 f32 func_00137DF8(void* src);
 s32 func_00137CC0(void* src);
 void* func_0018D500(s32 size);
 
-void func_0011F210(Table_11F210* self, void* src)
+void func_0011F210(T2196_678* self, Stream83* src)
 {
     self->count = func_00137BE0(src);
-    self->items = (Elem_11F210*)func_0018D500(0x20 * self->count);
+    self->keys = (Key2196_678*)func_0018D500(0x20 * self->count);
     for (s32 i = 0; i < self->count; i++) {
-        Elem_11F210* e = self->items + i;
-        e->a = (f32)func_00137D10(src) * 0.016666668f;
-        e->b = func_00137DF8(src);
+        Key2196_678* e = self->keys + i;
+        e->time = (f32)func_00137D10(src) * 0.016666668f;
+        e->value = func_00137DF8(src);
         e->c = func_00137CC0(src);
-        e->f = func_00137CC0(src);
+        e->kind = func_00137CC0(src);
         e->d = func_00137DF8(src);
         f32 t = func_00137DF8(src);
-        e->e = e->b - t;
+        e->e = e->value - t;
         e->g = func_00137DF8(src);
         f32 u = func_00137DF8(src);
-        e->h = e->b + u;
+        e->h = e->value + u;
     }
 }
 
@@ -761,11 +731,9 @@ void func_0011D600(s32 value)
     func_0011DB00(0x15, 4, &buf, 0, 0);
 }
 
-struct Self_11F3E8 { u8 pad0[8]; s32 count; u8* items; };
-struct Item_11F3E8 { f32 v; u8 pad4[0x1C]; };
 void* func_0018D658(s32 size);
 
-void func_0011F3E8(Self_11F3E8* self, s32* outCount, f32** outArr)
+void func_0011F3E8(T2196_678* self, s32* outCount, f32** outArr)
 {
     s32 n = self->count;
     *outCount = n;
@@ -775,7 +743,7 @@ void func_0011F3E8(Self_11F3E8* self, s32* outCount, f32** outArr)
         i = 0;
         if (*outCount > 0) {
             do {
-                (*outArr)[i] = ((Item_11F3E8*)self->items)[i].v;
+                (*outArr)[i] = self->keys[i].time;
                 i++;
             } while (i < *outCount);
         }
@@ -838,25 +806,22 @@ void func_0011E4C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
     func_0011D968(0x3E, 0x14, args);
 }
 
-struct Object_11F798 { void** vtbl; };
-typedef void (*Method_11F798)(Object_11F798* self, void* src);
-
 s32 func_00137B90(void* src);
 void func_00137E70(void* src, void* dst);
-void* func_00121160(s32 index);
+T2196_Weight* func_00121160(s32 index);
 
-void func_0011F798(Object_11F798** out, void* dst, void* src)
+void func_0011F798(T2196_Weight** out, Vec02* dst, Stream83* src)
 {
     s32 mask = func_00137B90(src);
-    Object_11F798** slot = out;
+    T2196_Weight** slot = out;
     func_00137E70(src, dst);
     s32 i = 2;
     do {
         s32 bit = mask & 1;
         mask >>= 1;
         if (bit) {
-            Object_11F798* o = (Object_11F798*)func_00121160(func_00137B90(src));
-            Method_11F798 fn = (Method_11F798)o->vtbl[1];
+            T2196_Weight* o = func_00121160(func_00137B90(src));
+            void (*fn)(T2196_Weight*, Stream83*) = o->vt->read;
             if (fn)
                 fn(o, src);
             *slot = o;
@@ -946,36 +911,32 @@ void func_0011EF68(void)
 {
 }
 
-struct Word_11EF70 { s32 value; };
-
-void func_0011EF70(void* context, Word_11EF70* first, Word_11EF70* second)
+void func_0011EF70(T2196_Rot* self, s32* first, s32* second)
 {
-    first->value = 0;
+    *first = 0;
     if (second != 0) {
-        second->value = 0;
+        *second = 0;
     }
 }
-
-struct Item_11FA88 { f32 k; u8 pad0[0xC]; u8 v0[0x10]; u8 v1[0x10]; u8 v2[0x10]; };
 
 s32 func_00137BE0(void* src);
 s32 func_00137D10(void* src);
 void func_00137E70(void* src, void* dst);
 void* func_0018D500(s32 size);
 
-void func_0011FA88(s32* outCount, void** outItems, void* src)
+void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
 {
     s32 count = func_00137BE0(src);
-    Item_11FA88* items = (Item_11FA88*)func_0018D500(count << 6);
+    Key2196_Vec* items = (Key2196_Vec*)func_0018D500(count << 6);
     if (count > 0) {
-        u8* p2 = items->v2;
-        u8* p1 = items->v1;
-        u8* p0 = items->v0;
-        Item_11FA88* it = items;
+        u8* p2 = (u8*)&items->v2;
+        u8* p1 = (u8*)&items->v1;
+        u8* p0 = (u8*)&items->v0;
+        Key2196_Vec* it = items;
         s32 left = count;
         do {
             left--;
-            it->k = (f32)func_00137D10(src) * 0.016666668f;
+            it->time = (f32)func_00137D10(src) * 0.016666668f;
             func_00137E70(src, p0);
             p0 += 0x40;
             func_00137E70(src, p1);
@@ -989,25 +950,24 @@ void func_0011FA88(s32* outCount, void** outItems, void* src)
     *outItems = items;
 }
 
-struct Obj_11FF08;
-typedef void (*Method_11FF08)(Obj_11FF08* self, void* a, void* b);
-struct Obj_11FF08 { Method_11FF08* vtbl; };
+// The owner's slot 45 (Desc02::m29) is told what was asked.
+typedef void (*Method_11FF08)(C02* self, void* a, void* b);
 struct Scratch_11FF08 { s32 a[4]; s32 b[4]; };
 
-void func_0011F6B0(u8* a, void* b, s32 c, u8* d, void* e, void* f);
+void func_0011F6B0(T2196_Weight** a, C02* b, s32 c, Vec02* d, void* e, void* f);
 void func_00188A20(void* a, void* b);
 void func_001EDE38(void* a, void* b, void* c);
 
-void func_0011FF08(u8* self, Obj_11FF08* other, s32 c, void* p3, void* p4)
+void func_0011FF08(T2196_6E8* self, C02* other, s32 c, void* p3, void* p4)
 {
     Scratch_11FF08 tmp;
-    func_0011F6B0(self + 0x20, other, c, self + 0x10, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
+    func_0011F6B0(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
     if (p3)
         func_00188A20(&tmp, p3);
     if (p4)
         func_001EDE38(&tmp, tmp.b, p4);
     if (other)
-        other->vtbl[45](other, p3, p4);
+        ((Method_11FF08)other->desc02()->m29)(other, p3, p4);
 }
 
 // Newly matched US functions from the small-function wave.
@@ -1103,9 +1063,9 @@ void func_0011EFA8()
 {
 }
 
-void* func_0011FFA8(void* self, u32 a1, u32 a2, u32 a3, u32 a4)
+void* func_0011FFA8(T2196_6E8* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
-    return func_0011F6B0((u8*)self + 0x20, a1, a2, (u8*)self + 0x10, a3, a4);
+    return func_0011F6B0(self->axis, a1, a2, &self->base, a3, a4);
 }
 
 extern u32 D_0062C56C;
@@ -1190,7 +1150,7 @@ void func_0011C2E8(Pool_11C2E8* self)
     self->tail = s2->next;
 }
 
-void func_0011EF90(void* a0, s32* a1, s32* a2)
+void func_0011EF90(T2196_Scale* a0, s32* a1, s32* a2)
 {
     *a1 = 0;
     if (a2 != 0) {
@@ -1243,20 +1203,17 @@ void func_0011C900(u32 addr)
     }
 }
 
-struct Table_11F478 { s32 pad[2]; s32 count; u8* items; };
-struct Entry_11F478 { u8 pad0[4]; f32 f04; u8 pad1[4]; f32 f0C; };
-
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
 
-void func_0011F478(Table_11F478* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void func_0011F478(T2196_688* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
     u8* p;
-    func_0011EE70(key, flags, 8, self->count, self->items, &diff, &delta, &p);
+    func_0011EE70(key, flags, 8, self->count, (u8*)self->keys, &diff, &delta, &p);
     if (delta < 0.0001f) {
         if (outF != 0) {
-            *outF = ((Entry_11F478*)p)->f04;
+            *outF = ((Key2196_688*)p)->value;
         }
         if (outI != 0) {
             *outI = 0.0f;
@@ -1265,33 +1222,29 @@ void func_0011F478(Table_11F478* self, s32 unused, s32 flags, f32* outF, f32* ou
     }
     if (outF != 0) {
         f32 t = diff / delta;
-        *outF = (1.0f - t) * ((Entry_11F478*)p)->f04 + t * ((Entry_11F478*)p)->f0C;
+        *outF = (1.0f - t) * ((Key2196_688*)p)->value + t * ((Key2196_688*)p + 1)->value;
     }
     if (outI != 0) {
-        *outI = scale * (((Entry_11F478*)p)->f0C - ((Entry_11F478*)p)->f04) / delta;
+        *outI = scale * (((Key2196_688*)p + 1)->value - ((Key2196_688*)p)->value) / delta;
     }
 }
-
-struct Elem_11F568 { f32 a; f32 b; };
-struct Table_11F568 { s32 pad[2]; s32 count; Elem_11F568* items; };
 
 s32 func_00137BE0(void* src);
 s32 func_00137D10(void* src);
 f32 func_00137DF8(void* src);
 void* func_0018D500(s32 size);
 
-void func_0011F568(Table_11F568* self, void* src)
+void func_0011F568(T2196_688* self, Stream83* src)
 {
     self->count = func_00137BE0(src);
-    self->items = (Elem_11F568*)func_0018D500(self->count << 3);
+    self->keys = (Key2196_688*)func_0018D500(self->count << 3);
     for (s32 i = 0; i < self->count; i++) {
-        Elem_11F568* e = self->items + i;
-        e->a = (f32)func_00137D10(src) * 0.016666668f;
-        e->b = func_00137DF8(src);
+        Key2196_688* e = self->keys + i;
+        e->time = (f32)func_00137D10(src) * 0.016666668f;
+        e->value = func_00137DF8(src);
     }
 }
 
-struct Self_11FFD8 { void** vt; u8 pad0[4]; s32 flag; };
 struct Locals_11FFD8 {
     u8 a[0x30];
     u8 b[0x30];
@@ -1301,86 +1254,77 @@ struct Locals_11FFD8 {
     f32* values;
     f32 first;
 };
-typedef void (*Fn3_11FFD8)(void*, void*, void*);
-typedef void (*Fn0_11FFD8)(void*, void*, void*, void*, void*, f32, f32);
-
-extern void func_0011F798(void*, void*, void*);
+extern void func_0011F798(T2196_Weight**, Vec02*, Stream83*);
 extern void func_00189150(void*, void*, void*);
 extern void func_00188D28(void*, void*, void*);
 extern void func_0018D608(void);
 extern void func_0018D6F0(void);
 
-void func_0011FFD8(Self_11FFD8* self, void* arg)
+void func_0011FFD8(T2196_6E8* self, Stream83* arg)
 {
     Locals_11FFD8 loc;
     s32 result;
 
-    func_0011F798((u8*)self + 0x20, (u8*)self + 0x10, arg);
+    func_0011F798(self->axis, &self->base, arg);
     func_0018D608();
-    ((Fn3_11FFD8)self->vt[3])(self, &loc.count, &loc.values);
+    self->vt->times(self, &loc.count, &loc.values);
     if (loc.count > 0) {
-        ((Fn0_11FFD8)self->vt[0])(self, 0, 0, loc.a, 0, loc.values[0], 1.0f);
-        ((Fn0_11FFD8)self->vt[0])(self, 0, 0, loc.b, 0, loc.values[loc.count - 1], 1.0f);
+        self->vt->eval(self, 0, 0, loc.a, 0, loc.values[0], 1.0f);
+        self->vt->eval(self, 0, 0, loc.b, 0, loc.values[loc.count - 1], 1.0f);
         func_00189150(loc.a, loc.b, loc.c);
         func_00188D28(loc.c, &loc.first, loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
     } else {
         result = 1;
     }
-    self->flag = result;
+    self->closed = result;
     func_0018D6F0();
 }
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f18` and the `move $a0`); the argument setup is scheduled differently.
 
-struct Table_11F0C8 { s32 pad[2]; s32 count; u8* items; };
-struct Entry_11F0C8 { u8 pad0[4]; f32 f04; u8 pad1[8]; s32 kind; f32 f14; u8 pad2[4]; f32 f1C; u8 pad3[4]; f32 f24; };
-
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
 void func_001303F0(f32 delta, f32 diff, f32 scale, f32 p4, f32 p14, f32 p1C, f32 p24, f32* outF, f32* outI, s32 zero);
 
-void func_0011F0C8(Table_11F0C8* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void func_0011F0C8(T2196_668* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
     u8* p;
-    func_0011EE70(key, flags, 0x18, self->count, self->items, &diff, &delta, &p);
-    if (((Entry_11F0C8*)p)->kind == 5) {
+    func_0011EE70(key, flags, 0x18, self->count, (u8*)self->keys, &diff, &delta, &p);
+    if (((Key2196_668*)p)->kind == 5) {
         if (outF != 0) {
-            *outF = ((Entry_11F0C8*)p)->f04;
+            *outF = ((Key2196_668*)p)->value;
         }
         if (outI != 0) {
             *outI = 0.0f;
         }
         return;
     }
-    func_001303F0(delta, diff, scale, ((Entry_11F0C8*)p)->f04, ((Entry_11F0C8*)p)->f14, ((Entry_11F0C8*)p)->f1C, ((Entry_11F0C8*)p)->f24, outF, outI, 0);
+    func_001303F0(delta, diff, scale, ((Key2196_668*)p)->value, ((Key2196_668*)p)->f, ((Key2196_668*)p + 1)->value, ((Key2196_668*)p + 1)->d, outF, outI, 0);
 }
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
 
-struct Table_11F320 { s32 pad[2]; s32 count; u8* items; };
-struct Entry_11F320 { u8 pad0[4]; f32 f04; u8 pad1[0xC]; s32 kind; f32 f18; f32 f1C; u8 pad2[4]; f32 f24; u8 pad3[4]; f32 f2C; f32 f30; };
-
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
 void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
 
-void func_0011F320(Table_11F320* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
+void func_0011F320(T2196_678* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
 {
     f32 diff;
     f32 delta;
     u8* p;
-    func_0011EE70(key, flags, 0x20, self->count, self->items, &diff, &delta, &p);
-    if (((Entry_11F320*)p)->kind == 5) {
+    func_0011EE70(key, flags, 0x20, self->count, (u8*)self->keys, &diff, &delta, &p);
+    if (((Key2196_678*)p)->kind == 5) {
         if (outF != 0) {
-            *outF = ((Entry_11F320*)p)->f04;
+            *outF = ((Key2196_678*)p)->value;
         }
         if (outI != 0) {
             *outI = 0.0f;
         }
         return;
     }
-    func_00130168(delta, diff, scale, ((Entry_11F320*)p)->f04, ((Entry_11F320*)p)->f18, ((Entry_11F320*)p)->f1C, ((Entry_11F320*)p)->f24, ((Entry_11F320*)p)->f2C, ((Entry_11F320*)p)->f30, outF, outI, 0);
+    func_00130168(delta, diff, scale, ((Key2196_678*)p)->value, ((Key2196_678*)p)->g, ((Key2196_678*)p)->h, ((Key2196_678*)p + 1)->value, ((Key2196_678*)p + 1)->d, ((Key2196_678*)p + 1)->e, outF, outI, 0);
 }
 
 struct Pack7_11E048 { void* w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
@@ -2407,22 +2351,18 @@ void func_0011CA90(void)
     Init_11CA90::Load(((u8*)&D_0062C598), 0x0C, D_0025C300, &D_0027B310);
 }
 
-struct Obj_11F850;
-typedef void (*VFn_11F850)(Obj_11F850* self, s32* count, f32** data);
-struct Obj_11F850 { VFn_11F850* vtbl; };
-
 void func_0018D800(f32* dst, f32* src, s32 n);
 void func_001F5CD0(f32* base, s32 n, s32 size, void* cmp);
 extern u8 func_001EB128[];
 
-void func_0011F850(Obj_11F850** objs, s32* outCount, f32** outArr)
+void func_0011F850(T2196_Weight** objs, s32* outCount, f32** outArr)
 {
     s32 counts[3];
     f32* ptrs[3];
     s32 i;
     for (i = 0; i < 3; i++) {
         if (objs[i]) {
-            objs[i]->vtbl[2](objs[i], &counts[i], &ptrs[i]);
+            objs[i]->vt->times(objs[i], &counts[i], &ptrs[i]);
         } else {
             counts[i] = 0;
             ptrs[i] = 0;

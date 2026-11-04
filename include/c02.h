@@ -12,6 +12,7 @@
 #include "c01.h"
 
 struct C02;
+struct T2195;   // an attachment (t2195.h): a record of the world's pool at C6C::pool1B20
 
 // A 16-byte vector (a position, a velocity, a matrix row), 16-aligned as the code moves it.
 struct __attribute__((aligned(16))) Vec02 {
@@ -102,9 +103,9 @@ struct C02 : C01 {
     Vec02 v190;             // 0x190
     Mat02 m1A0;             // 0x1A0
     Vec02 v1D0;             // 0x1D0
-    List01 list1E0;         // 0x1E0: offset 8
-    void* f1EC;             // 0x1EC
-    void* f1F0;             // 0x1F0
+    List01 list1E0;         // 0x1E0: the attachments (T2195 records), linked at T2195::link (offset 8)
+    T2195* f1EC;            // 0x1EC: the attachment that gives the position (slot 4)
+    T2195* f1F0;            // 0x1F0: the one that gives the orientation (slot 5)
     void* f1F4;             // 0x1F4
     void** f1F8;            // 0x1F8: f26C entries
     void* f1FC;             // 0x1FC

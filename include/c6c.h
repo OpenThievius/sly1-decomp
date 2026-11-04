@@ -57,7 +57,9 @@ struct C6C : C01 {
     u8 pad1AEC[0x1AF0 - 0x1AEC];
     Pool6C pool1AF0;        // 0x1AF0: 0x10-byte records, the contact rows (func_001DC828 gives them back)
     Pool6C pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
-    u8 pad1B08[0x1B7C - 0x1B08];
+    u8 pad1B08[0x1B20 - 0x1B08];
+    Pool6C pool1B20;        // 0x1B20: the T2195 records (func_00121228 takes one, func_00121358 gives it back)
+    u8 pad1B2C[0x1B7C - 0x1B2C];
     ActorList6C list1B7C;   // 0x1B7C
     u8 pad1B88[0x1BD0 - 0x1B88];
     Pool6C pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC

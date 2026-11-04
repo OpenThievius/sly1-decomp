@@ -497,8 +497,8 @@ void func_0018D9B8(C3C* self, void* b, f32 x)
     self->f1EC = 0;
     self->f1F0 = 0;
     func_001BC088(self, x, b);
-    self->f1EC = (void*)s1;
-    self->f1F0 = (void*)s0;
+    self->f1EC = (T2195*)s1;
+    self->f1F0 = (T2195*)s0;
 }
 
 ASM_FUNC(func_0018DA40);
