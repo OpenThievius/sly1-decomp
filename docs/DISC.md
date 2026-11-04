@@ -63,8 +63,7 @@ The records are grouped in tables (US addresses):
 | 0x2482D8, 0x2628B0 | 7, 6 × 0x20 | sounds | VAG |
 | 0x248470 | 1 | a file copied to the memory card | |
 
-PAL has the same scheme at other addresses; its level records hold five sector ranges per
-level.
+PAL has the same scheme at other addresses (see PAL).
 
 Reading goes through the CD library's sector read (0x203B18), called by a blocking retry
 wrapper (0x140CC8). Levels are read by a ring-buffered stream (0x137490) and decompressed
@@ -75,7 +74,7 @@ sector the game sends it. After the tray has been opened, the game checks the di
 CRC-32 of sector 1,368,303 (US).
 
 These tables cover 60% of the unlisted sectors. The levels hold the rest of the records
-(see Levels), bringing it to all but 77 sectors.
+(see Levels), bringing it to every sector but 13 empty ones.
 
 ## Levels
 
@@ -108,8 +107,8 @@ A level holds disc records of its own. The record after the music names the leve
 bank: these are the 45 files that start `01 00 00 00`, one per level except the splash
 screen. Three object classes read records: lists of steps (0x150570) and of events
 (0x12BC38) name 1,362 VAG sounds and 13 videos (see Events). With them, the records name
-1,355,898 of the 1,355,975 unlisted sectors; what remains is a 64-sector VAG at 454,000
-and 13 empty sectors.
+every unlisted sector but 13 empty ones (the 64-sector VAG at 454,000 is named by the
+record at 0x26A118, which 0x1936A0 reads).
 
 ### Textures
 
@@ -259,11 +258,47 @@ video at 593,237. A standalone parser written from this reads every animation, g
 step list of the 46 US levels (14,753 blocks, 34.9 MB) exactly as retail's loaders do,
 read for read.
 
+## PAL
+
+PAL holds every level five times, once per language, and moves the localized sound into
+the levels. Its level table (0x2490F0) has 46 records of 0xAC bytes: five disc records, the
+level code at +0xA0, at +0xA4 the id of the level's name in the level's string table, and
+the flags at +0xA8. The copy read is chosen by a language slot (0x263710): at start-up from
+the system language (0x160538, an entry of the init table; values 1, 2, 4, 3, 5 give slots
+0 to 4, anything else slot 0), later from the language menu, which reloads level 0x003. The
+copies' strings make the slots English, French, German, Spanish and Italian.
+
+Videos (0x24B0D0), sound banks (0x246440), the memory-card file and the disc check (sector
+1,427,630) are tables as on US. The music table (0x24B388, 33 × 0xC) keeps only the level
+code, a float and the credits; the music is named by the level's own record. The sounds the
+US tables name (0x2482D8, 0x2628B0, 0x26A118) become indices into 14 voice records each
+level holds.
+
+A PAL level is a US level with two more parts and three changed fields, read by PAL's world
+loader (0x1DDC68):
+
+| Part | Format | Reader |
+| --- | --- | --- |
+| strings | after the flags: u16 count; per string a u16 length and that many 16-bit characters (190 in every level, the same in all levels of a language) | 0x1DDA10, 0x1387C8 |
+| voices | after the level sound bank: 14 disc records | 0x1DDC68 |
+| event kind 0x36 | s16, s16 and a string id, where US has a string | 0x12BD58 |
+| step kind 3, class 0x82 | the name in 16-bit characters | 0x150820, 0x192CD8 |
+
+Everything else is read by the same code as on US. Running retail PAL's loaders over the
+230 level copies, the US parsers read every geometry block (119,740) and collision prefix
+(23,185) exactly, read for read, and with the changes above every animation, graph and step
+list (46,775 blocks); in every copy the objects end exactly where the texture data must
+start. The copies of a level differ in their strings, sounds, music and texture data, not in
+their objects; PAL English has two objects more than US in levels 0x003, 0x305 and 0x306.
+
+The records of the executable and of the levels name 1,415,288 of PAL's 1,415,303 unlisted
+sectors: 230 level copies, 17 + 13 videos, the sound banks, 164 music streams, 190 level
+sound banks, 70 voices and 2,625 event and step sounds (525 per language). What remains is
+15 empty sectors at the end of the disc.
+
 ## Next
 
-1. **Each format, from its reader.** What each class and event kind is in the game, and
-   the fields not yet named (listed in each section's reader); PAL's levels. Then models,
-   textures and sound, documented here, and the extractor written in OpenThievius, from
-   the functions that parse them.
-2. **The remaining data.** The 64-sector VAG at 454,000, which no record found yet names;
-   what the event kinds and the object classes are in the game.
+1. **The fields not yet named,** listed in each section above, and the sound banks' own
+   format; then the extractor, written in OpenThievius from these readers.
+2. **What the data is in the game.** The event kinds and object classes, which so far
+   have only a shape; PAL's language-specific music and its voice index 5.
