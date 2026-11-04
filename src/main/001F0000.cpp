@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c73.h"
+#include "c67.h"
 #include "c8d.h"
 #include "list_iter.h"
 
@@ -26,7 +27,7 @@ void func_00125B70(void* obj, void* c, void* out);
 void func_00188B08(void* a, void* b, void* out);
 void func_00125C90(void* obj, void* s, void* out);
 
-void func_001F0EB8(void* obj, u8* s, void* c)
+void func_001F0EB8(C67* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
     Cam_1F0EB8* p = D_00261990;
@@ -309,13 +310,11 @@ void func_00127378(void* self, s32 kind, void* msg);
 void func_001F0220(void* o, s32 mode);
 void func_001F1050(void* self, s32 mode);
 
-struct Obj_1F0F70 { u8 pad0[0x2D0]; s32 f2D0; u8 pad1[8]; s32 f2DC; s32 f2E0; u8 pad2[8]; s32 f2EC; };
-
-void func_001F0F70(Obj_1F0F70* self, s32 kind, void* msg)
+void func_001F0F70(C67* self, s32 kind, void* msg)
 {
     func_00127378(self, kind, msg);
     if (kind != 5) return;
-    s32 v = self->f2D0;
+    s32 v = self->mode;
     if (v == 3) goto L_three;
     if (v >= 4) goto L_ge4;
     if (v == 1) goto L_one;
@@ -1101,35 +1100,28 @@ f32 func_001F31F8(s32 a0)
     return (f32)n * 4.656612873077393e-10f;
 }
 
-struct Obj_1F0660 {
+// The common fields of class 0x02 that func_001F0660 reads (proposed for c02.h).
+struct Common_1F0660 {
     u8 pad0[8];
     s32 id;
     u8 pad0c[0x2C8 - 0xC];
     u64 flags;
-    u8 pad2d0[0x2F4 - 0x2D0];
-    s32 slot;
 };
 struct Glob_1F0660 {
     u8 pad[0x19D8];
     s32 val;
 };
-struct __attribute__((packed)) Ptr_1F0660 { Obj_1F0660* p; };
-struct Tab_1F0660 {
-    u8 pad[0x260];
-    Ptr_1F0660 cur;
-    Obj_1F0660* list[1];
-};
+struct __attribute__((packed)) Ptr_1F0660 { C67* p; };
+extern void func_00124A48(C67* o);
 
-extern void func_00124A48(Obj_1F0660* o);
-
-void func_001F0660(Obj_1F0660* o) {
+void func_001F0660(C67* o) {
     func_00124A48(o);
-    o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
+    ((Common_1F0660*)o)->flags = (((Common_1F0660*)o)->flags & ~(3UL << 40)) | (1UL << 40);
     if (((Glob_1F0660*)D_002623C0)->val) {
         u8* t = (u8*)&D_0026F808;
         ((Ptr_1F0660*)(t + 0x260))->p = o;
     }
-    switch (o->id) {
+    switch (((Common_1F0660*)o)->id) {
     case 0x1C7: o->slot = 1; break;
     case 0x1C8: o->slot = 2; break;
     case 0x1C9: o->slot = 3; break;
@@ -1469,23 +1461,18 @@ s32 func_001F0490(Obj_1F0490* self, s32 kind, s32* outA, s32* outB)
 struct Ent_275FE0 { s32 a, b, c; };
 extern Ent_275FE0 D_00275FE0[52];
 
-struct Obj_1F0758;
 struct Node_1F0758;
 struct List_1F0758 { u8* head; u8 pad4[4]; s32 offset; };
 struct Iter_1F0758 { List_1F0758* list; u8* link; s32 offset; Iter_1F0758* saved; };
 
-struct Elem_1F0758 { u8 pad0[0x24]; f32 f24; f32 f28; f32 f2C; f32 f30; };
-
-struct Obj_1F0758 {
+// The common fields of class 0x02 that func_001F0758 reads (proposed for c02.h).
+struct Common_1F0758 {
     u8 pad0[0x34];
     List_1F0758 list;
-    u8 pad2[0x2F8 - 0x40];
-    Elem_1F0758 elems[11];
-    s32 f534;
 };
 
-void func_001249A8(Obj_1F0758* self);
-void func_00124DF8(Obj_1F0758* self, s32 n, void* table);
+void func_001249A8(C67* self);
+void func_00124DF8(C67* self, s32 n, void* table);
 void func_00182ED8(Node_1F0758* node);
 f32 func_001EAAE0(f32 a, f32 b);
 
@@ -1509,16 +1496,16 @@ struct Begin_1F0758 {
     }
 };
 
-void func_001F0758(Obj_1F0758* self)
+void func_001F0758(C67* self)
 {
     Iter_1F0758 it;
     Node_1F0758* node;
-    Elem_1F0758* el;
+    Elem67* el;
     s32 i;
 
     func_001249A8(self);
     func_00124DF8(self, 0x34, D_00275FE0);
-    Begin_1F0758::Of(&it, &self->list);
+    Begin_1F0758::Of(&it, &((Common_1F0758*)self)->list);
     while ((node = Next_1F0758::Of(&it)) != 0) {
         func_00182ED8(node);
     }

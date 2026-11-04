@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c52.h"
+#include "c64.h"
 
 void func_001F3A40(void);
 
@@ -310,41 +312,30 @@ void func_0016DD00(void)
     D_002629C8 = 0;
 }
 
-struct Tune_0016DD10 {
-    u8 pad0[0x31C];
-    f32 f31C;
-    f32 f320;
-    f32 f324;
-    f32 f328;
-    f32 f32C;
-    f32 f330;
-    f32 f334;
-};
-
 void func_00123ED0(void* self);
 
-void func_0016DD10(Tune_0016DD10* self)
+void func_0016DD10(C64* self)
 {
     func_00123ED0(self);
-    self->f31C = 2.25f;
-    self->f320 = 2.0f;
-    self->f324 = 0.8f;
-    self->f328 = 4.0f;
-    self->f32C = 0.5f;
-    self->f330 = 1000.0f;
-    self->f334 = 2000.0f;
+    self->tune31C = 2.25f;
+    self->tune320 = 2.0f;
+    self->tune324 = 0.8f;
+    self->tune328 = 4.0f;
+    self->tune32C = 0.5f;
+    self->tune330 = 1000.0f;
+    self->tune334 = 2000.0f;
 }
 
 void func_001289C0(void* self);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 
-void func_0016DD90(u8* self)
+void func_0016DD90(C64* self)
 {
     func_001289C0(self);
-    s32 r = func_0015A4F0(*(s32*)(self + 0x14), 0x201, 0x73, self, 0x10, self + 0x2D0);
-    *(s32*)(self + 0x310) = r;
+    s32 r = func_0015A4F0((s32)self->world, 0x201, 0x73, self, 0x10, self->table2D0);
+    self->tableCount = r;
     if ((u32)r >= 0x11) {
-        *(s32*)(self + 0x310) = 0x10;
+        self->tableCount = 0x10;
     }
 }
 
@@ -585,15 +576,12 @@ void func_0016F2E0(void)
     D_00262E00.time = 0.0f;
 }
 
-typedef void (*VFn_16DDE8)(void* self);
-struct Obj_16DDE8 { VFn_16DDE8* vtbl; };
-
 void func_00124A48(void* self);
 
-void func_0016DDE8(Obj_16DDE8* self)
+void func_0016DDE8(C64* self)
 {
     func_00124A48(self);
-    self->vtbl[7](self);
+    self->desc->m03(self);
 }
 
 struct Obj_16DF68 { u8 pad0[0x14]; void* f14; u8 pad1[0x7A0 - 0x18]; s32 f7A0; s32 f7A4; s32 f7A8; s32 f7AC; };

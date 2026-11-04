@@ -2,6 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c83.h"
+#include "c6b.h"
 
 struct Owned { u8 pad[0x14]; void* owner; };
 
@@ -1523,13 +1524,11 @@ void func_0012AF38(Host_0012AF38* self, void* value, Rec_0012AF38* src, f32 x, f
 }
 
 // NEAR: same bytes except the prologue order: retail loads the crc word and the table base before the n > 0 test (lw v0, addiu t1, then blez); ours tests first
-struct Obj_0012B760 { u8 pad[0x2D0]; u32 crc; u32* cursor; s32 remaining; u32 table[256]; };
-
 s32 D_00261080[4];
 
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
-void func_0012B760(Obj_0012B760* self)
+void func_0012B760(C6B* self)
 {
     if (self->remaining != 0) {
         s32 n = self->remaining;
@@ -2462,21 +2461,13 @@ extern const Fn_2197C0 D_002197C0[10] = {
 extern u8 D_00148D64[];
 void func_00123ED0(void* self);
 
-struct Crc_12B6B8 {
-    u8 pad[0x2D0];
-    u32 f2D0;
-    s32 f2D4;
-    void* f2D8;
-    u32 table[256];
-};
-
-void func_0012B6B8(Crc_12B6B8* self)
+void func_0012B6B8(C6B* self)
 {
     u32 c;
     func_00123ED0(self);
-    self->f2D4 = 0x100018;
-    self->f2D8 = D_00148D64;
-    self->f2D0 = 0xFFFFFFFF;
+    self->start = 0x100018;
+    self->end = D_00148D64;
+    self->crc = 0xFFFFFFFF;
     for (s32 i = 0; i < 256; i++) {
         c = (u32)i;
         s32 k = 7;

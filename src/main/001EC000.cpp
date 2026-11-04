@@ -4,6 +4,7 @@
 #include "fpu.h"
 #include "c90.h"
 #include "c86.h"
+#include "c62.h"
 
 void func_00182C58(void);
 s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
@@ -265,19 +266,14 @@ void* func_001EF828(void* self)
     return (u8*)self + 0x590;
 }
 
-struct Obj_1EF838 { u8 pad0[0x2D0]; s32 f2D0; u8 pad1[0xC]; s32 f2E0; };
-
 void func_00123ED0(void* self);
 
-void func_001EF838(Obj_1EF838* self)
+void func_001EF838(C62* self)
 {
     func_00123ED0(self);
-    self->f2D0 = -1;
-    self->f2E0 = -1;
+    self->id2D0 = -1;
+    self->id2E0 = -1;
 }
-
-typedef void (*VFn_1EF868)(void* self);
-struct Obj_1EF868 { VFn_1EF868* vtbl; };
 
 extern s32 D_00275E10[92];
 
@@ -285,12 +281,12 @@ void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a, void* b);
 void func_001EF900(void* self, s32 b);
 
-void func_001EF868(Obj_1EF868* self)
+void func_001EF868(C62* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 1, D_00275E10);
     func_001EF900(self, 0);
-    self->vtbl[7](self);
+    self->desc->m03(self);
 }
 
 void func_0013EC00(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
@@ -706,17 +702,14 @@ void func_001EF3D8(Self_1EF3D8* self, s32 kind, void* msg)
     func_00127378(self, kind, msg);
 }
 
-struct Obj_1EF9C8 { u8 pad0[0x2DC]; s32 f2DC; };
-struct Msg_1EF9C8 { s32 f0; s32 f4; s32 f8; };
-
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001EF900(void* self, s32 b);
 
-void func_001EF9C8(Obj_1EF9C8* self, s32 kind, Msg_1EF9C8* msg)
+void func_001EF9C8(C62* self, s32 kind, Msg62* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 5) {
-        if (msg->f8 == self->f2DC) {
+        if (msg->id == self->id2DC) {
             func_001EF900(self, 0);
         }
     }

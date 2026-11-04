@@ -3,21 +3,18 @@
 #include "asm_func.h"
 extern f32 D_0026185C[];
 #include "list_iter.h"
+#include "c53.h"
 
 // A four-float vector, aligned as the VU0 reads it.
 struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
 
 
-struct Obj_1963D8 { u8 pad0[0x14]; u8* f14; };
-
-void func_00123ED0(Obj_1963D8* self);
-void func_00152470(u8* dst, Obj_1963D8* src);
+void func_00123ED0(C53* self);
+void func_00152470(u8* dst, C53* src);
 
 
 
-struct Obj_196900 { void** vtbl; };
-
-void func_00124A48(Obj_196900* self);
+void func_00124A48(C53* self);
 
 
 
@@ -214,13 +211,12 @@ void func_001B6DF8(Any_001969F8* a, void* b);
 
 
 
-struct Rd_196410;
 struct Nd_196410;
 struct VT_196410 {
     u8 pad0[8];
     u32 flags;
     u8 pad0C[0x38 - 0xC];
-    void (*m38)(Nd_196410*, Rd_196410*);
+    void (*m38)(Nd_196410*, Stream53*);
     u8 pad3C[0x58 - 0x3C];
     void (*m58)(Nd_196410*);
     u8 pad5C[0x64 - 0x5C];
@@ -245,20 +241,18 @@ struct Nd_196410 {
 };
 struct List_196410 { Nd_196410* head; s32 pad4; s32 link; };
 struct Cell_196410 { Nd_196410* node; s32 link; };
-struct Self_196410 {
-    VT_196410* vt;
-    u8 pad04[4];
+// The common fields of class 0x02 that func_00196410 reads (proposed for c02.h).
+struct Common_196410 {
+    u8 pad0[8];
     s32 f08;
-    u8 pad0C[0x14 - 0xC];
-    void* f14;
-    void* f18;
-    u8 pad1C[0x34 - 0x1C];
+    u8 pad0C[0x34 - 0xC];
     List_196410 f34;
     u8 pad40[0xD0 - 0x40];
     u8 fD0[0x30];
     u8 f100[0x2D0 - 0x100];
-    u8 f2D0[1];
 };
+typedef void (*Fn58_196410)(Nd_196410*);
+typedef void (*Fn02_196410)(C53*);
 struct Frame_196410 {
     List_196410* list;
     u8* cursor;
@@ -267,10 +261,10 @@ struct Frame_196410 {
 };
 
 void func_00152438(u8* a, s32 v);
-void func_00137EB0(Rd_196410* r, u8* out);
-void func_00137E70(Rd_196410* r, u8* out);
-s32 func_00137B90(Rd_196410* r);
-s32 func_00137D10(Rd_196410* r);
+void func_00137EB0(Stream53* r, u8* out);
+void func_00137E70(Stream53* r, u8* out);
+s32 func_00137B90(Stream53* r);
+s32 func_00137D10(Stream53* r);
 Nd_196410* func_001DC208(void* host, s32 a);
 Nd_196410* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
 void func_001DC150(void* host, Nd_196410* n, s32 v);
@@ -279,11 +273,11 @@ void func_00152470(u8* list, Cell_196410* c);
 Nd_196410* func_0015A418(void* host, s32 kind, s32 id, Nd_196410* c);
 void* func_001C1390(s32 id, void* host);
 void func_0011A338(void* a, void* b);
-s32 func_00137C40(Rd_196410* r);
-s32 func_00137CC0(Rd_196410* r);
-f32 func_00137DF8(Rd_196410* r);
-void func_0011EC40(Nd_196410* n, Rd_196410* r);
-void func_0011ECB8(void* host, Self_196410* self, Rd_196410* r);
+s32 func_00137C40(Stream53* r);
+s32 func_00137CC0(Stream53* r);
+f32 func_00137DF8(Stream53* r);
+void func_0011EC40(Nd_196410* n, Stream53* r);
+void func_0011ECB8(void* host, C53* self, Stream53* r);
 s32 func_00152720(List_196410* list);
 
 // The id that names no object.
@@ -294,25 +288,13 @@ struct Id_196410 {
 
 
 
-struct Pair_196810 { u32 first, second; };
-struct Trip_196810 { u32 first, second, third; };
 struct Cell_196810 { void* node; s32 link; };
 struct Elem_196810 { s32 f0; u8 pad4[4]; Elem_196810* next; };
 struct Item_196810 { u8 pad0[0x1C]; Item_196810* next; u8 pad20[0x10]; void* f30; };
 struct Head_196810 { u8 pad0[0x34]; Item_196810* f34; };
-struct Self_196810 {
-    u8 pad0[8];
-    s32 f08;
-    u8 pad0C[0xC];
-    Head_196810* f18;
-    u8 pad1C[0x2D0 - 0x1C];
-    Trip_196810 f2D0;
-    Pair_196810 f2DC;
-};
-
-void func_00127048(Self_196810* self, Self_196810* src);
-void func_00152440(Trip_196810* p);
-void func_00152470(Trip_196810* list, Cell_196810* c);
+void func_00127048(C53* self, C53* src);
+void func_00152440(List53* p);
+void func_00152470(List53* list, Cell_196810* c);
 
 
 
@@ -474,10 +456,10 @@ s32 D_0026A8E0[9] = { 0x0, 0x3E4, 0x558, 0x0, 0x3E5, 0x554, 0x20, 0x3E6, 0x55C }
 // The object func_00196938 registers itself as; filled at run time.
 void* D_0026A904 = 0;
 
-void func_001963D8(Obj_1963D8* self);
-void func_00196410(Self_196410* self, Rd_196410* rd);
-void func_00196810(Self_196810* self, Self_196810* src);
-void func_00196900(Obj_196900* self);
+void func_001963D8(C53* self);
+void func_00196410(C53* self, Stream53* rd);
+void func_00196810(C53* self, C53* src);
+void func_00196900(C53* self);
 void func_00196938(Obj_196938* self);
 void func_001969C0(void* self);
 void func_001969F8(Self_001969F8* self);
@@ -499,13 +481,13 @@ void func_00198760(Obj_198760* s1, f32 f);
 u32 func_00198858(void);
 void func_00198920(Obj_198920* self);
 
-void func_001963D8(Obj_1963D8* self)
+void func_001963D8(C53* self)
 {
     func_00123ED0(self);
-    func_00152470(self->f14 + 0x1C3C, self);
+    func_00152470((u8*)self->world + 0x1C3C, self);
 }
 
-void func_00196410(Self_196410* self, Rd_196410* rd)
+void func_00196410(C53* self, Stream53* rd)
 {
     Nd_196410* arr[64];
     Frame_196410 fr;
@@ -519,13 +501,13 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
     Nd_196410* x;
     Nd_196410* h;
 
-    func_00152438(self->f2D0, 8);
-    func_00137EB0(rd, self->fD0);
-    func_00137E70(rd, self->f100);
+    func_00152438((u8*)&self->cells, 8);
+    func_00137EB0(rd, ((Common_196410*)self)->fD0);
+    func_00137E70(rd, ((Common_196410*)self)->f100);
     n = func_00137B90(rd);
-    if (self->vt->m58 != 0)
+    if (self->desc->m12 != 0)
     {
-        self->vt->m58((Nd_196410*)self);
+        ((Fn58_196410)self->desc->m12)((Nd_196410*)self);
     }
     for (i = 0; i < n; i++)
     {
@@ -533,20 +515,20 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
         id = func_00137D10(rd);
         if (id == Id_196410::None())
         {
-            c = func_001DC208(self->f14, func_00137D10(rd));
+            c = func_001DC208(self->world, func_00137D10(rd));
         }
         else
         {
             s32 a = func_00137D10(rd);
-            c = func_0011E580(id, self->f14, 0, a, func_00137D10(rd));
+            c = func_0011E580(id, self->world, 0, a, func_00137D10(rd));
             c->vt->m38(c, rd);
-            func_001DC150(self->f14, c, func_00137D10(rd));
+            func_001DC150(self->world, c, func_00137D10(rd));
         }
         cell = func_0018D5C0(16);
         cell->node = c;
-        cell->link = self->f08;
+        cell->link = ((Common_196410*)self)->f08;
         c->f30 = cell;
-        func_00152470(self->f2D0, cell);
+        func_00152470((u8*)&self->cells, cell);
         arr[i] = c;
     }
     cnt = func_00137B90(rd);
@@ -564,7 +546,7 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
             }
             else if (c->vt->flags & 1)
             {
-                t = func_0015A418(self->f14, 0x101, id, c);
+                t = func_0015A418(self->world, 0x101, id, c);
             }
             if (t != 0)
             {
@@ -574,7 +556,7 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
         s32 res = func_00137D10(rd);
         if (res != Id_196410::None())
         {
-            void* r = func_001C1390(res, self->f14);
+            void* r = func_001C1390(res, self->world);
             if (t->f2C != 0)
             {
                 func_0011A338(r, t->f2C);
@@ -605,12 +587,12 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
         {
             c->vt->m68(c, self);
         }
-        c->vt->m64(c, self->f18);
+        c->vt->m64(c, self->parent);
     }
     if (n == 1)
     {
-        List_196410* list = &self->f34;
-        func_0011ECB8(self->f14, self, rd);
+        List_196410* list = &((Common_196410*)self)->f34;
+        func_0011ECB8(self->world, self, rd);
         if (func_00152720(list) == 0)
         {
             fr.list = list;
@@ -631,41 +613,41 @@ void func_00196410(Self_196410* self, Rd_196410* rd)
             D_0027B314 = (ListFrame*)fr.prev;
         }
     }
-    ((void (**)(Self_196410*))self->vt)[0x1C / 4](self);
-    ((void (**)(Self_196410*))self->vt)[0x18 / 4](self);
+    self->desc->m03(self);
+    ((Fn02_196410)self->desc->m02)(self);
 }
 
-void func_00196810(Self_196810* self, Self_196810* src)
+void func_00196810(C53* self, C53* src)
 {
-    Pair_196810 saved = self->f2DC;
+    Pair53 saved = self->kept;
     func_00127048(self, src);
-    self->f2DC = saved;
-    Trip_196810 list = self->f2D0;
-    func_00152440(&self->f2D0);
+    self->kept = saved;
+    List53 list = self->cells;
+    func_00152440(&self->cells);
     ListFrame frame;
     Elem_196810* e = (Elem_196810*)list.first;
     while (e != 0) {
-        Item_196810* it = self->f18->f34;
+        Item_196810* it = ((Head_196810*)self->parent)->f34;
         for (; it != 0; it = it->next) {
             if (it->f30 == e) break;
         }
         Cell_196810* cell = (Cell_196810*)func_0018D5C0(16);
-        cell->link = self->f08;
+        cell->link = ((Common_196410*)self)->f08;
         if (it != 0) {
             cell->node = it;
             it->f30 = cell;
         } else {
             cell->node = (void*)e->f0;
         }
-        func_00152470(&self->f2D0, cell);
+        func_00152470(&self->cells, cell);
         e = e->next;
     }
 }
 
-void func_00196900(Obj_196900* self)
+void func_00196900(C53* self)
 {
     func_00124A48(self);
-    ((void (*)(Obj_196900*))self->vtbl[7])(self);
+    self->desc->m03(self);
 }
 
 void func_00196938(Obj_196938* self)

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c88.h"
+#include "c54.h"
 
 struct Data_1B4BC8 { u8 pad0[0x20]; s32 count; };
 struct Node_1B4BC8 {
@@ -998,14 +999,15 @@ f32 func_001B5308(S_1B5308* p) { f32 result=0.0f; if (p->testA != 0.0f) result=(
 
 void func_001B5568(void* base, void** out) { out[0] = (u8*)base + 0x44; out[1] = (u8*)base + 0x4C; out[2] = (u8*)base + 0x48; }
 
-struct Actor_1B5CD8 { u8 pad0[0x2C8]; u64 flags; };
+// The common field of class 0x02 that func_001B5CD8 reads (proposed for c02.h).
+struct Common_1B5CD8 { u8 pad0[0x2C8]; u64 flags; };
 
 void func_00124A48(void* self);
 
-void func_001B5CD8(Actor_1B5CD8* self)
+void func_001B5CD8(C54* self)
 {
     func_00124A48(self);
-    self->flags = (self->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
+    ((Common_1B5CD8*)self)->flags = (((Common_1B5CD8*)self)->flags & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
 }
 
 struct Walk_1B5DD0 { s32 a; void* b; s32 c; };
@@ -1312,24 +1314,19 @@ void func_00124FC0(void* self);
 
 struct __attribute__((aligned(16))) Quad_1B5D28 { s32 a, b; f32 c; s32 d; };
 
-typedef void (*VFn_1B5D28)(void* self, void* p);
-struct Node_1B5D28 {
-    VFn_1B5D28* vtbl;
-    u8 pad[0x148 - 4];
-    f32 f148;
-    u8 pad2[0x2D0 - 0x14C];
-    s32 f2D0;
-};
+typedef void (*VFn_1B5D28)(C54* self, void* p);
+// The common field of class 0x02 that func_001B5D28 reads (proposed for c02.h).
+struct Common_1B5D28 { u8 pad[0x148]; f32 f148; };
 
-void func_001B5D28(Node_1B5D28* self)
+void func_001B5D28(C54* self)
 {
     func_00124FC0(self);
     Quad_1B5D28* src = (Quad_1B5D28*)((u8*)D_00261990 + 0x40);
     Quad_1B5D28 q = *src;
     if (self->f2D0 == 0) {
-        q.c = self->f148;
+        q.c = ((Common_1B5D28*)self)->f148;
     }
-    self->vtbl[33](self, &q);
+    ((VFn_1B5D28*)self->desc)[33](self, &q);
 }
 
 void func_001C6F48(void* self);

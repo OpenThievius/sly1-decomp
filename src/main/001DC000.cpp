@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c5e.h"
 
 s32 func_00160850(void* obj);
 
@@ -309,33 +310,19 @@ void func_001DC108(u8* owner, Node_1DC108* node)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_1DDCE0 { s32 a, b, c, d; };
+extern Quad5E D_00275730;
 
-struct Obj_1DDCE0 {
-    u8 pad[0x320];
-    Quad_1DDCE0 q;
-};
+void func_00123ED0(C5E* self);
 
-extern Quad_1DDCE0 D_00275730;
-
-void func_00123ED0(Obj_1DDCE0* self);
-
-void func_001DDCE0(Obj_1DDCE0* self)
+void func_001DDCE0(C5E* self)
 {
     func_00123ED0(self);
-    self->q = D_00275730;
+    self->q320 = D_00275730;
 }
 
-struct Obj_1DE768 {
-    u8 pad0[0x2D0];
-    Obj_1DE768* self2D0;
-    u8 pad1[0x2DC - 0x2D4];
-    s32 flag2DC;
-};
+void func_001276C0(C5E* self);
 
-void func_001276C0(Obj_1DE768* self);
-
-void func_001DE768(Obj_1DE768* self)
+void func_001DE768(C5E* self)
 {
     if (self->self2D0 == self) {
         self->flag2DC = 1;
@@ -1530,7 +1517,7 @@ f32 D_00275680[4] = { 100.0f, -150.0f, 500.0f, 0.0f };
 f32 D_00275690[2] = { 500.0f, 2500.0f };
 f32 D_00275698[2] = { 500.0f, 2500.0f };
 f32 D_002756A0[4] = { 500.0f, 2500.0f, 0.0f, 0.0f };
-Quad_1DDCE0 D_00275730 = { 0x42C80000, 0, 0, 0 };
+Quad5E D_00275730 = { 0x42C80000, 0, 0, 0 };
 Quad_1DE798 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
 Tab_275750 D_00275750 = { {
     { 0x0, 0x34D, 0x6DC }, { 0x0, 0x350, 0x758 }, { 0x4, 0x60, 0x748 },
