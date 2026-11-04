@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-extern u8 D_002619A0[];
+struct Item_2619A0 { u32 flags, id, off8; };
+extern Item_2619A0 D_002619A0[5];
 void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);
 void func_00124DF8(void* a, s32 b, void* c);
@@ -729,3 +730,11 @@ void func_001451F0(Self_1451F0* self, s32 flags, s32 k0, Tgt_1451F0* k1, s32 k2,
         }
     }
 }
+
+Item_2619A0 D_002619A0[5] = {
+    { 0, 0x25F, 0x2E4 },
+    { 2, 0x25B, 0x324 },
+    { 2, 0x25C, 0x328 },
+    { 2, 0x25E, 0x380 },
+    { 2, 0x25D, 0x384 },
+};

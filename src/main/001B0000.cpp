@@ -583,7 +583,8 @@ void func_001B2840(Self_1B2840* self, void* obj)
     func_0011EC40(self, obj);
 }
 
-extern u8 D_002744D8[];
+struct Item_2744D8 { u32 flags, id, off8; };
+extern Item_2744D8 D_002744D8[2];
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
@@ -2033,3 +2034,8 @@ void func_001B1070(Obj_1B1070* self, s32 arg)
     self->f5D8 = arg;
     self->f5DC = (*(Clk_1B1070*)&D_0026185C).t;
 }
+
+Item_2744D8 D_002744D8[2] = {
+    { 2, 0x28C, 0x5D0 },
+    { 2, 0x28D, 0x5D4 },
+};

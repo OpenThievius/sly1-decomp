@@ -636,7 +636,11 @@ void func_001BB210(Obj_1BB210* self, void* a, void* b)
 
 struct __attribute__((aligned(16))) Quad_1BB028 { s32 v[4]; };
 struct Entry_1BB028 { Quad_1BB028* quad; s32 value; };
-extern Entry_1BB028 D_002746E0[];
+extern Quad_1BB028 D_00248D00;
+extern Quad_1BB028 D_00248D10;
+extern Quad_1BB028 D_00248D20;
+extern Quad_1BB028 D_00248D30;
+extern Entry_1BB028 D_002746E0[8];
 void func_001BB028(s32 index, s32* out, Quad_1BB028* dst)
 {
     *out = D_002746E0[index].value;
@@ -1198,3 +1202,14 @@ void func_001B94F0(Obj_1B94F0* self, s32 mode)
     }
     ctx->f4B8 = 0;
 }
+
+Entry_1BB028 D_002746E0[8] = {
+    { &D_00248D30, 0 },
+    { &D_00248D30, 3 },
+    { &D_00248D00, 2 },
+    { &D_00248D10, 2 },
+    { &D_00248D20, 2 },
+    { &D_00248D20, 1 },
+    { &D_00248D10, 1 },
+    { &D_00248D00, 1 },
+};

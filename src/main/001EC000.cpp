@@ -280,7 +280,7 @@ void func_001EF838(Obj_1EF838* self)
 typedef void (*VFn_1EF868)(void* self);
 struct Obj_1EF868 { VFn_1EF868* vtbl; };
 
-extern u8 D_00275E10[];
+extern s32 D_00275E10[92];
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a, void* b);
@@ -1000,7 +1000,7 @@ void func_001EE7D0(Cursor_1EE7D0* self, s32 n, void* buf, s32 flag)
 
 struct Obj_1EFA30 { void* vtbl; };
 
-extern u8 D_002505C0[];
+extern void* D_002505C0[6];
 void* func_0018D5C0(u32 n);
 
 void* func_001EFA30(void)
@@ -1656,3 +1656,6 @@ void func_001EFFA0(Dst_1EFFA0* dst, Args_1EFFA0* args, s32 count)
         func_001F0220(dst, mode);
     }
 }
+
+void* D_002505C0[6];
+s32 D_00275E10[92] = { 2, 0x2EB, 0x2DC };

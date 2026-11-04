@@ -64,7 +64,7 @@ void func_00173708(void* a, void* b)
 }
 
 f32 D_002637BC = 2.0f;
-extern f32 D_002637C0;
+extern f32 D_002637C0[3];
 
 void func_001C53A8(void* self, s32 flags, void* out);
 
@@ -90,7 +90,7 @@ void func_00170528(Obj_170528* self, s32 flags, Out_170528* out)
             if (flags & 1) {
                 v = -self->f368 * self->f358 * D_00261860[0] * D_002637BC;
             } else {
-                v = -self->f368 * self->f358 * D_002637C0;
+                v = -self->f368 * self->f358 * D_002637C0[0];
             }
             if (v < out->f30) {
                 out->f30 = v;
@@ -487,7 +487,8 @@ void func_001725E0(Self_1725E0* self, void* a, void* b)
 
 struct Obj_1727B0 { u8 pad0[0x242C]; f32 f242C; f32 f2430; f32 f2434; };
 
-extern u8 D_002638A0[];
+struct Params_2638A0 { f32 f0; f32 f4; f32 f8; f32 fC; s32 f10; s32 f14; };
+extern Params_2638A0 D_002638A0;
 
 f32 func_002058A0(f32 v, f32 m);
 f32 func_001EA4B8(void* p, f32 a, f32 b, void* o, f32 c);
@@ -506,7 +507,7 @@ void func_001727B0(Obj_1727B0* self)
         if (self->f2434 == 0.0f) {
             return;
         }
-        f32 r = func_001EA4B8(D_002638A0, self->f2434, 6.2831855f, &self->f2430, D_00261860[0]);
+        f32 r = func_001EA4B8(&D_002638A0, self->f2434, 6.2831855f, &self->f2430, D_00261860[0]);
         self->f2434 = r;
         if (r == 6.2831855f) {
             self->f2434 = 0.0f;
@@ -796,3 +797,6 @@ void func_00172CF0(Self_172CF0* self, Ent_172CF0* a1, void* a2, void* a3, void* 
         }
     }
 }
+
+f32 D_002637C0[3] = { 0.1f, 2.0f, 0.0f };
+Params_2638A0 D_002638A0 = { 50.0f, 0.0f, 0.25f, 0.0f, 0x16F, 0x170 };

@@ -82,13 +82,13 @@ s32 func_00204DB8(void)
 
 s32 D_0027AE80;
 extern s32 D_0027AE84;
-extern u8 D_0024F780[];
-extern u8 D_0024F7A8[];
+extern const char D_0024F780[];
+extern const char D_0024F7A8[];
 
 s32 func_001F80C0(Sema_2040E8* s, u32 flags, s32 arg);
 s32 func_00204DB8(void);
 s32 func_00204228(void* arg);
-void func_001E1F10(const u8* fmt, ...);
+void func_001E1F10(const char* fmt, ...);
 
 s32 func_002040E8(void* arg)
 {
@@ -170,3 +170,6 @@ s32 func_00204C38(Owner_204C38* owner, s32 channel, s32 data)
     }
     return state;
 }
+
+extern const char D_0024F780[40] = "libpad: Module version mismatch ";
+extern const char D_0024F7A8[40] = "[libpad.a = %d.%d, padman.irx = %d.%d]\n";
