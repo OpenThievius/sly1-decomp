@@ -224,6 +224,23 @@ Measured on this compiler; add to this list when you learn something.
   their place with `INCLUDE_ASM(func_X);` (include/asm_func.h); an unmatched one still counts as
   unmatched, and its C replaces the line once it is EXACT. Retail's constructor list
   (`D_0027B130`) names each file's `_GLOBAL_$I$` function, so it gives that file's exact end.
+- **Finding and proving a file.** Retail's constructor list (`D_0027B130`) names each file's
+  `_GLOBAL_$I$` function, so it gives the exact end of every file with a static initialiser. A
+  file's start comes from its data: `.rodata`, `.data` and `.bss` are laid out in file order, in
+  several stretches of their own (method tables, literals and strings, initialised data), so the
+  last label the previous file's functions read bounds it. Inside one file the data follows the
+  definitions' order, not the code's. What the full build showed while proving files:
+  - GCC aligns a jump table to 16, so a file's `.rodata` must start where its tables land on 16.
+  - A string or float the code reads once is a literal in the code, placed before its
+    function's jump table; a named `extern const` would be emitted elsewhere, or folded.
+  - A global with no initialiser goes to the end of the file's `.data`; one in the middle of
+    retail's carries `= { 0 }`. A global built by a constructor stays at its definition.
+  - The linker pads before a file's `.data` or `.rodata` to that file's own alignment, up to 16.
+  - Functions GCC emits after the static initialiser and before `_GLOBAL_$I$` (the setters at
+    0x137248 to 0x137268) look like inline functions it emitted out of line at the end of the file.
+  - The colour objects (`Clr_180E38`, four bytes set in the constructor; `Rgba_1639E8`, one word)
+    and the 0x1C-byte style object (zeroed, then 0x2D, 0xFF7D4B00, two sizes given as integers,
+    0.3 twice) recur in many files' static initialisers.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.
