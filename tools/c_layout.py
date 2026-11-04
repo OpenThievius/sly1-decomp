@@ -320,8 +320,11 @@ def data_plan(chunks, data_placed):
             covered[name] = addr  # defined by C unless the C variable is a static
             end = addr + d[1]
             later = [a for _, a, _ in chunks[i + 1:] if a >= end]
-            # A whole file's section can end in the padding before the next object's (zeros).
-            if not later or later[0] - end >= 8 or (later[0] - end and d[3].count(".") > 1):
+            # A section can end in the padding before the next object's (zeros): a whole file's,
+            # or a global's ending on a word when the next label is 8-aligned, as GCC aligns an
+            # aggregate of 8 bytes or more.
+            gap = later[0] - end if later else 8
+            if gap >= 8 or (gap and d[3].count(".") > 1 and (end % 4 or later[0] % 8)):
                 raise LayoutError("%s (%d bytes) does not end where a label of .data starts"
                                   % (d[4], d[1]))
             end = later[0]
