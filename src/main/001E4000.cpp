@@ -367,7 +367,7 @@ void func_001E55D0(Self_1E55D0* self)
 
 extern u8* D_00275710;
 extern u8 D_00275640[];
-extern u8 D_00275B58[];
+extern f32 D_00275B58[2];
 extern f32 D_00275650;
 extern f32 D_00275654;
 extern f32 D_00275658;
@@ -523,7 +523,7 @@ struct Peer_1E5428 {
     Ctx_1E5428* owner;
 };
 
-extern u8 D_00275B28[];
+extern s32 D_00275B28[10];
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -1238,3 +1238,6 @@ void func_001E6C20(Self_1E6C20* self, Buf_1E6C20* buf)
     func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
     func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
 }
+
+s32 D_00275B28[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };
+f32 D_00275B58[2] = { 500.0f, 2500.0f };

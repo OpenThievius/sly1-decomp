@@ -8,7 +8,7 @@ s32 func_00160B28(u8* p)
     u32 i;
     s32 k;
     for (i = 0; i < 0x2E; i++) {
-        u8* e = D_00247AF0 + i * 0xAC;
+        u8* e = (u8*)D_00247AF0 + i * 0xAC;
         u32 v = *(u32*)(e + 0xA0);
         s32 idx = (s32)v >> 8;
         if (idx != 0) {

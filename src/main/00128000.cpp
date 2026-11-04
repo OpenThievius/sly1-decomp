@@ -4,12 +4,13 @@
 
 struct Owned { u8 pad[0x14]; void* owner; };
 
-extern u8 D_002197C0[];
+typedef void (*Fn_2197C0)();
+extern const Fn_2197C0 D_002197C0[10];
 void func_00121228(void* owner, void* item, void* table);
 
 void func_00128998(Owned* item)
 {
-    func_00121228(item->owner, item, D_002197C0);
+    func_00121228(item->owner, item, (void*)D_002197C0);
 }
 
 void func_0012A4A0(void* self, s32 a1);
@@ -290,7 +291,7 @@ void func_0012AEB0(Outer_12AEB0* self)
 struct Entry_12B0B0 { s32 w[16]; } __attribute__((aligned(16)));
 struct Outer_12B0B0 { u8 pad[0x288]; Entry_12B0B0* slot; };
 
-extern Entry_12B0B0 D_00260F00[];
+extern Entry_12B0B0 D_00260F00[4];
 
 void func_0012B040(void* self);
 
@@ -1336,13 +1337,13 @@ void func_0012AAE8(State_0012AAE8* self, f32 value)
     }
 }
 
-extern Entry_12B0B0 D_00261000;
+extern Entry_12B0B0 D_00261000[2];
 void func_0012B040(void* ptr)
 {
     Outer_12B0B0* self = (Outer_12B0B0*)ptr;
     if (!self->slot) {
         self->slot = (Entry_12B0B0*)func_0018D500(64);
-        *self->slot = D_00261000;
+        *self->slot = D_00261000[0];
         self->slot->w[0] = -1;
     }
 }
@@ -1908,7 +1909,7 @@ void func_00129730(Obj_129730* self)
     }
 }
 
-extern u8 D_002197C0[];
+extern const Fn_2197C0 D_002197C0[10];
 
 struct Item_129CA8;
 struct Node_129CA8 {
@@ -1929,11 +1930,11 @@ void* func_00129CA8(Node_129CA8* node)
 {
     while (node != 0) {
         Item_129CA8* a = node->f1EC;
-        if (a != 0 && a->tag == D_002197C0) {
+        if (a != 0 && a->tag == (void*)D_002197C0) {
             return a->f1C;
         }
         a = node->f1F0;
-        if (a != 0 && a->tag == D_002197C0) {
+        if (a != 0 && a->tag == (void*)D_002197C0) {
             return a->f1C;
         }
         node = node->f18;
@@ -2084,7 +2085,7 @@ void func_00129780(Self_129780* self)
         if (s2 == 0) if (n->b11 != -1) s2 = n;
         if (s3 == 0) if (n->b12 != -1) s3 = n;
         if (n->b13 == -1) continue;
-        if (n->w0 == (s32)D_002197C0) {
+        if (n->w0 == (s32)(void*)D_002197C0) {
             Entry_129780* e = (Entry_129780*)(n->w1C->tab->base + n->w28 * 0x1C);
             for (i = 0; i < e->count; i++) {
                 if (e->list[i] != 0) {
@@ -2476,3 +2477,28 @@ void func_00129A58(Obj_129A58* self)
     self->vt[0xBC / 4](self);
     D_0027B314 = (ListFrame*)it.saved;
 }
+
+Entry_12B0B0 D_00260F00[4] = {
+    { { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x42F00000, 0x433E0000, 0x42E60000, 0x00000000, 0x42F00000, 0x433E0000, 0x42700000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
+    { { 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x437F0000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
+    { { 0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x42F00000, 0x437F0000, 0x437F0000, 0x00000000, 0x42F00000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
+    { { 0x00000003, 0x00000000, 0x00000000, 0x00000000, 0x43700000, 0x437F0000, 0x437F0000, 0x00000000, 0x43700000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } }
+};
+
+Entry_12B0B0 D_00261000[2] = {
+    { { 0x00000004, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x437F0000, 0x437F0000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } },
+    { { 0x00000005, 0x00000000, 0x00000000, 0x00000000, 0x43960000, 0x437F0000, 0x437F0000, 0x00000000, 0x43960000, 0x00000000, 0x00000000, 0x00000000, 0x40000000, 0x00000000, 0x00000000, 0x00000000 } }
+};
+
+void func_00121338();
+void func_00122F88();
+void func_00122F28();
+void func_00122FE0();
+void func_00123120();
+void func_00123270();
+void func_001232E8();
+void func_00123358();
+extern const Fn_2197C0 D_002197C0[10] = {
+    func_00121338, func_00122F88, func_00122F28, 0, func_00122FE0,
+    func_00123120, func_00123270, func_001232E8, func_00123358, 0
+};
