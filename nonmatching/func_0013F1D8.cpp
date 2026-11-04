@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 232/184, checked 2026-11-01
+// SIZE 232/184, checked 2026-11-04
 // NEAR: append/copy behavior is modeled, but the candidate is larger and its frame and argument scheduling differ.
 #include "common.h"
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 212/216 (98.1%), checked 2026-11-01
-// NEAR (PAL, func_00136408 at PAL 0x136568): PAL's own definition, built in src/main/00134000.cpp's unit
-// (python3 tools/check.py nonmatching/eu/func_00136408.cpp func_00136408 --unit src/main/00134000.cpp).
+// BYTES 212/216 (98.1%), checked 2026-11-04
+// NEAR (PAL, func_00136408 at PAL 0x136568): PAL's own definition, built in src/main/file_130F48.cpp's unit
+// (python3 tools/check.py nonmatching/eu/func_00136408.cpp func_00136408 --unit src/main/file_130F48.cpp).
 // 4 instructions differ: the load of the field at 0x570 uses v0 where PAL has v1.
 // PAL: 16-bit text (func_eu_001E3018/001E3050), fields at 0x408/0x570/0x578, line breaks laid out by func_eu_0015E4A8, no line-start scan.
 struct Entry_00136408_eu {

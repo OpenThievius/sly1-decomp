@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 561/580 (96.7%), checked 2026-11-02
+// BYTES 561/580 (96.7%), checked 2026-11-04
 #include "common.h"
 // NEAR (p58b): 10 lines, unchanged from j40o03: the 200 gets a0 (retail v0) and the copy source v0 (retail a0), f00/f20 stores swap. extern const on the rodata quads changes nothing. Finding: the guard words D_00261F70/74 set after a temp+copy are exactly what GCC 2.95 emits for function-local statics initialised from an inline maker returning by value (`static B s = MakeB();`, see v549_make.cpp: same shape, same 10-line register diff, but it defines the statics so the relocations differ); a constructor (`static B s = B();`) builds in place instead.
 // NEAR: 10 lines, all in B_1549C8() + its copy loop: the 200 gets a0 (retail v0), so the copy source (global) takes v0 (retail a0), and the f00/f20 stores swap. With q30 present, local-alloc never gives the 200 v0 in any order tried (j40o03: ~2000 hill-climbed store orders, floor 10; callee return void/s32/ptr/s64; q30 as TImode int, array global, pointer source; float/int constants as locals). Without q30 the 200 does get v0.
