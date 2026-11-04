@@ -33,49 +33,11 @@ struct Span_130F48 {
     f32 q;
 };
 
-void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y)
-{
-    f32 fn = (f32)n;
-    f32 inv = 1.0f / fn;
-    s32 half = n / 2;
-    s32 t;
-    s32 lo;
-    f32 u;
-
-    d->head = *src;
-    d->len = fn;
-    d->mid = half;
-    t = (s32)(x / inv) >> 1;
-    d->hi = half + t;
-    d->halfw = (f32)t;
-    lo = half - t;
-    d->lo = lo;
-    u = (f32)lo / fn;
-    d->p = src->c0 + u * (src->c1 + u * src->c2);
-    d->q = src->c0 + 0.5f * (src->c1 + 0.5f * src->c2) + y;
-}
 
 
 
-f32 func_00131000(const Span_130F48* s, s32 x)
-{
-    if (x < s->lo || s->hi < x) {
-        f32 u = (f32)x / s->len;
-        return s->head.c0 + u * (s->head.c1 + u * s->head.c2);
-    }
-    if (x == s->lo || x == s->hi) {
-        return s->p;
-    }
-    if (x < s->mid) {
-        f32 t = (f32)(x - s->lo) / s->halfw;
-        return (1.0f - t) * s->p + t * s->q;
-    }
-    if (s->mid < x) {
-        f32 t = (f32)(x - s->mid) / s->halfw;
-        return (1.0f - t) * s->q + t * s->p;
-    }
-    return s->q;
-}
+
+
 
 typedef void (*VFn_131140)(void* self, s32 arg);
 
@@ -91,15 +53,7 @@ struct Obj_131140 {
 
 void func_001365A0(void* self, s32 arg);
 
-void func_00131140(Obj_131140* self)
-{
-    self->vtbl[8](self, 0);
-    func_001365A0(self, 0);
-    self->f300 = 0;
-    self->f304 = 0;
-    self->f308 = 0;
-    self->f314 = 0.4f;
-}
+
 
 struct Obj_130070 { s32 state; };
 
@@ -257,114 +211,7 @@ struct Lerp_133B58
     }
 };
 
-void func_00133B58(Self_133B58* self, Gs_133B58* gs)
-{
-    Rgba_133B58 c0;
-    Rgba_133B58 c1;
-    Rgba_133B58 c2;
-    f32 step = 1.0f / 24.0f;
-    f32 t;
-    t = 0.5f - func_00205210(self->phase) * 0.5f;
-    c0 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->phase + 1.5707964f) * 0.5f;
-    c1 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->phase + 3.1415927f) * 0.5f;
-    c2 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
-    s32 i;
-    f32 x;
 
-    func_001613C0(gs, 0x8C, 2, 0x41);
-
-    func_00161458(gs, *(u32*)&c2);
-    func_00161670(gs, 0x6C00, 0x7B45, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x7B62, 0, 0);
-    x = 1.0f / 24.0f;
-    for (i = 1; i < 24; i++)
-    {
-        f32 v = func_00131000(&D_00261280, i);
-        f32 sx = x * 640.0f;
-        f32 v2 = v + 4.0f;
-        func_00161458(gs, *(u32*)&c2);
-        s32 px = (s32)((sx + 1728.0f) * 16.0f);
-        x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c1);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-    }
-    func_00161458(gs, *(u32*)&c2);
-    func_001615F0(gs, 0x9400, 0x7B45, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x7B62, 0, 0);
-
-    func_00161458(gs, *(u32*)&c2);
-    func_00161670(gs, 0x6C00, 0x80FA, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x80DD, 0, 0);
-    x = 1.0f / 24.0f;
-    for (i = 1; i < 24; i++)
-    {
-        f32 v = func_00131000(&D_002612B0, i);
-        f32 sx = x * 640.0f;
-        f32 v2 = v - 4.0f;
-        func_00161458(gs, *(u32*)&c2);
-        s32 px = (s32)((sx + 1728.0f) * 16.0f);
-        x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c1);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-    }
-    func_00161458(gs, *(u32*)&c2);
-    func_001615F0(gs, 0x9400, 0x80FA, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x80DD, 0, 0);
-
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x7B62, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_00161670(gs, 0x6C00, 0x7B80, 0, 0);
-    x = 1.0f / 24.0f;
-    for (i = 1; i < 24; i++)
-    {
-        f32 r = func_00131000(&D_00261280, i);
-        f32 sx = x * 640.0f;
-        f32 v = r + 4.0f;
-        f32 v2 = v + 4.0f;
-        func_00161458(gs, *(u32*)&c1);
-        s32 px = (s32)((sx + 1728.0f) * 16.0f);
-        x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c0);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-    }
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x7B62, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_001615F0(gs, 0x9400, 0x7B80, 0, 0);
-
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x80DD, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_00161670(gs, 0x6C00, 0x80C0, 0, 0);
-    x = 1.0f / 24.0f;
-    for (i = 1; i < 24; i++)
-    {
-        f32 r = func_00131000(&D_002612B0, i);
-        f32 sx = x * 640.0f;
-        f32 v = r - 4.0f;
-        f32 v2 = v - 4.0f;
-        func_00161458(gs, *(u32*)&c1);
-        s32 px = (s32)((sx + 1728.0f) * 16.0f);
-        x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c0);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-    }
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x80DD, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_001615F0(gs, 0x9400, 0x80C0, 0, 0);
-}
 
 struct Obj_1310F0 {
     u8 pad0[0x234];
@@ -375,14 +222,7 @@ struct Obj_1310F0 {
     u32 f2F4;
 };
 void func_001AA1F0(Obj_1310F0* self, s32 a1);
-void func_001310F0(Obj_1310F0* self, s32 a1)
-{
-    self->f234 = 640.0f;
-    self->f238 = 492.800018f;
-    self->f2F0 = 15.0f;
-    self->f2F4 = 0x80FFFFFF;
-    func_001AA1F0(self, a1);
-}
+
 
 struct Self_130B48;
 struct Out_130B48 { u8 pad0[16]; };
@@ -543,176 +383,4 @@ struct Gfx_132500 {
     }
 };
 
-void func_00132500(Obj_132500* self, Gs_132500* gs)
-{
-    Rgba_132500 c0;
-    Rgba_132500 c1;
-    f32 k;
-    Pad_132500* pad;
-    u8 alpha;
-    f32 posX;
-    f32 posY;
-    f32 scale;
-    f32 offX;
-    f32 offY;
 
-    func_001613C0(gs, 0, 1, 0xE);
-    func_00161708(gs, 0x47, 0x31001);
-    func_00161708(gs, 0x42, 0x44);
-    func_00161708(gs, 0x40, 0xA90003027F0000);
-
-    pad = (D_00262C68 & 2) ? &D_00262C70 : &D_00262D38;
-    k = 3.0f;
-    if (0.0f < pad->f78) {
-        k = 6.0f;
-    } else if (pad->f78 < 0.0f) {
-        k = -6.0f;
-    }
-    self->f30C = func_001EA408(self->f30C + D_00261860 * k);
-
-    alpha = (s32)(D_00261990->f478 * 24.999f) + 0x30;
-    switch (self->f320) {
-    case 0:
-        if (self->f260 == 5) {
-            Rgba_132500 t = D_00261110;
-            t.a = alpha;
-            c0 = t;
-            t = D_00261108;
-            t.a = alpha;
-            c1 = t;
-        } else {
-            Rgba_132500 t = (*(Rgba_132500*)&D_002610E0);
-            t.a = alpha;
-            c0 = t;
-            t = (*(Rgba_132500*)&D_002610D8);
-            t.a = alpha;
-            c1 = t;
-        }
-        break;
-    case 1: {
-        Rgba_132500 t = D_00261100;
-        t.a = alpha;
-        c0 = t;
-        t = D_002610F8;
-        t.a = alpha;
-        c1 = t;
-        break;
-    }
-    case 2: {
-        Rgba_132500 t = D_002610F0;
-        t.a = alpha;
-        c0 = t;
-        t = D_002610E8;
-        t.a = alpha;
-        c1 = t;
-        break;
-    }
-    }
-
-    func_00136EC8(self, &posX, &posY);
-    scale = D_00261990->f478 + 1.0f;
-
-    {
-        f32 step = 1.0f / 24.0f;
-        f32 period = 256.0f;
-        f32 wide = 512.0f;
-        f32 s = Gfx_132500::Wave(-8.0f, period, self->f30C);
-        Rgba_132500 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-        s = Gfx_132500::Wave(-18.0f, period, self->f30C);
-        Rgba_132500 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-        f32 x0 = posX - scale * 35.0f;
-        f32 x1 = x0 + scale * 70.0f;
-        f32 u;
-        s32 i;
-
-        func_001613C0(gs, 0x4C, 2, 0x41);
-
-        func_00161458(gs, *(u32*)&colB);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -3.0f), 0, 0);
-        u = step;
-        for (i = 1; i < 24; i++) {
-            f32 x = x0 + scale * u * 70.0f;
-            f32 y;
-            f32 y2;
-            u += step;
-            y = posY + scale * func_00131000(&D_002612E0, i);
-            y2 = y + scale * 5.0f;
-            func_00161458(gs, *(u32*)&colB);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
-            func_00161458(gs, *(u32*)&colA);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
-        }
-        func_00161458(gs, *(u32*)&colB);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -4.0f), 0, 0);
-
-        func_00161458(gs, *(u32*)&colB);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -3.0f), 0, 0);
-        u = step;
-        for (i = 1; i < 24; i++) {
-            f32 x = x0 + scale * u * 70.0f;
-            f32 y;
-            f32 y2;
-            u += step;
-            y = posY - scale * func_00131000(&D_002612E0, i);
-            y2 = y - scale * 5.0f;
-            func_00161458(gs, *(u32*)&colB);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
-            func_00161458(gs, *(u32*)&colA);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
-        }
-        func_00161458(gs, *(u32*)&colB);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -4.0f), 0, 0);
-
-        if (self->f260 != 5) {
-            s32 n;
-
-            offX = 41.0f;
-            offY = -5.0f;
-            func_001613C0(gs, 0xC6, 5, 0x44441);
-            for (n = 0; n < 64; n++) {
-                f32 px, py;
-                f32 s = Gfx_132500::Wave(offX, wide, self->f30C);
-                px = posX + scale * offX;
-                py = posY + scale * offY;
-                Rgba_132500 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-                func_00161458(gs, *(u32*)&col);
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
-                py = posY + scale * offY;
-                px = posX - scale * offX;
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px - scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
-                offX += 8.0f;
-            }
-
-            offX = -5.0f;
-            offY = 24.0f;
-            for (n = 0; n < 32; n++) {
-                f32 px, py;
-                f32 s = Gfx_132500::Wave(offY, period, self->f30C);
-                px = posX + scale * offX;
-                py = posY + scale * offY;
-                Rgba_132500 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-                func_00161458(gs, *(u32*)&col);
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py + scale * 2.0f), 0, 0);
-                py = posY - scale * offY;
-                px = posX + scale * offX;
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py - scale * 2.0f), 0, 0);
-                offY += 8.0f;
-            }
-        }
-    }
-
-    func_001613C0(gs, 0, 1, 0xE);
-    func_00161708(gs, 0x40, 0xDF0000027F0000);
-}
