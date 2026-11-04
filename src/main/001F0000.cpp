@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c73.h"
+#include "c8d.h"
 #include "list_iter.h"
 
 struct Obj_1F0468 { u8 pad[0x19DC]; s32 value; };
@@ -203,11 +204,9 @@ s32 func_001F3C08(Holder_1F3C08* self, s32 arg)
     return func_00128150(self->link, 0, (u8*)self + 0x50, arg);
 }
 
-struct Reset_1F2758 { u8 pad0[0x34]; f32 scale34; u8 pad1[0x40 - 0x38]; s32 index40; u8 pad2[0x6D0 - 0x44]; s32 index6D0; };
-
 void func_00182C18(void* self);
 
-void func_001F2758(Reset_1F2758* self)
+void func_001F2758(C8D* self)
 {
     func_00182C18(self);
     self->index40 = -1;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6d.h"
 #include "asm_func.h"
 extern void func_001439A8(void*);
 extern void func_001439C8(void*);
@@ -184,7 +185,6 @@ struct __attribute__((packed)) Value_00143A08 { u32 value; };
 
 // EXACT: float constants and .data floats as locals, 1.0f stores in source order 1C0,1C4,1C8
 
-struct Self_00143648;
 struct Sub_00143648;
 
 struct __attribute__((packed)) Pk16_00143648 {
@@ -203,12 +203,12 @@ struct __attribute__((aligned(16))) Quad_00143648 {
     s32 d;
 };
 
-void func_00182C18(struct Self_00143648* self);
-void func_00143560(struct Self_00143648* self);
-void func_00149398(struct Sub_00143648* self, struct Self_00143648* owner);
-void func_00149660(struct Sub_00143648* self, struct Self_00143648* owner);
-void func_0014A888(struct Sub_00143648* self, struct Self_00143648* owner);
-void func_00143A60(struct Self_00143648* self, s32 a1);
+void func_00182C18(C01* self);
+void func_00143560(C6D* self);
+void func_00149398(struct Sub_00143648* self, C6D* owner);
+void func_00149660(struct Sub_00143648* self, C6D* owner);
+void func_0014A888(struct Sub_00143648* self, C6D* owner);
+void func_00143A60(C6D* self, s32 a1);
 
 extern u8 D_002483D0[];
 // An entry of a table of functions defined at the end of this file.
@@ -449,7 +449,6 @@ extern f32 D_0026185C;
 void func_00143140(void);
 void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3);
 void func_001434C8(Scaler_001434C8* self, f32* out, f32 p);
-void func_00143648(struct Self_00143648* self);
 void func_001437C0(void);
 void func_001437E8(void);
 void func_00143810(void);
@@ -550,7 +549,7 @@ void func_001434C8(Scaler_001434C8* self, f32* out, f32 p)
 
 ASM_FUNC(func_00143560);
 
-void func_00143648(struct Self_00143648* self)
+void func_00143648(C6D* self)
 {
     u8* s = (u8*)self;
 

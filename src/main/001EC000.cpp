@@ -2,16 +2,16 @@
 #include "common.h"
 #include "list_iter.h"
 #include "fpu.h"
-
-struct Obj_1ED198 { u8 pad0[0x14]; void* f14; u8 pad1[0x28]; s32 f40; };
+#include "c90.h"
+#include "c86.h"
 
 void func_00182C58(void);
 s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
 
-void func_001ED198(Obj_1ED198* self)
+void func_001ED198(C90* self)
 {
     func_00182C58();
-    self->f40 = func_0015A838(self->f14, 5, 0x13, 0);
+    self->found = func_0015A838(self->world, 5, 0x13, 0);
 }
 
 struct Inner_1ED1D8 { u8 pad[0xC70]; s32 c70; };
@@ -164,13 +164,12 @@ void func_001EE5C8(Stream_1EE5C8* s, void* unused1, s32 size, void* unused3, s32
 }
 
 struct Owner_1EE900 { u8 pad[0x1EC4]; void* slot; };
-struct Self_1EE900 { u8 pad[0x14]; Owner_1EE900* owner; };
-void func_00182C18(Self_1EE900* self);
+void func_00182C18(C01* self);
 
-void func_001EE900(Self_1EE900* self)
+void func_001EE900(C86* self)
 {
     func_00182C18(self);
-    self->owner->slot = self;
+    ((Owner_1EE900*)self->world)->slot = self;
 }
 
 struct Obj_1EEE50 { u8 pad[0x538]; u64 flags; };
@@ -562,15 +561,13 @@ tail:
     func_001C8C08(self);
 }
 
-struct Obj_1ED168 { u8 pad[0x38]; void* f38; };
-
 void func_00182C18(void* self);
 void* func_0018D500(s32 size);
 
-void func_001ED168(Obj_1ED168* self)
+void func_001ED168(C90* self)
 {
     func_00182C18(self);
-    self->f38 = func_0018D500(0xC00);
+    self->buffer = func_0018D500(0xC00);
 }
 
 struct Out_1ED6B0 { f32 x; f32 y; f32 z; };
@@ -630,25 +627,17 @@ s32 func_00137C40(void* src);
 void* func_0018D500(s32 size);
 void func_0011EC40(void* a, void* b);
 
-struct Obj_1EE930 {
-    u8 pad0[0x34];
-    s32 f34;
-    void* f38;
-    s32 f3C;
-    s32* f40;
-};
-
-void func_001EE930(Obj_1EE930* self, void* src)
+void func_001EE930(C86* self, void* src)
 {
     s32 i;
     s32 n;
 
-    func_00138398(src, &self->f34, &self->f38);
+    func_00138398(src, &self->count34, &self->data38);
     n = func_00137BE0(src);
-    self->f3C = n;
-    self->f40 = (s32*)func_0018D500(n * 4);
-    for (i = 0; i < self->f3C; i++) {
-        self->f40[i] = func_00137C40(src);
+    self->count = n;
+    self->values = (s32*)func_0018D500(n * 4);
+    for (i = 0; i < self->count; i++) {
+        self->values[i] = func_00137C40(src);
     }
     func_0011EC40(self, src);
 }

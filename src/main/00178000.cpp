@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c8f.h"
 
 struct Obj_178008 {
     u8 pad0[0x1520];
@@ -122,19 +123,11 @@ void func_0017B610(void* self)
 void func_00182C18(void* self);
 void* func_0018D500(int size);
 
-struct Obj_17B998 {
-    u8 pad0[0x38];
-    void* f38;
-    u8 pad1[0x68 - 0x3C];
-    s32 f68;
-};
-
-void func_0017B998(void* self)
+void func_0017B998(C8F* self)
 {
-    Obj_17B998* o = (Obj_17B998*)self;
     func_00182C18(self);
-    o->f38 = func_0018D500(0xA00);
-    o->f68 = 1;
+    self->buffer = func_0018D500(0xA00);
+    self->flag68 = 1;
 }
 
 struct Obj_0017ABD8 { u8 pad[0x6D0]; s32 flag; };

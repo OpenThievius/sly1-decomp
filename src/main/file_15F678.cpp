@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c87.h"
 #include "asm_func.h"
 #include "list_iter.h"
 
@@ -109,12 +110,10 @@ void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32
 
 
 
-struct Sub_15FF88 { u8 pad0[8]; s32 count; s32* arr; };
-struct Self_15FF88 { u8 pad0[0x14]; void* f14; void* f18; u8 pad1[0x18]; s32 f34; s32 items[8]; Sub_15FF88 sub; };
-void func_00182C58(Self_15FF88* self);
+void func_00182C58(C01* self);
 void* func_0018D500(s32 size);
-s32 func_0015A480(Sub_15FF88* a, s32 item, void* c);
-void func_0015F8B0(Sub_15FF88* a, Sub_15FF88* sub);
+s32 func_0015A480(List87* a, s32 item, void* c);
+void func_0015F8B0(List87* a, List87* sub);
 
 
 struct List_15F710 {
@@ -1352,7 +1351,6 @@ void func_0015FB28(Node_0015FB28* self, void* arg);
 s32 func_0015FBA0(Obj_0015FBA0* self, s32* out);
 void func_0015FBB8(Self_15FBB8* self, s32 flag);
 void func_0015FF58(void* self);
-void func_0015FF88(Self_15FF88* self);
 void func_00160050(Obj_00160050* obj, s32 value);
 void func_00160070();
 Ent_1600A0* func_001600A0(Ent_1600A0* key);
@@ -1639,17 +1637,17 @@ void func_0015FF58(void* self)
     func_0015FD78(self);
 }
 
-void func_0015FF88(Self_15FF88* self)
+void func_0015FF88(C87* self)
 {
     func_00182C58(self);
-    Sub_15FF88* cur = (Sub_15FF88*)self->f14;
-    Sub_15FF88* sub = &self->sub;
-    sub->arr = (s32*)func_0018D500(self->f34 * 4);
-    for (s32 i = 0; i < self->f34; i++) {
-        s32 r = func_0015A480(cur, self->items[i], self->f18);
+    List87* cur = (List87*)self->world;
+    List87* sub = &self->found;
+    sub->arr = (s32*)func_0018D500(self->itemCount * 4);
+    for (s32 i = 0; i < self->itemCount; i++) {
+        s32 r = func_0015A480(cur, self->items[i], self->parent);
         if (r != 0) { s32 n = sub->count; sub->arr[n] = r; sub->count = n + 1; }
     }
-    func_0015F8B0(cur, &self->sub);
+    func_0015F8B0(cur, &self->found);
 }
 
 void func_00160050(Obj_00160050* obj, s32 value) { obj->values[obj->count++] = value; }

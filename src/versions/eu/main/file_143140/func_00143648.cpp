@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the constant stored at +0x1E0 is 1.36574075f (0x3FAED098) where US has 1.29870129f.
-void func_00143648(struct Self_00143648* self)
+void func_00143648(C6D* self)
 {
     u8* s = (u8*)self;
 
