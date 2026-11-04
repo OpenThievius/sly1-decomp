@@ -161,6 +161,32 @@ packets itself, copying only a line mesh's positions, records and weights unchan
 A standalone parser written from this reads every geometry block of the 46 US levels
 (23,944 blocks) exactly as retail's loader does, read for read.
 
+### Collision
+
+Class 0x03 and the classes under it read a collision prefix before the common block
+(0x1BAC30): 22.6% of all level bytes.
+
+| Part | Format |
+| --- | --- |
+| flag | u8: the meshes are used in place (class 0x04, the scenery) or copied per object |
+| collision mesh | f32 radius; u16 count of vertices (3 f32); u16 face count; u16 link count; per face three u16 vertex indices (its plane), a bounding sphere (f32 radius, 3 f32 centre) and a u8 count of links {u16, u16 vertices of a shared edge, u16 the other face} |
+| its tree | u16 node count, u16 (the same count), per node u16 face, u16 back child, u16 front child (0xFFFF none) |
+| mass | f32 mass, 3×3 inertia tensor, 3 f32 offset |
+| groups | u16 count of {s16, u16 geometry entry}; u32 count (0 or the node count) of s16 node groups |
+| face references | u32 count of {s16 geometry entry, s16 mesh}, then if any an s16 start index per face and one more |
+| second mesh | a mesh and its tree, the same format (empty in most objects) |
+
+Faces are planar polygons: the three indices only give the plane, which the loader
+computes. Each shared edge is stored once, with the face that owns it. The tree is a BSP
+tree over the faces' planes, rooted at node 0, its back child always the next node; a
+sphere goes to the front child when wholly in front of the plane, to the back child when
+wholly behind, to both otherwise. Node groups name runs of geometry entries that segments
+through the tree mark (our guess, models the camera fades); face references are empty on
+US. Objects with no collision mesh often carry a unit-density sphere's mass and inertia.
+
+A standalone parser written from this reads every prefix of the 46 US levels (4,637
+objects) exactly as retail's loader does, read for read.
+
 ### Animations
 
 Classes 0x83 and 0x88 (20% of all level bytes) are animations. An animation (0x83,
@@ -204,9 +230,9 @@ read for read.
 
 ## Next
 
-1. **Each format, from its reader.** Field by field: class 0x03's collision meshes and the
-   event lists (0x11FA88 and its siblings), which hold most of a level's bytes; what each
-   class is; PAL's levels. Then models, textures and sound, documented here, and the
-   extractor written in OpenThievius, from the functions that parse them.
+1. **Each format, from its reader.** What each class and event kind is in the game, and
+   the fields not yet named (listed in each section's reader); PAL's levels. Then models,
+   textures and sound, documented here, and the extractor written in OpenThievius, from
+   the functions that parse them.
 2. **The remaining data.** The 64-sector VAG at 454,000, which no record found yet names;
    what the event kinds and the object classes are in the game.
