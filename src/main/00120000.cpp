@@ -395,11 +395,9 @@ void func_001233C0(C22* object)
 	func_0013D278(object);
 }
 
-struct Value_00123400 { u8 pad[0x6C0]; s32 value; };
-
-void func_00123400(Value_00123400* state, s32 value)
+void func_00123400(C22* state, C2F* value)
 {
-	state->value = value;
+    state->counter = value;
 }
 
 extern u8 D_00261420[];
@@ -553,44 +551,26 @@ s32 func_00123D40(C2F* self, void* arg)
     return 1;
 }
 
-struct Records_001250C8 {
-    u8 pad0[0x238];
-    s32 count;
-    u8 pad1[4];
-    u8* data;
-};
-
 struct Record_001250C8 { u8 pad[8]; s32 value; };
 
-void func_001250C8(Records_001250C8* records)
+void func_001250C8(C02* records)
 {
-    for (s32 i = 0; i < records->count; i++) {
-        Record_001250C8* record = (Record_001250C8*)(records->data + i * 0x28);
+    for (s32 i = 0; i < *(s32*)(records->sub22C + 0xC); i++) {
+        Record_001250C8* record = (Record_001250C8*)(*(u8**)(records->sub22C + 0x14) + i * 0x28);
         record->value = -1;
     }
 }
 
-struct Object_00126A48 {
-    u32* vtable;
-    u8 pad0[0x18];
-    Object_00126A48* next;
-    u8 pad1[0x14];
-    Object_00126A48* child;
-    u8 pad2[0x22C];
-    u32 state_flags;
-    u32 state;
-};
-
-void func_00126A48(Object_00126A48* object, u32 value)
+void func_00126A48(C02* object, u32 value)
 {
     ListFrame frame;
-    Object_00126A48* child = object->child;
-    object->state = value;
-    object->state_flags |= 2;
+    C02* child = (C02*)object->children.head;
+    *(u32*)(object->sub22C + 0x3C) = value;
+    *(u32*)(object->sub22C + 0x38) |= 2;
     while (child != 0) {
-        if ((child->vtable[2] & 1) != 0)
+        if ((child->desc->flags & 1) != 0)
             func_00126A48(child, value);
-        child = child->next;
+        child = (C02*)child->next;
     }
 }
 
@@ -839,7 +819,7 @@ struct Obj_1236C8 { VFn_1236C8* vt; };
 extern u8 D_00261420[];
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 s32 func_001300E8(void* node, s32 kind);
-void func_00123400(void* node, void* value);
+void func_00123400(C22* node, C2F* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
 
@@ -850,7 +830,7 @@ void func_001236C8(C2F* self)
     for (i = 0; i < self->count1; i++) {
         void* node = func_0015A418(self->world, 0x104, self->items1[i], self);
         if (node && func_001300E8(node, 0x22)) {
-            func_00123400(node, self);
+            func_00123400((C22*)node, self);
             kept++;
         }
     }

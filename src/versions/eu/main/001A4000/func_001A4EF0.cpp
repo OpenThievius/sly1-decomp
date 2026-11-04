@@ -4,9 +4,9 @@ struct __attribute__((packed)) Packed_1A4EF0_eu { u8 pad[0x5B0]; s32 v __attribu
 struct Glob_1A4EF0_eu { u8 pad[0x5B0]; s32 v; };
 struct Tab_1A4EF0_eu { u8 pad[0x574]; void* f574; void* f578; };
 
-void func_001A4EF0(Obj_1A4EF0* self, s32 state)
+void func_001A4EF0(C5F* self, s32 state)
 {
-    Obj_1A4EF0* o;
+    C5F* o;
     s32 v;
     ListFrame frame;
     if (W(self, 0x650) == state) return;
@@ -22,7 +22,7 @@ void func_001A4EF0(Obj_1A4EF0* self, s32 state)
                 if (((Step_1A4EF0*)D_002623C8)->f14) {
                     W(self, 0x658) = 0;
                 } else {
-                    W(self, 0x658) = func_0015A418(self->f14, 0x105, 0x33B, 0);
+                    W(self, 0x658) = func_0015A418(self->world, 0x105, 0x33B, 0);
                 }
             }
         }
@@ -34,13 +34,13 @@ void func_001A4EF0(Obj_1A4EF0* self, s32 state)
         break;
     }
     case 2: {
-        ((Tab_1A4EF0_eu*)&D_0026D0C8)->f574 = self->f3C4;
-        ((Tab_1A4EF0_eu*)&D_0026D0C8)->f578 = self->f3B8;
-        func_001DDC38(self->f14, self);
+        ((Tab_1A4EF0_eu*)&D_0026D0C8)->f574 = &self->f3C4;
+        ((Tab_1A4EF0_eu*)&D_0026D0C8)->f578 = &self->limit3B8;
+        func_001DDC38(self->world, self);
         break;
     }
     case 5:
-        v = func_0015A418(self->f14, 0x105, 0x33D, 0);
+        v = func_0015A418(self->world, 0x105, 0x33D, 0);
         W(self, 0x658) = v;
         if (v) {
             ((Glob_1A4EF0_eu*)&D_002701F8)->v = v;
@@ -50,7 +50,7 @@ void func_001A4EF0(Obj_1A4EF0* self, s32 state)
         func_00151FC8(D_00261EF0);
         break;
     case 3:
-        v = func_0015A418(self->f14, 0x105, 0x33E, 0);
+        v = func_0015A418(self->world, 0x105, 0x33E, 0);
         W(self, 0x658) = v;
         if (v) {
             ((Glob_1A4EF0_eu*)&D_002701F8)->v = v;
