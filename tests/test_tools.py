@@ -493,6 +493,11 @@ class DefinitionTest(unittest.TestCase):
                 "}\n")
         self.assertEqual([m.group(1) for m in todo.definitions(text)], ["func_0020C3F0"])
 
+    def test_a_class_constructor_is_not_a_function_of_ours(self):
+        text = ("Ctor_1E4E38::Ctor_1E4E38()\n{\n    f4 = 0;\n}\n"
+                "void Node_100000::func_00100000(s32 n)\n{\n}\n")
+        self.assertEqual([m.group(1) for m in todo.definitions(text)], ["func_00100000"])
+
 
 class AbsoluteAliasTest(unittest.TestCase):
     def test_short_names_get_their_eight_digit_spelling(self):

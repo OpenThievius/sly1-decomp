@@ -73,7 +73,10 @@ def definitions(text):
     lines is a definition only if a `{` comes before any `;` (else it is a declaration)."""
     for m in DEFINITION.finditer(text):
         brace, semi = text.find("{", m.start()), text.find(";", m.start())
-        if brace >= 0 and (semi < 0 or brace < semi):
+        # A class's own constructor or method (`Node::Node()`) is named by the compiler: a whole
+        # file's takes retail's name from config/us/generated.tsv.
+        member = text[:m.start(1)].endswith("::") and not m.group(1).startswith("func_")
+        if brace >= 0 and (semi < 0 or brace < semi) and not member:
             yield m
 
 
