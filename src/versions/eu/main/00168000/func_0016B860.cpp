@@ -20,7 +20,6 @@ struct Obj_16B860_eu {
     s32 f570;
 };
 
-extern u8 D_00262280[];
 extern f32 D_00261868;
 f32 func_00205400(f32 x);
 void func_0015C8B8(s32 handle, f32 a, f32 b);
@@ -61,7 +60,7 @@ void func_0016B860(Obj_16B860_eu* self)
         if (h != 0) {
             slot = *(Pk4_16B860*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->f54c);
-            Hd_16B860::Draw((V24A2**)self->f520, &out, D_00262280);
+            Hd_16B860::Draw((V24A2**)self->f520, &out, &D_00262280);
             *(Pk4_16B860*)((u8*)self->f520 + 0x18) = slot;
         }
         f32 r = func_00205400(D_00261868 * 10.0f);
@@ -70,7 +69,7 @@ void func_0016B860(Obj_16B860_eu* self)
         f32 v = self->f51c * k;
         func_0015C8B8(self->f4, v, v);
         func_eu_0015DCB8(loc, &self->f8, self->f4, 0);
-        out.Draw(loc, 0, D_00262280);
+        out.Draw(loc, 0, &D_00262280);
         func_0015C900(self->f4);
     }
 }

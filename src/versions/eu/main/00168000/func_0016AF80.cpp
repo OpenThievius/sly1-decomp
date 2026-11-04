@@ -15,7 +15,6 @@ struct Obj_16AF80_eu {
 void func_0016AF80(Ctx_16AF80* self)
 {
     s32 s1 = 0;
-    s32 stride = 0x44C;
     Pair_16AF80* p = self->f2E0;
 
     if (p->f28 != p->f30) {
@@ -24,7 +23,7 @@ void func_0016AF80(Ctx_16AF80* self)
         void** vt = *(void***)(&D_0026F138);
         ((VFnS_16AF80)vt[8])((&D_0026F138), func_eu_001DDAB0(0x16));
     } else {
-        s32 flags = *(s32*)(D_002623C0 + self->f2D0 * stride + 0x458);
+        s32 flags = D_002623C0->levels[self->f2D0].f448;
         if (flags & 1) {
             func_eu_001ADF10((&D_0026F138));
         } else if (self->f2D0 == self->f300) {

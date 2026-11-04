@@ -12,11 +12,10 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
     if (a == self->f2D0 && b == self->f2D4) return;
     if (a != self->f300 && a > 0) {
         Slot_16B300* slot = 0;
-        u8* ent = (u8*)D_002623C0 + a * 0x44C;
-        if (*(s32*)(ent + 0x458) & 1) {
-            if (!(((Glob_16B300*)D_002623C0)->f19EC & 2)) {
+        if (D_002623C0->levels[a].f448 & 1) {
+            if (!(D_002623C0->f19EC & 2)) {
                 slot = func_eu_001DE018(5);
-                ((Glob_16B300*)D_002623C0)->f19EC |= 2;
+                D_002623C0->f19EC |= 2;
             }
         } else {
             Gl_eu_16B300* gp = (Gl_eu_16B300*)&D_0026FA90;

@@ -2,6 +2,9 @@
 #include "common.h"
 #include "c05.h"
 #include "fpu.h"
+#include "g264a40.h"
+#include "g269990.h"
+#include "shapes.h"
 
 extern void func_001C7CB8(void);
 extern void func_001C6F48(void*);
@@ -26,8 +29,6 @@ extern void func_001F6B40(s32);
 extern s32 func_0018B770(void*);
 struct Ent_264910 { s32 a, b, c; };
 extern Ent_264910 D_00264910[2];
-extern u8 D_00269990[];
-extern u8 D_00264A40[];
 
 struct Quad_001884E0 { s32 a, b, c, d; } __attribute__((aligned(16)));
 
@@ -88,25 +89,16 @@ void func_00188810(f32* a, f32* b, f32* out)
 	} while (--count >= 0);
 }
 
-struct __attribute__((aligned(16))) Quad_188B08 { s32 w[4]; };
-
-struct Dst_188B08 {
-    Quad_188B08 q0;
-    Quad_188B08 q1;
-    Quad_188B08 q2;
-    Quad_188B08 q3;
-};
-
-void func_00188B08(Quad_188B08* a, Quad_188B08* b, Dst_188B08* dst)
+void func_00188B08(Quad16* a, Quad16* b, Quad16* dst)
 {
-    dst->q0 = b[0];
-    dst->q1 = b[1];
-    dst->q2 = b[2];
-    dst->q3 = *a;
-    dst->q0.w[3] = 0;
-    dst->q1.w[3] = 0;
-    dst->q2.w[3] = 0;
-    *(f32*)&dst->q3.w[3] = 1.0f;
+    dst[0] = b[0];
+    dst[1] = b[1];
+    dst[2] = b[2];
+    dst[3] = *a;
+    dst[0].w[3] = 0;
+    dst[1].w[3] = 0;
+    dst[2].w[3] = 0;
+    *(f32*)&dst[3].w[3] = 1.0f;
 }
 
 void func_00188CE0(f32* p)
@@ -139,15 +131,13 @@ void func_00188FD8(Span_188FD8* self, Out_188FD8* out)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_1891C0 { s32 w[4]; };
+void func_00188B48(void* a, void* b, Quad16* out);
+void func_00188668(Quad16* out, void* b, Quad16* in);
 
-void func_00188B48(void* a, void* b, Quad_1891C0* out);
-void func_00188668(Quad_1891C0* out, void* b, Quad_1891C0* in);
-
-void func_001891C0(u8* self, void* arg, Quad_1891C0* out)
+void func_001891C0(u8* self, void* arg, Quad16* out)
 {
-    Quad_1891C0 tmp[4];
-    Quad_1891C0 res[4];
+    Quad16 tmp[4];
+    Quad16 res[4];
 
     func_00188B48(self + 0x30, self, tmp);
     func_00188668(res, arg, tmp);
@@ -180,7 +170,6 @@ void func_0018A3B8(C0C* self)
 void func_001C91C8(void* self);
 void func_001603E8(s32 n);
 void func_0018C7F8(void* p);
-extern u8 D_00264A40[];
 
 void func_0018AB88(C0C* self)
 {
@@ -194,7 +183,7 @@ void func_0018AB88(C0C* self)
         }
     } else {
         func_001603E8(2);
-        func_0018C7F8(D_00264A40);
+        func_0018C7F8(&D_00264A40);
     }
 }
 
@@ -269,13 +258,12 @@ void func_0018B2E8(C0C* self)
 void func_0018B580(void)
 {
 	func_002093F0();
-	func_0018B5C0(D_00269990);
-	func_0018BD58(D_00264A40, 0, 0);
+	func_0018B5C0(&D_00269990);
+	func_0018BD58(&D_00264A40, 0, 0);
 }
 
 struct Obj_18B720 { void* f0; void* f4; };
 
-extern u8 D_00269990[];
 
 s32 func_0018B770(void* p);
 void func_001F6A50(void* a, s32 b);
@@ -284,7 +272,7 @@ void func_001F6B40(void* a);
 
 void func_0018B720(Obj_18B720* a0)
 {
-    if (func_0018B770(D_00269990)) {
+    if (func_0018B770(&D_00269990)) {
         func_001F6A50(a0->f4, 1);
     }
     func_001F6B60(a0->f0);
@@ -483,35 +471,32 @@ void func_0018AC58(C0C* self)
 }
 
 struct Glob_18BDC8 { u8 pad0[0x25C]; s32 f25C; u8 pad260[8]; s32 f268; };
-struct Self2_18BDC8 { u8 pad0[0xC]; s32 fC; f32 f10; s32 f14; s32 f18; f32 f1C; f32 f20; u8 pad24[0x4F44 - 0x24]; s32 f4F44; };
 
-extern u8 D_00269990[];
 extern f32 D_00261868[];
 extern Glob_18BDC8 D_0026FF68[];
 
-s32 func_0018B770(u8* p);
-void func_0018B670(u8* p, void* fn, Self2_18BDC8* self);
-void func_0018C028(Self2_18BDC8* self, s32 v);
-void func_0018D0A0(Self2_18BDC8* self);
+void func_0018B670(G269990* p, void* fn, G264A40* self);
+void func_0018C028(G264A40* self, s32 v);
+void func_0018D0A0(G264A40* self);
 void func_00194D30(Glob_18BDC8* g, s32 a, s32 b);
 
-void func_0018BDC8(Self2_18BDC8* self)
+void func_0018BDC8(G264A40* self)
 {
-    if (func_0018B770(D_00269990) != 0) return;
-    if (self->fC == self->f14) {
+    if (func_0018B770(&D_00269990) != 0) return;
+    if (self->f0C == self->f14) {
         if (self->f20 <= D_00261868[0])
-            func_0018B670(D_00269990, (void*)func_0018D0A0, self);
+            func_0018B670(&D_00269990, (void*)func_0018D0A0, self);
     } else {
         func_0018C028(self, self->f14);
     }
-    if (func_0018B770(D_00269990) != 0) return;
+    if (func_0018B770(&D_00269990) != 0) return;
     if (self->f18 == 1 && D_00261868[0] - self->f10 >= 0.3f) {
-        if (self->f4F44 != 0) {
-            if (self->fC != 5) func_00194D30(D_0026FF68, 1, 0x15);
+        if (self->i4F44 != 0) {
+            if (self->f0C != 5) func_00194D30(D_0026FF68, 1, 0x15);
         } else if (D_0026FF68->f25C != 0 && D_0026FF68->f268 == 0x11) {
-            if (self->fC != 5) func_00194D30(D_0026FF68, 1, 0x20);
+            if (self->f0C != 5) func_00194D30(D_0026FF68, 1, 0x20);
         } else {
-            switch (self->fC) {
+            switch (self->f0C) {
             case 1: func_00194D30(D_0026FF68, 1, 3); break;
             case 2: func_00194D30(D_0026FF68, 1, 4); break;
             case 3: func_00194D30(D_0026FF68, 1, 7); break;
@@ -582,31 +567,27 @@ second:
     return 0;
 }
 
-struct Slot_18B5C0 { s32 f00; s32 f04; u8 pad08[8]; s32 f10; };
-
 s32 func_001E2268(s32 a, s32 b);
 
-void func_0018B5C0(Slot_18B5C0* self)
+void func_0018B5C0(G269990* self)
 {
     s32 r = func_001E2268(1, 1);
-    self->f00 = r; self->f04 = -1; self->f10 = 0x22;
+    self->i00 = r; self->f04 = -1; self->f10 = 0x22;
 }
-
-struct Obj_18BD58 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; u8 pad18[0x4F44 - 0x18]; s32 f4F44; s32 f4F48; };
 
 void* func_001F5C0C(void* p, s32 zero, s32 size);
 void func_0018C178(void* self, s32 value);
 
-void func_0018BD58(Obj_18BD58* self, s32 a, s32 b)
+void func_0018BD58(G264A40* self, s32 a, s32 b)
 {
     func_001F5C0C(self, 0, 0x4F50);
-    self->fC = -1;
+    self->f0C = -1;
     self->f14 = 0;
     func_0018C178(self, 0);
-    self->f4 = a;
-    self->f8 = b;
-    self->f4F48 = 0;
-    self->f4F44 = 0;
+    self->f04 = (void*)a;
+    self->f08 = (void*)b;
+    self->i4F48 = 0;
+    self->i4F44 = 0;
 }
 
 // NEAR: same callees, args and frame. Retail saves s2,s1,s0 then moves a2->s2, a1->s1 before the jal and fills its delay slot with self->s0; the compiler places move s0 early and fills the delay slot with move s1.
@@ -632,10 +613,6 @@ s32 func_0018A910(C0C* self, void* a1, void* a2)
 }
 
 // Hoisting 1.0f into a local `one` matched the constant scheduling.
-struct Sub_18B460 { u8 pad[0xC]; f32 value; };
-
-extern Sub_18B460* D_002623C8;
-
 void func_001B6598(void* a, s32* out);
 
 void func_0018B460(C0C* a0, f32* a1)
@@ -645,7 +622,7 @@ void func_0018B460(C0C* a0, f32* a1)
     switch (kind) {
     case 0x43A:
         {
-            f32 v = D_002623C8->value * 1.3f - 0.3f;
+            f32 v = D_002623C8->dt * 1.3f - 0.3f;
             f32 one = 1.0f;
             if (v < 0.0f) {
                 v = 0.0f;
@@ -657,7 +634,7 @@ void func_0018B460(C0C* a0, f32* a1)
         break;
     case 0x43C:
         {
-            f32 v = D_002623C8->value * 1.3f - 0.3f;
+            f32 v = D_002623C8->dt * 1.3f - 0.3f;
             f32 one = 1.0f;
             if (v < 0.0f) {
                 v = 0.0f;
@@ -668,7 +645,7 @@ void func_0018B460(C0C* a0, f32* a1)
         }
         break;
     default:
-        *a1 = D_002623C8->value * D_002623C8->value;
+        *a1 = D_002623C8->dt * D_002623C8->dt;
         break;
     }
 }
@@ -985,36 +962,23 @@ done:
     return ok;
 }
 
-extern u8 D_00269990[];
 extern u8 D_00275960[];
 
-struct Obj_18B600;
-
-void func_001F6B60(Obj_18B600* a);
-void func_001F6B40(Obj_18B600* a);
+void func_001F6B60(void* a);
+void func_001F6B40(void* a);
 s32 func_001F6A30();
-
-typedef s32 (*Fn_18B600)(void* a);
-
-struct Obj_18B600 {
-    void* f0;
-    s32 f4;
-    Fn_18B600 f8;
-    void* fC;
-    s32 f10;
-};
 
 void func_0018B600()
 {
-    func_001F6B60(*(Obj_18B600**)D_00269990);
-    Obj_18B600* o = (Obj_18B600*)D_00269990;
-    s32 r = o->f8(o->fC);
+    func_001F6B60(D_00269990.f00);
+    G269990* o = &D_00269990;
+    s32 r = o->fn(o->f0C);
     o->f10 = r;
     *(s32*)D_00275960 = -1;
-    o->f4 = -1;
-    o->fC = 0;
-    o->f8 = 0;
-    func_001F6B40(*(Obj_18B600**)D_00269990);
+    o->f04 = -1;
+    o->f0C = 0;
+    o->fn = 0;
+    func_001F6B40(D_00269990.f00);
     func_001F6A30();
 }
 
@@ -1127,13 +1091,9 @@ s32 func_0018A830(void* self, Rec_18A830* rec)
     return 1;
 }
 
-struct Mat_188850 {
-    f32 m[4][4];
-};
-
 void func_001EAD88(f32 angle, f32* s, f32* c);
 
-void func_00188850(f32* axis, Mat_188850* mat, f32 angle)
+void func_00188850(f32* axis, Mat4* mat, f32 angle)
 {
     f32 s;
     f32 c;

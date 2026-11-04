@@ -12,7 +12,7 @@ void func_0016B7A8(Obj_16B7A8_eu* self, s32 v)
     if (v != 0) {
         func_0016B300(self->f570, ((Node_16B7A8*)self->f570)->f2D0, 0);
         func_0016E0F0(1);
-        func_0016EC88(D_00262C70);
+        func_0016EC88(&D_00262C70);
     } else {
         if (self->f574 != 0) {
             func_001BE998();

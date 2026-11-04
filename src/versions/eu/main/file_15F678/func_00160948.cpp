@@ -4,21 +4,21 @@ extern s32 D_eu_00263710;
 
 void func_00160948(void)
 {
-    Key_160948* k = func_00160180((((Ctx_160948*)D_002623C0)->f19D8 << 8) | ((Ctx_160948*)D_002623C0)->f19DC);
+    Key_160948* k = func_00160180((D_002623C0->f19D8 << 8) | D_002623C0->f19DC);
     if (k == 0) {
         k = (Key_160948*)((u8*)&D_00247AB0 + D_eu_00263710 * 0x20);
     }
     func_00160CC8(D_002623D8);
-    if (D_00275BC0.f30 != 1 || ((Ctx_160948*)D_002623C0)->fC != 0.0f || !k->Same(&D_00275B04)) {
+    if (D_00275BC0.f30 != 1 || D_002623C0->fC != 0.0f || !k->Same((Key_160948*)&D_00275B04)) {
         func_001F0428(k, -1, 1);
     } else if (D_00275BC0.f30 == 1) {
         if (D_00275F84 == 0) {
-            func_001C0760(((Ctx_160948*)D_002623C0)->f19EC & 0x80);
-            func_001C0790(((Ctx_160948*)D_002623C0)->f19EC & 0x40);
-            Rec_160948* r = func_0015A418(D_00275710, 0x105, 0x494, 0);
+            func_001C0760(D_002623C0->f19EC & 0x80);
+            func_001C0790(D_002623C0->f19EC & 0x40);
+            C83* r = func_0015A418(D_00275710, 0x105, 0x494, 0);
             if (r != 0) {
-                Frame_160948 frame((Lst_160948*)((u8*)r + 0x6C));
-                void* head = r->head;
+                Frame_160948 frame((Lst_160948*)r->props6C);
+                void* head = *(void**)r->props6C;
                 frame.cursor = (u8*)head + frame.next_off;
                 void* node = head;
                 if (node != 0) {
