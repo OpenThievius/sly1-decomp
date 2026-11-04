@@ -4,6 +4,8 @@
 // held it between its C functions, so the whole file's object holds it at its place:
 // `INCLUDE_ASM(func_X);` at file scope, in retail's order. tools/compile.py writes the included
 // file from the disassembly (tools/asm_func.py). This is not inline assembly in a function.
+// A function of the file's range that is not matched yet is included the same way until its C
+// matches; it counts as unmatched (tools/build.py, tools/progress.py).
 #ifndef ASM_FUNC_H
 #define ASM_FUNC_H
 

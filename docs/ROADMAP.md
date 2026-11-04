@@ -45,7 +45,10 @@ splits are taken from other projects or from the prototype
    A file whose range holds original assembly includes those functions at their place
    (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
    (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
-   after its first address until what it was is known.
+   after its first address until what it was is known. A function of its range not matched yet
+   is included the same way, so that a file is proved before all of its C is: it still counts
+   as unmatched, and its C replaces the line when it matches. Retail's constructor list
+   (`D_0027B130`) gives the exact end of every file with a static initialiser.
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)).

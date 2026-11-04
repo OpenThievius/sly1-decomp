@@ -26,6 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import asm_func  # noqa: E402
 import classify_asm  # noqa: E402
 import versions  # noqa: E402
 
@@ -84,6 +85,14 @@ def build_run(src):
         # Data runs can start at any label: 8, 4, 2 or 1, whatever its address allows.
         align = next(a for a in (8, 4, 2, 1) if start % a == 0) if section != ".text" else (8 if start % 8 == 0 else 4)
         run([tool("objcopy"), "--set-section-alignment", "%s=%d" % (section, align), str(out)])
+
+
+def included_asm():
+    """The functions the whole files (config/us/files.tsv) include with INCLUDE_ASM."""
+    names = set()
+    for line in (ROOT / "config" / "us" / "files.tsv").read_text().splitlines()[1:]:
+        names |= set(asm_func.included((ROOT / line.split("\t")[0]).read_text()))
+    return names
 
 
 def write_c_data(key, data_placed):
@@ -153,9 +162,9 @@ def main(argv=None):
     built = flat.read_bytes()
     sha1 = hashlib.sha1(built).hexdigest()
     rel = flat.relative_to(ROOT)
-    # A whole file also holds the original assembly functions inside its range (include/asm_func.h):
-    # they are placed with it, but they are not C.
-    asm = set(classify_asm.read_table())
+    # A whole file also holds the assembly functions inside its range (include/asm_func.h): the
+    # original assembly, and the functions not matched yet. They are placed with it, but not C.
+    asm = set(classify_asm.read_table()) | included_asm()
     from_c = [p for p in placed if p[-1] not in asm]
     linked = (" with %d function%s from C" % (len(from_c), "" if len(from_c) == 1 else "s")) if from_c else ""
     if data_placed:

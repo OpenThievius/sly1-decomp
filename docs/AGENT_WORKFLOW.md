@@ -220,6 +220,10 @@ Measured on this compiler; add to this list when you learn something.
   `-ffunction-sections` or `-fdata-sections`, no literal baking), and each of its sections is
   linked in one piece: the full build's `MATCH` proves the boundary. Its globals with
   constructors bring the compiler's initialiser functions, named in `config/us/generated.tsv`.
+  Its original assembly functions, and those of its functions not matched yet, are included at
+  their place with `INCLUDE_ASM(func_X);` (include/asm_func.h); an unmatched one still counts as
+  unmatched, and its C replaces the line once it is EXACT. Retail's constructor list
+  (`D_0027B130`) names each file's `_GLOBAL_$I$` function, so it gives that file's exact end.
 - **Spell data names with eight digits** (`D_00000FA0`, not `D_FA0`): `check.py` resolves only those.
   Keep each prototype, and each struct with an `__attribute__` in front of it, on one line:
   `tools/todo.py` reads source files line by line.

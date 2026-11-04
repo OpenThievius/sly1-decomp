@@ -76,7 +76,10 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   function computes a bare square root through it, and nothing else writes inline assembly.
   A whole file (`config/us/files.tsv`) holds the original assembly functions inside its range
   (`config/us/original_asm.tsv`) at file scope, `INCLUDE_ASM(func_X);` (include/asm_func.h),
-  their bytes taken from the disassembly: that is not inline assembly in a function.
+  their bytes taken from the disassembly: that is not inline assembly in a function. It holds a
+  function of its range that is not matched yet the same way, until its C matches: such a
+  function is never counted as matched (not in `config/us/original_asm.tsv`, not in the build's
+  count of functions from C), and its exact C replaces the line.
   `volatile` is one only where it stops the compiler. It is allowed where it is what the
   original had: a hardware register, at a fixed address (`*(volatile u32*)0x10002010`) or
   through a pointer to a register block (a DMA channel's), and data shared with hardware, an
