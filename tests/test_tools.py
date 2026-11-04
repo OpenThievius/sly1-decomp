@@ -577,6 +577,22 @@ class WholeFileTest(unittest.TestCase):
         with self.assertRaises(c_layout.LayoutError):  # not from the middle of a word
             c_layout.data_plan(chunks, [(0x100, 2, "x.o", ".data.D_00000100", "D_00000100")])
 
+    def test_a_global_may_end_in_the_padding_before_a_more_aligned_global(self):
+        chunks = [("D_00000100", 0x100, ["a"]), ("D_00000110", 0x110, ["b"]), ("D_00000120", 0x120, ["c"])]
+        first = (0x100, 4, "x.o", ".data.D_00000100", "D_00000100")
+        second = (0x110, 16, "x.o", ".data.D_00000110", "D_00000110")
+        aligns = dict(c_layout.ALIGNS)
+        try:
+            c_layout.ALIGNS[0x110] = 16
+            plan, _ = c_layout.data_plan(chunks, [first, second])
+            self.assertEqual([k for k, _ in plan], ["c", "c", "run"])
+            c_layout.ALIGNS[0x110] = 8  # a 12-byte gap is more than an 8-aligned global leaves
+            with self.assertRaises(c_layout.LayoutError):
+                c_layout.data_plan(chunks, [first, second])
+        finally:
+            c_layout.ALIGNS.clear()
+            c_layout.ALIGNS.update(aligns)
+
     def test_an_address_in_a_whole_file_belongs_to_it(self):
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / "config" / "us").mkdir(parents=True)
