@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BROKEN, checked 2026-11-04
+// BYTES 212/216 (98.1%), checked 2026-11-04
 // NEAR (PAL, func_00136408 at PAL 0x136568): PAL's own definition, built in src/main/file_130F48.cpp's unit
 // (python3 tools/check.py nonmatching/eu/func_00136408.cpp func_00136408 --unit src/main/file_130F48.cpp).
 // 4 instructions differ: the load of the field at 0x570 uses v0 where PAL has v1.
@@ -35,12 +35,12 @@ void func_00136408(Entry_00136408_eu* self, const char* name)
     s0 = 4;
     scale = 1.0f;
     if ((r = self->f570) == s0) scale = 0.8f;
-    func_0015C8B8(self->f04, scale, scale);
+    func_0015C8B8((V24A2*)self->f04, scale, scale);
     func_eu_0015DCB8(buf, self->name08, self->f04, 0);
     lim = 280.0f;
     if ((r = self->f570) == s0) lim = 380.0f;
     func_eu_0015E4A8(buf, self->list408, lim);
-    func_0015C900(self->f04);
+    func_0015C900((V24A2*)self->f04);
     goto tail;
 fail:
     self->name08[0] = 0;

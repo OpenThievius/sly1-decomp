@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BROKEN, checked 2026-11-04
+// SIZE 760/780, checked 2026-11-04
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AD800.cpp func_eu_001AD800 --unit src/main/001A8000.cpp
 // Still differs: Per-character fade-in text draw; now matches through the first division (lenF as (f32)n twice) but the clamp shape (retail: f0 result then mov f1,f0) and float/saved register allocation still differ (145 lines).
 // Draws a string character by character with a per-character fade: positions interpolate between two corners by the fade phase.
@@ -12,7 +12,7 @@ struct Vt_eu_1AD800 {
     s16 o38; u8 padD[2]; void (*end)(void* at, s32 a, void* d);
 };
 struct Font_eu_1AD800 { u8 pad0[0x4C]; Vt_eu_1AD800* vt; };
-struct Local_eu_1AD800 { f32 x; f32 y; u8 pad0[8]; PackedWord_001AB710 w10; u8 pad1[0xC]; };
+struct Local_eu_1AD800 { f32 x; f32 y; u8 pad0[8]; T217D_Word w10; u8 pad1[0xC]; };
 struct Label_eu_1AD800 {
     u8 pad0[4]; Font_eu_1AD800* font; u16 text[1];
     u8 pad1[0x518 - 0xA]; s32 f518; u8 pad2[4]; void* f520;
