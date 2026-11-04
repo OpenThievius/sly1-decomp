@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: f328 is at 0x5B4 (US 0x328).
+extern const f32 D_00249CFC;  // the FLT_MAX US writes as a literal, at its PAL address
 struct Self_135F48_eu {
     u8 pad000[0x5B4];
     s32 f5B4;

@@ -1,1243 +1,5290 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 
-struct Obj_5E08 {
-    u8 pad0[0x624];
-    void* f624;
+// Class descriptors (parent, class id, flags, object size, then the class's methods) and the
+// method tables of .rodata from 0x217380, defined here until their own files are found.
+typedef void (*Fn_Table)();
+template <int N> struct ClassDesc_217418 { const void* parent; s32 id; s32 f8; s32 size; Fn_Table methods[N]; };
+void func_0011EDA8();
+void func_001212D8();
+void func_00121338();
+void func_00121358();
+void func_001214B8();
+void func_00121508();
+void func_00121568();
+void func_00121580();
+void func_001215A8();
+void func_00122550();
+void func_001225D0();
+void func_00122708();
+void func_001227B0();
+void func_001227F0();
+void func_00122840();
+void func_00122858();
+void func_00122878();
+void func_001233C0();
+void func_00123408();
+void func_00123448();
+void func_00123540();
+void func_00123578();
+void func_00123ED0();
+void func_00124050();
+void func_001240F8();
+void func_00124338();
+void func_001243E0();
+void func_001245A8();
+void func_00124868();
+void func_001249A8();
+void func_00124A48();
+void func_00124FC0();
+void func_00125108();
+void func_00125138();
+void func_00125438();
+void func_00125440();
+void func_00125C90();
+void func_001261C0();
+void func_00126270();
+void func_00126F78();
+void func_00127048();
+void func_00127378();
+void func_001273F0();
+void func_00127478();
+void func_001274F8();
+void func_00127590();
+void func_001276C0();
+void func_001289C0();
+void func_00128E88();
+void func_00128FD0();
+void func_00129780();
+void func_0012B2E8();
+void func_0012B6B8();
+void func_0012B760();
+void func_0012B870();
+void func_0012B8C8();
+void func_0012C140();
+void func_0012C160();
+void func_0012D3E0();
+void func_0012D3E8();
+void func_0012D3F0();
+void func_0012F840();
+void func_0012F888();
+void func_0012F8C8();
+void func_0012F9B8();
+void func_0012FA88();
+void func_0012FB68();
+void func_00139DE8();
+void func_00139E80();
+void func_00139EC8();
+void func_0013A3A0();
+void func_0013A418();
+void func_0013A940();
+void func_0013AD08();
+void func_0013B4C0();
+void func_0013B598();
+void func_0013B5C8();
+void func_0013B610();
+void func_0013B708();
+void func_0013B778();
+void func_0013B9D8();
+void func_0013BA70();
+void func_0013BBA0();
+void func_0013CCF8();
+void func_0013CD80();
+void func_0013CDE8();
+void func_0013CE40();
+void func_0013D068();
+void func_0013D0B0();
+void func_0013D278();
+void func_0013DC38();
+void func_0013DCA8();
+void func_0013DD08();
+void func_0013DDB8();
+void func_0013DDF0();
+void func_0013DE38();
+void func_0013DEE8();
+void func_0013DF68();
+void func_0013F0E0();
+void func_0013F110();
+void func_0013F290();
+void func_0013F6C0();
+void func_0013FA10();
+void func_0013FAE8();
+void func_0013FD20();
+void func_00140028();
+void func_001400A8();
+void func_00140100();
+void func_00140140();
+void func_00140200();
+void func_00140258();
+void func_00141108();
+void func_001411A8();
+void func_00141210();
+void func_00141338();
+void func_00141438();
+void func_001415D0();
+void func_00141690();
+void func_001417F0();
+void func_00143648();
+void func_00146100();
+void func_00146130();
+void func_00146178();
+void func_001461A8();
+void func_00146340();
+void func_001463C0();
+void func_00146418();
+void func_00146470();
+void func_00146518();
+void func_001473E0();
+void func_00147428();
+void func_001478F0();
+void func_00147AB0();
+void func_00147E40();
+void func_00147EF8();
+void func_00147FB0();
+void func_00148298();
+void func_00148400();
+void func_00148470();
+void func_00148510();
+void func_00148598();
+void func_00148698();
+void func_00148718();
+void func_00148770();
+void func_00148828();
+void func_00148888();
+void func_00148D90();
+void func_00148E40();
+void func_00148EF8();
+void func_00148FF0();
+void func_00149168();
+void func_00149190();
+void func_0014B550();
+void func_0014B588();
+void func_0014B5C0();
+void func_0014B608();
+void func_0014B640();
+void func_0014B6A8();
+void func_0014BB08();
+void func_0014BCE8();
+void func_0014BD38();
+void func_0014BDC8();
+void func_0014BEA8();
+void func_0014BEF8();
+void func_0014BF88();
+void func_0014C018();
+void func_0014C138();
+void func_0014C6E0();
+void func_0014C788();
+void func_0014CF30();
+void func_0014DA18();
+void func_0014DA28();
+void func_0014DB40();
+void func_0014DB58();
+void func_0014EE40();
+void func_0014EE70();
+void func_0014EF00();
+void func_0014EF40();
+void func_0014EF88();
+void func_0014EFB8();
+void func_0014F020();
+void func_0014F058();
+void func_0014F740();
+void func_0014F770();
+void func_0014F850();
+void func_0014F920();
+void func_0014FA88();
+void func_0014FBE0();
+void func_0014FC38();
+void func_001504E0();
+void func_00150528();
+void func_001506F0();
+void func_00150AE8();
+void func_001512A8();
+void func_00152E28();
+void func_00153328();
+void func_00154C10();
+void func_00154F98();
+void func_00155080();
+void func_001550E8();
+void func_00155270();
+void func_00155678();
+void func_00155AB0();
+void func_001585F8();
+void func_001587C0();
+void func_001587C8();
+void func_00158980();
+void func_00158A10();
+void func_00158A80();
+void func_00158B00();
+void func_00158B30();
+void func_00158C28();
+void func_00158C60();
+void func_00158D38();
+void func_00158E10();
+void func_00158E48();
+void func_00158F10();
+void func_00158F80();
+void func_00159680();
+void func_001596E0();
+void func_00159890();
+void func_00159A80();
+void func_0015A8B8();
+void func_0015A918();
+void func_0015A960();
+void func_0015A9A8();
+void func_0015AAE0();
+void func_0015AC08();
+void func_0015AD80();
+void func_0015AE38();
+void func_0015AEB0();
+void func_0015AF50();
+void func_0015B128();
+void func_0015B4D0();
+void func_0015B720();
+void func_0015FBB8();
+void func_0015FCD8();
+void func_0015FF88();
+void func_001660A0();
+void func_001660E8();
+void func_00167D68();
+void func_00167E08();
+void func_00167EF0();
+void func_00167F10();
+void func_00169CD8();
+void func_00169D20();
+void func_00169D58();
+void func_00169D90();
+void func_00169DD8();
+void func_0016A100();
+void func_0016A140();
+void func_0016A178();
+void func_0016A1B0();
+void func_0016A1F8();
+void func_0016A3A8();
+void func_0016A420();
+void func_0016A490();
+void func_0016A4C8();
+void func_0016A500();
+void func_0016A548();
+void func_0016A580();
+void func_0016AA18();
+void func_0016AED8();
+void func_0016C470();
+void func_0016C4B8();
+void func_0016C4E8();
+void func_0016C508();
+void func_0016CE00();
+void func_0016CE80();
+void func_0016CF70();
+void func_0016D0C0();
+void func_0016D128();
+void func_0016DA00();
+void func_0016DD10();
+void func_0016DD90();
+void func_0016DDE8();
+void func_0016DF30();
+void func_0016DF68();
+void func_0016DFE0();
+void func_0016F608();
+void func_0016F7B0();
+void func_0016F810();
+void func_001701B0();
+void func_00170410();
+void func_00170528();
+void func_00170660();
+void func_00170790();
+void func_00170820();
+void func_00170960();
+void func_001721B0();
+void func_00172530();
+void func_001725E0();
+void func_00172898();
+void func_00172AE0();
+void func_00172B08();
+void func_00172B88();
+void func_00172CF0();
+void func_00172EB8();
+void func_00172EE0();
+void func_00173708();
+void func_00173888();
+void func_00174808();
+void func_00177E20();
+void func_00177E70();
+void func_00177EE0();
+void func_00177F98();
+void func_00178008();
+void func_00178038();
+void func_001793C0();
+void func_001793F0();
+void func_00179590();
+void func_00179690();
+void func_001796D0();
+void func_00179A68();
+void func_0017A6D0();
+void func_0017A700();
+void func_0017A788();
+void func_0017A9E0();
+void func_0017AA40();
+void func_0017AB58();
+void func_0017ABD8();
+void func_0017ADD0();
+void func_0017AE00();
+void func_0017AF38();
+void func_0017B308();
+void func_0017B3A8();
+void func_0017B5D0();
+void func_0017B610();
+void func_0017B648();
+void func_0017B710();
+void func_0017B7A8();
+void func_0017B998();
+void func_0017FD90();
+void func_0017FDC8();
+void func_0017FE00();
+void func_0017FE48();
+void func_0017FE90();
+void func_0017FEC0();
+void func_00180EB0();
+void func_00180EE8();
+void func_00180F20();
+void func_00180F68();
+void func_00180F98();
+void func_00181078();
+void func_00181448();
+void func_00181658();
+void func_00181780();
+void func_00181818();
+void func_00181A58();
+void func_00181A98();
+void func_00181AE0();
+void func_00181AF0();
+void func_00181BC8();
+void func_00181D28();
+void func_00181D88();
+void func_00182470();
+void func_001824D8();
+void func_00182548();
+void func_00182748();
+void func_00182C18();
+void func_00182C58();
+void func_00182C80();
+void func_00182D00();
+void func_00182D48();
+void func_00182D50();
+void func_00182E88();
+void func_00182ED0();
+void func_00182F78();
+void func_001830B0();
+void func_001830D8();
+void func_00183290();
+void func_001832C0();
+void func_001832F0();
+void func_00183320();
+void func_00183350();
+void func_001833D0();
+void func_00183CC8();
+void func_00183D88();
+void func_00183E40();
+void func_00183E70();
+void func_00183EA0();
+void func_00185358();
+void func_00185498();
+void func_00185538();
+void func_00187F40();
+void func_0018A388();
+void func_0018A3B8();
+void func_0018A3F0();
+void func_0018A628();
+void func_0018A9A8();
+void func_0018AAE0();
+void func_0018AB88();
+void func_0018ABF0();
+void func_0018ACD0();
+void func_0018ACF0();
+void func_0018AD88();
+void func_0018AE38();
+void func_0018B2E8();
+void func_0018B340();
+void func_0018D8E0();
+void func_0018D910();
+void func_0018D978();
+void func_0018D9B8();
+void func_0018DA40();
+void func_0018DB20();
+void func_0018DC88();
+void func_0018DDA0();
+void func_0018DDD8();
+void func_0018DE70();
+void func_0018DEE8();
+void func_0018E040();
+void func_0018F988();
+void func_0018F9D8();
+void func_0018FEF8();
+void func_0018FF28();
+void func_0018FFB0();
+void func_001900A0();
+void func_00190128();
+void func_00190258();
+void func_001903F0();
+void func_00190450();
+void func_001904E0();
+void func_00190570();
+void func_00190658();
+void func_001906F8();
+void func_00190740();
+void func_00190770();
+void func_001916D0();
+void func_00191F08();
+void func_00191F68();
+void func_00191FA0();
+void func_00191FD8();
+void func_00192020();
+void func_00192068();
+void func_001920E0();
+void func_00192128();
+void func_00192150();
+void func_001921A8();
+void func_001921E8();
+void func_00192230();
+void func_001922E8();
+void func_00192380();
+void func_00192410();
+void func_00192450();
+void func_00192488();
+void func_00192490();
+void func_001924C8();
+void func_001925C0();
+void func_00192820();
+void func_00192850();
+void func_00192A28();
+void func_00192A38();
+void func_00192B58();
+void func_00192C58();
+void func_001930B0();
+void func_001963D8();
+void func_00196410();
+void func_00196810();
+void func_00196900();
+void func_00196938();
+void func_001969C0();
+void func_001969F8();
+void func_00196B78();
+void func_00196EB0();
+void func_001974D8();
+void func_001974F8();
+void func_00197788();
+void func_00197A68();
+void func_00197A88();
+void func_00197F10();
+void func_00198090();
+void func_001980B0();
+void func_001982A0();
+void func_00198318();
+void func_001984B8();
+void func_00198530();
+void func_00198570();
+void func_001986E8();
+void func_00198760();
+void func_00198858();
+void func_00198860();
+void func_00198920();
+void func_00198980();
+void func_001989B0();
+void func_00198A88();
+void func_00198B28();
+void func_00198BD8();
+void func_00198DA8();
+void func_00198E58();
+void func_00198E98();
+void func_00198EF8();
+void func_00198FB0();
+void func_00199000();
+void func_00199070();
+void func_001990A8();
+void func_001990E0();
+void func_00199138();
+void func_00199170();
+void func_001991A8();
+void func_001991E0();
+void func_00199218();
+void func_001993F0();
+void func_00199428();
+void func_001994C8();
+void func_00199500();
+void func_00199698();
+void func_001999D0();
+void func_00199C58();
+void func_00199C78();
+void func_00199D08();
+void func_0019A148();
+void func_0019A1E0();
+void func_0019A520();
+void func_0019A6A8();
+void func_0019AB78();
+void func_0019AF00();
+void func_0019AF38();
+void func_0019AF70();
+void func_0019AFA8();
+void func_0019AFF0();
+void func_0019B038();
+void func_0019B0A0();
+void func_0019B188();
+void func_0019B1E0();
+void func_0019B218();
+void func_0019B250();
+void func_0019B298();
+void func_0019B378();
+void func_0019BB10();
+void func_0019BB90();
+void func_0019BC40();
+void func_0019BE08();
+void func_0019C3D0();
+void func_0019C408();
+void func_0019C440();
+void func_0019C470();
+void func_0019C728();
+void func_0019E0B8();
+void func_0019E168();
+void func_0019E220();
+void func_0019E418();
+void func_0019E420();
+void func_0019E848();
+void func_0019ECE0();
+void func_0019ED58();
+void func_001A0FE8();
+void func_001A1030();
+void func_001A11C0();
+void func_001A1398();
+void func_001A3AE0();
+void func_001A3B20();
+void func_001A3B58();
+void func_001A3C40();
+void func_001A3D40();
+void func_001A43C8();
+void func_001A44E8();
+void func_001A4538();
+void func_001A45B8();
+void func_001A4610();
+void func_001A4710();
+void func_001A4718();
+void func_001A48C0();
+void func_001A4B30();
+void func_001A4C48();
+void func_001A4D60();
+void func_001A6498();
+void func_001A64F8();
+void func_001A6540();
+void func_001A6588();
+void func_001A65C8();
+void func_001A6DE0();
+void func_001A6F88();
+void func_001A7008();
+void func_001A7050();
+void func_001A7098();
+void func_001A7128();
+void func_001A7230();
+void func_001A7290();
+void func_001A72B0();
+void func_001A7520();
+void func_001A7550();
+void func_001A7588();
+void func_001A75D0();
+void func_001A7648();
+void func_001A7708();
+void func_001A7750();
+void func_001A7798();
+void func_001A7800();
+void func_001A7FE8();
+void func_001A80E0();
+void func_001A84C8();
+void func_001A8590();
+void func_001A86F8();
+void func_001A98F8();
+void func_001A9928();
+void func_001A9960();
+void func_001A99B8();
+void func_001A99F8();
+void func_001A9A40();
+void func_001A9A98();
+void func_001A9AE8();
+void func_001AA1F0();
+void func_001AA268();
+void func_001AA298();
+void func_001AA4F0();
+void func_001AA790();
+void func_001AA898();
+void func_001AA8A0();
+void func_001AA8A8();
+void func_001AA8C8();
+void func_001AA8F0();
+void func_001AA958();
+void func_001AA998();
+void func_001AAAC8();
+void func_001AAF58();
+void func_001AAF88();
+void func_001AB058();
+void func_001AB198();
+void func_001AB5D8();
+void func_001AC5C0();
+void func_001AC638();
+void func_001AC700();
+void func_001AECB0();
+void func_001AECE0();
+void func_001AECE8();
+void func_001AEFA0();
+void func_001AF0A0();
+void func_001AF0D0();
+void func_001AF108();
+void func_001AF3B8();
+void func_001AF5C8();
+void func_001AF7A8();
+void func_001AF820();
+void func_001AFBB0();
+void func_001B00E8();
+void func_001B0120();
+void func_001B0160();
+void func_001B01B0();
+void func_001B04A0();
+void func_001B04D0();
+void func_001B0578();
+void func_001B0838();
+void func_001B0BD8();
+void func_001B0C68();
+void func_001B0EA8();
+void func_001B0EE0();
+void func_001B0F70();
+void func_001B0FC0();
+void func_001B1158();
+void func_001B11A0();
+void func_001B1238();
+void func_001B1438();
+void func_001B15D0();
+void func_001B1608();
+void func_001B1698();
+void func_001B1710();
+void func_001B2840();
+void func_001B28A8();
+void func_001B4AA0();
+void func_001B4AD0();
+void func_001B4B38();
+void func_001B4B48();
+void func_001B5CD8();
+void func_001B5D28();
+void func_001B5F50();
+void func_001B61A8();
+void func_001B6EC8();
+void func_001B7128();
+void func_001B7280();
+void func_001B7608();
+void func_001B7790();
+void func_001B7818();
+void func_001B7860();
+void func_001B78C0();
+void func_001B7920();
+void func_001B7968();
+void func_001B7A98();
+void func_001B7B78();
+void func_001B7D00();
+void func_001B7F78();
+void func_001B8148();
+void func_001B8540();
+void func_001B8960();
+void func_001B89B8();
+void func_001B8A08();
+void func_001B8A48();
+void func_001B8B90();
+void func_001B9338();
+void func_001B93D8();
+void func_001B93F8();
+void func_001B9680();
+void func_001B9690();
+void func_001B97E0();
+void func_001B9940();
+void func_001B99F0();
+void func_001B9B50();
+void func_001B9C80();
+void func_001B9F30();
+void func_001BA130();
+void func_001BA5B0();
+void func_001BAC28();
+void func_001BAC30();
+void func_001BB210();
+void func_001BBC30();
+void func_001BC088();
+void func_001BC320();
+void func_001BC368();
+void func_001BC760();
+void func_001BC828();
+void func_001BC978();
+void func_001C0F30();
+void func_001C0FF0();
+void func_001C10A8();
+void func_001C10D8();
+void func_001C1110();
+void func_001C1148();
+void func_001C3390();
+void func_001C33C8();
+void func_001C34C8();
+void func_001C3928();
+void func_001C39A0();
+void func_001C3B40();
+void func_001C3C00();
+void func_001C3C98();
+void func_001C3D28();
+void func_001C3D60();
+void func_001C3E50();
+void func_001C3E80();
+void func_001C4458();
+void func_001C44F0();
+void func_001C49C8();
+void func_001C4ED0();
+void func_001C4F00();
+void func_001C4F08();
+void func_001C4FA0();
+void func_001C4FF8();
+void func_001C5118();
+void func_001C5248();
+void func_001C5338();
+void func_001C5388();
+void func_001C53B0();
+void func_001C53E0();
+void func_001C5438();
+void func_001C57C8();
+void func_001C5BF0();
+void func_001C5DB8();
+void func_001C5F18();
+void func_001C6028();
+void func_001C6F48();
+void func_001C7140();
+void func_001C7188();
+void func_001C71E0();
+void func_001C72A0();
+void func_001C7468();
+void func_001C74E8();
+void func_001C7520();
+void func_001C75B0();
+void func_001C7CB8();
+void func_001C8010();
+void func_001C8590();
+void func_001C8C08();
+void func_001C8E28();
+void func_001C9008();
+void func_001C91C8();
+void func_001C96D8();
+void func_001C9990();
+void func_001C9A48();
+void func_001C9AF8();
+void func_001C9CF8();
+void func_001C9DE0();
+void func_001CA460();
+void func_001CA468();
+void func_001CA5E0();
+void func_001CAA08();
+void func_001CAC30();
+void func_001CACB0();
+void func_001CAD98();
+void func_001CB3C0();
+void func_001CB3C8();
+void func_001CB618();
+void func_001CB7A0();
+void func_001CD088();
+void func_001CDF78();
+void func_001D3290();
+void func_001D3398();
+void func_001D3470();
+void func_001D34E0();
+void func_001D3500();
+void func_001D35A8();
+void func_001D3678();
+void func_001D4D08();
+void func_001D54E0();
+void func_001D65D8();
+void func_001D6608();
+void func_001D6B18();
+void func_001D6DA0();
+void func_001D6DD8();
+void func_001D7018();
+void func_001D7040();
+void func_001D73A8();
+void func_001D7440();
+void func_001D7778();
+void func_001D9C98();
+void func_001D9D78();
+void func_001DA170();
+void func_001DA310();
+void func_001DA320();
+void func_001DA6E0();
+void func_001DA7E0();
+void func_001DAA18();
+void func_001DAC20();
+void func_001DACB0();
+void func_001DAE18();
+void func_001DAE48();
+void func_001DAE68();
+void func_001DAF08();
+void func_001DB4C8();
+void func_001DCEA0();
+void func_001DDCE0();
+void func_001DDD18();
+void func_001DDE90();
+void func_001DE768();
+void func_001DE798();
+void func_001DE808();
+void func_001DE910();
+void func_001DEBB8();
+void func_001DEBE8();
+void func_001DF290();
+void func_001DF2C8();
+void func_001DF520();
+void func_001DF5A0();
+void func_001DF700();
+void func_001DFA10();
+void func_001DFA40();
+void func_001DFB08();
+void func_001DFBD0();
+void func_001DFD90();
+void func_001DFDC8();
+void func_001DFE00();
+void func_001DFE38();
+void func_001E2520();
+void func_001E25F8();
+void func_001E2648();
+void func_001E2758();
+void func_001E2940();
+void func_001E2988();
+void func_001E29A8();
+void func_001E5378();
+void func_001E5428();
+void func_001E55D0();
+void func_001E56A0();
+void func_001E5750();
+void func_001E5CE8();
+void func_001E5DA8();
+void func_001E5E08();
+void func_001E5E50();
+void func_001E5E60();
+void func_001E88D0();
+void func_001E8948();
+void func_001E8A50();
+void func_001E8D58();
+void func_001E8DB0();
+void func_001E8DD0();
+void func_001E8E08();
+void func_001E8E48();
+void func_001E8EF8();
+void func_001E8FA8();
+void func_001E8FE8();
+void func_001E9038();
+void func_001EA118();
+void func_001EB460();
+void func_001EB518();
+void func_001EB598();
+void func_001EB608();
+void func_001EB748();
+void func_001EBC88();
+void func_001EBD08();
+void func_001EBD10();
+void func_001EBDD0();
+void func_001EBEB0();
+void func_001EBF40();
+void func_001EBFB0();
+void func_001EC098();
+void func_001EC0B8();
+void func_001EC0D8();
+void func_001EC188();
+void func_001EC380();
+void func_001EC3D8();
+void func_001EC478();
+void func_001EC570();
+void func_001EC828();
+void func_001ECBC8();
+void func_001ECDF8();
+void func_001ECE98();
+void func_001ECF10();
+void func_001ED168();
+void func_001ED198();
+void func_001EE900();
+void func_001EE930();
+void func_001EEC60();
+void func_001EECE0();
+void func_001EEF90();
+void func_001EF3A8();
+void func_001EF3D8();
+void func_001EF768();
+void func_001EF808();
+void func_001EF838();
+void func_001EF868();
+void func_001EF8F8();
+void func_001EF9C8();
+void func_001F0660();
+void func_001F0758();
+void func_001F0AE0();
+void func_001F0EB8();
+void func_001F0F70();
+void func_001F2758();
+void func_001F39F8();
+void func_001F3A40();
+void func_001F3A90();
+void func_001F3AF0();
+void func_001F3D80();
+void func_001F3EE0();
+void func_001F3F80();
+void func_001F4500();
+void func_001F4660();
+void func_001F4AE0();
+void func_001F4E18();
+void func_001F4E48();
+void func_001F4F70();
+void func_001F4FD8();
+void func_001F5008();
+void func_001F51A0();
+void func_001F51C8();
+void func_001F51E8();
+void func_001F5218();
+void func_001F5268();
+extern const ClassDesc_217418<2> D_00217380;
+extern const Fn_Table D_00217410[2];
+extern const ClassDesc_217418<28> D_00217418;
+extern const ClassDesc_217418<48> D_00217498;
+extern const ClassDesc_217418<86> D_00217568;
+extern const ClassDesc_217418<28> D_00217740;
+extern const ClassDesc_217418<28> D_002177C0;
+extern const ClassDesc_217418<28> D_00217840;
+extern const ClassDesc_217418<28> D_002178C0;
+extern const ClassDesc_217418<28> D_00217940;
+extern const ClassDesc_217418<48> D_002179C0;
+extern const ClassDesc_217418<48> D_00217A90;
+extern const ClassDesc_217418<48> D_00217B60;
+extern const ClassDesc_217418<124> D_00217C30;
+extern const Fn_Table D_00218330[20];
+extern const ClassDesc_217418<28> D_00218650;
+extern const ClassDesc_217418<72> D_00218770;
+extern const ClassDesc_217418<48> D_002188A0;
+extern const ClassDesc_217418<74> D_00218970;
+extern const ClassDesc_217418<72> D_00218AA8;
+extern const ClassDesc_217418<74> D_00218BD8;
+extern const ClassDesc_217418<74> D_00218D10;
+extern const ClassDesc_217418<74> D_00218E48;
+extern const ClassDesc_217418<72> D_00218F80;
+extern const ClassDesc_217418<72> D_002190B0;
+extern const ClassDesc_217418<28> D_002191E0;
+extern const ClassDesc_217418<48> D_00219260;
+extern const ClassDesc_217418<72> D_00219330;
+extern const ClassDesc_217418<28> D_00219460;
+extern const ClassDesc_217418<28> D_002194E0;
+extern const Fn_Table D_00219560[10];
+extern const Fn_Table D_00219588[10];
+extern const ClassDesc_217418<28> D_00219738;
+extern const ClassDesc_217418<28> D_002197E8;
+extern const ClassDesc_217418<28> D_00219868;
+extern const ClassDesc_217418<72> D_002198F0;
+extern const ClassDesc_217418<48> D_00219A20;
+extern const ClassDesc_217418<72> D_00219AF0;
+extern const Fn_Table D_00219DE0[8];
+extern const ClassDesc_217418<48> D_00219F80;
+extern const ClassDesc_217418<48> D_0021A050;
+extern const ClassDesc_217418<28> D_0021A120;
+extern const ClassDesc_217418<28> D_0021A1A0;
+extern const ClassDesc_217418<28> D_0021A220;
+extern const ClassDesc_217418<28> D_0021A2A0;
+extern const ClassDesc_217418<48> D_0021A320;
+extern const ClassDesc_217418<48> D_0021A490;
+extern const ClassDesc_217418<28> D_0021A560;
+extern const ClassDesc_217418<28> D_0021A5E0;
+extern const ClassDesc_217418<72> D_0021A660;
+extern const Fn_Table D_0021A790[10];
+extern const ClassDesc_217418<28> D_0021A7B8;
+extern const ClassDesc_217418<88> D_0021A838;
+extern const Fn_Table D_0021A9A8[10];
+extern const ClassDesc_217418<74> D_0021A9D0;
+extern const ClassDesc_217418<72> D_0021AB08;
+extern const ClassDesc_217418<78> D_0021AC38;
+extern const ClassDesc_217418<78> D_0021AD80;
+extern const ClassDesc_217418<78> D_0021AEC8;
+extern const ClassDesc_217418<78> D_0021B010;
+extern const ClassDesc_217418<28> D_0021B158;
+extern const ClassDesc_217418<28> D_0021B1D8;
+extern const ClassDesc_217418<28> D_0021B258;
+extern const ClassDesc_217418<72> D_0021B2D8;
+extern const ClassDesc_217418<48> D_0021B408;
+extern const ClassDesc_217418<72> D_0021B4D8;
+extern const ClassDesc_217418<28> D_0021B608;
+extern const ClassDesc_217418<88> D_0021B688;
+extern const ClassDesc_217418<28> D_0021B7F8;
+extern const ClassDesc_217418<72> D_0021B878;
+extern const ClassDesc_217418<72> D_0021B9A8;
+extern const ClassDesc_217418<28> D_0021BAD8;
+extern const ClassDesc_217418<100> D_0021BB58;
+extern const ClassDesc_217418<100> D_0021BCF8;
+extern const ClassDesc_217418<100> D_0021BE98;
+extern const ClassDesc_217418<72> D_0021C038;
+extern const ClassDesc_217418<72> D_0021C168;
+extern const ClassDesc_217418<28> D_0021C298;
+extern const ClassDesc_217418<72> D_0021C318;
+extern const ClassDesc_217418<28> D_0021C448;
+extern const ClassDesc_217418<48> D_0021C4C8;
+extern const ClassDesc_217418<72> D_0021C598;
+extern const ClassDesc_217418<48> D_0021C6C8;
+extern const ClassDesc_217418<48> D_0021C798;
+extern const ClassDesc_217418<48> D_0021C868;
+extern const ClassDesc_217418<48> D_0021C938;
+extern const ClassDesc_217418<48> D_0021CA08;
+extern const ClassDesc_217418<48> D_0021CAD8;
+extern const ClassDesc_217418<48> D_0021CBA8;
+extern const ClassDesc_217418<76> D_0021CC78;
+extern const ClassDesc_217418<76> D_0021CDB8;
+extern const ClassDesc_217418<76> D_0021CEF8;
+extern const ClassDesc_217418<48> D_0021D038;
+extern const ClassDesc_217418<48> D_0021D108;
+extern const ClassDesc_217418<84> D_0021D1D8;
+extern const ClassDesc_217418<28> D_0021D338;
+extern const ClassDesc_217418<72> D_0021D3B8;
+extern const ClassDesc_217418<48> D_0021D4E8;
+extern const ClassDesc_217418<84> D_0021D5B8;
+extern const ClassDesc_217418<72> D_0021D718;
+extern const ClassDesc_217418<72> D_0021D848;
+extern const ClassDesc_217418<72> D_0021D978;
+extern const ClassDesc_217418<72> D_0021DAA8;
+extern const ClassDesc_217418<72> D_0021DBD8;
+extern const ClassDesc_217418<74> D_0021DD08;
+extern const ClassDesc_217418<48> D_0021DE40;
+extern const ClassDesc_217418<74> D_0021DF10;
+extern const ClassDesc_217418<74> D_0021E048;
+extern const ClassDesc_217418<74> D_0021E180;
+extern const ClassDesc_217418<36> D_0021E2B8;
+extern const Fn_Table D_0021E438[8];
+extern const ClassDesc_217418<72> D_0021E458;
+extern const ClassDesc_217418<48> D_0021E588;
+extern const ClassDesc_217418<48> D_0021E658;
+extern const ClassDesc_217418<100> D_0021E728;
+extern const ClassDesc_217418<100> D_0021E8C8;
+extern const ClassDesc_217418<100> D_0021EA68;
+extern const ClassDesc_217418<84> D_0021EC08;
+extern const ClassDesc_217418<100> D_0021ED68;
+extern const ClassDesc_217418<28> D_0021EF08;
+extern const ClassDesc_217418<48> D_0021EF88;
+extern const ClassDesc_217418<72> D_0021F058;
+extern const ClassDesc_217418<72> D_0021F188;
+extern const ClassDesc_217418<28> D_0021F2B8;
+extern const ClassDesc_217418<28> D_0021F338;
+extern const ClassDesc_217418<28> D_0021F3B8;
+extern const ClassDesc_217418<28> D_0021F438;
+extern const ClassDesc_217418<88> D_0021F4B8;
+extern const ClassDesc_217418<84> D_0021F628;
+extern const ClassDesc_217418<100> D_0021F788;
+extern const ClassDesc_217418<84> D_0021F928;
+extern const ClassDesc_217418<100> D_0021FA88;
+extern const ClassDesc_217418<72> D_0021FC28;
+extern const ClassDesc_217418<72> D_0021FD58;
+extern const ClassDesc_217418<100> D_0021FE88;
+extern const ClassDesc_217418<100> D_00220028;
+extern const ClassDesc_217418<100> D_002201C8;
+extern const ClassDesc_217418<48> D_00220368;
+extern const ClassDesc_217418<84> D_00220438;
+extern const ClassDesc_217418<84> D_00220598;
+extern const ClassDesc_217418<72> D_002206F8;
+extern const ClassDesc_217418<72> D_00220828;
+extern const ClassDesc_217418<74> D_00220958;
+extern const ClassDesc_217418<84> D_00220A90;
+extern const ClassDesc_217418<28> D_00220C40;
+extern const ClassDesc_217418<84> D_00220CC0;
+extern const ClassDesc_217418<72> D_00220E20;
+extern const ClassDesc_217418<48> D_00220F50;
+extern const ClassDesc_217418<48> D_00221020;
+extern const ClassDesc_217418<48> D_00221140;
+extern const ClassDesc_217418<48> D_00221210;
+extern const ClassDesc_217418<48> D_002213D0;
+extern const ClassDesc_217418<28> D_002214A0;
+extern const ClassDesc_217418<28> D_00221520;
+extern const ClassDesc_217418<2> D_00217380 = { 0x0, 0x0, 0x0, 0x0, {
+    0, 0,
+} };
+extern const Fn_Table D_00217410[2] = {
+    0, 0,
+};
+extern const ClassDesc_217418<28> D_00217418 = { (const void*)(const u8*)&D_00217410, 0x1, 0x0, 0x34, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<48> D_00217498 = { (const void*)(const u8*)&D_00217418, 0x2, 0x1, 0x2D0, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<86> D_00217568 = { (const void*)(const u8*)&D_00217498, 0x3, 0x3, 0x550, {
+    (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    0, 0, 0, 0,
+    0, (Fn_Table)func_0014DA18, (Fn_Table)func_0014DA28, (Fn_Table)func_0014DB40,
+    (Fn_Table)func_0014DB58, 0, 0, 0,
+    0, 0,
+} };
+extern const ClassDesc_217418<28> D_00217740 = { (const void*)(const u8*)&D_00217418, 0x6E, 0x0, 0x38, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001B2840, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_002177C0 = { (const void*)(const u8*)&D_00217418, 0x7E, 0x0, 0x50, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00192068, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_00217840 = { (const void*)(const u8*)&D_002177C0, 0x82, 0x0, 0x60, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00192150, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_002178C0 = { (const void*)(const u8*)&D_00217418, 0x73, 0x0, 0x80, {
+    (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001F3A40, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_00217940 = { (const void*)(const u8*)&D_002178C0, 0x74, 0x0, 0x100, {
+    (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001F3EE0, (Fn_Table)func_001F3D80, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_001F3F80, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<48> D_002179C0 = { (const void*)(const u8*)&D_00217498, 0x7D, 0x1, 0x330, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001F4500, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001F4660, (Fn_Table)func_001F4AE0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_00217A90 = { (const void*)(const u8*)&D_00217498, 0x4E, 0x1, 0x320, {
+    (Fn_Table)func_001F4E18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001F4E48, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_00217B60 = { (const void*)(const u8*)&D_00217498, 0x51, 0x1, 0x620, {
+    (Fn_Table)func_00183CC8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00183E40, (Fn_Table)func_00183E70,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00183EA0, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00183D88,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<124> D_00217C30 = { (const void*)(const u8*)&D_00217568, 0x5, 0xB, 0x610, {
+    (Fn_Table)func_001921A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00192230, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_00192B58, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_00192450,
+    (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001AA1F0, (Fn_Table)func_001AA268, (Fn_Table)func_001AA298, 0,
+    0, (Fn_Table)func_001AA8C8, 0, 0,
+    (Fn_Table)func_001AA4F0, (Fn_Table)func_001AA790, 0, (Fn_Table)func_001AA898,
+    (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958,
+    (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0,
+    (Fn_Table)func_001AA1F0, (Fn_Table)func_001AAF88, (Fn_Table)func_001AB058, 0,
+    0, (Fn_Table)func_001AA8C8, 0, 0,
+    (Fn_Table)func_001AA4F0, (Fn_Table)func_001AB198, 0, (Fn_Table)func_001AA898,
+    (Fn_Table)func_001AB5D8, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958,
+    (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0,
+} };
+extern const Fn_Table D_00218330[20] = {
+    (Fn_Table)func_001AA1F0, (Fn_Table)func_001AC5C0, (Fn_Table)func_001AA298, 0,
+    0, (Fn_Table)func_001AA8C8, 0, 0,
+    (Fn_Table)func_001AC638, (Fn_Table)func_001AC700, 0, (Fn_Table)func_001AA898,
+    (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958,
+    (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0,
+};
+extern const ClassDesc_217418<28> D_00218650 = { (const void*)(const u8*)&D_00217418, 0x8E, 0x0, 0xA0, {
+    (Fn_Table)func_0017FE90, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_0017FEC0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<72> D_00218770 = { (const void*)(const u8*)&D_00217568, 0x1F, 0x83, 0x6B0, {
+    (Fn_Table)func_001EEC60, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_001EF3D8, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001EECE0, (Fn_Table)func_001EEF90, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001EF768, (Fn_Table)func_001EF3A8,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001EF808,
+} };
+extern const ClassDesc_217418<48> D_002188A0 = { (const void*)(const u8*)&D_00217498, 0x63, 0x1, 0x470, {
+    (Fn_Table)func_001E2520, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001E25F8,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001E2648, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001E2758, (Fn_Table)func_001E2940, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_001E29A8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001E2988, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<74> D_00218970 = { (const void*)(const u8*)&D_00217568, 0x20, 0x3, 0x6C0, {
+    (Fn_Table)func_0013CCF8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013CE40, (Fn_Table)func_0013D068, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013D0B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0013D278, 0,
+} };
+extern const ClassDesc_217418<72> D_00218AA8 = { (const void*)(const u8*)&D_00217568, 0x27, 0x3, 0x570, {
+    (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_0013DCA8, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_0013DC38, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_0013DD08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<74> D_00218BD8 = { (const void*)(const u8*)&D_00218970, 0x21, 0x13, 0x6C0, {
+    (Fn_Table)func_0013DDB8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013CE40, (Fn_Table)func_0013D068, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013D0B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0013D278, 0,
+} };
+extern const ClassDesc_217418<74> D_00218D10 = { (const void*)(const u8*)&D_00218970, 0x25, 0x3, 0x6D0, {
+    (Fn_Table)func_0013DDF0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013CE40, (Fn_Table)func_0013D068, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013D0B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_0013DE38, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0013D278, 0,
+} };
+extern const ClassDesc_217418<74> D_00218E48 = { (const void*)(const u8*)&D_00218D10, 0x26, 0x3, 0x6E0, {
+    (Fn_Table)func_0013DDF0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013CE40, (Fn_Table)func_0013DF68, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013D0B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_0013DEE8, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0013D278, 0,
+} };
+extern const ClassDesc_217418<72> D_00218F80 = { (const void*)(const u8*)&D_00217568, 0x29, 0x3, 0x7A0, {
+    (Fn_Table)func_001400A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00140200, (Fn_Table)func_00140100, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00140140, (Fn_Table)func_00140258, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_002190B0 = { (const void*)(const u8*)&D_00217568, 0x28, 0x3, 0x890, {
+    (Fn_Table)func_0013F0E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013F6C0, (Fn_Table)func_0013F110, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013F290, (Fn_Table)func_0013FD20, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_0013FA10, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_00140028, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    (Fn_Table)func_0013FAE8, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<28> D_002191E0 = { (const void*)(const u8*)&D_00217418, 0x87, 0x0, 0x68, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_0015FF88, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<48> D_00219260 = { (const void*)(const u8*)&D_00217498, 0x4F, 0x1, 0x2D0, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<72> D_00219330 = { (const void*)(const u8*)&D_00217568, 0x2B, 0x3, 0x550, {
+    (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<28> D_00219460 = { (const void*)(const u8*)&D_00217418, 0x86, 0x0, 0x44, {
+    (Fn_Table)func_001EE900, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001EE930, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_002194E0 = { (const void*)(const u8*)&D_00217418, 0x85, 0x0, 0x34, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const Fn_Table D_00219560[10] = {
+    (Fn_Table)func_00121338, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0,
+    (Fn_Table)func_001214B8, (Fn_Table)func_00121508, (Fn_Table)func_00121568, (Fn_Table)func_00121580,
+    (Fn_Table)func_001215A8, 0,
+};
+extern const Fn_Table D_00219588[10] = {
+    (Fn_Table)func_00122708, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0,
+    (Fn_Table)func_001227B0, (Fn_Table)func_001227F0, (Fn_Table)func_00122840, (Fn_Table)func_00122858,
+    (Fn_Table)func_00122878, 0,
+};
+extern const ClassDesc_217418<28> D_00219738 = { (const void*)(const u8*)&D_00217418, 0x83, 0x40, 0xB0, {
+    (Fn_Table)func_0012B870, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_0012C140, (Fn_Table)func_0012B8C8, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_0012C160, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_002197E8 = { (const void*)(const u8*)&D_00219738, 0x84, 0x40, 0xD0, {
+    (Fn_Table)func_0012B870, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_0012D3F0, (Fn_Table)func_0012D3E0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_0012D3E8, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_00219868 = { (const void*)(const u8*)&D_00217418, 0x88, 0x0, 0x54, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001B5F50, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_001B61A8, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<72> D_002198F0 = { (const void*)(const u8*)&D_00217568, 0x35, 0x3, 0x550, {
+    (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_0016C4E8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<48> D_00219A20 = { (const void*)(const u8*)&D_00217498, 0x52, 0x1, 0x2D0, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_0016C508, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<72> D_00219AF0 = { (const void*)(const u8*)&D_00217568, 0x1E, 0x3, 0x570, {
+    (Fn_Table)func_0019E0B8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0019E168,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_0019E420, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_0019E220,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_0019E848, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_0019E418, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const Fn_Table D_00219DE0[8] = {
+    (Fn_Table)func_001A0FE8, 0, 0, (Fn_Table)func_001A1030,
+    (Fn_Table)func_001A11C0, (Fn_Table)func_001A1398, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58,
+};
+extern const ClassDesc_217418<48> D_00219F80 = { (const void*)(const u8*)&D_00217498, 0x4D, 0x1, 0x640, {
+    (Fn_Table)func_00139DE8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00139E80, (Fn_Table)func_00139EC8,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_0013A3A0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_0013A418,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_0013A940,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_0013AD08, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_0021A050 = { (const void*)(const u8*)&D_00217498, 0x50, 0x1, 0x350, {
+    (Fn_Table)func_00154C10, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00155080, (Fn_Table)func_00154F98, 0,
+    0, (Fn_Table)func_00155678, (Fn_Table)func_00183350, (Fn_Table)func_001550E8,
+    (Fn_Table)func_00155270, (Fn_Table)func_00155AB0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021A120 = { (const void*)(const u8*)&D_002178C0, 0x77, 0x0, 0x90, {
+    (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001F3A40, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_001585F8, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001587C0,
+} };
+extern const ClassDesc_217418<28> D_0021A1A0 = { (const void*)(const u8*)&D_0021A120, 0x78, 0x0, 0xC0, {
+    (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_00158980, (Fn_Table)func_001587C8, 0,
+    0, 0, (Fn_Table)func_00183350, (Fn_Table)func_00158A10,
+    (Fn_Table)func_001585F8, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00158A80,
+} };
+extern const ClassDesc_217418<28> D_0021A220 = { (const void*)(const u8*)&D_0021A120, 0x79, 0x0, 0xA0, {
+    (Fn_Table)func_00158B00, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_00158C28, (Fn_Table)func_00158B30, 0,
+    0, 0, (Fn_Table)func_00183350, (Fn_Table)func_00158C60,
+    (Fn_Table)func_001585F8, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00158D38,
+} };
+extern const ClassDesc_217418<28> D_0021A2A0 = { (const void*)(const u8*)&D_0021A220, 0x7A, 0x0, 0xD0, {
+    (Fn_Table)func_00158E10, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_00158C28, (Fn_Table)func_00158B30, 0,
+    0, (Fn_Table)func_00158F10, (Fn_Table)func_00183350, (Fn_Table)func_00158E48,
+    (Fn_Table)func_001585F8, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00158F80,
+} };
+extern const ClassDesc_217418<48> D_0021A320 = { (const void*)(const u8*)&D_00217498, 0x53, 0x101, 0x2F0, {
+    (Fn_Table)func_001963D8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00196810, (Fn_Table)func_00196410, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00196900, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_0021A490 = { (const void*)(const u8*)&D_00217498, 0x65, 0x1, 0x340, {
+    (Fn_Table)func_001504E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_00150528, 0,
+    0, (Fn_Table)func_001512A8, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001506F0, (Fn_Table)func_00150AE8, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021A560 = { (const void*)(const u8*)&D_00217740, 0x6F, 0x0, 0x60, {
+    (Fn_Table)func_00169CD8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00169D20, (Fn_Table)func_00169D58,
+    (Fn_Table)func_001830B0, (Fn_Table)func_00169DD8, (Fn_Table)func_001B2840, 0,
+    0, 0, (Fn_Table)func_00183350, (Fn_Table)func_00169D90,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021A5E0 = { (const void*)(const u8*)&D_002177C0, 0x7F, 0x0, 0x80, {
+    (Fn_Table)func_0016A100, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0016A140, (Fn_Table)func_0016A178,
+    (Fn_Table)func_001830B0, (Fn_Table)func_0016A1F8, (Fn_Table)func_00192068, 0,
+    0, 0, (Fn_Table)func_00183350, (Fn_Table)func_0016A1B0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021A660 = { (const void*)(const u8*)&D_00217568, 0x3A, 0x3, 0x570, {
+    (Fn_Table)func_0016A3A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0016A490, (Fn_Table)func_0016A4C8,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0016A500, (Fn_Table)func_0016A420, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_0016A580, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_0016A548, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const Fn_Table D_0021A790[10] = {
+    (Fn_Table)func_00185358, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, (Fn_Table)func_00185498,
+    (Fn_Table)func_001214B8, (Fn_Table)func_00185538, (Fn_Table)func_00121568, (Fn_Table)func_00121580,
+    (Fn_Table)func_001215A8, 0,
+};
+extern const ClassDesc_217418<28> D_0021A7B8 = { (const void*)(const u8*)&D_00217418, 0x8B, 0x0, 0x3F0, {
+    (Fn_Table)func_0019C440, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_0019C470, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_0019C728, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<88> D_0021A838 = { (const void*)(const u8*)&D_00217C30, 0x6, 0xB, 0x720, {
+    (Fn_Table)func_001C4458, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00192230, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001C44F0, (Fn_Table)func_001C4ED0, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C5118, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001C49C8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, (Fn_Table)func_001C5BF0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001C5338, (Fn_Table)func_001C53E0, (Fn_Table)func_001C5388, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_00192450,
+    (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, 0,
+} };
+extern const Fn_Table D_0021A9A8[10] = {
+    (Fn_Table)func_00121338, (Fn_Table)func_001212D8, (Fn_Table)func_00121358, 0,
+    (Fn_Table)func_001C5F18, (Fn_Table)func_001C6028, (Fn_Table)func_00121568, (Fn_Table)func_00121580,
+    (Fn_Table)func_001215A8, 0,
+};
+extern const ClassDesc_217418<74> D_0021A9D0 = { (const void*)(const u8*)&D_00218BD8, 0x22, 0x13, 0x6D0, {
+    (Fn_Table)func_0013DDB8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013CE40, (Fn_Table)func_0013D068, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013D0B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001233C0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021AB08 = { (const void*)(const u8*)&D_00217568, 0x2F, 0x3, 0x6C0, {
+    (Fn_Table)func_00123408, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00123540, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00123448, (Fn_Table)func_00123578, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<78> D_0021AC38 = { (const void*)(const u8*)&D_00217568, 0x30, 0x3, 0x5D0, {
+    (Fn_Table)func_001AECB0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_001AEFA0, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    0, 0, 0, 0,
+    (Fn_Table)func_001AECE0, (Fn_Table)func_001AECE8,
+} };
+extern const ClassDesc_217418<78> D_0021AD80 = { (const void*)(const u8*)&D_0021AC38, 0x31, 0x3, 0xB10, {
+    (Fn_Table)func_001AF0A0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001AF0D0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001AF108,
+    (Fn_Table)func_001AF3B8, (Fn_Table)func_001AF5C8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_001AF7A8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001AF820, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001AFBB0, (Fn_Table)func_001B00E8, (Fn_Table)func_001B0120, (Fn_Table)func_001B0160,
+    (Fn_Table)func_001AECE0, (Fn_Table)func_001B01B0,
+} };
+extern const ClassDesc_217418<78> D_0021AEC8 = { (const void*)(const u8*)&D_0021AC38, 0x32, 0x3, 0x5F0, {
+    (Fn_Table)func_001B04A0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001B04D0, (Fn_Table)func_001B0578, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B0838, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B0BD8, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001B0C68, (Fn_Table)func_001B0EA8, (Fn_Table)func_001B0EE0, (Fn_Table)func_001B0F70,
+    (Fn_Table)func_001AECE0, (Fn_Table)func_001B0FC0,
+} };
+extern const ClassDesc_217418<78> D_0021B010 = { (const void*)(const u8*)&D_0021AC38, 0x33, 0x3, 0x620, {
+    (Fn_Table)func_001B1158, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001B11A0, (Fn_Table)func_001B1238, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001B1438, (Fn_Table)func_001B15D0, (Fn_Table)func_001B1608, (Fn_Table)func_001B1698,
+    (Fn_Table)func_001AECE0, (Fn_Table)func_001B1710,
+} };
+extern const ClassDesc_217418<28> D_0021B158 = { (const void*)(const u8*)&D_002178C0, 0x75, 0x0, 0xA0, {
+    (Fn_Table)func_001DFD90, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_001DFDC8, (Fn_Table)func_001DFE00,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001DFE38, (Fn_Table)func_001F3A40, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021B1D8 = { (const void*)(const u8*)&D_0021B158, 0x76, 0x0, 0xC0, {
+    (Fn_Table)func_0016C470, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_001DFDC8, (Fn_Table)func_001DFE00,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001DFE38, (Fn_Table)func_0016C4B8, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021B258 = { (const void*)(const u8*)&D_00217740, 0x70, 0x0, 0x70, {
+    (Fn_Table)func_00191F08, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00191F68, (Fn_Table)func_00191FA0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_00192020, (Fn_Table)func_001B2840, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00191FD8, 0, 0, 0,
+    0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021B2D8 = { (const void*)(const u8*)&D_00217568, 0x34, 0x3, 0x5B0, {
+    (Fn_Table)func_0012F840, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0012F888, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0012F8C8, (Fn_Table)func_0012F9B8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_0012FA88, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, (Fn_Table)func_0012FB68, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<48> D_0021B408 = { (const void*)(const u8*)&D_00217498, 0x5E, 0x1, 0x340, {
+    (Fn_Table)func_001DDCE0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001DDD18, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001DE768,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001DDE90, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021B4D8 = { (const void*)(const u8*)&D_00217568, 0x3B, 0x23, 0x690, {
+    (Fn_Table)func_0013B4C0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0013B598, 0,
+    0, (Fn_Table)func_0013B708, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013B610, (Fn_Table)func_0013B778, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013BBA0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, (Fn_Table)func_0013B9D8, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_0013BA70, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<28> D_0021B608 = { (const void*)(const u8*)&D_00217418, 0x8F, 0x0, 0x6C, {
+    (Fn_Table)func_0017B998, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<88> D_0021B688 = { (const void*)(const u8*)&D_0021A838, 0x7, 0xB, 0x2BF0, {
+    (Fn_Table)func_0016F608, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00178038, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_0016F7B0, 0,
+    0, (Fn_Table)func_00170960, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0016F810, (Fn_Table)func_00174808, (Fn_Table)func_00172530, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00172B08,
+    (Fn_Table)func_001701B0, (Fn_Table)func_00178008, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001CDF78,
+    (Fn_Table)func_001721B0, (Fn_Table)func_001725E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_00172B88, (Fn_Table)func_001CD088,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, (Fn_Table)func_00172CF0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_00170410, (Fn_Table)func_00170820, (Fn_Table)func_00170528, (Fn_Table)func_00172898,
+    (Fn_Table)func_00170660, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_00172AE0, (Fn_Table)func_00172EE0, (Fn_Table)func_001D6B18, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_00173708, (Fn_Table)func_00173888, (Fn_Table)func_00177E20, (Fn_Table)func_001D54E0,
+    (Fn_Table)func_001D4D08, (Fn_Table)func_001D65D8, (Fn_Table)func_00177E70, (Fn_Table)func_001925C0,
+    (Fn_Table)func_001D6608, (Fn_Table)func_00177EE0, (Fn_Table)func_00177F98, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_00172EB8, (Fn_Table)func_00170790, 0,
+} };
+extern const ClassDesc_217418<28> D_0021B7F8 = { (const void*)(const u8*)&D_002177C0, 0x80, 0x0, 0x70, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0017FD90, (Fn_Table)func_0017FDC8,
+    (Fn_Table)func_001830B0, (Fn_Table)func_0017FE00, (Fn_Table)func_00192068, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_0017FE48, 0, 0, 0,
+    0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021B878 = { (const void*)(const u8*)&D_0021B4D8, 0x3F, 0x23, 0x6A0, {
+    (Fn_Table)func_0013B4C0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0013B598, 0,
+    0, (Fn_Table)func_001D7040, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013B610, (Fn_Table)func_0013B778, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001D6DD8, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013BBA0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001D6DA0, (Fn_Table)func_00187F40, (Fn_Table)func_0013B9D8, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001D7018, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_0021B9A8 = { (const void*)(const u8*)&D_00217568, 0x4C, 0x3, 0x560, {
+    (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_001D3678, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001D3290, (Fn_Table)func_001D3398, (Fn_Table)func_001B89B8, (Fn_Table)func_001D35A8,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001D3470, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001D3500, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, (Fn_Table)func_001D34E0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<28> D_0021BAD8 = { (const void*)(const u8*)&D_00217418, 0x89, 0x0, 0x190, {
+    (Fn_Table)func_001CB618, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, (Fn_Table)func_001CB7A0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<100> D_0021BB58 = { (const void*)(const u8*)&D_0021A838, 0x8, 0xB, 0xC10, {
+    (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001C9DE0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_001C72A0, (Fn_Table)func_001C7CB8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_001CB3C8,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001C8010, (Fn_Table)func_001C8E28, (Fn_Table)func_001C9008,
+    (Fn_Table)func_001C91C8, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<100> D_0021BCF8 = { (const void*)(const u8*)&D_0021BB58, 0xA, 0xB, 0xC50, {
+    (Fn_Table)func_00167D68, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001C9DE0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_00167E08, (Fn_Table)func_001C7CB8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_00167EF0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_00167F10,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001C8010, (Fn_Table)func_001C8E28, (Fn_Table)func_001C9008,
+    (Fn_Table)func_001C91C8, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<100> D_0021BE98 = { (const void*)(const u8*)&D_0021BB58, 0x9, 0xB, 0xD00, {
+    (Fn_Table)func_001B6EC8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001B78C0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_001B7128, (Fn_Table)func_001B7608, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_001B7920, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_001B7280,
+    (Fn_Table)func_001B7860, (Fn_Table)func_001C8010, (Fn_Table)func_001C8E28, (Fn_Table)func_001C9008,
+    (Fn_Table)func_001B7790, (Fn_Table)func_001B7818, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<72> D_0021C038 = { (const void*)(const u8*)&D_00217568, 0x36, 0x3, 0x860, {
+    (Fn_Table)func_001F4F70, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001F51A0, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001F4FD8, (Fn_Table)func_001F5008, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001F51C8, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001F51E8,
+} };
+extern const ClassDesc_217418<72> D_0021C168 = { (const void*)(const u8*)&D_0021C038, 0x37, 0x3, 0x860, {
+    (Fn_Table)func_001F5218, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001F51A0, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001F4FD8, (Fn_Table)func_001F5268, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001F51C8, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001F51E8,
+} };
+extern const ClassDesc_217418<28> D_0021C298 = { (const void*)(const u8*)&D_002178C0, 0x7B, 0x0, 0x90, {
+    (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00141108, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021C318 = { (const void*)(const u8*)&D_00217568, 0x38, 0x3, 0x5C0, {
+    (Fn_Table)func_001411A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001415D0, (Fn_Table)func_00141210, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_00141338,
+    (Fn_Table)func_00141438, (Fn_Table)func_00141690, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001417F0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<28> D_0021C448 = { (const void*)(const u8*)&D_00217418, 0x8A, 0x0, 0x58, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001916D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<48> D_0021C4C8 = { (const void*)(const u8*)&D_00217498, 0x54, 0x1, 0x2E0, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001B5CD8, (Fn_Table)func_001B5D28, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021C598 = { (const void*)(const u8*)&D_00217568, 0x40, 0x3, 0x6A0, {
+    (Fn_Table)func_0015AAE0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0015AD80, (Fn_Table)func_0015AC08, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0015AEB0, (Fn_Table)func_0015B128, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015AE38, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_0015AF50, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_0015B4D0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0015B720, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<48> D_0021C6C8 = { (const void*)(const u8*)&D_00217498, 0x55, 0x1, 0x390, {
+    (Fn_Table)func_00146340, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00146470, (Fn_Table)func_00147428, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00146518,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001478F0, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00147AB0,
+} };
+extern const ClassDesc_217418<48> D_0021C798 = { (const void*)(const u8*)&D_0021C6C8, 0x58, 0x1, 0x3A0, {
+    (Fn_Table)func_00147E40, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
+    0, (Fn_Table)func_00147EF8, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00146470, (Fn_Table)func_00147FB0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00146518,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001478F0, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148298,
+} };
+extern const ClassDesc_217418<48> D_0021C868 = { (const void*)(const u8*)&D_0021C6C8, 0x56, 0x1, 0x390, {
+    (Fn_Table)func_00148400, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00146470, (Fn_Table)func_00147428, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00146518,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001478F0, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148470,
+} };
+extern const ClassDesc_217418<48> D_0021C938 = { (const void*)(const u8*)&D_0021C6C8, 0x59, 0x1, 0x390, {
+    (Fn_Table)func_00148510, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00146470, (Fn_Table)func_00147428, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00146518,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001478F0, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148598,
+} };
+extern const ClassDesc_217418<48> D_0021CA08 = { (const void*)(const u8*)&D_0021C6C8, 0x5A, 0x1, 0x390, {
+    (Fn_Table)func_00148698, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
+    0, (Fn_Table)func_00148770, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00148718, (Fn_Table)func_00148828, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00146518,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001478F0, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148888,
+} };
+extern const ClassDesc_217418<48> D_0021CAD8 = { (const void*)(const u8*)&D_0021C6C8, 0x57, 0x1, 0x3A0, {
+    (Fn_Table)func_00148D90, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
+    0, (Fn_Table)func_00148E40, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00146470, (Fn_Table)func_00148EF8, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00146518,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001478F0, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00148FF0,
+} };
+extern const ClassDesc_217418<48> D_0021CBA8 = { (const void*)(const u8*)&D_0021C6C8, 0x5B, 0x1, 0x390, {
+    (Fn_Table)func_00149168, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00146418, (Fn_Table)func_001463C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00146470, (Fn_Table)func_00149190, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00146518,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001478F0, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001473E0, 0, (Fn_Table)func_00147AB0,
+} };
+extern const ClassDesc_217418<76> D_0021CC78 = { (const void*)(const u8*)&D_00217568, 0x2C, 0x3, 0x5A0, {
+    (Fn_Table)func_00198980, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001989B0, 0,
+    0, (Fn_Table)func_00198EF8, (Fn_Table)func_001BB210, (Fn_Table)func_00198A88,
+    (Fn_Table)func_00198B28, (Fn_Table)func_00198BD8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_00198FB0, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_00199000, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_00198E98, (Fn_Table)func_00198DA8, (Fn_Table)func_00198E58, 0,
+} };
+extern const ClassDesc_217418<76> D_0021CDB8 = { (const void*)(const u8*)&D_0021CC78, 0x2D, 0x3, 0x5B0, {
+    (Fn_Table)func_00199070, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001990A8, (Fn_Table)func_001989B0, 0,
+    0, (Fn_Table)func_00198EF8, (Fn_Table)func_001BB210, (Fn_Table)func_00198A88,
+    (Fn_Table)func_00198B28, (Fn_Table)func_00198BD8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_00198FB0, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_00199000, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001990E0, (Fn_Table)func_00199138, (Fn_Table)func_00198E58, 0,
+} };
+extern const ClassDesc_217418<76> D_0021CEF8 = { (const void*)(const u8*)&D_0021CC78, 0x2E, 0x3, 0x5C0, {
+    (Fn_Table)func_001993F0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001994C8, (Fn_Table)func_00199428, 0,
+    0, (Fn_Table)func_00198EF8, (Fn_Table)func_001BB210, (Fn_Table)func_00198A88,
+    (Fn_Table)func_00199500, (Fn_Table)func_00199698, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00199D08, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_00199C78, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_00199C58, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_00198FB0, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_00199000, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_00198E98, (Fn_Table)func_001999D0, (Fn_Table)func_00198E58, 0,
+} };
+extern const ClassDesc_217418<48> D_0021D038 = { (const void*)(const u8*)&D_00217498, 0x5C, 0x1, 0x2E0, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_00199170, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001991A8, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_0021D108 = { (const void*)(const u8*)&D_00217498, 0x5D, 0x1, 0x330, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001991E0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00199218, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<84> D_0021D1D8 = { (const void*)(const u8*)&D_00217C30, 0x17, 0xB, 0x800, {
+    (Fn_Table)func_0019A148, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_0019AB78, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0019A1E0, (Fn_Table)func_00192B58, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0019A520, (Fn_Table)func_0019A6A8, (Fn_Table)func_00192410, (Fn_Table)func_00192450,
+    (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<28> D_0021D338 = { (const void*)(const u8*)&D_0021C298, 0x7C, 0x0, 0xA0, {
+    (Fn_Table)func_001F39F8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0019C3D0, (Fn_Table)func_0019C408,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_00141108, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001F3A90, (Fn_Table)func_001F3AF0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021D3B8 = { (const void*)(const u8*)&D_00217568, 0x41, 0x3, 0x670, {
+    (Fn_Table)func_0019B038, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0019B1E0, (Fn_Table)func_0019B218,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0019B250, (Fn_Table)func_0019B0A0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0019B188, (Fn_Table)func_0019B378, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_0019B298, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_0019BC40, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0019BE08, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_0019BB10, (Fn_Table)func_0019BB90, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<48> D_0021D4E8 = { (const void*)(const u8*)&D_00217498, 0x5F, 0x1, 0x660, {
+    (Fn_Table)func_001A4718, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001A48C0,
+    (Fn_Table)func_001A4B30, (Fn_Table)func_001A4C48, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, (Fn_Table)func_001A4D60, 0,
+} };
+extern const ClassDesc_217418<84> D_0021D5B8 = { (const void*)(const u8*)&D_00217C30, 0x15, 0xB, 0x690, {
+    (Fn_Table)func_001A3AE0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001A3B20, 0,
+    0, (Fn_Table)func_001A43C8, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001A3B58, (Fn_Table)func_001A3D40, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001A44E8, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001A4610, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001A45B8, (Fn_Table)func_001A4538, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001922E8, (Fn_Table)func_001A3C40, (Fn_Table)func_001A4710, (Fn_Table)func_00192450,
+    (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<72> D_0021D718 = { (const void*)(const u8*)&D_00217568, 0x42, 0x3, 0x5C0, {
+    (Fn_Table)func_001A6498, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001A6540, (Fn_Table)func_001A64F8, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001A6588, (Fn_Table)func_001A65C8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001A6DE0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_0021D848 = { (const void*)(const u8*)&D_00217568, 0x43, 0x3, 0x5B0, {
+    (Fn_Table)func_001A6F88, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001A7050, (Fn_Table)func_001A7008, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001A7098, (Fn_Table)func_001A7128, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001A7230, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001A72B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001A7290, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_0021D978 = { (const void*)(const u8*)&D_00217568, 0x44, 0x3, 0x570, {
+    (Fn_Table)func_001A7520, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001A7588, (Fn_Table)func_001A7550, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001A75D0, (Fn_Table)func_001A7648, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_0021DAA8 = { (const void*)(const u8*)&D_00217568, 0x45, 0x3, 0x570, {
+    (Fn_Table)func_001A7708, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001A7750, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001A7798, (Fn_Table)func_001A7800, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_0021DBD8 = { (const void*)(const u8*)&D_00217568, 0x46, 0x3, 0x590, {
+    (Fn_Table)func_0014EE40, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_0014EF00,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014EE70, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0014EF40, (Fn_Table)func_0014EF88, 0,
+    0, (Fn_Table)func_0014EFB8, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0014F020, (Fn_Table)func_0014F058, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<74> D_0021DD08 = { (const void*)(const u8*)&D_00218BD8, 0x23, 0x13, 0x7C0, {
+    (Fn_Table)func_0014F740, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
+    0, (Fn_Table)func_0014F770, (Fn_Table)func_001BB210, (Fn_Table)func_0014F850,
+    (Fn_Table)func_0014F920, (Fn_Table)func_0014FA88, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013D0B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_0014FBE0, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0014FC38, 0,
+} };
+extern const ClassDesc_217418<48> D_0021DE40 = { (const void*)(const u8*)&D_00217498, 0x60, 0x1, 0x300, {
+    (Fn_Table)func_0015A8B8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_0015A918, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_0015A960, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_0015A9A8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<74> D_0021DF10 = { (const void*)(const u8*)&D_0021B4D8, 0x3C, 0x23, 0x6F0, {
+    (Fn_Table)func_0018D8E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0018D978,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0018D910, 0,
+    0, (Fn_Table)func_0013B708, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013B610, (Fn_Table)func_0013B778, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_0018D9B8,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_0018DB20, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013BBA0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_0018DC88, (Fn_Table)func_00187F40, (Fn_Table)func_0013B9D8, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_0013BA70, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0018DA40, 0,
+} };
+extern const ClassDesc_217418<74> D_0021E048 = { (const void*)(const u8*)&D_0021DF10, 0x3D, 0x23, 0x710, {
+    (Fn_Table)func_0018DDA0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0018D978,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0018D910, 0,
+    0, (Fn_Table)func_0013B708, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013B610, (Fn_Table)func_0013B778, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_0018D9B8,
+    (Fn_Table)func_0018DE70, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_0018DB20, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013BBA0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_0018DC88, (Fn_Table)func_00187F40, (Fn_Table)func_0013B9D8, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_0013BA70, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0018DDD8, 0,
+} };
+extern const ClassDesc_217418<74> D_0021E180 = { (const void*)(const u8*)&D_0021DF10, 0x3E, 0x23, 0x710, {
+    (Fn_Table)func_0018D8E0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_0018D978,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013B5C8, (Fn_Table)func_0018D910, 0,
+    0, (Fn_Table)func_0013B708, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0013B610, (Fn_Table)func_0013B778, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_0018E040,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_0018DB20, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013BBA0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_0018DC88, (Fn_Table)func_00187F40, (Fn_Table)func_0013B9D8, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_0013BA70, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0018DEE8, 0,
+} };
+extern const ClassDesc_217418<36> D_0021E2B8 = { (const void*)(const u8*)&D_00217418, 0x8C, 0x0, 0x170, {
+    (Fn_Table)func_001A7FE8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_001A80E0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001A84C8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_001A8590, 0, 0, 0,
+    (Fn_Table)func_001A86F8, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+    (Fn_Table)func_001B4AA0, (Fn_Table)func_001B4AD0, 0, (Fn_Table)func_001B4B38,
+    0, (Fn_Table)func_001B4B48, 0, 0,
+} };
+extern const Fn_Table D_0021E438[8] = {
+    (Fn_Table)func_00159680, (Fn_Table)func_001596E0, (Fn_Table)func_00159890, (Fn_Table)func_001B4B38,
+    0, (Fn_Table)func_00159A80, 0, 0,
+};
+extern const ClassDesc_217418<72> D_0021E458 = { (const void*)(const u8*)&D_00217568, 0x39, 0x3, 0x560, {
+    (Fn_Table)func_00146100, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_00146130, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00146178, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, (Fn_Table)func_001461A8, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<48> D_0021E588 = { (const void*)(const u8*)&D_00217498, 0x61, 0x1, 0x2F0, {
+    (Fn_Table)func_00152E28, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_00153328, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_0021E658 = { (const void*)(const u8*)&D_00217498, 0x62, 0x1, 0x330, {
+    (Fn_Table)func_001EF838, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_001EF9C8, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001EF868, (Fn_Table)func_001EF8F8, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<100> D_0021E728 = { (const void*)(const u8*)&D_0021BCF8, 0xB, 0xB, 0xCA0, {
+    (Fn_Table)func_001E88D0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001C9DE0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_001E8948, (Fn_Table)func_001C7CB8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_00167EF0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, (Fn_Table)func_001E8FE8, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001E9038, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_001E8DB0,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001E8D58, (Fn_Table)func_001E8FA8, (Fn_Table)func_001C9008,
+    (Fn_Table)func_001E8A50, (Fn_Table)func_001E8DD0, (Fn_Table)func_001E8EF8, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001E8E48, (Fn_Table)func_001E8E08, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<100> D_0021E8C8 = { (const void*)(const u8*)&D_0021BB58, 0xC, 0xB, 0xE50, {
+    (Fn_Table)func_0018A388, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_0018A3B8, 0,
+    0, (Fn_Table)func_0018B340, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_0018A3F0, (Fn_Table)func_0018ACD0, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_0018A628, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, (Fn_Table)func_0018ACF0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_0018AAE0,
+    (Fn_Table)func_001CA460, (Fn_Table)func_0018ABF0, (Fn_Table)func_0018AE38, (Fn_Table)func_0018B2E8,
+    (Fn_Table)func_0018AB88, (Fn_Table)func_0018A9A8, (Fn_Table)func_0018AD88, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<100> D_0021EA68 = { (const void*)(const u8*)&D_0021BB58, 0xD, 0xB, 0xC30, {
+    (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001C9DE0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_001A98F8, (Fn_Table)func_001A9A40, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001A9AE8, (Fn_Table)func_001A9A98, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_001A9928,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001C8010, (Fn_Table)func_001A99B8, (Fn_Table)func_001C9008,
+    (Fn_Table)func_001A99F8, (Fn_Table)func_001CA468, (Fn_Table)func_001A9960, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<84> D_0021EC08 = { (const void*)(const u8*)&D_00217C30, 0x1C, 0xB, 0x690, {
+    (Fn_Table)func_001EB460, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001EB518, 0,
+    0, (Fn_Table)func_00192230, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001EB598, (Fn_Table)func_00192B58, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_001EBD10, (Fn_Table)func_001EBDD0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001EB608, (Fn_Table)func_001EB748, (Fn_Table)func_00192410, (Fn_Table)func_001EBC88,
+    (Fn_Table)func_001EBD08, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<100> D_0021ED68 = { (const void*)(const u8*)&D_0021BB58, 0x13, 0xB, 0xCA0, {
+    (Fn_Table)func_001EBEB0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001EC0B8, (Fn_Table)func_001EC098,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001EBF40, 0,
+    0, (Fn_Table)func_001EC828, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_001EBFB0, (Fn_Table)func_001ECBC8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_001EC380, (Fn_Table)func_001EC3D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, (Fn_Table)func_001ECDF8, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_001EC188,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001C8010, (Fn_Table)func_001ECF10, (Fn_Table)func_001EC478,
+    (Fn_Table)func_001EC570, (Fn_Table)func_001EC0D8, (Fn_Table)func_001ECE98, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<28> D_0021EF08 = { (const void*)(const u8*)&D_00217418, 0x90, 0x0, 0x48, {
+    (Fn_Table)func_001ED168, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_001ED198, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<48> D_0021EF88 = { (const void*)(const u8*)&D_00217498, 0x64, 0x1, 0x340, {
+    (Fn_Table)func_0016DD10, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_0016DD90, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0016DDE8, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<72> D_0021F058 = { (const void*)(const u8*)&D_00218F80, 0x2A, 0x3, 0x7C0, {
+    (Fn_Table)func_0016DF30, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00140200, (Fn_Table)func_00140100, 0,
+    0, (Fn_Table)func_0016DFE0, (Fn_Table)func_001BB210, (Fn_Table)func_0016DF68,
+    (Fn_Table)func_00140140, (Fn_Table)func_00140258, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_0021F188 = { (const void*)(const u8*)&D_00217568, 0x47, 0x3, 0x5E0, {
+    (Fn_Table)func_0016CE00, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_0016CE80, 0,
+    0, (Fn_Table)func_0016DA00, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0016CF70, (Fn_Table)func_0016D128, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_0016D0C0, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<28> D_0021F2B8 = { (const void*)(const u8*)&D_002177C0, 0x81, 0x0, 0x60, {
+    (Fn_Table)func_001C10A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_001C10D8, (Fn_Table)func_001C1110,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001C1148, (Fn_Table)func_00192068, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001920E0, (Fn_Table)func_00192128, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021F338 = { (const void*)(const u8*)&D_00217740, 0x71, 0x0, 0x5C, {
+    (Fn_Table)func_0019AF00, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_0019AF38, (Fn_Table)func_0019AF70,
+    (Fn_Table)func_001830B0, (Fn_Table)func_0019AFF0, (Fn_Table)func_001B2840, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_0019AFA8, 0, 0, 0,
+    0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021F3B8 = { (const void*)(const u8*)&D_00217740, 0x72, 0x0, 0x40, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00180EB0, (Fn_Table)func_00180EE8,
+    (Fn_Table)func_001830B0, (Fn_Table)func_00180F20, (Fn_Table)func_001B2840, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_001B28A8, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_0021F438 = { (const void*)(const u8*)&D_00217418, 0x8D, 0x0, 0x8F0, {
+    (Fn_Table)func_001F2758, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<88> D_0021F4B8 = { (const void*)(const u8*)&D_0021A838, 0x14, 0xB, 0x760, {
+    (Fn_Table)func_001DE798, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_001DFB08, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001DE808, (Fn_Table)func_001DE910, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C5118, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_001DF2C8, (Fn_Table)func_001C49C8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001DF520, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, (Fn_Table)func_001C5BF0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001DFA40, (Fn_Table)func_001C53E0, (Fn_Table)func_001C5388, (Fn_Table)func_001DFA10,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001DF290, (Fn_Table)func_001DEBE8, (Fn_Table)func_00192410, (Fn_Table)func_001DF5A0,
+    (Fn_Table)func_001DF700, (Fn_Table)func_001DFBD0, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_001DEBB8, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, 0,
+} };
+extern const ClassDesc_217418<84> D_0021F628 = { (const void*)(const u8*)&D_00217C30, 0x16, 0xB, 0x660, {
+    (Fn_Table)func_001E5378, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_001E5CE8, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001E5428, (Fn_Table)func_001E55D0, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001E5DA8, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001E5750, (Fn_Table)func_001E56A0, (Fn_Table)func_00192410, (Fn_Table)func_00192450,
+    (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001E5E08, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_001E5E50, (Fn_Table)func_00192A38, (Fn_Table)func_001E5E60,
+} };
+extern const ClassDesc_217418<100> D_0021F788 = { (const void*)(const u8*)&D_0021BB58, 0xE, 0xB, 0xC50, {
+    (Fn_Table)func_0018FEF8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_00190770, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_0018FF28, (Fn_Table)func_001C7CB8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001904E0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001903F0,
+    (Fn_Table)func_00190450, (Fn_Table)func_00190740, (Fn_Table)func_001906F8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_00190570,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001C8010, (Fn_Table)func_00190258, (Fn_Table)func_001900A0,
+    (Fn_Table)func_0018FFB0, (Fn_Table)func_00190658, (Fn_Table)func_00190128, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<84> D_0021F928 = { (const void*)(const u8*)&D_00217C30, 0x18, 0xB, 0x6C0, {
+    (Fn_Table)func_00196938, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001969C0, 0,
+    0, (Fn_Table)func_00197F10, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001969F8, (Fn_Table)func_00196EB0, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_00196B78, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, (Fn_Table)func_00197788, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_00197A68, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_00197A88, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001974D8, (Fn_Table)func_001974F8, (Fn_Table)func_00192410, (Fn_Table)func_00192450,
+    (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<100> D_0021FA88 = { (const void*)(const u8*)&D_0021BB58, 0xF, 0xB, 0xC20, {
+    (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001C74E8, (Fn_Table)func_001C7520,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001C7188, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001986E8, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_00198090, (Fn_Table)func_00198760, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001980B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_00198860,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001982A0, (Fn_Table)func_00198570, (Fn_Table)func_001984B8,
+    (Fn_Table)func_00198530, (Fn_Table)func_00198858, (Fn_Table)func_00198318, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<72> D_0021FC28 = { (const void*)(const u8*)&D_00217568, 0x48, 0x3, 0x560, {
+    (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00198920, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_0021FD58 = { (const void*)(const u8*)&D_00217568, 0x49, 0x3, 0x570, {
+    (Fn_Table)func_0018F988, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<100> D_0021FE88 = { (const void*)(const u8*)&D_0021BB58, 0x10, 0xB, 0xC20, {
+    (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014B550, (Fn_Table)func_0014B588,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0014B5C0, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001C9DE0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_001C72A0, (Fn_Table)func_001C7CB8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001C96D8, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_001CB3C8,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001C8010, (Fn_Table)func_001C8E28, (Fn_Table)func_001C9008,
+    (Fn_Table)func_001C91C8, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<100> D_00220028 = { (const void*)(const u8*)&D_0021FE88, 0x11, 0xB, 0xC30, {
+    (Fn_Table)func_0014B608, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014B550, (Fn_Table)func_0014B588,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0014B5C0, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001C9DE0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_0014B640, (Fn_Table)func_001C7CB8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0014BCE8, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_0014BB08,
+    (Fn_Table)func_001CA460, (Fn_Table)func_001C8010, (Fn_Table)func_001C8E28, (Fn_Table)func_001C9008,
+    (Fn_Table)func_0014BD38, (Fn_Table)func_001CA468, (Fn_Table)func_0014B6A8, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<100> D_002201C8 = { (const void*)(const u8*)&D_0021FE88, 0x12, 0xB, 0xC30, {
+    (Fn_Table)func_001C6F48, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_0014B550, (Fn_Table)func_0014B588,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0014B5C0, (Fn_Table)func_001C7140, 0,
+    0, (Fn_Table)func_001C9DE0, (Fn_Table)func_001BB210, (Fn_Table)func_001C71E0,
+    (Fn_Table)func_001C72A0, (Fn_Table)func_001C7CB8, (Fn_Table)func_001C5438, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C75B0, (Fn_Table)func_001B9690, (Fn_Table)func_001C4FA0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001C5DB8,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001CA5E0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0014BEF8, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001C4FF8, (Fn_Table)func_001BC760, (Fn_Table)func_001C4F08, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001C7468, (Fn_Table)func_00187F40, (Fn_Table)func_001CAD98, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001CAC30, (Fn_Table)func_001C53E0, (Fn_Table)func_001CACB0, (Fn_Table)func_001C57C8,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001CB3C0,
+    (Fn_Table)func_001922E8, 0, (Fn_Table)func_00192410, (Fn_Table)func_001C9A48,
+    (Fn_Table)func_001C9990, (Fn_Table)func_00192490, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+    (Fn_Table)func_001C53B0, (Fn_Table)func_001C4F00, (Fn_Table)func_001C5248, (Fn_Table)func_0014BEA8,
+    (Fn_Table)func_001CA460, (Fn_Table)func_0014BDC8, (Fn_Table)func_001C8E28, (Fn_Table)func_001C9008,
+    (Fn_Table)func_0014BF88, (Fn_Table)func_001CA468, (Fn_Table)func_001C8C08, (Fn_Table)func_001C8590,
+    (Fn_Table)func_001C9CF8, (Fn_Table)func_001C9AF8, (Fn_Table)func_001CAA08, 0,
+} };
+extern const ClassDesc_217418<48> D_00220368 = { (const void*)(const u8*)&D_00217498, 0x68, 0x1, 0x6A0, {
+    (Fn_Table)func_0014C018, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_0014CF30, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0014C138, (Fn_Table)func_0014C6E0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, (Fn_Table)func_0014C788, 0,
+} };
+extern const ClassDesc_217418<84> D_00220438 = { (const void*)(const u8*)&D_00217C30, 0x19, 0xB, 0xBB0, {
+    (Fn_Table)func_001D73A8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_001DAF08, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001D7440, (Fn_Table)func_001D9C98, (Fn_Table)func_001DAE18, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001D7778, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001DAA18, (Fn_Table)func_00126270, (Fn_Table)func_001DA7E0,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, (Fn_Table)func_001DA170, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001DAC20, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, (Fn_Table)func_001DA320, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001DA6E0, 0, 0, 0,
+    (Fn_Table)func_001DA310, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001DAE48, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001DAE68, (Fn_Table)func_001D9D78, (Fn_Table)func_00192410, (Fn_Table)func_00192450,
+    (Fn_Table)func_00192488, (Fn_Table)func_00192490, (Fn_Table)func_001DACB0, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00192C58, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<84> D_00220598 = { (const void*)(const u8*)&D_00217C30, 0x1B, 0xB, 0x710, {
+    (Fn_Table)func_001793C0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_0017AB58, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001793F0, (Fn_Table)func_001796D0, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00179690,
+    (Fn_Table)func_00179590, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_0017A788, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0017A700, (Fn_Table)func_00179A68, (Fn_Table)func_00192410, (Fn_Table)func_0017A9E0,
+    (Fn_Table)func_0017AA40, (Fn_Table)func_0017ABD8, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_0017A6D0, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<72> D_002206F8 = { (const void*)(const u8*)&D_00217568, 0x4A, 0x3, 0x620, {
+    (Fn_Table)func_0017ADD0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0017AE00, (Fn_Table)func_0017AF38, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0017B3A8, (Fn_Table)func_0017B308, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<72> D_00220828 = { (const void*)(const u8*)&D_00217568, 0x4B, 0x3, 0x570, {
+    (Fn_Table)func_0017B5D0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0017B610, (Fn_Table)func_0017B648, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0017B7A8, (Fn_Table)func_0017B710, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<74> D_00220958 = { (const void*)(const u8*)&D_00218BD8, 0x24, 0x13, 0x6F0, {
+    (Fn_Table)func_00182470, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_0013CDE8, (Fn_Table)func_0013CD80, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001824D8, (Fn_Table)func_00182548, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00182748,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0013D0B0, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_0013D278, 0,
+} };
+extern const ClassDesc_217418<84> D_00220A90 = { (const void*)(const u8*)&D_00220438, 0x1A, 0xB, 0xC10, {
+    (Fn_Table)func_00180F68, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00181D28, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00180F98, (Fn_Table)func_00181448, (Fn_Table)func_00181658, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001D7778, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00181818, (Fn_Table)func_001DAA18, (Fn_Table)func_00126270, (Fn_Table)func_001DA7E0,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, (Fn_Table)func_001DA170, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001DAC20, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, (Fn_Table)func_001DA320, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001DA6E0, 0, 0, (Fn_Table)func_00181D88,
+    (Fn_Table)func_001DA310, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00181A58, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_00181780, (Fn_Table)func_00181078, (Fn_Table)func_00192410, (Fn_Table)func_00181A98,
+    (Fn_Table)func_00181BC8, (Fn_Table)func_00181AE0, (Fn_Table)func_001DACB0, (Fn_Table)func_001925C0,
+    (Fn_Table)func_00181AF0, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<28> D_00220C40 = { (const void*)(const u8*)&D_00217418, 0x91, 0x0, 0x60, {
+    (Fn_Table)func_00182C18, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<84> D_00220CC0 = { (const void*)(const u8*)&D_00217C30, 0x1D, 0xB, 0x760, {
+    (Fn_Table)func_001C3390, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_00192820, (Fn_Table)func_00192850,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001921E8, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00192230, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001C33C8, (Fn_Table)func_001C34C8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001C3B40, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, (Fn_Table)func_001C3928, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    (Fn_Table)func_001C3C00, (Fn_Table)func_001C3C98, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_00192380, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+    (Fn_Table)func_001922E8, (Fn_Table)func_001C39A0, (Fn_Table)func_00192410, (Fn_Table)func_001C3D28,
+    (Fn_Table)func_001C3D60, (Fn_Table)func_001C3E50, (Fn_Table)func_001924C8, (Fn_Table)func_001925C0,
+    (Fn_Table)func_001C3E80, (Fn_Table)func_00192A28, (Fn_Table)func_00192A38, (Fn_Table)func_001930B0,
+} };
+extern const ClassDesc_217418<72> D_00220E20 = { (const void*)(const u8*)&D_00217568, 0x4, 0x3, 0x550, {
+    (Fn_Table)func_001B7968, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001B7A98, (Fn_Table)func_001B7B78,
+    (Fn_Table)func_00126F78, (Fn_Table)func_001BA130, (Fn_Table)func_001BAC30, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_001BB210, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_001B93F8, (Fn_Table)func_001B89B8, (Fn_Table)func_001B8960,
+    (Fn_Table)func_0015FCD8, (Fn_Table)func_001B9B50, (Fn_Table)func_001B9C80, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_001BC088,
+    (Fn_Table)func_001B9338, (Fn_Table)func_001B9690, (Fn_Table)func_001B97E0, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001B9940, (Fn_Table)func_001B99F0, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001B93D8, (Fn_Table)func_0018F9D8, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_001BC320, 0, (Fn_Table)func_001B7D00,
+    (Fn_Table)func_001B7F78, (Fn_Table)func_001B8148, (Fn_Table)func_001B8540, (Fn_Table)func_001BAC28,
+    (Fn_Table)func_001BC368, (Fn_Table)func_001BC760, (Fn_Table)func_001BC828, (Fn_Table)func_001BC978,
+    (Fn_Table)func_001B8A08, (Fn_Table)func_00187F40, 0, (Fn_Table)func_001B8B90,
+    0, 0, 0, 0,
+    0, 0, 0, (Fn_Table)func_001B8A48,
+    (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
+} };
+extern const ClassDesc_217418<48> D_00220F50 = { (const void*)(const u8*)&D_00217498, 0x66, 0x1, 0x340, {
+    (Fn_Table)func_001C0F30, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_001C0FF0, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_00221020 = { (const void*)(const u8*)&D_00217498, 0x67, 0x1, 0x570, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_001F0F70, (Fn_Table)func_00183350, (Fn_Table)func_001F0758,
+    (Fn_Table)func_001F0660, (Fn_Table)func_001F0AE0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_001F0EB8, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_00221140 = { (const void*)(const u8*)&D_00217498, 0x6A, 0x1, 0x300, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0016AA18, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_00221210 = { (const void*)(const u8*)&D_00217498, 0x69, 0x1, 0x350, {
+    (Fn_Table)func_00123ED0, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_0016AED8, (Fn_Table)func_00124FC0, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<48> D_002213D0 = { (const void*)(const u8*)&D_00217498, 0x6B, 0x1, 0x6E0, {
+    (Fn_Table)func_0012B6B8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00124050, (Fn_Table)func_00124338, (Fn_Table)func_001240F8, (Fn_Table)func_001243E0,
+    (Fn_Table)func_00126F78, (Fn_Table)func_00127048, (Fn_Table)func_001289C0, 0,
+    0, (Fn_Table)func_00127378, (Fn_Table)func_00183350, (Fn_Table)func_001249A8,
+    (Fn_Table)func_00124A48, (Fn_Table)func_0012B760, (Fn_Table)func_00125108, (Fn_Table)func_00125138,
+    (Fn_Table)func_0015FBB8, (Fn_Table)func_001245A8, (Fn_Table)func_00124868, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, (Fn_Table)func_00125440,
+    (Fn_Table)func_00125438, (Fn_Table)func_001273F0, (Fn_Table)func_00127478, (Fn_Table)func_001276C0,
+    (Fn_Table)func_001274F8, (Fn_Table)func_00127590, (Fn_Table)func_00122550, (Fn_Table)func_001225D0,
+    (Fn_Table)func_00125C90, (Fn_Table)func_001261C0, (Fn_Table)func_00126270, (Fn_Table)func_001660E8,
+    0, (Fn_Table)func_00128E88, (Fn_Table)func_00128FD0, (Fn_Table)func_00129780,
+    (Fn_Table)func_001660A0, (Fn_Table)func_0012B2E8, 0, 0,
+} };
+extern const ClassDesc_217418<28> D_002214A0 = { (const void*)(const u8*)&D_00217418, 0x6C, 0x0, 0x2360, {
+    (Fn_Table)func_001DB4C8, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001DCEA0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, (Fn_Table)func_001EA118, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+extern const ClassDesc_217418<28> D_00221520 = { (const void*)(const u8*)&D_00217418, 0x6D, 0x0, 0x590, {
+    (Fn_Table)func_00143648, (Fn_Table)func_0011EDA8, (Fn_Table)func_00182C80, (Fn_Table)func_00182D50,
+    (Fn_Table)func_00182D00, (Fn_Table)func_00182E88, (Fn_Table)func_00182D48, (Fn_Table)func_00182ED0,
+    (Fn_Table)func_001830B0, (Fn_Table)func_001830D8, (Fn_Table)func_001833D0, 0,
+    0, 0, (Fn_Table)func_00183350, 0,
+    (Fn_Table)func_00182C58, 0, 0, 0,
+    0, (Fn_Table)func_00182F78, 0, (Fn_Table)func_001832F0,
+    (Fn_Table)func_00183320, (Fn_Table)func_00183290, (Fn_Table)func_001832C0, 0,
+} };
+
+// The table of (a, b) pairs func_001BE4A8 (001BC000.cpp) and func_001C0070 (001C0000.cpp) index by id;
+// the latter reads it from its second word (D_00245024).
+struct Ent_1BFAF8 { s32 a; s32 b; };
+extern const Ent_1BFAF8 D_00245020[771] = {
+    { 0, 0 }, { 0, 1 }, { 0, 2 }, { 0, 3 }, { 0, 4 }, { 0, 5 }, { 0, 6 }, { 0, 7 },
+    { 0, 8 }, { 0, 9 }, { 0, 10 }, { 0, 11 }, { 0, 12 }, { 0, 13 }, { 0, 14 }, { 0, 15 },
+    { 0, 16 }, { 0, 17 }, { 0, 18 }, { 0, 19 }, { 0, 20 }, { 0, 21 }, { 0, 22 }, { 0, 23 },
+    { 0, 24 }, { 0, 25 }, { 0, 26 }, { 0, 27 }, { 0, 28 }, { 0, 29 }, { 0, 30 }, { 0, 31 },
+    { 0, 32 }, { 0, 33 }, { 0, 34 }, { 0, 35 }, { 0, 36 }, { 0, 37 }, { 0, 38 }, { 0, 39 },
+    { 0, 40 }, { 0, 41 }, { 0, 42 }, { 0, 43 }, { 0, 44 }, { 0, 45 }, { 0, 46 }, { 0, 47 },
+    { 0, 48 }, { 0, 49 }, { 0, 50 }, { 0, 51 }, { 0, 52 }, { 0, 53 }, { 0, 54 }, { 0, 55 },
+    { 0, 56 }, { 0, 57 }, { 0, 58 }, { 0, 59 }, { 0, 60 }, { 0, 61 }, { 0, 62 }, { 0, 63 },
+    { 0, 64 }, { 0, 65 }, { 0, 66 }, { 0, 67 }, { 0, 68 }, { 0, 69 }, { 0, 70 }, { 0, 71 },
+    { 0, 72 }, { 0, 73 }, { 0, 74 }, { 0, 75 }, { 0, 76 }, { 0, 77 }, { 0, 78 }, { 0, 79 },
+    { 0, 80 }, { 0, 81 }, { 0, 82 }, { 0, 83 }, { 0, 84 }, { 0, 85 }, { 0, 86 }, { 0, 87 },
+    { 0, 88 }, { 0, 89 }, { 0, 90 }, { 0, 91 }, { 0, 92 }, { 0, 93 }, { 0, 94 }, { 0, 95 },
+    { 0, 96 }, { 0, 97 }, { 0, 98 }, { 0, 99 }, { 0, 100 }, { 0, 101 }, { 0, 102 }, { 0, 103 },
+    { 0, 104 }, { 0, 105 }, { 0, 106 }, { 0, 107 }, { 0, 108 }, { 0, 109 }, { 0, 110 }, { 0, 111 },
+    { 0, 112 }, { 0, 113 }, { 0, 114 }, { 0, 115 }, { 0, 116 }, { 0, 117 }, { 0, 118 }, { 0, 119 },
+    { 0, 120 }, { 0, 121 }, { 0, 122 }, { 0, 123 }, { 0, 124 }, { 0, 125 }, { 0, 126 }, { 0, 127 },
+    { 0, 128 }, { 0, 129 }, { 0, 130 }, { 0, 131 }, { 0, 132 }, { 0, 133 }, { 0, 134 }, { 0, 135 },
+    { 0, 136 }, { 0, 137 }, { 0, 138 }, { 0, 139 }, { 0, 140 }, { 0, 141 }, { 0, 142 }, { 0, 143 },
+    { 0, 144 }, { 0, 145 }, { 0, 146 }, { 0, 147 }, { 0, 148 }, { 0, 149 }, { 0, 150 }, { 0, 151 },
+    { 0, 152 }, { 0, 153 }, { 0, 154 }, { 0, 155 }, { 0, 156 }, { 0, 157 }, { 0, 158 }, { 0, 159 },
+    { 0, 160 }, { 0, 161 }, { 0, 162 }, { 0, 163 }, { 0, 164 }, { 0, 165 }, { 0, 166 }, { 0, 167 },
+    { 0, 168 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 1, 4 }, { 1, 5 }, { 1, 6 },
+    { 1, 7 }, { 1, 8 }, { 1, 9 }, { 1, 10 }, { 1, 11 }, { 1, 12 }, { 1, 13 }, { 1, 14 },
+    { 1, 15 }, { 1, 16 }, { 1, 17 }, { 1, 18 }, { 1, 19 }, { 1, 20 }, { 1, 21 }, { 1, 22 },
+    { 1, 23 }, { 1, 24 }, { 1, 25 }, { 1, 26 }, { 1, 27 }, { 1, 28 }, { 1, 29 }, { 1, 30 },
+    { 1, 31 }, { 1, 32 }, { 1, 33 }, { 1, 34 }, { 1, 35 }, { 1, 36 }, { 1, 37 }, { 1, 38 },
+    { 1, 39 }, { 1, 40 }, { 1, 41 }, { 1, 42 }, { 1, 43 }, { 1, 44 }, { 1, 45 }, { 1, 46 },
+    { 1, 47 }, { 1, 48 }, { 1, 49 }, { 1, 50 }, { 1, 51 }, { 1, 52 }, { 1, 53 }, { 1, 54 },
+    { 1, 55 }, { 1, 56 }, { 1, 57 }, { 1, 58 }, { 1, 59 }, { 1, 60 }, { 1, 61 }, { 1, 62 },
+    { 1, 63 }, { 1, 64 }, { 2, 0 }, { 2, 1 }, { 2, 2 }, { 2, 3 }, { 2, 4 }, { 2, 5 },
+    { 2, 6 }, { 2, 7 }, { 2, 8 }, { 2, 9 }, { 2, 10 }, { 2, 11 }, { 2, 12 }, { 2, 13 },
+    { 2, 14 }, { 2, 15 }, { 2, 16 }, { 2, 17 }, { 2, 18 }, { 2, 19 }, { 2, 20 }, { 2, 21 },
+    { 2, 22 }, { 2, 23 }, { 2, 24 }, { 2, 25 }, { 2, 26 }, { 2, 27 }, { 2, 28 }, { 2, 29 },
+    { 2, 30 }, { 2, 31 }, { 2, 32 }, { 2, 33 }, { 2, 34 }, { 2, 35 }, { 2, 36 }, { 2, 37 },
+    { 2, 38 }, { 2, 39 }, { 2, 40 }, { 2, 41 }, { 2, 42 }, { 2, 43 }, { 2, 44 }, { 2, 45 },
+    { 2, 46 }, { 2, 47 }, { 2, 48 }, { 2, 49 }, { 2, 50 }, { 2, 51 }, { 2, 52 }, { 2, 53 },
+    { 2, 54 }, { 2, 55 }, { 2, 56 }, { 2, 57 }, { 2, 58 }, { 2, 59 }, { 2, 60 }, { 2, 61 },
+    { 2, 62 }, { 2, 63 }, { 2, 64 }, { 2, 65 }, { 2, 66 }, { 2, 67 }, { 2, 68 }, { 2, 69 },
+    { 2, 70 }, { 2, 71 }, { 2, 72 }, { 2, 73 }, { 2, 74 }, { 2, 75 }, { 2, 76 }, { 2, 77 },
+    { 2, 78 }, { 2, 79 }, { 2, 80 }, { 2, 81 }, { 2, 82 }, { 2, 83 }, { 2, 84 }, { 2, 85 },
+    { 2, 86 }, { 2, 87 }, { 2, 88 }, { 2, 89 }, { 2, 90 }, { 2, 91 }, { 2, 92 }, { 2, 93 },
+    { 2, 94 }, { 2, 95 }, { 2, 96 }, { 2, 97 }, { 2, 98 }, { 2, 99 }, { 2, 100 }, { 2, 101 },
+    { 2, 102 }, { 2, 103 }, { 2, 104 }, { 2, 105 }, { 2, 106 }, { 2, 107 }, { 2, 108 }, { 2, 109 },
+    { 2, 110 }, { 2, 111 }, { 2, 112 }, { 2, 113 }, { 2, 114 }, { 2, 115 }, { 2, 116 }, { 2, 117 },
+    { 2, 118 }, { 2, 119 }, { 2, 120 }, { 2, 121 }, { 2, 122 }, { 2, 123 }, { 2, 124 }, { 2, 125 },
+    { 2, 126 }, { 2, 127 }, { 2, 128 }, { 2, 129 }, { 2, 130 }, { 2, 131 }, { 2, 132 }, { 2, 133 },
+    { 2, 134 }, { 2, 135 }, { 3, 0 }, { 3, 1 }, { 3, 2 }, { 3, 3 }, { 3, 4 }, { 3, 5 },
+    { 3, 6 }, { 3, 7 }, { 3, 8 }, { 3, 9 }, { 3, 10 }, { 3, 11 }, { 3, 12 }, { 3, 13 },
+    { 3, 14 }, { 3, 15 }, { 3, 16 }, { 3, 17 }, { 3, 18 }, { 3, 19 }, { 3, 20 }, { 3, 21 },
+    { 3, 22 }, { 3, 23 }, { 3, 24 }, { 3, 25 }, { 3, 26 }, { 3, 27 }, { 3, 28 }, { 3, 29 },
+    { 3, 30 }, { 3, 31 }, { 3, 32 }, { 3, 33 }, { 3, 34 }, { 3, 35 }, { 3, 36 }, { 3, 37 },
+    { 3, 38 }, { 3, 39 }, { 3, 40 }, { 3, 41 }, { 3, 42 }, { 3, 43 }, { 3, 44 }, { 3, 45 },
+    { 3, 46 }, { 3, 47 }, { 3, 48 }, { 3, 49 }, { 3, 50 }, { 3, 51 }, { 3, 52 }, { 3, 53 },
+    { 3, 54 }, { 3, 55 }, { 3, 56 }, { 3, 57 }, { 3, 58 }, { 3, 59 }, { 3, 60 }, { 3, 61 },
+    { 3, 62 }, { 3, 63 }, { 3, 64 }, { 3, 65 }, { 3, 66 }, { 3, 67 }, { 3, 68 }, { 3, 69 },
+    { 3, 70 }, { 3, 71 }, { 3, 72 }, { 3, 73 }, { 3, 74 }, { 3, 75 }, { 3, 76 }, { 3, 77 },
+    { 3, 78 }, { 3, 79 }, { 3, 80 }, { 3, 81 }, { 3, 82 }, { 3, 83 }, { 3, 84 }, { 3, 85 },
+    { 3, 86 }, { 3, 87 }, { 3, 88 }, { 3, 89 }, { 3, 90 }, { 3, 91 }, { 3, 92 }, { 3, 93 },
+    { 3, 94 }, { 3, 95 }, { 3, 96 }, { 3, 97 }, { 3, 98 }, { 3, 99 }, { 3, 100 }, { 3, 101 },
+    { 3, 102 }, { 3, 103 }, { 3, 104 }, { 3, 105 }, { 3, 106 }, { 3, 107 }, { 3, 108 }, { 3, 109 },
+    { 3, 110 }, { 3, 111 }, { 3, 112 }, { 3, 113 }, { 3, 114 }, { 3, 115 }, { 3, 116 }, { 3, 117 },
+    { 3, 118 }, { 3, 119 }, { 3, 120 }, { 4, 0 }, { 4, 1 }, { 4, 2 }, { 4, 3 }, { 4, 4 },
+    { 4, 5 }, { 4, 6 }, { 4, 7 }, { 4, 8 }, { 4, 9 }, { 4, 10 }, { 4, 11 }, { 4, 12 },
+    { 4, 13 }, { 4, 14 }, { 4, 15 }, { 4, 16 }, { 4, 17 }, { 4, 18 }, { 4, 19 }, { 4, 20 },
+    { 4, 21 }, { 4, 22 }, { 4, 23 }, { 4, 24 }, { 4, 25 }, { 4, 26 }, { 4, 27 }, { 4, 28 },
+    { 4, 29 }, { 4, 30 }, { 4, 31 }, { 4, 32 }, { 4, 33 }, { 4, 34 }, { 4, 35 }, { 4, 36 },
+    { 4, 37 }, { 4, 38 }, { 4, 39 }, { 4, 40 }, { 4, 41 }, { 4, 42 }, { 4, 43 }, { 4, 44 },
+    { 4, 45 }, { 4, 46 }, { 4, 47 }, { 4, 48 }, { 4, 49 }, { 4, 50 }, { 4, 51 }, { 4, 52 },
+    { 4, 53 }, { 4, 54 }, { 4, 55 }, { 4, 56 }, { 4, 57 }, { 4, 58 }, { 4, 59 }, { 4, 60 },
+    { 4, 61 }, { 4, 62 }, { 4, 63 }, { 4, 64 }, { 4, 65 }, { 4, 66 }, { 4, 67 }, { 4, 68 },
+    { 4, 69 }, { 4, 70 }, { 4, 71 }, { 4, 72 }, { 4, 73 }, { 4, 74 }, { 4, 75 }, { 4, 76 },
+    { 4, 77 }, { 4, 78 }, { 4, 79 }, { 4, 80 }, { 4, 81 }, { 4, 82 }, { 4, 83 }, { 4, 84 },
+    { 4, 85 }, { 4, 86 }, { 4, 87 }, { 4, 88 }, { 4, 89 }, { 4, 90 }, { 4, 91 }, { 4, 92 },
+    { 4, 93 }, { 4, 94 }, { 4, 95 }, { 4, 96 }, { 4, 97 }, { 4, 98 }, { 4, 99 }, { 4, 100 },
+    { 4, 101 }, { 5, 0 }, { 5, 1 }, { 5, 2 }, { 5, 3 }, { 5, 4 }, { 5, 5 }, { 5, 6 },
+    { 5, 7 }, { 5, 8 }, { 5, 9 }, { 5, 10 }, { 5, 11 }, { 5, 12 }, { 5, 13 }, { 5, 14 },
+    { 5, 15 }, { 5, 16 }, { 5, 17 }, { 5, 18 }, { 5, 19 }, { 5, 20 }, { 5, 21 }, { 5, 22 },
+    { 5, 23 }, { 5, 24 }, { 5, 25 }, { 5, 26 }, { 5, 27 }, { 5, 28 }, { 5, 29 }, { 5, 30 },
+    { 5, 31 }, { 5, 32 }, { 5, 33 }, { 5, 34 }, { 5, 35 }, { 5, 36 }, { 5, 37 }, { 5, 38 },
+    { 5, 39 }, { 5, 40 }, { 5, 41 }, { 5, 42 }, { 5, 43 }, { 5, 44 }, { 5, 45 }, { 5, 46 },
+    { 5, 47 }, { 5, 48 }, { 5, 49 }, { 5, 50 }, { 5, 51 }, { 5, 52 }, { 5, 53 }, { 5, 54 },
+    { 5, 55 }, { 5, 56 }, { 5, 57 }, { 5, 58 }, { 5, 59 }, { 5, 60 }, { 5, 61 }, { 5, 62 },
+    { 5, 63 }, { 5, 64 }, { 5, 65 }, { 5, 66 }, { 5, 67 }, { 5, 68 }, { 5, 69 }, { 5, 70 },
+    { 5, 71 }, { 5, 72 }, { 5, 73 }, { 5, 74 }, { 5, 75 }, { 5, 76 }, { 5, 77 }, { 5, 78 },
+    { 5, 79 }, { 5, 80 }, { 5, 81 }, { 5, 82 }, { 5, 83 }, { 5, 84 }, { 5, 85 }, { 5, 86 },
+    { 5, 87 }, { 5, 88 }, { 5, 89 }, { 5, 90 }, { 5, 91 }, { 5, 92 }, { 5, 93 }, { 5, 94 },
+    { 5, 95 }, { 5, 96 }, { 5, 97 }, { 6, 0 }, { 6, 1 }, { 6, 2 }, { 6, 3 }, { 6, 4 },
+    { 6, 5 }, { 6, 6 }, { 6, 7 }, { 6, 8 }, { 6, 9 }, { 6, 10 }, { 6, 11 }, { 6, 12 },
+    { 6, 13 }, { 6, 14 }, { 6, 15 }, { 6, 16 }, { 6, 17 }, { 6, 18 }, { 6, 19 }, { 6, 20 },
+    { 6, 21 }, { 6, 22 }, { 6, 23 }, { 6, 24 }, { 6, 25 }, { 6, 26 }, { 6, 27 }, { 6, 28 },
+    { 6, 29 }, { 6, 30 }, { 6, 31 }, { 6, 32 }, { 6, 33 }, { 6, 34 }, { 6, 35 }, { 6, 36 },
+    { 6, 37 }, { 6, 38 }, { 6, 39 }, { 6, 40 }, { 6, 41 }, { 6, 42 }, { 6, 43 }, { 6, 44 },
+    { 6, 45 }, { 6, 46 }, { 6, 47 }, { 6, 48 }, { 6, 49 }, { 6, 50 }, { 6, 51 }, { 6, 52 },
+    { 6, 53 }, { 6, 54 }, { 6, 55 }, { 6, 56 }, { 6, 57 }, { 6, 58 }, { 6, 59 }, { 6, 60 },
+    { 6, 61 }, { 6, 62 }, { 6, 63 }, { 6, 64 }, { 6, 65 }, { 6, 66 }, { 6, 67 }, { 6, 68 },
+    { 6, 69 }, { 6, 70 }, { 6, 71 }, { 6, 72 }, { 6, 73 }, { 6, 74 }, { 6, 75 }, { 6, 76 },
+    { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
 
-struct Vtbl_5E08 {
-    void* slots[0x148 / 4];
+// Globals typed by worker dv04, from retail's bytes and their readers.
+float D_00274BD4 = -250.0f;
+float D_00274C50[4] = {1.0f, -1.0f, 0.0f, 0.0f};
+float D_00274C60[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+float D_00274C70[4] = {0.0f, 15.0f, 1.5f, 0.0f};
+float D_00274C80[4] = {0.0f, 2.5f, 0.25f, 0.0f};
+float D_00274C90 = 40.0f;
+float D_00274C94 = 50.0f;
+float D_00274C98[2] = {0.5f, 0.0f};
+float D_00274CA0[4] = {1.0f, -0.00100000005f, 0.0f, 0.0f};
+float D_00274CB0[4] = {0.25f, 1.0f, 0.0f, 0.0f};
+float D_00274CC0[4] = {0.0f, 0.00499999989f, 0.0f, 0.0f};
+float D_00274CD0[2] = {0.0f, 1.0f};
+float D_00274CD8[2] = {1.0f, 0.0f};
+float D_00274CE0[4] = {0.0f, 0.00499999989f, 0.0f, 0.0f};
+float D_00274CF0 = 0.349999994f;
+float D_00274CFC = 0.25f;
+float D_00274D00 = 700.0f;
+float D_00274D04 = 1200.0f;
+float D_00274D20[2] = {700.0f, 0.0f};
+float D_00274D28[2] = {-0.200000003f, 0.200000003f};
+float D_00274D30[4] = {0.800000012f, 1.20000005f, 0.0f, 0.0f};
+float D_00274D40 = -0.25f;
+float D_00274D44 = -2.5f;
+float D_00274D48 = -1.0f;
+float D_00274D4C = 0.25f;
+float D_00274D50[4] = {5.0f, 0.0f, 0.0f, 0.0f};
+float D_00274D60[4] = {0.5f, -0.00999999978f, 0.0f, 0.0f};
+float D_00274D70[4] = {1000.0f, 0.0f, 0.25f, 5000.0f};
+float D_00274D80 = 75.0f;
+float D_00274D84 = 230.0f;
+float D_00274D88[3] = {15.0f, 0.0f, 0.100000001f};
+float D_00274D94 = 1.39999998f;
+float D_00274D98 = 1.39999998f;
+float D_00274D9C = 0.25f;
+float D_00274DA0 = 0.100000001f;
+float D_00274DA4 = 0.400000006f;
+float D_00274DA8 = 80.0f;
+float D_00274DAC = 120.0f;
+float D_00274DB0[4] = {1.0f, 0.0f, 0.100000001f, 0.0f};
+float D_00274DC0[3] = {4.0f, 0.0f, 0.100000001f};
+float D_00274DCC = 1.70000005f;
+float D_00274DD0 = 3.0f;
+float D_00274DD4 = 3.5f;
+float D_00274DD8[2] = {-1.70000005f, 0.0f};
+float D_00274DE0[4] = {3000.0f, 1000.0f, 0.150000006f, 0.0f};
+float D_00274DF0[4] = {30.0f, 10.0f, 0.150000006f, 0.0f};
+float D_00274E00 = 150.0f;
+float D_00274E04 = 50.0f;
+float D_00274E08 = 250.0f;
+float D_00274E0C = 1000.0f;
+float D_00274E10 = 1.25f;
+float D_00274E14 = 2.0f;
+float D_00274E18 = 250.0f;
+float D_00274E1C = 0.200000003f;
+float D_00274E20 = 2500.0f;
+float D_00274E24 = -250.0f;
+float D_00274E30 = 1250.0f;
+float D_00274E34 = 500.0f;
+float D_00274E38 = 500.0f;
+float D_00274E40 = 100.0f;
+float D_00274E44 = 100.0f;
+float D_00274E48 = 0.300000012f;
+float D_00274E4C = 25.0f;
+float D_00274E50 = 1.5f;
+float D_00274E54 = 0.25f;
+float D_00274E58 = 0.5f;
+float D_00274E5C = 0.200000003f;
+float D_00274EF0[4] = {2500.0f, 0.0f, 1.0f, 0.0f};
+float D_00274F00 = 35.0f;
+float D_00274F04 = 100.0f;
+float D_00274F08 = 0.5f;
+float D_00274F14 = 50.0f;
+float D_00274F18 = 1.0f;
+float D_00274F1C = 0.400000006f;
+float D_00274F20[2] = {10.0f, 0.0f};
+float D_00274F28[4] = {1500.0f, 0.0f, 0.5f, 0.0f};
+s32 D_00274FA0[2] = {286, 287};
+s32 D_00274FA8[2] = {288, 289};
+s32 D_00274FB0[2] = {2, 2};
+s32 D_00274FB8[2] = {48, 64};
+float D_00275020[4] = {0.0f, 10.0f, 0.00999999978f, 0.0f};
+float D_0027506C = 0.25f;
+float D_00275070[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
+float D_002750A8[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
+float D_00275140[4] = {1.0f, 0.0f, -0.75f, 0.0f};
+float D_00275150[4] = {0.699999988f, 0.300000012f, 0.0f, 0.0f};
+float D_00275160 = 650.0f;
+float D_00275164 = 100.0f;
+float D_00275168 = -100.0f;
+float D_0027516C = 50.0f;
+float D_00275170[2] = {-10.0f, 0.0f};
+float D_00275178[4] = {250.0f, 0.0f, 1.0f, 4500.0f};
+float D_00275188 = 10.0f;
+float D_0027518C = 50.0f;
+float D_00275190[4] = {0.0f, 45.0f, 0.0f, 0.0f};
+float D_002751A0[4] = {0.0f, 2.5f, 0.0f, 0.0f};
+float D_002751B0[4] = {0.0f, 7.5f, 0.0f, 0.0f};
+float D_002751C0[4] = {0.0f, 4.0f, 0.0f, 0.0f};
+float D_002751D0 = 850.0f;
+s32 D_002751D4 = 60;
+float D_002751D8 = 1.25f;
+float D_002751DC = 0.75f;
+float D_002751E0[4] = {1.35000002f, 0.0f, -0.349999994f, 0.0f};
+float D_002751F0[4] = {1.0f, 1.35000002f, 0.0f, 0.0f};
+float D_00275200[4] = {1.5f, 0.0f, -0.5f, 0.0f};
+float D_00275210[4] = {1.0f, 1.5f, 0.0f, 0.0f};
+float D_00275220[4] = {9000.0f, 0.0f, -9000.0f, 0.0f};
+float D_00275230[4] = {0.0f, 9000.0f, 0.0f, 0.0f};
+float D_00275240[4] = {1.0f, -1.0f, 0.0f, 0.0f};
+float D_00275390 = 1.0f;
+float D_002753A0[4] = {0.0f, 30.0f, 3.0f, 0.0f};
+float D_002753B0[4] = {0.0f, 0.00999999978f, 0.0f, 0.0f};
+float D_002753C0[2] = {0.0f, 45.0f};
+float D_002753C8 = 15.0f;
+float D_002753CC = 90.0f;
+float D_002753D0[4] = {0.0f, 0.25f, 0.75f, 0.0f};
+float D_002753E0[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+float D_002753F0[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+float D_00275400[4] = {0.0f, 2.5f, 0.25f, 0.0f};
+float D_00275410 = 6000.0f;
+float D_00275414 = 11250.0f;
+float D_00275418 = 7.0f;
+float D_0027541C = 2500.0f;
+
+// Globals typed by worker dv02, from retail's bytes and their readers.
+f32 D_00263720[4] = { 1.0f, -4.0f, 0.0f, 0.0f };
+f32 D_00263730[4] = { 10.0f, 0.0f, 0.5f, 50.0f };
+f32 D_00263740[4] = { 40.0f, 0.0f, 0.25f, 200.0f };
+f32 D_00263750[4] = { 15.0f, 0.0f, 0.25f, 100.0f };
+f32 D_00263760[4] = { -0.200000003f, 0.00200000009f, 0.0f, 0.0f };
+f32 D_00263770[4] = { 0.200000003f, 0.0f, 0.800000012f, 0.0f };
+f32 D_00263780[4] = { 40.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00263790[4] = { 0.0f, 2.5f, 0.0f, 0.0f };
+f32 D_002637A0[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
+f32 D_002637CC = 0.875999987f;
+s32 D_002637D0 = 50;
+s32 D_002637D4 = 100;
+f32 D_002637D8 = 0.100000001f;
+f32 D_002637DC = 1000.0f;
+f32 D_002637E0 = 20.0f;
+f32 D_002637E4 = -7.5f;
+f32 D_002637E8[2] = { 0.5f, 0.0f };
+f32 D_002637F0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_00263800[4] = { -20.0f, 5.0f, -25.0f, 0.0f };
+f32 D_00263810[4] = { 0.0f, -0.600000024f, 0.5f, 0.0f };
+f32 D_00263820[4] = { -20.0f, 5.0f, -25.0f, 0.0f };
+f32 D_00263830[4] = { 0.0f, -0.600000024f, 0.5f, 0.0f };
+f32 D_00263840[4] = { 0.0f, 0.0f, -100.0f, 0.0f };
+f32 D_00263850 = -0.5f;
+f32 D_00263854 = 100.0f;
+f32 D_00263858[6] = { 4.0f, 0.0f, 0.5f, 10.0f, 0.0f, 0.0f };
+f32 D_00263870[4] = { 0.0f, 0.5f, 0.0f, 0.0f };
+f32 D_00263880 = 50.0f;
+f32 D_00263884 = -50.0f;
+f32 D_00263888[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_00263894 = 0.349999994f;
+f32 D_002638B8 = 75.0f;
+f32 D_002638BC = -325.0f;
+f32 D_002638C0 = -50.0f;
+f32 D_002638C4 = -350.0f;
+f32 D_002638C8[2] = { -300.0f, 0.0f };
+f32 D_002638D0[4] = { 1.5f, -0.5f, 0.0f, 0.0f };
+f32 D_002638E0[4] = { 1500.0f, 0.0f, 0.5f, 0.0f };
+f32 D_002638F0[4] = { 4000.0f, 0.0f, 4.0f, 0.0f };
+f32 D_00263900[4] = { 600.0f, 300.0f, 0.100000001f, 50.0f };
+f32 D_00263910[2] = { 0.150000006f, 0.25f };
+f32 D_00263918[3] = { 1000.0f, 0.0f, 0.25f };
+f32 D_00263924 = 0.899999976f;
+f32 D_00263928[2] = { 8.0f, 0.0f };
+f32 D_00263970[4] = { 0.0f, 0.0f, -750.0f, 0.0f };
+f32 D_00263980[4] = { 0.0f, 0.0f, 500.0f, 0.0f };
+f32 D_00263990 = -0.200000003f;
+f32 D_00263994 = 1.0f;
+f32 D_00263998 = 0.5f;
+f32 D_0026399C = 0.25f;
+f32 D_002639A0[4] = { -1.0f, 0.00400000019f, 0.0f, 0.0f };
+f32 D_002639B0[2] = { 150.0f, -0.75f };
+f32 D_002639C0[4] = { 0.0f, 0.0f, 75.0f, 0.0f };
+f32 D_002639D0[4] = { 0.0f, 0.0f, -225.0f, 0.0f };
+f32 D_002639E0[2] = { -75.0f, 0.0f };
+f32 D_002639E8[10] = { 0.699999988f, 0.800000012f, 0.899999976f, 1.0f, 1.20000005f, 1.39999998f, 1.60000002f, 1.79999995f, 2.0f, 0.0f };
+f32 D_00263A10[32] = { 40.0f, 0.0f, 0.0f, 0.0f, 28.2999992f, 28.2999992f, 0.0f, 0.0f, 0.0f, 40.0f, 0.0f, 0.0f, -28.2999992f, 28.2999992f, 0.0f, 0.0f, -40.0f, 0.0f, 0.0f, 0.0f, -28.2999992f, -28.2999992f, 0.0f, 0.0f, 0.0f, -40.0f, 0.0f, 0.0f, 28.2999992f, -28.2999992f, 0.0f, 0.0f };
+f32 D_00263A90[4] = { 200.0f, 200.0f, 200.0f, 0.0f };
+f32 D_00263AA0[4] = { 400.0f, -1.0f, 0.0f, 0.0f };
+f32 D_00263AB0[4] = { 0.0f, 1000.0f, 0.0f, 0.0f };
+f32 D_00263C00[4] = { 0.0f, -600.0f, 0.0f, 0.0f };
+f32 D_00263C10[4] = { 0.0f, -300.0f, 0.0f, 0.0f };
+f32 D_00263C4C = 0.699999988f;
+f32 D_00263C50[2] = { 0.150000006f, 0.0f };
+f32 D_00263C58[4] = { 1.5f, 0.0f, 0.75f, 0.0f };
+f32 D_00263C68[4] = { 20.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00263C78[2] = { -1.0f, 1.0f };
+f32 D_00263C80[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00263C90[4] = { -1.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00263CA0[4] = { 0.0f, -750.0f, 0.0f, 0.0f };
+f32 D_00263CB0[4] = { 0.0f, -450.0f, 0.0f, 0.0f };
+f32 D_00263CC0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_00263CD0[4] = { 0.0f, 0.5f, 0.0f, 0.0f };
+f32 D_00263CE0[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
+f32 D_00263CF0[4] = { 0.0f, 0.00100000005f, 0.0f, 0.0f };
+f32 D_00263D00[2] = { 0.0f, 0.300000012f };
+f32 D_00263D08[4] = { 30.0f, 0.0f, 0.5f, 0.0f };
+f32 D_00263D18[6] = { 30.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
+f32 D_00263DF4 = 0.5f;
+f32 D_00263DF8 = 1250.0f;
+f32 D_00263DFC = 750.0f;
+f32 D_00263E00 = 750.0f;
+f32 D_00263E34 = -200.0f;
+f32 D_00263E38 = 25.0f;
+f32 D_00263E3C = 15.0f;
+f32 D_00263E40 = 0.200000003f;
+f32 D_00263E50 = 0.150000006f;
+f32 D_00263E54 = 300.0f;
+f32 D_00263E58 = 2.5f;
+f32 D_00263E5C = 3.5f;
+f32 D_00263E60 = 2.5f;
+f32 D_00263E64 = 60.0f;
+f32 D_00263E68 = 20.0f;
+f32 D_00263E6C = 10.0f;
+f32 D_00263E70 = 0.0700000003f;
+f32 D_00263E74 = 0.300000012f;
+f32 D_00263E78 = -750.0f;
+f32 D_00263E7C = 5.0f;
+f32 D_00263E80 = 700.0f;
+f32 D_00263E84 = 245.0f;
+f32 D_00263E88 = 900.0f;
+f32 D_00263E8C = 800.0f;
+f32 D_00263E90[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
+f32 D_00263EA0[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
+f32 D_00263EB0[4] = { 0.400000006f, 0.0f, 0.0f, 0.0f };
+f32 D_00264020 = 60.0f;
+f32 D_00264024 = 70.0f;
+f32 D_00264028 = 300.0f;
+f32 D_0026402C = 500.0f;
+f32 D_00264030 = 1000.0f;
+f32 D_00264034 = 3000.0f;
+f32 D_00264038[2] = { -150.0f, 150.0f };
+f32 D_00264040 = 0.349999994f;
+f32 D_00264044 = 0.349999994f;
+f32 D_00264048[2] = { 10000.0f, 0.0f };
+f32 D_00264050[4] = { 682.0f, 0.5f, 0.0f, 0.0f };
+f32 D_00264060[4] = { -3.40282347e+38f, 682.0f, 0.0f, 0.0f };
+f32 D_00264070[4] = { 682.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
+f32 D_00264128[2] = { 0.150000006f, 0.0f };
+f32 D_00264130[3] = { 30.0f, 0.0f, 0.5f };
+f32 D_0026413C = 0.5f;
+f32 D_00264198[3] = { 20.0f, 0.0f, 0.100000001f };
+f32 D_002641A4 = 1.5f;
+f32 D_002641A8[4] = { 5000.0f, 500.0f, 0.150000006f, 0.0f };
+f32 D_002641B8[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_002641C4 = 3.0f;
+f32 D_002641C8[10] = { 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
+
+// Globals typed by worker dv06, from retail's bytes and their readers.
+struct VEnt_0024A0E0 { s32 delta; void (*fn)(); };
+struct VEnt_0024A220 { s32 delta; void (*fn)(); };
+struct Vec2_24A210 { f32 x; f32 y; };
+void func_00152E18();
+void func_0015C2E8();
+void func_0015C3C0();
+void func_0015C930();
+void func_0015CA38();
+void func_0015CA60();
+void func_0015CB88();
+void func_0015CC80();
+void func_0015CD18();
+void func_0015CF70();
+void func_0015D4E0();
+void func_001FBDF8();
+
+extern const s32 D_00248DF0[4] = {0x0, 0x6, 0x6, 0x6};
+extern const s32 D_00248E38[2] = {0x6, 0x1000};
+extern const s32 D_00248EA8[2] = {0xF, 0x6};
+extern const s32 D_00248EB0[2] = {0x1000, 0x2000};
+extern const f32 D_00249A1C = 3.4028235e+38f;
+extern const f32 D_00249B10[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_00249D64 = 3.4028235e+38f;
+extern const f32 D_00249D68 = -3.4028235e+38f;
+extern const f32 D_00249D6C = 3.4028235e+38f;
+extern const f32 D_00249D70 = -3.4028235e+38f;
+extern const f32 D_00249DD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const char D_00249E18[8] = ";1";
+extern const f32 D_00249E3C = 3.4028235e+38f;
+extern const f32 D_00249E40 = 3.4028235e+38f;
+extern const f32 D_00249E4C = 3.4028235e+38f;
+extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
+extern const f32 D_00249EF0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_00249FB4 = 3.4028235e+38f;
+extern const f32 D_00249FBC = 3.4028235e+38f;
+extern const f32 D_00249FC8 = 3.4028235e+38f;
+extern const f32 D_00249FD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
+extern const f32 D_0024A120 = 3.4028235e+38f;
+extern const Vec2_24A210 D_0024A210 = {0.0f, 4.73242188f};
+extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
+extern const VEnt_0024A220 D_0024A220[22] = {{0, 0}, {0, func_0015C930}, {0, func_0015CA38}, {0, func_0015CA60}, {0, func_0015CB88}, {0, func_0015CC80}, {0, func_0015CD18}, {0, func_0015C3C0}, {0, func_0015CF70}, {0, func_0015D4E0}, {0, 0}, {0, 0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C2E8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C3C0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, 0}};
+extern const char D_0024A2D0[8] = "Splash";
+extern const char D_0024A2D8[16] = "Paris, France";
+extern const char D_0024A2E8[16] = "The Hideout";
+extern const char D_0024A2F8[24] = "A Stealthy Approach";
+extern const char D_0024A310[24] = "Prowling the Grounds";
+extern const char D_0024A328[24] = "High Class Heist";
+extern const char D_0024A340[24] = "Into the Machine";
+extern const char D_0024A358[24] = "A Cunning Disguise";
+extern const char D_0024A370[24] = "The Fire Down Below";
+extern const char D_0024A388[24] = "Treasure in the Depths";
+extern const char D_0024A3A0[24] = "The Gunboat Graveyard";
+extern const char D_0024A3B8[24] = "The Eye of the Storm";
+extern const char D_0024A3D0[16] = "A Rocky Start";
+extern const char D_0024A3E0[16] = "Muggshot's Turf";
+extern const char D_0024A3F0[16] = "Boneyard Casino";
+extern const char D_0024A400[24] = "Murray's Big Gamble";
+extern const char D_0024A418[24] = "At the Dog Track";
+extern const char D_0024A430[16] = "Two to Tango";
+extern const char D_0024A440[24] = "Straight to the Top";
+extern const char D_0024A458[24] = "Back Alley Heist";
+extern const char D_0024A470[16] = "Last Call";
+extern const char D_0024A480[24] = "The Dread Swamp Path";
+extern const char D_0024A498[24] = "The Swamp's Dark Center";
+extern const char D_0024A4B0[24] = "The Lair of the Beast";
+extern const char D_0024A4C8[24] = "A Grave Undertaking";
+extern const char D_0024A4E0[16] = "Piranha Lake";
+extern const char D_0024A4F0[24] = "Descent into Danger";
+extern const char D_0024A508[24] = "A Ghastly Voyage";
+extern const char D_0024A520[24] = "Down Home Cooking";
+extern const char D_0024A538[16] = "A Deadly Dance";
+extern const char D_0024A548[24] = "A Perilous Ascent";
+extern const char D_0024A560[24] = "Inside the Stronghold";
+extern const char D_0024A578[24] = "Flaming Temple of Flame";
+extern const char D_0024A590[16] = "The Unseen Foe";
+extern const char D_0024A5A0[24] = "The King of the Hill";
+extern const char D_0024A5B8[24] = "Rapid Fire Assault";
+extern const char D_0024A5D0[24] = "Duel by the Dragon";
+extern const char D_0024A5E8[24] = "A Desperate Race";
+extern const char D_0024A600[16] = "Flame Fu!";
+extern const char D_0024A610[24] = "A Hazardous Path";
+extern const char D_0024A628[16] = "Burning Rubber";
+extern const char D_0024A638[16] = "A Daring Rescue";
+extern const char D_0024A648[24] = "Bentley Comes Through";
+extern const char D_0024A660[24] = "A Temporary Truce";
+extern const char D_0024A678[16] = "Sinking Peril";
+extern const char D_0024A688[24] = "A Strange Reunion";
+extern const char D_0024A7D8[4] = "???";
+
+// Globals typed by worker dv07, from retail's bytes and their readers.
+extern const f32 D_0024A844 = 3.40282347e+38f;
+extern const f32 D_0024AB7C = 3.40282347e+38f;
+extern const f32 D_0024AFA0 = 3.40282347e+38f;
+extern const f32 D_0024B164 = 3.40282347e+38f;
+extern const f32 D_0024B16C = 3.40282347e+38f;
+extern const f32 D_0024B258 = -3.40282347e+38f;
+extern const char D_0024B438[328] = "The Secret Police File\000\000The Tokyo Police File\000\000\000The Making Of Sly Cooper\000\000\000\000\000\000\000\000Commercials & Outtakes\000\000Tide of Terror\000\000Raleigh Hung out to Dry\000Sunset Snake Eyes\000\000\000\000\000\000\000Muggshot Busted\000Vicious Voodoo\000\000Mz Ruby Vexed\000\000\000Fire in the Sky\000The Panda King on Ice\000\000\000The Cold Heart of Hate\000\000Ten Seconds\000\000\000\000\000The Thievius Raccoonus\000\000Credits";
+extern const f32 D_0024B64C = 3.40282347e+38f;
+extern const f32 D_0024C930 = 3.40282347e+38f;
+extern const f32 D_0024C9B0 = 3.40282347e+38f;
+extern const f32 D_0024C9B4 = 3.40282347e+38f;
+extern const f32 D_0024C9BC = 3.40282347e+38f;
+extern const f32 D_0024CAEC = 3.40282347e+38f;
+extern const f32 D_0024CAF0 = 3.40282347e+38f;
+extern const f32 D_0024CAF4 = 3.40282347e+38f;
+extern const f32 D_0024CAF8 = 3.40282347e+38f;
+extern const f32 D_0024CAFC = 3.40282347e+38f;
+extern const char D_0024CBD0[8] = "&%c%c&.";
+extern const char D_0024CBD8[16] = "^05~b2a83d/\000\000\000\000";
+extern const char D_0024CBE8[8] = "~.^.\000\000\000";
+extern const f32 D_0024D164 = -3.40282347e+38f;
+extern const f32 D_0024D168 = 3.40282347e+38f;
+extern const f32 D_0024D260 = 3.40282347e+38f;
+extern const f32 D_0024D584 = 3.40282347e+38f;
+extern const f32 D_0024D588 = 3.40282347e+38f;
+extern const f32 D_0024D58C = 3.40282347e+38f;
+extern const f32 D_0024D590 = 3.40282347e+38f;
+
+// Globals typed by worker dv08, from retail's bytes and their readers.
+struct VtEnt_24F0D8 { s32 delta; void (*fn)(); };
+void func_001FEF00();
+void func_001FEFC0();
+void func_001FF008();
+void func_002005A0();
+void func_002005E8();
+void func_00200638();
+void func_00200680();
+
+extern const f32 D_0024DA90 = 3.40282347e+38f;
+extern const f32 D_0024DAA0[4] = {-3.40282347e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_0024DAD0 = -3.40282347e+38f;
+extern const f32 D_0024DC88[2] = {3.40282347e+38f, 0.0f};
+extern const f32 D_0024DC94 = 3.40282347e+38f;
+extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
+extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
+extern const char D_0024DCE8[80] = "Rob McDaniel\nDev Madan\nAugie Pagan\nKarin Yamagiwa\nHokyo Lim\nSuzanne Kaufmann";
+extern const char D_0024DD38[40] = "Bruce Oberg\nRob McDaniel\nHokyo Lim";
+extern const char D_0024DD60[32] = "Rob McDaniel\nChris Heidorn";
+extern const char D_0024DD80[32] = "Brian Fleming\nChris Bentzel";
+extern const char D_0024DDA0[40] = "Brian Fleming\nDJ Stiner\nRob McDaniel";
+extern const char D_0024DDC8[40] = "Brian Fleming\nNate Fox\nTravis Kotzesbue";
+extern const char D_0024DDF0[32] = "Bruce Oberg\nNate Fox\nMatt Olsen";
+extern const char D_0024DE10[40] = "Chris Zimmerman\nMatt Olsen\nBruce Oberg";
+extern const char D_0024DE38[24] = "Nate Fox\nChris Bentzel";
+extern const char D_0024DE50[32] = "Rob McDaniel\nBrian Fleming";
+extern const char D_0024DE70[40] = "Nate Fox\nMatt Olsen\nAndrew Woods";
+extern const char D_0024DE98[40] = "Nate Fox\nBrian Fleming\nReid Johnson";
+extern const char D_0024DEC0[48] = "Suzanne Kaufmann\nKelle DeForrest\nRob McDaniel";
+extern const char D_0024DEF0[32] = "Chris Bentzel\nKelle DeForrest";
+extern const char D_0024DF10[64] = "Rob McDaniel\nSuzanne Kaufmann\nAndrew Woods\nKarin Yamagiwa";
+extern const char D_0024DF50[40] = "Nate Fox\nMatthew Morgaine\nChris Heidorn";
+extern const char D_0024DF78[40] = "Bruce Oberg\nGary Burd\nChris Bentzel";
+extern const char D_0024DFA0[24] = "Nate Fox\nMatt Olsen";
+extern const char D_0024DFB8[32] = "Rob McDaniel\nDarrell Plank";
+extern const char D_0024DFD8[24] = "Nate Fox\nAndrew Woods";
+extern const char D_0024DFF0[40] = "Chris Bentzel\nIan Stout\nKelle DeForrest";
+extern const char D_0024E018[32] = "Chris Bentzel\nRob McDaniel";
+extern const char D_0024E038[40] = "Rob McDaniel\nAugie Pagan\nAndrew Woods";
+extern const char D_0024E060[40] = "Matthew Morgaine\nChris Zimmerman";
+extern const char D_0024E088[32] = "Nate Fox\nChris Zimmerman";
+extern const char D_0024E0A8[32] = "Nate Fox\nMatthew Morgaine";
+extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel";
+extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
+extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
+extern const char D_0024E140[40] = "Press &2L&. for Bonus Commentary";
+extern const char D_0024E168[24] = "Best time: &10.%d";
+extern const char D_0024E180[24] = "Best time: &1%d:%02d";
+extern const char D_0024E198[40] = "Beginning Master Thief Sprint!";
+extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
+extern const s32 D_0024E830 = 107;
+extern const s32 D_0024E838 = 108;
+extern const double D_0024E9C8 = 0.1;
+extern const double D_0024E9D0 = 0.1;
+extern const double D_0024E9D8 = 1000000.0;
+extern const char D_0024EB78[3][8] = {"....", "....", "all"};
+extern const u8 D_0024ECB0[256] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+extern const u8 D_0024EDB0[256] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+extern const u8 D_0024EEB0[256] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+extern const VtEnt_24F0D8 D_0024F0D8[3] = {{0, func_001FF008}, {0, func_001FEFC0}, {0, func_001FEF00}};
+extern const char D_0024F118[8] = "eh";
+extern const VtEnt_24F0D8 D_0024F278[3] = {{0, func_002005E8}, {0, func_002005A0}, {0, func_001FEF00}};
+extern const VtEnt_24F0D8 D_0024F290[3] = {{0, func_00200680}, {0, func_00200638}, {0, func_001FEF00}};
+extern const char D_0024F510[56] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
+extern const char D_0024F5F8[40] = "Ncmd fail sema cur_cmd:%d keep_cmd:%d\n";
+extern const char D_0024F620[24] = "Libcdvd bind err N CMD\n";
+extern const char D_0024F658[40] = "Scmd fail sema cur_cmd:%d keep_cmd:%d\n";
+extern const char D_0024F680[24] = "Libcdvd bind err S cmd\n";
+extern const char D_0024F698[32] = "Libcdvd bind err %d CD_Init %d\n";
+extern const char D_0024F6B8[16] = "Libcdvd Exit\n";
+extern const char D_0024F6C8[16] = "DiskReady 0\n";
+extern const char D_0024F6D8[32] = "Libcdvd bind err CdDiskReady\n";
+extern const char D_0024F6F8[24] = "DiskReady ended\n";
+extern const char D_0024F710[24] = "call cdread cmd\n";
+extern const char D_0024F728[16] = "cdread end\n";
+extern const char D_0024F738[72] = "libpad: sceSifSetDma faild\n\000\000\000\000\000libpad: tPadDma Structure Invalid\n";
+extern const char D_0024F7D0[48] = "libpad: buffer addr is not 64 byte align. %08x\n";
+extern const char D_0024F800[144] = "libpad: pad port is already open [%d][%d]\n\000\000\000\000\000\000ERROR\000\000\000STABLE\000\000EXECCMD\000FINDCTP1\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000DISCONNECT\000\000\000\000\000\000BUSY\000\000\000\000FAILED\000\000COMPLETE";
+extern const f32 D_0024F89C = 1.57079625f;
+extern const f32 D_0024F8AC = 7.54978942e-08f;
+extern const char D_0024F8F0[8] = "acosf";
+extern const char D_0024F8F8[8] = "asinf";
+extern const char D_0024F900[8] = "atan2f";
+extern const char D_0024F908[8] = "fmodf";
+extern const double D_0024F910 = (0.0/0.0);
+extern const char D_0024F918[8] = "logf";
+extern const double D_0024F920 = -3.4028234663852886e+38;
+extern const char D_0024F928[8] = "log10f";
+extern const double D_0024F930 = -3.4028234663852886e+38;
+extern const char D_0024F938[8] = "powf";
+extern const double D_0024F940 = (0.0/0.0);
+extern const double D_0024F948 = 3.4028234663852886e+38;
+extern const double D_0024F950 = -3.4028234663852886e+38;
+extern const char D_0024F958[8] = "sqrtf";
+extern const f32 D_0024FA4C = -(1.0f/0.0f);
+extern const f32 D_0024FAD4 = (1.0f/0.0f);
+extern const double D_0024FF70 = (1.0/0.0);
+extern const s32 D_0024FF78 = 1;
+extern const char D_002502E8[24] = "intra && skip MB";
+extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
+
+// Globals typed by worker dv03, from retail's bytes and their readers.
+extern const u8 D_0026A0E0[];
+extern const u8 D_0026A0E8[];
+extern const u8 D_0026A0F0[];
+extern const u8 D_0026A0F8[];
+extern const u8 D_0026A100[];
+extern const u8 D_0026A108[];
+extern const u8 D_0026A110[];
+struct Ent_26A138 { s32 n; const void* p; };
+void func_00199850();
+struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
+struct Sjis_274588 { u16 code; u16 id; };
+struct Rec_274BA0 { s32 a[12]; f32 b; };
+
+f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
+f32 D_00264248 = 2.5f;
+f32 D_0026424C = 300.0f;
+f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
+f32 D_002649D0[2] = { 0.0f, 0.25f };
+f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
+f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
+f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
+f32 D_00264A38 = 20.0f;
+f32 D_002699BC = 0.5f;
+f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
+f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
+s32 D_00269CD8[8] = { 3, 18, 19, 20, 4, 5, 21, 9 };
+s32 D_00269CF8[2] = { 0, 1 };
+s32 D_00269D00[2] = { 2, 0 };
+s32 D_00269D08[4] = { 10, 11, 12, 17 };
+s32 D_00269D18[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
+s32 D_00269D40[4] = { 24, 25, 26, 17 };
+u32 D_0026A118[8] = { 0x2815A489, 0x4A3840F1, 0xDB146408, 0x9260417F, 0x4CCB23D6, 0x281349F9, 0xDB146685, 0x4A39BF71 };
+Ent_26A138 D_0026A138[27] = {
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 2, D_0026A0E0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 2, D_0026A0E8 }, { 0, 0 },
+    { 2, D_0026A0F0 }, { 2, D_0026A0F8 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 2, D_0026A100 }, { 2, D_0026A108 }, { 2, D_0026A110 }
+};
+f32 D_0026A710 = 2200.0f;
+f32 D_0026A714 = 4000.0f;
+f32 D_0026A718 = 2000.0f;
+f32 D_0026A71C = 4000.0f;
+f32 D_0026A7D8[6] = { 7.0f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A7F0[4] = { 3.0f, -2.0f, -1.0f, 0.0f };
+f32 D_0026A800[4] = { 0.25f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A810[4] = { 1.2f, -1.2f, 0.0f, 0.0f };
+f32 D_0026A820 = 60.0f;
+f32 D_0026A824 = -30.0f;
+f32 D_0026A828 = 0.25f;
+f32 D_0026A82C = 0.7f;
+f32 D_0026A830 = 250.0f;
+f32 D_0026A834 = 0.25f;
+f32 D_0026A838 = 0.5f;
+f32 D_0026A850[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
+f32 D_0026A860[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+f32 D_0026A870[4] = { 5000.0f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A880[4] = { 3.0f, -2.0f, -1.0f, 0.0f };
+f32 D_0026A890[4] = { 500.0f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A8A0[4] = { 1.8f, -0.00024999998f, 0.0f, 0.0f };
+f32 D_0026A8B0[4] = { 1.1f, 1.6f, 0.0f, 0.0f };
+f32 D_0026A8C0[4] = { 1.4f, -0.005f, 0.0f, 0.0f };
+f32 D_0026A8D0[2] = { 0.9f, 1.2f };
+f32 D_0026A8D8 = 2000.0f;
+f32 D_0026A8DC = 1100.0f;
+f32 D_0026A910 = 100.0f;
+f32 D_0026A968 = 300.0f;
+Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
+f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
+f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
+f32 D_0026ABF0[4] = { 33218888.0f, 33218888.0f, 4.2520177e+09f, 0.0f };
+f32 D_0026AC00[4] = { 8.623489e+09f, 8.623489e+09f, 1.2884902e+10f, 0.0f };
+f32 D_0026B530[4] = { 1.0f, 1.666667f, -2.666667f, 0.0f };
+f32 D_0026B540 = 0.5f;
+f32 D_0026B544 = 0.5f;
+f32 D_0026B548 = 1.5f;
+f32 D_0026B54C = 200.0f;
+f32 D_0026B550[4] = { 0.25f, 0.0f, 0.0f, 0.0f };
+f32 D_0026B590[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_0026B5A0[4] = { 4.0f, -4.0f, 0.0f, 0.0f };
+f32 D_0026B5D0[4] = { 0.75f, -0.75f, -0.0f, 0.0f };
+f32 D_0026B5E0[4] = { 1.0f, 2.0f, -3.0f, 0.0f };
+f32 D_0026B5F0[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
+f32 D_0026B620[4] = { 135.0f, 0.0f, -85.0f, 0.0f };
+f32 D_0026B630[4] = { 50.0f, 170.0f, -85.0f, 0.0f };
+f32 D_0026B640[4] = { 1.0f, 0.0005f, 0.0f, 0.0f };
+f32 D_0026B650[4] = { 1.0f, 10.0f, 0.0f, 0.0f };
+f32 D_0026B660[4] = { 1.65f, -0.0002f, 0.0f, 0.0f };
+f32 D_0026B670[4] = { 0.65f, 1.0f, 0.0f, 0.0f };
+f32 D_0026B680[4] = { 0.0f, 6.0f, 0.0f, 0.0f };
+f32 D_0026B690[4] = { 5.0f, 16.0f, 0.0f, 0.0f };
+f32 D_0026B6D0[4] = { 0.0f, -0.01f, 0.0f, 0.0f };
+f32 D_0026B6E0[2] = { -10.0f, 10.0f };
+f32 D_0026B6E8 = -1.0f;
+f32 D_0026B6EC = 200.0f;
+f32 D_0026B6F0[4] = { 0.75f, 1.25f, 0.0f, 0.0f };
+f32 D_0026B700[4] = { 0.0f, 0.001f, 0.0f, 0.0f };
+f32 D_0026B730[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_0026B740[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+f32 D_0026B750[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
+f32 D_0026B760[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
+f32 D_0026B770[2] = { 0.5f, 1.0f };
+f32 D_002743B0 = 18.0f;
+f32 D_002743B4 = 8.0f;
+f32 D_002743B8 = 26.0f;
+f32 D_002743BC = 340.0f;
+f32 D_002744A4 = 0.1f;
+f32 D_002744A8 = 1.3f;
+f32 D_002744F0 = 50.0f;
+s32 D_00274548[4] = { 0, 1, 2, 0 };
+s32 D_00274558[4] = { 2, 0, 1, 0 };
+s32 D_00274568[4] = { 0, 2, 1, 0 };
+s32 D_00274578[4] = { 1, 0, 2, 0 };
+Sjis_274588 D_00274588[34] = {
+    { 0x8140, 0x0020 }, { 0x8149, 0x0021 }, { 0x8168, 0x0022 }, { 0x8194, 0x0023 },
+    { 0x8190, 0x0024 }, { 0x8193, 0x0025 }, { 0x8195, 0x0026 }, { 0x8166, 0x0027 },
+    { 0x8169, 0x0028 }, { 0x816A, 0x0029 }, { 0x8196, 0x002A }, { 0x817B, 0x002B },
+    { 0x8143, 0x002C }, { 0x817C, 0x002D }, { 0x8144, 0x002E }, { 0x815E, 0x002F },
+    { 0x8146, 0x003A }, { 0x8147, 0x003B }, { 0x8171, 0x003C }, { 0x8181, 0x003D },
+    { 0x8172, 0x003E }, { 0x8148, 0x003F }, { 0x8197, 0x0040 }, { 0x816D, 0x005B },
+    { 0x818F, 0x005C }, { 0x816E, 0x005D }, { 0x814F, 0x005E }, { 0x8151, 0x005F },
+    { 0x8165, 0x0060 }, { 0x816F, 0x007B }, { 0x8162, 0x007C }, { 0x8170, 0x007D },
+    { 0x8150, 0x007E }, { 0x0000, 0x0000 }
+};
+Sjis_274588 D_00274610[4] = {
+    { 0x824F, 0x0030 }, { 0x8260, 0x0041 }, { 0x8281, 0x0061 }, { 0x0000, 0x0000 }
+};
+f32 D_00274620[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
+f32 D_00274660[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
+f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
+f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+f32 D_00274A90[2] = { 1200.0f, 1.0f };
+f32 D_00274A98 = 0.25f;
+f32 D_00274A9C = 3000.0f;
+f32 D_00274AA0 = 0.1f;
+f32 D_00274AA8[3] = { 20.0f, 0.0f, 0.3f };
+f32 D_00274AB4 = 1000.0f;
+f32 D_00274AB8[2] = { 0.0f, 300.0f };
+f32 D_00274AC0[4] = { -1.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00274AD0[2] = { 1.0f, -1.0f };
+f32 D_00274B20[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
+f32 D_00274B64 = -0.033f;
+f32 D_00274B68[3] = { 300.0f, 0.0f, 0.25f };
+f32 D_00274B90 = 0.06666667f;
+f32 D_00274B94 = 0.16666667f;
+f32 D_00274B98 = 0.116666675f;
+Rec_274BA0 D_00274BA0 = { { (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, 6, 7, 4, 5, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF }, 0.15f };
+
+// Globals typed by worker dv05, from retail's bytes and their readers.
+void func_0020D138();
+void func_0020D248();
+void func_0020D3D0();
+void func_0020D538();
+void func_0020D730();
+void func_0020D880();
+void func_0020DA48();
+void func_0020DBF0();
+void func_0020D1B0();
+void func_0020D300();
+void func_0020D480();
+void func_0020D630();
+void func_0020D7D0();
+void func_0020D960();
+void func_0020DB20();
+void func_0020DD10();
+void func_001FDA38();
+extern const u8 D_002197B8[];
+extern const u8 D_002198E8[];
+extern const u8 D_002505B8[];
+extern const char D_0024DCB0[];
+extern const char D_0024DCC8[];
+extern const char D_0024DCE8[];
+extern const char D_0024DD38[];
+extern const char D_0024DD60[];
+extern const char D_0024DD80[];
+extern const char D_0024DDA0[];
+extern const char D_0024DDC8[];
+extern const char D_0024DDF0[];
+extern const char D_0024DE10[];
+extern const char D_0024DE38[];
+extern const char D_0024DE50[];
+extern const char D_0024DE70[];
+extern const char D_0024DE98[];
+extern const char D_0024DEC0[];
+extern const char D_0024DEF0[];
+extern const char D_0024DF10[];
+extern const char D_0024DF50[];
+extern const char D_0024DF78[];
+extern const char D_0024DFA0[];
+extern const char D_0024DFB8[];
+extern const char D_0024DFD8[];
+extern const char D_0024DFF0[];
+extern const char D_0024E018[];
+extern const char D_0024E038[];
+extern const char D_0024E060[];
+extern const char D_0024E088[];
+extern const char D_0024E0A8[];
+extern const char D_0024E0C8[];
+extern const char D_0024E0F8[];
+extern const char D_0024E118[];
+extern const u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
+
+f32 D_00275420[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
+f32 D_00275430[4] = { 0.5f, 1.0f, 0.0f, 0.0f };
+f32 D_00275440[2] = { 0.5f, 1.0f };
+f32 D_00275448[4] = { 4000.0f, 0.0f, 2.0f, 0.0f };
+f32 D_00275458[6] = { 2000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00275470[4] = { 0.0f, 0.0333333313f, 0.0f, 0.0f };
+f32 D_00275480[2] = { 0.0f, 50.0f };
+f32 D_00275488 = -10.0f;
+f32 D_002754B0[4] = { 1000.0f, -0.5f, 0.0f, 0.0f };
+f32 D_002754C0[2] = { 0.0f, 625.0f };
+f32 D_002754C8[2] = { -1300.0f, 1300.0f };
+f32 D_002754D0[3] = { 1125.0f, 0.0f, 0.100000001f };
+f32 D_002754DC = 750.0f;
+f32 D_002754E0[2] = { 1.0f, 0.0f };
+f32 D_00275500[2] = { 0.400000006f, 0.800000012f };
+f32 D_00275508[2] = { 0.0500000007f, 0.300000012f };
+f32 D_00275510[2] = { 0.100000001f, 0.400000006f };
+f32 D_00275518[3] = { 10.0f, 0.0f, 0.100000001f };
+f32 D_00275530[4] = { -0.5f, 0.699999988f, 0.0f, 0.0f };
+f32 D_00275540[4] = { 1.0f, -0.5f, 0.0f, 0.0f };
+f32 D_00275550[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00275560[4] = { -0.5f, 2.0f, 0.0f, 0.0f };
+f32 D_00275570[4] = { 0.5f, 4.0f, 0.0f, 0.0f };
+f32 D_00275580[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 D_00275590[4] = { 1.0f, -0.600000024f, 0.0f, 0.0f };
+f32 D_002755A0[2] = { 0.25f, 1.0f };
+f32 D_002755A8 = 1.10000002f;
+f32 D_002755AC = 1000.0f;
+f32 D_002755B0[4] = { 0.5f, 0.25f, 0.0f, 0.0f };
+f32 D_002755C0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_002755D0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_002755E0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_002755F0[2] = { 0.0f, 1.0f };
+f32 D_002755F8 = 0.75f;
+f32 D_00275600[4] = { 2000.0f, 0.0f, 2000.0f, 0.0f };
+f32 D_00275610 = 0.5f;
+f32 D_00275614 = 0.00200000009f;
+f32 D_00275618 = 800.0f;
+f32 D_00275620[4] = { 2000.0f, 0.0f, 0.150000006f, 0.0f };
+f32 D_00275640[4] = { 0.0f, 255.0f, 255.0f, 0.0f };
+f32 D_00275654 = 255.0f;
+f32 D_00275658 = 240.0f;
+f32 D_00275660[4] = { 180.0f, 0.0f, 0.0f, 0.0f };
+f32 D_002756B0[24] = { 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f };
+f32 D_002757E0[4] = { 0.0f, 0.0f, 800.0f, 0.0f };
+f32 D_002757F0[4] = { 0.0f, 800.0f, 0.0f, 0.0f };
+f32 D_00275800[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00275810[8] = { 0.150000006f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00275830[4] = { -0.200000003f, 0.0f, 0.0f, 0.0f };
+f32 D_00275840[4] = { 0.0f, 0.00124999997f, 0.0f, 0.0f };
+f32 D_00275850[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_00275860 = 15.0f;
+f32 D_00275890 = 0.5f;
+f32 D_00275894 = 700.0f;
+f32 D_00275898 = 650.0f;
+f32 D_0027589C = 650.0f;
+f32 D_002758A0 = 300.0f;
+f32 D_002758A4 = 400.0f;
+f32 D_002758A8 = -100.0f;
+f32 D_002758AC = 5.0f;
+s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
+f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00275C60[4] = { 0.0f, 1.0f, -1.0f, 1.0f };
+f32 D_00275CD0 = 700.0f;
+f32 D_00275CD4 = 650.0f;
+s32 D_00275CF8[4] = { 1247, 1248, 1249, 1250 };
+f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
+f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276288[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
+s32 D_00276298[11][4] = {
+    { 1, 10, 10, 5 },
+    { 2, 0, 3, 5 },
+    { -1, 1, 3, 5 },
+    { 2, 10, -1, 1 },
+    { 8, -1, 5, 7 },
+    { 2, 0, 1, 4 },
+    { -1, 7, 7, 8 },
+    { 6, 8, 4, 6 },
+    { 6, -1, 7, -1 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+s32 D_00276348[11][4] = {
+    { 4, 10, 4, 10 },
+    { 8, 0, 4, 3 },
+    { 5, 3, 1, -1 },
+    { 2, 10, 1, -1 },
+    { 7, 0, -1, 1 },
+    { 8, 2, 8, -1 },
+    { 8, 7, -1, 8 },
+    { 6, 4, -1, 1 },
+    { -1, 1, 6, 5 },
+    { -1, -1, -1, -1 },
+    { 3, -1, 0, -1 }
+};
+s32 D_002763F8[11][4] = {
+    { 1, 10, 10, 1 },
+    { 3, 0, 7, 2 },
+    { 4, 0, 1, -1 },
+    { 8, 1, 1, 4 },
+    { 3, 2, 1, 2 },
+    { 6, 10, -1, 8 },
+    { -1, 5, -1, 8 },
+    { -1, 0, 8, 1 },
+    { -1, 7, 5, 7 },
+    { -1, -1, -1, -1 },
+    { 5, -1, -1, 0 }
+};
+s32 D_002764A8[11][4] = {
+    { 1, 10, 10, 2 },
+    { 7, 0, 4, 2 },
+    { 5, 0, 1, 5 },
+    { 8, 4, -1, 4 },
+    { 3, 10, 3, 1 },
+    { 6, 2, 1, -1 },
+    { -1, 5, 7, -1 },
+    { 8, 1, 8, 6 },
+    { -1, 4, 3, 1 },
+    { -1, -1, -1, -1 },
+    { 4, -1, -1, 0 }
+};
+s32 D_00276558[11][4] = {
+    { 2, 10, 2, 4 },
+    { -1, -1, -1, -1 },
+    { 3, 0, -1, 3 },
+    { 8, 0, 2, 4 },
+    { 5, 0, 3, 5 },
+    { 6, 4, 4, -1 },
+    { 8, 5, 8, -1 },
+    { -1, -1, -1, -1 },
+    { -1, 3, -1, 6 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+f32 D_00276648 = 24.0f;
+volatile s32 D_00277138[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+s32 D_002771CC = -1;
+void* D_0027804C = (void*)func_001FDA38;
+s32 D_00279420 = -1;
+s32 D_00279428 = -1;
+s32 D_0027942C = -1;
+s32 D_00279438 = -1;
+s32 D_0027943C = -1;
+s32 D_00279440 = -1;
+s32 D_00279444 = -1;
+s32 D_00279448 = -1;
+s32 D_0027944C = -1;
+void (*D_0027B000[8])() = { func_0020D138, func_0020D248, func_0020D3D0, func_0020D538, func_0020D730, func_0020D880, func_0020DA48, func_0020DBF0 };
+void (*D_0027B020[8])() = { func_0020D1B0, func_0020D300, func_0020D480, func_0020D630, func_0020D7D0, func_0020D960, func_0020DB20, func_0020DD10 };
+extern const void* const D_00247448[149] = {
+    &D_00217410,
+    &D_00217418,
+    &D_00217498,
+    &D_00217568,
+    &D_00220E20,
+    &D_00217C30,
+    &D_0021A838,
+    &D_0021B688,
+    &D_0021BB58,
+    &D_0021BE98,
+    &D_0021BCF8,
+    &D_0021E728,
+    &D_0021E8C8,
+    &D_0021EA68,
+    &D_0021F788,
+    &D_0021FA88,
+    &D_0021FE88,
+    &D_00220028,
+    &D_002201C8,
+    &D_0021ED68,
+    &D_0021F4B8,
+    &D_0021D5B8,
+    &D_0021F628,
+    &D_0021D1D8,
+    &D_0021F928,
+    &D_00220438,
+    &D_00220A90,
+    &D_00220598,
+    &D_0021EC08,
+    &D_00220CC0,
+    &D_00219AF0,
+    &D_00218770,
+    &D_00218970,
+    &D_00218BD8,
+    &D_0021A9D0,
+    &D_0021DD08,
+    &D_00220958,
+    &D_00218D10,
+    &D_00218E48,
+    &D_00218AA8,
+    &D_002190B0,
+    &D_00218F80,
+    &D_0021F058,
+    &D_00219330,
+    &D_0021CC78,
+    &D_0021CDB8,
+    &D_0021CEF8,
+    &D_0021AB08,
+    &D_0021AC38,
+    &D_0021AD80,
+    &D_0021AEC8,
+    &D_0021B010,
+    &D_0021B2D8,
+    &D_002198F0,
+    &D_0021C038,
+    &D_0021C168,
+    &D_0021C318,
+    &D_0021E458,
+    &D_0021A660,
+    &D_0021B4D8,
+    &D_0021DF10,
+    &D_0021E048,
+    &D_0021E180,
+    &D_0021B878,
+    &D_0021C598,
+    &D_0021D3B8,
+    &D_0021D718,
+    &D_0021D848,
+    &D_0021D978,
+    &D_0021DAA8,
+    &D_0021DBD8,
+    &D_0021F188,
+    &D_0021FC28,
+    &D_0021FD58,
+    &D_002206F8,
+    &D_00220828,
+    &D_0021B9A8,
+    &D_00219F80,
+    &D_00217A90,
+    &D_00219260,
+    &D_0021A050,
+    &D_00217B60,
+    &D_00219A20,
+    &D_0021A320,
+    &D_0021C4C8,
+    &D_0021C6C8,
+    &D_0021C868,
+    &D_0021CAD8,
+    &D_0021C798,
+    &D_0021C938,
+    &D_0021CA08,
+    &D_0021CBA8,
+    &D_0021D038,
+    &D_0021D108,
+    &D_0021B408,
+    &D_0021D4E8,
+    &D_0021DE40,
+    &D_0021E588,
+    &D_0021E658,
+    &D_002188A0,
+    &D_0021EF88,
+    &D_0021A490,
+    &D_00220F50,
+    &D_00221020,
+    &D_00220368,
+    &D_00221210,
+    &D_00221140,
+    &D_002213D0,
+    &D_002214A0,
+    &D_00221520,
+    &D_00217740,
+    &D_0021A560,
+    &D_0021B258,
+    &D_0021F338,
+    &D_0021F3B8,
+    &D_002178C0,
+    &D_00217940,
+    &D_0021B158,
+    &D_0021B1D8,
+    &D_0021A120,
+    &D_0021A1A0,
+    &D_0021A220,
+    &D_0021A2A0,
+    &D_0021C298,
+    &D_0021D338,
+    &D_002179C0,
+    &D_002177C0,
+    &D_0021A5E0,
+    &D_0021B7F8,
+    &D_0021F2B8,
+    &D_00217840,
+    &D_00219738,
+    &D_002197E8,
+    &D_002194E0,
+    &D_00219460,
+    &D_002191E0,
+    &D_00219868,
+    &D_0021BAD8,
+    &D_0021C448,
+    &D_0021A7B8,
+    &D_0021E2B8,
+    &D_0021F438,
+    &D_00218650,
+    &D_0021B608,
+    &D_0021EF08,
+    &D_00220C40,
+    &D_002197B8,
+    &D_002198E8,
+    &D_002505B8
+};
+extern const u32 D_002476A0[256] = {
+    0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
+    0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
+    0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
+    0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5,
+    0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B,
+    0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
+    0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F,
+    0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D,
+    0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,
+    0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01,
+    0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457,
+    0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
+    0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB,
+    0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9,
+    0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
+    0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD,
+    0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683,
+    0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,
+    0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7,
+    0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5,
+    0xD6D6A3E8, 0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
+    0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79,
+    0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F,
+    0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
+    0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713,
+    0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21,
+    0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
+    0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69, 0x616BFFD3, 0x166CCF45,
+    0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB,
+    0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
+    0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
+    0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
+};
+extern const u32 D_00247AB0[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
+extern const u32 D_00247AD0[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
+extern const f32 D_002483D0[12] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+extern const f32 D_00248400[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+struct __attribute__((aligned(16))) Vec4_248D00 { f32 x, y, z, w; };
+extern const Vec4_248D00 D_00248D00 = { 1.0f, 0.0f, 0.0f, 0.0f };
+extern const f32 D_00248D10[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+extern const f32 D_00248D20[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
+extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
+
+// Globals typed by worker dv01, from retail's bytes and their readers.
+struct Rec_263558 { s32 f0; s32 f4; s32 f8; };
+struct Elem_261D40 { f32 key; s32 a; s32 b; };
+
+extern u8 D_0027C220[];
+extern u8 D_0027C230[];
+
+f32 D_00260E70[4] = { 0.0f, 15.0f, 0.0149999997f, 0.0f };
+f32 D_00260E80[4] = { 0.0f, 2.5f, 0.00249999994f, 0.0f };
+f32 D_00260E90[4] = { 0.0f, 15.0f, 1.5f, 0.0f };
+f32 D_00260EA0[4] = { 0.0f, 2.5f, 0.25f, 0.0f };
+f32 D_00260EB0[4] = { 1500.0f, 0.0f, 0.5f, 4500.0f };
+f32 D_00260EC0[4] = { 15.0f, 0.0f, 0.5f, 45.0f };
+f32 D_00260ED0[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00260EE0[4] = { -50.0f, 4.0f, 0.0f, 0.0f };
+f32 D_00260EF0[4] = { 0.0f, 400.0f, 0.0f, 0.0f };
+s32 D_00261090[4] = { 75, 0, 0, 0 };
+f32 D_002610A0[4] = { 80.0f, -288.0f, 288.0f, 0.0f };
+f32 D_002610B0[4] = { 280.800018f, 376.0f, -376.0f, 0.0f };
+f32 D_002610C0[4] = { -8.0f, -40.0f, 40.0f, 0.0f };
+f32 D_00261184 = 1.0f;
+f32 D_00261188 = 0.5f;
+f32 D_00261190[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
+f32 D_002611A0[4] = { 1.5f, -1.5f, 0.0f, 0.0f };
+f32 D_002611B0[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_002611BC = 0.5f;
+f32 D_002611C0[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_002611CC = 250.0f;
+f32 D_002611D0 = 40.0f;
+f32 D_002611D4 = -20.0f;
+f32 D_002611D8 = -15.0f;
+f32 D_002611DC = 1.0f;
+f32 D_00261268[3] = { 8.0f, 0.0f, 0.150000006f };
+f32 D_00261360 = 600.0f;
+f32 D_00261370[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
+f32 D_00261380[4] = { 2.0f, -1.5f, 0.0f, 0.0f };
+f32 D_00261390[8] = { 0.0f, 0.0f, 0.0f, 0.0f, -100000000.0f, 0.0f, 0.0f, 0.0f };
+f32 D_002613B0[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
+f32* D_002613D0[4] = { D_00261390, 0, 0, 0 };
+f32* D_002613E0[3] = { D_002613B0, 0, 0 };
+s32 D_002613F0 = -1;
+f32 D_00261850 = 1.0f;
+f32 D_00261854 = 1.0f;
+f32 D_002619DC = -5.0f;
+f32 D_002619E0 = 0.25f;
+f32 D_002619E4 = 1.0f;
+f32 D_002619E8 = 0.25f;
+f32 D_002619EC = 5.0f;
+f32 D_002619F0[4] = { 0.0f, 0.0f, -2250.0f, 0.0f };
+f32 D_00261A00[4] = { 0.0f, 75.0f, 85.0f, 0.0f };
+f32 D_00261A10[4] = { 10.0f, 0.0f, 0.25f, 0.0f };
+f32 D_00261A20[12] = { 20.0f, 5.0f, 0.150000006f, 120.0f, 800.0f, 50.0f, 0.25f, 4500.0f, 800.0f, 50.0f, 0.25f, 4500.0f };
+f32 D_00261A50 = 300.0f;
+f32 D_00261A60[4] = { 1.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00261A70[4] = { -250.0f, 0.0f, 600.0f, 0.0f };
+f32 D_00261A80[4] = { 1.0f, -0.300000012f, 0.0f, 0.0f };
+f32 D_00261A90[4] = { 0.699999988f, -0.400000006f, 0.0f, 0.0f };
+f32 D_00261AA0[4] = { 0.0f, 800.0f, 1200.0f, 0.0f };
+f32 D_00261BD0[4] = { 0.0f, 0.0f, 200.0f, 0.0f };
+f32 D_00261BE0 = 0.75f;
+f32 D_00261BF4 = 0.300000012f;
+f32 D_00261BFC = -1.0f;
+f32 D_00261C00[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00261C10[4] = { -150.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00261C20[4] = { -25.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00261C30[4] = { 2.0f, 0.0f, -1.0f, 0.0f };
+f32 D_00261C40[4] = { 0.200000003f, 0.0f, 0.5f, 1.0f };
+f32 D_00261C50[4] = { 0.25f, 0.0f, 0.75f, 2.25f };
+f32 D_00261C60[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00261C70[4] = { 1.0f, 0.400000006f, 1.5f, 0.0f };
+f32 D_00261C80[3] = { 5.0f, 0.0f, 0.5f };
+f32 D_00261C8C = 24.0f;
+s32 D_00261C90 = 4;
+f32 D_00261C94 = 900.0f;
+f32 D_00261C98 = 1200.0f;
+f32 D_00261CD4 = 500.0f;
+f32 D_00261CD8 = 800.0f;
+Elem_261D40 D_00261D40[4] = {
+    { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
+};
+f32 D_00262178[2] = { 0.5f, 2.0f };
+f32 D_002621F8[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
+f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
+f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
+char D_00262250[8] = "02134";
+s32 D_002622CC = 1;
+void* D_002623C0 = D_0027C220;
+void* D_002623C4 = D_0027C230;
+void* D_002623C8 = D_0027C230;
+s32 D_002623CC = -1;
+f32 D_00262970[6] = { 20.0f, 0.5f, 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00262988[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f };
+f32 D_00262A28[2] = { 1.25f, 1.5f };
+f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.699999988f, -0.699999988f };
+u32 D_00262A68[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
+u32 D_00262AA0[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800 };
+u32 D_00262AD8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x8000 };
+u32 D_00262B10[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x2000 };
+u32 D_00262B48[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x20 };
+u32 D_00262B80[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x1000 };
+u32 D_00262BB8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x4000 };
+u32 D_00262BF0[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x10 };
+u32 D_00262C28[8] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800080, 0x80, 0x0 };
+f32 D_00262E14 = 455.0f;
+f32 D_00262E18 = 0.699999988f;
+f32 D_00262E1C = 0.600000024f;
+f32 D_00262E20 = 0.699999988f;
+f32 D_00262E24 = 0.600000024f;
+f32 D_00262E28 = 1000.0f;
+f32 D_00262E2C = 850.0f;
+f32 D_00262E30 = 50.0f;
+f32 D_00262E3C = 0.25f;
+Rec_263558 D_00263558[27] = {
+    { 0x4, 0x60, 0x24F8 },
+    { 0x2, 0x161, 0x588 },
+    { 0x2, 0x162, 0x58C },
+    { 0x2, 0x163, 0x590 },
+    { 0x4, 0x5B, 0x2390 },
+    { 0x2, 0x62, 0x2394 },
+    { 0x2, 0x63, 0x2398 },
+    { 0x4, 0x16F, 0x23D0 },
+    { 0x4, 0x170, 0x23D4 },
+    { 0x2, 0x173, 0x23D8 },
+    { 0x4, 0x160, 0x584 },
+    { 0x20, 0x164, 0x59C },
+    { 0x20, 0x165, 0x5A0 },
+    { 0x20, 0x166, 0x5A4 },
+    { 0x22, 0x169, 0x267C },
+    { 0x22, 0x7E, 0x25D8 },
+    { 0x2, 0x7F, 0x25DC },
+    { 0x2, 0x80, 0x25E0 },
+    { 0x2, 0x1B9, 0x25E4 },
+    { 0x22, 0x81, 0x25E8 },
+    { 0x6, 0x50, 0x1504 },
+    { 0x26, 0x18E, 0x1508 },
+    { 0x26, 0x18F, 0x150C },
+    { 0x26, 0x190, 0x1510 },
+    { 0x26, 0x191, 0x1514 },
+    { 0x22, 0x192, 0x1518 },
+    { 0x26, 0x151, 0x2750 }
+};
+f32 D_002636A0[4] = { 0.0f, 0.5f, 0.5f, 0.5f };
+f32 D_002636B0[4] = { 0.0f, 0.25f, 0.449999988f, 0.449999988f };
+f32 D_002636C0[4] = { 0.0f, 0.25f, 0.449999988f, 0.449999988f };
+f32 D_002636D0[4] = { 0.0f, 0.5f, 0.5f, 0.5f };
+f32 D_002636E0[4] = { 0.0f, 0.5f, 0.5f, 0.5f };
+f32 D_002636F0[4] = { 37.0f, 0.0f, 25.0f, 0.0f };
+f32 D_00263700 = 1.29999995f;
+f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
+
+// Globals typed by worker dz06, from retail's bytes and their readers.
+// size: 8-byte label, readers (001AC000, 001B0000) only lw/sw word at +0 (s32), next label 8-aligned
+// count: word reader, 0x28-stride record count
+s32 D_002744F8 = 0;
+// pointer from allocator (func_0018D5C0), indexed array base; 4-byte word
+void* D_002744FC = 0;
+// count: loop bound word
+s32 D_00274500 = 0;
+// pointer from allocator (count*0x20), word
+void* D_00274504 = 0;
+// count: loop bound word
+s32 D_00274508 = 0;
+// pointer from allocator (count*0x18), word
+void* D_0027450C = 0;
+// word counter
+s32 D_00274510 = 0;
+// word value
+s32 D_00274514 = 0;
+// word, compared with (s32)self
+s32 D_00274518 = 0;
+// list head pointer, word
+void* D_0027451C = 0;
+// size: loop m<6 stores D_00274520[m] (24 bytes)
+s32 D_00274520[6] = {0};
+// word handle
+s32 D_00274538 = 0;
+// word count
+s32 D_0027453C = 0;
+// pointer array allocator result, word
+void* D_00274540 = 0;
+// list pointer, word
+void* D_00274544 = 0;
+// word handle
+s32 D_00274728 = 0;
+// word
+s32 D_0027472C = 0;
+// word flag
+s32 D_00274730 = 0;
+// word
+s32 D_00274734 = 0;
+// word
+s32 D_00274738 = 0;
+// word flag
+s32 D_00274744 = 0;
+// lwc1/swc1 word
+f32 D_00274B5C = 0;
+// lw word
+s32 D_00274C10 = 0;
+// lwc1 word
+f32 D_00274E28 = 0;
+// lwc1 word
+f32 D_00274E2C = 0;
+// lw/sw word
+s32 D_00275130 = 0;
+// lw/sw word
+s32 D_00275134 = 0;
+// 8-byte label, only lw/sw at +0; next label 8-aligned
+s32 D_00275138 = 0;
+// f32 reader
+f32 D_00275650 = 0;
+// f32 reader
+f32 D_0027565C = 0;
+// pointer word, many pointer readers
+void* D_00275710 = 0;
+// word flag
+s32 D_00275714 = 0;
+// word
+s32 D_00275718 = 0;
+
+// Globals typed by worker dz07, from retail's bytes and their readers.
+struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
+struct Vec16_275C40 { s32 v[4]; } __attribute__((aligned(16)));
+
+// size: func_001E0848 clears 0x1C bytes and sets fields through 0x18 (label 0x20, 4 bytes padding before 8-aligned next label)
+Config_1E0848 D_002758E0 = {0};
+// size: s32 read as one word (func_00150000.cpp and 001AC000.cpp test bit 8)
+// size: s32 compared with 1/2 in 00148000 and 00194000
+s32 D_00275BEC = 0;
+// size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
+Vec16_275C40 D_00275C40 = {0};
+// size: s32 state compared/assigned in 001EC000
+s32 D_00275DB8 = 0;
+// size: u32 cleared by func_001F7D88
+u32 D_00277134 = 0;
+// size: s32 flag set/cleared in 001F8000
+s32 D_002771B8 = 0;
+// size: s32 read as one word (> 0 test) in 00200000
+s32 D_00279410 = 0;
+// size: s32 flag tested in 00200000
+s32 D_00279414 = 0;
+// size: s32 flag set/cleared in 00200000
+s32 D_00279424 = 0;
+// size: s32 read as one word in 00200000
+s32 D_00279430 = 0;
+// size: s32 state word, written 8/0/-1 in 00200000
+s32 D_00279454 = 0;
+
+// Globals typed by worker dz05, from retail's bytes and their readers.
+// A 28-byte record func_001AEA70 clears (func_001F5C0C with 0x1C) and then fills.
+struct Obj_2743D0 {
+    void* f00;
+    u8 f04;
+    u8 pad05[3];
+    f32 f08;
+    f32 f0C;
+    f32 f10;
+    f32 f14;
+    u32 f18;
 };
 
-typedef void (*VFn_5E08)(void* self);
+// size: lw at offset 0 only, a 4-byte scalar of its own label
+s32 D_00270454 = 0;
+// size: lw at offset 0 (a pointer, read with lqc2 0x140 off it), 4-byte label
+void* D_002704F4 = 0;
+// size: lw at offset 0 compared with 1, 4-byte label
+s32 D_00270518 = 0;
+// size: lw at offset 0 compared with a count, 4-byte label
+s32 D_002726AC = 0;
+// size: lw at offset 0 compared with a count, 4-byte label
+s32 D_0027292C = 0;
+// size: memset 0x1C bytes (label 32, 8-aligned next label)
+Obj_2743D0 D_002743D0 = {0};
+// size: memset 0x1C bytes (label 32, 8-aligned next label)
+Obj_2743D0 D_002743F0 = {0};
+// size: memset 0x1C bytes (label 32, 8-aligned next label)
+Obj_2743D0 D_00274410 = {0};
+// size: memset 0x1C bytes
+Obj_2743D0 D_00274450 = {0};
+// size: memset 0x1C bytes
+Obj_2743D0 D_00274488 = {0};
 
-void func_001924C8(void* self);
-
-void func_001E5E08(void* self)
-{
-    Obj_5E08* o = (Obj_5E08*)self;
-
-    if (o->f624 != 0) {
-        VFn_5E08 fn = *(VFn_5E08*)(*(u8**)o->f624 + 0x148);
-        fn(o->f624);
-    } else {
-        func_001924C8(self);
-    }
-}
-
-struct Obj_E7440 { u8 pad[0x260]; s32 f260; f32 f264; };
-extern f32 D_00261868;
-
-void func_001E7440(Obj_E7440* a0, s32 a1)
-{
-    if (a1 != a0->f260) {
-        a0->f260 = a1;
-        a0->f264 = D_00261868;
-    }
-}
-
-struct Ptr_1E76E0 {
-    s32 f0;
-    union {
-        s32 i4;
-        f32 f4;
-    };
+// Globals typed by worker dz02, from retail's bytes and their readers.
+struct Obj_261EF0 {
+    u8 pad00[0x1C];
+    void* f1C;
+    u8 pad20[4];
 };
 
-struct Obj_1E76E0 {
-    u8 pad0[0x218];
-    Ptr_1E76E0* f218;
-    u8 pad1[0x250 - 0x21C];
-    s32 f250;
-    u8 pad2[0x268 - 0x254];
-    s32 f268;
+struct Rec12_2622E0 {
+    u32 f0;
+    u32 f4;
+    s32 f8;
 };
 
-extern s32 D_00270458;
-void func_001AA998(void* self, s32 flag);
-void func_001AAB20(void* self, f32 x, f32 y);
-void func_001E7518(void* self, s32 mode);
-
-void func_001E76E0(Obj_1E76E0* self, s32 value)
-{
-    s32 old = self->f250;
-    func_001AA998(self, value);
-    if (old == value) return;
-    if (old != 0) goto done;
-    if (D_00270458 == 4) {
-        self->f218->i4 = 0;
-        func_001AAB20(self, 640.0f, 360.0f);
-    } else {
-        self->f218->f4 = -20.0f;
-        func_001AAB20(self, 160.0f, 125.4f);
-    }
-done:
-    if (value != 2) return;
-    if (D_00270458 == 4) return;
-    self->f268 = -1;
-    func_001E7518(self, 3);
-}
-
-struct Ret_1E4880 { u8 pad[0x20]; f32 value; };
-
-f32 func_001E4880(void* a0, void* a1, void* a2, Ret_1E4880* a3)
-{
-    return a3->value;
-}
-
-void func_001F5C0C(void* p, s32 v, s32 n);
-
-struct Ctor_1E4E38 { s32 f0; s32 f4; s32 f8; s32 fC; s32 f10; u8 body[0x20]; };
-
-Ctor_1E4E38* func_001E4E38(Ctor_1E4E38* self)
-{
-    self->f4 = 0;
-    self->f10 = 0;
-    self->fC = self->f8 = -1;
-    func_001F5C0C(self->body, 0, 0x20);
-    return self;
-}
-
-struct Blk_1E4E80 { s32 state; s32 a; s32 b; s32 c; s32 d; };
-
-void func_001E4E80(Blk_1E4E80* self, s32 a1, s32 a2, s32 a3, s32 a4)
-{
-    if (self->state == 0) {
-        self->state = 1;
-        self->a = a1;
-        self->b = a2;
-        self->c = a3;
-        self->d = a4;
-    }
-}
-
-extern u8 D_00275AF0[];
-
-void func_001E4E38(void* item);
-
-void func_001E5328(void* owner, s32 code)
-{
-    if (code == 0xFFFF && owner != 0) {
-        func_001E4E38(D_00275AF0);
-    }
-}
-
-void func_001E5328(void* owner, s32 code);
-
-void func_001E5358(void)
-{
-    func_001E5328((void*)1, 0xFFFF);
-}
-
-struct Table_1E5378 {
-    u8 pad0[0x63C];
-    void* p63C;
-    void* p640;
-    s32 f644;
-    u8 pad1[0x650 - 0x648];
-    f32 f650;
-    f32 f654;
-    f32 f658;
-    f32 f65C;
+struct Rec12_2622F0 {
+    u32 f0;
+    u32 f4;
+    s32 f8;
 };
 
-void func_001921A8(void* self);
-void* func_0018D500(s32 size);
-
-void func_001E5378(Table_1E5378* self)
-{
-    func_001921A8(self);
-    self->f644 = 1;
-    self->p63C = func_0018D500(0x40);
-    self->p640 = func_0018D500(0x40);
-    self->f658 = -1.5f;
-    self->f65C = 1.5f;
-    self->f650 = -0.7f;
-    self->f654 = 0.7f;
-}
-
-struct Table_1E53F8 {
-    u8 pad0[0x638];
-    s32 count;
-    u8 pad1[4];
-    void** items;
+struct Rec12_262300 {
+    u32 f0;
+    u32 f4;
+    s32 f8;
 };
 
-void func_001E53F8(Table_1E53F8* self, void* value)
-{
-    s32 n = self->count;
-    if (n < 0x11) {
-        self->items[n] = value;
-        self->count = n + 1;
-    }
-}
-
-struct __attribute__((aligned(16))) Quad_1E5750 { s32 a, b, c, d; };
-
-struct Ctx_1E5750 {
-    u8 pad0[0x80];
-    Quad_1E5750 q80;
-    Quad_1E5750 q90;
-    Quad_1E5750 qA0;
-    u8 pad1[0x480 - 0xB0];
-    f32 f480;
-    u8 pad2[0x4BC - 0x484];
-    s32 f4BC;
+struct Slot12_262320 {
+    u8 pad00[4];
+    u8* f4;
+    u8 pad08[4];
+    u8* fC;
+    u8* f10;
+    u8 pad14[0xC];
+    Rec12_2622E0 s20;
+    Rec12_2622E0 s2C;
+    Rec12_2622E0 s38;
+    u8 pad44[4];
 };
 
-struct Actor_1E5750 {
-    u8 pad0[0x110];
-    Quad_1E5750 q110;
-    Quad_1E5750 q120;
-    Quad_1E5750 q130;
-    u8 pad1[0x614 - 0x140];
-    void* f614;
-    u8 pad2[0x61C - 0x618];
-    s32 f61C;
-    u8 pad3[0x630 - 0x620];
-    s32 f630;
-    u8 pad4[0x644 - 0x634];
-    s32 f644;
+struct Rec_262490 {
+    u32 f0;
+    u32 f4;
+    u8 pad08[8];
+    u64 f10;
+    u64 f18;
+    u8 pad20[8];
 };
 
-extern Ctx_1E5750* D_00261990;
-extern u8 D_00275BC0[];
-extern u8 D_002701F8[];
+// size: f32 read by lwc1 (game clock), 4-byte label
+f32 D_00261868 = 0;
+// size: f32 read by lwc1, 4-byte label
+f32 D_0026186C = 0;
+// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
+u64 D_00261870 = 0;
+// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
+u64 D_00261878 = 0;
+// size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
+s32 D_00261D38 = 0;
+// size: func_00151A68 clears 0x24 bytes of it
+Obj_261EF0 D_00261EF0 = {};
+// size: semaphore id from func_002027A0 (lw/sw), 4-byte label
+s32 D_00261F14 = 0;
+s32 D_00261F18 = 0;
+s32 D_00261F1C = 0;
+s32 D_00261F20 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00261F70 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00262260 = 0;
+// size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label
+u8* D_00262264 = 0;
+// size: loop bound 5, stride 4 in func_0015C200
+s32 D_00262268[5] = {0};
+// size: s32 (lw/sw), 4-byte label
+s32 D_0026227C = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002622D0 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002622D4 = 0;
+// size: pointer (lw/sw), 4 bytes before an 8-aligned next label
+Slot12_262320* D_002622D8 = 0;
+// size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
+Rec12_2622E0 D_002622E0 = {};
+// size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
+Rec12_2622F0 D_002622F0 = {};
+// size: 12-byte record copied into Slot r38 by func_0015EC68
+Rec12_262300 D_00262300 = {};
+// size: s32 (sw), 4-byte label
+s32 D_00262310 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00262318 = 0;
+// size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
+Slot12_262320 D_00262320[2] = {};
+// size: pointer (lw/sw), 4-byte label
+void* D_002623B4 = 0;
+// size: two 0x28-byte records (loop end = base + 0x50, stride 0x28 in func_001688B8)
+Rec_262490 D_00262490[2] = {};
+// size: s32 (lw/sw), 4-byte label
+s32 D_002626C0 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002626C8 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002626CC = 0;
+// size: s32 count (lw/sw), 4 bytes before an 8-aligned next label
+s32 D_002626D0 = 0;
 
-void func_001922E8(void* a, void* b);
-void func_001E9498(void* self, void* node);
-void func_001E9570(void* self);
-void func_001356C0(void* self, s32 mode);
-void func_00145088(void* a, s32 b, void* c, void* d, s32 e);
-void func_001495E8(void* a, s32 b);
-void func_001451F0(void* a, s32 b, s32 c, void* d, void* e, s32 f);
-void func_00149610(void* a);
-void func_001B64D8(void* a, s32 b);
-
-void func_001E5750(Actor_1E5750* self, u8* p)
-{
-    func_001922E8(self, p);
-    if (p != 0) {
-        D_00261990->f480 = 100.0f;
-        func_001E9498(D_00275BC0, D_002701F8);
-        func_001356C0(D_002701F8, 5);
-        D_00261990->f4BC = self->f61C;
-        if (self->f630 != 0) {
-            D_00261990->q80 = self->q110;
-            D_00261990->q90 = self->q120;
-            D_00261990->qA0 = self->q130;
-        }
-        func_00145088(D_00261990, 6, (u8*)D_00261990 + 0x460, self, 0);
-        func_001495E8((u8*)D_00261990 + 0x460, self->f644);
-        func_001B64D8(self->f614, 0x359);
-    } else {
-        D_00261990->f480 = 10.0f;
-        func_001E9570(D_00275BC0);
-        func_001451F0(D_00261990, 0xF, 6, (u8*)D_00261990 + 0x460, self, 0);
-        func_00149610((u8*)D_00261990 + 0x460);
-        func_001B64D8(self->f614, 0x358);
-    }
-}
-
-struct Actor_1E5C78 { u8 pad[0x614]; void* f614; void* f618; };
-
-void func_001B6598(void* dev, s32* out);
-void func_001B6568(void* dev, s32* out);
-s32 func_001A8C50(void* a);
-void func_001B64D8(void* dev, s32 value);
-
-void func_001E5C78(Actor_1E5C78* self)
-{
-    s32 a;
-    s32 b;
-    func_001B6598(self->f614, &a);
-    func_001B6568(self->f614, &b);
-    if (a == 0x359 && b == a) {
-        if (func_001A8C50(self->f618) != 0) {
-            func_001B64D8(self->f614, 0x35A);
-        }
-    }
-}
-
-struct Dev_1E5CE8 { u8 pad[0x24]; s32 f24; };
-struct Hdl_1E5CE8 { u8 pad[0x7E0]; s32 f7E0; };
-struct Actor_1E5CE8 { u8 pad[0x614]; void* f614; void* f618; u8 pad2[8]; Hdl_1E5CE8* f624; s32 f628; };
-struct Rec_1E5CE8 { s32 w0; s32 w4; s32 w8; };
-
-void func_00192230(void* self, s32 kind, Rec_1E5CE8* rec);
-void func_001A8C90(void* a, s32 b);
-
-void func_001E5CE8(Actor_1E5CE8* self, s32 kind, Rec_1E5CE8* rec)
-{
-    func_00192230(self, kind, rec);
-    if (kind == 0x13) {
-        Dev_1E5CE8* dev = (Dev_1E5CE8*)self->f614;
-        s32 id = rec->w0;
-        if (id == dev->f24) {
-            if (rec->w8 == 0x35B) {
-                func_001A8C90(self->f618, 1);
-            }
-        } else if (self->f624 != 0 && id == self->f624->f7E0) {
-            s32 k = rec->w8;
-            if (k != 0x15E) {
-                if (k == 0x15F) {
-                    self->f628 = 0;
-                }
-            } else {
-                self->f628 = 1;
-            }
-        }
-    }
-}
-
-struct Ctx_1E5DA8 { u8 pad[0x618]; void* p618; };
-
-s32 func_001B8A08(void* a, void* b);
-s32 func_001A8820(void* p, void* v);
-
-s32 func_001E5DA8(Ctx_1E5DA8* self, void* arg)
-{
-    if (func_001B8A08(self, arg)) {
-        return 1;
-    }
-    if (self->p618 != 0) {
-        s32 r = func_001A8820(self->p618, arg);
-        if (r != 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-struct Pair_1E5E50 { s32 lo; s32 hi; };
-
-void func_001E5E50(void* a0, void* a1, Pair_1E5E50* out)
-{
-    out->lo = 0;
-    out->hi = 0;
-}
-
-struct Obj_001E5E60 { u8 pad[0x620]; void* value; };
-void* func_001E5E60(Obj_001E5E60* self) { return self->value ? self->value : self; }
-
-struct Obj_001E6268 { u8 pad[0xC70]; f32 value; };
-void func_001E6268(Obj_001E6268* self, s32* first, s32* second) { s32 n = (s32)(self->value * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
-
-typedef s32 (*VFn_1E55D0)(void* self);
-struct Obj_1E55D0 { VFn_1E55D0* vtbl; };
-struct Item_1E55D0 { u8 pad0[0x724]; s32 f724; };
-struct Self_1E55D0 { u8 pad0[0x14]; void* f14; u8 pad1[0x568]; s32 f580; u8 pad2[0x9C]; Obj_1E55D0* f620; };
-
-void func_00192B58(void* self);
-s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-void func_001C8F20(void* node, s32 kind, s32 flag);
-
-void func_001E55D0(Self_1E55D0* self)
-{
-    void* arr[8];
-    s32 n;
-    s32 count;
-    s32 i;
-
-    func_00192B58(self);
-    if (self->f620 != 0) {
-        if (self->f620->vtbl[81](self->f620)) {
-            n = func_0015A4F0(self->f14, 5, 8, 0, 8, arr);
-            if (n > 0) {
-                count = n;
-                i = 0;
-                do {
-                    void* item = arr[i];
-                    if (item != self->f620) {
-                        if (((Item_1E55D0*)item)->f724 != 0xB) {
-                            func_001C8F20(item, 0xA, 0);
-                        }
-                    }
-                    count--;
-                    i++;
-                } while (count != 0);
-            }
-            self->f580 = 0;
-        } else {
-            self->f580 = 1;
-        }
-    }
-}
-
-extern u8* D_00275710;
-extern u8 D_00275640[];
-extern f32 D_00275B58[2];
-extern f32 D_00275650;
-extern f32 D_00275654;
-extern f32 D_00275658;
-extern f32 D_0027565C;
-extern f32 D_00275660;
-
-typedef void (*VFn_1E6188)(void* self);
-struct Inst_1E6188 { VFn_1E6188* vtbl; };
-struct Obj_1E6188 { u8 pad[0x27C]; Inst_1E6188* p27C; };
-
-void func_001AA268(void* self);
-void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
-void func_00184768(void* p, s32 v);
-void func_001847F0(void* p, void* q);
-void func_00184858(void* p, f32 v);
-void func_00184818(void* p, f32 v);
-void func_00184878(void* p, f32 v);
-void func_00184838(void* p, f32 v);
-void func_00184898(void* p, f32 v);
-void func_00184990(void* p, void* q);
-void func_00184968(void* p, s32 v);
-
-void func_001E6188(Obj_1E6188* self)
-{
-    func_001AA268(self);
-    self->p27C = (Inst_1E6188*)func_0011E580(0x51, D_00275710, 0, 0x201, -1);
-    func_00184768(self->p27C, 1);
-    func_001847F0(self->p27C, D_00275640);
-    func_00184858(self->p27C, D_00275650);
-    func_00184818(self->p27C, D_00275654);
-    func_00184878(self->p27C, D_00275658);
-    func_00184838(self->p27C, D_0027565C);
-    func_00184898(self->p27C, D_00275660);
-    func_00184990(self->p27C, D_00275B58);
-    func_00184968(self->p27C, 1);
-    self->p27C->vtbl[7](self->p27C);
-}
-
-extern u8 D_00262280[];
-
-s32 func_001E9A68(void);
-void func_001613C0(void* p, s32 a, s32 b, s32 c);
-void func_00161708(void* p, s32 a, u64 b);
-void func_001E6600(void* self, void* p);
-void func_001E6C20(void* self, void* p);
-
-void func_001E73B8(void* self)
-{
-    u8* s = D_00262280;
-    if (func_001E9A68()) {
-        func_001613C0(s, 0, 1, 0xE);
-        func_00161708(s, 0x47, 0x31001);
-        func_00161708(s, 0x42, 0x44);
-        func_001E6600(self, s);
-        func_001E6C20(self, s);
-    }
-}
-
-typedef s32 (*VFn_1E5888)(void* self, void* other);
-struct Vobj_1E5888 { VFn_1E5888* vtbl; };
-struct Rec_1E5888 { u8 pad0[0x48]; Vobj_1E5888* f48; };
-struct Ctx_1E5888 { u8 pad0[0x618]; Rec_1E5888* f618; };
-struct Node_1E5888 { u8 pad0[0x50]; Vobj_1E5888* f50; u8 pad1[0x4E0]; u64 f538; };
-
-s32 func_001A8820(void* p, void* v);
-
-s32 func_001E5888(Ctx_1E5888* self, Node_1E5888* node)
-{
-    Vobj_1E5888* a;
-    Vobj_1E5888* b;
-
-    if (node->f538 & (1ULL << 43)) {
-        return 0;
-    }
-    if ((void*)node->f50 == (void*)self) {
-        return 0;
-    }
-    if (func_001A8820(self->f618, node) != 0) {
-        return 0;
-    }
-    a = node->f50;
-    b = self->f618->f48;
-    if (a->vtbl[60](a, b) != 0 || b->vtbl[60](b, a) != 0) {
-        return 0;
-    }
-    return 1;
-}
-
-extern u8* D_00262E10;
-
-typedef void (*VFn_56A0)(void* self, f32 t, void* buf);
-
-void func_001E5938(void);
-void func_0016EC20(void* obj, s32 n);
-void func_001E5C78(void* self);
-s32 func_00182FC8(void);
-void func_001F5C0C(void* p, s32 v, s32 n);
-
-void func_001E56A0(void* self, void* obj, f32 t)
-{
-    u8 buf[0xC4];
-    u8* o;
-
-    func_001E5938();
-    if (*(u16*)((u8*)obj + 0xAA) & 0xC0) {
-        func_0016EC20(obj, 0xC0);
-        func_001E5C78(self);
-    }
-    o = D_00262E10;
-    if (o != 0) {
-        if (*(s32*)(o + 0x2740) != 0) {
-            if (func_00182FC8()) {
-                VFn_56A0 fn;
-                func_001F5C0C(buf, 0, 0xC4);
-                o = D_00262E10;
-                fn = *(VFn_56A0*)(*(u8**)o + 0x134);
-                if (fn != 0) {
-                    fn(o, t, buf);
-                }
-            }
-        }
-    }
-}
-
-typedef void (*VFn_1E5428)(void* self, void* other);
-
-struct Vt_1E5428 {
-    VFn_1E5428* vtbl;
+// Globals typed by worker dz04, from retail's bytes and their readers.
+struct Row_26AC30 {
+    void (*fn)(void);
+    u8 pad04[4];
+    s32 f8;
+    u8 padC[0x80 - 0xC];
 };
 
-struct Ctx_1E5428 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x584 - 0x18];
-    void* f584;
-    void* f588[3];
-    f32 f594;
-    void* f598;
-    u8 pad2[0x610 - 0x59C];
-    void* f610;
-    void* f614;
-    u8 pad3[0x620 - 0x618];
-    void* f620;
-    void* f624;
-    u8 pad4[0x638 - 0x628];
-    s32 f638;
-    void** f63C;
-    s32* f640;
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A700 = 0;
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A704 = 0;
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A708 = 0;
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A70C = 0;
+// size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
+s32 D_0026A914 = 0;
+// size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
+Row_26AC30 D_0026AC30[18] = {};
+// size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
+s32 D_0026EC58 = 0;
+// size: one s32 (lw, compared with 0), label 8 bytes with 4 of padding before the 8-aligned D_0026EC68
+s32 D_0026EC60 = 0;
+// size: one pointer (lw, passed to func_00150790), label 8 bytes with 4 of padding before the 8-aligned D_0026F808
+u8* D_0026F800 = 0;
+// size: one s32 (lw, bnez), label is 4 bytes
+s32 D_0026FA64 = 0;
+
+// Globals typed by worker dz01, from retail's bytes and their readers.
+struct Quad_261280 {
+    f32 c0, c1, c2, c3;
+} __attribute__((aligned(16)));
+
+// The span func_00130F48 fills: head, then len/halfw/lo/mid/hi/p/q, padded to 16 by the quad's alignment.
+struct Span_261280 {
+    Quad_261280 head;
+    f32 len;
+    f32 halfw;
+    s32 lo;
+    s32 mid;
+    s32 hi;
+    f32 p;
+    f32 q;
 };
 
-struct Peer_1E5428 {
-    u8 pad0[0xC2C];
-    Ctx_1E5428* owner;
-};
+// size: sizeof(Span_261280) == 0x30; func_00130F48 fills it (n = 0x18) and func_00131000 reads it
+Span_261280 D_00261280 = {};
+// size: same Span type, 0x30, filled by func_00130F48 at 0x131418 and read by func_00131000
+Span_261280 D_002612B0 = {};
+// size: same Span type, 0x30, filled by func_00130F48 at 0x131444 and read by func_00131000
+Span_261280 D_002612E0 = {};
+// size: one f32, read and written only with lwc1/swc1 (0x1312B8..0x131B48)
+f32 D_00261310 = 0;
+// size: one word, address passed to func_00139B70 (which func_001529E0 fills with sw) and read with lw at 0x13B1D0
+s32 D_00261314 = 0;
+// size: one word (sw by func_001529E0, lw at 0x13B1D8), then 4 bytes of padding before the 8-aligned next label
+s32 D_00261318 = 0;
+// size: one word, stored with sw and read with lw (0x14079C, 0x1409F4, 0x140B44, 0x18F348)
+s32 D_002613EC = 0;
+// size: one f32, read with lwc1 only; label is 4 bytes
+f32 D_0026185C = 0;
+// size: one f32, read with lwc1 only; 4 bytes of padding before the 8-aligned next label
+f32 D_00261860 = 0;
 
-extern s32 D_00275B28[10];
-
-void func_00124A48(void* self);
-void func_00124DF8(void* self, s32 n, void* table);
-void* func_001B6290(void* a, void* self, s32 b, s32 c);
-void* func_0015A448(void* a, s32 b, void* c);
-s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-void func_00189230(void* a, void* b, void* c);
-
-void func_001E5428(Ctx_1E5428* self)
-{
-    void* r2;
-    s32 i;
-    s32 n;
-    void* r;
-
-    func_00124A48(self);
-    func_00124DF8(self, 3, D_00275B28);
-    self->f614 = func_001B6290(self->f610, self, -1, 1);
-    r = func_0015A448(D_00275710, 7, self);
-    if (r != 0) {
-        self->f620 = r;
-        self->f624 = r;
-        ((Peer_1E5428*)r)->owner = self;
-        self->f598 = r;
-        self->f584 = (void*)func_0015A418(self->f14, 1, 0x160, r);
-        i = 0;
-        do {
-            self->f588[i] = (void*)func_0015A418(self->f14, 1, i + 0x161, r);
-            i++;
-        } while (i < 3);
-        self->f594 = 300.0f;
-        ((Vt_1E5428*)r)->vtbl[27](r, self);
-    } else {
-        self->f620 = (void*)D_00262E10;
-    }
-
-    n = 0;
-    while (n < self->f638) {
-        r2 = func_0015A448(self->f14, self->f640[n], self);
-        if (r2 != 0) {
-            self->f63C[n] = r2;
-            n++;
-        }
-    }
-    self->f638 = n;
-    func_00189230((u8*)self + 0x110, (u8*)self + 0x648, (u8*)self + 0x64C);
-}
-
-struct Blk_1E5278 { u8 pad[0x14]; };
-struct Ring_1E5278 { s32 w; };
-
-extern u8 D_00261420[];
-extern u8 D_00275AF0[];
-
-void func_001C05D0(f32 x);
-void func_00140ED0(Ring_1E5278* r);
-void func_001E4E80(Blk_1E5278* self, u8* p, s32 a, s32 b, s32 c);
-
-void func_001E5278(s32 mode)
-{
-    s32 n;
-    func_001C05D0(0.0f);
-    switch (mode) {
-    case 0:
-        n = 0;
-        break;
-    case 1:
-        func_00140ED0((Ring_1E5278*)D_00261420);
-        return;
-    case 2:
-        n = 2;
-        break;
-    case 3:
-        n = 4;
-        break;
-    }
-    func_001E4E80((Blk_1E5278*)D_00275AF0, D_00275AF0 + 0x14, -1, -1, n);
-}
-
-struct Node_1E7460;
-struct Obj_1E7460;
-void func_00126BC0(Node_1E7460* node, Obj_1E7460* self);
-extern s32 D_00270458;
-
-struct Node_1E7460 {
-    void** vtable;
-    u8 pad4[0x2C8 - 4];
-    unsigned long f2C8;
-};
-struct Obj_1E7460 {
-    u8 pad0[0x270];
-    Node_1E7460* f270;
-    Node_1E7460* f274;
-    Node_1E7460* f278;
-};
-
-void func_001E7460(Obj_1E7460* self)
-{
-    Node_1E7460* cur = self->f274;
-    if (self->f270 == cur) {
-        return;
-    }
-    if (cur != 0) {
-        if (!(D_00270458 == 4 && cur == self->f278)) {
-            ((void (*)(Node_1E7460*))cur->vtable[7])(cur);
-        }
-    }
-    self->f274 = self->f270;
-    if (self->f274 != 0) {
-        ((void (*)(Node_1E7460*))self->f274->vtable[6])(self->f274);
-        if (D_00270458 != 4) {
-            func_00126BC0(self->f274, self);
-        }
-        self->f274->f2C8 |= 0x100000000UL;
-    }
-}
-
-struct Obj_1E77C0;
-typedef void (*VFn_1E77C0)(Obj_1E77C0* self, s32 state);
-
-struct Elem_1E77C0
-{
-    u8 pad00[0x18];
-    f32 f18;
+// Globals typed by worker dz03, from retail's bytes and their readers.
+// A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
+struct Obj_2626E8 { u32 first; u32 last; u32 base; };
+// Three words set by func_00168D68.
+struct Obj_2626D8 { s32 a; s32 b; s32 c; };
+// Record func_0016C360 clears (0x1C bytes) and fills.
+struct Obj_2629A8 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
+struct Pair_262C70 { f32 lo; f32 hi; };
+// The input stream func_0016E1A0 clears (0xC4 bytes).
+struct Obj_262C70 {
+    u8 pad00[4];
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
     f32 f1C;
-    f32 f20;
-    f32 f24;
-    f32 f28;
+    s32 f20;
+    u8 pad24[0x2C];
+    s32 f50;
+    Pair_262C70 a54[4];
+    u8 pad74[0x10];
+    s32 f84;
+    Pair_262C70 a88[4];
+    s16 fA8;
+    u8 padAA[0x12];
+    void* fBC;
+    s32 fC0;
+};
+struct Ent_264670 { void* f0; s32 f4; s32 f8; s16 fC; s16 fE; };
+struct Slot_264A70 { u8 pad0[0xC]; f32 fC; u8 pad10[0x1A5C - 0x10]; };
+struct Slot_269990 { s32 f00; s32 f04; u8 pad08[8]; s32 f10; };
+
+// size: func_00168D68 sets three words (a, b, c) of it
+Obj_2626D8 D_002626D8 = {0};
+// size: list head of three words, func_00152438 sets the link offset at +8 (0x38)
+Obj_2626E8 D_002626E8 = {0};
+// size: list head of three words, link offset at +8 (0x50)
+Obj_2626E8 D_002626F8 = {0};
+// size: list head of three words, link offset at +8 (0x558); func_00150298 walks it
+Obj_2626E8 D_00262708 = {0};
+// size: s32 pointer, loaded and stored as a word (func_0016DD00 clears it)
+s32 D_002629C8 = 0;
+// size: s32 flags, word accesses only
+s32 D_00262C64 = 0;
+// size: s32 flags, word accesses only
+s32 D_00262C68 = 0;
+// size: s32 flags, word accesses only
+s32 D_00262C6C = 0;
+// size: chosen with D_00262C70 as the same pad pointer (conditional), 0xC4 to the next label
+Obj_262C70 D_00262D38 = {};
+// size: pointer, word accesses only
+void* D_00262E10 = 0;
+// size: s32, word load/store only
+s32 D_00263E2C = 0;
+// size: list head of three words, link offset at +8 (0x50)
+Obj_2626E8 D_00264088 = {0};
+// size: pointer, word store of D_002622CC
+// size: s32, word accesses only
+// size: func_00184DE8 fills it while index < 0x100 (sltiu 0x100, step 4)
+// size: s32 count, tested < 0x10 against the D_00264670 table in func_00184DE8
+// size: func_00184DE8 adds entries while count < 0x10, stride 0x10 (sll 4)
+// size: s32 flag, word load/store only
+s32 D_002649A8 = 0;
+// size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
+// size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
+Slot_269990 D_00269990 = {0};
+// size: s32, word load/store only
+s32 D_00269B48 = 0;
+// size: s32 counter, word load/store only
+s32 D_00269C90 = 0;
+Obj_2629A8 D_002629A8 = {0};
+Obj_262C70 D_00262C70 = {};
+struct Credit_248748 { s32 id; f32 f4; u32 digest[8]; const char* name; };
+extern const Credit_248748 D_00248748[33] = {
+    { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
+    { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, D_0024DCC8 },
+    { 0x00000103, 139.0f, { 0x7EA0F65C, 0xD2337F06, 0xBE2AFC49, 0x12C36311, 0x7C279683, 0x7EA42098, 0xBE2AFEF0, 0xD22162E6 }, D_0024DCE8 },
+    { 0x00000104, 90.0f, { 0x43450000, 0x1BA9F623, 0xD50CE115, 0x2C1200AF, 0xCEA641C8, 0x4356A7CF, 0xD50CE3A2, 0x1B896FC3 }, D_0024DD38 },
+    { 0x00000105, 92.0f, { 0x99CE9B7C, 0x71906A24, 0xF0C28B06, 0xEB485F8B, 0x53B61FF1, 0x99DD5CC8, 0xF0C289B0, 0x71B1D014 }, D_0024DD60 },
+    { 0x00000106, 0.0f, { 0x2699F11C, 0x49A028DA, 0x4F211F07, 0x48124182, 0x178D0C5F, 0x269A54DB, 0x4F211DBC, 0x4984311A }, D_0024DD80 },
+    { 0x00000107, 70.0f, { 0x58F37394, 0x1350631B, 0x01CBDC91, 0x44F71ECF, 0xDF5726B9, 0x58F33959, 0x01CBDE2D, 0x1372669B }, D_0024DDA0 },
+    { 0x00000200, 90.0f, { 0xD0F1FFA7, 0xC60FB906, 0xF6CBF1E8, 0xDBDFC7A2, 0x60C39D81, 0xD0F25069, 0xF6CBF340, 0xC62CF876 }, D_0024DDC8 },
+    { 0x00000202, 135.0f, { 0x8D75C2BA, 0x1C60DBC3, 0x87B409B3, 0xE1C1EC55, 0x1628B119, 0x8D73AF2A, 0x87B40B1A, 0x1C4054D3 }, D_0024DDF0 },
+    { 0x00000203, 80.0f, { 0xEFF2D448, 0xCD3CF9B6, 0x643C8676, 0xEE4BB37E, 0x5221084A, 0xEFFBDEE7, 0x643C84DA, 0xCD29D486 }, D_0024DD80 },
+    { 0x00000204, 0.0f, { 0x085CFED8, 0x500DEAB1, 0x2D8244CE, 0x20D7E0BD, 0x7B9BF59A, 0x084F301B, 0x2D824663, 0x50119521 }, D_0024DE10 },
+    { 0x00000205, 118.0f, { 0x34B8FDC0, 0xBA921EE9, 0xBC440B92, 0xF084CB5F, 0x9B5D7162, 0x34B8BB9E, 0xBC440938, 0xBAB16B39 }, D_0024DE38 },
+    { 0x00000206, 77.0f, { 0x1C7E6EEE, 0x3905F736, 0x84C0AC66, 0xF3ECEA0D, 0xF49EA1A6, 0x1C7E59A4, 0x84C0AECD, 0x39225AD6 }, D_0024DCC8 },
+    { 0x00000207, 83.0f, { 0x22F88C24, 0x981BED54, 0xBE8B1621, 0xC6B35547, 0x244B7E13, 0x22FEE53D, 0xBE8B148F, 0x98385A04 }, D_0024DE50 },
+    { 0x00000300, 95.0f, { 0x255C8D9D, 0xC67DD187, 0xB30FF9E1, 0xC0220E2F, 0x42968B68, 0x25585E92, 0xB30FFB5C, 0xC6607257 }, D_0024DE70 },
+    { 0x00000302, 122.0f, { 0x95E88262, 0x256551E6, 0x4ADF2CC3, 0x3DB989E3, 0xB6A6B35A, 0x95EB4CBA, 0x4ADF2E00, 0x2543D296 }, D_0024DE98 },
+    { 0x00000303, 138.0f, { 0x11AF8222, 0x4154CCCF, 0x0079AF5D, 0xE4F21BF0, 0x4D1A9134, 0x11BB038E, 0x0079ADE2, 0x414910EF }, D_0024DEC0 },
+    { 0x00000304, 0.0f, { 0x4E5C5D94, 0x9A873808, 0x96FFEFBF, 0x8BD43856, 0x4D5F0EF3, 0x4E53B0C4, 0x96FFED7E, 0x9A95DB18 }, D_0024DEF0 },
+    { 0x00000305, 128.0f, { 0xF98CB02D, 0xA283FC15, 0x25BB5DC0, 0xE157D974, 0x79983E9E, 0xF989BEEC, 0x25BB5F02, 0xA29D9135 }, D_0024DF10 },
+    { 0x00000306, 0.0f, { 0xCD08BB18, 0xE7BF9B3F, 0xC95EE322, 0xE910E326, 0x9644F239, 0xCD09B122, 0xC95EE1E2, 0xE799CE4F }, D_0024DF50 },
+    { 0x00000307, 0.0f, { 0x675AB398, 0xCDC3F75B, 0x04221B83, 0x8816DEE1, 0xC808ED2E, 0x675C5565, 0x0422193D, 0xCDD7A0DB }, D_0024DF78 },
+    { 0x00000400, 129.0f, { 0x690D68D5, 0x91BE10E9, 0x53BEE0CB, 0x2DD4C53B, 0x34B03761, 0x691EC614, 0x53BEE264, 0x91A1B799 }, D_0024DFA0 },
+    { 0x00000402, 135.0f, { 0xCDE8339C, 0xA52C25B6, 0x7A1C3B47, 0x60EAC381, 0x5CCA62D2, 0xCDE6A0FA, 0x7A1C39F5, 0xA50AE286 }, D_0024DFB8 },
+    { 0x00000403, 145.0f, { 0x2E641117, 0x48B11069, 0x55A7DCBF, 0xBEE1993E, 0x68804E34, 0x2E651ED2, 0x55A7DE0F, 0x4894DAA9 }, D_0024DFD8 },
+    { 0x00000404, 165.0f, { 0x67AF3B57, 0xF492F4FB, 0x4582A324, 0x58A7E5D7, 0x19037D39, 0x67BCF0BB, 0x4582A197, 0xF48440DB }, D_0024DFF0 },
+    { 0x00000405, 0.0f, { 0x39FDBB59, 0x61874FF5, 0x431AA733, 0x1BF9BD2A, 0xD8FC45CE, 0x39E904E7, 0x431AA586, 0x619A0B55 }, D_0024E018 },
+    { 0x00000406, 162.0f, { 0x130F1A4B, 0xF165A43C, 0x1085A760, 0x7EF09D87, 0xEEDC6182, 0x130BC343, 0x1085A5D1, 0xF17A745C }, D_0024E038 },
+    { 0x00000407, 0.0f, { 0xAEE1B3B0, 0x23F21A5C, 0x2C5069FC, 0x69DA4B36, 0x2EFC59A8, 0xAEE1800D, 0x2C506B48, 0x23E4C85C }, D_0024E060 },
+    { 0x00000502, 0.0f, { 0xE03513A1, 0xDF69E228, 0xBCC1BC75, 0x66B59F20, 0x5603C88D, 0xE0251B60, 0xBCC1BED2, 0xDF776558 }, D_0024E088 },
+    { 0x00000503, 0.0f, { 0x10003460, 0x2357C8AB, 0x82DF6820, 0x9EA4EEF0, 0x67FFDE84, 0x101449AA, 0x82DF6A86, 0x2348C7EB }, D_0024E0A8 },
+    { 0x00000504, 0.0f, { 0xC0351F76, 0xAEA9D7A0, 0xA96A1A69, 0x5A238437, 0x525CDAB3, 0xC03D3461, 0xA96A18CA, 0xAE889780 }, D_0024E0C8 },
+    { 0x00000505, 0.0f, { 0x166B5E9F, 0xD83C11E9, 0x64ED4809, 0x9F137E03, 0x544B9C1C, 0x167F901D, 0x64ED4AAC, 0xD82147F9 }, D_0024E0F8 },
+    { 0x00000506, 0.0f, { 0x9CD62C23, 0x9AB39D3E, 0xEA6D2E63, 0xFEC5BF26, 0xC170A675, 0x9CD0481B, 0xEA6D2CC7, 0x9A96D39E }, D_0024E118 },
 };
 
-struct Obj_1E77C0
-{
-    VFn_1E77C0* vtbl;
-    u8 pad004[0x210];
-    s32 f214;
-    u8 pad218[0x38];
-    s32 f250;
-    u8 pad254[0x14];
-    s32 f268;
-    f32 f26C;
-    s32 f270;
-    s32 f274;
-    u8 pad278[0x8];
-    Elem_1E77C0 elems[57];
-    u8 padC4C[0x10];
-    f32 fC5C;
-    f32 fC60;
-    f32 fC64;
-    f32 fC68;
-    f32 fC6C;
-    f32 fC70;
+// Globals typed by worker dz08, from retail's bytes and their readers.
+struct Obj_26EC70 {
+    const void* vt;
+    u8 pad04[0x25C];
 };
 
-extern f32 D_00261858[];
-extern s32 D_00270448;
-extern s32 D_00270458;
-
-void func_001AA298(Obj_1E77C0* self);
-f32 func_001EA4B8(f32* p, s32 zero, f32 a, f32 b, f32 c);
-s32 func_001EAC68(f32 a, f32 b, f32 c);
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001E7518(Obj_1E77C0* self, s32 mode);
-
-void func_001E77C0(Obj_1E77C0* self)
-{
-    func_001AA298(self);
-    s32 state = self->f250;
-    s32 sub = self->f268;
-    switch (state)
-    {
-    case 0:
-        if (self->f274 != 0)
-        {
-            state = 2;
-        }
-        else if (self->f270 != 0)
-        {
-            state = D_00270448 != 0;
-        }
-        break;
-    case 3:
-        sub = 3;
-        break;
-    case 2:
-        switch (sub)
-        {
-        case 0:
-        {
-            f32 f = self->fC70 + D_00261858[5] * 5.0f;
-            self->fC70 = f;
-            if (1.0f <= f)
-            {
-                self->fC70 = 1.0f;
-                sub = 1;
-            }
-            break;
-        }
-        case 2:
-        {
-            f32 f = self->fC70 - D_00261858[5] * 5.0f;
-            self->fC70 = f;
-            if (f <= 0.0f)
-            {
-                self->fC70 = 0.0f;
-                sub = 3;
-            }
-            break;
-        }
-        case 3:
-            if (self->f270 != 0)
-            {
-                sub = 0;
-            }
-            else
-            {
-                state = 3;
-            }
-            break;
-        }
-        if (D_00270458 != 4)
-        {
-            self->fC5C = func_001EA4B8(&self->fC64, 0, self->fC5C, self->fC60, D_00261858[5]);
-            if (func_001EAC68(self->fC5C, self->fC60, 1e-4f) != 0)
-            {
-                self->fC5C = 1.0f;
-                if (self->f214 == 0x1A)
-                {
-                    self->fC64 = func_001EAAE0(1.0f, 1.4f);
-                    self->fC68 = func_001EAAE0(0.6f, 0.8f);
-                    self->fC6C = func_001EAAE0(0.1f, 0.2f);
-                }
-                else
-                {
-                    self->fC64 = func_001EAAE0(0.5f, 0.7f);
-                    self->fC68 = func_001EAAE0(0.2f, 0.3f);
-                    self->fC6C = func_001EAAE0(0.3f, 0.5f);
-                }
-            }
-            s32 idx = (s32)(self->fC5C * 56.999f);
-            f32 d = func_001EAAE0(0.1f, 0.2f);
-            if (self->f214 == 0x1A)
-            {
-                d = d + d;
-            }
-            f32 lo = 0.0f;
-            f32 hi = 1.0f;
-            f32 v = self->elems[idx].f18 + d;
-            if (v < lo)
-            {
-                v = lo;
-            }
-            else if (hi < v)
-            {
-                v = hi;
-            }
-            self->elems[idx].f18 = v;
-            s32 big = 0x1A;
-            f32* q;
-            Elem_1E77C0* e;
-            s32 i;
-            for (q = &self->elems[0].f20, e = self->elems, i = 0; i < 57; q += 11, i++, e++)
-            {
-                if (func_001EAC68(e->f18, e->f1C, 1e-4f) != 0)
-                {
-                    if (self->f214 == big)
-                    {
-                        e->f20 = func_001EAAE0(0.6f, 0.8f);
-                        e->f24 = func_001EAAE0(0.4f, 0.6f);
-                        e->f28 = func_001EAAE0(0.05f, 0.2f);
-                    }
-                    else
-                    {
-                        e->f20 = func_001EAAE0(0.3f, 0.4f);
-                        e->f24 = func_001EAAE0(0.2f, 0.3f);
-                        e->f28 = func_001EAAE0(0.1f, 0.4f);
-                    }
-                    e->f1C = func_001EAAE0(0.0f, 0.05f);
-                }
-                else
-                {
-                    e->f18 = func_001EA4B8(q, 0, e->f18, e->f1C, D_00261858[5]);
-                }
-            }
-        }
-        break;
-    }
-    self->vtbl[16](self, state);
-    func_001E7518(self, sub);
-}
-
-#include "fpu.h"
-
-struct Elem_1E5E70 {
-    u8 pad0[4];
-    f32 f4;
-    u8 pad1[4];
-    f32 fC;
-    u8 pad2[0x2C - 0x10];
-    f32 f2C;
-    u8 pad3[4];
-    f32 f34;
-    u8 pad4[4];
-    u32 f3C;
-    u32 f40;
-    f32 f44;
-    f32 f48;
-    f32 f4C;
-    f32 f50;
-    f32 f54;
-};
-
-struct Obj_1E5E70 {
-    u8 pad0[0x214];
-    s32 mode;
-    u8 pad1[0x234 - 0x218];
-    f32 f234;
-    f32 f238;
-    u8 pad2[0x254 - 0x23C];
-    u8 elems[0xC24 - 0x254];
-    s32 fC24;
-    u8 padC28[4];
-    f32 fC2C;
-    u8 padC30[0xC4C - 0xC30];
-    f32 fC4C;
-    f32 fC50;
-    f32 fC54;
-    f32 fC58;
-    u8 padC5C[0xC64 - 0xC5C];
-    f32 fC64;
-    f32 fC68;
-    f32 fC6C;
-};
-
-void func_001AA1F0(Obj_1E5E70* self, s32 kind);
-f32 func_001EAAE0(f32 a, f32 b);
-
-void func_001E5E70(Obj_1E5E70* self, s32 kind)
-{
-    self->f234 = 160.0f;
-    self->f238 = 125.4f;
-    self->fC54 = self->fC58 = 3.3000002f;
-    func_001AA1F0(self, kind);
-    f32 sign;
-    if (kind == 0x1A) {
-        self->fC50 = 0.0f;
-        self->fC4C = self->f234 - 62.7f;
-        sign = 1.0f;
-    } else {
-        self->fC50 = self->f234;
-        self->fC4C = 62.7f;
-        sign = -1.0f;
-    }
-    f32 step = 1.0f / 57.0f;
-    s32 i = 0;
-    u32 dim = 0x30000000;
-    s32 special = 0x1A;
-    Elem_1E5E70* p;
-    for (p = (Elem_1E5E70*)self->elems; i < 0x39; i++) {
-        f32 t = (f32)i * step;
-        f32 y = t + t - 1.0f;
-        p->f34 = y;
-        p->f2C = sign * Fpu::Sqrt(1.0f - y * y);
-        p->f3C = p->f40 = (i & 1) ? dim : 0x30808080;
-        p->f44 = p->f48 = 0.0f;
-        if (self->mode == special) {
-            p->f4C = func_001EAAE0(0.6f, 0.8f);
-            p->f50 = func_001EAAE0(0.4f, 0.6f);
-            p->f54 = func_001EAAE0(0.05f, 0.2f);
-        } else {
-            p->f4C = func_001EAAE0(0.3f, 0.4f);
-            p->f50 = func_001EAAE0(0.2f, 0.3f);
-            p->f54 = func_001EAAE0(0.1f, 0.4f);
-        }
-        if (i != 0) {
-            p->fC = p->f34;
-            p->f4 = p->f2C;
-        }
-        p = (Elem_1E5E70*)((u8*)p + 0x2C);
-    }
-    self->fC2C = 1.0f;
-    self->fC24 = 0;
-    if (self->mode == 0x1A) {
-        self->fC64 = func_001EAAE0(1.0f, 1.4f);
-        self->fC68 = func_001EAAE0(0.6f, 0.8f);
-        self->fC6C = func_001EAAE0(0.1f, 0.2f);
-    } else {
-        self->fC64 = func_001EAAE0(0.5f, 0.7f);
-        self->fC68 = func_001EAAE0(0.2f, 0.3f);
-        self->fC6C = func_001EAAE0(0.3f, 0.5f);
-    }
-}
-
-struct Elem_1E62A8 { f32 f0; f32 f4; f32 f8; f32 fC; u8 pad10[0x1C]; };
-struct Self_1E62A8 {
-    u8 pad0[0x21C];
-    f32 f21C; f32 f220; f32 f224; f32 f228;
-    u8 pad22C[8];
-    f32 f234; f32 f238;
-    u8 pad23C[0x44];
-    Elem_1E62A8 e[0x39];
-    f32 fC4C; f32 fC50;
-};
-struct Ctx_1E62A8 { s32 x; };
-extern s32 D_00270458;
-void func_00161670(Ctx_1E62A8* c, s32 a, s32 b, s32 d, s32 e);
-void func_001615F0(Ctx_1E62A8* c, s32 a, s32 b, s32 d, s32 e);
-void func_001E6268(Self_1E62A8* self, s32* a, s32* b);
-
-void func_001E62A8(Self_1E62A8* self, Ctx_1E62A8* c, s32 k)
-{
-    if (D_00270458 == 4) {
-        f32 y = self->f228;
-        f32 x = self->f224;
-        s32 x0 = (s32)((x + 1728.0f) * 16.0f);
-        s32 y0 = (s32)((y * 0.45454547f + 1936.0f) * 16.0f);
-        func_00161670(c, x0, y0, k, 0);
-        func_00161670(c, x0, (s32)(((y + self->f238) * 0.45454547f + 1936.0f) * 16.0f), k, 0);
-        func_001615F0(c, (s32)(((x + self->f234) + 1728.0f) * 16.0f), y0, k, 0);
-        y = y + self->f238;
-        x = x + self->f234;
-        func_001615F0(c, (s32)((x + 1728.0f) * 16.0f), (s32)((y * 0.45454547f + 1936.0f) * 16.0f), k, 0);
-    } else {
-        s32 r[2];
-        func_001E6268(self, &r[0], &r[1]);
-        if (r[0] != r[1]) {
-            f32 a = self->f220 + 62.7f;
-            f32 b = self->f21C + self->fC50;
-            f32 bx = self->f21C + self->fC4C;
-            s32 x0, y0, i;
-            f32 t;
-            y0 = (s32)(((a + self->e[r[0]].f8 * 62.7f) * 0.45454547f + 1936.0f) * 16.0f);
-            x0 = (s32)((b + 1728.0f) * 16.0f);
-            t = bx + self->e[r[0]].f0 * 62.7f;
-            func_00161670(c, x0, y0, k, 0);
-            func_00161670(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
-            for (i = r[0]; i < r[1]; i++) {
-                Elem_1E62A8* p = &self->e[i];
-                t = bx + p->f4 * 62.7f;
-                s32 x = (s32)((b + 1728.0f) * 16.0f);
-                y0 = (s32)(((a + p->fC * 62.7f) * 0.45454547f + 1936.0f) * 16.0f);
-                func_001615F0(c, x, y0, k, 0);
-                func_001615F0(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
-            }
-        }
-    }
-}
-
-struct Obj_1E7460;
-void func_001E7460(Obj_1E7460* self);
-extern f32 D_00261858[];
-f32 func_001EAAE0(f32 a, f32 b);
-void func_001BFCD8(s32 id, s32 a, s32 b, s32 c, f32 f0, f32 f1, f32 f2, f32 f3, f32 f4, s32 d, s32 e);
-
-void func_001E7518(Obj_1E77C0* self, s32 mode)
-{
-    if (mode == self->f268) {
-        return;
-    }
-    switch (mode) {
-    case 0: {
-        func_001BFCD8(0x8C, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        for (s32 i = 0; i < 57; i++) {
-            Elem_1E77C0* e = &self->elems[i];
-            e->f18 = 1.0f;
-            e->f1C = func_001EAAE0(0.0f, 0.05f);
-            e->f20 = 1.0f;
-            e->f24 = 0.6f;
-            e->f28 = 0.2f;
-        }
-        break;
-    }
-    case 2:
-        func_001BFCD8(0x8D, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        break;
-    case 1:
-        self->fC70 = 1.0f;
-        break;
-    case 3:
-        self->fC70 = 0.0f;
-        func_001E7460((Obj_1E7460*)self);
-        break;
-    }
-    self->f268 = mode;
-    self->f26C = D_00261858[4];
-}
-
-struct Blob_1E4EA8 { u32 w[8]; };
-struct Eq_1E4EA8 {
-    static s32 Of(Blob_1E4EA8* a, Blob_1E4EA8* b)
-    {
-        if (a == b) return 1;
-        if (b == 0) return 0;
-        return ((a->w[2] ^ a->w[6]) ^ (b->w[2] ^ b->w[6])) == 0;
-    }
-};
-struct Key_1E4EA8 { s32 a; s32 b; };
-struct VT_1E4EA8 { u8 pad[0x38]; void (*m38)(void*, void*); };
-struct VT1_1E4EA8 { u8 pad[0x38]; void (*m38)(void*); };
-struct Mgr_1E4EA8 { VT_1E4EA8* vt; u8 pad04[0x1D78]; f32 f1D7C; };
-struct Self_1E4EA8 { s32 f0; Blob_1E4EA8* f4; s32 f8; s32 fC; s32 f10; Blob_1E4EA8 f14; };
-struct __attribute__((packed)) Word_1E4EA8 { u32 v; };
-struct Sub_1E4EA8 {
-    s32 pad[0xC]; void* f30; s32 pad34[3]; s32 pad40[8];
-    void SetOwner(void* o) { f30 = o; }
-};
-struct Obj30_1E4EA8 { s32 pad[10]; };
-struct Cur_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 f19E0; };
-struct Cur2_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 pad19E0[3]; u32 f19EC; };
-struct Pl_1E4EA8 { u8 pad[0x4F44]; Cur_1E4EA8* f4F44; };
-struct Vo_1E4EA8 { void* vt; };
-
-extern u8 D_002C3B00[];
-extern u8 D_00261EF0[];
-extern u8 D_002623D8[];
-extern u8 D_0026FA90[];
-extern f32 D_0026186C;
-extern Vo_1E4EA8 D_0026C6C8;
-extern Cur2_1E4EA8* D_002623C0;
-extern Pl_1E4EA8 D_00264A40;
-
-void func_00191E70(s32 a);
-void func_0018D410(Key_1E4EA8* q);
-Obj30_1E4EA8* func_00193210(Obj30_1E4EA8* q, Word_1E4EA8* a, Word_1E4EA8* b, Word_1E4EA8* c, Word_1E4EA8* d);
-void func_00137290(Sub_1E4EA8* q, s32 a, u8* b, s32 c);
-void func_00193270(void* q);
-s32 func_001373B0(Sub_1E4EA8* q, Key_1E4EA8* k);
-void func_001372E0(Sub_1E4EA8* q, s32 n);
-void func_001DB838(Mgr_1E4EA8* q);
-void func_001DB928(s32 a, Sub_1E4EA8* q);
-void func_001430B8(u8* q, f32 v);
-void func_0016E0F0(s32 n);
-void func_00160690(Blob_1E4EA8* q, s32 n);
-Mgr_1E4EA8* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
-void func_001C06A0(s32 a, s32 b, f32 x);
-void func_001373D0(Sub_1E4EA8* q);
-void func_00193300(void* q);
-void func_0018C7F8(Pl_1E4EA8* q);
-void func_00143A60(s32 q, s32 f);
-void func_001C0070(void);
-void func_001F4318(Mgr_1E4EA8* q, s32 a, s32 b);
-void func_00151E18(u8* q);
-void func_00160CE8(u8* q);
-void func_0016B520(u8* q);
-void func_00138C00(Mgr_1E4EA8* q, s32 n);
-void func_00143E40(s32 q, s32 n, f32 v);
-void func_00142ED0(f32 x);
-void func_001C06D8(void);
-void func_00191EB0(s32 a);
-
-void func_001E4EA8(Self_1E4EA8* self)
-{
-    Key_1E4EA8 key;
-    Blob_1E4EA8 blob;
-    Obj30_1E4EA8 o30;
-    Word_1E4EA8 w60, w70, w80, w90;
-    Sub_1E4EA8 sub;
-    func_00191E70(2);
-    if (self->f4 != 0) {
-        func_0018D410(&key);
-        blob = *self->f4;
-        self->f4 = 0;
-        key.b = blob.w[1] ^ blob.w[7];
-        key.a = blob.w[0] ^ blob.w[5];
-        if (key.b == 0) goto end;
-        {
-            Blob_1E4EA8* s2 = &self->f14;
-            s32 ne = !Eq_1E4EA8::Of(&blob, s2);
-            w60.v = 0x3F00;
-            w70.v = 0x3F3F3F;
-            w80.v = 0x3F3F;
-            w90.v = 0x3F;
-            func_00193210(&o30, &w60, &w70, &w80, &w90);
-            func_00137290(&sub, 0x340C00, D_002C3B00, 6);
-            sub.SetOwner(&o30);
-            if (sub.f30 != 0) func_00193270(sub.f30);
-            if (func_001373B0(&sub, &key) == 0) {
-                func_001372E0(&sub, 2);
-                goto end;
-            }
-            func_001DB838((*(Mgr_1E4EA8**)&D_00275710));
-            (*(Mgr_1E4EA8**)&D_00275710) = 0;
-            func_001DB928(ne, &sub);
-            func_001430B8(((u8*)&D_00261858), 0.0f);
-            func_0016E0F0(0x80);
-            self->f14 = blob;
-            func_00160690(s2, self->f10);
-            (*(Mgr_1E4EA8**)&D_00275710) = func_0011E580(0x6C, 0, 0, 3, -1);
-            func_001C06A0(0xA, 0, 0.0f);
-            (*(Mgr_1E4EA8**)&D_00275710)->vt->m38((*(Mgr_1E4EA8**)&D_00275710), &sub);
-            func_001373D0(&sub);
-            if (sub.f30 != 0) func_00193300(sub.f30);
-            if (D_002623C0->f19EC & 0x100) {
-                Cur_1E4EA8* c = D_00264A40.f4F44;
-                if (c != 0 && (c->f19D8 != D_002623C0->f19D8 || c->f19DC != D_002623C0->f19DC))
-                    func_0018C7F8(&D_00264A40);
-            }
-            func_001372E0(&sub, 2);
-        }
-    }
-    func_00143A60((*(s32*)&D_00261990), 1);
-    func_001C0070();
-    func_001C06A0(0xA, 0, 1.0f);
-    func_001F4318((*(Mgr_1E4EA8**)&D_00275710), self->f8, self->fC);
-    func_00151E18(D_00261EF0);
-    func_00160CE8(D_002623D8);
-    func_0016B520(D_0026FA90);
-    func_00138C00((*(Mgr_1E4EA8**)&D_00275710), 0);
-    func_00143E40((*(s32*)&D_00261990), 0, D_0026186C);
-    if (self->f10 & 0x10) ((VT1_1E4EA8*)D_0026C6C8.vt)->m38(&D_0026C6C8);
-    func_00142ED0(1.0f);
-end:
-    func_001C06D8();
-    func_001C06A0(1, 1, (*(Mgr_1E4EA8**)&D_00275710)->f1D7C);
-    func_00191EB0(2);
-    self->f0 = 0;
-}
-
-struct Rgba_1E6C20 { u8 c[4]; };
-struct Elem_1E6C20 { f32 f0; f32 f4; f32 f8; f32 fC; u8 pad[0x2C - 0x10]; };
-struct Self_1E6C20 {
-    u8 pad0[0x21C]; f32 f21C; f32 f220;
-    u8 pad1[0x260 - 0x224]; s32 f260; f32 f264;
-    u8 pad2[0x280 - 0x268]; Elem_1E6C20 elems[1];
-};
-struct Buf_1E6C20;
-
-extern f32 D_00261868;
-extern Rgba_1E6C20 D_002610D8;
-extern Rgba_1E6C20 D_002610E0;
-
-void func_001613C0(Buf_1E6C20* b, s32 a1, s32 a2, s32 a3);
-void func_00161458(Buf_1E6C20* b, u32 c);
-void func_001615F0(Buf_1E6C20* b, s32 x, s32 y, s32 a3, s32 a4);
-void func_001E6268(Self_1E6C20* self, s32* first, s32* last);
-
-struct Lerp_1E6C20 {
-    static u8 Of(s32 a, s32 b, f32 t)
-    {
-    if (a == b) return b;
-    if (a < b) return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
-    return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
-    }
-};
-
-#define SX_1E6C20(x) ((s32)(((x) + 1728.0f) * 16.0f))
-#define SY_1E6C20(y) ((s32)(((y) * 0.45454547f + 1936.0f) * 16.0f))
-
-struct Clamp_1E6C20 {
-    static f32 Of(f32 x, f32 lo, f32 hi)
-    {
-        if (x < lo) return lo;
-        if (hi < x) return hi;
-        return x;
-    }
-};
-
-void func_001E6C20(Self_1E6C20* self, Buf_1E6C20* buf)
-{
-    Rgba_1E6C20 c;
-    f32 t;
-    switch (self->f260) {
-    case 0:
-        t = Clamp_1E6C20::Of((D_00261868 - self->f264) * 5.0f, 0.0f, 1.0f);
-        break;
-    case 1:
-        t = Clamp_1E6C20::Of(1.0f - (D_00261868 - self->f264) * 5.0f, 0.0f, 1.0f);
-        break;
-    }
-    func_001613C0(buf, 0, 1, 1);
-    {
-        Rgba_1E6C20 a = D_002610D8;
-        Rgba_1E6C20 b = D_002610E0;
-        Rgba_1E6C20 r;
-        r.c[0] = Lerp_1E6C20::Of(a.c[0], b.c[0], t);
-        r.c[1] = Lerp_1E6C20::Of(a.c[1], b.c[1], t);
-        r.c[2] = Lerp_1E6C20::Of(a.c[2], b.c[2], t);
-        r.c[3] = Lerp_1E6C20::Of(a.c[3], b.c[3], t);
-        c = r;
-    }
-    func_00161458(buf, *(u32*)&c);
-    func_001613C0(buf, 0x44, 1, 4);
-    f32 x0 = self->f21C + *(f32*)((u8*)self + 0xC4C);
-    f32 y0 = self->f220 + 62.7f;
-    f32 xe = self->f21C + *(f32*)((u8*)self + 0xC50);
-    s32 first, last;
-    func_001E6268(self, &first, &last);
-    Elem_1E6C20* e = &self->elems[first];
-    f32 len = *(f32*)((u8*)self + 0xC54);
-    f32 xa = x0 + e->f0 * 62.7f;
-    f32 xb = x0 + (len + 62.7f) * e->f0;
-    f32 ya = y0 + e->f8 * 62.7f;
-    f32 yb = ya - len;
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
-    for (s32 i = first; i < last; i++) {
-        e = &self->elems[i];
-        xa = x0 + e->f0 * 62.7f;
-        ya = y0 + e->f8 * 62.7f;
-        xb = x0 + (*(f32*)((u8*)self + 0xC54) + 62.7f) * e->f0;
-        yb = y0 + (*(f32*)((u8*)self + 0xC54) + 62.7f) * e->f8;
-        func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-        func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
-    }
-    xa = x0 + e->f4 * 62.7f;
-    ya = y0 + e->fC * 62.7f;
-    yb = ya + *(f32*)((u8*)self + 0xC54);
-    xb = x0 + (*(f32*)((u8*)self + 0xC54) + 62.7f) * e->f4;
-    func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
-}
-
-s32 D_00275B28[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };
-f32 D_00275B58[2] = { 500.0f, 2500.0f };
+// size: func_0014ABD0 builds 4 embedded objects with this vtable (D_00218330) at stride 0x260
+Obj_26EC70 D_0026EC70 = {0};

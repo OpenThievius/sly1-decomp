@@ -31,3 +31,4 @@ dpadd	func_001FCD20	double add
 dptofp	func_001FD578	double to float
 __10Val_114F48	func_0011B008	constructor of the value func_00114F48 builds
 _$_10Val_114F48	func_0011B060	its destructor
+__builtin_delete	func_0018D778	operator delete

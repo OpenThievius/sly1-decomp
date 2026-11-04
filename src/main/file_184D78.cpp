@@ -1,0 +1,387 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+#include "common.h"
+#include "asm_func.h"
+
+#include "fpu.h"
+
+
+struct Obj_184D78 {
+    u8 pad0[0x2C8];
+    u64 bits;
+    s32 f2D0;
+    u8 pad1[0x304 - 0x2D4];
+    s32 f304;
+    s32 f308;
+};
+
+
+
+struct __attribute__((aligned(16))) Quad_00185358 { s32 a, b, c, d; };
+struct __attribute__((packed)) Pk8_00185358 { u64 v; };
+
+struct __attribute__((aligned(16))) Obj_00185358 {
+    u8 pad0[32]; s32 f20; u8 pad1[28]; f32 f40; s32 f44; s32 f48; u8 pad2[4];
+    Quad_00185358 q50; Pk8_00185358 p60; u8 pad3[8]; Quad_00185358 q70; Pk8_00185358 p80;
+};
+
+struct __attribute__((aligned(16))) Vec4_264770 { f32 x, y, z, w; };
+struct Vec2_2647A0 { f32 a, b; };
+
+void func_00121338(void* self);
+
+
+
+extern s32 D_00261F14;
+extern u8 D_00211E10[];
+void func_001F6C20(s32 unused);
+void func_00202A80(void* dma, void* addr);
+void func_00202C38(void* dma, s32 b, s32 c);
+
+
+
+extern u8 D_00261F18[];
+extern u8 D_00212110[];
+
+void func_001F6C20(s32 a);
+void func_00202A80(void* a, void* b);
+void func_00202C38(void* a, s32 b, s32 c);
+
+struct Flags_185AC8 {
+    s32 flags;
+};
+
+
+
+struct VT_275710 { u8 pad[0x54]; void (*fn)(void* self, f32 x); };
+struct Obj_275710 { VT_275710* vt; };
+struct Cfg_275F80 { s32 a; s32 mode; };
+struct Flag_269A00 { s32 a; s32 on; };
+struct Tm_261858 { s32 a; s32 b; f32 dt; };
+
+extern Flag_269A00 D_00269A00;
+extern Cfg_275F80 D_00275F80;
+extern s32 D_00275AF0;
+extern u8 D_00262C70[];
+extern u8 D_00275BC0[];
+extern Tm_261858 D_00261858;
+extern u8 D_00264A40[];
+extern Obj_275710* D_00275710;
+extern void* D_00261990;
+extern s32 D_002622CC;
+
+void func_001FAE18(void);
+void func_00185B38(void);
+void func_0015F210(s32 flag);
+void func_0018F148(void* p);
+void func_001E4EA8(void* p);
+void func_0016E238(void* p);
+void func_0016F2E0(void);
+void func_0018BDC8(void* p);
+void func_001E9108(void* p);
+void func_001607D0(f32 dt);
+void func_00144270(void* p);
+void func_0015E9F0(void);
+void func_00142F10(void* p);
+void func_0019D6C0(Obj_275710* o, void* a);
+void func_001E9668(void* p);
+void func_0019DC98(Obj_275710* o, void* a);
+void func_001E9648(void* p);
+void func_0015EC68(void);
+
+
+
+struct Frame_185B38 { s32 w[28]; };
+typedef void (*Fn_185B38)(void);
+
+// An entry of a table of functions defined at the end of this file.
+typedef void (*Fn_Table)();
+
+s32 func_00193210(void* a, void* b, void* c, void* d, void* e);
+void func_00191E70(s32 value);
+void func_00193270(void* p);
+void func_00193288(void* self, s32 value);
+void func_00193300(void* p);
+void func_00191EB0(s32 value);
+
+
+
+struct Obj_185468 {
+    u8 pad_00[0x1C];
+    s32 f1C;
+    u8 pad_20[0x4];
+    s32 f24;
+};
+
+s32 func_001925F0(void);
+
+
+
+struct __attribute__((aligned(16))) Quad_001853F0 { s32 w[4]; };
+struct Node_001853F0 {
+    u8 pad0[0x1C];
+    s32 f1C;
+    u8 pad1[0x04];
+    void* p24;
+    u8 pad2[0x08];
+    Quad_001853F0 q30;
+};
+
+extern Quad_001853F0 D_00248D30;
+
+
+
+void func_00140B60(void* buf, const u8* name, s32 n);
+void func_001F7BE8(s32 a);
+s32 func_00203548(s32 a);
+s32 func_00140968();
+void func_001409A8();
+s32 func_001F8BF8();
+s32 func_001F9C50(void* buf);
+s32 func_001F9C18();
+s32 func_001F9820();
+s32 func_00203828(s32 a);
+s32 func_00140D68(s32 a);
+s32 func_001F9A90(void* buf, s32 a, s32 b);
+
+s32 func_00184D78(Obj_184D78** a, Obj_184D78** b);
+void func_00185358(Obj_00185358* self);
+void func_001853F0(Node_001853F0* self, void* obj, Quad_001853F0* src);
+s32 func_00185468(Obj_185468* a0);
+void func_00185758(s32 a, s32 b);
+void func_001858F8();
+void func_00185A58(void);
+void func_00185AC8();
+void func_00185B38(void);
+
+void func_0012B868();
+void func_00139C38();
+void func_00140790();
+void func_001409D8();
+void func_0011E560();
+void func_001430C8();
+void func_00143140();
+void func_00152810();
+void func_0015C178();
+void func_0015E810();
+void func_00160070();
+void func_001688B8();
+void func_00169C58();
+void func_0016E0B8();
+void func_0016F588();
+void func_0017FD48();
+void func_0018B580();
+void func_0018D430();
+void func_0018E5E8();
+void func_00191EC0();
+void func_0019DF48();
+void func_001A9C68();
+void func_001BF130();
+void func_001DFD48();
+void func_001E2398();
+void func_001E9088();
+
+struct Ent_264670 { void* f0; s32 f4; s32 f8; s16 fC; s16 fE; };
+
+s32 D_00264260 = 0;
+s32 D_00264264 = 0;
+void* D_00264268[256] = {0};
+s32 D_00264668 = 0;
+Ent_264670 D_00264670[16] = {};
+Vec4_264770 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
+Vec4_264770 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
+Vec4_264770 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
+Vec2_2647A0 D_002647A0 = { -1.0f, 1.0f };
+const u8* D_002647A8[6] = {
+    (const u8*)"sio2man.irx", (const u8*)"padman.irx", (const u8*)"mcman.irx",
+    (const u8*)"mcserv.irx", (const u8*)"libsd.irx", (const u8*)"989snd.irx",
+};
+Fn_Table D_002647C0[29] = { (Fn_Table)func_0012B868, (Fn_Table)func_0018D430, (Fn_Table)func_00152810, (Fn_Table)func_001E2398, (Fn_Table)func_001688B8, (Fn_Table)func_001858F8, (Fn_Table)func_001409D8, (Fn_Table)func_00140790, (Fn_Table)func_0016E0B8, (Fn_Table)func_0016F588, (Fn_Table)func_0015E810, (Fn_Table)func_0015C178, (Fn_Table)func_0011E560, (Fn_Table)func_00143140, (Fn_Table)func_001BF130, (Fn_Table)func_001A9C68, (Fn_Table)func_001E9088, (Fn_Table)func_001DFD48, (Fn_Table)func_0017FD48, (Fn_Table)func_00191EC0, (Fn_Table)func_00169C58, (Fn_Table)func_00185A58, (Fn_Table)func_00185AC8, (Fn_Table)func_00139C38, (Fn_Table)func_0019DF48, (Fn_Table)func_001430C8, (Fn_Table)func_0018B580, (Fn_Table)func_00160070, (Fn_Table)func_0018E5E8 };
+s32 D_00264834;
+s32 D_00264838;
+
+s32 func_00184D78(Obj_184D78** a, Obj_184D78** b)
+{
+    Obj_184D78* x = *a;
+    Obj_184D78* y = *b;
+    s32 d;
+
+    d = x->f304 - y->f304;
+    if (d != 0) {
+        return d;
+    }
+    d = x->f308 - y->f308;
+    if (d != 0) {
+        return d;
+    }
+    d = ((s32)(x->bits >> 38) & 1) - ((s32)(y->bits >> 38) & 1);
+    if (d != 0) {
+        return d;
+    }
+    return x->f2D0 - y->f2D0;
+}
+
+INCLUDE_ASM(func_00184DE8);
+
+INCLUDE_ASM(func_00185150);
+
+void func_00185358(Obj_00185358* self)
+{
+    func_00121338(self);
+    self->f20 = -1;
+    self->f40 = 800.0f;
+    *(Quad_00185358*)&self->q50 = *(Quad_00185358*)&D_00264770;
+    self->p60 = *(Pk8_00185358*)&D_00264780;
+    self->q70 = *(Quad_00185358*)&D_00264790;
+    self->p80 = *(Pk8_00185358*)&D_002647A0;
+    self->f44 = 1;
+    self->f48 = -1;
+}
+
+void func_001853F0(Node_001853F0* self, void* obj, Quad_001853F0* src)
+{
+    if (obj == 0 || obj == (void*)func_001925F0()) {
+        self->f1C = 0;
+        self->p24 = 0;
+        self->q30 = D_00248D30;
+    } else {
+        self->p24 = obj;
+        self->f1C = 1;
+        self->q30 = *src;
+    }
+}
+
+s32 func_00185468(Obj_185468* a0) {
+    if (a0->f1C == 0) {
+        return func_001925F0();
+    }
+    return a0->f24;
+}
+
+INCLUDE_ASM(func_00185498);
+
+INCLUDE_ASM(func_00185538);
+
+void func_00185758(s32 a, s32 b)
+{
+    func_001FAE18();
+    D_00264834 = a;
+    D_00264838 = b;
+    func_00185B38();
+    while (1) {
+        if (D_00269A00.on != 0 && D_00275F80.mode != 1) {
+            func_0015F210(1);
+            func_0018F148(&D_00269A00);
+        }
+        if (D_00275AF0 != 0) {
+            func_0015F210(1);
+            func_001E4EA8(&D_00275AF0);
+        }
+        if (D_00269A00.on != 0 && D_00275F80.mode != 1) {
+            func_0015F210(1);
+            func_0018F148(&D_00269A00);
+        }
+        func_0016E238(D_00262C70);
+        func_0016F2E0();
+        func_0018BDC8(D_00264A40);
+        func_001E9108(D_00275BC0);
+        func_001607D0(D_00261858.dt);
+        if (D_00275710 != 0) {
+            func_00144270(D_00261990);
+            func_0015E9F0();
+            func_00142F10(&D_00261858);
+            if (D_00275710->vt->fn != 0)
+                D_00275710->vt->fn(D_00275710, D_00261858.dt);
+            func_0019D6C0(D_00275710, D_00261990);
+            func_001E9668(D_00275BC0);
+            func_0019DC98(D_00275710, D_00261990);
+            func_001E9648(D_00275BC0);
+            func_0015EC68();
+        }
+        D_002622CC++;
+    }
+}
+
+void func_001858F8()
+{
+    u8 buf[0x100];
+    func_00140B60(buf, (const u8*)"ioprp243.img", 1);
+    func_001F7BE8(0);
+    func_00203548(0);
+    if (func_00140968() == 0) {
+        for (;;) {
+        }
+    }
+    func_001409A8();
+    func_001F8BF8();
+    while (func_001F9C50(buf) == 0) {
+    }
+    while (func_001F9C18() == 0) {
+    }
+    func_001F7BE8(0);
+    func_001F9820();
+    func_00203548(0);
+    if (func_00140968() == 0) {
+        for (;;) {
+        }
+    }
+    func_001409A8();
+    func_001F8BF8();
+    func_00203828(0);
+    func_00140D68(1);
+    for (u32 i = 0; i < 6; i++) {
+        func_00140B60(buf, D_002647A8[i], 1);
+        while (func_001F9A90(buf, 0, 0) < 0) {
+        }
+    }
+}
+
+void func_00185A58(void)
+{
+    s32* p = (s32*)D_00261F14;
+    *p |= 0x40;
+    func_001F6C20(0);
+    func_00202A80((void*)D_00261F14, D_00211E10);
+    func_00202C38((void*)D_00261F14, 0, 0);
+    s32* q = (s32*)D_00261F14;
+    *q &= ~0x40;
+}
+
+void func_00185AC8()
+{
+    Flags_185AC8* p = *(Flags_185AC8**)D_00261F18;
+    p->flags |= 0x40;
+    func_001F6C20(0);
+    func_00202A80(*(void**)D_00261F18, D_00212110);
+    func_00202C38(*(void**)D_00261F18, 0, 0);
+    (*(Flags_185AC8**)D_00261F18)->flags &= ~0x40;
+}
+
+void func_00185B38(void)
+{
+    Frame_185B38 fr;
+    u32 i;
+    s32 idx;
+    Fn_185B38* tbl;
+
+    fr.w[12] = 0x7F0000;
+    fr.w[16] = 0x3F3F3F;
+    fr.w[20] = 0x3F3F;
+    fr.w[24] = 0x3F;
+    (void)func_00193210(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
+    idx = 0x1A;
+    func_00191E70(1);
+    func_00193270(&fr);
+    tbl = (Fn_185B38*)((u8*)D_002647C0);
+    i = 0;
+    do {
+        if ((s32)i >= 3) {
+            func_00193288(&fr, idx);
+        }
+        tbl[i]();
+        i++;
+        idx--;
+    } while (i < 0x1D);
+    func_00193288(&fr, 0);
+    func_00193300(&fr);
+    func_00191EB0(1);
+}

@@ -152,6 +152,7 @@ def placements(objects):
                     if addr in {d[0] for d in data}:
                         raise LayoutError("two definitions of the global %s" % m.group(1))
                     data.append((addr, sec["size"], rel, sec["name"], m.group(1)))
+                    ALIGNS[addr] = sec["align"]
                     continue
                 raise LayoutError("%s has %s data (%d bytes): a global defined in C is named "
                                   "D_XXXXXXXX, at its retail address, and lives in .data (AGENTS.md). "
@@ -303,6 +304,10 @@ def aligned(lines):
     return bool(lines) and bool(ALIGN.match(lines[0]))
 
 
+# The alignment of each C global's section, by address (filled by placements()).
+ALIGNS = {}
+
+
 def data_plan(chunks, data_placed):
     """The order of .data: [("run", [(label, address, lines)]) or ("c", placement)], and the labels
     a C global covers. A global starts at a label and ends where a later one starts."""
@@ -321,10 +326,15 @@ def data_plan(chunks, data_placed):
             end = addr + d[1]
             later = [a for _, a, _ in chunks[i + 1:] if a >= end]
             # A section can end in the padding before the next object's (zeros): a whole file's,
-            # or a global's ending on a word when the next label is 8-aligned, as GCC aligns an
-            # aggregate of 8 bytes or more.
-            gap = later[0] - end if later else 8
-            if gap >= 8 or (gap and d[3].count(".") > 1 and (end % 4 or later[0] % 8)):
+            # up to the next label's alignment (at most 16, the linker aligning the next file's
+            # section), or a global's ending on a word when the next label is 8-aligned, as GCC
+            # aligns an aggregate of 8 bytes or more, or ending in the padding before a C global
+            # whose type is aligned further (a 16-byte vector).
+            gap = later[0] - end if later else 16
+            whole = d[3].count(".") <= 1
+            padded = later and later[0] in at and not end % 4 and gap < ALIGNS.get(later[0], 1)
+            if not padded and (gap >= (min(16, later[0] & -later[0]) if whole and later else 8) or
+                               (gap and not whole and (end % 4 or later[0] % 8))):
                 raise LayoutError("%s (%d bytes) does not end where a label of .data starts"
                                   % (d[4], d[1]))
             end = later[0]

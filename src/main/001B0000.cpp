@@ -9,11 +9,7 @@ struct Obj_1B04A0 {
 
 void func_001AECB0(Obj_1B04A0* o);
 
-void func_001B04A0(Obj_1B04A0* o)
-{
-    func_001AECB0(o);
-    o->f5D8 = -1;
-}
+
 
 typedef void (*VFn_1B0F70)(void* self, s32 arg);
 
@@ -24,15 +20,7 @@ struct Obj_1B0F70 {
     s32 f558;
 };
 
-void func_001B0F70(Obj_1B0F70* o)
-{
-    if (o->f554 == 0) {
-        o->f554 = 1;
-        if (o->f558 != 8) {
-            o->vtbl[0x144 / 4](o, 3);
-        }
-    }
-}
+
 
 struct Obj_1B1DA8 {
     s32 pad_0;
@@ -264,18 +252,7 @@ struct Obj_1B11A0 {
     Item_1B11A0* f610;
 };
 
-void func_001B11A0(Obj_1B11A0* self)
-{
-    func_00124A48(self);
-    for (s32 i = 0; i < self->f27C; i++) {
-        Item_1B11A0* it = self->f280[i];
-        if (it->f08 == 1 && it->f14 != 0) {
-            self->f610 = it;
-            break;
-        }
-    }
-    self->vt->fn144(self, self->f560);
-}
+
 
 typedef void (*VFn_1B15D0)(void* self, s32 arg);
 
@@ -290,11 +267,7 @@ struct Obj_1B15D0 {
     s32 f554;
 };
 
-void func_001B15D0(Obj_1B15D0* self, s32 mode)
-{
-    self->f554 = mode;
-    self->vt->fn144(self, mode == 0 ? 1 : 5);
-}
+
 
 extern f32 D_0026185C;
 
@@ -321,20 +294,7 @@ struct Obj_1B1608 {
     s32 f5C0;
 };
 
-void func_001B1608(Obj_1B1608* self)
-{
-    if (self->f558 != 8) {
-        self->vt->fn144(self, self->f554 == 0 ? 3 : 7);
-    }
-    Rec_1B1608* r = self->f550;
-    if (r != 0) {
-        if (r->f550 == 1) {
-            if (__builtin_fabsf(D_0026185C - r->f554) < 0.2f) {
-                self->f5C0 = r->f550;
-            }
-        }
-    }
-}
+
 
 extern s32 D_002626D0;
 extern u8 D_0027DC20[];
@@ -422,15 +382,7 @@ typedef void (*VFn_1B00E8)(void* self, s32 arg);
 
 struct Obj_1B00E8 { VFn_1B00E8* vtbl; u8 pad_4[0x554 - 4]; s32 f554; s32 f558; };
 
-void func_001B00E8(Obj_1B00E8* self, s32 flag)
-{
-    s32 m = 5;
-    self->f554 = flag;
-    if (!flag) {
-        m = 1;
-    }
-    self->vtbl[0x144 / 4](self, m);
-}
+
 
 struct Obj_1B1158 {
     u8 pad_0[0x5D0];
@@ -448,17 +400,7 @@ struct Obj_1B1158 {
 
 void func_001AECB0(void* self);
 
-void func_001B1158(Obj_1B1158* self)
-{
-    func_001AECB0(self);
-    self->f5D0 = -1;
-    self->f5D4 = -1;
-    self->f5E0 = -1;
-    self->f5E4 = -1;
-    self->f5F0 = -1;
-    self->f5F4 = -1;
-    self->f600 = -1;
-}
+
 
 struct Entry_1B2988 { u8 pad[0x18]; u64 tail; };
 struct Cell_1B2988 { u8 pad[0x10]; u64 value; };
@@ -484,25 +426,14 @@ struct Obj_1B0160 {
     s32 f558;
 };
 
-void func_001B0160(Obj_1B0160* self)
-{
-    if (self->f558 < 3) {
-        if (self->f558 >= 0) {
-            self->vtbl[0x144 / 4](self, 3);
-        }
-    }
-    self->f554 = 1;
-}
+
 
 struct Obj_1B0470 {
     u8 pad_0[0xB08];
     f32 fB08;
 };
 
-void func_001B0470(Obj_1B0470* self, f32 x)
-{
-    self->fB08 = -1.0f / x;
-}
+
 
 struct Obj_1B1FB0 {
     u8 pad_0[0x40];
@@ -535,9 +466,9 @@ void func_001B1FE0(Obj_1B1FE0* o, f32 v)
 }
 
 struct S_1B0488 { u8 pad[0xB08]; f32 value; };
-void func_001B0488(S_1B0488* p, f32 x) { p->value = 1.0f / x; }
 
-s32 func_001B0BD8() { return 1; }
+
+
 
 typedef void (*VFn_1B0EA8)(void* self, s32 arg);
 
@@ -547,15 +478,7 @@ struct Obj_1B0EA8 {
     s32 f554;
 };
 
-void func_001B0EA8(Obj_1B0EA8* self, s32 value)
-{
-    s32 m = 5;
-    self->f554 = value;
-    if (!value) {
-        m = 1;
-    }
-    self->vtbl[0x144 / 4](self, m);
-}
+
 
 typedef void (*Fn_1B2840)(void* self, void* other);
 
@@ -611,25 +534,7 @@ struct Obj_1B04D0 {
     s32 x5D4;
 };
 
-void func_001B04D0(Obj_1B04D0* self)
-{
-    func_00124A48(self);
-    func_00124DF8(self, 2, D_002744D8);
-    if (self->x5D0 == 0) {
-        self->x5D0 = self;
-    }
-    if (self->x5D4 == 0) {
-        self->x5D4 = *(s32*)(self->p14 + 0x1D14);
-    }
-    if (self->p200 != 0) {
-        self->p200->x44 = 0;
-    }
-    u64 m = 0x8000;
-    m <<= 28;
-    self->f538 |= m;
-    func_001B9AE0(self, 3, 0, 3, 0);
-    self->vtbl[81](self, self->x560);
-}
+
 
 typedef void (*VFn_1B0EE0)(void* self, s32 arg);
 
@@ -656,20 +561,7 @@ struct Obj_1B0EE0 {
 
 extern f32 D_0026185C;
 
-void func_001B0EE0(Obj_1B0EE0* self)
-{
-    if (self->f558 != 8) {
-        self->vt->fn144(self, self->f554 == 0 ? 3 : 7);
-    }
-    Rec_1B0EE0* r = self->f550;
-    if (r != 0) {
-        if (r->f550 == 1) {
-            if (__builtin_fabsf(D_0026185C - r->f554) < 0.2f) {
-                self->f5C0 = r->f550;
-            }
-        }
-    }
-}
+
 
 struct Dma_1B2640 {
     u8 pad0[0xC];
@@ -774,17 +666,7 @@ typedef void (*VFn_1B0120)(void* self, s32 arg);
 
 struct Obj_1B0120 { VFn_1B0120* vtbl; u8 pad_4[0x554 - 4]; s32 f554; s32 f558; };
 
-void func_001B0120(Obj_1B0120* self)
-{
-    if (self->f558 == 8) {
-        return;
-    }
-    s32 m = 7;
-    if (!self->f554) {
-        m = 3;
-    }
-    self->vtbl[0x144 / 4](self, m);
-}
+
 
 struct Obj_1B2090 {
     u8 kind_0;
@@ -860,14 +742,7 @@ struct Obj_1B0BE0 {
 s32 func_001925F0(void);
 s32 func_001AEE50(void* self, void* other);
 
-s32 func_001B0BE0(Obj_1B0BE0* self, Obj_1B0BE0* other)
-{
-    if ((other->f538 & (1UL << 43)) != 0 || other->f50 == func_001925F0() || other->f50 == self->f50 || func_001AEE50(self, other) != 0) {
-        return 0;
-    }
-    s64 t = (s64)other->f2CC;
-    return ((s32)t ^ 1) & 1;
-}
+
 
 // Matched by a switch on f558 (cases 1 and 5).
 
@@ -889,21 +764,7 @@ struct Obj_1B1698 {
     s32 f618;
 };
 
-void func_001B1698(Obj_1B1698* self)
-{
-    self->f554 = 1;
-    if (self->f608 < 0.0f) {
-        self->f618 = 0;
-        switch (self->f558) {
-        case 1:
-            self->vt->fn144(self, 3);
-            break;
-        case 5:
-            self->vt->fn144(self, 7);
-            break;
-        }
-    }
-}
+
 
 struct Obj_001B2010 {
     u8 pad0[4];
@@ -1009,37 +870,7 @@ void func_001BF788(s32 a, s32 n);
 void func_001AECE8(Obj_1B01B0* self, s32 s);
 void func_00155F90(s32 p);
 
-void func_001B01B0(Obj_1B01B0* self, s32 s)
-{
-    u8* b = (u8*)self;
-    s32 st = self->state;
-    if (st == s) return;
-    if (st == -1 || st == 8) {
-        f32 z = 0.0f;
-        f32 a = 1000.0f, c = 100.0f, d = 0.4f;
-        (void)func_001BFCD8((Obj_1B01B0*)0x1A, (s32)(b + 0x5C4), self, 0, a, c, d, z, z, 0, 0);
-    }
-    switch (s) {
-    case 3:
-    case 7:
-        for (s32 i = 0; i < *(s32*)(b + 0x5D4); i++) {
-            Ent_1B01B0* e = (Ent_1B01B0*)(b + (i * 0x50 + 0x5E0));
-            for (s32 j = 0; j < e->count; j++) func_00155F90(e->e[j][0]);
-        }
-        break;
-    case 8: {
-        f32 v;
-        if (self->f554 == 0) v = *(f32*)(b + 0x5BC); else v = *(f32*)(b + 0xAEC);
-        func_001BF788(*(s32*)(b + 0x5C4), (s32)v * 1000);
-        self->vt->slot1C(self);
-        D_002744D0 = 1;
-        break;
-    }
-    default:
-        break;
-    }
-    func_001AECE8(self, s);
-}
+
 
 struct Self_1B0FC0 {
     u8 pad0[0x558];
@@ -1050,29 +881,7 @@ struct Self_1B0FC0 {
 void func_001B1070(Self_1B0FC0* self, s32 v);
 void func_001AECE8(Self_1B0FC0* self, s32 s);
 
-void func_001B0FC0(Self_1B0FC0* self, s32 s)
-{
-    if (self->state != s) {
-        switch (self->state) {
-        case -1: case 0: case 1: case 2: case 3: case 4: case 5: case 7:
-            break;
-        case 6:
-            func_001B1070(self, -1);
-            break;
-        case 8:
-            self->f5C0 = 0;
-            break;
-        }
-        switch (s) {
-        case 6:
-            func_001B1070(self, 0);
-            break;
-        case 0: case 1: case 2: case 3: case 4: case 5: case 7: case 8:
-            break;
-        }
-        func_001AECE8(self, s);
-    }
-}
+
 
 struct Obj_1B1710 {
     u8 pad0[0x558];
@@ -1091,42 +900,7 @@ void func_001BF788(Tgt_1B1710* t, s32 n);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_001AECE8(Obj_1B1710* self, s32 n);
 
-void func_001B1710(Obj_1B1710* self, s32 n)
-{
-    if (self->state == n) return;
-    switch (self->state) {
-    case 1:
-    case 5:
-        func_001BF788((Tgt_1B1710*)self->f5C4, 0);
-        self->f614 = self->f55C;
-        break;
-    case 8:
-        self->f5C0 = 0;
-        self->f618 = 0;
-        break;
-    }
-    switch (n) {
-    case 1:
-        func_001BFCD8(15, &self->f5C4, (s32)self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        break;
-    case 2:
-    case 6:
-        self->f618 = 1;
-        break;
-    case 3:
-    case 4:
-    case 7:
-        break;
-    case 5:
-        func_001BFCD8(27, &self->f5C4, (s32)self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        break;
-    }
-    func_001AECE8(self, n);
-    if (self->f618 != 0 && (n == 2 || n == 6)) {
-        self->state = (n == 2) ? 1 : 5;
-        self->f55C = self->f614;
-    }
-}
+
 
 struct Obj_001B0578;
 struct VT_001B0578 {
@@ -1157,76 +931,7 @@ void func_001AEF68(Obj_001B0578* self);
 void func_001B1070(Obj_001B0578* self, s32 n);
 void func_001D7098(void* buf, s32 n, Obj_001B0578* self);
 
-void func_001B0578(Obj_001B0578* self) {
-    s32 st;
-    s32 s1;
-    func_001AEFA0(self);
-    st = self->i558;
-    switch (self->i558) {
-    case 0:
-        if (self->f5B8 < D_0026185C - self->f55C) st = 1;
-        break;
-    case 2:
-        st = 3;
-        break;
-    case 3:
-        if (self->f5BC < D_0026185C - self->f55C) st = 8;
-        break;
-    case 4:
-        if (self->f5B8 < D_0026185C - self->f55C) st = 5;
-        break;
-    case 1:
-    case 5:
-        if (self->vt->f130) {
-            self->vt->f130(self, &st);
-        }
-        goto tail;
-    case 6:
-        s1 = self->i5D8;
-        switch (s1) {
-        case 0:
-            if (D_00262E10 && D_00262E10->vt->f13C(D_00262E10, 2)) {
-                s1 = 2;
-            } else if (self->f5E0 < D_0026185C - self->f5DC) {
-                if (D_00262E10) {
-                    u8 buf[16];
-                    func_001D7098(buf, 2, self);
-                    if (D_00262E10->vt->f140(D_00262E10, buf)) {
-                        s1 = 1;
-                        func_001AEF68(self);
-                    }
-                } else {
-                    s1 = 1;
-                }
-            }
-            break;
-        case 1:
-            if (self->f5E4 < D_0026185C - self->f5DC) s1 = 2;
-            break;
-        case 2:
-            if (self->f5E8 < D_0026185C - self->f5DC) {
-                s1 = -1;
-                st = 5;
-            }
-            break;
-        }
-        func_001B1070(self, s1);
-        goto tail;
-    case 7:
-        if (self->f5BC < D_0026185C - self->f55C) st = 8;
-        break;
-    case 8:
-        if (self->i5C0 == 0) {
-            switch (self->i554) {
-            case 0: st = 0; break;
-            case 1: st = 4; break;
-            }
-        }
-        goto tail;
-    }
-tail:
-    self->vt->f144(self, st);
-}
+
 
 struct Obj_1B1238;
 struct VT_1B1238 {
@@ -1254,73 +959,7 @@ extern f32 D_0026185C;
 void func_001AEFA0(Obj_1B1238* self);
 void func_001B1898(Obj_1B1238* self);
 
-void func_001B1238(Obj_1B1238* self)
-{
-    s32 state;
 
-    func_001AEFA0(self);
-    state = self->f558;
-    switch (state) {
-    case 0:
-        if (self->f5b8 < D_0026185C - self->f55c) {
-            state = 1;
-        }
-        break;
-    case 1:
-        if (0.0f <= self->f608) {
-            if (self->f608 < D_0026185C - self->f55c) {
-                state = 3;
-                break;
-            }
-        }
-        if (self->vt->f130 != 0) {
-            self->vt->f130(self, &state);
-        }
-        break;
-    case 3:
-        if (self->f5bc < D_0026185C - self->f55c) {
-            state = 8;
-        }
-        break;
-    case 4:
-        if (self->f5b8 < D_0026185C - self->f55c) {
-            state = 5;
-        }
-        break;
-    case 5:
-        if (0.0f <= self->f608) {
-            if (self->f608 < D_0026185C - self->f55c) {
-                state = 7;
-                break;
-            }
-        }
-        if (self->vt->f130 != 0) {
-            self->vt->f130(self, &state);
-        }
-        break;
-    case 7:
-        if (self->f5bc < D_0026185C - self->f55c) {
-            state = 8;
-        }
-        break;
-    case 8:
-        if (self->f5c0 == 0) {
-            if (self->f60c < D_0026185C - self->f55c) {
-                switch (self->f554) {
-                case 0:
-                    state = 0;
-                    break;
-                case 1:
-                    state = 4;
-                    break;
-                }
-            }
-        }
-        break;
-    }
-    self->vt->f144(self, state);
-    func_001B1898(self);
-}
 
 // NEAR: float regs: case 0 wants t=$f4 zero=$f2 m=$f3; ours t=$f3 zero=$f4 m=$f2 (8 lines differ); delay-slot load of m fixed via local m
 
@@ -1346,57 +985,7 @@ struct Obj_1B0360 {
 
 extern f32 D_0026185C;
 
-f32 func_001B0360(Obj_1B0360* o, Cfg_1B0360* c)
-{
-    f32 s = c->f4;
-    f32 r;
-    f32 m;
-    f32 t;
-    switch (o->mode) {
-    case 0:
-    case 4: {
-        f32 t0 = o->f5B8;
-        if (t0 == 0.0f) {
-            r = o->fB04;
-        } else {
-            f32 q = (D_0026185C - o->f55C) / t0;
-            m = o->fB04;
-            if (q < 0.0f)
-                r = 0.0f;
-            else if (m < q)
-                r = m;
-            else
-                r = q;
-        }
-        break;
-    }
-    case 1:
-    case 2:
-    case 5:
-    case 6:
-        r = o->fB04;
-        break;
-    case 3:
-    case 7:
-        t = o->i554 == 0 ? o->f5BC : o->fAEC;
-        if (t == 0.0f) {
-            r = 0.0f;
-        } else {
-            f32 m = o->fB04;
-            r = 1.0f - (D_0026185C - o->f55C) / t;
-            if (r < 0.0f)
-                r = 0.0f;
-            else if (m < r)
-                r = m;
-        }
-        s = c->f8;
-        break;
-    case 8:
-        r = 0.0f;
-        break;
-    }
-    return s * r;
-}
+
 
 // EXACT (us)
 
@@ -1899,83 +1488,7 @@ struct Obj_001B1898 {
 extern f32 D_0026185C;
 void func_001B46E0(s32 a, s32 frame);
 
-void func_001B1898(Obj_001B1898* self)
-{
-    s32 first, last, mode, frame;
-    f32 duration, start;
 
-    switch (self->state) {
-    case 0:
-    case 4:
-    case 8:
-        first = self->animA.first;
-        last = self->animA.last;
-        duration = self->animA.duration;
-        mode = self->animA.mode;
-        start = self->startTime;
-        break;
-    case 1:
-        first = self->animB.first;
-        last = self->animB.last;
-        duration = self->animB.duration;
-        mode = self->animB.mode;
-        start = self->startTime;
-        break;
-    case 3:
-        frame = (s32)((D_0026185C - self->startTime) / (1.0f / self->blinkRate)) % 2;
-        if (frame != 0) {
-            first = self->animB.first;
-            last = self->animB.last;
-            duration = self->animB.duration;
-            mode = self->animB.mode;
-            start = self->blinkStart;
-        } else {
-            first = self->blinkFrame;
-            last = first;
-        }
-        break;
-    case 7:
-        frame = (s32)((D_0026185C - self->startTime) / (1.0f / self->blinkRate)) % 2;
-        if (frame != 0) {
-            first = self->animC.first;
-            last = self->animC.last;
-            duration = self->animC.duration;
-            mode = self->animC.mode;
-            start = self->blinkStart;
-        } else {
-            first = self->blinkFrame;
-            last = first;
-        }
-        break;
-    case 5:
-        first = self->animC.first;
-        last = self->animC.last;
-        duration = self->animC.duration;
-        mode = self->animC.mode;
-        start = self->startTime;
-        break;
-    }
-
-    s32 count = last - first + 1;
-    if (count == 1 || duration <= 0.0f) {
-        frame = first;
-    } else {
-        switch (mode) {
-        case 0:
-            frame = (s32)((D_0026185C - start) / (duration / (f32)count)) % count;
-            break;
-        case 1: {
-            s32 period = count * 2 - 2;
-            frame = (s32)((D_0026185C - start) / (duration / (f32)period)) % period;
-            if (frame >= count)
-                frame -= (frame - count + 1) * 2;
-            break;
-        }
-        }
-        frame += first;
-    }
-    func_001B46E0(self->target + 0x10, frame);
-}
 
 struct Node_1B1070 {
     u8 pad0[0x44];
@@ -2000,42 +1513,5 @@ struct Clk_1B1070 { f32 t; };
 void func_001BF788(Snd_1B1070* p, s32 n);
 void func_001BFCD8(Kind_1B1070 a0, Snd_1B1070** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_001B1070(Obj_1B1070* self, s32 arg)
-{
-    if (self->f5D8 == arg) return;
-    switch (self->f5D8) {
-    case -1:
-        break;
-    case 0:
-        break;
-    case 1:
-        func_001BF788(self->f5C4, 0);
-        break;
-    case 2:
-        break;
-    }
-    switch (arg) {
-    case -1:
-        break;
-    case 0:
-        if (self->f200 != 0) {
-            self->f200->f44 = 4;
-        }
-        break;
-    case 1:
-        func_001BFCD8(KIND_1B1070_1B, &self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        break;
-    case 2:
-        if (self->f200 != 0) {
-            self->f200->f44 = 0;
-        }
-        break;
-    }
-    self->f5D8 = arg;
-    self->f5DC = (*(Clk_1B1070*)&D_0026185C).t;
-}
 
-Item_2744D8 D_002744D8[2] = {
-    { 2, 0x28C, 0x5D0 },
-    { 2, 0x28D, 0x5D4 },
-};
+

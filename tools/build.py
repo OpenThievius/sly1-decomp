@@ -26,6 +26,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import asm_func  # noqa: E402
+import classify_asm  # noqa: E402
 import versions  # noqa: E402
 
 ROOT = versions.ROOT
@@ -85,12 +87,30 @@ def build_run(src):
         run([tool("objcopy"), "--set-section-alignment", "%s=%d" % (section, align), str(out)])
 
 
+def included_asm():
+    """The functions the whole files (config/us/files.tsv) include with INCLUDE_ASM."""
+    names = set()
+    for line in (ROOT / "config" / "us" / "files.tsv").read_text().splitlines()[1:]:
+        names |= set(asm_func.included((ROOT / line.split("\t")[0]).read_text()))
+    return names
+
+
 def write_c_data(key, data_placed):
     """config/<key>/c_data.tsv: every global a C file defines, in a build that printed MATCH
     (tools/progress.py counts their bytes as matched data)."""
     rows = ["name\taddress\tsize\tsection\tsource"]
+    listings = {}
     for addr, size, obj, section, name in sorted(data_placed):
         source = Path(obj).relative_to(Path("build") / key).with_suffix(".cpp").as_posix()
+        if section in (".rodata", ".data"):
+            # A whole file's section: the labels it includes from the disassembly are not C.
+            text = (ROOT / source).read_text()
+            included = asm_func.included_rodata(text) if section == ".rodata" else asm_func.included_data(text)
+            if included:
+                name_ = "rodata.rodata.s" if section == ".rodata" else "data.data.s"
+                if name_ not in listings:
+                    listings[name_] = (ROOT / "asm" / key / "data" / name_).read_text()
+                size -= sum(asm_func.label_size(listings[name_], label) for label in included)
         rows.append("%s\t%08X\t%d\t%s\t%s" % (name, addr, size, section, source))
     path = ROOT / "config" / key / "c_data.tsv"
     text = "\n".join(rows) + "\n"
@@ -152,7 +172,11 @@ def main(argv=None):
     built = flat.read_bytes()
     sha1 = hashlib.sha1(built).hexdigest()
     rel = flat.relative_to(ROOT)
-    linked = (" with %d function%s from C" % (len(placed), "" if len(placed) == 1 else "s")) if placed else ""
+    # A whole file also holds the assembly functions inside its range (include/asm_func.h): the
+    # original assembly, and the functions not matched yet. They are placed with it, but not C.
+    asm = set(classify_asm.read_table()) | included_asm()
+    from_c = [p for p in placed if p[-1] not in asm]
+    linked = (" with %d function%s from C" % (len(from_c), "" if len(from_c) == 1 else "s")) if from_c else ""
     if data_placed:
         linked += " and %d global%s" % (len(data_placed), "" if len(data_placed) == 1 else "s")
     if sha1 == v["boot"]["sha1"]:

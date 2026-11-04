@@ -673,7 +673,7 @@ struct Pool_195958 {
 };
 
 extern Row_195958 D_00269D50[];
-extern Boot_195958 D_00264A40;
+Boot_195958 D_00264A40 = {};
 extern Sub_195958 D_0026F808;
 extern u8 D_00275BC0[];
 extern u8 D_00247AD0[];
@@ -1173,9 +1173,9 @@ extern Hud_1943E8 D_00274118;
 extern Obj_1943E8 D_0026EC70;
 extern f32 D_00261868;
 extern Pad_1943E8 D_00262C70;
-Ent_1943E8* D_0026998C = 0;
+extern Ent_1943E8* D_0026998C;
 struct Words6_264A58 { s32 v[6]; };
-Words6_264A58 D_00264A58 = { { 0, 0, 0, 0, 0, 0 } };
+extern Words6_264A58 D_00264A58;
 extern s32 D_00264A4C;
 extern u8 D_0026FF68[];
 f32 D_0026A22C = 5.0f;

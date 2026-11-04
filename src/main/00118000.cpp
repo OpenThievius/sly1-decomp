@@ -4,28 +4,14 @@
 // A count followed by that many values.
 struct IntList { s32 count; s32 items[1]; };
 
-void func_0011A338(IntList* list, int value)
-{
-    list->items[list->count++] = value;
-}
 
-void func_0011A6C0(IntList* list, int value)
-{
-    for (int i = 0; i < list->count; i++)
-        if (list->items[i] == value)
-            return;
-    list->items[list->count++] = value;
-}
+
+
 
 // A record that keeps a stack of values at 0x708.
 struct StackAt708 { u8 pad[0x708]; s32 count; s32 items[1]; };
 
-int func_0011A748(StackAt708* stack)
-{
-    if (stack->count > 0)
-        return stack->items[--stack->count];
-    return 0;
-}
+
 
 struct Vec_1188F0 { f32 x, y, z, w; };
 struct Src_1188F0 { s32 pad0; void* p4; };
@@ -37,20 +23,7 @@ void func_0011B060(void* self, s32 n);
 void func_0011B538(void* self, s32 k);
 void func_0011B018(void* dst, void* src);
 
-void* func_001188F0(void* ret, s32 unused, Src_1188F0* src)
-{
-    Vec_1188F0 t;
-    Vec_1188F0 u;
-    func_0011B008(&t);
-    void* s1 = src->p4;
-    func_0011B9A8(&u, (u8*)src + 8);
-    func_001566C8(s1, u.y);
-    func_0011B060(&u, 2);
-    func_0011B538(&t, 0x22);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
-    return ret;
-}
+
 
 struct __attribute__((aligned(16))) Quad_119A58 { s32 w[4]; };
 struct Node_119A58 { s32 pad[2]; Node_119A58* next; };
@@ -61,62 +34,24 @@ void func_0011B060(Quad_119A58* q, s32 mode);
 void func_0011B0A8(Quad_119A58* a, Quad_119A58* b);
 void func_0011A080(Quad_119A58* t, Node_119A58* n, s32 c);
 
-void* func_00119A58(void* out, Node_119A58* list, s32 c)
-{
-    Quad_119A58 q, t;
-    func_0011B008(&q);
-    Node_119A58* n = list;
-    do {
-        func_0011A080(&t, n, c);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
-        n = n->next;
-    } while (n);
-    func_0011B018(out, &q);
-    func_0011B060(&q, 2);
-    return out;
-}
+
 
 void* func_0011A4D8(void* a, s32 b, s32 c, void* d);
 void func_0011B0A8(void* a, void* b);
 
-s32 func_0011A498(void* a, s32 b, s32 c, void* d)
-{
-    void* r = func_0011A4D8(a, b, c, d);
-    if (r != 0) {
-        if (d)
-            func_0011B0A8(d, r);
-        return 1;
-    }
-    return 0;
-}
+
 
 void func_0018D778(void);
 
-void func_0011A680(void* p, s32 flag)
-{
-    if (flag & 1)
-        func_0018D778();
-}
+
 
 struct Stack_11A790 { u8 pad[0xF0C]; s32 count; s32 items[1]; };
 
-s32 func_0011A790(Stack_11A790* s)
-{
-    if (s->count > 0) {
-        s32 n = s->count - 1;
-        s->count = n;
-        return s->items[n];
-    }
-    return 0;
-}
+
 
 void func_0011ADF8(void* p, s32 mode);
 
-void func_0011AE58(void)
-{
-    func_0011ADF8(0, 0xFFFF);
-}
+
 
 extern u8 D_0025C2B0[];
 void* func_0011C240(void* p);
@@ -188,37 +123,18 @@ extern u8 D_0025C2D0[];
 
 void func_0011C2A0(void* p);
 
-void func_0011A800(void)
-{
-    func_0011C2A0(D_0025C250);
-    func_0011C2A0(D_0025C270);
-    func_0011C2A0(D_0025C290);
-    func_0011C2A0(D_0025C2B0);
-    func_0011C2A0(D_0025C2D0);
-}
+
 
 extern u8 D_00259F38[];
 
 void* func_0011A678(void* p);
 void func_0011A680(void* p, s32 n);
 
-void func_0011ADF8(s32 a, s32 b)
-{
-    if (b == 0xFFFF) {
-        if (a != 0) {
-            func_0011A678(D_00259F38);
-        } else {
-            func_0011A680(D_00259F38, 2);
-        }
-    }
-}
+
 
 void func_0011ADF8(s32 a, s32 b);
 
-void func_0011AE38(void)
-{
-    func_0011ADF8(1, 0xFFFF);
-}
+
 
 extern u8 D_0025C2D0[];
 
@@ -261,22 +177,7 @@ void func_0011B0A8(Quad_1180C0* a, Quad_1180C0* b);
 void func_0011B060(Quad_1180C0* q, int mode);
 void func_0011B018(void* dst, Quad_1180C0* src);
 
-void* func_001180C0(void* out, s32 unused, In_1180C0* in)
-{
-    Frame_1180C0 f;
-    f32 scale;
-    func_0011B008(&f.q);
-    if (in->kind == 0x14) scale = (f32)in->raw.i; else scale = in->raw.f;
-    func_0018D608();
-    func_001DC4D0(D_00275710, scale, 0, in->w4, 0, 0, &f.a, &f.b);
-    func_00117AF0(&f.t, f.a, f.b);
-    func_0011B0A8(&f.q, &f.t);
-    func_0011B060(&f.t, 2);
-    func_0018D6F0();
-    func_0011B018(out, &f.q);
-    func_0011B060(&f.q, 2);
-    return out;
-}
+
 
 struct Quad_1183B8 { s32 a, b, c, d; };
 struct Frame_1183B8 { Quad_1183B8 q; Quad_1183B8 t; };
@@ -287,17 +188,7 @@ void func_0011B0A8(Quad_1183B8* a, Quad_1183B8* b);
 void func_0011B060(Quad_1183B8* q, int mode);
 void func_0011B018(void* dst, Quad_1183B8* src);
 
-void* func_001183B8(void* out, s32 x, s32 y, s32 z)
-{
-    Frame_1183B8 f;
-    func_0011B008(&f.q);
-    func_00118198(&f.t, 0x71, x, y, z);
-    func_0011B0A8(&f.q, &f.t);
-    func_0011B060(&f.t, 2);
-    func_0011B018(out, &f.q);
-    func_0011B060(&f.q, 2);
-    return out;
-}
+
 
 struct Quad_118458 { s32 a, b, c, d; };
 struct Frame_118458 { Quad_118458 q; Quad_118458 t; };
@@ -308,17 +199,7 @@ void func_0011B0A8(Quad_118458* a, Quad_118458* b);
 void func_0011B060(Quad_118458* q, int mode);
 void func_0011B018(void* dst, Quad_118458* src);
 
-void* func_00118458(void* out, s32 x, s32 y, s32 z)
-{
-    Frame_118458 f;
-    func_0011B008(&f.q);
-    func_00118198(&f.t, 0x72, x, y, z);
-    func_0011B0A8(&f.q, &f.t);
-    func_0011B060(&f.t, 2);
-    func_0011B018(out, &f.q);
-    func_0011B060(&f.q, 2);
-    return out;
-}
+
 
 struct Blob_119FA0 { s32 w[4]; };
 struct Inner_119FA0 { u8 pad0[4]; s32 id; };
@@ -335,36 +216,11 @@ void func_001C13E8(void* dst, s32 id, u8* ctx);
 void* func_001C1390(s32 id, u8* ctx);
 void func_0011A338(void* list, void* value);
 
-void* func_00119FA0(void* self, Outer_119FA0* src, void* item)
-{
-    Blob_119FA0 a;
-    Blob_119FA0 b;
-    void* found;
-    s32 id;
 
-    func_0011B008(&a);
-    id = src->mid->inner->id;
-    found = func_001C1390(id, (u8*)D_00275710);
-    if (found == 0) {
-        func_001C13E8(&b, id, (u8*)D_00275710);
-        func_0011B0A8(&a, &b);
-        func_0011B060(&b, 2);
-        found = func_001C1390(id, (u8*)D_00275710);
-    }
-    func_0011A338(item, found);
-    func_0011B538(&a, 0x22);
-    func_0011B018(self, &a);
-    func_0011B060(&a, 2);
-    return self;
-}
 
 struct Slot_11A328 { s32 flag; s32 value; };
 
-void func_0011A328(Slot_11A328* slot, s32 value)
-{
-    slot->value = value;
-    slot->flag = 1;
-}
+
 
 struct Blob_11A358 { s32 w[4]; };
 struct Node_11A358 { s32 kind; u8 body[8]; Node_11A358* next; };
@@ -377,22 +233,7 @@ s32 func_0011B0A8(u8* a, void* b);
 void func_0011B538(Blob_11A358* b, s32 n);
 s32 func_0011C498(void);
 
-void* func_0011A358(void* self, Owner_11A358* owner, s32 kind, void* body)
-{
-    Blob_11A358 a;
-    Node_11A358* node;
 
-    func_0011B008(&a);
-    node = (Node_11A358*)func_0011C498();
-    node->kind = kind;
-    (void)func_0011B0A8(node->body, body);
-    node->next = owner->head;
-    owner->head = node;
-    func_0011B538(&a, 0x22);
-    func_0011B018(self, &a);
-    func_0011B060(&a, 2);
-    return self;
-}
 
 struct Blob_11A400 { s32 w[4]; };
 
@@ -403,34 +244,11 @@ void func_0011B0A8(void* a, void* b);
 void func_0011B538(Blob_11A400* b, s32 n);
 void* func_0011A4D8(void* table, void* key, s32 mode);
 
-void* func_0011A400(void* self, void* table, void* key, void* item)
-{
-    Blob_11A400 a;
-    void* found;
 
-    func_0011B008(&a);
-    found = func_0011A4D8(table, key, 1);
-    if (found != 0) {
-        (void)func_0011B0A8(found, item);
-    }
-    func_0011B538(&a, 0x22);
-    func_0011B018(self, &a);
-    func_0011B060(&a, 2);
-    return self;
-}
 
 struct Stack_11A7D8 { u8 pad[0x1310]; s32 count; s32 items[1]; };
 
-s32 func_0011A7D8(Stack_11A7D8* s)
-{
-    s32 n = s->count;
-    if (n > 0) {
-        n = n - 1;
-        s->count = n;
-        return s->items[n];
-    }
-    return 0;
-}
+
 
 struct Pair_11B0A8 { s32 a; s32 b; };
 
@@ -464,19 +282,7 @@ void func_0011B788(Quad_118608* q, void* b);
 void func_0011B018(void* dst, Quad_118608* src);
 void func_0011B060(Quad_118608* q, int mode);
 
-void* func_00118608(void* out, s32 unused, In_118608* in)
-{
-    Frame_118608 f;
-    void* obj;
-    func_0011B008(&f.q);
-    obj = func_0011C618();
-    func_00128150(in->f4, in->fC, in->f14, obj);
-    func_001884C0(obj);
-    func_0011B788(&f.q, obj);
-    func_0011B018(out, &f.q);
-    func_0011B060(&f.q, 2);
-    return out;
-}
+
 
 struct Quad_118720 { s32 a, b, c, d; };
 struct Frame_118720 { Quad_118720 q; s32 n; s32 pad[3]; };
@@ -489,18 +295,7 @@ void func_001BF718(void* slot);
 void func_0011B018(void* dst, Quad_118720* src);
 void func_0011B060(Quad_118720* q, int mode);
 
-void* func_00118720(void* out, s32 unused, In_118720* in)
-{
-    Frame_118720 f;
-    func_0011B008(&f.q);
-    f.n = 0;
-    func_001BFCD8(in->f4, in->fC ? &f.n : 0, in->fC, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
-    func_0011B570(&f.q, f.n);
-    if (f.n != 0) func_001BF718(&f.n);
-    func_0011B018(out, &f.q);
-    func_0011B060(&f.q, 2);
-    return out;
-}
+
 
 // A node of a keyed list: the key, a value whose address is returned, and the next node at 0xC.
 struct Node_11A4D8 { s32 key; s32 value; s32 pad8; struct Node_11A4D8* next; };
@@ -513,33 +308,7 @@ struct Tree_11A4D8 {
     s32 flag;
 };
 
-void* func_0011A4D8(struct Tree_11A4D8* self, s32 key, s32 flag)
-{
-    void* found = 0;
-    struct Node_11A4D8* n;
-    s32 i;
 
-    self->flag = 1;
-    for (n = self->head; n != 0; n = n->next) {
-        if (n->key == key) {
-            found = &n->value;
-            goto done;
-        }
-    }
-    if (flag != 0) {
-        for (i = 0; i < self->count; i++) {
-            struct Tree_11A4D8* c = self->items[i];
-            if (c->flag == 0) {
-                found = func_0011A4D8(c, key, flag);
-                if (found != 0)
-                    goto done;
-            }
-        }
-    }
-done:
-    self->flag = 0;
-    return found;
-}
 
 // The same tree node as func_0011A4D8: count and child pointers, a list head at 0x14, a flag at 0x18.
 struct Node_11A5B0;
@@ -554,16 +323,7 @@ void func_0018D800(void* dst, void* src, s32 bytes);
 s32 func_0011C498(void);
 void func_0011C418(void* a, void* b, void* c);
 
-void func_0011A5B0(struct Tree_11A5B0* src, struct Tree_11A5B0* dst)
-{
-    dst->count = src->count;
-    func_0018D800(dst->items, src->items, src->count * 4);
-    if (src->head != 0) {
-        void* n = (void*)func_0011C498();
-        func_0011C418(src->head, n, dst);
-        dst->head = (struct Node_11A5B0*)n;
-    }
-}
+
 
 struct Flag_11B5F0 { s32 tag; s32 flag; };
 void func_0011B418(void* self);
@@ -582,43 +342,18 @@ void func_0011B018(void* dst, void* src);
 
 extern u8 D_00262C70[];
 
-void* func_00118850(void* ret, s32 unused, Src_118850* src)
-{
-    Vec_118850 t;
-    Vec_118850 u;
-    func_0011B008(&t);
-    void* p = D_00262C70;
-    s32 n = src->n;
-    func_0011B9A8(&u, (u8*)src + 8);
-    func_0016EC38(p, n, u.y);
-    func_0011B060(&u, 2);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
-    return ret;
-}
+
 
 extern u8 D_0025C270[];
 void* func_0011C240(void* p);
 
-void* func_0011A630(void)
-{
-    void* p = func_0011C240(D_0025C270);
-    func_001F5C0C(p, 0, 0x1C);
-    return p;
-}
 
-void func_0011A670(void)
-{
-}
+
+
 
 struct Stack_11A7B8 { u8 pad[0x1310]; s32 count; s32 items[1]; };
 
-void func_0011A7B8(Stack_11A7B8* s, s32 value)
-{
-    s32 n = s->count;
-    s->items[n] = value;
-    s->count = n + 1;
-}
+
 
 struct Tag_11B680 { s32 tag; s32 value; };
 void func_0011B418(void* self);
@@ -639,27 +374,15 @@ void func_0011B570(Quad_11B928* q, s32 n);
 typedef u64 Quad_118D10 __attribute__((mode(TI)));
 
 // Copies the quadword at src into out and returns out.
-Quad_118D10* func_00118D10(Quad_118D10* out, void* src)
-{
-    Quad_118D10 v = *(Quad_118D10*)src;
-    *out = v;
-    return out;
-}
+
 
 // A 128-bit value, stored as one quadword.
 typedef u64 Quad_118D20 __attribute__((mode(TI)));
 
 // Stores the quadword v into out and returns out.
-Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v)
-{
-    *out = v;
-    return out;
-}
 
-void* func_0011A678(void* self)
-{
-    return self;
-}
+
+
 
 struct Counters_11A6A8 {
     s32 count;
@@ -667,11 +390,7 @@ struct Counters_11A6A8 {
     s32 count2;
 };
 
-void func_0011A6A8(Counters_11A6A8* self)
-{
-    self->count = 0;
-    self->count2 = 0;
-}
+
 
 struct Rec_11B6C0 { s32 tag; s32 value; };
 void func_0011B418(void* self);
@@ -681,15 +400,15 @@ void func_0011B418(void* self);
 s32 func_0011C580(u32 addr);
 
 struct Obj_0011A708 { u8 pad[0x504]; s32 count; s32 values[1]; };
-void func_0011A708(Obj_0011A708* obj, s32 value) { obj->values[obj->count++] = value; }
+
 
 struct Obj_0011A728 { u8 pad[0x708]; s32 count; s32 values[1]; };
-void func_0011A728(Obj_0011A728* obj, s32 value) { obj->values[obj->count++] = value; }
+
 
 struct Obj_0011A770 { u8 pad[0xF0C]; s32 count; s32 values[1]; };
-void func_0011A770(Obj_0011A770* obj, s32 value) { obj->values[obj->count++] = value; }
 
-void func_0011A6B8() {}
+
+
 
 s32 func_0011C690(u32 value);
 
@@ -709,17 +428,7 @@ void func_0011B740(void* a, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-void* func_001184F8(void* ret, s32 unused, Src_1184F8* src)
-{
-    Tmp_1184F8 t;
-    func_0011B008(&t);
-    void* p = func_0011C508();
-    (void)func_00128018(src->a, src->b, src->c, p);
-    func_0011B740(&t, p);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
-    return ret;
-}
+
 
 struct Tmp_118580 { u8 bytes[0x10]; };
 struct Src_118580 { s32 pad0; void* a; s32 pad2; s32 b; s32 pad4; void* c; };
@@ -731,17 +440,7 @@ void func_0011B740(void* a, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-void* func_00118580(void* ret, s32 unused, Src_118580* src)
-{
-    Tmp_118580 t;
-    func_0011B008(&t);
-    void* p = func_0011C508();
-    (void)func_001280C0(src->a, src->b, src->c, p);
-    func_0011B740(&t, p);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
-    return ret;
-}
+
 
 struct Tmp_1187E8 { s32 w0; s32 w1; s32 w2; s32 w3; };
 struct Src_1187E8 { s32 pad0; void* a; };
@@ -751,16 +450,7 @@ void func_001BF788(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-void* func_001187E8(void* ret, s32 unused, Src_1187E8* src)
-{
-    Tmp_1187E8 t;
-    func_0011B008(&t);
-    func_001BF788(src->a, 0);
-    t.w0 = 0x22;
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
-    return ret;
-}
+
 
 struct Tmp_118D48 { u8 bytes[0x10]; };
 struct Src_118D48 { s32 pad0; s32 a; };
@@ -770,15 +460,7 @@ s32 func_0011A498(void* a, s32 b, s32 c, void* d);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-void* func_00118D48(void* ret, Src_118D48* src, void* ctx)
-{
-    Tmp_118D48 t;
-    func_0011B008(&t);
-    (void)func_0011A498(ctx, src->a, 1, &t);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
-    return ret;
-}
+
 
 struct __attribute__((aligned(16))) Quad_119AF8 { s32 w[4]; };
 struct Node_119AF8 { s32 pad[2]; Node_119AF8* next; };
@@ -792,22 +474,7 @@ void func_0011B0A8(Quad_119AF8* a, Quad_119AF8* b);
 void func_0011B060(Quad_119AF8* q, s32 mode);
 void func_0011B018(void* dst, Quad_119AF8* src);
 
-void* func_00119AF8(void* self, Owner_119AF8* owner, s32 c)
-{
-    Quad_119AF8 q, t;
-    func_0011B008(&q);
-    func_0011B538(&q, 0x22);
-    Node_119AF8* n = owner->wrap->first;
-    while (n != 0) {
-        func_0011A080(&t, n, c);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
-        n = n->next;
-    }
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 // EXACT: callee 0011B008 declared s32 and called as statement.
 
@@ -822,23 +489,7 @@ void func_0011B538(Quad_118DB8* q, s32 n);
 void func_0011A080(Quad_118DB8* t, Node_118DB8* n, s32 c);
 void* func_0011A400(void* self, s32 table, void* key, void* item);
 
-void* func_00118DB8(void* self, Node_118DB8* x, s32 c)
-{
-    Quad_118DB8 q;
-    Quad_118DB8 t;
-    func_0011B008(&q);
-    Node_118DB8* p = x->f4;
-    Node_118DB8* m = p->f8;
-    func_0011A080(&t, m->f8, c);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011A400(&t, c, m->f4, &q);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 // EXACT: func_0011B008 declared s32, called as statement.
 
@@ -853,23 +504,7 @@ void func_0011B538(Quad_118E80* q, s32 n);
 void func_0011A080(Quad_118E80* t, Node_118E80* n, s32 c);
 void* func_0011A358(void* self, s32 owner, void* kind, void* body);
 
-void* func_00118E80(void* self, Node_118E80* x, s32 c)
-{
-    Quad_118E80 q;
-    Quad_118E80 t;
-    func_0011B008(&q);
-    Node_118E80* p = x->f4;
-    Node_118E80* m = p->f8;
-    func_0011A080(&t, m->f8, c);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011A358(&t, c, m->f4, &q);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 // EXACT: func_0011B008 declared s32, called as statement.
 
@@ -885,34 +520,7 @@ void func_0011B060(Quad_119878* q, s32 mode);
 void func_0011B538(Quad_119878* q, s32 k);
 void func_0011B018(void* dst, Quad_119878* src);
 
-void* func_00119878(void* self, Owner_119878* owner, s32 c)
-{
-    Quad_119878 q, t;
-    s32 a, b;
-    func_0011B008(&q);
-    Node_119878* first = owner->wrap->first;
-    Node_119878* second = first->next;
-    for (;;) {
-        func_0011A080(&t, first, c);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
-        a = q.w[0];
-        if (a != 0x1B)
-            goto other;
-        b = q.w[1];
-        if (b != 0)
-            goto other;
-        break;
-    other:
-        func_0011A080(&t, second, c);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
-    }
-    func_0011B538(&q, 0x22);
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 // EXACT: func_0011B008 declared s32, called as statement.
 
@@ -928,38 +536,7 @@ void func_0011B700(Quad_119970* r, Rec_119970* value);
 void func_0011B018(void* dst, Quad_119970* src);
 void func_0011B060(Quad_119970* q, s32 mode);
 
-void* func_00119970(void* self, Owner_119970* owner, s32 c)
-{
-    Quad_119970 q;
-    func_0011B008(&q);
-    Item_119970* first = owner->wrap->first;
-    Item_119970* after = first->next;
-    Rec_119970* p = (Rec_119970*)func_0011AFC8();
-    p->c = c;
-    if (first->tag == 0)
-        p->head = 0;
-    else
-        p->head = first->child;
-    p->after = after;
-    s32 found = 0;
-    s32 count = 0;
-    Item_119970* n = p->head;
-    while (n != 0) {
-        if (n->tag == 0x13) {
-            found = 1;
-            n = 0;
-        } else {
-            n = n->next;
-            count++;
-        }
-    }
-    p->count = count;
-    p->found = found;
-    func_0011B700(&q, p);
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 struct Node_11BD28 { s32 key; Value_11B008 value; Node_11BD28* next; };
 struct List_11BD28 { Node_11BD28* head; };
@@ -994,17 +571,7 @@ struct Cursor_119218 {
 Tmp_119218 func_0011A080(void* node, void* extra);
 void func_0011B0A8(void* a, const Tmp_119218& b);
 
-Cursor_119218 func_00119218(Args_119218* a1, void* a2)
-{
-    Cursor_119218 L;
-    func_0011B5F0(&L, 1);
-    for (Node_119218* n = a1->holder->head; n != 0; n = n->next) {
-        func_0011B0A8(&L, func_0011A080(n, a2));
-        if (L.tag == 27 && L.value == 0)
-            return L;
-    }
-    return L;
-}
+
 
 struct Cursor_119128 { s32 tag; s32 value; s32 pad[2]; };
 struct Node_119128 { s32 f0; s32 f4; Node_119128* next; };
@@ -1017,33 +584,7 @@ void func_0011B0A8(void* a, void* b);
 void func_0011B060(void* p, s32 flags);
 void func_0011B018(void* out, void* p);
 
-void* func_00119128(void* out, Args_119128* a1, void* a2)
-{
-    Cursor_119128 L;
-    Cursor_119128 M;
-    Node_119128* n;
 
-    func_0011B008(&L);
-    n = a1->holder->head;
-    if (n != 0) {
-        do {
-            func_0011A080(&M, n, a2);
-            func_0011B0A8(&L, &M);
-            func_0011B060(&M, 2);
-            if (L.tag != 27 || L.value != 0) {
-                func_0011B018(out, &L);
-                func_0011B060(&L, 2);
-                goto done;
-            }
-            n = n->next;
-        } while (n != 0);
-    }
-    func_0011B5F0(&L, 0);
-    func_0011B018(out, &L);
-    func_0011B060(&L, 2);
-done:
-    return out;
-}
 
 struct Link_1194A8 { s32 f0; Link_1194A8* f4; Link_1194A8* f8; };
 struct __attribute__((aligned(16))) Quad_1194A8 { s32 type; Link_1194A8* head; s32 w2; s32 w3; };
@@ -1058,75 +599,7 @@ void func_0011B0A8(void* a, void* b);
 void func_0011B060(void* q, s32 mode);
 void func_00113AA8(void* a, s32 b, void* c, void* d);
 
-void* func_001194A8(void* self, Link_1194A8* h, void* arg)
-{
-    Quad_1194A8 a;
-    Quad_1194A8 b;
-    Quad_1194A8 c;
-    Quad_1194A8 d;
-    func_0011B008(&a);
-    u8* p = (u8*)&b;
-    for (s32 k = 1; k != -1; k--) {
-        func_0011B008(p);
-        p += 8;
-    }
-    func_0011B008(&c);
-    func_0011B538(&a, 0x22);
-    Link_1194A8* s0 = ((Owner_1194A8*)h)->f4->f8;
-    func_0011A080(&d, s0, arg);
-    func_0011B0A8(&b, &d);
-    func_0011B060(&d, 2);
-    h = s0->f8;
-    if (h) do {
-        Link_1194A8* e = h->f4;
-        s32 found;
-        if (e->f0 == 10) {
-            found = 1;
-        } else {
-            found = 0;
-            Link_1194A8* x = e->f4;
-            if (x) {
-                do {
-                    func_0011B0A8((u8*)&b + 8, x);
-                    func_00113AA8(&d, 2, &b, arg);
-                    func_0011B0A8(&c, &d);
-                    func_0011B060(&d, 2);
-                    if (c.type == 0x1B && c.head != 0) {
-                        found = 1;
-                        x = 0;
-                    } else {
-                        x = x->f8;
-                    }
-                } while (x);
-            }
-        }
-        if (found) {
-            e = e->f8;
-            if (e) {
-                do {
-                    func_0011A080(&d, e, arg);
-                    func_0011B0A8(&a, &d);
-                    func_0011B060(&d, 2);
-                    e = e->f8;
-                } while (e);
-            }
-            h = 0;
-        } else {
-            h = h->f8;
-        }
-    } while (h);
-    func_0011B018(self, &a);
-    func_0011B060(&c, 2);
-    u8* p2 = (u8*)&c;
-    if ((u8*)&b != p2) {
-        do {
-            p2 -= 8;
-            func_0011B060(p2, 0);
-        } while ((u8*)&b != p2);
-    }
-    func_0011B060(&a, 2);
-    return self;
-}
+
 
 // Fixed by merging the two flag tests into one "kind != 0x1B || p != 0".
 
@@ -1140,46 +613,7 @@ void func_0011B0A8(Quad_119310* a, Quad_119310* b);
 void func_0011B538(Quad_119310* q, s32 n);
 void func_0011A080(Quad_119310* t, Node_119310* n, s32 c);
 
-void* func_00119310(void* self, Node_119310* x, s32 c)
-{
-    Quad_119310 q, r, t;
-    func_0011B008(&q);
-    func_0011B008(&r);
-    func_0011B538(&q, 0x22);
-    Node_119310* n = x->f4->f8;
-    while (n) {
-        Node_119310* e = n->f4;
-        s32 flag;
-        if (e->kind == 10) {
-            flag = 1;
-        } else {
-            func_0011A080(&t, e, c);
-            flag = 0;
-            func_0011B0A8(&r, &t);
-            func_0011B060(&t, 2);
-            if (r.kind != 0x1B || r.p != 0)
-                flag = 1;
-            if (flag && e->f8 == 0)
-                func_0011B0A8(&q, &r);
-        }
-        if (flag) {
-            e = e->f8;
-            while (e) {
-                func_0011A080(&t, e, c);
-                func_0011B0A8(&q, &t);
-                func_0011B060(&t, 2);
-                e = e->f8;
-            }
-            n = 0;
-        } else {
-            n = n->f8;
-        }
-    }
-    func_0011B018(self, &q);
-    func_0011B060(&r, 2);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 struct Quad_118F48 { s32 a, b, c, d; };
 struct Obj_118F48 { u8 pad[4]; Quad_118F48* f4; };
@@ -1195,28 +629,7 @@ void func_001E1F10(const char* x);
 s32 func_00113730(Quad_118F48* t, s32 mode, void* a, s32 c);
 extern const char D_00249200[];
 
-void* func_00118F48(void* self, void* p, s32 x)
-{
-    Frame_118F48 f;
-    func_0011B008(&f.q);
-    u8* a = *(u8**)((u8*)p + 4);
-    u8* b = *(u8**)(a + 8);
-    u8* c = *(u8**)(b + 8);
-    func_0011A080(&f.t, b, x);
-    func_0011B0A8(&f.q, &f.t);
-    func_0011B060(&f.t, 2);
-    if (f.q.b == 0) {
-        u8* v = *(u8**)(c + 4);
-        u8* w = *(u8**)(v + 8);
-        func_001E1F10(D_00249200);
-        func_00113730(&f.t, 1, w, x);
-        func_0011B060(&f.t, 2);
-    }
-    func_0011B538(&f.q, 0x22);
-    func_0011B018(self, &f.q);
-    func_0011B060(&f.q, 2);
-    return self;
-}
+
 
 struct Ent_11AB58;
 struct Sub_11AB58 { s32 type; Ent_11AB58* ent; };
@@ -1247,69 +660,7 @@ void func_0011A7B8(World_11AB58* w, Ent_11AB58* e);
 void func_0011A850(World_11AB58* w);
 void func_001834A0(void* a);
 
-void func_0011AB58(World_11AB58* w) {
-    func_0011C2B0(D_0025C250);
-    func_0011C2B0(D_0025C270);
-    func_0011C2B0(D_0025C290);
-    func_0011C2B0(D_0025C2B0);
-    func_0011C2B0(D_0025C2D0);
-    s32 i = w->count;
-    *(s32*)((u8*)w + 0x708) = 0;
-    *(s32*)((u8*)w + 0xF0C) = 0;
-    *(s32*)((u8*)w + 0x1310) = 0;
-    for (i--; i >= 0; i--) {
-        Ent_11AB58* e = w->ents[i];
-        if (func_0011C3C8(e)) {
-            func_0011C3F0(e);
-            func_0011A728(w, e);
-        }
-    }
-    s32 j = w->n504;
-    for (j--; j >= 0; j--) {
-        Node_11AB58* n = w->lists[j]->head;
-        while (n) {
-            func_0011C3F0((Ent_11AB58*)n);
-            Sub_11AB58* sp = &n->sub;
-            switch (sp->type) {
-            case 0x1E: {
-                Ent_11AB58* e = sp->ent;
-                if (func_0011C3C8(e)) {
-                    func_0011C3F0(e);
-                    func_0011A770(w, e);
-                }
-                break;
-            }
-            case 0x1F: {
-                Ent_11AB58* e = sp->ent;
-                if (func_0011C3C8(e)) {
-                    func_0011C3F0(e);
-                    func_0011A7B8(w, e);
-                }
-                break;
-            }
-            case 0x21:
-                func_0011C3F0(sp->ent);
-                break;
-            }
-            n = n->fC;
-        }
-    }
-    for (Item_11AB58* it = ((Glob_11AB58*)D_00275710)->f1EC8; it; it = it->f10) {
-        if (it->fn == (void*)func_001834A0) {
-            Ent_11AB58* e = it->fC;
-            if (e && func_0011C3C8(e)) {
-                func_0011C3F0(e);
-                func_0011A770(w, e);
-            }
-        }
-    }
-    func_0011A850(w);
-    func_0011C2E8(D_0025C250);
-    func_0011C2E8(D_0025C270);
-    func_0011C2E8(D_0025C290);
-    func_0011C2E8(D_0025C2B0);
-    func_0011C2E8(D_0025C2D0);
-}
+
 
 struct __attribute__((aligned(16))) Quad_1196C8 { s32 w[4]; };
 struct Node_1196C8 { s32 kind; Node_1196C8* f4; Node_1196C8* f8; };
@@ -1323,48 +674,7 @@ void* func_0011A630(void);
 void func_0011A358(Quad_1196C8* t, void* owner, Node_1196C8* kind, Quad_1196C8* body);
 void func_0011A328(void* slot, void* c);
 
-void* func_001196C8(void* self, Node_1196C8* x, void* c)
-{
-    Quad_1196C8 q, r, u, t;
-    func_0011B008(&q);
-    func_0011B008(&r);
-    func_0011B008(&u);
-    Node_1196C8* p = x->f4->f8;
-    void* d;
-    Node_1196C8* n;
-    if (p->kind == 0x1E) {
-        d = func_0011A630();
-        Node_1196C8* l = p->f4;
-        if (l) {
-            do {
-                Node_1196C8* e = l->f4;
-                Quad_1196C8* pr = &r;
-                func_0011A080(&t, e->f8, c);
-                func_0011B0A8(pr, &t);
-                func_0011B060(&t, 2);
-                func_0011A358(&t, d, e->f4, pr);
-                func_0011B0A8(&u, &t);
-                func_0011B060(&t, 2);
-                l = l->f8;
-            } while (l);
-        }
-        func_0011A328(d, c);
-    } else {
-        d = c;
-    }
-    n = p->f8;
-    while (n) {
-        func_0011A080(&t, n, d);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
-        n = n->f8;
-    }
-    func_0011B018(self, &q);
-    func_0011B060(&u, 2);
-    func_0011B060(&r, 2);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 struct Val_11B0F8 {
     s32 type;
@@ -1416,64 +726,7 @@ void func_00119AF8(Tmp_11A080* o, In_11A080* a, s32 b);
 void func_00119BB0(Tmp_11A080* o, In_11A080* a, s32 b);
 void func_00119FA0(Tmp_11A080* o, In_11A080* a, s32 b);
 
-Ret_11A080* func_0011A080(Ret_11A080* ret, In_11A080* in, s32 arg)
-{
-    Tmp_11A080 t;
-    Tmp_11A080 u;
-    void* src;
-    Inner_11A080* p;
-    func_0011B008(&t);
-    switch (in->kind) {
-    case 0:
-    case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27:
-    case 29:
-    case 32: case 33:
-        src = in;
-        goto copy;
-    case 28:
-        func_00118D48(&u, in, arg);
-        goto tail;
-    case 30:
-        p = in->inner;
-        switch (p->type) {
-        case 1: func_00118DB8(&u, in, arg); goto tail;
-        case 2: func_00118E80(&u, in, arg); goto tail;
-        case 5: func_00118F48(&u, in, arg); goto tail;
-        case 6: func_00119030(&u, in, arg); goto tail;
-        case 7: func_00119128(&u, in, arg); goto tail;
-        case 8: func_00119218(&u, in, arg); goto tail;
-        case 9: func_00119310(&u, in, arg); goto tail;
-        case 11: func_001194A8(&u, in, arg); goto tail;
-        case 12: func_001196C8(&u, in, arg); goto tail;
-        case 13: func_00119878(&u, in, arg); goto tail;
-        case 15: func_00119AF8(&u, in, arg); goto tail;
-        case 14: func_00119970(&u, in, arg); goto tail;
-        case 17:
-            src = (void*)p->f8;
-        copy:
-            func_0011B0A8(&t, src);
-            goto end;
-        case 16:
-            func_00119FA0(&u, in, arg);
-        tail:
-            func_0011B0A8(&t, &u);
-            func_0011B060(&u, 2);
-            goto end;
-        default:
-            func_00119BB0(&u, in, arg);
-            func_0011B0A8(&t, &u);
-            func_0011B060(&u, 2);
-            break;
-        }
-        break;
-    default:
-        break;
-    }
-end:
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
-    return ret;
-}
+
 
 struct Val_11B258 { s32 tag; void* val; };
 struct __attribute__((aligned(16))) Q16_11B258 { s32 w[4]; };
@@ -1541,126 +794,7 @@ void func_0011A358(V_119BB0* ret, void* s, void* x, V_119BB0* arg);
 void func_00119A58(V_119BB0* ret, s32 v, void* s);
 extern Ent_119BB0 D_00259958[];
 
-V_119BB0* func_00119BB0(V_119BB0* ret, Node_119BB0* self, void* ctx)
-{
-    Node_119BB0* node;
-    V_119BB0 a;
-    V_119BB0 b;
-    V_119BB0 arr[32];
-    V_119BB0 t;
-    V_119BB0 u;
-    s32 total;
-    Ent_119BB0* ent;
-    O21_119BB0* o21;
-    Def_119BB0* d;
-    s32 n;
-    s32 last;
-    s32 count;
-    s32 i;
-    V_119BB0* p;
 
-    func_0011B008(&a);
-    func_0011B008(&b);
-    p = arr;
-    for (s32 k = 31; k != -1; k--) {
-        func_0011B008(p);
-        p++;
-    }
-    Node_119BB0* first = (Node_119BB0*)self->f4;
-    func_0011A080(&t, first, ctx);
-    func_0011B0A8(&a, &t);
-    func_0011B060(&t, 2);
-    if (a.type == 0x1D) {
-        ent = &D_00259958[(s32)a.p];
-        n = ent->f4;
-        last = ent->f8;
-    } else if (a.type == 0x21) {
-        o21 = (O21_119BB0*)a.p;
-        last = 0;
-        n = o21->f8;
-    } else {
-        d = (Def_119BB0*)a.p;
-        n = d->f8;
-        last = d->fC;
-    }
-    node = first->f8;
-    total = n + (last != 0);
-    count = n;
-    for (i = 0; i < n; i++) {
-        V_119BB0* bp = &b;
-        func_0011A080(&t, node, ctx);
-        func_0011B0A8(bp, &t);
-        func_0011B060(&t, 2);
-        func_0011B0A8(&arr[i], bp);
-        node = node->f8;
-    }
-    if (last) {
-        V_119BB0* tail = 0;
-        V_119BB0* head = 0;
-        Node_119BB0* m;
-        for (m = node; m; m = m->f8) {
-            V_119BB0* e = (V_119BB0*)func_0011AF28();
-            func_0011A080(&t, m, ctx);
-            func_0011B0A8(e, &t);
-            func_0011B060(&t, 2);
-            if (tail) {
-                ((Node_119BB0*)tail)->f8 = (Node_119BB0*)e;
-                tail = e;
-            } else {
-                tail = e;
-                head = e;
-            }
-            count++;
-        }
-        if (head) {
-            func_0011B6C0(&arr[i], head);
-        } else {
-            func_0011B538(&arr[i], 0);
-        }
-    }
-    switch (a.type) {
-    case 0x1D:
-        ent->f0(&t, count, arr, ctx);
-        func_0011B0A8(&b, &t);
-        func_0011B060(&t, 2);
-        break;
-    case 0x1F: {
-        d = (Def_119BB0*)a.p;
-        void* s = func_0011A630();
-        func_0011A328(s, d->f0);
-        Node_119BB0* q = d->f4;
-        for (i = 0; i < total; i++) {
-            func_0011B008(&t);
-            if (0x13 == q->f0) {
-                q = q->f8;
-            }
-            func_0011A358(&u, s, q->f4, &arr[i]);
-            func_0011B0A8(&t, &u);
-            func_0011B060(&u, 2);
-            q = q->f8;
-            func_0011B060(&t, 2);
-        }
-        func_00119A58(&t, d->f10, s);
-        func_0011B0A8(&b, &t);
-        func_0011B060(&t, 2);
-        break;
-    }
-    case 0x21:
-        o21->f4(&t, o21->f0, count, arr);
-        func_0011B0A8(&b, &t);
-        func_0011B060(&t, 2);
-        break;
-    }
-    func_0011B018(ret, &b);
-    p = &t;
-    while (arr != p) {
-        p--;
-        func_0011B060(p, 0);
-    }
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
-    return ret;
-}
 
 struct __attribute__((aligned(16))) Quad_119030 { s32 w[4]; };
 struct Node_119030 { s32 pad0; Node_119030* f4; Node_119030* f8; };
@@ -1672,35 +806,7 @@ void func_0011B0A8(Quad_119030* a, Quad_119030* b);
 void func_0011B538(Quad_119030* q, s32 n);
 void func_0011A080(Quad_119030* t, Node_119030* n, s32 c);
 
-void* func_00119030(void* self, Node_119030* x, s32 c)
-{
-    Quad_119030 q;
-    Quad_119030 t;
-    Node_119030* m;
-    Node_119030* n2;
-    Node_119030* n3;
-    func_0011B008(&q);
-    m = x->f4->f8;
-    n2 = m->f8;
-    n3 = n2->f8;
-    func_0011A080(&t, m, c);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    if (q.w[1] == 1) {
-        func_0011A080(&t, n2, c);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
-    } else if (n3 != 0) {
-        func_0011A080(&t, n3, c);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
-    } else {
-        func_0011B538(&q, 0x22);
-    }
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
-    return self;
-}
+
 
 struct __attribute__((aligned(16))) Quad_118198 { s32 type; struct Node_118198* head; s32 w2; s32 w3; };
 struct Ent_118198;
@@ -1733,70 +839,7 @@ void func_0011B8A8(Node_118198* n, Ent_118198* e);
 void func_0011B740(Node_118198* n, Quad_118198* q);
 void func_0011B6C0(void* q, Node_118198* n);
 
-Val_118198 func_00118198(s32 id, s32 unused, Src_118198* src)
-{
-    Val_118198 l0;
-    Hit_118198 hit;
-    Ent_118198* slot;
-    if (src->type == 0) {
-        func_0011B0A8(&l0, src);
-    } else {
-        s32 kind = 0x71;
-        Node_118198* head = 0;
-        Node_118198* tail;
-        Node_118198* it;
-        for (it = src->head; it != 0; it = it->f8) {
-            Pair_118198* pa = &src->p0;
-            Pair_118198* pb = &src->p1;
-            Node_118198* n1;
-            Node_118198* n2;
-            Node_118198* n3;
-            Quad_118198* v;
-            Ent_118198* e = it->f4;
-            if (e == 0)
-                continue;
-            slot = e;
-            if (func_001419E8(0, pa->b, pb->b, 1, &slot, &hit) == 0)
-                continue;
-            if (id == kind) {
-                n1 = (struct Node_118198 *)func_0011AF28();
-                n2 = (struct Node_118198 *)func_0011AF28();
-                n3 = (struct Node_118198 *)func_0011AF28();
-                func_0011B8A8(n1, e);
-                n1->f8 = n2;
-                v = (struct Quad_118198 *)func_0011C508();
-                *v = hit.q[0];
-                func_0011B740(n2, v);
-                n2->f8 = n3;
-                v = (struct Quad_118198 *)func_0011C508();
-                *v = hit.q[1];
-                func_0011B740(n3, v);
-                n3 = (struct Node_118198 *)func_0011AF28();
-                func_0011B6C0(n3, n1);
-                if (head != 0)
-                    tail->f8 = n3;
-                else
-                    head = n3;
-                tail = n3;
-            } else {
-                n1 = (struct Node_118198 *)func_0011AF28();
-                n2 = (struct Node_118198 *)func_0011AF28();
-                func_0011B8A8(n1, e);
-                n1->f8 = n2;
-                v = (struct Quad_118198 *)func_0011C508();
-                *v = hit.q[1];
-                func_0011B740(n2, v);
-                func_0011B6C0(&l0, n1);
-                return l0;
-            }
-        }
-        if (head != 0)
-            func_0011B6C0(&l0, head);
-        else
-            l0.type = 0;
-    }
-    return l0;
-}
+
 
 struct Stk_11A850;
 
@@ -1829,107 +872,6 @@ Obj_11A850* func_0011A790(Stk_11A850* s);
 void func_0011C3F0(Obj_11A850* o);
 s32 func_0011C3C8(Obj_11A850* o);
 
-void func_0011A850(Stk_11A850* self)
-{
-    Obj_11A850* obj;
-    Obj_11A850* other;
-    Obj_11A850* group;
-    for (;;) {
-        group = func_0011A748(self);
-        if (group) {
-            Obj_11A850* link = group->f14;
-            if (link) {
-                do {
-                    func_0011C3F0(link);
-                    Obj_11A850* ev = (Obj_11A850*)&link->f4;
-                    switch (ev->f0) {
-                    case 0x1E:
-                        obj = ev->f4;
-                        if (func_0011C3C8(obj)) {
-                            func_0011C3F0(obj);
-                            func_0011A770(self, obj);
-                        }
-                        break;
-                    case 0x1F:
-                        other = ev->f4;
-                        if (func_0011C3C8(other)) {
-                            func_0011C3F0(other);
-                            func_0011A7B8(self, other);
-                        }
-                        break;
-                    case 0x21:
-                        func_0011C3F0(ev->f4);
-                        break;
-                    }
-                    link = link->fC;
-                } while (link);
-            }
-            if (group->f0 > 0) {
-                s32 i = 0;
-                Obj_11A850** p = &group->f4;
-                do {
-                    obj = *p;
-                    if (func_0011C3C8(obj)) {
-                        func_0011C3F0(obj);
-                        func_0011A728(self, obj);
-                    }
-                    i++;
-                    p++;
-                } while (i < group->f0);
-            }
-            continue;
-        }
-        Batch_11A850* b = func_0011A7D8(self);
-        if (b) {
-            obj = b->f4;
-            if (obj) {
-                do {
-                    func_0011C3F0(obj);
-                    obj = obj->f8;
-                } while (obj);
-            }
-            obj = b->f10;
-            if (func_0011C3C8(obj)) {
-                func_0011C3F0(obj);
-                func_0011A770(self, obj);
-            }
-            group = b->f0;
-            if (func_0011C3C8(group)) {
-                func_0011C3F0(group);
-                func_0011A728(self, group);
-            }
-            continue;
-        }
-        obj = func_0011A790(self);
-        if (!obj)
-            return;
-        switch (obj->f0) {
-        case 0x1E:
-            other = obj->f4;
-            if (func_0011C3C8(other)) {
-                func_0011C3F0(other);
-                func_0011A770(self, other);
-            }
-            break;
-        case 0x1F:
-            other = obj->f4;
-            if (func_0011C3C8(other)) {
-                func_0011C3F0(other);
-                func_0011A7B8(self, other);
-            }
-            break;
-        case 0x21:
-            func_0011C3F0(obj->f4);
-            break;
-        }
-        obj = obj->f8;
-        if (obj) {
-            if (func_0011C3C8(obj)) {
-                func_0011C3F0(obj);
-                func_0011A770(self, obj);
-            }
-        }
-    }
-}
+
 
 extern const char D_00249200[16] = "Splice assert: ";

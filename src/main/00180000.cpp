@@ -459,13 +459,6 @@ void func_00183E40(Obj_00183E40* self)
     func_00183DF8(self);
 }
 
-void func_00180E38(s32 a, s32 b);
-
-void func_00180E90(void)
-{
-    func_00180E38(1, 0xFFFF);
-}
-
 struct Obj_180EB0 { u8 pad[0x14]; u8* f14; };
 
 void func_00182D48(void* self);
@@ -1119,23 +1112,6 @@ s32 func_00181A98(Obj_181A98* self)
     return 0;
 }
 
-extern u8 D_002640A0[];
-extern u8 D_00264098[];
-
-void func_00180E38(s32 flag, s32 code)
-{
-    if (code == 0xFFFF && flag != 0) {
-        D_00264098[0] = 0xBF;
-        D_00264098[1] = 0xBF;
-        D_00264098[2] = 0xBF;
-        D_00264098[3] = 0x7F;
-        D_002640A0[0] = 0;
-        D_002640A0[1] = 0x87;
-        D_002640A0[2] = 0xFF;
-        D_002640A0[3] = 0x7F;
-    }
-}
-
 typedef void (*VFn_180F98)(void* self);
 
 struct Vt_180F98 {
@@ -1335,86 +1311,6 @@ void func_00181DA8(Obj_181DA8* self, s32 mode)
     self->fBB4 = D_00261858[1];
 }
 
-typedef int V128_180108 __attribute__((mode(TI)));
-
-struct Pkt_180108 {
-    u8 pad[1];
-};
-
-struct Mesh_180108 {
-    s32 count;
-    s32 pad4;
-};
-
-struct Group_180108 {
-    s32 pad0;
-    s32 n;
-    Mesh_180108* tris;
-};
-
-struct Obj_180108 {
-    u8 pad00[0x38];
-    V128_180108* verts;
-    u8 pad3C[0x28];
-    Group_180108 groups[5];
-};
-
-struct Col_180108 {
-    u8 r, g, b, a;
-};
-
-union Q_180108 {
-    V128_180108 v;
-    f32 f[4];
-};
-
-extern Pkt_180108 D_00262280;
-extern u8 D_00264098[];
-extern u8 D_002640A0[];
-
-void func_0018A008(s32 zero, void* out, f32 v);
-void func_001613C0(Pkt_180108* p, s32 a, s32 b, u64 c);
-void func_00161708(Pkt_180108* p, s32 a, u64 v);
-void func_00161458(Pkt_180108* p, u32 c);
-void func_001615F0(Pkt_180108* p, s32 a, s32 b, s32 c, s32 d);
-V128_180108 func_00188740(void* m, V128_180108 v);
-
-void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
-{
-    f32 sp[16];
-    Col_180108 col;
-    Q_180108 vv, q;
-    s32 g;
-    func_0018A008(0, sp, c);
-    sp[12] = a;
-    sp[13] = b;
-    func_001613C0(&D_00262280, 0, 1, 0xE);
-    func_00161708(&D_00262280, 0x47, 0x31001);
-    func_00161708(&D_00262280, 0x42, 0x44);
-    for (g = 4; g > 0; g--) {
-        Group_180108* grp = &self->groups[g];
-        if (grp->n > 0) {
-            func_001613C0(&D_00262280, 0, 1, 1);
-            col = *(Col_180108*)((u32)(g - 3) < 2 ? D_00264098 : D_002640A0);
-            col.a = (u8)(s32)((f32)col.a * d);
-            func_00161458(&D_00262280, *(u32*)&col);
-            func_001613C0(&D_00262280, (s8)col.a >= 0 ? 0x43 : 0x83, 1, 4);
-            {
-                s32 i;
-                for (i = 0; i < grp->n; i++) {
-                    u32* idx = (u32*)((u8*)grp->tris + i * 12);
-                    s32 j;
-                    for (j = 2; j >= 0; j--) {
-                        vv.v = self->verts[*idx++];
-                        q.v = func_00188740(sp, vv.v);
-                        func_001615F0(&D_00262280, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-                    }
-                }
-            }
-        }
-    }
-}
-
 struct __attribute__((packed)) Pair_183EA0 { s32 a; s32 b; };
 struct State_183EA0 { u8 pad00[0x304]; s32 value; u8 pad308[0x410 - 0x308]; Pair_183EA0 saved; };
 s32 func_00182FC8(State_183EA0*);
@@ -1508,8 +1404,6 @@ void func_00181818(Obj_181818* o, void* a, void* b)
     func_00125C90(o, a, b);
 }
 
-u8 D_00264098[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-u8 D_002640A0[4] = { 0, 0, 0, 0 };
 Ent_2640B0 D_002640B0[10] = {
     { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
     { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }

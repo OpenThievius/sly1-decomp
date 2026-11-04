@@ -42,6 +42,13 @@ splits are taken from other projects or from the prototype
    `src/main/` then give way to real files, with names that are ours. A file is proved by
    building it whole, as the original was, and linking each of its sections in one piece
    (`config/us/files.tsv`). The first, `src/main/value.cpp` (0x11AE78 to 0x11C128), is one.
+   A file whose range holds original assembly includes those functions at their place
+   (`INCLUDE_ASM`, include/asm_func.h, tools/asm_func.py): `src/main/file_1E5378.cpp`
+   (0x1E5378 to 0x1E88D0, five of its 34 functions assembly) is the first. A file is named
+   after its first address until what it was is known. A function of its range not matched yet
+   is included the same way, so that a file is proved before all of its C is: it still counts
+   as unmatched, and its C replaces the line when it matches. Retail's constructor list
+   (`D_0027B130`) gives the exact end of every file with a static initialiser.
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)).

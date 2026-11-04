@@ -23,6 +23,7 @@ import check  # noqa: E402
 import rodata  # noqa: E402
 import version_src  # noqa: E402
 import versions  # noqa: E402
+import asm_func  # noqa: E402
 import volatile_slots  # noqa: E402
 
 BOOT = b"\x7fELF" + bytes(range(256)) * 20
@@ -492,6 +493,11 @@ class DefinitionTest(unittest.TestCase):
                 "}\n")
         self.assertEqual([m.group(1) for m in todo.definitions(text)], ["func_0020C3F0"])
 
+    def test_a_class_constructor_is_not_a_function_of_ours(self):
+        text = ("Ctor_1E4E38::Ctor_1E4E38()\n{\n    f4 = 0;\n}\n"
+                "void Node_100000::func_00100000(s32 n)\n{\n}\n")
+        self.assertEqual([m.group(1) for m in todo.definitions(text)], ["func_00100000"])
+
 
 class AbsoluteAliasTest(unittest.TestCase):
     def test_short_names_get_their_eight_digit_spelling(self):
@@ -557,12 +563,35 @@ class WholeFileTest(unittest.TestCase):
             c_layout.data_plan([("D_002492F0", 0x2492F0, ["a"]), ("D_0024942C", 0x24942C, ["b"])],
                                [(0x2492F0, 0x134, "x.o", ".rodata.D_002492F0", "D_002492F0")])
 
+    def test_a_whole_file_may_end_in_the_padding_before_a_16_aligned_file(self):
+        chunks = [("D_00000098", 0x98, ["a"]), ("D_000000B0", 0xB0, ["b"]), ("D_000000B8", 0xB8, ["c"])]
+        plan, _ = c_layout.data_plan(chunks[:2], [(0x98, 0x10, "f.o", ".data", "D_00000098")])
+        self.assertEqual([k for k, _ in plan], ["c", "run"])
+        with self.assertRaises(c_layout.LayoutError):  # not before a label only 8-aligned
+            c_layout.data_plan([chunks[0], chunks[2]], [(0x98, 0x10, "f.o", ".data", "D_00000098")])
+
     def test_a_global_may_end_in_the_padding_before_an_8_aligned_label(self):
         chunks = [("D_00000100", 0x100, ["a"]), ("D_00000108", 0x108, ["b"])]
         plan, _ = c_layout.data_plan(chunks, [(0x100, 4, "x.o", ".data.D_00000100", "D_00000100")])
         self.assertEqual([k for k, _ in plan], ["c", "run"])
         with self.assertRaises(c_layout.LayoutError):  # not from the middle of a word
             c_layout.data_plan(chunks, [(0x100, 2, "x.o", ".data.D_00000100", "D_00000100")])
+
+    def test_a_global_may_end_in_the_padding_before_a_more_aligned_global(self):
+        chunks = [("D_00000100", 0x100, ["a"]), ("D_00000110", 0x110, ["b"]), ("D_00000120", 0x120, ["c"])]
+        first = (0x100, 4, "x.o", ".data.D_00000100", "D_00000100")
+        second = (0x110, 16, "x.o", ".data.D_00000110", "D_00000110")
+        aligns = dict(c_layout.ALIGNS)
+        try:
+            c_layout.ALIGNS[0x110] = 16
+            plan, _ = c_layout.data_plan(chunks, [first, second])
+            self.assertEqual([k for k, _ in plan], ["c", "c", "run"])
+            c_layout.ALIGNS[0x110] = 8  # a 12-byte gap is more than an 8-aligned global leaves
+            with self.assertRaises(c_layout.LayoutError):
+                c_layout.data_plan(chunks, [first, second])
+        finally:
+            c_layout.ALIGNS.clear()
+            c_layout.ALIGNS.update(aligns)
 
     def test_an_address_in_a_whole_file_belongs_to_it(self):
         with tempfile.TemporaryDirectory() as d:
@@ -708,4 +737,75 @@ class VolatileSlotTest(unittest.TestCase):
         self.assertEqual(volatile_slots.fill(plain), plain)
         apart = "\t#.set\tvolatile\n\tsw\t$3,0($2)\n\t#.set\tnovolatile\n\tmove\t$4,$0\n\tjal\tf"
         self.assertEqual(volatile_slots.fill(apart), apart)
+
+
+class AsmFuncTest(unittest.TestCase):
+    @staticmethod
+    def line(addr, word, text):
+        # a listing line as splat writes it; the words are invented, not the game's
+        return "    /" + "* %X %08X %s *" % (addr - 0xFF000, addr, word) + "/  " + text
+
+    def setUp(self):
+        self.listing = "\n".join([
+            ".align 3", "nonmatching func_00100010, 0x10", "", "glabel func_00100010",
+            self.line(0x100010, "11111111", "lw         $v0, 0x10($a0)"),
+            self.line(0x100014, "22222222", "addiu      $t0, $zero, 0x1"),
+            self.line(0x100018, "11223344", "vsub.xyzw  $vf1, $vf0, $vf0"),
+            self.line(0x10001C, "33333333", "jr         $ra"),
+            "endlabel func_00100010", self.line(0x100020, "00000000", "nop"), ""])
+
+    def test_the_function_is_its_label_to_its_size(self):
+        lines, size = asm_func.function_lines(self.listing, "func_00100010")
+        self.assertEqual(size, 16)
+        self.assertEqual(len(lines), 4)
+
+    def test_registers_are_numbers_with_the_64_bit_names(self):
+        out = asm_func.source(self.listing, "func_00100010")
+        self.assertIn("lw         $2, 0x10($4)", out)
+        self.assertIn("addiu      $12, $0, 0x1", out)
+        self.assertIn("jr         $31", out)
+        self.assertIn("\t.size\tfunc_00100010, 16", out)
+
+    def test_a_vu0_instruction_is_written_as_its_word(self):
+        out = asm_func.source(self.listing, "func_00100010")
+        self.assertIn(".word\t0x44332211", out)
+
+    def test_included_names_come_from_the_source(self):
+        self.assertEqual(asm_func.included("INCLUDE_ASM(func_00100010);\nvoid f();\n INCLUDE_ASM( func_00100020 );"),
+                         ["func_00100010", "func_00100020"])
+
+    def test_a_jump_table_target_is_a_plain_label(self):
+        self.assertEqual(asm_func.numeric("  jlabel .L00100014"), "  .L00100014:")
+
+    def test_read_only_data_keeps_its_case_labels_and_writes_other_words(self):
+        listing = "\n".join([
+            ".align 3", "nonmatching jtbl_00200000", "", "dlabel jtbl_00200000",
+            "    /" + "* 100000 00200000 14001000 *" + "/ .word .L00100014",
+            "    /" + "* 100004 00200004 0000803F *" + "/ .float 1",
+            "enddlabel jtbl_00200000", ""])
+        out = asm_func.rodata_source(listing, "jtbl_00200000")
+        self.assertIn("\t.align\t4", out)  # a jump table is aligned to 16, whatever splat wrote
+        self.assertIn("\t.word\t.L00100014", out)
+        self.assertIn("\t.word\t0x3F800000", out)
+        self.assertIn("\t.size\tjtbl_00200000, 8", out)
+        other = asm_func.rodata_source(listing.replace("jtbl_00200000", "D_00200008").replace(
+            "00200000 14", "00200008 14"), "D_00200008")
+        self.assertIn("\t.align\t3", other)  # aligned as its address is, whatever splat wrote
+
+    def test_data_bytes_are_written_and_sized(self):
+        listing = "\n".join(["nonmatching D_00260001", "", "dlabel D_00260001",
+                              "    /" + "* 100001 00260001 *" + "/ .byte 0x80",
+                              "    /" + "* 100002 00260002 *" + "/ .byte 0x10",
+                              "enddlabel D_00260001", ""])
+        out = asm_func.rodata_source(listing, "D_00260001")
+        self.assertIn("\t.byte\t0x80", out)
+        self.assertEqual(asm_func.label_size(listing, "D_00260001"), 2)
+        self.assertEqual(asm_func.included_data("INCLUDE_DATA(D_00260001);\n"), ["D_00260001"])
+
+    def test_read_only_data_without_an_align_takes_gcc_s(self):
+        words = ["    /" + "* 100000 0020000%X 00000000 *" % i + "/ .word 0x00000000" for i in (0, 4)]
+        listing = "\n".join(["nonmatching D_00200008", "", "dlabel D_00200008"] + words + ["enddlabel D_00200008", ""])
+        self.assertIn("\t.align\t3", asm_func.rodata_source(listing, "D_00200008"))  # 8 bytes at 8
+        one = "\n".join(["nonmatching D_00200004", "", "dlabel D_00200004", words[0], "enddlabel D_00200004", ""])
+        self.assertIn("\t.align\t2", asm_func.rodata_source(one, "D_00200004"))
 

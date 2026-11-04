@@ -47,29 +47,27 @@ void func_001E1028(Fmt_1E1028_eu* self, Sink_1E1028* sink, u64 value)
         case 'd':
         case 'i':
             if (neg) {
-                *(u16*)pfx = D_0024E3D0[0];
+                __builtin_strcpy(pfx, "-");
             } else if (self->f4) {
-                *(u16*)pfx = D_0024E3D8[0];
+                __builtin_strcpy(pfx, "+");
             } else if (self->f8) {
-                *(u16*)pfx = D_0024E3E0[0];
+                __builtin_strcpy(pfx, " ");
             }
             zeros -= func_001E2100(pfx);
             break;
         case 'b':
             if (self->fC) {
-                *(u16*)pfx = *(u16*)D_0024E3E8;
-                pfx[2] = D_0024E3E8[2];
+                __builtin_strcpy(pfx, "0b");
             }
             break;
         case 'o':
             if (self->fC) {
-                *(u16*)pfx = D_0024E3F0[0];
+                __builtin_strcpy(pfx, "0");
             }
             break;
         case 'x':
             if (self->fC) {
-                *(u16*)pfx = *(u16*)D_0024E3F8;
-                pfx[2] = D_0024E3F8[2];
+                __builtin_strcpy(pfx, "0x");
             }
             break;
         }

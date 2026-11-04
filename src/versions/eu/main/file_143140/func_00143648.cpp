@@ -22,7 +22,7 @@ void func_00143648(struct Self_00143648* self)
     *(f32*)(s + 0x1F8) = x;
     *(f32*)(s + 0x1FC) = y;
     *(f32*)(s + 0x200) = z;
-    *(struct Pk4_00143648*)(s + 0x204) = *(struct Pk4_00143648*)D_002618B0;
+    *(struct Pk4_00143648*)(s + 0x204) = *(struct Pk4_00143648*)&D_002618B0;
     *(struct Quad_00143648*)(s + 0x80) = *(struct Quad_00143648*)D_002483D0;
     *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(D_002483D0 + 0x10);
     *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(D_002483D0 + 0x20);
