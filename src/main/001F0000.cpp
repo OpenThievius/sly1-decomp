@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c73.h"
 #include "list_iter.h"
 
 struct Obj_1F0468 { u8 pad[0x19DC]; s32 value; };
@@ -154,36 +155,28 @@ void func_00137EB0(void* a, void* b);
 void func_00137E70(void* a, void* b);
 void func_0011EC40(void* a, void* b);
 
-void func_001F3A40(void* self, void* other)
+void func_001F3A40(C73* self, void* stream)
 {
-    func_00137EB0(other, (u8*)self + 0x50);
-    func_00137E70(other, (u8*)self + 0x40);
-    func_0011EC40(self, other);
+    func_00137EB0(stream, &self->rot);
+    func_00137E70(stream, &self->pos);
+    func_0011EC40(self, stream);
 }
-
-struct Obj_1F3A90 { u8 pad[0x18]; void* link; };
 
 void func_00128018(void* a0, void* a1, void* a2, void* a3);
 void func_00128150(void* a0, void* a1, void* a2, void* a3);
 void func_00182F78(void* self, void* value);
 
-void func_001F3A90(void* self, void* other)
+void func_001F3A90(C73* self, C01* other)
 {
-    Obj_1F3A90* s = (Obj_1F3A90*)self;
-    func_00128018(s->link, other, (u8*)self + 0x40, (u8*)self + 0x40);
-    func_00128150(s->link, other, (u8*)self + 0x50, (u8*)self + 0x50);
+    func_00128018(self->parent, other, &self->pos, &self->pos);
+    func_00128150(self->parent, other, &self->rot, &self->rot);
     func_00182F78(self, other);
 }
 
-void func_00128018(void* a0, void* a1, void* a2, void* a3);
-void func_00128150(void* a0, void* a1, void* a2, void* a3);
-
-void func_001F3AF0(void* self, void* other)
+void func_001F3AF0(C73* self, C01* other)
 {
-    u8* p = (u8*)self;
-    func_00128018(other, 0, p + 0x40, p + 0x40);
-    p += 0x50;
-    func_00128150(other, 0, p, p);
+    func_00128018(other, 0, &self->pos, &self->pos);
+    func_00128150(other, 0, &self->rot, &self->rot);
 }
 
 struct Holder_1F3BD8 {
@@ -1049,16 +1042,14 @@ void func_001F36E8(Obj_1F36E8* o)
     }
 }
 
-struct __attribute__((aligned(16))) Blk_1F39F8 { u8 b[48]; };
-struct Self_1F39F8 { u8 pad[0x50]; };
 extern u8 D_002483D0[];
-void func_00182C18(Self_1F39F8* self);
+void func_00182C18(C01* self);
 
-void func_001F39F8(Self_1F39F8* self)
+void func_001F39F8(C73* self)
 {
     func_00182C18(self);
-    u8* dst = (u8*)self + 0x50;
-    *(Blk_1F39F8*)dst = *(Blk_1F39F8*)D_002483D0;
+    Mat3_73* dst = &self->rot;
+    *dst = *(Mat3_73*)D_002483D0;
 }
 
 // NEAR: the two counter increments (0x38 and 0x6D0) are computed in the reverse
