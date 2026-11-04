@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6e.h"
 
 int func_001EAC68(f32 a, f32 b, f32 eps);
 
@@ -15,15 +16,13 @@ void func_00183F40(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d)
     }
 }
 
-struct __attribute__((packed)) Q_180F20 { u64 v; };
-struct Obj_180F20 { u8 pad0[0x38]; Q_180F20 q; };
 void func_001830D8(void* self);
 
-void func_00180F20(Obj_180F20* self)
+void func_00180F20(C72* self)
 {
-    Q_180F20 saved = self->q;
+    Keep6E saved = self->keep;
     func_001830D8(self);
-    self->q = saved;
+    self->keep = saved;
 }
 
 void func_00192C58(void* self);
@@ -459,15 +458,13 @@ void func_00183E40(Obj_00183E40* self)
     func_00183DF8(self);
 }
 
-struct Obj_180EB0 { u8 pad[0x14]; u8* f14; };
-
 void func_00182D48(void* self);
-void func_00152470(u8* table, Obj_180EB0* self);
+void func_00152470(u8* table, void* self);
 
-void func_00180EB0(Obj_180EB0* self)
+void func_00180EB0(C72* self)
 {
     func_00182D48(self);
-    func_00152470(self->f14 + 0x1C9C, self);
+    func_00152470((u8*)self->world + 0x1C9C, self);
 }
 
 void func_00182D48(void)
@@ -563,15 +560,13 @@ s32 func_00183438(Owner_183438* self)
     return -1;
 }
 
-struct Obj_180EE8 { u8 pad[0x14]; u8* f14; };
-
 void func_00182ED0(void* self);
-void func_00152600(u8* table, Obj_180EE8* self);
+void func_00152600(u8* table, void* self);
 
-void func_00180EE8(Obj_180EE8* self)
+void func_00180EE8(C72* self)
 {
     func_00182ED0(self);
-    func_00152600(self->f14 + 0x1C9C, self);
+    func_00152600((u8*)self->world + 0x1C9C, self);
 }
 
 struct Obj_180F68 { u8 pad[0xBF4]; f32 fBF4; };

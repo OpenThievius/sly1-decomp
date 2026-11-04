@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6e.h"
 #include "list_iter.h"
 
 extern u8 D_00262708[];
@@ -224,7 +225,7 @@ extern u8 D_002626E8[];
 void func_00182D48(void* self);
 void func_00152470(void* table, void* self);
 
-void func_00169D20(void* self)
+void func_00169D20(C6F* self)
 {
     func_00182D48(self);
     func_00152470(D_002626E8, self);
@@ -294,47 +295,30 @@ void func_0016AA18(Self_16AA18* self)
     }
 }
 
-struct Actor_169D90 {
-    u8 pad_00[0x14];
-    void* ptr_14;
-    s32 arg_18;
-    u8 pad_1C[0x44 - 0x1C];
-    s32 key_44;
-    void* res_48;
-};
-
 struct Res_0015A448 {
     u8 pad_00[0x398];
     s32 f398;
 };
 
 void* func_0015A448(void* a, s32 b, s32 c);
+void* func_0015A448(void* a, s32 b, void* c);
 
-void func_00169D90(Actor_169D90* self)
+void func_00169D90(C6F* self)
 {
-    if (self->key_44 != -1) {
-        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->ptr_14, self->key_44, self->arg_18);
-        self->res_48 = r;
+    if (self->id44 != -1) {
+        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->world, self->id44, self->parent);
+        self->found48 = r;
         r->f398 = 0;
     }
 }
 
-struct Blob_169DD8 {
-    u64 bits;
-} __attribute__((packed));
-
-struct Actor_169DD8 {
-    u8 pad_00[0x38];
-    Blob_169DD8 blob_38;
-};
-
 void func_001830D8(void* self);
 
-void func_00169DD8(Actor_169DD8* self)
+void func_00169DD8(C6F* self)
 {
-    Blob_169DD8 saved = self->blob_38;
+    Keep6E saved = self->keep;
     func_001830D8(self);
-    self->blob_38 = saved;
+    self->keep = saved;
 }
 
 void func_0016A140(void* self)
@@ -501,7 +485,7 @@ extern u8 D_002626E8[];
 void func_00182ED0(void* self);
 void func_00152600(void* data, void* self);
 
-void func_00169D58(void* self)
+void func_00169D58(C6F* self)
 {
     func_00182ED0(self);
     func_00152600(D_002626E8, self);
@@ -1299,24 +1283,13 @@ s32 func_0016A758(u8* self)
 
 void func_00182C18(void* self);
 
-struct Obj_169CD8 {
-    u8 pad0[0x44];
-    s32 f44;
-    s32 f48;
-    s32 f4C;
-    s32 f50;
-    u8 pad54[0x58 - 0x54];
-    f32 f58;
-};
-
-void func_00169CD8(void* self)
+void func_00169CD8(C6F* self)
 {
-    Obj_169CD8* o = (Obj_169CD8*)self;
     func_00182C18(self);
-    o->f44 = -1;
-    o->f4C = 1;
-    o->f50 = 3;
-    o->f58 = D_0024A794;
+    self->id44 = -1;
+    self->f4C = 1;
+    self->f50 = 3;
+    self->f58 = D_0024A794;
 }
 
 struct __attribute__((aligned(16))) Quad_169FC0 { s32 v[4]; };

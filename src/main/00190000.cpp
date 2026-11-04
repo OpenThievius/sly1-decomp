@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6e.h"
 
 struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
 void func_00168AF8(State_193288*);
@@ -178,23 +179,14 @@ void func_00191EB0(void)
     D_00269BA4 = 0;
 }
 
-struct Obj_191FD8 {
-    u8 pad0[0x14];
-    s32 c14;
-    s32 c18_pad;
-    u8 pad1[0x64 - 0x1C];
-    s32 c64;
-    s32 c68;
-};
-
 void func_00182C58(void* self);
-s32 func_0015A418(s32 a0, s32 a1, s32 a2, void* a3);
+s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_00191FD8(Obj_191FD8* self)
+void func_00191FD8(C70* self)
 {
     func_00182C58(self);
-    if (self->c64 != -1) {
-        self->c68 = func_0015A418(self->c14, 4, self->c64, self);
+    if (self->id64 != -1) {
+        self->found68 = func_0015A418(self->world, 4, self->id64, self);
     }
 }
 
@@ -713,16 +705,14 @@ struct S_193270 { s32 a,b,c,d,e; };
 struct S_193300 { s32 a,b,c,d,e; };
 
 
-struct __attribute__((packed)) Pack_192020 { u64 value; };
-
 void func_001830D8(void* self);
 
-void func_00192020(void* a0)
+void func_00192020(C70* self)
 {
-    Pack_192020 tmp;
-    tmp = *(Pack_192020*)((u8*)a0 + 0x38);
-    func_001830D8(a0);
-    *(Pack_192020*)((u8*)a0 + 0x38) = tmp;
+    Keep6E tmp;
+    tmp = self->keep;
+    func_001830D8(self);
+    self->keep = tmp;
 }
 
 struct __attribute__((packed)) Word_193210 { u32 value; };
@@ -754,7 +744,7 @@ extern u8 D_00269BA8[];
 void func_00182D48(void* self);
 void func_00152470(void* table, void* self);
 
-void func_00191F68(void* self)
+void func_00191F68(C70* self)
 {
     func_00182D48(self);
     func_00152470(D_00269BA8, self);
@@ -764,7 +754,7 @@ extern u8 D_00269BA8[];
 void func_00182ED0(void* self);
 void func_00152600(void* table, void* self);
 
-void func_00191FA0(void* self)
+void func_00191FA0(C70* self)
 {
     func_00182ED0(self);
     func_00152600(D_00269BA8, self);
@@ -1070,22 +1060,20 @@ void* func_00192620(void)
     return r;
 }
 
-struct Quad_191F08 { u8 b[16]; } __attribute__((aligned(16)));
-struct Obj_191F08 { u8 p0[0x40]; Quad_191F08 q40; s32 f50; s32 f54; s32 f58; f32 f5C; u8 p60[4]; s32 f64; };
 
 extern u8 D_00248D00[];
 extern f32 D_0024B650;
-void func_00182C18(Obj_191F08* self);
+void func_00182C18(C01* self);
 
-void func_00191F08(Obj_191F08* self)
+void func_00191F08(C70* self)
 {
     func_00182C18(self);
-    self->q40 = *(Quad_191F08*)D_00248D00;
+    self->q40 = *(Quad70*)D_00248D00;
     self->f54 = 9;
     self->f50 = 8;
     self->f58 = -1;
     self->f5C = D_0024B650;
-    self->f64 = -1;
+    self->id64 = -1;
 }
 
 // kind==0x10 loop test at the top (retail tests it with the first slot peeled) and

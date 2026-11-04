@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c6e.h"
 #include "list_iter.h"
 
 struct Actor_198980 { u8 pad0[0x554]; s32 flag554; };
@@ -491,49 +492,34 @@ void func_0019AD30(List_0019AD30* list, u32 index, void* item)
     }
 }
 
-struct Obj_0019AF38 { u8 pad[0x14]; u8* owner; };
-
-
-void func_0019AF38(Obj_0019AF38* obj)
+void func_0019AF38(C71* obj)
 {
     func_00182D48(obj);
-    func_00152470(obj->owner + 0x1C90, obj);
+    func_00152470((u8*)obj->world + 0x1C90, obj);
 }
 
-struct Obj_0019AF70 { u8 pad[0x14]; u8* owner; };
-
-
-void func_0019AF70(Obj_0019AF70* obj)
+void func_0019AF70(C71* obj)
 {
     func_00182ED0(obj);
-    func_00152600(obj->owner + 0x1C90, obj);
+    func_00152600((u8*)obj->world + 0x1C90, obj);
 }
 
-struct Obj_0019AFA8 { u8 pad[0x14]; void* owner; u8 pad2[0x3C]; s32 status; s32 result; };
-
-
-void func_0019AFA8(Obj_0019AFA8* obj)
+void func_0019AFA8(C71* obj)
 {
     func_00182C58(obj);
-    if (obj->status != -1)
-        obj->result = (s32)func_0015A418(obj->owner, 4, obj->status, obj);
+    if (obj->id54 != -1)
+        obj->found58 = (s32)func_0015A418(obj->world, 4, obj->id54, obj);
 }
-
-struct __attribute__((packed)) Field8_19AFF0 { s64 bits; };
-struct Obj_19AFF0 {
-    u8 pad0[0x38];
-    Field8_19AFF0 f38;
-};
 
 void func_001830D8(void* self);
 
-void func_0019AFF0(Obj_19AFF0* self)
+void func_0019AFF0(C71* self)
 {
-    Field8_19AFF0 tmp;
+    Keep6E tmp;
 
-    tmp = self->f38;
+    tmp = self->keep;
     func_001830D8(self);
-    self->f38 = tmp;
+    self->keep = tmp;
 }
 
 struct Obj_0019B1E0 { u8 pad[0x14]; u8* owner; };
@@ -1596,15 +1582,12 @@ void func_001993C0(s32 a0) {
     }
 }
 
-struct Self_19AF00 { u8 pad0[0x4C]; f32 f4C; u8 pad1[0x54 - 0x50]; s32 s54; };
-
 extern f32 D_0024C8C4;
-void func_00182C18(Self_19AF00* self);
 
-void func_0019AF00(Self_19AF00* self)
+void func_0019AF00(C71* self)
 {
     func_00182C18(self);
-    self->s54 = -1;
+    self->id54 = -1;
     self->f4C = D_0024C8C4;
 }
 
