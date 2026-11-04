@@ -1306,3 +1306,56 @@ void func_00138C00(World_138C00* w, s32 arg)
         o->kind = 7;
     }
 }
+
+#include "list_iter.h"
+
+struct Node_1399F8 { u8 pad0[0x14]; f32 f14; u8 pad18[0x3C - 0x18]; Node_1399F8* f3C; };
+struct Obj_1399F8 {
+    u8 pad0[0x34];
+    f32 f34;
+    u8 pad38[0x6C - 0x38];
+    Node_1399F8* f6C;
+    u8 pad70[0xB8 - 0x70];
+    void* fB8;
+    s32 fBC;
+    void* fC0;
+};
+struct Ent_1399F8 { s32 a; s32 b; s32 c; };
+
+void func_0018D800(void* a, void* b, s32 n);
+void func_00139740(s32 a0, s32 a1, void* a2, s32 a3, s32 a4, s32 a5, void* a6);
+void func_0012F1D8(void* node);
+
+void func_001399F8(Obj_1399F8* self, s32 a1, s32 a2, void* a3)
+{
+    Node_1399F8* node = self->f6C;
+    s32 i;
+    s32 count;
+    Ent_1399F8* ent;
+    ListFrame frame;
+
+    if (node != 0) {
+        do {
+            node->f14 = node->f14 / self->f34;
+            node = node->f3C;
+        } while (node != 0);
+    }
+    func_0018D800(self->fB8, a3, a2 * a1);
+    count = self->fBC;
+    if (count == 0) {
+        func_00139740(a1, a2, a3, 0, 0, 0, &self->f34);
+    } else {
+        for (i = 0; i < count; i++) {
+            ent = (Ent_1399F8*)((u8*)self->fC0 + i * 12);
+            func_00139740(a1, a2, a3, ent->a, ent->b, ent->c, &self->f34);
+        }
+    }
+    node = self->f6C;
+    if (node != 0) {
+        do {
+            node->f14 = node->f14 * self->f34;
+            func_0012F1D8(node);
+            node = node->f3C;
+        } while (node != 0);
+    }
+}

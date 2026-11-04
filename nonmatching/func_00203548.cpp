@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 690/736 (93.8%), checked 2026-11-02
+// BYTES 690/736 (93.8%), checked 2026-11-04
 #include "common.h"
 // NEAR (r60f): 26 lines, same as m59e but with D_0062A7D0 stored from a local after
 // D_00279424 = 1 (retail stores 424 before 62A7D0; the C++ front end otherwise computes

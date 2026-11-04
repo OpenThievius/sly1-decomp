@@ -3959,10 +3959,6 @@ void func_0015CF70();
 void func_0015D4E0();
 void func_001FBDF8();
 
-extern const s32 D_00248DF0[4] = {0x0, 0x6, 0x6, 0x6};
-extern const s32 D_00248E38[2] = {0x6, 0x1000};
-extern const s32 D_00248EA8[2] = {0xF, 0x6};
-extern const s32 D_00248EB0[2] = {0x1000, 0x2000};
 extern const f32 D_00249A1C = 3.4028235e+38f;
 extern const f32 D_00249B10[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249D64 = 3.4028235e+38f;
@@ -3978,9 +3974,6 @@ extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
 extern const f32 D_00249EF0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249FB4 = 3.4028235e+38f;
-extern const f32 D_00249FBC = 3.4028235e+38f;
-extern const f32 D_00249FC8 = 3.4028235e+38f;
-extern const f32 D_00249FD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
 extern const f32 D_0024A120 = 3.4028235e+38f;
 extern const Vec2_24A210 D_0024A210 = {0.0f, 4.73242188f};
@@ -5243,8 +5236,8 @@ s32 D_00269B48 = 0;
 s32 D_00269C90 = 0;
 Obj_2629A8 D_002629A8 = {0};
 Obj_262C70 D_00262C70 = {};
-struct Credit_248748 { s32 id; f32 f4; u32 digest[8]; const char* name; };
-extern const Credit_248748 D_00248748[33] = {
+struct Music_248748 { s32 level; f32 f4; u32 record[8]; const char* credits; };
+extern const Music_248748 D_00248748[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
     { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, D_0024DCC8 },
     { 0x00000103, 139.0f, { 0x7EA0F65C, 0xD2337F06, 0xBE2AFC49, 0x12C36311, 0x7C279683, 0x7EA42098, 0xBE2AFEF0, 0xD22162E6 }, D_0024DCE8 },

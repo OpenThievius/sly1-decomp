@@ -2250,3 +2250,10 @@ void func_00151A88(Self_151A88* self)
     self->f18 = func_001EAA70(e->a, e->b);
     self->f20 = 0;
 }
+
+void func_00123ED0(void* self);
+
+void func_00152E28(void* self)
+{
+    func_00123ED0(self);
+}

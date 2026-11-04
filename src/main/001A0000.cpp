@@ -876,3 +876,22 @@ s32 D_0026B6C0[4] = { 0x40, 5, 0x42, 0x43 };
 s32 D_0026B778[6] = { 2, 0x28E, 0x640, 2, 0x292, 0x650 };
 s32 D_0026B790[18] = { 4, 0x291, 0x64C, 4, 0x299, 0x664, 4, 0x297, 0x65C, 4, 0x298, 0x660, 2, 0x29A, 0x680, 2, 0x29B, 0x67C };
 extern const f32 D_0024C9C0[4] = { 30.0f, 0.0f, 0.2f, 0.0f };
+
+void func_001921A8(void* self);
+
+struct Obj_1A3AE0 {
+    u8 pad0[0x610];
+    s32 f610;
+    s32 f614;
+    u8 pad1[0x10];
+    f32 f628;
+};
+
+void func_001A3AE0(void* self)
+{
+    Obj_1A3AE0* o = (Obj_1A3AE0*)self;
+    func_001921A8(self);
+    o->f610 = -1;
+    o->f628 = 2000.0f;
+    o->f614 = -1;
+}
