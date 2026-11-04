@@ -10,7 +10,7 @@ s32 func_0011D140(s32 a0, s32 a1)
     u32 m;
 
     D_0025C348 = 0;
-    if (D_0025C388 != 0) {
+    if (D_0025C388.busy != 0) {
         if (D_eu_0025D6B8 == 0) {
             func_001E1F10((struct Ptr_11D140 *)D_00249570);
         }
@@ -23,7 +23,7 @@ s32 func_0011D140(s32 a0, s32 a1)
         }
         return 0;
     }
-    s32* p = &D_00260E00;
+    s32* p = &D_00260E00.result;
     m = 0xFFFFFFFFu;
     *p = (s32)m;
     D_00260E40[1] = a1;
@@ -35,8 +35,8 @@ s32 func_0011D140(s32 a0, s32 a1)
         func_0011CE30();
         func_001F6C20(0);
     }
-    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, D_00260E40, 8, &D_00260E00, 4, 0, 0);
-    v1 = D_00260E00;
+    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, D_00260E40, 8, &D_00260E00.result, 4, 0, 0);
+    v1 = D_00260E00.result;
     if (w < 0) {
         if (D_eu_0025D6B8 == 0) {
             func_001E1F10((struct Ptr_11D140 *)D_002495C0);
@@ -47,7 +47,7 @@ s32 func_0011D140(s32 a0, s32 a1)
     if ((u32)v1 == 0xFFFFFFFFu) {
         do {
             func_001F6C20(0);
-        } while ((u32)D_00260E00 == 0xFFFFFFFFu);
+        } while ((u32)D_00260E00.result == 0xFFFFFFFFu);
     }
-    return D_00260E00;
+    return D_00260E00.result;
 }

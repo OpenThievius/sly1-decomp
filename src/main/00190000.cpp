@@ -25,7 +25,7 @@ void func_00192498(Obj_192498* self, s32* out)
 }
 
 s32 D_00269BCC = -1;
-extern void* D_00269C98[];
+extern void* D_00269C98[16];
 
 void* func_001925F0()
 {
@@ -180,7 +180,7 @@ u32 func_001907E0(u32 x)
     return (x & 1) ? 0 : x;
 }
 
-extern s32 D_00269BA4;
+s32 D_00269BA4 = 0;
 
 void func_00191EB0(void)
 {
@@ -852,7 +852,7 @@ s32 func_00192450(Obj_00192450* self)
 
 struct __attribute__((aligned(16))) Quad_192380 { s32 w[4]; };
 
-extern u8 D_00269BC0[];
+extern f32 D_00269BC0[3];
 extern u8* D_00261990;
 void func_001B9F30(void);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
@@ -927,7 +927,8 @@ extern s32 D_00262C64;
 extern u8* D_002623C0;
 extern u8 D_00248D20[];
 extern u8 D_00248D30[];
-extern u8 D_00269BD0[];
+struct Entry_269BD0 { s32 f0, f4, f8, fC; f32 f10, f14; s32 f18, f1C; f32 f20, f24; s32 f28, f2C, f30, f34, f38, f3C; };
+extern Entry_269BD0 D_00269BD0;
 extern u8 D_00269C10[];
 
 struct Scratch_192C58 { u8 bytes[0x30]; };
@@ -976,7 +977,7 @@ void func_00192C58(Self_192C58* self)
     } else {
         s32 v = self->f58C;
         if (v != 0) {
-            u8* g = D_00269BD0;
+            u8* g = (u8*)&D_00269BD0;
             *(s32*)(g + 0x28) = v;
             func_00157EF8(self->f584 + 0x140, D_00248D20, 1, g, D_00269C10, 0, 0);
         }
@@ -1316,7 +1317,7 @@ struct Obj_1935B0 {
 };
 struct Dst_1935B0 { char c; };
 
-extern u8 D_0024C418[];
+extern const char D_0024C418[24];
 void* func_00160B28(Obj_1935B0* p);
 s32 func_00160148(s32 v);
 s32 func_001E1FD0(Dst_1935B0* dst, const char* fmt, ...);
@@ -1327,7 +1328,7 @@ void func_001935B0(Obj_1935B0* self, Dst_1935B0* dst)
     s32 b = func_00160148((self->f19D8 << 8) | self->f19DC);
     s32 v = (s32)(self->fC * (1.0f / 60.0f));
     s32 t = v > 0 ? v : 1;
-    func_001E1FD0(dst, (const char*)D_0024C418, a, b, t / 60, t % 60);
+    func_001E1FD0(dst, D_0024C418, a, b, t / 60, t % 60);
 }
 
 struct Obj_190128 {
@@ -1580,3 +1581,8 @@ void func_00193318(Obj_193318* o)
     func_001529E0(&buf.f, 0, 0);
     func_00168A48(&buf);
 }
+
+f32 D_00269BC0[3] = { 1000.0f, 10.0f, 1.0f };
+Entry_269BD0 D_00269BD0 = { 0x18, -1, 0, 0, 1.0f, 2.0f, 0, 0, 1.0f, 2.0f, 0, 0, 0, 1, 0, 0 };
+void* D_00269C98[16] = { 0 };
+extern const char D_0024C418[24] = "%d%% - %s - %d:%02d";

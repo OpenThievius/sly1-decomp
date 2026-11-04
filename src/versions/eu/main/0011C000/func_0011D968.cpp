@@ -15,7 +15,7 @@ s32 func_0011D968(s32 id, s32 size, u8* data)
     func_0011D110(&D_0025C3C0, 1);
     while (func_001F8480(D_0027B4C8)) {
         if (D_eu_0025D6B8 == 0)
-            func_001E1F10(D_002494E8);
+            func_001E1F10((void*)D_002494E8);
         func_0011CE30();
         func_001F6C20(0);
     }
@@ -25,7 +25,7 @@ s32 func_0011D968(s32 id, s32 size, u8* data)
         func_001F8290(D_0027B4C8, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
     while (!func_0011D078()) {
     }
-    r = D_0025C3C0.result;
+    r = ((Req_0025C3C0*)&D_0025C3C0)->result;
     if (*D_0025C360[D_0025C380] != 0 && D_0025C384 == 0)
         func_0011DE18();
     return r;

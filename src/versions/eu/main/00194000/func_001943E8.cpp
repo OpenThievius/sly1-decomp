@@ -138,7 +138,7 @@ void func_001943E8(Self_1943E8_eu* self)
             return;
         }
         D_eu_0026BB30 = Clamp_1943E8::Of(D_eu_0026BB30 + dx * D_0026A22C, 438.0f, 874.0f);
-        v = Clamp_1943E8::Of(D_eu_0026BB34 + dy * D_0026A230, 15.0f, 129.0f);
+        v = Clamp_1943E8::Of(D_eu_0026BB34 + dy * D_0026A230.f0, 15.0f, 129.0f);
         D_eu_0026BB34 = v;
         {
             Gs_1943E8* gs = ((Gs_1943E8*)&D_00262490);
@@ -160,7 +160,7 @@ void func_001943E8(Self_1943E8_eu* self)
     case 11:
     case 16:
     case 17:
-        if (D_00264A58 != 1) {
+        if (D_00264A58.v[0] != 1) {
             func_001961C0(self);
             return;
         } else {
@@ -181,14 +181,14 @@ void func_001943E8(Self_1943E8_eu* self)
         }
         break;
     case 18:
-        if (D_00264A58 != 1) {
+        if (D_00264A58.v[0] != 1) {
             func_001961C0(self);
         }
         break;
     case 20: {
         u16* p;
         s32 found;
-        if (D_00264A58 != 1) {
+        if (D_00264A58.v[0] != 1) {
             func_001961C0(self);
         }
         found = 0;

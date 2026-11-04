@@ -1102,7 +1102,7 @@ struct Glob_148FF0 {
 };
 
 extern u8 D_0026C6C8[];
-extern u8 D_00261B60[];
+extern void* D_00261B60[28];
 extern u8 D_00261420[];
 
 f32 func_001EAAE0(f32 a, f32 b);
@@ -1135,7 +1135,7 @@ one_case:
         Child_148FF0* c = (Child_148FF0*)func_0019EA78(0x10, 0);
         if (c != 0) {
             c->f134 = self;
-            c->f130 = D_00261B60;
+            c->f130 = (u8*)D_00261B60;
             c->vtbl[0](c, 1.0f, (u8*)self + 0x140, 0);
             c->f20 = self;
             c->f50 = self->f110;
@@ -1450,7 +1450,7 @@ typedef void (*Fn0_148038)(void* self);
 typedef void (*Fn1_148038)(void* self, void* a);
 typedef void (*Fn1s_148038)(void* self, s32 a);
 
-extern u8 D_00261AB0[];
+extern f32 D_00261AB0[4];
 extern u8 D_002483D0[];
 extern u8 D_00248D30[];
 extern Quad_148038 D_00261AC0;
@@ -1477,7 +1477,7 @@ void func_00148038(Self_148038* self)
     } else {
         ((Fn0_148038)((Obj_148038*)obj)->vtbl[6])(obj);
         ((Fn1s_148038)((Obj_148038*)obj)->vtbl[25])(obj, 0);
-        func_00144128(*(Ctx_148038**)D_00261990, D_00261AB0, buf);
+        func_00144128(*(Ctx_148038**)D_00261990, (void*)D_00261AB0, buf);
         ((Fn1_148038)((Obj_148038*)obj)->vtbl[33])(obj, buf);
         ((Fn1_148038)((Obj_148038*)obj)->vtbl[34])(obj, D_002483D0);
         ((Fn1_148038)((Obj_148038*)obj)->vtbl[36])(obj, D_00248D30);
@@ -1545,7 +1545,7 @@ struct Locals_148298 {
 };
 
 extern u8 D_0026CE48[];
-extern u8 D_00261AD0[];
+extern void* D_00261AD0[28];
 
 void* func_0019EA78(s32 a, s32 b);
 void func_001481A0(void* self);
@@ -1567,7 +1567,7 @@ void func_00148298(void* self, s32 mode)
                 void* p = func_0019EA78(0x10, 0);
                 if (p != 0) {
                     New_148298* n = (New_148298*)p;
-                    n->p130 = D_00261AD0;
+                    n->p130 = (u8*)D_00261AD0;
                     n->p134 = self;
                     n->vtbl[0](n, s->pad140, 0, 1.0f);
                     n->p20 = self;
@@ -1687,3 +1687,26 @@ void func_0014B0C0(s32 n, f32* a, f32* l)
         l[(n - 1) * n + (n - 1)] = 0.0f;
     }
 }
+
+f32 D_00261AB0[4] = { -0.6f, 0.85f, 300.0f, 0.0f };
+Quad_148038 D_00261AC0 = { 0x40A00000, (s32)0xC3FA0000, 0, 0 };
+void* D_00261AD0[28] = {
+    (void*)0xBF59999A, (void*)0x3F4CCCCD, (void*)0x42C80000, 0,
+    (void*)0xBF800000, (void*)0xBF800000, 0, 0,
+    (void*)0xBF800000, (void*)0x40000000, 0, 0,
+    (void*)0x3F800000, (void*)0x40400000, 0, 0,
+    0, 0, (void*)0x3F800000, 0,
+    (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
+    (void*)func_001481A0, 0, 0, 0
+};
+f32 D_00261B40 = 0.05f;
+void* D_00261B60[28] = {
+    (void*)0xBD4CCCCD, (void*)0x3F4CCCCD, (void*)0x42C80000, 0,
+    (void*)0xBF800000, (void*)0xBF800000, 0, 0,
+    (void*)0xBF800000, (void*)0x40000000, 0, 0,
+    (void*)0x3F800000, (void*)0x40400000, 0, 0,
+    0, 0, (void*)0x3F800000, 0,
+    (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
+    (void*)(void (*)(void))func_00148F80, 0, 0, 0
+};
+void* D_0026EC68;

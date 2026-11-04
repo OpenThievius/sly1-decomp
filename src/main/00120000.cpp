@@ -990,7 +990,7 @@ struct Owner_122488 { u8 pad0[0x270]; f32* values; u8 pad1[0x20]; s32 flag; };
 struct Self_122488 { void** vt; Owner_122488* owner; u8 pad0[0xB]; s8 kind; };
 typedef f32 (*Get_122488)(void*, s32);
 
-extern u8 D_00260E60[];
+extern f32 D_00260E60[4];
 extern f32 D_0026186C;
 extern f32 D_00261860;
 extern f32 func_001EA4B8(void*, s32, f32, f32, f32);
@@ -2033,3 +2033,5 @@ extern const Fn_Table D_002196F8[4] = { (Fn_Table)func_00120130, (Fn_Table)func_
 extern const Fn_Table D_00219708[4] = { (Fn_Table)func_00120700, (Fn_Table)func_0011EF68, 0, (Fn_Table)func_0011EF70 };
 extern const Fn_Table D_00219718[4] = { (Fn_Table)func_001202F0, (Fn_Table)func_00120360, (Fn_Table)func_00120388, 0 };
 extern const Fn_Table D_00219728[4] = { (Fn_Table)func_001203A8, (Fn_Table)func_00120418, (Fn_Table)func_00120440, 0 };
+
+f32 D_00260E60[4] = { 3.0f, 1.0f, 0.1f, 0.0f };

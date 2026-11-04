@@ -2237,3 +2237,7 @@ void func_0015D4E0(Self_15D4E0* self, Item_15D4E0* item, Rect_15D4E0* r, Strm_15
         self->disp->fnB((u8*)self + self->disp->offB, 0, s);
     }
 }
+
+void* D_0026231C = 0;
+void* D_002623B0 = 0;
+volatile s32 D_002623B8 = 0;

@@ -26,7 +26,8 @@ extern void func_001F6A50(s32, s32);
 extern void func_001F6B60(s32);
 extern void func_001F6B40(s32);
 extern s32 func_0018B770(void*);
-extern u8 D_00264910[];
+struct Ent_264910 { s32 a, b, c; };
+extern Ent_264910 D_00264910[2];
 extern u8 D_00269990[];
 extern u8 D_00264A40[];
 
@@ -169,7 +170,6 @@ void func_0018A388(void* self)
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
 
-extern u8 D_00264910[];
 
 void func_001C7140(void* self);
 void func_00124DF8(void* self, s32 n, void* data);
@@ -769,14 +769,14 @@ struct Obj_1884C0 {
     Quad_1884C0 q30;
 };
 
-extern u8 D_0024B260[];
+extern const Quad_1884C0 D_0024B260;
 
 void func_001884C0(Obj_1884C0* self)
 {
     self->f0C = 0;
     self->f1C = 0;
     self->f2C = 0;
-    self->q30 = *(Quad_1884C0*)D_0024B260;
+    self->q30 = D_0024B260;
 }
 
 struct Obj_189350;
@@ -791,9 +791,10 @@ void func_00189350(Obj_189350* self, void* value)
 }
 
 // was NEAR: 2 lines: retail has addiu s2 (self+0xE30) before the first call and li s3,2 in its delay slot; ours swaps them. About 20 rewrites (for/do-while, init placement, decl order, cast offsets) all give the same two swapped lines.
-extern u8 D_00264928[];
-extern u8 D_00264950[];
-extern u8 D_00264960[];
+extern s32 D_00264928[10];
+extern s32 D_00264950[4];
+struct Ent_264960 { s32 key; f32 f; s32 v; };
+extern Ent_264960 D_00264960[6];
 
 void func_001C72A0(void* self);
 void func_001DDC38(void* sub, void* self);
@@ -823,7 +824,7 @@ void func_0018A3F0(Self_18A3F0* self)
     self->f7BC = self->fE00;
     self->fE10 = func_001B6290(self->fE0C, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
-        self->ids[n] = func_001CA758(self, ((s32*)D_00264950)[n]);
+        self->ids[n] = func_001CA758(self, D_00264950[n]);
     self->count = 6;
     self->tbl = (Ent_18A3F0*)func_0018D568(0x48, D_00264960);
     for (i = 0; i < self->count; i++) {
@@ -1151,7 +1152,7 @@ void func_00188A20(f32* in, f32* out)
     out[10] = ca * cb;
 }
 
-extern s32 D_002649B0[];
+s32 D_002649B0[5] = { 4, 5, 60, 41, 76 };
 struct Sub_18A830;
 s32 func_001300E8(Sub_18A830* a, s32 b);
 s32 func_001833F0(Sub_18A830* a, s32 b);
@@ -1254,7 +1255,7 @@ struct Obj_18B340 {
 void func_001A8C90(void* obj, s32 v);
 void func_001C9DE0(void* self, s32 code, void* req);
 void func_001B6598(void* dev, s32* out);
-extern f32 D_00264A34;
+f32 D_00264A34 = 20.0f;
 extern f32 D_00264A38;
 
 void func_0018B340(Self_18B340* self, s32 a1, Key_18B340* key)
@@ -1367,3 +1368,15 @@ done:
     func_0018D6F0();
     return ok;
 }
+
+// Data definitions.
+Ent_264910 D_00264910[2] = { { 0, 0x82, 0xC24 }, { 0, 0x83, 0xC74 } };
+s32 D_00264928[10] = { 1, 0x437, 0xE0C, 0, 0x440, 0xE18, 0, 0x441, 0xE1C, 0 };
+s32 D_00264950[4] = { 0x446, 0x447, 0x448, 0 };
+Ent_264960 D_00264960[6] = {
+    { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 },
+    { 0x3B, 80.0f, 0 }, { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }
+};
+f32 D_002649C8 = 0.25f;
+extern const Quad_1884C0 D_0024B260 = { 0, 0, 0, 0x3F800000 };
+extern const f32 D_0024B270[4] = { 3.4028235e38f, 0.0f, 0.0f, 0.0f };

@@ -127,8 +127,8 @@ struct Pk8_1C0A50 { u64 v; } __attribute__((packed));
 struct Ent_1C0A50 { s32 key; Pk8_1C0A50 a; Pk8_1C0A50 b; };
 struct Obj_1C0A50 { u8 pad[0x1D80]; s32 count; Ent_1C0A50 ents[16]; };
 
-extern Pk8_1C0A50 D_00274820;
-extern Pk8_1C0A50 D_00274828;
+Pk8_1C0A50 D_00274820 = { 0x40C0000040800000ULL };
+Pk8_1C0A50 D_00274828 = { 0x45FA0000453B8000ULL };
 
 void func_001C0A50(Obj_1C0A50* self, s32 key)
 {
@@ -306,7 +306,7 @@ void func_001C05D0(f32 x)
     func_0011D480(8, (s32)(x * 1024.0f));
 }
 
-extern s32 D_00274808[];
+s32 D_00274808[6] = { 0, 2, 3, 4, 9, 1 };
 
 void func_0011E328(s32 a, s32 b);
 void func_0011E360(s32 a, s32 b, s32 c);
@@ -336,7 +336,7 @@ void func_001C0AB8(Obj_1C0AB8* self, Pt_1C0AB8* p)
     }
 }
 
-extern f32 D_00274838[][4];
+extern f32 D_00274838[11][4];
 
 void func_0011D480(s32 slot, s32 value);
 
@@ -363,7 +363,7 @@ void func_001C0600(s32 column)
     func_0011D480(column, (s32)(prod * 1024.0f));
 }
 
-extern f32 D_00274838[][4];
+extern f32 D_00274838[11][4];
 
 void func_001C0600(s32 column);
 
@@ -377,7 +377,7 @@ struct __attribute__((packed)) Pk8_1C0B38 { u64 v; };
 struct Ent_1C0B38 { s32 key; Pk8_1C0B38 a; Pk8_1C0B38 b; };
 struct Obj_1C0B38 { u8 pad[0x1D80]; s32 count; Ent_1C0B38 ents[16]; };
 
-extern u8 D_002748E8[];
+extern u8 D_002748E8[4];
 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, void* a4, void* a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
 
@@ -507,8 +507,8 @@ struct Obj_1C33C8 {
     void* f720[16];
 };
 
-extern u8 D_00274A40[];
-extern u8 D_002749B0[];
+extern char D_00274A40[4];
+extern s32 D_002749B0[36];
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -651,7 +651,7 @@ void func_001C25B0(s32 first, ...) {
     if (r->f4C == 3) r->f4C = 0;
 }
 
-extern u8 D_00274758[];
+extern f32 D_00274758[11][4];
 extern u8* D_002623C0;
 
 void func_0018D800(void* dst, void* src, s32 count);
@@ -798,8 +798,8 @@ s32 func_001C14C0(KeyHolder_1C14C0* self, s32 key)
 
 struct TabA_24D2A8 { s32 v[42]; };
 struct TabB_24D350 { s32 v[25]; };
-extern TabA_24D2A8 D_0024D2A8;
-extern TabB_24D350 D_0024D350;
+extern const TabA_24D2A8 D_0024D2A8;
+extern const TabB_24D350 D_0024D350;
 extern s32 D_00274830;
 s32 func_001EAA70(s32 a, s32 b);
 
@@ -837,7 +837,7 @@ extern f32 D_00261858[];
 extern f32 D_00274A44;
 f32 D_00274A60[4] = { 4e+01f, 0.0f, 0.3f, 0.0f };
 extern u8 D_00248D20[];
-extern s32 D_0026E228;
+extern s32 D_0026E228[8];
 
 void func_00192B58(void* self, f32 t);
 void* func_0015A838(void* a, s32 b, s32 c, s32 d);
@@ -877,7 +877,7 @@ void func_001C34C8(Obj_1C34C8* self, f32 t)
     } else if (self->s680) {
         func_0012C7B0(self->p678, self, 0, &self->p67C, 0.0f, 1.0f);
         self->s694 = self->s694 - 1;
-        D_0026E228 = -1;
+        D_0026E228[0] = -1;
     }
     self->s680 = 0;
     f32 u;
@@ -1434,10 +1434,10 @@ struct Obj_1C3FC8 {
 extern f32 D_00261858[];
 extern Quad_1C3FC8 D_00248D30;
 extern u8 D_00274AA8[];
-extern s32 D_0026E228;
+extern s32 D_0026E228[8];
 extern u8 D_00261EF0[];
 extern u8 D_0026FF68[];
-extern f32 D_0024D560;
+extern const f32 D_0024D560[4];
 
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA408(f32 a);
@@ -1472,14 +1472,14 @@ void func_001C3FC8(Obj_1C3FC8* self, s32 state)
         func_001EA728(r, F(self, 0x644), 0.0f, D_00274AA8, (u8*)&q + 8);
         self->vt->f94(self, &q);
         W(self, 0x694) = 0;
-        D_0026E228 = -1;
+        D_0026E228[0] = -1;
         if (state == 3) func_00151E20(D_00261EF0, 1.0f);
     }
     f12 = 0.0f;
     switch (state) {
     case 0: s2 = P(self, 0x618); break;
     case 1: s2 = P(self, 0x61C); break;
-    case 2: s2 = P(self, 0x620); F(self, 0x640) = D_0024D560; break;
+    case 2: s2 = P(self, 0x620); F(self, 0x640) = D_0024D560[0]; break;
     case 3: s2 = P(self, 0x624); break;
     case 4:
         func_00194D30(D_0026FF68, 0, 0x1A);
@@ -1539,8 +1539,8 @@ struct Glob_1C30E8 { u8 pad[1]; };
 
 extern u8 D_002622A8[];
 extern u8 D_002483D0[];
-extern u8 D_00274998[];
-extern u8 D_002749A0[];
+extern u8 D_00274998[8];
+extern u8 D_002749A0[16];
 extern f32 D_00261858[];
 
 void func_001619C0(Builder_1C30E8* b);
@@ -1919,3 +1919,17 @@ void func_001C2430(s32 size, ...)
     c->f80 = (e->base & 0x0FFFFFFF) | 0x80000000;
     func_00202A80(c, (u32)e->tags & 0x0FFFFFFF);
 }
+
+// Data definitions (retail values)
+s32 D_0026E228[8] = { 0 };
+f32 D_00274758[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+f32 D_00274838[11][4] = { 0 };
+s32 D_00274830;
+u8 D_002748E8[4] = { 0 };
+u8 D_00274998[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
+u8 D_002749A0[16] = { 0 };
+s32 D_002749B0[36] = { 4, 1317, 1632, 4, 1320, 1580, 2, 354, 1420, 2, 355, 1424, 6, 352, 1412, 0, 1319, 1636, 0, 1321, 1560, 0, 1322, 1564, 0, 1323, 1568, 0, 1324, 1572, 0, 1325, 1652, 0, 1326, 1656 };
+char D_00274A40[4] = "\r";
+extern const TabA_24D2A8 D_0024D2A8 = { { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, 1, -5, -5, -5, -5, 1, 1, -5, -5, -5, 1, 1, 1, -5, -5, 1, 1, 1, 1, -5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+extern const TabB_24D350 D_0024D350 = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 3, 2, 1, 0 } };
+extern const f32 D_0024D560[4] = { 3.4028235e+38f, 0.0f, 0.0f, 0.0f };

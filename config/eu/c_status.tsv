@@ -434,7 +434,7 @@ func_0011C9E0	func_0011C9E0	match
 func_0011CA20	func_0011CA20	match	
 func_0011CA90	func_0011CA90	match	
 func_0011CBB0	func_0011CBB0	match	
-func_0011CBB8	func_0011CBB8	match	version-specific
+func_0011CBB8	func_0011CBB8	match	version-specific, rodata
 func_0011CE30	func_0011CE30	match	
 func_0011D078	func_0011D078	match	version-specific
 func_0011D110	func_0011D120	match	
@@ -1597,7 +1597,7 @@ func_00169780	func_00169DD8	match
 func_00169B18	func_0016A170	match	
 func_00169C58	func_0016A2B0	match	
 func_00169CA0	func_0016A2F8	match	
-func_00169CD8	func_0016A330	match	rodata
+func_00169CD8	func_0016A330	match	
 func_00169D20	func_0016A378	match	
 func_00169D58	func_0016A3B0	match	
 func_00169D90	func_0016A3E8	match	
@@ -1617,7 +1617,7 @@ func_0016A548	func_0016ABA0	match
 func_0016A580	func_0016ABD8	match	
 func_0016A5F0	func_0016AC48	match	
 func_0016A758	func_0016ADB0	match	
-func_0016A820	func_0016AE78	match	rodata
+func_0016A820	func_0016AE78	match	
 func_0016AA18	func_0016B070	match	
 func_0016AB38	func_0016B190	differs	the C is 924 bytes, retail's function 812
 func_0016AED8	func_0016B4C0	match	
@@ -2124,7 +2124,7 @@ func_001973D8	func_00198120	match
 func_00197458	func_001981A0	match	
 func_001974D8	func_00198220	match	
 func_00197788	func_001984D0	match	
-func_00197848	func_00198590	match	rodata
+func_00197848	func_00198590	match	
 func_00197A08	func_00198750	match	
 func_00197A68	func_001987B0	match	
 func_00197F10	func_00198C58	match	version-specific

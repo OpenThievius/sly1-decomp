@@ -94,7 +94,7 @@ void func_0017B598(void* self)
 }
 
 extern s32 D_00263E2C;
-extern s32 D_00263E30;
+s32 D_00263E30 = 0;
 
 struct Obj_17B5D0 { u8 pad0[0x558]; s32 f558; };
 
@@ -107,7 +107,8 @@ void func_0017B5D0(void* self)
     D_00263E30 = 0;
 }
 
-extern u8 D_00263E08[];
+struct Entry_263E08 { s32 kind; s32 id; s32 offset; };
+extern Entry_263E08 D_00263E08[];
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, int n, void* table);
@@ -178,7 +179,8 @@ struct Obj_0017AE00 {
     void* ptrC;
 };
 
-extern u8 D_00263D58[];
+struct Entry_263D58 { s32 kind; s32 id; s32 offset; };
+extern Entry_263D58 D_00263D58[];
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
@@ -291,7 +293,8 @@ struct Obj_1793F0 { u8 pad0[0x650]; void* f650; void* f654; void* f658; u8 pad1[
 struct Sub_1793F0 { u8 pad0[0xE0]; void* fE0; };
 struct Packed_1793F0 { f32 v; } __attribute__((packed));
 
-extern u8 D_00263AC8[];
+struct Entry_263AC8 { s32 kind; s32 id; s32 offset; };
+extern Entry_263AC8 D_00263AC8[];
 extern u8 D_00270650[];
 
 void func_00124A48(void* self);
@@ -977,9 +980,9 @@ struct Node_179590 {
 };
 
 extern u8 D_00248D30[];
-extern u8 D_00263C20[];
-extern u8 D_00263C30[];
-extern u8 D_00263C40[];
+extern f32 D_00263C20[];
+extern f32 D_00263C30[];
+extern f32 D_00263C40[];
 
 void func_001B9338(Node_179590* self, f32 t);
 void func_001794E0(Node_179590* self, Quad_179590* a, Quad_179590* b);
@@ -1145,3 +1148,58 @@ void func_00178D98(Self_178D98* self, s32 n, Node_178D98** items, Hit_178D98* ou
 done:
     func_0018D6F0();
 }
+
+Entry_263AC8 D_00263AC8[26] = {
+    { 0, 0x453, 0x688 },
+    { 0, 0x454, 0x694 },
+    { 0, 0x455, 0x6A0 },
+    { 0, 0x456, 0x6AC },
+    { 0, 0x457, 0x6B8 },
+    { 0, 0x458, 0x6C4 },
+    { 0, 0x459, 0x6C8 },
+    { 0, 0x45A, 0x6CC },
+    { 0, 0x44E, 0x654 },
+    { 4, 0x50, 0x67C },
+    { 4, 0x45, 0x680 },
+    { 4, 0x44C, 0x6E4 },
+    { 4, 0x44D, 0x6E8 },
+    { 0, 0x162, 0x58C },
+    { 0, 0x163, 0x590 },
+    { 4, 0x160, 0x584 },
+    { 32, 0x18D, 0x604 },
+    { 4, 0x45B, 0x674 },
+    { 4, 0x45C, 0x678 },
+    { 4, 0x465, 0x66C },
+    { 4, 0x466, 0x670 },
+    { 4, 0x45D, 0x650 },
+    { 5, 0x461, 0x65C },
+    { 5, 0x45F, 0x660 },
+    { 5, 0x45E, 0x664 },
+    { 5, 0x460, 0x668 }
+};
+
+Entry_263D58 D_00263D58[13] = {
+    { 0, 0x468, 0x584 },
+    { 0, 0x469, 0x56C },
+    { 0, 0x46A, 0x560 },
+    { 0, 0x46B, 0x578 },
+    { 0, 0x46C, 0x594 },
+    { 0, 0x46D, 0x5A0 },
+    { 0, 0x46E, 0x5AC },
+    { 0, 0x46F, 0x5B8 },
+    { 2, 0x470, 0x5C8 },
+    { 2, 0x471, 0x5D4 },
+    { 2, 0x472, 0x5E0 },
+    { 2, 0x473, 0x5EC },
+    { 2, 0x474, 0x5F8 }
+};
+
+Entry_263E08 D_00263E08[3] = {
+    { 0, 0x478, 0x55C },
+    { 0, 0x479, 0x560 },
+    { 0, 0x47A, 0x564 }
+};
+
+f32 D_00263C20[4] = { 0.0f, 20.0f, 0.0f, 0.0f };
+f32 D_00263C30[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
+f32 D_00263C40[3] = { 25.0f, 0.0f, 0.5f };

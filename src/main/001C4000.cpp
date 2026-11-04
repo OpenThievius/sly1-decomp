@@ -140,7 +140,7 @@ void func_001C4FA0(Obj_1C4FA0* self, Vec2_1C4FA0* v)
     self->vtbl[88](self);
 }
 
-extern u8 D_00274BF0[];
+extern f32 D_00274BF0[4];
 
 struct Obj_1C6E58 {
     u8 pad0[0x14];
@@ -175,7 +175,7 @@ void func_001C6E58(Obj_1C6E58* self)
     }
 }
 
-extern u8 D_00274C00[];
+extern f32 D_00274C00[4];
 
 struct Obj_1C6ED0 {
     u8 pad0[0x14];
@@ -277,9 +277,9 @@ struct Blk12_1C4458 { Pack8_1C4458 a; s32 b; };
 struct Obj_1C4458 { u8 p0[0x360]; f32 f360; u8 p364[0x6F0 - 0x364]; Quad_1C4458 f6F0; f32 f700; };
 
 extern f32 D_00274B20;
-extern u8 D_00274B30[];
-extern u8 D_00274B40[];
-extern u8 D_00274B50[];
+extern Quad_1C4458 D_00274B30;
+extern s32 D_00274B40[4];
+extern s32 D_00274B50[3];
 
 void func_001921A8(void* self);
 void func_001C5E50(void* self, f32 x);
@@ -290,7 +290,7 @@ void func_001C4458(Obj_1C4458* self)
     self->f700 = 1.0f;
     self->f360 = D_00274B20;
     func_001C5E50(self, 1.0f);
-    self->f6F0 = *(Quad_1C4458*)D_00274B30;
+    self->f6F0 = D_00274B30;
     *(Blk12_1C4458*)((u8*)self + 0x710) = *(Blk12_1C4458*)D_00274B40;
     *(Blk12_1C4458*)((u8*)self + 0x704) = *(Blk12_1C4458*)D_00274B50;
 }
@@ -430,13 +430,13 @@ void func_001C5EA8(void* self, f32 v);
 void func_001C8F20(void* node, s32 kind, s32 flag);
 s32 func_00141008(u8* table, s32 v);
 void func_001DBCC8(void* host, void* fn, void* ctx, s32 a3, s32 a4);
-extern u8 D_00274C30[];
+extern s32 D_00274C30[8];
 extern u8 D_00261420[];
 
 void func_001C72A0(Self_1C72A0* self)
 {
     func_001C44F0(self);
-    func_00124DF8(self, 2, D_00274C30);
+    func_00124DF8(self, 2, (u8*)D_00274C30);
     if (self->f720 == 0) {
         void* t = func_001CB5B8(self->host14);
         self->f720 = t;
@@ -536,7 +536,7 @@ struct Obj_1C6D00 {
     s32 f2220;
 };
 
-extern u8 D_00274BE0[];
+extern f32 D_00274BE0[4];
 extern f32 D_00274BD8;
 
 void func_001C6AA8(Obj_1C6D00* self, s32 mode, void* tbl, s32* nOut, Frame_1C6D00* f, f32 a, f32 b);
@@ -606,7 +606,8 @@ void func_001C7188(Obj_1C7188* self, s32 v)
 struct __attribute__((aligned(16))) Blk48_1C44F0 { s32 a, b, c, d, e, f, g, h, i, j, k, l; };
 struct Obj_1C44F0 { u8 p0[0x610]; s32 f610; s32 f614; u8 p618[0x620 - 0x618]; s32 f620; s32 f624; s32 f628; s32 f62C; u8 p630[0x660 - 0x630]; Blk48_1C44F0 f660; };
 
-extern u8 D_00274AD8[];
+struct Ent_274AD8 { s32 a; s32 b; s32 c; };
+extern Ent_274AD8 D_00274AD8[6];
 extern u8 D_002483D0[];
 
 void func_00124A48(void* self);
@@ -942,11 +943,11 @@ struct Obj_1C5E50 {
     f32 z;
 };
 
-extern Vec_1C5E50 D_00274B80;
+extern f32 D_00274B80[4];
 
 void func_001C5E50(Obj_1C5E50* self, f32 s)
 {
-    *(Vec_1C5E50*)&self->x = D_00274B80;
+    *(Vec_1C5E50*)&self->x = *(Vec_1C5E50*)D_00274B80;
     self->x *= s;
     self->y *= s;
     self->z *= 1.0f / Fpu::Sqrt(s);
@@ -958,12 +959,12 @@ void func_001BAC30(Self_1C7140* self, void* a1);
 void func_00124DF8(Self_1C7140* self, s32 a1, void* a2);
 void func_001CA7C0(Self_1C7140* self);
 void func_001CA8E8(Self_1C7140* self);
-extern u8 D_00274C20[];
+extern s32 D_00274C20[4];
 
 void func_001C7140(Self_1C7140* self, void* a1)
 {
     func_001BAC30(self, a1);
-    func_00124DF8(self, 1, (void*)D_00274C20);
+    func_00124DF8(self, 1, D_00274C20);
     func_001CA7C0(self);
     func_001CA8E8(self);
 }
@@ -1006,3 +1007,15 @@ s32 func_001C5248(Self_1C5248* self, Arg_1C5248* a, s32 idx)
     }
     return 0;
 }
+
+Ent_274AD8 D_00274AD8[6] = { {6, 0x36, 0x61C}, {6, 0x35, 0x618}, {6, 0x37, 0x628}, {6, 0x3A, 0x62C}, {6, 0x38, 0x620}, {6, 0x3B, 0x624} };
+Quad_1C4458 D_00274B30 = { 0x3F800000, (s32)0xBF800000, 0, 0 };
+s32 D_00274B40[4] = { 0x453B8000, 0, 0x40000000, 0 };
+s32 D_00274B50[3] = { 0x453B8000, 0, 0x3E800000 };
+f32 D_00274B80[4] = { 25.0f, 0.0f, 0.25f, 0.0f };
+f32 D_00274BD8 = -1.0f;
+f32 D_00274BE0[4] = { 175.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00274BF0[4] = { 250.0f, 0.0f, 125.0f, 0.0f };
+f32 D_00274C00[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
+s32 D_00274C20[4] = { 2, 0x195, 0x87C, 0 };
+s32 D_00274C30[8] = { 2, 0x194, 0x750, 6, 0x50, 0x734, 0, 0 };

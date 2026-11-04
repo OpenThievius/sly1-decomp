@@ -6,7 +6,7 @@ struct Buf_19DF48 { u8 raw[0x30]; };
 typedef void (*Fn_19DF48)(void);
 struct Row_19DF48 { Fn_19DF48 fn; u8 pad0[8 - 4]; s32 x8; u8 pad1[0x80 - 12]; };
 
-extern u8 D_0026AC20[];
+extern s32 D_0026AC20[];
 extern u8 D_0026AC30[];
 
 void func_001611B8(void* self);
@@ -584,7 +584,7 @@ extern u8 D_0060478C[];
 extern u8 D_002622A8[];
 extern u8 D_0026ABF0[];
 extern u8 D_0026AC00[];
-extern u8 D_0026AC20[];
+extern s32 D_0026AC20[];
 extern u8* D_00275710;
 
 void func_00152B38(void* self);
@@ -1356,9 +1356,9 @@ void func_0019CC10(Obj_19C728* self, f32* out, f32 a, f32 b, f32 c);
 void func_001399F8(void* g, s32 a, s32 b, void* c);
 void func_0012CD78(f32 a, f32 b, Gr_19C728* g, void* r1, void* r2, s32 r3, void* r4, s32 r5, s32 r6, s32 r7);
 
-extern u8 D_0026ABD0[];
-extern u8 D_0026ABE0[];
-extern u8 D_0026ABD8[];
+extern s32 D_0026ABD0[];
+extern s32 D_0026ABE0[];
+extern s32 D_0026ABD8[];
 
 void func_0019C728(Obj_19C728* self)
 {
@@ -1522,3 +1522,8 @@ void func_0019E558(Self_19E558* self)
         ((void (*)(Self_19E558*))self->vtbl[7])(self);
     }
 }
+
+s32 D_0026ABD0[2] = { 0x130, 0x132 };
+s32 D_0026ABD8[2] = { 2, 0 };
+s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
+s32 D_0026AC20[4] = { 0, 0, 0, 0 };

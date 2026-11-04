@@ -243,8 +243,8 @@ void func_001E2988(void)
 
 s32 func_001E2100(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
 
-extern u8 D_00275980[];
-void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : D_00275980; }
+f32 D_00275980[16] = { -450.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f, 0, 0, 125.0f, 1.0f, 0, 0 };
+void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
 struct Obj_001E29E8 { u8 pad[0x360]; f32 a; f32 b; f32 c; };
 void func_001E29E8(Obj_001E29E8* self, f32 value) { self->b = value; self->c = 1.0f; self->a = value; }
@@ -344,7 +344,7 @@ void func_001E30A0(Obj_1E30A0* self)
 
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
-extern u8 D_00275940[];
+u8 D_00275940[0x18] = "0123456789abcdef";
 
 u64 func_001FBE00(u64 value, u64 radix);
 s64 func_001FC3D0(u64 value, u64 radix);
@@ -369,9 +369,9 @@ s32 func_001E0F58(u8* buf, s32 len, u64 value, u32 radixArg)
     return count;
 }
 
-extern u8 D_00275980[];
-extern u8 D_00275A10[];
-extern u8 D_00275A20[];
+extern f32 D_00275980[];
+f32 D_00275A10[4] = { 0, 0.5f, 0, 0 };
+f32 D_00275A20[2] = { 0, 3.4028235e38f };
 
 void func_00123ED0(void* self);
 
@@ -401,7 +401,7 @@ void func_001E2520(void* self)
     *(s32*)(p + 0x430) = -1;
     *(Quad_2520*)(p + 0x450) = *(Quad_2520*)D_00275A10;
     {
-        u8* src = D_00275A20;
+        u8* src = (u8*)D_00275A20;
         *(Pack8_2520*)(p + 0x460) = *(Pack8_2520*)src;
     }
     *(s32*)(p + 0x398) = -1;
@@ -480,7 +480,7 @@ extern Glob_1E00B0* D_00275710;
 extern Cam_1E00B0* D_002623C8;
 extern Pool_1E00B0 D_00262C70;
 extern f32 D_0026185C;
-extern s32 D_002623DC;
+s32 D_002623DC = 0;
 extern s32 D_002701C4;
 void func_001AA298(Obj_1E00B0* q);
 void func_0016EC20(Pool_1E00B0* q, s32 n);
@@ -730,12 +730,12 @@ struct Val_1E1028 {
     u64 v;
 };
 
-extern u16 D_0024E3D0;
-extern u16 D_0024E3D8;
-extern u16 D_0024E3E0;
-extern u8 D_0024E3E8[];
-extern u16 D_0024E3F0;
-extern u8 D_0024E3F8[];
+extern const u16 D_0024E3D0[4];
+extern const u16 D_0024E3D8[4];
+extern const u16 D_0024E3E0[4];
+extern const char D_0024E3E8[8];
+extern const u16 D_0024E3F0[4];
+extern const char D_0024E3F8[8];
 
 s32 func_001E0E18(Fmt_1E1028* self, Val_1E1028* v);
 s32 func_001E2100(char* p);
@@ -774,11 +774,11 @@ void func_001E1028(Fmt_1E1028* self, Sink_1E1028* sink, u64 value)
         case 'd':
         case 'i':
             if (neg) {
-                *(u16*)pfx = D_0024E3D0;
+                *(u16*)pfx = D_0024E3D0[0];
             } else if (self->f4) {
-                *(u16*)pfx = D_0024E3D8;
+                *(u16*)pfx = D_0024E3D8[0];
             } else if (self->f8) {
-                *(u16*)pfx = D_0024E3E0;
+                *(u16*)pfx = D_0024E3E0[0];
             }
             zeros -= func_001E2100(pfx);
             break;
@@ -790,7 +790,7 @@ void func_001E1028(Fmt_1E1028* self, Sink_1E1028* sink, u64 value)
             break;
         case 'o':
             if (self->fC) {
-                *(u16*)pfx = D_0024E3F0;
+                *(u16*)pfx = D_0024E3F0[0];
             }
             break;
         case 'x':
@@ -1041,8 +1041,8 @@ struct Spec_001E1A08 {
     s32 f00; s32 f04; s32 f08; u8 pad0C[4]; s32 f10; s32 f14; s32 f18;
     s32 i1C; s32 i20; s32 i24; s32 i28; u8 ch; u8 pad2D[3]; s32 f30;
 };
-extern char D_0024E478[]; extern char D_0024E480[]; extern char D_0024E488[];
-extern char D_0024E490[]; extern char D_0024E498[];
+extern const char D_0024E478[8]; extern const char D_0024E480[8]; extern const char D_0024E488[8];
+extern const char D_0024E490[8]; extern const char D_0024E498[8];
 
 s32 func_001E2100(const char* s);
 s32 func_001D7190(Ctx_001E1A08* c, const char* s, s32 n);
@@ -1161,7 +1161,7 @@ struct Obj_1E0CD0 {
     s32 f1C;
 };
 
-extern u8 D_0024E2E0[];
+extern const char D_0024E2E0[16];
 
 s32 func_001E2100(Str_1E0CD0* p);
 
@@ -1188,9 +1188,9 @@ void func_001E17A8(Spec_001E1A08* spec, Ctx_001E1A08* ctx, double value)
     neg = value < 0.0;
     if (neg) value = 0.0 - value;
     sign[0] = 0;
-    if (neg) *(u16*)sign = D_0024E3D0;
-    else if (spec->f04) *(u16*)sign = D_0024E3D8;
-    else if (spec->f08) *(u16*)sign = D_0024E3E0;
+    if (neg) *(u16*)sign = D_0024E3D0[0];
+    else if (spec->f04) *(u16*)sign = D_0024E3D8[0];
+    else if (spec->f08) *(u16*)sign = D_0024E3E0[0];
     slen = func_001E2100(sign);
     len = func_001E1498(buf, 0x1B5, spec, value);
     buf[len] = 0;
@@ -1231,7 +1231,7 @@ void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
     u8 pad;
 
     if (str == 0) {
-        str = (const char*)D_0024E2E0;
+        str = D_0024E2E0;
     }
     right = 0;
     n = func_001E2100((Str_1E0CD0*)str);
@@ -1285,13 +1285,13 @@ s8 func_001E13D0(Obj_1E13D0* self0, s32 a, s32 b)
 struct VT_1E02C8 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
 struct Obj_1E02C8 { VT_1E02C8* vt; u8 pad04[0x254]; f32* f258; s32 f25C_pad; s32 f260; f32 f264; s32 f268; s32 f26C; };
 struct Cnt_1E02C8 { u8 pad[0x440]; s32 f440; };
-struct Buf_1E02C8 { char c[1]; };
+struct Buf_1E02C8 { char c[0x40]; };
 struct X_1E02C8 { u8 pad[4]; };
 struct Y_1E02C8 { u8 pad[4]; };
 
 extern Cnt_1E02C8* D_002623C4;
 extern s32 D_002623DC;
-extern Buf_1E02C8 D_00275900;
+Buf_1E02C8 D_00275900 = {};
 extern X_1E02C8 D_00264A40;
 extern Y_1E02C8 D_0026FF68;
 
@@ -1413,8 +1413,8 @@ struct Spec_1E1498 {
 };
 
 extern u8 D_00275940[];
-extern char D_0024E468[];
-extern char D_0024E470[];
+extern const char D_0024E468[8];
+extern const char D_0024E470[8];
 
 void func_001E2138(char* dst, char* src);
 s32 func_001E2100(char* p);
@@ -1435,8 +1435,8 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     Bits_001E1498 bits;
     bits.d = v;
     if ((bits.u & 0x7FF0000000000000UL) == 0x7FF0000000000000UL) {
-        char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? D_0024E468 : D_0024E470;
-        func_001E2138(buf, s);
+        const char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? D_0024E468 : D_0024E470;
+        func_001E2138(buf, (char*)s);
         return func_001E2100(buf);
     }
     char* out = buf;
@@ -1629,3 +1629,18 @@ void func_001E0678(Obj_1E0678* self)
         func_0015C900(self->f4);
     }
 }
+
+extern const u16 D_0024E3D0[4] = { 0x2D };
+extern const u16 D_0024E3D8[4] = { 0x2B };
+extern const u16 D_0024E3E0[4] = { 0x20 };
+extern const char D_0024E3E8[8] = "0b";
+extern const u16 D_0024E3F0[4] = { 0x30 };
+extern const char D_0024E3F8[8] = "0x";
+extern const char D_0024E478[8] = "\n";
+extern const char D_0024E480[8] = ",\n";
+extern const char D_0024E488[8] = "{ ";
+extern const char D_0024E490[8] = ", ";
+extern const char D_0024E498[8] = " }";
+extern const char D_0024E2E0[16] = "(null)";
+extern const char D_0024E468[8] = "(nan)";
+extern const char D_0024E470[8] = "(inf)";

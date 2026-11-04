@@ -116,7 +116,7 @@ void func_001D1200(Thing_1D1200* self, s32 n)
     }
 }
 
-struct __attribute__((aligned(16))) Blob_274E60_1D1260 { u8 bytes[0x90]; };
+struct __attribute__((aligned(16))) Blob_274E60_1D1260 { f32 f[36]; };
 
 struct __attribute__((aligned(16))) Obj_1D1260 {
     u8 p0[0x2D4];
@@ -198,7 +198,7 @@ struct Obj_1D3290 { VFn_1D3290* vtbl; };
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
-extern u8 D_00274F90[];
+extern s32 D_00274F90[4];
 
 void func_001D3290(Obj_1D3290* self)
 {
@@ -457,7 +457,8 @@ extern s32 D_00274F74;
 extern Glob_1D29C8* D_002623C0;
 extern f32 D_00261854;
 extern Obj_1D29C8 D_0026EC70;
-extern s32 D_00274F58[];
+extern s32 D_00274F58[7];
+extern const char D_0024DB20[];
 
 void func_00175170(Ctx_1D29C8* self, s32 a, s32 b);
 s32 func_00182FC8(Sub_1D29C8* self);
@@ -507,3 +508,15 @@ tail:
         D_002623C0->f19FC = mode;
     }
 }
+
+Blob_274E60_1D1260 D_00274E60 = {
+    { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+      -225.0f, 1.0f, 0.0f, 0.0f, 20.0f, 1.0f, 0.0f, 0.0f,
+      -3.40282347e+38f, 3.40282347e+38f, -3.40282347e+38f, 3.40282347e+38f, -3.40282347e+38f, 3.40282347e+38f,
+      0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f }
+};
+s32 D_00274F58[7] = {
+    (s32)D_0024DB20, (s32)D_0024DB20 + 0x10, (s32)D_0024DB20 + 0x20, (s32)D_0024DB20 + 0x30,
+    (s32)D_0024DB20 + 0x40, (s32)D_0024DB20 + 0x50, (s32)D_0024DB20 + 0x60
+};
+s32 D_00274F90[4] = { 0x22, 0x152, 0x558, 0 };

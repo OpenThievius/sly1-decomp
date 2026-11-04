@@ -228,10 +228,12 @@ struct __attribute__((aligned(16))) Obj_00185358 {
     Quad_00185358 q50; Pk8_00185358 p60; u8 pad3[8]; Quad_00185358 q70; Pk8_00185358 p80;
 };
 
-extern u8 D_00264770[];
-extern u8 D_00264780[];
-extern u8 D_00264790[];
-extern u8 D_002647A0[];
+struct __attribute__((aligned(16))) Vec4_264770 { f32 x, y, z, w; };
+struct Vec2_2647A0 { f32 a, b; };
+extern Vec4_264770 D_00264770;
+extern Vec4_264770 D_00264780;
+extern Vec4_264770 D_00264790;
+extern Vec2_2647A0 D_002647A0;
 
 void func_00121338(void* self);
 
@@ -240,10 +242,10 @@ void func_00185358(Obj_00185358* self)
     func_00121338(self);
     self->f20 = -1;
     self->f40 = 800.0f;
-    *(Quad_00185358*)&self->q50 = *(Quad_00185358*)D_00264770;
-    self->p60 = *(Pk8_00185358*)D_00264780;
-    self->q70 = *(Quad_00185358*)D_00264790;
-    self->p80 = *(Pk8_00185358*)D_002647A0;
+    *(Quad_00185358*)&self->q50 = *(Quad_00185358*)&D_00264770;
+    self->p60 = *(Pk8_00185358*)&D_00264780;
+    self->q70 = *(Quad_00185358*)&D_00264790;
+    self->p80 = *(Pk8_00185358*)&D_002647A0;
     self->f44 = 1;
     self->f48 = -1;
 }
@@ -251,7 +253,7 @@ void func_00185358(Obj_00185358* self)
 struct IndexPair_185C18 { s32 a; s32 b; };
 struct Weight_264840 { f32 a; f32 b; };
 
-extern Weight_264840 D_00264840[];
+extern Weight_264840 D_00264840[13];
 extern s32 D_00262C64;
 
 f32 func_00185C18(IndexPair_185C18* p)
@@ -267,7 +269,7 @@ f32 func_00185C18(IndexPair_185C18* p)
 struct IndexPair_185CA0 { s32 a; s32 b; };
 struct Weight_2648A8 { f32 a; f32 b; };
 
-extern Weight_2648A8 D_002648A8[];
+extern Weight_2648A8 D_002648A8[13];
 
 f32 func_00185CA0(IndexPair_185CA0* p)
 {
@@ -601,8 +603,8 @@ void func_001853F0(Node_001853F0* self, void* obj, Quad_001853F0* src)
     }
 }
 
-extern const u8 D_0024B248[];
-extern const u8* D_002647A8[];
+extern const char D_0024B248[16];
+extern const u8* D_002647A8[6];
 void func_00140B60(void* buf, const u8* name, s32 n);
 void func_001F7BE8(s32 a);
 s32 func_00203548(s32 a);
@@ -619,7 +621,7 @@ s32 func_001F9A90(void* buf, s32 a, s32 b);
 void func_001858F8()
 {
     u8 buf[0x100];
-    func_00140B60(buf, D_0024B248, 1);
+    func_00140B60(buf, (const u8*)D_0024B248, 1);
     func_001F7BE8(0);
     func_00203548(0);
     if (func_00140968() == 0) {
@@ -890,3 +892,46 @@ void func_001867C8(s32 count, Edge_1867C8* base, s32* outCount, s32* keys, Edge_
     }
     *outCount = n;
 }
+
+extern const char D_0024B1E8[];
+
+Vec4_264770 D_00264770 = { 0.0f, 1.0f, 0.0f, 0.0f };
+Vec4_264770 D_00264780 = { -3.4028234663852886e38f, 3.4028234663852886e38f, 0.0f, 0.0f };
+Vec4_264770 D_00264790 = { 0.0f, 1.0f, 0.0f, 0.0f };
+Vec2_2647A0 D_002647A0 = { -1.0f, 1.0f };
+const u8* D_002647A8[6] = {
+    (const u8*)D_0024B1E8, (const u8*)D_0024B1E8 + 16, (const u8*)D_0024B1E8 + 32,
+    (const u8*)D_0024B1E8 + 48, (const u8*)D_0024B1E8 + 64, (const u8*)D_0024B1E8 + 80,
+};
+s32 D_00264838;
+Weight_264840 D_00264840[13] = {
+    {1.0f, 0.5f},
+    {3.0f, 2.4f},
+    {1.0f, 0.4f},
+    {1.0f, 0.5f},
+    {1.0f, 0.4f},
+    {1.0f, 1.0f},
+    {5.0f, 0.5f},
+    {1.0f, 1.5f},
+    {3.0f, 1.5f},
+    {3.0f, 2.4f},
+    {1.0f, 0.5f},
+    {1.0f, -10.0f},
+    {1.0f, -10.0f}
+};
+Weight_2648A8 D_002648A8[13] = {
+    {1.0f, 0.5f},
+    {5.0f, 1.0f},
+    {1.0f, 0.8f},
+    {1.0f, 0.4f},
+    {1.0f, 0.6f},
+    {1.0f, 0.9f},
+    {1.0f, 0.1f},
+    {1.0f, -1.0f},
+    {1.0f, -1.0f},
+    {1.0f, -1.0f},
+    {1.0f, -1.0f},
+    {1.0f, 0.5f},
+    {1.0f, 1.0f}
+};
+extern const char D_0024B248[16] = "ioprp243.img";

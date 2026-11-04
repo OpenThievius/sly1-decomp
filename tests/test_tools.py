@@ -553,8 +553,16 @@ class WholeFileTest(unittest.TestCase):
         whole = (0x2492F0, 0x134, "value.o", ".rodata", "D_002492F0")
         plan, covered = c_layout.data_plan(chunks, [whole])
         self.assertEqual([k for k, _ in plan], ["c", "run"])
-        with self.assertRaises(c_layout.LayoutError):  # a global of its own may not
-            c_layout.data_plan(chunks, [(0x2492F0, 0x134, "x.o", ".rodata.D_002492F0", "D_002492F0")])
+        with self.assertRaises(c_layout.LayoutError):  # a global of its own may not, before a word
+            c_layout.data_plan([("D_002492F0", 0x2492F0, ["a"]), ("D_0024942C", 0x24942C, ["b"])],
+                               [(0x2492F0, 0x134, "x.o", ".rodata.D_002492F0", "D_002492F0")])
+
+    def test_a_global_may_end_in_the_padding_before_an_8_aligned_label(self):
+        chunks = [("D_00000100", 0x100, ["a"]), ("D_00000108", 0x108, ["b"])]
+        plan, _ = c_layout.data_plan(chunks, [(0x100, 4, "x.o", ".data.D_00000100", "D_00000100")])
+        self.assertEqual([k for k, _ in plan], ["c", "run"])
+        with self.assertRaises(c_layout.LayoutError):  # not from the middle of a word
+            c_layout.data_plan(chunks, [(0x100, 2, "x.o", ".data.D_00000100", "D_00000100")])
 
     def test_an_address_in_a_whole_file_belongs_to_it(self):
         with tempfile.TemporaryDirectory() as d:

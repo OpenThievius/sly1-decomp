@@ -100,7 +100,8 @@ void func_0014EE70(Obj_14EE70* self)
     }
 }
 
-extern u8 D_00261CC8[];
+struct Entry_261CA0 { s32 a, b, c; };
+Entry_261CA0 D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 idx, void* table);
 
@@ -794,7 +795,7 @@ struct Self_14F920 {
 typedef void (*VFn_14F920)(void* self);
 typedef void (*VFn_14F920Arg)(void* self, s32 x);
 
-extern u8 D_00261CE0[];
+Entry_261CA0 D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
 
 void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -871,7 +872,7 @@ struct Obj_14C138 {
 
 extern Step_14C138* D_002623C8;
 extern f32 D_00275C60[];
-extern u8 D_00261CA0[];
+Entry_261CA0 D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
 void func_00124A48(Obj_14C138* self);
 void func_00124DF8(Obj_14C138* self, s32 n, void* table);
@@ -1770,3 +1771,9 @@ void func_0014C2F0(Obj_14C2F0* o)
         o->f45C = D_00261858[1];
     }
 }
+
+extern const Params_0014C018 D_00249F00 = {
+    { 0x41000000, 0x40C00000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A, 0x3F19999A, 0x3F4CCCCD, 0x3FA66666, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A },
+    { 3.5f, 5.0f }, { 2.0f, 2.5f },
+    { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F59999A, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F4CCCCD, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000 }
+};

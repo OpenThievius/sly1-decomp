@@ -1191,9 +1191,9 @@ void func_0011B060(Quad_118F48* q, int mode);
 void func_0011B0A8(Quad_118F48* a, Quad_118F48* b);
 void func_0011B538(Quad_118F48* q, int n);
 void func_0011A080(Quad_118F48* t, void* n, s32 c);
-void func_001E1F10(void* x);
+void func_001E1F10(const char* x);
 s32 func_00113730(Quad_118F48* t, s32 mode, void* a, s32 c);
-extern u8 D_00249200[];
+extern const char D_00249200[];
 
 void* func_00118F48(void* self, void* p, s32 x)
 {
@@ -1931,3 +1931,5 @@ void func_0011A850(Stk_11A850* self)
         }
     }
 }
+
+extern const char D_00249200[16] = "Splice assert: ";

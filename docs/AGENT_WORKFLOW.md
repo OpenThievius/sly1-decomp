@@ -195,7 +195,9 @@ Measured on this compiler; add to this list when you learn something.
   Every other file keeps it `extern`. Each global gets its own section (`-fdata-sections`), and
   `tools/c_layout.py` puts it at the address its name gives, in place of the disassembly's labels it
   covers, which stay defined at their addresses. It must start at a label of
-  `asm/us/data/<section>.<section>.s` and end where a later label (or jump table) starts. The full build is the check: a
+  `asm/us/data/<section>.<section>.s` and end where a later label (or jump table) starts, or one
+  word before an 8-aligned label: the padding GCC leaves before an aggregate of 8 bytes or more
+  (a scalar `f32 D_X = 150.0f;` followed by four zero bytes, not an `f32[2]`). The full build is the check: a
   wrong value makes it `DIFFER` at that global's offset. With GCC 2.95, a C++ global goes to
   `.data` even with no initialiser (`= 0` too); only a file's `static` variables go to `.bss`.
   So a `.bss` label (from 0x27B300) is a `static` of the one file that uses it, named

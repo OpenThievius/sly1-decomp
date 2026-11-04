@@ -24,10 +24,10 @@ void func_0011CBB8(s32 flags)
         for (n = 10000; --n != -1;) {
         }
     } while (((Rpc_0011CBB8*)D_0027B4C8)->f24 == 0);
-    D_0025C388 = 0;
+    D_0025C388.busy = 0;
     D_0025C390.fn = 0;
     D_0025C390.arg = 0;
-    D_00260E00 = 0;
+    D_00260E00.result = 0;
     do {
         ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4F0, 0x123457, 0) >= 0, 0xC4);
         for (n = 10000; --n != -1;) {

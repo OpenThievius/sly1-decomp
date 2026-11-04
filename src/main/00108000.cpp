@@ -343,7 +343,7 @@ struct __attribute__((aligned(16))) Quad_001083C8 { s32 a, b, c, d; };
 struct __attribute__((packed)) Key8_001083C8 { u8 b[8]; };
 struct Frame_001083C8 { Quad_001083C8 q; Key8_001083C8 k; Quad_001083C8 t; s32 o1; s32 o2; };
 struct Arg_001083C8;
-extern Key8_001083C8 D_00248F90;
+extern const s32 D_00248F90[2];
 
 void func_0011B008(Quad_001083C8* q);
 void func_0011B018(void* dst, Quad_001083C8* q);
@@ -357,7 +357,7 @@ void* func_001083C8(void* self, Arg_001083C8* p, int unused, int c)
 {
     Frame_001083C8 f;
     func_0011B008(&f.q);
-    f.k = D_00248F90;
+    f.k = *(Key8_001083C8*)D_00248F90;
     (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
     func_0011B0A8(&f.q, &f.t);
     func_0011B060(&f.t, 2);
@@ -372,7 +372,7 @@ struct __attribute__((aligned(16))) Quad_001089C8 { s32 a, b, c, d; };
 struct __attribute__((packed)) Key8_001089C8 { u8 b[8]; };
 struct Frame_001089C8 { Quad_001089C8 q; Key8_001089C8 k; Quad_001089C8 t; s32 o1; s32 o2; };
 struct Arg_001089C8;
-extern Key8_001089C8 D_00248F98;
+extern const s32 D_00248F98[2];
 
 void func_0011B008(Quad_001089C8* q);
 void func_0011B018(void* dst, Quad_001089C8* q);
@@ -386,7 +386,7 @@ void* func_001089C8(void* self, Arg_001089C8* p, int unused, int c)
 {
     Frame_001089C8 f;
     func_0011B008(&f.q);
-    f.k = D_00248F98;
+    f.k = *(Key8_001089C8*)D_00248F98;
     (void)func_001C23B0(&f.t, 2, c, &f.k, &f.o1, &f.o2);
     func_0011B0A8(&f.q, &f.t);
     func_0011B060(&f.t, 2);
@@ -404,7 +404,7 @@ struct __attribute__((packed)) Pk_00108DA8 { u8 b[8]; };
 struct Frame_00108DA8 { Quad_00108DA8 q; Pk_00108DA8 k; u8 pad[8]; Quad_00108DA8 t; s32 n; f32 out; };
 struct Obj_00108DA8 { u8 pad[0x1]; };
 
-extern u8 D_00248FC0[];
+extern const s32 D_00248FC0[2];
 
 void func_0011B008(Quad_00108DA8* q);
 void func_0011B018(void* dst, Quad_00108DA8* src);
@@ -434,7 +434,7 @@ struct __attribute__((packed)) Key8_1082E8 { u64 v; };
 struct Key_1082E8 { Key8_1082E8 v; s32 w; };
 struct Frame_1082E8 { Quad_1082E8 q; Key_1082E8 k; Quad_1082E8 t; s32 o0, o1, o2; };
 
-extern u8 D_00248F80[];
+extern const s32 D_00248F80[4];
 
 void func_0011B008(Quad_1082E8* q);
 void func_0011B018(void* out, Quad_1082E8* q);
@@ -467,7 +467,7 @@ struct Key_00108CC8 { Key8_00108CC8 v; s32 w; };
 struct Frame_00108CC8 { Quad_00108CC8 q; Key_00108CC8 k; Quad_00108CC8 t; s32 o0, o1, o2; };
 struct Obj_00108CC8;
 
-extern u8 D_00248FB0[];
+extern const s32 D_00248FB0[4];
 
 void func_0011B008(Quad_00108CC8* q);
 void func_0011B018(void* out, Quad_00108CC8* q);
@@ -500,7 +500,7 @@ struct Key_001090C8 { Key8_001090C8 v; s32 w; };
 struct Frame_001090C8 { Quad_001090C8 q; Key_001090C8 k; Quad_001090C8 t; s32 o0, o1, o2; };
 struct Obj_001090C8;
 
-extern u8 D_00248FC8[];
+extern const s32 D_00248FC8[4];
 
 void func_0011B008(Quad_001090C8* q);
 void func_0011B018(void* out, Quad_001090C8* q);
@@ -540,7 +540,7 @@ void func_0011B538(Quad_1093B8* q, s32 n);
 s32 func_001C23B0(Quad_1093B8* t, s32 mode, s32 c, void* z, void* z2, void* z3);
 void func_001D32D8(Obj_1093B8* self, s32 a, s32 b);
 
-extern u8 D_00248FD8[];
+extern const s32 D_00248FD8[2];
 
 void* func_001093B8(void* self, Obj_1093B8* x, s32 unused, s32 c)
 {
@@ -563,7 +563,7 @@ struct __attribute__((packed)) Pk_00108E70 { u8 b[8]; };
 struct Frame_00108E70 { Quad_00108E70 q; Pk_00108E70 k; u8 pad[8]; Quad_00108E70 t; s32 n; f32 out; };
 struct Obj_00108E70 { u8 pad[0x1]; };
 
-extern u8 D_00248FC0[];
+extern const s32 D_00248FC0[2];
 
 void func_0011B008(Quad_00108E70* q);
 void func_0011B018(void* dst, Quad_00108E70* src);
@@ -593,7 +593,7 @@ struct __attribute__((packed)) Pk_00108F38 { u8 b[8]; };
 struct Frame_00108F38 { Quad_00108F38 q; Pk_00108F38 k; u8 pad[8]; Quad_00108F38 t; s32 n; f32 out; };
 struct Obj_00108F38 { u8 pad[0x1]; };
 
-extern u8 D_00248FC0[];
+extern const s32 D_00248FC0[2];
 
 void func_0011B008(Quad_00108F38* q);
 void func_0011B018(void* dst, Quad_00108F38* src);
@@ -625,7 +625,7 @@ struct __attribute__((packed)) Pk_00109000 { u8 b[8]; };
 struct Frame_00109000 { Quad_00109000 q; Pk_00109000 k; u8 pad[8]; Quad_00109000 t; s32 n; f32 out; };
 struct Obj_00109000 { u8 pad[0x1]; };
 
-extern u8 D_00248FC0[];
+extern const s32 D_00248FC0[2];
 
 void func_0011B008(Quad_00109000* q);
 void func_0011B018(void* dst, Quad_00109000* src);
@@ -658,7 +658,7 @@ struct Key_00108BE8 { Key8_00108BE8 v; s32 w; };
 struct Frame_00108BE8 { Quad_00108BE8 q; Key_00108BE8 k; Quad_00108BE8 t; s32 o0, o1, o2; };
 struct Obj_00108BE8;
 
-extern u8 D_00248FA0[];
+extern const s32 D_00248FA0[4];
 
 void func_0011B008(Quad_00108BE8* q);
 void func_0011B018(void* out, Quad_00108BE8* q);
@@ -698,7 +698,7 @@ struct __attribute__((aligned(16))) Frame_00108128 {
 
 struct Obj_00108128;
 
-extern u8 D_00248F70[];
+extern const s32 D_00248F70[4];
 
 void func_0011B008(Quad_00108128* q);
 void func_0011B018(void* dst, Quad_00108128* src);
@@ -736,7 +736,7 @@ struct __attribute__((aligned(16))) Frame_108038 {
 };
 struct Obj_108038;
 
-extern u8 D_00248F60[];
+extern const s32 D_00248F60[4];
 
 void func_0011B008(Mat_108038* q);
 void func_0011B018(void* dst, Mat_108038* src);
@@ -775,7 +775,7 @@ struct __attribute__((aligned(16))) Frame_00108208 {
 
 struct Obj_00108208;
 
-extern u8 D_00248F70[];
+extern const s32 D_00248F70[4];
 
 void func_0011B008(Quad_00108208* q);
 void func_0011B018(void* dst, Quad_00108208* src);
@@ -799,3 +799,14 @@ void* func_00108208(void* self, void* x, s32 unused, s32 c)
     func_0011B060(&f.q, 2);
     return self;
 }
+
+extern const s32 D_00248F60[4] = { 6, 0x1000, 0x1000, 0 };
+extern const s32 D_00248F70[4] = { 6, 1, 0, 0 };
+extern const s32 D_00248F80[4] = { 6, 0x1000, 0, 0 };
+extern const s32 D_00248F90[2] = { 6, 0 };
+extern const s32 D_00248F98[2] = { 0x2000, 5 };
+extern const s32 D_00248FA0[4] = { 5, 1, 0x1000, 0 };
+extern const s32 D_00248FB0[4] = { 5, 1, 6, 0 };
+extern const s32 D_00248FC0[2] = { 5, 1 };
+extern const s32 D_00248FC8[4] = { 0x2000, 0x2000, 0x2000, 0 };
+extern const s32 D_00248FD8[2] = { 0x2000, 0 };

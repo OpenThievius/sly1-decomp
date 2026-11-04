@@ -10,7 +10,7 @@ u32 func_0020DEE8(u32 value)
 }
 
 struct Obj_20F0C0 { u8 pad[0x818]; u32 value; };
-extern u32 D_0027B040[];
+u32 D_0027B040[10] = { 0x1, 0x1, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1 };
 
 void func_0020F0C0(Obj_20F0C0* obj, u32 value)
 {
@@ -57,13 +57,13 @@ s32 func_0020E100(Ctx_0020E100* self)
 
 // NEAR: only the s0 and ra saves differ: retail saves ra and s0 with sd (8 bytes), the SN builds with sq; the 8-byte save is the Sony 2.9-ee-991111 form (docs/TOOLCHAIN.md), not used here.
 
-extern u8 D_002503E0[];
+extern const char D_002503E0[];
 
 struct Node_20E7E0 {
     s32 field0;
 };
 
-void func_0020B978(struct Node_20E7E0 *self, void *a1);
+void func_0020B978(struct Node_20E7E0 *self, const char *a1);
 
 s32 func_0020E7E0(struct Node_20E7E0 *self, s32 *a1, s32 *a2, s32 *a3, s32 *flags)
 {
@@ -222,8 +222,8 @@ void func_0020FCE0(Obj_0020FCE0* self)
 // NEAR: retail saves $s0 and $ra with 8-byte sd (ld to restore); 2.95.3 saves
 // them with 16-byte sq/lq, and no source form tried changed that.
 
-extern u8 D_00250460[];
-extern u8 D_00250488[];
+extern const char D_00250460[];
+extern const char D_00250488[];
 
 struct Obj_20FE40 {
     u8 pad[0x840];
@@ -234,7 +234,7 @@ struct Obj_20FE40 {
 void* func_0020F5B8(struct Obj_20FE40 *self, s32 a1);
 void func_0020F0F0(struct Obj_20FE40 *self);
 void func_0020F0C0(struct Obj_20FE40 *self, u32 value);
-void func_0020B978(struct Obj_20FE40 *self, void *a1);
+void func_0020B978(struct Obj_20FE40 *self, const char *a1);
 
 void func_0020FE40(struct Obj_20FE40 *self)
 {
@@ -276,13 +276,13 @@ struct Ctx_20E5F0 {
 struct Buf_20E5F0 { s32 w[8]; };
 struct Half_20E5F0 { s32 w[4]; };
 
-extern u8 D_002503C0[];
+extern const char D_002503C0[];
 
 s32 func_0020E4C0(Ctx_20E5F0* c, s32 n, s32* i, s32* j, Buf_20E5F0* b);
 s32 func_0020DF10(Ctx_20E5F0* c);
 s32 func_0020F3C0(Ctx_20E5F0* c, s32 k);
 s32 func_0020E2A8(Ctx_20E5F0* c);
-void func_0020B978(Ctx_20E5F0* c, u8* s);
+void func_0020B978(Ctx_20E5F0* c, const char* s);
 s32 func_0020E8A0(Ctx_20E5F0* c, s32* a, s32* b, s32* d, Buf_20E5F0* e, Half_20E5F0* f, Half_20E5F0* g);
 s32 func_0020E7E0(Ctx_20E5F0* c, Buf_20E5F0* e, s32* b, Half_20E5F0* f, s32* a);
 s32 func_0020C1A0(Ctx_20E5F0* c, s32 i, s32 j, s32 a, s32 b, Buf_20E5F0* e, Half_20E5F0* f, Half_20E5F0* g);
@@ -346,12 +346,12 @@ s32 func_0020E5F0(Ctx_20E5F0* c, s32 n)
 
 struct Ctx_20E3B8 { u8 pad0[0x12C]; s32 f12C; s32 f130; u8 pad134[0x40]; s32 f174; u8 pad178[0x698]; s32 f810; s32 f814; };
 
-extern u8 D_00250358[];
+extern const char D_00250358[];
 s32 func_0020E5F0(Ctx_20E3B8* c, s32 n);
 void func_0020F0F0(Ctx_20E3B8* c);
 s32 func_0020DF10(Ctx_20E3B8* c);
 void func_0020CF18(Ctx_20E3B8* c, s32 a);
-void func_0020B978(Ctx_20E3B8* c, u8* s);
+void func_0020B978(Ctx_20E3B8* c, const char* s);
 
 s32 func_0020E3B8(Ctx_20E3B8* c)
 {
@@ -374,8 +374,8 @@ s32 func_0020E3B8(Ctx_20E3B8* c)
     return res;
 }
 
-extern u8 D_00250378[];
-extern u8 D_002503A0[];
+extern const char D_00250378[];
+extern const char D_002503A0[];
 
 struct Ctx_20E4C0 {
     u8 pad0[0x11C];
@@ -399,11 +399,11 @@ struct Out_20E4C0 {
 
 void func_0020F708(struct Ctx_20E4C0 *self);
 s32 func_0020F3C0(struct Ctx_20E4C0 *self, s32 a1);
-void func_0020B940(struct Ctx_20E4C0 *self, void *a1, u32 a2);
+void func_0020B940(struct Ctx_20E4C0 *self, const char *a1, u32 a2);
 void func_0020F4C8(struct Ctx_20E4C0 *self, s32 a1);
 s32 func_0020F788(struct Ctx_20E4C0 *self);
 s32 func_0020E2A8(struct Ctx_20E4C0 *self);
-void func_0020B978(struct Ctx_20E4C0 *self, void *a1);
+void func_0020B978(struct Ctx_20E4C0 *self, const char *a1);
 
 s32 func_0020E4C0(struct Ctx_20E4C0 *self, s32 a1, s32 *outA, s32 *outB, struct Out_20E4C0 *outC) {
     u32 s2;
@@ -456,7 +456,7 @@ void func_0020F708(Obj_0020F708* self)
     }
 }
 
-extern u8 D_00250320[];
+extern const char D_00250320[];
 
 struct Node_20E2A8 {
     u8 pad0[0x11C];
@@ -468,7 +468,7 @@ struct Node_20E2A8 {
 s32 func_0020F248(struct Node_20E2A8 *self, s32 a1);
 s32 func_0020F3C0(struct Node_20E2A8 *self, s32 a1);
 void func_0020F4C8(struct Node_20E2A8 *self, s32 a1);
-void func_0020B940(struct Node_20E2A8 *self, u8 *a1, s32 a2);
+void func_0020B940(struct Node_20E2A8 *self, const char *a1, s32 a2);
 
 s32 func_0020E2A8(struct Node_20E2A8 *self) {
     s32 total = 0;
@@ -715,8 +715,8 @@ struct Dev_20C1A0 {
     s32 f810;
 };
 
-extern u8 D_00250260[];
-void func_0020B940(Dev_20C1A0* d, u8* msg, s32 code);
+extern const char D_00250260[];
+void func_0020B940(Dev_20C1A0* d, const char* msg, s32 code);
 void func_0020C3F0(Dev_20C1A0* d, s32 a, s32 b, s32 flags);
 void func_00210C38(Dev_20C1A0* d);
 
@@ -818,10 +818,10 @@ struct Self_20E8A0 {
     s32 f848;
 };
 
-extern u8 D_00250410[];
+extern const char D_00250410[];
 
 s16 func_0020F248(Self_20E8A0* self, s32 mode);
-void func_0020B978(Self_20E8A0* self, u8* msg);
+void func_0020B978(Self_20E8A0* self, const char* msg);
 s32 func_0020F5B8(Self_20E8A0* self, s32 n);
 s32 func_0020F4C8(Self_20E8A0* self, s32 n);
 void func_0020F0F0(Self_20E8A0* self);
@@ -1129,7 +1129,7 @@ void func_0020C3F0(Dev_0020C3F0* self, s32 x, s32 y, s32 flags, s32 type, s32* v
 }
 
 struct Obj_0020C138;
-extern const u8 D_002501A8[];
+extern const char D_002501A8[];
 void func_0020B978(Obj_0020C138* self, const void* table);
 
 void func_0020C138(Obj_0020C138* self)
@@ -1138,7 +1138,7 @@ void func_0020C138(Obj_0020C138* self)
 }
 
 struct Obj_0020C148;
-extern const u8 D_002501D8[];
+extern const char D_002501D8[];
 void func_0020B978(Obj_0020C148* self, const void* table);
 
 void func_0020C148(Obj_0020C148* self)
@@ -1147,7 +1147,7 @@ void func_0020C148(Obj_0020C148* self)
 }
 
 struct Obj_0020C158;
-extern const u8 D_002501F0[];
+extern const char D_002501F0[];
 void func_0020B978(Obj_0020C158* self, const void* table);
 
 void func_0020C158(Obj_0020C158* self)
@@ -1156,7 +1156,7 @@ void func_0020C158(Obj_0020C158* self)
 }
 
 struct Obj_0020C168;
-extern const u8 D_00250228[];
+extern const char D_00250228[];
 void func_0020B978(Obj_0020C168* self, const void* table);
 
 void func_0020C168(Obj_0020C168* self)
@@ -1489,3 +1489,22 @@ void func_0020FAF0(Ctx_20FAF0* c)
     func_0020F5B8(c, 7);
     func_0020F5B8(c, 8);
 }
+
+extern const char D_002501A8[48] = "_sequenceScalableExtension() is not implemented";
+extern const char D_002501D8[24] = "Unknown Extension";
+extern const char D_002501F0[56] = "_pictureSpatialScalableExtension is not supported";
+extern const char D_00250228[56] = "_pictureTemporalScalableExtension is not supported";
+extern const char D_00250260[40] = "Invalid modion type -- ignored(%d)";
+extern const char D_00250288[32] = "(a) invalid motion_type(%d)-0";
+extern const char D_002502A8[32] = "(b) invalid motion_type(%d)-1";
+extern const char D_002502C8[32] = "(c) invalid motion_type(%d)-2";
+extern const char D_00250300[32] = "Error code detected(BDEC)";
+extern const char D_00250320[56] = "Invalid macroblock_address_increment code(0x%08x)";
+extern const char D_00250358[32] = "= Skip to the next picture =";
+extern const char D_00250378[40] = "slice_start_code(0x%08x) out of range";
+extern const char D_002503A0[32] = "_sliceA0(): error happens";
+extern const char D_002503C0[32] = "Too many macroblocks in picture";
+extern const char D_002503E0[48] = "skiped macroblock in I picure is not allowed";
+extern const char D_00250410[32] = "Invalid macroblock_type code: 0";
+extern const char D_00250460[40] = "load_chroma_intra_quantizer_matrix == 1";
+extern const char D_00250488[48] = "load_chroma_non_intra_quantizer_matrix == 1";

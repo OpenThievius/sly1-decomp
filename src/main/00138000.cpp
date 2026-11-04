@@ -779,11 +779,11 @@ struct Obj_13B4C0 {
 void func_001B7968(Obj_13B4C0* self);
 
 extern const f32 D_00249D74 = 3.4028235e+38f;
-extern u8 D_00261320[];
-extern u8 D_00261330[];
-extern u8 D_00261340[];
-extern u8 D_00261350[];
-extern u8 D_00261358[];
+Quad_13B4C0 D_00261320 = { 0x42480000, 0x459C4000, 0, 0 };
+Quad_13B4C0 D_00261330 = { 0x43FA0000, 0x3FE66666, 0, 0 };
+Quad_13B4C0 D_00261340 = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
+Pair_13B4C0 D_00261350 = { 0x44160000, 0x44AF0000 };
+Pair_13B4C0 D_00261358 = { 0x41A00000, 0x42480000 };
 
 void func_0013B4C0(Obj_13B4C0* self)
 {
@@ -792,13 +792,13 @@ void func_0013B4C0(Obj_13B4C0* self)
     self->f55C = 200.0f;
     self->f560 = 200.0f;
     self->f550 = 0;
-    self->f56C = *(Pair_13B4C0*)D_00261320;
+    self->f56C = *(Pair_13B4C0*)&D_00261320;
     self->f568 = 800.0f;
     self->f574 = 5000.0f;
-    self->f5D0 = *(Quad_13B4C0*)D_00261330;
-    self->f5E0 = *(Pair_13B4C0*)D_00261350;
-    self->f5F0 = *(Quad_13B4C0*)D_00261340;
-    self->f600 = *(Pair_13B4C0*)D_00261358;
+    self->f5D0 = *(Quad_13B4C0*)&D_00261330;
+    self->f5E0 = *(Pair_13B4C0*)&D_00261350;
+    self->f5F0 = *(Quad_13B4C0*)&D_00261340;
+    self->f600 = *(Pair_13B4C0*)&D_00261358;
     self->f674 = 1;
     self->f678 = 1;
     self->f67C = 0;

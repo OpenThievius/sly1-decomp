@@ -453,7 +453,8 @@ void func_00188B08(Ctx_17DE88* a, Quad_17DE88* b, void* out);
 void func_00188700(Mat_17DE88* a, f32 w, void* b, void* c);
 s32 func_00141C28(Coll_17DE88* self, void* a1, void* a2, s32 a3, void* a4);
 extern u8 D_00248D20[];
-extern u8 D_00263EC0[];
+struct Vec_263EC0 { f32 x, y, z, w; };
+extern Vec_263EC0 D_00263EC0[22];
 
 s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad_17DE88* src)
 {
@@ -464,8 +465,8 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad_17DE88* src)
     func_001ED780(&q, buf + 0x10, D_00248D20, D_00248D20);
     func_00188B08(ctx, &q, buf + 0x30);
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, D_00263EC0 + i * 16, buf + 0x70);
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, D_00263EC0 + i * 16 + 16, buf + 0x80);
+        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i], buf + 0x70);
+        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i + 1], buf + 0x80);
         Node_17DE88* n = self->f480->head;
         while (n) {
             Coll_17DE88* a = n->fC;
@@ -514,3 +515,28 @@ void func_0017C660(Object_17C660* self)
     if (self->pending && func_0017C428(self, self->pending))
         self->pending = 0;
 }
+
+Vec_263EC0 D_00263EC0[22] = {
+    { 50.0f, 0.0f, 75.0f, 0.0f },
+    { 50.0f, 0.0f, -150.0f, 0.0f },
+    { 50.0f, 0.0f, 75.0f, 0.0f },
+    { -60.0f, 0.0f, 75.0f, 0.0f },
+    { -60.0f, 0.0f, 75.0f, 0.0f },
+    { -60.0f, 0.0f, -50.0f, 0.0f },
+    { -57.96f, 15.53f, 75.0f, 0.0f },
+    { -57.96f, 15.53f, -50.0f, 0.0f },
+    { -51.96f, 30.0f, 75.0f, 0.0f },
+    { -51.96f, 30.0f, -50.0f, 0.0f },
+    { -42.43f, 42.43f, 75.0f, 0.0f },
+    { -42.43f, 42.43f, -50.0f, 0.0f },
+    { -30.0f, 51.96f, 75.0f, 0.0f },
+    { -30.0f, 51.96f, -50.0f, 0.0f },
+    { -57.96f, -15.53f, 75.0f, 0.0f },
+    { -57.96f, -15.53f, -50.0f, 0.0f },
+    { -51.96f, -30.0f, 75.0f, 0.0f },
+    { -51.96f, -30.0f, -50.0f, 0.0f },
+    { -42.43f, -42.43f, 75.0f, 0.0f },
+    { -42.43f, -42.43f, -50.0f, 0.0f },
+    { -30.0f, -51.96f, 75.0f, 0.0f },
+    { -30.0f, -51.96f, -50.0f, 0.0f },
+};

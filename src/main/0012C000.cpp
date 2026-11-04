@@ -714,14 +714,15 @@ void func_0012FFE8(Obj_12FFE8* self)
 struct Pool_12D3F8 { u8 pad[4]; };
 struct Obj_12D3F8 { void* vt; u8 pad[0x5C]; };
 struct Buf_12D3F8 { u8 pad[4]; };
-extern u8 D_002197B8[];
+struct Head_2197B8 { const void* tinfo; s32 f4; };
+extern const Head_2197B8 D_002197B8;
 void* func_001B5EE0(Pool_12D3F8* pool);
 void func_00152438(Buf_12D3F8* self, s32 value);
 
 Obj_12D3F8* func_0012D3F8(Pool_12D3F8* pool)
 {
     Obj_12D3F8* o = (Obj_12D3F8*)func_001B5EE0((Pool_12D3F8*)((u8*)pool + 0x1B58));
-    o->vt = D_002197B8;
+    o->vt = (void*)&D_002197B8;
     func_00152438((Buf_12D3F8*)((u8*)o + 0x44), 0x20);
     *(void**)((u8*)o + 0x60) = (u8*)o + 0x64;
     return o;
@@ -2185,3 +2186,6 @@ void func_0012C288(Self_12C288* self, Self_12C288* alt, s32 npairs, Pair_12C288*
     pobj = &obj;
     func_001837E0(self, 9, 1, &pobj);
 }
+
+extern const u8 D_00217410[];
+extern const Head_2197B8 D_002197B8 = { D_00217410, 0x92 };

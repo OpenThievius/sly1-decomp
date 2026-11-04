@@ -108,8 +108,8 @@ f32 func_001EA408(f32 a);
 void func_001C5D58(void* obj);
 void func_00175170(void* obj, s32 a, s32 b);
 
-extern u8 D_00264180[];
-extern f32 D_00264190;
+extern f32 D_00264180[];
+f32 D_00264190 = 150.0f;
 
 struct Vec_181B20 {
     f32 x;
@@ -152,7 +152,8 @@ s32 func_001B6290(void* a0, void* self, s32 b, s32 c);
 s32 func_00121160(s32 a);
 void* func_0018D500(s32 size);
 
-extern u8 D_00264230[];
+struct Ent_264230 { s32 a, b, c; };
+extern Ent_264230 D_00264230[];
 
 struct Alloc_1824D8 {
     u8 pad[8];
@@ -1155,7 +1156,8 @@ struct Obj_180F98 {
 
 struct Packed_180F98 { f32 v; } __attribute__((packed));
 
-extern u8 D_002640B0[];
+struct Ent_2640B0 { s32 a, b, c; };
+extern Ent_2640B0 D_002640B0[];
 extern u8 D_00270650[];
 
 void func_001D7440(void* self);
@@ -1467,8 +1469,8 @@ struct Clamp_181818
 };
 
 extern f32 D_00261858[];
-extern f32 D_00264160[];
-extern f32 D_00264170[];
+f32 D_00264160[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
+f32 D_00264170[4] = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
 extern f32 D_00275C60[];
 extern Color_181818 D_002623E0[];
 
@@ -1505,3 +1507,12 @@ void func_00181818(Obj_181818* o, void* a, void* b)
     func_00126A48(o, *(u32*)&c);
     func_00125C90(o, a, b);
 }
+
+u8 D_00264098[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+u8 D_002640A0[4] = { 0, 0, 0, 0 };
+Ent_2640B0 D_002640B0[10] = {
+    { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
+    { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }
+};
+f32 D_00264180[4] = { -300.0f, 0.0f, 200.0f, 0.0f };
+Ent_264230 D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
