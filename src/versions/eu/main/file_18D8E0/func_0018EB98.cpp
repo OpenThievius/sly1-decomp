@@ -14,10 +14,12 @@ struct Self_18EB98_eu {
     s32 f94;
 };
 
-void func_eu_0018F210(void* p);
+struct Obj_eu_18F210;
+void func_eu_0018F210(Obj_eu_18F210* p);
 
-void func_0018EB98(Self_18EB98_eu* self)
+void func_0018EB98(Self_18EB98* self_)
 {
+    Self_18EB98_eu* self = (Self_18EB98_eu*)self_;
     switch (self->state) {
     case 2:
         func_0013CAD8(&self->f50, self->f94, (u8*)&self->f50 + 0x20);
@@ -33,7 +35,7 @@ void func_0018EB98(Self_18EB98_eu* self)
         break;
     case 3: {
         void* s0 = (u8*)&self->f50 + 0x20;
-        func_eu_0018F210(s0);
+        func_eu_0018F210((Obj_eu_18F210*)s0);
         func_0013CAD8(&self->f50, self->f94, s0);
         break;
     }

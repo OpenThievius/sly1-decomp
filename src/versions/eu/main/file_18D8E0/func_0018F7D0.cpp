@@ -8,14 +8,15 @@ struct Obj_18F7D0_eu {
     s32 f148;
 };
 
-void func_0018F7D0(Obj_18F7D0_eu* self)
+void func_0018F7D0(Obj_18F7D0* self_)
 {
+    Obj_18F7D0_eu* self = (Obj_18F7D0_eu*)self_;
     u8* base = (u8*)self;
     s32 mask;
 
     self->f0C = 0;
-    func_0018EA48((Obj_18F7D0*)(base + 0x80));
-    func_0018EAA0((Obj_18F7D0*)(base + 0x80));
+    func_0018EA48((Obj_18EA48*)(base + 0x80));
+    func_0018EAA0((Obj_18EAA0*)(base + 0x80));
     func_0020B0C0((Obj_18F7D0*)(base + 0x10));
     (void)func_0020B048((Obj_18F7D0*)(base + 0x10));
     if (self->f148 != 0) {

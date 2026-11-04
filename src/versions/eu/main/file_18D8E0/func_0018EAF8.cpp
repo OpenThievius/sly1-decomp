@@ -14,10 +14,13 @@ struct Stream_18EAF8_eu {
 };
 
 extern s32 D_eu_00263710;
+struct Self_eu_0018ED38;
+struct Src_eu_0018ED38;
 s32 func_eu_0018ED38(void* a, void* b);
 
-s32 func_0018EAF8(Stream_18EAF8_eu* self, s32 left, s32 right)
+s32 func_0018EAF8(Stream_18EAF8* self_, s32 left, u8* right)
 {
+    Stream_18EAF8_eu* self = (Stream_18EAF8_eu*)self_;
     s32 n;
     s32 b;
 

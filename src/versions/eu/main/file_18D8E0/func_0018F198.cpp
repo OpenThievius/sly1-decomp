@@ -5,10 +5,10 @@ void func_0018F198(Self_18F198* self, Key_18F198* key)
     Loc_18F198 loc;
     Pair_18F198 pr;
     func_00191E70(4);
-    self->mode = func_0018E410(key);
+    self->mode = func_0018E410((Ent_18E410*)key);
     func_0012FCF0(&loc, D_002C3B00);
     if (pr.Set(key) && func_0012FD78(&loc, &pr)) {
-        func_0018F448(self, &loc);
+        func_0018F448((Obj_18F448*)self, &loc);
         while (!func_0020B0B0(self->list)) {
             func_00143030(((u8*)D_00261858));
             func_0016E238(&D_00262C70);
@@ -30,10 +30,10 @@ void func_0018F198(Self_18F198* self, Key_18F198* key)
             }
             func_001409E0();
             if (D_002613EC != 3) break;
-            func_0018F6E8(self);
+            func_0018F6E8((Obj_18F6E8*)self);
         }
         if (key->Same((Key_18F198*)&D_00248490)) D_00269B4C = 1;
-        func_0018F7D0(self);
+        func_0018F7D0((Obj_18F7D0*)self);
         func_0012FDE8(&loc);
     } else {
         func_001BFCD8(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);

@@ -8,9 +8,9 @@ struct Self_133B58_eu
 
 void func_00133B58(Self_133B58_eu* self, Gs_133B58* gs)
 {
-    Rgba_133B58 c0;
-    Rgba_133B58 c1;
-    Rgba_133B58 c2;
+    Rgba_130F48 c0;
+    Rgba_130F48 c1;
+    Rgba_130F48 c2;
     f32 step = 1.0f / 24.0f;
     f32 t;
     t = 0.5f - func_00205210(self->phase) * 0.5f;

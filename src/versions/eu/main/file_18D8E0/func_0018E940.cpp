@@ -10,8 +10,9 @@ struct Obj_18E940_eu {
     s32 fA4;
 };
 
-void func_0018E940(struct Obj_18E940_eu* self)
+s32 func_0018E940(Obj_18E940* self_)
 {
+    Obj_18E940_eu* self = (Obj_18E940_eu*)self_;
     func_0011D6A8(0xFFFFFFFF);
     func_001C08B0(D_00275710, 0, 0);
     func_0011E010();

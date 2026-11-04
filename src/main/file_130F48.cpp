@@ -3,6 +3,8 @@
 #include "asm_func.h"
 
 #include "list_iter.h"
+#pragma implementation "layout_137228.h"
+#include "layout_137228.h"
 
 
 struct Quad_130F48 {
@@ -21,11 +23,6 @@ struct Span_130F48 {
 };
 
 
-
-
-
-
-
 typedef void (*VFn_131140)(void* self, s32 arg);
 
 struct Obj_131140 {
@@ -41,31 +38,25 @@ struct Obj_131140 {
 void func_001365A0(void* self, s32 arg);
 
 
-
-struct Rgba_133B58
+struct Rgba_130F48
 {
     u8 r;
     u8 g;
     u8 b;
     u8 a;
-    Rgba_133B58() {}
-    Rgba_133B58(const Rgba_133B58& o) { *this = o; }
+    Rgba_130F48() {}
+    Rgba_130F48(const Rgba_130F48& o) { *this = o; }
+    Rgba_130F48(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 struct Gs_133B58;
-struct Span_133B58;
 struct Self_133B58
 {
     u8 pad000[0x30C];
     f32 phase;
 };
 
-extern Rgba_133B58 D_002610E0;
-extern Rgba_133B58 D_002610D8;
-extern Span_133B58 D_00261280;
-extern Span_133B58 D_002612B0;
 
 f32 func_00205210(f32 x);
-f32 func_00131000(Span_133B58* s, s32 x);
 void func_001613C0(Gs_133B58* gs, s32 a, s32 b, s32 c);
 void func_00161458(Gs_133B58* gs, u32 c);
 void func_00161670(Gs_133B58* gs, s32 x, s32 y, s32 a3, s32 a4);
@@ -86,9 +77,9 @@ struct Lerp_133B58
         return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
     }
 
-    static Rgba_133B58 Mix(Rgba_133B58 a, Rgba_133B58 b, f32 t)
+    static Rgba_130F48 Mix(Rgba_130F48 a, Rgba_130F48 b, f32 t)
     {
-        Rgba_133B58 c;
+        Rgba_130F48 c;
         c.r = Channel(a.r, b.r, t);
         c.g = Channel(a.g, b.g, t);
         c.b = Channel(a.b, b.b, t);
@@ -96,7 +87,6 @@ struct Lerp_133B58
         return c;
     }
 };
-
 
 
 struct Obj_1310F0 {
@@ -110,17 +100,7 @@ struct Obj_1310F0 {
 void func_001AA1F0(Obj_1310F0* self, s32 a1);
 
 
-struct Rgba_132500
-{
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 a;
-    Rgba_132500() {}
-    Rgba_132500(const Rgba_132500& o) { *this = o; }
-};
 struct Gs_132500;
-struct Span_132500;
 
 struct Pad_132500 { u8 pad[0x78]; f32 f78; };
 struct Clock_132500 { u8 pad[0x478]; f32 f478; };
@@ -139,13 +119,6 @@ extern Pad_132500 D_00262C70;
 extern Pad_132500 D_00262D38;
 extern f32 D_00261860;
 extern Clock_132500* D_00261990;
-extern Rgba_132500 D_002610E8;
-extern Rgba_132500 D_002610F0;
-extern Rgba_132500 D_002610F8;
-extern Rgba_132500 D_00261100;
-extern Rgba_132500 D_00261108;
-extern Rgba_132500 D_00261110;
-extern Span_132500 D_002612E0;
 
 void func_001613C0(Gs_132500* gs, s32 a, s32 b, u64 c);
 void func_00161708(Gs_132500* gs, s32 reg, u64 value);
@@ -155,7 +128,6 @@ void func_001615F0(Gs_132500* gs, s32 x, s32 y, s32 z, s32 f);
 f32 func_001EA408(f32 a);
 f32 func_00205210(f32 a);
 void func_00136EC8(Obj_132500* self, f32* x, f32* y);
-f32 func_00131000(const Span_132500* s, s32 i);
 
 struct Gfx_132500 {
     static s32 LerpU8(s32 a, s32 b, f32 t)
@@ -169,9 +141,9 @@ struct Gfx_132500 {
         return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
     }
 
-    static Rgba_132500 Lerp(Rgba_132500 a, Rgba_132500 b, f32 t)
+    static Rgba_130F48 Lerp(Rgba_130F48 a, Rgba_130F48 b, f32 t)
     {
-        Rgba_132500 r;
+        Rgba_130F48 r;
         r.r = LerpU8(a.r, b.r, t);
         r.g = LerpU8(a.g, b.g, t);
         r.b = LerpU8(a.b, b.b, t);
@@ -202,17 +174,11 @@ void func_001AA8C8(void* self);
 s32 func_00150790(void* obj, s32 mode);
 
 
-
 struct Child_136EF8 { u8 pad0[0x2D0]; s32 kind; };
 struct Owner_136EF8 { u8 pad0[0x324]; Child_136EF8* child; };
 
 void func_001356C0(Owner_136EF8* self, s32 mode);
 void func_00150790(Child_136EF8* obj, s32 mode);
-
-
-
-struct Obj_137268 { u8 pad[0x18]; void* field18; };
-
 
 
 struct Entry_1357F0 {
@@ -223,14 +189,12 @@ struct Entry_1357F0 {
 s32 func_00182FC8(void* obj);
 
 
-
 struct Entry_135858 {
     void* obj;
     f32 key;
 };
 
 void func_00199C10(void* obj, s32* out);
-
 
 
 struct SlotEntry_135E78 { void* handle; s32 extra; };
@@ -249,8 +213,7 @@ struct SlotBank_135E78 {
 
 void func_0019EBE8(void* handle);
 void func_001A1DF0(void* handle, s32 mode);
-void func_001F5C0C(void* block, s32 value, s32 size);
-
+void* func_001F5C0C(void* block, s32 value, s32 size);
 
 
 struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
@@ -258,32 +221,12 @@ struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
 s32 func_001356C0(Owner_136FA8* self, s32 mode);
 
 
-
-struct Pair_137228 { f32 x; f32 y; };
-
-
-
-struct Vec2_137238 { u8 pad0[0x8]; f32 x; f32 y; };
-
-
-
-struct __attribute__((packed)) Unaligned_137248 { u32 value; };
-
-
-
 // Newly matched US functions from the small-function wave.
 struct Obj_1365A0 { u8 pad[0x2FC]; s32 f2FC; };
-struct Obj_137260 { u8 pad[0x14]; s32 f14; };
-extern void func_00136FE8(s32, s32);
 extern void func_001373D0(void*);
 extern void func_0018D778(void*);
 struct Obj_137398 { u8 pad0[4]; s32 state; u8 pad8[0x10]; s32 f18; s32 f1C; };
 extern void func_00137A60(void*, s32, void*);
-
-
-
-
-
 
 
 struct State_001365A8 { u8 pad[0x300]; f32 value;
@@ -314,7 +257,6 @@ void func_0015DB28(void* out, void* p, s32 handle);
 s32 func_0015DF58(void* self);
 
 
-
 extern f32 D_00261858[];
 
 struct Scratch_00136408 {
@@ -342,7 +284,6 @@ void func_0015DB80(void* buf);
 s32 func_0015DBE0(void* buf);
 
 
-
 typedef void (*VFn_1356C0)(void* self);
 
 struct __attribute__((packed)) Tail_1356C0 { u8 pad0[0x464]; s32 v; };
@@ -358,7 +299,6 @@ extern f32 D_0026185C;
 
 void func_00131140(Obj_1356C0* self);
 void func_001BFCD8(s32 a, s32 b, s32 c, s32 d, f32 g, f32 h, f32 i, f32 j, f32 k, s32 e, s32 f);
-
 
 
 extern u8 D_00275710[];
@@ -385,16 +325,13 @@ void func_00135E78(Self_135F48* self, s32 state, s32 flag);
 void func_001358D0(Self_135F48* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
 
 
-
 struct Obj_1365F0 { u8 pad0[0x260]; s32 state; };
 
 f32 func_001AA898(Obj_1365F0* self);
 
 
-
 struct S_136648 { u8 pad[0x260]; s32 mode; };
 extern f32 func_001AA8A8(S_136648* s);
-
 
 
 struct Tri_136040 { u64 a __attribute__((packed)); u32 b; };
@@ -433,17 +370,14 @@ f32 func_001EAFE0(f32 x, f32 y);
 void func_00135F48(Self_136040* self, Pad_136040* p);
 
 
-
 struct __attribute__((aligned(16))) Vec_135E30 { s32 a, b, c, d; };
 struct Obj_135E30 { char pad[0x140]; Vec_135E30 v; };
-
 
 
 struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
 struct Obj_135E48 { char pad[0x140]; Vec_135E48 v; };
 
 void func_001A1F40(Vec_135E48* v, s32 mode);
-
 
 
 struct Item_135550;
@@ -479,7 +413,6 @@ void func_0012F6B0(Item_135550* item, f32 x);
 void func_001AA998(Obj_135550* self, s32 value);
 
 
-
 struct Obj_136238;
 struct VT_136238 { u8 pad0[0x40]; void (*f40)(Obj_136238*, s32); };
 struct Obj_136238 {
@@ -495,7 +428,6 @@ struct Obj_136238 {
 struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
 struct In_136238 { s32 a; };
 
-extern s32 D_00261120[2];
 extern u8 D_00275710[];
 
 void func_001BEA50(void);
@@ -507,7 +439,6 @@ s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 void func_00192190(void* p);
 
 struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
-
 
 
 struct Obj_135228
@@ -524,9 +455,6 @@ struct Q_135228
     u8 pad[4];
 };
 
-extern f32 D_00261260[2];
-extern f32 D_002611E0[4][4];
-extern f32 D_00261220[4][4];
 
 void func_00160D30(u32* out);
 void func_00134B48(Obj_135228* self, Q_135228* q);
@@ -535,6 +463,87 @@ f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
 void func_001613C0(Q_135228* q, s32 a, s32 b, u64 c);
 void func_00161458(Q_135228* q, u32 v);
 void func_001615F0(Q_135228* q, s32 a, s32 b, s32 c, s32 d);
+
+// The file's .data, in retail's order from 0x261090. The colours and the two styles are built
+// by the static initialiser (func_00136FE8); their bytes are zero until then.
+struct Style_136FE8 {
+    s32 f0;
+    u8 f4;
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    u32 f18;
+    Style_136FE8(f32 w)
+    {
+        func_001F5C0C(this, 0, 0x1C);
+        f4 = 0x2D;
+        f8 = w;
+        f10 = 0.3f;
+        f14 = 0.3f;
+        f18 = 0xFF7D4B00;
+    }
+    Style_136FE8(s32 w, s32 h)
+    {
+        func_001F5C0C(this, 0, 0x1C);
+        f4 = 0x2D;
+        f8 = w;
+        fC = h;
+        f14 = f10 = 0.3f;
+        f18 = 0xFF7D4B00;
+    }
+};
+
+s32 D_00261090[4] = { 75, 0, 0, 0 };
+f32 D_002610A0[4] = { 80.0f, -288.0f, 288.0f, 0.0f };
+f32 D_002610B0[4] = { 280.800018f, 376.0f, -376.0f, 0.0f };
+f32 D_002610C0[4] = { -8.0f, -40.0f, 40.0f, 0.0f };
+Rgba_130F48 D_002610D0(0x00, 0x00, 0x00, 0x80);
+Rgba_130F48 D_002610D8(0x00, 0x52, 0x7E, 0x80);
+Rgba_130F48 D_002610E0(0x19, 0x1E, 0x6E, 0x80);
+Rgba_130F48 D_002610E8(0x7E, 0x28, 0x0A, 0x80);
+Rgba_130F48 D_002610F0(0x50, 0x28, 0x28, 0x80);
+Rgba_130F48 D_002610F8(0xF0, 0xF0, 0x00, 0x80);
+Rgba_130F48 D_00261100(0x28, 0x28, 0x00, 0x80);
+Rgba_130F48 D_00261108(0xFF, 0xFF, 0xFF, 0x80);
+Rgba_130F48 D_00261110(0xE6, 0xE6, 0xE6, 0x80);
+Rgba_130F48 D_00261118(0x2F, 0x72, 0x3E, 0x80);
+s32 D_00261120[2] = { -268435456, -268435456 };
+// The eight compass points, read by func_00131198 and func_001316E8.
+const char* D_00261128[8] = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" };
+Style_136FE8 D_00261148(2.0f);
+Style_136FE8 D_00261168(32, 16);
+f32 D_00261184 = 1.0f;
+f32 D_00261188 = 0.5f;
+f32 D_00261190[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
+f32 D_002611A0[4] = { 1.5f, -1.5f, 0.0f, 0.0f };
+f32 D_002611B0[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_002611BC = 0.5f;
+f32 D_002611C0[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_002611CC = 250.0f;
+f32 D_002611D0 = 40.0f;
+f32 D_002611D4 = -20.0f;
+f32 D_002611D8 = -15.0f;
+f32 D_002611DC = 1.0f;
+f32 D_002611E0[4][4] = {
+    { -5.0f, -15.0f, -35.0f, -15.0f },
+    { 5.0f, 15.0f, 35.0f, 15.0f },
+    { 0.0f, 10.0f, 0.0f, -10.0f },
+    { 0.0f, -10.0f, 0.0f, 10.0f },
+};
+f32 D_00261220[4][4] = {
+    { 0.0f, -11.0f, 0.0f, 11.0f },
+    { 0.0f, 11.0f, 0.0f, -11.0f },
+    { -4.4f, -15.4f, -35.2f, -15.4f },
+    { 4.4f, 15.4f, 35.2f, 15.4f },
+};
+f32 D_00261260[2] = { 8.0f, 0.0f };
+f32 D_00261268[3] = { 8.0f, 0.0f, 0.150000006f };
+f32 D_00261274 = 0.25f;
+Span_130F48 D_00261280;
+Span_130F48 D_002612B0;
+Span_130F48 D_002612E0;
+f32 D_00261310;
 
 void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y);
 f32 func_00131000(const Span_130F48* s, s32 x);
@@ -563,12 +572,6 @@ f32 func_00136648(S_136648* s);
 void func_00136EC8(State_00136EC8* self, f32* x, f32* y);
 void func_00136EF8(Owner_136EF8* self);
 s32 func_00136FA8(Owner_136FA8* self);
-void func_00137228(Pair_137228* out, f32 x, f32 y);
-void func_00137238(void* out, f32 x, f32 y);
-void func_00137248(void* out, s32* value);
-void func_00137260(Obj_137260* self, s32 value);
-void func_00137268(Obj_137268* self, void* value);
-void func_00137270();
 
 void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y)
 {
@@ -642,8 +645,8 @@ INCLUDE_ASM(func_00131F60);
 
 void func_00132500(Obj_132500* self, Gs_132500* gs)
 {
-    Rgba_132500 c0;
-    Rgba_132500 c1;
+    Rgba_130F48 c0;
+    Rgba_130F48 c1;
     f32 k;
     Pad_132500* pad;
     u8 alpha;
@@ -671,23 +674,23 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
     switch (self->f320) {
     case 0:
         if (self->f260 == 5) {
-            Rgba_132500 t = D_00261110;
+            Rgba_130F48 t = D_00261110;
             t.a = alpha;
             c0 = t;
             t = D_00261108;
             t.a = alpha;
             c1 = t;
         } else {
-            Rgba_132500 t = (*(Rgba_132500*)&D_002610E0);
+            Rgba_130F48 t = (*(Rgba_130F48*)&D_002610E0);
             t.a = alpha;
             c0 = t;
-            t = (*(Rgba_132500*)&D_002610D8);
+            t = (*(Rgba_130F48*)&D_002610D8);
             t.a = alpha;
             c1 = t;
         }
         break;
     case 1: {
-        Rgba_132500 t = D_00261100;
+        Rgba_130F48 t = D_00261100;
         t.a = alpha;
         c0 = t;
         t = D_002610F8;
@@ -696,7 +699,7 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
         break;
     }
     case 2: {
-        Rgba_132500 t = D_002610F0;
+        Rgba_130F48 t = D_002610F0;
         t.a = alpha;
         c0 = t;
         t = D_002610E8;
@@ -714,9 +717,9 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
         f32 period = 256.0f;
         f32 wide = 512.0f;
         f32 s = Gfx_132500::Wave(-8.0f, period, self->f30C);
-        Rgba_132500 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+        Rgba_130F48 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
         s = Gfx_132500::Wave(-18.0f, period, self->f30C);
-        Rgba_132500 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+        Rgba_130F48 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
         f32 x0 = posX - scale * 35.0f;
         f32 x1 = x0 + scale * 70.0f;
         f32 u;
@@ -779,7 +782,7 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
                 f32 s = Gfx_132500::Wave(offX, wide, self->f30C);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_132500 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
                 func_00161458(gs, *(u32*)&col);
                 func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
                 func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
@@ -797,7 +800,7 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
                 f32 s = Gfx_132500::Wave(offY, period, self->f30C);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_132500 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
                 func_00161458(gs, *(u32*)&col);
                 func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
                 func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py + scale * 2.0f), 0, 0);
@@ -816,9 +819,9 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
 
 void func_00133B58(Self_133B58* self, Gs_133B58* gs)
 {
-    Rgba_133B58 c0;
-    Rgba_133B58 c1;
-    Rgba_133B58 c2;
+    Rgba_130F48 c0;
+    Rgba_130F48 c1;
+    Rgba_130F48 c2;
     f32 step = 1.0f / 24.0f;
     f32 t;
     t = 0.5f - func_00205210(self->phase) * 0.5f;
@@ -1342,31 +1345,28 @@ done:
     return r;
 }
 
-INCLUDE_ASM(func_00136FE8);
-
-void func_00137228(Pair_137228* out, f32 x, f32 y)
+// The text layout's setters (layout_137228.h): defined after their callers, which call them,
+// and written out here at the end of the file, after the static initialiser.
+inline void Layout_137228::Pos(f32 x_, f32 y_)
 {
-    out->x = x;
-    out->y = y;
+    x = x_;
+    y = y_;
 }
 
-void func_00137238(void* out, f32 x, f32 y)
+inline void Layout_137228::Size(f32 w_, f32 h_)
 {
-    Vec2_137238* v = (Vec2_137238*)out;
-    v->x = x;
-    v->y = y;
+    w = w_;
+    h = h_;
 }
 
-void func_00137248(void* out, s32* value)
+inline void Layout_137228::Color(s32* value)
 {
-    *(Unaligned_137248*)((u8*)out + 0x10) = *(Unaligned_137248*)value;
+    color = *(Rgba_137248*)value;
 }
 
-void func_00137260(Obj_137260* self, s32 value) { self->f14 = value; }
+inline void Layout_137228::SetF14(s32 value) { f14 = value; }
 
-void func_00137268(Obj_137268* self, void* value)
+inline void Layout_137228::SetF18(void* value)
 {
-    self->field18 = value;
+    f18 = value;
 }
-
-void func_00137270() { func_00136FE8(1, 0xFFFF); }

@@ -7,8 +7,9 @@ struct Obj_18F610_eu {
     s32 remain;
 };
 
-void func_0018F610(Obj_18F610_eu* self)
+void func_0018F610(Obj_18F610* self_)
 {
+    Obj_18F610_eu* self = (Obj_18F610_eu*)self_;
     if (self->remain > 0) {
         s32 n = self->remain - 4;
         u32* tab = (u32*)D_005A2E60;
@@ -29,7 +30,7 @@ void func_0018F610(Obj_18F610_eu* self)
         u32 c = t ^ (c3 >> 8);
         self->crc = c;
         if (n == 0 && c != 0) {
-            *(s32*)D_00269B48 = 1;
+            D_00269B48 = 1;
         }
     }
 }

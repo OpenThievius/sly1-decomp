@@ -7,7 +7,7 @@ tools find them outside the tree.
 ## What built the game
 
 **SN Systems' GCC 2.95.3 for the PlayStation 2, compiling C++**, with
-`-O2 -G0 -fno-exceptions`, assembled by the EE GNU assembler of the same era.
+`-O2 -G0 -fno-exceptions -fno-rtti`, assembled by the EE GNU assembler of the same era.
 Measured on 2026-10-28 against seven retail functions of `SCUS_971.98` (a push
 onto a list, an add-if-absent loop, a pop, two calls passing a data address, a
 float update, and a function with saved registers and a local object): every
@@ -47,6 +47,12 @@ What else was measured:
   rac1-decomp: every library function matched before stays EXACT with it.
 - **`-fno-exceptions`.** Without it every file gets C++ exception frame records
   in `.data`; retail has only four such records, all in library code.
+- **`-fno-rtti`.** Retail's game vtables (the method tables of its C++ classes)
+  start with a zero entry, the slot RTTI would fill with the type's descriptor;
+  with RTTI on, GCC 2.95 fills it and emits the descriptors, and a whole file
+  with classes then differs. Every matched game file builds the same with or
+  without it. The libraries' own vtables (the runtime's `bad_alloc` and its
+  exception classes) do fill the slot; they have their own compiler and rows.
 - **`-ffunction-sections`** is added to every file so that the build can put
   each function at its retail address (tools/c_layout.py). It changes no code.
 - **The preprocessor** is the toolchain's `cpp.exe`, given the macros the
@@ -83,7 +89,7 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
 
 1. **SN build.** A function that compiles differently under the three SN
    builds would settle which one retail used.
-2. **Per-file flags.** `-O2 -G0 -fno-exceptions` is every file's default so
+2. **Per-file flags.** `-O2 -G0 -fno-exceptions -fno-rtti` is every file's default so
    far (config/cflags.tsv); a file that needs other options gets its own row,
    never a function.
 3. **The libraries.** Sony's libraries and the compiler's runtime were linked
