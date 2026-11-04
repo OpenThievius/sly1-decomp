@@ -855,7 +855,7 @@ func_00135858	func_001359B8	match
 func_00135E30	func_00135F90	match	
 func_00135E48	func_00135FA8	match	
 func_00135E78	func_00135FD8	match	version-specific
-func_00135F48	func_001360A8	match	version-specific, rodata
+func_00135F48	func_001360A8	match	version-specific
 func_00136040	func_001361A0	match	version-specific
 func_00136238	func_00136398	match	version-specific
 func_001363D0	func_00136530	match	version-specific
