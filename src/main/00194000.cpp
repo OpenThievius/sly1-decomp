@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "g264a40.h"
 
 void func_001AA8F0(void* self);
 
@@ -22,7 +23,6 @@ void func_001A76A0(void* node, s32 flag);
 void func_00152600(void* a, void* b);
 void func_00152470(void* a, void* b);
 
-extern void* D_002623C0;
 extern void* D_00275710;
 extern u8 D_00275B04[];
 extern u8 D_00275F80[];
@@ -95,25 +95,18 @@ extern f32 D_0026A708;
 extern f32 D_0026A70C;
 s32 func_001FD7A0(f32 x);
 
-struct Boot_195958 {
-    u8 pad0[0x4F44];
-    void* f4F44;
-    u8 pad1[0x4F4C - 0x4F48];
-    void* f4F4C;
-};
-
-Boot_195958 D_00264A40 = {};
+G264A40 D_00264A40 = {};
 extern u8 D_00275BC0[];
 extern u8 D_00247AD0[];
 
 void func_001F4408(s32 a, s32 b);
 void func_001F0428(u8* a, s32 b, s32 c);
-void func_0018C178(Boot_195958* a, s32 b);
-void func_0018C638(Boot_195958* self);
-void func_0018C1A8(Boot_195958* self);
-void func_0018C250(Boot_195958* self);
-void func_0018C770(Boot_195958* self);
-void func_0018C568(Boot_195958* self);
+void func_0018C178(G264A40* a, s32 b);
+void func_0018C638(G264A40* self);
+void func_0018C1A8(G264A40* self);
+void func_0018C250(G264A40* self);
+void func_0018C770(G264A40* self);
+void func_0018C568(G264A40* self);
 void func_00160948(void);
 void* func_00193660(void);
 void* func_001925F0(void);

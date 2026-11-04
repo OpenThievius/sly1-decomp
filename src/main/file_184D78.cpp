@@ -4,6 +4,10 @@
 
 #include "fpu.h"
 #include "t2195.h"
+#include "globals.h"
+#include "g261858.h"
+#include "g262c70.h"
+#include "g264a40.h"
 
 
 struct Obj_184D78 {
@@ -45,21 +49,13 @@ struct Flags_185AC8 {
 
 
 
-struct VT_275710 { u8 pad[0x54]; void (*fn)(void* self, f32 x); };
-struct Obj_275710 { VT_275710* vt; };
 struct Cfg_275F80 { s32 a; s32 mode; };
 struct Flag_269A00 { s32 a; s32 on; };
-struct Tm_261858 { s32 a; s32 b; f32 dt; };
 
 extern Flag_269A00 D_00269A00;
 extern Cfg_275F80 D_00275F80;
 extern s32 D_00275AF0;
-extern u8 D_00262C70[];
 extern u8 D_00275BC0[];
-extern Tm_261858 D_00261858;
-extern u8 D_00264A40[];
-extern Obj_275710* D_00275710;
-extern void* D_00261990;
 extern s32 D_002622CC;
 
 void func_001FAE18(void);
@@ -75,9 +71,9 @@ void func_001607D0(f32 dt);
 void func_00144270(void* p);
 void func_0015E9F0(void);
 void func_00142F10(void* p);
-void func_0019D6C0(Obj_275710* o, void* a);
+void func_0019D6C0(C6C* o, void* a);
 void func_001E9668(void* p);
-void func_0019DC98(Obj_275710* o, void* a);
+void func_0019DC98(C6C* o, void* a);
 void func_001E9648(void* p);
 void func_0015EC68(void);
 
@@ -102,7 +98,6 @@ s32 func_001925F0(void);
 
 
 
-extern Vec02 D_00248D30;
 
 
 
@@ -256,17 +251,17 @@ void func_00185758(s32 a, s32 b)
             func_0015F210(1);
             func_0018F148(&D_00269A00);
         }
-        func_0016E238(D_00262C70);
+        func_0016E238(&D_00262C70);
         func_0016F2E0();
-        func_0018BDC8(D_00264A40);
+        func_0018BDC8(&D_00264A40);
         func_001E9108(D_00275BC0);
         func_001607D0(D_00261858.dt);
         if (D_00275710 != 0) {
             func_00144270(D_00261990);
             func_0015E9F0();
             func_00142F10(&D_00261858);
-            if (D_00275710->vt->fn != 0)
-                D_00275710->vt->fn(D_00275710, D_00261858.dt);
+            if (D_00275710->desc->m11 != 0)
+                D_00275710->desc->m11(D_00275710, D_00261858.dt);
             func_0019D6C0(D_00275710, D_00261990);
             func_001E9668(D_00275BC0);
             func_0019DC98(D_00275710, D_00261990);

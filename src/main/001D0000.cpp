@@ -2,6 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "c63.h"
+#include "g261858.h"
 
 void func_001DDA20(void* a);
 void func_001DDB58(void* a);
@@ -23,12 +24,8 @@ void func_001D27C0(C07* a0, s32 a1)
     }
 }
 
-extern s32 D_00262E10;
-
 void func_001861E8(void* a, s32 b);
 
-
-extern f32 D_0026185C;
 
 void func_001D1200(C07* self, s32 n)
 {
@@ -36,7 +33,7 @@ void func_001D1200(C07* self, s32 n)
         return;
     }
     self->f2684 = n;
-    self->f2688 = D_0026185C;
+    self->f2688 = D_00261858.time;
     self->f26A0 = 0;
     if (n <= 0) {
         return;

@@ -1,6 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c01.h"
+#include "c02.h"
+#include "c05.h"
+#include "c6c.h"
+#include "v24a2.h"
+#include "shapes.h"
+#include "g248748.h"
+#include "g261d40.h"
+#include "g261ef0.h"
+#include "g262320.h"
+#include "g269990.h"
+#include "g26ac30.h"
+#include "g27c220.h"
+#include "s168d68.h"
 
 // Class descriptors (parent, class id, flags, object size, then the class's methods) and the
 // method tables of .rodata from 0x217380, defined here until their own files are found.
@@ -4656,21 +4669,17 @@ extern const u32 D_002476A0[256] = {
 };
 extern const u32 D_00247AB0[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
 extern const u32 D_00247AD0[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
-extern const f32 D_002483D0[12] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+extern const Mat02 D_002483D0 = { { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } } };
 extern const f32 D_00248400[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-struct __attribute__((aligned(16))) Vec4_248D00 { f32 x, y, z, w; };
-extern const Vec4_248D00 D_00248D00 = { 1.0f, 0.0f, 0.0f, 0.0f };
-extern const f32 D_00248D10[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-extern const f32 D_00248D20[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+extern const Vec02 D_00248D00 = { 1.0f, 0.0f, 0.0f, 0.0f };
+extern const Vec02 D_00248D10 = { 0.0f, 1.0f, 0.0f, 0.0f };
+extern const Vec02 D_00248D20 = { 0.0f, 0.0f, 1.0f, 0.0f };
 extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 
 // Globals typed by worker dv01, from retail's bytes and their readers.
 struct Rec_263558 { s32 f0; s32 f4; s32 f8; };
-struct Elem_261D40 { f32 key; s32 a; s32 b; };
 
-extern u8 D_0027C220[];
-extern u8 D_0027C230[];
 
 f32 D_00260E70[4] = { 0.0f, 15.0f, 0.0149999997f, 0.0f };
 f32 D_00260E80[4] = { 0.0f, 2.5f, 0.00249999994f, 0.0f };
@@ -4725,7 +4734,7 @@ f32 D_00261C94 = 900.0f;
 f32 D_00261C98 = 1200.0f;
 f32 D_00261CD4 = 500.0f;
 f32 D_00261CD8 = 800.0f;
-Elem_261D40 D_00261D40[4] = {
+G261D40 D_00261D40[4] = {
     { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
 };
 f32 D_00262178[2] = { 0.5f, 2.0f };
@@ -4734,9 +4743,9 @@ f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
 f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
 char D_00262250[8] = "02134";
 s32 D_002622CC = 1;
-void* D_002623C0 = D_0027C220;
-void* D_002623C4 = D_0027C230;
-void* D_002623C8 = D_0027C230;
+G27C220* D_002623C0 = &D_0027C220;
+G27C230* D_002623C4 = D_0027C230;
+G27C230* D_002623C8 = D_0027C230;
 s32 D_002623CC = -1;
 f32 D_00262970[6] = { 20.0f, 0.5f, 2.0f, 0.0f, 0.100000001f, 0.0f };
 f32 D_00262988[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f };
@@ -4807,11 +4816,11 @@ void* D_002744FC = 0;
 // count: loop bound word
 s32 D_00274500 = 0;
 // pointer from allocator (count*0x20), word
-void* D_00274504 = 0;
+V24A2_ImgA* D_00274504 = 0;
 // count: loop bound word
 s32 D_00274508 = 0;
 // pointer from allocator (count*0x18), word
-void* D_0027450C = 0;
+V24A2_ImgB* D_0027450C = 0;
 // word counter
 s32 D_00274510 = 0;
 // word value
@@ -4861,7 +4870,7 @@ f32 D_00275650 = 0;
 // f32 reader
 f32 D_0027565C = 0;
 // pointer word, many pointer readers
-void* D_00275710 = 0;
+C6C* D_00275710 = 0;
 // word flag
 s32 D_00275714 = 0;
 // word
@@ -4869,7 +4878,6 @@ s32 D_00275718 = 0;
 
 // Globals typed by worker dz07, from retail's bytes and their readers.
 struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
-struct Vec16_275C40 { s32 v[4]; } __attribute__((aligned(16)));
 
 // size: func_001E0848 clears 0x1C bytes and sets fields through 0x18 (label 0x20, 4 bytes padding before 8-aligned next label)
 Config_1E0848 D_002758E0 = {0};
@@ -4877,7 +4885,7 @@ Config_1E0848 D_002758E0 = {0};
 // size: s32 compared with 1/2 in 00148000 and 00194000
 s32 D_00275BEC = 0;
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
-Vec16_275C40 D_00275C40 = {0};
+Quad16 D_00275C40 = {0};
 // size: s32 state compared/assigned in 001EC000
 s32 D_00275DB8 = 0;
 // size: u32 cleared by func_001F7D88
@@ -4930,25 +4938,6 @@ Obj_2743D0 D_00274450 = {0};
 Obj_2743D0 D_00274488 = {0};
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
-struct Obj_261EF0 {
-    u8 pad00[0x1C];
-    void* f1C;
-    u8 pad20[4];
-};
-
-struct Slot12_262320 {
-    u8 pad00[4];
-    u8* f4;
-    u8 pad08[4];
-    u8* fC;
-    u8* f10;
-    u8 pad14[0xC];
-    List01 s20;
-    List01 s2C;
-    List01 s38;
-    u8 pad44[4];
-};
-
 struct Rec_262490 {
     u32 f0;
     u32 f4;
@@ -4969,7 +4958,7 @@ u64 D_00261878 = 0;
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
 s32 D_00261D38 = 0;
 // size: func_00151A68 clears 0x24 bytes of it
-Obj_261EF0 D_00261EF0 = {};
+G261EF0 D_00261EF0 = {};
 // size: semaphore id from func_002027A0 (lw/sw), 4-byte label
 s32 D_00261F14 = 0;
 s32 D_00261F18 = 0;
@@ -4990,7 +4979,7 @@ s32 D_002622D0 = 0;
 // size: s32 (lw/sw), 4-byte label
 s32 D_002622D4 = 0;
 // size: pointer (lw/sw), 4 bytes before an 8-aligned next label
-Slot12_262320* D_002622D8 = 0;
+G262320* D_002622D8 = 0;
 // size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
 List01 D_002622E0 = {};
 // size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
@@ -5002,7 +4991,7 @@ s32 D_00262310 = 0;
 // size: s32 (lw/sw), 4-byte label
 s32 D_00262318 = 0;
 // size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
-Slot12_262320 D_00262320[2] = {};
+G262320 D_00262320[2] = {};
 // size: pointer (lw/sw), 4-byte label
 void* D_002623B4 = 0;
 // size: two 0x28-byte records (loop end = base + 0x50, stride 0x28 in func_001688B8)
@@ -5017,13 +5006,6 @@ s32 D_002626CC = 0;
 s32 D_002626D0 = 0;
 
 // Globals typed by worker dz04, from retail's bytes and their readers.
-struct Row_26AC30 {
-    void (*fn)(void);
-    u8 pad04[4];
-    s32 f8;
-    u8 padC[0x80 - 0xC];
-};
-
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
@@ -5031,7 +5013,7 @@ struct Row_26AC30 {
 // size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
 s32 D_0026A914 = 0;
 // size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
-Row_26AC30 D_0026AC30[18] = {};
+G26AC30 D_0026AC30[18] = {};
 // size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
 s32 D_0026EC58 = 0;
 // size: one s32 (lw, compared with 0), label 8 bytes with 4 of padding before the 8-aligned D_0026EC68
@@ -5063,9 +5045,7 @@ f32 D_00261860 = 0;
 // Globals typed by worker dz03, from retail's bytes and their readers.
 // A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
 // Three words set by func_00168D68.
-struct Obj_2626D8 { s32 a; s32 b; s32 c; };
 // Record func_0016C360 clears (0x1C bytes) and fills.
-struct Obj_2629A8 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
 struct Pair_262C70 { f32 lo; f32 hi; };
 // The input stream func_0016E1A0 clears (0xC4 bytes).
 struct Obj_262C70 {
@@ -5089,10 +5069,10 @@ struct Obj_262C70 {
     void* fBC;
     s32 fC0;
 };
-struct Slot_269990 { s32 f00; s32 f04; u8 pad08[8]; s32 f10; };
+struct Obj_2629A8 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
 
 // size: func_00168D68 sets three words (a, b, c) of it
-Obj_2626D8 D_002626D8 = {0};
+S168D68 D_002626D8 = {0};
 // size: list head of three words, func_00152438 sets the link offset at +8 (0x38)
 List01 D_002626E8 = {0};
 // size: list head of three words, link offset at +8 (0x50)
@@ -5110,7 +5090,7 @@ s32 D_00262C6C = 0;
 // size: chosen with D_00262C70 as the same pad pointer (conditional), 0xC4 to the next label
 Obj_262C70 D_00262D38 = {};
 // size: pointer, word accesses only
-void* D_00262E10 = 0;
+C07* D_00262E10 = 0;
 // size: s32, word load/store only
 s32 D_00263E2C = 0;
 // size: list head of three words, link offset at +8 (0x50)
@@ -5124,14 +5104,13 @@ List01 D_00264088 = {0};
 s32 D_002649A8 = 0;
 // size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
 // size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
-Slot_269990 D_00269990 = {0};
+G269990 D_00269990 = {0};
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
 s32 D_00269C90 = 0;
 Obj_2629A8 D_002629A8 = {0};
 Obj_262C70 D_00262C70 = {};
-struct Music_248748 { s32 level; f32 f4; u32 record[8]; const char* credits; };
-extern const Music_248748 D_00248748[33] = {
+extern const G248748 D_00248748[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
     { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, D_0024DCC8 },
     { 0x00000103, 139.0f, { 0x7EA0F65C, 0xD2337F06, 0xBE2AFC49, 0x12C36311, 0x7C279683, 0x7EA42098, 0xBE2AFEF0, 0xD22162E6 }, D_0024DCE8 },
