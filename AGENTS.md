@@ -99,9 +99,20 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   (include/list_iter.h). A padding array (`s32 scratch[4];`), an invented type or a field that
   exists only to size the frame is not allowed.
 - **One flag set per source file**, never per function.
+- **`#pragma interface` and `#pragma implementation`, as a pair, and no other pragma.** GCC 2.95
+  writes out a class's inline functions at the end of the one file that says
+  `#pragma implementation "header.h"` for a header in `include/` that says `#pragma interface`.
+  Use the pair only where retail shows that emission (a class's small methods placed after the
+  file's static initialiser, docs/AGENT_WORKFLOW.md, "Finding and proving a file"), and nothing
+  else of the kind.
 - **A global is defined in C** only where its initial value matches retail's bytes at its address:
   one file defines it, under its eight-digit `D_XXXXXXXX` name, and every other file declares it
-  `extern`. Until then it stays `extern` (its bytes come from the disassembly).
+  `extern`. Until then it stays `extern` (its bytes come from the disassembly). A global retail
+  holds as zeros, filled at run time, is defined with `= {0}` (or `= {}`, `= 0`) over its whole
+  label, to the next label, as OpenRAC's rac1-decomp defines its zero buffers: with the type its
+  readers give it where they show one (fields at their offsets, the rest as padding up to the
+  label's end), or a byte array of the label's size where they don't. A size the code shows (a
+  clear of N bytes, a loop bound, a class size) wins over the label's.
 - **Our own names and types.** Retail is stripped: every function, type, field and file name
   is chosen by us from what retail's code does.
 - If you get close but not exact, keep the attempt in `nonmatching/` with what still differs,
