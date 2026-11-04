@@ -1629,9 +1629,9 @@ void func_0015FBB8(Self_15FBB8* self, s32 flag)
     }
 }
 
-INCLUDE_ASM(func_0015FCD8);
+ASM_FUNC(func_0015FCD8);
 
-INCLUDE_ASM(func_0015FD78);
+ASM_FUNC(func_0015FD78);
 
 void func_0015FF58(void* self)
 {
@@ -1656,7 +1656,7 @@ void func_00160050(Obj_00160050* obj, s32 value) { obj->values[obj->count++] = v
 
 void func_00160070() { func_00160918(); }
 
-INCLUDE_ASM(func_00160090);
+LINKER_REMNANT(func_00160090);
 
 Ent_1600A0* func_001600A0(Ent_1600A0* key)
 {
@@ -1707,7 +1707,7 @@ void* func_00160148()
     return *(void**)((u8*)p + 0x24);
 }
 
-INCLUDE_ASM(func_00160178);
+LINKER_REMNANT(func_00160178);
 
 s32 func_00160180(void)
 {
@@ -1723,7 +1723,7 @@ s32 func_001601A0(void)
     return v;
 }
 
-INCLUDE_ASM(func_001601D0);
+LINKER_REMNANT(func_001601D0);
 
 s32 func_001601D8(void* a0)
 {
@@ -2023,7 +2023,7 @@ s32 func_00160C58()
     return result;
 }
 
-INCLUDE_ASM(func_00160C90);
+LINKER_REMNANT(func_00160C90);
 
 void* func_00160CA0(u8* self,s32 index)
 {
@@ -2112,7 +2112,7 @@ void func_00160E80(Rec_160E80* self)
     self->f18 = 0;
 }
 
-INCLUDE_ASM(func_00160EA0);
+ASM_FUNC(func_00160EA0);
 
 s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_161028** out)
 {
@@ -2311,7 +2311,7 @@ void func_00161708(Stream_161708* self, u64 a1, u64 a2)
     p[1] = a1;
 }
 
-INCLUDE_ASM(func_00161760);
+LINKER_REMNANT(func_00161760);
 
 void func_00161768(Obj_161768* self, u32 a1, u64 a2)
 {
@@ -2337,7 +2337,7 @@ void func_001617E8(Stream_1617E8* self, s32 tag, f32 value)
     *p = lo | hi;
 }
 
-INCLUDE_ASM(func_00161858);
+LINKER_REMNANT(func_00161858);
 
 void func_00161860(Stream_161860* self, s32 a1, s32 a2)
 {
@@ -2358,7 +2358,7 @@ void func_001618C0(Stream_1618C0* self, s32 a1, s32 a2, u32 a3, u32 a4)
     *p = (lo | (mid << 32)) | ((u64)a4 << 56);
 }
 
-INCLUDE_ASM(func_00161950);
+LINKER_REMNANT(func_00161950);
 
 void Obj_161958::func_00161958(s32 count)
 {
@@ -2606,7 +2606,7 @@ void func_00162680(Body_162680* body, Vec3_162680* v)
     body->z = v->z;
 }
 
-INCLUDE_ASM(func_001626A0);
+LINKER_REMNANT(func_001626A0);
 
 void func_001626A8(u8* dst, u8* src)
 {
@@ -2652,7 +2652,7 @@ void func_00162810(Owner_162810* owner)
 }
 
 INCLUDE_RODATA(D_0024A710);
-INCLUDE_ASM(func_00162890);
+ASM_FUNC(func_00162890);
 
 void func_00163938(s32 mode, void* obj)
 {

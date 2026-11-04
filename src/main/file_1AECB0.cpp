@@ -862,7 +862,7 @@ void func_001AF0D0(void* self)
     func_00124DF8(self, 2, D_002744B8);
 }
 
-INCLUDE_ASM(func_001AF108);
+ASM_FUNC(func_001AF108);
 
 void func_001AF3B8(Obj_1AF3B8* self)
 {
@@ -1005,7 +1005,7 @@ void func_001AF7A8(Obj_1AF7A8* self, void* p)
     D_002744D0 = 1;
 }
 
-INCLUDE_ASM(func_001AF820);
+ASM_FUNC(func_001AF820);
 
 s32 func_001AFAF8(Obj_1AFAF8* a0, Obj_1AFAF8* a1)
 {
@@ -1025,7 +1025,7 @@ s32 func_001AFAF8(Obj_1AFAF8* a0, Obj_1AFAF8* a1)
 }
 
 INCLUDE_RODATA(jtbl_0024CFF0);
-INCLUDE_ASM(func_001AFBB0);
+ASM_FUNC(func_001AFBB0);
 
 void func_001B00E8(Obj_1B00E8* self, s32 flag)
 {
@@ -1248,7 +1248,7 @@ tail:
 }
 
 INCLUDE_RODATA(jtbl_0024D070);
-INCLUDE_ASM(func_001B0838);
+ASM_FUNC(func_001B0838);
 
 s32 func_001B0BD8() { return 1; }
 
@@ -1261,7 +1261,7 @@ s32 func_001B0BE0(Obj_1B0BE0* self, Obj_1B0BE0* other)
     return ((s32)t ^ 1) & 1;
 }
 
-INCLUDE_ASM(func_001B0C68);
+ASM_FUNC(func_001B0C68);
 
 void func_001B0EA8(Obj_1B0EA8* self, s32 value)
 {

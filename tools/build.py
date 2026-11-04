@@ -95,6 +95,27 @@ def included_asm():
     return names
 
 
+EXPECTED_MARKER = {"handwritten": "ASM_FUNC", "remnant": "LINKER_REMNANT"}
+
+
+def marker_errors(files=None, table=None):
+    """The inclusions of the whole files whose marker disagrees with config/us/original_asm.tsv:
+    ASM_FUNC for hand-written assembly, LINKER_REMNANT for a linker's leftover, INCLUDE_ASM for a
+    function still to match (include/asm_func.h)."""
+    table = classify_asm.read_table() if table is None else table
+    if files is None:
+        files = [(line.split("\t")[0], (ROOT / line.split("\t")[0]).read_text())
+                 for line in (ROOT / "config" / "us" / "files.tsv").read_text().splitlines()[1:]]
+    errors = []
+    for path, text in files:
+        for marker, name in asm_func.markers(text):
+            want = EXPECTED_MARKER.get(table.get(name), "INCLUDE_ASM")
+            if marker.replace("_AFTER_INIT", "") != want:
+                errors.append("%s: %s(%s) should be %s(%s) (config/us/original_asm.tsv)"
+                              % (path, marker, name, want, name))
+    return errors
+
+
 def write_c_data(key, data_placed):
     """config/<key>/c_data.tsv: every global a C file defines, in a build that printed MATCH
     (tools/progress.py counts their bytes as matched data)."""
@@ -140,6 +161,11 @@ def main(argv=None):
         print("error: %s is missing; run python3 tools/setup_asm.py --version %s" % (ld_script.relative_to(ROOT), key))
         return 1
 
+    if key == versions.primary():
+        errors = marker_errors()
+        if errors:
+            print("\n".join("error: " + e for e in errors))
+            return 1
     placed, data_placed = [], []
     try:
         if key == versions.primary():

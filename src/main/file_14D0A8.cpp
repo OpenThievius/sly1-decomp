@@ -152,7 +152,7 @@ void func_0014EA48(Obj_14EA48* self);
 void func_0014EC70(Obj_14EC70* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
 void func_0014ED98(Obj_14ED98* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
-INCLUDE_ASM(func_0014D0A8);
+ASM_FUNC(func_0014D0A8);
 
 f32 func_0014D138(s32 count, f32* table, s32 wrap, f32 x)
 {
@@ -187,12 +187,12 @@ s32 func_0014D1A0(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
     return i;
 }
 
-INCLUDE_ASM(func_0014D280);
+ASM_FUNC(func_0014D280);
 
 INCLUDE_RODATA(D_00249FBC);
-INCLUDE_ASM(func_0014D3A8);
+ASM_FUNC(func_0014D3A8);
 
-INCLUDE_ASM(func_0014D680);
+ASM_FUNC(func_0014D680);
 
 void func_0014D938(s32 count, Quad_14D938* dst, void* arg, void* self)
 {
@@ -254,13 +254,13 @@ s32 func_0014DA68(void* self, f32 t, f32* a1, f32* a2)
     return func_0014D1A0(t, o->cnt, o->p14, o->wrap, a1, a2);
 }
 
-INCLUDE_ASM(func_0014DA98);
+ASM_FUNC(func_0014DA98);
 
 f32 func_0014DB40(Obj_14DB40* obj) { u32 address = obj->index * 4 + obj->base; return *(f32*)(address - 4); }
 
 f32 func_0014DB58(Obj_14DB58* obj) { u32 address = obj->index * 4 + obj->base; return *(f32*)(address - 4); }
 
-INCLUDE_ASM(func_0014DB70);
+LINKER_REMNANT(func_0014DB70);
 
 f32 func_0014DB78(Obj_14DB78* self)
 {
@@ -301,7 +301,7 @@ void func_0014DBD0(Obj_14DBD0* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f3
     }
 }
 
-INCLUDE_ASM(func_0014DCF8);
+LINKER_REMNANT(func_0014DCF8);
 
 f32 func_0014DD00(Span_0014DD00* self)
 {
@@ -446,7 +446,7 @@ void func_0014E510(Obj_14E510* self, s32 i)
     }
 }
 
-INCLUDE_ASM(func_0014E5B8);
+ASM_FUNC(func_0014E5B8);
 
 void func_0014E6A8(Obj_14E6A8* self, s32 a1, void* a2)
 {
@@ -457,9 +457,9 @@ void func_0014E6A8(Obj_14E6A8* self, s32 a1, void* a2)
     }
 }
 
-INCLUDE_ASM(func_0014E710);
+ASM_FUNC(func_0014E710);
 
-INCLUDE_ASM(func_0014E828);
+ASM_FUNC(func_0014E828);
 
 f32 func_0014E910(Obj_14E910* self, f32 t0)
 {
@@ -500,7 +500,7 @@ void func_0014EA48(Obj_14EA48* self)
     }
 }
 
-INCLUDE_ASM(func_0014EB10);
+ASM_FUNC(func_0014EB10);
 
 void func_0014EC70(Obj_14EC70* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12)
 {

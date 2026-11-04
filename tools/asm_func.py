@@ -17,7 +17,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-INCLUDE = re.compile(r"^\s*INCLUDE_ASM\(\s*(func_[0-9A-F]{8})\s*\)", re.M)
+INCLUDE = re.compile(r"^\s*(?:INCLUDE_ASM|ASM_FUNC|LINKER_REMNANT_AFTER_INIT|LINKER_REMNANT)\(\s*(func_[0-9A-F]{8})\s*\)", re.M)
+MARKER = re.compile(r"^\s*(INCLUDE_ASM|ASM_FUNC|LINKER_REMNANT_AFTER_INIT|LINKER_REMNANT)\(\s*(func_[0-9A-F]{8})\s*\)", re.M)
 # The listing names the registers as the 64-bit ABI does: $8-$11 are $a4-$a7 and $12-$15 are
 # $t0-$t3 (checked against the encodings).
 REGS = {n: i for i, n in enumerate(
@@ -26,8 +27,13 @@ REGS["s8"] = 30
 
 
 def included(text):
-    """The functions a C source includes with INCLUDE_ASM, in order."""
+    """The functions a C source includes with INCLUDE_ASM, ASM_FUNC or LINKER_REMNANT, in order."""
     return INCLUDE.findall(text)
+
+
+def markers(text):
+    """[(marker, function)] of a C source's inclusions, in order."""
+    return MARKER.findall(text)
 
 
 def function_lines(listing, name):

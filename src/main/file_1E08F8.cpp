@@ -1297,7 +1297,7 @@ s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
     return n;
 }
 
-INCLUDE_ASM(func_001E20B0);
+LINKER_REMNANT(func_001E20B0);
 
 s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
 {
@@ -1305,7 +1305,7 @@ s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
     return func_001E2018(dst, cap, fmt, ap);
 }
 
-INCLUDE_ASM(func_001E20F8);
+LINKER_REMNANT(func_001E20F8);
 
 s32 func_001E2100(const char* s) { s32 length = 0; while (*s) { s++; length++; } return length; }
 
@@ -1335,7 +1335,7 @@ char* func_001E21D8(char* s, s32 c)
     return 0;
 }
 
-INCLUDE_ASM(func_001E2210);
+LINKER_REMNANT(func_001E2210);
 
 void func_001E2218(s8* p)
 {
@@ -1360,7 +1360,7 @@ void func_001E2268(void* a, void* b)
     func_001F6B20(&tmp);
 }
 
-INCLUDE_ASM(func_001E22B8);
+LINKER_REMNANT(func_001E22B8);
 
 void func_001E22C0(IntPair_1E22C0* self)
 {
@@ -1388,7 +1388,7 @@ void func_001E2358(Tally_1E2358* self)
     }
 }
 
-INCLUDE_ASM(func_001E2390);
+LINKER_REMNANT(func_001E2390);
 
 void func_001E2398(void)
 {
@@ -1407,7 +1407,7 @@ void func_001E2398(void)
 
 void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
 
-INCLUDE_ASM(func_001E2438);
+ASM_FUNC(func_001E2438);
 
 void func_001E2520(void* self)
 {
@@ -1550,11 +1550,11 @@ void func_001E29A8(void* self, void* p)
 
 void func_001E29E8(Obj_001E29E8* self, f32 value) { self->b = value; self->c = 1.0f; self->a = value; }
 
-INCLUDE_ASM(func_001E2A00);
+ASM_FUNC(func_001E2A00);
 
-INCLUDE_ASM(func_001E2BF0);
+ASM_FUNC(func_001E2BF0);
 
-INCLUDE_ASM(func_001E2E68);
+ASM_FUNC(func_001E2E68);
 
 void func_001E30A0(Obj_1E30A0* self)
 {
@@ -1574,11 +1574,11 @@ void func_001E30D8(void* self)
 
 void func_001E30E0(void) {}
 
-INCLUDE_ASM(func_001E30E8);
+ASM_FUNC(func_001E30E8);
 
-INCLUDE_ASM(func_001E31F0);
+ASM_FUNC(func_001E31F0);
 
-INCLUDE_ASM(func_001E4578);
+ASM_FUNC(func_001E4578);
 
 f32 func_001E4880(void* a0, void* a1, void* a2, Ret_1E4880* a3)
 {
@@ -1586,11 +1586,11 @@ f32 func_001E4880(void* a0, void* a1, void* a2, Ret_1E4880* a3)
 }
 
 INCLUDE_RODATA(D_0024E5F0);
-INCLUDE_ASM(func_001E4888);
+ASM_FUNC(func_001E4888);
 
 INCLUDE_ASM(func_001E4C48);
 
-INCLUDE_ASM(func_001E4DC0);
+ASM_FUNC(func_001E4DC0);
 
 Ctor_1E4E38::Ctor_1E4E38()
 {

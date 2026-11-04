@@ -713,7 +713,7 @@ void func_001969F8(Self_001969F8* self)
     func_001B6DF8((Any_001969F8*)self->p6B8, self);
 }
 
-INCLUDE_ASM(func_00196B78);
+ASM_FUNC(func_00196B78);
 
 s32 func_00196E48(s32 a0, Obj_196E48* self)
 {
@@ -723,9 +723,9 @@ s32 func_00196E48(s32 a0, Obj_196E48* self)
     return self->f50 != a0;
 }
 
-INCLUDE_ASM(func_00196EB0);
+ASM_FUNC(func_00196EB0);
 
-INCLUDE_ASM(func_001971B8);
+ASM_FUNC(func_001971B8);
 
 void func_001973D8(u8* self)
 {
@@ -762,7 +762,7 @@ void func_001974D8(void* a, void* b)
     func_001922E8(a, b);
 }
 
-INCLUDE_ASM(func_001974F8);
+ASM_FUNC(func_001974F8);
 
 void func_00197788(Obj_197788* self)
 {
@@ -831,7 +831,7 @@ void func_00197A68(void* ctx, Pair_00197A68* out)
     out->f94 = D_0026A840;
 }
 
-INCLUDE_ASM(func_00197A88);
+ASM_FUNC(func_00197A88);
 
 void func_00197F10(Obj_197F10* self, s32 kind, void* rec)
 {
@@ -880,7 +880,7 @@ void func_00198090(void* self)
     func_001C72A0(self);
 }
 
-INCLUDE_ASM(func_001980B0);
+ASM_FUNC(func_001980B0);
 
 s32 func_001982A0(void* self)
 {
@@ -908,7 +908,7 @@ s32 func_001982A0(void* self)
     return r;
 }
 
-INCLUDE_ASM(func_00198318);
+ASM_FUNC(func_00198318);
 
 void func_001984B8(void* self, void* arg)
 {
@@ -932,7 +932,7 @@ void func_00198530(void* self)
     }
 }
 
-INCLUDE_ASM(func_00198570);
+ASM_FUNC(func_00198570);
 
 void func_001986E8(Self_1986E8* self, s32 code, Req_1986E8* req)
 {
@@ -980,7 +980,7 @@ void func_00198760(Obj_198760* s1, f32 f)
 
 u32 func_00198858(void) { return 0; }
 
-INCLUDE_ASM(func_00198860);
+ASM_FUNC(func_00198860);
 
 void func_00198920(Obj_198920* self)
 {

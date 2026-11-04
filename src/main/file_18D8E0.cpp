@@ -541,7 +541,7 @@ void func_0018D9B8(Obj_18D9B8* self, void* b, f32 x)
     self->f1F0 = s0;
 }
 
-INCLUDE_ASM(func_0018DA40);
+ASM_FUNC(func_0018DA40);
 
 void func_0018DB20(Self_18DB20* self, void* in1, void* in2)
 {
@@ -612,13 +612,13 @@ void func_0018DDA0(Ctx_18DDA0* self)
     *(Quad_18DDA0*)((u8*)self + 0x350) = *(Quad_18DDA0*)D_00248D30;
 }
 
-INCLUDE_ASM(func_0018DDD8);
+ASM_FUNC(func_0018DDD8);
 
-INCLUDE_ASM(func_0018DE70);
+ASM_FUNC(func_0018DE70);
 
-INCLUDE_ASM(func_0018DEE8);
+ASM_FUNC(func_0018DEE8);
 
-INCLUDE_ASM(func_0018E040);
+ASM_FUNC(func_0018E040);
 
 s32 func_0018E410(Ent_18E410* key)
 {
@@ -1195,4 +1195,4 @@ s32 func_0018F890(Object_18F890* self, s32 wait)
     return result;
 }
 
-INCLUDE_ASM(func_0018F938);
+LINKER_REMNANT(func_0018F938);

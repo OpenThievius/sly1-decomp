@@ -747,7 +747,7 @@ void func_001C0EC0(void)
     }
 }
 
-INCLUDE_ASM(func_001C0F30);
+ASM_FUNC(func_001C0F30);
 
 void func_001C0FF0(Obj_001C0FF0* self)
 {
@@ -1343,7 +1343,7 @@ void func_001C25B0(s32 first, ...) {
     if (r->f4C == 3) r->f4C = 0;
 }
 
-INCLUDE_ASM(func_001C27A8);
+LINKER_REMNANT(func_001C27A8);
 
 INCLUDE_ASM(func_001C27B0);
 

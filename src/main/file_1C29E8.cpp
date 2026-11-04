@@ -82,9 +82,9 @@ void func_001C29E8(Obj_1C29E8* o)
     o->f8 = 0;
 }
 
-INCLUDE_ASM(func_001C29F8);
+ASM_FUNC(func_001C29F8);
 
-INCLUDE_ASM(func_001C3028);
+ASM_FUNC(func_001C3028);
 
 void func_001C30E8(Obj_1C30E8* self)
 {

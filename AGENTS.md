@@ -79,11 +79,15 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   behaves as an inline-assembly helper, which no C form reproduces (docs/TOOLCHAIN.md); a
   function computes a bare square root through it, and nothing else writes inline assembly.
   A whole file (`config/us/files.tsv`) holds the original assembly functions inside its range
-  (`config/us/original_asm.tsv`) at file scope, `INCLUDE_ASM(func_X);` (include/asm_func.h),
-  their bytes taken from the disassembly: that is not inline assembly in a function. It holds a
-  function of its range that is not matched yet the same way, until its C matches: such a
-  function is never counted as matched (not in `config/us/original_asm.tsv`, not in the build's
-  count of functions from C), and its exact C replaces the line.
+  (`config/us/original_asm.tsv`) at file scope, their bytes taken from the disassembly: that is
+  not inline assembly in a function. As OpenRAC's decompilations mark them, hand-written assembly
+  is `ASM_FUNC(func_X);` and a linker's leftover `LINKER_REMNANT(func_X);` (include/asm_func.h),
+  both final source; `LINKER_REMNANT_AFTER_INIT(func_X);`, written after the file's last
+  definition, is a leftover retail has between the static initialiser GCC generates and its
+  `_GLOBAL_$I$`. A function of its range that is not matched yet is `INCLUDE_ASM(func_X);` until
+  its C matches: such a function is never counted as matched (not in `config/us/original_asm.tsv`,
+  not in the build's count of functions from C), and its exact C replaces the line. The build
+  fails when a marker disagrees with `config/us/original_asm.tsv`.
   `volatile` is one only where it stops the compiler. It is allowed where it is what the
   original had: a hardware register, at a fixed address (`*(volatile u32*)0x10002010`) or
   through a pointer to a register block (a DMA channel's), and data shared with hardware, an

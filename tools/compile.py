@@ -199,6 +199,29 @@ def run_step(cmd, **kw):
         return subprocess.CompletedProcess(cmd, proc.returncode, out.read(), err.read())
 
 
+REMNANT_BLOCK = re.compile(r" #APP\n\s*# linker remnant\n.*?\n #NO_APP\n", re.S)
+STATIC_INIT = re.compile(r"^\t\.ent\t__static_initialization_and_destruction_0$", re.M)
+CONSTRUCTOR = re.compile(r"^\t\.align\t\d+\n\t\.globl\t_GLOBAL_\$I\$", re.M)
+
+
+def place_remnants(asm):
+    """Move the LINKER_REMNANT_AFTER_INIT blocks a file writes after its last function to just
+    before its _GLOBAL_$I$, where retail has them (include/asm_func.h). GCC emits a file-scope asm
+    where it reads it, and the static initialiser and _GLOBAL_$I$ only at the end of the unit."""
+    init, ctor = STATIC_INIT.search(asm), CONSTRUCTOR.search(asm)
+    if not init or not ctor or ctor.start() < init.start():
+        return asm
+    last_end = asm.rfind("\t.end\t", 0, init.start())
+    blocks = [m for m in REMNANT_BLOCK.finditer(asm) if last_end < m.start() < init.start()]
+    if not blocks:
+        return asm
+    moved = "".join(m.group(0) for m in blocks)
+    for m in reversed(blocks):
+        asm = asm[:m.start()] + asm[m.end():]
+    at = CONSTRUCTOR.search(asm).start()
+    return asm[:at] + moved + asm[at:]
+
+
 def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     """Compile `src` to the object `out`. Returns the cc1plus assembly text.
 
@@ -234,6 +257,10 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
                 raise CompileError((proc.stderr or proc.stdout).strip() or "%s failed" % name)
         asm = s.read_text()
+        placed = place_remnants(asm)
+        if placed != asm:
+            asm = placed
+            s.write_text(asm)
         names = generated_names(source)
         if names:
             asm = rename_generated(asm, names)

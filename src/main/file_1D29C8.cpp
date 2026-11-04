@@ -187,7 +187,7 @@ tail:
 
 INCLUDE_RODATA(jtbl_0024DB90);
 INCLUDE_RODATA(jtbl_0024DBB0);
-INCLUDE_ASM(func_001D2BB8);
+ASM_FUNC(func_001D2BB8);
 
 s32 func_001D3100(Self_1D3100* self, s32 start, s32 count, s32* table)
 {
@@ -258,7 +258,7 @@ void func_001D32D8(Self_D32D8* self, void* v, s32 flag)
     ((VFnB_D32D8*)self->vtbl)[7](self);
 }
 
-INCLUDE_ASM(func_001D3398);
+ASM_FUNC(func_001D3398);
 
 void func_001D3470(Node_1D3470* self, f32 t)
 {
@@ -294,7 +294,7 @@ void* func_001D3500(Self_D3500* a0, Node_D3500* a1)
     return r;
 }
 
-INCLUDE_ASM(func_001D35A8);
+ASM_FUNC(func_001D35A8);
 
 void func_001D3678(Self_001D3678* self, s32 kind, Msg_001D3678* msg)
 {
