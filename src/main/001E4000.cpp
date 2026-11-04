@@ -4872,3 +4872,385 @@ f32 D_002636E0[4] = { 0.0f, 0.5f, 0.5f, 0.5f };
 f32 D_002636F0[4] = { 37.0f, 0.0f, 25.0f, 0.0f };
 f32 D_00263700 = 1.29999995f;
 f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
+
+// Globals typed by worker dz06, from retail's bytes and their readers.
+// size: 8-byte label, readers (001AC000, 001B0000) only lw/sw word at +0 (s32), next label 8-aligned
+s32 D_002744D0 = 0;
+// count: word reader, 0x28-stride record count
+s32 D_002744F8 = 0;
+// pointer from allocator (func_0018D5C0), indexed array base; 4-byte word
+void* D_002744FC = 0;
+// count: loop bound word
+s32 D_00274500 = 0;
+// pointer from allocator (count*0x20), word
+void* D_00274504 = 0;
+// count: loop bound word
+s32 D_00274508 = 0;
+// pointer from allocator (count*0x18), word
+void* D_0027450C = 0;
+// word counter
+s32 D_00274510 = 0;
+// word value
+s32 D_00274514 = 0;
+// word, compared with (s32)self
+s32 D_00274518 = 0;
+// list head pointer, word
+void* D_0027451C = 0;
+// size: loop m<6 stores D_00274520[m] (24 bytes)
+s32 D_00274520[6] = {0};
+// word handle
+s32 D_00274538 = 0;
+// word count
+s32 D_0027453C = 0;
+// pointer array allocator result, word
+void* D_00274540 = 0;
+// list pointer, word
+void* D_00274544 = 0;
+// word handle
+s32 D_00274728 = 0;
+// word
+s32 D_0027472C = 0;
+// word flag
+s32 D_00274730 = 0;
+// word
+s32 D_00274734 = 0;
+// word
+s32 D_00274738 = 0;
+// word flag
+s32 D_00274744 = 0;
+// lwc1/swc1 word
+f32 D_00274B5C = 0;
+// lw word
+s32 D_00274C10 = 0;
+// lwc1 word
+f32 D_00274E28 = 0;
+// lwc1 word
+f32 D_00274E2C = 0;
+// lw/sw word
+s32 D_00275130 = 0;
+// lw/sw word
+s32 D_00275134 = 0;
+// 8-byte label, only lw/sw at +0; next label 8-aligned
+s32 D_00275138 = 0;
+// f32 reader
+f32 D_00275650 = 0;
+// f32 reader
+f32 D_0027565C = 0;
+// pointer word, many pointer readers
+void* D_00275710 = 0;
+// word flag
+s32 D_00275714 = 0;
+// word
+s32 D_00275718 = 0;
+
+// Globals typed by worker dz07, from retail's bytes and their readers.
+struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
+struct Vec16_275C40 { s32 v[4]; } __attribute__((aligned(16)));
+
+// size: func_001E0848 clears 0x1C bytes and sets fields through 0x18 (label 0x20, 4 bytes padding before 8-aligned next label)
+Config_1E0848 D_002758E0 = {0};
+// size: s32 read as one word (func_00150000.cpp and 001AC000.cpp test bit 8)
+// size: s32 compared with 1/2 in 00148000 and 00194000
+s32 D_00275BEC = 0;
+// size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
+Vec16_275C40 D_00275C40 = {0};
+// size: s32 state compared/assigned in 001EC000
+s32 D_00275DB8 = 0;
+// size: u32 cleared by func_001F7D88
+u32 D_00277134 = 0;
+// size: s32 flag set/cleared in 001F8000
+s32 D_002771B8 = 0;
+// size: s32 read as one word (> 0 test) in 00200000
+s32 D_00279410 = 0;
+// size: s32 flag tested in 00200000
+s32 D_00279414 = 0;
+// size: s32 flag set/cleared in 00200000
+s32 D_00279424 = 0;
+// size: s32 read as one word in 00200000
+s32 D_00279430 = 0;
+// size: s32 state word, written 8/0/-1 in 00200000
+s32 D_00279454 = 0;
+
+// Globals typed by worker dz05, from retail's bytes and their readers.
+// A 28-byte record func_001AEA70 clears (func_001F5C0C with 0x1C) and then fills.
+struct Obj_2743D0 {
+    void* f00;
+    u8 f04;
+    u8 pad05[3];
+    f32 f08;
+    f32 f0C;
+    f32 f10;
+    f32 f14;
+    u32 f18;
+};
+
+// size: lw at offset 0 only, a 4-byte scalar of its own label
+s32 D_00270454 = 0;
+// size: lw at offset 0 (a pointer, read with lqc2 0x140 off it), 4-byte label
+void* D_002704F4 = 0;
+// size: lw at offset 0 compared with 1, 4-byte label
+s32 D_00270518 = 0;
+// size: lw at offset 0 compared with a count, 4-byte label
+s32 D_002726AC = 0;
+// size: lw at offset 0 compared with a count, 4-byte label
+s32 D_0027292C = 0;
+// size: memset 0x1C bytes (label 32, 8-aligned next label)
+Obj_2743D0 D_002743D0 = {0};
+// size: memset 0x1C bytes (label 32, 8-aligned next label)
+Obj_2743D0 D_002743F0 = {0};
+// size: memset 0x1C bytes (label 32, 8-aligned next label)
+Obj_2743D0 D_00274410 = {0};
+// size: memset 0x1C bytes
+Obj_2743D0 D_00274450 = {0};
+// size: memset 0x1C bytes
+Obj_2743D0 D_00274488 = {0};
+
+// Globals typed by worker dz02, from retail's bytes and their readers.
+struct Obj_261EF0 {
+    u8 pad00[0x1C];
+    void* f1C;
+    u8 pad20[4];
+};
+
+struct Rec12_2622E0 {
+    u32 f0;
+    u32 f4;
+    s32 f8;
+};
+
+struct Rec12_2622F0 {
+    u32 f0;
+    u32 f4;
+    s32 f8;
+};
+
+struct Rec12_262300 {
+    u32 f0;
+    u32 f4;
+    s32 f8;
+};
+
+struct Slot12_262320 {
+    u8 pad00[4];
+    u8* f4;
+    u8 pad08[4];
+    u8* fC;
+    u8* f10;
+    u8 pad14[0xC];
+    Rec12_2622E0 s20;
+    Rec12_2622E0 s2C;
+    Rec12_2622E0 s38;
+    u8 pad44[4];
+};
+
+struct Rec_262490 {
+    u32 f0;
+    u32 f4;
+    u8 pad08[8];
+    u64 f10;
+    u64 f18;
+    u8 pad20[8];
+};
+
+// size: f32 read by lwc1 (game clock), 4-byte label
+f32 D_00261868 = 0;
+// size: f32 read by lwc1, 4-byte label
+f32 D_0026186C = 0;
+// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
+u64 D_00261870 = 0;
+// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
+u64 D_00261878 = 0;
+// size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
+s32 D_00261D38 = 0;
+// size: func_00151A68 clears 0x24 bytes of it
+Obj_261EF0 D_00261EF0 = {};
+// size: semaphore id from func_002027A0 (lw/sw), 4-byte label
+s32 D_00261F14 = 0;
+s32 D_00261F18 = 0;
+s32 D_00261F1C = 0;
+s32 D_00261F20 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00261F70 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00262260 = 0;
+// size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label
+u8* D_00262264 = 0;
+// size: loop bound 5, stride 4 in func_0015C200
+s32 D_00262268[5] = {0};
+// size: s32 (lw/sw), 4-byte label
+s32 D_0026227C = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002622D0 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002622D4 = 0;
+// size: pointer (lw/sw), 4 bytes before an 8-aligned next label
+Slot12_262320* D_002622D8 = 0;
+// size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
+Rec12_2622E0 D_002622E0 = {};
+// size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
+Rec12_2622F0 D_002622F0 = {};
+// size: 12-byte record copied into Slot r38 by func_0015EC68
+Rec12_262300 D_00262300 = {};
+// size: s32 (sw), 4-byte label
+s32 D_00262310 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00262318 = 0;
+// size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
+Slot12_262320 D_00262320[2] = {};
+// size: pointer (lw/sw), 4-byte label
+void* D_002623B4 = 0;
+// size: two 0x28-byte records (loop end = base + 0x50, stride 0x28 in func_001688B8)
+Rec_262490 D_00262490[2] = {};
+// size: s32 (lw/sw), 4-byte label
+s32 D_002626C0 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002626C8 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002626CC = 0;
+// size: s32 count (lw/sw), 4 bytes before an 8-aligned next label
+s32 D_002626D0 = 0;
+
+// Globals typed by worker dz04, from retail's bytes and their readers.
+struct Row_26AC30 {
+    void (*fn)(void);
+    u8 pad04[4];
+    s32 f8;
+    u8 padC[0x80 - 0xC];
+};
+
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A700 = 0;
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A704 = 0;
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A708 = 0;
+// size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
+f32 D_0026A70C = 0;
+// size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
+s32 D_0026A914 = 0;
+// size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
+Row_26AC30 D_0026AC30[18] = {};
+// size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
+s32 D_0026EC58 = 0;
+// size: one s32 (lw, compared with 0), label 8 bytes with 4 of padding before the 8-aligned D_0026EC68
+s32 D_0026EC60 = 0;
+// size: one pointer (lw, passed to func_00150790), label 8 bytes with 4 of padding before the 8-aligned D_0026F808
+u8* D_0026F800 = 0;
+// size: one s32 (lw, bnez), label is 4 bytes
+s32 D_0026FA64 = 0;
+
+// Globals typed by worker dz01, from retail's bytes and their readers.
+struct Quad_261280 {
+    f32 c0, c1, c2, c3;
+} __attribute__((aligned(16)));
+
+// The span func_00130F48 fills: head, then len/halfw/lo/mid/hi/p/q, padded to 16 by the quad's alignment.
+struct Span_261280 {
+    Quad_261280 head;
+    f32 len;
+    f32 halfw;
+    s32 lo;
+    s32 mid;
+    s32 hi;
+    f32 p;
+    f32 q;
+};
+
+// size: sizeof(Span_261280) == 0x30; func_00130F48 fills it (n = 0x18) and func_00131000 reads it
+Span_261280 D_00261280 = {};
+// size: same Span type, 0x30, filled by func_00130F48 at 0x131418 and read by func_00131000
+Span_261280 D_002612B0 = {};
+// size: same Span type, 0x30, filled by func_00130F48 at 0x131444 and read by func_00131000
+Span_261280 D_002612E0 = {};
+// size: one f32, read and written only with lwc1/swc1 (0x1312B8..0x131B48)
+f32 D_00261310 = 0;
+// size: one word, address passed to func_00139B70 (which func_001529E0 fills with sw) and read with lw at 0x13B1D0
+s32 D_00261314 = 0;
+// size: one word (sw by func_001529E0, lw at 0x13B1D8), then 4 bytes of padding before the 8-aligned next label
+s32 D_00261318 = 0;
+// size: one word, stored with sw and read with lw (0x14079C, 0x1409F4, 0x140B44, 0x18F348)
+s32 D_002613EC = 0;
+// size: one f32, read with lwc1 only; label is 4 bytes
+f32 D_0026185C = 0;
+// size: one f32, read with lwc1 only; 4 bytes of padding before the 8-aligned next label
+f32 D_00261860 = 0;
+
+// Globals typed by worker dz03, from retail's bytes and their readers.
+// A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
+struct Obj_2626E8 { u32 first; u32 last; u32 base; };
+// Three words set by func_00168D68.
+struct Obj_2626D8 { s32 a; s32 b; s32 c; };
+// Record func_0016C360 clears (0x1C bytes) and fills.
+struct Obj_2629A8 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
+struct Pair_262C70 { f32 lo; f32 hi; };
+// The input stream func_0016E1A0 clears (0xC4 bytes).
+struct Obj_262C70 {
+    u8 pad00[4];
+    s32 f04;
+    s32 f08;
+    s32 f0C;
+    s32 f10;
+    s32 f14;
+    s32 f18;
+    f32 f1C;
+    s32 f20;
+    u8 pad24[0x2C];
+    s32 f50;
+    Pair_262C70 a54[4];
+    u8 pad74[0x10];
+    s32 f84;
+    Pair_262C70 a88[4];
+    s16 fA8;
+    u8 padAA[0x12];
+    void* fBC;
+    s32 fC0;
+};
+struct Ent_264670 { void* f0; s32 f4; s32 f8; s16 fC; s16 fE; };
+struct Slot_264A70 { u8 pad0[0xC]; f32 fC; u8 pad10[0x1A5C - 0x10]; };
+struct Slot_269990 { s32 f00; s32 f04; u8 pad08[8]; s32 f10; };
+
+// size: func_00168D68 sets three words (a, b, c) of it
+Obj_2626D8 D_002626D8 = {0};
+// size: list head of three words, func_00152438 sets the link offset at +8 (0x38)
+Obj_2626E8 D_002626E8 = {0};
+// size: list head of three words, link offset at +8 (0x50)
+Obj_2626E8 D_002626F8 = {0};
+// size: list head of three words, link offset at +8 (0x558); func_00150298 walks it
+Obj_2626E8 D_00262708 = {0};
+// size: s32 pointer, loaded and stored as a word (func_0016DD00 clears it)
+s32 D_002629C8 = 0;
+// size: s32 flags, word accesses only
+s32 D_00262C64 = 0;
+// size: s32 flags, word accesses only
+s32 D_00262C68 = 0;
+// size: s32 flags, word accesses only
+s32 D_00262C6C = 0;
+// size: chosen with D_00262C70 as the same pad pointer (conditional), 0xC4 to the next label
+Obj_262C70 D_00262D38 = {};
+// size: pointer, word accesses only
+void* D_00262E10 = 0;
+// size: s32, word load/store only
+s32 D_00263E2C = 0;
+// size: list head of three words, link offset at +8 (0x50)
+Obj_2626E8 D_00264088 = {0};
+// size: pointer, word store of D_002622CC
+void* D_00264260 = 0;
+// size: s32, word accesses only
+s32 D_00264264 = 0;
+// size: func_00184DE8 fills it while index < 0x100 (sltiu 0x100, step 4)
+void* D_00264268[256] = {0};
+// size: s32 count, tested < 0x10 against the D_00264670 table in func_00184DE8
+s32 D_00264668 = 0;
+// size: func_00184DE8 adds entries while count < 0x10, stride 0x10 (sll 4)
+Ent_264670 D_00264670[16] = {};
+// size: s32 flag, word load/store only
+s32 D_002649A8 = 0;
+// size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
+// size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
+Slot_269990 D_00269990 = {0};
+// size: s32, word load/store only
+s32 D_00269B48 = 0;
+// size: s32 counter, word load/store only
+s32 D_00269C90 = 0;
+Obj_2629A8 D_002629A8 = {0};
+Obj_262C70 D_00262C70 = {};
