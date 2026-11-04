@@ -4044,7 +4044,6 @@ extern const f32 D_0024AB7C = 3.40282347e+38f;
 extern const f32 D_0024AFA0 = 3.40282347e+38f;
 extern const f32 D_0024B164 = 3.40282347e+38f;
 extern const f32 D_0024B16C = 3.40282347e+38f;
-extern const char D_0024B1E8[96] = "sio2man.irx\000\000\000\000\000padman.irx\000\000\000\000\000\000mcman.irx\000\000\000\000\000\000\000mcserv.irx\000\000\000\000\000\000libsd.irx\000\000\000\000\000\000\000989snd.irx\000\000\000\000\000";
 extern const f32 D_0024B258 = -3.40282347e+38f;
 extern const char D_0024B438[328] = "The Secret Police File\000\000The Tokyo Police File\000\000\000The Making Of Sly Cooper\000\000\000\000\000\000\000\000Commercials & Outtakes\000\000Tide of Terror\000\000Raleigh Hung out to Dry\000Sunset Snake Eyes\000\000\000\000\000\000\000Muggshot Busted\000Vicious Voodoo\000\000Mz Ruby Vexed\000\000\000Fire in the Sky\000The Panda King on Ice\000\000\000The Cold Heart of Hate\000\000Ten Seconds\000\000\000\000\000The Thievius Raccoonus\000\000Credits";
 extern const f32 D_0024B64C = 3.40282347e+38f;
@@ -5235,15 +5234,10 @@ s32 D_00263E2C = 0;
 // size: list head of three words, link offset at +8 (0x50)
 Obj_2626E8 D_00264088 = {0};
 // size: pointer, word store of D_002622CC
-void* D_00264260 = 0;
 // size: s32, word accesses only
-s32 D_00264264 = 0;
 // size: func_00184DE8 fills it while index < 0x100 (sltiu 0x100, step 4)
-void* D_00264268[256] = {0};
 // size: s32 count, tested < 0x10 against the D_00264670 table in func_00184DE8
-s32 D_00264668 = 0;
 // size: func_00184DE8 adds entries while count < 0x10, stride 0x10 (sll 4)
-Ent_264670 D_00264670[16] = {};
 // size: s32 flag, word load/store only
 s32 D_002649A8 = 0;
 // size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
