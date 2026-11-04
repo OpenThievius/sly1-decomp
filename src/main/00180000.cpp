@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c6e.h"
+#include "c51.h"
 
 int func_001EAC68(f32 a, f32 b, f32 eps);
 
@@ -236,7 +237,7 @@ void* func_00183058(Self_183058* self, void* a1, s32 a2)
 void func_001243E0(void* self);
 void func_00183DC0(void* self);
 
-void func_00183E70(void* self)
+void func_00183E70(C51* self)
 {
     func_001243E0(self);
     func_00183DC0(self);
@@ -362,7 +363,7 @@ void func_00125138(void* self);
 void func_001841D0(void* self);
 void func_00184B58(void* self);
 
-void func_00183D88(void* self)
+void func_00183D88(C51* self)
 {
     func_00125138(self);
     func_001841D0(self);
@@ -445,14 +446,10 @@ void func_00183DF8(Obj_00183DF8* self)
     if (fn != 0) fn(self);
 }
 
-typedef void (*VFn_00183E40)(void* self);
-
-struct Obj_00183E40 { VFn_00183E40* vtbl; u8 pad04[0x10]; u8* f14; };
-
 void func_001240F8(void* self);
-void func_00183DF8(Obj_00183E40* self);
+void func_00183DF8(C51* self);
 
-void func_00183E40(Obj_00183E40* self)
+void func_00183E40(C51* self)
 {
     func_001240F8(self);
     func_00183DF8(self);
@@ -1213,33 +1210,15 @@ done:
     ;
 }
 
-struct __attribute__((aligned(16))) Quad_183CC8 { s32 a, b, c, d; };
-struct Obj_183CC8 {
-    u8 p0[0x2C8];
-    u64 w2c8;
-    s32 w2d0;
-    u8 p1[0x2F8 - 0x2D4];
-    f32 f2f8;
-    f32 f2fc;
-    f32 f300;
-    u8 p2[0x320 - 0x304];
-    Quad_183CC8 q320;
-    f32 f330;
-    f32 f334;
-    f32 f338;
-    u8 p3[0x340 - 0x33C];
-    Quad_183CC8 q340;
-};
+extern Quad51 D_00248D20;
+extern Quad51 D_00248D10;
 
-extern Quad_183CC8 D_00248D20;
-extern Quad_183CC8 D_00248D10;
+void func_00184A70(C51* self);
+void func_00123ED0(C51* self);
 
-void func_00184A70(Obj_183CC8* self);
-void func_00123ED0(Obj_183CC8* self);
-
-void func_00183CC8(Obj_183CC8* self)
+void func_00183CC8(C51* self)
 {
-    self->w2c8 = (self->w2c8 & ~(0x3ULL << 40)) | ((u64)0x8000 << 25);
+    *(u64*)((u8*)self + 0x2C8) = (*(u64*)((u8*)self + 0x2C8) & ~(0x3ULL << 40)) | ((u64)0x8000 << 25);
     self->w2d0 = 0;
     self->q320 = D_00248D20;
     self->q340 = D_00248D10;
@@ -1306,14 +1285,11 @@ void func_00181DA8(Obj_181DA8* self, s32 mode)
     self->fBB4 = D_00261858[1];
 }
 
-struct __attribute__((packed)) Pair_183EA0 { s32 a; s32 b; };
-struct State_183EA0 { u8 pad00[0x304]; s32 value; u8 pad308[0x410 - 0x308]; Pair_183EA0 saved; };
-s32 func_00182FC8(State_183EA0*);
-void func_00183DC0(State_183EA0*);
-void func_00127048(State_183EA0*, State_183EA0*);
-void func_00183DF8(State_183EA0*);
+s32 func_00182FC8(C51*);
+void func_00183DC0(C51*);
+void func_00127048(C51*, C51*);
 
-void func_00183EA0(State_183EA0* self, State_183EA0* other)
+void func_00183EA0(C51* self, C51* other)
 {
     s32 changed = 0;
     if (func_00182FC8(self)) {
@@ -1322,7 +1298,7 @@ void func_00183EA0(State_183EA0* self, State_183EA0* other)
     if (changed) {
         func_00183DC0(self);
     }
-    Pair_183EA0 keep = self->saved;
+    Pair51 keep = self->saved;
     func_00127048(self, other);
     self->saved = keep;
     if (changed) {

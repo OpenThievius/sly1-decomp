@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c4d.h"
+#include "c50.h"
 
 struct Obj_1389C8 { u8 pad[0x1AEC]; s32 field; };
 
@@ -120,34 +122,20 @@ void func_00138278(void* self, In_138278* in, Table_138278* out)
     }
 }
 
-struct Actor_A418 {
-    u8 pad0[0x80];
-    f32 level;
-    u8 pad1[0x2C8 - 0x84];
-    u64 bits;
-    void* owner;
-};
-
-struct Src_A418 {
-    u8 pad0[0x80];
-    f32 level;
-    u8 pad1[0x314 - 0x84];
-    u8 sub[0x10];
-};
-
-void func_001832F0(Actor_A418* self, Src_A418* src);
-s32 func_001300E8(Src_A418* src, s32 kind);
+void func_001832F0(C4D* self, C01* src);
+s32 func_001300E8(C01* src, s32 kind);
 s32 func_00152720(void* sub);
 
-void func_0013A418(Actor_A418* self, Src_A418* src)
+void func_0013A418(C4D* self, C01* src)
 {
     func_001832F0(self, src);
     if (func_001300E8(src, 0x50) != 0) {
-        self->owner = src;
-        self->level = src->level;
-        if (func_00152720(src->sub) == 0) {
-            self->bits &= 0xFFFFFFFFF3FFFFFFULL;
-            self->bits &= 0xFFFFFFFFCFFFFFFFULL;
+        C50* from = (C50*)src;
+        self->owner = from;
+        *(f32*)((u8*)self + 0x80) = *(f32*)((u8*)from + 0x80);
+        if (func_00152720(from->list314) == 0) {
+            *(u64*)((u8*)self + 0x2C8) &= 0xFFFFFFFFF3FFFFFFULL;
+            *(u64*)((u8*)self + 0x2C8) &= 0xFFFFFFFFCFFFFFFFULL;
         }
     }
 }
@@ -205,20 +193,14 @@ void func_00138828(void* self, void* arg)
     func_001389C8(self);
 }
 
-struct Owner_139E80 {
-    u8 pad0[0x14];
-    u8* sub;
-};
-
 void func_00152600(void* sub, void* self);
 void func_00152470(void* sub, void* self);
 void func_001240F8(void* self);
 
-void func_00139E80(void* self)
+void func_00139E80(C4D* self)
 {
-    Owner_139E80* o = (Owner_139E80*)self;
-    func_00152600(o->sub + 0x1CC0, self);
-    func_00152470(o->sub + 0x1CB4, self);
+    func_00152600((u8*)self->world + 0x1CC0, self);
+    func_00152470((u8*)self->world + 0x1CB4, self);
     func_001240F8(self);
 }
 
@@ -482,42 +464,29 @@ void func_00152470(void* list, void* item);
 void func_00152438(void* self, s32 value);
 void func_00123ED0(void* self);
 
-struct Obj_139DE8 {
-    u8 pad0[0x14];
-    u8* p14;
-    u8 pad18[0x80 - 0x18];
-    f32 f80;
-    u8 pad84[0x2C8 - 0x84];
-    u64 bits2C8;
-};
-
-void func_00139DE8(Obj_139DE8* self)
+void func_00139DE8(C4D* self)
 {
-    func_00152470(self->p14 + 0x1CC0, self);
+    func_00152470((u8*)self->world + 0x1CC0, self);
     func_00123ED0(self);
-    func_00152438((u8*)self + 0x624, 0x1090);
-    u64 b = self->bits2C8;
+    func_00152438(&self->list, 0x1090);
+    u64 b = *(u64*)((u8*)self + 0x2C8);
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;
     b &= 0xFFFFFCFFFFFFFFFFull;
-    self->f80 = 1e10f;
+    *(f32*)((u8*)self + 0x80) = 1e10f;
     b |= 0x10000000000ull;
-    self->bits2C8 = b;
+    *(u64*)((u8*)self + 0x2C8) = b;
 }
-
-typedef void (*VFn_13A3A0)(void* self);
-struct Sub_13A3A0 { u8 pad0[0xC]; u32 flags; };
-struct Obj_13A3A0 { VFn_13A3A0* vtbl; u8 pad0[0x380 - 4]; Sub_13A3A0* sub; };
 
 extern u8* D_00261990;
 void func_00124FC0(void* self);
 void func_00129DF8(void* self);
 
-void func_0013A3A0(Obj_13A3A0* self)
+void func_0013A3A0(C4D* self)
 {
     func_00124FC0(self);
     func_00129DF8(self);
-    Sub_13A3A0* sub = self->sub;
+    Sub4D* sub = self->sub;
     u8* g = D_00261990;
     s32 hit = 0;
     u32 flags = sub->flags;
@@ -525,7 +494,7 @@ void func_0013A3A0(Obj_13A3A0* self)
     if ((flags & 0x10000000) != 0 || (mask & flags) == mask)
         hit = 1;
     if (hit == 0)
-        self->vtbl[7](self);
+        self->desc->m03(self);
 }
 
 struct Frame_139B70 { u8 buf[0x30]; };
@@ -559,7 +528,7 @@ void* func_001F5C0C(void* dst, s32 value, u32 size);
 void func_0019D410(void* block);
 void func_0013AD80(void* self);
 
-void func_0013AD08(void* owner, s32 unused, Src_13AD08* src)
+void func_0013AD08(C4D* owner, s32 unused, Src_13AD08* src)
 {
     ParamBlock_13AD08 blk;
     func_001F5C0C(&blk, 0, (u32)0x80);
@@ -648,15 +617,6 @@ struct Node_139EC8 {
     s32 next;
 };
 
-struct Obj_139EC8 {
-    u8 pad0[0x14];
-    u8* p14;
-    u8 pad1[0x624 - 0x18];
-    s32 head;
-    u8 pad2[4];
-    s32 link;
-};
-
 struct Frame_139EC8 {
     s32 list;
     s32 cursor;
@@ -664,11 +624,11 @@ struct Frame_139EC8 {
     s32 prev;
 };
 
-void func_00139EC8(void* self)
+void func_00139EC8(C4D* self)
 {
-    Obj_139EC8* obj = (Obj_139EC8*)self;
+    C4D* obj = self;
     Frame_139EC8 fr;
-    s32 e = (s32)&obj->head;
+    s32 e = (s32)&obj->list.head;
     fr.list = e;
     fr.cursor = e;
     s32 old = *(s32*)&D_0027B314;
@@ -676,7 +636,7 @@ void func_00139EC8(void* self)
     fr.prev = old;
     fr.link = link;
     *(s32*)&D_0027B314 = (s32)&fr;
-    s32 head = obj->head;
+    s32 head = obj->list.head;
     fr.cursor = head + fr.link;
     s32 node = head;
     while (node != 0) {
@@ -685,7 +645,7 @@ void func_00139EC8(void* self)
         fr.cursor = nx + fr.link;
         node = nx;
     }
-    func_00152600(obj->p14 + 0x1CB4, self);
+    func_00152600((u8*)obj->world + 0x1CB4, self);
     func_00152470(D_002622E0, self);
     func_001243E0(self);
     *(s32*)&D_0027B314 = fr.prev;

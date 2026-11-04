@@ -2,6 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c73.h"
+#include "c60.h"
 
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
@@ -743,20 +744,17 @@ void func_00158B00(C79* self)
     self->id98 = -1;
 }
 
-struct Obj_15A960 { u8 pad0[0x2EC]; f32 f2EC; f32 f2F0; };
-
 extern f32 D_00261860;
 void func_00124FC0(void* self);
 f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
 
-void func_0015A960(Obj_15A960* self)
+void func_0015A960(C60* self)
 {
     func_00124FC0(self);
-    self->f2EC = func_001EA4B8((u8*)self + 0x2E0, 0, self->f2EC, self->f2F0, D_00261860);
+    self->f2EC = func_001EA4B8(self->v, 0, self->f2EC, self->f2F0, D_00261860);
 }
 
 struct __attribute__((aligned(16))) Quad_15A9A8 { s32 w[4]; };
-struct Obj_15A9A8 { u8 pad0[0x2EC]; f32 f2EC; };
 struct Frame_15A9A8 { Quad_15A9A8 q0; u8 pad1[0x30]; Quad_15A9A8 m40[4]; u8 pad2[0x10]; Quad_15A9A8 m90[4]; };
 
 void func_0018A008(s32 zero, void* out, f32 v);
@@ -764,7 +762,7 @@ void func_00125B70(void* obj, void* c, void* out);
 void func_00188668(Quad_15A9A8* out, void* b, Quad_15A9A8* in);
 void func_001261C0(void* obj, void* b, void* m);
 
-void func_0015A9A8(Obj_15A9A8* self, void* arg1, void* arg2)
+void func_0015A9A8(C60* self, void* arg1, void* arg2)
 {
     Frame_15A9A8 f;
     func_0018A008(0, &f.q0, self->f2EC);
@@ -844,10 +842,10 @@ s32 func_0015A838(void* self,s32 flags,s32 kind,void* arg)
 
 void func_001289C0(void*,void*);
 s32 func_001E4C48(void*,void*,void*,void*,void*);
-void func_0015A918(u8* self,void* other)
+void func_0015A918(C60* self,void* other)
 {
     func_001289C0(self,other);
-    func_001E4C48(other,self+0x2D0,self+0x2D4,self+0x2D8,self+0x2DC);
+    func_001E4C48(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
 struct Rec_159A80 { u8 pad[0x3C]; s32 f3C; };
@@ -1374,16 +1372,14 @@ void func_0015B128(Self_15B128* self)
     }
 }
 
-struct Obj_15A8B8 { u8 pad0[0x2E0]; f32 v[2]; f32 f2e8; f32 f2ec; f32 f2f0; };
-
 void func_00123ED0(void* self);
 
-void func_0015A8B8(Obj_15A8B8* self)
+void func_0015A8B8(C60* self)
 {
     func_00123ED0(self);
     f32* v = self->v;
-    self->f2f0 = 1.0f;
-    self->f2ec = 1.0f;
+    self->f2F0 = 1.0f;
+    self->f2EC = 1.0f;
     self->v[0] = 1.0f;
     v[1] = 0.2f;
     v[2] = 0.1f;
