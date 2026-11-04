@@ -49,3 +49,7 @@ func_001A1030 = 0x001A1030; // type:func
 func_001A3AE0 = 0x001A3AE0; // type:func
 func_001B5F50 = 0x001B5F50; // type:func
 func_001B9940 = 0x001B9940; // type:func
+
+// Data labels no instruction names: the start of a proved file's .rodata, reached only through a
+// pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128).
+D_00249CA0 = 0x00249CA0;

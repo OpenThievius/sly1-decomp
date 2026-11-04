@@ -4727,23 +4727,6 @@ f32 D_00260EC0[4] = { 15.0f, 0.0f, 0.5f, 45.0f };
 f32 D_00260ED0[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
 f32 D_00260EE0[4] = { -50.0f, 4.0f, 0.0f, 0.0f };
 f32 D_00260EF0[4] = { 0.0f, 400.0f, 0.0f, 0.0f };
-s32 D_00261090[4] = { 75, 0, 0, 0 };
-f32 D_002610A0[4] = { 80.0f, -288.0f, 288.0f, 0.0f };
-f32 D_002610B0[4] = { 280.800018f, 376.0f, -376.0f, 0.0f };
-f32 D_002610C0[4] = { -8.0f, -40.0f, 40.0f, 0.0f };
-f32 D_00261184 = 1.0f;
-f32 D_00261188 = 0.5f;
-f32 D_00261190[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
-f32 D_002611A0[4] = { 1.5f, -1.5f, 0.0f, 0.0f };
-f32 D_002611B0[3] = { 5.0f, 0.0f, 0.100000001f };
-f32 D_002611BC = 0.5f;
-f32 D_002611C0[3] = { 5.0f, 0.0f, 0.100000001f };
-f32 D_002611CC = 250.0f;
-f32 D_002611D0 = 40.0f;
-f32 D_002611D4 = -20.0f;
-f32 D_002611D8 = -15.0f;
-f32 D_002611DC = 1.0f;
-f32 D_00261268[3] = { 8.0f, 0.0f, 0.150000006f };
 f32 D_00261360 = 600.0f;
 f32 D_00261370[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
 f32 D_00261380[4] = { 2.0f, -1.5f, 0.0f, 0.0f };
@@ -5144,13 +5127,9 @@ struct Span_261280 {
 };
 
 // size: sizeof(Span_261280) == 0x30; func_00130F48 fills it (n = 0x18) and func_00131000 reads it
-Span_261280 D_00261280 = {};
 // size: same Span type, 0x30, filled by func_00130F48 at 0x131418 and read by func_00131000
-Span_261280 D_002612B0 = {};
 // size: same Span type, 0x30, filled by func_00130F48 at 0x131444 and read by func_00131000
-Span_261280 D_002612E0 = {};
 // size: one f32, read and written only with lwc1/swc1 (0x1312B8..0x131B48)
-f32 D_00261310 = 0;
 // size: one word, address passed to func_00139B70 (which func_001529E0 fills with sw) and read with lw at 0x13B1D0
 s32 D_00261314 = 0;
 // size: one word (sw by func_001529E0, lw at 0x13B1D8), then 4 bytes of padding before the 8-aligned next label

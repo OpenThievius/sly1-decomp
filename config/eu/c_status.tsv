@@ -870,6 +870,7 @@ func_00136648	func_00136760	match	version-specific, rodata
 func_00136EC8	func_00137138	match	version-specific
 func_00136EF8	func_00137168	match	version-specific
 func_00136FA8	func_00137218	match	version-specific
+func_00136FE8	func_00137258	match	
 func_00137228	func_00137498	match	
 func_00137238	func_001374A8	match	
 func_00137248	func_001374B8	match	

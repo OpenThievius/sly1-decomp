@@ -25,8 +25,8 @@ struct Gfx_eu_132500 {
 
 void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
 {
-    Rgba_132500 c0;
-    Rgba_132500 c1;
+    Rgba_130F48 c0;
+    Rgba_130F48 c1;
     f32 k;
     Pad_132500* pad;
     u8 alpha;
@@ -54,23 +54,23 @@ void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
     switch (self->f5AC) {
     case 0:
         if (self->f570 == 5) {
-            Rgba_132500 t = D_00261110;
+            Rgba_130F48 t = D_00261110;
             t.a = alpha;
             c0 = t;
             t = D_00261108;
             t.a = alpha;
             c1 = t;
         } else {
-            Rgba_132500 t = (*(Rgba_132500*)&D_002610E0);
+            Rgba_130F48 t = (*(Rgba_130F48*)&D_002610E0);
             t.a = alpha;
             c0 = t;
-            t = (*(Rgba_132500*)&D_002610D8);
+            t = (*(Rgba_130F48*)&D_002610D8);
             t.a = alpha;
             c1 = t;
         }
         break;
     case 1: {
-        Rgba_132500 t = D_00261100;
+        Rgba_130F48 t = D_00261100;
         t.a = alpha;
         c0 = t;
         t = D_002610F8;
@@ -79,7 +79,7 @@ void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
         break;
     }
     case 2: {
-        Rgba_132500 t = D_002610F0;
+        Rgba_130F48 t = D_002610F0;
         t.a = alpha;
         c0 = t;
         t = D_002610E8;
@@ -97,9 +97,9 @@ void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
         f32 period = 256.0f;
         f32 wide = 512.0f;
         f32 s = Gfx_132500::Wave(-8.0f, period, self->f598);
-        Rgba_132500 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+        Rgba_130F48 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
         s = Gfx_132500::Wave(-18.0f, period, self->f598);
-        Rgba_132500 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+        Rgba_130F48 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
         f32 x0 = posX - scale * 35.0f;
         f32 x1 = x0 + scale * 70.0f;
         f32 u;
@@ -162,7 +162,7 @@ void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
                 f32 s = Gfx_132500::Wave(offX, wide, self->f598);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_132500 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
                 func_00161458(gs, *(u32*)&col);
                 func_00161670(gs, Gfx_eu_132500::ScreenX(px), Gfx_eu_132500::ScreenY(py), 0, 0);
                 func_001615F0(gs, Gfx_eu_132500::ScreenX(px + scale * 2.0f), Gfx_eu_132500::ScreenY(py + scale * 10.0f), 0, 0);
@@ -180,7 +180,7 @@ void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
                 f32 s = Gfx_132500::Wave(offY, period, self->f598);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_132500 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
                 func_00161458(gs, *(u32*)&col);
                 func_00161670(gs, Gfx_eu_132500::ScreenX(px), Gfx_eu_132500::ScreenY(py), 0, 0);
                 func_001615F0(gs, Gfx_eu_132500::ScreenX(px + scale * 10.0f), Gfx_eu_132500::ScreenY(py + scale * 2.0f), 0, 0);
