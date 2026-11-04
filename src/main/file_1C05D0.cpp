@@ -218,8 +218,6 @@ struct Dma_1C25B0 {
     s32 f80;
 };
 
-extern Ring_1C25B0 D_002748F0[];
-extern s32 D_00274990;
 extern Dma_1C25B0* D_00261F20;
 void func_00202C38(Dma_1C25B0* d, s32 b, s32 c);
 void func_00202B68(Dma_1C25B0* d);
@@ -265,7 +263,6 @@ void func_0011B060(void* q, s32 mode);
 
 
 
-extern s32 D_002748EC;
 s32 func_001C0CF0(void);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
@@ -498,7 +495,6 @@ struct Chan_1C2430 {
     u32 f80;
 };
 
-extern s32 D_00274990;
 extern Chan_1C2430* D_00261F24;
 
 typedef char* VaList_1C2430;
@@ -552,6 +548,18 @@ Quad_1C23B0* func_001C23B0(Quad_1C23B0* t, s32 n, s32 c, void* z, ...);
 void func_001C2430(s32 size, ...);
 void func_001C25B0(s32 first, ...);
 void func_001C29C8();
+
+// The file's .data, in retail's order.
+f32 D_00274758[11][4] = { 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+s32 D_00274808[6] = { 0, 2, 3, 4, 9, 1 };
+Pk8_1C0A50 D_00274820 = { 0x40C0000040800000ULL };
+Pk8_1C0A50 D_00274828 = { 0x45FA0000453B8000ULL };
+s32 D_00274830 = 0;
+f32 D_00274838[11][4] = { 0 };
+u8 D_002748E8[4] = { 0 };
+s32 D_002748EC = 0;
+Ring_1C25B0 D_002748F0[2] = { { 0 } };
+s32 D_00274990 = 0;
 
 void func_001C05D0(f32 x)
 {
