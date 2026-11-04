@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c6e.h"
+#include "c7e.h"
+#include "c8a.h"
 
 struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
 void func_00168AF8(State_193288*);
@@ -192,9 +194,9 @@ void func_00191FD8(C70* self)
 
 s32 func_00128018(void* a0, s32 a1, void* a2, void* a3);
 
-s32 func_00192128(u8* self, void* other)
+s32 func_00192128(C7E* self, void* other)
 {
-    void* p = self + 0x40;
+    void* p = &self->pos;
     return func_00128018(other, 0, p, p);
 }
 
@@ -445,24 +447,21 @@ s32 func_00190660(Slots_190660* self, Item_190660* item)
     return 0;
 }
 
-struct Node_001920E0 { u8 pad0[0x18]; void* link; };
-
 void func_00182F78(void* self, s32 value);
 
-void func_001920E0(Node_001920E0* self, s32 value)
+void func_001920E0(C7E* self, s32 value)
 {
-    void* sub = (u8*)self + 0x40;
-    func_00128018(self->link, value, sub, sub);
+    void* sub = &self->pos;
+    func_00128018(self->parent, value, sub, sub);
     func_00182F78(self, value);
 }
 
-void func_00192068(void* self, void* other);
 void func_001384A0(void* other, void* sub);
 
-void func_00192150(void* self, void* other)
+void func_00192150(C82* self, void* other)
 {
     func_00192068(self, other);
-    func_001384A0(other, (u8*)self + 0x50);
+    func_001384A0(other, &self->text);
 }
 
 struct Obj_00192190 { u8 pad0[0x54]; f32 f54; f32 f58; };
@@ -618,9 +617,9 @@ void func_00191A88(Owner_191A88* self)
 void func_00137E70(void* a, void* b);
 void func_0011EC40(void* a, void* b);
 
-void func_00192068(void* self, void* other)
+void func_00192068(C7E* self, void* other)
 {
-    func_00137E70(other, (u8*)self + 0x40);
+    func_00137E70(other, &self->pos);
     func_0011EC40(self, other);
 }
 
@@ -927,42 +926,25 @@ void func_00192C58(Self_192C58* self)
     }
 }
 
-struct Stream_1916D0;
-struct Edge_1916D0 { f32 pad[2]; };
-struct Vert_1916D0 { u8 pad[0x10]; s32 n; Edge_1916D0** list; u8 pad2[8]; };
-struct Face_1916D0 { u8 pad[0x10]; f32 f10; void* a; void* b; u8 pad2[8]; };
-struct Mesh_1916D0 {
-    s32 nVerts;
-    Vert_1916D0* verts;
-    s32 nEdges;
-    s32 nA;
-    u8* edges;
-    s32 nB;
-    u8* bs;
-    s32 nFaces;
-    Face_1916D0* faces;
-};
-struct Obj_1916D0 { u8 pad[0x34]; Mesh_1916D0 m; };
-
-void func_001833D0(Obj_1916D0* o, Stream_1916D0* in);
-s32 func_00137BE0(Stream_1916D0* in);
+void func_001833D0(C01* o, Stream8A* in);
+s32 func_00137BE0(Stream8A* in);
 void* func_0018D5C0(s32 n);
-void func_00137E70(Stream_1916D0* in, void* p);
-s32 func_00137B90(Stream_1916D0* in);
+void func_00137E70(Stream8A* in, void* p);
+s32 func_00137B90(Stream8A* in);
 void* func_0018D500(s32 n);
-f32 func_00137DF8(Stream_1916D0* in);
-s32 func_00137D10(Stream_1916D0* in);
-void func_001919F8(Mesh_1916D0* m);
+f32 func_00137DF8(Stream8A* in);
+s32 func_00137D10(Stream8A* in);
+void func_001919F8(Mesh8A* m);
 
-void func_001916D0(Obj_1916D0* o, Stream_1916D0* in)
+void func_001916D0(C8A* o, Stream8A* in)
 {
-    Mesh_1916D0* m = &o->m;
+    Mesh8A* m = &o->m;
     s32 i;
     s32 j;
     func_001833D0(o, in);
     i = 0;
     o->m.nVerts = func_00137BE0(in);
-    m->verts = (Vert_1916D0*)func_0018D5C0(o->m.nVerts << 5);
+    m->verts = (Vert8A*)func_0018D5C0(o->m.nVerts << 5);
     m->nA = func_00137BE0(in);
     m->nEdges = func_00137BE0(in) + m->nA;
     m->edges = (u8*)func_0018D5C0(m->nEdges * 12);
@@ -970,15 +952,15 @@ void func_001916D0(Obj_1916D0* o, Stream_1916D0* in)
     m->bs = (u8*)func_0018D5C0(m->nB * 12);
     if (o->m.nVerts > 0) {
         do {
-            Vert_1916D0* v = (Vert_1916D0*)((u8*)m->verts + (i << 5));
+            Vert8A* v = (Vert8A*)((u8*)m->verts + (i << 5));
             s32 k = i + 1;
             j = 0;
             func_00137E70(in, v);
             v->n = func_00137B90(in);
-            v->list = (Edge_1916D0**)func_0018D500((v->n + 1) << 2);
+            v->list = (Edge8A**)func_0018D500((v->n + 1) << 2);
             if (v->n > 0) {
                 do {
-                    v->list[j] = (Edge_1916D0*)(m->edges + func_00137BE0(in) * 12);
+                    v->list[j] = (Edge8A*)(m->edges + func_00137BE0(in) * 12);
                     j++;
                 } while (j < v->n);
             }
@@ -988,29 +970,29 @@ void func_001916D0(Obj_1916D0* o, Stream_1916D0* in)
     {
         s32 e;
         for (e = 0; e < m->nEdges; e++) {
-            Vert_1916D0** p = (Vert_1916D0**)(m->edges + e * 12);
+            Vert8A** p = (Vert8A**)(m->edges + e * 12);
             j = 1;
             do {
                 j--;
-                *p = (Vert_1916D0*)((u8*)m->verts + (func_00137BE0(in) << 5));
+                *p = (Vert8A*)((u8*)m->verts + (func_00137BE0(in) << 5));
                 p++;
             } while (j >= 0);
         }
         for (e = 0; e < m->nB; e++) {
-            Vert_1916D0** p = (Vert_1916D0**)(m->bs + e * 12);
+            Vert8A** p = (Vert8A**)(m->bs + e * 12);
             j = 2;
             do {
                 j--;
-                *p = (Vert_1916D0*)((u8*)m->verts + (func_00137BE0(in) << 5));
+                *p = (Vert8A*)((u8*)m->verts + (func_00137BE0(in) << 5));
                 p++;
             } while (j >= 0);
         }
     }
     m->nFaces = func_00137BE0(in);
-    m->faces = (Face_1916D0*)func_0018D5C0(m->nFaces << 5);
+    m->faces = (Face8A*)func_0018D5C0(m->nFaces << 5);
     for (s32 e = 0; e < m->nFaces; e++) {
         s32 a;
-        Face_1916D0* f = (Face_1916D0*)((u8*)m->faces + (e << 5));
+        Face8A* f = (Face8A*)((u8*)m->faces + (e << 5));
         func_00137E70(in, f);
         f->f10 = func_00137DF8(in);
         a = func_00137D10(in);

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "c7e.h"
+#include "c66.h"
 extern const f32 D_0024D2A0[2] = { 3.4028235e38f, 0.0f };
 extern u8* D_00275710;
 #include "list_iter.h"
@@ -37,10 +39,8 @@ s32 func_0011D8F0(s32 a, s32 b);
 
 
 
-struct Obj_1C1110 { u8 pad[0x14]; s32 f14; };
-
-void func_00182ED0(Obj_1C1110* self);
-void func_00152600(s32 p, Obj_1C1110* self);
+void func_00182ED0(void* self);
+void func_00152600(u8* table, void* self);
 
 
 
@@ -63,28 +63,7 @@ void func_001C0C08(s32 index, s32 value);
 
 
 
-typedef void (*Slot_001C0FF0)(void* self);
-
-struct Obj_001C0FF0 {
-    Slot_001C0FF0* vtbl;
-    u8 pad[0x328];
-    s32 f32C;
-};
-
-void func_001C1030(void* self, s32 v);
 void func_00124A48(void* self);
-
-
-
-struct Obj_001C1030 {
-    void* vtbl;
-    u8 pad[0x10];
-    void* host;
-    u8 pad2[0x314];
-    s32 f32C;
-    s32 f330;
-    s32 f334;
-};
 
 void func_001B6438(s32 p);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
@@ -92,19 +71,10 @@ s32 func_001B6290(s32 p, void* ctx, s32 a2, s32 a3);
 
 
 
-struct Obj_001C10D8 {
-    void* vtbl;
-    u8 pad[0x10];
-    u8* host;
-};
-
 void func_00182D48(void* self);
 void func_00152470(u8* table, void* self);
 
 
-
-struct __attribute__((packed)) Pack64_1C1148 { u64 v; };
-struct Obj_1C1148 { u8 pad[0x50]; Pack64_1C1148 field; };
 
 void func_001830D8(void* self);
 
@@ -309,9 +279,7 @@ extern s32 D_006053E0[];
 
 
 
-struct Self_1C10A8 { u8 pad[0x58]; f32 f58; };
-
-void func_00182C18(Self_1C10A8* self);
+void func_00182C18(C01* self);
 
 
 
@@ -524,12 +492,6 @@ void func_001C0C68(s32 i);
 void func_001C0CB0(void);
 s32 func_001C0CF0();
 void func_001C0EC0(void);
-void func_001C0FF0(Obj_001C0FF0* self);
-void func_001C1030(Obj_001C1030* self, s32 v);
-void func_001C10A8(Self_1C10A8* self);
-void func_001C10D8(Obj_001C10D8* self);
-void func_001C1110(Obj_1C1110* self);
-void func_001C1148(Obj_1C1148* self);
 void func_001C1190(Obj_1C1190* self, void* arg);
 void* func_001C1390(s32 index, Obj_1C1390* self);
 void* func_001C13E8(void* self, s32 index, Ctx_1C13E8* ctx);
@@ -749,51 +711,51 @@ void func_001C0EC0(void)
 
 ASM_FUNC(func_001C0F30);
 
-void func_001C0FF0(Obj_001C0FF0* self)
+void func_001C0FF0(C66* self)
 {
     func_00124A48(self);
-    func_001C1030(self, self->f32C);
-    self->vtbl[7](self);
+    func_001C1030(self, self->id32C);
+    self->desc->m03(self);
 }
 
-void func_001C1030(Obj_001C1030* self, s32 v)
+void func_001C1030(C66* self, s32 v)
 {
-    if (self->f334 != 0) {
-        func_001B6438(self->f334);
-        self->f334 = 0;
+    if (self->link334 != 0) {
+        func_001B6438(self->link334);
+        self->link334 = 0;
     }
-    s32 r = func_0015A418(self->host, 0x101, v, self);
-    self->f330 = r;
+    s32 r = func_0015A418(self->world, 0x101, v, self);
+    self->found330 = r;
     if (r != 0) {
-        self->f334 = func_001B6290(r, self, -1, 1);
+        self->link334 = func_001B6290(r, self, -1, 1);
     }
-    self->f32C = v;
+    self->id32C = v;
 }
 
-void func_001C10A8(Self_1C10A8* self)
+void func_001C10A8(C81* self)
 {
     func_00182C18(self);
     self->f58 = 3.4028235e38f;
 }
 
-void func_001C10D8(Obj_001C10D8* self)
+void func_001C10D8(C81* self)
 {
     func_00182D48(self);
-    func_00152470(self->host + 0x1C84, self);
+    func_00152470((u8*)self->world + 0x1C84, self);
 }
 
-void func_001C1110(Obj_1C1110* self)
+void func_001C1110(C81* self)
 {
     func_00182ED0(self);
-    func_00152600(self->f14 + 0x1C84, self);
+    func_00152600((u8*)self->world + 0x1C84, self);
 }
 
-void func_001C1148(Obj_1C1148* self)
+void func_001C1148(C81* self)
 {
-    Pack64_1C1148 saved;
-    saved = self->field;
+    Keep7E saved;
+    saved = self->keep;
     func_001830D8(self);
-    self->field = saved;
+    self->keep = saved;
 }
 
 void func_001C1190(Obj_1C1190* self, void* arg) {
