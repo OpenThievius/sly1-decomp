@@ -95,7 +95,9 @@ def rodata_source(listing, label):
                   % (label, label, label), listing, re.M | re.S)
     if m is None:
         raise KeyError("%s is not a label of the read-only data listing" % label)
-    out = ["\t.align\t%s" % (m.group(1) or "2"), "\t.globl\t%s" % label, "\t.type\t%s, @object" % label,
+    # A jump table is aligned to 16, as GCC writes it; the listing's `.align` before it is splat's.
+    align = "4" if label.startswith("jtbl_") else (m.group(1) or "2")
+    out = ["\t.align\t%s" % align, "\t.globl\t%s" % label, "\t.type\t%s, @object" % label,
            "%s:" % label]
     size = 0
     for line in m.group(2).split("\n"):

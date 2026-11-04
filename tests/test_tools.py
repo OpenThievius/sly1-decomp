@@ -761,8 +761,10 @@ class AsmFuncTest(unittest.TestCase):
             "    /" + "* 100004 00200004 0000803F *" + "/ .float 1",
             "enddlabel jtbl_00200000", ""])
         out = asm_func.rodata_source(listing, "jtbl_00200000")
-        self.assertIn("\t.align\t3", out)
+        self.assertIn("\t.align\t4", out)  # a jump table is aligned to 16, whatever splat wrote
         self.assertIn("\t.word\t.L00100014", out)
         self.assertIn("\t.word\t0x3F800000", out)
         self.assertIn("\t.size\tjtbl_00200000, 8", out)
+        other = asm_func.rodata_source(listing.replace("jtbl_00200000", "D_00200000"), "D_00200000")
+        self.assertIn("\t.align\t3", other)
 
