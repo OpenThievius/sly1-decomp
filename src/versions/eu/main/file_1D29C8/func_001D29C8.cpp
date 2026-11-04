@@ -36,7 +36,7 @@ tail:
     if (mode != D_002623C0->f19FC && mode < 7) {
         func_001AA8B8(&D_0026EC70, ((*(Ctx_1D29C8**)&D_00262E10) != 0 && (void*)(*(Ctx_1D29C8**)&D_00262E10) == func_001925F0()) ? 3.0f : 8.0f);
         func_001AA788(&D_0026EC70, 0.6f);
-        D_0026EC70.vt->fn20(&D_0026EC70, (s32)func_eu_001DDAB0(D_00274F58[mode]));
+        D_0026EC70.vt->fn20(&D_0026EC70, (s32)func_eu_001DDAB0((s32)D_00274F58[mode]));
         D_0026EC70.vt->fn38(&D_0026EC70);
         D_002623C0->f19FC = mode;
     }
