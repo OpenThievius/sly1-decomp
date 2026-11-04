@@ -701,13 +701,13 @@ struct Out_1CAC30 {
     f32 f98;
 };
 
-extern f32 D_00274CF4[];
+f32 D_00274CF4 = 0.85f;
 f32 D_00274CF8[1];
 
 void func_001CAC30(Obj_1CAC30* self, Out_1CAC30* out)
 {
     if (self->fC04 != 0) {
-        f32 a = D_00274CF4[0];
+        f32 a = D_00274CF4;
         f32 b = D_00274CF8[0];
         out->f94 = a;
         out->f98 = b;
@@ -1008,7 +1008,7 @@ s32 func_001CA6D0(Table_001CA6D0* self, s32 index)
     return self->slots[index].key;
 }
 
-extern f32 D_0024D828;
+extern const f32 D_0024D828;
 
 struct Sub_1C9A58 {
     u8 pad00[0x34];
@@ -2062,3 +2062,5 @@ s32 func_001CBB88(Obj_1CBB88* self)
     }
     return state;
 }
+
+extern const f32 D_0024D828 = 3.402823466e+38f;

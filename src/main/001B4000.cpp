@@ -1696,7 +1696,9 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
     }
 }
 
-extern u8 D_002198E8[];
+struct Entry_2198E8 { const u8* f0; s32 f4; };
+extern const Entry_2198E8 D_002198E8;
+extern const u8 D_00217410[];
 
 struct Self_1B6290 {
     u8 pad00[0x14];
@@ -1732,7 +1734,7 @@ Obj_1B6290* func_001B6290(Self_1B6290* self, s32 a1, s32 a2, s32 a3)
 {
     Obj_1B6290* obj = (Obj_1B6290*)func_001B5EE0((Pool_1B6290*)((u8*)self->f14 + 0x1B88));
     obj->f1C = a1;
-    obj->f00 = D_002198E8;
+    obj->f00 = (void*)&D_002198E8;
     obj->f20 = a3;
     obj->f38 = 1.0f;
     obj->f18 = self;
@@ -1871,7 +1873,7 @@ void func_001B6F50(Obj_1B6F50* self)
     }
 }
 
-extern u8 D_002746A0[];
+extern f32 D_002746A0[8];
 extern u8 D_00248D30[];
 
 struct Quad_1B7638 {
@@ -2256,3 +2258,6 @@ done:
     func_0018D6F0();
     func_001B6D78(self, 0x14, self);
 }
+
+extern const Entry_2198E8 D_002198E8 = { D_00217410, 0x93 };
+f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };
