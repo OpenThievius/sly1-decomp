@@ -2502,3 +2502,35 @@ extern const Fn_2197C0 D_002197C0[10] = {
     func_00121338, func_00122F88, func_00122F28, 0, func_00122FE0,
     func_00123120, func_00123270, func_001232E8, func_00123358, 0
 };
+
+extern u8 D_00148D64[];
+void func_00123ED0(void* self);
+
+struct Crc_12B6B8 {
+    u8 pad[0x2D0];
+    u32 f2D0;
+    s32 f2D4;
+    void* f2D8;
+    u32 table[256];
+};
+
+void func_0012B6B8(Crc_12B6B8* self)
+{
+    u32 c;
+    func_00123ED0(self);
+    self->f2D4 = 0x100018;
+    self->f2D8 = D_00148D64;
+    self->f2D0 = 0xFFFFFFFF;
+    for (s32 i = 0; i < 256; i++) {
+        c = (u32)i;
+        s32 k = 7;
+        do {
+            if (c & 1) {
+                c = (c >> 1) ^ 0xEDB88320;
+            } else {
+                c >>= 1;
+            }
+        } while (--k >= 0);
+        self->table[i] = c;
+    }
+}
