@@ -3,6 +3,7 @@
 #include "list_iter.h"
 #include "c61.h"
 #include "c65.h"
+#include "v24a0.h"
 
 struct Node_150298 { u8 pad[0x554]; f32 value554; u8 pad2[0x558 - 0x558]; Node_150298* next; };
 struct State_150298 { u8 pad[0x6CC]; Node_150298* selected; };
@@ -754,27 +755,24 @@ void func_00152600(u8* a, void* b)
     link->f4 = 0;
 }
 
-struct Target_00152D70 { u8 pad0[8]; s16 off8; u8 pad1[2]; void (*fnC)(void* self, s32 arg); };
-struct Obj_00152D70 { u8 pad0[8]; s32* f8; s32 fC; s32 f10; s32 f14; Target_00152D70* f18; };
-
-void func_00152D70(Obj_00152D70* self)
+void func_00152D70(V24A0* self)
 {
     if (self->f10 != 0) {
-        s32 p = self->fC;
+        s32 p = self->curS;
         if ((p & 0xF) != 0) {
             *(s32*)p = 0;
             p += 4;
             while ((p & 0xF) != 0) { *(s32*)p = 0; p += 4; }
         }
-        self->fC = p;
+        self->curS = p;
     } else if (self->f14 != 0) {
-        Target_00152D70* t = self->f18;
-        t->fnC((u8*)self + t->off8, 0);
+        const V24A0_Vt* t = self->vt;
+        t->close((V24A0*)((u8*)self + t->adj1), 0);
     }
-    s32* q = self->f8;
+    s32* q = self->f08;
     if (q != 0) {
-        *q = *q | (((self->fC - (s32)q) >> 4) - 1);
-        self->f8 = 0;
+        *q = *q | (((self->curS - (s32)q) >> 4) - 1);
+        self->f08 = 0;
     }
 }
 
@@ -912,16 +910,14 @@ void func_00151D28(Self_151D28* self)
     func_00148CE0(D_00275710);
 }
 
-struct Self_152888 { u8 pad0[0x10]; s32 f10; s32 f14; u8* f18; };
-
 extern u8 D_0024A0E0[];
-void func_001528C8(Self_152888* p);
+void func_001528C8(V24A0* p);
 
-Self_152888* func_00152888(Self_152888* self)
+V24A0* func_00152888(V24A0* self)
 {
     self->f10 = 0;
     self->f14 = 0;
-    self->f18 = D_0024A0E0;
+    self->vt = (const V24A0_Vt*)D_0024A0E0;
     func_001528C8(self);
     return self;
 }
@@ -1950,7 +1946,6 @@ void func_00152010(Self_152010* self, void* p, s32 n, s32 flag)
     }
 }
 
-struct Pkt_152E48 { u8 buf[0x30]; };
 struct Vec_152E48 { f32 x, y, z, w; };
 struct Q_152E48 { s32 a, b, c, d; };
 struct Tex_152E48 { u16 w; u16 h; u8 pad[0x14]; u64 f18; };
@@ -1966,32 +1961,32 @@ struct Self_152E48 {
     s32 f2E0;
 };
 
-void func_001611B8(Pkt_152E48* p);
-void func_001EE318(Pkt_152E48* p);
+void func_001611B8(V24A0* p);
+void func_001EE318(V24A0* p);
 void func_0018D608(void);
-void func_00152980(Pkt_152E48* p, s32 size);
-void func_001EE480(Pkt_152E48* p);
-void func_00169B18(Tex_152E48* t, Pkt_152E48* p);
-void func_001613C0(Pkt_152E48* p, s32 a, s32 b, u64 c);
-void func_00161458(Pkt_152E48* p, s32 a);
-void func_00161588(Pkt_152E48* p, s32 a, s32 b, u64 c);
-void func_00161708(Pkt_152E48* p, s32 a, u64 v);
-void func_00161200(Pkt_152E48* p);
-void func_001EE8D0(Pkt_152E48* p, Pkt_152E48* q);
-void func_001EE3B8(Pkt_152E48* p, s32 a, s32 b);
-void func_001EE668(Pkt_152E48* p, s32 size, s32 count, void* data, s32 flags);
-void func_001528C8(Pkt_152E48* p);
-void func_001529C8(Pkt_152E48* p, s32 n, Q_152E48* q);
-void func_001612F8(Pkt_152E48* p, s32 a, s32 b, s32 c, u64 d, s32 e);
-void func_00152A50(Pkt_152E48* p, s32* a, s32 b, s32* c, s32 d);
+void func_00152980(V24A0* p, s32 size);
+void func_001EE480(V24A0* p);
+void func_00169B18(Tex_152E48* t, V24A0* p);
+void func_001613C0(V24A0* p, s32 a, s32 b, u64 c);
+void func_00161458(V24A0* p, s32 a);
+void func_00161588(V24A0* p, s32 a, s32 b, u64 c);
+void func_00161708(V24A0* p, s32 a, u64 v);
+void func_00161200(V24A0* p);
+void func_001EE8D0(V24A0* p, V24A0* q);
+void func_001EE3B8(V24A0* p, s32 a, s32 b);
+void func_001EE668(V24A0* p, s32 size, s32 count, void* data, s32 flags);
+void func_001528C8(V24A0* p);
+void func_001529C8(V24A0* p, s32 n, Q_152E48* q);
+void func_001612F8(V24A0* p, s32 a, s32 b, s32 c, u64 d, s32 e);
+void func_00152A50(V24A0* p, s32* a, s32 b, s32* c, s32 d);
 void func_0018D6F0(void);
-void func_001614C8(Pkt_152E48* p, s32 a, s32 b);
-void func_001EE450(Pkt_152E48* p);
+void func_001614C8(V24A0* p, s32 a, s32 b);
+void func_001EE450(V24A0* p);
 
 void func_00152E48(Self_152E48* self, A_152E48* a)
 {
-    Pkt_152E48 pa;
-    Pkt_152E48 pb;
+    V24A0 pa;
+    V24A0 pb;
     Vec_152E48 v0;
     Vec_152E48 v1;
     Q_152E48 q;

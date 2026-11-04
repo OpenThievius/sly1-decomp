@@ -4,6 +4,7 @@
 #include "c27.h"
 #include "c28.h"
 #include "c20.h"
+#include "v249d.h"
 
 struct Slot_13C950 { u8 pad[0x680]; s32 slot; };
 
@@ -65,17 +66,9 @@ void func_0013CC48(Span_CC48* p, s32 n)
     p->b -= n;
 }
 
-struct Cursor_13CC80 {
-    u8 pad0[4];
-    u8* base;
-    u8 pad8[4];
-    s32 pos;
-    s32 remain;
-};
-
 void func_001F5A58(void* dst, void* src, s32 n);
 
-s32 func_0013CC80(Cursor_13CC80* self, s32 want, void* dst)
+s32 func_0013CC80(V249D* self, s32 want, void* dst)
 {
     s32 n = self->remain;
     u8* base = self->base;
@@ -1053,21 +1046,20 @@ void func_0013FD20(C28* self)
 }
 
 struct Self_13CC00 { u8 pad[4]; };
-struct Arg_13CC00 { void* vt; void* a4; void* a8; s32 aC; void* a10; };
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_00249D98[];
-s32 func_0013C9D0(Self_13CC00* self, void* a1, Arg_13CC00* arg);
+s32 func_0013C9D0(Self_13CC00* self, void* a1, V249D* arg);
 
 s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
 {
     if (a1 != 0) {
-        Arg_13CC00 arg;
-        arg.vt = ((u8*)D_00249D98);
-        arg.a4 = a2;
-        arg.a10 = a1;
-        arg.a8 = a1;
-        arg.aC = 0;
+        V249D arg;
+        arg.vt = (const V249D_Vt*)D_00249D98;
+        arg.base = (u8*)a2;
+        arg.f10 = a1;
+        arg.f08 = a1;
+        arg.pos = 0;
         return func_0013C9D0(self, a1, &arg);
     }
     return 0;
@@ -1162,19 +1154,6 @@ void func_0013E950(Zone28* self, C03* a1)
     D_0027B314 = (ListFrame*)it.saved;
 }
 
-typedef s32 (*Fn_0013C9D0)(void* self, s32 count, u8* dst);
-
-struct Cls_0013C9D0 {
-    u8 pad_00[0x08];
-    s16 off08;
-    u8 pad_0a[0x02];
-    Fn_0013C9D0 fn0c;
-};
-
-struct Port_0013C9D0 {
-    Cls_0013C9D0* cls;
-};
-
 struct Ring_0013C9D0 {
     u8* buf;
     s32 size;
@@ -1185,7 +1164,7 @@ struct Ring_0013C9D0 {
     u8 pad_18[0x04];
     s32 f1c;
 };
-s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, Port_0013C9D0* port)
+s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, V249D* port)
 {
     s32 total = 0;
     s32 rem = n;
@@ -1195,7 +1174,7 @@ s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, Port_0013C9D0* port)
     while (rem != 0) {
         s32 avail = self->size - self->pos;
         s32 cnt = rem < avail ? rem : avail;
-        s32 r = port->cls->fn0c((u8*)port + port->cls->off08, cnt, self->buf + self->pos);
+        s32 r = port->vt->read((V249D*)((u8*)port + port->vt->adj1), cnt, self->buf + self->pos);
         if (r == 0) {
             break;
         }
