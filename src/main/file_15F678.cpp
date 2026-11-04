@@ -161,7 +161,6 @@ struct Next_15F710 {
 };
 
 
-extern char D_002623D0[8];
 
 void* func_00160110();
 
@@ -327,7 +326,6 @@ Rec_1600A0* func_001600A0(void);
 
 struct __attribute__((packed)) Word_269984 { u32 value; };
 
-extern u8 D_002623D8[];
 extern u8 D_00261EF0[];
 extern Word_269984 D_00269984;
 extern s32 D_00262C64;
@@ -562,7 +560,6 @@ struct Rec_160948 {
     void* head;
 };
 
-extern u8 D_002623D8[];
 struct Sys_160948 { u8 pad0[0x30]; s32 f30; };
 extern Sys_160948 D_00275BC0;
 extern Key_160948 D_00275B04;
@@ -752,10 +749,19 @@ struct Rgba_1639E8
     Rgba_1639E8(u32 v) { rgba = v; }
 };
 
+// The file's .data, in retail's order.
+char D_002623D0[8] = "<none>";
+u8 D_002623D8[4] = { 0 };
+s32 D_002623DC = 0;
 Rgba_1639E8 D_002623E0(0x80101010);
 s32 D_002623E4 = 1;
-extern s32 D_002623E8[6];
-extern s32 D_00262400[6];
+s32 D_002623E8[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
+s32 D_00262400[6] = { -1, 0, 4, 8, 12, 0 };
+s32 D_00262418[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
+s32 D_00262430[6] = { -1, 0, 4, 8, 12, 0 };
+s32 D_00262448[6] = { 0, 1414812756, 1347440720, 1077952576, 0, 0 };
+s32 D_00262460[5] = { -1, 0, 4, 8, 12 };
+s32 D_00262474 = 0x28;
 extern u8 D_00001298[];
 extern u8 D_00001368[];
 extern u8 D_00000ED8[];
@@ -1066,8 +1072,6 @@ struct Hdr_163ED8 {
     s32 count;
 };
 
-extern s32 D_00262418[6];
-extern s32 D_00262430[6];
 extern u8 D_000002F8[];
 extern u8 D_00001A50[];
 extern u8 D_000036D0[];
@@ -1097,7 +1101,6 @@ void func_00169608(s32 a, s32 b, Node_163ED8* node);
 void func_001694F8(Mesh_163ED8* mesh, Strip_163ED8* strip, s32 a, s32 b, s32 n, Node_163ED8* node);
 
 
-extern s32 D_00262474;
 
 void func_001EE3B8(void* obj, s32 size, s32 flags);
 
@@ -1309,8 +1312,6 @@ struct Hdr_164868 {
     s32 count;
 };
 
-extern s32 D_00262448[6];
-extern s32 D_00262460[5];
 extern u8 D_00000288[];
 extern u8 D_00001AB0[];
 extern u8 D_00002008[];
