@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's own definition: draws a rectangle outline, or the visible rows of a list, with PAL's object layout.
+void func_001E6268(void* self, s32* first, s32* second);
+struct Elem_1E62A8 { f32 f0; f32 f4; f32 f8; f32 fC; u8 pad10[0x1C]; };
 struct Self_1E62A8_eu {
     u8 pad0[0x52C];
     f32 f52C; f32 f530; f32 f534; f32 f538;
@@ -26,7 +28,7 @@ void func_001E62A8(Self_1E62A8_eu* self, Ctx_1E62A8* c, s32 k)
         func_001615F0(c, (s32)((x + 1728.0f) * 16.0f), (s32)((y * 0.5462963f + 1920.0f) * 16.0f), k, 0);
     } else {
         s32 r[2];
-        func_001E6268((Self_1E62A8*)self, &r[0], &r[1]);
+        func_001E6268(self, &r[0], &r[1]);
         if (r[0] != r[1]) {
             f32 a = self->f530 + 63.152542f;
             f32 b = self->f52C + self->f1170;

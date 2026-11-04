@@ -24,7 +24,7 @@ void func_001356C0(Obj_1356C0_eu* self, s32 mode)
             break;
         case 4:
             ((Tail_1356C0_eu*)&D_0026F138)->v = 0;
-            D_0026F138.vtbl[15](&D_0026F138);
+            D_0026F138.vt->m15(&D_0026F138);
             self->state = mode;
             break;
         default:

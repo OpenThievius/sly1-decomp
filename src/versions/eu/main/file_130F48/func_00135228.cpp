@@ -15,7 +15,7 @@ void func_00135228(Obj_eu_135228* self, Q_135228* q)
     {
         if ((u32)func_00160D10() & 0x800)
         {
-            func_00134B48((Obj_135228*)self, q);
+            func_00134B48((T217D_440*)self, q);
         }
         u32 mask;
         func_00160D30(&mask);

@@ -28,7 +28,7 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
         if (a < 18) {
             if (a > 15) {
             call:
-                ((VFn_193EE8)D_0026EC70.vt[15])(&D_0026EC70);
+                D_0026EC70.vt->m15(&D_0026EC70);
             }
         }
     }
@@ -36,7 +36,7 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
     case 11:
     case 16:
     case 17: {
-        Obj_193EE8* o = &D_0026EC70;
+        T217D_330* o = &D_0026EC70;
         func_001AA8B8(o, 0.0f);
         func_001AA788(o, 0.6f);
         break;
@@ -54,11 +54,11 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
         break;
     }
     case -1:
-        ((VFn_193EE8)D_0026C6C8.vt[15])(&D_0026C6C8);
-        ((VFn_193EE8)D_0026C948.vt[15])(&D_0026C948);
-        ((VFn_193EE8)D_0026CBC8.vt[15])(&D_0026CBC8);
-        ((VFn_193EE8)D_0026CE48.vt[15])(&D_0026CE48);
-        ((VFn_193EE8)D_00274118.vt[15])(&D_00274118);
+        D_0026C6C8.vt->m15(&D_0026C6C8);
+        D_0026C948.vt->m15(&D_0026C948);
+        D_0026CBC8.vt->m15(&D_0026CBC8);
+        D_0026CE48.vt->m15(&D_0026CE48);
+        D_00274118.vt->m15(&D_00274118);
         break;
     }
 }

@@ -2,6 +2,8 @@
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"
+#include "t217d.h"
+#include "v24a2.h"
 
 struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
 void func_00168AF8(State_193288*);
@@ -9,22 +11,8 @@ void func_00193318(State_193288*);
 
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_001AA268(void* self);
 s32 func_0015C188(s32 k);
-void* func_0015C1C0(s32 k);
-
-struct Obj_193E58 {
-    u8 pad0[0x210];
-    void** f210;
-    u8 pad1[0x4C];
-    s32 f260;
-    u8 pad2[0x4];
-    s32 arr268[3];
-    u8 pad3[0x8];
-    s32 f27C;
-    u8 pad4[0x4];
-    f32 f284;
-};
+V24A2* func_0015C1C0(s32 k);
 
 struct S_193270 { s32 a,b,c,d,e; };
 
@@ -36,13 +24,6 @@ struct Obj_193210 {
     Word_193210 f14; Word_193210 f18; Word_193210 f1C; Word_193210 f20;
 };
 
-struct Obj_193EE8 {
-    void** vt;
-};
-struct Self_193EE8 {
-    u8 pad[0x288];
-    s32 f288;
-};
 struct Dev_193EE8 {
     u8 pad[0x18];
     union {
@@ -59,10 +40,6 @@ extern f32 D_0026A708;
 extern f32 D_0026A70C;
 
 void func_001BE998(void);
-void func_001AA8B8(Obj_193EE8* self, f32 v);
-void func_001AA788(Obj_193EE8* self, f32 v);
-
-typedef void (*VFn_193EE8)(void*);
 
 struct Obj_1935B0 {
     u8 pad0[0xC];
@@ -105,15 +82,12 @@ void func_00168A48(Buf_193318* b);
 
 void func_001AA8F0(void* self);
 
-struct Ctl_194F00 { u8 pad[0x250]; s32 mode250; u8 pad2[0x20]; s32 f274; };
 
 void func_001AA958(void* self);
 
-struct Ctl_194F38 { u8 pad[0x250]; s32 mode250; u8 pad2[0x20]; s32 f274; s32 f278; };
 
 void func_001936A0(void* self, s32 v);
 
-struct Ctl_195928 { u8 pad[0x260]; s32 f260; };
 
 struct Glob_194278 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; };
 struct Rec_194278 { s32 f0; void* f4; s32 f8; s32 fC; s32 f10; };
@@ -129,34 +103,12 @@ void* func_0015A838(void* a, s32 b, s32 c, s32 d);
 void func_001A4EF0(void* p, s32 mode);
 void func_001F4408(void* a, s32 b);
 
-struct Ctl_194E60 {
-    u8 pad0[0x250];
-    s32 f250;
-    u8 pad1[0x0C];
-    s32 f260;
-    u8 pad2[0x10];
-    s32 f274;
-    s32 f278;
-};
 
-void func_001936A0(Ctl_194E60* self);
+void func_001936A0(T217D_6D0* self);
 void func_00195928(void* self, s32 v);
 void func_001AA998(void* self, s32 flag);
 
-typedef void (*VFn_194D30)(void* self, s32 a);
-struct Obj_194D30 { VFn_194D30* vtbl; };
 
-struct Self_194D30 {
-    u8 pad0[0x250];
-    s32 f250;
-    u8 pad1[0x25C - 0x254];
-    s32 f25C;
-    s32 f260;
-    u8 pad2[0x268 - 0x264];
-    s32 arr268[3];
-    s32 f274;
-    s32 f278;
-};
 
 extern u8 D_00275BC0[];
 
@@ -180,10 +132,6 @@ struct Args_194398 {
 
 extern u8 D_00248D20[];
 
-struct Self_1961C0 {
-    u8 pad0[0x260];
-    s32 state;
-};
 // The register at +0x18 is described with 32-bit bit-fields, the one at +0x40 with 64-bit ones;
 // the mixed types are what give retail's copy of the masked value.
 struct Reg_1961C0 { u64 lo : 12; u64 mid : 11; u64 rest : 41; };
@@ -198,18 +146,9 @@ extern Gs_1961C0 D_00262490;
 extern s32 D_00275BF0;
 extern f32 D_0026A708;
 extern f32 D_0026A70C;
-void func_00194D30(Self_1961C0* self, s32 a, s32 b);
+void func_00194D30(T217D_6D0* self, s32 a, s32 b);
 s32 func_001FD7A0(f32 x);
 
-struct Menu_195958 {
-    u8 pad0[0x260];
-    s32 f260;
-    s32 f264;
-    s32 f268;
-    u8 pad1[0x27C - 0x26C];
-    s32 f27C;
-    s32 f280;
-};
 struct Row_195958 {
     u8 pad0[0x14];
     s32* items;
@@ -224,17 +163,6 @@ struct Boot_195958 {
     u8 pad1[0x4F4C - 0x4F48];
     void* f4F4C;
 };
-struct Sub_195958 {
-    u8 pad0[0x260];
-    s32 f260;
-};
-struct VT_195958 {
-    u8 pad0[0x38];
-    void (*f38)(void* self);
-};
-struct Dev_195958 {
-    VT_195958* vt;
-};
 struct Ent_195958 {
     u8 pad0[0xC];
     f32 fC;
@@ -245,17 +173,15 @@ struct Pool_195958 {
 };
 
 extern Boot_195958 D_00264A40;
-extern Sub_195958 D_0026F808;
 extern u8 D_00275BC0[];
 extern u8 D_00247AD0[];
 extern Pool_195958 D_00269990;
 extern Ent_195958 D_002542D8[];
-extern Dev_195958 D_00273EB0;
 
-void func_001961C0(Menu_195958* self);
-void func_00194D30(Menu_195958* self, s32 a, s32 b);
-void func_00194278(Menu_195958* self, s32 a, s32 b);
-void func_001E9498(u8* a, Sub_195958* b);
+void func_001961C0(T217D_6D0* self);
+void func_00194D30(T217D_6D0* self, s32 a, s32 b);
+void func_00194278(T217D_6D0* self, s32 a, s32 b);
+void func_001E9498(u8* a, void* b);
 void func_001F4408(s32 a, s32 b);
 void func_001F0428(u8* a, s32 b, s32 c);
 void func_0018C178(Boot_195958* a, s32 b);
@@ -266,7 +192,7 @@ void func_0018C250(Boot_195958* self);
 void func_0018C770(Boot_195958* self);
 void func_0018C568(Boot_195958* self);
 void func_00160948(void);
-void func_001936A0(Menu_195958* self);
+void func_001936A0(T217D_6D0* self);
 void* func_001925F0(void);
 s32 func_001300E8(void* node, s32 kind);
 void func_001B6598(void* ptr, s32* out);
@@ -281,20 +207,6 @@ void func_001C0760(s32 flag);
 void func_001C0790(s32 flag);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-struct Self_1943E8 {
-    u8 pad0[0x250];
-    s32 f250;
-    f32 f254;
-    u8 pad258[0x260 - 0x258];
-    s32 f260;
-    s32 f264;
-    u8 pad268[0x274 - 0x268];
-    s32 f274;
-    u8 pad278[0x27C - 0x278];
-    s32 f27C;
-    u8 pad280[0x288 - 0x280];
-    s32 f288;
-};
 struct Glob_1943E8 {
     u8 pad0[0x19D8];
     s32 f19D8;
@@ -306,14 +218,6 @@ struct Row_1943E8 {
     s32 fC;
     s32 f10;
     s32* items;
-};
-typedef Obj_193EE8 Obj_1943E8;
-struct Hud_1943E8 {
-    void** vt;
-    u8 pad4[0x264 - 0x4];
-    s32* f264;
-    u8 pad268[0x27C - 0x268];
-    s32 f27C;
 };
 struct Pad_1943E8 {
     u8 pad0[0xAA];
@@ -341,22 +245,13 @@ struct Gs_1943E8 {
     Reg_1943E8 f40;
 };
 
-typedef void (*VFn_1943E8)(void* self);
-typedef void (*VFnS_1943E8)(void* self, const char* s);
 
-extern Obj_1943E8 D_0026C6C8;
-extern Obj_1943E8 D_0026C948;
-extern Obj_1943E8 D_0026CBC8;
-extern Obj_1943E8 D_0026CE48;
-extern Hud_1943E8 D_00274118;
-extern Obj_1943E8 D_0026EC70;
 extern f32 D_00261868;
 extern Pad_1943E8 D_00262C70;
 extern Ent_1943E8* D_0026998C;
 struct Words6_264A58 { s32 v[6]; };
 extern Words6_264A58 D_00264A58;
 extern s32 D_00264A4C;
-extern u8 D_0026FF68[];
 extern f32 D_0026A22C;
 struct Pair_26A230 { f32 f0; f32 f4; };
 extern Pair_26A230 D_0026A230;
@@ -372,9 +267,9 @@ s32 func_0016EC98(Pad_1943E8* p);
 void func_0016EC20(Pad_1943E8* p, s32 mask);
 f32 func_0016F108(Pad_1943E8* p, s32 idx);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00194D30(Self_1943E8* self, s32 a, s32 b);
-void func_00195958(Self_1943E8* self);
-void func_001961C0(Self_1943E8* self);
+void func_00194D30(T217D_6D0* self, s32 a, s32 b);
+void func_00195958(T217D_6D0* self);
+void func_001961C0(T217D_6D0* self);
 void func_00194398(void);
 s32 func_0018B770(Pool_1943E8* p);
 void func_0018B670(Pool_1943E8* p, void* fn, void* arg);
@@ -395,14 +290,7 @@ struct Clamp_1943E8 {
     }
 };
 
-struct Obj_1940E8 {
-    void** vtbl;
-    u8 pad_004[0x25C - 4];
-    s32 f25C;
-    s32 f260;
-};
 
-typedef void (*VFn_1940E8)(Obj_1940E8* self);
 
 enum Bits_1940E8 {
     BITS_1940E8_ZERO = 0
@@ -417,8 +305,8 @@ extern u8* D_0027051C;
 
 void func_001BED48(void);
 void func_001BED70(void);
-void func_001E96F8(Obj_1940E8* self, s32 mode);
-void func_00193EE8(Obj_1940E8* self, s32 a, s32 b);
+void func_001E96F8(void* self, s32 mode);
+void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
 void func_0016E0F0(Bits_1940E8 bits);
 void func_0016E118(Bits_1940E8 n);
 void func_0016EC88(Pool_1940E8* p);
@@ -429,32 +317,11 @@ struct Rgba_194F80 { u8 r, g, b, a; };
 struct Out_194F80 { u8 b[0x20]; };
 struct Col_194F80 { s32 v[4]; };
 struct Buf_194F80 { u8 b[0xB0]; };
-struct Font_194F80 { u8 pad0[4]; s32 f4; s32 f8; u8 pad1[0x44 - 0xC]; f32 f44; f32 f48; };
 struct Owner_194F80;
 struct VEnt_194F80 { s16 delta; s16 idx; void (*fn)(void* self, Owner_194F80* o, Out_194F80* out, void* d); };
 struct Hook_194F80 { u8 pad[0x4C]; VEnt_194F80* vt; };
 struct Owner_194F80 { Hook_194F80* f0; u8 pad[0x14]; Rgba_194F80 f18; };
 struct Menu_194F80 { char* title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
-struct Self_194F80 {
-    u8 pad0[4];
-    Font_194F80* f4;
-    u8 pad1[0x210 - 8];
-    Owner_194F80* f210;
-    u8 pad2[0x224 - 0x214];
-    f32 f224;
-    f32 f228;
-    u8 pad3[0x234 - 0x22C];
-    f32 f234;
-    f32 f238;
-    f32 f23C;
-    u8 pad4[0x250 - 0x240];
-    s32 f250;
-    u8 pad5[0x260 - 0x254];
-    s32 f260;
-    s32 f264;
-    u8 pad6[0x284 - 0x268];
-    f32 f284;
-};
 
 extern f32 D_00261858[];
 extern s32 D_00275BEC;
@@ -469,11 +336,11 @@ void func_00137238(Out_194F80* out, f32 x, f32 y);
 void func_00137248(Out_194F80* out, Col_194F80* value);
 void func_00137260(Out_194F80* out, s32 flag);
 void func_00137268(Out_194F80* out, s32 flag);
-void func_0015C8B8(Font_194F80* font, f32 a, f32 b);
-Buf_194F80* func_0015DB28(Buf_194F80* out, void* str, Font_194F80* font);
+void func_0015C8B8(V24A2* font, f32 a, f32 b);
+Buf_194F80* func_0015DB28(Buf_194F80* out, void* str, V24A2* font);
 void func_0015E318(Buf_194F80* buf, Out_194F80* out, s32 zero, void* data);
 f32 func_0015E1B0(Buf_194F80* buf, f32 w);
-void func_0015C900(Font_194F80* font);
+void func_0015C900(V24A2* font);
 f32 func_0015DFF8(Buf_194F80* buf);
 char* func_00193598(s32 index);
 void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba_194F80* c, s32 k);
@@ -692,20 +559,20 @@ void func_00193300(S_193300* p);
 void func_00193318(Obj_193318* o);
 void func_001935B0(Obj_1935B0* self, Dst_1935B0* dst);
 s32 func_00193660(void);
-void func_00193E58(Obj_193E58* self);
-void func_00193EE8(Self_193EE8* self, s32 a, s32 b);
-void func_001940E8(Obj_1940E8* self, s32 mode);
+void func_00193E58(T217D_6D0* self);
+void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
+void func_001940E8(T217D_6D0* self, s32 mode);
 void func_00194278(void* a0, s32 a1, s32 a2);
 void func_00194398(void);
-void func_001943E8(Self_1943E8* self);
-void func_00194D30(Self_194D30* self, s32 idx, s32 value);
-void func_00194E60(Ctl_194E60* self, s32 v);
-void func_00194F00(Ctl_194F00* self);
-void func_00194F38(Ctl_194F38* self);
-void func_00194F80(Self_194F80* self);
-void func_00195928(Ctl_195928* self, s32 v);
-void func_00195958(Menu_195958* self);
-void func_001961C0(Self_1961C0* self);
+void func_001943E8(T217D_6D0* self);
+void func_00194D30(T217D_6D0* self, s32 idx, s32 value);
+void func_00194E60(T217D_6D0* self, s32 v);
+void func_00194F00(T217D_6D0* self);
+void func_00194F38(T217D_6D0* self);
+void func_00194F80(T217D_6D0* self);
+void func_00195928(T217D_6D0* self, s32 v);
+void func_00195958(T217D_6D0* self);
+void func_001961C0(T217D_6D0* self);
 
 Obj_193210* func_00193210(Obj_193210* self, Word_193210* s1, Word_193210* s2, Word_193210* s3, Word_193210* s4)
 {
@@ -811,29 +678,29 @@ INCLUDE_RODATA(jtbl_0024C480);
 INCLUDE_RODATA(jtbl_0024C4D0);
 ASM_FUNC(func_001936A0);
 
-void func_00193E58(Obj_193E58* self)
+void func_00193E58(T217D_6D0* self)
 {
     func_001AA268(self);
     if (func_0015C188(2)) {
-        self->f210 = (void**)&D_0026A210;
-        *self->f210 = func_0015C1C0(2);
+        self->frame = (V24A2**)&D_0026A210;
+        *self->frame = func_0015C1C0(2);
     }
-    self->f260 = -1;
-    self->f27C = -1;
+    self->page = -1;
+    self->stage = -1;
     for (u32 i = 0; i < 3; i++) {
-        self->arr268[i] = -1;
+        self->want[i] = -1;
     }
-    self->f284 = 1.0f;
+    self->fade = 1.0f;
 }
 
-void func_00193EE8(Self_193EE8* self, s32 a, s32 b)
+void func_00193EE8(T217D_6D0* self, s32 a, s32 b)
 {
     if (a == b) {
         return;
     }
-    if (self->f288 != 0) {
+    if (self->sound != 0) {
         func_001BE998();
-        self->f288 = 0;
+        self->sound = 0;
     }
     if (a == 11) {
         goto call;
@@ -842,7 +709,7 @@ void func_00193EE8(Self_193EE8* self, s32 a, s32 b)
         if (a < 18) {
             if (a > 15) {
             call:
-                ((VFn_193EE8)D_0026EC70.vt[15])(&D_0026EC70);
+                D_0026EC70.vt->m15(&D_0026EC70);
             }
         }
     }
@@ -850,7 +717,7 @@ void func_00193EE8(Self_193EE8* self, s32 a, s32 b)
     case 11:
     case 16:
     case 17: {
-        Obj_193EE8* o = &D_0026EC70;
+        T217D_330* o = &D_0026EC70;
         func_001AA8B8(o, 0.0f);
         func_001AA788(o, 0.6f);
         break;
@@ -861,53 +728,53 @@ void func_00193EE8(Self_193EE8* self, s32 a, s32 b)
         break;
     }
     case -1:
-        ((VFn_193EE8)D_0026C6C8.vt[15])(&D_0026C6C8);
-        ((VFn_193EE8)D_0026C948.vt[15])(&D_0026C948);
-        ((VFn_193EE8)D_0026CBC8.vt[15])(&D_0026CBC8);
-        ((VFn_193EE8)D_0026CE48.vt[15])(&D_0026CE48);
-        ((VFn_193EE8)D_00274118.vt[15])(&D_00274118);
+        D_0026C6C8.vt->m15(&D_0026C6C8);
+        D_0026C948.vt->m15(&D_0026C948);
+        D_0026CBC8.vt->m15(&D_0026CBC8);
+        D_0026CE48.vt->m15(&D_0026CE48);
+        D_00274118.vt->m15(&D_00274118);
         break;
     }
 }
 
-void func_001940E8(Obj_1940E8* self, s32 mode) {
-    if (self->f25C == mode) return;
+void func_001940E8(T217D_6D0* self, s32 mode) {
+    if (self->open == mode) return;
     if (mode != 0) {
         s32 key = (*(u32*)((*(u8**)&D_002623C0) + 0x19D8) << 8) | *(u32*)((*(u8**)&D_002623C0) + 0x19DC);
         if (key == 0x308) {
             func_001BED48();
-            func_001E96F8((Obj_1940E8*)D_00275BC0, 5);
+            func_001E96F8(D_00275BC0, 5);
         } else if (D_0027051C != 0) {
-            func_001E96F8((Obj_1940E8*)D_00275BC0, 5);
+            func_001E96F8(D_00275BC0, 5);
         } else {
             u8* base = D_00275BC0;
             if (((s32*)base)[1] == 3) {
-                func_001E96F8((Obj_1940E8*)base, 4);
+                func_001E96F8(base, 4);
             } else {
-                func_001E96F8((Obj_1940E8*)base, 5);
+                func_001E96F8(base, 5);
             }
         }
-        func_00193EE8(self, -1, self->f260);
-        ((VFn_1940E8)self->vtbl[14])(self);
+        func_00193EE8(self, -1, self->page);
+        self->vt->m14(self);
         func_0016E0F0((Bits_1940E8)1);
         func_0016EC88((Pool_1940E8*)((u8*)&D_00262C70));
     } else {
         s32 key = (*(u32*)((*(u8**)&D_002623C0) + 0x19D8) << 8) | *(u32*)((*(u8**)&D_002623C0) + 0x19DC);
         if (key == 0x308) {
             func_001BED70();
-            func_001E96F8((Obj_1940E8*)D_00275BC0, 3);
+            func_001E96F8(D_00275BC0, 3);
         } else if (D_0027051C != 0) {
-            func_001E96F8((Obj_1940E8*)D_00275BC0, 3);
-        } else if (self->f260 != 0) {
-            func_001E96F8((Obj_1940E8*)D_00275BC0, 3);
+            func_001E96F8(D_00275BC0, 3);
+        } else if (self->page != 0) {
+            func_001E96F8(D_00275BC0, 3);
         } else {
-            func_001E96F8((Obj_1940E8*)D_00275BC0, 6);
+            func_001E96F8(D_00275BC0, 6);
         }
-        func_00193EE8(self, self->f260, -1);
-        ((VFn_1940E8)self->vtbl[15])(self);
+        func_00193EE8(self, self->page, -1);
+        self->vt->m15(self);
         func_0016E118((Bits_1940E8)1);
     }
-    self->f25C = mode;
+    self->open = mode;
 }
 
 void func_00194278(void* a0, s32 a1, s32 a2)
@@ -954,10 +821,10 @@ void func_00194398(void)
     func_001EFFA0(D_00275F80, &args, 0);
 }
 
-void func_001943E8(Self_1943E8* self)
+void func_001943E8(T217D_6D0* self)
 {
     Glob_1943E8* g = (*(Glob_1943E8**)&D_002623C0);
-    Row_1943E8* row = &((Row_1943E8*)&D_00269D50)[self->f260];
+    Row_1943E8* row = &((Row_1943E8*)&D_00269D50)[self->page];
     s32 on;
     s32 n;
     Pad_1943E8* pad;
@@ -973,40 +840,40 @@ void func_001943E8(Self_1943E8* self)
     case 0x504:
         break;
     default:
-        on = self->f260 == 0;
+        on = self->page == 0;
         break;
     }
     if (on) {
-        ((VFn_1943E8)D_0026C6C8.vt[14])(&D_0026C6C8);
-        ((VFn_1943E8)D_0026C948.vt[14])(&D_0026C948);
-        ((VFn_1943E8)D_0026CBC8.vt[14])(&D_0026CBC8);
-        ((VFn_1943E8)D_0026CE48.vt[14])(&D_0026CE48);
+        D_0026C6C8.vt->m14(&D_0026C6C8);
+        D_0026C948.vt->m14(&D_0026C948);
+        D_0026CBC8.vt->m14(&D_0026CBC8);
+        D_0026CE48.vt->m14(&D_0026CE48);
     } else {
-        ((VFn_1943E8)D_0026C6C8.vt[15])(&D_0026C6C8);
-        ((VFn_1943E8)D_0026C948.vt[15])(&D_0026C948);
-        ((VFn_1943E8)D_0026CBC8.vt[15])(&D_0026CBC8);
-        ((VFn_1943E8)D_0026CE48.vt[15])(&D_0026CE48);
+        D_0026C6C8.vt->m15(&D_0026C6C8);
+        D_0026C948.vt->m15(&D_0026C948);
+        D_0026CBC8.vt->m15(&D_0026CBC8);
+        D_0026CE48.vt->m15(&D_0026CE48);
     }
-    switch (self->f260) {
+    switch (self->page) {
     case 0:
     case 11:
     case 17:
-        D_00274118.f27C = func_00160B28((*(Glob_1943E8**)&D_002623C0));
-        D_00274118.f264 = &D_00274118.f27C;
-        ((VFn_1943E8)D_00274118.vt[14])(&D_00274118);
+        D_00274118.own = func_00160B28((*(Glob_1943E8**)&D_002623C0));
+        D_00274118.target = &D_00274118.own;
+        D_00274118.vt->m14(&D_00274118);
         break;
     default:
-        ((VFn_1943E8)D_00274118.vt[15])(&D_00274118);
+        D_00274118.vt->m15(&D_00274118);
         break;
     }
-    if (self->f288 != 0) {
+    if (self->sound != 0) {
         if (func_001BE810() != 0) {
             func_0011CE30();
         }
-        self->f288 = func_001BE980();
+        self->sound = func_001BE980();
     }
     s32 ready = 1;
-    if (self->f274 != 0 || self->f250 != 2 || !(0.1f < D_00261868 - self->f254)) {
+    if (self->queued != 0 || self->mode != 2 || !(0.1f < D_00261868 - self->since)) {
         ready = 0;
     }
     pad = &D_00262C70;
@@ -1018,12 +885,12 @@ void func_001943E8(Self_1943E8* self)
         n = func_0016EC98(pad);
     }
     if (n > 0) {
-        self->f264 = (self->f264 + 1) % row->f10;
+        self->cursor = (self->cursor + 1) % row->f10;
         func_001BFCD8(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     if (n < 0) {
-        self->f264 = (self->f264 + row->f10 - 1) % row->f10;
+        self->cursor = (self->cursor + row->f10 - 1) % row->f10;
         func_001BFCD8(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
@@ -1037,8 +904,8 @@ void func_001943E8(Self_1943E8* self)
     }
     if (pad->fAA & 0x80) {
         func_0016EC20(&D_00262C70, 0x80);
-        if (self->f260 == 11 || self->f260 == 16) {
-            Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[row->items[self->f264]];
+        if (self->page == 11 || self->page == 16) {
+            Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[row->items[self->cursor]];
             if (e->fC != 0.0f) {
                 D_0026998C = e;
                 func_00194D30(self, 1, 0x12);
@@ -1051,7 +918,7 @@ void func_001943E8(Self_1943E8* self)
         func_00195958(self);
         return;
     }
-    switch (self->f260) {
+    switch (self->page) {
     case 24: {
         f32 a = func_0016F108(pad, 0);
         f32 dx = a - func_0016F108(pad, 1);
@@ -1088,31 +955,31 @@ void func_001943E8(Self_1943E8* self)
             func_001961C0(self);
             return;
         } else {
-            s32 id = row->items[self->f264];
+            s32 id = row->items[self->cursor];
             if ((u32)(id - 10) < 3) {
                 Ent_1943E8* e = &((Ent_1943E8*)&D_002542D8)[id];
-                if (self->f260 == 16) {
+                if (self->page == 16) {
                     if (e->fC != 0.0f) {
-                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, "&2S&. : Erase Game");
+                        D_0026EC70.vt->m08(&D_0026EC70, "&2S&. : Erase Game");
                     } else {
-                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, "&2X&. : New Game");
+                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : New Game");
                     }
-                } else if (self->f260 == 17) {
+                } else if (self->page == 17) {
                     if (e->fC != 0.0f) {
-                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, "&2X&. : Load Game");
+                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : Load Game");
                     } else {
-                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, "&2X&. : New Game");
+                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : New Game");
                     }
                 } else {
                     if (e->fC != 0.0f) {
-                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, "&2X&. : Overwrite Game\n&2S&. : Erase Game");
+                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : Overwrite Game\n&2S&. : Erase Game");
                     } else {
-                        ((VFnS_1943E8)D_0026EC70.vt[8])(&D_0026EC70, "&2X&. : Save Game");
+                        D_0026EC70.vt->m08(&D_0026EC70, "&2X&. : Save Game");
                     }
                 }
-                ((VFn_1943E8)D_0026EC70.vt[14])(&D_0026EC70);
+                D_0026EC70.vt->m14(&D_0026EC70);
             } else {
-                ((VFn_1943E8)D_0026EC70.vt[15])(&D_0026EC70);
+                D_0026EC70.vt->m15(&D_0026EC70);
             }
         }
         break;
@@ -1138,7 +1005,7 @@ void func_001943E8(Self_1943E8* self)
     case 10:
     case 32:
         if (D_00264A4C == 5) {
-            func_00194D30((Self_1943E8*)D_0026FF68, 1, -1);
+            func_00194D30(&D_0026FF68, 1, -1);
         }
         break;
     case 5: {
@@ -1169,7 +1036,7 @@ void func_001943E8(Self_1943E8* self)
         if (func_0018B770(p) == 0) {
             if (p->f10 == 0) {
                 func_00194D30(self, 1, -1);
-                if (self->f27C == 2) {
+                if (self->stage == 2) {
                     func_00194398();
                 }
             } else {
@@ -1195,7 +1062,7 @@ void func_001943E8(Self_1943E8* self)
     }
 }
 
-void func_00194D30(Self_194D30* self, s32 idx, s32 value)
+void func_00194D30(T217D_6D0* self, s32 idx, s32 value)
 {
     s32 s1;
     s32 s2;
@@ -1203,63 +1070,63 @@ void func_00194D30(Self_194D30* self, s32 idx, s32 value)
     s32* p;
 
     s2 = value;
-    self->arr268[idx] = s2;
-    p = self->arr268;
+    self->want[idx] = s2;
+    p = self->want;
     for (i = 0; i < 3; i++) {
         if (*p != -1) {
             s2 = *p;
         }
         p++;
     }
-    if (self->f274 != 0) {
-        s1 = self->f278;
+    if (self->queued != 0) {
+        s1 = self->queuedPage;
     } else {
-        s1 = self->f260;
+        s1 = self->page;
     }
     func_00193EE8(self, s1, s2);
     if (s1 != s2) {
-        if (self->f250 == 0) {
+        if (self->mode == 0) {
             func_00195928(self, s2);
-        } else if (self->f250 >= 0) {
-          if (self->f250 < 4) {
+        } else if (self->mode >= 0) {
+          if (self->mode < 4) {
             if (s2 == -1) {
-                self->f274 = 0;
-                self->f278 = s2;
+                self->queued = 0;
+                self->queuedPage = s2;
             } else {
-                self->f278 = s2;
-                self->f274 = 1;
-                ((Obj_194D30*)self)->vtbl[16](self, 3);
+                self->queuedPage = s2;
+                self->queued = 1;
+                self->vt->m16(self, 3);
             }
           }
         }
     }
     if (s2 == -1) {
-        if (self->f25C != 0) {
+        if (self->open != 0) {
             func_001E9570(D_00275BC0);
         }
     } else {
-        if (self->f25C == 0) {
+        if (self->open == 0) {
             func_001E9498(D_00275BC0, self);
         }
     }
 }
 
-void func_00194E60(Ctl_194E60* self, s32 v)
+void func_00194E60(T217D_6D0* self, s32 v)
 {
     s32 flag = v;
 
-    if (self->f250 == v) return;
-    if (self->f250 == 0 && self->f260 == 0) {
+    if (self->mode == v) return;
+    if (self->mode == 0 && self->page == 0) {
         func_001936A0(self);
     }
     if (v == 0) {
-        if (self->f274 != 0) {
-            func_00195928(self, self->f278);
+        if (self->queued != 0) {
+            func_00195928(self, self->queuedPage);
             flag = 1;
-            self->f274 = 0;
-            self->f278 = -1;
+            self->queued = 0;
+            self->queuedPage = -1;
         } else {
-            if (self->f260 == 0) {
+            if (self->page == 0) {
                 func_001936A0(self);
             }
         }
@@ -1267,23 +1134,23 @@ void func_00194E60(Ctl_194E60* self, s32 v)
     func_001AA998(self, flag);
 }
 
-void func_00194F00(Ctl_194F00* self)
+void func_00194F00(T217D_6D0* self)
 {
-    if (self->mode250 == 3 && self->f274 != 0) return;
+    if (self->mode == 3 && self->queued != 0) return;
     func_001AA8F0(self);
 }
 
-void func_00194F38(Ctl_194F38* self)
+void func_00194F38(T217D_6D0* self)
 {
-    if (self->mode250 == 3 && self->f274 != 0) {
-        self->f274 = 0;
-        self->f278 = -1;
+    if (self->mode == 3 && self->queued != 0) {
+        self->queued = 0;
+        self->queuedPage = -1;
         return;
     }
     func_001AA958(self);
 }
 
-void func_00194F80(Self_194F80* self)
+void func_00194F80(T217D_6D0* self)
 {
     f32 cx;
     f32 cy;
@@ -1298,29 +1165,29 @@ void func_00194F80(Self_194F80* self)
     f32 x;
     s32 i;
 
-    if (self->f250 == 0) {
+    if (self->mode == 0) {
         return;
     }
     {
-        f32 ww = self->f234;
-        f32 hh = self->f238;
-        f32 s = self->f23C;
-        f32 x0 = self->f224 + ww * 0.5f; 
-        f32 y0 = self->f228 + hh * 0.5f; 
+        f32 ww = self->w;
+        f32 hh = self->h;
+        f32 s = self->blend;
+        f32 x0 = self->shownX + ww * 0.5f; 
+        f32 y0 = self->shownY + hh * 0.5f; 
         w = ww * s; 
-        cx = self->f224 * s + x0 * (1.0f - s); 
-        cy = self->f228 * s + y0 * (1.0f - s); 
+        cx = self->shownX * s + x0 * (1.0f - s); 
+        cy = self->shownY * s + y0 * (1.0f - s); 
         h = hh * s; 
     }
     pulse = func_00205400(D_00261858[4] * 10.0f) * 0.5f + 0.5f;
-    menu = &((Menu_194F80*)&D_00269D50)[self->f260];
+    menu = &((Menu_194F80*)&D_00269D50)[self->page];
     fade = 1.0f;
-    if (self->f260 == 0 && D_00275BEC == 2) {
+    if (self->page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
-    self->f284 = func_001EA4B8(D_00260ED0, 0, self->f284, fade, D_00261858[5]);
-    alpha = (u8)(s32)(self->f284 * 255.0f);
-    if (self->f210 != 0) {
+    self->fade = func_001EA4B8(D_00260ED0, 0, self->fade, fade, D_00261858[5]);
+    alpha = (u8)(s32)(self->fade * 255.0f);
+    if (((Owner_194F80*)self->frame) != 0) {
         Out_194F80 out;
         s32 backColor = 0xFF808080;
         func_00137228(&out, cx, cy);
@@ -1332,14 +1199,14 @@ void func_00194F80(Self_194F80* self)
         }
         func_00137260(&out, 0);
         func_00137268(&out, 0);
-        Rgba_194F80 saved = self->f210->f18;
+        Rgba_194F80 saved = ((Owner_194F80*)self->frame)->f18;
         {
             Rgba_194F80 t = saved;
             t.a = alpha;
-            self->f210->f18 = t;
+            ((Owner_194F80*)self->frame)->f18 = t;
         }
         if (menu->count == 0) {
-            Owner_194F80* cur = self->f210;
+            Owner_194F80* cur = ((Owner_194F80*)self->frame);
             Rgba_194F80 gray;
             gray.r = 0x6F; 
             gray.g = 0x6F; 
@@ -1349,16 +1216,16 @@ void func_00194F80(Self_194F80* self)
             Lerp_194F80::Do(&res, cur->f18, gray, pulse * pulse);
             cur->f18 = res;
         }
-        CallHook_194F80::Do(self->f210, &out, D_00262280);
-        self->f210->f18 = saved;
+        CallHook_194F80::Do(((Owner_194F80*)self->frame), &out, D_00262280);
+        ((Owner_194F80*)self->frame)->f18 = saved;
     }
     if (menu->title != 0) {
         Buf_194F80 buf;
         Out_194F80 out;
         Rgba_194F80 c;
-        f32 sc = menu->titleScale * self->f23C;
-        func_0015C8B8(self->f4, sc, sc);
-        func_0015DB28(&buf, menu->title, self->f4);
+        f32 sc = menu->titleScale * self->blend;
+        func_0015C8B8(self->font, sc, sc);
+        func_0015DB28(&buf, menu->title, self->font);
         c.r = 0x7F;
         c.g = 0x7F;
         c.b = 0x7F;
@@ -1366,23 +1233,23 @@ void func_00194F80(Self_194F80* self)
         Setup_194F80::Do(&out, cx, cy, w, h, *(s32*)&c, 1);
         func_0015E318(&buf, &out, 0, D_00262280);
         cy += func_0015E1B0(&buf, 500.0f);
-        func_0015C900(self->f4);
+        func_0015C900(self->font);
     }
     base = cy + -1.0f;
     {
-        f32 sc = menu->itemScale * self->f23C;
-        func_0015C8B8(self->f4, sc, sc);
+        f32 sc = menu->itemScale * self->blend;
+        func_0015C8B8(self->font, sc, sc);
     }
-    lineH = (f32)self->f4->f8 * self->f4->f48;
+    lineH = (f32)self->font->height * self->font->sy;
     if (menu->vertical == 0) {
         f32 total = 0.0f;
         for (s32 k = 0; k < menu->count; k++) {
             Buf_194F80 buf;
             if (k != 0) {
-                total += (f32)self->f4->f4 * self->f4->f44 + (f32)self->f4->f4 * self->f4->f44;
+                total += (f32)self->font->advance * self->font->sx + (f32)self->font->advance * self->font->sx;
             }
             void* str = func_00193598(menu->items[k]);
-            func_0015DB28(&buf, str, self->f4);
+            func_0015DB28(&buf, str, self->font);
             total += func_0015DFF8(&buf);
         }
         x = cx + (w - total) * 0.5f;
@@ -1393,7 +1260,7 @@ void func_00194F80(Self_194F80* self)
         f32 width;
         void* str;
         f32 th;
-        if (i == self->f264) {
+        if (i == self->cursor) {
             Rgba_194F80 c;
             c.r = 0x6F;
             c.g = 0x6F;
@@ -1412,29 +1279,29 @@ void func_00194F80(Self_194F80* self)
         }
         Buf_194F80 buf;
         str = func_00193598(menu->items[i]);
-        func_0015DB28(&buf, str, self->f4);
+        func_0015DB28(&buf, str, self->font);
         width = func_0015DFF8(&buf);
         if (menu->vertical != 0) {
             x = cx + (w - width) * 0.5f;
         }
         {
-            f32 sc = menu->itemScale * self->f23C * grow;
-            func_0015C8B8(self->f4, sc, sc);
+            f32 sc = menu->itemScale * self->blend * grow;
+            func_0015C8B8(self->font, sc, sc);
         }
-        func_0015DB28(&buf, str, self->f4);
+        func_0015DB28(&buf, str, self->font);
         f32 width2 = func_0015DFF8(&buf);
-        th = (f32)self->f4->f8 * self->f4->f48;
+        th = (f32)self->font->height * self->font->sy;
         Out_194F80 out;
         Setup_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0);
         func_0015E318(&buf, &out, 0, D_00262280);
-        func_0015C900(self->f4);
+        func_0015C900(self->font);
         if (menu->vertical != 0) {
-            cy += (f32)self->f4->f8 * self->f4->f48;
+            cy += (f32)self->font->height * self->font->sy;
         } else {
-            x += width + ((f32)self->f4->f4 * self->f4->f44 + (f32)self->f4->f4 * self->f4->f44);
+            x += width + ((f32)self->font->advance * self->font->sx + (f32)self->font->advance * self->font->sx);
         }
     }
-    func_0015C900(self->f4);
+    func_0015C900(self->font);
     if (menu->title != 0 && menu->count != 0) {
         Rgba_194F80 c = *(Rgba_194F80*)&D_0026A210.f18;
         c.a = alpha;
@@ -1443,30 +1310,30 @@ void func_00194F80(Self_194F80* self)
     }
 }
 
-void func_00195928(Ctl_195928* self, s32 v)
+void func_00195928(T217D_6D0* self, s32 v)
 {
-    if (self->f260 != v) {
-        self->f260 = v;
+    if (self->page != v) {
+        self->page = v;
         if (v != -1) func_001936A0(self, v);
     }
 }
 
-void func_00195958(Menu_195958* self)
+void func_00195958(T217D_6D0* self)
 {
-    s32 sel = D_00269D50[self->f260].items ? D_00269D50[self->f260].items[self->f264] : -1;
+    s32 sel = D_00269D50[self->page].items ? D_00269D50[self->page].items[self->cursor] : -1;
     if (sel == 0x11) {
         func_001961C0(self);
         return;
     }
-    switch (self->f260) {
+    switch (self->page) {
     case 0:
         switch (sel) {
         case 3:
             func_00194D30(self, 0, -1);
             return;
         case 4: {
-            Sub_195958* s = &D_0026F808;
-            if (s->f260 != 0) {
+            T217D_0F0* s = &D_0026F808;
+            if (s->current != 0) {
                 func_00194D30(self, 0, -1);
                 func_001E9498(D_00275BC0, s);
                 return;
@@ -1531,9 +1398,9 @@ void func_00195958(Menu_195958* self)
             func_001A7F50(((Glob_195958*)D_002623C0));
             {
                 s32 keep;
-                keep = self->f264;
+                keep = self->cursor;
                 func_001936A0(self);
-                self->f264 = keep;
+                self->cursor = keep;
             }
             return;
         case 15: {
@@ -1542,9 +1409,9 @@ void func_00195958(Menu_195958* self)
             func_001C0760(g->f19EC & 0x80);
             {
                 s32 keep;
-                keep = self->f264;
+                keep = self->cursor;
                 func_001936A0(self);
-                self->f264 = keep;
+                self->cursor = keep;
             }
             return;
         }
@@ -1554,9 +1421,9 @@ void func_00195958(Menu_195958* self)
             func_001C0790(g->f19EC & 0x40);
             {
                 s32 keep;
-                keep = self->f264;
+                keep = self->cursor;
                 func_001936A0(self);
-                self->f264 = keep;
+                self->cursor = keep;
             }
             return;
         }
@@ -1593,7 +1460,7 @@ void func_00195958(Menu_195958* self)
         if (sel == 0) {
             Boot_195958* b = &D_00264A40;
             if (b->f4F44 != 0) {
-                self->f27C = 2;
+                self->stage = 2;
                 if ((((Glob_195958*)D_002623C0)->f19EC & 0x100) == 0) {
                     func_00194D30(self, 1, 0x14);
                 } else {
@@ -1612,23 +1479,23 @@ void func_00195958(Menu_195958* self)
         switch (sel) {
         case 0x18: {
             ((Glob_195958*)D_002623C0)->f19EC ^= 0x200;
-            s32 keep = self->f264;
+            s32 keep = self->cursor;
             func_001936A0(self);
-            self->f264 = keep;
+            self->cursor = keep;
             return;
         }
         case 0x19: {
             ((Glob_195958*)D_002623C0)->f19EC ^= 0x400;
-            s32 keep = self->f264;
+            s32 keep = self->cursor;
             func_001936A0(self);
-            self->f264 = keep;
+            self->cursor = keep;
             return;
         }
         case 0x1A: {
             ((Glob_195958*)D_002623C0)->f19EC ^= 0x800;
-            s32 keep = self->f264;
+            s32 keep = self->cursor;
             func_001936A0(self);
-            self->f264 = keep;
+            self->cursor = keep;
             return;
         }
         }
@@ -1663,7 +1530,7 @@ void func_00195958(Menu_195958* self)
         s32 v;
         func_00194D30(self, 1, -1);
         func_0018C178(&D_00264A40, 2);
-        v = self->f268;
+        v = self->want[0];
         if (v == 0xB) {
             goto c5F08;
         }
@@ -1711,7 +1578,7 @@ void func_00195958(Menu_195958* self)
             Boot_195958* b;
             b = &D_00264A40;
             b->f4F44 = b->f4F4C;
-            self->f27C = 0xB;
+            self->stage = 0xB;
             if ((((Glob_195958*)D_002623C0)->f19EC & 0x100) == 0) {
                 func_00194D30(self, 1, 0x14);
             } else {
@@ -1737,7 +1604,7 @@ void func_00195958(Menu_195958* self)
         return;
     case 20: {
         ((Glob_195958*)D_002623C0)->f19EC |= 0x100;
-        s32 v = self->f27C;
+        s32 v = self->stage;
         switch (v) {
         case 2:
         case 0xB:
@@ -1745,7 +1612,7 @@ void func_00195958(Menu_195958* self)
             break;
         case -1:
             func_00194D30(self, 1, -1);
-            D_00273EB0.vt->f38(&D_00273EB0);
+            D_00273EB0.vt->m14(&D_00273EB0);
             break;
         }
         func_0018B670(&D_00269990, (void*)func_0018C638, &D_00264A40);
@@ -1754,9 +1621,9 @@ void func_00195958(Menu_195958* self)
     }
 }
 
-void func_001961C0(Self_1961C0* self)
+void func_001961C0(T217D_6D0* self)
 {
-    switch (self->state) {
+    switch (self->page) {
     case 0:
         func_00194D30(self, 0, -1);
         break;

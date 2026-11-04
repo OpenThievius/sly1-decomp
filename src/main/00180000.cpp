@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "t217d.h"
 #include "c05.h"
 #include "c6e.h"
 #include "c51.h"
@@ -1023,7 +1024,6 @@ struct Packed_180F98 { f32 v; } __attribute__((packed));
 
 struct Ent_2640B0 { s32 a, b, c; };
 extern Ent_2640B0 D_002640B0[];
-extern u8 D_00270650[];
 
 void func_001D7440(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
@@ -1044,9 +1044,9 @@ void func_00180F98(C1A* self)
     func_00128018(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
     func_00181DA8(self, 1);
     self->f864 = 3.4028234663852886e+38f;
-    u8* base = D_00270650;
-    ((Packed_180F98*)(base + 0x288))->v = 0.0f;
-    *(s32*)(base + 0x284) = func_001B4688(0x36A);
+    T217D_BF0* base = &D_00270650;
+    ((Packed_180F98*)&base->f288)->v = 0.0f;
+    base->icon = func_001B4688(0x36A);
 }
 
 void func_00183350(C01* self, s32 kind, void* arg)

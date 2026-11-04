@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: fields at 0x578/0x580 and the manager state at 0x570; calls PAL's func_eu_001AB238 where US calls vtable slot 8.
+void func_001E7460(void* self);
+void func_001E7440(void* self, s32 v);
+void func_001E87F0(void* self, void* a1);
+void func_001E7518(void* self, s32 mode);
 struct Obj_1E86E0_eu {
     u8 pad0[0x578];
     s32 f578;

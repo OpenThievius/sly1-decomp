@@ -9,5 +9,5 @@ void func_00194F38(Ctl_194F38_eu* self)
         self->f588 = -1;
         return;
     }
-    func_001AA958((Ctl_194F38*)self);
+    func_001AA958((T217D*)self);
 }

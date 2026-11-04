@@ -56,19 +56,19 @@ void func_0016B580(Obj_16B580_eu* self, Arg_16B580* arg)
     if (self->f2D4 == 1 && (p->f28 == p->f30 || delay <= D_0026185C[0] - self->f2D8)) {
         s32 idx = self->f2D0;
         if (idx == 0) {
-            Obj_16B580_eu* g = (Obj_16B580_eu*)D_0026FD00;
+            Obj_16B580_eu* g = (Obj_16B580_eu*)&D_0026FD00;
             if (g->f250 != 0) {
                 return;
             }
-            func_001E9498(D_00275BC0, D_0026FD00);
+            func_001E9498(D_00275BC0, &D_0026FD00);
             return;
         }
-        Obj_16B580_eu* g = (Obj_16B580_eu*)D_0026F808;
+        Obj_16B580_eu* g = (Obj_16B580_eu*)&D_0026F808;
         if (g->f250 != 0) {
             return;
         }
-        g->p260 = *(Obj_16B580_eu**)(D_0026F808 + idx * 4 + 0x264 + 0x310);
-        func_001E9498(D_00275BC0, D_0026F808);
+        g->p260 = *(Obj_16B580_eu**)((u8*)&D_0026F808 + idx * 4 + 0x264 + 0x310);
+        func_001E9498(D_00275BC0, &D_0026F808);
         return;
     }
     if (p->f28 != p->f30) {
@@ -76,7 +76,7 @@ void func_0016B580(Obj_16B580_eu* self, Arg_16B580* arg)
     }
     if ((arg->flags & 0x800) || (arg->f14 == 1 && 5.0f <= D_0026185C[0])) {
         func_0016EC20(arg, 0x800);
-        func_00194D30(D_0026FF68, 0, 0x17);
+        func_00194D30(&D_0026FF68, 0, 0x17);
         return;
     }
     if ((arg->flags & 0x140) != 0) {

@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Constructor tail of an object holding a child: refreshes the child pointer, its colour and layout position.
+void func_001AA268(void* self);
+void func_001AAB20(void* self, f32 x, f32 y);
+void func_0015C8B8(void* a, f32 x, f32 y);
+void func_0015C900(void* h);
 struct Vt_16BA40_eu {
     u8 pad0[0x8];
     s16 off8;

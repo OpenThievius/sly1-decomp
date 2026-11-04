@@ -2,6 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "t217d.h"
+#include "v24a2.h"
 
 // The font object's calls (include/v24a2.h will declare them).
 V24A2* func_0015C1C0(s32 k);
@@ -709,8 +710,6 @@ void func_001ADC60(T217D_470* self)
     }
 }
 
-struct Inner_1AE510 { u8 pad0[8]; s32 f8; u8 pad1[0x3C]; f32 f48; };
-
 extern const char D_0024CF98[];
 extern f32 D_002744A8;
 
@@ -727,8 +726,8 @@ void func_001AE510(T217D_5B0* self)
     }
     func_0015C8B8(self->font, D_002744A8, D_002744A8);
     self->w = func_0015C418(self->font, self->text);
-    Inner_1AE510* in = (Inner_1AE510*)self->font;
-    self->h = (f32)in->f8 * in->f48;
+    V24A2* in = self->font;
+    self->h = (f32)in->height * in->sy;
     func_0015C900(self->font);
 }
 
@@ -853,8 +852,6 @@ void func_001AD0D0(T217D* self, s32 a1, s32 a2)
     self->vt->m08(self, (const char*)&str);
 }
 
-struct FontView { u8 pad0[8]; s32 lines; u8 padC[0x3C]; f32 lineHeight; };
-
 struct Buf_001AD7B0 { u8 pad[0x30]; };
 
 extern f32 D_00261868;
@@ -880,7 +877,7 @@ void func_001AD7B0(T217D_420* self)
     f32 s2 = sc * 0.1f + half;
     func_0015C8B8(h, s2, s2);
     f32 w = func_0015C418(h, (void*)D_0024CEE8);
-    f32 ht = (f32)((FontView*)h)->lines * ((FontView*)h)->lineHeight;
+    f32 ht = (f32)h->height * h->sy;
     func_00137228(&buf, self->x + 2.0f + self->w * half - w * half,
                   self->y + 14.0f + self->h * half - ht * half);
     func_00137238(&buf, w, ht);
@@ -1212,14 +1209,6 @@ struct Out_1AD3F0;
 struct Strm_1AD3F0 { u8 d[1]; };
 struct Buf_1AD3F0 { u8 d[0xB0]; };
 
-struct Glob_1AD3F0 {
-    u8 pad0[0x250];
-    s32 f250;
-    u8 pad1[0x25C - 0x254];
-    s32 f25C;
-    s32 f260;
-};
-
 struct Inner_1AD3F0 {
     u8 pad[0x2D0];
     s32 f2D0;
@@ -1254,13 +1243,13 @@ void func_001AD3F0(T217D_3D0* self)
     f32 px;
     f32 py;
     s32 held;
-    Glob_1AD3F0* g;
+    T217D_440* g;
 
     if (self->text[0] == 0) {
         return;
     }
-    g = (Glob_1AD3F0*)&D_002701F8;
-    if (g->f250 != 0 && (u32)(g->f260 - 1) < 2) {
+    g = &D_002701F8;
+    if (g->mode != 0 && (u32)(g->state - 1) < 2) {
         return;
     }
     if (self->announce != 0) {
@@ -1282,11 +1271,11 @@ void func_001AD3F0(T217D_3D0* self)
     out.FlagA(0);
     out.FlagB(0);
     if (self->announce == 0) {
-        Glob_1AD3F0* g2 = (Glob_1AD3F0*)&D_0026F808;
+        T217D_0F0* g2 = &D_0026F808;
         Strm_1AD3F0* s = (Strm_1AD3F0*)D_00262280;
         f32 sc = scale;
         f32 y;
-        if (g2->f25C != 0 && g2->f260 != 0 && ((Inner_1AD3F0*)g2->f260)->f2D0 == 2) {
+        if (g2->open != 0 && g2->current != 0 && ((Inner_1AD3F0*)g2->current)->f2D0 == 2) {
             sc = 1.0f;
         }
         ((u8*)&slot)[0] = 0;

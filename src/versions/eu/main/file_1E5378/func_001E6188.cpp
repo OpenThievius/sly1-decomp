@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the instrument pointer is at 0x58C (US 0x27C).
+void func_001AA268(void* self);
 struct Obj_1E6188_eu { u8 pad[0x58C]; Inst_1E6188* p58C; };
 
 void func_001E6188(Obj_1E6188_eu* self)

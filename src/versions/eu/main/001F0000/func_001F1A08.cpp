@@ -10,7 +10,7 @@ struct Obj_1F1A08_eu {
     f32 f590;
 };
 
-void func_001F1A08(Obj_1F1A08_eu* self, Obj_1F1A08* t)
+void func_001F1A08(Obj_1F1A08_eu* self, Pad_1F1A08* t)
 {
     s32 loc[2];
     s32 s3;

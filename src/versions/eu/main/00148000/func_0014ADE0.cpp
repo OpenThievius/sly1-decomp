@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the fields are 0x310 later, and the elements 0x570 apart, the first at 0x574 (US 0x264, 0x260 apart).
+typedef void (*VFn_14ADE0)(void* self);
 struct Elem_14ADE0_eu {
     VFn_14ADE0* vtbl;
     u8 pad004[0x52C - 0x004];

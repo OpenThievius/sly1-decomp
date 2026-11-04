@@ -13,7 +13,7 @@ void func_00180F98(C1A* self)
     func_00128018(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
     func_00181DA8(self, 1);
     self->f864 = 3.4028234663852886e+38f;
-    u8* base = D_00270650;
+    u8* base = (u8*)&D_00270650;
     ((Packed_180F98*)(base + 0x598))->v = 0.0f;
     *(s32*)(base + 0x594) = func_001B4688(0x36A);
 }

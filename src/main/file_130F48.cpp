@@ -5,6 +5,7 @@
 #include "list_iter.h"
 #pragma implementation "layout_137228.h"
 #include "layout_137228.h"
+#include "t217d.h"
 
 
 struct Quad_130F48 {
@@ -23,19 +24,7 @@ struct Span_130F48 {
 };
 
 
-typedef void (*VFn_131140)(void* self, s32 arg);
-
-struct Obj_131140 {
-    VFn_131140* vtbl;
-    u8 pad0[0x300 - 4];
-    s32 f300;
-    s32 f304;
-    s32 f308;
-    u8 pad1[8];
-    f32 f314;
-};
-
-void func_001365A0(void* self, s32 arg);
+void func_001365A0(T217D_440* self, s32 arg);
 
 
 struct Rgba_130F48
@@ -49,11 +38,6 @@ struct Rgba_130F48
     Rgba_130F48(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 struct Gs_133B58;
-struct Self_133B58
-{
-    u8 pad000[0x30C];
-    f32 phase;
-};
 
 
 f32 func_00205210(f32 x);
@@ -89,30 +73,12 @@ struct Lerp_133B58
 };
 
 
-struct Obj_1310F0 {
-    u8 pad0[0x234];
-    f32 f234;
-    f32 f238;
-    u8 pad1[0x2F0 - 0x23C];
-    f32 f2F0;
-    u32 f2F4;
-};
-void func_001AA1F0(Obj_1310F0* self, s32 a1);
 
 
 struct Gs_132500;
 
 struct Pad_132500 { u8 pad[0x78]; f32 f78; };
 struct Clock_132500 { u8 pad[0x478]; f32 f478; };
-
-struct Obj_132500 {
-    u8 pad0[0x260];
-    s32 f260;
-    u8 pad1[0x30C - 0x264];
-    f32 f30C;
-    u8 pad2[0x320 - 0x310];
-    s32 f320;
-};
 
 extern s32 D_00262C68;
 extern Pad_132500 D_00262C70;
@@ -127,7 +93,7 @@ void func_00161670(Gs_132500* gs, s32 x, s32 y, s32 z, s32 f);
 void func_001615F0(Gs_132500* gs, s32 x, s32 y, s32 z, s32 f);
 f32 func_001EA408(f32 a);
 f32 func_00205210(f32 a);
-void func_00136EC8(Obj_132500* self, f32* x, f32* y);
+void func_00136EC8(T217D_440* self, f32* x, f32* y);
 
 struct Gfx_132500 {
     static s32 LerpU8(s32 a, s32 b, f32 t)
@@ -168,16 +134,13 @@ struct Gfx_132500 {
 };
 
 
-struct Node_1363D0 { u8 pad0[0x324]; void* child; };
-
 void func_001AA8C8(void* self);
 s32 func_00150790(void* obj, s32 mode);
 
 
 struct Child_136EF8 { u8 pad0[0x2D0]; s32 kind; };
-struct Owner_136EF8 { u8 pad0[0x324]; Child_136EF8* child; };
 
-void func_001356C0(Owner_136EF8* self, s32 mode);
+void func_001356C0(T217D_440* self, s32 mode);
 void func_00150790(Child_136EF8* obj, s32 mode);
 
 
@@ -197,63 +160,35 @@ struct Entry_135858 {
 void func_00199C10(void* obj, s32* out);
 
 
-struct SlotEntry_135E78 { void* handle; s32 extra; };
-
-struct SlotBank_135E78 {
-    u8 pad0[0x328];
-    s32 state;
-    u8 pad1[0x4];
-    u8 blockA[0x10];
-    u8 blockB[0x10];
-    s32 countA;
-    s32 count;
-    u8 pad2[0x4];
-    SlotEntry_135E78 entries[1];
-};
-
 void func_0019EBE8(void* handle);
 void func_001A1DF0(void* handle, s32 mode);
 void* func_001F5C0C(void* block, s32 value, s32 size);
 
 
+// func_00136FA8 keeps its own view: it uses the result of func_001356C0, which returns nothing.
 struct Owner_136FA8 { u8 pad0[0x324]; void* child; };
 
 s32 func_001356C0(Owner_136FA8* self, s32 mode);
 
 
 // Newly matched US functions from the small-function wave.
-struct Obj_1365A0 { u8 pad[0x2FC]; s32 f2FC; };
 extern void func_001373D0(void*);
 extern void func_0018D778(void*);
 struct Obj_137398 { u8 pad0[4]; s32 state; u8 pad8[0x10]; s32 f18; s32 f1C; };
 extern void func_00137A60(void*, s32, void*);
 
 
-struct State_001365A8 { u8 pad[0x300]; f32 value;
-    void set(f32 x, f32 lo, f32 hi) {
+struct Value_1365A8 {
+    static void Set(T217D_440* self, f32 x, f32 lo, f32 hi) {
         if (x < lo) x = lo;
         else if (hi < x) x = hi;
-        value = x;
+        self->value = x;
     }
-};
-
-
-struct State_00136EC8 { u8 pad[0x304]; f32 x; f32 y; };
-
-
-struct Obj_136530 {
-    u8 pad0[4];
-    s32 handle;
-    s8 flag;
-    u8 pad1[0x268 - 9];
-    f32 f268;
-    u8 pad2[0x2F0 - 0x26C];
-    f32 scale;
 };
 
 extern f32 D_0026185C;
 
-void func_0015DB28(void* out, void* p, s32 handle);
+V24A2* func_0015DB28(void* out, void* p, V24A2* font);
 s32 func_0015DF58(void* self);
 
 
@@ -263,52 +198,25 @@ struct Scratch_00136408 {
     u8 bytes[0xB0];
 };
 
-struct Entry_00136408 {
-    u8 pad0[4];
-    s32 f04;
-    u8 name08[0x258];
-    s32 f260;
-    u8 pad264[4];
-    f32 f268;
-    s32 f26C;
-    s32 list270[16];
-};
-
 s32 func_001E2100(const char* s);
 void func_001E2138(void* dst, const char* src);
-void func_0015C8B8(s32 a, f32 x, f32 y);
-void func_0015DB28(void* buf, void* p, s32 v);
+void func_0015C8B8(V24A2* font, f32 x, f32 y);
 void func_0015E068(void* buf, f32 x);
-void func_0015C900(s32 v);
+void func_0015C900(V24A2* font);
 void func_0015DB80(void* buf);
 s32 func_0015DBE0(void* buf);
 
 
-typedef void (*VFn_1356C0)(void* self);
-
 struct __attribute__((packed)) Tail_1356C0 { u8 pad0[0x464]; s32 v; };
-struct Global_1356C0 {
-    VFn_1356C0* vtbl;
-    u8 pad0[0x464 - 4];
-};
-
-struct Obj_1356C0 { u8 pad0[0x260]; s32 state; f32 timer; };
-
-extern Global_1356C0 D_0026F138;
 extern f32 D_0026185C;
 
-void func_00131140(Obj_1356C0* self);
+void func_00131140(T217D_440* self);
 void func_001BFCD8(s32 a, s32 b, s32 c, s32 d, f32 g, f32 h, f32 i, f32 j, f32 k, s32 e, s32 f);
 
 
 extern u8 D_00275710[];
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
-
-struct Self_135F48 {
-    u8 pad000[0x328];
-    s32 f328;
-};
 
 struct Ctx_135F48 {
     u8 pad000[0x1D44];
@@ -321,17 +229,11 @@ struct Flag_135F48 { s32 v; };
 
 void func_00160D30(Flag_135F48* p);
 s32 func_00160D10(void);
-void func_00135E78(Self_135F48* self, s32 state, s32 flag);
-void func_001358D0(Self_135F48* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
+void func_001358D0(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
 
 
-struct Obj_1365F0 { u8 pad0[0x260]; s32 state; };
-
-f32 func_001AA898(Obj_1365F0* self);
 
 
-struct S_136648 { u8 pad[0x260]; s32 mode; };
-extern f32 func_001AA8A8(S_136648* s);
 
 
 struct Tri_136040 { u64 a __attribute__((packed)); u32 b; };
@@ -347,15 +249,6 @@ struct Pad_136040 {
     u8 pad_78[4];
     f32 f7C;
 };
-struct Self_136040 {
-    u8 pad_000[0x260];
-    s32 f260;
-    u8 pad_264[0x304 - 0x264];
-    f32 f304;
-    f32 f308;
-    u8 pad_30C[8];
-    f32 f314;
-};
 struct Glob_136040 {
     u8 pad[0x19EC];
     u32 flags;
@@ -367,7 +260,7 @@ extern Glob_136040* D_002623C0;
 
 Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, Tri_136040* c, s32 d, f32 f12);
 f32 func_001EAFE0(f32 x, f32 y);
-void func_00135F48(Self_136040* self, Pad_136040* p);
+void func_00135F48(T217D_440* self, Pad_136040* p);
 
 
 struct __attribute__((aligned(16))) Vec_135E30 { s32 a, b, c, d; };
@@ -384,7 +277,6 @@ struct Item_135550;
 struct List_135550 { u8* head; u8 pad4[4]; s32 offset; };
 struct Iter_135550 { List_135550* list; u8* link; s32 offset; Iter_135550* saved; };
 struct Group_135550 { u8 pad0[0x6C]; List_135550 list; };
-struct Obj_135550 { u8 pad0[0x250]; s32 f250; };
 struct Host_135550;
 
 
@@ -410,21 +302,9 @@ struct Begin_135550 {
 
 Group_135550* func_0015A418(Host_135550* host, s32 a1, s32 a2, void* ctx);
 void func_0012F6B0(Item_135550* item, f32 x);
-void func_001AA998(Obj_135550* self, s32 value);
 
 
-struct Obj_136238;
-struct VT_136238 { u8 pad0[0x40]; void (*f40)(Obj_136238*, s32); };
-struct Obj_136238 {
-    VT_136238* vt;
-    u8 pad4[0x25C - 4];
-    s32 f25C;
-    u8 pad260[0x320 - 0x260];
-    s32 f320;
-    struct Sub_136238* f324;
-    s32 f328;
-    s32 f32C;
-};
+
 struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
 struct In_136238 { s32 a; };
 
@@ -434,21 +314,13 @@ void func_001BEA50(void);
 void func_001BEA28(void);
 void func_00160D30(In_136238* p);
 s32 func_00160D10(void);
-void func_00135E78(Obj_136238* self, s32 state, s32 flag);
+void func_00135E78(T217D_440* self, s32 state, s32 flag);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 void func_00192190(void* p);
 
 struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
 
-struct Obj_135228
-{
-    u8 pad0[0x260];
-    s32 f260;
-    u8 pad1[0x330 - 0x264];
-    s32 f330[4];
-    f32 f340[4];
-};
 
 struct Q_135228
 {
@@ -457,7 +329,7 @@ struct Q_135228
 
 
 void func_00160D30(u32* out);
-void func_00134B48(Obj_135228* self, Q_135228* q);
+void func_00134B48(T217D_440* self, Q_135228* q);
 f32 func_00205210(f32 x);
 f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
 void func_001613C0(Q_135228* q, s32 a, s32 b, u64 c);
@@ -547,30 +419,30 @@ f32 D_00261310;
 
 void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y);
 f32 func_00131000(const Span_130F48* s, s32 x);
-void func_001310F0(Obj_1310F0* self, s32 a1);
-void func_00131140(Obj_131140* self);
-void func_00132500(Obj_132500* self, Gs_132500* gs);
-void func_00133B58(Self_133B58* self, Gs_133B58* gs);
-void func_00135228(Obj_135228* self, Q_135228* q);
-void func_00135550(Obj_135550* self, s32 value);
-void func_001356C0(Obj_1356C0* self, s32 mode);
+void func_001310F0(T217D_440* self, s32 a1);
+void func_00131140(T217D_440* self);
+void func_00132500(T217D_440* self, Gs_132500* gs);
+void func_00133B58(T217D_440* self, Gs_133B58* gs);
+void func_00135228(T217D_440* self, Q_135228* q);
+void func_00135550(T217D_440* self, s32 value);
+void func_001356C0(T217D_440* self, s32 mode);
 s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b);
 s32 func_00135858(Entry_135858* a, Entry_135858* b);
 void func_00135E30(Obj_135E30* self, Vec_135E30* out, s32* flag);
 void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out);
-void func_00135E78(SlotBank_135E78* self, s32 state, s32 flag);
-void func_00135F48(Self_135F48* self);
-void func_00136040(Self_136040* self, Pad_136040* p);
-void func_00136238(Obj_136238* self, s32 on);
-void func_001363D0(Node_1363D0* self);
-void func_00136408(Entry_00136408* self, const char* name);
-s32 func_00136530(Obj_136530* self);
-void func_001365A0(Obj_1365A0* self, s32 value);
-void func_001365A8(State_001365A8* self, f32 value);
-f32 func_001365F0(Obj_1365F0* self);
-f32 func_00136648(S_136648* s);
-void func_00136EC8(State_00136EC8* self, f32* x, f32* y);
-void func_00136EF8(Owner_136EF8* self);
+void func_00135E78(T217D_440* self, s32 state, s32 flag);
+void func_00135F48(T217D_440* self);
+void func_00136040(T217D_440* self, Pad_136040* p);
+void func_00136238(T217D_440* self, s32 on);
+void func_001363D0(T217D_440* self);
+void func_00136408(T217D_440* self, const char* name);
+s32 func_00136530(T217D_440* self);
+void func_001365A0(T217D_440* self, s32 value);
+void func_001365A8(T217D_440* self, f32 value);
+f32 func_001365F0(T217D_440* self);
+f32 func_00136648(T217D_440* s);
+void func_00136EC8(T217D_440* self, f32* x, f32* y);
+void func_00136EF8(T217D_440* self);
 s32 func_00136FA8(Owner_136FA8* self);
 
 void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y)
@@ -615,22 +487,22 @@ f32 func_00131000(const Span_130F48* s, s32 x)
     return s->q;
 }
 
-void func_001310F0(Obj_1310F0* self, s32 a1)
+void func_001310F0(T217D_440* self, s32 a1)
 {
-    self->f234 = 640.0f;
-    self->f238 = 492.800018f;
-    self->f2F0 = 15.0f;
-    self->f2F4 = 0x80FFFFFF;
+    self->w = 640.0f;
+    self->h = 492.800018f;
+    self->charsPerSecond = 15.0f;
+    self->highlight = 0x80FFFFFF;
     func_001AA1F0(self, a1);
 }
 
-void func_00131140(Obj_131140* self)
+void func_00131140(T217D_440* self)
 {
-    self->vtbl[8](self, 0);
+    self->vt->m08(self, 0);
     func_001365A0(self, 0);
-    self->f300 = 0;
-    self->f304 = 0;
-    self->f308 = 0;
+    self->value = 0;
+    self->stickX = 0;
+    self->stickY = 0;
     self->f314 = 0.4f;
 }
 
@@ -643,7 +515,7 @@ INCLUDE_RODATA(D_00249CE8);
 INCLUDE_RODATA(D_00249CF0);
 INCLUDE_ASM(func_00131F60);
 
-void func_00132500(Obj_132500* self, Gs_132500* gs)
+void func_00132500(T217D_440* self, Gs_132500* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;
@@ -668,12 +540,12 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
     } else if (pad->f78 < 0.0f) {
         k = -6.0f;
     }
-    self->f30C = func_001EA408(self->f30C + D_00261860 * k);
+    self->spin = func_001EA408(self->spin + D_00261860 * k);
 
     alpha = (s32)(D_00261990->f478 * 24.999f) + 0x30;
-    switch (self->f320) {
+    switch (self->palette) {
     case 0:
-        if (self->f260 == 5) {
+        if (self->state == 5) {
             Rgba_130F48 t = D_00261110;
             t.a = alpha;
             c0 = t;
@@ -716,9 +588,9 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
         f32 step = 1.0f / 24.0f;
         f32 period = 256.0f;
         f32 wide = 512.0f;
-        f32 s = Gfx_132500::Wave(-8.0f, period, self->f30C);
+        f32 s = Gfx_132500::Wave(-8.0f, period, self->spin);
         Rgba_130F48 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-        s = Gfx_132500::Wave(-18.0f, period, self->f30C);
+        s = Gfx_132500::Wave(-18.0f, period, self->spin);
         Rgba_130F48 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
         f32 x0 = posX - scale * 35.0f;
         f32 x1 = x0 + scale * 70.0f;
@@ -771,7 +643,7 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
         func_00161458(gs, *(u32*)&colA);
         func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -4.0f), 0, 0);
 
-        if (self->f260 != 5) {
+        if (self->state != 5) {
             s32 n;
 
             offX = 41.0f;
@@ -779,7 +651,7 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
             func_001613C0(gs, 0xC6, 5, 0x44441);
             for (n = 0; n < 64; n++) {
                 f32 px, py;
-                f32 s = Gfx_132500::Wave(offX, wide, self->f30C);
+                f32 s = Gfx_132500::Wave(offX, wide, self->spin);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
                 Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
@@ -797,7 +669,7 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
             offY = 24.0f;
             for (n = 0; n < 32; n++) {
                 f32 px, py;
-                f32 s = Gfx_132500::Wave(offY, period, self->f30C);
+                f32 s = Gfx_132500::Wave(offY, period, self->spin);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
                 Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
@@ -817,18 +689,18 @@ void func_00132500(Obj_132500* self, Gs_132500* gs)
     func_00161708(gs, 0x40, 0xDF0000027F0000);
 }
 
-void func_00133B58(Self_133B58* self, Gs_133B58* gs)
+void func_00133B58(T217D_440* self, Gs_133B58* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;
     Rgba_130F48 c2;
     f32 step = 1.0f / 24.0f;
     f32 t;
-    t = 0.5f - func_00205210(self->phase) * 0.5f;
+    t = 0.5f - func_00205210(self->spin) * 0.5f;
     c0 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->phase + 1.5707964f) * 0.5f;
+    t = 0.5f - func_00205210(self->spin + 1.5707964f) * 0.5f;
     c1 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->phase + 3.1415927f) * 0.5f;
+    t = 0.5f - func_00205210(self->spin + 3.1415927f) * 0.5f;
     c2 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
     s32 i;
     f32 x;
@@ -931,9 +803,9 @@ ASM_FUNC(func_00134AA0);
 INCLUDE_RODATA(D_00249CF8);
 ASM_FUNC(func_00134B48);
 
-void func_00135228(Obj_135228* self, Q_135228* q)
+void func_00135228(T217D_440* self, Q_135228* q)
 {
-    if (self->f260 == 1)
+    if (self->state == 1)
     {
         if ((u32)func_00160D10() & 0x800)
         {
@@ -953,8 +825,8 @@ void func_00135228(Obj_135228* self, Q_135228* q)
             f32 t = func_00205210(D_00261858[1] * D_00261260[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
-                f32 r = func_001EA4B8(self->f340[i], self->f330[i] ? 1.0f : 0.0f, D_00261858[2], &D_00261260[2], 0);
-                self->f340[i] = r;
+                f32 r = func_001EA4B8(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, D_00261858[2], &D_00261260[2], 0);
+                self->blockB[i] = r;
                 for (s32 j = 0; j < 4; j++)
                 {
                     out[j] = (s32)((1.0f - r) * (f32)c2[j] + r * t * (f32)c1[j] + r * (1.0f - t) * (f32)c0[j]);
@@ -973,12 +845,12 @@ void func_00135228(Obj_135228* self, Q_135228* q)
     }
 }
 
-void func_00135550(Obj_135550* self, s32 value)
+void func_00135550(T217D_440* self, s32 value)
 {
-    if (value == self->f250) {
+    if (value == self->mode) {
         return;
     }
-    if (self->f250 == 0) {
+    if (self->mode == 0) {
         Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
         if (g != 0) {
             Iter_135550 it;
@@ -1005,7 +877,7 @@ void func_00135550(Obj_135550* self, s32 value)
     func_001AA998(self, value);
 }
 
-void func_001356C0(Obj_1356C0* self, s32 mode)
+void func_001356C0(T217D_440* self, s32 mode)
 {
     if (mode != self->state) {
         if (self->state != 1) {
@@ -1024,14 +896,14 @@ void func_001356C0(Obj_1356C0* self, s32 mode)
             break;
         case 4:
             ((Tail_1356C0*)&D_0026F138)->v = 0;
-            D_0026F138.vtbl[15](&D_0026F138);
+            D_0026F138.vt->m15(&D_0026F138);
             self->state = mode;
             break;
         default:
             self->state = mode;
             break;
         }
-        self->timer = D_0026185C;
+        self->stateSince = D_0026185C;
     }
 }
 
@@ -1087,13 +959,13 @@ void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out)
 
 LINKER_REMNANT(func_00135E70);
 
-void func_00135E78(SlotBank_135E78* self, s32 state, s32 flag)
+void func_00135E78(T217D_440* self, s32 state, s32 flag)
 {
-    if (state == self->state) return;
+    if (state == self->bankState) return;
     s32 i = 0;
-    u8* blockA = self->blockA;
+    void* blockA = self->blockA;
     if (self->count > 0) {
-        SlotEntry_135E78* e = self->entries;
+        T217D_440_Slot* e = self->entries;
         do {
             if (flag != 0) {
                 func_0019EBE8(e->handle);
@@ -1108,10 +980,10 @@ void func_00135E78(SlotBank_135E78* self, s32 state, s32 flag)
     self->count = 0;
     self->countA = 0;
     func_001F5C0C(blockA, 0, 16);
-    self->state = state;
+    self->bankState = state;
 }
 
-void func_00135F48(Self_135F48* self)
+void func_00135F48(T217D_440* self)
 {
     Flag_135F48 flag;
     func_00160D30(&flag);
@@ -1120,7 +992,7 @@ void func_00135F48(Self_135F48* self)
         return;
     }
     func_00135E78(self, 1, 0);
-    if (self->f328 == 1) {
+    if (self->bankState == 1) {
         f32 k = 3.4028235e38f;
         Ctx_135F48* ctx = *(Ctx_135F48**)D_00275710;
         func_001358D0(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, ctx->f1D44, k);
@@ -1128,9 +1000,9 @@ void func_00135F48(Self_135F48* self)
     }
 }
 
-void func_00136040(Self_136040* self, Pad_136040* p)
+void func_00136040(T217D_440* self, Pad_136040* p)
 {
-    switch (self->f260) {
+    switch (self->state) {
     case 1: {
         Vec_136040 va;
         Vec_136040 vb;
@@ -1150,8 +1022,8 @@ void func_00136040(Self_136040* self, Pad_136040* p)
             v = hi2;
         }
         if (D_002623C0->flags & 0x200) v = -v;
-        va.x = self->f304;
-        va.y = self->f308;
+        va.x = self->stickX;
+        va.y = self->stickY;
         va.z = 0;
         vb.x = u * 50.0f;
         vb.y = v * 50.0f;
@@ -1159,13 +1031,13 @@ void func_00136040(Self_136040* self, Pad_136040* p)
         f32* g = ((f32*)D_00261858);
         *(Quad_136040*)&r = func_001EA818(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
         self->f314 += u * -0.08f;
-        self->f304 = r.x;
-        self->f308 = r.y;
+        self->stickX = r.x;
+        self->stickY = r.y;
         self->f314 = func_001EAFE0(self->f314, 1.0f);
         break;
     }
     case 5:
-        self->f308 = 50.0f;
+        self->stickY = 50.0f;
         break;
     }
     func_00135F48(self, p);
@@ -1174,23 +1046,23 @@ extern const Tri_136040 D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
 extern const Tri_136040 D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
 
 
-void func_00136238(Obj_136238* self, s32 on)
+void func_00136238(T217D_440* self, s32 on)
 {
     In_136238 in;
     void* arr[0x100];
     s32 n;
-    if ((on != 0) != (self->f25C == 0)) return;
-    if (self->f324 != 0 && self->f324->f2D4 == 3) {
+    if ((on != 0) != (self->open == 0)) return;
+    if (self->child != 0 && ((Sub_136238*)self->child)->f2D4 == 3) {
         if (on != 0) func_001BEA50();
         else func_001BEA28();
     }
-    self->f25C = on;
-    self->f320 = 0;
+    self->open = on;
+    self->palette = 0;
     if (on != 0) {
-        self->vt->f40(self, 2);
+        self->vt->m16(self, 2);
         func_00160D30(&in);
         if (func_00160D10() & in.a) {
-            if (func_00160D10() & D_00261120[self->f32C]) func_00135E78(self, self->f32C, 1);
+            if (func_00160D10() & D_00261120[self->savedBank]) func_00135E78(self, self->savedBank, 1);
         }
         if (func_00160D10() & 0x800) {
             n = func_0015A4F0(*(s32*)D_00275710, 0x205, 0x82, 0, 0x100, arr);
@@ -1202,13 +1074,13 @@ void func_00136238(Obj_136238* self, s32 on)
             }
         }
     } else {
-        self->vt->f40(self, 0);
-        self->f32C = self->f328;
+        self->vt->m16(self, 0);
+        self->savedBank = self->bankState;
         func_00135E78(self, 0, 1);
     }
 }
 
-void func_001363D0(Node_1363D0* self)
+void func_001363D0(T217D_440* self)
 {
     func_001AA8C8(self);
     if (self->child != 0) {
@@ -1216,7 +1088,7 @@ void func_001363D0(Node_1363D0* self)
     }
 }
 
-void func_00136408(Entry_00136408* self, const char* name)
+void func_00136408(T217D_440* self, const char* name)
 {
     Scratch_00136408 buf;
     s32 s1;
@@ -1226,58 +1098,58 @@ void func_00136408(Entry_00136408* self, const char* name)
     f32 lim;
     f32* tab;
 
-    self->f26C = 0;
+    self->lineCount = 0;
     if (name == 0) goto fail;
     if (func_001E2100(name) == 0) goto fail;
-    func_001E2138(self->name08, name);
+    func_001E2138(self->text, name);
     s1 = 4;
     scale = 1.0f;
-    if ((r = self->f260) == s1) scale = 0.8f;
-    func_0015C8B8(self->f04, scale, scale);
-    func_0015DB28(&buf, self->name08, self->f04);
+    if ((r = self->state) == s1) scale = 0.8f;
+    func_0015C8B8(self->font, scale, scale);
+    func_0015DB28(&buf, self->text, self->font);
     lim = 280.0f;
-    if ((r = self->f260) == s1) lim = 380.0f;
+    if ((r = self->state) == s1) lim = 380.0f;
     s1 = 0;
     func_0015E068(&buf, lim);
-    func_0015C900(self->f04);
+    func_0015C900(self->font);
     func_0015DB80(&buf);
     while ((r = func_0015DBE0(&buf)) != 0) {
         if (r == 10) {
-            idx = self->f26C;
-            self->list270[idx] = s1;
-            self->f26C = idx + 1;
+            idx = self->lineCount;
+            self->lineBreaks[idx] = s1;
+            self->lineCount = idx + 1;
         }
         s1++;
     }
     goto tail;
 fail:
-    self->name08[0] = 0;
+    self->text[0] = 0;
 tail:
     tab = (f32*)D_00261858;
-    self->f268 = tab[1];
+    self->textSince = tab[1];
 }
 
-s32 func_00136530(Obj_136530* self)
+s32 func_00136530(T217D_440* self)
 {
     u8 buf[0xB0];
 
-    if (self->flag == 0) {
+    if (self->text[0] == 0) {
         return 1;
     }
-    func_0015DB28(buf, &self->flag, self->handle);
+    func_0015DB28(buf, &self->text[0], self->font);
     s32 n = func_0015DF58(buf);
-    s32 v = (s32)((D_0026185C - self->f268) * self->scale);
+    s32 v = (s32)((D_0026185C - self->textSince) * self->charsPerSecond);
     return v >= n;
 }
 
-void func_001365A0(Obj_1365A0* self, s32 value) { self->f2FC = value; }
+void func_001365A0(T217D_440* self, s32 value) { self->f2FC = value; }
 
-void func_001365A8(State_001365A8* self, f32 value)
+void func_001365A8(T217D_440* self, f32 value)
 {
-    self->set(value * 0.01f, 0.0f, 1.0f);
+    Value_1365A8::Set(self, value * 0.01f, 0.0f, 1.0f);
 }
 
-f32 func_001365F0(Obj_1365F0* self)
+f32 func_001365F0(T217D_440* self)
 {
     switch (self->state) {
     case 1:
@@ -1291,8 +1163,8 @@ f32 func_001365F0(Obj_1365F0* self)
     }
 }
 
-f32 func_00136648(S_136648* s) {
-    switch (s->mode) {
+f32 func_00136648(T217D_440* s) {
+    switch (s->state) {
     case 1:
     case 2:
     case 5:
@@ -1307,16 +1179,16 @@ f32 func_00136648(S_136648* s) {
 INCLUDE_RODATA(D_00249D58);
 ASM_FUNC(func_001366A0);
 
-void func_00136EC8(State_00136EC8* self, f32* x, f32* y)
+void func_00136EC8(T217D_440* self, f32* x, f32* y)
 {
-    *x = self->x + 320.0f;
-    *y = self->y + 180.4000091552734375f;
+    *x = self->stickX + 320.0f;
+    *y = self->stickY + 180.4000091552734375f;
 }
 
-void func_00136EF8(Owner_136EF8* self)
+void func_00136EF8(T217D_440* self)
 {
     if (self->child != 0) {
-        switch (self->child->kind) {
+        switch (((Child_136EF8*)self->child)->kind) {
         case 0:
             func_001356C0(self, 2);
             break;
@@ -1327,7 +1199,7 @@ void func_00136EF8(Owner_136EF8* self)
             func_001356C0(self, 4);
             break;
         }
-        func_00150790(self->child, 3);
+        func_00150790((Child_136EF8*)self->child, 3);
     } else {
         func_001356C0(self, 1);
     }

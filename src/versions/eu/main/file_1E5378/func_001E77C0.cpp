@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: fields 0x310 further on, 69 elements where US has 57, and the rest 0x520 further on.
+struct Elem_1E77C0 { u8 pad00[0x18]; f32 f18; f32 f1C; f32 f20; f32 f24; f32 f28; };
 struct Obj_1E77C0_eu;
 typedef void (*VFn_1E77C0_eu)(Obj_1E77C0_eu* self, s32 state);
 

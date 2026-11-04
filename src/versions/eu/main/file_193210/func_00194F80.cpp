@@ -5,7 +5,7 @@ struct Buf_eu_194F80 { u8 b[0xC0]; };
 struct Lines_eu_194F80 { f32 f0; f32 f4; f32 height; };
 struct Self_eu_194F80 {
     u8 pad0[4];
-    Font_194F80* f4;
+    V24A2* f4;
     u8 pad1[0x408 - 8];
     Lines_eu_194F80 lines;
     u8 pad1b[0x520 - 0x414];
@@ -27,8 +27,8 @@ struct Self_eu_194F80 {
 };
 void func_eu_001374E0(Out_194F80* out, s32 v);
 void func_00137260(Out_194F80* out, Lines_eu_194F80* lines);
-Buf_eu_194F80* func_eu_0015DD18(Buf_eu_194F80* out, s32 id, Font_194F80* font, s32 zero);
-Buf_eu_194F80* func_eu_0015DCB8(Buf_eu_194F80* out, void* str, Font_194F80* font, s32 zero);
+Buf_eu_194F80* func_eu_0015DD18(Buf_eu_194F80* out, s32 id, V24A2* font, s32 zero);
+Buf_eu_194F80* func_eu_0015DCB8(Buf_eu_194F80* out, void* str, V24A2* font, s32 zero);
 void func_eu_0015E4A8(Buf_eu_194F80* buf, Lines_eu_194F80* lines, f32 w);
 void func_eu_0015E7E0(Buf_eu_194F80* buf, Out_194F80* out, s32 zero, void* data);
 f32 func_eu_0015E438(Buf_eu_194F80* buf);
@@ -140,13 +140,13 @@ void func_00194F80(Self_eu_194F80* self)
         f32 sc = menu->itemScale * self->f23C;
         func_0015C8B8(self->f4, sc, sc);
     }
-    lineH = (f32)self->f4->f8 * self->f4->f48;
+    lineH = (f32)self->f4->height * self->f4->sy;
     if (menu->vertical == 0) {
         f32 total = 0.0f;
         for (s32 k = 0; k < menu->count; k++) {
             Buf_eu_194F80 buf;
             if (k != 0) {
-                total += (f32)self->f4->f4 * self->f4->f44 + (f32)self->f4->f4 * self->f4->f44;
+                total += (f32)self->f4->advance * self->f4->sx + (f32)self->f4->advance * self->f4->sx;
             }
             void* str = func_00193598(page, menu->items[k]);
             func_eu_0015DCB8(&buf, str, self->f4, 0);
@@ -190,15 +190,15 @@ void func_00194F80(Self_eu_194F80* self)
         }
         func_eu_0015DCB8(&buf, str, self->f4, 0);
         f32 width2 = func_eu_0015E438(&buf);
-        th = (f32)self->f4->f8 * self->f4->f48;
+        th = (f32)self->f4->height * self->f4->sy;
         Out_194F80 out;
         Setup_eu_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0, 0);
         func_eu_0015E7E0(&buf, &out, 0, D_00262280);
         func_0015C900(self->f4);
         if (menu->vertical != 0) {
-            cy += (f32)self->f4->f8 * self->f4->f48;
+            cy += (f32)self->f4->height * self->f4->sy;
         } else {
-            x += width + ((f32)self->f4->f4 * self->f4->f44 + (f32)self->f4->f4 * self->f4->f44);
+            x += width + ((f32)self->f4->advance * self->f4->sx + (f32)self->f4->advance * self->f4->sx);
         }
     }
     func_0015C900(self->f4);

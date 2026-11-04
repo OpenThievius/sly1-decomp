@@ -9,7 +9,7 @@ struct SlotBank_135E78_eu {
     s32 countA;
     s32 count;
     u8 pad2[0x4];
-    SlotEntry_135E78 entries[1];
+    T217D_440_Slot entries[1];
 };
 
 void func_00135E78(SlotBank_135E78_eu* self, s32 state, s32 flag)
@@ -18,7 +18,7 @@ void func_00135E78(SlotBank_135E78_eu* self, s32 state, s32 flag)
     s32 i = 0;
     u8* blockA = self->blockA;
     if (self->count > 0) {
-        SlotEntry_135E78* e = self->entries;
+        T217D_440_Slot* e = self->entries;
         do {
             if (flag != 0) {
                 func_0019EBE8(e->handle);

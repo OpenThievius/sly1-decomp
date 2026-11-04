@@ -2,8 +2,10 @@
 // PAL: the object fields sit 0x310 bytes later (0x568..0x57C); the best-time text is a
 // translated label (text id 0xAB) followed by the formatted time, built in a 16-bit string
 // on the stack, and the opening line is text id 0xA9.
+struct VT2_1E00B0 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
+struct VT_1E02C8 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
 struct Obj_1E02C8_eu { VT_1E02C8* vt; u8 pad04[0x564]; f32* f568; s32 f56C_pad; s32 f570; f32 f574; s32 f578; s32 f57C; };
-struct Obj2_1E02C8_eu { VT_1E00B0* vt; u8 pad04[0x574]; f32 f578; };
+struct Obj2_1E02C8_eu { VT2_1E00B0* vt; u8 pad04[0x574]; f32 f578; };
 const char* func_eu_001DDAB0(s32 id);
 u16* func_eu_001E3050(u16* dst, const char* src);
 u16* func_eu_001E3178(u16* dst, const u8* src);
@@ -24,7 +26,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
         break;
     case 2:
         func_001AB958(&D_0026E760);
-        D_0026E760.vt->m3C(&D_0026E760);
+        D_0026E760.vt->m15(&D_0026E760);
         self->vt->m3C(self);
         break;
     }

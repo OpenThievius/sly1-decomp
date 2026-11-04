@@ -4,10 +4,9 @@
 #include "list_iter.h"
 #include "c8c.h"
 #include "t217d.h"
+#include "v24a2.h"
 
-// The font object's calls (include/v24a2.h will declare them), and the two fields of it that
-// these functions read: the number of lines at +8 and the height of one at +0x48.
-struct FontView { u8 pad0[8]; s32 lines; u8 padC[0x3C]; f32 lineHeight; };
+// The font object's calls.
 V24A2* func_0015C1C0(s32 k);
 void func_0015C8B8(V24A2* font, f32 x, f32 y);
 f32 func_0015C418(V24A2* font, void* text);
@@ -559,14 +558,6 @@ void func_001A84C8(C8C* self, C8C* other)
 
 extern u8 D_00262280[];
 
-// D_002186D0's object (a variant of wave 2): its mode and the fade at 0x284.
-struct Glob_1AB198 {
-    u8 pad0[0x250];
-    s32 f250;
-    u8 pad1[0x284 - 0x254];
-    f32 f284;
-};
-
 void func_00137228(void* out, f32 x, f32 y);
 void func_00137238(void* out, f32 x, f32 y);
 void func_00137248(void* out, s32* value);
@@ -583,15 +574,15 @@ void func_001AB198(T217D_E30* self)
     f32 scale;
     f32 px;
     f32 py;
-    Glob_1AB198* g;
+    T217D_6D0* g;
 
     if (self->text[0] == 0) {
         return;
     }
-    g = (Glob_1AB198*)&D_0026FF68;
+    g = &D_0026FF68;
     scale = 1.0f;
-    if (g->f250 != 0) {
-        scale = g->f284;
+    if (g->mode != 0) {
+        scale = g->fade;
     }
     packed = self->colorWord;
     ((u8*)&packed)[3] = (u8)(s32)(scale * 255.0f);
@@ -1552,8 +1543,8 @@ void func_001AB980(T217D_510* self, f32 dt)
         func_001E20B8(self->text, 0x200, D_0024CD50, 0x54, hi, sep, (lo < 10 && !tenths) ? D_0024CD60 : D_0024CD68, lo);
         func_0015C8B8(self->font, self->scale, self->scale);
         f32 w = func_0015C418(self->font, self->text);
-        FontView* f = (FontView*)self->font;
-        func_001AAB20(self, w, (f32)f->lines * f->lineHeight);
+        V24A2* f = self->font;
+        func_001AAB20(self, w, (f32)f->height * f->sy);
         func_0015C900(self->font);
     }
 }
@@ -1846,7 +1837,7 @@ void func_001AB058(T217D_E30* self)
         func_0015C8B8(self->font, self->scale, self->scale);
         func_0015DB28(&loc, &self->text[0], self->font);
         f32 x = func_0015DFF8(&loc);
-        f32 y = (f32)((FontView*)self->font)->lines * ((FontView*)self->font)->lineHeight;
+        f32 y = (f32)self->font->height * self->font->sy;
         func_001AAB20(self, x, y);
         func_0015C900(self->font);
     } else {

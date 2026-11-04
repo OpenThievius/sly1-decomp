@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: draws the object with a texture pointer set on the output, and the 50 Hz offsets.
 // D_eu_0027939C is US D_0027240C, at an address the tools do not pair.
+struct __attribute__((packed)) Pk4_1E0678 { s32 v; };
+typedef void (*VFn_1E0678)(void* self, void* handle, void* out, void* tbl);
+struct VTab_1E0678 { u8 pad0[0x48]; s16 adj; u8 pad1[0x4C - 0x4A]; VFn_1E0678 fn; };
 
 struct Obj_eu_1E0678 {
     u8 pad0[4];
