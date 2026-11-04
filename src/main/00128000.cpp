@@ -7,6 +7,9 @@
 #include "c05.h"
 #include "c6c.h"
 #include "t2195.h"
+#include "shapes.h"
+#include "s1291d0.h"
+#include "globals.h"
 
 typedef void (*Fn_2197C0)();
 extern const Fn_2197C0 D_002197C0[10];
@@ -56,12 +59,9 @@ void func_0012A5D0(C02* self, Vec16_12A5D0* src)
 
 extern u8 D_00275C40[];
 
-struct Vec16_12A610 { s32 v[4]; } __attribute__((aligned(16)));
-struct Sub_12A610 { u8 pad[0x50]; Vec16_12A610 v50; };
-
-void func_0012A610(C02* self, Vec16_12A610* out)
+void func_0012A610(C02* self, Quad16* out)
 {
-    Vec16_12A610* src = self->f200 != 0 ? (Vec16_12A610*)((u8*)self->f200 + 0x50) : (Vec16_12A610*)D_00275C40;
+    Quad16* src = self->f200 != 0 ? (Quad16*)((u8*)self->f200 + 0x50) : (Quad16*)D_00275C40;
     *out = *src;
 }
 
@@ -78,12 +78,9 @@ void func_0012A630(C02* self, U64_12A630* src)
 
 extern u8 D_00275C60[];
 
-struct __attribute__((packed)) U64_12A678 { u64 v; };
-struct Sub_12A678 { u8 pad[0x60]; U64_12A678 v60; };
-
-void func_0012A678(C02* self, U64_12A678* out)
+void func_0012A678(C02* self, U64P* out)
 {
-    U64_12A678* src = self->f200 != 0 ? (U64_12A678*)((u8*)self->f200 + 0x60) : (U64_12A678*)D_00275C60;
+    U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x60) : (U64P*)D_00275C60;
     *out = *src;
 }
 
@@ -100,12 +97,9 @@ void func_0012A6A0(C02* self, Vec16_12A6A0* src)
 
 extern u8 D_00275C40[];
 
-struct Vec16_12A6E0 { s32 v[4]; } __attribute__((aligned(16)));
-struct Sub_12A6E0 { u8 pad[0x70]; Vec16_12A6E0 v70; };
-
-void func_0012A6E0(C02* self, Vec16_12A6E0* out)
+void func_0012A6E0(C02* self, Quad16* out)
 {
-    Vec16_12A6E0* src = self->f200 != 0 ? (Vec16_12A6E0*)((u8*)self->f200 + 0x70) : (Vec16_12A6E0*)D_00275C40;
+    Quad16* src = self->f200 != 0 ? (Quad16*)((u8*)self->f200 + 0x70) : (Quad16*)D_00275C40;
     *out = *src;
 }
 
@@ -284,20 +278,19 @@ s32 func_0012B2E8(C02* self, Obj_12B2E8* a1)
     return a1->value != 0;
 }
 
-struct Node_128DB8 { u8 pad[0x18]; s32 f18; };
 struct Part_128DB8 {
     u8 pad0[0x60];
-    Node_128DB8* p60;
-    Node_128DB8* p64;
+    C01* p60;
+    C01* p64;
     u8 pad68[0x18];
     s32 f80;
-    Node_128DB8* p84;
+    C01* p84;
     void* p88;
     u8 pad8c[0xB0 - 0x8C];
     s32 flags;
 };
 
-Node_128DB8* func_0015A448(void* a0, void* a1, void* a2);
+C01* func_0015A448(void* a0, void* a1, void* a2);
 void* func_0015A868(void* a0, s32 a1);
 
 void func_00128DB8(C02* self)
@@ -308,12 +301,12 @@ void func_00128DB8(C02* self)
     p->flags = v;
     if (v & 0x10) {
         p->p60 = func_0015A448(self->world, p->p60, self);
-        p->p64 = (Node_128DB8*)1;
+        p->p64 = (C01*)1;
     }
     if (p->flags & 0x20) {
-        Node_128DB8* r = func_0015A448(self->world, p->p84, self);
+        C01* r = func_0015A448(self->world, p->p84, self);
         p->p84 = r;
-        s32 x = r->f18;
+        s32 x = (s32)r->parent;
         p->f80 = x;
         p->p88 = func_0015A868(self, x);
     }
@@ -528,10 +521,9 @@ void func_0012B2D8(C02* self, s32* out)
     *out = self->f2B4;
 }
 
-extern s32 D_00261990;
 s32 func_00182FC8(C02* self);
-void func_00143AF8(s32 a, C02* self);
-void func_00143B20(s32 a, C02* self);
+void func_00143AF8(C6D* a, C02* self);
+void func_00143B20(C6D* a, C02* self);
 
 void func_0012B420(C02* self, s32 flag)
 {
@@ -693,11 +685,9 @@ done:
     return;
 }
 
-struct Owner_1293D8 { u8 pad[0xB0]; s32 field_B0; };
-
 void func_001293D8(void* self, s32 value)
 {
-    ((Owner_1293D8*)func_001291D0(self))->field_B0 = value;
+    ((S1291D0*)func_001291D0(self))->fB0 = value;
 }
 
 
@@ -949,12 +939,9 @@ void func_00129E10(void* self, void* src)
 
 extern u8 D_00275C60[];
 
-struct __attribute__((packed)) U64_12A748 { u64 v; };
-struct Sub_12A748 { u8 pad[0x80]; U64_12A748 v80; };
-
-void func_0012A748(C02* self, U64_12A748* out)
+void func_0012A748(C02* self, U64P* out)
 {
-    U64_12A748* src = self->f200 != 0 ? (U64_12A748*)((u8*)self->f200 + 0x80) : (U64_12A748*)D_00275C60;
+    U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x80) : (U64P*)D_00275C60;
     *out = *src;
 }
 
@@ -1202,8 +1189,6 @@ void func_001299E0(C02* self, Node_1299E0* src)
     self->desc02()->m2B(self);
 }
 
-extern u8 D_00262300[];
-
 void func_00152600(void* a, void* b);
 void func_00152470(void* list, void* item);
 
@@ -1217,7 +1202,7 @@ void func_00129228(C02* self, s32 flag)
         return;
     }
     func_00152600((u8*)self->world + 0x1C00, self->f284);
-    func_00152470(D_00262300, self->f284);
+    func_00152470(&D_00262300, self->f284);
     self->f284 = 0;
 }
 
@@ -1474,12 +1459,6 @@ void func_0012B5B8(C02* self, void* a1, void* a2)
     }
 }
 
-struct Blk_128C10 {
-    u8 b[48];
-} __attribute__((aligned(16)));
-
-extern u8 D_002483D0[];
-
 s32 func_00137C40(void* a);
 void* func_0018D5C0(u32 n);
 void func_00137EB0(void* a, void* b);
@@ -1499,8 +1478,8 @@ void func_00128C10(C02* self, void* a1)
         *(s32*)(p + 0xB0) = flags;
 
         u8* q = p + 0x30;
-        *(Blk_128C10*)p = *(Blk_128C10*)D_002483D0;
-        *(Blk_128C10*)q = *(Blk_128C10*)D_002483D0;
+        *(Mat02*)p = D_002483D0;
+        *(Mat02*)q = D_002483D0;
         if (flags & 1) func_00137EB0(a1, p);
         if (flags & 2) func_00137EB0(a1, q);
         if (flags & 0xC) {
@@ -1653,11 +1632,9 @@ void func_00129D00(C02* self, void* v, Node_129D00** out)
 
 void func_001853F0(void* a, void* b, void* c);
 
-extern u8 D_00248D30[];
-
 void func_0012A860(C02* self, void* b)
 {
-    func_001853F0(self->f200, b, D_00248D30);
+    func_001853F0(self->f200, b, (void*)&D_00248D30);
 }
 
 extern const Fn_Table D_00219600[];
@@ -1687,21 +1664,17 @@ void func_0012A8D8(C02* self, s32 a1, f32 x, f32 y)
 
 struct __attribute__((aligned(16))) Quad_12B180 { s32 a, b, c, d; };
 
-extern u8 D_00248D30[];
-
 void func_0012B180(C02* self, Quad_12B180* out)
 {
-    u8* src = self->f288 ? (u8*)self->f288 + 0x10 : D_00248D30;
+    u8* src = self->f288 ? (u8*)self->f288 + 0x10 : (u8*)&D_00248D30;
     *out = *(Quad_12B180*)src;
 }
 
 struct __attribute__((aligned(16))) Quad_12B1E0 { s32 a, b, c, d; };
 
-extern u8 D_00248D30[];
-
 void func_0012B1E0(C02* self, Quad_12B1E0* out)
 {
-    u8* src = self->f288 ? (u8*)self->f288 + 0x20 : D_00248D30;
+    u8* src = self->f288 ? (u8*)self->f288 + 0x20 : (u8*)&D_00248D30;
     *out = *(Quad_12B1E0*)src;
 }
 

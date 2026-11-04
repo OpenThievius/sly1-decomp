@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: case 3 calls func_eu_001387C8 (a 16-bit string reader) instead of func_001384A0.
-void func_eu_001387C8(Rd_150570* r, void* out);
+void func_eu_001387C8(S137290* r, void* out);
 
-void func_00150570(void* unused, Rd_150570* rd, s32* outCount, Ent_150570** outArr)
+void func_00150570(void* unused, S137290* rd, s32* outCount, Ent_150570** outArr)
 {
     s32 i = 0;
     *outCount = func_00137CC0(rd);

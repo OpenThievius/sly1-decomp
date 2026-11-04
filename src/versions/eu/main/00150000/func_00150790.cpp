@@ -25,10 +25,10 @@ void func_00150790(C65* self, s32 next)
         func_001BE998();
         func_001837E0(self, 0x15, 0, 0);
         if (self->mode2D0 == 2) {
-            func_001451F0(D_00261990, 0xF, 6, D_00261990->f460, 0, 0);
+            func_001451F0(D_00261990, 0xF, 6, &D_00261990->ctl460, 0, 0);
             func_001DDA50(D_00275710);
         }
-        (void)func_00149610(D_00261990->f460);
+        (void)func_00149610(&D_00261990->ctl460);
         if ((self->f2E8 & 0x10) != 0 && self->value2F8 != 0) {
             func_0012E760((void*)self->value2F8);
         }
@@ -61,8 +61,8 @@ void func_00150790(C65* self, s32 next)
         self->step2E4 = -1;
         self->f2E8 = 0;
         if (self->mode2D0 == 2) {
-            func_001495E8(D_00261990->f460, 4);
-            func_00145088(D_00261990, 6, D_00261990->f460, 0, 0);
+            func_001495E8(&D_00261990->ctl460, 4);
+            func_00145088(D_00261990, 6, &D_00261990->ctl460, 0, 0);
             func_001DDA20(D_00275710);
             func_001365A0(&D_002701F8, 0);
             if (self->f330 != 0) {
@@ -71,12 +71,12 @@ void func_00150790(C65* self, s32 next)
                 func_001C06A0(9, 1, f);
             }
         } else {
-            func_001495E8(D_00261990->f460, 3);
+            func_001495E8(&D_00261990->ctl460, 3);
             if (self->mode2D0 == 0) {
                 if (self->second300 != -1) {
-                    D_00261990->f4BC = (s32)func_0015A448(self->world, self->second300, 0);
+                    D_00261990->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
                 } else {
-                    D_00261990->f4BC = 0;
+                    D_00261990->ctl460.f5C = 0;
                 }
             }
         }

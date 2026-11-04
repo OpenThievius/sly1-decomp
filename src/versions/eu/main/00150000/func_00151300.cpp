@@ -39,7 +39,7 @@ s32 func_00151300(C65* self)
     ((Sc_151300_eu*)&D_002701F8)->f584 = 0;
     if (flags == 0x100) {
         s32 r;
-        In_151300* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
+        G262C70* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
         s32 k = self->f2EC;
         r = 0;
         switch (k) {
@@ -56,17 +56,17 @@ s32 func_00151300(C65* self)
             if (0.8f < __builtin_fabsf(in->f44)) r = 1;
             break;
         case 13:
-            if (D_00262E10 != 0 && D_00262E10->f2220 == 2) r = D_00262E10->f2228 == 3;
+            if (D_00262E10 != 0 && ((Ctx_151300*)D_00262E10)->f2220 == 2) r = ((Ctx_151300*)D_00262E10)->f2228 == 3;
             break;
         case 14:
         {
-            Fl_151300* fl = (Fl_151300*)D_002623C8;
-            u32 t = fl->f0 & 4;
+            G27C230* fl = D_002623C8;
+            u32 t = fl->bits & 4;
             r = t != 0;
         }
             break;
         default:
-            r = (in->fAA & D_00261D08[k]) != 0;
+            r = (in->flags & D_00261D08[k]) != 0;
             break;
         }
         if (r != 0) {

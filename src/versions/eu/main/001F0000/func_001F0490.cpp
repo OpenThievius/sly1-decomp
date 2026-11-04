@@ -19,8 +19,7 @@ s32 func_001F0490(C67* self, s32 kind, s32* outA, s32* outB)
             if (allowed != 0) {
                 s32 m = mode * 0x44C;
                 if (*(s32*)((u8*)D_002623C0 + m + 0x88) & 1) {
-                    u8* p = (u8*)D_002623C0 + 0x458;
-                    s32 q = *(s32*)(p + m);
+                    s32 q = D_002623C0->levels[mode].f448;
                     flag = (q & D_00275FC8[mode]) != 0;
                 }
             }
