@@ -95,10 +95,11 @@ little-endian reads:
 | objects | an s16 count, then per object its class, id and value index and the class's own data; objects hold their children the same way | 0x11ECB8 |
 | texture data | at the next multiple of 16: CLUT colours and pixels, addressed by offset from the texture tables | 0x1DBA38 |
 
-The file ends zero to fifteen bytes after the texture data. When a level is loaded again,
-or another with the same time stamp, the texture data is still in memory and the stream
-stops before it. Every US level parses this way up to the objects; the objects, most of
-each level, need each class's loader.
+The texture data starts at the multiple of 16 after the objects; the file ends with 26 to
+747 bytes, a copy of the bytes 0x1FFF before them, that the game never reads. When a level
+is loaded again, or another with the same time stamp, the texture data is still in memory
+and the stream stops before it. Every byte of every US level is read by retail's loaders
+(see Objects).
 
 The time stamps read as Unix times on 25 August 2002, within 32 minutes; the code only
 compares them.
@@ -110,12 +111,41 @@ events (0x12BC38) name 1,362 VAG sounds and 12 videos. With them, the records co
 of the unlisted sectors; what remains is one MPEG region of 172,705 sectors at 593,237,
 a 64-sector VAG and 13 empty sectors.
 
+### Objects
+
+The objects are a tree. A list is an s16 count, then per object an s16 class (an index
+into the 149 entries at 0x247448, of which 0x01–0x91 are classes), an s16 id and an
+s16 index into the value table (-1 for none); the object is created and its class's
+load method (descriptor + 0x38) reads the rest. 56 classes have their own load method;
+the others inherit their parent's. Most objects end with the common block (0x1289C0):
+
+| Part | Format |
+| --- | --- |
+| placement | 3×3 matrix, 3-float position |
+| flags and ranges | three u8, a u32, four f32 |
+| properties | s16 field ids ended by a negative one, each with its value |
+| geometry | model entries and meshes (0x162890) |
+| options | u32 flags, then the matrices, references and values they select (0x128C10) |
+| a list | u8 count of {s16, one f32 per geometry channel} |
+| children | an object list, with this object as parent |
+
+Class 0x03 and the classes under it put collision meshes before the common block
+(0x1BAC30). The first object of every level is class 0x04 (the scenery, 39% of all
+object bytes) or 0x86. Classes 0x83 and 0x88 hold lists of events (0x12B8C8) and are
+another 21%.
+
+Running retail's own loaders over the 46 US levels reads every object byte: in each
+level the objects end exactly where the texture data must start for it to end where the
+file's data does. The 26 to 747 bytes after the texture data repeat the bytes 0x1FFF
+before them and are never read.
+
 ## Next
 
-1. **Each format, from its reader.** A level's objects, class by class from
-   their loaders (the common one is 0x1289C0), then models, textures and sound,
-   documented here, and the extractor written in OpenThievius, from the
-   functions that parse them.
+1. **Each format, from its reader.** Field by field: the geometry (0x162890) and its
+   meshes, class 0x03's collision meshes and the event lists (0x11FA88 and its
+   siblings), which hold most of a level's bytes; what each class is; PAL's levels.
+   Then models, textures and sound, documented here, and the extractor written in
+   OpenThievius, from the functions that parse them.
 2. **The remaining data.** The MPEG region of 172,705 sectors at 593,237 and the
    64-sector VAG at 454,000, which no record found yet names; and the object classes
    that read records (0x65, 0x7D, 0x83).
