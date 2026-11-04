@@ -3686,3 +3686,1039 @@ extern const Ent_1BFAF8 D_00245020[771] = {
     { 6, 69 }, { 6, 70 }, { 6, 71 }, { 6, 72 }, { 6, 73 }, { 6, 74 }, { 6, 75 }, { 6, 76 },
     { 6, 77 }, { 6, 78 }, { 6, 79 },
 };
+
+// Globals typed by worker dv04, from retail's bytes and their readers.
+float D_00274BD4 = -250.0f;
+float D_00274C50[4] = {1.0f, -1.0f, 0.0f, 0.0f};
+float D_00274C60[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+float D_00274C70[4] = {0.0f, 15.0f, 1.5f, 0.0f};
+float D_00274C80[4] = {0.0f, 2.5f, 0.25f, 0.0f};
+float D_00274C90 = 40.0f;
+float D_00274C94 = 50.0f;
+float D_00274C98[2] = {0.5f, 0.0f};
+float D_00274CA0[4] = {1.0f, -0.00100000005f, 0.0f, 0.0f};
+float D_00274CB0[4] = {0.25f, 1.0f, 0.0f, 0.0f};
+float D_00274CC0[4] = {0.0f, 0.00499999989f, 0.0f, 0.0f};
+float D_00274CD0[2] = {0.0f, 1.0f};
+float D_00274CD8[2] = {1.0f, 0.0f};
+float D_00274CE0[4] = {0.0f, 0.00499999989f, 0.0f, 0.0f};
+float D_00274CF0 = 0.349999994f;
+float D_00274CFC = 0.25f;
+float D_00274D00 = 700.0f;
+float D_00274D04 = 1200.0f;
+float D_00274D20[2] = {700.0f, 0.0f};
+float D_00274D28[2] = {-0.200000003f, 0.200000003f};
+float D_00274D30[4] = {0.800000012f, 1.20000005f, 0.0f, 0.0f};
+float D_00274D40 = -0.25f;
+float D_00274D44 = -2.5f;
+float D_00274D48 = -1.0f;
+float D_00274D4C = 0.25f;
+float D_00274D50[4] = {5.0f, 0.0f, 0.0f, 0.0f};
+float D_00274D60[4] = {0.5f, -0.00999999978f, 0.0f, 0.0f};
+float D_00274D70[4] = {1000.0f, 0.0f, 0.25f, 5000.0f};
+float D_00274D80 = 75.0f;
+float D_00274D84 = 230.0f;
+float D_00274D88[3] = {15.0f, 0.0f, 0.100000001f};
+float D_00274D94 = 1.39999998f;
+float D_00274D98 = 1.39999998f;
+float D_00274D9C = 0.25f;
+float D_00274DA0 = 0.100000001f;
+float D_00274DA4 = 0.400000006f;
+float D_00274DA8 = 80.0f;
+float D_00274DAC = 120.0f;
+float D_00274DB0[4] = {1.0f, 0.0f, 0.100000001f, 0.0f};
+float D_00274DC0[3] = {4.0f, 0.0f, 0.100000001f};
+float D_00274DCC = 1.70000005f;
+float D_00274DD0 = 3.0f;
+float D_00274DD4 = 3.5f;
+float D_00274DD8[2] = {-1.70000005f, 0.0f};
+float D_00274DE0[4] = {3000.0f, 1000.0f, 0.150000006f, 0.0f};
+float D_00274DF0[4] = {30.0f, 10.0f, 0.150000006f, 0.0f};
+float D_00274E00 = 150.0f;
+float D_00274E04 = 50.0f;
+float D_00274E08 = 250.0f;
+float D_00274E0C = 1000.0f;
+float D_00274E10 = 1.25f;
+float D_00274E14 = 2.0f;
+float D_00274E18 = 250.0f;
+float D_00274E1C = 0.200000003f;
+float D_00274E20 = 2500.0f;
+float D_00274E24 = -250.0f;
+float D_00274E30 = 1250.0f;
+float D_00274E34 = 500.0f;
+float D_00274E38 = 500.0f;
+float D_00274E40 = 100.0f;
+float D_00274E44 = 100.0f;
+float D_00274E48 = 0.300000012f;
+float D_00274E4C = 25.0f;
+float D_00274E50 = 1.5f;
+float D_00274E54 = 0.25f;
+float D_00274E58 = 0.5f;
+float D_00274E5C = 0.200000003f;
+float D_00274EF0[4] = {2500.0f, 0.0f, 1.0f, 0.0f};
+float D_00274F00 = 35.0f;
+float D_00274F04 = 100.0f;
+float D_00274F08 = 0.5f;
+float D_00274F14 = 50.0f;
+float D_00274F18 = 1.0f;
+float D_00274F1C = 0.400000006f;
+float D_00274F20[2] = {10.0f, 0.0f};
+float D_00274F28[4] = {1500.0f, 0.0f, 0.5f, 0.0f};
+s32 D_00274F74 = -1;
+float D_00274F78[3] = {2.0f, 0.0f, 0.100000001f};
+float D_00274F84 = 1.5f;
+float D_00274F88[2] = {0.25f, 0.0f};
+s32 D_00274FA0[2] = {286, 287};
+s32 D_00274FA8[2] = {288, 289};
+s32 D_00274FB0[2] = {2, 2};
+s32 D_00274FB8[2] = {48, 64};
+float D_00275020[4] = {0.0f, 10.0f, 0.00999999978f, 0.0f};
+float D_0027506C = 0.25f;
+float D_00275070[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
+float D_002750A8[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
+float D_00275140[4] = {1.0f, 0.0f, -0.75f, 0.0f};
+float D_00275150[4] = {0.699999988f, 0.300000012f, 0.0f, 0.0f};
+float D_00275160 = 650.0f;
+float D_00275164 = 100.0f;
+float D_00275168 = -100.0f;
+float D_0027516C = 50.0f;
+float D_00275170[2] = {-10.0f, 0.0f};
+float D_00275178[4] = {250.0f, 0.0f, 1.0f, 4500.0f};
+float D_00275188 = 10.0f;
+float D_0027518C = 50.0f;
+float D_00275190[4] = {0.0f, 45.0f, 0.0f, 0.0f};
+float D_002751A0[4] = {0.0f, 2.5f, 0.0f, 0.0f};
+float D_002751B0[4] = {0.0f, 7.5f, 0.0f, 0.0f};
+float D_002751C0[4] = {0.0f, 4.0f, 0.0f, 0.0f};
+float D_002751D0 = 850.0f;
+s32 D_002751D4 = 60;
+float D_002751D8 = 1.25f;
+float D_002751DC = 0.75f;
+float D_002751E0[4] = {1.35000002f, 0.0f, -0.349999994f, 0.0f};
+float D_002751F0[4] = {1.0f, 1.35000002f, 0.0f, 0.0f};
+float D_00275200[4] = {1.5f, 0.0f, -0.5f, 0.0f};
+float D_00275210[4] = {1.0f, 1.5f, 0.0f, 0.0f};
+float D_00275220[4] = {9000.0f, 0.0f, -9000.0f, 0.0f};
+float D_00275230[4] = {0.0f, 9000.0f, 0.0f, 0.0f};
+float D_00275240[4] = {1.0f, -1.0f, 0.0f, 0.0f};
+float D_00275390 = 1.0f;
+float D_002753A0[4] = {0.0f, 30.0f, 3.0f, 0.0f};
+float D_002753B0[4] = {0.0f, 0.00999999978f, 0.0f, 0.0f};
+float D_002753C0[2] = {0.0f, 45.0f};
+float D_002753C8 = 15.0f;
+float D_002753CC = 90.0f;
+float D_002753D0[4] = {0.0f, 0.25f, 0.75f, 0.0f};
+float D_002753E0[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+float D_002753F0[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+float D_00275400[4] = {0.0f, 2.5f, 0.25f, 0.0f};
+float D_00275410 = 6000.0f;
+float D_00275414 = 11250.0f;
+float D_00275418 = 7.0f;
+float D_0027541C = 2500.0f;
+
+// Globals typed by worker dv02, from retail's bytes and their readers.
+f32 D_00263720[4] = { 1.0f, -4.0f, 0.0f, 0.0f };
+f32 D_00263730[4] = { 10.0f, 0.0f, 0.5f, 50.0f };
+f32 D_00263740[4] = { 40.0f, 0.0f, 0.25f, 200.0f };
+f32 D_00263750[4] = { 15.0f, 0.0f, 0.25f, 100.0f };
+f32 D_00263760[4] = { -0.200000003f, 0.00200000009f, 0.0f, 0.0f };
+f32 D_00263770[4] = { 0.200000003f, 0.0f, 0.800000012f, 0.0f };
+f32 D_00263780[4] = { 40.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00263790[4] = { 0.0f, 2.5f, 0.0f, 0.0f };
+f32 D_002637A0[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
+f32 D_002637CC = 0.875999987f;
+s32 D_002637D0 = 50;
+s32 D_002637D4 = 100;
+f32 D_002637D8 = 0.100000001f;
+f32 D_002637DC = 1000.0f;
+f32 D_002637E0 = 20.0f;
+f32 D_002637E4 = -7.5f;
+f32 D_002637E8[2] = { 0.5f, 0.0f };
+f32 D_002637F0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_00263800[4] = { -20.0f, 5.0f, -25.0f, 0.0f };
+f32 D_00263810[4] = { 0.0f, -0.600000024f, 0.5f, 0.0f };
+f32 D_00263820[4] = { -20.0f, 5.0f, -25.0f, 0.0f };
+f32 D_00263830[4] = { 0.0f, -0.600000024f, 0.5f, 0.0f };
+f32 D_00263840[4] = { 0.0f, 0.0f, -100.0f, 0.0f };
+f32 D_00263850 = -0.5f;
+f32 D_00263854 = 100.0f;
+f32 D_00263858[6] = { 4.0f, 0.0f, 0.5f, 10.0f, 0.0f, 0.0f };
+f32 D_00263870[4] = { 0.0f, 0.5f, 0.0f, 0.0f };
+f32 D_00263880 = 50.0f;
+f32 D_00263884 = -50.0f;
+f32 D_00263888[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_00263894 = 0.349999994f;
+f32 D_002638B8 = 75.0f;
+f32 D_002638BC = -325.0f;
+f32 D_002638C0 = -50.0f;
+f32 D_002638C4 = -350.0f;
+f32 D_002638C8[2] = { -300.0f, 0.0f };
+f32 D_002638D0[4] = { 1.5f, -0.5f, 0.0f, 0.0f };
+f32 D_002638E0[4] = { 1500.0f, 0.0f, 0.5f, 0.0f };
+f32 D_002638F0[4] = { 4000.0f, 0.0f, 4.0f, 0.0f };
+f32 D_00263900[4] = { 600.0f, 300.0f, 0.100000001f, 50.0f };
+f32 D_00263910[2] = { 0.150000006f, 0.25f };
+f32 D_00263918[3] = { 1000.0f, 0.0f, 0.25f };
+f32 D_00263924 = 0.899999976f;
+f32 D_00263928[2] = { 8.0f, 0.0f };
+f32 D_00263970[4] = { 0.0f, 0.0f, -750.0f, 0.0f };
+f32 D_00263980[4] = { 0.0f, 0.0f, 500.0f, 0.0f };
+f32 D_00263990 = -0.200000003f;
+f32 D_00263994 = 1.0f;
+f32 D_00263998 = 0.5f;
+f32 D_0026399C = 0.25f;
+f32 D_002639A0[4] = { -1.0f, 0.00400000019f, 0.0f, 0.0f };
+f32 D_002639B0[2] = { 150.0f, -0.75f };
+f32 D_002639C0[4] = { 0.0f, 0.0f, 75.0f, 0.0f };
+f32 D_002639D0[4] = { 0.0f, 0.0f, -225.0f, 0.0f };
+f32 D_002639E0[2] = { -75.0f, 0.0f };
+f32 D_002639E8[10] = { 0.699999988f, 0.800000012f, 0.899999976f, 1.0f, 1.20000005f, 1.39999998f, 1.60000002f, 1.79999995f, 2.0f, 0.0f };
+f32 D_00263A10[32] = { 40.0f, 0.0f, 0.0f, 0.0f, 28.2999992f, 28.2999992f, 0.0f, 0.0f, 0.0f, 40.0f, 0.0f, 0.0f, -28.2999992f, 28.2999992f, 0.0f, 0.0f, -40.0f, 0.0f, 0.0f, 0.0f, -28.2999992f, -28.2999992f, 0.0f, 0.0f, 0.0f, -40.0f, 0.0f, 0.0f, 28.2999992f, -28.2999992f, 0.0f, 0.0f };
+f32 D_00263A90[4] = { 200.0f, 200.0f, 200.0f, 0.0f };
+f32 D_00263AA0[4] = { 400.0f, -1.0f, 0.0f, 0.0f };
+f32 D_00263AB0[4] = { 0.0f, 1000.0f, 0.0f, 0.0f };
+f32 D_00263C00[4] = { 0.0f, -600.0f, 0.0f, 0.0f };
+f32 D_00263C10[4] = { 0.0f, -300.0f, 0.0f, 0.0f };
+f32 D_00263C4C = 0.699999988f;
+f32 D_00263C50[2] = { 0.150000006f, 0.0f };
+f32 D_00263C58[4] = { 1.5f, 0.0f, 0.75f, 0.0f };
+f32 D_00263C68[4] = { 20.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00263C78[2] = { -1.0f, 1.0f };
+f32 D_00263C80[4] = { 10.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00263C90[4] = { -1.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00263CA0[4] = { 0.0f, -750.0f, 0.0f, 0.0f };
+f32 D_00263CB0[4] = { 0.0f, -450.0f, 0.0f, 0.0f };
+f32 D_00263CC0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_00263CD0[4] = { 0.0f, 0.5f, 0.0f, 0.0f };
+f32 D_00263CE0[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
+f32 D_00263CF0[4] = { 0.0f, 0.00100000005f, 0.0f, 0.0f };
+f32 D_00263D00[2] = { 0.0f, 0.300000012f };
+f32 D_00263D08[4] = { 30.0f, 0.0f, 0.5f, 0.0f };
+f32 D_00263D18[6] = { 30.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f };
+f32 D_00263DF4 = 0.5f;
+f32 D_00263DF8 = 1250.0f;
+f32 D_00263DFC = 750.0f;
+f32 D_00263E00 = 750.0f;
+f32 D_00263E34 = -200.0f;
+f32 D_00263E38 = 25.0f;
+f32 D_00263E3C = 15.0f;
+f32 D_00263E40 = 0.200000003f;
+f32 D_00263E50 = 0.150000006f;
+f32 D_00263E54 = 300.0f;
+f32 D_00263E58 = 2.5f;
+f32 D_00263E5C = 3.5f;
+f32 D_00263E60 = 2.5f;
+f32 D_00263E64 = 60.0f;
+f32 D_00263E68 = 20.0f;
+f32 D_00263E6C = 10.0f;
+f32 D_00263E70 = 0.0700000003f;
+f32 D_00263E74 = 0.300000012f;
+f32 D_00263E78 = -750.0f;
+f32 D_00263E7C = 5.0f;
+f32 D_00263E80 = 700.0f;
+f32 D_00263E84 = 245.0f;
+f32 D_00263E88 = 900.0f;
+f32 D_00263E8C = 800.0f;
+f32 D_00263E90[4] = { 0.0f, 5.0f, 0.0f, 0.0f };
+f32 D_00263EA0[4] = { 0.0f, 10.0f, 0.0f, 0.0f };
+f32 D_00263EB0[4] = { 0.400000006f, 0.0f, 0.0f, 0.0f };
+f32 D_00264020 = 60.0f;
+f32 D_00264024 = 70.0f;
+f32 D_00264028 = 300.0f;
+f32 D_0026402C = 500.0f;
+f32 D_00264030 = 1000.0f;
+f32 D_00264034 = 3000.0f;
+f32 D_00264038[2] = { -150.0f, 150.0f };
+f32 D_00264040 = 0.349999994f;
+f32 D_00264044 = 0.349999994f;
+f32 D_00264048[2] = { 10000.0f, 0.0f };
+f32 D_00264050[4] = { 682.0f, 0.5f, 0.0f, 0.0f };
+f32 D_00264060[4] = { -3.40282347e+38f, 682.0f, 0.0f, 0.0f };
+f32 D_00264070[4] = { 682.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
+f32 D_00264128[2] = { 0.150000006f, 0.0f };
+f32 D_00264130[3] = { 30.0f, 0.0f, 0.5f };
+f32 D_0026413C = 0.5f;
+f32 D_00264198[3] = { 20.0f, 0.0f, 0.100000001f };
+f32 D_002641A4 = 1.5f;
+f32 D_002641A8[4] = { 5000.0f, 500.0f, 0.150000006f, 0.0f };
+f32 D_002641B8[3] = { 5.0f, 0.0f, 0.100000001f };
+f32 D_002641C4 = 3.0f;
+f32 D_002641C8[10] = { 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
+
+// Globals typed by worker dv06, from retail's bytes and their readers.
+struct VEnt_0024A0E0 { s32 delta; void (*fn)(); };
+struct VEnt_0024A220 { s32 delta; void (*fn)(); };
+struct Vec2_24A210 { f32 x; f32 y; };
+void func_00152E18();
+void func_0015C2E8();
+void func_0015C3C0();
+void func_0015C930();
+void func_0015CA38();
+void func_0015CA60();
+void func_0015CB88();
+void func_0015CC80();
+void func_0015CD18();
+void func_0015CF70();
+void func_0015D4E0();
+void func_001FBDF8();
+
+extern const s32 D_00248DF0[4] = {0x0, 0x6, 0x6, 0x6};
+extern const s32 D_00248E38[2] = {0x6, 0x1000};
+extern const s32 D_00248EA8[2] = {0xF, 0x6};
+extern const s32 D_00248EB0[2] = {0x1000, 0x2000};
+extern const f32 D_00249A1C = 3.4028235e+38f;
+extern const f32 D_00249B10[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_00249D64 = 3.4028235e+38f;
+extern const f32 D_00249D68 = -3.4028235e+38f;
+extern const f32 D_00249D6C = 3.4028235e+38f;
+extern const f32 D_00249D70 = -3.4028235e+38f;
+extern const f32 D_00249DD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const char D_00249E18[8] = ";1";
+extern const f32 D_00249E3C = 3.4028235e+38f;
+extern const f32 D_00249E40 = 3.4028235e+38f;
+extern const f32 D_00249E4C = 3.4028235e+38f;
+extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
+extern const f32 D_00249EF0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_00249FB4 = 3.4028235e+38f;
+extern const f32 D_00249FBC = 3.4028235e+38f;
+extern const f32 D_00249FC8 = 3.4028235e+38f;
+extern const f32 D_00249FD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
+extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
+extern const f32 D_0024A120 = 3.4028235e+38f;
+extern const Vec2_24A210 D_0024A210 = {0.0f, 4.73242188f};
+extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
+extern const VEnt_0024A220 D_0024A220[22] = {{0, 0}, {0, func_0015C930}, {0, func_0015CA38}, {0, func_0015CA60}, {0, func_0015CB88}, {0, func_0015CC80}, {0, func_0015CD18}, {0, func_0015C3C0}, {0, func_0015CF70}, {0, func_0015D4E0}, {0, 0}, {0, 0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C2E8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C3C0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, 0}};
+extern const char D_0024A2D0[8] = "Splash";
+extern const char D_0024A2D8[16] = "Paris, France";
+extern const char D_0024A2E8[16] = "The Hideout";
+extern const char D_0024A2F8[24] = "A Stealthy Approach";
+extern const char D_0024A310[24] = "Prowling the Grounds";
+extern const char D_0024A328[24] = "High Class Heist";
+extern const char D_0024A340[24] = "Into the Machine";
+extern const char D_0024A358[24] = "A Cunning Disguise";
+extern const char D_0024A370[24] = "The Fire Down Below";
+extern const char D_0024A388[24] = "Treasure in the Depths";
+extern const char D_0024A3A0[24] = "The Gunboat Graveyard";
+extern const char D_0024A3B8[24] = "The Eye of the Storm";
+extern const char D_0024A3D0[16] = "A Rocky Start";
+extern const char D_0024A3E0[16] = "Muggshot's Turf";
+extern const char D_0024A3F0[16] = "Boneyard Casino";
+extern const char D_0024A400[24] = "Murray's Big Gamble";
+extern const char D_0024A418[24] = "At the Dog Track";
+extern const char D_0024A430[16] = "Two to Tango";
+extern const char D_0024A440[24] = "Straight to the Top";
+extern const char D_0024A458[24] = "Back Alley Heist";
+extern const char D_0024A470[16] = "Last Call";
+extern const char D_0024A480[24] = "The Dread Swamp Path";
+extern const char D_0024A498[24] = "The Swamp's Dark Center";
+extern const char D_0024A4B0[24] = "The Lair of the Beast";
+extern const char D_0024A4C8[24] = "A Grave Undertaking";
+extern const char D_0024A4E0[16] = "Piranha Lake";
+extern const char D_0024A4F0[24] = "Descent into Danger";
+extern const char D_0024A508[24] = "A Ghastly Voyage";
+extern const char D_0024A520[24] = "Down Home Cooking";
+extern const char D_0024A538[16] = "A Deadly Dance";
+extern const char D_0024A548[24] = "A Perilous Ascent";
+extern const char D_0024A560[24] = "Inside the Stronghold";
+extern const char D_0024A578[24] = "Flaming Temple of Flame";
+extern const char D_0024A590[16] = "The Unseen Foe";
+extern const char D_0024A5A0[24] = "The King of the Hill";
+extern const char D_0024A5B8[24] = "Rapid Fire Assault";
+extern const char D_0024A5D0[24] = "Duel by the Dragon";
+extern const char D_0024A5E8[24] = "A Desperate Race";
+extern const char D_0024A600[16] = "Flame Fu!";
+extern const char D_0024A610[24] = "A Hazardous Path";
+extern const char D_0024A628[16] = "Burning Rubber";
+extern const char D_0024A638[16] = "A Daring Rescue";
+extern const char D_0024A648[24] = "Bentley Comes Through";
+extern const char D_0024A660[24] = "A Temporary Truce";
+extern const char D_0024A678[16] = "Sinking Peril";
+extern const char D_0024A688[24] = "A Strange Reunion";
+extern const char D_0024A7D8[4] = "???";
+
+// Globals typed by worker dv07, from retail's bytes and their readers.
+extern const f32 D_0024A844 = 3.40282347e+38f;
+extern const f32 D_0024AB7C = 3.40282347e+38f;
+extern const f32 D_0024AFA0 = 3.40282347e+38f;
+extern const f32 D_0024B164 = 3.40282347e+38f;
+extern const f32 D_0024B16C = 3.40282347e+38f;
+extern const char D_0024B1E8[96] = "sio2man.irx\000\000\000\000\000padman.irx\000\000\000\000\000\000mcman.irx\000\000\000\000\000\000\000mcserv.irx\000\000\000\000\000\000libsd.irx\000\000\000\000\000\000\000989snd.irx\000\000\000\000\000";
+extern const f32 D_0024B258 = -3.40282347e+38f;
+extern const char D_0024B438[328] = "The Secret Police File\000\000The Tokyo Police File\000\000\000The Making Of Sly Cooper\000\000\000\000\000\000\000\000Commercials & Outtakes\000\000Tide of Terror\000\000Raleigh Hung out to Dry\000Sunset Snake Eyes\000\000\000\000\000\000\000Muggshot Busted\000Vicious Voodoo\000\000Mz Ruby Vexed\000\000\000Fire in the Sky\000The Panda King on Ice\000\000\000The Cold Heart of Hate\000\000Ten Seconds\000\000\000\000\000The Thievius Raccoonus\000\000Credits";
+extern const f32 D_0024B64C = 3.40282347e+38f;
+extern const f32 D_0024C930 = 3.40282347e+38f;
+extern const f32 D_0024C9B0 = 3.40282347e+38f;
+extern const f32 D_0024C9B4 = 3.40282347e+38f;
+extern const f32 D_0024C9BC = 3.40282347e+38f;
+extern const f32 D_0024CAEC = 3.40282347e+38f;
+extern const f32 D_0024CAF0 = 3.40282347e+38f;
+extern const f32 D_0024CAF4 = 3.40282347e+38f;
+extern const f32 D_0024CAF8 = 3.40282347e+38f;
+extern const f32 D_0024CAFC = 3.40282347e+38f;
+extern const char D_0024CBD0[8] = "&%c%c&.";
+extern const char D_0024CBD8[16] = "^05~b2a83d/\000\000\000\000";
+extern const char D_0024CBE8[8] = "~.^.\000\000\000";
+extern const f32 D_0024D164 = -3.40282347e+38f;
+extern const f32 D_0024D168 = 3.40282347e+38f;
+extern const f32 D_0024D260 = 3.40282347e+38f;
+extern const f32 D_0024D584 = 3.40282347e+38f;
+extern const f32 D_0024D588 = 3.40282347e+38f;
+extern const f32 D_0024D58C = 3.40282347e+38f;
+extern const f32 D_0024D590 = 3.40282347e+38f;
+
+// Globals typed by worker dv08, from retail's bytes and their readers.
+struct VtEnt_24F0D8 { s32 delta; void (*fn)(); };
+void func_001FEF00();
+void func_001FEFC0();
+void func_001FF008();
+void func_002005A0();
+void func_002005E8();
+void func_00200638();
+void func_00200680();
+
+extern const f32 D_0024DA90 = 3.40282347e+38f;
+extern const f32 D_0024DAA0[4] = {-3.40282347e+38f, 0.0f, 0.0f, 0.0f};
+extern const f32 D_0024DAD0 = -3.40282347e+38f;
+extern const char D_0024DB20[7][16] = {"&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun"};
+extern const f32 D_0024DC88[2] = {3.40282347e+38f, 0.0f};
+extern const f32 D_0024DC94 = 3.40282347e+38f;
+extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
+extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
+extern const char D_0024DCE8[80] = "Rob McDaniel\nDev Madan\nAugie Pagan\nKarin Yamagiwa\nHokyo Lim\nSuzanne Kaufmann";
+extern const char D_0024DD38[40] = "Bruce Oberg\nRob McDaniel\nHokyo Lim";
+extern const char D_0024DD60[32] = "Rob McDaniel\nChris Heidorn";
+extern const char D_0024DD80[32] = "Brian Fleming\nChris Bentzel";
+extern const char D_0024DDA0[40] = "Brian Fleming\nDJ Stiner\nRob McDaniel";
+extern const char D_0024DDC8[40] = "Brian Fleming\nNate Fox\nTravis Kotzesbue";
+extern const char D_0024DDF0[32] = "Bruce Oberg\nNate Fox\nMatt Olsen";
+extern const char D_0024DE10[40] = "Chris Zimmerman\nMatt Olsen\nBruce Oberg";
+extern const char D_0024DE38[24] = "Nate Fox\nChris Bentzel";
+extern const char D_0024DE50[32] = "Rob McDaniel\nBrian Fleming";
+extern const char D_0024DE70[40] = "Nate Fox\nMatt Olsen\nAndrew Woods";
+extern const char D_0024DE98[40] = "Nate Fox\nBrian Fleming\nReid Johnson";
+extern const char D_0024DEC0[48] = "Suzanne Kaufmann\nKelle DeForrest\nRob McDaniel";
+extern const char D_0024DEF0[32] = "Chris Bentzel\nKelle DeForrest";
+extern const char D_0024DF10[64] = "Rob McDaniel\nSuzanne Kaufmann\nAndrew Woods\nKarin Yamagiwa";
+extern const char D_0024DF50[40] = "Nate Fox\nMatthew Morgaine\nChris Heidorn";
+extern const char D_0024DF78[40] = "Bruce Oberg\nGary Burd\nChris Bentzel";
+extern const char D_0024DFA0[24] = "Nate Fox\nMatt Olsen";
+extern const char D_0024DFB8[32] = "Rob McDaniel\nDarrell Plank";
+extern const char D_0024DFD8[24] = "Nate Fox\nAndrew Woods";
+extern const char D_0024DFF0[40] = "Chris Bentzel\nIan Stout\nKelle DeForrest";
+extern const char D_0024E018[32] = "Chris Bentzel\nRob McDaniel";
+extern const char D_0024E038[40] = "Rob McDaniel\nAugie Pagan\nAndrew Woods";
+extern const char D_0024E060[40] = "Matthew Morgaine\nChris Zimmerman";
+extern const char D_0024E088[32] = "Nate Fox\nChris Zimmerman";
+extern const char D_0024E0A8[32] = "Nate Fox\nMatthew Morgaine";
+extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel";
+extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
+extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
+extern const char D_0024E140[40] = "Press &2L&. for Bonus Commentary";
+extern const char D_0024E168[24] = "Best time: &10.%d";
+extern const char D_0024E180[24] = "Best time: &1%d:%02d";
+extern const char D_0024E198[40] = "Beginning Master Thief Sprint!";
+extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
+extern const s32 D_0024E830 = 107;
+extern const s32 D_0024E838 = 108;
+extern const double D_0024E9C8 = 0.1;
+extern const double D_0024E9D0 = 0.1;
+extern const double D_0024E9D8 = 1000000.0;
+extern const char D_0024EB78[3][8] = {"....", "....", "all"};
+extern const u8 D_0024ECB0[256] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+extern const u8 D_0024EDB0[256] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+extern const u8 D_0024EEB0[256] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+extern const VtEnt_24F0D8 D_0024F0D8[3] = {{0, func_001FF008}, {0, func_001FEFC0}, {0, func_001FEF00}};
+extern const char D_0024F118[8] = "eh";
+extern const VtEnt_24F0D8 D_0024F278[3] = {{0, func_002005E8}, {0, func_002005A0}, {0, func_001FEF00}};
+extern const VtEnt_24F0D8 D_0024F290[3] = {{0, func_00200680}, {0, func_00200638}, {0, func_001FEF00}};
+extern const char D_0024F510[56] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
+extern const char D_0024F5F8[40] = "Ncmd fail sema cur_cmd:%d keep_cmd:%d\n";
+extern const char D_0024F620[24] = "Libcdvd bind err N CMD\n";
+extern const char D_0024F658[40] = "Scmd fail sema cur_cmd:%d keep_cmd:%d\n";
+extern const char D_0024F680[24] = "Libcdvd bind err S cmd\n";
+extern const char D_0024F698[32] = "Libcdvd bind err %d CD_Init %d\n";
+extern const char D_0024F6B8[16] = "Libcdvd Exit\n";
+extern const char D_0024F6C8[16] = "DiskReady 0\n";
+extern const char D_0024F6D8[32] = "Libcdvd bind err CdDiskReady\n";
+extern const char D_0024F6F8[24] = "DiskReady ended\n";
+extern const char D_0024F710[24] = "call cdread cmd\n";
+extern const char D_0024F728[16] = "cdread end\n";
+extern const char D_0024F738[72] = "libpad: sceSifSetDma faild\n\000\000\000\000\000libpad: tPadDma Structure Invalid\n";
+extern const char D_0024F7D0[48] = "libpad: buffer addr is not 64 byte align. %08x\n";
+extern const char D_0024F800[144] = "libpad: pad port is already open [%d][%d]\n\000\000\000\000\000\000ERROR\000\000\000STABLE\000\000EXECCMD\000FINDCTP1\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000DISCONNECT\000\000\000\000\000\000BUSY\000\000\000\000FAILED\000\000COMPLETE";
+extern const f32 D_0024F89C = 1.57079625f;
+extern const f32 D_0024F8AC = 7.54978942e-08f;
+extern const char D_0024F8F0[8] = "acosf";
+extern const char D_0024F8F8[8] = "asinf";
+extern const char D_0024F900[8] = "atan2f";
+extern const char D_0024F908[8] = "fmodf";
+extern const double D_0024F910 = (0.0/0.0);
+extern const char D_0024F918[8] = "logf";
+extern const double D_0024F920 = -3.4028234663852886e+38;
+extern const char D_0024F928[8] = "log10f";
+extern const double D_0024F930 = -3.4028234663852886e+38;
+extern const char D_0024F938[8] = "powf";
+extern const double D_0024F940 = (0.0/0.0);
+extern const double D_0024F948 = 3.4028234663852886e+38;
+extern const double D_0024F950 = -3.4028234663852886e+38;
+extern const char D_0024F958[8] = "sqrtf";
+extern const f32 D_0024FA4C = -(1.0f/0.0f);
+extern const f32 D_0024FAD4 = (1.0f/0.0f);
+extern const double D_0024FF70 = (1.0/0.0);
+extern const s32 D_0024FF78 = 1;
+extern const char D_002502E8[24] = "intra && skip MB";
+extern const char D_002504F8[48] = "Too small buffer size for %dx%d picture\n";
+
+// Globals typed by worker dv03, from retail's bytes and their readers.
+extern const u8 D_0026A0E0[];
+extern const u8 D_0026A0E8[];
+extern const u8 D_0026A0F0[];
+extern const u8 D_0026A0F8[];
+extern const u8 D_0026A100[];
+extern const u8 D_0026A108[];
+extern const u8 D_0026A110[];
+struct Ent_26A138 { s32 n; const void* p; };
+void func_00199850();
+struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
+struct Sjis_274588 { u16 code; u16 id; };
+struct Rec_274BA0 { s32 a[12]; f32 b; };
+
+f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
+f32 D_00264248 = 2.5f;
+f32 D_0026424C = 300.0f;
+f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
+f32 D_002649D0[2] = { 0.0f, 0.25f };
+f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
+f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
+f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
+f32 D_00264A38 = 20.0f;
+f32 D_002699BC = 0.5f;
+f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
+f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
+s32 D_00269CD8[8] = { 3, 18, 19, 20, 4, 5, 21, 9 };
+s32 D_00269CF8[2] = { 0, 1 };
+s32 D_00269D00[2] = { 2, 0 };
+s32 D_00269D08[4] = { 10, 11, 12, 17 };
+s32 D_00269D18[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
+s32 D_00269D40[4] = { 24, 25, 26, 17 };
+u32 D_0026A118[8] = { 0x2815A489, 0x4A3840F1, 0xDB146408, 0x9260417F, 0x4CCB23D6, 0x281349F9, 0xDB146685, 0x4A39BF71 };
+Ent_26A138 D_0026A138[27] = {
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 2, D_0026A0E0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 2, D_0026A0E8 }, { 0, 0 },
+    { 2, D_0026A0F0 }, { 2, D_0026A0F8 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 0, 0 }, { 0, 0 }, { 0, 0 },
+    { 2, D_0026A100 }, { 2, D_0026A108 }, { 2, D_0026A110 }
+};
+f32 D_0026A710 = 2200.0f;
+f32 D_0026A714 = 4000.0f;
+f32 D_0026A718 = 2000.0f;
+f32 D_0026A71C = 4000.0f;
+f32 D_0026A7D8[6] = { 7.0f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A7F0[4] = { 3.0f, -2.0f, -1.0f, 0.0f };
+f32 D_0026A800[4] = { 0.25f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A810[4] = { 1.2f, -1.2f, 0.0f, 0.0f };
+f32 D_0026A820 = 60.0f;
+f32 D_0026A824 = -30.0f;
+f32 D_0026A828 = 0.25f;
+f32 D_0026A82C = 0.7f;
+f32 D_0026A830 = 250.0f;
+f32 D_0026A834 = 0.25f;
+f32 D_0026A838 = 0.5f;
+f32 D_0026A850[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
+f32 D_0026A860[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+f32 D_0026A870[4] = { 5000.0f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A880[4] = { 3.0f, -2.0f, -1.0f, 0.0f };
+f32 D_0026A890[4] = { 500.0f, 0.0f, 0.0f, 0.0f };
+f32 D_0026A8A0[4] = { 1.8f, -0.00024999998f, 0.0f, 0.0f };
+f32 D_0026A8B0[4] = { 1.1f, 1.6f, 0.0f, 0.0f };
+f32 D_0026A8C0[4] = { 1.4f, -0.005f, 0.0f, 0.0f };
+f32 D_0026A8D0[2] = { 0.9f, 1.2f };
+f32 D_0026A8D8 = 2000.0f;
+f32 D_0026A8DC = 1100.0f;
+f32 D_0026A910 = 100.0f;
+f32 D_0026A968 = 300.0f;
+Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
+f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
+f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
+f32 D_0026ABF0[4] = { 33218888.0f, 33218888.0f, 4.2520177e+09f, 0.0f };
+f32 D_0026AC00[4] = { 8.623489e+09f, 8.623489e+09f, 1.2884902e+10f, 0.0f };
+f32 D_0026B530[4] = { 1.0f, 1.666667f, -2.666667f, 0.0f };
+f32 D_0026B540 = 0.5f;
+f32 D_0026B544 = 0.5f;
+f32 D_0026B548 = 1.5f;
+f32 D_0026B54C = 200.0f;
+f32 D_0026B550[4] = { 0.25f, 0.0f, 0.0f, 0.0f };
+f32 D_0026B590[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_0026B5A0[4] = { 4.0f, -4.0f, 0.0f, 0.0f };
+f32 D_0026B5D0[4] = { 0.75f, -0.75f, -0.0f, 0.0f };
+f32 D_0026B5E0[4] = { 1.0f, 2.0f, -3.0f, 0.0f };
+f32 D_0026B5F0[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
+f32 D_0026B620[4] = { 135.0f, 0.0f, -85.0f, 0.0f };
+f32 D_0026B630[4] = { 50.0f, 170.0f, -85.0f, 0.0f };
+f32 D_0026B640[4] = { 1.0f, 0.0005f, 0.0f, 0.0f };
+f32 D_0026B650[4] = { 1.0f, 10.0f, 0.0f, 0.0f };
+f32 D_0026B660[4] = { 1.65f, -0.0002f, 0.0f, 0.0f };
+f32 D_0026B670[4] = { 0.65f, 1.0f, 0.0f, 0.0f };
+f32 D_0026B680[4] = { 0.0f, 6.0f, 0.0f, 0.0f };
+f32 D_0026B690[4] = { 5.0f, 16.0f, 0.0f, 0.0f };
+f32 D_0026B6D0[4] = { 0.0f, -0.01f, 0.0f, 0.0f };
+f32 D_0026B6E0[2] = { -10.0f, 10.0f };
+f32 D_0026B6E8 = -1.0f;
+f32 D_0026B6EC = 200.0f;
+f32 D_0026B6F0[4] = { 0.75f, 1.25f, 0.0f, 0.0f };
+f32 D_0026B700[4] = { 0.0f, 0.001f, 0.0f, 0.0f };
+f32 D_0026B730[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_0026B740[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+f32 D_0026B750[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
+f32 D_0026B760[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
+f32 D_0026B770[2] = { 0.5f, 1.0f };
+f32 D_002743B0 = 18.0f;
+f32 D_002743B4 = 8.0f;
+f32 D_002743B8 = 26.0f;
+f32 D_002743BC = 340.0f;
+f32 D_002744A4 = 0.1f;
+f32 D_002744A8 = 1.3f;
+f32 D_002744F0 = 50.0f;
+s32 D_00274548[4] = { 0, 1, 2, 0 };
+s32 D_00274558[4] = { 2, 0, 1, 0 };
+s32 D_00274568[4] = { 0, 2, 1, 0 };
+s32 D_00274578[4] = { 1, 0, 2, 0 };
+Sjis_274588 D_00274588[34] = {
+    { 0x8140, 0x0020 }, { 0x8149, 0x0021 }, { 0x8168, 0x0022 }, { 0x8194, 0x0023 },
+    { 0x8190, 0x0024 }, { 0x8193, 0x0025 }, { 0x8195, 0x0026 }, { 0x8166, 0x0027 },
+    { 0x8169, 0x0028 }, { 0x816A, 0x0029 }, { 0x8196, 0x002A }, { 0x817B, 0x002B },
+    { 0x8143, 0x002C }, { 0x817C, 0x002D }, { 0x8144, 0x002E }, { 0x815E, 0x002F },
+    { 0x8146, 0x003A }, { 0x8147, 0x003B }, { 0x8171, 0x003C }, { 0x8181, 0x003D },
+    { 0x8172, 0x003E }, { 0x8148, 0x003F }, { 0x8197, 0x0040 }, { 0x816D, 0x005B },
+    { 0x818F, 0x005C }, { 0x816E, 0x005D }, { 0x814F, 0x005E }, { 0x8151, 0x005F },
+    { 0x8165, 0x0060 }, { 0x816F, 0x007B }, { 0x8162, 0x007C }, { 0x8170, 0x007D },
+    { 0x8150, 0x007E }, { 0x0000, 0x0000 }
+};
+Sjis_274588 D_00274610[4] = {
+    { 0x824F, 0x0030 }, { 0x8260, 0x0041 }, { 0x8281, 0x0061 }, { 0x0000, 0x0000 }
+};
+f32 D_00274620[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
+f32 D_00274660[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
+f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
+f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
+f32 D_00274A90[2] = { 1200.0f, 1.0f };
+f32 D_00274A98 = 0.25f;
+f32 D_00274A9C = 3000.0f;
+f32 D_00274AA0 = 0.1f;
+f32 D_00274AA8[3] = { 20.0f, 0.0f, 0.3f };
+f32 D_00274AB4 = 1000.0f;
+f32 D_00274AB8[2] = { 0.0f, 300.0f };
+f32 D_00274AC0[4] = { -1.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00274AD0[2] = { 1.0f, -1.0f };
+f32 D_00274B20[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
+f32 D_00274B64 = -0.033f;
+f32 D_00274B68[3] = { 300.0f, 0.0f, 0.25f };
+f32 D_00274B90 = 0.06666667f;
+f32 D_00274B94 = 0.16666667f;
+f32 D_00274B98 = 0.116666675f;
+Rec_274BA0 D_00274BA0 = { { (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, 6, 7, 4, 5, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF }, 0.15f };
+
+// Globals typed by worker dv05, from retail's bytes and their readers.
+void func_0020D138();
+void func_0020D248();
+void func_0020D3D0();
+void func_0020D538();
+void func_0020D730();
+void func_0020D880();
+void func_0020DA48();
+void func_0020DBF0();
+void func_0020D1B0();
+void func_0020D300();
+void func_0020D480();
+void func_0020D630();
+void func_0020D7D0();
+void func_0020D960();
+void func_0020DB20();
+void func_0020DD10();
+void func_001FDA38();
+extern const u8 D_002197B8[];
+extern const u8 D_002198E8[];
+extern const u8 D_002505B8[];
+extern const char D_0024DCB0[];
+extern const char D_0024DCC8[];
+extern const char D_0024DCE8[];
+extern const char D_0024DD38[];
+extern const char D_0024DD60[];
+extern const char D_0024DD80[];
+extern const char D_0024DDA0[];
+extern const char D_0024DDC8[];
+extern const char D_0024DDF0[];
+extern const char D_0024DE10[];
+extern const char D_0024DE38[];
+extern const char D_0024DE50[];
+extern const char D_0024DE70[];
+extern const char D_0024DE98[];
+extern const char D_0024DEC0[];
+extern const char D_0024DEF0[];
+extern const char D_0024DF10[];
+extern const char D_0024DF50[];
+extern const char D_0024DF78[];
+extern const char D_0024DFA0[];
+extern const char D_0024DFB8[];
+extern const char D_0024DFD8[];
+extern const char D_0024DFF0[];
+extern const char D_0024E018[];
+extern const char D_0024E038[];
+extern const char D_0024E060[];
+extern const char D_0024E088[];
+extern const char D_0024E0A8[];
+extern const char D_0024E0C8[];
+extern const char D_0024E0F8[];
+extern const char D_0024E118[];
+extern const u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
+
+f32 D_00275420[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
+f32 D_00275430[4] = { 0.5f, 1.0f, 0.0f, 0.0f };
+f32 D_00275440[2] = { 0.5f, 1.0f };
+f32 D_00275448[4] = { 4000.0f, 0.0f, 2.0f, 0.0f };
+f32 D_00275458[6] = { 2000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00275470[4] = { 0.0f, 0.0333333313f, 0.0f, 0.0f };
+f32 D_00275480[2] = { 0.0f, 50.0f };
+f32 D_00275488 = -10.0f;
+f32 D_002754B0[4] = { 1000.0f, -0.5f, 0.0f, 0.0f };
+f32 D_002754C0[2] = { 0.0f, 625.0f };
+f32 D_002754C8[2] = { -1300.0f, 1300.0f };
+f32 D_002754D0[3] = { 1125.0f, 0.0f, 0.100000001f };
+f32 D_002754DC = 750.0f;
+f32 D_002754E0[2] = { 1.0f, 0.0f };
+f32 D_00275500[2] = { 0.400000006f, 0.800000012f };
+f32 D_00275508[2] = { 0.0500000007f, 0.300000012f };
+f32 D_00275510[2] = { 0.100000001f, 0.400000006f };
+f32 D_00275518[3] = { 10.0f, 0.0f, 0.100000001f };
+f32 D_00275530[4] = { -0.5f, 0.699999988f, 0.0f, 0.0f };
+f32 D_00275540[4] = { 1.0f, -0.5f, 0.0f, 0.0f };
+f32 D_00275550[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00275560[4] = { -0.5f, 2.0f, 0.0f, 0.0f };
+f32 D_00275570[4] = { 0.5f, 4.0f, 0.0f, 0.0f };
+f32 D_00275580[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+f32 D_00275590[4] = { 1.0f, -0.600000024f, 0.0f, 0.0f };
+f32 D_002755A0[2] = { 0.25f, 1.0f };
+f32 D_002755A8 = 1.10000002f;
+f32 D_002755AC = 1000.0f;
+f32 D_002755B0[4] = { 0.5f, 0.25f, 0.0f, 0.0f };
+f32 D_002755C0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_002755D0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_002755E0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_002755F0[2] = { 0.0f, 1.0f };
+f32 D_002755F8 = 0.75f;
+f32 D_00275600[4] = { 2000.0f, 0.0f, 2000.0f, 0.0f };
+f32 D_00275610 = 0.5f;
+f32 D_00275614 = 0.00200000009f;
+f32 D_00275618 = 800.0f;
+f32 D_00275620[4] = { 2000.0f, 0.0f, 0.150000006f, 0.0f };
+f32 D_00275640[4] = { 0.0f, 255.0f, 255.0f, 0.0f };
+f32 D_00275654 = 255.0f;
+f32 D_00275658 = 240.0f;
+f32 D_00275660[4] = { 180.0f, 0.0f, 0.0f, 0.0f };
+f32 D_002756B0[24] = { 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f };
+f32 D_002757E0[4] = { 0.0f, 0.0f, 800.0f, 0.0f };
+f32 D_002757F0[4] = { 0.0f, 800.0f, 0.0f, 0.0f };
+f32 D_00275800[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00275810[8] = { 0.150000006f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
+f32 D_00275830[4] = { -0.200000003f, 0.0f, 0.0f, 0.0f };
+f32 D_00275840[4] = { 0.0f, 0.00124999997f, 0.0f, 0.0f };
+f32 D_00275850[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
+f32 D_00275860 = 15.0f;
+f32 D_00275890 = 0.5f;
+f32 D_00275894 = 700.0f;
+f32 D_00275898 = 650.0f;
+f32 D_0027589C = 650.0f;
+f32 D_002758A0 = 300.0f;
+f32 D_002758A4 = 400.0f;
+f32 D_002758A8 = -100.0f;
+f32 D_002758AC = 5.0f;
+s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
+f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+f32 D_00275C60[4] = { 0.0f, 1.0f, -1.0f, 1.0f };
+f32 D_00275CD0 = 700.0f;
+f32 D_00275CD4 = 650.0f;
+s32 D_00275CF8[4] = { 1247, 1248, 1249, 1250 };
+f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
+f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
+f32 D_00276288[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
+s32 D_00276298[11][4] = {
+    { 1, 10, 10, 5 },
+    { 2, 0, 3, 5 },
+    { -1, 1, 3, 5 },
+    { 2, 10, -1, 1 },
+    { 8, -1, 5, 7 },
+    { 2, 0, 1, 4 },
+    { -1, 7, 7, 8 },
+    { 6, 8, 4, 6 },
+    { 6, -1, 7, -1 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+s32 D_00276348[11][4] = {
+    { 4, 10, 4, 10 },
+    { 8, 0, 4, 3 },
+    { 5, 3, 1, -1 },
+    { 2, 10, 1, -1 },
+    { 7, 0, -1, 1 },
+    { 8, 2, 8, -1 },
+    { 8, 7, -1, 8 },
+    { 6, 4, -1, 1 },
+    { -1, 1, 6, 5 },
+    { -1, -1, -1, -1 },
+    { 3, -1, 0, -1 }
+};
+s32 D_002763F8[11][4] = {
+    { 1, 10, 10, 1 },
+    { 3, 0, 7, 2 },
+    { 4, 0, 1, -1 },
+    { 8, 1, 1, 4 },
+    { 3, 2, 1, 2 },
+    { 6, 10, -1, 8 },
+    { -1, 5, -1, 8 },
+    { -1, 0, 8, 1 },
+    { -1, 7, 5, 7 },
+    { -1, -1, -1, -1 },
+    { 5, -1, -1, 0 }
+};
+s32 D_002764A8[11][4] = {
+    { 1, 10, 10, 2 },
+    { 7, 0, 4, 2 },
+    { 5, 0, 1, 5 },
+    { 8, 4, -1, 4 },
+    { 3, 10, 3, 1 },
+    { 6, 2, 1, -1 },
+    { -1, 5, 7, -1 },
+    { 8, 1, 8, 6 },
+    { -1, 4, 3, 1 },
+    { -1, -1, -1, -1 },
+    { 4, -1, -1, 0 }
+};
+s32 D_00276558[11][4] = {
+    { 2, 10, 2, 4 },
+    { -1, -1, -1, -1 },
+    { 3, 0, -1, 3 },
+    { 8, 0, 2, 4 },
+    { 5, 0, 3, 5 },
+    { 6, 4, 4, -1 },
+    { 8, 5, 8, -1 },
+    { -1, -1, -1, -1 },
+    { -1, 3, -1, 6 },
+    { -1, -1, -1, -1 },
+    { 0, -1, -1, 0 }
+};
+f32 D_00276648 = 24.0f;
+volatile s32 D_00277138[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+s32 D_002771CC = -1;
+void* D_0027804C = (void*)func_001FDA38;
+s32 D_00279420 = -1;
+s32 D_00279428 = -1;
+s32 D_0027942C = -1;
+s32 D_00279438 = -1;
+s32 D_0027943C = -1;
+s32 D_00279440 = -1;
+s32 D_00279444 = -1;
+s32 D_00279448 = -1;
+s32 D_0027944C = -1;
+void (*D_0027B000[8])() = { func_0020D138, func_0020D248, func_0020D3D0, func_0020D538, func_0020D730, func_0020D880, func_0020DA48, func_0020DBF0 };
+void (*D_0027B020[8])() = { func_0020D1B0, func_0020D300, func_0020D480, func_0020D630, func_0020D7D0, func_0020D960, func_0020DB20, func_0020DD10 };
+extern const void* const D_00247448[149] = {
+    &D_00217410,
+    &D_00217418,
+    &D_00217498,
+    &D_00217568,
+    &D_00220E20,
+    &D_00217C30,
+    &D_0021A838,
+    &D_0021B688,
+    &D_0021BB58,
+    &D_0021BE98,
+    &D_0021BCF8,
+    &D_0021E728,
+    &D_0021E8C8,
+    &D_0021EA68,
+    &D_0021F788,
+    &D_0021FA88,
+    &D_0021FE88,
+    &D_00220028,
+    &D_002201C8,
+    &D_0021ED68,
+    &D_0021F4B8,
+    &D_0021D5B8,
+    &D_0021F628,
+    &D_0021D1D8,
+    &D_0021F928,
+    &D_00220438,
+    &D_00220A90,
+    &D_00220598,
+    &D_0021EC08,
+    &D_00220CC0,
+    &D_00219AF0,
+    &D_00218770,
+    &D_00218970,
+    &D_00218BD8,
+    &D_0021A9D0,
+    &D_0021DD08,
+    &D_00220958,
+    &D_00218D10,
+    &D_00218E48,
+    &D_00218AA8,
+    &D_002190B0,
+    &D_00218F80,
+    &D_0021F058,
+    &D_00219330,
+    &D_0021CC78,
+    &D_0021CDB8,
+    &D_0021CEF8,
+    &D_0021AB08,
+    &D_0021AC38,
+    &D_0021AD80,
+    &D_0021AEC8,
+    &D_0021B010,
+    &D_0021B2D8,
+    &D_002198F0,
+    &D_0021C038,
+    &D_0021C168,
+    &D_0021C318,
+    &D_0021E458,
+    &D_0021A660,
+    &D_0021B4D8,
+    &D_0021DF10,
+    &D_0021E048,
+    &D_0021E180,
+    &D_0021B878,
+    &D_0021C598,
+    &D_0021D3B8,
+    &D_0021D718,
+    &D_0021D848,
+    &D_0021D978,
+    &D_0021DAA8,
+    &D_0021DBD8,
+    &D_0021F188,
+    &D_0021FC28,
+    &D_0021FD58,
+    &D_002206F8,
+    &D_00220828,
+    &D_0021B9A8,
+    &D_00219F80,
+    &D_00217A90,
+    &D_00219260,
+    &D_0021A050,
+    &D_00217B60,
+    &D_00219A20,
+    &D_0021A320,
+    &D_0021C4C8,
+    &D_0021C6C8,
+    &D_0021C868,
+    &D_0021CAD8,
+    &D_0021C798,
+    &D_0021C938,
+    &D_0021CA08,
+    &D_0021CBA8,
+    &D_0021D038,
+    &D_0021D108,
+    &D_0021B408,
+    &D_0021D4E8,
+    &D_0021DE40,
+    &D_0021E588,
+    &D_0021E658,
+    &D_002188A0,
+    &D_0021EF88,
+    &D_0021A490,
+    &D_00220F50,
+    &D_00221020,
+    &D_00220368,
+    &D_00221210,
+    &D_00221140,
+    &D_002213D0,
+    &D_002214A0,
+    &D_00221520,
+    &D_00217740,
+    &D_0021A560,
+    &D_0021B258,
+    &D_0021F338,
+    &D_0021F3B8,
+    &D_002178C0,
+    &D_00217940,
+    &D_0021B158,
+    &D_0021B1D8,
+    &D_0021A120,
+    &D_0021A1A0,
+    &D_0021A220,
+    &D_0021A2A0,
+    &D_0021C298,
+    &D_0021D338,
+    &D_002179C0,
+    &D_002177C0,
+    &D_0021A5E0,
+    &D_0021B7F8,
+    &D_0021F2B8,
+    &D_00217840,
+    &D_00219738,
+    &D_002197E8,
+    &D_002194E0,
+    &D_00219460,
+    &D_002191E0,
+    &D_00219868,
+    &D_0021BAD8,
+    &D_0021C448,
+    &D_0021A7B8,
+    &D_0021E2B8,
+    &D_0021F438,
+    &D_00218650,
+    &D_0021B608,
+    &D_0021EF08,
+    &D_00220C40,
+    &D_002197B8,
+    &D_002198E8,
+    &D_002505B8
+};
+extern const u32 D_002476A0[256] = {
+    0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
+    0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
+    0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
+    0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5,
+    0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B,
+    0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
+    0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F,
+    0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D,
+    0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,
+    0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01,
+    0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457,
+    0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
+    0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB,
+    0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9,
+    0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
+    0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD,
+    0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683,
+    0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,
+    0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7,
+    0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5,
+    0xD6D6A3E8, 0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
+    0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79,
+    0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F,
+    0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
+    0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713,
+    0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21,
+    0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
+    0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69, 0x616BFFD3, 0x166CCF45,
+    0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB,
+    0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
+    0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
+    0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
+};
+extern const u32 D_00247AB0[8] = { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 };
+extern const u32 D_00247AD0[8] = { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 };
+extern const f32 D_002483D0[12] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+extern const f32 D_00248400[28] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+extern const f32 D_00248D00[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
+extern const f32 D_00248D10[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+extern const f32 D_00248D20[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
+extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
