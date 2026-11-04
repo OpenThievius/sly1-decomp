@@ -530,6 +530,26 @@ void func_001A0258(T219C* self, f32 f)
     func_00118D20(sub, func_00118D30(tv, u));
 }
 
+extern f32 D_0026B5D0[4];
+extern f32 D_0026B5E0[4];
+
+void func_001A0BA0(T219C* self, f32 f)
+{
+    func_001A0258(self, f);
+    Quad219C* sub = &self->q30;
+    u8* p = (u8*)D_0026B5E0;
+    s32 v = (s32)D_00275710->slot1CE8[10];
+    self->fB0 = -15.0f;
+    self->i20 = v;
+    self->q40 = *(Quad219C*)D_0026B5D0;
+    V128_1A0258 t;
+    func_00118CF0(&t, f);
+    V128_1A0258 tv = t;
+    V128_1A0258 u;
+    func_00118D10(&u, p);
+    func_00118D20(sub, func_00118D30(tv, u));
+}
+
 T219C* func_0019EA78(s32 kind, C1E* sys);
 void func_001A0338(void* self, s32 kind, void* extra);
 extern f32 D_0026185C;
