@@ -1779,3 +1779,19 @@ s32 func_0015A4F0(Sw_15A4F0* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax,
     }
     return c;
 }
+
+struct Obj_159680 { u8 pad0[0x10]; s32 f10; u8 pad14[0x18]; f32 f2C; f32 f30; f32 f34; f32 f38; s32 f3C; s32 f40; };
+struct Src_159680 { u8 pad0[4]; f32 f4; f32 f8; f32 fC; f32 f10; s16 f14; };
+
+void func_001B4AA0(void* a, void* b);
+
+void func_00159680(Obj_159680* self, Src_159680* src)
+{
+    func_001B4AA0(self, src);
+    self->f40 = self->f10;
+    self->f3C = src->f14;
+    self->f2C = src->f4;
+    self->f30 = src->f8;
+    self->f34 = src->fC;
+    self->f38 = src->f10;
+}

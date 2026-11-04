@@ -3655,7 +3655,24 @@ void* func_00117478(void* self, s32 unused, Node_117478* x)
     return self;
 }
 
-INCLUDE_ASM(func_00117598);
+struct Quad_117598 { s32 a, b, c, d; };
+struct Rec_117598 { s32 f0; s32 f4; s32 f8; s32 fC; };
+
+void* func_0011B008(Quad_117598* q);
+void func_0011B018(void* dst, Quad_117598* src);
+void func_0011B060(Quad_117598* q, s32 mode);
+void func_0011B570(Quad_117598* q, s32 v);
+
+void* func_00117598(void* self, void* unused, Rec_117598* r)
+{
+    Quad_117598 t;
+    func_0011B008(&t);
+    s32 v = r->f4 % r->fC;
+    func_0011B570(&t, v);
+    func_0011B018(self, &t);
+    func_0011B060(&t, 2);
+    return self;
+}
 
 void* func_00117610(void* self)
 {

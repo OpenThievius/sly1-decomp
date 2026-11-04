@@ -1902,3 +1902,43 @@ void func_0015D4E0(Self_15D4E0* self, Item_15D4E0* item, Rect_15D4E0* r, Strm_15
 void* D_0026231C = 0;
 void* D_002623B0 = 0;
 volatile s32 D_002623B8 = 0;
+
+extern void* D_002623B4;
+extern u8 D_00262320[];
+extern s32 D_00262318;
+extern u8 D_00262280[];
+extern u8 D_002622A8[];
+extern s32 D_002622D0;
+extern u8* D_00261990;
+
+void func_00191E70(s32 v);
+s32 func_001F6B60(void* a);
+void func_001529C8(void* self, s32 count, void* base);
+void func_00152B38(void* self);
+
+void func_0015E9F0(void)
+{
+    s32 idx;
+
+    func_00191E70(3);
+    func_001F6B60(D_002623B4);
+    idx = D_00262318;
+    D_00262318 = idx + 1;
+    D_002622D8 = (Slot_262320*)(D_00262320 + idx * 0x48);
+    if ((u32)(idx + 1) >= 2) {
+        D_00262318 = 0;
+    }
+    func_0015EFE8((Obj_15EFE8*)D_002622D8);
+    {
+        u8* slot = (u8*)D_002622D8;
+        s32 v = *(s32*)(D_00261990 + 0x21C);
+        *(s32*)(slot + 0x18) = 0;
+        *(s32*)(slot + 0x44) = v;
+        *(s32*)(slot + 0x1C) = 0;
+        func_001529C8(D_00262280, 0x8000, *(void**)(slot + 4));
+    }
+    func_001529C8(D_002622A8, 0x10000, *(void**)((u8*)D_002622D8 + 0xC));
+    D_002622D0 = *(s32*)((u8*)D_002622D8 + 0x10);
+    func_00152B38(D_00262280);
+    func_00152B38(D_002622A8);
+}
