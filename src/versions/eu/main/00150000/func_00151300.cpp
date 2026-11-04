@@ -11,12 +11,12 @@ s32 func_00151300(Obj_151300* self)
         if (e != 0 && e->f0 == 2) {
             if (flags == 2) return 0;
         }
-        if (((Hld_151300_eu*)D_002708E0)->f580 == self->f2F0 && ((Hld_151300_eu*)D_002708E0)->f578 == 1) flags &= 0xFFFFFFFD;
+        if (((Hld_151300_eu*)&D_002708E0)->f580 == self->f2F0 && ((Hld_151300_eu*)&D_002708E0)->f578 == 1) flags &= 0xFFFFFFFD;
     }
     if (flags & 4) {
         Ent_151300* e = self->f2E4 < self->f2DC - 1 ? &self->f2E0[self->f2E4 + 1] : 0;
         if (e != 0 && e->f0 == 1 && flags == 4) return 0;
-        if (((Hld_151300_eu*)D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
+        if (((Hld_151300_eu*)&D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)&D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
     }
     if (flags & 1) {
         if (func_001BE810() == 0) flags &= 0xFFFFFFFE;
@@ -28,7 +28,7 @@ s32 func_00151300(Obj_151300* self)
         if (self->f2F8 == 0) flags &= 0xFFFFFFEF;
     }
     if (flags & 0x20) {
-        if (func_00136530((Sc_151300*)&D_002701F8) != 0) flags &= 0xFFFFFFDF;
+        if (func_00136530(&D_002701F8) != 0) flags &= 0xFFFFFFDF;
     }
     if (flags & 0x40) {
         if (((Mgr_151300*)D_00261990)->f478 == ((Sc_151300_eu*)&D_002701F8)->f58C) flags &= 0xFFFFFFBF;

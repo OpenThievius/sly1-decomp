@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c01.h"
 
 // Class descriptors (parent, class id, flags, object size, then the class's methods) and the
 // method tables of .rodata from 0x217380, defined here until their own files are found.
@@ -4935,24 +4936,6 @@ struct Obj_261EF0 {
     u8 pad20[4];
 };
 
-struct Rec12_2622E0 {
-    u32 f0;
-    u32 f4;
-    s32 f8;
-};
-
-struct Rec12_2622F0 {
-    u32 f0;
-    u32 f4;
-    s32 f8;
-};
-
-struct Rec12_262300 {
-    u32 f0;
-    u32 f4;
-    s32 f8;
-};
-
 struct Slot12_262320 {
     u8 pad00[4];
     u8* f4;
@@ -4960,9 +4943,9 @@ struct Slot12_262320 {
     u8* fC;
     u8* f10;
     u8 pad14[0xC];
-    Rec12_2622E0 s20;
-    Rec12_2622E0 s2C;
-    Rec12_2622E0 s38;
+    List01 s20;
+    List01 s2C;
+    List01 s38;
     u8 pad44[4];
 };
 
@@ -5009,11 +4992,11 @@ s32 D_002622D4 = 0;
 // size: pointer (lw/sw), 4 bytes before an 8-aligned next label
 Slot12_262320* D_002622D8 = 0;
 // size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
-Rec12_2622E0 D_002622E0 = {};
+List01 D_002622E0 = {};
 // size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
-Rec12_2622F0 D_002622F0 = {};
+List01 D_002622F0 = {};
 // size: 12-byte record copied into Slot r38 by func_0015EC68
-Rec12_262300 D_00262300 = {};
+List01 D_00262300 = {};
 // size: s32 (sw), 4-byte label
 s32 D_00262310 = 0;
 // size: s32 (lw/sw), 4-byte label
@@ -5079,7 +5062,6 @@ f32 D_00261860 = 0;
 
 // Globals typed by worker dz03, from retail's bytes and their readers.
 // A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
-struct Obj_2626E8 { u32 first; u32 last; u32 base; };
 // Three words set by func_00168D68.
 struct Obj_2626D8 { s32 a; s32 b; s32 c; };
 // Record func_0016C360 clears (0x1C bytes) and fills.
@@ -5112,11 +5094,11 @@ struct Slot_269990 { s32 f00; s32 f04; u8 pad08[8]; s32 f10; };
 // size: func_00168D68 sets three words (a, b, c) of it
 Obj_2626D8 D_002626D8 = {0};
 // size: list head of three words, func_00152438 sets the link offset at +8 (0x38)
-Obj_2626E8 D_002626E8 = {0};
+List01 D_002626E8 = {0};
 // size: list head of three words, link offset at +8 (0x50)
-Obj_2626E8 D_002626F8 = {0};
+List01 D_002626F8 = {0};
 // size: list head of three words, link offset at +8 (0x558); func_00150298 walks it
-Obj_2626E8 D_00262708 = {0};
+List01 D_00262708 = {0};
 // size: s32 pointer, loaded and stored as a word (func_0016DD00 clears it)
 s32 D_002629C8 = 0;
 // size: s32 flags, word accesses only
@@ -5132,7 +5114,7 @@ void* D_00262E10 = 0;
 // size: s32, word load/store only
 s32 D_00263E2C = 0;
 // size: list head of three words, link offset at +8 (0x50)
-Obj_2626E8 D_00264088 = {0};
+List01 D_00264088 = {0};
 // size: pointer, word store of D_002622CC
 // size: s32, word accesses only
 // size: func_00184DE8 fills it while index < 0x100 (sltiu 0x100, step 4)

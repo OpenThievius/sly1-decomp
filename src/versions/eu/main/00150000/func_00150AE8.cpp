@@ -9,7 +9,7 @@ void func_00150AE8(C65* self)
     Ent65* s2;
 
     func_00124FC0(self);
-    if (!(((Gl_150AE8_eu*)D_0026E9F8)->f570 < 2 && ((Gl_150AE8_eu*)D_0026E9F8)->f57C == 0 && func_001BE5E8() == 0 && D_00275F84 != 1)) {
+    if (!(((Gl_150AE8_eu*)&D_0026E9F8)->f570 < 2 && ((Gl_150AE8_eu*)&D_0026E9F8)->f57C == 0 && func_001BE5E8() == 0 && D_00275F84 != 1)) {
         s32 st = self->state2D4;
         switch (st) {
         case 1:
@@ -21,7 +21,7 @@ void func_00150AE8(C65* self)
     }
     func_001F5C0C(q, 0, 8);
     s2 = func_001925F0();
-    if (func_001493A0((Bf_150AE8*)&((Mgr_150AE8*)D_00261990)->f454) != 0) {
+    if (func_001493A0(&((C6D*)D_00261990)->ctl454) != 0) {
         q[1] = 0;
         q[0] = 0;
     } else if (s2 != 0) {

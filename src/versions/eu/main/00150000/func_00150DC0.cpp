@@ -42,16 +42,16 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
         }
         switch (msg->type) {
         case 1:
-            func_001E86E0(D_002708E0, s2);
-            func_001E87F0(D_002708E0, s4);
+            func_001E86E0(&D_002708E0, s2);
+            func_001E87F0(&D_002708E0, s4);
             self->f2F0 = s2;
             if (s2) {
                 self->f2E8 |= 2;
             }
             break;
         case 2:
-            func_001E86E0(D_00271558, s2);
-            func_001E87F0(D_00271558, s4);
+            func_001E86E0(&D_00271558, s2);
+            func_001E87F0(&D_00271558, s4);
             self->f2F4 = s2;
             if (s2) {
                 self->f2E8 |= 4;
@@ -64,12 +64,12 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
     case 3:
         if (self->f2F0 && func_001833F0(self->f2F0, msg->f18)) {
             s2 = self->f2F0;
-            func_001E7440(D_002708E0, 1);
-            func_001E7440(D_00271558, 0);
+            func_001E7440(&D_002708E0, 1);
+            func_001E7440(&D_00271558, 0);
         } else if (self->f2F4 && func_001833F0(self->f2F4, msg->f18)) {
             s2 = self->f2F4;
-            func_001E7440(D_00271558, 1);
-            func_001E7440(D_002708E0, 0);
+            func_001E7440(&D_00271558, 1);
+            func_001E7440(&D_002708E0, 0);
         } else {
             s2 = 0;
         }
