@@ -34,13 +34,13 @@ void func_001E1A08(Spec_001E1A08* sp, Ctx_001E1A08* c, u8** va, const char* fmt,
         return;
     case 'e': case 'f': case 'g':
         if (sp->i24 != 0) {
-            const char* s4 = D_0024E478;
+            const char* s4 = "\n";
             u8* a = *va;
-            const char* s8 = D_0024E480;
-            const char* s7 = D_0024E488;
+            const char* s8 = ",\n";
+            const char* s7 = "{ ";
             *va = a + 8;
-            const char* s5 = D_0024E490;
-            const char* s6 = D_0024E498;
+            const char* s5 = ", ";
+            const char* s6 = " }";
             f32* fp = *(f32**)a;
             if (sp->i28 >= 2) {
                 func_001D7190(c, s4, func_001E2100(s4));
