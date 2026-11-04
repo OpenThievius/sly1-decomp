@@ -3,7 +3,7 @@
 extern s32 D_eu_0024AFD8[];
 Slot_0016D928* func_eu_001DE018(s32 id);
 
-void func_0016D928(Self_0016D928* self)
+void func_0016D928(C47* self)
 {
     s32 r;
     s32* tbl;

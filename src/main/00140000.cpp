@@ -2,6 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c28.h"
+#include "c29.h"
 #include "c38.h"
 
 extern const u32 D_00247AA0;
@@ -363,54 +364,37 @@ void func_001419E0(Slot_1419E0* self, s32 value)
 
 void func_00124A48(void* self);
 void func_0013EA38(void* p);
-void func_00140238(void* self, s32 flag);
+void func_00140238(C29* self, s32 flag);
 void* func_0015A448(void* obj, s32 id, void* ctx);
 
-struct Self_140140 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x550 - 0x18];
-    s32 f550;
-    s32 f554[8];
-    s32 f574;
-    s32 f578[1];
-    u8 pad2[0x5BC - 0x57C];
-    s32 f5BC;
-};
 
-void func_00140140(Self_140140* self)
+void func_00140140(C29* self)
 {
     func_00124A48(self);
-    func_0013EA38((u8*)self + 0x5C0);
+    func_0013EA38(&self->zone);
     func_00140238(self, 0);
-    for (s32 i = 0; i < self->f550; i++) {
-        void* p = func_0015A448(self->f14, self->f554[i], self);
+    for (s32 i = 0; i < self->countIds; i++) {
+        void* p = func_0015A448(self->world, self->ids[i], self);
         if (p != 0) {
-            s32 n = self->f574;
-            self->f578[n] = (s32)p;
-            self->f574 = n + 1;
+            s32 n = self->countObjs;
+            self->objs[n] = (s32)p;
+            self->countObjs = n + 1;
         }
     }
-    if (self->f550 == 0) {
+    if (self->countIds == 0) {
         self->f5BC = 1;
     }
 }
 
 void func_001BA130(void* self);
 
-struct Self_140200 {
-    u8 pad0[0x5C4];
-    void* f5C4;
-    u8 pad1[0x6E0 - 0x5C8];
-    s32 f6E0;
-};
 
-void func_00140200(Self_140200* self)
+void func_00140200(C29* self)
 {
-    s32 saved = self->f6E0;
+    s32 saved = self->zone.id120;
     func_001BA130(self);
-    self->f6E0 = saved;
-    self->f5C4 = self;
+    self->zone.id120 = saved;
+    self->zone.owner = self;
 }
 
 extern u8 D_00275B04[];
@@ -455,9 +439,9 @@ typedef unsigned char u8;
 
 extern void func_0013EB68(void* state);
 
-void func_00140238(void* self, s32 flag)
+void func_00140238(C29* self, s32 flag)
 {
-    func_0013EB68((u8*)self + 0x5C0);
+    func_0013EB68(&self->zone);
 }
 
 typedef signed int s32;
@@ -548,17 +532,16 @@ s32 func_00141170(State_00141170* self, void* value)
     return func_001E4DC0(self->child, &local);
 }
 
-struct Obj_140100 { u8 pad0[0x6FC]; s32 f6FC; u8 pad1[0x790 - 0x700]; s32 f790; };
 
 void func_001BAC30(void* self);
 void func_0013E950(void* p, void* self);
 
-void func_00140100(Obj_140100* self)
+void func_00140100(C29* self)
 {
     func_001BAC30(self);
-    func_0013E950((u8*)self + 0x5C0, self);
+    func_0013E950(&self->zone, self);
     if (self->f790 != 0) {
-        self->f6FC = 1;
+        self->zone.f13C = 1;
     }
 }
 
@@ -840,25 +823,16 @@ s32 func_00141B48(void* a0, void* a1, s32 count, Entry_141B48** list, s32 a4, s3
     return result;
 }
 
-struct Self_1400A8 {
-    u8 pad0[0x538];
-    u64 f538;
-    u8 pad1[0x88];
-};
 
-struct Sub_1400A8;
+void func_0013E918(Zone28* p);
 
-void func_001B7968(Self_1400A8* self);
-void func_0013E918(Sub_1400A8* p);
-void func_001B9AE0(Self_1400A8* self, s32 a, s32 b, s32 c, s32 d);
-
-void func_001400A8(Self_1400A8* self)
+void func_001400A8(C29* self)
 {
     u64 m = 0x8000;
     func_001B7968(self);
-    func_0013E918((Sub_1400A8*)((u8*)self + 0x5C0));
+    func_0013E918(&self->zone);
     m <<= 28;
-    self->f538 = self->f538 | m;
+    self->flags538 = self->flags538 | m;
     func_001B9AE0(self, 3, 0, 3, 0);
 }
 

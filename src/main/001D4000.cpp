@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c05.h"
+#include "c3b.h"
 
 typedef void (*VFn_D5418)(void* self);
 struct Obj_D5418 {
@@ -28,25 +29,19 @@ struct Node_1D6CB0 {
     void** vtbl;
 };
 
-struct Obj_1D6CB0 {
-    void** vtbl;
-    u8 pad4[0x68C];
-    f32 f690;
-    s32 f694;
-};
 
 struct Owner_1D6CB0 {
     u8 pad0[0x1504];
     Node_1D6CB0* fallback;
     Node_1D6CB0* slots[4];
-    Obj_1D6CB0* obj;
+    C3F* obj;
 };
 
 s32 func_00182FC8(void* node);
 
 void func_001D6CB0(Owner_1D6CB0* self)
 {
-    Obj_1D6CB0* obj = self->obj;
+    C3F* obj = self->obj;
     if (obj != 0) {
         Node_1D6CB0* s0 = 0;
         u32 i = 0;
@@ -60,9 +55,9 @@ void func_001D6CB0(Owner_1D6CB0* self)
         if (i >= 4) {
             s0 = self->fallback;
         }
-        ((VFnA)obj->vtbl[6])(obj);
-        ((VFnB)obj->vtbl[25])(obj, 0);
-        ((VFnB)obj->vtbl[35])(obj, s0);
+        obj->desc->m02(obj);
+        ((VFnB)((void**)obj->desc)[25])(obj, 0);
+        ((VFnB)((void**)obj->desc)[35])(obj, s0);
         obj->f690 = D_00261858[1];
         obj->f694 = 1;
         if (s0 != self->fallback) {
@@ -75,7 +70,7 @@ extern s32 D_00262E10;
 
 s32 func_001B8A08(void* self, s32 value);
 
-s32 func_001D6DA0(void* self, s32 value)
+s32 func_001D6DA0(C3F* self, s32 value)
 {
     if (value == D_00262E10) {
         return 1;
@@ -83,14 +78,8 @@ s32 func_001D6DA0(void* self, s32 value)
     return func_001B8A08(self, value);
 }
 
-struct Obj_1D7018 {
-    u8 pad0[0x694];
-    s32 f694;
-};
 
-void func_0013BA70(void* self);
-
-void func_001D7018(Obj_1D7018* self)
+void func_001D7018(C3F* self)
 {
     func_0013BA70(self);
     self->f694 = 0;
@@ -404,11 +393,10 @@ void func_001D73A8(C19* self)
     func_001DB290(self);
 }
 
-struct Obj_1D7040 { u8 pad[0x694]; s32 f694; };
-struct Ref_1D7040 { void* f0; Obj_1D7040* f4; };
-void func_0013B708(Obj_1D7040* self, s32 kind, Ref_1D7040* ref);
+struct Ref_1D7040 { void* f0; C3F* f4; };
+void func_0013B708(C3F* self, s32 kind, Ref_1D7040* ref);
 
-void func_001D7040(Obj_1D7040* self, s32 kind, Ref_1D7040* ref)
+void func_001D7040(C3F* self, s32 kind, Ref_1D7040* ref)
 {
     func_0013B708(self, kind, ref);
     if (kind == 10 && ref->f4 == self) {

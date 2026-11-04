@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "c3b.h"
 
 // The movie player: its object (D_00269A00), the stream its data comes through, and the two
 // sinks a transfer goes to (a ring buffer, and the IPU's DMA channel).
@@ -95,13 +96,9 @@ s32 D_00269B4C;
 extern u8 D_00261858[];
 extern u8* D_002623C0;
 
-struct Ctx_0018D8E0 { u8 pad[0x6B8]; s32 ready; };
 
-void func_0013B4C0(void* self);
 
-struct Ctx_0018D910 { u8 pad[0x2C8]; u64 flags; };
 
-void func_0013B598(void* self);
 void func_00124DF8(void* self, s32 mode, void* data);
 
 struct Span_18E7C0 {
@@ -115,22 +112,12 @@ void func_001F6C20(s32 a);
 void* func_001F6CA0(Span_18E7C0* span, s32 n);
 s32 func_001F6C90(void* obj);
 
-struct Obj_0018DC88 {
-    u8 pad0[0x6BC];
-    s32 count6BC;
-    void* items6C0[4];
-    s32 count6D0;
-    void* items6D4[4];
-    void* f6E4;
-};
 
 s32 func_001833F0(void* key, void* item);
 s32 func_001300E8(void* key, void* item);
 s32 func_001B8A08(void* self, void* key);
 
-struct List_0018DD50 { u8 pad0[0x6BC]; u32 count; void* items[4]; };
 
-struct Queue_18DD78 { u8 pad0[0x6D0]; s32 count; s32 items[4]; };
 
 struct Obj_18EA48 { s32 flag; u8 pad0[0x2C - 4]; };
 
@@ -230,13 +217,6 @@ struct Frame_18DB20 {
 typedef void (*VFn_18DB20)(void* self, f32 f, void* a, void* b);
 struct Obj_18DB20 { VFn_18DB20* vtbl; };
 
-struct Self_18DB20 {
-    u8 pad0[0x1EC];
-    Obj_18DB20* p1EC;
-    Obj_18DB20* p1F0;
-    u8 pad1[0x2C8 - 0x1F4];
-    u64 flags2C8;
-};
 
 extern u8 D_00248D30[];
 extern u8 D_002483D0[];
@@ -285,8 +265,6 @@ void func_0020B0C0(void* self);
 s32 func_0020B048(void* self);
 void func_001B3450(void);
 
-struct __attribute__((aligned(16))) Quad_18DDA0 { s32 a, b, c, d; };
-struct Ctx_18DDA0 { u8 pad[0]; };
 
 struct Ent_18E410 {
     u8 pad0[8];
@@ -395,17 +373,8 @@ s32 func_0011E4F8(void* self);
 
 struct Frame_18EDA8 { u8 buf[0x30]; };
 
-struct Obj_18D9B8 {
-    u8 pad0[0xD0];
-    u8 fD0[0x80];
-    u8 f150[0x9C];
-    s32 f1EC;
-    s32 f1F0;
-    u8 pad1[0x6B8 - 0x1F4];
-    s32 f6B8;
-};
-void func_00189350(u8* a, u8* b);
-s32 func_001BC088(Obj_18D9B8* self, f32 x, void* b);
+void func_00189350(void* a, void* b);
+s32 func_001BC088(C03* self, f32 x, void* b);
 
 struct Buffer_18F890 { u8 pad00[0x18]; s32 head; s32 base; s32 tail; };
 struct Object_18F890 { u8 pad00[0x0C]; Buffer_18F890* buffer; u8 pad10[4]; };
@@ -457,15 +426,6 @@ void func_0020AE40(void* self, void* a, s32 b);
 void func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
 void func_0020B168(void* self, s32 a, void* fn, void* arg);
 
-void func_0018D8E0(Ctx_0018D8E0* self);
-void func_0018D910(Ctx_0018D910* self);
-void func_0018D978(void* self);
-void func_0018D9B8(Obj_18D9B8* self, void* b, f32 x);
-void func_0018DB20(Self_18DB20* self, void* in1, void* in2);
-s32 func_0018DC88(Obj_0018DC88* self, void* key);
-void func_0018DD50(List_0018DD50* list, void* item);
-void func_0018DD78(Queue_18DD78* self, s32 value);
-void func_0018DDA0(Ctx_18DDA0* self);
 s32 func_0018E410(Ent_18E410* key);
 u8* func_0018E480(s32 index);
 void func_0018E4C0(s32 idx);
@@ -497,13 +457,13 @@ void func_0018F6E8(Obj_18F6E8* self);
 void func_0018F7D0(Obj_18F7D0* self);
 s32 func_0018F890(Object_18F890* self, s32 wait);
 
-void func_0018D8E0(Ctx_0018D8E0* self)
+void func_0018D8E0(C3C* self)
 {
     func_0013B4C0(self);
     self->ready = 1;
 }
 
-void func_0018D910(Ctx_0018D910* self)
+void func_0018D910(C3C* self)
 {
     u64 mask = (u64)(s64)-0x301;
     u64 set = 0x8000;
@@ -517,47 +477,47 @@ void func_0018D910(Ctx_0018D910* self)
     self->flags = (self->flags & mask) | set;
 }
 
-void func_0018D978(void* self)
+void func_0018D978(C3C* self)
 {
     func_001B7B78(self);
-    void* p = *(void**)((u8*)self + 0x6B4);
+    void* p = self->f6B4;
     if (p != 0) {
         func_0012E760(p);
-        *(void**)((u8*)self + 0x6B4) = 0;
+        self->f6B4 = 0;
     }
 }
 
-void func_0018D9B8(Obj_18D9B8* self, void* b, f32 x)
+void func_0018D9B8(C3C* self, void* b, f32 x)
 {
-    if (self->f6B8 != 0) {
-        func_00189350(self->f150, self->fD0);
+    if (self->ready != 0) {
+        func_00189350(&self->v150, &self->rot);
     }
-    s32 s1 = self->f1EC;
-    s32 s0 = self->f1F0;
+    s32 s1 = (s32)self->f1EC;
+    s32 s0 = (s32)self->f1F0;
     self->f1EC = 0;
     self->f1F0 = 0;
     func_001BC088(self, x, b);
-    self->f1EC = s1;
-    self->f1F0 = s0;
+    self->f1EC = (void*)s1;
+    self->f1F0 = (void*)s0;
 }
 
 ASM_FUNC(func_0018DA40);
 
-void func_0018DB20(Self_18DB20* self, void* in1, void* in2)
+void func_0018DB20(C3C* self, void* in1, void* in2)
 {
     Frame_18DB20 f;
 
-    if ((self->flags2C8 & 0x100000000ULL) == 0) {
-        if (self->p1EC == 0 && self->p1F0 == 0) {
+    if ((self->flags & 0x100000000ULL) == 0) {
+        if (self->f1EC == 0 && self->f1F0 == 0) {
             func_00125C90(self, in1, in2);
         } else {
-            if (self->p1EC != 0) {
-                self->p1EC->vtbl[4](self->p1EC, 0.0f, &f, &f.q10);
+            if (self->f1EC != 0) {
+                ((Obj_18DB20*)self->f1EC)->vtbl[4](self->f1EC, 0.0f, &f, &f.q10);
             } else {
                 f.q00 = *(Quad_18DB20*)D_00248D30;
             }
-            if (self->p1F0 != 0) {
-                self->p1F0->vtbl[5](self->p1F0, 0.0f, &f.tbl30, &f.q20);
+            if (self->f1F0 != 0) {
+                ((Obj_18DB20*)self->f1F0)->vtbl[5](self->f1F0, 0.0f, &f.tbl30, &f.q20);
             } else {
                 f.tbl30 = *(Tbl3_18DB20*)D_002483D0;
             }
@@ -570,7 +530,7 @@ void func_0018DB20(Self_18DB20* self, void* in1, void* in2)
     }
 }
 
-s32 func_0018DC88(Obj_0018DC88* self, void* key)
+s32 func_0018DC88(C3C* self, void* key)
 {
     if (key == self->f6E4) {
         return 1;
@@ -588,28 +548,28 @@ s32 func_0018DC88(Obj_0018DC88* self, void* key)
     return func_001B8A08(self, key);
 }
 
-void func_0018DD50(List_0018DD50* list, void* item)
+void func_0018DD50(C3C* self, void* item)
 {
-    u32 n = list->count;
+    u32 n = self->count6BC;
     if (n < 4) {
-        list->items[n] = item;
-        list->count = n + 1;
+        self->items6C0[n] = item;
+        self->count6BC = n + 1;
     }
 }
 
-void func_0018DD78(Queue_18DD78* self, s32 value)
+void func_0018DD78(C3C* self, s32 value)
 {
-    s32 n = self->count;
+    s32 n = self->count6D0;
     if ((u32)n < 4) {
-        self->items[n] = value;
-        self->count = n + 1;
+        self->items6D4[n] = (void*)value;
+        self->count6D0 = n + 1;
     }
 }
 
-void func_0018DDA0(Ctx_18DDA0* self)
+void func_0018DDA0(C3C* self)
 {
-    func_0018D8E0((Ctx_0018D8E0*)self);
-    *(Quad_18DDA0*)((u8*)self + 0x350) = *(Quad_18DDA0*)D_00248D30;
+    func_0018D8E0(self);
+    self->gravity = *(Vec02*)D_00248D30;
 }
 
 ASM_FUNC(func_0018DDD8);
