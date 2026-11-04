@@ -74,15 +74,48 @@ double-buffered stream (0x12FE70). Sound banks are loaded by the sound driver fr
 sector the game sends it. After the tray has been opened, the game checks the disc by the
 CRC-32 of sector 1,368,303 (US).
 
-These tables cover 60% of the unlisted sectors. The levels themselves hold 269 more
-records of the same form (263 VAG sounds, six videos), bringing it to 80%. The
-rest, including 45 files that start `01 00 00 00`, is not yet accounted for.
+These tables cover 60% of the unlisted sectors. The levels hold the rest of the records
+(see Levels), bringing it to 87%.
+
+## Levels
+
+A level is one LZ-compressed file. Decompressed, it is read front to back by the
+world's loader (0x1DCEA0, called from the level load at 0x1E4EA8) through a stream of
+little-endian reads:
+
+| Part | Format | Reader |
+| --- | --- | --- |
+| header | s32 size of the texture data at the end; u32 time stamp | 0x1DB928 |
+| flags | u8 names flag (0 on retail); s16 sound bank (index into 0x244F40); u32 string count | 0x1DCEA0, 0x1DCCC0 |
+| values | u32 count and two u32 counts of names, then the values, each a tagged type | 0x1C1190, 0x11BA28 |
+| world properties | s16 field ids, ended by a negative one, each with its value | 0x11EC40 |
+| music | an optional disc record and name, overriding the music table; empty on US | 0x138550, 0x1384A0 |
+| level sound bank | a disc record, loaded by the sound driver | 0x138550, 0x1BEB10 |
+| textures | CLUTs, images, shaders and a short list, each counted by a u16 | 0x1B3040 |
+| objects | an s16 count, then per object its class, id and value index and the class's own data; objects hold their children the same way | 0x11ECB8 |
+| texture data | at the next multiple of 16: CLUT colours and pixels, addressed by offset from the texture tables | 0x1DBA38 |
+
+The file ends zero to fifteen bytes after the texture data. When a level is loaded again,
+or another with the same time stamp, the texture data is still in memory and the stream
+stops before it. Every US level parses this way up to the objects; the objects, most of
+each level, need each class's loader.
+
+The time stamps read as Unix times on 25 August 2002, within 32 minutes; the code only
+compares them.
+
+A level holds disc records of its own. The record after the music names the level's
+sound bank: these are the 45 files that start `01 00 00 00`, one per level except the
+splash screen. Three object classes read records: lists of steps (0x150570) and of timed
+events (0x12BC38) name 1,362 VAG sounds and 12 videos. With them, the records cover 87%
+of the unlisted sectors; what remains is one MPEG region of 172,705 sectors at 593,237,
+a 64-sector VAG and 13 empty sectors.
 
 ## Next
 
-1. **Each format, from its reader.** Levels, models, textures and sound are
+1. **Each format, from its reader.** A level's objects, class by class from
+   their loaders (the common one is 0x1289C0), then models, textures and sound,
    documented here, and the extractor written in OpenThievius, from the
    functions that parse them.
-2. **The remaining data.** Find the records of the videos, sounds and the
-   files starting `01 00 00 00` that no table names yet, and the part of the
-   level parser that reads the records a level holds.
+2. **The remaining data.** The MPEG region of 172,705 sectors at 593,237 and the
+   64-sector VAG at 454,000, which no record found yet names; and the object classes
+   that read records (0x65, 0x7D, 0x83).
