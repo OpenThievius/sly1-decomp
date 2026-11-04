@@ -261,7 +261,7 @@ void func_00177EE0(Self_177EE0* self, Other_177EE0* other, s32* out)
         out[0] = 0;
 }
 
-extern s32 D_00263930[];
+s32 D_00263930[16] = { -1, 36, 36, 36, -1, 36, 36, 36, 36, -1, 45, 45, 41, 40, 0, 0 };
 
 struct Obj_174F50 {
     u8 pad0[0x1390];

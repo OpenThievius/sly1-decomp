@@ -1613,8 +1613,8 @@ struct Self_15B4D0 {
     f32 f638;
 };
 extern f32 D_0026185C;
-extern f32 D_00262230[];
-extern f32 D_00262240[];
+f32 D_00262230[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
+f32 D_00262240[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 extern f32 D_00275C60[];
 void func_00125B70(Self_15B4D0* self, void* c, void* out);
 

@@ -10,7 +10,7 @@ u32 func_0020DEE8(u32 value)
 }
 
 struct Obj_20F0C0 { u8 pad[0x818]; u32 value; };
-extern u32 D_0027B040[];
+u32 D_0027B040[10] = { 0x1, 0x1, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1 };
 
 void func_0020F0C0(Obj_20F0C0* obj, u32 value)
 {

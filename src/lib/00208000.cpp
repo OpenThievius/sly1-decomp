@@ -114,11 +114,11 @@ struct Handle_2095B0;
 struct Pool_2095B0;
 struct Name_2095B0;
 
-extern s32 D_0027AECC;
+s32 D_0027AECC = -1;
 extern u8 D_0062AD40[];
 extern u8 D_0062AE04[];
 extern u8 D_0062C300[];
-extern s32 D_0027AEC8;
+s32 D_0027AEC8 = 0;
 
 s32 func_001F6B70(Handle_2095B0* h);
 void func_001F6B40(Handle_2095B0* h);

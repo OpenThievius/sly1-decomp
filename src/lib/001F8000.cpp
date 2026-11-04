@@ -57,7 +57,7 @@ struct Buf_1F84D8 {
 
 s32 func_001F6B20(Buf_1F84D8* self);
 
-extern s32 D_002771C0;
+s32 D_002771C0 = -1;
 extern s32 D_002771C4;
 
 void func_001F84D8(void)
@@ -77,7 +77,7 @@ void func_001F84D8(void)
 struct Desc_001F8968 { s32 f0; s32 f4; s32 f8; s32 fc; s32 f10; s32 f14; };
 struct Handle_001F8968;
 
-extern s32 D_002771BC;
+s32 D_002771BC = -1;
 
 s32 func_001F6B20(Desc_001F8968* self);
 

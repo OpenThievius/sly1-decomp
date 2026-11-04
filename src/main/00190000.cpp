@@ -180,7 +180,7 @@ u32 func_001907E0(u32 x)
     return (x & 1) ? 0 : x;
 }
 
-extern s32 D_00269BA4;
+s32 D_00269BA4 = 0;
 
 void func_00191EB0(void)
 {

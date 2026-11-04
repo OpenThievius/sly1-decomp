@@ -20,9 +20,9 @@ void func_001BE708(void)
     func_001BE998();
 }
 
-extern s32 D_00274720;
+s32 D_00274720 = 0;
 extern s32 D_00274728;
-extern s32 D_0027473C;
+s32 D_0027473C = 0;
 
 void func_001BEB10(void* self);
 s32 func_0011CE30(void);
@@ -1602,7 +1602,7 @@ struct Obj_1BF920 {
     union { B8_1BF920 v; f32 f; } f80;
 };
 
-extern s32 D_0027474C;
+s32 D_0027474C = 0;
 void* func_001F5C0C(Obj_1BF920* p, s32 v, s32 n);
 s32 func_001EAA70(s32 a, s32 b);
 void func_001BF620(Q16_1BF920* self, f32* out, s32* flag, f32 a, f32 b, f32 c);

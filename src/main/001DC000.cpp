@@ -1473,8 +1473,8 @@ struct Self_1DF2C8 {
 struct Rgba_1DF2C8 { u8 r, g, b, a; };
 
 extern f32 D_00261858[];
-extern f32 D_00275870[];
-extern f32 D_00275880[];
+f32 D_00275870[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
+f32 D_00275880[4] = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
 extern Rgba_1DF2C8 D_002623E0;
 
 struct Clamp_1DF2C8 {

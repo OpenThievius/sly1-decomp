@@ -196,9 +196,9 @@ void func_001DAF08(void* self, s32 code, Rec_1DAF08* rec)
 
 struct Obj_1DBA38 { u8 pad0[0x14]; s32 f14; };
 
-extern s32 D_0027571C;
+s32 D_0027571C = 0;
 extern s32 D_00275718;
-extern s32 D_00275720;
+s32 D_00275720 = 0;
 extern s32 D_00275728;
 void func_00137B60(void* self, s32 n);
 void func_00137A60(void* self, s32 size, s32 obj);

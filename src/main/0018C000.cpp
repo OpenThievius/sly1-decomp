@@ -2073,7 +2073,7 @@ extern const Fn_Table D_0024B598[8] = { 0, 0, 0, (Fn_Table)func_0018E8C8, 0, (Fn
 extern const Fn_Table D_0024B5B8[10] = { 0, 0, 0, (Fn_Table)func_0018E6C0, 0, (Fn_Table)func_0018E8C0, 0, 0, 0, 0 };
 
 extern u8 D_0064C70F[];
-extern s32 D_002699A4;
+s32 D_002699A4 = 0;
 extern s32 D_002699A8;
 extern s32 D_002C2A10;
 extern s32 D_002C2A24;

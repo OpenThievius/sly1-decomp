@@ -1151,7 +1151,7 @@ void func_00188A20(f32* in, f32* out)
     out[10] = ca * cb;
 }
 
-extern s32 D_002649B0[];
+s32 D_002649B0[5] = { 4, 5, 60, 41, 76 };
 struct Sub_18A830;
 s32 func_001300E8(Sub_18A830* a, s32 b);
 s32 func_001833F0(Sub_18A830* a, s32 b);
@@ -1254,7 +1254,7 @@ struct Obj_18B340 {
 void func_001A8C90(void* obj, s32 v);
 void func_001C9DE0(void* self, s32 code, void* req);
 void func_001B6598(void* dev, s32* out);
-extern f32 D_00264A34;
+f32 D_00264A34 = 20.0f;
 extern f32 D_00264A38;
 
 void func_0018B340(Self_18B340* self, s32 a1, Key_18B340* key)

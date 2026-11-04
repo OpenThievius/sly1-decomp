@@ -85,7 +85,7 @@ u32 func_0016BB78(u32 bit)
 
 extern s32 D_002BE470;
 extern s32 D_002626C0;
-extern s32 D_002626C4;
+s32 D_002626C4 = 0;
 extern s32 D_002626C8;
 extern s32 D_002626CC;
 extern s32 D_00262484;

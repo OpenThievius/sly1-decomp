@@ -94,7 +94,7 @@ void func_0017B598(void* self)
 }
 
 extern s32 D_00263E2C;
-extern s32 D_00263E30;
+s32 D_00263E30 = 0;
 
 struct Obj_17B5D0 { u8 pad0[0x558]; s32 f558; };
 

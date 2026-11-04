@@ -403,7 +403,7 @@ void func_001A4860(Obj_1A4860* obj, s32 value)
     obj->field2D4 = value;
 }
 
-extern s32 D_0026C3DC;
+s32 D_0026C3DC = 0;
 
 void func_001A7E70(void)
 {

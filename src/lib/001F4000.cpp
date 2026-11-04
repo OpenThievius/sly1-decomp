@@ -117,7 +117,7 @@ struct Init_1F70F8 { s32 a; s32 b; s32 c; };
 struct Blk_1F70F8 { s32 a; s32 b; };
 struct Frame_1F70F8 { Ctx_1F70F8 ctx; u8 pad[0x18]; Init_1F70F8 init; u8 pad2[0x14]; };
 
-extern s32 D_00277128;
+s32 D_00277128 = 0;
 extern s32 D_00625B70;
 extern Blk_1F70F8 D_00625B78;
 extern u8 D_00625770[];

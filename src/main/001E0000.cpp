@@ -480,7 +480,7 @@ extern Glob_1E00B0* D_00275710;
 extern Cam_1E00B0* D_002623C8;
 extern Pool_1E00B0 D_00262C70;
 extern f32 D_0026185C;
-extern s32 D_002623DC;
+s32 D_002623DC = 0;
 extern s32 D_002701C4;
 void func_001AA298(Obj_1E00B0* q);
 void func_0016EC20(Pool_1E00B0* q, s32 n);

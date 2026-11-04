@@ -306,7 +306,7 @@ void func_001C05D0(f32 x)
     func_0011D480(8, (s32)(x * 1024.0f));
 }
 
-extern s32 D_00274808[];
+s32 D_00274808[6] = { 0, 2, 3, 4, 9, 1 };
 
 void func_0011E328(s32 a, s32 b);
 void func_0011E360(s32 a, s32 b, s32 c);

@@ -1015,7 +1015,7 @@ struct Obj_136238 {
 struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
 struct In_136238 { s32 a; };
 
-extern s32 D_00261120[];
+s32 D_00261120[2] = { -268435456, -268435456 };
 extern u8 D_00275710[];
 
 void func_001BEA50(void);
@@ -1149,7 +1149,7 @@ struct Q_135228
     u8 pad[4];
 };
 
-extern f32 D_00261260[];
+f32 D_00261260[2] = { 8.0f, 0.0f };
 extern f32 D_002611E0[][4];
 extern f32 D_00261220[][4];
 
