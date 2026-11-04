@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c88.h"
 
 struct Data_1B4BC8 { u8 pad0[0x20]; s32 count; };
 struct Node_1B4BC8 {
@@ -770,22 +771,16 @@ u8* func_001B4B48(Owner_1B4B48* owner, Key_1B4B48* key)
     return 0;
 }
 
-struct Actor_1B61A8 {
-    u8 pad_00[0x14];
-    void* owner_14;
-    u8 pad_18[0x2C];
-    s32 armed_44;
-};
 
 void func_00182C58(void* self);
 void func_001B61F0(void* self);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
-void func_001B61A8(Actor_1B61A8* self)
+void func_001B61A8(C88* self)
 {
     func_00182C58(self);
-    if (self->armed_44 != 0) {
-        func_001DBCC8(self->owner_14, (void*)func_001B61F0, self, 0, 0);
+    if (self->armed != 0) {
+        func_001DBCC8(self->world, (void*)func_001B61F0, self, 0, 0);
     }
 }
 

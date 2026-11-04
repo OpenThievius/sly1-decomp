@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c8c.h"
 
 struct Obj_1A5DD8 { u8 pad[0x560]; void* child; };
 
@@ -1621,63 +1622,40 @@ struct __attribute__((aligned(16))) Quad_1A7FE8 {
     s32 d;
 };
 
-struct V_1A7FE8 { s32 a; f32 b; s32 c; };
 
-struct Obj_1A7FE8 {
-    u8 p00[0x14];
-    s32 f14;
-    u8 p18[0x34];
-    s32 f4C;
-    s32 f50;
-    s32 f54;
-    s32 f58;
-    u8 q60[0x7C];
-    f32 fD8;
-    u8 pDC[0x34];
-    V_1A7FE8 v110;
-    u8 p11C[0x4];
-    s32 f120;
-    f32 f124;
-    u8 p128[0x1C];
-    f32 f144;
-    u8 p148[0x8];
-    u8 p150[0x18];
-    s32 f168;
-};
-
-void func_00182C18(Obj_1A7FE8* self);
+void func_00182C18(C8C* self);
 struct Buf_1A7FE8 { u8 b[1]; };
 s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
 struct Own_1A7FE8 { u8 b[1]; };
 void func_001DBCC8(Own_1A7FE8* owner, void* fn, void* arg, s32 a3, s32 a4);
-void func_001A8208(Obj_1A7FE8* self);
+void func_001A8208(C8C* self);
 
-void func_001A7FE8(Obj_1A7FE8* self)
+void func_001A7FE8(C8C* self)
 {
     func_00182C18(self);
     u8* s1 = (u8*)self + 0x60;
-    self->f4C = -1;
-    self->f50 = -1;
-    self->f54 = -1;
-    self->f58 = -1;
+    self->id4C = -1;
+    self->id50 = -1;
+    self->id54 = -1;
+    self->id58 = -1;
     (void)func_001F5C0C((Buf_1A7FE8*)s1, 0, 0x80);
     Quad_1A7FE8* src = (Quad_1A7FE8*)D_002483D0;
     *(Quad_1A7FE8*)(s1 + 0x20) = src[0];
     *(Quad_1A7FE8*)(s1 + 0x30) = src[1];
     *(Quad_1A7FE8*)(s1 + 0x40) = src[2];
     (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
-    V_1A7FE8* p = &self->v110;
+    V8C* p = &self->v110;
     p->a = 0;
     p->b = 1.0f;
     p->c = 0;
     self->f120 = 0;
     self->f124 = 20000.0f;
-    (void)func_001F5C0C((Buf_1A7FE8*)self->p150, 0, 0x18);
+    (void)func_001F5C0C((Buf_1A7FE8*)((u8*)self + 0x150), 0, 0x18);
     f32 d = D_0024CBC4;
     self->fD8 = 5.0f;
     self->f168 = 0;
     self->f144 = d;
-    func_001DBCC8((Own_1A7FE8*)self->f14, (void*)func_001A8208, self, 0, 0);
+    func_001DBCC8((Own_1A7FE8*)self->world, (void*)func_001A8208, self, 0, 0);
 }
 
 struct Sub_1A4C48 { u8 pad0[0x2D4]; s32 f2D4; };

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c8c.h"
 
 void func_00182ED0(void* self);
 void func_001A93C8(void* self);
 
-void func_001A80E0(void* self)
+void func_001A80E0(C8C* self)
 {
     func_00182ED0(self);
     func_001A93C8(self);
@@ -410,21 +411,19 @@ void func_001AA8C0(Obj_1AA8C0* self, f32 v)
     self->value = v;
 }
 
-struct Obj_1A8590 { u8 pad0[0x14]; void* f14; u8 pad1[0x34]; s32 f4C; s32 f50; s32 f54; s32 f58; void* f5C; void* f60; void* f64; void* f68; u8 pad2[0x74]; void* fE0; void* fE4; u8 pad3[0x78]; void* f160; void* f164; s32 f168; };
-
 void func_00182C58(void* self);
 void* func_0015A448(void* obj, s32 id, void* owner);
 s32 func_001300E8(void* node, s32 kind);
 
-void func_001A8590(Obj_1A8590* self)
+void func_001A8590(C8C* self)
 {
     func_00182C58(self);
     if (self->f168 != 0) {
         return;
     }
     self->f168 = 1;
-    if (self->f4C != -1) {
-        void* p = func_0015A448(self->f14, self->f4C, self);
+    if (self->id4C != -1) {
+        void* p = func_0015A448(self->world, self->id4C, self);
         if (p != 0) {
             if (func_001300E8(p, 0x7E) != 0) {
                 self->f60 = p;
@@ -435,8 +434,8 @@ void func_001A8590(Obj_1A8590* self)
             }
         }
     }
-    if (self->f50 != -1) {
-        void* p = func_0015A448(self->f14, self->f50, self);
+    if (self->id50 != -1) {
+        void* p = func_0015A448(self->world, self->id50, self);
         if (p != 0) {
             if (func_001300E8(p, 2) != 0) {
                 self->fE0 = p;
@@ -445,8 +444,8 @@ void func_001A8590(Obj_1A8590* self)
             }
         }
     }
-    if (self->f54 != -1) {
-        void* p = func_0015A448(self->f14, self->f54, self);
+    if (self->id54 != -1) {
+        void* p = func_0015A448(self->world, self->id54, self);
         if (p != 0) {
             if (func_001300E8(p, 0x73) != 0) {
                 self->f160 = p;
@@ -455,8 +454,8 @@ void func_001A8590(Obj_1A8590* self)
             }
         }
     }
-    if (self->f58 != -1) {
-        self->f5C = func_0015A448(self->f14, self->f58, self);
+    if (self->id58 != -1) {
+        self->f5C = func_0015A448(self->world, self->id58, self);
     }
 }
 
@@ -492,7 +491,7 @@ f32 func_001AB5D8(void)
 
 void func_001A93C8(void* self);
 
-void func_001A86F8(void* self, s32 flag)
+void func_001A86F8(C8C* self, s32 flag)
 {
     if (flag) {
         func_001A93C8(self);
@@ -640,16 +639,13 @@ void func_001AB928(Obj_1AB928* self, s32 v, f32 f)
     self->f28c = v;
 }
 
-struct Sub_1A84C8 { u8 pad0[4]; s32 f4; s32 f8; u8 pad1[8]; void* f14; };
-struct Obj_1A84C8 { u8 pad0[0x34]; s32 count; void* items; Sub_1A84C8* sub; };
-
-void func_001830D8(Obj_1A84C8* self, void* o);
+void func_001830D8(C8C* self, void* o);
 void* func_001A8110(void* self);
 void func_00152438(void* self, s32 value);
 void func_00152470(void* list, void* item);
 u8* func_0018D568(s32 size, void* src);
 
-void func_001A84C8(Obj_1A84C8* self, Obj_1A84C8* other)
+void func_001A84C8(C8C* self, C8C* other)
 {
     func_001830D8(self, other);
     if (self->sub != 0 && self->sub->f4 != 0) {
