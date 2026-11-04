@@ -199,14 +199,14 @@ struct Obj_1DBA38 { u8 pad0[0x14]; s32 f14; };
 s32 D_0027571C = 0;
 extern s32 D_00275718;
 s32 D_00275720 = 0;
-extern s32 D_00275728;
+extern s32 D_00275728[2];
 void func_00137B60(void* self, s32 n);
 void func_00137A60(void* self, s32 size, s32 obj);
 
 void func_001DBA38(Obj_1DBA38* self)
 {
     if (D_0027571C != 0) {
-        D_00275728 = self->f14;
+        D_00275728[0] = self->f14;
         func_00137B60(self, 0x10);
         func_00137A60(self, D_00275720, D_00275718);
     }
@@ -430,7 +430,7 @@ extern s32 D_00275718;
 extern s32 D_0027571C;
 extern s32 D_00275720;
 s32 D_00275724;
-extern s32 D_00275728;
+extern s32 D_00275728[2];
 
 s32 func_00137480(void* self, s32 n);
 s32 func_00137D78(void* self);
@@ -443,8 +443,8 @@ void func_001DB928(s32 a0, Self_1DB928* self)
     s32 s0;
     if (self->f4 == 1) {
         if (s2 == 0) {
-            func_00137480(self, D_00275728);
-            self->f14 -= D_00275728;
+            func_00137480(self, D_00275728[0]);
+            self->f14 -= D_00275728[0];
         }
         s3 = func_00137D78(self);
         s0 = func_00137D78(self);
@@ -453,7 +453,7 @@ void func_001DB928(s32 a0, Self_1DB928* self)
         s0 = func_00137D78(self);
         if (s0 != D_00275724) s2 = 1;
         if (s2 == 0) {
-            s32 v = self->f14 - D_00275728;
+            s32 v = self->f14 - D_00275728[0];
             self->f14 = (s2 < v) ? v : 0;
         }
     }
@@ -635,7 +635,7 @@ struct Obj_1D8578 {
 
 extern f32 D_00261858[];
 f32 D_002754A0[4] = { 1.5f, 2.5f, 0.0f, 0.0f };
-extern u8 D_00275490[];
+extern f32 D_00275490[4];
 
 void* func_001925F0(void);
 f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
@@ -644,7 +644,7 @@ f32 func_001EAAE0(f32 a, f32 b);
 void func_001D8578(Obj_1D8578* self)
 {
     if (self != func_001925F0()) {
-        self->f85C = func_001EA4B8(D_00275490, 0, self->f85C, self->f860, D_00261858[2]);
+        self->f85C = func_001EA4B8((u8*)D_00275490, 0, self->f85C, self->f860, D_00261858[2]);
         if (!(D_00261858[1] < self->f864)) {
             f32 one = 1.0f;  // hoisted: retail holds 1.0f in $f3 before the multiply
             s32 idx = 3 * (self->nB00 - 1) + self->sub->n0C;
@@ -1055,14 +1055,14 @@ void func_001DBC60(Obj_1DBC60* self, s32 a1, s32 a2, s32 a3, s32 a4)
 
 struct Slot_1D8D90 { u8 pad0[0x50]; f32 v; u8 pad1[0xC]; };
 struct Obj_1D8D90 { u8 pad0[0xD0]; f32 fD0; f32 fD4; u8 pad1[0x610 - 0xD8]; f32 f610; f32 f614; u8 pad2[0x694 - 0x618]; f32 f694; f32 f698; f32 f69C; u8 pad3[0x6B0 - 0x6A0]; Slot_1D8D90 slots[4]; };
-extern f32 D_002754F8; extern f32 D_002754F4; extern f32 D_00261860; extern u8 D_002754E8[];
+extern f32 D_002754F8[2]; extern f32 D_002754F4; extern f32 D_00261860; extern f32 D_002754E8[3];
 f32 func_00205778(f32 a, f32 b); f32 func_001EA408(f32 a); f32 func_001EA480(f32 a, f32 b); f32 func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
 void func_001D8D90(Obj_1D8D90* self)
 {
     f32 a = func_00205778(self->fD4, self->fD0);
     f32 b = func_001EA408(self->f694 - a);
-    f32 c = func_001EA480(D_002754F8 * b, D_002754F4);
-    self->f69C = func_001EA728(D_002754E8, 0, self->f69C, c, D_00261860);
+    f32 c = func_001EA480(D_002754F8[0] * b, D_002754F4);
+    self->f69C = func_001EA728((u8*)D_002754E8, 0, self->f69C, c, D_00261860);
     for (u32 i = 0; i < 4; i++) {
         Slot_1D8D90* s = &self->slots[i];
         if ((s32)i < 2) {
@@ -1129,3 +1129,9 @@ void func_001DB838(s32 a0)
         *(s32*)(e + 0x28C) = 0;
     }
 }
+
+f32 D_00275490[4] = { 0.05f, 0.0f, 0.25f, 0.0f };
+f32 D_002754E8[3] = { 8.0f, 0.0f, 0.25f };
+f32 D_002754F4 = 0.7f;
+f32 D_002754F8[2] = { 0.5f, 0.0f };
+s32 D_00275728[2] = { 0, 0 };

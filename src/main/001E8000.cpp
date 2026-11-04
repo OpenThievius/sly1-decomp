@@ -151,7 +151,10 @@ void func_001E88B0(void)
 
 struct Obj_1EB598 { u8 pad0[0x14]; void* f14; u8 pad1[0x610 - 0x18]; void* f610; void* f614; };
 
-extern u8 D_00275CA0[];
+struct Entry_275CA0 { s32 a; s32 b; s32 c; };
+Entry_275CA0 D_00275CA0[4] = {
+    { 4, 0x4D0, 0x618 }, { 4, 0x4D1, 0x61C }, { 4, 0x4D2, 0x620 }, { 4, 0x4D3, 0x624 }
+};
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a, void* p);
 void* func_001B6290(void* a, void* self, s32 b, s32 c);
@@ -420,7 +423,8 @@ void func_001EB160(void)
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 n, void* data);
-extern u8 D_00275C90[];
+struct Entry_275C90 { s32 a; s32 b; s32 c; };
+Entry_275C90 D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
 
 void func_001EB518(void* self)
 {
@@ -625,7 +629,11 @@ struct Obj_1E8948 {
 };
 
 extern u8 D_00261420[];
-extern u8 D_00275B60[];
+struct Entry_275B60 { s32 a; s32 b; s32 c; };
+Entry_275B60 D_00275B60[8] = {
+    { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
+    { 7, 0x2E3, 0xC6C }, { 7, 0x2E4, 0xC70 }, { 7, 0x2E5, 0xC74 }, { 7, 0x2E6, 0xC78 }
+};
 
 void func_00124DF8(void* self, s32 a1, void* a2);
 void func_001DDC38(void* sub, void* self);
@@ -946,8 +954,17 @@ void* func_001B6290(void* a, s32 b, s32 c, s32 d);
 void func_001B6DF8(void* a, void* self);
 void* func_0018D568(s32 size, void* name);
 s32 func_0015A418(void* a, s32 b, s32 c, void* self);
-extern u8 D_00275D08[];
-extern u8 D_00275D48[];
+struct Entry_275D08 { s32 a; s32 b; s32 c; };
+Entry_275D08 D_00275D08[5] = {
+    { 1, 0x4EB, 0xC50 }, { 0, 0x4E7, 0xC24 }, { 0, 0x4E8, 0xC28 }, { 0, 0x4E9, 0xC2C },
+    { 0, 0x4EA, 0xC30 }
+};
+struct Entry_275D48 { s32 id; f32 v; s32 z; };
+Entry_275D48 D_00275D48[9] = {
+    { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 }, { 0x3B, 80.0f, 0 },
+    { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }, { 0x52, 80.0f, 0 }, { 0x53, 80.0f, 0 },
+    { 0x54, 80.0f, 0 }
+};
 
 void func_001EBFB0(Ctx_1EBFB0* self)
 {
@@ -973,8 +990,8 @@ void func_001EBFB0(Ctx_1EBFB0* self)
 
 struct Obj_1EA0A8 { u8 pad[0x234C]; f32 f234C; f32 f2350; };
 
-extern u8 D_00275C18[];
-extern u8 D_00275C28[];
+f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
+f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
 
 f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
 

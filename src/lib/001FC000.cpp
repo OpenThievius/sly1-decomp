@@ -185,11 +185,16 @@ void* func_001FEFF0(void* self)
     return self;
 }
 
-extern u8 D_0024F1E0[];
+void func_00200000(void);
+void func_00200050(void);
+void* func_001FFFF0(void);
+struct VEnt_24F1E0 { s32 delta; void (*fn)(); };
+struct Bad_24F1E0 { char name[24]; VEnt_24F1E0 vt[3]; };
+extern const Bad_24F1E0 D_0024F1E0;
 
 void* func_001FFFF0(void)
 {
-    return D_0024F1E0;
+    return (void*)&D_0024F1E0;
 }
 
 // NEAR: retail saves $ra and $s0 with sd (8 bytes), not sq, and computes the third call argument earlier; retail is in the double-precision range that docs/TOOLCHAIN.md says is built by Sony 2.9-ee-991111, not SN GCC.
@@ -432,7 +437,7 @@ s32 func_001FEF00(Obj_001FEF00* self)
 // NEAR: only the $ra and $s0 saves differ: retail sd/ld, ours sq/lq
 
 extern u8 D_0062C5A8[];
-extern u8 D_0024F0F0[];
+extern const char D_0024F0F0[16];
 extern u8 D_0027B318[];
 
 struct Node_1FEF70 {
@@ -446,7 +451,7 @@ void* func_001FEF70(void) {
     struct Node_1FEF70 *node = (struct Node_1FEF70 *)D_0062C5A8;
     if (node->field0 == 0) {
         func_001FF008();
-        func_00200118(node, D_0024F0F0, D_0027B318);
+        func_00200118(node, (void*)D_0024F0F0, D_0027B318);
     }
     return node;
 }
@@ -454,7 +459,7 @@ void* func_001FEF70(void) {
 // NEAR: only the s0 and ra saves differ: retail saves ra and s0 with sd (8 bytes), the SN builds with sq; the 8-byte save is the Sony 2.9-ee-991111 form (docs/TOOLCHAIN.md), not used here.
 
 extern u8 D_0027B318[];
-extern u8 D_0024F100[];
+extern const char D_0024F100[16];
 
 struct Node_1FF008 {
     void *field0;
@@ -466,7 +471,7 @@ void func_00200138(struct Node_1FF008 *self, void *value);
 void *func_001FF008(void) {
     struct Node_1FF008 *node = (struct Node_1FF008 *)D_0027B318;
     if (*(void **)D_0027B318 == 0) {
-        func_00200138(node, D_0024F100);
+        func_00200138(node, (void*)D_0024F100);
     }
     return node;
 }
@@ -2180,3 +2185,10 @@ s32 func_001FE198(Obj_1FE198* obj, Pc_1FE198* pc, Frame_1FE198* fb, Frame_1FE198
     *pout = udata;
     return res;
 }
+
+// Globals defined from C.
+void (*D_00278048)() = func_001FD920;
+s32 D_00278640 = (s32)func_001FE908;
+extern const char D_0024F0F0[16] = "13bad_exception";
+extern const char D_0024F100[16] = "9exception";
+extern const Bad_24F1E0 D_0024F1E0 = { "bad_alloc", { { 0, func_00200000 }, { 0, func_00200050 }, { 0, (void(*)())func_001FFFF0 } } };

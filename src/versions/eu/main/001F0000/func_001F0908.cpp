@@ -10,7 +10,7 @@ struct Eng_eu_1F0908 {
 
 void func_001F0908(Obj_1F0908* self)
 {
-    if (D_00276250 == -1) return;
+    if (D_00276250[0] == -1) return;
     func_001AA8B8(&D_002721D0, (((*(Cfg_1F0908**)&D_002623C0)->hi << 8) | (*(Cfg_1F0908**)&D_002623C0)->lo) == 4 ? 0.5f : 2.0f);
     D_002721D0.vt->set(&D_002721D0, 2);
     Eng_eu_1F0908* e = ((Eng_eu_1F0908*)&D_0026F138);
@@ -20,7 +20,7 @@ void func_001F0908(Obj_1F0908* self)
     e->i974 = 1;
     func_001AA8B8((Eng_1F0908*)e, 0.0f);
     e->vt->set((Eng_1F0908*)e, 2);
-    Slot_1F0908* sl = self->slots[D_00276250].s;
+    Slot_1F0908* sl = self->slots[D_00276250[0]].s;
     if (sl != 0) {
         f32 f = 0.0f;
         if (D_00276654 == 0) f = sl->f34;
@@ -35,5 +35,5 @@ void func_001F0908(Obj_1F0908* self)
             }
         }
     }
-    D_00276250 = -1;
+    D_00276250[0] = -1;
 }

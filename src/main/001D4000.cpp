@@ -234,7 +234,11 @@ void func_001D40A0(Owner_1D40A0* a0, Obj_1D40A0* a1, Ctx_1D40A0* a2, f32 f12, f3
     func_001D39E0(6, a1, a2->sub->f8, &a0->f640);
 }
 
-extern u8 D_00274FC0[];
+struct Entry_274FC0 { s32 id; f32 v; s32 z; };
+Entry_274FC0 D_00274FC0[8] = {
+    { 0x35, 30.0f, 0 }, { 0x36, 30.0f, 0 }, { 0x37, 30.0f, 0 }, { 0x3A, 30.0f, 0 },
+    { 0x50, 60.0f, 0 }, { 0x58, 30.0f, 0 }, { 0x170, 30.0f, 0 }, { 0, 0.0f, 0 }
+};
 
 struct Item_1D4848 { s32 f0; u8 pad4[4]; s32 f8; };
 struct Obj_1D4848 { u8 pad0[0x14]; void* f14; u8 pad1[0x2690]; s32 f26A8; Item_1D4848* f26AC; };
@@ -281,9 +285,9 @@ struct Obj_1D4A98 {
 };
 
 extern f32 D_00261858[];
-extern u8 D_00275030[];
+f32 D_00275030[4] = { 3.5f, 0.0f, 0.5f, 0.0f };
 f32 func_00205778(f32 a, f32 b);
-f32 func_001EA728(u8* p, s32 a, f32 b, f32 c, f32 d);
+f32 func_001EA728(f32* p, s32 a, f32 b, f32 c, f32 d);
 s32 func_001300E8(void* e, s32 k);
 void func_001D4C98(Obj_1D4A98* self);
 void func_00175170(Obj_1D4A98* self, s32 a, s32 b);
@@ -397,8 +401,11 @@ struct Obj_1D73A8 {
     s32 i_b04;
 };
 
-extern u8 D_00275250[];
-extern u8 D_00275290[];
+f32 D_00275250[16] = {
+    1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f
+};
+f32 D_00275290[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 void func_001921A8(void* self);
 void func_0018D800(void* dst, void* src, u32 size);
@@ -533,7 +540,7 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, 
 extern u32 D_00262C64;
 extern f32 D_0026185C[];
 extern u8 D_00248D30[];
-extern u8 D_00275040[];
+f32 D_00275040[4] = { 0.0f, 0.0f, -1000.0f, 0.0f };
 
 s32 func_001D4D08(Obj_1D4D08* self, Ev_1D4D08* msg)
 {
@@ -746,7 +753,7 @@ struct Obj_1D72C8 {
     u8 f18[0x80];
 };
 
-extern u8 D_0024DC90[];
+extern const char D_0024DC90[4];
 
 void func_0018D800(void* dst, void* src, s32 bytes);
 void func_001F7B88(void* a, void* b);
@@ -777,7 +784,7 @@ void func_001D72C8(Obj_1D72C8* self)
             func_0018D800(buf, p, chunk);
             p += chunk;
             buf[chunk] = 0;
-            func_001F7B88(D_0024DC90, buf);
+            func_001F7B88((void*)D_0024DC90, buf);
         }
     } else {
         func_001F9028(self->fC, self->f18, self->f14);
@@ -826,7 +833,14 @@ s32 func_001D7190(Ring_1D7190* self, void* src, s32 size)
     return n;
 }
 
-extern u8 D_002752A0[];
+struct Entry_2752A0 { s32 a; s32 b; s32 c; };
+Entry_2752A0 D_002752A0[20] = {
+    { 4, 0x416, 0x6B0 }, { 4, 0x417, 0x710 }, { 4, 0x418, 0x770 }, { 4, 0x419, 0x7D0 },
+    { 0, 0x41A, 0x6B8 }, { 0, 0x41B, 0x718 }, { 0, 0x41C, 0x778 }, { 0, 0x41D, 0x7D8 },
+    { 6, 0x41E, 0x6B4 }, { 6, 0x41F, 0x714 }, { 6, 0x420, 0x774 }, { 6, 0x421, 0x7D4 },
+    { 0, 0x422, 0x690 }, { 2, 0x428, 0xB28 }, { 2, 0x429, 0xB2C }, { 2, 0x42A, 0xB44 },
+    { 2, 0x42B, 0xB4C }, { 0x22, 0x423, 0xB14 }, { 0x20, 0x424, 0xB18 }, { 0x20, 0x425, 0xB1C }
+};
 struct Host_1D7440 { u8 pad[0x1D70]; s32 f1D70; };
 struct Grp_1D7440 { s32 pad; };
 struct Snd_1D7440 { s32 pad; };
@@ -960,3 +974,5 @@ void func_001D7440(Obj_1D7440* self)
     }
     func_001DB290(self);
 }
+
+extern const char D_0024DC90[4] = "%s";

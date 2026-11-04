@@ -149,8 +149,8 @@ void func_00211988(Ctx_211988* s0)
     func_00211838((Arg_211988*)(u32)(s0->fC | 0x100));
 }
 
-extern u8 D_002504B8[];
-extern u8 D_002504D8[];
+extern const char D_002504B8[];
+extern const char D_002504D8[];
 
 struct Sub_210090 { u8 pad[0x28]; s32 f28; };
 struct Obj_210090 {
@@ -175,7 +175,7 @@ s32 func_00210090(Obj_210090* self)
     s32 v;
     s32 mode = self->f174;
     if (mode == 3 && self->f120 != 0) {
-        func_0020B978(self, D_002504B8);
+        func_0020B978(self, (u8*)D_002504B8);
         self->f120 = 0;
         mode = self->f174;
     }
@@ -191,7 +191,7 @@ s32 func_00210090(Obj_210090* self)
         break;
     default:
         s1 = self->f1C0;
-        func_0020B978(self, D_002504D8);
+        func_0020B978(self, (u8*)D_002504D8);
         break;
     }
     v = func_0020E3B8(self);
@@ -535,8 +535,9 @@ void func_002107E0(Obj_2107E0* self, Node_2107E0* node, s64* out1, s64* out3, s6
 }
 
 typedef u64 Quad_211BA8 __attribute__((mode(TI)));
-extern volatile Quad_211BA8 D_0027B0C0[];
-extern Quad_211BA8 D_0027B110[];
+struct Quad_27B0C0 { u64 lo; u64 hi; } __attribute__((aligned(16)));
+extern volatile Quad_27B0C0 D_0027B0C0[];
+extern Quad_27B0C0 D_0027B110[];
 void func_00211B40(u32 value);
 
 void func_00211BA8(void)
@@ -548,22 +549,22 @@ void func_00211BA8(void)
     *(volatile u32*)0x10002000 = 0;
     while (*(volatile s32*)0x10002010 < 0) {
     }
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[0];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[1];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[2];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[3];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[0];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[1];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[2];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[3];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
+    *(volatile Quad_211BA8*)0x10007010 = *(volatile Quad_211BA8*)&D_0027B0C0[4];
     *(volatile u32*)0x10002000 = 0x50000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }
     *(volatile u32*)0x10002000 = 0x58000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B110[0];
-    *(volatile Quad_211BA8*)0x10007010 = D_0027B110[1];
+    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&D_0027B110[0];
+    *(volatile Quad_211BA8*)0x10007010 = *(Quad_211BA8*)&D_0027B110[1];
     *(volatile u32*)0x10002000 = 0x60000000;
     while (*(volatile s32*)0x10002010 < 0) {
     }
@@ -831,3 +832,20 @@ void func_00211090(Self_211090* self, s32 addr, s32 size)
     func_001F6E10(3);
     func_001F6990(3, id);
 }
+
+extern u8 D_00278000[], D_00278050[], D_00278644[], D_002789DC[], D_00278A7C[], D_00278E88[];
+
+volatile Quad_27B0C0 D_0027B0C0[5] = {
+    { 0x1616131013101008ULL, 0x1B1A181A16161616ULL },
+    { 0x1B1B1A1A1A1A1B1BULL, 0x1D2222221D1D1D1BULL },
+    { 0x20201D1D1B1B1D1DULL, 0x2223232526252222ULL },
+    { 0x3030282828262623ULL, 0x5345453A38382E2EULL },
+    { 0x1010101010101010ULL, 0x1010101010101010ULL },
+};
+Quad_27B0C0 D_0027B110[2] = {
+    { 0x03E0084204210000ULL, 0x1CE718C614A51084ULL },
+    { 0x7C00294A2529001FULL, 0x39CE7FFF35AD318CULL },
+};
+
+extern const char D_002504B8[32] = "odd number of field pictures";
+extern const char D_002504D8[32] = "unknown picture sutructure";

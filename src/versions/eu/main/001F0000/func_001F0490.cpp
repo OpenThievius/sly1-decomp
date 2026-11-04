@@ -21,7 +21,7 @@ s32 func_001F0490(Obj_1F0490* self, s32 kind, s32* outA, s32* outB)
                 if (*(s32*)((u8*)D_002623C0 + m + 0x88) & 1) {
                     u8* p = (u8*)D_002623C0 + 0x458;
                     s32 q = *(s32*)(p + m);
-                    flag = (q & ((s32*)D_00275FC8)[mode]) != 0;
+                    flag = (q & D_00275FC8[mode]) != 0;
                 }
             }
         } else {
