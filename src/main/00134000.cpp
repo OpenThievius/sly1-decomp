@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "s137290.h"
+#include "s18d410.h"
 
 void func_001AA8C8(void* self);
 s32 func_00150790(void* obj, s32 mode);
@@ -9,13 +11,11 @@ struct Child_136EF8 { u8 pad0[0x2D0]; s32 kind; };
 
 void func_00150790(Child_136EF8* obj, s32 mode);
 
-struct Pair_1373B0 { void* first; s32 second; };
-
 void func_00137328(void* a, void* b, s32 c);
 
-void func_001373B0(void* a, Pair_1373B0* pair)
+void func_001373B0(void* a, S18D410* pair)
 {
-    func_00137328(a, pair->first, pair->second);
+    func_00137328(a, pair->p0, pair->second);
 }
 
 struct Ring_137B60 { u8 pad0[0x18]; s32 head; s32 size; };
@@ -66,18 +66,16 @@ void func_0019EBE8(void* handle);
 void func_001A1DF0(void* handle, s32 mode);
 void func_001F5C0C(void* block, s32 value, s32 size);
 
-struct Reader_137D10 { u8 pad0[0x18]; u8* cur_18; s32 remaining_1C; };
-
 void func_00137A60(void* self, s32 count, void* out);
 
-s32 func_00137D10(Reader_137D10* self)
+s32 func_00137D10(S137290* self)
 {
-    if (self->remaining_1C >= 2) {
-        u8* p = self->cur_18;
+    if (self->remaining >= 2) {
+        u8* p = self->cur;
         u8 lo = p[0];
         s32 hi = p[1];
-        self->cur_18 = p + 2;
-        self->remaining_1C -= 2;
+        self->cur = p + 2;
+        self->remaining -= 2;
         return lo | ((s16)(hi << 8));
     }
     s16 tmp;
@@ -85,22 +83,16 @@ s32 func_00137D10(Reader_137D10* self)
     return tmp;
 }
 
-struct Reader_137DF8 {
-    u8 pad0[0x18];
-    u8* cursor_18;
-    s32 left_1C;
-};
-
 void func_00137A60(void* self, s32 size, void* dst);
 
-f32 func_00137DF8(Reader_137DF8* r)
+f32 func_00137DF8(S137290* r)
 {
-    s32 left = r->left_1C;
+    s32 left = r->remaining;
     if (left >= 4) {
-        u8* p = r->cursor_18;
+        u8* p = r->cur;
         u32 v = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
-        r->cursor_18 = p + 4;
-        r->left_1C = left - 4;
+        r->cur = p + 4;
+        r->remaining = left - 4;
         return *(f32*)&v;
     }
     f32 tmp;
@@ -119,7 +111,6 @@ void func_00137E70(void* src, void* dst)
 extern void func_00136FE8(s32, s32);
 extern void func_001373D0(void*);
 extern void func_0018D778(void*);
-struct Obj_137398 { u8 pad0[4]; s32 state; u8 pad8[0x10]; s32 f18; s32 f1C; };
 extern void func_00137A60(void*, s32, void*);
 
 void func_001372E0(void* self, s32 flags)
@@ -128,7 +119,7 @@ void func_001372E0(void* self, s32 flags)
     if (flags & 1) func_0018D778(self);
 }
 
-void func_00137398(Obj_137398* self, s32 a1, s32 a2) { self->f1C = a1; self->f18 = a2; self->state = 2; }
+void func_00137398(S137290* self, s32 a1, s32 a2) { self->remaining = a1; self->ptr = a2; self->mode = 2; }
 
 void func_00137E90(void* self, void* out) { func_00137A60(self, 0x10, out); }
 
@@ -147,30 +138,30 @@ struct State_001365A8 { u8 pad[0x300]; f32 value;
     }
 };
 
-struct State_00137820 { s32 w[13]; s32 maximum(s32 a, s32 b) { return a < b ? b : a; } };
+struct Max_137820 { static s32 Of(s32 a, s32 b) { return a < b ? b : a; } };
 void func_001377C0(void* self);
 void func_00137490(void* self);
 void func_00193288(void* self, s32 value);
-void func_00137820(State_00137820* self)
+void func_00137820(S137290* self)
 {
-    switch (self->w[1]) {
+    switch (self->mode) {
     case 0: func_001377C0(self); break;
     case 1: func_00137490(self); break;
     }
-    s32 value = self->w[5] - self->w[9];
-    value = self->maximum(0, value);
-    self->w[5] = value;
-    if (self->w[12]) func_00193288((void*)self->w[12], value);
+    s32 value = self->f14 - self->nextCount;
+    value = Max_137820::Of(0, value);
+    self->f14 = value;
+    if (self->f30) func_00193288((void*)self->f30, value);
 }
 
-s32 func_00137B90(Reader_137D10* self)
+s32 func_00137B90(S137290* self)
 {
-    s32 count = self->remaining_1C;
+    s32 count = self->remaining;
     if (count >= 1) {
-        u8* p = self->cur_18;
+        u8* p = self->cur;
         s32 value = p[0];
-        self->cur_18 = p + 1;
-        self->remaining_1C = count - 1;
+        self->cur = p + 1;
+        self->remaining = count - 1;
         return value;
     }
     u8 value;
@@ -178,14 +169,14 @@ s32 func_00137B90(Reader_137D10* self)
     return value;
 }
 
-s32 func_00137BE0(Reader_137D10* self)
+s32 func_00137BE0(S137290* self)
 {
-    s32 count = self->remaining_1C;
+    s32 count = self->remaining;
     if (count >= 2) {
-        u8* p = self->cur_18;
+        u8* p = self->cur;
         s32 value = p[0] | (p[1] << 8);
-        self->cur_18 = p + 2;
-        self->remaining_1C = count - 2;
+        self->cur = p + 2;
+        self->remaining = count - 2;
         return value;
     }
     u16 value;
@@ -193,14 +184,14 @@ s32 func_00137BE0(Reader_137D10* self)
     return value;
 }
 
-u32 func_00137C40(Reader_137D10* self)
+u32 func_00137C40(S137290* self)
 {
-    s32 count = self->remaining_1C;
+    s32 count = self->remaining;
     if (count >= 4) {
-        u8* p = self->cur_18;
+        u8* p = self->cur;
         u32 value = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
-        self->cur_18 = p + 4;
-        self->remaining_1C = count - 4;
+        self->cur = p + 4;
+        self->remaining = count - 4;
         return value;
     }
     u32 value;
@@ -208,14 +199,14 @@ u32 func_00137C40(Reader_137D10* self)
     return value;
 }
 
-s32 func_00137CC0(Reader_137D10* self)
+s32 func_00137CC0(S137290* self)
 {
-    s32 count = self->remaining_1C;
+    s32 count = self->remaining;
     if (count >= 1) {
-        u8* p = self->cur_18;
+        u8* p = self->cur;
         s32 value = (s8)p[0];
-        self->cur_18 = p + 1;
-        self->remaining_1C = count - 1;
+        self->cur = p + 1;
+        self->remaining = count - 1;
         return value;
     }
     s8 value;
@@ -223,14 +214,14 @@ s32 func_00137CC0(Reader_137D10* self)
     return value;
 }
 
-s32 func_00137D78(Reader_137D10* self)
+s32 func_00137D78(S137290* self)
 {
-    s32 count = self->remaining_1C;
+    s32 count = self->remaining;
     if (count >= 4) {
-        u8* p = self->cur_18;
+        u8* p = self->cur;
         s32 value = p[0] + (p[1] << 8) + (p[2] << 16) + ((s8)p[3] << 24);
-        self->cur_18 = p + 4;
-        self->remaining_1C = count - 4;
+        self->cur = p + 4;
+        self->remaining = count - 4;
         return value;
     }
     s32 value;
@@ -272,44 +263,24 @@ void func_0015C900(s32 v);
 void func_0015DB80(void* buf);
 s32 func_0015DBE0(void* buf);
 
-struct Chan_001373D0 {
-    s32 a00;
-    s32 mode;
-    s32 a08;
-    s32 a0C;
-    s32 a10;
-    s32 a14;
-    s32 a18;
-    s32 a1C;
-    s32 a20;
-    s32 a24;
-    s32 a28;
-    s32 a2C;
-    s32 a30;
-    s32 a34;
-    s32 a38;
-    s32 a3C;
-    s32 a40;
-};
-
 s32 func_001F8DB8(s32 p, s32 a, s32 b);
 
 void func_001F8C38(s32 p);
 void func_00203E28(void);
 void func_0011E2A0(void);
 
-void func_001373D0(Chan_001373D0* self)
+void func_001373D0(S137290* self)
 {
     s32 next = -1;
     switch (self->mode) {
     case 0:
-        if (self->a34 >= 0) {
-            func_001F8C38(self->a34);
+        if (self->f34 >= 0) {
+            func_001F8C38(self->f34);
         }
         break;
     case 1:
-        if (self->a3C != 0) {
-            if ((self->a00 & 2) != 0) {
+        if (self->f3C != 0) {
+            if ((self->flags & 2) != 0) {
                 func_00203E28();
             } else {
                 func_0011E2A0();
@@ -320,12 +291,12 @@ void func_001373D0(Chan_001373D0* self)
         break;
     }
     self->mode = next;
-    self->a20 = 0;
-    self->a18 = 0;
-    self->a24 = 0;
-    self->a1C = 0;
-    self->a28 = 0;
-    self->a2C = 0;
+    self->nextPtr = 0;
+    self->ptr = 0;
+    self->nextCount = 0;
+    self->remaining = 0;
+    self->f28 = 0;
+    self->f2C = 0;
 }
 
 struct Ring_00137328 {
@@ -385,31 +356,22 @@ s32 func_00160D10(void);
 
 // NEAR: control flow and the calls match; the compiler picks s0 for self and s1 for n (retail: s1, s0),
 // and keeps the loaded count in $a2 where retail uses $v1.
-struct Stream_137A60 {
-    s32 flags;      // 0x00
-    u8 pad04[0x14];
-    s32 ptr;        // 0x18
-    s32 count;      // 0x1C
-    s32 nextPtr;    // 0x20
-    s32 nextCount;  // 0x24
-};
-
 struct Dst_137A60;
 
-void func_001378A0(Stream_137A60* self);
-void func_00137820(Stream_137A60* self);
+void func_001378A0(S137290* self);
+void func_00137820(S137290* self);
 void func_0018D800(Dst_137A60* dst, void* src, s32 count);
 
-void func_00137A60(Stream_137A60* self, s32 remaining, Dst_137A60* dst)
+void func_00137A60(S137290* self, s32 remaining, Dst_137A60* dst)
 {
-    if (self->count < 0) {
+    if (self->remaining < 0) {
         return;
     }
     if (remaining <= 0) {
         return;
     }
     do {
-        s32 cnt = self->count;
+        s32 cnt = self->remaining;
         if (cnt == 0) {
             if (self->flags & 4) {
                 func_001378A0(self);
@@ -417,14 +379,14 @@ void func_00137A60(Stream_137A60* self, s32 remaining, Dst_137A60* dst)
                 func_00137820(self);
                 s32 nc = self->nextCount;
                 s32 np = self->nextPtr;
-                self->count = nc;
+                self->remaining = nc;
                 self->ptr = np;
                 self->nextPtr = np + nc;
                 self->nextCount = 0;
             }
-            cnt = self->count;
+            cnt = self->remaining;
             if (cnt == 0) {
-                self->count = -1;
+                self->remaining = -1;
                 return;
             }
         }
@@ -440,7 +402,7 @@ void func_00137A60(Stream_137A60* self, s32 remaining, Dst_137A60* dst)
         }
         remaining -= n;
         self->ptr += n;
-        self->count -= n;
+        self->remaining -= n;
     } while (remaining > 0);
 }
 
@@ -454,21 +416,20 @@ struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
 
 void func_001A1F40(Vec_135E48* v, s32 mode);
 
-struct Obj_137290 { s32 f0; s32 f4; s32 f8; s32 fC; u8 pad10[8]; s32 f18; s32 f1C; s32 f20; s32 f24; s32 f28; s32 f2C; s32 f30; };
-Obj_137290* func_00137290(Obj_137290* self, s32 a1, s32 a2, s32 a3)
+S137290* func_00137290(S137290* self, s32 a1, s32 a2, s32 a3)
 {
     s32 align = (a2 + 0x3F) & -0x40;
-    self->f4 = -1;
-    self->f0 = a3;
-    self->f20 = 0;
-    self->f18 = 0;
-    self->f24 = 0;
-    self->f1C = 0;
+    self->mode = -1;
+    self->flags = a3;
+    self->nextPtr = 0;
+    self->ptr = 0;
+    self->nextCount = 0;
+    self->remaining = 0;
     self->f30 = 0;
     self->f28 = 0;
     self->f2C = 0;
-    self->f8 = align;
-    self->fC = a1 - (align - a2);
+    self->end = align;
+    self->start = a1 - (align - a2);
     return self;
 }
 
@@ -535,25 +496,15 @@ void func_00192190(void* p);
 
 struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
-struct Dec_1378A0 {
-    u8 pad0[0x18];
-    u8* f18;
-    s32 f1C;
-    u8* f20;
-    s32 f24;
-    s32 f28;
-    s32 f2C;
-};
-
-void func_00137820(Dec_1378A0* d);
+void func_00137820(S137290* d);
 void func_001F5A58(void* dst, void* src, s32 n);
 
-void func_001378A0(Dec_1378A0* d)
+void func_001378A0(S137290* d)
 {
     u8* base = (u8*)0x70000000;
     s32 pos = 0;
-    s32 n = d->f24;
-    u8* p = d->f20;
+    s32 n = d->nextCount;
+    u8* p = d->next;
     s32 flags = d->f28;
     s32 more;
     s32 carry = d->f2C;
@@ -566,17 +517,17 @@ void func_001378A0(Dec_1378A0* d)
         if (!(flags & 0x100)) {
             if (--n < 0) {
                 func_00137820(d);
-                if (d->f24 <= 0) break;
-                p = d->f20;
-                n = d->f24 - 1;
+                if (d->nextCount <= 0) break;
+                p = d->next;
+                n = d->nextCount - 1;
             }
             flags = *p++ + 0xFF00;
         }
         if (--n < 0) {
             func_00137820(d);
-            if (d->f24 <= 0) break;
-            p = d->f20;
-            n = d->f24 - 1;
+            if (d->nextCount <= 0) break;
+            p = d->next;
+            n = d->nextCount - 1;
         }
         s32 b = *p++;
         if (flags & 1) {
@@ -584,8 +535,8 @@ void func_001378A0(Dec_1378A0* d)
         } else {
             if (--n < 0) {
                 func_00137820(d);
-                p = d->f20;
-                n = d->f24 - 1;
+                p = d->next;
+                n = d->nextCount - 1;
             }
             u32 v = b + (*p++ << 8);
             s32 cnt = ((s32)v >> 13) + 2;
@@ -595,16 +546,16 @@ void func_001378A0(Dec_1378A0* d)
             }
         }
     }
-    d->f18 = base;
+    d->cur = base;
     if (more == 0) {
-        d->f1C = 0x2000;
+        d->remaining = 0x2000;
         d->f2C = pos - 0x2000;
     } else {
-        d->f1C = pos;
+        d->remaining = pos;
         d->f2C = 0;
     }
-    d->f20 = p;
-    d->f24 = n;
+    d->next = p;
+    d->nextCount = n;
     d->f28 = flags;
 }
 

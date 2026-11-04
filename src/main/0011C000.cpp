@@ -2,6 +2,8 @@
 #include "common.h"
 #include "t2196.h"
 #include "c6c.h"
+#include "g25c250.h"
+#include "s137290.h"
 
 extern u8 D_0062C568[];
 void func_001B5F28(void* list, void* item);
@@ -100,11 +102,9 @@ s32 func_0011E2A0()
 
 s32 func_0011C0A8(s32 a, s32 b);
 
-struct Stride_11C288 { s32 stride; s32 pad4; s32 base; };
-
-s32 func_0011C288(Stride_11C288* self, s32 index)
+void* func_0011C288(G25C250* self, s32 index)
 {
-    return self->base + index * self->stride;
+    return self->mem + index * self->stride;
 }
 
 struct Cell_11C3C8 { s32 pad0; s32 value; };
@@ -360,11 +360,6 @@ void func_0011EF60(void)
 }
 
 extern u8 D_00259F38[];
-extern u8 D_0025C250[];
-extern u8 D_0025C270[];
-extern u8 D_0025C290[];
-extern u8 D_0025C2B0[];
-extern u8 D_0025C2D0[];
 
 void func_0011A6B8(void* p);
 void func_0011C1D0(void* p);
@@ -511,14 +506,13 @@ void func_0011C418(Node_11C418* a, Node_11C418* b, s32 c)
     }
 }
 
-extern u8 D_0025C290[];
 Node_11C418* func_0011C240(void* pool);
 void func_001F5C0C(void* dst, s32 value, u32 size);
 void func_0011B008(void* p);
 
 Node_11C418* func_0011C498(void)
 {
-    Node_11C418* n = func_0011C240(D_0025C290);
+    Node_11C418* n = func_0011C240(&D_0025C290);
     func_001F5C0C(n, 0, 16);
     func_0011B008(&n->f4);
     n->f4 = -1;
@@ -653,25 +647,16 @@ void func_0011F210(T2196_678* self, Stream83* src)
 
 s32 func_0011C0A8(void* p, s32 mask);
 
-struct Pool_11C128 {
-    s32 slots;
-    s32 size;
-    void* mem;
-    void* head;
-    s32 live;
-    s32 high;
-};
-
 void* func_0018D500(s32 bytes);
-void* func_0011C288(Pool_11C128* p, s32 index);
+void* func_0011C288(G25C250* p, s32 index);
 
-void func_0011C128(Pool_11C128* p, s32 count, s32 size)
+void func_0011C128(G25C250* p, s32 count, s32 size)
 {
-    p->slots = count + 8;
-    p->size = size;
-    p->mem = func_0018D500((count + 8) * size);
+    p->stride = count + 8;
+    p->count = size;
+    p->mem = (u8*)func_0018D500((count + 8) * size);
     void* node = func_0011C288(p, 0);
-    p->head = node;
+    p->free = node;
     s32 i = 1;
     if (i < size) {
         void* prev;
@@ -974,10 +959,6 @@ struct Node_0011C2A0 {
     Node_0011C2A0* next;
     s32 state;
 };
-struct State_0011C2B0 {
-    u8 pad0[0x10];
-    Node_0011C2A0* current;
-};
 
 Node_11C418* func_0011C240(void* self)
 {
@@ -986,14 +967,14 @@ Node_11C418* func_0011C240(void* self)
     return result;
 }
 
-void func_0011C2A0(State_0011C2B0* self)
+void func_0011C2A0(G25C250* self)
 {
-    *(Node_0011C2A0**)((u8*)self + 0x14) = self->current;
+    self->tail = self->head;
 }
 
-void func_0011C2B0(State_0011C2B0* self)
+void func_0011C2B0(G25C250* self)
 {
-    Node_0011C2A0* node = self->current;
+    Node_0011C2A0* node = (Node_0011C2A0*)self->head;
     if (node == 0) return;
     do {
         node->state = 0;
@@ -1105,20 +1086,10 @@ struct Node_11C2E8 {
     s32 f4;
 };
 
-struct Pool_11C2E8 {
-    s32 f00;
-    s32 f04;
-    s32 f08;
-    Node_11C2E8* freeHead;
-    Node_11C2E8* head;
-    Node_11C2E8* tail;
-    Cb_11C2E8 onRemove;
-};
-
-void func_0011C2E8(Pool_11C2E8* self)
+void func_0011C2E8(G25C250* self)
 {
     Node_11C2E8* prev = (Node_11C2E8*)&self->head;
-    Node_11C2E8* cur = self->head;
+    Node_11C2E8* cur = (Node_11C2E8*)self->head;
     if (cur != 0 && cur != self->tail) {
         prev = cur;
         for (;;) {
@@ -1136,10 +1107,10 @@ void func_0011C2E8(Pool_11C2E8* self)
             prev = cur;
         } else {
             prev->next = cur->next;
-            cur->next = self->freeHead;
-            self->freeHead = cur;
-            if (self->onRemove != 0) {
-                self->onRemove(func_0011C3B8(cur));
+            cur->next = (Node_11C2E8*)self->free;
+            self->free = cur;
+            if (self->callback != 0) {
+                ((Cb_11C2E8)self->callback)(func_0011C3B8(cur));
             }
         }
         cur = prev->next;
@@ -1627,18 +1598,17 @@ Pool_11C968* func_0011C968(void)
 
 struct Pair_11EDA8 { void* node; s32 pad; };
 struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
-struct Buf_11EDA8 { u8 b[0x60]; };
 
 extern u8 D_00244950[];
 
-void func_00137290(Buf_11EDA8* self, s32 a, s32 b, s32 c);
-void func_00137398(Buf_11EDA8* self, s32 a1, u8* a2);
-void func_0011E680(C01* self, Node_11EDA8* slot, Buf_11EDA8* obj);
-void func_001372E0(Buf_11EDA8* self, s32 flags);
+void func_00137290(S137290* self, s32 a, s32 b, s32 c);
+void func_00137398(S137290* self, s32 a1, u8* a2);
+void func_0011E680(C01* self, Node_11EDA8* slot, S137290* obj);
+void func_001372E0(S137290* self, s32 flags);
 
 void func_0011EDA8(C01* self)
 {
-    Buf_11EDA8 buf;
+    S137290 buf;
     s32 off = self->desc->id << 3;
     s32 n = *(s32*)(D_00244950 + off);
     u8* list = *(u8**)(D_00244950 + off + 4);
@@ -1776,7 +1746,6 @@ Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
 // EXACT: dtor of the temp called before e = rp; array dtor written as while (buf != e) { e--; dtor(e,0); }
 
 struct W_11E680 { s32 a, b; };
-struct Rd_11E680 { s32 x; };
 struct Dsc_11E680 {
     s32 type;
     u32 flags;
@@ -1792,11 +1761,11 @@ union Sc_11E680 { W_11E680 buf[32]; f32 f[8]; s32 i[2]; };
 
 void func_0011B008(W_11E680* q);
 void func_0011B060(W_11E680* q, s32 mode);
-s32 func_00137D10(Rd_11E680* r);
-s32 func_00137B90(Rd_11E680* r);
-s32 func_00137D78(Rd_11E680* r);
-s32 func_00137C40(Rd_11E680* r);
-f32 func_00137DF8(Rd_11E680* r);
+s32 func_00137D10(S137290* r);
+s32 func_00137B90(S137290* r);
+s32 func_00137D78(S137290* r);
+s32 func_00137C40(S137290* r);
+f32 func_00137DF8(S137290* r);
 void func_0011B5F0(W_11E680* w, s32 v);
 void func_0011B5B0(W_11E680* w, f32 v);
 void func_0011B570(W_11E680* w, s32 v);
@@ -1805,7 +1774,7 @@ void func_0011B818(W_11E680* w, f32* p);
 void func_0011B740(W_11E680* w, f32* p);
 void func_00188978(f32* in, f32* out);
 
-void func_0011E680(void* obj, Dsc_11E680* d, Rd_11E680* r)
+void func_0011E680(void* obj, Dsc_11E680* d, S137290* r)
 {
     Sc_11E680 sc;
     W_11E680 ret;

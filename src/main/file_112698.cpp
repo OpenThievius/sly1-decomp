@@ -2,6 +2,8 @@
 #include "common.h"
 #include "asm_func.h"
 #include "c6c.h"
+#include "globals.h"
+#include "s1dbbd8.h"
 
 // The script machine's built-in functions (the table D_00259958, which func_00119BB0 calls through,
 // lists them from func_00112698 on), their helpers and the collector's mark stacks: one source
@@ -644,8 +646,6 @@ void func_0011B570(void* q, s32 v);
 struct Quad_117BC8 { s32 a, b, c, d; };
 struct In_117BC8 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
 
-extern void* D_00275710;
-
 void func_0011B008(Quad_117BC8* q);
 s32 func_0011B8A8(Quad_117BC8* q, s32 v);
 void func_0011B018(void* dst, Quad_117BC8* src);
@@ -654,8 +654,6 @@ s32 func_0015A418(void* host, s32 a1, s32 a2, s32 ctx);
 
 struct Quad_117D00 { s32 a, b, c, d; };
 struct In_117D00 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
-
-extern void* D_00275710;
 
 void func_0011B008(Quad_117D00* q);
 s32 func_0011B8A8(Quad_117D00* q, s32 v);
@@ -671,8 +669,6 @@ void func_0011B060(Quad_117E78* q, int mode);
 void func_0011B8A8(Quad_117E78* q, s32 v);
 
 struct Quad_117ED0 { s32 a, b, c, d; };
-
-extern s32 D_00261990;
 
 s32 func_0011B008(Quad_117ED0* q);
 void func_0011B018(void* dst, Quad_117ED0* src);
@@ -792,8 +788,6 @@ void func_0011B060(Quad_1149F0* obj, s32 n);
 struct Quad_117C48 { s32 a, b, c, d; };
 struct In_117C48 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
 
-extern void* D_00275710;
-
 s32 func_0011B008(Quad_117C48* q);
 void func_00117AF0(Quad_117C48* t, s32 a, void* b);
 s32 func_0011B0A8(Quad_117C48* a, Quad_117C48* b);
@@ -841,8 +835,6 @@ struct Quad_117D78 { s32 a, b, c, d; };
 struct In_117D78 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
 struct Host_117D78;
 
-extern void* D_00275710;
-
 s32 func_0011B008(Quad_117D78* q);
 void func_00117AF0(Quad_117D78* t, s32 a, void* b);
 s32 func_0011B0A8(Quad_117D78* a, Quad_117D78* b);
@@ -853,8 +845,6 @@ s32 func_0015A198(Host_117D78* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5
 struct Quad_117F28 { s32 a, b, c, d; };
 struct In_117F28 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
 struct Host_117F28;
-
-extern void* D_00275710;
 
 s32 func_0011B008(Quad_117F28* q);
 void func_00117AF0(Quad_117F28* t, s32 a, void* b);
@@ -1068,8 +1058,6 @@ struct Quad_1180C0 { s32 a, b, c, d; };
 struct Frame_1180C0 { Quad_1180C0 q; Quad_1180C0 t; s32 a; s32 b; };
 union Raw_1180C0 { s32 i; f32 f; };
 struct In_1180C0 { u8 pad0[4]; s32 w4; s32 kind; Raw_1180C0 raw; };
-
-extern void* D_00275710;
 
 void func_0011B008(Quad_1180C0* q);
 void func_0018D608(void);
@@ -1450,7 +1438,6 @@ struct World_11AB58 {
     s32 n504;
     List_11AB58* lists[1];
 };
-struct Item_11AB58 { void* fn; u8 p[8]; Ent_11AB58* fC; Item_11AB58* f10; };
 
 extern u8 D_0025C250[];
 extern u8 D_0025C270[];
@@ -3321,12 +3308,12 @@ void* func_00117668(void* ret, s32 limit, Src_117668* src)
             } while (n);
         }
     }
-    func_0011A498(((C6C*)D_00275710)->f2C, ((C6C*)D_00275710)->f1EF8, 0, &r);
+    func_0011A498(D_00275710->f2C, D_00275710->f1EF8, 0, &r);
     if (r.a == 0x1E) {
         a->next = (Node_117668*)r.b;
     }
     func_0011B6C0(&r, a);
-    func_0011A400(&t, ((C6C*)D_00275710)->f2C, ((C6C*)D_00275710)->f1EF8, &r);
+    func_0011A400(&t, D_00275710->f2C, D_00275710->f1EF8, &r);
     func_0011B060(&t, 2);
     func_0011B018(ret, &q);
     func_0011B060(&r, 2);
@@ -3517,7 +3504,7 @@ void* func_00117ED0(void* self)
 {
     Quad_117ED0 q;
     s32 r = func_0011B008(&q);
-    func_0011B8A8(&q, D_00261990);
+    func_0011B8A8(&q, (s32)D_00261990);
     func_0011B018(self, &q);
     func_0011B060(&q, 2);
     return self;
@@ -4684,9 +4671,9 @@ void func_0011AB58(World_11AB58* w) {
             n = n->fC;
         }
     }
-    for (Item_11AB58* it = (Item_11AB58*)((C6C*)D_00275710)->f1EC8; it; it = it->f10) {
-        if (it->fn == (void*)func_001834A0) {
-            Ent_11AB58* e = it->fC;
+    for (S1DBBD8* it = (S1DBBD8*)D_00275710->f1EC8; it; it = it->next) {
+        if ((void*)it->fn == (void*)func_001834A0) {
+            Ent_11AB58* e = (Ent_11AB58*)it->p0C;
             if (e && func_0011C3C8(e)) {
                 func_0011C3F0(e);
                 func_0011A770(w, e);

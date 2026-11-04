@@ -3,25 +3,14 @@
 #include "c55.h"
 #include "c6c.h"
 #include "c6d.h"
+#include "g27c220.h"
 #include "t219c.h"
 #include "t217d.h"
 #include "v24a2.h"
 
-struct Glob_1481A0 {
-    u8 pad0[0x19D8];
-    s32 f19D8;
-    s32 f19DC;
-    s32 f19E0;
-    s32 f19E4;
-    s32 f19E8;
-};
-typedef Glob_1481A0 Glob_148178;
-
-extern Glob_148178* D_002623C0;
-
 void func_00148178(void)
 {
-    Glob_148178* g = D_002623C0;
+    G27C220* g = D_002623C0;
     s32 r = 99;
     if (g->f19E0 + 1 <= 98) r = g->f19E0 + 1;
     g->f19E0 = r;
@@ -32,8 +21,6 @@ struct __attribute__((packed)) PSys_1481A0 {
     f32 f26C;
 };
 
-extern Glob_1481A0* D_002623C0;
-
 void func_00148038(void);
 void func_00148178(void);
 s32 func_00160D98(void);
@@ -41,7 +28,7 @@ s32 func_00160D98(void);
 void func_001481A0(void* self)
 {
     T219C* s = (T219C*)self;
-    Glob_1481A0* g = D_002623C0;
+    G27C220* g = D_002623C0;
     s32 c = g->f19E8 + 1;
     s32 r;
     g->f19E8 = c;
@@ -76,15 +63,13 @@ struct Node_148CE0 {
     Node_148CE0* next;
 };
 
-typedef Glob_1481A0 Glob_148CE0;
-
 extern s32 D_0026EC58;
 
 s32 func_001300E8(void* node, s32 kind);
 
 void func_00148CE0(C6C* self)
 {
-    Glob_148CE0* g = D_002623C0;
+    G27C220* g = D_002623C0;
     if (((g->f19D8 << 8) | g->f19DC) == 0x308) return;
     s32 r = func_00160D98();
     if (g->f19E4 < r) {
@@ -273,15 +258,6 @@ s32 func_0014BEF8(C12* self, Node_0014BEF8** slot)
     return 1;
 }
 
-struct Flags_148598 {
-    s32 flags;
-};
-
-struct Ctx_148598 {
-    u8 pad0[0x438];
-    s32 f438;
-};
-
 typedef void (*VFn_148598)(void* self);
 typedef void (*VFn3_148598)(void* self, s32 a, void* b);
 struct VObj_148598 {
@@ -291,8 +267,6 @@ struct VObj3_148598 {
     VFn3_148598* vtbl;
 };
 
-extern Flags_148598* D_002623C8;
-extern Ctx_148598* D_002623C4;
 extern s32 D_00275C34;
 extern u8 D_00261EF0[];
 extern u8 D_00264A40[];
@@ -304,10 +278,10 @@ void func_00148598(C59* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
-        Flags_148598* fl = D_002623C8;
+        G27C230* fl = D_002623C8;
         s32 bits = fl->flags;
         if ((bits & 2) == 0) {
-            Ctx_148598* cx = D_002623C4;
+            G27C230* cx = D_002623C4;
             fl->flags = bits | 2;
             s32 g = D_00275C34; s32 old = cx->f438; cx->f438 = old + 1; if (g != 0) cx->f438 = old;
         }
@@ -627,16 +601,11 @@ void func_00148EF8(C57* self)
     }
 }
 
-struct Glob_148F80 {
-    u8 pad0[0x19E0];
-    s32 f19E0;
-};
-
 void func_00148F80(void)
 {
     T217D_E30* obj = &D_0026C6C8;
     obj->vt->m14(obj);
-    Glob_148F80* g = (Glob_148F80*)D_002623C0;
+    G27C220* g = D_002623C0;
     if (g->f19E0 < 0x63) {
         g->f19E0 = g->f19E0 + 1;
         obj->rate = 250.0f;
@@ -710,12 +679,6 @@ void func_0014BF88(C12* self)
     }
 }
 
-struct Flags_148510 {
-    s32 flags;
-};
-
-
-
 void func_00148510(C59* self)
 {
     C59* o = self;
@@ -725,7 +688,7 @@ void func_00148510(C59* self)
     f32 k500 = 500.0f;
     f32 k250 = 250.0f;
     f32 k075 = 0.75f;
-    Flags_148510* fl = (Flags_148510*)D_002623C8;
+    G27C230* fl = D_002623C8;
     o->f350 = o->f34C = k35;
     o->f344 = k500;
     o->f348 = k250;
@@ -1016,11 +979,6 @@ s32 func_00148AC0(C6C* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
 
 // NEAR: every instruction matches except the setup of the last call: retail loads obj into $a1 and derives $a2 from it, we load it into $a2 and derive $a1
 
-struct Glob_148038 {
-    u8 pad0[0x19E4];
-    s32 f19E4;
-};
-
 struct Obj_148038 {
     void** vtbl;
     u8 pad0[0x2A8 - 4];
@@ -1051,16 +1009,16 @@ void func_00148038(C6C* self)
 {
     void* obj;
     s32 buf[4];
-    Glob_148038* g;
+    G27C220* g;
     s32 n;
     s32 c;
 
     if (func_00148938(self, 0x56, 1, &obj) == 0) {
-        g = (Glob_148038*)D_002623C0;
+        g = D_002623C0;
         n = func_00160D98();
         c = g->f19E4 + 1;
         c = (c < n) ? c : n;
-        ((Glob_148038*)D_002623C0)->f19E4 = c;
+        D_002623C0->f19E4 = c;
     } else {
         ((Fn0_148038)((Obj_148038*)obj)->vtbl[6])(obj);
         ((Fn1s_148038)((Obj_148038*)obj)->vtbl[25])(obj, 0);

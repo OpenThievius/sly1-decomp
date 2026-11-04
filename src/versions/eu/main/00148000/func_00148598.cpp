@@ -4,7 +4,7 @@ void func_00148598(C59* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
-        Flags_148598* fl = D_002623C8;
+        G27C230* fl = D_002623C8;
         s32 bits = fl->flags;
         if ((bits & 2) == 0) {
             fl->flags = bits | 2;

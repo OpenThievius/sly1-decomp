@@ -14,7 +14,7 @@ void func_00148F80(void)
 {
     Obj_148F80_eu* obj = (Obj_148F80_eu*)&D_0026C6C8;
     obj->vtbl[14](obj);
-    Glob_148F80* g = (Glob_148F80*)D_002623C0;
+    G27C220* g = D_002623C0;
     if (g->f19E0 < 0x63) {
         g->f19E0 = g->f19E0 + 1;
         obj->f26C = 250.0f;
