@@ -1371,19 +1371,19 @@ void func_0015B4D0(C40* self, void* a1, void* a2)
     }
 }
 
-s32 func_001300E8(C02* plo, s32 id);
-s32 func_00182FC8(C02* plo);
+s32 func_001300E8(C02* obj, s32 id);
+s32 func_00182FC8(C02* obj);
 s32 func_0015A4B8(u32 i, s32 id);
-void func_00159F48(C02* plo, s32 kind, s32 fAll, s32 zero, C02* ploRoot, s32 cmax,
-                   s32* pc, C02** aplo, s32* pmin);
+void func_00159F48(C02* obj, s32 kind, s32 all, s32 zero, C02* root, s32 max,
+                   s32* countOut, C02** found, s32* minOut);
 
-s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, C02* ploRoot, s32 cmax, C02** aplo)
+s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found)
 {
     s32 c;
     s32 min;
     s32 kind;
-    C02* plo;
-    C02* ploMark;
+    C02* obj;
+    C02* mark;
     C02* p;
     s32 n;
     u32 i;
@@ -1391,34 +1391,34 @@ s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, C02* ploRoot, s32 cmax, C02** aplo)
     if (id == -1) {
         return 0;
     }
-    if (ploRoot == 0 && (grf & 5) == 0) {
+    if (root == 0 && (flags & 5) == 0) {
         return 0;
     }
-    kind = grf & 0xFF;
+    kind = flags & 0xFF;
     c = 0;
     if (kind == 3) {
-        // Retail reads plo here before anything sets it (lw 0($s0) with $s0 unset).
-        if (!(plo->desc->flags & 1)) {
-            plo = (C02*)plo->parent;
+        // Retail reads obj here before anything sets it (lw 0($s0) with $s0 unset).
+        if (!(obj->desc->flags & 1)) {
+            obj = (C02*)obj->parent;
         }
-        for (; plo != 0; plo = (C02*)plo->parent) {
-            if (func_001300E8(plo, id) != 0 && ((grf & 0x100) || func_00182FC8(plo) != 0)) {
-                if (c < cmax) {
-                    aplo[c] = plo;
+        for (; obj != 0; obj = (C02*)obj->parent) {
+            if (func_001300E8(obj, id) != 0 && ((flags & 0x100) || func_00182FC8(obj) != 0)) {
+                if (c < max) {
+                    found[c] = obj;
                 }
                 c++;
             }
         }
-    } else if (kind == 2 && !(grf & 0x100)) {
-        if (!(ploRoot->desc->flags & 1)) {
+    } else if (kind == 2 && !(flags & 0x100)) {
+        if (!(root->desc->flags & 1)) {
             return 0;
         }
-        for (plo = (C02*)ploRoot->children.head; plo != 0; plo = (C02*)plo->next) {
-            if (func_001300E8(plo, id) == 0) {
+        for (obj = (C02*)root->children.head; obj != 0; obj = (C02*)obj->next) {
+            if (func_001300E8(obj, id) == 0) {
                 continue;
             }
-            if (c < cmax) {
-                aplo[c] = plo;
+            if (c < max) {
+                found[c] = obj;
             }
             c++;
         }
@@ -1427,11 +1427,11 @@ s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, C02* ploRoot, s32 cmax, C02** aplo)
         case 1:
         case 3:
         case 4:
-            ploMark = ploRoot;
-            if (ploMark != 0 && !(ploMark->desc->flags & 1)) {
-                ploMark = (C02*)ploMark->parent;
+            mark = root;
+            if (mark != 0 && !(mark->desc->flags & 1)) {
+                mark = (C02*)mark->parent;
             }
-            p = ploMark;
+            p = mark;
             n = 0;
             while (p != 0) {
                 n++;
@@ -1441,20 +1441,20 @@ s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, C02* ploRoot, s32 cmax, C02** aplo)
             min = 0x7FFFFFFF;
             break;
         default:
-            ploMark = 0;
+            mark = 0;
             break;
         }
         for (i = id; i < 0x95 && func_0015A4B8(i, id); i++) {
-            for (plo = (C02*)psw->f1884[i]; plo != 0; plo = (C02*)plo->nextById) {
-                func_00159F48(plo, kind, grf & 0x100, 0, ploRoot, cmax, &c, aplo, &min);
+            for (obj = (C02*)world->f1884[i]; obj != 0; obj = (C02*)obj->nextById) {
+                func_00159F48(obj, kind, flags & 0x100, 0, root, max, &c, found, &min);
             }
         }
-        for (p = ploMark; p != 0; p = (C02*)p->parent) {
+        for (p = mark; p != 0; p = (C02*)p->parent) {
             p->mark = 0;
         }
     }
-    if (!(grf & 0x200) && cmax < c) {
-        c = cmax;
+    if (!(flags & 0x200) && max < c) {
+        c = max;
     }
     return c;
 }
