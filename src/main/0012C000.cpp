@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c83.h"
 
 s32 func_0012C288(void* a, void* b, s32 c, s32 d, s32 e, s32 f);
 
@@ -119,25 +120,6 @@ void func_0012C140(void)
     func_001830D8();
 }
 
-struct Kin_0012C160 {
-    f32 pos;
-    f32 vel;
-    f32 acc;
-};
-
-struct Track_0012C160 {
-    u8 pad0[0x14];
-    void* host;
-    u8 pad1[0x30];
-    s32 enabled;
-    u8 pad2[0x34];
-    Kin_0012C160 kin;
-    u8 pad3[4];
-    f32 lo;
-    f32 hi;
-    f32 out;
-};
-
 struct Step_002623C8 {
     u8 pad0[0xC];
     f32 dt;
@@ -149,10 +131,10 @@ void func_00182C58(void* self);
 void func_0012C208(void* self);
 void func_001DBC60(void* host, void* cb, void* ctx, s32 a3, s32 a4);
 
-void func_0012C160(Track_0012C160* self)
+void func_0012C160(C83* self)
 {
     func_00182C58(self);
-    Kin_0012C160* k = &self->kin;
+    Kin83* k = &self->kin;
     f32 t = D_002623C8->dt;
     f32 v = k->pos + t * (k->vel + t * k->acc);
     f32 lo = self->lo;
@@ -164,7 +146,7 @@ void func_0012C160(Track_0012C160* self)
     }
     self->out = v;
     if (self->enabled) {
-        func_001DBC60(self->host, (void*)func_0012C208, self, 0, 0);
+        func_001DBC60(self->world, (void*)func_0012C208, self, 0, 0);
     }
 }
 

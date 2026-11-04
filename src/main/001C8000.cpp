@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c89.h"
 
 s32 func_001CA460(void)
 {
@@ -123,49 +124,30 @@ void* func_001CB5B8(void* a0)
     return obj;
 }
 
-struct Item_CB7A0;
-
-struct Item_CB7A0 {
-    u8 pad0[0x720];
-    void* owner720;
-};
-
-struct Self_CB7A0 {
-    u8 pad0[0x58];
-    s32 n58;
-    Item_CB7A0* arr5C[16];
-    s32 cnt9C;
-    Item_CB7A0* list9C[16];
-    s32 nE0;
-    Item_CB7A0* arrE4[16];
-    s32 cnt124;
-    Item_CB7A0* list124[16];
-};
-
 extern u32 D_00275710;
 
-Item_CB7A0* func_0015A448(u32 a, Item_CB7A0* b, Self_CB7A0* c);
+Item89* func_0015A448(u32 a, Item89* b, C89* c);
 
-void func_001CB7A0(Self_CB7A0* a0)
+void func_001CB7A0(C89* a0)
 {
-    for (s32 i = 0; i < a0->cnt9C; i++) {
-        Item_CB7A0* r = func_0015A448(D_00275710, a0->list9C[i], a0);
+    for (s32 i = 0; i < a0->owned.wantedCount; i++) {
+        Item89* r = func_0015A448(D_00275710, a0->owned.wanted[i], a0);
         if (r != 0) {
-            s32 n = a0->n58;
+            s32 n = a0->owned.count;
             if ((u32)n < 16) {
-                a0->arr5C[n] = r;
-                a0->n58 = n + 1;
-                r->owner720 = a0;
+                a0->owned.found[n] = r;
+                a0->owned.count = n + 1;
+                r->owner = a0;
             }
         }
     }
-    for (s32 i = 0; i < a0->cnt124; i++) {
-        Item_CB7A0* r = func_0015A448(D_00275710, a0->list124[i], a0);
+    for (s32 i = 0; i < a0->listed.wantedCount; i++) {
+        Item89* r = func_0015A448(D_00275710, a0->listed.wanted[i], a0);
         if (r != 0) {
-            s32 n = a0->nE0;
+            s32 n = a0->listed.count;
             if ((u32)n < 16) {
-                a0->arrE4[n] = r;
-                a0->nE0 = n + 1;
+                a0->listed.found[n] = r;
+                a0->listed.count = n + 1;
                             }
         }
     }
@@ -235,14 +217,9 @@ s32 func_001CB3C8(void)
     return 0;
 }
 
-struct Obj_1CB618 {
-    u8 pad0[0x180];
-    s32 f180;
-};
-
 void func_00182C18(void* self);
 
-void func_001CB618(Obj_1CB618* self)
+void func_001CB618(C89* self)
 {
     func_00182C18(self);
     self->f180 = -1;

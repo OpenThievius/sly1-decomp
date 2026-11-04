@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c83.h"
 
 struct Owned { u8 pad[0x14]; void* owner; };
 
@@ -1466,32 +1467,20 @@ void func_00129648(Obj_129648* self, f32* src)
     ((VFnB_129648*)self->vtbl)[34](self, out);
 }
 
-struct Obj_12B870 {
-    u8 pad0[0x6C];
-    u8 pad6C[0x14];
-    f32 f80;
-    s32 a84;
-    s32 a88;
-    u8 pad8C[4];
-    s32 a90;
-    f32 f94;
-    f32 f98;
-};
-
 void func_00182C18(void* self);
 void func_00152438(void* self, s32 value);
 
-void func_0012B870(Obj_12B870* self)
+void func_0012B870(C83* self)
 {
     func_00182C18(self);
-    func_00152438(&self->pad6C, 0x3C);
-    self->f80 = 1.0f;
-    s32* q = (s32*)((u8*)self + 0x80);
-    q[1] = 0;
-    q[2] = 0;
-    self->a90 = 0;
-    self->f94 = 1.0f;
-    self->f98 = 1.0f;
+    func_00152438(&self->props6C, 0x3C);
+    Kin83* k = &self->kin;
+    k->pos = 1.0f;
+    k->vel = 0.0f;
+    k->acc = 0.0f;
+    self->lo = 0.0f;
+    self->hi = 1.0f;
+    self->out = 1.0f;
 }
 
 // NEAR: same bytes except the load order of the arguments to func_001BFCD8 (retail loads a0, a4, f12, a1, f13..f15 and f16 last, in the delay slot)
@@ -1571,109 +1560,76 @@ void func_0012B760(Obj_0012B760* self)
     }
 }
 
-struct Other_12B8C8;
-struct Obj_12B8C8;
-typedef void (*Fn_12B8C8)(Obj_12B8C8* self, Other_12B8C8* other);
-struct Obj_12B8C8 { Fn_12B8C8* vtbl; };
-
-struct Elem_12B8C8 {
-    s32 f0;
-    Obj_12B8C8* p4;
-    Obj_12B8C8* p8;
-    Obj_12B8C8* pC;
-    Obj_12B8C8* p10;
-    s32 n14;
-    Obj_12B8C8** p18;
-};
-
-struct Self_12B8C8 {
-    u8 pad0[0x34];
-    f32 f34;
-    s32 n38;
-    Elem_12B8C8* p3C;
-    s32 f40;
-    u8 pad44[0x10];
-    s32 f54;
-    s32 f58;
-    s32 f5C;
-    s32 f60;
-    s32 f64;
-    s32 f68;
-    u8 pad6C[0x34];
-    s32 nA0;
-    s32* pA4;
-};
-
-s32 func_00137D10(Other_12B8C8* p);
-s32 func_00137BE0(Other_12B8C8* p);
-s32 func_00137CC0(Other_12B8C8* p);
-s32 func_00137B90(Other_12B8C8* p);
+s32 func_00137D10(Stream83* p);
+s32 func_00137BE0(Stream83* p);
+s32 func_00137CC0(Stream83* p);
+s32 func_00137B90(Stream83* p);
 void* func_0018D500(s32 size);
 void* func_0018D5C0(s32 size);
-void func_0012D2A8(Self_12B8C8* a, Elem_12B8C8* b);
-void func_0012BC38(Self_12B8C8* a, Other_12B8C8* b, s32 c, s32* d, s32* e);
-void func_0011EC40(Self_12B8C8* a, Other_12B8C8* b);
-Obj_12B8C8* func_00120FB0(s32 cc);
-Obj_12B8C8* func_00121050(s32 cc);
-Obj_12B8C8* func_001210F0(s32 cc);
-Obj_12B8C8* func_00121160(s32 cc);
+void func_0012D2A8(C83* a, Track83* b);
+void func_0012BC38(C83* a, Stream83* b, s32 c, s32* d, s32* e);
+void func_0011EC40(C83* a, Stream83* b);
+Curve83* func_00120FB0(s32 cc);
+Curve83* func_00121050(s32 cc);
+Curve83* func_001210F0(s32 cc);
+Curve83* func_00121160(s32 cc);
 
-void func_0012B8C8(Self_12B8C8* self, Other_12B8C8* other)
+void func_0012B8C8(C83* self, Stream83* other)
 {
     s32 k;
-    Elem_12B8C8* sel = 0;
-    Elem_12B8C8* e;
-    Obj_12B8C8* q;
+    Track83* sel = 0;
+    Track83* e;
+    Curve83* q;
     s32 i;
     s32 j;
     s32 t;
     s32 flags;
 
     t = func_00137D10(other);
-    self->f40 = t;
+    self->id = t;
     t = func_00137D10(other);
-    self->f34 = (f32)t * 0.01666666753590107f;
+    self->length = (f32)t * 0.01666666753590107f;
     t = func_00137BE0(other);
-    self->nA0 = t;
-    self->pA4 = (s32*)func_0018D500(t << 2);
-    for (k = 0; k < self->nA0; k++) {
-        self->pA4[k] = func_00137D10(other);
+    self->targetCount = t;
+    self->targets = (s32*)func_0018D500(t << 2);
+    for (k = 0; k < self->targetCount; k++) {
+        self->targets[k] = func_00137D10(other);
     }
     t = func_00137CC0(other);
-    self->n38 = t;
-    self->p3C = (Elem_12B8C8*)func_0018D5C0(t * 28);
-    for (i = 0; i < self->n38; i++) {
-        e = &self->p3C[i];
-        e->f0 = func_00137D10(other);
+    self->trackCount = t;
+    self->tracks = (Track83*)func_0018D5C0(t * 28);
+    for (i = 0; i < self->trackCount; i++) {
+        e = &self->tracks[i];
+        e->target = func_00137D10(other);
         flags = func_00137CC0(other);
         if (flags & 1) {
             q = func_00120FB0(func_00137CC0(other));
-            e->p4 = q;
+            e->pos = q;
             if (q->vtbl[1]) q->vtbl[1](q, other);
         }
         if (flags & 2) {
             q = func_00121050(func_00137CC0(other));
-            e->p8 = q;
+            e->rot = q;
             if (q->vtbl[2]) q->vtbl[2](q, other);
         }
         if (flags & 4) {
             q = func_001210F0(func_00137CC0(other));
-            e->pC = q;
+            e->scale = q;
             if (q->vtbl[1]) q->vtbl[1](q, other);
         }
         if (flags & 8) {
             q = func_00121160(func_00137CC0(other));
-            e->p10 = q;
+            e->weight = q;
             if (q->vtbl[1]) q->vtbl[1](q, other);
         }
         if (flags & 0x10) {
-            e->n14 = func_00137B90(other);
-            e->p18 = (Obj_12B8C8**)func_0018D5C0(e->n14 << 2);
-            for (j = 0; j < e->n14; j++) {
+            e->morphCount = func_00137B90(other);
+            e->morph = (Curve83**)func_0018D5C0(e->morphCount << 2);
+            for (j = 0; j < e->morphCount; j++) {
                 t = func_00137CC0(other);
                 if (t != -1) {
-                    e->p18[j] = func_00121160(t);
-                    q = e->p18[j];
+                    e->morph[j] = func_00121160(t);
+                    q = e->morph[j];
                     if (q->vtbl[1]) q->vtbl[1](q, other);
                 }
             }
@@ -1681,9 +1637,9 @@ void func_0012B8C8(Self_12B8C8* self, Other_12B8C8* other)
         sel = (flags & 0x20) ? e : sel;
     }
     if (sel != 0) func_0012D2A8(self, sel);
-    func_0012BC38(self, other, 0, &self->f54, &self->f58);
-    func_0012BC38(self, other, 1, &self->f5C, &self->f60);
-    func_0012BC38(self, other, 0, &self->f64, &self->f68);
+    func_0012BC38(self, other, 0, &self->startCount, &self->startList);
+    func_0012BC38(self, other, 1, &self->timedCount, &self->timedList);
+    func_0012BC38(self, other, 0, &self->endCount, &self->endList);
     func_0011EC40(self, other);
 }
 
