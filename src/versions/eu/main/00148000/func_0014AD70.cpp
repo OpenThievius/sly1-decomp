@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: count is at 0x570 and the slots start at 0x574, 0x570 apart (US 0x260, 0x264, 0x260).
+typedef void (*VFn1_14AD70)(void* self);
+void func_001AA298(void* self);
 struct Slot_14AD70_eu { VFn1_14AD70* vtbl; u8 pad[0x570 - 4]; };
 struct Owner_14AD70_eu { u8 pad[0x570]; s32 count; Slot_14AD70_eu slots[1]; };
 

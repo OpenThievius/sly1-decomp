@@ -45,7 +45,7 @@ void func_00194D30(Self_194D30_eu* self, s32 idx, s32 value)
             } else {
                 self->f588 = s2;
                 self->f584 = 1;
-                ((Obj_194D30*)self)->vtbl[16](self, 3);
+                ((T217D*)self)->vt->m16((T217D*)self, 3);
             }
           }
         }

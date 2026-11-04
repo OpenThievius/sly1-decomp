@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's object has its fields at 0x528, 0x560 and 0x578, and the y is 126.30508 where US has 125.4.
+void func_001AA998(void* self, s32 flag);
+void func_001AAB20(void* self, f32 x, f32 y);
+void func_001E7518(void* self, s32 mode);
 struct Ptr_1E76E0_eu {
     s32 f0;
     union {

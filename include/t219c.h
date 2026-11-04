@@ -1,0 +1,129 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Kind t219c: the records of class 0x1E's list (C1E::list558) -- the effects a part with
+// collision shows: a spark, a flash, a ring that follows a body. Written for this project from
+// what retail's code does (config/us/tables.tsv, src/main/0019C000.cpp, 001A0000.cpp).
+//
+// func_0019EA78(kind, owner) takes a record from the world's pool at C6C+0x1B2C (0x180 records
+// of 0x140 bytes), zeroes it, stores the kind's table (func_0019E908: kind 0 is D_00219C20, kind
+// 2 on D_00219C40 and the next 26 tables, 0x20 bytes apart; no kind 1) at +0, the kind at +4 and
+// the 1E object at +0xC, links it into the list (link at +0x10) and counts a use (+8).
+// func_0019EBE8 takes it out again and, when the last use goes, func_0019EC30 runs its end
+// hooks and gives it back to the pool.
+//
+// The 27 kinds share one layout: the header and the fields the shared slots read are the same
+// for all, and each kind's own fields sit in the span from +0x28 to +0x140 where the others
+// leave it free. Where two kinds read one offset differently (a float, an integer, a pointer),
+// a union holds them. The tables are defined in src/main/0019C000.cpp as arrays of function
+// pointers; Vt219C gives their slots types.
+#ifndef T219C_H
+#define T219C_H
+
+#include "common.h"
+#include "c02.h"
+
+struct C1E;     // the owner (include/c1e.h)
+struct C03;     // the body some records follow (include/c03.h)
+struct T219C;
+
+// A 16-byte, 16-aligned block moved as one quadword.
+struct __attribute__((aligned(16))) Quad219C {
+    s32 a, b, c, d;
+};
+
+// The 8 slots of a kind's table. Slot 0 is the kind's set-up (the creator calls it right after
+// func_0019EA78 with the place); 3, 4, 5, 6 and 7 are mostly the shared func_0019F390,
+// func_0019F560, func_0019F858, func_0019ECE0 and func_0019ED58.
+struct Vt219C {
+    void (*m00)(T219C* self, void* pos, f32 scale, s32 flags);          // 0x00: set-up
+    void (*m01)(T219C* self, void* other);                              // 0x04
+    void (*m02)(T219C* self);                                           // 0x08
+    void (*m03)(T219C* self);                                           // 0x0C
+    void (*m04)(T219C* self, f32 dt);                                   // 0x10: every frame
+    void (*m05)(T219C* self, void* other);                              // 0x14
+    void (*m06)(T219C* self, s32 flag);                                 // 0x18: end (func_0019F560)
+    s32 (*m07)(T219C* self, void* other, void* a2, void* a3);           // 0x1C: contact
+};
+
+// What a record runs when it ends (+0x118, the list func_0019EC30 walks).
+struct T219CHook {
+    void (*fn)(void* payload, s32 kind, T219C* owner);      // 0x00
+    void* payload;                                          // 0x04
+    u8 pad08[0x10 - 0x08];                                  // 0x08
+    T219CHook* next;                                        // 0x10
+};
+
+// The parameter block a kind-0x10 record points to (+0x130): D_00261AD0, D_00261B60 and
+// D_0026A970, 0x70 bytes each, const data of the three owners that create such a record
+// (func_00148298, func_00148FF0, func_001999D0). Six rows of floats, then the function the
+// record runs with its owner (+0x134) when it ends (func_001A0F88).
+struct T219C_Params {
+    f32 rows[24];                   // 0x00
+    void (*fn60)(void* owner);      // 0x60
+    u8 pad64[0x70 - 0x64];          // 0x64
+};
+
+struct T219C {
+    const Vt219C* vt;       // 0x00
+    s32 kind;               // 0x04
+    s32 uses;               // 0x08: func_0019EC20 counts one, func_0019EC30 ends at 0
+    C1E* owner;             // 0x0C: the 0x1E object whose list holds it
+    T219C* next;            // 0x10: the link in C1E::list558
+    T219C* prev;            // 0x14
+    f32 start;              // 0x18: the time it began (D_0026185C)
+    f32 life;               // 0x1C: how long it lasts (func_0019F560)
+    union {
+        s32 i20;            // 0x20: a number taken from the world (D_00275710 + 0x1CEC ..)
+        void* p20;          // 0x20: the object it follows (kinds 16 and 26)
+    };
+    C03* target;            // 0x24: the body it follows (func_0019F560, func_0019F9D0)
+    u8 pad28[0x30 - 0x28];  // 0x28
+    union {
+        Quad219C q30;       // 0x30
+        f32 m30[3];         // 0x30
+    };
+    Quad219C q40;           // 0x40
+    Vec02 rot50[3];         // 0x50: the placement (func_0019F858 reads it with the one at +0x80)
+    Quad219C q80;           // 0x80
+    Quad219C q90;           // 0x90
+    u8 padA0[0xB0 - 0xA0];  // 0xA0
+    union {
+        f32 fB0;            // 0xB0
+        s32 iB0;            // 0xB0
+    };
+    u8 padB4[0xC0 - 0xB4];  // 0xB4
+    Quad219C qC0;           // 0xC0
+    u8 padD0[0x110 - 0xD0]; // 0xD0
+    s32 i110;               // 0x110
+    void* p114;             // 0x114: the frame func_0019F858 places the record by
+    T219CHook* hooks;       // 0x118: run at its end (func_0019EC30)
+    u8 pad11C[0x120 - 0x11C];   // 0x11C
+    union {
+        f32 f120;           // 0x120
+        s32 i120;           // 0x120
+        void* p120;         // 0x120
+    };
+    union {
+        f32 f124;           // 0x124
+        s32 i124;           // 0x124
+        T219C* p124;        // 0x124
+    };
+    union {
+        f32 f128;           // 0x128
+        s32 i128;           // 0x128
+        T219C* p128;        // 0x128
+    };
+    u8 pad12C[0x130 - 0x12C];   // 0x12C
+    const T219C_Params* params; // 0x130: kind 16's block
+    union {
+        void* p134;         // 0x134: kind 16's owner
+        s32 i134;           // 0x134
+    };
+    u8 pad138[0x140 - 0x138];   // 0x138
+};
+
+typedef char check_Quad219C[sizeof(Quad219C) == 0x10 ? 1 : -1];
+typedef char check_T219CHook[sizeof(T219CHook) == 0x14 ? 1 : -1];
+typedef char check_T219C_Params[sizeof(T219C_Params) == 0x70 ? 1 : -1];
+typedef char check_T219C[sizeof(T219C) == 0x140 ? 1 : -1];
+
+#endif

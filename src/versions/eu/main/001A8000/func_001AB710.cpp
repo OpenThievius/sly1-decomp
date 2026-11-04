@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: fields moved (+0x310), u16 flag at +8, extra func_eu_001374E0 call, PAL-only name lookup func_eu_0015C778 and a buffer built by func_eu_0015DCB8/func_eu_0015E7E0.
-struct Actor_001AB710_eu { u8 pad0[4]; void* p4; u16 f08; u8 pad1[0x518 - 0xA]; s32 f518; f32 f51C; void* f520; u8 pad2[8]; f32 f52C; f32 f530; u8 pad3[0x10]; f32 f544; f32 f548; u8 pad4[0x40]; PackedWord_001AB710 w58C; u8 pad5[4]; s32 f594; };
+struct Actor_001AB710_eu { u8 pad0[4]; V24A2* p4; u16 f08; u8 pad1[0x518 - 0xA]; s32 f518; f32 f51C; void* f520; u8 pad2[8]; f32 f52C; f32 f530; u8 pad3[0x10]; f32 f544; f32 f548; u8 pad4[0x40]; T217D_Word w58C; u8 pad5[4]; s32 f594; };
 
 void func_00137248(void* out, void* p);
 void func_eu_001374E0(void* out, s32 v);

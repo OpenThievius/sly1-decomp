@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL has the object fields 0x310 bytes later (0x570..0x57C) and calls func_eu_001AB238 where US calls vt->m20.
+struct VT_1E00B0 { u8 pad[0x20]; void (*m20)(void*, void*); u8 pad24[0x14]; void (*m38)(void*); void (*m3C)(void*); };
 struct Obj_1E00B0_eu { VT_1E00B0* vt; u8 pad04[0x56C]; s32 f570; u8 pad574[4]; f32 f578; s32 f57C; };
 void func_eu_001AB238(Obj_1E00B0_eu* q, void* p);
 void func_001AA298(Obj_1E00B0_eu* q);
@@ -46,7 +47,7 @@ void func_001E00B0(Obj_1E00B0_eu* self)
         if (D_002623C8->flags & 8) {
             s32 b = 0;
             if (r && D_002701C4 == 0 && D_002623C8->f08 < ((Obj_1E00B0_eu*)&D_0026E760)->f578) b = 1;
-            if (b) D_0026E9F8.vt->m38(&D_0026E9F8); else D_0026E9F8.vt->m3C(&D_0026E9F8);
+            if (b) D_0026E9F8.vt->m14(&D_0026E9F8); else D_0026E9F8.vt->m15(&D_0026E9F8);
         }
     }
     break;

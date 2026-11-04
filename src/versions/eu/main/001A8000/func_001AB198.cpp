@@ -6,7 +6,7 @@ struct Obj_1AB198_eu {
     u16 f8;
     u8 pad1[0x408 - 0xA];
     u8 f408[0x518 - 0x408];
-    Word_1AB198 f518;
+    T217D_Word f518;
     f32 f51c;
     u8 pad3[0x52C - 0x520];
     f32 f52c;
@@ -24,6 +24,8 @@ struct Glob_1AB198_eu {
 };
 
 void func_00137260(void* out, void* p);
+void func_0015C8B8(s32 handle, f32 a, f32 b);
+void func_0015C900(s32 handle);
 void func_eu_001374E0(void* out, s32 flag);
 void func_eu_0015DCB8(void* buf, void* out, s32 handle, s32 zero);
 void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* data);
@@ -31,7 +33,7 @@ void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* data);
 void func_001AB198(Obj_1AB198_eu* self)
 {
     u8 out[0x20];
-    Word_1AB198 packed;
+    T217D_Word packed;
     s32 held;
     s32 tmp[4];
     u8 buf[0xC0];
@@ -43,7 +45,7 @@ void func_001AB198(Obj_1AB198_eu* self)
     if (self->f8 == 0) {
         return;
     }
-    g = (Glob_1AB198_eu*)D_0026FF68;
+    g = (Glob_1AB198_eu*)&D_0026FF68;
     scale = 1.0f;
     if (g->f560 != 0) {
         scale = g->f594;

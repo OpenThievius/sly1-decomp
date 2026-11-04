@@ -16,7 +16,7 @@ void func_00194E60(Ctl_194E60_eu* self, s32 v)
 
     if (self->f560 == v) return;
     if (self->f560 == 0 && self->f570 == 0) {
-        func_001936A0((Ctl_194E60*)self);
+        func_001936A0((T217D_6D0*)self);
     }
     if (v == 0) {
         if (self->f584 != 0) {
@@ -26,7 +26,7 @@ void func_00194E60(Ctl_194E60_eu* self, s32 v)
             self->f588 = -1;
         } else {
             if (self->f570 == 0) {
-                func_001936A0((Ctl_194E60*)self);
+                func_001936A0((T217D_6D0*)self);
             }
         }
     }

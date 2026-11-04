@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 #include "c5e.h"
+#include "c6c.h"
+#include "t217d.h"
+#include "v24a2.h"
 
 s32 func_00160850(void* obj);
 
@@ -170,14 +174,9 @@ void func_001DDCB0(void* self, s32* out)
     *out = ((Obj_DDCB0*)D_002623C0)->f19E4;
 }
 
-struct Obj_DF290 {
-    u8 pad[0x728];
-    s32 f728;
-};
-
 void func_001922E8(void* self, void* p);
 
-void func_001DF290(Obj_DF290* self, void* p)
+void func_001DF290(C14* self, void* p)
 {
     func_001922E8(self, p);
     if (p == 0) {
@@ -234,14 +233,11 @@ void func_001DD9C0(void* unused, f32* out)
 }
 
 struct Owner_1DDBB8 { u8 pad[0x2320]; s32 count; };
-typedef void (*VFn_1DDBB8)(void* self);
-struct Svc_1DDBB8 { VFn_1DDBB8* vtbl; };
-extern Svc_1DDBB8 D_002721D0;
 
 void func_001DDBB8(Owner_1DDBB8* self)
 {
     if (--self->count == 0) {
-        D_002721D0.vtbl[15](&D_002721D0);
+        D_002721D0.vt->m15(&D_002721D0);
     }
 }
 
@@ -330,18 +326,15 @@ void func_001DE768(C5E* self)
     func_001276C0(self);
 }
 
-struct Node_1DC7D0 { u8 pad[8]; Node_1DC7D0* next; Node_1DC7D0* prev; };
-struct Owner_1DC7D0 { u8 pad[0x1AE4]; Node_1DC7D0* listA; Node_1DC7D0* listB; };
+void func_001DC710(Contacts03* node, Contacts03** head);
+void func_001DC7B0(Contacts03* node, Contacts03** head);
 
-void func_001DC710(Node_1DC7D0* node, Node_1DC7D0** head);
-void func_001DC7B0(Node_1DC7D0* node, Node_1DC7D0** head);
-
-Node_1DC7D0* func_001DC7D0(Owner_1DC7D0* owner, void* self)
+Contacts03* func_001DC7D0(C6C* owner, C03* self)
 {
-    Node_1DC7D0* n = owner->listA;
-    func_001DC710(n, &owner->listA);
-    func_001DC7B0(n, &owner->listB);
-    *(void**)((u8*)n + 4) = self;
+    Contacts03* n = owner->freeTables;
+    func_001DC710(n, &owner->freeTables);
+    func_001DC7B0(n, &owner->usedTables);
+    n->owner = self;
     return n;
 }
 
@@ -361,23 +354,19 @@ void func_001DDAD0(void)
     }
 }
 
-extern u8 D_0026FF68[];
-
 struct __attribute__((packed)) Unaligned_1DDB20 { s32 v; };
 
-void func_00194D30(void* self, s32 mode, s32 value);
+void func_00194D30(T217D_6D0* self, s32 mode, s32 value);
 
 void func_001DDB20(void* unused, s32 a1, s32 a2)
 {
     s32 saved = a1;
-    u8* p = D_0026FF68;
+    u8* p = (u8*)&D_0026FF68;
     ((Unaligned_1DDB20*)(p + 0x280))->v = a2;
-    func_00194D30(D_0026FF68, 0, saved);
+    func_00194D30(&D_0026FF68, 0, saved);
 }
 
-struct Self_001DFBD0 { u8 pad0[0x728]; s32 f728; };
-
-s32 func_001DFBD0(Self_001DFBD0* self)
+s32 func_001DFBD0(C14* self)
 {
     return self->f728 != 0;
 }
@@ -411,13 +400,11 @@ void func_001DDA08(void* unused, f32* out)
 
 struct Owner_1DDB58 { u8 pad[0x2320]; s32 count; };
 
-void func_001AA8B8(void* self, f32 v);
-
 void func_001DDB58(Owner_1DDB58* self)
 {
     if (++self->count == 1) {
         func_001AA8B8(&D_002721D0, 0.0f);
-        D_002721D0.vtbl[14](&D_002721D0);
+        D_002721D0.vt->m14(&D_002721D0);
     }
 }
 
@@ -506,7 +493,7 @@ void func_001DDA90(void* self, s32* out)
 void func_00192C58(void* self);
 void func_001DFBE0(void* self, s32 flag);
 
-void func_001DEBB8(void* self)
+void func_001DEBB8(C14* self)
 {
     func_00192C58(self);
     func_001DFBE0(self, 1);
@@ -515,7 +502,7 @@ void func_001DEBB8(void* self)
 void func_001BC4D8(void* self, void* sub);
 void func_001C57C8(void* self);
 
-void func_001DFA10(void* self)
+void func_001DFA10(C14* self)
 {
     func_001BC4D8(self, (u8*)self + 0x740);
     func_001C57C8(self);
@@ -532,30 +519,23 @@ struct Dev_001DFB08 {
     s32 f24;
 };
 
-struct Obj_001DFB08 {
-    u8 pad0[0x738];
-    s32 f738;
-    u8 pad1[0x75C - 0x73C];
-    Dev_001DFB08* f75C;
-};
-
 void func_001B6598(void* dev, s32* out);
 void func_001B6568(void* dev, s32* out);
 void func_00192230(void* self, s32 kind, Rec_001DFB08* rec);
 
-void func_001DFB08(Obj_001DFB08* self, s32 code, Rec_001DFB08* rec)
+void func_001DFB08(C14* self, s32 code, Rec_001DFB08* rec)
 {
     s32 loc[2];
 
     if (code != 0x13) {
         if (code == 0x14) {
-            if (rec == (Rec_001DFB08*)self->f75C) {
+            if (rec == (Rec_001DFB08*)((Dev_001DFB08*)self->f75C)) {
                 func_001B6598(rec, &loc[0]);
-                func_001B6568(self->f75C, &loc[1]);
+                func_001B6568(((Dev_001DFB08*)self->f75C), &loc[1]);
             }
         }
     } else {
-        Dev_001DFB08* dev = self->f75C;
+        Dev_001DFB08* dev = ((Dev_001DFB08*)self->f75C);
         s32 key = rec->f0;
         if (dev != 0 && key == dev->f24) {
             s32 kind = rec->f8;
@@ -673,20 +653,11 @@ void func_001DC740(Pool_DC740* self)
     }
 }
 
-struct Obj_001DF5A0 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x720 - 0x18];
-    s32 f720;
-    s32 f724;
-    s32 f728;
-};
-
 s32 func_001DDA80(void* p);
 
-s32 func_001DF5A0(Obj_001DF5A0* self, s32 mode)
+s32 func_001DF5A0(C14* self, s32 mode)
 {
-    if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || func_001DDA80(self->f14) != 0) return 1;
+    if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || func_001DDA80(self->world) != 0) return 1;
     return 0;
 }
 
@@ -783,7 +754,7 @@ struct F4_2758B0 { f32 a, b, c, d; };
 extern F4_2758B0 D_002758B0;
 f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
-void func_001DFA40(void* self, void* out)
+void func_001DFA40(C14* self, void* out)
 {
     Obj_1DFA40* obj = (Obj_1DFA40*)self;
     Out_1DFA40* o = (Out_1DFA40*)out;
@@ -810,51 +781,45 @@ void func_001DFA40(void* self, void* out)
     }
 }
 
-struct Obj_1DC828;
-struct Elem_1DC828 { s32 word0; Elem_1DC828* next; u8 pad8[4]; Obj_1DC828* obj; };
-struct Obj_1DC828 { u8 pad0[0x480]; s32 handle480; u8 pad1[0x538 - 0x484]; u64 flags538; };
-struct Node_1DC828 { Elem_1DC828* elems; void* self; Node_1DC828* next; Node_1DC828* prev; };
-struct Owner_1DC828 { u8 pad0[0x1ADC]; u8* tab; Node_1DC828* base; Node_1DC828* listA; Node_1DC828* listB; };
-
-void func_001DC710(Node_1DC828* node, Node_1DC828** head);
-void func_001DC7B0(Node_1DC828* node, Node_1DC828** head);
-Elem_1DC828* func_00138788(void* owner, s32 h, Node_1DC828* handle);
-void func_001861E8(void* a, s32 b);
+void func_001DC710(Contacts03* node, Contacts03** head);
+void func_001DC7B0(Contacts03* node, Contacts03** head);
+ContactRow03* func_00138788(void* owner, Contacts03* h, Contacts03* handle);
+void func_001861E8(void* a, Contact03* b);
 void func_00129DF8(void* self);
 void func_001B5F28(void* list, void* item);
 
-void func_001DC828(Owner_1DC828* owner, Node_1DC828* handle)
+void func_001DC828(C6C* owner, Contacts03* handle)
 {
-    Elem_1DC828* e = handle->elems;
+    ContactRow03* e = handle->head;
     if (e != 0) {
-        void* freeList = (u8*)owner + 0x1AF0;
+        void* freeList = &owner->pool1AF0;
         do {
-            Elem_1DC828* next = e->next;
-            Elem_1DC828* s1 = func_00138788(owner, e->obj->handle480, handle);
-            if (e->word0 != 0) {
-                func_001861E8(owner, e->word0);
-                if (!(e->obj->flags538 & (1ULL << 55))) {
-                    func_00129DF8(e->obj);
+            ContactRow03* next = e->next;
+            ContactRow03* s1 = func_00138788(owner, e->other->contacts, handle);
+            if (e->head != 0) {
+                func_001861E8(owner, e->head);
+                if (!(e->other->flags538 & (1ULL << 55))) {
+                    func_00129DF8(e->other);
                 }
-                if (!(s1->obj->flags538 & (1ULL << 55))) {
-                    func_00129DF8(s1->obj);
+                if (!(s1->other->flags538 & (1ULL << 55))) {
+                    func_00129DF8(s1->other);
                 }
             }
-            s1->word0 = 0;
-            e->word0 = 0;
+            s1->head = 0;
+            e->head = 0;
             func_001B5F28(freeList, e);
             func_001B5F28(freeList, s1);
             e = next;
         } while (e != 0);
     }
-    handle->elems = 0;
-    Node_1DC828** hb = &owner->listB;
-    s32 a3 = handle - owner->base;
-    Node_1DC828* p = *hb;
+    handle->head = 0;
+    Contacts03** hb = &owner->usedTables;
+    s32 a3 = handle - owner->tables;
+    Contacts03* p = *hb;
     if (p != 0) {
         do {
-            s32 b = p - owner->base;
-            u8* tab = owner->tab;
+            s32 b = p - owner->tables;
+            u8* tab = (u8*)owner->buf1ADC;
             u8* r1 = tab + (a3 << 8);
             u8* r2 = tab + (b << 8);
             r2[a3] = 0;
@@ -862,9 +827,9 @@ void func_001DC828(Owner_1DC828* owner, Node_1DC828* handle)
             p = p->next;
         } while (p != 0);
     }
-    handle->self = 0;
+    handle->owner = 0;
     func_001DC710(handle, hb);
-    func_001DC7B0(handle, &owner->listA);
+    func_001DC7B0(handle, &owner->freeTables);
 }
 
 typedef u64 Q_1DD3E0 __attribute__((mode(TI)));
@@ -925,24 +890,18 @@ struct Cam_11A338 { u8 pad0[0x19D8]; s32 hi; s32 lo; };
 struct Ent_11A338 { u32 pad0; f32 f4; u8 pad1[0x1C - 8]; s32 w1c; u8 pad2[0x28 - 0x20]; void* w28; };
 struct Cur_11A338 { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
 struct Glob_11A338 { u8 pad0[0x230C]; f32 f; Cur_11A338* cur; void* nm; };
-struct VTab_11A338;
-struct Obj_11A338 { VTab_11A338* vt; u8 pad0[0x208 - 4]; s32 color; u8 pad1[4]; void** slot; u8 pad2[0x26C - 0x214]; s32 f26c; s32 f270; };
-struct VTab_11A338 { u8 pad[0x20]; void (*f20)(Obj_11A338*, const char*); u8 pad2[0x38 - 0x24]; void (*f38)(Obj_11A338*); };
 struct Flags_11A338 { u32 flags; };
 
 extern u8 D_002758E0[];
 
-void func_001AA268(void* self);
 void* func_001DFE80(s32 k);
 s32 func_001E2100(void* p);
 s32 func_0015C188(s32 k);
-void* func_0015C1C0(s32 k);
-void func_001AA788(void* self, f32 v);
-void func_001AA8B8(void* self, f32 v);
+V24A2* func_0015C1C0(s32 k);
 s32 func_001DD7A0(Glob_11A338* g, s32 k);
-void func_001E02C8(void* self, s32 n);
+void func_001E02C8(T217D_1380* self, s32 n);
 
-void func_001DFEB8(Obj_11A338* self)
+void func_001DFEB8(T217D_1380* self)
 {
     Ent_11A338* e;
 
@@ -960,8 +919,8 @@ void func_001DFEB8(Obj_11A338* self)
         }
     }
     if (func_0015C188(2)) {
-        self->slot = (void**)D_002758E0;
-        *self->slot = func_0015C1C0(2);
+        self->frame = (V24A2**)D_002758E0;
+        *self->frame = func_0015C1C0(2);
     }
     func_001AA788(self, 0.6f);
     *(s32*)((u8*)self + 0x208) = (s32)0xDF7F7F7Fu;
@@ -972,15 +931,15 @@ void func_001DFEB8(Obj_11A338* self)
     }
     if (((Flags_11A338*)D_002623C8)->flags & 8) {
         if (((Glob_11A338*)D_00275710)->cur->differs()) {
-            self->vt->f20(self, "Press &2L&. for Bonus Commentary");
+            self->vt->m08(self, "Press &2L&. for Bonus Commentary");
             func_001AA8B8(self, 5.0f);
-            self->vt->f38(self);
-            self->f26c = 1;
+            self->vt->m14(self);
+            self->pressed = 1;
         } else {
-            self->f26c = 0;
+            self->pressed = 0;
         }
     } else {
-        self->f26c = 0;
+        self->pressed = 0;
     }
     self->f270 = 0;
 }
@@ -1073,41 +1032,26 @@ void func_001DDA50(Obj_1DDA50* self)
     }
 }
 
-struct Self_1DE798;
 struct Tab_1DE798;
 struct __attribute__((aligned(16))) Quad_1DE798 { s32 w[4]; };
 
-struct Self_1DE798 {
-    u8 pad0[0xD0];
-    f32 fD0;
-    f32 fD4;
-    u8 pad1[0x638 - 0xD8];
-    f32 f638;
-    u8 pad2[0x6F0 - 0x63C];
-    Quad_1DE798 q6F0;
-    u8 pad3[0x720 - 0x700];
-    s32 w720;
-    u8 pad4[0x72C - 0x724];
-    f32 f72C;
-};
-
 extern u8 D_00248D20[];
 extern Quad_1DE798 D_00275740;
-void func_001C4458(Self_1DE798* self);
+void func_001C4458(C14* self);
 f32 func_00205778(f32 a, f32 b);
 void func_00188850(Tab_1DE798* t, void* out, f32 x);
 
-void func_001DE798(Self_1DE798* self)
+void func_001DE798(C14* self)
 {
     f32 f;
 
     func_001C4458(self);
-    f = func_00205778(self->fD4, self->fD0);
+    f = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     self->f638 = f;
     func_00188850((Tab_1DE798*)D_00248D20, (u8*)self + 0x660, f);
-    self->w720 = -1;
+    self->f720 = -1;
     self->f72C = -10.0f;
-    self->q6F0 = D_00275740;
+    (*(Quad_1DE798*)&self->v6F0) = D_00275740;
 }
 
 struct Slot_001DFE80 { s32 key; s32 rest[10]; };
@@ -1162,7 +1106,7 @@ void func_00129D00(void* a, s32 b, void* c);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_001DFBE0(void* self, s32 flag);
 
-void func_001DE808(void* self)
+void func_001DE808(C14* self)
 {
     Obj_1DE808* s = (Obj_1DE808*)self;
     s32 flag;
@@ -1190,7 +1134,6 @@ void func_001DE808(void* self)
 
 // NEAR: the call sequence, the list walk and the frame (0xC0) match; the scale constant D_002757D0 is held in s8 in retail but the C here addresses it through a pointer, so the register numbering of the constants 1 and 4 and the float tail differ (40 differing lines).
 
-struct Obj_1DE910;
 struct Loc_1DE910 { s32 v[4]; };
 struct Child_1DE910;
 struct Pa_1DE910;
@@ -1215,36 +1158,20 @@ struct ListNode_1DE910 {
     u8 pad[0xD0 - 0x80];
     ListNode_1DE910* next;
 };
-struct Obj_1DE910 {
-    VFnObj_1DE910* vtbl;
-    u8 pad0[0x14 - 4];
-    void* f14;
-    u8 pad1[0x720 - 0x18];
-    s32 f720;
-    s32 f724;
-    s32 f728;
-    f32 f72C;
-    f32 f730;
-    u8 pad2[0x740 - 0x734];
-    ListNode_1DE910* f740;
-    Pa_1DE910* f744;
-    Pb_1DE910* f748;
-};
-
 extern f32 D_00261858[];
 f32 D_002757C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 f32 D_002757D0[1] = { 6.0f };
 extern f32 D_002757D4;
 
 void func_001C4ED0(void);
-s32 func_00128230(Obj_1DE910* self);
-void func_001DEB30(Obj_1DE910* self);
+s32 func_00128230(C14* self);
+void func_001DEB30(C14* self);
 void func_001D7098(Loc_1DE910* l, s32 zero, Child_1DE910* c);
 void func_001861E8(Pa_1DE910* a0, ListNode_1DE910* a1);
 void func_00129E10(Pb_1DE910* a, f32 v);
 void func_00129FB0(Pb_1DE910* a, f32 v);
 
-void func_001DE910(Obj_1DE910* self)
+void func_001DE910(C14* self)
 {
     Loc_1DE910 loc;
     f32 f20;
@@ -1257,7 +1184,7 @@ void func_001DE910(Obj_1DE910* self)
     if (func_00128230(self) != 0) {
         func_001DEB30(self);
     }
-    ListNode_1DE910* head = self->f740;
+    ListNode_1DE910* head = ((ListNode_1DE910*)self->f740);
     if (head != 0) {
         s1 = head;
         do {
@@ -1276,12 +1203,12 @@ void func_001DE910(Obj_1DE910* self)
                         }
                         s0 = s0->next18;
                     }
-                    self->vtbl[80](self, &loc);
+                    ((VFnObj_1DE910*)self->desc)[80](self, &loc);
                 }
             }
             s1 = s1->next;
         } while (s1 != 0);
-        func_001861E8((Pa_1DE910*)self->f14, self->f740);
+        func_001861E8((Pa_1DE910*)self->world, ((ListNode_1DE910*)self->f740));
         self->f740 = 0;
     }
     {
@@ -1297,8 +1224,8 @@ void func_001DE910(Obj_1DE910* self)
             f20 = x;
         }
     }
-    func_00129E10(self->f748, f20 * D_002757D0[0]);
-    func_00129FB0(self->f748, f20 * D_002757D4);
+    func_00129E10(((Pb_1DE910*)self->f748), f20 * D_002757D0[0]);
+    func_00129FB0(((Pb_1DE910*)self->f748), f20 * D_002757D4);
     if (self->f728 != 0 && self->f720 != 2) {
         f32 e = D_00261858[1] - self->f730;
         if (2.0f < e) {
@@ -1451,16 +1378,6 @@ s32 func_001DD710(Arg_001DD710* a0, Arg_001DD710* a1)
     return r;
 }
 
-struct Self_1DF2C8 {
-    u8 pad0[0x2C8];
-    u64 f2C8;
-    u8 pad2D0[0x720 - 0x2D0];
-    s32 f720;
-    u8 pad724[4];
-    s32 f728;
-    f32 f72C;
-    f32 f730;
-};
 struct Rgba_1DF2C8 { u8 r, g, b, a; };
 
 extern f32 D_00261858[];
@@ -1476,15 +1393,15 @@ struct Clamp_1DF2C8 {
 };
 
 f32 func_00205210(f32 x);
-void func_00126A48(Self_1DF2C8* s, u32 c);
-void func_00125C90(Self_1DF2C8* s, void* a, void* b);
+void func_00126A48(C14* s, u32 c);
+void func_00125C90(C14* s, void* a, void* b);
 
-void func_001DF2C8(Self_1DF2C8* self, void* a1, void* a2)
+void func_001DF2C8(C14* self, void* a1, void* a2)
 {
     Rgba_1DF2C8 out;
     Rgba_1DF2C8 col;
     f32 t;
-    if (!(self->f2C8 & 0x100000000UL)) {
+    if (!(self->flags & 0x100000000UL)) {
         *(u32*)&col = 0x800000A0;
         if (self->f728 != 0) {
             if (self->f720 != 2) {

@@ -12,6 +12,7 @@
 #include "c01.h"
 
 struct C02;
+struct T2195;   // an attachment (t2195.h): a record of the world's pool at C6C::pool1B20
 
 // A 16-byte vector (a position, a velocity, a matrix row), 16-aligned as the code moves it.
 struct __attribute__((aligned(16))) Vec02 {
@@ -33,6 +34,18 @@ struct __attribute__((packed)) Link02 {
 struct Key02 {
     s32 key;        // 0x00
     Key02* next;    // 0x04
+};
+
+// An element of the list at +0x280 (func_00146298, func_0012AA50, func_001B11A0): its kind,
+// then the values those readers take of kinds 1 and 6.
+struct Elem02 {
+    u8 pad00[0x08];
+    s32 kind;               // 0x08: func_0012AA50 takes kind 6, func_0012AAE8 kind 5, func_001B11A0 kind 1
+    u8 pad0C[0x14 - 0x0C];
+    s32 f14;                // 0x14: func_001B11A0 takes the first kind 1 with it set
+    u8 pad18[0x2C - 0x18];
+    f32 x;                  // 0x2C: func_00146298 (kind 6)
+    f32 y;                  // 0x30
 };
 
 // Class 0x02's descriptor: the root's slots, then twenty more (slot n at 0x10 + 4n).
@@ -72,10 +85,14 @@ struct C02 : C01 {
     f32 f80;                // 0x80: FLT_MAX at set-up
     f32 f84;                // 0x84: FLT_MAX at set-up
     s32 f88;                // 0x88: 0x0FFFFFFF at set-up
-    u8 pad8C[0xA0 - 0x8C];
+    u8 pad8C[0x90 - 0x8C];
+    s32 save90;             // 0x90: C03::mode450 kept by func_001BD790
+    s32 save94;             // 0x94: C03::mode470 kept by func_001BD790
+    u8 pad98[0xA0 - 0x98];
     Vec02 vA0;              // 0xA0: v150 kept by slot 20
     Vec02 vB0;              // 0xB0: v160 kept by slot 20
-    u8 padC0[0xD0 - 0xC0];
+    u64 savedC0;            // 0xC0: bits 0, 1: C03::flags538 bits 54, 55 kept by func_001BD790
+    u8 padC8[0xD0 - 0xC8];
     Mat02 rot;              // 0xD0: the placement matrix (the common block)
     Vec02 pos;              // 0x100: the position (the common block; slot 29)
     Mat02 m110;             // 0x110
@@ -86,9 +103,9 @@ struct C02 : C01 {
     Vec02 v190;             // 0x190
     Mat02 m1A0;             // 0x1A0
     Vec02 v1D0;             // 0x1D0
-    List01 list1E0;         // 0x1E0: offset 8
-    void* f1EC;             // 0x1EC
-    void* f1F0;             // 0x1F0
+    List01 list1E0;         // 0x1E0: the attachments (T2195 records), linked at T2195::link (offset 8)
+    T2195* f1EC;            // 0x1EC: the attachment that gives the position (slot 4)
+    T2195* f1F0;            // 0x1F0: the one that gives the orientation (slot 5)
     void* f1F4;             // 0x1F4
     void** f1F8;            // 0x1F8: f26C entries
     void* f1FC;             // 0x1FC
@@ -102,10 +119,13 @@ struct C02 : C01 {
     u8* p21C;               // 0x21C: D_00260EB0
     u8* p220;               // 0x220: D_00260EC0
     void* f224;             // 0x224: a 0xC0-byte record
-    u8 pad228[0x22C - 0x228];
+    s32 tries;              // 0x228: as Actor6C::tries; func_0013DC38 tests it, func_00129DF8 clears the root's
     u8 sub22C[0x26C - 0x22C];   // 0x22C: a record func_00165728/165828/165920/165FE0 work on
     s32 f26C;               // 0x26C: the number of f1F8 entries
-    u8 pad270[0x284 - 0x270];
+    u8 pad270[0x278 - 0x270];
+    s32 f278;               // 0x278: func_001EECE0 calls slot 50 while it is set
+    s32 elemCount;          // 0x27C
+    Elem02** elems;         // 0x280: elemCount of them
     void* f284;             // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
     void* f288;             // 0x288: a 0x40-byte record
     u8 pad28C[0x294 - 0x28C];
@@ -128,6 +148,10 @@ struct C02 : C01 {
             u64 bits24 : 2; // set-up: 1 with a parent, 2 without
             u64 bits26 : 2; // set-up: 0 with a parent, 2 without
             u64 bits28 : 2; // func_00196410
+        };
+        struct {
+            u32 flagsLo;    // 0x2C8
+            u32 flagsHi;    // 0x2CC: bits 32 up, read as a word (func_001AFAF8, func_001B0BE0)
         };
     };
 

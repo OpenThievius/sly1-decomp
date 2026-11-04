@@ -4,6 +4,7 @@
 #include "c02.h"
 #include "asm_func.h"
 #include "list_iter.h"
+#include "v24a0.h"
 
 
 struct Owner_15F678
@@ -340,19 +341,6 @@ struct Stream_161708 {
 
 
 
-typedef void (*Fn_161768)(void* self, s32 a1);
-
-struct Adjust_161768 { u8 pad0[8]; s16 adj; u8 pad1[2]; Fn_161768 fn; };
-
-struct Obj_161768 {
-    u8 pad0[0xC];
-    u64* cur;
-    u8 pad1[8];
-    Adjust_161768* sub;
-    u64* last;
-    u32 f20;
-    s32 f24;
-};
 
 
 
@@ -370,9 +358,6 @@ struct Rec_160E80 { u8 pad0[4]; s32 f4; s32 f8; s32 fC; s32 f10; s32 f14; s32 f1
 
 
 
-typedef void (*Fn_161200)(void* self, s32 a);
-struct Sub_161200 { u8 pad0[8]; s16 off8; u8 pad1[2]; Fn_161200 fn; };
-struct Obj_161200 { u8 pad0[0x18]; Sub_161200* f18; s32 f1C; };
 
 void func_001613C0(void* self, s32 a, s32 b, s32 c);
 
@@ -438,9 +423,6 @@ extern u8 D_00000FD8[];
 
 void func_001EE3F0(void* s, s32 n);
 
-typedef void (*Fn_1612F8)(void* self, s32 zero);
-struct Sub_1612F8 { u8 pad0[8]; s16 off8; u8 pad1[2]; Fn_1612F8 fnC; };
-struct Out_1612F8 { u8 pad0[0xC]; u8* cur0C; u8 pad1[0x18 - 0x10]; Sub_1612F8* sub18; };
 
 
 
@@ -653,11 +635,10 @@ void func_001F0428(Obj_160918* obj, s32 value, s32 count);
 
 
 
-struct Self_1611B8 { u8 pad0[0x14]; s32 f14; void* f18; s32 f1C; s32 f20; s32 f24; };
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_0024A6F8[];
-s32 func_00152888(Self_1611B8* a);
+s32 func_00152888(V24A0* a);
 
 
 
@@ -673,34 +654,10 @@ void func_001604B8(s32 mode);
 
 // EXACT: self->block store ahead of self->f20 store.
 
-typedef void (*Fn_1613C0)(void* self, s32 mode);
-
-struct Desc_1613C0 {
-    u8 pad0[8];
-    s16 adj;
-    u8 pad1[2];
-    Fn_1613C0 fn;
-};
-
-struct Ctx_1613C0 {
-    u8 pad0[0xC];
-    u8* cur;
-    u8 pad1[8];
-    Desc_1613C0* desc;
-    u8* block;
-    s32 f20;
-    s32 f24;
-};
 
 
 
 struct Pkt_1639E8;
-struct Frame_1639E8
-{
-    s32 f0;
-    u8* f4;
-    u8 pad08[0x28];
-};
 struct Hdr_1639E8
 {
     u16* p;
@@ -752,14 +709,13 @@ extern u8 D_00000ED8[];
 
 void func_001EE5C8(Pkt_1639E8* s, s32 tag, s32 size, s32 a3, void* a4, void* a5);
 void* func_001F5C0C(void* p, s32 value, s32 size);
-void func_001611B8(Frame_1639E8* f);
-void func_00152980(Frame_1639E8* f, s32 size);
-void func_001613C0(Frame_1639E8* f, s32 a, s32 b, s32 c);
-void func_00161708(Frame_1639E8* f, s32 a, u64 b);
-void func_00161278(Frame_1639E8* f, s32 n);
+void func_00152980(V24A0* f, s32 size);
+void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
+void func_00161708(V24A0* f, s32 a, u64 b);
+void func_00161278(V24A0* f, s32 n);
 void func_001EE668(Pkt_1639E8* s, s32 a, s32 b, void* data, s32 flags);
-void func_001528E0(Frame_1639E8* f);
-void func_001615F0(Frame_1639E8* f, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_001528E0(V24A0* f);
+void func_001615F0(V24A0* f, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001EE4C0(Pkt_1639E8* s, u32* src);
 void func_001EE528(Pkt_1639E8* s, s32 value);
 void func_001EE3F0(Pkt_1639E8* s, void* data);
@@ -776,14 +732,6 @@ struct Zero_1639E8
 
 
 
-struct Frame_161278 {
-    u8 pad0[0xC];
-    u32 fC;
-    u8 pad10[0xC];
-    u32* f1C;
-    u32 f20;
-    u32 f24;
-};
 
 
 
@@ -1373,12 +1321,12 @@ s32 func_00160D98(void);
 void func_00160DA0(void);
 void func_00160E80(Rec_160E80* self);
 s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_161028** out);
-Self_1611B8* func_001611B8(Self_1611B8* self);
-void func_00161200(Obj_161200* self);
-void func_00161278(Frame_161278* f, s32 n);
+V24A0* func_001611B8(V24A0* self);
+void func_00161200(V24A0* self);
+void func_00161278(V24A0* f, s32 n);
 s32 func_001612E8(Obj_1612E8* obj);
-void func_001612F8(void* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out);
-void func_001613C0(Ctx_1613C0* self, s32 a1, s32 a2, s32 a3);
+void func_001612F8(V24A0* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out);
+void func_001613C0(V24A0* self, s32 a1, s32 a2, s32 a3);
 void func_00161458(Stream_161458* self, u32 value);
 void func_001614C8(Stream_161458* self,s32 a,s32 b);
 void func_00161520(Stream_161458* self,f32 a,f32 b,f32 c);
@@ -1386,7 +1334,7 @@ void func_00161588(Stream_161588* self, s32 a1, s32 a2, u64 a3);
 void func_001615F0(Stream_1615F0* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void func_00161670(Stream_161670* self, u32 a1, u32 a2, u32 a3, u32 a4);
 void func_00161708(Stream_161708* self, u64 a1, u64 a2);
-void func_00161768(Obj_161768* self, u32 a1, u64 a2);
+void func_00161768(V24A0* self, u32 a1, u64 a2);
 void func_001617E8(Stream_1617E8* self, s32 tag, f32 value);
 void func_00161860(Stream_161860* self, s32 a1, s32 a2);
 void func_001618C0(Stream_1618C0* self, s32 a1, s32 a2, u32 a3, u32 a4);
@@ -2139,39 +2087,39 @@ s32 func_00161028(Ctx_161028* dst, Ctx_161028* src, s32 key, s32 maxOut, Entry_1
     return j;
 }
 
-extern const Fn_Table D_0024A6F8[6] = { 0, 0, 0, (Fn_Table)(void (*)(Frame_161278* f, s32 n))func_00161278, 0, 0 };
+extern const Fn_Table D_0024A6F8[6] = { 0, 0, 0, (Fn_Table)(void (*)(V24A0* f, s32 n))func_00161278, 0, 0 };
 
-Self_1611B8* func_001611B8(Self_1611B8* self)
+V24A0* func_001611B8(V24A0* self)
 {
     (void)func_00152888(self);
     self->f14 = 1;
-    self->f18 = ((u8*)D_0024A6F8);
+    self->vt = (const V24A0_Vt*)D_0024A6F8;
     self->f1C = 0;
     self->f20 = 0;
     self->f24 = 0;
     return self;
 }
 
-void func_00161200(Obj_161200* self)
+void func_00161200(V24A0* self)
 {
     if (self->f1C != 0) {
-        Sub_161200* s = self->f18;
-        s->fn((u8*)self + s->off8, 1);
+        const V24A0_Vt* s = self->vt;
+        s->close((V24A0*)((u8*)self + s->adj1), 1);
     } else {
         func_001613C0(self, 0, 1, 0xE);
-        Sub_161200* s = self->f18;
-        s->fn((u8*)self + s->off8, 1);
+        const V24A0_Vt* s = self->vt;
+        s->close((V24A0*)((u8*)self + s->adj1), 1);
     }
 }
 
-void func_00161278(Frame_161278* f, s32 n)
+void func_00161278(V24A0* f, s32 n)
 {
     if (f->f1C == 0)
         return;
     u32 q = f->f24 / f->f20;
-    u32 a2 = f->fC;
+    u32 a2 = f->curU;
     if (a2 & 0xF) {
-        f->fC = a2 + 8;
+        f->curU = a2 + 8;
         *(u64*)a2 = 0;
     }
     u32* p = f->f1C;
@@ -2189,27 +2137,27 @@ void func_00161278(Frame_161278* f, s32 n)
 
 s32 func_001612E8(Obj_1612E8* obj) { return ++obj->value; }
 
-void func_001612F8(void* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out)
+void func_001612F8(V24A0* self, u64 prim, s32 nloop, s32 nreg, u64 data, s32* out)
 {
-    Out_1612F8* w = (Out_1612F8*)self;
-    Sub_1612F8* sub = w->sub18;
-    sub->fnC((u8*)self + sub->off8, 0);
+    V24A0* w = self;
+    const V24A0_Vt* sub = w->vt;
+    sub->close((V24A0*)((u8*)self + sub->adj1), 0);
 
-    u8* p = w->cur0C;
+    u8* p = w->cur;
     u64 tag = (prim << 47) | (1ULL << 46) | (u64)nloop | ((u64)nreg << 60);
-    w->cur0C = p + 16;
+    w->cur = p + 16;
     *(u64*)(p + 8) = data;
     *(u64*)p = tag;
     if (out != 0) {
-        *out = (s32)w->cur0C;
+        *out = (s32)w->cur;
     }
-    w->cur0C = w->cur0C + nloop * nreg * 16;
+    w->cur = w->cur + nloop * nreg * 16;
 }
 
-void func_001613C0(Ctx_1613C0* self, s32 a1, s32 a2, s32 a3)
+void func_001613C0(V24A0* self, s32 a1, s32 a2, s32 a3)
 {
-    Desc_1613C0* d = self->desc;
-    d->fn((u8*)self + d->adj, 0);
+    const V24A0_Vt* d = self->vt;
+    d->close((V24A0*)((u8*)self + d->adj1), 0);
     u8* blk = self->cur;
     s64 lo = ((s64)a2 << 60) | ((s64)1 << 46);
     s64 hdr = ((s64)a1 << 47) | lo;
@@ -2294,12 +2242,12 @@ void func_00161708(Stream_161708* self, u64 a1, u64 a2)
 
 LINKER_REMNANT(func_00161760);
 
-void func_00161768(Obj_161768* self, u32 a1, u64 a2)
+void func_00161768(V24A0* self, u32 a1, u64 a2)
 {
-    Adjust_161768* sub = self->sub;
-    sub->fn((u8*)self + sub->adj, 0);
-    u64* p = self->cur;
-    self->cur = p + 2;
+    const V24A0_Vt* sub = self->vt;
+    sub->close((V24A0*)((u8*)self + sub->adj1), 0);
+    u64* p = self->cur64;
+    self->cur64 = p + 2;
     p[1] = a2;
     p[0] = ((u64)a1 << 60) | ((u64)0x8000 << 43);
     self->f20 = a1;
@@ -2662,7 +2610,7 @@ void func_00163990(s32 mode, void* obj)
 void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_1639E8* vecs, s32 extra,
                    void* extraData, Ent_1639E8* ents, Vec3_1639E8* verts, void* data, Pkt_1639E8* pkt)
 {
-    Frame_1639E8 f;
+    V24A0 f;
     u32 buf[4];
     s32 i;
     Vec3_1639E8* out;
@@ -2677,7 +2625,7 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     func_00161708(&f, 1, (u64)D_002623E0.r | ((u64)D_002623E0.g << 8) | ((u64)D_002623E0.b << 16)
                              | ((u64)D_002623E0.a << 24) | (1ULL << 32));
     func_00161278(&f, 1);
-    func_001EE668(pkt, 0xC, 2, f.f4, 0x18);
+    func_001EE668(pkt, 0xC, 2, f.begin, 0x18);
     func_001528E0(&f);
     func_001613C0(&f, 0xC1, 3, 0x44E);
     func_00161708(&f, 0x47, 0x70000);
@@ -2689,10 +2637,10 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     func_001615F0(&f, 0, 0, 0, 0);
     func_001615F0(&f, 0, 0, 0, 0);
     func_00161278(&f, 1);
-    func_001EE668(pkt, 0xC, 2, f.f4, 0x1B);
-    func_001EE668(pkt, 0xC, 2, f.f4 + 0x40, 0x1F);
-    func_001EE668(pkt, 0xC, 2, f.f4, 0x23);
-    func_001EE668(pkt, 0xC, 2, f.f4 + 0x40, 0x27);
+    func_001EE668(pkt, 0xC, 2, f.begin, 0x1B);
+    func_001EE668(pkt, 0xC, 2, f.begin + 0x40, 0x1F);
+    func_001EE668(pkt, 0xC, 2, f.begin, 0x23);
+    func_001EE668(pkt, 0xC, 2, f.begin + 0x40, 0x27);
 
     hdr->p[0] = off;
     off += n;

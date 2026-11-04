@@ -4,6 +4,7 @@
 #include "c83.h"
 #include "c6b.h"
 #include "c02.h"
+#include "t2195.h"
 
 struct Owned { u8 pad[0x14]; void* owner; };
 
@@ -1053,12 +1054,9 @@ void func_001294E0(void* self, f32* out)
     *out = ((Sub_1294E0*)func_00129400(self))->f40;
 }
 
-struct Sub_129DF8 { u8 pad[0x228]; s32 f228; };
-struct Obj_129DF8 { u8 pad[0x50]; Sub_129DF8* p50; };
-
-void func_00129DF8(Obj_129DF8* self)
+void func_00129DF8(C02* self)
 {
-    if (self->p50 != 0) self->p50->f228 = 0;
+    if (self->root != 0) self->root->tries = 0;
 }
 
 typedef u64 Quad_129E10 __attribute__((mode(TI)));
@@ -1315,28 +1313,25 @@ void func_00129E88(State_00129E88* self, Vec16_12A5D0* value)
     *self->value = *value;
 }
 
-struct Part_0012AA50 { u8 pad[8]; s32 kind; };
-struct State_0012AA50 { u8 pad[0x27C]; s32 count; Part_0012AA50** parts; };
 void func_001B5388(void* part, f32 a, f32 b);
-void func_0012AA50(State_0012AA50* self, f32 a, f32 b)
+void func_0012AA50(C02* self, f32 a, f32 b)
 {
-    for (s32 i = 0; i < self->count; i++) {
-        Part_0012AA50* p = self->parts[i];
+    for (s32 i = 0; i < self->elemCount; i++) {
+        Elem02* p = self->elems[i];
         if (p->kind == 6) func_001B5388(p, a, b);
     }
 }
 
-struct State_0012AAE8 { s32* table; u8 pad[0x18]; State_0012AAE8* next; u8 gap[0x14]; State_0012AAE8* child; u8 gap2[0x244]; s32 count; Part_0012AA50** parts; };
 void func_00159A00(void* part, f32 value);
-void func_0012AAE8(State_0012AAE8* self, f32 value)
+void func_0012AAE8(C02* self, f32 value)
 {
     ListFrame frame;
-    for (s32 i = 0; i < self->count; i++) {
-        Part_0012AA50* p = self->parts[i];
+    for (s32 i = 0; i < self->elemCount; i++) {
+        Elem02* p = self->elems[i];
         if (p->kind == 5) func_00159A00(p, value);
     }
-    for (State_0012AAE8* child = self->child; child; child = child->next) {
-        if (child->table[2] & 1) func_0012AAE8(child, value);
+    for (C02* child = (C02*)self->children.head; child; child = (C02*)child->next) {
+        if (child->desc->flags & 1) func_0012AAE8(child, value);
     }
 }
 
@@ -1569,17 +1564,20 @@ void* func_0018D5C0(s32 size);
 void func_0012D2A8(C83* a, Track83* b);
 void func_0012BC38(C83* a, Stream83* b, s32 c, s32* d, s32* e);
 void func_0011EC40(C83* a, Stream83* b);
-Curve83* func_00120FB0(s32 cc);
-Curve83* func_00121050(s32 cc);
-Curve83* func_001210F0(s32 cc);
-Curve83* func_00121160(s32 cc);
+T2196_Pos* func_00120FB0(s32 cc);
+T2196_Rot* func_00121050(s32 cc);
+T2196_Scale* func_001210F0(s32 cc);
+T2196_Weight* func_00121160(s32 cc);
 
 void func_0012B8C8(C83* self, Stream83* other)
 {
     s32 k;
     Track83* sel = 0;
     Track83* e;
-    Curve83* q;
+    T2196_Pos* qp;
+    T2196_Rot* qr;
+    T2196_Scale* qs;
+    T2196_Weight* qw;
     s32 i;
     s32 j;
     s32 t;
@@ -1603,34 +1601,34 @@ void func_0012B8C8(C83* self, Stream83* other)
         e->target = func_00137D10(other);
         flags = func_00137CC0(other);
         if (flags & 1) {
-            q = func_00120FB0(func_00137CC0(other));
-            e->pos = q;
-            if (q->vtbl[1]) q->vtbl[1](q, other);
+            qp = func_00120FB0(func_00137CC0(other));
+            e->pos = qp;
+            if (qp->vt->read) qp->vt->read(qp, other);
         }
         if (flags & 2) {
-            q = func_00121050(func_00137CC0(other));
-            e->rot = q;
-            if (q->vtbl[2]) q->vtbl[2](q, other);
+            qr = func_00121050(func_00137CC0(other));
+            e->rot = qr;
+            if (qr->vt->read) qr->vt->read(qr, other);
         }
         if (flags & 4) {
-            q = func_001210F0(func_00137CC0(other));
-            e->scale = q;
-            if (q->vtbl[1]) q->vtbl[1](q, other);
+            qs = func_001210F0(func_00137CC0(other));
+            e->scale = qs;
+            if (qs->vt->read) qs->vt->read(qs, other);
         }
         if (flags & 8) {
-            q = func_00121160(func_00137CC0(other));
-            e->weight = q;
-            if (q->vtbl[1]) q->vtbl[1](q, other);
+            qw = func_00121160(func_00137CC0(other));
+            e->weight = qw;
+            if (qw->vt->read) qw->vt->read(qw, other);
         }
         if (flags & 0x10) {
             e->morphCount = func_00137B90(other);
-            e->morph = (Curve83**)func_0018D5C0(e->morphCount << 2);
+            e->morph = (T2196_Weight**)func_0018D5C0(e->morphCount << 2);
             for (j = 0; j < e->morphCount; j++) {
                 t = func_00137CC0(other);
                 if (t != -1) {
                     e->morph[j] = func_00121160(t);
-                    q = e->morph[j];
-                    if (q->vtbl[1]) q->vtbl[1](q, other);
+                    qw = e->morph[j];
+                    if (qw->vt->read) qw->vt->read(qw, other);
                 }
             }
         }
@@ -1994,46 +1992,26 @@ void func_0012B1E0(Obj_12B1E0* self, Quad_12B1E0* out)
     *out = *(Quad_12B1E0*)src;
 }
 
-struct Node_129780;
-struct Entry_129780 { u8 pad0[0x14]; s32 count; Node_129780** list; };
-struct Tab_129780 { u8 pad0[0x3C]; u8* base; };
-struct Mid_129780 { u8 pad0[8]; Tab_129780* tab; };
-struct Node_129780 {
-    s32 w0;
-    u8 pad4[4];
-    Node_129780* next;
-    u8 pad0C[4];
-    s8 b10;
-    s8 b11;
-    s8 b12;
-    s8 b13;
-    u8 pad14[8];
-    Mid_129780* w1C;
-    u8 pad20[8];
-    s32 w28;
-};
-
-
 void func_001F5C0C(void** p, s32 v, s32 n);
 void func_00129DF8(C02* self);
-void func_001226D8(Node_129780* n);
+void func_001226D8(T2195* n);
 
 void func_00129780(C02* self)
 {
-    Node_129780* s3 = 0;
-    Node_129780* s2 = 0;
-    Node_129780* s1 = 0;
+    T2195* s3 = 0;
+    T2195* s2 = 0;
+    T2195* s1 = 0;
     s32 i;
     if (self->f1F8) func_001F5C0C(self->f1F8, 0, self->f26C << 2);
-    for (Node_129780* n = (Node_129780*)self->list1E0.head; n != 0; n = n->next) {
-        if (s1 == 0) if (n->b10 != -1) s1 = n;
-        if (s2 == 0) if (n->b11 != -1) s2 = n;
-        if (s3 == 0) if (n->b12 != -1) s3 = n;
-        if (n->b13 == -1) continue;
-        if (n->w0 == (s32)(void*)D_002197C0) {
-            Entry_129780* e = (Entry_129780*)(n->w1C->tab->base + n->w28 * 0x1C);
-            for (i = 0; i < e->count; i++) {
-                if (e->list[i] != 0) {
+    for (T2195* n = (T2195*)self->list1E0.head; n != 0; n = n->link.next) {
+        if (s1 == 0) if (n->mode0 != -1) s1 = n;
+        if (s2 == 0) if (n->mode1 != -1) s2 = n;
+        if (s3 == 0) if (n->mode2 != -1) s3 = n;
+        if (n->mode3 == -1) continue;
+        if (n->vt == (const T2195_Vt*)D_002197C0) {
+            Track83* e = &((T2195_7C0*)n)->player->anim->tracks[((T2195_7C0*)n)->index];
+            for (i = 0; i < e->morphCount; i++) {
+                if (e->morph[i] != 0) {
                     if (self->f1F8[i] == 0) self->f1F8[i] = n;
                 }
             }
@@ -2043,13 +2021,13 @@ void func_00129780(C02* self)
             }
         }
     }
-    if (s1 && s1->b10 == 0) s1 = 0;
-    if (s2 && s2->b11 == 0) s2 = 0;
-    if (s3 && s3->b12 == 0) s3 = 0;
+    if (s1 && s1->mode0 == 0) s1 = 0;
+    if (s2 && s2->mode1 == 0) s2 = 0;
+    if (s3 && s3->mode2 == 0) s3 = 0;
     if (self->f1F8) {
         for (i = 0; i < self->f26C; i++) {
             if (self->f1F8[i] != 0) {
-                if (((Node_129780*)self->f1F8[i])->b13 == 0) self->f1F8[i] = 0;
+                if (((T2195*)self->f1F8[i])->mode3 == 0) self->f1F8[i] = 0;
             }
         }
     }

@@ -1,0 +1,166 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Class 0x30 (descriptor D_0021AC38, 0x5D0 bytes), a collidable object with a small state machine
+// (a state at +0x558, the time it was entered at +0x55C, a descriptor hook that picks the next
+// state), and the three classes under it: 0x31 (D_0021AD80, 0xB10 bytes: a group of child
+// objects), 0x32 (D_0021AEC8, 0x5F0 bytes) and 0x33 (D_0021B010, 0x620 bytes: three frame
+// ranges and a blink). Written for this project from what retail's code does
+// (config/us/classes.tsv; src/main/file_1AECB0.cpp).
+//
+// Their fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
+// field at its retail offset.
+#ifndef C30_H
+#define C30_H
+
+#include "c03.h"
+
+struct C30;
+
+// The record func_00129CA8 hands out (func_001AEF68 takes one): 0x18 holds a value that is given
+// back as the record is cleared (a float read, then zeroed as an integer).
+struct Node30 {
+    u8 pad00[0x18];
+    union {
+        s32 w;
+        f32 f;
+    } f18;                  // 0x18
+};
+
+// Class 0x30's descriptor: 0x03's slots, then six more (slot n at 0x10 + 4n; slot 72 is empty in
+// 0x30).
+struct Desc30 : Desc03 {
+    void (*m48)(C30* self, s32* state);     // 0x130: pick the next state (0x32: func_001B0C68)
+    void (*m49)(C30* self, s32 flag);       // 0x134: func_001B00E8, func_001B0EA8
+    void (*m4A)(C30* self);                 // 0x138: func_001B0120, func_001B0EE0
+    void (*m4B)(C30* self);                 // 0x13C: func_001B0160, func_001B0F70
+    void (*m4C)(C30* self, s32 value);      // 0x140: func_001AECE0
+    void (*m4D)(C30* self, s32 state);      // 0x144: enter a state (func_001AECE8)
+};
+
+struct C30 : C03 {
+    void* f550;             // 0x550: set by slot 76; slot 77 tells it when the state goes from 1 to 2
+    s32 f554;               // 0x554: 0 at set-up
+    s32 state;              // 0x558: -1 at set-up
+    f32 f55C;               // 0x55C: the time the state was entered
+    s32 f560;               // 0x560: the state slot 77 is called with when the object is set up
+    Ids03 ids564;           // 0x564: object ids (func_001AF000)
+    Ids03 ids578;           // 0x578: object ids (func_001AF028)
+    Ids03 ids58C;           // 0x58C: class ids (func_001AF050)
+    Ids03 ids5A0;           // 0x5A0: class ids (func_001AF078)
+    s32 f5B4;               // 0x5B4: when set, every object is accepted (func_001AED78)
+    f32 f5B8;               // 0x5B8
+    f32 f5BC;               // 0x5BC
+    s32 f5C0;               // 0x5C0
+    void* f5C4;             // 0x5C4: a sound (func_001BFCD8 starts it, func_001BF788 stops it)
+    Node30* f5C8;           // 0x5C8
+    f32 f5CC;               // 0x5CC: the value kept out of f5C8's record
+
+    const Desc30* desc30() const { return (const Desc30*)desc; }
+};
+
+// A group of 0x31: a child object and the objects it was cloned from the first group for.
+struct Entry31 {
+    C01* obj;               // 0x00
+    s32 value;              // 0x04
+};
+
+struct Group31 {
+    C01* child;             // 0x00
+    u8 pad04[0x24 - 0x04];
+    s32 count;              // 0x24
+    Entry31 items[5];       // 0x28
+};
+
+// 0x31: slot 9 (func_001AF3B8) clones the first group's entries into every other group; the
+// objects are kept in the world's list at +0x1CA8 (link at 0xAF0).
+struct C31 : C30 {
+    u8 pad5D0[0x5D4 - 0x5D0];
+    s32 groupCount;         // 0x5D4
+    u8 pad5D8[0x5E0 - 0x5D8];
+    Group31 groups[16];     // 0x5E0
+    u8 padAE0[0xAEC - 0xAE0];
+    f32 fAEC;               // 0xAEC
+    C31* listNext;          // 0xAF0: the link in the world's list at +0x1CA8
+    u8 padAF4[0xAF8 - 0xAF4];
+    s32 flagAF8;            // 0xAF8: 1 while it is in the list
+    f32 fAFC;               // 0xAFC
+    s32 fB00;               // 0xB00
+    f32 fB04;               // 0xB04: 1.0 at set-up
+    f32 fB08;               // 0xB08
+    u8 padB0C[0xB10 - 0xB0C];
+};
+
+// 0x32: two object ids it resolves at load (D_002744D8: +0x5D0 and +0x5D4), a state of its own
+// at +0x5D8 (func_001B1070) and three times.
+struct C32 : C30 {
+    C03* f5D0;              // 0x5D0
+    s32 f5D4;               // 0x5D4
+    s32 state5D8;           // 0x5D8: -1 at set-up
+    f32 f5DC;               // 0x5DC: the time it was entered
+    f32 f5E0;               // 0x5E0
+    f32 f5E4;               // 0x5E4
+    f32 f5E8;               // 0x5E8
+    u8 pad5EC[0x5F0 - 0x5EC];
+};
+
+// A range of frames (func_001B1898): the first and the last, the time it takes, and how it
+// loops (0 around, 1 back and forth).
+struct Anim33 {
+    s32 first;              // 0x00: -1 at set-up
+    s32 last;               // 0x04: -1 at set-up
+    f32 duration;           // 0x08
+    s32 mode;               // 0x0C
+};
+
+struct C33 : C30 {
+    Anim33 animB;           // 0x5D0
+    Anim33 animC;           // 0x5E0
+    Anim33 animA;           // 0x5F0
+    s32 blinkFrame;         // 0x600: -1 at set-up
+    f32 blinkRate;          // 0x604
+    f32 f608;               // 0x608
+    f32 f60C;               // 0x60C
+    Elem02* f610;           // 0x610: an entry of C02's list at 0x280 (a frame target for func_001B1898)
+    f32 f614;               // 0x614
+    s32 f618;               // 0x618
+    u8 pad61C[0x620 - 0x61C];
+};
+
+typedef char check_Desc30[sizeof(Desc30) == 0x148 ? 1 : -1];
+typedef char check_C30[sizeof(C30) == 0x5D0 ? 1 : -1];
+typedef char check_Group31[sizeof(Group31) == 0x50 ? 1 : -1];
+typedef char check_C31[sizeof(C31) == 0xB10 ? 1 : -1];
+typedef char check_C32[sizeof(C32) == 0x5F0 ? 1 : -1];
+typedef char check_Anim33[sizeof(Anim33) == 0x10 ? 1 : -1];
+typedef char check_C33[sizeof(C33) == 0x620 ? 1 : -1];
+
+// The methods (config/us/classes.tsv); a slot's function takes its class's object.
+void func_001AECB0(C30* self);                      // 0x30 slot 0
+void func_001AEFA0(C30* self);                      // 0x30 slot 17
+void func_001AECE0(C30* self, s32 value);           // 0x30 slot 76
+void func_001AECE8(C30* self, s32 state);           // 0x30 slot 77
+void func_001AF0A0(C31* self);                      // 0x31 slot 0
+void func_001AF0D0(C31* self);                      // 0x31 slot 10
+void func_001AF3B8(C31* self);                      // 0x31 slot 16
+void func_001AF5C8(C31* self, f32 dt);              // 0x31 slot 17
+void func_001AF7A8(C31* self, void* p);             // 0x31 slot 20
+void func_001B00E8(C31* self, s32 flag);            // 0x31 slot 73
+void func_001B0120(C31* self);                      // 0x31 slot 74
+void func_001B0160(C31* self);                      // 0x31 slot 75
+void func_001B01B0(C31* self, s32 state);           // 0x31 slot 77
+void func_001B04A0(C32* self);                      // 0x32 slot 0
+void func_001B04D0(C32* self);                      // 0x32 slot 16
+void func_001B0578(C32* self);                      // 0x32 slot 17
+s32 func_001B0BD8();                                // 0x32 slot 56
+void func_001B0EA8(C32* self, s32 flag);            // 0x32 slot 73
+void func_001B0EE0(C32* self);                      // 0x32 slot 74
+void func_001B0F70(C32* self);                      // 0x32 slot 75
+void func_001B0FC0(C32* self, s32 state);           // 0x32 slot 77
+void func_001B1158(C33* self);                      // 0x33 slot 0
+void func_001B11A0(C33* self);                      // 0x33 slot 16
+void func_001B1238(C33* self);                      // 0x33 slot 17
+void func_001B15D0(C33* self, s32 flag);            // 0x33 slot 73
+void func_001B1608(C33* self);                      // 0x33 slot 74
+void func_001B1698(C33* self);                      // 0x33 slot 75
+void func_001B1710(C33* self, s32 state);           // 0x33 slot 77
+
+#endif

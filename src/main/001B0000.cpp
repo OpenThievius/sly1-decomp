@@ -482,14 +482,14 @@ struct Obj_1B0EA8 {
 
 
 s32 func_00137B90(void* src);
-void* func_0014D9A8(s32 index);
+T2176* func_0014D9A8(s32 kind);
 void func_0011EC40(void* self, void* obj);
 
 void func_001B2840(C6E* self, void* obj)
 {
-    Hook6E* p = (Hook6E*)func_0014D9A8(func_00137B90(obj));
-    self->hook = p;
-    HookLoad6E fn = p->vtbl->load;
+    T2176* p = func_0014D9A8(func_00137B90(obj));
+    self->curve = p;
+    void (*fn)(T2176* self, void* stream) = p->vt->m00;
     if (fn != 0) {
         fn(p, obj);
     }
@@ -814,7 +814,7 @@ void func_001B28A8(C6E* self, C01* other)
 {
     Dst_1B28A8 a;
     Dst_1B28A8 b;
-    Hook6E* h;
+    T2176* h;
     if (self->parent) {
         func_00188B08((u8*)self->parent + 0x140, (u8*)self->parent + 0x110, &a);
     } else {
@@ -825,9 +825,9 @@ void func_001B28A8(C6E* self, C01* other)
     } else {
         b = *(Dst_1B28A8*)D_00248400;
     }
-    h = self->hook;
-    if (h->vtbl->frames) {
-        h->vtbl->frames(h, &a, &b);
+    h = self->curve;
+    if (h->vt->m04) {
+        h->vt->m04(h, &a, &b);
     }
     func_00182F78(self, other);
 }

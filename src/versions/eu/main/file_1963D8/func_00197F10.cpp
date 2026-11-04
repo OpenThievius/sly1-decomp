@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the two slots written in D_0026D348 on code 0x3F3 are at 0x574 and 0x578 (not 0x264 and 0x268).
-void func_00197F10(Obj_197F10* self, s32 kind, void* rec)
+void func_00197F10(C18* self, s32 kind, void* rec)
 {
     s32 code;
     func_00192230(self, kind, rec);
@@ -22,7 +22,7 @@ void func_00197F10(Obj_197F10* self, s32 kind, void* rec)
             tbl = (u8*)&D_0026D348;
             *(void**)(tbl + 0x574) = (u8*)self + 0x680;
             *(void**)(tbl + 0x578) = (u8*)self + 0x684;
-            func_001DDC38(self->f14, self);
+            func_001DDC38(self->world, self);
             func_001AB890(&D_0026E760, self->f688);
             func_001AB928(&D_0026E760, 0.0f, (void*)func_00197458);
             func_001AB938(&D_0026E760);
@@ -35,7 +35,7 @@ void func_00197F10(Obj_197F10* self, s32 kind, void* rec)
                 ((Vt_197F10*)&D_0026D348)->vtbl[15](&D_0026D348);
                 ((Vt_197F10*)&D_0026E4E0)->vtbl[15](&D_0026E4E0);
                 ((Vt_197F10*)&D_0026E760)->vtbl[15](&D_0026E760);
-                func_001DDC38(self->f14, 0);
+                func_001DDC38(self->world, 0);
             }
         }
         return;

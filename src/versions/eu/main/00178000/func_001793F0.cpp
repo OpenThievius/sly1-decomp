@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the D_00270650 words at 0x594 and 0x598 (US 0x284 and 0x288).
 
-void func_001793F0(Obj_1793F0* self)
+void func_001793F0(C1B* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 0x1A, D_00263AC8);

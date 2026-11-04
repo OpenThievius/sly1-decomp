@@ -3,6 +3,7 @@
 #include "asm_func.h"
 
 #include "fpu.h"
+#include "t2195.h"
 
 
 struct Obj_184D78 {
@@ -16,18 +17,10 @@ struct Obj_184D78 {
 
 
 
-struct __attribute__((aligned(16))) Quad_00185358 { s32 a, b, c, d; };
-struct __attribute__((packed)) Pk8_00185358 { u64 v; };
-
-struct __attribute__((aligned(16))) Obj_00185358 {
-    u8 pad0[32]; s32 f20; u8 pad1[28]; f32 f40; s32 f44; s32 f48; u8 pad2[4];
-    Quad_00185358 q50; Pk8_00185358 p60; u8 pad3[8]; Quad_00185358 q70; Pk8_00185358 p80;
-};
-
 struct __attribute__((aligned(16))) Vec4_264770 { f32 x, y, z, w; };
 struct Vec2_2647A0 { f32 a, b; };
 
-void func_00121338(void* self);
+void func_00121338(T2195* self);
 
 
 
@@ -105,28 +98,11 @@ void func_00191EB0(s32 value);
 
 
 
-struct Obj_185468 {
-    u8 pad_00[0x1C];
-    s32 f1C;
-    u8 pad_20[0x4];
-    s32 f24;
-};
-
 s32 func_001925F0(void);
 
 
 
-struct __attribute__((aligned(16))) Quad_001853F0 { s32 w[4]; };
-struct Node_001853F0 {
-    u8 pad0[0x1C];
-    s32 f1C;
-    u8 pad1[0x04];
-    void* p24;
-    u8 pad2[0x08];
-    Quad_001853F0 q30;
-};
-
-extern Quad_001853F0 D_00248D30;
+extern Vec02 D_00248D30;
 
 
 
@@ -144,9 +120,9 @@ s32 func_00140D68(s32 a);
 s32 func_001F9A90(void* buf, s32 a, s32 b);
 
 s32 func_00184D78(Obj_184D78** a, Obj_184D78** b);
-void func_00185358(Obj_00185358* self);
-void func_001853F0(Node_001853F0* self, void* obj, Quad_001853F0* src);
-s32 func_00185468(Obj_185468* a0);
+void func_00185358(T2195_790* self);
+void func_001853F0(T2195_790* self, void* obj, Vec02* src);
+s32 func_00185468(T2195_790* a0);
 void func_00185758(s32 a, s32 b);
 void func_001858F8();
 void func_00185A58(void);
@@ -224,37 +200,37 @@ INCLUDE_ASM(func_00184DE8);
 
 ASM_FUNC(func_00185150);
 
-void func_00185358(Obj_00185358* self)
+void func_00185358(T2195_790* self)
 {
     func_00121338(self);
     self->f20 = -1;
     self->f40 = 800.0f;
-    *(Quad_00185358*)&self->q50 = *(Quad_00185358*)&D_00264770;
-    self->p60 = *(Pk8_00185358*)&D_00264780;
-    self->q70 = *(Quad_00185358*)&D_00264790;
-    self->p80 = *(Pk8_00185358*)&D_002647A0;
+    self->v50 = *(Vec02*)&D_00264770;
+    self->p60 = *(Pk8_2195*)&D_00264780;
+    self->v70 = *(Vec02*)&D_00264790;
+    self->p80 = *(Pk8_2195*)&D_002647A0;
     self->f44 = 1;
     self->f48 = -1;
 }
 
-void func_001853F0(Node_001853F0* self, void* obj, Quad_001853F0* src)
+void func_001853F0(T2195_790* self, void* obj, Vec02* src)
 {
     if (obj == 0 || obj == (void*)func_001925F0()) {
-        self->f1C = 0;
-        self->p24 = 0;
-        self->q30 = D_00248D30;
+        self->hasTarget = 0;
+        self->target = 0;
+        self->point = D_00248D30;
     } else {
-        self->p24 = obj;
-        self->f1C = 1;
-        self->q30 = *src;
+        self->target = obj;
+        self->hasTarget = 1;
+        self->point = *src;
     }
 }
 
-s32 func_00185468(Obj_185468* a0) {
-    if (a0->f1C == 0) {
+s32 func_00185468(T2195_790* a0) {
+    if (a0->hasTarget == 0) {
         return func_001925F0();
     }
-    return a0->f24;
+    return (s32)a0->target;
 }
 
 ASM_FUNC(func_00185498);

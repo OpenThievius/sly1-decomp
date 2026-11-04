@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: fields 0x310 further on (0x920 for the tail), and PAL's screen scale and centre.
+struct Elem_1E6C20 { f32 f0; f32 f4; f32 f8; f32 fC; u8 pad[0x2C - 0x10]; };
 struct Self_eu_1E6C20 {
     u8 pad0[0x52C]; f32 f52C; f32 f530;
     u8 pad1[0x570 - 0x534]; s32 f570; f32 f574;

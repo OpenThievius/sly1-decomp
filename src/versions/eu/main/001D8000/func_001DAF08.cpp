@@ -2,7 +2,7 @@
 // PAL: the count fields of the two counters are at 0x58C (US 0x27C).
 struct Counter_1DAF08_eu { u8 pad[0x58C]; s32 count; };
 
-void func_001DAF08(void* self, s32 code, Rec_1DAF08* rec)
+void func_001DAF08(C19* self, s32 code, Rec_1DAF08* rec)
 {
     func_00192230(self, code, rec);
     if (code == 0xE && rec->kind == 0x426) {

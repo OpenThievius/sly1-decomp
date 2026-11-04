@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Draws an object and its child through a draw list, scaled by a pulsing factor.
+struct __attribute__((packed)) Pk4_16B860 { s32 v; };
 struct Obj_16B860_eu {
     u8 pad0[4];
     s32 f4;
@@ -60,7 +61,7 @@ void func_0016B860(Obj_16B860_eu* self)
         if (h != 0) {
             slot = *(Pk4_16B860*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->f54c);
-            Hd_16B860::Draw(self->f520, &out, D_00262280);
+            Hd_16B860::Draw((V24A2**)self->f520, &out, D_00262280);
             *(Pk4_16B860*)((u8*)self->f520 + 0x18) = slot;
         }
         f32 r = func_00205400(D_00261868 * 10.0f);

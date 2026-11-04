@@ -4,7 +4,7 @@
 // Draws a label with a slide-in offset; when the owner is absent also draws a translucent backdrop box, then the text.
 struct __attribute__((packed)) PW_eu_1AE138 { s32 v; };
 struct Actor_eu_1AE138 {
-    u8 pad0[4]; void* p4; u16 f08; u8 pad1[0x518 - 0xA]; PW_eu_1AE138 col; f32 f51C; u8 pad2[0x534 - 0x520];
+    u8 pad0[4]; V24A2* p4; u16 f08; u8 pad1[0x518 - 0xA]; PW_eu_1AE138 col; f32 f51C; u8 pad2[0x534 - 0x520];
     f32 f534; f32 f538; u8 pad3[0x544 - 0x53C]; f32 f544; f32 f548; f32 f54C;
     u8 pad4[0x974 - 0x550]; void* f974;
 };

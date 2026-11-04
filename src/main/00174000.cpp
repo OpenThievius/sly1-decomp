@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 
 struct Obj_177828 {
     u8 pad0[0x4B8];
@@ -34,21 +35,19 @@ s32 func_00177968(Keyed_177968* a, Keyed_177968* b)
     return r;
 }
 
-struct Ctx_177E20 { u8 pad0[0x2220]; s32 kind; u8 pad1[4]; s32 sub; };
-
 extern u8* D_00261990;
 s32 func_001493A0(u8* p);
 
-s32 func_00177E20(Ctx_177E20* self)
+s32 func_00177E20(C07* self)
 {
-    if (self->kind == 12 && self->sub == 0x22) return 0;
+    if (self->f2220 == 12 && self->f2228 == 0x22) return 0;
     return func_001493A0(D_00261990 + 0x454) == 0;
 }
 
 void func_001924C8(void* self, s32 mode);
 void func_00175170(void* self, s32 a, s32 b);
 
-void func_00177E70(void* self, s32 mode)
+void func_00177E70(C07* self, s32 mode)
 {
     func_001924C8(self, mode);
     switch (mode) {
@@ -125,32 +124,21 @@ struct Node_177F98 {
     s32 kind;
 };
 
-struct Obj_177F98 {
-    u8 pad0[0x2220];
-    s32 state;
-    u8 pad1[0x30];
-    s32 flags;
-    s32 f2258;
-    s32 f225C;
-    u8 pad2[0x2BD0 - 0x2260];
-    void* f2BD0;
-};
-
 void func_001E9498(void* a, void* b);
 
-void func_00177F98(Obj_177F98* self, Node_177F98* node)
+void func_00177F98(C07* self, Node_177F98* node)
 {
     if ((u32)(node->kind - 1) < 2) {
         D_002701F8.f324 = node;
         func_001E9498(D_00275BC0, &D_002701F8);
         return;
     }
-    if (self->state != 0xC) {
-        s32 f = self->flags;
+    if (self->f2220 != 0xC) {
+        s32 f = self->f2254;
         self->f225C = 0x21;
         self->f2BD0 = node;
         self->f2258 = 0xC;
-        self->flags = f | 1;
+        self->f2254 = f | 1;
     }
 }
 
@@ -212,14 +200,13 @@ Node_177838* func_00177838(Q_177838* q, s32 n, Node_177838** list) {
     return node;
 }
 
-struct Self_177EE0 { u8 pad0[0x2220]; s32 mode; u8 pad1[0x2BD0 - 0x2224]; s32 f2BD0; };
 struct Other_177EE0 { u8 pad0[0x2D0]; s32 f2D0; };
 extern s32 D_00275BC4;
 
-void func_00177EE0(Self_177EE0* self, Other_177EE0* other, s32* out)
+void func_00177EE0(C07* self, Other_177EE0* other, s32* out)
 {
     s32 v;
-    switch (self->mode) {
+    switch (self->f2220) {
     case 0:
     case 1:
     case 5:
@@ -245,7 +232,7 @@ void func_00177EE0(Self_177EE0* self, Other_177EE0* other, s32* out)
         break;
     case 12:
         out[0] = 0;
-        out[1] = self->f2BD0 == (s32)other;
+        out[1] = (s32)self->f2BD0 == (s32)other;
         break;
     case 4:
     case 9:

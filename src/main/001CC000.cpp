@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 
 struct Vec2_CDB28 {
     f32 x;
@@ -18,15 +19,13 @@ void func_001CDB28(u8* a0, f32* a1)
 }
 
 struct Target_001CD088 { s32 pad0; void* target; };
-struct Actor_001CD088 { u8 pad0[0x22AC]; Target_001CD088* ref; };
-
 void func_001B9AB0(void* target, void* slot);
 void func_001B9AC8(void* target, void* slot);
 
-void func_001CD088(Actor_001CD088* self)
+void func_001CD088(C07* self)
 {
-    func_001B9AB0(self->ref->target, (u8*)self + 0x22D0);
-    func_001B9AC8(self->ref->target, (u8*)self + 0x22E0);
+    func_001B9AB0(((Target_001CD088*)self->f22AC)->target, (u8*)self + 0x22D0);
+    func_001B9AC8(((Target_001CD088*)self->f22AC)->target, (u8*)self + 0x22E0);
 }
 
 struct Flags_001CD7E0 { u8 pad[8]; u32 flags; };
@@ -189,17 +188,12 @@ f32 func_001CEDF8(Obj_1CEDF8* o, f32 t)
     return out;
 }
 
-struct Self_1CDF78 {
-    u8 pad[0x2220];
-    s32 state;
-};
+void func_001225D0(C07* self, f32 t, void* out, void* extra);
+void func_001C5DB8(C07* self, f32 t, void* out, void* extra);
 
-void func_001225D0(Self_1CDF78* self, f32 t, void* out, void* extra);
-void func_001C5DB8(Self_1CDF78* self, f32 t, void* out, void* extra);
-
-void func_001CDF78(Self_1CDF78* self, f32 t, void* out, void* extra)
+void func_001CDF78(C07* self, f32 t, void* out, void* extra)
 {
-    if (self->state == 3) {
+    if (self->f2220 == 3) {
         func_001225D0(self, t, out, extra);
     } else {
         func_001C5DB8(self, t, out, extra);

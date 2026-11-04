@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c36.h"
 #include "c4e.h"
 #include "c7d.h"
 
@@ -23,35 +24,33 @@ void func_00123ED0(void*);
 void func_001F4E18(C4E* self) { func_00123ED0(self); self->id = -1; }
 
 void func_001F57E0(void*);
-int func_001F51E8(void* self) { func_001F57E0((u8*)self + 0x550); return 1; }
+int func_001F51E8(C36* self) { func_001F57E0(&self->rec); return 1; }
 
 struct Obj_1F7FC0 { u8 pad[0x28]; struct Node* root; };
 struct Node { u8 pad0[8]; Node* child; u8 pad1[0x2C]; Node* next; };
 void* func_001F7FC0(u32 key, Obj_1F7FC0* obj) { Node* node = obj->root; while (node) { Node* child = node->child; while (child) { if (*(u32*)child == key) return child; child = child->next; } node = *(Node**)((u8*)node + 0x14); } return 0; }
 
-struct Obj_1F5840 { u8 pad[0x10]; s32 count; void* entries[8]; };
-void func_001F5840(Obj_1F5840* self, void* entry) { u32 n = self->count; if (n < 32) { self->entries[n] = entry; self->count = n + 1; } }
+void func_001F5840(Rec36* self, void* entry) { u32 n = self->count; if (n < 32) { self->keys[n] = entry; self->count = n + 1; } }
 
 extern u8 D_0027696C[];
 void func_001F66F8(void* value) { void* p = *(void**)D_0027696C; *(void**)((u8*)p + 0x58) = value; }
 
-void func_001F5590(void* a, void* b) { *(void**)a = b; *(u32*)((u8*)a + 4) = 0; *(f32*)((u8*)a + 8) = 150.0f; }
+void func_001F5590(Rec36* a, C36* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
 
 extern u8 D_00261990[];
 void func_00145088(u32, int, void*, int, void*);
 void func_001F4F20(void* self) { if (*(s32*)((u8*)self + 0x310)) { func_001451F0(*(u32*)D_00261990, 0xB, 7, (u8*)*(u32*)D_00261990 + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
-struct Obj_1F51A0 { u8 pad[0x550]; void* field; };
 void* func_001BA130(void*);
-void func_001F51A0(Obj_1F51A0* self) { func_001BA130(self); self->field = self; }
+void func_001F51A0(C36* self) { func_001BA130(self); self->rec.owner = self; }
 
 void func_0013EC00(void*, int, void*, void*, void*, void*, void*);
 void func_001F42D0(void* self, void* a1, void* a2, void* a3, void* a4) { func_0013EC00((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
 extern u32 D_00277134;
 void func_00124A48(void*);
-void func_001F55A8(void*);
-void func_001F4FD8(void* self) { func_00124A48(self); func_001F55A8((u8*)self + 0x550); }
+void func_001F55A8(Rec36*);
+void func_001F4FD8(C36* self) { func_00124A48(self); func_001F55A8(&self->rec); }
 
 void func_001FA468();
 void func_001F4ED0(void* self) { if (!*(s32*)((u8*)self + 0x310)) { func_00145088(*(u32*)D_00261990, 7, (u8*)*(u32*)D_00261990 + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
@@ -182,44 +181,32 @@ void func_001F4E48(C4E* self)
     }
 }
 
-struct Obj_1F4F70 { u8 pad[0x4E0]; s32 f4E0; u8 pad2[0x538 - 0x4E4]; u64 f538; };
-void func_001B7968(Obj_1F4F70* self);
-void func_001F5590(void* a, Obj_1F4F70* b);
+void func_001B7968(C03* self);
 
-void func_001F4F70(Obj_1F4F70* self)
+void func_001F4F70(C36* self)
 {
     func_001B7968(self);
-    func_001F5590((u8*)self + 0x550, self);
+    func_001F5590(&self->rec, self);
     self->f4E0 = 1;
-    self->f538 = (self->f538 & ~0xF000000000ULL) | 0x2000000000ULL;
+    self->flags538 = (self->flags538 & ~0xF000000000ULL) | 0x2000000000ULL;
 }
 
-struct Obj_1F5218 {
-    u8 pad[0x538];
-    u64 flags;
-};
-void func_001F4F70(Obj_1F5218* o);
-void func_001B9AE0(Obj_1F5218* o, s32 a, s32 b, s32 c, s32 d);
+void func_001B9AE0(C37* o, s32 a, s32 b, s32 c, s32 d);
 
-void func_001F5218(Obj_1F5218* o) {
+void func_001F5218(C37* o) {
     func_001F4F70(o);
-    o->flags |= ((u64)0x8000 << 28);
+    o->flags538 |= ((u64)0x8000 << 28);
     func_001B9AE0(o, 3, 0, 3, 0);
 }
 
-struct List_1F5868 {
-    u8 pad[0x94];
-    u32 count;
-    void* items[1];
-};
 struct Ev_1F5868;
 s32 func_001300E8(Ev_1F5868* e, s32 kind);
 
-void func_001F5868(List_1F5868* self, Ev_1F5868* e) {
-    if (self->count < 0x20) {
+void func_001F5868(Rec36* self, Ev_1F5868* e) {
+    if (self->found < 0x20) {
         if (func_001300E8(e, 0x7E) || func_001300E8(e, 0x6E) || func_001300E8(e, 0x76) ||
             func_001300E8(e, 0x70) || func_001300E8(e, 0x71) || func_001300E8(e, 0x81)) {
-            self->items[self->count++] = e;
+            self->nodes[self->found++] = e;
         }
     }
 }
@@ -451,18 +438,7 @@ void func_001F4500(C7D* self, void* s3)
 
 struct Kind_1F55A8 { s32 f0; s32 type; };
 struct Node_1F55A8 { Kind_1F55A8* kind; };
-struct List_1F55A8 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_1F55A8 { List_1F55A8* list; u8* link; s32 offset; Iter_1F55A8* saved; };
-struct Ctx_1F55A8 { u8 pad0[0x14]; void* f14; };
-struct Owner_1F55A8 { u8 pad0[0x14]; Ctx_1F55A8* ctx; u8 pad18[0x1C]; List_1F55A8 list; };
-struct Obj_1F55A8 {
-    Owner_1F55A8* owner;
-    u8 pad4[0xC];
-    s32 count;
-    void* keys[32];
-    u32 found;
-    Node_1F55A8* nodes[32];
-};
+struct Iter_1F55A8 { List01* list; u8* link; s32 offset; Iter_1F55A8* saved; };
 
 struct Next_1F55A8 {
     static Node_1F55A8* Of(Iter_1F55A8* it)
@@ -474,7 +450,7 @@ struct Next_1F55A8 {
 };
 
 struct Begin_1F55A8 {
-    static void Of(Iter_1F55A8* it, List_1F55A8* list)
+    static void Of(Iter_1F55A8* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -484,16 +460,16 @@ struct Begin_1F55A8 {
     }
 };
 
-Node_1F55A8* func_0015A418(Ctx_1F55A8* a, s32 b, void* c, Owner_1F55A8* d);
-void func_001F5868(Obj_1F55A8* self, Node_1F55A8* n);
+Node_1F55A8* func_0015A418(C6C* a, s32 b, void* c, C36* d);
+void func_001F5868(Rec36* self, Node_1F55A8* n);
 
-void func_001F55A8(Obj_1F55A8* self)
+void func_001F55A8(Rec36* self)
 {
     Iter_1F55A8 it;
     Node_1F55A8* n;
     s32 i;
 
-    Begin_1F55A8::Of(&it, &self->owner->list);
+    Begin_1F55A8::Of(&it, &self->owner->children);
     while ((n = Next_1F55A8::Of(&it)) != 0) {
         s32 t = n->kind->type;
         if (t == 0x7E || t == 0x6E) {
@@ -503,7 +479,7 @@ void func_001F55A8(Obj_1F55A8* self)
         }
     }
     for (i = 0; i < self->count; i++) {
-        n = func_0015A418(self->owner->ctx, 0x104, self->keys[i], self->owner);
+        n = func_0015A418(self->owner->world, 0x104, self->keys[i], self->owner);
         if (n != 0) {
             func_001F5868(self, n);
         }
@@ -511,106 +487,67 @@ void func_001F55A8(Obj_1F55A8* self)
     D_0027B314 = (ListFrame*)it.saved;
 }
 
-struct Q_1F5008 {
-    u32 w[4] __attribute__((aligned(16)));
-};
 struct Obj_1F5008 {
     u8 pad0[0x550];
     s32 f550;
 };
-struct Self_1F5008;
-struct Item_1F5008 {
-    Self_1F5008* ref;
-    Obj_1F5008* obj0;
-    u8 pad0[8];
-    Q_1F5008 q10;
-    u8 pad1[0x30];
-    Q_1F5008 q50;
-    u8 pad3[0x20];
-    Q_1F5008 q80;
-    u8 pad4[0x40];
-    Item_1F5008* next;
-};
-struct Grp_1F5008 {
-    Item_1F5008* items;
-    Grp_1F5008* next;
-};
-struct Hold_1F5008 {
-    Grp_1F5008* head;
-};
-struct Owner_1F5008 {
-    u8 pad[0x480];
-    Hold_1F5008* hold;
-};
-struct Slot_1F5008 {
-    Obj_1F5008* obj;
-    u8 pad[0xC];
-    Q_1F5008 q10;
-    Q_1F5008 q20;
-};
-struct Self_1F5008 {
-    u8 pad0[0x50];
-    Owner_1F5008* owner;
-    u8 pad1[0x61C];
-    Slot_1F5008 slots[10];
-    s32 count;
-};
+
+s32 func_001B93F8(C03* self);
+s32 func_00182F40(Obj_1F5008* o, C36* self);
+s32 func_001300E8(Obj_1F5008* o, s32 kind);
+s32 func_001F5C0C(void* p, s32 a, s32 b);
+s32 func_00177838(void* t, s32 a, s32 b);
+
 struct Tmp_1F5008 {
-    Self_1F5008* self;
+    C36* self;
     Obj_1F5008* obj;
     u8 pad[0x18];
-    Q_1F5008 q20;
-    Q_1F5008 q30;
+    Vec02 q20;
+    Vec02 q30;
 };
 
-s32 func_001B93F8(Self_1F5008* self);
-s32 func_00182F40(Obj_1F5008* o, Self_1F5008* self);
-s32 func_001300E8(Obj_1F5008* o, s32 kind);
-s32 func_001F5C0C(Tmp_1F5008* p, s32 a, s32 b);
-s32 func_00177838(Tmp_1F5008* t, s32 a, s32 b);
-
 struct Add_1F5008 {
-    static void Of(Self_1F5008* self, Obj_1F5008* p, Q_1F5008* a, Q_1F5008* b)
+    static void Of(C36* self, Obj_1F5008* p, Vec02* a, Vec02* b)
     {
         s32 c = self->count;
         if ((u32)c < 10) {
             if (p->f550 != 3) {
-                Slot_1F5008* s = &self->slots[c];
+                Slot36* s = &self->slots[c];
                 self->count = c + 1;
-                s->obj = p;
+                s->obj = (C03*)p;
                 s->q10 = *a;
                 s->q20 = *b;
             }
         }
     }
 };
-void func_001F5008(Self_1F5008* self) {
+void func_001F5008(C36* self) {
     Tmp_1F5008 tmp;
     Obj_1F5008* p;
     func_001B93F8(self);
     self->count = 0;
-    Owner_1F5008* owner = self->owner;
-    for (Grp_1F5008* g = owner->hold->head; g; g = g->next) {
-        for (Item_1F5008* it = g->items; it; it = it->next) {
-            s32 side = (owner != (Owner_1F5008*)it->ref);
-            Obj_1F5008* near = *(Obj_1F5008**)((u8*)it + (side << 6) + 4);
+    C03* owner = self->root03();
+    for (ContactRow03* g = owner->contacts->head; g; g = g->next) {
+        for (Contact03* it = g->head; it; it = it->next) {
+            s32 side = (owner != it->end[0].body);
+            Obj_1F5008* near = (Obj_1F5008*)it->end[side].part;
             if (func_00182F40(near, self)) {
-                u8* far = (u8*)it + ((1 - side) << 6);
-                Obj_1F5008* o = *(Obj_1F5008**)(far + 4);
+                ContactEnd03* far = &it->end[1 - side];
+                Obj_1F5008* o = (Obj_1F5008*)far->part;
                 if (func_001300E8(o, 0x41)) {
-                    p = o; Add_1F5008::Of(self, p, (Q_1F5008*)(far + 0x10), &it->q80);
+                    p = o; Add_1F5008::Of(self, p, &far->v10, &it->v80);
                 }
             }
         }
     }
     func_001F5C0C(&tmp, 0, 0x40);
     for (s32 i = 0; i < self->count; i++) {
-        Slot_1F5008* s = &self->slots[i];
-        p = s->obj;
+        Slot36* s = &self->slots[i];
+        p = (Obj_1F5008*)s->obj;
         tmp.self = self;
         tmp.obj = p;
-        tmp.q20 = *(Q_1F5008*)((u8*)p + 0x140);
-        tmp.q30 = *(Q_1F5008*)((u8*)p + 0x150);
+        tmp.q20 = *(Vec02*)((u8*)p + 0x140);
+        tmp.q30 = *(Vec02*)((u8*)p + 0x150);
         func_00177838(&tmp, 0, 0);
     }
 }

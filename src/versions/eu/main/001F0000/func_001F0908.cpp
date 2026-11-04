@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's own definition: resets the two engines after a pending change and restores the slot's pose.
+struct Eng_1F0908;
+typedef void (*SetFn_1F0908)(Eng_1F0908* e, s32 mode);
+struct EngVt_1F0908 { u8 pad[0x40]; SetFn_1F0908 set; };
+struct Eng_1F0908 { EngVt_1F0908* vt; };
+void func_001AA8B8(Eng_1F0908* e, f32 x);
+void func_001AD0D0(Eng_1F0908* e, s32 a, s32 b);
 struct Eng_eu_1F0908 {
     EngVt_1F0908* vt;
     u8 pad4[0x56C];
@@ -12,7 +18,7 @@ void func_001F0908(Obj_1F0908* self)
 {
     if (D_00276250 == -1) return;
     func_001AA8B8(&D_002721D0, (((*(Cfg_1F0908**)&D_002623C0)->hi << 8) | (*(Cfg_1F0908**)&D_002623C0)->lo) == 4 ? 0.5f : 2.0f);
-    D_002721D0.vt->set(&D_002721D0, 2);
+    D_002721D0.vt->m16(&D_002721D0, 2);
     Eng_eu_1F0908* e = ((Eng_eu_1F0908*)&D_0026F138);
     e->i570 = 0;
     e->vt->set((Eng_1F0908*)e, 0);

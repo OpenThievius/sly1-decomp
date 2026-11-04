@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL lays Obj_11A338 out 0x310 bytes later from 0x208 on, no longer sets the current
 // entry here, takes the name from entry offset 8, and fetches the message with func_eu_001DDAB0(0xAA).
+void func_001AA268(void* self);
+void func_001AA788(void* self, f32 v);
+void func_001AA8B8(void* self, f32 v);
+void func_001E02C8(void* self, s32 n);
 struct Ent_11A338_eu { u32 pad0; f32 f4; void* w8; };
 struct Obj_11A338_eu;
 struct VTab_11A338_eu { u8 pad[0x20]; void (*f20)(Obj_11A338_eu*, const char*); u8 pad2[0x38 - 0x24]; void (*f38)(Obj_11A338_eu*); };

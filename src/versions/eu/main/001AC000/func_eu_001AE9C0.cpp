@@ -24,7 +24,6 @@ struct Obj_eu_1AE9C0 {
 };
 
 void func_eu_001AAFB0(Obj_eu_1AE9C0* self);
-void* func_0015C1C0(s32 k);
 void* func_001B4688(s32 id);
 void func_001AAB20(Obj_eu_1AE9C0* self, f32 x, f32 y);
 const char* func_eu_001DDAB0(s32 id);

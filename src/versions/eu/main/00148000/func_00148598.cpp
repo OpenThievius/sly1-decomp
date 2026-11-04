@@ -10,7 +10,7 @@ void func_00148598(C59* self, s32 mode)
             fl->flags = bits | 2;
             D_002623C4->f438++;
         }
-        VObj_148598* vo = (VObj_148598*)D_0026CBC8;
+        VObj_148598* vo = (VObj_148598*)&D_0026CBC8;
         vo->vtbl[14](vo);
         void* r = (void*)func_001925F0();
         if (r != 0) {

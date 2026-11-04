@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the fields from 0x218 on sit 0x310 bytes further on, and the screen's height and its
 // scale are PAL's (468.6 for 492.8, 1.0926 and 0.9153 for 0.9091 and 1.1).
+struct Rec_1AAB60 { f32 f0; f32 f4; s32 f8; s32 fC; s32 f10; };
 struct Self_1AAB60_eu;
 struct Vt_1AAB60_eu { u8 p[0x48]; s32 (*m48)(Self_1AAB60_eu*, Self_1AAB60_eu*); };
 struct Self_1AAB60_eu {

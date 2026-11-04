@@ -337,7 +337,7 @@ void func_00195958(Menu_195958_eu* self)
             break;
         case -1:
             func_00194D30(self, 1, -1);
-            D_00273EB0.vt->f38(&D_00273EB0);
+            D_00273EB0.vt->m14(&D_00273EB0);
             break;
         }
         func_0018B670(&D_00269990, (void*)func_0018C638, &D_00264A40);

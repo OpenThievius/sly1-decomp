@@ -11,31 +11,17 @@
 #define C6E_H
 
 #include "c01.h"
-
-struct Hook6E;
-
-typedef void (*HookLoad6E)(Hook6E* self, void* stream);
-
-// The hook's table: entry 0 reads the hook's own data from the level stream (func_001B2840),
-// entry 4 is told the frames of the object's parent and of another object (func_001B28A8).
-struct HookVtbl6E {
-    HookLoad6E load;                                    // 0x00
-    void* slot04[3];                                    // 0x04
-    void (*frames)(Hook6E* self, void* from, void* to); // 0x10
-};
-
-// The object 0x6E finds by the index it reads (func_0014D9A8).
-struct Hook6E {
-    HookVtbl6E* vtbl;       // 0x00
-};
+#include "t2176.h"
 
 // Eight bytes that each subclass keeps through a copy (slot 9: saved, the parent's copy,
 // restored); retail moves them as one unaligned doubleword.
 struct __attribute__((packed)) Keep6E { u64 bits; };
 
-// 0x6E: the hook.
+// 0x6E: a key-frame curve (include/t2176.h) found by the index the stream names; slot 0 of
+// its table reads it (func_001B2840), slot 4 is told the frames of the object's parent and of
+// another object (func_001B28A8).
 struct C6E : C01 {
-    Hook6E* hook;           // 0x34
+    T2176* curve;           // 0x34
 };
 
 // 0x6F: an object id (-1 for none) resolved after loading (slot 15) into an object whose

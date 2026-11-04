@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "c55.h"
 #include "c6c.h"
+#include "c39.h"
 
 struct Item_2619A0 { u32 flags, id, off8; };
 extern Item_2619A0 D_002619A0[5];
@@ -91,65 +92,44 @@ void func_00147FB0(C58* self)
     }
 }
 
-struct Obj_146130 {
-    u8 pad0[0x554];
-    f32 f554;
-    f32 f558;
-};
-
-void func_001BAC30(void* self, void* p);
+void func_001BAC30(C03* self, void* p);
 f32 func_00137DF8(void* p);
 
-void func_00146130(void* self, void* p)
+void func_00146130(C39* self, void* p)
 {
-    Obj_146130* o = (Obj_146130*)self;
     func_001BAC30(self, p);
-    o->f554 = func_00137DF8(p);
-    o->f558 = func_00137DF8(p);
+    self->factorX = func_00137DF8(p);
+    self->factorY = func_00137DF8(p);
 }
 
 void func_00124A48(void* self);
-void func_00146298(void* self);
+void func_00146298(C39* self);
 
-void func_00146178(void* self)
+void func_00146178(C39* self)
 {
     func_00124A48(self);
     func_00146298(self);
 }
 
-struct Obj_146240 {
-    u8 pad0[0x14];
-    void* p14;
-    u8 pad1[0x538];
-    f32 f550;
-};
-
-void func_00138BE0(void* a, void* self, s32 n);
-void func_00146298(void* self);
+void func_00138BE0(C6C* a, void* self, s32 n);
 void func_00129DF8(void* self);
 
-void func_00146240(void* self, f32 v)
+void func_00146240(C39* self, f32 v)
 {
-    Obj_146240* o = (Obj_146240*)self;
-    if (v != o->f550) {
-        o->f550 = v;
-        func_00138BE0(o->p14, o, 7);
-        func_00146298(o);
-        func_00129DF8(o);
+    if (v != self->scale) {
+        self->scale = v;
+        func_00138BE0(self->world, self, 7);
+        func_00146298(self);
+        func_00129DF8(self);
     }
 }
 
-struct Obj_00146100 {
-    u8 pad_000[0x550];
-    f32 value_550;
-};
+void func_001B7968(C03* self);
 
-void func_001B7968(void* self);
-
-void func_00146100(Obj_00146100* self)
+void func_00146100(C39* self)
 {
     func_001B7968(self);
-    self->value_550 = 100.0f;
+    self->scale = 100.0f;
 }
 
 void func_00127378(void* self, s32 kind, void* msg);
@@ -217,16 +197,14 @@ s32 func_00146D10(void* unused, Obj_146D10* self)
     return 1;
 }
 
-struct Elem_146298 { u8 pad0[8]; s32 tag; u8 pad1[0x20]; f32 x; f32 y; };
-struct Obj_146298 { u8 pad0[0x27C]; s32 count; Elem_146298** list; u8 pad1[0x550 - 0x284]; f32 f550; f32 f554; f32 f558; };
 
-void func_00146298(Obj_146298* self)
+void func_00146298(C39* self)
 {
-    for (s32 i = 0; i < self->count; i++) {
-        if (self->list[i]->tag == 6) {
-            Elem_146298* e = self->list[i];
-            e->x = -(self->f550 * self->f554);
-            e->y = -(self->f550 * self->f558);
+    for (s32 i = 0; i < self->elemCount; i++) {
+        if (self->elems[i]->kind == 6) {
+            Elem02* e = self->elems[i];
+            e->x = -(self->scale * self->factorX);
+            e->y = -(self->scale * self->factorY);
             break;
         }
     }

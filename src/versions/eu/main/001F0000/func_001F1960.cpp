@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL has no sound-slot setup nor the virtual call, and its fields sit at 0x518, 0x570 and 0x574.
+typedef void (*VFn_1F1960)(void* self, void* arg);
 struct Obj_1F1960_eu {
     VFn_1F1960* vtbl;
     u8 pad004[0x514];

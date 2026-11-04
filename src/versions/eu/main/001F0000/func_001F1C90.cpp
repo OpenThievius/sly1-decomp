@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the fields of self are at 0x56C, 0x570, 0x58C and 0x590 (US 0x25C, 0x260, 0x27C, 0x280).
+typedef void (*VFn_1F1C90)(void* self);
 struct Obj_1F1C90_eu {
     VFn_1F1C90* vtbl;
     u8 pad0[0x56C - 4];

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c05.h"
 #include "fpu.h"
 
 struct Quad_001891C0 { s32 a, b, c, d; } __attribute__((aligned(16)));
@@ -164,7 +165,7 @@ void* func_00189AF0(void* a0, void* a1)
 	return func_00189438(4, a0, a1);
 }
 
-void func_0018A388(void* self)
+void func_0018A388(C0C* self)
 {
 	func_001C6F48(self);
 	*(s32*)((char*)self + 0xE3C) = -1;
@@ -174,27 +175,18 @@ void func_0018A388(void* self)
 void func_001C7140(void* self);
 void func_00124DF8(void* self, s32 n, void* data);
 
-void func_0018A3B8(void* self)
+void func_0018A3B8(C0C* self)
 {
     func_001C7140(self);
     func_00124DF8(self, 2, D_00264910);
 }
-
-struct Self_18AB88 {
-    u8 pad0[0x724];
-    s32 f724;
-    u8 pad1[0xA68 - 0x728];
-    s32 fA68;
-    u8 pad2[0xC04 - 0xA6C];
-    s32 fC04;
-};
 
 void func_001C91C8(void* self);
 void func_001603E8(s32 n);
 void func_0018C7F8(void* p);
 extern u8 D_00264A40[];
 
-void func_0018AB88(Self_18AB88* self)
+void func_0018AB88(C0C* self)
 {
     func_001C91C8(self);
     s32 st = self->f724;
@@ -210,18 +202,11 @@ void func_0018AB88(Self_18AB88* self)
     }
 }
 
-struct Self_18ABF0 {
-    u8 pad0[0x724];
-    s32 f724;
-    u8 pad1[0xE10 - 0x728];
-    void* fE10;
-};
-
 void func_001B6598(void* a, s32* out);
 s32 func_001C96B8(void* self);
 s32 func_001C8010(void* self);
 
-s32 func_0018ABF0(Self_18ABF0* self)
+s32 func_0018ABF0(C0C* self)
 {
     if (self->f724 == 4) {
         s32 kind;
@@ -247,16 +232,11 @@ struct Obj_18ACF0 {
     VFn_18ACF0* vtbl;
 };
 
-struct Self_18ACF0 {
-    u8 pad0[0xE10];
-    void* fE10;
-};
-
 extern Obj_18ACF0 D_0026E248;
 
 s32 func_001E9970(void);
 
-void func_0018ACF0(Self_18ACF0* self)
+void func_0018ACF0(C0C* self)
 {
     s32 kind;
     func_001B6598(self->fE10, &kind);
@@ -279,16 +259,14 @@ void func_0018ACF0(Self_18ACF0* self)
 extern void func_001C9008(void*);
 extern void func_001B64D8(s32, s32);
 
-struct State_0018B2E8 { u8 pad0[0x724]; s32 type; u8 pad1[0xE10 - 0x728]; s32 handle; u8 pad2[0xE3C - 0xE14]; s32 token; };
-
-void func_0018B2E8(State_0018B2E8* self)
+void func_0018B2E8(C0C* self)
 {
     func_001C9008(self);
-    if (self->type == 16) {
-        s32 token = self->token;
+    if (self->f724 == 16) {
+        s32 token = self->fE3C;
         if (token == -1) return;
-        func_001B64D8(self->handle, token);
-        self->token = -1;
+        func_001B64D8((s32)self->fE10, token);
+        self->fE3C = -1;
     }
 }
 
@@ -468,29 +446,17 @@ s32 func_0018BFA8(void* lhs, void* rhs)
 
 typedef s32 (*VFnI_0018AAE0)(void* self);
 
-struct Obj_0018AAE0 {
-    VFnI_0018AAE0* vtbl;
-    u8 pad0[0x14 - 4];
-    void* owner;
-    u8 pad1[0x724 - 0x18];
-    s32 f724;
-    u8 pad2[0xC10 - 0x728];
-    s32 fC10;
-    u8 pad3[0xE10 - 0xC14];
-    void* fE10;
-};
-
 s32 func_001DDA80(void* p);
 void func_001B6598(void* dev, s32* out);
 
-s32 func_0018AAE0(Obj_0018AAE0* self)
+s32 func_0018AAE0(C0C* self)
 {
     s32 out;
-    if (func_001DDA80(self->owner) != 0) goto zero;
+    if (func_001DDA80(self->world) != 0) goto zero;
     if (self->fC10 != 0) goto zero;
     if (self->f724 == 0x10) goto zero;
     if (self->f724 == 0xB) goto zero;
-    if (self->vtbl[0x66](self) == 0) goto zero;
+    if (((VFnI_0018AAE0*)self->desc)[0x66](self) == 0) goto zero;
     func_001B6598(self->fE10, &out);
     if (out == 0x43C) goto one;
     if (out < 0x43D) {
@@ -583,7 +549,7 @@ struct Loc_18A9A8 {
 s32 func_0018A910(void* self, void* a, void* b);
 s32 func_00125750(void* a, s32 b, void* c, s32 d, s32 e, s32 f, f32 g);
 
-s32 func_0018A9A8(void* self)
+s32 func_0018A9A8(C0C* self)
 {
     u8* obj = (u8*)self;
     Loc_18A9A8 loc;
@@ -807,29 +773,24 @@ s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
 struct Ent_18A3F0 { s32 key; s32 pad4; s32 value; };
 
-struct Self_18A3F0 {
-    u8 pad0[0x14]; void* host; u8 pad1[0x7BC - 0x18]; s32 f7BC; u8 pad2[0xE00 - 0x7C0];
-    s32 fE00; u8 pad3[8]; void* fE0C; void* fE10; u8 pad4[0xE20 - 0xE14]; s32 count; Ent_18A3F0* tbl; u8 pad5[8]; s32 ids[3];
-};
-
-void func_0018A3F0(Self_18A3F0* self)
+void func_0018A3F0(C0C* self)
 {
     s32 n;
     s32 i;
 
     func_001C72A0(self);
-    func_001DDC38(self->host, self);
+    func_001DDC38(self->world, self);
     func_00124DF8(self, 3, D_00264928);
     func_001D36F0(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
-    self->f7BC = self->fE00;
+    self->f758[12].obj = (void*)self->fE00;
     self->fE10 = func_001B6290(self->fE0C, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
-        self->ids[n] = func_001CA758(self, D_00264950[n]);
-    self->count = 6;
-    self->tbl = (Ent_18A3F0*)func_0018D568(0x48, D_00264960);
-    for (i = 0; i < self->count; i++) {
-        Ent_18A3F0* e = self->tbl + i;
-        e->value = func_0015A418(self->host, 1, e->key, self);
+        self->fE30[n] = func_001CA758(self, D_00264950[n]);
+    self->fE20 = 6;
+    self->fE24 = (Ent_18A3F0*)func_0018D568(0x48, D_00264960);
+    for (i = 0; i < self->fE20; i++) {
+        Ent_18A3F0* e = ((Ent_18A3F0*)self->fE24) + i;
+        e->value = func_0015A418(self->world, 1, e->key, self);
     }
 }
 
@@ -1231,22 +1192,6 @@ struct Key_18B340 {
     s32 b;
 };
 
-struct Self_18B340 {
-    u8 pad0[0x148];
-    f32 f148;
-    u8 pad1[0x7E0 - 0x14C];
-    s32 f7E0;
-    u8 pad2[0xE10 - 0x7E4];
-    void* fE10;
-    void* fE14;
-    void* fE18;
-    void* fE1C;
-    u8 pad3[0xE2C - 0xE20];
-    s32 fE2C;
-    u8 pad4[0xE40 - 0xE30];
-    Quad_18B340 fE40;
-};
-
 struct Obj_18B340 {
     u8 pad0[0xF0];
     Quad_18B340 fF0;
@@ -1258,9 +1203,9 @@ void func_001B6598(void* dev, s32* out);
 f32 D_00264A34 = 20.0f;
 extern f32 D_00264A38;
 
-void func_0018B340(Self_18B340* self, s32 a1, Key_18B340* key)
+void func_0018B340(C0C* self, s32 a1, Key_18B340* key)
 {
-    if (a1 == 0x13 && key->a == self->f7E0) {
+    if (a1 == 0x13 && key->a == (s32)self->f7E0) {
         switch (key->b) {
         case 0x442:
         case 0x443: {
@@ -1275,11 +1220,11 @@ void func_0018B340(Self_18B340* self, s32 a1, Key_18B340* key)
             switch (kind) {
             case 0x43A:
             case 0x43C:
-                obj->fF0 = self->fE40;
-                *(f32*)((u8*)obj + 0xF8) = self->f148 + D_00264A34;
+                obj->fF0 = (*(Quad_18B340*)&self->vE40);
+                *(f32*)((u8*)obj + 0xF8) = self->v140.z + D_00264A34;
                 break;
             case 0x43E:
-                obj->fF0 = self->fE40;
+                obj->fF0 = (*(Quad_18B340*)&self->vE40);
                 *(f32*)((u8*)obj + 0xF8) = *(f32*)((u8*)obj + 0xF8) + D_00264A38;
                 break;
             }
