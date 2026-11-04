@@ -33,3 +33,12 @@ func_001FFCD8 = 0x001FFCD8; // type:func
 func_001FFD10 = 0x001FFD10; // type:func
 func_001FF028 = 0x001FF028; // type:func
 func_001FF140 = 0x001FF140; // type:func
+
+// The same, at PAL's addresses.
+func_0012B7D8 = 0x0012B7D8; // type:func
+func_001530E0 = 0x001530E0; // type:func
+func_00159938 = 0x00159938; // type:func
+func_001A1D78 = 0x001A1D78; // type:func
+func_001A4828 = 0x001A4828; // type:func
+func_001B6C40 = 0x001B6C40; // type:func
+func_001BA630 = 0x001BA630; // type:func

@@ -39,3 +39,13 @@ func_001FE918 = 0x001FE918; // type:func
 func_001FE950 = 0x001FE950; // type:func
 func_001FDC68 = 0x001FDC68; // type:func
 func_001FDD80 = 0x001FDD80; // type:func
+
+// More function starts behind the linker's leftovers, which only class method tables reach
+// (as func_X + 8 or + 0x18 before). Named by us.
+func_0012B6B8 = 0x0012B6B8; // type:func
+func_00152E28 = 0x00152E28; // type:func
+func_00159680 = 0x00159680; // type:func
+func_001A1030 = 0x001A1030; // type:func
+func_001A3AE0 = 0x001A3AE0; // type:func
+func_001B5F50 = 0x001B5F50; // type:func
+func_001B9940 = 0x001B9940; // type:func

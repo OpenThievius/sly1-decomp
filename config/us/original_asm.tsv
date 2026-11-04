@@ -89,7 +89,7 @@ func_00128E88	00128E88	328	handwritten	VU0 macro instruction
 func_00128FD0	00128FD0	228	handwritten	VU0 macro instruction
 func_001290B8	001290B8	40	handwritten	VU0 macro instruction
 func_001290E0	001290E0	40	handwritten	VU0 macro instruction
-func_0012B6A0	0012B6A0	188	handwritten	VU0 macro instruction
+func_0012B6A0	0012B6A0	20	handwritten	VU0 macro instruction
 func_0012C9E8	0012C9E8	508	handwritten	VU0 macro instruction
 func_0012CD78	0012CD78	1080	handwritten	VU0 macro instruction
 func_0012D5C8	0012D5C8	4	remnant	stripped-function leftover
@@ -204,6 +204,7 @@ func_0014F270	0014F270	1232	handwritten	VU0 macro instruction
 func_00150008	00150008	656	handwritten	VU0 macro instruction
 func_001525F8	001525F8	4	remnant	stripped-function leftover
 func_00152B30	00152B30	4	remnant	stripped-function leftover
+func_00152E20	00152E20	4	remnant	stripped-function leftover
 func_001536C8	001536C8	184	handwritten	VU0 macro instruction
 func_00153780	00153780	716	handwritten	VU0 macro instruction
 func_00154088	00154088	744	handwritten	VU0 macro instruction
@@ -225,7 +226,7 @@ func_00158288	00158288	352	handwritten	VU0 macro instruction
 func_001583E8	001583E8	148	handwritten	VU0 macro instruction
 func_00158630	00158630	256	handwritten	VU0 macro instruction
 func_001590A0	001590A0	984	handwritten	VU0 macro instruction
-func_00159668	00159668	120	handwritten	VU0 macro instruction
+func_00159668	00159668	20	handwritten	VU0 macro instruction
 func_0015A8B0	0015A8B0	4	remnant	stripped-function leftover
 func_0015AA50	0015AA50	144	handwritten	VU0 macro instruction
 func_0015AF50	0015AF50	472	handwritten	VU0 macro instruction
@@ -437,7 +438,8 @@ func_001A0758	001A0758	500	handwritten	VU0 macro instruction
 func_001A0C98	001A0C98	196	handwritten	128-bit MMI instruction
 func_001A0D60	001A0D60	144	handwritten	kernel or system instruction (max.s)
 func_001A0DF0	001A0DF0	404	handwritten	VU0 macro instruction
-func_001A1028	001A1028	404	handwritten	VU0 macro instruction
+func_001A1028	001A1028	4	remnant	stripped-function leftover
+func_001A1030	001A1030	396	handwritten	VU0 macro instruction
 func_001A11C0	001A11C0	468	handwritten	VU0 macro instruction
 func_001A1398	001A1398	120	handwritten	VU0 macro instruction
 func_001A15D8	001A15D8	2072	handwritten	VU0 macro instruction
@@ -455,7 +457,7 @@ func_001A31A0	001A31A0	80	handwritten	VU0 macro instruction
 func_001A3250	001A3250	836	handwritten	VU0 macro instruction
 func_001A35F0	001A35F0	320	handwritten	VU0 macro instruction
 func_001A3730	001A3730	444	handwritten	VU0 macro instruction
-func_001A3AC8	001A3AC8	84	handwritten	VU0 macro instruction
+func_001A3AC8	001A3AC8	20	handwritten	VU0 macro instruction
 func_001A3D40	001A3D40	512	handwritten	VU0 macro instruction
 func_001A4538	001A4538	124	handwritten	VU0 macro instruction
 func_001A48C0	001A48C0	620	handwritten	kernel or system instruction (max.s)
@@ -495,6 +497,7 @@ func_001B4670	001B4670	20	remnant	stripped-function leftover
 func_001B55C0	001B55C0	1416	handwritten	VU0 macro instruction
 func_001B5B48	001B5B48	12	remnant	stripped-function leftover
 func_001B5E98	001B5E98	4	remnant	stripped-function leftover
+func_001B5F48	001B5F48	4	remnant	stripped-function leftover
 func_001B7280	001B7280	904	handwritten	VU0 macro instruction
 func_001B7D00	001B7D00	628	handwritten	VU0 macro instruction
 func_001B7F78	001B7F78	464	handwritten	VU0 macro instruction
@@ -511,7 +514,8 @@ func_001B91A8	001B91A8	396	handwritten	VU0 macro instruction
 func_001B9448	001B9448	168	handwritten	VU0 macro instruction
 func_001B9690	001B9690	332	handwritten	VU0 macro instruction
 func_001B9860	001B9860	212	handwritten	VU0 macro instruction
-func_001B9938	001B9938	184	handwritten	VU0 macro instruction
+func_001B9938	001B9938	4	remnant	stripped-function leftover
+func_001B9940	001B9940	176	handwritten	VU0 macro instruction
 func_001B99F0	001B99F0	180	handwritten	VU0 macro instruction
 func_001B9AA8	001B9AA8	4	remnant	stripped-function leftover
 func_001B9AB0	001B9AB0	20	handwritten	VU0 macro instruction
