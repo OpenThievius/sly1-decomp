@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL runs at 50 Hz: the frame step is clamped to 1/50 to 1/25 of a second.
-void func_00142F10(Timer_00142F10* self)
+void func_00142F10(G261858* self)
 {
     s64 now = func_001430F8();
     s64 delta = now - self->last;
@@ -29,12 +29,12 @@ void func_00142F10(Timer_00142F10* self)
     if (0.02f <= s) {
         self->step = s;
     }
-    f32 new_a = self->acc_a + s;
-    f32 old_b = self->hist_b;
-    f32 new_d = self->acc_d + self->step;
-    self->acc_a = new_a;
-    self->hist_c = old_b;
-    self->hist_b = s;
-    self->acc_d = new_d;
+    f32 new_a = self->time + s;
+    f32 old_b = self->dt;
+    f32 new_d = self->f10 + self->step;
+    self->time = new_a;
+    self->f0C = old_b;
+    self->dt = s;
+    self->f10 = new_d;
     self->last = now;
 }

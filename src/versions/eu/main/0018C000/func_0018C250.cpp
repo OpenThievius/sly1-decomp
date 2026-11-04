@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the memory-card directory names carry SCES-50917, the title is "Sly Raccoon", and the save count is 11.
-s32 func_0018C250(Card_18C250* self)
+s32 func_0018C250(G264A40* self)
 {
     char name[0x50];
     s32 info[4];
-    s32 r = func_0018BD00(func_0020A078(self->f4, self->f8, "/"), 0x12, info);
+    s32 r = func_0018BD00(func_0020A078(self->f04, self->f08, "/"), 0x12, info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
     s32 sz = func_0018C1E8((void *)D_00248470);

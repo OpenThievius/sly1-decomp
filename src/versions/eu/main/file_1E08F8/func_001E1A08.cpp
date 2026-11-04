@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL reads the %c argument as an unsigned byte (lbu where US has lb)
-void func_001E1A08(Spec_001E1A08* sp, Ctx_001E1A08* c, u8** va, const char* fmt, s32 len) {
+void func_001E1A08(Spec_001E1A08* sp, S1D7190* c, u8** va, const char* fmt, s32 len) {
     u64 v;
     switch (sp->ch) {
     case '%':

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL adds a check after the switch: for 0 or 12, a state other than 2 forces 11 and f14 = 1.
-s32 func_0018D0A0(Obj_18D0A0* o)
+s32 func_0018D0A0(G264A40* o)
 {
-    s32 r = func_0018BD00(func_00209CB8(o->p4, o->p8, &o->f24, &o->f28, &o->f2C), 1, 0);
+    s32 r = func_0018BD00(func_00209CB8(o->f04, o->f08, &o->f24, &o->f28, &o->f2C), 1, 0);
     switch (r) {
     case 9:
     case 11:

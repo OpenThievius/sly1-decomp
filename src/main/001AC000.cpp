@@ -4,6 +4,12 @@
 #include "t217d.h"
 #include "v24a0.h"
 #include "v24a2.h"
+#include "globals.h"
+#include "g27c220.h"
+#include "g275f80.h"
+#include "layout_137228.h"
+#include "s1b2988.h"
+#include "shapes.h"
 
 // The font object's calls (include/v24a2.h will declare them).
 V24A2* func_0015C1C0(s32 k);
@@ -81,9 +87,6 @@ struct Node_129CA8 {
 };
 
 struct Sink_001AEFA0 { u8 pad0[0x18]; f32 value; };
-struct Global_001AEFA0 { u8 pad0[0x2220]; s32 state; };
-
-extern Global_001AEFA0* D_00262E10;
 
 
 extern u8 D_002743D0[];
@@ -183,13 +186,13 @@ extern u8 D_00275BC0[];
 
 void func_001AD718(T217D_420* self)
 {
-    Global_001AEFA0* g;
+    C07* g;
     Mgr_001AD718* m;
 
     func_001AA298(self);
     if (self->flag == 0) goto tail;
     g = D_00262E10;
-    if (g != 0 && g->state == 6) goto tail;
+    if (g != 0 && g->f2220 == 6) goto tail;
     m = (Mgr_001AD718*)D_00275BC0;
     if (m->f4 == 3 && m->f2C < 2) {
         self->vt->m14(self);
@@ -272,7 +275,6 @@ void func_001ACDA0(T217D_3D0* self)
     }
 }
 
-extern u8* D_00275710;
 extern f32 D_00261858[];
 extern s32 D_002744D0;
 
@@ -387,8 +389,6 @@ extern f32 D_00261868;
 extern f32 D_0027240C;
 extern s32 D_00272420;
 extern u8 D_00269990[];
-extern u8 D_00262280[];
-extern void* D_002623C0;
 
 s32 func_0018B770(void* p);
 void func_00137228(void* out, f32 x, f32 y);
@@ -450,7 +450,7 @@ void func_001AE820(T217D_600* self)
     func_001E1FD0(sp, fmt, c, func_00160B28(D_002623C0));
     func_0015C8B8(self->font, self->scale, self->scale);
     func_0015DB28(buf, sp, self->font);
-    func_0015E318(buf, out, 0, D_00262280);
+    func_0015E318(buf, out, 0, &D_00262280);
     func_0015C900(self->font);
 }
 
@@ -689,7 +689,6 @@ struct Buf_001AD7B0 { u8 pad[0x30]; };
 
 extern f32 D_00261868;
 extern const char D_0024CEE8[];
-extern u8 D_00262280[];
 
 f32 func_001EA408(f32 a);
 f32 func_00205210(f32 x);
@@ -718,7 +717,7 @@ void func_001AD7B0(T217D_420* self)
     func_00137248(&buf, (s32*)((u8*)&buf + 0x20));
     func_00137260(&buf, 0);
     func_00137268(&buf, 0);
-    func_0015C638(h, (void*)D_0024CEE8, &buf, 0, D_00262280);
+    func_0015C638(h, (void*)D_0024CEE8, &buf, 0, &D_00262280);
     func_0015C900(h);
 }
 
@@ -828,7 +827,6 @@ void func_00123AB0(Sub_1AECE8* object, s32 mode);
 extern f32 D_0026185C[];
 
 struct Ctx_1ADB00;
-extern u8 D_00262280[];
 
 void func_001613C0(Ctx_1ADB00* p, s32 a, s32 b, u64 c);
 void func_00161708(Ctx_1ADB00* p, u64 a, u64 b);
@@ -839,18 +837,17 @@ void func_001ADB00(T217D_560* self)
 {
     f32 x = self->blend * 66.40001f;
     f32 y = 492.80002f - x;
-    func_001613C0((Ctx_1ADB00*)D_00262280, 6, 7, 0x044441EE);
-    func_00161708((Ctx_1ADB00*)D_00262280, 0x47, 0x30000);
-    func_00161708((Ctx_1ADB00*)D_00262280, 0x42, 0x44);
-    func_00161458((Ctx_1ADB00*)D_00262280, 0x80000000);
-    func_001615F0((Ctx_1ADB00*)D_00262280, 0x6C00, 0x7900, 0x0FFFFFF0, 0);
-    func_001615F0((Ctx_1ADB00*)D_00262280, 0x9400, (s32)((x * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
-    func_001615F0((Ctx_1ADB00*)D_00262280, 0x6C00, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
-    func_001615F0((Ctx_1ADB00*)D_00262280, 0x9400, 0x8700, 0x0FFFFFF0, 0);
+    func_001613C0((Ctx_1ADB00*)&D_00262280, 6, 7, 0x044441EE);
+    func_00161708((Ctx_1ADB00*)&D_00262280, 0x47, 0x30000);
+    func_00161708((Ctx_1ADB00*)&D_00262280, 0x42, 0x44);
+    func_00161458((Ctx_1ADB00*)&D_00262280, 0x80000000);
+    func_001615F0((Ctx_1ADB00*)&D_00262280, 0x6C00, 0x7900, 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)&D_00262280, 0x9400, (s32)((x * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)&D_00262280, 0x6C00, (s32)((y * 0.45454547f + 1936.0f) * 16.0f), 0x0FFFFFF0, 0);
+    func_001615F0((Ctx_1ADB00*)&D_00262280, 0x9400, 0x8700, 0x0FFFFFF0, 0);
 }
 
 struct Ctx_1AE3B8;
-extern u8 D_00262280[];
 
 void func_001613C0(Ctx_1AE3B8* p, s32 a, s32 b, u64 c);
 void func_00161708(Ctx_1AE3B8* p, u64 a, u64 b);
@@ -860,46 +857,40 @@ void func_00161278(Ctx_1AE3B8* p, s32 a);
 
 void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8* rgba, s32 flag)
 {
-    func_001613C0((Ctx_1AE3B8*)D_00262280, rgba[3] < 0xFF ? 0x41 : 1, 4, 0x441E);
+    func_001613C0((Ctx_1AE3B8*)&D_00262280, rgba[3] < 0xFF ? 0x41 : 1, 4, 0x441E);
 
-    func_00161708((Ctx_1AE3B8*)D_00262280, 0x47, (u64)(flag ? 0x11001 : 0x11000) | (flag ? 0x60000 : 0x20000));
+    func_00161708((Ctx_1AE3B8*)&D_00262280, 0x47, (u64)(flag ? 0x11001 : 0x11000) | (flag ? 0x60000 : 0x20000));
 
-    func_00161458((Ctx_1AE3B8*)D_00262280, ((u32)((rgba[3] + 1) & 0x1FE) << 23) | (rgba[2] << 16) | (rgba[1] << 8) | rgba[0]);
-    func_001615F0((Ctx_1AE3B8*)D_00262280, a0, a1, a2, 0);
-    func_001615F0((Ctx_1AE3B8*)D_00262280, a3, a4, a5, 0);
-    func_00161278((Ctx_1AE3B8*)D_00262280, 0);
+    func_00161458((Ctx_1AE3B8*)&D_00262280, ((u32)((rgba[3] + 1) & 0x1FE) << 23) | (rgba[2] << 16) | (rgba[1] << 8) | rgba[0]);
+    func_001615F0((Ctx_1AE3B8*)&D_00262280, a0, a1, a2, 0);
+    func_001615F0((Ctx_1AE3B8*)&D_00262280, a3, a4, a5, 0);
+    func_00161278((Ctx_1AE3B8*)&D_00262280, 0);
 }
 
-struct Glob_1AD970 { u8 pad0[0x19D8]; s32 f19d8; s32 f19dc; };
-
-struct Game_1AD970 { s32 f0; s32 mode; static s32 Mode(Game_1AD970* g) { return g->mode; } };
-extern Game_1AD970 D_00275F80;
 extern u8 D_00275B00[];
-extern void* D_002623C0;
-extern s32 D_0027051C;
 
 void func_001AD970(T217D_560* self, s32 newval)
 {
     T217D_3D0* g;
-    Glob_1AD970* gg;
+    G27C220* gg;
 
     if (self->mode != newval) {
-        if (Game_1AD970::Mode(&D_00275F80) == 1) {
+        if (D_00275F80.mode == 1) {
             if (newval == 3 || newval == 0) {
                 newval = self->mode;
             }
         }
-        if (Game_1AD970::Mode(&D_00275F80) == 3) {
+        if (D_00275F80.mode == 3) {
             if ((u32)(newval - 1) < 2) {
                 newval = 0;
                 if ((*(s32*)D_00275B00 & 8) == 0) {
                     newval = 2;
-                    if (((Glob_1AD970*)D_002623C0)->f19d8 != 0 && D_0027051C == 0) {
+                    if (D_002623C0->f19D8 != 0 && D_0027051C == 0) {
                         g = &D_0026F138;
                         g->pending = 0;
                         g->vt->m16(g, 0);
-                        gg = (Glob_1AD970*)D_002623C0;
-                        func_001AD0D0(g, gg->f19d8, gg->f19dc);
+                        gg = D_002623C0;
+                        func_001AD0D0(g, gg->f19D8, gg->f19DC);
                         g->announce = 1;
                         func_001AA8B8(g, 0.0f);
                         g->vt->m16(g, 2);
@@ -923,14 +914,12 @@ void func_001AD970(T217D_560* self, s32 newval)
 
 typedef void (*VFn_1AC700)(void* self, void* handle, void* out, void* tbl);
 struct VTab_1AC700 { u8 pad0[0x48]; s16 adj; u8 pad1[0x4C - 0x4A]; VFn_1AC700 fn; };
-struct Out_1AC700;
-void func_00137228(Out_1AC700* out, f32 x, f32 y);
-void func_00137238(Out_1AC700* out, f32 x, f32 y);
-void func_00137248(Out_1AC700* out, s32* value);
-void func_00137260(Out_1AC700* out, s32 flag);
-void func_00137268(Out_1AC700* out, s32 flag);
-struct Out_1AC700 {
-    u8 b[32];
+void func_00137228(Layout_137228* out, f32 x, f32 y);
+void func_00137238(Layout_137228* out, f32 x, f32 y);
+void func_00137248(Layout_137228* out, s32* value);
+void func_00137260(Layout_137228* out, s32 flag);
+void func_00137268(Layout_137228* out, s32 flag);
+struct Out_1AC700 : Layout_137228 {
     void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
     void Size(f32 x, f32 y) { func_00137238(this, x, y); }
     void Color(s32* c) { func_00137248(this, c); }
@@ -946,7 +935,6 @@ struct Hd_1AC700 {
         }
     }
 };
-extern u8 D_00262280[];
 
 void func_001AC700(T217D_330* self)
 {
@@ -972,12 +960,12 @@ void func_001AC700(T217D_330* self)
         if (h != 0) {
             slot = *(T217D_Word*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
-            Hd_1AC700::Draw(self->frame, &out, D_00262280);
+            Hd_1AC700::Draw(self->frame, &out, &D_00262280);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
         func_0015C8B8(self->font, self->scale, self->scale);
         func_0015DB28(loc, &self->text[0], self->font);
-        func_0015E318(loc, &out, 0, D_00262280);
+        func_0015E318(loc, &out, 0, &D_00262280);
         func_0015C900(self->font);
     }
 }
@@ -989,52 +977,44 @@ struct Pair_1ADD28 {
     u16 b;
 };
 
-struct Sub_1ADD28 {
-    u8 pad0[0xC];
-    Pair_1ADD28** p0c;
-};
-
 struct Hold_1ADD28 {
     u8 pad0[0x14];
-    Sub_1ADD28* p14;
+    S1B2988* p14;
 };
 
-extern u8 D_00262280[];
 
 void func_001613C0(Ctx_1ADD28* p, s32 a, s32 b, u64 c);
 void func_00161708(Ctx_1ADD28* p, u64 a, u64 b);
 void func_00161458(Ctx_1ADD28* p, u32 rgba);
 void func_001614C8(Ctx_1ADD28* p, s32 a, s32 b);
 void func_001615F0(Ctx_1ADD28* p, s32 a, s32 b, s32 c, s32 d);
-u64 func_001B2988(Sub_1ADD28* t, s32 i, s32 j);
+u64 func_001B2988(S1B2988* t, s32 i, s32 j);
 
 void func_001ADD28(T217D_470* self)
 {
     if (self->icon != 0) {
-        Sub_1ADD28* sub = ((Hold_1ADD28*)self->icon)->p14;
-        Pair_1ADD28* pr = *sub->p0c;
+        S1B2988* sub = ((Hold_1ADD28*)self->icon)->p14;
+        Pair_1ADD28* pr = (Pair_1ADD28*)*sub->p0c;
         u64 v = func_001B2988(sub, 0, 0);
         u8 rgba[4];
-        func_001613C0((Ctx_1ADD28*)D_00262280, 0x156, 0xA, 0x43431EEEEEULL);
-        func_00161708((Ctx_1ADD28*)D_00262280, 0x47, 0x33001);
-        func_00161708((Ctx_1ADD28*)D_00262280, 0x42, 0x44);
-        func_00161708((Ctx_1ADD28*)D_00262280, 6, v);
-        func_00161708((Ctx_1ADD28*)D_00262280, 0x14, 0x60);
-        func_00161708((Ctx_1ADD28*)D_00262280, 8, 5);
+        func_001613C0((Ctx_1ADD28*)&D_00262280, 0x156, 0xA, 0x43431EEEEEULL);
+        func_00161708((Ctx_1ADD28*)&D_00262280, 0x47, 0x33001);
+        func_00161708((Ctx_1ADD28*)&D_00262280, 0x42, 0x44);
+        func_00161708((Ctx_1ADD28*)&D_00262280, 6, v);
+        func_00161708((Ctx_1ADD28*)&D_00262280, 0x14, 0x60);
+        func_00161708((Ctx_1ADD28*)&D_00262280, 8, 5);
         *(u32*)rgba = 0x80808080;
-        func_00161458((Ctx_1ADD28*)D_00262280, *(u32*)rgba);
-        func_001614C8((Ctx_1ADD28*)D_00262280, 0, pr->b << 4);
-        func_001615F0((Ctx_1ADD28*)D_00262280, (s32)((self->x + 1728.0f) * 16.0f), (s32)((self->y * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_001614C8((Ctx_1ADD28*)D_00262280, pr->a << 4, 0);
-        func_001615F0((Ctx_1ADD28*)D_00262280, (s32)((self->x + self->w + 1728.0f) * 16.0f), (s32)(((self->y + self->h) * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        func_00161458((Ctx_1ADD28*)&D_00262280, *(u32*)rgba);
+        func_001614C8((Ctx_1ADD28*)&D_00262280, 0, pr->b << 4);
+        func_001615F0((Ctx_1ADD28*)&D_00262280, (s32)((self->x + 1728.0f) * 16.0f), (s32)((self->y * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        func_001614C8((Ctx_1ADD28*)&D_00262280, pr->a << 4, 0);
+        func_001615F0((Ctx_1ADD28*)&D_00262280, (s32)((self->x + self->w + 1728.0f) * 16.0f), (s32)(((self->y + self->h) * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
     } else {
         func_001AA790(self);
     }
 }
 
-extern u8 D_00262280[];
 
-struct Out_1AD3F0;
 struct Buf_1AD3F0 { u8 d[0xB0]; };
 
 struct Inner_1AD3F0 {
@@ -1042,13 +1022,12 @@ struct Inner_1AD3F0 {
     s32 f2D0;
 };
 
-void func_00137228(Out_1AD3F0* out, f32 x, f32 y);
-void func_00137238(Out_1AD3F0* out, f32 x, f32 y);
-void func_00137248(Out_1AD3F0* out, s32* value);
-void func_00137260(Out_1AD3F0* out, s32 flag);
-void func_00137268(Out_1AD3F0* out, s32 flag);
-struct Out_1AD3F0 {
-    u8 d[0x20];
+void func_00137228(Layout_137228* out, f32 x, f32 y);
+void func_00137238(Layout_137228* out, f32 x, f32 y);
+void func_00137248(Layout_137228* out, s32* value);
+void func_00137260(Layout_137228* out, s32 flag);
+void func_00137268(Layout_137228* out, s32 flag);
+struct Out_1AD3F0 : Layout_137228 {
     void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
     void Size(f32 x, f32 y) { func_00137238(this, x, y); }
     void Color(s32* c) { func_00137248(this, c); }
@@ -1100,7 +1079,7 @@ void func_001AD3F0(T217D_3D0* self)
     out.FlagB(0);
     if (self->announce == 0) {
         T217D_0F0* g2 = &D_0026F808;
-        V24A0* s = (V24A0*)D_00262280;
+        V24A0* s = &D_00262280;
         f32 sc = scale;
         f32 y;
         if (g2->open != 0 && g2->current != 0 && ((Inner_1AD3F0*)g2->current)->f2D0 == 2) {
@@ -1120,20 +1099,17 @@ void func_001AD3F0(T217D_3D0* self)
     }
     func_0015C8B8(self->font, self->scale, self->scale);
     func_0015DB28(&buf, &self->text[0], self->font);
-    func_0015E318(&buf, &out, 0, D_00262280);
+    func_0015E318(&buf, &out, 0, &D_00262280);
     func_0015C900(self->font);
 }
 
-extern u8 D_00262280[];
 
-struct Out_1ACAA8;
-void func_00137228(Out_1ACAA8* out, f32 x, f32 y);
-void func_00137238(Out_1ACAA8* out, f32 x, f32 y);
-void func_00137248(Out_1ACAA8* out, s32* value);
-void func_00137260(Out_1ACAA8* out, s32 flag);
-void func_00137268(Out_1ACAA8* out, s32 flag);
-struct Out_1ACAA8 {
-    u8 d[0x20];
+void func_00137228(Layout_137228* out, f32 x, f32 y);
+void func_00137238(Layout_137228* out, f32 x, f32 y);
+void func_00137248(Layout_137228* out, s32* value);
+void func_00137260(Layout_137228* out, s32 flag);
+void func_00137268(Layout_137228* out, s32 flag);
+struct Out_1ACAA8 : Layout_137228 {
     void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
     void Size(f32 x, f32 y) { func_00137238(this, x, y); }
     void Color(s32 c) { func_00137248(this, &c); }
@@ -1194,41 +1170,38 @@ void func_001ACAA8(T217D_380* self)
         out.FlagB(0);
         V24A2* o = *self->frame;
         if (o != 0) {
-            o->vt->drawBox((V24A2*)((u8*)o + o->vt->adj9), self->frame, &out, D_00262280);
+            o->vt->drawBox((V24A2*)((u8*)o + o->vt->adj9), self->frame, &out, &D_00262280);
         }
     }
-    Font_1ACAA8::Begin(self->font, 0, D_00262280);
+    Font_1ACAA8::Begin(self->font, 0, &D_00262280);
     for (i = 0; i < n; i++) {
         s32 ch = self->text[i];
         f32 d;
         c = Clamp_1ACAA8::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
         rest = 1.0f - c;
-        Font_1ACAA8::Glyph(self->font, ch, self->color, D_00262280, c * x + rest * y, self->shownY);
+        Font_1ACAA8::Glyph(self->font, ch, self->color, &D_00262280, c * x + rest * y, self->shownY);
         d = Font_1ACAA8::Advance(self->font, ch);
         x += d;
         y += d;
     }
-    Font_1ACAA8::End(self->font, 0, D_00262280);
+    Font_1ACAA8::End(self->font, 0, &D_00262280);
 }
 
 struct Rgba_1AC0E8 { u8 c[4]; };
-struct Col_1AC0E8 { s32 v[4]; };
-struct Rect_1AC0E8 { f32 x; f32 y; f32 w; f32 h; s32 f10; s32 f14; s32 f18; s32 f1C; };
 struct VEnt_1AC0E8 { s16 delta; s16 index; void (*fn)(void* self, f32 x, f32 y, s32 a, s32 b, void* c); };
 struct Text_1AC0E8 { u8 pad[0x4C]; VEnt_1AC0E8* vtbl; };
 struct Q3_1AC0E8 { f32 f0; f32 f4; f32 f8; f32 fC; };
 
 extern f32 D_00261858[];
 extern Q3_1AC0E8 D_002743C0;
-extern u8 D_00262280[];
 
 f32 func_001EA4B8(Q3_1AC0E8* p, s32 a1, f32 f12, f32 f13, f32 f14);
-void func_00137228(Rect_1AC0E8* out, f32 x, f32 y);
-void func_00137238(Rect_1AC0E8* out, f32 x, f32 y);
-void func_00137248(Rect_1AC0E8* out, Col_1AC0E8* value);
-void func_00137260(Rect_1AC0E8* out, s32 flag);
-void func_00137268(Rect_1AC0E8* out, s32 flag);
-void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, u8* d);
+void func_00137228(Layout_137228* out, f32 x, f32 y);
+void func_00137238(Layout_137228* out, f32 x, f32 y);
+void func_00137248(Layout_137228* out, Quad4* value);
+void func_00137260(Layout_137228* out, s32 flag);
+void func_00137268(Layout_137228* out, s32 flag);
+void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, V24A0* d);
 f32 func_00205400(f32 x);
 f32 func_00205210(f32 x);
 
@@ -1255,7 +1228,7 @@ struct LerpRgba_1AC0E8 {
 
 void func_001AC0E8(T217D_2E0* self)
 {
-    Rect_1AC0E8 out;
+    Layout_137228 out;
     f32 t = 0.0f;
     s32 flag = 0;
     if (self->changedAt != t) {
@@ -1272,8 +1245,8 @@ void func_001AC0E8(T217D_2E0* self)
     func_00137228(&out, self->x + self->barX, self->y + self->barY);
     func_00137238(&out, w, y);
     {
-        Col_1AC0E8 tmp;
-        tmp.v[0] = grey;
+        Quad4 tmp;
+        tmp.w[0] = grey;
         func_00137248(&out, &tmp);
     }
     func_00137260(&out, 0);
@@ -1281,7 +1254,7 @@ void func_001AC0E8(T217D_2E0* self)
     {
     Rgba_1AC0E8 col;
     col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;
-    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, D_00262280);
+    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, &D_00262280);
     {
         out.x = self->x + self->barX;
         out.y = self->y + self->barY + y;
@@ -1292,12 +1265,12 @@ void func_001AC0E8(T217D_2E0* self)
         b.c[0] = 0xC0; b.c[1] = 0xC0; b.c[2] = 0xC0; b.c[3] = 0xFF;
         LerpRgba_1AC0E8::Do(&col, &a, &b, t);
     }
-    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], D_00262280);
+    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], &D_00262280);
     }
     func_0015C8B8(self->font, self->scale, self->scale);
     Text_1AC0E8* text = (Text_1AC0E8*)self->font;
     VEnt_1AC0E8* ve = &text->vtbl[8];
-    ve->fn((u8*)self->font + ve->delta, self->x, self->y, 0x7A, out.f10, D_00262280);
+    ve->fn((u8*)self->font + ve->delta, self->x, self->y, 0x7A, out.color.value, &D_00262280);
     f32 dx = 0.0f;
     f32 dy = dx;
     if (flag) {
@@ -1309,9 +1282,9 @@ void func_001AC0E8(T217D_2E0* self)
     out.w = 0.0f;
     out.h = 0.0f;
     out.f14 = 1;
-    out.f18 = 1;
+    out.f18 = (void*)1;
     char str[2] = { self->letter + 0x72, 0 };
-    func_0015C638(self->font, str, &out, 0, D_00262280);
+    func_0015C638(self->font, str, &out, 0, &D_00262280);
     func_0015C900(self->font);
 }
 

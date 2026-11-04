@@ -77,6 +77,6 @@ void func_001AE820(Obj_1AE820_eu* self)
     func_001E1FD0(sp, fmt, c, func_00160B28(D_002623C0));
     func_0015C8B8(self->f4, self->f20c, self->f20c);
     func_0015DB28(buf, sp, self->f4, 0);
-    func_eu_0015E7E0(buf, out, 0, D_00262280);
+    func_eu_0015E7E0(buf, out, 0, &D_00262280);
     func_0015C900(self->f4);
 }
