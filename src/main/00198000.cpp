@@ -6,6 +6,8 @@
 #include "c6e.h"
 #include "c5c.h"
 #include "c5d.h"
+#include "c1e.h"
+#include "c50.h"
 #include "c8b.h"
 #include "c6c.h"
 #include "t219c.h"
@@ -216,28 +218,17 @@ void func_001990A8(C2D* obj)
     obj->f5A0 = value;
 }
 
-struct Flags_00199380 {
-    u8 pad[0x2D0];
-    u32 flags;
-};
-
-void func_00199380(Flags_00199380* flags, u32 bit)
+void func_00199380(C5D* flags, u32 bit)
 {
-    flags->flags = 1 << (bit + 1);
+    flags->mask2D0 = 1 << (bit + 1);
 }
 
-struct Queue_00199398 {
-    u8 pad[0x2DC];
-    u32 count;
-    void* items[1];
-};
-
-void func_00199398(Queue_00199398* queue, void* item)
+void func_00199398(C5D* queue, void* item)
 {
-    u32 count = queue->count;
+    u32 count = queue->count2DC;
     if (count < 8) {
-        queue->items[count] = item;
-        queue->count = count + 1;
+        queue->ids2E0[count] = (s32)item;
+        queue->count2DC = count + 1;
     }
 }
 
@@ -394,14 +385,12 @@ tail:
     }
 }
 
-struct Record_0019AD30 { u32 count; void* items[1]; };
-struct List_0019AD30 { u8 pad[0x658]; Record_0019AD30 records[1]; };
-void func_0019AD30(List_0019AD30* list, u32 index, void* item)
+void func_0019AD30(C17* list, u32 index, void* item)
 {
-    Record_0019AD30* record = (Record_0019AD30*)((u8*)list + 0x658 + index * 0x2C);
+    Ent17* record = (Ent17*)((u8*)list + 0x658 + index * 0x2C);
     u32 count = record->count;
     if (count < 4) {
-        record->items[count] = item;
+        record->keys[count] = (s32)item;
         record->count = count + 1;
     }
 }
@@ -471,12 +460,11 @@ void func_0019C440(C8B* obj)
     obj->first34 = -1;
 }
 
-struct Vec_0019CE28 { u8 pad[0x54]; f32 x, y, z; };
-void func_0019CE28(Vec_0019CE28* value, f32 x, f32 y, f32 z)
+void func_0019CE28(C8B* value, f32 x, f32 y, f32 z)
 {
-    value->x = x;
-    value->y = y;
-    value->z = z;
+    value->f54 = x;
+    value->f58 = y;
+    value->f5C = z;
 }
 
 struct Val_0019D468 { u8 pad[4]; f32 value; };
@@ -546,11 +534,9 @@ void func_0019DB68(void)
     func_0015EAE0(D_002622A8, D_00215C60, D_00217348);
 }
 
-struct A_0019E158 { u8 pad[0x554]; f32 value; };
-struct B_0019E158 { u8 pad[0x1E8]; f32 value; };
-void func_0019E158(A_0019E158* a, B_0019E158* b)
+void func_0019E158(C1E* a, Rec50* b)
 {
-    a->value = b->value;
+    a->f554 = b->f1E8;
 }
 
 void func_0019E418(void) {}
@@ -676,12 +662,10 @@ void func_00199138(C2D* self)
 }
 
 typedef void (*VFn_199AF0)(void* self);
-struct Obj_199AF0 { VFn_199AF0* vtbl; };
 
-void func_00199AF0(void* p)
+void func_00199AF0(C2E* p)
 {
-    Obj_199AF0* o = (Obj_199AF0*)p;
-    o->vtbl[77](o);
+    ((VFn_199AF0*)p->desc)[77](p);
 }
 
 void func_001C72A0(void* self);
@@ -883,32 +867,6 @@ void func_0019B188(C41* self)
     self->v650 = self->v140;
 }
 
-typedef void (*VFn1_19AD68)(void* self);
-typedef void (*VFn2_19AD68)(void* self, void* arg);
-
-struct Obj1_19AD68 { VFn1_19AD68* vtbl; };
-struct Obj2_19AD68 { VFn2_19AD68* vtbl; };
-
-struct Inner_19AD68 {
-    u8 pad0[0x1CE4];
-    s32 f1CE4;
-};
-
-struct Actor_19AD68 {
-    u8 pad0[0x14];
-    Inner_19AD68* f14;
-    u8 pad1[0x614 - 0x18];
-    void* f614;
-    u8 pad2[0x650 - 0x618];
-    Obj2_19AD68* f650;
-    u8 pad3[0x760 - 0x654];
-    s32 f760;
-    s32 f764;
-    void* arr768[28];
-    s32 f7D8;
-    void* arr7DC[1];
-};
-
 struct Ctx_002623C4 {
     u8 pad0[0x43C];
     s32 f43C;
@@ -935,20 +893,20 @@ void func_001604B8(s32 mode);
 void func_0018C7F8(void* p);
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_0019AD68(Actor_19AD68* self)
+void func_0019AD68(C17* self)
 {
     s32 sel;
     s32 idx;
     s32 n;
     s32 v;
     void* item;
-    Obj1_19AD68* r;
+    C01* r;
 
     func_001B64D8(self->f614, 0x38E);
     if (self->f650 == 0) {
         self->f7D8 = 0;
     } else {
-        self->f650->vtbl[28](self->f650, self);
+        ((C01*)self->f650)->desc->m18((C01*)self->f650, self);
         self->f650 = 0;
         self->f7D8 = 0;
     }
@@ -963,7 +921,7 @@ void func_0019AD68(Actor_19AD68* self)
 
         ctx->f43C = ctx->f43C + 1;
         g->f19F0 = g->f19F0 | self->f760;
-        self->f14->f1CE4 = 0;
+        self->world->f1CE4 = 0;
         ctl->f0 = ctl->f0 | 4;
 
         v = g->f19EC;
@@ -983,17 +941,17 @@ void func_0019AD68(Actor_19AD68* self)
             func_0018C7F8(D_00264A40);
         }
 
-        r = (Obj1_19AD68*)func_0015A418(self->f14, 0x101, sel, self);
+        r = (C01*)func_0015A418(self->world, 0x101, sel, self);
         if (r != 0) {
-            r->vtbl[6](r);
+            r->desc->m02(r);
         }
 
         idx = self->f764;
         if (idx >= 0) {
-            item = self->arr768[idx];
+            item = self->f768[idx];
             if (item != 0) {
                 n = self->f7D8;
-                self->arr7DC[n] = item;
+                self->f7DC[n] = item;
                 self->f7D8 = n + 1;
             }
         }
@@ -1350,11 +1308,9 @@ struct Frame_1989B0 {
         *(s32*)&D_0027B314 = (s32)this;
     }
 };
-struct Cls_1989B0 { u8 pad0[8]; s32 flags; };
-struct Node_1989B0 { Cls_1989B0* cls; };
 void func_001BAC30(void* self);
 void func_00159478(void* sub, void* self);
-void func_00182ED8(Node_1989B0* n);
+void func_00182ED8(C01* n);
 
 void func_001989B0(C2C* self)
 {
@@ -1362,9 +1318,9 @@ void func_001989B0(C2C* self)
     func_00159478(&self->f584, self);
     Frame_1989B0 fr((List_1989B0*)&self->children);
     fr.cursor = (s32)self->children.head + fr.link;
-    Node_1989B0* p = (Node_1989B0*)self->children.head;
+    C01* p = (C01*)self->children.head;
     while (p != 0) {
-        if (p->cls->flags & 0x40) {
+        if (p->desc->flags & 0x40) {
             s32 i = self->count570;
             self->found574[i] = p;
             self->count570 = i + 1;
@@ -1372,7 +1328,7 @@ void func_001989B0(C2C* self)
         }
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
-        p = (Node_1989B0*)nx;
+        p = (C01*)nx;
     }
     *(s32*)&D_0027B314 = fr.prev;
 }

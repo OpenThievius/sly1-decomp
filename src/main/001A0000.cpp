@@ -2,6 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "t219c.h"
+#include "c6c.h"
 
 void func_0019EBE8(T219C* self);
 
@@ -88,24 +89,22 @@ void func_001A0FE8(T219C* self)
     self->life = 2.0f;
 }
 
-struct Ctrl_1A3FE0 { u8 pad0[0x610]; s32 mode610; u8 pad1[8]; f32 level61C; u8 pad2[0x64]; s32 flag684; };
-
-s32 func_001A3FE0(Ctrl_1A3FE0* self)
+s32 func_001A3FE0(C15* self)
 {
-    s32 r = self->mode610;
+    s32 r = self->f610;
     switch (r) {
     case 0:
-        if (0.0f < self->level61C) {
+        if (0.0f < self->f61C) {
             r = 1;
         }
         break;
     case 1:
-        if (self->level61C == 0.0f) {
+        if (self->f61C == 0.0f) {
             r = 0;
         }
         break;
     case 2:
-        if (self->flag684 == 0) {
+        if (self->f684 == 0) {
             r = 1;
         }
         break;
@@ -113,15 +112,13 @@ s32 func_001A3FE0(Ctrl_1A3FE0* self)
     return r;
 }
 
-struct Ctx_1A1410 { u8 pad0[0x1D28]; s32 value1D28; };
-
 void func_001A0040(T219C* self);
 
 void func_001A1410(T219C* self)
 {
     func_001A0040(self);
-    Ctx_1A1410* ctx = (Ctx_1A1410*)D_00275710;
-    s32 v = ctx->value1D28;
+    C6C* ctx = (C6C*)D_00275710;
+    s32 v = ctx->f1D28;
     self->f120 = 0.15f;
     self->i20 = v;
 }
@@ -436,14 +433,13 @@ void func_001A3B58(C15* self)
     }
 }
 
-struct Dst_1A3F40 { u8 pad_000[0x618]; s32 f618; f32 f61C; f32 f620; f32 f624; };
 struct Src_1A3F40 { u8 pad_000[0x48]; f32 f48; u8 pad_04C[0x7C - 0x4C]; f32 f7C; };
 
 extern void* D_00261990;
 
 void func_00144FF8(void* a, void* b, s32 c, void* d);
 
-void func_001A3F40(Dst_1A3F40* out, Src_1A3F40* src)
+void func_001A3F40(C15* out, Src_1A3F40* src)
 {
     if (0.3f < src->f48) {
         func_00144FF8(D_00261990, src, 0, &out->f618);
@@ -709,17 +705,9 @@ extern const f32 D_0024C9C0[4] = { 30.0f, 0.0f, 0.2f, 0.0f };
 
 void func_001921A8(void* self);
 
-struct Obj_1A3AE0 {
-    u8 pad0[0x610];
-    s32 f610;
-    s32 f614;
-    u8 pad1[0x10];
-    f32 f628;
-};
-
 void func_001A3AE0(C15* self)
 {
-    Obj_1A3AE0* o = (Obj_1A3AE0*)self;
+    C15* o = self;
     func_001921A8(self);
     o->f610 = -1;
     o->f628 = 2000.0f;

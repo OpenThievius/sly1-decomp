@@ -4,6 +4,10 @@
 #include "c8b.h"
 #include "c1e.h"
 #include "c6c.h"
+#include "c6d.h"
+#include "c41.h"
+#include "c05.h"
+#include "v24a0.h"
 #include "t219c.h"
 
 struct Buf_19DF48 { u8 raw[0x30]; };
@@ -63,21 +67,18 @@ void func_0019DF48(void)
     } while (i >= 0);
 }
 
-// The world, as the pool of 0x1E objects sees it.
-struct Pool_19E040 { u8 pad0[0x1B38]; C1E* head1B38; C1E* last1B3C; };
-
-C1E* func_0019E040(Pool_19E040* self, s32 flag)
+C1E* func_0019E040(C6C* self, s32 flag)
 {
-    if (flag == 0 && self->last1B3C != 0) {
-        return self->last1B3C;
+    if (flag == 0 && self->f1B3C != 0) {
+        return self->f1B3C;
     }
-    C1E* n = self->head1B38;
+    C1E* n = self->f1B38;
     if (n != 0) {
-        self->head1B38 = n->saved564;
+        self->f1B38 = n->saved564;
         n->f550 = flag;
         n->desc->m02(n);
         if (flag == 0) {
-            self->last1B3C = n;
+            self->f1B3C = n;
         }
     }
     return n;
@@ -115,7 +116,7 @@ void func_0019EC20(T219C* self);
 T219C* func_0019EA78(s32 kind, C1E* sys)
 {
     if (sys == 0) {
-        sys = func_0019E040((Pool_19E040*)D_00275710, 0);
+        sys = func_0019E040((C6C*)D_00275710, 0);
         if (sys == 0) return 0;
     }
     T219C* o = (T219C*)func_001B5EA0(&sys->world->pool1B2C);
@@ -190,9 +191,7 @@ void func_0019FE10(T219C* self)
     self->i20 = v;
 }
 
-struct Obj_19CE38 { u8 pad0[0x54]; f32 f54; f32 f58; f32 f5C; u8 pad1[0x80 - 0x60]; s32 f80; };
-
-void func_0019CE38(Obj_19CE38* self, f32 x, f32 y, f32 z)
+void func_0019CE38(C8B* self, f32 x, f32 y, f32 z)
 {
     self->f80 = 1;
     self->f54 = x;
@@ -200,7 +199,6 @@ void func_0019CE38(Obj_19CE38* self, f32 x, f32 y, f32 z)
     self->f5C = z;
 }
 
-struct Obj_19D2A8 { u8 pad0[0x2424]; f32 f2424; };
 struct __attribute__((aligned(16))) Vec_19D2A8 { s32 a, b, c, d; };
 struct Frame_19D2A8 { Vec_19D2A8 q0; Vec_19D2A8 q1; s32 w20; s32 w24; };
 
@@ -210,7 +208,7 @@ void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
 void func_0019C9C8(void* a, s32 b, void* c);
 
-void func_0019D2A8(Obj_19D2A8* self, void* x, void* y)
+void func_0019D2A8(C07* self, void* x, void* y)
 {
     Frame_19D2A8 f;
     if (y != 0) {
@@ -374,14 +372,9 @@ struct Frame_19D6C0 {
     s32 prev;
 };
 
-struct Obj_19D6C0 {
-    u8 pad0[0x60];
-    s32 h60;
-};
-
 void func_00159D00(Node_19D6C0* n);
 
-void func_0019D6C0(Obj_19D6C0* self, void* arg)
+void func_0019D6C0(C6C* self, void* arg)
 {
     Frame_19D6C0 f1;
     Frame_19D6C0 f2;
@@ -554,13 +547,11 @@ void func_0019F9D0(T219C* self, s32 flag)
     }
 }
 
-struct Obj_19DBB0 { u8 pad0[0x1C4]; f32 f1C4; f32 f1C8; };
 struct Ctx_19DBB0 { u8 pad0[0x2F4]; s32 idx2F4; };
-struct Self_19DBB0 { u8 pad0[0xC]; u8* ptr0C; };
 
 extern Ctx_19DBB0* D_0026FA68;
 extern s32 D_00274520[];
-extern Obj_19DBB0* D_00261990;
+extern C6D* D_00261990;
 extern u8 D_002622A8[];
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
@@ -568,12 +559,12 @@ extern u8 D_00215C50[];
 void func_0015EAE0(void* self, void* a, void* b);
 void func_0019D860(void);
 void func_0019D930(void);
-void func_00143940(Obj_19DBB0* self, f32 v);
-void func_00144848(Obj_19DBB0* self);
+void func_00143940(C6D* self, f32 v);
+void func_00144848(C6D* self);
 
 void func_0019DBB0(void)
 {
-    Self_19DBB0* self = (Self_19DBB0*)D_002622A8;
+    V24A0* self = (V24A0*)D_002622A8;
     func_0015EAE0(self, D_00212160, D_00215C50);
     func_0019D860();
     func_0019D930();
@@ -581,13 +572,13 @@ void func_0019DBB0(void)
     if (D_0026FA68 != 0) {
         s32 v = D_00274520[D_0026FA68->idx2F4];
         if (v != 0) {
-            *(u64*)self->ptr0C = ((u64)v << 32) | 0x50000000;
-            self->ptr0C = self->ptr0C + 0x10;
+            *(u64*)self->cur = ((u64)v << 32) | 0x50000000;
+            self->cur = self->cur + 0x10;
         }
     }
 
     {
-        Obj_19DBB0* o = D_00261990;
+        C6D* o = D_00261990;
         f32 keep20 = o->f1C4;
         f32 keep21 = o->f1C8;
         func_00143940(o, 1.0f);
@@ -673,10 +664,10 @@ void func_0019E168(C1E* self)
         func_0019EBE8(node);
         node = cur.next();
     }
-    self->saved564 = ((Pool_19E040*)self->world)->head1B38;
-    ((Pool_19E040*)self->world)->head1B38 = self;
-    if (self == ((Pool_19E040*)self->world)->last1B3C) {
-        ((Pool_19E040*)self->world)->last1B3C = 0;
+    self->saved564 = self->world->f1B38;
+    self->world->f1B38 = self;
+    if (self == self->world->f1B3C) {
+        self->world->f1B3C = 0;
     }
     func_001B7B78(self);
 }
@@ -884,31 +875,17 @@ extern u8 D_00248D30[];
 typedef void (*VFn_19C068)(void *self);
 typedef void (*VFn2_19C068)(void *self, void *x);
 
-struct List_19C068 { s32 head; s32 pad; s32 step; };
-
-struct Obj_19C068 {
-    VFn_19C068 *vtbl;
-    u8 pad4[0x10];
-    void *mgr;
-    u8 pad18[0x2D8 - 0x18];
-    struct List_19C068 list;
-    u8 pad2E4[0x5FC - 0x2E4];
-    void *o5FC;
-    u8 pad600[0x660 - 0x600];
-    void *o660;
-};
-
 struct Frame_19C068;
 struct Frame_19C068 {
-    List_19C068 *list;
+    List01 *list;
     s32 *cur;
     s32 step;
     Frame_19C068 *prev;
-    Frame_19C068(List_19C068 *l)
+    Frame_19C068(List01 *l)
     {
         list = l;
-        cur = &l->head;
-        step = l->step;
+        cur = (s32 *)&l->head;
+        step = l->offset;
         prev = ((Frame_19C068*)D_0027B314);
         D_0027B314 = (ListFrame*)this;
     }
@@ -921,42 +898,38 @@ struct Frame_19C068 {
     }
 };
 
-struct Mgr_19C068 {
-    s32 field0;
-};
-
 struct Ob_19C068 {
     VFn_19C068 *vtbl;
 };
 
-void func_00152600(struct Mgr_19C068 *a, struct Obj_19C068 *b);
-void func_00152470(struct Mgr_19C068 *a, struct Obj_19C068 *b);
+void func_00152600(List01 *a, C41 *b);
+void func_00152470(List01 *a, C41 *b);
 struct Buf_19C068 { s32 w[4]; };
-void func_00128018(struct Mgr_19C068 *a, s32 b, void *c, struct Buf_19C068 *d);
-void func_001B9860(struct Obj_19C068 *a, struct Buf_19C068 *b, void *c);
-void func_001B7C40(struct Obj_19C068 *self, s32 flag);
+void func_00128018(void *a, s32 b, void *c, struct Buf_19C068 *d);
+void func_001B9860(C41 *a, struct Buf_19C068 *b, void *c);
+void func_001B7C40(C41 *self, s32 flag);
 
-void func_0019C068(struct Obj_19C068 *self, s32 a1) {
+void func_0019C068(C41 *self, s32 a1) {
     if (a1 != 0) {
-        func_00152600((struct Mgr_19C068 *)((u8 *)self->mgr + 0x1C60), self);
-        ((struct Ob_19C068 *)self->o5FC)->vtbl[7](self->o5FC);
+        func_00152600(&self->world->list1C60, self);
+        ((struct Ob_19C068 *)self->f5FC)->vtbl[7](self->f5FC);
     } else {
         struct Buf_19C068 buf;
-        func_00152470((struct Mgr_19C068 *)((u8 *)self->mgr + 0x1C60), self);
-        ((struct Ob_19C068 *)self->o5FC)->vtbl[6](self->o5FC);
-        func_00128018((struct Mgr_19C068 *)*(void **)((u8 *)self->o660 + 0x18), 0,
-                      (u8 *)self->o660 + 0x40, &buf);
+        func_00152470(&self->world->list1C60, self);
+        ((struct Ob_19C068 *)self->f5FC)->vtbl[6](self->f5FC);
+        func_00128018(*(void **)((u8 *)self->f660 + 0x18), 0,
+                      (u8 *)self->f660 + 0x40, &buf);
         func_001B9860(self, &buf, D_00248D20);
     }
     func_001B7C40(self, a1 == 0);
-    Frame_19C068 it(&self->list);
+    Frame_19C068 it(&self->parts);
     s32 node = it.Next();
     while (node != 0) {
-        func_001B7C40((struct Obj_19C068 *)node, a1 == 0);
+        func_001B7C40((C41 *)node, a1 == 0);
         node = it.Next();
     }
-    ((VFn2_19C068 *)self->vtbl)[0x90 / 4](self, D_00248D30);
-    ((VFn2_19C068 *)self->vtbl)[0x94 / 4](self, D_00248D30);
+    self->desc02()->m20(self, (Vec02 *)D_00248D30);
+    self->desc02()->m21(self, (Vec02 *)D_00248D30);
 }
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.

@@ -4,6 +4,7 @@
 #include "list_iter.h"
 #include "fpu.h"
 #include "c6c.h"
+#include "c67.h"
 
 void func_001C9AF8(void);
 
@@ -463,39 +464,24 @@ void func_001E8FA8(C0B* self)
     }
 }
 
-typedef void (*VFn_1E9E30)(void* self);
-struct Node_1E9E30 {
-    VFn_1E9E30* vtbl;
-    u8 pad0[0x6C - 4];
-    Node_1E9E30* f6C;
-    u8 pad1[0x2D8 - 0x70];
-    Node_1E9E30* f2D8;
-    u8 pad2[0x2E4 - 0x2DC];
-    Node_1E9E30* f2E4;
-    u8 pad3[0x414 - 0x2E8];
-    Node_1E9E30* f414;
-    u8 pad4[0x538 - 0x418];
-    u64 f538;
-};
-
-void func_001E9E30(void* self)
+void func_001E9E30(C6C* self)
 {
     ListFrame frame;
-    Node_1E9E30* s1 = ((Node_1E9E30*)self)->f6C;
+    C03* s1 = (C03*)self->list6C.head;
     if (s1 != 0) {
         do {
-            Node_1E9E30* s0 = s1->f2D8;
+            C03* s0 = (C03*)s1->parts.head;
             if (s0 != 0) {
                 do {
                     u64 bit = (u64)1 << 53;
-                    if ((s0->f538 & bit) == 0) {
-                        s0->vtbl[72](s0);
+                    if ((s0->flags538 & bit) == 0) {
+                        ((Desc03*)s0->desc)->m44(s0);
                     }
-                    s0->f538 &= ~bit;
-                    s0 = s0->f2E4;
+                    s0->flags538 &= ~bit;
+                    s0 = (C03*)s0->link2E4.next;
                 } while (s0 != 0);
             }
-            s1 = s1->f414;
+            s1 = (C03*)s1->link414.next;
         } while (s1 != 0);
     }
 }
@@ -836,16 +822,14 @@ void func_001EBFB0(C13* self)
     }
 }
 
-struct Obj_1EA0A8 { u8 pad[0x234C]; f32 f234C; f32 f2350; };
-
 f32 D_00275C18[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
 
 f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
 
-void func_001EA0A8(void* self, f32 x)
+void func_001EA0A8(C6C* self, f32 x)
 {
-    Obj_1EA0A8* o = (Obj_1EA0A8*)self;
+    C6C* o = self;
     f32 a = o->f234C;
     f32 b = o->f2350;
     if (b < a) {
@@ -989,8 +973,7 @@ struct Glob_1E9108 {
     s32 f4F48;
 };
 
-struct Sub_1E9108 { u8 pad[0x2D0]; s32 f2D0; };
-struct G2_1E9108 { u8 pad[0x260]; Sub_1E9108* f260; };
+struct G2_1E9108 { u8 pad[0x260]; C67* f260; };
 extern u32 D_00262C68;
 extern u32 D_00262C6C;
 extern In_1E9108 D_00262D38;
@@ -1078,9 +1061,9 @@ void func_001E9108(Obj_1E9108* obj)
                 func_0016EC20(s2, 0x800);
             } else if ((v = s2->bits) & 0x100) {
                 G2_1E9108* g2 = (G2_1E9108*)D_0026F808;
-                Sub_1E9108* x = g2->f260;
+                C67* x = g2->f260;
                 if (x == 0) break;
-                if (x->f2D0) break;
+                if (x->mode) break;
                 func_001E9498(obj, g2);
                 s1 = obj->state;
                 func_0016EC20(s2, 0x100);
@@ -1153,7 +1136,6 @@ struct G_1EB748 {
     f32 f26D0;
 };
 struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
-struct Obj_1EB748 { u8 pad[0xBFC]; f32 fBFC; };
 
 s32 D_00275CD8[4] = { 1228, 1230, 1229, 1231 };
 s32 D_00275CE8[4] = { 574, 576, 575, 577 };
@@ -1166,7 +1148,7 @@ s32 func_00160C58(void);
 void func_001929D0(G_1EB748* g);
 void func_001D7098(Msg_1EB748* out, s32 mode, C1C* self);
 void func_001EB698(void);
-void func_001ED020(Obj_1EB748* o);
+void func_001ED020(C13* o);
 void func_001C0C08(s32 a, s32 b);
 void func_0017CE20(void* a, G_1EB748* g);
 
@@ -1231,12 +1213,12 @@ void func_001EB748(C1C* self, In_1EB748* in)
             func_001BFCD8(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
             if (func_00160C58() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
                 Msg_1EB748 msg;
-                Obj_1EB748* o;
+                C13* o;
                 func_001929D0(((G_1EB748*)D_00262E10));
                 func_001D7098(&msg, 0, self);
                 msg.fC = func_001EB698;
                 ((s32 (*)(G_1EB748*, Msg_1EB748*))((G_1EB748*)D_00262E10)->vtbl[0x140 / 4])(((G_1EB748*)D_00262E10), &msg);
-                o = (Obj_1EB748*)func_0015A838(self->world, 5, 0x13, 0);
+                o = (C13*)func_0015A838(self->world, 5, 0x13, 0);
                 func_001ED020(o);
                 o->fBFC = D_0026185C[0];
                 func_001C0C08(2, 1);
@@ -1437,7 +1419,6 @@ void func_001EAD88(f32* sinOut, f32* cosOut, f32 angle)
     *sinOut = s;
 }
 
-struct Ptr_1E9970 { u8 pad[0x1]; };
 struct Obj_1E9970 {
     u8 pad[0x250];
     s32 f250;
@@ -1448,12 +1429,12 @@ struct Obj_1E9970 {
 
 extern s32 D_00275F84;
 extern s32 D_00270458;
-s32 func_001DDA80(Ptr_1E9970* p);
+s32 func_001DDA80(C6C* p);
 
 s32 func_001E9970(void)
 {
     if (D_00275F84 != 0) goto fail;
-    if (func_001DDA80((Ptr_1E9970*)D_00275710) != 0) goto fail;
+    if (func_001DDA80((C6C*)D_00275710) != 0) goto fail;
     if (((Obj_1E9970*)D_0026FF68)->f25C != 0 && ((Obj_1E9970*)D_0026FF68)->f260 != 0) goto fail;
     if (((Obj_1E9970*)D_0026F808)->f25C != 0) goto fail;
     if (((Obj_1E9970*)D_0026F808)->f250 != 0) goto fail;
@@ -1502,19 +1483,9 @@ struct Vtbl_1E9EE8 {
     void (*update)(Node_1E9EE8*, s32, f32);
 };
 struct Node_1E9EE8 { Vtbl_1E9EE8* vtbl; };
-struct List_1E9EE8 { Node_1E9EE8* head; s32 p4; s32 offset; };
-struct Iter_1E9EE8 { List_1E9EE8* list; u8* link; s32 offset; Iter_1E9EE8* prev; };
-struct Obj_1E9EE8 {
-    u8 pad0[0x78];
-    List_1E9EE8 a;
-    u8 pad1[0x1B70 - 0x84];
-    List_1E9EE8 b;
-    u8 pad2[0x1C30 - 0x1B7C];
-    List_1E9EE8 c;
-};
-
+struct Iter_1E9EE8 { List01* list; u8* link; s32 offset; Iter_1E9EE8* prev; };
 struct Begin_1E9EE8 {
-    static void Of(Iter_1E9EE8* it, List_1E9EE8* list)
+    static void Of(Iter_1E9EE8* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
@@ -1539,34 +1510,29 @@ struct End_1E9EE8 {
 void func_00124EE8(Node_1E9EE8* n, f32 dt);
 void func_0012EBD8(Node_1E9EE8* n, f32 dt);
 void func_00159AD0(Node_1E9EE8* n, f32 dt);
-void func_001DBE48(Obj_1E9EE8* self);
+void func_001DBE48(C6C* self);
 
-void func_001E9EE8(Obj_1E9EE8* self, f32 dt)
+void func_001E9EE8(C6C* self, f32 dt)
 {
     if (dt == 0.0f) return;
     Iter_1E9EE8 it;
-    Begin_1E9EE8::Of(&it, &self->a);
+    Begin_1E9EE8::Of(&it, &self->list78);
     for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00124EE8(obj, dt);
     End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, &self->b);
+    Begin_1E9EE8::Of(&it, (List01*)&self->f1B70);
     for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_0012EBD8(obj, dt);
     End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, &self->c);
+    Begin_1E9EE8::Of(&it, (List01*)&self->f1C30);
     for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) func_00159AD0(obj, dt);
     End_1E9EE8::Of(&it);
-    Begin_1E9EE8::Of(&it, &self->a);
+    Begin_1E9EE8::Of(&it, &self->list78);
     for (Node_1E9EE8* obj = Next_1E9EE8::Of(&it); obj; obj = Next_1E9EE8::Of(&it)) obj->vtbl->update(obj, 0, dt);
     End_1E9EE8::Of(&it);
     func_001DBE48(self);
 }
 
-struct List_1E9C78 {
-    u8* first;
-    s32 pad04;
-    s32 offset;
-};
 struct Iter_1E9C78 {
-    List_1E9C78* list;
+    List01* list;
     u8** link;
     s32 offset;
     Iter_1E9C78* prev;
@@ -1575,7 +1541,7 @@ struct Iter_1E9C78 {
 extern u8 D_00262C70[];
 
 struct Begin_1E9C78 {
-    static void Of(Iter_1E9C78* it, List_1E9C78* list)
+    static void Of(Iter_1E9C78* it, List01* list)
     {
         it->list = list;
         it->link = (u8**)list;
@@ -1608,26 +1574,17 @@ struct Holder_1E9C78 {
     Vt_1E9C78* vt;
 };
 
-struct Obj_1E9C78 {
-    u8 pad0[0x60];
-    List_1E9C78 l60;
-    u8 pad6c[0x1B64 - 0x6C];
-    List_1E9C78 l1B64;
-    u8 pad1b70[0x1C24 - 0x1B70];
-    List_1E9C78 l1C24;
-};
-
 void func_001E9B30(void);
 Holder_1E9C78* func_001925F0(void);
-void func_0015FF58(Obj_1E9C78* self);
+void func_0015FF58(C6C* self);
 void func_00124EE8(u8* n, f32 dt);
 void func_0012EBD8(u8* n, f32 dt);
 void func_00159AD0(u8* n, f32 dt);
-void func_00159588(Obj_1E9C78* self);
+void func_00159588(C6C* self);
 void func_001C0070(void);
-void func_001DBE48(Obj_1E9C78* self);
+void func_001DBE48(C6C* self);
 
-void func_001E9C78(Obj_1E9C78* self, f32 dt)
+void func_001E9C78(C6C* self, f32 dt)
 {
     func_001E9B30();
     Holder_1E9C78* h = func_001925F0();
@@ -1645,7 +1602,7 @@ void func_001E9C78(Obj_1E9C78* self, f32 dt)
     func_0015FF58(self);
     {
         Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, &self->l60);
+        Begin_1E9C78::Of(&it, (List01*)&self->list60);
         for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
             func_00124EE8(n, dt);
         }
@@ -1653,7 +1610,7 @@ void func_001E9C78(Obj_1E9C78* self, f32 dt)
     }
     {
         Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, &self->l1B64);
+        Begin_1E9C78::Of(&it, (List01*)&self->f1B64);
         for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
             func_0012EBD8(n, dt);
         }
@@ -1661,7 +1618,7 @@ void func_001E9C78(Obj_1E9C78* self, f32 dt)
     }
     {
         Iter_1E9C78 it;
-        Begin_1E9C78::Of(&it, &self->l1C24);
+        Begin_1E9C78::Of(&it, (List01*)&self->f1C24);
         for (u8* n = Next_1E9C78::Of(&it); n != 0; n = Next_1E9C78::Of(&it)) {
             func_00159AD0(n, dt);
         }

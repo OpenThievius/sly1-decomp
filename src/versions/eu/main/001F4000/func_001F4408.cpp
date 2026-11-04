@@ -5,7 +5,7 @@ void func_001F4408(s32 flag, s32 n)
 {
     Ctx_1F4408* ctx = *(Ctx_1F4408**)D_002623C0;
     Obj_1F4408* o;
-    Obj_1F4408* v;
+    C7D* v;
     Val_1F4408* k;
     Args_1F4408 args;
     if (ctx->f19D8 == 5) {
@@ -26,12 +26,12 @@ l4470:
     func_001F0428(k, 0x1BD, n);
     return;
 l4490:
-    v = (Obj_1F4408*)func_001F4378();
+    v = (C7D*)func_001F4378();
     if (v == 0) {
         goto larg;
     }
     if (flag != 0) {
-        v->f310 = 0;
+        v->count = 0;
     }
     func_001F4808(v);
     return;

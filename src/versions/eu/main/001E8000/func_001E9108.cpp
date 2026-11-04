@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: calls func_0018C178(g, 1) before func_0018C568 and handles a third button (0x10) when D_eu_002636EC >= 2
 extern s32 D_eu_002636EC;
-struct G2_1E9108_eu { u8 pad[0x570]; Sub_1E9108* f570; };
+struct G2_1E9108_eu { u8 pad[0x570]; C67* f570; };
 extern void func_001E9498(Obj_1E9108* o, G2_1E9108_eu* g);
 extern void func_0018C178(Glob_1E9108* g, s32 a);
 
@@ -73,9 +73,9 @@ void func_001E9108(Obj_1E9108* obj)
                 func_0016EC20(s2, 0x800);
             } else if ((v = s2->bits) & 0x100) {
                 G2_1E9108_eu* g2 = (G2_1E9108_eu*)D_0026F808;
-                Sub_1E9108* x = g2->f570;
+                C67* x = g2->f570;
                 if (x == 0) break;
-                if (x->f2D0) break;
+                if (x->mode) break;
                 func_001E9498(obj, g2);
                 s1 = obj->state;
                 func_0016EC20(s2, 0x100);
