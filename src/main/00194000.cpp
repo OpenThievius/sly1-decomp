@@ -2003,3 +2003,50 @@ extern const char D_0024C5D0[48] = "&2X&. : Overwrite Game\n&2S&. : Erase Game";
 extern const char D_0024C600[24] = "&2X&. : Save Game";
 extern const char D_0024C618[8] = "&2";
 extern const f32 D_0024C864 = 3.4028235e+38f;
+
+struct Pair_196810 { u32 first, second; };
+struct Trip_196810 { u32 first, second, third; };
+struct Cell_196810 { void* node; s32 link; };
+struct Elem_196810 { s32 f0; u8 pad4[4]; Elem_196810* next; };
+struct Item_196810 { u8 pad0[0x1C]; Item_196810* next; u8 pad20[0x10]; void* f30; };
+struct Head_196810 { u8 pad0[0x34]; Item_196810* f34; };
+struct Self_196810 {
+    u8 pad0[8];
+    s32 f08;
+    u8 pad0C[0xC];
+    Head_196810* f18;
+    u8 pad1C[0x2D0 - 0x1C];
+    Trip_196810 f2D0;
+    Pair_196810 f2DC;
+};
+
+void func_00127048(Self_196810* self, Self_196810* src);
+void func_00152440(Trip_196810* p);
+void func_00152470(Trip_196810* list, Cell_196810* c);
+
+void func_00196810(Self_196810* self, Self_196810* src)
+{
+    Pair_196810 saved = self->f2DC;
+    func_00127048(self, src);
+    self->f2DC = saved;
+    Trip_196810 list = self->f2D0;
+    func_00152440(&self->f2D0);
+    ListFrame frame;
+    Elem_196810* e = (Elem_196810*)list.first;
+    while (e != 0) {
+        Item_196810* it = self->f18->f34;
+        for (; it != 0; it = it->next) {
+            if (it->f30 == e) break;
+        }
+        Cell_196810* cell = (Cell_196810*)func_0018D5C0(16);
+        cell->link = self->f08;
+        if (it != 0) {
+            cell->node = it;
+            it->f30 = cell;
+        } else {
+            cell->node = (void*)e->f0;
+        }
+        func_00152470(&self->f2D0, cell);
+        e = e->next;
+    }
+}
