@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c3a.h"
 #include "c6e.h"
 #include "c7e.h"
 #include "c69.h"
@@ -11,23 +12,19 @@ extern u8 D_00262708[];
 void func_001B7B78(void* self);
 void func_00152600(void* data, void* self);
 
-void func_0016A4C8(void* self)
+void func_0016A4C8(C3A* self)
 {
     func_001B7B78(self);
     func_00152600(D_00262708, self);
 }
 
-struct Packed_16A500 {
-    u64 value;
-} __attribute__((packed));
-
 void func_001BA130(void* self);
 
-void func_0016A500(u8* self)
+void func_0016A500(C3A* self)
 {
-    Packed_16A500 tmp = *(Packed_16A500*)(self + 0x558);
+    Link02 tmp = self->link558;
     func_001BA130(self);
-    *(Packed_16A500*)(self + 0x558) = tmp;
+    self->link558 = tmp;
 }
 
 extern void* D_00262E10;
@@ -37,11 +34,11 @@ struct Owner_16A548 {
     void* field;
 };
 
-s32 func_001B8A08(void* a, void* b);
+s32 func_001B8A08(C03* a, C03* b);
 
-s32 func_0016A548(void* a0, Owner_16A548* a1)
+s32 func_0016A548(C03* a0, C03* a1)
 {
-    if (a1 == D_00262E10 && a0 == a1->field) {
+    if ((void*)a1 == D_00262E10 && (void*)a0 == ((Owner_16A548*)a1)->field) {
         return 1;
     }
     return func_001B8A08(a0, a1);
@@ -336,18 +333,13 @@ void func_0016A1F8(C7F* self)
     self->keep = saved;
 }
 
-struct Actor_16A3A8 {
-    u8 pad_000[0x568];
-    f32 f568;
-};
-
 void func_001B7968(void* self);
 void func_00129FB0(void* self, f32 k);
 void func_0012A080(void* self, f32 k);
 void func_0012A150(void* self, f32 k);
 void func_0012A270(void* self, f32 k);
 
-void func_0016A3A8(Actor_16A3A8* self)
+void func_0016A3A8(C3A* self)
 {
     f32 k = 3.0f;
     func_001B7968(self);
@@ -360,7 +352,7 @@ void func_0016A3A8(Actor_16A3A8* self)
 
 void func_001B7A98(void* self);
 
-void func_0016A490(void* self)
+void func_0016A490(C3A* self)
 {
     func_001B7A98(self);
     func_00152470(D_00262708, self);
@@ -1589,54 +1581,51 @@ void func_0016A100(C7F* self)
     self->f70 = k;
 }
 
-struct Self_16A420;
 struct Blk_16A420 { u8 pad0[0xB0]; u32 flags; };
 struct __attribute__((aligned(16))) Quad_16A420 { s32 w[4]; };
-struct Self_16A420 { u8 pad0[0x224]; Blk_16A420* blk; };
 
 extern u8 D_002483D0[];
-void func_001BAC30(Self_16A420* self);
+void func_001BAC30(C03* self);
 void* func_0018D5C0(s32 bytes);
 
-void func_0016A420(Self_16A420* self)
+void func_0016A420(C3A* self)
 {
     Blk_16A420* b;
     Quad_16A420* dst;
     Quad_16A420* src;
 
     func_001BAC30(self);
-    if (self->blk == 0) {
-        self->blk = (Blk_16A420*)func_0018D5C0(0xC0);
+    if (self->f224 == 0) {
+        self->f224 = func_0018D5C0(0xC0);
     }
-    b = self->blk;
+    b = (Blk_16A420*)self->f224;
     b->flags |= 1;
-    dst = (Quad_16A420*)self->blk;
+    dst = (Quad_16A420*)self->f224;
     src = (Quad_16A420*)D_002483D0;
     dst[0] = src[0];
     dst[1] = src[1];
     dst[2] = src[2];
 }
 
-struct Obj_16A580 { u8 pad0[0x214]; s32 w214; s32 w218; u8 pad1[0x550 - 0x21C]; s32 w550; };
 struct Sub_16A580 { u8 pad0[4]; };
 struct Buf_16A580 { f32 v[12]; };
 
 extern u8 D_00248D30[];
 
-void func_001B9338(Obj_16A580* self, f32 t);
+void func_001B9338(C03* self, f32 t);
 void func_00189378(Sub_16A580* sub, s32 zero, Buf_16A580* out);
-void func_001B91A8(Obj_16A580* self, Buf_16A580* out, s32 a, void* table, s32 b, f32 t);
+void func_001B91A8(C03* self, Buf_16A580* out, s32 a, void* table, s32 b, f32 t);
 
-void func_0016A580(Obj_16A580* self, f32 t)
+void func_0016A580(C3A* self, f32 t)
 {
     Buf_16A580 buf;
 
     func_001B9338(self, t);
-    if (self->w550 != 0) {
+    if (self->f550 != 0) {
         return;
     }
     func_00189378((Sub_16A580*)((u8*)self + 0xD0), 0, &buf);
-    func_001B91A8(self, &buf, self->w214, D_00248D30, self->w218, t);
+    func_001B91A8(self, &buf, (s32)self->p214, D_00248D30, (s32)self->p218, t);
 }
 
 // NEAR: only the order of `addiu v0,s5,lo(D_00261858)` vs `sw s4,0x2D4(s3)` differs (2 instrs swapped)
