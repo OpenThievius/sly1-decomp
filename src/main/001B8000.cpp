@@ -1,285 +1,156 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c03.h"
 
-typedef void (*VFn_1B89B8)(void* self);
-
-struct Sub_1B89B8 {
-    VFn_1B89B8* vtbl;
-};
-
-struct Obj_1B89B8 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x38];
-    Sub_1B89B8* f50;
-};
-
-void func_00125108(Obj_1B89B8* self);
+void func_00125108(C03* self);
 void func_00138BE0(void* a, void* b, s32 c);
 void func_001389C8(void* a);
 
-void func_001B89B8(Obj_1B89B8* self)
+void func_001B89B8(C03* self)
 {
     func_00125108(self);
-    self->f50->vtbl[54](self->f50);
-    func_00138BE0(self->f14, self, 7);
-    func_001389C8(self->f14);
+    self->root03()->desc03()->m32(self->root03());
+    func_00138BE0(self->world, self, 7);
+    func_001389C8(self->world);
 }
 
-struct Obj_1B9418 {
-    u8 pad0[0x368];
-    f32 f368;
-};
+void func_001B9448(C03* self);
 
-void func_001B9448(Obj_1B9418* self);
-
-void func_001B9418(Obj_1B9418* self, f32 v)
+void func_001B9418(C03* self, f32 v)
 {
-    f32 a = self->f368;
+    f32 a = self->mass;
     f32 q = v / a;
-    self->f368 = a * q;
+    self->mass = a * q;
     func_001B9448(self);
 }
 
-void func_001BAC28(void)
+void func_001BAC28(C03* self, Attach03* node, f32 dt)
 {
 }
 
-struct Obj_1BB1A0 {
-    u8 pad0[0x538];
-    u64 f538;
-};
-
-void func_001BB1A0(Obj_1BB1A0* self, s32 flag)
+void func_001BB1A0(C03* self, s32 flag)
 {
-    self->f538 = (self->f538 & 0xFFFEFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 48);
+    self->flags538 = (self->flags538 & 0xFFFEFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 48);
 }
 
-struct Obj_1BB400 { u8 pad[0x538]; u64 flags; };
+void func_001B94F0(C03* self, s32 value);
 
-void func_001B94F0(Obj_1BB400* self, s32 value);
-
-void func_001BB400(Obj_1BB400* self, s32 value)
+void func_001BB400(C03* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 43;
-    self->flags = (self->flags & ~(1ULL << 43)) | bit;
+    self->flags538 = (self->flags538 & ~(1ULL << 43)) | bit;
     func_001B94F0(self, value != 0 ? 2 : 0);
 }
 
-struct Node_1BB9A0 { s32 value; Node_1BB9A0* next; };
-
-s32 func_001BB9A0(Node_1BB9A0* node, s32 value)
+s32 func_001BB9A0(Touch03* node, C03* value)
 {
     while (node != 0) {
-        if (node->value == value) return 1;
+        if (node->obj == value) return 1;
         node = node->next;
     }
     return 0;
 }
 
-struct Obj_1BB378 {
-    u8 pad0[0x538];
-    u64 flags;
-};
-
-void func_001BB378(Obj_1BB378* self, s32 flag)
+void func_001BB378(C03* self, s32 flag)
 {
-    self->flags = (self->flags & ~(1ULL << 51)) | ((u64)(flag & 1) << 51);
+    self->flags538 = (self->flags538 & ~(1ULL << 51)) | ((u64)(flag & 1) << 51);
 }
 
-struct Obj_1BB3B0 {
-    u8 pad0[0x538];
-    u64 flags;
-};
-
-void func_001B94F0(void* self, s32 value);
-
-void func_001BB3B0(Obj_1BB3B0* self, s32 value)
+void func_001BB3B0(C03* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 42;
-    self->flags = (self->flags & ~(1ULL << 42)) | bit;
+    self->flags538 = (self->flags538 & ~(1ULL << 42)) | bit;
     func_001B94F0(self, value != 0);
 }
 
-struct Obj_1BB450 {
-    u8 pad0[0x538];
-    u64 flags;
-};
-
-void func_001B94F0(void* self, s32 value);
-
-void func_001BB450(Obj_1BB450* self, s32 value)
+void func_001BB450(C03* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 44;
-    self->flags = (self->flags & ~(1ULL << 44)) | bit;
+    self->flags538 = (self->flags538 & ~(1ULL << 44)) | bit;
     func_001B94F0(self, value != 0 ? 3 : 0);
 }
 
-struct Info_1BB4A0 {
-    u8 pad0[8];
-    u32 f8;
-    u8 pad1[0xF4];
-    void* f100;
-    void* f104;
-    void* f108;
-    u8 pad2[0x8];
-    void* f114;
-};
-
-struct Obj_1BB4A0 {
-    Info_1BB4A0* info;
-    u8 pad0[0x14];
-    Obj_1BB4A0* f18;
-    Obj_1BB4A0* f1c;
-    u8 pad1[0x34 - 0x20];
-    Obj_1BB4A0* f34;
-    u8 pad2[0x4E4 - 0x38];
-    Obj_1BB4A0* f4e4;
-};
-
-void func_001BB4A0(Obj_1BB4A0* self)
+void func_001BB4A0(C03* self)
 {
     ListFrame frame;
-    Info_1BB4A0* info = self->info;
-    if (info->f114 != 0 || info->f100 != 0 || info->f104 != 0) {
-        self->f4e4 = self;
-    } else if (info->f108 != 0) {
-        self->f4e4 = self;
+    const Desc03* info = self->desc03();
+    if (info->m41 != 0 || info->m3C != 0 || info->m3D != 0) {
+        self->handler = self;
+    } else if (info->m3E != 0) {
+        self->handler = self;
     } else {
-        Obj_1BB4A0* p = self->f18;
+        C03* p = (C03*)self->parent;
         if (p != 0) {
-            self->f4e4 = p->f4e4;
+            self->handler = p->handler;
         } else {
-            self->f4e4 = 0;
+            self->handler = 0;
         }
     }
-    Obj_1BB4A0* c = self->f34;
+    C03* c = (C03*)self->children.head;
     while (c != 0) {
-        if (c->info->f8 & 2) func_001BB4A0(c);
-        c = c->f1c;
+        if (c->desc->flags & 2) func_001BB4A0(c);
+        c = (C03*)c->next;
     }
 }
 
-struct Obj_1BB540 {
-    u8* info;
-    u8 pad0[0x14];
-    Obj_1BB540* f18;
-    u8 pad1[0x4E4 - 0x1C];
-    Obj_1BB540* f4e4;
-};
-
-Obj_1BB540* func_001BB540(Obj_1BB540* node, s32 offset)
+C03* func_001BB540(C03* node, s32 offset)
 {
-    Obj_1BB540* s;
-    while (node != 0 && (s = node->f4e4) != 0) {
-        if (*(s32*)(s->info + offset) != 0) return s;
-        node = s->f18;
+    C03* s;
+    while (node != 0 && (s = node->handler) != 0) {
+        if (*(s32*)((u8*)s->desc + offset) != 0) return s;
+        node = (C03*)s->parent;
     }
     return 0;
 }
 
-struct Info_1BB580 {
-    u8 pad0[8];
-    u32 f8;
-};
-
-struct Obj_1BB580 {
-    Info_1BB580* info;
-    u8 pad0[0x10];
-    void* f14;
-    Obj_1BB580* f18;
-    Obj_1BB580* f1c;
-    u8 pad1[0x34 - 0x20];
-    Obj_1BB580* f34;
-    u8 pad2[0x50 - 0x38];
-    void* f50;
-    u8 pad3[0x450 - 0x54];
-    s32 f450;
-    u8 pad4[0x470 - 0x454];
-    s32 f470;
-    u8 pad5[0x538 - 0x474];
-    u64 flags;
-};
-
 void func_00138F28(void* a, void* b);
 
-void func_001BB580(Obj_1BB580* self)
+void func_001BB580(C03* self)
 {
     ListFrame frame;
     s32 flag = 0;
-    if (self->f450 == 3) {
-        flag = (self->f470 == 3);
+    if (self->mode450 == 3) {
+        flag = (self->mode470 == 3);
     }
-    self->flags = (self->flags & ~(1ULL << 54)) | ((u64)flag << 54);
+    self->flags538 = (self->flags538 & ~(1ULL << 54)) | ((u64)flag << 54);
     s32 s2 = flag & 1;
     s32 a0 = 0;
-    if (self->flags & (1ULL << 54)) {
-        if (self->f18 == 0 || (self->f18->flags & (1ULL << 56)) != 0) a0 = 1;
+    if (self->flags538 & (1ULL << 54)) {
+        if (self->parent == 0 || (((C03*)self->parent)->flags538 & (1ULL << 56)) != 0) a0 = 1;
     }
-    self->flags = (self->flags & ~(1ULL << 56)) | ((u64)a0 << 56);
-    Obj_1BB580* c = self->f34;
+    self->flags538 = (self->flags538 & ~(1ULL << 56)) | ((u64)a0 << 56);
+    C03* c = (C03*)self->children.head;
     while (c != 0) {
-        if (c->info->f8 & 2) {
+        if (c->desc->flags & 2) {
             func_001BB580(c);
-            if ((c->flags & (1ULL << 55)) == 0) s2 = 0;
+            if ((c->flags538 & (1ULL << 55)) == 0) s2 = 0;
         }
-        c = c->f1c;
+        c = (C03*)c->next;
     }
-    u64 bit = (self->flags >> 55) & 1;
+    u64 bit = (self->flags538 >> 55) & 1;
     if (bit != (u64)s2) {
-        self->flags = (self->flags & ~(1ULL << 55)) | ((u64)(s2 & 1) << 55);
-        if (self->f18 == 0 && self->f50 != 0) {
-            func_00138F28(self->f14, self);
+        self->flags538 = (self->flags538 & ~(1ULL << 55)) | ((u64)(s2 & 1) << 55);
+        if (self->parent == 0 && self->root != 0) {
+            func_00138F28(self->world, self);
         }
     }
 }
 
-struct Slot_1BB710 {
-    u32 f0;
-    void* f4;
-    u8 pad0[0x38];
-};
-
-struct Entry_1BB710 {
-    Slot_1BB710 slot[2];
-    u8 pad1[0xD0 - 0x80];
-    Entry_1BB710* next;
-};
-
-struct Node_1BB710 {
-    Entry_1BB710* items;
-    Node_1BB710* next;
-};
-
-struct Table_1BB710 {
-    Node_1BB710* head;
-};
-
-struct Ctx_1BB710 {
-    u8 pad0[0x480];
-    Table_1BB710* f480;
-};
-
-struct Obj_1BB710 {
-    u8 pad0[0x50];
-    Ctx_1BB710* f50;
-};
-
 s32 func_001C1AD8(s32 value, void* out);
 s32 func_001C1A28(s32 value, void* out);
 
-s32 func_001BB710(Obj_1BB710* self, s32 value)
+s32 func_001BB710(C03* self, s32 value)
 {
-    Ctx_1BB710* ctx = self->f50;
-    Node_1BB710* n = ctx->f480->head;
+    C03* ctx = self->root03();
+    ContactRow03* n = ctx->contacts->head;
     while (n != 0) {
-        Entry_1BB710* e = n->items;
+        Contact03* e = n->head;
         while (e != 0) {
-            s32 idx = (e->slot[0].f0 ^ (u32)ctx) != 0;
-            Slot_1BB710* s = &e->slot[idx];
-            if (s->f4 == self) {
-                void* tmp = e->slot[1 - idx].f4;
+            s32 idx = ((u32)e->end[0].body ^ (u32)ctx) != 0;
+            ContactEnd03* s = &e->end[idx];
+            if (s->part == self) {
+                void* tmp = e->end[1 - idx].part;
                 if (func_001C1AD8(value, &tmp) == 0) {
                     if (func_001C1A28(value, &tmp) == 0) return 0;
                 }
@@ -291,15 +162,13 @@ s32 func_001BB710(Obj_1BB710* self, s32 value)
     return 1;
 }
 
-struct Actor_1B8A08 { u8 pad[0x538]; u64 flags; };
-
-s32 func_001B8A08(Actor_1B8A08* a, Actor_1B8A08* b)
+s32 func_001B8A08(C03* a, C03* b)
 {
     u64 m1 = 0x8080;
     s32 r = 0;
     m1 <<= 40;
-    if ((a->flags & m1) != 0) {
-        u64 bf = b->flags;
+    if ((a->flags538 & m1) != 0) {
+        u64 bf = b->flags538;
         u64 m2 = 0x8000;
         m2 <<= 40;
         if ((bf & m2) != 0) {
@@ -309,43 +178,17 @@ s32 func_001B8A08(Actor_1B8A08* a, Actor_1B8A08* b)
     return r;
 }
 
-typedef void (*Fn_1B8A48)(void* obj, void* item, s32 index);
-
-struct Obj_1B8A48 { Fn_1B8A48* vtbl; };
-
-struct Slot_1B8A48 { Obj_1B8A48* obj; u8 rest[0x3C]; };
-
-struct Item_1B8A48 {
-    u8 pad0[4];
-    Slot_1B8A48 slots[2];
-    u8 pad1[0xC4 - 0x84];
-    f32 timer;
-    u8 pad2[0xD0 - 0xC8];
-    Item_1B8A48* next;
-};
-
-struct Node_1B8A48 { Item_1B8A48* item; Node_1B8A48* next; };
-
-struct List_1B8A48 { Node_1B8A48* head; };
-
-struct Self_1B8A48 {
-    u8 pad[0x480];
-    List_1B8A48* list;
-};
-
-extern void* func_001BB540(void* obj, s32 type);
-
-void func_001B8A48(Self_1B8A48* self)
+void func_001B8A48(C03* self)
 {
-    Node_1B8A48* node = self->list->head;
+    ContactRow03* node = self->contacts->head;
     while (node != 0) {
-        Item_1B8A48* it = node->item;
+        Contact03* it = node->head;
         while (it != 0) {
             if (0.0001f < it->timer) {
                 for (s32 i = 0; i < 2; i++) {
-                    Obj_1B8A48* obj = (Obj_1B8A48*)func_001BB540(it->slots[i].obj, 0x114);
+                    C03* obj = func_001BB540(it->end[i].part, 0x114);
                     if (obj != 0) {
-                        Fn_1B8A48 fn = obj->vtbl[0x114 / 4];
+                        void (*fn)(C03*, Contact03*, s32) = obj->desc03()->m41;
                         if (fn != 0) {
                             fn(obj, it, i);
                         }
@@ -353,7 +196,7 @@ void func_001B8A48(Self_1B8A48* self)
                 }
                 *(s32*)&it->timer = 0;
             }
-            if (node->item == 0) {
+            if (node->head == 0) {
                 break;
             }
             it = it->next;
@@ -362,68 +205,50 @@ void func_001B8A48(Self_1B8A48* self)
     }
 }
 
-typedef void (*Fn_1B9338)(void* obj, void* node, f32 t);
-
-struct Obj_1B9338 { Fn_1B9338* vtbl; };
-
-struct Node_1B9338 { Obj_1B9338* obj; u8 pad[4]; Node_1B9338* next; };
-
-struct Actor_1B9338 {
-    u8 pad0[0x18];
-    s32 field18;
-    u8 pad1[0x4B0 - 0x1C];
-    Node_1B9338* chain;
-    u8 pad2[0x538 - 0x4B4];
-    u64 flags;
-};
-
 struct Vec_1B9338 { s32 v[4]; };
 
 void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
 void func_001B9AB0(void* a, void* b);
 
-void func_001B9338(Actor_1B9338* self, f32 t)
+void func_001B9338(C03* self, f32 t)
 {
     Vec_1B9338 local;
-    Node_1B9338* node;
+    Attach03* node;
     u64 m = 0x8000;
     m <<= 36;
-    if (self->field18 == 0) {
-        if ((self->flags & m) == 0) {
-            func_001BA500(self, (u8*)self + 0x440, (u8*)self + 0x350, &local, 0);
+    if (self->parent == 0) {
+        if ((self->flags538 & m) == 0) {
+            func_001BA500(self, &self->v440, &self->gravity, &local, 0);
             func_001B9AB0(self, &local);
         }
     }
-    node = self->chain;
+    node = self->attached;
     if (node != 0) {
         do {
-            Obj_1B9338* obj = node->obj;
-            obj->vtbl[0xDC / 4](obj, node, t);
+            C03* obj = node->owner;
+            obj->desc03()->m33(obj, node, t);
             node = node->next;
         } while (node != 0);
     }
 }
 
-void func_001261C0(void);
+void func_001261C0(C03* self, void* a, void* m);
 
-void func_001B93D8(void)
+void func_001B93D8(C03* self, void* a, void* m)
 {
-    func_001261C0();
+    func_001261C0(self, a, m);
 }
 
 void func_00124FC0(void* self);
 
-void func_001B93F8(void* self)
+void func_001B93F8(C03* self)
 {
     func_00124FC0(self);
 }
 
-struct __attribute__((aligned(16))) Quad_001B9680 { s32 a, b, c, d; };
-struct Obj_001B9680 { u8 pad0[0x140]; Quad_001B9680 src; u8 pad1[0x370 - 0x150]; Quad_001B9680 dst; };
-
-void func_001B9680(Obj_001B9680* self)
+void func_001B9680(C03* self)
 {
-    self->dst = self->src;
+    self->v370 = self->v140;
 }
 
 void func_001BA430(void* a, void* b, void* c, s32 d);
@@ -433,116 +258,84 @@ void func_001BA500(void* self, void* a, void* b, void* c, s32 d)
     func_001BA430(a, b, c, d);
 }
 
-struct Node_1BA528 { u8 pad0[8]; Node_1BA528* next; };
-struct Owner_1BA528 { u8 pad0[0x4B0]; Node_1BA528* head; };
-
 void func_00129DF8(void* self);
 
-void func_001BA528(Owner_1BA528* self, Node_1BA528* node)
+void func_001BA528(C03* self, Attach03* node)
 {
-    node->next = self->head;
-    self->head = node;
+    node->next = self->attached;
+    self->attached = node;
     func_00129DF8(self);
 }
 
-s32 func_001BBC30(void)
+s32 func_001BBC30(C03* self)
 {
     return 0;
 }
 
-struct __attribute__((aligned(16))) Quad_1B97E0 { s32 a, b, c, d; };
-typedef void (*VFn_1B97E0)(void* self);
-typedef void (*VFnB_1B97E0)(void* self, s32 a, void* b);
-struct Obj_1B97E0 { VFn_1B97E0* vtbl; u8 pad0[0x50 - 4]; void* f50; u8 pad1[0xD0 - 0x54]; Quad_1B97E0 q0; Quad_1B97E0 q1; Quad_1B97E0 q2; };
-
-void func_001B94F0(void* self, s32 value);
-
-void func_001B97E0(Obj_1B97E0* self, Quad_1B97E0* src)
+void func_001B97E0(C03* self, Mat02* src)
 {
-    self->q0 = src[0];
-    self->q1 = src[1];
-    self->q2 = src[2];
-    if (self->f50 != 0) {
-        if (self->vtbl[0x58 / 4] != 0) {
-            self->vtbl[0x58 / 4](self);
+    self->rot.r[0] = src->r[0];
+    self->rot.r[1] = src->r[1];
+    self->rot.r[2] = src->r[2];
+    if (self->root != 0) {
+        if (self->desc->m12 != 0) {
+            self->desc->m12(self);
         }
         func_001B94F0(self, 1);
     }
-    ((VFnB_1B97E0)self->vtbl[0x48 / 4])(self, 4, self);
+    self->desc->m0E(self, 4, self);
 }
 
-struct Obj_1BAFE0 { u8 pad0[0x3CC]; f32 f3CC; u8 pad1[0x538 - 0x3D0]; u64 bits538; };
-
-void func_001BAFE0(Obj_1BAFE0* self, f32 v)
+void func_001BAFE0(C03* self, f32 v)
 {
-    self->bits538 |= (u64)0x8000 << 25;
-    self->f3CC = v;
+    self->flags538 |= (u64)0x8000 << 25;
+    self->radius3CC = v;
 }
 
-struct Obj_001BB138 { u8 pad[0x538]; u64 flags; };
-void func_001BB138(Obj_001BB138* self, u32 value) { self->flags = (self->flags & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
+void func_001BB138(C03* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
 
-struct Obj_001BB168 { u8 pad[0x538]; u64 flags; };
-void func_001BB168(Obj_001BB168* self, u32 value) { self->flags = (self->flags & ~(1ULL << 47)) | ((u64)(value & 1) << 47); }
+void func_001BB168(C03* self, u32 value) { self->flags538 = (self->flags538 & ~(1ULL << 47)) | ((u64)(value & 1) << 47); }
 
-struct Obj_001BB1D8 { u8 pad[0x2C8]; u8 value; };
-void func_001BB1D8(Obj_001BB1D8* self, u8 value) { self->value = value; }
+void func_001BB1D8(C03* self, u8 value) { self->b2C8 = value; }
 
-struct Obj_001BB1E0 { u8 pad[0x538]; u64 flags; };
-void func_001BB1E0(Obj_001BB1E0* self, u32 value) { self->flags = (self->flags & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
+void func_001BB1E0(C03* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
 
 typedef u64 Quad_1B8960 __attribute__((mode(TI)));
 
-struct Obj_1B8960 {
-    u8 pad0[0x140];
-    Quad_1B8960 f140;
-};
-
 void func_00125138(void* self);
-void func_001B8820(void* a, void* b, Quad_1B8960 q, void* c);
+void func_001B8820(Mesh03* a, Mesh03* b, Quad_1B8960 q, Mat02* c);
 
-void func_001B8960(Obj_1B8960* self)
+void func_001B8960(C03* self)
 {
     func_00125138(self);
-    func_001B8820((u8*)self + 0x380, (u8*)self + 0x3A4, self->f140, (u8*)self + 0x110);
-    func_001B8820((u8*)self + 0x4E8, (u8*)self + 0x50C, self->f140, (u8*)self + 0x110);
+    func_001B8820(&self->mesh, &self->meshCopy, *(Quad_1B8960*)&self->v140, &self->m110);
+    func_001B8820(&self->mesh2, &self->mesh2Copy, *(Quad_1B8960*)&self->v140, &self->m110);
 }
 
 struct __attribute__((aligned(16))) Quad_1B9B50 { s32 a, b, c, d; };
 
-struct Obj_1B9B50 {
-    u8 pad0[0x18];
-    void* f18;
-    u8 pad1[0x50 - 0x1C];
-    Obj_1B9B50* f50;
-    u8 pad2[0x538 - 0x54];
-    u64 f538;
-};
-
 void func_001280C0(void* a, void* b, void* c, void* d);
 void func_001245A8(void* self, void* p);
-void func_001BB580(void* p);
-void func_001BB4A0(void* self);
 
-void func_001B9B50(Obj_1B9B50* self, void* p)
+void func_001B9B50(C03* self, C01* p)
 {
     Quad_1B9B50 local0;
     Quad_1B9B50 local1;
-    if (self->f18 == p) {
+    if (self->parent == p) {
         return;
     }
-    Obj_1B9B50* s5 = self->f50;
-    func_001280C0(self->f18, 0, (u8*)self + 0x440, &local0);
-    func_001280C0(self->f18, 0, (u8*)self + 0x460, &local1);
+    C03* s5 = self->root03();
+    func_001280C0(self->parent, 0, &self->v440, &local0);
+    func_001280C0(self->parent, 0, &self->v460, &local1);
     func_001245A8(self, p);
-    func_001280C0(0, p, &local0, (u8*)self + 0x440);
-    func_001280C0(0, p, &local1, (u8*)self + 0x460);
-    if (self->f50 != 0) {
-        if ((self->f538 & (1ULL << 54)) != 0 && s5 != 0) {
+    func_001280C0(0, p, &local0, &self->v440);
+    func_001280C0(0, p, &local1, &self->v460);
+    if (self->root != 0) {
+        if ((self->flags538 & (1ULL << 54)) != 0 && s5 != 0) {
             func_001BB580(s5);
         }
-        Obj_1B9B50* f = self->f50;
-        if ((f->f538 & (1ULL << 55)) != 0) {
+        C03* f = self->root03();
+        if ((f->flags538 & (1ULL << 55)) != 0) {
             func_001BB580(f);
         } else {
             func_001BB580(self);
@@ -551,36 +344,16 @@ void func_001B9B50(Obj_1B9B50* self, void* p)
     func_001BB4A0(self);
 }
 
-struct Pair_1BA068 {
-    s32 f0;
-    void* f4;
-    u8 pad8[0x40 - 8];
-    s32 g0;
-    void* g4;
-    u8 pad48[0xD0 - 0x48];
-    Pair_1BA068* next;
-};
-
-struct Outer_1BA068 {
-    Pair_1BA068* f0;
-    Outer_1BA068* f4;
-};
-
-struct Obj_1BA068 {
-    u8 pad0[0x50];
-    Obj_1BA068* f50;
-};
-
 s32 func_00182F40(void* e, void* b);
 
-void* func_001BA068(Obj_1BA068* self)
+void* func_001BA068(C03* self)
 {
-    Obj_1BA068* s3 = self->f50;
-    Outer_1BA068* s2 = *(Outer_1BA068**)(*(u8**)((u8*)s3 + 0x480));
-    for (; s2 != 0; s2 = s2->f4) {
-        Pair_1BA068* s0 = s2->f0;
+    C03* s3 = self->root03();
+    ContactRow03* s2 = s3->contacts->head;
+    for (; s2 != 0; s2 = s2->next) {
+        Contact03* s0 = s2->head;
         while (s0 != 0) {
-            s32 s1 = ((u32)s3 ^ (u32)s0->f0) != 0;
+            s32 s1 = ((u32)s3 ^ (u32)s0->end[0].body) != 0;
             if (func_00182F40(*(void**)((u8*)(s0) + (s1 << 6) + 4), self) != 0) {
                 return *(void**)((u8*)(s0) + ((1 - s1) << 6) + 4);
             }
@@ -597,36 +370,20 @@ void func_001BB000(void* self)
     func_001B9AE0(self, 3, 0, 3, 0);
 }
 
-typedef void (*VFn_1BB210)(void* self, void* a, void* b);
+void func_00183350(void* self, s32 kind, void* arg);
 
-struct Obj_1BB210;
-
-struct Node_1BB210 {
-    Obj_1BB210* f0;
-    u8 pad4[4];
-    Node_1BB210* f8;
-};
-
-struct Obj_1BB210 {
-    VFn_1BB210* vtbl;
-    u8 pad4[0x4B0 - 4];
-    Node_1BB210* f4B0;
-};
-
-void func_00183350(void* self, void* a, void* b);
-
-void func_001BB210(Obj_1BB210* self, void* a, void* b)
+void func_001BB210(C03* self, s32 kind, void* arg)
 {
-    func_00183350(self, a, b);
-    Node_1BB210* n = self->f4B0;
+    func_00183350(self, kind, arg);
+    Attach03* n = self->attached;
     if (n != 0) {
         do {
-            Node_1BB210* next = n->f8;
-            Obj_1BB210* obj = n->f0;
+            Attach03* next = n->next;
+            C03* obj = n->owner;
             if (obj != self) {
-                VFn_1BB210 fn = obj->vtbl[17];
+                void (*fn)(C01*, s32, void*) = obj->desc->m0D;
                 if (fn != 0) {
-                    fn(obj, a, b);
+                    fn(obj, kind, arg);
                 }
             }
             n = next;
@@ -647,35 +404,27 @@ void func_001BB028(s32 index, s32* out, Quad_1BB028* dst)
     *dst = *D_002746E0[index].quad;
 }
 
-struct Item_1BB800 { void* owner; u8 pad[0xCC]; Item_1BB800* next; };
-struct Node_1BB800 { Item_1BB800* item; Node_1BB800* next; };
-struct List_1BB800 { Node_1BB800* head; };
-struct Owner_1BB800 { u8 pad[0x480]; List_1BB800* list; };
-struct Obj_1BB800 { u8 pad[0x50]; Owner_1BB800* owner; };
-struct Arg_1BB800 { s32 x; };
-
-s32 func_00182F40(void* a, Arg_1BB800* b);
 void* func_0018D658(s32 n);
 
-s32 func_001BB800(Obj_1BB800* obj, s32* outCount, void*** outArr)
+s32 func_001BB800(C03* obj, s32* outCount, void*** outArr)
 {
-    Owner_1BB800* own = obj->owner;
-    Node_1BB800* nd;
-    Item_1BB800* it;
+    C03* own = obj->root03();
+    ContactRow03* nd;
+    Contact03* it;
     s32 n = 0;
-    for (nd = own->list->head; nd; nd = nd->next) {
-        for (it = nd->item; it; it = it->next) {
-            s32 g = it->owner != own;
-            if (func_00182F40(*(void**)((u8*)it + (g << 6) + 4), (Arg_1BB800*)obj))
+    for (nd = own->contacts->head; nd; nd = nd->next) {
+        for (it = nd->head; it; it = it->next) {
+            s32 g = it->end[0].body != own;
+            if (func_00182F40(*(void**)((u8*)it + (g << 6) + 4), obj))
                 n++;
         }
     }
     void** arr = (void**)func_0018D658(n << 2);
     void** end = arr;
-    for (nd = own->list->head; nd; nd = nd->next) {
-        for (Item_1BB800* it2 = nd->item; it2; it2 = it2->next) {
-            s32 f = it2->owner != own;
-            if (func_00182F40(*(void**)((u8*)it2 + (f << 6) + 4), (Arg_1BB800*)obj)) {
+    for (nd = own->contacts->head; nd; nd = nd->next) {
+        for (Contact03* it2 = nd->head; it2; it2 = it2->next) {
+            s32 f = it2->end[0].body != own;
+            if (func_00182F40(*(void**)((u8*)it2 + (f << 6) + 4), obj)) {
                 void* v = *(void**)((u8*)it2 + ((1 - f) << 6) + 4);
                 void** p;
                 for (p = arr; p < end; p++)
@@ -693,25 +442,19 @@ s32 func_001BB800(Obj_1BB800* obj, s32* outCount, void*** outArr)
     return cnt;
 }
 
-struct Node_1BA550 { u8 pad0[8]; Node_1BA550* next; };
-
-struct Obj_1BA550 { u8 pad0[0x4B0]; Node_1BA550* chain; };
-
-void func_00129DF8(void* self);
-
-void func_001BA550(Obj_1BA550* o, Node_1BA550* node)
+void func_001BA550(C03* o, Attach03* node)
 {
-    Node_1BA550** link = &o->chain;
+    Attach03** link = &o->attached;
     if (*link == 0) {
         goto tail;
     }
-    if (o->chain == node) {
-        o->chain = node->next;
+    if (o->attached == node) {
+        o->attached = node->next;
     } else {
-        Node_1BA550* prev;
+        Attach03* prev;
         for (;;) {
             prev = *link;
-            Node_1BA550* nx = prev->next;
+            Attach03* nx = prev->next;
             link = &prev->next;
             if (nx == 0) {
                 goto tail;
@@ -727,18 +470,14 @@ tail:
     func_00129DF8(o);
 }
 
-struct Slot_1B9FB0 { s32 f0; void* f4; u8 pad0[0x38]; };
-struct Node_1B9FB0 { Slot_1B9FB0 slot[2]; u8 pad0[0xD0 - 0x80]; Node_1B9FB0* next; };
-struct Self_1B9FB0 { u8 pad0[0x50]; s32 key; };
-
 s32 func_001387F8(void* self, void* other);
-s32 func_00182F40(void* e, void* b);
-s32 func_001B9FB0(Self_1B9FB0* self, void* other)
+
+s32 func_001B9FB0(C03* self, void* other)
 {
     s32 key;
-    Node_1B9FB0* n;
-    for (n = (Node_1B9FB0*)func_001387F8(self, other), key = self->key; n != 0; n = n->next) {
-        s32 s1 = (key ^ n->slot[0].f0) != 0;
+    Contact03* n;
+    for (n = (Contact03*)func_001387F8(self, other), key = (s32)self->root; n != 0; n = n->next) {
+        s32 s1 = (key ^ (s32)n->end[0].body) != 0;
         s32 o0 = s1 * 64;
         if (func_00182F40(*(void**)((u8*)n + o0 + 4), self) != 0) {
             s32 o1 = (1 - s1) * 64;
@@ -752,56 +491,39 @@ s32 func_001B9FB0(Self_1B9FB0* self, void* other)
 
 // Matched by indexing the end as (u32)e + (i << 6).
 
-struct Obj_1BB9D0;
-struct Edge_1BB9D0 {
-    struct End { Obj_1BB9D0* o; Obj_1BB9D0* other; u8 pad[0x38]; } e[2];
-    u8 pad80[0x50];
-    Edge_1BB9D0* next;
-};
-struct Out_1BB9D0 { Edge_1BB9D0* first; Out_1BB9D0* next; };
-struct OutHead_1BB9D0 { Out_1BB9D0* head; };
-struct Mem_1BB9D0 { Obj_1BB9D0* value; Mem_1BB9D0* next; };
-struct Core_1BB9D0 { u8 pad[0x480]; OutHead_1BB9D0* outs; };
-struct Obj_1BB9D0 {
-    u8 pad0[0x14]; void* pool;
-    u8 pad18[0x38]; Core_1BB9D0* core;
-    u8 pad54[0x4EC]; Mem_1BB9D0* mem;
-};
+void func_001837E0(void* self, s32 a, s32 b, void* c);
+void func_001DC108(void* pool, Touch03* m);
+Touch03* func_001DC0C8(void* pool);
 
-s32 func_001BB9A0(Mem_1BB9D0* m, Obj_1BB9D0* v);
-void func_001837E0(Obj_1BB9D0* self, s32 a, s32 b, void* c);
-void func_001DC108(void* pool, Mem_1BB9D0* m);
-Mem_1BB9D0* func_001DC0C8(void* pool);
-
-void func_001BB9D0(Obj_1BB9D0* self)
+void func_001BB9D0(C03* self)
 {
-    Core_1BB9D0* core = self->core;
-    Out_1BB9D0* o;
-    Edge_1BB9D0* e;
-    Mem_1BB9D0* m;
-    Mem_1BB9D0* prev;
-    Obj_1BB9D0* other;
+    C03* core = self->root03();
+    ContactRow03* o;
+    Contact03* e;
+    Touch03* m;
+    Touch03* prev;
+    C03* other;
     void* args;
-    for (o = core->outs->head; o != 0; o = o->next) {
-        for (e = o->first; e != 0; e = e->next) {
-            s32 i = e->e[0].o != (Obj_1BB9D0*)core;
-            if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
-                other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
-                if (!func_001BB9A0(self->mem, other)) {
+    for (o = core->contacts->head; o != 0; o = o->next) {
+        for (e = o->head; e != 0; e = e->next) {
+            s32 i = e->end[0].body != core;
+            if (((ContactEnd03*)((u32)e + (i << 6)))->part == self) {
+                other = ((ContactEnd03*)((u32)e + ((1 - i) << 6)))->part;
+                if (!func_001BB9A0(self->touching, other)) {
                     args = &other;
                     func_001837E0(self, 6, 1, &args);
                 }
             }
         }
     }
-    for (m = self->mem; m != 0; m = m->next) {
+    for (m = self->touching; m != 0; m = m->next) {
         s32 found = 0;
-        for (o = core->outs->head; o != 0 && !found; o = o->next) {
-            for (e = o->first; e != 0 && !found; e = e->next) {
-                s32 i = e->e[0].o != (Obj_1BB9D0*)core;
-                if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
-                    other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
-                    if (other == m->value) found = 1;
+        for (o = core->contacts->head; o != 0 && !found; o = o->next) {
+            for (e = o->head; e != 0 && !found; e = e->next) {
+                s32 i = e->end[0].body != core;
+                if (((ContactEnd03*)((u32)e + (i << 6)))->part == self) {
+                    other = ((ContactEnd03*)((u32)e + ((1 - i) << 6)))->part;
+                    if (other == m->obj) found = 1;
                 }
             }
         }
@@ -810,258 +532,175 @@ void func_001BB9D0(Obj_1BB9D0* self)
             func_001837E0(self, 7, 1, &args);
         }
     }
-    func_001DC108(self->pool, self->mem);
-    self->mem = 0;
-    for (o = core->outs->head; o != 0; o = o->next) {
-        for (e = o->first; e != 0; e = e->next) {
-            s32 i = e->e[0].o != (Obj_1BB9D0*)core;
-            if (((Edge_1BB9D0::End*)((u32)e + (i << 6)))->other == self) {
-                other = ((Edge_1BB9D0::End*)((u32)e + ((1 - i) << 6)))->other;
-                Mem_1BB9D0* n = func_001DC0C8(self->pool);
-                n->value = other;
-                if (self->mem != 0) prev->next = n; else self->mem = n;
+    func_001DC108(self->world, self->touching);
+    self->touching = 0;
+    for (o = core->contacts->head; o != 0; o = o->next) {
+        for (e = o->head; e != 0; e = e->next) {
+            s32 i = e->end[0].body != core;
+            if (((ContactEnd03*)((u32)e + (i << 6)))->part == self) {
+                other = ((ContactEnd03*)((u32)e + ((1 - i) << 6)))->part;
+                Touch03* n = func_001DC0C8(self->world);
+                n->obj = other;
+                if (self->touching != 0) prev->next = n; else self->touching = n;
                 prev = n;
             }
         }
     }
 }
 
-struct B8_1BA130 { u8 b[8]; };
-struct B12_1BA130 { u8 b[8]; s32 w; };
-struct Obj_1BA130 {
-    u8 pad0[0x2D0];
-    B8_1BA130 f2D0;
-    B12_1BA130 f2D8;
-    B8_1BA130 f2E4;
-    u8 pad2EC[0x3A4 - 0x2EC];
-    u8 f3A4[0x4C];
-    s32 f3F0[2];
-    u8 pad3F8[0x414 - 0x3F8];
-    B8_1BA130 f414;
-    u8 pad41C[0x480 - 0x41C];
-    s32 f480;
-    u8 pad484[0x4B0 - 0x484];
-    s32 f4B0;
-    u8 pad4B4[4];
-    s32 f4B8;
-    u8 pad4BC[0x4E4 - 0x4BC];
-    s32 f4E4;
-    u8 pad4E8[0x510 - 0x4E8];
-    s32 f510;
-    u8 pad514[0x538 - 0x514];
-    u64 f538;
-    s32 f540;
-};
+void func_00127048(C03* self, C03* other);
+void func_001B7C40(C03* self, s32 flag);
+void func_00160EA0(Mesh03* a, s32 b, Mesh03* c);
+void func_0013E6C8(Mesh03* a, Tree03* b, Mesh03* c, Tree03* d);
 
-void func_00127048(Obj_1BA130* self, Obj_1BA130* other);
-void func_001B7C40(Obj_1BA130* self, s32 flag);
-void func_00160EA0(u8* a, s32 b, u8* c);
-void func_0013E6C8(u8* a, u8* b, u8* c, u8* d);
-
-void func_001BA130(Obj_1BA130* self, Obj_1BA130* other)
+void func_001BA130(C03* self, C03* other)
 {
-    u64 bit = (self->f538 >> 50) & 1;
-    B8_1BA130 a, c, d;
-    B12_1BA130 b;
-    a = self->f2D0;
-    b = self->f2D8;
-    c = self->f2E4;
-    s32 s480 = self->f480;
-    s32 s4E4 = self->f4E4;
-    d = self->f414;
+    u64 bit = (self->flags538 >> 50) & 1;
+    Link02 a, c, d;
+    List01 b;
+    a = self->link2D0;
+    b = self->parts;
+    c = self->link2E4;
+    Contacts03* s480 = self->contacts;
+    C03* s4E4 = self->handler;
+    d = self->link414;
     func_00127048(self, other);
-    self->f480 = s480;
-    self->f2D0 = a;
-    self->f2D8 = b;
-    self->f2E4 = c;
-    self->f414 = d;
-    self->f4E4 = s4E4;
-    self->f4B0 = 0;
+    self->contacts = s480;
+    self->link2D0 = a;
+    self->parts = b;
+    self->link2E4 = c;
+    self->link414 = d;
+    self->handler = s4E4;
+    self->attached = 0;
     self->f4B8 = 0;
-    self->f538 = (self->f538 & 0xFFFBFFFFFFFFFFFFULL) | (bit << 50);
+    self->flags538 = (self->flags538 & 0xFFFBFFFFFFFFFFFFULL) | (bit << 50);
     func_001B7C40(self, 1);
-    if (*(s32*)(self->f3A4 + 4)) func_00160EA0((u8*)other + 0x3A4, 0, self->f3A4);
-    if (*(s32*)((u8*)self + 0x3F8)) func_0013E6C8((u8*)other + 0x3A4, (u8*)other + 0x3F0, self->f3A4, (u8*)self + 0x3F0);
-    if (self->f510) func_00160EA0((u8*)other + 0x50C, 0, (u8*)self + 0x50C);
-    if ((s32)self->f538) func_0013E6C8((u8*)other + 0x50C, (u8*)other + 0x530, (u8*)self + 0x50C, (u8*)self + 0x530);
-    self->f540 = 0;
-    self->f538 |= 0x20000000000ULL;
+    if (self->meshCopy.vertCount) func_00160EA0(&other->meshCopy, 0, &self->meshCopy);
+    if (self->tree.nodes) func_0013E6C8(&other->meshCopy, &other->tree, &self->meshCopy, &self->tree);
+    if (self->mesh2Copy.vertCount) func_00160EA0(&other->mesh2Copy, 0, &self->mesh2Copy);
+    if ((s32)self->flags538) func_0013E6C8(&other->mesh2Copy, &other->tree2, &self->mesh2Copy, &self->tree2);
+    self->touching = 0;
+    self->flags538 |= 0x20000000000ULL;
 }
 
 // NEAR: 14 lines: retail preloads f400/f40C into s0 (lw s0 before loop and in the bnel delay slot), we load into v1; f408 loop test reload; last loop pointer s2 vs index
 
 struct In_1BAC30 { u8 pad[4]; };
-struct Blk_1BAC30 {
-    u64 q0 __attribute__((packed));
-    u64 q1 __attribute__((packed));
-    u64 q2 __attribute__((packed));
-    u64 q3 __attribute__((packed));
-    s32 w8;
-};
-struct Self_1BAC30;
-typedef void (*VFn_1BAC30)(Self_1BAC30* self);
-struct VT_1BAC30 {
-    u8 pad_00[0xD8];
-    VFn_1BAC30 vD8;
-    u8 pad_DC[0x120 - 0xDC];
-    VFn_1BAC30 v120;
-};
-struct Pair_1BAC30 { s32 a; s32 b; };
-struct Self_1BAC30 {
-    VT_1BAC30* vtbl;
-    u8 pad_04[0x10];
-    void* f14;
-    s32 f18;
-    u8 pad_1C[0x2C8 - 0x1C];
-    u64 flags;
-    u8 pad_2D0[0x2F0 - 0x2D0];
-    u8 f2F0[0x368 - 0x2F0];
-    f32 f368;
-    u8 pad_36C[0x380 - 0x36C];
-    Blk_1BAC30 f380;
-    Blk_1BAC30 f3A4;
-    u8 pad_3C8[4];
-    f32 f3CC;
-    f32 f3D0;
-    u8 pad_3D4[0x3F0 - 0x3D4];
-    u8 f3F0[0xC];
-    s32 f3FC;
-    Pair_1BAC30* f400;
-    s32* f404;
-    s32 f408;
-    Pair_1BAC30* f40C;
-    s32* f410;
-    u8 pad_414[0x4D0 - 0x414];
-    u8 f4D0[0x18];
-    Blk_1BAC30 f4E8;
-    Blk_1BAC30 f50C;
-    u8 f530[0xC];
-};
 
 s32 func_00137B90(In_1BAC30* in);
-void func_00137FB0(In_1BAC30* in, Blk_1BAC30* p);
-void func_00160EA0(Blk_1BAC30* a, s32 b, Blk_1BAC30* c);
-void func_00138278(In_1BAC30* in, Blk_1BAC30* a, u8* out);
+void func_00137FB0(In_1BAC30* in, Mesh03* p);
+void func_00138278(In_1BAC30* in, Mesh03* a, Tree03* out);
 f32 func_00137DF8(In_1BAC30* in);
-void func_00137EB0(In_1BAC30* in, u8* p);
-void func_00137E70(In_1BAC30* in, u8* p);
-void func_001B9448(Self_1BAC30* self, f32 x);
+void func_00137EB0(In_1BAC30* in, Mat02* p);
+void func_00137E70(In_1BAC30* in, Vec02* p);
+void func_001B9448(C03* self, f32 x);
 s32 func_00137BE0(In_1BAC30* in);
 void* func_0018D500(s32 size);
 s32 func_00137D10(In_1BAC30* in);
 s32 func_00137C40(In_1BAC30* in);
-void func_001289C0(Self_1BAC30* self, In_1BAC30* in);
-void func_001B7C40(Self_1BAC30* self, s32 x);
-void func_00138F28(void* a, Self_1BAC30* b);
+void func_001289C0(C03* self, In_1BAC30* in);
+void func_00138F28(void* a, C03* b);
 
-void func_001BAC30(Self_1BAC30* self, In_1BAC30* in)
+void func_001BAC30(C03* self, In_1BAC30* in)
 {
     s32 i;
     s32 j;
     s32 n;
-    Pair_1BAC30* e;
+    Pair03* e;
     u8 flag = func_00137B90(in) & 1;
     self->flags = (self->flags & ~(1ULL << 33)) | ((u64)flag << 33);
-    func_00137FB0(in, &self->f380);
-    self->f3D0 = *(f32*)&self->f380;
-    self->f3CC = *(f32*)&self->f380;
+    func_00137FB0(in, &self->mesh);
+    self->radius3D0 = self->mesh.radius;
+    self->radius3CC = self->mesh.radius;
     if (self->flags & (1ULL << 33)) {
-        self->f3A4 = self->f380;
+        self->meshCopy = self->mesh;
     } else {
-        func_00160EA0(&self->f380, 0, &self->f3A4);
+        func_00160EA0(&self->mesh, 0, &self->meshCopy);
     }
-    func_00138278(in, &self->f3A4, self->f3F0);
+    func_00138278(in, &self->meshCopy, &self->tree);
     i = 0;
-    self->f368 = func_00137DF8(in);
-    func_00137EB0(in, self->f2F0);
-    func_00137E70(in, self->f4D0);
+    self->mass = func_00137DF8(in);
+    func_00137EB0(in, &self->inertia);
+    func_00137E70(in, &self->offset);
     func_001B9448(self, 1.0f);
-    self->f3FC = func_00137BE0(in);
-    self->f400 = (Pair_1BAC30*)func_0018D500(self->f3FC << 3);
-    if (self->f3FC > 0) {
+    self->groupCount = func_00137BE0(in);
+    self->groups = (Pair03*)func_0018D500(self->groupCount << 3);
+    if (self->groupCount > 0) {
         do {
-            e = self->f400;
+            e = self->groups;
             e += i++;
             e->a = func_00137D10(in);
             e->b = func_00137BE0(in);
-        } while (i < self->f3FC);
+        } while (i < self->groupCount);
     }
     n = func_00137C40(in);
     j = 0;
-    self->f404 = (s32*)func_0018D500(n << 2);
+    self->nodeGroups = (s32*)func_0018D500(n << 2);
     if (n > 0) {
         do {
             s32 v = func_00137D10(in);
-            self->f404[j] = v;
+            self->nodeGroups[j] = v;
             j++;
         } while (j < n);
     }
-    self->f408 = func_00137C40(in);
+    self->refCount = func_00137C40(in);
     i = 0;
-    self->f40C = (Pair_1BAC30*)func_0018D500(self->f408 << 3);
-    while (i < self->f408) {
-        e = self->f40C;
+    self->refs = (Pair03*)func_0018D500(self->refCount << 3);
+    while (i < self->refCount) {
+        e = self->refs;
         e += i++;
         e->a = func_00137D10(in);
         e->b = func_00137D10(in);
     }
-    if (self->f408 > 0) {
+    if (self->refCount > 0) {
         j = 0;
-        self->f410 = (s32*)func_0018D500((*(s32*)((u8*)&self->f3A4 + 12) + 1) << 2);
-        if (*(s32*)((u8*)&self->f3A4 + 12) >= 0) {
+        self->faceStarts = (s32*)func_0018D500((self->meshCopy.faceCount + 1) << 2);
+        if (self->meshCopy.faceCount >= 0) {
             do {
                 s32 v = func_00137D10(in);
-                self->f410[j] = v;
+                self->faceStarts[j] = v;
                 j++;
-            } while (*(s32*)((u8*)&self->f3A4 + 12) >= j);
+            } while (self->meshCopy.faceCount >= j);
         }
     }
-    func_00137FB0(in, &self->f4E8);
+    func_00137FB0(in, &self->mesh2);
     if (self->flags & (1ULL << 33)) {
-        self->f50C = self->f4E8;
+        self->mesh2Copy = self->mesh2;
     } else {
-        func_00160EA0(&self->f4E8, 0, &self->f50C);
+        func_00160EA0(&self->mesh2, 0, &self->mesh2Copy);
     }
-    func_00138278(in, &self->f50C, self->f530);
+    func_00138278(in, &self->mesh2Copy, &self->tree2);
     func_001289C0(self, in);
     func_001B7C40(self, 1);
-    self->vtbl->v120(self);
-    if (self->f18 == 0) {
-        self->vtbl->vD8(self);
-        func_00138F28(self->f14, self);
+    self->desc03()->m44(self);
+    if (self->parent == 0) {
+        self->desc03()->m32(self);
+        func_00138F28(self->world, self);
     }
 }
 
 struct Quad_1B9F30 { f32 v[4]; } __attribute__((aligned(16)));
-struct Sub_1B9F30 { s32 pad; };
-struct Self_1B9F30 {
-    u8 pad[0x110];
-    Sub_1B9F30 sub;
-    u8 pad114[0x2C];
-    Quad_1B9F30 q140;
-    Quad_1B9F30 q150;
-};
 struct Out_1B9F30 {
     s32 f00;
     u8 pad04[0x0C];
-    Quad_1B9F30 q10;
-    Quad_1B9F30 q20;
+    Vec02 q10;
+    Vec02 q20;
     f32 f30;
     f32 f34;
     f32 f38;
     s32 f3C;
 };
 
-void func_00189378(Sub_1B9F30* sub, s32 zero, Quad_1B9F30* out);
+void func_00189378(Mat02* m, s32 zero, Quad_1B9F30* out);
 f32 func_00205778(f32 a, f32 b);
 extern f32 D_0026185C[];
 
-void func_001B9F30(Self_1B9F30* self, Out_1B9F30* out)
+void func_001B9F30(C03* self, Out_1B9F30* out)
 {
     Quad_1B9F30 tmp[3];
-    out->q10 = self->q140;
-    out->q20 = self->q150;
-    func_00189378(&self->sub, 0, &tmp[0]);
+    out->q10 = self->v140;
+    out->q20 = self->v150;
+    func_00189378(&self->m110, 0, &tmp[0]);
     out->f30 = func_00205778(-tmp[0].v[1], -tmp[0].v[0]);
     out->f34 = 100.0f;
     out->f00 = 0;
@@ -1069,39 +708,18 @@ void func_001B9F30(Self_1B9F30* self, Out_1B9F30* out)
     out->f3C = 0;
 }
 
-struct __attribute__((aligned(16))) Quad_001B9AE0 {
-    s32 a, b, c, d;
-};
-
-struct Sub_001B9AE0;
-
-struct Obj_001B9AE0 {
-    u8 pad0[0x50];
-    Sub_001B9AE0* f50;
-    u8 pad1[0x3EC];
-    Quad_001B9AE0 f440;
-    s32 f450;
-    u8 pad2[0xC];
-    Quad_001B9AE0 f460;
-    s32 f470;
-    u8 pad3[0xC4];
-    u64 f538;
-};
-
-void func_001BB580(Sub_001B9AE0* p);
-
-void func_001B9AE0(Obj_001B9AE0* self, s32 a1, Quad_001B9AE0* a2, s32 a3, Quad_001B9AE0* a4)
+void func_001B9AE0(C03* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
 {
-    self->f450 = a1;
-    u64 flag = (self->f538 >> 54) & 1;
+    self->mode450 = a1;
+    u64 flag = (self->flags538 >> 54) & 1;
     if (a2 != 0) {
-        self->f440 = *a2;
+        self->v440 = *a2;
     }
-    self->f470 = a3;
+    self->mode470 = a3;
     if (a4 != 0) {
-        self->f460 = *a4;
+        self->v460 = *a4;
     }
-    Sub_001B9AE0* sub = self->f50;
+    C03* sub = self->root03();
     if (sub != 0) {
         s32 f2 = 0;
         if (a1 == 3) {
@@ -1113,73 +731,34 @@ void func_001B9AE0(Obj_001B9AE0* self, s32 a1, Quad_001B9AE0* a2, s32 a3, Quad_0
     }
 }
 
-struct Sub_1B94F0 {
-    void* key;
-    void* f4;
-    u8 pad_08[0x40 - 8];
-};
+void func_001861E8(void* pool, Contact03* head);
 
-struct Item_1B94F0 {
-    Sub_1B94F0 sub0;
-    Sub_1B94F0 sub1;
-    u8 pad_80[0x9C - 0x80];
-    s32 f9C;
-    u8 padA0[0xD0 - 0xA0];
-    Item_1B94F0* next;
-};
-
-struct Outer_1B94F0 {
-    Item_1B94F0* head;
-    Outer_1B94F0* next;
-    Item_1B94F0** link;
-};
-
-struct Ctx_1B94F0 {
-    u8 pad_000[0x480];
-    Outer_1B94F0** f480;
-    u8 pad_484[0x4B8 - 0x484];
-    s32 f4B8;
-};
-
-struct Obj_1B94F0 {
-    u8 pad_000[0x14];
-    void* f14;
-    u8 pad_018[0x50 - 0x18];
-    Ctx_1B94F0* f50;
-};
-
-struct Callee_1B94F0;
-struct Pool_1B94F0;
-
-s32 func_00182F40(Callee_1B94F0* e, Obj_1B94F0* b);
-void func_001861E8(Pool_1B94F0* a, Item_1B94F0* head);
-
-void func_001B94F0(Obj_1B94F0* self, s32 mode)
+void func_001B94F0(C03* self, s32 mode)
 {
-    Ctx_1B94F0* ctx = self->f50;
+    C03* ctx = self->root03();
     if (ctx == 0) {
         return;
     }
     if (mode != 0) {
-        Item_1B94F0* freed = 0;
-        for (Outer_1B94F0* o = *ctx->f480; o != 0; o = o->next) {
-            Item_1B94F0** pp = &o->head;
-            Item_1B94F0* it;
+        Contact03* freed = 0;
+        for (ContactRow03* o = ctx->contacts->head; o != 0; o = o->next) {
+            Contact03** pp = &o->head;
+            Contact03* it;
             while ((it = *pp) != 0) {
-                s32 other = it->sub0.key != ctx;
-                Sub_1B94F0* p = &(&it->sub0)[other];
+                s32 other = it->end[0].body != ctx;
+                ContactEnd03* p = &it->end[other];
                 s32 hit;
                 switch (mode) {
                 case 1:
-                    hit = func_00182F40((Callee_1B94F0*)p->f4, self);
+                    hit = func_00182F40(p->part, self);
                     break;
                 case 2:
-                    hit = p->f4 == (void*)self;
+                    hit = p->part == self;
                     break;
                 case 3:
                     hit = 0;
-                    if (p->f4 == (void*)self && other == 0) {
-                        if (it->f9C >= 8 && it->f9C <= 9) {
+                    if (p->part == self && other == 0) {
+                        if (it->kind >= 8 && it->kind <= 9) {
                             hit = 1;
                         }
                     }
@@ -1198,7 +777,7 @@ void func_001B94F0(Obj_1B94F0* self, s32 mode)
             }
             *o->link = o->head;
         }
-        func_001861E8((Pool_1B94F0*)self->f14, freed);
+        func_001861E8(self->world, freed);
     }
     ctx->f4B8 = 0;
 }

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c03.h"
 
-struct Obj_1BC748 { u8 pad[0x538]; u64 flags; };
-
-void func_001BC748(Obj_1BC748* self, u32* out)
+void func_001BC748(C03* self, u32* out)
 {
-    u32 bit = (u32)(self->flags >> 52) & 1;
+    u32 bit = (u32)(self->flags538 >> 52) & 1;
     *out = bit;
 }
 
@@ -172,12 +171,10 @@ void func_001BFFC8(void* guard, s64 key)
     }
 }
 
-struct Owner_001BC088 { u8 pad0[0x3C8]; void* hook; };
+void func_001BBEB8(C03* self);
+void func_00125440(C03* self, f32 x, void* b);
 
-void func_001BBEB8(Owner_001BC088* self);
-void func_00125440(Owner_001BC088* self, f32 x, void* b);
-
-void func_001BC088(Owner_001BC088* self, void* b, f32 x)
+void func_001BC088(C03* self, void* b, f32 x)
 {
     if (self->hook != 0) {
         func_001BBEB8(self);
@@ -189,19 +186,17 @@ struct Shape_001BC320 { u8 pad0[8]; f32 radius; s32 flags; };
 
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
 
-s32 func_001BC320(void* a0, Shape_001BC320* self)
+s32 func_001BC320(C03* self, Shape_001BC320* shape)
 {
-    if (self->flags & 0x8) {
-        func_001BC0E0(a0, self->radius, (u8*)self + 0x20, (u8*)self + 0x30);
+    if (shape->flags & 0x8) {
+        func_001BC0E0(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
     }
-    return self->flags != 0;
+    return shape->flags != 0;
 }
 
-struct Flagged_001BC710 { u8 pad[0x538]; u64 bits; };
-
-void func_001BC710(Flagged_001BC710* self, u32 flag)
+void func_001BC710(C03* self, u32 flag)
 {
-    self->bits = (self->bits & 0xFFEFFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 52);
+    self->flags538 = (self->flags538 & 0xFFEFFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 52);
 }
 
 void func_001C06A0(s32 a, s32 b, f32 x);
@@ -245,19 +240,15 @@ void* func_001BED98(void)
     return p;
 }
 
-struct VtItem_1BC760 { u8 pad0[8]; u32 flags; u8 pad1[0xE4 - 0x0C]; void (*visit)(void* item, s32* index, void* list); };
-struct Item_1BC760 { VtItem_1BC760* vtbl; u8 pad[0x18]; Item_1BC760* next; };
-struct Obj_1BC760 { u8 pad0[0x34]; Item_1BC760* head; u8 pad1[0x4C0 - 0x38]; s32 count; };
-
-void func_001BC760(Obj_1BC760* self, s32* index, Obj_1BC760** list)
+void func_001BC760(C03* self, s32* index, C03** list)
 {
     ListFrame frame;
-    self->count = *index;
+    self->index = *index;
     list[*index] = self;
     (*index)++;
-    for (Item_1BC760* item = self->head; item; item = item->next)
-        if (item->vtbl->flags & 2)
-            item->vtbl->visit(item, index, list);
+    for (C03* item = (C03*)self->children.head; item; item = (C03*)item->next)
+        if (item->desc->flags & 2)
+            item->desc03()->m35(item, index, list);
 }
 
 struct Entry_1BF048 {
