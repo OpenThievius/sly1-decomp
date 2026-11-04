@@ -41,7 +41,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
         func_001AB920(&D_0026E760, -func_00205C78(2.0f, (f32)D_002623DC));
         func_001AB928(&D_0026E760, zero, 0);
         func_001AB938(&D_0026E760);
-        Cam_1E00B0* cam = D_002623C8;
+        G27C230* cam = D_002623C8;
         if (cam->flags & 8) {
             char time[32];
             u16 text[128];
@@ -70,7 +70,7 @@ void func_001E02C8(Obj_1E02C8_eu* self, s32 n)
         s32 id;
         f32 t = o->f578;
         if (0.0f < t) {
-            Cam_1E00B0* cam = D_002623C8;
+            G27C230* cam = D_002623C8;
             if (cam->flags & 8) {
                 if (cam->f08 < t) {
                     cam->f08 = t;

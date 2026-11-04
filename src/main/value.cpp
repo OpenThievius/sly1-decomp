@@ -1,21 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "g25c250.h"
 
 // The five pools values are taken from (func_0011C240): func_0011BF70 sets them up, func_0011C040
 // empties them all. Built at startup: the compiler's initialiser, constructor and destructor for this
 // file are func_0011C0A8, func_0011C0E8 and func_0011C108 (config/us/generated.tsv).
-struct Pool_25C250 {
-    u8 pad0[0x18];
-    void* callback;  // set by func_0011BF70
-    s32 pad1C;
-    Pool_25C250() { callback = 0; }
-    ~Pool_25C250() {}
-};
-Pool_25C250 D_0025C250;
-Pool_25C250 D_0025C270;
-Pool_25C250 D_0025C290;
-Pool_25C250 D_0025C2B0;
-Pool_25C250 D_0025C2D0;
+G25C250 D_0025C250;
+G25C250 D_0025C270;
+G25C250 D_0025C290;
+G25C250 D_0025C2B0;
+G25C250 D_0025C2D0;
 
 void* func_0011B008(void* self);
 

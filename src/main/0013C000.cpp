@@ -7,6 +7,7 @@
 #include "c3b.h"
 #include "c05.h"
 #include "v249d.h"
+#include "s127378.h"
 
 void func_001BE4D8(void* p);
 
@@ -188,18 +189,13 @@ void func_0013DC38(C27* self)
     func_0013DD78(self, next);
 }
 
-struct Msg_13DB28 {
-    s32 kind_00;
-    C27* target_04;
-};
+void func_00127378(C27* self, s32 kind, S127378* msg);
 
-void func_00127378(C27* self, s32 kind, Msg_13DB28* msg);
-
-void func_0013DCA8(C27* self, s32 kind, Msg_13DB28* msg)
+void func_0013DCA8(C27* self, s32 kind, S127378* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 0xF) {
-        if (msg->target_04 == self) {
+        if ((C27*)msg->target == self) {
             func_0013DD78(self, 1);
         }
     }
@@ -463,24 +459,23 @@ void func_0013CD80(C20* self)
     }
 }
 
-struct Elem_13E6C8 { s32 f0; s32 f4; s32 f8; };
-struct Tbl_13E6C8 { s32 count; s32 f4; Elem_13E6C8* elems; };
 struct Self_13E6C8 { u8 pad0[0x10]; s32 f10; };
 struct Base_13E6C8 { u8 pad0[0x10]; s32 f10; };
 
 void* func_0018D500(s32 size);
 
-void func_0013E6C8(Self_13E6C8* self, Tbl_13E6C8* src, Base_13E6C8* base, Tbl_13E6C8* dst)
+void func_0013E6C8(Self_13E6C8* self, Tree03* src, Base_13E6C8* base, Tree03* dst)
 {
     dst->count = src->count;
-    dst->f4 = src->f4;
-    dst->elems = (Elem_13E6C8*)func_0018D500(src->count * 12);
+    dst->count2 = src->count2;
+    dst->nodes = (TreeNode03*)func_0018D500(src->count * 12);
     for (s32 i = 0; i < dst->count; i++) {
-        Elem_13E6C8* s = &src->elems[i];
-        Elem_13E6C8* d = &dst->elems[i];
-        d->f0 = base->f10 + (s->f0 - self->f10);
-        d->f4 = s->f4 != 0 ? (s32)dst->elems + (s->f4 - (s32)src->elems) : 0;
-        d->f8 = s->f8 != 0 ? (s32)dst->elems + (s->f8 - (s32)src->elems) : 0;
+        TreeNode03* s = &src->nodes[i];
+        TreeNode03* d = &dst->nodes[i];
+        d->face = (void*)(base->f10 + ((s32)s->face - self->f10));
+        d->back = s->back != 0 ? (TreeNode03*)((s32)dst->nodes + ((s32)s->back - (s32)src->nodes)) : 0;
+        d->front = s->front != 0 ? (TreeNode03*)((s32)dst->nodes + ((s32)s->front - (s32)src->nodes)) : 0;
+
     }
 }
 

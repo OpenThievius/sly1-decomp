@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c05.h"
+#include "globals.h"
 
 struct Loc_171DD8 { u8 pad0[8]; f32 f8; };
 
@@ -449,7 +450,6 @@ divide:
 
 // EXACT: callee func_001300E8 declared with a third parameter and called with k, which puts k in a2
 
-struct __attribute__((aligned(16))) Quad_172898 { s32 a, b, c, d; };
 struct Aux_172898 { u8 pad0[0x50]; void* f50; u8 pad1[0x554 - 0x54]; Contact03* f554; };
 
 void func_001BC4D8(C07* a, void* b);
@@ -458,7 +458,6 @@ void func_001C57C8(C07* a);
 void func_00128018(Aux_172898* a, s32 b, void* c, void* d);
 void func_001861E8(void* a, Contact03* b);
 extern f32 D_0026185C[];
-extern Quad_172898 D_00248D20;
 
 void func_00172898(C07* self)
 {
@@ -503,7 +502,7 @@ void func_00172898(C07* self)
         self->f690 = 1;
         self->f694 = D_0026185C[0];
         func_00128018(((Aux_172898*)self->f24A0), 0, self->f24B0, &self->v6A0);
-        (*(Quad_172898*)&self->v6B0) = D_00248D20;
+        self->v6B0 = D_00248D20;
         self->f6C0 = ((Aux_172898*)self->f24A0);
         row = self->contacts->head;
         if (row) {
@@ -535,30 +534,16 @@ void func_00172898(C07* self)
     func_001861E8(self->world, head);
 }
 
-struct Ent_172CF0
-{
-    u8 pad0[0x18];
-    Ent_172CF0* f18;
-    u8 pad1C[0x3CC - 0x1C];
-    f32 f3CC;
-    u8 pad3D0[0x3F0 - 0x3D0];
-    s32 f3F0;
-    u8 pad3F4[4];
-    s32 f3F8;
-    u8 pad3FC[0x538 - 0x3FC];
-    u64 f538;
-};
+void func_001C5C10(C07* a, C03* b, void* c, void* d);
+void func_001C4790(C07* a, C03* b, void* c, void* d);
+void func_001879C0(C03* a, f32 f, void* b, void* c, s32 d, s32 e, s32 g, void* h);
+void func_00186BA8(void* a, C03* b, void* c, void* d, void* e, void* f);
 
-void func_001C5C10(C07* a, Ent_172CF0* b, void* c, void* d);
-void func_001C4790(C07* a, Ent_172CF0* b, void* c, void* d);
-void func_001879C0(Ent_172CF0* a, f32 f, void* b, void* c, s32 d, s32 e, s32 g, void* h);
-void func_00186BA8(void* a, Ent_172CF0* b, void* c, void* d, void* e, void* f);
-
-void func_00172CF0(C07* self, Ent_172CF0* a1, void* a2, void* a3, void* a4, void* a5)
+void func_00172CF0(C07* self, C03* a1, void* a2, void* a3, void* a4, void* a5)
 {
     s32 idx;
-    Ent_172CF0* v;
-    Ent_172CF0* cur;
+    C03* v;
+    C03* cur;
 
     switch (self->f2220)
     {
@@ -588,16 +573,16 @@ void func_00172CF0(C07* self, Ent_172CF0* a1, void* a2, void* a3, void* a4, void
     }
     func_001C4790(self, a1, a4, &self->f1190);
     func_001C4790(self, a1, a4, &self->f1290);
-    v = (Ent_172CF0*)func_00172BF8(self, &idx);
+    v = (C03*)func_00172BF8(self, &idx);
     if (v)
     {
-        for (cur = a1; cur; cur = cur->f18)
+        for (cur = a1; cur; cur = (C03*)cur->parent)
         {
             if (*((u8*)cur + idx + 0x2B0))
             {
-                if (a1->f538 & (1ULL << 40))
+                if (a1->flags538 & (1ULL << 40))
                 {
-                    func_001879C0(a1, a1->f3CC, (u8*)a1 + 0x140, v, v->f3F0, v->f3F8, 0, (u8*)self + 0x2670);
+                    func_001879C0(a1, a1->radius3CC, (u8*)a1 + 0x140, v, v->tree.count, (s32)v->tree.nodes, 0, (u8*)self + 0x2670);
                 }
                 else if (a3)
                 {

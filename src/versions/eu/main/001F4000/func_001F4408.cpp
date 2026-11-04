@@ -7,7 +7,7 @@ void func_001F4408(s32 flag, s32 n)
     Obj_1F4408* o;
     C7D* v;
     Val_1F4408* k;
-    Args_1F4408 args;
+    S1EFFA0 args;
     if (ctx->f19D8 == 5) {
         goto lm1;
     }
@@ -36,10 +36,10 @@ l4490:
     func_001F4808(v);
     return;
 larg:
-    args.f00 = 1;
-    args.f04 = D_00275B04;
+    args.kind = 1;
+    args.key = &D_00275B04;
     args.f08 = -1;
     args.f0C = -1;
-    args.f10 = 0;
-    func_001EFFA0((Dst_1F4408*)D_00275F80, &args, n);
+    args.flags = 0;
+    func_001EFFA0(&D_00275F80, &args, n);
 }

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "fpu.h"
+#include "globals.h"
 
 void func_001C4180(C1D* self, s32 value)
 {
@@ -47,8 +48,6 @@ void func_001C5D58(C06* self)
 }
 
 typedef s32 (*VFn_C7B60)(void* self);
-struct Glob_C7B60 { u8 pad[0x275C]; s32 f275C; };
-extern Glob_C7B60* D_00262E10;
 void func_001C8F20(C08* self, s32 a1, s32 a2);
 
 void func_001C7B60(C08* self)
@@ -338,7 +337,6 @@ void func_001C4A80(C07* self, f32* p, f32 f) {
 }
 
 typedef void (*VFnSelf_1C72A0)(void* self, void* item, s32 flag);
-struct Elem_1C72A0 { s32 key00; C03* obj04; s32 c08; };
 void func_001C44F0(C06* self);
 void func_00124DF8(void* self, s32 a1, u8* table);
 void* func_001CB5B8(void* host);
@@ -351,6 +349,9 @@ void func_001C8F20(void* node, s32 kind, s32 flag);
 s32 func_00141008(u8* table, s32 v);
 void func_001DBCC8(void* host, void* fn, void* ctx, s32 a3, s32 a4);
 extern s32 D_00274C30[8];
+struct Ent_274AD8 { s32 a; s32 b; s32 c; };
+extern Ent_274AD8 D_00274AD8[6];
+
 extern u8 D_00261420[];
 
 void func_001C72A0(C08* self)
@@ -376,13 +377,13 @@ void func_001C72A0(C08* self)
     if (self->fA78 > 0) {
         u64 bit = 0x8000;
         bit <<= 28;
-        Elem_1C72A0* e = (Elem_1C72A0*)self->fA7C;
+        Elem08* e = self->fA7C;
         do {
-            C03* o = (C03*)func_0015A418(self->world, 0x101, e->key00, self);
-            e->obj04 = o;
+            C03* o = (C03*)func_0015A418(self->world, 0x101, e->key, self);
+            e->obj = o;
             if (o != 0) {
                 o->flags538 |= bit;
-                e->obj04->desc->m03(e->obj04);
+                ((C03*)e->obj)->desc->m03((C03*)e->obj);
             }
             e++;
             j++;
@@ -502,9 +503,6 @@ void func_001C7188(C08* self, s32 v)
     self->fB74 = v;
 }
 
-struct Ent_274AD8 { s32 a; s32 b; s32 c; };
-extern Ent_274AD8 D_00274AD8[6];
-extern u8 D_002483D0[];
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* table);
@@ -526,10 +524,9 @@ void func_001C44F0(C06* self)
         self->f614 = self->f62C;
     }
     Mat02* dst = &self->m660;
-    *dst = *(Mat02*)D_002483D0;
+    *dst = D_002483D0;
 }
 
-extern u8 D_00248D20[];
 
 s32 func_001CB578(void* self);
 void func_001892A0(f32 a, f32 b, void* out);
@@ -544,7 +541,7 @@ void func_001C7AE0(C08* self, f32 x, f32 y)
     if (t != 0) {
         func_001892A0(x, y, (u8*)self + 0x660);
     } else {
-        func_00188850(D_00248D20, x, (u8*)self + 0x660);
+        func_00188850((u8*)&D_00248D20, x, (u8*)self + 0x660);
     }
 }
 
@@ -576,14 +573,11 @@ s32 func_001C7468(C08* self, C03* obj)
     return 0;
 }
 
-struct Tbl_1C53B0 { u8 pad[0]; };
-
-extern u8 D_00248D20[];
-void func_00188850(Tbl_1C53B0* t, f32 x, void* p);
+void func_00188850(const Vec02* t, f32 x, void* p);
 
 void func_001C53B0(C06* self)
 {
-    func_00188850((Tbl_1C53B0*)D_00248D20, self->f638, (u8*)self + 0x660);
+    func_00188850(&D_00248D20, self->f638, (u8*)self + 0x660);
 }
 
 extern f32 D_0024D654;

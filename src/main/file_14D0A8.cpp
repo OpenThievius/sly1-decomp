@@ -4,8 +4,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "t2176.h"
-
-struct __attribute__((aligned(16))) Quad_14D938 { s32 w[4]; };
+#include "shapes.h"
 
 struct __attribute__((aligned(16))) Vec_14DB78 { f32 v[4]; };
 struct Src_14DB78;
@@ -47,7 +46,7 @@ f32 func_00137DF8(void* src);
 void func_00137E70(void* src, void* dst);
 void func_00186320(Vec_14DB78* p, Vec_14DB78* a, Vec_14DB78* b, f32* o1, f32* o2);
 void func_00188700(void* a, void* b, void* c, f32 w);
-void func_001891C0(void* self, void* arg, Quad_14D938* out);
+void func_001891C0(void* self, void* arg, Quad16* out);
 void* func_0018D500(s32 size);
 void* func_0018D5C0(u32 n);
 void func_001DD3E0(void* a, void* b, void* c, s32 d, s32 e);
@@ -59,7 +58,7 @@ s32 func_0014D1A0(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi);
 void func_0014D280(s32 count, void* points, f32* times, s32 wrap, s32 a4, s32 a5);
 void func_0014D3A8(void* a0, void* a1, s32 count, void* a3, void* a4, void* a5, s32* outIdx, f32* outT);
 void func_0014D680(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
-void func_0014D938(s32 count, Quad_14D938* dst, void* arg, void* self);
+void func_0014D938(s32 count, Quad16* dst, void* arg, void* self);
 T2176* func_0014D9A8(s32 kind);
 f32 func_0014DA18(void);
 f32 func_0014DA28(void);
@@ -135,10 +134,10 @@ ASM_FUNC(func_0014D3A8);
 
 ASM_FUNC(func_0014D680);
 
-void func_0014D938(s32 count, Quad_14D938* dst, void* arg, void* self)
+void func_0014D938(s32 count, Quad16* dst, void* arg, void* self)
 {
-    Quad_14D938 mat[4];
-    Quad_14D938 tmp;
+    Quad16 mat[4];
+    Quad16 tmp;
 
     func_001891C0(self, arg, mat);
     if (count > 0) {
@@ -295,7 +294,7 @@ void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
     func_001DD3E0(&A, &B, &C, a3, a5);
 }
 
-void func_0014DF68(T2176* self,void* a,void* b) { func_0014D938(self->count,(Quad_14D938*)self->points,a,b); }
+void func_0014DF68(T2176* self,void* a,void* b) { func_0014D938(self->count,(Quad16*)self->points,a,b); }
 
 f32 func_0014DF98(T2176* self, f32 t0)
 {

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "t217d.h"
 #include "v24a2.h"
+#include "g27c220.h"
 
 struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
 extern Config_1E0848 D_002758E0;
@@ -28,10 +29,8 @@ void func_001E0828(void* self)
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
 struct Glob_1E00B0 { u8 pad[0x230C]; f32 f230C; s32 f2310; void* f2314; };
-struct Cam_1E00B0 { s32 flags; u8 pad[4]; f32 f08; };
 struct Pool_1E00B0 { u8 pad[0xAA]; u16 fAA; };
 extern Glob_1E00B0* D_00275710;
-extern Cam_1E00B0* D_002623C8;
 extern Pool_1E00B0 D_00262C70;
 extern f32 D_0026185C;
 extern s32 D_002701C4;
@@ -90,11 +89,9 @@ void func_001E00B0(T217D_1380* self)
     }
 }
 
-struct Cnt_1E02C8 { u8 pad[0x440]; s32 f440; };
 struct Buf_1E02C8 { char c[0x40]; };
 struct X_1E02C8 { u8 pad[4]; };
 
-extern Cnt_1E02C8* D_002623C4;
 extern s32 D_002623DC;
 Buf_1E02C8 D_00275900 = {};
 extern X_1E02C8 D_00264A40;
@@ -144,7 +141,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
         func_001AB920(&D_0026E760, -func_00205C78(2.0f, (f32)D_002623DC));
         func_001AB928(&D_0026E760, zero, 0);
         func_001AB938(&D_0026E760);
-        Cam_1E00B0* cam = D_002623C8;
+        G27C230* cam = D_002623C8;
         if (cam->flags & 8) {
             f32 t = cam->f08;
             if (t < one) {
@@ -169,7 +166,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
         s32 id;
         f32 t = o->time;
         if (0.0f < t) {
-            Cam_1E00B0* cam = D_002623C8;
+            G27C230* cam = D_002623C8;
             if (cam->flags & 8) {
                 if (cam->f08 < t) {
                     cam->f08 = t;

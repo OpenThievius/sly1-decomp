@@ -3,6 +3,7 @@
 #include "c01.h"
 #include "c05.h"
 #include "list_iter.h"
+#include "globals.h"
 
 void func_001921A8(void* self);
 
@@ -185,7 +186,6 @@ extern f32 D_00261854;
 extern f32 D_00261858[];
 extern f32 D_00274A44;
 f32 D_00274A60[4] = { 4e+01f, 0.0f, 0.3f, 0.0f };
-extern u8 D_00248D20[];
 extern s32 D_0026E228[8];
 
 void func_00192B58(void* self, f32 t);
@@ -252,7 +252,7 @@ void func_001C34C8(C1D* self, f32 t)
         if (D_0026185C[0] - self->f640 > 2.0f) self->f638 = 0;
     }
     f32 ang = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    func_00188850(D_00248D20, buf, self->f648 - ang);
+    func_00188850((u8*)&D_00248D20, buf, self->f648 - ang);
     func_001EA918((u8*)((Obj_1C34C8_Vt*)self->f660) + 0xD0, buf, D_00274A60, buf2, 0, t);
     ((Obj_1C34C8_Vt*)self->f660)->vt->f88(((Obj_1C34C8_Vt*)self->f660), buf2);
     ca[0] = 0x8010FF00;
@@ -288,9 +288,7 @@ void func_001C34C8(C1D* self, f32 t)
 
 // EXACT: callee func_001EA728 declared with float params first
 
-struct __attribute__((aligned(16))) Quad_1C3FC8 { f32 v[4]; };
 extern f32 D_00261858[];
-extern Quad_1C3FC8 D_00248D30;
 extern u8 D_00274AA8[];
 extern s32 D_0026E228[8];
 extern u8 D_00261EF0[];
@@ -320,7 +318,7 @@ void func_001C3FC8(C02* self, s32 state)
     }
     W(self, 0x670) = 0;
     if (state < 4) if (state >= 2) {
-        Quad_1C3FC8 q;
+        Vec02 q;
         f32 a = func_00205778(F(self, 0x154), F(self, 0x150));
         f32 b = func_001EA408(a + 3.14159274f);
         F(self, 0x644) = b;
@@ -381,16 +379,13 @@ struct Rec_1C30E8 {
     Elem_1C30E8 elems[1];
 };
 
-extern u8 D_002622A8[];
-extern u8 D_002483D0[];
 extern u8 D_00274998[8];
 extern u8 D_002749A0[16];
 extern f32 D_00261858[];
 
 struct Ent_1C0070;
-struct Frame_1C0070 {
-    void* f0; u8* f4; s32 f8; Frame_1C0070* fC;
-    Ent_1C0070* Next() { Ent_1C0070* n = *(Ent_1C0070**)f4; f4 = (u8*)n + f8; return n; }
+struct Frame_1C0070 : ListFrame {
+    Ent_1C0070* Next() { Ent_1C0070* n = *(Ent_1C0070**)link; link = (u8*)n + offset; return n; }
 };
 struct Ent_1C0070 {
     s32 f0; s32 f4; s32 f8; u8 pad0c[0x08]; f32 f14;
@@ -403,8 +398,7 @@ struct Ent_1C0070 {
 };
 struct Pair_1C0070 { s32 a; s32 b; };
 
-extern u8* D_00275710;
-extern Frame_1C0070* D_0027472C;
+extern ListFrame* D_0027472C;
 extern s32 D_00274744;
 extern s32 D_00274730;
 extern s32 D_00274738;
@@ -419,7 +413,7 @@ s32 func_001BF1F0(void);
 void* func_001BF3D0(void);
 typedef f32 (*Fn_1C0070)(void* a, void* b);
 Fn_1C0070 func_001BF578(void);
-s32 func_0011D708(Frame_1C0070* h);
+s32 func_0011D708(ListFrame* h);
 void func_0011D928(s32 a);
 void func_001C06A0(s32 a, s32 b, f32 x);
 s32 func_00182FC8(C01* o);
@@ -441,13 +435,13 @@ void func_001C0070(void)
     if (func_001BF1F0() != 0) return;
     void* v4 = func_001BF3D0();
     Fn_1C0070 v5 = func_001BF578();
-    u8* P = D_00275710 + 0x1BAC;
-    Frame_1C0070* saved = (Frame_1C0070*)D_0027B314;
-    f.f0 = P;
-    f.f4 = P;
-    f.f8 = *(s32*)(P + 8);
-    f.fC = saved;
-    D_0027B314 = (ListFrame*)&f;
+    u8* P = (u8*)D_00275710 + 0x1BAC;
+    ListFrame* saved = D_0027B314;
+    f.list = P;
+    f.link = P;
+    f.offset = *(s32*)(P + 8);
+    f.prev = saved;
+    D_0027B314 = &f;
     if (D_0027472C != 0 && func_0011D708(D_0027472C) == 0) {
         if (D_00274744 != 0) {
             func_001C06A0(8, 1, 1.0f);
@@ -566,7 +560,7 @@ void func_001C0070(void)
         }
     }
     func_0011CE30();
-    D_0027B314 = (ListFrame*)f.fC;
+    D_0027B314 = f.prev;
 }
 
 // Data definitions (retail values)

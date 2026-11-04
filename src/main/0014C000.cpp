@@ -5,6 +5,9 @@
 #include "c20.h"
 #include "c6c.h"
 #include "t217d.h"
+#include "s124df8.h"
+#include "g261ef0.h"
+#include "shapes.h"
 
 void func_0014C838(C68* self, s32 value)
 {
@@ -44,8 +47,7 @@ void func_0014EE70(C46* self)
     }
 }
 
-struct Entry_261CA0 { s32 a, b, c; };
-Entry_261CA0 D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
+S124DF8 D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 idx, void* table);
 
@@ -367,13 +369,13 @@ void func_0014F770(C23* self, s32 kind, void* msg)
 
 s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
-struct __attribute__((aligned(16))) Quad_14F920 { s32 a, b, c, d; };
-struct Elem_14F920 { void** vtbl; };
-struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; C01* f18; u8 pad1[0x190 - 0x1C]; Quad_14F920 q190[4]; };
+
+struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; C01* f18; u8 pad1[0x190 - 0x1C]; Quad16 q190[4];
+ };
 typedef void (*VFn_14F920)(void* self);
 typedef void (*VFn_14F920Arg)(void* self, s32 x);
 
-Entry_261CA0 D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
+S124DF8 D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
 
 void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -389,21 +391,21 @@ void func_0014F920(C23* self)
     func_00124DF8(self, 3, D_00261CE0);
     ((Held23*)self->p734->f200)->f4C = 1;
     Src_14F920* s2 = func_0015A480(self->world, self->f6C0, self);
-    *(Quad_14F920*)&self->q6F0[0] = s2->q190[0];
-    *(Quad_14F920*)&self->q6F0[1] = s2->q190[1];
-    *(Quad_14F920*)&self->q6F0[2] = s2->q190[2];
-    *(Quad_14F920*)&self->q6F0[3] = s2->q190[3];
+    *(Quad16*)&self->q6F0[0] = s2->q190[0];
+    *(Quad16*)&self->q6F0[1] = s2->q190[1];
+    *(Quad16*)&self->q6F0[2] = s2->q190[2];
+    *(Quad16*)&self->q6F0[3] = s2->q190[3];
     self->f730 = s2->f18;
     s32 i = 1;
     if (i < self->cnt) {
         do {
-            Elem_14F920* e = (Elem_14F920*)func_00183058(s2, s2->p14, 0);
-            if (e->vtbl[19] != 0) {
-                ((VFn_14F920)e->vtbl[19])(e);
+            C01* e = (C01*)func_00183058(s2, s2->p14, 0);
+            if (e->desc->m0F != 0) {
+                e->desc->m0F(e);
             }
             i++;
-            ((VFn_14F920)e->vtbl[20])(e);
-            ((VFn_14F920)e->vtbl[7])(e);
+            e->desc->m10(e);
+            e->desc->m03(e);
         } while (i < self->cnt);
     }
     ((VFn_14F920Arg)s2->vtbl[25])(s2, 0);
@@ -424,7 +426,7 @@ struct Node_14C138 {
 
 extern Step_14C138* D_002623C8;
 extern f32 D_00275C60[];
-Entry_261CA0 D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
+S124DF8 D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
 void func_00124A48(C68* self);
 void func_00124DF8(C68* self, s32 n, void* table);
@@ -562,7 +564,6 @@ void func_0014F110(C46* self, s32 state)
     }
 }
 
-extern u8 D_00261EF0[];
 void func_00151E20(void* self, f32 amount);
 
 void func_0014C5E8(C68* self)
@@ -577,7 +578,7 @@ void func_0014C5E8(C68* self)
     } else {
         c = ratio;
     }
-    func_00151E20(D_00261EF0, 1.0f - c * 0.8f);
+    func_00151E20(&D_00261EF0, 1.0f - c * 0.8f);
 }
 
 // An entry of a table of functions defined at the end of this file.

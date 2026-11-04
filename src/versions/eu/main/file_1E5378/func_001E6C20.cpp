@@ -15,7 +15,7 @@ void func_001E6268(Self_eu_1E6C20* self, s32* first, s32* last);
 
 void func_001E6C20(Self_eu_1E6C20* self, Buf_1E6C20* buf)
 {
-    Rgba_1E6C20 c;
+    Rgba4 c;
     f32 t;
     switch (self->f570) {
     case 0:
@@ -27,13 +27,13 @@ void func_001E6C20(Self_eu_1E6C20* self, Buf_1E6C20* buf)
     }
     func_001613C0(buf, 0, 1, 1);
     {
-        Rgba_1E6C20 a = D_002610D8;
-        Rgba_1E6C20 b = D_002610E0;
-        Rgba_1E6C20 r;
-        r.c[0] = Lerp_1E6C20::Of(a.c[0], b.c[0], t);
-        r.c[1] = Lerp_1E6C20::Of(a.c[1], b.c[1], t);
-        r.c[2] = Lerp_1E6C20::Of(a.c[2], b.c[2], t);
-        r.c[3] = Lerp_1E6C20::Of(a.c[3], b.c[3], t);
+        Rgba4 a = D_002610D8;
+        Rgba4 b = D_002610E0;
+        Rgba4 r;
+        r.r = Lerp_1E6C20::Of(a.r, b.r, t);
+        r.g = Lerp_1E6C20::Of(a.g, b.g, t);
+        r.b = Lerp_1E6C20::Of(a.b, b.b, t);
+        r.a = Lerp_1E6C20::Of(a.a, b.a, t);
         c = r;
     }
     func_00161458(buf, *(u32*)&c);

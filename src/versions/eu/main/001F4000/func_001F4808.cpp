@@ -3,13 +3,13 @@
 struct Gl_eu_1F4808 { u8 pad[0x570]; s32 f570; };
 void func_001F4808(C7D* self)
 {
-    Item_1F4808* key;
+    C01* key;
     s32 i;
     s32 found = 0;
     s32 next;
-    Item_1F4808* it;
+    C83* it;
 
-    key = (struct Item_1F4808 *)func_001925F0();
+    key = (C01*)func_001925F0();
     if (((Gl_eu_1F4808*)(Gl_1F4808*)&D_0026E9F8)->f570 == 2
         && (self->f2E0 != 0 || self->f2D4 != 0
             || ((*(Glob_1F4808**)&D_002623C0)->f19DC == 0 && (u8)func_001601A0(self->f2FC) == 1))) {
@@ -30,7 +30,7 @@ void func_001F4808(C7D* self)
     }
     func_001F4760(self, 5);
     for (i = 0; i < self->count; i++) {
-        it = (Item_1F4808*)self->items[i];
+        it = (C83*)self->items[i];
         func_0012C7B0(it, 0, 0, 0, 0.0f, 1.0f);
         next = 0;
         if (found != 0 || func_0012C9A8(it) != 0) {
@@ -42,7 +42,7 @@ void func_001F4808(C7D* self)
         if (self->f324 > 0.0f) {
             self->f31C = ((f32*)&D_0026185C)[0] + self->f324;
         } else if (self->count > 0) {
-            self->f31C = ((f32*)&D_0026185C)[0] + ((Item_1F4808*)self->items[0])->f34;
+            self->f31C = ((f32*)&D_0026185C)[0] + ((C83*)self->items[0])->length;
         } else {
             self->f31C = ((f32*)&D_0026185C)[0];
         }

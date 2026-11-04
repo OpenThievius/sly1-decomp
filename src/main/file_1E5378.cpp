@@ -6,6 +6,8 @@
 #include "list_iter.h"
 #include "v24a0.h"
 #include "t217d.h"
+#include "s192230.h"
+#include "shapes.h"
 extern u8* D_00262E10;
 extern u8* D_00275710;
 
@@ -271,23 +273,22 @@ void func_001E5C78(C16* self)
 
 struct Dev_1E5CE8 { u8 pad[0x24]; s32 f24; };
 struct Hdl_1E5CE8 { u8 pad[0x7E0]; s32 f7E0; };
-struct Rec_1E5CE8 { s32 w0; s32 w4; s32 w8; };
 
-void func_00192230(void* self, s32 kind, Rec_1E5CE8* rec);
+void func_00192230(void* self, s32 kind, S192230* rec);
 void func_001A8C90(void* a, s32 b);
 
-void func_001E5CE8(C16* self, s32 kind, Rec_1E5CE8* rec)
+void func_001E5CE8(C16* self, s32 kind, S192230* rec)
 {
     func_00192230(self, kind, rec);
     if (kind == 0x13) {
         Dev_1E5CE8* dev = (Dev_1E5CE8*)self->f614;
-        s32 id = rec->w0;
+        s32 id = rec->f0;
         if (id == dev->f24) {
-            if (rec->w8 == 0x35B) {
+            if (rec->f8 == 0x35B) {
                 func_001A8C90(self->f618, 1);
             }
         } else if (((Hdl_1E5CE8*)self->f624) != 0 && id == ((Hdl_1E5CE8*)self->f624)->f7E0) {
-            s32 k = rec->w8;
+            s32 k = rec->f8;
             if (k != 0x15E) {
                 if (k == 0x15F) {
                     self->f628 = 0;
@@ -509,12 +510,11 @@ void func_001E62A8(T217D_3F0* self, V24A0* c, s32 k)
 
 ASM_FUNC(func_001E6600);
 
-struct Rgba_1E6C20 { u8 c[4]; };
 struct Buf_1E6C20;
 
 extern f32 D_00261868;
-extern Rgba_1E6C20 D_002610D8;
-extern Rgba_1E6C20 D_002610E0;
+extern Rgba4 D_002610D8;
+extern Rgba4 D_002610E0;
 
 void func_001613C0(Buf_1E6C20* b, s32 a1, s32 a2, s32 a3);
 void func_00161458(Buf_1E6C20* b, u32 c);
@@ -543,7 +543,7 @@ struct Clamp_1E6C20 {
 
 void func_001E6C20(T217D_3F0* self, Buf_1E6C20* buf)
 {
-    Rgba_1E6C20 c;
+    Rgba4 c;
     f32 t;
     switch (self->fade) {
     case 0:
@@ -555,13 +555,13 @@ void func_001E6C20(T217D_3F0* self, Buf_1E6C20* buf)
     }
     func_001613C0(buf, 0, 1, 1);
     {
-        Rgba_1E6C20 a = D_002610D8;
-        Rgba_1E6C20 b = D_002610E0;
-        Rgba_1E6C20 r;
-        r.c[0] = Lerp_1E6C20::Of(a.c[0], b.c[0], t);
-        r.c[1] = Lerp_1E6C20::Of(a.c[1], b.c[1], t);
-        r.c[2] = Lerp_1E6C20::Of(a.c[2], b.c[2], t);
-        r.c[3] = Lerp_1E6C20::Of(a.c[3], b.c[3], t);
+        Rgba4 a = D_002610D8;
+        Rgba4 b = D_002610E0;
+        Rgba4 r;
+        r.r = Lerp_1E6C20::Of(a.r, b.r, t);
+        r.g = Lerp_1E6C20::Of(a.g, b.g, t);
+        r.b = Lerp_1E6C20::Of(a.b, b.b, t);
+        r.a = Lerp_1E6C20::Of(a.a, b.a, t);
         c = r;
     }
     func_00161458(buf, *(u32*)&c);
@@ -630,34 +630,27 @@ void func_001E7440(T217D_3F0* a0, s32 a1)
     }
 }
 
-struct Node_1E7460;
-struct Obj_1E7460;
-void func_00126BC0(Node_1E7460* node, T217D_3F0* self);
+void func_00126BC0(C02* node, T217D_3F0* self);
 extern s32 D_00270458;
 
-struct Node_1E7460 {
-    void** vtable;
-    u8 pad4[0x2C8 - 4];
-    unsigned long f2C8;
-};
 void func_001E7460(T217D_3F0* self)
 {
-    Node_1E7460* cur = (Node_1E7460*)self->current;
-    if ((Node_1E7460*)self->target == cur) {
+    C02* cur = (C02*)self->current;
+    if ((C02*)self->target == cur) {
         return;
     }
     if (cur != 0) {
-        if (!(D_00270458 == 4 && cur == (Node_1E7460*)self->special)) {
-            ((void (*)(Node_1E7460*))cur->vtable[7])(cur);
+        if (!(D_00270458 == 4 && cur == (C02*)self->special)) {
+            cur->desc->m03(cur);
         }
     }
     self->current = self->target;
     if (self->current != 0) {
-        ((void (*)(Node_1E7460*))((Node_1E7460*)self->current)->vtable[6])((Node_1E7460*)self->current);
+        ((C02*)self->current)->desc->m02((C02*)self->current);
         if (D_00270458 != 4) {
-            func_00126BC0((Node_1E7460*)self->current, self);
+            func_00126BC0((C02*)self->current, self);
         }
-        ((Node_1E7460*)self->current)->f2C8 |= 0x100000000UL;
+        ((C02*)self->current)->flags |= 0x100000000UL;
     }
 }
 
@@ -892,20 +885,15 @@ void func_001E86E0(T217D_3F0* self, void* value)
     }
 }
 
-struct Obj_1E87F0 {
-    u8 pad0[0x2C8];
-    u64 f2C8;
-};
-
 void func_001E87F0(T217D_3F0* self, void* a1)
 {
-    Obj_1E87F0* old = (Obj_1E87F0*)self->special;
+    C02* old = (C02*)self->special;
     if (old != 0) {
-        old->f2C8 &= ~(1ULL << 32);
+        old->flags &= ~(1ULL << 32);
     }
     self->special = a1;
     if (a1 != 0) {
-        ((Obj_1E87F0*)a1)->f2C8 |= (1ULL << 32);
+        ((C02*)a1)->flags |= (1ULL << 32);
     }
 }
 

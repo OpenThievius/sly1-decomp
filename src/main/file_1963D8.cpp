@@ -8,6 +8,9 @@ extern f32 D_0026185C[];
 #include "c6c.h"
 #include "c48.h"
 #include "t2195.h"
+#include "shapes.h"
+#include "globals.h"
+#include "t217d.h"
 
 // A four-float vector, aligned as the VU0 reads it.
 struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
@@ -39,11 +42,6 @@ s32 func_001300E8(void* self, s32 kind);
 void func_001B6598(void* obj, s32* out);
 void* func_001E9970(s32 arg);
 
-typedef void (*VFn_197788)(void* self);
-struct Iface_197788 { VFn_197788* vtbl; };
-extern Iface_197788 D_0026D348;
-extern Iface_197788 D_0026E4E0;
-extern Iface_197788 D_0026E760;
 
 void func_001A76A0(void* node, s32 flag);
 void func_00152600(void* a, void* b);
@@ -75,8 +73,6 @@ void func_001973D8(u8* self);
 
 extern u8 D_0026E744[];
 
-typedef void (*VFn_197F10)(void* self);
-struct Vt_197F10 { VFn_197F10* vtbl; };
 
 void func_00192230(void* self, s32 kind, void* rec);
 void func_001B6598(void* dev, s32* out);
@@ -95,7 +91,6 @@ struct Node_197848 {
 };
 
 extern f32 D_00261858[];
-extern u8 D_00248D30[];
 extern C0F* func_00182FC8(C0F*);
 extern s32 func_001527D8(void* list);
 extern s32 func_001EAA70(s32 a, s32 b);
@@ -106,9 +101,7 @@ extern void func_001A76A0(void* node, s32 flag);
 
 
 
-extern u8 D_00248D20[];
 
-struct __attribute__((aligned(16))) Quad_196938 { s32 a, b, c, d; };
 
 
 
@@ -117,14 +110,12 @@ void func_00152438(List01* p, s32 value);
 
 
 
-struct __attribute__((aligned(16))) Quad_001969F8 { s32 a, b, c, d; };
 struct Item_001969F8 { u8 pad[0x24]; void* p24; };
 
 struct Any_001969F8;
 
 struct Tbl_26A738 { s32 f0; Rec_26A728 r[13]; };
 extern u8 D_0021A790[];
-extern u8 D_00248D30[];
 
 void func_00124A48(C18* self);
 void func_00124DF8(C18* self, s32 n, void* table);
@@ -139,59 +130,25 @@ void func_001B6DF8(Any_001969F8* a, void* b);
 
 
 
-struct Nd_196410;
-struct VT_196410 {
-    u8 pad0[8];
-    u32 flags;
-    u8 pad0C[0x38 - 0xC];
-    void (*m38)(Nd_196410*, Stream53*);
-    u8 pad3C[0x58 - 0x3C];
-    void (*m58)(Nd_196410*);
-    u8 pad5C[0x64 - 0x5C];
-    void (*m64)(Nd_196410*, void*);
-    void (*m68)(Nd_196410*, void*);
-};
-struct Nd_196410 {
-    VT_196410* vt;
-    u8 pad04[4];
-    s32 f08;
-    u8 pad0C[0x2C - 0xC];
-    void* f2C;
-    void* f30;
-    u8 pad34[0x80 - 0x34];
-    f32 f80;
-    u8 pad84[4];
-    s32 f88;
-    u8 pad8C[0x2C8 - 0x8C];
-    u64 b0 : 28;
-    u64 mode : 2;
-    u64 b30 : 34;
-};
-struct Cell_196410 { Nd_196410* node; s32 link; };
-struct Frame_196410 {
-    List01* list;
-    u8* cursor;
-    s32 link;
-    Frame_196410* prev;
-};
+struct Cell_196410 { C02* node; s32 link; };
 
 void func_00152438(u8* a, s32 v);
 void func_00137EB0(Stream53* r, void* out);
 void func_00137E70(Stream53* r, void* out);
 s32 func_00137B90(Stream53* r);
 s32 func_00137D10(Stream53* r);
-Nd_196410* func_001DC208(void* host, s32 a);
-Nd_196410* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
-void func_001DC150(void* host, Nd_196410* n, s32 v);
+C02* func_001DC208(void* host, s32 a);
+C02* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
+void func_001DC150(void* host, C02* n, s32 v);
 Cell_196410* func_0018D5C0(s32 n);
 void func_00152470(u8* list, Cell_196410* c);
-Nd_196410* func_0015A418(void* host, s32 kind, s32 id, Nd_196410* c);
+C02* func_0015A418(void* host, s32 kind, s32 id, C02* c);
 void* func_001C1390(s32 id, void* host);
 void func_0011A338(void* a, void* b);
 s32 func_00137C40(Stream53* r);
 s32 func_00137CC0(Stream53* r);
 f32 func_00137DF8(Stream53* r);
-void func_0011EC40(Nd_196410* n, Stream53* r);
+void func_0011EC40(C02* n, Stream53* r);
 void func_0011ECB8(void* host, C53* self, Stream53* r);
 s32 func_00152720(List01* list);
 
@@ -283,6 +240,11 @@ s32 func_001C8010(void* self);
 
 
 
+
+void* func_001925F0(C0F* self, f32 f);
+s32 func_001300E8(void* key, s32 kind);
+s32 func_00182FC8(void* p);
+s32 func_00141170(void* self, void* value);
 struct Tmp_198760 {
     void* f00;
     void* f04;
@@ -291,11 +253,6 @@ struct Tmp_198760 {
     s32 f10;
     u8 pad14[0x40 - 0x14];
 };
-
-void* func_001925F0(C0F* self, f32 f);
-s32 func_001300E8(void* key, s32 kind);
-s32 func_00182FC8(void* p);
-s32 func_00141170(void* self, void* value);
 s32 func_00177838(Tmp_198760* f, s32 a, s32 b);
 void func_001C7CB8(C0F* self, f32 f);
 
@@ -383,17 +340,17 @@ void func_001963D8(C53* self)
 
 void func_00196410(C53* self, Stream53* rd)
 {
-    Nd_196410* arr[64];
-    Frame_196410 fr;
-    Nd_196410* t;
-    Nd_196410* c;
+    C02* arr[64];
+    ListFrame fr;
+    C02* t;
+    C02* c;
     s32 n;
     s32 i;
     s32 j;
     s32 cnt;
     s32 id;
-    Nd_196410* x;
-    Nd_196410* h;
+    C02* x;
+    C02* h;
 
     func_00152438((u8*)&self->cells, 8);
     func_00137EB0(rd, &self->rot);
@@ -415,13 +372,13 @@ void func_00196410(C53* self, Stream53* rd)
         {
             s32 a = func_00137D10(rd);
             c = func_0011E580(id, self->world, 0, a, func_00137D10(rd));
-            c->vt->m38(c, rd);
+            c->desc->m0A(c, rd);
             func_001DC150(self->world, c, func_00137D10(rd));
         }
         cell = func_0018D5C0(16);
         cell->node = c;
         cell->link = self->id;
-        c->f30 = cell;
+        c->alias = (Alias01*)cell;
         func_00152470((u8*)&self->cells, cell);
         arr[i] = c;
     }
@@ -434,11 +391,11 @@ void func_00196410(C53* self, Stream53* rd)
         for (i = 0; i < n; i++)
         {
             c = arr[i];
-            if (c->f08 == id)
+            if (c->id == id)
             {
                 t = c;
             }
-            else if (c->vt->flags & 1)
+            else if (c->desc->flags & 1)
             {
                 t = func_0015A418(self->world, 0x101, id, c);
             }
@@ -458,14 +415,14 @@ void func_00196410(C53* self, Stream53* rd)
             t->f2C = r;
         }
         s32 w = func_00137C40(rd);
-        if (t->vt->flags & 1)
+        if (t->desc->flags & 1)
         {
             t->f88 = w;
         }
         s32 m = func_00137CC0(rd);
         if (m == 2)
         {
-            t->mode = m;
+            t->bits28 = m;
             t->f80 = func_00137DF8(rd);
             if (t->f80 == 3.4028235e+38f)
             {
@@ -477,11 +434,11 @@ void func_00196410(C53* self, Stream53* rd)
     for (i = 0; i < n; i++)
     {
         c = arr[i];
-        if (c->vt->m68 != 0)
+        if (c->desc->m16 != 0)
         {
-            c->vt->m68(c, self);
+            c->desc->m16(c, self);
         }
-        c->vt->m64(c, self->parent);
+        c->desc->m15(c, self->parent);
     }
     if (n == 1)
     {
@@ -490,21 +447,21 @@ void func_00196410(C53* self, Stream53* rd)
         if (func_00152720(list) == 0)
         {
             fr.list = list;
-            fr.prev = (Frame_196410*)D_0027B314;
-            fr.link = list->offset;
-            D_0027B314 = (ListFrame*)&fr;
+            fr.prev = D_0027B314;
+            fr.offset = list->offset;
+            D_0027B314 = &fr;
             c = arr[0];
-            h = *(Nd_196410**)list;
-            fr.cursor = (u8*)h + fr.link;
+            h = *(C02**)list;
+            fr.link = (u8*)h + fr.offset;
             x = h;
             while (x != 0)
             {
-                x->vt->m64(x, c);
-                Nd_196410* nx = *(Nd_196410**)fr.cursor;
-                fr.cursor = (u8*)nx + fr.link;
+                x->desc->m15(x, c);
+                C02* nx = *(C02**)fr.link;
+                fr.link = (u8*)nx + fr.offset;
                 x = nx;
             }
-            D_0027B314 = (ListFrame*)fr.prev;
+            D_0027B314 = fr.prev;
         }
     }
     self->desc->m03(self);
@@ -548,7 +505,7 @@ void func_00196938(C18* self)
 {
     func_001921A8(self);
     self->f61C = -10.0f;
-    (*(Quad_196938*)&self->v630) = *(Quad_196938*)D_00248D20;
+    (*(Quad16*)&self->v630) = *(Quad16*)&D_00248D20;
     self->f688 = 120.0f;
     self->f624 = D_0026A71C;
     self->f628 = D_0026A718;
@@ -576,7 +533,7 @@ void func_001969F8(C18* self)
     func_001299E0((Any_001969F8*)self->f65C, self->f664);
     ((s32*)self->f664)[7] = 1;
     ((Item_001969F8*)self->f664)->p24 = self->f660;
-    *(Quad_001969F8*)((u8*)self->f664 + 0x30) = *(Quad_001969F8*)D_00248D30;
+    *(Quad16*)((u8*)self->f664 + 0x30) = *(Quad16*)&D_00248D30;
     s32 n1 = func_0015A4F0((Any_001969F8*)self->world, 0x305, 0xF, 0, 0, 0);
     self->f690 = n1;
     void* buf = func_0018D500(n1 * 4);
@@ -648,14 +605,14 @@ void func_00197788(C18* self)
     void* p = 0;
     if (v == 0x3F3) p = func_001E9970(0);
     if (p != 0) {
-        D_0026D348.vtbl[14](&D_0026D348);
-        D_0026E4E0.vtbl[14](&D_0026E4E0);
-        D_0026E760.vtbl[14](&D_0026E760);
+        D_0026D348.vt->m14(&D_0026D348);
+        D_0026E4E0.vt->m14(&D_0026E4E0);
+        D_0026E760.vt->m14(&D_0026E760);
         return;
     }
-    D_0026D348.vtbl[15](&D_0026D348);
-    D_0026E4E0.vtbl[15](&D_0026E4E0);
-    D_0026E760.vtbl[15](&D_0026E760);
+    D_0026D348.vt->m15(&D_0026D348);
+    D_0026E4E0.vt->m15(&D_0026E4E0);
+    D_0026E760.vt->m15(&D_0026E760);
 }
 
 void func_00197848(C18* self)
@@ -684,8 +641,8 @@ void func_00197848(C18* self)
     o->desc->m02(o);
     o->desc02()->m1D(o, (Vec02*)((u8*)nd + 0x140));
     o->desc02()->m1E(o, (Mat02*)((u8*)nd + 0x110));
-    o->desc02()->m20(o, (Vec02*)D_00248D30);
-    o->desc02()->m21(o, (Vec02*)D_00248D30);
+    o->desc02()->m20(o, (Vec02*)&D_00248D30);
+    o->desc02()->m21(o, (Vec02*)&D_00248D30);
     func_001C8F20(o, 0x10, 0);
     o->fC14 = nd;
     func_001A76A0(nd, 1);
@@ -728,11 +685,9 @@ void func_00197F10(C18* self, s32 kind, void* rec)
         }
         func_001B6598(rec, &code);
         if (code == 0x3F3) {
-            u8* tbl;
             *(void**)D_0026E744 = (u8*)self + 0x67C;
-            tbl = (u8*)&D_0026D348;
-            *(void**)(tbl + 0x264) = (u8*)self + 0x680;
-            *(void**)(tbl + 0x268) = (u8*)self + 0x684;
+            D_0026D348.target = (s32*)((u8*)self + 0x680);
+            D_0026D348.limit = (s32*)((u8*)self + 0x684);
             func_001DDC38(self->world, self);
             func_001AB890(&D_0026E760, self->f688);
             func_001AB928(&D_0026E760, 0.0f, (void*)func_00197458);
@@ -743,9 +698,9 @@ void func_00197F10(C18* self, s32 kind, void* rec)
             }
             if (code < 0x3F6) {
                 func_001AB958(&D_0026E760);
-                ((Vt_197F10*)&D_0026D348)->vtbl[15](&D_0026D348);
-                ((Vt_197F10*)&D_0026E4E0)->vtbl[15](&D_0026E4E0);
-                ((Vt_197F10*)&D_0026E760)->vtbl[15](&D_0026E760);
+                D_0026D348.vt->m15(&D_0026D348);
+                D_0026E4E0.vt->m15(&D_0026E4E0);
+                D_0026E760.vt->m15(&D_0026E760);
                 func_001DDC38(self->world, 0);
             }
         }

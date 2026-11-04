@@ -3,6 +3,8 @@
 #include "c50.h"
 #include "c1e.h"
 #include "t219c.h"
+#include "shapes.h"
+#include "s153528.h"
 
 void func_00155F90();
 void func_00155FA0(C50* self);
@@ -155,14 +157,10 @@ struct Word_154EE0 {
     s32 value;
 };
 
-struct __attribute__((packed)) Packed_154EE0 {
-    s32 value;
-};
-
 struct Buffer_154EE0 {
     u8 pad0[0x4C];
     s32 cap;
-    Packed_154EE0* items;
+    U32P* items;
     void* source;
 };
 
@@ -175,12 +173,12 @@ void func_00154EE0(Buffer_154EE0* self, s32 count, void* unused, void* src)
     s32 limit = 31;
     s32 cap = (limit < count) ? 32 : count;
     self->cap = cap;
-    self->items = (Packed_154EE0*)func_0018D500(cap * 4);
+    self->items = (U32P*)func_0018D500(cap * 4);
     self->source = func_00137B90(src);
     for (s32 i = 0; i < count; i++) {
         Word_154EE0 tmp = func_00137C40(src);
         if (i < self->cap) {
-            self->items[i] = *(Packed_154EE0*)&tmp;
+            self->items[i] = *(U32P*)&tmp;
         }
     }
 }
@@ -431,26 +429,18 @@ struct Item_154880 {
     u8 pad2[0x60 - 0x48];
 };
 
-struct Loc_154880 {
-    u32 hdr;
-    s32 count;
-    u8* items;
-    u8 pad[0x30 - 0xC];
-    u8 tmp[0x10];
-    u8 tail[0x10];
-};
 
 void func_0018D608(void);
 void func_0018D6F0(void);
 void* func_0018D658(s32 size);
 void func_0018D800(void* dst, void* src, s32 size);
-void func_00153528(Loc_154880* loc, s32 count);
+void func_00153528(S153528* loc, s32 count);
 void func_00152470(void* tmp, Item_154880* item);
-void func_00153EC0(Loc_154880* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void func_00153EC0(S153528* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
 void func_00154880(s32 count, u8* data, f32* values, f32* out)
 {
-    Loc_154880 loc;
+    S153528 loc;
     s32 i;
 
     func_0018D608();
@@ -460,7 +450,7 @@ void func_00154880(s32 count, u8* data, f32* values, f32* out)
         item->p44 = func_0018D658(count * 4);
         func_0018D800(item->p44, data + i * count * 4, count * 4);
         item->f38 = values[i];
-        func_00152470(loc.tmp, item);
+        func_00152470(&loc.d, item);
     }
     loc.count = count;
     func_00153EC0(&loc, 0, 0, 0, 0, 0);
@@ -622,17 +612,16 @@ void func_00157FF8(void* self, void* obj, f32 x)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_157EF8 { s32 a, b, c, d; };
-struct __attribute__((aligned(16))) Blk_157EF8 { Quad_157EF8 q[8]; };
-struct __attribute__((aligned(16))) Tail_157EF8 { Quad_157EF8 q[4]; };
+struct __attribute__((aligned(16))) Blk_157EF8 { Quad16 q[8]; };
+struct __attribute__((aligned(16))) Tail_157EF8 { Quad16 q[4]; };
 void* func_001F5C0C(void* p, s32 v, u32 n);
 struct Pair_157EF8 { s32 z; s32 b; s32 c; Pair_157EF8() { func_001F5C0C(this, 0, sizeof(*this)); } };
-struct __attribute__((aligned(16))) Frame_157EF8 { u8 pad0[0x20]; Quad_157EF8 self_copy; u8 pad1[0x30]; Quad_157EF8 a1_copy; u8 pad2[0x30]; Blk_157EF8 blk; s32 f120; u8 pad3[0x8C]; Tail_157EF8 tail; u8 pad4[0x10]; };
+struct __attribute__((aligned(16))) Frame_157EF8 { u8 pad0[0x20]; Quad16 self_copy; u8 pad1[0x30]; Quad16 a1_copy; u8 pad2[0x30]; Blk_157EF8 blk; s32 f120; u8 pad3[0x8C]; Tail_157EF8 tail; u8 pad4[0x10]; };
 
 void func_001549C8(void* mem);
 void func_00157E00(void* a, void* b, void* c);
 
-void func_00157EF8(Quad_157EF8* self, Quad_157EF8* a1, void* a2, Tail_157EF8* a3, Blk_157EF8* a4, s32 a5, s32 a6)
+void func_00157EF8(Quad16* self, Quad16* a1, void* a2, Tail_157EF8* a3, Blk_157EF8* a4, s32 a5, s32 a6)
 {
     Frame_157EF8 f;
     func_001549C8(&f);

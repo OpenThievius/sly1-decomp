@@ -2,9 +2,9 @@
 #include "c55.h"
 #include "c6c.h"
 #include "c39.h"
+#include "g27c220.h"
+#include "s124df8.h"
 
-struct Item_2619A0 { u32 flags, id, off8; };
-extern Item_2619A0 D_002619A0[5];
 void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);
 void func_00124DF8(void* a, s32 b, void* c);
@@ -28,13 +28,7 @@ void func_00146418(C55* self, void* arg)
     self->f37C = keep;
 }
 
-struct Glob_146470 {
-    u8 pad0[0x19D8];
-    s32 f19D8;
-    s32 f19DC;
-};
 
-extern Glob_146470* D_002623C0;
 extern u8 D_00261420[];
 void func_00124A48(void* a);
 void* func_0015A838(void* a, s32 b, s32 c, void* d);
@@ -48,7 +42,7 @@ void func_00146470(C55* self)
     if (r != 0) {
         ((void (*)(void*))((void**)*(void***)r)[7])(r);
     }
-    Glob_146470* g = D_002623C0;
+    G27C220* g = D_002623C0;
     if (((g->f19D8 << 8) | g->f19DC) != 0x308) {
         if (func_00141008(D_00261420, self->f37C)) {
             self->f2D8 = 2;
@@ -234,7 +228,8 @@ void func_00146340(C55* self)
     self->f340 = 1;
 }
 
-Item_2619A0 D_002619A0[5] = {
+S124DF8 D_002619A0[5] = {
+
     { 0, 0x25F, 0x2E4 },
     { 2, 0x25B, 0x324 },
     { 2, 0x25C, 0x328 },
