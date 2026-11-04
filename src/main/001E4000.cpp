@@ -4875,7 +4875,6 @@ f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
 
 // Globals typed by worker dz06, from retail's bytes and their readers.
 // size: 8-byte label, readers (001AC000, 001B0000) only lw/sw word at +0 (s32), next label 8-aligned
-s32 D_002744D0 = 0;
 // count: word reader, 0x28-stride record count
 s32 D_002744F8 = 0;
 // pointer from allocator (func_0018D5C0), indexed array base; 4-byte word
