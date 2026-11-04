@@ -80,7 +80,7 @@ struct Peer_1E5428 {
     Ctx_1E5428* owner;
 };
 
-extern u8 D_00275B28[];
+extern s32 D_00275B28[10];
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -514,7 +514,7 @@ void func_001E5E70(Obj_1E5E70* self, s32 kind)
 
 extern u8* D_00275710;
 extern u8 D_00275640[];
-extern u8 D_00275B58[];
+extern f32 D_00275B58[2];
 extern f32 D_00275650;
 extern f32 D_00275654;
 extern f32 D_00275658;
@@ -1128,7 +1128,7 @@ void func_001E8840(Obj_1E8840* self)
     self->f268 = 3;
 }
 
-extern u8 D_00275B50[];
+extern u8 D_00275B50[8];
 void func_001E8878(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
 
 s32 func_001E8878(s32 a0, s32 a1);
@@ -1137,3 +1137,7 @@ void func_001E88B0(void)
 {
     func_001E8878(1, 0xFFFF);
 }
+
+s32 D_00275B28[10] = { 0x00000000, 0x00000356, 0x00000618, 0x00000000, 0x00000357, 0x00000610, 0x00000002, 0x0000035C, 0x0000061C, 0x00000000 };
+u8 D_00275B50[8] = { 0 };
+f32 D_00275B58[2] = { 500.0f, 2500.0f };
