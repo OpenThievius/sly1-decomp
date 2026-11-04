@@ -563,6 +563,13 @@ class WholeFileTest(unittest.TestCase):
             c_layout.data_plan([("D_002492F0", 0x2492F0, ["a"]), ("D_0024942C", 0x24942C, ["b"])],
                                [(0x2492F0, 0x134, "x.o", ".rodata.D_002492F0", "D_002492F0")])
 
+    def test_a_whole_file_may_end_in_the_padding_before_a_16_aligned_file(self):
+        chunks = [("D_00000098", 0x98, ["a"]), ("D_000000B0", 0xB0, ["b"]), ("D_000000B8", 0xB8, ["c"])]
+        plan, _ = c_layout.data_plan(chunks[:2], [(0x98, 0x10, "f.o", ".data", "D_00000098")])
+        self.assertEqual([k for k, _ in plan], ["c", "run"])
+        with self.assertRaises(c_layout.LayoutError):  # not before a label only 8-aligned
+            c_layout.data_plan([chunks[0], chunks[2]], [(0x98, 0x10, "f.o", ".data", "D_00000098")])
+
     def test_a_global_may_end_in_the_padding_before_an_8_aligned_label(self):
         chunks = [("D_00000100", 0x100, ["a"]), ("D_00000108", 0x108, ["b"])]
         plan, _ = c_layout.data_plan(chunks, [(0x100, 4, "x.o", ".data.D_00000100", "D_00000100")])
