@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BROKEN, checked 2026-11-04
+// BYTES 115/180 (63.9%), checked 2026-11-04
 // Near miss: the frame and helper-call sequence match, but the compiler saves
 // the constant-data register after the constructor call and orders the prologue
 // and scale store differently from retail.
@@ -10,6 +10,7 @@ struct Obj_1A09C0 { u8 pad0[0x1C]; f32 scale; u32 handle; u8 pad28[8]; u8 pad30[
 extern u8* D_00275710;
 extern Quad_1A09C0 D_0026B590;
 extern Quad_1A09C0 D_0026B5A0;
+void func_0019EB28(Obj_1A09C0* self);
 void func_00118CF0(Quad_1A09C0* out, f32 value);
 Quad_1A09C0* func_00118D10(Quad_1A09C0* out, void* src);
 Quad_1A09C0 func_00118D30(Quad_1A09C0 a, Quad_1A09C0 b);
