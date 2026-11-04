@@ -109,7 +109,7 @@ void func_001C5D58(void* obj);
 void func_00175170(void* obj, s32 a, s32 b);
 
 extern f32 D_00264180[];
-extern f32 D_00264190;
+f32 D_00264190 = 150.0f;
 
 struct Vec_181B20 {
     f32 x;
