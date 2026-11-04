@@ -6,8 +6,8 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     Bits_001E1498 bits;
     bits.d = v;
     if ((bits.u & 0x7FF0000000000000UL) == 0x7FF0000000000000UL) {
-        char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? D_0024E468 : D_0024E470;
-        func_001E2138(buf, s);
+        const char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? D_0024E468 : D_0024E470;
+        func_001E2138(buf, (char*)s);
         return func_001E2100(buf);
     }
     char* out = buf;

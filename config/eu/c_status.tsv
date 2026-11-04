@@ -434,7 +434,7 @@ func_0011C9E0	func_0011C9E0	match
 func_0011CA20	func_0011CA20	match	
 func_0011CA90	func_0011CA90	match	
 func_0011CBB0	func_0011CBB0	match	
-func_0011CBB8	func_0011CBB8	match	version-specific
+func_0011CBB8	func_0011CBB8	match	version-specific, rodata
 func_0011CE30	func_0011CE30	match	
 func_0011D078	func_0011D078	match	version-specific
 func_0011D110	func_0011D120	match	

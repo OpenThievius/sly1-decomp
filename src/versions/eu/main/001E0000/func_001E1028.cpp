@@ -47,11 +47,11 @@ void func_001E1028(Fmt_1E1028_eu* self, Sink_1E1028* sink, u64 value)
         case 'd':
         case 'i':
             if (neg) {
-                *(u16*)pfx = D_0024E3D0;
+                *(u16*)pfx = D_0024E3D0[0];
             } else if (self->f4) {
-                *(u16*)pfx = D_0024E3D8;
+                *(u16*)pfx = D_0024E3D8[0];
             } else if (self->f8) {
-                *(u16*)pfx = D_0024E3E0;
+                *(u16*)pfx = D_0024E3E0[0];
             }
             zeros -= func_001E2100(pfx);
             break;
@@ -63,7 +63,7 @@ void func_001E1028(Fmt_1E1028_eu* self, Sink_1E1028* sink, u64 value)
             break;
         case 'o':
             if (self->fC) {
-                *(u16*)pfx = D_0024E3F0;
+                *(u16*)pfx = D_0024E3F0[0];
             }
             break;
         case 'x':
