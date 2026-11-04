@@ -33,7 +33,7 @@ void func_001AB2B8(Self_1AB2B8_eu* self)
         }
         break;
     case 6:
-        if (((B_1AB2B8*)D_00275710)->f2354 != 0) {
+        if (((C6C*)D_00275710)->f2354 != 0) {
             func_001E20B8(buf, 0x200, D_0024CC78, 0x43, self->f570);
         } else {
             buf[0] = 0;

@@ -2,7 +2,7 @@
 // Clears the screen with a colour: a GS packet of sprite-block fills; PAL uses other VRAM bases.
 void func_00168770(Self_168770* self, u8* color, s32 flag)
 {
-    Packet_168770 f;
+    V24A0 f;
     s32 x;
 
     func_001611B8(&f);

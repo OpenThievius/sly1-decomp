@@ -469,19 +469,10 @@ one:
 s32 D_002649D8[4] = { 16, 16, 11, 0 };
 s32 D_002649E8[6] = { 1083, 1085, 1087, 0, 0, 0 };
 
-struct Obj_0018AC58 {
-    u8 pad0[0xE28];
-    s32 fE28;
-    u8 pad1[0xE30 - 0xE2C];
-    s32 fE30[1];
-    u8 pad2[0xE3C - 0xE34];
-    s32 fE3C;
-};
-
 void func_001AC060(void* p);
 void func_001C8F20(void* node, s32 kind, s32 flag);
 
-void func_0018AC58(Obj_0018AC58* self)
+void func_0018AC58(C0C* self)
 {
     func_001AC060((u8*)&D_0026E248);
     s32 idx = self->fE28;
@@ -621,11 +612,6 @@ void func_0018BD58(Obj_18BD58* self, s32 a, s32 b)
 // NEAR: same callees, args and frame. Retail saves s2,s1,s0 then moves a2->s2, a1->s1 before the jal and fills its delay slot with self->s0; the compiler places move s0 early and fills the delay slot with move s1.
 typedef s32 (*Cb_18A910)(void* self, void* ctx);
 
-struct Self_18A910 {
-    u8 pad[0x14];
-    void* f14;
-};
-
 s32 func_0018A830(void* self, void* ctx);
 void func_0018D608(void* self, void* a1, void* a2);
 void func_001DC238(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
@@ -633,13 +619,13 @@ s32 func_0018A6C0(s32 a0, void* a1, void* a2, s32 a3, s32 a4, void* a5, f32 f);
 void func_0018D6F0(void);
 f32 D_002649C4 = 1.5e+02f;
 
-s32 func_0018A910(Self_18A910* self, void* a1, void* a2)
+s32 func_0018A910(C0C* self, void* a1, void* a2)
 {
     u8 buf[0x70];
     s32 x;
     s32 y;
     func_0018D608(self, a1, a2);
-    func_001DC238(self->f14, 0, a1, a2, func_0018A830, self, &x, &y);
+    func_001DC238(self->world, 0, a1, a2, func_0018A830, self, &x, &y);
     s32 r = func_0018A6C0(0, a1, a2, x, y, buf, D_002649C4);
     func_0018D6F0();
     return r != 0;
@@ -647,16 +633,15 @@ s32 func_0018A910(Self_18A910* self, void* a1, void* a2)
 
 // Hoisting 1.0f into a local `one` matched the constant scheduling.
 struct Sub_18B460 { u8 pad[0xC]; f32 value; };
-struct Obj_18B460 { u8 pad[0xE10]; void* inner; };
 
 extern Sub_18B460* D_002623C8;
 
 void func_001B6598(void* a, s32* out);
 
-void func_0018B460(Obj_18B460* a0, f32* a1)
+void func_0018B460(C0C* a0, f32* a1)
 {
     s32 kind;
-    func_001B6598(a0->inner, &kind);
+    func_001B6598(a0->fE10, &kind);
     switch (kind) {
     case 0x43A:
         {
@@ -1110,14 +1095,11 @@ void func_00188A20(f32* in, f32* out)
 }
 
 s32 D_002649B0[5] = { 4, 5, 60, 41, 76 };
-struct Sub_18A830;
-s32 func_001300E8(Sub_18A830* a, s32 b);
-s32 func_001833F0(Sub_18A830* a, s32 b);
+s32 func_001300E8(C01* a, s32 b);
+s32 func_001833F0(C01* a, s32 b);
 
-typedef s32 (*VFn_18A830)(Sub_18A830* self, void* arg);
-struct Type_18A830 { u8 pad[4]; s32 kind; };
-struct Sub_18A830 { VFn_18A830* vt; };
-struct Rec_18A830 { u8 pad[0x50]; Sub_18A830* sub; };
+typedef s32 (*VFn_18A830)(C01* self, void* arg);
+struct Rec_18A830 { u8 pad[0x50]; C01* sub; };
 
 s32 func_0018A830(void* self, Rec_18A830* rec)
 {
@@ -1131,11 +1113,11 @@ s32 func_0018A830(void* self, Rec_18A830* rec)
     if (i < 5) {
         return 0;
     }
-    if (((Type_18A830*)rec->sub->vt)->kind == 3) {
+    if (rec->sub->desc->id == 3) {
         return 0;
     }
     if (func_001300E8(rec->sub, 0x34) != 0) {
-        if (rec->sub->vt[60](rec->sub, self) == 0) {
+        if (((VFn_18A830*)rec->sub->desc)[60](rec->sub, self) == 0) {
             return 0;
         }
     }

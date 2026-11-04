@@ -108,6 +108,9 @@ struct V24A2 {
     V24A2_Glyph* glyphs;    // 0x7C
     u32 mask;               // 0x80: bit in D_002622D8->flags marking the state as sent
     u8 pad84[4];            // 0x84
+
+    // Whether the font has a glyph for `c`, through its table's entry 2.
+    s32 Has(s32 c) { return vt->has((V24A2*)((u8*)this + vt->adj2), c); }
 };
 
 typedef char check_V24A2[sizeof(V24A2) == 0x88 ? 1 : -1];

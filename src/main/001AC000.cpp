@@ -2,6 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "t217d.h"
+#include "v24a0.h"
 #include "v24a2.h"
 
 // The font object's calls (include/v24a2.h will declare them).
@@ -84,38 +85,32 @@ struct Global_001AEFA0 { u8 pad0[0x2220]; s32 state; };
 
 extern Global_001AEFA0* D_00262E10;
 
-typedef void* (*VFn_1AC5C0)(void* self, f32 sx, f32 sy);
-struct VTab_1AC5C0 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1AC5C0 fn; };
-struct Obj_1AC5C0 { u8 pad0[0x4C]; VTab_1AC5C0* vt; };
 
 extern u8 D_002743D0[];
 
 void func_001AC5C0(T217D_330* self)
 {
-    VTab_1AC5C0* vt;
+    const V24A2_Vt* vt;
 
     func_001AA268(self);
-    vt = ((Obj_1AC5C0*)self->font)->vt;
-    self->font = (V24A2*)vt->fn((u8*)self->font + vt->delta, 1.25f, 1.25f);
+    vt = self->font->vt;
+    self->font = vt->clone((V24A2*)((u8*)self->font + vt->adj1), 1.25f, 1.25f);
     if (func_0015C188(2)) {
         self->frame = (V24A2**)D_002743D0;
         *self->frame = func_0015C1C0(2);
     }
 }
 
-typedef void* (*VFn_1AC888)(void* self, f32 sx, f32 sy);
-struct VTab_1AC888 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1AC888 fn; };
-struct Obj_1AC888 { u8 pad0[0x4C]; VTab_1AC888* vt; };
 
 extern u8 D_002743F0[];
 
 void func_001AC888(T217D_380* self)
 {
-    VTab_1AC888* vt;
+    const V24A2_Vt* vt;
 
     func_001AA268(self);
-    vt = ((Obj_1AC888*)self->font)->vt;
-    self->font = (V24A2*)vt->fn((u8*)self->font + vt->delta, 0.9f, 0.9f);
+    vt = self->font->vt;
+    self->font = vt->clone((V24A2*)((u8*)self->font + vt->adj1), 0.9f, 0.9f);
     self->color = 0xDF7F7F7Fu;
     if (func_0015C188(2)) {
         self->frame = (V24A2**)D_002743F0;
@@ -257,21 +252,18 @@ void func_001AE7F8(T217D_600* self, s32 flag)
 s32 func_001833F0(void* key, s32 item);
 s32 func_001300E8(void* key, s32 item);
 
-typedef void* (*VFn_1ACDA0)(void* self, f32 sx, f32 sy);
-struct VTab_1ACDA0 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1ACDA0 fn; };
-struct Obj_1ACDA0 { u8 pad0[0x4C]; VTab_1ACDA0* vt; };
 
 extern u8 D_00274410[];
 
 void func_001ACDA0(T217D_3D0* self)
 {
-    Obj_1ACDA0* o;
-    VTab_1ACDA0* vt;
+    V24A2* o;
+    const V24A2_Vt* vt;
 
     func_001AA268(self);
-    o = (Obj_1ACDA0*)func_0015C1C0(0);
+    o = func_0015C1C0(0);
     vt = o->vt;
-    self->font = (V24A2*)vt->fn((u8*)o + vt->delta, 1.0f, 1.0f);
+    self->font = vt->clone((V24A2*)((u8*)o + vt->adj1), 1.0f, 1.0f);
     self->scale = 0.8f;
     self->outTime = 0.5f;
     if (func_0015C188(2)) {
@@ -341,8 +333,6 @@ void func_001AE758(T217D_600* self)
 }
 
 struct Flt_1ADF28 { u8 pad[0xC]; f32 v; };
-struct Obj_1ADF28 { u8 pad0[0x4C]; struct VTab_1ADF28* vt; };
-struct VTab_1ADF28 { s32 w0; s32 w1; s16 delta; s16 w2; void* (*fn)(void* self, f32 sx, f32 sy); };
 
 f32 D_0027446C = 0.7f;
 struct Pair_274470 { f32 a; f32 b; };
@@ -352,11 +342,11 @@ extern s32 D_00262C84;
 
 void func_001ADF28(T217D_4C0* self)
 {
-    VTab_1ADF28* vt;
+    const V24A2_Vt* vt;
 
     func_001AA268(self);
-    vt = ((Obj_1ADF28*)self->font)->vt;
-    self->font = (V24A2*)vt->fn((u8*)self->font + vt->delta, D_0027446C, D_00274470.a);
+    vt = self->font->vt;
+    self->font = vt->clone((V24A2*)((u8*)self->font + vt->adj1), D_0027446C, D_00274470.a);
     if (func_0015C1C0(2)) {
         self->frame = (V24A2**)D_00274488;
         *self->frame = func_0015C1C0(2);
@@ -525,28 +515,22 @@ void func_001AD088(T217D* self, s32 value)
     }
 }
 
-typedef void* (*VFn_1AD6A8)(void* self, f32 sx, f32 sy);
-struct VTab_1AD6A8 { s32 w0; s32 w1; s16 delta; s16 w2; VFn_1AD6A8 fn; };
-struct Obj_1AD6A8 { u8 pad0[0x4C]; VTab_1AD6A8* vt; };
 
 extern const char D_0024CEE0[];
 
 void func_001AD6A8(T217D_420* self)
 {
-    Obj_1AD6A8* o;
-    VTab_1AD6A8* vt;
+    V24A2* o;
+    const V24A2_Vt* vt;
 
     func_001AA268(self);
-    o = (Obj_1AD6A8*)func_0015C1C0(2);
+    o = func_0015C1C0(2);
     vt = o->vt;
-    self->font = (V24A2*)vt->fn((u8*)o + vt->delta, 1.0f, 1.0f);
+    self->font = vt->clone((V24A2*)((u8*)o + vt->adj1), 1.0f, 1.0f);
     self->vt->m08(self, D_0024CEE0);
     self->flag = 0;
 }
 
-typedef void* (*FnA_1ADC60)(void* self, f32 a, f32 b);
-struct Tbl_1ADC60 { u8 pad0[8]; s16 off; u8 pad1[2]; FnA_1ADC60 fn; };
-struct Inner_1ADC60 { u8 pad0[0x4C]; Tbl_1ADC60* tbl; };
 
 f32 D_00274448 = 0.9f;
 f32 D_0027444C = 0.9f;
@@ -558,8 +542,8 @@ void* func_001B4688(s32 key);
 void func_001ADC60(T217D_470* self)
 {
     func_001AA268(self);
-    Inner_1ADC60* in = (Inner_1ADC60*)self->font;
-    self->font = (V24A2*)in->tbl->fn((u8*)in + in->tbl->off, D_00274448, D_0027444C);
+    V24A2* in = self->font;
+    self->font = in->vt->clone((V24A2*)((u8*)in + in->vt->adj1), D_00274448, D_0027444C);
     if (func_0015C1C0(2) != 0) {
         self->frame = (V24A2**)D_00274450;
         *self->frame = func_0015C1C0(2);
@@ -1062,7 +1046,6 @@ void func_001ADD28(T217D_470* self)
 extern u8 D_00262280[];
 
 struct Out_1AD3F0;
-struct Strm_1AD3F0 { u8 d[1]; };
 struct Buf_1AD3F0 { u8 d[0xB0]; };
 
 struct Inner_1AD3F0 {
@@ -1083,10 +1066,10 @@ struct Out_1AD3F0 {
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };
-void func_001613C0(Strm_1AD3F0* f, s32 a, s32 b, u64 c);
-void func_00161708(Strm_1AD3F0* f, u64 a, u64 b);
-void func_00161458(Strm_1AD3F0* f, u32 v);
-void func_001615F0(Strm_1AD3F0* f, s32 a, s32 b, s32 c, s32 d);
+void func_001613C0(V24A0* f, s32 a, s32 b, u64 c);
+void func_00161708(V24A0* f, u64 a, u64 b);
+void func_00161458(V24A0* f, u32 v);
+void func_001615F0(V24A0* f, s32 a, s32 b, s32 c, s32 d);
 
 void func_001AD3F0(T217D_3D0* self)
 {
@@ -1128,7 +1111,7 @@ void func_001AD3F0(T217D_3D0* self)
     out.FlagB(0);
     if (self->announce == 0) {
         T217D_0F0* g2 = &D_0026F808;
-        Strm_1AD3F0* s = (Strm_1AD3F0*)D_00262280;
+        V24A0* s = (V24A0*)D_00262280;
         f32 sc = scale;
         f32 y;
         if (g2->open != 0 && g2->current != 0 && ((Inner_1AD3F0*)g2->current)->f2D0 == 2) {
@@ -1169,40 +1152,11 @@ struct Out_1ACAA8 {
     void FlagB(s32 f) { func_00137268(this, f); }
 };
 
-struct Hnd_1ACAA8;
-typedef void (*Draw_1ACAA8)(void* a, void* h, Out_1ACAA8* out, void* d);
-typedef void (*Mode_1ACAA8)(void* a, s32 b, void* d);
-typedef void (*Chr_1ACAA8)(void* a, s32 ch, s32 color, void* d, f32 x, f32 y);
-typedef f32 (*Adv_1ACAA8)(void* a, s32 ch);
-
-struct Vt_1ACAA8 {
-    u8 pad0[0x18];
-    s16 adj18;
-    s16 pad1a;
-    Adv_1ACAA8 f1c;
-    s16 adj20;
-    s16 pad22;
-    Mode_1ACAA8 f24;
-    u8 pad28[0x30 - 0x28];
-    s16 adj30;
-    s16 pad32;
-    Chr_1ACAA8 f34;
-    s16 adj38;
-    s16 pad3a;
-    Mode_1ACAA8 f3c;
-    u8 pad40[0x48 - 0x40];
-    s16 adj48;
-    s16 pad4a;
-    Draw_1ACAA8 f4c;
-};
-
-struct Hnd_1ACAA8 {
-    u8 pad[0x4C];
-    Vt_1ACAA8* vt;
-    f32 Advance(s32 ch) { return vt->f1c((u8*)this + vt->adj18, ch); }
-    void Begin(s32 a, void* d) { vt->f24((u8*)this + vt->adj20, a, d); }
-    void Glyph(s32 ch, s32 color, void* d, f32 x, f32 y) { vt->f34((u8*)this + vt->adj30, ch, color, d, x, y); }
-    void End(s32 a, void* d) { vt->f3c((u8*)this + vt->adj38, a, d); }
+struct Font_1ACAA8 {
+    static f32 Advance(V24A2* f, s32 ch) { return f->vt->width((V24A2*)((u8*)f + f->vt->adj3), ch); }
+    static void Begin(V24A2* f, s32 a, void* d) { f->vt->begin((V24A2*)((u8*)f + f->vt->adj4), a, (s32)d); }
+    static void Glyph(V24A2* f, s32 ch, s32 color, void* d, f32 x, f32 y) { f->vt->draw(x, y, (V24A2*)((u8*)f + f->vt->adj6), ch, color, (s32)d); }
+    static void End(V24A2* f, s32 a, void* d) { f->vt->end((V24A2*)((u8*)f + f->vt->adj7), a, (s32)d); }
 };
 
 struct Clamp_1ACAA8 {
@@ -1249,23 +1203,23 @@ void func_001ACAA8(T217D_380* self)
         out.Color(grey);
         out.FlagA(0);
         out.FlagB(0);
-        Hnd_1ACAA8* o = (Hnd_1ACAA8*)*self->frame;
+        V24A2* o = *self->frame;
         if (o != 0) {
-            o->vt->f4c((u8*)o + o->vt->adj48, self->frame, &out, D_00262280);
+            o->vt->drawBox((V24A2*)((u8*)o + o->vt->adj9), self->frame, &out, D_00262280);
         }
     }
-    ((Hnd_1ACAA8*)self->font)->Begin(0, D_00262280);
+    Font_1ACAA8::Begin(self->font, 0, D_00262280);
     for (i = 0; i < n; i++) {
         s32 ch = self->text[i];
         f32 d;
         c = Clamp_1ACAA8::Of(self->blend / ((f32)(i + 1) / (f32)n), 0.0f, 1.0f);
         rest = 1.0f - c;
-        ((Hnd_1ACAA8*)self->font)->Glyph(ch, self->color, D_00262280, c * x + rest * y, self->shownY);
-        d = ((Hnd_1ACAA8*)self->font)->Advance(ch);
+        Font_1ACAA8::Glyph(self->font, ch, self->color, D_00262280, c * x + rest * y, self->shownY);
+        d = Font_1ACAA8::Advance(self->font, ch);
         x += d;
         y += d;
     }
-    ((Hnd_1ACAA8*)self->font)->End(0, D_00262280);
+    Font_1ACAA8::End(self->font, 0, D_00262280);
 }
 
 struct Rgba_1AC0E8 { u8 c[4]; };
