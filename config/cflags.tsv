@@ -7,7 +7,7 @@
 # Linux build 2.9-ee-991111-01, as OpenRAC's rac1-decomp builds those objects
 # (docs/TOOLCHAIN.md).
 compiler	2.95.3
-default	-O2 -G0 -fno-exceptions
+default	-O2 -G0 -fno-exceptions -fno-rtti
 src/lib/001F4000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/001F8000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/001FC000.cpp	-O2 -G0	2.9-ee-991111
