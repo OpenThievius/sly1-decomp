@@ -89,6 +89,12 @@ s32 D_002626C4 = 0;
 extern s32 D_002626C8;
 extern s32 D_002626CC;
 extern s32 D_00262484;
+extern const f32 D_0024A794;
+extern const f32 D_0024A79C;
+extern const u32 D_0024A7A0[2];
+extern const char D_0024A7A8[8];
+extern const char D_0024A7B0[8];
+extern const char D_0024A7B8[32];
 extern u8 D_00262490[];
 extern u8 D_002624F0[];
 extern u8 D_002625E0[];
@@ -244,7 +250,9 @@ struct Self_16AA18 {
     Dyn_16AA18* slots[9];
 };
 
-extern u8 D_00262718[];
+struct Ent_262718 { s32 a; s32 b; s32 c; };
+struct Tab_262718 { Ent_262718 e[9]; s32 end; };
+extern Tab_262718 D_00262718;
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -254,7 +262,7 @@ u32* func_00160810(s32 idx);
 void func_0016AA18(Self_16AA18* self)
 {
     func_00124A48(self);
-    func_00124DF8(self, 9, D_00262718);
+    func_00124DF8(self, 9, &D_00262718);
 
     if ((u32)(self->kind - 0x515) < 5) {
         s32 t = self->kind - 0x514;
@@ -662,8 +670,8 @@ void func_001688B8(void)
 }
 
 extern s32 D_002626C0;
-extern u8 D_002624E0[];
-extern u8 D_002625D0[];
+extern u8 D_002624E0[16];
+extern u8 D_002625D0[16];
 extern s32 D_00261F1C;
 
 void func_001F6C20(s32 a0);
@@ -767,8 +775,8 @@ extern s32 D_002626C0;
 extern s32 D_002626C4;
 extern u8 D_002625E0[];
 extern u8 D_002624F0[];
-extern u8 D_002625D0[];
-extern u8 D_002624E0[];
+extern u8 D_002625D0[16];
+extern u8 D_002624E0[16];
 
 void func_00202098(void* p, s32 a1, s32 a2, s32 a3);
 void func_001F6C20(s32 a0);
@@ -864,7 +872,8 @@ struct Obj_16AED8 { u8 pad0[0x14]; void* f14; u8 pad1[0x2B0]; u64 f2C8; s32 f2D0
 struct Obj_16AED8Glob { u8 pad0[0x30]; s32 f30; };
 
 s32 D_0026FCF0;
-extern u8 D_00262788[];
+struct Ent_262788 { s32 a; s32 b; s32 c; };
+extern Ent_262788 D_00262788[18];
 extern u8 D_00275BC0[];
 
 void func_00124A48(void* self);
@@ -1090,7 +1099,7 @@ struct Rec_16B190 {
 
 extern u8* D_002623C0;
 struct Tab_16B300 { s32 a; s32 b; };
-extern Tab_16B300 D_00262860[];
+extern Tab_16B300 D_00262860[6];
 extern u8 D_00275BC0[];
 
 void* func_00160180(s32 key);
@@ -1307,7 +1316,7 @@ void func_00169CD8(void* self)
     o->f44 = -1;
     o->f4C = 1;
     o->f50 = 3;
-    o->f58 = 3.4028234663852886e+38f;
+    o->f58 = D_0024A794;
 }
 
 struct __attribute__((aligned(16))) Quad_169FC0 { s32 v[4]; };
@@ -1469,7 +1478,7 @@ void* func_0016A820(u8* self)
 {
     Walk_16A820 w((Iter_16A820*)(self + 0x34));
     void* best = 0;
-    f32 bestF = 3.4028234663852886e+38f;
+    f32 bestF = D_0024A79C;
     void* node = w.First();
     while (node != 0) {
         if (func_001300E8(node, 0x46)) {
@@ -1527,14 +1536,14 @@ void func_0016AF80(Ctx_16AF80* self)
         ((VFnS_16AF80)vt[8])(D_0026F138, "");
     } else if (self->f2D0 == 0) {
         void** vt = *(void***)D_0026F138;
-        ((VFnS_16AF80)vt[8])(D_0026F138, "Bentley");
+        ((VFnS_16AF80)vt[8])(D_0026F138, D_0024A7A8);
     } else {
         s32 flags = *(s32*)(D_002623C0 + self->f2D0 * stride + 0x458);
         if (flags & 1) {
             func_001AD1E8(D_0026F138);
         } else if (self->f2D0 == self->f300) {
             void** vt = *(void***)D_0026F138;
-            ((VFnS_16AF80)vt[8])(D_0026F138, "Murray");
+            ((VFnS_16AF80)vt[8])(D_0026F138, D_0024A7B0);
         } else {
             s1 = 1;
             void** vt = *(void***)D_0026F138;
@@ -1550,7 +1559,7 @@ void func_0016AF80(Ctx_16AF80* self)
     }
 
     if (s1 != 0) {
-        ((VFnS_16AF80)(*(void***)D_0026FA90)[8])(D_0026FA90, "Press &2X&. to Start Mission!");
+        ((VFnS_16AF80)(*(void***)D_0026FA90)[8])(D_0026FA90, D_0024A7B8);
         ((VFnV_16AF80)(*(void***)D_0026FA90)[14])(D_0026FA90);
     } else {
         void** vt = *(void***)D_0026FA90;
@@ -1699,8 +1708,9 @@ struct Slot_16B300 { u8 pad[0x20]; };
 extern f32 D_00261858[];
 extern f32 D_00262970;
 struct Gl_16B300 { u8 pad[0x268]; f32 f268; };
-extern u8 D_00262890[];
-extern u8 D_00262950[];
+struct Slot_262890 { u32 w[8]; };
+extern Slot_262890 D_00262890[6];
+extern Slot_262890 D_00262950;
 extern s32 D_0026FCF4;
 void func_001BE728(Slot_16B300* s);
 s32 func_001BE980(void);
@@ -1717,14 +1727,14 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
             s32 fl = ((Glob_16B300*)D_002623C0)->f19EC;
             if (!(fl & 2)) {
                 ((Glob_16B300*)D_002623C0)->f19EC = fl | 2;
-                slot = (Slot_16B300*)D_00262950;
+                slot = (Slot_16B300*)&D_00262950;
             }
         } else {
             Gl_16B300* gp = (Gl_16B300*)D_0026FA90;
             f32 t = D_00261858[1];
             if (D_00262970 <= t - gp->f268) {
                 gp->f268 = t;
-                slot = (Slot_16B300*)(D_00262890 + (a << 5));
+                slot = (Slot_16B300*)((u8*)D_00262890 + (a << 5));
             }
         }
         if (slot) {
@@ -2421,3 +2431,39 @@ void func_0016BBA8(Ctx_16BBA8* ctx, Obj_16BBA8* o)
     }
     func_001BFCD8((Tag_16BBA8*)0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
+
+s32 D_00262480 = 0xF;
+u8 D_002624E0[16] = { 0 };
+u8 D_002625D0[16] = { 0 };
+Tab_262718 D_00262718 = {
+    { { 2, 0x51A, 0x2D0 }, { 2, 0x51B, 0x2D4 }, { 2, 0x51C, 0x2D8 }, { 2, 0x51D, 0x2DC },
+      { 2, 0x51E, 0x2E0 }, { 2, 0x51F, 0x2E4 }, { 2, 0x520, 0x2E8 }, { 2, 0x521, 0x2EC },
+      { 2, 0x522, 0x2F0 } },
+    0
+};
+Ent_262788 D_00262788[18] = {
+    { 0, 0x4F9, 0x2DC }, { 0, 0x4FA, 0x2E4 }, { 0, 0x4FB, 0x2EC }, { 1, 0x4FC, 0x2F4 },
+    { 0, 0x50B, 0x328 }, { 0, 0x50C, 0x32C }, { 0, 0x50D, 0x330 }, { 0, 0x50E, 0x334 },
+    { 0, 0x50F, 0x338 }, { 1, 0x510, 0x310 }, { 1, 0x511, 0x314 }, { 1, 0x512, 0x318 },
+    { 1, 0x513, 0x31C }, { 1, 0x514, 0x320 }, { 7, 0x33B, 0x33C }, { 7, 0x33C, 0x340 },
+    { 7, 0x33D, 0x344 }, { 7, 0x33E, 0x348 }
+};
+Tab_16B300 D_00262860[6] = {
+    { 0x4FF, 0x505 }, { 0x500, 0x506 }, { 0x501, 0x507 }, { 0x502, 0x508 }, { 0x503, 0x509 },
+    { 0x504, 0x50A }
+};
+Slot_262890 D_00262890[6] = {
+    { { 0, 0, 0, 0, 0, 0, 0, 0 } },
+    { { 0x635DE216, 0x4EC49A4B, 0xE334472E, 0xCEF69512, 0x21FD26D6, 0x635CED13, 0xE33445A7, 0x4EC400FB } },
+    { { 0x3FB4CB9D, 0xE4C59CDC, 0xB54DAA16, 0x74DAA291, 0x4E0ADF39, 0x3FB04A25, 0xB54DA89D, 0xE4C5FF1C } },
+    { { 0x51EAF76B, 0xB417FD43, 0x999B48BC, 0xA609B70E, 0x7503D2C5, 0x51EAB865, 0x999B4A34, 0xB41790D3 } },
+    { { 0xA46F3D2E, 0x368721CE, 0xF314B84E, 0x702E7249, 0x5011BB12, 0xA47BDDCC, 0xF314BAC4, 0x3687A2FE } },
+    { { 0x4BEF3327, 0x61E51B24, 0x2E2955B0, 0xFEF61D5D, 0x4AC1B015, 0x4BE71C67, 0x2E29573C, 0x61E5EF04 } }
+};
+Slot_262890 D_00262950 = { { 0xAD5AA16C, 0xC4D11624, 0x183E0989, 0x9870DBBF, 0xC74A50B2, 0xAD59F526, 0x183E0BF2, 0xC4D06934 } };
+extern const f32 D_0024A794 = 3.4028235e+38f;
+extern const f32 D_0024A79C = 3.4028235e+38f;
+extern const u32 D_0024A7A0[2] = { 0, 0 };
+extern const char D_0024A7A8[8] = "Bentley";
+extern const char D_0024A7B0[8] = "Murray";
+extern const char D_0024A7B8[32] = "Press &2X&. to Start Mission!";

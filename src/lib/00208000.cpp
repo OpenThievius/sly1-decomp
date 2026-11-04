@@ -381,8 +381,8 @@ s32 func_0020B978(Self_20B978* self, s32 value)
 }
 
 // NEAR: retail saves $ra and $s0-$s5 with sd (8 bytes), not the 16-byte sq of this compiler; the body is otherwise identical.
-extern u8 D_00250160[];
-extern u8 D_00250188[];
+extern const char D_00250160[];
+extern const char D_00250188[];
 
 struct Obj_20BF78 {
     u8 pad0[0x124];
@@ -399,7 +399,7 @@ struct Obj_20BF78 {
 
 u32 func_0020DEE8(u32 value);
 u32 func_0020F5B8(struct Obj_20BF78 *self, u32 n);
-void func_0020B978(struct Obj_20BF78 *self, void *p);
+void func_0020B978(struct Obj_20BF78 *self, const void *p);
 
 void func_0020BF78(struct Obj_20BF78 *self)
 {
@@ -530,9 +530,9 @@ struct Pool_0020B278 {
     u32 f08;
 };
 
-extern u8 D_00250098[];
+extern const char D_00250098[];
 
-s32 func_0020B978(Owner_0020B278* owner, u8* p);
+s32 func_0020B978(Owner_0020B278* owner, const char* p);
 
 s32 func_0020B278(Owner_0020B278* owner, Pool_0020B278* pool, u32 offset, u32 align)
 {
@@ -801,7 +801,7 @@ void func_0020B940(Ctx_20B2E8* c, s32 msg, s32 flags);
 s32 func_0020F7F0(Ctx_20B2E8* c);
 s32 func_0020B570(Self_20B2E8* self, s32 a, s32 b);
 s32 func_0020B718(Self_20B2E8* self);
-extern s32 D_002500B8;
+extern const char D_002500B8[];
 
 s32 func_0020B2E8(Self_20B2E8* self)
 {
@@ -810,7 +810,7 @@ s32 func_0020B2E8(Self_20B2E8* self)
     Ctx_20B2E8* c = self->ctx;
     c->f0 = 0;
     if ((c->fD8 & 0x3F) != 0) {
-        func_0020B940(c, (s32)&D_002500B8, c->fD8);
+        func_0020B940(c, (s32)D_002500B8, c->fD8);
         return -1;
     }
     c->f820 = 0;
@@ -874,13 +874,13 @@ struct Table_20A7F0
     u8 bits[16];
 };
 
-extern Table_20A7F0 D_00250028;
-extern char D_00250038[];
+extern const Table_20A7F0 D_00250028;
+extern const char D_00250038[];
 
 u32 func_002116B0(Bits_20A7F0* bs, s32 n);
 void func_00211700(Bits_20A7F0* bs);
 void func_00211748(Bits_20A7F0* bs, s32 n);
-void func_0020B978(Ctx_20A7F0* ctx, char* msg);
+void func_0020B978(Ctx_20A7F0* ctx, const char* msg);
 
 s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
 {
@@ -1054,16 +1054,16 @@ struct Info_2093F0 {
 
 extern s32 D_0027AECC;
 extern u8 D_0062ADC0[];
-extern u8 D_0024FFA0[];
-extern u8 D_0024FFB8[];
-extern u8 D_0024FFE0[];
+extern const char D_0024FFA0[];
+extern const char D_0024FFB8[];
+extern const char D_0024FFE0[];
 
 s32 func_001F6B20(Req_2093F0* r);
 void func_00209B80(s32 a, s32 b, s32 c);
 void func_001F6B60(s32 sema);
 void func_001F7BE8(s32 a);
 s32 func_001F80C0(Sema_2093F0* p, u32 flags, s32 z);
-void func_001E1F10(u8* msg);
+void func_001E1F10(const char* msg);
 s32 func_001F8290(Sema_2093F0* p, s32 a1, s32 a2, u8* a3, s32 a4, Info_2093F0* a5, s32 a6, s32 a7, s32 a8);
 void func_001F6B40(s32 sema);
 
@@ -1342,8 +1342,8 @@ struct Dec_20B9F0 {
     void* f858;
 };
 
-extern u8 D_0027AF80[];
-extern u8 D_0027AFC0[];
+extern u8 D_0027AF80[64];
+extern u8 D_0027AFC0[64];
 
 u32 func_0020F5B8(Dec_20B9F0* d, s32 bits);
 void func_0020B978(Dec_20B9F0* d, const char* msg);
@@ -1860,3 +1860,19 @@ void func_0020BEA0(Obj_20BEA0* obj, u32 value, u32 mask)
     req.mode = 3;
     func_0020B190((Handle_20BEA0*)obj->field858, &req);
 }
+
+extern const Table_20A7F0 D_00250028 = { { 0x00, 0x10, 0x08, 0x18, 0x08, 0x18, 0x10, 0x20, 0x18, 0x28, 0x20, 0x30, 0x20, 0x30, 0x28, 0x38 } };
+extern const char D_0024FFA0[24] = "bind error libmc \n";
+extern const char D_0024FFB8[40] = "libmc: too old release of mcserv.irx\n";
+extern const char D_0024FFE0[72] = "libmc: too old release of mcman.irx\n\0\0\0\0sceMcUdCheckNewCard RPC faild\n";
+extern const char D_00250038[56] = "pack_header_field_flag needs to be '0' in PS\n";
+extern const char D_00250070[40] = "The size of work area is too small";
+extern const char D_00250098[32] = "work area size is too small";
+extern const char D_002500B8[72] = "image buffer needs to be aligned to 64byte boundary(0x%08x)";
+extern const char D_00250118[32] = "the second field is missing";
+extern const char D_00250138[16] = "[MPEG ERROR]%s\n";
+extern const char D_00250148[24] = "vertical size > 2800";
+extern const char D_00250160[40] = "_chroma_format needs to be 1: 420";
+extern const char D_00250188[32] = "Unsupported profile/level";
+u8 D_0027AF80[64] = { 0x08, 0x10, 0x10, 0x13, 0x10, 0x13, 0x16, 0x16, 0x16, 0x16, 0x16, 0x16, 0x1a, 0x18, 0x1a, 0x1b, 0x1b, 0x1b, 0x1a, 0x1a, 0x1a, 0x1a, 0x1b, 0x1b, 0x1b, 0x1d, 0x1d, 0x1d, 0x22, 0x22, 0x22, 0x1d, 0x1d, 0x1d, 0x1b, 0x1b, 0x1d, 0x1d, 0x20, 0x20, 0x22, 0x22, 0x25, 0x26, 0x25, 0x23, 0x23, 0x22, 0x23, 0x26, 0x26, 0x28, 0x28, 0x28, 0x30, 0x30, 0x2e, 0x2e, 0x38, 0x38, 0x3a, 0x45, 0x45, 0x53 };
+u8 D_0027AFC0[64] = { 16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16 };
