@@ -2758,7 +2758,7 @@ func_001C0CF0	func_001C19E8	match
 func_001C0EC0	func_001C1BB8	match	
 func_001C0FF0	func_001C1CE8	match	
 func_001C1030	func_001C1D28	match	
-func_001C10A8	func_001C1DA0	match	
+func_001C10A8	func_001C1DA0	match	rodata
 func_001C10D8	func_001C1DD0	match	
 func_001C1110	func_001C1E08	match	
 func_001C1148	func_001C1E40	match	
