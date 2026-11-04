@@ -253,15 +253,15 @@ Node_15A868* func_0015A868(Node_15A868* list, Node_15A868* other)
 
 struct __attribute__((packed)) Pk_15AAE0 { u64 v; };
 
-extern Pk_15AAE0 D_00262180;
-extern Pk_15AAE0 D_00262188;
-extern Pk_15AAE0 D_00262190;
-extern Pk_15AAE0 D_00262198;
-extern Pk_15AAE0 D_002621A0;
-extern Pk_15AAE0 D_002621A8;
-extern Pk_15AAE0 D_002621B0;
-extern Pk_15AAE0 D_002621B8;
-extern Pk_15AAE0 D_002621C0;
+Pk_15AAE0 D_00262180 = { 0x4348000043480000ULL };
+Pk_15AAE0 D_00262188 = { 0x42C8000042C80000ULL };
+Pk_15AAE0 D_00262190 = { 0x4448000043FA0000ULL };
+Pk_15AAE0 D_00262198 = { 0x43960000C3960000ULL };
+Pk_15AAE0 D_002621A0 = { 0x4270000041700000ULL };
+Pk_15AAE0 D_002621A8 = { 0x42F0000041F00000ULL };
+Pk_15AAE0 D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
+Pk_15AAE0 D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
+Pk_15AAE0 D_002621C0 = { 0x4170000040A00000ULL };
 
 struct Obj_15AAE0 {
     u8 pad0[0x14];
@@ -742,7 +742,7 @@ struct Actor_15AEB0 {
     f32 f688;
 };
 
-extern u8 D_002621E0[];
+s32 D_002621E0[6] = { 4, 0x258, 0x5D8, 2, 0x25A, 0x67C };
 
 void func_00124DF8(void* self, s32 n, void* p);
 f32 func_001EAAE0(f32 a, f32 b);
@@ -1548,7 +1548,7 @@ struct Actor_15AC08 {
     s32 f634;
 };
 
-extern u8 D_002621C8[];
+s32 D_002621C8[6] = { 0, 0x256, 0x5D0, 2, 0x259, 0x678 };
 
 void func_001BAC30(Actor_15AC08* self, void* arg);
 void func_00124DF8(Actor_15AC08* self, s32 n, void* table);
