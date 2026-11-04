@@ -36,8 +36,8 @@ void func_001F0908(Obj_1F0908* self)
         for (s32 i = 0; i < self->tbl->count; i++) {
             Ent_1F0908* en = &self->tbl->ents[i];
             if (en->type == 10) {
-                Body_1F0908* n = func_0015A418(self->f14, 0x104, en->id, self);
-                if (n != 0) n->vt->fn(n);
+                C01* n = func_0015A418(self->f14, 0x104, en->id, self);
+                if (n != 0) n->desc->m02(n);
             }
         }
     }

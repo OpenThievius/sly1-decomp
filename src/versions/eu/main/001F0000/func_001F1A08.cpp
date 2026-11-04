@@ -4,7 +4,7 @@ struct Obj_1F1A08_eu {
     u8 pad0[0x560];
     s32 f560;
     u8 pad1[0x570 - 0x564];
-    Sub_1F1A08* f570;
+    C67* f570;
     u8 pad2[0x58C - 0x574];
     f32 f58C;
     f32 f590;
@@ -18,14 +18,14 @@ void func_001F1A08(Obj_1F1A08_eu* self, Pad_1F1A08* t)
     s32 v1;
 
     if (self->f570 == 0) return;
-    if (self->f570->f2D0 != 2) return;
+    if (self->f570->mode != 2) return;
     if (self->f570->f560 != 0) return;
     if ((t->fAA & 0x910) != 0 || t->f14 == 1) {
         func_001E9570((Q_1F1A08*)D_00275BC0);
         func_0016EC20((Pool_1F1A08*)D_00262C70, 0x910);
         return;
     }
-    if (self->f560 != self->f570->f2D0) return;
+    if (self->f560 != self->f570->mode) return;
 
     s3 = func_001F0490(self->f570, self->f570->f2DC, &loc[0], &loc[1]);
     s2 = func_0016EC98(t);

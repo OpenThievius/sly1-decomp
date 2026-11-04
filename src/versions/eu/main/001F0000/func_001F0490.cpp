@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL's own definition: reports whether an action is allowed, with the selector and index it used.
-s32 func_001F0490(Obj_1F0490* self, s32 kind, s32* outA, s32* outB)
+s32 func_001F0490(C67* self, s32 kind, s32* outA, s32* outB)
 {
     s32 sel = -1;
     s32 idx = -1;
@@ -10,7 +10,7 @@ s32 func_001F0490(Obj_1F0490* self, s32 kind, s32* outA, s32* outB)
         idx = 4;
         flag = 1;
     } else {
-        s32 mode = self->f2F4;
+        s32 mode = self->slot;
         s32 allowed = 1;
         if (mode == 5 && (kind == 1 || kind == 7)) {
             allowed = 0;
