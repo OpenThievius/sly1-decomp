@@ -3959,10 +3959,6 @@ void func_0015CF70();
 void func_0015D4E0();
 void func_001FBDF8();
 
-extern const s32 D_00248DF0[4] = {0x0, 0x6, 0x6, 0x6};
-extern const s32 D_00248E38[2] = {0x6, 0x1000};
-extern const s32 D_00248EA8[2] = {0xF, 0x6};
-extern const s32 D_00248EB0[2] = {0x1000, 0x2000};
 extern const f32 D_00249A1C = 3.4028235e+38f;
 extern const f32 D_00249B10[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249D64 = 3.4028235e+38f;
