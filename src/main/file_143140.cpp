@@ -9,12 +9,10 @@ extern void func_001448C8(void*, s32, void*);
 #include "list_iter.h"
 
 
-extern void* D_00261990;
 void func_00143968(void* arg);
 
 
 
-extern void* D_00261990;
 void func_00143A38(void* arg);
 
 
@@ -29,7 +27,6 @@ struct Rgba_1639E8
     };
     Rgba_1639E8(u32 v) { rgba = v; }
 };
-Rgba_1639E8 D_002618B0(0x80303030);
 
 struct Obj_1439A8 {
     u8 pad[0x1F8];
@@ -69,13 +66,11 @@ void func_00183FE0(f32* a, f32* b, f32 x, f32 y, f32 z, f32 w);
 
 
 
-extern void* D_00261990;
 
 void func_00143940(void* self);
 
 
 
-extern void* D_00261990;
 
 void func_00143988(void* self);
 
@@ -99,8 +94,6 @@ struct Ctl_143A60 {
     u8 f454[0x20];
 };
 
-extern f32 D_00261880[4];
-extern f32 D_00261890[4];
 void func_00144938(void* self, void* a, void* b);
 void func_001493B8(void* p, s32 zero);
 void func_00145088(void* self, s32 a1, void* a2, s32 a3, s32 a4);
@@ -217,7 +210,6 @@ void func_00149660(struct Sub_00143648* self, struct Self_00143648* owner);
 void func_0014A888(struct Sub_00143648* self, struct Self_00143648* owner);
 void func_00143A60(struct Self_00143648* self, s32 a1);
 
-extern f32 D_002618B8[4];
 extern u8 D_002483D0[];
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
@@ -226,9 +218,6 @@ extern const Fn_Table D_002173B0[];
 extern const Fn_Table D_002173C8[];
 extern const Fn_Table D_002173E0[];
 extern const Fn_Table D_002173F8[];
-extern f32 D_002618A0;
-extern f32 D_002618A4;
-extern f32 D_002618A8;
 
 
 
@@ -503,6 +492,31 @@ s32 func_00145FD8(u8* self);
 s32 func_00145FF8(u8* self);
 void func_00146018(Obj_146018* obj, s32 value, f32 first, f32 second);
 void func_00146028(Obj_146028* obj);
+
+// The file's .data, in retail's order; the labels only its assembly reads are included.
+f32 D_00261880[4] = { 0.0f, -2000.0f, 500.0f, 0.0f };
+f32 D_00261890[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+f32 D_002618A0 = 5e+02f;
+f32 D_002618A4 = 2e+04f;
+f32 D_002618A8 = 0.5f;
+Rgba_1639E8 D_002618B0(0x80303030);
+f32 D_002618B8[4] = { 0.5f, 0.0f, 0.1f, 10.0f };
+INCLUDE_DATA(D_002618C8);
+INCLUDE_DATA(D_002618CC);
+INCLUDE_DATA(D_002618D0);
+INCLUDE_DATA(D_002618E0);
+INCLUDE_DATA(D_002618F0);
+INCLUDE_DATA(D_00261900);
+INCLUDE_DATA(D_00261910);
+INCLUDE_DATA(D_00261920);
+INCLUDE_DATA(D_00261924);
+INCLUDE_DATA(D_00261928);
+INCLUDE_DATA(D_0026194C);
+INCLUDE_DATA(D_00261950);
+INCLUDE_DATA(D_00261958);
+INCLUDE_DATA(D_00261970);
+INCLUDE_DATA(D_00261980);
+void* D_00261990 = 0;
 
 void func_00143140(void)
 {

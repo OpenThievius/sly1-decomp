@@ -344,5 +344,3 @@ Item_2619A0 D_002619A0[5] = {
 };
 
 // Data of src/main/file_143140.cpp, defined here until the file's own data is proved.
-f32 D_002618A0 = 5e+02f;
-f32 D_002618A4 = 2e+04f;
