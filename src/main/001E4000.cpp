@@ -4034,7 +4034,6 @@ extern const f32 D_0024AFA0 = 3.40282347e+38f;
 extern const f32 D_0024B164 = 3.40282347e+38f;
 extern const f32 D_0024B16C = 3.40282347e+38f;
 extern const f32 D_0024B258 = -3.40282347e+38f;
-extern const char D_0024B438[328] = "The Secret Police File\000\000The Tokyo Police File\000\000\000The Making Of Sly Cooper\000\000\000\000\000\000\000\000Commercials & Outtakes\000\000Tide of Terror\000\000Raleigh Hung out to Dry\000Sunset Snake Eyes\000\000\000\000\000\000\000Muggshot Busted\000Vicious Voodoo\000\000Mz Ruby Vexed\000\000\000Fire in the Sky\000The Panda King on Ice\000\000\000The Cold Heart of Hate\000\000Ten Seconds\000\000\000\000\000The Thievius Raccoonus\000\000Credits";
 extern const f32 D_0024B64C = 3.40282347e+38f;
 extern const f32 D_0024C930 = 3.40282347e+38f;
 extern const f32 D_0024C9B0 = 3.40282347e+38f;
@@ -4181,7 +4180,6 @@ f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
 f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
 f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
 f32 D_00264A38 = 20.0f;
-f32 D_002699BC = 0.5f;
 f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
 s32 D_00269CD8[8] = { 3, 18, 19, 20, 4, 5, 21, 9 };
@@ -5210,7 +5208,6 @@ s32 D_002649A8 = 0;
 // size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
 Slot_269990 D_00269990 = {0};
 // size: s32, word load/store only
-s32 D_00269B48 = 0;
 // size: s32 counter, word load/store only
 s32 D_00269C90 = 0;
 Obj_2629A8 D_002629A8 = {0};

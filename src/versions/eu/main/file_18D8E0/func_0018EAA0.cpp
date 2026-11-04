@@ -7,8 +7,9 @@ struct Obj_18EAA0_eu {
     s32 fA4;
 };
 
-void func_0018EAA0(struct Obj_18EAA0_eu* self)
+void func_0018EAA0(Obj_18EAA0* self_)
 {
+    Obj_18EAA0_eu* self = (Obj_18EAA0_eu*)self_;
     self->f00 = 0;
     func_0011E498();
     func_0011D480(2, self->fA0);
