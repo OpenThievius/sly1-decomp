@@ -3068,15 +3068,15 @@ func_001E0828	func_001E1650	match
 func_001E0848	func_001E1670	match	
 func_001E08F8	func_001E1720	match	version-specific
 func_001E0978	func_001E1798	match	version-specific, rodata
-func_001E0CD0	func_001E1AD8	match	
+func_001E0CD0	func_001E1AD8	match	rodata
 func_001E0E18	func_001E1C20	match	
 func_001E0EF8	func_001E1D00	match	version-specific, rodata
 func_001E0F58	func_001E1D58	match	
 func_001E1028	func_001E1E28	match	version-specific, rodata
 func_001E1330	func_001E2130	match	
 func_001E13D0	func_001E21D0	match	version-specific, rodata
-func_001E1498	func_001E2298	match	version-specific
-func_001E17A8	func_001E25A8	match	
+func_001E1498	func_001E2298	match	version-specific, rodata
+func_001E17A8	func_001E25A8	match	rodata
 func_001E1A08	func_001E2808	match	version-specific, rodata
 func_001E1DB8	func_001E2BB8	match	version-specific
 func_001E1EB0	func_001E2CB0	match	
