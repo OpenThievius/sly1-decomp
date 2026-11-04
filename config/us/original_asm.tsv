@@ -258,7 +258,7 @@ func_00169E20	00169E20	416	handwritten	VU0 macro instruction
 func_0016A240	0016A240	224	handwritten	VU0 macro instruction
 func_0016A320	0016A320	136	handwritten	VU0 macro instruction
 func_0016A910	0016A910	260	handwritten	VU0 macro instruction
-func_0016C440	0016C440	48	handwritten	stores and nops before the stack frame is set up
+func_0016C440	0016C440	12	remnant	stripped-function leftover
 func_0016C4D8	0016C4D8	12	remnant	stripped-function leftover
 func_0016C528	0016C528	2260	handwritten	VU0 macro instruction
 func_0016D128	0016D128	184	handwritten	VU0 macro instruction
@@ -396,7 +396,7 @@ func_001925C0	001925C0	48	handwritten	VU0 macro instruction
 func_00192988	00192988	4	remnant	stripped-function leftover
 func_00192DD0	00192DD0	736	handwritten	VU0 macro instruction
 func_001936A0	001936A0	1972	handwritten	kernel or system instruction (max.s)
-func_001963A8	001963A8	48	handwritten	stores and nops before the stack frame is set up
+func_001963A8	001963A8	12	remnant	stripped-function leftover
 func_00196B78	00196B78	716	handwritten	VU0 macro instruction
 func_00196EB0	00196EB0	776	handwritten	VU0 macro instruction
 func_001971B8	001971B8	540	handwritten	VU0 macro instruction
@@ -476,7 +476,7 @@ func_001A9AE8	001A9AE8	368	handwritten	VU0 macro instruction
 func_001AA890	001AA890	4	remnant	stripped-function leftover
 func_001AE220	001AE220	404	handwritten	kernel or system instruction (min.s)
 func_001AE5E0	001AE5E0	372	handwritten	kernel or system instruction (max.s)
-func_001AEC80	001AEC80	48	handwritten	stores and nops before the stack frame is set up
+func_001AEC80	001AEC80	12	remnant	stripped-function leftover
 func_001AF108	001AF108	688	handwritten	VU0 macro instruction
 func_001AF820	001AF820	728	handwritten	VU0 macro instruction
 func_001AFBB0	001AFBB0	1332	handwritten	VU0 macro instruction
@@ -657,7 +657,7 @@ func_001DF520	001DF520	128	handwritten	VU0 macro instruction
 func_001DF600	001DF600	256	handwritten	VU0 macro instruction
 func_001DF700	001DF700	780	handwritten	VU0 macro instruction
 func_001E0820	001E0820	4	remnant	stripped-function leftover
-func_001E08C8	001E08C8	48	handwritten	stores and nops before the stack frame is set up
+func_001E08C8	001E08C8	12	remnant	stripped-function leftover
 func_001E20B0	001E20B0	4	remnant	stripped-function leftover
 func_001E20F8	001E20F8	4	remnant	stripped-function leftover
 func_001E2210	001E2210	4	remnant	stripped-function leftover
@@ -713,7 +713,7 @@ func_001EFCE0	001EFCE0	4	remnant	stripped-function leftover
 func_001F0218	001F0218	4	remnant	stripped-function leftover
 func_001F17A0	001F17A0	268	handwritten	VU0 macro instruction
 func_001F20A8	001F20A8	1504	handwritten	VU0 macro instruction
-func_001F2728	001F2728	48	handwritten	stores and nops before the stack frame is set up
+func_001F2728	001F2728	12	remnant	stripped-function leftover
 func_001F2840	001F2840	1712	handwritten	VU0 macro instruction
 func_001F2EF0	001F2EF0	592	handwritten	VU0 macro instruction
 func_001F3140	001F3140	184	handwritten	VU0 macro instruction

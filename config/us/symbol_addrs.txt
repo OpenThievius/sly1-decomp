@@ -53,3 +53,12 @@ func_001B9940 = 0x001B9940; // type:func
 // Data labels no instruction names: the start of a proved file's .rodata, reached only through a
 // pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128).
 D_00249CA0 = 0x00249CA0;
+
+// Constructors (_GLOBAL_$I$) behind the linker's leftovers: retail's constructor list
+// (D_0027B130) names each as func_X + 0x10, after the two 8-byte runs (a store, then a nop) the
+// linker left of the layout setters each file wrote out after its static initialiser. Named by us.
+func_0016C450 = 0x0016C450; // type:func
+func_001963B8 = 0x001963B8; // type:func
+func_001AEC90 = 0x001AEC90; // type:func
+func_001E08D8 = 0x001E08D8; // type:func
+func_001F2738 = 0x001F2738; // type:func

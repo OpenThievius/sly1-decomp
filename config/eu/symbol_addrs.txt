@@ -42,3 +42,11 @@ func_001A1D78 = 0x001A1D78; // type:func
 func_001A4828 = 0x001A4828; // type:func
 func_001B6C40 = 0x001B6C40; // type:func
 func_001BA630 = 0x001BA630; // type:func
+
+// Constructors (_GLOBAL_$I$) behind the linker's leftovers, as in config/us/symbol_addrs.txt:
+// each follows the 16 bytes the linker left of two layout setters. Named by us.
+func_0016CA98 = 0x0016CA98; // type:func
+func_00197100 = 0x00197100; // type:func
+func_001AF980 = 0x001AF980; // type:func
+func_001E1700 = 0x001E1700; // type:func
+func_001F3728 = 0x001F3728; // type:func
