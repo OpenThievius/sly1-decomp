@@ -468,18 +468,7 @@ s32 func_00160D10();
 
 extern f32 D_0026185C[];
 
-struct Obj_1AC060 {
-    u8 pad[0x264];
-    s32 f264;
-    s32 f268;
-    s32 f26C;
-    s32 f270;
-    u8 pad2[0x278 - 0x274];
-    f32 f278;
-    f32 f27C;
-};
-
-void func_001AC060(Obj_1AC060* self)
+void func_001AC060(T217D_2E0* self)
 {
     s32 n = self->f270 - 1;
     self->f270 = n;
@@ -499,8 +488,8 @@ void func_001AC060(Obj_1AC060* self)
     s32 v0 = self->f26C - 1;
     s32 b = self->f270;
     v0 = (-1 < v0) ? v0 : 0;
-    self->f278 = (f32)(v0 * a + b) / d;
-    self->f27C = D_0026185C[0];
+    self->fillTarget = (f32)(v0 * a + b) / d;
+    self->changedAt = D_0026185C[0];
 }
 
 extern const char D_0024CE00[];

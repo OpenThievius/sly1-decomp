@@ -277,7 +277,7 @@ void func_001DC108(u8* owner, Touch03* node)
     }
 }
 
-extern Quad5E D_00275730;
+extern Quad16 D_00275730;
 
 void func_00123ED0(C5E* self);
 
@@ -1046,7 +1046,7 @@ void func_001DE808(C14* self)
     func_00129D00(s->f750, 5, &s->f754);
     ((u8*)s->f754)[0x11] = 1;
     ((Fn0_1DE808)((Base_1DE808*)s->f750)->vtbl[47])(s->f750);
-    s->f75C = func_001B6290(s->f758, self, -1, 1);
+    s->f75C = (S1B6290*)func_001B6290(s->f758, self, -1, 1);
     if (s->f73C == 0 || D_00262E10[0] == 0) {
         flag = 1;
     } else {
@@ -1193,25 +1193,7 @@ extern const F2_24DCA8 D_0024DCA8;
 extern u8 D_00248D20[];
 extern u8 D_00248D30[];
 
-struct __attribute__((aligned(16))) Quad_1DFBE0 { s32 a, b, c, d; };
 
-struct Obj_1DFBE0 {
-    u8 pad0[0x4E0];
-    s32 f4E0;
-    u8 pad1[0x580 - 0x4E4];
-    s32 f580;
-    u8 pad2[0x638 - 0x584];
-    f32 f638;
-    u8 pad3[0x640 - 0x63C];
-    Quad_1DFBE0 f640;
-    u8 pad4[0x720 - 0x650];
-    s32 f720;
-    f32 f724;
-    u8 pad5[0x730 - 0x728];
-    f32 f730;
-    u8 pad6[0x75C - 0x734];
-    void* f75C;
-};
 
 struct Tab_1DFBE0 { s32 x; };
 
@@ -1219,7 +1201,7 @@ void func_001B64D8(C2F* h, s32 b);
 void func_001B6628(C2F* h, s32 b);
 void func_00188850(struct Tab_1DFBE0* tab, void* out, f32 v);
 
-void func_001DFBE0(struct Obj_1DFBE0* self, s32 mode)
+void func_001DFBE0(C14* self, s32 mode)
 {
     s32 old = self->f720;
     if (mode != old) {
@@ -1253,8 +1235,9 @@ void func_001DFBE0(struct Obj_1DFBE0* self, s32 mode)
         case 0:
         case 2:
         case 3:
-            self->f640 = *(struct Quad_1DFBE0*)D_00248D30;
-            func_00188850((struct Tab_1DFBE0*)D_00248D20, (u8*)self + 0x660, self->f638);
+            self->v640 = *(Vec02*)D_00248D30;
+            func_00188850((struct Tab_1DFBE0*)D_00248D20, &self->m660, self->f638);
+
             self->f580 = 0;
             break;
         default:
@@ -1334,7 +1317,8 @@ f32 D_00275680[4] = { 100.0f, -150.0f, 500.0f, 0.0f };
 f32 D_00275690[2] = { 500.0f, 2500.0f };
 f32 D_00275698[2] = { 500.0f, 2500.0f };
 f32 D_002756A0[4] = { 500.0f, 2500.0f, 0.0f, 0.0f };
-Quad5E D_00275730 = { 0x42C80000, 0, 0, 0 };
+Quad16 D_00275730 = { 0x42C80000, 0, 0, 0 };
+
 Quad_1DE798 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
 Tab_275750 D_00275750 = { {
     { 0x0, 0x34D, 0x6DC }, { 0x0, 0x350, 0x758 }, { 0x4, 0x60, 0x748 },

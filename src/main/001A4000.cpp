@@ -8,6 +8,7 @@
 #include "list_iter.h"
 #include "c8c.h"
 #include "c5f.h"
+#include "t217d.h"
 
 void func_001A76A0(void* child, int flag);
 
@@ -504,13 +505,6 @@ void func_001A4B30(C5F* self)
     }
 }
 
-typedef void (*VFn_1A4D60)(void* self);
-
-struct Mgr_1A4D60 {
-    VFn_1A4D60* vtbl;
-};
-
-extern Mgr_1A4D60 D_0026D0C8;
 
 void* func_001E9970(void* zero);
 
@@ -521,9 +515,9 @@ void func_001A4D60(C5F* self)
         p = func_001E9970(p);
     }
     if (p != 0) {
-        D_0026D0C8.vtbl[14](&D_0026D0C8);
+        D_0026D0C8.vt->m14(&D_0026D0C8);
     } else {
-        D_0026D0C8.vtbl[15](&D_0026D0C8);
+        D_0026D0C8.vt->m15(&D_0026D0C8);
     }
 }
 
@@ -1479,7 +1473,7 @@ void func_001A4C48(C5F* self)
         }
         break;
     case 5: {
-        t = (C45*)self->target;
+        t = self->target;
         if (t) {
             if (t->state == 0) {
                 Link5F* s = self->link;
@@ -1515,7 +1509,7 @@ s32 func_001A4DC0(C5F* self)
         break;
     case 5:
         if (self->target) {
-            if (((C45*)self->target)->state == 3 && ((C45*)self->target)->f554 + 3.0f < D_0026185C[0]) s = 6;
+            if (self->target->state == 3 && self->target->f554 + 3.0f < D_0026185C[0]) s = 6;
         } else if (self->f654 + 5.0f < D_0026185C[0]) {
             if (!self->link || self->link->f2D4 != 3) s = 6;
         }
@@ -1616,18 +1610,12 @@ void func_001A7D98(Obj_1A7D98* self, s32 state)
 }
 
 struct Link_1A4EF0 { u8 pad[0x18]; C5F* f18; };
+// T217D_440::child, written as an unaligned word here (swl/swr).
 struct Packed_1A4EF0 { u8 pad[0x324]; s32 v __attribute__((packed)); };
-struct Glob_1A4EF0 { u8 pad[0x324]; s32 v; };
 
-extern Glob_1A4EF0 D_002701F8;
 struct Step_1A4EF0 { u8 pad[0x14]; void* f14; };
-struct Vt_1A4EF0 { u8 pad[0x3C]; void (*f3C)(void* self); };
-struct Single_1A4EF0 { Vt_1A4EF0* vt; };
 extern u8 D_00275BC0[];
 extern u8 D_00261EF0[];
-extern u8 D_0026FF68[];
-struct Tab_1A4EF0 { u8 pad[0x264]; void* f264; void* f268; };
-extern Single_1A4EF0 D_0026EC70;
 
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_001E9498(u8* a, u8* b);
@@ -1673,8 +1661,8 @@ void func_001A4EF0(C5F* self, s32 state)
         break;
     }
     case 2: {
-        ((Tab_1A4EF0*)&D_0026D0C8)->f264 = &self->f3C4;
-        ((Tab_1A4EF0*)&D_0026D0C8)->f268 = &self->limit3B8;
+        D_0026D0C8.target = &self->f3C4;
+        D_0026D0C8.limit = &self->limit3B8;
         func_001DDC38(self->world, self);
         break;
     }
@@ -1682,7 +1670,7 @@ void func_001A4EF0(C5F* self, s32 state)
         v = func_0015A418(self->world, 0x105, 0x33D, 0);
         W(self, 0x658) = v;
         if (v) {
-            D_002701F8.v = v;
+            D_002701F8.child = (void*)v;
             func_001E9498(D_00275BC0, (u8*)&D_002701F8);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) func_001A6BE0(o, 8);
@@ -1692,7 +1680,7 @@ void func_001A4EF0(C5F* self, s32 state)
         v = func_0015A418(self->world, 0x105, 0x33E, 0);
         W(self, 0x658) = v;
         if (v) {
-            D_002701F8.v = v;
+            D_002701F8.child = (void*)v;
             func_001E9498(D_00275BC0, (u8*)&D_002701F8);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) {
@@ -1702,11 +1690,11 @@ void func_001A4EF0(C5F* self, s32 state)
         func_00151E20(D_00261EF0, 1.0f);
         break;
     case 4:
-        func_00194D30(D_0026FF68, 0, 0x1A);
+        func_00194D30((u8*)&D_0026FF68, 0, 0x1A);
         break;
     case 6:
         func_001A4070(P(self, 0x354), 3);
-        D_0026EC70.vt->f3C(&D_0026EC70);
+        D_0026EC70.vt->m15(&D_0026EC70);
         break;
     }
 }

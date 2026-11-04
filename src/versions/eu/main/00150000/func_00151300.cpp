@@ -3,18 +3,18 @@
 struct Hld_151300_eu { u8 pad[0x578]; s32 f578; u8 pad2[4]; s32 f580; };
 struct Sc_151300_eu { u8 pad[0x584]; u8 f584; u8 pad2[7]; f32 f58C; };
 
-s32 func_00151300(Obj_151300* self)
+s32 func_00151300(C65* self)
 {
     s32 flags = self->f2E8;
     if (flags & 2) {
-        Ent_151300* e = self->f2E4 < self->f2DC - 1 ? &self->f2E0[self->f2E4 + 1] : 0;
+        Ent_151300* e = self->step2E4 < self->count2DC - 1 ? &((Ent_151300*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->f0 == 2) {
             if (flags == 2) return 0;
         }
         if (((Hld_151300_eu*)&D_002708E0)->f580 == self->f2F0 && ((Hld_151300_eu*)&D_002708E0)->f578 == 1) flags &= 0xFFFFFFFD;
     }
     if (flags & 4) {
-        Ent_151300* e = self->f2E4 < self->f2DC - 1 ? &self->f2E0[self->f2E4 + 1] : 0;
+        Ent_151300* e = self->step2E4 < self->count2DC - 1 ? &((Ent_151300*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->f0 == 1 && flags == 4) return 0;
         if (((Hld_151300_eu*)&D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)&D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
     }
@@ -25,7 +25,7 @@ s32 func_00151300(Obj_151300* self)
         if (func_001BE980() == 0) flags &= 0xFFFFFFF7;
     }
     if (flags & 0x10) {
-        if (self->f2F8 == 0) flags &= 0xFFFFFFEF;
+        if (self->value2F8 == 0) flags &= 0xFFFFFFEF;
     }
     if (flags & 0x20) {
         if (func_00136530(&D_002701F8) != 0) flags &= 0xFFFFFFDF;

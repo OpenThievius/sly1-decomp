@@ -11,7 +11,11 @@
 
 struct C05;
 struct C06;
+struct C07;
 struct C08;
+struct C63;     // an object of class 0x63 (c63.h)
+struct S1B6290; // a handle func_001B6290 makes (s1b6290.h)
+struct Player2195;  // an animation's player (t2195.h)
 
 // 0x80 bytes at 0x580 of class 0x05, which class 0x17's slot 72 copies as one block.
 struct Blk05 {
@@ -72,7 +76,17 @@ struct Slot19 {
     void* obj;              // 0x00
     u8 pad04[0x10 - 0x04];
     Vec02 v10;              // 0x10
-    u8 pad20[0x60 - 0x20];
+    u8 pad20[0x50 - 0x20];
+    f32 f50;                // 0x50: f698 over f610 (slots 0, 1) or f614 (func_001D8D90)
+    u8 pad54[0x60 - 0x54];
+};
+
+// An entry of class 0x08's second queue at 0xAC8 (func_001CA720 adds one, func_001CA7C0
+// resolves its id into obj).
+struct Pend08 {
+    s32 f00;                // 0x00
+    s32 id;                 // 0x04: -1 once resolved
+    void* obj;              // 0x08
 };
 
 // Class 0x10's doubleword at 0xC10, which its slot 9 keeps across the copy as an unaligned
@@ -165,8 +179,11 @@ struct C06 : C05 {
     f32 f634;               // 0x634
     f32 f638;               // 0x638
     f32 f63C;               // 0x63C
-    void* f640;             // 0x640
-    u8 pad644[0x660 - 0x644];
+    union {
+        void* f640;         // 0x640
+        Vec02 v640;         // 0x640: class 0x14 sets it from D_00248D30 (func_001DFBE0)
+    };
+    u8 pad650[0x660 - 0x650];
     Mat02 m660;             // 0x660: the identity at set-up (slot 16); slot 84 hands it on
 
     s32 f690;               // 0x690
@@ -286,8 +303,9 @@ struct C07 : C06 {
     u8 pad25B0[0x25D8 - 0x25B0];
     void* f25D8[5];         // 0x25D8
     u8 pad25EC[0x2674 - 0x25EC];
-    s32 f2674;              // 0x2674
-    u8 pad2678[0x2684 - 0x2678];
+    s32 f2674;              // 0x2674: func_001D1200 compares it with f2678
+    C63* f2678;             // 0x2678: the record func_001D1260 fills
+    u8 pad267C[0x2684 - 0x267C];
     s32 f2684;              // 0x2684
     f32 f2688;              // 0x2688
     s32 f268C;              // 0x268C
@@ -296,7 +314,10 @@ struct C07 : C06 {
     u8 pad26A4[0x26A8 - 0x26A4];
     s32 f26A8;              // 0x26A8
     void* f26AC;            // 0x26AC
-    u8 pad26B0[0x26B4 - 0x26B0];
+    union {
+        s32 f26B0;          // 0x26B0: set by func_001D4C90 (a function's address, or 0)
+        void (*cb26B0)(C07* self);  // 0x26B0: called once by func_001D4C98
+    };
     Ev07 f26B4;             // 0x26B4: the last message slot 75 took (func_001D4D08)
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
@@ -313,14 +334,20 @@ struct C07 : C06 {
     s32 f2768;              // 0x2768
     u8 pad276C[0x2770 - 0x276C];
     u8 f2770[0x20];         // 0x2770
-    u8 pad2790[0x2B74 - 0x2790];
-    s32 f2B74;              // 0x2B74
-    s32 f2B78;              // 0x2B78
-    s32 f2B7C;              // 0x2B7C
-    s32 f2B80;              // 0x2B80
-    s32 f2B84;              // 0x2B84
-    s32 f2B88;              // 0x2B88
-    s32 f2B8C;              // 0x2B8C
+    u8 pad2790[0x2B70 - 0x2790];
+    union {
+        Vec02 q2B70[2];     // 0x2B70: the two quads func_00178598 copies from what func_001782C0 takes
+        struct {
+            void* f2B70;    // 0x2B70: the object it touches (func_001D4A98, func_001D51A0)
+            s32 f2B74;      // 0x2B74
+            s32 f2B78;      // 0x2B78
+            s32 f2B7C;      // 0x2B7C
+            s32 f2B80;      // 0x2B80
+            s32 f2B84;      // 0x2B84
+            s32 f2B88;      // 0x2B88
+            s32 f2B8C;      // 0x2B8C
+        };
+    };
     u8 pad2B90[0x2BB0 - 0x2B90];
     Vec02 v2BB0;            // 0x2BB0
     Vec02 v2BC0;            // 0x2BC0
@@ -338,7 +365,8 @@ struct C08 : C06 {
     s32 f724;               // 0x724
     f32 f728;               // 0x728
     s32 f72C;               // 0x72C
-    u8 pad730[0x738 - 0x730];
+    void* f730;             // 0x730: what func_001C9A58 hands to func_001C8F20 (0 from func_001CB328)
+    u8 pad734[0x738 - 0x734];
     s32 f738;               // 0x738
     f32 f73C;               // 0x73C
     f32 f740;               // 0x740
@@ -346,9 +374,9 @@ struct C08 : C06 {
     f32 f748;               // 0x748
     f32 f74C;               // 0x74C
     void* f750;             // 0x750
-    void* f754;             // 0x754
+    Player2195* f754;       // 0x754: an animation's player (func_0012C288 makes it, func_0012E760 ends it)
     Slot08 f758[17];        // 0x758: ids -1 at set-up (slot 0)
-    void* f7E0;             // 0x7E0
+    Player2195* f7E0;       // 0x7E0: another (func_0012F0A0, func_0012F6B0)
     s32 f7E4;               // 0x7E4
     Group08 f7E8[8];        // 0x7E8
     void* f868;             // 0x868
@@ -372,13 +400,15 @@ struct C08 : C06 {
     s32 fA6C;               // 0xA6C
     f32 fA70;               // 0xA70
     void* fA74;             // 0xA74
-    s32 fA78;               // 0xA78
-    Elem08 fA7C[10];        // 0xA7C
-    u8 padAF4[0xAF8 - 0xAF4];
+    s32 fA78;               // 0xA78: the number of fA7C entries (func_001CA960)
+    Elem08 fA7C[4];         // 0xA7C
+    u8 padAAC[0xAC4 - 0xAAC];
+    s32 fAC4;               // 0xAC4: the number of fAC8 entries (func_001CA720)
+    Pend08 fAC8[4];         // 0xAC8
     s32 fAF8;               // 0xAF8
     s32 fAFC;               // 0xAFC
     s32 fB00;               // 0xB00
-    void* fB04;             // 0xB04
+    s32 fB04;               // 0xB04: a flag (1 from func_001CA888, tested by func_001C72A0)
     s32 fB08;               // 0xB08
     void* fB0C;             // 0xB0C
     s32 fB10;               // 0xB10
@@ -388,7 +418,7 @@ struct C08 : C06 {
     u8 fB20[4];             // 0xB20
     f32 fB24;               // 0xB24
     u8 padB28[0xB40 - 0xB28];
-    void* fB40;             // 0xB40
+    s32 fB40;               // 0xB40: set to 1 with fB48 (func_001CAB00)
     u8 padB44[0xB48 - 0xB44];
     void* fB48;             // 0xB48
     s32 fB4C;               // 0xB4C
@@ -573,8 +603,8 @@ struct C13 : C08 {
 };
 
 struct C14 : C06 {
-    s32 f720;               // 0x720
-    s32 f724;               // 0x724
+    s32 f720;               // 0x720: the mode func_001DFBE0 sets
+    f32 f724;               // 0x724: the clock when it last changed (func_001DFBE0)
     s32 f728;               // 0x728
     f32 f72C;               // 0x72C
     f32 f730;               // 0x730
@@ -588,7 +618,7 @@ struct C14 : C06 {
     void* f750;             // 0x750
     void* f754;             // 0x754
     void* f758;             // 0x758
-    void* f75C;             // 0x75C
+    S1B6290* f75C;          // 0x75C: a handle (func_001B64D8, func_001B6628 take it)
 };
 
 struct C15 : C05 {
@@ -644,7 +674,7 @@ struct C16 : C05 {
 
 struct C17 : C05 {
     s32 f610;               // 0x610
-    void* f614;             // 0x614: a handle (func_001B6290)
+    S1B6290* f614;          // 0x614: a handle (func_001B6290)
     u8 pad618[0x61C - 0x618];
     u8 f61C[0x28];          // 0x61C: three 12-byte records func_0019A178 sets up (slot 16)
     s32 f644;               // 0x644
@@ -663,7 +693,7 @@ struct C17 : C05 {
 
 struct C18 : C05 {
     void* f610;             // 0x610
-    void* f614;             // 0x614
+    S1B6290* f614;          // 0x614: a handle (func_001B6290)
     f32 f618;               // 0x618
     f32 f61C;               // 0x61C
     u8 pad620[0x624 - 0x620];
@@ -671,18 +701,20 @@ struct C18 : C05 {
     f32 f628;               // 0x628
     u8 pad62C[0x630 - 0x62C];
     Vec02 v630;             // 0x630
-    u8 pad640[0x644 - 0x640];
+    void* f640;             // 0x640: an object func_00198760 tests and hands on
     s32 f644;               // 0x644
     u8 pad648[0x65C - 0x648];
     void* f65C;             // 0x65C
     void* f660;             // 0x660
     void* f664;             // 0x664
-    u8 pad668[0x688 - 0x668];
+    u8 pad668[0x67C - 0x668];
+    s32 f67C;               // 0x67C: counted up by func_00198760, at most D_0026A720
+    u8 pad680[0x688 - 0x680];
     f32 f688;               // 0x688
     u8 pad68C[0x690 - 0x68C];
     s32 f690;               // 0x690
     void* f694;             // 0x694: f690 entries
-    u8 pad698[0x69C - 0x698];
+    f32 f698;               // 0x698: the time of the next transfer (func_00197848, func_00198760)
     List01 f69C;            // 0x69C: link offset 0x568 (slot 0); filled by slot 16
     List01 f6A8;            // 0x6A8: link offset 0x568 (slot 0)
     void* f6B4;             // 0x6B4
@@ -705,8 +737,8 @@ struct C19 : C05 {
     f32 f684;               // 0x684
     u8 pad688[0x694 - 0x688];
     f32 f694;               // 0x694
-    s32 f698;               // 0x698
-    u8 pad69C[0x6A0 - 0x69C];
+    f32 f698;               // 0x698: divided by f610 or f614 into the slots (func_001D8D90); 0 in func_001D9C98
+    f32 f69C;               // 0x69C: eased by func_001D8D90
     s32 f6A0;               // 0x6A0
     u8 pad6A4[0x6B0 - 0x6A4];
     Slot19 f6B0[4];         // 0x6B0
@@ -760,7 +792,7 @@ struct C1A : C19 {
     s32 fBB0;               // 0xBB0
     f32 fBB4;               // 0xBB4
     void* fBB8;             // 0xBB8
-    void* fBBC;             // 0xBBC
+    S1B6290* fBBC;          // 0xBBC: a handle (func_001B6290)
     void* fBC0;             // 0xBC0
     u8 padBC4[0xBC8 - 0xBC4];
     void* fBC8;             // 0xBC8

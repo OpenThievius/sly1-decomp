@@ -5,6 +5,7 @@
 #include "fpu.h"
 #include "c6c.h"
 #include "c67.h"
+#include "t217d.h"
 
 void func_001C9AF8(void);
 
@@ -163,41 +164,35 @@ void func_001E90E8(void* self)
     func_001E96F8(self, 3);
 }
 
-typedef void (*VFn_001E9498)(void* self);
-typedef void (*VFnFlag_001E9498)(void* self, s32 flag);
-
-struct Node_001E9498 {
-    VFn_001E9498* vtbl;
-};
 
 struct Set_001E9498 {
     u8 pad0[0xC];
-    Node_001E9498* items[8];
+    T217D* items[8];
     s32 count;
 };
 
 s32 func_001BE5E8(void);
 void func_001BEA28(void);
 
-void func_001E9498(Set_001E9498* self, Node_001E9498* node)
+void func_001E9498(Set_001E9498* self, T217D* node)
 {
     if (func_001BE5E8() && self->count == 1) {
         func_001BEA28();
     }
     if (self->count >= 2) {
-        Node_001E9498* last = self->items[self->count - 1];
-        if (last->vtbl[3]) {
-            ((VFnFlag_001E9498)last->vtbl[3])(last, 0);
+        T217D* last = self->items[self->count - 1];
+        if (last->vt->m03) {
+            last->vt->m03(last, 0);
         }
     }
-    if (node->vtbl[3]) {
-        ((VFnFlag_001E9498)node->vtbl[3])(node, 1);
+    if (node->vt->m03) {
+        node->vt->m03(node, 1);
     }
     s32 index = self->count;
     self->items[index] = node;
     self->count = index + 1;
-    if (node->vtbl[6]) {
-        node->vtbl[6](node);
+    if (node->vt->m06) {
+        node->vt->m06(node);
     }
 }
 
@@ -328,20 +323,16 @@ void func_001EB518(C1C* self)
     func_00124DF8(self, 1, D_00275C90);
 }
 
-struct Gate_0026FF68 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; s32 f260; };
-struct Gate_0026F808 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; };
 
 extern s32 D_00275F84;
-extern u8 D_0026FF68[];
-extern u8 D_0026F808[];
 
 s32 func_001E9A10(void)
 {
     if (D_00275F84 != 0) goto fail;
-    if (((Gate_0026FF68*)D_0026FF68)->f25C != 0) goto fail;
-    if (((Gate_0026FF68*)D_0026FF68)->f250 != 0) goto fail;
-    if (((Gate_0026F808*)D_0026F808)->f25C != 0) goto fail;
-    if (((Gate_0026F808*)D_0026F808)->f250 == 0) goto ok;
+    if (D_0026FF68.open != 0) goto fail;
+    if (D_0026FF68.mode != 0) goto fail;
+    if (D_0026F808.open != 0) goto fail;
+    if (D_0026F808.mode == 0) goto ok;
 fail:
     return 0;
 ok:
@@ -513,39 +504,31 @@ void func_001E8948(C0B* self)
     func_00167E08(self);
 }
 
-extern u8 D_0026E248[];
 
-typedef void (*VFn_1E8FE8)(void* self);
-struct Obj_1E8FE8 {
-    VFn_1E8FE8* vtbl;
-};
 
 s32 func_001E9970(void);
 
 void func_001E8FE8(void)
 {
     if (func_001E9970()) {
-        ((Obj_1E8FE8*)D_0026E248)->vtbl[14](D_0026E248);
+        D_0026E248.vt->m14(&D_0026E248);
     } else {
-        ((Obj_1E8FE8*)D_0026E248)->vtbl[15](D_0026E248);
+        D_0026E248.vt->m15(&D_0026E248);
     }
 }
 
-struct Gate_1E9A68 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; };
 
 extern s32 D_00275F84;
-extern u8 D_0026FF68[];
-extern u8 D_0026F808[];
 extern s32 D_00270458;
 
 s32 func_001E9A68(void)
 {
     s32 m;
     if (D_00275F84 != 0) goto fail;
-    if (((Gate_1E9A68*)D_0026FF68)->f25C != 0) goto fail;
-    if (((Gate_1E9A68*)D_0026FF68)->f250 != 0) goto fail;
-    if (((Gate_1E9A68*)D_0026F808)->f25C != 0) goto fail;
-    if (((Gate_1E9A68*)D_0026F808)->f250 != 0) goto fail;
+    if (D_0026FF68.open != 0) goto fail;
+    if (D_0026FF68.mode != 0) goto fail;
+    if (D_0026F808.open != 0) goto fail;
+    if (D_0026F808.mode != 0) goto fail;
     m = D_00270458;
     if (m == 4) goto fail;
     if (m != 1) goto ok;
@@ -555,19 +538,16 @@ ok:
     return 1;
 }
 
-struct Gate_1E9AD8 { u8 pad0[0x250]; s32 f250; u8 pad1[8]; s32 f25C; };
 
 extern s32 D_00275F84;
-extern u8 D_0026FF68[];
-extern u8 D_0026F808[];
 
 s32 func_001E9AD8(void)
 {
     if (D_00275F84 != 0) goto fail;
-    if (((Gate_1E9AD8*)D_0026FF68)->f25C != 0) goto fail;
-    if (((Gate_1E9AD8*)D_0026FF68)->f250 != 0) goto fail;
-    if (((Gate_1E9AD8*)D_0026F808)->f25C != 0) goto fail;
-    if (((Gate_1E9AD8*)D_0026F808)->f250 == 0) goto ok;
+    if (D_0026FF68.open != 0) goto fail;
+    if (D_0026FF68.mode != 0) goto fail;
+    if (D_0026F808.open != 0) goto fail;
+    if (D_0026F808.mode == 0) goto ok;
 fail:
     return 0;
 ok:
@@ -867,17 +847,8 @@ void func_001EB550(Blk_1EB550* a0)
 }
 
 struct Obj_1E96F8 { u8 pad0[4]; s32 f4; f32 f8; u8 pad1[0x24]; s32 f30; };
-struct Vt_1E96F8;
-struct Vtbl_1E96F8 { u8 pad[0x38]; void (*f38)(Vt_1E96F8*); void (*f3C)(Vt_1E96F8*); };
-struct Vt_1E96F8 { Vtbl_1E96F8* vt; };
 struct Cam_1E96F8 { u8 pad[0x18]; s32 f18; };
 
-extern Vt_1E96F8 D_00272930;
-extern Vt_1E96F8 D_00272B98;
-extern Vt_1E96F8 D_0026C6C8;
-extern Vt_1E96F8 D_0026C948;
-extern Vt_1E96F8 D_0026CBC8;
-extern Vt_1E96F8 D_0026CE48;
 extern Cam_1E96F8 D_00264A40;
 extern u8 D_00275F80[];
 extern void* D_00275710;
@@ -900,8 +871,8 @@ void func_001E96F8(Obj_1E96F8* self, s32 state)
     if (self->f4 != state) {
         if (self->f4 != 0) {
             if (self->f4 == 1) {
-                D_00272930.vt->f3C(&D_00272930);
-                D_00272B98.vt->f3C(&D_00272B98);
+                D_00272930.vt->m15(&D_00272930);
+                D_00272B98.vt->m15(&D_00272B98);
                 func_001DDA50(D_00275710);
             }
         }
@@ -915,8 +886,8 @@ void func_001E96F8(Obj_1E96F8* self, s32 state)
         break;
     case 1:
         func_001E98E8(self, 1.0f);
-        D_00272930.vt->f38(&D_00272930);
-        D_00272B98.vt->f38(&D_00272B98);
+        D_00272930.vt->m14(&D_00272930);
+        D_00272B98.vt->m14(&D_00272B98);
         func_001DDA20(D_00275710);
         func_001A7E70();
         break;
@@ -932,10 +903,10 @@ void func_001E96F8(Obj_1E96F8* self, s32 state)
         func_001E98E8(self, 0.0f);
         break;
     case 8:
-        D_0026C6C8.vt->f3C(&D_0026C6C8);
-        D_0026C948.vt->f3C(&D_0026C948);
-        D_0026CBC8.vt->f3C(&D_0026CBC8);
-        D_0026CE48.vt->f3C(&D_0026CE48);
+        D_0026C6C8.vt->m15(&D_0026C6C8);
+        D_0026C948.vt->m15(&D_0026C948);
+        D_0026CBC8.vt->m15(&D_0026CBC8);
+        D_0026CE48.vt->m15(&D_0026CE48);
         break;
     }
     }
@@ -973,13 +944,11 @@ struct Glob_1E9108 {
     s32 f4F48;
 };
 
-struct G2_1E9108 { u8 pad[0x260]; C67* f260; };
 extern u32 D_00262C68;
 extern u32 D_00262C6C;
 extern In_1E9108 D_00262D38;
 extern f32 D_00261858[];
 extern s32 D_002701B8;
-extern u8 D_0026FF68[];
 extern s32 D_00275F84;
 
 extern void* D_002623C0;
@@ -992,7 +961,7 @@ extern void func_0018C568(Glob_1E9108* g);
 extern void func_001605E8(void* p);
 extern void func_00160948(void);
 extern void func_00194D30(void* self, s32 a, s32 b);
-extern void func_001E9498(Obj_1E9108* o, G2_1E9108* g);
+extern void func_001E9498(Obj_1E9108* o, T217D* g);
 extern void func_001E98E8(Obj_1E9108* o, f32 v);
 extern void func_001E96F8(Obj_1E9108* o, s32 mode);
 extern void func_001409E0(void);
@@ -1045,7 +1014,7 @@ void func_001E9108(Obj_1E9108* obj)
             s1 = obj->state;
         } else if (v & 0x100) {
             func_0016EC20(s2, 0x100);
-            func_00194D30(D_0026FF68, 0, 0x17);
+            func_00194D30(&D_0026FF68, 0, 0x17);
             s1 = obj->state;
         }
         break;
@@ -1056,12 +1025,12 @@ void func_001E9108(Obj_1E9108* obj)
         {
             u32 v = s2->bits;
             if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= D_00261858[1])) {
-                func_00194D30(D_0026FF68, 0, 0);
+                func_00194D30(&D_0026FF68, 0, 0);
                 s1 = obj->state;
                 func_0016EC20(s2, 0x800);
             } else if ((v = s2->bits) & 0x100) {
-                G2_1E9108* g2 = (G2_1E9108*)D_0026F808;
-                C67* x = g2->f260;
+                T217D_0F0* g2 = &D_0026F808;
+                C67* x = g2->current;
                 if (x == 0) break;
                 if (x->mode) break;
                 func_001E9498(obj, g2);
@@ -1419,13 +1388,6 @@ void func_001EAD88(f32* sinOut, f32* cosOut, f32 angle)
     *sinOut = s;
 }
 
-struct Obj_1E9970 {
-    u8 pad[0x250];
-    s32 f250;
-    u8 pad2[0x08];
-    s32 f25C;
-    s32 f260;
-};
 
 extern s32 D_00275F84;
 extern s32 D_00270458;
@@ -1435,9 +1397,9 @@ s32 func_001E9970(void)
 {
     if (D_00275F84 != 0) goto fail;
     if (func_001DDA80((C6C*)D_00275710) != 0) goto fail;
-    if (((Obj_1E9970*)D_0026FF68)->f25C != 0 && ((Obj_1E9970*)D_0026FF68)->f260 != 0) goto fail;
-    if (((Obj_1E9970*)D_0026F808)->f25C != 0) goto fail;
-    if (((Obj_1E9970*)D_0026F808)->f250 != 0) goto fail;
+    if (D_0026FF68.open != 0 && D_0026FF68.page != 0) goto fail;
+    if (D_0026F808.open != 0) goto fail;
+    if (D_0026F808.mode != 0) goto fail;
     if (D_00270458 == 2) goto fail;
     if (D_00270458 == 1) goto fail;
     if (D_00270458 != 4) goto ok;

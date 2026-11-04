@@ -1400,14 +1400,15 @@ void func_001837E0(C88* self, s32 a, s32 b, void* c);
 
 Obj_1B6290* func_001B6290(C88* self, s32 a1, s32 a2, s32 a3)
 {
-    Obj_1B6290* obj = (Obj_1B6290*)func_001B5EE0((Pool6C*)((u8*)self->world + 0x1B88));
+    Obj_1B6290* obj = (Obj_1B6290*)func_001B5EE0(&self->world->pool1B88);
     obj->f1C = a1;
     obj->f00 = (void*)&D_002198E8;
     obj->f20 = a3;
     obj->f38 = 1.0f;
     obj->f18 = self;
     obj->f2C = -1;
-    func_00152470((List01*)((u8*)self->world + 0x1B94), obj);
+    func_00152470(&self->world->list1B94, obj);
+
     func_00152470((List01*)((u8*)self + 0x48), obj);
     if (a2 != -1) {
         s32 v = func_001B63F8(self, a2);

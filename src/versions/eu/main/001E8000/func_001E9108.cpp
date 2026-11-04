@@ -53,11 +53,11 @@ void func_001E9108(Obj_1E9108* obj)
             s1 = obj->state;
         } else if (v & 0x100) {
             func_0016EC20(s2, 0x100);
-            func_00194D30(D_0026FF68, 0, 0x17);
+            func_00194D30(&D_0026FF68, 0, 0x17);
             s1 = obj->state;
         } else if (D_eu_002636EC >= 2 && (v & 0x10)) {
             func_0016EC20(s2, 0x10);
-            func_00194D30(D_0026FF68, 0, 0x21);
+            func_00194D30(&D_0026FF68, 0, 0x21);
             s1 = obj->state;
         }
         break;
@@ -68,11 +68,11 @@ void func_001E9108(Obj_1E9108* obj)
         {
             u32 v = s2->bits;
             if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= D_00261858[1])) {
-                func_00194D30(D_0026FF68, 0, 0);
+                func_00194D30(&D_0026FF68, 0, 0);
                 s1 = obj->state;
                 func_0016EC20(s2, 0x800);
             } else if ((v = s2->bits) & 0x100) {
-                G2_1E9108_eu* g2 = (G2_1E9108_eu*)D_0026F808;
+                G2_1E9108_eu* g2 = (G2_1E9108_eu*)&D_0026F808;
                 C67* x = g2->f570;
                 if (x == 0) break;
                 if (x->mode) break;

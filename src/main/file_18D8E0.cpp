@@ -2,6 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "c3b.h"
+#include "t2195.h"
 
 // The movie player: its object (D_00269A00), the stream its data comes through, and the two
 // sinks a transfer goes to (a ring buffer, and the IPU's DMA channel).
@@ -214,8 +215,7 @@ struct Frame_18DB20 {
     Blk4_18DB20 blkF0;
 };
 
-typedef void (*VFn_18DB20)(void* self, f32 f, void* a, void* b);
-struct Obj_18DB20 { VFn_18DB20* vtbl; };
+
 
 
 extern u8 D_00248D30[];
@@ -512,12 +512,13 @@ void func_0018DB20(C3C* self, void* in1, void* in2)
             func_00125C90(self, in1, in2);
         } else {
             if (self->f1EC != 0) {
-                ((Obj_18DB20*)self->f1EC)->vtbl[4](self->f1EC, 0.0f, &f, &f.q10);
+                self->f1EC->vt->getPos(self->f1EC, 0.0f, (Vec02*)&f.q00, (Vec02*)&f.q10);
             } else {
                 f.q00 = *(Quad_18DB20*)D_00248D30;
             }
             if (self->f1F0 != 0) {
-                ((Obj_18DB20*)self->f1F0)->vtbl[5](self->f1F0, 0.0f, &f.tbl30, &f.q20);
+                self->f1F0->vt->getRot(self->f1F0, 0.0f, (Mat02*)&f.tbl30, (Vec02*)&f.q20);
+
             } else {
                 f.tbl30 = *(Tbl3_18DB20*)D_002483D0;
             }

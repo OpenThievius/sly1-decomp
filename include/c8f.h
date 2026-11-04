@@ -14,7 +14,7 @@ struct C8F : C01 {
     void* f3C;              // 0x3C
     s32 f40;                // 0x40
     s32 f44;                // 0x44
-    s32 f48;                // 0x48
+    void* f48;              // 0x48: a queued entry (func_0017C660 hands it to func_0017C428)
     s32 f4C;                // 0x4C
     void* f50;              // 0x50
     u8 pad54[0x68 - 0x54];

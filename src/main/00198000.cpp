@@ -1125,7 +1125,8 @@ void func_0019A1E0(C17* o)
         func_0019A178(o->f61C + i * 12, 0x390);
     s32 h = func_001B6290(o->f610, o, 0x384, 1);
     o->f764 = -1;
-    o->f614 = (void*)h;
+    o->f614 = (S1B6290*)h;
+
     if (((Flags_19A1E0*)D_002623C8)->flags & 4) {
         func_001B64D8(h, 0x38F);
         return;

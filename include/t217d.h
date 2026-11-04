@@ -47,7 +47,7 @@ struct T217D_Vt {
     void (*m00)(T217D* self, s32 index);        // 0x00: init (func_001AA1F0)
     void (*m01)(T217D* self);                   // 0x04: set up (func_001AA268 in the base)
     void (*m02)(T217D* self);                   // 0x08: update the slide (func_001AA298)
-    void (*m03)(T217D* self);                   // 0x0C: not used by these files
+    void (*m03)(T217D* self, s32 top);          // 0x0C: told it is (1) or is no longer (0) the top of a stack (func_001E9498)
     void (*m04)(T217D* self);                   // 0x10: not used by these files
     void (*m05)(T217D* self);                   // 0x14: reset, m16(self, 0) (func_001AA8C8)
     void (*m06)(T217D* self);                   // 0x18: not used by these files
@@ -139,8 +139,10 @@ struct T217D_2E0 : T217D {
     u8 pad260[0x264 - 0x260];
     s32 f264;               // 0x264
     s32 f268;               // 0x268
-    u8 letter;                  // 0x26C: the glyph to show, from 'r'
-    u8 pad26D[0x270 - 0x26D];
+    union {
+        u8 letter;          // 0x26C: the glyph to show, from 'r'
+        s32 f26C;           // 0x26C: counted down by func_001AC060
+    };
     s32 f270;               // 0x270
     f32 fill;                   // 0x274: the filled part of the bar
     f32 fillTarget;             // 0x278

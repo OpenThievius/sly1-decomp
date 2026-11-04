@@ -4,6 +4,7 @@
 #include "t21e3.h"
 #include "c6c.h"
 #include "v24a0.h"
+#include "v24a2.h"
 #include "list_iter.h"
 
 typedef void (*VFn_1B0F70)(void* self, s32 arg);
@@ -41,15 +42,15 @@ s32 func_001B2118(void* unused, Obj_1B2118* o)
     return r;
 }
 
-struct Hdr_1B2B50 { u8 pad0[4]; u16 count; u8 pad6[2]; u32 off8; u32 size; };
+
 extern u32 D_00275718;
 void func_00137A60(void* a, s32 b, void* c);
 
-void func_001B2B50(void* a0, Hdr_1B2B50* a1)
+void func_001B2B50(void* a0, V24A2_ImgB* a1)
 {
     func_00137A60(a0, 12, a1);
-    a1->off8 = D_00275718 + a1->off8;
-    a1->size = (u32)((a1->count << 2) + 15) >> 4;
+    a1->f8 = D_00275718 + a1->f8;
+    a1->fC = (u32)((a1->f4 << 2) + 15) >> 4;
 }
 
 struct Bits_1B29E0 {
@@ -145,21 +146,15 @@ void func_001B2BA8(void* self)
 
 void func_00137A60(void* self, s32 size, void* obj);
 
-struct Blk_1B2CA8 {
-    u8 pad0[0xC];
-    u32 bytes;
-    s32 offset;
-    s32 blocks;
-};
-
-void func_001B2CA8(void* self, Blk_1B2CA8* obj)
+void func_001B2CA8(void* self, V24A2_ImgA* obj)
 {
     func_00137A60(self, 0x14, obj);
     s32 base = D_00275718;
     u32 bytes = obj->bytes;
-    s32 off = obj->offset;
-    obj->blocks = (bytes + 0xF) >> 4;
-    obj->offset = base + off;
+    s32 off = obj->f10;
+    obj->f14 = (bytes + 0xF) >> 4;
+    obj->f10 = base + off;
+
 }
 
 struct Rec_1B2CF8 {

@@ -30,9 +30,9 @@ struct V24A2_ImgA {
     u8 f8;                  // 0x8
     u8 f9;                  // 0x9
     u16 f0A;            // 0x0A
-    u8 pad0C[0x10 - 0x0C];
-    s32 f10;            // 0x10
-    s32 f14;            // 0x14
+    u32 bytes;          // 0x0C: its size (func_001B2CA8)
+    s32 f10;            // 0x10: an offset, made absolute by func_001B2CA8
+    s32 f14;            // 0x14: the size in 16-byte blocks (func_001B2CA8)
     u64 f18;            // 0x18
 };
 typedef char check_V24A2_ImgA[sizeof(V24A2_ImgA) == 0x20 ? 1 : -1];   // 32-byte records (D_00274504, func_0015D8A8)

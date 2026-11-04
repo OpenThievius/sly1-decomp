@@ -58,7 +58,7 @@ struct C83 : C01 {
     f32 lo;                 // 0x90
     f32 hi;                 // 0x94
     f32 out;                // 0x98
-    u8 pad9C[0xA0 - 0x9C];
+    Track83* f9C;           // 0x9C: the track func_0012D2A8 moved to the end (func_0012D398 tests it)
     s32 targetCount;        // 0xA0
     s32* targets;           // 0xA4
     u8 padA8[0xB0 - 0xA8];

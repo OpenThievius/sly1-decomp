@@ -11,7 +11,7 @@
 
 #include "c02.h"
 
-struct __attribute__((aligned(16))) Quad51 { s32 a, b, c, d; };
+#include "shapes.h"   // Quad16
 
 // Eight bytes that slot 9 keeps through the parent's copy; retail moves them unaligned.
 struct __attribute__((packed)) Pair51 { s32 a; s32 b; };
@@ -27,12 +27,12 @@ struct C51 : C02 {
     f32 f300;               // 0x300: 180.0 at setup
     s32 value;              // 0x304: compared by slot 9
     u8 pad308[0x320 - 0x308];
-    Quad51 q320;            // 0x320: D_00248D20 at setup
+    Quad16 q320;            // 0x320: D_00248D20 at setup
     f32 f330;               // 0x330: 200.0 at setup
     f32 f334;               // 0x334: 2000.0 at setup
     f32 f338;               // 0x338: 60.0 at setup
     f32 f33C;               // 0x33C
-    Quad51 q340;            // 0x340: D_00248D10 at setup
+    Quad16 q340;            // 0x340: D_00248D10 at setup
     f32 f350;               // 0x350
     f32 f354;               // 0x354
     f32 f358;               // 0x358

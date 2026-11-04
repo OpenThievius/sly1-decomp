@@ -2,6 +2,7 @@
 #include "common.h"
 #include "c87.h"
 #include "c02.h"
+#include "s1be4d8.h"
 #include "asm_func.h"
 #include "list_iter.h"
 #include "v24a0.h"
@@ -55,17 +56,6 @@ struct Self_15FA58 { u8 pad0[0x1ED0]; s32 count; Obj_15FA58** items; };
 void func_0015F7D8(void* self, void* item);
 
 struct Obj_15FBB8;
-struct Ctx_15FBB8 {
-    void* w0;
-    f32 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    u8 b14[8];
-    void* p1C;
-    f32 f20;
-};
-
 extern u8 D_00248D30[];
 
 void func_001BF788(Obj_15FBB8* self, s32 n);
@@ -1304,7 +1294,7 @@ void func_0015FBB8(C02* self, s32 flag)
         self->vB0 = self->v160;
         self->f29C = 0;
         if (self->f2AC != 0) {
-            func_001BF788((Obj_15FBB8*)((Ctx_15FBB8*)self->f2AC)->p1C, 0);
+            func_001BF788((Obj_15FBB8*)self->f2AC->p1C, 0);
         }
         self->desc02()->m20(self, (Vec02*)D_00248D30);
         self->desc02()->m21(self, (Vec02*)D_00248D30);
@@ -1313,9 +1303,9 @@ void func_0015FBB8(C02* self, s32 flag)
         self->flags &= ~((u64)1 << 38);
         self->desc02()->m20(self, &self->vA0);
         self->desc02()->m21(self, &self->vB0);
-        Ctx_15FBB8* c = (Ctx_15FBB8*)self->f2AC;
+        S1BE4D8* c = self->f2AC;
         if (c != 0) {
-            func_001BFCD8(c->w0, &c->p1C, (void*)self, 0, c->f4, c->f8, c->fC, c->f10, c->f20, &c->b14, 0);
+            func_001BFCD8(c->p00, &c->p1C, (void*)self, 0, c->f04, c->f08, c->f0C, c->f10, c->f20, &c->b14, 0);
         }
     }
 }

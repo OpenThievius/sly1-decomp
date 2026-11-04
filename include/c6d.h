@@ -18,7 +18,10 @@ struct C6D : C01 {
     u8 pad34[0x40 - 0x34];
     s32 f40[4];             // 0x40
     u8 pad50[0x80 - 0x50];
-    s32 f80[4];             // 0x80
+    union {
+        s32 f80[4];         // 0x80
+        f32 g80[4];         // 0x80: func_00144FF8 reads the first two as floats
+    };
     s32 f90[4];             // 0x90
     s32 fA0[4];             // 0xA0
     u8 padB0[0x1C0 - 0xB0];

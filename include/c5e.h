@@ -10,14 +10,14 @@
 
 #include "c02.h"
 
-struct __attribute__((aligned(16))) Quad5E { s32 a, b, c, d; };
+#include "shapes.h"   // Quad16
 
 struct C5E : C02 {
     C5E* self2D0;           // 0x2D0: the object this one stands for (itself, or another)
     u8 pad2D4[0x2DC - 0x2D4];
     s32 flag2DC;            // 0x2DC
     u8 pad2E0[0x320 - 0x2E0];
-    Quad5E q320;            // 0x320: set from D_00275730 by func_001DDCE0
+    Quad16 q320;            // 0x320: set from D_00275730 by func_001DDCE0
     u8 pad330[0x340 - 0x330];
 };
 

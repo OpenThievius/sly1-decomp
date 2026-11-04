@@ -443,16 +443,16 @@ void func_001EDE38(Angles_1EDE38* in, Vec3_1EDE38* b, Vec3_1EDE38* out)
 }
 
 typedef u64 Quad_1EEB60 __attribute__((mode(TI)));
-struct Obj_1EEB60 { u8 pad0[0x38]; void* node; };
 s32 func_001EEA40(void* self, void* node, Quad_1EEB60 q, s32* out);
 
-s32 func_001EEB60(Obj_1EEB60* self, Quad_1EEB60* vec, s32* out)
+s32 func_001EEB60(C86* self, Quad_1EEB60* vec, s32* out)
 {
     s32 r;
-    if (self != 0 && self->node != 0) {
+    if (self != 0 && self->data38 != 0) {
         Quad_1EEB60 q = *vec;
         *out = 0;
-        r = func_001EEA40(self, self->node, q, out);
+        r = func_001EEA40(self, self->data38, q, out);
+
     } else {
         r = 0x0FFFFFFF;
         *out = r;
@@ -1356,27 +1356,17 @@ void func_001ED0D8(C13* self, s32 key)
     }
 }
 
-struct Entry_1ED278 { s32 f0; s32 f4; f32 f8; s32 fC; };
 struct Inner_1ED278 { u8 pad[0xC70]; s32 fC70; u8 pad2[0xC7C - 0xC74]; f32 fC7C; };
-struct Obj_1ED278 {
-    u8 pad0[0x34];
-    s32 f34;
-    Entry_1ED278* f38;
-    s32 f3C;
-    Inner_1ED278* f40;
-    s32 f44;
-    Entry_1ED278* Cur() { return &f38[f3C]; }
-};
-void func_001ED318(Obj_1ED278* self, Entry_1ED278* e);
+void func_001ED318(C90* self, Entry90* e);
 
-void func_001ED278(Obj_1ED278* self)
+void func_001ED278(C90* self)
 {
-    Entry_1ED278* e;
+    Entry90* e;
     s32 v;
-    while (self->f3C < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(self->f40->fC70 < v))) {
-        if (v == self->f40->fC70 && self->f40->fC7C < e->f8) return;
+    while (self->index < self->f34 && (e = self->Cur(), v = e->f4 + self->f44, !(((Inner_1ED278*)self->found)->fC70 < v))) {
+        if (v == ((Inner_1ED278*)self->found)->fC70 && ((Inner_1ED278*)self->found)->fC7C < e->f8) return;
         func_001ED318(self, e);
-        self->f3C++;
+        self->index++;
     }
 }
 

@@ -4,6 +4,7 @@
 #include "c46.h"
 #include "c20.h"
 #include "c6c.h"
+#include "t217d.h"
 
 void func_0014C838(C68* self, s32 value)
 {
@@ -111,11 +112,6 @@ void func_0014C6E0(C68* self)
     }
 }
 
-extern u8 D_0026D348[];
-extern u8 D_0026E760[];
-
-typedef void (*VFn_14C788)(void* self);
-struct Obj_14C788 { VFn_14C788* vtbl; };
 
 void* func_001E9970(void* zero);
 
@@ -128,11 +124,11 @@ void func_0014C788(C68* self)
         p = func_001E9970(p);
     }
     if (p) {
-        ((Obj_14C788*)D_0026D348)->vtbl[14](D_0026D348);
-        ((Obj_14C788*)D_0026E760)->vtbl[14](D_0026E760);
+        D_0026D348.vt->m14(&D_0026D348);
+        D_0026E760.vt->m14(&D_0026E760);
     } else {
-        ((Obj_14C788*)D_0026D348)->vtbl[15](D_0026D348);
-        ((Obj_14C788*)D_0026E760)->vtbl[15](D_0026E760);
+        D_0026D348.vt->m15(&D_0026D348);
+        D_0026E760.vt->m15(&D_0026E760);
     }
 }
 
@@ -476,7 +472,6 @@ void func_0014C138(C68* self)
     func_0014C2F0(self);
 }
 
-extern u8 D_0026E760[];
 extern f32 D_0026185C[];
 
 struct Arg_14CDC8 {
@@ -530,7 +525,7 @@ void func_0014CDC8(C68* self, Arg_14CDC8* arg)
                 } while (--cnt != 0);
             }
         }
-        func_001AB958(D_0026E760);
+        func_001AB958(&D_0026E760);
     }
     func_0014C2F0(self);
     if (self->f454 == self->f44C) {
@@ -888,22 +883,14 @@ void func_0014ED98();
 extern const Fn_Table D_002176D0[14] = { (Fn_Table)func_0014DD28, (Fn_Table)func_0014DE08, (Fn_Table)func_0014DE40, (Fn_Table)func_0014DE78, (Fn_Table)func_0014DF68, (Fn_Table)func_0014DF98, (Fn_Table)func_0014E000, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014E068, (Fn_Table)func_0014E090, (Fn_Table)func_0014E170, (Fn_Table)func_0014E2A0, 0 };
 extern const Fn_Table D_00217708[14] = { (Fn_Table)func_0014E3D0, (Fn_Table)func_0014E5B8, (Fn_Table)func_0014E6A8, (Fn_Table)func_0014E710, (Fn_Table)func_0014E828, (Fn_Table)func_0014E910, (Fn_Table)func_0014E990, (Fn_Table)func_0014DB40, (Fn_Table)func_0014DB58, (Fn_Table)func_0014EA48, (Fn_Table)func_0014EB10, (Fn_Table)func_0014EC70, (Fn_Table)func_0014ED98, 0 };
 
-typedef void (*VFn_14CF30)(void* self);
 typedef void (*Cb_14CF30)(void* self);
-
-struct Glob_14CF30 {
-    VFn_14CF30* vtbl;
-    u8 pad0[0x264 - 4];
-    void* f264;
-    void* f268;
-};
 
 void func_00127378(C68* self, s32 kind, void* key);
 void func_001B6598(void* key, s32* out);
 void func_001DDC38(void* sub, C68* self);
-void func_001AB890(Glob_14CF30* self, f32 v);
-void func_001AB928(Glob_14CF30* self, f32 v, Cb_14CF30 cb);
-void func_001AB938(Glob_14CF30* self);
+void func_001AB890(T217D_510* self, f32 v);
+void func_001AB928(T217D_510* self, f32 v, Cb_14CF30 cb);
+void func_001AB938(T217D_510* self);
 void func_0014C668(void* self);
 
 void func_0014CF30(C68* self, s32 kind, void* key)
@@ -927,16 +914,16 @@ void func_0014CF30(C68* self, s32 kind, void* key)
             s32 out;
             func_001B6598(key, &out);
             if (out == 0x3FD) {
-                (*(Glob_14CF30*)&D_0026D348).f264 = &self->f2D0;
-                (*(Glob_14CF30*)&D_0026D348).f268 = &self->f2D4;
+                D_0026D348.target = &self->f2D0;
+                D_0026D348.limit = &self->f2D4;
                 func_001DDC38(self->world, self);
-                func_001AB890(((Glob_14CF30*)&D_0026E760), self->f2D8);
-                func_001AB928(((Glob_14CF30*)&D_0026E760), 0.0f, func_0014C668);
-                func_001AB938(((Glob_14CF30*)&D_0026E760));
+                func_001AB890(&D_0026E760, self->f2D8);
+                func_001AB928(&D_0026E760, 0.0f, func_0014C668);
+                func_001AB938(&D_0026E760);
             }
             if (self->tag430 == 0x3FD) {
-                (*(Glob_14CF30*)&D_0026D348).vtbl[15](((Glob_14CF30*)&D_0026D348));
-                (*(Glob_14CF30*)&D_0026E760).vtbl[15](((Glob_14CF30*)&D_0026E760));
+                D_0026D348.vt->m15(&D_0026D348);
+                D_0026E760.vt->m15(&D_0026E760);
                 func_001DDC38(self->world, 0);
             }
             self->tag430 = out;

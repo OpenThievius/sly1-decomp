@@ -311,7 +311,7 @@ void func_0017C660(C8F* self)
             break;
         func_0017BCD0(self);
     }
-    if (self->f48 && func_0017C428(self, (void*)self->f48))
+    if (self->f48 && func_0017C428(self, self->f48))
         self->f48 = 0;
 }
 

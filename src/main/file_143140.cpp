@@ -196,11 +196,6 @@ struct Probe_00144FF8 {
     f32 y_78;
 };
 
-struct Pose_00144FF8 {
-    u8 pad_00[0x80];
-    f32 y_80;
-    f32 x_84;
-};
 
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA408(f32 a);
@@ -344,7 +339,7 @@ void func_00144848(u8* self);
 void func_001448C8(C6D* self, Quad_1448C8* a, Quad_1448C8* b);
 void func_00144938(Ctx_144938* self, void* p, s32 q);
 void func_00144B70(C6D* self, Vec_144B70* arg);
-void func_00144FF8(Pose_00144FF8* self, Probe_00144FF8* p, s32 mode, f32* out);
+void func_00144FF8(C6D* self, Probe_00144FF8* p, s32 mode, f32* out);
 void func_001451F0(C6D* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3);
 void func_001455C0(C6D* self, f32* src);
 void func_001455E0(C6D* self);
@@ -765,7 +760,7 @@ void func_00144B70(C6D* self, Vec_144B70* arg)
 
 ASM_FUNC(func_00144BE8);
 
-void func_00144FF8(Pose_00144FF8* self, Probe_00144FF8* p, s32 mode, f32* out)
+void func_00144FF8(C6D* self, Probe_00144FF8* p, s32 mode, f32* out)
 {
     f32 t;
     f32 x;
@@ -788,7 +783,8 @@ call:
 zero:
     t = 0.0f;
 store:
-    *out = func_001EA408(t + func_00205778(self->x_84, self->y_80));
+    *out = func_001EA408(t + func_00205778(self->g80[1], self->g80[0]));
+
 }
 
 LINKER_REMNANT(func_00145080);

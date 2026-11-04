@@ -17,6 +17,7 @@
 #include "c02.h"
 
 struct C83;     // an animation (c83.h)
+struct S1DBBD8; // a callback record (s1dbbd8.h)
 struct T2195;
 
 // The table. Slots 4 and 5 give the position and the orientation (each with a vector next to
@@ -26,8 +27,8 @@ struct T2195_Vt {
     void (*copy)(T2195* self, T2195* src);                              // 0x04: copy src's record, keeping the owner and the link
     void (*release)(T2195* self, s32 flags);                            // 0x08: out of the owner's list, back to the pool
     void* m3;                                                           // 0x0C
-    void (*getPos)(T2195* self, Vec02* pos, Vec02* vec, f32 t);         // 0x10
-    void (*getRot)(T2195* self, Mat02* rot, Vec02* vec, f32 t);         // 0x14
+    void (*getPos)(T2195* self, f32 t, Vec02* pos, Vec02* vec);         // 0x10
+    void (*getRot)(T2195* self, f32 t, Mat02* rot, Vec02* vec);         // 0x14
     void (*getValue)(T2195* self, f32* value, f32* slope);              // 0x18
     void (*getMatrix)(T2195* self, Mat02* out);                         // 0x1C
     f32 (*getIndexed)(T2195* self, s32 index);                          // 0x20
@@ -62,18 +63,39 @@ struct Rec2195_224 {
 // The player an animation track attachment follows (D_002197C0): it holds the animation, a
 // time and a speed, the attachment it drives (+0x28) and the list of the ones that follow it
 // (+0x44). func_0012E9E0 keeps the time (+0x14) and the speed (+0x18) within the length.
+// It is a 0xEC-byte record of the world's pool at C6C::pool1B58 (func_0012D3F8 takes one,
+// stores the table D_002197B8 at +0, makes the list at +0x44 with offset 0x20 and points +0x60
+// at its own +0x64).
 struct Player2195 {
-    u8 pad00[0x08]; // 0x00
+    const void* vt;         // 0x00: D_002197B8
+    u8 pad04[0x08 - 0x04]; // 0x04
     C83* anim;              // 0x08: its tracks (C83::tracks at +0x3C) are what the attachment follows
-    u8 pad0C[0x10 - 0x0C]; // 0x0C
+    void* fC;               // 0x0C: an object func_0012F760 calls slot 18 of
     f32 f10;                // 0x10
     f32 time;               // 0x14
     f32 speed;              // 0x18
-    u8 pad1C[0x28 - 0x1C]; // 0x1C
+    f32 f1C;                // 0x1C: a scale of the speed (func_0012F6B0, func_0012F6D0; func_0012C288 sets it)
+    s32 f20;                // 0x20: the next timed entry (func_0012E4E0, func_0012D5D0)
+    s8 state24;             // 0x24: func_0012D448
+    u8 pad25[0x28 - 0x25]; // 0x25
     T2195* driven;          // 0x28
-    u8 pad2C[0x44 - 0x2C]; // 0x2C
-    List01 list44;          // 0x44
+    void* f2C;              // 0x2C: func_0012D5D0
+    void* f30;              // 0x30: func_0012D5D0
+    u8 pad34[0x44 - 0x34]; // 0x34
+    List01 list44;          // 0x44: the attachments that follow it (offset 0x20)
+    union {
+        s32 f50;            // 0x50: its address goes to func_001BF718 (func_0012E760)
+        void* p50;          // 0x50: an object func_0012D5D0 calls through
+    };
+    u8 f54[8];              // 0x54: handed to func_0015F9A0 (func_0012E760)
+    s32 f5C;                // 0x5C: the number of f60 entries (func_0012C288)
+    void* f60;              // 0x60: its own +0x64 at set-up (func_0012D3F8)
+    u8 pad64[0xE4 - 0x64]; // 0x64
+    S1DBBD8* fE4;           // 0xE4: its callbacks, records of C6C::pool1B14 (func_0012F760 calls each, func_0012E760 gives them back)
+    u8 padE8[0xEC - 0xE8]; // 0xE8
 };
+
+typedef char check_Player2195[sizeof(Player2195) == 0xEC ? 1 : -1];   // the pool's records (func_001DB4C8)
 
 struct __attribute__((packed)) Pk8_2195 { u64 v; };
 struct __attribute__((packed)) Pair2195 { s32 lo; s32 hi; };
@@ -125,7 +147,7 @@ struct T2195_600 : T2195 {
 // D_002197C0: follows a track of an animation: the animation's player drives it (slots 4 to 8
 // ask the track's curves).
 struct T2195_7C0 : T2195 {
-    u8 pad14[0x18 - 0x14]; // 0x14
+    s32 f14;                // 0x14: the player's start (func_0012C288, func_0012D5D0)
     f32 f18;                // 0x18
     Player2195* player;     // 0x1C
     Pair2195 w20;           // 0x20: kept by slot 1

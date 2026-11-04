@@ -12,7 +12,7 @@
 struct S1DBBD8 {
     union {
         s32 k0;             // 0x00: func_001DBC60, func_001DBCC8, func_001DBD40
-        void (*fn)(void);   // 0x00: func_001DBE48 and func_0011AB58 call it
+        void (*fn)(s32 a, s32 b, s32 c);    // 0x00: func_001DBE48 calls it with k1..k3; func_0011AB58 compares it
     };
     s32 k1;                 // 0x04
     s32 k2;                 // 0x08

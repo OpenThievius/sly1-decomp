@@ -2,6 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c01.h"
+#include "c40.h"
 #include "v24a0.h"
 #include "v24a2.h"
 
@@ -267,28 +268,10 @@ void func_0015F658(void)
     func_0015F618(1, 0xFFFF);
 }
 
-struct __attribute__((aligned(16))) Quad_15C0A0 {
-    s32 w0;
-    s32 w1;
-    f32 f2;
-    s32 w3;
-};
-
 struct Frame_15C0A0 {
-    Quad_15C0A0 q;
+    Vec02 q;
     s32 a;
     s32 b;
-};
-
-struct Obj_15C0A0 {
-    u8 pad0[0x14];
-    s32 x14;
-    u8 pad1[0x140 - 0x18];
-    Quad_15C0A0 q140;
-    u8 pad2[0x64C - 0x150];
-    f32 f64c;
-    u8 pad3[0x66C - 0x650];
-    f32 f66c;
 };
 
 extern f32 D_00261858[];
@@ -301,20 +284,20 @@ s32 func_001419E8(s32 zero, void* p, void* q, s32 a, s32 b, s32 c);
 void func_0018D6F0(void);
 void func_001DC4D0(s32 a0, s32 a1, void* a2, Pred_15C0A0 a3, void* a4, s32* a5, s32* a6, f32 f12);
 
-s32 func_0015C0A0(Obj_15C0A0* self)
+s32 func_0015C0A0(C40* self)
 {
     f32* tbl = D_00261858;
-    if (tbl[1] - self->f66c < 0.05f) {
+    if (tbl[1] - self->f66C < 0.05f) {
         return 0;
     }
     func_0018D608(self);
     Frame_15C0A0 fr;
-    func_001DC4D0(self->x14, 0, &self->q140, func_0015C058, self, &fr.a, &fr.b, self->f64c);
-    fr.q = self->q140;
-    fr.q.f2 = fr.q.f2 - self->f64c;
-    s32 r = func_001419E8(0, &self->q140, &fr.q, fr.a, fr.b, 0);
+    func_001DC4D0((s32)self->world, 0, &self->v140, func_0015C058, self, &fr.a, &fr.b, self->f64C);
+    fr.q = self->v140;
+    fr.q.z = fr.q.z - self->f64C;
+    s32 r = func_001419E8(0, &self->v140, &fr.q, fr.a, fr.b, 0);
     func_0018D6F0();
-    self->f66c = tbl[1];
+    self->f66C = tbl[1];
     return r == 0;
 }
 

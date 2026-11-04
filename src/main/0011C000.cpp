@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "t2196.h"
+#include "c6c.h"
 
 extern u8 D_0062C568[];
 void func_001B5F28(void* list, void* item);
@@ -1346,17 +1347,13 @@ struct Obj_11ECB8 {
     Slot_11ECB8* vtbl;
 };
 
-struct Ctx_11ECB8 {
-    u8 pad[0x1CE8];
-    void* table[31];
-};
 
 s32 func_00137D10(void* p);
 void* func_0011E580(s32 slot, void* self, void* a1, s32 key, s32 flag);
 s32 func_0011ECA0(s32 value);
 void func_00182ED8(void* obj);
 
-void func_0011ECB8(Ctx_11ECB8* self, void* a1, void* a2)
+void func_0011ECB8(C6C* self, void* a1, void* a2)
 {
     s32 n = func_00137D10(a2);
     if (n > 0) {
@@ -1369,7 +1366,8 @@ void func_0011ECB8(Ctx_11ECB8* self, void* a1, void* a2)
             obj->vtbl[14](obj, a2);
             s32 r = func_0011ECA0(key);
             if (r >= 0) {
-                self->table[r] = obj;
+                self->slot1CE8[r] = (C01*)obj;
+
                 func_00182ED8(obj);
             }
         } while (--i != 0);

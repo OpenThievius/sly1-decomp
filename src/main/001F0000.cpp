@@ -1048,64 +1048,26 @@ struct Sub_1F1050 {
     u8 pad38[0x298 - 0x38];
     Rec_1F1050* f298;
 };
-struct Slot_1F1050 {
-    Sub_1F1050* f00;
-    Sub_1F1050* f04;
-    f32 f08;
-    Sub_1F1050* f0C;
-    f32 f10;
-    s32 f14;
-    s32 f18;
-    s32 f1C;
-    s32 f20;
-    f32 f24;
-    f32 f28;
-    f32 f2C;
-    s32 f30;
-};
-struct Quad_1F1050 { u64 a; u64 b; } __attribute__((aligned(16)));
-struct Ptr_1F1050;
-struct Obj_1F1050 {
-    void (**vtbl)(Obj_1F1050*);
-    u8 pad04[0x2CC];
-    s32 f2D0;
-    f32 f2D4;
-    s32 f2D8;
-    s32 f2DC;
-    s32 f2E0;
-    Sub_1F1050* f2E4;
-    Sub_1F1050* f2E8;
-    void* f2EC;
-    void* f2F0;
-    u8 pad2F4[4];
-    Slot_1F1050 slot[11]; // 0x2F8
-    s32 f534;
-    u8 pad538[8];
-    Quad_1F1050 f540;
-    Quad_1F1050 f550;
-    s32 f560;
-    Ptr_1F1050* f564;
-};
 
 extern f32 D_00261858[];
 
 s32 func_001F0468(void);
-s32 func_001F0490(Obj_1F1050* o, s32 n, s32* a, s32* b);
-s32 func_001F0580(Obj_1F1050* o, s32 n);
-void func_001F0878(Obj_1F1050* o, s32 n);
-void func_001F0908(Obj_1F1050* o);
-void func_001F18B0(Obj_1F1050* o, s32 n);
-void func_001BF788(Ptr_1F1050* p, s32 n);
+s32 func_001F0490(C67* o, s32 n, s32* a, s32* b);
+s32 func_001F0580(C67* o, s32 n);
+void func_001F0878(C67* o, s32 n);
+void func_001F0908(C67* o);
+void func_001F18B0(C67* o, s32 n);
+void func_001BF788(void* p, s32 n);
 void func_00159C28(Rec_1F1050* r);
 void func_00126C58(Sub_1F1050* o);
-void func_0012C918(Sub_1F1050* a, Obj_1F1050* b, s32 c, void* d, f32 e, f32 f);
-void func_001BFCD8(s32 a0, Ptr_1F1050** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_0012C918(Sub_1F1050* a, C67* b, s32 c, void* d, f32 e, f32 f);
+void func_001BFCD8(s32 a0, void** a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_001F1050(Obj_1F1050* self, u32 next)
+void func_001F1050(C67* self, u32 next)
 {
     s32 i;
     Sub_1F1050* t;
-    s32 cur = self->f2D0;
+    s32 cur = self->mode;
     if (cur == (s32)next) {
         return;
     }
@@ -1119,14 +1081,14 @@ void func_001F1050(Obj_1F1050* self, u32 next)
             D_0026F138.vt->m15(&D_0026F138);
         }
         for (s32 k = 0; k < 11; k++) {
-            self->slot[k].f28 = 0;
+            self->elems[k].f28 = 0;
         }
         break;
     case 0: {
         f32 one = 1.0f;
-        self->vtbl[6](self);
+        self->desc->m02(self);
         for (s32 n = 0; n < 11; n++) {
-            Slot_1F1050* s = &self->slot[n];
+            Elem67* s = &self->elems[n];
             if (func_001F0490(self, n, (s32*)0, (s32*)0)) {
                 s->f08 = one;
                 s32 want;
@@ -1147,9 +1109,9 @@ void func_001F1050(Obj_1F1050* self, u32 next)
         }
         *(f32*)((u8*)self + 0x4DC) = *(f32*)((u8*)self + 0x33C);
         for (s32 j = 0; j <= 10; j++) {
-            Slot_1F1050* s = &self->slot[j];
-            Sub_1F1050* a = s->f04;
-            Sub_1F1050* b = s->f0C;
+            Elem67* s = &self->elems[j];
+            Sub_1F1050* a = (Sub_1F1050*)s->f04;
+            Sub_1F1050* b = (Sub_1F1050*)s->f0C;
             if (a) {
                 a->vtbl[6](a);
                 func_00126C58(a);
@@ -1186,19 +1148,19 @@ void func_001F1050(Obj_1F1050* self, u32 next)
                 func_0012C918(a, self, 0, &self->f2F0, fa, 0.0f);
             }
         } else {
-            Sub_1F1050* a = self->slot[1].f00;
+            Sub_1F1050* a = (Sub_1F1050*)self->elems[1].f00;
             if (a) {
                 func_0012C918(a, self, 0, &self->f2F0, 0.0f, 0.0f);
             }
             f32 z = 0.0f;
             func_001F18B0(self, self->f2DC);
-            self->f540 = self->f550;
+            self->q540 = self->q550;
             func_001F0878(self, self->f2DC);
             func_001AA8B8(&D_0026F138, z);
             D_0026F138.vt->m14(&D_0026F138);
             func_001BFCD8(0x8A, &self->f564, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
             for (i = 0; i < 11; i++) {
-                Slot_1F1050* s = &self->slot[i];
+                Elem67* s = &self->elems[i];
                 s32 r = func_001F0580(self, i);
                 s->f1C = r;
                 s32 v = 0;
@@ -1210,7 +1172,7 @@ void func_001F1050(Obj_1F1050* self, u32 next)
             }
         }
         self->f2D8 = self->f2DC;
-        t = self->f2E4;
+        t = (Sub_1F1050*)self->f2E4;
         if (t != 0) {
             goto L146C;
         }
@@ -1224,30 +1186,30 @@ void func_001F1050(Obj_1F1050* self, u32 next)
             }
         }
         func_001F0908(self);
-        t = self->f2E8;
+        t = (Sub_1F1050*)self->f2E8;
         if (t == 0) {
             goto Lz;
         }
     L146C:
         func_0012C918(t, self, 0, &self->f2EC, 0.0f, 1.0f);
-        self->f2D0 = next;
+        self->mode = next;
         goto L1550;
     }
     case 2:
         for (s32 m = 0; m < 11; m++) {
             if (m != self->f534) {
-                self->slot[m].f28 = 1.0f;
+                self->elems[m].f28 = 1.0f;
             }
         }
-        self->f2D0 = next;
+        self->mode = next;
         goto L1550;
     case 3:
         self->f2D8 = -1;
         break;
     case 0:
         for (i = 0; i < 11; i++) {
-            Sub_1F1050* a = self->slot[i].f04;
-            Sub_1F1050* b = self->slot[i].f0C;
+            Sub_1F1050* a = (Sub_1F1050*)self->elems[i].f04;
+            Sub_1F1050* b = (Sub_1F1050*)self->elems[i].f0C;
             if (a) {
                 if (a->f298) {
                     func_00159C28(a->f298);
@@ -1266,7 +1228,7 @@ void func_001F1050(Obj_1F1050* self, u32 next)
         break;
     }
 L154C:
-    self->f2D0 = next;
+    self->mode = next;
 L1550:
     self->f2D4 = D_00261858[4];
     return;

@@ -110,7 +110,8 @@ void func_00184A08(C51* self, f32 v)
     func_001841D0(self);
 }
 
-void func_00184A38(C51* self, Quad51* src)
+void func_00184A38(C51* self, Quad16* src)
+
 {
     self->q340 = *src;
     func_001841D0(self);

@@ -363,7 +363,7 @@ void* func_001291D0(C02* self)
 {
     if (self->f284 == 0) {
         void* o = func_001B5EE0((u8*)self->world + 0x1BF4);
-        self->f284 = o;
+        self->f284 = (S1291D0*)o;
         func_001B1AC8(o);
         func_00152470((u8*)self->world + 0x1C00, self->f284);
     }
@@ -823,7 +823,8 @@ s32 func_001833F0(void* key, s32 item);
 Node_129C20* func_00129C20(C02* self, s32 key)
 {
     ListFrame frame;
-    Node_129C20* n = (Node_129C20*)self->world->f1B94;
+    Node_129C20* n = (Node_129C20*)self->world->list1B94.head;
+
     while (n != 0) {
         if (n->f1C == self) {
             if (key == -1) return n;
@@ -1240,7 +1241,7 @@ void func_001295C8(C02* self, f32* out)
 }
 
 struct Local_129648 { f32 tmp[4]; f32 out[4]; u8 pad[0x20]; };
-typedef void (*VFnA_129648)(void* self, void* a, s32 b);
+
 
 void func_00188A20(void* a, void* b);
 
@@ -1258,7 +1259,7 @@ void func_00129648(C02* self, f32* src)
         dst++;
     } while (i >= 0);
     func_00188A20(l.tmp, out);
-    ((VFnA_129648)self->desc02()->m29)(self, out, 0);
+    self->desc02()->m29(self, (Mat02*)out, 0);
     self->desc02()->m1E(self, (Mat02*)out);
 }
 
@@ -1452,7 +1453,7 @@ void func_0012B5B8(C02* self, void* a1, void* a2)
     if (a1 == t || a2 == t || a1 == a2) {
         if (a1 != 0 || a2 != 0) {
             if (self->f224 == 0) {
-                self->f224 = (Sub_12B5B8*)func_0018D5C0(0xC0);
+                self->f224 = (Rec2195_224*)func_0018D5C0(0xC0);
             }
         }
         Sub_12B5B8* p = (Sub_12B5B8*)self->f224;
@@ -1494,8 +1495,9 @@ void func_00128C10(C02* self, void* a1)
     s32 flags = func_00137C40(a1);
     if (flags) {
         u8* p = (u8*)func_0018D5C0(0xC0);
-        self->f224 = p;
+        self->f224 = (Rec2195_224*)p;
         *(s32*)(p + 0xB0) = flags;
+
         u8* q = p + 0x30;
         *(Blk_128C10*)p = *(Blk_128C10*)D_002483D0;
         *(Blk_128C10*)q = *(Blk_128C10*)D_002483D0;

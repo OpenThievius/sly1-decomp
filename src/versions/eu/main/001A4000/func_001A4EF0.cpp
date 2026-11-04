@@ -63,11 +63,11 @@ void func_001A4EF0(C5F* self, s32 state)
         func_00151E20(D_00261EF0, 1.0f);
         break;
     case 4:
-        func_00194D30(D_0026FF68, 0, 0x1A);
+        func_00194D30((u8*)&D_0026FF68, 0, 0x1A);
         break;
     case 6:
         func_001A4070(P(self, 0x354), 3);
-        D_0026EC70.vt->f3C(&D_0026EC70);
+        D_0026EC70.vt->m15(&D_0026EC70);
         break;
     }
 }

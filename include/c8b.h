@@ -12,7 +12,7 @@
 
 #include "c01.h"
 
-struct __attribute__((aligned(16))) Quad8B { s32 a, b, c, d; };
+#include "shapes.h"   // Quad16
 
 struct Node8B;
 typedef void (*VFn8B)(Node8B* n);
@@ -61,12 +61,12 @@ struct C8B : C01 {
     f32 f5C;                // 0x5C
     f32 f60;                // 0x60
     u8 pad64[0x70 - 0x64];
-    Quad8B q70;             // 0x70
+    Quad16 q70;             // 0x70
     s32 f80;                // 0x80
     f32 f84;                // 0x84
     f32 f88;                // 0x88
     f32 f8C;                // 0x8C
-    Quad8B q90;             // 0x90
+    Quad16 q90;             // 0x90
     u8 fA0[4];              // 0xA0: read by func_00137FB0 (the field after it, fA4, is a count)
     s32 fA4;                // 0xA4
     u8 padA8[8];

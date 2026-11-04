@@ -12,7 +12,7 @@ u32 func_eu_001E3018(u16* a);
 void func_001365A8(Hud_150DC0_eu* a, f32 b);
 void func_001365A0(Hud_150DC0_eu* a, s32 b);
 
-void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
+void func_00150DC0(C65* self, Msg_150DC0* msg)
 {
     Slot_150DC0* s2;
     Slot_150DC0* s4;
@@ -28,12 +28,12 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
     case 1:
     case 2:
         if (msg->f4.i != -1) {
-            s2 = (Slot_150DC0*)func_0015A418(self->f14, 0x104, msg->f4.i, self->f50 ? self->f50 : self);
+            s2 = (Slot_150DC0*)func_0015A418(self->world, 0x104, msg->f4.i, self->root ? self->root : self);
         } else {
             s2 = 0;
         }
         if (msg->f8.i != -1) {
-            s4 = (Slot_150DC0*)func_0015A418(self->f14, 0x104, msg->f8.i, self->f50 ? self->f50 : self);
+            s4 = (Slot_150DC0*)func_0015A418(self->world, 0x104, msg->f8.i, self->root ? self->root : self);
         } else {
             s4 = 0;
         }
@@ -44,7 +44,7 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
         case 1:
             func_001E86E0(&D_002708E0, s2);
             func_001E87F0(&D_002708E0, s4);
-            self->f2F0 = s2;
+            self->p2F0 = s2;
             if (s2) {
                 self->f2E8 |= 2;
             }
@@ -52,7 +52,7 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
         case 2:
             func_001E86E0(&D_00271558, s2);
             func_001E87F0(&D_00271558, s4);
-            self->f2F4 = s2;
+            self->p2F4 = s2;
             if (s2) {
                 self->f2E8 |= 4;
             }
@@ -62,12 +62,12 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
         }
         break;
     case 3:
-        if (self->f2F0 && func_001833F0(self->f2F0, msg->f18)) {
-            s2 = self->f2F0;
+        if (self->p2F0 && func_001833F0((Slot_150DC0*)self->p2F0, msg->f18)) {
+            s2 = (Slot_150DC0*)self->p2F0;
             func_001E7440(&D_002708E0, 1);
             func_001E7440(&D_00271558, 0);
-        } else if (self->f2F4 && func_001833F0(self->f2F4, msg->f18)) {
-            s2 = self->f2F4;
+        } else if (self->p2F4 && func_001833F0((Slot_150DC0*)self->p2F4, msg->f18)) {
+            s2 = (Slot_150DC0*)self->p2F4;
             func_001E7440(&D_00271558, 1);
             func_001E7440(&D_002708E0, 0);
         } else {
@@ -76,16 +76,16 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
         a2 = msg->f1C;
         a0 = 0;
         if (a2 != -1) {
-            a0 = func_0015A418(self->f14, 2, a2, self);
+            a0 = func_0015A418(self->world, 2, a2, self);
             self->f2E8 |= 0x10;
         } else {
             if (s2) {
-                a0 = func_0015A418(self->f14, 1, 0x54A, (Self_150DC0*)s2);
+                a0 = func_0015A418(self->world, 1, 0x54A, s2);
             }
         }
         if (a0) {
-            func_0012C7B0(0.0f, 1.0f, (Slot_150DC0*)a0, (s32)s2, 1, &self->f2F8);
-            func_0012F810(self->f2F8, self);
+            func_0012C7B0(0.0f, 1.0f, (Slot_150DC0*)a0, (s32)s2, 1, &self->player2F8);
+            func_0012F810(self->player2F8, self);
         }
         nm = (u16*)msg->f14;
         if (nm && *nm) {
@@ -95,11 +95,11 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
             } else {
                 (*(Hud_150DC0_eu*)&D_002701F8).f2F4 = 0x80808080;
             }
-            if (self->f2F8) {
+            if (self->player2F8) {
                 if (msg->f1C == -1) {
                     f20 = msg->f8.f;
                 } else {
-                    f20 = self->f2F8->f8->f34;
+                    f20 = self->player2F8->anim->length;
                 }
             } else {
                 f20 = msg->f8.f;
@@ -121,13 +121,13 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
             self->f2FC = D_0026185C[0] + msg->f8.f;
         }
         if (msg->f20 != -1) {
-            s32 r = func_0015A418(self->f14, 0x104, msg->f20, self->f50 ? self->f50 : self);
+            s32 r = func_0015A418(self->world, 0x104, msg->f20, self->root ? self->root : self);
             func_001365A0(&(*(Hud_150DC0_eu*)&D_002701F8), r);
         }
         if (msg->f24 != -1) {
-            D_00261990->f4BC = (s32)func_0015A448(self->f14, msg->f24, 0);
-        } else if (self->f300 != -1) {
-            D_00261990->f4BC = (s32)func_0015A448(self->f14, self->f300, 0);
+            D_00261990->f4BC = (s32)func_0015A448(self->world, msg->f24, 0);
+        } else if (self->second300 != -1) {
+            D_00261990->f4BC = (s32)func_0015A448(self->world, self->second300, 0);
         } else {
             D_00261990->f4BC = 0;
         }
@@ -143,10 +143,10 @@ void func_00150DC0(Self_150DC0* self, Msg_150DC0* msg)
         break;
     }
     case 5:
-        func_001DDB58(self->f14);
+        func_001DDB58(self->world);
         break;
     case 6:
-        func_001DDBB8(self->f14);
+        func_001DDBB8(self->world);
         break;
     case 7:
         func_0018F0E8(D_00269A00, msg->f4.i);

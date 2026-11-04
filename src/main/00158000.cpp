@@ -1018,53 +1018,41 @@ s32 func_0015A4B8(s32 index, s32 value)
     return 0;
 }
 
-struct Type_159F48 { u8 pad0[8]; u32 flags; };
-struct Link_159F48 { u8 pad0[4]; s32 f4; };
-struct Obj_159F48 {
-    Type_159F48* type;
-    u8 pad4[0x14];
-    Obj_159F48* parent;
-    u8 pad1C[0x14];
-    Link_159F48* link;
-    u8 pad34[0x2C8 - 0x34];
-    union { u64 flags; struct { u64 lo : 42; u64 level : 4; } b; };
-};
+s32 func_00182FC8(C02* o);
 
-s32 func_00182FC8(Obj_159F48* o);
-
-void func_00159F48(Obj_159F48* self, s32 mode, s32 a2, s32 a3, Obj_159F48* a4, s32 cap,
-                   s32* count, Obj_159F48** arr, s32* lvlp)
+void func_00159F48(C02* self, s32 mode, s32 a2, s32 a3, C02* a4, s32 cap,
+                   s32* count, C02** arr, s32* lvlp)
 {
-    Obj_159F48* a0;
-    Obj_159F48* prev;
+    C02* a0;
+    C02* prev;
     switch (mode) {
     case 2:
-        if (self->link != 0 && a3 == 0) return;
+        if (self->alias != 0 && a3 == 0) return;
         if (self->parent == a4) goto add;
         return;
     case 1:
-        if (self->link != 0 && a3 == 0) return;
-        a0 = self->parent;
+        if (self->alias != 0 && a3 == 0) return;
+        a0 = (C02*)self->parent;
         if (a0 == 0) return;
         do {
-            u64 lvl = a0->b.level;
+            u64 lvl = a0->mark;
             if (lvl != 0) {
                 if (lvl == 1) goto add;
                 return;
             }
-            if (a0->link != 0) return;
-            a0 = a0->parent;
+            if (a0->alias != 0) return;
+            a0 = (C02*)a0->parent;
         } while (a0 != 0);
         return;
     case 3:
-        if (self->type->flags & 1) {
+        if (self->desc->flags & 1) {
             if (self->flags & ((u64)0xF000 << 30)) goto add;
         }
         return;
     case 4:
         prev = 0;
         a0 = self;
-        if ((self->type->flags & 1) == 0) a0 = self->parent;
+        if ((self->desc->flags & 1) == 0) a0 = (C02*)self->parent;
         while (a0 != 0) {
             u64 f = a0->flags;
             if (f & ((u64)0xF000 << 30)) {
@@ -1079,17 +1067,17 @@ void func_00159F48(Obj_159F48* self, s32 mode, s32 a2, s32 a3, Obj_159F48* a4, s
                 }
             }
             if (a0 == prev) return;
-            if (a0->link != 0 && (a0 != self || a3 == 0)) {
+            if (a0->alias != 0 && (a0 != self || a3 == 0)) {
                 s32 want = -1;
                 if (a4 != 0) {
-                    for (Obj_159F48* v = a4; v; v = v->parent) {
-                        if (v->link != 0) { want = v->link->f4; break; }
+                    for (C02* v = a4; v; v = (C02*)v->parent) {
+                        if (v->alias != 0) { want = v->alias->id; break; }
                     }
                 }
-                if (a0->link->f4 != want) return;
-                prev = a0->parent;
+                if (a0->alias->id != want) return;
+                prev = (C02*)a0->parent;
             }
-            a0 = a0->parent;
+            a0 = (C02*)a0->parent;
         }
         if (*lvlp != 0x7FFFFFFF) return;
         goto add;
@@ -1383,35 +1371,20 @@ void func_0015B4D0(C40* self, void* a1, void* a2)
     }
 }
 
-struct Lo_15A4F0 {
-    const Desc01* pvt;
-    u8 pad4[0x14];
-    Lo_15A4F0* pnext;   // 0x18
-    Lo_15A4F0* psib;    // 0x1C
-    u8 pad20[4];
-    Lo_15A4F0* pchain;  // 0x24
-    u8 pad28[0xC];
-    Lo_15A4F0* pchild;  // 0x34
-    u8 pad38[0x2C8 - 0x38];
-    u64 unk0 : 42;      // 0x2C8
-    u64 imark : 4;
-    u64 unk1 : 18;
-};
-
-s32 func_001300E8(Lo_15A4F0* plo, s32 id);
-s32 func_00182FC8(Lo_15A4F0* plo);
+s32 func_001300E8(C02* plo, s32 id);
+s32 func_00182FC8(C02* plo);
 s32 func_0015A4B8(u32 i, s32 id);
-void func_00159F48(Lo_15A4F0* plo, s32 kind, s32 fAll, s32 zero, Lo_15A4F0* ploRoot, s32 cmax,
-                   s32* pc, Lo_15A4F0** aplo, s32* pmin);
+void func_00159F48(C02* plo, s32 kind, s32 fAll, s32 zero, C02* ploRoot, s32 cmax,
+                   s32* pc, C02** aplo, s32* pmin);
 
-s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax, Lo_15A4F0** aplo)
+s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, C02* ploRoot, s32 cmax, C02** aplo)
 {
     s32 c;
     s32 min;
     s32 kind;
-    Lo_15A4F0* plo;
-    Lo_15A4F0* ploMark;
-    Lo_15A4F0* p;
+    C02* plo;
+    C02* ploMark;
+    C02* p;
     s32 n;
     u32 i;
 
@@ -1425,10 +1398,10 @@ s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax, Lo_15
     c = 0;
     if (kind == 3) {
         // Retail reads plo here before anything sets it (lw 0($s0) with $s0 unset).
-        if (!(plo->pvt->flags & 1)) {
-            plo = plo->pnext;
+        if (!(plo->desc->flags & 1)) {
+            plo = (C02*)plo->parent;
         }
-        for (; plo != 0; plo = plo->pnext) {
+        for (; plo != 0; plo = (C02*)plo->parent) {
             if (func_001300E8(plo, id) != 0 && ((grf & 0x100) || func_00182FC8(plo) != 0)) {
                 if (c < cmax) {
                     aplo[c] = plo;
@@ -1437,10 +1410,10 @@ s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax, Lo_15
             }
         }
     } else if (kind == 2 && !(grf & 0x100)) {
-        if (!(ploRoot->pvt->flags & 1)) {
+        if (!(ploRoot->desc->flags & 1)) {
             return 0;
         }
-        for (plo = ploRoot->pchild; plo != 0; plo = plo->psib) {
+        for (plo = (C02*)ploRoot->children.head; plo != 0; plo = (C02*)plo->next) {
             if (func_001300E8(plo, id) == 0) {
                 continue;
             }
@@ -1455,15 +1428,15 @@ s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax, Lo_15
         case 3:
         case 4:
             ploMark = ploRoot;
-            if (ploMark != 0 && !(ploMark->pvt->flags & 1)) {
-                ploMark = ploMark->pnext;
+            if (ploMark != 0 && !(ploMark->desc->flags & 1)) {
+                ploMark = (C02*)ploMark->parent;
             }
             p = ploMark;
             n = 0;
             while (p != 0) {
                 n++;
-                p->imark = n;
-                p = p->pnext;
+                p->mark = n;
+                p = (C02*)p->parent;
             }
             min = 0x7FFFFFFF;
             break;
@@ -1472,12 +1445,12 @@ s32 func_0015A4F0(C6C* psw, u32 grf, s32 id, Lo_15A4F0* ploRoot, s32 cmax, Lo_15
             break;
         }
         for (i = id; i < 0x95 && func_0015A4B8(i, id); i++) {
-            for (plo = (Lo_15A4F0*)psw->f1884[i]; plo != 0; plo = plo->pchain) {
+            for (plo = (C02*)psw->f1884[i]; plo != 0; plo = (C02*)plo->nextById) {
                 func_00159F48(plo, kind, grf & 0x100, 0, ploRoot, cmax, &c, aplo, &min);
             }
         }
-        for (p = ploMark; p != 0; p = p->pnext) {
-            p->imark = 0;
+        for (p = ploMark; p != 0; p = (C02*)p->parent) {
+            p->mark = 0;
         }
     }
     if (!(grf & 0x200) && cmax < c) {

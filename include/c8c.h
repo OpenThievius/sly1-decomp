@@ -35,7 +35,7 @@ struct C8C : C01 {
     Sub8C* sub;             // 0x3C
     s32 f40;                // 0x40
     s32 f44;                // 0x44
-    u8 pad48[0x4C - 0x48];
+    s32 f48;                // 0x48: the item chosen (func_001A8AF8); func_001A8C50 tests it, func_001A93C8 clears it
     s32 id4C;               // 0x4C: object ids, -1 for none (set by func_001A7FE8,
     s32 id50;               // 0x50  looked up by func_001A8590)
     s32 id54;               // 0x54

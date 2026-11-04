@@ -329,16 +329,6 @@ struct Sub_178598 {
     Quad_178598 q30;
 };
 
-typedef void (*VFn_178598)(void* self, void* a);
-
-struct Obj_178598 {
-    VFn_178598* vtbl;
-    u8 pad0[0x2514 - 4];
-    Sub_178598* f2514;
-    u8 pad1[0x2B70 - 0x2518];
-    Quad_178598 q2B70;
-    Quad_178598 q2B80;
-};
 
 struct Frame_178598 {
     Quad_178598 q0;
@@ -355,7 +345,7 @@ void func_00175170(void* self, s32 a, s32 b);
 
 extern f32 D_0026185C;
 
-void func_00178598(Obj_178598* self, Pair_178598* s2, f32 f)
+void func_00178598(C07* self, Pair_178598* s2, f32 f)
 {
     Frame_178598 fr;
     fr.fl = f;
@@ -365,12 +355,13 @@ void func_00178598(Obj_178598* self, Pair_178598* s2, f32 f)
     }
     void* q1 = &fr.q1;
     func_001782C0(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
-    self->f2514->f18 = D_0026185C + fr.fl;
-    self->f2514->q20 = fr.q0;
-    self->f2514->q30 = fr.q2;
-    self->vtbl[36](self, q1);
-    self->q2B70 = s2->q0;
-    self->q2B80 = s2->q1;
+    ((Sub_178598*)self->f2514)->f18 = D_0026185C + fr.fl;
+    ((Sub_178598*)self->f2514)->q20 = fr.q0;
+    ((Sub_178598*)self->f2514)->q30 = fr.q2;
+    self->desc02()->m20(self, (Vec02*)q1);
+    self->q2B70[0] = *(Vec02*)&s2->q0;
+    self->q2B70[1] = *(Vec02*)&s2->q1;
+
     func_00175170(self, 4, 0x2C);
 }
 

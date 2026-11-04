@@ -59,15 +59,16 @@ s32 func_001300E8(C01* list, s32 key)
 }
 
 extern u8 D_00259F38[];
-s32 func_0011BF30(void);
-void func_0011A708(void* dst, s32 value);
+void* func_0011BF30(void);
+void func_0011A708(void* dst, void* value);
 
 void func_00130110(C01* self)
 {
     if (self->f04 == 0) {
-        s32 v = func_0011BF30();
-        self->f04 = (void*)v;
+        void* v = func_0011BF30();
+        self->f04 = v;
         func_0011A708(D_00259F38, v);
+
     }
 }
 

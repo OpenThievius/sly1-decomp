@@ -418,8 +418,7 @@ void func_001AB920(T217D_510* self, f32 value)
 struct Row_1A8820 { s32 unk0; s32 itemCount; void** items; u8 pad[8]; };
 s32 func_001A8820(C8C* list, C01* query) { for(s32 i=0;i<list->count;i++){ Row_1A8820* row=(Row_1A8820*)((u8*)list->items+i*0x14); if(row->itemCount<=0) continue; void** items=row->items; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->itemCount;j++) if(query==items[j]) return 1; } return 0; }
 
-struct S_1A93C8 { u8 pad0[0x3C]; s32 ptr; u8 pad1[8]; s32 field; };
-void func_001A93C8(S_1A93C8* p) { p->field = 0; if (p->ptr != 0 && *(s32*)((u8*)p->ptr + 4) != 0) *(s32*)((u8*)p->ptr + 0x10) = 0; }
+void func_001A93C8(C8C* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
 
 struct Entry_1A87E0 { s32 pad0; s32 f4; s32 pad1; s32 fC; };
 
@@ -955,20 +954,15 @@ void func_001A87A8(Tab_1A87A8* table, s32 key)
     }
 }
 
-struct Obj_001A8C50 {
-    u8 pad[0x48];
-    s32 count;
-};
+void func_001A8AF8(C8C* self);
 
-void func_001A8AF8(Obj_001A8C50* self);
-
-s32 func_001A8C50(Obj_001A8C50* self)
+s32 func_001A8C50(C8C* self)
 {
-    if (self->count != 0) {
+    if (self->f48 != 0) {
         return 1;
     }
     func_001A8AF8(self);
-    return self->count != 0;
+    return self->f48 != 0;
 }
 
 void func_001AA958(T217D* self)
@@ -1305,37 +1299,28 @@ void func_001AB2B8(T217D_E30* self)
 // EXACT: dst built as i*4 + (u32)items
 
 struct Rec_1A8AF8 { s32 f0; s32 count; s32* items; s32 f0C; s32 flags; };
-struct Self_1A8AF8 {
-    u8 pad0[0x34];
-    s32 f34;
-    Rec_1A8AF8* recs;
-    Sub8C* node;
-    s32 f40;
-    s32 idx;
-    s32 f48;
-};
-
-void func_001A89E8(Self_1A8AF8* self);
-s32 func_001A88A0(Self_1A8AF8* self, s32 item);
+void func_001A89E8(C8C* self);
+s32 func_001A88A0(C8C* self, s32 item);
 void func_001F5B08(s32* dst, s32* src, s32 size);
 
-void func_001A8AF8(Self_1A8AF8* self)
+void func_001A8AF8(C8C* self)
 {
     s32 s5 = 0;
     s32 s4 = 0;
-    if (self->f34 != 0) {
+    if (self->count != 0) {
         if (self->f40 == 0) {
             func_001A89E8(self);
         }
-        Rec_1A8AF8* rec = &self->recs[self->idx];
+        Rec_1A8AF8* rec = &((Rec_1A8AF8*)self->items)[self->f44];
+
         if (rec->flags & 2) {
             s32 i = 0;
             if (rec->count > 0) {
                 do {
                     if (func_001A88A0(self, rec->items[i]) != 0) {
                         s4 = rec->items[i];
-                        if (self->node != 0 && self->node->f4 != 0) {
-                            s5 = self->node->fC + (self->idx << 5);
+                        if (self->sub != 0 && self->sub->f4 != 0) {
+                            s5 = self->sub->fC + (self->f44 << 5);
                         }
                         if (rec->flags & 1) {
                         } else {
@@ -1351,8 +1336,8 @@ void func_001A8AF8(Self_1A8AF8* self)
         }
     }
     self->f48 = s4;
-    if (self->node != 0 && self->node->f4 != 0) {
-        self->node->f10 = s5;
+    if (self->sub != 0 && self->sub->f4 != 0) {
+        self->sub->f10 = s5;
     }
 }
 
@@ -1799,15 +1784,8 @@ void func_001AB058(T217D_E30* self)
 
 
 struct Key_1A88A0 { u8 pad0[0x678]; s32 f678; u8 pad1[4]; s32 f680; };
-struct Ent_1A88A0;
 struct List_1A88A0 { u8* head; u8 pad4[4]; s32 offset; };
 struct Iter_1A88A0 { List_1A88A0* list; u8* link; s32 offset; Iter_1A88A0* prev; };
-struct Ent_1A88A0 {
-    u8 pad0[0x3C];
-    Ent_1A88A0* f3C;
-    u8 pad40[8];
-    Key_1A88A0* f48;
-};
 
 s32 func_00182FC8(Key_1A88A0* p);
 s32 func_001300E8(Key_1A88A0* p, s32 kind);
@@ -1845,7 +1823,7 @@ s32 func_001A88A0(C8C* self, Key_1A88A0* key)
 
     if (group != 0 && group->f4 != 0) {
         List_1A88A0* list;
-        Ent_1A88A0* skip;
+        C8C* skip;
         Iter_1A88A0 it;
         u8* obj;
 
@@ -1855,19 +1833,19 @@ s32 func_001A88A0(C8C* self, Key_1A88A0* key)
             skip = 0;
             break;
         case 2: {
-            Ent_1A88A0* e = (Ent_1A88A0*)group->f14;
-            skip = (Ent_1A88A0*)self;
-            if (e->f48 == key) {
+            C8C* e = (C8C*)group->f14;
+            skip = self;
+            if (e->f48 == (s32)key) {
                 return 0;
             }
-            list = (List_1A88A0*)((u8*)e->f3C + 0x14);
+            list = (List_1A88A0*)&e->sub->f14;
             break;
         }
         }
         Begin_1A88A0::Of(&it, list);
         for (obj = Next_1A88A0::Of(&it); obj != 0; obj = Next_1A88A0::Of(&it)) {
-            Ent_1A88A0* e = *(Ent_1A88A0**)obj;
-            if (e != skip && e->f48 == key) {
+            C8C* e = *(C8C**)obj;
+            if (e != skip && e->f48 == (s32)key) {
                 End_1A88A0::Of(&it);
                 return 0;
             }

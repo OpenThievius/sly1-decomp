@@ -1519,7 +1519,8 @@ void func_0016A420(C3A* self)
 
     func_001BAC30(self);
     if (self->f224 == 0) {
-        self->f224 = func_0018D5C0(0xC0);
+        self->f224 = (Rec2195_224*)func_0018D5C0(0xC0);
+
     }
     b = (Blk_16A420*)self->f224;
     b->flags |= 1;

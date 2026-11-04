@@ -2,6 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "c6c.h"
+#include "s1dbbd8.h"
 #include "t219c.h"
 
 void func_001B9F30(void);
@@ -79,18 +80,17 @@ void func_001DBC18(u8* self, T219CHook* node)
     }
 }
 
-struct Entry_1DBCC8 { s32 k0; s32 k1; s32 k2; s32 k3; Entry_1DBCC8* next; };
 
 void* func_001DBBD8(void* self);
 
-Entry_1DBCC8* func_001DBCC8(C6C* self, s32 a, s32 b, s32 c, s32 d)
+S1DBBD8* func_001DBCC8(C6C* self, s32 a, s32 b, s32 c, s32 d)
 {
-    Entry_1DBCC8* e = (Entry_1DBCC8*)func_001DBBD8(self);
+    S1DBBD8* e = (S1DBBD8*)func_001DBBD8(self);
     e->k0 = a;
     e->k1 = b;
     e->k2 = c;
     e->k3 = d;
-    if (self->f1ECC != 0) ((Entry_1DBCC8*)self->f1ECC)->next = e;
+    if (self->f1ECC != 0) self->f1ECC->next = e;
     else self->f1EC8 = e;
     self->f1ECC = e;
     return e;
@@ -110,19 +110,17 @@ void func_001D92F0(C19* self)
     }
 }
 
-typedef void (*VFn_1DBE48)(s32 a, s32 b, s32 c);
-struct Node_1DBE48 { VFn_1DBE48 fn; s32 a; s32 b; s32 c; Node_1DBE48* next; };
 
 void func_001DBC18(void* self, void* node);
 
 void func_001DBE48(C6C* self)
 {
     while (self->f1EC8 != 0) {
-        Node_1DBE48* node = (Node_1DBE48*)self->f1EC8;
+        S1DBBD8* node = self->f1EC8;
         if (node == self->f1ECC) self->f1ECC = 0;
         self->f1EC8 = node->next;
         node->next = 0;
-        node->fn(node->a, node->b, node->c);
+        node->fn(node->k1, node->k2, node->k3);
         func_001DBC18(self, node);
     }
 }
@@ -233,16 +231,15 @@ void func_001DB480(u8* self)
     }
 }
 
-struct Node_1DBD40 { s32 f0; s32 f4; s32 f8; s32 fC; struct Node_1DBD40* next; };
 
 void func_001DBC18(void* self, void* node);
 
 void func_001DBD40(C6C* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
 {
-    struct Node_1DBD40* prev = 0;
-    struct Node_1DBD40* removed = 0;
-    struct Node_1DBD40* cur = (struct Node_1DBD40*)self->f1EC8;
-    struct Node_1DBD40* next;
+    S1DBBD8* prev = 0;
+    S1DBBD8* removed = 0;
+    S1DBBD8* cur = self->f1EC8;
+    S1DBBD8* next;
     s32 bit;
 
     if (cur != 0) {
@@ -253,16 +250,16 @@ void func_001DBD40(C6C* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
                 if (mask & bit) {
                     switch (bit) {
                     case 1:
-                        if (cur->f0 != k0) goto miss;
+                        if (cur->k0 != k0) goto miss;
                         break;
                     case 2:
-                        if (cur->f4 != k1) goto miss;
+                        if (cur->k1 != k1) goto miss;
                         break;
                     case 4:
-                        if (cur->f8 != k2) goto miss;
+                        if (cur->k2 != k2) goto miss;
                         break;
                     case 8:
-                        if (cur->fC != k3) goto miss;
+                        if (cur->k3 != k3) goto miss;
                         break;
                     }
                 }
@@ -901,39 +898,38 @@ s32 func_001DBAE0(s32 unused, Id_1DBAE0 index)
     return func_001C0C50(index);
 }
 
-struct Node_1DBC60 { s32 f0; s32 f4; s32 f8; s32 fC; Node_1DBC60* f10; };
 
 void func_001DBC60(C6C* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
-    Node_1DBC60* n = (Node_1DBC60*)self->f1EC8;
+    S1DBBD8* n = self->f1EC8;
     if (n != 0) {
         do {
-            if (n->f0 == a1 && n->f4 == a2 && n->f8 == a3 && n->fC == a4) {
+            if (n->k0 == a1 && n->k1 == a2 && n->k2 == a3 && n->k3 == a4) {
                 return;
             }
-            n = n->f10;
+            n = n->next;
         } while (n != 0);
     }
     func_001DBCC8(self, a1, a2, a3, a4);
 }
 
-struct Slot_1D8D90 { u8 pad0[0x50]; f32 v; u8 pad1[0xC]; };
-struct Obj_1D8D90 { u8 pad0[0xD0]; f32 fD0; f32 fD4; u8 pad1[0x610 - 0xD8]; f32 f610; f32 f614; u8 pad2[0x694 - 0x618]; f32 f694; f32 f698; f32 f69C; u8 pad3[0x6B0 - 0x6A0]; Slot_1D8D90 slots[4]; };
+
 extern f32 D_002754F8; extern f32 D_002754F4; extern f32 D_00261860; extern f32 D_002754E8[3];
 f32 func_00205778(f32 a, f32 b); f32 func_001EA408(f32 a); f32 func_001EA480(f32 a, f32 b); f32 func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
-void func_001D8D90(Obj_1D8D90* self)
+void func_001D8D90(C19* self)
 {
-    f32 a = func_00205778(self->fD4, self->fD0);
+    f32 a = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     f32 b = func_001EA408(self->f694 - a);
     f32 c = func_001EA480(D_002754F8 * b, D_002754F4);
     self->f69C = func_001EA728((u8*)D_002754E8, 0, self->f69C, c, D_00261860);
     for (u32 i = 0; i < 4; i++) {
-        Slot_1D8D90* s = &self->slots[i];
+        Slot19* s = &self->f6B0[i];
         if ((s32)i < 2) {
-            s->v = self->f698 / self->f610;
+            s->f50 = self->f698 / self->f610;
         } else {
-            s->v = self->f698 / self->f614;
+            s->f50 = self->f698 / self->f614;
         }
+
     }
 }
 

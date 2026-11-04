@@ -151,7 +151,7 @@ void func_001824D8(C24* self)
 {
     func_0013CE40(self);
     func_00124DF8(self, 2, D_00264230);
-    self->x6C8 = (void*)func_001B6290(self->x6C4, self, 0x36E, 0);
+    self->x6C8 = (S1B6290*)func_001B6290(self->x6C4, self, 0x36E, 0);
     Alloc24* n = (Alloc24*)func_00121160(0);
     self->x6E8 = n;
     n->field8 = 0;
@@ -945,7 +945,7 @@ void func_00180F98(C1A* self)
 {
     func_001D7440(self);
     func_00124DF8(self, 0xA, D_002640B0);
-    self->fBBC = (void*)func_001B6290(self->fBB8, self, -1, 0);
+    self->fBBC = (S1B6290*)func_001B6290(self->fBB8, self, -1, 0);
     func_00129D00(self->fBCC, 5, &self->fBD0);
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
@@ -1010,8 +1010,9 @@ done:
     ;
 }
 
-extern Quad51 D_00248D20;
-extern Quad51 D_00248D10;
+extern Quad16 D_00248D20;
+extern Quad16 D_00248D10;
+
 
 void func_00184A70(C51* self);
 void func_00123ED0(C51* self);

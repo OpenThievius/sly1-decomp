@@ -27,21 +27,10 @@ extern s32 D_00262E10;
 
 void func_001861E8(void* a, s32 b);
 
-struct Thing_1D1200 {
-    u8 pad0[0x2674];
-    s32 f2674;
-    s32 f2678;
-    u8 pad1[0x2684 - 0x267C];
-    s32 f2684;
-    f32 f2688;
-    s32 f268C;
-    u8 pad2[0x26A0 - 0x2690];
-    s32 f26A0;
-};
 
 extern f32 D_0026185C;
 
-void func_001D1200(Thing_1D1200* self, s32 n)
+void func_001D1200(C07* self, s32 n)
 {
     if (n == self->f2684) {
         return;
@@ -60,7 +49,7 @@ void func_001D1200(Thing_1D1200* self, s32 n)
     }
     {
         s32 v = self->f2674;
-        if (v == self->f2678) {
+        if (v == (s32)self->f2678) {
             self->f268C = 2;
         } else {
             self->f268C = 0;
@@ -70,16 +59,13 @@ void func_001D1200(Thing_1D1200* self, s32 n)
 
 struct __attribute__((aligned(16))) Blob_274E60_1D1260 { f32 f[36]; };
 
-struct Thing_1D1260 {
-    u8 pad0[0x2678];
-    C63* f2678;
-};
 
 extern Blob_274E60_1D1260 D_00274E60;
 
 void func_001E2840(C63* o, s32 v);
 
-void func_001D1260(Thing_1D1260* self)
+void func_001D1260(C07* self)
+
 {
     C63* o = self->f2678;
     o->i414 = 5;

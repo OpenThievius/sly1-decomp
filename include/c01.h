@@ -78,14 +78,14 @@ struct Desc01 {
 
 struct C01 {
     const Desc01* desc;     // 0x00
-    void* f04;              // 0x04: copied through func_0011BEE0 by slot 9
+    void* f04;              // 0x04: a 4-byte block func_0011BF30 makes (func_00130110); copied through func_0011BEE0 by slot 9
     s32 id;                 // 0x08: the object's id (func_001833F0)
     u8 pad0C[0x14 - 0x0C];
     C6C* world;             // 0x14
     C01* parent;            // 0x18
     C01* next;              // 0x1C: the link in the parent's list of children (C02::children)
     C01* prev;              // 0x20
-    u8 pad24[0x28 - 0x24];
+    C01* nextById;          // 0x24: the next in its bucket of C6C::f1884 (func_0015A4F0 walks them)
     Callback01* callbacks;  // 0x28: slot 14 calls each
     void* f2C;              // 0x2C: looked up by func_001837E0, copied through func_0011A5B0
     Alias01* alias;         // 0x30

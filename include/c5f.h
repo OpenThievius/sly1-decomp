@@ -12,7 +12,7 @@
 
 #include "c02.h"
 
-struct Tgt5F;   // the object at 0x358 (its own class; func_001A4C48 reads its state at 0x550)
+struct C45;     // the object at 0x358 (c45.h; func_001A4C48 reads its state at 0x550)
 struct Link5F;  // the object at 0x658 (func_001A4C48 reads a state at 0x2D4)
 
 struct __attribute__((aligned(16))) Quad5F { f32 a, b, c, d; };
@@ -40,7 +40,7 @@ struct C5F : C02 {
     f32 tune34C;            // 0x34C
     f32 tune350;            // 0x350
     void* f354;             // 0x354
-    Tgt5F* target;          // 0x358
+    C45* target;            // 0x358
     u8 list35C[0x368 - 0x35C];  // lists (func_00152438 sets their element size)
     u8 list368[0x374 - 0x368];
     u8 list374[0x384 - 0x374];

@@ -8,6 +8,8 @@
 
 #include "c03.h"
 
+struct S1B6290;     // a handle func_001B6290 makes (s1b6290.h)
+
 struct C38 : C03 {
     s32 nIdsA;              // 0x550: the ids at idsA (func_00141338 looks each up)
     s32 idsA[4];            // 0x554
@@ -20,7 +22,7 @@ struct C38 : C03 {
     s32 f5A0;               // 0x5A0: the id of the first child of kind 0x74 (-1 until found)
     void* f5A4;             // 0x5A4: that object
     void* f5A8;             // 0x5A8: the object of id 0x545 (the loader's table D_00261410)
-    void* f5AC;             // 0x5AC: a handle func_001B6290 makes for f5A8
+    S1B6290* f5AC;          // 0x5AC: a handle func_001B6290 makes for f5A8
     s32 f5B0;               // 0x5B0: an index of the table at D_00261420 (func_00140FF8)
     s32 f5B4;               // 0x5B4: the world's count at +0x2304 when it was made
     u8 pad5B8[0x5C0 - 0x5B8];

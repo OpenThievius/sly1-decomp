@@ -3,6 +3,9 @@
 #include "c05.h"
 #include "c89.h"
 #include "c62.h"
+#include "c83.h"
+#include "t2195.h"
+
 
 s32 func_001CA460(void)
 {
@@ -11,12 +14,13 @@ s32 func_001CA460(void)
 
 void func_001CA720(C08* self, s32 a1, s32 a2)
 {
-    s32 n = self->fA7C[6].key;
+    s32 n = self->fAC4;
     if ((u32)n < 4) {
-        self->fA7C[6].key = n + 1;
-        u8* p = (u8*)self + (n * 12 + 0xAC8);
-        *(s32*)p = a1;
-        *(s32*)(p + 4) = a2;
+        self->fAC4 = n + 1;
+        Pend08* p = &self->fAC8[n];
+        p->f00 = a1;
+        p->id = a2;
+
     }
 }
 
@@ -157,20 +161,12 @@ void func_001CAEE0(u8* self, Obj_1CAEE0* other)
     }
 }
 
-struct Obj_1CB328 {
-    u8 pad0[0x72C];
-    s32 f72C;
-    s32 f730;
-    u8 pad1[0x1C];
-    void* f750;
-    void* f754;
-};
 
 void func_0012E760(void* p);
 s32 func_001C96B8(void* self);
 void func_0012C9E8(void* a, void* b, f32 c, void* d, void* e, s32 f, s32 g);
 
-void func_001CB328(Obj_1CB328* self, void* value)
+void func_001CB328(C08* self, void* value)
 {
     void* p;
 
@@ -250,42 +246,32 @@ void* func_001CA758(C08* self, void* arg)
     return item;
 }
 
-struct Slot8_001CA7C0 { s32 key; s32 value; };
-struct Slot12_001CA7C0 { s32 link; s32 key; s32 value; };
-struct Owner_001CA7C0 {
-    u8 pad0[0x758];
-    Slot8_001CA7C0 early[17];
-    u8 pad1[0xAC4 - 0x758 - 17 * 8];
-    s32 lateCount;
-    Slot12_001CA7C0 late[1];
-};
-
-void* func_001CA758(Owner_001CA7C0* self, s32 arg);
 void* func_001CA758(C08* self, s32 arg);
 
-void func_001CA7C0(Owner_001CA7C0* self)
+void func_001CA7C0(C08* self)
 {
     s32 i = 16;
-    Slot8_001CA7C0* slot = self->early;
+    Slot08* slot = self->f758;
     do {
-        if (slot->key != -1) {
-            slot->value = (s32)func_001CA758(self, slot->key);
-            slot->key = -1;
+        if (slot->id != -1) {
+            slot->obj = func_001CA758(self, slot->id);
+            slot->id = -1;
         }
         i--;
         slot++;
     } while (i >= 0);
 
     s32 j = 0;
-    if (self->lateCount > 0) {
+    if (self->fAC4 > 0) {
         do {
-            Slot12_001CA7C0* late = &self->late[j];
-            if (late->key != -1) {
-                late->value = (s32)func_001CA758(self, late->key);
-                late->key = -1;
+            Pend08* late = &self->fAC8[j];
+            if (late->id != -1) {
+                late->obj = func_001CA758(self, late->id);
+                late->id = -1;
             }
             j++;
-        } while (j < self->lateCount);
+        } while (j < self->fAC4);
+
     }
 }
 
@@ -298,7 +284,7 @@ void func_001CA878(C08* self, s32 v)
 void func_001CA888(C08* self, s32 v)
 {
     self->fB08 = v;
-    self->fB04 = (void*)1;
+    self->fB04 = 1;
 }
 
 s32 func_001CA600(s32 index);
@@ -346,7 +332,8 @@ void func_001CAAD0(C08* self, s32* out)
 void func_001CAB00(C08* self, s32 value)
 {
     self->fB48 = (void*)value;
-    self->fB40 = (void*)1;
+    self->fB40 = 1;
+
 }
 
 s32 func_001C84C0(C08* self)
@@ -884,48 +871,29 @@ s32 func_001CA6D0(C08* self, s32 index)
 
 extern const f32 D_0024D828;
 
-struct Sub_1C9A58 {
-    u8 pad00[0x34];
-    f32 f34;
-};
-struct Child_1C9A58 {
-    u8 pad00[0x8];
-    Sub_1C9A58* sub8;
-    u8 pad0C[0x4];
-    f32 f10;
-    f32 f14;
-};
-struct Obj_1C9A58 {
-    u8 pad000[0x724];
-    u32 f724;
-    u8 pad728[0x4];
-    u32 flags72C;
-    void* f730;
-    u8 pad734[0xAC];
-    Child_1C9A58* f7E0;
-};
 
-void func_0012E760(Child_1C9A58* c);
-void func_001C8F20(Obj_1C9A58* self, void* arg, s32 mode);
+void func_0012E760(Player2195* c);
+void func_001C8F20(C08* self, void* arg, s32 mode);
 
-void func_001C9A58(Obj_1C9A58* self) {
-    if (self->flags72C == 0) {
+void func_001C9A58(C08* self) {
+    if (self->f72C == 0) {
         return;
     }
-    if (self->flags72C & 2) {
+    if (self->f72C & 2) {
         if (self->f7E0 != 0) {
             if (self->f724 != 0xB) {
                 func_0012E760(self->f7E0);
                 self->f7E0 = 0;
             } else {
-                self->f7E0->f14 = self->f7E0->sub8->f34;
+                self->f7E0->time = self->f7E0->anim->length;
                 self->f7E0->f10 = D_0024D828;
             }
         }
         s32 m = -3;
-        self->flags72C &= m;
+        self->f72C &= m;
     }
-    if (self->flags72C & 1) {
+    if (self->f72C & 1) {
+
         func_001C8F20(self, self->f730, 0);
     }
 }

@@ -1089,7 +1089,8 @@ void func_00141438(C38* self)
         self->f5A4 = func_0015A448(self->world, self->f5A0, self);
     }
     if (self->f5A8 != 0) {
-        self->f5AC = func_001B6290(self->f5A8, self, 0x546, 0);
+        self->f5AC = (S1B6290*)func_001B6290(self->f5A8, self, 0x546, 0);
+
         if (func_00141008(D_00261420, self->f5B0) != 0)
             func_001B64D8(self->f5AC, 0x547);
     }
