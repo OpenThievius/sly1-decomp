@@ -6,6 +6,11 @@
 #include "c51.h"
 #include "c6c.h"
 #include "c20.h"
+#include "s124df8.h"
+#include "s192230.h"
+#include "shapes.h"
+#include "g27c220.h"
+#include "globals.h"
 
 int func_001EAC68(f32 a, f32 b, f32 eps);
 
@@ -144,9 +149,6 @@ s32 func_001B6290(void* a0, void* self, s32 b, s32 c);
 s32 func_00121160(s32 a);
 void* func_0018D500(s32 size);
 
-struct Ent_264230 { s32 a, b, c; };
-extern Ent_264230 D_00264230[];
-
 void func_001824D8(C24* self)
 {
     func_0013CE40(self);
@@ -206,16 +208,12 @@ void func_00183E70(C51* self)
     func_00183DC0(self);
 }
 
-struct Tuning_182E40 { u8 pad[0xC]; f32 scale; };
-
-extern Tuning_182E40* D_002623C8;
-
 s32 func_001EB050(void* target, f32 scale);
 void func_00182DD8(void* self);
 
 void func_00182E40(void* self, void* target)
 {
-    if (func_001EB050(target, D_002623C8->scale)) {
+    if (func_001EB050(target, D_002623C8->dt)) {
         func_00182DD8(self);
     }
 }
@@ -564,11 +562,10 @@ void func_00181A58(C1A* self, void* outv)
 }
 
 struct Sub_181D28 { u8 pad0[0x24]; s32 f24; };
-struct Rec_181D28 { s32 f0; u8 pad4[4]; s32 f8; };
 
-void func_001DAF08(void* self, s32 code, Rec_181D28* rec);
+void func_001DAF08(void* self, s32 code, S192230* rec);
 
-void func_00181D28(C1A* self, s32 code, Rec_181D28* rec)
+void func_00181D28(C1A* self, s32 code, S192230* rec)
 {
     if (code == 0x13) {
         Sub_181D28* sub = ((Sub_181D28*)self->fBBC);
@@ -747,7 +744,6 @@ void func_001929D0(void* value);
 void func_001D7098(void* out, s32 mode, void* owner);
 void func_00181B20(void);
 
-extern s32 D_00262E10;
 extern f32 D_0026185C;
 
 struct Vt_181BC8 { void** vt; };
@@ -757,7 +753,7 @@ s32 func_00181BC8(C1A* self, s32* arg)
 {
     Loc_181BC8 loc;
     s32 r;
-    s32 g;
+    C07* g;
     Vt_181BC8* gp;
     VFnP_181BC8 f;
     void** vt2;
@@ -931,9 +927,6 @@ struct Vt_180F98 {
 
 struct Packed_180F98 { f32 v; } __attribute__((packed));
 
-struct Ent_2640B0 { s32 a, b, c; };
-extern Ent_2640B0 D_002640B0[];
-
 void func_001D7440(void* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
 void func_00129D00(void* a, s32 b, void* c);
@@ -1010,9 +1003,6 @@ done:
     ;
 }
 
-extern Quad16 D_00248D20;
-extern Quad16 D_00248D10;
-
 
 void func_00184A70(C51* self);
 void func_00123ED0(C51* self);
@@ -1021,8 +1011,8 @@ void func_00183CC8(C51* self)
 {
     self->flags = (self->flags & ~(0x3ULL << 40)) | ((u64)0x8000 << 25);
     self->w2d0 = 0;
-    self->q320 = D_00248D20;
-    self->q340 = D_00248D10;
+    self->q320 = *(const Quad16*)&D_00248D20;
+    self->q340 = *(const Quad16*)&D_00248D10;
     self->f330 = 200.0f;
     self->f334 = 2000.0f;
     self->f2fc = 240.0f;
@@ -1105,10 +1095,6 @@ void func_00183EA0(C51* self, C51* other)
     }
 }
 
-struct Color_181818 {
-    u8 r, g, b, a;
-};
-
 struct Clamp_181818
 {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -1129,7 +1115,7 @@ extern f32 D_00261858[];
 f32 D_00264160[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
 f32 D_00264170[4] = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
 extern f32 D_00275C60[];
-extern Color_181818 D_002623E0[];
+extern Rgba4 D_002623E0[];
 
 f32 func_00205210(f32 x);
 void func_00126A48(C1A* o, u32 c);
@@ -1137,7 +1123,7 @@ void func_00125C90(C1A* o, void* a, void* b);
 
 void func_00181818(C1A* o, void* a, void* b)
 {
-    Color_181818 c;
+    Rgba4 c;
     u8 from[4];
     *(u32*)from = 0x800000A0;
     if (o->fBF0) {
@@ -1165,9 +1151,9 @@ void func_00181818(C1A* o, void* a, void* b)
     func_00125C90(o, a, b);
 }
 
-Ent_2640B0 D_002640B0[10] = {
+S124DF8 D_002640B0[10] = {
     { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
     { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }
 };
 f32 D_00264180[4] = { -300.0f, 0.0f, 200.0f, 0.0f };
-Ent_264230 D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
+S124DF8 D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };

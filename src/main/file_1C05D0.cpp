@@ -4,8 +4,9 @@
 #include "c7e.h"
 #include "c66.h"
 #include "c6c.h"
+#include "globals.h"
+#include "g27c220.h"
 extern const f32 D_0024D2A0[2] = { 3.4028235e38f, 0.0f };
-extern u8* D_00275710;
 #include "list_iter.h"
 
 void func_00130110(void* p);
@@ -189,7 +190,6 @@ void func_00202B68(Dma_1C25B0* d);
 
 
 extern f32 D_00274758[11][4];
-extern u8* D_002623C0;
 
 void func_0018D800(void* dst, void* src, s32 count);
 
@@ -549,8 +549,8 @@ void func_001C06D8(void)
     for (s32 i = 0; i < 4; i++) {
         func_001C0600(i);
     }
-    func_001C0760(*(s32*)(D_002623C0 + 0x19EC) & 0x80);
-    func_001C0790(*(s32*)(D_002623C0 + 0x19EC) & 0x40);
+    func_001C0760(D_002623C0->f19EC & 0x80);
+    func_001C0790(D_002623C0->f19EC & 0x40);
 }
 
 void func_001C0760(s32 flag)
@@ -580,7 +580,7 @@ void func_001C0808(void* item)
     if (D_00275710) {
         Iter_1C0808 it;
         u8* obj;
-        Begin_1C0808::Of(&it, (List_1C0808*)&((C6C*)D_00275710)->f1BAC);
+        Begin_1C0808::Of(&it, (List_1C0808*)&D_00275710->f1BAC);
         for (obj = Next_1C0808::Of(&it); obj; obj = Next_1C0808::Of(&it)) {
             func_001BF788(obj, item);
         }

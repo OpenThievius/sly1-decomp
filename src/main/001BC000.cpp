@@ -3,6 +3,9 @@
 #include "list_iter.h"
 #include "c03.h"
 #include "c6c.h"
+#include "s1bc320.h"
+#include "s1be728.h"
+#include "s18d410.h"
 
 void func_001BC748(C03* self, u32* out)
 {
@@ -183,16 +186,14 @@ void func_001BC088(C03* self, void* b, f32 x)
     func_00125440(self, x, b);
 }
 
-struct Shape_001BC320 { u8 pad0[8]; f32 radius; s32 flags; };
-
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
 
-s32 func_001BC320(C03* self, Shape_001BC320* shape)
+s32 func_001BC320(C03* self, S1BC320* shape)
 {
-    if (shape->flags & 0x8) {
+    if (shape->fC & 0x8) {
         func_001BC0E0(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
     }
-    return shape->flags != 0;
+    return shape->fC != 0;
 }
 
 void func_001BC710(C03* self, u32 flag)
@@ -533,10 +534,9 @@ void func_0018D410(void* p);
 s32 func_0011E048(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
 void func_0011E0E0(s32 a0, void (*a1)(void), u64 a2);
 
-struct Obj_1BE728 { s32 w0; s32 w4; u8 pad8[0xC]; s32 w14; u8 pad18[4]; s32 w1C; };
 struct Local_1BE728 { s32 a; s32 b; };
 
-void func_001BE728(Obj_1BE728* self)
+void func_001BE728(S1BE728* self)
 {
     if (D_00274744 != 0) {
         return;
@@ -1284,7 +1284,6 @@ void func_001BF7F8(Ent_1BF7F8* p, f32 a)
 }
 
 struct Ent_1BE268 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; s32 w14; s32 w18; s32 w1C; };
-struct Loc_1BE268 { s32 a; s32 b; };
 struct Pair_1BE268 { s32 id; s32 arg; };
 
 s32 D_00274740 = -1;
@@ -1295,14 +1294,14 @@ void func_001BE1E8(void);
 void func_0011D450(void);
 s32 func_0011CE30(void);
 void func_0011D420(void);
-void func_0018D410(Loc_1BE268* p);
+void func_0018D410(S18D410* p);
 s32 func_00203828(s32 a);
 s32 func_0011D140(s32 a, s32 b);
 s32 func_0011D760(s32 a, s32 b);
 
 s32 func_001BE268(s32 n)
 {
-    Loc_1BE268 l;
+    S18D410 l;
     s32 h;
     if (n == D_00274740) {
         return ((s32*)&D_00604790)[n];
@@ -1329,15 +1328,15 @@ s32 func_001BE268(s32 n)
     if (e == 0) {
         ok = 0;
     } else {
-        l.b = e->w4 ^ e->w1C;
-        l.a = e->w0 ^ e->w14;
-        ok = l.b != 0;
+        l.second = e->w4 ^ e->w1C;
+        l.first = e->w0 ^ e->w14;
+        ok = l.second != 0;
     }
     if (ok) {
         while (func_00203828(0) != 2) {
         }
         func_0011E1F8(0);
-        s32 r = func_0011D140(l.a, 0);
+        s32 r = func_0011D140(l.first, 0);
         ((s32*)&D_00604790)[n] = r;
         if (r != 0) {
             func_0011D420();

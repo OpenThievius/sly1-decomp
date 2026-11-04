@@ -33,11 +33,11 @@ const char* func_eu_001DDAB0(s32 id);
 #define HUD_EU ((Hud_1943E8_eu*)&D_00274118)
 void func_001943E8(Self_1943E8_eu* self)
 {
-    Glob_1943E8* g = (*(Glob_1943E8**)&D_002623C0);
+    G27C220* g = D_002623C0;
     Row_1943E8* row = &((Row_1943E8*)&D_00269D50)[self->f570];
     s32 on;
     s32 n;
-    Pad_1943E8* pad;
+    G262C70* pad;
 
     on = 0;
     switch ((g->f19D8 << 8) | g->f19DC) {
@@ -68,7 +68,7 @@ void func_001943E8(Self_1943E8_eu* self)
     case 0:
     case 11:
     case 17:
-        HUD_EU->f58C = func_00160B28((*(Glob_1943E8**)&D_002623C0));
+        HUD_EU->f58C = func_00160B28(D_002623C0);
         HUD_EU->f574 = &HUD_EU->f58C;
         D_00274118.vt->m14(&D_00274118);
         break;
@@ -107,12 +107,12 @@ void func_001943E8(Self_1943E8_eu* self)
     if (!ready) {
         return;
     }
-    if (pad->fAA & 0x810) {
+    if (pad->flags & 0x810) {
         func_0016EC20(&D_00262C70, 0x810);
         func_001961C0(self);
         return;
     }
-    if (pad->fAA & 0x80) {
+    if (pad->flags & 0x80) {
         func_0016EC20(&D_00262C70, 0x80);
         if (self->f570 == 11 || self->f570 == 16) {
             Ent_1943E8* e = &((Ent_1943E8*)&D_eu_00255538)[row->items[self->f574]];
@@ -123,7 +123,7 @@ void func_001943E8(Self_1943E8_eu* self)
         }
         return;
     }
-    if (pad->fAA & 0x40) {
+    if (pad->flags & 0x40) {
         func_0016EC20(&D_00262C70, 0x40);
         func_00195958(self);
         return;
@@ -225,10 +225,10 @@ void func_001943E8(Self_1943E8_eu* self)
         }
         break;
     case 5: {
-        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        G269990* p = &D_00269990;
         if (func_0018B770(p) == 0) {
             if (p->f10 == 0) {
-                func_0018B670(p, (void*)(void (*)(Boot_195958*))func_0018C250, ((u8*)&D_00264A40));
+                func_0018B670(p, (void*)(void (*)(G264A40*))func_0018C250, ((u8*)&D_00264A40));
                 func_00194D30(self, 1, 8);
             } else {
                 func_00194D30(self, 1, 6);
@@ -237,7 +237,7 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     }
     case 8: {
-        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        G269990* p = &D_00269990;
         if (func_0018B770(p) == 0) {
             if (p->f10 == 0) {
                 func_00194D30(self, 1, -1);
@@ -248,7 +248,7 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     }
     case 12: {
-        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        G269990* p = &D_00269990;
         if (func_0018B770(p) == 0) {
             if (p->f10 == 0) {
                 func_00194D30(self, 1, -1);
@@ -263,7 +263,7 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     }
     case 19: {
-        Pool_1943E8* p = ((Pool_1943E8*)&D_00269990);
+        G269990* p = &D_00269990;
         if (func_0018B770(p) == 0) {
             D_0026998C = 0;
             if (p->f10 == 0) {

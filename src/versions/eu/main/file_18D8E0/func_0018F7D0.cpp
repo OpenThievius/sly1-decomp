@@ -30,5 +30,5 @@ void func_0018F7D0(Obj_18F7D0* self_)
     } else {
         mask = 1 << self->f00;
     }
-    *(s32*)((u8*)D_002623C0 + 0x19F8) |= mask;
+    D_002623C0->f19F8 |= mask;
 }

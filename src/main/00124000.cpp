@@ -5,12 +5,14 @@
 #include "t2195.h"
 #include "s1291d0.h"
 #include "s1be4d8.h"
+#include "s124df8.h"
+#include "s12c288.h"
+#include "c83.h"
+#include "globals.h"
 
 #include "c6c.h"
 #include "c40.h"
 #include "c42.h"
-
-extern void* D_00261990;
 
 void func_00182ED0(C01* self);
 void func_00152600(void* list, void* item);
@@ -587,19 +589,17 @@ void func_00125B70(C02* self, Quad_00125B70* src, Dst_00125B70* dst)
     }
 }
 
-struct Item_124DF8 { u32 flags; u32 id; u32 off8; };
-
 void* func_0015A418(C6C* host, s32 kind, u32 id, C01* ctx);
 void func_00182ED8(void* node);
 void func_001832F0(void* node, C01* ctx);
 
-void func_00124DF8(C01* self, s32 count, Item_124DF8* item)
+void func_00124DF8(C01* self, s32 count, S124DF8* item)
 {
     C6C* host = self->world;
     if (count <= 0) {
         return;
     }
-    Item_124DF8* it = item;
+    S124DF8* it = item;
     s32 n = count;
     do {
         u32 f = it->flags;
@@ -610,7 +610,7 @@ void func_00124DF8(C01* self, s32 count, Item_124DF8* item)
         void* node = func_0015A418(host, kind, it->id, self);
         if (node) {
             if (!(it->flags & 8)) {
-                *(void**)((u8*)self + it->off8) = node;
+                *(void**)((u8*)self + it->offset) = node;
             }
             if (!(it->flags & 4)) {
                 func_00182ED8(node);
@@ -803,14 +803,11 @@ void func_00124FC0(C02* self, f32 f)
     func_001837E0(self, 1, 1, args);
 }
 
-struct Node_124CC0 { u8 pad0[0x34]; f32 f34; u8 pad1[0x40 - 0x38]; s32 f40; };
-struct Ctx_124CC0 { Node_124CC0* node; void* key; s32 mode; f32 value; f32 f10; };
-struct Self_124CC0 { u8 pad0[0x14]; void* f14; u8 pad1[0x2A0 - 0x18]; Ctx_124CC0* ctx; };
-struct Frame_124CC0 { s32 w0; Self_124CC0* self; u8 pad0[8]; f32 tmp; };
+struct Ctx_124CC0 { C83* node; void* key; s32 mode; f32 value; f32 f10; };
 
-Node_124CC0* func_0015A418(void* a, s32 b, void* c, Self_124CC0* d);
-void func_0012C9E8(Node_124CC0* a, Self_124CC0* b, f32 c, void* d, f32* e, s32 f, s32 g);
-void func_0012C288(Node_124CC0* a, Self_124CC0* b, s32 c, Frame_124CC0* d, f32 e, f32 f, s32 g, s32 h);
+C83* func_0015A418(void* a, s32 b, void* c, C02* d);
+void func_0012C9E8(C83* a, C02* b, f32 c, void* d, f32* e, s32 f, s32 g);
+void func_0012C288(C83* a, C02* b, s32 c, S12C288* d, f32 e, f32 f, s32 g, s32 h);
 
 struct Clamp_124CC0 {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -826,19 +823,21 @@ struct Clamp_124CC0 {
 };
 
 struct Find_124CC0 {
-    static Node_124CC0* Of(Self_124CC0* self, Ctx_124CC0* ctx)
+    static C83* Of(C02* self, Ctx_124CC0* ctx)
     {
         if (ctx->node != 0) {
             return ctx->node;
         }
-        return func_0015A418(self->f14, 0x104, ctx->key, self);
+        return func_0015A418(self->world, 0x104, ctx->key, self);
     }
 };
 
-void func_00124CC0(Self_124CC0* self)
+struct Frame_124CC0 : S12C288 { u8 pad0[8]; f32 tmp; };
+
+void func_00124CC0(C02* self)
 {
-    Ctx_124CC0* ctx = self->ctx;
-    Node_124CC0* node = Find_124CC0::Of(self, ctx);
+    Ctx_124CC0* ctx = (Ctx_124CC0*)self->f2A0;
+    C83* node = Find_124CC0::Of(self, ctx);
     if (node == 0) {
         return;
     }
@@ -848,7 +847,7 @@ void func_00124CC0(Self_124CC0* self)
         fr.tmp = ctx->value;
         break;
     case 1:
-        fr.tmp = Clamp_124CC0::Of(ctx->value, 0.0f, 1.0f) * node->f34;
+        fr.tmp = Clamp_124CC0::Of(ctx->value, 0.0f, 1.0f) * node->length;
         break;
     case 2:
         func_0012C9E8(node, self, 0.0f, (u8*)self + 0x100, &fr.tmp, 0, 0);
@@ -856,8 +855,8 @@ void func_00124CC0(Self_124CC0* self)
     default:
         return;
     }
-    fr.w0 = node->f40;
-    fr.self = self;
+    fr.key = node->id;
+    fr.val = self;
     func_0012C288(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
 }
 

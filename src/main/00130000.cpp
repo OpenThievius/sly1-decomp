@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c01.h"
+#include "s130070.h"
 
-struct Obj_1300D8 { u8 pad[0x20]; s32 f20; };
-
-void func_001300D8(Obj_1300D8* a0, s32 a1)
+void func_001300D8(S130070* a0, s32 a1)
 {
-    a0->f20 += a1;
+    a0->tail += a1;
 }
 
 void func_00130B48(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
@@ -27,12 +26,10 @@ typedef void (*VFn_131140)(void* self, s32 arg);
 
 void func_001365A0(void* self, s32 arg);
 
-struct Obj_130070 { s32 state; };
-
 void func_0012FE70(void* self);
 void func_0012FFE8(void* self);
 
-void func_00130070(Obj_130070* self)
+void func_00130070(S130070* self)
 {
     switch (self->state) {
     case 0:

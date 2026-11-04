@@ -19,7 +19,7 @@ void func_001A4EF0(C5F* self, s32 state)
     case 1: {
         if (W(self, 0x64C) < 3) {
             if (W(self, 0x64C) >= 0) {
-                if (((Step_1A4EF0*)D_002623C8)->f14) {
+                if (D_002623C8->f14) {
                     W(self, 0x658) = 0;
                 } else {
                     W(self, 0x658) = func_0015A418(self->world, 0x105, 0x33B, 0);

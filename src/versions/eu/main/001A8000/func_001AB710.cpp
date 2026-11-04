@@ -28,11 +28,11 @@ void func_001AB710(Actor_001AB710_eu* self)
             SubObj_001AB710* sub = *(SubObj_001AB710**)obj;
             if (sub != 0) {
                 VDesc_001AB710* d = sub->desc4C;
-                d->fn4C((u8*)sub + d->off48, obj, &L, D_00262280);
+                d->fn4C((u8*)sub + d->off48, obj, &L, &D_00262280);
             }
         }
         f32 v = self->f51C;
-        u8* dp = D_00262280;
+        u8* dp = (u8*)&D_00262280;
         func_0015C8B8(self->p4, v, v);
         ((u8*)&L.tag)[0] = 0x54;
         ((u8*)&L.tag)[1] = 0;

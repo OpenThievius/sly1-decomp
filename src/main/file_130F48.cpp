@@ -8,6 +8,8 @@
 #include "t217d.h"
 #include "c65.h"
 #include "v24a0.h"
+#include "g262c70.h"
+#include "g27c220.h"
 
 struct Quad_130F48 {
     f32 c0, c1, c2, c3;
@@ -72,12 +74,9 @@ struct Lerp_133B58
 
 struct Gs_132500;
 
-struct Pad_132500 { u8 pad[0x78]; f32 f78; };
 struct Clock_132500 { u8 pad[0x478]; f32 f478; };
 
 extern s32 D_00262C68;
-extern Pad_132500 D_00262C70;
-extern Pad_132500 D_00262D38;
 extern f32 D_00261860;
 extern Clock_132500* D_00261990;
 
@@ -225,14 +224,9 @@ struct Pad_136040 {
     u8 pad_78[4];
     f32 f7C;
 };
-struct Glob_136040 {
-    u8 pad[0x19EC];
-    u32 flags;
-};
 
 extern const Tri_136040 D_00249D00;
 extern const Tri_136040 D_00249D10;
-extern Glob_136040* D_002623C0;
 
 Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, Tri_136040* c, s32 d, f32 f12);
 f32 func_001EAFE0(f32 x, f32 y);
@@ -482,7 +476,7 @@ void func_00132500(T217D_440* self, Gs_132500* gs)
     Rgba_130F48 c0;
     Rgba_130F48 c1;
     f32 k;
-    Pad_132500* pad;
+    G262C70* pad;
     u8 alpha;
     f32 posX;
     f32 posY;
@@ -983,7 +977,7 @@ void func_00136040(T217D_440* self, Pad_136040* p)
         } else if (hi2 < v) {
             v = hi2;
         }
-        if (D_002623C0->flags & 0x200) v = -v;
+        if (D_002623C0->u19EC & 0x200) v = -v;
         va.x = self->stickX;
         va.y = self->stickY;
         va.z = 0;
