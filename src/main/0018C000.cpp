@@ -2076,7 +2076,7 @@ extern const Fn_Table D_0024B5B8[10] = { 0, 0, 0, (Fn_Table)func_0018E6C0, 0, (F
 
 extern u8 D_0064C70F[];
 s32 D_002699A4 = 0;
-extern s32 D_002699A8[2];
+extern s32 D_002699A8;
 extern s32 D_002C2A10;
 extern s32 D_002C2A24;
 extern u8 D_002C2A28[];
@@ -2086,10 +2086,10 @@ void func_001E22C0(void* self);
 void func_0018D430(void)
 {
     D_002699A4 = (s32)D_0064C70F & -16;
-    D_002699A8[0] = 0x2000000;
+    D_002699A8 = 0x2000000;
     // The heap's pointers (u8* elsewhere in this file), written as words.
     D_002C2A10 = *(s32*)&D_002C2A14 = *(s32*)&D_002C2A18 = *(s32*)&D_002C2A1C = D_002699A4;
-    *(s32*)&D_002C2A20 = D_002C2A24 = D_002699A8[0];
+    *(s32*)&D_002C2A20 = D_002C2A24 = D_002699A8;
     D_002C2A34 = -1;
     func_001E22C0(D_002C2A28);
 }
@@ -2400,7 +2400,7 @@ extern const char D_0024B3E8[24] = "icon.sys";
 extern const char D_0024B580[8] = "Nil";
 extern const char D_0024B588[16] = "(unknown)";
 
-s32 D_002699A8[2] = { 0, 0 };
+s32 D_002699A8;
 Ent_2699B0 D_002699B0 = { 2, 0x317, 0x6B0 };
 u8* D_002699C0[16] = {
     D_0024B438,

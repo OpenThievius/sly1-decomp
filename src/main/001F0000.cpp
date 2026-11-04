@@ -268,12 +268,12 @@ void func_001F0878(Obj_1F0878* self, s32 value)
     func_001F18B0(self, value);
 }
 
-extern s32 D_00276250[2];
+extern s32 D_00276250;
 extern s32 D_00276654;
 
 void func_001F08F0(s32 unused, s32 a, s32 b)
 {
-    D_00276250[0] = a;
+    D_00276250 = a;
     D_00276654 = b;
 }
 
@@ -486,7 +486,7 @@ typedef s32 Id_1F1A08;
 extern f32 D_00261858[];
 extern u8 D_00262C70[];
 extern u8 D_00275BC0[];
-f32 D_00275FC0[2] = { 0.5f, 0.0f };
+f32 D_00275FC0 = 0.5f;
 extern u8 D_00276278[];
 
 s32 func_001F0490(Sub_1F1A08* o, s32 n, s32* a, s32* b);
@@ -551,7 +551,7 @@ void func_001F1A08(Obj_1F1A08* self, Obj_1F1A08* t)
     if (s3 != 0) {
         self->f280 = 1.0f;
     } else {
-        self->f280 = D_00275FC0[0];
+        self->f280 = D_00275FC0;
     }
     self->f27C = func_001EA4B8((Q3_1F1A08*)D_00276278, 0, self->f27C, self->f280, D_00261858[5]);
 }
@@ -1655,7 +1655,7 @@ struct Obj_1F0908 {
 };
 struct Cfg_1F0908 { u8 pad[0x19D8]; s32 hi; s32 lo; };
 
-extern s32 D_00276250[2];
+extern s32 D_00276250;
 extern s32 D_00276654;
 extern Eng_1F0908 D_002721D0;
 
@@ -1666,7 +1666,7 @@ Body_1F0908* func_0015A418(void* o, s32 a, s32 b, Obj_1F0908* c);
 
 void func_001F0908(Obj_1F0908* self)
 {
-    if (D_00276250[0] == -1) return;
+    if (D_00276250 == -1) return;
     func_001AA8B8(&D_002721D0, (((*(Cfg_1F0908**)&D_002623C0)->hi << 8) | (*(Cfg_1F0908**)&D_002623C0)->lo) == 4 ? 0.5f : 2.0f);
     D_002721D0.vt->set(&D_002721D0, 2);
     Eng_1F0908* e = ((Eng_1F0908*)&D_0026F138);
@@ -1676,7 +1676,7 @@ void func_001F0908(Obj_1F0908* self)
     e->i464 = 1;
     func_001AA8B8(e, 0.0f);
     e->vt->set(e, 2);
-    Slot_1F0908* sl = self->slots[D_00276250[0]].s;
+    Slot_1F0908* sl = self->slots[D_00276250].s;
     if (sl != 0) {
         f32 f = 0.0f;
         if (D_00276654 == 0) f = sl->f34;
@@ -1691,7 +1691,7 @@ void func_001F0908(Obj_1F0908* self)
             }
         }
     }
-    D_00276250[0] = -1;
+    D_00276250 = -1;
 }
 
 extern u8 D_00262280[];
@@ -1791,7 +1791,7 @@ Ent_275FE0 D_00275FE0[52] = {
     { 0x2, 0x1F5, 0x4AC },
     { 0x2, 0x1F7, 0x514 },
 };
-s32 D_00276250[2] = { -1, 0 };
+s32 D_00276250 = -1;
 s32 (*D_00276608[6])[4] = { 0, (s32(*)[4])D_00276298, (s32(*)[4])D_00276348, (s32(*)[4])D_002763F8, (s32(*)[4])D_002764A8, (s32(*)[4])D_00276558 };
 Cfg_1F2688 D_00276620;
 extern const char D_0024E808[40] = "&2T&. : Back\n&2(&. : Move\n&2X&. : Warp";

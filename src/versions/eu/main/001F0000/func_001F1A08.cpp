@@ -60,7 +60,7 @@ void func_001F1A08(Obj_1F1A08_eu* self, Obj_1F1A08* t)
     if (s3 != 0) {
         self->f590 = 1.0f;
     } else {
-        self->f590 = D_00275FC0[0];
+        self->f590 = D_00275FC0;
     }
     self->f58C = func_001EA4B8((Q3_1F1A08*)D_00276278, 0, self->f58C, self->f590, D_00261858[5]);
 }

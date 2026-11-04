@@ -570,7 +570,7 @@ void func_0018BDC8(Self2_18BDC8* self)
 
 // Matches US and EU: retail's return-1 block is a shared target that every return-1 path branches to.
 extern f32 D_0026185C;
-extern f32 D_002649C8[2];
+extern f32 D_002649C8;
 
 typedef void* (*FnSelf_18A9A8)(void* self);
 typedef s32 (*FnSub_18A9A8)(void* self);
@@ -622,7 +622,7 @@ s32 func_0018A9A8(void* self)
 one:
     return 1;
 second:
-    func_00125750(sub, 0, loc.buf, 0, 0, 0, D_002649C8[0]);
+    func_00125750(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
     if (func_0018A910(obj, obj + 0x140, loc.buf) == 0) {
         goto one;
     }
@@ -1377,6 +1377,6 @@ Ent_264960 D_00264960[6] = {
     { 0x35, 50.0f, 0 }, { 0x36, 50.0f, 0 }, { 0x38, 80.0f, 0 },
     { 0x3B, 80.0f, 0 }, { 0x60, 70.0f, 0 }, { 0x50, 220.0f, 0 }
 };
-f32 D_002649C8[2] = { 0.25f, 0.0f };
+f32 D_002649C8 = 0.25f;
 extern const Quad_1884C0 D_0024B260 = { 0, 0, 0, 0x3F800000 };
 extern const f32 D_0024B270[4] = { 3.4028235e38f, 0.0f, 0.0f, 0.0f };

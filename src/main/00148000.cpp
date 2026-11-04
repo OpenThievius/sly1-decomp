@@ -511,13 +511,13 @@ void func_001496C0(Obj_1496C0* self)
     func_00143968(eng, 49.0f);
 }
 
-extern void* D_0026EC68[2];
+extern void* D_0026EC68;
 void func_00146470(void* self);
 
 void func_00148718(void* self)
 {
     func_00146470(self);
-    D_0026EC68[0] = self;
+    D_0026EC68 = self;
 }
 
 typedef void (*VFn_148748)(void* self, s32 arg);
@@ -1233,7 +1233,7 @@ void func_0014AC48(Obj_14AC48* self)
 
 void func_00146340(void* self);
 
-extern s32 D_0026EC60[2];
+extern u8 D_0026EC60[];
 
 struct Obj_148698 {
     u8 pad0[0x2D8];
@@ -1259,7 +1259,7 @@ void func_00148698(Obj_148698* self)
     self->f348 = 250.0f;
     self->f354 = 0.6f;
     self->f320 = 0.75f;
-    if (D_0026EC60[0] == 0) {
+    if (*(s32*)D_0026EC60 == 0) {
         self->f2D8 = 2;
     }
 }
@@ -1368,7 +1368,7 @@ struct Self_148AC0 {
 
 extern u8 D_002483D0[];
 extern u8 D_00248D30[];
-extern f32 D_00261B40[2];
+extern f32 D_00261B40;
 f32 D_00261B48[2] = { 75.0f, 1e+02f };
 f32 D_00261B50[4] = { 1e+03f, 1.3e+03f, 0.0f, 0.0f };
 
@@ -1407,7 +1407,7 @@ s32 func_00148AC0(Self_148AC0* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
             o->vt->f88(o, D_002483D0);
             o->vt->f90(o, D_00248D30);
             o->vt->f94(o, D_00248D30);
-            o->f2E0 = (f32)i * D_00261B40[0];
+            o->f2E0 = (f32)i * D_00261B40;
             o->f33C = 0;
             i++;
             o->vt->fCC(o, 3);
@@ -1699,7 +1699,7 @@ void* D_00261AD0[28] = {
     (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
     (void*)func_001481A0, 0, 0, 0
 };
-f32 D_00261B40[2] = { 0.05f, 0.0f };
+f32 D_00261B40 = 0.05f;
 void* D_00261B60[28] = {
     (void*)0xBD4CCCCD, (void*)0x3F4CCCCD, (void*)0x42C80000, 0,
     (void*)0xBF800000, (void*)0xBF800000, 0, 0,
@@ -1709,5 +1709,4 @@ void* D_00261B60[28] = {
     (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
     (void*)(void (*)(void))func_00148F80, 0, 0, 0
 };
-s32 D_0026EC60[2] = { 0, 0 };
-void* D_0026EC68[2] = { 0, 0 };
+void* D_0026EC68;

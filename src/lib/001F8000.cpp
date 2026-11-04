@@ -126,7 +126,7 @@ struct Arg_1F9790;
 u32 D_0027697C = 0x30333432;
 extern u8 D_00628E28[];
 extern char D_0024EB80[];
-void* D_002771D0[2] = { D_0024EB80, 0 };
+void* D_002771D0 = D_0024EB80;
 
 s32 func_001F59C4(struct Arg_1F9790* a, void* b, s32 c);
 
@@ -135,8 +135,8 @@ s32 func_001F9790(void)
     s32 result = 0;
     void* second = &D_0027697C;
     if (func_001F59C4((struct Arg_1F9790*)D_00628E28, second, 4) != 0) {
-        if (func_001F59C4((struct Arg_1F9790*)D_00628E28, D_002771D0[0], 4) != 0) {
-            result = func_001F59C4((struct Arg_1F9790*)second, D_002771D0[0], 4) != 0;
+        if (func_001F59C4((struct Arg_1F9790*)D_00628E28, D_002771D0, 4) != 0) {
+            result = func_001F59C4((struct Arg_1F9790*)second, D_002771D0, 4) != 0;
         }
     }
     return result;
@@ -484,7 +484,7 @@ struct Frame_001F9DC0 { s32 w[16]; };
 
 s32 func_001F6B20(Frame_001F9DC0* q);
 s32 D_002771E4;
-s32 D_002771E8[2] = { 0, 0 };
+s32 D_002771E8;
 
 void func_001F9DC0(void)
 {
@@ -494,7 +494,7 @@ void func_001F9DC0(void)
     f.w[9] = 1;
     f.w[10] = 1;
     D_002771E4 = func_001F6B20(&f);
-    D_002771E8[0] = func_001F6B20((Frame_001F9DC0*)&f.w[8]);
+    D_002771E8 = func_001F6B20((Frame_001F9DC0*)&f.w[8]);
 }
 
 extern s32 D_00629394;

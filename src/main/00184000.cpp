@@ -447,7 +447,7 @@ struct Flag_269A00 { s32 a; s32 on; };
 struct Tm_261858 { s32 a; s32 b; f32 dt; };
 
 s32 D_00264834;
-extern s32 D_00264838[2];
+extern s32 D_00264838;
 extern Flag_269A00 D_00269A00;
 extern Cfg_275F80 D_00275F80;
 extern s32 D_00275AF0;
@@ -482,7 +482,7 @@ void func_00185758(s32 a, s32 b)
 {
     func_001FAE18();
     D_00264834 = a;
-    D_00264838[0] = b;
+    D_00264838 = b;
     func_00185B38();
     while (1) {
         if (D_00269A00.on != 0 && D_00275F80.mode != 1) {
@@ -903,7 +903,7 @@ const u8* D_002647A8[6] = {
     (const u8*)D_0024B1E8, (const u8*)D_0024B1E8 + 16, (const u8*)D_0024B1E8 + 32,
     (const u8*)D_0024B1E8 + 48, (const u8*)D_0024B1E8 + 64, (const u8*)D_0024B1E8 + 80,
 };
-s32 D_00264838[2] = { 0, 0 };
+s32 D_00264838;
 Weight_264840 D_00264840[13] = {
     {1.0f, 0.5f},
     {3.0f, 2.4f},

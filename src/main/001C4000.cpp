@@ -537,7 +537,7 @@ struct Obj_1C6D00 {
 };
 
 extern f32 D_00274BE0[4];
-extern f32 D_00274BD8[2];
+extern f32 D_00274BD8;
 
 void func_001C6AA8(Obj_1C6D00* self, s32 mode, void* tbl, s32* nOut, Frame_1C6D00* f, f32 a, f32 b);
 void func_001399F8(void* ctx, s32 n, s32 m, Out_1C6D00* out);
@@ -567,8 +567,8 @@ void func_001C6D00(Obj_1C6D00* s, Out_1C6D00* out, void* ctx)
     } else {
         t = 1.0f;
     }
-    if (D_00274BD8[0] >= 0.0f) {
-        t = D_00274BD8[0];
+    if (D_00274BD8 >= 0.0f) {
+        t = D_00274BD8;
     }
     out->a = 1.0f - t;
     out->b = t;
@@ -1013,7 +1013,7 @@ Quad_1C4458 D_00274B30 = { 0x3F800000, (s32)0xBF800000, 0, 0 };
 s32 D_00274B40[4] = { 0x453B8000, 0, 0x40000000, 0 };
 s32 D_00274B50[3] = { 0x453B8000, 0, 0x3E800000 };
 f32 D_00274B80[4] = { 25.0f, 0.0f, 0.25f, 0.0f };
-f32 D_00274BD8[2] = { -1.0f, 0.0f };
+f32 D_00274BD8 = -1.0f;
 f32 D_00274BE0[4] = { 175.0f, 0.0f, 0.0f, 0.0f };
 f32 D_00274BF0[4] = { 250.0f, 0.0f, 125.0f, 0.0f };
 f32 D_00274C00[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
