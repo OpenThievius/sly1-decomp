@@ -28,7 +28,7 @@ VAG sound header.
 
 - **No names.** The executable holds no file names for it: its only device
   strings are `cdrom0:`, the IOP modules and `ioprp243.img`. The data is found
-  by sector, through an index the code reads.
+  by sector, through records the executable holds (below).
 - **The start sector is not a constant.** 12345 (`0x3039`) appears once in
   the code, as the increment of a random number generator in the libraries
   (0x1F6728), so the base comes from the index or from data, not from an
@@ -39,12 +39,50 @@ VAG sound header.
   shared code to decompile as there is in some other PS2 games: everything is
   in the executable, and config/<version>/layout.tsv covers all of it.
 
+## How the game finds its data
+
+There is no index on the disc. Every piece of data the game loads is named by a 32-byte
+record in the executable's read-only data, in which the start sector and the size are
+hidden with XOR:
+
+| Words (u32) | |
+| --- | --- |
+| 0 ^ 5 | start sector |
+| 1 ^ 7 | size in bytes; 0 means no entry |
+| 2 ^ 6 | identifier: records are compared on it |
+| 3, 4 | never read |
+
+The records are grouped in tables (US addresses):
+
+| Table | Entries | What | Format on the disc |
+| --- | ---: | --- | --- |
+| 0x247AF0 | 46 × 0x2C | levels: record, level code (world × 0x100 + level), name, flags | LZ-compressed |
+| 0x248490 | 17 × 0x20 | videos | MPEG program streams |
+| 0x244F40 | 7 × 0x20 | sound banks, loaded by the IOP sound driver | |
+| 0x248748 | 33 × 0x2C | music, by level code | VAG |
+| 0x2482D8, 0x2628B0 | 7, 6 × 0x20 | sounds | VAG |
+| 0x248470 | 1 | a file copied to the memory card | |
+
+PAL has the same scheme at other addresses; its level records hold five sector ranges per
+level.
+
+Reading goes through the CD library's sector read (0x203B18), called by a blocking retry
+wrapper (0x140CC8). Levels are read by a ring-buffered stream (0x137490) and decompressed
+as they arrive (0x1378A0): LZSS over an 8 KiB window, a flag byte for eight items, a
+reference of two bytes (13-bit position, 3-bit length + 3). Videos have their own
+double-buffered stream (0x12FE70). Sound banks are loaded by the sound driver from a
+sector the game sends it. After the tray has been opened, the game checks the disc by the
+CRC-32 of sector 1,368,303 (US).
+
+These tables cover 60% of the unlisted sectors. The levels themselves hold 269 more
+records of the same form (263 VAG sounds, six videos), bringing it to 80%. The
+rest, including 45 files that start `01 00 00 00`, is not yet accounted for.
+
 ## Next
 
-1. **The loader.** Find, by decompiling it, the code that reads sectors
-   (the calls into the CD library, then their callers) and how it locates
-   the index: where it is, how it is stored, and how an entry names a
-   sector range.
-2. **Each format, from its reader.** Levels, models, textures and sound are
+1. **Each format, from its reader.** Levels, models, textures and sound are
    documented here, and the extractor written in OpenThievius, from the
    functions that parse them.
+2. **The remaining data.** Find the records of the videos, sounds and the
+   files starting `01 00 00 00` that no table names yet, and the part of the
+   level parser that reads the records a level holds.
