@@ -45,10 +45,8 @@ HEADER = "name\taddress\tsize\tkind\twhy"
 BRANCH = re.compile(r"^(j|jal|jr|jalr|b|bal|beq|bne|beqz|bnez|bgez|bgtz|blez|bltz|bgezal|bltzal|beql|bnel|"
                     r"beqzl|bnezl|bgezl|bgtzl|blezl|bltzl|bc[0-3][tf]l?)$")
 OWN_LINES = ("nonmatching", "glabel", "endlabel", "dlabel", "enddlabel")
-# Multimedia instructions the compiler is known to emit: six functions that contain one are
-# matched in C (por is the 128-bit |), so seeing it proves nothing. Add an instruction here only
-# with such a function; a function in the table that src/ defines is an error (tests/test_tools.py).
-COMPILER_EMITS = {"por", "pref"}
+# Multimedia instructions the compiler is known to emit (tools/todo.py, COMPILER_EMITS).
+COMPILER_EMITS = todo.COMPILER_EMITS
 # Kernel, cache and system-control instructions, and the paired-pipeline and max/min floats: no
 # function matched in C holds one, and neither compiler emits them from plain C (docs/
 # ASM_CLASSIFICATION.md, "Kernel and system code"). sqrt.s is not here: __builtin_sqrtf gives it.
