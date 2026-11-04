@@ -79,12 +79,19 @@ def source(listing, name):
 
 
 INCLUDE_RODATA = re.compile(r"^\s*INCLUDE_RODATA\(\s*((?:D|jtbl)_[0-9A-F]{8})\s*\)", re.M)
+INCLUDE_DATA = re.compile(r"^\s*INCLUDE_DATA\(\s*(D_[0-9A-F]{8})\s*\)", re.M)
 DATA_WORD = re.compile(r"^\s*/\*\s*[0-9A-F]+ [0-9A-F]{8} ([0-9A-F]{8}) \*/\s*\.(\w+)\s+(.*?)\s*$")
+DATA_SMALL = re.compile(r"^\s*/\*\s*[0-9A-F]+ [0-9A-F]{8} \*/\s*\.(byte|short|half)\s+(\S+)\s*$")
 
 
 def included_rodata(text):
     """The read-only data labels a C source includes with INCLUDE_RODATA, in order."""
     return INCLUDE_RODATA.findall(text)
+
+
+def included_data(text):
+    """The .data labels a C source includes with INCLUDE_DATA, in order."""
+    return INCLUDE_DATA.findall(text)
 
 
 def rodata_source(listing, label):
@@ -97,7 +104,8 @@ def rodata_source(listing, label):
         raise KeyError("%s is not a label of the read-only data listing" % label)
     # A jump table is aligned to 16, as GCC writes it; the listing's `.align` before it is splat's.
     # Without one, data of 8 bytes or more at an 8-aligned address is GCC's aggregate, aligned to 8.
-    words = len([l for l in m.group(2).split("\n") if DATA_WORD.match(l)])
+    words = (len([l for l in m.group(2).split("\n") if DATA_WORD.match(l)])
+             + len([l for l in m.group(2).split("\n") if DATA_SMALL.match(l)]) / 4.0)
     address = int(label[-8:], 16)
     align = "4" if label.startswith("jtbl_") else (m.group(1) or ("3" if words >= 2 and address % 8 == 0 else "2"))
     out = ["\t.align\t%s" % align, "\t.globl\t%s" % label, "\t.type\t%s, @object" % label,
@@ -106,6 +114,11 @@ def rodata_source(listing, label):
     for line in m.group(2).split("\n"):
         w = DATA_WORD.match(line)
         if not line.strip():
+            continue
+        small = DATA_SMALL.match(line) if w is None else None
+        if small:
+            out.append("\t.%s\t%s" % ("byte" if small.group(1) == "byte" else "half", small.group(2)))
+            size += 1 if small.group(1) == "byte" else 2
             continue
         if w is None:
             raise KeyError("%s: a line this tool does not write: %s" % (label, line.strip()))
@@ -136,9 +149,19 @@ def write(names, key="us"):
     return paths
 
 
-def write_rodata(labels, key="us"):
+def label_size(listing, label):
+    """The bytes of a data label in a splat data listing, from its label to its end."""
+    return int(re.search(r"\.size\t%s, (\d+)" % label, rodata_source(listing, label)).group(1))
+
+
+def write_data(labels, key="us"):
+    """Write build/<key>/asm_func/<label>.s for each .data label (INCLUDE_DATA), as write() does."""
+    return write_rodata(labels, key, "data.data.s")
+
+
+def write_rodata(labels, key="us", listing_name="rodata.rodata.s"):
     """Write build/<key>/asm_func/<label>.s for each read-only data label, as write() does."""
-    text = ROOT / "asm" / key / "data" / "rodata.rodata.s"
+    text = ROOT / "asm" / key / "data" / listing_name
     out_dir = ROOT / "build" / key / "asm_func"
     paths, listing = [], None
     for label in labels:

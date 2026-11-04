@@ -15,6 +15,10 @@
 
 // The read-only data at a label that only original assembly uses (a jump table into an assembly
 // function, a constant it loads), included in the whole file's .rodata in retail's order.
+// The same for a .data label that only original assembly (or a function not matched yet) uses.
+#define INCLUDE_DATA(LABEL)                                                                  \
+    __asm__(".section .data\n\t.include \"build/us/asm_func/" #LABEL ".s\"\n\t.section .text")
+
 #define INCLUDE_RODATA(LABEL)                                                                \
     __asm__(".section .rodata\n\t.include \"build/us/asm_func/" #LABEL ".s\"\n\t.section .text")
 

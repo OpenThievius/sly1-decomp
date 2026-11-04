@@ -775,6 +775,16 @@ class AsmFuncTest(unittest.TestCase):
         other = asm_func.rodata_source(listing.replace("jtbl_00200000", "D_00200000"), "D_00200000")
         self.assertIn("\t.align\t3", other)
 
+    def test_data_bytes_are_written_and_sized(self):
+        listing = "\n".join(["nonmatching D_00260001", "", "dlabel D_00260001",
+                              "    /" + "* 100001 00260001 *" + "/ .byte 0x80",
+                              "    /" + "* 100002 00260002 *" + "/ .byte 0x10",
+                              "enddlabel D_00260001", ""])
+        out = asm_func.rodata_source(listing, "D_00260001")
+        self.assertIn("\t.byte\t0x80", out)
+        self.assertEqual(asm_func.label_size(listing, "D_00260001"), 2)
+        self.assertEqual(asm_func.included_data("INCLUDE_DATA(D_00260001);\n"), ["D_00260001"])
+
     def test_read_only_data_without_an_align_takes_gcc_s(self):
         words = ["    /" + "* 100000 0020000%X 00000000 *" % i + "/ .word 0x00000000" for i in (0, 4)]
         listing = "\n".join(["nonmatching D_00200008", "", "dlabel D_00200008"] + words + ["enddlabel D_00200008", ""])

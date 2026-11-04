@@ -99,8 +99,18 @@ def write_c_data(key, data_placed):
     """config/<key>/c_data.tsv: every global a C file defines, in a build that printed MATCH
     (tools/progress.py counts their bytes as matched data)."""
     rows = ["name\taddress\tsize\tsection\tsource"]
+    listings = {}
     for addr, size, obj, section, name in sorted(data_placed):
         source = Path(obj).relative_to(Path("build") / key).with_suffix(".cpp").as_posix()
+        if section in (".rodata", ".data"):
+            # A whole file's section: the labels it includes from the disassembly are not C.
+            text = (ROOT / source).read_text()
+            included = asm_func.included_rodata(text) if section == ".rodata" else asm_func.included_data(text)
+            if included:
+                name_ = "rodata.rodata.s" if section == ".rodata" else "data.data.s"
+                if name_ not in listings:
+                    listings[name_] = (ROOT / "asm" / key / "data" / name_).read_text()
+                size -= sum(asm_func.label_size(listings[name_], label) for label in included)
         rows.append("%s\t%08X\t%d\t%s\t%s" % (name, addr, size, section, source))
     path = ROOT / "config" / key / "c_data.tsv"
     text = "\n".join(rows) + "\n"

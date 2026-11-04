@@ -219,6 +219,7 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     text = src.read_text()
     asm_func.write(asm_func.included(text))
     asm_func.write_rodata(asm_func.included_rodata(text))
+    asm_func.write_data(asm_func.included_data(text))
     with tempfile.TemporaryDirectory(prefix="sly1-cc-") as tmp:
         ii, s = Path(tmp).resolve() / "unit.ii", Path(tmp).resolve() / "unit.s"
         if linux:

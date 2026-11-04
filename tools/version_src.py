@@ -115,7 +115,7 @@ def unit_text(shared, definitions):
         text = text.rstrip("\n") + "\n\n" + Path(definitions[name]).read_text().rstrip() + "\n"
     # A whole file includes US assembly (include/asm_func.h); the version's unit leaves it out, so
     # its C reaches those functions and data by name, at the version's addresses.
-    return re.sub(r"^INCLUDE_(?:ASM|RODATA)\(\w+\);\n", "", text, flags=re.M)
+    return re.sub(r"^INCLUDE_(?:ASM|RODATA|DATA)\(\w+\);\n", "", text, flags=re.M)
 
 
 def only_here(key):
