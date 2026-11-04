@@ -4,6 +4,7 @@
 #include "c6e.h"
 #include "c51.h"
 #include "c6c.h"
+#include "c20.h"
 
 int func_001EAC68(f32 a, f32 b, f32 eps);
 
@@ -163,7 +164,7 @@ struct Obj_1824D8 {
     Alloc_1824D8* x6E8;
 };
 
-void func_001824D8(void* self_)
+void func_001824D8(C24* self_)
 {
     Obj_1824D8* self = (Obj_1824D8*)self_;
     func_0013CE40(self);
@@ -664,11 +665,9 @@ void func_00181D28(C1A* self, s32 code, Rec_181D28* rec)
     func_001DAF08(self, code, rec);
 }
 
-struct Obj_182470 { u8 pad0[0x6CC]; f32 f6CC; s32 f6D0; f32 f6D4; f32 f6D8; f32 f6DC; f32 f6E0; };
-
 void func_0013DDB8(void* self);
 
-void func_00182470(Obj_182470* self)
+void func_00182470(C24* self)
 {
     func_0013DDB8(self);
     self->f6DC = 10.0f;

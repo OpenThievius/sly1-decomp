@@ -6,6 +6,7 @@ extern f32 D_0026185C[];
 #include "list_iter.h"
 #include "c53.h"
 #include "c6c.h"
+#include "c48.h"
 
 // A four-float vector, aligned as the VU0 reads it.
 struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
@@ -263,10 +264,8 @@ void func_0019F9D0(void*, u32);
 
 
 
-struct Obj_198920 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x684 - 0x18];
+struct Found_198920 {
+    u8 pad0[0x684];
     s32 f684;
 };
 
@@ -413,7 +412,7 @@ void func_00198530(C0F* self);
 void func_001986E8(C0F* self, s32 code, Req_1986E8* req);
 void func_00198760(C0F* s1, f32 f);
 u32 func_00198858(void);
-void func_00198920(Obj_198920* self);
+void func_00198920(C48* self);
 
 void func_001963D8(C53* self)
 {
@@ -898,11 +897,11 @@ u32 func_00198858(void) { return 0; }
 
 ASM_FUNC(func_00198860);
 
-void func_00198920(Obj_198920* self)
+void func_00198920(C48* self)
 {
     func_00124DF8(self, 3, (u8*)D_0026A8E0);
     func_00124A48(self);
-    Obj_198920* p = (Obj_198920*)func_0015A838(self->f14, 5, 0x18, 0);
+    Found_198920* p = (Found_198920*)func_0015A838(self->world, 5, 0x18, 0);
     if (p != 0) {
         p->f684 = p->f684 + 1;
     }

@@ -3,6 +3,7 @@
 #include "list_iter.h"
 #include "c02.h"
 #include "c2f.h"
+#include "c20.h"
 
 void func_0011F850(void* a, void* b);
 
@@ -578,17 +579,11 @@ f32 func_00123358(Owner_00123358* self, s32 index)
     return result;
 }
 
-struct Object_001233C0 {
-	u8 pad0[0x680];
-	s32 state;
-	u8 pad684[0x3C];
-	C2F* counter;
-};
 extern void func_0013D278(void*);
 
-void func_001233C0(Object_001233C0* object)
+void func_001233C0(C22* object)
 {
-	if (!object->state)
+	if (!object->hold)
 		func_00123B18(object->counter);
 	func_0013D278(object);
 }
