@@ -27,15 +27,15 @@ void func_00143648(C6D* self)
     *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(D_002483D0 + 0x10);
     *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(D_002483D0 + 0x20);
     func_00143560(self);
-    *(void**)(s + 0x454) = ((u8*)D_00217398);
-    func_00149398((struct Sub_00143648*)(s + 0x454), self);
-    *(void**)(s + 0x460) = ((u8*)D_002173B0);
-    func_00149660((struct Sub_00143648*)(s + 0x460), self);
-    *(void**)(s + 0x4C0) = ((u8*)D_002173C8);
-    func_0014A888((struct Sub_00143648*)(s + 0x4C0), self);
-    *(void**)(s + 0x510) = ((u8*)D_002173E0);
-    func_00149398((struct Sub_00143648*)(s + 0x510), self);
-    *(void**)(s + 0x520) = ((u8*)D_002173F8);
-    func_00149398((struct Sub_00143648*)(s + 0x520), self);
+    self->ctl454.vt = (const Vt2173*)D_00217398;
+    func_00149398(&self->ctl454, self);
+    self->ctl460.vt = (const Vt2173*)D_002173B0;
+    func_00149660(&self->ctl460, self);
+    self->ctl4C0.vt = (const Vt2173*)D_002173C8;
+    func_0014A888(&self->ctl4C0, self);
+    self->ctl510.vt = (const Vt2173*)D_002173E0;
+    func_00149398(&self->ctl510, self);
+    self->ctl520.vt = (const Vt2173*)D_002173F8;
+    func_00149398(&self->ctl520, self);
     func_00143A60(self, 1);
 }

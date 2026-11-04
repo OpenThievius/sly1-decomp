@@ -2,6 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "c63.h"
+#include "t2173.h"
 
 
 void func_001D7120(u8* buf, char* dst, s32 cap);
@@ -138,7 +139,6 @@ void func_0011EC40(void* a, void* b);
 
 
 struct Sub_1E30A0 { u8 pad[0x438]; f32 f438; f32 f43C; };
-struct Obj_1E30A0 { u8 pad[0x8]; Sub_1E30A0* sub; };
 struct Glob_1E30A0 { u8 pad[0x1C8]; f32 f1C8; };
 
 
@@ -1532,23 +1532,23 @@ ASM_FUNC(func_001E2BF0);
 
 ASM_FUNC(func_001E2E68);
 
-void func_001E30A0(Obj_1E30A0* self)
+void func_001E30A0(T2173_3F8* self)
 {
-    Sub_1E30A0* s = self->sub;
+    Sub_1E30A0* s = (Sub_1E30A0*)self->ptr;
     if (s != 0) {
         if (s->f438 != 0.0f) {
             Glob_1E30A0* g = (Glob_1E30A0*)D_00261990;
             g->f1C8 = s->f43C;
         }
     }
-    self->sub = 0;
+    self->ptr = 0;
 }
 
-void func_001E30D8(void* self)
+void func_001E30D8(T2173_3F8* self, s32 arg)
 {
 }
 
-void func_001E30E0(void) {}
+void func_001E30E0(T2173_3F8* self, s32 arg) {}
 
 ASM_FUNC(func_001E30E8);
 

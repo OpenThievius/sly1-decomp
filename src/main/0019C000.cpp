@@ -3,6 +3,8 @@
 #include "list_iter.h"
 #include "c8b.h"
 #include "c1e.h"
+#include "c6c.h"
+#include "t219c.h"
 
 struct Buf_19DF48 { u8 raw[0x30]; };
 typedef void (*Fn_19DF48)(void);
@@ -102,138 +104,89 @@ void func_0019E0B8(C1E* self)
     self->flags = flags;
 }
 
-struct Pool_19EA78 { s32 size; };
-struct Proc_19EA78 { u8 pad0[0x1B2C]; Pool_19EA78 pool1B2C; };
-struct Obj_19EA78 {
-    void* f0;
-    void* f4;
-    u8 pad8[4];
-    void* fC;
-};
-
 extern u8* D_00275710;
 
 void* func_001B5EA0(void* p);
 void func_001F5C0C(void* p, s32 zero, s32 size);
-void* func_0019E908(void* owner);
+const Vt219C* func_0019E908(u32 n);
 void func_00152470(void* list, void* item);
-void func_0019EC20(void* self);
+void func_0019EC20(T219C* self);
 
-void* func_0019EA78(s32 a, s32 b)
+T219C* func_0019EA78(s32 kind, C1E* sys)
 {
-    void* owner = (void*)a;
-    C1E* sys = (C1E*)b;
     if (sys == 0) {
         sys = func_0019E040((Pool_19E040*)D_00275710, 0);
         if (sys == 0) return 0;
     }
-    Obj_19EA78* o = (Obj_19EA78*)func_001B5EA0((u8*)sys->world + 0x1B2C);
+    T219C* o = (T219C*)func_001B5EA0(&sys->world->pool1B2C);
     if (o != 0) {
-        func_001F5C0C(o, 0, ((Proc_19EA78*)sys->world)->pool1B2C.size);
-        void* r = func_0019E908(owner);
-        o->f4 = owner;
-        o->fC = sys;
-        o->f0 = r;
+        func_001F5C0C(o, 0, sys->world->pool1B2C.size);
+        const Vt219C* r = func_0019E908(kind);
+        o->kind = kind;
+        o->owner = sys;
+        o->vt = r;
         func_00152470(&sys->list558, o);
         func_0019EC20(o);
     }
     return o;
 }
 
-struct Obj_19EBE8 {
-    u8 pad0[0xC];
-    u8* fC;
-};
-
 void func_00152600(void* table, void* self);
-void func_0019EC30(void* self);
+void func_0019EC30(T219C* self);
 
-void func_0019EBE8(void* self)
+void func_0019EBE8(T219C* self)
 {
-    Obj_19EBE8* o = (Obj_19EBE8*)self;
-    func_00152600(o->fC + 0x558, self);
+    func_00152600(&self->owner->list558, self);
     func_0019EC30(self);
 }
-
-typedef void (*ItemFn_19EC30)(void* payload, s32 n, void* owner);
-typedef void (*VFn_19EC30)(void* self);
-
-struct Item_19EC30 {
-    ItemFn_19EC30 fn;
-    void* payload;
-    u8 pad_08[0x8];
-    Item_19EC30* next;
-};
-
-struct Ctx_19EC30 {
-    u8 pad_00[0x14];
-    u8* table;
-};
-
-struct Owner_19EC30 {
-    VFn_19EC30* vtbl;
-    u8 pad_04[0x4];
-    s32 count;
-    Ctx_19EC30* ctx;
-    u8 pad_10[0x108];
-    Item_19EC30* head;
-};
 
 void func_001DBC18(void* a, void* b);
 void func_001B5F28(void* a, void* b);
 
-void func_0019EC30(Owner_19EC30* self)
+void func_0019EC30(T219C* self)
 {
-    s32 n = self->count - 1;
-    self->count = n;
+    s32 n = self->uses - 1;
+    self->uses = n;
     if (n != 0) {
         return;
     }
-    VFn_19EC30 fn = self->vtbl[2];
+    void (*fn)(T219C*) = self->vt->m02;
     if (fn != 0) {
         fn(self);
     }
-    Item_19EC30* head = self->head;
+    T219CHook* head = self->hooks;
     if (head != 0) {
-        self->head = 0;
-        for (Item_19EC30* it = head; it != 0; it = it->next) {
+        self->hooks = 0;
+        for (T219CHook* it = head; it != 0; it = it->next) {
             it->fn(it->payload, 0x10, self);
         }
         func_001DBC18(D_00275710, head);
     }
-    func_001B5F28(self->ctx->table + 0x1B2C, self);
+    func_001B5F28(&self->owner->world->pool1B2C, self);
 }
-
-struct Lerp_19ED00 {
-    u8 pad_00[0x18];
-    f32 a18;
-    f32 a1C;
-};
 
 extern f32 D_00261858[];
 
-void func_0019ED00(Lerp_19ED00* self, f32 x)
+void func_0019ED00(T219C* self, f32 x)
 {
-    f32 span = D_00261858[1] - self->a18;
-    f32 t = self->a1C - span;
+    f32 span = D_00261858[1] - self->start;
+    f32 t = self->life - span;
     if (x < t) {
-        f32 r = t / self->a1C;
+        f32 r = t / self->life;
         f32 q = x / r;
-        self->a1C = q;
-        self->a18 = D_00261858[1] - (1.0f - r) * q;
+        self->life = q;
+        self->start = D_00261858[1] - (1.0f - r) * q;
     }
 }
 
-struct Obj_19FE10 { u8 pad0[0x1C]; f32 f1C; s32 i20; };
+void func_0019EB28(T219C* self);
 
-void func_0019EB28(Obj_19FE10* self);
-
-void func_0019FE10(Obj_19FE10* self)
+void func_0019FE10(T219C* self)
 {
     func_0019EB28(self);
     u8* g = D_00275710;
     s32 v = *(s32*)(g + 0x1D00);
-    self->f1C = 0.5f;
+    self->life = 0.5f;
     self->i20 = v;
 }
 
@@ -271,85 +224,56 @@ void func_0019D2A8(Obj_19D2A8* self, void* x, void* y)
     }
 }
 
-struct Ctx_19F560 {
-    u8 pad_000[0x550];
-    s32 f550;
-};
-
-struct Sub_19F560 {
-    u8 pad_000[0x3F8];
-    s32 f3F8;
-};
-
-typedef void (*VFn_19F560)(void* self, s32 flag);
-
-struct Actor_19F560 {
-    VFn_19F560* vtbl;
-    u8 pad_004[0x0C - 4];
-    Ctx_19F560* ctx_0C;
-    u8 pad_010[0x18 - 0x10];
-    f32 f18;
-    f32 f1C;
-    u8 pad_020[0x24 - 0x20];
-    Sub_19F560* sub_24;
-    u8 pad_028[0x80 - 0x28];
-};
-
 extern f32 D_0026185C;
 
-void func_0019EBE8(void* self);
+void func_0019EBE8(T219C* self);
 s32 func_00182FC8(void* p);
 s32 func_0013E658(void* a, s32 b);
 
-void func_0019F560(Actor_19F560* self)
+void func_0019F560(T219C* self)
 {
-    f32 t = D_0026185C - self->f18;
-    if (self->f1C < t) {
+    f32 t = D_0026185C - self->start;
+    if (self->life < t) {
         func_0019EBE8(self);
         return;
     }
-    Ctx_19F560* c = self->ctx_0C;
+    C1E* c = self->owner;
     if (c->f550 == 1) {
         return;
     }
-    Sub_19F560* h = self->sub_24;
+    C03* h = self->target;
     if (h == 0) {
         return;
     }
-    if (h->f3F8 == 0) {
+    if (h->tree.nodes == 0) {
         return;
     }
     s32 flag = 0;
     if (func_00182FC8(h) != 0) {
-        if (func_0013E658(&self->pad_028[0x80 - 0x28], self->sub_24->f3F8) != 0) {
+        if (func_0013E658(&self->q80, (s32)self->target->tree.nodes) != 0) {
             flag = 1;
         }
     }
-    self->vtbl[6](self, flag);
+    self->vt->m06(self, flag);
 }
-
-struct Obj_19F858 {
-    u8 pad_000[0x114];
-    void* f114;
-};
 
 void func_001F2EF0(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
 s32 func_0019F620(void* self, void* a1, void* a2, void* a3);
-void func_0019EBE8(void* self);
+void func_0019EBE8(T219C* self);
 
-void func_0019F858(Obj_19F858* self, void* a1)
+void func_0019F858(T219C* self, void* a1)
 {
     u8 scratch[0x40];
     void* a2;
     void* a3;
-    if (self->f114 != 0) {
-        func_001F2EF0(50.0f, self->f114, (u8*)self + 0x80, (u8*)self + 0x50,
+    if (self->p114 != 0) {
+        func_001F2EF0(50.0f, self->p114, &self->q80, self->rot50,
                       scratch, scratch + 0x10, 0);
         a2 = scratch;
         a3 = scratch + 0x10;
     } else {
-        a2 = (u8*)self + 0x80;
-        a3 = (u8*)self + 0x50;
+        a2 = &self->q80;
+        a3 = self->rot50;
     }
     s32 r = func_0019F620(self, a1, a2, a3);
     if (r == 0) {
@@ -357,59 +281,34 @@ void func_0019F858(Obj_19F858* self, void* a1)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_19F988 { s32 a, b, c, d; };
-struct Obj_19F988 {
-    u8 pad_00[0x1C];
-    f32 f1C;
-    s32 i20;
-    u8 pad_24[0xC0 - 0x24];
-    Quad_19F988 q0C0;
-};
-
 extern u8* D_00275710;
 
-void func_0019EB28(void* self);
+void func_0019EB28(T219C* self);
 
-void func_0019F988(Obj_19F988* self)
+void func_0019F988(T219C* self)
 {
     func_0019EB28(self);
-    self->f1C = 5.0f;
+    self->life = 5.0f;
     u8* g = D_00275710;
     self->i20 = *(s32*)(g + 0x1CEC);
-    self->q0C0 = *(Quad_19F988*)(g + 0x1EE0);
+    self->qC0 = *(Quad219C*)(g + 0x1EE0);
 }
-
-struct Obj_19FD70 {
-    u8 pad_00[0x1C];
-    f32 f1C;
-    s32 i20;
-    u8 pad_24[0x34 - 0x24];
-    f32 f34;
-};
 
 extern u8* D_00275710;
 
-void func_0019EB28(void* self);
+void func_0019EB28(T219C* self);
 
-void func_0019FD70(Obj_19FD70* self)
+void func_0019FD70(T219C* self)
 {
     func_0019EB28(self);
-    self->f1C = 3.0f;
+    self->life = 3.0f;
     u8* g = D_00275710;
     s32 v = *(s32*)(g + 0x1CF4);
-    self->f34 = 0.6f;
+    self->m30[1] = 0.6f;
     self->i20 = v;
 }
 
 extern f32 D_00261858[];
-
-typedef void (*VFn_19E848)(void* self, void* arg);
-
-struct Node_19E848 {
-    VFn_19E848* vtbl;
-    u8 pad4[0x14];
-    f32 f18;
-};
 
 struct Frame_19E848 {
     s32 list;
@@ -433,10 +332,10 @@ void func_0019E848(C1E* self, void* arg)
     fr.cursor = h + link;
     s32 n = h;
     while (n != 0) {
-        Node_19E848* node = (Node_19E848*)n;
-        if (node->f18 >= D_00261858[1]) {
+        T219C* node = (T219C*)n;
+        if (node->start >= D_00261858[1]) {
         } else {
-            node->vtbl[5](node, arg);
+            node->vt->m05(node, arg);
         }
         s32 nx = *(s32*)fr.cursor;
         s32 lk = fr.link;
@@ -446,27 +345,17 @@ void func_0019E848(C1E* self, void* arg)
     D_0027B314 = (ListFrame*)fr.prev;
 }
 
-struct __attribute__((aligned(16))) Quad_19FDC0 { s32 a, b, c, d; };
-struct Obj_19FDC0 {
-    u8 pad_00[0x1C];
-    f32 f1C;
-    u8 pad_20[0x38 - 0x20];
-    f32 f38;
-    u8 pad_3C[0xC0 - 0x3C];
-    Quad_19FDC0 q0C0;
-};
-
 extern u8* D_00275710;
 
-void func_0019EB28(void* self);
+void func_0019EB28(T219C* self);
 
-void func_0019FDC0(Obj_19FDC0* self)
+void func_0019FDC0(T219C* self)
 {
     func_0019EB28(self);
-    self->f1C = 2.0f;
+    self->life = 2.0f;
     u8* g = D_00275710;
-    self->q0C0 = *(Quad_19FDC0*)(g + 0x1EE0);
-    self->f38 = -1.0f;
+    self->qC0 = *(Quad219C*)(g + 0x1EE0);
+    self->m30[2] = -1.0f;
 }
 
 extern u8 D_0026AC10[];
@@ -638,31 +527,27 @@ void func_0019DA60(void)
     func_00152D70(self);
 }
 
-struct __attribute__((aligned(16))) Quad_19F9D0 { s32 a, b, c, d; };
-struct Scratch_19F9D0 { Quad_19F9D0 head; u8 rest[0x700 - 16]; };
-struct Ctx_19F9D0 { u8 pad000[0x278]; s32* f278; u8 pad27C[0x3F8 - 0x27C]; void* f3F8; };
-struct Actor_19F9D0 { u8 pad00[0x24]; Ctx_19F9D0* f24; u8 pad28[0x80 - 0x28]; Quad_19F9D0 q80; u8 pad90[0x10]; };
-struct Obj_19F9D0 { void** vtbl; u8 pad04[0x1C - 4]; f32 f1C; u8 pad20[0x34 - 0x20]; f32 f34; u8 pad38[0x114 - 0x38]; s32 f114; };
+struct Scratch_19F9D0 { Quad219C head; u8 rest[0x700 - 16]; };
 
 void func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
-void* func_0019EA78(s32 a, s32 b);
-void func_0019EBE8(void* self);
+T219C* func_0019EA78(s32 kind, C1E* sys);
+void func_0019EBE8(T219C* self);
 
-void func_0019F9D0(Actor_19F9D0* self, s32 flag)
+void func_0019F9D0(T219C* self, s32 flag)
 {
     if (flag != 0) {
         Scratch_19F9D0 s;
         s.head = self->q80;
-        if (self->f24->f3F8 != 0) {
-            func_0013DFD8(self->f24->f3F8, self->pad90, &self->q80, 0, 0x10, &s);
+        if (self->target->tree.nodes != 0) {
+            func_0013DFD8(self->target->tree.nodes, &self->q90, &self->q80, 0, 0x10, &s);
         }
-        Obj_19F9D0* p = (Obj_19F9D0*)func_0019EA78(4, 0);
+        T219C* p = func_0019EA78(4, 0);
         if (p != 0) {
-            ((void (*)(void*, f32, void*, s32))p->vtbl[0])(p, 40.0f, &s, 0);
-            p->f1C = 0.75f;
-            p->f34 = 30.0f;
-            if (self->f24->f278 != 0) {
-                p->f114 = self->f24->f278[3];
+            p->vt->m00(p, &s, 40.0f, 0);
+            p->life = 0.75f;
+            p->m30[1] = 30.0f;
+            if (self->target->f278 != 0) {
+                p->p114 = (void*)((s32*)self->target->f278)[3];
             }
         }
         func_0019EBE8(self);
@@ -750,10 +635,7 @@ void func_0019D338(void* self, void* dst, Src_19D338* src, f32* k)
     func_0019C9C8(dst, f.w40, &f.q3);
 }
 
-struct Node_19E168;
-
 struct Cursor_19E168;
-struct Node_19E168;
 struct Cursor_19E168 {
     void* link;
     u8* at;
@@ -766,13 +648,13 @@ struct Cursor_19E168 {
         prev = ((Cursor_19E168*)D_0027B314);
         D_0027B314 = (ListFrame*)this;
     }
-    Node_19E168* first() {
-        Node_19E168* n = *(Node_19E168**)link;
+    T219C* first() {
+        T219C* n = *(T219C**)link;
         at = (u8*)n + stride;
         return n;
     }
-    Node_19E168* next() {
-        Node_19E168* n = *(Node_19E168**)at;
+    T219C* next() {
+        T219C* n = *(T219C**)at;
         at = (u8*)n + stride;
         return n;
     }
@@ -780,13 +662,13 @@ struct Cursor_19E168 {
 };
 
 
-void func_0019EBE8(Node_19E168* node);
+void func_0019EBE8(T219C* node);
 void func_001B7B78(C03* self);
 
 void func_0019E168(C1E* self)
 {
     Cursor_19E168 cur(&self->list558);
-    Node_19E168* node = cur.first();
+    T219C* node = cur.first();
     while (node != 0) {
         func_0019EBE8(node);
         node = cur.next();
@@ -959,36 +841,36 @@ extern const Fn_Table D_00219F20[];
 extern const Fn_Table D_00219F40[];
 extern const Fn_Table D_00219F60[];
 
-u8* func_0019E908(u32 n)
+const Vt219C* func_0019E908(u32 n)
 {
     switch (n) {
-    case 0: return ((u8*)D_00219C20);
-    case 2: return ((u8*)D_00219C40);
-    case 3: return ((u8*)D_00219C60);
-    case 4: return ((u8*)D_00219C80);
-    case 5: return ((u8*)D_00219CA0);
-    case 6: return ((u8*)D_00219CC0);
-    case 7: return ((u8*)D_00219CE0);
-    case 8: return ((u8*)D_00219D00);
-    case 9: return ((u8*)D_00219D20);
-    case 10: return ((u8*)D_00219D40);
-    case 11: return ((u8*)D_00219D60);
-    case 12: return ((u8*)D_00219D80);
-    case 13: return ((u8*)D_00219DA0);
-    case 14: return ((u8*)D_00219DC0);
-    case 15: return D_00219DE0;
-    case 16: return ((u8*)D_00219E00);
-    case 17: return ((u8*)D_00219E20);
-    case 18: return ((u8*)D_00219E40);
-    case 19: return ((u8*)D_00219E60);
-    case 20: return ((u8*)D_00219E80);
-    case 21: return ((u8*)D_00219EA0);
-    case 22: return ((u8*)D_00219EC0);
-    case 23: return ((u8*)D_00219EE0);
-    case 24: return ((u8*)D_00219F00);
-    case 25: return ((u8*)D_00219F20);
-    case 26: return ((u8*)D_00219F40);
-    case 27: return ((u8*)D_00219F60);
+    case 0: return (const Vt219C*)(D_00219C20);
+    case 2: return (const Vt219C*)(D_00219C40);
+    case 3: return (const Vt219C*)(D_00219C60);
+    case 4: return (const Vt219C*)(D_00219C80);
+    case 5: return (const Vt219C*)(D_00219CA0);
+    case 6: return (const Vt219C*)(D_00219CC0);
+    case 7: return (const Vt219C*)(D_00219CE0);
+    case 8: return (const Vt219C*)(D_00219D00);
+    case 9: return (const Vt219C*)(D_00219D20);
+    case 10: return (const Vt219C*)(D_00219D40);
+    case 11: return (const Vt219C*)(D_00219D60);
+    case 12: return (const Vt219C*)(D_00219D80);
+    case 13: return (const Vt219C*)(D_00219DA0);
+    case 14: return (const Vt219C*)(D_00219DC0);
+    case 15: return (const Vt219C*)D_00219DE0;
+    case 16: return (const Vt219C*)(D_00219E00);
+    case 17: return (const Vt219C*)(D_00219E20);
+    case 18: return (const Vt219C*)(D_00219E40);
+    case 19: return (const Vt219C*)(D_00219E60);
+    case 20: return (const Vt219C*)(D_00219E80);
+    case 21: return (const Vt219C*)(D_00219EA0);
+    case 22: return (const Vt219C*)(D_00219EC0);
+    case 23: return (const Vt219C*)(D_00219EE0);
+    case 24: return (const Vt219C*)(D_00219F00);
+    case 25: return (const Vt219C*)(D_00219F20);
+    case 26: return (const Vt219C*)(D_00219F40);
+    case 27: return (const Vt219C*)(D_00219F60);
     default: return 0;
     }
 }
@@ -1132,7 +1014,7 @@ void func_001A38F0();
 void func_001A3990();
 void func_001A39C8();
 void func_001A3A18();
-extern const Fn_Table D_00219C20[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219C20[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219C40[8] = { (Fn_Table)func_0019F988, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019F9D0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219C60[8] = { (Fn_Table)func_0019FA98, 0, 0, (Fn_Table)func_0019FB08, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019FCE8, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219C80[8] = { (Fn_Table)func_0019FD08, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
@@ -1149,15 +1031,15 @@ extern const Fn_Table D_00219DC0[8] = { (Fn_Table)func_001A0C50, 0, 0, (Fn_Table
 extern const Fn_Table D_00219E00[8] = { (Fn_Table)func_001A0C98, 0, 0, (Fn_Table)func_001A0D60, (Fn_Table)func_001A0F88, (Fn_Table)func_001A0DF0, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219E20[8] = { (Fn_Table)func_001A1410, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A00A0, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219E40[8] = { (Fn_Table)func_001A1458, 0, 0, (Fn_Table)func_001A1498, (Fn_Table)func_001A14A0, (Fn_Table)func_001A15D8, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219E60[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A22C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A22E0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A25F0 };
-extern const Fn_Table D_00219E80[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A26B0, (Fn_Table)func_001A26F8, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219EA0[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A2770, 0, (Fn_Table)func_001A2830, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2A68 };
-extern const Fn_Table D_00219EC0[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A2B48, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219EE0[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A2D30, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A2D88, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2E68 };
-extern const Fn_Table D_00219F00[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A3008, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A31A0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A3128 };
+extern const Fn_Table D_00219E60[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A22C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A22E0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A25F0 };
+extern const Fn_Table D_00219E80[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A26B0, (Fn_Table)func_001A26F8, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219EA0[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A2770, 0, (Fn_Table)func_001A2830, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2A68 };
+extern const Fn_Table D_00219EC0[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A2B48, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219EE0[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A2D30, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A2D88, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2E68 };
+extern const Fn_Table D_00219F00[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A3008, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A31A0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A3128 };
 extern const Fn_Table D_00219F20[8] = { (Fn_Table)func_001A31F0, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A3250, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219F40[8] = { (Fn_Table)func_001A3598, 0, 0, (Fn_Table)func_001A3730, (Fn_Table)func_001A38F0, (Fn_Table)func_001A3990, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(Obj_19FE10* self))func_0019EB28, (Fn_Table)func_001A39C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A3A18, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A39C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A3A18, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 
 struct Entry_19D410 { u32 w[32]; } __attribute__((aligned(16)));
 
@@ -1185,28 +1067,18 @@ void func_0019CD90(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
 
 extern f32 D_00261858[];
 
-struct Node_19E420;
-void func_0019EC20(Node_19E420* node);
-void func_0019EC30(Node_19E420* node);
+void func_0019EC20(T219C* node);
+void func_0019EC30(T219C* node);
 u32 func_00152720(List01* list);
 void func_0019E558(C1E* self);
 void func_00129DF8(C02* self);
 
-struct NodeVt_19E420 {
-    u8 pad0[0x10];
-    void (*update)(Node_19E420* node, f32 t);
-};
-struct Node_19E420 {
-    NodeVt_19E420* vtbl;
-    u8 pad4[0x14];
-    f32 f18;
-};
 struct Iter_19E420 { List01* list; u8* link; s32 offset; Iter_19E420* saved; };
 
 struct Next_19E420 {
-    static Node_19E420* Of(Iter_19E420* it)
+    static T219C* Of(Iter_19E420* it)
     {
-        Node_19E420* obj = *(Node_19E420**)it->link;
+        T219C* obj = *(T219C**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -1227,13 +1099,13 @@ void func_0019E420(C1E* self, f32 t)
 {
     Iter_19E420 it;
     Begin_19E420::Of(&it, &self->list558);
-    Node_19E420* node;
+    T219C* node;
     while ((node = Next_19E420::Of(&it)) != 0) {
-        if (node->f18 >= D_00261858[1]) {
+        if (node->start >= D_00261858[1]) {
             continue;
         }
         func_0019EC20(node);
-        node->vtbl->update(node, t);
+        node->vt->m04(node, t);
         func_0019EC30(node);
     }
     s64 m = 0x8000;
@@ -1333,9 +1205,6 @@ struct End_19E558 {
 };
 
 struct Hit_19E558 { u8 pad0[0x40]; f32 weight; u8 pad44[0x2C]; };
-struct Node_19E558;
-typedef s32 (*VFn_19E558)(Node_19E558* self, C03* o, void* a2, void* a3);
-struct Node_19E558 { VFn_19E558* vtbl; u8 pad4[0x14]; f32 f18; };
 
 extern f32 D_00261858[];
 
@@ -1376,15 +1245,15 @@ void func_0019E558(C1E* self)
                 buf = 0;
             }
             {
-                Node_19E558* n;
-                for (n = (Node_19E558*)Next_19E558::Of(&it1); n != 0; n = (Node_19E558*)Next_19E558::Of(&it1)) {
-                    if (n->f18 >= D_00261858[1]) continue;
-                    s32 cnt = func_00141C90(s2, buf, (u8*)n + 0x90, (u8*)n + 0x80, 4, hits);
+                T219C* n;
+                for (n = (T219C*)Next_19E558::Of(&it1); n != 0; n = (T219C*)Next_19E558::Of(&it1)) {
+                    if (n->start >= D_00261858[1]) continue;
+                    s32 cnt = func_00141C90(s2, buf, &n->q90, &n->q80, 4, hits);
                     s32 i;
                     for (i = 0; i < cnt; i++) {
                         Hit_19E558* h = &hits[i];
                         if (h->weight == 0.0f) continue;
-                        if (n->vtbl[7](n, s2, h, (u8*)h + 0x20) != 0) break;
+                        if (n->vt->m07(n, s2, h, (u8*)h + 0x20) != 0) break;
                     }
                 }
             }

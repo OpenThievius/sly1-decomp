@@ -14,11 +14,13 @@
 
 #include "c03.h"
 
+struct T219C;   // the records of list558 (include/t219c.h)
+
 struct C1E : C03 {
     s32 f550;               // 0x550: 0 or 1, as the world hands the object out (func_0019E040 sets it);
                             // func_0019E558 only runs for 1
     u8 pad554[0x558 - 0x554];
-    List01 list558;         // 0x558: the records of its owners (link offset 0x10, func_00152438)
+    List01 list558;         // 0x558: the T219C records of its owners (link offset 0x10, func_00152438)
     C1E* saved564;          // 0x564: the next object in the world's unused list (+0x1B38)
     u8 pad568[0x570 - 0x568];
 };

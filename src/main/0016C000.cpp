@@ -5,6 +5,7 @@
 #include "c64.h"
 #include "c29.h"
 #include "c47.h"
+#include "t262a.h"
 
 void func_001F3A40(void);
 
@@ -216,8 +217,6 @@ void func_0016F7B0(C07* self)
 }
 
 
-struct Entry_262A80 { void* data; s32 kind; void* fn; s32 arg; s32 pad[4]; };
-struct Entry_262C48 { void* data; s32 kind; void* fn; s32 arg; s32 pad[3]; };
 extern u8 D_00262A68[];
 extern u8 D_00262AA0[];
 extern u8 D_00262AD8[];
@@ -234,28 +233,28 @@ void func_0016F478(void);
 void func_00199F38(void);
 void func_00199FF0(void);
 void func_0019A0F0(void);
-Entry_262A80 D_00262A80 = { D_00262A68, 0xB, (void*)func_001E5278, 0x0 };
-Entry_262A80 D_00262AB8 = { D_00262AA0, 0xB, (void*)func_0016F408, 0x0 };
-Entry_262A80 D_00262AF0 = { D_00262AD8, 0xB, (void*)func_0016F430, 0x4004 };
-Entry_262A80 D_00262B28 = { D_00262B10, 0xB, (void*)func_0016F430, 0x8 };
-Entry_262A80 D_00262B60 = { D_00262B48, 0xB, (void*)func_0016F430, 0x2 };
-Entry_262A80 D_00262B98 = { D_00262B80, 0xB, (void*)func_00199F38, 0x0 };
-Entry_262A80 D_00262BD0 = { D_00262BB8, 0xB, (void*)func_00199FF0, 0xF000FFFF };
-Entry_262A80 D_00262C08 = { D_00262BF0, 0xB, (void*)func_0019A0F0, 0x0 };
-Entry_262C48 D_00262C48 = { D_00262C28, 0xD, (void*)func_0016F478, 0x0 };
+T262A_Slot D_00262A80 = { { (const u16*)D_00262A68, 0xB, (Fn262A)func_001E5278, 0x0 } };
+T262A_Slot D_00262AB8 = { { (const u16*)D_00262AA0, 0xB, (Fn262A)func_0016F408, 0x0 } };
+T262A_Slot D_00262AF0 = { { (const u16*)D_00262AD8, 0xB, (Fn262A)func_0016F430, 0x4004 } };
+T262A_Slot D_00262B28 = { { (const u16*)D_00262B10, 0xB, (Fn262A)func_0016F430, 0x8 } };
+T262A_Slot D_00262B60 = { { (const u16*)D_00262B48, 0xB, (Fn262A)func_0016F430, 0x2 } };
+T262A_Slot D_00262B98 = { { (const u16*)D_00262B80, 0xB, (Fn262A)func_00199F38, 0x0 } };
+T262A_Slot D_00262BD0 = { { (const u16*)D_00262BB8, 0xB, (Fn262A)func_00199FF0, 0xF000FFFF } };
+T262A_Slot D_00262C08 = { { (const u16*)D_00262BF0, 0xB, (Fn262A)func_0019A0F0, 0x0 } };
+T262A D_00262C48 = { (const u16*)D_00262C28, 0xD, (Fn262A)func_0016F478, 0x0 };
 
-void func_0016F188(void* entry);
+void func_0016F188(T262A* entry);
 
 void func_0016F588(void)
 {
-    func_0016F188(&D_00262A80);
-    func_0016F188(&D_00262AB8);
-    func_0016F188(&D_00262AF0);
-    func_0016F188(&D_00262B28);
-    func_0016F188(&D_00262B60);
-    func_0016F188(&D_00262B98);
-    func_0016F188(&D_00262BD0);
-    func_0016F188(&D_00262C08);
+    func_0016F188(&D_00262A80.rec);
+    func_0016F188(&D_00262AB8.rec);
+    func_0016F188(&D_00262AF0.rec);
+    func_0016F188(&D_00262B28.rec);
+    func_0016F188(&D_00262B60.rec);
+    func_0016F188(&D_00262B98.rec);
+    func_0016F188(&D_00262BD0.rec);
+    func_0016F188(&D_00262C08.rec);
     func_0016F188(&D_00262C48);
 }
 
@@ -508,17 +507,15 @@ void func_0016D9A8(C47* self)
     }
 }
 
-struct Timer_16F1F8 { s32 f0; s32 f4; void (*f8)(void*); void* fC; s32 f10; s32 f14; Timer_16F1F8* f18; };
-
-Timer_16F1F8* D_00262DFC = 0;
+T262A* D_00262DFC = 0;
 
 void func_0016F1F8(void)
 {
-    Timer_16F1F8* p = D_00262DFC;
+    T262A* p = D_00262DFC;
     if (p != 0) {
         do {
-            p->f10 = 0;
-            p = p->f18;
+            p->pos = 0;
+            p = p->next;
         } while (p != 0);
     }
 }
@@ -538,28 +535,28 @@ void func_0016F2E0(void)
     if (!(D_00262E00.time <= D_00261868[0])) {
         return;
     }
-    Timer_16F1F8* best = 0;
-    Timer_16F1F8** link = &D_00262DFC;
-    Timer_16F1F8* p = D_00262DFC;
+    T262A* best = 0;
+    T262A** link = &D_00262DFC;
+    T262A* p = D_00262DFC;
     while (p != 0) {
-        if (p->f14 != 0) {
-            *link = p->f18;
-            p->f10 = 0;
-            p->f14 = 0;
-            p->f18 = 0;
-        } else if (p->f10 < p->f4) {
-            link = &p->f18;
+        if (p->drop != 0) {
+            *link = p->next;
+            p->pos = 0;
+            p->drop = 0;
+            p->next = 0;
+        } else if (p->pos < p->length) {
+            link = &p->next;
         } else {
-            if (best == 0 || best->f4 < p->f4) {
+            if (best == 0 || best->length < p->length) {
                 best = p;
             }
-            link = &p->f18;
+            link = &p->next;
         }
         p = *link;
     }
     if (best != 0) {
         func_001BFCD8(0x79, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
-        best->f8(best->fC);
+        best->fn(best->arg);
     }
     func_0016F1F8();
     D_00262E00.time = 0.0f;
@@ -879,23 +876,23 @@ done:
 
 extern u16 D_00262D18;
 
-void func_0016F188(Timer_16F1F8* node)
+void func_0016F188(T262A* node)
 {
-    Timer_16F1F8* p = D_00262DFC;
+    T262A* p = D_00262DFC;
     if (p != 0) {
         do {
             if (node == p) {
                 return;
             }
-            p = p->f18;
+            p = p->next;
         } while (p != 0);
     }
-    node->f18 = D_00262DFC;
+    node->next = D_00262DFC;
     D_00262DFC = node;
-    if (D_00262D18 == *(u16*)node->f0) {
-        node->f10 = 1;
+    if (D_00262D18 == *(u16*)node->buttons) {
+        node->pos = 1;
     } else {
-        node->f10 = 0;
+        node->pos = 0;
     }
 }
 
@@ -1456,14 +1453,6 @@ void func_0016F478(void)
     }
 }
 
-struct Node_16F238 {
-    u16* values;
-    s32 length;
-    u8 pad08[8];
-    s32 cursor;
-    u8 pad14[4];
-    Node_16F238* next;
-};
 struct Clock_16F238 {
     u8 pad00[0x10];
     f32 time;
@@ -1474,15 +1463,15 @@ struct Actor_16F238 {
 };
 
 struct Advance_16F238 {
-    static void Of(Node_16F238* node)
+    static void Of(T262A* node)
     {
         do {
-            s32 index = node->cursor;
+            s32 index = node->pos;
             if (index < node->length) {
-                if ((*(Actor_16F238*)&D_00262C70).key == node->values[index])
-                    node->cursor = index + 1;
+                if ((*(Actor_16F238*)&D_00262C70).key == node->buttons[index])
+                    node->pos = index + 1;
                 else
-                    node->cursor = 0;
+                    node->pos = 0;
             }
             node = node->next;
         } while (node);
@@ -1492,7 +1481,7 @@ struct Advance_16F238 {
 void func_0016F238(Actor_16F238* self, s32 value)
 {
     u16 id = (u16)value;
-    Node_16F238* head = (*(Node_16F238**)&D_00262DFC);
+    T262A* head = D_00262DFC;
     if (head == 0) return;
     if (self != (Actor_16F238*)&D_00262C70) return;
     u16 previous = self->key;
