@@ -75,7 +75,7 @@ sector the game sends it. After the tray has been opened, the game checks the di
 CRC-32 of sector 1,368,303 (US).
 
 These tables cover 60% of the unlisted sectors. The levels hold the rest of the records
-(see Levels), bringing it to 87%.
+(see Levels), bringing it to all but 77 sectors.
 
 ## Levels
 
@@ -104,12 +104,12 @@ and the stream stops before it. Every byte of every US level is read by retail's
 The time stamps read as Unix times on 25 August 2002, within 32 minutes; the code only
 compares them.
 
-A level holds disc records of its own. The record after the music names the level's
-sound bank: these are the 45 files that start `01 00 00 00`, one per level except the
-splash screen. Three object classes read records: lists of steps (0x150570) and of timed
-events (0x12BC38) name 1,362 VAG sounds and 12 videos. With them, the records cover 87%
-of the unlisted sectors; what remains is one MPEG region of 172,705 sectors at 593,237,
-a 64-sector VAG and 13 empty sectors.
+A level holds disc records of its own. The record after the music names the level's sound
+bank: these are the 45 files that start `01 00 00 00`, one per level except the splash
+screen. Three object classes read records: lists of steps (0x150570) and of events
+(0x12BC38) name 1,362 VAG sounds and 13 videos (see Events). With them, the records name
+1,355,898 of the 1,355,975 unlisted sectors; what remains is a 64-sector VAG at 454,000
+and 13 empty sectors.
 
 ### Objects
 
@@ -161,12 +161,52 @@ packets itself, copying only a line mesh's positions, records and weights unchan
 A standalone parser written from this reads every geometry block of the 46 US levels
 (23,944 blocks) exactly as retail's loader does, read for read.
 
+### Animations
+
+Classes 0x83 and 0x88 (20% of all level bytes) are animations. An animation (0x83,
+0x12B8C8) holds an s16 object id, its length (an s16 count of 1/60 s, the unit of every
+time below), a u16 count of target object ids, an s8 count of tracks, three event lists
+and a property list. A track is an s16 target and s8 flags selecting a position (0x1),
+a rotation in Euler angles (0x2), a scale (0x4), a weight (0x8) and a u8 count of morph
+channels (0x10), each a curve whose s8 kind chooses its reader:
+
+| Curve | Reader | Format |
+| --- | --- | --- |
+| Hermite | 0x11EFC8 | u16 count; per key time, f32 value, two s8 modes, f32 in and out slopes |
+| Bézier | 0x11F210 | u16 count; per key time, f32 value, two s8 modes, four f32 handle offsets |
+| linear | 0x11F568 | u16 count; per key time, f32 value |
+| per axis | 0x11F798 | u8 axis mask, 3-float constant, a u8 kind and a scalar curve per set bit |
+| vector | 0x11FA88 | u16 count; per key time, 3-float value, in and out tangents (Hermite) |
+
+Vector keys are 73% of these bytes. A graph (0x88, 0x1B5F50) holds u8-counted states
+{s16 id, s16 next} and transitions {s8, s16 from, s16 to, s32, f32}, a property list,
+an s16 it drops, then for each transition whose s8 is set an animation created inline
+(class, id and value index as in an object list).
+
+### Events
+
+An animation's three event lists (0x12BC38) run when it starts, as its time passes
+each event (the second list, the only one with times) and when it ends. A list is an s8
+count; an event an s8 kind (0x00–0x3B), its time in the timed list, and a payload of 0
+to 32 bytes chosen by the kind. Kind 0x00 plays a sound effect at an object, 0x2C a
+streamed sound and 0x33 a video, both named by a disc record; the others start, stop
+and adjust animations, objects and the world.
+
+Class 0x65 (mostly created inline by 0x53) ends with a list of steps (0x150570): an s8
+count of steps, each an s8 kind (0–7) and its payload; kind 0 plays a streamed sound and
+kind 7 a video from a disc record, kind 3 holds two floats, two bytes, four ids and a
+string.
+
+The events and steps name 1,362 VAG sounds and 13 videos, among them the 172,705-sector
+video at 593,237. A standalone parser written from this reads every animation, graph and
+step list of the 46 US levels (14,753 blocks, 34.9 MB) exactly as retail's loaders do,
+read for read.
+
 ## Next
 
 1. **Each format, from its reader.** Field by field: class 0x03's collision meshes and the
    event lists (0x11FA88 and its siblings), which hold most of a level's bytes; what each
    class is; PAL's levels. Then models, textures and sound, documented here, and the
    extractor written in OpenThievius, from the functions that parse them.
-2. **The remaining data.** The MPEG region of 172,705 sectors at 593,237 and the
-   64-sector VAG at 454,000, which no record found yet names; and the object classes
-   that read records (0x65, 0x7D, 0x83).
+2. **The remaining data.** The 64-sector VAG at 454,000, which no record found yet names;
+   what the event kinds and the object classes are in the game.
