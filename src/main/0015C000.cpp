@@ -107,35 +107,6 @@ void func_0015EB20(void* self, void* p, s32 n)
     func_001529E0(self, p, n);
 }
 
-struct Owner_15F678
-{
-    u8 pad[0x1ED0];
-    s32 count;
-    void** items;
-};
-
-void func_0015F678(Owner_15F678* owner, u8* obj)
-{
-    u64 flags = *(u64*)(obj + 0x2C8);
-    u64 bit = (u64)0x8000 << 24;
-    if (!(flags & bit))
-    {
-        *(u64*)(obj + 0x2C8) = flags | bit;
-        s32 n = owner->count;
-        owner->items[n] = obj;
-        owner->count = n + 1;
-    }
-}
-
-void func_0015FA58(void* self);
-void func_0015FD78(void* self);
-
-void func_0015FF58(void* self)
-{
-    func_0015FA58(self);
-    func_0015FD78(self);
-}
-
 struct Rec_15C9B0 {
     u8 pad0[0x50];
     s32 f50;
@@ -619,31 +590,6 @@ f32 func_0015DFF8(Walker_15DFF8* self)
     return acc;
 }
 
-struct Sub_15F9A0 { u8 pad0[8]; s32 count; void** items; };
-struct Obj_15F9A0 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C; void* items70[1]; };
-
-void func_0015F930(void* list, void* base, void* item);
-void func_0015F710(void* self, void* value);
-
-void func_0015F9A0(void* self, Sub_15F9A0* s)
-{
-    s32 i;
-    Obj_15F9A0* obj;
-    if (s->count >= 2) {
-        for (i = 0; i < s->count; i++) {
-            obj = (Obj_15F9A0*)s->items[i];
-            func_0015F930(&obj->count6C, obj->items70, s);
-        }
-        for (i = 0; i < s->count; i++) {
-            obj = (Obj_15F9A0*)s->items[i];
-            if (obj->f54 != 0) {
-                func_0015F710(self, obj->f54);
-                break;
-            }
-        }
-    }
-}
-
 typedef f32 (*Measure_15E068)(void* at, s32 ch);
 struct Glyph_15E068 { u8 pad[0x18]; s16 offset; u8 pad2[2]; Measure_15E068 measure; };
 struct Holder_15E068 { u8 pad[8]; s32 units; u8 pad2[0x3C]; f32 scale; Glyph_15E068* glyph; };
@@ -707,35 +653,6 @@ f32 func_0015E1B0(Wrap_15E1B0* self)
     return width * (f32)lines;
 }
 
-struct Class_0015FB28 { u8 pad0[8]; s32 flags; u8 pad1[0x54]; void (*visit)(void* self, void* arg); };
-struct Node_0015FB28 { Class_0015FB28* cls; u8 pad0[0x18]; Node_0015FB28* next; u8 pad1[0x14]; Node_0015FB28* child; };
-
-void func_0015FB28(Node_0015FB28* self, void* arg)
-{
-    ListFrame frame;
-    if (self->cls->visit != 0)
-        self->cls->visit(self, arg);
-    Node_0015FB28* node = self->child;
-    if (node != 0)
-    {
-        do
-        {
-            if (node->cls->flags & 1)
-                func_0015FB28(node, arg);
-            node = node->next;
-        } while (node != 0);
-    }
-}
-
-struct Obj_0015FBA0 { u8 pad[0x2C8]; u64 flags; };
-
-s32 func_0015FBA0(Obj_0015FBA0* self, s32* out)
-{
-    s32 bit = (s32)(self->flags >> 38) & 1;
-    *out = bit;
-    return bit;
-}
-
 struct Obj_15C900 { u8 pad0[0xC]; s32 index; u8 pad1[0x34]; f32 first; f32 second; };
 void func_0015C900(Obj_15C900* obj) { obj->index--; f32* item = (f32*)((u8*)obj + 0x10 + obj->index * 8); obj->first = item[0]; obj->second = item[1]; }
 
@@ -747,26 +664,6 @@ void func_0015DBB8(u8* dst, u8* src)
     ((Unaligned_15DBB8*)(dst + 0xA4))->v = v;
     v = ((Unaligned_15DBB8*)(dst + 0xA4))->v;
     ((Unaligned_15DBB8*)(dst + 0x9C))->v = v;
-}
-
-struct Elem_15F6C0 { u8 pad[0x54]; void* owner; Elem_15F6C0* next; };
-struct Owner_15F6C0 { u8 pad[0x60]; Elem_15F6C0* head; };
-
-void func_00152730(void* dst, void* src);
-
-void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other)
-{
-    ListFrame frame;
-    if (self != other) {
-        Elem_15F6C0* e = other->head;
-        if (e != 0) {
-            e->owner = self;
-            for (e = e->next; e != 0; e = e->next) {
-                e->owner = self;
-            }
-        }
-        func_00152730(&self->head, &other->head);
-    }
 }
 
 extern s8 D_00262250[];
@@ -951,49 +848,6 @@ void func_0015E290(void* self, f32 f, f32* out1, f32* out2)
     }
 }
 
-struct Item_15F7D8 { u8 pad[0x54]; void* f54; };
-struct Group_15F7D8 { u8 pad[8]; s32 count; Item_15F7D8** items; };
-
-s32 func_00182FC8(void* p);
-void func_0015F6C0(void* ctx, void* a, void* b);
-
-void func_0015F7D8(void* self, Group_15F7D8* group)
-{
-    s32 i = 0;
-    while (i < group->count) {
-        if (func_00182FC8(group->items[i]) != 0) {
-            break;
-        }
-        i++;
-    }
-    s32 first = i;
-    for (; i < group->count; i++) {
-        if (func_00182FC8(group->items[i]) != 0) {
-            func_0015F6C0(self, group->items[first]->f54, group->items[i]->f54);
-        }
-    }
-}
-
-struct Item_15F8B0 { u8 pad[0x6C]; s32 count6C; void* items70[4]; };
-struct Group_15F8B0 { u8 pad[8]; s32 count; Item_15F8B0** items; };
-
-void func_0015F7D8(void* self, Group_15F8B0* group);
-
-void func_0015F8B0(void* self, Group_15F8B0* group)
-{
-    if (group->count >= 2) {
-        for (s32 i = 0; i < group->count; i++) {
-            Item_15F8B0* item = group->items[i];
-            u32 n = item->count6C;
-            if (n < 4) {
-                item->items70[n] = group;
-                item->count6C = n + 1;
-            }
-        }
-        func_0015F7D8(self, group);
-    }
-}
-
 struct Obj_0015C2E8;
 struct Vec4_0015C2E8 { f32 x; f32 y; f32 z; f32 w; };
 
@@ -1100,35 +954,6 @@ void func_0015F210(s32 flag)
     D_0026231C = 0;
 }
 
-struct Items_15F930
-{
-    s32 count;
-};
-
-void* func_001F5B08(void* dst, void* src, s32 bytes);
-
-void func_0015F930(Items_15F930* list, s32* arr, s32 value)
-{
-    s32 i = list->count;
-    s32* p = (s32*)(((s32)i << 2) + (s32)arr);
-    i--;
-    for (;;)
-    {
-        if (i < 0)
-        {
-            return;
-        }
-        p--;
-        if (*p == value)
-        {
-            break;
-        }
-        i--;
-    }
-    (void)func_001F5B08(arr, arr + 1, (list->count - i) * 4 - 4);
-    list->count--;
-}
-
 struct Local_15D8A8 {
     u16 u0;
     u16 u2;
@@ -1188,33 +1013,6 @@ void func_0015D8A8(Obj_15D8A8* obj, void* src)
     obj->f48 = F;
     obj->f7C = func_0018D500(n << 3);
     func_00137A60(src, obj->f78 << 3, obj->f7C);
-}
-
-struct Obj_15FA58 { u8 pad0[0x54]; void* f54; u8 pad1[0x6C - 0x58]; s32 count6C; void* items70[1]; u8 pad2[0x2C8 - 0x74]; u64 flags2C8; };
-struct Self_15FA58 { u8 pad0[0x1ED0]; s32 count; Obj_15FA58** items; };
-
-void func_0015F7D8(void* self, void* item);
-
-void func_0015FA58(Self_15FA58* self)
-{
-    s32 i = self->count;
-    i--;
-    if (i >= 0) {
-        u64 mask = ((u64)~0x80 << 32) | 0xFFFFFFFF;
-        do {
-            Obj_15FA58* obj = self->items[i];
-            obj->flags2C8 &= mask;
-            if (obj->f54 == obj) {
-                s32 j = obj->count6C;
-                j--;
-                for (; j >= 0; j--) {
-                    func_0015F7D8(self, obj->items70[j]);
-                }
-            }
-            i--;
-        } while (i >= 0);
-    }
-    self->count = 0;
 }
 
 typedef void (*Fn_15CF70)(void* at, s32 a, void* b);
@@ -1469,64 +1267,6 @@ Blk_0015DB28* func_0015DB28(Blk_0015DB28* self, s32 a1, s32 a2)
     return self;
 }
 
-struct Quad_15FBB8 { s32 a, b, c, d; } __attribute__((aligned(16)));
-struct Obj_15FBB8;
-struct Ctx_15FBB8 {
-    void* w0;
-    f32 f4;
-    f32 f8;
-    f32 fC;
-    f32 f10;
-    u8 b14[8];
-    void* p1C;
-    f32 f20;
-};
-typedef void (*VFn_15FBB8)(void* self, void* b);
-struct Self_15FBB8 {
-    VFn_15FBB8* vtbl;
-    u8 pad04[0x9C];
-    Quad_15FBB8 qA0;
-    Quad_15FBB8 qB0;
-    u8 pad0C0[0x90];
-    Quad_15FBB8 q150;
-    Quad_15FBB8 q160;
-    u8 pad170[0x29C - 0x170];
-    s32 s29C;
-    u8 pad2A0[0x2AC - 0x2A0];
-    Ctx_15FBB8* p2AC;
-    u8 pad2B0[0x2C8 - 0x2B0];
-    u64 u2C8;
-};
-
-extern u8 D_00248D30[];
-
-void func_001BF788(Obj_15FBB8* self, s32 n);
-void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
-
-void func_0015FBB8(Self_15FBB8* self, s32 flag)
-{
-    if (flag != 0) {
-        self->qA0 = self->q150;
-        self->qB0 = self->q160;
-        self->s29C = 0;
-        if (self->p2AC != 0) {
-            func_001BF788((Obj_15FBB8*)self->p2AC->p1C, 0);
-        }
-        self->vtbl[36]((void*)self, D_00248D30);
-        self->vtbl[37]((void*)self, D_00248D30);
-        self->u2C8 |= (u64)1 << 38;
-    } else {
-        self->u2C8 &= ~((u64)1 << 38);
-        self->vtbl[36]((void*)self, &self->qA0);
-        self->vtbl[37]((void*)self, &self->qB0);
-        if (self->p2AC != 0) {
-            func_001BFCD8(self->p2AC->w0, &self->p2AC->p1C, (void*)self, 0,
-                          self->p2AC->f4, self->p2AC->f8, self->p2AC->fC,
-                          self->p2AC->f10, self->p2AC->f20, &self->p2AC->b14, 0);
-        }
-    }
-}
-
 // EXACT: element address written as off + (u32)entries
 
 struct Entry_15DAB8 {
@@ -1575,25 +1315,6 @@ s32 func_0015C058(A_0015C058* a0, B_0015C058* a1)
     return ((s32)v ^ 1) & 1;
 }
 
-struct Sub_15FF88 { u8 pad0[8]; s32 count; s32* arr; };
-struct Self_15FF88 { u8 pad0[0x14]; void* f14; void* f18; u8 pad1[0x18]; s32 f34; s32 items[8]; Sub_15FF88 sub; };
-void func_00182C58(Self_15FF88* self);
-void* func_0018D500(s32 size);
-s32 func_0015A480(Sub_15FF88* a, s32 item, void* c);
-void func_0015F8B0(Sub_15FF88* a, Sub_15FF88* sub);
-void func_0015FF88(Self_15FF88* self)
-{
-    func_00182C58(self);
-    Sub_15FF88* cur = (Sub_15FF88*)self->f14;
-    Sub_15FF88* sub = &self->sub;
-    sub->arr = (s32*)func_0018D500(self->f34 * 4);
-    for (s32 i = 0; i < self->f34; i++) {
-        s32 r = func_0015A480(cur, self->items[i], self->f18);
-        if (r != 0) { s32 n = sub->count; sub->arr[n] = r; sub->count = n + 1; }
-    }
-    func_0015F8B0(cur, &self->sub);
-}
-
 struct Frame_15EE80 { u8 pad0[0x4]; s32 f4; u8 pad8[0x4]; s32 fC; u8 pad10[0x38]; };
 
 extern void* D_002623B0;
@@ -1635,66 +1356,6 @@ void func_0015EE80(void)
         func_001683E8();
         D_002626CC = 1;
     }
-}
-
-struct List_15F710 {
-    u8* head;
-    u8* tail;
-    s32 offset;
-};
-
-struct Iter_15F710 {
-    List_15F710* list;
-    u8* link;
-    s32 offset;
-    Iter_15F710* prev;
-};
-
-struct Node_15F710 {
-    u8 pad0[0x54];
-    Node_15F710* f54;
-    u8 pad58[8];
-    List_15F710 list;
-};
-
-void func_00152600(List_15F710* list, Node_15F710* node);
-void func_0015F678(void* self, Node_15F710* node);
-
-struct Begin_15F710 {
-    static void Of(Iter_15F710* it, List_15F710* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->prev = (Iter_15F710*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
-    }
-};
-
-struct Next_15F710 {
-    static Node_15F710* Of(Iter_15F710* it)
-    {
-        Node_15F710* obj = *(Node_15F710**)it->link;
-        it->link = (u8*)obj + it->offset;
-        return obj;
-    }
-};
-
-void func_0015F710(void* self, Node_15F710* owner)
-{
-    Iter_15F710 it;
-    Node_15F710* node;
-    Begin_15F710::Of(&it, &owner->list);
-    while ((node = Next_15F710::Of(&it)) != 0) {
-        if (node != owner) {
-            func_00152600(&owner->list, node);
-            node->f54 = node;
-            node->list.tail = (u8*)node;
-            node->list.head = (u8*)node;
-        }
-        func_0015F678(self, node);
-    }
-    D_0027B314 = (ListFrame*)it.prev;
 }
 
 struct List_15EFE8 {
