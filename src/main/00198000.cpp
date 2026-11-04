@@ -160,7 +160,7 @@ void func_001831E8(void*, void*, void*, void*);
 void func_00183238(void*, void*, void*, void*);
 void func_0019F9D0(void*, u32);
 
-u32 func_00198858(void) { return 0; }
+
 
 struct Queue_00198ED8 {
     u8 pad[0x55C];
@@ -707,7 +707,6 @@ void func_0019FCE8(void* value, u32 enabled)
     func_0019F9D0(value, enabled < 1);
 }
 
-extern s32 D_0026A8E0[9];
 
 struct Obj_198920 {
     u8 pad0[0x14];
@@ -720,15 +719,7 @@ void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 void* func_0015A838(void* a, s32 b, s32 c, void* d);
 
-void func_00198920(Obj_198920* self)
-{
-    func_00124DF8(self, 3, (u8*)D_0026A8E0);
-    func_00124A48(self);
-    Obj_198920* p = (Obj_198920*)func_0015A838(self->f14, 5, 0x18, 0);
-    if (p != 0) {
-        p->f684 = p->f684 + 1;
-    }
-}
+
 
 extern u8 D_00261420[];
 
@@ -847,10 +838,7 @@ void func_00199AF0(void* p)
 
 void func_001C72A0(void* self);
 
-void func_00198090(void* self)
-{
-    func_001C72A0(self);
-}
+
 
 struct __attribute__((aligned(16))) Quad_1984B8 { s32 a, b, c, d; };
 typedef void (*VFn_1984B8)(void* self, void* ctx);
@@ -860,32 +848,14 @@ void* func_001925F0(void);
 void func_00197A08(void* h, void* self);
 void func_001C9008(void* self, void* arg);
 
-void func_001984B8(void* self, void* arg)
-{
-    Actor_1984B8* actor = (Actor_1984B8*)self;
-    if (actor->kind == 0x10) {
-        void* h = func_001925F0();
-        func_00197A08(h, self);
-        Quad_1984B8 ctx = actor->q150;
-        ctx.c = 0;
-        actor->vtbl[36](self, &ctx);
-    }
-    func_001C9008(self, arg);
-}
+
 
 struct Actor_198530 { u8 pad0[0x724]; s32 kind; };
 
 void func_001C91C8(void* self);
 void func_001C8920(void* self);
 
-void func_00198530(void* self)
-{
-    Actor_198530* actor = (Actor_198530*)self;
-    func_001C91C8(self);
-    if (actor->kind == 0x10) {
-        func_001C8920(self);
-    }
-}
+
 
 struct Req_1986E8 {
     s32 a;
@@ -899,21 +869,7 @@ struct Self_1986E8 {
 
 void func_001C9DE0(void* self, s32 code, void* req);
 
-void func_001986E8(Self_1986E8* self, s32 code, Req_1986E8* req)
-{
-    func_001C9DE0(self, code, req);
-    if (code != 10) {
-        if (code == 11) {
-            if (req->b == (s32)self) {
-                self->slot = 0;
-            }
-        }
-    } else {
-        if (req->b == (s32)self) {
-            self->slot = req->a;
-        }
-    }
-}
+
 
 struct Ev_199C78 { u8 pad[0xC]; s32 flags; };
 typedef void (*VFnA_199C78)(void* self, s32 a);
@@ -1529,31 +1485,7 @@ struct Actor_1982A0 { u8 pad0[0x724]; s32 kind; u8 pad1[0xC10 - 0x728]; s32 fC10
 s32 func_001C96B8(void* self);
 s32 func_001C8010(void* self);
 
-s32 func_001982A0(void* self)
-{
-    Actor_1982A0* actor = (Actor_1982A0*)self;
-    s32 r;
 
-    switch (actor->kind) {
-    case 2:
-        if (func_001C96B8(self) == 0) {
-            r = 4;
-            break;
-        }
-        r = func_001C8010(self);
-        break;
-    case 0x10:
-        r = 0x10;
-        if (actor->fC10 != 0) {
-            r = 0;
-        }
-        break;
-    default:
-        r = func_001C8010(self);
-        break;
-    }
-    return r;
-}
 
 struct Actor_199218 {
     u8 pad0[0x14];
@@ -1724,9 +1656,6 @@ void func_001989B0(Obj_1989B0* self)
     *(s32*)&D_0027B314 = fr.prev;
 }
 
-extern s32 D_0026A720;
-extern const f32 D_0024C868[2];
-extern f32 D_0026A838;
 
 struct Obj_198760 {
     u8 pad000[0x640];
@@ -1753,33 +1682,7 @@ s32 func_00141170(void* self, void* value);
 s32 func_00177838(Tmp_198760* f, s32 a, s32 b);
 void func_001C7CB8(Obj_198760* self, f32 f);
 
-void func_00198760(Obj_198760* s1, f32 f)
-{
-    Obj_198760* s0 = (Obj_198760*)func_001925F0(s1, f);
-    if (func_001300E8(s0, 0x18) != 0) {
-        if (s0->f640 != 0) {
-            if (func_00182FC8(s0->f640) != 0) {
-                if (func_00141170(s0->f640, (u8*)s1 + 0x140) != 0) {
-                    Tmp_198760 t;
-                    t.f00 = s1;
-                    t.f10 = 2;
-                    t.f04 = s1;
-                    if (func_00177838(&t, 0, 0) != 0) {
-                        s32 n = s0->f67C + 1;
-                        if (!(n < D_0026A720)) {
-                            n = D_0026A720;
-                        }
-                        s0->f67C = n;
-                        if (s0->f698 == D_0024C868[0]) {
-                            s0->f698 = D_0026185C[0] + D_0026A838;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    func_001C7CB8(s1, f);
-}
+
 
 struct Slot_19AB78 { u8 pad[0x304]; s32* f304; };
 
@@ -1847,12 +1750,9 @@ void func_0019AB78(Self_19AB78* self, s32 msg, s32* rec)
     }
 }
 
-s32 D_0026A8E0[9] = { 0x0, 0x3E4, 0x558, 0x0, 0x3E5, 0x554, 0x20, 0x3E6, 0x55C };
 s32 D_0026A918[4] = { 0x0, 0x22B, 0x2D0, 0x0 };
 s32 D_0026A928[4] = { 0x0, 0x22D, 0x2D8, 0x0 };
 s32 D_0026A938[4] = { 0x0, 0x22C, 0x2D4, 0x0 };
 s32 D_0026A948[4] = { 0x0, 0x339, 0x5BC, 0x0 };
 s32 D_0026AB90[4] = { 0x0, 0x268, 0x5EC, 0x0 };
 s32 D_0026ABA0[4] = { 0x4, 0x267, 0x5FC, 0x0 };
-s32 D_0026A720 = 5;
-extern const f32 D_0024C868[2] = { 3.402823466e+38f, 0.0f };
