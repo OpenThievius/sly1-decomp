@@ -23,7 +23,7 @@ void func_001AAB60(Self_1AAB60_eu* self) {
 
     if (r->fC != -1) {
         Self_1AAB60_eu** objs = (Self_1AAB60_eu**)D_002486B0;
-        Rec_1AAB60* recs = (Rec_1AAB60*)D_0026C3E0;
+        Rec_1AAB60* recs = (Rec_1AAB60*)&D_0026C3E0;
         do {
             Self_1AAB60_eu* o = objs[r->fC];
             if (o->vt->m48(o, self)) {

@@ -316,14 +316,14 @@ struct Obj_1DDCE0 {
     Quad_1DDCE0 q;
 };
 
-extern u8 D_00275730[];
+extern Quad_1DDCE0 D_00275730;
 
 void func_00123ED0(Obj_1DDCE0* self);
 
 void func_001DDCE0(Obj_1DDCE0* self)
 {
     func_00123ED0(self);
-    self->q = *(Quad_1DDCE0*)D_00275730;
+    self->q = D_00275730;
 }
 
 struct Obj_1DE768 {
@@ -708,18 +708,18 @@ struct Alloc_1DC9A0;
 typedef void (*VFn_1DC9A0)(void* self, void* p);
 struct Inst_1DC9A0 { VFn_1DC9A0* vtbl; };
 
-extern s32 D_00275630;
+extern s32 D_00275630[4];
 extern u8 D_00275640[];
 extern f32 D_00275650;
 extern f32 D_00275654;
 extern f32 D_00275658;
 extern f32 D_0027565C;
 extern f32 D_00275660;
-extern u8 D_00275670[];
-extern u8 D_00275680[];
-extern u8 D_00275690[];
-extern u8 D_00275698[];
-extern u8 D_002756A0[];
+extern f32 D_00275670[4];
+extern f32 D_00275680[4];
+extern f32 D_00275690[2];
+extern f32 D_00275698[2];
+extern f32 D_002756A0[4];
 
 Inst_1DC9A0* func_0011E580(Alloc_1DC9A0* a0, Obj_1DC9A0* a1, void* a2, s32 a3, s32 a4);
 void func_00184768(Inst_1DC9A0* p, s32 v);
@@ -736,7 +736,7 @@ void func_001DC9A0(Obj_1DC9A0* self)
 {
     Inst_1DC9A0* p;
 
-    if (D_00275630 & 1) {
+    if (D_00275630[0] & 1) {
         p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         func_001847F0(p, D_00275640);
         func_00184858(p, D_00275650);
@@ -746,7 +746,7 @@ void func_001DC9A0(Obj_1DC9A0* self)
         func_00184898(p, D_00275660);
         func_001848B8(p, D_00275670);
     }
-    if (D_00275630 & 2) {
+    if (D_00275630[0] & 2) {
         p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         func_00184768(p, 1);
         func_001847F0(p, D_00275640);
@@ -758,7 +758,7 @@ void func_001DC9A0(Obj_1DC9A0* self)
         func_00184990(p, D_00275690);
         p->vtbl[33](p, D_00275680);
     }
-    if (D_00275630 & 4) {
+    if (D_00275630[0] & 4) {
         p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         func_00184768(p, 2);
         func_001847F0(p, D_00275640);
@@ -771,7 +771,7 @@ void func_001DC9A0(Obj_1DC9A0* self)
         func_00184990(p, D_00275698);
         p->vtbl[33](p, D_00275680);
     }
-    if (D_00275630 & 8) {
+    if (D_00275630[0] & 8) {
         p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         func_00184768(p, 3);
         func_001847F0(p, D_00275640);
@@ -792,7 +792,8 @@ struct Out_1DFA40 { u8 pad0[0x94]; f32 f94; s32 f98; };
 typedef s32 (*Pred_1DFA40)(void* self, void* out);
 
 extern f32 D_0026185C;
-extern f32 D_002758B0;
+struct F4_2758B0 { f32 a, b, c, d; };
+extern F4_2758B0 D_002758B0;
 f32 D_002758C0[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 
 void func_001DFA40(void* self, void* out)
@@ -813,7 +814,7 @@ void func_001DFA40(void* self, void* out)
         } else {
             r = v;
         }
-        f32 k = D_002758B0;
+        f32 k = D_002758B0.a;
         o->f98 = 0;
         o->f94 = r * k;
     } else {
@@ -1104,7 +1105,7 @@ struct Self_1DE798 {
 };
 
 extern u8 D_00248D20[];
-extern u8 D_00275740[];
+extern Quad_1DE798 D_00275740;
 void func_001C4458(Self_1DE798* self);
 f32 func_00205778(f32 a, f32 b);
 void func_00188850(Tab_1DE798* t, void* out, f32 x);
@@ -1119,7 +1120,7 @@ void func_001DE798(Self_1DE798* self)
     func_00188850((Tab_1DE798*)D_00248D20, (u8*)self + 0x660, f);
     self->w720 = -1;
     self->f72C = -10.0f;
-    self->q6F0 = *(Quad_1DE798*)D_00275740;
+    self->q6F0 = D_00275740;
 }
 
 struct Slot_001DFE80 { s32 key; s32 rest[10]; };
@@ -1164,7 +1165,9 @@ struct Obj_1DE808 {
 };
 
 extern s32 D_00262E10[];
-extern u8 D_00275750[];
+struct Ent_275750 { s32 a, b, c; };
+struct Tab_275750 { Ent_275750 e[9]; s32 end; };
+extern Tab_275750 D_00275750;
 
 void func_001C44F0(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -1178,7 +1181,7 @@ void func_001DE808(void* self)
     s32 flag;
 
     func_001C44F0(self);
-    func_00124DF8(self, 9, D_00275750);
+    func_00124DF8(self, 9, &D_00275750);
     ((Fn3_1DE808)s->vtbl[56])(self, s->f6DC, 1);
     func_00129D00(s->f748, 5, &s->f74C);
     ((u8*)s->f74C)[0x10] = 1;
@@ -1339,14 +1342,14 @@ struct Self_001DCD28 {
     Node_001DCD28* head;
 };
 
-extern u8 D_0024DC98[];
+extern const s32 D_0024DC98[4];
 
 Obj_001DCD28* func_00183058(Node_001DCD28* node, Self_001DCD28* self, void* z);
 
 void func_001DCD28(Self_001DCD28* self)
 {
     Pair_001DCD28 pairs[2];
-    *(Pk16_001DCD28*)&pairs[0] = *(Pk16_001DCD28*)D_0024DC98;
+    *(Pk16_001DCD28*)&pairs[0] = *(const Pk16_001DCD28*)D_0024DC98;
     u32 i;
     for (i = 0; i < 2; i++) {
         Node_001DCD28* n;
@@ -1370,7 +1373,8 @@ void func_001DCD28(Self_001DCD28* self)
 }
 
 extern f32 D_00261858[];
-extern f32 D_0024DCA8;
+struct F2_24DCA8 { f32 a, b; };
+extern const F2_24DCA8 D_0024DCA8;
 extern u8 D_00248D20[];
 extern u8 D_00248D30[];
 
@@ -1423,12 +1427,12 @@ void func_001DFBE0(struct Obj_1DFBE0* self, s32 mode)
             break;
         case 2:
             func_001B6628((struct Handle_1DFBE0*)self->f75C, 0x354);
-            self->f730 = D_0024DCA8;
+            self->f730 = D_0024DCA8.a;
             break;
         case 3:
             func_001B6628((struct Handle_1DFBE0*)self->f75C, 0x355);
             self->f4E0 = mode;
-            self->f730 = D_0024DCA8;
+            self->f730 = D_0024DCA8.a;
             break;
         }
         switch (mode) {
@@ -1519,3 +1523,20 @@ void func_001DF2C8(Self_1DF2C8* self, void* a1, void* a2)
         func_00125C90(self, a1, a2);
     }
 }
+
+s32 D_00275630[4] = { 1, 0, 0, 0 };
+f32 D_00275670[4] = { -0.2f, 0.3f, -1.0f, 0.0f };
+f32 D_00275680[4] = { 100.0f, -150.0f, 500.0f, 0.0f };
+f32 D_00275690[2] = { 500.0f, 2500.0f };
+f32 D_00275698[2] = { 500.0f, 2500.0f };
+f32 D_002756A0[4] = { 500.0f, 2500.0f, 0.0f, 0.0f };
+Quad_1DDCE0 D_00275730 = { 0x42C80000, 0, 0, 0 };
+Quad_1DE798 D_00275740 = { { 0x3F800000, 0, 0, 0 } };
+Tab_275750 D_00275750 = { {
+    { 0x0, 0x34D, 0x6DC }, { 0x0, 0x350, 0x758 }, { 0x4, 0x60, 0x748 },
+    { 0x4, 0x50, 0x750 }, { 0x4, 0x34E, 0x744 }, { 0x2, 0x161, 0x588 },
+    { 0x2, 0x162, 0x58C }, { 0x2, 0x163, 0x590 }, { 0x4, 0x160, 0x584 }
+    }, 0 };
+F4_2758B0 D_002758B0 = { 1.5f, 0.0f, 0.0f, 0.0f };
+extern const s32 D_0024DC98[4] = { 0x58, 0x23, 0x56, 0x5 };
+extern const F2_24DCA8 D_0024DCA8 = { 3.402823466e+38f, 0.0f };

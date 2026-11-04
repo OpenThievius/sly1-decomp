@@ -360,14 +360,16 @@ struct Obj_1AA1F0 {
     u8* table258;
 };
 
-extern u8 D_0026C3E0[];
+struct Entry_26C3E0 { f32 f0; f32 f4; s32 f8; s32 fC; s32 f10; };
+struct Tab_26C3E0 { Entry_26C3E0 e[37]; s32 end; };
+extern Tab_26C3E0 D_0026C3E0;
 extern u8 D_00261868[];
 
 void func_001AAB20(Obj_1AA1F0* self, f32 x, f32 y);
 
 void func_001AA1F0(Obj_1AA1F0* self, s32 index)
 {
-    self->entry218 = D_0026C3E0 + index * 20;
+    self->entry218 = (u8*)&D_0026C3E0 + index * 20;
     self->f248 = 0.25f;
     self->f240 = 0.25f;
     self->table258 = D_00261868;
@@ -840,7 +842,7 @@ void func_001AB710(Actor_001AB710* self)
 typedef void (*VFn_1A9FD0)(void* self);
 struct Dyn_1A9FD0 { VFn_1A9FD0* vtbl; };
 
-extern u8 D_002486B0[];
+extern void* const D_002486B0[];
 extern u8 D_00262C68[];
 extern u8 D_00262C70[];
 extern u8 D_00262D38[];
@@ -870,7 +872,7 @@ struct Obj_1AA0C0 {
     VFn_1AA0C0* vtbl;
 };
 
-extern u8 D_002486B0[];
+extern void* const D_002486B0[];
 
 void func_001AA0C0(void)
 {
@@ -1263,7 +1265,7 @@ void func_001A93E8(u8* self)
     *(Tri_1A93E8*)(p + 0x20) = *(Tri_1A93E8*)D_002483D0;
 }
 
-extern u8 D_002486B0[];
+extern void* const D_002486B0[];
 
 struct Vt_001A9F78 { void* slot0; void (*slot1)(void*); };
 struct Obj_001A9F78 { Vt_001A9F78* vt; };
@@ -1280,7 +1282,7 @@ void func_001A9F78(void)
     } while (i >= 0);
 }
 
-extern u8 D_002486B0[];
+extern void* const D_002486B0[];
 
 struct Vt_001AA060 { u8 pad[0x40]; void (*fn)(void*, s32); };
 struct Obj_001AA060 { Vt_001AA060* vt; };
@@ -1302,7 +1304,7 @@ struct Obj_1AA110;
 typedef void (*Fn_1AA110)(Obj_1AA110* self);
 struct VT_1AA110 { u8 pad0[0x28]; Fn_1AA110 fn28; };
 struct Obj_1AA110 { VT_1AA110* vt; u8 pad0[0x250 - 4]; s32 f250; };
-extern u8 D_002486B0[];
+extern void* const D_002486B0[];
 void func_001AA110(void)
 {
     s32 n = 0x24;
@@ -1320,7 +1322,7 @@ void func_001AA110(void)
     } while (n >= 0);
 }
 
-extern u8 D_0026C3E0[];
+extern Tab_26C3E0 D_0026C3E0;
 
 struct Entry_001AAEC0 {
     u8 pad0[0xC];
@@ -1334,7 +1336,7 @@ void func_001AAB60(Obj_001AAEC0* self);
 
 void func_001AAEC0(s32 key)
 {
-    Entry_001AAEC0* e = (Entry_001AAEC0*)D_0026C3E0;
+    Entry_001AAEC0* e = (Entry_001AAEC0*)&D_0026C3E0;
     s32 i;
 
     for (i = 0; i < 0x25; i++, e++) {
@@ -1583,14 +1585,14 @@ struct Self_1AB2B8 {
 
 s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
 void func_001AA5A0(Self_1AB2B8* self);
-extern char D_0024CC78[];
-extern char D_0024CC80[];
-extern char D_0024CC88[];
-extern char D_0024CC90[];
-extern char D_0024CC98[];
-extern char D_0024CCA8[];
-extern char D_0024CCB0[];
-extern char D_0024CCB8[];
+extern const char D_0024CC78[];
+extern const char D_0024CC80[];
+extern const char D_0024CC88[];
+extern const char D_0024CC90[];
+extern const char D_0024CC98[];
+extern const char D_0024CCA8[];
+extern const char D_0024CCB0[];
+extern const char D_0024CCB8[];
 extern s32 D_002751D4;
 
 void func_001AB2B8(Self_1AB2B8* self)
@@ -1802,8 +1804,8 @@ struct Clock_1AB980
 struct Clock_00261858 { s32 on; f32 now; f32 wait; };
 
 extern const f32 D_0024CD6C = 3.4028235e+38f;
-extern char D_0024CD50[];
-extern char D_0024CD60[];
+extern const char D_0024CD50[];
+extern const char D_0024CD60[];
 extern char D_0024CD68[];
 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -1942,7 +1944,7 @@ void func_001AAB60(Self_1AAB60* self) {
 
     if (r->fC != -1) {
         Self_1AAB60** objs = (Self_1AAB60**)D_002486B0;
-        Rec_1AAB60* recs = (Rec_1AAB60*)D_0026C3E0;
+        Rec_1AAB60* recs = (Rec_1AAB60*)&D_0026C3E0;
         do {
             Self_1AAB60* o = objs[r->fC];
             if (o->vt->m48(o, self)) {
@@ -2411,3 +2413,97 @@ void func_001AA998(Obj_1AA998* self, s32 mode)
         func_001AAB60(self);
     }
 }
+
+// Data defined by this file.
+extern void* const D_002486B0[38] = {
+    (void*)&D_002721D0,
+    (void*)&D_002701F8,
+    (void*)&D_00270650,
+    (void*)&D_0026C6C8,
+    (void*)&D_0026C948,
+    (void*)&D_0026CBC8,
+    (void*)&D_0026CE48,
+    (void*)&D_0026D0C8,
+    (void*)&D_0026D348,
+    (void*)&D_0026D5C8,
+    (void*)&D_0026D848,
+    (void*)&D_0026DAC8,
+    (void*)&D_0026DD48,
+    (void*)&D_0026DFC8,
+    (void*)&D_0026E248,
+    (void*)&D_0026E4E0,
+    (void*)&D_0026E760,
+    (void*)&D_0026E9F8,
+    (void*)&D_0026EC70,
+    (void*)&D_0026EED0,
+    (void*)&D_0026F138,
+    (void*)&D_0026F5A0,
+    (void*)&D_0026F808,
+    (void*)&D_0026FA90,
+    (void*)&D_0026FD00,
+    (void*)&D_0026FF68,
+    (void*)&D_002708E0,
+    (void*)&D_00271558,
+    (void*)&D_00272430,
+    (void*)&D_002726B0,
+    (void*)&D_00272930,
+    (void*)&D_00272B98,
+    (void*)&D_00272E08,
+    (void*)&D_002739F0,
+    (void*)&D_00273C50,
+    (void*)&D_00273EB0,
+    (void*)&D_00274118,
+    0,
+};
+Tab_26C3E0 D_0026C3E0 = {
+    {
+        { 0.0f, 0.0f, -1, -1, -1 },
+        { 0.0f, 0.0f, -1, -1, -1 },
+        { 0.0f, 0.0f, -1, -1, -1 },
+        { 0.0f, 20.0f, 2, -1, -1 },
+        { -18.0f, 20.0f, 1, -1, -1 },
+        { -18.0f, 20.0f, 1, 4, 2 },
+        { 18.0f, 20.0f, 0, -1, -1 },
+        { -18.0f, 20.0f, 1, 5, 2 },
+        { -18.0f, 20.0f, 1, -1, -1 },
+        { 18.0f, 20.0f, 2, 6, 2 },
+        { 0.0f, 20.0f, 2, 3, 2 },
+        { -18.0f, 20.0f, 2, 5, 2 },
+        { -18.0f, 20.0f, 2, 5, 2 },
+        { 18.0f, 20.0f, 2, 6, 2 },
+        { 18.0f, 20.0f, 0, -1, -1 },
+        { 18.0f, 20.0f, 0, -1, -1 },
+        { 18.0f, -20.0f, 0, -1, -1 },
+        { 18.0f, -20.0f, 0, 16, 3 },
+        { 18.0f, -20.0f, -1, -1, -1 },
+        { -18.0f, -20.0f, 1, -1, -1 },
+        { -18.0f, -20.0f, 1, 19, 3 },
+        { 18.0f, -20.0f, 0, 18, 3 },
+        { 18.0f, -20.0f, -1, -1, -1 },
+        { 0.0f, -40.0f, -1, -1, -1 },
+        { 0.0f, 0.0f, -1, -1, -1 },
+        { 0.0f, 0.0f, -1, -1, -1 },
+        { 1.0f, -20.0f, 0, -1, -1 },
+        { -1.0f, -20.0f, 1, -1, -1 },
+        { -18.0f, 20.0f, 2, -1, -1 },
+        { 18.0f, 20.0f, 2, -1, -1 },
+        { 18.0f, 20.0f, 2, -1, -1 },
+        { -18.0f, -20.0f, 3, -1, -1 },
+        { 18.0f, 20.0f, -1, -1, -1 },
+        { 18.0f, -20.0f, 2, -1, -1 },
+        { 18.0f, -20.0f, 2, -1, -1 },
+        { 18.0f, -20.0f, 3, -1, -1 },
+        { 0.0f, -20.0f, 3, -1, -1 },
+    },
+    0,
+};
+extern const char D_0024CC78[8] = "%c%d";
+extern const char D_0024CC80[8] = "%d/%d%c";
+extern const char D_0024CC88[8] = "%d%c";
+extern const char D_0024CC90[8] = "%c%d/%d";
+extern const char D_0024CC98[16] = "%c%c%c%c%c%c";
+extern const char D_0024CCA8[8] = "rstuv";
+extern const char D_0024CCB0[8] = "%c%d/5";
+extern const char D_0024CCB8[8] = "%d%%";
+extern const char D_0024CD50[16] = "%c%d%c%s%d";
+extern const char D_0024CD60[8] = "0";
