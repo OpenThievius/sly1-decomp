@@ -1527,3 +1527,21 @@ s32 D_0026ABD0[2] = { 0x130, 0x132 };
 s32 D_0026ABD8[2] = { 2, 0 };
 s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
 s32 D_0026AC20[4] = { 0, 0, 0, 0 };
+
+struct Pkt_19DDA0;
+void func_001613C0(Pkt_19DDA0* p, s32 a, s32 b, u64 c);
+void func_00161708(Pkt_19DDA0* p, s32 reg, u64 value);
+void func_00161458(Pkt_19DDA0* p, u32 c);
+void func_001615F0(Pkt_19DDA0* p, s32 a, s32 b, s32 c, s32 d);
+
+void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, Pkt_19DDA0* p)
+{
+    u32 col;
+    func_001613C0(p, a <= 0xFE ? 0x46 : 6, 5, 0x441EE);
+    col = (((a + 1) & 0x1FE) << 23) | (b << 16) | (g << 8) | r;
+    func_00161708(p, 0x47, 0x31001);
+    func_00161708(p, 0x42, 0x44);
+    func_00161458(p, col);
+    func_001615F0(p, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    func_001615F0(p, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+}
