@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
+#include "c61.h"
+#include "c65.h"
 
 struct Node_150298 { u8 pad[0x554]; f32 value554; u8 pad2[0x558 - 0x558]; Node_150298* next; };
 struct State_150298 { u8 pad[0x6CC]; Node_150298* selected; };
@@ -106,23 +108,21 @@ void func_00150418(Events_150418* self, void* event)
 }
 
 extern void func_00123ED0();
-struct State_001504E0 { u8 pad0[0x2C8]; u64 flags; u8 pad1[0x30]; s32 second; u8 pad2[8]; s32 first; };
-
-void func_001504E0(State_001504E0* state)
+void func_001504E0(C65* state)
 {
 	func_00123ED0();
-	state->flags |= ((u64)0x8000u << 17);
-	state->second = -1;
-	state->first = -1;
+	*(u64*)((u8*)state + 0x2C8) |= ((u64)0x8000u << 17);
+	state->second300 = -1;
+	state->first30C = -1;
 }
 
 void func_001289C0(void* self, void* arg);
 void func_00150570(void* self, void* arg, void* a, void* b);
 
-void func_00150528(void* self, void* arg)
+void func_00150528(C65* self, void* arg)
 {
     func_001289C0(self, arg);
-    func_00150570(self, arg, (u8*)self + 0x2DC, (u8*)self + 0x2E0);
+    func_00150570(self, arg, &self->count2DC, &self->steps2E0);
 }
 
 struct Mgr_151A88;
@@ -130,25 +130,16 @@ extern Mgr_151A88* D_002623C8;
 void func_00124A48(void* self);
 void* func_00160CA0(void* base, s32 index);
 
-struct Slot_1506F0 {
-    u8 pad0[0x8];
-    s32 f8;
-    u8 pad1[0x2F8];
-    void* f304;
-    u8 f308[4];
-    s32 f30C;
-};
-
-void func_001506F0(Slot_1506F0* self)
+void func_001506F0(C65* self)
 {
     func_00124A48(self);
-    if (self->f30C == -1) {
-        self->f30C = self->f8;
+    if (self->first30C == -1) {
+        self->first30C = *(s32*)((u8*)self + 8);
     }
-    void* v = func_00160CA0(D_002623C8, self->f30C);
-    self->f304 = v;
+    void* v = func_00160CA0(D_002623C8, self->first30C);
+    self->target304 = v;
     if (!v) {
-        self->f304 = self->f308;
+        self->target304 = self->fallback308;
     }
 }
 
@@ -194,13 +185,11 @@ void func_00150780(Obj_150780* self, s32 value)
 }
 
 extern void func_00127378(void*, u32, u32);
-struct State_001512A8 { u8 pad[0x2F8]; u32 value; };
-
-void func_001512A8(State_001512A8* state, u32 mode, u32 value)
+void func_001512A8(C65* state, u32 mode, u32 value)
 {
 	func_00127378(state, mode, value);
-	if (mode == 6 && value == state->value)
-		state->value = 0;
+	if (mode == 6 && value == state->value2F8)
+		state->value2F8 = 0;
 }
 
 extern u8 D_00275BC0[];
@@ -673,12 +662,6 @@ void func_001517C0(Ctl_001517C0* self)
 
 typedef void (*VFn_153328)(void* self, void* arg);
 
-struct Self_153328 {
-    VFn_153328* vtbl;
-    u8 pad0[0x2D0 - 4];
-    void* f2D0;
-};
-
 struct Frame_153328 {
     void* fn;
     s32 f04;
@@ -695,11 +678,11 @@ s32 func_001F5C0C(void* p, s32 zero, s32 size);
 void func_00125B70(void* obj, void* c, void* out);
 void func_0019D410(void* p);
 
-void func_00153328(Self_153328* self, s32 unused, void* a2)
+void func_00153328(C61* self, s32 unused, void* a2)
 {
     (void)unused;
     if (self->f2D0 != 0) {
-        self->vtbl[43](self, a2);
+        ((VFn_153328*)self->desc)[43](self, a2);
         Frame_153328 f;
         (void)func_001F5C0C(&f, 0, 0x80);
         f.fn = (void*)func_001533A8;
@@ -1294,49 +1277,33 @@ void func_001516C0(Self_1516C0* self)
 struct Gl_150AE8 { u8 pad0[0x260]; s32 f260; u8 pad1[8]; s32 f26C; };
 struct Mgr_150AE8 { u8 pad[0x454]; u8 f454; };
 struct Bf_150AE8 { u8 p[1]; };
-struct Obj_150AE8;
-struct VtE_150AE8 { u8 pad[0x154]; void (*f154)(void* o, Obj_150AE8* self, s32* q); };
-struct Ent_150AE8 { VtE_150AE8* vt; };
-struct Obj_150AE8 {
-    u8 pad0[0x2D0];
-    s32 f2D0;
-    s32 f2D4;
-    f32 f2D8;
-    s32 f2DC;
-    u8 pad1[4];
-    s32 f2E4;
-    u8 pad2[0x324 - 0x2E8];
-    s32 f324;
-    s32 f328;
-};
-
 extern u8 D_0026E9F8[];
 extern s32 D_00275F84;
 extern s32 D_00270B30;
 extern s32 D_002717A8;
 extern u8 D_00275BC0[];
 
-void func_00124FC0(Obj_150AE8* self);
+void func_00124FC0(C65* self);
 s32 func_001BE5E8(void);
-void func_00150790(Obj_150AE8* self, s32 mode);
+void func_00150790(C65* self, s32 mode);
 void func_001F5C0C(s32* p, s32 v, s32 n);
-Ent_150AE8* func_001925F0(void);
+Ent65* func_001925F0(void);
 s32 func_001493A0(Bf_150AE8* p);
-void func_001518B8(Obj_150AE8* self);
-void func_00151860(Obj_150AE8* value, Ent_150AE8* object);
-void func_001516C0(Obj_150AE8* self);
+void func_001518B8(C65* self);
+void func_00151860(C65* value, Ent65* object);
+void func_001516C0(C65* self);
 void func_001E9570(void* p);
-void func_001517C0(Obj_150AE8* self);
+void func_001517C0(C65* self);
 
-void func_00150AE8(Obj_150AE8* self)
+void func_00150AE8(C65* self)
 {
     s32 q[2];
     s32 s1;
-    Ent_150AE8* s2;
+    Ent65* s2;
 
     func_00124FC0(self);
     if (!(((Gl_150AE8*)D_0026E9F8)->f260 < 2 && ((Gl_150AE8*)D_0026E9F8)->f26C == 0 && func_001BE5E8() == 0 && D_00275F84 != 1)) {
-        s32 st = self->f2D4;
+        s32 st = self->state2D4;
         switch (st) {
         case 1:
         case 5:
@@ -1355,14 +1322,14 @@ void func_00150AE8(Obj_150AE8* self)
     } else {
         q[1] = 1;
     }
-    s1 = self->f2D4;
+    s1 = self->state2D4;
     switch (s1) {
     case 0:
         if (self->f324 != 0) {
             if (D_00275F84 == 0 && q[1] != 0) {
                 self->f324 = 0;
                 func_001518B8(self);
-                s1 = self->f2D4;
+                s1 = self->state2D4;
             }
         }
         break;
@@ -1380,25 +1347,25 @@ void func_00150AE8(Obj_150AE8* self)
         goto timer;
     case 1:
         if (q[1] != 0) {
-            Obj_150AE8* o = (Obj_150AE8*)D_0027051C;
+            C65* o = (C65*)D_0027051C;
             if (o == 0) {
                 func_00151860(self, s2);
-                s1 = self->f2D4;
+                s1 = self->state2D4;
             } else if (o != self) {
-                if (o->f328 == 0 && o->f2D4 == 3) {
+                if (o->f328 == 0 && o->state2D4 == 3) {
                     func_001516C0(o);
                 }
             }
             break;
         }
     timer:
-        if (D_0026185C[0] - self->f2D8 >= 5.0f) s1 = 0;
+        if (D_0026185C[0] - self->time2D8 >= 5.0f) s1 = 0;
         break;
     case 3:
-        if (self->f2D0 != 2) {
-            if (!(self->f2E4 < self->f2DC) || D_00275F84 == 1) {
+        if (self->mode2D0 != 2) {
+            if (!(self->step2E4 < self->count2DC) || D_00275F84 == 1) {
                 func_001E9570(D_00275BC0);
-                s1 = self->f2D4;
+                s1 = self->state2D4;
             }
         }
         break;
@@ -1409,7 +1376,7 @@ void func_00150AE8(Obj_150AE8* self)
         break;
     }
     func_00150790(self, s1);
-    switch (self->f2D4) {
+    switch (self->state2D4) {
     case 0:
     case 1:
     case 2:
@@ -2253,7 +2220,7 @@ void func_00151A88(Self_151A88* self)
 
 void func_00123ED0(void* self);
 
-void func_00152E28(void* self)
+void func_00152E28(C61* self)
 {
     func_00123ED0(self);
 }

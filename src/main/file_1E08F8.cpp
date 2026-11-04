@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "c63.h"
 
 
 void func_001D7120(u8* buf, char* dst, s32 cap);
@@ -90,7 +91,6 @@ extern void func_001F6B40(void* a);
 
 
 
-struct Actor_1E2940 { u8 pad000[0x14]; void* f14; u8 pad018[0x398 - 0x18]; s32 f398; };
 
 void func_00124FC0(void* self);
 void func_001E2870(void* self, s32 a, s32 b);
@@ -134,16 +134,6 @@ s32 func_00137CC0(void* a);
 void* func_0014D9A8(s32 idx);
 void func_0011EC40(void* a, void* b);
 
-struct Arr_1E2648 { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
-struct Obj_1E2648 {
-    void** vtbl;
-    u8 pad0[0x2E4 - 4];
-    Arr_1E2648* obj;
-    u8 pad1[0x3F0 - 0x2E8];
-    f32 f3F0;
-    u8 pad2[0x414 - 0x3F4];
-    s32 i414;
-};
 
 
 
@@ -169,17 +159,6 @@ extern f32 D_00275A20[2];
 
 void func_00123ED0(void* self);
 
-struct __attribute__((aligned(16))) Block_2520 {
-    u8 d[0x90];
-};
-
-struct __attribute__((aligned(16))) Quad_2520 {
-    u8 d[0x10];
-};
-
-struct __attribute__((packed)) Pack8_2520 {
-    u64 v;
-};
 
 
 
@@ -1409,51 +1388,51 @@ void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_002
 
 ASM_FUNC(func_001E2438);
 
-void func_001E2520(void* self)
+void func_001E2520(C63* self)
 {
     u8* p = (u8*)self;
 
     func_00123ED0(self);
-    *(Block_2520*)(p + 0x2F0) = *(Block_2520*)D_00275980;
-    *(f32*)(p + 0x428) = 2.0f;
-    *(f32*)(p + 0x42C) = 1.0f;
+    self->block2F0 = *(Block63*)D_00275980;
+    self->f428 = 2.0f;
+    self->f42C = 1.0f;
     *(u64*)(p + 0x2C8) = (*(u64*)(p + 0x2C8) & 0xFFFFFCFFFFFFFFFFULL) | 0x10000000000ULL;
-    *(f32*)(p + 0x420) = 2.0f;
-    *(f32*)(p + 0x424) = 1.0f;
-    *(s32*)(p + 0x430) = -1;
-    *(Quad_2520*)(p + 0x450) = *(Quad_2520*)D_00275A10;
+    self->f420 = 2.0f;
+    self->f424 = 1.0f;
+    self->f430 = -1;
+    self->quad450 = *(Quad63*)D_00275A10;
     {
         u8* src = (u8*)D_00275A20;
-        *(Pack8_2520*)(p + 0x460) = *(Pack8_2520*)src;
+        self->pack460 = *(Pack63*)src;
     }
-    *(s32*)(p + 0x398) = -1;
+    self->f398 = -1;
 }
 
-void func_001E25F8(void* self)
+void func_001E25F8(C63* self)
 {
     func_001243E0(self);
     func_001E2778(self, 0);
-    func_001DBD40(*(void**)((u8*)self + 0x14), 2, 0, self, -1, 0);
+    func_001DBD40(self->world, 2, 0, self, -1, 0);
 }
 
-void func_001E2648(Obj_1E2648* self, void* a1)
+void func_001E2648(C63* self, void* a1)
 {
     func_00137EB0(a1, (u8*)self + 0xD0);
     func_00137E70(a1, (u8*)self + 0x100);
-    void** vt = self->vtbl;
+    void** vt = (void**)self->desc;
     if (vt[22] != 0) {
         ((void (*)(void*))vt[22])(self);
     }
     func_001E4C48(a1, (u8*)self + 0x2D4, (u8*)self + 0x2D8, (u8*)self + 0x2DC, (u8*)self + 0x2E0);
     s32 idx = func_00137CC0(a1);
     if (idx != -1) {
-        Arr_1E2648* o = (Arr_1E2648*)func_0014D9A8(idx);
+        Arr63* o = (Arr63*)func_0014D9A8(idx);
         self->obj = o;
         void** ovt = *(void***)o;
         if (ovt[0] != 0) {
             ((void (*)(void*, void*))ovt[0])(o, a1);
         }
-        Arr_1E2648* p = self->obj;
+        Arr63* p = self->obj;
         self->f3F0 = p->data[p->count - 1];
     } else {
         func_00137EB0(a1, (u8*)self + 0x3B0);
@@ -1464,7 +1443,7 @@ void func_001E2648(Obj_1E2648* self, void* a1)
     func_0011EC40(self, a1);
 }
 
-void func_001E2758(void* self)
+void func_001E2758(C63* self)
 {
     func_00124A48(self);
 }
@@ -1526,12 +1505,11 @@ void func_001E2870(Obj_1E2870* self) {
     func_001E2778(self, st);
 }
 
-void func_001E2940(void* selfv)
+void func_001E2940(C63* self)
 {
-    Actor_1E2940* self = (Actor_1E2940*)selfv;
     func_00124FC0(self);
     if (self->f398 != 0) {
-        func_001DBCC8(self->f14, (void*)(void (*)(Obj_1E2870*))func_001E2870, self, 0, 0);
+        func_001DBCC8(self->world, (void*)(void (*)(Obj_1E2870*))func_001E2870, self, 0, 0);
     }
 }
 
@@ -1540,7 +1518,7 @@ void func_001E2988(void)
     func_001261C0();
 }
 
-void func_001E29A8(void* self, void* p)
+void func_001E29A8(C63* self, void* p)
 {
     func_0015FBB8(self, p);
     if (p != 0) {

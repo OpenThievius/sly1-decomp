@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c6e.h"
+#include "c5c.h"
+#include "c5d.h"
+#include "c8b.h"
 #include "list_iter.h"
 
 struct Actor_198980 { u8 pad0[0x554]; s32 flag554; };
@@ -558,13 +561,11 @@ void func_0019C408(Obj_0019C408* obj)
     func_00152600(obj->owner + 0x1C6C, obj);
 }
 
-struct Obj_0019C440 { u8 pad[0x34]; s32 first, second; };
-
-void func_0019C440(Obj_0019C440* obj)
+void func_0019C440(C8B* obj)
 {
     func_00182C18(obj);
-    obj->second = -1;
-    obj->first = -1;
+    obj->second38 = -1;
+    obj->first34 = -1;
 }
 
 struct Vec_0019CE28 { u8 pad[0x54]; f32 x, y, z; };
@@ -898,7 +899,7 @@ extern s32 D_0026A918[4];
 void func_001289C0(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 
-void func_00199170(void* self)
+void func_00199170(C5C* self)
 {
     func_001289C0(self);
     func_00124DF8(self, 1, (u8*)D_0026A918);
@@ -909,7 +910,7 @@ extern s32 D_0026A928[4];
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 
-void func_001991A8(void* self)
+void func_001991A8(C5C* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 1, (u8*)D_0026A928);
@@ -920,7 +921,7 @@ extern s32 D_0026A938[4];
 void func_001289C0(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 
-void func_001991E0(void* self)
+void func_001991E0(C5D* self)
 {
     func_001289C0(self);
     func_00124DF8(self, 1, (u8*)D_0026A938);
@@ -1473,19 +1474,6 @@ s32 func_001C8010(void* self);
 
 
 
-struct Actor_199218 {
-    u8 pad0[0x14];
-    void* f14;
-    u8 pad1[0x2D0 - 0x18];
-    s32 n2D0;
-    void* f2D4;
-    void* f2D8;
-    s32 n2DC;
-    s32 arr2E0[8];
-    s32 n300;
-    void* arr304[8];
-};
-
 struct Elem_199218 {
     u8 pad0[0x2D0];
     void* f2D0;
@@ -1503,25 +1491,25 @@ s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_001B64D8(void* p, s32 n);
 
-void func_00199218(Actor_199218* self)
+void func_00199218(C5D* self)
 {
     func_00124A48(self);
-    self->n300 = func_0015A4F0(self->f14, 1, 0x5C, self, 8, self->arr304);
+    self->count300 = func_0015A4F0(self->world, 1, 0x5C, self, 8, self->objs304);
     s32 i;
     Elem_199218* e;
-    for (i = 0; i < self->n2DC; i++) {
-        e = (Elem_199218*)func_0015A418(self->f14, 4, self->arr2E0[i], self);
+    for (i = 0; i < self->count2DC; i++) {
+        e = (Elem_199218*)func_0015A418(self->world, 4, self->ids2E0[i], self);
         if (e != 0) {
-            u32 k = self->n300;
+            u32 k = self->count300;
             if (k < 8) {
-                self->arr304[k] = (void*)e;
-                self->n300 = k + 1;
+                self->objs304[k] = (void*)e;
+                self->count300 = k + 1;
             }
         }
     }
-    s32 s4 = (((Gl_199218*)D_002623C4)->n448 & self->n2D0) ? 0x22F : 0x22E;
-    for (i = 0; i < self->n300; i++) {
-        e = (Elem_199218*)self->arr304[i];
+    s32 s4 = (((Gl_199218*)D_002623C4)->n448 & self->mask2D0) ? 0x22F : 0x22E;
+    for (i = 0; i < self->count300; i++) {
+        e = (Elem_199218*)self->objs304[i];
         e->f2D4 = func_001B6290(e->f2D0, e, -1, 0);
         func_001B64D8(e->f2D4, s4);
     }
