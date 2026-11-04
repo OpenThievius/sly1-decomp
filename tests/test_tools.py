@@ -772,8 +772,9 @@ class AsmFuncTest(unittest.TestCase):
         self.assertIn("\t.word\t.L00100014", out)
         self.assertIn("\t.word\t0x3F800000", out)
         self.assertIn("\t.size\tjtbl_00200000, 8", out)
-        other = asm_func.rodata_source(listing.replace("jtbl_00200000", "D_00200000"), "D_00200000")
-        self.assertIn("\t.align\t3", other)
+        other = asm_func.rodata_source(listing.replace("jtbl_00200000", "D_00200008").replace(
+            "00200000 14", "00200008 14"), "D_00200008")
+        self.assertIn("\t.align\t3", other)  # aligned as its address is, whatever splat wrote
 
     def test_data_bytes_are_written_and_sized(self):
         listing = "\n".join(["nonmatching D_00260001", "", "dlabel D_00260001",

@@ -102,12 +102,12 @@ def rodata_source(listing, label):
                   % (label, label, label), listing, re.M | re.S)
     if m is None:
         raise KeyError("%s is not a label of the read-only data listing" % label)
-    # A jump table is aligned to 16, as GCC writes it; the listing's `.align` before it is splat's.
-    # Without one, data of 8 bytes or more at an 8-aligned address is GCC's aggregate, aligned to 8.
-    words = (len([l for l in m.group(2).split("\n") if DATA_WORD.match(l)])
-             + len([l for l in m.group(2).split("\n") if DATA_SMALL.match(l)]) / 4.0)
+    # Included data sits at its retail address: aligned as that address is, up to 16. With what
+    # comes before it laid out as retail's, this pads exactly where retail does (a jump table, which
+    # GCC aligns to 16; an aggregate of 8 bytes or more; a vector the VU code loads whole), and
+    # nowhere else; splat's own `.align` is its guess.
     address = int(label[-8:], 16)
-    align = "4" if label.startswith("jtbl_") else (m.group(1) or ("3" if words >= 2 and address % 8 == 0 else "2"))
+    align = str(min(4, (address & -address).bit_length() - 1))
     out = ["\t.align\t%s" % align, "\t.globl\t%s" % label, "\t.type\t%s, @object" % label,
            "%s:" % label]
     size = 0
