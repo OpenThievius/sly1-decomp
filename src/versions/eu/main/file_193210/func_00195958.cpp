@@ -52,7 +52,7 @@ void func_00195958(Menu_195958_eu* self)
         }
         case 18: {
             s32 v;
-            void* s2 = func_00193660();
+            void* s2 = (void*)func_00193660();
             void* s0 = func_001925F0();
             if (s2 != 0 && s0 != 0 && func_001300E8(s0, 0x19) != 0) {
                 func_001B6598(s2, &v);

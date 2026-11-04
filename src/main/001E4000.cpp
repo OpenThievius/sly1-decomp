@@ -4182,24 +4182,6 @@ f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
 f32 D_00264A38 = 20.0f;
 f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
-s32 D_00269CD8[8] = { 3, 18, 19, 20, 4, 5, 21, 9 };
-s32 D_00269CF8[2] = { 0, 1 };
-s32 D_00269D00[2] = { 2, 0 };
-s32 D_00269D08[4] = { 10, 11, 12, 17 };
-s32 D_00269D18[10] = { 6, 7, 8, 15, 16, 13, 14, 23, 17, 0 };
-s32 D_00269D40[4] = { 24, 25, 26, 17 };
-u32 D_0026A118[8] = { 0x2815A489, 0x4A3840F1, 0xDB146408, 0x9260417F, 0x4CCB23D6, 0x281349F9, 0xDB146685, 0x4A39BF71 };
-Ent_26A138 D_0026A138[27] = {
-    { 0, 0 }, { 0, 0 }, { 0, 0 },
-    { 0, 0 }, { 0, 0 }, { 0, 0 },
-    { 0, 0 }, { 0, 0 }, { 0, 0 },
-    { 2, D_0026A0E0 }, { 0, 0 }, { 0, 0 },
-    { 0, 0 }, { 2, D_0026A0E8 }, { 0, 0 },
-    { 2, D_0026A0F0 }, { 2, D_0026A0F8 }, { 0, 0 },
-    { 0, 0 }, { 0, 0 }, { 0, 0 },
-    { 0, 0 }, { 0, 0 }, { 0, 0 },
-    { 2, D_0026A100 }, { 2, D_0026A108 }, { 2, D_0026A110 }
-};
 f32 D_0026A910 = 100.0f;
 f32 D_0026A968 = 300.0f;
 Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
@@ -5061,13 +5043,9 @@ struct Row_26AC30 {
 };
 
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-f32 D_0026A700 = 0;
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-f32 D_0026A704 = 0;
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-f32 D_0026A708 = 0;
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-f32 D_0026A70C = 0;
 // size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
 s32 D_0026A914 = 0;
 // size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
@@ -5254,7 +5232,6 @@ Obj_2639B8 D_002639B8 = {0};
 // 24 bytes, byte array in readers
 u8 D_00269BA8[24] = {0};
 // 24 bytes, byte array in readers
-u8 D_0026A210[24] = {0};
 
 // Globals typed by worker dz202, from retail's bytes and their readers.
 struct Obj_26AC10 { s32 p0; u8 pad04[12]; };
