@@ -35,8 +35,39 @@
 // stack reserve raised to 64 MiB, whose output for this file's form was byte-identical to stock's.
 // That is for measuring only: a candidate must compile on the stock compiler to land.
 //
-// Next: compare -dl/-dg dumps against retail's spills, starting with why retail keeps
-// func_00155778 in s4 from entry 150 to 420 where this form rebuilds it.
+// The function is one basic block: no call, no branch. func_00155778 (2026-11-05, -dl/-dg
+// dumps with -dumpbase): retail holds it in two values, s4 (16 stores at +0x1C, asm lines
+// 3043-3183) and a copy in a7 = r11 (36 stores, 3193-3490), both loaded near line 1370. This
+// form has the same two after CSE: pseudo 2196 (the copy, 37 refs) gets r11 as retail's does, but
+// pseudo 2083 (18 refs over 5132 insns, a user variable from the helpers' parameters) gets no
+// register in global alloc, so reload rebuilds it at each store (lui/addiu into s1, s3, s6...).
+// Its priority, floor_log2(refs) * refs / live length, is low, so it is allocated late; by then
+// s4 is held here by the 2194 of entries 257 on (retail holds that one in s7; entries 134-248
+// hold 2194 in t6 on both sides).
+//
+// The whole allocation is permuted, from entry 0 (value 4: s5 here, s3 in retail). Per value,
+// this form builds 4 23 times fewer than retail and func_00155778 7 times more: it keeps one 4
+// in s5 across the whole table, where retail rebuilds 4 at almost every use after entry 237 and
+// spends the register on func_00155778. The 4s are eleven pseudos here (user variables from the
+// helpers' parameters), each live over thousands of insns: sched1, before allocation, moves the
+// constant loads far from their stores, so the live lengths behind every priority come from
+// sched1's choices, whose ties go to insn order (LUID), that is to the order of the source's
+// parameters and statements. That is why only orders move this function; byte-exact counts barely
+// move until everything is right.
+//
+// Next: score candidates on the allocation instead of the bytes. build/swarm/lead/f109/trace.py
+// gives, per store (entry, offset), each side's register and value (the values all agree), and
+// builds.py the per-value build counts; a search that minimises the register differences, or the
+// build-count distance (4 and func_00155778 first), has a gradient where EXACT has none.
+//
+// Tried (2026-11-05, build/swarm/lead/f109/): hill-climbing the statement order inside the helpers
+// on that score took the register differences from 3,537 to 3,133 of 5,503 stores and the size to
+// retail's (37,392 bytes, 13,045 matching), but only by giving up the store order: 159 of 1,179
+// entries in retail's order, against this file's 1,059. 4 and func_00155778 did not move. The
+// parameter orders (call sites rewritten to match), with the store order held, found nothing in
+// 1,500 tries: most swaps compile to the same bytes, the rest lose the store order. This file stays
+// the best. Neither order reaches retail's allocation in this shape; what is left is the shape of
+// the entries themselves, of which the plain stores and the forms above score worse.
 
 void func_001000C8();
 void func_00100178();
