@@ -55,7 +55,7 @@ void func_0011CA20(void* p);
 
 // The stream reader (00134000.cpp).
 s32 func_00137B90(BufferedStream* r);
-void func_00137BE0(BufferedStream* r);
+s32 func_00137BE0(BufferedStream* r);
 s32 func_00137D78(BufferedStream* r);
 f32 func_00137DF8(BufferedStream* r);
 s32 func_00137C40(BufferedStream* r);

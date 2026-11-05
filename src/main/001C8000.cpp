@@ -585,7 +585,7 @@ set:
     return r;
 }
 
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001CBB20(void* self);
 
 struct Obj_1CBAA0 { u8 pad0[0x50]; s32 f50; u8 pad1[0x17C - 0x54]; s32 f17C; };
@@ -1418,7 +1418,7 @@ void func_001C4D60(Agent* self, Animation* t, s32 z);
 void func_0012F6B0(AnimationPlayer* t, f32 x);
 void func_001C7AE0(Agent* self, f32 x, f32 y);
 void func_001C8D78(Agent* self);
-void func_0012C7B0(Animation* t, Agent* self, s32 mode, void* out, f32 x, f32 y);
+s32 func_0012C7B0(Animation* t, Agent* self, s32 mode, void* out, f32 x, f32 y);
 void func_0012C288(Animation* t, Agent* self, s32 one, s32* p, s32 mode, void* out, f32 x, f32 y);
 s32 func_00183458(Agent* self);
 Attachment* func_0012D570(AnimationPlayer* t, s32 q);

@@ -121,7 +121,7 @@ void func_0017CDE0(EntryQueue* self)
 }
 
 void func_001837E0(void* self, s32 kind, s32 a, s32 b);
-void func_0016E0F0(s32 a);
+s32 func_0016E0F0(s32 a);
 void func_001DDA20(void* a);
 
 struct Other_17CE20 {

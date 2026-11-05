@@ -166,7 +166,7 @@ struct Obj_210090 {
     Sub_210090* f1E0;
 };
 
-void func_0020B978(Obj_210090* self, void* a1);
+s32 func_0020B978(Obj_210090* self, void* a1);
 s32 func_0020E3B8(Obj_210090* self);
 
 s32 func_00210090(Obj_210090* self)
@@ -242,7 +242,7 @@ struct Rec_2104A8 {
 };
 
 s32 func_001E1FD0(char *dst, const char *fmt, ...);
-void func_0020B978(struct Node_2104A8 *self, char *buf);
+s32 func_0020B978(struct Node_2104A8 *self, char *buf);
 
 s32 func_002104A8(struct Node_2104A8 *self, struct Rec_2104A8 *rec) {
     char buf[0x100];
@@ -406,9 +406,9 @@ struct Ctx_210A80 {
     u8 pD4[0x174 - 0xD4]; s32 f174; u8 p178[0x858 - 0x178]; Blk_210A80* f858;
 };
 
-s32 func_002107E0(Ctx_210A80* c, Src_210A80* s, void* a, void* b, void* d);
+void func_002107E0(Ctx_210A80* c, Src_210A80* s, void* a, void* b, void* d);
 s32 func_002104A8(Ctx_210A80* c, Src_210A80* s);
-s32 func_00211348(Ctx_210A80* c, Src_210A80* s);
+void func_00211348(Ctx_210A80* c, Src_210A80* s);
 s32 func_00210548(Ctx_210A80* c, Src_210A80* s);
 s32 func_002107B8(Ctx_210A80* c);
 
@@ -719,7 +719,7 @@ struct Hdl_210E00;
 struct Obj_210E00 { u8 pad[0x858]; Hdl_210E00* f858; };
 
 void func_0020F0C0(Obj_210E00* obj, u32 value);
-void func_0020B190(Hdl_210E00* h, s32* p);
+s32 func_0020B190(Hdl_210E00* h, s32* p);
 
 void func_00210E00(Obj_210E00* self, u32 a1, u32 a2)
 {
@@ -795,8 +795,8 @@ s32 func_001F6E78(s32 channel);
 s32 func_001F9D60(void);
 s32 func_001F9DA8(void);
 s32 func_00210F18(s32 channel, void* arg);
-void func_0020B190(Queue_211090* q, Msg_211090* m);
-void func_0020B978(Self_211090* self, u8* msg);
+s32 func_0020B190(Queue_211090* q, Msg_211090* m);
+s32 func_0020B978(Self_211090* self, u8* msg);
 extern u8 D_00250528[];
 
 void func_00211090(Self_211090* self, s32 addr, s32 size)

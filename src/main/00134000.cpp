@@ -5,13 +5,13 @@
 #include "key_id.h"
 
 void func_001AA8C8(void* self);
-s32 func_00150790(void* obj, s32 mode);
+void func_00150790(void* obj, s32 mode);
 
 struct Child_136EF8 { u8 pad0[0x2D0]; s32 kind; };
 
 void func_00150790(Child_136EF8* obj, s32 mode);
 
-void func_00137328(void* a, void* b, s32 c);
+s32 func_00137328(void* a, void* b, s32 c);
 
 void func_001373B0(void* a, KeyId* pair)
 {
@@ -231,7 +231,7 @@ s32 func_00137D78(BufferedStream* self)
 
 extern f32 D_0026185C;
 
-void func_0015DB28(void* out, void* p, s32 handle);
+void* func_0015DB28(void* out, void* p, s32 handle);
 s32 func_0015DF58(void* self);
 
 void func_00137A60(void* self, s32 size, void* obj);
@@ -255,19 +255,19 @@ void func_00137F08(void* self, u8* p)
 extern f32 D_00261858[];
 
 s32 func_001E2100(const char* s);
-void func_001E2138(void* dst, const char* src);
+void* func_001E2138(void* dst, const char* src);
 void func_0015C8B8(s32 a, f32 x, f32 y);
-void func_0015DB28(void* buf, void* p, s32 v);
-void func_0015E068(void* buf, f32 x);
+void* func_0015DB28(void* buf, void* p, s32 v);
+s32 func_0015E068(void* buf, f32 x);
 void func_0015C900(s32 v);
 void func_0015DB80(void* buf);
 s32 func_0015DBE0(void* buf);
 
 s32 func_001F8DB8(s32 p, s32 a, s32 b);
 
-void func_001F8C38(s32 p);
-void func_00203E28(void);
-void func_0011E2A0(void);
+s32 func_001F8C38(s32 p);
+s32 func_00203E28(void);
+s32 func_0011E2A0(void);
 
 void func_001373D0(BufferedStream* self)
 {

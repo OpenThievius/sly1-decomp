@@ -63,7 +63,7 @@ extern u8 D_00604790[];
 void func_001F5C0C(u8* p, s32 a, s32 b);
 void func_0011CBB8(void);
 s32 func_001BE268(s32 a);
-void func_0011DF58(s32 a, s32 b, s32 c, s32 d);
+s32 func_0011DF58(s32 a, s32 b, s32 c, s32 d);
 void func_0011D928(s32 a);
 void func_001C06D8(void);
 void func_0011D520(s32 a, s32 b);
@@ -1044,7 +1044,7 @@ struct Ent_1BE4A8 { u8 pad[0]; };
 
 struct Ent_1BFAF8 { s32 a; s32 b; };
 extern Ent_1BFAF8 D_00245020[];
-void func_001BE268(Ent_1BE4A8* e);
+s32 func_001BE268(Ent_1BE4A8* e);
 
 void func_001BE4A8(s32 idx)
 {

@@ -19,7 +19,7 @@ typedef void (*Fn_19DF48)(void);
 
 extern s32 D_0026AC20[];
 
-void func_001611B8(void* self);
+void* func_001611B8(void* self);
 void func_001529C8(void* self, s32 a, void* b);
 void func_001612F8(void* self, s32 a, s32 b, s32 c, s32 d, s32 e);
 void func_0019DA30(void);
@@ -512,7 +512,7 @@ void func_0019DA60(void)
 
 struct Scratch_19F9D0 { Quad219C head; u8 rest[0x700 - 16]; };
 
-void func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
+s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 Effect* func_0019EA78(s32 kind, EffectOwner* sys);
 void func_0019EBE8(Effect* self);
 
@@ -740,7 +740,7 @@ void func_0019C470(C8B* o, Stream_19C470* in)
 
 
 void func_001BE0A8(void** base, s32 count, s32 size, void* cmp);
-void func_0019D468(void);
+int func_0019D468(void);
 
 s32 func_0019D4B0(s32 n, DeferredRequest* items, void** out)
 {
@@ -952,18 +952,18 @@ void func_001A14A0();
 void func_001A15D8();
 void func_001A22C8();
 void func_001A22E0();
-void func_001A25F0();
+s32 func_001A25F0();
 void func_001A26B0();
 void func_001A26F8();
 void func_001A2770();
 void func_001A2830();
-void func_001A2A68();
+s32 func_001A2A68();
 void func_001A2B48();
 void func_001A2D30();
 void func_001A2D88();
 void func_001A2E68();
 void func_001A3008();
-void func_001A3128();
+s32 func_001A3128();
 void func_001A31A0();
 void func_001A31F0();
 void func_001A3250();

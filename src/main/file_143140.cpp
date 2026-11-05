@@ -273,7 +273,7 @@ struct __attribute__((aligned(16))) Quad_1442C8 { s32 w[4]; };
 struct Mat_1442C8 { f32 m[16]; };
 
 void func_001885E0(void* self);
-void func_00189AF0(void* a0, void* a1);
+void* func_00189AF0(void* a0, void* a1);
 void func_00188668(void* out, void* b, void* in);
 
 

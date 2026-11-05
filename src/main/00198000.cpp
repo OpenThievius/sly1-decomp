@@ -65,7 +65,7 @@ void func_00198B28(ObjectSet* self)
 
 typedef void (*VFn_198DA8)(void* self);
 
-void func_0012C8F8(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
+void* func_0012C8F8(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
 void func_00198DA8(ObjectSet* self)
@@ -1219,7 +1219,7 @@ void func_00199B18(Actor_199B18* self)
 }
 
 struct Arg_001993C0;
-s32 func_001781E0(Arg_001993C0* a, s32 v);
+void func_001781E0(Arg_001993C0* a, s32 v);
 
 void func_001993C0(s32 a0) {
     if (D_00262E10 != 0) {

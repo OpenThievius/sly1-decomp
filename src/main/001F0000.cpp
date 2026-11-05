@@ -503,7 +503,7 @@ void func_001AA8B0(void* self, f32 v);
 void func_001AA8C0(void* self, f32 v);
 void func_001BED48(void);
 void func_001BED70(void);
-void func_0016E0F0(s32 bits);
+s32 func_0016E0F0(s32 bits);
 void func_0016E118(s32 n);
 void func_0016EC88(void* p);
 void func_001E96F8(void* obj, s32 mode);

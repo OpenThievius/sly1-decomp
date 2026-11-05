@@ -599,7 +599,7 @@ AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key)
 
 void func_00182C58(void* self);
 void func_001B61F0(void* self);
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
 void func_001B61A8(C88* self)
 {
@@ -1147,7 +1147,7 @@ struct Bank_1B61F0 {
 };
 
 s32 func_0015A448(void* owner, s32 value, void* bank);
-void func_001B6290(void* bank, s32 r, s32 minus_one, s32 zero);
+void* func_001B6290(void* bank, s32 r, s32 minus_one, s32 zero);
 
 void func_001B61F0(Bank_1B61F0* self)
 {
@@ -1646,7 +1646,7 @@ void* func_0018D658(s32 size);
 void func_0018D6F0(void);
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001B6E28(Mover_1B66A0* self, s32 a, s32 b);
-void func_0012C7B0(Track_1B66A0* track, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
+s32 func_0012C7B0(Track_1B66A0* track, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
 void func_0012F7E0(void* obj, void (*fn)(Mover_1B66A0*, s32, s32), Mover_1B66A0* self);
 void func_001B6CA8(Mover_1B66A0* self, s32 a, s32 b);
 void func_0012F190(void* obj, s32 zero);

@@ -233,7 +233,7 @@ Rec50* func_00155778(EffectSpawner* self, s32 mode);
 void func_00158288(Rec50* p, EffectSpawner* self);
 Rec_001550E8* func_0015A418(void* a0, s32 a1, s32 a2, EffectSpawner* a3);
 s32 func_001300E8(Rec_001550E8* p, s32 k);
-void func_001DBCC8(void* a0, void (*cb)(void), EffectSpawner* a2, s32 a3, s32 a4);
+void* func_001DBCC8(void* a0, void (*cb)(void), EffectSpawner* a2, s32 a3, s32 a4);
 
 void func_001550E8(EffectSpawner* self)
 {

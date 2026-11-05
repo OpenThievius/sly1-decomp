@@ -386,8 +386,8 @@ extern u8 D_00269990[];
 s32 func_0018BFA8(void* lhs, void* rhs);
 void func_001605E8(void* self);
 void func_0018B670(void* a, void* fn, void* self);
-void func_0018C420(void* self);
-void func_0018D0A0(void* self);
+s32 func_0018C420(void* self);
+s32 func_0018D0A0(void* self);
 
 void func_0018C028(MemoryCard* self, s32 value)
 {
@@ -451,7 +451,7 @@ extern Obj_18C7F8 D_00273EB0[];
 
 void func_00194D30(void* self, s32 a, s32 b);
 void func_0018B670(void* a, void* fn, void* self);
-void func_0018C638(void* self);
+s32 func_0018C638(void* self);
 
 void func_0018C7F8(MemoryCard* self)
 {
@@ -474,7 +474,7 @@ extern u8 D_002BE540[];
 extern u8 D_002BE9C0[];
 
 s32 func_001E2100(void* p);
-void func_001E2138(void* dst, void* src);
+void* func_001E2138(void* dst, void* src);
 void func_001F5C0C(void* p, s32 zero, s32 size);
 s32 func_00209E48(void* a, void* b, void* c, s32 d, s32 e, void* f);
 s32 func_0018BD00(s32 v, s32 code, void* extra);
@@ -550,12 +550,12 @@ void func_0011E010(void);
 s32 func_0011CE30(void);
 void func_0011E110(s32 a0);
 s32 func_0011E1F8(s32 flag);
-s32 func_0011D4B8(s32 arg);
+void func_0011D4B8(s32 arg);
 void func_0011D480(s32 a0, s32 a1);
-s32 func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001C08B0(void* p, s32 a, s32 b);
 void func_0013C988(void* state, s32 initialValue, void* secondaryValue);
-s32 func_0018E678(void* self, s32 a1, s32 a2);
+void func_0018E678(void* self, s32 a1, s32 a2);
 
 extern u8* D_00275710;
 
@@ -564,7 +564,7 @@ void func_0011D480(s32 a0, s32 a1);
 void func_001C0950(void* p);
 void func_0011D6D8(u32 a0);
 
-void func_0013CC00(void* a, u32 b, void* c);
+s32 func_0013CC00(void* a, u32 b, void* c);
 
 void* func_0018D5C0(u32 n);
 
@@ -573,9 +573,9 @@ void* func_0018D758(u32 n)
     return func_0018D5C0(n);
 }
 
-void func_0018EAF8(void* self, s32 a, s32 b);
+s32 func_0018EAF8(void* self, s32 a, s32 b);
 
-void func_0018F890(void* self, s32 flag);
+s32 func_0018F890(void* self, s32 flag);
 
 struct Blk_18EB98 { u8 b[0x24]; };
 
@@ -686,7 +686,7 @@ s32 func_0018C250(MemoryCard* self)
 extern u32 D_00269A00[];
 extern s32 D_00261F1C;
 
-void func_001F6B60(s32 a);
+s32 func_001F6B60(s32 a);
 void func_001686E8(s32 a, s32 b);
 void func_001684E8(void);
 void func_001683E8(void);
@@ -728,7 +728,7 @@ s32 func_0018C770(MemoryCard* self)
 
 struct Obj_18CBF8;
 
-void func_0018CC20(Obj_18CBF8* self, void* b, void* c, void* d);
+s32 func_0018CC20(Obj_18CBF8* self, void* b, void* c, void* d);
 
 extern const u32 D_00248470[8];
 extern const char D_0024B3D8[8];

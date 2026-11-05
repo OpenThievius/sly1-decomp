@@ -19,7 +19,7 @@ extern Pad_193598_eu* D_eu_002636F0;
 extern Slot_193598_eu D_eu_00265CD0[];
 extern u8 D_eu_0026B530[][0x200];
 s32 func_001A7EE8(Pad_193598_eu* p);
-void* func_001935B0(Slot_193598_eu* a, void* b);
+void func_001935B0(Slot_193598_eu* a, void* b);
 const char* func_eu_001DDAB0(s32 i);
 
 void* func_00193598(s32 x, s32 index)

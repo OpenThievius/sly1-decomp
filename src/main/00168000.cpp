@@ -98,7 +98,7 @@ void func_001683B8(void);
 void func_00201A18(s32 a0, s32 a1, s32 a2, s32 a3);
 void func_00202098(void* p, s32 a1, s32 a2, s32 a3);
 void func_001F6C20(s32 a0);
-void func_00201FF8(void* p, s32 a1);
+s32 func_00201FF8(void* p, s32 a1);
 
 void func_001685B8(void)
 {
@@ -129,7 +129,7 @@ void func_001685B8(void)
 struct Blob_168AF8 { u8 bytes[0x20]; };
 
 extern u8 D_002BE1A0[];
-void func_00152888(Blob_168AF8* a);
+void* func_00152888(Blob_168AF8* a);
 void func_001529C8(Blob_168AF8* a, s32 n, Blob_168AF8* b);
 void func_00152B80(Blob_168AF8* a, s32 n, void* table);
 void func_00152D30(Blob_168AF8* a);
@@ -155,7 +155,7 @@ extern s32 D_00274514;
 extern s32 D_00274510;
 extern s32 D_00261F1C;
 
-void func_001611B8(V24A0* f);
+void* func_001611B8(V24A0* f);
 void func_0018D608(void);
 void func_00152980(V24A0* f, s32 size);
 void func_00152B38(V24A0* f);
@@ -581,9 +581,9 @@ extern u8 D_002625D0[16];
 extern s32 D_00261F1C;
 
 void func_001F6C20(s32 a0);
-void func_00201C78(void* p);
+s32 func_00201C78(void* p);
 void func_00202A80(s32 a, void* b);
-void func_00202C38(s32 a, s32 b, s32 c);
+s32 func_00202C38(s32 a, s32 b, s32 c);
 
 void func_00168A48(Blob_168AF8* b)
 {
@@ -637,7 +637,7 @@ void func_001683B8(void);
 void func_00168130(void);
 void func_00202098(void* p, s32 a1, s32 a2, s32 a3);
 void func_001F6C20(s32 a0);
-void func_00201FF8(void* p, s32 a1);
+s32 func_00201FF8(void* p, s32 a1);
 void func_00201988(s32 a0, s32 a1);
 
 void func_001683E8(void)
@@ -683,7 +683,7 @@ extern u8 D_002624E0[16];
 
 void func_00202098(void* p, s32 a1, s32 a2, s32 a3);
 void func_001F6C20(s32 a0);
-void func_00201C78(void* p);
+s32 func_00201C78(void* p);
 
 void func_001684E8(void)
 {
@@ -719,7 +719,7 @@ struct Frame_1693A8 : V24A0 { u8 span[0x10]; s32 out; };
 extern s32 D_00274514;
 extern s32 D_00274510;
 
-void func_001611B8(V24A0* f);
+void* func_001611B8(V24A0* f);
 void func_00168D68(void* p, s32 a, s32 b);
 void func_0018D608(void);
 void func_00152980(V24A0* f, s32 size);
@@ -828,7 +828,7 @@ struct Node_16B7A8 {
 };
 
 void func_0016B300(void* self, s32 idx, s32 flag);
-void func_0016E0F0(s32 bits);
+s32 func_0016E0F0(s32 bits);
 void func_0016EC88(void* p);
 void func_001BE998(void);
 void func_0016E118(s32 n);
@@ -860,7 +860,7 @@ struct Frame_168B68 : V24A0 { s32 value; u8 pad[0x3F0]; };
 extern s32 D_002626CC;
 extern s32 D_00261F1C;
 
-void func_001611B8(V24A0* f);
+void* func_001611B8(V24A0* f);
 void func_001683B8(void);
 void func_001529C8(V24A0* f, s32 n, s32* p);
 void func_00152B38(V24A0* f);
@@ -1036,7 +1036,7 @@ void func_0016B190(Obj_16B190* self)
     }
 }
 
-void func_0016E0F0(s32 n);
+s32 func_0016E0F0(s32 n);
 void func_0016E118(s32 n);
 void func_0016EC88(void* p);
 s32 func_0016BB78(s32 n);
@@ -1381,7 +1381,7 @@ void func_0016AF80(Ctx_16AF80* self)
 extern s32 D_002BE460;
 extern s32 D_002BE46C;
 struct Arg_001683B8;
-void func_001F6B60(Arg_001683B8* a);
+s32 func_001F6B60(Arg_001683B8* a);
 
 void func_001683B8(void) {
     D_002BE46C = 1;
@@ -1430,7 +1430,7 @@ s32 func_00202120(void);
 s32 func_00202058(s32 a);
 void func_001F6C20(s32 a);
 void func_00202A80(Self_1686E8* a, void* b);
-void func_001F6B60(s32 a);
+s32 func_001F6B60(s32 a);
 
 void func_001686E8(Self_1686E8* self, void* b)
 {
@@ -1678,7 +1678,7 @@ void func_00168F48(V24A2_ImgB* e, s32 v, void* ctx)
     func_00168D98(p, 1, 0, step, ((n + step) & -step) / step, e->fC, ctx);
 }
 
-void func_001611B8(V24A0* f);
+void* func_001611B8(V24A0* f);
 void func_001529C8(V24A0* f, s32 n, V24A0* p);
 void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
 void func_00161200(V24A0* f);
@@ -1795,7 +1795,7 @@ struct Hd_16B860 {
 extern f32 D_00261868;
 f32 func_00205400(f32 x);
 void func_0015C8B8(V24A2* font, f32 a, f32 b);
-void func_0015DB28(void* out, void* p, V24A2* font);
+void* func_0015DB28(void* out, void* p, V24A2* font);
 void func_0015E318(void* a, void* b, s32 c, void* d);
 void func_0015C900(V24A2* font);
 
@@ -1843,8 +1843,8 @@ extern s32 D_00274514;
 extern s32 D_00274510;
 
 void func_00168D68(BumpAllocator* p, s32 a, s32 b);
-void func_001611B8(V24A0* f);
-void func_001EE318(V24A0* f);
+void* func_001611B8(V24A0* f);
+void* func_001EE318(V24A0* f);
 void func_0018D608(void);
 void func_00152980(V24A0* f, s32 size);
 void func_00152B38(V24A0* f);

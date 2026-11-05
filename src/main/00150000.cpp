@@ -1497,7 +1497,7 @@ void func_001E86E0(T217D_3F0* a, Slot_150DC0* b);
 void func_001E87F0(T217D_3F0* a, Slot_150DC0* b);
 s32 func_001833F0(Slot_150DC0* a, s32 b);
 void func_001E7440(T217D_3F0* a, s32 b);
-void func_0012C7B0(f32 e, f32 f, Slot_150DC0* a, s32 b, s32 c, AnimationPlayer** d);
+s32 func_0012C7B0(f32 e, f32 f, Slot_150DC0* a, s32 b, s32 c, AnimationPlayer** d);
 void func_0012F810(AnimationPlayer* a, StepSequence* b);
 u32 func_001E2100(s8* a);
 void func_001365A8(T217D_440* a, f32 b);
@@ -1742,8 +1742,8 @@ struct Self_152E48 {
     s32 f2E0;
 };
 
-void func_001611B8(V24A0* p);
-void func_001EE318(V24A0* p);
+void* func_001611B8(V24A0* p);
+void* func_001EE318(V24A0* p);
 void func_0018D608(void);
 void func_00152980(V24A0* p, s32 size);
 void func_001EE480(V24A0* p);

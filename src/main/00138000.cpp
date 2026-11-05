@@ -476,7 +476,7 @@ void func_0013A3A0(WorldListedObject* self)
         self->desc->m03(self);
 }
 
-void func_001611B8(V24A0* f);
+void* func_001611B8(V24A0* f);
 void func_001528F0(V24A0* f, s32 n);
 void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
 void func_00161708(V24A0* f, s32 a, u64 b);
@@ -937,7 +937,7 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
     func_0018D6F0();
 }
 
-void func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
+s32 func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
 void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
 {

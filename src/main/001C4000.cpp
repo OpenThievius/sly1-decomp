@@ -37,7 +37,7 @@ void func_001C5338(TurningCollider* self, Out_C5338* out)
 }
 
 f32 func_00205778(f32 a, f32 b);
-void func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
+f32 func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
 
 void func_001C5D58(TurningCollider* self)
 {
@@ -347,7 +347,7 @@ void* func_0015A838(void* host, s32 a1, s32 a2, void* ctx);
 void func_001C5EA8(void* self, f32 v);
 void func_001C8F20(void* node, s32 kind, s32 flag);
 s32 func_00141008(u8* table, s32 v);
-void func_001DBCC8(void* host, void* fn, void* ctx, s32 a3, s32 a4);
+void* func_001DBCC8(void* host, void* fn, void* ctx, s32 a3, s32 a4);
 extern s32 D_00274C30[8];
 struct Ent_274AD8 { s32 a; s32 b; s32 c; };
 extern Ent_274AD8 D_00274AD8[6];

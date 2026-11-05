@@ -91,7 +91,7 @@ typedef void (*Hook_CE40)(void* self);
 
 void func_00124A48(MaskedCollider* self);
 void func_0013CE80(MaskedCollider* self);
-void func_001DBCC8(void* target, Hook_CE40 fn, MaskedCollider* ctx, s32 a3, s32 a4);
+void* func_001DBCC8(void* target, Hook_CE40 fn, MaskedCollider* ctx, s32 a3, s32 a4);
 
 void func_0013CE40(MaskedCollider* self)
 {
@@ -313,7 +313,7 @@ extern u8 D_00261420[];
 
 void func_0013E7C0(void* a, void* b, void* c);
 s32 func_00141008(void* table, s32 v);
-void func_001DBCC8(void* a, void* fn, void* c, s32 d, s32 e);
+void* func_001DBCC8(void* a, void* fn, void* c, s32 d, s32 e);
 void func_0013EAE0(void* self, s32 mode);
 
 void func_0013EA38(Zone28* self)
@@ -337,7 +337,7 @@ void func_0013EA38(Zone28* self)
     }
 }
 
-void func_001DBCC8(void* a, void* fn, void* c, s32 d, s32 e);
+void* func_001DBCC8(void* a, void* fn, void* c, s32 d, s32 e);
 void func_0013EF50(void* self, s32 a, s32 b);
 
 void func_0013EAE0(void* selfp, s32 mode)
@@ -434,7 +434,7 @@ void* func_0013DAF0(MaskedCollider* self)
     return self->f6B4;
 }
 
-void func_0013EC00(void* list, s32 size, void* count, s32 a, s32 b, s32 c, s32 d);
+s32 func_0013EC00(void* list, s32 size, void* count, s32 a, s32 b, s32 c, s32 d);
 void func_0013EB30(Zone28* self, s32 a, s32 b, s32 c, s32 d)
 {
     func_0013EC00(self->table14C, 8, &self->count148, a, b, c, d);
@@ -1021,7 +1021,7 @@ void func_0013CDE8(MaskedCollider* self, MaskedCollider* other)
 
 struct IntList_13E7C0 { s32 count; void* items[1]; };
 void* func_0015A418(void*, s32, void*, void*);
-void func_0013E8D8(IntList_13E7C0*, void*);
+bool func_0013E8D8(IntList_13E7C0*, void*);
 void func_00182ED8(void*);
 
 void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
@@ -1052,7 +1052,7 @@ struct Call_13E950;
 
 
 s32 func_0013E868(Call_13E950* set, void* key);
-void func_0013E8D8(Call_13E950* queue, void* value);
+bool func_0013E8D8(Call_13E950* queue, void* value);
 
 struct Next_13E950 {
     static Node_13E950* Of(Iter_13E950* it)

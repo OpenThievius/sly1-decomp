@@ -603,7 +603,7 @@ zero:
 extern const char D_0024DC90[4];
 
 void func_0018D800(void* dst, void* src, s32 bytes);
-void func_001F7B88(void* a, void* b);
+s32 func_001F7B88(void* a, void* b);
 void func_001F9028(s32 a, void* b, s32 n);
 
 void func_001D72C8(OutputBuffer* self)

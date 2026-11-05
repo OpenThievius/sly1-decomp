@@ -11,14 +11,14 @@
 #include "output_buffer.h"
 
 
-void func_001D7120(u8* buf, char* dst, s32 cap);
+void* func_001D7120(u8* buf, char* dst, s32 cap);
 s32 func_001E1DB8(u8* buf, s32 a, s32 b);
 void func_001D7148(u8* buf, s32 n);
 
 
 
 void func_001F5C0C(void* p, s32 v, s32 n);
-void func_001F6B20(void* self);
+s32 func_001F6B20(void* self);
 
 struct Ctor_1E2268 {
     u8 pad0[4];
@@ -37,7 +37,7 @@ s32 func_001E1EB0(void* self, void* ap);
 
 struct Stream_001E1F58 { u8 bytes[0x420]; };
 
-void func_001D7120(void* stream, char* dst, s32 cap);
+void* func_001D7120(void* stream, char* dst, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
 void func_001D7148(void* stream, s32 mode);
 
@@ -53,7 +53,7 @@ s32 func_001E2018(char* dst, s32 cap, const char* fmt, void* ap);
 
 struct Stream_1E1EB0 { u8 bytes[0x420]; };
 
-void func_001D7100(void* stream, s32 cap);
+void* func_001D7100(void* stream, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
 void func_001D7148(void* stream, s32 mode);
 
@@ -98,7 +98,7 @@ extern void func_001F6B40(void* a);
 
 void func_00124FC0(void* self);
 void func_001E2870(void* self, s32 a, s32 b);
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 
 
 
@@ -359,7 +359,7 @@ extern u8 D_00275940[];
 
 
 
-void func_001E2138(char* dst, char* src);
+void* func_001E2138(char* dst, char* src);
 s32 func_001E2100(char* p);
 s32 func_001E1330(double v);
 u8 func_001E13D0(double v, s32 e, s32 i);
@@ -468,14 +468,14 @@ extern Pl_1E4EA8 D_00264A40;
 void func_00191E70(s32 a);
 void func_0018D410(KeyId* q);
 S193210* func_00193210(S193210* q, U32P* a, U32P* b, U32P* c, U32P* d);
-void func_00137290(BufferedStream* q, s32 a, u8* b, s32 c);
+void* func_00137290(BufferedStream* q, s32 a, u8* b, s32 c);
 void func_00193270(void* q);
 s32 func_001373B0(BufferedStream* q, KeyId* k);
 void func_001372E0(BufferedStream* q, s32 n);
 void func_001DB838(World* q);
 void func_001DB928(s32 a, BufferedStream* q);
 void func_001430B8(u8* q, f32 v);
-void func_0016E0F0(s32 n);
+s32 func_0016E0F0(s32 n);
 void func_00160690(Blob_1E4EA8* q, s32 n);
 World* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
 void func_001C06A0(s32 a, s32 b, f32 x);
@@ -484,7 +484,7 @@ void func_00193300(void* q);
 void func_0018C7F8(Pl_1E4EA8* q);
 void func_00143A60(s32 q, s32 f);
 void func_001C0070(void);
-void func_001F4318(World* q, s32 a, s32 b);
+s32 func_001F4318(World* q, s32 a, s32 b);
 void func_00151E18(u8* q);
 void func_00160CE8(u8* q);
 void func_0016B520(u8* q);

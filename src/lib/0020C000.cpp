@@ -513,7 +513,7 @@ struct Obj_0020F0F0 {
     s32 dev;               // 0x858
 };
 
-void func_0020B1E0(Dev_0020F0F0* d);
+s32 func_0020B1E0(Dev_0020F0F0* d);
 
 s32 func_0020F0F0(Obj_0020F0F0* self)
 {
@@ -536,7 +536,7 @@ s32 func_0020F0F0(Obj_0020F0F0* self)
 
 struct Dev_0020F198;
 struct Ctx_0020F198 { u8 pad[0x858]; Dev_0020F198* dev; };
-void func_0020B1E0(Dev_0020F198* a);
+s32 func_0020B1E0(Dev_0020F198* a);
 
 s64 func_0020F198(Ctx_0020F198* p) {
     s32 i = 0;
@@ -823,12 +823,12 @@ extern const char D_00250410[];
 s16 func_0020F248(Self_20E8A0* self, s32 mode);
 void func_0020B978(Self_20E8A0* self, const char* msg);
 s32 func_0020F5B8(Self_20E8A0* self, s32 n);
-s32 func_0020F4C8(Self_20E8A0* self, s32 n);
+void func_0020F4C8(Self_20E8A0* self, s32 n);
 void func_0020F0F0(Self_20E8A0* self);
 void func_0020F0C0(Self_20E8A0* self, s32 v);
 void func_00210D90(s32 a, s32 b);
-s32 func_0020EDD0(Self_20E8A0* self, s32* b1, s32* b2, s32* o5, s32 a4, s32 a5, s32 a6, s32 a7, s32 s0, s32 s8, s32 s10);
-s32 func_0020EF70(Self_20E8A0* self, s32* b1, s32* b2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
+void func_0020EDD0(Self_20E8A0* self, s32* b1, s32* b2, s32* o5, s32 a4, s32 a5, s32 a6, s32 a7, s32 s0, s32 s8, s32 s10);
+void func_0020EF70(Self_20E8A0* self, s32* b1, s32* b2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 
 s32 func_0020E8A0(Self_20E8A0* self, s32* st, s32* mode, s32* o3, s32* b1, s32* o5, s32* b2)
 {
@@ -1298,7 +1298,7 @@ struct Obj_20F3C0 {
 };
 
 s64 func_0020F198(Obj_20F3C0* obj);
-void func_0020B1E0(u8* p);
+s32 func_0020B1E0(u8* p);
 
 extern u32 D_0027B040[];
 
@@ -1331,7 +1331,7 @@ struct Obj_20F5B8 {
 };
 
 s64 func_0020F198(Obj_20F5B8* obj);
-void func_0020B1E0(u8* p);
+s32 func_0020B1E0(u8* p);
 
 extern u32 D_0027B040[];
 
@@ -1411,7 +1411,7 @@ struct Self_20F248 {
     Sub_20F248* f858;
 };
 
-void func_0020B1E0(Sub_20F248* s);
+s32 func_0020B1E0(Sub_20F248* s);
 
 s16 func_0020F248(Self_20F248* self, s32 mode)
 {

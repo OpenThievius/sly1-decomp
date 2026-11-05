@@ -156,7 +156,7 @@ struct Locals_1CEE30 {
     f32 out;
 };
 
-void func_001CEDF8(void);
+f32 func_001CEDF8(void);
 void func_001EB168(f32 f12, f32 f13, f32 f14, f32 f15, void* fn, void* b, s32 c, void* out);
 
 f32 func_001CEE30(Self_1CEE30* self)

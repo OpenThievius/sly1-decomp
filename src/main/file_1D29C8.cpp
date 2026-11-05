@@ -65,7 +65,7 @@ void func_001B91A8(Collider* self, void* buf, s32 a, void* p, s32 b, f32 t);
 
 
 void func_00127378(PlacedObject* self, s32 kind, ObjectMessage* msg);
-void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
 void func_0016EC20(PadRecord* self, s32 mask);
 s32 func_00160D10(void);

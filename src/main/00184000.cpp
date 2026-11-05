@@ -199,7 +199,7 @@ void func_001861E8(u8* self, Contact03* head)
 struct Ent_001879C0 { u8 pad0[0x20]; f32 f; s32 b; s32 c; u8 pad1[4]; };
 
 s32 func_00187260(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, Ent_001879C0* a6);
-void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
 void func_001879C0(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6)
 {
@@ -216,7 +216,7 @@ struct Vec_00187C28 { f32 x; f32 y; f32 z; f32 w; };
 
 s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
-void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, void* a6, void* a7);
+s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, void* a6, void* a7);
 
 s32 func_00187C28(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5)
 {
@@ -241,7 +241,7 @@ struct Loc_00187E88 { s32 a[4]; s32 b[4]; f32 fa; f32 fb; s32 pad[2]; };
 
 s32 func_00187D08(void* a0, void* a1, void* a2, s32 a3, void* a4, void* a5, void* a6, f32 f);
 void func_00187B60(void* a0, void* a1, void* a2, void* a3, f32 f);
-void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
+s32 func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
 s32 func_00187E88(void* a0, void* a1, void* a2)
 {
@@ -258,14 +258,14 @@ extern s32 D_00261F14;
 extern u8 D_00211E10[];
 void func_001F6C20(s32 unused);
 void func_00202A80(void* dma, void* addr);
-void func_00202C38(void* dma, s32 b, s32 c);
+s32 func_00202C38(void* dma, s32 b, s32 c);
 
 extern u8 D_00261F18[];
 extern u8 D_00212110[];
 
 void func_001F6C20(s32 a);
 void func_00202A80(void* a, void* b);
-void func_00202C38(void* a, s32 b, s32 c);
+s32 func_00202C38(void* a, s32 b, s32 c);
 
 struct Self_186450 {
     u8 pad0[0x3AC];
@@ -363,7 +363,7 @@ s32 func_001F9C18();
 s32 func_001F9820();
 s32 func_00203828(s32 a);
 s32 func_00140D68(s32 a);
-s32 func_001F9A90(void* buf, s32 a, s32 b);
+void func_001F9A90(void* buf, s32 a, s32 b);
 
 f32 func_002054F0(f32 a);
 

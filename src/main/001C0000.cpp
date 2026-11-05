@@ -297,7 +297,7 @@ extern const f32 D_0024D560[4];
 
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA408(f32 a);
-void func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
+f32 func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
 void func_00151E20(u8* a, f32 b);
 void func_00194D30(u8* a, s32 b, s32 c);
 void func_0012C918(void* a, PlacedObject* b, s32 c, void* d, f32 e, f32 f);

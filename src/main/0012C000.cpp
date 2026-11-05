@@ -88,7 +88,7 @@ void func_0012FCB0(IdFilterObject* a0, s32 a1)
 }
 
 s32 func_0012FF10(StreamReader* self);
-void func_001F8C38(s32 h);
+s32 func_001F8C38(s32 h);
 s32 func_002032C8(s32 x);
 void func_0012FFE8(StreamReader* self);
 
@@ -141,7 +141,7 @@ void func_0012C160(Animation* self)
 }
 
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-void func_0012C7B0(void* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
+s32 func_0012C7B0(void* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
 
 struct Obj_0012C208 {
     u8 pad0[0x14];
@@ -202,7 +202,7 @@ Node_0012C808* func_0012C808(Owner_0012C808* self, s32 key)
 }
 
 void* func_0012C808(void* self, s32 key);
-void func_0012C7B0(void* self, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
+s32 func_0012C7B0(void* self, s32 a1, s32 a2, void** out, f32 fa, f32 fb);
 void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
 
 void func_0012C840(void* self, s32 key, s32 a2, s32 a3, void** out, f32 fa, f32 fb)
@@ -492,7 +492,7 @@ void func_0012D448(AnimationPlayer* self, s32 v)
 }
 
 void func_0012E760(void* obj);
-void func_0012C7B0(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
+s32 func_0012C7B0(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
 
 void func_0012C918(void* self, void* a1, void* a2, void** out, f32 fa, f32 fb)
 {
@@ -1013,7 +1013,7 @@ void func_001B64D8(void* a, s32 b);
 void func_001B6438(void* o);
 s32 func_001300E8(Collider* n, s32 kind);
 void func_001920B0(Collider* n, Vec4U* out);
-void func_001F3BD8(Collider* n, Vec4U* out);
+s32 func_001F3BD8(Collider* n, Vec4U* out);
 s32 func_00182FC8(void* p);
 void func_001DDB58(World_12D5D0* w);
 void func_001DDBB8(World_12D5D0* w);
@@ -1555,7 +1555,7 @@ f32 func_0012E968(Obj_12E968* self, f32 value)
     return r;
 }
 
-void func_001F8DB8(void* p, s32 a, s32 b);
+s32 func_001F8DB8(void* p, s32 a, s32 b);
 void func_00140CC8(void* p, s32 n, s32 base);
 
 void func_0012FE70(StreamReader* self)

@@ -102,7 +102,7 @@ struct Packed_001C0B08 { u64 value; } __attribute__((packed));
 void func_0011E010(void);
 s32 func_0011CE30(void);
 void func_0011E110(s32 a0);
-void func_0011E1F8(s32 flag);
+s32 func_0011E1F8(s32 flag);
 void func_001C0808(s32 a0);
 void func_001BEE48(void);
 void func_001C0CB0(void);
@@ -140,7 +140,7 @@ struct Dma_1C25B0 {
 };
 
 extern Dma_1C25B0* D_00261F20;
-void func_00202C38(Dma_1C25B0* d, s32 b, s32 c);
+s32 func_00202C38(Dma_1C25B0* d, s32 b, s32 c);
 void func_00202B68(Dma_1C25B0* d);
 
 
@@ -229,7 +229,7 @@ void* func_0018D500(u32 size);
 void func_00138518(void* self);
 s32 func_0011A630(void);
 void func_0011A6C0(u8* a, s32 b);
-void func_0011A358(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
+void* func_0011A358(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
 extern s32 D_00275714;
 extern u8 D_00259F38[];
 
@@ -255,7 +255,7 @@ struct D8_1C15D8 { s32 a, b; };
 
 extern void* func_0011C508(void);
 extern void* func_0011C618(void);
-extern void func_001884E0(void* d, void* s);
+extern void* func_001884E0(void* d, void* s);
 extern void func_001884C0(void* d);
 extern void* func_0011C748(void);
 extern void* func_0011C858(void);
@@ -325,7 +325,7 @@ extern Chan_1C2430* D_00261F24;
 typedef char* VaList_1C2430;
 #define VA_ARG_1C2430(ap, T) (*(T*)((ap += 8) - 8))
 
-void func_00202C38(void* p, s32 a, s32 b);
+s32 func_00202C38(void* p, s32 a, s32 b);
 void func_00202A80(Chan_1C2430* c, u32 addr);
 
 void func_001C05D0(f32 x);

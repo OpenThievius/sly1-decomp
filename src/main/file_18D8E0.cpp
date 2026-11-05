@@ -231,7 +231,7 @@ void func_00125C90(void* obj, void* s, void* out);
 
 extern s32 D_00261F1C;
 
-void func_001F6B60(s32 a);
+s32 func_001F6B60(s32 a);
 void func_001686E8(s32 a, s32 b);
 void func_001684E8(void);
 void func_001683E8(void);
@@ -314,7 +314,7 @@ extern u8 D_00275F80[];
 extern s32 D_002613EC;
 
 void func_00191E70(s32 v);
-void func_0012FCF0(StreamReader* o, u8* d);
+void* func_0012FCF0(StreamReader* o, u8* d);
 s32 func_0012FD78(StreamReader* o, KeyId* k);
 void func_0016EC20(PadRecord* d, s32 n);
 void func_00143030(u8* t);
@@ -344,7 +344,7 @@ s32 func_0011E4F8(void* self);
 struct Frame_18EDA8 { u8 buf[0x30]; };
 
 void func_00189350(void* a, void* b);
-s32 func_001BC088(Collider* self, f32 x, void* b);
+void func_001BC088(Collider* self, f32 x, void* b);
 
 struct Object_18F890 { u8 pad00[0x0C]; StreamReaderWindow* buffer; u8 pad10[4]; };
 struct Empty_18F890 {
@@ -391,9 +391,9 @@ extern u8 D_005A2D40[];
 extern u8 D_00148D68[];
 
 void func_0020ADA0(void);
-void func_0020AE40(void* self, void* a, s32 b);
+s32 func_0020AE40(void* self, void* a, s32 b);
 s32 func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
-void func_0020B168(void* self, s32 a, void* fn, void* arg);
+s32 func_0020B168(void* self, s32 a, void* fn, void* arg);
 
 s32 func_0018E410(IdentityKey* key);
 u8* func_0018E480(s32 index);

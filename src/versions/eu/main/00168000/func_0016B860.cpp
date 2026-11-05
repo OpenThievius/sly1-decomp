@@ -23,7 +23,7 @@ struct Obj_16B860_eu {
 extern f32 D_00261868;
 f32 func_00205400(f32 x);
 void func_0015C8B8(s32 handle, f32 a, f32 b);
-void func_0015DB28(void* out, void* p, s32 handle);
+void* func_0015DB28(void* out, void* p, s32 handle);
 void func_0015E318(void* a, void* b, s32 c, void* d);
 void func_0015C900(s32 handle);
 

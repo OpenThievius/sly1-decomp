@@ -11,20 +11,20 @@ extern void func_001C6F48(void*);
 extern void func_001C7140(void*);
 extern void func_00124DF8(void*, s32, void*);
 extern void* func_00189438(s32, void*, void*);
-extern void func_001EA480(f32, f32);
+extern f32 func_001EA480(f32, f32);
 extern void func_001884C0(void*);
 extern void func_00188668(void*, void*, void*);
-extern s32 func_001B6598(s32, s32*);
+extern void func_001B6598(s32, s32*);
 extern s32 func_001C96B8(void*);
 extern s32 func_001C8010(void*);
 extern s32 func_00209B80(s32, s32*, s32*);
 extern s32 func_0018B930(s32);
 extern s32 func_0018B988(s32, s32);
-extern void func_002093F0(void);
+extern s32 func_002093F0(void);
 extern void func_0018B5C0(void*);
 extern void func_0018BD58(void*, s32, s32);
 extern void func_001F6A50(s32, s32);
-extern void func_001F6B60(s32);
+extern s32 func_001F6B60(s32);
 extern void func_001F6B40(s32);
 extern s32 func_0018B770(void*);
 struct Ent_264910 { s32 a, b, c; };
@@ -267,7 +267,7 @@ struct Obj_18B720 { void* f0; void* f4; };
 
 s32 func_0018B770(void* p);
 void func_001F6A50(void* a, s32 b);
-void func_001F6B60(void* a);
+s32 func_001F6B60(void* a);
 void func_001F6B40(void* a);
 
 void func_0018B720(Obj_18B720* a0)
@@ -325,7 +325,7 @@ struct Dst_18B780 {
 };
 
 void* func_001F5C0C(void* p, int c, int n);
-void func_001E2138(void* dst, void* src);
+void* func_001E2138(void* dst, void* src);
 
 void func_0018B780(Src_18B780* s, Dst_18B780* d)
 {
@@ -477,7 +477,7 @@ extern Glob_18BDC8 D_0026FF68[];
 
 void func_0018B670(BackgroundJob* p, void* fn, MemoryCard* self);
 void func_0018C028(MemoryCard* self, s32 v);
-void func_0018D0A0(MemoryCard* self);
+s32 func_0018D0A0(MemoryCard* self);
 void func_00194D30(Glob_18BDC8* g, s32 a, s32 b);
 
 void func_0018BDC8(MemoryCard* self)
@@ -964,7 +964,7 @@ done:
 
 extern u8 D_00275960[];
 
-void func_001F6B60(void* a);
+s32 func_001F6B60(void* a);
 void func_001F6B40(void* a);
 s32 func_001F6A30();
 
@@ -1135,7 +1135,7 @@ struct Obj_18B340 {
     Quad_18B340 fF0;
 };
 
-void func_001A8C90(void* obj, s32 v);
+s32 func_001A8C90(void* obj, s32 v);
 void func_001C9DE0(void* self, s32 code, void* req);
 void func_001B6598(void* dev, s32* out);
 f32 D_00264A34 = 20.0f;

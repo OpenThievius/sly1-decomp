@@ -407,7 +407,7 @@ void func_00124DF8(void* self, s32 a1, void* a2);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-s32 func_001A4070(void* self, s32 n);
+void func_001A4070(void* self, s32 n);
 void func_001A42C8(void* self, s32 v);
 
 void func_001A3B58(C15* self)
@@ -506,9 +506,9 @@ void func_001A3A18(Effect* self, f32 scale)
 typedef int V128_1A0258 __attribute__((mode(TI)));
 void func_0019EB28(Effect* self, f32 f);
 void func_00118CF0(void* out, f32 f);
-void func_00118D10(void* out, void* in);
+void* func_00118D10(void* out, void* in);
 V128_1A0258 func_00118D30(V128_1A0258 a, V128_1A0258 b);
-void func_00118D20(void* dst, V128_1A0258 v);
+void* func_00118D20(void* dst, V128_1A0258 v);
 extern f32 D_0026B570[4];
 extern f32 D_0026B580[4];
 
@@ -589,9 +589,9 @@ typedef int V128_1A01B8 __attribute__((mode(TI)));
 
 void func_0019EB28(Effect* self, f32 f);
 void func_00118CF0(void* out, f32 f);
-void func_00118D10(void* out, void* in);
+void* func_00118D10(void* out, void* in);
 V128_1A01B8 func_00118D30(V128_1A01B8 a, V128_1A01B8 b);
-void func_00118D20(void* dst, V128_1A01B8 v);
+void* func_00118D20(void* dst, V128_1A01B8 v);
 extern f32 D_0026B560[4];
 
 void func_001A01B8(Effect* self, f32 f)
@@ -733,7 +733,7 @@ void func_001A3AE0(C15* self)
 typedef int V128_1A09C0 __attribute__((mode(TI)));
 void func_0019EB28(Effect* self, f32 f);
 void func_00118CF0(void* out, f32 f);
-void func_00118D10(void* out, void* in);
+void* func_00118D10(void* out, void* in);
 V128_1A09C0 func_00118D30(V128_1A09C0 a, V128_1A09C0 b);
 void* func_00118D20(Quad219C* dst, V128_1A09C0 v);
 extern f32 D_0026B590[4];

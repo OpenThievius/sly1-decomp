@@ -158,7 +158,7 @@ s32 func_001F9820(void)
 
 // NEAR: retail saves $ra with sd, default compiler with sq; call and frame identical
 struct Ctx_001F9A90;
-void func_001F9868(Ctx_001F9A90* a0, void* a1, void* a2, u32* a3, s32 a4);
+s32 func_001F9868(Ctx_001F9A90* a0, void* a1, void* a2, u32* a3, s32 a4);
 
 void func_001F9A90(Ctx_001F9A90* a0, void* a1, void* a2)
 {
@@ -239,7 +239,7 @@ s32 func_001F9F50(void)
 
 struct Node_001FA068 { s32 a; };
 
-void func_001FA9C0(Node_001FA068* p);
+s32 func_001FA9C0(Node_001FA068* p);
 
 void func_001FA068(Node_001FA068* p)
 {
@@ -1489,7 +1489,7 @@ void func_001E08D8();
 void func_001F2738();
 void func_00180E90();
 void func_0018F968();
-void func_001931F0();
+s32 func_001931F0();
 void func_001C29C8();
 void func_001E5358();
 void func_001E88B0();

@@ -733,7 +733,7 @@ void func_0016DFE0(C2A* self, s32 kind)
 }
 
 void func_0016E148(void);
-void func_002040E8(void* a);
+s32 func_002040E8(void* a);
 
 void func_0016E0B8(void)
 {
@@ -1317,7 +1317,7 @@ extern const char D_002483B8[24] = "@KFWHJGL";
 extern const char D_0024A848[24] = "The password is: %s";
 
 s32 func_001602A0(void);
-void func_001E2138(char* dst, const u8* src);
+void* func_001E2138(char* dst, const u8* src);
 s32 func_001E1FD0(char* dst, const u8* fmt, ...);
 void func_001AA8B8(Obj_16F478* self, f32 v);
 

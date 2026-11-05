@@ -3,7 +3,7 @@
 
 void func_00159ED0(void* x);
 
-void func_0017D220(void* x);
+s32 func_0017D220(void* x);
 
 void func_0017B598(void* x);
 
@@ -11,11 +11,11 @@ void func_0017AD50(void* x);
 
 void func_001ED020(void* x);
 
-s32 func_0017B550(void* self, s32 index);
+void func_0017B550(void* self, s32 index);
 
-s32 func_001ED018(void* self, s32 value);
+void func_001ED018(void* self, s32 value);
 
-s32 func_001ED0D8(void* self, s32 value);
+void func_001ED0D8(void* self, s32 value);
 
 void func_001EC528(void* x);
 
@@ -36,7 +36,7 @@ void func_001C41A0(void* self, s32 value);
 struct Arg_001083C8;
 extern const s32 D_00248F90[2];
 
-void func_0017D0D8(Arg_001083C8* p, s32 a, s32 b);
+void* func_0017D0D8(Arg_001083C8* p, s32 a, s32 b);
 
 struct Arg_001089C8;
 extern const s32 D_00248F98[2];

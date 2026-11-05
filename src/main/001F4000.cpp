@@ -43,10 +43,10 @@ extern u8 D_00261990[];
 void func_00145088(u32, int, void*, int, void*);
 void func_001F4F20(void* self) { if (*(s32*)((u8*)self + 0x310)) { func_001451F0(*(u32*)D_00261990, 0xB, 7, (u8*)*(u32*)D_00261990 + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
-void* func_001BA130(void*);
+void func_001BA130(void*);
 void func_001F51A0(ContactTracker* self) { func_001BA130(self); self->rec.owner = self; }
 
-void func_0013EC00(void*, int, void*, void*, void*, void*, void*);
+s32 func_0013EC00(void*, int, void*, void*, void*, void*, void*);
 void func_001F42D0(void* self, void* a1, void* a2, void* a3, void* a4) { func_0013EC00((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
 extern u32 D_00277134;
@@ -466,7 +466,7 @@ struct Obj_1F5008 {
     s32 f550;
 };
 
-s32 func_001B93F8(Collider* self);
+void func_001B93F8(Collider* self);
 s32 func_00182F40(Obj_1F5008* o, ContactTracker* self);
 s32 func_001300E8(Obj_1F5008* o, s32 kind);
 s32 func_001F5C0C(void* p, s32 a, s32 b);
@@ -538,7 +538,7 @@ void func_001E02C8(Gl_1F4808* g, s32 n);
 void func_001F4408(s32 flag, s32 n);
 s32 func_001300E8(BaseObject* key, s32 kind);
 void func_001451F0(u8* a0, s32 a1, s32 a2, u8* a3, s32 a4, s32 a5);
-void func_0012C7B0(Animation* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
+s32 func_0012C7B0(Animation* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
 s32 func_0012C9A8(Animation* node);
 void func_001837E0(ObjectSubGroup* self, s32 a, s32 b, s32 c);
 

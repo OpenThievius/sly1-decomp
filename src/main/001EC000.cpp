@@ -133,7 +133,7 @@ void func_001ED090(C13* self, void* a, s32 b)
     func_0012F810(a, self);
 }
 
-void func_001EDEF0(void* self);
+s32 func_001EDEF0(void* self);
 
 void func_001EE290(void* self)
 {
@@ -276,7 +276,7 @@ void func_001EF868(C62* self)
     self->desc->m03(self);
 }
 
-void func_0013EC00(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
+s32 func_0013EC00(void* a, s32 b, void* c, s32 d, s32 e, s32 f, s32 g, s32 h);
 
 void func_001EF8C0(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
 {
@@ -328,7 +328,7 @@ void func_001EE420(V24A0* s, s32 n)
 }
 
 void func_001EFB20(void* self);
-void func_001DBCC8(s32 a, void* b, void* c, s32 d, s32 e);
+void* func_001DBCC8(s32 a, void* b, void* c, s32 d, s32 e);
 
 struct Node_1EFC98 { u8 pad[0x28]; s32 flag; };
 
@@ -499,7 +499,7 @@ void func_001EC380(C13* self, void* s, void* c)
 
 void func_001C8418(void* self, void* p);
 void func_001C8C08(void* self);
-void func_001F3BD8(void* self, void* arg);
+s32 func_001F3BD8(void* self, void* arg);
 
 void func_001ECE98(C13* self)
 {
@@ -784,7 +784,7 @@ void func_001ED278(Sub_1ECBC8* sub);
 void func_001B6598(Dev_1ECBC8* dev, s32* out);
 void func_001C0C68(Id_1ECBC8 a, Dev_1ECBC8* b);
 s32 func_001C0C50(Id_1ECBC8 a);
-void func_001DBCC8(Dev_1ECBC8* dev, Cb_1ECBC8 cb, C13* self, s32 a3, s32 a4);
+void* func_001DBCC8(Dev_1ECBC8* dev, Cb_1ECBC8 cb, C13* self, s32 a3, s32 a4);
 void func_001ECB18(void);
 
 void func_001ECBC8(C13* self)
@@ -1078,7 +1078,7 @@ struct Evt_1EF900 {
 
 extern f32 D_0026185C[];
 
-void func_0013ECB0(Mgr_1EF900* mgr, s32 a, void* b, C62* self, s32 c);
+s32 func_0013ECB0(Mgr_1EF900* mgr, s32 a, void* b, C62* self, s32 c);
 
 void func_001EF900(C62* self, s32 state)
 {
