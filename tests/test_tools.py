@@ -388,6 +388,51 @@ class EpilogueTailTest(unittest.TestCase):
                                                      "addiu     $sp, $sp, 0x20"]))
 
 
+class DeclsTest(unittest.TestCase):
+    """tools/decls.py reads return types and what retail's callers do with $v0 and $f0."""
+
+    def test_return_kinds(self):
+        import decls
+        text = ("void func_00100000(s32 a);\n"
+                "void* func_00100008(void* p);\n"
+                "static inline f32 func_00100010(void);\n"
+                "const char* func_00100018(s32 i);\n"
+                "s32 Obj::func_00100020(s32 x)\n{\n    return x;\n}\n"
+                "    return func_00100000(1);\n")
+        got = {n: (k, d) for n, k, _l, d in decls.signatures(text)}
+        self.assertEqual(got, {"func_00100000": ("void", False), "func_00100008": ("value", False),
+                               "func_00100010": ("float", False), "func_00100018": ("value", False),
+                               "func_00100020": ("value", True)})
+
+    def test_what_an_instruction_does_with_the_result(self):
+        import decls
+        use = lambda text, reg: decls.register_use(*decls.operands(text), reg)
+        self.assertEqual(use("sw $v0, 0x10($s0)", "$v0"), "read")
+        self.assertEqual(use("daddu $s0, $v0, $zero", "$v0"), "read")
+        self.assertEqual(use("lw $v0, 0x10($s0)", "$v0"), "write")
+        self.assertEqual(use("lw $a0, 0x0($v0)", "$v0"), "read")
+        self.assertEqual(use("beqz $v0, .L00100000", "$v0"), "read")
+        self.assertEqual(use("mfc1 $v0, $f0", "$f0"), "read")
+        self.assertEqual(use("mtc1 $zero, $f0", "$f0"), "write")
+        self.assertEqual(use("swc1 $f0, 0x4($s0)", "$f0"), "read")
+        self.assertIsNone(use("addiu $v1, $zero, 0x1", "$v0"))
+
+    def test_callers_prove_a_result(self):
+        import decls
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "text.s"
+            path.write_text("glabel func_00100000\n"
+                            "    /* - */  jal        func_00200000\n"
+                            "    /* - */   nop\n"
+                            "    /* - */  sw         $v0, 0x0($s0)\n"
+                            "    /* - */  jal        func_00200008\n"
+                            "    /* - */   nop\n"
+                            "    /* - */  addiu      $v0, $zero, 0x1\n"
+                            "    /* - */  jr         $ra\n"
+                            "endlabel func_00100000\n")
+            self.assertEqual(decls.result_uses(path), {"func_00200000": {"$v0"}})
+
+
 class RegdiffTest(unittest.TestCase):
     """tools/regdiff.py tells a register-only difference from one in the code."""
 
