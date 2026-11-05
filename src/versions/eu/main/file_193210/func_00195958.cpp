@@ -104,7 +104,7 @@ void func_00195958(Menu_195958_eu* self)
             func_00194D30(self, 0, 0xB);
             return;
         case 13:
-            func_001A7F50(((Glob_195958*)D_002623C0));
+            func_001A7F50(D_002623C0);
             {
                 s32 keep;
                 keep = self->f264;
@@ -113,9 +113,9 @@ void func_00195958(Menu_195958_eu* self)
             }
             return;
         case 15: {
-            Glob_195958* g = ((Glob_195958*)D_002623C0);
-            g->f19EC ^= 0x80;
-            func_001C0760(g->f19EC & 0x80);
+            G27C220* g = D_002623C0;
+            g->u19EC ^= 0x80;
+            func_001C0760(g->u19EC & 0x80);
             {
                 s32 keep;
                 keep = self->f264;
@@ -125,9 +125,9 @@ void func_00195958(Menu_195958_eu* self)
             return;
         }
         case 16: {
-            Glob_195958* g = ((Glob_195958*)D_002623C0);
-            g->f19EC ^= 0x40;
-            func_001C0790(g->f19EC & 0x40);
+            G27C220* g = D_002623C0;
+            g->u19EC ^= 0x40;
+            func_001C0790(g->u19EC & 0x40);
             {
                 s32 keep;
                 keep = self->f264;
@@ -167,10 +167,10 @@ void func_00195958(Menu_195958_eu* self)
     }
     case 2:
         if (sel == 0) {
-            Boot_195958* b = &D_00264A40;
+            G264A40* b = &D_00264A40;
             if (b->f4F44 != 0) {
                 self->f27C = 2;
-                if ((((Glob_195958*)D_002623C0)->f19EC & 0x100) == 0) {
+                if ((D_002623C0->u19EC & 0x100) == 0) {
                     func_00194D30(self, 1, 0x14);
                 } else {
                     func_00194D30(self, 1, 0xC);
@@ -187,21 +187,21 @@ void func_00195958(Menu_195958_eu* self)
     case 31:
         switch (sel) {
         case 0x18: {
-            ((Glob_195958*)D_002623C0)->f19EC ^= 0x200;
+            D_002623C0->u19EC ^= 0x200;
             s32 keep = self->f264;
             func_001936A0(self);
             self->f264 = keep;
             return;
         }
         case 0x19: {
-            ((Glob_195958*)D_002623C0)->f19EC ^= 0x400;
+            D_002623C0->u19EC ^= 0x400;
             s32 keep = self->f264;
             func_001936A0(self);
             self->f264 = keep;
             return;
         }
         case 0x1A: {
-            ((Glob_195958*)D_002623C0)->f19EC ^= 0x800;
+            D_002623C0->u19EC ^= 0x800;
             s32 keep = self->f264;
             func_001936A0(self);
             self->f264 = keep;
@@ -300,11 +300,11 @@ void func_00195958(Menu_195958_eu* self)
         D_00264A40.f4F4C = e;
         if (e->fC == 0.0f) {
         c6030:
-            Boot_195958* b;
+            G264A40* b;
             b = &D_00264A40;
             b->f4F44 = b->f4F4C;
             self->f27C = 0xB;
-            if ((((Glob_195958*)D_002623C0)->f19EC & 0x100) == 0) {
+            if ((D_002623C0->u19EC & 0x100) == 0) {
                 func_00194D30(self, 1, 0x14);
             } else {
                 func_00194D30(self, 1, 0xC);
@@ -328,7 +328,7 @@ void func_00195958(Menu_195958_eu* self)
         func_00194D30(self, 1, -1);
         return;
     case 20: {
-        ((Glob_195958*)D_002623C0)->f19EC |= 0x100;
+        D_002623C0->u19EC |= 0x100;
         s32 v = self->f27C;
         switch (v) {
         case 2:

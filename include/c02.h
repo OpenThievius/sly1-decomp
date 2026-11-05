@@ -13,6 +13,9 @@
 
 struct C02;
 struct T2195;   // an attachment (t2195.h): a record of the world's pool at C6C::pool1B20
+struct Rec2195_224;     // the 0xC0-byte record at +0x224 (t2195.h)
+struct S1291D0;         // the 0x2E0-byte record at +0x284 (s1291d0.h)
+struct S1BE4D8;         // the 0x24-byte record at +0x2AC (s1be4d8.h)
 
 // A 16-byte vector (a position, a velocity, a matrix row), 16-aligned as the code moves it.
 struct __attribute__((aligned(16))) Vec02 {
@@ -62,8 +65,8 @@ struct Desc02 : Desc01 {
     void (*m25)(C02* self, void* a, void* m);       // 0xA4: func_001261C0
     void (*m26)(C02* self, void* a, void* m);       // 0xA8: func_00126270
     void (*m27)(C02* self, void* frame);            // 0xAC: func_001660E8
-    void* m28;                                      // 0xB0
-    void* m29;                                      // 0xB4: func_00128E88
+    void (*m28)(C02* self, Vec02* pos, Vec02* vec); // 0xB0: told the position an attachment gave (func_001227B0)
+    void (*m29)(C02* self, Mat02* rot, Vec02* v);   // 0xB4: told the orientation (func_00122968, func_00129648; func_00128E88)
     void (*m2A)(C02* self, void* out);              // 0xB8: func_00128FD0
     void (*m2B)(C02* self);                         // 0xBC: func_00129780
     void (*m2C)(C02* self);                         // 0xC0: func_001660A0
@@ -85,10 +88,11 @@ struct C02 : C01 {
     f32 f80;                // 0x80: FLT_MAX at set-up
     f32 f84;                // 0x84: FLT_MAX at set-up
     s32 f88;                // 0x88: 0x0FFFFFFF at set-up
-    u8 pad8C[0x90 - 0x8C];
+    void* f8C;              // 0x8C
     s32 save90;             // 0x90: C03::mode450 kept by func_001BD790
     s32 save94;             // 0x94: C03::mode470 kept by func_001BD790
-    u8 pad98[0xA0 - 0x98];
+    s32 f98[1];             // 0x98
+    u8 pad9C[0xA0 - 0x9C];
     Vec02 vA0;              // 0xA0: v150 kept by slot 20
     Vec02 vB0;              // 0xB0: v160 kept by slot 20
     u64 savedC0;            // 0xC0: bits 0, 1: C03::flags538 bits 54, 55 kept by func_001BD790
@@ -118,26 +122,32 @@ struct C02 : C01 {
     u8* p218;               // 0x218: D_00260EA0
     u8* p21C;               // 0x21C: D_00260EB0
     u8* p220;               // 0x220: D_00260EC0
-    void* f224;             // 0x224: a 0xC0-byte record
+    Rec2195_224* f224;      // 0x224: a 0xC0-byte record (t2195.h)
     s32 tries;              // 0x228: as Actor6C::tries; func_0013DC38 tests it, func_00129DF8 clears the root's
     u8 sub22C[0x26C - 0x22C];   // 0x22C: a record func_00165728/165828/165920/165FE0 work on
     s32 f26C;               // 0x26C: the number of f1F8 entries
-    u8 pad270[0x278 - 0x270];
+    f32* f270;              // 0x270
+    u8 pad274[0x278 - 0x274];
     s32 f278;               // 0x278: func_001EECE0 calls slot 50 while it is set
     s32 elemCount;          // 0x27C
     Elem02** elems;         // 0x280: elemCount of them
-    void* f284;             // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
+    S1291D0* f284;          // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
     void* f288;             // 0x288: a 0x40-byte record
-    u8 pad28C[0x294 - 0x28C];
+    f32 f28C;               // 0x28C
+    f32 f290;               // 0x290
     s32 f294;               // 0x294: in the world's list at 0x78 instead of 0x54
     void* f298;             // 0x298
     s32 f29C;               // 0x29C
     void* f2A0;             // 0x2A0
     u8 pad2A4[0x2A8 - 0x2A4];
     f32 f2A8;               // 0x2A8
-    void* f2AC;             // 0x2AC: a 0x24-byte record
+    S1BE4D8* f2AC;          // 0x2AC: a 0x24-byte record
     u8 tint[4];             // 0x2B0: four bytes, set to 0x10 by func_00146340
-    u8 pad2B4[0x2C4 - 0x2B4];
+    u8 f2B4;                // 0x2B4
+    u8 pad2B5[0x2B8 - 0x2B5];
+    s32 f2B8;               // 0x2B8
+    void* f2BC;             // 0x2BC
+    void* f2C0;             // 0x2C0
     Key02* keys;            // 0x2C4: slot 16 resolves each and empties the list
     union {
         u64 flags;          // 0x2C8
@@ -148,6 +158,10 @@ struct C02 : C01 {
             u64 bits24 : 2; // set-up: 1 with a parent, 2 without
             u64 bits26 : 2; // set-up: 0 with a parent, 2 without
             u64 bits28 : 2; // func_00196410
+        };
+        struct {
+            u64 : 42;
+            u64 mark : 4;   // bits 42..45: a level func_00159F48 compares, a mark func_0015A4F0 numbers
         };
         struct {
             u32 flagsLo;    // 0x2C8

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "c6c.h"
+#include "globals.h"
+#include "s1dbbd8.h"
 
 // The script machine's built-in functions (the table D_00259958, which func_00119BB0 calls through,
 // lists them from func_00112698 on), their helpers and the collector's mark stacks: one source
@@ -16,7 +19,6 @@ struct Gc_259F38 {
     ~Gc_259F38();
 };
 
-
 struct Quad_113780 { s32 a, b, c, d; };
 
 void* func_0011B008(void* state);
@@ -24,30 +26,10 @@ extern void func_0011B538(void* state, s32 n);
 extern void func_0011B018(void* state, void* value);
 extern void func_0011B060(void* state, s32 mode);
 
-
-
 extern void* func_00113888(void* state, void* value, s32 mode);
 extern void* func_00113B60(void* state, void* value, void* rangeEnd);
 
-
-
-
-
-
-
-
-
-
-
 extern void func_0011B5F0(void* state, bool condition);
-
-
-
-
-
-
-
-
 
 struct Quad_113730 { s32 a, b, c, d; };
 
@@ -56,16 +38,12 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, s32 n);
 void func_0011B538(void* q, s32 n);
 
-
-
 struct Quad_1137D0 { s32 a, b, c, d; };
 
 void* func_0011B008(void* q);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, s32 n);
 void func_0011B538(void* q, s32 n);
-
-
 
 // NEAR: the second field load (0xC) goes to $v0, retail loads it into $v1 (xor operand register)
 
@@ -76,8 +54,6 @@ Quad_113820* func_0011B008(Quad_113820* q);
 void func_0011B018(void* dst, Quad_113820* src);
 void func_0011B060(Quad_113820* q, int mode);
 s32 func_0011B5F0(Quad_113820* q, s32 flag);
-
-
 
 struct Entry_113888 {
     s32 tag;
@@ -94,8 +70,6 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, s32 n);
 void func_0011B5F0(void* q, s32 flag);
 
-
-
 struct Quad_113AA8 { s32 a, b, c, d; };
 struct Ent_113AA8 { s32 kind; s32 val; };
 
@@ -103,8 +77,6 @@ s32 func_0011B008(Quad_113AA8* q);
 s32 func_0011B5F0(Quad_113AA8* q, s32 flag);
 void func_0011B018(void* dst, Quad_113AA8* src);
 void func_0011B060(Quad_113AA8* q, s32 mode);
-
-
 
 struct __attribute__((aligned(16))) Q_113B60 {
     s32 f0;
@@ -127,34 +99,19 @@ void func_0011B0A8(Q_113B60* a, Q_113B60* b);
 void func_0011B5F0(Q_113B60* q, s32 v);
 void func_0011B6C0(Q_113B60* q, Q_113B60* v);
 
+void func_00115CA0(void* self, s32 value, s32 mode);
 
 void func_00115CA0(void* self, s32 value, s32 mode);
 
-
+void func_00115CA0(void* self, s32 value, s32 mode);
 
 void func_00115CA0(void* self, s32 value, s32 mode);
 
-
+void func_00115CA0(void* self, s32 value, s32 mode);
 
 void func_00115CA0(void* self, s32 value, s32 mode);
 
-
-
 void func_00115CA0(void* self, s32 value, s32 mode);
-
-
-
-void func_00115CA0(void* self, s32 value, s32 mode);
-
-
-
-void func_00115CA0(void* self, s32 value, s32 mode);
-
-
-
-void func_00115CA0(void* self, s32 value, s32 mode);
-
-
 
 struct Entry_115EC8 {
     s32 tag;
@@ -174,8 +131,6 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 f32 func_00205778(f32 x, f32 y);
 void* func_0011B5B0(void* obj, f32 x);
-
-
 
 struct Node_116600 {
     u8 pad[8];
@@ -202,8 +157,6 @@ void func_0011B6C0(void* a, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Tmp_1166C0 {
     u8 bytes[0x10];
 };
@@ -220,8 +173,6 @@ void func_0011B788(void* obj, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Tmp_116740 {
     u8 bytes[0x10];
 };
@@ -237,8 +188,6 @@ void func_00189AF0(s32 a, void* b);
 void func_0011B788(void* obj, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
-
-
 
 struct Tmp_1167C0 {
     u8 bytes[0x10];
@@ -258,16 +207,12 @@ void func_0011B788(void* obj, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Quad_114018 { s32 a, b, c, d; };
 
 void func_0011B008(Quad_114018* q);
 void func_0011B5F0(Quad_114018* q, int flag);
 void func_0011B018(void* out, Quad_114018* q);
 void func_0011B060(Quad_114018* q, int mode);
-
-
 
 struct Quad_114288 { s32 a, b, c, d; };
 
@@ -276,11 +221,7 @@ void func_0011B5F0(Quad_114288* q, int flag);
 void func_0011B018(void* out, Quad_114288* q);
 void func_0011B060(Quad_114288* q, int mode);
 
-
-
 void func_001147B8(void* self, int a, void* b, void* c, int n);
-
-
 
 struct Vec_1158B8 { f32 x, y, z, w; };
 
@@ -292,8 +233,6 @@ void func_0011B060(void* self, s32 n);
 void func_0011B860(void* a, void* b);
 void func_0011B018(void* dst, void* src);
 
-
-
 struct Vec_116DC8 { f32 x, y, z, w; };
 struct Src_116DC8 { s32 pad0; f32* poly; s32 pad8; f32* range; };
 void* func_0011B008(void* self);
@@ -302,7 +241,6 @@ void* func_0011B5B0(void* obj, f32 x);
 void func_0011B060(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 
-
 struct Tmp_1171F0 { s32 w[4]; };
 struct Src_1171F0 { s32 pad0; f32 v; };
 
@@ -310,8 +248,6 @@ void* func_0011B008(void* self);
 void func_0011B570(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* self, s32 n);
-
-
 
 struct Tmp_117880 { s32 w[4]; };
 struct Obj_117880 { u8 pad[0x29C]; f32 value; };
@@ -322,8 +258,6 @@ void func_0011B9A8(void* out, void* src);
 void func_0011B060(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 
-
-
 struct Quad_114080 { s32 a, b, c, d; };
 struct Tag_114080 { s32 tag; };
 
@@ -331,8 +265,6 @@ void* func_0011B008(void* q);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, s32 n);
 void func_0011B5F0(void* q, s32 flag);
-
-
 
 struct Quad_1140E8 { s32 a, b, c, d; };
 struct Tag_1140E8 { s32 tag; };
@@ -342,8 +274,6 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, s32 n);
 void func_0011B5F0(void* q, s32 flag);
 
-
-
 struct Quad_114150 { s32 a, b, c, d; };
 struct Tag_114150 { s32 tag; };
 
@@ -352,27 +282,17 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, s32 n);
 void func_0011B5F0(void* q, s32 flag);
 
-
-
 // Calls the common builder with kind 0x63 and returns its first argument.
 void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
-
-
 
 // Calls the common builder with kind 0x64 and returns its first argument.
 void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
 
-
-
 // Calls the common builder with kind 0x65 and returns its first argument.
 void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
 
-
-
 // Calls the common builder with kind 0x66 and returns its first argument.
 void* func_00117910(void* ret, s32 a1, void* src, s32 a3, s32 kind);
-
-
 
 struct Handle_1141B8 { s32 word; u8 pad[12]; };
 
@@ -381,16 +301,12 @@ void func_0011B018(void* dst, Handle_1141B8* src);
 void func_0011B060(Handle_1141B8* h, int mode);
 void func_0011B5F0(Handle_1141B8* h, int flag);
 
-
-
 struct Handle_114220 { s32 word; u8 pad[12]; };
 
 void func_0011B008(Handle_114220* h);
 void func_0011B018(void* dst, Handle_114220* src);
 void func_0011B060(Handle_114220* h, int mode);
 void func_0011B5F0(Handle_114220* h, int flag);
-
-
 
 struct Entry_1156B0 { u8 pad0[4]; s32 index; u8 pad1[4]; s32 value; };
 struct Var_1156B0 { s32 tag; s32 value; u8 pad[8]; };
@@ -400,8 +316,6 @@ void func_0011B538(void* self, s32 n);
 void func_0011B018(void* out, void* src);
 void func_0011B060(void* self, s32 mode);
 void func_001C0C08(s32 index, s32 value);
-
-
 
 struct Entry_115710 { s32 tag; s32 word; };
 struct Var_115710 { s32 tag; f32 value; u8 pad[8]; };
@@ -414,8 +328,6 @@ void func_0011B7D0(void* self, void* ptr);
 void func_0011B018(void* out, void* src);
 void* func_0011B008(void* self);
 
-
-
 struct Entry_1157E0 { s32 tag; s32 word; };
 struct Var_1157E0 { s32 tag; f32 value; u8 pad[8]; };
 
@@ -427,8 +339,6 @@ void func_0011B818(void* self, void* ptr);
 void func_0011B018(void* out, void* src);
 void* func_0011B008(void* self);
 
-
-
 union Word_115B78 { s32 i; f32 f; };
 struct Entry_115B78 { s32 tag; Word_115B78 word; };
 struct Var_115B78 { s32 tag; f32 value; u8 pad[8]; };
@@ -438,8 +348,6 @@ void func_0011B018(void* out, void* src);
 void func_0011B060(void* self, s32 mode);
 void func_001F66F8(s32 v);
 
-
-
 struct Quad_1146E0 { s32 a, b, c, d; };
 struct Src_1146E0 { s32 pad0; Quad_1146E0* other; };
 
@@ -447,8 +355,6 @@ void func_0011B008(Quad_1146E0* q);
 void func_0011B018(void* dst, Quad_1146E0* src);
 void func_0011B060(Quad_1146E0* q, int mode);
 void func_0011B0A8(Quad_1146E0* a, Quad_1146E0* b);
-
-
 
 struct Quad_147B8 { s32 a, b, c, d; };
 struct Args_147B8 { s32 pad0; Quad_147B8* p; Quad_147B8 q; };
@@ -459,11 +365,7 @@ void func_0011B060(Quad_147B8* q, int mode);
 void func_0011B0A8(Quad_147B8* a, Quad_147B8* b);
 void func_0011B538(Quad_147B8* q, int n);
 
-
-
 void* func_001147B8(void* self, s32 u1, void* src, s32 u3, s32 mode);
-
-
 
 struct Src_116A88 { s32 pad0; void* p; };
 struct Tmp_116A88 { u8 bytes[0x10]; };
@@ -474,8 +376,6 @@ void func_0011B060(void* obj, s32 n);
 void func_0011B740(void* a, void* b);
 void* func_0011C508(void);
 void func_00188FD8(void* a, void* b);
-
-
 
 struct Src_116B08 { s32 pad0; void* p; };
 struct Tmp_116B08 { u8 bytes[0x10]; };
@@ -489,8 +389,6 @@ void func_0011B6C0(void* a, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Src_116C80 { s32 pad0; void* p; };
 struct Tmp_116C80 { u8 bytes[0x10]; };
 struct Vec_116C80 { u8 bytes[0x30]; };
@@ -503,8 +401,6 @@ void func_0011B788(void* obj, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Coef_116D20 { f32 a; f32 b; f32 c; };
 struct Src_116D20 { s32 pad0; Coef_116D20* coef; };
 struct Tmp_116D20 { u8 bytes[0x10]; };
@@ -515,8 +411,6 @@ void func_0011B9A8(void* out, void* src);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Quad_1148B8 { s32 a, b, c, d; };
 struct Node_1148B8 { s32 a, b; Node_1148B8* next; };
 struct Rec_1148B8 { s32 tag; Node_1148B8* head; };
@@ -525,8 +419,6 @@ void func_0011B008(Quad_1148B8* q);
 void func_0011B570(Quad_1148B8* q, int n);
 void func_0011B018(void* self, Quad_1148B8* q);
 void func_0011B060(Quad_1148B8* q, int mode);
-
-
 
 struct Quad_114950 { s32 a, b, c, d; };
 struct Node_114950 { s32 a, b; Node_114950* next; };
@@ -539,8 +431,6 @@ void func_0011B0A8(Quad_114950* a, Node_114950* b);
 void func_0011B018(void* self, Quad_114950* q);
 void func_0011B060(Quad_114950* q, int mode);
 
-
-
 struct Vec_116EA8 { f32 x, y, z, w; };
 
 void* func_0011C748();
@@ -550,8 +440,6 @@ void func_0011B060(void* v, int mode);
 void func_0011B018(void* dst, void* src);
 void func_0011B7D0(void* self, void* ptr);
 void func_001EB018(void* a0, f32 x, f32 y, f32 z, f32 w);
-
-
 
 struct Vec_116FE8 { f32 x, y, z, w; };
 struct Src_116FE8 { s32 pad0; void* p4; };
@@ -563,7 +451,6 @@ void* func_0011B5B0(void* obj, f32 x);
 void func_0011B060(void* v, int mode);
 void func_0011B018(void* dst, void* src);
 
-
 struct Quad_1143C8 { s32 a, b, c, d; };
 
 void func_0011B008(Quad_1143C8* q);
@@ -571,16 +458,12 @@ void func_0011B5F0(Quad_1143C8* q, int flag);
 void func_0011B018(void* out, Quad_1143C8* q);
 void func_0011B060(Quad_1143C8* q, int mode);
 
-
-
 struct Quad_114438 { s32 a, b, c, d; };
 
 void func_0011B008(Quad_114438* q);
 void func_0011B5F0(Quad_114438* q, int flag);
 void func_0011B018(void* out, Quad_114438* q);
 void func_0011B060(Quad_114438* q, int mode);
-
-
 
 struct Pair_115440 { s32 a; s32 b; };
 struct Frame_115440 { s32 w[4]; };
@@ -593,8 +476,6 @@ void func_0011B0A8(Frame_115440* a, Frame_115440* b);
 void func_0011B740(Frame_115440* a, f32* out);
 void* func_0011C508(void);
 
-
-
 union Cell_115C00 { f32 f; s32 i; };
 struct Tagged_115C00 { s32 tag; Cell_115C00 cell; };
 struct Pair_115C00 { Tagged_115C00 x; Tagged_115C00 y; };
@@ -606,8 +487,6 @@ void func_0011B060(Frame_115C00* f, s32 mode);
 void func_0011B5B0(Frame_115C00* f, f32 v);
 f32 func_001EAAE0(f32 a, f32 b);
 
-
-
 struct Tmp_117180 { s32 w[4]; };
 struct Src_117180 { s32 pad0; f32 v; };
 
@@ -615,8 +494,6 @@ void* func_0011B008(void* self);
 void func_0011B570(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* self, s32 n);
-
-
 
 struct Tmp_117260 { s32 w[4]; };
 struct Src_117260 { s32 pad0; f32 v; };
@@ -626,8 +503,6 @@ void func_0011B570(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* self, s32 n);
 
-
-
 struct Quad_1144A0 { s32 a, b, c, d; };
 
 void func_0011B008(Quad_1144A0* q);
@@ -635,16 +510,12 @@ void func_0011B5F0(Quad_1144A0* q, int flag);
 void func_0011B018(void* out, Quad_1144A0* q);
 void func_0011B060(Quad_1144A0* q, int mode);
 
-
-
 struct Quad_1145C8 { s32 a, b, c, d; };
 
 void func_0011B008(Quad_1145C8* q);
 void func_0011B5F0(Quad_1145C8* q, int flag);
 void func_0011B018(void* out, Quad_1145C8* q);
 void func_0011B060(Quad_1145C8* q, int mode);
-
-
 
 union Cell_115CA0 { f32 f; s32 i; };
 struct Tagged_115CA0 { s32 tag; Cell_115CA0 cell; };
@@ -659,14 +530,10 @@ void func_0011B018(void* dst, Frame_115CA0* src);
 void func_0011B060(Frame_115CA0* f, s32 mode);
 void func_0011B5B0(Frame_115CA0* f, f32 v);
 
-
-
 union Cell_115D48 { f32 f; s32 i; };
 struct Tagged_115D48 { s32 tag; Cell_115D48 cell; };
 
 void* func_00115CA0(void* self, Tagged_115D48* src, s32 index);
-
-
 
 union Num_1172C8 { s32 i; f32 f; };
 struct Value_1172C8 { s32 type; Num_1172C8 num; s32 pad8; s32 padC; };
@@ -677,10 +544,6 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, s32 mode);
 void func_0011B570(void* q, s32 v);
 
-
-
-
-
 struct Quad_114300 { s32 a, b, c, d; };
 struct Src_114300 { s32 flag; };
 
@@ -689,8 +552,6 @@ s32 func_0011B5F0(Quad_114300* q, s32 flag);
 void func_0011B018(void* dst, Quad_114300* src);
 void func_0011B060(Quad_114300* q, int mode);
 
-
-
 struct Quad_114360 { s32 a, b, c, d; };
 struct Src_114360 { s32 flag; };
 
@@ -698,8 +559,6 @@ void func_0011B008(Quad_114360* q);
 s32 func_0011B5F0(Quad_114360* q, s32 flag);
 void func_0011B018(void* dst, Quad_114360* src);
 void func_0011B060(Quad_114360* q, int mode);
-
-
 
 struct Quad_114638 { s32 a, b, c, d; };
 struct Node_114638 { u8 pad[8]; s32 val; };
@@ -712,8 +571,6 @@ void func_0011B6C0(Quad_114638* q, void* node);
 void func_0011B018(void* dst, Quad_114638* src);
 void func_0011B060(Quad_114638* q, int mode);
 
-
-
 struct Tmp_115398 { u8 bytes[0x10]; };
 
 void* func_0011B008(void* obj);
@@ -721,8 +578,6 @@ void func_0011B0A8(void* a, void* b);
 void func_0011A080(void* t, void* n, s32 c);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
-
-
 
 struct Quad_1169E8 { s32 a, b, c, d; };
 struct __attribute__((aligned(16))) Block_1169E8 { s32 w[16]; };
@@ -735,8 +590,6 @@ void* func_0011C618(void);
 void func_001884C0(void* p);
 void func_0011B788(Quad_1169E8* q, void* b);
 
-
-
 struct Quad_117E20 { s32 a, b, c, d; };
 
 void func_0011B008(Quad_117E20* q);
@@ -744,8 +597,6 @@ void func_0011B018(void* dst, Quad_117E20* src);
 void func_0011B060(Quad_117E20* q, int mode);
 s32 func_0011B8A8(Quad_117E20* q, s32 v);
 void* func_001925F0(void);
-
-
 
 struct Quad_114518 { s32 a, b, c, d; };
 struct Frame_114518 { Quad_114518 q; f32 out[3]; };
@@ -757,8 +608,6 @@ void func_0011B018(void* dst, Quad_114518* src);
 void func_0011B060(Quad_114518* q, int mode);
 s32 func_001EAC68(f32 a, f32 b, f32 c);
 s32 func_0011B5F0(Quad_114518* q, s32 flag);
-
-
 
 struct Quad_116520 { s32 a, b, c, d; };
 struct Value_116520 { s32 tag; f32 payload; };
@@ -774,8 +623,6 @@ void func_0011B740(Quad_116520* q, void* p);
 void* func_0011C508(void);
 void func_001EDEF0(void* a0, void* a1, void* a2, void* a3, f32 f);
 
-
-
 struct Quad_117080 { s32 a, b, c, d; };
 struct Value_117080 { s32 tag; f32 payload; };
 struct Src_117080 { s32 pad0; void* f4; Value_117080 f8; };
@@ -788,8 +635,6 @@ void func_0011B9A8(void* out, void* src);
 s32 func_001EB050(void* target, f32 scale);
 s32 func_0011B5F0(Quad_117080* q, s32 flag);
 
-
-
 struct Quad_117118 { s32 a, b, c, d; };
 struct In_117118 { s32 pad0; f32 f4; };
 
@@ -798,12 +643,8 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, int mode);
 void func_0011B570(void* q, s32 v);
 
-
-
 struct Quad_117BC8 { s32 a, b, c, d; };
 struct In_117BC8 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
-
-extern void* D_00275710;
 
 void func_0011B008(Quad_117BC8* q);
 s32 func_0011B8A8(Quad_117BC8* q, s32 v);
@@ -811,12 +652,8 @@ void func_0011B018(void* dst, Quad_117BC8* src);
 void func_0011B060(Quad_117BC8* q, int mode);
 s32 func_0015A418(void* host, s32 a1, s32 a2, s32 ctx);
 
-
-
 struct Quad_117D00 { s32 a, b, c, d; };
 struct In_117D00 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
-
-extern void* D_00275710;
 
 void func_0011B008(Quad_117D00* q);
 s32 func_0011B8A8(Quad_117D00* q, s32 v);
@@ -824,28 +661,19 @@ void func_0011B018(void* dst, Quad_117D00* src);
 void func_0011B060(Quad_117D00* q, int mode);
 s32 func_0015A418(void* host, s32 a1, s32 a2, s32 ctx);
 
-
-
 struct Quad_117E78 { s32 a, b, c, d; };
-
 
 s32 func_0011B008(Quad_117E78* q);
 void func_0011B018(void* dst, Quad_117E78* src);
 void func_0011B060(Quad_117E78* q, int mode);
 void func_0011B8A8(Quad_117E78* q, s32 v);
 
-
-
 struct Quad_117ED0 { s32 a, b, c, d; };
-
-extern s32 D_00261990;
 
 s32 func_0011B008(Quad_117ED0* q);
 void func_0011B018(void* dst, Quad_117ED0* src);
 void func_0011B060(Quad_117ED0* q, int mode);
 void func_0011B8A8(Quad_117ED0* q, s32 v);
-
-
 
 struct Quad_114740 { s32 a, b, c, d; };
 struct Inner_114740 { u8 pad[8]; s32 val; };
@@ -857,8 +685,6 @@ void func_0011B538(Quad_114740* q, s32 n);
 void func_0011B018(void* dst, Quad_114740* src);
 void func_0011B060(Quad_114740* q, int mode);
 
-
-
 struct Tmp_116978 { u8 bytes[0x10]; };
 struct __attribute__((aligned(16))) Quad_116978 { s32 a, b, c, d; };
 struct Src_116978 { s32 pad0; void* p; };
@@ -869,8 +695,6 @@ s32 func_0011B740(Tmp_116978* a, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Node_117360 { s32 tag; union { s32 i; f32 f; } v; Node_117360* next; Node_117360* child; };
 
 void* func_0011B008(void* q);
@@ -878,16 +702,12 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, int mode);
 s32 func_0011B0A8(Node_117360* a, void* b);
 
-
-
 struct Node_117478 { s32 tag; union { s32 i; f32 f; } v; Node_117478* next; Node_117478* child; };
 
 void* func_0011B008(void* q);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, int mode);
 s32 func_0011B0A8(Node_117478* a, void* b);
-
-
 
 // NEAR: the lui/lwc1 pair of D_0026185C uses $v1 in retail, $v0 here (scalar and array externs and a local float all tried).
 
@@ -900,8 +720,6 @@ void func_0011B018(void* dst, void* src);
 void func_0011B060(void* q, int mode);
 void func_0011B5B0(Quad_117610* q, f32 v);
 
-
-
 struct __attribute__((aligned(16))) Quad_115510 { f32 f[4]; };
 struct Node_115510 { s32 pad0; Quad_115510* f4; Node_115510* f8; };
 struct List_115510 { s32 pad0; Node_115510* f4; };
@@ -913,8 +731,6 @@ void func_0011B0A8(Quad_115510* a, Quad_115510* b);
 void func_0011B788(Quad_115510* q, Quad_115510* v);
 void func_0011B9A8(Quad_115510* out, Node_115510* n);
 void func_001884C0(Quad_115510* v);
-
-
 
 struct Quad_117668;
 void func_0011B008(Quad_117668* q);
@@ -929,7 +745,6 @@ struct TQ_117668 { s32 a; f32 f4; s32 c, d; };
 struct Node_117668 { s32 type; Node_117668* head; Node_117668* next; };
 struct Ent_117668 { s32 pad0; Node_117668* node; };
 struct Src_117668 { Ent_117668 e[1]; };
-struct Self_117668 { u8 pad0[0x2C]; void* f2C; u8 pad30[0x1EF8 - 0x30]; s32 f1EF8; };
 
 void func_0011B008(QP_117668* q);
 void func_0011B060(QP_117668* q, s32 mode);
@@ -948,8 +763,6 @@ void func_0011B9A8(TQ_117668* t, Src_117668* s);
 s32 func_0011A498(void* a, s32 b, s32 c, Quad_117668* d);
 void func_0011A400(TQ_117668* self, void* table, s32 key, Quad_117668* item);
 extern s32 D_00259DE8;
-
-
 
 struct __attribute__((aligned(16))) Quad_1149F0 { s32 a, b, c, d; };
 struct Pair_1149F0 { s32 a, b; };
@@ -972,12 +785,8 @@ void func_0011B018(void* dst, Quad_1149F0* src);
 void func_0011B060(Pair_1149F0* obj, s32 n);
 void func_0011B060(Quad_1149F0* obj, s32 n);
 
-
-
 struct Quad_117C48 { s32 a, b, c, d; };
 struct In_117C48 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
-
-extern void* D_00275710;
 
 s32 func_0011B008(Quad_117C48* q);
 void func_00117AF0(Quad_117C48* t, s32 a, void* b);
@@ -985,8 +794,6 @@ s32 func_0011B0A8(Quad_117C48* a, Quad_117C48* b);
 s32 func_0011B060(Quad_117C48* q, int mode);
 s32 func_0011B018(void* dst, Quad_117C48* src);
 s32 func_0015A198(void* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
-
-
 
 struct __attribute__((aligned(16))) Quad_1159B8 { s32 a, b, c, d; };
 struct Idx_1159B8 { s32 f0; s32 f4; Idx_1159B8* f8; };
@@ -1000,8 +807,6 @@ void func_0011B060(Quad_1159B8* q, s32 mode);
 void func_0011B5B0(Quad_1159B8* q, f32 x);
 void func_0011B740(Quad_1159B8* q, Arr_1159B8* c);
 
-
-
 struct Quad_117AF0 { u8 pad0[16]; };
 struct Node_117AF0 { u8 pad0[8]; Node_117AF0* next; };
 
@@ -1011,8 +816,6 @@ void func_0011B8A8(Node_117AF0* n, s32 v);
 void func_0011B538(Quad_117AF0* q, s32 n);
 void func_0011B018(void* dst, Quad_117AF0* src);
 void func_0011B060(Quad_117AF0* q, s32 mode);
-
-
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 void func_001EA408();
@@ -1032,8 +835,6 @@ struct Quad_117D78 { s32 a, b, c, d; };
 struct In_117D78 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
 struct Host_117D78;
 
-extern void* D_00275710;
-
 s32 func_0011B008(Quad_117D78* q);
 void func_00117AF0(Quad_117D78* t, s32 a, void* b);
 s32 func_0011B0A8(Quad_117D78* a, Quad_117D78* b);
@@ -1041,13 +842,9 @@ s32 func_0011B060(Quad_117D78* q, int mode);
 s32 func_0011B018(void* dst, Quad_117D78* src);
 s32 func_0015A198(Host_117D78* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
 
-
-
 struct Quad_117F28 { s32 a, b, c, d; };
 struct In_117F28 { u8 pad0[4]; s32 w4; s32 w8; s32 wc; };
 struct Host_117F28;
-
-extern void* D_00275710;
 
 s32 func_0011B008(Quad_117F28* q);
 void func_00117AF0(Quad_117F28* t, s32 a, void* b);
@@ -1055,8 +852,6 @@ s32 func_0011B0A8(Quad_117F28* a, Quad_117F28* b);
 s32 func_0011B060(Quad_117F28* q, int mode);
 s32 func_0011B018(void* dst, Quad_117F28* src);
 s32 func_0015A4F0(Host_117F28* host, s32 a1, s32 a2, void* ctx, s32 a4, void* a5);
-
-
 
 struct Quad_117910 { u8 b[16]; };
 struct Src_117910 { u8 pad0[4]; s32 f4; u8 pad8[4]; s32 fC; u8 f10[4]; };
@@ -1070,8 +865,6 @@ void* func_001C2238(Sub_117910* self, s32 a1, s32 a2, void* a3);
 void* func_001C2320(Sub_117910* self, s32 a1, s32 a2, void* a3);
 void* func_001C22B8(Sub_117910* self, s32 a1, s32 a2, void* a3);
 void* func_001C21A0(Sub_117910* self, s32 a1, s32 a2);
-
-
 
 struct Val_1151C0;
 struct Obj_1151C0;
@@ -1103,8 +896,6 @@ struct Obj_1151C0 {
 
 Val_1151C0 func_0011A080(Val_1151C0* expr, s32 c);
 
-
-
 struct Val_114D18;
 
 void func_0011B008(Val_114D18* v);
@@ -1133,8 +924,6 @@ struct Obj_114D18 {
 };
 
 Val_114D18 func_0011A080(Val_114D18* expr, s32 c);
-
-
 
 struct Val_114F48;
 
@@ -1168,18 +957,11 @@ struct Obj_114F48 {
 
 Val_114F48 func_0011A080(Val_114F48* expr, s32 c);
 
-
 // A count followed by that many values.
 struct IntList { s32 count; s32 items[1]; };
 
-
-
-
-
 // A record that keeps a stack of values at 0x708.
 struct StackAt708 { u8 pad[0x708]; s32 count; s32 items[1]; };
-
-
 
 struct Vec_1188F0 { f32 x, y, z, w; };
 struct Src_1188F0 { s32 pad0; void* p4; };
@@ -1191,8 +973,6 @@ void func_0011B060(void* self, s32 n);
 void func_0011B538(void* self, s32 k);
 void func_0011B018(void* dst, void* src);
 
-
-
 struct __attribute__((aligned(16))) Quad_119A58 { s32 w[4]; };
 struct Node_119A58 { s32 pad[2]; Node_119A58* next; };
 
@@ -1202,40 +982,22 @@ void func_0011B060(Quad_119A58* q, s32 mode);
 void func_0011B0A8(Quad_119A58* a, Quad_119A58* b);
 void func_0011A080(Quad_119A58* t, Node_119A58* n, s32 c);
 
-
-
 void* func_0011A4D8(void* a, s32 b, s32 c, void* d);
 void func_0011B0A8(void* a, void* b);
 
-
-
 void func_0018D778(void);
 
-
-
 struct Stack_11A790 { u8 pad[0xF0C]; s32 count; s32 items[1]; };
-
-
-
-
-
 
 extern u8 D_0025C2B0[];
 void* func_0011C240(void* p);
 void* func_001F5C0C(void* p, s32 value, s32 size);
 
-struct Rec_11B570 { s32 tag; s32 value; };
 void func_0011B418(void* self);
-
-struct Rec_11B700 { s32 tag; s32 value; };
-void func_0011B418(void* self);
-
-struct Obj_11B8A8 { s32 tag; void* ptr; };
 
 void func_0011B418(void* self);
 
-struct Node_11BE90 { s32 key; u8 data[8]; struct Node_11BE90* next; };
-struct Head_11BE90 { struct Node_11BE90* first; };
+void func_0011B418(void* self);
 
 void func_0011B0A8(void* a, void* b);
 
@@ -1257,28 +1019,6 @@ Node_11AF28* func_0011B008(Node_11AF28* self);
 
 void func_0011B060(void* self, s32 flags);
 
-struct Ext_11AF98 {
-    s32 w0;
-    s32 w1;
-    s32 w2;
-    s32 w3;
-    s32 w4;
-};
-
-struct Node_11B008 {
-    s32 kind;
-    s32 value;
-    Node_11B008* child;
-};
-
-struct Node_11B018 {
-    s32 kind;
-    s32 value;
-    Node_11B018* child;
-};
-
-void func_0011B4A8(Node_11B018* node);
-
 void func_0011B418(void* self);
 void func_0018D778(void* self);
 
@@ -1289,15 +1029,6 @@ extern u8 D_0025C2B0[];
 extern u8 D_0025C2D0[];
 
 void func_0011C2A0(void* p);
-
-
-
-
-
-
-
-
-
 
 extern u8 D_0025C2D0[];
 
@@ -1328,8 +1059,6 @@ struct Frame_1180C0 { Quad_1180C0 q; Quad_1180C0 t; s32 a; s32 b; };
 union Raw_1180C0 { s32 i; f32 f; };
 struct In_1180C0 { u8 pad0[4]; s32 w4; s32 kind; Raw_1180C0 raw; };
 
-extern void* D_00275710;
-
 void func_0011B008(Quad_1180C0* q);
 void func_0018D608(void);
 void func_0018D6F0(void);
@@ -1338,8 +1067,6 @@ void func_00117AF0(Quad_1180C0* t, s32 a, s32 b);
 void func_0011B0A8(Quad_1180C0* a, Quad_1180C0* b);
 void func_0011B060(Quad_1180C0* q, int mode);
 void func_0011B018(void* dst, Quad_1180C0* src);
-
-
 
 struct Quad_1183B8 { s32 a, b, c, d; };
 struct Frame_1183B8 { Quad_1183B8 q; Quad_1183B8 t; };
@@ -1350,8 +1077,6 @@ void func_0011B0A8(Quad_1183B8* a, Quad_1183B8* b);
 void func_0011B060(Quad_1183B8* q, int mode);
 void func_0011B018(void* dst, Quad_1183B8* src);
 
-
-
 struct Quad_118458 { s32 a, b, c, d; };
 struct Frame_118458 { Quad_118458 q; Quad_118458 t; };
 
@@ -1361,13 +1086,10 @@ void func_0011B0A8(Quad_118458* a, Quad_118458* b);
 void func_0011B060(Quad_118458* q, int mode);
 void func_0011B018(void* dst, Quad_118458* src);
 
-
-
 struct Blob_119FA0 { s32 w[4]; };
 struct Inner_119FA0 { u8 pad0[4]; s32 id; };
 struct Mid_119FA0 { u8 pad0[8]; Inner_119FA0* inner; };
 struct Outer_119FA0 { u8 pad0[4]; Mid_119FA0* mid; };
-
 
 void func_0011B008(Blob_119FA0* b);
 void func_0011B018(void* dst, Blob_119FA0* src);
@@ -1378,11 +1100,7 @@ void func_001C13E8(void* dst, s32 id, u8* ctx);
 void* func_001C1390(s32 id, u8* ctx);
 void func_0011A338(void* list, void* value);
 
-
-
 struct Slot_11A328 { s32 flag; s32 value; };
-
-
 
 struct Blob_11A358 { s32 w[4]; };
 struct Node_11A358 { s32 kind; u8 body[8]; Node_11A358* next; };
@@ -1395,8 +1113,6 @@ s32 func_0011B0A8(u8* a, void* b);
 void func_0011B538(Blob_11A358* b, s32 n);
 s32 func_0011C498(void);
 
-
-
 struct Blob_11A400 { s32 w[4]; };
 
 void func_0011B008(Blob_11A400* b);
@@ -1406,22 +1122,12 @@ void func_0011B0A8(void* a, void* b);
 void func_0011B538(Blob_11A400* b, s32 n);
 void* func_0011A4D8(void* table, void* key, s32 mode);
 
-
-
 struct Stack_11A7D8 { u8 pad[0x1310]; s32 count; s32 items[1]; };
-
-
-
-struct Pair_11B0A8 { s32 a; s32 b; };
 
 void func_0011B418(void* self);
 void func_0011B4A8(void* self);
 
-struct Cell_11B538 { s32 value; };
-
 void func_0011B418(void* self);
-
-struct Tagged_11B5B0 { s32 tag; f32 value; };
 
 void func_0011B418(void* self);
 
@@ -1444,8 +1150,6 @@ void func_0011B788(Quad_118608* q, void* b);
 void func_0011B018(void* dst, Quad_118608* src);
 void func_0011B060(Quad_118608* q, int mode);
 
-
-
 struct Quad_118720 { s32 a, b, c, d; };
 struct Frame_118720 { Quad_118720 q; s32 n; s32 pad[3]; };
 struct In_118720 { u8 pad0[4]; s32 f4; u8 pad8[4]; s32 fC; };
@@ -1457,8 +1161,6 @@ void func_001BF718(void* slot);
 void func_0011B018(void* dst, Quad_118720* src);
 void func_0011B060(Quad_118720* q, int mode);
 
-
-
 // A node of a keyed list: the key, a value whose address is returned, and the next node at 0xC.
 struct Node_11A4D8 { s32 key; s32 value; s32 pad8; struct Node_11A4D8* next; };
 
@@ -1469,8 +1171,6 @@ struct Tree_11A4D8 {
     struct Node_11A4D8* head;
     s32 flag;
 };
-
-
 
 // The same tree node as func_0011A4D8: count and child pointers, a list head at 0x14, a flag at 0x18.
 struct Node_11A5B0;
@@ -1485,12 +1185,8 @@ void func_0018D800(void* dst, void* src, s32 bytes);
 s32 func_0011C498(void);
 void func_0011C418(void* a, void* b, void* c);
 
-
-
-struct Flag_11B5F0 { s32 tag; s32 flag; };
 void func_0011B418(void* self);
 
-struct Obj_11B640 { s32 tag; void* ptr; };
 void func_0011B418(void* self);
 
 struct Vec_118850 { f32 x, y, z, w; };
@@ -1504,47 +1200,26 @@ void func_0011B018(void* dst, void* src);
 
 extern u8 D_00262C70[];
 
-
-
 extern u8 D_0025C270[];
 void* func_0011C240(void* p);
 
-
-
-
-
 struct Stack_11A7B8 { u8 pad[0x1310]; s32 count; s32 items[1]; };
 
-
-
-struct Tag_11B680 { s32 tag; s32 value; };
 void func_0011B418(void* self);
-
-struct Tagged_11B8E8 { s32 tag; s32 value; };
 
 void func_0011B418(void* self);
 
-struct Quad_11B928 { s32 a, b, c, d; };
-struct Scaled_11B928 { s32 tag; f32 scale; };
-
-void func_0011B008(Quad_11B928* q);
 void func_0011B018(void* dst, void* src);
-void func_0011B060(Quad_11B928* q, int mode);
-void func_0011B570(Quad_11B928* q, s32 n);
 
 // A 128-bit value, copied as one quadword.
 typedef u64 Quad_118D10 __attribute__((mode(TI)));
 
 // Copies the quadword at src into out and returns out.
 
-
 // A 128-bit value, stored as one quadword.
 typedef u64 Quad_118D20 __attribute__((mode(TI)));
 
 // Stores the quadword v into out and returns out.
-
-
-
 
 struct Counters_11A6A8 {
     s32 count;
@@ -1552,25 +1227,16 @@ struct Counters_11A6A8 {
     s32 count2;
 };
 
-
-
-struct Rec_11B6C0 { s32 tag; s32 value; };
 void func_0011B418(void* self);
 
-struct Rec_11B740 { s32 tag; s32 value; };
 void func_0011B418(void* self);
 s32 func_0011C580(u32 addr);
 
 struct Obj_0011A708 { u8 pad[0x504]; s32 count; s32 values[1]; };
 
-
 struct Obj_0011A728 { u8 pad[0x708]; s32 count; s32 values[1]; };
 
-
 struct Obj_0011A770 { u8 pad[0xF0C]; s32 count; s32 values[1]; };
-
-
-
 
 s32 func_0011C690(u32 value);
 
@@ -1590,8 +1256,6 @@ void func_0011B740(void* a, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Tmp_118580 { u8 bytes[0x10]; };
 struct Src_118580 { s32 pad0; void* a; s32 pad2; s32 b; s32 pad4; void* c; };
 
@@ -1602,8 +1266,6 @@ void func_0011B740(void* a, void* b);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Tmp_1187E8 { s32 w0; s32 w1; s32 w2; s32 w3; };
 struct Src_1187E8 { s32 pad0; void* a; };
 
@@ -1612,8 +1274,6 @@ void func_001BF788(void* self, s32 n);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
 
-
-
 struct Tmp_118D48 { u8 bytes[0x10]; };
 struct Src_118D48 { s32 pad0; s32 a; };
 
@@ -1621,8 +1281,6 @@ void* func_0011B008(void* obj);
 s32 func_0011A498(void* a, s32 b, s32 c, void* d);
 void func_0011B018(void* dst, void* src);
 void func_0011B060(void* obj, s32 n);
-
-
 
 struct __attribute__((aligned(16))) Quad_119AF8 { s32 w[4]; };
 struct Node_119AF8 { s32 pad[2]; Node_119AF8* next; };
@@ -1635,8 +1293,6 @@ void func_0011A080(Quad_119AF8* t, Node_119AF8* n, s32 c);
 void func_0011B0A8(Quad_119AF8* a, Quad_119AF8* b);
 void func_0011B060(Quad_119AF8* q, s32 mode);
 void func_0011B018(void* dst, Quad_119AF8* src);
-
-
 
 // EXACT: callee 0011B008 declared s32 and called as statement.
 
@@ -1651,8 +1307,6 @@ void func_0011B538(Quad_118DB8* q, s32 n);
 void func_0011A080(Quad_118DB8* t, Node_118DB8* n, s32 c);
 void* func_0011A400(void* self, s32 table, void* key, void* item);
 
-
-
 // EXACT: func_0011B008 declared s32, called as statement.
 
 struct __attribute__((aligned(16))) Quad_118E80 { s32 w[4]; };
@@ -1665,8 +1319,6 @@ void func_0011B0A8(Quad_118E80* a, Quad_118E80* b);
 void func_0011B538(Quad_118E80* q, s32 n);
 void func_0011A080(Quad_118E80* t, Node_118E80* n, s32 c);
 void* func_0011A358(void* self, s32 owner, void* kind, void* body);
-
-
 
 // EXACT: func_0011B008 declared s32, called as statement.
 
@@ -1682,8 +1334,6 @@ void func_0011B060(Quad_119878* q, s32 mode);
 void func_0011B538(Quad_119878* q, s32 k);
 void func_0011B018(void* dst, Quad_119878* src);
 
-
-
 // EXACT: func_0011B008 declared s32, called as statement.
 
 struct __attribute__((aligned(16))) Quad_119970 { s32 w[4]; };
@@ -1698,10 +1348,7 @@ void func_0011B700(Quad_119970* r, Rec_119970* value);
 void func_0011B018(void* dst, Quad_119970* src);
 void func_0011B060(Quad_119970* q, s32 mode);
 
-
-
 struct Node_11BD28 { s32 key; Value_11B008 value; Node_11BD28* next; };
-struct List_11BD28 { Node_11BD28* head; };
 
 void func_0011B008(Value_11B008* v);
 void func_0011B018(Value_11B008* dst, Value_11B008* src);
@@ -1733,8 +1380,6 @@ struct Cursor_119218 {
 Tmp_119218 func_0011A080(void* node, void* extra);
 void func_0011B0A8(void* a, const Tmp_119218& b);
 
-
-
 struct Cursor_119128 { s32 tag; s32 value; s32 pad[2]; };
 struct Node_119128 { s32 f0; s32 f4; Node_119128* next; };
 struct Holder_119128 { s32 f0; s32 f4; Node_119128* head; };
@@ -1745,8 +1390,6 @@ void func_0011A080(void* out, void* node, void* extra);
 void func_0011B0A8(void* a, void* b);
 void func_0011B060(void* p, s32 flags);
 void func_0011B018(void* out, void* p);
-
-
 
 struct Link_1194A8 { s32 f0; Link_1194A8* f4; Link_1194A8* f8; };
 struct __attribute__((aligned(16))) Quad_1194A8 { s32 type; Link_1194A8* head; s32 w2; s32 w3; };
@@ -1761,8 +1404,6 @@ void func_0011B0A8(void* a, void* b);
 void func_0011B060(void* q, s32 mode);
 void func_00113AA8(void* a, s32 b, void* c, void* d);
 
-
-
 // Fixed by merging the two flag tests into one "kind != 0x1B || p != 0".
 
 struct __attribute__((aligned(16))) Quad_119310 { s32 kind; void* p; s32 w[2]; };
@@ -1775,10 +1416,7 @@ void func_0011B0A8(Quad_119310* a, Quad_119310* b);
 void func_0011B538(Quad_119310* q, s32 n);
 void func_0011A080(Quad_119310* t, Node_119310* n, s32 c);
 
-
-
 struct Quad_118F48 { s32 a, b, c, d; };
-struct Obj_118F48 { u8 pad[4]; Quad_118F48* f4; };
 struct Frame_118F48 { Quad_118F48 q; Quad_118F48 t; };
 
 void func_0011B008(Quad_118F48* q);
@@ -1790,8 +1428,6 @@ void func_0011A080(Quad_118F48* t, void* n, s32 c);
 void func_001E1F10(const char* x);
 s32 func_00113730(Quad_118F48* t, s32 mode, void* a, s32 c);
 
-
-
 struct Ent_11AB58;
 struct Sub_11AB58 { s32 type; Ent_11AB58* ent; };
 struct Node_11AB58 { Ent_11AB58* f0; Sub_11AB58 sub; Node_11AB58* fC; };
@@ -1802,8 +1438,6 @@ struct World_11AB58 {
     s32 n504;
     List_11AB58* lists[1];
 };
-struct Item_11AB58 { void* fn; u8 p[8]; Ent_11AB58* fC; Item_11AB58* f10; };
-struct Glob_11AB58 { u8 p[0x1EC8]; Item_11AB58* f1EC8; };
 
 extern u8 D_0025C250[];
 extern u8 D_0025C270[];
@@ -1821,8 +1455,6 @@ void func_0011A7B8(World_11AB58* w, Ent_11AB58* e);
 void func_0011A850(World_11AB58* w);
 void func_001834A0(void* a);
 
-
-
 struct __attribute__((aligned(16))) Quad_1196C8 { s32 w[4]; };
 struct Node_1196C8 { s32 kind; Node_1196C8* f4; Node_1196C8* f8; };
 
@@ -1835,32 +1467,14 @@ void* func_0011A630(void);
 void func_0011A358(Quad_1196C8* t, void* owner, Node_1196C8* kind, Quad_1196C8* body);
 void func_0011A328(void* slot, void* c);
 
-
-
-struct Val_11B0F8 {
-    s32 type;
-    union {
-        s32 i;
-        f32 f;
-        f32* v;
-        void* p;
-    } u;
-};
-
 s32 func_001F59C4(void* a, void* b, s32 n);
 
 struct Arg_11B418;
-struct Op_11B418 { s32 kind; Arg_11B418* arg; };
 void func_0011C5B0(Arg_11B418* a);
 void func_0011C6C0(Arg_11B418* a);
 void func_0011C7F0(Arg_11B418* a);
 void func_0011C900(Arg_11B418* a);
 void func_0011CA20(Arg_11B418* a);
-
-struct Cmd_11B4A8 {
-    s32 op;
-    u32 arg;
-};
 
 struct Tmp_11A080 { s32 w[4]; };
 struct Inner_11A080 { s32 type; s32 f4; s32 f8; };
@@ -1887,32 +1501,17 @@ void func_00119AF8(Tmp_11A080* o, In_11A080* a, s32 b);
 void func_00119BB0(Tmp_11A080* o, In_11A080* a, s32 b);
 void func_00119FA0(Tmp_11A080* o, In_11A080* a, s32 b);
 
-
-
-struct Val_11B258 { s32 tag; void* val; };
 struct __attribute__((aligned(16))) Q16_11B258 { s32 w[4]; };
-struct __attribute__((aligned(16))) Q64_11B258 { Q16_11B258 q[4]; };
 struct __attribute__((packed)) D8_11B258 { s32 a, b; };
-struct D12_11B258 { D8_11B258 a; s32 c; };
-struct Node_11B258 { s32 pad; };
 
-void func_0011AEB8(Val_11B258* src, Node_11B258* dst, void* arg);
 void* func_0011C748(void);
 void* func_0011C858(void);
 void* func_0011C968(void);
 s32 func_0011C580(Q16_11B258* p);
-s32 func_0011C690(Q64_11B258* p);
 s32 func_0011C7C0(Q16_11B258* p);
 s32 func_0011C8D0(D8_11B258* p);
-s32 func_0011C9E0(D12_11B258* p);
-void func_0011AF98(Val_11B258* src, Node_11B258* dst, void* arg);
 
 struct Rd_11BA28;
-struct Node_11BA28 {
-    s32 kind;
-    s32 w4;
-    Node_11BA28* child;
-};
 
 extern s32 D_00275714;
 
@@ -1921,18 +1520,6 @@ void func_00137BE0(Rd_11BA28* r);
 s32 func_00137D78(Rd_11BA28* r);
 f32 func_00137DF8(Rd_11BA28* r);
 s32 func_00137C40(Rd_11BA28* r);
-void func_0011B570(Node_11BA28* n, s32 v);
-void func_0011B5B0(Node_11BA28* n, f32 v);
-void func_0011B5F0(Node_11BA28* n, s32 v);
-void func_0011B8A8(Node_11BA28* n, s32 v);
-void func_0011B640(Node_11BA28* n, s32 v);
-void func_0011B680(Node_11BA28* n, s32 v);
-void func_0011B740(Node_11BA28* n, f32* p);
-void func_0011B788(Node_11BA28* n, f32* p);
-void func_0011B7D0(Node_11BA28* n, f32* p);
-void func_0011B818(Node_11BA28* n, f32* p);
-void func_0011B860(Node_11BA28* n, f32* p);
-void func_0011B6C0(Node_11BA28* n, Node_11BA28* c);
 
 struct V_119BB0 { s32 type; void* p; };
 struct Node_119BB0 { s32 f0; void* f4; Node_119BB0* f8; };
@@ -1955,8 +1542,6 @@ void func_0011A358(V_119BB0* ret, void* s, void* x, V_119BB0* arg);
 void func_00119A58(V_119BB0* ret, s32 v, void* s);
 extern Ent_119BB0 D_00259958[];
 
-
-
 struct __attribute__((aligned(16))) Quad_119030 { s32 w[4]; };
 struct Node_119030 { s32 pad0; Node_119030* f4; Node_119030* f8; };
 
@@ -1966,8 +1551,6 @@ void func_0011B060(Quad_119030* q, s32 mode);
 void func_0011B0A8(Quad_119030* a, Quad_119030* b);
 void func_0011B538(Quad_119030* q, s32 n);
 void func_0011A080(Quad_119030* t, Node_119030* n, s32 c);
-
-
 
 struct __attribute__((aligned(16))) Quad_118198 { s32 type; struct Node_118198* head; s32 w2; s32 w3; };
 struct Ent_118198;
@@ -1999,8 +1582,6 @@ s32 func_001419E8(Quad_118198* z, s32 a, s32 b, s32 c, Ent_118198** d, Hit_11819
 void func_0011B8A8(Node_118198* n, Ent_118198* e);
 void func_0011B740(Node_118198* n, Quad_118198* q);
 void func_0011B6C0(void* q, Node_118198* n);
-
-
 
 struct Stk_11A850;
 
@@ -3727,12 +3308,12 @@ void* func_00117668(void* ret, s32 limit, Src_117668* src)
             } while (n);
         }
     }
-    func_0011A498(((Self_117668*)D_00275710)->f2C, ((Self_117668*)D_00275710)->f1EF8, 0, &r);
+    func_0011A498(D_00275710->f2C, D_00275710->f1EF8, 0, &r);
     if (r.a == 0x1E) {
         a->next = (Node_117668*)r.b;
     }
     func_0011B6C0(&r, a);
-    func_0011A400(&t, ((Self_117668*)D_00275710)->f2C, ((Self_117668*)D_00275710)->f1EF8, &r);
+    func_0011A400(&t, D_00275710->f2C, D_00275710->f1EF8, &r);
     func_0011B060(&t, 2);
     func_0011B018(ret, &q);
     func_0011B060(&r, 2);
@@ -3923,7 +3504,7 @@ void* func_00117ED0(void* self)
 {
     Quad_117ED0 q;
     s32 r = func_0011B008(&q);
-    func_0011B8A8(&q, D_00261990);
+    func_0011B8A8(&q, (s32)D_00261990);
     func_0011B018(self, &q);
     func_0011B060(&q, 2);
     return self;
@@ -5090,9 +4671,9 @@ void func_0011AB58(World_11AB58* w) {
             n = n->fC;
         }
     }
-    for (Item_11AB58* it = ((Glob_11AB58*)D_00275710)->f1EC8; it; it = it->f10) {
-        if (it->fn == (void*)func_001834A0) {
-            Ent_11AB58* e = it->fC;
+    for (S1DBBD8* it = (S1DBBD8*)D_00275710->f1EC8; it; it = it->next) {
+        if ((void*)it->fn == (void*)func_001834A0) {
+            Ent_11AB58* e = (Ent_11AB58*)it->p0C;
             if (e && func_0011C3C8(e)) {
                 func_0011C3F0(e);
                 func_0011A770(w, e);

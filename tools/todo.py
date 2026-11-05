@@ -35,7 +35,8 @@ What stops a function from being matched, the blocker column:
   assembler left after a return; no C function can produce it. A listing that ends in a tail
   jump to another function (Sony's 2.9-ee writes them), a branch back into itself or a call
   that never returns is a whole function, not a fragment
-- mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C
+- mmi: 128-bit multimedia instructions (pextlw, pcpyld, ...): not plain C. por and pref are not
+  counted: the compiler emits them (COMPILER_EMITS)
 - nonc: max.s, min.s: no plain C form with the files' flags. A bare sqrt.s is not one: it is
   written with include/fpu.h's Fpu::Sqrt (AGENTS.md); `break 0, 7` after a division is the
   compiler's divide-by-zero trap, plain C, not system code
@@ -89,6 +90,11 @@ DIVIDE_TRAP = "0, 7"  # `break 0, 7` after a division: the compiler's divide-by-
 # __builtin_sqrtf adds a NaN check and a call to sqrtf that retail never has.)
 NONC = {"max.s", "min.s"}
 MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu1|madd1|maddu1|mfsa|mtsa)")
+# Multimedia instructions the compiler is known to emit: six functions that contain one are
+# matched in C (por is the 128-bit |, which also moves a 128-bit value between registers), so
+# seeing it proves nothing. Add an instruction here only with such a function; a function in
+# config/us/original_asm.tsv that src/ defines is an error (tests/test_tools.py).
+COMPILER_EMITS = {"por", "pref"}
 
 
 def window_of(addr):
@@ -255,7 +261,7 @@ def tags_of(lines, kind):
             tags.add("float")
         if op in NONC:
             tags.add("nonc")
-        if MMI.match(op) and op != "pref":
+        if MMI.match(op) and op not in COMPILER_EMITS:
             tags.add("mmi")
     if "calls" not in tags:
         tags.add("leaf")

@@ -35,12 +35,12 @@ void func_00136408(Entry_00136408_eu* self, const char* name)
     s0 = 4;
     scale = 1.0f;
     if ((r = self->f570) == s0) scale = 0.8f;
-    func_0015C8B8(self->f04, scale, scale);
+    func_0015C8B8((V24A2*)self->f04, scale, scale);
     func_eu_0015DCB8(buf, self->name08, self->f04, 0);
     lim = 280.0f;
     if ((r = self->f570) == s0) lim = 380.0f;
     func_eu_0015E4A8(buf, self->list408, lim);
-    func_0015C900(self->f04);
+    func_0015C900((V24A2*)self->f04);
     goto tail;
 fail:
     self->name08[0] = 0;

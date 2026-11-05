@@ -53,7 +53,7 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
     self->lastTenth = tenth;
     self->lastSec = sec;
 
-    if ((*(Clock_00261858*)&D_00261858).on != 0 && self->mode == 2 && (*(s32*)D_00262C68 & 2))
+    if (D_00261858.running != 0 && self->mode == 2 && (*(s32*)D_00262C68 & 2))
     {
         s32 warn = 0;
         s32 end = 0;
@@ -107,7 +107,7 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
     else
     {
         s32 s = (s32)t;
-        if (s != sec || (self->mode == 1 && (*(Clock_00261858*)&D_00261858).now - self->start <= (*(Clock_00261858*)&D_00261858).wait))
+        if (s != sec || (self->mode == 1 && D_00261858.time - self->start <= D_00261858.dt))
         {
             hi = s / 60;
             lo = s % 60;

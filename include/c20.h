@@ -9,6 +9,8 @@
 
 #include "c03.h"
 
+struct S1B6290;     // a handle func_001B6290 makes (s1b6290.h)
+
 // The object at the 0x200 field of what C23 keeps at 0x734: a flag at 0x1C and one at 0x4C.
 struct Held23 {
     void** vtbl;            // 0x00
@@ -106,7 +108,7 @@ struct C23 : C21 {
     s32 count768;           // 0x768
     void* items76C[8];      // 0x76C
     s32 f78C;               // 0x78C
-    u8 pad790[0x7B0 - 0x790];
+    void* f790[8];          // 0x790
     s32 f7B0;               // 0x7B0
     u8 pad7B4[0x7C0 - 0x7B4];
 };
@@ -122,7 +124,7 @@ struct Alloc24 {
 struct C24 : C21 {
     u8 pad6C0[4];
     void* x6C4;             // 0x6C4: loaded (D_00264230)
-    void* x6C8;             // 0x6C8
+    S1B6290* x6C8;          // 0x6C8: a handle func_001B6290 makes for x6C4
     f32 f6CC;               // 0x6CC
     s32 f6D0;               // 0x6D0
     f32 f6D4;               // 0x6D4

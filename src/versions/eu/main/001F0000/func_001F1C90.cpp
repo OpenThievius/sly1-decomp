@@ -5,7 +5,7 @@ struct Obj_1F1C90_eu {
     VFn_1F1C90* vtbl;
     u8 pad0[0x56C - 4];
     s32 f56C;
-    Sub_1F1C90* f570;
+    C67* f570;
     u8 pad1[0x58C - 0x574];
     f32 f58C;
     f32 f590;
@@ -37,29 +37,29 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
         func_001F1590(self->f570, r, 2);
         self->f590 = 1.0f;
         self->f58C = 1.0f;
-        Anim_1F1C90* an = self->f570->f2E4;
+        Anim_1F1C90* an = (Anim_1F1C90*)self->f570->f2E4;
         if (an != 0) {
             func_001AA8B0(self, an->f34);
         }
-        Glob_1F1C90* g = (Glob_1F1C90*)D_002623C0;
+        G27C220* g = D_002623C0;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
             func_001BED48();
         }
         self->vtbl[14](self);
         func_0016E0F0(1);
-        func_0016EC88(D_00262C70);
+        func_0016EC88(&D_00262C70);
         func_001E96F8(D_00275BC0, 7);
     } else {
         self->vtbl[15](self);
         if (self->f570->f560 == 0) {
             func_001F1610(self->f570);
-            Anim_1F1C90* an = self->f570->f2E8;
+            Anim_1F1C90* an = (Anim_1F1C90*)self->f570->f2E8;
             if (an != 0) {
                 func_001AA8C0(self, an->f34);
             }
             func_0016E118(1);
             func_001E96F8(D_00275BC0, 3);
-            Glob_1F1C90* g = (Glob_1F1C90*)D_002623C0;
+            G27C220* g = D_002623C0;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
                 func_001BED70();
             }

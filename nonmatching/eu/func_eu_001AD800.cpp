@@ -12,7 +12,7 @@ struct Vt_eu_1AD800 {
     s16 o38; u8 padD[2]; void (*end)(void* at, s32 a, void* d);
 };
 struct Font_eu_1AD800 { u8 pad0[0x4C]; Vt_eu_1AD800* vt; };
-struct Local_eu_1AD800 { f32 x; f32 y; u8 pad0[8]; PackedWord_001AB710 w10; u8 pad1[0xC]; };
+struct Local_eu_1AD800 { f32 x; f32 y; u8 pad0[8]; T217D_Word w10; u8 pad1[0xC]; };
 struct Label_eu_1AD800 {
     u8 pad0[4]; Font_eu_1AD800* font; u16 text[1];
     u8 pad1[0x518 - 0xA]; s32 f518; u8 pad2[4]; void* f520;

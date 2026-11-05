@@ -4,13 +4,10 @@
 
 #include "list_iter.h"
 #include "c30.h"
+#include "c05.h"
 #include "c6c.h"
-
-// An object of another class (the player): the state at +0x2220.
-struct Global_001AEFA0 { u8 pad0[0x2220]; s32 state; };
-
-struct Dev_001B0578;
-extern Dev_001B0578* D_00262E10;
+#include "globals.h"
+#include "s124df8.h"
 
 void func_001B7968(C03* self);
 void func_001B93F8(C03* self);
@@ -19,8 +16,7 @@ Node30* func_00129CA8(C30* self);
 // passes it (retail's frame shows the argument live).
 void func_001AEFA0(C30* self, f32 dt);
 
-struct Entry_2744B8 { s32 a; s32 b; s32 c; };
-Entry_2744B8 D_002744B8[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
+S124DF8 D_002744B8[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
 
 void func_001BAC30(C03* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -28,7 +24,6 @@ void func_00124DF8(void* self, s32 n, void* table);
 s32 func_001833F0(void* key, s32 item);
 s32 func_001300E8(void* key, s32 item);
 
-extern u8* D_00275710;
 extern f32 D_00261858[];
 s32 D_002744D0 = 0;
 
@@ -42,14 +37,6 @@ void* func_00183058(void* a, void* b, void* c);
 s32 func_001AEE50(C30* self, void* key);
 s32 func_00160D10();
 
-// The player (D_00262E10) as func_001AFAF8 reads it past C03's fields.
-struct Player_1AFAF8 {
-    u8 pad0[0x2220];
-    s32 x2220;
-    u8 pad4[0x239C - 0x2224];
-    s32 x239C;
-};
-
 extern f32 D_0026185C[];
 void func_00123AB0(void* object, s32 mode);
 void func_001837E0(C02* self, s32 a, s32 b, s32 c);
@@ -61,8 +48,7 @@ struct Rec_1B0EE0 {
     f32 f554;
 };
 
-struct Item_2744D8 { u32 flags, id, off8; };
-Item_2744D8 D_002744D8[2] = {
+S124DF8 D_002744D8[2] = {
     { 2, 0x28C, 0x5D0 },
     { 2, 0x28D, 0x5D4 },
 };
@@ -85,13 +71,6 @@ struct Cfg_1B0360 {
     f32 f8;
 };
 
-struct Obj_001B0578;
-struct DevVT_001B0578 {
-    u8 pad[0x13C];
-    s32 (*f13C)(Dev_001B0578* d, s32 n);
-    s32 (*f140)(Dev_001B0578* d, void* b);
-};
-struct Dev_001B0578 { DevVT_001B0578* vt; };
 void func_001D7098(void* buf, s32 n, void* self);
 
 void func_001B46E0(s32 a, s32 frame);
@@ -194,9 +173,9 @@ void func_001AEFA0(C30* self)
     func_001B93F8(self);
     Node30* sink = self->f5C8;
     if (sink != 0) {
-        Global_001AEFA0* g = (Global_001AEFA0*)D_00262E10;
+        C07* g = D_00262E10;
         if (g != 0) {
-            if (g->state != 4) {
+            if (g->f2220 != 4) {
                 sink->f18.f = self->f5CC;
                 self->f5C8 = 0;
                 *(s32*)&self->f5CC = 0;
@@ -290,7 +269,7 @@ void func_001AF508()
 {
     ListFrame frame;
     s32 count = 0;
-    C31* n = *(C31**)(D_00275710 + 0x1CA8);
+    C31* n = (C31*)D_00275710->list1CA8.head;
     while (n != 0) {
         s32 t = count + 1;
         count = (n->state != 8) ? t : count;
@@ -298,7 +277,7 @@ void func_001AF508()
     }
     if (count != 0) {
         s32 idx = 0;
-        n = *(C31**)(D_00275710 + 0x1CA8);
+        n = (C31*)D_00275710->list1CA8.head;
         while (n != 0) {
             if (n->state != 8) {
                 n->fAFC = D_00261858[1] + (0.03333333507180214f / (f32)count) * (f32)idx;
@@ -405,7 +384,7 @@ s32 func_001AFAF8(C30* a0, C03* a1)
     if ((a1->flags538 & m) != 0 || a1->root == a0->root || func_001AEE50(a0, a1) != 0) {
         return 0;
     }
-    if ((void*)a1 == (void*)D_00262E10 && ((Player_1AFAF8*)a1)->x2220 == 6 && ((Player_1AFAF8*)a1)->x239C == 3) {
+    if ((void*)a1 == (void*)D_00262E10 && ((C07*)a1)->f2220 == 6 && ((C07*)a1)->f239C == 3) {
         if ((func_00160D10() & 0x12000) != 0) {
             return 0;
         }
@@ -594,13 +573,13 @@ void func_001B0578(C32* self) {
         s1 = self->state5D8;
         switch (s1) {
         case 0:
-            if (D_00262E10 && D_00262E10->vt->f13C(D_00262E10, 2)) {
+            if (D_00262E10 && D_00262E10->desc06()->m4B(D_00262E10, 2)) {
                 s1 = 2;
             } else if (self->f5E0 < D_0026185C[0] - self->f5DC) {
                 if (D_00262E10) {
                     u8 buf[16];
                     func_001D7098(buf, 2, self);
-                    if (D_00262E10->vt->f140(D_00262E10, buf)) {
+                    if (D_00262E10->desc06()->m4C(D_00262E10, buf)) {
                         s1 = 1;
                         func_001AEF68(self);
                     }

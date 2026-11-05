@@ -9,7 +9,7 @@ struct Obj_eu_135228
     f32 f5CC[4];
 };
 
-void func_00135228(Obj_eu_135228* self, Q_135228* q)
+void func_00135228(Obj_eu_135228* self, V24A0* q)
 {
     if (self->f570 == 1)
     {

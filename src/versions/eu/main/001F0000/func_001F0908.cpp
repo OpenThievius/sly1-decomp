@@ -17,12 +17,12 @@ struct Eng_eu_1F0908 {
 void func_001F0908(Obj_1F0908* self)
 {
     if (D_00276250 == -1) return;
-    func_001AA8B8(&D_002721D0, (((*(Cfg_1F0908**)&D_002623C0)->hi << 8) | (*(Cfg_1F0908**)&D_002623C0)->lo) == 4 ? 0.5f : 2.0f);
+    func_001AA8B8(&D_002721D0, ((D_002623C0->f19D8 << 8) | D_002623C0->f19DC) == 4 ? 0.5f : 2.0f);
     D_002721D0.vt->m16(&D_002721D0, 2);
     Eng_eu_1F0908* e = ((Eng_eu_1F0908*)&D_0026F138);
     e->i570 = 0;
     e->vt->set((Eng_1F0908*)e, 0);
-    func_001AD0D0((Eng_1F0908*)e, (*(Cfg_1F0908**)&D_002623C0)->hi, (*(Cfg_1F0908**)&D_002623C0)->lo);
+    func_001AD0D0((Eng_1F0908*)e, D_002623C0->f19D8, D_002623C0->f19DC);
     e->i974 = 1;
     func_001AA8B8((Eng_1F0908*)e, 0.0f);
     e->vt->set((Eng_1F0908*)e, 2);
@@ -36,8 +36,8 @@ void func_001F0908(Obj_1F0908* self)
         for (s32 i = 0; i < self->tbl->count; i++) {
             Ent_1F0908* en = &self->tbl->ents[i];
             if (en->type == 10) {
-                Body_1F0908* n = func_0015A418(self->f14, 0x104, en->id, self);
-                if (n != 0) n->vt->fn(n);
+                C01* n = func_0015A418(self->f14, 0x104, en->id, self);
+                if (n != 0) n->desc->m02(n);
             }
         }
     }

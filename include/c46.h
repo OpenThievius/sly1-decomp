@@ -15,7 +15,8 @@ struct __attribute__((packed)) Keep46 {
 struct C46 : C03 {
     s32 state;              // 0x550: func_0014F110 (-1 at set-up, 0 on entering the world)
     f32 stateTime;          // 0x554: the clock when the state changed (D_0026185C)
-    u8 pad558[0x564 - 0x558];
+    C46* next;              // 0x558: the next in the list at D_00262708 (func_00150298)
+    u8 pad55C[0x564 - 0x55C];
     f32 f564;               // 0x564: handed to func_00126D60 when the state becomes 5
     f32 delay;              // 0x568: slot 17 waits this long in state 4
     Keep46 keep56C;         // 0x56C: kept by slot 9

@@ -5,9 +5,9 @@ void func_001F4408(s32 flag, s32 n)
 {
     Ctx_1F4408* ctx = *(Ctx_1F4408**)D_002623C0;
     Obj_1F4408* o;
-    Obj_1F4408* v;
+    C7D* v;
     Val_1F4408* k;
-    Args_1F4408 args;
+    S1EFFA0 args;
     if (ctx->f19D8 == 5) {
         goto lm1;
     }
@@ -26,20 +26,20 @@ l4470:
     func_001F0428(k, 0x1BD, n);
     return;
 l4490:
-    v = (Obj_1F4408*)func_001F4378();
+    v = (C7D*)func_001F4378();
     if (v == 0) {
         goto larg;
     }
     if (flag != 0) {
-        v->f310 = 0;
+        v->count = 0;
     }
     func_001F4808(v);
     return;
 larg:
-    args.f00 = 1;
-    args.f04 = D_00275B04;
+    args.kind = 1;
+    args.key = &D_00275B04;
     args.f08 = -1;
     args.f0C = -1;
-    args.f10 = 0;
-    func_001EFFA0((Dst_1F4408*)D_00275F80, &args, n);
+    args.flags = 0;
+    func_001EFFA0(&D_00275F80, &args, n);
 }

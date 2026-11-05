@@ -82,7 +82,7 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     {
     Rgba_eu_1ACEE0 col;
     col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;
-    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, D_00262280);
+    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, (u8*)&D_00262280);
     {
         out.x = self->f52C + self->f590;
         out.y = self->f530 + self->f594 + y;
@@ -93,11 +93,11 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
         b.c[0] = 0xC0; b.c[1] = 0xC0; b.c[2] = 0xC0; b.c[3] = 0xFF;
         LerpRgba_eu_1ACEE0::Do(&col, &a, &b, t);
     }
-    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], D_00262280);
+    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], (u8*)&D_00262280);
     }
     func_0015C8B8(self->text, self->f51C, self->f51C);
     VEnt_eu_1ACEE0* ve = &self->text->vtbl[8];
-    ve->fn((u8*)self->text + ve->delta, self->f52C, self->f530, 0x7A, out.f10, D_00262280);
+    ve->fn((u8*)self->text + ve->delta, self->f52C, self->f530, 0x7A, out.f10, (u8*)&D_00262280);
     f32 dx = 0.0f;
     f32 dy = dx;
     if (flag) {
@@ -111,6 +111,6 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     out.f18 = 1;
     out.f1C = 1;
     char str[2] = { self->f57C + 0x72, 0 };
-    func_eu_0015C778(self->text, str, &out, 0, D_00262280);
+    func_eu_0015C778(self->text, str, &out, 0, (u8*)&D_00262280);
     func_0015C900(self->text);
 }

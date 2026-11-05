@@ -2,7 +2,7 @@
 // PAL's func_0011E048 takes one more argument (a 0 before the final 1).
 s32 func_0011E048(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8, s32 a9);
 
-void func_001BE728(Obj_1BE728* self)
+void func_001BE728(S1BE728* self)
 {
     if (D_00274744 != 0) {
         return;

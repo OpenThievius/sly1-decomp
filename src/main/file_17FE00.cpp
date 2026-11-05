@@ -3,6 +3,7 @@
 #include "asm_func.h"
 #include "c7e.h"
 #include "c8e.h"
+#include "c6d.h"
 
 
 
@@ -194,6 +195,142 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
     }
 }
 
-INCLUDE_ASM(func_00180398);
+struct Obj_180398;
+struct Desc_180398 {
+    u8 pad00[0x144];
+    s32 (*m144)(Obj_180398* self);
+    u8 pad148[0x15C - 0x148];
+    Obj_180398* (*m15C)(Obj_180398* self);
+};
+struct Obj_180398 {
+    const Desc_180398* desc;
+    u8 pad04[0x140 - 0x04];
+    u8 pos[0x10];
+};
+struct Vec_180398 {
+    f32 x, y, z, w;
+};
+struct Num_180398 {
+    static f32 Clamp(f32 v, f32 lo, f32 hi)
+    {
+        return v < lo ? lo : (hi < v ? hi : v);
+    }
+};
+struct Col_180398 {
+    u8 c[4];
+    // One channel moved from a to b by t, rounding up towards b.
+    static s32 Mix(s32 a, s32 b, f32 t)
+    {
+        if (a == b) return b;
+        if (a < b) return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
+        return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
+    }
+    // This colour set to a moved towards b by t.
+    void Blend(const Col_180398& a, const Col_180398& b, f32 t)
+    {
+        Col_180398 r;
+        r.c[0] = Mix(a.c[0], b.c[0], t);
+        r.c[1] = Mix(a.c[1], b.c[1], t);
+        r.c[2] = Mix(a.c[2], b.c[2], t);
+        r.c[3] = Mix(a.c[3], b.c[3], t);
+        *this = r;
+    }
+};
 
+Obj_180398* func_001925F0(void);
+extern C6D* D_00261990;
+void func_001441C0(C6D* cam, void* pos, Vec_180398* out);
 
+void func_00180398(C8E* self, f32 t)
+{
+    f32 mat[16];
+    Obj_180398* o;
+
+    func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->f60) + t * (4.0f / self->f60));
+    o = func_001925F0();
+    if (o != 0 && (o = o->desc->m15C(o)) != 0 && o->desc->m144(o) == 2) {
+        Vec_180398 v;
+        f32 x, y;
+        func_001441C0(D_00261990, o->pos, &v);
+        x = Num_180398::Clamp(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
+        mat[12] = (1.0f - t) * 320.0f + t * x;
+        y = Num_180398::Clamp(v.y * -246.40001f + 246.40001f, 16.0f, 476.80002f);
+        mat[13] = (1.0f - t) * 246.40001f + t * y;
+    } else {
+        mat[12] = 320.0f;
+        mat[13] = 246.40001f;
+    }
+    {
+        Col_180398 base;
+        s32 g;
+        s32 vis;
+        func_001613C0(&D_00262280, 0, 1, 0xE);
+        func_00161708(&D_00262280, 0x47, 0x31001);
+        func_00161708(&D_00262280, 0x42, 0x44);
+        vis = 0;
+        for (g = 4; g >= 0; g--) {
+            Rec8E* r = &self->recs[g];
+            Col_180398 col = *(Col_180398*)&r->col;
+            if (g == 0) {
+                Col_180398 mixed;
+                Col_180398 from = *(Col_180398*)&r->col;
+                Col_180398 black;
+                *(u32*)&black = 0x80000000;
+                mixed.Blend(from, black, t);
+                col = mixed;
+            }
+            if (t <= 0.4f) {
+                col.c[3] = (s32)((f32)col.c[3] * t * 2.5f);
+            }
+            if (g == 0) {
+                base = col;
+            }
+            if (r->n > 0) {
+                s32 i;
+                func_001613C0(&D_00262280, 0, 1, 1);
+                func_00161458(&D_00262280, *(u32*)&col);
+                func_001613C0(&D_00262280, (s8)col.c[3] >= 0 ? 0x43 : 0x83, 1, 4);
+                for (i = 0; i < r->n; i++) {
+                    u32* idx = (u32*)&r->ents[i];
+                    s32 j;
+                    for (j = 2; j >= 0; j--, idx++) {
+                        Q_180108 p, q;
+                        p.v = *(V128_180108*)&self->f38[*idx];
+                        q.v = func_00188740(mat, p.v);
+                        func_001615F0(&D_00262280, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                        vis = vis || 0.0f < q.f[0] || q.f[0] < 640.0f || 0.0f < q.f[1] || q.f[1] < 492.80002f;
+                    }
+                }
+            }
+        }
+        if (vis) {
+            Q_180108 lo, hi;
+            f32 d;
+            lo.v = func_00188740(mat, *(V128_180108*)&self->f40);
+            hi.v = func_00188740(mat, *(V128_180108*)&self->f50);
+            func_001613C0(&D_00262280, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
+            func_00161458(&D_00262280, *(u32*)&base);
+            func_001615F0(&D_00262280, 0x6C00, 0x7900, 0, 0);
+            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            func_001615F0(&D_00262280, 0x9400, 0x7900, 0, 0);
+            func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            func_001615F0(&D_00262280, 0x9400, 0x8700, 0, 0);
+            func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            func_001615F0(&D_00262280, 0x6C00, 0x8700, 0, 0);
+            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            func_001615F0(&D_00262280, 0x6C00, 0x7900, 0, 0);
+            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            d = 1.0f - t;
+            if (d <= 0.1f) {
+                Col_180398 fade = base;
+                fade.c[3] = (s32)((f32)fade.c[3] * (1.0f - d * 10.0f));
+                func_001613C0(&D_00262280, 0x44, 5, 0x44441);
+                func_00161458(&D_00262280, *(u32*)&fade);
+                func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            }
+        }
+    }
+}

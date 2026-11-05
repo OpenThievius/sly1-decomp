@@ -12,7 +12,7 @@
 
 #include "c01.h"
 
-struct __attribute__((aligned(16))) Quad8B { s32 a, b, c, d; };
+#include "shapes.h"   // Quad16
 
 struct Node8B;
 typedef void (*VFn8B)(Node8B* n);
@@ -24,7 +24,20 @@ struct Rec8B { s32 id; u8 pos[96]; };
 
 struct Fl8B { u8 pad[8]; f32 f8; };
 struct In8B { u8 pad[8]; Fl8B* p8; };
-struct Gr8B { u8 pad[0x78]; s32 f78; u8 pad7C[0x44]; In8B* pC0; };
+struct Gr8B {
+    u8 pad0[0x34];
+    f32 f34;                // 0x34
+    s32 f38;                // 0x38
+    u8* f3C;                // 0x3C
+    u8 pad40[0x6C - 0x40];
+    void* f6C;              // 0x6C
+    u8 pad70[0x78 - 0x70];
+    s32 f78;                // 0x78
+    u8 pad7C[0xB8 - 0x7C];
+    void* fB8;              // 0xB8
+    s32 fBC;                // 0xBC
+    In8B* pC0;              // 0xC0
+};
 
 struct Slot8B {
     u8 pad0[4];
@@ -48,12 +61,12 @@ struct C8B : C01 {
     f32 f5C;                // 0x5C
     f32 f60;                // 0x60
     u8 pad64[0x70 - 0x64];
-    Quad8B q70;             // 0x70
+    Quad16 q70;             // 0x70
     s32 f80;                // 0x80
     f32 f84;                // 0x84
     f32 f88;                // 0x88
     f32 f8C;                // 0x8C
-    Quad8B q90;             // 0x90
+    Quad16 q90;             // 0x90
     u8 fA0[4];              // 0xA0: read by func_00137FB0 (the field after it, fA4, is a count)
     s32 fA4;                // 0xA4
     u8 padA8[8];

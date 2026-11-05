@@ -2,7 +2,7 @@
 // PAL: key is an unsigned 16-bit glyph, 576-line screen (468.6 limit, 0.5454 scale, 1920 offset)
 V24A2_Glyph* func_0015DAB8(V24A2* self, u16 key);
 
-f32 func_0015CD18(f32 x, f32 y, V24A2* self, u16 key, u32 color, Stream_15CD18* s)
+f32 func_0015CD18(f32 x, f32 y, V24A2* self, u16 key, u32 color, V24A0* s)
 {
     V24A2_Glyph* e = func_0015DAB8(self, key);
     if (e != 0) {

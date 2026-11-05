@@ -4,7 +4,10 @@
 #include "c28.h"
 #include "c29.h"
 #include "c38.h"
+#include "c41.h"
 #include "c6c.h"
+#include "g261858.h"
+#include "s1bc320.h"
 
 extern const u32 D_00247AA0;
 s32 D_002613F4;
@@ -77,17 +80,11 @@ s32 func_00141008(u8* bits, s32 index)
     return (bits[0xC] & mask) != 0;
 }
 
-struct Obj_1419C0 {
-    u8 pad[0x550];
-    s32 count;
-    void* items[1];
-};
-
-void func_001419C0(Obj_1419C0* obj, void* item)
+void func_001419C0(C38* obj, void* item)
 {
-    s32 n = obj->count;
-    obj->items[n] = item;
-    obj->count = n + 1;
+    s32 n = obj->nIdsA;
+    obj->idsA[n] = (s32)item;
+    obj->nIdsA = n + 1;
 }
 
 void func_001430C0(void** dst, void* value)
@@ -96,7 +93,6 @@ void func_001430C0(void** dst, void* value)
 }
 
 extern f32 D_00261850;
-extern s32 D_00261858;
 void func_001430C0(void* dst, s32 value);
 
 void func_00142ED0(f32 x)
@@ -105,22 +101,12 @@ void func_00142ED0(f32 x)
     func_001430C0(&D_00261858, x > 0.0f ? 1 : 0);
 }
 
-struct Timer_00142F10 {
-    s32 running;
-    f32 acc_a;
-    f32 hist_b;
-    f32 hist_c;
-    f32 acc_d;
-    f32 step;
-    s64 last;
-};
-
 extern f32 D_00261850;
 extern f32 D_00261854;
 s64 func_001430F8(void);
 f32 func_001FB6B0(s64 value);
 
-void func_00142F10(Timer_00142F10* self)
+void func_00142F10(G261858* self)
 {
     s64 now = func_001430F8();
     s64 delta = now - self->last;
@@ -149,27 +135,20 @@ void func_00142F10(Timer_00142F10* self)
     if (0.016666668f <= s) {
         self->step = s;
     }
-    f32 new_a = self->acc_a + s;
-    f32 old_b = self->hist_b;
-    f32 new_d = self->acc_d + self->step;
-    self->acc_a = new_a;
-    self->hist_c = old_b;
-    self->hist_b = s;
-    self->acc_d = new_d;
+    f32 new_a = self->time + s;
+    f32 old_b = self->dt;
+    f32 new_d = self->f10 + self->step;
+    self->time = new_a;
+    self->f0C = old_b;
+    self->dt = s;
+    self->f10 = new_d;
     self->last = now;
 }
-
-struct Timer_00143030 {
-    u8 pad0[0x10];
-    f32 acc_d;
-    f32 step;
-    s64 last;
-};
 
 s64 func_001430F8(void);
 f32 func_001FB6B0(s64 value);
 
-void func_00143030(Timer_00143030* self)
+void func_00143030(G261858* self)
 {
     s64 now = func_001430F8();
     s64 delta = now - self->last;
@@ -184,17 +163,12 @@ void func_00143030(Timer_00143030* self)
     f32 dt = t * 0.0000000033908420f;
     self->last = now;
     self->step = dt;
-    self->acc_d = self->acc_d + dt;
+    self->f10 = self->f10 + dt;
 }
 
-struct Timer_001430B8 {
-    u8 pad0[4];
-    f32 acc_a;
-};
-
-void func_001430B8(Timer_001430B8* self, f32 value)
+void func_001430B8(G261858* self, f32 value)
 {
-    self->acc_a = value;
+    self->time = value;
 }
 
 extern s32 D_002613EC;
@@ -265,24 +239,18 @@ void func_001415D0(C38* self)
     }
 }
 
-struct Event_1417F0 {
-    s32 type;
-    u8 pad[0xC];
-    s32 flags;
-};
-
 extern u8 D_00262C70[];
 
 void func_00141870(C38* self);
-s32 func_001925F0(void* self, Event_1417F0* ev);
-s32 func_001BC320(void* self, Event_1417F0* ev);
+s32 func_001925F0(void* self, S1BC320* ev);
+s32 func_001BC320(void* self, S1BC320* ev);
 void func_0016EC38(void* p, f32 f, s32 n);
 
-s32 func_001417F0(C38* self, Event_1417F0* ev)
+s32 func_001417F0(C38* self, S1BC320* ev)
 {
     s32 r = func_001925F0(self, ev);
     if (ev->type == r) {
-        if ((ev->flags & 0x10) == 0) {
+        if ((ev->f10 & 0x10) == 0) {
             func_0016EC38(D_00262C70, 0.2f, 2);
         }
         func_00141870(self);
@@ -331,15 +299,9 @@ void func_00141870(C38* self)
     }
 }
 
-struct Queue_1419A0 {
-    u8 pad[0x578];
-    s32 count;
-    s32 items[1];
-};
-
-void func_001419A0(Queue_1419A0* q, s32 value)
+void func_001419A0(C38* q, s32 value)
 {
-    q->items[q->count++] = value;
+    q->idsB[q->nIdsB++] = value;
 }
 
 void func_001406D0(C28* self, s32 value)
@@ -356,11 +318,9 @@ void func_001406F0(C28* self, s32 value)
     self->countKindsIn = n + 1;
 }
 
-struct Slot_1419E0 { u8 pad[0x5A0]; s32 value; };
-
-void func_001419E0(Slot_1419E0* self, s32 value)
+void func_001419E0(C38* self, s32 value)
 {
-    self->value = value;
+    self->f5A0 = value;
 }
 
 void func_00124A48(void* self);
@@ -522,15 +482,14 @@ void func_001405F0(u8* self, s32 value)
     func_001405D0(self + 0x554, self, value);
 }
 
-struct State_00141170 { u8 pad[0x8C]; void* child; };
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
 void func_001F3B48(void* self, void* value, void* out);
 s32 func_001E4DC0(void* self, void* value);
-s32 func_00141170(State_00141170* self, void* value)
+s32 func_00141170(C41* self, void* value)
 {
     Quad_00141170 local;
     func_001F3B48(self, value, &local);
-    return func_001E4DC0(self->child, &local);
+    return func_001E4DC0(self->f8C, &local);
 }
 
 
@@ -592,22 +551,13 @@ void func_001411A8(C38* self)
 s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 s32 func_00141F48(void* a, void* b, void* c, s32 d, s32 e, f32 x);
 
-struct Self_141C28 {
-    u8 pad0[0x3CC];
-    f32 f3CC;
-    u8 pad1[0x3F8 - 0x3D0];
-    s32 f3F8;
-    u8 pad2[0x538 - 0x3FC];
-    u64 f538;
-};
-
-s32 func_00141C28(Self_141C28* self, void* a1, void* a2, s32 a3, s32 a4)
+s32 func_00141C28(C03* self, void* a1, void* a2, s32 a3, s32 a4)
 {
-    if (self->f3F8 != 0) {
-        return func_0013DFD8((void*)self->f3F8, a1, a2, 0, a3, (void*)a4);
+    if (self->tree.nodes != 0) {
+        return func_0013DFD8((void*)self->tree.nodes, a1, a2, 0, a3, (void*)a4);
     }
-    if (self->f538 & ((u64)0x8000 << 25)) {
-        return func_00141F48((u8*)self + 0x140, a1, a2, a3, a4, self->f3CC);
+    if (self->flags538 & ((u64)0x8000 << 25)) {
+        return func_00141F48((u8*)self + 0x140, a1, a2, a3, a4, self->radius3CC);
     }
     return 0;
 }
@@ -1103,7 +1053,8 @@ void func_00141438(C38* self)
         self->f5A4 = func_0015A448(self->world, self->f5A0, self);
     }
     if (self->f5A8 != 0) {
-        self->f5AC = func_001B6290(self->f5A8, self, 0x546, 0);
+        self->f5AC = (S1B6290*)func_001B6290(self->f5A8, self, 0x546, 0);
+
         if (func_00141008(D_00261420, self->f5B0) != 0)
             func_001B64D8(self->f5AC, 0x547);
     }

@@ -69,6 +69,7 @@ struct Contact03 {
     f32 timer;              // 0xC4: slot 67 tells both ends' slot 65 while it is positive
     u8 padC8[0xD0 - 0xC8];
     Contact03* next;        // 0xD0
+    u8 fD4[0x0C];           // 0xD4: the tail func_001BC4D8 copies with the rest
 };
 
 // A row of a body's contact table: its contacts with one other body (func_001BD558,

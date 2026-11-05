@@ -20,9 +20,9 @@ struct Obj_16B580_eu {
 
 void func_0016AF80(Obj_16B580_eu* o);
 void func_0016B190(Obj_16B580_eu* o);
-void func_0016B0F8(Obj_16B580_eu* o, Arg_16B580* a);
+void func_0016B0F8(Obj_16B580_eu* o, G262C70* a);
 
-void func_0016B580(Obj_16B580_eu* self, Arg_16B580* arg)
+void func_0016B580(Obj_16B580_eu* self, G262C70* arg)
 {
     if (self->p260 == 0) {
         return;

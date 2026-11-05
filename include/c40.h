@@ -62,7 +62,7 @@ struct C40 : C03 {
     Pair40 p658;            // 0x658: D_002621B0
     Pair40 p660;            // 0x660: D_002621B8
     f32 f668;               // 0x668
-    u8 pad66C[0x670 - 0x66C];
+    f32 f66C;               // 0x66C: the clock when func_0015C0A0 last looked
     Pair40 p670;            // 0x670: D_002621C0
     u8 pad678[0x680 - 0x678];
     f32 f680;               // 0x680

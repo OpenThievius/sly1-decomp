@@ -3,16 +3,14 @@
 struct Gate_1E9AD8_eu { u8 pad0[0x560]; s32 f560; u8 pad1[8]; s32 f56C; };
 
 extern s32 D_00275F84;
-extern u8 D_0026FF68[];
-extern u8 D_0026F808[];
 
 s32 func_001E9AD8(void)
 {
     if (D_00275F84 != 0) goto fail;
-    if (((Gate_1E9AD8_eu*)D_0026FF68)->f56C != 0) goto fail;
-    if (((Gate_1E9AD8_eu*)D_0026FF68)->f560 != 0) goto fail;
-    if (((Gate_1E9AD8_eu*)D_0026F808)->f56C != 0) goto fail;
-    if (((Gate_1E9AD8_eu*)D_0026F808)->f560 == 0) goto ok;
+    if (((Gate_1E9AD8_eu*)&D_0026FF68)->f56C != 0) goto fail;
+    if (((Gate_1E9AD8_eu*)&D_0026FF68)->f560 != 0) goto fail;
+    if (((Gate_1E9AD8_eu*)&D_0026F808)->f56C != 0) goto fail;
+    if (((Gate_1E9AD8_eu*)&D_0026F808)->f560 == 0) goto ok;
 fail:
     return 0;
 ok:

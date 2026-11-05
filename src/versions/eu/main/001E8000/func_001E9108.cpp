@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: calls func_0018C178(g, 1) before func_0018C568 and handles a third button (0x10) when D_eu_002636EC >= 2
 extern s32 D_eu_002636EC;
-struct G2_1E9108_eu { u8 pad[0x570]; Sub_1E9108* f570; };
+struct G2_1E9108_eu { u8 pad[0x570]; C67* f570; };
 extern void func_001E9498(Obj_1E9108* o, G2_1E9108_eu* g);
-extern void func_0018C178(Glob_1E9108* g, s32 a);
+extern void func_0018C178(G264A40* g, s32 a);
 
 void func_001E9108(Obj_1E9108* obj)
 {
-    f32 d = D_00261858[4] - obj->f8;
+    f32 d = D_00261858.f10 - obj->f8;
     s32 s1 = obj->state;
-    In_1E9108* s2;
+    G262C70* s2;
     s32 s5;
     if (D_00262C68 & 4) {
-        s2 = (In_1E9108*)D_00262C70;
+        s2 = &D_00262C70;
     } else {
         s2 = &D_00262D38;
     }
     s5 = 0;
     if (D_00262C6C & 0x80) {
-        if (0.1f < D_00261858[1]) {
+        if (0.1f < D_00261858.time) {
             func_0016E118(0x80);
         }
     }
@@ -26,8 +26,8 @@ void func_001E9108(Obj_1E9108* obj)
     case 0: {
         s32 a2 = 0;
         if (D_002701B8 == 0) {
-            s32 m = ((Glob_1E9108*)(Glob_1E9108*)&D_00264A40)->f18;
-            if (m == 2 || (m == 1 && ((Glob_1E9108*)(Glob_1E9108*)&D_00264A40)->fC == 5)) {
+            s32 m = D_00264A40.f18;
+            if (m == 2 || (m == 1 && D_00264A40.f0C == 5)) {
                 a2 = 1;
             }
         }
@@ -37,15 +37,15 @@ void func_001E9108(Obj_1E9108* obj)
         break;
     }
     case 1: {
-        u32 v = s2->bits;
+        u32 v = s2->flags;
         if (v & 0x800) {
             s32 t;
             func_0016EC20(s2, 0x800);
-            t = ((Glob_1E9108*)(Glob_1E9108*)&D_00264A40)->f4F48;
-            ((Glob_1E9108*)(Glob_1E9108*)&D_00264A40)->f4F44 = t;
+            t = D_00264A40.i4F48;
+            D_00264A40.i4F44 = t;
             if (t) {
-                func_0018C178((Glob_1E9108*)&D_00264A40, 1);
-                func_0018C568((Glob_1E9108*)&D_00264A40);
+                func_0018C178(&D_00264A40, 1);
+                func_0018C568(&D_00264A40);
             } else {
                 func_001605E8(D_002623C0);
             }
@@ -53,11 +53,11 @@ void func_001E9108(Obj_1E9108* obj)
             s1 = obj->state;
         } else if (v & 0x100) {
             func_0016EC20(s2, 0x100);
-            func_00194D30(D_0026FF68, 0, 0x17);
+            func_00194D30(&D_0026FF68, 0, 0x17);
             s1 = obj->state;
         } else if (D_eu_002636EC >= 2 && (v & 0x10)) {
             func_0016EC20(s2, 0x10);
-            func_00194D30(D_0026FF68, 0, 0x21);
+            func_00194D30(&D_0026FF68, 0, 0x21);
             s1 = obj->state;
         }
         break;
@@ -66,16 +66,16 @@ void func_001E9108(Obj_1E9108* obj)
         if (D_00262C6C & 2) break;
         if (D_00275F84) break;
         {
-            u32 v = s2->bits;
-            if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= D_00261858[1])) {
-                func_00194D30(D_0026FF68, 0, 0);
+            u32 v = s2->flags;
+            if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= D_00261858.time)) {
+                func_00194D30(&D_0026FF68, 0, 0);
                 s1 = obj->state;
                 func_0016EC20(s2, 0x800);
-            } else if ((v = s2->bits) & 0x100) {
-                G2_1E9108_eu* g2 = (G2_1E9108_eu*)D_0026F808;
-                Sub_1E9108* x = g2->f570;
+            } else if ((v = s2->flags) & 0x100) {
+                G2_1E9108_eu* g2 = (G2_1E9108_eu*)&D_0026F808;
+                C67* x = g2->f570;
                 if (x == 0) break;
-                if (x->f2D0) break;
+                if (x->mode) break;
                 func_001E9498(obj, g2);
                 s1 = obj->state;
                 func_0016EC20(s2, 0x100);

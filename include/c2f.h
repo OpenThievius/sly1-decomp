@@ -8,11 +8,13 @@
 
 #include "c03.h"
 
+struct S1B6290;     // a handle func_001B6290 makes (s1b6290.h)
+
 struct C2F : C03 {
     s32 state;              // 0x550: func_00123888 (-1 at set-up)
     f32 stateTime;          // 0x554: the clock when the state changed (D_0026185C)
     void* found558;         // 0x558: the first child of kind 0x88 (func_00123448)
-    void* f55C;             // 0x55C: a handle func_001B6290 makes for found558
+    S1B6290* f55C;          // 0x55C: a handle func_001B6290 makes for found558
     f32 timeout;            // 0x560: in state 2, how long before the state falls to 0
     s32 count1;             // 0x564: the ids at items1 whose objects (kind 0x22) it keeps
     s32 items1[4];          // 0x568: func_00123C90 appends

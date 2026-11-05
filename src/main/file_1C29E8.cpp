@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-
-struct __attribute__((aligned(16))) Quad_1C3FC8 { f32 v[4]; };
-extern f32 D_00275C60[];
-extern Quad_1C3FC8 D_00248D30;
+#include "v24a0.h"
+#include "globals.h"
+#include "shapes.h"
+#include "s1c30e8.h"
+#include "s1eb050.h"
+#include "g261858.h"
 
 struct Obj_1C29E8 { u8 pad[8]; s32 f8; s32 fC; };
 
-struct Builder_1C30E8 {
-    u8 pad0[0x98];
-    s32 f98;
-    u8 rest[0x1850 - 0x9C];
-};
-struct __attribute__((packed)) Col_1C30E8 { u8 r, g, b, a; };
 struct Elem_1C30E8 { f32 f0; f32 f4; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
 struct Poly_1C30E8 {
     f32 c[3];
@@ -51,24 +47,19 @@ struct Obj_1C30E8 {
     Rec_1C30E8* f60;
 };
 struct Obj2_1C30E8 { u8 pad0[0x2A8]; f32 f2A8; };
-struct Glob_1C30E8 { u8 pad[1]; };
 
-extern u8 D_002622A8[];
-extern u8 D_002483D0[];
-extern f32 D_00261858[];
-
-void func_001619C0(Builder_1C30E8* b);
-void func_00152B38(Glob_1C30E8* g);
-void func_00161AB0(Builder_1C30E8* b, u8* a, u8* c);
-void func_00161BB0(Builder_1C30E8* b, s32 v);
-void func_00161B10(Builder_1C30E8* b, u8* a, f32 f);
-void func_001626C0(Builder_1C30E8* b, u8* src);
-void func_001626A8(Builder_1C30E8* b, Col_1C30E8* c);
-void func_00162680(Builder_1C30E8* b, void* v);
-void func_001626D8(Builder_1C30E8* b, s32 z);
-void func_00162508(Builder_1C30E8* b);
-void func_00152D70(Glob_1C30E8* g);
-void func_00161A88(Builder_1C30E8* b, s32 f);
+void func_001619C0(S1C30E8* b);
+void func_00152B38(V24A0* g);
+void func_00161AB0(S1C30E8* b, u8* a, u8* c);
+void func_00161BB0(S1C30E8* b, s32 v);
+void func_00161B10(S1C30E8* b, u8* a, f32 f);
+void func_001626C0(S1C30E8* b, u8* src);
+void func_001626A8(S1C30E8* b, Rgba4* c);
+void func_00162680(S1C30E8* b, void* v);
+void func_001626D8(S1C30E8* b, s32 z);
+void func_00162508(S1C30E8* b);
+void func_00152D70(V24A0* g);
+void func_00161A88(S1C30E8* b, s32 f);
 
 u8 D_00274998[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
 u8 D_002749A0[16] = { 0 };
@@ -88,9 +79,9 @@ ASM_FUNC(func_001C3028);
 
 void func_001C30E8(Obj_1C30E8* self)
 {
-    Builder_1C30E8 b;
-    Col_1C30E8 c;
-    Col_1C30E8 c2;
+    S1C30E8 b;
+    Rgba4 c;
+    Rgba4 c2;
     Rec_1C30E8* r = self->f60;
     s32 none = -1;
     s32 best = none;
@@ -98,9 +89,9 @@ void func_001C30E8(Obj_1C30E8* self)
     u32 idx;
     func_001619C0(&b);
     *(u32*)&c = 0xFFFFFFFF;
-    func_00152B38((Glob_1C30E8*)D_002622A8);
+    func_00152B38(&D_002622A8);
     b.f98 = 0;
-    func_00161AB0(&b, ((u8*)&D_00248D30), D_002483D0);
+    func_00161AB0(&b, ((u8*)&D_00248D30), (u8*)&D_002483D0);
     func_00161BB0(&b, r->f4);
     func_00161B10(&b, ((u8*)&D_00248D30), ((Obj2_1C30E8*)r->f0)->f2A8);
     idx = r->f8;
@@ -109,7 +100,7 @@ void func_001C30E8(Obj_1C30E8* self)
             f32 zero = 0.0f;
             f32 full = 255.0f;
             Elem_1C30E8* e = (Elem_1C30E8*)((u8*)r->elems + idx * size);
-            f32 t = D_00261858[1] - e->f0;
+            f32 t = D_00261858.time - e->f0;
             f32 v = (*(Range_1C30E8*)&D_00275C60).Clamp(r->poly.Eval(t));
             f32 w = self->f50 * e->f4 * v;
             if (zero < w) {
@@ -141,6 +132,6 @@ void func_001C30E8(Obj_1C30E8* self)
     else
         r->f8 = r->fC;
     func_00162508(&b);
-    func_00152D70((Glob_1C30E8*)D_002622A8);
+    func_00152D70(&D_002622A8);
     func_00161A88(&b, 2);
 }

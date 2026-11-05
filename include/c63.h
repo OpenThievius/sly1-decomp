@@ -31,20 +31,31 @@ struct Arr63 { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
 
 struct C63 : C02 {
     void* f2D0;             // 0x2D0
-    u8 pad2D4[0x2E4 - 0x2D4];
+    s32 f2D4;               // 0x2D4
+    u8 f2D8[4];             // 0x2D8
+    s32 f2DC;               // 0x2DC
+    void* f2E0;             // 0x2E0
     union {
         Arr63* obj;         // 0x2E4: the list the stream names, or 0
         T2176* curve;       // 0x2E4: the same, as the key-frame curve it is
     };
-    u8 pad2E8[0x2F0 - 0x2E8];
+    u8 f2E8[0x2F0 - 0x2E8]; // 0x2E8
     Block63 block2F0;       // 0x2F0
-    u8 pad380[0x398 - 0x380];
+    s32 f380;               // 0x380
+    s32 f384;               // 0x384
+    s32 f388;               // 0x388
+    u8 f38C[0x390 - 0x38C]; // 0x38C
+    s32 f390;               // 0x390
+    s32 f394;               // 0x394
     s32 f398;               // 0x398: -1 at construction
-    u8 pad39C[0x3F0 - 0x39C];
+    f32 f39C;               // 0x39C
+    s32 f3A0;               // 0x3A0
+    u8 pad3A4[0x3F0 - 0x3A4];
     f32 f3F0;               // 0x3F0: the list's last value, or 0
     u8 pad3F4[0x414 - 0x3F4];
     s32 i414;               // 0x414: 7 with a list, 5 without
-    u8 pad418[0x420 - 0x418];
+    s32 f418;               // 0x418
+    s32 f41C;               // 0x41C
     f32 f420;               // 0x420
     f32 f424;               // 0x424
     f32 f428;               // 0x428

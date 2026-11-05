@@ -1,21 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "g25c250.h"
 
 // The five pools values are taken from (func_0011C240): func_0011BF70 sets them up, func_0011C040
 // empties them all. Built at startup: the compiler's initialiser, constructor and destructor for this
 // file are func_0011C0A8, func_0011C0E8 and func_0011C108 (config/us/generated.tsv).
-struct Pool_25C250 {
-    u8 pad0[0x18];
-    void* callback;  // set by func_0011BF70
-    s32 pad1C;
-    Pool_25C250() { callback = 0; }
-    ~Pool_25C250() {}
-};
-Pool_25C250 D_0025C250;
-Pool_25C250 D_0025C270;
-Pool_25C250 D_0025C290;
-Pool_25C250 D_0025C2B0;
-Pool_25C250 D_0025C2D0;
+G25C250 D_0025C250;
+G25C250 D_0025C270;
+G25C250 D_0025C290;
+G25C250 D_0025C2B0;
+G25C250 D_0025C2D0;
 
 void* func_0011B008(void* self);
 
@@ -27,20 +21,9 @@ void func_0011B538(void* self, s32 k);
 
 void func_0011B018(void* dst, void* src);
 
-struct __attribute__((aligned(16))) Quad_119A58 { s32 w[4]; };
-
-void func_0011B008(Quad_119A58* q);
-
-void func_0011B018(void* out, Quad_119A58* q);
-
-void func_0011B060(Quad_119A58* q, s32 mode);
-
-void func_0011B0A8(Quad_119A58* a, Quad_119A58* b);
-
 void func_0011B0A8(void* a, void* b);
 
 void func_0018D778(void);
-
 
 void* func_0011C240(void* p);
 
@@ -69,7 +52,6 @@ typedef Node_11AF28 Node_11AEB8;
 void func_0011B258(void* src, void* dst, void* arg);
 
 Node_11AEB8* func_0011AF28(void);
-
 
 void* func_0011C240(void* pool);
 
@@ -103,9 +85,6 @@ void func_0011B4A8(Node_11B018* node);
 
 void func_0018D778(void* self);
 
-
-
-
 extern u8 D_00259F38[];
 
 void* func_001F5C0C(void* p, s32 v, s32 n);
@@ -128,69 +107,7 @@ void func_0011C128(void* obj, s32 count, s32 size);
 
 void func_0011CA90(void);
 
-struct Quad_1180C0 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_1180C0* q);
-
-void func_0011B0A8(Quad_1180C0* a, Quad_1180C0* b);
-
-void func_0011B060(Quad_1180C0* q, int mode);
-
-void func_0011B018(void* dst, Quad_1180C0* src);
-
-struct Quad_1183B8 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_1183B8* q);
-
-void func_0011B0A8(Quad_1183B8* a, Quad_1183B8* b);
-
-void func_0011B060(Quad_1183B8* q, int mode);
-
-void func_0011B018(void* dst, Quad_1183B8* src);
-
-struct Quad_118458 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_118458* q);
-
-void func_0011B0A8(Quad_118458* a, Quad_118458* b);
-
-void func_0011B060(Quad_118458* q, int mode);
-
-void func_0011B018(void* dst, Quad_118458* src);
-
-struct Blob_119FA0 { s32 w[4]; };
-
-void func_0011B008(Blob_119FA0* b);
-
-void func_0011B018(void* dst, Blob_119FA0* src);
-
-void func_0011B060(Blob_119FA0* b, s32 mode);
-
-void func_0011B0A8(Blob_119FA0* a, void* b);
-
-void func_0011B538(Blob_119FA0* b, s32 n);
-
-struct Blob_11A358 { s32 w[4]; };
-
-void func_0011B008(Blob_11A358* b);
-
-void func_0011B018(void* dst, Blob_11A358* src);
-
-void func_0011B060(Blob_11A358* b, s32 mode);
-
 s32 func_0011B0A8(u8* a, void* b);
-
-void func_0011B538(Blob_11A358* b, s32 n);
-
-struct Blob_11A400 { s32 w[4]; };
-
-void func_0011B008(Blob_11A400* b);
-
-void func_0011B018(void* dst, Blob_11A400* src);
-
-void func_0011B060(Blob_11A400* b, s32 mode);
-
-void func_0011B538(Blob_11A400* b, s32 n);
 
 struct Pair_11B0A8 { s32 a; s32 b; };
 
@@ -210,27 +127,7 @@ void func_0011B060(Value_11B008* v, int mode);
 
 void func_0011B5B0(Value_11B008* v, f32 f);
 
-struct Quad_118608 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_118608* q);
-
 void* func_0011C618(void);
-
-void func_0011B788(Quad_118608* q, void* b);
-
-void func_0011B018(void* dst, Quad_118608* src);
-
-void func_0011B060(Quad_118608* q, int mode);
-
-struct Quad_118720 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_118720* q);
-
-void func_0011B570(Quad_118720* q, s32 n);
-
-void func_0011B018(void* dst, Quad_118720* src);
-
-void func_0011B060(Quad_118720* q, int mode);
 
 void func_0011C418(void* a, void* b, void* c);
 
@@ -254,14 +151,6 @@ void func_0011B060(Quad_11B928* q, int mode);
 
 void func_0011B570(Quad_11B928* q, s32 n);
 
-struct Counters_11A6A8 {
-    s32 count;
-    u8 pad[0x500];
-    s32 count2;
-};
-
-void func_0011A6A8(Counters_11A6A8* self);
-
 struct Rec_11B6C0 { s32 tag; s32 value; };
 
 struct Rec_11B740 { s32 tag; s32 value; };
@@ -284,77 +173,17 @@ void func_0011B740(void* a, void* b);
 
 void func_0011B060(void* obj, s32 n);
 
-struct __attribute__((aligned(16))) Quad_119AF8 { s32 w[4]; };
-
-void func_0011B008(Quad_119AF8* q);
-
-void func_0011B538(Quad_119AF8* q, s32 k);
-
-void func_0011B0A8(Quad_119AF8* a, Quad_119AF8* b);
-
-void func_0011B060(Quad_119AF8* q, s32 mode);
-
-void func_0011B018(void* dst, Quad_119AF8* src);
-
 // EXACT: callee 0011B008 declared s32 and called as statement.
 
-struct __attribute__((aligned(16))) Quad_118DB8 { s32 w[4]; };
-
-s32 func_0011B008(Quad_118DB8* q);
-
-void func_0011B018(void* out, Quad_118DB8* q);
-
-void func_0011B060(Quad_118DB8* q, s32 mode);
-
-void func_0011B0A8(Quad_118DB8* a, Quad_118DB8* b);
-
-void func_0011B538(Quad_118DB8* q, s32 n);
+// EXACT: func_0011B008 declared s32, called as statement.
 
 // EXACT: func_0011B008 declared s32, called as statement.
 
-struct __attribute__((aligned(16))) Quad_118E80 { s32 w[4]; };
-
-s32 func_0011B008(Quad_118E80* q);
-
-void func_0011B018(void* out, Quad_118E80* q);
-
-void func_0011B060(Quad_118E80* q, s32 mode);
-
-void func_0011B0A8(Quad_118E80* a, Quad_118E80* b);
-
-void func_0011B538(Quad_118E80* q, s32 n);
-
 // EXACT: func_0011B008 declared s32, called as statement.
-
-struct __attribute__((aligned(16))) Quad_119878 { s32 w[4]; };
-
-s32 func_0011B008(Quad_119878* q);
-
-void func_0011B0A8(Quad_119878* a, Quad_119878* b);
-
-void func_0011B060(Quad_119878* q, s32 mode);
-
-void func_0011B538(Quad_119878* q, s32 k);
-
-void func_0011B018(void* dst, Quad_119878* src);
-
-// EXACT: func_0011B008 declared s32, called as statement.
-
-struct __attribute__((aligned(16))) Quad_119970 { s32 w[4]; };
 
 struct Item_119970 { s32 tag; Item_119970* child; Item_119970* next; };
 
-struct Rec_119970 { s32 c; Item_119970* head; s32 count; s32 found; Item_119970* after; };
-
-s32 func_0011B008(Quad_119970* q);
-
 void* func_0011AFC8(void);
-
-void func_0011B700(Quad_119970* r, Rec_119970* value);
-
-void func_0011B018(void* dst, Quad_119970* src);
-
-void func_0011B060(Quad_119970* q, s32 mode);
 
 struct Node_11BD28 { s32 key; Value_11B008 value; Node_11BD28* next; };
 
@@ -383,8 +212,6 @@ void func_0011B0A8(void* a, const Tmp_119218& b);
 
 struct Link_1194A8 { s32 f0; Link_1194A8* f4; Link_1194A8* f8; };
 
-struct __attribute__((aligned(16))) Quad_1194A8 { s32 type; Link_1194A8* head; s32 w2; s32 w3; };
-
 void* func_0011B008(void* q);
 
 void func_0011B018(void* self, void* q);
@@ -394,40 +221,6 @@ void func_0011B538(void* q, s32 n);
 void func_0011B060(void* q, s32 mode);
 
 // Fixed by merging the two flag tests into one "kind != 0x1B || p != 0".
-
-struct __attribute__((aligned(16))) Quad_119310 { s32 kind; void* p; s32 w[2]; };
-
-s32 func_0011B008(Quad_119310* q);
-
-void func_0011B018(void* out, Quad_119310* q);
-
-void func_0011B060(Quad_119310* q, s32 mode);
-
-void func_0011B0A8(Quad_119310* a, Quad_119310* b);
-
-void func_0011B538(Quad_119310* q, s32 n);
-
-struct Quad_118F48 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_118F48* q);
-
-void func_0011B018(void* dst, Quad_118F48* src);
-
-void func_0011B060(Quad_118F48* q, int mode);
-
-void func_0011B0A8(Quad_118F48* a, Quad_118F48* b);
-
-void func_0011B538(Quad_118F48* q, int n);
-
-struct __attribute__((aligned(16))) Quad_1196C8 { s32 w[4]; };
-
-s32 func_0011B008(Quad_1196C8* q);
-
-void func_0011B018(void* out, Quad_1196C8* q);
-
-void func_0011B060(Quad_1196C8* q, s32 mode);
-
-void func_0011B0A8(Quad_1196C8* a, Quad_1196C8* b);
 
 struct Val_11B0F8 {
     s32 type;
@@ -460,17 +253,7 @@ struct Cmd_11B4A8 {
     u32 arg;
 };
 
-struct Tmp_11A080 { s32 w[4]; };
-
 struct Ret_11A080;
-
-void func_0011B008(Tmp_11A080* t);
-
-void func_0011B018(Ret_11A080* dst, Tmp_11A080* src);
-
-void func_0011B060(Tmp_11A080* t, s32 mode);
-
-void func_0011B0A8(Tmp_11A080* dst, void* src);
 
 struct Val_11B258 { s32 tag; void* val; };
 
@@ -547,20 +330,6 @@ void func_0011B818(Node_11BA28* n, f32* p);
 void func_0011B860(Node_11BA28* n, f32* p);
 
 void func_0011B6C0(Node_11BA28* n, Node_11BA28* c);
-
-struct V_119BB0 { s32 type; void* p; };
-
-V_119BB0* func_0011B008(V_119BB0* q);
-
-void func_0011B060(V_119BB0* q, s32 mode);
-
-void func_0011B0A8(V_119BB0* a, V_119BB0* b);
-
-void func_0011B018(V_119BB0* dst, V_119BB0* src);
-
-void func_0011B6C0(V_119BB0* q, V_119BB0* head);
-
-void func_0011B538(V_119BB0* q, s32 n);
 
 void* func_0011AE78(void);
 void func_0011AEB8(Node_11AEB8* src, Node_11AEB8* dst, void* arg);

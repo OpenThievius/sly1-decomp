@@ -1,15 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c05.h"
+#include "s177838.h"
 
-struct Obj_177828 {
-    u8 pad0[0x4B8];
-    s32 f4B8;
-    u8 pad1[0x2BD8 - 0x4BC];
-    s32 f2BD8;
-};
-
-void func_00177828(Obj_177828* self, s32 value)
+void func_00177828(C07* self, s32 value)
 {
     self->f2BD8 = value;
     self->f4B8 = 0;
@@ -162,25 +156,12 @@ struct Node_177838 {
     u8 b2B4;
 };
 struct Head_177838 { u32 pad0; u32 pad4; u32 flags; };
-struct Hold_177838 {
-    Head_177838* head;
-    u8 pad4[0x14];
-    Node_177838* first;
-};
-struct Q_177838 {
-    s32 pad0;
-    Node_177838* hold;
-    s32 pad8;
-    s32 out;
-    s32 kind;
-};
-
-Node_177838* func_00177838(Q_177838* q, s32 n, Node_177838** list) {
+Node_177838* func_00177838(S177838* q, s32 n, Node_177838** list) {
     Node_177838* node;
-    if (q->hold->vt->flags & 1) {
-        node = q->hold;
+    if (((Node_177838*)q->hold)->vt->flags & 1) {
+        node = (Node_177838*)q->hold;
     } else {
-        node = q->hold->next;
+        node = ((Node_177838*)q->hold)->next;
     }
     for (; node != 0; node = node->next) {
         s32 i;

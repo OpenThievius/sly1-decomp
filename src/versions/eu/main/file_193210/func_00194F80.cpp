@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: draws a menu box with its title (laid out into the owner's line table), its items and a separator line.
+// PAL's layout record is 0x20 bytes (its setters differ): its own type, not Layout_137228.
+struct Out_eu_194F80 { u8 b[0x20]; };
+struct Col_eu_194F80 { s32 v[4]; };
 struct Menu_eu_194F80 { s32 title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
 struct Buf_eu_194F80 { u8 b[0xC0]; };
 struct Lines_eu_194F80 { f32 f0; f32 f4; f32 height; };
@@ -25,20 +28,24 @@ struct Self_eu_194F80 {
     u8 pad6[0x594 - 0x578];
     f32 f284;
 };
-void func_eu_001374E0(Out_194F80* out, s32 v);
-void func_00137260(Out_194F80* out, Lines_eu_194F80* lines);
+void func_00137228(Out_eu_194F80* out, f32 x, f32 y);
+void func_00137238(Out_eu_194F80* out, f32 x, f32 y);
+void func_00137248(Out_eu_194F80* out, Col_eu_194F80* value);
+void func_00137268(Out_eu_194F80* out, s32 flag);
+void func_eu_001374E0(Out_eu_194F80* out, s32 v);
+void func_00137260(Out_eu_194F80* out, Lines_eu_194F80* lines);
 Buf_eu_194F80* func_eu_0015DD18(Buf_eu_194F80* out, s32 id, V24A2* font, s32 zero);
 Buf_eu_194F80* func_eu_0015DCB8(Buf_eu_194F80* out, void* str, V24A2* font, s32 zero);
 void func_eu_0015E4A8(Buf_eu_194F80* buf, Lines_eu_194F80* lines, f32 w);
-void func_eu_0015E7E0(Buf_eu_194F80* buf, Out_194F80* out, s32 zero, void* data);
+void func_eu_0015E7E0(Buf_eu_194F80* buf, Out_eu_194F80* out, s32 zero, void* data);
 f32 func_eu_0015E438(Buf_eu_194F80* buf);
 void* func_00193598(s32 menu, s32 id);
 
-struct Setup_eu_194F80 { static void Do(Out_194F80* out, f32 x, f32 y, f32 w, f32 h, s32 color, Lines_eu_194F80* lines, s32 flag)
+struct Setup_eu_194F80 { static void Do(Out_eu_194F80* out, f32 x, f32 y, f32 w, f32 h, s32 color, Lines_eu_194F80* lines, s32 flag)
 {
     func_00137228(out, x, y);
     func_00137238(out, w, h);
-    Col_194F80 tmp;
+    Col_eu_194F80 tmp;
     tmp.v[0] = color;
     func_00137248(out, &tmp);
     func_00137260(out, lines);
@@ -86,12 +93,12 @@ void func_00194F80(Self_eu_194F80* self)
     self->f284 = func_001EA4B8(D_00260ED0, 0, self->f284, fade, D_00261858[5]);
     alpha = (u8)(s32)(self->f284 * 255.0f);
     if (self->f210 != 0) {
-        Out_194F80 out;
+        Out_eu_194F80 out;
         s32 backColor = 0xFF808080;
         func_00137228(&out, cx, cy);
         func_00137238(&out, w, h);
         {
-            Col_194F80 tmp;
+            Col_eu_194F80 tmp;
             tmp.v[0] = backColor;
             func_00137248(&out, &tmp);
         }
@@ -115,12 +122,12 @@ void func_00194F80(Self_eu_194F80* self)
             Lerp_194F80::Do(&res, cur->f18, gray, pulse * pulse);
             cur->f18 = res;
         }
-        CallHook_194F80::Do(self->f210, &out, D_00262280);
+        CallHook_194F80::Do(self->f210, (Layout_137228*)&out, D_00262280);
         self->f210->f18 = saved;
     }
     if (menu->title != -1) {
         Buf_eu_194F80 buf;
-        Out_194F80 out;
+        Out_eu_194F80 out;
         Rgba_194F80 c;
         f32 sc = menu->titleScale * self->f23C;
         func_0015C8B8(self->f4, sc, sc);
@@ -191,7 +198,7 @@ void func_00194F80(Self_eu_194F80* self)
         func_eu_0015DCB8(&buf, str, self->f4, 0);
         f32 width2 = func_eu_0015E438(&buf);
         th = (f32)self->f4->height * self->f4->sy;
-        Out_194F80 out;
+        Out_eu_194F80 out;
         Setup_eu_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0, 0);
         func_eu_0015E7E0(&buf, &out, 0, D_00262280);
         func_0015C900(self->f4);

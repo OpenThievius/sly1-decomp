@@ -2,6 +2,8 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c03.h"
+#include "globals.h"
+#include "s137290.h"
 
 void func_00125108(C03* self);
 void func_00138BE0(void* a, void* b, s32 c);
@@ -391,14 +393,9 @@ void func_001BB210(C03* self, s32 kind, void* arg)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_1BB028 { s32 v[4]; };
-struct Entry_1BB028 { Quad_1BB028* quad; s32 value; };
-extern Quad_1BB028 D_00248D00;
-extern Quad_1BB028 D_00248D10;
-extern Quad_1BB028 D_00248D20;
-extern Quad_1BB028 D_00248D30;
+struct Entry_1BB028 { const Vec02* quad; s32 value; };
 extern Entry_1BB028 D_002746E0[8];
-void func_001BB028(s32 index, s32* out, Quad_1BB028* dst)
+void func_001BB028(s32 index, s32* out, Vec02* dst)
 {
     *out = D_002746E0[index].value;
     *dst = *D_002746E0[index].quad;
@@ -585,23 +582,22 @@ void func_001BA130(C03* self, C03* other)
 
 // NEAR: 14 lines: retail preloads f400/f40C into s0 (lw s0 before loop and in the bnel delay slot), we load into v1; f408 loop test reload; last loop pointer s2 vs index
 
-struct In_1BAC30 { u8 pad[4]; };
 
-s32 func_00137B90(In_1BAC30* in);
-void func_00137FB0(In_1BAC30* in, Mesh03* p);
-void func_00138278(In_1BAC30* in, Mesh03* a, Tree03* out);
-f32 func_00137DF8(In_1BAC30* in);
-void func_00137EB0(In_1BAC30* in, Mat02* p);
-void func_00137E70(In_1BAC30* in, Vec02* p);
+s32 func_00137B90(S137290* in);
+void func_00137FB0(S137290* in, Mesh03* p);
+void func_00138278(S137290* in, Mesh03* a, Tree03* out);
+f32 func_00137DF8(S137290* in);
+void func_00137EB0(S137290* in, Mat02* p);
+void func_00137E70(S137290* in, Vec02* p);
 void func_001B9448(C03* self, f32 x);
-s32 func_00137BE0(In_1BAC30* in);
+s32 func_00137BE0(S137290* in);
 void* func_0018D500(s32 size);
-s32 func_00137D10(In_1BAC30* in);
-s32 func_00137C40(In_1BAC30* in);
-void func_001289C0(C03* self, In_1BAC30* in);
+s32 func_00137D10(S137290* in);
+s32 func_00137C40(S137290* in);
+void func_001289C0(C03* self, S137290* in);
 void func_00138F28(void* a, C03* b);
 
-void func_001BAC30(C03* self, In_1BAC30* in)
+void func_001BAC30(C03* self, S137290* in)
 {
     s32 i;
     s32 j;
@@ -679,7 +675,6 @@ void func_001BAC30(C03* self, In_1BAC30* in)
     }
 }
 
-struct Quad_1B9F30 { f32 v[4]; } __attribute__((aligned(16)));
 struct Out_1B9F30 {
     s32 f00;
     u8 pad04[0x0C];
@@ -691,17 +686,17 @@ struct Out_1B9F30 {
     s32 f3C;
 };
 
-void func_00189378(Mat02* m, s32 zero, Quad_1B9F30* out);
+void func_00189378(Mat02* m, s32 zero, Vec02* out);
 f32 func_00205778(f32 a, f32 b);
 extern f32 D_0026185C[];
 
 void func_001B9F30(C03* self, Out_1B9F30* out)
 {
-    Quad_1B9F30 tmp[3];
+    Vec02 tmp[3];
     out->q10 = self->v140;
     out->q20 = self->v150;
     func_00189378(&self->m110, 0, &tmp[0]);
-    out->f30 = func_00205778(-tmp[0].v[1], -tmp[0].v[0]);
+    out->f30 = func_00205778(-tmp[0].y, -tmp[0].x);
     out->f34 = 100.0f;
     out->f00 = 0;
     out->f38 = D_0026185C[0];

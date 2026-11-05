@@ -3,20 +3,20 @@
 struct Hld_151300_eu { u8 pad[0x578]; s32 f578; u8 pad2[4]; s32 f580; };
 struct Sc_151300_eu { u8 pad[0x584]; u8 f584; u8 pad2[7]; f32 f58C; };
 
-s32 func_00151300(Obj_151300* self)
+s32 func_00151300(C65* self)
 {
     s32 flags = self->f2E8;
     if (flags & 2) {
-        Ent_151300* e = self->f2E4 < self->f2DC - 1 ? &self->f2E0[self->f2E4 + 1] : 0;
+        Ent_151300* e = self->step2E4 < self->count2DC - 1 ? &((Ent_151300*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->f0 == 2) {
             if (flags == 2) return 0;
         }
-        if (((Hld_151300_eu*)D_002708E0)->f580 == self->f2F0 && ((Hld_151300_eu*)D_002708E0)->f578 == 1) flags &= 0xFFFFFFFD;
+        if (((Hld_151300_eu*)&D_002708E0)->f580 == self->f2F0 && ((Hld_151300_eu*)&D_002708E0)->f578 == 1) flags &= 0xFFFFFFFD;
     }
     if (flags & 4) {
-        Ent_151300* e = self->f2E4 < self->f2DC - 1 ? &self->f2E0[self->f2E4 + 1] : 0;
+        Ent_151300* e = self->step2E4 < self->count2DC - 1 ? &((Ent_151300*)self->steps2E0)[self->step2E4 + 1] : 0;
         if (e != 0 && e->f0 == 1 && flags == 4) return 0;
-        if (((Hld_151300_eu*)D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
+        if (((Hld_151300_eu*)&D_00271558)->f580 == self->f2F4 && ((Hld_151300_eu*)&D_00271558)->f578 == 1) flags &= 0xFFFFFFFB;
     }
     if (flags & 1) {
         if (func_001BE810() == 0) flags &= 0xFFFFFFFE;
@@ -25,10 +25,10 @@ s32 func_00151300(Obj_151300* self)
         if (func_001BE980() == 0) flags &= 0xFFFFFFF7;
     }
     if (flags & 0x10) {
-        if (self->f2F8 == 0) flags &= 0xFFFFFFEF;
+        if (self->value2F8 == 0) flags &= 0xFFFFFFEF;
     }
     if (flags & 0x20) {
-        if (func_00136530((Sc_151300*)&D_002701F8) != 0) flags &= 0xFFFFFFDF;
+        if (func_00136530(&D_002701F8) != 0) flags &= 0xFFFFFFDF;
     }
     if (flags & 0x40) {
         if (((Mgr_151300*)D_00261990)->f478 == ((Sc_151300_eu*)&D_002701F8)->f58C) flags &= 0xFFFFFFBF;
@@ -39,7 +39,7 @@ s32 func_00151300(Obj_151300* self)
     ((Sc_151300_eu*)&D_002701F8)->f584 = 0;
     if (flags == 0x100) {
         s32 r;
-        In_151300* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
+        G262C70* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
         s32 k = self->f2EC;
         r = 0;
         switch (k) {
@@ -56,17 +56,17 @@ s32 func_00151300(Obj_151300* self)
             if (0.8f < __builtin_fabsf(in->f44)) r = 1;
             break;
         case 13:
-            if (D_00262E10 != 0 && D_00262E10->f2220 == 2) r = D_00262E10->f2228 == 3;
+            if (D_00262E10 != 0 && ((Ctx_151300*)D_00262E10)->f2220 == 2) r = ((Ctx_151300*)D_00262E10)->f2228 == 3;
             break;
         case 14:
         {
-            Fl_151300* fl = (Fl_151300*)D_002623C8;
-            u32 t = fl->f0 & 4;
+            G27C230* fl = D_002623C8;
+            u32 t = fl->bits & 4;
             r = t != 0;
         }
             break;
         default:
-            r = (in->fAA & D_00261D08[k]) != 0;
+            r = (in->flags & D_00261D08[k]) != 0;
             break;
         }
         if (r != 0) {

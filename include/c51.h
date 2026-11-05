@@ -11,26 +11,37 @@
 
 #include "c02.h"
 
-struct __attribute__((aligned(16))) Quad51 { s32 a, b, c, d; };
+#include "shapes.h"   // Quad16
 
 // Eight bytes that slot 9 keeps through the parent's copy; retail moves them unaligned.
 struct __attribute__((packed)) Pair51 { s32 a; s32 b; };
 
 struct C51 : C02 {
     s32 w2d0;               // 0x2D0: 0 at setup
-    u8 pad2D4[0x2F8 - 0x2D4];
+    u8 pad2D4[0x2E0 - 0x2D4];
+    u32 f2E0[4];            // 0x2E0
+    f32 f2F0;               // 0x2F0
+    f32 f2F4;               // 0x2F4
     f32 f2f8;               // 0x2F8: 180.0 at setup
     f32 f2fc;               // 0x2FC: 240.0 at setup
     f32 f300;               // 0x300: 180.0 at setup
     s32 value;              // 0x304: compared by slot 9
     u8 pad308[0x320 - 0x308];
-    Quad51 q320;            // 0x320: D_00248D20 at setup
+    Quad16 q320;            // 0x320: D_00248D20 at setup
     f32 f330;               // 0x330: 200.0 at setup
     f32 f334;               // 0x334: 2000.0 at setup
     f32 f338;               // 0x338: 60.0 at setup
-    u8 pad33C[0x340 - 0x33C];
-    Quad51 q340;            // 0x340: D_00248D10 at setup
-    u8 pad350[0x410 - 0x350];
+    f32 f33C;               // 0x33C
+    Quad16 q340;            // 0x340: D_00248D10 at setup
+    f32 f350;               // 0x350
+    f32 f354;               // 0x354
+    f32 f358;               // 0x358
+    f32 f35C;               // 0x35C
+    f32 f360;               // 0x360
+    f32 f364;               // 0x364
+    f32 f368;               // 0x368
+    f32 f36C;               // 0x36C
+    u8 pad370[0x410 - 0x370];
     Pair51 saved;           // 0x410: kept through a copy
     u8 pad418[0x620 - 0x418];
 };

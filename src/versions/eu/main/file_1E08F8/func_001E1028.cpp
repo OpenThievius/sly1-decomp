@@ -17,7 +17,7 @@ struct Fmt_1E1028_eu {
 s32 func_001E0E18(Fmt_1E1028_eu* self, Val_1E1028* v);
 s32 func_001E0EF8(u8 c);
 
-void func_001E1028(Fmt_1E1028_eu* self, Sink_1E1028* sink, u64 value)
+void func_001E1028(Fmt_1E1028_eu* self, S1D7190* sink, u64 value)
 {
     char buf[0x50];
     char pfx[0x10];

@@ -174,14 +174,15 @@ void func_00121648(T2195* self, s32 flag)
 
     if (self == s2->f1EC) {
         if (flag != 0 || self->mode0 == 2) {
-            self->vt->getPos(self, &loc.pos, &loc.vec, 0.0f);
+            self->vt->getPos(self, 0.0f, &loc.pos, &loc.vec);
             s2->desc02()->m1D(s2, &loc.pos);
             s2->desc02()->m20(s2, &loc.vec);
         }
     }
     if (self == s2->f1F0) {
         if (flag != 0 || self->mode1 == 2) {
-            self->vt->getRot(self, &loc.rot, &loc.pos, 0.0f);
+            self->vt->getRot(self, 0.0f, &loc.rot, &loc.pos);
+
             s2->desc02()->m1E(s2, &loc.rot);
             s2->desc02()->m21(s2, &loc.pos);
         }
@@ -206,7 +207,7 @@ void func_001227B0(T2195_588* src, Vec02* d0, Vec02* d1)
     *d0 = src->pos;
     *d1 = src->vec;
     C02* obj = src->owner;
-    Told_1227B0 fn = (Told_1227B0)obj->desc02()->m28;
+    Told_1227B0 fn = obj->desc02()->m28;
     if (fn != 0) {
         fn(obj, d0, d1);
     }
@@ -254,7 +255,7 @@ void func_00122920(T2195_5B0* self, Vec02* first, Vec02* second)
 		callback(self->owner);
 }
 
-typedef void (*Told_122968)(C02* self, Mat02* a, Vec02* b);
+
 
 void func_00122968(T2195_5B0* self, Mat02* d1, Vec02* d2)
 {
@@ -263,7 +264,8 @@ void func_00122968(T2195_5B0* self, Mat02* d1, Vec02* d2)
     d1->r[1] = s->r[1];
     d1->r[2] = s->r[2];
     *d2 = *self->vec2;
-    ((Told_122968)self->owner->desc02()->m29)(self->owner, d1, d2);
+    self->owner->desc02()->m29(self->owner, d1, d2);
+
 }
 
 void func_001229C0(T2195_5B0* self, f32* a, f32* b)
@@ -395,11 +397,9 @@ void func_001233C0(C22* object)
 	func_0013D278(object);
 }
 
-struct Value_00123400 { u8 pad[0x6C0]; s32 value; };
-
-void func_00123400(Value_00123400* state, s32 value)
+void func_00123400(C22* state, C2F* value)
 {
-	state->value = value;
+    state->counter = value;
 }
 
 extern u8 D_00261420[];
@@ -553,44 +553,26 @@ s32 func_00123D40(C2F* self, void* arg)
     return 1;
 }
 
-struct Records_001250C8 {
-    u8 pad0[0x238];
-    s32 count;
-    u8 pad1[4];
-    u8* data;
-};
-
 struct Record_001250C8 { u8 pad[8]; s32 value; };
 
-void func_001250C8(Records_001250C8* records)
+void func_001250C8(C02* records)
 {
-    for (s32 i = 0; i < records->count; i++) {
-        Record_001250C8* record = (Record_001250C8*)(records->data + i * 0x28);
+    for (s32 i = 0; i < *(s32*)(records->sub22C + 0xC); i++) {
+        Record_001250C8* record = (Record_001250C8*)(*(u8**)(records->sub22C + 0x14) + i * 0x28);
         record->value = -1;
     }
 }
 
-struct Object_00126A48 {
-    u32* vtable;
-    u8 pad0[0x18];
-    Object_00126A48* next;
-    u8 pad1[0x14];
-    Object_00126A48* child;
-    u8 pad2[0x22C];
-    u32 state_flags;
-    u32 state;
-};
-
-void func_00126A48(Object_00126A48* object, u32 value)
+void func_00126A48(C02* object, u32 value)
 {
     ListFrame frame;
-    Object_00126A48* child = object->child;
-    object->state = value;
-    object->state_flags |= 2;
+    C02* child = (C02*)object->children.head;
+    *(u32*)(object->sub22C + 0x3C) = value;
+    *(u32*)(object->sub22C + 0x38) |= 2;
     while (child != 0) {
-        if ((child->vtable[2] & 1) != 0)
+        if ((child->desc->flags & 1) != 0)
             func_00126A48(child, value);
-        child = child->next;
+        child = (C02*)child->next;
     }
 }
 
@@ -717,7 +699,6 @@ void func_001201F0(T2196_6F8* self, Stream83* arg)
     self->closed = result;
 }
 
-struct Owner_122488 { u8 pad0[0x270]; f32* values; u8 pad1[0x20]; s32 flag; };
 
 extern f32 D_00260E60[4];
 extern f32 D_0026186C;
@@ -729,12 +710,12 @@ void func_00122488(T2195* self, s32 val)
     f32 ret = self->vt->getIndexed(self, val);
     switch (self->mode3) {
     case 2:
-        ((Owner_122488*)self->owner)->values[val] = ret;
+        self->owner->f270[val] = ret;
         break;
     case 3: {
-        f32 cur = ((Owner_122488*)self->owner)->values[val];
-        f32 limit = ((Owner_122488*)self->owner)->flag ? D_0026186C : D_00261860;
-        ((Owner_122488*)self->owner)->values[val] = func_001EA4B8(D_00260E60, 0, cur, ret, limit);
+        f32 cur = self->owner->f270[val];
+        f32 limit = self->owner->f294 ? D_0026186C : D_00261860;
+        self->owner->f270[val] = func_001EA4B8(D_00260E60, 0, cur, ret, limit);
         break;
     }
     }
@@ -779,7 +760,7 @@ void func_00123448(C2F* self)
         } while (s0 != 0);
     }
     if (self->found558 != 0) {
-        self->f55C = func_001B6290(self->found558, self, -1, 1);
+        self->f55C = (S1B6290*)func_001B6290(self->found558, self, -1, 1);
         func_00182ED8(self->found558);
     }
     D_0027B314 = (ListFrame*)fr.f0C;
@@ -839,7 +820,7 @@ struct Obj_1236C8 { VFn_1236C8* vt; };
 extern u8 D_00261420[];
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 s32 func_001300E8(void* node, s32 kind);
-void func_00123400(void* node, void* value);
+void func_00123400(C22* node, C2F* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
 
@@ -850,7 +831,7 @@ void func_001236C8(C2F* self)
     for (i = 0; i < self->count1; i++) {
         void* node = func_0015A418(self->world, 0x104, self->items1[i], self);
         if (node && func_001300E8(node, 0x22)) {
-            func_00123400(node, self);
+            func_00123400((C22*)node, self);
             kept++;
         }
     }

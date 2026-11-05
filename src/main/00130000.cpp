@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "c01.h"
+#include "s130070.h"
 
-struct Obj_1300D8 { u8 pad[0x20]; s32 f20; };
-
-void func_001300D8(Obj_1300D8* a0, s32 a1)
+void func_001300D8(S130070* a0, s32 a1)
 {
-    a0->f20 += a1;
+    a0->tail += a1;
 }
 
 void func_00130B48(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
@@ -22,45 +22,14 @@ struct Quad_130F48 {
     f32 c0, c1, c2, c3;
 } __attribute__((aligned(16)));
 
-struct Span_130F48 {
-    Quad_130F48 head;
-    f32 len;
-    f32 halfw;
-    s32 lo;
-    s32 mid;
-    s32 hi;
-    f32 p;
-    f32 q;
-};
-
-
-
-
-
-
-
 typedef void (*VFn_131140)(void* self, s32 arg);
 
-struct Obj_131140 {
-    VFn_131140* vtbl;
-    u8 pad0[0x300 - 4];
-    s32 f300;
-    s32 f304;
-    s32 f308;
-    u8 pad1[8];
-    f32 f314;
-};
-
 void func_001365A0(void* self, s32 arg);
-
-
-
-struct Obj_130070 { s32 state; };
 
 void func_0012FE70(void* self);
 void func_0012FFE8(void* self);
 
-void func_00130070(Obj_130070* self)
+void func_00130070(S130070* self)
 {
     switch (self->state) {
     case 0:
@@ -74,33 +43,29 @@ void func_00130070(Obj_130070* self)
     }
 }
 
-struct Node_1300E8 { Node_1300E8* next; s32 key; };
-struct List_1300E8 { Node_1300E8* head; };
-
-s32 func_001300E8(List_1300E8* list, s32 key)
+s32 func_001300E8(C01* list, s32 key)
 {
-    Node_1300E8* node = list->head;
+    const Desc01* node = list->desc;
     while (node != 0) {
-        if (node->key == key) {
+        if (node->id == key) {
             return 1;
         }
-        node = node->next;
+        node = (const Desc01*)node->parent;
     }
     return 0;
 }
 
-struct Obj_130110 { s32 pad0; s32 field4; };
-
 extern u8 D_00259F38[];
-s32 func_0011BF30(void);
-void func_0011A708(void* dst, s32 value);
+void* func_0011BF30(void);
+void func_0011A708(void* dst, void* value);
 
-void func_00130110(Obj_130110* self)
+void func_00130110(C01* self)
 {
-    if (self->field4 == 0) {
-        s32 v = func_0011BF30();
-        self->field4 = v;
+    if (self->f04 == 0) {
+        void* v = func_0011BF30();
+        self->f04 = v;
         func_0011A708(D_00259F38, v);
+
     }
 }
 
@@ -167,11 +132,6 @@ struct Rgba_133B58
 };
 struct Gs_133B58;
 struct Span_133B58;
-struct Self_133B58
-{
-    u8 pad000[0x30C];
-    f32 phase;
-};
 
 extern Rgba_133B58 D_002610E0;
 extern Rgba_133B58 D_002610D8;
@@ -210,19 +170,6 @@ struct Lerp_133B58
         return c;
     }
 };
-
-
-
-struct Obj_1310F0 {
-    u8 pad0[0x234];
-    f32 f234;
-    f32 f238;
-    u8 pad1[0x2F0 - 0x23C];
-    f32 f2F0;
-    u32 f2F4;
-};
-void func_001AA1F0(Obj_1310F0* self, s32 a1);
-
 
 struct Self_130B48;
 struct Out_130B48 { u8 pad0[16]; };
@@ -310,23 +257,8 @@ struct Rgba_132500
 struct Gs_132500;
 struct Span_132500;
 
-struct Pad_132500 { u8 pad[0x78]; f32 f78; };
-struct Clock_132500 { u8 pad[0x478]; f32 f478; };
-
-struct Obj_132500 {
-    u8 pad0[0x260];
-    s32 f260;
-    u8 pad1[0x30C - 0x264];
-    f32 f30C;
-    u8 pad2[0x320 - 0x310];
-    s32 f320;
-};
-
 extern s32 D_00262C68;
-extern Pad_132500 D_00262C70;
-extern Pad_132500 D_00262D38;
 extern f32 D_00261860;
-extern Clock_132500* D_00261990;
 extern Rgba_132500 D_002610E8;
 extern Rgba_132500 D_002610F0;
 extern Rgba_132500 D_002610F8;
@@ -342,45 +274,5 @@ void func_00161670(Gs_132500* gs, s32 x, s32 y, s32 z, s32 f);
 void func_001615F0(Gs_132500* gs, s32 x, s32 y, s32 z, s32 f);
 f32 func_001EA408(f32 a);
 f32 func_00205210(f32 a);
-void func_00136EC8(Obj_132500* self, f32* x, f32* y);
 f32 func_00131000(const Span_132500* s, s32 i);
-
-struct Gfx_132500 {
-    static s32 LerpU8(s32 a, s32 b, f32 t)
-    {
-        if (a == b) {
-            return b;
-        }
-        if (a < b) {
-            return a + (s32)(t * ((f32)b + 0.999f - (f32)a));
-        }
-        return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
-    }
-
-    static Rgba_132500 Lerp(Rgba_132500 a, Rgba_132500 b, f32 t)
-    {
-        Rgba_132500 r;
-        r.r = LerpU8(a.r, b.r, t);
-        r.g = LerpU8(a.g, b.g, t);
-        r.b = LerpU8(a.b, b.b, t);
-        r.a = LerpU8(a.a, b.a, t);
-        return r;
-    }
-
-    static f32 Wave(f32 x, f32 period, f32 phase)
-    {
-        return func_00205210(phase + (x / period) * 2.0f * 3.1415927f);
-    }
-
-    static s32 ScreenX(f32 x)
-    {
-        return (s32)((x + 1728.0f) * 16.0f);
-    }
-
-    static s32 ScreenY(f32 y)
-    {
-        return (s32)((y * 0.45454547f + 1936.0f) * 16.0f);
-    }
-};
-
 

@@ -19,18 +19,28 @@ struct V24A2;
 // Image record at +0x54 (func_0015D998 reads its width and its 64-bit register word;
 // func_0015CAB8 sends the two words at +0x10 to the packet).
 struct V24A2_ImgA {
-    u8 pad00[0x0A];
+    union {
+        s32 w0;             // 0x0
+        struct {
+            u16 f0;         // 0x0
+            u16 f2;         // 0x2
+        };
+    };
+    u32 f4;                 // 0x4
+    u8 f8;                  // 0x8
+    u8 f9;                  // 0x9
     u16 f0A;            // 0x0A
-    u8 pad0C[0x10 - 0x0C];
-    s32 f10;            // 0x10
-    s32 f14;            // 0x14
+    u32 bytes;          // 0x0C: its size (func_001B2CA8)
+    s32 f10;            // 0x10: an offset, made absolute by func_001B2CA8
+    s32 f14;            // 0x14: the size in 16-byte blocks (func_001B2CA8)
     u64 f18;            // 0x18
 };
 typedef char check_V24A2_ImgA[sizeof(V24A2_ImgA) == 0x20 ? 1 : -1];   // 32-byte records (D_00274504, func_0015D8A8)
 
 // Second image record at +0x58 (a palette; same readers).
 struct V24A2_ImgB {
-    u8 pad00[6];
+    u32 f0;                 // 0x0
+    u16 f4;                 // 0x4
     u16 f6;             // 0x06
     s32 f8;             // 0x08
     s32 fC;             // 0x0C
@@ -98,6 +108,9 @@ struct V24A2 {
     V24A2_Glyph* glyphs;    // 0x7C
     u32 mask;               // 0x80: bit in D_002622D8->flags marking the state as sent
     u8 pad84[4];            // 0x84
+
+    // Whether the font has a glyph for `c`, through its table's entry 2.
+    s32 Has(s32 c) { return vt->has((V24A2*)((u8*)this + vt->adj2), c); }
 };
 
 typedef char check_V24A2[sizeof(V24A2) == 0x88 ? 1 : -1];

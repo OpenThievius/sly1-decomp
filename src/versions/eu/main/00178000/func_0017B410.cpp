@@ -18,14 +18,14 @@ void func_0017B410(C4A* self, s32 mode)
     }
     if (mode >= 0) {
         if (mode < 2) {
-            Sys_17B410_eu* sys = (Sys_17B410_eu*)D_0026E248;
+            Sys_17B410_eu* sys = (Sys_17B410_eu*)&D_0026E248;
             sys->f588 = 1.0f;
             sys->f57C = sys->f570;
             sys->f580 = sys->f574;
             sys->f584 = 0;
             func_001DDC38(self->world, self);
         } else if (mode < 4) {
-            Sys_17B410_eu* sys = (Sys_17B410_eu*)D_0026E248;
+            Sys_17B410_eu* sys = (Sys_17B410_eu*)&D_0026E248;
             sys->vtbl[15](sys);
             func_001DDC38(self->world, 0);
         }

@@ -4,10 +4,10 @@ struct Sys_1F0220_eu { u8 pad0[0x30]; s32 f30; } __attribute__((packed));
 struct Tbl_1F0220_eu { u8 pad0[0x570]; void* f570; void* f574[1]; };
 extern Tbl_1F0220_eu D_eu_00274868;
 
-void func_001F0220(Obj_1F0220* self, s32 mode)
+void func_001F0220(G275F80* self, s32 mode)
 {
-    if (self->f4 == mode) goto L0410;
-    if (self->f4 == 2) {
+    if (self->mode == mode) goto L0410;
+    if (self->mode == 2) {
         if (D_0026FA68 != 0) {
             func_001F1050(D_0026FA68, 0);
         }
@@ -15,25 +15,25 @@ void func_001F0220(Obj_1F0220* self, s32 mode)
     if (mode == 1) goto L02E0;
     if (mode < 2) {
         if (mode == 0) {
-            self->fC.i = 0;
+            self->i0C = 0;
             goto L0400;
         }
-        self->f4 = mode;
+        self->mode = mode;
         goto L0404;
     }
     if (mode == 2) goto L02A0;
     if (mode == 3) goto L0374;
-    self->f4 = mode;
+    self->mode = mode;
     goto L0404;
 
 L02A0:
-    if (self->f10 != 0) {
-        Quint_1F0220* q = (Quint_1F0220*)((u8*)self + 0x10);
-        func_001E4E80(D_00275AF0, q->b, q->c, q->d, q->e);
+    if (self->cur.kind != 0) {
+        S1EFFA0* q = &self->cur;
+        func_001E4E80(D_00275AF0, (s32)q->key, q->f08, q->f0C, q->flags);
     }
-    self->f10 = 0;
-    self->fC.f = 1.0f;
-    self->f28 = 0;
+    self->cur.kind = 0;
+    self->scale = 1.0f;
+    self->saved.kind = 0;
     goto L0400;
 
 L02E0:
@@ -46,7 +46,7 @@ L02E0:
 
 L0300:
     {
-        s32 v = func_001601A0(self->f14);
+        s32 v = func_001601A0((s32)self->cur.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
         if (D_0026FA68 == 0) goto L034C;
@@ -69,7 +69,7 @@ L0354:
 L0364:
     ((Sys_1F0220_eu*)D_00275BC0)->f30 = 8;
     func_001E96F8(D_00275BC0, 8);
-    self->f4 = mode;
+    self->mode = mode;
     goto L0404;
 
 L0374:
@@ -77,7 +77,7 @@ L0374:
         s32 a = self->f24;
         if (a == 2) goto L038C;
         if (a == mode) goto L03EC;
-        self->f4 = mode;
+        self->mode = mode;
         goto L0404;
     }
 
@@ -90,9 +90,9 @@ L038C:
             }
         }
         if (D_eu_00274868.f570 != 0) {
-            ((Sub_1F0220*)D_eu_00274868.f570)->f2E0 = 3;
+            ((C67*)D_eu_00274868.f570)->f2E0 = 3;
             func_001F1050(D_eu_00274868.f570, 4);
-            self->f4 = mode;
+            self->mode = mode;
             goto L0404;
         }
         self->f24 = 3;
@@ -105,9 +105,9 @@ L03EC:
     goto L0400;
 
 L0400:
-    self->f4 = mode;
+    self->mode = mode;
 L0404:
-    self->f8 = D_00261868;
+    self->f08 = D_00261868;
 L0410:
     return;
 }

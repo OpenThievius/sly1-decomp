@@ -12,7 +12,7 @@ void func_001793F0(C1B* self)
     self->f684 = 1.0f;
     func_001399F8(self->f6C0, 0xC, 5, &self->f684);
     func_0017ABE8(self, 2);
-    u8* base = D_00270650;
+    u8* base = (u8*)&D_00270650;
     ((Packed_1793F0*)(base + 0x598))->v = 0.0f;
     *(s32*)(base + 0x594) = func_001B4688(0x36A);
 }

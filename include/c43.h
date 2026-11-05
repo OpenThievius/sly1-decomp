@@ -17,7 +17,7 @@ struct C43 : C03 {
     s32 state;              // 0x550: -1 at set-up (func_001A6F88); func_001A7480 sets it
     f32 f554;               // 0x554: the time of the last state change
     void* f558;             // 0x558: told when the state leaves 9 (func_001A7480)
-    u8 pad55C[0x560 - 0x55C];
+    void* f55C;             // 0x55C
     void* f560;             // 0x560: the sound's id (slot 16 starts it with func_001B6290)
     void* f564;             // 0x564: its handle; func_001A7480 changes the sound by state
     s32 f568;               // 0x568: 8 at set-up: the hits the object takes (func_001A72B0)

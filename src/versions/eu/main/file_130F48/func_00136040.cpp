@@ -33,7 +33,7 @@ void func_00136040(Self_136040_eu* self, Pad_136040* p)
         } else if (hi2 < v) {
             v = hi2;
         }
-        if (D_002623C0->flags & 0x200) v = -v;
+        if (D_002623C0->u19EC & 0x200) v = -v;
         va.x = self->f304;
         va.y = self->f308;
         va.z = 0;

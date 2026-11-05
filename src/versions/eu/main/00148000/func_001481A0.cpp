@@ -19,8 +19,8 @@ struct __attribute__((packed)) PSys_1481A0_eu {
 
 void func_001481A0(void* self)
 {
-    Self_1481A0* s = (Self_1481A0*)self;
-    Glob_1481A0* g = D_002623C0;
+    T219C* s = (T219C*)self;
+    G27C220* g = D_002623C0;
     s32 c = g->f19E8 + 1;
     s32 r;
     g->f19E8 = c;
@@ -30,7 +30,7 @@ void func_001481A0(void* self)
             D_002623C0->f19E8 = 0;
             ((PSys_1481A0_eu*)&D_0026CE48)->f26C = 250.0f;
             ((Sys_1481A0_eu*)&D_0026CE48)->fn274 = func_00148038;
-            ((Sys_1481A0_eu*)&D_0026CE48)->p278 = s->p14;
+            ((Sys_1481A0_eu*)&D_0026CE48)->p278 = s->prev;
             return;
         }
         if (D_002623C0->f19E0 < 99) {

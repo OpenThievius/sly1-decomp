@@ -32,9 +32,9 @@ void func_00197F10(C18* self, s32 kind, void* rec)
             }
             if (code < 0x3F6) {
                 func_001AB958(&D_0026E760);
-                ((Vt_197F10*)&D_0026D348)->vtbl[15](&D_0026D348);
-                ((Vt_197F10*)&D_0026E4E0)->vtbl[15](&D_0026E4E0);
-                ((Vt_197F10*)&D_0026E760)->vtbl[15](&D_0026E760);
+                D_0026D348.vt->m15(&D_0026D348);
+                D_0026E4E0.vt->m15(&D_0026E4E0);
+                D_0026E760.vt->m15(&D_0026E760);
                 func_001DDC38(self->world, 0);
             }
         }

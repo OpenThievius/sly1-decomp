@@ -13,13 +13,17 @@
 #include "c02.h"
 
 struct C17;
+struct C1E;
 struct Contacts03;
+struct S1DBBD8;     // an entry of the callback list at 0x1EC8 (s1dbbd8.h)
 
 struct Actor6C;
 
 // The methods slots 0x118 and 0x11C of an object that the world updates every frame.
 struct ActorVtbl6C {
-    u8 pad0[0x118];
+    u8 pad0[0x8];
+    s32 f8;                 // 0x8
+    u8 padC[0x118 - 0xC];
     void (*update)(Actor6C* self, f32 dt);   // 0x118
     void (*post)(Actor6C* self);             // 0x11C
 };
@@ -27,7 +31,11 @@ struct ActorVtbl6C {
 // An object in one of the world's lists (func_001EA118).
 struct Actor6C {
     ActorVtbl6C* vtable;    // 0x00
-    u8 pad4[0x224];
+    u8 pad4[0x1C - 0x4];
+    void* f1C;              // 0x1C
+    u8 pad20[0x34 - 0x20];
+    void* f34;              // 0x34
+    u8 pad38[0x228 - 0x38];
     s32 tries;              // 0x228: how often func_00129D70 failed it
     u8 pad22C[0x30C];
     u64 flags;              // 0x538: bit 63 asks for func_001BB9D0
@@ -48,27 +56,51 @@ struct C6C : C01 {
     ActorList6C list60;     // 0x60: the objects func_00129D70 tries to start
     ActorList6C list6C;     // 0x6C: the objects updated every frame
     List01 list78;          // 0x78: the placed objects without a parent that have +0x294 set
-    u8 pad84[0x1AD8 - 0x84];
+    u8 pad84[0x1884 - 0x84];
+    void* f1884[0x95];      // 0x1884: the objects by id, chained at C01::nextById (func_0015A4F0)
     void* buf1AD8;          // 0x1AD8: 0x4800 bytes
     void* buf1ADC;          // 0x1ADC: 0x10000 bytes, a byte for each pair of contact tables (func_001DC828)
     Contacts03* tables;     // 0x1AE0: the bodies' contact tables (func_001DC828 numbers one by its place)
     Contacts03* freeTables; // 0x1AE4: the tables not in use (func_001DC7D0 takes the first)
     Contacts03* usedTables; // 0x1AE8: the tables in use
-    u8 pad1AEC[0x1AF0 - 0x1AEC];
+    s32 f1AEC;              // 0x1AEC
     Pool6C pool1AF0;        // 0x1AF0: 0x10-byte records, the contact rows (func_001DC828 gives them back)
     Pool6C pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
-    u8 pad1B08[0x1B20 - 0x1B08];
+    Pool6C pool1B08;        // 0x1B08: 0x10-byte records (func_001DBB50, func_001DBB90)
+    Pool6C pool1B14;        // 0x1B14: the 0x14-byte S1DBBD8 entries (func_001DBBD8, func_001DBC18)
     Pool6C pool1B20;        // 0x1B20: the T2195 records (func_00121228 takes one, func_00121358 gives it back)
     Pool6C pool1B2C;        // 0x1B2C: the 0x140-byte records of kind t219c (func_0019EA78), 0x180 of them
-    u8 pad1B38[0x1B7C - 0x1B38];
+    C1E* f1B38;             // 0x1B38
+    C1E* f1B3C;             // 0x1B3C
+    Pool6C pool1B40;        // 0x1B40: 0x10C0-byte records (func_00139C70)
+    u8 pad1B4C[0x1B58 - 0x1B4C];
+    Pool6C pool1B58;        // 0x1B58: the 0xEC-byte Player2195 records (func_0012D3F8)
+    void* f1B64;            // 0x1B64
+    s32 f1B68;              // 0x1B68
+    s32 f1B6C;              // 0x1B6C
+    void* f1B70;            // 0x1B70
+    s32 f1B74;              // 0x1B74
+    s32 f1B78;              // 0x1B78
     ActorList6C list1B7C;   // 0x1B7C
-    u8 pad1B88[0x1BD0 - 0x1B88];
+    Pool6C pool1B88;        // 0x1B88: the 0x40-byte S1B6290 handles (func_001B6290)
+    List01 list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)
+    u8 pad1BA0[0x1BAC - 0x1BA0];
+    u8* f1BAC;              // 0x1BAC
+    s32 f1BB0;              // 0x1BB0
+    s32 f1BB4;              // 0x1BB4
+    u8 pad1BB8[0x1BD0 - 0x1BB8];
     Pool6C pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC
     List01 list1BDC;        // 0x1BDC
     List01 list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
     Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of C02::f284
     List01 list1C00;        // 0x1C00: the C02::f284 records in use
-    u8 pad1C0C[0x1C3C - 0x1C0C];
+    u8 pad1C0C[0x1C24 - 0x1C0C];
+    u8* f1C24;              // 0x1C24
+    s32 f1C28;              // 0x1C28
+    s32 f1C2C;              // 0x1C2C
+    void* f1C30;            // 0x1C30
+    s32 f1C34;              // 0x1C34
+    s32 f1C38;              // 0x1C38
     List01 list1C3C;        // 0x1C3C: class 0x53's objects
     List01 list1C48;        // 0x1C48: class 0x40's objects (offset 0x5DC)
     List01 list1C54;        // 0x1C54: the 0x55 family's objects
@@ -84,30 +116,54 @@ struct C6C : C01 {
     List01 list1CCC;        // 0x1CCC: class 0x10's objects (offset 0xC10)
     u8 pad1CD8[0x1CE4 - 0x1CD8];
     C17* f1CE4;             // 0x1CE4: the class 0x17 object (func_0019A1E0)
-    u8 pad1CE8[0x1D14 - 0x1CE8];
-    s32 f1D14;              // 0x1D14: class 0x32's default for its +0x5D4 (func_001B04D0)
-    u8 pad1D18[0x1D60 - 0x1D18];
-    C01* f1D60;             // 0x1D60: told (slot 27) when a 0x55-family object ends
+    union {
+        C01* slot1CE8[31];  // 0x1CE8: objects by key, at the index func_0011ECA0 gives (func_0011ECB8)
+        struct {
+            u8 pad1CE8[0x1D14 - 0x1CE8];
+            s32 f1D14;      // 0x1D14: class 0x32's default for its +0x5D4 (func_001B04D0)
+            u8 pad1D18[0x1D28 - 0x1D18];
+            s32 f1D28;      // 0x1D28
+            u8 pad1D2C[0x1D60 - 0x1D2C];
+            C01* f1D60;     // 0x1D60: told (slot 27) when a 0x55-family object ends
+        };
+    };
     u8 f1D64;               // 0x1D64
     u8 f1D65;
     u8 f1D66;
     u8 pad1D67;
     f32 f1D68;              // 0x1D68
-    u8 pad1D6C[4];
+    f32 f1D6C;              // 0x1D6C
     s32 f1D70;              // 0x1D70: -1
     s32 f1D74;              // 0x1D74
-    u8 pad1D78[0x1EC4 - 0x1D78];
+    u8 pad1D78[0x1D7C - 0x1D78];
+    f32 f1D7C;              // 0x1D7C
+    s32 f1D80;              // 0x1D80
+    u8 f1D84[0x140];        // 0x1D84
     void* f1EC4;            // 0x1EC4: the class 0x86 object (func_001EE900)
-    u8 pad1EC8[0x1ED4 - 0x1EC8];
+    S1DBBD8* f1EC8;         // 0x1EC8: the callback list's first entry (func_001DBCC8 appends, func_001DBE48 runs them)
+    S1DBBD8* f1ECC;         // 0x1ECC: its last
+    u8 pad1ED0[0x1ED4 - 0x1ED0];
     void* buf1ED4;          // 0x1ED4: 0x1000 bytes
     u8 pad1ED8[0x1EE0 - 0x1ED8];
     Vec02 gravity;          // 0x1EE0: every 0x03 object's at set-up (func_001B7968)
-    u8 pad1EF0[0x2300 - 0x1EF0];
+    s32 f1EF0;              // 0x1EF0: the number of f1EF4 entries
+    void* f1EF4;            // 0x1EF4: 8-byte entries, a key and a value (func_001C1190, func_001C1390, func_001C13E8)
+    s32 f1EF8;              // 0x1EF8
+    s32 f1EFC;              // 0x1EFC
+    u8 f1F00[0x40];         // 0x1F00
+    u8 pad1F40[0x2300 - 0x1F40];
     s32 count2300;          // 0x2300: numbers class 0x2E's objects (func_001993F0)
     s32 count2304;          // 0x2304: numbers class 0x38's objects (func_001411A8)
     f32 f2308;              // 0x2308
     f32 f230C;              // 0x230C
-    u8 pad2310[0x234C - 0x2310];
+    void* f2310;            // 0x2310
+    void* f2314;            // 0x2314
+    f32 f2318;              // 0x2318
+    s32 f231C;              // 0x231C
+    s32 f2320;              // 0x2320
+    void* f2324;            // 0x2324
+    u8 f2328[0x20];         // 0x2328
+    s32 f2348;              // 0x2348
     f32 f234C;              // 0x234C
     f32 f2350;              // 0x2350
     s32 f2354;              // 0x2354

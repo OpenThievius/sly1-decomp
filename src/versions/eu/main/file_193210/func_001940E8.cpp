@@ -13,7 +13,7 @@ void func_00193EE8(Obj_1940E8_eu* self, s32 a, s32 b);
 void func_001940E8(Obj_1940E8_eu* self, s32 mode) {
     if (self->f56C == mode) return;
     if (mode != 0) {
-        s32 key = (*(u32*)((*(u8**)&D_002623C0) + 0x19D8) << 8) | *(u32*)((*(u8**)&D_002623C0) + 0x19DC);
+        s32 key = (D_002623C0->f19D8 << 8) | D_002623C0->f19DC;
         if (key == 0x308) {
             func_001BED48();
             func_001E96F8((Obj_1940E8_eu*)D_00275BC0, 5);
@@ -30,9 +30,9 @@ void func_001940E8(Obj_1940E8_eu* self, s32 mode) {
         func_00193EE8(self, -1, self->f570);
         ((VFn_1940E8_eu)self->vtbl[14])(self);
         func_0016E0F0((Bits_1940E8)1);
-        func_0016EC88((Pool_1940E8*)((u8*)&D_00262C70));
+        func_0016EC88(&D_00262C70);
     } else {
-        s32 key = (*(u32*)((*(u8**)&D_002623C0) + 0x19D8) << 8) | *(u32*)((*(u8**)&D_002623C0) + 0x19DC);
+        s32 key = (D_002623C0->f19D8 << 8) | D_002623C0->f19DC;
         if (key == 0x308) {
             func_001BED70();
             func_001E96F8((Obj_1940E8_eu*)D_00275BC0, 3);

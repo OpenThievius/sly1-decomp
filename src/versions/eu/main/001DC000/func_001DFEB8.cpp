@@ -16,13 +16,13 @@ void func_001DFEB8(Obj_11A338_eu* self)
     Ent_11A338_eu* e;
 
     func_001AA268(self);
-    e = (Ent_11A338_eu*)func_001DFE80((((Cam_11A338*)D_002623C0)->hi << 8) | ((Cam_11A338*)D_002623C0)->lo);
+    e = (Ent_11A338_eu*)func_001DFE80((D_002623C0->f19D8 << 8) | D_002623C0->f19DC);
     if (e) {
         if (e->f4 != 0.0f) {
-            ((Glob_11A338*)D_00275710)->f = e->f4;
+            D_00275710->f230C = e->f4;
         }
-        if (((Glob_11A338*)D_00275710)->nm == 0 || !func_001E2100(((Glob_11A338*)D_00275710)->nm)) {
-            ((Glob_11A338*)D_00275710)->nm = e->w8;
+        if (D_00275710->f2314 == 0 || !func_001E2100(D_00275710->f2314)) {
+            D_00275710->f2314 = e->w8;
         }
     }
     if (func_0015C188(2)) {
@@ -31,13 +31,13 @@ void func_001DFEB8(Obj_11A338_eu* self)
     }
     func_001AA788(self, 0.6f);
     *(s32*)((u8*)self + 0x518) = (s32)0xDF7F7F7Fu;
-    if (func_001DD7A0((Glob_11A338*)D_00275710, (((Cam_11A338*)D_002623C0)->hi << 8) | ((Cam_11A338*)D_002623C0)->lo)) {
+    if (func_001DD7A0(D_00275710, (D_002623C0->f19D8 << 8) | D_002623C0->f19DC)) {
         func_001E02C8(self, 1);
     } else {
         func_001E02C8(self, 0);
     }
-    if (((Flags_11A338*)D_002623C8)->flags & 8) {
-        if (((Glob_11A338*)D_00275710)->cur->differs()) {
+    if (D_002623C8->bits & 8) {
+        if (((Cur_11A338*)D_00275710->f2310)->differs()) {
             self->vt->f20(self, func_eu_001DDAB0(0xAA));
             func_001AA8B8(self, 5.0f);
             self->vt->f38(self);

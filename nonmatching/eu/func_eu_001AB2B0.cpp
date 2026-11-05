@@ -15,11 +15,11 @@ void func_eu_001AB2B0(Obj_eu_001AB2B0* self, void* key)
     u8 buf[0xC0];
     if (key != 0 && func_eu_001E3018(key) != 0) {
         func_eu_001E3050((u8*)self + 8, key);
-        func_0015C8B8(self->f4, self->f51C, self->f51C);
+        func_0015C8B8((V24A2*)self->f4, self->f51C, self->f51C);
         func_eu_0015DCB8(buf, (u8*)self + 8, self->f4, 0);
         func_eu_0015E4A8(buf, (u8*)self + 0x408, 0.0f);
         func_001AAB20((Obj_001AAB20_eu*)self, self->f40C, self->f410);
-        func_0015C900(self->f4);
+        func_0015C900((V24A2*)self->f4);
     } else {
         self->f8 = 0;
         func_001AAB20((Obj_001AAB20_eu*)self, 0.0f, 0.0f);

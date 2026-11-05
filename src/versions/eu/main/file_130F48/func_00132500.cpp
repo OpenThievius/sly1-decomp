@@ -28,7 +28,7 @@ void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
     Rgba_130F48 c0;
     Rgba_130F48 c1;
     f32 k;
-    Pad_132500* pad;
+    G262C70* pad;
     u8 alpha;
     f32 posX;
     f32 posY;

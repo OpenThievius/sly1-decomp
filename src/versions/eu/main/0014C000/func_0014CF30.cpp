@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the two slots written in D_0026D348 are at 0x574 and 0x578 (not 0x264 and 0x268).
 struct Glob_eu_14CF30 {
-    VFn_14CF30* vtbl;
-    u8 pad0[0x574 - 4];
+    u8 pad0[0x574];
     void* f574;
     void* f578;
 };
@@ -31,13 +30,13 @@ void func_0014CF30(C68* self, s32 kind, void* key)
                 (*(Glob_eu_14CF30*)&D_0026D348).f574 = &self->f2D0;
                 (*(Glob_eu_14CF30*)&D_0026D348).f578 = &self->f2D4;
                 func_001DDC38(self->world, self);
-                func_001AB890(((Glob_14CF30*)&D_0026E760), self->f2D8);
-                func_001AB928(((Glob_14CF30*)&D_0026E760), 0.0f, func_0014C668);
-                func_001AB938(((Glob_14CF30*)&D_0026E760));
+                func_001AB890(&D_0026E760, self->f2D8);
+                func_001AB928(&D_0026E760, 0.0f, func_0014C668);
+                func_001AB938(&D_0026E760);
             }
             if (self->tag430 == 0x3FD) {
-                (*(Glob_14CF30*)&D_0026D348).vtbl[15](((Glob_14CF30*)&D_0026D348));
-                (*(Glob_14CF30*)&D_0026E760).vtbl[15](((Glob_14CF30*)&D_0026E760));
+                D_0026D348.vt->m15(&D_0026D348);
+                D_0026E760.vt->m15(&D_0026E760);
                 func_001DDC38(self->world, 0);
             }
             self->tag430 = out;

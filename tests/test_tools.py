@@ -326,6 +326,12 @@ class SystemEvidenceTest(unittest.TestCase):
         normal = ["addiu $sp, $sp, -0x10", "sd $ra, 0x0($sp)", "nop", "sw $a0, 0x4($sp)", "jr $ra", "nop"]
         self.assertIsNone(classify_asm.handwritten(classify_asm.ops_of(normal), "code", normal))
 
+    def test_a_multimedia_instruction_the_compiler_emits_does_not_block(self):
+        # por moves a 128-bit value (a mode(TI) argument) between registers: plain C emits it.
+        self.assertNotIn("mmi", todo.tags_of(["lq $a1, 0x10($sp)", "jal func_00118D30", "por $a0, $zero, $s1",
+                                              "jr $ra"], "code"))
+        self.assertIn("mmi", todo.tags_of(["pcpyld $v0, $a0, $a1", "jr $ra"], "code"))
+
     def test_the_divide_trap_and_sqrt_do_not_block(self):
         self.assertNotIn("system", todo.tags_of(["div $zero, $a0, $a1", "break 0, 7", "mflo $v0", "jr $ra"], "code"))
         self.assertIn("system", todo.tags_of(["break 1023, 1023", "jr $ra"], "code"))

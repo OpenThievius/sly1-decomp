@@ -12,11 +12,6 @@ struct Obj_1AAF88_eu {
     f32 f26C;
 };
 
-extern u8* D_002623C0;
-extern u8* D_002623C4;
-extern u8* D_002623C8;
-extern u8* D_00275710;
-
 void func_001AA268(Obj_1AAF88_eu* self);
 
 void func_001AAF88(Obj_1AAF88_eu* self)
@@ -27,17 +22,17 @@ void func_001AAF88(Obj_1AAF88_eu* self)
     self->f26C = 6000.0f;
     switch (self->f214) {
     case 3:
-        self->f264 = D_002623C0 + 0x19E0;
+        self->f264 = &D_002623C0->f19E0;
         break;
     case 4:
-        self->f264 = D_002623C8 + 0x64;
-        self->f268 = D_00275710 + 0x2300;
+        self->f264 = &D_002623C8->count64;
+        self->f268 = &D_00275710->count2300;
         break;
     case 5:
-        self->f264 = D_002623C4 + 0x438;
+        self->f264 = &D_002623C4->f438;
         break;
     case 6:
-        self->f264 = D_002623C0 + 0x19E8;
+        self->f264 = &D_002623C0->f19E8;
         break;
     case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 28: case 29:
