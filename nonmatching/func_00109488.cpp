@@ -35,8 +35,21 @@
 // stack reserve raised to 64 MiB, whose output for this file's form was byte-identical to stock's.
 // That is for measuring only: a candidate must compile on the stock compiler to land.
 //
-// Next: compare -dl/-dg dumps against retail's spills, starting with why retail keeps
-// func_00155778 in s4 from entry 150 to 420 where this form rebuilds it.
+// The function is one basic block: no call, no branch. func_00155778 (2026-11-05, -dl/-dg
+// dumps with -dumpbase): retail holds it in two values, s4 (16 stores at +0x1C, asm lines
+// 3043-3183) and a copy in a7 = r11 (36 stores, 3193-3490), both loaded near line 1370. This
+// form has the same two after CSE: pseudo 2196 (the copy, 37 refs) gets r11 as retail's does, but
+// pseudo 2083 (18 refs over 5132 insns, a user variable from the helpers' parameters) gets no
+// register in global alloc, so reload rebuilds it at each store (lui/addiu into s1, s3, s6...).
+// Its priority, floor_log2(refs) * refs / live length, is low, so it is allocated late; by then
+// s4 is held by this form's long-lived 2194 (built at line 1045 here, stored at +4 from 2198).
+// Retail builds that long-lived 2194 earlier, at line 700, into s7: a longer range, a lower
+// priority, so it is allocated after the func_00155778 value and takes s7. Both sides build 2194
+// twelve times and load the same 33 floats; the difference is where the long 2194 value starts.
+//
+// Next: find why this form's long 2194 value starts at the entry of line 1045 and not at the
+// entry of line 700 (the CSE equivalence of the earlier 2194 ends there: an entry between them
+// sets it in a register CSE cannot keep), and try the field set of that entry in its retail order.
 
 void func_001000C8();
 void func_00100178();
