@@ -306,6 +306,7 @@
 #define IsScriptNullRef                           func_001143C8
 #define IsScriptHostFunction                      func_00114438
 #define IsScriptFunction                          func_001144A0
+#define TestScriptNearlyEqual                     func_00114518
 #define IsScriptFalse                             func_001145C8
 #define PrependScriptListItem                     func_00114638
 #define GetScriptListHead                         func_001146E0
@@ -323,14 +324,23 @@
 #define EvalScriptArgument                        func_00115398
 #define MakeScriptVector                          func_00115440
 #define MakeScriptMatrix                          func_00115510
+#define SetScriptVoiceParam                       func_001156B0
 #define MakeScriptVector4FromThree                func_00115710
 #define MakeScriptFloatPair                       func_001157E0
 #define MakeScriptFloatTriple                     func_001158B8
 #define GetScriptVectorElement                    func_001159B8
+#define SetScriptRandomSeed                       func_00115B78
+#define GetScriptRandomFloat                      func_00115C00
 #define CallScriptMathFunction                    func_00115CA0
+#define GetScriptAtan2                            func_00115EC8
+#define TransposeScriptMatrix                     func_001166C0
+#define InvertScriptMatrix                        func_00116740
+#define GetScriptMatrixEuler                      func_00116A88
 #define EvalScriptQuadratic                       func_00116D20
 #define EvalScriptClampedQuadratic                func_00116DC8
 #define MakeScriptVector4FromFour                 func_00116EA8
+#define ClampScriptToRange                        func_00116FE8
+#define TestScriptInsideRange                     func_00117080
 #define RoundScriptFloat                          func_001171F0
 #define TruncateScriptFloat                       func_00117260
 #define GetScriptAbsolute                         func_001172C8
@@ -338,17 +348,27 @@
 #define GetScriptMinimum                          func_00117478
 #define GetScriptRemainder                        func_00117598
 #define GetScriptClock                            func_00117610
+#define DispatchScriptObjectProperty              func_00117910
+#define AddScriptObjectProperty                   func_00117A30
+#define SetScriptExtraObjectProperty              func_00117A60
+#define UpdateScriptObjectProperty                func_00117A90
+#define GetScriptObjectProperty                   func_00117AC0
 #define MakeScriptRefList                         func_00117AF0
 #define FindScriptObject                          func_00117BC8
 #define FindScriptObjectList                      func_00117C48
+#define FindScriptObjectById                      func_00117D00
 #define GetScriptControlledObject                 func_00117E20
 #define GetScriptWorld                            func_00117E78
 #define GetScriptTracker                          func_00117ED0
+#define GatherScriptObjectsById                   func_00117F28
 #define SearchScriptObjectHits                    func_00118198
 #define CollectScriptObjectHits                   func_001183B8
 #define FindScriptObjectHit                       func_00118458
+#define TransformScriptPointBetweenFrames         func_001184F8
+#define TransformScriptRotationBetweenFrames      func_00118608
 #define StartScriptEffect                         func_00118720
 #define StopScriptEffect                          func_001187E8
+#define StartScriptPadRecordPattern               func_00118850
 #define CopyQuadword                              func_00118D10
 #define StoreQuadword                             func_00118D20
 #define EvalScriptVariable                        func_00118D48
@@ -389,6 +409,7 @@
 #define MarkPoolLiveEnds                          func_0011A800
 #define DrainMarkStacks                           func_0011A850
 #define CollectScriptPools                        func_0011AB58
+#define TakeZeroedPoolEntry                       func_0011AE78
 #define CopyScriptValueChain                      func_0011AEB8
 #define NewScriptValueNode                        func_0011AF28
 #define DestroyScriptValueNode                    func_0011AF78
@@ -470,6 +491,7 @@
 #define StopSoundVoice                            func_0011D600
 #define IsVoiceBusy                               func_0011D708
 #define RequestVoiceCallback                      func_0011D730
+#define SetVoiceVolumePan                         func_0011D798
 #define GetSoundPitchBase                         func_0011D7D8
 #define SetVoicePitch                             func_0011D810
 #define SetVoiceParam                             func_0011D8B0
@@ -484,6 +506,8 @@
 #define StartDiscRead                             func_0011E138
 #define SyncDiscRead                              func_0011E1F8
 #define GetDiscReadError                          func_0011E2E8
+#define SetIopChannelValue                        func_0011E328
+#define SetIopChannelValuePair                    func_0011E360
 #define OpenIopRing                               func_0011E428
 #define GetIopRingPosition                        func_0011E4F8
 #define CreateTypedRecord                         func_0011E580
@@ -596,6 +620,7 @@
 #define ReparentPlacedObject                      func_001245A8
 #define PostLoadPlacedObject                      func_001249A8
 #define StartPlacedObject                         func_00124A48
+#define StartAnimationFromContext                 func_00124CC0
 #define ResolveObjectLinks                        func_00124DF8
 #define UpdatePlacedObject                        func_00124FC0
 #define ClearObjectRecordValues                   func_001250C8
@@ -604,6 +629,7 @@
 #define BuildPlacedObjectTransform                func_00125B70
 #define SetObjectTreeRecordValue                  func_00126A48
 #define SetObjectTreeRecordsValue                 func_00126BC0
+#define EnsureObjectWorldNode                     func_00126C58
 #define ClonePlacedObject                         func_00126F78
 #define CopyPlacedObject                          func_00127048
 #define HandlePlacedObjectNotification            func_00127378
@@ -696,12 +722,16 @@
 #define InitAnimation                             func_0012B870
 #define LoadAnimation                             func_0012B8C8
 #define ReadAnimationEvents                       func_0012BC38
+#define StartClampedKinematicValue                func_0012C160
+#define StartLinkedObjectAnimation                func_0012C208
 #define CreateAnimationPlayer                     func_0012C288
 #define CreateAnimationPlayerWithoutPresetTargets func_0012C7B0
 #define CreateAnimationPlayerReturned             func_0012C7D8
 #define FindAnimationPlayerByScope                func_0012C808
 #define FindOrCreateAnimationPlayerAndSeek        func_0012C840
 #define ReplaceAnimationPlayer                    func_0012C918
+#define FindRecordByKey                           func_0012CBE8
+#define FindEntryByObjectId                       func_0012CCE8
 #define GatherAnimationEventObjects               func_0012D1B0
 #define MoveAnimationTrackToEnd                   func_0012D2A8
 #define NewAnimationPlayer                        func_0012D3F8
@@ -710,11 +740,14 @@
 #define RunAnimationEvent                         func_0012D5D0
 #define RunSeekAnimationEvents                    func_0012E4E0
 #define RunAnimationEventsToTime                  func_0012E5D0
+#define ReleaseWorldListEntry                     func_0012E710
 #define StopAnimationPlayer                       func_0012E760
 #define ReleasePlayerAttachment                   func_0012E928
 #define GetRangeFalloffScale                      func_0012E968
 #define ApplyAnimationLoopMode                    func_0012E9E0
 #define SeekAnimationPlayer                       func_0012F0A0
+#define ApplyListedPoseSources                    func_0012F190
+#define SettleListedPoseSources                   func_0012F1D8
 #define SetAnimationPlayerSpeed                   func_0012F6B0
 #define SetAnimationPlayerSpeedScale              func_0012F6D0
 #define NotifyAnimationPlayerCallbacks            func_0012F760
@@ -737,9 +770,11 @@
 #define PumpStreamReader                          func_00130070
 #define ConsumeStreamBytes                        func_001300D8
 #define IsObjectOfKind                            func_001300E8
+#define EnsureKeyedList                           func_00130110
 #define SolveBezierSegment                        func_00130168
 #define EvaluateHermiteSegment                    func_001303F0
 #define SampleCurvePoints                         func_00130B48
+#define MeasureCurveSegmentLength                 func_00130C20
 #define InitCurveSpan                             func_00130F48
 #define EvalCurveSpan                             func_00131000
 #define InitTextPanel                             func_001310F0
@@ -747,6 +782,8 @@
 #define DrawTextPanelBlocks                       func_00135228
 #define SetTextPanelMode                          func_00135550
 #define SetTextPanelState                         func_001356C0
+#define CompareEntriesByAttachedKey               func_001357F0
+#define CompareEntriesFlaggedLast                 func_00135858
 #define ReleasePanelEntries                       func_00135E78
 #define RefreshPanelEntries                       func_00135F48
 #define UpdatePanelStick                          func_00136040
@@ -786,6 +823,7 @@
 #define ReadBufferedString                        func_001384A0
 #define SkipBufferedBlock                         func_00138518
 #define ReadOptionalBufferedBlock                 func_00138550
+#define SetContactPairFlags                       func_001385A0
 #define PushContactRow                            func_00138738
 #define UnlinkContactRow                          func_00138788
 #define FindContactRow                            func_001387C0
@@ -842,6 +880,7 @@
 #define AppendToObjectQueue                       func_0013E8F8
 #define InitZoneRecord                            func_0013E918
 #define CollectZoneChildren                       func_0013E950
+#define StartZoneRecord                           func_0013EA38
 #define SetZoneEntry                              func_0013EB30
 #define SetZoneMode                               func_0013EB68
 #define UpsertKeyedEntry                          func_0013EC00
@@ -877,6 +916,7 @@
 #define TestFlagTableBit                          func_00141008
 #define SetFlagTableBit                           func_00141040
 #define ClearFlagTableBit                         func_001410A0
+#define ReadObjectTransformAndTables              func_00141108
 #define InitFlaggedObject                         func_001411A8
 #define CollectChildLists                         func_00141210
 #define ResolveListIds                            func_00141338
@@ -911,6 +951,7 @@
 #define SetCameraPlacement                        func_001448C8
 #define PushCameraController                      func_00145088
 #define RemoveCameraControllers                   func_001451F0
+#define FindFirstFreeSpan                         func_00145810
 #define PushCameraStackValue                      func_00145FB8
 #define PopCameraStackValue                       func_00145FD8
 #define PeekCameraStackValue                      func_00145FF8
@@ -929,6 +970,8 @@
 #define InitTimeRangeNotifier                     func_00147E40
 #define HandleTimeRangeNotifierNotification       func_00147EF8
 #define UpdateTimeRangeNotifier                   func_00147FB0
+#define SetEffectNotifierState                    func_00148298
+#define SetSoundNotifierState                     func_00148470
 #define UpdateNotifierWorldDeadline               func_00148828
 #define CompareFloatsDescending                   func_00148910
 #define ScatterObjectsAroundCircle                func_00148AC0
@@ -954,6 +997,8 @@
 #define HandleNumberedAgentObjectEvent            func_0014BCE8
 #define EnterNumberedAgentState                   func_0014BD38
 #define ChooseAgentStateByContact                 func_0014BDC8
+#define HandleContactAgentObjectEvent             func_0014BEF8
+#define EnterContactAgentState                    func_0014BF88
 #define InitGaugeManager                          func_0014C018
 #define BlendParamSets                            func_0014C138
 #define ComputeGaugeOutputs                       func_0014C2F0
@@ -973,6 +1018,7 @@
 #define FindPathCurveSegmentByLength              func_0014DA68
 #define GetPathCurveEndTime                       func_0014DB40
 #define GetPathCurveEndLength                     func_0014DB58
+#define GetPathCurveSearchStep                    func_0014DD00
 #define ReadPathCurve                             func_0014DD28
 #define DrawPathCurveSegment                      func_0014DE78
 #define TransformPathCurvePoints                  func_0014DF68
@@ -1003,6 +1049,8 @@
 #define ReleaseTaker                              func_0014FC38
 #define SetTakerWalkerState                       func_0014FCE8
 #define TakePooledObject                          func_0014FEC0
+#define SelectEarliestPooledObject                func_00150298
+#define FindFirstAttachedPooledObject             func_00150338
 #define InitStepSequence                          func_001504E0
 #define LoadStepSequence                          func_00150528
 #define ReadSequenceSteps                         func_00150570
@@ -1028,10 +1076,12 @@
 #define IsListEmpty                               func_00152720
 #define SpliceListToEnd                           func_00152730
 #define CountListItems                            func_001527D8
+#define InitDmaChannels                           func_00152810
 #define InitPacketBuffer                          func_00152888
 #define ClearPacketBuffer                         func_001528C8
 #define RewindPacketBuffer                        func_001528E0
 #define AllocatePacketBuffer                      func_001528F0
+#define AllocateQuadwordBuffer                    func_00152938
 #define AllocateTempPacketBuffer                  func_00152980
 #define UsePacketBufferMemory                     func_001529C8
 #define DetachPacketBuffer                        func_001529E0
@@ -1044,6 +1094,8 @@
 #define AddDmaEndTag                              func_00152D30
 #define CloseDmaTag                               func_00152D70
 #define BuildTexturePackets                       func_00152E48
+#define QueuePlacedObjectDraw                     func_00153328
+#define DrawPlacedObjectParts                     func_001533A8
 #define InitActiveSetSolver                       func_00153528
 #define ResetActiveSetSolver                      func_00153608
 #define PivotActiveSet                            func_00153A50
@@ -1066,6 +1118,7 @@
 #define IsEffectSpawnerActive                     func_00155FB0
 #define GetEffectSpawnerInactive                  func_00156030
 #define GetEffectSpawnerActive                    func_00156060
+#define RandomizeEffectSpawnerDelay               func_00156088
 #define SetSpawnRecordKind                        func_00156188
 #define SetEffectSpawnerKind                      func_00156218
 #define InitSpawnRing                             func_00156FC8
@@ -1100,9 +1153,11 @@
 #define StepObjectLevelRamp                       func_00159AD0
 #define AddObjectNodeToWorld                      func_00159BB0
 #define RemoveObjectNodeFromWorld                 func_00159C28
+#define DrawScreenFill                            func_00159CA0
 #define UpdateColorFade                           func_00159D00
 #define StartColorFade                            func_00159ED0
 #define GetHashedSlot                             func_00159F20
+#define CollectObjectByMode                       func_00159F48
 #define FindFirstObjectById                       func_0015A418
 #define IsClassOfKind                             func_0015A4B8
 #define GatherObjectsById                         func_0015A4F0
@@ -1156,6 +1211,8 @@
 #define UploadAllFontImages                       func_0015E5F0
 #define InitRenderFrames                          func_0015E810
 #define BeginRenderFrame                          func_0015E9F0
+#define AddDmaRefTagIfChanged                     func_0015EAE0
+#define WriteGsFinishPacket                       func_0015EB20
 #define CloseDrawBuffer                           func_0015EBF0
 #define SubmitRenderFrame                         func_0015EC68
 #define VerifyCodeChecksum                        func_0015EDB8
@@ -1163,6 +1220,7 @@
 #define SendRenderFrameToDma                      func_0015EF88
 #define ReleaseFrameNodes                         func_0015EFE8
 #define DrainRenderFrames                         func_0015F210
+#define ResetPacketWriters                        func_0015F658
 #define QueueObjectForRegroup                     func_0015F678
 #define MergeObjectLinkLists                      func_0015F6C0
 #define DissolveObjectLinkList                    func_0015F710
@@ -1213,6 +1271,7 @@
 #define AddGifImageTag                            func_00161958
 #define InitVertexBatch                           func_001619C0
 #define DestroyVertexBatch                        func_00161A88
+#define SetVertexBatchTransform                   func_00161AB0
 #define ResetVertexBatch                          func_00161B80
 #define BuildUnlitVertexPacket                    func_00161C00
 #define BuildLitVertexPacket                      func_00161F70
@@ -1230,6 +1289,7 @@
 #define CopyAttachmentBlock                       func_00165920
 #define UpdateAttachments                         func_00165FE0
 #define UpdateAttachmentFrames                    func_001660E8
+#define FlipVifBaseOffset                         func_00166658
 #define ApplyFieldDisplayOffset                   func_00168130
 #define FlipDisplayFrame                          func_001683E8
 #define FillScreenColor                           func_00168770
@@ -1246,11 +1306,14 @@
 #define BuildImageTexRegister                     func_00168FB0
 #define StartImageUpload                          func_00169088
 #define PlaceMaskedImages                         func_001690C0
+#define SendMaskedImagesToGif                     func_001692B0
+#define BuildMaskedImagesPacket                   func_001693A8
 #define SubmitMeshQueueEntry                      func_001694A0
 #define QueueMeshStrip                            func_001694F8
 #define QueueNodeLink                             func_00169608
 #define RemapMeshQueueValues                      func_001696B8
 #define FlushMeshQueue                            func_00169718
+#define UploadImagesByMask                        func_00169780
 #define SetupTextureRenderTarget                  func_00169B18
 #define SetObjectListLinkOffsets                  func_00169C58
 #define ClearObjectLists                          func_00169CA0
@@ -1340,10 +1403,12 @@
 #define SavePlayerPreviousPosition                func_00172AE0
 #define SetPlayerBoundsPoints                     func_00172B08
 #define UpdatePlayerBounds                        func_00172B88
+#define FindFirstAttachedSlotObject               func_00172BF8
 #define CollidePlayerWithObject                   func_00172CF0
 #define SetPlayerTracked                          func_00173708
 #define UpdatePlayer                              func_00174808
 #define FindNodeForQuery                          func_00177838
+#define CompareByKey                              func_00177968
 #define GetPlayerInteractFlags                    func_00177EE0
 #define ReceivePlayerNode                         func_00177F98
 #define SetPlayerPosition                         func_00178008
@@ -1379,6 +1444,7 @@
 #define RemoveFromPointObjectList                 func_0017FDC8
 #define InitColoredTriangles                      func_0017FE90
 #define LoadColoredTriangles                      func_0017FEC0
+#define DrawTriangleGroups                        func_00180108
 #define DrawColoredTriangles                      func_00180398
 #define RegisterListedKeepObject                  func_00180EB0
 #define UnregisterListedKeepObject                func_00180EE8
@@ -1459,6 +1525,7 @@
 #define VectorToAngles                            func_00189230
 #define InvertSquareMatrix                        func_00189438
 #define InvertMatrix3x3                           func_001897F0
+#define InvertMatrix4x4                           func_00189AF0
 #define BuildProjectionMatrix                     func_00189F58
 #define InitMemoryCardSystem                      func_0018B580
 #define InitBackgroundJob                         func_0018B5C0
@@ -1482,6 +1549,7 @@
 #define ApplyMemoryCardImage                      func_0018C568
 #define SaveGameToMemoryCardSlot                  func_0018C638
 #define WriteSelectedMemoryCardSlot               func_0018C770
+#define StartMemoryCardSave                       func_0018C7F8
 #define ListMemoryCardDirectory                   func_0018C888
 #define CheckMemoryCardFileExists                 func_0018C9C0
 #define WriteMemoryCardSaveHeader                 func_0018CA10
@@ -1499,6 +1567,7 @@
 #define WriteMemoryCardFile                       func_0018D328
 #define CreateMemoryCardFile                      func_0018D368
 #define ClearKeyId                                func_0018D410
+#define InitHeap                                  func_0018D430
 #define ReservePermanentMemory                    func_0018D4B0
 #define AllocateFrontMemory                       func_0018D500
 #define ResetFrontMemory                          func_0018D550
@@ -1567,10 +1636,12 @@
 #define ActivateSwitchedColliderIndex             func_00192880
 #define SetSwitchedColliderEnabled                func_00192990
 #define ActivateSwitchedCollider                  func_001929D0
+#define ShowDialogueCaptionBox                    func_00192A38
 #define UpdateSwitchedCollider                    func_00192B58
 #define InitLoadProgress                          func_00193210
 #define UpdateLoadProgress                        func_00193288
 #define DrawLoadProgressBar                       func_00193318
+#define GetMenuChoiceLabel                        func_00193598
 #define FormatGameSummary                         func_001935B0
 #define InitPauseMenu                             func_00193E58
 #define ChangePauseMenuPage                       func_00193EE8
@@ -1616,6 +1687,7 @@
 #define CompareEntriesByValueDescending           func_0019D468
 #define BucketDeferredRequests                    func_0019D4B0
 #define RunWorldFrameLists                        func_0019D6C0
+#define UploadProjectionConstants                 func_0019D860
 #define WriteColoredSpritePacket                  func_0019DDA0
 #define InitGroupMarkers                          func_0019DF48
 #define AcquireEffectOwner                        func_0019E040
@@ -1777,6 +1849,7 @@
 #define CloneTimedGroupEntries                    func_001AF3B8
 #define StaggerGroupOffsets                       func_001AF508
 #define UpdateTimedGroup                          func_001AF5C8
+#define SetStaggeredColliderFrozen                func_001AF7A8
 #define SetTimedGroupMode                         func_001B00E8
 #define RequestTimedGroupEnd                      func_001B0120
 #define EnterTimedGroupState                      func_001B01B0
@@ -1797,8 +1870,14 @@
 #define RequestBlinkObjectEnd                     func_001B1608
 #define EnterBlinkObjectState                     func_001B1710
 #define SetBlinkObjectFrame                       func_001B1898
+#define LoadPathCurveObject                       func_001B2840
+#define ReparentPathCurveObject                   func_001B28A8
 #define GetTextureRegisterBits                    func_001B2988
 #define SendTextureRegisters                      func_001B29E0
+#define LoadFonts                                 func_001B2DF8
+#define LoadScreenResources                       func_001B3040
+#define SwitchActiveImageMask                     func_001B3488
+#define BuildAnimRecordGifPackets                 func_001B3510
 #define FindAnimRecord                            func_001B4688
 #define SetCursorFrame                            func_001B46E0
 #define SetCursorCoords                           func_001B4750
@@ -1845,6 +1924,7 @@
 #define PushFreeSlot                              func_001B5F28
 #define SpawnInitialStateWalker                   func_001B61F0
 #define CreateStateWalker                         func_001B6290
+#define FindListNodeByKey                         func_001B6388
 #define FindStateEntryIndex                       func_001B63C0
 #define FindStateEntryIndexOrZero                 func_001B63F8
 #define GetStateEntryKey                          func_001B6420
@@ -1894,6 +1974,7 @@
 #define ResolveContactHandler                     func_001BB4A0
 #define FindHandlerForSlot                        func_001BB540
 #define UpdateAnchorModeFlags                     func_001BB580
+#define CollectContactingPartsToScriptList        func_001BB710
 #define CollectContactingParts                    func_001BB800
 #define IsInTouchingList                          func_001BB9A0
 #define UpdateTouchingParts                       func_001BB9D0
@@ -1920,6 +2001,7 @@
 #define StopLockedStreamVoice                     func_001BE708
 #define OpenKeyRecord                             func_001BE728
 #define ApplySoundRecordVolumePan                 func_001BE860
+#define PlaySoundAndApplyVolumePan                func_001BE8F8
 #define HasStreamVoice                            func_001BE980
 #define StopStreamVoice                           func_001BE998
 #define StopStagedBankVoice                       func_001BEA78
@@ -1986,6 +2068,8 @@
 #define AddObjectProperty                         func_001C22B8
 #define SetExtraObjectProperty                    func_001C2320
 #define StoreScriptArgumentsVa                    func_001C23B0
+#define StartToSprChain                           func_001C2430
+#define StartFromSprChain                         func_001C25B0
 #define ResetTrailRing                            func_001C29E8
 #define DrawTrailRibbon                           func_001C30E8
 #define InitTurningCollider                       func_001C4458
@@ -2052,6 +2136,7 @@
 #define AddOwnedWantedId                          func_001CB6A8
 #define AddListedWantedId                         func_001CB6D0
 #define FindWantedItems                           func_001CB7A0
+#define GroupAnimationEventObjects                func_001CB8B8
 #define SyncPlayerTarget                          func_001CD088
 #define GetPlayerPose                             func_001CDF78
 #define ShowModeLabel                             func_001D29C8
@@ -2079,6 +2164,7 @@
 #define TakeContactTable                          func_001DC7D0
 #define ReleaseContactTable                       func_001DC828
 #define CreateConeVolumes                         func_001DC9A0
+#define SkipBufferedBlocks                        func_001DCCC0
 #define SpawnListedObjectCopies                   func_001DCD28
 #define DrawProjectedLine                         func_001DD3E0
 #define DrawProjectedCurve                        func_001DD548
@@ -2086,7 +2172,10 @@
 #define CheckEntryThreeBitRequirement             func_001DD7A0
 #define SetEntrySlotValue                         func_001DD7E8
 #define GetEntrySlotValue                         func_001DD888
+#define ScatterRandomObjects                      func_001DD950
 #define GetDeltaTime                              func_001DD9C0
+#define AcquirePadSelectFlag                      func_001DDA20
+#define ReleasePadSelectFlag                      func_001DDA50
 #define ShowCountedScreenElement                  func_001DDB58
 #define HideCountedScreenElement                  func_001DDBB8
 #define SetWorldFlagBit                           func_001DDC78
@@ -2134,6 +2223,7 @@
 #define InitRecursiveLock                         func_001E22C0
 #define EnterRecursiveLock                        func_001E22F8
 #define LeaveRecursiveLock                        func_001E2358
+#define CreateRenderThread                        func_001E2398
 #define GetOnOffObjectBlock                       func_001E2420
 #define InitOnOffObject                           func_001E2520
 #define UnregisterOnOffObject                     func_001E25F8
@@ -2143,6 +2233,7 @@
 #define SetOnOffObjectForcedState                 func_001E2840
 #define UpdateOnOffObjectState                    func_001E2870
 #define UpdateOnOffObject                         func_001E2940
+#define SetOnOffObjectFrozen                      func_001E29A8
 #define ReadMeshTables                            func_001E4C48
 #define QueueWorldLoad                            func_001E4E80
 #define RunPendingWorldLoad                       func_001E4EA8
@@ -2213,6 +2304,7 @@
 #define RunTimelineEntries                        func_001ED278
 #define RunTimelineEntry                          func_001ED318
 #define AppendTimelineEntry                       func_001ED4C8
+#define ComputePolarOffset                        func_001ED650
 #define ComputeDirectionFromAngles                func_001ED6B0
 #define GetVectorAngles                           func_001EDDB0
 #define RotateVectorByTwoAngles                   func_001EDE38
@@ -2234,6 +2326,7 @@
 #define RegisterValueListObject                   func_001EE900
 #define LoadValueList                             func_001EE930
 #define ExpandMaskThroughTable                    func_001EE9D0
+#define ReconcileColliderAttachments              func_001EEE50
 #define HandleAttachedObjectRemoved               func_001EF3D8
 #define RebuildAttachedSet                        func_001EF520
 #define HandleStateMessage                        func_001EF9C8
@@ -2254,6 +2347,7 @@
 #define IsWarpEntryReachable                      func_001F0580
 #define InitWarpPage                              func_001F0660
 #define StartWarpPage                             func_001F0758
+#define SelectWarpPageEntry                       func_001F0878
 #define SetPendingWarpEntry                       func_001F08F0
 #define HandleWarpPageNotification                func_001F0F70
 #define SetWarpPageMode                           func_001F1050
@@ -2270,6 +2364,12 @@
 #define SampleSmoothNoise                         func_001F3250
 #define ApplyBiasCurve                            func_001F3328
 #define EvaluateNoiseBlend                        func_001F3358
+#define AppendVector4ToBuffer                     func_001F38F0
+#define InitTransformObject                       func_001F39F8
+#define ReadTransformObject                       func_001F3A40
+#define ReparentObjectKeepingTransform            func_001F3A90
+#define GetObjectWorldPosition                    func_001F3BD8
+#define GetObjectWorldRotation                    func_001F3C08
 #define FindActiveObjectSubGroup                  func_001F4378
 #define LoadObjectSubGroup                        func_001F4500
 #define StartObjectSubGroup                       func_001F4660

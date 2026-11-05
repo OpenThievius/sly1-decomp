@@ -2281,3 +2281,103 @@ D_00262AA0	g_clearFlagsButtonSequence	button sequence of g_clearFlagsButtonCode
 D_00262B48	g_setFlagsButtonSequenceC	button sequence of g_setFlagsButtonCodeC
 D_00262B80	g_flagNumberedItemsButtonSequence	button sequence of g_flagNumberedItemsButtonCode
 D_00262C28	g_passwordMessageButtonSequence	button sequence of g_passwordMessageButtonCode
+func_00152810	InitDmaChannels	enables DMA with func_002027C8(1), then stores the channel pointer for ids 0, 1, 2, 8, 9 into the VIF0, VIF1, GIF, from-SPR and to-SPR tables; sits in the start-up function table D_002647C0
+func_00152938	AllocateQuadwordBuffer	takes count*16 bytes from AllocateFrontMemory and sets the buffer's allocated, current and end pointers to that block
+func_0018D430	InitHeap	sets the heap start to the image end rounded to 16, the end to 0x2000000, resets the permanent, front and back cursors and the back mark index, and inits the heap lock; sits in the start-up function table D_002647C0
+func_0015EB20	WriteGsFinishPacket	builds a GIF packet with one register write to GS register 0x61 (FINISH), writes it through VIF direct, adds a DMA end tag and detaches the buffer
+func_00159CA0	DrawScreenFill	callback of the colour-fade object: fills a packet with the colour at +0x60 through FillScreenColor and writes it as VIF direct inside a DMA tag
+func_0015EAE0	AddDmaRefTagIfChanged	adds a DMA ref tag of (end-value+15)/16 quadwords only when value differs from the last one remembered in D_0026230C
+func_0015F658	ResetPacketWriters	calls func_0015F618(1, 0xFFFF), which re-initialises the GS packet writer and the VIF packet writer
+func_00156088	RandomizeEffectSpawnerDelay	clears the dirty flag and stores a random value in [f2DC, f2E0], times 60 when mode f2D4 is 3, into f328
+func_001533A8	DrawPlacedObjectParts	deferred draw callback queued by func_00153328: adds DMA ref tags, writes a matrix to VIF, then runs the part drawer func_00166690 for each 0x70-byte part
+func_00153328	QueuePlacedObjectDraw	builds the placed-object transform and queues func_001533A8 as a deferred request with the object as its argument
+func_00159F48	CollectObjectByMode	switch on a collection mode (parent chain, level bits, alias ids) that appends self to a bounded array and counts it when it passes and is attached
+func_001692B0	SendMaskedImagesToGif	places the masked images, appends TEXFLUSH and FINISH register writes, ends the packet and sends it down the GIF channel
+func_001693A8	BuildMaskedImagesPacket	places the masked images into a bump-allocated temporary packet, appends TEXFLUSH and copies the finished packet out to the caller
+func_00169780	UploadImagesByMask	for every image and palette record whose flag word contains the mask, builds the texture register and upload packet and writes it through VIF direct
+func_00172BF8	FindFirstAttachedSlotObject	tests the five slot objects at f25D8 in a fixed priority order, returns the first attached one and writes its group index (0, 1 or 2)
+func_00177968	CompareByKey	sort comparator that returns 1 when a's key is greater than b's and -1 otherwise
+func_00189AF0	InvertMatrix4x4	calls InvertSquareMatrix with dimension 4
+func_0018C7F8	StartMemoryCardSave	when the save flag allows, starts the background job SaveGameToMemoryCardSlot, otherwise shows the pause-menu page; called when a level is marked done
+func_00192A38	ShowDialogueCaptionBox	stores a word in the dialogue caption box's child and pushes the box onto the element stack
+func_0019D860	UploadProjectionConstants	once per frame (flag D_0060478C), opens a DMA tag on the VIF packet writer and copies the projection scale, projection offset, a 0xC-word block and the world's f1D68 into it, then closes the tag
+func_001B2DF8	LoadFonts	reads a u16 count, allocates that many font records, loads each with LoadFont, tags it with bit i, then sets the default font to font 0
+func_001B3040	LoadScreenResources	reads image records A and B, animation records with their per-kind packet buffers and cursor animators, loads fonts, binds the animators, places masked images, uploads the fonts and initialises the screen elements
+func_001B3510	BuildAnimRecordGifPackets	for every animation record matching the mask, builds per-kind GIF packets of TEST/ALPHA/texture register writes into the record's packet buffers
+func_001B3488	SwitchActiveImageMask	flushes cursors and, if the mask differs from the current one (D_00274518), resets the bump allocator, places the mask's images, rebuilds their packets, flushes the mesh queue and updates matching listed objects
+func_001B6388	FindListNodeByKey	walks the owner's list from head and returns the first node whose key equals the argument, else 0
+func_001B2840	LoadPathCurveObject	creates a path curve from a stream byte, lets the curve read its data through vt slot 0, then reads the property records
+func_001B28A8	ReparentPathCurveObject	builds the old parent's and the new parent's matrices, passes both to the curve's vt slot 1, then calls ReparentObject
+func_001BB710	CollectContactingPartsToScriptList	walks the root's contact rows, and for each contact touching this part appends the other part to the script list unless already present
+func_001BE8F8	PlaySoundAndApplyVolumePan	starts a sound with StartSoundEffect, applies the record's volume/pan, and clears the handle again when the caller passed no handle slot
+func_001CB8B8	GroupAnimationEventObjects	gathers each listed node's animation event objects and gives the objects that have no group (f328) a new small list, sharing it with later objects of equal f2E0
+func_00135858	CompareEntriesFlaggedLast	sort comparator: an entry whose object has a non-zero GetNumberedItemFlag orders after the other (returns 1 if a is flagged, -1 if b is), else by key
+func_00145810	FindFirstFreeSpan	collects spans of every object with func_0013DFD8, merges them with MergeOverlappingSpans, and returns the first gap in [0,1] wider than thresh through lo/hi
+func_0014DD00	GetPathCurveSearchStep	returns a tenth of the first time interval (times[1]-times[0]); func_0014DBD0 passes it as the step of its parameter search
+func_00161AB0	SetVertexBatchTransform	flushes the vertex batch (FlushVertexBatch), then builds the matrix from rotation and translation into the object and a second one at +0x40, as SelectBatchShape and SetVertexColor are also batch setters
+func_00166658	FlipVifBaseOffset	sets D_00262474 to 0x23C minus itself and writes it as the VIF base offset of g_vifPacketWriter, toggling between two buffer halves
+func_00180108	DrawTriangleGroups	for each of four groups, emits a GIF colour entry (alpha scaled by d) and the projected XYZF of every triangle's three vertices
+func_00193598	GetMenuChoiceLabel	returns the string D_0026A068 (g_menuChoiceLabels) holds at index
+func_001AF7A8	SetStaggeredColliderFrozen	calls SetColliderFrozen, then removes or appends the collider in the world list at +0x1CA8 (flag AF8 tracks membership) and sets g_groupStaggerDirty
+func_001C2430	StartToSprChain	variadic (size,data) pairs become 16-byte-aligned entries and DMA tags of the current ring slot, then it kicks the to-scratchpad channel (g_toSprChannel) at the slot's tag list
+func_001C25B0	StartFromSprChain	variadic values are written into the tags of the current ring slot, the last marked as end, then it kicks the from-scratchpad channel (g_fromSprChannel)
+func_001E2398	CreateRenderThread	fills a thread init record (entry RunRenderThread, 0x20000-byte stack D_006056D0, priority 2, global pointer) and creates the thread into g_mainAndRenderThreads
+func_001E29A8	SetOnOffObjectFrozen	calls SetPlacedObjectFrozen, and when frozen sets the object off with SetOnOffObjectState(self, 0)
+func_0011AE78	TakeZeroedPoolEntry	takes an entry from pool D_0025C2D0 with TakePoolEntry and clears its 12 bytes
+func_00124CC0	StartAnimationFromContext	reads the context at +0x2A0, picks a start time by its mode (the value, the value clamped to 0..1 times the node's length, or one computed with func_0012C9E8) and starts CreateAnimationPlayer on the found node
+func_00126C58	EnsureObjectWorldNode	when +0x298 is empty gets a node from AddObjectNodeToWorld and stores 1.0 or 0.0 in its +4 by IsObjectAttached
+func_0012C160	StartClampedKinematicValue	after StartObject computes pos + t*(vel + t*acc) with t from the current entry, clamps it to lo..hi into out, and schedules func_0012C208 with the world when enabled
+func_0012C208	StartLinkedObjectAnimation	looks up the object with its id (kind 4, then 0x104) on its host with FindFirstObjectById and calls CreateAnimationPlayerWithoutPresetTargets for it
+func_0012CBE8	FindRecordByKey	scans three counted record arrays (+0x58, +0x60, +0x68) for the record whose type word is 0x27 and whose key word equals the argument
+func_0012CCE8	FindEntryByObjectId	walks the 0x1C-byte entries at +0x3C and returns the first whose key MatchesObjectId accepts
+func_0012E710	ReleaseWorldListEntry	removes the item from the world list at +0x1B7C with RemoveFromList and pushes it back on the free pool at +0x1B58 with PushFreeSlot
+func_0012F190	ApplyListedPoseSources	walks the list at +0x44 and calls ApplyPoseSource on each item with the argument
+func_0012F1D8	SettleListedPoseSources	walks the list at +0x44 and calls SettlePoseSourceModes on each item
+func_00130110	EnsureKeyedList	when +0x04 is empty makes a list with NewKeyedList, stores it and registers it with AddMarkRootList
+func_00130C20	MeasureCurveSegmentLength	samples 20 points of a segment with SampleCurvePoints and returns the total of their lengths through AccumulateSegmentLengths (GetSplineLengthAtTime and FillSplinePathLengths call it)
+func_001385A0	SetContactPairFlags	ors set and clears clr in the symmetric byte matrix at +0x1ADC for two table entries, and on reaching the linked state (low bits 0xF or bit 0x40) pushes a contact row each way with PushContactRow, on leaving it unlinks them and frees the chain
+func_0013EA38	StartZoneRecord	the zone record's start (called by StartZoneCollider): sets mode -1, resolves both pairs' objects with ResolveZoneObjects and, when its flag-table bit is set, schedules func_0013EAE0
+func_00141108	ReadObjectTransformAndTables	reads a buffered rotation to +0x50, a vector to +0x40 and four mesh table words to +0x80..0x8C, then the property records
+func_00150298	SelectEarliestPooledObject	unless one is already held at +0x6CC, takes from every item of the list D_00262708 its FindEarliestPooledChild, keeps the one with the smallest state time and sets it to state 5 with SetPooledObjectState
+func_00150338	FindFirstAttachedPooledObject	returns the first of the up to 8 objects at +0x790 that IsObjectAttached and whose state is neither 3 nor 4
+func_0014BEF8	HandleContactAgentObjectEvent	a method of class 0x12 (overriding HandleAgentObjectEvent): returns 1 in state 0x10 or 0xB, else runs the base handler and when the slot's object is the active switched collider sends it an owner message
+func_0014BF88	EnterContactAgentState	a method of class 0x12 (overriding EnterAgentState): runs EnterAgentState, clears the pending record at 0xC20 on states 0xB and 0xC and sets the animation player speed on 0xC
+func_00148470	SetSoundNotifierState	a method of class 0x56 (overriding SetStateNotifierState): on state 1 plays sound 0x74, sends script event 2 and moves to state 4
+func_00148298	SetEffectNotifierState	a method of class 0x58 (overriding SetStateNotifierState): state 0 draws a random time, state 1 creates an effect object (CreateEffect), plays sound 0x78, tells the listener and moves to 2
+func_0011D798	SetVoiceVolumePan	sends command 0x1B with a voice handle and two words; ApplySoundRecordVolumePan passes the record's volume times 1024 and a pan angle, and the stream voice reset passes 0, 0
+func_0011E328	SetIopChannelValue	sends command 0xE with a channel number and a value; PushIopChannel2Setting, PopIopChannel2Setting and SetIopChannel2Setting call it for channel 2 with a table entry
+func_0011E360	SetIopChannelValuePair	sends command 0xF with a channel number and two words; the channel 2 setting functions pass the same value twice
+func_001DDA20	AcquirePadSelectFlag	increments a use count at +0x231C and on the 0 to 1 transition calls SetPadSelectFlags(2); its pair func_001DDA50 releases it
+func_001DDA50	ReleasePadSelectFlag	decrements the use count at +0x231C and on reaching 0 calls ClearPadSelectFlags(2)
+func_001DCCC0	SkipBufferedBlocks	reads a u32 count n from the buffered stream and, when D_00275714 is set, skips n-1 blocks with SkipBufferedBlock
+func_001DD950	ScatterRandomObjects	picks a count with RandomIntInRange(a, b) and, if nonzero, calls ScatterObjectsAroundCircle on the current world with that count
+func_001ED650	ComputePolarOffset	takes sin and cos of its angle (ComputeSinCos) and writes cos*scale, sin*scale and z to the output vector
+func_001EEE50	ReconcileColliderAttachments	walks an attachment list: adds or removes the collider attachment when flag bits 59 and 60 of the target differ, unlinks nodes whose bit 60 is clear, then clears both bits
+func_001F38F0	AppendVector4ToBuffer	appends four floats to a buffer of capacity 4 (count at +4) and increments the count
+func_001F3A90	ReparentObjectKeepingTransform	converts the object's pos and rot from its old parent's frame to the new one (func_00128018, func_00128150) and calls ReparentObject
+func_001F3BD8	GetObjectWorldPosition	converts the vector at +0x40 out of the object's parent frame (func_00128018 with frame 0) into the output; used as the position getter by many callers
+func_001F3C08	GetObjectWorldRotation	same for the rotation at +0x50 with func_00128150, into the output
+func_001F39F8	InitTransformObject	InitObject then copies the identity matrix into the rotation field at +0x40
+func_001F3A40	ReadTransformObject	reads a buffered rotation, a buffered vector and the property records of an object from a stream
+func_001F0878	SelectWarpPageEntry	writes the element text for entry value (or entry 4 for value 10, or -1 when out of range) and calls SetWarpPageSelectedEntry
+func_001357F0	CompareEntriesByAttachedKey	sort comparator: an entry whose object is not attached sorts first, otherwise ordered by the key field
+func_00115B78	SetScriptRandomSeed	builtin: passes its int or float argument to func_001F66F8, which stores the seed at +0x58 of the random state record, and returns the unit tag 0x22
+func_00115C00	GetScriptRandomFloat	builtin: converts two int or float arguments to floats and returns RandomFloatInRange of them
+func_00115EC8	GetScriptAtan2	builtin: converts two arguments to floats and returns func_00205778 (atan2) of them as a script float
+func_001156B0	SetScriptVoiceParam	builtin: passes its two int arguments to SetCachedVoiceParam and returns the unit tag
+func_001166C0	TransposeScriptMatrix	builtin: allocates a matrix payload, fills it with CopyTransposedMatrix of the argument and returns it
+func_00116740	InvertScriptMatrix	builtin: allocates a matrix payload, fills it with InvertMatrix4x4 of the argument and returns it
+func_00116A88	GetScriptMatrixEuler	builtin: returns MatrixToEulerAngles of its matrix argument as a vector
+func_00116FE8	ClampScriptToRange	builtin: returns ClampToRange(range argument, float argument) as a script float
+func_00117080	TestScriptInsideRange	builtin: returns IsInsideRange(range argument, float argument) as a script bool
+func_00117910	DispatchScriptObjectProperty	builtin core: switch on kind 0x63..0x66 calling AddObjectProperty, SetExtraObjectProperty, UpdateObjectProperty or GetObjectProperty with the first two int arguments
+func_00117A30	AddScriptObjectProperty	builtin: calls func_00117910 with kind 0x63, which selects AddObjectProperty
+func_00117A60	SetScriptExtraObjectProperty	builtin: calls func_00117910 with kind 0x64, which selects SetExtraObjectProperty
+func_00117A90	UpdateScriptObjectProperty	builtin: calls func_00117910 with kind 0x65, which selects UpdateObjectProperty
+func_00117AC0	GetScriptObjectProperty	builtin: calls func_00117910 with kind 0x66, which selects GetObjectProperty
+func_00117D00	FindScriptObjectById	builtin: returns FindFirstObjectById(current world, 0x104, arg0, arg1) as a script pointer
+func_00117F28	GatherScriptObjectsById	builtin: GatherObjectsById on the current world (0x101 or 0x105 by arg1) into a 0x100 buffer, returned as a script reference list
+func_00118850	StartScriptPadRecordPattern	builtin: calls StartPadRecordPattern on the pad record with an int and a float argument and returns an empty value
+func_00114518	TestScriptNearlyEqual	builtin: converts three int or float arguments to floats, calls func_001EAC68 (compare with epsilon, as the callers use it with 1e-4) and returns the result as a bool
+func_001184F8	TransformScriptPointBetweenFrames	builtin: calls func_00128018 (the position frame conversion ReparentObjectKeepingTransform uses) into a vector payload
+func_00118608	TransformScriptRotationBetweenFrames	builtin: calls func_00128150 (the rotation frame conversion) into a matrix payload and returns it
