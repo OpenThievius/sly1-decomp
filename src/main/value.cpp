@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "g25c250.h"
+#include "r11b008.h"
+#include "s137290.h"
+#include "shapes.h"
 
 // The five pools values are taken from (func_0011C240): func_0011BF70 sets them up, func_0011C040
 // empties them all. Built at startup: the compiler's initialiser, constructor and destructor for this
@@ -11,364 +14,53 @@ G25C250 D_0025C290;
 G25C250 D_0025C2B0;
 G25C250 D_0025C2D0;
 
-void* func_0011B008(void* self);
+// The payloads of tags 0x19 and 0x1A as func_0011B258 copies them (ldl/ldr for the first two
+// words: the pool does not align them).
+struct Pair_11B258 { U64P xy; };
+struct Triple_11B258 { U64P xy; s32 z; };
 
-void func_0011B9A8(void* out, void* src);
-
-void func_0011B060(void* self, s32 n);
-
-void func_0011B538(void* self, s32 k);
-
-void func_0011B018(void* dst, void* src);
-
-void func_0011B0A8(void* a, void* b);
-
-void func_0018D778(void);
-
-void* func_0011C240(void* p);
-
-void* func_001F5C0C(void* p, s32 value, s32 size);
-
-struct Rec_11B570 { s32 tag; s32 value; };
-
-void func_0011B418(void* self);
-
-struct Rec_11B700 { s32 tag; s32 value; };
-
-struct Obj_11B8A8 { s32 tag; void* ptr; };
-
-struct Node_11BE90 { s32 key; u8 data[8]; struct Node_11BE90* next; };
-
-struct Head_11BE90 { struct Node_11BE90* first; };
-
-struct Node_11AF28 {
-    s32 kind;
-    s32 value;
-    Node_11AF28* child;
-};
-
-typedef Node_11AF28 Node_11AEB8;
-
-void func_0011B258(void* src, void* dst, void* arg);
-
-Node_11AEB8* func_0011AF28(void);
-
-void* func_0011C240(void* pool);
-
-void* func_001F5C0C(void* dst, s32 value, s32 size);
-
-Node_11AF28* func_0011B008(Node_11AF28* self);
-
-void func_0011B060(void* self, s32 flags);
-
-struct Ext_11AF98 {
-    s32 w0;
-    s32 w1;
-    s32 w2;
-    s32 w3;
-    s32 w4;
-};
-
-struct Node_11B008 {
-    s32 kind;
-    s32 value;
-    Node_11B008* child;
-};
-
-struct Node_11B018 {
-    s32 kind;
-    s32 value;
-    Node_11B018* child;
-};
-
-void func_0011B4A8(Node_11B018* node);
-
-void func_0018D778(void* self);
-
-extern u8 D_00259F38[];
-
-void* func_001F5C0C(void* p, s32 v, s32 n);
-
-s32 func_0011C498(void);
-
-void func_0011C418(void* obj, s32 value, s32 zero);
-
+void func_0018D778(void* p);
 void* func_0018D5C0(s32 size);
-
+void* func_001F5C0C(void* p, s32 value, s32 size);
+s32 func_001F59C4(void* a, void* b, s32 n);
+void* func_0011C240(G25C250* pool);
+void func_0011C128(G25C250* pool, s32 size, s32 count);
+void func_0011C1D0(G25C250* pool);
+R11B008Key* func_0011C498(void);
+void func_0011C418(R11B008Key* src, R11B008Key* dst, s32 zero);
+void func_0011C4E8(void);
+void func_0011CA90(void);
+void func_0011CBB0(void);
+extern u8 D_00259F38[];
 void func_0011A6A8(void* p);
-
+void func_0011A6B8(void* p);
 void func_0011A670(void);
 
-void func_0011AF78(void* self);
-
-void func_0011C4E8(void);
-
-void func_0011C128(void* obj, s32 count, s32 size);
-
-void func_0011CA90(void);
-
-s32 func_0011B0A8(u8* a, void* b);
-
-struct Pair_11B0A8 { s32 a; s32 b; };
-
-void func_0011B4A8(void* self);
-
-struct Cell_11B538 { s32 value; };
-
-struct Tagged_11B5B0 { s32 tag; f32 value; };
-
-struct Value_11B008 { s32 tag; s32 payload; };
-
-void func_0011B008(Value_11B008* v);
-
-void func_0011B018(Value_11B008* dst, Value_11B008* src);
-
-void func_0011B060(Value_11B008* v, int mode);
-
-void func_0011B5B0(Value_11B008* v, f32 f);
-
-void* func_0011C618(void);
-
-void func_0011C418(void* a, void* b, void* c);
-
-struct Flag_11B5F0 { s32 tag; s32 flag; };
-
-struct Obj_11B640 { s32 tag; void* ptr; };
-
-void func_0011B060(void* self, s32 mode);
-
-struct Tag_11B680 { s32 tag; s32 value; };
-
-struct Tagged_11B8E8 { s32 tag; s32 value; };
-
-struct Quad_11B928 { s32 a, b, c, d; };
-
-struct Scaled_11B928 { s32 tag; f32 scale; };
-
-void func_0011B008(Quad_11B928* q);
-
-void func_0011B060(Quad_11B928* q, int mode);
-
-void func_0011B570(Quad_11B928* q, s32 n);
-
-struct Rec_11B6C0 { s32 tag; s32 value; };
-
-struct Rec_11B740 { s32 tag; s32 value; };
-
-s32 func_0011C580(u32 addr);
-
-s32 func_0011C690(u32 value);
-
-s32 func_0011C7C0(u32 value);
-
-s32 func_0011C8D0(u32 value);
-
-s32 func_0011C9E0(u32 value);
-
-void* func_0011B008(void* obj);
-
+// The pooled payloads (0011C000.cpp): each tag's allocator, reference and release.
 void* func_0011C508(void);
-
-void func_0011B740(void* a, void* b);
-
-void func_0011B060(void* obj, s32 n);
-
-// EXACT: callee 0011B008 declared s32 and called as statement.
-
-// EXACT: func_0011B008 declared s32, called as statement.
-
-// EXACT: func_0011B008 declared s32, called as statement.
-
-// EXACT: func_0011B008 declared s32, called as statement.
-
-struct Item_119970 { s32 tag; Item_119970* child; Item_119970* next; };
-
-void* func_0011AFC8(void);
-
-struct Node_11BD28 { s32 key; Value_11B008 value; Node_11BD28* next; };
-
-struct List_11BD28 { Node_11BD28* head; };
-
-Value_11B008* func_0011B0A8(Value_11B008* dst, Value_11B008* src);
-
-void func_0011B538(Value_11B008* v, s32 tag);
-
-void* func_0011B008(void* p);
-
-void func_0011B5F0(void* p, s32 flag);
-
-void func_0011B060(void* p, s32 flags);
-
-struct Tmp_119218;
-
-void func_0011B018(void* out, void* p);
-
-struct Tmp_119218 {
-    s32 tag; s32 value; s32 pad[2];
-    ~Tmp_119218() { func_0011B060(this, 2); }
-};
-
-void func_0011B0A8(void* a, const Tmp_119218& b);
-
-struct Link_1194A8 { s32 f0; Link_1194A8* f4; Link_1194A8* f8; };
-
-void* func_0011B008(void* q);
-
-void func_0011B018(void* self, void* q);
-
-void func_0011B538(void* q, s32 n);
-
-void func_0011B060(void* q, s32 mode);
-
-// Fixed by merging the two flag tests into one "kind != 0x1B || p != 0".
-
-struct Val_11B0F8 {
-    s32 type;
-    union {
-        s32 i;
-        f32 f;
-        f32* v;
-        void* p;
-    } u;
-};
-
-s32 func_001F59C4(void* a, void* b, s32 n);
-
-struct Arg_11B418;
-
-struct Op_11B418 { s32 kind; Arg_11B418* arg; };
-
-void func_0011C5B0(Arg_11B418* a);
-
-void func_0011C6C0(Arg_11B418* a);
-
-void func_0011C7F0(Arg_11B418* a);
-
-void func_0011C900(Arg_11B418* a);
-
-void func_0011CA20(Arg_11B418* a);
-
-struct Cmd_11B4A8 {
-    s32 op;
-    u32 arg;
-};
-
-struct Ret_11A080;
-
-struct Val_11B258 { s32 tag; void* val; };
-
-struct __attribute__((aligned(16))) Q16_11B258 { s32 w[4]; };
-
-struct __attribute__((aligned(16))) Q64_11B258 { Q16_11B258 q[4]; };
-
-struct __attribute__((packed)) D8_11B258 { s32 a, b; };
-
-struct D12_11B258 { D8_11B258 a; s32 c; };
-
-struct Node_11B258 { s32 pad; };
-
-void func_0011AEB8(Val_11B258* src, Node_11B258* dst, void* arg);
-
+void* func_0011C618(void);
 void* func_0011C748(void);
-
 void* func_0011C858(void);
-
 void* func_0011C968(void);
+s32 func_0011C580(void* p);
+s32 func_0011C690(void* p);
+s32 func_0011C7C0(void* p);
+s32 func_0011C8D0(void* p);
+s32 func_0011C9E0(void* p);
+void func_0011C5B0(void* p);
+void func_0011C6C0(void* p);
+void func_0011C7F0(void* p);
+void func_0011C900(void* p);
+void func_0011CA20(void* p);
 
-s32 func_0011C580(Q16_11B258* p);
-
-s32 func_0011C690(Q64_11B258* p);
-
-s32 func_0011C7C0(Q16_11B258* p);
-
-s32 func_0011C8D0(D8_11B258* p);
-
-s32 func_0011C9E0(D12_11B258* p);
-
-void func_0011AF98(Val_11B258* src, Node_11B258* dst, void* arg);
-
-struct Rd_11BA28;
-
-struct Node_11BA28 {
-    s32 kind;
-    s32 w4;
-    Node_11BA28* child;
-};
+// The stream reader (00134000.cpp).
+s32 func_00137B90(S137290* r);
+void func_00137BE0(S137290* r);
+s32 func_00137D78(S137290* r);
+f32 func_00137DF8(S137290* r);
+s32 func_00137C40(S137290* r);
 
 extern s32 D_00275714;
-
-s32 func_00137B90(Rd_11BA28* r);
-
-void func_00137BE0(Rd_11BA28* r);
-
-s32 func_00137D78(Rd_11BA28* r);
-
-f32 func_00137DF8(Rd_11BA28* r);
-
-s32 func_00137C40(Rd_11BA28* r);
-
-void func_0011B570(Node_11BA28* n, s32 v);
-
-void func_0011B5B0(Node_11BA28* n, f32 v);
-
-void func_0011B5F0(Node_11BA28* n, s32 v);
-
-void func_0011B8A8(Node_11BA28* n, s32 v);
-
-void func_0011B640(Node_11BA28* n, s32 v);
-
-void func_0011B680(Node_11BA28* n, s32 v);
-
-void func_0011B740(Node_11BA28* n, f32* p);
-
-void func_0011B788(Node_11BA28* n, f32* p);
-
-void func_0011B7D0(Node_11BA28* n, f32* p);
-
-void func_0011B818(Node_11BA28* n, f32* p);
-
-void func_0011B860(Node_11BA28* n, f32* p);
-
-void func_0011B6C0(Node_11BA28* n, Node_11BA28* c);
-
-void* func_0011AE78(void);
-void func_0011AEB8(Node_11AEB8* src, Node_11AEB8* dst, void* arg);
-Node_11AF28* func_0011AF28(void);
-void func_0011AF78(void* self);
-void func_0011AF98(Ext_11AF98* src, Ext_11AF98* dst, s32 first);
-void* func_0011AFC8(void);
-Node_11B008* func_0011B008(Node_11B008* self);
-Node_11B018* func_0011B018(Node_11B018* dst, Node_11B018* src);
-void func_0011B060(void* self, s32 flags);
-Pair_11B0A8* func_0011B0A8(Pair_11B0A8* dst, Pair_11B0A8* src);
-s32 func_0011B0F8(Val_11B0F8* a, Val_11B0F8* b);
-void func_0011B258(Val_11B258* in, Val_11B258* out, void* arg);
-void func_0011B418(Op_11B418* op);
-void func_0011B4A8(Cmd_11B4A8* c);
-void func_0011B538(Cell_11B538* self, s32 v);
-void func_0011B570(Rec_11B570* r, s32 value);
-void func_0011B5B0(Tagged_11B5B0* self, f32 v);
-void func_0011B5F0(Flag_11B5F0* r, void* arg);
-void func_0011B640(Obj_11B640* self, void* arg);
-void func_0011B680(Tag_11B680* r, s32 value);
-void func_0011B6C0(Rec_11B6C0* r, s32 value);
-void func_0011B700(Rec_11B700* r, s32 value);
-void func_0011B740(Rec_11B740* r, s32 value);
-void func_0011B788(Rec_11B570* self, u32 value);
-void func_0011B7D0(Rec_11B570* self, u32 value);
-void func_0011B818(Rec_11B570* self, u32 value);
-void func_0011B860(Rec_11B570* self, u32 value);
-void func_0011B8A8(Obj_11B8A8* self, void* arg);
-void func_0011B8E8(Tagged_11B8E8* self, s32 value);
-void* func_0011B928(void* out, Scaled_11B928* in);
-Value_11B008* func_0011B9A8(Value_11B008* out, Value_11B008* in);
-Node_11BA28* func_0011BA28(Rd_11BA28* rd);
-Value_11B008* func_0011BD28(Value_11B008* self, List_11BD28* list, s32 key, Value_11B008* value);
-Value_11B008* func_0011BDD0(Value_11B008* out, List_11BD28* list, s32 key, Value_11B008* value);
-s32 func_0011BE90(Head_11BE90* head, s32 key, void* arg);
-void func_0011BEE0(void** self, s32* out);
-void* func_0011BF30(void);
-void func_0011BF70(void);
 
 void* func_0011AE78(void)
 {
@@ -377,64 +69,64 @@ void* func_0011AE78(void)
     return p;
 }
 
-void func_0011AEB8(Node_11AEB8* src, Node_11AEB8* dst, void* arg)
+void func_0011AEB8(R11B008Node* src, R11B008Node* dst, s32 first)
 {
-    func_0011B258(src, dst, arg);
-    if (src->child != 0) {
-        Node_11AEB8* copy = func_0011AF28();
-        func_0011AEB8(src->child, copy, arg);
-        dst->child = copy;
+    func_0011B258(src, dst, first);
+    if (src->next != 0) {
+        R11B008Node* copy = func_0011AF28();
+        func_0011AEB8(src->next, copy, first);
+        dst->next = copy;
     }
 }
 
-Node_11AF28* func_0011AF28(void)
+R11B008Node* func_0011AF28(void)
 {
-    Node_11AF28* node = (Node_11AF28*)func_0011C240(&D_0025C250);
+    R11B008Node* node = (R11B008Node*)func_0011C240(&D_0025C250);
     func_001F5C0C(node, 0, 12);
     func_0011B008(node);
-    node->kind = -1;
+    node->tag = -1;
     return node;
 }
 
-void func_0011AF78(void* self)
+void func_0011AF78(R11B008Node* self)
 {
     func_0011B060(self, 2);
 }
 
-void func_0011AF98(Ext_11AF98* src, Ext_11AF98* dst, s32 first)
+void func_0011AF98(R11AFC8* src, R11AFC8* dst, s32 first)
 {
     if (first == 0) {
         first = src->w0;
     }
     dst->w0 = first;
-    dst->w1 = src->w1;
-    dst->w2 = src->w2;
-    dst->w3 = src->w3;
     dst->w4 = src->w4;
+    dst->w8 = src->w8;
+    dst->wC = src->wC;
+    dst->w10 = src->w10;
 }
 
-void* func_0011AFC8(void)
+R11AFC8* func_0011AFC8(void)
 {
-    void* p = func_0011C240(&D_0025C2B0);
+    R11AFC8* p = (R11AFC8*)func_0011C240(&D_0025C2B0);
     func_001F5C0C(p, 0, 0x14);
     return p;
 }
 
-Node_11B008* func_0011B008(Node_11B008* self)
+R11B008* func_0011B008(R11B008* self)
 {
-    self->kind = -1;
+    self->tag = -1;
     return self;
 }
 
-Node_11B018* func_0011B018(Node_11B018* dst, Node_11B018* src)
+R11B008* func_0011B018(R11B008* self, const R11B008* src)
 {
     func_0011B4A8(src);
-    dst->kind = src->kind;
-    dst->value = src->value;
-    return dst;
+    self->tag = src->tag;
+    self->i = src->i;
+    return self;
 }
 
-void func_0011B060(void* self, s32 flags)
+void func_0011B060(R11B008* self, s32 flags)
 {
     func_0011B418(self);
     if (flags & 1) {
@@ -442,30 +134,30 @@ void func_0011B060(void* self, s32 flags)
     }
 }
 
-Pair_11B0A8* func_0011B0A8(Pair_11B0A8* dst, Pair_11B0A8* src)
+R11B008* func_0011B0A8(R11B008* self, const R11B008* src)
 {
     func_0011B4A8(src);
-    func_0011B418(dst);
-    dst->a = src->a;
-    dst->b = src->b;
-    return dst;
+    func_0011B418(self);
+    self->tag = src->tag;
+    self->i = src->i;
+    return self;
 }
 
-s32 func_0011B0F8(Val_11B0F8* a, Val_11B0F8* b)
+s32 func_0011B0F8(const R11B008* a, const R11B008* b)
 {
-    if (a->type != b->type)
+    if (a->tag != b->tag)
         return 0;
-    switch (a->type) {
+    switch (a->tag) {
     case 0x15:
-        return a->u.f == b->u.f;
+        return a->f == b->f;
     case 0x1B: {
         s32 r = 0;
-        if (a->u.p == 0) {
-            if (b->u.p == 0)
+        if (a->p == 0) {
+            if (b->p == 0)
                 goto yes;
             goto out;
         }
-        if (b->u.p != 0) {
+        if (b->p != 0) {
         yes:
             r = 1;
         }
@@ -473,10 +165,10 @@ s32 func_0011B0F8(Val_11B0F8* a, Val_11B0F8* b)
         return r;
     }
     case 0x17:
-        return func_001F59C4(a->u.p, b->u.p, 0x40) == 0;
+        return func_001F59C4(a->p, b->p, 0x40) == 0;
     case 0x19: {
-        f32* pa = a->u.v;
-        f32* pb = b->u.v;
+        f32* pa = a->v;
+        f32* pb = b->v;
         s32 r = 0;
         if (pa[0] == pb[0] && pa[1] == pb[1])
             r = 1;
@@ -485,8 +177,8 @@ s32 func_0011B0F8(Val_11B0F8* a, Val_11B0F8* b)
     case 0x16:
     case 0x18:
     case 0x1A: {
-        f32* pa = a->u.v;
-        f32* pb = b->u.v;
+        f32* pa = a->v;
+        f32* pb = b->v;
         s32 r = 0;
         if (pa[0] == pb[0] && pa[1] == pb[1] && pa[2] == pb[2])
             r = 1;
@@ -499,239 +191,239 @@ s32 func_0011B0F8(Val_11B0F8* a, Val_11B0F8* b)
     case 0x1F:
     case 0x20:
     case 0x21:
-        return a->u.i == b->u.i;
+        return a->i == b->i;
     }
     return 1;
 }
 
-void func_0011B258(Val_11B258* in, Val_11B258* out, void* arg)
+void func_0011B258(const R11B008* src, R11B008* dst, s32 first)
 {
-    out->tag = in->tag;
-    switch (in->tag) {
+    dst->tag = src->tag;
+    switch (src->tag) {
     case 0x1E: {
-        Node_11B258* n = (Node_11B258*)func_0011AF28();
-        func_0011AEB8((Val_11B258*)in->val, n, arg);
-        out->val = n;
+        R11B008Node* n = func_0011AF28();
+        func_0011AEB8(src->node, n, first);
+        dst->node = n;
         break;
     }
     case 0x16: {
-        Q16_11B258* p = (Q16_11B258*)func_0011C508();
-        *p = *(Q16_11B258*)in->val;
+        Quad16* p = (Quad16*)func_0011C508();
+        *p = *(Quad16*)src->p;
         (void)func_0011C580(p);
-        out->val = p;
+        dst->p = p;
         break;
     }
     case 0x17: {
-        Q64_11B258* p = (Q64_11B258*)func_0011C618();
-        *p = *(Q64_11B258*)in->val;
+        Mat4A* p = (Mat4A*)func_0011C618();
+        *p = *(Mat4A*)src->p;
         (void)func_0011C690(p);
-        out->val = p;
+        dst->p = p;
         break;
     }
     case 0x18: {
-        Q16_11B258* p = (Q16_11B258*)func_0011C748();
-        *p = *(Q16_11B258*)in->val;
+        Quad16* p = (Quad16*)func_0011C748();
+        *p = *(Quad16*)src->p;
         (void)func_0011C7C0(p);
-        out->val = p;
+        dst->p = p;
         break;
     }
     case 0x19: {
-        D8_11B258* p = (D8_11B258*)func_0011C858();
-        *p = *(D8_11B258*)in->val;
+        Pair_11B258* p = (Pair_11B258*)func_0011C858();
+        *p = *(Pair_11B258*)src->p;
         (void)func_0011C8D0(p);
-        out->val = p;
+        dst->p = p;
         break;
     }
     case 0x1A: {
-        D12_11B258* p = (D12_11B258*)func_0011C968();
-        *p = *(D12_11B258*)in->val;
+        Triple_11B258* p = (Triple_11B258*)func_0011C968();
+        *p = *(Triple_11B258*)src->p;
         (void)func_0011C9E0(p);
-        out->val = p;
+        dst->p = p;
         break;
     }
     case 0x1F: {
-        Node_11B258* n = (Node_11B258*)func_0011AFC8();
-        func_0011AF98((Val_11B258*)in->val, n, arg);
-        out->val = n;
+        R11AFC8* r = func_0011AFC8();
+        func_0011AF98(src->rec, r, first);
+        dst->rec = r;
         break;
     }
     default:
-        out->val = in->val;
+        dst->p = src->p;
         break;
     }
 }
 
-void func_0011B418(Op_11B418* op)
+void func_0011B418(R11B008* self)
 {
-    switch (op->kind) {
-    case 0x16: func_0011C5B0(op->arg); break;
-    case 0x17: func_0011C6C0(op->arg); break;
-    case 0x18: func_0011C7F0(op->arg); break;
-    case 0x19: func_0011C900(op->arg); break;
-    case 0x1A: func_0011CA20(op->arg); break;
+    switch (self->tag) {
+    case 0x16: func_0011C5B0(self->p); break;
+    case 0x17: func_0011C6C0(self->p); break;
+    case 0x18: func_0011C7F0(self->p); break;
+    case 0x19: func_0011C900(self->p); break;
+    case 0x1A: func_0011CA20(self->p); break;
     }
 }
 
-void func_0011B4A8(Cmd_11B4A8* c)
+void func_0011B4A8(const R11B008* self)
 {
-    switch (c->op) {
-    case 0x16: func_0011C580(c->arg); break;
-    case 0x17: func_0011C690(c->arg); break;
-    case 0x18: func_0011C7C0(c->arg); break;
-    case 0x19: func_0011C8D0(c->arg); break;
-    case 0x1A: func_0011C9E0(c->arg); break;
+    switch (self->tag) {
+    case 0x16: func_0011C580(self->p); break;
+    case 0x17: func_0011C690(self->p); break;
+    case 0x18: func_0011C7C0(self->p); break;
+    case 0x19: func_0011C8D0(self->p); break;
+    case 0x1A: func_0011C9E0(self->p); break;
     }
 }
 
-void func_0011B538(Cell_11B538* self, s32 v)
+void func_0011B538(R11B008* self, s32 tag)
 {
     func_0011B418(self);
-    self->value = v;
+    self->tag = tag;
 }
 
-void func_0011B570(Rec_11B570* r, s32 value)
-{
-    func_0011B418(r);
-    r->value = value;
-    r->tag = 0x14;
-}
-
-void func_0011B5B0(Tagged_11B5B0* self, f32 v)
+void func_0011B570(R11B008* self, s32 value)
 {
     func_0011B418(self);
-    self->value = v;
+    self->i = value;
+    self->tag = 0x14;
+}
+
+void func_0011B5B0(R11B008* self, f32 value)
+{
+    func_0011B418(self);
+    self->f = value;
     self->tag = 0x15;
 }
 
-void func_0011B5F0(Flag_11B5F0* r, void* arg)
-{
-    func_0011B418(r);
-    if (arg != 0)
-        r->flag = 1;
-    else
-        r->flag = 0;
-    r->tag = 0x1B;
-}
-
-void func_0011B640(Obj_11B640* self, void* arg)
+void func_0011B5F0(R11B008* self, s32 flag)
 {
     func_0011B418(self);
-    self->ptr = arg;
+    if (flag != 0)
+        self->i = 1;
+    else
+        self->i = 0;
+    self->tag = 0x1B;
+}
+
+void func_0011B640(R11B008* self, void* p)
+{
+    func_0011B418(self);
+    self->p = p;
     self->tag = 0x1C;
 }
 
-void func_0011B680(Tag_11B680* r, s32 value)
+void func_0011B680(R11B008* self, s32 value)
 {
-    func_0011B418(r);
-    r->value = value;
-    r->tag = 0x1D;
-}
-
-void func_0011B6C0(Rec_11B6C0* r, s32 value)
-{
-    func_0011B418(r);
-    r->value = value;
-    r->tag = 0x1E;
-}
-
-void func_0011B700(Rec_11B700* r, s32 value)
-{
-    func_0011B418(r);
-    r->value = value;
-    r->tag = 0x1F;
-}
-
-void func_0011B740(Rec_11B740* r, s32 value)
-{
-    func_0011C580(value);
-    func_0011B418(r);
-    r->value = value;
-    r->tag = 0x16;
-}
-
-void func_0011B788(Rec_11B570* self, u32 value)
-{
-    (void)func_0011C690(value);
     func_0011B418(self);
-    self->value = value;
+    self->i = value;
+    self->tag = 0x1D;
+}
+
+void func_0011B6C0(R11B008* self, R11B008Node* node)
+{
+    func_0011B418(self);
+    self->node = node;
+    self->tag = 0x1E;
+}
+
+void func_0011B700(R11B008* self, R11AFC8* rec)
+{
+    func_0011B418(self);
+    self->rec = rec;
+    self->tag = 0x1F;
+}
+
+void func_0011B740(R11B008* self, f32* v)
+{
+    func_0011C580(v);
+    func_0011B418(self);
+    self->v = v;
+    self->tag = 0x16;
+}
+
+void func_0011B788(R11B008* self, f32* v)
+{
+    (void)func_0011C690(v);
+    func_0011B418(self);
+    self->v = v;
     self->tag = 23;
 }
 
-void func_0011B7D0(Rec_11B570* self, u32 value)
+void func_0011B7D0(R11B008* self, f32* v)
 {
-    (void)func_0011C7C0(value);
+    (void)func_0011C7C0(v);
     func_0011B418(self);
-    self->value = value;
+    self->v = v;
     self->tag = 24;
 }
 
-void func_0011B818(Rec_11B570* self, u32 value)
+void func_0011B818(R11B008* self, f32* v)
 {
-    (void)func_0011C8D0(value);
+    (void)func_0011C8D0(v);
     func_0011B418(self);
-    self->value = value;
+    self->v = v;
     self->tag = 25;
 }
 
-void func_0011B860(Rec_11B570* self, u32 value)
+void func_0011B860(R11B008* self, f32* v)
 {
-    (void)func_0011C9E0(value);
+    (void)func_0011C9E0(v);
     func_0011B418(self);
-    self->value = value;
+    self->v = v;
     self->tag = 26;
 }
 
-void func_0011B8A8(Obj_11B8A8* self, void* arg)
+void func_0011B8A8(R11B008* self, void* p)
 {
     func_0011B418(self);
-    self->ptr = arg;
+    self->p = p;
     self->tag = 0x20;
 }
 
-void func_0011B8E8(Tagged_11B8E8* self, s32 value)
+void func_0011B8E8(R11B008* self, s32 value)
 {
     func_0011B418(self);
     self->tag = 0x21;
-    self->value = value;
+    self->i = value;
 }
 
-void* func_0011B928(void* out, Scaled_11B928* in)
+R11B008* func_0011B928(R11B008* out, const R11B008* in)
 {
     if (in->tag == 0x14) {
         func_0011B018(out, in);
     } else {
-        Quad_11B928 q;
-        func_0011B008(&q);
-        func_0011B570(&q, (s32)in->scale);
-        func_0011B018(out, &q);
-        func_0011B060(&q, 2);
-    }
-    return out;
-}
-
-Value_11B008* func_0011B9A8(Value_11B008* out, Value_11B008* in)
-{
-    if (in->tag == 0x15) {
-        func_0011B018(out, in);
-    } else {
-        Value_11B008 tmp;
+        R11B008 tmp;
         func_0011B008(&tmp);
-        func_0011B5B0(&tmp, (f32)in->payload);
+        func_0011B570(&tmp, (s32)in->f);
         func_0011B018(out, &tmp);
         func_0011B060(&tmp, 2);
     }
     return out;
 }
 
-Node_11BA28* func_0011BA28(Rd_11BA28* rd)
+R11B008* func_0011B9A8(R11B008* out, const R11B008* in)
+{
+    if (in->tag == 0x15) {
+        func_0011B018(out, in);
+    } else {
+        R11B008 tmp;
+        func_0011B008(&tmp);
+        func_0011B5B0(&tmp, (f32)in->i);
+        func_0011B018(out, &tmp);
+        func_0011B060(&tmp, 2);
+    }
+    return out;
+}
+
+R11B008Node* func_0011BA28(S137290* rd)
 {
     s32 tag = func_00137B90(rd);
     if (tag == 0xFF) {
         return 0;
     }
     s32 flag = tag & 0x80;
-    Node_11BA28* n = (Node_11BA28*)func_0011AF28();
-    n->kind = tag & 0x7F;
+    R11B008Node* n = func_0011AF28();
+    n->tag = tag & 0x7F;
     if (D_00275714) {
         func_00137BE0(rd);
         func_00137BE0(rd);
@@ -739,7 +431,7 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         func_00137BE0(rd);
         func_00137BE0(rd);
     }
-    switch (n->kind) {
+    switch (n->tag) {
     case 0:
     case 1:
     case 2:
@@ -771,10 +463,10 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         func_0011B5F0(n, func_00137C40(rd));
         break;
     case 32:
-        func_0011B8A8(n, func_00137C40(rd));
+        func_0011B8A8(n, (void*)func_00137C40(rd));
         break;
     case 28:
-        func_0011B640(n, func_00137C40(rd));
+        func_0011B640(n, (void*)func_00137C40(rd));
         break;
     case 29:
         func_0011B680(n, func_00137C40(rd));
@@ -787,7 +479,7 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         do {
             *p++ = func_00137DF8(rd);
         } while (--i >= 0);
-        n->kind = -1;
+        n->tag = -1;
         func_0011B740(n, buf);
     }
         break;
@@ -799,7 +491,7 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         do {
             *p++ = func_00137DF8(rd);
         } while (--i >= 0);
-        n->kind = -1;
+        n->tag = -1;
         func_0011B788(n, buf);
     }
         break;
@@ -811,7 +503,7 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         do {
             *p++ = func_00137DF8(rd);
         } while (--i >= 0);
-        n->kind = -1;
+        n->tag = -1;
         func_0011B7D0(n, buf);
     }
         break;
@@ -820,7 +512,7 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         f32* p = (f32*)func_0011C858();
         p[0] = func_00137DF8(rd);
         p[1] = func_00137DF8(rd);
-        n->kind = -1;
+        n->tag = -1;
         func_0011B818(n, p);
     }
         break;
@@ -830,7 +522,7 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         p[0] = func_00137DF8(rd);
         p[1] = func_00137DF8(rd);
         p[2] = func_00137DF8(rd);
-        n->kind = -1;
+        n->tag = -1;
         func_0011B860(n, p);
     }
         break;
@@ -839,32 +531,32 @@ Node_11BA28* func_0011BA28(Rd_11BA28* rd)
         break;
     }
     if (flag) {
-        n->child = func_0011BA28(rd);
+        n->next = func_0011BA28(rd);
     } else {
-        n->child = 0;
+        n->next = 0;
     }
     return n;
 }
 
-Value_11B008* func_0011BD28(Value_11B008* self, List_11BD28* list, s32 key, Value_11B008* value)
+R11B008* func_0011BD28(R11B008* out, R11B008List* list, s32 key, const R11B008* value)
 {
-    Value_11B008 tmp;
+    R11B008 tmp;
     func_0011B008(&tmp);
-    Node_11BD28* node = (Node_11BD28*)func_0011C498();
+    R11B008Key* node = func_0011C498();
     node->key = key;
     (void)func_0011B0A8(&node->value, value);
     node->next = list->head;
     list->head = node;
     func_0011B538(&tmp, 0x22);
-    func_0011B018(self, &tmp);
+    func_0011B018(out, &tmp);
     func_0011B060(&tmp, 2);
-    return self;
+    return out;
 }
 
-Value_11B008* func_0011BDD0(Value_11B008* out, List_11BD28* list, s32 key, Value_11B008* value)
+R11B008* func_0011BDD0(R11B008* out, R11B008List* list, s32 key, const R11B008* value)
 {
-    Value_11B008 tmp;
-    Node_11BD28* node = list->head;
+    R11B008 tmp;
+    R11B008Key* node = list->head;
     while (node != 0) {
         if (node->key == key) {
             func_0011B008(&tmp);
@@ -884,13 +576,13 @@ done:
     return out;
 }
 
-s32 func_0011BE90(Head_11BE90* head, s32 key, void* arg)
+s32 func_0011BE90(R11B008List* list, s32 key, R11B008* out)
 {
-    Node_11BE90* n = head->first;
+    R11B008Key* n = list->head;
     while (n != 0) {
         if (n->key == key) {
-            if (arg != 0) {
-                func_0011B0A8(arg, n->data);
+            if (out != 0) {
+                func_0011B0A8(out, &n->value);
             }
             return 1;
         }
@@ -899,16 +591,16 @@ s32 func_0011BE90(Head_11BE90* head, s32 key, void* arg)
     return 0;
 }
 
-void func_0011BEE0(void** self, s32* out)
+void func_0011BEE0(R11B008List* self, R11B008List* out)
 {
-    s32 v = func_0011C498();
-    func_0011C418(*self, v, 0);
-    *out = v;
+    R11B008Key* copy = func_0011C498();
+    func_0011C418(self->head, copy, 0);
+    out->head = copy;
 }
 
-void* func_0011BF30(void)
+R11B008List* func_0011BF30(void)
 {
-    void* p = func_0018D5C0(4);
+    R11B008List* p = (R11B008List*)func_0018D5C0(4);
     func_001F5C0C(p, 0, 4);
     return p;
 }
@@ -926,10 +618,6 @@ void func_0011BF70(void)
     func_0011CA90();
     func_0011C128(&D_0025C2D0, 0xC, 0x80);
 }
-
-void func_0011A6B8(void* p);
-void func_0011C1D0(void* p);
-void func_0011CBB0(void);
 
 void func_0011C040(void)
 {

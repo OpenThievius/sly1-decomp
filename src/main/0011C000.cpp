@@ -4,6 +4,7 @@
 #include "c6c.h"
 #include "g25c250.h"
 #include "s137290.h"
+#include "r11b008.h"
 
 extern u8 D_0062C568[];
 void func_001B5F28(void* list, void* item);
@@ -489,41 +490,36 @@ extern s32 D_0025C2A8;
 extern s32 D_0025C2C8;
 extern s32 D_0025C2E8;
 
-struct Node_11C418 { s32 f0; s32 f4; s32 f8; s32 fC; };
+R11B008Key* func_0011C498(void);
+void func_0011C418(R11B008Key* a, R11B008Key* b, s32 c);
 
-void func_0011B258(void* dst, void* src);
-Node_11C418* func_0011C498(void);
-void func_0011C418(Node_11C418* a, Node_11C418* b, s32 c);
-
-void func_0011C418(Node_11C418* a, Node_11C418* b, s32 c)
+void func_0011C418(R11B008Key* a, R11B008Key* b, s32 c)
 {
-    b->f0 = a->f0;
-    func_0011B258(&a->f4, &b->f4);
-    if (a->fC != 0) {
-        Node_11C418* n = func_0011C498();
-        func_0011C418((Node_11C418*)a->fC, n, c);
-        b->fC = (s32)n;
+    b->key = a->key;
+    func_0011B258(&a->value, &b->value, c);
+    if (a->next != 0) {
+        R11B008Key* n = func_0011C498();
+        func_0011C418(a->next, n, c);
+        b->next = n;
     }
 }
 
-Node_11C418* func_0011C240(void* pool);
+void* func_0011C240(void* pool);
 void func_001F5C0C(void* dst, s32 value, u32 size);
-void func_0011B008(void* p);
 
-Node_11C418* func_0011C498(void)
+R11B008Key* func_0011C498(void)
 {
-    Node_11C418* n = func_0011C240(&D_0025C290);
+    R11B008Key* n = (R11B008Key*)func_0011C240(&D_0025C290);
     func_001F5C0C(n, 0, 16);
-    func_0011B008(&n->f4);
-    n->f4 = -1;
+    func_0011B008(&n->value);
+    n->value.tag = -1;
     return n;
 }
 
-void func_0011B060(void* p, s32 mode);
 
-void func_0011C4E8(void* a)
+void func_0011C4E8(R11B008Key* a)
 {
-    func_0011B060((u8*)a + 4, 2);
+    func_0011B060(&a->value, 2);
 }
 
 extern s32 D_0062C558;
@@ -960,9 +956,9 @@ struct Node_0011C2A0 {
     s32 state;
 };
 
-Node_11C418* func_0011C240(void* self)
+void* func_0011C240(void* self)
 {
-    Node_11C418* result = (Node_11C418*)func_0011C1D8(self);
+    void* result = func_0011C1D8(self);
     func_001F5C0C(result, 0, *(s32*)self - 8);
     return result;
 }
@@ -1745,47 +1741,38 @@ Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
 
 // EXACT: dtor of the temp called before e = rp; array dtor written as while (buf != e) { e--; dtor(e,0); }
 
-struct W_11E680 { s32 a, b; };
 struct Dsc_11E680 {
     s32 type;
     u32 flags;
     u8 pad8[4];
-    void (*fC)(W_11E680* ret, void* obj, s32 n, W_11E680* args);
+    void (*fC)(R11B008* ret, void* obj, s32 n, R11B008* args);
     u8 pad10[4];
     s32 count;
     s32 off;
     void* (*f1C)(void* obj, s32 one);
 };
 typedef void (*Fn_11E680)(void);
-union Sc_11E680 { W_11E680 buf[32]; f32 f[8]; s32 i[2]; };
+union Sc_11E680 { R11B008 buf[32]; f32 f[8]; s32 i[2]; };
 
-void func_0011B008(W_11E680* q);
-void func_0011B060(W_11E680* q, s32 mode);
 s32 func_00137D10(S137290* r);
 s32 func_00137B90(S137290* r);
 s32 func_00137D78(S137290* r);
 s32 func_00137C40(S137290* r);
 f32 func_00137DF8(S137290* r);
-void func_0011B5F0(W_11E680* w, s32 v);
-void func_0011B5B0(W_11E680* w, f32 v);
-void func_0011B570(W_11E680* w, s32 v);
-void func_0011B7D0(W_11E680* w, f32* p);
-void func_0011B818(W_11E680* w, f32* p);
-void func_0011B740(W_11E680* w, f32* p);
 void func_00188978(f32* in, f32* out);
 
 void func_0011E680(void* obj, Dsc_11E680* d, S137290* r)
 {
     Sc_11E680 sc;
-    W_11E680 ret;
+    R11B008 ret;
     u32 flags = d->flags;
     if (flags & 0x400) {
-        W_11E680* p = sc.buf;
-        W_11E680* rp;
+        R11B008* p = sc.buf;
+        R11B008* rp;
         s32 i;
         s32 n;
         s32 k;
-        W_11E680* e;
+        R11B008* e;
         i = 31;
         rp = &ret;
         for (; i != -1; i--) {

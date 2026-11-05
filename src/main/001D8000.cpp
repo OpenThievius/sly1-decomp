@@ -8,6 +8,7 @@
 #include "s137290.h"
 #include "s1eb050.h"
 #include "t217d.h"
+#include "r11b008.h"
 
 void func_001B9F30(void);
 
@@ -467,52 +468,42 @@ void func_001DA170(C19* self)
     }
 }
 
-struct __attribute__((aligned(16))) Quad_1DBEC8 { s32 type; struct Node_1DBEC8* head; s32 w2; s32 w3; };
-struct Ent_1DBEC8 { s32 f0; f32 f4; Quad_1DBEC8* f8; };
-struct Node_1DBEC8 { s32 f0; Ent_1DBEC8* f4; Node_1DBEC8* f8; };
-
-s32 func_0011B008(Quad_1DBEC8* q);
 void func_0011A800(void* a);
-s32 func_0011A498(void* a, s32 b, s32 c, Quad_1DBEC8* d);
-void func_0011A080(Quad_1DBEC8* t, void* n, void* c);
-void func_0011B0A8(Quad_1DBEC8* a, Quad_1DBEC8* b);
-void func_0011B060(Quad_1DBEC8* q, s32 mode);
-void func_0011B538(Quad_1DBEC8* q, s32 n);
-void* func_0011B5B0(Ent_1DBEC8* obj, f32 x);
-void func_0011B6C0(Quad_1DBEC8* q, Node_1DBEC8* v);
-void* func_0011A400(Quad_1DBEC8* self, void* table, s32 key, Quad_1DBEC8* item);
+s32 func_0011A498(void* a, s32 b, s32 c, R11B008* d);
+void func_0011A080(R11B008* t, R11B008Node* n, void* c);
+void* func_0011A400(R11B008* self, void* table, s32 key, R11B008* item);
 extern u8 D_00259F38[];
 
 void func_001DBEC8(C6C* self, f32 limit)
 {
-    Quad_1DBEC8 a;
-    Quad_1DBEC8 q;
-    Quad_1DBEC8 t;
+    R11B008 a;
+    R11B008 q;
+    R11B008 t;
     func_0011B008(&a);
     func_0011B008(&q);
     func_0011A800(D_00259F38);
     func_0011A498(self->f2C, self->f1EF8, 0, &a);
-    Node_1DBEC8* n;
+    R11B008Node* n;
     s32 found;
-    if (a.type != 0x1E) {
+    if (a.tag != 0x1E) {
         goto fin;
     }
     {
-        n = a.head;
+        n = a.node;
         found = 0;
         while (n) {
-            Ent_1DBEC8* e = n->f4;
-            f32 d = e->f4 - limit;
+            R11B008Node* e = n->node;
+            f32 d = e->f - limit;
             if (d <= 0.0f) {
                 found = 1;
-                func_0011A080(&t, e->f8, self->f2C);
+                func_0011A080(&t, e->next, self->f2C);
                 func_0011B0A8(&q, &t);
                 func_0011B060(&t, 2);
-                func_0011B538((Quad_1DBEC8*)n, 0);
+                func_0011B538(n, 0);
             } else {
                 func_0011B5B0(e, d);
             }
-            n = n->f8;
+            n = n->next;
         }
         if (!found) {
         fin:
@@ -523,18 +514,18 @@ void func_001DBEC8(C6C* self, f32 limit)
     }
     func_0011A498(self->f2C, self->f1EF8, 0, &a);
     {
-        Node_1DBEC8* head = a.head;
-        Node_1DBEC8* prev = 0;
-        for (n = a.head; n; n = n->f8) {
-            if (n->f0 == 0x1E) {
+        R11B008Node* head = a.node;
+        R11B008Node* prev = 0;
+        for (n = a.node; n; n = n->next) {
+            if (n->tag == 0x1E) {
                 prev = n;
             } else if (prev) {
-                prev->f8 = n->f8;
+                prev->next = n->next;
             } else {
-                head = n->f8;
+                head = n->next;
             }
         }
-        if (head != a.head) {
+        if (head != a.node) {
             if (head) {
                 func_0011B6C0(&a, head);
             } else {
