@@ -2368,3 +2368,54 @@ func_00118850	StartScriptPadRecordPattern	builtin: calls StartPadRecordPattern o
 func_00114518	TestScriptNearlyEqual	builtin: converts three int or float arguments to floats, calls func_001EAC68 (compare with epsilon, as the callers use it with 1e-4) and returns the result as a bool
 func_001184F8	TransformScriptPointBetweenFrames	builtin: calls func_00128018 (the position frame conversion ReparentObjectKeepingTransform uses) into a vector payload
 func_00118608	TransformScriptRotationBetweenFrames	builtin: calls func_00128150 (the rotation frame conversion) into a matrix payload and returns it
+func_001000C8	TestScriptObjectOfKind	IsObjectOfKind with kind mask 7 on the object and one int argument, returned as a script bool
+func_00100178	AddScriptObjectKeyToOwner	no-argument builtin whose only effect is AddObjectKeyToOwner on the object
+func_00100368	CreateScriptObjectCopy	builtin: two int arguments to CreateObjectCopy, result returned as a script pointer
+func_001004F0	TestScriptObjectDescendantOf	builtin: IsObjectDescendantOf(object, pointer argument) returned as a script bool
+func_001005A0	TestScriptObjectIdMatch	builtin: MatchesObjectId(object, int argument) returned as a script bool
+func_00100650	SetScriptExtraObjectPropertyBool	builtin: two int arguments forwarded to SetExtraObjectPropertyBool, empty result
+func_001007F0	SetScriptExtraObjectPropertyFloat	builtin: int and float arguments forwarded to SetExtraObjectPropertyFloat, empty result
+func_00100998	SetScriptExtraObjectPropertyPair	builtin: int and vector arguments forwarded to SetExtraObjectPropertyPair, empty result
+func_00100C28	ClearScriptObjectRecordValues	builtin without arguments: calls ClearObjectRecordValues on the object, empty result
+func_00100CC8	ClearScriptAimHold	builtin without arguments: calls ClearAimHold on the object, empty result
+func_00100D68	SetScriptAimHold	builtin without arguments: calls SetAimHold on the object, empty result
+func_00100E08	SetScriptValueAttachment	builtin: two floats and an int forwarded to SetValueAttachment, empty result
+func_00101058	StartScriptSoundWithParams	builtin: int, three floats and a vector forwarded to StartSoundWithParams, empty result
+func_00101168	StopScriptPlayingSound	builtin without arguments: calls StopPlayingSound on the object, empty result
+func_00101368	FindScriptObjectHandle	builtin: FindObjectHandle(object, int argument) returned as a script pointer
+func_00101418	FindScriptObjectAnimationPlayer	builtin: FindObjectAnimationPlayer(object, int argument) returned as a script pointer
+func_001014C8	FindScriptTrackPlayer	builtin without arguments: FindTrackPlayer(object) returned as a script pointer
+func_00101620	SetScriptFollowObjects	builtin: two int arguments forwarded to SetFollowObjects, empty result
+func_00101A90	CreateScriptAnimationPlayer	builtin: four arguments to CreateAnimationPlayerReturned, result returned as a script pointer
+func_00101D38	SeekScriptAnimationPlayer	builtin: three arguments forwarded to SeekAnimationPlayer, empty result
+func_00101E10	StopScriptAnimationPlayer	builtin without arguments: calls StopAnimationPlayer, empty result
+func_00101EB0	ApplyScriptListedPoseSources	builtin: one argument forwarded to ApplyListedPoseSources, empty result
+func_00101F60	ReleaseScriptPlayerAttachment	builtin: two arguments forwarded to ReleasePlayerAttachment, empty result
+func_00102358	ActivateScriptSwitchedColliderUnlessActive	builtin without arguments: calls ActivateSwitchedColliderUnlessActive, empty result
+func_001024B0	SetScriptStateTriggerStateFromMessage	builtin: one argument forwarded to SetStateTriggerStateFromMessage, empty result
+func_00102560	AddScriptStateTriggerTableEntry	builtin: four int arguments forwarded to AddStateTriggerTableEntry, empty result
+func_001027C0	SetScriptTimedGroupFadeInTime	builtin: one float forwarded to SetTimedGroupFadeInTime, empty result
+func_00102870	SetScriptTimedGroupFadeOutTime	builtin: one float forwarded to SetTimedGroupFadeOutTime, empty result
+func_00102920	SetScriptEffectSpawnerActiveFor	builtin: one float forwarded to SetEffectSpawnerActiveFor, empty result
+func_001029D0	SetScriptEffectSpawnerActiveForever	builtin without arguments: calls SetEffectSpawnerActiveForever, empty result
+func_00102B10	AddScriptSpawnRangeEntry	builtin: six arguments forwarded to AddSpawnRangeEntry, empty result
+func_00102C28	AddScriptRecordMemberRangeEntry	builtin: six arguments forwarded to AddRecordMemberRangeEntry, empty result
+func_001030E0	CreateScriptStateWalker	builtin: three arguments to CreateStateWalker, result returned as a script pointer
+func_001031C0	DestroyScriptStateWalker	builtin without arguments: calls DestroyStateWalker, empty result
+func_00103260	ScatterScriptRandomObjects	builtin: three arguments forwarded to ScatterRandomObjects, empty result
+func_00103350	SetScriptIopChannel2Setting	builtin: two arguments forwarded to SetIopChannel2Setting, empty result
+func_00103420	PushScriptIopChannel2Setting	builtin: two arguments forwarded to PushIopChannel2Setting, empty result
+func_001034F0	PopScriptIopChannel2Setting	builtin without arguments: calls PopIopChannel2Setting, empty result
+func_00103900	CheckScriptEntryTwoBitRequirement	builtin: one argument to CheckEntryTwoBitRequirement, returned as a script bool
+func_001039B0	CheckScriptEntryThreeBitRequirement	builtin: one argument to CheckEntryThreeBitRequirement, returned as a script bool
+func_00103A60	SetScriptEntrySlotValue	builtin: three arguments forwarded to SetEntrySlotValue, empty result
+func_00103B40	GetScriptEntrySlotValue	builtin: two arguments to GetEntrySlotValue, result returned as a script int
+func_00103F80	ShowScriptCountedScreenElement	builtin without arguments: calls ShowCountedScreenElement, empty result
+func_00104020	HideScriptCountedScreenElement	builtin without arguments: calls HideCountedScreenElement, empty result
+func_00104470	AcquireScriptPadSelectFlag	builtin without arguments: calls AcquirePadSelectFlag, empty result
+func_00104510	ReleaseScriptPadSelectFlag	builtin without arguments: calls ReleasePadSelectFlag, empty result
+func_001045B0	ClearScriptWorldFlagBit	builtin: one argument forwarded to ClearWorldFlagBit, empty result
+func_00104660	SetScriptWorldFlagBit	builtin: one argument forwarded to SetWorldFlagBit, empty result
+func_00104710	PushScriptCameraStackValue	builtin: one argument forwarded to PushCameraStackValue, empty result
+func_001047C0	PopScriptCameraStackValue	builtin without arguments: PopCameraStackValue returned as a script int
+func_00104860	PeekScriptCameraStackValue	builtin without arguments: PeekCameraStackValue returned as a script int
