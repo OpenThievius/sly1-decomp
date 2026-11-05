@@ -12,7 +12,7 @@
 #ifndef RENDER_FRAME_H
 #define RENDER_FRAME_H
 
-#include "c01.h"
+#include "base_object.h"
 
 struct RenderFrame {
     u8 pad00[0x04];

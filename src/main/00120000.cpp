@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c02.h"
-#include "c2f.h"
-#include "c20.h"
-#include "c6c.h"
-#include "c83.h"
-#include "t2195.h"
+#include "placed_object.h"
+#include "state_trigger.h"
+#include "masked_collider.h"
+#include "world.h"
+#include "animation.h"
+#include "attachment.h"
 #include "t2196.h"
 
 void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
@@ -17,12 +17,12 @@ void func_00120110(T2196_6E8* self, s32* outCount, f32** outTimes)
 }
 
 struct Buffer_00120130 { u8 bytes[0x20]; };
-typedef void (*Finish_00120130)(C02* self, void* output, void* state);
+typedef void (*Finish_00120130)(PlacedObject* self, void* output, void* state);
 extern void func_0011F9F8(s32, Key2196_Vec*, s32, void*, void*);
 extern void func_00188A20(void*, void*);
 extern void func_001EDE38(void*, void*, void*);
 
-void func_00120130(T2196_6F8* self, C02* parent, s32 mode,
+void func_00120130(T2196_6F8* self, PlacedObject* parent, s32 mode,
                    void* output, void* state)
 {
     Buffer_00120130 buffer;
@@ -55,10 +55,10 @@ void func_001202C0(T2196_6F8* self, s32* outCount, f32** outTimes)
 
 struct Result_001202F0 { f32 x; f32 y; f32 z; };
 struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
-extern void func_0011F6B0(T2196_Weight**, C02*, void*, Vec02*, void*, s32, f32, f32);
+extern void func_0011F6B0(T2196_Weight**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
-void func_001202F0(T2196_718* self, C02* second, void* third,
+void func_001202F0(T2196_718* self, PlacedObject* second, void* third,
                    Output_001202F0* output, f32 factor)
 {
     Result_001202F0 result;
@@ -99,7 +99,7 @@ struct Output_001203A8 {
 extern void func_0011F9F8(s32, Key2196_Vec*, void*, f32*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
-void func_001203A8(T2196_728* self, C02* unused, void* mode,
+void func_001203A8(T2196_728* self, PlacedObject* unused, void* mode,
                    Output_001203A8* output, f32 factor)
 {
     Result_001203A8 result;
@@ -127,35 +127,35 @@ void func_00120440(T2196_728* self, s32* outCount, f32** outTimes)
 
 extern void* func_001B5EE0(void*);
 
-T2195* func_00121228(C6C* root, C02* value, const T2195_Vt* table)
+Attachment* func_00121228(World* root, PlacedObject* value, const T2195_Vt* table)
 {
-	T2195* node = (T2195*)func_001B5EE0(&root->pool1B20);
+	Attachment* node = (Attachment*)func_001B5EE0(&root->pool1B20);
 	node->vt = table;
 	table->init(node, value);
 	return node;
 }
 
-extern C6C* D_00275710;
+extern World* D_00275710;
 
-void func_0018D800(T2195* self, T2195* src, s32 size);
+void func_0018D800(Attachment* self, Attachment* src, s32 size);
 
-void func_001212D8(T2195* self, T2195* src)
+void func_001212D8(Attachment* self, Attachment* src)
 {
     Link2195 tmp = self->link;
-    C02* saved = self->owner;
+    PlacedObject* saved = self->owner;
     func_0018D800(self, src, D_00275710->pool1B20.size);
     self->link = tmp;
     self->owner = saved;
 }
 
-void func_00121568(T2195* self, f32* value, f32* slope)
+void func_00121568(Attachment* self, f32* value, f32* slope)
 {
 	Rec2195_224* rec = (Rec2195_224*)self->owner->f224;
 	*value = rec->f8C;
 	*slope = 0.0f;
 }
 
-f32 func_001215A8(T2195* self, s32 index)
+f32 func_001215A8(Attachment* self, s32 index)
 {
 	return (*(f32**)((u8*)self->owner + 0x274))[index];
 }
@@ -167,10 +167,10 @@ struct Locals_121648 {
     Mat02 rot;
 };
 
-void func_00121648(T2195* self, s32 flag)
+void func_00121648(Attachment* self, s32 flag)
 {
     Locals_121648 loc;
-    C02* s2 = self->owner;
+    PlacedObject* s2 = self->owner;
 
     if (self == s2->f1EC) {
         if (flag != 0 || self->mode0 == 2) {
@@ -189,7 +189,7 @@ void func_00121648(T2195* self, s32 flag)
     }
 }
 
-void func_001226D8(T2195* self)
+void func_001226D8(Attachment* self)
 {
     if (self->mode0 == 7) {
         self->mode0 = 3;
@@ -200,20 +200,20 @@ void func_001226D8(T2195* self)
 }
 
 // The owner's slot 44 (Desc02::m28) and 45 (m29) are told what was asked.
-typedef void (*Told_1227B0)(C02* self, Vec02* a, Vec02* b);
+typedef void (*Told_1227B0)(PlacedObject* self, Vec02* a, Vec02* b);
 
 void func_001227B0(T2195_588* src, Vec02* d0, Vec02* d1)
 {
     *d0 = src->pos;
     *d1 = src->vec;
-    C02* obj = src->owner;
+    PlacedObject* obj = src->owner;
     Told_1227B0 fn = obj->desc02()->m28;
     if (fn != 0) {
         fn(obj, d0, d1);
     }
 }
 
-typedef void (*Told_1227F0)(C02* self, Mat02* b, Vec02* q);
+typedef void (*Told_1227F0)(PlacedObject* self, Mat02* b, Vec02* q);
 
 void func_001227F0(T2195_588* src, Mat02* d0, Vec02* d1)
 {
@@ -221,7 +221,7 @@ void func_001227F0(T2195_588* src, Mat02* d0, Vec02* d1)
     d0->r[1] = src->rot.r[1];
     d0->r[2] = src->rot.r[2];
     *d1 = src->v70;
-    C02* obj = src->owner;
+    PlacedObject* obj = src->owner;
     Told_1227F0 fn = (Told_1227F0)obj->desc02()->m29;
     fn(obj, d0, d1);
 }
@@ -244,7 +244,7 @@ f32 func_00122878(T2195_588* self, s32 i)
     return self->valuesC4[i];
 }
 
-typedef void (*Told_122920)(C02* self);
+typedef void (*Told_122920)(PlacedObject* self);
 
 void func_00122920(T2195_5B0* self, Vec02* first, Vec02* second)
 {
@@ -292,9 +292,9 @@ f32 func_00122D90(void)
     return 0.0f;
 }
 
-void func_00121338(T2195* self, C02* a1);
+void func_00121338(Attachment* self, PlacedObject* a1);
 
-void func_00122DA0(T2195_600* self, C02* a1)
+void func_00122DA0(T2195_600* self, PlacedObject* a1)
 {
     func_00121338(self, a1);
     self->f1C = 1.0f;
@@ -302,11 +302,11 @@ void func_00122DA0(T2195_600* self, C02* a1)
 }
 
 void func_00152600(void* list, void* item);
-void func_00121358(T2195* self, s32 flags);
+void func_00121358(Attachment* self, s32 flags);
 
 void func_00122F28(T2195_7C0* self, s32 a1)
 {
-    Player2195* o = self->player;
+    AnimationPlayer* o = self->player;
     func_00152600(&o->list44, self);
     if (o->driven == self) {
         o->driven = 0;
@@ -315,12 +315,12 @@ void func_00122F28(T2195_7C0* self, s32 a1)
 }
 
 extern f32 D_0026185C[];
-void func_001214B8(T2195* self, Vec02* a1, Vec02* a2);
-s32 func_0012E9E0(Player2195* t, f32* a, f32* b);
+void func_001214B8(Attachment* self, Vec02* a1, Vec02* a2);
+s32 func_0012E9E0(AnimationPlayer* t, f32* a, f32* b);
 
 void func_00122FE0(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
 {
-    Player2195* track = self->player;
+    AnimationPlayer* track = self->player;
     Track83* e = &track->anim->tracks[self->index];
     if (e->pos != 0) {
         f32 tmp[2];
@@ -346,13 +346,13 @@ void func_00122FE0(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
 }
 
 extern f32 D_0026185C[];
-void func_00121508(T2195* self, Mat02* a, Vec02* b);
-s32 func_0012E9E0(Player2195* t, f32* a, f32* b);
+void func_00121508(Attachment* self, Mat02* a, Vec02* b);
+s32 func_0012E9E0(AnimationPlayer* t, f32* a, f32* b);
 
 void func_00123120(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
 {
-    C02* p4 = self->owner;
-    Player2195* track = self->player;
+    PlacedObject* p4 = self->owner;
+    AnimationPlayer* track = self->player;
     Track83* e = &track->anim->tracks[self->index];
     if (e->rot != 0) {
         f32 tmp[2];
@@ -379,7 +379,7 @@ void func_00123120(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
 
 f32 func_00123358(T2195_7C0* self, s32 index)
 {
-    Player2195* track = self->player;
+    AnimationPlayer* track = self->player;
     Track83* row = &track->anim->tracks[self->index];
     T2196_Weight** values = row->morph;
     T2196_Weight* object = values[index];
@@ -397,25 +397,25 @@ void func_001233C0(C22* object)
 	func_0013D278(object);
 }
 
-void func_00123400(C22* state, C2F* value)
+void func_00123400(C22* state, StateTrigger* value)
 {
     state->counter = value;
 }
 
 extern u8 D_00261420[];
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 s32 func_00140FF8(void* p);
 
-void func_00123408(C2F* self)
+void func_00123408(StateTrigger* self)
 {
     func_001B7968(self);
     self->state = -1;
     self->id6B0 = func_00140FF8(D_00261420);
 }
 
-extern void func_001BA130(C03*);
+extern void func_001BA130(Collider*);
 
-void func_00123540(C2F* object)
+void func_00123540(StateTrigger* object)
 {
 	s32 value = object->id6B0;
 	func_001BA130(object);
@@ -429,11 +429,11 @@ struct Ctx_123578 { u8 pad[0x2220]; s32 f2220; };
 extern f32 D_0026185C[];
 extern Ctx_123578* D_00262E10;
 
-void func_001B93F8(C03* self);
+void func_001B93F8(Collider* self);
 void* func_0015A418(void* a, s32 b, void* c, void* d);
 s32 func_001300E8(void* node, s32 kind);
 
-void func_00123578(C2F* self)
+void func_00123578(StateTrigger* self)
 {
     func_001B93F8(self);
     if (self->state == 2 && self->timeout != 0.0f) {
@@ -465,7 +465,7 @@ done:
     ;
 }
 
-void func_00123AB0(C2F* object, s32 mode)
+void func_00123AB0(StateTrigger* object, s32 mode)
 {
     s32 mapped;
     switch (mode) {
@@ -477,7 +477,7 @@ void func_00123AB0(C2F* object, s32 mode)
     func_00123888(object, mapped);
 }
 
-void func_00123B18(C2F* counter)
+void func_00123B18(StateTrigger* counter)
 {
 	counter->done++;
 }
@@ -495,7 +495,7 @@ struct Elem_123B28 {
     s32 f560;
 };
 
-void func_00123B28(C2F* self)
+void func_00123B28(StateTrigger* self)
 {
     for (s32 i = 0; i < self->outCount; i++) {
         Elem_123B28* e = (Elem_123B28*)self->outItems[i];
@@ -505,7 +505,7 @@ void func_00123B28(C2F* self)
     }
 }
 
-void func_00123C90(C2F* self, s32 value)
+void func_00123C90(StateTrigger* self, s32 value)
 {
     u32 n = self->count1;
     if (n < 4) {
@@ -514,7 +514,7 @@ void func_00123C90(C2F* self, s32 value)
     }
 }
 
-void func_00123CB8(C2F* self, s32 value)
+void func_00123CB8(StateTrigger* self, s32 value)
 {
     u32 n = self->count2;
     if (n < 16) {
@@ -523,7 +523,7 @@ void func_00123CB8(C2F* self, s32 value)
     }
 }
 
-void func_00123CE0(C2F* self, s32 value)
+void func_00123CE0(StateTrigger* self, s32 value)
 {
     u32 n = self->count3;
     if (n < 6) {
@@ -534,7 +534,7 @@ void func_00123CE0(C2F* self, s32 value)
 
 extern void func_0013EC00(void*, s32, void*, void*, void*, void*, void*);
 
-void func_00123D08(C2F* object, void* a1, void* a2, void* a3, void* a4)
+void func_00123D08(StateTrigger* object, void* a1, void* a2, void* a3, void* a4)
 {
 	func_0013EC00((u8*)object + 0x630, 8, (u8*)object + 0x62C,
 			  a1, a2, a3, a4);
@@ -542,7 +542,7 @@ void func_00123D08(C2F* object, void* a1, void* a2, void* a3, void* a4)
 
 s32 func_001C1A28(void* a, void* b);
 
-s32 func_00123D40(C2F* self, void* arg)
+s32 func_00123D40(StateTrigger* self, void* arg)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
@@ -555,7 +555,7 @@ s32 func_00123D40(C2F* self, void* arg)
 
 struct Record_001250C8 { u8 pad[8]; s32 value; };
 
-void func_001250C8(C02* records)
+void func_001250C8(PlacedObject* records)
 {
     for (s32 i = 0; i < *(s32*)(records->sub22C + 0xC); i++) {
         Record_001250C8* record = (Record_001250C8*)(*(u8**)(records->sub22C + 0x14) + i * 0x28);
@@ -563,16 +563,16 @@ void func_001250C8(C02* records)
     }
 }
 
-void func_00126A48(C02* object, u32 value)
+void func_00126A48(PlacedObject* object, u32 value)
 {
     ListFrame frame;
-    C02* child = (C02*)object->children.head;
+    PlacedObject* child = (PlacedObject*)object->children.head;
     *(u32*)(object->sub22C + 0x3C) = value;
     *(u32*)(object->sub22C + 0x38) |= 2;
     while (child != 0) {
         if ((child->desc->flags & 1) != 0)
             func_00126A48(child, value);
-        child = (C02*)child->next;
+        child = (PlacedObject*)child->next;
     }
 }
 
@@ -604,10 +604,10 @@ void func_00126BC0(Object_00126BC0* object, s32 value)
     }
 }
 
-void func_001215C0(T2195* obj)
+void func_001215C0(Attachment* obj)
 {
-    C02* node = obj->owner;
-    C03* a2 = (node->desc->flags & 2) ? (C03*)node : 0;
+    PlacedObject* node = obj->owner;
+    Collider* a2 = (node->desc->flags & 2) ? (Collider*)node : 0;
     s8 b2C9 = node->b2C9;
     if (b2C9 != -1) {
         obj->mode0 = b2C9;
@@ -630,9 +630,9 @@ void func_001215C0(T2195* obj)
     }
 }
 
-void func_00122F88(T2195_7C0* self, T2195* a1)
+void func_00122F88(T2195_7C0* self, Attachment* a1)
 {
-    Player2195* saved = self->player;
+    AnimationPlayer* saved = self->player;
     Pair2195 tmp = self->w20;
     func_001212D8(self, a1);
     self->w20 = tmp;
@@ -641,7 +641,7 @@ void func_00122F88(T2195_7C0* self, T2195* a1)
 
 struct Child_00123BB0 { void** vt; };
 
-void func_00123BB0(C2F* self)
+void func_00123BB0(StateTrigger* self)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
@@ -656,7 +656,7 @@ void func_00123BB0(C2F* self)
 typedef void (*VFn_123C20)(void* self);
 struct Item_123C20 { VFn_123C20* vtbl; };
 
-void func_00123C20(C2F* self)
+void func_00123C20(StateTrigger* self)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
@@ -705,7 +705,7 @@ extern f32 D_0026186C;
 extern f32 D_00261860;
 extern f32 func_001EA4B8(void*, s32, f32, f32, f32);
 
-void func_00122488(T2195* self, s32 val)
+void func_00122488(Attachment* self, s32 val)
 {
     f32 ret = self->vt->getIndexed(self, val);
     switch (self->mode3) {
@@ -730,7 +730,7 @@ void func_00182ED8(void* a);
 
 struct Frame_123448 { s32 f00; s32 f04; s32 f08; s32 f0C; };
 
-void func_00123448(C2F* self)
+void func_00123448(StateTrigger* self)
 {
     Frame_123448 fr;
     s32 s0;
@@ -760,17 +760,17 @@ void func_00123448(C2F* self)
         } while (s0 != 0);
     }
     if (self->found558 != 0) {
-        self->f55C = (S1B6290*)func_001B6290(self->found558, self, -1, 1);
+        self->f55C = (StateWalker*)func_001B6290(self->found558, self, -1, 1);
         func_00182ED8(self->found558);
     }
     D_0027B314 = (ListFrame*)fr.f0C;
 }
 
-void func_00121568(T2195* self, f32* value, f32* slope);
+void func_00121568(Attachment* self, f32* value, f32* slope);
 
-void func_00122C48(T2195* self, f32* a1, f32* a2)
+void func_00122C48(Attachment* self, f32* a1, f32* a2)
 {
-    T2195* p = self;
+    Attachment* p = self;
     while ((p = p->link.next) != 0) {
         s8 f = p->mode1;
         if (f == 0) { p = 0; break; }
@@ -783,13 +783,13 @@ void func_00122C48(T2195* self, f32* a1, f32* a2)
     }
 }
 
-extern void func_00121568(T2195* self, f32* a1, f32* a2);
+extern void func_00121568(Attachment* self, f32* a1, f32* a2);
 
 void func_00123270(T2195_7C0* self, f32* a1, f32* a2)
 {
     f32* saved = a1;
-    C02* f4 = self->owner;
-    Player2195* player = self->player;
+    PlacedObject* f4 = self->owner;
+    AnimationPlayer* player = self->player;
     Track83* e = &player->anim->tracks[self->index];
     T2196_Weight* target = e->weight;
     if (target) {
@@ -799,13 +799,13 @@ void func_00123270(T2195_7C0* self, f32* a1, f32* a2)
     }
 }
 
-extern void func_00121580(T2195* self, Mat02* a1);
+extern void func_00121580(Attachment* self, Mat02* a1);
 
 void func_001232E8(T2195_7C0* self, Mat02* a1)
 {
     Mat02* saved = a1;
-    C02* f4 = self->owner;
-    Player2195* player = self->player;
+    PlacedObject* f4 = self->owner;
+    AnimationPlayer* player = self->player;
     Track83* e = &player->anim->tracks[self->index];
     T2196_Scale* target = e->scale;
     if (target) {
@@ -820,11 +820,11 @@ struct Obj_1236C8 { VFn_1236C8* vt; };
 extern u8 D_00261420[];
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 s32 func_001300E8(void* node, s32 kind);
-void func_00123400(C22* node, C2F* value);
+void func_00123400(C22* node, StateTrigger* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
 
-void func_001236C8(C2F* self)
+void func_001236C8(StateTrigger* self)
 {
     s32 kept = 0;
     s32 i;
@@ -840,7 +840,7 @@ void func_001236C8(C2F* self)
         void* node = func_0015A418(self->world, 0x104, self->items2[i], self);
         if (node && func_001300E8(node, 0x30)) {
             s32 idx = self->outCount;
-            self->outItems[idx] = (C03*)node;
+            self->outItems[idx] = (Collider*)node;
             self->outCount = idx + 1;
             ((Obj_1236C8*)node)->vt[0x140 / 4](node, self);
         }
@@ -870,12 +870,12 @@ void func_001B64D8(void* a, s32 b);
 void func_001B6628(void* a, s32 b);
 s32 func_00141008(void* a, s32 b);
 void func_00141040(void* a, s32 b);
-void func_001837E0(C01* self, s32 a, s32 b, s32 c);
+void func_001837E0(BaseObject* self, s32 a, s32 b, s32 c);
 s32 func_001BEEF8(s32 a);
 void func_00160CF0(void* p);
-void func_001BFCD8(s32 a0, void* a1, C2F* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BFCD8(s32 a0, void* a1, StateTrigger* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_00123888(C2F* self, s32 mode)
+void func_00123888(StateTrigger* self, s32 mode)
 {
     s32 cur = self->state;
     if (cur == mode) {
@@ -983,13 +983,13 @@ void func_001274F8(void* a, void* b);
 void func_00127590(void* a, void* b);
 void func_001B5F28(void* a, void* b);
 
-void func_00121358(T2195* self, s32 flags)
+void func_00121358(Attachment* self, s32 flags)
 {
-    C02* m = self->owner;
+    PlacedObject* m = self->owner;
     s32 local[4];
     func_00152600(&m->list1E0, self);
-    T2195* a = m->f1EC;
-    T2195* b = m->f1F0;
+    Attachment* a = m->f1EC;
+    Attachment* b = m->f1F0;
     m->desc02()->m2B(m);
     if (self == a && m->f1EC == 0 && (flags & 1) != 0) {
         if ((m->desc->flags & 2) != 0) {
@@ -1011,9 +1011,9 @@ void func_00121358(T2195* self, s32 flags)
 }
 
 extern u8 D_002483D0[];
-void func_00121338(T2195* self, C02* a1);
+void func_00121338(Attachment* self, PlacedObject* a1);
 
-void func_00122708(T2195_588* self, C02* src)
+void func_00122708(T2195_588* self, PlacedObject* src)
 {
     func_00121338(self, src);
     self->pos = src->v190;
@@ -1037,7 +1037,7 @@ void func_00122708(T2195_588* self, C02* src)
 s32 func_00139970(f32 x, f32 period, s32 count, Pair2196* p, f32* out);
 f32 func_001EA408(f32 a);
 
-void func_00120AA8(T2196_698* o, C02* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
+void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
     f32 v0 = sum1;
@@ -1114,7 +1114,7 @@ void func_00120AA8(T2196_698* o, C02* cam, s32 c, f32* out0, f32* out1, f32 dt, 
 s32 func_00139970(f32 x, f32 period, s32 count, Pair2196* p, f32* out);
 f32 func_001EA408(f32 a);
 
-void func_00120D58(T2196_6A8* o, C02* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
+void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
 {
     f32 sum1 = 0.0f;
     f32 sum0 = sum1;
@@ -1179,7 +1179,7 @@ void func_00120D58(T2196_6A8* o, C02* cam, s32 c, f32* out0, f32* out1, f32 dt, 
         *out1 = sum1;
 }
 
-void func_00121338(T2195* self, C02* value)
+void func_00121338(Attachment* self, PlacedObject* value)
 {
 	s8 m = -1;
 	self->owner = value;
@@ -1246,17 +1246,17 @@ T2196_Scale* func_001210F0(s32 kind)
 
 extern u8 D_00219560[];
 
-T2195* func_00121280(T2195* self, C6C* a, C02* b)
+Attachment* func_00121280(Attachment* self, World* a, PlacedObject* b)
 {
-    T2195* node = func_00121228(a, b, (const T2195_Vt*)D_00219560);
+    Attachment* node = func_00121228(a, b, (const T2195_Vt*)D_00219560);
     node->vt->copy(node, self);
     return node;
 }
 
-typedef void (*Told_1214B8)(C02* self, Vec02* out);
+typedef void (*Told_1214B8)(PlacedObject* self, Vec02* out);
 extern u8 D_00248D30[];
 
-void func_001214B8(T2195* self, Vec02* out1, Vec02* out2)
+void func_001214B8(Attachment* self, Vec02* out1, Vec02* out2)
 {
     *out1 = self->owner->v190;
     *out2 = *(Vec02*)D_00248D30;
@@ -1267,7 +1267,7 @@ void func_001214B8(T2195* self, Vec02* out1, Vec02* out2)
 
 extern u8 D_002483D0[];
 
-void func_00121580(T2195* unused, Mat02* out)
+void func_00121580(Attachment* unused, Mat02* out)
 {
     Mat02* src = (Mat02*)D_002483D0;
     out->r[0] = src->r[0];
@@ -1278,9 +1278,9 @@ void func_00121580(T2195* unused, Mat02* out)
 extern u8 D_00248D30[];
 extern u8 D_002483D0[];
 
-void func_00121338(T2195* self, C02* a1);
+void func_00121338(Attachment* self, PlacedObject* a1);
 
-void func_00122890(T2195_5B0* self, C02* src)
+void func_00122890(T2195_5B0* self, PlacedObject* src)
 {
     func_00121338(self, src);
     self->pos = &src->v190;
@@ -1299,7 +1299,7 @@ void func_00122890(T2195_5B0* self, C02* src)
     self->ident = (Mat02*)D_002483D0;
 }
 
-void func_00121338(T2195* self);
+void func_00121338(Attachment* self);
 
 void func_00122A18(T2195_5D8* self)
 {
@@ -1366,11 +1366,11 @@ T2196_Weight* func_00121160(u32 kind)
     return o;
 }
 
-typedef void (*Told_121508)(C02* self, Mat02* out1, Vec02* out2);
+typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
 extern u8 D_00248D30[];
 
-void func_00121508(T2195* self, Mat02* out1, Vec02* out2)
+void func_00121508(Attachment* self, Mat02* out1, Vec02* out2)
 {
     *out1 = self->owner->m1A0;
     *out2 = *(Vec02*)D_00248D30;
@@ -1386,16 +1386,16 @@ extern u8 D_00260EB0[];
 extern u8 D_00260EC0[];
 
 void func_00152438(void* list, s32 n);
-void func_00182C18(C01* self);
+void func_00182C18(BaseObject* self);
 
 // Two stores of the set-up written as small inline helpers, the shape that matches: a value
 // passed as an int, and a matrix copied through its own pointer (as each copy's own register).
 struct Init_00123ED0 {
-    static void SetB2CA(C02* o, s32 value) { o->b2CA = value; }
+    static void SetB2CA(PlacedObject* o, s32 value) { o->b2CA = value; }
     static void Copy(Mat02* dst, const Mat02* src) { *dst = *src; }
 };
 
-void func_00123ED0(C02* self)
+void func_00123ED0(PlacedObject* self)
 {
     func_00152438(&self->children, 0x1C);
     func_00152438(&self->list60, 0x58);

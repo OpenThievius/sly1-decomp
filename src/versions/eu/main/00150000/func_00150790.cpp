@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: D_0026F5A0.f260 is at 0x570 (US 0x260) and D_002701F8.f324 at 0x5B0 (US 0x324).
-struct Glob_150790_eu { u8 pad0[0x570]; C65* f260; };
+struct Glob_150790_eu { u8 pad0[0x570]; StepSequence* f260; };
 struct __attribute__((packed)) Blk_150790_eu { u8 pad0[0x5B0]; s32 f5B0; };
 
-void func_00150790(C65* self, s32 next)
+void func_00150790(StepSequence* self, s32 next)
 {
     s32 cur = self->state2D4;
     if (next == cur) {

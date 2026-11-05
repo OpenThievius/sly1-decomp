@@ -9,14 +9,14 @@
 #ifndef CONE_VOLUME_H
 #define CONE_VOLUME_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 #include "shapes.h"   // Quad16
 
 // Eight bytes that slot 9 keeps through the parent's copy; retail moves them unaligned.
 struct __attribute__((packed)) ConeVolumeSaved { s32 a; s32 b; };
 
-struct ConeVolume : C02 {
+struct ConeVolume : PlacedObject {
     s32 mode;               // 0x2D0: 0 at setup
     u8 pad2D4[0x2E0 - 0x2D4];
     u32 f2E0[4];            // 0x2E0

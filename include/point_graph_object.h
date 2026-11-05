@@ -8,7 +8,7 @@
 #ifndef POINT_GRAPH_OBJECT_H
 #define POINT_GRAPH_OBJECT_H
 
-#include "c01.h"
+#include "base_object.h"
 
 struct Stream8A;  // the level stream the graph is read from (func_00137BE0 and friends)
 
@@ -35,7 +35,7 @@ struct PointGraph {
 };
 
 // 0x8A: the graph, right after the root's fields.
-struct PointGraphObject : C01 {
+struct PointGraphObject : BaseObject {
     PointGraph graph;       // 0x34
 };
 

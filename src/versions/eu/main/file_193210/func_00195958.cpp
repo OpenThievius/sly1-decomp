@@ -113,7 +113,7 @@ void func_00195958(Menu_195958_eu* self)
             }
             return;
         case 15: {
-            G27C220* g = D_002623C0;
+            GameProgress* g = D_002623C0;
             g->u19EC ^= 0x80;
             func_001C0760(g->u19EC & 0x80);
             {
@@ -125,7 +125,7 @@ void func_00195958(Menu_195958_eu* self)
             return;
         }
         case 16: {
-            G27C220* g = D_002623C0;
+            GameProgress* g = D_002623C0;
             g->u19EC ^= 0x40;
             func_001C0790(g->u19EC & 0x40);
             {

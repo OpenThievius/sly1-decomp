@@ -33,11 +33,11 @@ const char* func_eu_001DDAB0(s32 id);
 #define HUD_EU ((Hud_1943E8_eu*)&D_00274118)
 void func_001943E8(Self_1943E8_eu* self)
 {
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     Row_1943E8* row = &((Row_1943E8*)&D_00269D50)[self->f570];
     s32 on;
     s32 n;
-    G262C70* pad;
+    PadRecord* pad;
 
     on = 0;
     switch ((g->f19D8 << 8) | g->f19DC) {

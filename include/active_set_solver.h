@@ -8,7 +8,7 @@
 #ifndef ACTIVE_SET_SOLVER_H
 #define ACTIVE_SET_SOLVER_H
 
-#include "c01.h"
+#include "base_object.h"
 
 struct ActiveSetSolver {
     union {

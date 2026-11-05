@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c01.h"
-#include "c05.h"
+#include "base_object.h"
+#include "switched_collider.h"
 #include "list_iter.h"
 #include "globals.h"
 
@@ -108,7 +108,7 @@ void func_001C33C8(C1D* self)
     func_00124DF8(self, 0xC, D_002749B0);
     self->f668 = func_001B6290(self->f664, self, -1, 0);
     self->f644 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    C02* v = (C02*)self->f660;
+    PlacedObject* v = (PlacedObject*)self->f660;
     self->f648 = func_00205778(v->rot.r[0].y, v->rot.r[0].x);
     *(Pk8_1C33C8*)&self->f630 = *(Pk8_1C33C8*)((u8*)self->f62C + 0x2DC);
     u8* g1 = (u8*)&D_0026DD48;
@@ -300,13 +300,13 @@ f32 func_001EA408(f32 a);
 void func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
 void func_00151E20(u8* a, f32 b);
 void func_00194D30(u8* a, s32 b, s32 c);
-void func_0012C918(void* a, C02* b, s32 c, void* d, f32 e, f32 f);
+void func_0012C918(void* a, PlacedObject* b, s32 c, void* d, f32 e, f32 f);
 
 #define F(o, off) (*(f32*)((u8*)(o) + (off)))
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 #define P(o, off) (*(void**)((u8*)(o) + (off)))
 
-void func_001C3FC8(C02* self, s32 state)
+void func_001C3FC8(PlacedObject* self, s32 state)
 {
     void* s2;
     f32 f12;
@@ -391,7 +391,7 @@ struct Ent_1C0070 {
     s32 f0; s32 f4; s32 f8; u8 pad0c[0x08]; f32 f14;
     s32 f18; u8 pad1c[0x04];
     u8 f20[0x10];
-    C01* f30; f32 f34; f32 f38; s32 f3C; s32 f40; s32 f44; s32 f48; u8 f4C;
+    BaseObject* f30; f32 f34; f32 f38; s32 f3C; s32 f40; s32 f44; s32 f48; u8 f4C;
     u8 pad4d[3];
     s32 f50; s32 f54; f32 f58; u8 pad5c[0x18];
     f32 f74; f32 f78;
@@ -416,7 +416,7 @@ Fn_1C0070 func_001BF578(void);
 s32 func_0011D708(ListFrame* h);
 void func_0011D928(s32 a);
 void func_001C06A0(s32 a, s32 b, f32 x);
-s32 func_00182FC8(C01* o);
+s32 func_00182FC8(BaseObject* o);
 void func_0011D600(s32 h);
 void func_0011D730(s32 h, void (*fn)(void), s64 arg);
 void func_001BFFC8(void);

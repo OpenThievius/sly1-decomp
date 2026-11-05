@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "id_lookup_object.h"
-#include "c02.h"
-#include "c83.h"
-#include "s1be4d8.h"
+#include "placed_object.h"
+#include "animation.h"
+#include "sound_record.h"
 #include "asm_func.h"
 #include "list_iter.h"
 #include "v24a0.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "screen_fade.h"
 #include "keyed_entry.h"
 #include "identity_key.h"
@@ -69,10 +69,10 @@ extern u8 D_00248D30[];
 void func_001BF788(Obj_15FBB8* self, s32 n);
 void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, s32 a5);
 
-void func_00182C58(C01* self);
+void func_00182C58(BaseObject* self);
 void* func_0018D500(s32 size);
-s32 func_0015A480(C6C* world, s32 item, void* c);
-void func_0015F8B0(C6C* world, FoundList* sub);
+s32 func_0015A480(World* world, s32 item, void* c);
+void func_0015F8B0(World* world, FoundList* sub);
 
 
 struct Iter_15F710 {
@@ -318,7 +318,7 @@ void func_00160CC8(void* p);
 void func_001F0428(void* a, s32 b, s32 c);
 void func_001C0760(s32 flag);
 void func_001C0790(s32 flag);
-C83* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
+Animation* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_0012E760(void* obj);
 void func_001E96F8(void* obj, s32 mode);
 
@@ -895,8 +895,8 @@ void func_0015F930(Items_15F930* list, s32* arr, s32 value);
 void func_0015F9A0(void* self, Sub_15F9A0* s);
 void func_0015FA58(Self_15FA58* self);
 void func_0015FB28(Node_0015FB28* self, void* arg);
-s32 func_0015FBA0(C02* self, s32* out);
-void func_0015FBB8(C02* self, s32 flag);
+s32 func_0015FBA0(PlacedObject* self, s32* out);
+void func_0015FBB8(PlacedObject* self, s32 flag);
 void func_0015FF58(void* self);
 void func_00160050(IdLookupObject* obj, s32 value);
 void func_00160070();
@@ -912,8 +912,8 @@ void func_00160340(s32 n);
 void func_001603E8(s32 n);
 void func_001604B8(s32 mode);
 void func_00160578(s32 kind);
-void func_001605E8(G27C220* self);
-s32 func_00160650(G27C220* s);
+void func_001605E8(GameProgress* self);
+s32 func_00160650(GameProgress* s);
 void func_00160690(s32 a0, s32 flags);
 void func_001607D0(f32 dx);
 void* func_00160810(s32 key);
@@ -978,12 +978,12 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
                    s32 n, Rec_164868* recs, Ent_164868* ents, Vec3_164868* verts, Vec3_164868* vnrms,
                    f32* weights, Pkt_164868* pkt, s32** outs);
 void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c);
-void func_00165728(Self_165728* self, C02* ctx);
-void func_00165828(Obj_165828* self, C02* ctx);
+void func_00165728(Self_165728* self, PlacedObject* ctx);
+void func_00165828(Obj_165828* self, PlacedObject* ctx);
 void func_00165920(Obj_165920* self, s32 arg, void* src);
-void func_00165FE0(Owner_165FE0* self, C02* sub, f32 f);
-void func_001660A0(C02* self);
-void func_001660E8(C02* self, Par_1660E8* par);
+void func_00165FE0(Owner_165FE0* self, PlacedObject* sub, f32 f);
+void func_001660A0(PlacedObject* self);
+void func_001660E8(PlacedObject* self, Par_1660E8* par);
 void func_00166658(void);
 
 void func_0015F678(Owner_15F678* owner, u8* obj)
@@ -1143,14 +1143,14 @@ void func_0015FB28(Node_0015FB28* self, void* arg)
     }
 }
 
-s32 func_0015FBA0(C02* self, s32* out)
+s32 func_0015FBA0(PlacedObject* self, s32* out)
 {
     s32 bit = (s32)(self->flags >> 38) & 1;
     *out = bit;
     return bit;
 }
 
-void func_0015FBB8(C02* self, s32 flag)
+void func_0015FBB8(PlacedObject* self, s32 flag)
 {
     if (flag != 0) {
         self->vA0 = self->v150;
@@ -1166,7 +1166,7 @@ void func_0015FBB8(C02* self, s32 flag)
         self->flags &= ~((u64)1 << 38);
         self->desc02()->m20(self, &self->vA0);
         self->desc02()->m21(self, &self->vB0);
-        S1BE4D8* c = self->f2AC;
+        SoundRecord* c = self->f2AC;
         if (c != 0) {
             func_001BFCD8(c->p00, &c->p1C, (void*)self, 0, c->f04, c->f08, c->f0C, c->f10, c->f20, &c->b14, 0);
         }
@@ -1186,7 +1186,7 @@ void func_0015FF58(void* self)
 void func_0015FF88(IdLookupObject* self)
 {
     func_00182C58(self);
-    C6C* cur = self->world;
+    World* cur = self->world;
     FoundList* sub = &self->found;
     sub->items = (s32*)func_0018D500(self->idCount * 4);
     for (s32 i = 0; i < self->idCount; i++) {
@@ -1392,7 +1392,7 @@ void func_00160578(s32 kind)
     }
 }
 
-void func_001605E8(G27C220* self)
+void func_001605E8(GameProgress* self)
 {
     func_001F5C0C(self, 0, 0x1A00);
     self->type = 0x12;
@@ -1405,7 +1405,7 @@ void func_001605E8(G27C220* self)
     func_001A7E90(self);
 }
 
-s32 func_00160650(G27C220* s)
+s32 func_00160650(GameProgress* s)
 {
     u8* p = (u8*)&s->fC;
     s32 sum = 0;
@@ -1421,7 +1421,7 @@ void func_00160690(s32 a0, s32 flags)
     s32 hi = (r != -1) ? (r >> 8) : 0;
     s32 lo = (r != -1) ? (r & 0xFF) : 0;
     G27C230* base = &D_002623C0->levels[hi];
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     s32 gate = g->f19E0;
     D_002623C4 = base;
     D_002623C8 = (G27C230*)((u8*)base + lo * 0x78);
@@ -1478,7 +1478,7 @@ void func_00160880(void)
 
 void func_001608E0(void)
 {
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     g->f19E0 = 5;
     g->f19E4 = 0;
     func_00140D90((Sys_1608E0*)D_00261420);
@@ -1503,7 +1503,7 @@ void func_00160948(void)
         if (D_00275F84 == 0) {
             func_001C0760(D_002623C0->f19EC & 0x80);
             func_001C0790(D_002623C0->f19EC & 0x40);
-            C83* r = func_0015A418(D_00275710, 0x105, 0x494, 0);
+            Animation* r = func_0015A418(D_00275710, 0x105, 0x494, 0);
             if (r != 0) {
                 Frame_160948 frame((Lst_160948*)r->props6C);
                 void* head = *(void**)r->props6C;
@@ -1621,13 +1621,13 @@ s32 func_00160D98(void)
 
 void func_00160DA0(void)
 {
-    G27C220* o = D_002623C0;
+    GameProgress* o = D_002623C0;
     u8* x = (u8*)D_00275710;
     s32 t = o->f19E0 - 1;
     o->f19E0 = t;
     func_001DDAD0((Call_160DA0*)x);
     func_001BE708();
-    G27C220* p = D_002623C0;
+    GameProgress* p = D_002623C0;
     s32 m = p->f19DC;
     if (m == 1) {
         FadeRequest args;
@@ -2769,7 +2769,7 @@ void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c)
     func_001529E0(buf, &c->fC, &c->f10);
 }
 
-void func_00165728(Self_165728* self, C02* ctx)
+void func_00165728(Self_165728* self, PlacedObject* ctx)
 {
     for (s32 i = 0; i < self->count0C; i++)
     {
@@ -2796,7 +2796,7 @@ void func_00165728(Self_165728* self, C02* ctx)
     }
 }
 
-void func_00165828(Obj_165828* self, C02* ctx)
+void func_00165828(Obj_165828* self, PlacedObject* ctx)
 {
     Frame_165828 f;
     s32 i;
@@ -2867,7 +2867,7 @@ void func_00165920(Obj_165920* self, s32 arg, void* src)
 
 INCLUDE_ASM(func_00165AE8);
 
-void func_00165FE0(Owner_165FE0* self, C02* sub, f32 f)
+void func_00165FE0(Owner_165FE0* self, PlacedObject* sub, f32 f)
 {
     Elem_165FE0* e;
     s32 i;
@@ -2886,13 +2886,13 @@ void func_00165FE0(Owner_165FE0* self, C02* sub, f32 f)
     }
 }
 
-void func_001660A0(C02* self)
+void func_001660A0(PlacedObject* self)
 {
     u8* p=(u8*)self->f224;
     if (p && (*(s32*)(p+0xB0)&16) && *(s32*)(p+0x64)) func_0016C528(*(void**)(p+0x60));
 }
 
-void func_001660E8(C02* self, Par_1660E8* par)
+void func_001660E8(PlacedObject* self, Par_1660E8* par)
 {
     Mat_1660E8 a;
     Mat_1660E8 b;

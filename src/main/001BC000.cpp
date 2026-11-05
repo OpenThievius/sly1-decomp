@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c03.h"
-#include "c6c.h"
+#include "collider.h"
+#include "world.h"
 #include "object_event.h"
 #include "key_record.h"
 #include "key_id.h"
 
-void func_001BC748(C03* self, u32* out)
+void func_001BC748(Collider* self, u32* out)
 {
     u32 bit = (u32)(self->flags538 >> 52) & 1;
     *out = bit;
@@ -175,10 +175,10 @@ void func_001BFFC8(void* guard, s64 key)
     }
 }
 
-void func_001BBEB8(C03* self);
-void func_00125440(C03* self, f32 x, void* b);
+void func_001BBEB8(Collider* self);
+void func_00125440(Collider* self, f32 x, void* b);
 
-void func_001BC088(C03* self, void* b, f32 x)
+void func_001BC088(Collider* self, void* b, f32 x)
 {
     if (self->hook != 0) {
         func_001BBEB8(self);
@@ -188,7 +188,7 @@ void func_001BC088(C03* self, void* b, f32 x)
 
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
 
-s32 func_001BC320(C03* self, ObjectEvent* shape)
+s32 func_001BC320(Collider* self, ObjectEvent* shape)
 {
     if (shape->eventFlags & 0x8) {
         func_001BC0E0(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
@@ -196,7 +196,7 @@ s32 func_001BC320(C03* self, ObjectEvent* shape)
     return shape->eventFlags != 0;
 }
 
-void func_001BC710(C03* self, u32 flag)
+void func_001BC710(Collider* self, u32 flag)
 {
     self->flags538 = (self->flags538 & 0xFFEFFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 52);
 }
@@ -242,13 +242,13 @@ void* func_001BED98(void)
     return p;
 }
 
-void func_001BC760(C03* self, s32* index, C03** list)
+void func_001BC760(Collider* self, s32* index, Collider** list)
 {
     ListFrame frame;
     self->index = *index;
     list[*index] = self;
     (*index)++;
-    for (C03* item = (C03*)self->children.head; item; item = (C03*)item->next)
+    for (Collider* item = (Collider*)self->children.head; item; item = (Collider*)item->next)
         if (item->desc->flags & 2)
             item->desc03()->m35(item, index, list);
 }
@@ -887,7 +887,7 @@ void func_001BE998(void)
     D_00274730 = 0;
 }
 
-void func_001BD790(C03* obj, s32 mode)
+void func_001BD790(Collider* obj, s32 mode)
 {
     if (mode) {
         u64 f = obj->flags538;
@@ -947,11 +947,11 @@ void func_0018D608();
 void func_0018D6F0();
 void func_001F6C20(s32 a);
 void func_001BD678(Node_1BDD00* n, s32* c1, Node_1BDD00** a1, s32* c2, Node_1BDD00** a2);
-void func_001BDA50(C6C* ctx, s32 n, Node_1BDD00** arr, f32 f, s32 flags);
+void func_001BDA50(World* ctx, s32 n, Node_1BDD00** arr, f32 f, s32 flags);
 s32 func_00129D70(Node_1BDD00* n);
 void func_00129DF8(Node_1BDD00* n);
 
-void func_001BDD00(C6C* self, s32 flags, f32 f)
+void func_001BDD00(World* self, s32 flags, f32 f)
 {
     Frame_1BDD00 fr;
     Cnt_1BDD00 c;
@@ -1474,7 +1474,7 @@ void func_001BEE48(void)
 Contact03* func_001B5EC0(u8* p);
 void func_001861E8(u8* a, Contact03* b);
 
-void func_001BC4D8(C03* self, Contact03** out)
+void func_001BC4D8(Collider* self, Contact03** out)
 {
     Contact03* freed = 0;
     if (self->root == self) {
@@ -1485,8 +1485,8 @@ void func_001BC4D8(C03* self, Contact03** out)
                 Contact03* n;
                 while ((n = *pp) != 0) {
                     int k = (n->end[0].body != self);
-                    C03* e = n->end[1 - k].part;
-                    while (e && !e->f4E0) e = (C03*)e->parent;
+                    Collider* e = n->end[1 - k].part;
+                    while (e && !e->f4E0) e = (Collider*)e->parent;
                     if (e) {
                         switch (e->f4E0) {
                         case 1: {

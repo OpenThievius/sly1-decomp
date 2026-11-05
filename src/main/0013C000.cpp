@@ -2,16 +2,16 @@
 #include "common.h"
 #include "list_iter.h"
 #include "timed_state_object.h"
-#include "c28.h"
-#include "c20.h"
-#include "c3b.h"
-#include "c05.h"
+#include "trigger_zone.h"
+#include "masked_collider.h"
+#include "child_group_object.h"
+#include "switched_collider.h"
 #include "memory_reader.h"
 #include "object_message.h"
 
 void func_001BE4D8(void* p);
 
-s32 func_0013C950(C3B* self)
+s32 func_0013C950(ChildGroupObject* self)
 {
     if (self->slot == 0) {
         func_001BE4D8(&self->slot);
@@ -89,11 +89,11 @@ int func_0013CCE8() {
 
 typedef void (*Hook_CE40)(void* self);
 
-void func_00124A48(C20* self);
-void func_0013CE80(C20* self);
-void func_001DBCC8(void* target, Hook_CE40 fn, C20* ctx, s32 a3, s32 a4);
+void func_00124A48(MaskedCollider* self);
+void func_0013CE80(MaskedCollider* self);
+void func_001DBCC8(void* target, Hook_CE40 fn, MaskedCollider* ctx, s32 a3, s32 a4);
 
-void func_0013CE40(C20* self)
+void func_0013CE40(MaskedCollider* self)
 {
     func_00124A48(self);
     func_001DBCC8(self->world, func_0013CE80, self, 0, 0);
@@ -101,7 +101,7 @@ void func_0013CE40(C20* self)
 
 void func_001B93F8(void* self);
 
-void func_0013D068(C20* self)
+void func_0013D068(MaskedCollider* self)
 {
     func_001B93F8(self);
     if (self->f678 != 0) {
@@ -115,7 +115,7 @@ extern u8 D_00261420[];
 void func_00141040(void* table, s32 v);
 void func_001410A0(void* table, s32 v);
 
-void func_0013D820(C20* self, s32 v)
+void func_0013D820(MaskedCollider* self, s32 v)
 {
     self->hold = v;
     if (v != 0) {
@@ -125,7 +125,7 @@ void func_0013D820(C20* self, s32 v)
     }
 }
 
-void func_0013D868(C20* q, s32 value)
+void func_0013D868(MaskedCollider* q, s32 value)
 {
     if ((u32)q->count550 < 16) {
         q->slots[q->count550].key = value;
@@ -134,7 +134,7 @@ void func_0013D868(C20* q, s32 value)
     }
 }
 
-void func_0013D8B0(C20* q, s32 value)
+void func_0013D8B0(MaskedCollider* q, s32 value)
 {
     if ((u32)q->count550 < 16) {
         q->slots[q->count550].key = value;
@@ -143,7 +143,7 @@ void func_0013D8B0(C20* q, s32 value)
     }
 }
 
-void func_0013D950(C20* q, s32 value)
+void func_0013D950(MaskedCollider* q, s32 value)
 {
     if ((u32)q->count550 < 16) {
         q->slots[q->count550].key = value;
@@ -152,15 +152,15 @@ void func_0013D950(C20* q, s32 value)
     }
 }
 
-void func_0013D9E0(C20* state, s32* result) {
+void func_0013D9E0(MaskedCollider* state, s32* result) {
 	*result = state->mask & 1;
 }
 
-void func_0013DA30(C20* state, s32* result) {
+void func_0013DA30(MaskedCollider* state, s32* result) {
 	*result = (state->mask >> 2) & 1;
 }
 
-void func_0013DA80(C20* r, s32 value)
+void func_0013DA80(MaskedCollider* r, s32 value)
 {
     s32 n = r->count654;
     if ((u32)n < 4) {
@@ -171,7 +171,7 @@ void func_0013DA80(C20* r, s32 value)
 }
 
 extern f32 D_0026185C;
-void func_001B93F8(C03* self);
+void func_001B93F8(Collider* self);
 
 void func_0013DC38(TimedStateObject* self)
 {
@@ -201,7 +201,7 @@ void func_0013DCA8(TimedStateObject* self, s32 kind, ObjectMessage* msg)
     }
 }
 
-void func_0013CCF8(C20* self);
+void func_0013CCF8(MaskedCollider* self);
 
 void func_0013DDB8(C21* self)
 {
@@ -220,7 +220,7 @@ void func_0013DDF0(C25* self)
 }
 
 void func_0013DE38(C25* self, u8* table, s32 index);
-s32 func_0013DB28(C20* self, s32 value);
+s32 func_0013DB28(MaskedCollider* self, s32 value);
 s32 func_001300E8(void* node, s32 kind);
 
 void func_0013DEE8(C26* self, u8* table, s32 index)
@@ -232,12 +232,12 @@ void func_0013DEE8(C26* self, u8* table, s32 index)
     value = *(s32*)(table + ((1 - index) << 6));
     if (func_001300E8((void*)value, 5) != 0) {
         if (func_0013DB28(self, value) != 0) {
-            self->sel6D4 = (C05*)value;
+            self->sel6D4 = (SwitchedCollider*)value;
         }
     }
 }
 
-void func_0013D068(C20* self);
+void func_0013D068(MaskedCollider* self);
 void* func_001925F0(void);
 void func_001D7098(void* out, void* a1, void* self);
 
@@ -251,7 +251,7 @@ void func_0013DF68(C26* self)
             return;
         }
         func_001D7098(local, self->f6D0, self);
-        C05* p = self->sel6D4;
+        SwitchedCollider* p = self->sel6D4;
         p->desc05()->m4C(p, local);
         self->sel6D4 = 0;
     }
@@ -357,31 +357,31 @@ void func_0013F070(Zone28* self, void* p)
 {
     func_001837E0(self->owner, 3, 0, 0);
     func_0013ED90(self, 1, p, 0);
-    C03* o = self->owner;
+    Collider* o = self->owner;
     o->desc->m0E(o, 13, self);
 }
 
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 void func_0013E918(void* p);
 
-void func_0013F0E0(C28* self)
+void func_0013F0E0(TriggerZone* self)
 {
     func_001B7968(self);
     func_0013E918(&self->zone);
 }
 
-void func_001BAC30(C03* self);
-void func_0013E950(Zone28* p, C03* self);
+void func_001BAC30(Collider* self);
+void func_0013E950(Zone28* p, Collider* self);
 
-void func_0013F110(C28* self)
+void func_0013F110(TriggerZone* self)
 {
     func_001BAC30(self);
     func_0013E950(&self->zone, self);
 }
 
-void func_001BA130(C03* self);
+void func_001BA130(Collider* self);
 
-void func_0013F6C0(C28* self)
+void func_0013F6C0(TriggerZone* self)
 {
     s32 keep = self->zone.id120;
     func_001BA130(self);
@@ -391,15 +391,15 @@ void func_0013F6C0(C28* self)
 
 extern void func_0013EB68(void* state);
 
-void func_0013F6F8(C28* state) {
+void func_0013F6F8(TriggerZone* state) {
 	func_0013EB68(&state->zone);
 }
 
-void func_0013DA48(C20* obj, s32 value) { if ((u32)obj->count640 < 4) { obj->list644[obj->count640++] = (void*)value; obj->mask |= 2; } }
+void func_0013DA48(MaskedCollider* obj, s32 value) { if ((u32)obj->count640 < 4) { obj->list644[obj->count640++] = (void*)value; obj->mask |= 2; } }
 
-void func_0013DAB8(C20* obj, s32 value) { if ((u32)obj->count668 < 3) { obj->list66C[obj->count668++] = (void*)value; obj->mask |= 2; } }
+void func_0013DAB8(MaskedCollider* obj, s32 value) { if ((u32)obj->count668 < 3) { obj->list66C[obj->count668++] = (void*)value; obj->mask |= 2; } }
 
-void func_0013D900(C20* self, s32 value)
+void func_0013D900(MaskedCollider* self, s32 value)
 {
     if ((u32)self->count550 < 16) {
         self->slots[self->count550].key = value;
@@ -408,7 +408,7 @@ void func_0013D900(C20* self, s32 value)
     }
 }
 
-void func_0013D9A0(C20* self, s32 enabled)
+void func_0013D9A0(MaskedCollider* self, s32 enabled)
 {
     if (enabled) {
         self->mask = (self->mask | 1) & ~8;
@@ -418,7 +418,7 @@ void func_0013D9A0(C20* self, s32 enabled)
     }
 }
 
-void func_0013D9F0(C20* self, s32 enabled)
+void func_0013D9F0(MaskedCollider* self, s32 enabled)
 {
     if (enabled) {
         self->mask = (self->mask | 4) & ~8;
@@ -428,7 +428,7 @@ void func_0013D9F0(C20* self, s32 enabled)
     }
 }
 
-void* func_0013DAF0(C20* self)
+void* func_0013DAF0(MaskedCollider* self)
 {
     if (!self->f6B4) func_001BE4D8(&self->f6B4);
     return self->f6B4;
@@ -445,7 +445,7 @@ s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_00159478(void* sub, void* self);
 void func_00182ED8(s32 a);
 
-void func_0013CD80(C20* self)
+void func_0013CD80(MaskedCollider* self)
 {
     func_001BAC30(self);
     if (self->f614 == -1) {
@@ -487,7 +487,7 @@ struct Loc_13F940 {
     f32 v[12];
 };
 
-s32 func_0013F940(C28* s, f32* out)
+s32 func_0013F940(TriggerZone* s, f32* out)
 {
     Loc_13F940 loc;
     f32 best = 0.0f;
@@ -516,9 +516,9 @@ extern u8 D_00261420[];
 void func_001B7968(void* self);
 void* func_00140FF8(void* p);
 
-void func_0013CCF8(C20* self)
+void func_0013CCF8(MaskedCollider* self)
 {
-    C20* o = self;
+    MaskedCollider* o = self;
     func_001B7968(self);
     o->f628 = 0.8f;
     o->f62C = 1.2f;
@@ -537,7 +537,7 @@ void* func_001925F0(void);
 s32 func_001833F0(void* msg, void* item);
 s32 func_001300E8(void* msg, void* item);
 
-s32 func_0013DB28(C20* self, C19* msg)
+s32 func_0013DB28(MaskedCollider* self, C19* msg)
 {
 
 
@@ -663,7 +663,7 @@ void func_0013DD78(TimedStateObject* self, s32 state)
     }
 }
 
-s32 func_0013DB28(C20* self, s32 value);
+s32 func_0013DB28(MaskedCollider* self, s32 value);
 void func_001BB058(C25* self, s32 sel);
 void func_001BB0C8(C25* self, s32 sel);
 void func_0013DE38(C25* self, u8* table, s32 index)
@@ -716,8 +716,8 @@ void func_0013EB68(void* a, s32 b)
     }
 }
 
-s32 func_001300E8(C03* src, s32 kind);
-s32 func_0013DD08(TimedStateObject* node, C03* src)
+s32 func_001300E8(Collider* src, s32 kind);
+s32 func_0013DD08(TimedStateObject* node, Collider* src)
 {
     s32 r;
     if (src->flags538 & (1ULL << 55)) return 0;
@@ -733,7 +733,7 @@ s32 func_0013DD08(TimedStateObject* node, C03* src)
 s32 func_001833F0(void* a, s32 n);
 void func_001F5B08(void* end, void* begin, s32 bytes);
 
-void func_0013F140(C28* self, void* a1, Quad28* q)
+void func_0013F140(TriggerZone* self, void* a1, Quad28* q)
 {
     s32 n = self->f7B4;
     s32 idx;
@@ -785,11 +785,11 @@ void func_0013EF50(Zone28* self, void* p, void* q)
 
 extern u8 D_00248D30[];
 
-void func_001B9338(C03* self, f32 t);
-void func_001B9058(C03* self, void* buf, s32 a, void* table, s32 b, f32 t);
-void func_001B91A8(C03* self, void* buf, s32 a, void* table, s32 b, f32 t);
+void func_001B9338(Collider* self, f32 t);
+void func_001B9058(Collider* self, void* buf, s32 a, void* table, s32 b, f32 t);
+void func_001B91A8(Collider* self, void* buf, s32 a, void* table, s32 b, f32 t);
 
-void func_0013FA10(C28* self, f32 t)
+void func_0013FA10(TriggerZone* self, f32 t)
 {
     func_001B9338(self, t);
     switch (self->state) {
@@ -818,14 +818,14 @@ extern u8 D_00261420[];
 
 struct Frame_13CE80 { s32 list; s32 cursor; s32 link; s32 prev; s32 out; };
 s32 func_00141008(Frame_13CE80* t, s32 v);
-s32 func_001300E8(C20* n, s32 kind);
-void func_00199C10(C20* n, s32* out);
-s32 func_001833F0(C20* n, s32 key);
+s32 func_001300E8(MaskedCollider* n, s32 kind);
+void func_00199C10(MaskedCollider* n, s32* out);
+s32 func_001833F0(MaskedCollider* n, s32 key);
 
-void func_0013CE80(C20* self)
+void func_0013CE80(MaskedCollider* self)
 {
     Frame_13CE80 fr;
-    C20* n;
+    MaskedCollider* n;
     s32 i;
     Slot20* e;
     if (func_00141008((Frame_13CE80*)D_00261420, self->id688)) self->f678 = 1;
@@ -839,7 +839,7 @@ void func_0013CE80(C20* self)
     s32 h = (s32)self->children.head;
     fr.link = link;
     fr.cursor = h + link;
-    n = (C20*)h;
+    n = (MaskedCollider*)h;
     while (n != 0) {
         if (self->f678) {
             if (!func_001300E8(n, 0x2E)) goto next;
@@ -877,7 +877,7 @@ void func_0013CE80(C20* self)
     next:
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
-        n = (C20*)nx;
+        n = (MaskedCollider*)nx;
     }
     *(s32*)&D_0027B314 = fr.prev;
 }
@@ -885,14 +885,14 @@ void func_0013CE80(C20* self)
 extern u8* D_00262E10;
 extern f32 D_0026185C;
 
-void func_001B93F8(C03* self);
-void func_0013F6F8(C28* self, s32 v);
-s32 func_0013F8A0(C28* self, f32* out);
-s32 func_0013F940(C28* self, f32* out);
-s32 func_0013F718(C28* self, void* p);
+void func_001B93F8(Collider* self);
+void func_0013F6F8(TriggerZone* self, s32 v);
+s32 func_0013F8A0(TriggerZone* self, f32* out);
+s32 func_0013F940(TriggerZone* self, f32* out);
+s32 func_0013F718(TriggerZone* self, void* p);
 void func_00129DF8(void* self);
 
-void func_0013FD20(C28* self)
+void func_0013FD20(TriggerZone* self)
 {
     func_001B93F8(self);
     switch (self->zone.mode) {
@@ -938,7 +938,7 @@ void func_0013FD20(C28* self)
             break;
         }
         case 2: {
-            C03* s4 = self->root03();
+            Collider* s4 = self->root03();
             ContactRow03* l = s4->contacts->head;
             r = 0;
             for (; l; l = l->next) {
@@ -1007,10 +1007,10 @@ s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
 extern const Fn_Table D_00249D98[6] = { 0, 0, 0, (Fn_Table)func_0013CC80, 0, 0 };
 
 
-void func_001BA130(C20* self, C20* other);
+void func_001BA130(MaskedCollider* self, MaskedCollider* other);
 void* func_0018D568(s32 size, void* owner);
 
-void func_0013CDE8(C20* self, C20* other)
+void func_0013CDE8(MaskedCollider* self, MaskedCollider* other)
 {
     s32 saved = self->id688;
     func_001BA130(self, other);
@@ -1074,7 +1074,7 @@ struct Begin_13E950 {
     }
 };
 
-void func_0013E950(Zone28* self, C03* a1)
+void func_0013E950(Zone28* self, Collider* a1)
 {
     Iter_13E950 it;
     Begin_13E950::Of(&it, &a1->children);
@@ -1186,7 +1186,7 @@ s32 func_0013CAD8(Self_13CAD8* self, s32 n, Obj_13CAD8* o)
 s32 func_001833F0(void* node, s32 key);
 s32 func_001300E8(void* node, s32 kind);
 
-s32 func_0013F718(C28* self, void* arg)
+s32 func_0013F718(TriggerZone* self, void* arg)
 {
     if (self->countIdsIn > 0) {
         s32 i;

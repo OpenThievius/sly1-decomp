@@ -7,7 +7,7 @@ void func_001C33C8(C1D* self)
     func_00124DF8(self, 0xC, D_002749B0);
     self->f668 = func_001B6290(self->f664, self, -1, 0);
     self->f644 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    C02* v = (C02*)self->f660;
+    PlacedObject* v = (PlacedObject*)self->f660;
     self->f648 = func_00205778(v->rot.r[0].y, v->rot.r[0].x);
     *(Pk8_1C33C8*)&self->f630 = *(Pk8_1C33C8*)((u8*)self->f62C + 0x2DC);
     u8* g1 = (u8*)&D_0026DD48;

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c28.h"
-#include "c29.h"
+#include "trigger_zone.h"
+#include "zone_collider.h"
 #include "flagged_object.h"
 #include "object_gatherer.h"
-#include "c6c.h"
+#include "world.h"
 #include "game_clock.h"
 #include "object_event.h"
 
@@ -211,17 +211,17 @@ void func_00140640(void* self, void* unused, int value)
 
 void func_00140640(void* self, void* unused, int value);
 
-void func_00140660(C28* self, int value)
+void func_00140660(TriggerZone* self, int value)
 {
     func_00140640(&self->zone, self, value);
 }
 
-void func_001406B0(C28* list, s32 value)
+void func_001406B0(TriggerZone* list, s32 value)
 {
     list->idsIn[list->countIdsIn++] = value;
 }
 
-void func_001BA130(C03* self);
+void func_001BA130(Collider* self);
 void* func_00183058(void* item, void* x, FlaggedObject* self);
 
 void func_001415D0(FlaggedObject* self)
@@ -280,7 +280,7 @@ void func_00141870(FlaggedObject* self)
     s32 idx = -1;
     func_00141040(D_00261420, self->flagIndex);
     if (func_00182F40((s32)self->child, self)) {
-        for (C01* n = self; n != 0; n = n->parent) {
+        for (BaseObject* n = self; n != 0; n = n->parent) {
             Alias01* sl = n->alias;
             if (sl != 0) {
                 idx = sl->id;
@@ -304,14 +304,14 @@ void func_001419A0(FlaggedObject* q, s32 value)
     q->idsB[q->nIdsB++] = value;
 }
 
-void func_001406D0(C28* self, s32 value)
+void func_001406D0(TriggerZone* self, s32 value)
 {
     s32 n = self->countIdsOut;
     self->idsOut[n] = value;
     self->countIdsOut = n + 1;
 }
 
-void func_001406F0(C28* self, s32 value)
+void func_001406F0(TriggerZone* self, s32 value)
 {
     s32 n = self->countKindsIn;
     self->kindsIn[n] = value;
@@ -325,11 +325,11 @@ void func_001419E0(FlaggedObject* self, s32 value)
 
 void func_00124A48(void* self);
 void func_0013EA38(void* p);
-void func_00140238(C29* self, s32 flag);
+void func_00140238(ZoneCollider* self, s32 flag);
 void* func_0015A448(void* obj, s32 id, void* ctx);
 
 
-void func_00140140(C29* self)
+void func_00140140(ZoneCollider* self)
 {
     func_00124A48(self);
     func_0013EA38(&self->zone);
@@ -350,7 +350,7 @@ void func_00140140(C29* self)
 void func_001BA130(void* self);
 
 
-void func_00140200(C29* self)
+void func_00140200(ZoneCollider* self)
 {
     s32 saved = self->zone.id120;
     func_001BA130(self);
@@ -400,7 +400,7 @@ typedef unsigned char u8;
 
 extern void func_0013EB68(void* state);
 
-void func_00140238(C29* self, s32 flag)
+void func_00140238(ZoneCollider* self, s32 flag)
 {
     func_0013EB68(&self->zone);
 }
@@ -457,7 +457,7 @@ extern void func_00143A08(void*);
 extern void* D_00261990;
 extern void func_001448C8(void*, s32, void*);
 
-void func_00140710(C28* self, void* value)
+void func_00140710(TriggerZone* self, void* value)
 {
     s32 i = self->countKindsOut;
     u32 address = (u32)self + (u32)(i << 2);
@@ -496,7 +496,7 @@ s32 func_00141170(ObjectGatherer* self, void* value)
 void func_001BAC30(void* self);
 void func_0013E950(void* p, void* self);
 
-void func_00140100(C29* self)
+void func_00140100(ZoneCollider* self)
 {
     func_001BAC30(self);
     func_0013E950(&self->zone, self);
@@ -506,9 +506,9 @@ void func_00140100(C29* self)
 }
 
 s32 func_001BC320(void* self, void* ev);
-void func_0013F6F8(C28* state, s32 mode);
+void func_0013F6F8(TriggerZone* state, s32 mode);
 
-s32 func_00140028(C28* a0, void* a1)
+s32 func_00140028(TriggerZone* a0, void* a1)
 {
     s32 r = func_001BC320(a0, a1);
     if (r != 0 && (*(s32*)((u8*)a1 + 0xC) & 4) == 0 && a0->state == 3 && a0->zone.mode == 0) {
@@ -532,7 +532,7 @@ void func_00141108(void* a0, void* a1)
 
 extern u8 D_00261420[];
 s32 func_00140FF8(void* p);
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001411A8(FlaggedObject* self)
@@ -540,7 +540,7 @@ void func_001411A8(FlaggedObject* self)
     func_001B7968(self);
     self->flagIndex = func_00140FF8(D_00261420);
     self->childId = -1;
-    C6C* in = self->world;
+    World* in = self->world;
     s32 n = in->count2304;
     self->ordinal = n;
     n = n + 1;
@@ -551,7 +551,7 @@ void func_001411A8(FlaggedObject* self)
 s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
 s32 func_00141F48(void* a, void* b, void* c, s32 d, s32 e, f32 x);
 
-s32 func_00141C28(C03* self, void* a1, void* a2, s32 a3, s32 a4)
+s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
 {
     if (self->tree.nodes != 0) {
         return func_0013DFD8((void*)self->tree.nodes, a1, a2, 0, a3, (void*)a4);
@@ -702,7 +702,7 @@ struct Frame_141210 {
 };
 
 extern u32 D_00261410[4];
-void func_001BAC30(C03* self);
+void func_001BAC30(Collider* self);
 void func_00124DF8(void* self, s32 a, void* b);
 s32 func_001300E8(void* node, s32 kind);
 void func_00182ED8(void* node);
@@ -772,7 +772,7 @@ s32 func_00141B48(void* a0, void* a1, s32 count, Entry_141B48** list, s32 a4, s3
 
 void func_0013E918(Zone28* p);
 
-void func_001400A8(C29* self)
+void func_001400A8(ZoneCollider* self)
 {
     u64 m = 0x8000;
     func_001B7968(self);
@@ -1053,7 +1053,7 @@ void func_00141438(FlaggedObject* self)
         self->child = func_0015A448(self->world, self->childId, self);
     }
     if (self->f5A8 != 0) {
-        self->handle = (S1B6290*)func_001B6290(self->f5A8, self, 0x546, 0);
+        self->handle = (StateWalker*)func_001B6290(self->f5A8, self, 0x546, 0);
 
         if (func_00141008(D_00261420, self->flagIndex) != 0)
             func_001B64D8(self->handle, 0x547);

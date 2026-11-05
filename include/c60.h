@@ -8,9 +8,9 @@
 #ifndef C60_H
 #define C60_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C60 : C02 {
+struct C60 : PlacedObject {
     s32 out2D0;             // 0x2D0: written by func_001E4C48 (slot 10)
     s32 out2D4;             // 0x2D4
     s32 out2D8;             // 0x2D8

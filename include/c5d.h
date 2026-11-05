@@ -9,9 +9,9 @@
 #ifndef C5D_H
 #define C5D_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C5D : C02 {
+struct C5D : PlacedObject {
     s32 mask2D0;            // 0x2D0: tested against the global's flags (0x448) to choose 0x22F or 0x22E
     void* f2D4;             // 0x2D4: what the handle at 0x2D8 is made from
     void* f2D8;             // 0x2D8: the object's own handle

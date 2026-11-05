@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
-#include "c63.h"
+#include "switched_collider.h"
+#include "on_off_object.h"
 #include "game_clock.h"
 
 void func_001DDA20(void* a);
@@ -9,7 +9,7 @@ void func_001DDB58(void* a);
 void func_001DDA50(void* a);
 void func_001DDBB8(void* a);
 
-void func_001D27C0(C07* a0, s32 a1)
+void func_001D27C0(Player* a0, s32 a1)
 {
     if (a0->f2718 != a1) {
         if (a0->f2718 == -1) {
@@ -27,7 +27,7 @@ void func_001D27C0(C07* a0, s32 a1)
 void func_001861E8(void* a, s32 b);
 
 
-void func_001D1200(C07* self, s32 n)
+void func_001D1200(Player* self, s32 n)
 {
     if (n == self->f2684) {
         return;
@@ -59,12 +59,12 @@ struct __attribute__((aligned(16))) Blob_274E60_1D1260 { f32 f[36]; };
 
 extern Blob_274E60_1D1260 D_00274E60;
 
-void func_001E2840(C63* o, s32 v);
+void func_001E2840(OnOffObject* o, s32 v);
 
-void func_001D1260(C07* self)
+void func_001D1260(Player* self)
 
 {
-    C63* o = self->f2678;
+    OnOffObject* o = self->f2678;
     o->i414 = 5;
     o->f2D4 = 0;
     o->f2DC = 0;
@@ -82,7 +82,7 @@ void func_001D1260(C07* self)
 
 struct Obj_1D1478 { u8 pad[0x50]; s32 f50; };
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
-s32 func_001D1478(C07* self)
+s32 func_001D1478(Player* self)
 {
     void* arr[64];
     s32 n = func_0015A4F0(self->world, 5, 0x89, 0, 0x40, arr);
@@ -110,7 +110,7 @@ struct Entry_1D14F0 {
 void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 void func_0012CD78(f32 f12, f32 f13, void* a0, void* a1, void* a2, s32 a3, void* a4, s32 a5, void* a6, s32 a7);
 
-void func_001D14F0(C07* self)
+void func_001D14F0(Player* self)
 {
     f32 out[4];
     Entry_1D14F0* e = (Entry_1D14F0*)self->f103C;

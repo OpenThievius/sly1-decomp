@@ -9,7 +9,7 @@
 #ifndef WORLD_LISTED_OBJECT_H
 #define WORLD_LISTED_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 struct FlagRecord {
     u8 pad00[0xC];
@@ -24,7 +24,7 @@ struct OffsetList {
     s32 link;               // 0x08
 };
 
-struct WorldListedObject : C02 {
+struct WorldListedObject : PlacedObject {
     void* source;                // 0x2D0: the object a copy was taken from (func_0013A418)
     u8 pad2D4[0x380 - 0x2D4];
     FlagRecord* flagRecord;           // 0x380
@@ -39,7 +39,7 @@ void func_00139DE8(WorldListedObject* self);                       // slot 0
 void func_00139E80(WorldListedObject* self);                       // slot 6
 void func_00139EC8(WorldListedObject* self);                       // slot 7
 void func_0013A3A0(WorldListedObject* self);                       // slot 17
-void func_0013A418(WorldListedObject* self, C01* src);             // slot 23
+void func_0013A418(WorldListedObject* self, BaseObject* src);             // slot 23
 void func_0013AD08(WorldListedObject* owner, s32 unused, void* src); // slot 37
 
 #endif

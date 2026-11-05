@@ -7,7 +7,7 @@
 #ifndef C62_H
 #define C62_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 // What func_001EF9C8 reads of the message it is told about (kind 5): the id at 0x08.
 struct Msg62 {
@@ -18,7 +18,7 @@ struct Msg62 {
 
 // 0x62: func_001EF838 sets both ids to -1 (none); func_001EF9C8 resets the object when the
 // message names the id at 0x2DC.
-struct C62 : C02 {
+struct C62 : PlacedObject {
     s32 id2D0;              // 0x2D0: -1 for none
     f32 f2D4;               // 0x2D4
     u8 pad2D8[0x2DC - 0x2D8];

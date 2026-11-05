@@ -69,10 +69,10 @@ source files proved, PAL close behind US, and names and types under way.
    its built-ins, and the views kept for a stated reason. The names come after: a family's
    types, fields and header are renamed in place, and its functions and globals get readable
    names as macros over their address names (`config/names.tsv`, `include/names.h`,
-   [NAMING.md](NAMING.md)). On 2026-11-05 about 2,370 symbols have one, and the leaf class
-   families, shared records, global types and three method-table kinds have their types named;
-   the families the base headers (`c01.h` to `c08.h`, `t2195.h` and the others the busiest
-   files include) hold keep their ids for now. Definitions still use the address names.
+   [NAMING.md](NAMING.md)). On 2026-11-05 about 2,480 symbols have one, and about a hundred
+   types are named, from the base classes (`BaseObject`, `PlacedObject`, `Collider`) to the
+   leaf families, shared records and global types; the types whose role the code does not show
+   keep their ids. Definitions still use the address names.
 7. **The disc's data.** Its loader and index, then each format from the code that reads it
    ([DISC.md](DISC.md)); OpenThievius's extractor is written from that.
 

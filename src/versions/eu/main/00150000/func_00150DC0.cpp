@@ -12,7 +12,7 @@ u32 func_eu_001E3018(u16* a);
 void func_001365A8(Hud_150DC0_eu* a, f32 b);
 void func_001365A0(Hud_150DC0_eu* a, s32 b);
 
-void func_00150DC0(C65* self, Msg_150DC0* msg)
+void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
 {
     Slot_150DC0* s2;
     Slot_150DC0* s4;

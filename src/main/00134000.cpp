@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "s137290.h"
+#include "buffered_stream.h"
 #include "key_id.h"
 
 void func_001AA8C8(void* self);
@@ -68,7 +68,7 @@ void func_001F5C0C(void* block, s32 value, s32 size);
 
 void func_00137A60(void* self, s32 count, void* out);
 
-s32 func_00137D10(S137290* self)
+s32 func_00137D10(BufferedStream* self)
 {
     if (self->remaining >= 2) {
         u8* p = self->cur;
@@ -85,7 +85,7 @@ s32 func_00137D10(S137290* self)
 
 void func_00137A60(void* self, s32 size, void* dst);
 
-f32 func_00137DF8(S137290* r)
+f32 func_00137DF8(BufferedStream* r)
 {
     s32 left = r->remaining;
     if (left >= 4) {
@@ -119,7 +119,7 @@ void func_001372E0(void* self, s32 flags)
     if (flags & 1) func_0018D778(self);
 }
 
-void func_00137398(S137290* self, s32 a1, s32 a2) { self->remaining = a1; self->ptr = a2; self->mode = 2; }
+void func_00137398(BufferedStream* self, s32 a1, s32 a2) { self->remaining = a1; self->ptr = a2; self->mode = 2; }
 
 void func_00137E90(void* self, void* out) { func_00137A60(self, 0x10, out); }
 
@@ -142,7 +142,7 @@ struct Max_137820 { static s32 Of(s32 a, s32 b) { return a < b ? b : a; } };
 void func_001377C0(void* self);
 void func_00137490(void* self);
 void func_00193288(void* self, s32 value);
-void func_00137820(S137290* self)
+void func_00137820(BufferedStream* self)
 {
     switch (self->mode) {
     case 0: func_001377C0(self); break;
@@ -154,7 +154,7 @@ void func_00137820(S137290* self)
     if (self->f30) func_00193288((void*)self->f30, value);
 }
 
-s32 func_00137B90(S137290* self)
+s32 func_00137B90(BufferedStream* self)
 {
     s32 count = self->remaining;
     if (count >= 1) {
@@ -169,7 +169,7 @@ s32 func_00137B90(S137290* self)
     return value;
 }
 
-s32 func_00137BE0(S137290* self)
+s32 func_00137BE0(BufferedStream* self)
 {
     s32 count = self->remaining;
     if (count >= 2) {
@@ -184,7 +184,7 @@ s32 func_00137BE0(S137290* self)
     return value;
 }
 
-u32 func_00137C40(S137290* self)
+u32 func_00137C40(BufferedStream* self)
 {
     s32 count = self->remaining;
     if (count >= 4) {
@@ -199,7 +199,7 @@ u32 func_00137C40(S137290* self)
     return value;
 }
 
-s32 func_00137CC0(S137290* self)
+s32 func_00137CC0(BufferedStream* self)
 {
     s32 count = self->remaining;
     if (count >= 1) {
@@ -214,7 +214,7 @@ s32 func_00137CC0(S137290* self)
     return value;
 }
 
-s32 func_00137D78(S137290* self)
+s32 func_00137D78(BufferedStream* self)
 {
     s32 count = self->remaining;
     if (count >= 4) {
@@ -269,7 +269,7 @@ void func_001F8C38(s32 p);
 void func_00203E28(void);
 void func_0011E2A0(void);
 
-void func_001373D0(S137290* self)
+void func_001373D0(BufferedStream* self)
 {
     s32 next = -1;
     switch (self->mode) {
@@ -358,11 +358,11 @@ s32 func_00160D10(void);
 // and keeps the loaded count in $a2 where retail uses $v1.
 struct Dst_137A60;
 
-void func_001378A0(S137290* self);
-void func_00137820(S137290* self);
+void func_001378A0(BufferedStream* self);
+void func_00137820(BufferedStream* self);
 void func_0018D800(Dst_137A60* dst, void* src, s32 count);
 
-void func_00137A60(S137290* self, s32 remaining, Dst_137A60* dst)
+void func_00137A60(BufferedStream* self, s32 remaining, Dst_137A60* dst)
 {
     if (self->remaining < 0) {
         return;
@@ -416,7 +416,7 @@ struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
 
 void func_001A1F40(Vec_135E48* v, s32 mode);
 
-S137290* func_00137290(S137290* self, s32 a1, s32 a2, s32 a3)
+BufferedStream* func_00137290(BufferedStream* self, s32 a1, s32 a2, s32 a3)
 {
     s32 align = (a2 + 0x3F) & -0x40;
     self->mode = -1;
@@ -496,10 +496,10 @@ void func_00192190(void* p);
 
 struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
-void func_00137820(S137290* d);
+void func_00137820(BufferedStream* d);
 void func_001F5A58(void* dst, void* src, s32 n);
 
-void func_001378A0(S137290* d)
+void func_001378A0(BufferedStream* d)
 {
     u8* base = (u8*)0x70000000;
     s32 pos = 0;

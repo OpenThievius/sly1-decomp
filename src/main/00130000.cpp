@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c01.h"
+#include "base_object.h"
 #include "stream_reader_window.h"
 
 void func_001300D8(StreamReaderWindow* a0, s32 a1)
@@ -43,7 +43,7 @@ void func_00130070(StreamReaderWindow* self)
     }
 }
 
-s32 func_001300E8(C01* list, s32 key)
+s32 func_001300E8(BaseObject* list, s32 key)
 {
     const Desc01* node = list->desc;
     while (node != 0) {
@@ -59,7 +59,7 @@ extern u8 D_00259F38[];
 void* func_0011BF30(void);
 void func_0011A708(void* dst, void* value);
 
-void func_00130110(C01* self)
+void func_00130110(BaseObject* self)
 {
     if (self->f04 == 0) {
         void* v = func_0011BF30();

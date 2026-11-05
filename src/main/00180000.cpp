@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "t217d.h"
-#include "c05.h"
+#include "screen_element.h"
+#include "switched_collider.h"
 #include "c6e.h"
 #include "cone_volume.h"
-#include "c6c.h"
-#include "c20.h"
+#include "world.h"
+#include "masked_collider.h"
 #include "object_link.h"
 #include "message_body.h"
 #include "shapes.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "globals.h"
-#include "r11b008.h"
+#include "script_value.h"
 
-void func_001C2320(R11B008* self, C01* p, s32 key, R11B008* value);
-R11B008* func_001C1E48(R11B008* self, s32 n, s32* keys, s32* vals);
+void func_001C2320(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value);
+ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals);
 
 int func_001EAC68(f32 a, f32 b, f32 eps);
 
@@ -48,13 +48,13 @@ void func_00181AF0(C1A* self)
     func_00181DA8(self, 1);
 }
 
-void func_00182D00(C01* self)
+void func_00182D00(BaseObject* self)
 {
     self->desc->m06(self);
     self->desc->m0E(self, 1, self);
 }
 
-void func_00182E88(C01* self)
+void func_00182E88(BaseObject* self)
 {
     self->desc->m07(self);
     self->desc->m0E(self, 2, self);
@@ -72,7 +72,7 @@ void func_001831E8(void* a0, void** head, void* item, s32 count)
     *head = n;
 }
 
-s32 func_00183458(C01* a)
+s32 func_00183458(BaseObject* a)
 {
     if (a->alias) return a->alias->id;
     return a->id;
@@ -157,14 +157,14 @@ void func_001824D8(C24* self)
 {
     func_0013CE40(self);
     func_00124DF8(self, 2, D_00264230);
-    self->x6C8 = (S1B6290*)func_001B6290(self->x6C4, self, 0x36E, 0);
+    self->x6C8 = (StateWalker*)func_001B6290(self->x6C4, self, 0x36E, 0);
     Alloc24* n = (Alloc24*)func_00121160(0);
     self->x6E8 = n;
     n->field8 = 0;
     self->x6E8->field_c = func_0018D500(0xC00);
 }
 
-void func_00182C18(C01* self)
+void func_00182C18(BaseObject* self)
 {
     self->desc->m01(self);
     self->desc->m02(self);
@@ -172,12 +172,12 @@ void func_00182C18(C01* self)
 
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
-void func_00182C58(C01* self)
+void func_00182C58(BaseObject* self)
 {
     func_001837E0(self, 0, 0, 0);
 }
 
-void func_00182F78(C01* self, C01* parent)
+void func_00182F78(BaseObject* self, BaseObject* parent)
 {
     self->desc->m03(self);
     self->parent = parent;
@@ -196,7 +196,7 @@ void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
 typedef void (*VFn_183058)(void* self, void* arg);
 struct Obj_183058 { void* vtbl; };
 
-void* func_00183058(C01* self, void* a1, s32 a2)
+void* func_00183058(BaseObject* self, void* a1, s32 a2)
 {
     Obj_183058* r = (Obj_183058*)func_0011E580(self->desc->id, a1, a2, self->id, -1);
     ((VFn_183058*)r->vtbl)[12](r, self);
@@ -222,17 +222,17 @@ void func_00182E40(void* self, void* target)
     }
 }
 
-void func_00182ED0(C01* self)
+void func_00182ED0(BaseObject* self)
 {
     (void)self;
 }
 
 s32 func_00182FC8(void* self);
 
-void func_00182ED8(C01* self)
+void func_00182ED8(BaseObject* self)
 {
     if (func_00182FC8(self)) {
-        void (*f)(C01*) = self->desc->m0F;
+        void (*f)(BaseObject*) = self->desc->m0F;
         if (f) {
             f(self);
         }
@@ -241,7 +241,7 @@ void func_00182ED8(C01* self)
     }
 }
 
-s32 func_00182F40(C01* node, C01* target)
+s32 func_00182F40(BaseObject* node, BaseObject* target)
 {
     if (node == 0) {
         return 0;
@@ -259,10 +259,10 @@ struct __attribute__((packed)) Pack_183B20 { u64 v; };
 
 void* func_0011C858(void);
 
-void func_00183B20(C01* a0, s32 a1, void* a2)
+void func_00183B20(BaseObject* a0, s32 a1, void* a2)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     void* p;
     func_0011B008(&a);
     p = func_0011C858();
@@ -274,10 +274,10 @@ void func_00183B20(C01* a0, s32 a1, void* a2)
 }
 
 
-void func_00183BB8(C01* a0, s32 a1, s32 n)
+void func_00183BB8(BaseObject* a0, s32 a1, s32 n)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     func_0011B008(&a);
     func_0011B570(&a, n);
     func_001C2320(&b, a0, a1, &a);
@@ -288,10 +288,10 @@ void func_00183BB8(C01* a0, s32 a1, s32 n)
 
 void* func_0011C508(void);
 
-void func_00183C38(C01* a0, s32 a1, void* a2)
+void func_00183C38(BaseObject* a0, s32 a1, void* a2)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     f32* p;
     func_0011B008(&a);
     p = (f32*)func_0011C508();
@@ -313,7 +313,7 @@ void func_00183D88(ConeVolume* self)
     func_00184B58(self);
 }
 
-void func_001830B0(C01* self, C01* src)
+void func_001830B0(BaseObject* self, BaseObject* src)
 {
     self->desc->m09(self, src);
 }
@@ -322,7 +322,7 @@ extern u8 D_00259F38[];
 
 void func_0011A708(u8* a, void* b);
 void func_0018D800(void* dst, void* src, s32 size);
-u8* func_00159F20(C6C* world, s32 n);
+u8* func_00159F20(World* world, s32 n);
 void func_00152600(u8* p, void* self);
 void func_00152470(u8* p, void* self);
 void* func_0011A630(void);
@@ -330,7 +330,7 @@ void func_0011A800(u8* a);
 void func_0011A5B0(void* a, void* b);
 void func_0011A6C0(u8* a, void* b);
 
-void func_001830D8(C01* self, C01* src)
+void func_001830D8(BaseObject* self, BaseObject* src)
 {
     if (src->f04 != 0) {
         R11B008List* p = func_0011BF30();
@@ -339,8 +339,8 @@ void func_001830D8(C01* self, C01* src)
         func_0011A708(D_00259F38, p);
     }
     const Desc01* d = src->desc;
-    C6C* s0 = self->world;
-    func_0018D800((u8*)self + sizeof(C01), (u8*)src + sizeof(C01), d->size - sizeof(C01));
+    World* s0 = self->world;
+    func_0018D800((u8*)self + sizeof(BaseObject), (u8*)src + sizeof(BaseObject), d->size - sizeof(BaseObject));
     u8* t = func_00159F20(s0, self->id);
     func_00152600(t, self);
     t = func_00159F20(s0, src->id);
@@ -361,7 +361,7 @@ void func_00152470(void* sub, void* self);
 
 void func_00183DF8(ConeVolume* self)
 {
-    void (*fn)(C01*);
+    void (*fn)(BaseObject*);
 
     func_00152470((u8*)self->world + 0x1BE8, self);
     fn = self->desc->m12;
@@ -386,22 +386,22 @@ void func_00180EB0(C72* self)
     func_00152470(&self->world->list1C9C, self);
 }
 
-void func_00182D48(C01* self)
+void func_00182D48(BaseObject* self)
 {
     (void)self;
 }
 
-s32 func_001526D0(List01* list, C01* item);
-s32 func_00182FC8(C01* self);
-void func_00152600(List01* list, C01* item);
+s32 func_001526D0(List01* list, BaseObject* item);
+s32 func_00182FC8(BaseObject* self);
+void func_00152600(List01* list, BaseObject* item);
 
-void func_00182D50(C01* self)
+void func_00182D50(BaseObject* self)
 {
     List01* sub;
     if (self->parent == 0) {
         sub = &self->world->list48;
     } else {
-        sub = &((C02*)self->parent)->children;
+        sub = &((PlacedObject*)self->parent)->children;
     }
     if (func_001526D0(sub, self) != 0) {
         if (func_00182FC8(self) != 0) {
@@ -413,7 +413,7 @@ void func_00182D50(C01* self)
     }
 }
 
-s32 func_001833F0(C01* self, s32 id)
+s32 func_001833F0(BaseObject* self, s32 id)
 {
     Alias01* link;
 
@@ -436,7 +436,7 @@ missing:
     return 0;
 }
 
-s32 func_00183438(C01* self)
+s32 func_00183438(BaseObject* self)
 {
     Alias01* link = self->alias;
     if (link != 0) {
@@ -464,13 +464,13 @@ void func_00180F68(C1A* self)
 
 void* func_0018D500(s32 size);
 
-void func_00182DD8(C02* self)
+void func_00182DD8(PlacedObject* self)
 {
-    C02* target;
+    PlacedObject* target;
     if (self->desc->flags & 1) {
         target = self;
     } else {
-        target = (C02*)self->parent;
+        target = (PlacedObject*)self->parent;
     }
     if (target != 0) {
         Key02* n = (Key02*)func_0018D500(8);
@@ -516,10 +516,10 @@ void func_00183478(void* self, s32* out)
 }
 
 
-void func_00183910(C01* a0, s32 a1, s32 a2)
+void func_00183910(BaseObject* a0, s32 a1, s32 a2)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     func_0011B008(&a);
     func_0011B5F0(&a, a2);
     func_001C2320(&b, a0, a1, &a);
@@ -577,15 +577,15 @@ void func_00182470(C24* self)
     self->f6D4 = 0.5f;
 }
 
-void func_00152470(List01* list, C01* item);
+void func_00152470(List01* list, BaseObject* item);
 
-void func_00182C80(C01* self)
+void func_00182C80(BaseObject* self)
 {
     List01* sub;
     if (self->parent == 0) {
         sub = &self->world->list48;
     } else {
-        sub = &((C02*)self->parent)->children;
+        sub = &((PlacedObject*)self->parent)->children;
     }
     if (func_001526D0(sub, self) != 0) {
         return;
@@ -596,16 +596,16 @@ void func_00182C80(C01* self)
     }
 }
 
-s32 func_001526D0(void* sub, C01* self);
+s32 func_001526D0(void* sub, BaseObject* self);
 
-s32 func_00182FC8(C01* self)
+s32 func_00182FC8(BaseObject* self)
 {
-    C01* node = self;
+    BaseObject* node = self;
     while (node != 0) {
-        C01* next = node->parent;
+        BaseObject* next = node->parent;
         void* sub;
         if (next != 0) {
-            sub = &((C02*)next)->children;
+            sub = &((PlacedObject*)next)->children;
         } else {
             sub = node->world;
             sub = (u8*)sub + 0x48;
@@ -619,31 +619,31 @@ s32 func_00182FC8(C01* self)
 }
 
 // The callback list's helpers (func_001831E8 adds, func_00183238 removes), as the slots call them.
-void func_001831E8(C6C* world, Callback01** head, void* fn, s32 ctx);
-void func_00183238(C6C* world, Callback01** head, s32 fn, s32 ctx);
-void func_001831E8(C6C* world, Callback01** head, void (*fn)(C01*, s32, void*), C01* ctx);
-void func_00183238(C6C* world, Callback01** head, void (*fn)(C01*, s32, void*), C01* ctx);
+void func_001831E8(World* world, Callback01** head, void* fn, s32 ctx);
+void func_00183238(World* world, Callback01** head, s32 fn, s32 ctx);
+void func_001831E8(World* world, Callback01** head, void (*fn)(BaseObject*, s32, void*), BaseObject* ctx);
+void func_00183238(World* world, Callback01** head, void (*fn)(BaseObject*, s32, void*), BaseObject* ctx);
 
-void func_00183290(C01* self, void* fn, s32 ctx)
+void func_00183290(BaseObject* self, void* fn, s32 ctx)
 {
     func_001831E8(self->world, &self->callbacks, fn, ctx);
 }
 
-void func_001832C0(C01* self, s32 fn, s32 ctx)
+void func_001832C0(BaseObject* self, s32 fn, s32 ctx)
 {
     func_00183238(self->world, &self->callbacks, fn, ctx);
 }
 
-void func_001832F0(C01* self, C01* src)
+void func_001832F0(BaseObject* self, BaseObject* src)
 {
     func_001831E8(self->world, &self->callbacks, src->desc->m0D, src);
 }
 
 
-void func_00183990(C01* a0, s32 a1, s32 n)
+void func_00183990(BaseObject* a0, s32 a1, s32 n)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     func_0011B008(&a);
     func_0011B570(&a, n);
     func_001C2320(&b, a0, a1, &a);
@@ -652,10 +652,10 @@ void func_00183990(C01* a0, s32 a1, s32 n)
 }
 
 
-void func_00183A10(C01* a0, s32 a1, f32 x)
+void func_00183A10(BaseObject* a0, s32 a1, f32 x)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     func_0011B008(&a);
     func_0011B5B0(&a, x);
     func_001C2320(&b, a0, a1, &a);
@@ -666,10 +666,10 @@ void func_00183A10(C01* a0, s32 a1, f32 x)
 
 void* func_0011C748(void);
 
-void func_00183A90(C01* a0, s32 a1, void* a2)
+void func_00183A90(BaseObject* a0, s32 a1, void* a2)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     func_0011B008(&a);
     f32* p = (f32*)func_0011C748();
     *(Quad16*)p = *(Quad16*)a2;
@@ -679,14 +679,14 @@ void func_00183A90(C01* a0, s32 a1, void* a2)
     func_0011B060(&a, 2);
 }
 
-void func_00183320(C01* self, C01* src)
+void func_00183320(BaseObject* self, BaseObject* src)
 {
     func_00183238(self->world, &self->callbacks, src->desc->m0D, src);
 }
 
 void func_0011EC40(void* a, void* b);
 
-void func_001833D0(C01* self, void* stream)
+void func_001833D0(BaseObject* self, void* stream)
 {
     func_0011EC40(self, stream);
 }
@@ -716,7 +716,7 @@ s32 func_00181BC8(C1A* self, s32* arg)
 {
     Loc_181BC8 loc;
     s32 r;
-    C07* g;
+    Player* g;
     Vt_181BC8* gp;
     VFnP_181BC8 f;
     void** vt2;
@@ -759,7 +759,7 @@ tail:
 
 typedef s32 (*Fn_181448)(C1A*, void*, void*);
 struct Vt_181448 { u8 pad0[0x12C]; Fn_181448 f12C; };
-struct Slot_181448 { C03* p; u8 pad[0x3C]; };
+struct Slot_181448 { Collider* p; u8 pad[0x3C]; };
 struct Node_181448 {
     C1A* owner;
     Slot_181448 s[2];
@@ -774,7 +774,7 @@ extern f32 D_00264154[];
 extern f32 D_00275C60[];
 
 void func_001D9C98(C1A* self, f32 dt);
-void func_001D7098(void* out, s32 mode, C03* c);
+void func_001D7098(void* out, s32 mode, Collider* c);
 void func_001861E8(void* a, void* head);
 void func_00129E10(void* o, f32 v);
 void func_00129FB0(void* o, f32 v);
@@ -787,13 +787,13 @@ void func_00181448(C1A* self, f32 dt)
         Node_181448* n = (Node_181448*)self->fC04;
         do {
             s32 j = (n->owner != self);
-            C03* c = n->s[1 - j].p;
-            while (c != 0 && c->f4E0 == 0) c = (C03*)c->parent;
+            Collider* c = n->s[1 - j].p;
+            while (c != 0 && c->f4E0 == 0) c = (Collider*)c->parent;
             if (c != 0 && (c->f4E0 == 1 || c->f4E0 == 4)) {
                 func_001D7098(buf, 0, c);
                 while (c != 0) {
                     if (((Vt_181448*)c->desc)->f12C((C1A*)c, n, buf) != 0) break;
-                    c = (C03*)c->parent;
+                    c = (Collider*)c->parent;
                 }
                 ((Desc05*)self->desc)->m4C(self, buf);
             }
@@ -823,18 +823,18 @@ struct Slot_1834A0 { s32 flag; s32 value; };
 struct Item_1834A0 { s32 pad0; s32 pad4; Item_1834A0* next; };
 
 void func_0011A800(void* d);
-s32 func_0011A498(void* a, s32 b, s32 c, R11B008* d);
+s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
 void func_0011A328(Slot_1834A0* slot, s32 value);
-void* func_0011A358(R11B008* out, Slot_1834A0* owner, void* kind, void* body);
-void func_00119A58(R11B008* out, void* list, Slot_1834A0* c);
+void* func_0011A358(ScriptValue* out, Slot_1834A0* owner, void* kind, void* body);
+void func_00119A58(ScriptValue* out, void* list, Slot_1834A0* c);
 extern u8 D_00259F38[];
 
-void func_001834A0(C01* self, s32 key, Item_1834A0* list)
+void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list)
 {
-    R11B008 q0;
-    R11B008 q1;
-    R11B008 q2;
-    R11B008 q3;
+    ScriptValue q0;
+    ScriptValue q1;
+    ScriptValue q2;
+    ScriptValue q3;
     func_0011B008(&q0);
     func_0011B008(&q1);
     func_0011B008(&q2);
@@ -898,7 +898,7 @@ void func_00180F98(C1A* self)
 {
     func_001D7440(self);
     func_00124DF8(self, 0xA, D_002640B0);
-    self->fBBC = (S1B6290*)func_001B6290(self->fBB8, self, -1, 0);
+    self->fBBC = (StateWalker*)func_001B6290(self->fBB8, self, -1, 0);
     func_00129D00(self->fBCC, 5, &self->fBD0);
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
@@ -911,7 +911,7 @@ void func_00180F98(C1A* self)
     base->icon = func_001B4688(0x36A);
 }
 
-void func_00183350(C01* self, s32 kind, void* arg)
+void func_00183350(BaseObject* self, s32 kind, void* arg)
 {
     if (self->desc->m0D != 0) {
         self->desc->m0D(self, kind, arg);
@@ -924,15 +924,15 @@ extern u8 D_00259F38[];
 extern const s32 D_00244EC0[32] = { 0, 1, 3, 4, 5, 6, 7, 9, 11, 12, 14, 17, 19, 20, 22, 26, 29, 31, 33, 34, 36, 38, 39, 40, 41, 43, 44, 45, 47, 48, 50, 0 };
 extern s32 D_00244DFC[];
 void func_0011A800(u8* a);
-s32 func_0011A498(void* a, s32 b, s32 c, R11B008* d);
-s32 func_00183668(C01* self, s32 idx, s32 flag, void* out);
+s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
+s32 func_00183668(BaseObject* self, s32 idx, s32 flag, void* out);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
-void func_001834A0(C01* self, s32 key, Item_1834A0* list);
+void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list);
 
-void func_001837E0(C01* self, s32 idx, s32 flag, s32* out)
+void func_001837E0(BaseObject* self, s32 idx, s32 flag, s32* out)
 {
-    R11B008 r;
-    R11B008 tmp;
+    ScriptValue r;
+    ScriptValue tmp;
     s32 a4;
 
     func_0011B008(&r);

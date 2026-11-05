@@ -2,7 +2,7 @@
 // PAL: the Gl_150AE8 global has f260 at 0x570 and f26C at 0x57C (US 0x260, 0x26C).
 struct Gl_150AE8_eu { u8 pad0[0x570]; s32 f570; u8 pad1[8]; s32 f57C; };
 
-void func_00150AE8(C65* self)
+void func_00150AE8(StepSequence* self)
 {
     s32 q[2];
     s32 s1;
@@ -21,7 +21,7 @@ void func_00150AE8(C65* self)
     }
     func_001F5C0C(q, 0, 8);
     s2 = func_001925F0();
-    if (func_001493A0(&((C6D*)D_00261990)->ctl454) != 0) {
+    if (func_001493A0(&((Camera*)D_00261990)->ctl454) != 0) {
         q[1] = 0;
         q[0] = 0;
     } else if (s2 != 0) {
@@ -54,7 +54,7 @@ void func_00150AE8(C65* self)
         goto timer;
     case 1:
         if (q[1] != 0) {
-            C65* o = (C65*)D_0027051C;
+            StepSequence* o = (StepSequence*)D_0027051C;
             if (o == 0) {
                 func_00151860(self, s2);
                 s1 = self->state2D4;

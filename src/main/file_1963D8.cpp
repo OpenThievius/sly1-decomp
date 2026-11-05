@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "asm_func.h"
 extern f32 D_0026185C[];
 #include "list_iter.h"
 #include "object_group.h"
-#include "c6c.h"
+#include "world.h"
 #include "c48.h"
-#include "t2195.h"
+#include "attachment.h"
 #include "shapes.h"
 #include "globals.h"
-#include "t217d.h"
+#include "screen_element.h"
 
 // A four-float vector, aligned as the VU0 reads it.
 struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
@@ -121,7 +121,7 @@ void func_00124A48(C18* self);
 void func_00124DF8(C18* self, s32 n, void* table);
 f32 func_00205778(f32 a, f32 b);
 void* func_001B6290(Any_001969F8* a, void* b, s32 c, s32 d);
-void* func_00121228(C6C* root, void* value, const T2195_Vt* table);
+void* func_00121228(World* root, void* value, const T2195_Vt* table);
 void func_001299E0(Any_001969F8* a, void* b);
 s32 func_0015A4F0(Any_001969F8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void* func_0018D500(s32 size);
@@ -130,25 +130,25 @@ void func_001B6DF8(Any_001969F8* a, void* b);
 
 
 
-struct Cell_196410 { C02* node; s32 link; };
+struct Cell_196410 { PlacedObject* node; s32 link; };
 
 void func_00152438(u8* a, s32 v);
 void func_00137EB0(LoadStream* r, void* out);
 void func_00137E70(LoadStream* r, void* out);
 s32 func_00137B90(LoadStream* r);
 s32 func_00137D10(LoadStream* r);
-C02* func_001DC208(void* host, s32 a);
-C02* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
-void func_001DC150(void* host, C02* n, s32 v);
+PlacedObject* func_001DC208(void* host, s32 a);
+PlacedObject* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
+void func_001DC150(void* host, PlacedObject* n, s32 v);
 Cell_196410* func_0018D5C0(s32 n);
 void func_00152470(u8* list, Cell_196410* c);
-C02* func_0015A418(void* host, s32 kind, s32 id, C02* c);
+PlacedObject* func_0015A418(void* host, s32 kind, s32 id, PlacedObject* c);
 void* func_001C1390(s32 id, void* host);
 void func_0011A338(void* a, void* b);
 s32 func_00137C40(LoadStream* r);
 s32 func_00137CC0(LoadStream* r);
 f32 func_00137DF8(LoadStream* r);
-void func_0011EC40(C02* n, LoadStream* r);
+void func_0011EC40(PlacedObject* n, LoadStream* r);
 void func_0011ECB8(void* host, ObjectGroup* self, LoadStream* r);
 s32 func_00152720(List01* list);
 
@@ -340,17 +340,17 @@ void func_001963D8(ObjectGroup* self)
 
 void func_00196410(ObjectGroup* self, LoadStream* rd)
 {
-    C02* arr[64];
+    PlacedObject* arr[64];
     ListFrame fr;
-    C02* t;
-    C02* c;
+    PlacedObject* t;
+    PlacedObject* c;
     s32 n;
     s32 i;
     s32 j;
     s32 cnt;
     s32 id;
-    C02* x;
-    C02* h;
+    PlacedObject* x;
+    PlacedObject* h;
 
     func_00152438((u8*)&self->cells, 8);
     func_00137EB0(rd, &self->rot);
@@ -451,13 +451,13 @@ void func_00196410(ObjectGroup* self, LoadStream* rd)
             fr.offset = list->offset;
             D_0027B314 = &fr;
             c = arr[0];
-            h = *(C02**)list;
+            h = *(PlacedObject**)list;
             fr.link = (u8*)h + fr.offset;
             x = h;
             while (x != 0)
             {
                 x->desc->m15(x, c);
-                C02* nx = *(C02**)fr.link;
+                PlacedObject* nx = *(PlacedObject**)fr.link;
                 fr.link = (u8*)nx + fr.offset;
                 x = nx;
             }
@@ -478,7 +478,7 @@ void func_00196810(ObjectGroup* self, ObjectGroup* src)
     ListFrame frame;
     Elem_196810* e = (Elem_196810*)list.first;
     while (e != 0) {
-        Item_196810* it = (Item_196810*)((C02*)self->parent)->children.head;
+        Item_196810* it = (Item_196810*)((PlacedObject*)self->parent)->children.head;
         for (; it != 0; it = it->next) {
             if (it->f30 == e) break;
         }
@@ -526,10 +526,10 @@ void func_001969F8(C18* self)
     func_00124A48(self);
     func_00124DF8(self, 0xD, &D_0026A738);
     self->f618 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    self->f614 = (S1B6290*)func_001B6290((Any_001969F8*)self->f610, self, -1, 1);
+    self->f614 = (StateWalker*)func_001B6290((Any_001969F8*)self->f610, self, -1, 1);
 
     self->f664 = func_00121228(self->world, self->f65C, (const T2195_Vt*)D_0021A790);
-    ((T2195*)self->f664)->mode1 = 2;
+    ((Attachment*)self->f664)->mode1 = 2;
     func_001299E0((Any_001969F8*)self->f65C, self->f664);
     ((s32*)self->f664)[7] = 1;
     ((Item_001969F8*)self->f664)->p24 = self->f660;

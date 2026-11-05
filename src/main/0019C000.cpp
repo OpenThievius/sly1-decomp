@@ -2,13 +2,13 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c8b.h"
-#include "c1e.h"
-#include "c6c.h"
-#include "c6d.h"
+#include "effect_owner.h"
+#include "world.h"
+#include "camera.h"
 #include "object_gatherer.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "v24a0.h"
-#include "t219c.h"
+#include "effect.h"
 #include "globals.h"
 #include "group_marker.h"
 #include "deferred_request.h"
@@ -69,12 +69,12 @@ void func_0019DF48(void)
     } while (i >= 0);
 }
 
-C1E* func_0019E040(C6C* self, s32 flag)
+EffectOwner* func_0019E040(World* self, s32 flag)
 {
     if (flag == 0 && self->f1B3C != 0) {
         return self->f1B3C;
     }
-    C1E* n = self->f1B38;
+    EffectOwner* n = self->f1B38;
     if (n != 0) {
         self->f1B38 = n->saved564;
         n->f550 = flag;
@@ -86,10 +86,10 @@ C1E* func_0019E040(C6C* self, s32 flag)
     return n;
 }
 
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 void func_00152438(void* p, s32 n);
 
-void func_0019E0B8(C1E* self)
+void func_0019E0B8(EffectOwner* self)
 {
     func_001B7968(self);
     func_00152438(&self->list558, 0x10);
@@ -112,15 +112,15 @@ void* func_001B5EA0(void* p);
 void func_001F5C0C(void* p, s32 zero, s32 size);
 const Vt219C* func_0019E908(u32 n);
 void func_00152470(void* list, void* item);
-void func_0019EC20(T219C* self);
+void func_0019EC20(Effect* self);
 
-T219C* func_0019EA78(s32 kind, C1E* sys)
+Effect* func_0019EA78(s32 kind, EffectOwner* sys)
 {
     if (sys == 0) {
         sys = func_0019E040(D_00275710, 0);
         if (sys == 0) return 0;
     }
-    T219C* o = (T219C*)func_001B5EA0(&sys->world->pool1B2C);
+    Effect* o = (Effect*)func_001B5EA0(&sys->world->pool1B2C);
     if (o != 0) {
         func_001F5C0C(o, 0, sys->world->pool1B2C.size);
         const Vt219C* r = func_0019E908(kind);
@@ -134,9 +134,9 @@ T219C* func_0019EA78(s32 kind, C1E* sys)
 }
 
 void func_00152600(void* table, void* self);
-void func_0019EC30(T219C* self);
+void func_0019EC30(Effect* self);
 
-void func_0019EBE8(T219C* self)
+void func_0019EBE8(Effect* self)
 {
     func_00152600(&self->owner->list558, self);
     func_0019EC30(self);
@@ -145,14 +145,14 @@ void func_0019EBE8(T219C* self)
 void func_001DBC18(void* a, void* b);
 void func_001B5F28(void* a, void* b);
 
-void func_0019EC30(T219C* self)
+void func_0019EC30(Effect* self)
 {
     s32 n = self->uses - 1;
     self->uses = n;
     if (n != 0) {
         return;
     }
-    void (*fn)(T219C*) = self->vt->m02;
+    void (*fn)(Effect*) = self->vt->m02;
     if (fn != 0) {
         fn(self);
     }
@@ -169,7 +169,7 @@ void func_0019EC30(T219C* self)
 
 extern f32 D_00261858[];
 
-void func_0019ED00(T219C* self, f32 x)
+void func_0019ED00(Effect* self, f32 x)
 {
     f32 span = D_00261858[1] - self->start;
     f32 t = self->life - span;
@@ -181,12 +181,12 @@ void func_0019ED00(T219C* self, f32 x)
     }
 }
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_0019FE10(T219C* self)
+void func_0019FE10(Effect* self)
 {
     func_0019EB28(self);
-    C6C* g = D_00275710;
+    World* g = D_00275710;
     s32 v = (s32)g->slot1CE8[6];
     self->life = 0.5f;
     self->i20 = v;
@@ -209,7 +209,7 @@ void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
 void func_0019C9C8(void* a, s32 b, void* c);
 
-void func_0019D2A8(C07* self, void* x, void* y)
+void func_0019D2A8(Player* self, void* x, void* y)
 {
     Frame_19D2A8 f;
     if (y != 0) {
@@ -225,22 +225,22 @@ void func_0019D2A8(C07* self, void* x, void* y)
 
 extern f32 D_0026185C;
 
-void func_0019EBE8(T219C* self);
+void func_0019EBE8(Effect* self);
 s32 func_00182FC8(void* p);
 s32 func_0013E658(void* a, s32 b);
 
-void func_0019F560(T219C* self)
+void func_0019F560(Effect* self)
 {
     f32 t = D_0026185C - self->start;
     if (self->life < t) {
         func_0019EBE8(self);
         return;
     }
-    C1E* c = self->owner;
+    EffectOwner* c = self->owner;
     if (c->f550 == 1) {
         return;
     }
-    C03* h = self->target;
+    Collider* h = self->target;
     if (h == 0) {
         return;
     }
@@ -258,9 +258,9 @@ void func_0019F560(T219C* self)
 
 void func_001F2EF0(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
 s32 func_0019F620(void* self, void* a1, void* a2, void* a3);
-void func_0019EBE8(T219C* self);
+void func_0019EBE8(Effect* self);
 
-void func_0019F858(T219C* self, void* a1)
+void func_0019F858(Effect* self, void* a1)
 {
     u8 scratch[0x40];
     void* a2;
@@ -281,25 +281,25 @@ void func_0019F858(T219C* self, void* a1)
 }
 
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_0019F988(T219C* self)
+void func_0019F988(Effect* self)
 {
     func_0019EB28(self);
     self->life = 5.0f;
-    C6C* g = D_00275710;
+    World* g = D_00275710;
     self->i20 = (s32)g->slot1CE8[1];
     self->qC0 = *(Quad219C*)&g->gravity;
 }
 
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_0019FD70(T219C* self)
+void func_0019FD70(Effect* self)
 {
     func_0019EB28(self);
     self->life = 3.0f;
-    C6C* g = D_00275710;
+    World* g = D_00275710;
     s32 v = (s32)g->slot1CE8[3];
     self->m30[1] = 0.6f;
     self->i20 = v;
@@ -314,7 +314,7 @@ struct Frame_19E848 {
     s32 prev;
 };
 
-void func_0019E848(C1E* self, void* arg)
+void func_0019E848(EffectOwner* self, void* arg)
 {
     Frame_19E848 fr;
     s32 e = (s32)&self->list558;
@@ -329,7 +329,7 @@ void func_0019E848(C1E* self, void* arg)
     fr.cursor = h + link;
     s32 n = h;
     while (n != 0) {
-        T219C* node = (T219C*)n;
+        Effect* node = (Effect*)n;
         if (node->start >= D_00261858[1]) {
         } else {
             node->vt->m05(node, arg);
@@ -343,13 +343,13 @@ void func_0019E848(C1E* self, void* arg)
 }
 
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_0019FDC0(T219C* self)
+void func_0019FDC0(Effect* self)
 {
     func_0019EB28(self);
     self->life = 2.0f;
-    C6C* g = D_00275710;
+    World* g = D_00275710;
     self->qC0 = *(Quad219C*)&g->gravity;
     self->m30[2] = -1.0f;
 }
@@ -368,7 +368,7 @@ struct Frame_19D6C0 {
 
 void func_00159D00(ColorFade* n);
 
-void func_0019D6C0(C6C* self, void* arg)
+void func_0019D6C0(World* self, void* arg)
 {
     Frame_19D6C0 f1;
     Frame_19D6C0 f2;
@@ -513,10 +513,10 @@ void func_0019DA60(void)
 struct Scratch_19F9D0 { Quad219C head; u8 rest[0x700 - 16]; };
 
 void func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
-T219C* func_0019EA78(s32 kind, C1E* sys);
-void func_0019EBE8(T219C* self);
+Effect* func_0019EA78(s32 kind, EffectOwner* sys);
+void func_0019EBE8(Effect* self);
 
-void func_0019F9D0(T219C* self, s32 flag)
+void func_0019F9D0(Effect* self, s32 flag)
 {
     if (flag != 0) {
         Scratch_19F9D0 s;
@@ -524,7 +524,7 @@ void func_0019F9D0(T219C* self, s32 flag)
         if (self->target->tree.nodes != 0) {
             func_0013DFD8(self->target->tree.nodes, &self->q90, &self->q80, 0, 0x10, &s);
         }
-        T219C* p = func_0019EA78(4, 0);
+        Effect* p = func_0019EA78(4, 0);
         if (p != 0) {
             p->vt->m00(p, &s, 40.0f, 0);
             p->life = 0.75f;
@@ -541,15 +541,15 @@ struct Ctx_19DBB0 { u8 pad0[0x2F4]; s32 idx2F4; };
 
 extern Ctx_19DBB0* D_0026FA68;
 extern s32 D_00274520[];
-extern C6D* D_00261990;
+extern Camera* D_00261990;
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
 
 void func_0015EAE0(void* self, void* a, void* b);
 void func_0019D860(void);
 void func_0019D930(void);
-void func_00143940(C6D* self, f32 v);
-void func_00144848(C6D* self);
+void func_00143940(Camera* self, f32 v);
+void func_00144848(Camera* self);
 
 void func_0019DBB0(void)
 {
@@ -567,7 +567,7 @@ void func_0019DBB0(void)
     }
 
     {
-        C6D* o = D_00261990;
+        Camera* o = D_00261990;
         f32 keep20 = o->f1C4;
         f32 keep21 = o->f1C8;
         func_00143940(o, 1.0f);
@@ -628,13 +628,13 @@ struct Cursor_19E168 {
         prev = ((Cursor_19E168*)D_0027B314);
         D_0027B314 = (ListFrame*)this;
     }
-    T219C* first() {
-        T219C* n = *(T219C**)link;
+    Effect* first() {
+        Effect* n = *(Effect**)link;
         at = (u8*)n + stride;
         return n;
     }
-    T219C* next() {
-        T219C* n = *(T219C**)at;
+    Effect* next() {
+        Effect* n = *(Effect**)at;
         at = (u8*)n + stride;
         return n;
     }
@@ -642,13 +642,13 @@ struct Cursor_19E168 {
 };
 
 
-void func_0019EBE8(T219C* node);
-void func_001B7B78(C03* self);
+void func_0019EBE8(Effect* node);
+void func_001B7B78(Collider* self);
 
-void func_0019E168(C1E* self)
+void func_0019E168(EffectOwner* self)
 {
     Cursor_19E168 cur(&self->list558);
-    T219C* node = cur.first();
+    Effect* node = cur.first();
     while (node != 0) {
         func_0019EBE8(node);
         node = cur.next();
@@ -973,7 +973,7 @@ void func_001A38F0();
 void func_001A3990();
 void func_001A39C8();
 void func_001A3A18();
-extern const Fn_Table D_00219C20[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219C20[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219C40[8] = { (Fn_Table)func_0019F988, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019F9D0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219C60[8] = { (Fn_Table)func_0019FA98, 0, 0, (Fn_Table)func_0019FB08, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019FCE8, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219C80[8] = { (Fn_Table)func_0019FD08, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
@@ -990,15 +990,15 @@ extern const Fn_Table D_00219DC0[8] = { (Fn_Table)func_001A0C50, 0, 0, (Fn_Table
 extern const Fn_Table D_00219E00[8] = { (Fn_Table)func_001A0C98, 0, 0, (Fn_Table)func_001A0D60, (Fn_Table)func_001A0F88, (Fn_Table)func_001A0DF0, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219E20[8] = { (Fn_Table)func_001A1410, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A00A0, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219E40[8] = { (Fn_Table)func_001A1458, 0, 0, (Fn_Table)func_001A1498, (Fn_Table)func_001A14A0, (Fn_Table)func_001A15D8, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219E60[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A22C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A22E0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A25F0 };
-extern const Fn_Table D_00219E80[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A26B0, (Fn_Table)func_001A26F8, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219EA0[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A2770, 0, (Fn_Table)func_001A2830, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2A68 };
-extern const Fn_Table D_00219EC0[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A2B48, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219EE0[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A2D30, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A2D88, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2E68 };
-extern const Fn_Table D_00219F00[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A3008, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A31A0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A3128 };
+extern const Fn_Table D_00219E60[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, (Fn_Table)func_001A22C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A22E0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A25F0 };
+extern const Fn_Table D_00219E80[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A26B0, (Fn_Table)func_001A26F8, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219EA0[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, (Fn_Table)func_001A2770, 0, (Fn_Table)func_001A2830, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2A68 };
+extern const Fn_Table D_00219EC0[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, (Fn_Table)func_001A2B48, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219EE0[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, (Fn_Table)func_001A2D30, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A2D88, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A2E68 };
+extern const Fn_Table D_00219F00[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, (Fn_Table)func_001A3008, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A31A0, (Fn_Table)func_0019ECE0, (Fn_Table)func_001A3128 };
 extern const Fn_Table D_00219F20[8] = { (Fn_Table)func_001A31F0, 0, 0, (Fn_Table)func_0019F390, (Fn_Table)func_0019F560, (Fn_Table)func_001A3250, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 extern const Fn_Table D_00219F40[8] = { (Fn_Table)func_001A3598, 0, 0, (Fn_Table)func_001A3730, (Fn_Table)func_001A38F0, (Fn_Table)func_001A3990, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
-extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(T219C* self))func_0019EB28, (Fn_Table)func_001A39C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A3A18, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
+extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(Effect* self))func_0019EB28, (Fn_Table)func_001A39C8, 0, (Fn_Table)func_0019F390, (Fn_Table)func_001A3A18, (Fn_Table)func_0019F858, (Fn_Table)func_0019ECE0, (Fn_Table)func_0019ED58 };
 
 
 // D_0026AC10 points at the next free 128-byte entry of D_005E4700 (1024 of them).
@@ -1025,18 +1025,18 @@ void func_0019CD90(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
 
 extern f32 D_00261858[];
 
-void func_0019EC20(T219C* node);
-void func_0019EC30(T219C* node);
+void func_0019EC20(Effect* node);
+void func_0019EC30(Effect* node);
 u32 func_00152720(List01* list);
-void func_0019E558(C1E* self);
-void func_00129DF8(C02* self);
+void func_0019E558(EffectOwner* self);
+void func_00129DF8(PlacedObject* self);
 
 struct Iter_19E420 { List01* list; u8* link; s32 offset; Iter_19E420* saved; };
 
 struct Next_19E420 {
-    static T219C* Of(Iter_19E420* it)
+    static Effect* Of(Iter_19E420* it)
     {
-        T219C* obj = *(T219C**)it->link;
+        Effect* obj = *(Effect**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -1053,11 +1053,11 @@ struct Begin_19E420 {
     }
 };
 
-void func_0019E420(C1E* self, f32 t)
+void func_0019E420(EffectOwner* self, f32 t)
 {
     Iter_19E420 it;
     Begin_19E420::Of(&it, &self->list558);
-    T219C* node;
+    Effect* node;
     while ((node = Next_19E420::Of(&it)) != 0) {
         if (node->start >= D_00261858[1]) {
             continue;
@@ -1170,10 +1170,10 @@ void func_0018D608(void);
 void* func_0018D658(s32 size);
 void func_0018D6F0(void);
 s32 func_0013E430(u8* a0, u8* a1, void** a2, f32 scale);
-s32 func_00141C90(C03* self, void* a1, void* a2, void* a3, s32 a4, Hit_19E558* a5);
+s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, Hit_19E558* a5);
 u32 func_00152720(List01* p);
 
-void func_0019E558(C1E* self)
+void func_0019E558(EffectOwner* self)
 {
     if (self->f550 != 1) return;
     ContactRow03* l;
@@ -1184,8 +1184,8 @@ void func_0019E558(C1E* self)
             End_19E558::Of(&it0);
             continue;
         }
-        C03* s2;
-        for (s2 = (C03*)Next_19E558::Of(&it0); s2 != 0; s2 = (C03*)Next_19E558::Of(&it0)) {
+        Collider* s2;
+        for (s2 = (Collider*)Next_19E558::Of(&it0); s2 != 0; s2 = (Collider*)Next_19E558::Of(&it0)) {
             Iter_19E558 it1;
             void* buf;
             Hit_19E558 hits[4];
@@ -1203,8 +1203,8 @@ void func_0019E558(C1E* self)
                 buf = 0;
             }
             {
-                T219C* n;
-                for (n = (T219C*)Next_19E558::Of(&it1); n != 0; n = (T219C*)Next_19E558::Of(&it1)) {
+                Effect* n;
+                for (n = (Effect*)Next_19E558::Of(&it1); n != 0; n = (Effect*)Next_19E558::Of(&it1)) {
                     if (n->start >= D_00261858[1]) continue;
                     s32 cnt = func_00141C90(s2, buf, &n->q90, &n->q80, 4, hits);
                     s32 i;

@@ -1,39 +1,39 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "r11b008.h"
+#include "script_value.h"
 #include "shapes.h"
-#include "c01.h"
-#include "c02.h"
-#include "c03.h"
-#include "c05.h"
+#include "base_object.h"
+#include "placed_object.h"
+#include "collider.h"
+#include "switched_collider.h"
 #include "c1f.h"
-#include "c20.h"
-#include "c28.h"
-#include "c29.h"
-#include "c2c.h"
-#include "c30.h"
-#include "c36.h"
-#include "c3b.h"
-#include "c47.h"
+#include "masked_collider.h"
+#include "trigger_zone.h"
+#include "zone_collider.h"
+#include "object_set.h"
+#include "timed_object.h"
+#include "contact_tracker.h"
+#include "child_group_object.h"
+#include "target_follower.h"
 #include "c4a.h"
 #include "c4c.h"
-#include "c4e.h"
-#include "c50.h"
+#include "lookup_object.h"
+#include "effect_spawner.h"
 #include "c5d.h"
 #include "c60.h"
 #include "c62.h"
-#include "c65.h"
-#include "c6d.h"
-#include "c73.h"
-#include "c7d.h"
-#include "c83.h"
+#include "step_sequence.h"
+#include "camera.h"
+#include "transform_object.h"
+#include "object_sub_group.h"
+#include "animation.h"
 #include "c88.h"
 #include "c8b.h"
-#include "c8c.h"
+#include "object_pool.h"
 #include "c8d.h"
-#include "c8f.h"
-#include "c90.h"
+#include "entry_queue.h"
+#include "timeline.h"
 
 // The kinds a property's arguments are read as (func_001C23B0's fourth argument): one word per
 // argument, copied from the file's .rodata into the frame as one block.
@@ -46,7 +46,7 @@ struct Kinds6 { s32 k[6]; };
 struct Obj_101D38;
 
 void func_00123AB0(void* object, s32 mode);
-s32 func_00123D08(C2F* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 func_00123D08(StateTrigger* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001250C8(void* p);
 s32 func_00126CB8(void* self, f32 value);
 s32 func_00126D60(void* self, f32 value);
@@ -55,14 +55,14 @@ void* func_00129C20(void* self, s32 key);
 void* func_00129CA8(void* self);
 void func_0012A8B8(void* p);
 void func_0012A8C8(void* p);
-void func_0012A8D8(C02* self, s32 a, f32 x, f32 y);
+void func_0012A8D8(PlacedObject* self, s32 a, f32 x, f32 y);
 void func_0012AA50(void* self, f32 a, f32 b);
 s32 func_0012AAE8(void* self, f32 value);
-void func_0012AF38(C02* self, s32 value, Quad16* src, f32 x, f32 y, f32 z);
+void func_0012AF38(PlacedObject* self, s32 value, Quad16* src, f32 x, f32 y, f32 z);
 void func_0012B010(void* p);
-s32 func_0012B5B8(C02* x, s32 a, s32 b);
-void* func_0012C7D8(C83* self, s32 a1, f32 f1, f32 f2, s32 a2);
-void* func_0012C8F8(C83* item, s32 a, f32 x, f32 y, s32 b, s32 c);
+s32 func_0012B5B8(PlacedObject* x, s32 a, s32 b);
+void* func_0012C7D8(Animation* self, s32 a1, f32 f1, f32 f2, s32 a2);
+void* func_0012C8F8(Animation* item, s32 a, f32 x, f32 y, s32 b, s32 c);
 f32 func_0012CCC0(void* obj, s32 id);
 void func_0012E760(void* obj);
 s32 func_0012E928(void* obj, s32 a, s32 b);
@@ -71,14 +71,14 @@ void func_0012F190(void* obj, s32 v);
 s32 func_001300E8(void* list, s32 value);
 s32 func_0013BE00(void* p, f32 x);
 void func_0013BF68(void*);
-s32 func_00140750(C28* self, s32 a1, s32 a2, s32 a3, s32 a4);
-s32 func_00140770(C29* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 func_00140750(TriggerZone* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 func_00140770(ZoneCollider* self, s32 a1, s32 a2, s32 a3, s32 a4);
 s32 func_00141170(void*,void*);
 void func_001455F0(void* p);
 s32 func_00145FB8(void*,s32);
 s32 func_00145FD8(void*);
 s32 func_00145FF8(void* x);
-void func_00146018(C6D* obj, s32 value, f32 first, f32 second);
+void func_00146018(Camera* obj, s32 value, f32 first, f32 second);
 void func_00146028(void* x);
 s32 func_00146038(void* obj, void* p, f32 x, f32 y);
 void func_00150408(void*);
@@ -87,7 +87,7 @@ void func_00150750(void* x);
 void func_00150760(void* x);
 void func_001518B8(void* x);
 void func_001519A8(void* x);
-void func_001519E0(C65* p, s32 a, s32 b);
+void func_001519E0(StepSequence* p, s32 a, s32 b);
 void func_001557D0(void* self, s32 a, s32 b, f32 x, f32 y, f32 z, f32 w);
 s32 func_00155F78(void* p, f32 x);
 void func_00155F90(void* x);
@@ -118,24 +118,24 @@ void func_0017D018(void* x, s32 v);
 s32 func_0017D040(void* self, s32 value);
 void* func_0017D078(void* self, s32 value);
 void func_0017D0A0(void* self, s32 a, f32 value);
-void func_0017D0D8(C8F* p, s32 a, s32 b);
-void func_0017D100(C8F* self, s32 b, s32 c, s32 d, s32 e);
-void func_0017D148(C8F* self, s32 a, s32 b, f32 value);
-void func_0017D180(C8F* self, s32 a, s32 b, f32 value);
+void func_0017D0D8(EntryQueue* p, s32 a, s32 b);
+void func_0017D100(EntryQueue* self, s32 b, s32 c, s32 d, s32 e);
+void func_0017D148(EntryQueue* self, s32 a, s32 b, f32 value);
+void func_0017D180(EntryQueue* self, s32 a, s32 b, f32 value);
 void func_0017D1B8(void* self, s32 b, s32 c, s32 d);
 void func_0017D1E8(void* x, f32 f);
 void func_0017D220(void* x);
 void func_00182948(void* a0, s32 a1, f32 x);
 void func_00182DD8(void* p);
 s32 func_00182F40(void* e, s32 v);
-void* func_00183058(C01* x, s32 a, s32 b);
+void* func_00183058(BaseObject* x, s32 a, s32 b);
 s32 func_001833F0(void* key, s32 item);
-s32 func_00183910(C01* x, s32 a, s32 b);
-s32 func_00183990(C01* x, s32 a, s32 b);
+s32 func_00183910(BaseObject* x, s32 a, s32 b);
+s32 func_00183990(BaseObject* x, s32 a, s32 b);
 void func_00183A10(void* a0, s32 a1, f32 x);
 void func_00183A90(void* a0, s32 a1, Quad16* a2);
 void func_00183B20(void* a0, s32 a1, Quad16* a2);
-s32 func_00183BB8(C01* x, s32 a, s32 b);
+s32 func_00183BB8(BaseObject* x, s32 a, s32 b);
 void func_00183C38(void* a0, s32 a1, Quad16* a2);
 void func_0018AC58(C0C* st);
 void func_0018DD50(void*,s32);
@@ -147,10 +147,10 @@ void func_00199AF0(void* p);
 void func_0019AD30(C17* p, s32 a, s32 b);
 void func_0019CE28(C8B* value, f32 x, f32 y, f32 z);
 void func_0019CE38(C8B* self, f32 x, f32 y, f32 z);
-s32 func_001A8150(C8C* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001A8778(void*,s32);
 void func_001A87A8(void*,s32);
-void func_001A87E0(C8C* p, s32 a, s32 b);
+void func_001A87E0(ObjectPool* p, s32 a, s32 b);
 void func_001A8AF8(void*);
 s32 func_001A8C90(void* obj, s32 v);
 void func_001A93E8(void* x);
@@ -164,20 +164,20 @@ void func_001B6438(void* x);
 void func_001B70B0(C09* p, s32 a, s32 b);
 void func_001BB1E0(void* self, u32 value);
 s32 func_001BC670(void* x, void* out);
-s32 func_001C08B0(C6C* x, s32 a, s32 b);
+s32 func_001C08B0(World* x, s32 a, s32 b);
 void func_001C0950(void* p);
-s32 func_001C09D8(C6C* x, s32 a, s32 b);
+s32 func_001C09D8(World* x, s32 a, s32 b);
 void func_001C3F68(void* self, s32 value);
 void func_001C4180(void* self, s32 value);
 void func_001C41A0(void* self, s32 value);
-void func_001C8FD0(C08* p, s32 a, s32 b);
-void func_001CA608(C08* self, s32 a, s32 b);
-void func_001CA658(C08* self, s32 a, s32 b);
+void func_001C8FD0(Agent* p, s32 a, s32 b);
+void func_001CA608(Agent* self, s32 a, s32 b);
+void func_001CA658(Agent* self, s32 a, s32 b);
 void* func_001CA6D0(void* obj, s32 v);
-void func_001CA720(C08* self, s32 a, s32 b);
-void func_001CA898(C08* p, s32 a, s32 b);
-void func_001CA960(C08* self, s32 a, s32 b);
-s32 func_001CAD60(C08* self, s32 a1, s32 a2, s32 a3, s32 a4);
+void func_001CA720(Agent* self, s32 a, s32 b);
+void func_001CA898(Agent* p, s32 a, s32 b);
+void func_001CA960(Agent* self, s32 a, s32 b);
+s32 func_001CAD60(Agent* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001CB328(void*, s32);
 void func_001D2830(void*,s32);
 void func_001D31D0(void*,s32);
@@ -186,9 +186,9 @@ void func_001D6CB0(void* obj);
 void func_001DB110(void*,s32);
 void func_001DB1E8(C19* item, s32 a, f32 x, f32 y, s32 b, s32 c);
 void func_001DB290(C19* st);
-void func_001DBAC0(C6C* self, s32 a, s32 b);
+void func_001DBAC0(World* self, s32 a, s32 b);
 s32 func_001DBAE0(void*,s32);
-void func_001DBB00(C6C* self, s32 a, s32 b);
+void func_001DBB00(World* self, s32 a, s32 b);
 s32 func_001DD690(void* self, s32 obj);
 s32 func_001DD6B0(void* self, s32 obj);
 s32 func_001DD6D0(void* self, s32 obj);
@@ -196,16 +196,16 @@ s32 func_001DD6F0(void* self, s32 obj);
 s32 func_001DD710(void* x, s32 v);
 s32 func_001DD758(void* x, s32 v);
 s32 func_001DD7A0(void* x, s32 v);
-void func_001DD7E8(C6C* self, void* obj, s32 key, s32 value);
-s32 func_001DD888(C6C* self, s32 a, s32 b);
+void func_001DD7E8(World* self, void* obj, s32 key, s32 value);
+s32 func_001DD888(World* self, s32 a, s32 b);
 s32 func_001DD8E8(void* x, s32 v);
 s32 func_001DD908(void* self, s32 index);
 s32 func_001DD928(void* self);
-void func_001DD950(C6C* unused, s32 a, s32 b, void* c);
+void func_001DD950(World* unused, s32 a, s32 b, void* c);
 void func_001DDA20(void* a);
 void func_001DDA50(void*);
 void func_001DDAD0(void* x);
-void func_001DDB20(C6C* self, s32 a, s32 b);
+void func_001DDB20(World* self, s32 a, s32 b);
 void func_001DDB58(void* x);
 void func_001DDBB8(void* x);
 s32 func_001DDBF8(void*,s32);
@@ -217,12 +217,12 @@ s32 func_001ED018(void* self, s32 value);
 void func_001ED020(void* x);
 void func_001ED090(C13* p, s32 a, s32 b);
 s32 func_001ED0D8(void* self, s32 value);
-void func_001ED558(C90* self, s32 p, f32 f, s32 q);
-void func_001ED588(C90* self, s32 p, f32 f, s32 q);
-void func_001ED5B8(C90* self, s32 p, f32 v);
-void func_001ED5D8(C90* self, s32 p, f32 v);
-void func_001ED5F8(C90* self, s32 p, f32 v);
-void func_001ED618(C90* self, s32 p, f32 v);
+void func_001ED558(Timeline* self, s32 p, f32 f, s32 q);
+void func_001ED588(Timeline* self, s32 p, f32 f, s32 q);
+void func_001ED5B8(Timeline* self, s32 p, f32 v);
+void func_001ED5D8(Timeline* self, s32 p, f32 v);
+void func_001ED5F8(Timeline* self, s32 p, f32 v);
+void func_001ED618(Timeline* self, s32 p, f32 v);
 void func_001EF830(void* o);
 s32 func_001EF8C0(C62* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001F36E8(void*);
@@ -230,7 +230,7 @@ void func_001F3768(void* x);
 void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d);
 void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d);
 void func_001F4008(void* x);
-s32 func_001F42D0(C73* self, s32 a1, s32 a2, s32 a3, s32 a4);
+s32 func_001F42D0(TransformObject* self, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_001F4808(void* x);
 void func_001F4ED0(void*);
 void func_001F4F20(void* p);
@@ -238,7 +238,7 @@ void func_001F5210(void* p);
 
 // Reads a property call's arguments: count values of args, each as its kind in kinds, through
 // the pointers that follow (func_001C1BF8, src/main/file_1C05D0.cpp); gives back a value.
-R11B008* func_001C23B0(R11B008* ret, s32 count, R11B008* args, const void* kinds, ...);
+ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const void* kinds, ...);
 
 // The file's .rodata: the argument signatures its functions copy, in retail's order.
 extern const s32 D_00248D80[2] = { 0x2000, 0x2000 };
@@ -293,212 +293,212 @@ extern const s32 D_00248FD8[2] = { 0x2000, 0 };
 struct Prop_2505D8 { s32 f0; s32 flags; u8 body[24]; };
 Prop_2505D8 D_002505D8[1179];
 
-R11B008* func_001000C8(R11B008* ret, void* obj, s32 unused, R11B008* args);
-R11B008* func_00100178(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100218(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_001002C0(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100368(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100438(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_001004F0(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_001005A0(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100650(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100720(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_001007F0(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_001008B8(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100998(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100A78(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100B48(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00100C28(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00100CC8(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00100D68(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00100E08(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00100EE0(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00100FA8(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00101058(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00101168(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00101208(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_001012B8(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00101368(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00101418(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_001014C8(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00101568(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_00101620(R11B008* ret, C02* obj, s32 unused, R11B008* args);
-R11B008* func_001016F0(R11B008* ret, C03* obj, s32 unused, R11B008* args);
-R11B008* func_001017A0(R11B008* ret, C03* obj, s32 unused, R11B008* args);
-R11B008* func_00101860(R11B008* ret, C73* obj, s32 unused, R11B008* args);
-R11B008* func_00101950(R11B008* ret, C73* obj, s32 unused, R11B008* args);
-R11B008* func_001019F0(R11B008* ret, C7D* obj, s32 unused, R11B008* args);
-R11B008* func_00101A90(R11B008* ret, C83* obj, s32 unused, R11B008* args);
-R11B008* func_00101B80(R11B008* ret, C83* obj, s32 unused, R11B008* args);
-R11B008* func_00101C88(R11B008* ret, C83* obj, s32 unused, R11B008* args);
-R11B008* func_00101D38(R11B008* ret, Obj_101D38* obj, s32 unused, R11B008* args);
-R11B008* func_00101E10(R11B008* ret, void* obj, s32 unused, R11B008* args);
-R11B008* func_00101EB0(R11B008* ret, void* obj, s32 unused, R11B008* args);
-R11B008* func_00101F60(R11B008* ret, void* obj, s32 unused, R11B008* args);
-R11B008* func_00102030(R11B008* ret, C1F* obj, s32 unused, R11B008* args);
-R11B008* func_001020D0(R11B008* ret, C20* obj, s32 unused, R11B008* args);
-R11B008* func_00102178(R11B008* ret, C28* obj, s32 unused, R11B008* args);
-R11B008* func_00102268(R11B008* ret, C29* obj, s32 unused, R11B008* args);
-R11B008* func_00102358(R11B008* ret, C05* obj, s32 unused, R11B008* args);
-R11B008* func_001023F8(R11B008* ret, C05* obj, s32 unused, R11B008* args);
-R11B008* func_001024B0(R11B008* ret, C2F* obj, s32 unused, R11B008* args);
-R11B008* func_00102560(R11B008* ret, C2F* obj, s32 unused, R11B008* args);
-R11B008* func_00102650(R11B008* ret, C30* obj, s32 unused, R11B008* args);
-R11B008* func_00102710(R11B008* ret, C30* obj, s32 unused, R11B008* args);
-R11B008* func_001027C0(R11B008* ret, C31* obj, s32 unused, R11B008* args);
-R11B008* func_00102870(R11B008* ret, C31* obj, s32 unused, R11B008* args);
-R11B008* func_00102920(R11B008* ret, C50* obj, s32 unused, R11B008* args);
-R11B008* func_001029D0(R11B008* ret, C50* obj, s32 unused, R11B008* args);
-R11B008* func_00102A70(R11B008* ret, C50* obj, s32 unused, R11B008* args);
-R11B008* func_00102B10(R11B008* ret, C50* obj, s32 unused, R11B008* args);
-R11B008* func_00102C28(R11B008* ret, C79* obj, s32 unused, R11B008* args);
-R11B008* func_00102D40(R11B008* ret, C7A* obj, s32 unused, R11B008* args);
-R11B008* func_00102DE0(R11B008* ret, C7A* obj, s32 unused, R11B008* args);
-R11B008* func_00102F10(R11B008* ret, C78* obj, s32 unused, R11B008* args);
-R11B008* func_00102FB0(R11B008* ret, C78* obj, s32 unused, R11B008* args);
-R11B008* func_001030E0(R11B008* ret, C88* obj, s32 unused, R11B008* args);
-R11B008* func_001031C0(R11B008* ret, void* obj, s32 unused, R11B008* args);
-R11B008* func_00103260(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103350(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103420(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001034F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103590(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103640(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001036F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001037A0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103850(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103900(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001039B0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103A60(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103B40(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103C10(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103CC0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103D70(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103E10(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103EB0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00103F80(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00104020(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001040C0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00104170(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00104220(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001042F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001043A0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00104470(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00104510(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_001045B0(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00104660(R11B008* ret, C6C* obj, s32 unused, R11B008* args);
-R11B008* func_00104710(R11B008* ret, C6D* obj, s32 unused, R11B008* args);
-R11B008* func_001047C0(R11B008* ret, C6D* obj, s32 unused, R11B008* args);
-R11B008* func_00104860(R11B008* ret, C6D* obj, s32 unused, R11B008* args);
-R11B008* func_00104900(R11B008* ret, C6D* obj, s32 unused, R11B008* args);
-R11B008* func_001049D8(R11B008* ret, C6D* obj, s32 unused, R11B008* args);
-R11B008* func_00104A78(R11B008* ret, C6D* obj, s32 unused, R11B008* args);
-R11B008* func_00104B18(R11B008* ret, C6D* obj, s32 unused, R11B008* args);
-R11B008* func_00104C00(R11B008* ret, C4E* obj, s32 unused, R11B008* args);
-R11B008* func_00104CA0(R11B008* ret, C4E* obj, s32 unused, R11B008* args);
-R11B008* func_00104D40(R11B008* ret, C36* obj, s32 unused, R11B008* args);
-R11B008* func_00104DE0(R11B008* ret, C2E* obj, s32 unused, R11B008* args);
-R11B008* func_00104E80(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_00104F50(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_00105020(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_001050D0(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_001051C0(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_00105290(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_00105360(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_00105430(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_00105500(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_001055A8(R11B008* ret, C08* obj, s32 unused, R11B008* args);
-R11B008* func_00105658(R11B008* ret, C09* obj, s32 unused, R11B008* args);
-R11B008* func_00105728(R11B008* ret, C3B* obj, s32 unused, R11B008* args);
-R11B008* func_001057D8(R11B008* ret, C3B* obj, s32 unused, R11B008* args);
-R11B008* func_00105878(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105960(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105A00(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105AB0(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105B60(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105C10(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105CC0(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105D60(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105E10(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105EC0(R11B008* ret, C07* obj, s32 unused, R11B008* args);
-R11B008* func_00105F70(R11B008* ret, C8B* obj, s32 unused, R11B008* args);
-R11B008* func_00106048(R11B008* ret, C8B* obj, s32 unused, R11B008* args);
-R11B008* func_00106120(R11B008* ret, C23* obj, s32 unused, R11B008* args);
-R11B008* func_001061C0(R11B008* ret, C23* obj, s32 unused, R11B008* args);
-R11B008* func_00106270(R11B008* ret, C3C* obj, s32 unused, R11B008* args);
-R11B008* func_00106320(R11B008* ret, C3C* obj, s32 unused, R11B008* args);
-R11B008* func_001063D0(R11B008* ret, C62* obj, s32 unused, R11B008* args);
-R11B008* func_001064C0(R11B008* ret, C47* obj, s32 unused, R11B008* args);
-R11B008* func_00106560(R11B008* ret, C47* obj, s32 unused, R11B008* args);
-R11B008* func_00106600(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_001066F0(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_001067A0(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_00106850(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_00106920(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_001069C0(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_00106A70(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_00106B10(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_00106BB0(R11B008* ret, C8C* obj, s32 unused, R11B008* args);
-R11B008* func_00106C50(R11B008* ret, C65* obj, s32 unused, R11B008* args);
-R11B008* func_00106CF0(R11B008* ret, C65* obj, s32 unused, R11B008* args);
-R11B008* func_00106D90(R11B008* ret, C65* obj, s32 unused, R11B008* args);
-R11B008* func_00106E60(R11B008* ret, C65* obj, s32 unused, R11B008* args);
-R11B008* func_00106F00(R11B008* ret, C65* obj, s32 unused, R11B008* args);
-R11B008* func_00106FA0(R11B008* ret, C5D* obj, s32 unused, R11B008* args);
-R11B008* func_00107040(R11B008* ret, C8D* obj, s32 unused, R11B008* args);
-R11B008* func_001070E0(R11B008* ret, C8D* obj, s32 unused, R11B008* args);
-R11B008* func_00107180(R11B008* ret, C8D* obj, s32 unused, R11B008* args);
-R11B008* func_00107268(R11B008* ret, C8D* obj, s32 unused, R11B008* args);
-R11B008* func_00107350(R11B008* ret, C0C* obj, s32 unused, R11B008* args);
-R11B008* func_001073F0(R11B008* ret, C17* obj, s32 unused, R11B008* args);
-R11B008* func_001074C0(R11B008* ret, C19* obj, s32 unused, R11B008* args);
-R11B008* func_00107570(R11B008* ret, C19* obj, s32 unused, R11B008* args);
-R11B008* func_00107678(R11B008* ret, C19* obj, s32 unused, R11B008* args);
-R11B008* func_00107718(R11B008* ret, C73* obj, s32 unused, R11B008* args);
-R11B008* func_001077D8(R11B008* ret, C60* obj, s32 unused, R11B008* args);
-R11B008* func_00107898(R11B008* ret, C0E* obj, s32 unused, R11B008* args);
-R11B008* func_00107948(R11B008* ret, C24* obj, s32 unused, R11B008* args);
-R11B008* func_00107A10(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107AB0(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107B60(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107C00(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107CB0(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107D60(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107E10(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107EC0(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00107F70(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00108038(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00108128(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00108208(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_001082E8(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_001083C8(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00108498(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_00108548(R11B008* ret, C8F* obj, s32 unused, R11B008* args);
-R11B008* func_001085E8(R11B008* ret, C01* obj, s32 unused, R11B008* args);
-R11B008* func_00108688(R11B008* ret, C4A* obj, s32 unused, R11B008* args);
-R11B008* func_00108728(R11B008* ret, C4A* obj, s32 unused, R11B008* args);
-R11B008* func_001087D8(R11B008* ret, C1B* obj, s32 unused, R11B008* args);
-R11B008* func_00108878(R11B008* ret, C13* obj, s32 unused, R11B008* args);
-R11B008* func_00108928(R11B008* ret, C13* obj, s32 unused, R11B008* args);
-R11B008* func_001089C8(R11B008* ret, C13* obj, s32 unused, R11B008* args);
-R11B008* func_00108A98(R11B008* ret, C13* obj, s32 unused, R11B008* args);
-R11B008* func_00108B48(R11B008* ret, C13* obj, s32 unused, R11B008* args);
-R11B008* func_00108BE8(R11B008* ret, C90* obj, s32 unused, R11B008* args);
-R11B008* func_00108CC8(R11B008* ret, C90* obj, s32 unused, R11B008* args);
-R11B008* func_00108DA8(R11B008* ret, C90* obj, s32 unused, R11B008* args);
-R11B008* func_00108E70(R11B008* ret, C90* obj, s32 unused, R11B008* args);
-R11B008* func_00108F38(R11B008* ret, C90* obj, s32 unused, R11B008* args);
-R11B008* func_00109000(R11B008* ret, C90* obj, s32 unused, R11B008* args);
-R11B008* func_001090C8(R11B008* ret, C0D* obj, s32 unused, R11B008* args);
-R11B008* func_001091A8(R11B008* ret, C1D* obj, s32 unused, R11B008* args);
-R11B008* func_00109258(R11B008* ret, C1D* obj, s32 unused, R11B008* args);
-R11B008* func_00109308(R11B008* ret, C1D* obj, s32 unused, R11B008* args);
-R11B008* func_001093B8(R11B008* ret, C4C* obj, s32 unused, R11B008* args);
+ScriptValue* func_001000C8(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100178(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100218(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001002C0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100368(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100438(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001004F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001005A0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100650(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100720(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001007F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001008B8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100998(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100A78(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100B48(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100C28(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100CC8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100D68(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100E08(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100EE0(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00100FA8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101058(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101168(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101208(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001012B8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101368(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101418(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001014C8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101568(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101620(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001016F0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001017A0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101860(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101950(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001019F0(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101A90(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101B80(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101D38(ScriptValue* ret, Obj_101D38* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101E10(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101EB0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102030(ScriptValue* ret, C1F* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001020D0(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102178(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102268(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102358(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001023F8(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001024B0(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102560(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102650(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102870(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102920(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001029D0(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102B10(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102C28(ScriptValue* ret, C79* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102D40(ScriptValue* ret, C7A* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102DE0(ScriptValue* ret, C7A* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102F10(ScriptValue* ret, C78* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00102FB0(ScriptValue* ret, C78* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001030E0(ScriptValue* ret, C88* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001031C0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103260(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103350(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103420(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001034F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103590(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103640(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001036F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001037A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103850(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103900(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001039B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103A60(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103B40(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103C10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103CC0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103D70(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103E10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103EB0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00103F80(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104020(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001040C0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104170(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104220(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001042F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001043A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104470(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104510(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001045B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104660(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104710(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001047C0(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104860(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104900(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001049D8(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104A78(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104B18(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104C00(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104CA0(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104D40(ScriptValue* ret, ContactTracker* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104DE0(ScriptValue* ret, C2E* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104E80(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00104F50(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105020(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001050D0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001051C0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105290(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105360(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105430(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105500(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001055A8(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105658(ScriptValue* ret, C09* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105728(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001057D8(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105878(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105960(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105A00(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105AB0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105B60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105C10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105CC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105D60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105E10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105EC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00105F70(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106048(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106120(ScriptValue* ret, C23* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001061C0(ScriptValue* ret, C23* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106270(ScriptValue* ret, C3C* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106320(ScriptValue* ret, C3C* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001063D0(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001064C0(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106560(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106600(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001066F0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001067A0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106850(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106920(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001069C0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106A70(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106B10(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106BB0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106C50(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106CF0(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106D90(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106E60(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106F00(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107040(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001070E0(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107180(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107268(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107350(ScriptValue* ret, C0C* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001073F0(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001074C0(ScriptValue* ret, C19* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107570(ScriptValue* ret, C19* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107678(ScriptValue* ret, C19* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107718(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001077D8(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107898(ScriptValue* ret, C0E* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107948(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107A10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107AB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107B60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107C00(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107CB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107D60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107E10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107EC0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00107F70(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108038(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108128(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108208(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001082E8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001083C8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108498(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108548(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001085E8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108688(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108728(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001087D8(ScriptValue* ret, C1B* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108878(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108928(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001089C8(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108A98(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108B48(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108BE8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108CC8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108DA8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108E70(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00108F38(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00109000(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001090C8(ScriptValue* ret, C0D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001091A8(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00109258(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_00109308(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args);
+ScriptValue* func_001093B8(ScriptValue* ret, C4C* obj, s32 unused, ScriptValue* args);
 
-R11B008* func_001000C8(R11B008* ret, void* obj, s32 unused, R11B008* args)
+ScriptValue* func_001000C8(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -512,10 +512,10 @@ R11B008* func_001000C8(R11B008* ret, void* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100178(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100178(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -527,10 +527,10 @@ R11B008* func_00100178(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100218(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100218(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -542,10 +542,10 @@ R11B008* func_00100218(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001002C0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_001002C0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -557,11 +557,11 @@ R11B008* func_001002C0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100368(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100368(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -575,12 +575,12 @@ R11B008* func_00100368(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100438(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100438(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
-    C01* out;
+    BaseObject* out;
     func_0011B008(&q);
     kinds = 0x2000;
     (void)func_001C23B0(&t, 1, args, &kinds, &out);
@@ -593,10 +593,10 @@ R11B008* func_00100438(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001004F0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_001004F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -611,10 +611,10 @@ R11B008* func_001004F0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001005A0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_001005A0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -629,11 +629,11 @@ R11B008* func_001005A0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100650(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100650(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -648,11 +648,11 @@ R11B008* func_00100650(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100720(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100720(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -667,11 +667,11 @@ R11B008* func_00100720(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001007F0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_001007F0(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 a;
     f32 b;
     func_0011B008(&q);
@@ -686,12 +686,12 @@ R11B008* func_001007F0(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001008B8(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_001008B8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
     Quad16 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 out;
     func_0011B008(&q);
     kinds = *(Kinds2*)&D_00248DA0;
@@ -705,12 +705,12 @@ R11B008* func_001008B8(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100998(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100998(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
     Quad16 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 out;
     func_0011B008(&q);
     kinds = *(Kinds2*)&D_00248DA8;
@@ -724,11 +724,11 @@ R11B008* func_00100998(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100A78(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100A78(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -743,12 +743,12 @@ R11B008* func_00100A78(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100B48(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100B48(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
     Quad16 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 out;
     func_0011B008(&q);
     kinds = *(Kinds2*)&D_00248DB8;
@@ -762,10 +762,10 @@ R11B008* func_00100B48(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100C28(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100C28(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -777,10 +777,10 @@ R11B008* func_00100C28(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100CC8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100CC8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -792,10 +792,10 @@ R11B008* func_00100CC8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100D68(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100D68(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -807,11 +807,11 @@ R11B008* func_00100D68(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100E08(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100E08(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     f32 o0;
     f32 o1;
     s32 o2;
@@ -835,11 +835,11 @@ R11B008* func_00100E08(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100EE0(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100EE0(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     f32 x;
     f32 y;
     func_0011B008(&q);
@@ -854,10 +854,10 @@ R11B008* func_00100EE0(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00100FA8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00100FA8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 f0;
     func_0011B008(&q);
@@ -872,12 +872,12 @@ R11B008* func_00100FA8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101058(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101058(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds5 kinds;
     Quad16 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 i0;
     f32 f0, f1, f2;
     func_0011B008(&q);
@@ -892,10 +892,10 @@ R11B008* func_00101058(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101168(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101168(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -907,10 +907,10 @@ R11B008* func_00101168(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101208(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101208(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 f0;
     func_0011B008(&q);
@@ -925,10 +925,10 @@ R11B008* func_00101208(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001012B8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_001012B8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 f0;
     func_0011B008(&q);
@@ -943,10 +943,10 @@ R11B008* func_001012B8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101368(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101368(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -960,10 +960,10 @@ R11B008* func_00101368(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101418(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101418(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 y;
     func_0011B008(&q);
@@ -979,10 +979,10 @@ R11B008* func_00101418(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001014C8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_001014C8(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -993,15 +993,15 @@ R11B008* func_001014C8(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101568(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101568(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
-    C02* y;
+    PlacedObject* y;
     func_0011B008(&q);
     s32* px = &kinds;
-    C02** py = &y;
+    PlacedObject** py = &y;
     *px = 0x2000;
     (void)func_001C23B0(&t, 1, args, px, py);
     func_0011B0A8(&q, &t);
@@ -1013,11 +1013,11 @@ R11B008* func_00101568(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101620(R11B008* ret, C02* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101620(ScriptValue* ret, PlacedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -1032,10 +1032,10 @@ R11B008* func_00101620(R11B008* ret, C02* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001016F0(R11B008* ret, C03* obj, s32 unused, R11B008* args)
+ScriptValue* func_001016F0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 y;
     func_0011B008(&q);
@@ -1052,11 +1052,11 @@ R11B008* func_001016F0(R11B008* ret, C03* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001017A0(R11B008* ret, C03* obj, s32 unused, R11B008* args)
+ScriptValue* func_001017A0(ScriptValue* ret, Collider* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Quad4 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 kinds;
     func_0011B008(&q);
     kinds = 2;
@@ -1070,11 +1070,11 @@ R11B008* func_001017A0(R11B008* ret, C03* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101860(R11B008* ret, C73* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101860(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -1092,10 +1092,10 @@ R11B008* func_00101860(R11B008* ret, C73* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101950(R11B008* ret, C73* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101950(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1107,10 +1107,10 @@ R11B008* func_00101950(R11B008* ret, C73* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001019F0(R11B008* ret, C7D* obj, s32 unused, R11B008* args)
+ScriptValue* func_001019F0(ScriptValue* ret, ObjectSubGroup* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1122,11 +1122,11 @@ R11B008* func_001019F0(R11B008* ret, C7D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101A90(R11B008* ret, C83* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101A90(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     f32 o1;
     f32 o2;
@@ -1143,11 +1143,11 @@ R11B008* func_00101A90(R11B008* ret, C83* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101B80(R11B008* ret, C83* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101B80(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds5 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     f32 o3;
@@ -1164,10 +1164,10 @@ R11B008* func_00101B80(R11B008* ret, C83* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101C88(R11B008* ret, C83* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 v;
     func_0011B008(&q);
@@ -1182,11 +1182,11 @@ R11B008* func_00101C88(R11B008* ret, C83* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101D38(R11B008* ret, Obj_101D38* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101D38(ScriptValue* ret, Obj_101D38* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     f32 o1;
     f32 o2;
@@ -1202,10 +1202,10 @@ R11B008* func_00101D38(R11B008* ret, Obj_101D38* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101E10(R11B008* ret, void* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101E10(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1217,10 +1217,10 @@ R11B008* func_00101E10(R11B008* ret, void* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101EB0(R11B008* ret, void* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101EB0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1235,11 +1235,11 @@ R11B008* func_00101EB0(R11B008* ret, void* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00101F60(R11B008* ret, void* obj, s32 unused, R11B008* args)
+ScriptValue* func_00101F60(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -1254,10 +1254,10 @@ R11B008* func_00101F60(R11B008* ret, void* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102030(R11B008* ret, C1F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102030(ScriptValue* ret, C1F* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1269,10 +1269,10 @@ R11B008* func_00102030(R11B008* ret, C1F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001020D0(R11B008* ret, C20* obj, s32 unused, R11B008* args)
+ScriptValue* func_001020D0(ScriptValue* ret, MaskedCollider* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1284,11 +1284,11 @@ R11B008* func_001020D0(R11B008* ret, C20* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102178(R11B008* ret, C28* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102178(ScriptValue* ret, TriggerZone* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -1306,11 +1306,11 @@ R11B008* func_00102178(R11B008* ret, C28* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102268(R11B008* ret, C29* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102268(ScriptValue* ret, ZoneCollider* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -1328,10 +1328,10 @@ R11B008* func_00102268(R11B008* ret, C29* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102358(R11B008* ret, C05* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102358(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1343,10 +1343,10 @@ R11B008* func_00102358(R11B008* ret, C05* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001023F8(R11B008* ret, C05* obj, s32 unused, R11B008* args)
+ScriptValue* func_001023F8(ScriptValue* ret, SwitchedCollider* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1361,10 +1361,10 @@ R11B008* func_001023F8(R11B008* ret, C05* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001024B0(R11B008* ret, C2F* obj, s32 unused, R11B008* args)
+ScriptValue* func_001024B0(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1379,11 +1379,11 @@ R11B008* func_001024B0(R11B008* ret, C2F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102560(R11B008* ret, C2F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102560(ScriptValue* ret, StateTrigger* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -1401,10 +1401,10 @@ R11B008* func_00102560(R11B008* ret, C2F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102650(R11B008* ret, C30* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102650(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1412,7 +1412,7 @@ R11B008* func_00102650(R11B008* ret, C30* obj, s32 unused, R11B008* args)
     (void)func_001C23B0(&t, 1, args, &kinds, &out);
     func_0011B0A8(&q, &t);
     func_0011B060(&t, 2);
-    void (*fn)(C30*, s32) = obj->desc30()->m49;
+    void (*fn)(TimedObject*, s32) = obj->desc30()->m49;
     if (fn != 0) {
         fn(obj, out);
     }
@@ -1422,15 +1422,15 @@ R11B008* func_00102650(R11B008* ret, C30* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102710(R11B008* ret, C30* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102710(ScriptValue* ret, TimedObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
     func_0011B060(&t, 2);
-    void (*fn)(C30*) = obj->desc30()->m4A;
+    void (*fn)(TimedObject*) = obj->desc30()->m4A;
     if (fn != 0) {
         fn(obj);
     }
@@ -1440,10 +1440,10 @@ R11B008* func_00102710(R11B008* ret, C30* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001027C0(R11B008* ret, C31* obj, s32 unused, R11B008* args)
+ScriptValue* func_001027C0(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 out;
     func_0011B008(&q);
@@ -1458,10 +1458,10 @@ R11B008* func_001027C0(R11B008* ret, C31* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102870(R11B008* ret, C31* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102870(ScriptValue* ret, C31* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 out;
     func_0011B008(&q);
@@ -1476,10 +1476,10 @@ R11B008* func_00102870(R11B008* ret, C31* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102920(R11B008* ret, C50* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102920(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 out;
     func_0011B008(&q);
@@ -1494,10 +1494,10 @@ R11B008* func_00102920(R11B008* ret, C50* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001029D0(R11B008* ret, C50* obj, s32 unused, R11B008* args)
+ScriptValue* func_001029D0(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1509,10 +1509,10 @@ R11B008* func_001029D0(R11B008* ret, C50* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102A70(R11B008* ret, C50* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1524,11 +1524,11 @@ R11B008* func_00102A70(R11B008* ret, C50* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102B10(R11B008* ret, C50* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102B10(ScriptValue* ret, EffectSpawner* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds6 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 i0, i1;
     f32 f0, f1, f2, f3;
     func_0011B008(&q);
@@ -1543,11 +1543,11 @@ R11B008* func_00102B10(R11B008* ret, C50* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102C28(R11B008* ret, C79* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102C28(ScriptValue* ret, C79* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds6 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 i0, i1;
     f32 f0, f1, f2, f3;
     func_0011B008(&q);
@@ -1562,10 +1562,10 @@ R11B008* func_00102C28(R11B008* ret, C79* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102D40(R11B008* ret, C7A* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102D40(ScriptValue* ret, C7A* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1577,13 +1577,13 @@ R11B008* func_00102D40(R11B008* ret, C7A* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102DE0(R11B008* ret, C7A* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102DE0(ScriptValue* ret, C7A* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds6 kinds;
     Quad4 vec0;
     Quad4 vec1;
-    R11B008 t;
+    ScriptValue t;
     s32 i0;
     s32 i1;
     f32 f0;
@@ -1603,10 +1603,10 @@ R11B008* func_00102DE0(R11B008* ret, C7A* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102F10(R11B008* ret, C78* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102F10(ScriptValue* ret, C78* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1618,13 +1618,13 @@ R11B008* func_00102F10(R11B008* ret, C78* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00102FB0(R11B008* ret, C78* obj, s32 unused, R11B008* args)
+ScriptValue* func_00102FB0(ScriptValue* ret, C78* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds6 kinds;
     Quad4 vec0;
     Quad4 vec1;
-    R11B008 t;
+    ScriptValue t;
     s32 i0;
     s32 i1;
     f32 f0;
@@ -1642,11 +1642,11 @@ R11B008* func_00102FB0(R11B008* ret, C78* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001030E0(R11B008* ret, C88* obj, s32 unused, R11B008* args)
+ScriptValue* func_001030E0(ScriptValue* ret, C88* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     s32 o3;
@@ -1662,10 +1662,10 @@ R11B008* func_001030E0(R11B008* ret, C88* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001031C0(R11B008* ret, void* obj, s32 unused, R11B008* args)
+ScriptValue* func_001031C0(ScriptValue* ret, void* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1677,12 +1677,12 @@ R11B008* func_001031C0(R11B008* ret, void* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103260(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103260(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
     Quad4 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 a;
     s32 b;
     func_0011B008(&q);
@@ -1697,11 +1697,11 @@ R11B008* func_00103260(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103350(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103350(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -1716,11 +1716,11 @@ R11B008* func_00103350(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103420(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103420(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -1735,10 +1735,10 @@ R11B008* func_00103420(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001034F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001034F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1750,10 +1750,10 @@ R11B008* func_001034F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103590(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103590(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1767,10 +1767,10 @@ R11B008* func_00103590(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103640(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103640(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1784,10 +1784,10 @@ R11B008* func_00103640(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001036F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001036F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1801,10 +1801,10 @@ R11B008* func_001036F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001037A0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001037A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1818,10 +1818,10 @@ R11B008* func_001037A0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103850(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103850(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1835,10 +1835,10 @@ R11B008* func_00103850(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103900(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103900(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1852,10 +1852,10 @@ R11B008* func_00103900(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001039B0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001039B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1869,11 +1869,11 @@ R11B008* func_001039B0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103A60(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103A60(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     void* o1;
     s32 o2;
     s32 o3;
@@ -1889,11 +1889,11 @@ R11B008* func_00103A60(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103B40(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103B40(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     func_0011B008(&q);
@@ -1908,10 +1908,10 @@ R11B008* func_00103B40(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103C10(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103C10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1925,10 +1925,10 @@ R11B008* func_00103C10(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103CC0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103CC0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -1942,10 +1942,10 @@ R11B008* func_00103CC0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103D70(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103D70(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1956,10 +1956,10 @@ R11B008* func_00103D70(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103E10(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103E10(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -1971,11 +1971,11 @@ R11B008* func_00103E10(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103EB0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103EB0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     func_0011B008(&q);
@@ -1990,10 +1990,10 @@ R11B008* func_00103EB0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00103F80(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00103F80(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2005,10 +2005,10 @@ R11B008* func_00103F80(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104020(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104020(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2020,10 +2020,10 @@ R11B008* func_00104020(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001040C0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001040C0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2038,10 +2038,10 @@ R11B008* func_001040C0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104170(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104170(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2056,11 +2056,11 @@ R11B008* func_00104170(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104220(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104220(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     func_0011B008(&q);
@@ -2075,10 +2075,10 @@ R11B008* func_00104220(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001042F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001042F0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2093,11 +2093,11 @@ R11B008* func_001042F0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001043A0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001043A0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     Kinds2* pp;
@@ -2118,10 +2118,10 @@ R11B008* func_001043A0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104470(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104470(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2133,10 +2133,10 @@ R11B008* func_00104470(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104510(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104510(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2148,10 +2148,10 @@ R11B008* func_00104510(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001045B0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001045B0(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2166,10 +2166,10 @@ R11B008* func_001045B0(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104660(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104660(ScriptValue* ret, World* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2184,10 +2184,10 @@ R11B008* func_00104660(R11B008* ret, C6C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104710(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104710(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2202,10 +2202,10 @@ R11B008* func_00104710(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001047C0(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
+ScriptValue* func_001047C0(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2216,10 +2216,10 @@ R11B008* func_001047C0(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104860(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104860(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2231,11 +2231,11 @@ R11B008* func_00104860(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104900(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104900(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     f32 o1;
     f32 o2;
@@ -2251,10 +2251,10 @@ R11B008* func_00104900(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001049D8(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
+ScriptValue* func_001049D8(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2266,10 +2266,10 @@ R11B008* func_001049D8(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104A78(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104A78(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2281,12 +2281,12 @@ R11B008* func_00104A78(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104B18(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104B18(ScriptValue* ret, Camera* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
     Quad4 vec;
-    R11B008 t;
+    ScriptValue t;
     f32 fx;
     f32 fy;
     func_0011B008(&q);
@@ -2300,10 +2300,10 @@ R11B008* func_00104B18(R11B008* ret, C6D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104C00(R11B008* ret, C4E* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104C00(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2315,10 +2315,10 @@ R11B008* func_00104C00(R11B008* ret, C4E* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104CA0(R11B008* ret, C4E* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104CA0(ScriptValue* ret, LookupObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2330,10 +2330,10 @@ R11B008* func_00104CA0(R11B008* ret, C4E* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104D40(R11B008* ret, C36* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104D40(ScriptValue* ret, ContactTracker* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2345,10 +2345,10 @@ R11B008* func_00104D40(R11B008* ret, C36* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104DE0(R11B008* ret, C2E* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104DE0(ScriptValue* ret, C2E* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2360,11 +2360,11 @@ R11B008* func_00104DE0(R11B008* ret, C2E* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104E80(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104E80(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     func_0011B008(&q);
@@ -2379,11 +2379,11 @@ R11B008* func_00104E80(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00104F50(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_00104F50(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     func_0011B008(&q);
@@ -2398,10 +2398,10 @@ R11B008* func_00104F50(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105020(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105020(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2415,11 +2415,11 @@ R11B008* func_00105020(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001050D0(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_001050D0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -2437,11 +2437,11 @@ R11B008* func_001050D0(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001051C0(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_001051C0(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     func_0011B008(&q);
@@ -2456,11 +2456,11 @@ R11B008* func_001051C0(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105290(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105290(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 out1;
     s32 out2;
     func_0011B008(&q);
@@ -2475,11 +2475,11 @@ R11B008* func_00105290(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105360(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105360(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -2494,11 +2494,11 @@ R11B008* func_00105360(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105430(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105430(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     Kinds2* kp;
@@ -2519,10 +2519,10 @@ R11B008* func_00105430(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105500(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105500(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2534,10 +2534,10 @@ R11B008* func_00105500(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001055A8(R11B008* ret, C08* obj, s32 unused, R11B008* args)
+ScriptValue* func_001055A8(ScriptValue* ret, Agent* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2552,11 +2552,11 @@ R11B008* func_001055A8(R11B008* ret, C08* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105658(R11B008* ret, C09* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105658(ScriptValue* ret, C09* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -2571,10 +2571,10 @@ R11B008* func_00105658(R11B008* ret, C09* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105728(R11B008* ret, C3B* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105728(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 out;
     func_0011B008(&q);
@@ -2589,10 +2589,10 @@ R11B008* func_00105728(R11B008* ret, C3B* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001057D8(R11B008* ret, C3B* obj, s32 unused, R11B008* args)
+ScriptValue* func_001057D8(ScriptValue* ret, ChildGroupObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2604,12 +2604,12 @@ R11B008* func_001057D8(R11B008* ret, C3B* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105878(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105878(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
     Quad4 vec;
-    R11B008 t;
+    ScriptValue t;
     f32 fx;
     f32 fy;
     Kinds3* kp;
@@ -2632,10 +2632,10 @@ R11B008* func_00105878(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105960(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105960(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2647,10 +2647,10 @@ R11B008* func_00105960(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105A00(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105A00(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2665,10 +2665,10 @@ R11B008* func_00105A00(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105AB0(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105AB0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2683,10 +2683,10 @@ R11B008* func_00105AB0(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105B60(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105B60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2701,10 +2701,10 @@ R11B008* func_00105B60(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105C10(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105C10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2719,10 +2719,10 @@ R11B008* func_00105C10(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105CC0(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105CC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2734,10 +2734,10 @@ R11B008* func_00105CC0(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105D60(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105D60(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2752,10 +2752,10 @@ R11B008* func_00105D60(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105E10(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105E10(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2770,10 +2770,10 @@ R11B008* func_00105E10(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105EC0(R11B008* ret, C07* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105EC0(ScriptValue* ret, Player* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2788,11 +2788,11 @@ R11B008* func_00105EC0(R11B008* ret, C07* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00105F70(R11B008* ret, C8B* obj, s32 unused, R11B008* args)
+ScriptValue* func_00105F70(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     f32 o0;
     f32 o1;
     f32 o2;
@@ -2808,11 +2808,11 @@ R11B008* func_00105F70(R11B008* ret, C8B* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106048(R11B008* ret, C8B* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106048(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     f32 o0;
     f32 o1;
     f32 o2;
@@ -2828,10 +2828,10 @@ R11B008* func_00106048(R11B008* ret, C8B* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106120(R11B008* ret, C23* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106120(ScriptValue* ret, C23* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2843,10 +2843,10 @@ R11B008* func_00106120(R11B008* ret, C23* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001061C0(R11B008* ret, C23* obj, s32 unused, R11B008* args)
+ScriptValue* func_001061C0(ScriptValue* ret, C23* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2861,10 +2861,10 @@ R11B008* func_001061C0(R11B008* ret, C23* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106270(R11B008* ret, C3C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106270(ScriptValue* ret, C3C* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2879,10 +2879,10 @@ R11B008* func_00106270(R11B008* ret, C3C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106320(R11B008* ret, C3C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106320(ScriptValue* ret, C3C* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2897,11 +2897,11 @@ R11B008* func_00106320(R11B008* ret, C3C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001063D0(R11B008* ret, C62* obj, s32 unused, R11B008* args)
+ScriptValue* func_001063D0(ScriptValue* ret, C62* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -2919,10 +2919,10 @@ R11B008* func_001063D0(R11B008* ret, C62* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001064C0(R11B008* ret, C47* obj, s32 unused, R11B008* args)
+ScriptValue* func_001064C0(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2934,10 +2934,10 @@ R11B008* func_001064C0(R11B008* ret, C47* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106560(R11B008* ret, C47* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106560(ScriptValue* ret, TargetFollower* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -2949,11 +2949,11 @@ R11B008* func_00106560(R11B008* ret, C47* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106600(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106600(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -2971,10 +2971,10 @@ R11B008* func_00106600(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001066F0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001066F0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -2989,10 +2989,10 @@ R11B008* func_001066F0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001067A0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001067A0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3007,11 +3007,11 @@ R11B008* func_001067A0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106850(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106850(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -3026,10 +3026,10 @@ R11B008* func_00106850(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106920(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106920(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3041,10 +3041,10 @@ R11B008* func_00106920(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001069C0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001069C0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3059,10 +3059,10 @@ R11B008* func_001069C0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106A70(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106A70(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3074,10 +3074,10 @@ R11B008* func_00106A70(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106B10(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106B10(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3089,10 +3089,10 @@ R11B008* func_00106B10(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106BB0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106BB0(ScriptValue* ret, ObjectPool* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3104,10 +3104,10 @@ R11B008* func_00106BB0(R11B008* ret, C8C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106C50(R11B008* ret, C65* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106C50(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3119,10 +3119,10 @@ R11B008* func_00106C50(R11B008* ret, C65* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106CF0(R11B008* ret, C65* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106CF0(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3134,11 +3134,11 @@ R11B008* func_00106CF0(R11B008* ret, C65* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106D90(R11B008* ret, C65* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106D90(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -3153,10 +3153,10 @@ R11B008* func_00106D90(R11B008* ret, C65* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106E60(R11B008* ret, C65* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106E60(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3168,10 +3168,10 @@ R11B008* func_00106E60(R11B008* ret, C65* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106F00(R11B008* ret, C65* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106F00(ScriptValue* ret, StepSequence* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3183,10 +3183,10 @@ R11B008* func_00106F00(R11B008* ret, C65* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00106FA0(R11B008* ret, C5D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3198,10 +3198,10 @@ R11B008* func_00106FA0(R11B008* ret, C5D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107040(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107040(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3213,10 +3213,10 @@ R11B008* func_00107040(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001070E0(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
+ScriptValue* func_001070E0(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3228,11 +3228,11 @@ R11B008* func_001070E0(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107180(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107180(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     f32 x;
     f32 y;
     f32 z;
@@ -3249,11 +3249,11 @@ R11B008* func_00107180(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107268(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107268(ScriptValue* ret, C8D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     f32 x;
     f32 y;
     f32 z;
@@ -3270,10 +3270,10 @@ R11B008* func_00107268(R11B008* ret, C8D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107350(R11B008* ret, C0C* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107350(ScriptValue* ret, C0C* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3285,11 +3285,11 @@ R11B008* func_00107350(R11B008* ret, C0C* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001073F0(R11B008* ret, C17* obj, s32 unused, R11B008* args)
+ScriptValue* func_001073F0(ScriptValue* ret, C17* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -3304,10 +3304,10 @@ R11B008* func_001073F0(R11B008* ret, C17* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001074C0(R11B008* ret, C19* obj, s32 unused, R11B008* args)
+ScriptValue* func_001074C0(ScriptValue* ret, C19* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3322,11 +3322,11 @@ R11B008* func_001074C0(R11B008* ret, C19* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107570(R11B008* ret, C19* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107570(ScriptValue* ret, C19* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds5 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     f32 o2;
     f32 o3;
@@ -3344,10 +3344,10 @@ R11B008* func_00107570(R11B008* ret, C19* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107678(R11B008* ret, C19* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107678(ScriptValue* ret, C19* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3359,11 +3359,11 @@ R11B008* func_00107678(R11B008* ret, C19* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107718(R11B008* ret, C73* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107718(ScriptValue* ret, TransformObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Quad4 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 kinds;
     func_0011B008(&q);
     kinds = 2;
@@ -3376,11 +3376,11 @@ R11B008* func_00107718(R11B008* ret, C73* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001077D8(R11B008* ret, C60* obj, s32 unused, R11B008* args)
+ScriptValue* func_001077D8(ScriptValue* ret, C60* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Quad4 vec;
-    R11B008 t;
+    ScriptValue t;
     s32 kinds;
     func_0011B008(&q);
     kinds = 2;
@@ -3393,10 +3393,10 @@ R11B008* func_001077D8(R11B008* ret, C60* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107898(R11B008* ret, C0E* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107898(ScriptValue* ret, C0E* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3410,11 +3410,11 @@ R11B008* func_00107898(R11B008* ret, C0E* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107948(R11B008* ret, C24* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107948(ScriptValue* ret, C24* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 a;
     f32 b;
     func_0011B008(&q);
@@ -3429,9 +3429,9 @@ R11B008* func_00107948(R11B008* ret, C24* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107A10(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107A10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q, t;
+    ScriptValue q, t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3443,10 +3443,10 @@ R11B008* func_00107A10(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107AB0(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107AB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3461,9 +3461,9 @@ R11B008* func_00107AB0(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107B60(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107B60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q, t;
+    ScriptValue q, t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3475,10 +3475,10 @@ R11B008* func_00107B60(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107C00(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107C00(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3493,10 +3493,10 @@ R11B008* func_00107C00(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107CB0(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107CB0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3511,10 +3511,10 @@ R11B008* func_00107CB0(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107D60(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107D60(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3529,10 +3529,10 @@ R11B008* func_00107D60(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107E10(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107E10(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3547,10 +3547,10 @@ R11B008* func_00107E10(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107EC0(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107EC0(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3565,11 +3565,11 @@ R11B008* func_00107EC0(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00107F70(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00107F70(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 a;
     f32 b;
     func_0011B008(&q);
@@ -3584,11 +3584,11 @@ R11B008* func_00107F70(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108038(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108038(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds4 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     s32 o3;
@@ -3605,11 +3605,11 @@ R11B008* func_00108038(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108128(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108128(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     f32 o2;
     s32 o3;
@@ -3625,11 +3625,11 @@ R11B008* func_00108128(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108208(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108208(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     f32 o2;
     s32 o3;
@@ -3645,11 +3645,11 @@ R11B008* func_00108208(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001082E8(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_001082E8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -3665,11 +3665,11 @@ R11B008* func_001082E8(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001083C8(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_001083C8(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -3684,10 +3684,10 @@ R11B008* func_001083C8(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108498(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108498(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     f32 out;
     func_0011B008(&q);
@@ -3702,10 +3702,10 @@ R11B008* func_00108498(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108548(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108548(ScriptValue* ret, EntryQueue* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3717,10 +3717,10 @@ R11B008* func_00108548(R11B008* ret, C8F* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001085E8(R11B008* ret, C01* obj, s32 unused, R11B008* args)
+ScriptValue* func_001085E8(ScriptValue* ret, BaseObject* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3732,10 +3732,10 @@ R11B008* func_001085E8(R11B008* ret, C01* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108688(R11B008* ret, C4A* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108688(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3747,10 +3747,10 @@ R11B008* func_00108688(R11B008* ret, C4A* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108728(R11B008* ret, C4A* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108728(ScriptValue* ret, C4A* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3765,10 +3765,10 @@ R11B008* func_00108728(R11B008* ret, C4A* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001087D8(R11B008* ret, C1B* obj, s32 unused, R11B008* args)
+ScriptValue* func_001087D8(ScriptValue* ret, C1B* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3780,10 +3780,10 @@ R11B008* func_001087D8(R11B008* ret, C1B* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108878(R11B008* ret, C13* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108878(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3798,10 +3798,10 @@ R11B008* func_00108878(R11B008* ret, C13* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108928(R11B008* ret, C13* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108928(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3813,11 +3813,11 @@ R11B008* func_00108928(R11B008* ret, C13* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001089C8(R11B008* ret, C13* obj, s32 unused, R11B008* args)
+ScriptValue* func_001089C8(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o1;
     s32 o2;
     func_0011B008(&q);
@@ -3832,10 +3832,10 @@ R11B008* func_001089C8(R11B008* ret, C13* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108A98(R11B008* ret, C13* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108A98(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -3850,10 +3850,10 @@ R11B008* func_00108A98(R11B008* ret, C13* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108B48(R11B008* ret, C13* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108B48(ScriptValue* ret, C13* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_001C23B0(&t, 0, args, 0);
     func_0011B0A8(&q, &t);
@@ -3865,11 +3865,11 @@ R11B008* func_00108B48(R11B008* ret, C13* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108BE8(R11B008* ret, C90* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108BE8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     f32 o1;
     s32 o2;
@@ -3885,11 +3885,11 @@ R11B008* func_00108BE8(R11B008* ret, C90* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108CC8(R11B008* ret, C90* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108CC8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     f32 o1;
     s32 o2;
@@ -3905,11 +3905,11 @@ R11B008* func_00108CC8(R11B008* ret, C90* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108DA8(R11B008* ret, C90* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108DA8(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 n;
     f32 out;
     func_0011B008(&q);
@@ -3924,11 +3924,11 @@ R11B008* func_00108DA8(R11B008* ret, C90* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108E70(R11B008* ret, C90* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108E70(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 n;
     f32 out;
     func_0011B008(&q);
@@ -3943,11 +3943,11 @@ R11B008* func_00108E70(R11B008* ret, C90* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00108F38(R11B008* ret, C90* obj, s32 unused, R11B008* args)
+ScriptValue* func_00108F38(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 n;
     f32 out;
     func_0011B008(&q);
@@ -3962,11 +3962,11 @@ R11B008* func_00108F38(R11B008* ret, C90* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00109000(R11B008* ret, C90* obj, s32 unused, R11B008* args)
+ScriptValue* func_00109000(ScriptValue* ret, Timeline* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 n;
     f32 out;
     func_0011B008(&q);
@@ -3981,11 +3981,11 @@ R11B008* func_00109000(R11B008* ret, C90* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001090C8(R11B008* ret, C0D* obj, s32 unused, R11B008* args)
+ScriptValue* func_001090C8(ScriptValue* ret, C0D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds3 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     s32 o2;
@@ -4001,10 +4001,10 @@ R11B008* func_001090C8(R11B008* ret, C0D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001091A8(R11B008* ret, C1D* obj, s32 unused, R11B008* args)
+ScriptValue* func_001091A8(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -4019,10 +4019,10 @@ R11B008* func_001091A8(R11B008* ret, C1D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00109258(R11B008* ret, C1D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00109258(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -4037,10 +4037,10 @@ R11B008* func_00109258(R11B008* ret, C1D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_00109308(R11B008* ret, C1D* obj, s32 unused, R11B008* args)
+ScriptValue* func_00109308(ScriptValue* ret, C1D* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 kinds;
     s32 out;
     func_0011B008(&q);
@@ -4055,11 +4055,11 @@ R11B008* func_00109308(R11B008* ret, C1D* obj, s32 unused, R11B008* args)
     return ret;
 }
 
-R11B008* func_001093B8(R11B008* ret, C4C* obj, s32 unused, R11B008* args)
+ScriptValue* func_001093B8(ScriptValue* ret, C4C* obj, s32 unused, ScriptValue* args)
 {
-    R11B008 q;
+    ScriptValue q;
     Kinds2 kinds;
-    R11B008 t;
+    ScriptValue t;
     s32 o0;
     s32 o1;
     func_0011B008(&q);

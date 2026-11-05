@@ -11,7 +11,7 @@ struct Obj_eu_1E9970 {
 s32 func_001E9970(void)
 {
     if (D_00275F84 != 0) goto fail;
-    if (func_001DDA80((C6C*)D_00275710) != 0) goto fail;
+    if (func_001DDA80((World*)D_00275710) != 0) goto fail;
     if (((Obj_eu_1E9970*)&D_0026FF68)->f56C != 0 && ((Obj_eu_1E9970*)&D_0026FF68)->f570 != 0) goto fail;
     if (((Obj_eu_1E9970*)&D_0026F808)->f56C != 0) goto fail;
     if (((Obj_eu_1E9970*)&D_0026F808)->f560 != 0) goto fail;

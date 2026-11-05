@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x1F (descriptor D_00218770, 0x6B0 bytes): a collision object that keeps a list of the
-// objects it is attached to (+0x550; each link is also in the target's list at C03::attached)
+// objects it is attached to (+0x550; each link is also in the target's list at Collider::attached)
 // and a record of its own at +0x590 (func_001F5590 sets it up, func_001F55A8 and func_001F57E0
 // work on it). Written for this project from what retail's code does
 // (config/us/classes.tsv).
 #ifndef C1F_H
 #define C1F_H
 
-#include "c03.h"
+#include "collider.h"
 
 // The set of objects func_001EF520 hands to the world (func_0015F9A0, func_0015F8B0): the
 // object itself, then the targets of its links.
@@ -24,7 +24,7 @@ struct Rec1F {
     u8 pad8[0x120 - 8];
 };
 
-struct C1F : C03 {
+struct C1F : Collider {
     Attach03* links;        // 0x550: the objects it is attached to (linked at Attach03::nextOwn)
     Set1F set554;           // 0x554
     u8 pad564[0x584 - 0x564];

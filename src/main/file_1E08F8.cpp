@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "c63.h"
-#include "c6c.h"
+#include "on_off_object.h"
+#include "world.h"
 #include "t2173.h"
 #include "globals.h"
-#include "s137290.h"
+#include "buffered_stream.h"
 #include "key_id.h"
 #include "s193210.h"
 #include "output_buffer.h"
@@ -197,9 +197,9 @@ struct Glob_1E2870 {
 
 
 void* func_001925F0(void);
-void func_00128018(Mgr_1E2870* a0, C63* a1, void* a2, Loc_1E2870* a3);
+void func_00128018(Mgr_1E2870* a0, OnOffObject* a1, void* a2, Loc_1E2870* a3);
 s32 func_001E4DC0(Sub_1E2870* self, Loc_1E2870* value);
-void func_001E2778(C63* self, s32 state);
+void func_001E2778(OnOffObject* self, s32 state);
 
 
 
@@ -448,7 +448,7 @@ struct Eq_1E4EA8 {
 };
 struct VT1_1E4EA8 { u8 pad[0x38]; void (*m38)(void*); };
 struct Self_1E4EA8 { s32 f0; Blob_1E4EA8* f4; s32 f8; s32 fC; s32 f10; Blob_1E4EA8 f14; };
-struct Sub_1E4EA8 : S137290 {
+struct Sub_1E4EA8 : BufferedStream {
     void SetOwner(void* o) { owner = o; }
 };
 struct Cur_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 f19E0; };
@@ -468,27 +468,27 @@ extern Pl_1E4EA8 D_00264A40;
 void func_00191E70(s32 a);
 void func_0018D410(KeyId* q);
 S193210* func_00193210(S193210* q, U32P* a, U32P* b, U32P* c, U32P* d);
-void func_00137290(S137290* q, s32 a, u8* b, s32 c);
+void func_00137290(BufferedStream* q, s32 a, u8* b, s32 c);
 void func_00193270(void* q);
-s32 func_001373B0(S137290* q, KeyId* k);
-void func_001372E0(S137290* q, s32 n);
-void func_001DB838(C6C* q);
-void func_001DB928(s32 a, S137290* q);
+s32 func_001373B0(BufferedStream* q, KeyId* k);
+void func_001372E0(BufferedStream* q, s32 n);
+void func_001DB838(World* q);
+void func_001DB928(s32 a, BufferedStream* q);
 void func_001430B8(u8* q, f32 v);
 void func_0016E0F0(s32 n);
 void func_00160690(Blob_1E4EA8* q, s32 n);
-C6C* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
+World* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
 void func_001C06A0(s32 a, s32 b, f32 x);
-void func_001373D0(S137290* q);
+void func_001373D0(BufferedStream* q);
 void func_00193300(void* q);
 void func_0018C7F8(Pl_1E4EA8* q);
 void func_00143A60(s32 q, s32 f);
 void func_001C0070(void);
-void func_001F4318(C6C* q, s32 a, s32 b);
+void func_001F4318(World* q, s32 a, s32 b);
 void func_00151E18(u8* q);
 void func_00160CE8(u8* q);
 void func_0016B520(u8* q);
-void func_00138C00(C6C* q, s32 n);
+void func_00138C00(World* q, s32 n);
 void func_00143E40(s32 q, s32 n, f32 v);
 void func_00142ED0(f32 x);
 void func_001C06D8(void);
@@ -1360,7 +1360,7 @@ void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_002
 
 ASM_FUNC(func_001E2438);
 
-void func_001E2520(C63* self)
+void func_001E2520(OnOffObject* self)
 {
     func_00123ED0(self);
     self->block2F0 = *(Block63*)D_00275980;
@@ -1378,14 +1378,14 @@ void func_001E2520(C63* self)
     self->f398 = -1;
 }
 
-void func_001E25F8(C63* self)
+void func_001E25F8(OnOffObject* self)
 {
     func_001243E0(self);
     func_001E2778(self, 0);
     func_001DBD40(self->world, 2, 0, self, -1, 0);
 }
 
-void func_001E2648(C63* self, void* a1)
+void func_001E2648(OnOffObject* self, void* a1)
 {
     func_00137EB0(a1, &self->rot);
     func_00137E70(a1, &self->pos);
@@ -1413,14 +1413,14 @@ void func_001E2648(C63* self, void* a1)
     func_0011EC40(self, a1);
 }
 
-void func_001E2758(C63* self)
+void func_001E2758(OnOffObject* self)
 {
     func_00124A48(self);
 }
 
 void func_001E2778(void* selfv, s32 state)
 {
-    C63* self = (C63*)selfv;
+    OnOffObject* self = (OnOffObject*)selfv;
     if (self->f394 == state) return;
     if (state != 0) {
         if (state != 1) {
@@ -1442,13 +1442,13 @@ tail:
 
 void func_001E2840(void* selfv, s32 value)
 {
-    C63* self = (C63*)selfv;
+    OnOffObject* self = (OnOffObject*)selfv;
     if (value == self->f398) return;
     self->f398 = value;
     func_001E2870(self, 0, 0);
 }
 
-void func_001E2870(C63* self) {
+void func_001E2870(OnOffObject* self) {
     Loc_1E2870 loc;
     void* p = func_001925F0();
     if (p == 0) {
@@ -1475,11 +1475,11 @@ void func_001E2870(C63* self) {
     func_001E2778(self, st);
 }
 
-void func_001E2940(C63* self)
+void func_001E2940(OnOffObject* self)
 {
     func_00124FC0(self);
     if (self->f398 != 0) {
-        func_001DBCC8(self->world, (void*)(void (*)(C63*))func_001E2870, self, 0, 0);
+        func_001DBCC8(self->world, (void*)(void (*)(OnOffObject*))func_001E2870, self, 0, 0);
     }
 }
 
@@ -1488,7 +1488,7 @@ void func_001E2988(void)
     func_001261C0();
 }
 
-void func_001E29A8(C63* self, void* p)
+void func_001E29A8(OnOffObject* self, void* p)
 {
     func_0015FBB8(self, p);
     if (p != 0) {
@@ -1496,7 +1496,7 @@ void func_001E29A8(C63* self, void* p)
     }
 }
 
-void func_001E29E8(C63* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
+void func_001E29E8(OnOffObject* self, f32 value) { *(f32*)(self->block2F0.d + 0x74) = value; *(f32*)(self->block2F0.d + 0x78) = 1.0f; *(f32*)(self->block2F0.d + 0x70) = value; }
 
 ASM_FUNC(func_001E2A00);
 

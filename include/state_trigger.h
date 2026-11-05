@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Class 0x2F (descriptor D_0021AB08, 0x6C0 bytes): a collision object with three states (0, 1, 2)
+// that watches lists of other objects: the ones it keeps (items1), the ones it asks for in
+// state 2 (items2), the ones it found and tells (outItems) and a last list of ids (items3).
+// Written for this project from what retail's code does (config/us/classes.tsv).
+#ifndef STATE_TRIGGER_H
+#define STATE_TRIGGER_H
+
+#include "collider.h"
+
+struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
+
+struct StateTrigger : Collider {
+    s32 state;              // 0x550: func_00123888 (-1 at set-up)
+    f32 stateTime;          // 0x554: the clock when the state changed (D_0026185C)
+    void* found558;         // 0x558: the first child of kind 0x88 (func_00123448)
+    StateWalker* f55C;          // 0x55C: a handle func_001B6290 makes for found558
+    f32 timeout;            // 0x560: in state 2, how long before the state falls to 0
+    s32 count1;             // 0x564: the ids at items1 whose objects (kind 0x22) it keeps
+    s32 items1[4];          // 0x568: func_00123C90 appends
+    s32 count2;             // 0x578
+    s32 items2[16];         // 0x57C: func_00123CB8 appends; objects of kind 0x30 are put in outItems
+    s32 outCount;           // 0x5BC
+    Collider* outItems[16];      // 0x5C0: the objects found (kind 0x30); the state changes tell them
+    s32 count3;             // 0x600
+    s32 items3[6];          // 0x604: func_00123CE0 appends; objects of kind 8 are told func_001CAD40
+    s32 done;               // 0x61C: counted up by func_00123B18; state 1 follows when it equals count1
+    s32 f620;               // 0x620: handed to func_001BF788 when state 2 ends
+    s32 f624;               // 0x624: handed to func_001BF048 when state 2 ends
+    s32 f628;               // 0x628
+    s32 count62C;           // 0x62C: the entries of table630 (func_0013EC00)
+    u8 table630[0x6B0 - 0x630];  // 0x630: func_0013ECB0 and func_0013EC00 work on it
+    s32 id6B0;              // 0x6B0: an id of the table at D_00261420 (func_00140FF8)
+    u8 pad6B4[0x6C0 - 0x6B4];
+};
+
+typedef char check_StateTrigger[sizeof(StateTrigger) == 0x6C0 ? 1 : -1];
+
+void func_00123408(StateTrigger* self);                  // slot 0
+void func_00123540(StateTrigger* self);                  // slot 9
+void func_00123448(StateTrigger* self);                  // slot 16
+void func_00123578(StateTrigger* self);                  // slot 17
+void func_001236C8(StateTrigger* self);                  // the callback func_00123448 queues
+void func_00123888(StateTrigger* self, s32 mode);        // sets the state
+void func_00123AB0(StateTrigger* self, s32 mode);        // sets the state from a message's mode
+void func_00123B18(StateTrigger* self);                  // one more object done
+void func_00123B28(StateTrigger* self);
+void func_00123BB0(StateTrigger* self);
+void func_00123C20(StateTrigger* self);
+void func_00123C90(StateTrigger* self, s32 value);
+void func_00123CB8(StateTrigger* self, s32 value);
+void func_00123CE0(StateTrigger* self, s32 value);
+s32 func_00123D40(StateTrigger* self, void* arg);
+
+#endif

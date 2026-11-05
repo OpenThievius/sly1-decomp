@@ -8,11 +8,11 @@
 #ifndef ENTRY_TABLE_OBJECT_H
 #define ENTRY_TABLE_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 // 0x64: func_0016DD10 sets the tuning values; func_0016DD90 loads the table (the entries
 // func_0015A4F0 finds for the object, at most 0x10 of them) after the common load.
-struct EntryTableObject : C02 {
+struct EntryTableObject : PlacedObject {
     u8 entries[0x310 - 0x2D0];  // 0x2D0: sixteen 32-bit entries
     s32 entryCount;         // 0x310: how many were found (at most 0x10)
     u8 pad314[0x31C - 0x314];

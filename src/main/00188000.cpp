@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "fpu.h"
 #include "memory_card.h"
 #include "background_job.h"
@@ -1059,11 +1059,11 @@ void func_00188A20(f32* in, f32* out)
 }
 
 s32 D_002649B0[5] = { 4, 5, 60, 41, 76 };
-s32 func_001300E8(C01* a, s32 b);
-s32 func_001833F0(C01* a, s32 b);
+s32 func_001300E8(BaseObject* a, s32 b);
+s32 func_001833F0(BaseObject* a, s32 b);
 
-typedef s32 (*VFn_18A830)(C01* self, void* arg);
-struct Rec_18A830 { u8 pad[0x50]; C01* sub; };
+typedef s32 (*VFn_18A830)(BaseObject* self, void* arg);
+struct Rec_18A830 { u8 pad[0x50]; BaseObject* sub; };
 
 s32 func_0018A830(void* self, Rec_18A830* rec)
 {

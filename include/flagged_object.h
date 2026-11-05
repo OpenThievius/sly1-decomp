@@ -6,11 +6,11 @@
 #ifndef FLAGGED_OBJECT_H
 #define FLAGGED_OBJECT_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct S1B6290;     // a handle func_001B6290 makes (s1b6290.h)
+struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 
-struct FlaggedObject : C03 {
+struct FlaggedObject : Collider {
     s32 nIdsA;              // 0x550: the ids at idsA (func_00141338 looks each up)
     s32 idsA[4];            // 0x554
     s32 countA;             // 0x564: the objects found (kind 0x83)
@@ -22,7 +22,7 @@ struct FlaggedObject : C03 {
     s32 childId;            // 0x5A0: the id of the first child of kind 0x74 (-1 until found)
     void* child;            // 0x5A4: that object
     void* f5A8;             // 0x5A8: the object of id 0x545 (the loader's table D_00261410)
-    S1B6290* handle;        // 0x5AC: a handle func_001B6290 makes for f5A8
+    StateWalker* handle;        // 0x5AC: a handle func_001B6290 makes for f5A8
     s32 flagIndex;          // 0x5B0: an index of the table at D_00261420 (func_00140FF8)
     s32 ordinal;            // 0x5B4: the world's count at +0x2304 when it was made
     u8 pad5B8[0x5C0 - 0x5B8];

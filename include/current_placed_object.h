@@ -8,11 +8,11 @@
 #ifndef CURRENT_PLACED_OBJECT_H
 #define CURRENT_PLACED_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 // 0x69: after loading (slot 16) it sets two bits of the parent's doubleword at 0x2C8, sets
 // 0x2D0 to -1 and has its level call func_0016AB38 on it (func_001DBCC8).
-struct CurrentPlacedObject : C02 {
+struct CurrentPlacedObject : PlacedObject {
     s32 f2D0;               // 0x2D0: -1 after loading
     u8 pad2D4[0x350 - 0x2D4];
 };

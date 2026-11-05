@@ -10,7 +10,7 @@
 #ifndef PAIR_CONTROLLER_H
 #define PAIR_CONTROLLER_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 struct ObjectCreator;  // the object at 0x358 (object_creator.h; func_001A4C48 reads its state at 0x550)
 struct LinkedObject;  // the object at 0x658 (func_001A4C48 reads a state at 0x2D4)
@@ -26,7 +26,7 @@ struct BlendMotion {
 
 // 0x5F: func_001A4718 sets it up (the lists, the ids, the tuning values and two copies of the
 // pose table); func_001A4B30 blends the pose at 0x3E0 with the one at 0x4A0 into 0x560.
-struct PairController : C02 {
+struct PairController : PlacedObject {
     s32 id2D0;  // 0x2D0: -1 for none
     s32 id2D4;  // 0x2D4
     s32 id2D8;  // 0x2D8

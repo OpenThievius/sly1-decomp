@@ -5,11 +5,11 @@
 #include "list_iter.h"
 #pragma implementation "layout_137228.h"
 #include "layout_137228.h"
-#include "t217d.h"
-#include "c65.h"
+#include "screen_element.h"
+#include "step_sequence.h"
 #include "v24a0.h"
-#include "g262c70.h"
-#include "g27c220.h"
+#include "pad_record.h"
+#include "game_progress.h"
 
 struct Quad_130F48 {
     f32 c0, c1, c2, c3;
@@ -131,7 +131,7 @@ void func_001AA8C8(void* self);
 s32 func_00150790(void* obj, s32 mode);
 
 void func_001356C0(T217D_440* self, s32 mode);
-void func_00150790(C65* obj, s32 mode);
+void func_00150790(StepSequence* obj, s32 mode);
 
 struct Entry_1357F0 {
     void* obj;
@@ -476,7 +476,7 @@ void func_00132500(T217D_440* self, Gs_132500* gs)
     Rgba_130F48 c0;
     Rgba_130F48 c1;
     f32 k;
-    G262C70* pad;
+    PadRecord* pad;
     u8 alpha;
     f32 posX;
     f32 posY;
@@ -1143,7 +1143,7 @@ void func_00136EC8(T217D_440* self, f32* x, f32* y)
 void func_00136EF8(T217D_440* self)
 {
     if (self->child != 0) {
-        switch (((C65*)self->child)->mode2D0) {
+        switch (((StepSequence*)self->child)->mode2D0) {
         case 0:
             func_001356C0(self, 2);
             break;
@@ -1154,7 +1154,7 @@ void func_00136EF8(T217D_440* self)
             func_001356C0(self, 4);
             break;
         }
-        func_00150790((C65*)self->child, 3);
+        func_00150790((StepSequence*)self->child, 3);
     } else {
         func_001356C0(self, 1);
     }

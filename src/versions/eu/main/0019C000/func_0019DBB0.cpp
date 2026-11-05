@@ -16,7 +16,7 @@ void func_0019DBB0(void)
     }
 
     {
-        C6D* o = D_00261990;
+        Camera* o = D_00261990;
         f32 keep20 = o->f1C4;
         f32 keep21 = o->f1C8;
         func_00143940(o, 0.975f);

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c83.h"
+#include "animation.h"
 #include "id_filter_object.h"
-#include "c6c.h"
+#include "world.h"
 #include "c8b.h"
-#include "t2195.h"
+#include "attachment.h"
 #include "s1dbbd8.h"
 #include "target_binding.h"
 #include "stream_reader.h"
 #include "key_id.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "shapes.h"
 #include "globals.h"
 
@@ -21,7 +21,7 @@ s32 func_0012C7B0(void* a, void* b, s32 c, s32 d)
     return func_0012C288(a, b, 0, 0, c, d);
 }
 
-s32 func_0012C9A8(C83* a0)
+s32 func_0012C9A8(Animation* a0)
 {
     s32 n = a0->timedCount;
     if (n > 0) {
@@ -37,9 +37,9 @@ s32 func_0012C9A8(C83* a0)
 }
 
 void* func_0012CCE8(void);
-void func_0012D2A8(C83* a, Track83* b);
+void func_0012D2A8(Animation* a, Track83* b);
 
-void func_0012D398(C83* a0)
+void func_0012D398(Animation* a0)
 {
     if (a0->f9C == 0) {
         void* r = func_0012CCE8();
@@ -49,7 +49,7 @@ void func_0012D398(C83* a0)
 
 s32 func_001833F0(void* a, void* b);
 
-T2195_7C0* func_0012D570(Player2195* a0, void* a1)
+T2195_7C0* func_0012D570(AnimationPlayer* a0, void* a1)
 {
     ListFrame frame;
     T2195_7C0* n = (T2195_7C0*)a0->list44.head;
@@ -62,7 +62,7 @@ T2195_7C0* func_0012D570(Player2195* a0, void* a1)
 
 void func_00121648(void* n, void* b);
 
-void func_0012F190(Player2195* a0, void* a1)
+void func_0012F190(AnimationPlayer* a0, void* a1)
 {
     ListFrame frame;
     T2195_7C0* n = (T2195_7C0*)a0->list44.head;
@@ -121,7 +121,7 @@ void func_00182C58(void* self);
 void func_0012C208(void* self);
 void func_001DBC60(void* host, void* cb, void* ctx, s32 a3, s32 a4);
 
-void func_0012C160(C83* self)
+void func_0012C160(Animation* self)
 {
     func_00182C58(self);
     Kin83* k = &self->kin;
@@ -227,14 +227,14 @@ void* func_0012C8F8(void* self, s32 key, s32 a2, s32 a3, f32 fa, f32 fb)
     return out;
 }
 
-void func_0012F6B0(Player2195* self, f32 x);
-void func_0012F190(Player2195* self, s32 zero);
-void func_0012F1D8(Player2195* self);
-void func_0012E4E0(Player2195* self, C83* sub, s32* out);
-void func_0012E760(Player2195* self);
-void func_0012D4A8(Player2195* self);
+void func_0012F6B0(AnimationPlayer* self, f32 x);
+void func_0012F190(AnimationPlayer* self, s32 zero);
+void func_0012F1D8(AnimationPlayer* self);
+void func_0012E4E0(AnimationPlayer* self, Animation* sub, s32* out);
+void func_0012E760(AnimationPlayer* self);
+void func_0012D4A8(AnimationPlayer* self);
 
-void func_0012F0A0(Player2195* self, s32 mode, f32 a, f32 b)
+void func_0012F0A0(AnimationPlayer* self, s32 mode, f32 a, f32 b)
 {
     s32 flag = 0;
     f32 t;
@@ -276,7 +276,7 @@ struct Item_0012F1D8 { u8 pad[0x20]; Item_0012F1D8* next; };
 
 void func_001226D8(Item_0012F1D8* item);
 
-void func_0012F1D8(Player2195* self)
+void func_0012F1D8(AnimationPlayer* self)
 {
     ListFrame frame;
     for (Item_0012F1D8* p = (Item_0012F1D8*)self->list44.head; p != 0; p = p->next) {
@@ -284,12 +284,12 @@ void func_0012F1D8(Player2195* self)
     }
 }
 
-void func_0012F6B0(Player2195* self, f32 x)
+void func_0012F6B0(AnimationPlayer* self, f32 x)
 {
     self->speed = x * self->f1C * self->anim->out;
 }
 
-void func_0012F6D0(Player2195* self, f32 x)
+void func_0012F6D0(AnimationPlayer* self, f32 x)
 {
     f32 denom = self->f1C * self->anim->out;
     f32 r = self->speed;
@@ -310,11 +310,11 @@ void func_0012E710(void* a0)
     func_001B5F28((u8*)&D_00275710->pool1B58, a0);
 }
 
-T2195* func_0012D570(void* a0, void* a1);
+Attachment* func_0012D570(void* a0, void* a1);
 
 void func_0012E928(void* a0, void* a1, void* a2)
 {
-    T2195* n = func_0012D570(a0, a1);
+    Attachment* n = func_0012D570(a0, a1);
     if (n) n->vt->release(n, (s32)a2);
 }
 
@@ -350,7 +350,7 @@ struct Obj_12F760 {
     void (**vtbl)(void* self);
 };
 
-void func_0012F760(Player2195* self, s32 a1, s32 a2)
+void func_0012F760(AnimationPlayer* self, s32 a1, s32 a2)
 {
     Obj_12F760* obj = (Obj_12F760*)self->fC;
     if (obj != 0) {
@@ -378,13 +378,13 @@ f32 func_0012CCC0(void)
 
 void func_001831E8(void* a, void* b, void* c, void* d);
 
-void func_0012F810(Player2195* a0, C02** a1)
+void func_0012F810(AnimationPlayer* a0, PlacedObject** a1)
 {
     func_001831E8(a0->anim->world, &a0->fE4, (void*)(*a1)->link40.prev, a1);
 }
 
-void func_001B7968(C03* self);
-void func_001B9AE0(C03* self, s32 a, Vec02* b, s32 c, Vec02* d);
+void func_001B7968(Collider* self);
+void func_001B9AE0(Collider* self, s32 a, Vec02* b, s32 c, Vec02* d);
 
 void func_0012F840(IdFilterObject* self)
 {
@@ -393,7 +393,7 @@ void func_0012F840(IdFilterObject* self)
     self->id = -1;
 }
 
-void func_001BA130(C03* self);
+void func_001BA130(Collider* self);
 void func_00138F28(void* a, void* b);
 
 void func_0012F888(IdFilterObject* self)
@@ -478,7 +478,7 @@ s32 func_0012FD78(void* self, KeyId* pair)
 void func_001DDA20(void* a);
 void func_001DDA50(void* a);
 
-void func_0012D448(Player2195* self, s32 v)
+void func_0012D448(AnimationPlayer* self, s32 v)
 {
     if (v == self->state24) {
         return;
@@ -519,11 +519,11 @@ void* func_0012CCE8(Gr8B* self, void* key)
     return 0;
 }
 
-s32 func_001B8A08(C03* self, C03* key);
+s32 func_001B8A08(Collider* self, Collider* key);
 s32 func_001833F0(void* key, s32 item);
 s32 func_001300E8(void* key, s32 kind);
 
-s32 func_0012FA88(IdFilterObject* self, C03* key)
+s32 func_0012FA88(IdFilterObject* self, Collider* key)
 {
     s32 hit;
     s32 i;
@@ -594,9 +594,9 @@ extern const Head_2197B8 D_002197B8;
 void* func_001B5EE0(Pool6C* pool);
 void func_00152438(List01* self, s32 value);
 
-Player2195* func_0012D3F8(C6C* pool)
+AnimationPlayer* func_0012D3F8(World* pool)
 {
-    Player2195* o = (Player2195*)func_001B5EE0(&pool->pool1B58);
+    AnimationPlayer* o = (AnimationPlayer*)func_001B5EE0(&pool->pool1B58);
 
     o->vt = &D_002197B8;
     func_00152438(&o->list44, 0x20);
@@ -607,13 +607,13 @@ Player2195* func_0012D3F8(C6C* pool)
 
 struct Quad_12F9B8 { s32 a, b, c, d; };
 
-void func_001B93F8(C03* self);
+void func_001B93F8(Collider* self);
 void func_00128018(void* a, s32 b, void* c, void* d);
 
 void func_0012F9B8(IdFilterObject* self)
 {
     Quad_12F9B8 loc;
-    C02* cur;
+    PlacedObject* cur;
     func_001B93F8(self);
     if (self->pendingTarget != 0) {
         self->pendingTarget->desc02()->m20(self->pendingTarget, (Vec02*)&D_00248D30);
@@ -623,7 +623,7 @@ void func_0012F9B8(IdFilterObject* self)
             self->pendingTarget->desc02()->m1D(self->pendingTarget, &self->pos);
             break;
         case 2: {
-            C02* node = self->found;
+            PlacedObject* node = self->found;
             func_00128018(node->parent, 0, &node->link40, &loc);
             self->pendingTarget->desc02()->m1D(self->pendingTarget, (Vec02*)&loc);
             break;
@@ -641,23 +641,23 @@ struct Elem_12E760 { Vt_12E760* vt; };
 struct Frame_12E760 { s32 f00; s32 f04; s32 f08; s32 f0C; };
 struct Tmp_12E760 { s32 a; s32 b; };
 
-void func_0012D5D0(Player2195* self, Item_12E760* item, Tmp_12E760* out);
-void func_0012F760(Player2195* self, s32 a, Player2195* b);
+void func_0012D5D0(AnimationPlayer* self, Item_12E760* item, Tmp_12E760* out);
+void func_0012F760(AnimationPlayer* self, s32 a, AnimationPlayer* b);
 void func_001DBC18(u8* self, void* node);
 void func_0015F9A0(u8* a, u8* s);
-void func_0012D448(Player2195* self, s32 v);
-void func_001DBD40(u8* a, s32 b, s32 c, Player2195* d, s32 e, s32 f);
-void func_00152600(u8* a, Player2195* b);
-void func_00152470(u8* a, Player2195* b);
+void func_0012D448(AnimationPlayer* self, s32 v);
+void func_001DBD40(u8* a, s32 b, s32 c, AnimationPlayer* d, s32 e, s32 f);
+void func_00152600(u8* a, AnimationPlayer* b);
+void func_00152470(u8* a, AnimationPlayer* b);
 void func_001BF718(s32* slot);
-void func_001837E0(C83* self, s32 a, s32 b, s32* c);
+void func_001837E0(Animation* self, s32 a, s32 b, s32* c);
 
-void func_0012E760(Player2195* self)
+void func_0012E760(AnimationPlayer* self)
 {
     Frame_12E760 fr;
     Tmp_12E760 tmp;
     s32 i = 0;
-    C83* sub = self->anim;
+    Animation* sub = self->anim;
     u8* base = (u8*)sub->world;
     for (i = 0; i < sub->endCount; i++) {
         Item_12E760* it = (Item_12E760*)((u8*)sub->endList + i * 16);
@@ -708,10 +708,10 @@ void func_0012E760(Player2195* self)
 f32 func_002058A0(f32 a, f32 b);
 f32 func_001EAFE0(f32 a, f32 b);
 
-s32 func_0012E9E0(Player2195* o, f32* pos, f32* vel)
+s32 func_0012E9E0(AnimationPlayer* o, f32* pos, f32* vel)
 {
     s32 r = 0;
-    C83* l = o->anim;
+    Animation* l = o->anim;
     f32 x = *pos;
     f32 lim = l->length;
     if (lim <= x) {
@@ -776,7 +776,7 @@ s32 func_0012E9E0(Player2195* o, f32* pos, f32* vel)
 
 void func_001F5B08(Track83* dst, Track83* src, s32 bytes);
 
-void func_0012D2A8(C83* self, Track83* p)
+void func_0012D2A8(Animation* self, Track83* p)
 {
     Track83 tmp = *p;
     s32 idx = p - self->tracks;
@@ -791,9 +791,9 @@ void func_0012D2A8(C83* self, Track83* p)
 }
 
 struct Item_12E4E0 { f32 t; s32 type; s32 w2; s32 w3; };
-void func_0012D5D0(Player2195* self, Item_12E4E0* item, s32* out);
+void func_0012D5D0(AnimationPlayer* self, Item_12E4E0* item, s32* out);
 
-void func_0012E4E0(Player2195* self, C83* sub, s32* out)
+void func_0012E4E0(AnimationPlayer* self, Animation* sub, s32* out)
 {
     f32 limit = self->time + 0.0001f;
     if (sub->timedCount != 0) {
@@ -971,30 +971,30 @@ void func_001BE728(void* p);
 void func_001BE998(void);
 s32 func_001EAA70(s32 lo, s32 hi);
 s32 func_001BE568(s32 id);
-C03* func_0015A418(World_12D5D0* w, s32 kind, s32 id, void* scope);
-C03* func_0015A448(World_12D5D0* w, s32 id, void* scope);
-void func_001BFCD8(s32 id, VObj_12D5D0** handle, C03* target, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+Collider* func_0015A418(World_12D5D0* w, s32 kind, s32 id, void* scope);
+Collider* func_0015A448(World_12D5D0* w, s32 id, void* scope);
+void func_001BFCD8(s32 id, VObj_12D5D0** handle, Collider* target, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_001BF788(VObj_12D5D0* h, s32 n);
 void func_001BED20(void);
 void func_001BECF8(void);
-void func_0012F6B0(Player2195* self, f32 x);
-void func_0012D4A8(Player2195* self);
-void func_0012F1D8(Player2195* self);
-void func_001518B8(C03* t);
-void func_0012E760(Player2195* self);
-s32 func_00126CB8(C03* t, f32 v);
-s32 func_00126D60(C03* t, f32 v);
-void func_001B9AE0(C03* t, s32 a, s32 b, s32 c, s32 d);
-void func_001F4ED0(C03* t);
-void func_001F4F20(C03* t);
-void func_0012D448(Player2195* self, s32 v);
-void func_00177800(C07* g, s32 flag);
-void func_0012F190(Player2195* self, s32 v);
+void func_0012F6B0(AnimationPlayer* self, f32 x);
+void func_0012D4A8(AnimationPlayer* self);
+void func_0012F1D8(AnimationPlayer* self);
+void func_001518B8(Collider* t);
+void func_0012E760(AnimationPlayer* self);
+s32 func_00126CB8(Collider* t, f32 v);
+s32 func_00126D60(Collider* t, f32 v);
+void func_001B9AE0(Collider* t, s32 a, s32 b, s32 c, s32 d);
+void func_001F4ED0(Collider* t);
+void func_001F4F20(Collider* t);
+void func_0012D448(AnimationPlayer* self, s32 v);
+void func_00177800(Player* g, s32 flag);
+void func_0012F190(AnimationPlayer* self, s32 v);
 // the node keeps the inline setter of its second mode byte that retail's code calls (see NOTES.md)
 struct Node_12D5D0 : T2195_7C0 {
     void SetMode(s32 mode) { mode1 = mode; }
 };
-Node_12D5D0* func_0012D570(Player2195* self, s32 key);
+Node_12D5D0* func_0012D570(AnimationPlayer* self, s32 key);
 void func_001215C0(Node_12D5D0* n);
 void func_001EFFA0(u8* dst, s32 a, s32 b);
 void func_001F00C0(u8* dst, s32 a, s32 b);
@@ -1002,18 +1002,18 @@ void func_001F4408(s32 a, s32 b);
 void func_001AB890(u8* p, f32 x);
 void func_001AB938(u8* p);
 void func_001AB958(u8* p);
-s32 func_0012C7B0(C03* a, C03* b, s32 c, s32 d, f32 x, f32 y);
+s32 func_0012C7B0(Collider* a, Collider* b, s32 c, s32 d, f32 x, f32 y);
 void func_0016EC38(u8* p, s32 n, f32 f);
 void func_001837E0(void* self, s32 a, s32 b, void* c);
-void func_0012F760(Player2195* self, s32 a, void* b);
-void func_0012B2F8(C03* t, s32 key);
-void* func_001B6388(C03* a, C03* b);
-void* func_001B6290(C03* a, C03* b, s32 c, s32 d);
+void func_0012F760(AnimationPlayer* self, s32 a, void* b);
+void func_0012B2F8(Collider* t, s32 key);
+void* func_001B6388(Collider* a, Collider* b);
+void* func_001B6290(Collider* a, Collider* b, s32 c, s32 d);
 void func_001B64D8(void* a, s32 b);
 void func_001B6438(void* o);
-s32 func_001300E8(C03* n, s32 kind);
-void func_001920B0(C03* n, Vec4U* out);
-void func_001F3BD8(C03* n, Vec4U* out);
+s32 func_001300E8(Collider* n, s32 kind);
+void func_001920B0(Collider* n, Vec4U* out);
+void func_001F3BD8(Collider* n, Vec4U* out);
 s32 func_00182FC8(void* p);
 void func_001DDB58(World_12D5D0* w);
 void func_001DDBB8(World_12D5D0* w);
@@ -1024,7 +1024,7 @@ void func_0014AF38(VObj_12D5D0* self, s32 a, s32 b, f32 x);
 void func_001E96F8(u8* obj, s32 mode);
 void func_001DDAB8(World_12D5D0* w, f32 v);
 void func_001DDAC8(World_12D5D0* w, f32 v);
-void func_0017CE20(C03* t, C07* g);
+void func_0017CE20(Collider* t, Player* g);
 
 struct Clamp_12D5D0 {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -1039,7 +1039,7 @@ struct Clamp_12D5D0 {
     }
 };
 
-void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
+void func_0012D5D0(AnimationPlayer* self, Msg_12D5D0* msg, s32* out)
 {
     Scratch_12D5D0 u;
     s32 rev = 0;
@@ -1068,7 +1068,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         s32 idx;
         s32 busy;
         s32 id;
-        C03* tgt;
+        Collider* tgt;
         if (Q_12D5D0->count < 2) {
             idx = 0;
         } else {
@@ -1087,7 +1087,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         if (Q_12D5D0->target != -1) {
             tgt = func_0015A418(world, 0x104, Q_12D5D0->target, self->fC ? self->fC : (void*)self->anim);
         } else {
-            tgt = (C03*)self->fC;
+            tgt = (Collider*)self->fC;
         }
         if (tgt != 0) {
             func_001BFCD8(id, busy ? (VObj_12D5D0**)&self->p50 : 0, tgt, 0, (f32)Q_12D5D0->f18, (f32)Q_12D5D0->f14, Q_12D5D0->f24,
@@ -1127,7 +1127,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         func_0012F6B0(self, msg->a8.f);
         break;
     case 6: {
-        C03* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)owner);
+        Collider* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)owner);
         if (t != 0) {
             func_001518B8(t);
         }
@@ -1143,7 +1143,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         if (rev) {
             on = !on;
         }
-        C03* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)owner);
+        Collider* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)owner);
         if (t == 0) {
             return;
         }
@@ -1163,7 +1163,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         break;
     }
     case 16: {
-        C03* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)self->anim);
+        Collider* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)self->anim);
         if (t != 0) {
             func_001B9AE0(t, msg->aC.h.lo < 0 ? t->mode450 : msg->aC.h.lo, 0, msg->aC.h.hi < 0 ? t->mode470 : msg->aC.h.hi, 0);
         }
@@ -1172,7 +1172,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
     case 12:
     case 13: {
         s32 on = msg->kind == 12;
-        C03* t;
+        Collider* t;
         if (rev) {
             on = !on;
         }
@@ -1267,7 +1267,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         func_001F00C0(g_screenFade, msg->aC.i, msg->a8.h.lo);
         break;
     case 27: {
-        C07* g = D_00262E10;
+        Player* g = D_00262E10;
         if (g != 0 && *(s32*)((u8*)g + 0x2220) == 9 && *(s32*)((u8*)g + 0x2228) == 0x1C && D_002623C8 == D_002623C4) {
             return;
         }
@@ -1282,8 +1282,8 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         func_001AB958(D_0026E760);
         break;
     case 28: {
-        C03* a = func_0015A448(world, ((Info_12D5D0*)msg->a8.p)->f0, owner->f18);
-        C03* b;
+        Collider* a = func_0015A448(world, ((Info_12D5D0*)msg->a8.p)->f0, owner->f18);
+        Collider* b;
         if (((Info_12D5D0*)msg->a8.p)->f4 != -1) {
             b = func_0015A448(owner->world, ((Info_12D5D0*)msg->a8.p)->f4, owner->f18);
         } else {
@@ -1345,7 +1345,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
             break;
         }
         Ent_12D5D0* e = &owner->ents[n->index];
-        C02* o = n->owner;
+        PlacedObject* o = n->owner;
         if (msg->kind == 35) {
             ((VFnAim_12D5D0)e->f4->vt[0])(e->f4, o, 0, &u.v[0], &u.v[1], msg->a0.f, self->speed);
             o->desc02()->m1D(o, (Vec02*)&u.v[0]);
@@ -1361,9 +1361,9 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         func_0016EC38(D_00262C70, msg->a8.h.hi, (f32)msg->a8.h.lo * 0.016666668f);
         break;
     case 38: {
-        C03* t;
+        Collider* t;
         if (msg->a8.i == -1) {
-            t = (C03*)self->fC;
+            t = (Collider*)self->fC;
         } else {
             t = func_0015A448(world, msg->a8.i, self->fC);
         }
@@ -1389,7 +1389,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         break;
     }
     case 41: {
-        C03* t;
+        Collider* t;
         if (self->fC == 0) {
             break;
         }
@@ -1404,7 +1404,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         break;
     }
     case 45: {
-        C03* t = func_0015A418(world, 0x104, msg->a8.i, self->fC);
+        Collider* t = func_0015A418(world, 0x104, msg->a8.i, self->fC);
         if (t != 0) {
             func_0012B2F8(t, msg->aC.i);
         }
@@ -1412,8 +1412,8 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
     }
     case 46: {
         void* scope = self->fC ? self->fC : (void*)self->anim;
-        C03* a = func_0015A418(world, 0x104, msg->a8.h.lo, scope);
-        C03* b;
+        Collider* a = func_0015A418(world, 0x104, msg->a8.h.lo, scope);
+        Collider* b;
         void* link;
         if (a == 0) {
             break;
@@ -1432,7 +1432,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         if (scope == 0) {
             scope = self->anim;
         }
-        C03* a = func_0015A448(world, msg->a8.i, scope);
+        Collider* a = func_0015A448(world, msg->a8.i, scope);
         if (a != 0) {
             link = func_001B6388(a, func_0015A448(world, msg->aC.i, scope));
         }
@@ -1444,13 +1444,13 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
     case 48: {
         Info_12D5D0* in = (Info_12D5D0*)msg->a8.p;
         void* scope = self->fC ? self->fC : (void*)owner;
-        C03* t = func_0015A418(world, 0x104, in->f0, scope);
+        Collider* t = func_0015A418(world, 0x104, in->f0, scope);
         if (t == 0) {
             break;
         }
         u.req.flags = 0;
         if (in->f4 != -1) {
-            C03* s = func_0015A418(world, 4, in->f4, scope);
+            Collider* s = func_0015A418(world, 4, in->f4, scope);
             if (s != 0) {
                 if (func_001300E8(s, 2) != 0) {
                     u.req.f4 = s;
@@ -1474,7 +1474,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
             }
         }
         if (in->f8 != -1) {
-            C03* s = func_0015A418(world, 4, in->f8, scope);
+            Collider* s = func_0015A418(world, 4, in->f8, scope);
             if (s != 0) {
                 u.req.f38 = s;
                 u.req.flags |= 0x20;
@@ -1528,7 +1528,7 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         func_001DDAC8(world, msg->a8.f);
         break;
     case 59: {
-        C03* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)owner);
+        Collider* t = func_0015A418(world, 0x104, msg->a8.i, self->fC ? self->fC : (void*)owner);
         if (t != 0) {
             func_0017CE20(t, D_00262E10);
         }
@@ -1592,9 +1592,9 @@ struct Key_12D4A8 {
     u8 pad[12];
 };
 
-void func_0012D4A8(Player2195* self)
+void func_0012D4A8(AnimationPlayer* self)
 {
-    C83* track = self->anim;
+    Animation* track = self->anim;
     s32 n = track->timedCount;
     s32 i;
     if (n == 0) {
@@ -1666,9 +1666,9 @@ Rec_12CBE8* func_0012CBE8(Obj_12CBE8* self, s32 key) {
 struct Iter_12F8C8 { List01* list; u8* link; s32 offset; Iter_12F8C8* saved; };
 
 struct Next_12F8C8 {
-    static C02* Of(Iter_12F8C8* it)
+    static PlacedObject* Of(Iter_12F8C8* it)
     {
-        C02* obj = *(C02**)it->link;
+        PlacedObject* obj = *(PlacedObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -1685,8 +1685,8 @@ struct Begin_12F8C8 {
     }
 };
 
-void func_00124A48(C02* self);
-s32 func_0015A448(void* world, s32 b, C02* c);
+void func_00124A48(PlacedObject* self);
+s32 func_0015A448(void* world, s32 b, PlacedObject* c);
 s32 func_001300E8(void* n, s32 kind);
 
 void func_0012F8C8(IdFilterObject* self)
@@ -1699,7 +1699,7 @@ void func_0012F8C8(IdFilterObject* self)
     }
     Iter_12F8C8 it;
     Begin_12F8C8::Of(&it, &self->children);
-    C02* n = Next_12F8C8::Of(&it);
+    PlacedObject* n = Next_12F8C8::Of(&it);
     if (n == 0 || func_001300E8(n, 0x7E) == 0) {
         D_0027B314 = (ListFrame*)it.saved;
         return;
@@ -1721,9 +1721,9 @@ struct Entry_12E5D0 {
     s32 aC;
 };
 
-void func_0012D5D0(Player2195* self, Entry_12E5D0* entry, s32* out);
+void func_0012D5D0(AnimationPlayer* self, Entry_12E5D0* entry, s32* out);
 
-void func_0012E5D0(Player2195* self, C83* list, s32* out)
+void func_0012E5D0(AnimationPlayer* self, Animation* list, s32* out)
 {
     if (list->timedCount == 0) return;
     for (;;) {
@@ -1750,32 +1750,32 @@ void func_0012E5D0(Player2195* self, C83* list, s32* out)
 // kept: the bitfields make `n->f10 = n->f11 = 3` store from two registers, as retail does
 struct Node_12C288 {
     u8 pad0[0x10]; s32 f10 : 8; s32 f11 : 8; s32 f12 : 8; s32 f13 : 8; s32 f14;
-    u8 pad1[0x1C - 0x18]; Player2195* f1C;
+    u8 pad1[0x1C - 0x18]; AnimationPlayer* f1C;
     u8 pad2[0x28 - 0x20]; s32 f28;
 };
 struct Item_12C288 { u8 pad[0x10]; };
 
-void func_00152470(u8* list, Player2195* o);
+void func_00152470(u8* list, AnimationPlayer* o);
 void func_00152470(u8* list, Node_12C288* n);
 void func_0018D608(void);
 void* func_0018D658(s32 size);
-C02* func_0015A418(C6C* w, s32 kind, s32 key, void* ctx);
-Node_12C288* func_00128998(C02* h);
+PlacedObject* func_0015A418(World* w, s32 kind, s32 key, void* ctx);
+Node_12C288* func_00128998(PlacedObject* h);
 void func_001B5F28(u8* list, Node_12C288* n);
 void func_001215C0(Node_12C288* n);
-void func_001299E0(C02* h, Node_12C288* n);
+void func_001299E0(PlacedObject* h, Node_12C288* n);
 void func_0018D6F0(void);
-void func_0015F8B0(C6C* w, u8* p);
-void func_0012D5D0(Player2195* o, Item_12C288* item, s32* out);
-void func_0012F190(Player2195* o, s32 flag);
-void func_001837E0(C83* self, s32 a, s32 b, Player2195*** c);
+void func_0015F8B0(World* w, u8* p);
+void func_0012D5D0(AnimationPlayer* o, Item_12C288* item, s32* out);
+void func_0012F190(AnimationPlayer* o, s32 flag);
+void func_001837E0(Animation* self, s32 a, s32 b, AnimationPlayer*** c);
 
-void func_0012C288(C83* self, C83* alt, s32 npairs, TargetBinding* pairs, s32 flags, Player2195** out, f32 fa, f32 fb)
+void func_0012C288(Animation* self, Animation* alt, s32 npairs, TargetBinding* pairs, s32 flags, AnimationPlayer** out, f32 fa, f32 fb)
 {
     s32 tmp;
-    Player2195* obj;
-    Player2195** pobj;
-    C6C* world = self->world;
+    AnimationPlayer* obj;
+    AnimationPlayer** pobj;
+    World* world = self->world;
     obj = func_0012D3F8(world);
     if (out != 0) *out = obj;
     obj->time = fa;
@@ -1790,9 +1790,9 @@ void func_0012C288(C83* self, C83* alt, s32 npairs, TargetBinding* pairs, s32 fl
         func_00152470((u8*)&world->f1B64, obj);
     }
     func_0018D608();
-    C83* ctx;
+    Animation* ctx;
     if (alt == 0) ctx = self; else ctx = alt;
-    C02** hosts = (C02**)func_0018D658(self->targetCount * 4);
+    PlacedObject** hosts = (PlacedObject**)func_0018D658(self->targetCount * 4);
     s32 i;
     for (i = 0; i < self->targetCount; i++) {
         hosts[i] = func_0015A418(world, 4, self->targets[i], ctx);
@@ -1801,11 +1801,11 @@ void func_0012C288(C83* self, C83* alt, s32 npairs, TargetBinding* pairs, s32 fl
     for (s32 k = 0; k < count; k++) {
         Track83* e = &self->tracks[k];
         s32 key = e->target;
-        C02* h;
+        PlacedObject* h;
         s32 j;
         for (j = 0; j < npairs; j++) {
             if (key == pairs[j].key) {
-                h = (C02*)pairs[j].object;
+                h = (PlacedObject*)pairs[j].object;
                 goto found;
             }
         }
@@ -1843,21 +1843,21 @@ void func_0012C288(C83* self, C83* alt, s32 npairs, TargetBinding* pairs, s32 fl
         if (e->morph != 0) n->f13 = 2;
         func_00152470((u8*)&obj->list44, n);
         func_001299E0(h, n);
-        C02* r = h->root;
+        PlacedObject* r = h->root;
         if (r == 0) {
             r = h;
-            while (r->parent != 0) r = (C02*)r->parent;
+            while (r->parent != 0) r = (PlacedObject*)r->parent;
         }
         if (!(r->flags & 0x400000000000)) {
             if ((u32)obj->f5C < 0x20) {
                 r->flags |= 0x400000000000;
-                ((C02**)obj->f60)[obj->f5C++] = r;
+                ((PlacedObject**)obj->f60)[obj->f5C++] = r;
             }
         }
     }
     func_0018D6F0();
     for (s32 j = 0; j < obj->f5C; j++) {
-        ((C02**)obj->f60)[j]->flags &= ~0x400000000000;
+        ((PlacedObject**)obj->f60)[j]->flags &= ~0x400000000000;
     }
     func_0015F8B0(world, obj->f54);
     if (self->f4C != 0) func_0012D448(obj, 1);

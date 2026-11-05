@@ -13,7 +13,7 @@ void func_0014ABD0(Ent_0014ABD0* self)
     self = (Ent_0014ABD0*)((u8*)self + 0x574);
     for (n = 0; n < 4; n++) {
         self->link = (void*)&D_00218330;
-        D_00218330.m00((T217D*)self, 0x12);
+        D_00218330.m00((ScreenElement*)self, 0x12);
         self = (Ent_0014ABD0*)((u8*)self + 0x570);
     }
 }

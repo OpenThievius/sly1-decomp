@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "node_query.h"
 
-void func_00177828(C07* self, s32 value)
+void func_00177828(Player* self, s32 value)
 {
     self->f2BD8 = value;
     self->f4B8 = 0;
@@ -32,7 +32,7 @@ s32 func_00177968(Keyed_177968* a, Keyed_177968* b)
 extern u8* D_00261990;
 s32 func_001493A0(u8* p);
 
-s32 func_00177E20(C07* self)
+s32 func_00177E20(Player* self)
 {
     if (self->f2220 == 12 && self->f2228 == 0x22) return 0;
     return func_001493A0(D_00261990 + 0x454) == 0;
@@ -41,7 +41,7 @@ s32 func_00177E20(C07* self)
 void func_001924C8(void* self, s32 mode);
 void func_00175170(void* self, s32 a, s32 b);
 
-void func_00177E70(C07* self, s32 mode)
+void func_00177E70(Player* self, s32 mode)
 {
     func_001924C8(self, mode);
     switch (mode) {
@@ -120,7 +120,7 @@ struct Node_177F98 {
 
 void func_001E9498(void* a, void* b);
 
-void func_00177F98(C07* self, Node_177F98* node)
+void func_00177F98(Player* self, Node_177F98* node)
 {
     if ((u32)(node->kind - 1) < 2) {
         D_002701F8.f324 = node;
@@ -184,7 +184,7 @@ Node_177838* func_00177838(NodeQuery* q, s32 n, Node_177838** list) {
 struct Other_177EE0 { u8 pad0[0x2D0]; s32 f2D0; };
 extern s32 D_00275BC4;
 
-void func_00177EE0(C07* self, Other_177EE0* other, s32* out)
+void func_00177EE0(Player* self, Other_177EE0* other, s32* out)
 {
     s32 v;
     switch (self->f2220) {

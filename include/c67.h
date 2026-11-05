@@ -8,7 +8,7 @@
 #ifndef C67_H
 #define C67_H
 
-#include "c02.h"
+#include "placed_object.h"
 #include "shapes.h"
 
 // One of the eleven elements func_001F0758 sets up: two values cleared, two drawn at random
@@ -31,7 +31,7 @@ struct Elem67 {
 
 // 0x67: func_001F0F70 reacts to a message by mode (1, 3 or 4), func_001F0660 enters the object
 // in the table of the objects of its kind (slot by id), func_001F0758 sets up the elements.
-struct C67 : C02 {
+struct C67 : PlacedObject {
     s32 mode;               // 0x2D0
     f32 f2D4;               // 0x2D4: func_001F1050
     s32 f2D8;               // 0x2D8: func_001F1050 (f2DC, or -1)

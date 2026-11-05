@@ -15,7 +15,7 @@ void func_00160948(void)
         if (D_00275F84 == 0) {
             func_001C0760(D_002623C0->f19EC & 0x80);
             func_001C0790(D_002623C0->f19EC & 0x40);
-            C83* r = func_0015A418(D_00275710, 0x105, 0x494, 0);
+            Animation* r = func_0015A418(D_00275710, 0x105, 0x494, 0);
             if (r != 0) {
                 Frame_160948 frame((Lst_160948*)r->props6C);
                 void* head = *(void**)r->props6C;

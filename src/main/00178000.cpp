@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "c4a.h"
 #include "countdown_collider.h"
-#include "c8f.h"
+#include "entry_queue.h"
 #include "globals.h"
 #include "object_link.h"
 #include "message_body.h"
 #include "object_event.h"
 #include "shapes.h"
-#include "t217d.h"
+#include "screen_element.h"
 
 void func_001B9690(void* self);
 void func_001C29E8(void* sub);
 
-void func_00178008(C07* self)
+void func_00178008(Player* self)
 {
     func_001B9690(self);
     func_001C29E8(self->f1520);
@@ -110,7 +110,7 @@ void func_0017B610(CountdownCollider* self)
 void func_00182C18(void* self);
 void* func_0018D500(int size);
 
-void func_0017B998(C8F* self)
+void func_0017B998(EntryQueue* self)
 {
     func_00182C18(self);
     self->buffer = func_0018D500(0xA00);
@@ -202,7 +202,7 @@ void func_0017B550(C4A* self, s32 index)
 
 struct Item_178258 { u8 pad[0x2D0]; s32 link; };
 
-void func_00178258(C07* a0, Item_178258* a1)
+void func_00178258(Player* a0, Item_178258* a1)
 {
     if (a0->f2220 != 9 && a1->link == 0) {
         a0->f2BE4 = a1;
@@ -211,7 +211,7 @@ void func_00178258(C07* a0, Item_178258* a1)
 
 struct Item_178280 { u8 pad[0x2D0]; s32 link; };
 
-void func_00178280(C07* a0, Item_178280* a1)
+void func_00178280(Player* a0, Item_178280* a1)
 {
     if (a0->f2220 != 9 && a1->link == 0) {
         a0->f2BE8 = a1;
@@ -257,7 +257,7 @@ void func_001793F0(C1B* self)
 void func_001C29E8(void* sub);
 void func_00192820(void* self);
 
-void func_00178038(C07* self)
+void func_00178038(Player* self)
 {
     func_001C29E8(self->f1520);
     func_00192820(self);
@@ -336,7 +336,7 @@ void func_00175170(void* self, s32 a, s32 b);
 
 extern f32 D_0026185C;
 
-void func_00178598(C07* self, Pair_178598* s2, f32 f)
+void func_00178598(Player* self, Pair_178598* s2, f32 f)
 {
     Frame_178598 fr;
     fr.fl = f;
@@ -847,13 +847,13 @@ void func_0018D6F0(void);
 s32 func_00182FC8(Node_178D98* p);
 s32 func_001300E8(Node_178D98* n, s32 kind);
 void func_00128018(void* a, void* b, Q_178D98* c, Q_178D98* d);
-void func_001782C0(C07* self, Entry_178D98* e, f32 f, void* a2, void* a3, void* a4);
+void func_001782C0(Player* self, Entry_178D98* e, f32 f, void* a2, void* a3, void* a4);
 s32 func_00178D18(Entry_178D98* a, Entry_178D98* b);
 void func_001F5CD0(Entry_178D98* base, s32 n, s32 size, s32 (*cmp)(Entry_178D98*, Entry_178D98*));
-f32 func_001788F0(C07* self, void* e, s32 v, void* a3, Hit_178D98* a4, f32* a5);
+f32 func_001788F0(Player* self, void* e, s32 v, void* a3, Hit_178D98* a4, f32* a5);
 void func_001F5C0C(void* dst, s32 value, s32 size);
 
-void func_00178D98(C07* self, s32 n, Node_178D98** items, Hit_178D98* out, f32* outf)
+void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f32* outf)
 {
     u8 scratch[0x80];
     Hit_178D98 hit;

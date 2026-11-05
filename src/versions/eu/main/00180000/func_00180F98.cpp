@@ -5,7 +5,7 @@ void func_00180F98(C1A* self)
 {
     func_001D7440(self);
     func_00124DF8(self, 0xA, D_002640B0);
-    self->fBBC = (S1B6290*)func_001B6290(self->fBB8, self, -1, 0);
+    self->fBBC = (StateWalker*)func_001B6290(self->fBB8, self, -1, 0);
 
     func_00129D00(self->fBCC, 5, &self->fBD0);
     ((u8*)self->fBD0)[0x10] = 9;

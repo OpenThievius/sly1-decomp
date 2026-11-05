@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
-#include "c2f.h"
+#include "switched_collider.h"
+#include "state_trigger.h"
 #include "listed_collision_part.h"
 #include "c6e.h"
 #include "point_object.h"
 #include "current_placed_object.h"
 #include "part_holder_object.h"
 #include "list_iter.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "v24a0.h"
 #include "v24a2.h"
-#include "g27c220.h"
-#include "t2195.h"
-#include "g262c70.h"
+#include "game_progress.h"
+#include "attachment.h"
+#include "pad_record.h"
 #include "globals.h"
 #include "strip_mesh.h"
 #include "bump_allocator.h"
@@ -38,11 +38,11 @@ void func_0016A500(ListedCollisionPart* self)
     self->listLink = tmp;
 }
 
-s32 func_001B8A08(C03* a, C03* b);
+s32 func_001B8A08(Collider* a, Collider* b);
 
-s32 func_0016A548(C03* a0, C03* a1)
+s32 func_0016A548(Collider* a0, Collider* a1)
 {
-    if ((void*)a1 == D_00262E10 && (void*)a0 == ((C07*)a1)->f23B0) {
+    if ((void*)a1 == D_00262E10 && (void*)a0 == ((Player*)a1)->f23B0) {
         return 1;
     }
     return func_001B8A08(a0, a1);
@@ -1052,7 +1052,7 @@ void func_0016BDD0(T217D_1330* self, s32 flag)
         func_0016EC88(&D_00262C70);
         self->vt->m14(self);
         s32 mask = func_0016BB78(15);
-        G27C220* g = D_002623C0;
+        GameProgress* g = D_002623C0;
         for (; bit > 0; bit--) {
             if (g->u19F4 & mask) {
                 break;
@@ -1454,7 +1454,7 @@ void func_0016A100(C7F* self)
     self->f70 = k;
 }
 
-void func_001BAC30(C03* self);
+void func_001BAC30(Collider* self);
 void* func_0018D5C0(s32 bytes);
 
 void func_0016A420(ListedCollisionPart* self)
@@ -1477,9 +1477,9 @@ void func_0016A420(ListedCollisionPart* self)
     dst[2] = src[2];
 }
 
-void func_001B9338(C03* self, f32 t);
+void func_001B9338(Collider* self, f32 t);
 void func_00189378(Mat02* sub, s32 zero, Mat3U* out);
-void func_001B91A8(C03* self, Mat3U* out, s32 a, void* table, s32 b, f32 t);
+void func_001B91A8(Collider* self, Mat3U* out, s32 a, void* table, s32 b, f32 t);
 
 void func_0016A580(ListedCollisionPart* self, f32 t)
 {
@@ -1578,12 +1578,12 @@ void func_0018C7F8(u8* p);
 void func_001518B8(void* p);
 void func_0016AF80(Obj_16B580* o);
 void func_001E9498(u8* a, void* b);
-void func_0016EC20(G262C70* a, s32 mask);
+void func_0016EC20(PadRecord* a, s32 mask);
 void func_00194D30(T217D_6D0* a, s32 b, s32 c);
 void func_0016B190(Obj_16B580* o);
-void func_0016B0F8(Obj_16B580* o, G262C70* a);
+void func_0016B0F8(Obj_16B580* o, PadRecord* a);
 
-void func_0016B580(T217D_12E0* self, G262C70* arg)
+void func_0016B580(T217D_12E0* self, PadRecord* arg)
 {
     if (self->node == 0) {
         return;
@@ -1948,8 +1948,8 @@ struct Cand_16AB38 {
     s32* flagp;
 };
 struct Pair_16AB38 {
-    C2F* src;
-    C2F* dst;
+    StateTrigger* src;
+    StateTrigger* dst;
 };
 struct Self_16AB38 {
     u8 pad0[0x2DC];
@@ -1959,7 +1959,7 @@ struct Self_16AB38 {
     u8 pad1[4];
     Cand_16AB38* chosen;
     u8 pad2[4];
-    C2F* objs[5];
+    StateTrigger* objs[5];
     u8 pad3[0x18];
     Cand_16AB38* cands[4];
 };
@@ -1971,10 +1971,10 @@ struct SelEnt_16AB38 {
 extern s32 D_002623CC;
 extern u8 D_00275BC0[];
 
-C2F* func_001B6290(C2F* o, s32 a, s32 b, s32 c);
+StateTrigger* func_001B6290(StateTrigger* o, s32 a, s32 b, s32 c);
 s32 func_001602A0();
 void func_0016B300(Self_16AB38* self, s32 idx, s32 z);
-void func_001B6628(C2F* o, s32 id);
+void func_001B6628(StateTrigger* o, s32 id);
 void func_001E9498(u8* a, u8* b);
 
 void func_0016AB38(Self_16AB38* self)
@@ -1993,7 +1993,7 @@ void func_0016AB38(Self_16AB38* self)
         self->cur = d;
     }
     for (s32 i = 1; i <= self->cur; i++) {
-        C2F* o = self->objs[i - 1];
+        StateTrigger* o = self->objs[i - 1];
         if (o && (D_002623C0->levels[i].f448 & 1)) o->desc->m02(o);
     }
     self->chosen = 0;
@@ -2039,7 +2039,7 @@ void func_0016AB38(Self_16AB38* self)
         if (idx != 5) {
             self->sel = idx;
         } else {
-            G27C220* t = D_002623C0;
+            GameProgress* t = D_002623C0;
             if (t->levels[4].f448 & 0x20) self->sel = 0;
             else if (t->levels[5].f448 & 1) self->sel = 0;
             else self->sel = idx;
@@ -2056,15 +2056,15 @@ struct Group_16BBA8;
 
 extern u8 D_00275BC0[];
 
-void func_0016EC20(G262C70* self, s32 mask);
+void func_0016EC20(PadRecord* self, s32 mask);
 void func_001E9570(Group_16BBA8* g);
 u32 func_0016BB78(Bits_16BBA8* bit);
 void func_0018E4C0(Bits_16BBA8* bit);
 void func_001BFCD8(Tag_16BBA8* a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 r2, s32 a5);
-s32 func_0016EC98(G262C70* p);
-s32 func_0016EED0(G262C70* p);
+s32 func_0016EC98(PadRecord* p);
+s32 func_0016EED0(PadRecord* p);
 
-void func_0016BBA8(T217D_1330* ctx, G262C70* o)
+void func_0016BBA8(T217D_1330* ctx, PadRecord* o)
 {
     s32 s1;
     s32 r2;

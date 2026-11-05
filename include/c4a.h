@@ -10,9 +10,9 @@
 #ifndef C4A_H
 #define C4A_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct C4A : C03 {
+struct C4A : Collider {
     s32 mode;               // 0x550: -1 at set-up (slot 0, func_0017ADD0); func_0017B410 sets it
     f32 f554;               // 0x554: the clock when the mode was set
     u8 f558[4];             // 0x558: passed with the object to func_0012C918

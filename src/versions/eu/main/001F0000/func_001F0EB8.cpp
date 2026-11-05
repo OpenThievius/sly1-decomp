@@ -3,7 +3,7 @@
 void func_001F0EB8(void* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
-    C6D* p = D_00261990;
+    Camera* p = D_00261990;
     f32 keep1 = p->f1C4;
     f32 keep2 = p->f1C8;
     func_00143940(p, 0.975f);

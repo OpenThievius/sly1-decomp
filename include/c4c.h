@@ -9,9 +9,9 @@
 #ifndef C4C_H
 #define C4C_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct C4C : C03 {
+struct C4C : Collider {
     s32 count;              // 0x550: the touches left (func_001D32D8 counts it down)
     s32 f554;               // 0x554: a chain of the world's records, given back with func_001861E8
     void* f558;             // 0x558: the object func_001D32D8 hands to func_00158730

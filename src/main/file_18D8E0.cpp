@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "c3b.h"
-#include "t2195.h"
+#include "child_group_object.h"
+#include "attachment.h"
 #include "shapes.h"
 #include "object_link.h"
 #include "stream_reader.h"
 #include "stream_reader_window.h"
 #include "key_id.h"
 #include "identity_key.h"
-#include "g262c70.h"
-#include "g27c220.h"
+#include "pad_record.h"
+#include "game_progress.h"
 #include "globals.h"
 
 // The movie player: its object (D_00269A00), the stream its data comes through, and the two
@@ -312,10 +312,10 @@ extern s32 D_002613EC;
 void func_00191E70(s32 v);
 void func_0012FCF0(StreamReader* o, u8* d);
 s32 func_0012FD78(StreamReader* o, KeyId* k);
-void func_0016EC20(G262C70* d, s32 n);
+void func_0016EC20(PadRecord* d, s32 n);
 void func_00143030(u8* t);
-void func_0016E238(G262C70* d);
-s32 func_001F00F0(u8* a, G262C70* b, s32 c);
+void func_0016E238(PadRecord* d);
+s32 func_001F00F0(u8* a, PadRecord* b, s32 c);
 void func_001409E0();
 s32 func_0020B0B0(u8* l);
 void func_0012FDE8(StreamReader* o);
@@ -340,7 +340,7 @@ s32 func_0011E4F8(void* self);
 struct Frame_18EDA8 { u8 buf[0x30]; };
 
 void func_00189350(void* a, void* b);
-s32 func_001BC088(C03* self, f32 x, void* b);
+s32 func_001BC088(Collider* self, f32 x, void* b);
 
 struct Object_18F890 { u8 pad00[0x0C]; StreamReaderWindow* buffer; u8 pad10[4]; };
 struct Empty_18F890 {
@@ -462,8 +462,8 @@ void func_0018D9B8(C3C* self, void* b, f32 x)
     self->f1EC = 0;
     self->f1F0 = 0;
     func_001BC088(self, x, b);
-    self->f1EC = (T2195*)s1;
-    self->f1F0 = (T2195*)s0;
+    self->f1EC = (Attachment*)s1;
+    self->f1F0 = (Attachment*)s0;
 }
 
 ASM_FUNC(func_0018DA40);
@@ -588,7 +588,7 @@ void func_0018E4C0(s32 idx)
 
 void func_0018E4F0(s32 idx, u32 n)
 {
-    G27C220* dev;
+    GameProgress* dev;
     s32 m;
 
     func_0018E4C0(idx);

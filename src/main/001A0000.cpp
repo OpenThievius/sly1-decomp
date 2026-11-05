@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
-#include "t219c.h"
-#include "c6c.h"
+#include "switched_collider.h"
+#include "effect.h"
+#include "world.h"
 #include "globals.h"
 
-void func_0019EBE8(T219C* self);
+void func_0019EBE8(Effect* self);
 
-void func_001A0020(T219C* self, void* other)
+void func_001A0020(Effect* self, void* other)
 {
     if (other != 0) {
         func_0019EBE8(self);
     }
 }
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_001A1458(T219C* self)
+void func_001A1458(Effect* self)
 {
     func_0019EB28(self);
     s32 v = D_00275710->f1D28;
@@ -25,10 +25,10 @@ void func_001A1458(T219C* self)
     self->i128 = -1;
 }
 
-void func_0019F560(T219C* self);
+void func_0019F560(Effect* self);
 s32 func_00182FC8(s32 handle);
 
-void func_001A26B0(T219C* self)
+void func_001A26B0(Effect* self)
 {
     func_0019F560(self);
     s32 h = self->i120;
@@ -49,10 +49,10 @@ void func_001A3B20(C15* self)
     func_00124DF8(self, 2, (void*)D_0026B778);
 }
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 extern Quad219C D_00275C50;
 
-void func_001A0040(T219C* self)
+void func_001A0040(Effect* self)
 {
     func_0019EB28(self);
     self->life = 0.25f;
@@ -64,16 +64,16 @@ void func_001A0040(T219C* self)
 
 void func_001A0338(void* self, s32 kind, s32 extra);
 
-void func_001A0318(T219C* self)
+void func_001A0318(Effect* self)
 {
     func_001A0338(self, 0, 0);
 }
 
 extern f32 D_0026185C;
 
-void func_0019EBE8(T219C* self);
+void func_0019EBE8(Effect* self);
 
-void func_001A0F88(T219C* self)
+void func_001A0F88(Effect* self)
 {
     if (self->life < D_0026185C - self->start) {
         func_0019EBE8(self);
@@ -81,7 +81,7 @@ void func_001A0F88(T219C* self)
     }
 }
 
-void func_001A0FE8(T219C* self)
+void func_001A0FE8(Effect* self)
 {
     func_0019EB28(self);
     self->q40 = D_00275C50;
@@ -111,28 +111,28 @@ s32 func_001A3FE0(C15* self)
     return r;
 }
 
-void func_001A0040(T219C* self);
+void func_001A0040(Effect* self);
 
-void func_001A1410(T219C* self)
+void func_001A1410(Effect* self)
 {
     func_001A0040(self);
-    C6C* ctx = D_00275710;
+    World* ctx = D_00275710;
     s32 v = ctx->f1D28;
     self->f120 = 0.15f;
     self->i20 = v;
 }
 
-void func_001A1498(T219C* self)
+void func_001A1498(Effect* self)
 {
 }
 
 extern f32 D_0026185C;
 f32 D_0026B600[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
 f32 D_0026B610[4] = { 1.0f, -0.7f, 0.0f, 0.0f };
-void func_001A1DF0(T219C* self, s32 n);
-void func_0019EBE8(T219C* self);
+void func_001A1DF0(Effect* self, s32 n);
+void func_0019EBE8(Effect* self);
 
-void func_001A14A0(T219C* c, f32 dt)
+void func_001A14A0(Effect* c, f32 dt)
 {
     f32 t = (D_0026185C - c->start) / c->life;
     f32 k;
@@ -163,7 +163,7 @@ s32 func_001A1F18(Item_1A1F18* a, Item_1A1F18* b)
 
 struct Src_1A22C8 { u8 pad0[0x1DC]; s32 f1DC; u8 pad1[0x10]; s32 f1F0; };
 
-void func_001A22C8(T219C* self, Src_1A22C8* src)
+void func_001A22C8(Effect* self, Src_1A22C8* src)
 {
     self->i120 = src->f1DC;
     self->i124 = src->f1F0;
@@ -173,11 +173,11 @@ struct Obj_1A25F0 { u8 pad0[0x50]; void* f50; };
 
 extern s32 D_0026B6C0[4];
 
-void func_001A2380(T219C* self, s32 v, void* other, void* a2, void* a3, s32 zero);
-void func_0019EBE8(T219C* self);
+void func_001A2380(Effect* self, s32 v, void* other, void* a2, void* a3, s32 zero);
+void func_0019EBE8(Effect* self);
 s32 func_001300E8(void* self, s32 kind);
 
-s32 func_001A25F0(T219C* self, Obj_1A25F0* other, void* a2, void* a3)
+s32 func_001A25F0(Effect* self, Obj_1A25F0* other, void* a2, void* a3)
 {
     u32 i;
     for (i = 0; i < 4; i++) {
@@ -192,18 +192,18 @@ s32 func_001A25F0(T219C* self, Obj_1A25F0* other, void* a2, void* a3)
     return 1;
 }
 
-void func_0019F560(T219C* self);
-T219C* func_0019EA78(s32 kind, C1E* sys);
+void func_0019F560(Effect* self);
+Effect* func_0019EA78(s32 kind, EffectOwner* sys);
 extern f32 D_0026185C;
 
-void func_001A0A78(T219C* self, f32 arg)
+void func_001A0A78(Effect* self, f32 arg)
 {
     func_0019F560(self);
     f32 d = D_0026185C - self->start;
     d = d - 0.15f;
     if (0.0f <= d && d < arg) {
         arg = -self->m30[2];
-        T219C* n = func_0019EA78(12, 0);
+        Effect* n = func_0019EA78(12, 0);
         if (n != 0) {
             n->vt->m00(n, &self->q80, arg, 0);
         }
@@ -211,11 +211,11 @@ void func_001A0A78(T219C* self, f32 arg)
 }
 
 s32 func_001300E8(void* self, s32 kind);
-s32 func_0019ED58(T219C* a, void* b, void* c, void* d);
+s32 func_0019ED58(Effect* a, void* b, void* c, void* d);
 
 struct Obj_1A3128 { u8 pad0[0x50]; void* p50; };
 
-s32 func_001A3128(T219C* a0, Obj_1A3128* a1, void* a2, void* a3)
+s32 func_001A3128(Effect* a0, Obj_1A3128* a1, void* a2, void* a3)
 {
     if (func_001300E8(a1->p50, 6) != 0) {
         return 0;
@@ -223,12 +223,12 @@ s32 func_001A3128(T219C* a0, Obj_1A3128* a1, void* a2, void* a3)
     return func_0019ED58(a0, a1, a2, a3);
 }
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_001A0C50(T219C* self)
+void func_001A0C50(Effect* self)
 {
     func_0019EB28(self);
-    C6C* g = D_00275710;
+    World* g = D_00275710;
     s32 v = (s32)g->slot1CE8[1];
     self->life = 0.5f;
     self->i20 = v;
@@ -239,10 +239,10 @@ typedef void (*VFn_1A38F0)(void* self);
 struct Obj_1A38F0 { VFn_1A38F0* vtbl; };
 extern f32 D_00261858[];
 
-void func_001A35F0(T219C* self);
-void func_0019EBE8(T219C* self);
+void func_001A35F0(Effect* self);
+void func_0019EBE8(Effect* self);
 
-void func_001A38F0(T219C* self)
+void func_001A38F0(Effect* self)
 {
     if (self->start <= D_00261858[1]) {
         if (self->i134 != 0) {
@@ -259,9 +259,9 @@ void func_001A38F0(T219C* self)
 
 extern f32 D_0026185C;
 
-void func_0019F858(T219C* self);
+void func_0019F858(Effect* self);
 
-void func_001A3990(T219C* self)
+void func_001A3990(Effect* self)
 {
     if (D_0026185C < self->start) {
         return;
@@ -300,7 +300,7 @@ void func_00128018(void* a0, void* a1, void* a2, void* a3);
 void func_00128150(void* a0, void* a1, void* a2, void* a3);
 s32 func_0019F620(void* self, void* a1, void* a2, void* a3);
 
-void func_001A26F8(T219C* self, void* a1)
+void func_001A26F8(Effect* self, void* a1)
 {
     u8 scratch[0x40];
 
@@ -312,11 +312,11 @@ void func_001A26F8(T219C* self, void* a1)
 struct Other_1A2A68 { u8 pad0[0x50]; void* f50; };
 
 s32 func_001300E8(void* node, s32 kind);
-void func_001A2380(T219C* self, s32 v, void* other, void* a2, void* a3, void* out);
+void func_001A2380(Effect* self, s32 v, void* other, void* a2, void* a3, void* out);
 void func_00128150(void* a0, void* a1, void* a2, void* a3);
-void func_0019EBE8(T219C* self);
+void func_0019EBE8(Effect* self);
 
-s32 func_001A2A68(T219C* self, void* a1, void* a2, void* a3)
+s32 func_001A2A68(Effect* self, void* a1, void* a2, void* a3)
 {
     Other_1A2A68* other = (Other_1A2A68*)a1;
     u8 out[0x10];
@@ -355,7 +355,7 @@ struct Src_1A2D30 { u8 pad0[0x7C]; void* link; u8 pad1[0x1F0 - 0x80]; s32 f1F0; 
 
 void func_00128018(void* a0, void* a1, void* a2, void* a3);
 
-void func_001A2D30(T219C* dst, void* a1)
+void func_001A2D30(Effect* dst, void* a1)
 {
     Src_1A2D30* src = (Src_1A2D30*)a1;
     func_00128018(src->link, 0, (u8*)src + 0x20, &dst->q80);
@@ -368,12 +368,12 @@ void func_001A2D30(T219C* dst, void* a1)
 extern f32 D_0026B5B0[4];
 extern f32 D_0026B5C0[4];
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_001A0B20(T219C* self)
+void func_001A0B20(Effect* self)
 {
     func_0019EB28(self);
-    C6C* sys = D_00275710;
+    World* sys = D_00275710;
     self->i20 = (s32)sys->slot1CE8[9];
     self->life = 3.0f;
     self->q40 = *(Quad219C*)D_0026B5B0;
@@ -392,7 +392,7 @@ struct Other_1A39C8 {
     f32 f1F4;
 };
 
-void func_001A39C8(T219C* self, void* otherv)
+void func_001A39C8(Effect* self, void* otherv)
 {
     Other_1A39C8* other = (Other_1A39C8*)otherv;
     self->i120 = func_0015A418(D_00275710, 0x104, other->i1F0, other->p7C);
@@ -452,9 +452,9 @@ void func_001A3F40(C15* out, Src_1A3F40* src)
 extern f32 D_0026B710[4];
 extern f32 D_0026B720[4];
 
-void func_0019EB28(T219C* self);
+void func_0019EB28(Effect* self);
 
-void func_001A31F0(T219C* self)
+void func_001A31F0(Effect* self)
 {
     func_0019EB28(self);
     f32 half = 0.5f;
@@ -465,9 +465,9 @@ void func_001A31F0(T219C* self)
     self->q30 = *(Quad219C*)D_0026B720;
 }
 
-void func_0019EB28(T219C* self, f32 x);
+void func_0019EB28(Effect* self, f32 x);
 
-void func_001A3598(T219C* self, f32 x)
+void func_001A3598(Effect* self, f32 x)
 {
     func_0019EB28(self, x);
     self->q40 = *(Quad219C*)&D_00275C50;
@@ -480,9 +480,9 @@ struct Quad_1A3A18 { s32 a, b, c, d; } __attribute__((aligned(16)));
 struct Buf_1A3A18 { s32 n; u8 pad[0x1C]; Quad_1A3A18 q; u8 tail[0x20]; };
 typedef void (*Fn_1A3A18)(void* self, void* arg);
 
-void func_0019F560(T219C* self, f32 s);
+void func_0019F560(Effect* self, f32 s);
 
-void func_001A3A18(T219C* self, f32 scale)
+void func_001A3A18(Effect* self, f32 scale)
 {
     func_0019F560(self, scale);
     if (self->p120 == 0) return;
@@ -504,7 +504,7 @@ void func_001A3A18(T219C* self, f32 scale)
 }
 
 typedef int V128_1A0258 __attribute__((mode(TI)));
-void func_0019EB28(T219C* self, f32 f);
+void func_0019EB28(Effect* self, f32 f);
 void func_00118CF0(void* out, f32 f);
 void func_00118D10(void* out, void* in);
 V128_1A0258 func_00118D30(V128_1A0258 a, V128_1A0258 b);
@@ -512,7 +512,7 @@ void func_00118D20(void* dst, V128_1A0258 v);
 extern f32 D_0026B570[4];
 extern f32 D_0026B580[4];
 
-void func_001A0258(T219C* self, f32 f)
+void func_001A0258(Effect* self, f32 f)
 {
     func_0019EB28(self, f);
     Quad219C* sub = &self->q30;
@@ -533,7 +533,7 @@ void func_001A0258(T219C* self, f32 f)
 extern f32 D_0026B5D0[4];
 extern f32 D_0026B5E0[4];
 
-void func_001A0BA0(T219C* self, f32 f)
+void func_001A0BA0(Effect* self, f32 f)
 {
     func_001A0258(self, f);
     Quad219C* sub = &self->q30;
@@ -550,20 +550,20 @@ void func_001A0BA0(T219C* self, f32 f)
     func_00118D20(sub, func_00118D30(tv, u));
 }
 
-T219C* func_0019EA78(s32 kind, C1E* sys);
+Effect* func_0019EA78(s32 kind, EffectOwner* sys);
 void func_001A0338(void* self, s32 kind, void* extra);
 extern f32 D_0026185C;
 
-void func_001A04A0(T219C* self)
+void func_001A04A0(Effect* self)
 {
-    T219C* d = func_0019EA78(10, 0);
+    Effect* d = func_0019EA78(10, 0);
     if (d != 0) {
         d->vt->m00(d, &self->q80, 0.0f, 0);
         d->i20 = self->i20;
         d->fB0 = self->fB0;
         d->q40 = self->q40;
         d->life = self->life;
-        T219C* p;
+        Effect* p;
         if (self->i120 == 1) {
             p = self->p124;
             f32* m = p->m30;
@@ -587,14 +587,14 @@ void func_001A04A0(T219C* self)
 
 typedef int V128_1A01B8 __attribute__((mode(TI)));
 
-void func_0019EB28(T219C* self, f32 f);
+void func_0019EB28(Effect* self, f32 f);
 void func_00118CF0(void* out, f32 f);
 void func_00118D10(void* out, void* in);
 V128_1A01B8 func_00118D30(V128_1A01B8 a, V128_1A01B8 b);
 void func_00118D20(void* dst, V128_1A01B8 v);
 extern f32 D_0026B560[4];
 
-void func_001A01B8(T219C* self, f32 f)
+void func_001A01B8(Effect* self, f32 f)
 {
     func_0019EB28(self, f);
     self->life = 0.5f;
@@ -665,7 +665,7 @@ extern const f32 D_0024C9B8 = 3.4028235e+38f;
 extern f32 D_0026B6A0[4];
 extern f32 D_0026B6B0[4];
 
-void func_001A1DF0(T219C* self, s32 mode)
+void func_001A1DF0(Effect* self, s32 mode)
 {
     f32 t;
     f32 x;
@@ -731,7 +731,7 @@ void func_001A3AE0(C15* self)
 }
 
 typedef int V128_1A09C0 __attribute__((mode(TI)));
-void func_0019EB28(T219C* self, f32 f);
+void func_0019EB28(Effect* self, f32 f);
 void func_00118CF0(void* out, f32 f);
 void func_00118D10(void* out, void* in);
 V128_1A09C0 func_00118D30(V128_1A09C0 a, V128_1A09C0 b);
@@ -739,7 +739,7 @@ void* func_00118D20(Quad219C* dst, V128_1A09C0 v);
 extern f32 D_0026B590[4];
 extern f32 D_0026B5A0[4];
 
-void func_001A09C0(T219C* self, f32 f)
+void func_001A09C0(Effect* self, f32 f)
 {
     func_0019EB28(self, f);
     Quad219C* sub = &self->q30;

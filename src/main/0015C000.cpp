@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c01.h"
+#include "base_object.h"
 #include "object_cycler.h"
 #include "v24a0.h"
 #include "v24a2.h"

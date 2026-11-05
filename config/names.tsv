@@ -2368,3 +2368,118 @@ func_00118850	StartScriptPadRecordPattern	builtin: calls StartPadRecordPattern o
 func_00114518	TestScriptNearlyEqual	builtin: converts three int or float arguments to floats, calls func_001EAC68 (compare with epsilon, as the callers use it with 1e-4) and returns the result as a bool
 func_001184F8	TransformScriptPointBetweenFrames	builtin: calls func_00128018 (the position frame conversion ReparentObjectKeepingTransform uses) into a vector payload
 func_00118608	TransformScriptRotationBetweenFrames	builtin: calls func_00128150 (the rotation frame conversion) into a matrix payload and returns it
+func_001000C8	TestScriptObjectOfKind	IsObjectOfKind with kind mask 7 on the object and one int argument, returned as a script bool
+func_00100178	AddScriptObjectKeyToOwner	no-argument builtin whose only effect is AddObjectKeyToOwner on the object
+func_00100368	CreateScriptObjectCopy	builtin: two int arguments to CreateObjectCopy, result returned as a script pointer
+func_001004F0	TestScriptObjectDescendantOf	builtin: IsObjectDescendantOf(object, pointer argument) returned as a script bool
+func_001005A0	TestScriptObjectIdMatch	builtin: MatchesObjectId(object, int argument) returned as a script bool
+func_00100650	SetScriptExtraObjectPropertyBool	builtin: two int arguments forwarded to SetExtraObjectPropertyBool, empty result
+func_001007F0	SetScriptExtraObjectPropertyFloat	builtin: int and float arguments forwarded to SetExtraObjectPropertyFloat, empty result
+func_00100998	SetScriptExtraObjectPropertyPair	builtin: int and vector arguments forwarded to SetExtraObjectPropertyPair, empty result
+func_00100C28	ClearScriptObjectRecordValues	builtin without arguments: calls ClearObjectRecordValues on the object, empty result
+func_00100CC8	ClearScriptAimHold	builtin without arguments: calls ClearAimHold on the object, empty result
+func_00100D68	SetScriptAimHold	builtin without arguments: calls SetAimHold on the object, empty result
+func_00100E08	SetScriptValueAttachment	builtin: two floats and an int forwarded to SetValueAttachment, empty result
+func_00101058	StartScriptSoundWithParams	builtin: int, three floats and a vector forwarded to StartSoundWithParams, empty result
+func_00101168	StopScriptPlayingSound	builtin without arguments: calls StopPlayingSound on the object, empty result
+func_00101368	FindScriptObjectHandle	builtin: FindObjectHandle(object, int argument) returned as a script pointer
+func_00101418	FindScriptObjectAnimationPlayer	builtin: FindObjectAnimationPlayer(object, int argument) returned as a script pointer
+func_001014C8	FindScriptTrackPlayer	builtin without arguments: FindTrackPlayer(object) returned as a script pointer
+func_00101620	SetScriptFollowObjects	builtin: two int arguments forwarded to SetFollowObjects, empty result
+func_00101A90	CreateScriptAnimationPlayer	builtin: four arguments to CreateAnimationPlayerReturned, result returned as a script pointer
+func_00101D38	SeekScriptAnimationPlayer	builtin: three arguments forwarded to SeekAnimationPlayer, empty result
+func_00101E10	StopScriptAnimationPlayer	builtin without arguments: calls StopAnimationPlayer, empty result
+func_00101EB0	ApplyScriptListedPoseSources	builtin: one argument forwarded to ApplyListedPoseSources, empty result
+func_00101F60	ReleaseScriptPlayerAttachment	builtin: two arguments forwarded to ReleasePlayerAttachment, empty result
+func_00102358	ActivateScriptSwitchedColliderUnlessActive	builtin without arguments: calls ActivateSwitchedColliderUnlessActive, empty result
+func_001024B0	SetScriptStateTriggerStateFromMessage	builtin: one argument forwarded to SetStateTriggerStateFromMessage, empty result
+func_00102560	AddScriptStateTriggerTableEntry	builtin: four int arguments forwarded to AddStateTriggerTableEntry, empty result
+func_001027C0	SetScriptTimedGroupFadeInTime	builtin: one float forwarded to SetTimedGroupFadeInTime, empty result
+func_00102870	SetScriptTimedGroupFadeOutTime	builtin: one float forwarded to SetTimedGroupFadeOutTime, empty result
+func_00102920	SetScriptEffectSpawnerActiveFor	builtin: one float forwarded to SetEffectSpawnerActiveFor, empty result
+func_001029D0	SetScriptEffectSpawnerActiveForever	builtin without arguments: calls SetEffectSpawnerActiveForever, empty result
+func_00102B10	AddScriptSpawnRangeEntry	builtin: six arguments forwarded to AddSpawnRangeEntry, empty result
+func_00102C28	AddScriptRecordMemberRangeEntry	builtin: six arguments forwarded to AddRecordMemberRangeEntry, empty result
+func_001030E0	CreateScriptStateWalker	builtin: three arguments to CreateStateWalker, result returned as a script pointer
+func_001031C0	DestroyScriptStateWalker	builtin without arguments: calls DestroyStateWalker, empty result
+func_00103260	ScatterScriptRandomObjects	builtin: three arguments forwarded to ScatterRandomObjects, empty result
+func_00103350	SetScriptIopChannel2Setting	builtin: two arguments forwarded to SetIopChannel2Setting, empty result
+func_00103420	PushScriptIopChannel2Setting	builtin: two arguments forwarded to PushIopChannel2Setting, empty result
+func_001034F0	PopScriptIopChannel2Setting	builtin without arguments: calls PopIopChannel2Setting, empty result
+func_00103900	CheckScriptEntryTwoBitRequirement	builtin: one argument to CheckEntryTwoBitRequirement, returned as a script bool
+func_001039B0	CheckScriptEntryThreeBitRequirement	builtin: one argument to CheckEntryThreeBitRequirement, returned as a script bool
+func_00103A60	SetScriptEntrySlotValue	builtin: three arguments forwarded to SetEntrySlotValue, empty result
+func_00103B40	GetScriptEntrySlotValue	builtin: two arguments to GetEntrySlotValue, result returned as a script int
+func_00103F80	ShowScriptCountedScreenElement	builtin without arguments: calls ShowCountedScreenElement, empty result
+func_00104020	HideScriptCountedScreenElement	builtin without arguments: calls HideCountedScreenElement, empty result
+func_00104470	AcquireScriptPadSelectFlag	builtin without arguments: calls AcquirePadSelectFlag, empty result
+func_00104510	ReleaseScriptPadSelectFlag	builtin without arguments: calls ReleasePadSelectFlag, empty result
+func_001045B0	ClearScriptWorldFlagBit	builtin: one argument forwarded to ClearWorldFlagBit, empty result
+func_00104660	SetScriptWorldFlagBit	builtin: one argument forwarded to SetWorldFlagBit, empty result
+func_00104710	PushScriptCameraStackValue	builtin: one argument forwarded to PushCameraStackValue, empty result
+func_001047C0	PopScriptCameraStackValue	builtin without arguments: PopCameraStackValue returned as a script int
+func_00104860	PeekScriptCameraStackValue	builtin without arguments: PeekCameraStackValue returned as a script int
+func_00104C00	PushScriptObjectCameraController	builtin wrapper: unpacks no arguments and calls func_001F4ED0 (PushObjectCameraController) on its object, returning the empty result tag 0x22
+func_00104CA0	RemoveScriptObjectCameraController	builtin wrapper: no arguments, calls func_001F4F20 (RemoveObjectCameraController) on its object, returns the empty result
+func_00104D40	ClearScriptTrackedNodes	builtin wrapper: no arguments, calls func_001F5210 (ClearTrackedNodes) on its object, returns the empty result
+func_00104E80	SetScriptAgentStateClipId	builtin wrapper: unpacks two ints with StoreScriptArgumentsVa and passes them to func_001CA608 (SetAgentStateClipId)
+func_00104F50	SetScriptAgentStateClip	builtin wrapper: unpacks two ints with StoreScriptArgumentsVa and passes them to func_001CA658 (SetAgentStateClip)
+func_00105020	GetScriptAgentStateClip	builtin wrapper: unpacks one int, returns func_001CA6D0 (GetAgentStateClip) of it as a pointer value (SetScriptValuePointerB)
+func_001050D0	AddScriptAgentClipGroup	builtin wrapper: unpacks four ints and passes them to func_001CAD60 (AddAgentClipGroup)
+func_001051C0	AddScriptAgentMeshKey	builtin wrapper: unpacks two values and passes them to func_001CA960 (AddAgentMeshKey)
+func_00105290	AddScriptAgentExtraClip	builtin wrapper: unpacks two values and passes them to func_001CA720 (AddAgentExtraClip)
+func_00105430	SetScriptAgentSecondaryClipId	builtin wrapper: unpacks two ints and passes them to func_001CA898 (SetAgentSecondaryClipId)
+func_001055A8	SetScriptAgentMainClip	builtin wrapper: unpacks one value (kind 0x2000) and passes it to func_001CB328 (SetAgentMainClip)
+func_00105728	StartScriptChildGroupDelay	builtin wrapper: unpacks one value and passes it to func_0013BE00 (StartChildGroupDelay)
+func_00106120	ResetScriptCollectedItems	builtin wrapper: no arguments; calls func_00150408 which zeroes the collected count at 0x78C and the flag at 0x7B0
+func_001061C0	CollectScriptItem	builtin wrapper: one value passed to func_00150418, which appends it to the list at 0x790 (max 8) when it is in the list at 0x76C
+func_001064C0	SetScriptCurrentTargetFollower	builtin wrapper: no arguments, calls func_0016DCF0 (SetCurrentTargetFollower) on its object
+func_00106560	ClearScriptCurrentTargetFollower	builtin wrapper: no arguments; calls func_0016DD00 which stores 0 in D_002629C8, the current target follower
+func_00106600	AddScriptObjectPoolEntry	builtin wrapper: unpacks four ints and passes them to func_001A8150 (AddObjectPoolEntry)
+func_001066F0	EnableScriptObjectPoolEntry	builtin wrapper: one value to func_001A8778 (EnableObjectPoolEntry)
+func_001067A0	DisableScriptObjectPoolEntry	builtin wrapper: one value to func_001A87A8 (DisableObjectPoolEntry)
+func_00106850	SetScriptObjectPoolEntryCount	builtin wrapper: two ints to func_001A87E0 (SetObjectPoolEntryCount)
+func_00106920	ChooseScriptObjectPoolItem	builtin wrapper: no arguments, calls func_001A8AF8 (ChooseObjectPoolItem)
+func_00106D90	AddScriptSequenceExtraTarget	builtin wrapper: two values to func_001519E0 (AddSequenceExtraTarget)
+func_00106E60	ChooseScriptStepSequenceState	builtin wrapper: no arguments, calls func_001518B8 (ChooseStepSequenceState)
+func_00106F00	ResetScriptStepSequence	builtin wrapper: no arguments, calls func_001519A8 (ResetStepSequence)
+func_001073F0	AddScriptEntryRecordKey	builtin wrapper: two ints to func_0019AD30 (AddEntryRecordKey)
+func_00107A10	ResetScriptEntryQueue	builtin wrapper: no arguments, calls func_0017CDE0 (ResetEntryQueue)
+func_00107AB0	BindScriptEntryQueueToObject	builtin wrapper: one value (kind 0x2000, an object) to func_0017CE20 (BindEntryQueueToObject)
+func_00107B60	UnbindScriptEntryQueue	builtin wrapper: no arguments, calls func_0017CE80 (UnbindEntryQueue)
+func_001085E8	StartScriptColorFade	builtin wrapper: no arguments, calls func_00159ED0 (StartColorFade)
+func_001087D8	PlaceScriptModeColliderAtAnchor	builtin wrapper: no arguments, calls func_0017AD50 (PlaceModeColliderAtAnchor)
+func_001A0F88	RunEffectEndCallback	slot 4 of the 0x219E00 effect table: once the effect's life has elapsed (life < now - start) it runs RemoveEffect and then calls params->fn60 with its stored owner (+0x134)
+func_001A26B0	UpdateEffectUntilDetached	slot 4 of the 0x219E80 effect table: runs the shared update func_0019F560, then calls RemoveEffect when the handle at +0x120 is nonzero and IsObjectAttached on it returns 0
+func_001A1F18	CompareByFloatKeyAscending	compares the f32 at +0x20 of two records and returns -1 when the first is smaller, else 1 (a sort comparator)
+func_001A25F0	HandleEffectImpact	slot 7 (contact) of the 0x219E60 effect table: returns 0 when the other object's owner is of a kind in D_0026B6C0, else runs func_001A2380 unless the object is kind 0x1F, then RemoveEffect and returns 1
+func_001A1DF0	SetEffectPhase	switches the effect's phase at +0x120 to 0, 1 or 2, giving each its own table at +0x40 and life (0.25, unlimited, 0.5) and rescaling start so the fraction of life already spent carries over between phases 0 and 2
+func_001A14A0	AdvanceEffectPhases	slot 4 of the 0x219E40 effect table: advances the value at +0x124 by a polynomial of the life fraction times the time step, and when the life fraction passes 1 moves phase 0 to 1 and 1 to 2 with SetEffectPhase and removes the effect at phase 2
+func_001A3A18	SendEffectMessagesAtRate	slot 4 of the 0x219F60 effect table: runs the shared update, then adds time*rate (+0x124) to the counter at +0x128 and for each whole unit calls slot 31 (message handler) of the object at +0x120 with a 4-word record holding the effect's position
+func_001A39C8	ResolveEffectTarget	slot 1 of the 0x219F60 effect table: stores FindFirstObjectById(world, 0x104, source's id at +0x1F0, source's link at +0x7C) in +0x120 and copies the source's float at +0x1F4 to +0x124
+func_001A3AE0	InitWalkerCollider	slot 0 of class 0x15: runs the base set-up func_001921A8, then sets the state at +0x610 and +0x614 to -1 and the float at +0x628 to 2000.0
+func_001A3B20	LoadWalkerCollider	slot 10 of class 0x15: runs LoadCollider, then ResolveObjectLinks over the two link records of D_0026B778 (offsets 0x640 and 0x650)
+func_001A3B58	StartWalkerCollider	slot 20 of class 0x15: runs StartPlacedObject, and when +0x678 is set resolves the six links of D_0026B790, sets the anchors, creates a state walker for each of the objects at +0x640 and +0x650 (CreateStateWalker) and gathers objects by id into +0x668, otherwise calls slot 7
+func_001A3FE0	ChooseWalkerColliderState	returns the next state of a class 0x15 object from +0x610: 0 goes to 1 when the float at +0x61C is positive, 1 goes to 0 when it is 0, 2 goes to 1 when the word at +0x684 is 0
+func_001D86F8	GetWrappedDifference	returns lim - base, then subtracts or adds the period x when that difference lies beyond half of it in either direction
+func_001D8470	FindNearestValueOutsideSpans	returns x when func_001EB080 says no span of the array contains it, else the span end (lo or hi) nearest to x that no span contains
+func_001DBBD8	TakeCallRecord	takes a 0x14-byte entry from the world's pool at +0x1B14 (PopZeroedFreeSlot) and clears 0x14 bytes
+func_001DBC18	ReleaseCallRecords	walks the chain linked through the next word at +0x10 and pushes each 0x14-byte record back on the world's pool at +0x1B14 (PushFreeSlot)
+func_001DBCC8	AppendQueuedCall	takes a call record, stores its four words, and appends it to the world's list at +0x1EC8 (tail at +0x1ECC)
+func_001DBC60	AppendQueuedCallOnce	walks the list at +0x1EC8 and returns if a record with the same four words exists, otherwise calls AppendQueuedCall
+func_001DBE48	RunQueuedCalls	slot of the world: pops each record of the list at +0x1EC8, calls its function with the next three words, and releases it with ReleaseCallRecords
+func_001DBD40	RemoveQueuedCalls	unlinks every record of the list at +0x1EC8 whose words match the ones selected by the bit mask (bits 1, 2, 4, 8 for words 0..3) and releases them
+func_001DBB50	TakeAttachRecord	takes a 0x10-byte entry from the world's pool at +0x1B08 and clears 16 bytes; its callers store it as an Attach03 link
+func_001DBB90	ReleaseAttachRecords	walks an Attach03 chain by nextOwn and pushes each node back on the world's pool at +0x1B08
+func_001DB4C8	InitWorldPools	slot of the world (class 0x6C): allocates its front-memory buffers, sets up the sixteen slot pools (InitSlotPool) at +0x1AF0..+0x1C18 and the lists at +0x3C..+0x1CD8, and sets the world's default fields
+func_001DB838	ResetWorldSubsystems	when its argument is nonzero, runs a series of subsystem reset functions and zeroes the globals D_00269C90, D_00262E10, D_00262C6C, D_00261990 and D_002640A4
+func_001DB928	ReadBufferedBlockHeader	reads two signed words from the stream, allocates front memory of the first one's size into D_00275718 and stores the words and a flag in D_00275720..D_00275728
+func_001DBA38	ReadBufferedBlockBody	when D_0027571C is set, aligns the stream (AlignBufferedStreamPosition 0x10) and reads D_00275720 bytes into the buffer D_00275718 (ReadBufferedStreamBytes)
+func_001D8740	IsPathFollowerAhead	returns 1 when the first object's lap count at +0xB00 is greater than the other's, then compares the index of its current entry (+0xAF8, word at +0xC), then the wrapped difference of their positions along the path
+func_001DB110	AddPathFollowerEntry	appends an item to the 16-entry array at +0x874 (count at +0x870), links it into the circular entry list at +0xAF4 and, when a path is set (+0x830), queries it with the item's world position
+func_001DB238	SetPathFollowerMode	stores the mode at +0xB34 and its time at +0xB38 and, in mode 2 when the object is not the current switched collider, activates it with ActivateSwitchedCollider
+func_001DB290	ResetPathFollower	sets the lap at +0xB00 to 1, the current entry (+0xAF8) to the first (+0xAF4) and its timers to -10.0, then blends two stored vectors by a clamped polynomial of the frame time and stores the clamped result in +0x85C and +0x860
+func_001DAFB8	SetPathFollowerPath	stores the path object at +0x830, queries its slot 10 for the start location, copies +0x840 to +0x844, reads the path's length from its slot 8 into +0x834 and queries the path for each entry of the array at +0x874
+func_001D8578	UpdatePathFollowerPace	moves the value at +0x85C toward the target at +0x860 and, once the time at +0x864 has passed, picks a new target from a clamped polynomial of lap and entry index plus a random offset and a random next time
+func_001D9C98	UpdatePathFollower	slot of class 0x19: runs the base update func_00192B58, then per mode (+0xB34) UpdateFollowerPace and the rest of the per-frame follower functions, and records the time at +0x850 when the third row's z exceeds 0.5
+func_001DAE68	HandlePathFollowerActivation	slot of class 0x19: runs HandleSwitchedColliderActivation, then on activation points the global element targets at its +0xB00..+0xB0C fields, and on deactivation in mode 2 resets the mode to 0

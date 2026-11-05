@@ -10,7 +10,7 @@
 #ifndef C8B_H
 #define C8B_H
 
-#include "c01.h"
+#include "base_object.h"
 
 #include "shapes.h"   // Quad16
 
@@ -47,7 +47,7 @@ struct Slot8B {
     u8 pad10[0x10];
 };
 
-struct C8B : C01 {
+struct C8B : BaseObject {
     s32 first34;            // 0x34: -1 at construction
     s32 second38;           // 0x38: -1 at construction
     void* f3C;              // 0x3C

@@ -3,7 +3,7 @@
 #include "asm_func.h"
 #include "point_object.h"
 #include "colored_triangle_set.h"
-#include "c6d.h"
+#include "camera.h"
 
 
 
@@ -32,7 +32,7 @@ s32 func_0015A418(void* ref, s32 mode, s32 key, void* self);
 
 // NEAR: only li s8,12 / ori s7 (pre-loop hoist order) swapped; the rest matches
 
-void func_0011EC40(C01* o, Stream8E* r);
+void func_0011EC40(BaseObject* o, Stream8E* r);
 s32 func_00137BE0(Stream8E* r);
 f32 func_00137DF8(Stream8E* r);
 TrianglePoint* func_0018D5C0(s32 bytes);
@@ -238,8 +238,8 @@ struct Col_180398 {
 };
 
 Obj_180398* func_001925F0(void);
-extern C6D* D_00261990;
-void func_001441C0(C6D* cam, void* pos, Vec_180398* out);
+extern Camera* D_00261990;
+void func_001441C0(Camera* cam, void* pos, Vec_180398* out);
 
 void func_00180398(ColoredTriangleSet* self, f32 t)
 {

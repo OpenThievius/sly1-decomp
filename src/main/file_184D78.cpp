@@ -3,10 +3,10 @@
 #include "asm_func.h"
 
 #include "fpu.h"
-#include "t2195.h"
+#include "attachment.h"
 #include "globals.h"
 #include "game_clock.h"
-#include "g262c70.h"
+#include "pad_record.h"
 #include "memory_card.h"
 
 
@@ -24,7 +24,7 @@ struct Obj_184D78 {
 struct __attribute__((aligned(16))) Vec4_264770 { f32 x, y, z, w; };
 struct Vec2_2647A0 { f32 a, b; };
 
-void func_00121338(T2195* self);
+void func_00121338(Attachment* self);
 
 
 
@@ -71,9 +71,9 @@ void func_001607D0(f32 dt);
 void func_00144270(void* p);
 void func_0015E9F0(void);
 void func_00142F10(void* p);
-void func_0019D6C0(C6C* o, void* a);
+void func_0019D6C0(World* o, void* a);
 void func_001E9668(void* p);
-void func_0019DC98(C6C* o, void* a);
+void func_0019DC98(World* o, void* a);
 void func_001E9648(void* p);
 void func_0015EC68(void);
 

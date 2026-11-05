@@ -6,14 +6,14 @@
 #ifndef HIT_TARGET_H
 #define HIT_TARGET_H
 
-#include "c03.h"
+#include "collider.h"
 
 // Three floats func_001A7128 reads as a polynomial in time: x + t * (y + t * z).
 struct TimePolynomial {
     f32 x, y, z;
 };
 
-struct HitTarget : C03 {
+struct HitTarget : Collider {
     s32 state;  // 0x550: -1 at set-up (func_001A6F88); func_001A7480 sets it
     f32 stateTime;  // 0x554: the time of the last state change
     void* controller;  // 0x558: told when the state leaves 9 (func_001A7480)

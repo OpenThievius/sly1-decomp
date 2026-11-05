@@ -2,15 +2,15 @@
 #include "common.h"
 #include "asm_func.h"
 #include "list_iter.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "v24a0.h"
 #include "v24a2.h"
 #include "shapes.h"
 #include "s193210.h"
 #include "text_reader.h"
 #include "layout_137228.h"
-#include "g27c220.h"
-#include "g262c70.h"
+#include "game_progress.h"
+#include "pad_record.h"
 #include "memory_card.h"
 #include "background_job.h"
 
@@ -167,7 +167,7 @@ void func_001B64D8(s32 a, s32 b);
 s32 func_001602A0(void);
 void func_00160578(s32 n);
 void func_00194398(void);
-void func_001A7F50(G27C220* g);
+void func_001A7F50(GameProgress* g);
 void func_001C0760(s32 flag);
 void func_001C0790(s32 flag);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -208,14 +208,14 @@ extern Pair_26A230 D_0026A230;
 extern f32 D_0026A700;
 extern f32 D_0026A704;
 
-s32 func_00160B28(G27C220* g);
+s32 func_00160B28(GameProgress* g);
 s32 func_001BE810(void);
 s32 func_0011CE30(void);
 s32 func_001BE980(void);
-s32 func_0016EED0(G262C70* p);
-s32 func_0016EC98(G262C70* p);
-void func_0016EC20(G262C70* p, s32 mask);
-f32 func_0016F108(G262C70* p, s32 idx);
+s32 func_0016EED0(PadRecord* p);
+s32 func_0016EC98(PadRecord* p);
+void func_0016EC20(PadRecord* p, s32 mask);
+f32 func_0016F108(PadRecord* p, s32 idx);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00194D30(T217D_6D0* self, s32 a, s32 b);
 void func_00195958(T217D_6D0* self);
@@ -253,7 +253,7 @@ void func_001E96F8(void* self, s32 mode);
 void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
 void func_0016E0F0(Bits_1940E8 bits);
 void func_0016E118(Bits_1940E8 n);
-void func_0016EC88(G262C70* p);
+void func_0016EC88(PadRecord* p);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).
 
@@ -498,7 +498,7 @@ void func_00193270(S_193270* p);
 void func_00193288(State_193288* self, s32 value);
 void func_00193300(S_193300* p);
 void func_00193318(Obj_193318* o);
-void func_001935B0(G27C220* self, char* dst);
+void func_001935B0(GameProgress* self, char* dst);
 s32 func_00193660(void);
 void func_00193E58(T217D_6D0* self);
 void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
@@ -592,7 +592,7 @@ char* func_00193598(s32 index)
     return D_0026A068[index];
 }
 
-void func_001935B0(G27C220* self, char* dst)
+void func_001935B0(GameProgress* self, char* dst)
 {
     s32 a = func_00160B28(self);
     s32 b = func_00160148((self->f19D8 << 8) | self->f19DC);
@@ -721,7 +721,7 @@ void func_001940E8(T217D_6D0* self, s32 mode) {
 void func_00194278(void* a0, s32 a1, s32 a2)
 {
     func_00194D30(a0, 0, -1);
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     s32 key = (g->f19D8 << 8) | g->f19DC;
     if (key == 0x106) {
         if (a1 != 0) {
@@ -764,11 +764,11 @@ void func_00194398(void)
 
 void func_001943E8(T217D_6D0* self)
 {
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     Row_1943E8* row = &((Row_1943E8*)&D_00269D50)[self->page];
     s32 on;
     s32 n;
-    G262C70* pad;
+    PadRecord* pad;
 
     on = 0;
     switch ((g->f19D8 << 8) | g->f19DC) {
@@ -1345,7 +1345,7 @@ void func_00195958(T217D_6D0* self)
             }
             return;
         case 15: {
-            G27C220* g = D_002623C0;
+            GameProgress* g = D_002623C0;
             g->u19EC ^= 0x80;
             func_001C0760(g->u19EC & 0x80);
             {
@@ -1357,7 +1357,7 @@ void func_00195958(T217D_6D0* self)
             return;
         }
         case 16: {
-            G27C220* g = D_002623C0;
+            GameProgress* g = D_002623C0;
             g->u19EC ^= 0x40;
             func_001C0790(g->u19EC & 0x40);
             {

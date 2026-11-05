@@ -2,23 +2,23 @@
 #include "common.h"
 #include "list_iter.h"
 #include "world_listed_object.h"
-#include "c50.h"
-#include "c6c.h"
-#include "c3b.h"
+#include "effect_spawner.h"
+#include "world.h"
+#include "child_group_object.h"
 #include "c8b.h"
 #include "v24a0.h"
 #include "owned_record.h"
 #include "object_message.h"
 #include "globals.h"
 
-void func_001389C8(C6C* a0)
+void func_001389C8(World* a0)
 {
     a0->f1AEC = 0;
 }
 
-void func_00138BE0(void* a0, C03* owner, u32 mask)
+void func_00138BE0(void* a0, Collider* owner, u32 mask)
 {
-    C03* n = owner->root03();
+    Collider* n = owner->root03();
     if (n) {
         n->f4B8 &= ~mask;
     }
@@ -121,15 +121,15 @@ void func_00138278(void* self, In_138278* in, Tree03* out)
     }
 }
 
-void func_001832F0(WorldListedObject* self, C01* src);
-s32 func_001300E8(C01* src, s32 kind);
+void func_001832F0(WorldListedObject* self, BaseObject* src);
+s32 func_001300E8(BaseObject* src, s32 kind);
 s32 func_00152720(void* sub);
 
-void func_0013A418(WorldListedObject* self, C01* src)
+void func_0013A418(WorldListedObject* self, BaseObject* src)
 {
     func_001832F0(self, src);
     if (func_001300E8(src, 0x50) != 0) {
-        C50* from = (C50*)src;
+        EffectSpawner* from = (EffectSpawner*)src;
         self->source = from;
         self->f80 = from->f80;
         if (func_00152720(from->list314) == 0) {
@@ -159,9 +159,9 @@ struct Slot_138828 {
 
 void func_001389C8(void* self);
 
-void func_00138828(C6C* self, void* arg)
+void func_00138828(World* self, void* arg)
 {
-    C6C* t = self;
+    World* t = self;
     s32 stride = 24;
     s32 one = 1;
     u8* a3 = (u8*)arg + 0x430;
@@ -198,7 +198,7 @@ void func_00139E80(WorldListedObject* self)
 
 extern f32 D_0026185C;
 
-void func_0013BE00(C3B* self, f32 delta)
+void func_0013BE00(ChildGroupObject* self, f32 delta)
 {
     self->f554 = D_0026185C + delta;
 }
@@ -206,7 +206,7 @@ void func_0013BE00(C3B* self, f32 delta)
 void func_001BAC30(void* self);
 void func_00159478(void* sub, void* self);
 
-void func_0013B598(C3B* self)
+void func_0013B598(ChildGroupObject* self)
 {
     func_001BAC30(self);
     func_00159478(&self->member5BC, self);
@@ -245,7 +245,7 @@ struct Src_138738 { u8 pad0[4]; s32 value4; };
 
 void* func_001B5EC0(void* pool);
 
-Node_138738* func_00138738(C6C* self, List_138738* list, Src_138738* src)
+Node_138738* func_00138738(World* self, List_138738* list, Src_138738* src)
 {
     Node_138738* n = (Node_138738*)func_001B5EC0((u8*)self + 0x1AF0);
     n->a0 = 0;
@@ -255,10 +255,10 @@ Node_138738* func_00138738(C6C* self, List_138738* list, Src_138738* src)
     return n;
 }
 
-void* func_001387C0(C03* self, C03* other)
+void* func_001387C0(Collider* self, Collider* other)
 {
     ContactRow03* cur = self->root03()->contacts->head;
-    C02* key = other->root;
+    PlacedObject* key = other->root;
     if (cur != 0) {
         do {
             if (cur->other != key) {
@@ -284,7 +284,7 @@ void func_001384A0(void* self, u8** out)
 ContactRow03* func_00138788(void* unused, ContactRow03** head, Contacts03* key)
 {
     ContactRow03* node = *head;
-    C03* wanted = key->owner;
+    Collider* wanted = key->owner;
     while (node) {
         if (node->other == wanted) {
             *head = node->next;
@@ -297,7 +297,7 @@ ContactRow03* func_00138788(void* unused, ContactRow03** head, Contacts03* key)
 }
 
 void func_001BA130(void* self, void* other);
-void func_0013B5C8(C3B* self, C3B* other)
+void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other)
 {
     func_001BA130(self, other);
     if (other->slot) self->slot = (void*)func_0018D568(0x24, other->slot);
@@ -424,16 +424,16 @@ void func_00139F80(Obj_139F80* self, void* x)
 }
 
 
-void func_00127378(C3B* self, s32 kind, ObjectMessage* msg);
-void func_0013BE00(C3B* p, f32 delta);
+void func_00127378(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
+void func_0013BE00(ChildGroupObject* p, f32 delta);
 
-void func_0013B708(C3B* self, s32 kind, ObjectMessage* msg)
+void func_0013B708(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 0xA) {
-        if ((C3B*)msg->target == self) {
-            if (((C3B*)msg->target)->f550 == 0) {
-                func_0013BE00((C3B*)msg->target, 0.0f);
+        if ((ChildGroupObject*)msg->target == self) {
+            if (((ChildGroupObject*)msg->target)->f550 == 0) {
+                func_0013BE00((ChildGroupObject*)msg->target, 0.0f);
             }
         }
     }
@@ -465,7 +465,7 @@ void func_0013A3A0(WorldListedObject* self)
     func_00124FC0(self);
     func_00129DF8(self);
     FlagRecord* sub = self->flagRecord;
-    C6D* g = D_00261990;
+    Camera* g = D_00261990;
     s32 hit = 0;
     u32 flags = sub->flags;
     u32 mask = g->f21C;
@@ -541,7 +541,7 @@ s32 func_001300E8(void* node, s32 kind);
 void func_00182ED8(s32 a);
 void* func_0018D500(s32 size);
 
-void func_0013B610(C3B* self)
+void func_0013B610(ChildGroupObject* self)
 {
     func_00124A48(self);
     Frame_13B610 f((List_13B610*)&self->children);
@@ -644,9 +644,9 @@ void func_0013B430(s32 mask)
     }
 }
 
-void func_001385A0(C6C* a0, s32 a1, Contacts03* a2, s32 a3, s32 a4);
+void func_001385A0(World* a0, s32 a1, Contacts03* a2, s32 a3, s32 a4);
 
-void func_00138F28(C6C* self, C03* obj)
+void func_00138F28(World* self, Collider* obj)
 {
     obj->f4B8 = 0;
     Contacts03* n = self->usedTables;
@@ -662,7 +662,7 @@ void func_00138F28(C6C* self, C03* obj)
     }
 }
 
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 
 extern const f32 D_00249D74 = 3.4028235e+38f;
 Quad3B D_00261320 = { 0x42480000, 0x459C4000, 0, 0 };
@@ -671,7 +671,7 @@ Quad3B D_00261340 = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
 Pair3B D_00261350 = { 0x44160000, 0x44AF0000 };
 Pair3B D_00261358 = { 0x41A00000, 0x42480000 };
 
-void func_0013B4C0(C3B* self)
+void func_0013B4C0(ChildGroupObject* self)
 {
     func_001B7968(self);
     self->f554 = D_00249D74;
@@ -690,15 +690,15 @@ void func_0013B4C0(C3B* self)
     self->f67C = 0;
 }
 
-struct Link_1385A0 { s32 f0; s32 f4; Link_1385A0* f8; C03* fC; };
+struct Link_1385A0 { s32 f0; s32 f4; Link_1385A0* f8; Collider* fC; };
 
-Link_1385A0* func_00138738(C6C* w, s32 a, s32 b);
-Link_1385A0* func_00138788(C6C* w, s32 a, s32 b);
-void func_001861E8(C6C* w, s32 a);
-void func_00129DF8(C03* e);
+Link_1385A0* func_00138738(World* w, s32 a, s32 b);
+Link_1385A0* func_00138788(World* w, s32 a, s32 b);
+void func_001861E8(World* w, s32 a);
+void func_00129DF8(Collider* e);
 void func_001B5F28(u8* w, Link_1385A0* l);
 
-void func_001385A0(C6C* w, s32 a, s32 b, u8 set, u8 clr) {
+void func_001385A0(World* w, s32 a, s32 b, u8 set, u8 clr) {
     Link_1385A0* n1;
     Link_1385A0* n2;
     s32 ia = (a - (s32)w->tables) >> 4;
@@ -802,7 +802,7 @@ struct Anim_139038 {
 
 void func_0018D608(void);
 void func_0018D6F0(void);
-Anim_139038* func_0011E580(s32 kind, s32 a, C03* ctx, s32 b, s32 c);
+Anim_139038* func_0011E580(s32 kind, s32 a, Collider* ctx, s32 b, s32 c);
 void* func_0018D500(s32 size);
 void* func_0018D5C0(s32 size);
 Grp_139038* func_0018D6A8(s32 size);
@@ -812,7 +812,7 @@ Track_139038* func_00121050(s32 kind);
 Track_139038* func_00121160(s32 kind);
 void func_00138FF0(s32 a, s32 b, s32 c, s32 d);
 
-void func_00139038(C03* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, Anim_139038** out)
+void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* keyA, s32* keyB, Anim_139038** out)
 {
     s32 i;
     Item_139038* item;
@@ -939,7 +939,7 @@ void func_00139038(C03* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s32* k
 
 void func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
-void func_0013B9D8(C3B* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
+void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
 {
     s32 i;
     if (self->active) {
@@ -1071,13 +1071,13 @@ struct Obj_138C00
     u64 bits538;
 };
 
-void func_001389D0(C6C* w);
-void func_001861E8(C6C* w, Contact03* item);
-Contact03* func_00188270(C6C* w, Obj_138C00** pair, s32 arg);
-void func_001860A8(C6C* w, s32 one, Contact03** item);
+void func_001389D0(World* w);
+void func_001861E8(World* w, Contact03* item);
+Contact03* func_00188270(World* w, Obj_138C00** pair, s32 arg);
+void func_001860A8(World* w, s32 one, Contact03** item);
 void func_00129DF8(Obj_138C00* o);
 
-void func_00138C00(C6C* w, s32 arg)
+void func_00138C00(World* w, s32 arg)
 {
     Obj_138C00* pair[2];
     Obj_138C00* o;

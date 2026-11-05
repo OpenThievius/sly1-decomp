@@ -6,7 +6,7 @@
 #ifndef TIMED_STATE_OBJECT_H
 #define TIMED_STATE_OBJECT_H
 
-#include "c03.h"
+#include "collider.h"
 
 // The object at +0x560: a part of another class whose +0x694 func_0013DD08 tests.
 struct Child27 {
@@ -14,7 +14,7 @@ struct Child27 {
     s32 f694;
 };
 
-struct TimedStateObject : C03 {
+struct TimedStateObject : Collider {
     s32 state;              // 0x550: func_0013DD78 sets it
     f32 stamp;              // 0x554: the clock when the state changed (D_0026185C)
     f32 limit;              // 0x558: how long state 1 lasts
@@ -28,7 +28,7 @@ typedef char check_TimedStateObject[sizeof(TimedStateObject) == 0x570 ? 1 : -1];
 
 void func_0013DCA8(TimedStateObject* self, s32 kind, void* msg);     // slot 13
 void func_0013DC38(TimedStateObject* self);                          // slot 17
-s32 func_0013DD08(TimedStateObject* self, C03* other);               // slot 57
+s32 func_0013DD08(TimedStateObject* self, Collider* other);               // slot 57
 void func_0013DD78(TimedStateObject* self, s32 state);               // sets the state
 
 #endif

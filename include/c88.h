@@ -6,9 +6,9 @@
 #ifndef C88_H
 #define C88_H
 
-#include "c01.h"
+#include "base_object.h"
 
-struct C88 : C01 {
+struct C88 : BaseObject {
     s32 f34;                // 0x34
     void* f38;              // 0x38
     u8 pad3C[0x44 - 0x3C];

@@ -9,7 +9,7 @@
 #ifndef OBJECT_GATHERER_H
 #define OBJECT_GATHERER_H
 
-#include "c03.h"
+#include "collider.h"
 
 // The eight bytes func_0019B250 (slot 9) keeps across the copy, read as one unaligned
 // doubleword.
@@ -17,7 +17,7 @@ struct __attribute__((packed)) PackedS64 {
     s64 v;
 };
 
-struct ObjectGatherer : C03 {
+struct ObjectGatherer : Collider {
     s32 state;            // 0x550: -1 at set-up (func_0019B188, slot 16); func_0019BE08 (slot 45) tests it for 3
     u8 pad554[0x55C - 0x554];
     f32 f55C;               // 0x55C: slot 0 (func_0019B038) stores func_001EAB48 of the clock

@@ -5,10 +5,10 @@
 #ifndef C8D_H
 #define C8D_H
 
-#include "c01.h"
+#include "base_object.h"
 
 // 0x8D: func_001F2758 (slot 0) resets three indices and a scale to -1.
-struct C8D : C01 {
+struct C8D : BaseObject {
     f32 scale34;            // 0x34
     s32 f38;                // 0x38
     s32 f3C;                // 0x3C

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "state_notifier.h"
-#include "c6c.h"
+#include "world.h"
 #include "scaled_offset_object.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "object_link.h"
 
 void func_0012AA28(void* a, s32 b);
@@ -42,7 +42,7 @@ void func_00146470(StateNotifier* self)
     if (r != 0) {
         ((void (*)(void*))((void**)*(void***)r)[7])(r);
     }
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     if (((g->f19D8 << 8) | g->f19DC) != 0x308) {
         if (func_00141008(D_00261420, self->f37C)) {
             self->initialMode = 2;
@@ -86,7 +86,7 @@ void func_00147FB0(C58* self)
     }
 }
 
-void func_001BAC30(C03* self, void* p);
+void func_001BAC30(Collider* self, void* p);
 f32 func_00137DF8(void* p);
 
 void func_00146130(ScaledOffsetObject* self, void* p)
@@ -105,7 +105,7 @@ void func_00146178(ScaledOffsetObject* self)
     func_00146298(self);
 }
 
-void func_00138BE0(C6C* a, void* self, s32 n);
+void func_00138BE0(World* a, void* self, s32 n);
 void func_00129DF8(void* self);
 
 void func_00146240(ScaledOffsetObject* self, f32 v)
@@ -118,7 +118,7 @@ void func_00146240(ScaledOffsetObject* self, f32 v)
     }
 }
 
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 
 void func_00146100(ScaledOffsetObject* self)
 {
@@ -143,7 +143,7 @@ void func_00147EF8(C58* self, s32 kind, void* target)
     if (target != self->f2E8) return;
     func_001B6598(target, &code);
     if (code != 0x263) return;
-    C01* obj = self->world->f1D60;
+    BaseObject* obj = self->world->f1D60;
     if (obj != 0) {
         args.flag = 1;
         args.self = self;

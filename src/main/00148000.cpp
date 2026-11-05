@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include "c05.h"
+#include "switched_collider.h"
 #include "state_notifier.h"
-#include "c6c.h"
-#include "c6d.h"
-#include "g27c220.h"
-#include "t219c.h"
-#include "t217d.h"
+#include "world.h"
+#include "camera.h"
+#include "game_progress.h"
+#include "effect.h"
+#include "screen_element.h"
 #include "v24a2.h"
 
 void func_00148178(void)
 {
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     s32 r = 99;
     if (g->f19E0 + 1 <= 98) r = g->f19E0 + 1;
     g->f19E0 = r;
@@ -27,8 +27,8 @@ s32 func_00160D98(void);
 
 void func_001481A0(void* self)
 {
-    T219C* s = (T219C*)self;
-    G27C220* g = D_002623C0;
+    Effect* s = (Effect*)self;
+    GameProgress* g = D_002623C0;
     s32 c = g->f19E8 + 1;
     s32 r;
     g->f19E8 = c;
@@ -67,9 +67,9 @@ extern s32 D_0026EC58;
 
 s32 func_001300E8(void* node, s32 kind);
 
-void func_00148CE0(C6C* self)
+void func_00148CE0(World* self)
 {
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     if (((g->f19D8 << 8) | g->f19DC) == 0x308) return;
     s32 r = func_00160D98();
     if (g->f19E4 < r) {
@@ -298,9 +298,9 @@ void func_00148598(C59* self, s32 mode)
     func_00147AB0(self, mode);
 }
 
-void func_00149398(T2173* self, C6D* owner);
+void func_00149398(T2173* self, Camera* owner);
 
-void func_00149660(T2173_3B0* self, C6D* owner)
+void func_00149660(T2173_3B0* self, Camera* owner)
 {
     func_00149398(self, owner);
     self->count = 0;
@@ -325,7 +325,7 @@ void func_00143968(void* eng, f32 x);
 void func_001496C0(T2173_3B0* self)
 {
     Tmp_1496C0 tmp;
-    C6D* eng = (C6D*)self->owner;
+    Camera* eng = (Camera*)self->owner;
     func_00189230((u8*)eng + 0x80, (u8*)self + 8, (u8*)self + 0x10);
     f32 d = self->f20;
     self->f10 = D_00261BF0;
@@ -357,7 +357,7 @@ void func_00148748(Dispatch_148748* self)
     self->vtbl[51](self, 2);
 }
 
-void func_00149398(T2173* self, C6D* owner)
+void func_00149398(T2173* self, Camera* owner)
 {
     self->owner = owner;
 }
@@ -391,7 +391,7 @@ void func_00148770(C5A* self, s32 kind, void* msg)
     if (msg != self->f2E8) return;
     func_001B6598(msg, &fr.code);
     if (fr.code != 0x263) return;
-    C01* dev = self->world->f1D60;
+    BaseObject* dev = self->world->f1D60;
     if (dev != 0) {
         fr.note.flag = 1;
         fr.note.owner = self;
@@ -475,7 +475,7 @@ void func_00149168(C5B* self)
 
 void func_0014A8D0(T2173_3C8* self)
 {
-    C6D* parent = self->owner;
+    Camera* parent = self->owner;
     func_00144B70(parent, (u8*)parent->stack[0].target + 0x370);
 }
 
@@ -575,7 +575,7 @@ void func_00148E40(C57* self, s32 kind, void* msg)
     if (msg != self->f2E8) return;
     func_001B6598(msg, &fr.code);
     if (fr.code != 0x263) return;
-    C01* dev = self->world->f1D60;
+    BaseObject* dev = self->world->f1D60;
     if (dev != 0) {
         fr.note.flag = 1;
         fr.note.owner = self;
@@ -605,7 +605,7 @@ void func_00148F80(void)
 {
     T217D_E30* obj = &D_0026C6C8;
     obj->vt->m14(obj);
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     if (g->f19E0 < 0x63) {
         g->f19E0 = g->f19E0 + 1;
         obj->rate = 250.0f;
@@ -632,11 +632,11 @@ void func_0014A7B8(T2173_3B0* self)
 {
     Quad_14A7B8 a;
     Quad_14A7B8 b;
-    C6D* n;
+    Camera* n;
 
     func_001493C8(&a, self);
     func_00149458(&b, self);
-    n = (C6D*)self->owner;
+    n = (Camera*)self->owner;
     func_001BF788(self->p48, 0);
     func_001BF788(self->p4C, 500);
     func_00144938(n, &b, &a);
@@ -723,7 +723,7 @@ extern void* D_00261B60[28];
 extern u8 D_00261420[];
 
 f32 func_001EAAE0(f32 a, f32 b);
-T219C* func_0019EA78(s32 kind, C1E* sys);
+Effect* func_0019EA78(s32 kind, EffectOwner* sys);
 void func_00141040(void* table, s32 v);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00148F80(void* self);
@@ -748,7 +748,7 @@ zero_case:
 
 one_case:
     {
-        T219C* c = func_0019EA78(0x10, 0);
+        Effect* c = func_0019EA78(0x10, 0);
         if (c != 0) {
             c->p134 = self;
             c->params = (const T219C_Params*)D_00261B60;
@@ -889,7 +889,7 @@ void func_0014AD00(T217D_720* self, f32* clock)
 
 
 extern u8 D_002483D0[];
-void func_0014A888(T2173_3C8* self, C6D* a1)
+void func_0014A888(T2173_3C8* self, Camera* a1)
 {
     func_00149398(self, a1);
     Blk2173* dst = &self->frame20;
@@ -929,13 +929,13 @@ f32 D_00261B50[4] = { 1e+03f, 1.3e+03f, 0.0f, 0.0f };
 
 void func_0018D608(void);
 Obj_148AC0** func_0018D658(s32 size);
-s32 func_00148938(C6C* self, s32 a1, s32 n, Obj_148AC0** arr);
+s32 func_00148938(World* self, s32 a1, s32 n, Obj_148AC0** arr);
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001ED650(void* out, f32 x, f32 y, f32 z);
-void func_001EEB60(C6C* a, f32 f, void* b, void* c);
+void func_001EEB60(World* a, f32 f, void* b, void* c);
 void func_0018D6F0(void);
 
-s32 func_00148AC0(C6C* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
+s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
 {
     Obj_148AC0** p;
     s32 i;
@@ -970,7 +970,7 @@ s32 func_00148AC0(C6C* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
             b = func_001EAAE0(D_00261B50[0], D_00261B50[1]);
             func_001ED650(q, ang, a, b);
             ang += step;
-            func_001EEB60((C6C*)self->f1EC4, o->f2A8, (u8*)o + 0x140, (u8*)o + 0x88);
+            func_001EEB60((World*)self->f1EC4, o->f2A8, (u8*)o + 0x140, (u8*)o + 0x88);
         }
     }
     func_0018D6F0();
@@ -1000,16 +1000,16 @@ extern u8 D_002483D0[];
 extern u8 D_00248D30[];
 extern Quad_148038 D_00261AC0;
 
-s32 func_00148938(C6C* self, s32 a1, s32 a2, void** out);
+s32 func_00148938(World* self, s32 a1, s32 a2, void** out);
 s32 func_00160D98(void);
 void func_00144128(Ctx_148038* a, void* b, void* c);
 s32 func_001EEB60(Ctx_148038* self, f32 x, void* vec, void* out);
 
-void func_00148038(C6C* self)
+void func_00148038(World* self)
 {
     void* obj;
     s32 buf[4];
-    G27C220* g;
+    GameProgress* g;
     s32 n;
     s32 c;
 
@@ -1042,7 +1042,7 @@ struct Locals_148298 {
 
 extern void* D_00261AD0[28];
 
-T219C* func_0019EA78(s32 kind, C1E* sys);
+Effect* func_0019EA78(s32 kind, EffectOwner* sys);
 void func_001481A0(void* self);
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -1058,7 +1058,7 @@ void func_00148298(C58* self, s32 mode)
             }
             break;
         case 1:
-                T219C* n = func_0019EA78(0x10, 0);
+                Effect* n = func_0019EA78(0x10, 0);
                 if (n != 0) {
                     n->params = (const T219C_Params*)D_00261AD0;
                     n->p134 = self;

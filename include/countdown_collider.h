@@ -9,7 +9,7 @@
 #ifndef COUNTDOWN_COLLIDER_H
 #define COUNTDOWN_COLLIDER_H
 
-#include "c03.h"
+#include "collider.h"
 
 // The record at CountdownCollider::record, which func_0017B648 (slot 17) lets go of when its field at 0x18
 // has run to zero.
@@ -18,7 +18,7 @@ struct CountdownRecord {
     f32 remaining;
 };
 
-struct CountdownCollider : C03 {
+struct CountdownCollider : Collider {
     s32 mode;               // 0x550: func_0017B648 tests it for 2; func_0017B710 (slot 46) for 1
     f32 startTime;          // 0x554: the clock func_0017B648 compares against
     s32 countdown;          // 0x558: 0x10 at set-up (slot 0, func_0017B5D0); func_0017B7A8 counts it down

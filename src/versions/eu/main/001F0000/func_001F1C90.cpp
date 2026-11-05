@@ -41,7 +41,7 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
         if (an != 0) {
             func_001AA8B0(self, an->f34);
         }
-        G27C220* g = D_002623C0;
+        GameProgress* g = D_002623C0;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
             func_001BED48();
         }
@@ -59,7 +59,7 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
             }
             func_0016E118(1);
             func_001E96F8(D_00275BC0, 3);
-            G27C220* g = D_002623C0;
+            GameProgress* g = D_002623C0;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
                 func_001BED70();
             }

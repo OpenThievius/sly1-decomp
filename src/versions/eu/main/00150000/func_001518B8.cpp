@@ -2,7 +2,7 @@
 // PAL: D_0026E9F8.f260 and f26C are at 0x570 and 0x57C (US 0x260, 0x26C).
 struct Gl_0026E9F8_eu { u8 pad0[0x570]; s32 f570; u8 pad1[8]; s32 f57C; };
 
-void func_001518B8(C65* self)
+void func_001518B8(StepSequence* self)
 {
     Gl_0026E9F8_eu* g = (Gl_0026E9F8_eu*)&D_0026E9F8;
     if (g->f570 >= 2 || g->f57C != 0)

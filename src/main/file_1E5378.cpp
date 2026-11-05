@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "asm_func.h"
 #include "fpu.h"
 #include "list_iter.h"
 #include "v24a0.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "message_body.h"
 #include "shapes.h"
 extern u8* D_00262E10;
@@ -364,7 +364,7 @@ struct Elem_1E5E70 {
     f32 f54;
 };
 
-void func_001AA1F0(T217D* self, s32 kind);
+void func_001AA1F0(ScreenElement* self, s32 kind);
 f32 func_001EAAE0(f32 a, f32 b);
 
 void func_001E5E70(T217D_3F0* self, s32 kind)
@@ -435,7 +435,7 @@ extern f32 D_00275660;
 typedef void (*VFn_1E6188)(void* self);
 struct Inst_1E6188 { VFn_1E6188* vtbl; };
 
-void func_001AA268(T217D* self);
+void func_001AA268(ScreenElement* self);
 void* func_0011E580(s32 a0, void* a1, void* a2, s32 a3, s32 a4);
 void func_00184768(void* p, s32 v);
 void func_001847F0(void* p, void* q);
@@ -630,27 +630,27 @@ void func_001E7440(T217D_3F0* a0, s32 a1)
     }
 }
 
-void func_00126BC0(C02* node, T217D_3F0* self);
+void func_00126BC0(PlacedObject* node, T217D_3F0* self);
 extern s32 D_00270458;
 
 void func_001E7460(T217D_3F0* self)
 {
-    C02* cur = (C02*)self->current;
-    if ((C02*)self->target == cur) {
+    PlacedObject* cur = (PlacedObject*)self->current;
+    if ((PlacedObject*)self->target == cur) {
         return;
     }
     if (cur != 0) {
-        if (!(D_00270458 == 4 && cur == (C02*)self->special)) {
+        if (!(D_00270458 == 4 && cur == (PlacedObject*)self->special)) {
             cur->desc->m03(cur);
         }
     }
     self->current = self->target;
     if (self->current != 0) {
-        ((C02*)self->current)->desc->m02((C02*)self->current);
+        ((PlacedObject*)self->current)->desc->m02((PlacedObject*)self->current);
         if (D_00270458 != 4) {
-            func_00126BC0((C02*)self->current, self);
+            func_00126BC0((PlacedObject*)self->current, self);
         }
-        ((C02*)self->current)->flags |= 0x100000000UL;
+        ((PlacedObject*)self->current)->flags |= 0x100000000UL;
     }
 }
 
@@ -692,7 +692,7 @@ void func_001E7518(T217D_3F0* self, s32 mode)
 }
 
 extern s32 D_00270458;
-void func_001AAB20(T217D* self, f32 x, f32 y);
+void func_001AAB20(ScreenElement* self, f32 x, f32 y);
 
 void func_001E76E0(T217D_3F0* self, s32 value)
 {
@@ -718,7 +718,7 @@ extern f32 D_00261858[];
 extern s32 D_00270448;
 extern s32 D_00270458;
 
-void func_001AA298(T217D* self);
+void func_001AA298(ScreenElement* self);
 f32 func_001EA4B8(f32* p, s32 zero, f32 a, f32 b, f32 c);
 s32 func_001EAC68(f32 a, f32 b, f32 c);
 f32 func_001EAAE0(f32 a, f32 b);
@@ -887,13 +887,13 @@ void func_001E86E0(T217D_3F0* self, void* value)
 
 void func_001E87F0(T217D_3F0* self, void* a1)
 {
-    C02* old = (C02*)self->special;
+    PlacedObject* old = (PlacedObject*)self->special;
     if (old != 0) {
         old->flags &= ~(1ULL << 32);
     }
     self->special = a1;
     if (a1 != 0) {
-        ((C02*)a1)->flags |= (1ULL << 32);
+        ((PlacedObject*)a1)->flags |= (1ULL << 32);
     }
 }
 

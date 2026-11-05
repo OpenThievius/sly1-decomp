@@ -5,9 +5,9 @@
 #ifndef C35_H
 #define C35_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct C35 : C03 {
+struct C35 : Collider {
 };
 
 typedef char check_C35[sizeof(C35) == 0x550 ? 1 : -1];

@@ -10,7 +10,7 @@
 #ifndef OBJECT_GROUP_H
 #define OBJECT_GROUP_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 struct LoadStream;  // the level stream an object is loaded from
 
@@ -30,7 +30,7 @@ struct Pair53 {
 
 // 0x53: a list of cells that point at the loaded objects (func_00196410 fills it; copying
 // (func_00196810) makes new cells that point at the copy's objects).
-struct ObjectGroup : C02 {
+struct ObjectGroup : PlacedObject {
     GroupList cells;           // 0x2D0
     Pair53 kept;            // 0x2DC: restored after the common copy
     u8 pad2E4[0x2F0 - 0x2E4];
