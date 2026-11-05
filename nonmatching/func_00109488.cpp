@@ -42,14 +42,23 @@
 // pseudo 2083 (18 refs over 5132 insns, a user variable from the helpers' parameters) gets no
 // register in global alloc, so reload rebuilds it at each store (lui/addiu into s1, s3, s6...).
 // Its priority, floor_log2(refs) * refs / live length, is low, so it is allocated late; by then
-// s4 is held by this form's long-lived 2194 (built at line 1045 here, stored at +4 from 2198).
-// Retail builds that long-lived 2194 earlier, at line 700, into s7: a longer range, a lower
-// priority, so it is allocated after the func_00155778 value and takes s7. Both sides build 2194
-// twelve times and load the same 33 floats; the difference is where the long 2194 value starts.
+// s4 is held here by the 2194 of entries 257 on (retail holds that one in s7; entries 134-248
+// hold 2194 in t6 on both sides).
 //
-// Next: find why this form's long 2194 value starts at the entry of line 1045 and not at the
-// entry of line 700 (the CSE equivalence of the earlier 2194 ends there: an entry between them
-// sets it in a register CSE cannot keep), and try the field set of that entry in its retail order.
+// The whole allocation is permuted, from entry 0 (value 4: s5 here, s3 in retail). Per value,
+// this form builds 4 23 times fewer than retail and func_00155778 7 times more: it keeps one 4
+// in s5 across the whole table, where retail rebuilds 4 at almost every use after entry 237 and
+// spends the register on func_00155778. The 4s are eleven pseudos here (user variables from the
+// helpers' parameters), each live over thousands of insns: sched1, before allocation, moves the
+// constant loads far from their stores, so the live lengths behind every priority come from
+// sched1's choices, whose ties go to insn order (LUID), that is to the order of the source's
+// parameters and statements. That is why only orders move this function; byte-exact counts barely
+// move until everything is right.
+//
+// Next: score candidates on the allocation instead of the bytes. build/swarm/lead/f109/trace.py
+// gives, per store (entry, offset), each side's register and value (the values all agree), and
+// builds.py the per-value build counts; a search that minimises the register differences, or the
+// build-count distance (4 and func_00155778 first), has a gradient where EXACT has none.
 
 void func_001000C8();
 void func_00100178();
