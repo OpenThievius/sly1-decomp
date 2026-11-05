@@ -312,7 +312,13 @@ void func_001AE178(T217D_4C0* self)
 struct Flags_1AE758 { u8 a; u8 b; };
 extern f32 D_002744AC;
 
-s8 func_001AEA08(void);
+// The letter func_001AEA08 picks: PAL reads the table's bytes unsigned (docs/VERSIONS.md).
+#ifdef VERSION_EU
+typedef u8 Letter_1AEA08;
+#else
+typedef s8 Letter_1AEA08;
+#endif
+Letter_1AEA08 func_001AEA08(void);
 void func_001AE758(T217D_600* self)
 {
     f32 k = 0.25f;
@@ -815,7 +821,7 @@ extern const char D_0024CFA0[];
 
 u32 func_001E2100(Table_001AEA08* t);
 
-s8 func_001AEA08(void)
+Letter_1AEA08 func_001AEA08(void)
 {
     s32 scaled = (s32)(D_00261868 * 5.0f);
     u32 divisor = func_001E2100((Table_001AEA08*)D_002744B0.p);

@@ -48,7 +48,11 @@ public:
 struct Obj_18E940 {
     s32 f00;
     s32 f04;
+#ifdef VERSION_EU
+    u8 pad08[0x28];     // a word longer in PAL: its func_0018E940 has sub-objects at 0x30 and 0x50
+#else
     u8 pad08[0x24];
+#endif
     u8 sub2C[0x20];
     u8 sub4C[0x20];
     Ring_18E6C0 sub6C;
@@ -388,7 +392,7 @@ extern u8 D_00148D68[];
 
 void func_0020ADA0(void);
 void func_0020AE40(void* self, void* a, s32 b);
-void func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
+s32 func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
 void func_0020B168(void* self, s32 a, void* fn, void* arg);
 
 s32 func_0018E410(IdentityKey* key);

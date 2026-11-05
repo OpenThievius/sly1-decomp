@@ -100,12 +100,14 @@ def definition_span(text, name):
     raise VersionSourceError("no definition of %s" % name)
 
 
-def unit_text(shared, definitions):
+def unit_text(shared, definitions, key="eu"):
     """The shared file's text with each function of `definitions` ({name: file}) defined by its file.
 
     A function only the version has (OWN_NAME) replaces nothing: it is added at the end, in name order.
+    The unit starts by defining VERSION_EU (VERSION_<KEY>), so that a declaration whose type differs
+    between the versions can say so (docs/VERSIONS.md); it changes nothing else.
     """
-    text = Path(shared).read_text()
+    text = "#define VERSION_%s 1\n" % key.upper() + Path(shared).read_text()
     own = sorted(n for n in definitions if OWN_NAME.match(n))
     spans = sorted(((definition_span(text, name), path) for name, path in definitions.items() if name not in own),
                    reverse=True)
@@ -147,7 +149,7 @@ def unit(shared, key, trying=None):
     mine.update(trying or {})
     out = ROOT / "build" / key / "versions" / ("try" if trying else "") / rel
     out.parent.mkdir(parents=True, exist_ok=True)
-    text = unit_text(shared, mine)
+    text = unit_text(shared, mine, key)
     if not out.exists() or out.read_text() != text:
         out.write_text(text)
     return out, sorted(mine)
@@ -179,12 +181,14 @@ def main(argv=None):
         for name, path in overrides(args.version).items():
             print("%s\t%s" % (name, path.relative_to(ROOT)))
     else:
+        import classify_asm
         import todo
         bodies = todo.bodies(args.version)
         done = overrides(args.version)
+        assembly = classify_asm.read_table(ROOT / "config" / args.version / "original_asm.tsv")
         for name, addr, size, shared in only_here(args.version):
             own = "func_%s_%08X" % (args.version, addr)
-            if own not in done:
+            if own not in done and name not in assembly:
                 tags = ",".join(sorted(todo.tags_of(bodies.get(name, []), "code"))) or "none"
                 print("%s\t%d\t%s\t%s" % (own, size, tags, shared.relative_to(ROOT)))
     return 0

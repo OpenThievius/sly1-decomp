@@ -9,9 +9,9 @@ the source only loosely: retail's order is often one particular order of the sam
 
 Mark the lines to reorder with a /*P*/ comment; consecutive marked lines form one group, and the
 groups are permuted together (at most --limit orders in all). --auto marks every run of two to
-seven consecutive simple statements (an assignment or a call ending in `;`) instead, and then
-permutes one run at a time, keeping the best order of each before the next; a run with more
-orders than --limit is taken in overlapping windows that fit it.
+seven consecutive simple statements (an assignment or a call ending in `;`) in FUNC's definition
+instead, and then permutes one run at a time, keeping the best order of each before the next; a
+run with more orders than --limit is taken in overlapping windows that fit it.
 
 Each candidate is compiled the way the function lands (its src/ file's compiler and flags,
 check.source_for(); with --unit, in that shared file's unit as PAL's own definitions are) and
@@ -42,11 +42,28 @@ SIMPLE = re.compile(r"^\s+(?!return\b|if\b|else\b|for\b|while\b|do\b|switch\b|ca
                     r"continue\b)[^{};]*;\s*(//.*|/\*.*\*/)?\s*$")
 
 
-def groups(lines, auto):
-    """[[line index, ...], ...]: the runs of lines to permute."""
+def function_lines(lines, func):
+    """(first, end) line indices of FUNC's definition in a file, or None when it has none: a near
+    miss holds its whole unit, and statements outside the function only cost compiles."""
+    import version_src
+    text = "\n".join(lines)
+    try:
+        start, end = version_src.definition_span(text, func)
+    except version_src.VersionSourceError:
+        return None
+    return text.count("\n", 0, start), text.count("\n", 0, end) + 1
+
+
+def groups(lines, auto, within=None):
+    """[[line index, ...], ...]: the runs of lines to permute; with --auto, only in the line range
+    `within` (the function's own definition) when it is given."""
     out, run = [], []
+    lo, hi = within or (0, len(lines))
     for i, line in enumerate(lines):
-        hit = (SIMPLE.match(line) and "=" in line or SIMPLE.match(line) and "(" in line) if auto else MARK in line
+        if auto and not lo <= i < hi:
+            hit = False
+        else:
+            hit = (SIMPLE.match(line) and "=" in line or SIMPLE.match(line) and "(" in line) if auto else MARK in line
         if hit:
             run.append(i)
             continue
@@ -153,7 +170,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     key = "eu" if args.unit and args.version == "us" else args.version
     lines = Path(args.file).read_text().rstrip("\n").split("\n")
-    runs = groups(lines, args.auto)
+    runs = groups(lines, args.auto, function_lines(lines, args.func) if args.auto else None)
     if not runs:
         print("nothing to permute: mark lines with %s, or use --auto" % MARK)
         return 2

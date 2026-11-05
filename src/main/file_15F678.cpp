@@ -1913,7 +1913,27 @@ void Obj_161958::func_00161958(s32 count)
     p[1] = 0;
 }
 
-INCLUDE_ASM(func_001619C0);
+struct Bytes16_1619C0 { u8 b[16]; };
+extern u8* D_00261990;
+
+u8* func_001619C0(u8* self)
+{
+    s32 i;
+    for (i = 0x93; i != -1; i--) {
+    }
+    func_001F5C0C(self + 0xFC, 0, 0x28);
+    func_001F5C0C(self, 0, 0xB0);
+    u8* camera = D_00261990;
+    *(s32*)(self + 0x98) = 1;
+    *(f32*)(self + 0x90) = 1.0f;
+    *(Bytes16_1619C0*)(self + 0x80) = *(Bytes16_1619C0*)(camera + 0x208);
+    *(s32*)(self + 0xB0) = 0;
+    *(s32*)(self + 0xB4) = 0;
+    *(s32*)(self + 0x94) = -1;
+    *(f32*)(self + 0xAC) = 1.0f;
+    func_00161B80(self);
+    return self;
+}
 
 void func_00161A88(void* self, s32 flag)
 {

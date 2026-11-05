@@ -230,7 +230,7 @@ class VersionSourceTest(unittest.TestCase):
             shared.write_text(self.SHARED)
             own.write_text("void func_eu_00100030(void)\n{\n}\n")
             text = version_src.unit_text(shared, {"func_eu_00100030": own})
-        self.assertTrue(text.startswith(self.SHARED.rstrip("\n")))
+        self.assertTrue(text.startswith("#define VERSION_EU 1\n" + self.SHARED.rstrip("\n")))
         self.assertTrue(text.rstrip().endswith("void func_eu_00100030(void)\n{\n}"))
 
     def test_a_version_file_names_its_version_and_shared_file(self):
@@ -326,6 +326,12 @@ class SystemEvidenceTest(unittest.TestCase):
         normal = ["addiu $sp, $sp, -0x10", "sd $ra, 0x0($sp)", "nop", "sw $a0, 0x4($sp)", "jr $ra", "nop"]
         self.assertIsNone(classify_asm.handwritten(classify_asm.ops_of(normal), "code", normal))
 
+    def test_pal_counts_its_own_table(self):
+        # The functions only PAL has are classified in config/eu/original_asm.tsv, under PAL's names.
+        own = set(classify_asm.read_table(classify_asm.EU_TABLE))
+        self.assertTrue(own)
+        self.assertLessEqual(own, progress.original_asm("eu"))
+
     def test_a_multimedia_instruction_the_compiler_emits_does_not_block(self):
         # por moves a 128-bit value (a mode(TI) argument) between registers: plain C emits it.
         self.assertNotIn("mmi", todo.tags_of(["lq $a1, 0x10($sp)", "jal func_00118D30", "por $a0, $zero, $s1",
@@ -366,7 +372,7 @@ class ProgressCountTest(unittest.TestCase):
         self.assertEqual(progress.exact_c("us") & asm, set())
 
     def test_a_pal_function_follows_its_us_counterpart(self):
-        pal = progress.original_asm("eu")
+        pal = progress.original_asm("eu") - set(classify_asm.read_table(classify_asm.EU_TABLE))
         self.assertTrue(pal)
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
@@ -472,6 +478,12 @@ class PermuteTest(unittest.TestCase):
 
     def test_auto_takes_runs_of_simple_statements(self):
         self.assertEqual(permute.groups(self.LINES, auto=True), [[2, 3, 4, 5, 6]])
+
+    def test_auto_stays_in_the_function(self):
+        lines = ["void g(S* s)", "{", "    s->x = 1;", "    s->y = 2;", "}"] + self.LINES
+        within = permute.function_lines(lines, "f")
+        self.assertEqual(within, (5, 16))
+        self.assertEqual(permute.groups(lines, auto=True, within=within), [[7, 8, 9, 10, 11]])
 
     def test_every_order_is_tried(self):
         got = {tuple(c[2:4]) for c in permute.orders(self.LINES, [[2, 3]])}

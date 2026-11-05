@@ -861,7 +861,7 @@ func_00135F48	func_001360A8	match	version-specific
 func_00136040	func_001361A0	match	version-specific
 func_00136238	func_00136398	match	version-specific
 func_001363D0	func_00136530	match	version-specific
-func_00136408	func_00136568	differs	the C is 292 bytes, retail's function 216
+func_00136408	func_00136568	match	version-specific
 func_00136530	func_00136640	match	version-specific
 func_001365A0	func_001366B8	match	version-specific
 func_001365A8	func_001366C0	match	version-specific
@@ -1543,6 +1543,7 @@ func_001617E8	func_00161E48	match
 func_00161860	func_00161EC0	match	
 func_001618C0	func_00161F20	match	
 func_00161958	func_00161FB8	match	
+func_001619C0	func_00162020	match	
 func_00161A88	func_001620E8	match	
 func_00161AB0	func_00162110	match	
 func_00161B80	func_001621E0	match	
@@ -2023,12 +2024,12 @@ func_0018EF78	func_0018FA48	match	version-specific
 func_0018F0E8	func_0018FBB8	match	
 func_0018F148	func_0018FC18	match	
 func_0018F198	func_0018FC68	match	version-specific
-func_0018F448	func_0018FF20	differs	
+func_0018F448	func_0018FF20	match	version-specific
 func_0018F610	func_00190150	match	version-specific
 func_0018F6E8	func_00190228	match	version-specific
 func_0018F7D0	func_00190310	match	version-specific
 func_0018F890	func_001903D0	match	version-specific
-func_0018F940	func_001904C8	differs	rodata
+func_0018F940	func_001904C8	match	rodata
 func_0018F968	func_001904F0	match	
 func_0018F988	func_00190510	match	
 func_0018FEF8	func_00190A80	match	
@@ -2107,7 +2108,7 @@ func_00193270	func_00193DF8	match
 func_00193288	func_00193E10	match	
 func_00193300	func_00193E88	match	
 func_00193318	func_00193EA0	match	version-specific
-func_00193598	func_00194190	differs	
+func_00193598	func_00194190	match	version-specific, rodata
 func_001935B0	func_00194120	match	version-specific
 func_00193660	func_00194398	match	
 func_00193E58	func_00194A40	match	version-specific
@@ -2487,7 +2488,7 @@ func_001AE510	func_001AF250	match	version-specific
 func_001AE758	func_001AF438	match	version-specific
 func_001AE7F8	func_001AF4D8	match	version-specific
 func_001AE820	func_001AF500	match	version-specific, rodata
-func_001AEA08	func_001AF6F8	differs	
+func_001AEA08	func_001AF6F8	match	version-specific
 func_001AEC90	func_001AF980	match	
 func_001AECB0	func_001AF9A0	match	
 func_001AECE0	func_001AF9D0	match	
@@ -3844,6 +3845,7 @@ func_eu_00160800	func_00160800	match	only in PAL
 func_eu_00160830	func_00160830	match	only in PAL
 func_eu_001608C8	func_001608C8	match	only in PAL
 func_eu_0018EBE8	func_0018EBE8	match	only in PAL
+func_eu_0018ECA8	func_0018ECA8	match	only in PAL
 func_eu_0018ED38	func_0018ED38	match	only in PAL
 func_eu_0018EDE8	func_0018EDE8	match	only in PAL
 func_eu_0018EE08	func_0018EE08	match	only in PAL
@@ -3857,6 +3859,7 @@ func_eu_001AB238	func_001AB238	match	only in PAL
 func_eu_001AB550	func_001AB550	match	only in PAL
 func_eu_001AB558	func_001AB558	match	only in PAL
 func_eu_001ACE58	func_001ACE58	match	only in PAL
+func_eu_001ACEE0	func_001ACEE0	match	only in PAL
 func_eu_001AD3C0	func_001AD3C0	match	only in PAL
 func_eu_001AD438	func_001AD438	match	only in PAL
 func_eu_001AD5E0	func_001AD5E0	match	only in PAL
