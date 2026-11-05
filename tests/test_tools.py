@@ -230,7 +230,7 @@ class VersionSourceTest(unittest.TestCase):
             shared.write_text(self.SHARED)
             own.write_text("void func_eu_00100030(void)\n{\n}\n")
             text = version_src.unit_text(shared, {"func_eu_00100030": own})
-        self.assertTrue(text.startswith(self.SHARED.rstrip("\n")))
+        self.assertTrue(text.startswith("#define VERSION_EU 1\n" + self.SHARED.rstrip("\n")))
         self.assertTrue(text.rstrip().endswith("void func_eu_00100030(void)\n{\n}"))
 
     def test_a_version_file_names_its_version_and_shared_file(self):

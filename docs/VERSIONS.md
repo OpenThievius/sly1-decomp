@@ -57,6 +57,11 @@ What makes PAL differ, from the first `differs` rows read one by one:
 - **Field offsets.** Some objects are laid out differently (a field at 0x590 where US has it at
   0x304): the PAL definition uses a struct of its own.
 - **Unsigned bytes.** PAL's string and character functions read `u8` where US reads `s8`.
+  Where that changes a function's type, not only its body, the shared file declares the type
+  for both: a version's unit starts with `#define VERSION_EU 1`, so the declaration can read
+  `#ifdef VERSION_EU` / `typedef u8 Letter_1AEA08;` / `#else` / `typedef s8 ...` / `#endif`
+  (src/main/001AC000.cpp, func_001AEA08). That is the macro's one use: it never selects code,
+  which is PAL's own definition's job.
 - **Other calls and arguments.** A call to a function only PAL has, or one more argument.
 
 Code and data only PAL has are named `func_eu_XXXXXXXX` and `D_eu_XXXXXXXX`, and reach that PAL
