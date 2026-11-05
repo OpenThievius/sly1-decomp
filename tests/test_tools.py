@@ -371,6 +371,32 @@ class ProgressCountTest(unittest.TestCase):
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
 
+class EpilogueTailTest(unittest.TestCase):
+    """A lone `jr $ra` that frees stack is the end of a stripped function, not a whole one."""
+
+    def test_only_a_return_freeing_stack_is_a_tail(self):
+        self.assertTrue(classify_asm.epilogue_tail(["jr         $ra", "addiu     $sp, $sp, 0x20", "nop", ""]))
+        self.assertFalse(classify_asm.epilogue_tail(["jr         $ra", "nop"]))
+        self.assertFalse(classify_asm.epilogue_tail(["jr         $ra", "addiu     $sp, $sp, -0x20"]))
+        self.assertFalse(classify_asm.epilogue_tail(["addiu     $v0, $zero, 0x1", "jr         $ra",
+                                                     "addiu     $sp, $sp, 0x20"]))
+
+
+class RegdiffTest(unittest.TestCase):
+    """tools/regdiff.py tells a register-only difference from one in the code."""
+
+    def test_the_four_verdicts(self):
+        import regdiff
+        retail = [("00851021", "addu v0,a0,a1"), ("03e00008", "jr ra"), ("24420001", "addiu v0,v0,1")]
+        self.assertEqual(regdiff.classify(retail, retail)[0], "EXACT")
+        regs = [("00a41021", "addu v0,a1,a0"), ("03e00008", "jr ra"), ("24630001", "addiu v1,v1,1")]
+        self.assertEqual(regdiff.classify(regs, retail)[0], "registers")
+        moved = [retail[2], retail[0], retail[1]]
+        self.assertEqual(regdiff.classify(moved, retail)[0], "order")
+        other = [retail[0], retail[1], ("24420002", "addiu v0,v0,2")]
+        self.assertEqual(regdiff.classify(other, retail), ("code", 2, 3))
+
+
 class ExitNoteTest(unittest.TestCase):
     """A failed compile step says its exit code, and names a crash of the compiler's stack."""
 

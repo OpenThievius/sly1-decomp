@@ -27,7 +27,7 @@ struct Zone28 {
     u8 pad00[4];
     Collider* owner;             // 0x04: the object it is in (func_0013E950)
     Pair28 pairs[2];        // 0x08, 0x90
-    u8 pad118[0x11C - 0x118];
+    f32 f118;               // 0x118: the time handed to func_0012C8F8 (func_0013ED90)
     s32 f11C;               // 0x11C
     s32 id120;              // 0x120: an index of the table at D_00261420 (func_00140FF8)
     f32 stamp;              // 0x124: the clock when the mode changed (D_0026185C)
@@ -35,7 +35,7 @@ struct Zone28 {
     s32 mode;               // 0x12C: func_0013EB68 changes it
     u8 pad130[4];
     s32 f134;               // 0x134
-    u8 pad138[4];
+    s32 f138;               // 0x138: non-zero reverses the direction (func_0013ED90)
     s32 f13C;               // 0x13C
     s32 f140;               // 0x140: -1 at set-up
     u8 pad144[4];

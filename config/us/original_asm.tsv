@@ -1,4 +1,5 @@
 name	address	size	kind	why
+func_00100000	00100000	4	remnant	padding before the entry routine
 func_00100008	00100008	172	handwritten	marked handwritten by the disassembler
 func_001000B8	001000B8	8	handwritten	a tail jump, which the game's compiler never writes
 func_001000C0	001000C0	8	handwritten	marked handwritten by the disassembler
@@ -826,6 +827,7 @@ func_001FA168	001FA168	36	remnant	stripped-function leftover
 func_001FA1D8	001FA1D8	12	remnant	stripped-function leftover
 func_001FA6B0	001FA6B0	296	handwritten	marked handwritten by the disassembler
 func_001FA7D8	001FA7D8	172	handwritten	marked handwritten by the disassembler
+func_001FA884	001FA884	8	remnant	stripped-function epilogue
 func_001FA890	001FA890	16	handwritten	marked handwritten by the disassembler
 func_001FA8D8	001FA8D8	16	handwritten	marked handwritten by the disassembler
 func_001FA8E8	001FA8E8	16	handwritten	marked handwritten by the disassembler

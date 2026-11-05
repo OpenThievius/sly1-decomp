@@ -1278,3 +1278,40 @@ Tab_275750 D_00275750 = { {
 F4_2758B0 D_002758B0 = { 1.5f, 0.0f, 0.0f, 0.0f };
 extern const s32 D_0024DC98[4] = { 0x58, 0x23, 0x56, 0x5 };
 extern const F2_24DCA8 D_0024DCA8 = { 3.402823466e+38f, 0.0f };
+
+struct Plane_1DD218 { f32 x, y, z, w; };
+extern Plane_1DD218 D_002756B0[6];
+
+s32 func_001DD218(Quad_001DD3E0* pts)
+{
+    u32 i;
+    for (i = 0; i < 6; i++) {
+        const Plane_1DD218* pl = &D_002756B0[i];
+        f32 d[2];
+        s32 k;
+        for (k = 0; k < 2; k++) {
+            d[k] = pts[k].x * pl->x + pts[k].y * pl->y + pts[k].z * pl->z + pts[k].w * pl->w;
+        }
+        if (d[0] >= 0.0f && d[1] >= 0.0f) {
+            continue;
+        }
+        if (d[0] < 0.0f && d[1] < 0.0f) {
+            return 0;
+        }
+        f32 t = d[1] / (d[1] - d[0]);
+        if (d[0] >= 0.0f) {
+            f32 u = 1.0f - t;
+            pts[1].x = t * pts[0].x + u * pts[1].x;
+            pts[1].y = t * pts[0].y + u * pts[1].y;
+            pts[1].z = t * pts[0].z + u * pts[1].z;
+            pts[1].w = t * pts[0].w + u * pts[1].w;
+        } else {
+            f32 u = 1.0f - t;
+            pts[0].x = t * pts[0].x + u * pts[1].x;
+            pts[0].y = t * pts[0].y + u * pts[1].y;
+            pts[0].z = t * pts[0].z + u * pts[1].z;
+            pts[0].w = t * pts[0].w + u * pts[1].w;
+        }
+    }
+    return 1;
+}
