@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "list_iter.h"
 #include "fpu.h"
-#include "c90.h"
+#include "timeline.h"
 #include "value_list_object.h"
-#include "c6c.h"
+#include "world.h"
 #include "c62.h"
 #include "c1f.h"
 #include "v24a0.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "globals.h"
 #include "screen_fade.h"
 
 void func_00182C58(void);
 s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
 
-void func_001ED198(C90* self)
+void func_001ED198(Timeline* self)
 {
     func_00182C58();
     self->found = func_0015A838(self->world, 5, 0x13, 0);
@@ -37,9 +37,9 @@ void func_001ED1D8(Obj_1ED1D8* self)
 struct Inner_1ED210 { u8 pad[0xC3C]; s32 c3C; };
 
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-void func_001ED318(C90* self, s32* p);
+void func_001ED318(Timeline* self, s32* p);
 
-void func_001ED210(C90* self)
+void func_001ED210(Timeline* self)
 {
     s32 n;
     func_001837E0(self, 0x1C, 0, 0);
@@ -163,7 +163,7 @@ void func_001EE5C8(V24A0* s, void* unused1, s32 size, void* unused3, s32* outSiz
     }
 }
 
-void func_00182C18(C01* self);
+void func_00182C18(BaseObject* self);
 
 void func_001EE900(ValueListObject* self)
 {
@@ -171,8 +171,8 @@ void func_001EE900(ValueListObject* self)
     self->world->f1EC4 = self;
 }
 
-void func_001BA550(C03* o, Attach03* node);
-void func_001BA528(C03* o, Attach03* node);
+void func_001BA550(Collider* o, Attach03* node);
+void func_001BA528(Collider* o, Attach03* node);
 void func_001DBB90(void* owner, Attach03* list);
 
 void func_001EEE50(void* owner, Attach03** head)
@@ -181,7 +181,7 @@ void func_001EEE50(void* owner, Attach03** head)
     Attach03* node = *head;
     Attach03* removed = 0;
     while (node != 0) {
-        C03* o = node->target;
+        Collider* o = node->target;
         Attach03* next = node->nextOwn;
         if (((o->flags538 >> 59) & 1) != ((o->flags538 >> 60) & 1)) {
             if (o->flags538 & (1ULL << 59)) {
@@ -190,7 +190,7 @@ void func_001EEE50(void* owner, Attach03** head)
                 func_001BA528(o, node);
             }
         }
-        C03* p = node->target;
+        Collider* p = node->target;
         if (p->flags538 & (1ULL << 60)) {
             link = &node->nextOwn;
         } else {
@@ -198,7 +198,7 @@ void func_001EEE50(void* owner, Attach03** head)
             node->nextOwn = removed;
             removed = node;
         }
-        C03* q = node->target;
+        Collider* q = node->target;
         q->flags538 = q->flags538 & ~(1ULL << 60);
         q->flags538 = q->flags538 & ~(1ULL << 59);
         node = next;
@@ -473,7 +473,7 @@ typedef void (*VFn_1EF3A8)(void* self, void* arg);
 
 void func_001EF3A8(C1F* self, Attach03* link)
 {
-    C03* target = link->target;
+    Collider* target = link->target;
     ((VFn_1EF3A8)target->desc03()->m46)(target, self);
 }
 
@@ -524,7 +524,7 @@ tail:
 void func_00182C18(void* self);
 void* func_0018D500(s32 size);
 
-void func_001ED168(C90* self)
+void func_001ED168(Timeline* self)
 {
     func_00182C18(self);
     self->buffer = func_0018D500(0xC00);
@@ -599,9 +599,9 @@ void func_001EE930(ValueListObject* self, void* src)
     func_0011EC40(self, src);
 }
 
-struct Msg_1EF3D8 { C1F* self; C03* obj; };
+struct Msg_1EF3D8 { C1F* self; Collider* obj; };
 
-void func_001BA550(C03* o, Attach03* node);
+void func_001BA550(Collider* o, Attach03* node);
 void func_001DBB90(void* owner, Attach03* list);
 void func_001EF520(C1F* self);
 void func_00127378(void* self, s32 kind, void* msg);
@@ -625,7 +625,7 @@ void func_001EF3D8(C1F* self, s32 kind, void* msg)
             Attach03** link = &self->links;
             Attach03* n = *link;
             if (n != 0) {
-                if (n->target == (C03*)msg) {
+                if (n->target == (Collider*)msg) {
                     *link = n->nextOwn;
                 } else {
                     for (;;) {
@@ -634,7 +634,7 @@ void func_001EF3D8(C1F* self, s32 kind, void* msg)
                         if (n == 0) {
                             break;
                         }
-                        if (n->target == (C03*)msg) {
+                        if (n->target == (Collider*)msg) {
                             *link = n->nextOwn;
                             break;
                         }
@@ -1152,11 +1152,11 @@ struct Msg_1ED318 {
 extern u8 D_00262C70[];
 
 void func_001EC7A8(Inner_1ED318* p);
-void func_001837E0(C90* self, s32 a, s32 b, s32* c);
+void func_001837E0(Timeline* self, s32 a, s32 b, s32* c);
 void func_0016EC88(void* p);
-void func_001BFCD8(s32 a0, C90* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
+void func_001BFCD8(s32 a0, Timeline* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_001ED318(C90* self, Msg_1ED318* msg)
+void func_001ED318(Timeline* self, Msg_1ED318* msg)
 {
     switch (msg->kind) {
     case 0:
@@ -1196,7 +1196,7 @@ struct Entry_1ED4C8 { s32 f00; s32 f04; f32 f08; s32 pad0C; };
 extern u8 D_00625760[];
 s32 func_001F5C0C(Entry_1ED4C8* dst, s32 value, s32 size);
 
-void* func_001ED4C8(C90* self, s32 a, s32 b, f32 c)
+void* func_001ED4C8(Timeline* self, s32 a, s32 b, f32 c)
 {
     if (self->f34 >= 0xC0) return D_00625760;
     Entry_1ED4C8* e = (Entry_1ED4C8*)((u8*)self->buffer + self->f34 * 16);
@@ -1327,9 +1327,9 @@ void func_001ED0D8(C13* self, s32 key)
 }
 
 struct Inner_1ED278 { u8 pad[0xC70]; s32 fC70; u8 pad2[0xC7C - 0xC74]; f32 fC7C; };
-void func_001ED318(C90* self, Entry90* e);
+void func_001ED318(Timeline* self, Entry90* e);
 
-void func_001ED278(C90* self)
+void func_001ED278(Timeline* self)
 {
     Entry90* e;
     s32 v;
@@ -1401,7 +1401,7 @@ void func_001ECB18(Self_1ECB18* self)
 }
 
 
-void func_001DDAD0(C6C* x);
+void func_001DDAD0(World* x);
 void func_001F0220(ScreenFade* o, s32 mode);
 
 struct Match_1EFFA0 {

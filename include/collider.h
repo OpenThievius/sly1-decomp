@@ -6,14 +6,14 @@
 //
 // The fields are the ones the class's own methods (src/main/001B4000.cpp, 001B8000.cpp,
 // 001BC000.cpp) and the families under it read. A 0x03 object is a part of a body: the
-// topmost 0x03 object above it (C02::root, root03()) is the body, which keeps the list of its
+// topmost 0x03 object above it (PlacedObject::root, root03()) is the body, which keeps the list of its
 // parts, the contacts between bodies and the flags that sum up its parts.
-#ifndef C03_H
-#define C03_H
+#ifndef COLLIDER_H
+#define COLLIDER_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C03;
+struct Collider;
 
 // A collision mesh as the loader keeps it (func_00137FB0 reads it, func_00160EA0 copies it,
 // func_00160E80 clears it): the radius of its bounding sphere, its vertices and its faces
@@ -50,8 +50,8 @@ struct Pair03 {
 
 // One end of a contact: the body and the part of it that touches.
 struct ContactEnd03 {
-    C03* body;              // 0x00
-    C03* part;              // 0x04
+    Collider* body;              // 0x00
+    Collider* part;              // 0x04
     u8 pad08[0x10 - 0x08];
     Vec02 v10;              // 0x10: handed on with v80 by func_001F5008
     u8 pad20[0x40 - 0x20];
@@ -78,15 +78,15 @@ struct ContactRow03 {
     Contact03* head;        // 0x00
     ContactRow03* next;     // 0x04
     Contact03** link;       // 0x08
-    C03* other;             // 0x0C: the other body
+    Collider* other;             // 0x0C: the other body
 };
 
 // A body's contact table (+0x480): the world gives one to every body (func_001DC7D0) and
-// takes it back (func_001DC828), moving it between its free and used lists (C6C +0x1AE4,
+// takes it back (func_001DC828), moving it between its free and used lists (World +0x1AE4,
 // +0x1AE8; func_001DC710 takes one out, func_001DC7B0 puts one in).
 struct Contacts03 {
     ContactRow03* head;     // 0x00
-    C03* owner;             // 0x04
+    Collider* owner;             // 0x04
     Contacts03* next;       // 0x08: in the world's free or used list
     Contacts03* prev;       // 0x0C
 };
@@ -103,8 +103,8 @@ struct Ids03 {
 // one, func_001BA550 removes it): slot 28 calls each owner's slot 51, slot 14 tells each
 // owner's slot 13. The owner keeps its links in a list of its own (class 0x1F: +0x550).
 struct Attach03 {
-    C03* owner;             // 0x00
-    C03* target;            // 0x04: the object whose list it is in
+    Collider* owner;             // 0x00
+    Collider* target;            // 0x04: the object whose list it is in
     Attach03* next;         // 0x08: in the target's list
     Attach03* nextOwn;      // 0x0C: in the owner's list
 };
@@ -112,7 +112,7 @@ struct Attach03 {
 // An object a part touched (+0x540; func_001BB9D0 builds the list from the contacts, the
 // world's pool takes it back with func_001DC108).
 struct Touch03 {
-    C03* obj;               // 0x00
+    Collider* obj;               // 0x00
     Touch03* next;          // 0x04
 };
 
@@ -122,13 +122,13 @@ struct Touch03 {
 struct Desc03 : Desc02 {
     void* m30;                                      // 0xD0: func_001B7F78
     void* m31;                                      // 0xD4: func_001B8148
-    void (*m32)(C03* self);                         // 0xD8: a body's parts changed (func_001B8540)
-    void (*m33)(C03* self, Attach03* node, f32 dt); // 0xDC: called by what it is attached to (func_001BAC28)
+    void (*m32)(Collider* self);                         // 0xD8: a body's parts changed (func_001B8540)
+    void (*m33)(Collider* self, Attach03* node, f32 dt); // 0xDC: called by what it is attached to (func_001BAC28)
     void* m34;                                      // 0xE0: func_001BC368
-    void (*m35)(C03* self, s32* index, C03** list); // 0xE4: number the parts (func_001BC760)
+    void (*m35)(Collider* self, s32* index, Collider** list); // 0xE4: number the parts (func_001BC760)
     void* m36;                                      // 0xE8: func_001BC828
     void* m37;                                      // 0xEC: func_001BC978
-    s32 (*m38)(C03* self, C03* other);              // 0xF0: func_001B8A08
+    s32 (*m38)(Collider* self, Collider* other);              // 0xF0: func_001B8A08
     void* m39;                                      // 0xF4: func_00187F40
     void* m3A;                                      // 0xF8
     void* m3B;                                      // 0xFC: func_001B8B90
@@ -137,16 +137,16 @@ struct Desc03 : Desc02 {
     void* m3E;                                      // 0x108
     void* m3F;                                      // 0x10C
     void* m40;                                      // 0x110
-    void (*m41)(C03* self, Contact03* c, s32 end);  // 0x114: told of a contact (func_001B8A48)
+    void (*m41)(Collider* self, Contact03* c, s32 end);  // 0x114: told of a contact (func_001B8A48)
     void* m42;                                      // 0x118
-    void (*m43)(C03* self);                         // 0x11C: tell the contacts (func_001B8A48)
-    void (*m44)(C03* self);                         // 0x120: keep v140 in v370 (func_001B9680)
-    void (*m45)(C03* self, void* out);              // 0x124: func_001B9F30
+    void (*m43)(Collider* self);                         // 0x11C: tell the contacts (func_001B8A48)
+    void (*m44)(Collider* self);                         // 0x120: keep v140 in v370 (func_001B9680)
+    void (*m45)(Collider* self, void* out);              // 0x124: func_001B9F30
     void* m46;                                      // 0x128: func_001BA5B0
-    s32 (*m47)(C03* self);                          // 0x12C: func_001BBC30
+    s32 (*m47)(Collider* self);                          // 0x12C: func_001BBC30
 };
 
-struct C03 : C02 {
+struct Collider : PlacedObject {
     Link02 link2D0;         // 0x2D0: kept by slot 9
     List01 parts;           // 0x2D8: (a body) its parts, linked at link2E4 (func_001B7C40)
     Link02 link2E4;         // 0x2E4: the link in the body's parts
@@ -192,7 +192,7 @@ struct C03 : C02 {
     u8 pad4C4[0x4D0 - 0x4C4];
     Vec02 offset;           // 0x4D0: the prefix's offset (3 f32)
     s32 f4E0;               // 0x4E0: 1 in class 0x36; func_001BC4D8 walks up the parents to the first set
-    C03* handler;           // 0x4E4: the nearest object (itself or above) with slot 60, 61, 62 or 65 (func_001BB4A0)
+    Collider* handler;           // 0x4E4: the nearest object (itself or above) with slot 60, 61, 62 or 65 (func_001BB4A0)
     Mesh03 mesh2;           // 0x4E8: the second mesh as loaded
     Mesh03 mesh2Copy;       // 0x50C: the object's own
     union {
@@ -209,10 +209,10 @@ struct C03 : C02 {
     u8 pad544[0x550 - 0x544];
 
     const Desc03* desc03() const { return (const Desc03*)desc; }
-    C03* root03() const { return (C03*)root; }
+    Collider* root03() const { return (Collider*)root; }
 };
 
-typedef char check_C03[sizeof(C03) == 0x550 ? 1 : -1];
+typedef char check_Collider[sizeof(Collider) == 0x550 ? 1 : -1];
 typedef char check_Desc03[sizeof(Desc03) == 0x130 ? 1 : -1];
 typedef char check_Mesh03[sizeof(Mesh03) == 0x24 ? 1 : -1];
 typedef char check_Contact03[sizeof(Contact03) == 0xE0 ? 1 : -1];

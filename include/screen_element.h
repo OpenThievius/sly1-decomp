@@ -6,7 +6,7 @@
 // slot 9 (draw), and slots 14 and 15 (show, hide) from many files. Written for this project from
 // what retail's code does (config/us/tables.tsv, dispatch.tsv).
 //
-// T217D is the base: the fields the generic slots (func_001AA1F0 ... func_001AAF58) use, up to
+// ScreenElement is the base: the fields the generic slots (func_001AA1F0 ... func_001AAF58) use, up to
 // 0x260; the derived elements add their own from 0x260 on (T217D_XXX, XXX the last three hex
 // digits of the table). Fields are named for what the code does with them; a later step may
 // rename them. The globals' sizes are not known (the labels in .data are 0x23C to 0x298 apart,
@@ -14,8 +14,8 @@
 // Three tables of the later segment end in the same three digits as one of the first
 // (D_002212E0 and D_002182E0, D_00221330 and D_00218330, D_00221380 and D_00218380): their
 // variants take four digits (T217D_12E0, T217D_1330, T217D_1380).
-#ifndef T217D_H
-#define T217D_H
+#ifndef SCREEN_ELEMENT_H
+#define SCREEN_ELEMENT_H
 
 #include "common.h"
 
@@ -39,35 +39,35 @@ struct T217D_Place {
 
 typedef char check_T217D_Place[sizeof(T217D_Place) == 20 ? 1 : -1];   // func_001AA1F0 steps 20 bytes
 
-struct T217D;
+struct ScreenElement;
 
 // The 20 slots. Those the base fills are the generic ones; the derived tables replace
 // slots 0, 1, 2, 8, 9, 14, 15, 16 and so on with their own.
 struct T217D_Vt {
-    void (*m00)(T217D* self, s32 index);        // 0x00: init (func_001AA1F0)
-    void (*m01)(T217D* self);                   // 0x04: set up (func_001AA268 in the base)
-    void (*m02)(T217D* self);                   // 0x08: update the slide (func_001AA298)
-    void (*m03)(T217D* self, s32 top);          // 0x0C: told it is (1) or is no longer (0) the top of a stack (func_001E9498)
-    void (*m04)(T217D* self);                   // 0x10: not used by these files
-    void (*m05)(T217D* self);                   // 0x14: reset, m16(self, 0) (func_001AA8C8)
-    void (*m06)(T217D* self);                   // 0x18: not used by these files
-    void (*m07)(T217D* self);                   // 0x1C: not used by these files
-    void (*m08)(T217D* self, const char* text); // 0x20: set the text (func_001AA4F0)
-    void (*m09)(T217D* self);                   // 0x24: draw (func_001AA790)
-    void (*m10)(T217D* self);                   // 0x28: not used by these files
-    f32 (*m11)(T217D* self);                    // 0x2C: seconds to slide in
-    f32 (*m12)(T217D* self);                    // 0x30: seconds to stay, 0 for always
-    f32 (*m13)(T217D* self);                    // 0x34: seconds to slide out
-    void (*m14)(T217D* self);                   // 0x38: show (func_001AA8F0)
-    void (*m15)(T217D* self);                   // 0x3C: hide (func_001AA958)
-    void (*m16)(T217D* self, s32 mode);         // 0x40: go to a mode (func_001AA998)
-    void (*m17)(T217D* self, f32* clock);       // 0x44: use another clock (func_001AAF58)
-    s32 (*m18)(T217D* self, T217D* other);      // 0x48: both on screen together (func_001AAAC8)
-    void (*m19)(T217D* self);                   // 0x4C: unused, 0 in every table
+    void (*m00)(ScreenElement* self, s32 index);        // 0x00: init (func_001AA1F0)
+    void (*m01)(ScreenElement* self);                   // 0x04: set up (func_001AA268 in the base)
+    void (*m02)(ScreenElement* self);                   // 0x08: update the slide (func_001AA298)
+    void (*m03)(ScreenElement* self, s32 top);          // 0x0C: told it is (1) or is no longer (0) the top of a stack (func_001E9498)
+    void (*m04)(ScreenElement* self);                   // 0x10: not used by these files
+    void (*m05)(ScreenElement* self);                   // 0x14: reset, m16(self, 0) (func_001AA8C8)
+    void (*m06)(ScreenElement* self);                   // 0x18: not used by these files
+    void (*m07)(ScreenElement* self);                   // 0x1C: not used by these files
+    void (*m08)(ScreenElement* self, const char* text); // 0x20: set the text (func_001AA4F0)
+    void (*m09)(ScreenElement* self);                   // 0x24: draw (func_001AA790)
+    void (*m10)(ScreenElement* self);                   // 0x28: not used by these files
+    f32 (*m11)(ScreenElement* self);                    // 0x2C: seconds to slide in
+    f32 (*m12)(ScreenElement* self);                    // 0x30: seconds to stay, 0 for always
+    f32 (*m13)(ScreenElement* self);                    // 0x34: seconds to slide out
+    void (*m14)(ScreenElement* self);                   // 0x38: show (func_001AA8F0)
+    void (*m15)(ScreenElement* self);                   // 0x3C: hide (func_001AA958)
+    void (*m16)(ScreenElement* self, s32 mode);         // 0x40: go to a mode (func_001AA998)
+    void (*m17)(ScreenElement* self, f32* clock);       // 0x44: use another clock (func_001AAF58)
+    s32 (*m18)(ScreenElement* self, ScreenElement* other);      // 0x48: both on screen together (func_001AAAC8)
+    void (*m19)(ScreenElement* self);                   // 0x4C: unused, 0 in every table
 };
 
 // The base element, 0x260 bytes (the four sub-elements of D_00218720's object are this big).
-struct T217D {
+struct ScreenElement {
     const T217D_Vt* vt;         // 0x00
     V24A2* font;                // 0x04: the font object (func_0015C1C0) the text is drawn with
     char text[0x200];           // 0x08: the text; its first byte is the element's visible flag
@@ -101,7 +101,7 @@ struct T217D {
 
 // The sixteen plain captions (D_00217E30 ... D_00218290, one table shape): a text that follows
 // a counter in the game's state, f214 telling which one (func_001AB2B8), and counts to it.
-struct T217D_E30 : T217D {
+struct T217D_E30 : ScreenElement {
     s32 shown;                  // 0x260: the value on the display, -1 before the first update
     s32* target;                // 0x264: the counter it follows
     s32* limit;                 // 0x268: a second counter (the "of" in "3/5")
@@ -116,7 +116,7 @@ struct T217D_510;
 typedef void (*T217D_510_Fn)(T217D_510* self, s32 arg);
 
 // The timer (D_00218510): counts up or down and shows minutes and seconds.
-struct T217D_510 : T217D {
+struct T217D_510 : ScreenElement {
     s32 state;                  // 0x260: 0 off, 1 waiting, 2 counting (func_001ABE20)
     f32 stateSince;             // 0x264: the clock when the state began
     f32 time;                   // 0x268: seconds on the timer
@@ -135,7 +135,7 @@ struct T217D_510 : T217D {
 void func_001ABE20(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
-struct T217D_2E0 : T217D {
+struct T217D_2E0 : ScreenElement {
     u8 pad260[0x264 - 0x260];
     s32 f264;               // 0x264
     s32 f268;               // 0x268
@@ -156,49 +156,49 @@ struct T217D_2E0 : T217D {
 };
 
 // D_00218330: the base without any field of its own.
-struct T217D_330 : T217D {
+struct T217D_330 : ScreenElement {
 };
 
 // A caption that can be told a new text while it is on screen (D_00218380): the new one waits
 // in f264 until the element has slid out.
-struct T217D_380 : T217D {
+struct T217D_380 : ScreenElement {
     s32 pending;                // 0x260: a new text waits
     const char* pendingText;    // 0x264
 };
 
 // The same with the text copied (D_002183D0).
-struct T217D_3D0 : T217D {
+struct T217D_3D0 : ScreenElement {
     s32 pending;                // 0x260
     char pendingText[0x200];    // 0x264
     s32 announce;               // 0x464: 1 while the announcement is shown in the middle
 };
 
 // D_00218420.
-struct T217D_420 : T217D {
+struct T217D_420 : ScreenElement {
     s32 flag;                   // 0x260
 };
 
 // D_00218470: an element with an icon table.
-struct T217D_470 : T217D {
+struct T217D_470 : ScreenElement {
     void* icon;                 // 0x260: the icon's record (func_001B4688), or 0
 };
 
 // D_002184C0.
-struct T217D_4C0 : T217D {
+struct T217D_4C0 : ScreenElement {
     s32 flagA;                  // 0x260
     s32 flagB;                  // 0x264
     s32 pending;                // 0x268
 };
 
 // D_00218560 and D_002185B0 have no field of their own.
-struct T217D_560 : T217D {
+struct T217D_560 : ScreenElement {
 };
 
-struct T217D_5B0 : T217D {
+struct T217D_5B0 : ScreenElement {
 };
 
 // D_00218600.
-struct T217D_600 : T217D {
+struct T217D_600 : ScreenElement {
     s32 flag;                   // 0x260
 };
 
@@ -221,7 +221,7 @@ struct T217D_3F0_Pt {
 typedef char check_T217D_3F0_Pt[sizeof(T217D_3F0_Pt) == 0x2C ? 1 : -1];   // func_001E5E70 steps 0x2C bytes
 
 // The sparkle round a held item (D_0021A3F0, two objects: D_002708E0 and D_00271558).
-struct T217D_3F0 : T217D {
+struct T217D_3F0 : ScreenElement {
     s32 fade;                   // 0x260: 0 fading in, 1 fading out (func_001E6C20, func_001E7440)
     f32 fadeSince;              // 0x264: the clock when `fade` was set
     s32 phase;                  // 0x268: 0 growing, 1 full, 2 shrinking, 3 gone (func_001E7518, func_001E77C0)
@@ -251,7 +251,7 @@ struct T217D_440_Slot {
 
 // The caption box of the dialogue and tutorial screens (D_0021A440, D_002701F8): it types its text
 // out, keeps a state of its own (0 off ... 5), and follows a game object (`child`).
-struct T217D_440 : T217D {
+struct T217D_440 : ScreenElement {
     s32 state;                  // 0x260: 0 off, 1 .. 4 the kinds of box, 5 (func_001356C0 sets it, func_00136408 tests 4)
     f32 stateSince;             // 0x264: the clock when `state` was set
     f32 textSince;              // 0x268: the clock when the text was set (func_00136408; the typing starts here)
@@ -284,7 +284,7 @@ struct T217D_440 : T217D {
 
 // The pause menu (D_002186D0, D_0026FF68): three layers each ask for a screen, the lowest answer
 // shown (func_00194D30); it slides in and out like the other elements.
-struct T217D_6D0 : T217D {
+struct T217D_6D0 : ScreenElement {
     s32 page;                   // 0x260: the screen on view, -1 for none (func_00193E58 starts it at -1)
     s32 cursor;                 // 0x264: the highlighted row of that screen
     s32 want[3];                // 0x268: the screen each of the three layers asks for, -1 for none
@@ -297,7 +297,7 @@ struct T217D_6D0 : T217D {
 };
 
 // The map screen's list (D_002210F0, D_0026F808): it holds the objects of kind 0x67 by slot.
-struct T217D_0F0 : T217D {
+struct T217D_0F0 : ScreenElement {
     C67* current;               // 0x260: the object it shows
     C67* nodes[6];              // 0x264: the objects of kind 0x67, by their slot (func_001F0660 enters them)
     f32 scale;                  // 0x27C: eased toward `scaleTarget` (func_001F1A08)
@@ -305,19 +305,19 @@ struct T217D_0F0 : T217D {
 };
 
 // D_002212E0 (D_0026FA90): a caption that opens an object's screen.
-struct T217D_12E0 : T217D {
+struct T217D_12E0 : ScreenElement {
     void* node;                 // 0x260: the object it shows (its mode at +0x2D0)
     s32 sound;                  // 0x264: the sound handle func_001BE980 gave, 0 for none
     f32 lastAt;                 // 0x268: the clock of the last time it spoke; -D_00262970 at the start, so the first test passes
 };
 
 // D_00221330 (D_0026FD00).
-struct T217D_1330 : T217D {
+struct T217D_1330 : ScreenElement {
     s32 cursor;                 // 0x260: the chosen one of 16 (4 by 4, func_0016BBA8); func_0016BDD0 starts it at the highest bit set in the game state's word at +0x19F4
 };
 
 // D_00221380 (D_0026E9F8): the caption of the timed sprint.
-struct T217D_1380 : T217D {
+struct T217D_1380 : ScreenElement {
     s32 state;                  // 0x260: 0 off, 1, 2 the sprint on, 3 (func_001E02C8)
     f32 stateSince;             // 0x264: the clock when `state` was set
     s32 active;                 // 0x268: state != 0
@@ -326,40 +326,40 @@ struct T217D_1380 : T217D {
 };
 
 // D_00220BF0 (D_00270650).
-struct T217D_BF0 : T217D {
+struct T217D_BF0 : ScreenElement {
     u8 pad260[0x284 - 0x260];
     s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
     f32 f288;                   // 0x288: 0.0 at the start
 };
 
 // D_00218720 (D_00272E08): four sub-elements of the same kind (D_00218330) stacked, drawn together.
-struct T217D_720 : T217D {
+struct T217D_720 : ScreenElement {
     s32 count;                  // 0x260: how many of `items` are in use (func_0014ADE0)
     T217D_330 items[4];         // 0x264: 0x260 bytes each (func_0014ABD0)
 };
 
 // The base's functions (src/main/001A8000.cpp).
-void func_001AA1F0(T217D* self, s32 index);
-void func_001AA268(T217D* self);
-void func_001AA298(T217D* self);
-void func_001AA4F0(T217D* self, const char* text);
-void func_001AA788(T217D* self, f32 scale);
-void func_001AA790(T217D* self);
-f32 func_001AA898(T217D* self);
-f32 func_001AA8A0(T217D* self);
-f32 func_001AA8A8(T217D* self);
-void func_001AA8B0(T217D* self, f32 seconds);
-void func_001AA8B8(T217D* self, f32 seconds);
-void func_001AA8C0(T217D* self, f32 seconds);
-void func_001AA8C8(T217D* self);
-void func_001AA8F0(T217D* self);
-void func_001AA958(T217D* self);
-void func_001AA998(T217D* self, s32 mode);
-s32 func_001AAAC8(T217D* self, T217D* other);
-void func_001AAB20(T217D* self, f32 w, f32 h);
-void func_001AAB60(T217D* self);
-void func_001AAEC0(T217D* changed);
-void func_001AAF58(T217D* self, f32* clock);
+void func_001AA1F0(ScreenElement* self, s32 index);
+void func_001AA268(ScreenElement* self);
+void func_001AA298(ScreenElement* self);
+void func_001AA4F0(ScreenElement* self, const char* text);
+void func_001AA788(ScreenElement* self, f32 scale);
+void func_001AA790(ScreenElement* self);
+f32 func_001AA898(ScreenElement* self);
+f32 func_001AA8A0(ScreenElement* self);
+f32 func_001AA8A8(ScreenElement* self);
+void func_001AA8B0(ScreenElement* self, f32 seconds);
+void func_001AA8B8(ScreenElement* self, f32 seconds);
+void func_001AA8C0(ScreenElement* self, f32 seconds);
+void func_001AA8C8(ScreenElement* self);
+void func_001AA8F0(ScreenElement* self);
+void func_001AA958(ScreenElement* self);
+void func_001AA998(ScreenElement* self, s32 mode);
+s32 func_001AAAC8(ScreenElement* self, ScreenElement* other);
+void func_001AAB20(ScreenElement* self, f32 w, f32 h);
+void func_001AAB60(ScreenElement* self);
+void func_001AAEC0(ScreenElement* changed);
+void func_001AAF58(ScreenElement* self, f32* clock);
 
 // The 37 objects, in .data (D_002486B0 lists them in this order). Each is of the variant of
 // its table (D_0026EC70 and the four sub-elements of D_00272E08 have the base's table D_00218330).
@@ -402,7 +402,7 @@ extern T217D_600 D_00273EB0;    // D_00218600
 extern T217D_E30 D_00274118;    // D_002181F0
 
 // The base is the stride of D_00218720's four sub-elements (func_0014ABD0 steps 0x260 bytes).
-typedef char check_T217D[sizeof(T217D) == 0x260 ? 1 : -1];
+typedef char check_ScreenElement[sizeof(ScreenElement) == 0x260 ? 1 : -1];
 typedef char check_T217D_330[sizeof(T217D_330) == 0x260 ? 1 : -1];
 
 #endif

@@ -5,10 +5,10 @@
 //
 // Its methods also use class 0x02's fields (include/c02.h): the flags word at 0x2C8, and the
 // placement matrix and position the loader reads at 0xD0 and 0x100.
-#ifndef C63_H
-#define C63_H
+#ifndef ON_OFF_OBJECT_H
+#define ON_OFF_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 #include "t2176.h"
 
 // The 0x90 bytes at 0x2F0, copied from the table at D_00275980 at construction.
@@ -29,7 +29,7 @@ struct __attribute__((packed)) Pack63 {
 // T2176::lengths; func_001E2648 (file_1E08F8.cpp) can read it as a T2176 through `curve`.
 struct Arr63 { u8 pad0[0xC]; s32 count; u8 pad1[4]; f32* data; };
 
-struct C63 : C02 {
+struct OnOffObject : PlacedObject {
     void* f2D0;             // 0x2D0
     s32 f2D4;               // 0x2D4
     u8 f2D8[4];             // 0x2D8
@@ -67,14 +67,14 @@ struct C63 : C02 {
     u8 pad468[0x470 - 0x468];
 };
 
-typedef char check_C63[sizeof(C63) == 0x470 ? 1 : -1];
+typedef char check_OnOffObject[sizeof(OnOffObject) == 0x470 ? 1 : -1];
 
-void func_001E2520(C63* self);                  // 0x63 slot 0
-void func_001E25F8(C63* self);                  // 0x63 slot 7
-void func_001E2648(C63* self, void* stream);    // 0x63 slot 10
-void func_001E2758(C63* self);                  // 0x63 slot 16
-void func_001E2940(C63* self);                  // 0x63 slot 17
-void func_001E29A8(C63* self, void* p);         // 0x63 slot 20
+void func_001E2520(OnOffObject* self);                  // 0x63 slot 0
+void func_001E25F8(OnOffObject* self);                  // 0x63 slot 7
+void func_001E2648(OnOffObject* self, void* stream);    // 0x63 slot 10
+void func_001E2758(OnOffObject* self);                  // 0x63 slot 16
+void func_001E2940(OnOffObject* self);                  // 0x63 slot 17
+void func_001E29A8(OnOffObject* self, void* p);         // 0x63 slot 20
 void func_001E2988(void);                       // 0x63 slot 37 (calls the common slot)
 
 #endif

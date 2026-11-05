@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "c49.h"
 #include "game_clock.h"
 #include "memory_card.h"
 #include "object_link.h"
-#include "s137290.h"
+#include "buffered_stream.h"
 #include "key_id.h"
 
 s32 func_0018D1F8(void* self);
@@ -1024,22 +1024,22 @@ struct Pair_18CC20 : KeyId {
 extern const char D_0024B3E0[8];
 void func_0018D608(void);
 u8* func_0018D658(s32 size);
-s32 func_00137290(S137290* o, s32 a, u8* b, s32 c);
+s32 func_00137290(BufferedStream* o, s32 a, u8* b, s32 c);
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 s32 func_0018D268(Self_18CC20* s, char* a, s32 b, s32* c);
 void func_0018D410(KeyId* p);
-s32 func_001373B0(S137290* o, KeyId* p);
-void func_00137A60(S137290* o, s32 n, u8* d);
+s32 func_001373B0(BufferedStream* o, KeyId* p);
+void func_00137A60(BufferedStream* o, s32 n, u8* d);
 s32 func_0018D328(Self_18CC20* s, s32 a, u8* d, s32 n, s32* out);
-void func_001373D0(S137290* o);
+void func_001373D0(BufferedStream* o);
 s32 func_0018D2B0(Self_18CC20* s, s32 a);
 void func_0018D6F0(void);
-void func_001372E0(S137290* o, s32 f);
+void func_001372E0(BufferedStream* o, s32 f);
 
 s32 func_0018CC20(Self_18CC20* self, s32 a1, Key_18CC20* key, s32 a3)
 {
     char text[0x50];
-    S137290 obj;
+    BufferedStream obj;
     Pair_18CC20 pair;
     u8 data[0x1000];
     s32 code;
@@ -1230,7 +1230,7 @@ s32 func_0020A518(void*, s32, s32);
 void func_001300D8(Buffer_18F890*, s32);
 
 
-void func_001A7E90(G27C220* ctx);
+void func_001A7E90(GameProgress* ctx);
 
 s32 func_0018C568(MemoryCard* self)
 {
@@ -1252,17 +1252,17 @@ void func_0018EB98(void* a);
 struct Info_18CDD8 { u8 pad0[0x44]; s32 f44; s32 f48; u8 pad4C[0x60 - 0x4C]; };
 
 void func_001F5C0C(void* p, s32 v, s32 n);
-void func_001605E8(G27C220* img);
-s32 func_00160650(G27C220* img);
+void func_001605E8(GameProgress* img);
+s32 func_00160650(GameProgress* img);
 s32 func_0018C9C0(void* a, void* b, Info_18CDD8* info);
 s32 func_0018D268(void* a, void* b, s32 c, s32* h);
-s32 func_0018D2E8(void* a, s32 h, G27C220* buf, s32 size, s32* got);
+s32 func_0018D2E8(void* a, s32 h, GameProgress* buf, s32 size, s32* got);
 void func_0018D2B0(void* a, s32 h);
 
-s32 func_0018CDD8(void* a0, void* a1, G27C220* out, Info_18CDD8* info)
+s32 func_0018CDD8(void* a0, void* a1, GameProgress* out, Info_18CDD8* info)
 {
     Info_18CDD8 local;
-    G27C220 buf;
+    GameProgress buf;
     s32 handle = -1;
     s32 got;
     s32 r;

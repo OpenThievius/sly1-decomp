@@ -8,12 +8,12 @@
 // No code shows its size: three of its callers (func_0011EDA8, func_0018CC20, func_001E4EA8)
 // give it 0x60 bytes of their frames, func_001E4EA8 with fields up to 0x60, so the record runs
 // to 0x60 without a size check.
-#ifndef S137290_H
-#define S137290_H
+#ifndef BUFFERED_STREAM_H
+#define BUFFERED_STREAM_H
 
 #include "common.h"
 
-struct S137290 {
+struct BufferedStream {
     s32 flags;              // 0x00: the fourth argument (func_00137290, func_00137A60)
     s32 mode;               // 0x04: -1 at set-up (func_00137398, func_001373D0)
     s32 end;                // 0x08: the buffer's end, aligned to 64

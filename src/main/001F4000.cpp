@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c36.h"
-#include "c4e.h"
-#include "c7d.h"
-#include "c05.h"
-#include "c83.h"
+#include "contact_tracker.h"
+#include "lookup_object.h"
+#include "object_sub_group.h"
+#include "switched_collider.h"
+#include "animation.h"
 #include "screen_fade.h"
 
 void func_001451F0(u32, int, int, void*, int, void*);
@@ -17,16 +17,16 @@ void func_001F51C8() { func_00125C90(); }
 
 void* func_001F5208(void* self) { return (u8*)self + 0x550; }
 
-void func_001F5210(C36* self) { self->rec.found = 0; }
+void func_001F5210(ContactTracker* self) { self->rec.found = 0; }
 
 struct Obj_1F7E58 { u8 pad[0x10]; u32 flags; u8 pad2[4]; s32 field_18; };
 void func_001F7E58(Obj_1F7E58* self) { self->field_18 = 0; self->flags &= ~1u; }
 
 void func_00123ED0(void*);
-void func_001F4E18(C4E* self) { func_00123ED0(self); self->id = -1; }
+void func_001F4E18(LookupObject* self) { func_00123ED0(self); self->id = -1; }
 
 void func_001F57E0(void*);
-int func_001F51E8(C36* self) { func_001F57E0(&self->rec); return 1; }
+int func_001F51E8(ContactTracker* self) { func_001F57E0(&self->rec); return 1; }
 
 struct Obj_1F7FC0 { u8 pad[0x28]; struct Node* root; };
 struct Node { u8 pad0[8]; Node* child; u8 pad1[0x2C]; Node* next; };
@@ -37,14 +37,14 @@ void func_001F5840(Rec36* self, void* entry) { u32 n = self->count; if (n < 32) 
 extern u8 D_0027696C[];
 void func_001F66F8(void* value) { void* p = *(void**)D_0027696C; *(void**)((u8*)p + 0x58) = value; }
 
-void func_001F5590(Rec36* a, C36* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
+void func_001F5590(Rec36* a, ContactTracker* b) { a->owner = b; a->f04 = 0; a->f08 = 150.0f; }
 
 extern u8 D_00261990[];
 void func_00145088(u32, int, void*, int, void*);
 void func_001F4F20(void* self) { if (*(s32*)((u8*)self + 0x310)) { func_001451F0(*(u32*)D_00261990, 0xB, 7, (u8*)*(u32*)D_00261990 + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 0; } }
 
 void* func_001BA130(void*);
-void func_001F51A0(C36* self) { func_001BA130(self); self->rec.owner = self; }
+void func_001F51A0(ContactTracker* self) { func_001BA130(self); self->rec.owner = self; }
 
 void func_0013EC00(void*, int, void*, void*, void*, void*, void*);
 void func_001F42D0(void* self, void* a1, void* a2, void* a3, void* a4) { func_0013EC00((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
@@ -52,7 +52,7 @@ void func_001F42D0(void* self, void* a1, void* a2, void* a3, void* a4) { func_00
 extern u32 D_00277134;
 void func_00124A48(void*);
 void func_001F55A8(Rec36*);
-void func_001F4FD8(C36* self) { func_00124A48(self); func_001F55A8(&self->rec); }
+void func_001F4FD8(ContactTracker* self) { func_00124A48(self); func_001F55A8(&self->rec); }
 
 void func_001FA468();
 void func_001F4ED0(void* self) { if (!*(s32*)((u8*)self + 0x310)) { func_00145088(*(u32*)D_00261990, 7, (u8*)*(u32*)D_00261990 + 0x510, 0, self); *(s32*)((u8*)self + 0x310) = 1; } }
@@ -87,22 +87,22 @@ extern u8 D_002623C8[];
 
 void func_00124A48(void* self);
 
-void func_001F4660(C7D* self)
+void func_001F4660(ObjectSubGroup* self)
 {
     func_00124A48(self);
     for (s32 i = 0; i < self->count; i++) {
-        C01* e = self->items[i];
+        BaseObject* e = self->items[i];
         const Desc01* vt = e->desc;
         if (vt->m0F != 0) {
             vt->m0F(e);
         }
-        C01* e2 = self->items[i];
+        BaseObject* e2 = self->items[i];
         e2->desc->m10(e2);
     }
     if (self->f2D4 != 0) {
         s32* g = (s32*)*(void**)D_002623C8;
         if ((g[0] & 2) == 0) {
-            C01* a = self;
+            BaseObject* a = self;
             while (a->parent != 0) {
                 a = a->parent;
             }
@@ -117,7 +117,7 @@ extern Glob_1F4760 D_0026F138;
 extern f32 D_0026185C;
 void func_001DDA20(void* a);
 
-void func_001F4760(C7D* self, s32 state)
+void func_001F4760(ObjectSubGroup* self, s32 state)
 {
     if (state != self->f2E4) {
         if (self->f2E4 == 4 && state != 5)
@@ -138,7 +138,7 @@ s32 func_001601A0(s32 a0);
 s32 func_00160850(s32 a0);
 void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
 
-void func_001F4A30(C7D* self)
+void func_001F4A30(ObjectSubGroup* self)
 {
     FadeRequest m;
     s32 ok = 0;
@@ -160,15 +160,15 @@ void func_001F4A30(C7D* self)
     func_001EFFA0(&g_screenFade, &m, self->f318);
 }
 
-void func_00124A48(C4E* self);
-C01* func_0015A418(void* host, s32 a1, s32 a2, C4E* ctx);
-s32 func_001300E8(C01* n, s32 kind);
+void func_00124A48(LookupObject* self);
+BaseObject* func_0015A418(void* host, s32 a1, s32 a2, LookupObject* ctx);
+s32 func_001300E8(BaseObject* n, s32 kind);
 
-void func_001F4E48(C4E* self)
+void func_001F4E48(LookupObject* self)
 {
     func_00124A48(self);
     if (self->id != -1) {
-        C01* c = func_0015A418(self->world, 0x104, self->id, self);
+        BaseObject* c = func_0015A418(self->world, 0x104, self->id, self);
         if (c) {
             if (c->desc->flags & 1) {
                 self->found2D8 = c;
@@ -179,9 +179,9 @@ void func_001F4E48(C4E* self)
     }
 }
 
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 
-void func_001F4F70(C36* self)
+void func_001F4F70(ContactTracker* self)
 {
     func_001B7968(self);
     func_001F5590(&self->rec, self);
@@ -285,14 +285,14 @@ struct Val_1F4408 { s32 unused; };
 struct Key_1F4408 { s32 unused; };
 Val_1F4408* func_00160180(Key_1F4408* k);
 void func_001F0428(Val_1F4408* v, s32 m, s32 n);
-void func_001F4808(C7D* x);
+void func_001F4808(ObjectSubGroup* x);
 void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
 
 void func_001F4408(s32 flag, s32 n)
 {
     Ctx_1F4408* ctx = *(Ctx_1F4408**)D_002623C0;
     Obj_1F4408* o;
-    C7D* v;
+    ObjectSubGroup* v;
     Val_1F4408* k;
     FadeRequest args;
     if (ctx->f19D8 == 5) {
@@ -313,7 +313,7 @@ l4470:
     func_001F0428(k, 0x1BD, n);
     return;
 l4490:
-    v = (C7D*)func_001F4378();
+    v = (ObjectSubGroup*)func_001F4378();
     if (v == 0) {
         goto larg;
     }
@@ -351,13 +351,13 @@ struct Frame_1F56D8 {
 extern u8 D_00248D20[];
 extern u8 D_00248D30[];
 
-void func_00178D98(C07* self, s32 a1, void* a2, void* a3, void* a4);
-void func_001782C0(C07* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+void func_00178D98(Player* self, s32 a1, void* a2, void* a3, void* a4);
+void func_001782C0(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
 void func_00188850(Tab_1F56D8* t, void* out, f32 x);
-void func_00175170(C07* self, s32 a, s32 b);
-void func_00178598(C07* self, void* s2, f32 f);
+void func_00175170(Player* self, s32 a, s32 b);
+void func_00178598(Player* self, void* s2, f32 f);
 
-void func_001F56D8(Ctx_1F56D8* ctx, C07* self)
+void func_001F56D8(Ctx_1F56D8* ctx, Player* self)
 {
     Frame_1F56D8 f;
     func_00178D98(self, ctx->s94, (u8*)ctx + 0x98, f.a, &f.f60);
@@ -383,13 +383,13 @@ s32 func_00137D10(void* a);
 void* func_0018D500(s32 size);
 void* func_0011E580(s32 a, s32 b, s32 c, s32 d, s32 e);
 
-void func_001F4500(C7D* self, void* s3)
+void func_001F4500(ObjectSubGroup* self, void* s3)
 {
     func_00138550(s3, (u8*)self + 0x2FC);
     func_00138550(s3, (u8*)self + 0x308);
     func_00137EB0(s3, &self->rot);
     func_00137E70(s3, &self->pos);
-    void (*f)(C01* self) = self->desc->m12;
+    void (*f)(BaseObject* self) = self->desc->m12;
     if (f != 0) {
         f(self);
     }
@@ -399,12 +399,12 @@ void func_001F4500(C7D* self, void* s3)
     func_0011EC40(self, s3);
     s32 n = func_00137D10(s3);
     self->count = n;
-    self->items = (C01**)func_0018D500(n * 4);
+    self->items = (BaseObject**)func_0018D500(n * 4);
     while (i < self->count) {
         s32 a = func_00137D10(s3);
         s32 b = func_00137D10(s3);
         s32 c = func_00137D10(s3);
-        C01* o = (C01*)func_0011E580(a, (s32)self->world, (s32)self->parent, b, c);
+        BaseObject* o = (BaseObject*)func_0011E580(a, (s32)self->world, (s32)self->parent, b, c);
         self->items[i++] = o;
         o->desc->m0A(o, s3);
         o->desc->m03(o);
@@ -415,9 +415,9 @@ void func_001F4500(C7D* self, void* s3)
 struct Iter_1F55A8 { List01* list; u8* link; s32 offset; Iter_1F55A8* saved; };
 
 struct Next_1F55A8 {
-    static C01* Of(Iter_1F55A8* it)
+    static BaseObject* Of(Iter_1F55A8* it)
     {
-        C01* obj = *(C01**)it->link;
+        BaseObject* obj = *(BaseObject**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
@@ -434,13 +434,13 @@ struct Begin_1F55A8 {
     }
 };
 
-C01* func_0015A418(C6C* a, s32 b, void* c, C36* d);
-void func_001F5868(Rec36* self, C01* n);
+BaseObject* func_0015A418(World* a, s32 b, void* c, ContactTracker* d);
+void func_001F5868(Rec36* self, BaseObject* n);
 
 void func_001F55A8(Rec36* self)
 {
     Iter_1F55A8 it;
-    C01* n;
+    BaseObject* n;
     s32 i;
 
     Begin_1F55A8::Of(&it, &self->owner->children);
@@ -466,14 +466,14 @@ struct Obj_1F5008 {
     s32 f550;
 };
 
-s32 func_001B93F8(C03* self);
-s32 func_00182F40(Obj_1F5008* o, C36* self);
+s32 func_001B93F8(Collider* self);
+s32 func_00182F40(Obj_1F5008* o, ContactTracker* self);
 s32 func_001300E8(Obj_1F5008* o, s32 kind);
 s32 func_001F5C0C(void* p, s32 a, s32 b);
 s32 func_00177838(void* t, s32 a, s32 b);
 
 struct Tmp_1F5008 {
-    C36* self;
+    ContactTracker* self;
     Obj_1F5008* obj;
     u8 pad[0x18];
     Vec02 q20;
@@ -481,26 +481,26 @@ struct Tmp_1F5008 {
 };
 
 struct Add_1F5008 {
-    static void Of(C36* self, Obj_1F5008* p, Vec02* a, Vec02* b)
+    static void Of(ContactTracker* self, Obj_1F5008* p, Vec02* a, Vec02* b)
     {
         s32 c = self->count;
         if ((u32)c < 10) {
             if (p->f550 != 3) {
                 Slot36* s = &self->slots[c];
                 self->count = c + 1;
-                s->obj = (C03*)p;
+                s->obj = (Collider*)p;
                 s->q10 = *a;
                 s->q20 = *b;
             }
         }
     }
 };
-void func_001F5008(C36* self) {
+void func_001F5008(ContactTracker* self) {
     Tmp_1F5008 tmp;
     Obj_1F5008* p;
     func_001B93F8(self);
     self->count = 0;
-    C03* owner = self->root03();
+    Collider* owner = self->root03();
     for (ContactRow03* g = owner->contacts->head; g; g = g->next) {
         for (Contact03* it = g->head; it; it = it->next) {
             s32 side = (owner != it->end[0].body);
@@ -533,24 +533,24 @@ extern Gl_1F4808 D_0026E9F8;
 
 s32 func_001601A0(s32 a);
 void func_001E0828(Gl_1F4808* g);
-void func_001F4760(C7D* self, s32 state);
+void func_001F4760(ObjectSubGroup* self, s32 state);
 void func_001E02C8(Gl_1F4808* g, s32 n);
 void func_001F4408(s32 flag, s32 n);
-s32 func_001300E8(C01* key, s32 kind);
+s32 func_001300E8(BaseObject* key, s32 kind);
 void func_001451F0(u8* a0, s32 a1, s32 a2, u8* a3, s32 a4, s32 a5);
-void func_0012C7B0(C83* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
-s32 func_0012C9A8(C83* node);
-void func_001837E0(C7D* self, s32 a, s32 b, s32 c);
+void func_0012C7B0(Animation* self, s32 a1, s32 a2, s32* out, f32 fa, f32 fb);
+s32 func_0012C9A8(Animation* node);
+void func_001837E0(ObjectSubGroup* self, s32 a, s32 b, s32 c);
 
-void func_001F4808(C7D* self)
+void func_001F4808(ObjectSubGroup* self)
 {
-    C01* key;
+    BaseObject* key;
     s32 i;
     s32 found = 0;
     s32 next;
-    C83* it;
+    Animation* it;
 
-    key = (C01*)func_001925F0();
+    key = (BaseObject*)func_001925F0();
     if (D_0026E9F8.f260 == 2
         && (self->f2E0 != 0 || self->f2D4 != 0
             || ((*(Glob_1F4808**)&D_002623C0)->f19DC == 0 && (u8)func_001601A0(self->f2FC) == 1))) {
@@ -571,7 +571,7 @@ void func_001F4808(C7D* self)
     }
     func_001F4760(self, 5);
     for (i = 0; i < self->count; i++) {
-        it = (C83*)self->items[i];
+        it = (Animation*)self->items[i];
         func_0012C7B0(it, 0, 0, 0, 0.0f, 1.0f);
         next = 0;
         if (found != 0 || func_0012C9A8(it) != 0) {
@@ -583,7 +583,7 @@ void func_001F4808(C7D* self)
         if (self->f324 > 0.0f) {
             self->f31C = ((f32*)&D_0026185C)[0] + self->f324;
         } else if (self->count > 0) {
-            self->f31C = ((f32*)&D_0026185C)[0] + ((C83*)self->items[0])->length;
+            self->f31C = ((f32*)&D_0026185C)[0] + ((Animation*)self->items[0])->length;
         } else {
             self->f31C = ((f32*)&D_0026185C)[0];
         }

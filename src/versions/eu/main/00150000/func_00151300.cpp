@@ -3,7 +3,7 @@
 struct Hld_151300_eu { u8 pad[0x578]; s32 f578; u8 pad2[4]; s32 f580; };
 struct Sc_151300_eu { u8 pad[0x584]; u8 f584; u8 pad2[7]; f32 f58C; };
 
-s32 func_00151300(C65* self)
+s32 func_00151300(StepSequence* self)
 {
     s32 flags = self->f2E8;
     if (flags & 2) {
@@ -39,7 +39,7 @@ s32 func_00151300(C65* self)
     ((Sc_151300_eu*)&D_002701F8)->f584 = 0;
     if (flags == 0x100) {
         s32 r;
-        G262C70* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
+        PadRecord* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
         s32 k = self->f2EC;
         r = 0;
         switch (k) {

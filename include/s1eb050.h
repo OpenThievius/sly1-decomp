@@ -3,8 +3,8 @@
 // it of each range of an array, func_001EB0F8 clamps a value to it (Range_1C30E8 inlines the
 // same clamp). Written for this project from what retail's code does.
 //
-// Ranges sit at C08+0x738, in D_002754C8, D_00275C60 (the clamp of the D_002623C8 record's
-// word 0x10, 00150000.cpp) and eight times in G262C70 (g262c70.h). 00128000.cpp copies
+// Ranges sit at Agent+0x738, in D_002754C8, D_00275C60 (the clamp of the D_002623C8 record's
+// word 0x10, 00150000.cpp) and eight times in PadRecord (g262c70.h). 00128000.cpp copies
 // D_00275C60 as one unaligned doubleword (U64_12A678, U64_12A748): that view stays the file's.
 #ifndef S1EB050_H
 #define S1EB050_H

@@ -2,38 +2,38 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c61.h"
-#include "c46.h"
-#include "c20.h"
-#include "c65.h"
-#include "c83.h"
-#include "t2195.h"
-#include "t217d.h"
-#include "c6d.h"
-#include "c6c.h"
+#include "pooled_object.h"
+#include "masked_collider.h"
+#include "step_sequence.h"
+#include "animation.h"
+#include "attachment.h"
+#include "screen_element.h"
+#include "camera.h"
+#include "world.h"
 #include "flagged_object.h"
 #include "v24a0.h"
 #include "shapes.h"
 #include "globals.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "g261ef0.h"
 #include "threshold_range.h"
-#include "g262c70.h"
+#include "pad_record.h"
 #include "active_set_solver.h"
-#include "s137290.h"
+#include "buffered_stream.h"
 #include "texture_header.h"
-#include "s1291d0.h"
+#include "range_record.h"
 
 extern f32 D_0024A014;
-C46* func_0016A820(C46*);
+PooledObject* func_0016A820(PooledObject*);
 void func_00150298(C23* self)
 {
 	ListFrame frame;
 	if (self->p6CC != 0) return;
-	C46* current = (C46*)D_00262708.head;
-	C46* best = 0;
+	PooledObject* current = (PooledObject*)D_00262708.head;
+	PooledObject* best = 0;
 	f32 minimum = D_0024A014;
 	while (current != 0) {
-		C46* candidate = func_0016A820(current);
+		PooledObject* candidate = func_0016A820(current);
 		current = current->next;
 
 		if (candidate != 0 && candidate->stateTime < minimum) { best = candidate; minimum = candidate->stateTime; }
@@ -43,10 +43,10 @@ void func_00150298(C23* self)
 
 extern s32 func_00182FC8(void*);
 
-C46* func_00150338(C23* state)
+PooledObject* func_00150338(C23* state)
 {
 	for (s32 i = 0; i < state->f78C; ++i) {
-		C46* item = (C46*)state->f790[i];
+		PooledObject* item = (PooledObject*)state->f790[i];
 		if (func_00182FC8(item) == 0) continue;
 		if (item->state == 3) continue;
 		if (item->state == 4) continue;
@@ -98,7 +98,7 @@ void func_00150418(C23* self, void* event)
 }
 
 extern void func_00123ED0();
-void func_001504E0(C65* state)
+void func_001504E0(StepSequence* state)
 {
 	func_00123ED0();
 	state->flags |= ((u64)0x8000u << 17);
@@ -109,7 +109,7 @@ void func_001504E0(C65* state)
 void func_001289C0(void* self, void* arg);
 void func_00150570(void* self, void* arg, void* a, void* b);
 
-void func_00150528(C65* self, void* arg)
+void func_00150528(StepSequence* self, void* arg)
 {
     func_001289C0(self, arg);
     func_00150570(self, arg, &self->count2DC, &self->steps2E0);
@@ -118,7 +118,7 @@ void func_00150528(C65* self, void* arg)
 void func_00124A48(void* self);
 void* func_00160CA0(void* base, s32 index);
 
-void func_001506F0(C65* self)
+void func_001506F0(StepSequence* self)
 {
     func_00124A48(self);
     if (self->first30C == -1) {
@@ -131,28 +131,28 @@ void func_001506F0(C65* self)
     }
 }
 
-void func_00150750(C65* self)
+void func_00150750(StepSequence* self)
 {
     self->mode2D0 = 1;
 }
 
-void func_00150760(C65* self)
+void func_00150760(StepSequence* self)
 {
     self->mode2D0 = 2;
 }
 
-void func_00150770(C65* self, s32* out)
+void func_00150770(StepSequence* self, s32* out)
 {
     *out = *(s32*)self->target304;
 }
 
-void func_00150780(C65* self, s32 value)
+void func_00150780(StepSequence* self, s32 value)
 {
     *(s32*)self->target304 = value;
 }
 
 extern void func_00127378(void*, u32, u32);
-void func_001512A8(C65* state, u32 mode, u32 value)
+void func_001512A8(StepSequence* state, u32 mode, u32 value)
 {
 	func_00127378(state, mode, value);
 	if (mode == 6 && value == state->value2F8)
@@ -181,9 +181,9 @@ void func_00151860(void* value, Object_151860* object)
     }
 }
 
-void func_00150790(C65* self, s32 arg);
+void func_00150790(StepSequence* self, s32 arg);
 
-void func_001519A8(C65* self)
+void func_001519A8(StepSequence* self)
 {
     if (self->state2D4 != 1 && self->state2D4 != 3) {
         func_00150790(self, 0);
@@ -192,7 +192,7 @@ void func_001519A8(C65* self)
 
 extern void* func_00160810(const char*);
 extern void* func_00160CA0(void*, u32);
-void func_001519E0(C65* collection, const char* name, u32 kind)
+void func_001519E0(StepSequence* collection, const char* name, u32 kind)
 {
 	if ((u32)collection->f310 >= 4) return;
 	void* item = func_00160810(name);
@@ -549,12 +549,12 @@ void func_00152D30(void* self)
 
 void func_00152E18() {}
 
-void func_00150DC0(C65* self, u8* item);
-s32 func_00151300(C65* self);
+void func_00150DC0(StepSequence* self, u8* item);
+s32 func_00151300(StepSequence* self);
 void func_0012E760(void* obj);
-void func_001516C0(C65* self);
+void func_001516C0(StepSequence* self);
 
-void func_001517C0(C65* self)
+void func_001517C0(StepSequence* self)
 {
     s32 index;
 
@@ -713,9 +713,9 @@ struct Gl_0026E9F8 { u8 pad0[0x260]; s32 f260; u8 pad1[0x8]; s32 f26C; };
 
 extern s32 D_00275F84;
 s32 func_001BE5E8(void);
-void func_00150790(C65* self, s32 mode);
+void func_00150790(StepSequence* self, s32 mode);
 
-void func_001518B8(C65* self)
+void func_001518B8(StepSequence* self)
 {
     Gl_0026E9F8* g = (Gl_0026E9F8*)&D_0026E9F8;
     if (g->f260 >= 2 || g->f26C != 0)
@@ -822,19 +822,19 @@ V24A0* func_00152888(V24A0* self)
 }
 
 struct __attribute__((packed)) Blk_150790 { u8 pad0[0x324]; s32 f324; };
-struct Glob_150790 { u8 pad0[0x260]; C65* f260; };
+struct Glob_150790 { u8 pad0[0x260]; StepSequence* f260; };
 
 extern s32 D_00261D38;
 extern f32 D_0026185C[];
 
 void func_001BE998(void);
-void func_001837E0(C65* self, s32 a, s32 b, s32 c);
-void func_001451F0(C6D* m, s32 a, s32 b, void* c, s32 d, s32 e);
+void func_001837E0(StepSequence* self, s32 a, s32 b, s32 c);
+void func_001451F0(Camera* m, s32 a, s32 b, void* c, s32 d, s32 e);
 void func_001DDA50(void* a);
 void func_001DDA20(void* a);
 s32 func_00149610(void* a);
 void func_001495E8(void* a, s32 b);
-void func_00145088(C6D* m, s32 a, void* b, s32 c, s32 d);
+void func_00145088(Camera* m, s32 a, void* b, s32 c, s32 d);
 void func_0012E760(void* a);
 void func_001C06A0(s32 a, s32 b, f32 f);
 void func_001356C0(T217D_440* a, s32 b);
@@ -843,7 +843,7 @@ void* func_0015A448(void* a, s32 b, s32 c);
 void func_001E86E0(T217D_3F0* a, s32 b);
 void func_001E87F0(T217D_3F0* a, s32 b);
 
-void func_00150790(C65* self, s32 next)
+void func_00150790(StepSequence* self, s32 next)
 {
     s32 cur = self->state2D4;
     if (next == cur) {
@@ -1042,15 +1042,15 @@ struct Ent_150570 {
     s32 w24;
 };
 
-s32 func_00137CC0(S137290* r);
+s32 func_00137CC0(BufferedStream* r);
 void* func_0018D5C0(s32 n);
-void func_00138550(S137290* r, void* out);
-s32 func_00137D10(S137290* r);
-f32 func_00137DF8(S137290* r);
-s32 func_00137B90(S137290* r);
-void func_001384A0(S137290* r, void* out);
+void func_00138550(BufferedStream* r, void* out);
+s32 func_00137D10(BufferedStream* r);
+f32 func_00137DF8(BufferedStream* r);
+s32 func_00137B90(BufferedStream* r);
+void func_001384A0(BufferedStream* r, void* out);
 
-void func_00150570(void* unused, S137290* rd, s32* outCount, Ent_150570** outArr)
+void func_00150570(void* unused, BufferedStream* rd, s32* outCount, Ent_150570** outArr)
 {
     s32 i = 0;
     *outCount = func_00137CC0(rd);
@@ -1088,12 +1088,12 @@ void func_00150570(void* unused, S137290* rd, s32* outCount, Ent_150570** outArr
 
 struct Item_1516C0 { s32 kind; s32 data[9]; };
 extern u8 D_00275BC0[];
-void func_001837E0(C65* self, s32 a, s32 b, s32* c);
+void func_001837E0(StepSequence* self, s32 a, s32 b, s32* c);
 void func_001DDB58(void* a);
 void func_001DDBB8(void* a);
 void func_001E9570(void* p);
 
-void func_001516C0(C65* self)
+void func_001516C0(StepSequence* self)
 {
     if (self->state2D4 != 4) {
         if (self->step2E4 < self->count2DC) {
@@ -1127,19 +1127,19 @@ extern s32 D_00270B30;
 extern s32 D_002717A8;
 extern u8 D_00275BC0[];
 
-void func_00124FC0(C65* self);
+void func_00124FC0(StepSequence* self);
 s32 func_001BE5E8(void);
-void func_00150790(C65* self, s32 mode);
+void func_00150790(StepSequence* self, s32 mode);
 void func_001F5C0C(s32* p, s32 v, s32 n);
 Ent65* func_001925F0(void);
 s32 func_001493A0(T2173* p);
-void func_001518B8(C65* self);
-void func_00151860(C65* value, Ent65* object);
-void func_001516C0(C65* self);
+void func_001518B8(StepSequence* self);
+void func_00151860(StepSequence* value, Ent65* object);
+void func_001516C0(StepSequence* self);
 void func_001E9570(void* p);
-void func_001517C0(C65* self);
+void func_001517C0(StepSequence* self);
 
-void func_00150AE8(C65* self)
+void func_00150AE8(StepSequence* self)
 {
     s32 q[2];
     s32 s1;
@@ -1191,7 +1191,7 @@ void func_00150AE8(C65* self)
         goto timer;
     case 1:
         if (q[1] != 0) {
-            C65* o = D_0027051C;
+            StepSequence* o = D_0027051C;
             if (o == 0) {
                 func_00151860(self, s2);
                 s1 = self->state2D4;
@@ -1247,7 +1247,7 @@ s32 func_001BE810(void);
 s32 func_001BE980(void);
 s32 func_00136530(T217D_440* p);
 
-s32 func_00151300(C65* self)
+s32 func_00151300(StepSequence* self)
 {
     s32 flags = self->f2E8;
     if (flags & 2) {
@@ -1283,7 +1283,7 @@ s32 func_00151300(C65* self)
     D_002701F8.f2F8 = 0;
     if (flags == 0x100) {
         s32 r;
-        G262C70* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
+        PadRecord* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
         s32 k = self->f2EC;
         r = 0;
         switch (k) {
@@ -1497,18 +1497,18 @@ void func_001E86E0(T217D_3F0* a, Slot_150DC0* b);
 void func_001E87F0(T217D_3F0* a, Slot_150DC0* b);
 s32 func_001833F0(Slot_150DC0* a, s32 b);
 void func_001E7440(T217D_3F0* a, s32 b);
-void func_0012C7B0(f32 e, f32 f, Slot_150DC0* a, s32 b, s32 c, Player2195** d);
-void func_0012F810(Player2195* a, C65* b);
+void func_0012C7B0(f32 e, f32 f, Slot_150DC0* a, s32 b, s32 c, AnimationPlayer** d);
+void func_0012F810(AnimationPlayer* a, StepSequence* b);
 u32 func_001E2100(s8* a);
 void func_001365A8(T217D_440* a, f32 b);
 void func_001365A0(T217D_440* a, s32 b);
 void* func_0015A448(void* a, s32 b, s32 c);
-void func_001837E0(C65* a, s32 b, s32 c, void* d);
+void func_001837E0(StepSequence* a, s32 b, s32 c, void* d);
 void func_001DDB58(void* a);
 void func_001DDBB8(void* a);
 void func_0018F0E8(u8* a, s32 b);
 
-void func_00150DC0(C65* self, Msg_150DC0* msg)
+void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
 {
     Slot_150DC0* s2;
     Slot_150DC0* s4;
@@ -1660,7 +1660,7 @@ struct Table_152010 {
 
 s32 func_001EAA70(s32 lo, s32 hi);
 f32 func_001EB0F8(void* p, f32 v);
-s32 func_00148AC0(C6C* mgr, s32 kind, void* p, s32 n, void* arr);
+s32 func_00148AC0(World* mgr, s32 kind, void* p, s32 n, void* arr);
 
 struct Lerp_152010
 {
@@ -1735,7 +1735,7 @@ struct C_152E48 { u8 pad[0xC]; TextureHeader** tex; };
 struct B_152E48 { u8 pad[0x14]; C_152E48* c; };
 struct Self_152E48 {
     u8 pad[0x2D0];
-    S1291D0* f2D0;
+    RangeRecord* f2D0;
     s32 f2D4;
     s32 f2D8;
     s32 f2DC;
@@ -1764,7 +1764,7 @@ void func_0018D6F0(void);
 void func_001614C8(V24A0* p, s32 a, s32 b);
 void func_001EE450(V24A0* p);
 
-void func_00152E48(Self_152E48* self, S1291D0* a)
+void func_00152E48(Self_152E48* self, RangeRecord* a)
 {
     V24A0 pa;
     V24A0 pb;
@@ -1952,7 +1952,7 @@ void func_00151A88(G261EF0* self)
     self->f08 = 6;
     self->f0C = 1;
     self->f10 = 3;
-    G27C220* g = D_002623C0;
+    GameProgress* g = D_002623C0;
     if (g->f19D8 == 0 || g->f19D8 == 5 || g->f19DC == 1) self->table = &D_00261E90;
     else if (!(D_002623C8->flags & 2)) self->table = D_00261D70;
     else self->table = &D_00261E30;

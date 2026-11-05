@@ -3,10 +3,10 @@
 // records it loads at +0x550, a list of the class 0x2A objects (include/c29.h) at +0x55C, and a
 // few tuning values (+0x5B0). Written for this project from what retail's code does
 // (config/us/classes.tsv).
-#ifndef C47_H
-#define C47_H
+#ifndef TARGET_FOLLOWER_H
+#define TARGET_FOLLOWER_H
 
-#include "c03.h"
+#include "collider.h"
 
 struct C2A;
 struct Obj_1BF0D8;
@@ -52,7 +52,7 @@ struct Tune47 {
     f32 c;                  // 0x08
 };
 
-struct C47 : C03 {
+struct TargetFollower : Collider {
     List47* list550;        // 0x550: loaded (table D_002629D0, id 0x2EE)
     void* f554;             // 0x554: func_001B6290(list550, self, -1, 1)
     C2A* f558;              // 0x558: the class 0x2A object it follows (func_0016D3F0)
@@ -91,12 +91,12 @@ struct C47 : C03 {
     u8 pad5DC[0x5E0 - 0x5DC];
 };
 
-typedef char check_C47[sizeof(C47) == 0x5E0 ? 1 : -1];
+typedef char check_TargetFollower[sizeof(TargetFollower) == 0x5E0 ? 1 : -1];
 
-void func_0016CE00(C47* self);                          // slot 0
-void func_0016CE80(C47* self);                          // slot 10
-void func_0016DA00(C47* self, s32 type, Packet47* packet);  // slot 13
-void func_0016CF70(C47* self);                          // slot 16
-void func_0016D0C0(C47* self, f32 t);                   // slot 28
+void func_0016CE00(TargetFollower* self);                          // slot 0
+void func_0016CE80(TargetFollower* self);                          // slot 10
+void func_0016DA00(TargetFollower* self, s32 type, Packet47* packet);  // slot 13
+void func_0016CF70(TargetFollower* self);                          // slot 16
+void func_0016D0C0(TargetFollower* self, f32 t);                   // slot 28
 
 #endif

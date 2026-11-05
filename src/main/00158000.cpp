@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c73.h"
-#include "t219c.h"
+#include "transform_object.h"
+#include "effect.h"
 #include "cursor_animator.h"
 #include "object_cycler.h"
 #include "c60.h"
-#include "c6c.h"
+#include "world.h"
 #include "globals.h"
 #include "deferred_request.h"
 #include "color_fade.h"
 
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
-typedef void (*VFn_158108)(T219C* self, void* a, s32 z, f32 f);
+typedef void (*VFn_158108)(Effect* self, void* a, s32 z, f32 f);
 
 void* func_0019EA78(s32 a, s32 b);
 
 void func_00158108(void* a0, Owner_158108* a1, f32 f)
 {
-    T219C* o = (T219C*)func_0019EA78(4, 0);
+    Effect* o = (Effect*)func_0019EA78(4, 0);
     if (o != 0) {
         ((VFn_158108)o->vt->m00)(o, a0, 0, f);
         o->life = 0.75f;
@@ -102,7 +102,7 @@ void func_00158D38(void)
 {
 }
 
-void func_00158F10(C7A* self, s32 kind, C01* other)
+void func_00158F10(C7A* self, s32 kind, BaseObject* other)
 {
     if (kind == 2) {
         if (other == self->heldC0) {
@@ -181,10 +181,10 @@ u8* func_00159F20(u8* base, s32 n)
     return base + (((n * 0x95675) & 0x1FF) * 12 + 0x84);
 }
 
-C01* func_0015A868(C01* list, C01* other)
+BaseObject* func_0015A868(BaseObject* list, BaseObject* other)
 {
-    for (C01* p = list; p != 0; p = p->parent) {
-        for (C01* q = other; q != 0; q = q->parent) {
+    for (BaseObject* p = list; p != 0; p = p->parent) {
+        for (BaseObject* q = other; q != 0; q = q->parent) {
             if (p == q) {
                 return p;
             }
@@ -203,7 +203,7 @@ PackedFloatPair D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
 PackedFloatPair D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
 PackedFloatPair D_002621C0 = { 0x4170000040A00000ULL };
 
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 void func_00152470(List01* a, ObjectCycler* b);
 
 void func_0015AAE0(ObjectCycler* self)
@@ -325,7 +325,7 @@ s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 
 void func_00159478(void** out, void* self)
 {
-    C01* o = (C01*)self;
+    BaseObject* o = (BaseObject*)self;
     void* arr[32];
     s32 n;
     s32 cnt;
@@ -582,13 +582,13 @@ void func_0015AEB0(ObjectCycler* self)
     self->f64C = self->radius3CC + self->radius3CC;
 }
 
-struct Node_159BB0 { C02* owner; };
+struct Node_159BB0 { PlacedObject* owner; };
 
 
 void* func_001B5EE0(void* where);
 void func_00152470(void* where, Node_159BB0* node);
 
-Node_159BB0* func_00159BB0(C02* self)
+Node_159BB0* func_00159BB0(PlacedObject* self)
 {
     Node_159BB0* node = (Node_159BB0*)func_001B5EE0((u8*)D_00275710 + 0x1C18);
     node->owner = self;
@@ -622,7 +622,7 @@ void func_00158A10(C78* self)
 {
     for (s32 i = 0; i < self->count; i++) {
         C77* it = self->members[i];
-        void (*fn)(C01*) = it->desc->m0F;
+        void (*fn)(BaseObject*) = it->desc->m0F;
         if (fn != 0) {
             fn(it);
         }
@@ -1012,13 +1012,13 @@ s32 func_0015A4B8(s32 index, s32 value)
     return 0;
 }
 
-s32 func_00182FC8(C02* o);
+s32 func_00182FC8(PlacedObject* o);
 
-void func_00159F48(C02* self, s32 mode, s32 a2, s32 a3, C02* a4, s32 cap,
-                   s32* count, C02** arr, s32* lvlp)
+void func_00159F48(PlacedObject* self, s32 mode, s32 a2, s32 a3, PlacedObject* a4, s32 cap,
+                   s32* count, PlacedObject** arr, s32* lvlp)
 {
-    C02* a0;
-    C02* prev;
+    PlacedObject* a0;
+    PlacedObject* prev;
     switch (mode) {
     case 2:
         if (self->alias != 0 && a3 == 0) return;
@@ -1026,7 +1026,7 @@ void func_00159F48(C02* self, s32 mode, s32 a2, s32 a3, C02* a4, s32 cap,
         return;
     case 1:
         if (self->alias != 0 && a3 == 0) return;
-        a0 = (C02*)self->parent;
+        a0 = (PlacedObject*)self->parent;
         if (a0 == 0) return;
         do {
             u64 lvl = a0->mark;
@@ -1035,7 +1035,7 @@ void func_00159F48(C02* self, s32 mode, s32 a2, s32 a3, C02* a4, s32 cap,
                 return;
             }
             if (a0->alias != 0) return;
-            a0 = (C02*)a0->parent;
+            a0 = (PlacedObject*)a0->parent;
         } while (a0 != 0);
         return;
     case 3:
@@ -1046,7 +1046,7 @@ void func_00159F48(C02* self, s32 mode, s32 a2, s32 a3, C02* a4, s32 cap,
     case 4:
         prev = 0;
         a0 = self;
-        if ((self->desc->flags & 1) == 0) a0 = (C02*)self->parent;
+        if ((self->desc->flags & 1) == 0) a0 = (PlacedObject*)self->parent;
         while (a0 != 0) {
             u64 f = a0->flags;
             if (f & ((u64)0xF000 << 30)) {
@@ -1064,14 +1064,14 @@ void func_00159F48(C02* self, s32 mode, s32 a2, s32 a3, C02* a4, s32 cap,
             if (a0->alias != 0 && (a0 != self || a3 == 0)) {
                 s32 want = -1;
                 if (a4 != 0) {
-                    for (C02* v = a4; v; v = (C02*)v->parent) {
+                    for (PlacedObject* v = a4; v; v = (PlacedObject*)v->parent) {
                         if (v->alias != 0) { want = v->alias->id; break; }
                     }
                 }
                 if (a0->alias->id != want) return;
-                prev = (C02*)a0->parent;
+                prev = (PlacedObject*)a0->parent;
             }
-            a0 = (C02*)a0->parent;
+            a0 = (PlacedObject*)a0->parent;
         }
         if (*lvlp != 0x7FFFFFFF) return;
         goto add;
@@ -1250,7 +1250,7 @@ struct Begin_00159588 {
     }
 };
 
-void func_00159588(C6C* self)
+void func_00159588(World* self)
 {
     Iter_00159588 it;
     Begin_00159588::Of(&it, &self->list1BDC);
@@ -1292,14 +1292,14 @@ void func_0015AC08(ObjectCycler* self, void* arg)
             if (self->swapKind == kind)
                 self->swapIndex = self->count;
         }
-        self->objs[self->count++] = (C02*)p;
+        self->objs[self->count++] = (PlacedObject*)p;
     }
     if (self->mode == 1) {
         for (i = 0; i < 8; i++) {
             s32 p = func_0015A480((u8*)self->world, i + 0x24D, self);
             if (p) {
                 func_00182ED8(p);
-                self->altObjects[self->altCount++] = (C02*)p;
+                self->altObjects[self->altCount++] = (PlacedObject*)p;
             }
         }
     }
@@ -1365,20 +1365,20 @@ void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
     }
 }
 
-s32 func_001300E8(C02* obj, s32 id);
-s32 func_00182FC8(C02* obj);
+s32 func_001300E8(PlacedObject* obj, s32 id);
+s32 func_00182FC8(PlacedObject* obj);
 s32 func_0015A4B8(u32 i, s32 id);
-void func_00159F48(C02* obj, s32 kind, s32 all, s32 zero, C02* root, s32 max,
-                   s32* countOut, C02** found, s32* minOut);
+void func_00159F48(PlacedObject* obj, s32 kind, s32 all, s32 zero, PlacedObject* root, s32 max,
+                   s32* countOut, PlacedObject** found, s32* minOut);
 
-s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found)
+s32 func_0015A4F0(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, PlacedObject** found)
 {
     s32 c;
     s32 min;
     s32 kind;
-    C02* obj;
-    C02* mark;
-    C02* p;
+    PlacedObject* obj;
+    PlacedObject* mark;
+    PlacedObject* p;
     s32 n;
     u32 i;
 
@@ -1393,9 +1393,9 @@ s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found
     if (kind == 3) {
         // Retail reads obj here before anything sets it (lw 0($s0) with $s0 unset).
         if (!(obj->desc->flags & 1)) {
-            obj = (C02*)obj->parent;
+            obj = (PlacedObject*)obj->parent;
         }
-        for (; obj != 0; obj = (C02*)obj->parent) {
+        for (; obj != 0; obj = (PlacedObject*)obj->parent) {
             if (func_001300E8(obj, id) != 0 && ((flags & 0x100) || func_00182FC8(obj) != 0)) {
                 if (c < max) {
                     found[c] = obj;
@@ -1407,7 +1407,7 @@ s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found
         if (!(root->desc->flags & 1)) {
             return 0;
         }
-        for (obj = (C02*)root->children.head; obj != 0; obj = (C02*)obj->next) {
+        for (obj = (PlacedObject*)root->children.head; obj != 0; obj = (PlacedObject*)obj->next) {
             if (func_001300E8(obj, id) == 0) {
                 continue;
             }
@@ -1423,14 +1423,14 @@ s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found
         case 4:
             mark = root;
             if (mark != 0 && !(mark->desc->flags & 1)) {
-                mark = (C02*)mark->parent;
+                mark = (PlacedObject*)mark->parent;
             }
             p = mark;
             n = 0;
             while (p != 0) {
                 n++;
                 p->mark = n;
-                p = (C02*)p->parent;
+                p = (PlacedObject*)p->parent;
             }
             min = 0x7FFFFFFF;
             break;
@@ -1439,11 +1439,11 @@ s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found
             break;
         }
         for (i = id; i < 0x95 && func_0015A4B8(i, id); i++) {
-            for (obj = (C02*)world->f1884[i]; obj != 0; obj = (C02*)obj->nextById) {
+            for (obj = (PlacedObject*)world->f1884[i]; obj != 0; obj = (PlacedObject*)obj->nextById) {
                 func_00159F48(obj, kind, flags & 0x100, 0, root, max, &c, found, &min);
             }
         }
-        for (p = mark; p != 0; p = (C02*)p->parent) {
+        for (p = mark; p != 0; p = (PlacedObject*)p->parent) {
             p->mark = 0;
         }
     }

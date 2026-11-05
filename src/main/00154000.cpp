@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c50.h"
-#include "c1e.h"
-#include "t219c.h"
+#include "effect_spawner.h"
+#include "effect_owner.h"
+#include "effect.h"
 #include "shapes.h"
 #include "active_set_solver.h"
 
 void func_00155F90();
-void func_00155FA0(C50* self);
+void func_00155FA0(EffectSpawner* self);
 
-void func_00156108(C50* self, s32 a1)
+void func_00156108(EffectSpawner* self, s32 a1)
 {
     if (self->f2D4 == -1) {
         self->f2D8 = a1;
@@ -25,7 +25,7 @@ void func_00156108(C50* self, s32 a1)
     self->f34C = 1;
 }
 
-void func_00156178(C50* a0, s32 a1)
+void func_00156178(EffectSpawner* a0, s32 a1)
 {
     a0->f308 = a1;
     a0->f34C = 1;
@@ -90,7 +90,7 @@ void func_001550B8(Obj_1550B8* self)
     self->vtbl[25](self, self->sub->value);
 }
 
-C50* func_001557B8(C50* self, s32 value)
+EffectSpawner* func_001557B8(EffectSpawner* self, s32 value)
 {
     if (value == 1) {
         self->f34C = value;
@@ -100,7 +100,7 @@ C50* func_001557B8(C50* self, s32 value)
 
 extern f32 D_0026185C;
 
-s32 func_00155FB0(C50* self)
+s32 func_00155FB0(EffectSpawner* self)
 {
     if (D_0026185C < self->f340) {
         return 1;
@@ -193,7 +193,7 @@ s32 func_00137BE0(s32 count);
 void* func_00155778(void* self, s32 flag);
 void func_00154EE0(void* self, s32 count, void* unused, s32 src);
 
-void func_00154F98(C50* self, s32 count)
+void func_00154F98(EffectSpawner* self, s32 count)
 {
     void* mem = func_0018D500(0x200);
     self->rec = (Rec50*)mem;
@@ -220,7 +220,7 @@ void func_00154F98(C50* self, s32 count)
 
 void func_00127048(void* self);
 
-void func_00155080(C50* self)
+void func_00155080(EffectSpawner* self)
 {
     func_00127048(self);
     self->rec->uses++;
@@ -228,14 +228,14 @@ void func_00155080(C50* self)
 
 struct Rec_001550E8 { u8 pad00[0x18]; void* f18; u8 pad1C[0x18]; s32 f34; };
 
-void func_001249A8(C50* self);
-Rec50* func_00155778(C50* self, s32 mode);
-void func_00158288(Rec50* p, C50* self);
-Rec_001550E8* func_0015A418(void* a0, s32 a1, s32 a2, C50* a3);
+void func_001249A8(EffectSpawner* self);
+Rec50* func_00155778(EffectSpawner* self, s32 mode);
+void func_00158288(Rec50* p, EffectSpawner* self);
+Rec_001550E8* func_0015A418(void* a0, s32 a1, s32 a2, EffectSpawner* a3);
 s32 func_001300E8(Rec_001550E8* p, s32 k);
-void func_001DBCC8(void* a0, void (*cb)(void), C50* a2, s32 a3, s32 a4);
+void func_001DBCC8(void* a0, void (*cb)(void), EffectSpawner* a2, s32 a3, s32 a4);
 
-void func_001550E8(C50* self)
+void func_001550E8(EffectSpawner* self)
 {
     Rec50* s2;
 
@@ -269,7 +269,7 @@ tail:
     func_00158288(self->rec, self);
 }
 
-void func_00155678(C50* self, s32 mode, C01* p)
+void func_00155678(EffectSpawner* self, s32 mode, BaseObject* p)
 {
     if (mode == 2) {
         if (p == self->held344) {
@@ -297,7 +297,7 @@ Rec50* func_001556E8(Rec50* self)
     return n;
 }
 
-Rec50* func_00155778(C50* self, s32 mode)
+Rec50* func_00155778(EffectSpawner* self, s32 mode)
 {
     if (mode == 1) {
         self->f34C = mode;
@@ -306,17 +306,17 @@ Rec50* func_00155778(C50* self, s32 mode)
     return self->rec;
 }
 
-void func_00155F28(C50* self)
+void func_00155F28(EffectSpawner* self)
 {
     if ((self->flags & 0x0C000000) == 0x08000000) {
         return;
     }
-    C02* p = (C02*)self->parent;
+    PlacedObject* p = (PlacedObject*)self->parent;
     while (p != 0) {
         if ((p->flags & 0x0C000000) == 0x08000000) {
             break;
         }
-        p = (C02*)p->parent;
+        p = (PlacedObject*)p->parent;
     }
     if (p != 0) {
         self->f88 = p->f88;
@@ -325,12 +325,12 @@ void func_00155F28(C50* self)
 
 extern f32 D_0026185C;
 
-void func_00155F78(C50* self, f32 f)
+void func_00155F78(EffectSpawner* self, f32 f)
 {
     self->f340 = D_0026185C + f;
 }
 
-void func_00155FA0(C50* self)
+void func_00155FA0(EffectSpawner* self)
 {
     self->f340 = -1.0f;
 }
@@ -360,7 +360,7 @@ void func_00156030(Obj_156030* self, s32* out)
 
 void func_00123ED0(void*);
 void func_00152438(void*,s32);
-void func_00154C10(C50* self)
+void func_00154C10(EffectSpawner* self)
 {
     func_00123ED0(self);
     self->f2D8=-1;
@@ -386,7 +386,7 @@ void func_001557D0(void* self,void* a,void* b,f32 x,f32 y,f32 z,f32 w)
 
 void func_00156060(void* self,s32* out)
 {
-    *out=func_00155FB0((C50*)self);
+    *out=func_00155FB0((EffectSpawner*)self);
 }
 
 void func_0013A128(void*,void*);
@@ -459,18 +459,18 @@ void func_00154880(s32 count, u8* data, f32* values, f32* out)
     func_0018D6F0();
 }
 
-void func_00155F90(C50* self)
+void func_00155F90(EffectSpawner* self)
 {
     self->f340 = 3.4028234663852886e+38f;
 }
 
 struct __attribute__((aligned(16))) Q_157320 { s32 a, b, c, d; };
 struct Hdr_157320 { u8 pad[4]; s32* f4; s32 f8; };
-C1E* func_0019E040(u8* ctx, s32 flag);
-void func_0019E158(C1E* a, Rec50* b);
-T219C* func_0019EA78(s32 a, C1E* b);
-void func_001A0338(C1E* self, s32 kind, T219C* extra);
-void func_001583E8(T219C* a, Rec50* b);
+EffectOwner* func_0019E040(u8* ctx, s32 flag);
+void func_0019E158(EffectOwner* a, Rec50* b);
+Effect* func_0019EA78(s32 a, EffectOwner* b);
+void func_001A0338(EffectOwner* self, s32 kind, Effect* extra);
+void func_001583E8(Effect* a, Rec50* b);
 f32 func_001EAAE0(f32 a, f32 b);
 s32 func_00152720(void* p);
 
@@ -480,11 +480,11 @@ typedef void (*VFn)();
 void func_00157320(Rec50* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q2, f32* v5, f32* v6)
 {
     u8* s7 = AT(u8*, self, 0x7C);
-    C1E* node = 0;
+    EffectOwner* node = 0;
     u8* c = (u8*)self + 0x120;
     s32 i;
     if (h) {
-        if (h->f4) node = (C1E*)*h->f4;
+        if (h->f4) node = (EffectOwner*)*h->f4;
     }
     if (!node) {
         node = func_0019E040((u8*)D_00275710, AT(s32, c, 0xC4));
@@ -495,19 +495,19 @@ void func_00157320(Rec50* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q
         func_0019E158(node, self);
         if (h) {
             if (h->f8) {
-                typedef void (*F)(C1E*, s32);
+                typedef void (*F)(EffectOwner*, s32);
                 (*(F*)(AT(u8*, node, 0) + 0x6C))(node, h->f8);
             }
         }
     }
     if (node) {
     for (i = 0; i < n; i++) {
-        T219C* it = func_0019EA78(AT(s32, c, 0x90), node);
+        Effect* it = func_0019EA78(AT(s32, c, 0x90), node);
         if (!it) break;
         Q_157320* s1 = pos + i;
         u8* cls = AT(u8*, it, 0);
         f32 f = func_001EAAE0(AT(f32, c, 0xB0), AT(f32, c, 0xB4));
-        typedef void (*F0)(T219C*, Q_157320*, s32, f32);
+        typedef void (*F0)(Effect*, Q_157320*, s32, f32);
         (*(F0*)cls)(it, s1, AT(s32, c, 0xC0), f);
         f32 f1 = AT(f32, c, 0xA4);
         if (f1 != 0.0f || AT(f32, c, 0xA8) != 0.0f) {
@@ -518,7 +518,7 @@ void func_00157320(Rec50* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q
         AT(f32, it, 0x18) = v5[i];
         AT(f32, it, 0x1C) = v6[i] - v5[i];
         AT(Q_157320, it, 0x40) = AT(Q_157320, self, 0x110);
-        func_001583E8((T219C*)((u8*)it + 0xB0), self);
+        func_001583E8((Effect*)((u8*)it + 0xB0), self);
         if (AT(s32, c, 0xB8)) AT(s32, it, 0x20) = AT(s32, c, 0xB8);
         if (s7) {
             AT(Q_157320, it, 0x50) = AT(Q_157320, s7, 0x110);
@@ -526,9 +526,9 @@ void func_00157320(Rec50* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q
             AT(Q_157320, it, 0x70) = AT(Q_157320, s7, 0x130);
         }
         if (AT(s32, c, 0x94) != -1) {
-            C1E* o = (C1E*)func_0019EA78(AT(s32, c, 0x94), 0);
+            EffectOwner* o = (EffectOwner*)func_0019EA78(AT(s32, c, 0x94), 0);
             if (!o) break;
-            typedef void (*F1)(f32, C1E*, void*, s32);
+            typedef void (*F1)(f32, EffectOwner*, void*, s32);
             F1 fn = *(F1*)(*(u8**)o);
             fn(AT(f32, it, 0x30) * 0.5f, o, (u8*)it + 0x80, 0);
             func_001A0338(o, 1, it);
@@ -536,11 +536,11 @@ void func_00157320(Rec50* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q
         {
             u8* cl = AT(u8*, it, 0);
             VFn* p = (VFn*)(cl + 4);
-            if (*p) ((void (*)(T219C*, Rec50*))*p)(it, self);
+            if (*p) ((void (*)(Effect*, Rec50*))*p)(it, self);
         }
     }
     if (func_00152720((u8*)node + 0x558)) {
-        typedef void (*F2)(C1E*);
+        typedef void (*F2)(EffectOwner*);
         (*(F2*)(AT(u8*, node, 0) + 0x1C))(node);
     }
     }

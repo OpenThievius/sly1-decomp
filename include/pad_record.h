@@ -6,13 +6,13 @@
 // does (build/swarm/st3/groups.tsv, g1917).
 //
 // The size is the labels': each runs 0xC4 bytes to the next one.
-#ifndef G262C70_H
-#define G262C70_H
+#ifndef PAD_RECORD_H
+#define PAD_RECORD_H
 
 #include "common.h"
 #include "s1eb050.h"
 
-struct G262C70 {
+struct PadRecord {
     u8 pad00[0x04];
     s32 f04;                // 0x04: func_0016E1A0, func_0016E238, func_0016E940
     s32 f08;                // 0x08: func_0016E1A0, func_0016E238, func_0016E940
@@ -69,9 +69,9 @@ struct G262C70 {
     };
 };
 
-typedef char check_G262C70[sizeof(G262C70) == 0xC4 ? 1 : -1];
+typedef char check_PadRecord[sizeof(PadRecord) == 0xC4 ? 1 : -1];
 
-extern G262C70 D_00262C70;      // 001E4000.cpp
-extern G262C70 D_00262D38;      // 001E4000.cpp
+extern PadRecord D_00262C70;      // 001E4000.cpp
+extern PadRecord D_00262D38;      // 001E4000.cpp
 
 #endif

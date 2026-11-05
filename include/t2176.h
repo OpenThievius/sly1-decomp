@@ -3,7 +3,7 @@
 // func_0014D9A8(kind) makes (0x1C bytes for kind 0, 0x1D0 for kind 1) and stores the table at
 // +0 and the kind at +4; the slot-10 loaders of classes 0x50 (func_00154F98, Rec50+0x20), 0x79
 // (func_00158B30, Rec79+0x20), 0x6E (func_001B2840, C6E+0x34) and 0x63 (func_001E2648,
-// C63+0x2E4) keep it and read it from the level stream with slot 0.
+// OnOffObject+0x2E4) keep it and read it from the level stream with slot 0.
 //
 // Kind 0 is the base (table D_002176D0, a time-sorted list of 16-byte points); kind 1
 // (T2176_708, table D_00217708) keeps in and out tangents as well (a Hermite spline) and a

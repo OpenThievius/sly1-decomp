@@ -4,10 +4,10 @@
 // say which objects count (func_0013F718); mode 4 is the last, then the state follows
 // (slot 17, func_0013FD20). Written for this project from what retail's code does
 // (config/us/classes.tsv).
-#ifndef C28_H
-#define C28_H
+#ifndef TRIGGER_ZONE_H
+#define TRIGGER_ZONE_H
 
-#include "c03.h"
+#include "collider.h"
 
 // Up to sixteen values, counted (func_0013E8F8 appends).
 struct Queue28 {
@@ -25,7 +25,7 @@ struct Pair28 {
 // class that func_00140100 loads): its helpers take the record's address.
 struct Zone28 {
     u8 pad00[4];
-    C03* owner;             // 0x04: the object it is in (func_0013E950)
+    Collider* owner;             // 0x04: the object it is in (func_0013E950)
     Pair28 pairs[2];        // 0x08, 0x90
     u8 pad118[0x11C - 0x118];
     s32 f11C;               // 0x11C
@@ -52,7 +52,7 @@ struct Entry28 {
     u8 pad0[0x30];
 };
 
-struct C28 : C03 {
+struct TriggerZone : Collider {
     s32 state;              // 0x550: 0 and 1 test the hit, 2 and 4 end it, 3 waits (func_0013FD20)
     Zone28 zone;            // 0x554
     s32 countIdsIn;         // 0x720: ids an object must have, if any (func_0013F718); func_001406B0 appends
@@ -80,13 +80,13 @@ struct C28 : C03 {
 };
 
 typedef char check_Zone28[sizeof(Zone28) == 0x1CC ? 1 : -1];
-typedef char check_C28[sizeof(C28) == 0x890 ? 1 : -1];
+typedef char check_TriggerZone[sizeof(TriggerZone) == 0x890 ? 1 : -1];
 
-void func_0013F0E0(C28* self);                          // slot 0
-void func_0013F6C0(C28* self);                          // slot 9
-void func_0013F110(C28* self);                          // slot 10
-void func_0013FA10(C28* self, f32 t);                   // slot 28
-void func_0013FD20(C28* self);                          // slot 17
-s32 func_00140028(C28* self, void* event);              // slot 48 (m30)
+void func_0013F0E0(TriggerZone* self);                          // slot 0
+void func_0013F6C0(TriggerZone* self);                          // slot 9
+void func_0013F110(TriggerZone* self);                          // slot 10
+void func_0013FA10(TriggerZone* self, f32 t);                   // slot 28
+void func_0013FD20(TriggerZone* self);                          // slot 17
+s32 func_00140028(TriggerZone* self, void* event);              // slot 48 (m30)
 
 #endif

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "v24a2.h"
-#include "g27c220.h"
+#include "game_progress.h"
 
 struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
 extern Config_1E0848 D_002758E0;

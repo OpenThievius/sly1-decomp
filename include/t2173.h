@@ -17,7 +17,7 @@
 
 #include "common.h"
 
-struct C6D;     // the camera, class 0x6D (include/c6d.h), the owner of its controllers
+struct Camera;     // the camera, class 0x6D (include/c6d.h), the owner of its controllers
 struct T2173;
 
 typedef void (*Fn2173)(T2173* self, s32 arg);
@@ -36,7 +36,7 @@ struct Vt2173 {
 // controller of D_002173F8 uses as a pointer (its target, a class 0x63 object).
 struct T2173 {
     const Vt2173* vt;       // 0x00
-    C6D* owner;             // 0x04: func_00149398 sets it; func_001493A0 asks whether it is the top
+    Camera* owner;             // 0x04: func_00149398 sets it; func_001493A0 asks whether it is the top
     union {
         s32 value;          // 0x08: func_001493B8, func_0014AA90 set it, func_0014AA98 clears it
         void* ptr;          // 0x08: D_002173F8's target (func_001E30A0 clears it)
@@ -88,7 +88,7 @@ struct T2173_3F8 : T2173 {
     u8 pad28[0x70 - 0x28];  // 0x28
 };
 
-// One entry of the camera's stack (C6D::stack), sorted by key.
+// One entry of the camera's stack (Camera::stack), sorted by key.
 struct T2173Entry {
     s32 key;                // 0x00: the entries are ordered by it (func_00145088)
     T2173* ctl;             // 0x04: the controller

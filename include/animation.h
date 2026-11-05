@@ -6,10 +6,10 @@
 // Each class's fields follow its parent's and end at the size its descriptor gives; the
 // pads keep every field at its retail offset. Fields are named for what the code does with
 // them; step 6 of the roadmap may rename them.
-#ifndef C83_H
-#define C83_H
+#ifndef ANIMATION_H
+#define ANIMATION_H
 
-#include "c01.h"
+#include "base_object.h"
 #include "t2196.h"
 
 struct Stream83;  // the level stream an animation is read from (func_00137D10 and friends)
@@ -37,7 +37,7 @@ struct Kin83 {
 
 // 0x83: an animation. func_0012B8C8 reads it: the object id, the length in seconds, the target
 // ids, the tracks and the three event lists (counts and records at 0x54..0x68).
-struct C83 : C01 {
+struct Animation : BaseObject {
     f32 length;             // 0x34: seconds (the stream's 1/60 s count times 1/60)
     s32 trackCount;         // 0x38
     Track83* tracks;        // 0x3C
@@ -65,19 +65,19 @@ struct C83 : C01 {
 };
 
 // 0x84: no field of its own is read.
-struct C84 : C83 {
+struct C84 : Animation {
     u8 padB0[0xD0 - 0xB0];
 };
 
-typedef char check_C83[sizeof(C83) == 0xB0 ? 1 : -1];
+typedef char check_Animation[sizeof(Animation) == 0xB0 ? 1 : -1];
 typedef char check_C84[sizeof(C84) == 0xD0 ? 1 : -1];
 typedef char check_Track83[sizeof(Track83) == 0x1C ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0012B870(C83* self);                      // 0x83 slot 0
+void func_0012B870(Animation* self);                      // 0x83 slot 0
 void func_0012C140(void);                           // 0x83 slot 9 (the base class's copy)
-void func_0012B8C8(C83* self, Stream83* stream);    // 0x83 slot 10
-void func_0012C160(C83* self);                      // 0x83 slot 16
+void func_0012B8C8(Animation* self, Stream83* stream);    // 0x83 slot 10
+void func_0012C160(Animation* self);                      // 0x83 slot 16
 void func_0012D3F0();                               // 0x84 slot 9 (empty)
 void func_0012D3E0();                               // 0x84 slot 10 (empty)
 void func_0012D3E8();                               // 0x84 slot 16 (empty)

@@ -15,10 +15,10 @@
 #ifndef T2196_H
 #define T2196_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 struct Stream83;     // the level stream a curve is read from (func_00137D10 and friends)
-struct C83;
+struct Animation;
 struct T2196_Pos;
 struct T2196_Rot;
 struct T2196_Scale;
@@ -36,7 +36,7 @@ struct T2196 {
 // Slot 0 evaluates at `key` (the value and its slope, either may be 0), slot 1 reads the
 // curve from the stream (0 for the blends), slot 2 gives the key times (a count and a new
 // array, which may be 0).
-typedef void (*T2196_WeightEval)(T2196_Weight* self, C02* owner, s32 flags, f32* outValue, f32* outSlope, f32 key, f32 scale);
+typedef void (*T2196_WeightEval)(T2196_Weight* self, PlacedObject* owner, s32 flags, f32* outValue, f32* outSlope, f32 key, f32 scale);
 typedef void (*T2196_WeightRead)(T2196_Weight* self, Stream83* stream);
 typedef void (*T2196_WeightTimes)(T2196_Weight* self, s32* outCount, f32** outTimes);
 struct T2196_WeightVt {
@@ -138,7 +138,7 @@ struct T2196_6A8 : T2196_698 {
 
 // Slot 0 evaluates (owner, mode, out value, out slope, key, scale), then tells the owner
 // (its slot 44); slot 1 reads the curve; slot 2 gives the key times.
-typedef void (*T2196_PosEval)(T2196_Pos* self, C02* owner, s32 mode, void* outValue, void* outSlope, f32 key, f32 scale);
+typedef void (*T2196_PosEval)(T2196_Pos* self, PlacedObject* owner, s32 mode, void* outValue, void* outSlope, f32 key, f32 scale);
 typedef void (*T2196_PosRead)(T2196_Pos* self, Stream83* stream);
 typedef void (*T2196_PosTimes)(T2196_Pos* self, s32* outCount, f32** outTimes);
 struct T2196_PosVt {
@@ -191,7 +191,7 @@ struct T2196_6D8 : T2196_Pos {
 // The rotation curves: an orientation over time. func_00121050 makes them, by kind 0..2.
 // Slot 0 evaluates the matrix (slot 1 of kind 0 gives the orientation), slot 3 gives the key
 // times (kind 0 and 1), and slot 2 reads the curve from the stream.
-typedef void (*T2196_RotEval)(T2196_Rot* self, C02* owner, s32 mode, void* outRot, void* outVec, f32 key, f32 scale);
+typedef void (*T2196_RotEval)(T2196_Rot* self, PlacedObject* owner, s32 mode, void* outRot, void* outVec, f32 key, f32 scale);
 typedef void* (*T2196_RotGet)(T2196_Rot* self, u32 a1, u32 a2, u32 a3, u32 a4);
 typedef void (*T2196_RotRead)(T2196_Rot* self, Stream83* stream);
 typedef void (*T2196_RotTimes)(T2196_Rot* self, s32* outCount, f32** outTimes);
@@ -231,7 +231,7 @@ struct T2196_708 : T2196_Rot {
 
 // ---------------------------------------------------------------------------------------------
 // The scale curves: func_001210F0 makes them, by kind 0..1.
-typedef void (*T2196_ScaleEval)(T2196_Scale* self, C02* owner, void* mode, void* out, f32 factor);
+typedef void (*T2196_ScaleEval)(T2196_Scale* self, PlacedObject* owner, void* mode, void* out, f32 factor);
 typedef void (*T2196_ScaleRead)(T2196_Scale* self, Stream83* stream);
 typedef void (*T2196_ScaleTimes)(T2196_Scale* self, s32* outCount, f32** outTimes);
 struct T2196_ScaleVt {

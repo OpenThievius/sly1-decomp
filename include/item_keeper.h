@@ -7,7 +7,7 @@
 #ifndef ITEM_KEEPER_H
 #define ITEM_KEEPER_H
 
-#include "c01.h"
+#include "base_object.h"
 
 // An object a 0x89 finds and owns: it keeps the owner at 0x720 (func_001CB7A0).
 struct FoundItem {
@@ -24,7 +24,7 @@ struct ItemGroup {
     FoundItem* wanted[16];     // 0x48
 };
 
-struct ItemKeeper : C01 {
+struct ItemKeeper : BaseObject {
     u8 pad34[0x58 - 0x34];
     ItemGroup owned;          // 0x58: the ones that become its own (their owner is set to it)
     ItemGroup listed;         // 0xE0: the ones it only keeps

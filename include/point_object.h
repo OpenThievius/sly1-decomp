@@ -9,7 +9,7 @@
 #ifndef POINT_OBJECT_H
 #define POINT_OBJECT_H
 
-#include "c01.h"
+#include "base_object.h"
 
 struct __attribute__((aligned(16))) ObjectPoint { f32 x, y, z, w; };
 
@@ -20,7 +20,7 @@ struct __attribute__((packed)) KeptBits { u64 bits; };
 // 0x7E: a point, read from the level stream as three floats (func_00192068 through
 // func_00137E70) and moved into and out of another object's frame (func_001920E0,
 // func_00192128 through func_00128018).
-struct PointObject : C01 {
+struct PointObject : BaseObject {
     u8 pad34[0x40 - 0x34];
     ObjectPoint pos;        // 0x40
 };
@@ -48,7 +48,7 @@ struct C80 : PointObject {
     u8 pad64[0x70 - 0x64];
 };
 
-// 0x81: registers itself in a table inside its level (C6C::list1C84, slots 6, 7).
+// 0x81: registers itself in a table inside its level (World::list1C84, slots 6, 7).
 struct C81 : PointObject {
     KeptBits keep;          // 0x50
     f32 f58;                // 0x58: the largest float at setup

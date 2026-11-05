@@ -14,7 +14,7 @@ void func_0016BDD0(Mgr_16BDD0_eu* self, s32 flag)
         func_0016EC88(&D_00262C70);
         self->vtbl[14](self);
         s32 mask = func_0016BB78(15);
-        G27C220* g = D_002623C0;
+        GameProgress* g = D_002623C0;
         for (; bit > 0; bit--) {
             if (g->u19F4 & mask) {
                 break;

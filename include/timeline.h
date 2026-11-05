@@ -2,10 +2,10 @@
 // Class 0x90 (descriptor D_0021EF08, 0x48 bytes), a direct child of 0x01. Written for this
 // project from what retail's code does (config/us/classes.tsv). Fields follow the parent's
 // 0x34 bytes; pads keep each at its retail offset.
-#ifndef C90_H
-#define C90_H
+#ifndef TIMELINE_H
+#define TIMELINE_H
 
-#include "c01.h"
+#include "base_object.h"
 
 // A 16-byte entry of the buffer at 0x38 (func_001ED4C8 adds one).
 struct Entry90 {
@@ -17,7 +17,7 @@ struct Entry90 {
 
 // 0x90: func_001ED168 allocates its 0xC00-byte buffer, func_001ED198 looks something up in
 // the level (+0x14) and keeps the result.
-struct C90 : C01 {
+struct Timeline : BaseObject {
     s32 f34;                // 0x34
     void* buffer;           // 0x38: f34 Entry90 records (0xC00 bytes, func_001ED168)
     s32 index;              // 0x3C: the entry func_001ED278 is at
@@ -27,9 +27,9 @@ struct C90 : C01 {
     Entry90* Cur() { return &((Entry90*)buffer)[index]; }
 };
 
-typedef char check_C90[sizeof(C90) == 0x48 ? 1 : -1];
+typedef char check_Timeline[sizeof(Timeline) == 0x48 ? 1 : -1];
 
-void func_001ED168(C90* self);   // slot 0
-void func_001ED198(C90* self);   // slot 16
+void func_001ED168(Timeline* self);   // slot 0
+void func_001ED198(Timeline* self);   // slot 16
 
 #endif

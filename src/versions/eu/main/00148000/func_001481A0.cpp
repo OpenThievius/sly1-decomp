@@ -19,8 +19,8 @@ struct __attribute__((packed)) PSys_1481A0_eu {
 
 void func_001481A0(void* self)
 {
-    T219C* s = (T219C*)self;
-    G27C220* g = D_002623C0;
+    Effect* s = (Effect*)self;
+    GameProgress* g = D_002623C0;
     s32 c = g->f19E8 + 1;
     s32 r;
     g->f19E8 = c;

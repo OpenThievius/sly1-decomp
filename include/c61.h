@@ -6,9 +6,9 @@
 #ifndef C61_H
 #define C61_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C61 : C02 {
+struct C61 : PlacedObject {
     void* f2D0;             // 0x2D0: what func_00153328 tests before drawing
     u8 pad2D4[0x2F0 - 0x2D4];
 };

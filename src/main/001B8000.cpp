@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c03.h"
+#include "collider.h"
 #include "globals.h"
-#include "s137290.h"
+#include "buffered_stream.h"
 
-void func_00125108(C03* self);
+void func_00125108(Collider* self);
 void func_00138BE0(void* a, void* b, s32 c);
 void func_001389C8(void* a);
 
-void func_001B89B8(C03* self)
+void func_001B89B8(Collider* self)
 {
     func_00125108(self);
     self->root03()->desc03()->m32(self->root03());
@@ -17,9 +17,9 @@ void func_001B89B8(C03* self)
     func_001389C8(self->world);
 }
 
-void func_001B9448(C03* self);
+void func_001B9448(Collider* self);
 
-void func_001B9418(C03* self, f32 v)
+void func_001B9418(Collider* self, f32 v)
 {
     f32 a = self->mass;
     f32 q = v / a;
@@ -27,25 +27,25 @@ void func_001B9418(C03* self, f32 v)
     func_001B9448(self);
 }
 
-void func_001BAC28(C03* self, Attach03* node, f32 dt)
+void func_001BAC28(Collider* self, Attach03* node, f32 dt)
 {
 }
 
-void func_001BB1A0(C03* self, s32 flag)
+void func_001BB1A0(Collider* self, s32 flag)
 {
     self->flags538 = (self->flags538 & 0xFFFEFFFFFFFFFFFFULL) | ((u64)(flag & 1) << 48);
 }
 
-void func_001B94F0(C03* self, s32 value);
+void func_001B94F0(Collider* self, s32 value);
 
-void func_001BB400(C03* self, s32 value)
+void func_001BB400(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 43;
     self->flags538 = (self->flags538 & ~(1ULL << 43)) | bit;
     func_001B94F0(self, value != 0 ? 2 : 0);
 }
 
-s32 func_001BB9A0(Touch03* node, C03* value)
+s32 func_001BB9A0(Touch03* node, Collider* value)
 {
     while (node != 0) {
         if (node->obj == value) return 1;
@@ -54,26 +54,26 @@ s32 func_001BB9A0(Touch03* node, C03* value)
     return 0;
 }
 
-void func_001BB378(C03* self, s32 flag)
+void func_001BB378(Collider* self, s32 flag)
 {
     self->flags538 = (self->flags538 & ~(1ULL << 51)) | ((u64)(flag & 1) << 51);
 }
 
-void func_001BB3B0(C03* self, s32 value)
+void func_001BB3B0(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 42;
     self->flags538 = (self->flags538 & ~(1ULL << 42)) | bit;
     func_001B94F0(self, value != 0);
 }
 
-void func_001BB450(C03* self, s32 value)
+void func_001BB450(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 44;
     self->flags538 = (self->flags538 & ~(1ULL << 44)) | bit;
     func_001B94F0(self, value != 0 ? 3 : 0);
 }
 
-void func_001BB4A0(C03* self)
+void func_001BB4A0(Collider* self)
 {
     ListFrame frame;
     const Desc03* info = self->desc03();
@@ -82,33 +82,33 @@ void func_001BB4A0(C03* self)
     } else if (info->m3E != 0) {
         self->handler = self;
     } else {
-        C03* p = (C03*)self->parent;
+        Collider* p = (Collider*)self->parent;
         if (p != 0) {
             self->handler = p->handler;
         } else {
             self->handler = 0;
         }
     }
-    C03* c = (C03*)self->children.head;
+    Collider* c = (Collider*)self->children.head;
     while (c != 0) {
         if (c->desc->flags & 2) func_001BB4A0(c);
-        c = (C03*)c->next;
+        c = (Collider*)c->next;
     }
 }
 
-C03* func_001BB540(C03* node, s32 offset)
+Collider* func_001BB540(Collider* node, s32 offset)
 {
-    C03* s;
+    Collider* s;
     while (node != 0 && (s = node->handler) != 0) {
         if (*(s32*)((u8*)s->desc + offset) != 0) return s;
-        node = (C03*)s->parent;
+        node = (Collider*)s->parent;
     }
     return 0;
 }
 
 void func_00138F28(void* a, void* b);
 
-void func_001BB580(C03* self)
+void func_001BB580(Collider* self)
 {
     ListFrame frame;
     s32 flag = 0;
@@ -119,16 +119,16 @@ void func_001BB580(C03* self)
     s32 s2 = flag & 1;
     s32 a0 = 0;
     if (self->flags538 & (1ULL << 54)) {
-        if (self->parent == 0 || (((C03*)self->parent)->flags538 & (1ULL << 56)) != 0) a0 = 1;
+        if (self->parent == 0 || (((Collider*)self->parent)->flags538 & (1ULL << 56)) != 0) a0 = 1;
     }
     self->flags538 = (self->flags538 & ~(1ULL << 56)) | ((u64)a0 << 56);
-    C03* c = (C03*)self->children.head;
+    Collider* c = (Collider*)self->children.head;
     while (c != 0) {
         if (c->desc->flags & 2) {
             func_001BB580(c);
             if ((c->flags538 & (1ULL << 55)) == 0) s2 = 0;
         }
-        c = (C03*)c->next;
+        c = (Collider*)c->next;
     }
     u64 bit = (self->flags538 >> 55) & 1;
     if (bit != (u64)s2) {
@@ -142,9 +142,9 @@ void func_001BB580(C03* self)
 s32 func_001C1AD8(s32 value, void* out);
 s32 func_001C1A28(s32 value, void* out);
 
-s32 func_001BB710(C03* self, s32 value)
+s32 func_001BB710(Collider* self, s32 value)
 {
-    C03* ctx = self->root03();
+    Collider* ctx = self->root03();
     ContactRow03* n = ctx->contacts->head;
     while (n != 0) {
         Contact03* e = n->head;
@@ -164,7 +164,7 @@ s32 func_001BB710(C03* self, s32 value)
     return 1;
 }
 
-s32 func_001B8A08(C03* a, C03* b)
+s32 func_001B8A08(Collider* a, Collider* b)
 {
     u64 m1 = 0x8080;
     s32 r = 0;
@@ -180,7 +180,7 @@ s32 func_001B8A08(C03* a, C03* b)
     return r;
 }
 
-void func_001B8A48(C03* self)
+void func_001B8A48(Collider* self)
 {
     ContactRow03* node = self->contacts->head;
     while (node != 0) {
@@ -188,9 +188,9 @@ void func_001B8A48(C03* self)
         while (it != 0) {
             if (0.0001f < it->timer) {
                 for (s32 i = 0; i < 2; i++) {
-                    C03* obj = func_001BB540(it->end[i].part, 0x114);
+                    Collider* obj = func_001BB540(it->end[i].part, 0x114);
                     if (obj != 0) {
-                        void (*fn)(C03*, Contact03*, s32) = obj->desc03()->m41;
+                        void (*fn)(Collider*, Contact03*, s32) = obj->desc03()->m41;
                         if (fn != 0) {
                             fn(obj, it, i);
                         }
@@ -212,7 +212,7 @@ struct Vec_1B9338 { s32 v[4]; };
 void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
 void func_001B9AB0(void* a, void* b);
 
-void func_001B9338(C03* self, f32 t)
+void func_001B9338(Collider* self, f32 t)
 {
     Vec_1B9338 local;
     Attach03* node;
@@ -227,28 +227,28 @@ void func_001B9338(C03* self, f32 t)
     node = self->attached;
     if (node != 0) {
         do {
-            C03* obj = node->owner;
+            Collider* obj = node->owner;
             obj->desc03()->m33(obj, node, t);
             node = node->next;
         } while (node != 0);
     }
 }
 
-void func_001261C0(C03* self, void* a, void* m);
+void func_001261C0(Collider* self, void* a, void* m);
 
-void func_001B93D8(C03* self, void* a, void* m)
+void func_001B93D8(Collider* self, void* a, void* m)
 {
     func_001261C0(self, a, m);
 }
 
 void func_00124FC0(void* self);
 
-void func_001B93F8(C03* self)
+void func_001B93F8(Collider* self)
 {
     func_00124FC0(self);
 }
 
-void func_001B9680(C03* self)
+void func_001B9680(Collider* self)
 {
     self->v370 = self->v140;
 }
@@ -262,19 +262,19 @@ void func_001BA500(void* self, void* a, void* b, void* c, s32 d)
 
 void func_00129DF8(void* self);
 
-void func_001BA528(C03* self, Attach03* node)
+void func_001BA528(Collider* self, Attach03* node)
 {
     node->next = self->attached;
     self->attached = node;
     func_00129DF8(self);
 }
 
-s32 func_001BBC30(C03* self)
+s32 func_001BBC30(Collider* self)
 {
     return 0;
 }
 
-void func_001B97E0(C03* self, Mat02* src)
+void func_001B97E0(Collider* self, Mat02* src)
 {
     self->rot.r[0] = src->r[0];
     self->rot.r[1] = src->r[1];
@@ -288,26 +288,26 @@ void func_001B97E0(C03* self, Mat02* src)
     self->desc->m0E(self, 4, self);
 }
 
-void func_001BAFE0(C03* self, f32 v)
+void func_001BAFE0(Collider* self, f32 v)
 {
     self->flags538 |= (u64)0x8000 << 25;
     self->radius3CC = v;
 }
 
-void func_001BB138(C03* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
+void func_001BB138(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 32)) | ((u64)(value & 0xF) << 32); }
 
-void func_001BB168(C03* self, u32 value) { self->flags538 = (self->flags538 & ~(1ULL << 47)) | ((u64)(value & 1) << 47); }
+void func_001BB168(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(1ULL << 47)) | ((u64)(value & 1) << 47); }
 
-void func_001BB1D8(C03* self, u8 value) { self->b2C8 = value; }
+void func_001BB1D8(Collider* self, u8 value) { self->b2C8 = value; }
 
-void func_001BB1E0(C03* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
+void func_001BB1E0(Collider* self, u32 value) { self->flags538 = (self->flags538 & ~(0xFULL << 36)) | ((u64)(value & 0xF) << 36); }
 
 typedef u64 Quad_1B8960 __attribute__((mode(TI)));
 
 void func_00125138(void* self);
 void func_001B8820(Mesh03* a, Mesh03* b, Quad_1B8960 q, Mat02* c);
 
-void func_001B8960(C03* self)
+void func_001B8960(Collider* self)
 {
     func_00125138(self);
     func_001B8820(&self->mesh, &self->meshCopy, *(Quad_1B8960*)&self->v140, &self->m110);
@@ -319,14 +319,14 @@ struct __attribute__((aligned(16))) Quad_1B9B50 { s32 a, b, c, d; };
 void func_001280C0(void* a, void* b, void* c, void* d);
 void func_001245A8(void* self, void* p);
 
-void func_001B9B50(C03* self, C01* p)
+void func_001B9B50(Collider* self, BaseObject* p)
 {
     Quad_1B9B50 local0;
     Quad_1B9B50 local1;
     if (self->parent == p) {
         return;
     }
-    C03* s5 = self->root03();
+    Collider* s5 = self->root03();
     func_001280C0(self->parent, 0, &self->v440, &local0);
     func_001280C0(self->parent, 0, &self->v460, &local1);
     func_001245A8(self, p);
@@ -336,7 +336,7 @@ void func_001B9B50(C03* self, C01* p)
         if ((self->flags538 & (1ULL << 54)) != 0 && s5 != 0) {
             func_001BB580(s5);
         }
-        C03* f = self->root03();
+        Collider* f = self->root03();
         if ((f->flags538 & (1ULL << 55)) != 0) {
             func_001BB580(f);
         } else {
@@ -348,9 +348,9 @@ void func_001B9B50(C03* self, C01* p)
 
 s32 func_00182F40(void* e, void* b);
 
-void* func_001BA068(C03* self)
+void* func_001BA068(Collider* self)
 {
-    C03* s3 = self->root03();
+    Collider* s3 = self->root03();
     ContactRow03* s2 = s3->contacts->head;
     for (; s2 != 0; s2 = s2->next) {
         Contact03* s0 = s2->head;
@@ -374,16 +374,16 @@ void func_001BB000(void* self)
 
 void func_00183350(void* self, s32 kind, void* arg);
 
-void func_001BB210(C03* self, s32 kind, void* arg)
+void func_001BB210(Collider* self, s32 kind, void* arg)
 {
     func_00183350(self, kind, arg);
     Attach03* n = self->attached;
     if (n != 0) {
         do {
             Attach03* next = n->next;
-            C03* obj = n->owner;
+            Collider* obj = n->owner;
             if (obj != self) {
-                void (*fn)(C01*, s32, void*) = obj->desc->m0D;
+                void (*fn)(BaseObject*, s32, void*) = obj->desc->m0D;
                 if (fn != 0) {
                     fn(obj, kind, arg);
                 }
@@ -403,9 +403,9 @@ void func_001BB028(s32 index, s32* out, Vec02* dst)
 
 void* func_0018D658(s32 n);
 
-s32 func_001BB800(C03* obj, s32* outCount, void*** outArr)
+s32 func_001BB800(Collider* obj, s32* outCount, void*** outArr)
 {
-    C03* own = obj->root03();
+    Collider* own = obj->root03();
     ContactRow03* nd;
     Contact03* it;
     s32 n = 0;
@@ -439,7 +439,7 @@ s32 func_001BB800(C03* obj, s32* outCount, void*** outArr)
     return cnt;
 }
 
-void func_001BA550(C03* o, Attach03* node)
+void func_001BA550(Collider* o, Attach03* node)
 {
     Attach03** link = &o->attached;
     if (*link == 0) {
@@ -469,7 +469,7 @@ tail:
 
 s32 func_001387F8(void* self, void* other);
 
-s32 func_001B9FB0(C03* self, void* other)
+s32 func_001B9FB0(Collider* self, void* other)
 {
     s32 key;
     Contact03* n;
@@ -492,14 +492,14 @@ void func_001837E0(void* self, s32 a, s32 b, void* c);
 void func_001DC108(void* pool, Touch03* m);
 Touch03* func_001DC0C8(void* pool);
 
-void func_001BB9D0(C03* self)
+void func_001BB9D0(Collider* self)
 {
-    C03* core = self->root03();
+    Collider* core = self->root03();
     ContactRow03* o;
     Contact03* e;
     Touch03* m;
     Touch03* prev;
-    C03* other;
+    Collider* other;
     void* args;
     for (o = core->contacts->head; o != 0; o = o->next) {
         for (e = o->head; e != 0; e = e->next) {
@@ -545,12 +545,12 @@ void func_001BB9D0(C03* self)
     }
 }
 
-void func_00127048(C03* self, C03* other);
-void func_001B7C40(C03* self, s32 flag);
+void func_00127048(Collider* self, Collider* other);
+void func_001B7C40(Collider* self, s32 flag);
 void func_00160EA0(Mesh03* a, s32 b, Mesh03* c);
 void func_0013E6C8(Mesh03* a, Tree03* b, Mesh03* c, Tree03* d);
 
-void func_001BA130(C03* self, C03* other)
+void func_001BA130(Collider* self, Collider* other)
 {
     u64 bit = (self->flags538 >> 50) & 1;
     Link02 a, c, d;
@@ -559,7 +559,7 @@ void func_001BA130(C03* self, C03* other)
     b = self->parts;
     c = self->link2E4;
     Contacts03* s480 = self->contacts;
-    C03* s4E4 = self->handler;
+    Collider* s4E4 = self->handler;
     d = self->link414;
     func_00127048(self, other);
     self->contacts = s480;
@@ -583,21 +583,21 @@ void func_001BA130(C03* self, C03* other)
 // NEAR: 14 lines: retail preloads f400/f40C into s0 (lw s0 before loop and in the bnel delay slot), we load into v1; f408 loop test reload; last loop pointer s2 vs index
 
 
-s32 func_00137B90(S137290* in);
-void func_00137FB0(S137290* in, Mesh03* p);
-void func_00138278(S137290* in, Mesh03* a, Tree03* out);
-f32 func_00137DF8(S137290* in);
-void func_00137EB0(S137290* in, Mat02* p);
-void func_00137E70(S137290* in, Vec02* p);
-void func_001B9448(C03* self, f32 x);
-s32 func_00137BE0(S137290* in);
+s32 func_00137B90(BufferedStream* in);
+void func_00137FB0(BufferedStream* in, Mesh03* p);
+void func_00138278(BufferedStream* in, Mesh03* a, Tree03* out);
+f32 func_00137DF8(BufferedStream* in);
+void func_00137EB0(BufferedStream* in, Mat02* p);
+void func_00137E70(BufferedStream* in, Vec02* p);
+void func_001B9448(Collider* self, f32 x);
+s32 func_00137BE0(BufferedStream* in);
 void* func_0018D500(s32 size);
-s32 func_00137D10(S137290* in);
-s32 func_00137C40(S137290* in);
-void func_001289C0(C03* self, S137290* in);
-void func_00138F28(void* a, C03* b);
+s32 func_00137D10(BufferedStream* in);
+s32 func_00137C40(BufferedStream* in);
+void func_001289C0(Collider* self, BufferedStream* in);
+void func_00138F28(void* a, Collider* b);
 
-void func_001BAC30(C03* self, S137290* in)
+void func_001BAC30(Collider* self, BufferedStream* in)
 {
     s32 i;
     s32 j;
@@ -690,7 +690,7 @@ void func_00189378(Mat02* m, s32 zero, Vec02* out);
 f32 func_00205778(f32 a, f32 b);
 extern f32 D_0026185C[];
 
-void func_001B9F30(C03* self, Out_1B9F30* out)
+void func_001B9F30(Collider* self, Out_1B9F30* out)
 {
     Vec02 tmp[3];
     out->q10 = self->v140;
@@ -703,7 +703,7 @@ void func_001B9F30(C03* self, Out_1B9F30* out)
     out->f3C = 0;
 }
 
-void func_001B9AE0(C03* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
+void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
 {
     self->mode450 = a1;
     u64 flag = (self->flags538 >> 54) & 1;
@@ -714,7 +714,7 @@ void func_001B9AE0(C03* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
     if (a4 != 0) {
         self->v460 = *a4;
     }
-    C03* sub = self->root03();
+    Collider* sub = self->root03();
     if (sub != 0) {
         s32 f2 = 0;
         if (a1 == 3) {
@@ -728,9 +728,9 @@ void func_001B9AE0(C03* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
 
 void func_001861E8(void* pool, Contact03* head);
 
-void func_001B94F0(C03* self, s32 mode)
+void func_001B94F0(Collider* self, s32 mode)
 {
-    C03* ctx = self->root03();
+    Collider* ctx = self->root03();
     if (ctx == 0) {
         return;
     }

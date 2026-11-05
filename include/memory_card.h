@@ -12,7 +12,7 @@
 #define MEMORY_CARD_H
 
 #include "common.h"
-#include "g27c220.h"
+#include "game_progress.h"
 
 struct MemoryCard {
     s32 f00;                // 0x00: func_0018D0A0
@@ -29,7 +29,7 @@ struct MemoryCard {
     s32 f2C;                // 0x2C: func_0018D0A0
     u8 pad30[0x4F44 - 0x30];
     union {
-        G27C220* image;     // 0x4F44: the block func_0018C568 writes (Data_18C568, 0x1A00 bytes)
+        GameProgress* image;     // 0x4F44: the block func_0018C568 writes (Data_18C568, 0x1A00 bytes)
         u8* p4F44;          // 0x4F44: func_0018C638
         void* f4F44;        // 0x4F44: func_001943E8, func_00195958
         s32 i4F44;          // 0x4F44: func_0018BDC8, func_0018C178, func_0018C7F8, func_001E9108

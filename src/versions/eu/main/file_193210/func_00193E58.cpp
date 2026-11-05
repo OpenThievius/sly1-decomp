@@ -15,7 +15,7 @@ struct Obj_193E58_eu {
 
 void func_00193E58(Obj_193E58_eu* self)
 {
-    func_001AA268((T217D*)self);
+    func_001AA268((ScreenElement*)self);
     if (func_0015C188(2)) {
         self->f520 = (void**)&D_0026A210;
         *self->f520 = func_0015C1C0(2);

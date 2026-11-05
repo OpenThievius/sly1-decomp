@@ -7,10 +7,10 @@
 // Each class's fields follow its parent's and end at the size its descriptor gives; the
 // pads keep every field at its retail offset. Fields are named for what the code does with
 // them; step 6 of the roadmap may rename them.
-#ifndef C73_H
-#define C73_H
+#ifndef TRANSFORM_OBJECT_H
+#define TRANSFORM_OBJECT_H
 
-#include "c01.h"
+#include "base_object.h"
 #include "t2176.h"
 
 struct __attribute__((aligned(16))) Vec4_73 { f32 x, y, z, w; };
@@ -18,7 +18,7 @@ struct __attribute__((aligned(16))) Mat3_73 { Vec4_73 row[3]; };
 
 // 0x73: position and orientation; func_001F39F8 sets the orientation to identity
 // (D_002483D0), func_001F3A90/func_001F3AF0 move both into and out of the parent's frame.
-struct C73 : C01 {
+struct TransformObject : BaseObject {
     u8 pad34[0x40 - 0x34];
     Vec4_73 pos;            // 0x40
     Mat3_73 rot;            // 0x50
@@ -27,7 +27,7 @@ struct C73 : C01 {
 struct C78;
 
 // 0x77: a member of a group (class 0x78, func_001587C8 and func_00159478 fill it).
-struct C77 : C73 {
+struct C77 : TransformObject {
     C78* group;             // 0x80
     u8 pad84[0x90 - 0x84];
 };
@@ -79,13 +79,13 @@ struct C7A : C79 {
     s32 idB4;               // 0xB4
     f32 delay;              // 0xB8
     u8 padBC[0xC0 - 0xBC];
-    C01* heldC0;            // 0xC0
-    C01* heldC4;            // 0xC4
+    BaseObject* heldC0;            // 0xC0
+    BaseObject* heldC4;            // 0xC4
     u8 padC8[0xD0 - 0xC8];
 };
 
 // Each class ends at its descriptor's size.
-typedef char check_C73[sizeof(C73) == 0x80 ? 1 : -1];
+typedef char check_TransformObject[sizeof(TransformObject) == 0x80 ? 1 : -1];
 typedef char check_C77[sizeof(C77) == 0x90 ? 1 : -1];
 typedef char check_C78[sizeof(C78) == 0xC0 ? 1 : -1];
 typedef char check_C79[sizeof(C79) == 0xA0 ? 1 : -1];
@@ -93,10 +93,10 @@ typedef char check_C7A[sizeof(C7A) == 0xD0 ? 1 : -1];
 typedef char check_Rec79[sizeof(Rec79) == 0x200 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F39F8(C73* self);                       // 0x73 slot 0
-void func_001F3A40(C73* self, void* stream);         // 0x73 slot 10
-void func_001F3A90(C73* self, C01* other);          // 0x73 slot 21
-void func_001F3AF0(C73* self, C01* other);          // 0x73 slot 22
+void func_001F39F8(TransformObject* self);                       // 0x73 slot 0
+void func_001F3A40(TransformObject* self, void* stream);         // 0x73 slot 10
+void func_001F3A90(TransformObject* self, BaseObject* other);          // 0x73 slot 21
+void func_001F3AF0(TransformObject* self, BaseObject* other);          // 0x73 slot 22
 void func_001585F8(C77* self);                       // 0x77 slot 16
 void func_001587C0();                                // 0x77 slot 27 (empty)
 void func_00158980(C78* self);                       // 0x78 slot 9
@@ -109,7 +109,7 @@ void func_00158B30(C79* self, void* stream);         // 0x79 slot 10
 void func_00158C60(C79* self);                       // 0x79 slot 15
 void func_00158D38(void);                            // 0x79 slot 27 (empty)
 void func_00158E10(C7A* self);                       // 0x7A slot 0
-void func_00158F10(C7A* self, s32 kind, C01* other); // 0x7A slot 13
+void func_00158F10(C7A* self, s32 kind, BaseObject* other); // 0x7A slot 13
 void func_00158E48(C7A* self);                       // 0x7A slot 15
 void func_00158F80(C7A* self, void* message);        // 0x7A slot 27
 Rec79* func_00158DD8(C79* self, s32 own);            // the record, made the object's own first

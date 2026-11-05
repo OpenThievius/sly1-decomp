@@ -7,12 +7,12 @@
 //
 // Each class derives from its parent's, with every field at its retail offset and the pads
 // that keep it there, up to the size the descriptor gives.
-#ifndef C2C_H
-#define C2C_H
+#ifndef OBJECT_SET_H
+#define OBJECT_SET_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct C2C : C03 {
+struct ObjectSet : Collider {
     u8 pad550[0x554 - 0x550];
     s32 f554;               // 0x554: slot 0 (func_00198980) sets 1; func_00198E98 (slot 72) tests it
     s32 f558;               // 0x558: func_00198B28 (slot 16) sets 1 when a kept object answers
@@ -28,16 +28,16 @@ struct C2C : C03 {
     s32 f59C;               // 0x59C: func_00199000 (slot 60)
 };
 
-typedef char check_C2C[sizeof(C2C) == 0x5A0 ? 1 : -1];
+typedef char check_ObjectSet[sizeof(ObjectSet) == 0x5A0 ? 1 : -1];
 
-struct C2D : C2C {
+struct C2D : ObjectSet {
     s32 f5A0;               // 0x5A0: slot 0 (func_00199070) stores a table entry; the others pass it as an index
     u8 pad5A4[0x5B0 - 0x5A4];
 };
 
 typedef char check_C2D[sizeof(C2D) == 0x5B0 ? 1 : -1];
 
-struct C2E : C2C {
+struct C2E : ObjectSet {
     s32 f5A0;               // 0x5A0: an index into the world's bit table (func_00199C10, func_00199500, func_00199850)
     f32 f5A4;               // 0x5A4: func_00199500 (slot 16)
     f32 f5A8;               // 0x5A8

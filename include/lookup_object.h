@@ -6,23 +6,23 @@
 //
 // Its fields follow class 0x02's and end at the size its descriptor gives; the pads keep every
 // field at its retail offset.
-#ifndef C4E_H
-#define C4E_H
+#ifndef LOOKUP_OBJECT_H
+#define LOOKUP_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 // 0x4E: the id at 0x2D0 (-1 for none), and the objects found by it.
-struct C4E : C02 {
+struct LookupObject : PlacedObject {
     s32 id;                 // 0x2D0: -1 for none
-    C01* found2D4;          // 0x2D4: the object found, when it is not a group (flags 0x1)
-    C01* found2D8;          // 0x2D8: the object found, when it is a group (flags 0x1)
+    BaseObject* found2D4;          // 0x2D4: the object found, when it is not a group (flags 0x1)
+    BaseObject* found2D8;          // 0x2D8: the object found, when it is a group (flags 0x1)
     u8 pad2DC[0x320 - 0x2DC];
 };
 
-typedef char check_C4E[sizeof(C4E) == 0x320 ? 1 : -1];
+typedef char check_LookupObject[sizeof(LookupObject) == 0x320 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F4E18(C4E* self);                       // 0x4E slot 0
-void func_001F4E48(C4E* self);                       // 0x4E slot 16
+void func_001F4E18(LookupObject* self);                       // 0x4E slot 0
+void func_001F4E48(LookupObject* self);                       // 0x4E slot 16
 
 #endif

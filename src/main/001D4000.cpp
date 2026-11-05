@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
-#include "c2f.h"
-#include "c3b.h"
-#include "t217d.h"
+#include "switched_collider.h"
+#include "state_trigger.h"
+#include "child_group_object.h"
+#include "screen_element.h"
 #include "object_link.h"
 #include "object_message.h"
 #include "owner_message.h"
@@ -40,7 +40,7 @@ struct Node_1D6CB0 {
 
 s32 func_00182FC8(void* node);
 
-void func_001D6CB0(C07* self)
+void func_001D6CB0(Player* self)
 {
     C3F* obj = (C3F*)self->f1518;
     if (obj != 0) {
@@ -104,7 +104,7 @@ Node_1D7100* func_001D7100(Node_1D7100* self, s32 value)
     return self;
 }
 
-s32 func_001D65D8(C07* self)
+s32 func_001D65D8(Player* self)
 {
     if (self->f2220 != 4) {
         return self->f26C4 != 0;
@@ -115,7 +115,7 @@ s32 func_001D65D8(C07* self)
     return 2;
 }
 
-void func_001D4C90(C07* self, s32 value)
+void func_001D4C90(Player* self, s32 value)
 {
     self->f26B0 = value;
 }
@@ -186,7 +186,7 @@ struct Ctx_1D40A0 {
 void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
 void func_001D39E0(s32 a0, void* a1, s32 a2, void* a3);
 
-void func_001D40A0(C06* a0, Obj_1D40A0* a1, Ctx_1D40A0* a2, f32 f12, f32 f13)
+void func_001D40A0(TurningCollider* a0, Obj_1D40A0* a1, Ctx_1D40A0* a2, f32 f12, f32 f13)
 {
     a0->f638 = f12;
     if (a1->f54 == 0) {
@@ -216,7 +216,7 @@ struct Item_1D4848 { s32 f0; u8 pad4[4]; s32 f8; };
 u8* func_0018D568(s32 size, void* src);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
-void func_001D4848(C07* self)
+void func_001D4848(Player* self)
 {
     self->f26A8 = 7;
     self->f26AC = func_0018D568(0x54, D_00274FC0);
@@ -241,12 +241,12 @@ f32 D_00275030[4] = { 3.5f, 0.0f, 0.5f, 0.0f };
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA728(f32* p, s32 a, f32 b, f32 c, f32 d);
 s32 func_001300E8(void* e, s32 k);
-void func_001D4C98(C07* self);
-void func_00175170(C07* self, s32 a, s32 b);
-s32 func_001CF158(C07* self, void* b);
-void func_001782C0(C07* self, void* s2, f32 f, void* a2, void* a3, void* a4);
+void func_001D4C98(Player* self);
+void func_00175170(Player* self, s32 a, s32 b);
+s32 func_001CF158(Player* self, void* b);
+void func_001782C0(Player* self, void* s2, f32 f, void* a2, void* a3, void* a4);
 
-void func_001D4A98(C07* self) {
+void func_001D4A98(Player* self) {
     switch (self->f2228) {
     case 0x2B: {
         f32 t = func_00205778(self->v150.y, self->v150.x);
@@ -281,17 +281,17 @@ void func_001D4A98(C07* self) {
 }
 
 s32 func_00160C58(void);
-void func_00192C58(C07* o);
-void func_00175170(C07* o, s32 a, s32 b);
-s32 func_001CF158(C07* o, void* p);
-void func_001D4C90(C07* o, s32 value);
+void func_00192C58(Player* o);
+void func_00175170(Player* o, s32 a, s32 b);
+s32 func_001CF158(Player* o, void* p);
+void func_001D4C90(Player* o, s32 value);
 void func_001D6608(void);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 f32 D_00275050[4] = { -0.5f, -0.0025f, 0.0f, 0.0f };
 f32 D_00275060[2] = { 0.0f, 0.7f };
 f32 D_00275068[1];
 
-void func_001D51A0(C07* self)
+void func_001D51A0(Player* self)
 {
     if (self->f2228 == 0x2C && self->f2B70 != 0 &&
         (func_001300E8(self->f2B70, 0x70) || func_001300E8(self->f2B70, 0x71) ||
@@ -375,13 +375,13 @@ void func_001D7148(OutputBuffer* a0, s32 a1)
     if (a1 & 1) func_0018D778(a0);
 }
 
-extern void func_001D5620(C07* self);
-extern void func_00175170(C07* self, s32 mode, s32 count);
+extern void func_001D5620(Player* self);
+extern void func_00175170(Player* self, s32 mode, s32 count);
 
-void func_001D4C98(C07* self)
+void func_001D4C98(Player* self)
 {
     s32 v = self->f2254;
-    void (*fn)(C07* self) = self->cb26B0;
+    void (*fn)(Player* self) = self->cb26B0;
 
     v &= -0x11;
     self->cb26B0 = 0;
@@ -398,12 +398,12 @@ void func_001D4C98(C07* self)
     }
 }
 
-typedef void (*Cb_1D4D08)(s32 data, C07* self);
-struct Msg_1D4D08 { C07* self; s32 v; };
+typedef void (*Cb_1D4D08)(s32 data, Player* self);
+struct Msg_1D4D08 { Player* self; s32 v; };
 
 void func_001837E0(s32 target, s32 a, s32 b, Ev07** c);
-void func_00175170(C07* self, s32 a, s32 b);
-void func_001D4C90(C07* self, s32 value);
+void func_00175170(Player* self, s32 a, s32 b);
+void func_001D4C90(Player* self, s32 value);
 s32 func_001DDA80(s32 p);
 s32 func_00160D10(void);
 s32 func_00160C58(void);
@@ -412,7 +412,7 @@ extern u32 D_00262C64;
 extern f32 D_0026185C[];
 f32 D_00275040[4] = { 0.0f, 0.0f, -1000.0f, 0.0f };
 
-s32 func_001D4D08(C07* self, Ev07* msg)
+s32 func_001D4D08(Player* self, Ev07* msg)
 {
     if (self->desc05()->m4B(self, msg->kind) != 0) {
         return 0;
@@ -541,7 +541,7 @@ struct Key_1D54E0;
 s32 func_001DDA80(Key_1D54E0* k);
 extern u32 D_00262C64;
 
-s32 func_001D54E0(C07* self, s32 n)
+s32 func_001D54E0(Player* self, s32 n)
 {
     s32 v;
     s32 k;
@@ -702,12 +702,12 @@ struct Ent_1D7440 { Vt_1D7440* vt; };
 void func_00124A48(C19* self);
 void func_00124DF8(C19* self, s32 n, void* table);
 f32 func_00205778(f32 a, f32 b);
-C2F* func_001B6290(Snd_1D7440* a, C19* self, s32 b, s32 c);
-void func_001B64D8(C2F* a, s32 b);
+StateTrigger* func_001B6290(Snd_1D7440* a, C19* self, s32 b, s32 c);
+void func_001B64D8(StateTrigger* a, s32 b);
 void func_001BFCD8(s32 id, void* a1, C19* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 f32 func_001EAAE0(f32 a, f32 b);
-void* func_0015A418(C6C* host, s32 a1, s32 a2, C19* ctx);
-s32 func_0015A198(C6C* host, s32 a1, s32 a2, s32 a3, s32 a4, Ent_1D7440** out);
+void* func_0015A418(World* host, s32 a1, s32 a2, C19* ctx);
+s32 func_0015A198(World* host, s32 a1, s32 a2, s32 a3, s32 a4, Ent_1D7440** out);
 void func_001DB290(C19* self);
 
 void func_001D7440(C19* self)
@@ -720,7 +720,7 @@ void func_001D7440(C19* self)
     func_00124DF8(self, 0x14, D_002752A0);
     self->f694 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     if (((Snd_1D7440*)self->fB44) != 0) {
-        C2F* v = func_001B6290(((Snd_1D7440*)self->fB44), self, -1, 0);
+        StateTrigger* v = func_001B6290(((Snd_1D7440*)self->fB44), self, -1, 0);
         self->fB48 = v;
         func_001B64D8(v, self->fB30 == 1 ? 0x484 : 0x384);
     }

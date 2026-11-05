@@ -8,11 +8,11 @@
 #ifndef ID_LINKED_OBJECT_H
 #define ID_LINKED_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 // 0x66: func_001C1030 sets the id: it lets go of the old link (func_001B6438), looks the id
 // up (func_0015A418 with 0x101) and links to what it finds (func_001B6290).
-struct IdLinkedObject : C02 {
+struct IdLinkedObject : PlacedObject {
     u8 pad2D0[0x32C - 0x2D0];
     s32 linkId;             // 0x32C
     s32 linkTarget;         // 0x330: what func_0015A418 returns for linkId

@@ -5,11 +5,11 @@
 #ifndef VALUE_LIST_OBJECT_H
 #define VALUE_LIST_OBJECT_H
 
-#include "c01.h"
+#include "base_object.h"
 
 // 0x86: registers itself in its level (func_001EE900) and loads a list of values
 // (func_001EE930).
-struct ValueListObject : C01 {
+struct ValueListObject : BaseObject {
     s32 count34;            // 0x34: filled by func_00138398 with f38
     void* data38;           // 0x38
     s32 valueCount;         // 0x3C: number of values

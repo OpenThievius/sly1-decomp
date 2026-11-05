@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c6d.h"
+#include "camera.h"
 #include "asm_func.h"
 extern void func_001439A8(void*);
 extern void func_001439C8(void*);
@@ -154,12 +154,12 @@ struct __attribute__((aligned(16))) Quad_00143648 {
     s32 d;
 };
 
-void func_00182C18(C01* self);
-void func_00143560(C6D* self);
-void func_00149398(T2173* self, C6D* owner);
-void func_00149660(T2173_3B0* self, C6D* owner);
-void func_0014A888(T2173_3C8* self, C6D* owner);
-void func_00143A60(C6D* self, s32 a1);
+void func_00182C18(BaseObject* self);
+void func_00143560(Camera* self);
+void func_00149398(T2173* self, Camera* owner);
+void func_00149660(T2173_3B0* self, Camera* owner);
+void func_0014A888(T2173_3C8* self, Camera* owner);
+void func_00143A60(Camera* self, s32 a1);
 
 extern u8 D_002483D0[];
 // An entry of a table of functions defined at the end of this file.
@@ -177,10 +177,10 @@ extern u8 D_00262C70[];
 extern u8 D_00262D38[];
 
 f32 func_001EA620(f32 a, f32 b, f32 c, f32 d, void* p, void* q);
-void func_001433E0(C6D* c, void* n, void* x);
-void func_00143208(C6D* c, void* n, f32 dt, void* x);
-void func_00143940(C6D* c, f32 v);
-void func_00143560(C6D* c);
+void func_001433E0(Camera* c, void* n, void* x);
+void func_00143208(Camera* c, void* n, f32 dt, void* x);
+void func_00143940(Camera* c, f32 v);
+void func_00143560(Camera* c);
 
 
 typedef void (*VFn_143E40)(void* self, f32 dt, void* a);
@@ -263,7 +263,7 @@ struct __attribute__((aligned(16))) Quad_1448C8 {
 };
 
 
-void func_00144540(C6D* self);
+void func_00144540(Camera* self);
 
 
 
@@ -321,36 +321,36 @@ void func_00143900(void* self, void* value);
 void func_00143920(void* arg, void* arg2);
 void func_00143940(void* self, f32 x);
 void func_00143968(void* self, f32 x);
-void func_00143988(C6D* self, f32 value);
-void func_001439A8(C6D* self, f32 value);
-void func_001439C8(C6D* self, f32 value);
+void func_00143988(Camera* self, f32 value);
+void func_001439A8(Camera* self, f32 value);
+void func_001439C8(Camera* self, f32 value);
 void func_001439E8(void* ptr, f32 value);
 void func_00143A08(void* self, void* value);
-void func_00143A38(C6D* self, f32 value);
-void func_00143A60(C6D* self, s32 flag);
-void func_00143AF0(C6D* obj);
-void func_00143AF8(C6D* list, void* item);
-void func_00143B20(C6D* list, s32 value);
+void func_00143A38(Camera* self, f32 value);
+void func_00143A60(Camera* self, s32 flag);
+void func_00143AF0(Camera* obj);
+void func_00143AF8(Camera* list, void* item);
+void func_00143B20(Camera* list, s32 value);
 s32 func_00143BA8(void* unused, Entry_143BA8* e);
-void func_00143E40(C6D* self, s32 flag, f32 dt);
-void func_00144270(C6D* self);
+void func_00143E40(Camera* self, s32 flag, f32 dt);
+void func_00144270(Camera* self);
 void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out);
 void func_00144848(u8* self);
-void func_001448C8(C6D* self, Quad_1448C8* a, Quad_1448C8* b);
+void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b);
 void func_00144938(Ctx_144938* self, void* p, s32 q);
-void func_00144B70(C6D* self, Vec_144B70* arg);
-void func_00144FF8(C6D* self, Probe_00144FF8* p, s32 mode, f32* out);
-void func_001451F0(C6D* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3);
-void func_001455C0(C6D* self, f32* src);
-void func_001455E0(C6D* self);
+void func_00144B70(Camera* self, Vec_144B70* arg);
+void func_00144FF8(Camera* self, Probe_00144FF8* p, s32 mode, f32* out);
+void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3);
+void func_001455C0(Camera* self, f32* src);
+void func_001455E0(Camera* self);
 void func_001455F0(void* p);
 s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi);
 s32 func_00145DD8(void* unused, State_00145DD8* other);
-void func_00145FB8(C6D* self, s32 value);
-s32 func_00145FD8(C6D* self);
-s32 func_00145FF8(C6D* self);
-void func_00146018(C6D* obj, s32 value, f32 first, f32 second);
-void func_00146028(C6D* obj);
+void func_00145FB8(Camera* self, s32 value);
+s32 func_00145FD8(Camera* self);
+s32 func_00145FF8(Camera* self);
+void func_00146018(Camera* obj, s32 value, f32 first, f32 second);
+void func_00146028(Camera* obj);
 
 // The file's .data, in retail's order; the labels only its assembly reads are included.
 f32 D_00261880[4] = { 0.0f, -2000.0f, 500.0f, 0.0f };
@@ -409,7 +409,7 @@ void func_001434C8(Scaler_001434C8* self, f32* out, f32 p)
 
 ASM_FUNC(func_00143560);
 
-void func_00143648(C6D* self)
+void func_00143648(Camera* self)
 {
     u8* s = (u8*)self;
 
@@ -486,7 +486,7 @@ void func_00143920(void* arg, void* arg2) { func_001448C8(arg, 0, arg2); }
 
 void func_00143940(void* self, f32 x)
 {
-    C6D* c = (C6D*)self;
+    Camera* c = (Camera*)self;
     c->f1C4 = x;
     c->f1C8 = x;
     c->i1CC = 0;
@@ -495,24 +495,24 @@ void func_00143940(void* self, f32 x)
 
 void func_00143968(void* self, f32 x)
 {
-    C6D* c = (C6D*)self;
+    Camera* c = (Camera*)self;
     c->f1E4 = x;
     func_00143560(self);
 }
 
-void func_00143988(C6D* self, f32 value)
+void func_00143988(Camera* self, f32 value)
 {
     self->f1E8 = value;
     func_00143560(self);
 }
 
-void func_001439A8(C6D* self, f32 value)
+void func_001439A8(Camera* self, f32 value)
 {
     self->f1F8 = value;
     func_00143560(self);
 }
 
-void func_001439C8(C6D* self, f32 value)
+void func_001439C8(Camera* self, f32 value)
 {
     self->f1FC = value;
     func_00143560(self);
@@ -520,7 +520,7 @@ void func_001439C8(C6D* self, f32 value)
 
 void func_001439E8(void* ptr, f32 value)
 {
-    C6D* self = (C6D*)ptr;
+    Camera* self = (Camera*)ptr;
     self->f200 = value;
     func_00143560(self);
 }
@@ -531,13 +531,13 @@ void func_00143A08(void* self, void* value)
     func_00143560(self);
 }
 
-void func_00143A38(C6D* self, f32 value)
+void func_00143A38(Camera* self, f32 value)
 {
     self->f1C0 = value;
     func_00143560(D_00261990);
 }
 
-void func_00143A60(C6D* self, s32 flag)
+void func_00143A60(Camera* self, s32 flag)
 {
     if (flag != 0) {
         func_00144938(self, D_00261880, D_00261890);
@@ -550,12 +550,12 @@ void func_00143A60(C6D* self, s32 flag)
     self->f218 = -10.0f;
 }
 
-void func_00143AF0(C6D* obj)
+void func_00143AF0(Camera* obj)
 {
     obj->f340 = 0;
 }
 
-void func_00143AF8(C6D* list, void* item)
+void func_00143AF8(Camera* list, void* item)
 {
     u32 n = list->f340;
     if (n < 8) {
@@ -564,7 +564,7 @@ void func_00143AF8(C6D* list, void* item)
     }
 }
 
-void func_00143B20(C6D* list, s32 value)
+void func_00143B20(Camera* list, s32 value)
 {
     for (s32 i = 0; i < list->f340; i++) {
         if (value == ((s32*)list->f344)[i]) {
@@ -596,7 +596,7 @@ done:
 
 ASM_FUNC(func_00143BE0);
 
-void func_00143E40(C6D* self, s32 flag, f32 dt)
+void func_00143E40(Camera* self, s32 flag, f32 dt)
 {
     if (self->f220 != 0) {
         self->f220 = 0;
@@ -654,7 +654,7 @@ ASM_FUNC(func_00144128);
 
 ASM_FUNC(func_001441C0);
 
-void func_00144270(C6D* self)
+void func_00144270(Camera* self)
 {
     Quad_144270 in;
     s32 out;
@@ -722,7 +722,7 @@ void func_00144848(u8* self)
     func_00152D70(D_002622A8);
 }
 
-void func_001448C8(C6D* self, Quad_1448C8* a, Quad_1448C8* b)
+void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b)
 {
     if (a != 0) {
         *(Quad_1448C8*)self->f40 = *a;
@@ -750,7 +750,7 @@ ASM_FUNC(func_00144978);
 
 ASM_FUNC(func_00144AA0);
 
-void func_00144B70(C6D* self, Vec_144B70* arg)
+void func_00144B70(Camera* self, Vec_144B70* arg)
 {
     Vec_144B70 tmp;
     func_00144AA0((Vec_144B70*)self->f2D0, (Vec_144B70*)self->f40, &tmp, self->f2B0, self->f2B4, self->f2B8);
@@ -760,7 +760,7 @@ void func_00144B70(C6D* self, Vec_144B70* arg)
 
 ASM_FUNC(func_00144BE8);
 
-void func_00144FF8(C6D* self, Probe_00144FF8* p, s32 mode, f32* out)
+void func_00144FF8(Camera* self, Probe_00144FF8* p, s32 mode, f32* out)
 {
     f32 t;
     f32 x;
@@ -791,7 +791,7 @@ LINKER_REMNANT(func_00145080);
 
 INCLUDE_ASM(func_00145088);
 
-void func_001451F0(C6D* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3)
+void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3)
 {
     s32 s5 = 0;
     T2173* s4 = 0;
@@ -838,7 +838,7 @@ ASM_FUNC(func_00145438);
 
 ASM_FUNC(func_001454E0);
 
-void func_001455C0(C6D* self, f32* src)
+void func_001455C0(Camera* self, f32* src)
 {
     self->f224 = 1;
     if (src != 0) {
@@ -847,14 +847,14 @@ void func_001455C0(C6D* self, f32* src)
     }
 }
 
-void func_001455E0(C6D* self)
+void func_001455E0(Camera* self)
 {
     self->f220 = 1;
 }
 
 void func_001455F0(void* p)
 {
-    func_001455C0((C6D*)p, 0);
+    func_001455C0((Camera*)p, 0);
 }
 
 ASM_FUNC(func_00145610);
@@ -902,24 +902,24 @@ ASM_FUNC(func_00145DE8);
 
 ASM_FUNC(func_00145E68);
 
-void func_00145FB8(C6D* self, s32 value)
+void func_00145FB8(Camera* self, s32 value)
 {
     func_001495E8(&self->ctl460, value);
 }
 
-s32 func_00145FD8(C6D* self)
+s32 func_00145FD8(Camera* self)
 {
     return func_00149610(&self->ctl460);
 }
 
-s32 func_00145FF8(C6D* self)
+s32 func_00145FF8(Camera* self)
 {
     return func_00149638(&self->ctl460);
 }
 
-void func_00146018(C6D* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.f58 = second; }
+void func_00146018(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.f58 = second; }
 
-void func_00146028(C6D* obj) { obj->f218 = D_0026185C; }
+void func_00146028(Camera* obj) { obj->f218 = D_0026185C; }
 
 ASM_FUNC(func_00146038);
 

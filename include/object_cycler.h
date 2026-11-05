@@ -9,8 +9,8 @@
 #ifndef OBJECT_CYCLER_H
 #define OBJECT_CYCLER_H
 
-#include "c73.h"
-#include "c03.h"
+#include "transform_object.h"
+#include "collider.h"
 
 // Two floats the level data keeps as one doubleword (a range, a pair of times): func_0015AAE0
 // sets them from tables of doublewords, func_0015B128 and func_0015AEB0 read each float.
@@ -28,7 +28,7 @@ union FloatRange {
 // 0x40: mode 0 shows one object and keeps a handle at 0x5E4 (func_001BFCD8 makes it), mode 1
 // steps through its objects with the timers below. State -1 at set-up; 0, 1, 3, 5 and 6 are
 // the ones func_0015B128 and func_0015B4D0 distinguish.
-struct ObjectCycler : C03 {
+struct ObjectCycler : Collider {
     s32 mode;               // 0x550: 0 or 1
     s32 state;              // 0x554: -1 at set-up
     f32 stateStart;               // 0x558: the time the state started
@@ -36,10 +36,10 @@ struct ObjectCycler : C03 {
     s32 startState;               // 0x560: the state slot 16 starts in
     s32 count;              // 0x564: how many objects in objs
     s32 index;              // 0x568: the one shown
-    C02* objs[16];          // 0x56C: found by kind 0x23C + i (func_0015AC08)
+    PlacedObject* objs[16];          // 0x56C: found by kind 0x23C + i (func_0015AC08)
     s32 altCount;           // 0x5AC: how many in altObjects
-    C02* altObjects[8];        // 0x5B0: mode 1 only: found by kind 0x24D + i
-    C02* obj5D0;            // 0x5D0
+    PlacedObject* altObjects[8];        // 0x5B0: mode 1 only: found by kind 0x24D + i
+    PlacedObject* obj5D0;            // 0x5D0
     C77* group;             // 0x5D4: a 0x77 or 0x78 found by func_00159478 (kept by slot 10)
     u8 pad5D8[0x5DC - 0x5D8];
     PackedFloatPair f5DC;              // 0x5DC: kept across the copy by slot 9

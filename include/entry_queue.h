@@ -2,13 +2,13 @@
 // Class 0x8F (descriptor D_0021B608, 0x6C bytes), a direct child of 0x01. Written for this
 // project from what retail's code does (config/us/classes.tsv). Fields follow the parent's
 // 0x34 bytes; pads keep each at its retail offset.
-#ifndef C8F_H
-#define C8F_H
+#ifndef ENTRY_QUEUE_H
+#define ENTRY_QUEUE_H
 
-#include "c01.h"
+#include "base_object.h"
 
 // 0x8F: func_0017B998 (slot 0) allocates a 0xA00-byte buffer and sets a flag.
-struct C8F : C01 {
+struct EntryQueue : BaseObject {
     s32 f34;                // 0x34
     void* buffer;           // 0x38
     void* f3C;              // 0x3C
@@ -21,8 +21,8 @@ struct C8F : C01 {
     s32 flag68;             // 0x68
 };
 
-typedef char check_C8F[sizeof(C8F) == 0x6C ? 1 : -1];
+typedef char check_EntryQueue[sizeof(EntryQueue) == 0x6C ? 1 : -1];
 
-void func_0017B998(C8F* self);   // slot 0
+void func_0017B998(EntryQueue* self);   // slot 0
 
 #endif

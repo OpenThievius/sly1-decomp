@@ -2,10 +2,10 @@
 #include "common.h"
 #include "asm_func.h"
 #include "c4c.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "globals.h"
-#include "g27c220.h"
-#include "g262c70.h"
+#include "game_progress.h"
+#include "pad_record.h"
 #include "object_message.h"
 
 s32 D_00274F38[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
@@ -33,7 +33,7 @@ struct Ref_D3500 {
 };
 
 
-void* func_001BC320(C03* a);
+void* func_001BC320(Collider* a);
 void func_001861E8(void* a, s32 b);
 
 void func_001BC4D8(void* self, void* sub);
@@ -59,15 +59,15 @@ s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void func_0012F0A0(void* obj, s32 a1, f32 fa, f32 fb);
 
 
-void func_001B9338(C03* self, f32 t);
+void func_001B9338(Collider* self, f32 t);
 void func_00189378(Mat02* sub, s32 zero, void* out);
-void func_001B91A8(C03* self, void* buf, s32 a, void* p, s32 b, f32 t);
+void func_001B91A8(Collider* self, void* buf, s32 a, void* p, s32 b, f32 t);
 
 
-void func_00127378(C02* self, s32 kind, ObjectMessage* msg);
+void func_00127378(PlacedObject* self, s32 kind, ObjectMessage* msg);
 void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
-void func_0016EC20(G262C70* self, s32 mask);
+void func_0016EC20(PadRecord* self, s32 mask);
 s32 func_00160D10(void);
 
 struct Vt_1D29C8 { u8 pad0[0x20]; void (*fn20)(void* self, s32 a); u8 pad24[0x14]; void (*fn38)(void* self); };
@@ -76,17 +76,17 @@ struct Sub_1D29C8;
 extern f32 D_00261854;
 extern Obj_1D29C8 D_0026EC70;
 
-void func_00175170(C07* self, s32 a, s32 b);
+void func_00175170(Player* self, s32 a, s32 b);
 s32 func_00182FC8(Sub_1D29C8* self);
 void func_00126D60(Sub_1D29C8* self, f32 v);
-void func_001D32D8(Sub_1D29C8* self, C07* a, s32 b);
-void func_001D31D0(C07* self, s32 a);
+void func_001D32D8(Sub_1D29C8* self, Player* a, s32 b);
+void func_001D31D0(Player* self, s32 a);
 void* func_001925F0(void);
 void func_001AA8B8(Obj_1D29C8* self, f32 v);
 void func_001AA788(Obj_1D29C8* self, f32 v);
 
 void func_001D29C8(u32 mode);
-s32 func_001D3100(G262C70* self, s32 start, s32 count, s32* table);
+s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table);
 void func_001D32D8(C4C* self, void* v, s32 flag);
 void* func_001D3500(C4C* a0, Node_D3500* a1);
 void func_001D3678(C4C* self, s32 kind, ObjectMessage* msg);
@@ -135,7 +135,7 @@ INCLUDE_RODATA(jtbl_0024DB90);
 INCLUDE_RODATA(jtbl_0024DBB0);
 ASM_FUNC(func_001D2BB8);
 
-s32 func_001D3100(G262C70* self, s32 start, s32 count, s32* table)
+s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table)
 {
     s32 step;
     s32 left;
@@ -162,7 +162,7 @@ s32 func_001D3100(G262C70* self, s32 start, s32 count, s32* table)
     return idx;
 }
 
-void func_001D31D0(C07* self, s32 value)
+void func_001D31D0(Player* self, s32 value)
 {
     void* buf[0x100];
     if (value == self->f275C) {

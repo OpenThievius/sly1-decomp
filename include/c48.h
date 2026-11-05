@@ -5,9 +5,9 @@
 #ifndef C48_H
 #define C48_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct C48 : C03 {
+struct C48 : Collider {
     u8 pad550[4];
     void* f554;             // 0x554: loaded (id 0x3E5)
     void* f558;             // 0x558: loaded (id 0x3E4)

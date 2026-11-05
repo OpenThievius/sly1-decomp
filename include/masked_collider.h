@@ -4,12 +4,12 @@
 // objects it reacts to (+0x63C, with the lists it names) and a flag it sets while it is busy
 // (+0x678). Written for this project from what retail's code does (config/us/classes.tsv); one
 // struct per class, named by class id until the naming step, each derived from its parent's.
-#ifndef C20_H
-#define C20_H
+#ifndef MASKED_COLLIDER_H
+#define MASKED_COLLIDER_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct S1B6290;     // a handle func_001B6290 makes (s1b6290.h)
+struct StateWalker;     // a handle func_001B6290 makes (s1b6290.h)
 
 // The object at the 0x200 field of what C23 keeps at 0x734: a flag at 0x1C and one at 0x4C.
 struct Held23 {
@@ -20,10 +20,10 @@ struct Held23 {
     s32 f4C;                // 0x4C
 };
 
-struct C20;
-struct C2F;
-struct C05;
-struct C46;
+struct MaskedCollider;
+struct StateTrigger;
+struct SwitchedCollider;
+struct PooledObject;
 
 // An entry of the queue at 0x554 (func_0013D868 and its siblings append {kind, value}; the
 // callback func_0013CE80 fills `node` with the object it found for `key`).
@@ -35,11 +35,11 @@ struct Slot20 {
 
 // Class 0x20's descriptor: 0x03's slots, then two more (slot n at 0x10 + 4n).
 struct Desc20 : Desc03 {
-    void (*m48)(C20* self);                         // 0x130: slot 72 (func_0013D278)
+    void (*m48)(MaskedCollider* self);                         // 0x130: slot 72 (func_0013D278)
     void* m49;                                      // 0x134: slot 73
 };
 
-struct C20 : C03 {
+struct MaskedCollider : Collider {
     s32 count550;           // 0x550: entries of slots
     Slot20 slots[16];       // 0x554: func_0013D868, 0013D8B0, 0013D900, 0013D950 append (kind 0, 1, 2, 3)
     s32 f614;               // 0x614: a key for func_0015A418, -1 at set-up
@@ -71,16 +71,16 @@ struct C20 : C03 {
     const Desc20* desc20() const { return (const Desc20*)desc; }
 };
 
-typedef char check_C20[sizeof(C20) == 0x6C0 ? 1 : -1];
+typedef char check_MaskedCollider[sizeof(MaskedCollider) == 0x6C0 ? 1 : -1];
 typedef char check_Desc20[sizeof(Desc20) == 0x138 ? 1 : -1];
 
-struct C21 : C20 {
+struct C21 : MaskedCollider {
 };
 
 typedef char check_C21[sizeof(C21) == 0x6C0 ? 1 : -1];
 
 struct C22 : C21 {
-    C2F* counter;           // 0x6C0: told when the object is done (func_00123B18)
+    StateTrigger* counter;           // 0x6C0: told when the object is done (func_00123B18)
     u8 pad6C4[0x6D0 - 0x6C4];
 };
 
@@ -89,18 +89,18 @@ typedef char check_C22[sizeof(C22) == 0x6D0 ? 1 : -1];
 struct C23 : C21 {
     s32 f6C0;               // 0x6C0: -1 at set-up; the kind of object slot 16 looks up
     s32 cnt;                // 0x6C4
-    C01* p6C8;              // 0x6C8: slot 72 lets go of it
-    C46* p6CC;              // 0x6CC: the object of class 0x46 it holds while its state is 5 (func_0014FEC0)
+    BaseObject* p6C8;              // 0x6C8: slot 72 lets go of it
+    PooledObject* p6CC;              // 0x6CC: the object of class 0x46 it holds while its state is 5 (func_0014FEC0)
     f32 f6D0;               // 0x6D0: how long before func_0014FEC0 is tried again
     u8 pad6D4[0x6D8 - 0x6D4];
     f32 f6D8;               // 0x6D8: the clock when func_0014FEC0 took the object
     s32 f6DC;               // 0x6DC
-    C46* p6E0;              // 0x6E0
+    PooledObject* p6E0;              // 0x6E0
     u8 pad6E4[0x6F0 - 0x6E4];
     Vec02 q6F0[4];          // 0x6F0
-    C01* f730;              // 0x730
-    C02* p734;              // 0x734
-    C02* p738;              // 0x738
+    BaseObject* f730;              // 0x730
+    PlacedObject* p734;              // 0x734
+    PlacedObject* p738;              // 0x738
     void* p73C;             // 0x73C
     void* p740;             // 0x740
     s32 count744;           // 0x744
@@ -124,7 +124,7 @@ struct Alloc24 {
 struct C24 : C21 {
     u8 pad6C0[4];
     void* x6C4;             // 0x6C4: loaded (D_00264230)
-    S1B6290* x6C8;          // 0x6C8: a handle func_001B6290 makes for x6C4
+    StateWalker* x6C8;          // 0x6C8: a handle func_001B6290 makes for x6C4
     f32 f6CC;               // 0x6CC
     s32 f6D0;               // 0x6D0
     f32 f6D4;               // 0x6D4
@@ -138,7 +138,7 @@ struct C24 : C21 {
 
 typedef char check_C24[sizeof(C24) == 0x6F0 ? 1 : -1];
 
-struct C25 : C20 {
+struct C25 : MaskedCollider {
     f32 scale;              // 0x6C0
     s32 sel6C4;             // 0x6C4: -1 at set-up
     s32 sel6C8;             // 0x6C8: -1 at set-up
@@ -149,7 +149,7 @@ typedef char check_C25[sizeof(C25) == 0x6D0 ? 1 : -1];
 
 struct C26 : C25 {
     void* f6D0;             // 0x6D0
-    C05* sel6D4;            // 0x6D4
+    SwitchedCollider* sel6D4;            // 0x6D4
     u8 pad6D8[0x6E0 - 0x6D8];
 };
 

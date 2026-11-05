@@ -9,7 +9,7 @@
 #ifndef COLORED_TRIANGLE_SET_H
 #define COLORED_TRIANGLE_SET_H
 
-#include "c01.h"
+#include "base_object.h"
 
 struct Stream8E;  // the level stream (func_00137BE0, func_00137DF8)
 
@@ -28,7 +28,7 @@ struct TriangleList {
     TriangleIndices* triangles;     // 0x08
 };
 
-struct ColoredTriangleSet : C01 {
+struct ColoredTriangleSet : BaseObject {
     s32 pointCount;         // 0x34: the number of points
     TrianglePoint* points;  // 0x38: the points
     u8 pad3C[0x40 - 0x3C];

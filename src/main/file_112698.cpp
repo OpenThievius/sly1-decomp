@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "c6c.h"
+#include "world.h"
 #include "globals.h"
 #include "shapes.h"
-#include "r11b008.h"
+#include "script_value.h"
 #include "r119bb0.h"
 #include "s1dbbd8.h"
 
@@ -76,10 +76,10 @@ void* func_0015A418(void* host, s32 a1, s32 a2, s32 ctx);
 s32 func_0015A198(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
 s32 func_0015A4F0(void* host, s32 a1, s32 a2, void* ctx, s32 a4, u8* a5);
 void* func_001925F0(void);
-R11B008* func_001C2238(R11B008* out, s32 a1, s32 a2, R11B008* a3);
-R11B008* func_001C2320(R11B008* out, s32 a1, s32 a2, R11B008* a3);
-R11B008* func_001C22B8(R11B008* out, s32 a1, s32 a2, R11B008* a3);
-R11B008* func_001C21A0(R11B008* out, s32 a1, s32 a2);
+ScriptValue* func_001C2238(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
+ScriptValue* func_001C2320(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
+ScriptValue* func_001C22B8(ScriptValue* out, s32 a1, s32 a2, ScriptValue* a3);
+ScriptValue* func_001C21A0(ScriptValue* out, s32 a1, s32 a2);
 void func_0018D608(void);
 void func_0018D6F0(void);
 void func_001DC4D0(void* self, f32 scale, s32 p1, s32 p2, s32 p3, s32 p4, s32* o1, u8** o2);
@@ -92,7 +92,7 @@ void func_001BF788(void* self, s32 n);
 void func_0016EC38(void* p, s32 n, f32 f);
 void func_001566C8(void* obj, f32 f);
 void func_001E1F10(const char* x);
-R11B008* func_001C13E8(R11B008* out, s32 id, u8* ctx);
+ScriptValue* func_001C13E8(ScriptValue* out, s32 id, u8* ctx);
 R11A630* func_001C1390(s32 id, u8* ctx);
 void func_001834A0(void* a);
 
@@ -208,126 +208,126 @@ struct Hit_118198 {
 s32 func_001419E8(Quad16* z, s32 a, s32 b, s32 c, void** d, Hit_118198* e);
 
 // This file's functions. The built-ins (R119BB0Fn) and their helpers:
-R11B008* func_00113730(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113780(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001137D0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113820(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113888(R11B008* ret, R11B008* args, s32 mode);
-R11B008* func_001139E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113A18(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113A48(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113A78(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113AA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113B60(R11B008* ret, R11B008* a, R11B008* b);
-R11B008* func_00113E48(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113E78(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113EE0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113F48(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00113FB0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114018(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114080(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001140E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114150(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001141B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114220(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114288(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114300(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114360(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001143C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114438(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001144A0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114518(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001145C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114638(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001146E0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114740(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001147B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope, s32 mode);
-R11B008* func_00114858(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114888(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001148B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114950(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001149F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114B80(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114D18(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00114F48(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001151C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115398(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115440(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115510(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001156B0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115710(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001157E0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001158B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001159B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115B78(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115C00(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115CA0(R11B008* ret, R11B008* arg, s32 index);
-R11B008* func_00115D48(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115D78(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115DA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115DD8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115E08(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115E38(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115E68(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115E98(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00115EC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116520(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116600(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001166C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116740(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001167C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116978(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001169E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116A88(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116B08(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116C80(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116D20(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116DC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116EA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00116FE8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117080(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117118(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117180(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001171F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117260(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001172C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117360(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117478(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117598(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117610(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117668(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117880(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117910(R11B008* ret, s32 count, R11B008* args, R11A630* scope, s32 kind);
-R11B008* func_00117A30(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117A60(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117A90(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117AC0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117AF0(R11B008* ret, s32 count, void** values);
+ScriptValue* func_00113730(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113780(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001137D0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113820(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113888(ScriptValue* ret, ScriptValue* args, s32 mode);
+ScriptValue* func_001139E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113A18(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113A48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113A78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113AA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b);
+ScriptValue* func_00113E48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113E78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113EE0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113F48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00113FB0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114018(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114080(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001140E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114150(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001141B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114220(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114288(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114300(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114360(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001143C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114438(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001144A0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001145C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114638(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001146E0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114740(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001147B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope, s32 mode);
+ScriptValue* func_00114858(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114888(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001148B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114950(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001149F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114B80(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114D18(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00114F48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001151C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115398(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115440(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001156B0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115710(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001157E0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001158B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115B78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115C00(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115CA0(ScriptValue* ret, ScriptValue* arg, s32 index);
+ScriptValue* func_00115D48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115DA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115DD8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115E08(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115E38(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115E68(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115E98(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00115EC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116600(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001166C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116740(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001167C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116978(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001169E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116A88(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116B08(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116D20(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116DC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116EA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00116FE8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117080(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117118(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117180(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001171F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117260(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001172C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117360(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117478(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117598(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117610(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117880(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117910(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope, s32 kind);
+ScriptValue* func_00117A30(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117A60(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117A90(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117AC0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117AF0(ScriptValue* ret, s32 count, void** values);
 // How its callers declare it (KEPT: see build/swarm/v2/NOTES.md): they call it as GCC calls a
 // function that gives a class back, a `call` with no value (expand_call has no value register when
 // the result goes through the hidden address), which schedules the argument moves differently
 // from a call of a function returning a pointer. The plain value cannot say that.
-void func_00117AF0(R11B008* ret, s32 count, u8* values);
-R11B008* func_00117BC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117C48(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117D00(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117D78(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117E20(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117E78(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117ED0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00117F28(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001180C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
+void func_00117AF0(ScriptValue* ret, s32 count, u8* values);
+ScriptValue* func_00117BC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117D00(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117E20(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117E78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117ED0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00117F28(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001180C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
 // How its callers declare it; it is defined giving back a RetValue (KEPT, see there).
-R11B008* func_00118198(R11B008* ret, s32 id, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001183B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00118458(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001184F8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00118580(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00118608(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00118720(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001187E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_00118850(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
-R11B008* func_001188F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
+ScriptValue* func_00118198(ScriptValue* ret, s32 id, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001183B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00118458(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001184F8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00118580(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00118720(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001187E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_00118850(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
+ScriptValue* func_001188F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
 
 // A 128-bit value, copied as one quadword.
 typedef u64 Quad_118D10 __attribute__((mode(TI)));
@@ -339,32 +339,32 @@ Quad_118D10* func_00118D10(Quad_118D10* out, void* src);
 Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v);
 
 // The evaluator (func_0011A080) and the handlers it dispatches to by the expression's kind.
-R11B008* func_00118D48(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00118DB8(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00118E80(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00118F48(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119030(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119128(R11B008* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00118D48(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00118DB8(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00118E80(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00118F48(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119030(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119128(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
 // How func_0011A080 declares it; it is defined giving back a RetValue (KEPT, see there).
-R11B008* func_00119218(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119310(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_001194A8(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_001196C8(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119878(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119970(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119A58(R11B008* ret, R11B008Node* list, R11A630* scope);
-R11B008* func_00119AF8(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119BB0(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_00119FA0(R11B008* ret, R11B008Node* expr, R11A630* scope);
-R11B008* func_0011A080(R11B008* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119218(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_001196C8(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119878(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119970(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119A58(ScriptValue* ret, R11B008Node* list, R11A630* scope);
+ScriptValue* func_00119AF8(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_00119FA0(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
+ScriptValue* func_0011A080(ScriptValue* ret, R11B008Node* expr, R11A630* scope);
 
 // The scopes.
 void func_0011A328(R11A630* scope, R11A630* parent);
 void func_0011A338(R11A630* scope, R11A630* parent);
-R11B008* func_0011A358(R11B008* ret, R11A630* scope, s32 key, R11B008* value);
-R11B008* func_0011A400(R11B008* ret, R11A630* scope, s32 key, R11B008* value);
-s32 func_0011A498(R11A630* scope, s32 key, s32 flag, R11B008* out);
-R11B008* func_0011A4D8(R11A630* scope, s32 key, s32 flag);
+ScriptValue* func_0011A358(ScriptValue* ret, R11A630* scope, s32 key, ScriptValue* value);
+ScriptValue* func_0011A400(ScriptValue* ret, R11A630* scope, s32 key, ScriptValue* value);
+s32 func_0011A498(R11A630* scope, s32 key, s32 flag, ScriptValue* out);
+ScriptValue* func_0011A4D8(R11A630* scope, s32 key, s32 flag);
 void func_0011A5B0(R11A630* src, R11A630* dst);
 R11A630* func_0011A630(void);
 void func_0011A670(void);
@@ -413,9 +413,9 @@ INCLUDE_RODATA(jtbl_00249080);
 INCLUDE_RODATA(jtbl_002490A0);
 ASM_FUNC(func_00113240);
 
-R11B008* func_00113730(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113730(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B538(&q, 0x22);
     func_0011B018(ret, &q);
@@ -423,9 +423,9 @@ R11B008* func_00113730(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00113780(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113780(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B538(&q, 0x22);
     func_0011B018(ret, &q);
@@ -433,9 +433,9 @@ R11B008* func_00113780(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001137D0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001137D0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B538(&q, 0x22);
     func_0011B018(ret, &q);
@@ -443,9 +443,9 @@ R11B008* func_001137D0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00113820(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113820(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, args[0].i == args[1].i);
     func_0011B018(ret, &q);
@@ -453,10 +453,10 @@ R11B008* func_00113820(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00113888(R11B008* ret, R11B008* e, s32 mode)
+ScriptValue* func_00113888(ScriptValue* ret, ScriptValue* e, s32 mode)
 {
     f32 xy[2];
-    R11B008 obj;
+    ScriptValue obj;
     func_0011B008(&obj);
     f32* out = xy;
     for (s32 i = 1; i >= 0; i--, e++) {
@@ -486,37 +486,37 @@ R11B008* func_00113888(R11B008* ret, R11B008* e, s32 mode)
     return ret;
 }
 
-R11B008* func_001139E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001139E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00113888(ret, args, 0);
     return ret;
 }
 
-R11B008* func_00113A18(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113A18(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00113888(ret, args, 1);
     return ret;
 }
 
-R11B008* func_00113A48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113A48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00113888(ret, args, 2);
     return ret;
 }
 
-R11B008* func_00113A78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113A78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00113888(ret, args, 3);
     return ret;
 }
 
-R11B008* func_00113AA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113AA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     s32 r;
     func_0011B008(&q);
-    R11B008* k = args;
-    R11B008* p = k + 1;
+    ScriptValue* k = args;
+    ScriptValue* p = k + 1;
     if (k->tag != p->tag) {
         r = 0;
     } else {
@@ -538,15 +538,15 @@ R11B008* func_00113AA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00113B60(R11B008* ret, R11B008* a, R11B008* b)
+ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
 {
-    R11B008 R;
-    R11B008 A;
-    R11B008 B;
-    R11B008 C;
-    R11B008 D;
-    R11B008 E;
-    R11B008 F;
+    ScriptValue R;
+    ScriptValue A;
+    ScriptValue B;
+    ScriptValue C;
+    ScriptValue D;
+    ScriptValue E;
+    ScriptValue F;
     s32 r;
 
     func_0011B008(&R);
@@ -637,15 +637,15 @@ R11B008* func_00113B60(R11B008* ret, R11B008* a, R11B008* b)
     return ret;
 }
 
-R11B008* func_00113E48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113E48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00113B60(ret, args, args + 1);
     return ret;
 }
 
-R11B008* func_00113E78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113E78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 local;
+    ScriptValue local;
     func_0011B008(&local);
     func_0011B5F0(&local, args[0].tag == 0x1B);
     func_0011B018(ret, &local);
@@ -653,9 +653,9 @@ R11B008* func_00113E78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00113EE0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113EE0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 local;
+    ScriptValue local;
     func_0011B008(&local);
     func_0011B5F0(&local, args[0].tag >= 0x14 && args[0].tag < 0x16);
     func_0011B018(ret, &local);
@@ -663,9 +663,9 @@ R11B008* func_00113EE0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00113F48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113F48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 local;
+    ScriptValue local;
     func_0011B008(&local);
     func_0011B5F0(&local, args[0].tag == 0x15);
     func_0011B018(ret, &local);
@@ -673,9 +673,9 @@ R11B008* func_00113F48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00113FB0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00113FB0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 local;
+    ScriptValue local;
     func_0011B008(&local);
     func_0011B5F0(&local, args[0].tag == 0x14);
     func_0011B018(ret, &local);
@@ -683,9 +683,9 @@ R11B008* func_00113FB0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114018(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114018(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, args->tag == 0x1C);
     func_0011B018(ret, &q);
@@ -693,9 +693,9 @@ R11B008* func_00114018(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114080(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114080(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, args->tag == 0x16);
     func_0011B018(ret, &q);
@@ -703,9 +703,9 @@ R11B008* func_00114080(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001140E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001140E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, args->tag == 0x17);
     func_0011B018(ret, &q);
@@ -713,9 +713,9 @@ R11B008* func_001140E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114150(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114150(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, args->tag == 0x18);
     func_0011B018(ret, &q);
@@ -723,9 +723,9 @@ R11B008* func_00114150(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001141B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001141B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 a;
+    ScriptValue a;
     func_0011B008(&a);
     func_0011B5F0(&a, args->tag == 0x19);
     func_0011B018(ret, &a);
@@ -733,9 +733,9 @@ R11B008* func_001141B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114220(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114220(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 a;
+    ScriptValue a;
     func_0011B008(&a);
     func_0011B5F0(&a, args->tag == 0x1A);
     func_0011B018(ret, &a);
@@ -743,9 +743,9 @@ R11B008* func_00114220(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114288(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114288(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     s32 v = args->tag;
     func_0011B5F0(&q, v == 0x1E || v == 0);
@@ -754,9 +754,9 @@ R11B008* func_00114288(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114300(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114300(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, args->tag == 0);
     func_0011B018(ret, &q);
@@ -764,9 +764,9 @@ R11B008* func_00114300(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114360(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114360(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, (args->tag ^ 0x20) == 0);
     func_0011B018(ret, &q);
@@ -774,9 +774,9 @@ R11B008* func_00114360(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001143C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001143C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     int flag = 0;
     if (args[0].tag == 0x20) {
@@ -788,9 +788,9 @@ R11B008* func_001143C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114438(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114438(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5F0(&q, args[0].tag == 0x21);
     func_0011B018(ret, &q);
@@ -798,9 +798,9 @@ R11B008* func_00114438(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001144A0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001144A0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     s32 v = args->tag;
     int flag = (v == 0x1F || v == 0x1D);
@@ -810,9 +810,9 @@ R11B008* func_001144A0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114518(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     f32 out[3];
     func_0011B008(&q);
     for (s32 k = 0; k < 3; k++) {
@@ -829,9 +829,9 @@ R11B008* func_00114518(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001145C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001145C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     int flag = 0;
     if (args[0].tag == 0x1B) {
@@ -843,9 +843,9 @@ R11B008* func_001145C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114638(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114638(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     R11B008Node* node = func_0011AF28();
     func_0011B0A8(node, args);
@@ -862,9 +862,9 @@ R11B008* func_00114638(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001146E0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001146E0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B0A8(&q, args->node);
     func_0011B018(ret, &q);
@@ -872,9 +872,9 @@ R11B008* func_001146E0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114740(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114740(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     R11B008Node* in = args->node;
     R11B008Node* v = in->next;
@@ -888,9 +888,9 @@ R11B008* func_00114740(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001147B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope, s32 mode)
+ScriptValue* func_001147B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope, s32 mode)
 {
-    R11B008 q;
+    ScriptValue q;
     R11B008Node* p;
     func_0011B008(&q);
     p = args[0].node;
@@ -909,21 +909,21 @@ R11B008* func_001147B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope, s
     return ret;
 }
 
-R11B008* func_00114858(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114858(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_001147B8(ret, count, args, scope, 0x23);
     return ret;
 }
 
-R11B008* func_00114888(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114888(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_001147B8(ret, count, args, scope, 0x24);
     return ret;
 }
 
-R11B008* func_001148B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001148B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     s32 n = 0;
     if (args->tag == 0x1E && args->node) {
@@ -939,14 +939,14 @@ R11B008* func_001148B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114950(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114950(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B538(&q, 0);
     if (args->tag == 0x1E) {
         R11B008Node* node = args->node;
-        R11B008* sub = &args[1];
+        ScriptValue* sub = &args[1];
         s32 i = 0;
         while (node != 0) {
             if (i == sub->i) {
@@ -962,18 +962,18 @@ R11B008* func_00114950(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001149F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001149F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 A;
-    R11B008 B;
-    R11B008 C[2];
-    R11B008 D;
+    ScriptValue A;
+    ScriptValue B;
+    ScriptValue C[2];
+    ScriptValue D;
     s32 n;
     R11B008Node* cur;
 
     func_0011B008(&A);
     func_0011B008(&B);
-    R11B008* q = C;
+    ScriptValue* q = C;
     n = 1;
     do {
         func_0011B008(q);
@@ -1011,7 +1011,7 @@ R11B008* func_001149F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114B80(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114B80(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_0011B018(ret, args);
     return ret;
@@ -1019,9 +1019,9 @@ R11B008* func_00114B80(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
 
 INCLUDE_ASM(func_00114BB0);
 
-R11B008* func_00114D18(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114D18(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     R11B008Node arr[5];
     R11B008Node* it;
     func_0011B008(&q);
@@ -1052,10 +1052,10 @@ R11B008* func_00114D18(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
         func_0011B0A8(p[0], args);
         arr[4].tag = 0x11;
         arr[4].next = p[1];
-        R11B008* m = &args[1];
+        ScriptValue* m = &args[1];
         for (R11B008Node* l = m->node; l != 0; l = l->next) {
             R11B008Node* e = func_0011AF28();
-            R11B008 t;
+            ScriptValue t;
             func_0011B0A8(p[1], l);
             func_0011A080(&t, &arr[0], scope);
             func_0011B0A8(e, &t);
@@ -1079,13 +1079,13 @@ R11B008* func_00114D18(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00114F48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00114F48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     R11B008Node arr[5];
     R11B008Node* it;
     R11B008Node* p[2];
-    R11B008 r;
+    ScriptValue r;
     func_0011B008(&q);
     it = arr;
     for (s32 k = 4; k != -1; k--) {
@@ -1113,9 +1113,9 @@ R11B008* func_00114F48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
         func_0011B0A8(p[0], args);
         arr[4].tag = 0x11;
         arr[4].next = p[1];
-        R11B008* m = &args[1];
+        ScriptValue* m = &args[1];
         for (R11B008Node* l = m->node; l != 0; l = l->next) {
-            R11B008 t;
+            ScriptValue t;
             func_0011B0A8(p[1], l);
             func_0011A080(&t, &arr[0], scope);
             func_0011B0A8(&r, &t);
@@ -1149,9 +1149,9 @@ R11B008* func_00114F48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001151C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001151C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     R11B008Node arr[5];
     R11B008Node* it;
     func_0011B008(&q);
@@ -1177,9 +1177,9 @@ R11B008* func_001151C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
         func_0011B0A8(p[0], args);
         arr[4].tag = 0x11;
         arr[4].next = p[1];
-        R11B008* m = &args[1];
+        ScriptValue* m = &args[1];
         for (R11B008Node* l = m->node; l != 0; l = l->next) {
-            R11B008 t;
+            ScriptValue t;
             func_0011B0A8(p[1], l);
             func_0011A080(&t, &arr[0], scope);
             func_0011B0A8(&q, &t);
@@ -1197,10 +1197,10 @@ R11B008* func_001151C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00115398(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115398(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 u;
+    ScriptValue t;
+    ScriptValue u;
     func_0011B008(&t);
     R11B008Node* n = func_0011AF28();
     func_0011B0A8(n, args);
@@ -1212,13 +1212,13 @@ R11B008* func_00115398(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00115440(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115440(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     s32 n = 2;
     func_0011B008(&a);
-    R11B008* in = args;
+    ScriptValue* in = args;
     f32* base = func_0011C508();
     f32* out = base;
     do {
@@ -1241,9 +1241,9 @@ struct __attribute__((aligned(16))) Row_115510 {
     f32 f[4];               // 0x00
 };
 
-R11B008* func_00115510(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t, u;
+    ScriptValue t, u;
     func_0011B008(&t);
     Row_115510* a = (Row_115510*)func_0011C618();
     R11B008Node* n = args->node;
@@ -1279,9 +1279,9 @@ R11B008* func_00115510(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001156B0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001156B0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_001C0C08(args[0].i, args[1].i);
     func_0011B008(&q);
     func_0011B538(&q, 0x22);
@@ -1290,15 +1290,15 @@ R11B008* func_001156B0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00115710(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115710(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     f32* base;
     f32* out;
     s32 n = 2;
     func_0011B008(&a);
-    R11B008* p = args;
+    ScriptValue* p = args;
     base = func_0011C748();
     out = base;
     do {
@@ -1315,10 +1315,10 @@ R11B008* func_00115710(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001157E0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001157E0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     f32* out;
     func_0011B008(&a);
     out = func_0011C858();
@@ -1336,10 +1336,10 @@ R11B008* func_001157E0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001158B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001158B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 u;
+    ScriptValue t;
+    ScriptValue u;
     func_0011B008(&t);
     f32* out = func_0011C968();
     func_0011B9A8(&u, args);
@@ -1369,9 +1369,9 @@ struct Mat_1159B8 {
     Arr_1159B8 row[4];      // 0x00
 };
 
-R11B008* func_001159B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     R11B008Node* ix = args[1].node;
     switch (args[0].tag) {
@@ -1417,9 +1417,9 @@ R11B008* func_001159B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00115B78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115B78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     if (args->tag == 0x14) {
         func_001F66F8(args->i);
@@ -1432,9 +1432,9 @@ R11B008* func_00115B78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00115C00(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115C00(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 f;
+    ScriptValue f;
     func_0011B008(&f);
     f32 x;
     f32 y;
@@ -1455,9 +1455,9 @@ R11B008* func_00115C00(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00115CA0(R11B008* ret, R11B008* arg, s32 index)
+ScriptValue* func_00115CA0(ScriptValue* ret, ScriptValue* arg, s32 index)
 {
-    R11B008 f;
+    ScriptValue f;
     func_0011B008(&f);
     f32 v;
     if (arg->tag == 0x15) {
@@ -1472,57 +1472,57 @@ R11B008* func_00115CA0(R11B008* ret, R11B008* arg, s32 index)
     return ret;
 }
 
-R11B008* func_00115D48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115D48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 0);
     return ret;
 }
 
-R11B008* func_00115D78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 1);
     return ret;
 }
 
-R11B008* func_00115DA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115DA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 2);
     return ret;
 }
 
-R11B008* func_00115DD8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115DD8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 3);
     return ret;
 }
 
-R11B008* func_00115E08(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115E08(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 4);
     return ret;
 }
 
-R11B008* func_00115E38(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115E38(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 5);
     return ret;
 }
 
-R11B008* func_00115E68(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115E68(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 6);
     return ret;
 }
 
-R11B008* func_00115E98(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115E98(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00115CA0(ret, args, 7);
     return ret;
 }
 
-R11B008* func_00115EC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00115EC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 obj;
+    ScriptValue obj;
     f32 xy[2];
     func_0011B008(&obj);
     f32* out = xy;
@@ -1557,10 +1557,10 @@ ASM_FUNC(func_00116400);
 
 ASM_FUNC(func_00116490);
 
-R11B008* func_00116520(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 v;
+    ScriptValue q;
+    ScriptValue v;
     func_0011B008(&q);
     f32* p = func_0011C508();
     void* s3;
@@ -1580,9 +1580,9 @@ R11B008* func_00116520(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116600(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116600(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     R11B008Node* a = func_0011AF28();
     R11B008Node* b = func_0011AF28();
@@ -1597,9 +1597,9 @@ R11B008* func_00116600(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001166C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001166C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     f32* a = func_0011C618();
     func_00188770(args[0].i, a);
@@ -1609,9 +1609,9 @@ R11B008* func_001166C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116740(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116740(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     f32* a = func_0011C618();
     func_00189AF0(args[0].i, a);
@@ -1621,9 +1621,9 @@ R11B008* func_00116740(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001167C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001167C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     f32* a = func_0011C618();
     func_001891C0(args[0].i, args[1].i, a);
@@ -1635,9 +1635,9 @@ R11B008* func_001167C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
 
 ASM_FUNC(func_00116840);
 
-R11B008* func_00116978(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116978(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     f32* c = func_0011C508();
     *(Quad16*)c = *(Quad16*)((u8*)args[0].p + 0x30);
@@ -1647,9 +1647,9 @@ R11B008* func_00116978(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001169E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001169E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     f32* obj;
     func_0011B008(&q);
     obj = func_0011C618();
@@ -1661,9 +1661,9 @@ R11B008* func_001169E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116A88(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116A88(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     f32* c = func_0011C508();
     func_00188FD8(args[0].p, c);
@@ -1673,9 +1673,9 @@ R11B008* func_00116A88(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116B08(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116B08(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     Vec4U vec;
     func_0011B008(&t);
     R11B008Node* a = func_0011AF28();
@@ -1698,9 +1698,9 @@ struct Vec_116C80 {
     u8 bytes[0x30];         // 0x00
 };
 
-R11B008* func_00116C80(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     Vec_116C80 v;
     func_0011B008(&t);
     f32* a = func_0011C618();
@@ -1712,10 +1712,10 @@ R11B008* func_00116C80(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116D20(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116D20(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 v;
+    ScriptValue t;
+    ScriptValue v;
     func_0011B008(&t);
     Vec3* k = (Vec3*)args[0].v;
     func_0011B9A8(&v, args + 1);
@@ -1728,10 +1728,10 @@ R11B008* func_00116D20(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116DC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116DC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 u;
+    ScriptValue t;
+    ScriptValue u;
     func_0011B008(&t);
     f32* poly = args[0].v;
     f32* range = args[1].v;
@@ -1752,13 +1752,13 @@ R11B008* func_00116DC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116EA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116EA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q0;
-    R11B008 q1;
-    R11B008 q2;
-    R11B008 q3;
-    R11B008 q4;
+    ScriptValue q0;
+    ScriptValue q1;
+    ScriptValue q2;
+    ScriptValue q3;
+    ScriptValue q4;
     func_0011B008(&q0);
     f32* p = func_0011C748();
     func_0011B9A8(&q1, args);
@@ -1780,10 +1780,10 @@ R11B008* func_00116EA8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00116FE8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00116FE8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q0;
-    R11B008 q1;
+    ScriptValue q0;
+    ScriptValue q1;
     func_0011B008(&q0);
     void* span = args[0].p;
     func_0011B9A8(&q1, args + 1);
@@ -1795,10 +1795,10 @@ R11B008* func_00116FE8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117080(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117080(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 v;
+    ScriptValue q;
+    ScriptValue v;
     func_0011B008(&q);
     void* s1 = args[0].p;
     func_0011B9A8(&v, &args[1]);
@@ -1810,9 +1810,9 @@ R11B008* func_00117080(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117118(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117118(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B570(&q, (s32)args->f);
     func_0011B018(ret, &q);
@@ -1820,9 +1820,9 @@ R11B008* func_00117118(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117180(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117180(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     s32 n = (s32)(args->f + 1.0f);
     func_0011B570(&t, n);
@@ -1831,9 +1831,9 @@ R11B008* func_00117180(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001171F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001171F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     s32 n = (s32)(args->f + 0.5f);
     func_0011B570(&t, n);
@@ -1842,9 +1842,9 @@ R11B008* func_001171F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117260(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117260(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     s32 n = (s32)args->f;
     func_0011B570(&t, n);
@@ -1853,9 +1853,9 @@ R11B008* func_00117260(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001172C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001172C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     if (args->tag == 20) {
         s32 v = args->i; v = v < 0 ? -v : v;
@@ -1872,9 +1872,9 @@ R11B008* func_001172C8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117360(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117360(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B0A8(&q, args);
     if (args[1].tag == 0) {
@@ -1915,9 +1915,9 @@ R11B008* func_00117360(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117478(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117478(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B0A8(&q, args);
     if (args[1].tag == 0) {
@@ -1958,9 +1958,9 @@ R11B008* func_00117478(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117598(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117598(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     s32 v = args[0].i % args[1].i;
     func_0011B570(&t, v);
@@ -1969,9 +1969,9 @@ R11B008* func_00117598(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117610(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117610(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B5B0(&q, D_0026185C);
     func_0011B018(ret, &q);
@@ -1979,10 +1979,10 @@ R11B008* func_00117610(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117668(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 r;
+    ScriptValue q;
+    ScriptValue r;
     func_0011B008(&q);
     func_0011B008(&r);
     R11B008Node* a = func_0011AF28();
@@ -1994,7 +1994,7 @@ R11B008* func_00117668(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     e = func_0011AF28();
     f = func_0011AF28();
     func_0011B6C0(a, b);
-    R11B008 t;
+    ScriptValue t;
     func_0011B9A8(&t, args);
     func_0011B5B0(b, t.f);
     func_0011B060(&t, 2);
@@ -2042,10 +2042,10 @@ struct Obj_117880 {
     f32 value;              // 0x29C
 };
 
-R11B008* func_00117880(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117880(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 u;
+    ScriptValue t;
+    ScriptValue u;
     func_0011B008(&t);
     Obj_117880* obj = (Obj_117880*)args[0].p;
     func_0011B9A8(&u, args + 1);
@@ -2057,10 +2057,10 @@ R11B008* func_00117880(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117910(R11B008* ret, s32 count, R11B008* args, R11A630* scope, s32 kind)
+ScriptValue* func_00117910(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope, s32 kind)
 {
-    R11B008 q1;
-    R11B008 q2;
+    ScriptValue q1;
+    ScriptValue q2;
 
     func_0011B008(&q1);
     s32 x1 = args[0].i;
@@ -2092,33 +2092,33 @@ R11B008* func_00117910(R11B008* ret, s32 count, R11B008* args, R11A630* scope, s
     return ret;
 }
 
-R11B008* func_00117A30(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117A30(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00117910(ret, count, args, scope, 0x63);
     return ret;
 }
 
-R11B008* func_00117A60(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117A60(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00117910(ret, count, args, scope, 0x64);
     return ret;
 }
 
-R11B008* func_00117A90(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117A90(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00117910(ret, count, args, scope, 0x65);
     return ret;
 }
 
-R11B008* func_00117AC0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117AC0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     func_00117910(ret, count, args, scope, 0x66);
     return ret;
 }
 
-R11B008* func_00117AF0(R11B008* ret, s32 count, void** values)
+ScriptValue* func_00117AF0(ScriptValue* ret, s32 count, void** values)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     if (count != 0) {
         R11B008Node* prev = 0;
@@ -2145,9 +2145,9 @@ R11B008* func_00117AF0(R11B008* ret, s32 count, void** values)
     return ret;
 }
 
-R11B008* func_00117BC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117BC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     void* r;
     func_0011B008(&q);
     s32 flag = 0x105;
@@ -2160,11 +2160,11 @@ R11B008* func_00117BC8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117C48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     u8 buf[0x100];
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&q);
     s32 r = func_0015A198(D_00275710, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
     func_00117AF0(&t, r, buf);
@@ -2175,9 +2175,9 @@ R11B008* func_00117C48(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117D00(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117D00(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     void* r;
     func_0011B008(&q);
     r = func_0015A418(D_00275710, 0x104, args[0].i, args[1].i);
@@ -2187,11 +2187,11 @@ R11B008* func_00117D00(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117D78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     u8 buf[0x100];
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&q);
     s32 r = func_0015A198(D_00275710, 0x104, args[0].i, args[1].p, 0x40, buf);
     func_00117AF0(&t, r, buf);
@@ -2202,9 +2202,9 @@ R11B008* func_00117D78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117E20(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117E20(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B8A8(&q, func_001925F0());
     func_0011B018(ret, &q);
@@ -2212,9 +2212,9 @@ R11B008* func_00117E20(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117E78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117E78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B8A8(&q, D_00275710);
     func_0011B018(ret, &q);
@@ -2222,9 +2222,9 @@ R11B008* func_00117E78(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117ED0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117ED0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     func_0011B8A8(&q, D_00261990);
     func_0011B018(ret, &q);
@@ -2232,11 +2232,11 @@ R11B008* func_00117ED0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00117F28(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00117F28(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     u8 buf[0x400];
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&q);
     s32 r = func_0015A4F0(D_00275710, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x100, buf);
     func_00117AF0(&t, r, buf);
@@ -2249,10 +2249,10 @@ R11B008* func_00117F28(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
 
 ASM_FUNC(func_00117FE0);
 
-R11B008* func_001180C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001180C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     s32 n;
     u8* list;
     f32 scale;
@@ -2273,14 +2273,14 @@ R11B008* func_001180C0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
 // class (the result's place is GCC's hidden first argument), and their early return inside a
 // loop keeps its own copy and destruction only so: written with the plain value and explicit
 // calls, GCC cross-jumps that return into the last one. Their callers call them through the
-// plain declarations above (R11B008* first).
-struct RetValue : R11B008 {
+// plain declarations above (ScriptValue* first).
+struct RetValue : ScriptValue {
     RetValue() { func_0011B008(this); }
     RetValue(const RetValue& o) { func_0011B018(this, &o); }
     ~RetValue() { func_0011B060(this, 2); }
 };
 
-RetValue func_00118198(s32 id, s32 count, R11B008* args, R11A630* scope)
+RetValue func_00118198(s32 id, s32 count, ScriptValue* args, R11A630* scope)
 {
     RetValue l0;
     Hit_118198 hit;
@@ -2293,8 +2293,8 @@ RetValue func_00118198(s32 id, s32 count, R11B008* args, R11A630* scope)
         R11B008Node* tail;
         R11B008Node* it;
         for (it = args[0].node; it != 0; it = it->next) {
-            R11B008* pa = &args[1];
-            R11B008* pb = &args[2];
+            ScriptValue* pa = &args[1];
+            ScriptValue* pb = &args[2];
             R11B008Node* n1;
             R11B008Node* n2;
             R11B008Node* n3;
@@ -2345,10 +2345,10 @@ RetValue func_00118198(s32 id, s32 count, R11B008* args, R11A630* scope)
     return l0;
 }
 
-R11B008* func_001183B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001183B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_00118198(&t, 0x71, count, args, scope);
     func_0011B0A8(&q, &t);
@@ -2358,10 +2358,10 @@ R11B008* func_001183B8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00118458(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00118458(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     func_00118198(&t, 0x72, count, args, scope);
     func_0011B0A8(&q, &t);
@@ -2371,9 +2371,9 @@ R11B008* func_00118458(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001184F8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001184F8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     f32* p = func_0011C508();
     func_00128018(args[0].p, args[1].i, args[2].p, p);
@@ -2383,9 +2383,9 @@ R11B008* func_001184F8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00118580(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00118580(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     f32* p = func_0011C508();
     func_001280C0(args[0].p, args[1].i, args[2].p, p);
@@ -2395,9 +2395,9 @@ R11B008* func_00118580(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00118608(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     f32* obj;
     func_0011B008(&q);
     obj = func_0011C618();
@@ -2411,9 +2411,9 @@ R11B008* func_00118608(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
 
 ASM_FUNC(func_00118698);
 
-R11B008* func_00118720(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00118720(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     s32 n;
     func_0011B008(&q);
     n = 0;
@@ -2425,9 +2425,9 @@ R11B008* func_00118720(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001187E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001187E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     func_001BF788(args[0].p, 0);
     t.tag = 0x22;
@@ -2436,10 +2436,10 @@ R11B008* func_001187E8(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00118850(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_00118850(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 u;
+    ScriptValue t;
+    ScriptValue u;
     func_0011B008(&t);
     void* p = D_00262C70;
     s32 n = args[0].i;
@@ -2451,10 +2451,10 @@ R11B008* func_00118850(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001188F0(R11B008* ret, s32 count, R11B008* args, R11A630* scope)
+ScriptValue* func_001188F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 u;
+    ScriptValue t;
+    ScriptValue u;
     func_0011B008(&t);
     void* s1 = args[0].p;
     func_0011B9A8(&u, args + 1);
@@ -2485,9 +2485,9 @@ Quad_118D20* func_00118D20(Quad_118D20* out, Quad_118D20 v)
 
 ASM_FUNC(func_00118D30);
 
-R11B008* func_00118D48(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00118D48(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 t;
+    ScriptValue t;
     func_0011B008(&t);
     func_0011A498(scope, expr->i, 1, &t);
     func_0011B018(ret, &t);
@@ -2495,10 +2495,10 @@ R11B008* func_00118D48(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00118DB8(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00118DB8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     R11B008Node* p = expr->node;
     R11B008Node* m = p->next;
@@ -2513,10 +2513,10 @@ R11B008* func_00118DB8(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00118E80(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00118E80(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     R11B008Node* p = expr->node;
     R11B008Node* m = p->next;
@@ -2536,10 +2536,10 @@ R11B008* func_00118E80(R11B008* ret, R11B008Node* expr, R11A630* scope)
 extern const char D_00249200[];
 INCLUDE_RODATA(D_00249200);
 
-R11B008* func_00118F48(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00118F48(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&q);
     R11B008Node* a = expr->node;
     R11B008Node* b = a->next;
@@ -2560,10 +2560,10 @@ R11B008* func_00118F48(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119030(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119030(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q;
-    R11B008 t;
+    ScriptValue q;
+    ScriptValue t;
     R11B008Node* m;
     R11B008Node* n2;
     R11B008Node* n3;
@@ -2590,10 +2590,10 @@ R11B008* func_00119030(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119128(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119128(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 L;
-    R11B008 M;
+    ScriptValue L;
+    ScriptValue M;
     R11B008Node* n;
 
     func_0011B008(&L);
@@ -2623,7 +2623,7 @@ RetValue func_00119218(R11B008Node* expr, R11A630* scope)
     RetValue L;
     func_0011B5F0(&L, 1);
     for (R11B008Node* n = expr->node->next; n != 0; n = n->next) {
-        R11B008 t;
+        ScriptValue t;
         func_0011A080(&t, n, scope);
         func_0011B0A8(&L, &t);
         func_0011B060(&t, 2);
@@ -2633,9 +2633,9 @@ RetValue func_00119218(R11B008Node* expr, R11A630* scope)
     return L;
 }
 
-R11B008* func_00119310(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q, r, t;
+    ScriptValue q, r, t;
     func_0011B008(&q);
     func_0011B008(&r);
     func_0011B538(&q, 0x22);
@@ -2674,14 +2674,14 @@ R11B008* func_00119310(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001194A8(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 a;
-    R11B008 b[2];
-    R11B008 c;
-    R11B008 d;
+    ScriptValue a;
+    ScriptValue b[2];
+    ScriptValue c;
+    ScriptValue d;
     func_0011B008(&a);
-    R11B008* p = b;
+    ScriptValue* p = b;
     for (s32 k = 1; k != -1; k--) {
         func_0011B008(p);
         p++;
@@ -2733,7 +2733,7 @@ R11B008* func_001194A8(R11B008* ret, R11B008Node* expr, R11A630* scope)
     } while (expr);
     func_0011B018(ret, &a);
     func_0011B060(&c, 2);
-    R11B008* p2 = &c;
+    ScriptValue* p2 = &c;
     if (b != p2) {
         do {
             p2--;
@@ -2744,9 +2744,9 @@ R11B008* func_001194A8(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_001196C8(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_001196C8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q, r, u, t;
+    ScriptValue q, r, u, t;
     func_0011B008(&q);
     func_0011B008(&r);
     func_0011B008(&u);
@@ -2759,7 +2759,7 @@ R11B008* func_001196C8(R11B008* ret, R11B008Node* expr, R11A630* scope)
         if (l) {
             do {
                 R11B008Node* e = l->node;
-                R11B008* pr = &r;
+                ScriptValue* pr = &r;
                 func_0011A080(&t, e->next, scope);
                 func_0011B0A8(pr, &t);
                 func_0011B060(&t, 2);
@@ -2787,9 +2787,9 @@ R11B008* func_001196C8(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119878(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119878(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q, t;
+    ScriptValue q, t;
     s32 a, b;
     func_0011B008(&q);
     R11B008Node* first = expr->node->next;
@@ -2816,9 +2816,9 @@ R11B008* func_00119878(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119970(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119970(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q;
+    ScriptValue q;
     func_0011B008(&q);
     R11B008Node* first = expr->node->next;
     R11B008Node* after = first->next;
@@ -2849,9 +2849,9 @@ R11B008* func_00119970(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119A58(R11B008* ret, R11B008Node* list, R11A630* scope)
+ScriptValue* func_00119A58(ScriptValue* ret, R11B008Node* list, R11A630* scope)
 {
-    R11B008 q, t;
+    ScriptValue q, t;
     func_0011B008(&q);
     R11B008Node* n = list;
     do {
@@ -2865,9 +2865,9 @@ R11B008* func_00119A58(R11B008* ret, R11B008Node* list, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119AF8(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119AF8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 q, t;
+    ScriptValue q, t;
     func_0011B008(&q);
     func_0011B538(&q, 0x22);
     R11B008Node* n = expr->node->next;
@@ -2882,14 +2882,14 @@ R11B008* func_00119AF8(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119BB0(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     R11B008Node* node;
-    R11B008 a;
-    R11B008 b;
-    R11B008 arr[32];
-    R11B008 t;
-    R11B008 u;
+    ScriptValue a;
+    ScriptValue b;
+    ScriptValue arr[32];
+    ScriptValue t;
+    ScriptValue u;
     s32 total;
     R119BB0* ent;
     R119BB0Host* host;
@@ -2898,7 +2898,7 @@ R11B008* func_00119BB0(R11B008* ret, R11B008Node* expr, R11A630* scope)
     s32 last;
     s32 count;
     s32 i;
-    R11B008* p;
+    ScriptValue* p;
 
     func_0011B008(&a);
     func_0011B008(&b);
@@ -2928,7 +2928,7 @@ R11B008* func_00119BB0(R11B008* ret, R11B008Node* expr, R11A630* scope)
     total = n + (last != 0);
     count = n;
     for (i = 0; i < n; i++) {
-        R11B008* bp = &b;
+        ScriptValue* bp = &b;
         func_0011A080(&t, node, scope);
         func_0011B0A8(bp, &t);
         func_0011B060(&t, 2);
@@ -3003,10 +3003,10 @@ R11B008* func_00119BB0(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_00119FA0(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_00119FA0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 a;
-    R11B008 b;
+    ScriptValue a;
+    ScriptValue b;
     R11A630* found;
     s32 id;
 
@@ -3026,11 +3026,11 @@ R11B008* func_00119FA0(R11B008* ret, R11B008Node* expr, R11A630* scope)
     return ret;
 }
 
-R11B008* func_0011A080(R11B008* ret, R11B008Node* expr, R11A630* scope)
+ScriptValue* func_0011A080(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
-    R11B008 t;
-    R11B008 u;
-    R11B008* src;
+    ScriptValue t;
+    ScriptValue u;
+    ScriptValue* src;
     R11B008Node* p;
     func_0011B008(&t);
     switch (expr->tag) {
@@ -3096,9 +3096,9 @@ void func_0011A338(R11A630* scope, R11A630* parent)
     scope->parents[scope->count++] = parent;
 }
 
-R11B008* func_0011A358(R11B008* ret, R11A630* scope, s32 key, R11B008* value)
+ScriptValue* func_0011A358(ScriptValue* ret, R11A630* scope, s32 key, ScriptValue* value)
 {
-    R11B008 a;
+    ScriptValue a;
     R11B008Key* node;
 
     func_0011B008(&a);
@@ -3113,10 +3113,10 @@ R11B008* func_0011A358(R11B008* ret, R11A630* scope, s32 key, R11B008* value)
     return ret;
 }
 
-R11B008* func_0011A400(R11B008* ret, R11A630* scope, s32 key, R11B008* value)
+ScriptValue* func_0011A400(ScriptValue* ret, R11A630* scope, s32 key, ScriptValue* value)
 {
-    R11B008 a;
-    R11B008* found;
+    ScriptValue a;
+    ScriptValue* found;
 
     func_0011B008(&a);
     found = func_0011A4D8(scope, key, 1);
@@ -3129,9 +3129,9 @@ R11B008* func_0011A400(R11B008* ret, R11A630* scope, s32 key, R11B008* value)
     return ret;
 }
 
-s32 func_0011A498(R11A630* scope, s32 key, s32 flag, R11B008* out)
+s32 func_0011A498(R11A630* scope, s32 key, s32 flag, ScriptValue* out)
 {
-    R11B008* r = func_0011A4D8(scope, key, flag);
+    ScriptValue* r = func_0011A4D8(scope, key, flag);
     if (r != 0) {
         if (out)
             func_0011B0A8(out, r);
@@ -3140,9 +3140,9 @@ s32 func_0011A498(R11A630* scope, s32 key, s32 flag, R11B008* out)
     return 0;
 }
 
-R11B008* func_0011A4D8(R11A630* scope, s32 key, s32 flag)
+ScriptValue* func_0011A4D8(R11A630* scope, s32 key, s32 flag)
 {
-    R11B008* found = 0;
+    ScriptValue* found = 0;
     R11B008Key* n;
     s32 i;
 
@@ -3388,7 +3388,7 @@ void func_0011AB58(World_11AB58* w) {
         R11B008Key* n = w->lists[j]->head;
         while (n) {
             func_0011C3F0((Ent_11AB58*)n);
-            R11B008* sp = &n->value;
+            ScriptValue* sp = &n->value;
             switch (sp->tag) {
             case 0x1E: {
                 Ent_11AB58* e = (Ent_11AB58*)sp->p;

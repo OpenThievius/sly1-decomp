@@ -6,9 +6,9 @@
 #ifndef PAIRED_OBJECT_H
 #define PAIRED_OBJECT_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct PairedObject : C03 {
+struct PairedObject : Collider {
     s32 state;  // 0x550: -1 at set-up (func_001A6498); func_001A6BE0 sets it
     f32 stateTime;  // 0x554: the time of the last state change (func_001A6BE0)
     void* controller;  // 0x558: the object func_001A6BE0 hands to the state's functions

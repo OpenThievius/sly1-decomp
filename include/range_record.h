@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The 0x2E0-byte record a placed object keeps at C02::f284 (c02.h): func_001291D0 takes it from
-// the world's pool C6C::pool1BF4 (func_001B5EE0), sets it up with func_001B1AC8 and puts it in
-// C6C::list1C00. Written for this project from what retail's code does.
+// The 0x2E0-byte record a placed object keeps at PlacedObject::f284 (c02.h): func_001291D0 takes it from
+// the world's pool World::pool1BF4 (func_001B5EE0), sets it up with func_001B1AC8 and puts it in
+// World::list1C00. Written for this project from what retail's code does.
 //
 // The size is the pool's: func_001DB4C8 sets pool1BF4 up with func_001B5DD0(pool, 0x2E0, 0x20).
-// Its readers are func_00124A48 (C02 slot 16), func_001293D8, func_00152E48 and the functions
+// Its readers are func_00124A48 (PlacedObject slot 16), func_001293D8, func_00152E48 and the functions
 // func_001B1B38..func_001B2010 of src/main/001B0000.cpp.
-#ifndef S1291D0_H
-#define S1291D0_H
+#ifndef RANGE_RECORD_H
+#define RANGE_RECORD_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct S1291D0 {
+struct RangeRecord {
     void* link;             // 0x00: what func_001B4688 finds for a key (func_001B1CF8; 0x2C when -1); func_001B1B38 reads its word 0xC
     f32 f04;                // 0x04: -1 at set-up (func_001B1AC8); func_001B1D38 tests it, func_001B1D70 sets it
     f32 f08;                // 0x08: -1 at set-up; func_001B1D70 copies f04 into it while negative, func_001B1DA8 sets it
@@ -30,6 +30,6 @@ struct S1291D0 {
     u8 pad2D4[0x2E0 - 0x2D4];
 };
 
-typedef char check_S1291D0[sizeof(S1291D0) == 0x2E0 ? 1 : -1];
+typedef char check_RangeRecord[sizeof(RangeRecord) == 0x2E0 ? 1 : -1];
 
 #endif

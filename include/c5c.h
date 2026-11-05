@@ -9,9 +9,9 @@
 #ifndef C5C_H
 #define C5C_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C5C : C02 {
+struct C5C : PlacedObject {
     u8 pad2D0[0x2E0 - 0x2D0];
 };
 

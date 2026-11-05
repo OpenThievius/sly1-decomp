@@ -9,7 +9,7 @@ void func_001E9108(Obj_1E9108* obj)
 {
     f32 d = D_00261858.elapsed - obj->f8;
     s32 s1 = obj->state;
-    G262C70* s2;
+    PadRecord* s2;
     s32 s5;
     if (D_00262C68 & 4) {
         s2 = &D_00262C70;

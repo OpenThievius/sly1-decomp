@@ -4,10 +4,10 @@
 // waits until a time (+0x554), collects up to sixteen of its children of kind 0x27 (slot 16) and
 // keeps a table of animation entries it starts by key (slot 58). Written for this project from
 // what retail's code does (config/us/classes.tsv).
-#ifndef C3B_H
-#define C3B_H
+#ifndef CHILD_GROUP_OBJECT_H
+#define CHILD_GROUP_OBJECT_H
 
-#include "c03.h"
+#include "collider.h"
 
 struct __attribute__((aligned(16))) Quad3B {
     s32 a, b, c, d;
@@ -27,7 +27,7 @@ struct Entry3B {
     u8 pad28[8];
 };
 
-struct C3B : C03 {
+struct ChildGroupObject : Collider {
     s32 f550;               // 0x550: 0 at set-up; a message of kind 10 starts the clock while it is 0
     f32 f554;               // 0x554: FLT_MAX at set-up; the clock plus a delay (func_0013BE00)
     u8 pad558[0x55C - 0x558];
@@ -58,7 +58,7 @@ struct C3B : C03 {
 
 // The movie player's object (file_18D8E0.cpp): the lists of objects it asks about (slot 56),
 // the movie's data (+0x6B4) and a flag.
-struct C3C : C3B {
+struct C3C : ChildGroupObject {
     u8 pad690[0x6B4 - 0x690];
     void* f6B4;             // 0x6B4: given back by slot 7 (func_0012E760)
     s32 ready;              // 0x6B8: 1 at set-up (slot 0); slot 27 tests it
@@ -70,22 +70,22 @@ struct C3C : C3B {
     u8 pad6E8[0x6F0 - 0x6E8];
 };
 
-struct C3F : C3B {
+struct C3F : ChildGroupObject {
     f32 f690;               // 0x690: the clock when func_001D6CB0 started it
     s32 f694;               // 0x694: 1 while it runs
     u8 pad698[0x6A0 - 0x698];
 };
 
-typedef char check_C3B[sizeof(C3B) == 0x690 ? 1 : -1];
+typedef char check_ChildGroupObject[sizeof(ChildGroupObject) == 0x690 ? 1 : -1];
 typedef char check_C3C[sizeof(C3C) == 0x6F0 ? 1 : -1];
 typedef char check_C3F[sizeof(C3F) == 0x6A0 ? 1 : -1];
 
-void func_0013B4C0(C3B* self);                          // slot 0
-void func_0013B5C8(C3B* self, C3B* other);              // slot 9
-void func_0013B598(C3B* self);                          // slot 10
-void func_0013B610(C3B* self);                          // slot 16
-void func_0013B9D8(C3B* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
-void func_0013BA70(C3B* self);                          // slot 60
+void func_0013B4C0(ChildGroupObject* self);                          // slot 0
+void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other);              // slot 9
+void func_0013B598(ChildGroupObject* self);                          // slot 10
+void func_0013B610(ChildGroupObject* self);                          // slot 16
+void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5);   // slot 58
+void func_0013BA70(ChildGroupObject* self);                          // slot 60
 void func_0018D8E0(C3C* self);                          // slot 0
 void func_0018D910(C3C* self);                          // slot 10
 void func_0018D978(C3C* self);                          // slot 7

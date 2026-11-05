@@ -5,9 +5,9 @@
 #ifndef C52_H
 #define C52_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C52 : C02 {
+struct C52 : PlacedObject {
 };
 
 typedef char check_C52[sizeof(C52) == 0x2D0 ? 1 : -1];

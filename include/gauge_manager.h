@@ -9,7 +9,7 @@
 #ifndef GAUGE_MANAGER_H
 #define GAUGE_MANAGER_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 struct GaugePair {
     f32 a;
@@ -51,7 +51,7 @@ struct GaugeSlot {
     u8 pad10[4];
 };
 
-struct GaugeManager : C02 {
+struct GaugeManager : PlacedObject {
     s32 amount;             // 0x2D0
     s32 maxAmount;          // 0x2D4: 50 at setup
     f32 f2D8;               // 0x2D8: 90.0 at setup

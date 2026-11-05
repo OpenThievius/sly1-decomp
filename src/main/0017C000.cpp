@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "point_object.h"
-#include "c8f.h"
-#include "c05.h"
-#include "c03.h"
+#include "entry_queue.h"
+#include "switched_collider.h"
+#include "collider.h"
 #include "globals.h"
 #include "shapes.h"
 
@@ -20,7 +20,7 @@ void func_001837E0(void* self, s32 a, s32 b, s32 c);
 void func_0016E118(s32 n);
 void func_001DDA50(void* p);
 
-void func_0017CE80(C8F* self)
+void func_0017CE80(EntryQueue* self)
 {
     if (self->f3C != 0) {
         func_0017BC20(self, 0);
@@ -96,9 +96,9 @@ void func_0017FDC8(C80* self)
     func_00152600(&D_00264088, self);
 }
 
-void func_0017C660(C8F* self);
+void func_0017C660(EntryQueue* self);
 
-s32 func_0017CDA8(C8F* self)
+s32 func_0017CDA8(EntryQueue* self)
 {
     func_0017C660(self);
     if (self->f34 > 0) {
@@ -107,9 +107,9 @@ s32 func_0017CDA8(C8F* self)
     return 0;
 }
 
-void func_0017CE80(C8F* self);
+void func_0017CE80(EntryQueue* self);
 
-void func_0017CDE0(C8F* self)
+void func_0017CDE0(EntryQueue* self)
 {
     if (self->f3C != 0) {
         func_0017CE80(self);
@@ -131,7 +131,7 @@ struct Other_17CE20 {
 
 void func_0017CE20(void* a0, void* a1)
 {
-    C8F* self = (C8F*)a0;
+    EntryQueue* self = (EntryQueue*)a0;
     ((Other_17CE20*)a1)->f2740 = self;
     self->f3C = a1;
     self->f40 = -1;
@@ -218,7 +218,7 @@ void func_0017D1E8(void* self, f32 value)
 extern u8 D_002BE478[];
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
-void* func_0017CF38(C8F* pool, s32 a, s32 b, s32 c)
+void* func_0017CF38(EntryQueue* pool, s32 a, s32 b, s32 c)
 {
     if (pool->f34 >= 0x80) {
         return D_002BE478;
@@ -234,7 +234,7 @@ void* func_0017CF38(C8F* pool, s32 a, s32 b, s32 c)
     return e;
 }
 
-s32 func_0017E6D0(C07* self)
+s32 func_0017E6D0(Player* self)
 {
     s32 r;
     if (0.0f < self->f634) {
@@ -247,7 +247,7 @@ s32 func_0017E6D0(C07* self)
     return r;
 }
 
-struct Node_17DE88 { C03* f0; Node_17DE88* f4; u8 pad[4]; C03* fC; };
+struct Node_17DE88 { Collider* f0; Node_17DE88* f4; u8 pad[4]; Collider* fC; };
 struct List_17DE88 { Node_17DE88* head; };
 struct Obj_17DE88 { u8 pad[0x480]; List_17DE88* f480; };
 struct Ctx_17DE88 { u8 pad[1]; };
@@ -256,7 +256,7 @@ struct Mat_17DE88 { f32 m[16]; };
 void func_001ED780(Quad16* q, void* out, const Vec02* a, const Vec02* b);
 void func_00188B08(Ctx_17DE88* a, Quad16* b, void* out);
 void func_00188700(Mat_17DE88* a, f32 w, void* b, void* c);
-s32 func_00141C28(C03* self, void* a1, void* a2, s32 a3, void* a4);
+s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, void* a4);
 struct Vec_263EC0 { f32 x, y, z, w; };
 extern Vec_263EC0 D_00263EC0[22];
 
@@ -273,9 +273,9 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
         func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i + 1], buf + 0x80);
         Node_17DE88* n = self->f480->head;
         while (n) {
-            C03* a = n->fC;
+            Collider* a = n->fC;
             if (!(a->flags538 & 0x40000000000ULL)) {
-                C03* c = (C03*)a->parts.head;
+                Collider* c = (Collider*)a->parts.head;
                 while (c) {
                     if (!(c->flags538 & 0x80000000000ULL)) {
                         if (func_00141C28(c, buf + 0x70, buf + 0x80, 1, buf + 0x90) > 0) {
@@ -284,7 +284,7 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
                             if (0.7f < *(f32*)(buf + 0xB8)) hits++;
                         }
                     }
-                    c = (C03*)c->link2E4.next;
+                    c = (Collider*)c->link2E4.next;
                 }
             }
             n = n->f4;
@@ -294,10 +294,10 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
 }
 
 struct Entry_17C660 { u8 pad[8]; s32 state; u8 tail[8]; };
-void func_0017BCD0(C8F* self);
-s32 func_0017C428(C8F* self, void* item);
+void func_0017BCD0(EntryQueue* self);
+s32 func_0017C428(EntryQueue* self, void* item);
 
-void func_0017C660(C8F* self)
+void func_0017C660(EntryQueue* self)
 {
     if (self->f40 < 0 && self->f34 > 0)
         func_0017BCD0(self);

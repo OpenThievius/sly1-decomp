@@ -2,12 +2,12 @@
 // The script machine's built-in functions (src/main/file_112698.cpp): their shared signature, the
 // record of their table, the host function a tag 0x21 value points to, and the scope every
 // evaluation runs in. Written for this project from what retail's code does
-// (build/swarm/v2/NOTES.md); the value itself is R11B008 (r11b008.h).
+// (build/swarm/v2/NOTES.md); the value itself is ScriptValue (r11b008.h).
 #ifndef R119BB0_H
 #define R119BB0_H
 
 #include "common.h"
-#include "r11b008.h"
+#include "script_value.h"
 
 struct R11A630;
 
@@ -15,7 +15,7 @@ struct R11A630;
 // record's first word, the four arguments in a0..a3) and every built-in returns its first
 // argument, as GCC 2.95 returns the address of a class it gives back. `args` holds `count`
 // values, 8 bytes apart; `scope` is the scope the call is evaluated in.
-typedef R11B008* (*R119BB0Fn)(R11B008* ret, s32 count, R11B008* args, R11A630* scope);
+typedef ScriptValue* (*R119BB0Fn)(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope);
 
 // A record of the built-ins' table: 125 records from D_00259958 (func_00112698's) to 0x259F34;
 // retail's second label, D_00259DE8, falls on the count of record 97 (func_00117668's, which
@@ -36,7 +36,7 @@ typedef char check_R119BB0[sizeof(R119BB0) == 0xC ? 1 : -1];
 // size is not known.
 struct R119BB0Host {
     void* self;             // 0x00: func_00119BB0, func_00113B60
-    R11B008* (*fn)(R11B008* ret, void* self, s32 count, R11B008* args);   // 0x04: func_00119BB0, func_00113B60
+    ScriptValue* (*fn)(ScriptValue* ret, void* self, s32 count, ScriptValue* args);   // 0x04: func_00119BB0, func_00113B60
     s32 count;              // 0x08: func_00119BB0
 };
 

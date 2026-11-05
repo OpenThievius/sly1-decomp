@@ -7,10 +7,10 @@
 // and nodes of other classes) and are not this class's.
 //
 // Fields follow the root's and end at the descriptor's size; pads keep each at its retail offset.
-#ifndef C8C_H
-#define C8C_H
+#ifndef OBJECT_POOL_H
+#define OBJECT_POOL_H
 
-#include "c01.h"
+#include "base_object.h"
 
 // 0x3C: a record shared with the object this one was copied from (func_001A84C8).
 struct Sub8C {
@@ -29,7 +29,7 @@ struct V8C {
     s32 c;
 };
 
-struct C8C : C01 {
+struct ObjectPool : BaseObject {
     s32 count;              // 0x34: number of 0x14-byte items (func_001A84C8)
     void* items;            // 0x38
     Sub8C* sub;             // 0x3C
@@ -63,12 +63,12 @@ struct C8C : C01 {
     u8 pad16C[0x170 - 0x16C];
 };
 
-typedef char check_C8C[sizeof(C8C) == 0x170 ? 1 : -1];
+typedef char check_ObjectPool[sizeof(ObjectPool) == 0x170 ? 1 : -1];
 
-void func_001A7FE8(C8C* self);                  // slot 0
-void func_001A80E0(C8C* self);                  // slot 7
-void func_001A84C8(C8C* self, C8C* other);      // slot 9
-void func_001A8590(C8C* self);                  // slot 16
-void func_001A86F8(C8C* self, s32 flag);        // slot 20
+void func_001A7FE8(ObjectPool* self);                  // slot 0
+void func_001A80E0(ObjectPool* self);                  // slot 7
+void func_001A84C8(ObjectPool* self, ObjectPool* other);      // slot 9
+void func_001A8590(ObjectPool* self);                  // slot 16
+void func_001A86F8(ObjectPool* self, s32 flag);        // slot 20
 
 #endif

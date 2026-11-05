@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "t2196.h"
-#include "c6c.h"
+#include "world.h"
 #include "entry_pool.h"
-#include "s137290.h"
-#include "r11b008.h"
+#include "buffered_stream.h"
+#include "script_value.h"
 
 extern u8 D_0062C568[];
 void func_001B5F28(void* list, void* item);
@@ -457,11 +457,11 @@ void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr)
 }
 
 // The owner's slot 44 (Desc02::m28) is told what was asked.
-typedef void (*Hook_11FC20)(C02* self, s32 a, s32 b);
+typedef void (*Hook_11FC20)(PlacedObject* self, s32 a, s32 b);
 
-void func_0011F6B0(T2196_Weight** a, C02* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
+void func_0011F6B0(T2196_Weight** a, PlacedObject* b, s32 c, Vec02* d, s32 e, s32 f, f32 g, f32 h);
 
-void func_0011FC20(T2196_6B8* self, C02* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
+void func_0011FC20(T2196_6B8* self, PlacedObject* other, s32 c, s32 e, s32 f, f32 p12, f32 p13)
 {
     func_0011F6B0(self->axis, other, c, &self->base, e, f, p12, p13);
     if (other && other->desc02()->m28)
@@ -470,7 +470,7 @@ void func_0011FC20(T2196_6B8* self, C02* other, s32 c, s32 e, s32 f, f32 p12, f3
 
 void func_0011F9F8(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
 
-void func_0011FDD8(T2196_6C8* self, C02* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
+void func_0011FDD8(T2196_6C8* self, PlacedObject* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
 {
     func_0011F9F8(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
     if (other && other->desc02()->m28)
@@ -929,14 +929,14 @@ void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
 }
 
 // The owner's slot 45 (Desc02::m29) is told what was asked.
-typedef void (*Method_11FF08)(C02* self, void* a, void* b);
+typedef void (*Method_11FF08)(PlacedObject* self, void* a, void* b);
 struct Scratch_11FF08 { s32 a[4]; s32 b[4]; };
 
-void func_0011F6B0(T2196_Weight** a, C02* b, s32 c, Vec02* d, void* e, void* f);
+void func_0011F6B0(T2196_Weight** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
 void func_00188A20(void* a, void* b);
 void func_001EDE38(void* a, void* b, void* c);
 
-void func_0011FF08(T2196_6E8* self, C02* other, s32 c, void* p3, void* p4)
+void func_0011FF08(T2196_6E8* self, PlacedObject* other, s32 c, void* p3, void* p4)
 {
     Scratch_11FF08 tmp;
     func_0011F6B0(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
@@ -1320,7 +1320,7 @@ void* func_0011E580(s32 slot, void* self, void* a1, s32 key, s32 flag);
 s32 func_0011ECA0(s32 value);
 void func_00182ED8(void* obj);
 
-void func_0011ECB8(C6C* self, void* a1, void* a2)
+void func_0011ECB8(World* self, void* a1, void* a2)
 {
     s32 n = func_00137D10(a2);
     if (n > 0) {
@@ -1333,7 +1333,7 @@ void func_0011ECB8(C6C* self, void* a1, void* a2)
             obj->vtbl[14](obj, a2);
             s32 r = func_0011ECA0(key);
             if (r >= 0) {
-                self->slot1CE8[r] = (C01*)obj;
+                self->slot1CE8[r] = (BaseObject*)obj;
 
                 func_00182ED8(obj);
             }
@@ -1597,14 +1597,14 @@ struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
 
 extern u8 D_00244950[];
 
-void func_00137290(S137290* self, s32 a, s32 b, s32 c);
-void func_00137398(S137290* self, s32 a1, u8* a2);
-void func_0011E680(C01* self, Node_11EDA8* slot, S137290* obj);
-void func_001372E0(S137290* self, s32 flags);
+void func_00137290(BufferedStream* self, s32 a, s32 b, s32 c);
+void func_00137398(BufferedStream* self, s32 a1, u8* a2);
+void func_0011E680(BaseObject* self, Node_11EDA8* slot, BufferedStream* obj);
+void func_001372E0(BufferedStream* self, s32 flags);
 
-void func_0011EDA8(C01* self)
+void func_0011EDA8(BaseObject* self)
 {
-    S137290 buf;
+    BufferedStream buf;
     s32 off = self->desc->id << 3;
     s32 n = *(s32*)(D_00244950 + off);
     u8* list = *(u8**)(D_00244950 + off + 4);
@@ -1745,34 +1745,34 @@ struct Dsc_11E680 {
     s32 type;
     u32 flags;
     u8 pad8[4];
-    void (*fC)(R11B008* ret, void* obj, s32 n, R11B008* args);
+    void (*fC)(ScriptValue* ret, void* obj, s32 n, ScriptValue* args);
     u8 pad10[4];
     s32 count;
     s32 off;
     void* (*f1C)(void* obj, s32 one);
 };
 typedef void (*Fn_11E680)(void);
-union Sc_11E680 { R11B008 buf[32]; f32 f[8]; s32 i[2]; };
+union Sc_11E680 { ScriptValue buf[32]; f32 f[8]; s32 i[2]; };
 
-s32 func_00137D10(S137290* r);
-s32 func_00137B90(S137290* r);
-s32 func_00137D78(S137290* r);
-s32 func_00137C40(S137290* r);
-f32 func_00137DF8(S137290* r);
+s32 func_00137D10(BufferedStream* r);
+s32 func_00137B90(BufferedStream* r);
+s32 func_00137D78(BufferedStream* r);
+s32 func_00137C40(BufferedStream* r);
+f32 func_00137DF8(BufferedStream* r);
 void func_00188978(f32* in, f32* out);
 
-void func_0011E680(void* obj, Dsc_11E680* d, S137290* r)
+void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
 {
     Sc_11E680 sc;
-    R11B008 ret;
+    ScriptValue ret;
     u32 flags = d->flags;
     if (flags & 0x400) {
-        R11B008* p = sc.buf;
-        R11B008* rp;
+        ScriptValue* p = sc.buf;
+        ScriptValue* rp;
         s32 i;
         s32 n;
         s32 k;
-        R11B008* e;
+        ScriptValue* e;
         i = 31;
         rp = &ret;
         for (; i != -1; i--) {

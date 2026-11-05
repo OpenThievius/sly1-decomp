@@ -6,10 +6,10 @@
 // Fields follow the parent's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset. Class 0x4D's slot 23 also copies class 0x02's float at 0x80
 // (include/c02.h) from it.
-#ifndef C50_H
-#define C50_H
+#ifndef EFFECT_SPAWNER_H
+#define EFFECT_SPAWNER_H
 
-#include "c02.h"
+#include "placed_object.h"
 #include "t2176.h"
 
 // The record the object points to (func_00154F98 makes it, func_00155778 makes it the object's
@@ -39,7 +39,7 @@ struct Rec50 {
     u8 pad1EC[0x200 - 0x1EC];
 };
 
-struct C50 : C02 {
+struct EffectSpawner : PlacedObject {
     Rec50* rec;             // 0x2D0
     s32 f2D4;               // 0x2D4: -1 at setup
     s32 f2D8;               // 0x2D8: -1 at setup
@@ -58,17 +58,17 @@ struct C50 : C02 {
     u8 list314[0x10];       // 0x314: initialised with func_00152438
     u8 pad324[0x340 - 0x324];
     f32 f340;               // 0x340: -1.0 at setup
-    C01* held344;           // 0x344: objects it must let go of when told (slot 13)
-    C01* held348;           // 0x348
+    BaseObject* held344;           // 0x344: objects it must let go of when told (slot 13)
+    BaseObject* held348;           // 0x348
     s32 f34C;               // 0x34C
 };
 
-typedef char check_C50[sizeof(C50) == 0x350 ? 1 : -1];
+typedef char check_EffectSpawner[sizeof(EffectSpawner) == 0x350 ? 1 : -1];
 
-void func_00154C10(C50* self);                       // slot 0
-void func_00155080(C50* self);                       // slot 9
-void func_00154F98(C50* self, s32 count);            // slot 10
-void func_00155678(C50* self, s32 mode, C01* p);     // slot 13
-void func_001550E8(C50* self);                       // slot 15
+void func_00154C10(EffectSpawner* self);                       // slot 0
+void func_00155080(EffectSpawner* self);                       // slot 9
+void func_00154F98(EffectSpawner* self, s32 count);            // slot 10
+void func_00155678(EffectSpawner* self, s32 mode, BaseObject* p);     // slot 13
+void func_001550E8(EffectSpawner* self);                       // slot 15
 
 #endif

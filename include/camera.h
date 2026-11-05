@@ -2,10 +2,10 @@
 // Class 0x6D (descriptor D_00221520, 0x590 bytes), a direct child of 0x01. Written for this
 // project from what retail's code does (config/us/classes.tsv). Only the span func_00143648
 // sets up is declared; its other users (file_143140.cpp) still reach the rest by offset.
-#ifndef C6D_H
-#define C6D_H
+#ifndef CAMERA_H
+#define CAMERA_H
 
-#include "c01.h"
+#include "base_object.h"
 #include "t2173.h"
 
 // func_00143648 (slot 0) fills the identity frame at 0x80 and the settings at 0x1C0..0x208,
@@ -14,7 +14,7 @@
 // The controllers are the kind t2173 (include/t2173.h). The camera keeps the ones in action in
 // a stack ordered by key: func_00145088 pushes, func_001451F0 removes, func_00143E40 runs the
 // first. The stack's size is the span up to the first controller (no code checks a limit).
-struct C6D : C01 {
+struct Camera : BaseObject {
     u8 pad34[0x40 - 0x34];
     s32 f40[4];             // 0x40
     u8 pad50[0x80 - 0x50];
@@ -70,8 +70,8 @@ struct C6D : C01 {
     T2173_3F8 ctl520;       // 0x520: D_002173F8
 };
 
-typedef char check_C6D[sizeof(C6D) == 0x590 ? 1 : -1];
+typedef char check_Camera[sizeof(Camera) == 0x590 ? 1 : -1];
 
-void func_00143648(C6D* self);   // slot 0
+void func_00143648(Camera* self);   // slot 0
 
 #endif

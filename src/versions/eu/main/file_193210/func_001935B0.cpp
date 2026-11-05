@@ -10,7 +10,7 @@ s32 func_001E1FD0(char* dst, const char* fmt, ...);
 u16* func_eu_001E3140(u16* dst, char* src);
 u16* func_eu_001E30A0(u16* dst, u16* src);
 
-void func_001935B0(G27C220* self, u16* dst)
+void func_001935B0(GameProgress* self, u16* dst)
 {
     char pct[16];
     s32 percent = func_00160B28(self);

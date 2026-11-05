@@ -7,8 +7,8 @@
 // (func_001603E8 reaches record n's word 0x448 at 0x458 + n * 0x44C), and the game's own words
 // at 0x19D8..0x19FC. D_002623C0 points to the block; D_002623C4 and D_002623C8 both point to a
 // record, the first one at D_0027C230 to begin with (001E4000.cpp defines all three pointers).
-#ifndef G27C220_H
-#define G27C220_H
+#ifndef GAME_PROGRESS_H
+#define GAME_PROGRESS_H
 
 #include "common.h"
 
@@ -39,7 +39,7 @@ struct G27C230 {
 // The block. The head's words are func_00160650's and func_0018CDD8's (Save_160650,
 // Img_18CDD8); the words after the records are read by twenty functions in fourteen files
 // (build/swarm/st3/groups.tsv, g1481).
-struct G27C220 {
+struct GameProgress {
     s32 type;               // 0x00: func_001605E8, func_00160650, func_0018CDD8
     s32 size;               // 0x04
     s32 sum;                // 0x08: func_00160650's checksum (func_0018CDD8 keeps a handle there)
@@ -67,11 +67,11 @@ struct G27C220 {
 };
 
 typedef char check_G27C230[sizeof(G27C230) == 0x44C ? 1 : -1];
-typedef char check_G27C220[sizeof(G27C220) == 0x1A00 ? 1 : -1];
+typedef char check_GameProgress[sizeof(GameProgress) == 0x1A00 ? 1 : -1];
 
-extern G27C220 D_0027C220;      // .bss: the head (label D_0027C220, 0x10) and D_0027C230 (0x19F0)
+extern GameProgress D_0027C220;      // .bss: the head (label D_0027C220, 0x10) and D_0027C230 (0x19F0)
 extern G27C230 D_0027C230[];    // .bss: D_0027C220.levels, the label the two record pointers name
-extern G27C220* D_002623C0;     // 001E4000.cpp: = D_0027C220
+extern GameProgress* D_002623C0;     // 001E4000.cpp: = D_0027C220
 extern G27C230* D_002623C4;     // 001E4000.cpp: = D_0027C230
 extern G27C230* D_002623C8;     // 001E4000.cpp: = D_0027C230
 

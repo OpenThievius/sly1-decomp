@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
-#include "c2f.h"
+#include "switched_collider.h"
+#include "state_trigger.h"
 #include "cone_volume.h"
 #include "redirect_object.h"
-#include "c6c.h"
-#include "t217d.h"
+#include "world.h"
+#include "screen_element.h"
 #include "v24a2.h"
 #include "globals.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "level_entry.h"
 #include "message_body.h"
 #include "owner_message.h"
@@ -110,7 +110,7 @@ void func_001DC7B0(Contacts03* node, Contacts03** head)
 extern void* D_002622CC;
 extern void* D_00264260;
 
-void func_001DD5F8(C6C* self, f32 v)
+void func_001DD5F8(World* self, f32 v)
 {
     self->f1D6C = v;
     D_00264260 = D_002622CC;
@@ -126,7 +126,7 @@ void func_001DD9D8()
     D_002623C8->f10 = r;
 }
 
-void func_001DDAB8(C6C* self, f32 v)
+void func_001DDAB8(World* self, f32 v)
 {
     self->f2350 = v;
     self->f234C = v;
@@ -163,7 +163,7 @@ void func_001DFD48()
     func_00152438(D_002758D0, 0x80);
 }
 
-void func_001DD610(C6C* self, f32 v)
+void func_001DD610(World* self, f32 v)
 {
     self->f1D68 = v;
     D_00264260 = D_002622CC;
@@ -194,7 +194,7 @@ void func_001DD9C0(void* unused, f32* out)
     *out = D_002623C8->dt;
 }
 
-void func_001DDBB8(C6C* self)
+void func_001DDBB8(World* self)
 {
     if (--self->f2320 == 0) {
         D_002721D0.vt->m15(&D_002721D0);
@@ -208,7 +208,7 @@ void* func_001DDC18(void* unused, void* p)
     return func_001BF0D8(p);
 }
 
-void func_001DDC38(C6C* self, void* v)
+void func_001DDC38(World* self, void* v)
 {
     self->f2324 = v;
 }
@@ -216,7 +216,7 @@ void func_001DDC38(C6C* self, void* v)
 typedef void (*VFn_001DDC40)(void* self);
 struct Child_001DDC40 { VFn_001DDC40* vtbl; };
 
-void func_001DDC40(C6C* self)
+void func_001DDC40(World* self)
 {
     Child_001DDC40* p = (Child_001DDC40*)self->f2324;
     if (p != 0) {
@@ -227,14 +227,14 @@ void func_001DDC40(C6C* self)
     }
 }
 
-void func_001DDC78(C6C* self, s32 bit)
+void func_001DDC78(World* self, s32 bit)
 {
     s32 m = 1;
     m <<= bit;
     self->f235C |= m;
 }
 
-void func_001DDC90(C6C* self, s32 bit)
+void func_001DDC90(World* self, s32 bit)
 {
     s32 m = 1;
     m <<= bit;
@@ -280,7 +280,7 @@ void func_001DE768(RedirectObject* self)
 void func_001DC710(Contacts03* node, Contacts03** head);
 void func_001DC7B0(Contacts03* node, Contacts03** head);
 
-Contacts03* func_001DC7D0(C6C* owner, C03* self)
+Contacts03* func_001DC7D0(World* owner, Collider* self)
 {
     Contacts03* n = owner->freeTables;
     func_001DC710(n, &owner->freeTables);
@@ -295,7 +295,7 @@ void func_001E9570(void* g);
 
 void func_001DDAD0(void)
 {
-    C65* ctx = D_0027051C;
+    StepSequence* ctx = D_0027051C;
     if (ctx != 0 && ctx->state2D4 != 4) {
         u32 t = (u32)(ctx->mode2D0 - 1);
         if (t < 2) func_001E9570(D_00275BC0);
@@ -344,7 +344,7 @@ void func_001DDA08(void* unused, f32* out)
     *out = D_002623C8->f10;
 }
 
-void func_001DDB58(C6C* self)
+void func_001DDB58(World* self)
 {
     if (++self->f2320 == 1) {
         func_001AA8B8(&D_002721D0, 0.0f);
@@ -374,18 +374,18 @@ void func_001DFD90(void* self)
 }
 
 struct Stack_001DC208 { s32 count; s32* values; };
-s32 func_001DC208(C6C* self, s32 index) { Stack_001DC208* s = &((Stack_001DC208*)self->f1F00)[index]; s->count--; return s->values[s->count]; }
+s32 func_001DC208(World* self, s32 index) { Stack_001DC208* s = &((Stack_001DC208*)self->f1F00)[index]; s->count--; return s->values[s->count]; }
 
-s32 func_001DDA80(C6C* self) { return self->f231C > 0; }
+s32 func_001DDA80(World* self) { return self->f231C > 0; }
 
-void func_001DDAC8(C6C* self, f32 value) { self->f2350 = value; }
+void func_001DDAC8(World* self, f32 value) { self->f2350 = value; }
 
 struct __attribute__((packed)) Pair_1DC150 { s32 n; void* buf; };
 
 void* func_0018D500(s32 size);
 void* func_00183058(void* a, void* b, void* c);
 
-void func_001DC150(C6C* self, void* src, s32 n)
+void func_001DC150(World* self, void* src, s32 n)
 {
     struct Pair_1DC150 tmp;
     s32 i;
@@ -538,7 +538,7 @@ void func_0011D928(s32 a);
 
 void func_001DD628(void* self, f32 x)
 {
-    C6C* s = (C6C*)self;
+    World* s = (World*)self;
 
     s->f2318 = x;
     *(s32*)D_00274738 = -100;
@@ -572,7 +572,7 @@ struct Node_DC740 { u8 pad[8]; Node_DC740* next; Node_DC740* prev; };
 
 void* func_0018D5C0(u32 n);
 
-void func_001DC740(C6C* self)
+void func_001DC740(World* self)
 {
     void* mem = func_0018D5C0(0x1000);
     self->tables = (Contacts03*)mem;
@@ -716,7 +716,7 @@ void func_001861E8(void* a, Contact03* b);
 void func_00129DF8(void* self);
 void func_001B5F28(void* list, void* item);
 
-void func_001DC828(C6C* owner, Contacts03* handle)
+void func_001DC828(World* owner, Contacts03* handle)
 {
     ContactRow03* e = handle->head;
     if (e != 0) {
@@ -823,7 +823,7 @@ void* func_001DFE80(s32 k);
 s32 func_001E2100(void* p);
 s32 func_0015C188(s32 k);
 V24A2* func_0015C1C0(s32 k);
-s32 func_001DD7A0(C6C* g, s32 k);
+s32 func_001DD7A0(World* g, s32 k);
 void func_001E02C8(T217D_1380* self, s32 n);
 
 void func_001DFEB8(T217D_1380* self)
@@ -920,7 +920,7 @@ s32 func_001DD7A0(void* self, void* obj)
 
 void func_0016E0F0(s32 bits);
 
-void func_001DDA20(C6C* a0) {
+void func_001DDA20(World* a0) {
     s32 n = a0->f231C + 1;
     a0->f231C = n;
     if (n == 1) {
@@ -930,7 +930,7 @@ void func_001DDA20(C6C* a0) {
 
 void func_0016E118(s32 n);
 
-void func_001DDA50(C6C* self)
+void func_001DDA50(World* self)
 {
     s32 v = self->f231C - 1;
     self->f231C = v;
@@ -1004,7 +1004,7 @@ void func_001DE808(C14* self)
     func_00129D00(s->f750, 5, &s->f754);
     ((u8*)s->f754)[0x11] = 1;
     ((Fn0_1DE808)((Base_1DE808*)s->f750)->vtbl[47])(s->f750);
-    s->f75C = (S1B6290*)func_001B6290(s->f758, self, -1, 1);
+    s->f75C = (StateWalker*)func_001B6290(s->f758, self, -1, 1);
     if (s->f73C == 0 || D_00262E10 == 0) {
         flag = 1;
     } else {
@@ -1029,7 +1029,7 @@ extern f32 D_002757D4;
 void func_001C4ED0(void);
 s32 func_00128230(C14* self);
 void func_001DEB30(C14* self);
-void func_001D7098(OwnerMessage* l, s32 zero, C03* c);
+void func_001D7098(OwnerMessage* l, s32 zero, Collider* c);
 void func_001861E8(Pa_1DE910* a0, Contact03* a1);
 void func_00129E10(Pb_1DE910* a, f32 v);
 void func_00129FB0(Pb_1DE910* a, f32 v);
@@ -1039,7 +1039,7 @@ void func_001DE910(C14* self)
     OwnerMessage loc;
     f32 f20;
     Contact03* s1;
-    C03* s0;
+    Collider* s0;
     s32 v;
     s32 idx;
 
@@ -1054,7 +1054,7 @@ void func_001DE910(C14* self)
             idx = (s1->end[0].body != self);
             s0 = s1->end[1 - idx].part;
             while (s0 != 0 && s0->f4E0 == 0) {
-                s0 = (C03*)s0->parent;
+                s0 = (Collider*)s0->parent;
             }
             if (s0 != 0) {
                 v = s0->f4E0;
@@ -1064,7 +1064,7 @@ void func_001DE910(C14* self)
                         if (((VFnChild_1DE910)s0->desc03()->m47)(s0, s1, &loc)) {
                             break;
                         }
-                        s0 = (C03*)s0->parent;
+                        s0 = (Collider*)s0->parent;
                     }
                     ((VFnObj_1DE910*)self->desc)[80](self, &loc);
                 }
@@ -1116,9 +1116,9 @@ struct Node_001DCD28 {
 
 extern const s32 D_0024DC98[4];
 
-Obj_001DCD28* func_00183058(Node_001DCD28* node, C6C* self, void* z);
+Obj_001DCD28* func_00183058(Node_001DCD28* node, World* self, void* z);
 
-void func_001DCD28(C6C* self)
+void func_001DCD28(World* self)
 {
     Pair_001DCD28 pairs[2];
     *(Pk16_001DCD28*)&pairs[0] = *(const Pk16_001DCD28*)D_0024DC98;
@@ -1150,8 +1150,8 @@ extern const F2_24DCA8 D_0024DCA8;
 
 
 
-void func_001B64D8(C2F* h, s32 b);
-void func_001B6628(C2F* h, s32 b);
+void func_001B64D8(StateTrigger* h, s32 b);
+void func_001B6628(StateTrigger* h, s32 b);
 void func_00188850(const Vec02* tab, void* out, f32 v);
 
 void func_001DFBE0(C14* self, s32 mode)
@@ -1169,17 +1169,17 @@ void func_001DFBE0(C14* self, s32 mode)
         }
         switch (mode) {
         case 0:
-            func_001B64D8((C2F*)self->f75C, 0x351);
+            func_001B64D8((StateTrigger*)self->f75C, 0x351);
             break;
         case 1:
-            func_001B64D8((C2F*)self->f75C, 0x352);
+            func_001B64D8((StateTrigger*)self->f75C, 0x352);
             break;
         case 2:
-            func_001B6628((C2F*)self->f75C, 0x354);
+            func_001B6628((StateTrigger*)self->f75C, 0x354);
             self->f730 = D_0024DCA8.a;
             break;
         case 3:
-            func_001B6628((C2F*)self->f75C, 0x355);
+            func_001B6628((StateTrigger*)self->f75C, 0x355);
             self->f4E0 = mode;
             self->f730 = D_0024DCA8.a;
             break;
@@ -1204,7 +1204,7 @@ void func_001DFBE0(C14* self, s32 mode)
 
 struct Arg_001DD710 { s32 pad; };
 u32 func_001601D8(Arg_001DD710* a);
-s32 func_001DD710(C6C* a0, Arg_001DD710* a1)
+s32 func_001DD710(World* a0, Arg_001DD710* a1)
 {
     s32 one = 1;
     u32 m = func_001601D8(a1);

@@ -8,11 +8,11 @@
 #ifndef LISTED_COLLISION_PART_H
 #define LISTED_COLLISION_PART_H
 
-#include "c03.h"
+#include "collider.h"
 
 // 0x3A: slot 6 appends it to the list (func_00152470), slot 7 removes it (func_00152600),
 // slot 9 keeps the link across the copy.
-struct ListedCollisionPart : C03 {
+struct ListedCollisionPart : Collider {
     s32 f550;               // 0x550: 0 means func_0016A580 (slot 28) lets the parts follow it
     u8 pad554[0x558 - 0x554];
     Link02 listLink;         // 0x558: the link in the list (func_00152438 gets the offset)
@@ -30,6 +30,6 @@ void func_0016A4C8(ListedCollisionPart* self);                       // 0x3A slo
 void func_0016A500(ListedCollisionPart* self);                       // 0x3A slot 9
 void func_0016A420(ListedCollisionPart* self);                       // 0x3A slot 10
 void func_0016A580(ListedCollisionPart* self, f32 t);                // 0x3A slot 28
-s32 func_0016A548(C03* self, C03* other);            // 0x3A slot 56
+s32 func_0016A548(Collider* self, Collider* other);            // 0x3A slot 56
 
 #endif

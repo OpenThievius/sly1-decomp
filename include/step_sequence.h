@@ -7,23 +7,23 @@
 //
 // Its methods also use the base classes' fields (include/c01.h, include/c02.h): the id at
 // 0x08 and the flags word at 0x2C8.
-#ifndef C65_H
-#define C65_H
+#ifndef STEP_SEQUENCE_H
+#define STEP_SEQUENCE_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C65;
-struct Player2195;  // an animation's player (t2195.h)
+struct StepSequence;
+struct AnimationPlayer;  // an animation's player (t2195.h)
 
 // The entry func_001925F0 returns; its slot at 0x154 gives the state of the controls.
 struct Ent65;
 struct VtEnt65 {
     u8 pad[0x154];
-    void (*f154)(void* o, C65* self, s32* q);
+    void (*f154)(void* o, StepSequence* self, s32* q);
 };
 struct Ent65 { VtEnt65* vt; };
 
-struct C65 : C02 {
+struct StepSequence : PlacedObject {
     s32 mode2D0;            // 0x2D0: 1 and 2 are set by func_00150750 and func_00150760
     s32 state2D4;           // 0x2D4: the state machine's state (0 to 6)
     f32 time2D8;            // 0x2D8: when the state was entered
@@ -42,7 +42,7 @@ struct C65 : C02 {
     };
     union {
         u32 value2F8;       // 0x2F8: cleared when message 6 brings it back (func_001512A8)
-        Player2195* player2F8;  // 0x2F8: the player func_0012E760 ends (func_00150DC0 reads its animation)
+        AnimationPlayer* player2F8;  // 0x2F8: the player func_0012E760 ends (func_00150DC0 reads its animation)
     };
     f32 f2FC;               // 0x2FC
     s32 second300;          // 0x300: -1 at load
@@ -58,12 +58,12 @@ struct C65 : C02 {
     u8 pad334[0x340 - 0x334];
 };
 
-typedef char check_C65[sizeof(C65) == 0x340 ? 1 : -1];
+typedef char check_StepSequence[sizeof(StepSequence) == 0x340 ? 1 : -1];
 
-void func_001504E0(C65* self);                          // 0x65 slot 0
-void func_00150528(C65* self, void* arg);               // 0x65 slot 10
-void func_001512A8(C65* self, u32 mode, u32 value);     // 0x65 slot 13
-void func_001506F0(C65* self);                          // 0x65 slot 16
-void func_00150AE8(C65* self);                          // 0x65 slot 17
+void func_001504E0(StepSequence* self);                          // 0x65 slot 0
+void func_00150528(StepSequence* self, void* arg);               // 0x65 slot 10
+void func_001512A8(StepSequence* self, u32 mode, u32 value);     // 0x65 slot 13
+void func_001506F0(StepSequence* self);                          // 0x65 slot 16
+void func_00150AE8(StepSequence* self);                          // 0x65 slot 17
 
 #endif

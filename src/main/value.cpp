@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "entry_pool.h"
-#include "r11b008.h"
-#include "s137290.h"
+#include "script_value.h"
+#include "buffered_stream.h"
 #include "shapes.h"
 
 // The five pools values are taken from (func_0011C240): func_0011BF70 sets them up, func_0011C040
@@ -54,11 +54,11 @@ void func_0011C900(void* p);
 void func_0011CA20(void* p);
 
 // The stream reader (00134000.cpp).
-s32 func_00137B90(S137290* r);
-void func_00137BE0(S137290* r);
-s32 func_00137D78(S137290* r);
-f32 func_00137DF8(S137290* r);
-s32 func_00137C40(S137290* r);
+s32 func_00137B90(BufferedStream* r);
+void func_00137BE0(BufferedStream* r);
+s32 func_00137D78(BufferedStream* r);
+f32 func_00137DF8(BufferedStream* r);
+s32 func_00137C40(BufferedStream* r);
 
 extern s32 D_00275714;
 
@@ -112,13 +112,13 @@ R11AFC8* func_0011AFC8(void)
     return p;
 }
 
-R11B008* func_0011B008(R11B008* self)
+ScriptValue* func_0011B008(ScriptValue* self)
 {
     self->tag = -1;
     return self;
 }
 
-R11B008* func_0011B018(R11B008* self, const R11B008* src)
+ScriptValue* func_0011B018(ScriptValue* self, const ScriptValue* src)
 {
     func_0011B4A8(src);
     self->tag = src->tag;
@@ -126,7 +126,7 @@ R11B008* func_0011B018(R11B008* self, const R11B008* src)
     return self;
 }
 
-void func_0011B060(R11B008* self, s32 flags)
+void func_0011B060(ScriptValue* self, s32 flags)
 {
     func_0011B418(self);
     if (flags & 1) {
@@ -134,7 +134,7 @@ void func_0011B060(R11B008* self, s32 flags)
     }
 }
 
-R11B008* func_0011B0A8(R11B008* self, const R11B008* src)
+ScriptValue* func_0011B0A8(ScriptValue* self, const ScriptValue* src)
 {
     func_0011B4A8(src);
     func_0011B418(self);
@@ -143,7 +143,7 @@ R11B008* func_0011B0A8(R11B008* self, const R11B008* src)
     return self;
 }
 
-s32 func_0011B0F8(const R11B008* a, const R11B008* b)
+s32 func_0011B0F8(const ScriptValue* a, const ScriptValue* b)
 {
     if (a->tag != b->tag)
         return 0;
@@ -196,7 +196,7 @@ s32 func_0011B0F8(const R11B008* a, const R11B008* b)
     return 1;
 }
 
-void func_0011B258(const R11B008* src, R11B008* dst, s32 first)
+void func_0011B258(const ScriptValue* src, ScriptValue* dst, s32 first)
 {
     dst->tag = src->tag;
     switch (src->tag) {
@@ -253,7 +253,7 @@ void func_0011B258(const R11B008* src, R11B008* dst, s32 first)
     }
 }
 
-void func_0011B418(R11B008* self)
+void func_0011B418(ScriptValue* self)
 {
     switch (self->tag) {
     case 0x16: func_0011C5B0(self->p); break;
@@ -264,7 +264,7 @@ void func_0011B418(R11B008* self)
     }
 }
 
-void func_0011B4A8(const R11B008* self)
+void func_0011B4A8(const ScriptValue* self)
 {
     switch (self->tag) {
     case 0x16: func_0011C580(self->p); break;
@@ -275,27 +275,27 @@ void func_0011B4A8(const R11B008* self)
     }
 }
 
-void func_0011B538(R11B008* self, s32 tag)
+void func_0011B538(ScriptValue* self, s32 tag)
 {
     func_0011B418(self);
     self->tag = tag;
 }
 
-void func_0011B570(R11B008* self, s32 value)
+void func_0011B570(ScriptValue* self, s32 value)
 {
     func_0011B418(self);
     self->i = value;
     self->tag = 0x14;
 }
 
-void func_0011B5B0(R11B008* self, f32 value)
+void func_0011B5B0(ScriptValue* self, f32 value)
 {
     func_0011B418(self);
     self->f = value;
     self->tag = 0x15;
 }
 
-void func_0011B5F0(R11B008* self, s32 flag)
+void func_0011B5F0(ScriptValue* self, s32 flag)
 {
     func_0011B418(self);
     if (flag != 0)
@@ -305,35 +305,35 @@ void func_0011B5F0(R11B008* self, s32 flag)
     self->tag = 0x1B;
 }
 
-void func_0011B640(R11B008* self, void* p)
+void func_0011B640(ScriptValue* self, void* p)
 {
     func_0011B418(self);
     self->p = p;
     self->tag = 0x1C;
 }
 
-void func_0011B680(R11B008* self, s32 value)
+void func_0011B680(ScriptValue* self, s32 value)
 {
     func_0011B418(self);
     self->i = value;
     self->tag = 0x1D;
 }
 
-void func_0011B6C0(R11B008* self, R11B008Node* node)
+void func_0011B6C0(ScriptValue* self, R11B008Node* node)
 {
     func_0011B418(self);
     self->node = node;
     self->tag = 0x1E;
 }
 
-void func_0011B700(R11B008* self, R11AFC8* rec)
+void func_0011B700(ScriptValue* self, R11AFC8* rec)
 {
     func_0011B418(self);
     self->rec = rec;
     self->tag = 0x1F;
 }
 
-void func_0011B740(R11B008* self, f32* v)
+void func_0011B740(ScriptValue* self, f32* v)
 {
     func_0011C580(v);
     func_0011B418(self);
@@ -341,7 +341,7 @@ void func_0011B740(R11B008* self, f32* v)
     self->tag = 0x16;
 }
 
-void func_0011B788(R11B008* self, f32* v)
+void func_0011B788(ScriptValue* self, f32* v)
 {
     (void)func_0011C690(v);
     func_0011B418(self);
@@ -349,7 +349,7 @@ void func_0011B788(R11B008* self, f32* v)
     self->tag = 23;
 }
 
-void func_0011B7D0(R11B008* self, f32* v)
+void func_0011B7D0(ScriptValue* self, f32* v)
 {
     (void)func_0011C7C0(v);
     func_0011B418(self);
@@ -357,7 +357,7 @@ void func_0011B7D0(R11B008* self, f32* v)
     self->tag = 24;
 }
 
-void func_0011B818(R11B008* self, f32* v)
+void func_0011B818(ScriptValue* self, f32* v)
 {
     (void)func_0011C8D0(v);
     func_0011B418(self);
@@ -365,7 +365,7 @@ void func_0011B818(R11B008* self, f32* v)
     self->tag = 25;
 }
 
-void func_0011B860(R11B008* self, f32* v)
+void func_0011B860(ScriptValue* self, f32* v)
 {
     (void)func_0011C9E0(v);
     func_0011B418(self);
@@ -373,26 +373,26 @@ void func_0011B860(R11B008* self, f32* v)
     self->tag = 26;
 }
 
-void func_0011B8A8(R11B008* self, void* p)
+void func_0011B8A8(ScriptValue* self, void* p)
 {
     func_0011B418(self);
     self->p = p;
     self->tag = 0x20;
 }
 
-void func_0011B8E8(R11B008* self, s32 value)
+void func_0011B8E8(ScriptValue* self, s32 value)
 {
     func_0011B418(self);
     self->tag = 0x21;
     self->i = value;
 }
 
-R11B008* func_0011B928(R11B008* out, const R11B008* in)
+ScriptValue* func_0011B928(ScriptValue* out, const ScriptValue* in)
 {
     if (in->tag == 0x14) {
         func_0011B018(out, in);
     } else {
-        R11B008 tmp;
+        ScriptValue tmp;
         func_0011B008(&tmp);
         func_0011B570(&tmp, (s32)in->f);
         func_0011B018(out, &tmp);
@@ -401,12 +401,12 @@ R11B008* func_0011B928(R11B008* out, const R11B008* in)
     return out;
 }
 
-R11B008* func_0011B9A8(R11B008* out, const R11B008* in)
+ScriptValue* func_0011B9A8(ScriptValue* out, const ScriptValue* in)
 {
     if (in->tag == 0x15) {
         func_0011B018(out, in);
     } else {
-        R11B008 tmp;
+        ScriptValue tmp;
         func_0011B008(&tmp);
         func_0011B5B0(&tmp, (f32)in->i);
         func_0011B018(out, &tmp);
@@ -415,7 +415,7 @@ R11B008* func_0011B9A8(R11B008* out, const R11B008* in)
     return out;
 }
 
-R11B008Node* func_0011BA28(S137290* rd)
+R11B008Node* func_0011BA28(BufferedStream* rd)
 {
     s32 tag = func_00137B90(rd);
     if (tag == 0xFF) {
@@ -538,9 +538,9 @@ R11B008Node* func_0011BA28(S137290* rd)
     return n;
 }
 
-R11B008* func_0011BD28(R11B008* out, R11B008List* list, s32 key, const R11B008* value)
+ScriptValue* func_0011BD28(ScriptValue* out, R11B008List* list, s32 key, const ScriptValue* value)
 {
-    R11B008 tmp;
+    ScriptValue tmp;
     func_0011B008(&tmp);
     R11B008Key* node = func_0011C498();
     node->key = key;
@@ -553,9 +553,9 @@ R11B008* func_0011BD28(R11B008* out, R11B008List* list, s32 key, const R11B008* 
     return out;
 }
 
-R11B008* func_0011BDD0(R11B008* out, R11B008List* list, s32 key, const R11B008* value)
+ScriptValue* func_0011BDD0(ScriptValue* out, R11B008List* list, s32 key, const ScriptValue* value)
 {
-    R11B008 tmp;
+    ScriptValue tmp;
     R11B008Key* node = list->head;
     while (node != 0) {
         if (node->key == key) {
@@ -576,7 +576,7 @@ done:
     return out;
 }
 
-s32 func_0011BE90(R11B008List* list, s32 key, R11B008* out)
+s32 func_0011BE90(R11B008List* list, s32 key, ScriptValue* out)
 {
     R11B008Key* n = list->head;
     while (n != 0) {

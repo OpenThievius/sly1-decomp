@@ -10,7 +10,7 @@
 #ifndef C6E_H
 #define C6E_H
 
-#include "c01.h"
+#include "base_object.h"
 #include "t2176.h"
 
 // Eight bytes that each subclass keeps through a copy (slot 9: saved, the parent's copy,
@@ -20,7 +20,7 @@ struct __attribute__((packed)) Keep6E { u64 bits; };
 // 0x6E: a key-frame curve (include/t2176.h) found by the index the stream names; slot 0 of
 // its table reads it (func_001B2840), slot 4 is told the frames of the object's parent and of
 // another object (func_001B28A8).
-struct C6E : C01 {
+struct C6E : BaseObject {
     T2176* curve;           // 0x34
 };
 
@@ -79,7 +79,7 @@ typedef char check_C72[sizeof(C72) == 0x40 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void func_001B2840(C6E* self, void* stream);        // 0x6E slot 10
-void func_001B28A8(C6E* self, C01* other);          // 0x6E slot 21
+void func_001B28A8(C6E* self, BaseObject* other);          // 0x6E slot 21
 void func_00169CD8(C6F* self);                      // 0x6F slot 0
 void func_00169D20(C6F* self);                      // 0x6F slot 6
 void func_00169D58(C6F* self);                      // 0x6F slot 7

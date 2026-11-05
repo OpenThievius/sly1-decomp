@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "fpu.h"
-#include "c03.h"
+#include "collider.h"
 #include "cone_volume.h"
 
 struct Vec2_1840B8 { f32 x; f32 y; };

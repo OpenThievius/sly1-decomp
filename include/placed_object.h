@@ -6,16 +6,16 @@
 // The fields are the ones the class's own methods (src/main/00120000.cpp, 00124000.cpp,
 // 00128000.cpp, file_15F678.cpp) and the families under it read. Records only the class points
 // to, which its readers see in different shapes, stay `void*` until their own types exist.
-#ifndef C02_H
-#define C02_H
+#ifndef PLACED_OBJECT_H
+#define PLACED_OBJECT_H
 
-#include "c01.h"
+#include "base_object.h"
 
-struct C02;
-struct T2195;   // an attachment (t2195.h): a record of the world's pool at C6C::pool1B20
+struct PlacedObject;
+struct Attachment;   // an attachment (t2195.h): a record of the world's pool at World::pool1B20
 struct Rec2195_224;     // the 0xC0-byte record at +0x224 (t2195.h)
-struct S1291D0;         // the 0x2E0-byte record at +0x284 (s1291d0.h)
-struct S1BE4D8;         // the 0x24-byte record at +0x2AC (s1be4d8.h)
+struct RangeRecord;         // the 0x2E0-byte record at +0x284 (s1291d0.h)
+struct SoundRecord;         // the 0x24-byte record at +0x2AC (s1be4d8.h)
 
 // A 16-byte vector (a position, a velocity, a matrix row), 16-aligned as the code moves it.
 struct __attribute__((aligned(16))) Vec02 {
@@ -53,49 +53,49 @@ struct Elem02 {
 
 // Class 0x02's descriptor: the root's slots, then twenty more (slot n at 0x10 + 4n).
 struct Desc02 : Desc01 {
-    void (*m1C)(C02* self);                         // 0x80: func_00125438
-    void (*m1D)(C02* self, Vec02* pos);             // 0x84: set the position (func_001273F0)
-    void (*m1E)(C02* self, Mat02* rot);             // 0x88: set the matrix (func_00127478)
-    void (*m1F)(C02* self, C02* other);             // 0x8C: take other's frame (func_001276C0)
-    void (*m20)(C02* self, Vec02* v);               // 0x90: func_001274F8
-    void (*m21)(C02* self, Vec02* v);               // 0x94: func_00127590
+    void (*m1C)(PlacedObject* self);                         // 0x80: func_00125438
+    void (*m1D)(PlacedObject* self, Vec02* pos);             // 0x84: set the position (func_001273F0)
+    void (*m1E)(PlacedObject* self, Mat02* rot);             // 0x88: set the matrix (func_00127478)
+    void (*m1F)(PlacedObject* self, PlacedObject* other);             // 0x8C: take other's frame (func_001276C0)
+    void (*m20)(PlacedObject* self, Vec02* v);               // 0x90: func_001274F8
+    void (*m21)(PlacedObject* self, Vec02* v);               // 0x94: func_00127590
     void* m22;                                      // 0x98: func_00122550
     void* m23;                                      // 0x9C: func_001225D0
-    void (*m24)(C02* self, void* a, void* b);       // 0xA0: func_00125C90
-    void (*m25)(C02* self, void* a, void* m);       // 0xA4: func_001261C0
-    void (*m26)(C02* self, void* a, void* m);       // 0xA8: func_00126270
-    void (*m27)(C02* self, void* frame);            // 0xAC: func_001660E8
-    void (*m28)(C02* self, Vec02* pos, Vec02* vec); // 0xB0: told the position an attachment gave (func_001227B0)
-    void (*m29)(C02* self, Mat02* rot, Vec02* v);   // 0xB4: told the orientation (func_00122968, func_00129648; func_00128E88)
-    void (*m2A)(C02* self, void* out);              // 0xB8: func_00128FD0
-    void (*m2B)(C02* self);                         // 0xBC: func_00129780
-    void (*m2C)(C02* self);                         // 0xC0: func_001660A0
-    s32 (*m2D)(C02* self, void* other);             // 0xC4: func_0012B2E8
+    void (*m24)(PlacedObject* self, void* a, void* b);       // 0xA0: func_00125C90
+    void (*m25)(PlacedObject* self, void* a, void* m);       // 0xA4: func_001261C0
+    void (*m26)(PlacedObject* self, void* a, void* m);       // 0xA8: func_00126270
+    void (*m27)(PlacedObject* self, void* frame);            // 0xAC: func_001660E8
+    void (*m28)(PlacedObject* self, Vec02* pos, Vec02* vec); // 0xB0: told the position an attachment gave (func_001227B0)
+    void (*m29)(PlacedObject* self, Mat02* rot, Vec02* v);   // 0xB4: told the orientation (func_00122968, func_00129648; func_00128E88)
+    void (*m2A)(PlacedObject* self, void* out);              // 0xB8: func_00128FD0
+    void (*m2B)(PlacedObject* self);                         // 0xBC: func_00129780
+    void (*m2C)(PlacedObject* self);                         // 0xC0: func_001660A0
+    s32 (*m2D)(PlacedObject* self, void* other);             // 0xC4: func_0012B2E8
     void* m2E;                                      // 0xC8
-    void (*m2F)(C02* self, s32 state);              // 0xCC: set the state (class 0x55: func_00147AB0)
+    void (*m2F)(PlacedObject* self, s32 state);              // 0xCC: set the state (class 0x55: func_00147AB0)
 };
 
-struct C02 : C01 {
-    List01 children;        // 0x34: the child objects, linked at C01::next (offset 0x1C)
+struct PlacedObject : BaseObject {
+    List01 children;        // 0x34: the child objects, linked at BaseObject::next (offset 0x1C)
     Link02 link40;          // 0x40
     Link02 link48;          // 0x48
-    C02* root;              // 0x50: the topmost object above it (itself at the top)
+    PlacedObject* root;              // 0x50: the topmost object above it (itself at the top)
     void* f54;              // 0x54: given back with func_0015F710 by slot 7
     Link02 link58;          // 0x58: the link in list60
     List01 list60;          // 0x60: offset 0x58
     s32 count6C;            // 0x6C
-    C02* items70[4];        // 0x70: count6C of them
+    PlacedObject* items70[4];        // 0x70: count6C of them
     f32 f80;                // 0x80: FLT_MAX at set-up
     f32 f84;                // 0x84: FLT_MAX at set-up
     s32 f88;                // 0x88: 0x0FFFFFFF at set-up
     void* f8C;              // 0x8C
-    s32 save90;             // 0x90: C03::mode450 kept by func_001BD790
-    s32 save94;             // 0x94: C03::mode470 kept by func_001BD790
+    s32 save90;             // 0x90: Collider::mode450 kept by func_001BD790
+    s32 save94;             // 0x94: Collider::mode470 kept by func_001BD790
     s32 f98[1];             // 0x98
     u8 pad9C[0xA0 - 0x9C];
     Vec02 vA0;              // 0xA0: v150 kept by slot 20
     Vec02 vB0;              // 0xB0: v160 kept by slot 20
-    u64 savedC0;            // 0xC0: bits 0, 1: C03::flags538 bits 54, 55 kept by func_001BD790
+    u64 savedC0;            // 0xC0: bits 0, 1: Collider::flags538 bits 54, 55 kept by func_001BD790
     u8 padC8[0xD0 - 0xC8];
     Mat02 rot;              // 0xD0: the placement matrix (the common block)
     Vec02 pos;              // 0x100: the position (the common block; slot 29)
@@ -107,9 +107,9 @@ struct C02 : C01 {
     Vec02 v190;             // 0x190
     Mat02 m1A0;             // 0x1A0
     Vec02 v1D0;             // 0x1D0
-    List01 list1E0;         // 0x1E0: the attachments (T2195 records), linked at T2195::link (offset 8)
-    T2195* f1EC;            // 0x1EC: the attachment that gives the position (slot 4)
-    T2195* f1F0;            // 0x1F0: the one that gives the orientation (slot 5)
+    List01 list1E0;         // 0x1E0: the attachments (Attachment records), linked at Attachment::link (offset 8)
+    Attachment* f1EC;            // 0x1EC: the attachment that gives the position (slot 4)
+    Attachment* f1F0;            // 0x1F0: the one that gives the orientation (slot 5)
     void* f1F4;             // 0x1F4
     void** f1F8;            // 0x1F8: f26C entries
     void* f1FC;             // 0x1FC
@@ -131,7 +131,7 @@ struct C02 : C01 {
     s32 f278;               // 0x278: func_001EECE0 calls slot 50 while it is set
     s32 elemCount;          // 0x27C
     Elem02** elems;         // 0x280: elemCount of them
-    S1291D0* f284;          // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
+    RangeRecord* f284;          // 0x284: a 0x2E0-byte record in the world's list at 0x1C00
     void* f288;             // 0x288: a 0x40-byte record
     f32 f28C;               // 0x28C
     f32 f290;               // 0x290
@@ -141,7 +141,7 @@ struct C02 : C01 {
     void* f2A0;             // 0x2A0
     u8 pad2A4[0x2A8 - 0x2A4];
     f32 f2A8;               // 0x2A8
-    S1BE4D8* f2AC;          // 0x2AC: a 0x24-byte record
+    SoundRecord* f2AC;          // 0x2AC: a 0x24-byte record
     u8 tint[4];             // 0x2B0: four bytes, set to 0x10 by func_00146340
     u8 f2B4;                // 0x2B4
     u8 pad2B5[0x2B8 - 0x2B5];
@@ -172,7 +172,7 @@ struct C02 : C01 {
     const Desc02* desc02() const { return (const Desc02*)desc; }
 };
 
-typedef char check_C02[sizeof(C02) == 0x2D0 ? 1 : -1];
+typedef char check_PlacedObject[sizeof(PlacedObject) == 0x2D0 ? 1 : -1];
 typedef char check_Desc02[sizeof(Desc02) == 0xD0 ? 1 : -1];
 
 #endif

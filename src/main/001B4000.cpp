@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "r11b008.h"
+#include "script_value.h"
 #include "cursor_animator.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "list_iter.h"
-#include "c03.h"
+#include "collider.h"
 #include "c88.h"
 #include "c54.h"
-#include "c6c.h"
-#include "t2195.h"
-#include "s1b6290.h"
+#include "world.h"
+#include "attachment.h"
+#include "state_walker.h"
 #include "globals.h"
 
 void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
@@ -183,7 +183,7 @@ void func_001B5D80(Walk_1B5D80* s, s32 v, s32 n)
     *(u32*)cur = 0;
 }
 
-void func_001B5F28(Pool6C* list, T2195* item)
+void func_001B5F28(Pool6C* list, Attachment* item)
 {
     if (item) {
         item->vt = (const T2195_Vt*)list->head;
@@ -227,9 +227,9 @@ struct Self_1B71C8 {
 };
 
 s32 func_001300E8(void* a, s32 b);
-s32 func_00182F40(C03* e, void* b);
+s32 func_00182F40(Collider* e, void* b);
 
-s32 func_001B71C8(Self_1B71C8* self, C03* ent)
+s32 func_001B71C8(Self_1B71C8* self, Collider* ent)
 {
     if (ent->flags538 & (1ULL << 43)) {
         return 0;
@@ -494,13 +494,13 @@ Contacts03* func_001DC7D0(void* owner, void* self);
 void func_00138F28(void* owner, void* self);
 void func_00152470(void* p, void* self);
 void func_001240F8(void* self);
-void func_001B7C40(C03* self, s32 flag);
+void func_001B7C40(Collider* self, s32 flag);
 void func_001BB580(void* p);
 void func_001BB4A0(void* self);
 
-void func_001B7A98(C03* self)
+void func_001B7A98(Collider* self)
 {
-    C6C* owner = self->world;
+    World* owner = self->world;
     owner->count34++;
     if (self->parent == 0) {
         func_00138828(owner, self);
@@ -526,10 +526,10 @@ void func_001DC828(void* owner, Contacts03* contacts);
 void func_00152600(void* p, void* self);
 void func_001DC108(void* owner, Touch03* list);
 
-void func_001B7B78(C03* self)
+void func_001B7B78(Collider* self)
 {
-    C03* old50 = self->root03();
-    C6C* owner = self->world;
+    Collider* old50 = self->root03();
+    World* owner = self->world;
     func_001B7C40(self, 0);
     func_001243E0(self);
     owner->count34--;
@@ -549,7 +549,7 @@ void func_001B7B78(C03* self)
 
 void func_00138BE0(void* owner, void* self, s32 n);
 
-void func_001B7C40(C03* self, s32 flag)
+void func_001B7C40(Collider* self, s32 flag)
 {
     if (flag == ((self->flags538 >> 50) & 1)) {
         return;
@@ -561,7 +561,7 @@ void func_001B7C40(C03* self, s32 flag)
     }
     self->flags538 = (self->flags538 & ~(1ULL << 50)) | ((u64)(flag & 1) << 50);
     func_00138BE0(self->world, self, 7);
-    C03* sub = self->root03();
+    Collider* sub = self->root03();
     sub->desc03()->m32(sub);
 }
 
@@ -723,12 +723,12 @@ void func_00152438(void* self, s32 value);
 void func_00123ED0(void* self);
 void func_00160E80(Mesh03* mesh);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 func_0011A498(void* a, s32 b, s32 c, R11B008* d);
+s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
 void func_001BB4A0(void* self);
 
-void func_001B7968(C03* self)
+void func_001B7968(Collider* self)
 {
-    R11B008 local;
+    ScriptValue local;
     s32 s0;
     func_0011B008(&local);
     func_00152438(&self->parts, 0x2E4);
@@ -864,7 +864,7 @@ struct Self_1B6DF8 {
 
 void func_001831E8(void* a, void* b, s32 c, void* d);
 
-void func_001B6DF8(Self_1B6DF8* self, C02** p)
+void func_001B6DF8(Self_1B6DF8* self, PlacedObject** p)
 {
     func_001831E8(self->holder->ptr, (u8*)self + 0x3C, (s32)(*p)->link40.prev, p);
 }
@@ -1251,7 +1251,7 @@ struct Sub_001B6568 {
     u8 pad0[0x38];
     Entry_001B6568* table;
 };
-void func_001B6568(S1B6290* a0, s32* out) {
+void func_001B6568(StateWalker* a0, s32* out) {
     s32 idx = a0->index;
     s32 v;
     if (idx >= 0) {
@@ -1289,10 +1289,10 @@ void func_001B6598(Ctx_001B6598* a0, s32* out) {
 }
 
 s32 func_001B63F8(void* self, s32 key);
-void func_001B6E28(S1B6290* self, s32 a, s32 b);
-void func_001B66A0(S1B6290* self);
+void func_001B6E28(StateWalker* self, s32 a, s32 b);
+void func_001B66A0(StateWalker* self);
 
-void func_001B6628(S1B6290* self, s32 key)
+void func_001B6628(StateWalker* self, s32 key)
 {
     s32 s1 = func_001B63F8(self->owner, key);
     if (self->f28 == s1) {
@@ -1321,7 +1321,7 @@ struct Node_1B64D8 {
 
 s32 func_001B63F8(C88* self, s32 key);
 void func_001B6C68(Node_1B64D8* self);
-void func_0012E760(Player2195* obj);
+void func_0012E760(AnimationPlayer* obj);
 void func_001B66A0(Node_1B64D8* self);
 
 void func_001B64D8(Node_1B64D8* self, s32 key)
@@ -1337,7 +1337,7 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
         Flags_1B64D8* p = self->f34;
         if (p != 0 && (p->flags & 2)) {
             func_001B6C68(self);
-            func_0012E760((Player2195*)self->f24);
+            func_0012E760((AnimationPlayer*)self->f24);
             self->f24 = 0;
         }
         if (self->f24 == 0) {
@@ -1351,15 +1351,15 @@ extern const Entry_2198E8 D_002198E8;
 extern const u8 D_00217410[];
 
 void* func_001B5EE0(Pool6C* pool);
-void func_00152470(List01* list, S1B6290* item);
+void func_00152470(List01* list, StateWalker* item);
 s32 func_001B63F8(C88* self, s32 key);
-void func_001B6E28(S1B6290* self, s32 a, s32 b);
-void func_001B66A0(S1B6290* self);
+void func_001B6E28(StateWalker* self, s32 a, s32 b);
+void func_001B66A0(StateWalker* self);
 void func_001837E0(C88* self, s32 a, s32 b, void* c);
 
-S1B6290* func_001B6290(C88* self, s32 a1, s32 a2, s32 a3)
+StateWalker* func_001B6290(C88* self, s32 a1, s32 a2, s32 a3)
 {
-    S1B6290* obj = (S1B6290*)func_001B5EE0(&self->world->pool1B88);
+    StateWalker* obj = (StateWalker*)func_001B5EE0(&self->world->pool1B88);
     obj->f1C = a1;
     obj->vt = (void*)&D_002198E8;
     obj->f20 = a3;
@@ -1376,7 +1376,7 @@ S1B6290* func_001B6290(C88* self, s32 a1, s32 a2, s32 a3)
         func_001B6E28(obj, -1, v);
     }
     func_001B66A0(obj);
-    S1B6290** pp = &obj;
+    StateWalker** pp = &obj;
     func_001837E0(self, 0x11, 1, (void*)&pp);
     return obj;
 }

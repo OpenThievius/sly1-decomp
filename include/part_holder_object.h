@@ -8,7 +8,7 @@
 #ifndef PART_HOLDER_OBJECT_H
 #define PART_HOLDER_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 typedef void (*PartFn)(void* self);
 
@@ -17,7 +17,7 @@ struct PartObject { PartFn* vtbl; };
 
 // 0x6A: after loading (slot 16), for the kinds 0x515..0x519, it calls slot 6 of each of its
 // objects whose flag (func_001601D8, func_00160810, or D_002623C0's for the ninth) is set.
-struct PartHolderObject : C02 {
+struct PartHolderObject : PlacedObject {
     PartObject* parts[9];       // 0x2D0
     u8 pad2F4[0x300 - 0x2F4];
 };

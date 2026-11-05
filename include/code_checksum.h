@@ -9,9 +9,9 @@
 #ifndef CODE_CHECKSUM_H
 #define CODE_CHECKSUM_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct CodeChecksum : C02 {
+struct CodeChecksum : PlacedObject {
     u32 crc;                // 0x2D0: the running sum, 0xFFFFFFFF at the start
     union {
         s32 start;          // 0x2D4: where the range starts (func_0012B6B8 sets it)

@@ -8,11 +8,11 @@
 #ifndef REDIRECT_OBJECT_H
 #define REDIRECT_OBJECT_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 #include "shapes.h"   // Quad16
 
-struct RedirectObject : C02 {
+struct RedirectObject : PlacedObject {
     RedirectObject* target; // 0x2D0: the object this one stands for (itself, or another)
     u8 pad2D4[0x2DC - 0x2D4];
     s32 targetIsSelf;       // 0x2DC

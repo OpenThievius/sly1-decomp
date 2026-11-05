@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c73.h"
+#include "transform_object.h"
 #include "c67.h"
 #include "c8d.h"
-#include "c6d.h"
+#include "camera.h"
 #include "list_iter.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "shapes.h"
 #include "globals.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "screen_fade.h"
-#include "g262c70.h"
+#include "pad_record.h"
 #include "object_link.h"
 
 extern s32 D_00275BF0;
@@ -23,7 +23,7 @@ s32 func_001F0468(void)
     return 10;
 }
 
-extern C6D* D_00261990;
+extern Camera* D_00261990;
 
 void func_00143940(void* p, f32 v);
 void func_00125B70(void* obj, void* c, void* out);
@@ -33,7 +33,7 @@ void func_00125C90(void* obj, void* s, void* out);
 void func_001F0EB8(C67* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
-    C6D* p = D_00261990;
+    Camera* p = D_00261990;
     f32 keep1 = p->f1C4;
     f32 keep2 = p->f1C8;
     func_00143940(p, 1.0f);
@@ -148,7 +148,7 @@ void func_00137EB0(void* a, void* b);
 void func_00137E70(void* a, void* b);
 void func_0011EC40(void* a, void* b);
 
-void func_001F3A40(C73* self, void* stream)
+void func_001F3A40(TransformObject* self, void* stream)
 {
     func_00137EB0(stream, &self->rot);
     func_00137E70(stream, &self->pos);
@@ -159,14 +159,14 @@ void func_00128018(void* a0, void* a1, void* a2, void* a3);
 void func_00128150(void* a0, void* a1, void* a2, void* a3);
 void func_00182F78(void* self, void* value);
 
-void func_001F3A90(C73* self, C01* other)
+void func_001F3A90(TransformObject* self, BaseObject* other)
 {
     func_00128018(self->parent, other, &self->pos, &self->pos);
     func_00128150(self->parent, other, &self->rot, &self->rot);
     func_00182F78(self, other);
 }
 
-void func_001F3AF0(C73* self, C01* other)
+void func_001F3AF0(TransformObject* self, BaseObject* other)
 {
     func_00128018(other, 0, &self->pos, &self->pos);
     func_00128150(other, 0, &self->rot, &self->rot);
@@ -174,14 +174,14 @@ void func_001F3AF0(C73* self, C01* other)
 
 s32 func_00128018(void* a, s32 b, void* c, s32 d);
 
-s32 func_001F3BD8(C01* self, s32 arg)
+s32 func_001F3BD8(BaseObject* self, s32 arg)
 {
     return func_00128018(self->parent, 0, (u8*)self + 0x40, arg);
 }
 
 s32 func_00128150(void* a, s32 b, void* c, s32 d);
 
-s32 func_001F3C08(C01* self, s32 arg)
+s32 func_001F3C08(BaseObject* self, s32 arg)
 {
     return func_00128150(self->parent, 0, (u8*)self + 0x50, arg);
 }
@@ -423,8 +423,8 @@ f32 D_00275FC0 = 0.5f;
 extern u8 D_00276278[];
 
 s32 func_001F0490(C67* o, s32 n, s32* a, s32* b);
-s32 func_0016EC98(G262C70* t);
-s32 func_0016EED0(G262C70* t);
+s32 func_0016EC98(PadRecord* t);
+s32 func_0016EED0(PadRecord* t);
 void func_001F1648(C67* o, s32 n);
 void func_0016EC20(Pool_1F1A08* p, s32 n);
 s32 func_001F0468(void);
@@ -434,7 +434,7 @@ void func_001F0428(Val_1F1A08* v, s32 m, s32 n);
 void func_001BFCD8(Id_1F1A08 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 f32 func_001EA4B8(Q3_1F1A08* p, s32 a1, f32 f12, f32 f13, f32 f14);
 
-void func_001F1A08(T217D_0F0* self, G262C70* t)
+void func_001F1A08(T217D_0F0* self, PadRecord* t)
 {
     s32 loc[2];
     s32 s3;
@@ -525,7 +525,7 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
         if (an != 0) {
             func_001AA8B0(self, an->f34);
         }
-        G27C220* g = D_002623C0;
+        GameProgress* g = D_002623C0;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
             func_001BED48();
         }
@@ -543,7 +543,7 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
             }
             func_0016E118(1);
             func_001E96F8(D_00275BC0, 3);
-            G27C220* g = D_002623C0;
+            GameProgress* g = D_002623C0;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
                 func_001BED70();
             }
@@ -610,9 +610,9 @@ struct Blk20_1F00F0 {
 
 
 s32 func_001DDA80(void* p);
-void func_0016EC20(G262C70* o, s32 n);
+void func_0016EC20(PadRecord* o, s32 n);
 
-s32 func_001F00F0(ScreenFade* self, G262C70* o, void* param2)
+s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2)
 {
     if (func_001DDA80(D_00275710) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
         func_0016EC20(o, 0x800);
@@ -876,9 +876,9 @@ void func_001F36E8(C8D* o)
     }
 }
 
-void func_00182C18(C01* self);
+void func_00182C18(BaseObject* self);
 
-void func_001F39F8(C73* self)
+void func_001F39F8(TransformObject* self)
 {
     func_00182C18(self);
     Mat3_73* dst = &self->rot;
@@ -1282,8 +1282,8 @@ void func_001F0758(C67* self)
 
 
 
-C7A* func_0015A418(C6C* host, s32 kind, s32 id, C7A* ctx);
-s32 func_0015A4F0(C6C* host, s32 kind, s32 a2, s32 a3, s32 max, C7A** out);
+C7A* func_0015A418(World* host, s32 kind, s32 id, C7A* ctx);
+s32 func_0015A4F0(World* host, s32 kind, s32 a2, s32 a3, s32 max, C7A** out);
 
 struct Min_1F3C38 {
     static s32 Of(s32 a, s32 b) { return a < b ? a : b; }
@@ -1376,7 +1376,7 @@ extern s32 D_00276250;
 extern s32 D_00276654;
 
 void func_0012C918(Slot_1F0908* s, Obj_1F0908* o, s32 c, void* d, f32 a, f32 b);
-C01* func_0015A418(void* o, s32 a, s32 b, Obj_1F0908* c);
+BaseObject* func_0015A418(void* o, s32 a, s32 b, Obj_1F0908* c);
 
 void func_001F0908(Obj_1F0908* self)
 {
@@ -1400,7 +1400,7 @@ void func_001F0908(Obj_1F0908* self)
         for (s32 i = 0; i < self->tbl->count; i++) {
             Ent_1F0908* en = &self->tbl->ents[i];
             if (en->type == 10) {
-                C01* n = func_0015A418(self->f14, 0x104, en->id, self);
+                BaseObject* n = func_0015A418(self->f14, 0x104, en->id, self);
                 if (n != 0) n->desc->m02(n);
             }
         }

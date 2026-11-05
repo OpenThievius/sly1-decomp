@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "c52.h"
 #include "entry_table_object.h"
-#include "c29.h"
-#include "c47.h"
+#include "zone_collider.h"
+#include "target_follower.h"
 #include "button_code.h"
 #include "globals.h"
 #include "game_clock.h"
-#include "g262c70.h"
-#include "g27c220.h"
+#include "pad_record.h"
+#include "game_progress.h"
 #include "key_record.h"
 #include "shapes.h"
 
@@ -38,7 +38,7 @@ void func_0016DF30(C2A* self)
 
 void func_001A7CE8(void* p);
 
-void func_0016EC38(G262C70* self)
+void func_0016EC38(PadRecord* self)
 {
     if (self->pC0 == 0) return;
     if (self->f18 < 3) return;
@@ -209,7 +209,7 @@ void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 id, void* table);
 void func_00159478(void* a, void* b);
 
-void func_0016F7B0(C07* self)
+void func_0016F7B0(Player* self)
 {
     func_001BAC30(self);
     func_00124DF8(self, 0x97, &D_00262E40);
@@ -268,7 +268,7 @@ void func_0016D828(void* self);
 void func_0016D928(void* self);
 void func_0016DAC0(void* self, s32 mode);
 
-void func_0016DA00(C47* self, s32 type, Packet47* packet)
+void func_0016DA00(TargetFollower* self, s32 type, Packet47* packet)
 {
     func_00127378(self, type, packet);
     if (type != 0x13) {
@@ -372,9 +372,9 @@ void func_0016E148()
 void func_001F5C0C(void* p, s32 value, s32 size);
 void* func_0018D4B0(s32 size);
 void func_002042C8(s32 a, s32 b, s32 c);
-void func_0016E630(G262C70* self, s32 mode, s32 n);
+void func_0016E630(PadRecord* self, s32 mode, s32 n);
 
-void func_0016E1A0(G262C70* self, s32 a, s32 b)
+void func_0016E1A0(PadRecord* self, s32 a, s32 b)
 {
     func_001F5C0C(self, 0, 0xC4);
     func_0016E630(self, 1, 0);
@@ -390,7 +390,7 @@ void func_0016E1A0(G262C70* self, s32 a, s32 b)
 
 void func_001A7B20(void* a, s32 b, s32 c);
 
-void func_0016E630(G262C70* self, s32 mode, s32 n)
+void func_0016E630(PadRecord* self, s32 mode, s32 n)
 {
     s32 next = mode;
     if (mode == self->f14)
@@ -428,7 +428,7 @@ void func_0016E630(G262C70* self, s32 mode, s32 n)
     self->f1C = D_00261858.elapsed;
 }
 
-void func_0016EC20(G262C70* self, u32 mask)
+void func_0016EC20(PadRecord* self, u32 mask)
 {
     u16 m = (u16)mask;
     self->flags &= (u16)~m;
@@ -440,7 +440,7 @@ void func_001A8AF8(void* p);
 Obj_1BF0D8* func_001BEEF8(s32 kind);
 void func_001BF0D8(Obj_1BF0D8* p);
 
-void func_0016D3F0(C47* self, C2A* x)
+void func_0016D3F0(TargetFollower* self, C2A* x)
 {
     if (x == self->f558) {
         return;
@@ -473,7 +473,7 @@ void func_0016D3F0(C47* self, C2A* x)
 s32 func_001BE810(void* self);
 void func_001BE8F8(void* self, s32 mode, f32 a, f32 b);
 
-void func_0016D9A8(C47* self)
+void func_0016D9A8(TargetFollower* self)
 {
     if (self->f5CC != 0) {
         if (func_001BE810(self) == 0) {
@@ -585,7 +585,7 @@ void func_0016F430(s32 flags)
     }
 }
 
-void func_0016EC88(G262C70* p) { p->f28 = 0; p->f2C = 0; }
+void func_0016EC88(PadRecord* p) { p->f28 = 0; p->f2C = 0; }
 
 void func_001261C0(void);
 
@@ -597,11 +597,11 @@ void func_0016C508(void)
 
 
 void* func_0015A448(void* obj, void* id, void* owner);
-void func_0016D3F0(C47* self, C2A* x);
-void func_0016D788(C47* self);
-void func_0016DAC0(C47* self, s32 mode);
+void func_0016D3F0(TargetFollower* self, C2A* x);
+void func_0016D788(TargetFollower* self);
+void func_0016DAC0(TargetFollower* self, s32 mode);
 
-void func_0016D040(C47* self, void* x)
+void func_0016D040(TargetFollower* self, void* x)
 {
     self->f578 = (s32)x;
     C2A* p = (C2A*)func_0015A448(self->world, x, self);
@@ -650,7 +650,7 @@ extern s32 D_002629C8;
 
 
 
-void func_0016CE00(C47* self)
+void func_0016CE00(TargetFollower* self)
 {
     func_001B7968(self);
     self->f578 = -1;
@@ -672,10 +672,10 @@ void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_001920B0(void* self, f32* arg);
-void func_0016D040(C47* self, void* x);
+void func_0016D040(TargetFollower* self, void* x);
 void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
 
-void func_0016CF70(C47* self)
+void func_0016CF70(TargetFollower* self)
 {
     f32 scratch[4];
 
@@ -711,22 +711,22 @@ void func_0016DFE0(C2A* self, s32 kind)
     case 2:
         if (D_002629C8 != 0)
         {
-            if (func_001526D0(&((C47*)D_002629C8)->list55C, self) != 0)
+            if (func_001526D0(&((TargetFollower*)D_002629C8)->list55C, self) != 0)
             {
-                func_00152600(&((C47*)D_002629C8)->list55C, self);
+                func_00152600(&((TargetFollower*)D_002629C8)->list55C, self);
             }
         }
         break;
     case 0xC:
         if (D_002629C8 != 0)
         {
-            func_00152470(&((C47*)D_002629C8)->list55C, self);
+            func_00152470(&((TargetFollower*)D_002629C8)->list55C, self);
         }
         break;
     case 0xD:
         if (D_002629C8 != 0)
         {
-            func_00152600(&((C47*)D_002629C8)->list55C, self);
+            func_00152600(&((TargetFollower*)D_002629C8)->list55C, self);
         }
         break;
     }
@@ -744,7 +744,7 @@ void func_0016E0B8(void)
 
 u16 D_00262A50[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
 
-f32 func_0016F108(G262C70* self, s32 idx)
+f32 func_0016F108(PadRecord* self, s32 idx)
 {
     if (self->keyA8 & D_00262A50[idx]) {
         if (self->f18 >= 4) {
@@ -760,9 +760,9 @@ f32 func_0016F108(G262C70* self, s32 idx)
     return 0.0f;
 }
 
-void func_0016EC20(G262C70* self, s32 mask);
+void func_0016EC20(PadRecord* self, s32 mask);
 
-s32 func_0016EED0(G262C70* self)
+s32 func_0016EED0(PadRecord* self)
 {
     f32 c;
     f32 base;
@@ -877,7 +877,7 @@ void func_00124DF8(void* self, s32 id, void* table);
 s32 func_001B6420(void* a, s32 b);
 s32 D_002629D0[16] = { 0x0, 0x2EE, 0x550, 0x0, 0x2F8, 0x57C, 0x0, 0x2F9, 0x580, 0x0, 0x2FB, 0x588, 0x0, 0x2FC, 0x58C, 0x0 };
 
-void func_0016CE80(C47* self)
+void func_0016CE80(TargetFollower* self)
 {
     s32 k1 = 0x2EF;
     s32 k2 = 0x2F0;
@@ -928,10 +928,10 @@ void func_0016C470(void* a0)
 void func_001F5C0C(u8* p, s32 a, s32 b);
 s32 func_00204510(s32 a, s32 b, u8* c);
 void func_0018D800(u8* dst, u8* src, s32 n);
-void func_0016E738(G262C70* p, s32 a, s32 b, f32* c, f32* d, f32* e, u8* f, u8* g, f32* h, f32* i);
-void func_0016F238(G262C70* p, s32 old);
+void func_0016E738(PadRecord* p, s32 a, s32 b, f32* c, f32* d, f32* e, u8* f, u8* g, f32* h, f32* i);
+void func_0016F238(PadRecord* p, s32 old);
 
-s32 func_0016E940(G262C70* self)
+s32 func_0016E940(PadRecord* self)
 {
     u8 buf[0x40];
     s32 res;
@@ -991,11 +991,11 @@ s32 func_0016E940(G262C70* self)
     return res;
 }
 
-void func_001B9338(C03* self, f32 t);
+void func_001B9338(Collider* self, f32 t);
 void func_00188850(const Vec02* tab, Mat3U* out, f32 v);
-void func_001B9D10(C03* self, f32 t, Mat3U* out, void* data);
+void func_001B9D10(Collider* self, f32 t, Mat3U* out, void* data);
 
-void func_0016D0C0(C47* self, f32 t)
+void func_0016D0C0(TargetFollower* self, f32 t)
 {
     Mat3U buf;
 
@@ -1007,12 +1007,12 @@ void func_0016D0C0(C47* self, f32 t)
     func_001B9D10(self, t, &buf, self->sub5B0);
 }
 
-typedef void (*VFn_16D788)(C47* self, const void* arg);
+typedef void (*VFn_16D788)(TargetFollower* self, const void* arg);
 
-void func_001B9AE0(C03* self, s32 a, s32 b, s32 c, s32 d);
+void func_001B9AE0(Collider* self, s32 a, s32 b, s32 c, s32 d);
 void func_001920B0(void* arg, Vec3* out);
 
-void func_0016D788(C47* self) {
+void func_0016D788(TargetFollower* self) {
     Vec3 v;
     func_001B9AE0(self, 3, 0, 3, 0);
     ((VFn_16D788*)self->desc)[36](self, &D_00248D30);
@@ -1037,7 +1037,7 @@ s32 func_001BE980(void);
 s32 func_001EAA70(void* a, s32 b);
 void func_001BE728(KeyRecord* slot);
 
-void func_0016D928(C47* self)
+void func_0016D928(TargetFollower* self)
 {
     s32 r;
 
@@ -1149,11 +1149,11 @@ s32 func_00204AA8(s32 a, s32 b, u8* buf);
 s32 func_00204CE8(s32 a, s32 b);
 s32 func_00204D48(s32 a, s32 b);
 s32 func_00204678(s32 a, s32 b);
-s32 func_0016E940(G262C70* self);
+s32 func_0016E940(PadRecord* self);
 void func_001A7B88(void* p);
-void func_0016E630(G262C70* self, s32 mode, s32 n);
+void func_0016E630(PadRecord* self, s32 mode, s32 n);
 
-void func_0016E238(G262C70* self)
+void func_0016E238(PadRecord* self)
 {
     u8 buf[16];
     if (self->f14 == 0)
@@ -1360,7 +1360,7 @@ struct Advance_16F238 {
     }
 };
 
-void func_0016F238(G262C70* self, s32 value)
+void func_0016F238(PadRecord* self, s32 value)
 {
     u16 id = (u16)value;
     ButtonCode* head = g_buttonCodes;

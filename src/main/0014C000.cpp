@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "gauge_manager.h"
-#include "c46.h"
-#include "c20.h"
-#include "c6c.h"
-#include "t217d.h"
+#include "pooled_object.h"
+#include "masked_collider.h"
+#include "world.h"
+#include "screen_element.h"
 #include "object_link.h"
 #include "g261ef0.h"
 #include "shapes.h"
@@ -31,12 +31,12 @@ void func_0014D680(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a
 
 f32 func_00130C20(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y);
 
-void func_001B7A98(C03* self);
+void func_001B7A98(Collider* self);
 s32 func_001526D0(void* a, void* b);
 void func_00152600(void* a, void* b);
 s32 func_001300E8(void* a, s32 b);
 
-void func_0014EE70(C46* self)
+void func_0014EE70(PooledObject* self)
 {
     func_001B7A98(self);
     if (func_001526D0(&self->world->list1C78, self)) func_00152600(&self->world->list1C78, self);
@@ -51,7 +51,7 @@ ObjectLink D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 idx, void* table);
 
-void func_0014F020(C46* self)
+void func_0014F020(PooledObject* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 1, D_00261CC8);
@@ -187,10 +187,10 @@ void func_0014F850(C23* self)
 
 s32 func_001B8A08(void* self, void* obj);
 
-s32 func_0014FBE0(C23* self, C03* obj)
+s32 func_0014FBE0(C23* self, Collider* obj)
 {
     if (func_001300E8(obj, 0x46) != 0) {
-        if (((C46*)obj)->taker == self) {
+        if (((PooledObject*)obj)->taker == self) {
             return 1;
         }
     }
@@ -268,9 +268,9 @@ f32 func_0014D0A8(s32 n, void* buf, void* other);
 typedef f32 (*Fn_14E6A8)(void* self);
 typedef void (*Fn2_14E6A8)(void* self, f32 t, s32 a1, void* a2);
 
-void func_001B7968(C03* self);
+void func_001B7968(Collider* self);
 
-void func_0014EE40(C46* self)
+void func_0014EE40(PooledObject* self)
 {
     func_001B7968(self);
     func_0014F110(self, -1);
@@ -303,24 +303,24 @@ void func_0014E500(void* self);
 
 void func_00182D50(void*);
 void func_00152470(void*,void*);
-void func_0014EF00(C46* self)
+void func_0014EF00(PooledObject* self)
 {
     func_00182D50(self);
     func_00152470(&self->world->list1C78, self);
     func_0014F110(self, 0);
 }
 
-void func_001BA130(C03* self, C03* other);
-void func_0014EF40(C46* self, C03* other)
+void func_001BA130(Collider* self, Collider* other);
+void func_0014EF40(PooledObject* self, Collider* other)
 {
     Keep46 save = self->keep56C;
     func_001BA130(self, other);
     self->keep56C = save;
 }
 
-void func_001BAC30(C03* self);
+void func_001BAC30(Collider* self);
 void func_00159478(void** out, void* self);
-void func_0014EF88(C46* self)
+void func_0014EF88(PooledObject* self)
 {
     func_001BAC30(self);
     func_00159478(&self->member58C, self);
@@ -328,7 +328,7 @@ void func_0014EF88(C46* self)
 
 void func_00127378(void* self, s32 kind, void* msg);
 
-void func_0014EFB8(C46* self, s32 kind, void* msg)
+void func_0014EFB8(PooledObject* self, s32 kind, void* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 6) {
@@ -370,7 +370,7 @@ void func_0014F770(C23* self, s32 kind, void* msg)
 s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
 
-struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; C01* f18; u8 pad1[0x190 - 0x1C]; Quad16 q190[4];
+struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; BaseObject* f18; u8 pad1[0x190 - 0x1C]; Quad16 q190[4];
  };
 typedef void (*VFn_14F920)(void* self);
 typedef void (*VFn_14F920Arg)(void* self, s32 x);
@@ -399,7 +399,7 @@ void func_0014F920(C23* self)
     s32 i = 1;
     if (i < self->cnt) {
         do {
-            C01* e = (C01*)func_00183058(s2, s2->p14, 0);
+            BaseObject* e = (BaseObject*)func_00183058(s2, s2->p14, 0);
             if (e->desc->m0F != 0) {
                 e->desc->m0F(e);
             }
@@ -545,7 +545,7 @@ extern f32 D_0026185C[];
 
 s32 func_00126D60(Sub_14F110* sub, f32 value);
 
-void func_0014F110(C46* self, s32 state)
+void func_0014F110(PooledObject* self, s32 state)
 {
     if (self->state != state) {
         if (self->state != 2) {
@@ -593,9 +593,9 @@ void* func_0018D5C0(u32 n);
 extern u8 D_00248D30[];
 
 s32 func_0014FEC0(C23* self);
-C46* func_00150338(C23* self);
-s32 func_00182FC8(C46* p);
-void func_001853F0(Held23* a, C46* b, u8* c);
+PooledObject* func_00150338(C23* self);
+s32 func_00182FC8(PooledObject* p);
+void func_001853F0(Held23* a, PooledObject* b, u8* c);
 
 void func_0014FDA8(C23* self, s32* state)
 {
@@ -629,10 +629,10 @@ extern u8 D_00248D30[];
 
 s32 func_00152720(void* p);
 void func_00150298(C23* self);
-void func_001B9AE0(C03* o, s32 a, s32 b, s32 c, s32 d);
+void func_001B9AE0(Collider* o, s32 a, s32 b, s32 c, s32 d);
 
 s32 func_0014FEC0(C23* self) {
-    C46* s0;
+    PooledObject* s0;
 
     if (self->p6C8 != 0) {
         return 1;
@@ -646,7 +646,7 @@ s32 func_0014FEC0(C23* self) {
         func_00150298(self);
         return 0;
     }
-    s0 = (C46*)self->world->list1C78.head;
+    s0 = (PooledObject*)self->world->list1C78.head;
     s0->taker = self;
     s0->desc->m02(s0);
     s0->desc->m15(s0, self->f730);
@@ -667,10 +667,10 @@ struct Tab_14D1A0;
 
 f32 func_0014D138(Tab_14D1A0* count, f32* table, void* wrap, f32 x);
 
-void func_001B93F8(C03* self);
-void func_0014F270(C46* self, f32 f);
+void func_001B93F8(Collider* self);
+void func_0014F270(PooledObject* self, f32 f);
 
-void func_0014F058(C46* self, f32 f)
+void func_0014F058(PooledObject* self, f32 f)
 {
     func_001B93F8(self);
     switch (self->state) {
@@ -684,7 +684,7 @@ void func_0014F058(C46* self, f32 f)
         break;
     case 4:
         if (self->delay < D_0026185C[0] - self->stateTime) {
-            if (D_00262E10 == 0 || self->parent != *(C01**)(D_00262E10 + 0x23B0))
+            if (D_00262E10 == 0 || self->parent != *(BaseObject**)(D_00262E10 + 0x23B0))
                 func_0014F110(self, 5);
         }
         break;

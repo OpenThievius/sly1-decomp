@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
-#include "c6c.h"
+#include "switched_collider.h"
+#include "world.h"
 #include "s1dbbd8.h"
-#include "t219c.h"
-#include "g27c220.h"
-#include "s137290.h"
+#include "effect.h"
+#include "game_progress.h"
+#include "buffered_stream.h"
 #include "s1eb050.h"
-#include "t217d.h"
-#include "r11b008.h"
+#include "screen_element.h"
+#include "script_value.h"
 
 void func_001B9F30(void);
 
@@ -88,7 +88,7 @@ void func_001DBC18(u8* self, T219CHook* node)
 
 void* func_001DBBD8(void* self);
 
-S1DBBD8* func_001DBCC8(C6C* self, s32 a, s32 b, s32 c, s32 d)
+S1DBBD8* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d)
 {
     S1DBBD8* e = (S1DBBD8*)func_001DBBD8(self);
     e->k0 = a;
@@ -118,7 +118,7 @@ void func_001D92F0(C19* self)
 
 void func_001DBC18(void* self, void* node);
 
-void func_001DBE48(C6C* self)
+void func_001DBE48(World* self)
 {
     while (self->f1EC8 != 0) {
         S1DBBD8* node = self->f1EC8;
@@ -205,7 +205,7 @@ struct Entry_001DB1E8 { s32 active; s32 a; u8 pad[0x10]; f32 x; f32 y; s32 b; s3
 void func_001DB1E8(C19* self, s32 a, s32 b, s32 c, f32 x, f32 y) { if (a && (u32)self->f870 < 16) { Entry_001DB1E8* e = &((Entry_001DB1E8*)self->f874)[self->f870]; self->f870++; e->a = a; e->active = 1; e->x = x; e->y = y; e->b = b; e->c = c; } }
 
 struct Link_001DBB20 { u32 pad[2]; u32 flags; };
-s32 func_001DBB20(C6C* self, Link_001DBB20** link, u32 value) { return ((*link)->flags & 2) && self->count38 >= 0xF7 && value == 0; }
+s32 func_001DBB20(World* self, Link_001DBB20** link, u32 value) { return ((*link)->flags & 2) && self->count38 >= 0xF7 && value == 0; }
 
 typedef void (*VFn_1DB0C8)(void* self, void* a, s32 b, void* c, s32 d, void* e, s32 f);
 struct Inner_1DB0C8 { VFn_1DB0C8* vtbl; };
@@ -236,7 +236,7 @@ void func_001DB480(u8* self)
 
 void func_001DBC18(void* self, void* node);
 
-void func_001DBD40(C6C* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
+void func_001DBD40(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
 {
     S1DBBD8* prev = 0;
     S1DBBD8* removed = 0;
@@ -389,7 +389,7 @@ s32 func_00137480(void* self, s32 n);
 s32 func_00137D78(void* self);
 s32 func_0018D500(s32 size);
 
-void func_001DB928(s32 a0, S137290* self)
+void func_001DB928(s32 a0, BufferedStream* self)
 {
     s32 s2 = a0;
     s32 s3;
@@ -469,16 +469,16 @@ void func_001DA170(C19* self)
 }
 
 void func_0011A800(void* a);
-s32 func_0011A498(void* a, s32 b, s32 c, R11B008* d);
-void func_0011A080(R11B008* t, R11B008Node* n, void* c);
-void* func_0011A400(R11B008* self, void* table, s32 key, R11B008* item);
+s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
+void func_0011A080(ScriptValue* t, R11B008Node* n, void* c);
+void* func_0011A400(ScriptValue* self, void* table, s32 key, ScriptValue* item);
 extern u8 D_00259F38[];
 
-void func_001DBEC8(C6C* self, f32 limit)
+void func_001DBEC8(World* self, f32 limit)
 {
-    R11B008 a;
-    R11B008 q;
-    R11B008 t;
+    ScriptValue a;
+    ScriptValue q;
+    ScriptValue t;
     func_0011B008(&a);
     func_0011B008(&q);
     func_0011A800(D_00259F38);
@@ -778,18 +778,18 @@ struct Sub_1DB4C8 { u8 b; };
 
 extern s32 D_00262C64;
 
-void func_00182C18(C6C* self);
-void func_001C09D8(C6C* self, s32 a, s32 b);
+void func_00182C18(World* self);
+void func_001C09D8(World* self, s32 a, s32 b);
 void* func_0018D5C0(s32 size);
-void func_001DC740(C6C* self);
+void func_001DC740(World* self);
 void func_001B5DD0(Sub_1DB4C8* p, s32 a, s32 b);
 void func_001B5E30(Sub_1DB4C8* p, s32 a, s32 b);
 void func_00152438(Sub_1DB4C8* p, s32 a);
-void func_001DBA90(C6C* self, f32 x);
+void func_001DBA90(World* self, f32 x);
 
 #define SUB(off) ((Sub_1DB4C8*)((u8*)self + (off)))
 
-void func_001DB4C8(C6C* self)
+void func_001DB4C8(World* self)
 {
     f32 x;
     func_00182C18(self);
@@ -874,7 +874,7 @@ s32 func_001DBAE0(s32 unused, Id_1DBAE0 index)
 }
 
 
-void func_001DBC60(C6C* self, s32 a1, s32 a2, s32 a3, s32 a4)
+void func_001DBC60(World* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     S1DBBD8* n = self->f1EC8;
     if (n != 0) {

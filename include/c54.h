@@ -8,9 +8,9 @@
 #ifndef C54_H
 #define C54_H
 
-#include "c02.h"
+#include "placed_object.h"
 
-struct C54 : C02 {
+struct C54 : PlacedObject {
     s32 f2D0;               // 0x2D0
     u8 pad2D4[0x2E0 - 0x2D4];
 };

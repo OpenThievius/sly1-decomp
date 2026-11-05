@@ -6,9 +6,9 @@
 #ifndef OBJECT_CREATOR_H
 #define OBJECT_CREATOR_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct ObjectCreator : C03 {
+struct ObjectCreator : Collider {
     s32 state;  // 0x550: -1 at set-up (func_001A7708)
     f32 stateTime;  // 0x554: the time of the last state change (func_001A7998)
     s32 createsObject;  // 0x558: whether slot 16 creates the object

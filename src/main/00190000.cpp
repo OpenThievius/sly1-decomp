@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "c6e.h"
 #include "point_object.h"
 #include "point_graph_object.h"
-#include "c6c.h"
-#include "c65.h"
-#include "t217d.h"
+#include "world.h"
+#include "step_sequence.h"
+#include "screen_element.h"
 #include "globals.h"
-#include "g262c70.h"
+#include "pad_record.h"
 
-void func_00192498(C05* self, s32* out)
+void func_00192498(SwitchedCollider* self, s32* out)
 {
-    *out = ((s32 (*)(C05*, s32*))self->desc05()->m4D)(self, out);
+    *out = ((s32 (*)(SwitchedCollider*, s32*))self->desc05()->m4D)(self, out);
 }
 
 s32 D_00269BCC = -1;
@@ -27,9 +27,9 @@ void* func_001925F0()
 
 extern s32 D_00269C90;
 s32 func_00182FC8();
-s32 func_00192688(C05* value);
+s32 func_00192688(SwitchedCollider* value);
 
-void func_001926D0(C05* self)
+void func_001926D0(SwitchedCollider* self)
 {
     if (self->f550 == 0) return;
     if (self->parent != 0) return;
@@ -62,7 +62,7 @@ void func_00192780(void* value)
 void func_001B7A98(void* self);
 void func_001926D0(void* self);
 
-void func_00192820(C05* self)
+void func_00192820(SwitchedCollider* self)
 {
     func_001B7A98(self);
     func_001926D0(self);
@@ -71,16 +71,16 @@ void func_00192820(C05* self)
 void func_001B7B78(void* self);
 void func_00192780(void* self);
 
-void func_00192850(C05* self)
+void func_00192850(SwitchedCollider* self)
 {
     func_001B7B78(self);
     func_00192780(self);
 }
 
-void func_001926D0(C05* self);
-void func_00192780(C05* self);
+void func_001926D0(SwitchedCollider* self);
+void func_00192780(SwitchedCollider* self);
 
-void func_00192990(C05* self, s32 value)
+void func_00192990(SwitchedCollider* self, s32 value)
 {
     if (self->f550 == value) return;
     self->f550 = value;
@@ -236,7 +236,7 @@ void* func_0019EA78(s32 kind, s32 zero);
 void func_0019F8E8(void* node, void* owner);
 f32 func_0012CCC0(void* obj, s32 id);
 
-void func_001924C8(C05* self, s32 mode, C02* other)
+void func_001924C8(SwitchedCollider* self, s32 mode, PlacedObject* other)
 {
     switch (mode) {
     case 0:
@@ -299,7 +299,7 @@ extern u8 D_00275BC0[];
 
 void func_001E9498(void* a, void* b);
 
-void func_00192A38(C05* self, u32 value)
+void func_00192A38(SwitchedCollider* self, u32 value)
 {
     T217D_440* block = &D_002701F8;
     ((T217D_Word*)&block->child)->v = value;
@@ -313,16 +313,16 @@ extern u8* D_0026F800;
 
 
 s32 func_001493A0(void* p);
-void func_001516C0(C65* ctx, G262C70* rec);
+void func_001516C0(StepSequence* ctx, PadRecord* rec);
 void func_00150790(void* p, s32 n);
-void func_0016EC20(G262C70* rec, s32 n);
+void func_0016EC20(PadRecord* rec, s32 n);
 
-void func_00192A70(void* self, G262C70* rec)
+void func_00192A70(void* self, PadRecord* rec)
 {
     if (func_001493A0(&D_00261990->ctl454) != 0)
         return;
-    G262C70* a1 = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
-    C65* ctx = D_0027051C;
+    PadRecord* a1 = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
+    StepSequence* ctx = D_0027051C;
     if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {
         func_001516C0(ctx, a1);
@@ -383,9 +383,9 @@ void func_00192190(Obj_00192190* self)
 }
 
 void func_001B7968(void* self);
-void func_00192990(C05* self, s32 value);
+void func_00192990(SwitchedCollider* self, s32 value);
 
-void func_001921A8(C05* self)
+void func_001921A8(SwitchedCollider* self)
 {
     func_001B7968(self);
     self->f598 = self;
@@ -400,7 +400,7 @@ void func_001906F0(C0E* self, s32 value)
 
 extern void func_001C8F20(C0E* self, s32 mode, s32 value);
 
-void func_001906F8(C0E* self, s32 flag, C02* extra)
+void func_001906F8(C0E* self, s32 flag, PlacedObject* extra)
 {
     func_001924C8(self, flag, extra);
     if (flag == 0) {
@@ -425,10 +425,10 @@ void func_00190770(C0E* self, s32 code, Req_190770* req)
     }
 }
 
-void func_001BA130(C05* self);
-void func_00192990(C05* self, s32 mode);
+void func_001BA130(SwitchedCollider* self);
+void func_00192990(SwitchedCollider* self, s32 mode);
 
-void func_001921E8(C05* self)
+void func_001921E8(SwitchedCollider* self)
 {
     func_001BA130(self);
     if (self->f550 != 0) {
@@ -438,10 +438,10 @@ void func_001921E8(C05* self)
     func_00192990(self, 0);
 }
 
-void func_00145088(void* mgr, s32 a1, void* a2, C05* self, s32 a4);
-void func_001451F0(void* mgr, s32 a1, s32 a2, s32 a3, C05* self, s32 a5);
+void func_00145088(void* mgr, s32 a1, void* a2, SwitchedCollider* self, s32 a4);
+void func_001451F0(void* mgr, s32 a1, s32 a2, s32 a3, SwitchedCollider* self, s32 a5);
 
-void func_001922E8(C05* self, s32 mode)
+void func_001922E8(SwitchedCollider* self, s32 mode)
 {
     if (mode != 0) {
         self->v560 = self->v140;
@@ -479,7 +479,7 @@ void func_00192418(void* self)
     if (self != func_001925F0()) func_001929D0(self);
 }
 
-s32 func_00192488(C05* self)
+s32 func_00192488(SwitchedCollider* self)
 {
     return 0;
 }
@@ -515,7 +515,7 @@ void func_00192068(PointObject* self, void* other)
 
 s32 func_00128018(void* a, s32 b, void* c, s32 d);
 
-void func_001920B0(C01* self, s32 arg)
+void func_001920B0(BaseObject* self, s32 arg)
 {
     func_00128018((void*)self->parent, 0, (u8*)self + 0x40, arg);
 }
@@ -553,7 +553,7 @@ void func_00191E70(s32 value)
     }
 }
 
-void* func_001930B0(C05* p)
+void* func_001930B0(SwitchedCollider* p)
 {
     return p;
 }
@@ -626,7 +626,7 @@ s32 func_00190740(C0E* self)
 
 s32 func_001DDA80(void* p);
 
-s32 func_00192450(C05* self)
+s32 func_00192450(SwitchedCollider* self)
 {
     if ((D_00262C64 & 1) || func_001DDA80(self->world)) return 1;
     return 0;
@@ -639,14 +639,14 @@ void func_001B9F30(void);
 // func_001EA4B8 takes its float arguments first: the caller then sets $f14 before $a0.
 f32 func_001EA4B8(f32 a, f32 b, f32 c, Quad_192380* p, s32 zero);
 
-void func_00192380(C05* self, u8* out, f32 a)
+void func_00192380(SwitchedCollider* self, u8* out, f32 a)
 {
     func_001B9F30();
     if (self->f554 != 0) {
         *(Quad_192380*)(out + 0x10) = *(Quad_192380*)((u8*)self + 0x560);
         return;
     }
-    C6D* base = D_00261990;
+    Camera* base = D_00261990;
     if (base->f224 == 0) {
         *(f32*)(out + 0x18) = func_001EA4B8(self->v560.z, self->v140.z, a, (Quad_192380*)D_00269BC0, 0);
     }
@@ -705,7 +705,7 @@ void func_00189378(void* sub, s32 zero, void* out);
 void func_0012C7B0(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
 void func_00157EF8(void* a, void* b, s32 c, void* d, void* e, s32 f, s32 g);
 
-void func_00192C58(C05* self)
+void func_00192C58(SwitchedCollider* self)
 {
     s32 flags = D_00262C64 & 2;
     if (flags == 0) {
@@ -714,7 +714,7 @@ void func_00192C58(C05* self)
         *(s32*)(g + 0x19E4) = flags < n ? n : 0;
     }
 
-    C02* s1 = self->f604;
+    PlacedObject* s1 = self->f604;
     if (s1 != 0) {
         Scratch_192C58 tmp;
         s1->desc->m02(s1);
@@ -738,7 +738,7 @@ void func_00192C58(C05* self)
     }
 }
 
-void func_001833D0(C01* o, Stream8A* in);
+void func_001833D0(BaseObject* o, Stream8A* in);
 s32 func_00137BE0(Stream8A* in);
 void* func_0018D5C0(s32 n);
 void func_00137E70(Stream8A* in, void* p);
@@ -837,7 +837,7 @@ void* func_00192620(void)
 {
     void* r = func_001925F0();
     if (r == 0) {
-        C07* q = D_00262E10;
+        Player* q = D_00262E10;
         if (q != 0) {
             s32 t = q->f550;
             if (t != 0) r = q;
@@ -850,7 +850,7 @@ void* func_00192620(void)
 }
 
 extern f32 D_0024B650;
-void func_00182C18(C01* self);
+void func_00182C18(BaseObject* self);
 
 void func_00191F08(C70* self)
 {
@@ -868,10 +868,10 @@ void func_00191F08(C70* self)
 
 struct Sub_192230;
 
-void func_00127378(C05* self, s32 kind, void* msg);
+void func_00127378(SwitchedCollider* self, s32 kind, void* msg);
 void func_001BF788(Sub_192230* self, s32 n);
 
-void func_00192230(C05* self, s32 kind, void* msg)
+void func_00192230(SwitchedCollider* self, s32 kind, void* msg)
 {
     func_00127378(self, kind, msg);
     switch (kind) {
@@ -1071,8 +1071,8 @@ typedef void (*VFn_192B58)(void* self);
 
 extern u8* D_002623C0;
 
-void func_001B93F8(C05* self);
-void func_00192DD0(C05* self);
+void func_001B93F8(SwitchedCollider* self);
+void func_00192DD0(SwitchedCollider* self);
 
 struct Clamp_192B58 {
     static s32 Of(s32 v, s32 lo, s32 hi)
@@ -1083,7 +1083,7 @@ struct Clamp_192B58 {
     }
 };
 
-void func_00192B58(C05* self)
+void func_00192B58(SwitchedCollider* self)
 {
     func_001B93F8(self);
 

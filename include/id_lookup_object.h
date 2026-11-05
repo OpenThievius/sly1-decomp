@@ -5,7 +5,7 @@
 #ifndef ID_LOOKUP_OBJECT_H
 #define ID_LOOKUP_OBJECT_H
 
-#include "c01.h"
+#include "base_object.h"
 
 // A growing list of s32 (func_0015FF88 appends to it).
 struct FoundList {
@@ -16,7 +16,7 @@ struct FoundList {
 
 // 0x87: eight item ids (count at 0x34); func_0015FF88 (slot 16) looks each up in the level
 // object (+0x14) and keeps the hits in its own list.
-struct IdLookupObject : C01 {
+struct IdLookupObject : BaseObject {
     s32 idCount;            // 0x34
     s32 ids[8];             // 0x38
     FoundList found;        // 0x58..0x68

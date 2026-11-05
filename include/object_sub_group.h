@@ -5,14 +5,14 @@
 //
 // Its fields follow class 0x02's and end at the size its descriptor gives; the pads keep every
 // field at its retail offset.
-#ifndef C7D_H
-#define C7D_H
+#ifndef OBJECT_SUB_GROUP_H
+#define OBJECT_SUB_GROUP_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 // 0x7D: its own fields are read in two places only, the child table and what func_001F4500
 // reads from the stream.
-struct C7D : C02 {
+struct ObjectSubGroup : PlacedObject {
     u8 pad2D0[0x2D4 - 0x2D0];
     void* f2D4;             // 0x2D4: set means the object has something to do after its children
     s32 f2D8;               // 0x2D8
@@ -30,7 +30,7 @@ struct C7D : C02 {
     s32 f308;               // 0x308
     s32 f30C;               // 0x30C
     s32 count;              // 0x310: how many children
-    C01** items;            // 0x314: the children, each created by func_0011E580
+    BaseObject** items;            // 0x314: the children, each created by func_0011E580
     s32 f318;               // 0x318
     f32 f31C;               // 0x31C
     u8 pad320[0x324 - 0x320];
@@ -38,10 +38,10 @@ struct C7D : C02 {
     u8 pad328[0x330 - 0x328];
 };
 
-typedef char check_C7D[sizeof(C7D) == 0x330 ? 1 : -1];
+typedef char check_ObjectSubGroup[sizeof(ObjectSubGroup) == 0x330 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001F4500(C7D* self, void* stream);         // 0x7D slot 10
-void func_001F4660(C7D* self);                       // 0x7D slot 16
+void func_001F4500(ObjectSubGroup* self, void* stream);         // 0x7D slot 10
+void func_001F4660(ObjectSubGroup* self);                       // 0x7D slot 16
 
 #endif

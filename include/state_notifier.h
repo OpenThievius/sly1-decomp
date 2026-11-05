@@ -11,7 +11,7 @@
 #ifndef STATE_NOTIFIER_H
 #define STATE_NOTIFIER_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 // A thing that takes a message in its class's slot 31 (0x10 + 4 * 31 = 0x8C).
 struct StateListener {
@@ -27,7 +27,7 @@ struct ContactObject {
 };
 
 // 0x55: a state, a few movement numbers set by each subclass's constructor.
-struct StateNotifier : C02 {
+struct StateNotifier : PlacedObject {
     s32 state;              // 0x2D0
     u8 pad2D4[0x2D8 - 0x2D4];
     s32 initialMode;               // 0x2D8

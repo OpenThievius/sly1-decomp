@@ -19,14 +19,14 @@
 // func_0011B0A8 the assignment (returns this). They stay free functions under their retail
 // names here, and callers call them explicitly: an inline constructor or destructor wrapping
 // them changes the callers' code (build/swarm/v1/NOTES.md, "Class or free functions").
-#ifndef R11B008_H
-#define R11B008_H
+#ifndef SCRIPT_VALUE_H
+#define SCRIPT_VALUE_H
 
 #include "common.h"
 
 struct R11B008Node;
 struct R11AFC8;
-struct S137290;
+struct BufferedStream;
 
 // Tags: the setters, func_0011B0F8 (the comparison), func_0011B258 (the deep copy),
 // func_0011B418 / func_0011B4A8 (the payload's release and reference), func_0011BA28 (the reader).
@@ -41,7 +41,7 @@ struct S137290;
 //   0x22 nothing: func_0011B538 sets the tag alone (the built-ins' empty result)
 //   -1 unset (func_0011B008)
 
-struct R11B008 {
+struct ScriptValue {
     s32 tag;                    // 0x00: func_0011B008 (-1), the setters, func_0011B418, func_0011B4A8
     union {
         s32 i;                  // 0x04: 0x14 0x1B 0x1D 0x21 (func_0011B570, func_0011B5F0, func_0011B680, func_0011B8E8)
@@ -53,13 +53,13 @@ struct R11B008 {
     };
 };
 
-typedef char check_R11B008[sizeof(R11B008) == 8 ? 1 : -1];
+typedef char check_ScriptValue[sizeof(ScriptValue) == 8 ? 1 : -1];
 
 // A value in a chain: the 0xC-byte entries of D_0025C250, made by func_0011AF28 (cleared and
 // constructed), destroyed by func_0011AF78 (the pool's callback), copied with its chain by
 // func_0011AEB8, read from a stream by func_0011BA28. A tag 0x1E value points to the first; the
 // setters take a node as the value it starts with.
-struct R11B008Node : R11B008 {
+struct R11B008Node : ScriptValue {
     R11B008Node* next;          // 0x08: func_0011AEB8, func_0011BA28
 };
 
@@ -70,7 +70,7 @@ typedef char check_R11B008Node[sizeof(R11B008Node) == 0xC ? 1 : -1];
 // of them, func_0011BD28 pushes one, func_0011BDD0 and func_0011BE90 find one by key.
 struct R11B008Key {
     s32 key;                    // 0x00: func_0011BD28, func_0011BDD0, func_0011BE90
-    R11B008 value;              // 0x04: func_0011BD28, func_0011BDD0 (func_0011B0A8), func_0011BE90
+    ScriptValue value;              // 0x04: func_0011BD28, func_0011BDD0 (func_0011B0A8), func_0011BE90
     R11B008Key* next;           // 0x0C: func_0011BD28, func_0011BDD0, func_0011BE90
 };
 
@@ -104,35 +104,35 @@ R11B008Node* func_0011AF28(void);
 void func_0011AF78(R11B008Node* self);
 void func_0011AF98(R11AFC8* src, R11AFC8* dst, s32 first);
 R11AFC8* func_0011AFC8(void);
-R11B008* func_0011B008(R11B008* self);
-R11B008* func_0011B018(R11B008* self, const R11B008* src);
-void func_0011B060(R11B008* self, s32 flags);
-R11B008* func_0011B0A8(R11B008* self, const R11B008* src);
-s32 func_0011B0F8(const R11B008* a, const R11B008* b);
-void func_0011B258(const R11B008* src, R11B008* dst, s32 first);
-void func_0011B418(R11B008* self);
-void func_0011B4A8(const R11B008* self);
-void func_0011B538(R11B008* self, s32 tag);
-void func_0011B570(R11B008* self, s32 value);
-void func_0011B5B0(R11B008* self, f32 value);
-void func_0011B5F0(R11B008* self, s32 flag);
-void func_0011B640(R11B008* self, void* p);
-void func_0011B680(R11B008* self, s32 value);
-void func_0011B6C0(R11B008* self, R11B008Node* node);
-void func_0011B700(R11B008* self, R11AFC8* rec);
-void func_0011B740(R11B008* self, f32* v);
-void func_0011B788(R11B008* self, f32* v);
-void func_0011B7D0(R11B008* self, f32* v);
-void func_0011B818(R11B008* self, f32* v);
-void func_0011B860(R11B008* self, f32* v);
-void func_0011B8A8(R11B008* self, void* p);
-void func_0011B8E8(R11B008* self, s32 value);
-R11B008* func_0011B928(R11B008* out, const R11B008* in);
-R11B008* func_0011B9A8(R11B008* out, const R11B008* in);
-R11B008Node* func_0011BA28(S137290* rd);
-R11B008* func_0011BD28(R11B008* out, R11B008List* list, s32 key, const R11B008* value);
-R11B008* func_0011BDD0(R11B008* out, R11B008List* list, s32 key, const R11B008* value);
-s32 func_0011BE90(R11B008List* list, s32 key, R11B008* out);
+ScriptValue* func_0011B008(ScriptValue* self);
+ScriptValue* func_0011B018(ScriptValue* self, const ScriptValue* src);
+void func_0011B060(ScriptValue* self, s32 flags);
+ScriptValue* func_0011B0A8(ScriptValue* self, const ScriptValue* src);
+s32 func_0011B0F8(const ScriptValue* a, const ScriptValue* b);
+void func_0011B258(const ScriptValue* src, ScriptValue* dst, s32 first);
+void func_0011B418(ScriptValue* self);
+void func_0011B4A8(const ScriptValue* self);
+void func_0011B538(ScriptValue* self, s32 tag);
+void func_0011B570(ScriptValue* self, s32 value);
+void func_0011B5B0(ScriptValue* self, f32 value);
+void func_0011B5F0(ScriptValue* self, s32 flag);
+void func_0011B640(ScriptValue* self, void* p);
+void func_0011B680(ScriptValue* self, s32 value);
+void func_0011B6C0(ScriptValue* self, R11B008Node* node);
+void func_0011B700(ScriptValue* self, R11AFC8* rec);
+void func_0011B740(ScriptValue* self, f32* v);
+void func_0011B788(ScriptValue* self, f32* v);
+void func_0011B7D0(ScriptValue* self, f32* v);
+void func_0011B818(ScriptValue* self, f32* v);
+void func_0011B860(ScriptValue* self, f32* v);
+void func_0011B8A8(ScriptValue* self, void* p);
+void func_0011B8E8(ScriptValue* self, s32 value);
+ScriptValue* func_0011B928(ScriptValue* out, const ScriptValue* in);
+ScriptValue* func_0011B9A8(ScriptValue* out, const ScriptValue* in);
+R11B008Node* func_0011BA28(BufferedStream* rd);
+ScriptValue* func_0011BD28(ScriptValue* out, R11B008List* list, s32 key, const ScriptValue* value);
+ScriptValue* func_0011BDD0(ScriptValue* out, R11B008List* list, s32 key, const ScriptValue* value);
+s32 func_0011BE90(R11B008List* list, s32 key, ScriptValue* out);
 void func_0011BEE0(R11B008List* self, R11B008List* out);
 R11B008List* func_0011BF30(void);
 void func_0011BF70(void);

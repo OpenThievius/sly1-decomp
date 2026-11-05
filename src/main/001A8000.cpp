@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "list_iter.h"
-#include "c6c.h"
-#include "c8c.h"
-#include "t217d.h"
+#include "world.h"
+#include "object_pool.h"
+#include "screen_element.h"
 #include "v24a2.h"
 #include "shapes.h"
 #include "game_clock.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "text_reader.h"
 #include "globals.h"
 
@@ -24,7 +24,7 @@ void func_0015E318(void* buf, void* out, s32 zero, void* d);
 void func_00182ED0(void* self);
 void func_001A93C8(void* self);
 
-void func_001A80E0(C8C* self)
+void func_001A80E0(ObjectPool* self)
 {
     func_00182ED0(self);
     func_001A93C8(self);
@@ -65,12 +65,12 @@ void func_001A9A40(C0D* self)
     }
 }
 
-void func_001AA788(T217D* self, f32 v)
+void func_001AA788(ScreenElement* self, f32 v)
 {
     self->scale = v;
 }
 
-void func_001AA8B8(T217D* self, f32 v)
+void func_001AA8B8(ScreenElement* self, f32 v)
 {
     self->holdTime = v;
 }
@@ -108,7 +108,7 @@ void func_001ABE20(T217D_510* self, s32 state)
 
 extern s32 D_0026227C;
 
-void func_001AA268(T217D* self)
+void func_001AA268(ScreenElement* self)
 {
     s32 value = D_0026227C;
     u32 flags = 0xFF808080;
@@ -127,7 +127,7 @@ void func_00137248(void* out, s32* value);
 void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
 
-void func_001AA790(T217D* self)
+void func_001AA790(ScreenElement* self)
 {
     u8 out[32];
     s32 tmp;
@@ -162,17 +162,17 @@ void func_001AA790(T217D* self)
     }
 }
 
-f32 func_001AA898(T217D* self)
+f32 func_001AA898(ScreenElement* self)
 {
     return self->inTime;
 }
 
-f32 func_001AA8A0(T217D* self)
+f32 func_001AA8A0(ScreenElement* self)
 {
     return self->holdTime;
 }
 
-f32 func_001AA8A8(T217D* self)
+f32 func_001AA8A8(ScreenElement* self)
 {
     return self->outTime;
 }
@@ -279,7 +279,7 @@ struct Tab_26C3E0 { T217D_Place e[37]; s32 end; };
 extern Tab_26C3E0 D_0026C3E0;
 extern u8 D_00261868[];
 
-void func_001AA1F0(T217D* self, s32 index)
+void func_001AA1F0(ScreenElement* self, s32 index)
 {
     self->place = (T217D_Place*)((u8*)&D_0026C3E0 + index * 20);
     self->outTime = 0.25f;
@@ -293,22 +293,22 @@ void func_001AA1F0(T217D* self, s32 index)
 
 void* func_0018D5C0(u32 n);
 
-void* func_001A8110(C8C* self)
+void* func_001A8110(ObjectPool* self)
 {
     if (self->sub == 0) {
         Sub8C* p = (Sub8C*)func_0018D5C0(0x20);
         self->sub = p;
-        *(C8C**)p = self;
+        *(ObjectPool**)p = self;
     }
     return self->sub;
 }
 
-void func_001AA8B0(T217D* self, f32 v)
+void func_001AA8B0(ScreenElement* self, f32 v)
 {
     self->inTime = v;
 }
 
-void func_001AA8C0(T217D* self, f32 v)
+void func_001AA8C0(ScreenElement* self, f32 v)
 {
     self->outTime = v;
 }
@@ -317,7 +317,7 @@ void func_00182C58(void* self);
 void* func_0015A448(void* obj, s32 id, void* owner);
 s32 func_001300E8(void* node, s32 kind);
 
-void func_001A8590(C8C* self)
+void func_001A8590(ObjectPool* self)
 {
     func_00182C58(self);
     if (self->f168 != 0) {
@@ -363,7 +363,7 @@ void func_001A8590(C8C* self)
 
 void func_001F5C0C(void* p, s32 value, s32 size);
 
-void func_001A9438(C8C* self)
+void func_001A9438(ObjectPool* self)
 {
     func_001F5C0C((u8*)self + 0xE0, 0, 0x70);
     V8C* t = &self->v110;
@@ -388,7 +388,7 @@ f32 func_001AB5D8(void)
 
 void func_001A93C8(void* self);
 
-void func_001A86F8(C8C* self, s32 flag)
+void func_001A86F8(ObjectPool* self, s32 flag)
 {
     if (flag) {
         func_001A93C8(self);
@@ -397,9 +397,9 @@ void func_001A86F8(C8C* self, s32 flag)
 
 struct Entry_1A8718 { s32 key; s32 pad[3]; s32 flags; };
 
-Entry_1A8718* func_001A8718(C8C* table, s32 key);
+Entry_1A8718* func_001A8718(ObjectPool* table, s32 key);
 
-void func_001A8778(C8C* table, s32 key)
+void func_001A8778(ObjectPool* table, s32 key)
 {
     Entry_1A8718* e = func_001A8718(table, key);
     if (e) {
@@ -407,7 +407,7 @@ void func_001A8778(C8C* table, s32 key)
     }
 }
 
-void func_001AA8C8(T217D* self)
+void func_001AA8C8(ScreenElement* self)
 {
     self->vt->m16(self, 0);
 }
@@ -418,9 +418,9 @@ void func_001AB920(T217D_510* self, f32 value)
 }
 
 struct Row_1A8820 { s32 unk0; s32 itemCount; void** items; u8 pad[8]; };
-s32 func_001A8820(C8C* list, C01* query) { for(s32 i=0;i<list->count;i++){ Row_1A8820* row=(Row_1A8820*)((u8*)list->items+i*0x14); if(row->itemCount<=0) continue; void** items=row->items; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->itemCount;j++) if(query==items[j]) return 1; } return 0; }
+s32 func_001A8820(ObjectPool* list, BaseObject* query) { for(s32 i=0;i<list->count;i++){ Row_1A8820* row=(Row_1A8820*)((u8*)list->items+i*0x14); if(row->itemCount<=0) continue; void** items=row->items; if(*(s32*)((u8*)items[0]+8) != query->id) continue; for(s32 j=0;j<row->itemCount;j++) if(query==items[j]) return 1; } return 0; }
 
-void func_001A93C8(C8C* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
+void func_001A93C8(ObjectPool* p) { p->f48 = 0; if (p->sub != 0 && p->sub->f4 != 0) p->sub->f10 = 0; }
 
 struct Entry_1A87E0 { s32 pad0; s32 f4; s32 pad1; s32 fC; };
 
@@ -499,7 +499,7 @@ void func_001AB938(T217D_510* self)
 
 extern u8 D_00261868[];
 
-void func_001AAF58(T217D* self, f32* p)
+void func_001AAF58(ScreenElement* self, f32* p)
 {
     if (self->clock != p) {
         if (p == 0) {
@@ -516,13 +516,13 @@ void func_001AB928(T217D_510* self, T217D_510_Fn onEnd, f32 limit)
     self->onEnd = onEnd;
 }
 
-void func_001830D8(C8C* self, void* o);
+void func_001830D8(ObjectPool* self, void* o);
 void* func_001A8110(void* self);
 void func_00152438(void* self, s32 value);
 void func_00152470(void* list, void* item);
 u8* func_0018D568(s32 size, void* src);
 
-void func_001A84C8(C8C* self, C8C* other)
+void func_001A84C8(ObjectPool* self, ObjectPool* other)
 {
     func_001830D8(self, other);
     if (self->sub != 0 && self->sub->f4 != 0) {
@@ -589,7 +589,7 @@ void func_001AB198(T217D_E30* self)
     func_0015C900(self->font);
 }
 
-void func_001AA8F0(T217D* self)
+void func_001AA8F0(ScreenElement* self)
 {
     s32 s = self->mode;
     if (s == 2) {
@@ -672,9 +672,9 @@ void func_001EFD10(void* a, void* b);
 
 void func_001A9FD0(void)
 {
-    T217D** slots = (T217D**)D_002486B0;
+    ScreenElement** slots = (ScreenElement**)D_002486B0;
     for (s32 i = 36; i >= 0; i--) {
-        T217D* o = slots[i];
+        ScreenElement* o = slots[i];
         o->vt->m02(o);
     }
     u8* g = g_screenFade;
@@ -691,11 +691,11 @@ extern void* const D_002486B0[];
 
 void func_001AA0C0(void)
 {
-    T217D** p = (T217D**)D_002486B0;
+    ScreenElement** p = (ScreenElement**)D_002486B0;
     s32 n = 0x24;
     do {
         n--;
-        T217D* o = *p;
+        ScreenElement* o = *p;
         o->vt->m05(o);
         p++;
     } while (n >= 0);
@@ -782,7 +782,7 @@ void func_001A9C68()
     D_00273EB0.vt = (const T217D_Vt*)D_00218600;
     D_00274118.vt = (const T217D_Vt*)D_002181F0;
     for (s32 i = 0x24; i >= 0; i--) {
-        ((T217D**)D_002486B0)[i]->vt->m00(((T217D**)D_002486B0)[i], i);
+        ((ScreenElement**)D_002486B0)[i]->vt->m00(((ScreenElement**)D_002486B0)[i], i);
     }
     func_001EFCE8(g_screenFade);
 }
@@ -792,7 +792,7 @@ extern u8 D_0024E879[];
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 void func_001E2138(void* dst, void* src);
 
-void func_001AA5A0(T217D* self)
+void func_001AA5A0(ScreenElement* self)
 {
     char buf[0x200];
     char* s = self->text;
@@ -844,10 +844,10 @@ struct Self_1A8208 {
 };
 
 void* func_0018D500(s32 size);
-C02* func_0015A418(void* a, s32 b, s32 c, Self_1A8208* d);
+PlacedObject* func_0015A418(void* a, s32 b, s32 c, Self_1A8208* d);
 void func_00152438(void* p, s32 a);
 s32 func_001527D8(void* p);
-C02* func_00183058(C02* a, C6C* b, C01* c);
+PlacedObject* func_00183058(PlacedObject* a, World* b, BaseObject* c);
 
 void func_001A8208(Self_1A8208* self)
 {
@@ -859,7 +859,7 @@ void func_001A8208(Self_1A8208* self)
     }
     for (i = 0; i < self->f34; i++) {
         Ent_1A8208* e = &self->f38[i];
-        C02* obj = func_0015A418(self->f14, 4, e->f0, self);
+        PlacedObject* obj = func_0015A418(self->f14, 4, e->f0, self);
         s32 n;
         s32 cnt;
         if (obj == 0) {
@@ -898,7 +898,7 @@ void func_001A8208(Self_1A8208* self)
         if (cnt > 0) {
             s32 k = cnt;
             do {
-                C02* o2 = func_00183058(obj, obj->world, obj->parent);
+                PlacedObject* o2 = func_00183058(obj, obj->world, obj->parent);
                 e->f8[e->fC++] = o2;
                 if (o2->desc->m0F != 0) o2->desc->m0F(o2);
                 o2->desc->m10(o2);
@@ -918,7 +918,7 @@ void func_001A8208(Self_1A8208* self)
     }
 }
 
-s32 func_001AAAC8(T217D* a, T217D* b)
+s32 func_001AAAC8(ScreenElement* a, ScreenElement* b)
 {
     s32 r = 0;
     s32 am = a->mode;
@@ -945,9 +945,9 @@ void func_001A87A8(Tab_1A87A8* table, s32 key)
     }
 }
 
-void func_001A8AF8(C8C* self);
+void func_001A8AF8(ObjectPool* self);
 
-s32 func_001A8C50(C8C* self)
+s32 func_001A8C50(ObjectPool* self)
 {
     if (self->f48 != 0) {
         return 1;
@@ -956,7 +956,7 @@ s32 func_001A8C50(C8C* self)
     return self->f48 != 0;
 }
 
-void func_001AA958(T217D* self)
+void func_001AA958(ScreenElement* self)
 {
     s32 m = self->mode;
     if (m < 3) {
@@ -966,7 +966,7 @@ void func_001AA958(T217D* self)
     }
 }
 
-void func_001AAB20(T217D *self, f32 x, f32 y) {
+void func_001AAB20(ScreenElement *self, f32 x, f32 y) {
     if (0.0f <= x) {
         self->w = x;
     }
@@ -990,8 +990,8 @@ extern void* const D_002486B0[];
 
 void func_001A9F78(void)
 {
-    T217D** base = (T217D**)D_002486B0;
-    T217D** p = base + 36;
+    ScreenElement** base = (ScreenElement**)D_002486B0;
+    ScreenElement** p = base + 36;
     s32 i = 0x24;
     do {
         i--;
@@ -1004,11 +1004,11 @@ extern void* const D_002486B0[];
 
 void func_001AA060(void)
 {
-    T217D** base = (T217D**)D_002486B0;
-    T217D** p = base + 36;
+    ScreenElement** base = (ScreenElement**)D_002486B0;
+    ScreenElement** p = base + 36;
     s32 i = 0x24;
     do {
-        T217D* o = *p;
+        ScreenElement* o = *p;
         p--;
         o->vt->m16(o, 0);
         i--;
@@ -1019,13 +1019,13 @@ extern void* const D_002486B0[];
 void func_001AA110(void)
 {
     s32 n = 0x24;
-    T217D** p = (T217D**)D_002486B0;
+    ScreenElement** p = (ScreenElement**)D_002486B0;
     do {
-        T217D* o = *p;
+        ScreenElement* o = *p;
         p++;
         n--;
         if (o->mode != 0) {
-            void (*fn)(T217D*) = o->vt->m10;
+            void (*fn)(ScreenElement*) = o->vt->m10;
             if (fn != 0) {
                 fn(o);
             }
@@ -1035,7 +1035,7 @@ void func_001AA110(void)
 
 extern Tab_26C3E0 D_0026C3E0;
 
-void func_001AAEC0(T217D* changed)
+void func_001AAEC0(ScreenElement* changed)
 {
     T217D_Place* e = (T217D_Place*)&D_0026C3E0;
     s32 i;
@@ -1043,8 +1043,8 @@ void func_001AAEC0(T217D* changed)
     for (i = 0; i < 0x25; i++, e++) {
         s32 v = e->anchor;
         if (v != -1) {
-            if (((T217D**)D_002486B0)[v] == changed) {
-                func_001AAB60(((T217D**)D_002486B0)[i]);
+            if (((ScreenElement**)D_002486B0)[v] == changed) {
+                func_001AAB60(((ScreenElement**)D_002486B0)[i]);
             }
         }
     }
@@ -1093,7 +1093,7 @@ void func_001AA178(void)
 {
     s32 i;
     for (i = 0; i < 0x25; i++) {
-        T217D* p = ((T217D**)D_002486B0)[i];
+        ScreenElement* p = ((ScreenElement**)D_002486B0)[i];
         if (p->mode != 0) {
             p->vt->m09(p);
         }
@@ -1104,7 +1104,7 @@ void func_001AA178(void)
 
 f32 D_002743A0[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
 
-void func_001AA298(T217D* self) {
+void func_001AA298(ScreenElement* self) {
     f32 t = *self->clock;
     s32 s = self->mode;
     switch (s) {
@@ -1154,7 +1154,7 @@ struct Entry_1A8150 { s32 f0; s32 f4; u8 pad[8]; s32 f10; };
 
 void* func_0018D5C0(u32 n);
 
-void func_001A8150(C8C* self, s32 a1, s32 a2, s32 a3, s32 a4)
+void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     if (self->items == 0) {
         self->items = func_0018D5C0(0x50);
@@ -1278,11 +1278,11 @@ void func_001AB2B8(T217D_E30* self)
 // EXACT: dst built as i*4 + (u32)items
 
 struct Rec_1A8AF8 { s32 f0; s32 count; s32* items; s32 f0C; s32 flags; };
-void func_001A89E8(C8C* self);
-s32 func_001A88A0(C8C* self, s32 item);
+void func_001A89E8(ObjectPool* self);
+s32 func_001A88A0(ObjectPool* self, s32 item);
 void func_001F5B08(s32* dst, s32* src, s32 size);
 
-void func_001A8AF8(C8C* self)
+void func_001A8AF8(ObjectPool* self)
 {
     s32 s5 = 0;
     s32 s4 = 0;
@@ -1328,9 +1328,9 @@ struct Rec_001A89E8 {
     s32 f10;
 };
 
-s32 func_001A88A0(C8C* self, s32 item);
+s32 func_001A88A0(ObjectPool* self, s32 item);
 
-void func_001A89E8(C8C* self)
+void func_001A89E8(ObjectPool* self)
 {
     s32 i;
     s32 pos;
@@ -1477,7 +1477,7 @@ void func_001AB980(T217D_510* self, f32 dt)
 
 f32 func_001EAF28(f32 x);
 
-void func_001AAB60(T217D* self) {
+void func_001AAB60(ScreenElement* self) {
     T217D_Place* r = self->place;
     f32 x0 = 0.0f;
     f32 x1 = 640.0f;
@@ -1485,10 +1485,10 @@ void func_001AAB60(T217D* self) {
     f32 y0 = x0;
 
     if (r->anchor != -1) {
-        T217D** objs = (T217D**)D_002486B0;
+        ScreenElement** objs = (ScreenElement**)D_002486B0;
         T217D_Place* recs = (T217D_Place*)&D_0026C3E0;
         do {
-            T217D* o = objs[r->anchor];
+            ScreenElement* o = objs[r->anchor];
             if (o->vt->m18(o, self)) {
                 switch (r->relation) {
                 case 0:
@@ -1656,27 +1656,27 @@ extern const Fn_Table D_002181A0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func
 extern const Fn_Table D_002181F0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AAF88, (Fn_Table)func_001AB058, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AB198, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AB5D8, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00218240[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AAF88, (Fn_Table)func_001AB058, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AB198, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AB5D8, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00218290[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AAF88, (Fn_Table)func_001AB058, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AB198, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AB5D8, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_002182E0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001ABE70, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AC0E8, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_00218380[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AC888, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AC910, (Fn_Table)func_001ACAA8, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001ACA30, (Fn_Table)func_001ACA68, (Fn_Table)func_001AC990, (Fn_Table)func_001AAF58, (Fn_Table)func_001AC9E0, 0 };
-extern const Fn_Table D_002183D0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001ACDA0, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001ACE38, (Fn_Table)func_001AD3F0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AD378, (Fn_Table)func_001AD3B0, (Fn_Table)func_001AD320, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_002182E0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001ABE70, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AC0E8, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_00218380[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AC888, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AC910, (Fn_Table)func_001ACAA8, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001ACA30, (Fn_Table)func_001ACA68, (Fn_Table)func_001AC990, (Fn_Table)func_001AAF58, (Fn_Table)func_001AC9E0, 0 };
+extern const Fn_Table D_002183D0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001ACDA0, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001ACE38, (Fn_Table)func_001AD3F0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AD378, (Fn_Table)func_001AD3B0, (Fn_Table)func_001AD320, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00218420[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AD6A8, (Fn_Table)func_001AD718, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AD7B0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_00218470[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001ADC60, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001ADD28, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_00218470[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001ADC60, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001ADD28, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_002184C0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001ADF28, (Fn_Table)func_001AE178, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AE220, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AE130, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00218510[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AB600, (Fn_Table)func_001AB660, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AB710, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_00218560[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AD940, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001ADB00, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AD970, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_002185B0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AE510, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AE5E0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_00218600[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AE758, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AA790, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AE7F8, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_002186D0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_00193E58, (Fn_Table)(void (*)(T217D* self))func_001AA298, (Fn_Table)func_001940E8, (Fn_Table)func_001943E8, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_00194F80, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_00194F00, (Fn_Table)func_00194F38, (Fn_Table)func_00194E60, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_00218560[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AD940, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001ADB00, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AD970, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_002185B0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AE510, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AE5E0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_00218600[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001AE758, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001AA790, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AE7F8, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_002186D0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_00193E58, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, (Fn_Table)func_001940E8, (Fn_Table)func_001943E8, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_00194F80, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_00194F00, (Fn_Table)func_00194F38, (Fn_Table)func_00194E60, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00218720[20] = { (Fn_Table)func_0014ABD0, (Fn_Table)func_0014AC48, (Fn_Table)func_0014AD70, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_0014ADE0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_0014AD00, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_0021A3F0[20] = { (Fn_Table)func_001E5E70, (Fn_Table)func_001E6188, (Fn_Table)func_001E77C0, 0, 0, (Fn_Table)func_001E8840, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001E73B8, (Fn_Table)func_001E7C60, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001E76E0, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_0021A440[20] = { (Fn_Table)func_001310F0, (Fn_Table)func_00131198, (Fn_Table)(void (*)(T217D* self))func_001AA298, (Fn_Table)func_00136238, (Fn_Table)func_00136040, (Fn_Table)func_001363D0, (Fn_Table)func_00136EF8, (Fn_Table)func_00136FA8, (Fn_Table)func_00136408, (Fn_Table)func_001366A0, 0, (Fn_Table)func_001365F0, (Fn_Table)func_001AA8A0, (Fn_Table)func_00136648, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_00135550, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_00220BF0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)(void (*)(T217D* self))func_001AA268, (Fn_Table)(void (*)(T217D* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001821B0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_002210F0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001F1960, (Fn_Table)(void (*)(T217D* self))func_001AA298, (Fn_Table)func_001F1C90, (Fn_Table)func_001F1A08, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001F20A8, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_0021A440[20] = { (Fn_Table)func_001310F0, (Fn_Table)func_00131198, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, (Fn_Table)func_00136238, (Fn_Table)func_00136040, (Fn_Table)func_001363D0, (Fn_Table)func_00136EF8, (Fn_Table)func_00136FA8, (Fn_Table)func_00136408, (Fn_Table)func_001366A0, 0, (Fn_Table)func_001365F0, (Fn_Table)func_001AA8A0, (Fn_Table)func_00136648, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_00135550, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_00220BF0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)(void (*)(ScreenElement* self))func_001AA268, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001821B0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_002210F0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001F1960, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, (Fn_Table)func_001F1C90, (Fn_Table)func_001F1A08, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001F20A8, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_002212E0[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_0016B4A0, (Fn_Table)func_0016B560, (Fn_Table)func_0016B7A8, (Fn_Table)func_0016B580, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_0016B860, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
-extern const Fn_Table D_00221330[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_0016BA40, (Fn_Table)(void (*)(T217D* self))func_001AA298, (Fn_Table)func_0016BDD0, (Fn_Table)func_0016BBA8, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_0016BEA0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
+extern const Fn_Table D_00221330[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_0016BA40, (Fn_Table)(void (*)(ScreenElement* self))func_001AA298, (Fn_Table)func_0016BDD0, (Fn_Table)func_0016BBA8, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_0016BEA0, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 extern const Fn_Table D_00221380[20] = { (Fn_Table)func_001AA1F0, (Fn_Table)func_001DFEB8, (Fn_Table)func_001E00B0, 0, 0, (Fn_Table)func_001AA8C8, 0, 0, (Fn_Table)func_001AA4F0, (Fn_Table)func_001E0678, 0, (Fn_Table)func_001AA898, (Fn_Table)func_001AA8A0, (Fn_Table)func_001AA8A8, (Fn_Table)func_001AA8F0, (Fn_Table)func_001AA958, (Fn_Table)func_001AA998, (Fn_Table)func_001AAF58, (Fn_Table)func_001AAAC8, 0 };
 
-Entry_1A8718* func_001A8718(C8C* self, s32 key)
+Entry_1A8718* func_001A8718(ObjectPool* self, s32 key)
 {
     s32 i;
     for (i = 0; i < self->count; i++) {
@@ -1689,7 +1689,7 @@ Entry_1A8718* func_001A8718(C8C* self, s32 key)
 s32 func_001E2100(const char*);
 void func_001E2138(char*, const char*);
 void func_0015E290(TextReader*, f32, f32*, f32*);
-void func_001AA4F0(T217D* self, const char* arg)
+void func_001AA4F0(ScreenElement* self, const char* arg)
 {
     if (arg && func_001E2100(arg)) {
         func_001E2138(self->text, arg);
@@ -1792,13 +1792,13 @@ struct End_1A88A0 {
     }
 };
 
-s32 func_001A88A0(C8C* self, Key_1A88A0* key)
+s32 func_001A88A0(ObjectPool* self, Key_1A88A0* key)
 {
     Sub8C* group = self->sub;
 
     if (group != 0 && group->f4 != 0) {
         List_1A88A0* list;
-        C8C* skip;
+        ObjectPool* skip;
         Iter_1A88A0 it;
         u8* obj;
 
@@ -1808,7 +1808,7 @@ s32 func_001A88A0(C8C* self, Key_1A88A0* key)
             skip = 0;
             break;
         case 2: {
-            C8C* e = (C8C*)group->f14;
+            ObjectPool* e = (ObjectPool*)group->f14;
             skip = self;
             if (e->f48 == (s32)key) {
                 return 0;
@@ -1819,7 +1819,7 @@ s32 func_001A88A0(C8C* self, Key_1A88A0* key)
         }
         Begin_1A88A0::Of(&it, list);
         for (obj = Next_1A88A0::Of(&it); obj != 0; obj = Next_1A88A0::Of(&it)) {
-            C8C* e = *(C8C**)obj;
+            ObjectPool* e = *(ObjectPool**)obj;
             if (e != skip && e->f48 == (s32)key) {
                 End_1A88A0::Of(&it);
                 return 0;
@@ -1839,7 +1839,7 @@ s32 func_001A88A0(C8C* self, Key_1A88A0* key)
     return 1;
 }
 
-void func_001AA998(T217D* self, s32 mode)
+void func_001AA998(ScreenElement* self, s32 mode)
 {
     if (self->mode == mode) {
         return;

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "paired_object.h"
 #include "hit_target.h"
 #include "sound_state_object.h"
 #include "object_creator.h"
 #include "list_iter.h"
-#include "c8c.h"
+#include "object_pool.h"
 #include "pair_controller.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "shapes.h"
 #include "object_link.h"
 #include "target_binding.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "globals.h"
 
 void func_001A76A0(void* child, int flag);
@@ -385,7 +385,7 @@ void func_001A7E70(void)
 
 extern s32 D_0026C3DC;
 
-void func_001A7E90(G27C220* ctx)
+void func_001A7E90(GameProgress* ctx)
 {
     s32 v = D_0026C3DC;
     if (v == 2) {
@@ -407,7 +407,7 @@ set:
 
 extern s32 D_0026C3DC;
 
-s32 func_001A7EE8(G27C220* ctx)
+s32 func_001A7EE8(GameProgress* ctx)
 {
     s32 v = D_0026C3DC;
     if (v == 1) {
@@ -545,7 +545,7 @@ void func_001A75D0(SoundStateObject* self)
     if (self->soundId != 0) {
         self->soundHandle = (void*)func_001B6290(self->soundId, self, -1, 1);
     }
-    C01* n = (C01*)self->children.head;
+    BaseObject* n = (BaseObject*)self->children.head;
     while (n != 0) {
         if (func_001300E8(n, 0x7E) != 0) {
             self->child7E = n;
@@ -569,8 +569,8 @@ void func_001A7648(SoundStateObject* self)
     }
 }
 
-void func_001B7968(C03* self);
-void func_001B9AE0(C03* self, s32 a, s32 b, s32 c, s32 d);
+void func_001B7968(Collider* self);
+void func_001B9AE0(Collider* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001A7708(ObjectCreator* self)
 {
@@ -1180,29 +1180,29 @@ s32 func_001A4898(void)
 
 enum Kind_1A5C90 { };
 
-void func_001B9AE0(C03* self, s32 a, s32 b, s32 c, s32 d);
+void func_001B9AE0(Collider* self, s32 a, s32 b, s32 c, s32 d);
 void func_001BFCD8(Kind_1A5C90 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 void func_001A5C90(void* a0, void* a1)
 {
     PairedObject* s = (PairedObject*)a1;
-    ((C03*)s->partner)->desc->m15((C03*)s->partner, (C01*)a1);
+    ((Collider*)s->partner)->desc->m15((Collider*)s->partner, (BaseObject*)a1);
     s = (PairedObject*)a1;
-    ((C03*)s->partner)->desc02()->m20((C03*)s->partner, (Vec02*)&D_00248D30);
+    ((Collider*)s->partner)->desc02()->m20((Collider*)s->partner, (Vec02*)&D_00248D30);
     s = (PairedObject*)a1;
-    ((C03*)s->partner)->desc02()->m21((C03*)s->partner, (Vec02*)&D_00248D30);
-    func_001B9AE0((C03*)((PairedObject*)a1)->partner, 3, 0, 3, 0);
+    ((Collider*)s->partner)->desc02()->m21((Collider*)s->partner, (Vec02*)&D_00248D30);
+    func_001B9AE0((Collider*)((PairedObject*)a1)->partner, 3, 0, 3, 0);
     func_001BFCD8((Kind_1A5C90)0x151, (void*)0, 0, (void*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
 
 struct Ctx_1A5D50 { u8 bytes[4]; };
 
-void func_001B9AE0(C03* self, s32 a, void* b, s32 c, s32 d);
+void func_001B9AE0(Collider* self, s32 a, void* b, s32 c, s32 d);
 
 void func_001A5D50(Ctx_1A5D50* unused, PairedObject* h)
 {
-    C03* o = (C03*)h->partner;
+    Collider* o = (Collider*)h->partner;
 
     (void)unused;
     o->desc->m15(o, 0);
@@ -1211,8 +1211,8 @@ void func_001A5D50(Ctx_1A5D50* unused, PairedObject* h)
     func_001B9AE0(o, 2, (void*)&D_00248D20, 3, 0);
 }
 
-void func_001B7968(C03* self);
-void func_001B9AE0(C03* self, s32 a, void* b, s32 c, void* d);
+void func_001B7968(Collider* self);
+void func_001B9AE0(Collider* self, s32 a, void* b, s32 c, void* d);
 
 void func_001A6498(PairedObject* self)
 {
@@ -1330,8 +1330,8 @@ void func_001A4070(C15* self, s32 n)
 }
 
 
-void func_001B7968(C03* self);
-void func_001B9AE0(C03* self, s32 a, void* b, s32 c, s32 d);
+void func_001B7968(Collider* self);
+void func_001B9AE0(Collider* self, s32 a, void* b, s32 c, s32 d);
 void func_001A6F88(HitTarget* self)
 {
     s32* z;
@@ -1348,7 +1348,7 @@ self->hitInterval = pt2;
 z[1]=0;z[2]=0;
 }
 
-void func_001A7F50(G27C220* self)
+void func_001A7F50(GameProgress* self)
 {
     s32 g = D_0026C3DC;
     switch (g) {
@@ -1365,13 +1365,13 @@ void func_001A7F50(G27C220* self)
 
 extern f32 D_0024CBC4;
 
-void func_00182C18(C8C* self);
+void func_00182C18(ObjectPool* self);
 struct Buf_1A7FE8 { u8 b[1]; };
 s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
-void func_001A8208(C8C* self);
+void func_001A8208(ObjectPool* self);
 
-void func_001A7FE8(C8C* self)
+void func_001A7FE8(ObjectPool* self)
 {
     func_00182C18(self);
     u8* s1 = (u8*)self + 0x60;

@@ -5,9 +5,9 @@
 #ifndef SCALED_OFFSET_OBJECT_H
 #define SCALED_OFFSET_OBJECT_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct ScaledOffsetObject : C03 {
+struct ScaledOffsetObject : Collider {
     f32 scale;              // 0x550: 100.0 at set-up (slot 0); func_00146240 changes it
     f32 factorX;            // 0x554: read after the collision prefix (slot 10)
     f32 factorY;            // 0x558: read after factorX

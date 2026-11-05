@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "globals.h"
 
 struct Loc_171DD8 { u8 pad0[8]; f32 f8; };
@@ -15,7 +15,7 @@ void func_001B6628(void* p, s32 n);
 
 extern f32 D_00261860[];
 
-void func_00171DD8(C07* self)
+void func_00171DD8(Player* self)
 {
     Loc_171DD8 loc;
     if (func_00171180(self) == 0) {
@@ -42,7 +42,7 @@ void func_00171DD8(C07* self)
 
 void func_001B9680(void* self);
 
-void func_00172AE0(C07* self)
+void func_00172AE0(Player* self)
 {
     func_001B9680(self);
     self->f21CC = 0;
@@ -53,7 +53,7 @@ extern u8* D_002623C0;
 void func_001922E8(void* a, void* b);
 void func_001D29C8(s32 id);
 
-void func_00173708(C07* a, void* b)
+void func_00173708(Player* a, void* b)
 {
     func_001922E8(a, b);
     s32 id;
@@ -72,7 +72,7 @@ struct Out_170528 {
     f32 f30;
 };
 
-void func_00170528(C07* self, s32 flags, Out_170528* out)
+void func_00170528(Player* self, s32 flags, Out_170528* out)
 {
     if (self->f2220 == 4) {
         if (flags & 0x10) {
@@ -95,7 +95,7 @@ void func_00175170(void* self, s32 mode, s32 count);
 void func_001C61E0(void* self, s32 arg);
 void func_001D4C98(void* self);
 
-void func_001705C8(C07* self)
+void func_001705C8(Player* self)
 {
     s32 flags = self->f2254;
     if (flags == 0) {
@@ -127,7 +127,7 @@ struct Ent_170790 {
     s32 i9C;
 };
 
-s32 func_00170790(C07* self, Ent_170790* e, s32 idx)
+s32 func_00170790(Player* self, Ent_170790* e, s32 idx)
 {
     if (self->f2220 != 0xD) {
         return func_001C5248(self);
@@ -151,7 +151,7 @@ struct Vec4_171F28 {
 
 void func_001EDEF0(void* a0, void* a1, void* a2, void* a3);
 
-void func_00171F28(C07* self, f32 unusedF12, f32 scale)
+void func_00171F28(Player* self, f32 unusedF12, f32 scale)
 {
     Vec4_171F28 tmp = *(Vec4_171F28*)((u8*)self + 0x140);
     tmp.z = tmp.z - 75.0f;
@@ -168,7 +168,7 @@ void func_00171F28(C07* self, f32 unusedF12, f32 scale)
     }
 }
 
-void func_00171FE0(C07* self)
+void func_00171FE0(Player* self)
 {
     s32 st = self->f2220;
     if (st != 6) {
@@ -199,7 +199,7 @@ struct __attribute__((aligned(16))) Quad_172B88 { s32 a, b, c, d; };
 void func_001B8540(void* self);
 void func_001B8420(void* self, void* p, f32 f);
 
-void func_00172B88(C07* self)
+void func_00172B88(Player* self)
 {
     s32 i = 0;
     func_001B8540(self);
@@ -215,7 +215,7 @@ void func_00172B88(C07* self)
 
 s32 func_00182FC8(void* p);
 
-void* func_00172BF8(C07* self, s32* out)
+void* func_00172BF8(Player* self, s32* out)
 {
     void* p = self->f25D8[0];
     if (p != 0 && func_00182FC8(p) != 0) {
@@ -245,7 +245,7 @@ void* func_00172BF8(C07* self, s32* out)
     return 0;
 }
 
-s32 func_00172EB8(C07* self)
+s32 func_00172EB8(Player* self)
 {
     if (self->f2220 == 3 || self->f2220 == 0xD) {
         return 0;
@@ -253,10 +253,10 @@ s32 func_00172EB8(C07* self)
     return 3;
 }
 
-void func_001C5438(C07* self);
-void func_001C4618(C07* self, void* a1, void* a2, s32 a3, f32 f12, void* a4);
+void func_001C5438(Player* self);
+void func_001C4618(Player* self, void* a1, void* a2, s32 a3, f32 f12, void* a4);
 
-void func_00172530(C07* self)
+void func_00172530(Player* self)
 {
     func_001C5438(self);
     if (self->f2220 == 6 && self->f239C == 7) {
@@ -298,7 +298,7 @@ typedef void (*VFn_172B08)(void* self);
 
 void func_001BC088(void* self, void* b, f32 x);
 
-void func_00172B08(C07* self)
+void func_00172B08(Player* self)
 {
     *(Quad_172B08*)&self->v21D0[1] = ((Inner_172B08*)self->f23D4)->q140;
     self->f21CC = 0;
@@ -322,16 +322,16 @@ struct VtObj_1725E0
 {
     void** vt;
 };
-void func_001C4848(C07* s, void* a, void* b, void* c);
-void func_00125B70(C07* s, void* c, f32* out);
-void func_00172078(C07* s, f32* buf, f32 t);
+void func_001C4848(Player* s, void* a, void* b, void* c);
+void func_00125B70(Player* s, void* c, f32* out);
+void func_00172078(Player* s, f32* buf, f32 t);
 void func_00188B08(void* a, f32* b, f32* out);
-void func_001CDD98(C07* s);
-void func_001C49C8(C07* s, void* a, void* b);
+void func_001CDD98(Player* s);
+void func_001C49C8(Player* s, void* a, void* b);
 void func_001C3028(void* a, void* b);
-void func_001D62E0(C07* s, void* a, void* b);
+void func_001D62E0(Player* s, void* a, void* b);
 
-void func_001725E0(C07* self, void* a, void* b)
+void func_001725E0(Player* self, void* a, void* b)
 {
     f32 buf[12];
     f32 out[20];
@@ -373,7 +373,7 @@ extern Params_2638A0 D_002638A0;
 f32 func_002058A0(f32 v, f32 m);
 f32 func_001EA4B8(void* p, f32 a, f32 b, void* o, f32 c);
 
-void func_001727B0(C07* self)
+void func_001727B0(Player* self)
 {
     if (self->f242C == 0.0f) {
         if (self->f2434 == 0.0f) {
@@ -398,7 +398,7 @@ void func_001727B0(C07* self)
 // NEAR: frame, saves, the vtable call and the branch tree match; the 0xD path loads its two floats into $f1/$f0 where retail uses $f0/$f1, so the shared store tail differs
 
 struct Sub_170410 { u8 pad0[0x40]; s32 f40; };
-typedef s32 (*VFn_170410)(C07* self, void* out);
+typedef s32 (*VFn_170410)(Player* self, void* out);
 struct Out_170410 { u8 pad0[0x94]; f32 f94; f32 f98; };
 
 f32 D_00262E34 = 0.8f;
@@ -407,7 +407,7 @@ f32 D_002637B0 = 1.0f;
 f32 D_002637B4 = 0.3f;
 f32 D_002637B8 = 1.5f;
 
-void func_00170410(C07* self, Out_170410* out)
+void func_00170410(Player* self, Out_170410* out)
 {
     f32 a;
     f32 b;
@@ -452,14 +452,14 @@ divide:
 
 struct Aux_172898 { u8 pad0[0x50]; void* f50; u8 pad1[0x554 - 0x54]; Contact03* f554; };
 
-void func_001BC4D8(C07* a, void* b);
+void func_001BC4D8(Player* a, void* b);
 s32 func_001300E8(void* key, s32 kind, s32 extra);
-void func_001C57C8(C07* a);
+void func_001C57C8(Player* a);
 void func_00128018(Aux_172898* a, s32 b, void* c, void* d);
 void func_001861E8(void* a, Contact03* b);
 extern f32 D_0026185C[];
 
-void func_00172898(C07* self)
+void func_00172898(Player* self)
 {
     ContactRow03* row;
     Contact03** slot;
@@ -483,7 +483,7 @@ void func_00172898(C07* self)
                         } else {
                             slot = &n->next;
                         }
-                    } else if ((void*)n->end[1 - k].body == ((Aux_172898*)self->f2750) && ((s32 (*)(C07*, Contact03*))self->desc06()->m56)(self, n)) {
+                    } else if ((void*)n->end[1 - k].body == ((Aux_172898*)self->f2750) && ((s32 (*)(Player*, Contact03*))self->desc06()->m56)(self, n)) {
                         *slot = n->next;
                         n->next = ((Aux_172898*)self->f2750)->f554;
                         ((Aux_172898*)self->f2750)->f554 = n;
@@ -534,16 +534,16 @@ void func_00172898(C07* self)
     func_001861E8(self->world, head);
 }
 
-void func_001C5C10(C07* a, C03* b, void* c, void* d);
-void func_001C4790(C07* a, C03* b, void* c, void* d);
-void func_001879C0(C03* a, f32 f, void* b, void* c, s32 d, s32 e, s32 g, void* h);
-void func_00186BA8(void* a, C03* b, void* c, void* d, void* e, void* f);
+void func_001C5C10(Player* a, Collider* b, void* c, void* d);
+void func_001C4790(Player* a, Collider* b, void* c, void* d);
+void func_001879C0(Collider* a, f32 f, void* b, void* c, s32 d, s32 e, s32 g, void* h);
+void func_00186BA8(void* a, Collider* b, void* c, void* d, void* e, void* f);
 
-void func_00172CF0(C07* self, C03* a1, void* a2, void* a3, void* a4, void* a5)
+void func_00172CF0(Player* self, Collider* a1, void* a2, void* a3, void* a4, void* a5)
 {
     s32 idx;
-    C03* v;
-    C03* cur;
+    Collider* v;
+    Collider* cur;
 
     switch (self->f2220)
     {
@@ -573,10 +573,10 @@ void func_00172CF0(C07* self, C03* a1, void* a2, void* a3, void* a4, void* a5)
     }
     func_001C4790(self, a1, a4, &self->f1190);
     func_001C4790(self, a1, a4, &self->f1290);
-    v = (C03*)func_00172BF8(self, &idx);
+    v = (Collider*)func_00172BF8(self, &idx);
     if (v)
     {
-        for (cur = a1; cur; cur = (C03*)cur->parent)
+        for (cur = a1; cur; cur = (Collider*)cur->parent)
         {
             if (*((u8*)cur + idx + 0x2B0))
             {

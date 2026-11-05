@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "list_iter.h"
 #include "fpu.h"
-#include "c6c.h"
+#include "world.h"
 #include "c67.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "globals.h"
 #include "shapes.h"
 #include "object_link.h"
 #include "owner_message.h"
 #include "game_clock.h"
-#include "g262c70.h"
+#include "pad_record.h"
 #include "memory_card.h"
 
 void func_001C9AF8(void);
@@ -170,20 +170,20 @@ void func_001E90E8(void* self)
 
 struct Set_001E9498 {
     u8 pad0[0xC];
-    T217D* items[8];
+    ScreenElement* items[8];
     s32 count;
 };
 
 s32 func_001BE5E8(void);
 void func_001BEA28(void);
 
-void func_001E9498(Set_001E9498* self, T217D* node)
+void func_001E9498(Set_001E9498* self, ScreenElement* node)
 {
     if (func_001BE5E8() && self->count == 1) {
         func_001BEA28();
     }
     if (self->count >= 2) {
-        T217D* last = self->items[self->count - 1];
+        ScreenElement* last = self->items[self->count - 1];
         if (last->vt->m03) {
             last->vt->m03(last, 0);
         }
@@ -453,13 +453,13 @@ void func_001E8FA8(C0B* self)
     }
 }
 
-void func_001E9E30(C6C* self)
+void func_001E9E30(World* self)
 {
     ListFrame frame;
-    C03* s1 = (C03*)self->list6C.head;
+    Collider* s1 = (Collider*)self->list6C.head;
     if (s1 != 0) {
         do {
-            C03* s0 = (C03*)s1->parts.head;
+            Collider* s0 = (Collider*)s1->parts.head;
             if (s0 != 0) {
                 do {
                     u64 bit = (u64)1 << 53;
@@ -467,10 +467,10 @@ void func_001E9E30(C6C* self)
                         ((Desc03*)s0->desc)->m44(s0);
                     }
                     s0->flags538 &= ~bit;
-                    s0 = (C03*)s0->link2E4.next;
+                    s0 = (Collider*)s0->link2E4.next;
                 } while (s0 != 0);
             }
-            s1 = (C03*)s1->link414.next;
+            s1 = (Collider*)s1->link414.next;
         } while (s1 != 0);
     }
 }
@@ -802,9 +802,9 @@ f32 D_00275C28[3] = { 1.0f, 0.0f, 0.1f };
 
 f32 func_001EA4B8(void* p, void* out, f32 a, f32 b, f32 c);
 
-void func_001EA0A8(C6C* self, f32 x)
+void func_001EA0A8(World* self, f32 x)
 {
-    C6C* o = self;
+    World* o = self;
     f32 a = o->f234C;
     f32 b = o->f2350;
     if (b < a) {
@@ -927,12 +927,12 @@ extern s32 D_00275F84;
 extern void func_0016E118(s32 n);
 extern void* func_001F4378(void);
 extern void func_001F4808(void* x);
-extern void func_0016EC20(G262C70* p, s32 n);
+extern void func_0016EC20(PadRecord* p, s32 n);
 extern void func_0018C568(MemoryCard* g);
 extern void func_001605E8(void* p);
 extern void func_00160948(void);
 extern void func_00194D30(void* self, s32 a, s32 b);
-extern void func_001E9498(Obj_1E9108* o, T217D* g);
+extern void func_001E9498(Obj_1E9108* o, ScreenElement* g);
 extern void func_001E98E8(Obj_1E9108* o, f32 v);
 extern void func_001E96F8(Obj_1E9108* o, s32 mode);
 extern void func_001409E0(void);
@@ -942,7 +942,7 @@ void func_001E9108(Obj_1E9108* obj)
 {
     f32 d = D_00261858.elapsed - obj->f8;
     s32 s1 = obj->state;
-    G262C70* s2;
+    PadRecord* s2;
     s32 s5;
     if (D_00262C68 & 4) {
         s2 = &D_00262C70;
@@ -1062,7 +1062,7 @@ struct Grid_1EB748 {
     f32 scale;
 };
 typedef s32 (*Fn_1EB748)(C1C* self, void* arg);
-typedef void (*GFn_1EB748)(C07* g, void* arg);
+typedef void (*GFn_1EB748)(Player* g, void* arg);
 struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
 
 s32 D_00275CD8[4] = { 1228, 1230, 1229, 1231 };
@@ -1073,12 +1073,12 @@ void func_001F3C08(void* a, Mat3U* out);
 void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_001B64D8(void* a, s32 b);
 s32 func_00160C58(void);
-void func_001929D0(C07* g);
+void func_001929D0(Player* g);
 void func_001D7098(OwnerMessage* out, s32 mode, C1C* self);
 void func_001EB698(void);
 void func_001ED020(C13* o);
 void func_001C0C08(s32 a, s32 b);
-void func_0017CE20(void* a, C07* g);
+void func_0017CE20(void* a, Player* g);
 
 void func_001EB748(C1C* self, In_1EB748* in)
 {
@@ -1145,7 +1145,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
                 func_001929D0(D_00262E10);
                 func_001D7098(&msg, 0, self);
                 msg.fn = func_001EB698;
-                ((s32 (*)(C07*, OwnerMessage*))((GFn_1EB748*)D_00262E10->desc)[0x140 / 4])(D_00262E10, &msg);
+                ((s32 (*)(Player*, OwnerMessage*))((GFn_1EB748*)D_00262E10->desc)[0x140 / 4])(D_00262E10, &msg);
                 o = (C13*)func_0015A838(self->world, 5, 0x13, 0);
                 func_001ED020(o);
                 o->fBFC = D_0026185C[0];
@@ -1155,7 +1155,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
             if (((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
                 List_1EB748* l;
                 ((void (*)(C1C*))((Fn_1EB748*)self->desc)[0x150 / 4])(self);
-                C07* gl = D_00262E10;
+                Player* gl = D_00262E10;
                 self->f688 = 1;
                 gl->f26C4 = 1;
                 f32 v = D_0026185C[0];
@@ -1346,12 +1346,12 @@ void func_001EAD88(f32* sinOut, f32* cosOut, f32 angle)
 
 extern s32 D_00275F84;
 extern s32 D_00270458;
-s32 func_001DDA80(C6C* p);
+s32 func_001DDA80(World* p);
 
 s32 func_001E9970(void)
 {
     if (D_00275F84 != 0) goto fail;
-    if (func_001DDA80((C6C*)D_00275710) != 0) goto fail;
+    if (func_001DDA80((World*)D_00275710) != 0) goto fail;
     if (D_0026FF68.open != 0 && D_0026FF68.page != 0) goto fail;
     if (D_0026F808.open != 0) goto fail;
     if (D_0026F808.mode != 0) goto fail;
@@ -1427,9 +1427,9 @@ struct End_1E9EE8 {
 void func_00124EE8(Node_1E9EE8* n, f32 dt);
 void func_0012EBD8(Node_1E9EE8* n, f32 dt);
 void func_00159AD0(Node_1E9EE8* n, f32 dt);
-void func_001DBE48(C6C* self);
+void func_001DBE48(World* self);
 
-void func_001E9EE8(C6C* self, f32 dt)
+void func_001E9EE8(World* self, f32 dt)
 {
     if (dt == 0.0f) return;
     Iter_1E9EE8 it;
@@ -1492,15 +1492,15 @@ struct Holder_1E9C78 {
 
 void func_001E9B30(void);
 Holder_1E9C78* func_001925F0(void);
-void func_0015FF58(C6C* self);
+void func_0015FF58(World* self);
 void func_00124EE8(u8* n, f32 dt);
 void func_0012EBD8(u8* n, f32 dt);
 void func_00159AD0(u8* n, f32 dt);
-void func_00159588(C6C* self);
+void func_00159588(World* self);
 void func_001C0070(void);
-void func_001DBE48(C6C* self);
+void func_001DBE48(World* self);
 
-void func_001E9C78(C6C* self, f32 dt)
+void func_001E9C78(World* self, f32 dt)
 {
     func_001E9B30();
     Holder_1E9C78* h = func_001925F0();
@@ -1568,23 +1568,23 @@ struct Begin_1EA118 {
     }
 };
 
-void func_001E9EE8(C6C* self, f32 t);
-void func_001E9C78(C6C* self, f32 t);
-void func_001E9E30(C6C* self);
-void func_00138C00(C6C* self, s32 a);
-void func_001BDD00(C6C* self, s32 a, f32 t);
+void func_001E9EE8(World* self, f32 t);
+void func_001E9C78(World* self, f32 t);
+void func_001E9E30(World* self);
+void func_00138C00(World* self, s32 a);
+void func_001BDD00(World* self, s32 a, f32 t);
 s32 func_00129D70(Actor6C* n);
 void func_00129DF8(Actor6C* n);
 void func_001BB9D0(Actor6C* n);
-void func_001DBEC8(C6C* self, f32 t);
-void func_001DBE48(C6C* self);
+void func_001DBEC8(World* self, f32 t);
+void func_001DBE48(World* self);
 void func_001B4878(f32 t);
-void func_001DDC40(C6C* self);
+void func_001DDC40(World* self);
 void func_0012E710(Actor6C* n);
-void func_00143E40(C6D* a, s32 b, f32 t);
-void func_001EA0A8(C6C* self, f32 t);
+void func_00143E40(Camera* a, s32 b, f32 t);
+void func_001EA0A8(World* self, f32 t);
 
-void func_001EA118(C6C* self)
+void func_001EA118(World* self)
 {
     Iter_1EA118 it;
     GameClock* clock = &D_00261858;

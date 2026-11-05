@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x6C (descriptor D_002214A0, 0x2360 bytes): the world, the object every level object
-// has as its level (C01::world). Written for this project from what retail's code does
+// has as its level (BaseObject::world). Written for this project from what retail's code does
 // (config/us/classes.tsv).
 //
 // The fields follow the parent's and end at the size the descriptor gives; the pads keep
 // every field at its retail offset. Only the fields the matched methods read are named, and
-// the lists and pools other classes' methods reach through C01::world; the many sub-records
+// the lists and pools other classes' methods reach through BaseObject::world; the many sub-records
 // func_001DB4C8 sets up are reached by offset (its SUB macro).
-#ifndef C6C_H
-#define C6C_H
+#ifndef WORLD_H
+#define WORLD_H
 
-#include "c02.h"
+#include "placed_object.h"
 
 struct C17;
-struct C1E;
+struct EffectOwner;
 struct Contacts03;
 struct S1DBBD8;     // an entry of the callback list at 0x1EC8 (s1dbbd8.h)
 
@@ -47,17 +47,17 @@ struct ActorList6C { Actor6C* head; u8 pad4[4]; s32 offset; };
 // A pool of free records of one size (func_001B5EA0 takes the first, func_001B5EE0 clears it).
 struct Pool6C { s32 size; u8 pad4[4]; void* head; };
 
-struct C6C : C01 {
+struct World : BaseObject {
     s32 count34;            // 0x34: the 0x03 objects in the world (func_001B7A98, func_001B7B78)
     s32 count38;            // 0x38: the bodies among them (0x03 objects without a parent)
-    List01 bodies;          // 0x3C: the bodies, linked at C03::link2D0 (offset 0x2D0)
+    List01 bodies;          // 0x3C: the bodies, linked at Collider::link2D0 (offset 0x2D0)
     List01 list48;          // 0x48: the objects without a parent (func_00182C80)
     List01 list54;          // 0x54: the placed objects without a parent (func_001240F8)
     ActorList6C list60;     // 0x60: the objects func_00129D70 tries to start
     ActorList6C list6C;     // 0x6C: the objects updated every frame
     List01 list78;          // 0x78: the placed objects without a parent that have +0x294 set
     u8 pad84[0x1884 - 0x84];
-    void* f1884[0x95];      // 0x1884: the objects by id, chained at C01::nextById (func_0015A4F0)
+    void* f1884[0x95];      // 0x1884: the objects by id, chained at BaseObject::nextById (func_0015A4F0)
     void* buf1AD8;          // 0x1AD8: 0x4800 bytes
     void* buf1ADC;          // 0x1ADC: 0x10000 bytes, a byte for each pair of contact tables (func_001DC828)
     Contacts03* tables;     // 0x1AE0: the bodies' contact tables (func_001DC828 numbers one by its place)
@@ -68,13 +68,13 @@ struct C6C : C01 {
     Pool6C pool1AFC;        // 0x1AFC: 0xE0-byte records, the contacts (func_001BC4D8)
     Pool6C pool1B08;        // 0x1B08: 0x10-byte records (func_001DBB50, func_001DBB90)
     Pool6C pool1B14;        // 0x1B14: the 0x14-byte S1DBBD8 entries (func_001DBBD8, func_001DBC18)
-    Pool6C pool1B20;        // 0x1B20: the T2195 records (func_00121228 takes one, func_00121358 gives it back)
+    Pool6C pool1B20;        // 0x1B20: the Attachment records (func_00121228 takes one, func_00121358 gives it back)
     Pool6C pool1B2C;        // 0x1B2C: the 0x140-byte records of kind t219c (func_0019EA78), 0x180 of them
-    C1E* f1B38;             // 0x1B38
-    C1E* f1B3C;             // 0x1B3C
+    EffectOwner* f1B38;             // 0x1B38
+    EffectOwner* f1B3C;             // 0x1B3C
     Pool6C pool1B40;        // 0x1B40: 0x10C0-byte records (func_00139C70)
     u8 pad1B4C[0x1B58 - 0x1B4C];
-    Pool6C pool1B58;        // 0x1B58: the 0xEC-byte Player2195 records (func_0012D3F8)
+    Pool6C pool1B58;        // 0x1B58: the 0xEC-byte AnimationPlayer records (func_0012D3F8)
     void* f1B64;            // 0x1B64
     s32 f1B68;              // 0x1B68
     s32 f1B6C;              // 0x1B6C
@@ -82,7 +82,7 @@ struct C6C : C01 {
     s32 f1B74;              // 0x1B74
     s32 f1B78;              // 0x1B78
     ActorList6C list1B7C;   // 0x1B7C
-    Pool6C pool1B88;        // 0x1B88: the 0x40-byte S1B6290 handles (func_001B6290)
+    Pool6C pool1B88;        // 0x1B88: the 0x40-byte StateWalker handles (func_001B6290)
     List01 list1B94;        // 0x1B94: the handles in use (func_001B6290 adds each)
     u8 pad1BA0[0x1BAC - 0x1BA0];
     u8* f1BAC;              // 0x1BAC
@@ -92,8 +92,8 @@ struct C6C : C01 {
     Pool6C pool1BD0;        // 0x1BD0: the records func_00158F80 queues in list1BDC
     List01 list1BDC;        // 0x1BDC
     List01 list1BE8;        // 0x1BE8: class 0x51's objects (func_00183DC0)
-    Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of C02::f284
-    List01 list1C00;        // 0x1C00: the C02::f284 records in use
+    Pool6C pool1BF4;        // 0x1BF4: the 0x2E0-byte records of PlacedObject::f284
+    List01 list1C00;        // 0x1C00: the PlacedObject::f284 records in use
     u8 pad1C0C[0x1C24 - 0x1C0C];
     u8* f1C24;              // 0x1C24
     s32 f1C28;              // 0x1C28
@@ -117,14 +117,14 @@ struct C6C : C01 {
     u8 pad1CD8[0x1CE4 - 0x1CD8];
     C17* f1CE4;             // 0x1CE4: the class 0x17 object (func_0019A1E0)
     union {
-        C01* slot1CE8[31];  // 0x1CE8: objects by key, at the index func_0011ECA0 gives (func_0011ECB8)
+        BaseObject* slot1CE8[31];  // 0x1CE8: objects by key, at the index func_0011ECA0 gives (func_0011ECB8)
         struct {
             u8 pad1CE8[0x1D14 - 0x1CE8];
             s32 f1D14;      // 0x1D14: class 0x32's default for its +0x5D4 (func_001B04D0)
             u8 pad1D18[0x1D28 - 0x1D18];
             s32 f1D28;      // 0x1D28
             u8 pad1D2C[0x1D60 - 0x1D2C];
-            C01* f1D60;     // 0x1D60: told (slot 27) when a 0x55-family object ends
+            BaseObject* f1D60;     // 0x1D60: told (slot 27) when a 0x55-family object ends
         };
     };
     u8 f1D64;               // 0x1D64
@@ -171,9 +171,9 @@ struct C6C : C01 {
     s32 f235C;              // 0x235C
 };
 
-typedef char check_C6C[sizeof(C6C) == 0x2360 ? 1 : -1];
+typedef char check_World[sizeof(World) == 0x2360 ? 1 : -1];
 
-void func_001DB4C8(C6C* self);      // 0x6C slot 0
-void func_001EA118(C6C* self);      // 0x6C slot 17 (every frame)
+void func_001DB4C8(World* self);      // 0x6C slot 0
+void func_001EA118(World* self);      // 0x6C slot 17 (every frame)
 
 #endif

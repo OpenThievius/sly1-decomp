@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
-#include "c2c.h"
+#include "switched_collider.h"
+#include "object_set.h"
 #include "object_gatherer.h"
 #include "c6e.h"
 #include "c5c.h"
 #include "c5d.h"
-#include "c1e.h"
-#include "c50.h"
+#include "effect_owner.h"
+#include "effect_spawner.h"
 #include "c8b.h"
-#include "c6c.h"
-#include "t219c.h"
+#include "world.h"
+#include "effect.h"
 #include "list_iter.h"
 #include "globals.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "object_message.h"
 #include "object_event.h"
 
 void func_001B7968(void* self);
 
-void func_00198980(C2C* self)
+void func_00198980(ObjectSet* self)
 {
     func_001B7968(self);
     self->f554 = 1;
@@ -28,7 +28,7 @@ void func_00198980(C2C* self)
 void func_001249A8(void* self);
 void* func_0015A448(void* a, void* b, void* c);
 
-void func_00198A88(C2C* self)
+void func_00198A88(ObjectSet* self)
 {
     s32 i;
 
@@ -46,7 +46,7 @@ void func_00124A48(void* self);
 s32 func_0012C9A8(void* node);
 void func_00182ED8(void* node);
 
-void func_00198B28(C2C* self)
+void func_00198B28(ObjectSet* self)
 {
     s32 i;
 
@@ -68,7 +68,7 @@ typedef void (*VFn_198DA8)(void* self);
 void func_0012C8F8(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
-void func_00198DA8(C2C* self)
+void func_00198DA8(ObjectSet* self)
 {
     VFn_198DA8 fn = ((VFn_198DA8*)self->desc)[7];
     fn(self);
@@ -93,7 +93,7 @@ struct Target_198E58 {
     VFn_198E58* vtbl;
 };
 
-void func_00198E58(C2C* self)
+void func_00198E58(ObjectSet* self)
 {
     Target_198E58* t = (Target_198E58*)self->f584;
     if (t != 0) {
@@ -106,7 +106,7 @@ void func_00198E58(C2C* self)
 
 s32 func_00182FC8(void* self);
 
-s32 func_00198E98(C2C* self)
+s32 func_00198E98(ObjectSet* self)
 {
     if (func_00182FC8(self)) {
         return (self->f554 != 0) ? 1 : 2;
@@ -115,7 +115,7 @@ s32 func_00198E98(C2C* self)
 }
 
 void func_001BA130(void*);
-void func_00198980(C2C*);
+void func_00198980(ObjectSet*);
 void func_001B7F78(void);
 void func_00182D48(void*);
 void func_00152470(void*, void*);
@@ -131,13 +131,13 @@ void func_0015EAE0(void*, void*, void*);
 void func_0019D860(void);
 void func_0019D968(void);
 void func_0019D930(void);
-void func_0019EBE8(T219C*);
+void func_0019EBE8(Effect*);
 void func_001831E8(void*, void*, s32, void*);
 void func_001831E8(void*, void*, void*, void*);
 void func_00183238(void*, void*, void*, void*);
-void func_0019F9D0(T219C*, s32);
+void func_0019F9D0(Effect*, s32);
 
-void func_00198ED8(C2C* queue, void* item)
+void func_00198ED8(ObjectSet* queue, void* item)
 {
     queue->keys560[queue->n55C++] = item;
 }
@@ -151,9 +151,9 @@ struct Ctx_198EF8 {
 };
 
 
-void func_00127378(C2C* self, s32 msg, ObjectMessage* m);
+void func_00127378(ObjectSet* self, s32 msg, ObjectMessage* m);
 
-void func_00198EF8(C2C* self, s32 msg, ObjectMessage* m)
+void func_00198EF8(ObjectSet* self, s32 msg, ObjectMessage* m)
 {
     (void)func_00127378(self, msg, m);
     if (msg == 5) {
@@ -174,7 +174,7 @@ void func_00198EF8(C2C* self, s32 msg, ObjectMessage* m)
 
 s32 func_001300E8(void* obj, s32 kind);
 
-s32 func_00198FB0(C2C* unused, void* obj)
+s32 func_00198FB0(ObjectSet* unused, void* obj)
 {
     if (func_001300E8(obj, 8) != 0 || func_001300E8(obj, 0x3B) != 0) {
         return 1;
@@ -196,7 +196,7 @@ struct Elem_199000 {
     u8 pad1[0x40 - 0x8];
 };
 
-void func_00199000(C2C* self, Elem_199000* elems, s32 idx)
+void func_00199000(ObjectSet* self, Elem_199000* elems, s32 idx)
 {
     Rec_199000* r = (Rec_199000*)func_001929F8();
     if (r->f18 == 0) return;
@@ -518,19 +518,19 @@ void func_0019DB68(void)
     func_0015EAE0(&D_002622A8, D_00215C60, D_00217348);
 }
 
-void func_0019E158(C1E* a, Rec50* b)
+void func_0019E158(EffectOwner* a, Rec50* b)
 {
     a->f554 = b->f1E8;
 }
 
 void func_0019E418(void) {}
 
-void func_0019EC20(T219C* counter)
+void func_0019EC20(Effect* counter)
 {
     counter->uses++;
 }
 
-void func_0019ECE0(T219C* value, s32 enabled)
+void func_0019ECE0(Effect* value, s32 enabled)
 {
     if (enabled) func_0019EBE8(value);
 }
@@ -553,7 +553,7 @@ void func_0019F950(void* obj, void* a1, void* a2)
     func_00183238((void*)D_00275710, (u8*)obj + 0x118, a1, a2);
 }
 
-void func_0019FCE8(T219C* value, u32 enabled)
+void func_0019FCE8(Effect* value, u32 enabled)
 {
     func_0019F9D0(value, enabled < 1);
 }
@@ -564,7 +564,7 @@ void* func_0015A838(void* a, s32 b, s32 c, void* d);
 
 extern u8 D_00261420[];
 
-void func_00198980(C2C* self);
+void func_00198980(ObjectSet* self);
 void* func_00140FF8(void* p);
 
 void func_00199070(C2D* self)
@@ -573,7 +573,7 @@ void func_00199070(C2D* self)
     self->f5A0 = (s32)func_00140FF8(D_00261420);
 }
 
-void func_001989B0(C2C* self);
+void func_001989B0(ObjectSet* self);
 void func_00124DF8(void* self, s32 a1, void* a2);
 void* func_0018D500(s32 size);
 void func_00182ED8(s32 a);
@@ -623,7 +623,7 @@ s32 func_0019BE08(ObjectGatherer* self, Src_19BE08* src)
 }
 
 extern u8 D_00261420[];
-s32 func_00198E98(C2C* self);
+s32 func_00198E98(ObjectSet* self);
 s32 func_00141008(void* table, s32 index);
 
 s32 func_001990E0(C2D* self)
@@ -637,7 +637,7 @@ s32 func_001990E0(C2D* self)
 
 extern u8 D_00261420[];
 void func_00141040(void* table, s32 index);
-void func_00198DA8(C2C* self);
+void func_00198DA8(ObjectSet* self);
 
 void func_00199138(C2D* self)
 {
@@ -780,7 +780,7 @@ s32 func_0019A000(s32 bits)
     if (func_001602A0() & 2) {
         return 0;
     }
-    G27C220* c = D_002623C0;
+    GameProgress* c = D_002623C0;
     s64 v = c->f19F0 | bits;
     s32 r = 1;
     if ((v & mask) ^ mask) {
@@ -861,13 +861,13 @@ void func_0019AD68(C17* self)
     s32 n;
     s32 v;
     void* item;
-    C01* r;
+    BaseObject* r;
 
     func_001B64D8(self->f614, 0x38E);
     if (self->f650 == 0) {
         self->f7D8 = 0;
     } else {
-        ((C01*)self->f650)->desc->m18((C01*)self->f650, self);
+        ((BaseObject*)self->f650)->desc->m18((BaseObject*)self->f650, self);
         self->f650 = 0;
         self->f7D8 = 0;
     }
@@ -877,7 +877,7 @@ void func_0019AD68(C17* self)
     }
     if ((self->f760 & (s64)0xF000FFFF) != 0) {
         G27C230* ctx = D_002623C4;
-        G27C220* g = D_002623C0;
+        GameProgress* g = D_002623C0;
         G27C230* ctl = D_002623C8;
 
         ctx->f43C = ctx->f43C + 1;
@@ -902,7 +902,7 @@ void func_0019AD68(C17* self)
             func_0018C7F8(g_memoryCard);
         }
 
-        r = (C01*)func_0015A418(self->world, 0x101, sel, self);
+        r = (BaseObject*)func_0015A418(self->world, 0x101, sel, self);
         if (r != 0) {
             r->desc->m02(r);
         }
@@ -924,7 +924,7 @@ extern s32 D_00275C34;
 f32 D_0026A958[2] = { 0.8f, 1.2f };
 f32 D_0026A960[2] = { 0.9f, 1.1f };
 
-void func_00198B28(C2C* self);
+void func_00198B28(ObjectSet* self);
 f32 func_001EAAE0(f32 a, f32 b);
 s32 func_001EAA70(s32 a, s32 b);
 
@@ -978,16 +978,16 @@ struct __attribute__((aligned(16))) Quad_1999D0 { s32 a, b, c, d; };
 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00128018(void* a0, s32 a1, void* a2, void* a3);
-T219C* func_0019EA78(s32 kind, C1E* sys);
+Effect* func_0019EA78(s32 kind, EffectOwner* sys);
 void func_00199850(C2E* self);
-void func_00198DA8(C2C* self);
+void func_00198DA8(ObjectSet* self);
 
 void func_001999D0(C2E* self)
 {
     Quad_1999D0 loc;
     Obj_1999D0* g = (Obj_1999D0*)D_0026C948;
     g->vtbl[14](g);
-    T219C* n = func_0019EA78(0x10, 0);
+    Effect* n = func_0019EA78(0x10, 0);
     if (n != 0) {
         if (D_002623C8->count64 + 1 >= D_00275710->count2300) {
             f32 z = 0.0f;
@@ -1061,7 +1061,7 @@ void func_00124DF8(C17* o, s32 n, u8* t);
 void func_0019A178(void* p, s32 x);
 s32 func_001B6290(s32 a, C17* b, s32 c, s32 d);
 void func_001B64D8(s32 a, s32 b);
-VObj_19A1E0* func_0015A448(C6C* a, s32 b, C17* c);
+VObj_19A1E0* func_0015A448(World* a, s32 b, C17* c);
 s32 func_001EAA70(s32 a, s32 b);
 void func_00160D30(s32* p);
 
@@ -1074,7 +1074,7 @@ void func_0019A1E0(C17* o)
         func_0019A178(o->f61C + i * 12, 0x390);
     s32 h = func_001B6290(o->f610, o, 0x384, 1);
     o->f764 = -1;
-    o->f614 = (S1B6290*)h;
+    o->f614 = (StateWalker*)h;
 
     if (D_002623C8->bits & 4) {
         func_001B64D8(h, 0x38F);
@@ -1249,15 +1249,15 @@ struct Frame_1989B0 {
 };
 void func_001BAC30(void* self);
 void func_00159478(void* sub, void* self);
-void func_00182ED8(C01* n);
+void func_00182ED8(BaseObject* n);
 
-void func_001989B0(C2C* self)
+void func_001989B0(ObjectSet* self)
 {
     func_001BAC30(self);
     func_00159478(&self->f584, self);
     Frame_1989B0 fr((List_1989B0*)&self->children);
     fr.cursor = (s32)self->children.head + fr.link;
-    C01* p = (C01*)self->children.head;
+    BaseObject* p = (BaseObject*)self->children.head;
     while (p != 0) {
         if (p->desc->flags & 0x40) {
             s32 i = self->count570;
@@ -1267,7 +1267,7 @@ void func_001989B0(C2C* self)
         }
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
-        p = (C01*)nx;
+        p = (BaseObject*)nx;
     }
     *(s32*)&D_0027B314 = fr.prev;
 }

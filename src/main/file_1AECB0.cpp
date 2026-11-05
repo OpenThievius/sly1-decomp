@@ -3,22 +3,22 @@
 #include "asm_func.h"
 
 #include "list_iter.h"
-#include "c30.h"
-#include "c05.h"
-#include "c6c.h"
+#include "timed_object.h"
+#include "switched_collider.h"
+#include "world.h"
 #include "globals.h"
 #include "object_link.h"
 
-void func_001B7968(C03* self);
-void func_001B93F8(C03* self);
-Node30* func_00129CA8(C30* self);
+void func_001B7968(Collider* self);
+void func_001B93F8(Collider* self);
+Node30* func_00129CA8(TimedObject* self);
 // Slot 17 takes the frame time (Desc01::m11); func_001AEFA0 ignores it, but func_001AF5C8's call
 // passes it (retail's frame shows the argument live).
-void func_001AEFA0(C30* self, f32 dt);
+void func_001AEFA0(TimedObject* self, f32 dt);
 
 ObjectLink D_002744B8[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
 
-void func_001BAC30(C03* self);
+void func_001BAC30(Collider* self);
 void func_00124DF8(void* self, s32 n, void* table);
 
 s32 func_001833F0(void* key, s32 item);
@@ -31,17 +31,17 @@ void func_0015FCD8(void* self, void* p);
 void func_00152470(void* list, void* item);
 void func_00152600(void* list, void* item);
 
-void func_00124A48(C02* self);
+void func_00124A48(PlacedObject* self);
 void* func_00183058(void* a, void* b, void* c);
 
-s32 func_001AEE50(C30* self, void* key);
+s32 func_001AEE50(TimedObject* self, void* key);
 s32 func_00160D10();
 
 extern f32 D_0026185C[];
 void func_00123AB0(void* object, s32 mode);
-void func_001837E0(C02* self, s32 a, s32 b, s32 c);
+void func_001837E0(PlacedObject* self, s32 a, s32 b, s32 c);
 
-// The target a C30 follows (+0x550): its state and the time it changed.
+// The target a TimedObject follows (+0x550): its state and the time it changed.
 struct Rec_1B0EE0 {
     u8 pad0[0x550];
     s32 f550;
@@ -52,7 +52,7 @@ ObjectLink D_002744D8[2] = {
     { 2, 0x28C, 0x5D0 },
     { 2, 0x28D, 0x5D4 },
 };
-void func_001B9AE0(C03* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
+void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4);
 
 struct Sub_1B04D0 {
     u8 pad0[0x44];
@@ -83,23 +83,23 @@ struct Node_1B1070 {
 struct Clk_1B1070 { f32 t; };
 
 void func_001B1070(C32* self, s32 arg);
-void func_001AEF68(C30* self);
-s32 func_001AEF00(C30* o, void* p);
+void func_001AEF68(TimedObject* self);
+s32 func_001AEF00(TimedObject* o, void* p);
 void func_001AF508();
 void func_001B1898(C33* self);
 
-void func_001AECB0(C30* a0) {
+void func_001AECB0(TimedObject* a0) {
     func_001B7968(a0);
     a0->f554 = 0;
     a0->state = -1;
 }
 
-void func_001AECE0(C30* self, s32 value)
+void func_001AECE0(TimedObject* self, s32 value)
 {
     self->f550 = (void*)value;
 }
 
-void func_001AECE8(C30* self, s32 state)
+void func_001AECE8(TimedObject* self, s32 state)
 {
     if (self->state == state) return;
     if (self->state == 1 && state == 2) {
@@ -113,7 +113,7 @@ void func_001AECE8(C30* self, s32 state)
     self->f55C = D_0026185C[0];
 }
 
-s32 func_001AED78(C30* self, void* value)
+s32 func_001AED78(TimedObject* self, void* value)
 {
 
     if (self->f5B4 != 0) {
@@ -135,7 +135,7 @@ s32 func_001AED78(C30* self, void* value)
     return 0;
 }
 
-s32 func_001AEE50(C30* self, void* key)
+s32 func_001AEE50(TimedObject* self, void* key)
 {
     for (s32 i = 0; i < self->ids578.count; i++) {
         if (func_001833F0(key, self->ids578.items[i]) != 0) {
@@ -150,14 +150,14 @@ s32 func_001AEE50(C30* self, void* key)
     return 0;
 }
 
-s32 func_001AEF00(C30* o, void* p)
+s32 func_001AEF00(TimedObject* o, void* p)
 {
     if (p == 0) return 0;
     if (o->f5B4 == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && func_001833F0(p, o->ids564.items[0]) != 0) return 1;
     return 0;
 }
 
-void func_001AEF68(C30* self)
+void func_001AEF68(TimedObject* self)
 {
     Node30* node = func_00129CA8(self);
 
@@ -168,12 +168,12 @@ void func_001AEF68(C30* self)
     }
 }
 
-void func_001AEFA0(C30* self)
+void func_001AEFA0(TimedObject* self)
 {
     func_001B93F8(self);
     Node30* sink = self->f5C8;
     if (sink != 0) {
-        C07* g = D_00262E10;
+        Player* g = D_00262E10;
         if (g != 0) {
             if (g->f2220 != 4) {
                 sink->f18.f = self->f5CC;
@@ -184,7 +184,7 @@ void func_001AEFA0(C30* self)
     }
 }
 
-void func_001AF000(C30* self, s32 value)
+void func_001AF000(TimedObject* self, s32 value)
 {
     u32 n = self->ids564.count;
     if (n < 4) {
@@ -193,7 +193,7 @@ void func_001AF000(C30* self, s32 value)
     }
 }
 
-void func_001AF028(C30* self, s32 item)
+void func_001AF028(TimedObject* self, s32 item)
 {
     s32 n = self->ids578.count;
     if ((u32)n < 4) {
@@ -202,7 +202,7 @@ void func_001AF028(C30* self, s32 item)
     }
 }
 
-void func_001AF050(C30* self, s32 item)
+void func_001AF050(TimedObject* self, s32 item)
 {
     s32 n = self->ids58C.count;
     if ((u32)n < 4) {
@@ -211,7 +211,7 @@ void func_001AF050(C30* self, s32 item)
     }
 }
 
-void func_001AF078(C30* q, u32 value)
+void func_001AF078(TimedObject* q, u32 value)
 {
     u32 n = q->ids5A0.count;
     if (n < 4) {
@@ -240,7 +240,7 @@ void func_001AF3B8(C31* self)
     func_00124A48(self);
     for (s32 i = 0; i < self->groupCount; i++) {
         Group31* g = &self->groups[i];
-        C01* c = g->child;
+        BaseObject* c = g->child;
         c->desc->m03(c);
         if (i != 0) {
             {
@@ -248,7 +248,7 @@ void func_001AF3B8(C31* self)
                 for (j = 0; j < src->count; j++) {
                     Entry31* s = src->items + j;
                     Entry31* d = g->items + j;
-                    C01* o = (C01*)func_00183058(s->obj, self->world, self);
+                    BaseObject* o = (BaseObject*)func_00183058(s->obj, self->world, self);
                     d->obj = o;
                     if (o->desc->m0F != 0) {
                         o->desc->m0F(o);
@@ -377,14 +377,14 @@ void func_001AF7A8(C31* self, void* p)
 
 ASM_FUNC(func_001AF820);
 
-s32 func_001AFAF8(C30* a0, C03* a1)
+s32 func_001AFAF8(TimedObject* a0, Collider* a1)
 {
     u64 m = 0x8000;
     m <<= 28;
     if ((a1->flags538 & m) != 0 || a1->root == a0->root || func_001AEE50(a0, a1) != 0) {
         return 0;
     }
-    if ((void*)a1 == (void*)D_00262E10 && ((C07*)a1)->f2220 == 6 && ((C07*)a1)->f239C == 3) {
+    if ((void*)a1 == (void*)D_00262E10 && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->f239C == 3) {
         if ((func_00160D10() & 0x12000) != 0) {
             return 0;
         }
@@ -621,7 +621,7 @@ ASM_FUNC(func_001B0838);
 
 s32 func_001B0BD8() { return 1; }
 
-s32 func_001B0BE0(C30* self, C03* other)
+s32 func_001B0BE0(TimedObject* self, Collider* other)
 {
     if ((other->flags538 & (1UL << 43)) != 0 || (s32)other->root == func_001925F0() || other->root == self->root || func_001AEE50(self, other) != 0) {
         return 0;

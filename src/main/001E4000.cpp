@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c01.h"
-#include "c02.h"
-#include "c05.h"
-#include "c6c.h"
+#include "base_object.h"
+#include "placed_object.h"
+#include "switched_collider.h"
+#include "world.h"
 #include "v24a2.h"
 #include "shapes.h"
 #include "level_entry.h"
@@ -12,7 +12,7 @@
 #include "render_frame.h"
 #include "background_job.h"
 #include "group_marker.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "bump_allocator.h"
 
 // Class descriptors (parent, class id, flags, object size, then the class's methods) and the
@@ -4743,7 +4743,7 @@ f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
 f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
 char D_00262250[8] = "02134";
 s32 D_002622CC = 1;
-G27C220* D_002623C0 = &D_0027C220;
+GameProgress* D_002623C0 = &D_0027C220;
 G27C230* D_002623C4 = D_0027C230;
 G27C230* D_002623C8 = D_0027C230;
 s32 D_002623CC = -1;
@@ -4870,7 +4870,7 @@ f32 D_00275650 = 0;
 // f32 reader
 f32 D_0027565C = 0;
 // pointer word, many pointer readers
-C6C* D_00275710 = 0;
+World* D_00275710 = 0;
 // word flag
 s32 D_00275714 = 0;
 // word
@@ -5090,7 +5090,7 @@ s32 D_00262C6C = 0;
 // size: chosen with D_00262C70 as the same pad pointer (conditional), 0xC4 to the next label
 Obj_262C70 D_00262D38 = {};
 // size: pointer, word accesses only
-C07* D_00262E10 = 0;
+Player* D_00262E10 = 0;
 // size: s32, word load/store only
 s32 D_00263E2C = 0;
 // size: list head of three words, link offset at +8 (0x50)

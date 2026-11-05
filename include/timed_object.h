@@ -8,12 +8,12 @@
 //
 // Their fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.
-#ifndef C30_H
-#define C30_H
+#ifndef TIMED_OBJECT_H
+#define TIMED_OBJECT_H
 
-#include "c03.h"
+#include "collider.h"
 
-struct C30;
+struct TimedObject;
 
 // The record func_00129CA8 hands out (func_001AEF68 takes one): 0x18 holds a value that is given
 // back as the record is cleared (a float read, then zeroed as an integer).
@@ -28,15 +28,15 @@ struct Node30 {
 // Class 0x30's descriptor: 0x03's slots, then six more (slot n at 0x10 + 4n; slot 72 is empty in
 // 0x30).
 struct Desc30 : Desc03 {
-    void (*m48)(C30* self, s32* state);     // 0x130: pick the next state (0x32: func_001B0C68)
-    void (*m49)(C30* self, s32 flag);       // 0x134: func_001B00E8, func_001B0EA8
-    void (*m4A)(C30* self);                 // 0x138: func_001B0120, func_001B0EE0
-    void (*m4B)(C30* self);                 // 0x13C: func_001B0160, func_001B0F70
-    void (*m4C)(C30* self, s32 value);      // 0x140: func_001AECE0
-    void (*m4D)(C30* self, s32 state);      // 0x144: enter a state (func_001AECE8)
+    void (*m48)(TimedObject* self, s32* state);     // 0x130: pick the next state (0x32: func_001B0C68)
+    void (*m49)(TimedObject* self, s32 flag);       // 0x134: func_001B00E8, func_001B0EA8
+    void (*m4A)(TimedObject* self);                 // 0x138: func_001B0120, func_001B0EE0
+    void (*m4B)(TimedObject* self);                 // 0x13C: func_001B0160, func_001B0F70
+    void (*m4C)(TimedObject* self, s32 value);      // 0x140: func_001AECE0
+    void (*m4D)(TimedObject* self, s32 state);      // 0x144: enter a state (func_001AECE8)
 };
 
-struct C30 : C03 {
+struct TimedObject : Collider {
     void* f550;             // 0x550: set by slot 76; slot 77 tells it when the state goes from 1 to 2
     s32 f554;               // 0x554: 0 at set-up
     s32 state;              // 0x558: -1 at set-up
@@ -59,12 +59,12 @@ struct C30 : C03 {
 
 // A group of 0x31: a child object and the objects it was cloned from the first group for.
 struct Entry31 {
-    C01* obj;               // 0x00
+    BaseObject* obj;               // 0x00
     s32 value;              // 0x04
 };
 
 struct Group31 {
-    C01* child;             // 0x00
+    BaseObject* child;             // 0x00
     u8 pad04[0x24 - 0x04];
     s32 count;              // 0x24
     Entry31 items[5];       // 0x28
@@ -72,7 +72,7 @@ struct Group31 {
 
 // 0x31: slot 9 (func_001AF3B8) clones the first group's entries into every other group; the
 // objects are kept in the world's list at +0x1CA8 (link at 0xAF0).
-struct C31 : C30 {
+struct C31 : TimedObject {
     u8 pad5D0[0x5D4 - 0x5D0];
     s32 groupCount;         // 0x5D4
     u8 pad5D8[0x5E0 - 0x5D8];
@@ -91,8 +91,8 @@ struct C31 : C30 {
 
 // 0x32: two object ids it resolves at load (D_002744D8: +0x5D0 and +0x5D4), a state of its own
 // at +0x5D8 (func_001B1070) and three times.
-struct C32 : C30 {
-    C03* f5D0;              // 0x5D0
+struct C32 : TimedObject {
+    Collider* f5D0;              // 0x5D0
     s32 f5D4;               // 0x5D4
     s32 state5D8;           // 0x5D8: -1 at set-up
     f32 f5DC;               // 0x5DC: the time it was entered
@@ -111,7 +111,7 @@ struct Anim33 {
     s32 mode;               // 0x0C
 };
 
-struct C33 : C30 {
+struct C33 : TimedObject {
     Anim33 animB;           // 0x5D0
     Anim33 animC;           // 0x5E0
     Anim33 animA;           // 0x5F0
@@ -119,14 +119,14 @@ struct C33 : C30 {
     f32 blinkRate;          // 0x604
     f32 f608;               // 0x608
     f32 f60C;               // 0x60C
-    Elem02* f610;           // 0x610: an entry of C02's list at 0x280 (a frame target for func_001B1898)
+    Elem02* f610;           // 0x610: an entry of PlacedObject's list at 0x280 (a frame target for func_001B1898)
     f32 f614;               // 0x614
     s32 f618;               // 0x618
     u8 pad61C[0x620 - 0x61C];
 };
 
 typedef char check_Desc30[sizeof(Desc30) == 0x148 ? 1 : -1];
-typedef char check_C30[sizeof(C30) == 0x5D0 ? 1 : -1];
+typedef char check_TimedObject[sizeof(TimedObject) == 0x5D0 ? 1 : -1];
 typedef char check_Group31[sizeof(Group31) == 0x50 ? 1 : -1];
 typedef char check_C31[sizeof(C31) == 0xB10 ? 1 : -1];
 typedef char check_C32[sizeof(C32) == 0x5F0 ? 1 : -1];
@@ -134,10 +134,10 @@ typedef char check_Anim33[sizeof(Anim33) == 0x10 ? 1 : -1];
 typedef char check_C33[sizeof(C33) == 0x620 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_001AECB0(C30* self);                      // 0x30 slot 0
-void func_001AEFA0(C30* self);                      // 0x30 slot 17
-void func_001AECE0(C30* self, s32 value);           // 0x30 slot 76
-void func_001AECE8(C30* self, s32 state);           // 0x30 slot 77
+void func_001AECB0(TimedObject* self);                      // 0x30 slot 0
+void func_001AEFA0(TimedObject* self);                      // 0x30 slot 17
+void func_001AECE0(TimedObject* self, s32 value);           // 0x30 slot 76
+void func_001AECE8(TimedObject* self, s32 state);           // 0x30 slot 77
 void func_001AF0A0(C31* self);                      // 0x31 slot 0
 void func_001AF0D0(C31* self);                      // 0x31 slot 10
 void func_001AF3B8(C31* self);                      // 0x31 slot 16

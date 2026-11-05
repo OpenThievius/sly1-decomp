@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "t217d.h"
+#include "screen_element.h"
 #include "v24a0.h"
 #include "v24a2.h"
 #include "globals.h"
-#include "g27c220.h"
+#include "game_progress.h"
 #include "screen_fade.h"
 #include "layout_137228.h"
 #include "texture_table.h"
@@ -186,7 +186,7 @@ extern u8 D_00275BC0[];
 
 void func_001AD718(T217D_420* self)
 {
-    C07* g;
+    Player* g;
     Mgr_001AD718* m;
 
     func_001AA298(self);
@@ -454,7 +454,7 @@ void func_001AE820(T217D_600* self)
     func_0015C900(self->font);
 }
 
-s32 func_001AC9E0(T217D_380* self, T217D* other)
+s32 func_001AC9E0(T217D_380* self, ScreenElement* other)
 {
     s32 r = 0;
     if (func_001AAAC8(self, other) != 0 || self->pending != 0) {
@@ -493,9 +493,9 @@ void func_001AC060(T217D_2E0* self)
 }
 
 extern const char D_0024CE00[];
-void func_001AD0D0(T217D* self, s32 hi, s32 lo);
+void func_001AD0D0(ScreenElement* self, s32 hi, s32 lo);
 
-void func_001AD088(T217D* self, s32 value)
+void func_001AD088(ScreenElement* self, s32 value)
 {
     if (value != -1) {
         func_001AD0D0(self, value >> 8, (u8)value);
@@ -664,7 +664,7 @@ s32 func_001E2100(Buf_1AD0D0* buf);
 void* func_001E2138(Str_1AD0D0* dst, void* src);
 s32 func_001E1FD0(Str_1AD0D0* dst, const char* fmt, ...);
 
-void func_001AD0D0(T217D* self, s32 a1, s32 a2)
+void func_001AD0D0(ScreenElement* self, s32 a1, s32 a2)
 {
     Buf_1AD0D0 buf;
     Str_1AD0D0 str;
@@ -787,7 +787,7 @@ char* func_001E2138(Buf_1AD1E8* dst, const char* src);
 s32 func_001E2100(void* p);
 s32 func_001E1FD0(Buf_1AD1E8* dst, const char* fmt, ...);
 
-void func_001AD1E8(T217D* self, s32 idx)
+void func_001AD1E8(ScreenElement* self, s32 idx)
 {
     char buf[0x200];
     s32 a, b, c;
@@ -872,7 +872,7 @@ extern u8 D_00275B00[];
 void func_001AD970(T217D_560* self, s32 newval)
 {
     T217D_3D0* g;
-    G27C220* gg;
+    GameProgress* gg;
 
     if (self->mode != newval) {
         if (g_screenFade.mode == 1) {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Kind t219c: the records of class 0x1E's list (C1E::list558) -- the effects a part with
+// Kind t219c: the records of class 0x1E's list (EffectOwner::list558) -- the effects a part with
 // collision shows: a spark, a flash, a ring that follows a body. Written for this project from
 // what retail's code does (config/us/tables.tsv, src/main/0019C000.cpp, 001A0000.cpp).
 //
-// func_0019EA78(kind, owner) takes a record from the world's pool at C6C+0x1B2C (0x180 records
+// func_0019EA78(kind, owner) takes a record from the world's pool at World+0x1B2C (0x180 records
 // of 0x140 bytes), zeroes it, stores the kind's table (func_0019E908: kind 0 is D_00219C20, kind
 // 2 on D_00219C40 and the next 26 tables, 0x20 bytes apart; no kind 1) at +0, the kind at +4 and
 // the 1E object at +0xC, links it into the list (link at +0x10) and counts a use (+8).
@@ -15,15 +15,15 @@
 // leave it free. Where two kinds read one offset differently (a float, an integer, a pointer),
 // a union holds them. The tables are defined in src/main/0019C000.cpp as arrays of function
 // pointers; Vt219C gives their slots types.
-#ifndef T219C_H
-#define T219C_H
+#ifndef EFFECT_H
+#define EFFECT_H
 
 #include "common.h"
-#include "c02.h"
+#include "placed_object.h"
 
-struct C1E;     // the owner (include/c1e.h)
-struct C03;     // the body some records follow (include/c03.h)
-struct T219C;
+struct EffectOwner;     // the owner (include/c1e.h)
+struct Collider;     // the body some records follow (include/c03.h)
+struct Effect;
 
 // A 16-byte, 16-aligned block moved as one quadword.
 struct __attribute__((aligned(16))) Quad219C {
@@ -34,19 +34,19 @@ struct __attribute__((aligned(16))) Quad219C {
 // func_0019EA78 with the place); 3, 4, 5, 6 and 7 are mostly the shared func_0019F390,
 // func_0019F560, func_0019F858, func_0019ECE0 and func_0019ED58.
 struct Vt219C {
-    void (*m00)(T219C* self, void* pos, f32 scale, s32 flags);          // 0x00: set-up
-    void (*m01)(T219C* self, void* other);                              // 0x04
-    void (*m02)(T219C* self);                                           // 0x08
-    void (*m03)(T219C* self);                                           // 0x0C
-    void (*m04)(T219C* self, f32 dt);                                   // 0x10: every frame
-    void (*m05)(T219C* self, void* other);                              // 0x14
-    void (*m06)(T219C* self, s32 flag);                                 // 0x18: end (func_0019F560)
-    s32 (*m07)(T219C* self, void* other, void* a2, void* a3);           // 0x1C: contact
+    void (*m00)(Effect* self, void* pos, f32 scale, s32 flags);          // 0x00: set-up
+    void (*m01)(Effect* self, void* other);                              // 0x04
+    void (*m02)(Effect* self);                                           // 0x08
+    void (*m03)(Effect* self);                                           // 0x0C
+    void (*m04)(Effect* self, f32 dt);                                   // 0x10: every frame
+    void (*m05)(Effect* self, void* other);                              // 0x14
+    void (*m06)(Effect* self, s32 flag);                                 // 0x18: end (func_0019F560)
+    s32 (*m07)(Effect* self, void* other, void* a2, void* a3);           // 0x1C: contact
 };
 
 // What a record runs when it ends (+0x118, the list func_0019EC30 walks).
 struct T219CHook {
-    void (*fn)(void* payload, s32 kind, T219C* owner);      // 0x00
+    void (*fn)(void* payload, s32 kind, Effect* owner);      // 0x00
     void* payload;                                          // 0x04
     u8 pad08[0x10 - 0x08];                                  // 0x08
     T219CHook* next;                                        // 0x10
@@ -62,20 +62,20 @@ struct T219C_Params {
     u8 pad64[0x70 - 0x64];          // 0x64
 };
 
-struct T219C {
+struct Effect {
     const Vt219C* vt;       // 0x00
     s32 kind;               // 0x04
     s32 uses;               // 0x08: func_0019EC20 counts one, func_0019EC30 ends at 0
-    C1E* owner;             // 0x0C: the 0x1E object whose list holds it
-    T219C* next;            // 0x10: the link in C1E::list558
-    T219C* prev;            // 0x14
+    EffectOwner* owner;             // 0x0C: the 0x1E object whose list holds it
+    Effect* next;            // 0x10: the link in EffectOwner::list558
+    Effect* prev;            // 0x14
     f32 start;              // 0x18: the time it began (D_0026185C)
     f32 life;               // 0x1C: how long it lasts (func_0019F560)
     union {
         s32 i20;            // 0x20: a number taken from the world (D_00275710 + 0x1CEC ..)
         void* p20;          // 0x20: the object it follows (kinds 16 and 26)
     };
-    C03* target;            // 0x24: the body it follows (func_0019F560, func_0019F9D0)
+    Collider* target;            // 0x24: the body it follows (func_0019F560, func_0019F9D0)
     u8 pad28[0x30 - 0x28];  // 0x28
     union {
         Quad219C q30;       // 0x30
@@ -105,12 +105,12 @@ struct T219C {
     union {
         f32 f124;           // 0x124
         s32 i124;           // 0x124
-        T219C* p124;        // 0x124
+        Effect* p124;        // 0x124
     };
     union {
         f32 f128;           // 0x128
         s32 i128;           // 0x128
-        T219C* p128;        // 0x128
+        Effect* p128;        // 0x128
     };
     u8 pad12C[0x130 - 0x12C];   // 0x12C
     const T219C_Params* params; // 0x130: kind 16's block
@@ -124,6 +124,6 @@ struct T219C {
 typedef char check_Quad219C[sizeof(Quad219C) == 0x10 ? 1 : -1];
 typedef char check_T219CHook[sizeof(T219CHook) == 0x14 ? 1 : -1];
 typedef char check_T219C_Params[sizeof(T219C_Params) == 0x70 ? 1 : -1];
-typedef char check_T219C[sizeof(T219C) == 0x140 ? 1 : -1];
+typedef char check_Effect[sizeof(Effect) == 0x140 ? 1 : -1];
 
 #endif

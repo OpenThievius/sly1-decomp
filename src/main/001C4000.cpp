@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c05.h"
+#include "switched_collider.h"
 #include "fpu.h"
 #include "globals.h"
 
@@ -14,7 +14,7 @@ void func_001C4180(C1D* self, s32 value)
 void func_00192B58(void* self);
 void func_001C4C20(void* self);
 
-void func_001C4ED0(C06* self)
+void func_001C4ED0(TurningCollider* self)
 {
     func_00192B58(self);
     func_001C4C20(self);
@@ -24,7 +24,7 @@ typedef s32 (*VFn_C5338)(void* self);
 struct Out_C5338 { u8 pad[0x94]; f32 f94; s32 f98; };
 extern f32 D_00274B74;
 
-void func_001C5338(C06* self, Out_C5338* out)
+void func_001C5338(TurningCollider* self, Out_C5338* out)
 {
     if (((VFn_C5338*)self->desc)[0x168 / 4](self)) {
         f32 d = D_00274B74;
@@ -39,7 +39,7 @@ void func_001C5338(C06* self, Out_C5338* out)
 f32 func_00205778(f32 a, f32 b);
 void func_001EA728(void* p, void* out, f32 a, f32 b, f32 c);
 
-void func_001C5D58(C06* self)
+void func_001C5D58(TurningCollider* self)
 {
     Vec02 q = self->v160;
     f32 r = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
@@ -48,9 +48,9 @@ void func_001C5D58(C06* self)
 }
 
 typedef s32 (*VFn_C7B60)(void* self);
-void func_001C8F20(C08* self, s32 a1, s32 a2);
+void func_001C8F20(Agent* self, s32 a1, s32 a2);
 
-void func_001C7B60(C08* self)
+void func_001C7B60(Agent* self)
 {
     if (self->fB84 != 0) return;
     if (self->fB88 != 0) return;
@@ -65,7 +65,7 @@ void func_001C7B60(C08* self)
 void func_001B9338(void* self);
 void func_001C5148(void* self);
 
-void func_001C5118(C06* self)
+void func_001C5118(TurningCollider* self)
 {
     func_001B9338(self);
     func_001C5148(self);
@@ -83,9 +83,9 @@ void func_001C53A8(void)
 }
 
 typedef s32 (*VFn_1C53E0)(void* self);
-void func_001C54D0(C06* self, void* b, s32 c);
+void func_001C54D0(TurningCollider* self, void* b, s32 c);
 
-void func_001C53E0(C06* self, void* b, s32 c)
+void func_001C53E0(TurningCollider* self, void* b, s32 c)
 {
     if (((VFn_1C53E0*)self->desc)[90](self)) {
         func_001C54D0(self, b, c);
@@ -94,7 +94,7 @@ void func_001C53E0(C06* self, void* b, s32 c)
 
 void func_001C5C10(void* a, s32 b, s32 c, s32 d);
 
-void func_001C5BF0(C06* a0, s32 a1, s32 unused2, s32 unused3, s32 a4, s32 a5)
+void func_001C5BF0(TurningCollider* a0, s32 a1, s32 unused2, s32 unused3, s32 a4, s32 a5)
 {
     func_001C5C10(a0, a1, a4, a5);
 }
@@ -104,7 +104,7 @@ typedef void (*VFn_1C4FA0)(void* self);
 void func_001B97E0(void* self, void* src);
 f32 func_00205778(f32 a, f32 b);
 
-void func_001C4FA0(C06* self, Vec2_1C4FA0* v)
+void func_001C4FA0(TurningCollider* self, Vec2_1C4FA0* v)
 {
     func_001B97E0(self, v);
     f32 r = func_00205778(v->y, v->x);
@@ -183,13 +183,13 @@ void func_001C6ED0(Obj_1C6ED0* self)
     }
 }
 
-void func_001249A8(C08* self);
-s32 func_0015A448(s32 a, s32 b, C08* self);
-void func_001CAB10(C08* self);
-s32 func_0015A418(s32 a, s32 b, s32 c, C08* self);
-void func_00159478(s32* p, C08* self);
+void func_001249A8(Agent* self);
+s32 func_0015A448(s32 a, s32 b, Agent* self);
+void func_001CAB10(Agent* self);
+s32 func_0015A418(s32 a, s32 b, s32 c, Agent* self);
+void func_00159478(s32* p, Agent* self);
 
-void func_001C71E0(C08* self)
+void func_001C71E0(Agent* self)
 {
     s32 v;
     func_001249A8(self);
@@ -220,7 +220,7 @@ s32 func_001C7278(Obj_1C7278* self)
 void func_00192820(void* self);
 void func_001CB648(void* list, void* value);
 
-void func_001C74E8(C08* self)
+void func_001C74E8(Agent* self)
 {
     func_00192820(self);
     if (self->f720 != 0) {
@@ -239,7 +239,7 @@ extern s32 D_00274B50[3];
 void func_001921A8(void* self);
 void func_001C5E50(void* self, f32 x);
 
-void func_001C4458(C06* self)
+void func_001C4458(TurningCollider* self)
 {
     func_001921A8(self);
     self->f700 = 1.0f;
@@ -255,7 +255,7 @@ s32 func_001C4F00(void) { return 3; }
 struct Sub_1C4578 { u8 pad[0x98]; s32 f98; u8 pad2[0xB0 - 0x9C]; s32 fB0; };
 struct Holder_1C4578 { u8 pad[0x224]; Sub_1C4578* f224; };
 
-void func_001C4578(C06* self, s32 a1)
+void func_001C4578(TurningCollider* self, s32 a1)
 {
     Holder_1C4578* h = (Holder_1C4578*)self->f61C;
     if (h != 0) {
@@ -277,7 +277,7 @@ void func_001C4578(C06* self, s32 a1)
 
 void func_001BC828(void* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-void func_001C4F08(C06* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
+void func_001C4F08(TurningCollider* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
 {
     s32 old = self->mode470;
     self->mode470 = self->desc06()->m55(self);
@@ -314,7 +314,7 @@ s32 func_001EAA70(s32 a, s32 b);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, u8* a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
 void func_001C0EC0();
 
-void func_001C4A80(C07* self, f32* p, f32 f) {
+void func_001C4A80(Player* self, f32* p, f32 f) {
     f32 old = self->f6C4;
     f32 ang;
     self->f6C4 = f;
@@ -337,7 +337,7 @@ void func_001C4A80(C07* self, f32* p, f32 f) {
 }
 
 typedef void (*VFnSelf_1C72A0)(void* self, void* item, s32 flag);
-void func_001C44F0(C06* self);
+void func_001C44F0(TurningCollider* self);
 void func_00124DF8(void* self, s32 a1, u8* table);
 void* func_001CB5B8(void* host);
 void func_001CB648(void* a, void* b);
@@ -354,7 +354,7 @@ extern Ent_274AD8 D_00274AD8[6];
 
 extern u8 D_00261420[];
 
-void func_001C72A0(C08* self)
+void func_001C72A0(Agent* self)
 {
     func_001C44F0(self);
     func_00124DF8(self, 2, (u8*)D_00274C30);
@@ -379,11 +379,11 @@ void func_001C72A0(C08* self)
         bit <<= 28;
         Elem08* e = self->fA7C;
         do {
-            C03* o = (C03*)func_0015A418(self->world, 0x101, e->key, self);
+            Collider* o = (Collider*)func_0015A418(self->world, 0x101, e->key, self);
             e->obj = o;
             if (o != 0) {
                 o->flags538 |= bit;
-                ((C03*)e->obj)->desc->m03((C03*)e->obj);
+                ((Collider*)e->obj)->desc->m03((Collider*)e->obj);
             }
             e++;
             j++;
@@ -404,11 +404,11 @@ void func_001C72A0(C08* self)
 }
 
 s32 func_00182FC8(void* p);
-void func_001C61E0(C07* self, s32 mode);
-void func_0019D2A8(C07* self, s32 v, void* p);
-void func_0019D338(C07* self, s32 v, s32 w, void* blk);
+void func_001C61E0(Player* self, s32 mode);
+void func_0019D2A8(Player* self, s32 v, void* p);
+void func_0019D338(Player* self, s32 v, s32 w, void* blk);
 
-void func_001C6890(C07* s)
+void func_001C6890(Player* s)
 {
     if (s->f2200 != 0 && func_00182FC8(s->f2200) == 0) {
         s32 v = s->f223C;
@@ -491,9 +491,9 @@ void func_001C6D00(Obj_1C6D00* s, Out_1C6D00* out, void* ctx)
     }
 }
 
-void func_001921E8(C08* self, s32 v);
+void func_001921E8(Agent* self, s32 v);
 
-void func_001C7188(C08* self, s32 v)
+void func_001C7188(Agent* self, s32 v)
 {
     s32 b = self->fB10;
     s32 a = (s32)self->f720;
@@ -508,7 +508,7 @@ void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 a1, void* table);
 void func_001C4578(void* self, s32 a1);
 
-void func_001C44F0(C06* self)
+void func_001C44F0(TurningCollider* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 6, D_00274AD8);
@@ -532,7 +532,7 @@ s32 func_001CB578(void* self);
 void func_001892A0(f32 a, f32 b, void* out);
 void func_00188850(void* table, f32 x, void* out);
 
-void func_001C7AE0(C08* self, f32 x, f32 y)
+void func_001C7AE0(Agent* self, f32 x, f32 y)
 {
     if (func_001CB578(self) != 0) return;
     s32 t = self->fB1C;
@@ -552,10 +552,10 @@ void func_001C49C8(void)
     func_001B93D8();
 }
 
-s32 func_001B8A08(C08* self, C03* obj);
-s32 func_001A8820(void* p, C03* obj);
+s32 func_001B8A08(Agent* self, Collider* obj);
+s32 func_001A8820(void* p, Collider* obj);
 
-s32 func_001C7468(C08* self, C03* obj)
+s32 func_001C7468(Agent* self, Collider* obj)
 {
     if (func_001B8A08(self, obj) != 0) {
         return 1;
@@ -575,18 +575,18 @@ s32 func_001C7468(C08* self, C03* obj)
 
 void func_00188850(const Vec02* t, f32 x, void* p);
 
-void func_001C53B0(C06* self)
+void func_001C53B0(TurningCollider* self)
 {
     func_00188850(&D_00248D20, self->f638, (u8*)self + 0x660);
 }
 
 extern f32 D_0024D654;
 
-void func_00192850(C08* self);
+void func_00192850(Agent* self);
 void func_0012E760(void* obj);
-void func_001CB6F8(void* a, C08* b);
+void func_001CB6F8(void* a, Agent* b);
 
-void func_001C7520(C08* self)
+void func_001C7520(Agent* self)
 {
     func_00192850(self);
     if (self->f7E0 != 0) {
@@ -612,11 +612,11 @@ void func_001C7520(C08* self)
 
 extern f32 D_00275C60[];
 
-void func_001B89B8(C06* self);
+void func_001B89B8(TurningCollider* self);
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA408(f32 a);
 
-void func_001C5438(C06* self)
+void func_001C5438(TurningCollider* self)
 {
     func_001B89B8(self);
     f32 t = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
@@ -635,10 +635,10 @@ void func_001C5438(C06* self)
 }
 
 struct Other_1C6928 { u8 pad[0xAA]; u16 flags; };
-void func_00175170(C07* self, s32 a, s32 b);
-void func_001C61E0(C07* self, s32 state);
+void func_00175170(Player* self, s32 a, s32 b);
+void func_001C61E0(Player* self, s32 state);
 
-void func_001C6928(C07* self, Other_1C6928* other)
+void func_001C6928(Player* self, Other_1C6928* other)
 {
     s32 flag = 1;
     s32 held = other->flags & 0x80;
@@ -700,14 +700,14 @@ tail:
 
 extern u8 D_00261420[];
 extern const f32 D_0024D650 = 3.4028235e+38f;
-void func_001C4458(C06* self);
+void func_001C4458(TurningCollider* self);
 struct Tbl_1C6F48;
 s32 func_00140FF8(Tbl_1C6F48* p);
-void func_00192990(C08* self, s32 a);
+void func_00192990(Agent* self, s32 a);
 
 #define F(T, o) (*(T*)((u8*)self + (o)))
 
-void func_001C6F48(C08* self)
+void func_001C6F48(Agent* self)
 {
     func_001C4458(self);
     f32 c300 = 300.0f;
@@ -759,7 +759,7 @@ struct Vec_1C5E50 { Pk8_1C5E50 xy; u32 z; };
 
 extern f32 D_00274B80[4];
 
-void func_001C5E50(C06* self, f32 s)
+void func_001C5E50(TurningCollider* self, f32 s)
 {
     *(Vec_1C5E50*)&self->f6E0 = *(Vec_1C5E50*)D_00274B80;
     self->f6E0 *= s;
@@ -767,13 +767,13 @@ void func_001C5E50(C06* self, f32 s)
     self->f6E8 *= 1.0f / Fpu::Sqrt(s);
 }
 
-void func_001BAC30(C08* self, void* a1);
-void func_00124DF8(C08* self, s32 a1, void* a2);
-void func_001CA7C0(C08* self);
-void func_001CA8E8(C08* self);
+void func_001BAC30(Agent* self, void* a1);
+void func_00124DF8(Agent* self, s32 a1, void* a2);
+void func_001CA7C0(Agent* self);
+void func_001CA8E8(Agent* self);
 extern s32 D_00274C20[4];
 
-void func_001C7140(C08* self, void* a1)
+void func_001C7140(Agent* self, void* a1)
 {
     func_001BAC30(self, a1);
     func_00124DF8(self, 1, D_00274C20);
@@ -784,7 +784,7 @@ void func_001C7140(C08* self, void* a1)
 struct Arg_1C5248 { u8 pad0[0x88]; f32 f88; u8 pad1[0x9C - 0x8C]; s32 f9C; s32 fA0; s32 fA4; };
 extern f32 D_00274AD0[];
 
-s32 func_001C5248(C06* self, Arg_1C5248* a, s32 idx)
+s32 func_001C5248(TurningCollider* self, Arg_1C5248* a, s32 idx)
 {
     if (self->f6DC == 0) {
         return 0;

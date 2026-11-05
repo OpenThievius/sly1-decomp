@@ -2,21 +2,21 @@
 #include "common.h"
 #include "c6e.h"
 #include "cursor_animator.h"
-#include "c6c.h"
+#include "world.h"
 #include "v24a0.h"
 #include "v24a2.h"
 #include "list_iter.h"
 #include "shapes.h"
 #include "globals.h"
-#include "s1291d0.h"
+#include "range_record.h"
 #include "texture_table.h"
 #include "bump_allocator.h"
 
 typedef void (*VFn_1B0F70)(void* self, s32 arg);
 
-void func_001B1BF0(S1291D0* o);
+void func_001B1BF0(RangeRecord* o);
 
-void func_001B1DA8(S1291D0* o, f32 v)
+void func_001B1DA8(RangeRecord* o, f32 v)
 {
     o->f08 = v;
     if (o->f04 < 0.0f) {
@@ -198,10 +198,10 @@ typedef void (*VFn_1B1608)(void* self, s32 arg);
 extern s32 D_002626D0;
 extern u8 D_0027DC20[];
 
-void func_001B1CF8(S1291D0* self, s32 code);
-s32 func_001B1D38(S1291D0* self);
-void func_001B1D70(S1291D0* self, f32 v);
-void func_001B1DA8(S1291D0* self, f32 v);
+void func_001B1CF8(RangeRecord* self, s32 code);
+s32 func_001B1D38(RangeRecord* self);
+void func_001B1D70(RangeRecord* self, f32 v);
+void func_001B1DA8(RangeRecord* self, f32 v);
 void func_001F5C0C(void* p, s32 v, s32 n);
 
 struct Hdr_1B1B38 {
@@ -209,7 +209,7 @@ struct Hdr_1B1B38 {
     s32 f0C;
 };
 
-void func_001B1B38(S1291D0* self)
+void func_001B1B38(RangeRecord* self)
 {
     if (self->link == 0) {
         func_001B1CF8(self, 0x2C);
@@ -229,13 +229,13 @@ void func_001B1B38(S1291D0* self)
     }
 }
 
-void func_001B1BF0(S1291D0* self)
+void func_001B1BF0(RangeRecord* self)
 {
     self->fC0 = 0;
 }
 
 void* func_001B4688(s32 key);
-void func_001B1CF8(S1291D0* self, s32 key)
+void func_001B1CF8(RangeRecord* self, s32 key)
 {
     void* found = func_001B4688(key != -1 ? key : 0x2C);
     self->link = found;
@@ -243,7 +243,7 @@ void func_001B1CF8(S1291D0* self, s32 key)
         func_001B1BF0(self);
 }
 
-s32 func_001B1D38(S1291D0* p)
+s32 func_001B1D38(RangeRecord* p)
 {
     s32 r = 0;
     if (0.0f <= p->f04 && 0.0f <= p->f08)
@@ -251,7 +251,7 @@ s32 func_001B1D38(S1291D0* p)
     return r;
 }
 
-void func_001B1D70(S1291D0* p, f32 v)
+void func_001B1D70(RangeRecord* p, f32 v)
 {
     p->f04 = v;
     if (p->f08 < 0.0f)
@@ -278,16 +278,16 @@ u64 func_001B2988(TextureTable* t, s32 i, s32 j)
 
 typedef void (*VFn_1B0160)(void* self, s32 arg);
 
-void func_001B1BF8(S1291D0* o);
+void func_001B1BF8(RangeRecord* o);
 
-void func_001B1FB0(S1291D0* o, f32 v)
+void func_001B1FB0(RangeRecord* o, f32 v)
 {
     o->f40 = v;
     func_001B1BF8(o);
     func_001B1BF0(o);
 }
 
-void func_001B1FE0(S1291D0* o, f32 v)
+void func_001B1FE0(RangeRecord* o, f32 v)
 {
     o->f44 = v;
     func_001B1BF8(o);
@@ -339,7 +339,7 @@ void func_001B2358(void* o);
 void func_001B2640(Obj_1B2640* o)
 {
     if (o->f0 != 0) {
-        C6D* c = D_00261990;
+        Camera* c = D_00261990;
         s32 bits = o->f0->f0C;
         s32 need = c->f21C;
         s32 a2 = 0;
@@ -370,7 +370,7 @@ done:
     ;
 }
 
-void func_001B2068(S1291D0* self, Quad16* src)
+void func_001B2068(RangeRecord* self, Quad16* src)
 {
     *(Quad16*)((u8*)self + 0x30) = *src;
     func_001B1BF0(self);
@@ -381,7 +381,7 @@ struct Node_1B2790 { u8 pad[0xB8]; Node_1B2790* next; };
 
 s32 func_001B26F8(Node_1B2790* node, void* a1, f32 f);
 
-void func_001B2790(C6C* self, void* a1, s32 max, s32* outCount, Node_1B2790** out, f32 f)
+void func_001B2790(World* self, void* a1, s32 max, s32* outCount, Node_1B2790** out, f32 f)
 {
     ListFrame frame;
     s32 count = 0;
@@ -414,7 +414,7 @@ s32 func_001B2090(Obj_1B2090** self, u32 bits)
     s32 r = 0;
     if (*self != 0) {
         u32 flags = (*self)->flags_C;
-        C6D* g = D_00261990;
+        Camera* g = D_00261990;
         u32 mask = g->f21C;
         s32 ok = 0;
         if ((flags & 0x10000000) != 0 || (mask & flags) == mask) {
@@ -471,9 +471,9 @@ s32 func_001AEE50(void* self, void* other);
 
 typedef void (*VFn_1B1698)(void* self, s32 arg);
 
-f32 func_002054F0(S1291D0* o, f32 s);
+f32 func_002054F0(RangeRecord* o, f32 s);
 
-void func_001B2010(S1291D0* o, f32 s) {
+void func_001B2010(RangeRecord* o, f32 s) {
     f32 t = func_002054F0(o, s * 0.00872664712f);
     o->f04 = t * o->f40;
     o->f08 = t * o->f44;
@@ -509,9 +509,9 @@ void func_001B3488(Obj_1B3488* self)
 extern u8 D_00248400[];
 
 void func_00188B08(void* a, void* b, Mat4A* dst);
-void func_00182F78(C01* self, void* other);
+void func_00182F78(BaseObject* self, void* other);
 
-void func_001B28A8(C6E* self, C01* other)
+void func_001B28A8(C6E* self, BaseObject* other)
 {
     Mat4A a;
     Mat4A b;
