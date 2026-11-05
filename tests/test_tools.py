@@ -479,6 +479,12 @@ class PermuteTest(unittest.TestCase):
     def test_auto_takes_runs_of_simple_statements(self):
         self.assertEqual(permute.groups(self.LINES, auto=True), [[2, 3, 4, 5, 6]])
 
+    def test_auto_stays_in_the_function(self):
+        lines = ["void g(S* s)", "{", "    s->x = 1;", "    s->y = 2;", "}"] + self.LINES
+        within = permute.function_lines(lines, "f")
+        self.assertEqual(within, (5, 16))
+        self.assertEqual(permute.groups(lines, auto=True, within=within), [[7, 8, 9, 10, 11]])
+
     def test_every_order_is_tried(self):
         got = {tuple(c[2:4]) for c in permute.orders(self.LINES, [[2, 3]])}
         self.assertEqual(got, {("    s->a = 1; /*P*/", "    s->b = 2; /*P*/"), ("    s->b = 2; /*P*/", "    s->a = 1; /*P*/")})
