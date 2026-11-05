@@ -20,7 +20,10 @@ Two kinds, over game code and Sony's libraries; a function matched in C is C and
 - remnant: a run of words the linker left of a stripped function. It starts on an
   8-byte boundary, has no jump or branch in it, nothing refers to it (no instruction
   or data names it), and the code before it is finished: going back over earlier
-  remnants, a `jr` and its delay slot, a tail `j`, or the start of the code.
+  remnants, a `jr` and its delay slot, a tail `j`, or the start of the code. A lone epilogue
+  (`jr $ra` freeing stack in its delay slot) after finished code, which nothing refers to, is one
+  too, whatever its alignment: no whole function frees stack it never took. So are the nops at
+  the start of the code, before the entry routine, though code takes their address.
 
 What these rules do not classify (kernel and cache instructions, max.s/min.s/sqrt.s,
 fragments that contain a jump) stays unmatched and is listed by tools/todo.py with its
@@ -42,6 +45,7 @@ import versions  # noqa: E402
 ROOT = versions.ROOT
 TABLE = ROOT / "config" / "us" / "original_asm.tsv"
 HEADER = "name\taddress\tsize\tkind\twhy"
+CODE_START = 0x100000  # the first word of game code (config/us/layout.tsv)
 BRANCH = re.compile(r"^(j|jal|jr|jalr|b|bal|beq|bne|beqz|bnez|bgez|bgtz|blez|bltz|bgezal|bltzal|beql|bnel|"
                     r"beqzl|bnezl|bgezl|bgtzl|blezl|bltzl|bc[0-3][tf]l?)$")
 OWN_LINES = ("nonmatching", "glabel", "endlabel", "dlabel", "enddlabel")
@@ -87,6 +91,23 @@ def stores_before_frame(lines):
             before = [x.split()[0] for x in ins[:i]]
             return "nop" in before and any(o in STORES for o in before)
     return False
+
+
+def epilogue_tail(lines):
+    """True when a listing is only a return that frees stack: `jr $ra` with a positive stack
+    adjustment in its delay slot. No whole function frees stack it never took, so it is the end of
+    a stripped one."""
+    ins = []
+    for line in lines:
+        parts = line.split(None, 1)
+        if parts and not line.startswith(("jlabel", ".L")):
+            ins.append((parts[0], parts[1].replace(" ", "") if len(parts) > 1 else ""))
+    while ins and ins[-1][0] == "nop":
+        ins.pop()  # the padding behind the delay slot
+    if len(ins) != 2 or ins[0] != ("jr", "$ra"):
+        return False
+    m = re.match(r"\$sp,\$sp,(0x[0-9A-Fa-f]+|\d+)$", ins[1][1])
+    return ins[1][0] == "addiu" and m is not None and int(m.group(1), 0) > 0
 
 
 def handwritten(ops, kind, lines=()):
@@ -143,6 +164,14 @@ def classify(funcs, bodies, references, sdk=None):
                 and references.get(name, 0) == 0):
             out.append((name, addr, size, "remnant", "stripped-function leftover"))
             continue  # the chain stays finished across a remnant
+        if addr == CODE_START and ops and all(o == "nop" for o in ops):
+            # The words before the entry routine: the startup file's own padding. Code takes their
+            # address as the start of the code, which names no function.
+            out.append((name, addr, size, "remnant", "padding before the entry routine"))
+            continue
+        if ok and references.get(name, 0) == 0 and epilogue_tail(lines):
+            out.append((name, addr, size, "remnant", "stripped-function epilogue"))
+            continue
         ok = ends_finished(ops)
     return out
 

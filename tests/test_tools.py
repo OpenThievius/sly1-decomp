@@ -371,6 +371,17 @@ class ProgressCountTest(unittest.TestCase):
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
 
+class EpilogueTailTest(unittest.TestCase):
+    """A lone `jr $ra` that frees stack is the end of a stripped function, not a whole one."""
+
+    def test_only_a_return_freeing_stack_is_a_tail(self):
+        self.assertTrue(classify_asm.epilogue_tail(["jr         $ra", "addiu     $sp, $sp, 0x20", "nop", ""]))
+        self.assertFalse(classify_asm.epilogue_tail(["jr         $ra", "nop"]))
+        self.assertFalse(classify_asm.epilogue_tail(["jr         $ra", "addiu     $sp, $sp, -0x20"]))
+        self.assertFalse(classify_asm.epilogue_tail(["addiu     $v0, $zero, 0x1", "jr         $ra",
+                                                     "addiu     $sp, $sp, 0x20"]))
+
+
 class RegdiffTest(unittest.TestCase):
     """tools/regdiff.py tells a register-only difference from one in the code."""
 
