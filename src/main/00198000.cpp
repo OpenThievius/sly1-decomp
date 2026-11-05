@@ -2,7 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "c2c.h"
-#include "c41.h"
+#include "object_gatherer.h"
 #include "c6e.h"
 #include "c5c.h"
 #include "c5d.h"
@@ -414,13 +414,13 @@ void func_0019AFF0(C71* self)
     self->keep = tmp;
 }
 
-void func_0019B1E0(C41* obj)
+void func_0019B1E0(ObjectGatherer* obj)
 {
     func_001B7A98(obj);
     func_00152470(&obj->world->list1C60, obj);
 }
 
-void func_0019B218(C41* obj)
+void func_0019B218(ObjectGatherer* obj)
 {
     func_001B7B78(obj);
     func_00152600(&obj->world->list1C60, obj);
@@ -606,12 +606,12 @@ struct Obj_19BE08 { VFn_19BE08* vtbl; };
 
 void func_0019C1C0(void* self, s32 mode);
 
-s32 func_0019BE08(C41* self, Src_19BE08* src)
+s32 func_0019BE08(ObjectGatherer* self, Src_19BE08* src)
 {
     Local_19BE08 loc;
-    if (self->mode550 != 3) {
+    if (self->state != 3) {
         func_0019C1C0(self, 3);
-        Obj_19BE08* obj = (Obj_19BE08*)self->f5F8;
+        Obj_19BE08* obj = (Obj_19BE08*)self->group;
         if (obj != 0) {
             loc.mode = 6;
             loc.qb = src->q20;
@@ -687,9 +687,9 @@ s32 func_00199C78(C2E* self, S1BC320* a1)
 
 void func_001BA130(void* self);
 
-void func_0019B250(C41* self)
+void func_0019B250(ObjectGatherer* self)
 {
-    Pk8_41 tmp;
+    PackedS64 tmp;
     tmp = self->q600;
     func_001BA130(self);
     self->q600 = tmp;
@@ -793,7 +793,7 @@ extern f32 D_0026185C[];
 void func_001B7968(void* self);
 f32 func_001EAB48(f32 a, f32 b, f32 c);
 
-void func_0019B038(C41* self)
+void func_0019B038(ObjectGatherer* self)
 {
     func_001B7968(self);
     self->f60C = 1.0f;
@@ -810,20 +810,20 @@ void func_00124DF8(void* self, s32 a1, void* a2);
 void* func_0015A480(void* self, s32 kind, void* arg);
 void func_00182ED8(void* node);
 
-void func_0019B0A0(C41* self)
+void func_0019B0A0(ObjectGatherer* self)
 {
     s32 k = 0x269;
     func_001BAC30(self);
-    func_00159478(&self->f5F8, self);
+    func_00159478(&self->group, self);
     func_00124DF8(self, 1, (u8*)D_0026AB90);
     for (; k < 0x288; k++) {
         void* node = func_0015A480(self->world, k, self);
         if (node != 0) {
             func_00182ED8(node);
             if (k < 0x279) {
-                self->f568[self->n564++] = node;
+                self->lowObjects[self->lowCount++] = node;
             } else {
-                self->f5AC[self->n5A8++] = node;
+                self->highObjects[self->highCount++] = node;
             }
         }
     }
@@ -835,11 +835,11 @@ void func_0019C1C0(void* self, s32 mode);
 void func_00124DF8(void* self, s32 n, void* table);
 void func_00124A48(void* self);
 
-void func_0019B188(C41* self)
+void func_0019B188(ObjectGatherer* self)
 {
     func_00124DF8(self, 1, (u8*)D_0026ABA0);
     func_00124A48(self);
-    self->mode550 = -1;
+    self->state = -1;
     func_0019C1C0(self, 1);
     self->v650 = self->v140;
 }

@@ -4,7 +4,7 @@
 #include "asm_func.h"
 extern f32 D_0026185C[];
 #include "list_iter.h"
-#include "c53.h"
+#include "object_group.h"
 #include "c6c.h"
 #include "c48.h"
 #include "t2195.h"
@@ -16,12 +16,12 @@ extern f32 D_0026185C[];
 struct __attribute__((aligned(16))) Vec4_1963D8 { f32 x, y, z, w; };
 
 
-void func_00123ED0(C53* self);
-void func_00152470(u8* dst, C53* src);
+void func_00123ED0(ObjectGroup* self);
+void func_00152470(u8* dst, ObjectGroup* src);
 
 
 
-void func_00124A48(C53* self);
+void func_00124A48(ObjectGroup* self);
 
 
 
@@ -133,10 +133,10 @@ void func_001B6DF8(Any_001969F8* a, void* b);
 struct Cell_196410 { C02* node; s32 link; };
 
 void func_00152438(u8* a, s32 v);
-void func_00137EB0(Stream53* r, void* out);
-void func_00137E70(Stream53* r, void* out);
-s32 func_00137B90(Stream53* r);
-s32 func_00137D10(Stream53* r);
+void func_00137EB0(LoadStream* r, void* out);
+void func_00137E70(LoadStream* r, void* out);
+s32 func_00137B90(LoadStream* r);
+s32 func_00137D10(LoadStream* r);
 C02* func_001DC208(void* host, s32 a);
 C02* func_0011E580(s32 slot, void* host, s32 z, s32 key, s32 flag);
 void func_001DC150(void* host, C02* n, s32 v);
@@ -145,11 +145,11 @@ void func_00152470(u8* list, Cell_196410* c);
 C02* func_0015A418(void* host, s32 kind, s32 id, C02* c);
 void* func_001C1390(s32 id, void* host);
 void func_0011A338(void* a, void* b);
-s32 func_00137C40(Stream53* r);
-s32 func_00137CC0(Stream53* r);
-f32 func_00137DF8(Stream53* r);
-void func_0011EC40(C02* n, Stream53* r);
-void func_0011ECB8(void* host, C53* self, Stream53* r);
+s32 func_00137C40(LoadStream* r);
+s32 func_00137CC0(LoadStream* r);
+f32 func_00137DF8(LoadStream* r);
+void func_0011EC40(C02* n, LoadStream* r);
+void func_0011ECB8(void* host, ObjectGroup* self, LoadStream* r);
 s32 func_00152720(List01* list);
 
 // The id that names no object.
@@ -163,9 +163,9 @@ struct Id_196410 {
 struct Cell_196810 { void* node; s32 link; };
 struct Elem_196810 { s32 f0; u8 pad4[4]; Elem_196810* next; };
 struct Item_196810 { u8 pad0[0x1C]; Item_196810* next; u8 pad20[0x10]; void* f30; };
-void func_00127048(C53* self, C53* src);
-void func_00152440(List53* p);
-void func_00152470(List53* list, Cell_196810* c);
+void func_00127048(ObjectGroup* self, ObjectGroup* src);
+void func_00152440(GroupList* p);
+void func_00152470(GroupList* list, Cell_196810* c);
 
 
 
@@ -307,10 +307,10 @@ s32 D_0026A8E0[9] = { 0x0, 0x3E4, 0x558, 0x0, 0x3E5, 0x554, 0x20, 0x3E6, 0x55C }
 // The object func_00196938 registers itself as; filled at run time.
 void* D_0026A904 = 0;
 
-void func_001963D8(C53* self);
-void func_00196410(C53* self, Stream53* rd);
-void func_00196810(C53* self, C53* src);
-void func_00196900(C53* self);
+void func_001963D8(ObjectGroup* self);
+void func_00196410(ObjectGroup* self, LoadStream* rd);
+void func_00196810(ObjectGroup* self, ObjectGroup* src);
+void func_00196900(ObjectGroup* self);
 void func_00196938(C18* self);
 void func_001969C0(C18* self);
 void func_001969F8(C18* self);
@@ -332,13 +332,13 @@ void func_00198760(C0F* s1, f32 f);
 u32 func_00198858(void);
 void func_00198920(C48* self);
 
-void func_001963D8(C53* self)
+void func_001963D8(ObjectGroup* self)
 {
     func_00123ED0(self);
     func_00152470(&self->world->list1C3C, self);
 }
 
-void func_00196410(C53* self, Stream53* rd)
+void func_00196410(ObjectGroup* self, LoadStream* rd)
 {
     C02* arr[64];
     ListFrame fr;
@@ -468,12 +468,12 @@ void func_00196410(C53* self, Stream53* rd)
     self->desc->m02(self);
 }
 
-void func_00196810(C53* self, C53* src)
+void func_00196810(ObjectGroup* self, ObjectGroup* src)
 {
     Pair53 saved = self->kept;
     func_00127048(self, src);
     self->kept = saved;
-    List53 list = self->cells;
+    GroupList list = self->cells;
     func_00152440(&self->cells);
     ListFrame frame;
     Elem_196810* e = (Elem_196810*)list.first;
@@ -495,7 +495,7 @@ void func_00196810(C53* self, C53* src)
     }
 }
 
-void func_00196900(C53* self)
+void func_00196900(ObjectGroup* self)
 {
     func_00124A48(self);
     self->desc->m03(self);

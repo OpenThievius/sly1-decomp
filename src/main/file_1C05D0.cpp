@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "c7e.h"
-#include "c66.h"
+#include "point_object.h"
+#include "id_linked_object.h"
 #include "c6c.h"
 #include "globals.h"
 #include "g27c220.h"
@@ -568,25 +568,25 @@ void func_001C0EC0(void)
 
 ASM_FUNC(func_001C0F30);
 
-void func_001C0FF0(C66* self)
+void func_001C0FF0(IdLinkedObject* self)
 {
     func_00124A48(self);
-    func_001C1030(self, self->id32C);
+    func_001C1030(self, self->linkId);
     self->desc->m03(self);
 }
 
-void func_001C1030(C66* self, s32 v)
+void func_001C1030(IdLinkedObject* self, s32 v)
 {
-    if (self->link334 != 0) {
-        func_001B6438(self->link334);
-        self->link334 = 0;
+    if (self->link != 0) {
+        func_001B6438(self->link);
+        self->link = 0;
     }
     s32 r = func_0015A418(self->world, 0x101, v, self);
-    self->found330 = r;
+    self->linkTarget = r;
     if (r != 0) {
-        self->link334 = func_001B6290(r, self, -1, 1);
+        self->link = func_001B6290(r, self, -1, 1);
     }
-    self->id32C = v;
+    self->linkId = v;
 }
 
 void func_001C10A8(C81* self)
@@ -609,7 +609,7 @@ void func_001C1110(C81* self)
 
 void func_001C1148(C81* self)
 {
-    Keep7E saved;
+    KeptBits saved;
     saved = self->keep;
     func_001830D8(self);
     self->keep = saved;

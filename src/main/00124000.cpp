@@ -11,7 +11,7 @@
 #include "globals.h"
 
 #include "c6c.h"
-#include "c40.h"
+#include "object_cycler.h"
 #include "paired_object.h"
 
 void func_00182ED0(C01* self);
@@ -170,7 +170,7 @@ void func_00127590(C02* self, Vec02* src)
 }
 
 struct Vec3_127558 { f32 x; f32 y; f32 z; };
-void func_00127558(C40* self, f32 x, f32 y, f32 z)
+void func_00127558(ObjectCycler* self, f32 x, f32 y, f32 z)
 {
     Vec3_127558 v;
     v.x = x;

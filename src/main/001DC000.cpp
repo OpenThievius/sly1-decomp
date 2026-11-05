@@ -2,8 +2,8 @@
 #include "common.h"
 #include "c05.h"
 #include "c2f.h"
-#include "c51.h"
-#include "c5e.h"
+#include "cone_volume.h"
+#include "redirect_object.h"
 #include "c6c.h"
 #include "t217d.h"
 #include "v24a2.h"
@@ -259,20 +259,20 @@ void func_001DC108(u8* owner, Touch03* node)
 
 extern Quad16 D_00275730;
 
-void func_00123ED0(C5E* self);
+void func_00123ED0(RedirectObject* self);
 
-void func_001DDCE0(C5E* self)
+void func_001DDCE0(RedirectObject* self)
 {
     func_00123ED0(self);
     self->q320 = D_00275730;
 }
 
-void func_001276C0(C5E* self);
+void func_001276C0(RedirectObject* self);
 
-void func_001DE768(C5E* self)
+void func_001DE768(RedirectObject* self)
 {
-    if (self->self2D0 == self) {
-        self->flag2DC = 1;
+    if (self->target == self) {
+        self->targetIsSelf = 1;
     }
     func_001276C0(self);
 }
@@ -608,20 +608,20 @@ extern f32 D_00275690[2];
 extern f32 D_00275698[2];
 extern f32 D_002756A0[4];
 
-C51* func_0011E580(Alloc_1DC9A0* a0, Obj_1DC9A0* a1, void* a2, s32 a3, s32 a4);
-void func_00184768(C51* p, s32 v);
-void func_001847F0(C51* p, void* q);
-void func_00184858(C51* p, f32 v);
-void func_00184818(C51* p, f32 v);
-void func_00184878(C51* p, f32 v);
-void func_00184838(C51* p, f32 v);
-void func_00184898(C51* p, f32 v);
-void func_001848B8(C51* p, void* q);
-void func_00184990(C51* p, void* q);
+ConeVolume* func_0011E580(Alloc_1DC9A0* a0, Obj_1DC9A0* a1, void* a2, s32 a3, s32 a4);
+void func_00184768(ConeVolume* p, s32 v);
+void func_001847F0(ConeVolume* p, void* q);
+void func_00184858(ConeVolume* p, f32 v);
+void func_00184818(ConeVolume* p, f32 v);
+void func_00184878(ConeVolume* p, f32 v);
+void func_00184838(ConeVolume* p, f32 v);
+void func_00184898(ConeVolume* p, f32 v);
+void func_001848B8(ConeVolume* p, void* q);
+void func_00184990(ConeVolume* p, void* q);
 
 void func_001DC9A0(Obj_1DC9A0* self)
 {
-    C51* p;
+    ConeVolume* p;
 
     if (D_00275630[0] & 1) {
         p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);

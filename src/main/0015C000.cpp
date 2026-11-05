@@ -2,7 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c01.h"
-#include "c40.h"
+#include "object_cycler.h"
 #include "v24a0.h"
 #include "v24a2.h"
 #include "shapes.h"
@@ -276,7 +276,7 @@ s32 func_001419E8(s32 zero, void* p, void* q, s32 a, s32 b, s32 c);
 void func_0018D6F0(void);
 void func_001DC4D0(s32 a0, s32 a1, void* a2, Pred_15C0A0 a3, void* a4, s32* a5, s32* a6, f32 f12);
 
-s32 func_0015C0A0(C40* self)
+s32 func_0015C0A0(ObjectCycler* self)
 {
     f32* tbl = D_00261858;
     if (tbl[1] - self->f66C < 0.05f) {

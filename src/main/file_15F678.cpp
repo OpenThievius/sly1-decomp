@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c87.h"
+#include "id_lookup_object.h"
 #include "c02.h"
 #include "c83.h"
 #include "s1be4d8.h"
@@ -72,7 +72,7 @@ void func_001BFCD8(void* a0, void* a1, void* a2, void* a3, f32 f12, f32 f13, f32
 void func_00182C58(C01* self);
 void* func_0018D500(s32 size);
 s32 func_0015A480(C6C* world, s32 item, void* c);
-void func_0015F8B0(C6C* world, List87* sub);
+void func_0015F8B0(C6C* world, FoundList* sub);
 
 
 struct Iter_15F710 {
@@ -898,7 +898,7 @@ void func_0015FB28(Node_0015FB28* self, void* arg);
 s32 func_0015FBA0(C02* self, s32* out);
 void func_0015FBB8(C02* self, s32 flag);
 void func_0015FF58(void* self);
-void func_00160050(C87* obj, s32 value);
+void func_00160050(IdLookupObject* obj, s32 value);
 void func_00160070();
 S1600A0* func_001600A0(S1600A0* key);
 void* func_00160110(s32 key);
@@ -1183,20 +1183,20 @@ void func_0015FF58(void* self)
     func_0015FD78(self);
 }
 
-void func_0015FF88(C87* self)
+void func_0015FF88(IdLookupObject* self)
 {
     func_00182C58(self);
     C6C* cur = self->world;
-    List87* sub = &self->found;
-    sub->arr = (s32*)func_0018D500(self->itemCount * 4);
-    for (s32 i = 0; i < self->itemCount; i++) {
-        s32 r = func_0015A480(cur, self->items[i], self->parent);
-        if (r != 0) { s32 n = sub->count; sub->arr[n] = r; sub->count = n + 1; }
+    FoundList* sub = &self->found;
+    sub->items = (s32*)func_0018D500(self->idCount * 4);
+    for (s32 i = 0; i < self->idCount; i++) {
+        s32 r = func_0015A480(cur, self->ids[i], self->parent);
+        if (r != 0) { s32 n = sub->count; sub->items[n] = r; sub->count = n + 1; }
     }
     func_0015F8B0(cur, &self->found);
 }
 
-void func_00160050(C87* obj, s32 value) { obj->items[obj->itemCount++] = value; }
+void func_00160050(IdLookupObject* obj, s32 value) { obj->ids[obj->idCount++] = value; }
 
 void func_00160070() { func_00160918(); }
 

@@ -4,7 +4,7 @@
 #include "c28.h"
 #include "c29.h"
 #include "flagged_object.h"
-#include "c41.h"
+#include "object_gatherer.h"
 #include "c6c.h"
 #include "g261858.h"
 #include "s1bc320.h"
@@ -485,7 +485,7 @@ void func_001405F0(u8* self, s32 value)
 struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
 void func_001F3B48(void* self, void* value, void* out);
 s32 func_001E4DC0(void* self, void* value);
-s32 func_00141170(C41* self, void* value)
+s32 func_00141170(ObjectGatherer* self, void* value)
 {
     Quad_00141170 local;
     func_001F3B48(self, value, &local);

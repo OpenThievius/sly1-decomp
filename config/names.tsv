@@ -76,3 +76,47 @@ func_001A4B30	BlendControllerPose	slot 16: steps the blend weight by the frame t
 func_001A4878	AppendControllerId	appends its argument to the PairController's ids array and increments idCount
 func_001A6480	GetControllerPose	returns the address of pose number poseIndex in the 0xC0-byte pose records from 0x3E0
 func_001A54F8	StartPairedObjects	takes a PairedObject from one list and an attachment from another at random, links them, sets both to state 1 and sets the next time
+func_00183CC8	InitConeVolume	slot 0 of the 0x51 class: sets the mode to 0, the range to 200 and 2000, the angles to 60, copies two vectors, calls UpdateConeVolumeTangents then the base set-up func_00123ED0
+func_00184768	SetConeVolumeMode	stores its flag in the mode field at 0x2D0, sets or clears two flag bits by whether it is 0, then calls the refresh functions func_001841D0 and func_00184B58
+func_00184990	SetConeVolumeRange	copies one eight-byte pair into the adjacent rangeMin and rangeMax fields (default 200 and 2000) then calls the refresh functions
+func_001849D0	SetConeVolumeOuterAngle	stores its float in outerAngle (60 at set-up), then calls UpdateConeVolumeTangents and the refresh functions
+func_00184A08	SetConeVolumeInnerAngle	stores its float in innerAngle, then calls UpdateConeVolumeTangents and func_001841D0
+func_00184A70	UpdateConeVolumeTangents	clamps outerAngle to 0..175 and innerAngle to 0..outerAngle, and stores func_002054F0 of each angle times pi/360 and their ratios in the 0x350..0x36C fields
+func_00183EA0	CopyConeVolume	slot 9 of the 0x51 class: calls the parent copy func_00127048 while keeping the saved pair at 0x410, with a re-register around it when value differs
+func_001DDCE0	InitRedirectObject	slot 0 of the 0x5E class: calls the base set-up func_00123ED0 and sets the vector at 0x320 from D_00275730
+func_001DE768	MarkRedirectToSelf	slot 31 of the 0x5E class: sets targetIsSelf to 1 when target equals the object itself, then calls the parent func_001276C0
+func_001963D8	InitObjectGroup	slot 0 of the 0x53 class: runs the base set-up func_00123ED0 and adds itself to its world's list at +0x1C3C
+func_00196410	LoadObjectGroup	slot 10 of the 0x53 class: reads the member count from the level stream, creates or looks up each member object, records it in a cell of the list at 0x2D0, then reads per-member settings and hands each member the group as parent
+func_00196810	CopyObjectGroup	slot 9 of the 0x53 class: runs the common copy keeping the words at 0x2DC, then rebuilds the cell list at 0x2D0 with new cells that point at the copy's own matching members
+func_00196900	FinishObjectGroupSetup	slot 16 of the 0x53 class: runs the base func_00124A48 and then its own slot 3
+func_00146340	InitStateNotifier	slot 0 of the 0x55 class: sets state to -1, initialMode to 0, armed to 1 and the tint bytes to 0x10, and adds itself to its world's list at +0x1C54
+func_001463C0	LoadStateNotifier	slot 10 of the 0x55 class: runs the base loaders func_0012AA28 and func_001289C0, then installs the five-entry table D_002619A0 through func_00124DF8
+func_00146418	CopyStateNotifier	slot 9 of the 0x55 class: runs the common copy func_00127048 and restores the word at 0x37C and the eight bytes at 0x374 it saved before
+func_00146470	StartStateNotifier	slot 16 of the 0x55 class: after the base func_00124A48 it sets the state to initialMode (2 under a flag condition) through slot 47
+func_001473E0	HandleStateNotifierContact	slot 45 of the 0x55 class: when armed is set and the other object has flag 0x10 it sets the state to 1 through slot 47, and returns 1
+func_00147428	UpdateStateNotifier	slot 17 of the 0x55 class (original assembly); the 0x57, 0x58 and 0x5A updates call it first and then test the state
+func_00147AB0	SetStateNotifierState	slot 47 of the 0x55 class: does nothing if the state is unchanged, otherwise runs the per-mode set-up for modes 0..7 and stores the new value at 0x2D0 and the clock at 0x2D4; every subclass override ends by calling it
+func_0015AAE0	InitObjectCycler	slot 0 of the 0x40 class: runs the base set-up, sets state -1, loads its ranges from the doubleword tables D_00262180..D_002621C0 and appends itself to the world list at +0x1C48
+func_0015AD80	CopyObjectCycler	slot 9 of the 0x40 class: keeps the doubleword at 0x5DC across the base copy func_001BA130, then in mode 0 starts the effect handle and otherwise leaves the world list
+func_0015AC08	LoadObjectCycler	slot 10 of the 0x40 class: runs the base load, finds the objects of kinds 0x23C..0x24B (and 0x24D..0x254 in mode 1) into its object arrays and appends itself to the world list in mode 1
+func_0015AEB0	StartObjectCycler	slot 16 of the 0x40 class: registers its table, draws the first check and step times in mode 1, enters its start state and sets 0x64C to twice its radius
+func_0015B128	UpdateObjectCycler	slot 17 of the 0x40 class: moves the state on when its end time passes, steps the shown index (cycling in mode 0, back and forth in mode 1) and advances state 6
+func_0015AE38	SetObjectCyclerHandle	slot 20 of the 0x40 class: in mode 0 stops its effect handle (func_001BF788) when flag is set and starts it again (func_001BFCD8) when not
+func_0015B4D0	DrawObjectCycler	slot 37 of the 0x40 class: builds a parameter block with func_00125B70, scales it by a clamped curve of the state time and passes it to the shown object's method slot 24
+func_0015B720	HandleObjectCyclerMessage	slot 45 of the 0x40 class: if not already in state 1 it enters state 1 and forwards the message's values to its group object's method 0x1B
+func_0019B038	InitObjectGatherer	slot 0 of the 0x41 class: runs the base set-up, sets 0x608 to 0.5 and 0x60C to 1.0, stores func_001EAB48 of the clock and sets 0x664 to -1
+func_0019B0A0	LoadObjectGatherer	slot 10 of the 0x41 class: runs the base load, func_00159478 for its group record, then finds the objects of ids 0x269..0x287 and files each in the low or high array
+func_0019B188	StartObjectGatherer	slot 16 of the 0x41 class: registers its table D_0026ABA0, sets state -1, enters mode 1 with func_0019C1C0 and copies its position (v140) to 0x650
+func_0019B250	CopyObjectGatherer	slot 9 of the 0x41 class: keeps the eight bytes at 0x600 across the base copy func_001BA130
+func_0019B1E0	AddObjectGatherer	slot 6 of the 0x41 class: runs the base step then appends itself to the world list at +0x1C60 (func_00152470)
+func_0019B218	RemoveObjectGatherer	slot 7 of the 0x41 class: runs the base step then removes itself from the world list at +0x1C60 (func_00152600)
+func_0019BE08	HandleObjectGathererMessage	slot 45 of the 0x41 class: if its state is not 3 it enters state 3 with func_0019C1C0 and sends the message's values to its group object's method 31
+func_00192068	LoadPointObject	reads the point (three floats via func_00137E70) from the level stream into pos, then runs the base load func_0011EC40; PointObject slot 10
+func_00192150	LoadTextPointObject	loads the point through func_00192068, then reads a string from the stream into text via func_001384A0; slot 10
+func_001C1030	SetObjectLinkId	lets go of the old link (func_001B6438), looks the new id up with func_0015A418, links to what it finds with func_001B6290 and stores the id in linkId
+func_001916D0	LoadPointGraph	reads the point count, link and triangle records, per-point link lists and the faces with their neighbours from the level stream into the graph; slot 10
+func_0017FEC0	LoadColoredTriangles	reads the point list, two corner pairs and five lists of index triples from the stream, giving each list a colour from func_001B4688; slot 10
+func_00180398	DrawColoredTriangles	transforms the points by a matrix built from width and t and emits each list as coloured triangles to the packet buffer D_00262280, then a box over minX..maxX
+func_001EE930	LoadValueList	reads a block, a count and that many s32 values from the stream into valueCount and values, then the base load; slot 10
+func_0015FF88	ResolveLookupIds	looks each of the idCount ids up with func_0015A480 and appends the non-null hits to found, then passes found to func_0015F8B0; slot 16
+func_00160050	AddLookupId	stores a value at ids[idCount] and increments idCount

@@ -5,7 +5,7 @@
 #include "c1e.h"
 #include "c6c.h"
 #include "c6d.h"
-#include "c41.h"
+#include "object_gatherer.h"
 #include "c05.h"
 #include "v24a0.h"
 #include "t219c.h"
@@ -888,14 +888,14 @@ struct Ob_19C068 {
     VFn_19C068 *vtbl;
 };
 
-void func_00152600(List01 *a, C41 *b);
-void func_00152470(List01 *a, C41 *b);
+void func_00152600(List01 *a, ObjectGatherer *b);
+void func_00152470(List01 *a, ObjectGatherer *b);
 struct Buf_19C068 { s32 w[4]; };
 void func_00128018(void *a, s32 b, void *c, struct Buf_19C068 *d);
-void func_001B9860(C41 *a, struct Buf_19C068 *b, void *c);
-void func_001B7C40(C41 *self, s32 flag);
+void func_001B9860(ObjectGatherer *a, struct Buf_19C068 *b, void *c);
+void func_001B7C40(ObjectGatherer *self, s32 flag);
 
-void func_0019C068(C41 *self, s32 a1) {
+void func_0019C068(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
         func_00152600(&self->world->list1C60, self);
         ((struct Ob_19C068 *)self->f5FC)->vtbl[7](self->f5FC);
@@ -911,7 +911,7 @@ void func_0019C068(C41 *self, s32 a1) {
     Frame_19C068 it(&self->parts);
     s32 node = it.Next();
     while (node != 0) {
-        func_001B7C40((C41 *)node, a1 == 0);
+        func_001B7C40((ObjectGatherer *)node, a1 == 0);
         node = it.Next();
     }
     self->desc02()->m20(self, (Vec02 *)&D_00248D30);

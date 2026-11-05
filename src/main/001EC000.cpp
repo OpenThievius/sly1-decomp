@@ -4,7 +4,7 @@
 #include "list_iter.h"
 #include "fpu.h"
 #include "c90.h"
-#include "c86.h"
+#include "value_list_object.h"
 #include "c6c.h"
 #include "c62.h"
 #include "c1f.h"
@@ -165,7 +165,7 @@ void func_001EE5C8(V24A0* s, void* unused1, s32 size, void* unused3, s32* outSiz
 
 void func_00182C18(C01* self);
 
-void func_001EE900(C86* self)
+void func_001EE900(ValueListObject* self)
 {
     func_00182C18(self);
     self->world->f1EC4 = self;
@@ -442,7 +442,7 @@ void func_001EDE38(Angles_1EDE38* in, Vec3_1EDE38* b, Vec3_1EDE38* out)
 typedef u64 Quad_1EEB60 __attribute__((mode(TI)));
 s32 func_001EEA40(void* self, void* node, Quad_1EEB60 q, s32* out);
 
-s32 func_001EEB60(C86* self, Quad_1EEB60* vec, s32* out)
+s32 func_001EEB60(ValueListObject* self, Quad_1EEB60* vec, s32* out)
 {
     s32 r;
     if (self != 0 && self->data38 != 0) {
@@ -584,16 +584,16 @@ s32 func_00137C40(void* src);
 void* func_0018D500(s32 size);
 void func_0011EC40(void* a, void* b);
 
-void func_001EE930(C86* self, void* src)
+void func_001EE930(ValueListObject* self, void* src)
 {
     s32 i;
     s32 n;
 
     func_00138398(src, &self->count34, &self->data38);
     n = func_00137BE0(src);
-    self->count = n;
+    self->valueCount = n;
     self->values = (s32*)func_0018D500(n * 4);
-    for (i = 0; i < self->count; i++) {
+    for (i = 0; i < self->valueCount; i++) {
         self->values[i] = func_00137C40(src);
     }
     func_0011EC40(self, src);

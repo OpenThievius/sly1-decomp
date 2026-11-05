@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
-#include "c7e.h"
-#include "c8e.h"
+#include "point_object.h"
+#include "colored_triangle_set.h"
 #include "c6d.h"
 
 
@@ -35,9 +35,9 @@ s32 func_0015A418(void* ref, s32 mode, s32 key, void* self);
 void func_0011EC40(C01* o, Stream8E* r);
 s32 func_00137BE0(Stream8E* r);
 f32 func_00137DF8(Stream8E* r);
-Pt8E* func_0018D5C0(s32 bytes);
-Ent8E* func_0018D500(s32 bytes);
-Col8E* func_001B4688(s32 key);
+TrianglePoint* func_0018D5C0(s32 bytes);
+TriangleIndices* func_0018D500(s32 bytes);
+TriangleColor* func_001B4688(s32 key);
 
 
 
@@ -93,7 +93,7 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d);
 
 void func_0017FE00(C80* self)
 {
-    Keep7E tmp = self->keep;
+    KeptBits tmp = self->keep;
     func_001830D8(self);
     self->keep = tmp;
 }
@@ -101,18 +101,18 @@ void func_0017FE00(C80* self)
 void func_0017FE48(C80* self)
 {
     func_00182C58(self);
-    if (self->id5C != -1) {
-        self->found60 = func_0015A418(self->world, 0x104, self->id5C, self);
+    if (self->targetId != -1) {
+        self->target = func_0015A418(self->world, 0x104, self->targetId, self);
     }
 }
 
-void func_0017FE90(C8E* self)
+void func_0017FE90(ColoredTriangleSet* self)
 {
     func_00182C18(self);
     D_002640A4 = self;
 }
 
-void func_0017FEC0(C8E* self, Stream8E* rd)
+void func_0017FEC0(ColoredTriangleSet* self, Stream8E* rd)
 {
     s32 i;
     s32 m;
@@ -120,38 +120,38 @@ void func_0017FEC0(C8E* self, Stream8E* rd)
     s32 k;
 
     func_0011EC40(self, rd);
-    self->f34 = func_00137BE0(rd);
-    self->f38 = func_0018D5C0(self->f34 << 4);
-    for (i = 0; i < self->f34; i++) {
-        self->f38[i].x = func_00137DF8(rd);
-        self->f38[i].y = -func_00137DF8(rd);
-        self->f38[i].w = 1.0f;
+    self->pointCount = func_00137BE0(rd);
+    self->points = func_0018D5C0(self->pointCount << 4);
+    for (i = 0; i < self->pointCount; i++) {
+        self->points[i].x = func_00137DF8(rd);
+        self->points[i].y = -func_00137DF8(rd);
+        self->points[i].w = 1.0f;
     }
-    self->f40 = func_00137DF8(rd);
-    self->f44 = func_00137DF8(rd);
+    self->minX = func_00137DF8(rd);
+    self->minY = func_00137DF8(rd);
     self->f4C = 1.0f;
-    self->f50 = func_00137DF8(rd);
-    self->f54 = func_00137DF8(rd);
-    self->f60 = self->f50 - self->f40;
+    self->maxX = func_00137DF8(rd);
+    self->maxY = func_00137DF8(rd);
+    self->width = self->maxX - self->minX;
     self->f5C = 1.0f;
     m = 0;
     for (; m < 5; m++) {
-        Col8E* p = func_001B4688(m + 0x48E);
-        Rec8E* r = &self->recs[m];
+        TriangleColor* p = func_001B4688(m + 0x48E);
+        TriangleList* r = &self->lists[m];
         if (p != 0) {
             r->col = p[1];
             for (k = 0; k < 4; k++) {
                 r->col.c[k] = (r->col.c[k] + 1) >> 1;
             }
         } else {
-            Col8E d;
+            TriangleColor d;
             *(u32*)&d = 0x80808080;
             r->col = d;
         }
-        r->n = func_00137BE0(rd);
-        r->ents = func_0018D500(r->n * 12);
-        for (j = 0; j < r->n; j++) {
-            Ent8E* e = &r->ents[j];
+        r->count = func_00137BE0(rd);
+        r->triangles = func_0018D500(r->count * 12);
+        for (j = 0; j < r->count; j++) {
+            TriangleIndices* e = &r->triangles[j];
             e->a = func_00137BE0(rd);
             e->b = func_00137BE0(rd);
             e->c = func_00137BE0(rd);
@@ -241,12 +241,12 @@ Obj_180398* func_001925F0(void);
 extern C6D* D_00261990;
 void func_001441C0(C6D* cam, void* pos, Vec_180398* out);
 
-void func_00180398(C8E* self, f32 t)
+void func_00180398(ColoredTriangleSet* self, f32 t)
 {
     f32 mat[16];
     Obj_180398* o;
 
-    func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->f60) + t * (4.0f / self->f60));
+    func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
     o = func_001925F0();
     if (o != 0 && (o = o->desc->m15C(o)) != 0 && o->desc->m144(o) == 2) {
         Vec_180398 v;
@@ -269,7 +269,7 @@ void func_00180398(C8E* self, f32 t)
         func_00161708(&D_00262280, 0x42, 0x44);
         vis = 0;
         for (g = 4; g >= 0; g--) {
-            Rec8E* r = &self->recs[g];
+            TriangleList* r = &self->lists[g];
             Col_180398 col = *(Col_180398*)&r->col;
             if (g == 0) {
                 Col_180398 mixed;
@@ -285,17 +285,17 @@ void func_00180398(C8E* self, f32 t)
             if (g == 0) {
                 base = col;
             }
-            if (r->n > 0) {
+            if (r->count > 0) {
                 s32 i;
                 func_001613C0(&D_00262280, 0, 1, 1);
                 func_00161458(&D_00262280, *(u32*)&col);
                 func_001613C0(&D_00262280, (s8)col.c[3] >= 0 ? 0x43 : 0x83, 1, 4);
-                for (i = 0; i < r->n; i++) {
-                    u32* idx = (u32*)&r->ents[i];
+                for (i = 0; i < r->count; i++) {
+                    u32* idx = (u32*)&r->triangles[i];
                     s32 j;
                     for (j = 2; j >= 0; j--, idx++) {
                         Q_180108 p, q;
-                        p.v = *(V128_180108*)&self->f38[*idx];
+                        p.v = *(V128_180108*)&self->points[*idx];
                         q.v = func_00188740(mat, p.v);
                         func_001615F0(&D_00262280, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
                         vis = vis || 0.0f < q.f[0] || q.f[0] < 640.0f || 0.0f < q.f[1] || q.f[1] < 492.80002f;
@@ -306,8 +306,8 @@ void func_00180398(C8E* self, f32 t)
         if (vis) {
             Q_180108 lo, hi;
             f32 d;
-            lo.v = func_00188740(mat, *(V128_180108*)&self->f40);
-            hi.v = func_00188740(mat, *(V128_180108*)&self->f50);
+            lo.v = func_00188740(mat, *(V128_180108*)&self->minX);
+            hi.v = func_00188740(mat, *(V128_180108*)&self->maxX);
             func_001613C0(&D_00262280, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
             func_00161458(&D_00262280, *(u32*)&base);
             func_001615F0(&D_00262280, 0x6C00, 0x7900, 0, 0);

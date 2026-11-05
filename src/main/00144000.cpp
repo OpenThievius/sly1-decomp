@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#include "c55.h"
+#include "state_notifier.h"
 #include "c6c.h"
 #include "scaled_offset_object.h"
 #include "g27c220.h"
@@ -9,7 +9,7 @@ void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);
 void func_00124DF8(void* a, s32 b, void* c);
 
-void func_001463C0(C55* self, void* arg)
+void func_001463C0(StateNotifier* self, void* arg)
 {
     func_0012AA28(self, 1);
     func_001289C0(self, arg);
@@ -18,7 +18,7 @@ void func_001463C0(C55* self, void* arg)
 
 void func_00127048(void* a, void* b);
 
-void func_00146418(C55* self, void* arg)
+void func_00146418(StateNotifier* self, void* arg)
 {
     s32 keep = self->f37C;
     u64 tmp;
@@ -34,7 +34,7 @@ void func_00124A48(void* a);
 void* func_0015A838(void* a, s32 b, s32 c, void* d);
 s32 func_00141008(void* a, s32 b);
 
-void func_00146470(C55* self)
+void func_00146470(StateNotifier* self)
 {
     func_00124A48(self);
     void* r = func_0015A838(self->world, 1, 0x75, self);
@@ -45,15 +45,15 @@ void func_00146470(C55* self)
     G27C220* g = D_002623C0;
     if (((g->f19D8 << 8) | g->f19DC) != 0x308) {
         if (func_00141008(D_00261420, self->f37C)) {
-            self->f2D8 = 2;
+            self->initialMode = 2;
         }
     }
-    self->desc02()->m2F(self, self->f2D8);
+    self->desc02()->m2F(self, self->initialMode);
 }
 
-s32 func_001473E0(C55* self, Other55* b)
+s32 func_001473E0(StateNotifier* self, ContactObject* b)
 {
-    if (self->f340 != 0) {
+    if (self->armed != 0) {
         if (b->fC & 0x10) {
             self->desc02()->m2F(self, 1);
         }
@@ -79,9 +79,9 @@ void func_00147FB0(C58* self)
     if (self->state != 0) return;
     if (self->f338 == 0) return;
     if (D_00270458 != 2) {
-        self->f398 = self->f398 - D_00261860;
+        self->timeLeft = self->timeLeft - D_00261860;
     }
-    if (self->f398 <= 0.0f) {
+    if (self->timeLeft <= 0.0f) {
         self->desc02()->m2F(self, 6);
     }
 }
@@ -163,8 +163,8 @@ void func_00147E40(C58* self)
     self->f358 = 0.6f;
     self->f354 = 0.75f;
     self->f320 = 0.25f;
-    self->f390 = 8.0f;
-    self->f394 = 10.0f;
+    self->timeMin = 8.0f;
+    self->timeMax = 10.0f;
 }
 
 struct Obj_146D10 {
@@ -208,13 +208,13 @@ extern u8 D_00261420[];
 
 struct Ptr_146340;
 
-void func_00123ED0(C55* self);
-void func_00152470(List01* list, C55* item);
+void func_00123ED0(StateNotifier* self);
+void func_00152470(List01* list, StateNotifier* item);
 s32 func_00140FF8(Ptr_146340* p);
 
-void func_00146340(C55* self)
+void func_00146340(StateNotifier* self)
 {
-    self->f2D8 = 0;
+    self->initialMode = 0;
     self->f388 = 30.0f;
     self->state = self->f2DC = -1;
     func_00123ED0(self);
@@ -225,7 +225,7 @@ void func_00146340(C55* self)
     self->tint[1] = 0x10;
     self->tint[0] = 0x10;
     self->tint[3] = 0x10;
-    self->f340 = 1;
+    self->armed = 1;
 }
 
 S124DF8 D_002619A0[5] = {

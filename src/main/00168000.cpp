@@ -4,7 +4,7 @@
 #include "c2f.h"
 #include "listed_collision_part.h"
 #include "c6e.h"
-#include "c7e.h"
+#include "point_object.h"
 #include "current_placed_object.h"
 #include "part_holder_object.h"
 #include "list_iter.h"
@@ -309,16 +309,16 @@ void func_0016A140(C7F* self)
 
 void func_0016A1B0(C7F* self)
 {
-    if (self->id60 != -1) {
-        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->world, self->id60, self->parent);
-        self->found64 = r;
+    if (self->targetId != -1) {
+        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->world, self->targetId, self->parent);
+        self->target = r;
         r->f398 = 0;
     }
 }
 
 void func_0016A1F8(C7F* self)
 {
-    Keep7E saved = self->keep;
+    KeptBits saved = self->keep;
     func_001830D8(self);
     self->keep = saved;
 }
@@ -1449,7 +1449,7 @@ void func_0016A100(C7F* self)
 {
     func_00182C18(self);
     f32 k = D_0024A798;
-    self->id60 = -1;
+    self->targetId = -1;
     self->f68 = 1;
     self->f70 = k;
 }
