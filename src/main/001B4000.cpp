@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "r11b008.h"
 #include "t21e3.h"
 #include "c05.h"
 #include "list_iter.h"
@@ -718,20 +719,16 @@ void func_001B5588(Vec3_1B5588* dst, Vec3_1B5588* src)
     dst->z = src->z;
 }
 
-struct __attribute__((aligned(16))) Quad_001B7968 { s32 a, b, c, d; };
-
-void func_0011B008(Quad_001B7968* q);
-void func_0011B060(Quad_001B7968* q, s32 mode);
 void func_00152438(void* self, s32 value);
 void func_00123ED0(void* self);
 void func_00160E80(Mesh03* mesh);
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 func_0011A498(void* a, s32 b, s32 c, void* d);
+s32 func_0011A498(void* a, s32 b, s32 c, R11B008* d);
 void func_001BB4A0(void* self);
 
 void func_001B7968(C03* self)
 {
-    Quad_001B7968 local;
+    R11B008 local;
     s32 s0;
     func_0011B008(&local);
     func_00152438(&self->parts, 0x2E4);
