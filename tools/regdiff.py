@@ -74,9 +74,11 @@ def attempt(path, func, key="us"):
 
 
 def near_misses():
-    """(path, function) of every US near miss in nonmatching/ whose function is not matched yet."""
+    """(path, function) of every US near miss in nonmatching/ whose function is not matched yet
+    or classed as original assembly (config/us/original_asm.tsv)."""
+    import classify_asm
     import version_check
-    done = version_check.defined_in_src()
+    done = set(version_check.defined_in_src()) | set(classify_asm.read_table())
     for path in sorted((ROOT / "nonmatching").glob("func_*.cpp")):
         if path.stem not in done:
             yield path, path.stem
