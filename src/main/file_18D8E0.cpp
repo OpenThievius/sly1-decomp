@@ -392,7 +392,7 @@ extern u8 D_00148D68[];
 
 void func_0020ADA0(void);
 void func_0020AE40(void* self, void* a, s32 b);
-void func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
+s32 func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
 void func_0020B168(void* self, s32 a, void* fn, void* arg);
 
 s32 func_0018E410(IdentityKey* key);
