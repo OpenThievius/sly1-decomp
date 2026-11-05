@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 398/404 (98.5%), checked 2026-11-04
+// BYTES 398/404 (98.5%), checked 2026-11-05
 #include "common.h"
 // NEAR: k (&D_00248D20) and the constant 2 swap $s7/$s8 (4 lines). Global-alloc priority is 5 refs each, live 122 (k) vs 120 (2): 2 wins. The 2 is hoisted by the second loop pass, after k's set; moving k into the loop makes D hoist in pass 1 (still before 2) and drops the 2 hoist.
 

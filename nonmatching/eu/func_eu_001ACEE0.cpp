@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1213/1248 (97.2%), checked 2026-11-04
+// BYTES 1213/1248 (97.2%), checked 2026-11-05
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACEE0.cpp func_eu_001ACEE0 --unit src/main/001A8000.cpp
 // Still differs: the colour as its real 4-byte packed word puts the str initialiser temporary at sp+0x60, not 0x30 (frame 0x110, not 0x100); retail's frame needs more counted space at 0x20 than the real objects there give (build/swarm/n45/NOTES.md). It matched before only with a 16-byte colour local of which one word is used, an object sized for the frame, which AGENTS.md and OpenRAC (rac2-decomp docs/COMPILER-NOTES.md, "Object extent and stack allocation") rule out.
 // PAL: draws a gauge box (dark frame, a bar fading from red to grey), then one glyph over it that shakes while the timer runs.

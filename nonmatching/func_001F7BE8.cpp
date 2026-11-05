@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 355/412 (86.2%), checked 2026-11-04
+// BYTES 355/412 (86.2%), checked 2026-11-05
 #include "common.h"
 // NEAR: body and calls right, tail call right; only the scheduling/register choice of the 10 stores to D_00627800 (s2/s0 setup order) differs
 

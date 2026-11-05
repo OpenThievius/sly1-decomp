@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 623/628 (99.2%), checked 2026-11-04
+// BYTES 623/628 (99.2%), checked 2026-11-05
 #include "common.h"
 // NEAR: only the first status poll differs: retail keeps the 0x10002010 address in v1 and the value in v0, ours swaps v0/v1 (5 instructions)
 
