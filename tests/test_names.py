@@ -46,6 +46,29 @@ class NamesTest(unittest.TestCase):
         self.assertEqual(len(names.problems([row("func_0016F588", "RegisterButtonCodes")], FUNCS, header="")), 1)
 
 
+class UseOrDefinitionTest(unittest.TestCase):
+    """_is_use tells a use of the macro from a source's own identifier of the same name."""
+
+    def check(self, text):
+        path = Path(names.ROOT) / "build" / "test_names_is_use.cpp"
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(text)
+        try:
+            return names._is_use(row("D_00262DFC", "g_buttonCodes"), path.relative_to(names.ROOT))
+        finally:
+            path.unlink()
+
+    def test_uses_are_uses(self):
+        for text in ("if (n > 0 && g_buttonCodes[0].x != 0) {}", "return g_buttonCodes;",
+                     "p = (u8*)g_buttonCodes + 8;", "f(a, g_buttonCodes);"):
+            self.assertTrue(self.check(text), text)
+
+    def test_declarations_are_not(self):
+        for text in ("s32 g_buttonCodes;", "extern Slot* g_buttonCodes[4];", "void f(s32 a, u8* g_buttonCodes)",
+                     "struct g_buttonCodes {};"):
+            self.assertFalse(self.check(text), text)
+
+
 class CommittedNamesTest(unittest.TestCase):
     """The committed config/names.tsv and include/names.h, which CI checks without a disc."""
 
