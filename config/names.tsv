@@ -849,3 +849,287 @@ func_0012B5B8	SetFollowObjects	makes the +0x224 record when either argument is s
 func_0012B870	InitAnimation	slot 0 of class 0x83: runs the base set-up, sets the property list's element size to 0x3C, and the value at +0x80 to 1.0, +0x84 and +0x88 to 0, +0x90 to 0, +0x94 and +0x98 to 1.0
 func_0012B8C8	LoadAnimation	slot 10 of class 0x83: reads id, length, the target ids, the tracks with their position, rotation, scale, weight and morph curves, and the start, timed and end event lists
 func_0012BC38	ReadAnimationEvents	reads a count and that many 16-byte events from the stream, each by its kind in a large switch, merging equal-time kind 0 events into one group
+func_00198980	InitObjectSet	slot 0 of the 0x2C class: runs InitCollider (func_001B7968) and sets the word at 0x554 to 1
+func_00198A88	PostLoadObjectSet	slot 15 of the 0x2C class: runs PostLoadPlacedObject, then looks each of the n55C keys at 0x560 up with func_0015A448 and appends the hits to the list at 0x574 (count 0x570)
+func_00198B28	StartObjectSet	slot 16 of the 0x2C class: runs StartPlacedObject, calls func_0012C9A8 and func_00182ED8 on every object of the list at 0x574 (setting 0x558 when the first returns nonzero), then calls descriptor slot 7 if slot 76 returns 0
+func_00198ED8	AddObjectSetKey	stores item at keys560[n55C] and increments the count at 0x55C, the key list PostLoadObjectSet resolves
+func_00198EF8	HandleObjectSetNotification	slot 13 of the 0x2C class: runs HandlePlacedObjectNotification, and for kind 5 marks the entry of marks588 whose object matches the message key
+func_001989B0	LoadObjectSet	slot 10 of the 0x2C class: runs LoadCollider, func_00159478 on the sub-object at 0x584, then walks the child list and appends each child whose descriptor flag 0x40 is set to the list at 0x574 (count 0x570)
+func_001993F0	InitNumberedItem	slot 0 of the 0x2E class: runs InitObjectSet and stores the world counter at 0x2300, post-incremented, as the item's own number at 0x5A0
+func_00199C10	GetNumberedItemFlag	slot of the 0x2E class: reads bit (number & 7) of byte number / 8 in the bitmap bits68 of D_002623C8 and writes 0 or 1 through its out pointer
+func_00199428	LoadNumberedItem	slot 10 of the 0x2E class: runs LoadObjectSet, installs the table D_0026A948 with func_00124DF8 and looks up to 0x20 objects (ids 0x318..0x337) up with func_0015A418 into a 0x80-byte array at 0x5B0
+func_00199500	StartNumberedItem	slot 16 of the 0x2E class: after StartObjectSet draws random angle and scale values from func_001EAAE0 into 0x5A4..0x5B8, and calls descriptor slot 7 when its bit in the bitmap of D_002623C8 is already set
+func_00199850	SetNumberedItemFlag	sets the item's bit in the bitmap bits68 of D_002623C8 (and increments count64 when it was clear), then compares count64 with the world's count at 0x2300 to pick a message and starts it with func_0015A418
+func_00199B18	FlagNumberedItem	calls descriptor slot 7, sets the item's bit in bits68 of D_002623C8 with count64++ when it was clear, and runs func_0012C8F8 on each object of the list at 0x574 in reverse
+func_00199F38	FlagAllNumberedItems	gathers every object of class 0x2E (func_0015A4F0 with 0x105, 0x2E), runs FlagNumberedItem on each from the last, then calls descriptor slot 7 of its sub-object at 0x18 when func_001300E8 says kind 0x20
+func_00199C78	HandleNumberedItemObjectEvent	runs HandleObjectEvent (func_001BC320) on the event, with extra descriptor calls (slots 25 and 77) when its eventFlags 0x8 and 0x10 are set; returns 1
+func_0019AD30	AddEntryRecordKey	appends item to keys of the 0x2C-byte record at index in the table at 0x658 of the 0x17 class, only while its count is below 4
+func_0019D468	CompareEntriesByValueDescending	comparator on two pointers to records: the larger value at +4 sorts first, ties broken by the address difference shifted right by 7
+func_001DD758	CheckEntryTwoBitRequirement	takes the flags of an entry (func_001601D8); when bit 4 is set returns whether the low two bits are all set in the flags word of D_002623C8, else 0
+func_001DD7A0	CheckEntryThreeBitRequirement	as CheckEntryTwoBitRequirement but with the low three bits and enabling bit 8
+func_001DD7E8	SetEntrySlotValue	in the four key/value slots after offset 0x44 of the record func_00160810 returns, finds the slot with the key (or the first empty one) and stores key and value
+func_001DD888	GetEntrySlotValue	searches the four key/value slots at offset 0x44 of the record func_00160810 returns and returns the value of the one with the key, else 0
+func_001DC0C8	AllocateTouchNode	takes a record from the pool at world + 0x1C0C (func_001B5EC0) and clears its 8 bytes
+func_001DC108	FreeTouchNodes	walks a Touch03 chain by next and gives each node back to the pool at owner + 0x1C0C with func_001B5F28
+func_001DC740	InitContactTables	allocates 0x1000 bytes, makes them 0x100 16-byte Contacts03 records chained through next/prev, sets tables and freeTables to the block
+func_001DC7B0	PushContactTable	pushes node on the front of the doubly linked list *head (next, prev)
+func_001DC710	UnlinkContactTable	removes node from the doubly linked list whose head is *head, fixing prev/next and the head
+func_001DC7D0	TakeContactTable	unlinks the first of freeTables, pushes it onto usedTables and sets its owner
+func_001DC828	ReleaseContactTable	gives back every contact row of the table to pool1AF0, clears its byte pair entries in buf1ADC, unlinks it from usedTables and pushes it onto freeTables
+func_001DD9C0	GetDeltaTime	writes the dt field of D_002623C8 through its out pointer
+func_001DDB58	ShowCountedScreenElement	increments the counter at 0x2320 and, on reaching 1, sets the hold time of the screen element D_002721D0 to 0 and calls its slot 14
+func_001DDBB8	HideCountedScreenElement	decrements the counter at 0x2320 and, on reaching 0, calls slot 15 of the screen element D_002721D0
+func_001DDC78	SetWorldFlagBit	sets bit n in the word at 0x235C
+func_001DDC90	ClearWorldFlagBit	clears bit n in the word at 0x235C
+func_001DD3E0	DrawProjectedLine	transforms two points by the matrix at obj + 0x100, and when func_001DD218 accepts them divides by w, applies the scale D_0026ABF0 and bias D_0026AC00 and draws the segment with func_001AE3B8
+func_001DD548	DrawProjectedCurve	fills ten points with func_00130B48 and draws each consecutive pair with DrawProjectedLine
+func_001DE798	InitTintBlendCollider	slot 0 of the 0x14 class: runs InitTurningCollider, stores the heading from the rotation row, sets the state at 0x720 to -1 and the time at 0x72C to -10
+func_001DE808	StartTintBlendCollider	slot 16 of the 0x14 class: runs StartTurningCollider, installs the 9-entry table D_00275750, makes two links with func_00129D00 and a handle at 0x75C, and enters state 0 or 1 with SetFlashingColliderState
+func_001DE910	UpdateTintBlendCollider	slot 17 of the 0x14 class: runs UpdateTurningCollider, sends an OwnerMessage for each contact in the list at 0x740, then scales a quadratic of the time since 0x72C into two values for the link at 0x748 and clears 0x728 after 2 seconds
+func_001DFB08	HandleTintBlendColliderNotification	slot 13 of the 0x14 class: kind 0x13 with code 0x15E / 0x15F sets or clears 0x738, kind 0x14 reads the handle at 0x75C, then runs the 0x05 base handler
+func_001DFBE0	SetTintBlendColliderState	switches the state at 0x720 (0..3), starting handle animations 0x351 / 0x352 / 0x354 / 0x355 on the handle at 0x75C and stamping the time at 0x730 or 0x724
+func_001DF2C8	ApplyTintBlendColliderTint	slot 36 of the 0x14 class: while 0x728 is set blends the object's colour towards 0x800000A0 by clamped quadratics of the times at 0x72C and 0x730, sets it with func_00126A48 and runs the base slot func_00125C90
+func_001DF290	SetTintBlendColliderTracked	slot 72 of the 0x14 class: runs the base func_001922E8 (the same slot SetPlayerTracked overrides) and clears 0x728 when the argument is 0
+func_001DF5A0	IsTintBlendColliderRequestBlocked	slot 75 of the 0x14 class (the slot IsPlayerRequestBlocked and IsAgentRequestBlocked fill): returns 1 for mode 5, states 0, 2 and 3, a set 0x728 or a positive counter at world + 0x231C
+func_001DC9A0	CreateConeVolumes	for each of bits 1, 2, 4, 8 of D_00275630[0] creates a ConeVolume with func_0011E580 (mode 0..3) and sets the same distances and the per-mode ranges from the D_002756xx floats
+func_001DCD28	SpawnListedObjectCopies	for two (key, count) pairs finds the first object of list1C54 with that descriptor key and flag334 clear and makes count copies of it with func_00183058, setting 0x2D8 to 2 and calling slots 19 and 20
+func_001DC150	PushCloneBatch	makes n - 1 copies of src with func_00183058 into a new buffer and pushes the (count, buffer) pair on the stack at 0x1F00 indexed by 0x1EFC
+func_001DC208	PopSpawnedClone	decrements the count of the stack entry at index in the array at 0x1F00 and returns the value it then points to
+func_001DFEB8	InitCommentaryPromptElement	after SetupScreenElementText looks up the current level's entry (FindLevelEntry) to set world fields, then on bit 8 of D_002623C8 shows the string "Press &2L&. for Bonus Commentary" with a 5-second hold
+func_001E9498	PushStackElement	appends a screen element to the stack at +0xC (count at +0x2C, at most 8), telling the previous top (vt slot 3, 0) it is no longer on top and the new one (slot 3, 1) that it is, then calls the new element's slot 6; func_0016B580 pushes D_0026F808 and D_0026FD00 through it
+func_001E9570	PopStackElement	removes the top element of the same stack, calls its vt slot 3 with 0 and slot 7, then tells the new top (slot 3, 1) it is on top; func_0016BBA8 pops D_00275BC0 with it
+func_001E90A8	InitElementStack	sets the saved state at +0x30 and the pending state at +4 to -1, enters state 3 with func_001E96F8, then zeroes +0xC and sets the count at +0x2C to 1
+func_001E9088	InitGlobalElementStack	runs InitElementStack on the global D_00275BC0, the stack object the pause and map code push to and pop from
+func_001E90E8	ResumeElementStackState	calls func_001E96F8 with state 3, which uses the saved state at +0x30 when it is not -1
+func_001E96F8	SetElementStackState	leaves the old state (state 1 hides the elements D_00272930 and D_00272B98 and calls func_001DDA50), stores the new one and the clock time, and per state fades the screen, shows or hides elements or sets the time scale with func_001E98E8
+func_001E9108	UpdateElementStack	per-frame step of the element stack: reads the pad record's button flags, advances the state timers (states 4 and 6 ramp the time scale over 0.2 s and 0.5 s), handles pad flags 0x800 and 0x100, then calls vt slot 4 of the top element
+func_001E9688	ResetElementStack	pops elements until fewer than two remain, sets the saved state to -1 and the count to 1, then calls func_001A7D98 and ResetScreenElements
+func_001E98E8	ApplyStackTimeScale	when D_0026185C[0] is positive, passes a blend of its argument toward 1 (factor 0.6) to func_001C06A0 twice, then always calls SetGameClockScale with the argument; SetElementStackState calls it with 1.0 or 0.0
+func_001E9B30	StepMemoryChecksum	runs a table-driven CRC (table D_002476A0) over up to 32 words of memory per call, starting at 0x100004, keeping pointer, remaining count and running value in globals, and sets D_00275C34 once the count reaches 0 with a nonzero value
+func_001E9970	AreMenusAndFadeClear	returns 0 when the screen fade D_00275F84 is on, the world is busy (func_001DDA80), the pause menu D_0026FF68 is open on a page, the map list D_0026F808 is open or has a mode, or D_00270458 is 1, 2 or 4
+func_001E8FE8	ShowElementWhenMenusClear	calls slot 14 (show) of the element D_0026E248 when AreMenusAndFadeClear is true and slot 15 (hide) otherwise
+func_001E9A10	AreMenusClosed	returns 1 only when the screen fade D_00275F84 is off and neither the pause menu D_0026FF68 nor the map list D_0026F808 is open or has a mode
+func_001EAFE0	WrapModulo	takes the remainder of x by y with func_002058A0 and adds y when it is negative, giving a result in 0 .. y
+func_001EA408	WrapAngle	brings an angle outside -pi .. pi back into it by WrapModulo of (a + pi) by 2 pi, minus pi
+func_001EA480	ClampToMagnitude	limits a to the range -b .. b
+func_001EB050	IsInsideRange	returns 1 when x is strictly between the lo and hi of a range record
+func_001EB080	IsInsideAnyRange	loops over count range records and returns 1 when IsInsideRange holds for one of them
+func_001EB0F8	ClampToRange	returns lo when x is below it, hi when above it, else x
+func_001EB128	CompareFloats	compares the floats two pointers refer to and returns 1, -1 or 0 (a comparison function with qsort's shape)
+func_001EB018	FitQuadraticCurve	from values x, y, w at 0, 1 and z stores the coefficients c0 = x, c1, c2 so that c0 + c1 t + c2 t*t passes through the three points
+func_001EAD30	RemapQuadraticParameter	from quadratic coefficients (x, y, z) computes the coefficients of the same polynomial after the substitution t -> s t + u (z s s, 2 z s u + y s, z u u + y u + x)
+func_001EAD88	ComputeSinCos	reduces the angle by multiples of pi, evaluates a five-term odd polynomial for the sine and takes the cosine as sqrt(1 - sin^2) with the sign of the reduction; callers use both outputs for rotations
+func_001ED6B0	ComputeDirectionFromAngles	takes the sine and cosine of two angles and writes (cos b cos a, cos b sin a, sin b) times a scale
+func_001EDE38	RotateVectorByTwoAngles	takes sines and cosines of two angles and writes the rotated copy of a vector from products of them
+func_001EDDB0	GetVectorAngles	writes the wrapped atan2 of (y, x) and the wrapped atan2 of z against the length of (x, y)
+func_001EAAE0	RandomFloatInRange	returns a when a == b, else a + (b - a) times a random 31-bit integer from func_001F6708 scaled by 2^-31
+func_001EAA70	RandomIntInRange	returns a + (random value mod b - a + 1) for a != b, using func_001F6708
+func_001EAB48	RandomGaussian	draws points in the unit circle by RandomFloatInRange, applies the polar transform with log and square root, scales by deviation, adds mean and clamps to mean +- limit when limit is nonzero
+func_001EACA0	SolveQuadratic	computes the discriminant of a x^2 + b x + c, returns 0 when negative, 1 root when it is below 0.0001 and 2 roots otherwise, written to the array
+func_001EAF28	TruncateFloat	reads a float's exponent, returns 0 below 1 and clears the fraction bits below the binary point of larger values (adding 1 when they were all ones)
+func_001EAE78	TruncateDouble	the double version of TruncateFloat: exponent test, clears the fraction bits, adds 1.0 with func_001FCD20 when they were all ones
+func_001EA4B8	ApproachValueWithRamp	moves a value toward a target within a time step using a profile of three floats (top speed, end speed, acceleration), writes the new speed through the out pointer and returns the new value; callers pass a profile table, the current value, the target and the clock step
+func_001EA728	ApproachAngleWithRamp	wraps the angle difference with WrapAngle, runs ApproachValueWithRamp on it and wraps the sum with the start angle
+func_001EA620	ApproachValueClampingVelocity	runs ApproachValueWithRamp, then when the object's +0xC limit is positive keeps the new speed within the old speed +- limit times the step
+func_001EA798	ApproachAngleClampingVelocity	wraps the angle difference, runs ApproachValueClampingVelocity on it and wraps the sum with the start angle
+func_001EA0A8	StepWorldValueTowardTarget	moves the world's f234C toward f2350 with ApproachValueWithRamp, using the profile D_00275C18 when it is above the target and D_00275C28 when below
+func_001EA118	UpdateWorld	slot 21 of class 0x6C: runs the step lists with the clock's step, and when the clock's delta is nonzero the delta lists, the update and post slots of the list at +0x6C, the retry loop over list +0x60 and the animator step; then updates list +0x1B7C and StepWorldValueTowardTarget
+func_001E9EE8	UpdateWorldStepLists	returns on a zero step, else runs func_00124EE8, func_0012EBD8 and func_00159AD0 over three of the world's lists and slot 31 of each object of list +0x78, then func_001DBE48; UpdateWorld calls it with the clock step
+func_001E9C78	UpdateWorldDeltaLists	runs StepMemoryChecksum, calls slot 77 of the object func_001925F0 returns with the pad record, then runs func_00124EE8, func_0012EBD8 and func_00159AD0 over the lists at +0x60, +0x1B64 and +0x1C24 with the delta; UpdateWorld calls it with the clock delta
+func_001E9E30	UpdateUnflaggedParts	for each object of list +0x6C and each part of its list, calls slot 17 of the part unless bit 53 of its flags is set, then clears that bit
+func_001E9038	TestAgentMayContactExceptKeys	slot 60 of class 0x0B: returns 0 when the probe's key (+0x50) is one of the six keys at +0xC64, else TestAgentMayContact
+func_001ED168	InitTimeline	slot 4 of class 0x90: runs func_00182C18 and allocates the 0xC00-byte buffer of 0xC0 sixteen-byte entries
+func_001ED198	FindTimelineTarget	slot 20 of class 0x90: finds the class 0x13 object in the world with func_0015A838 and keeps it in +0x40
+func_001ED4C8	AppendTimelineEntry	stores a kind, a value and a float in the next 16-byte entry of the buffer (limit 0xC0, returning a dummy record when full) and returns it; func_001ED558 .. func_001ED618 call it with kinds 0 .. 5
+func_001ED278	RunTimelineEntries	while the entry at the current index is due (its time plus +0x44 is not after the target's beat counter at +0xC70, and not equal with an earlier fraction), runs it with RunTimelineEntry and advances the index
+func_001ED318	RunTimelineEntry	switches on the entry's kind: kind 0 calls func_001EC7A8 on the target, 1 sends message 0x1B, 2 and 3 set and clear a flag in the object at +0xC3C and set the element D_00273C50's state, 4 and 5 do the same for +0xC4C and D_002739F0
+func_001EF520	RebuildAttachedSet	on the root object of class 0x1F, rebuilds the set at +0x554 from the object itself and the target of every attached link and registers it with the world (func_0015F8B0)
+func_001EF3D8	HandleAttachedObjectRemoved	slot 17 of class 0x1F: for message kind 2 either detaches every link (when the message object is itself) or the link whose target is the message object, then RebuildAttachedSet, then the base handler func_00127378
+func_001EF9C8	HandleStateMessage	slot 17 of class 0x62: runs the base handler func_00127378 and for kind 5 with the object's id at +0x2DC resets its state to 0 with SetStateAndNotify
+func_001EFB20	UpdateItemTimeouts	over the up-to-8 items of the set, sets state 0 on each item in state 2 whose elapsed time since its start exceeds its limit, or when the owner's link matches and every item is in state 1 sets them all to state 2
+func_001EFC98	ScheduleItemTimeouts	sets the flag at +0x28 once and schedules func_001EFB20 on the world with func_001DBCC8
+func_001EFA60	AppendToSmallList	stores a value in the list's next slot (count at +4) while fewer than 8 are in
+func_001EFA88	RemoveFromSmallList	finds a value in the list and moves the following items down over it, decrementing the count
+func_001EE900	RegisterValueListObject	slot 4 of class 0x86: runs func_00182C18 and stores itself at the world's +0x1EC4
+func_001EE318	InitPacketWriter	runs func_00152888 on the writer, sets the closing-pad flag +0x10 to 1, installs the vtable D_0024A0E0 and clears +0x1C and +0x20
+func_001EE368	PadPacketToQuadSlot	zero-fills words from the cursor until its word index within the quadword (bits 2 and 3) equals the target
+func_001EE468	WriteVifFlushA	appends the word 0x13000000 to the writer
+func_001EE450	WriteVifFlush	appends the word 0x11000000 to the writer
+func_001EE480	WriteVifFlushE	appends the word 0x10000000 to the writer
+func_001EE3F0	WriteVifMscal	appends 0x14000000 or n / 8 (a microprogram call)
+func_001EE420	WriteVifMscalf	appends 0x15000000 or n / 8
+func_001EE498	WriteVifStcycl	appends 0x01000000 or y or x << 8 (the cycle register word)
+func_001EE3B8	WriteVifBaseOffset	appends 0x03000000 or a then 0x02000000 or b (the double-buffer base and offset words)
+func_001EE4C0	WriteVifStrow	appends 0x30000000 followed by the four words of the source (the row register)
+func_001EE528	WriteVifStmask	when the value is nonzero appends 0x20000000 and the value; always stores the value in +0x1C
+func_001EE560	WriteVifUnpackHeader	appends an unpack word (format in the top byte from a, count b, address c, flag bits 0x6000C000), ORs 0x10000000 when +0x1C is set, and returns the per-format size table D_00275DD0[a] times b
+func_001EE718	WriteVifUnpack	when the count is nonzero pads to quad slot 3, writes the unpack header, closes the packet with func_00152B80 in quadwords and optionally returns the offset of the packet header
+func_001EE8D0	WriteVifDirectFromWriter	writes a direct packet (WriteVifDirectFromBuffer) from the second writer's buffer, its byte span divided by 16
+func_001EE668	CopyWordsToWriter	reserves space with func_001EE5C8 and copies the source words there, the odd words first and then four at a time
+func_001EE9D0	ExpandMaskThroughTable	for every set bit i of the 31-bit mask ANDs table[i] (count at +0x3C) into an accumulator starting at all ones, and returns it ORed with the mask; 0 for an empty mask
+D_00275BC0	g_elementStack	the stack object InitGlobalElementStack, func_0016B580, func_0016BBA8, func_001940E8 and func_001DB838 pass to PushStackElement, PopStackElement, SetElementStackState and ResetElementStack
+func_0015F678	QueueObjectForRegroup	sets bit 39 of the object's flags at +0x2C8 and appends it to the owner's item array unless the bit is already set
+func_0015F6C0	MergeObjectLinkLists	points every element of the other list's owner field at self then splices the other list onto self's with func_00152730
+func_0015F710	DissolveObjectLinkList	takes each node out of the owner's list, resets it to a list of its own and queues it with func_0015F678
+func_0015F7D8	MergeObjectGroupMembers	for the group's items that func_00182FC8 accepts, merges each one's link list (+0x54) into the first accepted item's with func_0015F6C0
+func_0015F8B0	RegisterObjectGroup	for a group of 2 or more, records it in each member's group table (max 4 at +0x6C/+0x70) then merges the members' link lists
+func_0015F930	RemoveValueFromArray	finds value scanning the array from its last entry, shifts the tail down with func_001F5B08 and decrements the count
+func_0015F9A0	UnregisterObjectGroup	removes the group from each member's group table (func_0015F930) and dissolves the first member's link list that still exists
+func_0015FA58	RegroupQueuedObjects	clears bit 39 on each queued object and, for those that head their own link list, re-merges every group they belong to, then empties the queue
+func_0015FB28	VisitObjectTree	calls the class's visit hook (+0x60 of its descriptor) on the object, then recurses into each child whose class flag bit 0 is set
+func_0015FBA0	GetPlacedObjectFrozen	returns bit 38 of the flags, the bit SetPlacedObjectFrozen sets and clears, and stores it in *out
+func_001603E8	MarkLevelDone	sets bit 0x20 of the level record n (the bit func_00160B28 and func_001602A0 count) and the matching progress flag bits
+func_001605E8	ResetGameProgress	zeroes the 0x1A00-byte progress block, then sets its type 0x12, size, current-level fields and -1 slot before func_001A7E90
+func_00160650	ChecksumGameProgress	adds up every byte of the progress block from +0xC to its end
+func_00160690	SetCurrentLevelEntry	finds the entry by key (func_001601A0), splits it into level (>>8) and entry (&0xFF, 0x78 bytes each), stores both pointers in D_002623C4/C8 and marks both visited
+func_001607D0	AddElapsedTime	adds dx to the progress total at +0xC, the current level's total at +0x444 and the current entry's at +4
+func_00160810	GetLevelEntryByKey	maps key (level<<8 | entry) to the 0x78-byte entry inside the level table of D_002623C0, or 0 for -1
+func_00160B28	ComputeCompletionPercent	counts the done bits of every keyed entry and the five level-done bits against their total, returns 0, 100 or the percentage clamped to 1..99
+func_00160CE8	ResetCounter	stores 0 in the counter's count field
+func_00160CF0	IncrementCounter	increments the counter's count field and returns it
+func_00160D00	DecrementRefCount	decrements the refs field of the object
+func_00160D30	GetLevelMask	maps the current level number (+0x19D8) to a one-bit mask 0x10000000..0x80000000 (0 for levels 0 and 5) and stores it in *out when out is set
+func_00161028	CollectEntriesForKey	runs a query over src's data and gathers up to maxOut distinct entries whose k0 or k1 equals key into out, returning the count
+func_001611B8	InitGifPacket	runs the base buffer set-up func_00152888, switches on the GIF-mode flag, installs the table D_0024A6F8 and clears the tag fields at 0x1C..0x24
+func_00161200	EndGifPacket	opens a final tag (func_001613C0) when none is open, then calls the table's close entry with flag 1
+func_00161278	CloseGifTag	slot 3 of D_0024A6F8: pads the cursor to 16 bytes and ORs the entry count (f24 / f20) and, when n is set, bit 15 into the open tag's first word
+func_001612E8	CountGifEntry	increments the entry counter at +0x24 of the packet and returns it; every Add* writer below calls it first
+func_001612F8	ReserveGifPackedData	closes any open tag, writes a tag with nloop, nreg and prim, stores the pointer past it in *out and advances the cursor over nloop * nreg quadwords
+func_001613C0	BeginGifTag	closes any open tag then writes a new one: prim a1 at bit 47, register count a2 at bit 60, register list a3, remembering it as the open tag
+func_00161458	AddGifRgbaEntry	adds a packed entry whose four words are the four bytes of value (register 1, RGBAQ)
+func_001614C8	AddGifUvEntry	adds a packed entry of two integers (register 3, UV)
+func_00161520	AddGifStEntry	adds a packed entry of three floats (register 2, ST with Q)
+func_00161588	AddGifXyzEntry	adds a packed entry of two integers and a 64-bit value (register 5, XYZ2)
+func_001615F0	AddGifXyzfEntry	adds a packed entry of three words and a fourth word a4 << 4 (register 4, XYZF2)
+func_00161670	AddGifXyzfNoDrawEntry	like AddGifXyzfEntry but masks the third word to 24 bits and sets bit 15 of the fourth (the drawing-kick-off disable bit)
+func_00161708	AddGifRegisterWrite	adds an address-and-data entry (register 14, A+D): the value a2 first, the register address a1 second
+func_00161768	BeginGifRegListTag	closes any open tag and writes a tag in register-list mode (bit 58) with register count a1, remembering it as the open tag
+func_001617E8	AddGifRegListFloat	adds one 64-bit register-list entry: tag in the low word, the float's bits in the high word
+func_00161958	AddGifImageTag	writes a 16-byte tag with the quadword count in the low bits and mode 2 (image) at bit 58
+func_00161B80	ResetVertexBatch	clears the shape word at +0xF8 and vertex count at +0x124 and zeroes the 0x1720-byte vertex list at +0x128
+func_00161C00	BuildUnlitVertexPacket	writes the batch's vertex positions, texture coordinates, scaled colours and strip tags into the packet D_002622A8 for shapes 1, 6, 7 and 8
+func_00161F70	BuildLitVertexPacket	like the unlit builder but also writes each vertex's three normal components in groups of four, for shape 0
+func_00162810	CollectNonNullRefs	allocates capacity words and copies in the non-null ref of each item, leaving the compacted array at refs
+func_001639E8	BuildMorphTargetPacket	writes positions, optional weights and, for each of the f40 targets, the difference between the target's vertex (through its index list) and the base position
+func_00163ED8	BuildStripMeshPacket	writes positions with the per-record flag, optional texture coordinates, weights, morph differences, tinted colours and queues each strip (func_001694F8)
+func_00164868	BuildLitStripMeshPacket	the strip-mesh builder that also carries per-vertex normals and their morph differences
+func_00165728	StartAttachments	for each attachment entry runs the object's slot 1 and func_001662A8, then hands every listed node's looked-up object to func_001F2798; PlacedObject's start calls it with the block at +0x22C
+func_00165828	BindAttachmentTargets	looks up the object for each key with func_0015A448 and stores the relative transform between it and the owner (func_00188668) in the element; PostLoadPlacedObject calls it
+func_00165920	CopyAttachmentBlock	copies the 0x58-byte block from the source, reallocates its arrays, re-links the node chain to the new copies and rebuilds the ref list; CopyPlacedObject calls it with both +0x22C blocks
+func_00165FE0	UpdateAttachments	calls slot 2 of each attached element that func_001B4B08 accepts with the frame time, then func_001F3408 on each chained node; UpdatePlacedObject calls it first
+func_001660E8	UpdateAttachmentFrames	slot 43 of class 0x02: for each attachment record multiplies the owner's (or parent's) frame by the attached object's frame and by the record's local matrix into +0x50
+func_00152440	ClearList	zeroes the head and tail words of an intrusive list
+func_00152460	GetListLinks	returns the address of an item's link pair: the item plus the list's offset field
+func_00152470	AppendToList	links the item after the list's tail through the pair at item + offset, and makes it the tail
+func_00152540	InsertBeforeInList	inserts value before the given item (appending when it is 0, prepending when it is the head)
+func_001524D8	PrependToList	links the item in front of the list's head, and makes it the head
+func_001526D0	IsInList	true when the item's next link is set or it is the list's tail
+func_00152720	IsListEmpty	returns whether the list's head is 0
+func_001527D8	CountListItems	follows the next links from the head and counts the items
+func_00152730	SpliceListToEnd	moves every item of src onto the end of dst through their link pairs and clears src
+func_00152600	RemoveFromList	unlinks the item from its list, repairs the head and tail and moves every live iteration frame (chain D_0027B314) that points at it on to the next item
+func_00152888	InitPacketBuffer	clears the open-tag and mode words, installs the table D_0024A0E0 and clears begin, cur and end
+func_001528C8	ClearPacketBuffer	zeroes begin, end, the open-tag pointer and the cursor
+func_001528E0	RewindPacketBuffer	drops the open tag and moves the cursor back to the buffer's start
+func_001528F0	AllocatePacketBuffer	allocates count * 16 bytes with func_0018D4B0 and sets begin, cur and end
+func_00152980	AllocateTempPacketBuffer	allocates count * 16 bytes with func_0018D658, the call used between func_0018D608 and func_0018D6F0, and sets begin, cur and end
+func_001529C8	UsePacketBufferMemory	sets begin and cur to the given base and end count * 16 bytes past it
+func_001529E0	DetachPacketBuffer	closes the open tag, outputs the quadword count and begin pointer, then clears the buffer
+func_00152A50	DetachPacketBufferCopy	closes the open tag, outputs the count and begin, copies the contents with func_0018D568 into *out and clears the buffer
+func_00152AE0	SubmitPacketBuffer	closes the open tag, starts the DMA channel with the buffer's begin (func_00202A80) and rewinds the cursor
+func_00152B38	BeginDmaTag	closes any open tag, writes a count tag (0x10000000) at the cursor and remembers it as the open tag whose size CloseDmaTag fills in
+func_00152B80	AddDmaRefTag	closes an open tag if there is one, writes a reference tag (0x40000000) with size lo and address hi, then reopens a count tag
+func_00152C18	AddDmaCallTag	same as AddDmaRefTag but writes a call tag (0x50000000) with the address hi
+func_00152CA0	AddDmaReturnTag	closes the open tag and writes a return tag (0x60000000)
+func_00152D30	AddDmaEndTag	closes the open tag and writes an end tag (0x70000000) at the buffer's cursor
+func_00152D70	CloseDmaTag	pads the cursor to 16 bytes and ORs the open tag's quadword count (distance from the tag / 16 - 1) into its first word
+func_00153608	ResetActiveSetSolver	empties its four lists, clears each 0x60-byte item's two floats and eight bytes and files every item in the free list at +0x30
+func_00150570	ReadSequenceSteps	reads a count, allocates count * 0x28 bytes and reads one typed step each (types 0..4 and 7 with their own fields)
+func_001504E0	InitStepSequence	slot 0 of class 0x65: runs the placed-object set-up func_00123ED0, sets a flag bit and sets the two ids at +0x300 and +0x30C to -1
+func_00150528	LoadStepSequence	slot 14 of class 0x65: runs the base loader func_001289C0 then reads the step list with func_00150570 into +0x2DC/+0x2E0
+func_001506F0	StartStepSequence	slot 20 of class 0x65: runs the base start func_00124A48, defaults the target id, and looks the target word up in the current level entry (func_00160CA0)
+func_00150770	ReadSequenceTarget	copies the word at the sequence's target pointer (+0x304) to *out
+func_00150780	WriteSequenceTarget	stores value in the word at the sequence's target pointer (+0x304)
+func_00150790	SetStepSequenceState	leaves the old state (1, 3, 4 or 5) with its clean-up and enters the new one with its set-up, then stamps the time at +0x2D8
+func_00150AE8	UpdateStepSequence	slot 21 of class 0x65: runs the placed-object update, picks the next state from the current one, the pause and timeout (5 seconds) and runs func_001517C0 in state 3
+func_00150DC0	HandleStepSequenceMessage	switches on the message type: 0..2 and 3 queue speaker, text, timing and wait flags at +0x2E8, 4..6 run actions, 7 passes a value on
+func_00151300	TestStepWaitConditions	clears each wait bit of +0x2E8 whose condition has been met (speaker done, text done, timer past, input pressed) and returns whether any remain
+func_001516C0	SkipRemainingSteps	moves on through the later steps running only the action kinds 4, 5 and 6, then calls func_001E9570 in mode 2
+func_001517C0	RunStepSequence	repeats: stop while TestStepWaitConditions is pending, otherwise advance to the next step and send it to HandleStepSequenceMessage; when done calls SkipRemainingSteps
+func_001518B8	ChooseStepSequenceState	unless blocked by globals, picks state 1 or 5 (or the current one) from the target word and extra targets and calls SetStepSequenceState
+func_001519A8	ResetStepSequence	returns to state 0 unless the state is 1 or 3
+func_001519E0	AddSequenceExtraTarget	looks up an entry by name and kind and appends it to the sequence's list of up to 4 extra target words at +0x314
+func_00152E48	BuildTexturePackets	for a texture, builds two DMA packets (one clearing/copying through its dimensions, one drawing edge quads) and stores their pointers and sizes at +0x2D4..+0x2E0
+func_00168130	ApplyFieldDisplayOffset	reads the GS CSR field bit (0x12001000 side, bit 13), and when it differs from the saved field copies the frame's display and dispfb records to DISPLAY2/DISPFB2 with the height one less and the start line (or framebuffer y) one further down, then writes PMODE
+func_001683E8	FlipDisplayFrame	per-frame: picks one of two display records by the parity of the frame counter D_002626C0, sends it with func_00202098, increments the counter, then calls ApplyFieldDisplayOffset when D_002626CC is 1 or 2
+func_001688B8	InitDisplay	clears the display records, fills three images with a colour (func_00168770), creates two semaphores, installs the two interrupt handlers func_001682C0 and func_00168698, then runs InitMeshQueue and func_001685B8
+func_00168770	FillScreenColor	builds a GS packet that sets the colour register from its four bytes and draws sprites in 32-pixel steps across 0x280 pixels, two strips per step, with the flag choosing between two prim values
+func_00168B68	FadeScreenToBlack	for t*60 frames draws a full-screen 640-wide quad of colour (0,0,0,alpha) with alpha = (i/n)^2*255 into a packet and calls FlipDisplayFrame, so the screen goes to black
+func_00168D00	InitMeshQueue	calls InitBumpAllocator(&g_bumpAllocator, 0x1E00, 0x4000) and zeroes D_002626D0, the count of entries QueueMeshStrip and QueueNodeLink append to D_0027DC20
+func_00168D30	CeilLog2	returns the smallest count (at most 31) such that 1<<count is not below n, by doubling a value from 1 (BuildImageTexRegister uses it for the texture width and height exponents)
+func_00168D98	BeginImageTransfer	writes GS registers 0x50 to 0x53 (BITBLTBUF with dbp, dbw and dpsm, TRXPOS 0, TRXREG with width and height, TRXDIR 0) into a packet, then sends the data with func_00161958
+func_00168E78	BuildPaletteTexRegister	stores the VRAM address in the bit field at +0x10 that sits where TEX0 keeps its palette base, picks psm 0x14 or 0x13 by whether the colour count is at most 16, and sets the load-palette field to 1
+func_00168F48	StartPaletteUpload	calls BeginImageTransfer for a palette record with a width of 16 or 8 chosen by its colour count, height rounded up from it, and its VRAM address v
+func_00168FB0	BuildImageTexRegister	fills the TEX0-shaped bit field at +0x18 of an image record: base address, width in 64-pixel units, psm, CeilLog2 of the width and of the height, and the colour-component bit set
+func_00169088	StartImageUpload	calls BeginImageTransfer with an image record's psm, buffer width, width and height
+func_001690C0	PlaceMaskedImages	for each palette record and each image record whose flags contain the mask, takes its size from the bump allocator (aligned to 0x80 and 0x20), sets its register bits, and when given a packet starts the upload; returns whether the packet's write pointer moved
+func_00169B18	SetupTextureRenderTarget	writes GS registers 0x4D (FRAME_2), 0x4F (ZBUF_2), 0x19 (XYOFFSET_2), 0x41 (SCISSOR_2), 0x48 (TEST_2) and 0x43 into a packet from a texture header's TEX0 base and size, so drawing lands in that texture
+func_001694A0	SubmitMeshQueueEntry	copies the entry's source block to its destination with func_0018D800 and, when its flag word is set, ORs 0x8000 and the flag into two words of the destination
+func_00169718	FlushMeshQueue	runs SubmitMeshQueueEntry over each of the D_002626D0 entries of D_0027DC20
+func_001696B8	RemapMeshQueueValues	for entries from idx on, a value in [take, take+lo) is moved to give plus its offset from take
+func_00169C58	SetObjectListLinkOffsets	gives the three lists D_002626E8, D_002626F8 and D_00262708 their link offsets 0x38, 0x50 and 0x558 with func_00152438
+func_00169CA0	ClearObjectLists	zeroes the head and tail of the three lists D_002626E8, D_002626F8 and D_00262708 with func_00152440
+func_00169CD8	InitTargetCurve	class 0x6F slot 0: InitObject, then id44 = -1, f4C = 1, f50 = 3 and the largest float (the class carries an object id it resolves later)
+func_00169D20	RegisterTargetCurve	class 0x6F slot 6: RegisterObject, then appends the object to the list D_002626E8
+func_00169D58	UnregisterTargetCurve	class 0x6F slot 7: UnregisterObject, then removes it from the list D_002626E8
+func_00169D90	PostLoadTargetCurve	class 0x6F at table offset 0x4C: when id44 is not -1 finds that object with func_0015A448, stores it in found48 and clears its 0x398 word
+func_00169DD8	CopyTargetCurve	class 0x6F slot 9: saves the 8 bytes at +0x38, calls CopyObjectData and restores them
+func_0016A100	InitTargetPoint	class 0x7F slot 0: InitObject, then targetId = -1, f68 = 1 and f70 = the largest float
+func_0016A140	RegisterTargetPoint	class 0x7F slot 6: RegisterObject, then appends the object to the list D_002626F8
+func_0016A178	UnregisterTargetPoint	class 0x7F slot 7: UnregisterObject, then removes it from the list D_002626F8
+func_0016A1B0	PostLoadTargetPoint	class 0x7F at table offset 0x4C: when targetId is not -1 finds that object with func_0015A448, stores it in target and clears its 0x398 word
+func_0016A1F8	CopyTargetPoint	class 0x7F slot 9: saves the keep word, calls CopyObjectData and restores it
+func_0016A3A8	InitListedCollisionPart	class 0x3A slot 0: InitCollider, calls func_00129FB0, func_0012A080 and func_0012A150 with 3.0 and func_0012A270 with 2.0, and sets f568 to 300.0
+func_0016A420	LoadListedCollisionPart	class 0x3A at table offset 0x38 (LoadAgent in class 8): LoadCollider, then allocates a 0xC0-byte block if the object has none, sets bit 0 of a flag byte in it and copies 48 bytes of constants from D_002483D0
+func_0016A548	TestListedCollisionPartMayContact	class 0x3A at table offset 0xF0 (TestAgentMayContact in class 8): returns 1 for the pair (D_00262E10's object, its f23B0 object), else TestCollidersMayContact
+func_0016A580	StepListedCollisionPart	class 0x3A at table offset 0x80 (StepAgent in class 8): StepCollider, then, while f550 is 0, computes a matrix from the sub-object at +0xD0 and passes it to func_001B91A8
+func_0016A820	FindEarliestPooledChild	walks the child list at +0x34 for kind 0x46 (PooledObject) objects in state 4 and returns the one with the smallest stateTime; func_00150298 calls it for each listed part to pick the earliest and put it in state 5
+func_0016AB38	SetupCurrentObjectChoices	deferred call set up by BecomeCurrentObject: creates the four paired objects, finds the highest choice whose levels entry allows it, picks the starting choice and calls SetCurrentObjectChoice
+func_0016AF80	ShowCurrentObjectCaptions	sets D_0026F138's text to the name string, an empty string or the stored one from the choice's levels flags, and shows or hides D_0026FA90 with its start prompt string
+func_0016B0F8	MoveCurrentObjectChoice	steps the object's choice at +0x2D0 by one in the direction of the stick axis func_0016EC98 returns (wrapping between 0 and the limit at +0x2FC when that is 5), then calls SetCurrentObjectChoice
+func_0016B190	ConfirmCurrentObjectChoice	for a choice not yet taken starts the object's element and sound for it (func_0012C7B0, func_001F0428, func_001E9570) or plays its sound, then calls SetCurrentObjectChoice with 1; func_0016B580 calls it for the confirm buttons 0x140
+func_0016B300	SetCurrentObjectChoice	stores the choice a and the sub-choice b at +0x2D0 and +0x2D4 with the clock at +0x2D8, requests a sound from the table D_00262890 for a choice newly reached, and sends the matching ids from D_00262860 to the object at +0x2E0
+func_0016B4A0	InitSelectionCaption	slot 1 of D_002212E0: SetupScreenElementText, takes a frame from func_0015C1C0(2), clears the node and sound and sets lastAt to -D_00262970
+func_0016B560	UpdateSelectionCaption	slot 2 of D_002212E0: calls UpdateScreenElementSlide
+func_0016B580	HandleSelectionCaptionInput	slot 4 of D_002212E0: per frame with the pad record, releases the held node's handle, shows the captions and answers the pad bits 0x800 (opens the pause menu), 0x140 (ConfirmCurrentObjectChoice) and otherwise MoveCurrentObjectChoice
+func_0016B7A8	SetSelectionCaptionOpen	slot 3 of D_002212E0: on opening sets the node's choice and runs func_0016E0F0 and func_0016EC88, on closing stops the sound handle, runs func_0016E118 and hides both captions
+func_0016B860	DrawSelectionCaption	slot 9 of D_002212E0: draws the frame box and the text with the colour alpha scaled by blend and a scale pulsed by func_00205400 of the clock
+func_0016BA40	InitGridSelector	slot 1 of D_00221330: SetupScreenElementText, clones the font at scale 1.0, measures a 0x5F-wide string at scale 1.3 and sizes the element with SetScreenElementSize
+func_0016BB78	TestGridEntryBit	returns the bit n (0 to 15) of the 16-bit word at +0x19F4 of the game state (0 for n of 16 or more)
+func_0016BBA8	HandleGridSelectorInput	slot of D_00221330 given the pad record: closes on 0x9B0, runs the entry on 0x40, and moves the cursor over the 4 by 4 grid by the stick axes with wrap-around in both directions
+func_0016BDD0	SetGridSelectorOpen	slot 3 of D_00221330: on opening runs func_0016E0F0 and func_0016EC88 and sets the cursor to the highest bit set in the word at +0x19F4; on closing runs func_0016E118
+func_001925F0	GetActiveSwitchedCollider	returns the entry of D_00269C98 at the active index D_00269BCC, or 0 when the index is negative
+func_00192688	FindSwitchedColliderIndex	returns the index of the key in the D_00269C98 array of D_00269C90 entries, or -1
+func_001926D0	AddToSwitchedColliderList	appends a SwitchedCollider with f550 set, no parent and not yet listed to the 16-entry array D_00269C98 (class id 5 may take slot 0 when the array is full and there is no player)
+func_00192780	RemoveFromSwitchedColliderList	finds the collider in D_00269C98, deactivates it with ActivateSwitchedColliderIndex(-1) if it was active, shifts the later entries down and fixes the active index and the count
+func_00192880	ActivateSwitchedColliderIndex	makes index the active one of D_00269C98: clears bit 45 of the old one's flags and calls its slot 76 with (0, new), sets bit 45 of the new one and calls its slot 76 with (1, old)
+func_00192990	SetSwitchedColliderEnabled	stores value in f550 and adds the collider to the list when it is nonzero, removes it when it is zero
+func_001929D0	ActivateSwitchedCollider	calls ActivateSwitchedColliderIndex with the index FindSwitchedColliderIndex gives for the object
+func_00192418	ActivateSwitchedColliderUnlessActive	calls ActivateSwitchedCollider for the object unless it is already the one GetActiveSwitchedCollider returns
+func_00192620	GetCurrentSwitchedCollider	returns the active collider, else the object at D_00262E10 when its f550 is nonzero, else the first entry of the array D_00269C98
+func_001922E8	HandleSwitchedColliderActivation	table offset 0x130 of class 5, the call ActivateSwitchedColliderIndex makes with 1 or 0: for 1 copies v140 to v560 and calls func_00145088; for 0 calls func_001451F0 for each of 1 to 6
+func_00192450	IsSwitchedColliderRequestBlocked	class 5 at table offset 0x13C, where IsAgentRequestBlocked sits in class 8: returns 1 when D_00262C64 bit 0 is set or func_001DDA80 of the world is nonzero, else 0
+func_001907E0	GetNeighbourFace	returns the neighbour word unchanged when its low bit is clear (a face, as LoadPointGraph stores it) and 0 when the bit is set (a triangle)
+func_001907F0	GetNeighbourTriangle	returns the neighbour word with the low bit cleared when it is set (a triangle, as LoadPointGraph stores it) and 0 otherwise
+func_001909B0	ClassifyAgainstUnitRange	returns 0 for a value above 1.0, 1 for one below -1.0 and 2 for one inside
+func_00191128	SimplifyPointPath	copies the first and last of an array of points and each point func_00190E30 keeps between them into a new array, recurses while the count shrinks and is 3 or more, and copies the result back with its count
+func_00191EC0	SetTargetVectorListLinkOffset	gives the list D_00269BA8 its link offset 0x38 with func_00152438
+func_00191EE8	ClearTargetVectorList	zeroes the head and tail of the list D_00269BA8 with func_00152440
+func_00191F08	InitTargetVector	class 0x70 slot 0: InitObject, then copies the quad at D_00248D00, sets f50 = 8, f54 = 9, f58 = -1, f5C and id64 = -1
+func_00191F68	RegisterTargetVector	class 0x70 slot 6: RegisterObject, then appends the object to the list D_00269BA8
+func_00191FA0	UnregisterTargetVector	class 0x70 slot 7: UnregisterObject, then removes it from the list D_00269BA8
+func_00191FD8	StartTargetVector	class 0x70 at table offset 0x50: StartObject, then when id64 is not -1 stores in found68 what func_0015A418 finds for it
+func_00192020	CopyTargetVector	class 0x70 slot 9: saves the 8 bytes at +0x38, calls CopyObjectData and restores them
+func_001920E0	ReparentPointObject	class 0x7E at table offset 0x64: converts the position (&pos) against the parent and the new value with func_00128018, then calls ReparentObject
+D_00269C98	g_switchedColliders	the 16-entry array of SwitchedColliders: AddToSwitchedColliderList appends, RemoveFromSwitchedColliderList shifts, GetActiveSwitchedCollider indexes it, no other file uses it
+D_00269BCC	g_activeSwitchedCollider	the active index into g_switchedColliders (-1 for none): set by ActivateSwitchedColliderIndex, read by GetActiveSwitchedCollider, no other file uses it
