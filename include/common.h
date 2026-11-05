@@ -14,4 +14,7 @@ typedef signed long s64;
 typedef unsigned long u64;
 typedef float f32;
 
+// Readable names for address-named symbols (docs/NAMING.md).
+#include "names.h"
+
 #endif

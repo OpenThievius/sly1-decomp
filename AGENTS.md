@@ -28,6 +28,7 @@ procedure; read it before you match anything.
 | `config/eu/c_status.tsv` | each C function checked at its PAL counterpart | `tools/version_check.py` |
 | `config/us/original_asm.tsv` | the game-code functions that are original assembly or linker leftovers, counted as finished apart from the exact C (docs/ASM_CLASSIFICATION.md) | `tools/classify_asm.py` |
 | `config/us/classes.tsv`, `methods.tsv`, `creators.tsv` | the game's class map from retail's class descriptors: each class's parent, id, flags, size and method slots (own or inherited), the classes each function is a method of, and the functions that create an object of a class | `tools/classes.py` |
+| `config/names.tsv`, `include/names.h` | readable names for address-named functions and globals, each with its evidence, and the macros generated from them (docs/NAMING.md) | by hand; `names.h` by `tools/names.py header` |
 | `config/us/tables.tsv`, `members.tsv`, `installers.tsv`, `dispatch.tsv` | every other table of function pointers in retail's data (method tables, GCC vtables, callback records), the tables each function is in, the functions that install each table, and the calls through an object's table by slot | `tools/tables.py` |
 | `src/main/XXXXXXXX.cpp` | matched game C++, one file per 16 KiB window of `.text` | you |
 | `src/main/<name>.cpp`, `config/us/files.tsv` | a real source file, found in retail and proved by building it whole (docs/AGENT_WORKFLOW.md); the table gives its code range and where its data starts | you, by hand |
@@ -65,6 +66,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/classify_asm.py [--check]` | which game-code functions are original assembly (needs `asm/us/`) |
 | `python3 tools/classes.py [--check]` | the class map: classes, their methods and creators (needs `asm/us/`) |
 | `python3 tools/tables.py [--check]` | the other function-pointer tables, their members and installers (needs `asm/us/`) |
+| `python3 tools/names.py header\|check` | the readable names: `config/names.tsv` to `include/names.h`, and the table's rules (docs/NAMING.md) |
 | `python3 -m unittest discover -s tests` | the tools' unit tests (CI) |
 | `python3 tools/proprietary.py` | scans what git would commit for game data and proprietary material |
 | `python3 tests/check_repository.py` | `proprietary.py`, licence headers (CI) |
@@ -122,7 +124,10 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   label's end), or a byte array of the label's size where they don't. A size the code shows (a
   clear of N bytes, a loop bound, a class size) wins over the label's.
 - **Our own names and types.** Retail is stripped: every function, type, field and file name
-  is chosen by us from what retail's code does.
+  is chosen by us from what retail's code does. Functions and globals keep their address names;
+  readable names are macros from `config/names.tsv`, each with its evidence, and docs/NAMING.md
+  is the convention. Never write a name you remember from the original game, its prototype or
+  another project (a Hungarian prefix such as `psw`, `plo`, `grf` is a sign of one).
 - If you get close but not exact, keep the attempt in `nonmatching/` with what still differs,
   and move on. Stop on a function after about ten compiles without getting closer.
 
