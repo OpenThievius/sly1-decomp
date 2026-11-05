@@ -351,7 +351,7 @@ void func_0013EAE0(void* selfp, s32 mode)
 }
 
 void func_001837E0(void* obj, s32 kind, s32 a, s32 b);
-void func_0013ED90(Zone28* self, s32 mode, void* p, s32 flag);
+void func_0013ED90(Zone28* self, s32 mode, void* p, void* q);
 
 void func_0013F070(Zone28* self, void* p)
 {
@@ -1231,4 +1231,61 @@ s32 func_0013F718(TriggerZone* self, void* arg)
         }
     }
     return 1;
+}
+
+void* func_0015A448(void* world, s32 key, void* requester);
+s32 func_001833F0(void* owner, s32 key);
+void* func_0012C8F8(void* obj, void* other, s32 a2, s32 a3, f32 fa, f32 fb);
+void func_001518B8(void* t);
+void func_001519A8(void* t);
+
+struct Obj_13ED90 { u8 pad[0x40]; s32 key40; s32 flag44; };
+
+void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
+{
+    s32 n = self->pairs[mode].queued.count;
+    {
+        s32* list = self->pairs[mode].queued.values;
+        s32 i;
+        for (i = 0; i < n; i++) {
+            Obj_13ED90* obj = *(Obj_13ED90**)&list[i];
+            void* other;
+            s32 dir;
+            if (func_001833F0(self->owner, obj->key40)) {
+                other = self->owner;
+            } else if (obj->key40 != -1) {
+                other = func_0015A448(self->owner->world, obj->key40, self->owner);
+            } else {
+                other = 0;
+            }
+            if (p != 0 && obj->flag44 == 0) {
+                f32 t = self->f118;
+                dir = 0;
+                if (t >= 0.0f) {
+                    dir = 2;
+                }
+                func_0012C8F8(obj, other, dir, 0, 0.0f, t);
+            } else if (self->f138 != 0) {
+                f32 t = self->f118;
+                dir = 0;
+                if (t < 0.0f) {
+                    dir = 2;
+                }
+                func_0012C8F8(obj, other, dir, 0, 0.0f, t);
+            } else {
+                func_0012C8F8(obj, other, 1, 0, 0.0f, self->f118);
+            }
+        }
+    }
+    func_0013ECB0(self->owner->world, self->count148, (Ent_13ECB0*)self->table14C, self->owner, mode == 0);
+    if (self->f140 != -1 && q == 0) {
+        void* t = func_0015A448(self->owner->world, self->f140, self->owner);
+        if (mode != 0) {
+            if (mode == 1) {
+                func_001519A8(t);
+            }
+            return;
+        }
+        func_001518B8(t);
+    }
 }
