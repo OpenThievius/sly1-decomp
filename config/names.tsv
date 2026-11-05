@@ -2056,3 +2056,228 @@ func_00147FB0	UpdateTimeRangeNotifier	slot 17 of class 0x58: runs UpdateStateNot
 func_00147EF8	HandleTimeRangeNotifierNotification	slot 13 of class 0x58: runs HandlePlacedObjectNotification, then for kind 0x14 from its stored target whose code is 0x263 sends the world object at +0x1D60 a slot 27 message and queues func_00147ED0
 func_001201D0	GetKeyedRotationCurve	slot 1 of the keyed rotation curve table D_002196F8: returns func_0011F9F8 (EvaluateVectorKeyCurve) of its count and keys, as GetAxisRotationCurve does for the axis kind
 func_00123D40	TestStateTriggerItemsAccepted	returns 0 as soon as func_001C1A28 refuses one of the found items in outItems (0x5C0, count 0x5BC), else 1; same walk as TestListedEntriesAccepted
+D_00244950	g_classPropertyLists	property registry indexed by class id, each record a count and a list of (id, descriptor); ApplyObjectClassDefaults walks it and FindPropertyDescriptor binary-searches it
+D_00245020	g_soundEntries	table of (bank, index) pairs indexed by sound id; StartSoundEffect and EnsureSoundEntryBankLoaded read the entry's bank before starting or loading
+D_002476A0	g_crc32Table	lookup table StepMemoryChecksum and StepDiscSectorCheck index to run a table-driven CRC-32
+D_002482D8	g_streamVoiceKeys	seven 32-byte KeyRecords StartRandomStreamVoice picks one of at random to open a stream voice
+D_002483D0	g_identityMatrix	identity matrix (1 on the diagonal, 3 rows) copied by GetIdentityMatrix and InitIdentityPoseSource and used by dozens of callers as the default matrix
+D_002484B0	g_movieKeys	16 key records of 32 bytes; FindKeyIndex looks an argument up in them and QueueMovieByIndex queues the movie key at index * 32
+D_002486B0	g_screenElements	array of the 37 screen element objects InstallScreenElements, InitScreenElements and the teardown call slots on in turn
+D_00248D00	g_unitXVector	constant quad (1,0,0,0) copied into object axis fields (InitTargetVector and others)
+D_00248D10	g_unitYVector	constant quad (0,1,0,0) copied into object axis fields and listed as an axis in the table in 001B8000.cpp
+D_00248D20	g_unitZVector	constant quad (0,0,1,0) used as the rotation axis of the heading matrix (BuildTurningColliderHeadingMatrix) and copied into direction fields
+D_00249D98	g_memoryReaderMethods	method table installed in the MemoryReader FillRingBufferFromMemory builds; slot 1 is ReadMemoryReader
+D_0024A220	g_fontMethods	method table of the font object; CloneFont is its slot 1 and fonts install it as vt
+D_0024A6F8	g_gifPacketMethods	method table InitGifPacket installs; slot 3 is CloseGifTag
+D_0024B598	g_dmaStreamSinkMethods	movie data sink table of the IPU input DMA channel (include/stream_sink.h)
+D_0024B5B8	g_ringStreamSinkMethods	movie data sink table of the ring buffer in IOP memory read through the SIF (include/stream_sink.h)
+D_0024E879	g_charClassFlags	per-character class bits; UppercaseString shifts letters with bit 2, number parsing tests bit 1 and the text formatter tests bit 4
+D_00249F00	g_defaultGaugeParams	44-word parameter block the gauge manager's constructor copies into both of its parameter sets
+D_0024C9D0	g_pairControllerPoseTable	pose table InitPairController copies into the controller after the base set-up
+D_00248470	g_memoryCardIconKey	keyed data WriteMemoryCardIcon writes under the name sly.ico and GetKeyedDataSize measures
+D_002177C0	g_pointObjectClass	class descriptor of PointObject (include/point_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_00218650	g_coloredTriangleSetClass	class descriptor of ColoredTriangleSet (include/colored_triangle_set.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021B2D8	g_idFilterObjectClass	class descriptor of IdFilterObject (include/id_filter_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021B408	g_redirectObjectClass	class descriptor of RedirectObject (include/redirect_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021BAD8	g_itemKeeperClass	class descriptor of ItemKeeper (include/item_keeper.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021C318	g_flaggedObjectClass	class descriptor of FlaggedObject (include/flagged_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021C448	g_pointGraphObjectClass	class descriptor of PointGraphObject (include/point_graph_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021C598	g_objectCyclerClass	class descriptor of ObjectCycler (include/object_cycler.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021C6C8	g_stateNotifierClass	class descriptor of StateNotifier (include/state_notifier.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021D3B8	g_objectGathererClass	class descriptor of ObjectGatherer (include/object_gatherer.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021D4E8	g_pairControllerClass	class descriptor of PairController (include/pair_controller.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021D718	g_pairedObjectClass	class descriptor of PairedObject (include/paired_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021D848	g_hitTargetClass	class descriptor of HitTarget (include/hit_target.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021D978	g_soundStateObjectClass	class descriptor of SoundStateObject (include/sound_state_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021DAA8	g_objectCreatorClass	class descriptor of ObjectCreator (include/object_creator.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021E458	g_scaledOffsetObjectClass	class descriptor of ScaledOffsetObject (include/scaled_offset_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_0021EF88	g_entryTableObjectClass	class descriptor of EntryTableObject (include/entry_table_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_00220828	g_countdownColliderClass	class descriptor of CountdownCollider (include/countdown_collider.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_00220F50	g_idLinkedObjectClass	class descriptor of IdLinkedObject (include/id_linked_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_00221140	g_partHolderObjectClass	class descriptor of PartHolderObject (include/part_holder_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_00221210	g_currentPlacedObjectClass	class descriptor of CurrentPlacedObject (include/current_placed_object.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_002213D0	g_codeChecksumClass	class descriptor of CodeChecksum (include/code_checksum.h names it as the descriptor of that class; 001E4000.cpp defines it and lists it among the class descriptors)
+D_00219668	g_weightCurveKind0Methods	method table func_00121160 stores for weight curve kind 0
+D_00219678	g_weightCurveKind1Methods	method table func_00121160 stores for weight curve kind 1
+D_00219688	g_weightCurveKind2Methods	method table func_00121160 stores for weight curve kind 2
+D_00219698	g_weightCurveKind3Methods	method table func_00121160 stores for weight curve kind 3
+D_002196A8	g_weightCurveKind4Methods	method table func_00121160 stores for weight curve kind 4
+D_002196B8	g_positionCurveKind0Methods	method table func_00120FB0 stores for position curve kind 0
+D_002196C8	g_positionCurveKind1Methods	method table func_00120FB0 stores for position curve kind 1
+D_002196D8	g_positionCurveKind2Methods	method table func_00120FB0 stores for position curve kind 2
+D_002196E8	g_rotationCurveKind0Methods	method table func_00121050 stores for rotation curve kind 0
+D_002196F8	g_rotationCurveKind1Methods	method table func_00121050 stores for rotation curve kind 1
+D_00219708	g_rotationCurveKind2Methods	method table func_00121050 stores for rotation curve kind 2
+D_00219718	g_scaleCurveKind0Methods	method table func_001210F0 stores for scale curve kind 0
+D_00219728	g_scaleCurveKind1Methods	method table func_001210F0 stores for scale curve kind 1
+D_002176D0	g_pathCurveKind0Methods	table CreatePathCurve stores in a kind 0 curve (time-sorted list of points)
+D_00217708	g_pathCurveKind1Methods	table CreatePathCurve stores in a kind 1 curve (Hermite spline with tangents)
+D_002197B8	g_animationPlayerMethods	table NewAnimationPlayer stores at +0 of each animation player record
+D_002198E8	g_stateWalkerMethods	table CreateStateWalker stores at +0 of each state walker handle
+D_0021E358	g_frameRunAnimatorMethods	method table func_001B4980 returns for cursor animator type 1, the table of FrameRunAnimator (include/cursor_animator.h)
+D_0021E378	g_framePingPongAnimatorMethods	method table func_001B4980 returns for cursor animator type 2, the table of FramePingPongAnimator (include/cursor_animator.h)
+D_0021E398	g_randomJumpAnimatorMethods	method table func_001B4980 returns for cursor animator type 3, the table of RandomJumpAnimator (include/cursor_animator.h)
+D_0021E3B8	g_angleFrameAnimatorMethods	method table func_001B4980 returns for cursor animator type 4, the table of AngleFrameAnimator (include/cursor_animator.h)
+D_0021E438	g_crossfadeAnimatorMethods	method table func_001B4980 returns for cursor animator type 5, the table of CrossfadeAnimator (include/cursor_animator.h)
+D_0021E3D8	g_scrollAnimatorMethods	method table func_001B4980 returns for cursor animator type 6, the table of ScrollAnimator (include/cursor_animator.h)
+D_0021E3F8	g_circleAnimatorMethods	method table func_001B4980 returns for cursor animator type 7, the table of CircleAnimator (include/cursor_animator.h)
+D_0021E418	g_triangleAnimatorMethods	method table func_001B4980 returns for cursor animator type 8, the table of TriangleAnimator (include/cursor_animator.h)
+D_00275710	g_currentWorld	GetScriptWorld returns it, FindScriptObject and ResolveObjectLinks look objects up on it, and classes read it as their world (C6C*); about 220 uses.
+D_0027B314	g_activeListFrames	RemoveFromList walks this chain of live iteration frames and moves each frame that points at a removed item to the next one; list_iter.h declares it as the ListFrame chain head.
+D_00275C60	g_unitRange	an S1EB050 range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (00150000.cpp) and func_001EB460 clamps its blend factor to.
+D_00275958	g_mainAndRenderThreads	func_001E2398 stores the current thread id in word 0 and the id of the thread it creates (entry func_0015EE80, stack D_006056D0) in word 1; InitRenderFrames starts word 1.
+D_006056D0	g_renderThreadStack	func_001E2398 passes it as the stack (size 0x20000) in the record that creates the render thread stored in g_mainAndRenderThreads.
+D_00275964	g_movieDecodeThread	CreateMovieDecodeThread stores the id returned by the thread-create call (entry RunMovieDecodeThread) there and then starts it.
+D_002C2B00	g_movieDecodeThreadStack	CreateMovieDecodeThread passes it as the stack (size 0x1000) of the thread it creates.
+D_0027696C	g_randomState	func_001F6708 advances the seed at +0x58 of the record it points to with state * 0x41C64E6D + 0x3039 and returns it masked to 31 bits.
+D_006256D0	g_memoryChecksumCursor	StepMemoryChecksum starts it at 0x100004 and advances it a word at a time as the next address to sum.
+D_006256D4	g_memoryChecksumRemaining	StepMemoryChecksum loads it with the byte count, subtracts 4 per word summed and finishes when it reaches 0.
+D_006256D8	g_memoryChecksumValue	StepMemoryChecksum starts it at 0xFFFFFFFF and keeps the running CRC in it; a nonzero value at the end sets D_00275C34.
+D_002C2A14	g_permanentCursor	ReservePermanentMemory returns it, advances it by the size rounded to 16 and sets the front mark and cursor to the new value.
+D_002C2A18	g_frontResetMark	ReservePermanentMemory sets it, and ResetFrontMemory copies it back into the front cursor.
+D_002C2A1C	g_frontCursor	AllocateFrontMemory returns it and advances it by the rounded size; ResetFrontMemory restores it from the mark.
+D_002C2A20	g_backCursor	AllocateBackMemory lowers it by the rounded size and returns it; PushBackMemoryMark saves it and PopBackMemoryMark restores it.
+D_002C2A28	g_heapLock	InitRecursiveLock is called on it from the heap init (func_0018D430) and PushBackMemoryMark / PopBackMemoryMark take and release it.
+D_002C2A34	g_backMarkIndex	PushBackMemoryMark increments it before storing, PopBackMemoryMark decrements it, and the heap init sets it to -1.
+D_002C2A38	g_backMarks	PushBackMemoryMark stores the back cursor in the slot named by g_backMarkIndex and PopBackMemoryMark reads it back.
+D_0064C70F	g_imageEnd	the heap init (func_0018D430) rounds its address down to 16 to get the heap start.
+D_00275630	g_coneVolumeMask	CreateConeVolumes tests bits 1, 2, 4 and 8 of word 0 and creates one ConeVolume (modes 0 to 3) for each bit set.
+D_00277138	g_semaphoreSlots	a table of 32 semaphore ids, -1 when free: the reply handler clears the slot holding the finished id and the status query scans for a non-free slot.
+D_0026C3E0	g_elementPlaces	the array of 20-byte placement records (T217D_Place) func_001AAB60 and InstallScreenElements read, one per screen element in the order of D_002486B0
+D_0026E760	g_timerElement	the on-screen timer object of t217d.h (T217D_510: counts up or down, minutes and seconds); UpdateBestTimeState reads its time
+D_0026E248	g_gaugeBarElement	the screen element of t217d.h that is a filled bar following a value and flashing a letter (T217D_2E0), shown and hidden by SetElementStackState
+D_0026E9F8	g_timedSprintCaption	the screen element t217d.h documents as the caption of the timed sprint (T217D_1380)
+D_0026F808	g_mapScreenList	the screen element t217d.h documents as the map screen's list of objects of kind 0x67 by slot; AreMenusAndFadeClear and func_001E9A68 test its open and mode fields
+D_0026FF68	g_pauseMenuElement	the screen element t217d.h documents as the pause menu (three layers ask for a screen); tested by AreMenusAndFadeClear and func_001E9A68 through open, mode and page
+D_002701F8	g_dialogueCaptionBox	the screen element t217d.h documents as the caption box of the dialogue and tutorial screens that types its text out
+D_00272E08	g_stackedCaptionGroup	t217d.h: an object holding four sub-elements of one kind stacked and drawn together (T217D_720)
+D_0026D348	g_gaugeAmountCaption	a plain caption (T217D_E30) whose target counter HandleGaugeManagerNotification points at the gauge manager's amount and HandleGaugeColliderNotification at the gauge collider's +0x680
+D_00264088	g_pointObjects	the list head AddToPointObjectList and RemoveFromPointObjectList append to and unlink from for the 0x80 class (ClearPointObjectList empties it)
+D_00269BA8	g_targetVectors	the list head RegisterTargetVector and UnregisterTargetVector append to and unlink from for class 0x70 (set up with element size 0x38)
+D_002640A4	g_coloredTriangleSet	the single object InitColoredTriangles (class 0x8E) stores itself in; func_001EFEE0 passes it to func_00180398 with its opacity and the teardown code clears it
+D_00269A00	g_moviePlayer	the movie player state (Movie_269A00): QueueMovieByIndex, QueueMovieWithSuccessor, RunMovieDecodeThread, CreateMovieDecodeThread, InitMoviePlayback and the main loop's on flag all use it
+D_0026A068	g_menuChoiceLabels	28 label strings (Yes, No, Continue, Return to Game, ...) that func_00193598 returns by index for the pause menu's items
+D_00269D50	g_pauseMenuPages	33-entry table of title, scales, item count and item list that DrawPauseMenu, UpdatePauseMenu and ActivatePauseMenuSelection index by page
+D_0026A238	g_pauseMenuItems	the item list (8 entries) of the first page "Paused" in g_pauseMenuPages
+D_0026A258	g_optionsMenuItems	the item list (9 entries) of the page titled "Options" in g_pauseMenuPages
+D_00269CF8	g_yesNoItems	item list {0, 1} (labels Yes, No in g_menuChoiceLabels) shared by the confirmation pages (Really Quit?, format the card, ...)
+D_00269C90	g_switchedColliderCount	AddToSwitchedColliderList appends at this index (limit 16) and bumps it, RemoveFromSwitchedColliderList lowers it, FindSwitchedColliderIndex loops to it
+D_002647A8	g_iopModuleNames	six module file names (sio2man.irx ... 989snd.irx) that LoadIopModules passes in turn to func_00140B60
+D_002647C0	g_startupInitializers	29 function pointers that RunStartupInitializers walks at start-up (tables.tsv: data table of 29 methods)
+D_002699A4	g_heapStart	InitHeap-style func_0018D430 sets it to the end of the loaded image rounded to 16 and copies it into the four front pointers of the heap
+D_002699A8	g_heapEnd	func_0018D430 sets it to 0x2000000 and copies it into the heap's back pointer D_002C2A20 and D_002C2A24
+D_002699C0	g_movieTitles	16 title strings GetMovieTitle returns by index
+D_0026AC10	g_nextDeferredRequest	pointer to the next free 128-byte entry of D_005E4700: QueueDeferredRequest stores a request there and advances it, RunWorldFrameLists resets it to the array's start
+D_0026ABF0	g_projectionScale	DrawProjectedLine multiplies the projected x by it; func_0019D860 also passes it as the scale quad of a request
+D_0026AC00	g_projectionOffset	DrawProjectedLine adds its x after scaling by g_projectionScale; func_0019D860 passes it with it
+D_00274728	g_stagedBankVoice	the voice PlayStagedBank starts on the staged bank, which StopStagedBankVoice and UnloadStagedBank stop and clear
+D_0027472C	g_streamVoice	the voice handle StartLockedStreamVoice and OpenKeyRecord store; HasStreamVoice tests it and StopStreamVoice stops and clears it
+D_00274730	g_streamVoicePending	set to 1 by OpenKeyRecord when it opens a stream voice, cleared by ClearStreamVoicePending (the voice's completion callback), StopStreamVoice and StartLockedStreamVoice
+D_00274744	g_streamVoiceLocked	the lock StartLockedStreamVoice sets, StopLockedStreamVoice clears and IsStreamVoiceLocked returns; StopStreamVoice does nothing while it is set
+D_00274734	g_currentSoundLevel	the highest value among the sound levels: raised by PushSoundLevel, recomputed by RecomputeSoundLevel and ReleaseSoundLevel, compared by UpdateSoundEmitters
+D_00274738	g_previousSoundLevel	PushSoundLevel and RemoveSoundLevelAndRecompute keep the level the current one replaced here; -100 means none (SetElementStackState sets it)
+D_002744F8	g_animRecordCount	func_001B3040 sets it from func_00137BE0 and sizes the record array by it; FindAnimRecord bounds its index by it
+D_002744FC	g_animRecords	the array of 0x28-byte AnimRecords func_001B3040 allocates; FindAnimRecord indexes it
+D_00274500	g_imageRecordCountA	func_001B2CF8 sets it to the count of the 0x20-byte image records of g_imageRecordsA; PlaceMaskedImages loops to it
+D_00274504	g_imageRecordsA	the array of V24A2_ImgA records (0x20 bytes each) func_001B2CF8 allocates; PlaceMaskedImages and LoadFont index it
+D_00274508	g_imageRecordCountB	func_001B2BA8 sets it to the count of the 0x18-byte image records of g_imageRecordsB; PlaceMaskedImages loops to it
+D_0027450C	g_imageRecordsB	the array of V24A2_ImgB records (0x18 bytes each) func_001B2BA8 allocates; PlaceMaskedImages and LoadFont index it
+D_0027453C	g_cursorAnimatorCount	func_001B3040 sets it from func_00137BE0 and StepAnimators loops to it
+D_00274540	g_cursorAnimators	the array of CursorAnimator pointers func_001B3040 allocates (count * 4); StepAnimators steps each
+D_0027451C	g_pendingCursors	head of the list of cursors SetCursorFrame and SetCursorCoords chain on; FlushCursors walks it, applies each frame and clears the head
+D_00274838	g_volumeChannelFactors	the 11 x 4 float table SetVolumeChannelFactor writes and ApplyVolumeChannelFactors reads; ResetVolumeChannelFactors fills it from the defaults
+D_00274758	g_defaultVolumeChannelFactors	the 0xB0-byte initial values ResetVolumeChannelFactors copies into g_volumeChannelFactors
+D_0026FCF0	g_currentPlacedObject	BecomeCurrentObject (slot 16 of class 0x69) stores itself here (current_placed_object.h calls it the current one)
+D_002640B0	g_modeWalkerLinks	the ten-entry ObjectLink table StartModeWalkerObject passes to ResolveObjectLinks
+D_0026A728	g_gaugeColliderLoadLinks	the one-entry ObjectLink table LoadGaugeCollider installs
+D_0026A738	g_gaugeColliderStartLinks	the 13-entry ObjectLink table StartGaugeCollider installs
+D_0026A8E0	g_gaugeCountedObjectLinks	the 3-entry ObjectLink table StartGaugeCountedObject installs
+D_0026A948	g_numberedItemLinks	the ObjectLink table LoadNumberedItem installs
+D_0026AB90	g_objectGathererLoadLinks	the ObjectLink table LoadObjectGatherer installs
+D_0026ABA0	g_objectGathererStartLinks	the ObjectLink table StartObjectGatherer installs
+D_0026B7E8	g_pairedObjectLinks	the six-entry ObjectLink table LoadPairedObject resolves
+D_0026B830	g_hitTargetLoadLinks	the one-entry ObjectLink table LoadHitTarget resolves
+D_0026B840	g_hitTargetStartLinks	the one-entry ObjectLink table StartHitTarget resolves
+D_0026B888	g_soundStateObjectLinks	the one-entry ObjectLink table LoadSoundStateObject resolves
+D_0026B8A0	g_objectCreatorLinks	the one-entry ObjectLink table LoadObjectCreator resolves
+D_00274AD8	g_turningColliderLinks	the six-entry ObjectLink table StartTurningCollider passes to ResolveObjectLinks
+D_002744D8	g_sequencedObjectLinks	the ObjectLink table SetUpSequencedObject passes to ResolveObjectLinks
+D_0026B898	g_soundStateSoundIds	two sound ids (688, 689) SetSoundStateObjectState indexes by state and passes with the object's sound handle
+D_0026B860	g_hitTargetStateIds	ten ids (0x2A4 ...) SetHitTargetState indexes by the new state to pick the item to use
+D_0025C400	g_iopCommandArgs	320-byte buffer func_0011D968 copies a command's argument bytes into before sending it over the RPC channel
+D_0025C3C4	g_iopBankLoadResult	reply word of the single pending request: PollIopCommands passes it as first argument to the callback in D_0025C3A0
+D_00260E00	g_iopChannel2Result	reply word of the RPC channel D_0027B4F0: set to 0xFFFFFFFF while a command is pending, polled by PollIopCommands, cleared when its callback ran
+D_00260E40	g_iopChannel2Args	8-byte argument block (two words) the function at 0011C000.cpp:1665 sends as command 3 over channel D_0027B4F0
+D_00260E60	g_valueRampProfile	three-float profile (3.0, 1.0, 0.1) passed to ApproachValueWithRamp for the pose-source indexed value in ApplyPoseSourceIndexedValue
+D_00260ED0	g_fadeRampProfile	three-float profile (2.0, 0, 0.1) passed to ApproachValueWithRamp for the fade value in file_193210.cpp:1129
+D_00261420	g_flagTable	the table TakeFlagTableIndex hands bit indices out of (counter at +4) and TestFlagTableBit / func_00141040 read and set (bitmap at +0xC); class set-up code takes its indices from it
+D_00261850	g_timeScale	set by func_00142ED0 (which also turns the clock's running flag on when it is positive) and multiplied into the step in func_00142F10
+D_00261854	g_stepScale	second factor of the step in func_00142F10; reset to 1.0 on level reset and set from a clamped quadratic of a ratio in 001C0000.cpp
+D_0026185C	g_gameTime	the game clock's time field (D_00261858+4): func_00142F10 adds the step to it; readers compare it with stored times
+D_00261860	g_frameDt	the game clock's dt field (D_00261858+8): the per-frame step that timers subtract and ramps use
+D_00261868	g_elapsedTime	the game clock's elapsed field (D_00261858+0x10): sum of every step; readers store it as a start time and subtract it later
+D_0026186C	g_frameStep	the game clock's step field (D_00261858+0x14); 00120000.cpp uses it instead of dt for one owner kind
+D_00261990	g_camera	pointer to the class 0x6D object (InitCamera is its slot 0): zoom and projection settings, and the lists of objects func_00143AF8 / func_00143B20 add to and remove from
+D_002619A0	g_stateNotifierLinks	five-entry link table LoadStateNotifier installs through func_00124DF8
+D_00261CA0	g_gaugeManagerLinks	three-entry link table the GaugeManager function func_0014C138 installs through func_00124DF8
+D_00261CC8	g_pooledObjectLinks	one-entry link table StartPooledObject (class 0x46) resolves through func_00124DF8
+D_00261CE0	g_takerLinks	three-entry link table StartTaker (class 0x23) resolves through func_00124DF8
+D_002621C8	g_objectCyclerLoadLinks	two-entry link table LoadObjectCycler installs through func_00124DF8
+D_002621E0	g_objectCyclerStartLinks	two-entry link table StartObjectCycler installs through func_00124DF8
+D_002629D0	g_targetFollowerLoadLinks	five-entry id table LoadTargetFollowerRecords (class 0x47 slot 10) loads
+D_00262A10	g_targetFollowerResolveLinks	two-entry table ResolveTargetFollowerLinks (class 0x47 slot 20) loads
+D_00262E40	g_playerCharacterLinks	0x97-entry link table LoadPlayerCharacter (class 0x07 slot 10) installs through func_00124DF8
+D_00263AC8	g_modeColliderLinks	26-entry link table StartModeCollider (class 0x1B) installs through func_00124DF8
+D_00263D58	g_gaugeHolderLinks	13-entry link table StartGaugeHolder (class 0x4A) installs through func_00124DF8
+D_00261410	g_flaggedObjectLinks	one-entry link table func_00141210 (FlaggedObject, class 0x38) installs through func_00124DF8
+D_00262718	g_partHolderLinks	nine-entry link table func_0016AA18 (PartHolderObject) installs through func_00124DF8
+D_00262788	g_currentPlacedObjectLinks	0x12-entry link table func_0016AED8 (CurrentPlacedObject) installs through func_00124DF8
+D_002613EC	g_discSectorCheckState	state of StepDiscSectorCheck: ResetDiscSectorCheck stores 3, the steps move it to 1 and 2, file_18D8E0 tests it for 3
+D_002613F4	g_lastDiscReadResult	result of the last StartDiscRead call, stored by StartDiscReadUntilAccepted and its twin func_00140CC8
+D_002613F8	g_discReadErrors	array whose word 0 receives GetDiscReadError after each refused disc read in StartDiscReadUntilAccepted
+D_00261F14	g_vif0Channel	handle func_00152810 gets from func_002027A0(0) (DMA channel 0, VIF0); file_184D78.cpp sets bit 0x40 in its first word
+D_00261F18	g_vif1Channel	handle from func_002027A0(1) (DMA channel 1, VIF1): the render thread sends it the buffer of the second packet writer (bufB)
+D_00261F1C	g_gifChannel	handle from func_002027A0(2) (DMA channel 2, GIF): the render thread sends it the buffer of the first packet writer (bufA)
+D_00261F20	g_fromSprChannel	handle from func_002027A0(8) (DMA channel 8, fromSPR), stored once by func_00152810
+D_00261F24	g_toSprChannel	handle from func_002027A0(9) (DMA channel 9, toSPR); file_1C05D0.cpp reads it as a channel record
+D_00262250	g_fontEscapeKeys	the characters '0','2','1','3','4': func_0015C200 maps a key character to a font slot and 001A8000.cpp writes entries 3 and 4 into text escapes
+D_00262260	g_fontCount	number of font records: set from func_00137BE0 in 001B0000.cpp, which allocates g_fontRecords with it; looped over in 0015C000.cpp
+D_00262264	g_fontRecords	array allocated with new for g_fontCount entries; func_0015D8A8 initialises each and registers it by id in g_fonts
+D_00262268	g_fonts	five font pointers by id, filled by func_0015D8A8 and read by GetFontById
+D_0026227C	g_defaultFont	font GetFontById returns when an id has none; set from func_0015C1C0(0) and read by 001A8000.cpp as the default font
+D_00262280	g_gsPacketWriter	writer DrawColoredCircle and DrawColoredTriangles emit GS packets into; BeginRenderFrame points it at the build frame's bufA (0x8000 bytes)
+D_002622A8	g_vifPacketWriter	writer the VIF-code helpers (WriteVifMscal, WriteVifBaseOffset, ReserveWriterSpace) append to; BeginRenderFrame points it at bufB (0x10000 bytes)
+D_002622D0	g_buildFrameData	the i10 buffer of the frame being built, stored by BeginRenderFrame and cleared when the frame is submitted
+D_002622D4	g_drawFrameData	the i10 buffer of the frame being drawn, stored by func_0015ED50 at the start of the render thread's draw
+D_00262300	g_deferredReleaseListC	global list (link offset 0xB8) copied into the frame's l38 on submit; func_00128000 appends the object it unlinks from the world here
+D_00262310	g_codeChecksumFailed	set to 1 by func_0015EDB8 when its CRC-32 over the code image from 0x100000 is nonzero
+D_002623B0	g_frameReadySemaphore	semaphore func_0015EC68 signals when a frame is submitted and the render thread waits on
+D_002623B4	g_frameDoneSemaphore	semaphore the render thread signals after drawing a frame and BeginRenderFrame waits on
+D_002623B8	g_renderThreadWaiting	volatile flag the render thread sets to 1 before waiting for a frame and clears after; func_0015C000.cpp:707 spins on it
+D_0026231C	g_drawingFrame	the RenderFrame the render thread is drawing (set to g_renderFrames[D_00262314] each loop, cleared on exit)
+D_00262318	g_nextBuildFrameIndex	index of the next of the two RenderFrame records BeginRenderFrame takes, wrapped at 2
+D_002623C0	g_saveData	pointer to the 0x1A00-byte block at D_0027C220 that is checksummed and written to the card (G27C220)
+D_002623C4	g_currentLevelRecord	the level record base = levels[hi] that func_00160690 selects from a level key
+D_002623C8	g_currentEntry	the record at base + lo * 0x78 that func_00160690 selects; readers use its flags, dt and bit sets
+D_002623CC	g_previousLevelIndex	func_00160690 stores the old level index (word 0x19D8) here before overwriting it; reset to -1 by func_00160880
+D_00262C64	g_buttonCodeFlags	flag word the button-code callbacks SetButtonCodeFlags / ClearButtonCodeFlags change; many callers test its bits
+D_00262C70	g_padRecord	the pad record InitPadSystem initialises with InitPadRecord and readers pick when the selection bit is set
+D_00262D38	g_blankPadRecord	the second pad record, defined as zeros and never initialised; readers pick it when the selection bit is clear
+D_00262E10	g_player	singleton LoadPlayerCharacter (class 0x07 slot 10) stores itself in; ShowModeLabel and others read it
+D_002626C0	g_displayFrameCounter	incremented in func_001685B8 and FlipDisplayFrame; its parity selects the display record
+D_002626D0	g_meshQueueCount	count of entries QueueMeshStrip and QueueNodeLink append to D_0027DC20; zeroed by InitMeshQueue
+D_002626E8	g_targetCurveList	list RegisterTargetCurve appends class 0x6F objects to and UnregisterTargetCurve removes them from
+D_002626F8	g_targetPointList	list RegisterTargetPoint appends class 0x7F objects to and UnregisterTargetPoint removes them from
+D_00262708	g_partList	list AddToPartList appends to and RemoveFromPartList removes from
+D_002629C8	g_currentTargetFollower	set by SetCurrentTargetFollower, cleared by ClearCurrentTargetFollower; FollowableObject messages and InitTargetFollower use it
+D_00262A50	g_padButtonMasks	button mask for each of 12 indices that GetPadButtonAnalog tests against the pad's key word
+D_00262A80	g_worldLoadButtonCode	button-code slot whose callback is RequestWorldLoadByMode; RegisterButtonCodes adds it
+D_00262AB8	g_clearFlagsButtonCode	button-code slot whose callback is ClearButtonCodeFlags
+D_00262B60	g_setFlagsButtonCodeC	button-code slot whose callback is SetButtonCodeFlags with argument 2
+D_00262B98	g_flagNumberedItemsButtonCode	button-code slot whose callback is FlagAllNumberedItems
+D_00262C48	g_passwordMessageButtonCode	button-code record whose callback is ShowPasswordMessage
+D_00262A68	g_worldLoadButtonSequence	button sequence of g_worldLoadButtonCode
+D_00262AA0	g_clearFlagsButtonSequence	button sequence of g_clearFlagsButtonCode
+D_00262B48	g_setFlagsButtonSequenceC	button sequence of g_setFlagsButtonCodeC
+D_00262B80	g_flagNumberedItemsButtonSequence	button sequence of g_flagNumberedItemsButtonCode
+D_00262C28	g_passwordMessageButtonSequence	button sequence of g_passwordMessageButtonCode
