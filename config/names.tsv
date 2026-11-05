@@ -1437,3 +1437,360 @@ D_006047B0	g_soundBankLoaded	per-bank flag func_001BE268 sets after loading, tes
 D_006047D0	g_soundEntryAvailable	per-entry flag func_001BE268 fills for every entry of a loaded bank; func_001BE568 returns it
 D_00244F40	g_soundBankKeys	seven 32-byte records whose xored word pairs func_001BE268 decodes into the key it loads each bank with
 D_00246838	g_soundEntryForcedAvailable	0x304 words ORed into the per-entry availability by func_001BE268
+func_00143648	InitCamera	slot 0 of the 0x6D class: runs the base set-up, stores the zoom, near/far and projection settings at 0x1C0..0x208, copies the frame at 0x80, installs the five controller tables and calls ResetCamera
+func_00143560	UpdateCameraProjection	derives from the zoom at 0x1C4, the settings at 0x1E0 and the near and far distances at 0x1E4/0x1E8 the values at 0x1F0..0x1EC, builds the matrix at 0xC0 with func_00189F58 and calls func_001434C8 and func_00144540; every setter below calls it
+func_00143940	SnapCameraZoom	stores its argument as both the zoom at 0x1C4 and the target zoom at 0x1C8, zeroes the rate at 0x1CC and calls UpdateCameraProjection (UpdateCamera calls it to jump to the target)
+func_00143968	SetCameraNearDistance	stores the value at 0x1E4 (default 100, passed to the projection builder before the 20000 at 0x1E8) and updates the projection
+func_00143988	SetCameraFarDistance	stores the value at 0x1E8 (default 20000, the last argument of the projection builder in UpdateCameraProjection) and updates the projection
+func_00143A60	ResetCamera	optionally places the camera from D_00261880/D_00261890, then empties the controller stack (count 0x3D0 = 0), pushes controller ctl454 with func_00145088, clears the pending snap and sets 0x218/0x21C
+func_00143AF0	ClearCameraObjectList	sets the count at 0x340 of the object pointer list at 0x344 to 0
+func_00143AF8	AddCameraObject	appends the item to the pointer list at 0x344 when the count at 0x340 is below 8
+func_00143B20	RemoveCameraObject	finds the value in the list at 0x344, shifts the later entries down with func_0018D800 and decrements the count at 0x340
+func_00143900	SetCameraPosition	calls SetCameraPlacement with only the position argument (the 16 bytes copied to 0x40)
+func_00143920	SetCameraOrientation	calls SetCameraPlacement with only the second argument (the three 16-byte rows copied to 0x80, 0x90, 0xA0)
+func_001448C8	SetCameraPlacement	copies a 16-byte position to 0x40 and three 16-byte rows to 0x80/0x90/0xA0 when given, calls func_00144540 and zeroes the five floats at 0x2B0..0x2C0
+func_00145088	PushCameraController	pushes a controller onto the camera's stack at 0x3D4 (count 0x3D0), ordered by key; the stack is walked by UpdateCamera and cleaned by RemoveCameraControllers
+func_001451F0	RemoveCameraControllers	drops the stack entries matching the key, controller, target and argument selected by the flag bits, calls their slot 3, then slot 1 on the old top and slot 0 on the new top
+func_00143E40	UpdateCamera	runs the top controller on the frame time (calls the target's slot 0x124/4, the controller's slot 4) and eases the zoom at 0x1C4 toward 0x1C8 with func_001EA620, updating the projection
+func_00145FB8	PushCameraStackValue	calls PushStackValue on the camera's controller at 0x460
+func_00145FD8	PopCameraStackValue	returns PopStackValue of the camera's controller at 0x460
+func_00145FF8	PeekCameraStackValue	returns PeekStackValue of the camera's controller at 0x460
+D_002744D0	g_groupStaggerDirty	set to 1 by func_001AF7A8 and func_001B01B0, tested by the group update and cleared by StaggerGroupOffsets; only file_1AECB0.cpp uses it
+func_001AECB0	InitTimedObject	slot 0 of the 0x30 class: runs the base set-up func_001B7968, sets the mode at 0x554 to 0 and the state at 0x558 to -1
+func_001AECE0	SetTimedObjectTarget	slot 76: stores its argument in 0x550, the object whose state and time the subclasses read
+func_001AECE8	EnterTimedObjectState	slot 77: stores the new state at 0x558 and the time D_0026185C[0] at 0x55C (after notifying the target when going from 1 to 2)
+func_001AED78	IsObjectInAcceptLists	returns 1 when everything is accepted (0x5B4) or the object matches an entry of the lists at 0x564/0x58C, 0 when IsObjectExcluded matches
+func_001AEE50	IsObjectExcluded	returns 1 when the key matches an entry of the lists at 0x578 or 0x5A0 (tested with func_001833F0 and func_001300E8)
+func_001AEF00	IsSoleAcceptedObject	returns 1 when the accept list holds exactly one object id, no class ids, nothing is accept-all and that id matches the argument
+func_001AF000	AddTimedObjectAcceptedObjectId	appends a value to the id list at 0x564 while its count is below 4
+func_001AF028	AddTimedObjectExcludedObjectId	appends a value to the id list at 0x578 while its count is below 4
+func_001AF050	AddTimedObjectAcceptedClassId	appends a value to the id list at 0x58C while its count is below 4
+func_001AF078	AddTimedObjectExcludedClassId	appends a value to the id list at 0x5A0 while its count is below 4
+func_001AF0A0	InitTimedGroup	slot 0 of the 0x31 class: runs InitTimedObject and sets the fade at 0xB04 to 1.0
+func_001AF3B8	CloneTimedGroupEntries	slot of the 0x31 class: for each group after the first, creates copies (func_00183058) of the first group's entries and copies their values, then calls slot 77 with 0x560
+func_001AF508	StaggerGroupOffsets	counts the world-list (+0x1CA8) objects not in state 8 and gives each an offset at 0xAFC spaced by (1/30)/count, then clears g_groupStaggerDirty
+func_001AF5C8	UpdateTimedGroup	slot 17 of the 0x31 class: steps the fade at 0xB04 by frame time times 0xB08 clamped to 0..1, then moves the state by elapsed time against 0x5B8, 0x5BC and 0xAEC and enters it through slot 77
+func_001B00E8	SetTimedGroupMode	slot 73 of the 0x31 class: stores the mode at 0x554 and enters state 1 for mode 0, 5 otherwise
+func_001B0120	RequestTimedGroupEnd	slot 74 of the 0x31 class: unless in state 8, enters state 3 (mode 0) or 7 (the other mode), the states that time out into 8
+func_001B01B0	EnterTimedGroupState	slot 77 of the 0x31 class: starts a sound when leaving state -1 or 8, stops it and calls slot 3 on reaching 8, then runs EnterTimedObjectState
+func_001B0360	ComputeTimedGroupRamp	returns a scale (config +4 or +8) times a 0..1 ramp from the elapsed time in the current state against 0x5B8, 0x5BC or 0xAEC, capped by the fade at 0xB04
+func_001B0470	SetTimedGroupFadeOutTime	stores -1/x in the fade rate at 0xB08 that UpdateTimedGroup adds to the fade each frame
+func_001B0488	SetTimedGroupFadeInTime	stores 1/x in the fade rate at 0xB08 that UpdateTimedGroup adds to the fade each frame
+func_001B04A0	InitSequencedObject	slot 0 of the 0x32 class: runs InitTimedObject and sets the substate at 0x5D8 to -1
+func_001B04D0	SetUpSequencedObject	set-up of the 0x32 class: links its tables, defaults the two references at 0x5D0/0x5D4, sets a flag bit, then calls slot 77 with 0x560
+func_001B0578	UpdateSequencedObject	slot 17 of the 0x32 class: moves the state by elapsed time and, in state 6, steps the substate at 0x5D8 (0, 1, 2) against 0x5E0, 0x5E4, 0x5E8
+func_001B0EA8	SetSequencedObjectMode	slot 73 of the 0x32 class: stores the mode at 0x554 and enters state 1 for mode 0, 5 otherwise
+func_001B0EE0	RequestSequencedObjectEnd	slot 74 of the 0x32 class: unless in state 8 enters 3 or 7 by mode, then copies the target's state 1 into 0x5C0 when it entered that state within 0.2s
+func_001B0FC0	EnterSequencedObjectState	slot 77 of the 0x32 class: leaves substate on state 6 exit, starts substate 0 on entering 6, clears 0x5C0 leaving 8, then runs EnterTimedObjectState
+func_001B1070	EnterSequencedSubstate	changes the substate at 0x5D8: stops a sound leaving 1, sets the field 0x44 of the object at 0x200 on entering 0 or 2, starts a sound on 1, stores the time at 0x5DC
+func_001B1158	InitBlinkObject	slot 0 of the 0x33 class: runs InitTimedObject and sets the three frame ranges and the blink frame to -1
+func_001B11A0	SetUpBlinkObject	set-up of the 0x33 class: picks the first element of kind 1 with a nonzero 0x14 into 0x610, then calls slot 77 with 0x560
+func_001B1238	UpdateBlinkObject	slot 17 of the 0x33 class: moves the state by elapsed time against 0x5B8, 0x5BC, 0x608, 0x60C, enters it through slot 77 and calls the frame selector
+func_001B15D0	SetBlinkObjectMode	slot 73 of the 0x33 class: stores the mode at 0x554 and enters state 1 for mode 0, 5 otherwise
+func_001B1608	RequestBlinkObjectEnd	slot 74 of the 0x33 class: same body as RequestSequencedObjectEnd (enters 3 or 7 by mode, copies the target's state 1 within 0.2s)
+func_001B1710	EnterBlinkObjectState	slot 77 of the 0x33 class: stops the sound leaving 1 or 5, starts one on entering 1 or 5, then runs EnterTimedObjectState
+func_001B1898	SetBlinkObjectFrame	picks the frame range of the current state (alternating with the blink frame in states 3 and 7), computes the frame from elapsed time, looping or ping-pong, and passes it to func_001B46E0
+func_0018D4B0	ReservePermanentMemory	takes size rounded up to 16 from the heap base D_002C2A14, advances it, and sets both the reset mark D_002C2A18 and the front pointer D_002C2A1C to the new base
+func_0018D500	AllocateFrontMemory	returns D_002C2A1C and advances it by size rounded up to 16 (0 for size 0)
+func_0018D550	ResetFrontMemory	sets the front pointer D_002C2A1C back to the mark D_002C2A18
+func_0018D568	CopyToFrontMemory	allocates size bytes with func_0018D500 and copies size bytes from src into them with func_0018D800
+func_0018D5C0	AllocateZeroedFrontMemory	allocates n bytes with func_0018D500 and clears them with func_001F5C0C
+func_0018D658	AllocateBackMemory	lowers the back pointer D_002C2A20 by size rounded up to 16 and returns it
+func_0018D6A8	AllocateZeroedBackMemory	allocates size bytes with func_0018D658 and clears them with func_001F5C0C
+func_0018D608	PushBackMemoryMark	increments the index D_002C2A34 and stores the current back pointer D_002C2A20 in the array D_002C2A38 (func_0018D6F0 undoes it)
+func_0018D6F0	PopBackMemoryMark	restores the back pointer D_002C2A20 from D_002C2A38[D_002C2A34] and decrements the index
+func_0018D800	CopyMemory	byte copy when dst, src or size is not word aligned, word copy when not 16-byte aligned, otherwise 16-byte block copy through func_0018D780
+func_0018D780	CopyQuadwords	copies n 128-bit values, the remainder n & 3 first and then four per iteration
+func_0018B580	InitMemoryCardSystem	calls func_002093F0, InitBackgroundJob(&g_backgroundJob) and InitMemoryCard(&g_memoryCard, 0, 0); listed in the game's init function table D_002647C0
+func_0018B780	ConvertMemoryCardDirEntry	clears a 0x5C-byte record, copies the 32-byte name at +0x20, the size at +0x10 and maps attribute bits of the source to a flag word at +0x48 plus created/modified time bytes
+func_0018BFA8	CompareMemoryCardEntryTimes	subtracts the time fields (+0x54, +0x52, +0x53, +0x56, +0x57, +0x58) of two ConvertMemoryCardDirEntry records in order and returns the first difference; func_0018C028 uses it to pick the newest slot
+func_0018B910	ClassifyMemoryCardCallResult	maps a card call's return value to 29 (zero), 30 (positive) or 31 (negative)
+func_0018B930	ClassifyMemoryCardSyncResult	maps a card sync return value 0, 1, -1 to 32, 33, 34 and anything else to 31
+func_0018BC90	SyncMemoryCardResult	calls func_00209B80 for two ints, classifies the first with func_0018B930, stores the second through a2 and for 33 turns it into a game code with func_0018B988
+func_0018B988	MapMemoryCardErrorCode	big switch from an operation code (1..21) and a card result value to the game's error code (0, 1, 9..26, 31, 35)
+func_0018BD00	FinishMemoryCardCall	every card operation passes its return value and operation code here: classifies the value with func_0018B910 and, when it is 29, completes it with func_0018BC90
+func_0018C9C0	CheckMemoryCardFileExists	lists the directory entries matching a name with func_0018C888 (at most 1) and returns 0 when exactly one is found, else 14
+func_0018C888	ListMemoryCardDirectory	rejects counts above 0x12 and names longer than 0x40, calls the card directory read (operation 0xD) into a 0x480-byte buffer and converts every entry (0x40 each) into a 0x5C record with func_0018B780
+func_0018D168	GetMemoryCardFreeBytes	calls the card info function (operation 1), maps result codes 9 and 10 to 0 and 12 and stores the free block count << 10
+func_0018D228	CreateMemoryCardDirectory	calls the card call with operation 0xB (the directory path) and turns result 0x18 into 0
+func_0018D268	OpenMemoryCardFile	card call (operation 2) with a path and flags that returns the file handle through the last argument; func_0018D368 passes 514 to create a file
+func_0018D2B0	CloseMemoryCardFile	card call with operation 3 on a handle
+func_0018D2E8	ReadMemoryCardFile	card call with operation 5 on a handle, a buffer and a size; func_0018CDD8 reads a 0x1A00 slot with it and checks the byte count
+func_0018D328	WriteMemoryCardFile	card call with operation 6 on a handle, data and size; func_0018D368 compares the byte count it returns with the size
+func_0018D368	CreateMemoryCardFile	opens the path for creation, writes version bytes from data, requires the byte count to match (else 7) and closes the file
+func_0018CFC0	WriteMemoryCardSlotFile	sets the slot record's type to 18 and size to 0x1A00, stores the checksum of func_00160650 and writes 0x1A00 bytes to the file with func_0018D368
+func_0018D028	WriteMemoryCardSlot	initialises the slot record with func_001605E8, writes it with func_0018CFC0 and then checks the file with func_0018C9C0
+func_0018C638	SaveGameToMemoryCardSlot	copies the live game state into the slot record, derives its number from its address within the card object (stride 0x1A5C) and writes "/dir/saveN" with func_0018CFC0
+func_0018C770	WriteSelectedMemoryCardSlot	same file name as func_0018C638, derived from the slot pointer at i4F4C, written with func_0018D028
+func_0018CDD8	ReadMemoryCardSlotFile	reads a save file, requires the directory entry attributes, size 0x1A00, type 18, matching size and checksum (func_00160650), and copies the record out; codes 20, 28, 27, 8 for the failures
+func_0018C420	LoadMemoryCardSaveSlots	lists the save directory and reads the three slots "saveN" with func_0018CDD8, then raises the target state to 5
+func_0018C568	ApplyMemoryCardImage	copies the card object's image into the live game state D_002623C0 and refreshes it with func_001A7E90; returns 0x2C when there is no image
+func_0018C250	CreateMemoryCardSaveFiles	checks the free blocks against the needed count, makes the save directory, writes the icon and header files and the three "saveN" slot files, then raises the target state to 5
+func_0018CA10	WriteMemoryCardSaveHeader	builds a 0x3C4-byte settings block of colours and floats, with the icon name, and writes it as "dir/icon.sys" with func_0018D368
+func_0018CBF8	WriteMemoryCardIcon	writes the keyed data D_00248470 under the name "sly.ico" in the given directory with func_0018CC20
+func_0018CC20	WriteMemoryCardKeyedFile	opens "dir/name" for creation, opens the stream described by a key and copies it to the file in 0x1000-byte pieces; code 0x27 without a key
+func_0018C1E8	GetKeyedDataSize	builds a key pair from two xored word pairs, returns func_001407A0 of it (0 when the key is empty); func_0018C250 turns the result of D_00248470 into a block count
+func_00188770	CopyTransposedMatrix	copies four rows, then swaps m[i][j] with m[j][i] for i < j
+func_00188810	AddMatrices	out[i] = a[i] + b[i] for 16 floats
+func_001885E0	InitIdentityMatrix	clears 0x40 bytes and sets the four diagonal floats to 1.0
+func_00188B08	BuildMatrixFromRotationAndTranslation	copies three rows of b with w = 0 and a as the fourth row with w = 1
+func_00188C10	BuildScaledTransformMatrix	multiplies each rotation row by a scale component, with the position as fourth row and w column 0, 0, 0, 1
+func_00188A20	BuildEulerRotationMatrix	takes the sine and cosine of three angles and fills the nine elements of a 3x3 rotation
+func_00188850	BuildAxisAngleMatrix	sine and cosine of an angle, t*axis[i]*axis[j] plus cosine on the diagonal and the cross-product terms: the axis-angle rotation matrix
+func_00188FD8	MatrixToEulerAngles	asin of -m[2], and atan2 of other elements for the other two angles, with the singular case at +-1.5707
+func_00189230	VectorToAngles	atan2(y, x) and atan2(z, sqrt(x*x + y*y)) stored through the two output pointers
+func_001897F0	InvertMatrix3x3	Gauss-Jordan elimination with row pivoting on a copy, starting from an identity table; returns 0 when a pivot is 0
+func_00189438	InvertSquareMatrix	same elimination for n by n floats on a scratch copy taken between PushBackMemoryMark and PopBackMemoryMark; returns 0 when singular
+func_00189F58	BuildProjectionMatrix	clears 0x40 bytes and fills a, b, c, d, (e+f)/(e-f), e*(1-that) and 1.0 at fixed elements from six floats
+func_0018E480	GetMovieTitle	index below 16 returns the string in D_002699C0, -1 returns "Nil", else "(unknown)"
+func_0018F0E8	QueueMovie	if the player's pending key (+4) is empty stores the key and sets its bit in the device flags word u19F4
+func_0018E4C0	QueueMovieByIndex	queues the movie key at D_002484B0 + index * 32 with func_0018F0E8
+func_0018E4F0	QueueMovieWithSuccessor	queues a movie by index, stores the key of a second index as the player's following movie (+8) and sets its bit in u19F4
+func_0018F148	PlayQueuedMovies	takes the pending keys (+4, +8), clears them and plays the first with func_0018F198, then the second if set
+func_0018F198	PlayMovie	opens the movie stream for a key, starts playback and loops on func_0018F6E8 until the movie ends or a button is pressed, then finishes with func_0018F7D0; a failure plays a sound effect
+func_0018E558	RunMovieDecodeThread	thread body: forever waits on a semaphore, then submits two buffers per round with func_001686E8/func_001684E8/func_001683E8
+func_0018E5E8	CreateMovieDecodeThread	creates the semaphore at +0x130 and a thread whose entry is func_0018E558, then starts it; listed in the init function table D_002647C0
+func_0018E678	InitIopRingSink	stores the ring's IOP address and size (from OpenIopRing's result) and resets it with func_0018E6A0
+func_0018E6A0	ResetIopRingSink	free space = size and read, write and fill counters set to 0
+func_0018E7C0	WriteIopRingBlock	describes one transfer (source, ring address + write position, size) and runs it through the DMA calls func_001F6CA0/func_001F6C90, waiting until it finishes
+func_0018E838	UpdateIopRingSink	reads the ring position with GetIopRingPosition and recomputes the free space, filled amount and read position modulo the size
+func_0018E940	StartMovieStream	prepares the sound volume channels and the IOP ring (OpenIopRing 0x6000), sets up two stream buffers and the ring sink; f00 is 1 when the ring opens
+func_0018EA48	ResetMovieStream	if the stream is open, resets its two buffers and the ring sink
+func_0018EAA0	StopMovieStream	clears the open flag and restores both volume channels and the previous state saved by func_0018E940
+func_0018EAF8	FeedMovieStream	skips the 4-byte header, fills the first buffer (mode 1) and then the second (mode 2) from a chunk; returns 0 until enough data is available
+func_0018EB98	UpdateMovieStream	state 2 drains the buffer then starts the ring (state 3); state 3 refreshes the ring and keeps draining
+func_0018ECA8	FlushMovieToIpu	tops up the stream until 0x1000 bytes, pads with zeroes to a 32-byte multiple and drains the buffer into a Dma_18E8C8 sink
+func_0018EDA8	UploadMovieFrame	builds a GIF packet that uploads the decoded frame in 16 by 16 blocks (0x400 bytes each)
+func_0018EF78	DrawMovieFrame	builds a GIF packet that sets up registers and draws the frame's sprite at the given x, y
+func_0018F448	InitMoviePlayback	sets up buffers, the stream and decoder callbacks, sets the checksum cursor and fills the 256-entry CRC table (0xEDB88320)
+func_0018F610	AdvanceCodeChecksum	updates a CRC-32 over four bytes at the cursor from the table; sets D_00269B48 when the end is reached with a nonzero result
+func_0018F6E8	StepMovieFrame	waits for the decoder, decodes a frame with func_0020B058, uploads and draws it and advances the checksum while the decoder runs
+func_0018F7D0	FinishMovie	stops the stream and decoder, waits for the thread, sets D_002626CC to 3 and sets the movie's bit in the device flags word f19F8
+func_0018F890	FeedMovieDecoder	while the stream window is empty refills it; passes the unread bytes to func_0020A518 and consumes the returned count; returns 0 when empty and not waiting
+func_0014D0A8	AccumulateSegmentLengths	asm; FillPathCurveLengths calls it with (count, points, lengths) and SampleSplineSegment with (20, pts30, len170), each time to fill a running length array from a point array
+func_0014D138	WrapCurveTime	returns x unchanged when wrap is 0, else adds or subtracts the span (last key minus first key) until x lies between the first and last key times
+func_0014D1A0	FindPathCurveSegment	wraps x with WrapCurveTime, scans the key array for the first key above it, and returns the segment index with the offset into the segment and the segment length through lo and hi
+func_0014D938	TransformPointArray	gets a matrix from func_001891C0 and replaces each of count 16-byte points with func_00188700 of the matrix and the point
+func_0014D9A8	CreatePathCurve	allocates 0x1C or 0x1D0 bytes for kind 0 or 1, stores the table D_002176D0 or D_00217708 and the kind, returns 0 for other kinds
+func_0014DA38	FindPathCurveSegmentByTime	FindPathCurveSegment over the curve's times array
+func_0014DA68	FindPathCurveSegmentByLength	FindPathCurveSegment over the curve's arc-length array
+func_0014DB40	GetPathCurveEndTime	table slot 7: returns the last entry of the times array
+func_0014DB58	GetPathCurveEndLength	table slot 8: returns the last entry of the arc-length array
+func_0014DD28	ReadPathCurve	table slot 0: reads wrap, count, then a time and a 16-byte point per key from the stream into freshly allocated arrays, then calls table slot 9
+func_0014DE78	DrawPathCurveSegment	transforms the segment's two end points (the last wraps to the first) with func_00188700 and draws the line between them with DrawProjectedLine
+func_0014DF68	TransformPathCurvePoints	table slot 4: passes the curve's count and points to TransformPointArray
+func_0014DF98	GetPathCurveLengthAtTime	table slot 5: finds the segment of a time and linearly blends the arc lengths of its two keys
+func_0014E000	GetPathCurveTimeAtLength	table slot 6: finds the segment of an arc length and linearly blends the times of its two keys
+func_0014E068	FillPathCurveLengths	table slot 9: fills the arc-length array from the points with AccumulateSegmentLengths
+func_0014E3D0	ReadSplinePathCurve	table slot 0 of the kind 1 curve: reads wrap, count, then a time, a point and two tangent vectors per key, calls slot 9 and resets the sample cache
+func_0014E500	ResetSplineSegmentCache	stores -1 in the cached segment index at 0x1C0
+func_0014E510	SampleSplineSegment	when a segment is not the cached one, fills 20 samples of it with func_00130B48 and their running lengths with AccumulateSegmentLengths, then caches its index
+func_0014E910	GetSplineLengthAtTime	table slot 5 of kind 1: finds the segment of a time, adds the Hermite length of the part (func_00130C20) to the length at the segment start
+func_0014E990	GetSplineTimeAtLength	table slot 6 of kind 1: samples the segment of an arc length, locates the length among the 20 sample lengths and blends the segment's key times by the fraction (1/19 steps)
+func_0014EA48	FillSplinePathLengths	table slot 9 of kind 1: sets the first length to 0 and adds the Hermite length of each segment (func_00130C20) to the running total
+func_0012C288	CreateAnimationPlayer	takes a player from the world's pool, sets its time and speed, links it into the animation's list and the world's lists, binds each track to the object found for its target key, runs the start events and the seek
+func_0012C7B0	CreateAnimationPlayerWithoutPresetTargets	calls CreateAnimationPlayer with no preset target pairs and no flags
+func_0012C7D8	CreateAnimationPlayerReturned	calls CreateAnimationPlayer and returns the player it wrote through the out pointer
+func_0012C808	FindAnimationPlayerByScope	walks the animation's list of players for the one whose scope word (offset 0xC) equals the key
+func_0012C840	FindOrCreateAnimationPlayerAndSeek	uses the player FindAnimationPlayerByScope finds, else creates one, then seeks it with SeekAnimationPlayer
+func_0012C918	ReplaceAnimationPlayer	stops the player in *out with StopAnimationPlayer and clears it, then creates a new one into *out when an animation is given
+func_0012D1B0	GatherAnimationEventObjects	counts the 16-byte events of type 0x29 and fills a new array with the object func_0015A418 finds for each one's id
+func_0012D2A8	MoveAnimationTrackToEnd	copies the track out, shifts the later tracks down with func_001F5B08, puts it last and stores it in f9C
+func_0012D3F8	NewAnimationPlayer	takes a record from the world's pool at 0x1B58, stores the table D_002197B8, makes the attachment list with offset 0x20 and points +0x60 at its own +0x64
+func_0012D4A8	SeekAnimationEventCursor	sets the next-event index (0x20) to the first timed event at or after the time (forward speed) or one past the last event at or before it (backward)
+func_0012D570	FindPlayerAttachmentByOwner	walks the player's attachment list and returns the first whose owner passes func_001833F0 against the key
+func_0012D5D0	RunAnimationEvent	one big switch on the event kind: moves the time, plays or stops sounds, switches objects on and off, sets attachment modes, fades the screen, starts effects and sends notifications
+func_0012E4E0	RunSeekAnimationEvents	runs the timed events up to the current time that set state (types 9, 10, 14 to 18, 28, 39), stopping and zeroing the speed at a type 8 event
+func_0012E5D0	RunAnimationEventsToTime	runs the timed events the time has passed, forward for events before it and backward when the time went back, stopping when one sets the out flag
+func_0012E760	StopAnimationPlayer	runs the end events, notifies callbacks, releases the callbacks, takes the player out of the animation's and the world's lists and sends the animation message 0xB
+func_0012E928	ReleasePlayerAttachment	finds the player's attachment for a key and calls its release slot
+func_0012E968	GetRangeFalloffScale	returns 1.0 below the range's minimum, 0.15 from its maximum and a linear ramp between them
+func_0012E9E0	ApplyAnimationLoopMode	when the player's time is past the animation length or below 0, clamps it, wraps it or reflects it (reversing the speed) by the loop mode at 0x44
+func_0012F0A0	SeekAnimationPlayer	sets the time (absolute, from the current time, or from the end), sets the speed, repositions the event cursor or runs the events, and refreshes the attachments
+func_0012F6B0	SetAnimationPlayerSpeed	stores x times the speed scale (0x1C) times the animation's out value as the speed
+func_0012F6D0	SetAnimationPlayerSpeedScale	stores a new speed scale at 0x1C and re-applies the old speed divided by the old scale through SetAnimationPlayerSpeed
+func_0012F760	NotifyAnimationPlayerCallbacks	calls slot 18 of the player's object, then each callback record of the list at 0xE4 with the two arguments
+func_0012FF20	PollChunkRead	when the ready data is used up and a read is pending, asks the file (func_001F92E8) or disc (func_002032C8, func_00203D90) whether it finished and clears the pending length and destination on completion
+func_00158198	AddRangeEntry	sets kind 3, allocates 0x500 bytes of 0x28-byte entries once, and appends up to 0x20 entries of two ints and two start/end float pairs (a negative end defaults to the start)
+func_00158730	SendZeroMessage	builds a zeroed 0x50-byte block and passes it to the object's message slot 27
+func_00158778	SendTwoVectorMessage	fills a 0x50-byte block with two words, two 16-byte vectors and two floats and passes it to message slot 27
+func_00158980	CloneGroupMembers	slot 9 of class 0x78: replaces each member by a copy made with func_00183058, starts it through slot 3 and points its group back at itself
+func_00158A80	BroadcastMessageToMembers	slot 27 of class 0x78: passes the message to slot 27 of every member
+func_001587C8	LoadGroupMembers	slot 10 of class 0x78: for each entry in the stream creates an object with func_0011E580, loads it and keeps it (or its members) as a group member when it is of class 0x78 or 0x7A, up to 8
+func_00158B00	InitRecordMember	slot 0 of class 0x79: runs the base set-up and sets both object ids (0x94, 0x98) to -1
+func_00158B30	LoadRecordMember	slot 10 of class 0x79: allocates the 0x200-byte shared record, reads a path-curve kind index and builds the curve with CreatePathCurve and its slot 0, and reads more for record kind 4
+func_00158C28	CopyRecordMember	slot 9 of class 0x79: runs CopyObjectData and counts one more user of the shared record
+func_00158C60	ResolveRecordMemberTargets	slot 15 of class 0x79: finds the objects for the ids at 0x94 and 0x98 (func_0015A418) into the record's target and value, then runs func_00158288
+func_00158D40	AddRecordMemberRangeEntry	makes the object's own record and adds a range entry to it with AddRangeEntry
+func_00158DD8	GetOwnRecord	with own set, replaces the shared record by a copy (func_001556E8) before returning it
+func_00158E10	InitHoldingMember	slot 0 of class 0x7A: runs InitRecordMember and sets the three ids at 0xAC, 0xB0, 0xB4 to -1
+func_00158E48	ResolveHoldingMemberTargets	slot 15 of class 0x7A: runs ResolveRecordMemberTargets, then looks up the objects for its three ids into the record's found array (the third only if of kind 3)
+func_00158F10	ReleaseHeldObject	slot 13 of class 0x7A: on message kind 2 calls slot 18 of the object it holds (0xC0 or 0xC4) and clears that field
+func_00158F80	SendMessageAfterDelay	slot 27 of class 0x7A: with a positive delay copies the message into a pooled record due at now plus the delay and appends it to the world list at 0x1BDC, else sends it at once
+func_00159068	GetOrCreateSoundParams	returns the record at 0xA0, first making it with InitSoundParams when it is 0
+func_00159478	FindOrBuildMemberGroup	gathers the class 0x77 objects under the object with func_0015A4F0; none gives 0, one is returned, more are collected (up to 8) into a new class 0x78 object that becomes their owner
+func_00159588	DispatchDelayedMessages	walks the world's list at 0x1BDC and for each record whose due time has passed sends its message with func_001590A0, unlinks it and returns it to the pool
+func_00159AD0	StepObjectLevelRamp	moves a level (0x4) by its rate (0x8) times dt; reaching 0 calls the object's slot 7, and reaching 0 or 1 (or the object not being live) removes the node with RemoveObjectNodeFromWorld
+func_00159BB0	AddObjectNodeToWorld	takes a node from the world pool at 0x1C18, stores the object in it and appends it to the list at 0x1C30 or 0x1C24 by the flag at 0x294
+func_00159C28	RemoveObjectNodeFromWorld	removes the node from the list at 0x1C30 or 0x1C24 by the owner's flag at 0x294, clears the flag at 0x298 and returns it to the pool at 0x1C18
+func_00159F20	GetHashedSlot	returns base plus 0x84 plus 12 times ((n * 0x95675) and 0x1FF)
+func_0015A418	FindFirstObjectById	runs func_0015A198 with flags or 0x200, one result wanted, and returns that object
+func_0015A4B8	IsClassOfKind	walks the list kept at D_00247448[index] and returns 1 when it holds the value
+func_0015A4F0	GatherObjectsById	by the low byte of the flags (modes 1 to 5) collects up to max objects of the id's classes (IsClassOfKind) from the world, from the root's children or from the root's parent chain, returning the count
+func_0015A838	FindFirstObjectByIdGathered	runs GatherObjectsById with flags or 0x200 and one result wanted, and returns it
+func_0015A868	FindCommonAncestor	returns the first object on the first parent chain that also appears on the second
+func_001C0600	ApplyVolumeChannelFactors	multiplies the 11 factors of one column of D_00274838, clamps the product to 0..1 and passes it times 1024 to SetIopVolumeChannel for that column
+func_001C06A0	SetVolumeChannelFactor	stores a float at [row][column] of D_00274838 and re-applies that column with ApplyVolumeChannelFactors
+func_001C06D8	ResetVolumeChannelFactors	copies the default table D_00274758 over D_00274838 (0xB0 bytes), sets channel 8 to full and re-applies columns 0..3
+func_001C0808	StopWorldSoundRecords	walks the world's list at +0x1BAC calling StopSoundRecord on each object with item, then PollIopCommands
+func_001C07B0	StopAllSoundsAndWait	stops the world's sound records, ClearSoundLevels, ClearCachedVoiceParams, then polls the IOP commands until none are left and syncs the disc read
+func_001C08B0	PushIopChannel2Setting	while fewer than 4 pairs are stacked, applies a setting to IOP channel 2 (func_0011E328/func_0011E360) and pushes the pair on the stack at +0x2328
+func_001C0950	PopIopChannel2Setting	drops the top pair of the stack at +0x2328 (keeping one) and re-applies the pair below it to IOP channel 2
+func_001C09D8	SetIopChannel2Setting	applies a setting to IOP channel 2 and stores the pair at +0x2328 with the flag at +0x2348 set
+func_001C0A50	AddWorldSoundEntry	appends a key with two constant 8-byte values to the world's array of up to 16 entries at +0x1D84 (count at +0x1D80)
+func_001C0B38	StartWorldSoundEntries	calls StartSoundEffect once per entry of the array at +0x1D84 with the entry's key and its two stored 8-byte values
+func_001C0C08	SetCachedVoiceParam	stores a value in D_006053E0[index] and calls SetVoiceParam only when it differs from the cached one
+func_001C0C50	GetCachedVoiceParam	returns D_006053E0[index]
+func_001C0C68	RefreshCachedVoiceParam	reloads D_006053E0[i] from GetVoiceParam
+func_001C0CB0	ClearCachedVoiceParams	calls SetCachedVoiceParam(i, 0) for i in 0..7 (StopAllSoundsAndWait calls it)
+func_001C0CF0	StepBiasedRandomWalk	adds a table entry (picked by the random value 0..5 and the current D_00274830) to D_00274830 and returns it
+func_001C0FF0	StartIdLinkedObject	slot 16 of class 0x66: StartPlacedObject, then SetObjectLinkId with its linkId, then slot 3
+func_001C10A8	InitListedPointObject	slot 0 of class 0x81: InitObject, then sets the float at 0x58 to the largest float
+func_001C10D8	RegisterListedPointObject	slot 6 of class 0x81: RegisterObject, then adds itself to the world's list at +0x1C84
+func_001C1110	UnregisterListedPointObject	slot 7 of class 0x81: UnregisterObject, then removes itself from the world's list at +0x1C84
+func_001C1148	LoadListedPointObject	slot 9 of class 0x81: saves the kept 8 bytes, runs the base copy func_001830D8 and restores them
+func_001C1190	LoadScriptEntryTable	reads a count and n1/n2 from the stream, allocates count 8-byte entries at +0x1EF4, reads one script value chain per entry, then evaluates each through EvalScriptEntry in a scope
+func_001C1390	GetScriptEntryScope	returns -1 as 0, else the scope stored in entry index of the table at +0x1EF4 after AddUniqueMarkRoot
+func_001C13E8	EvalScriptEntry	for entry index of the table at +0x1EF4 creates its scope (NewScriptScope) once and evaluates the entry's chain in it with EvalScriptExpression
+func_001C14C0	FindPropertyDescriptor	binary search for key in the sorted pair table D_00244950[class index]; returns the matching value or 0
+func_001C1530	BuildScriptListFromCallback	runs a callback that fills a record, then makes a script value from the chain it collected (SetScriptValueChain) or an empty one
+func_001C15D8	ReadPropertyValue	reads a property described by a Desc record (kind, flags, offset or getter) from an object and builds the matching script value for int, float, bool, vector, matrix, pair or triple kinds
+func_001C1A28	AppendPropertyToScriptList	reads one value of the list's kind with ReadPropertyValue into a new script value node and links it at the list's tail
+func_001C1AD8	ScriptListContainsValue	builds a script value of the command's kind from val and walks the list comparing with AreScriptValuesEqual, returning 1 on a match
+func_001C1BF8	StoreScriptArguments	for each of n script values, converts and stores it through the destination pointer of the same index according to its kind (int, float, vector, matrix, pair, triple)
+func_001C1E48	BuildScriptListFromPairs	for n key/value pairs appends AppendPropertyToScriptList nodes with the key as kind and ends in one script value chain
+func_001C1F20	WritePropertyValue	INCLUDE_ASM counterpart of ReadPropertyValue: called by UpdateObjectProperty with the object, the descriptor from FindPropertyDescriptor and the new value
+func_001C21A0	GetObjectProperty	keys below 0x495 go through FindPropertyDescriptor and ReadPropertyValue, other keys are looked up in the object's keyed list at +4 with FindKeyedValue
+func_001C2238	UpdateObjectProperty	keys below 0x495 write through FindPropertyDescriptor and WritePropertyValue, other keys call UpdateKeyedValue on the list at +4
+func_001C22B8	AddObjectProperty	after func_00130110 calls AddKeyedValue with key and value on the list at +4
+func_001C2320	SetExtraObjectProperty	after func_00130110 updates the key in the object's keyed list at +4 when FindKeyedValue finds it, otherwise adds it
+func_001C23B0	StoreScriptArgumentsVa	collects the variadic destination pointers (count of them) into an array and calls StoreScriptArguments
+func_00183F40	FitLineThroughPoints	returns the intercept and slope of the line through (a,b) and (c,d); a vertical pair gives slope 0 and intercept b
+func_00183FE0	FitReciprocalThroughPoints	solves out + t/x through (x,y) and (z,w): t = x*z*(w-y)/(x-z), out = y - t/x, with a zero fallback
+func_001840B8	FitUnitRampBetweenPair	calls FitLineThroughPoints for the line that is 1 at the pair's x and 0 at its y
+func_001840F0	FitLineThroughAngleSamples	turns two angles (halved, to radians, t + t^3) and two bytes (scaled by 1/255) into two points and calls FitLineThroughPoints
+func_00180F20	LoadListedKeepObject	slot 9 of class 0x72: saves the kept 8 bytes, runs the base copy func_001830D8 and restores them
+func_00180EB0	RegisterListedKeepObject	slot 6 of class 0x72: RegisterObject, then adds itself to the world's list at +0x1C9C
+func_00180EE8	UnregisterListedKeepObject	slot 7 of class 0x72: UnregisterObject, then removes itself from the world's list at +0x1C9C
+func_001831E8	AddCallbackNode	takes a node from the pool func_001DBBD8, stores fn and ctx in it and pushes it on the list head (func_00183290 and func_001832F0 call it)
+func_00183238	RemoveCallbackNode	walks the list for the node whose two keys match, unlinks it and returns it to the pool with func_001DBC18
+func_00183458	GetEffectiveObjectId	returns the alias's id when the object has an alias, otherwise its own id
+func_001833F0	MatchesObjectId	0 for id -1, else 1 when the id equals the object's own id or its alias's id
+func_00183438	GetAliasId	returns the alias's id, or -1 when the object has no alias
+func_00182FC8	IsObjectAttached	walks up the parent chain checking each node is in its parent's children list (or the world's list at +0x48); 1 only when all are
+func_00182F40	IsObjectDescendantOf	walks up the parent chain from node looking for target; returns 1 on a hit, and 1 for a null target
+func_00183058	CreateObjectCopy	creates an object of the same class id with CreateTypedRecord for the given world and parent, then calls its slot 12 with the original
+func_00182DD8	AddObjectKeyToOwner	pushes a node with its own id on the key list at +0x2CC of itself (descriptor flag 1) or of its parent
+func_001834A0	RunScriptEventHandler	looks key up in the object's script scope, makes a child scope and evaluates the handler body and each argument item in it
+func_001837E0	TriggerScriptEvent	when the object's scope has handler idx and func_00183668 declines, queues RunScriptEventHandler for the world (func_001DBCC8) with the argument list from BuildScriptListFromPairs
+func_00183910	SetExtraObjectPropertyBool	wraps a bool in a script value and passes it to SetExtraObjectProperty
+func_00183A10	SetExtraObjectPropertyFloat	wraps a float in a script value and passes it to SetExtraObjectProperty
+func_00183B20	SetExtraObjectPropertyPair	copies an 8-byte pair into a pair payload, wraps it with SetScriptValuePair and passes it to SetExtraObjectProperty
+func_00183E40	RegisterConeVolume	slot 6 of class 0x51: base register func_001240F8, then AddConeVolumeToWorldList
+func_00183E70	UnregisterConeVolume	slot 7 of class 0x51: base unregister func_001243E0, then RemoveConeVolumeFromWorldList
+func_00183DF8	AddConeVolumeToWorldList	adds itself to the world's list at +0x1BE8 and calls slot 18 when it has one
+func_00183DC0	RemoveConeVolumeFromWorldList	removes itself from the world's list at +0x1BE8, then func_001841B0
+func_00183D88	RefreshConeVolume	slot 19 of class 0x51: base func_00125138, then func_001841D0 and func_00184B58
+func_00184968	SetConeVolumeValue	when the value at 0x304 changes stores it and runs func_001841D0
+func_00181DA8	SetModeWalkerMode	changes the mode word at 0xBB0 and drives its walker with SetStateWalkerTarget (0x35E, 0x35F) or TeleportStateWalker (0x361, 0x362)
+func_00180F68	InitModeWalkerObject	slot 0 of class 0x1A: base init func_001D73A8, then sets the time stamp at 0xBF4 to -10
+func_00180F98	StartModeWalkerObject	slot 16 of class 0x1A: resolves its links, creates the walker (CreateStateWalker) and sets mode 1
+func_00181448	UpdateModeWalkerObject	slot 17 of class 0x1A: after the base update walks the contact list at 0xC04, frees it with FreePooledContactChain and fits a clamped ramp from the clock into two calls on the object at 0xBCC
+func_00181818	ApplyModeWalkerTint	slot 36 of class 0x1A: blends the base colour with a fixed one by two clamped ramps while the flag at 0xBF0 is set, passes it to func_00126A48 and runs func_00125C90
+func_00181D28	HandleModeWalkerMessage	slot 13 of class 0x1A: on message 0x13 from the walker target's source sets the flag at 0xC00 for 0x15E and clears it for 0x15F, then the base handler
+func_00181D88	ExtractModeWalkerContacts	slot 67 of class 0x1A: ExtractContactsByPartMode on its sub-record at 0xC04
+func_001861E8	FreePooledContactChain	walks a Contact03 chain returning each node to the pool at world+0x1AFC with PushFreeSlot
+func_00186A70	FindGraphPath	breadth-first search over groups whose pair holds two ids, from key to target, marking visited items with flag 4; returns the groups along the path in out
+func_001867C8	GroupEdgesByKey	sorts edges by the key their idx58 pair gives, swapping an edge's two halves when needed, and chains edges of the same key into groups
+func_001C84C0	HasAgentReachedPathEnd	returns whether the path index at 0x930 equals the path point count at 0x92C once the path flag 0xA60 is set; ChooseAgentState tests it before leaving states 4, 5 and 12
+func_001C8D40	IsAgentNearPathEnd	writes 1 through out when the path flag 0xA60 is set and the path index 0x930 is within 2 of the count 0x92C, else 0
+func_001C8F20	ChangeAgentState	clears bit 0 of 0x72C, then when the state differs calls LeaveAgentState and EnterAgentState through descriptor slots 0x5B and 0x5C around storing the new state in 0x724 and its clock time in 0x728, and posts message 15 with the old/new pair
+func_001C9A58	ApplyPendingAgentChanges	acts on the request bits of 0x72C: bit 1 ends the animation player 0x7E0 (or parks it at its end time in state 0xB) and clears the bit, bit 0 calls ChangeAgentState with the state in 0x730
+func_001C9D50	TestAgentTargetContact	returns 0 unless the key equals the current target 0xB54; then by state 0xA, 0xB, 0x10 gives 0 and 0xC..0xE gives 1, else 1 for an object under the same root and otherwise asks 0xB0C (func_001A8820)
+func_001CA600	IsAgentSlotIndex	returns whether the index is below 17, the size of the 0x758 and 0x870 tables; the slot setters test it
+func_001CA608	SetAgentStateClipId	stores a value into the id word of entry index of the 17-entry table at 0x758 when the index passes IsAgentSlotIndex
+func_001CA658	SetAgentStateClip	stores the id into entry index of the table at 0x758 and resolves its object with ResolveAgentClip (0 for id -1), when the index passes IsAgentSlotIndex
+func_001CA6D0	GetAgentStateClip	returns the resolved object of entry index of the table at 0x758, 0 for an index not below 17
+func_001CA720	AddAgentExtraClip	appends an (f00, id) pair to the list at 0xAC8 while its count at 0xAC4 is below 4; ResolveAgentClips resolves their ids
+func_001CA758	ResolveAgentClip	looks the id up with func_0015A418 in the world (kind 0x101), and for a hit zeroes its state at +0x48, links it to the agent with func_0012D398 and passes it to func_00182ED8
+func_001CA7C0	ResolveAgentClips	resolves every id of the 17-entry table at 0x758 and of the extra list at 0xAC8 with ResolveAgentClip and sets each id to -1
+func_001CA898	SetAgentSecondaryClipId	stores a value into the id word of entry index of the table at 0x870 when the index passes IsAgentSlotIndex
+func_001CA8E8	ResolveAgentSecondaryClips	for each of the 17 entries of the table at 0x870 with an id other than -1, looks the object up with func_0015A418 (kind 0x101) into the entry and passes it to func_00182ED8
+func_001CA960	AddAgentMeshKey	appends a (key, f08) pair to the list at 0xA7C while its count at 0xA78 is below 4; CollideAgentWithObject tests each entry
+func_001CA998	SetAgentPathObjectId	stores the index at 0x924 and its object from func_0015A448 at 0x928 (0 for -1), clearing the path flag 0xA60 when the object changes; BuildAgentPath asks that object for points
+func_001CAAD0	StoreAgentTarget	writes the result of slot 98 (SelectAgentTarget) through out
+func_001CAB00	SetAgentSecondaryTarget	stores the object at 0xB48 and sets 0xB40; SelectAgentTarget uses it when 0xB50 is empty and 0xB40 is set
+func_001CAC28	SetAgentPrimaryTarget	stores the object at 0xB50, the first choice of SelectAgentTarget
+func_001CAD28	SetAgentAngleLimitDegrees	stores the value times 0.017453294 (degrees to radians) at 0x74C, the angle limit IsAgentTargetInRange compares
+func_001CAD60	AddAgentClipGroup	appends four ids to the group table at 0x7E8 while its count at 0x7E4 is below 8; EnterAgentState looks for the old and new clip ids in one group to carry the blend over
+func_001CB328	SetAgentMainClip	replaces the clip at 0x750: ends the player 0x754, and when the roster state is 3 clears 0x730 and sets bit 0 of 0x72C, then starts the new clip on the agent with func_0012C9E8
+func_001CB578	IsAgentFacingBlocked	returns 1 when 0xB7C or 0xB80 is set, or the global object D_00262E10 points at has a nonzero word at +0x275C; SetAgentFacingAngles tests it
+func_001AC060	DecrementGaugeCount	counts the gauge's 0x270 down by one, rolling it over to 0x264 and decrementing 0x26C, then sets fillTarget from (rows - 1) times 0x264 plus 0x270 over 0x268 and stamps changedAt
+func_001AC0E8	DrawGauge	slot 9 of the gauge element: eases fill toward fillTarget (func_001EA4B8), draws the dark bar and the lit part with a colour interpolated by the time since changedAt (func_0019DDA0) and the letter glyph, shaking it for 0.75 seconds after a change
+func_001AC700	DrawElementWithFadedFrame	slot 9 of the plain framed element: when it has text scales the alpha of the colour and of the frame object by the blend, draws the frame, then the text with the font
+func_001ACA30	ShowElementUnlessTextPending	slot 14 of the pointer-text caption: shows it with func_001AA8F0 unless it is in mode 3 with a new text waiting
+func_001ACA68	HideElementOrDropPendingText	slot 15 of the pointer-text caption: in mode 3 with a new text waiting clears the wait, otherwise hides it with func_001AA958
+func_001ACAA8	DrawSlidingGlyphElement	slot 9 of the pointer-text caption: in mode 2 draws normally, in modes 1 and 3 draws the frame and each glyph in turn at a position clamped between its hidden and shown x by the blend, advancing by each glyph's width
+func_001AC910	SetElementTextAfterSlideOut	slot 8 of the pointer-text caption: in mode 0 sets the text at once; in modes 1 to 3 when it differs keeps the pointer in 0x264, sets the pending flag and goes to mode 3 through slot 16
+func_001AC990	SetElementModeApplyingPendingText	slot 16 of the pointer-text caption: when a text is pending and the mode is 0, sets the text with func_001AA4F0, clears the wait and changes to mode 1 instead
+func_001AC9E0	AreElementsTogetherOrPending	slot 18 of the pointer-text caption: returns 1 when func_001AAAC8 says so or a text is pending
+func_001ACE38	SetElementTextCopiedAfterSlideOut	slot 8 of the copied-text caption: like the pointer-text version but copies the new text into the buffer at 0x264 (or empties it) and sets the pending flag
+func_001AD320	SetElementModeApplyingCopiedText	slot 16 of the copied-text caption: applies the pending buffer at mode 0 as func_001AC990 does and clears the announce flag when the mode becomes 0
+func_001AD378	ShowElementUnlessCopiedTextPending	slot 14 of the copied-text caption: returns when in mode 3 with a text pending, otherwise shows it with func_001AA8F0
+func_001AD3B0	HideElementOrDropCopiedText	slot 15 of the copied-text caption: in mode 3 with a text pending clears the wait, otherwise hides it with func_001AA958
+func_001AD3F0	DrawMessageElement	slot 9 of the copied-text caption: draws its text with alpha scaled by the blend or, while the announce flag is set, at the lowered position from D_0027240C, with a shade band under it when not announcing
+func_001ACEE0	FormatFlagGlyphs	writes into the buffer the glyph characters for the bits 2, 4 and 8 of the record's flags that the mask selects (colour code format D_0024CD88), and for bit 8 a time as seconds fraction or minutes:seconds
+func_001AD088	SetElementTextFromPackedEntry	sets the text of the element through slot 8: SetElementTextFromEntry with value >> 8 and the low byte, or the string D_0024CE00 for -1
+func_001AD0D0	SetElementTextFromEntry	builds the text from the entry at index hi * 0x44C + lo * 0x78 of the table behind D_002623C0: the name from func_00160148 followed by the FormatFlagGlyphs string, then sets it through slot 8
+func_001AD1E8	SetElementTextFromIndexedCounts	builds a text from the heading D_00274430[idx] and up to three "n/m" counts of the entry from func_00160208, then sets it through slot 8
+func_001ADFF0	RebuildPromptText	for the prompt element: when flagA is set picks one of three strings by flagB (plus a shared line) in a grey colour, otherwise the fourth string in red, then resizes the element to the measured text
+func_001AE178	UpdatePromptElement	slot 2 of the prompt element: while D_00275BF0 is 1 recomputes flagA (D_00262C84 equals 3) and flagB (D_00269988's float is nonzero), rebuilds the text with RebuildPromptText when either changed, then runs the slide update
+func_001AE130	SetElementModeRebuildingText	slot 16 of the prompt element: when a rebuild is pending and the force argument is 0 clears the wait, runs RebuildPromptText and forces the mode change
+func_001AD970	SetElementModeFollowingFade	slot 16 of D_002721D0's table: while the screen fade is on in mode 1 keeps the old mode for 3 or 0, in fade mode 3 maps modes 1 and 2 to 0 or 2 and then shows the message element D_0026F138, and hides D_0026F138 and D_00273EB0 when the new mode is 0
+func_001AE3B8	DrawLineSegment	draws a line between two screen points as a GS packet with the colour bytes of rgba (alpha scaled), alpha blend when alpha is below 0xFF; DrawProjectedLine ends with it
+func_001AEA08	GetCyclingGlyph	returns the character of the table behind D_002744B0 at index (clock * 5) modulo its length
+func_0015C930	CloneFont	slot 1 of the font table D_0024A220: allocates 0x88 bytes, installs the table, copies the source with CopyFont and multiplies its scales by x and y
+func_0015CA38	HasFontGlyph	slot 2 of the font table: returns whether FindFontGlyph finds the key
+func_0015CA60	GetFontCharWidth	slot 3 of the font table: the glyph width plus 1 times the scale, or the default advance times the scale when the key has no glyph
+func_0015CB88	BeginFontDraw	slot 4 of the font table: sets the clip through the base, adds the font images to the frame with AddFontImagesToFrame and writes the texture and alpha registers for drawing glyphs
+func_0015CD18	DrawFontGlyph	slot 6 of the font table: draws one glyph as a textured sprite at x, y when it lies inside 640 by 492.8 and returns the advance
+func_0015CF70	DrawFontGlyphTurned	slot 8 of the font table: like DrawFontGlyph with the sprite's width and height swapped, as four vertices, then calls slot 7
+func_0015D4E0	DrawFontFrame	slot 9 of the font table: draws a rectangle frame as nine DrawFontQuad pieces (four corners, four edges and a centre) from one glyph of the font
+func_0015D338	DrawFontQuad	writes a colour (alpha scaled) and two corner texture-and-screen points of a sprite into the packet
+func_0015C2E8	SetFontClipRect	slot 4 of the abstract font base: writes the clip register (0x40) from a rectangle as x, y and the last pixel at the corner, with y scaled by 0.4545
+func_0015C3C0	ResetFontClipRect	slot 7 of the font tables: when the flag is set writes the clip register (0x40) with the full-screen rectangle constant
+func_0015CAB8	AddFontImagesToFrame	if the font's mask bit is not yet set in the build frame's flags, writes its two images' transfers into the packet and sets the bit, returning whether it did
+func_0015C260	CopyFontMetrics	copies the first fields, sizes, scale stack and the three words at 0x30..0x40 from one font to another
+func_0015C9B0	CopyFont	copies the metrics with CopyFontMetrics plus the id, the two images, the register words, the glyph table and the mask
+func_0015C8B8	PushFontScale	saves the scale on the font's stack and sets the scale to the first entry times the two factors
+func_0015C900	PopFontScale	takes the top of the scale stack back into the font's scale
+func_0015C1C0	GetFontById	returns the font registered under the id in D_00262268, the default font D_0026227C when none, 0 for -1
+func_0015C188	IsFontLoaded	returns 1 when the id is not -1 and D_00262268 holds a font for it
+func_0015C200	FindFontByKeyChar	looks the character up in the 5-entry key table D_00262250 and returns the font at the same index of D_00262268 (the & code of the text reader), else 0
+func_0015C178	ClearDefaultFont	sets the default font D_0026227C to 0
+func_0015C418	MeasureFontString	adds the width of each character of the string through slot 3, 0 for a null string
+func_0015C4A8	MeasureFontStringHeight	the font's height times its scale times the number of lines WrapFontString counts
+func_0015C4E8	WrapFontString	counts the lines of the string, starting a new one at a newline and, when the line passes the width limit, overwriting the last space or tab (or the current character) with a newline
+func_0015C638	DrawFontString	draws a string with the font into a rectangle: vertical position by the mode (top, centre or bottom), each line aligned left, centre or right by its measured width, drawing through slot 6 between slot 4 and slot 7
+func_0015D8A8	LoadFont	reads a 16-byte header from the data, registers the font under its id in D_00262268, links the two images from the tables D_00274504 and D_0027450C and copies the glyph table
+func_0015D998	UploadFontImages	sends the font's image (and second image) to video memory with a GS packet, recording the register word and the packet words in 0x60..0x74
+func_0015E5F0	UploadAllFontImages	for each of the D_00262260 fonts at D_00262264 (0x88 bytes apart) calls UploadFontImages
+func_0015DAB8	FindFontGlyph	binary search of the font's glyph table (8-byte entries sorted by key) for the key
+func_0015DF58	CountTextChars	rewinds the reader and counts the characters ReadTextChar returns
+func_0015DFA0	SeekTextReader	rewinds the reader, skips n characters (stopping at the end) and clears the changed-font flag
+func_0015E068	WrapTextLines	counts the lines of the reader's text, starting a new line at a newline and, when the width passes the limit, overwriting the last space or tab (or the current character) with a newline
+func_0015E810	InitRenderFrames	gives each of the two render frames its buffers and three lists, creates the empty global lists, starts the render thread and its two semaphores and fills the CRC-32 table D_002C3B00
+func_0015EDB8	VerifyCodeChecksum	folds the words from 0x100000 for D_00148D74 bytes through the CRC-32 table and sets D_00262310 to 1 when the result is nonzero; RunRenderThread calls it first
+func_0015EBF0	CloseDrawBuffer	finishes a GS buffer: sets its header registers (0x61), closes it with func_00161200 and func_00152D30 and submits it with func_001529E0
+func_0015EF88	SendRenderFrameToDma	sets up the frame with func_0015ED50, sends its buffer to the DMA channel D_00261F18 and, when the flag is set, also the second buffer to D_00261F1C
+func_0015F210	DrainRenderFrames	waits on the semaphore D_002623B4 until the render thread is idle, optionally sends the last frame again a few times, then releases the nodes of both frames with ReleaseFrameNodes
