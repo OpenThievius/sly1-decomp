@@ -5,7 +5,7 @@
 #include "c64.h"
 #include "c29.h"
 #include "c47.h"
-#include "t262a.h"
+#include "button_code.h"
 #include "globals.h"
 #include "g261858.h"
 #include "g262c70.h"
@@ -236,29 +236,29 @@ void func_0016F478(void);
 void func_00199F38(void);
 void func_00199FF0(void);
 void func_0019A0F0(void);
-T262A_Slot D_00262A80 = { { (const u16*)D_00262A68, 0xB, (Fn262A)func_001E5278, 0x0 } };
-T262A_Slot D_00262AB8 = { { (const u16*)D_00262AA0, 0xB, (Fn262A)func_0016F408, 0x0 } };
-T262A_Slot D_00262AF0 = { { (const u16*)D_00262AD8, 0xB, (Fn262A)func_0016F430, 0x4004 } };
-T262A_Slot D_00262B28 = { { (const u16*)D_00262B10, 0xB, (Fn262A)func_0016F430, 0x8 } };
-T262A_Slot D_00262B60 = { { (const u16*)D_00262B48, 0xB, (Fn262A)func_0016F430, 0x2 } };
-T262A_Slot D_00262B98 = { { (const u16*)D_00262B80, 0xB, (Fn262A)func_00199F38, 0x0 } };
-T262A_Slot D_00262BD0 = { { (const u16*)D_00262BB8, 0xB, (Fn262A)func_00199FF0, 0xF000FFFF } };
-T262A_Slot D_00262C08 = { { (const u16*)D_00262BF0, 0xB, (Fn262A)func_0019A0F0, 0x0 } };
-T262A D_00262C48 = { (const u16*)D_00262C28, 0xD, (Fn262A)func_0016F478, 0x0 };
+ButtonCodeSlot D_00262A80 = { { (const u16*)D_00262A68, 0xB, (ButtonCodeFn)func_001E5278, 0x0 } };
+ButtonCodeSlot D_00262AB8 = { { (const u16*)D_00262AA0, 0xB, (ButtonCodeFn)func_0016F408, 0x0 } };
+ButtonCodeSlot D_00262AF0 = { { (const u16*)D_00262AD8, 0xB, (ButtonCodeFn)func_0016F430, 0x4004 } };
+ButtonCodeSlot D_00262B28 = { { (const u16*)D_00262B10, 0xB, (ButtonCodeFn)func_0016F430, 0x8 } };
+ButtonCodeSlot D_00262B60 = { { (const u16*)D_00262B48, 0xB, (ButtonCodeFn)func_0016F430, 0x2 } };
+ButtonCodeSlot D_00262B98 = { { (const u16*)D_00262B80, 0xB, (ButtonCodeFn)func_00199F38, 0x0 } };
+ButtonCodeSlot D_00262BD0 = { { (const u16*)D_00262BB8, 0xB, (ButtonCodeFn)func_00199FF0, 0xF000FFFF } };
+ButtonCodeSlot D_00262C08 = { { (const u16*)D_00262BF0, 0xB, (ButtonCodeFn)func_0019A0F0, 0x0 } };
+ButtonCode D_00262C48 = { (const u16*)D_00262C28, 0xD, (ButtonCodeFn)func_0016F478, 0x0 };
 
-void func_0016F188(T262A* entry);
+void func_0016F188(ButtonCode* entry);
 
 void func_0016F588(void)
 {
-    func_0016F188(&D_00262A80.rec);
-    func_0016F188(&D_00262AB8.rec);
-    func_0016F188(&D_00262AF0.rec);
-    func_0016F188(&D_00262B28.rec);
-    func_0016F188(&D_00262B60.rec);
-    func_0016F188(&D_00262B98.rec);
-    func_0016F188(&D_00262BD0.rec);
-    func_0016F188(&D_00262C08.rec);
-    func_0016F188(&D_00262C48);
+    AddButtonCode(&D_00262A80.rec);
+    AddButtonCode(&D_00262AB8.rec);
+    AddButtonCode(&D_00262AF0.rec);
+    AddButtonCode(&D_00262B28.rec);
+    AddButtonCode(&D_00262B60.rec);
+    AddButtonCode(&D_00262B98.rec);
+    AddButtonCode(&D_00262BD0.rec);
+    AddButtonCode(&D_00262C08.rec);
+    AddButtonCode(&D_00262C48);
 }
 
 
@@ -483,11 +483,11 @@ void func_0016D9A8(C47* self)
     }
 }
 
-T262A* D_00262DFC = 0;
+ButtonCode* D_00262DFC = 0;
 
 void func_0016F1F8(void)
 {
-    T262A* p = D_00262DFC;
+    ButtonCode* p = g_buttonCodes;
     if (p != 0) {
         do {
             p->pos = 0;
@@ -511,9 +511,9 @@ void func_0016F2E0(void)
     if (!(D_00262E00.time <= D_00261868[0])) {
         return;
     }
-    T262A* best = 0;
-    T262A** link = &D_00262DFC;
-    T262A* p = D_00262DFC;
+    ButtonCode* best = 0;
+    ButtonCode** link = &g_buttonCodes;
+    ButtonCode* p = g_buttonCodes;
     while (p != 0) {
         if (p->drop != 0) {
             *link = p->next;
@@ -534,7 +534,7 @@ void func_0016F2E0(void)
         func_001BFCD8(0x79, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
         best->fn(best->arg);
     }
-    func_0016F1F8();
+    ResetButtonCodes();
     D_00262E00.time = 0.0f;
 }
 
@@ -842,9 +842,9 @@ done:
 
 extern u16 D_00262D18;
 
-void func_0016F188(T262A* node)
+void func_0016F188(ButtonCode* node)
 {
-    T262A* p = D_00262DFC;
+    ButtonCode* p = g_buttonCodes;
     if (p != 0) {
         do {
             if (node == p) {
@@ -853,8 +853,8 @@ void func_0016F188(T262A* node)
             p = p->next;
         } while (p != 0);
     }
-    node->next = D_00262DFC;
-    D_00262DFC = node;
+    node->next = g_buttonCodes;
+    g_buttonCodes = node;
     if (D_00262D18 == *(u16*)node->buttons) {
         node->pos = 1;
     } else {
@@ -980,7 +980,7 @@ s32 func_0016E940(G262C70* self)
                 self->f48 = 1.0f;
             }
         }
-        func_0016F238(self, old);
+        AdvanceButtonCodes(self, old);
         self->x20 = D_00261858.f10;
         if (self->keyA8 != 0 || self->f48 != 0.0f || self->f7C != 0.0f) {
             self->f24 = D_00261858.f10;
@@ -1345,7 +1345,7 @@ void func_0016F478(void)
 }
 
 struct Advance_16F238 {
-    static void Of(T262A* node)
+    static void Of(ButtonCode* node)
     {
         do {
             s32 index = node->pos;
@@ -1363,7 +1363,7 @@ struct Advance_16F238 {
 void func_0016F238(G262C70* self, s32 value)
 {
     u16 id = (u16)value;
-    T262A* head = D_00262DFC;
+    ButtonCode* head = g_buttonCodes;
     if (head == 0) return;
     if (self != &D_00262C70) return;
     u16 previous = self->keyA8;

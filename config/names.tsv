@@ -1,1 +1,7 @@
 symbol	name	evidence
+func_0016F188	AddButtonCode	links a button-code record into the list D_00262DFC unless it is already in it (func_0016F588 calls it for each of the nine)
+func_0016F1F8	ResetButtonCodes	sets every listed button-code record's position back to 0 (RunCompletedButtonCode calls it after each run)
+func_0016F238	AdvanceButtonCodes	on a pad button change, moves each listed record's position on when the pressed mask is its next one and back to 0 when not
+func_0016F2E0	RunCompletedButtonCode	once the delay AdvanceButtonCodes set has passed, unlinks the records marked for removal, runs the callback of the completed record with the longest sequence, then resets every position
+func_0016F588	RegisterButtonCodes	adds the nine static button-code records D_00262A80 .. D_00262C48 to the list, one AddButtonCode each
+D_00262DFC	g_buttonCodes	the head of the button-code list: AddButtonCode pushes onto it, AdvanceButtonCodes and RunCompletedButtonCode walk it

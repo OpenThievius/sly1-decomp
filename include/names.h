@@ -7,5 +7,11 @@
 #ifndef NAMES_H
 #define NAMES_H
 
+#define g_buttonCodes          D_00262DFC
+#define AddButtonCode          func_0016F188
+#define ResetButtonCodes       func_0016F1F8
+#define AdvanceButtonCodes     func_0016F238
+#define RunCompletedButtonCode func_0016F2E0
+#define RegisterButtonCodes    func_0016F588
 
 #endif
