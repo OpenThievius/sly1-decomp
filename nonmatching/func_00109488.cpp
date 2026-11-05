@@ -59,6 +59,15 @@
 // gives, per store (entry, offset), each side's register and value (the values all agree), and
 // builds.py the per-value build counts; a search that minimises the register differences, or the
 // build-count distance (4 and func_00155778 first), has a gradient where EXACT has none.
+//
+// Tried (2026-11-05, build/swarm/lead/f109/): hill-climbing the statement order inside the helpers
+// on that score took the register differences from 3,537 to 3,133 of 5,503 stores and the size to
+// retail's (37,392 bytes, 13,045 matching), but only by giving up the store order: 159 of 1,179
+// entries in retail's order, against this file's 1,059. 4 and func_00155778 did not move. The
+// parameter orders (call sites rewritten to match), with the store order held, found nothing in
+// 1,500 tries: most swaps compile to the same bytes, the rest lose the store order. This file stays
+// the best. Neither order reaches retail's allocation in this shape; what is left is the shape of
+// the entries themselves, of which the plain stores and the forms above score worse.
 
 void func_001000C8();
 void func_00100178();
