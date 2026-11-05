@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 259/292 (88.7%), checked 2026-11-04
+// BYTES 259/292 (88.7%), checked 2026-11-05
 #include "common.h"
 
 // NEAR: every instruction and offset matches; the allocation of the loop variables differs (retail: self in s5, key in s6, the base in s2, i+1 in s3; ours: key in s2, self in s6, base in s3)

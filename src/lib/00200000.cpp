@@ -1080,6 +1080,69 @@ s32 func_002023B0(s16 px, s16 py, s16 pz)
     return ((yS * c) << 17) >> 16;
 }
 
+typedef int V128_201D60 __attribute__((mode(TI)));
+
+// A 16-byte record of two 64-bit words of bitfields.
+struct Tag_201D60 {
+    u64 count : 15;
+    u64 last : 1;
+    u64 pad0 : 44;
+    u64 words : 4;
+    u64 kind : 4;
+    u64 pad1 : 60;
+};
+
+struct Low9_201D60 {
+    u64 value : 9;
+    u64 pad : 55;
+};
+
+struct Obj_201D60 {
+    u8 pad0[0x38];
+    Low9_201D60 f38;
+    u8 pad40[0x50 - 0x40];
+    Tag_201D60 tag50;
+    Low9_201D60 f60;
+    u8 pad68[0x140 - 0x68];
+    Tag_201D60 tag140;
+};
+
+void func_00202140(void* p, s32 a, s32 b, s32 c, s32 d, s32 e);
+void func_00202478(void* p, s32 a, s32 b, s32 c, s32 d, s32 e);
+void func_00202660(void* p, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
+
+void func_00201D60(Obj_201D60* self, s16 a1, s16 w, s16 h, s16 a4, s16 a5, s16 flag)
+{
+    u8* base = (u8*)self;
+    u64* mode = func_00201BA8();
+    func_00202140(self, a1, w, h, 0, 0);
+    func_00202140(base + 0x28, a1, w, h, 0, 0);
+    func_00202478(base + 0x60, a1, w, h, a4, a5);
+    func_00202478(base + 0x150, a1, w, h, a4, a5);
+    if (flag) {
+        s32 y = 0x800 - (w >> 1);
+        s32 z = 0x800 - (h >> 1);
+        func_00202660(base + 0xE0, a4, y, z, w, h, 0, 0, 0, 0, 0);
+        func_00202660(base + 0x1D0, a4, y, z, w, h, 0, 0, 0, 0, 0);
+    }
+    *(V128_201D60*)&self->tag50 = 0;
+    *(V128_201D60*)&self->tag140 = 0;
+    self->tag50.count = flag ? 14 : 8;
+    self->tag50.last = 1;
+    self->tag50.words = 1;
+    self->tag50.kind = 14;
+    self->tag140.count = flag ? 14 : 8;
+    self->tag140.last = 1;
+    self->tag140.words = 1;
+    self->tag140.kind = 14;
+    s32 r = func_002023B0(a1, w, h);
+    if ((*mode & 0xFFFF0000FFFFULL) == 0x100000001ULL || *(s16*)mode == 0) {
+        s16 half = r >> 1;
+        self->f38.value = half;
+        self->f60.value = r >> 1;
+    }
+}
+
 struct Q_203230;
 struct Dev_203230;
 extern u8 D_00279480[128];
