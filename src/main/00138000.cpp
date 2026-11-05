@@ -1218,3 +1218,10 @@ void func_001399F8(Gr8B* self, s32 a1, s32 a2, void* a3)
         } while (node != 0);
     }
 }
+
+void func_00138FF0(s32 a, s32 b, s32 c, s32 d)
+{
+    s32 i;
+    for (i = 0; i < (a < c ? a : c); i++) {
+    }
+}
