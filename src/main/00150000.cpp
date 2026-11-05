@@ -10,17 +10,17 @@
 #include "t217d.h"
 #include "c6d.h"
 #include "c6c.h"
-#include "c38.h"
+#include "flagged_object.h"
 #include "v24a0.h"
 #include "shapes.h"
 #include "globals.h"
 #include "g27c220.h"
 #include "g261ef0.h"
-#include "g261d40.h"
+#include "threshold_range.h"
 #include "g262c70.h"
-#include "s153528.h"
+#include "active_set_solver.h"
 #include "s137290.h"
-#include "s169b18.h"
+#include "texture_header.h"
 #include "s1291d0.h"
 
 extern f32 D_0024A014;
@@ -611,11 +611,11 @@ void func_00153328(C61* self, s32 unused, void* a2)
 
 struct Part_151ED8 { u8 pad0[0x14]; f32 f14; f32 f18; };
 
-void func_00151ED8(G261EF0* obj, C38* node)
+void func_00151ED8(G261EF0* obj, FlaggedObject* node)
 {
     f32 value;
     if (node != 0) {
-        s32 idx = node->f5B4;
+        s32 idx = node->ordinal;
         s32 bit = 1 << (idx & 7);
         if (D_002623C8->bits74[idx / 8] & bit) {
             value = ((Part_151ED8*)obj->table)->f18;
@@ -627,7 +627,7 @@ have:
     func_00152410(obj, D_002623C8->dt + value);
     if (node != 0) {
         G27C230* m = D_002623C8;
-        s32 idx = node->f5B4;
+        s32 idx = node->ordinal;
         s32 bit = 1 << (idx & 7);
         u8 cur = m->bits74[idx / 8];
         if (cur & bit) return;
@@ -690,23 +690,23 @@ void func_00152D70(V24A0* self)
 s32 func_001F5C0C(void* p, s32 zero, s32 size);
 void func_00152438(Obj_152438* self, void* value);
 
-void func_00153528(S153528* self, s32 count)
+void func_00153528(ActiveSetSolver* self, s32 count)
 {
 	(void)func_001F5C0C(self, 0, 0x50);
 	s32 n = count << 1;
-	self->f00 = n;
+	self->slots = n;
 	s32 size = 0x60 * n;
 	self->items = func_0018D658(size);
 	(void)func_001F5C0C(self->items, 0, size);
-	func_00152438((Obj_152438*)&self->a, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->b, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->c, (void*)0x4C);
-	func_00152438((Obj_152438*)&self->d, (void*)0x4C);
+	func_00152438((Obj_152438*)&self->active, (void*)0x4C);
+	func_00152438((Obj_152438*)&self->atLow, (void*)0x4C);
+	func_00152438((Obj_152438*)&self->atHigh, (void*)0x4C);
+	func_00152438((Obj_152438*)&self->pending, (void*)0x4C);
 	s32 sq = (n * n) << 2;
-	self->mat = (f32*)func_0018D658(sq);
-	self->vec1 = (f32*)func_0018D658(sq);
-	self->vec2 = (f32*)func_0018D658(count << 3);
-	self->vec3 = (f32*)func_0018D658(count << 3);
+	self->matrix = (f32*)func_0018D658(sq);
+	self->factor = (f32*)func_0018D658(sq);
+	self->rhs = (f32*)func_0018D658(count << 3);
+	self->solution = (f32*)func_0018D658(count << 3);
 }
 
 struct Gl_0026E9F8 { u8 pad0[0x260]; s32 f260; u8 pad1[0x8]; s32 f26C; };
@@ -953,17 +953,17 @@ struct Frame_153EC0 {
     s32 prev;
 };
 
-void func_00153780(S153528* self, s32 a1, Node_153EC0* n, s32 a3, s32 a4, s32 a5, s32 a6);
+void func_00153780(ActiveSetSolver* self, s32 a1, Node_153EC0* n, s32 a3, s32 a4, s32 a5, s32 a6);
 void func_00152600(void* list, Node_153EC0* n);
 void func_00152470(void* list, Node_153EC0* n);
-void func_00153A50(S153528* self, Node_153EC0* n);
+void func_00153A50(ActiveSetSolver* self, Node_153EC0* n);
 extern f32 D_BC23D70A;
 
-void func_00153EC0(S153528* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
+void func_00153EC0(ActiveSetSolver* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7)
 {
     Frame_153EC0 fr;
     ListFrame frame;
-    s32 e = (s32)&self->d;
+    s32 e = (s32)&self->pending;
     fr.cursor = e;
     fr.list = e;
     s32 old = (s32)D_0027B314;
@@ -979,9 +979,9 @@ void func_00153EC0(S153528* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7
             if (node->f44 == 0) {
                 func_00153780(self, a1, node, a3, a4, a5, a6);
             }
-            func_00152600(&self->d, node);
-            func_00152470(&self->a, node);
-            self->total++;
+            func_00152600(&self->pending, node);
+            func_00152470(&self->active, node);
+            self->activeCount++;
         }
         Node_153EC0* nx = *(Node_153EC0**)fr.cursor;
         s32 lk = fr.link;
@@ -993,7 +993,7 @@ void func_00153EC0(S153528* self, s32 a1, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7
     for (;;) {
         f32 best = -0.01f;
         Node_153EC0* sel = 0;
-        for (Node_153EC0* p = (Node_153EC0*)self->d.head; p != 0; p = p->next) {
+        for (Node_153EC0* p = (Node_153EC0*)self->pending.head; p != 0; p = p->next) {
             if (p->f38 < best) {
                 best = p->f38;
                 sel = p;
@@ -1344,7 +1344,7 @@ void func_00152470(List01* list, Node_153A50* n);
 void func_0014B0C0(s32 n, f32* mat, f32* vec);
 void func_0014B3E0(s32 n, f32* a, f32* b, f32* c);
 
-void func_00153A50(S153528* self, Node_153A50* x)
+void func_00153A50(ActiveSetSolver* self, Node_153A50* x)
 {
     s32 iter;
     Node_153A50* p;
@@ -1352,34 +1352,34 @@ void func_00153A50(S153528* self, Node_153A50* x)
     f32* w;
     s32 i;
     if (x) {
-        func_00152600(&self->d, x);
-        func_00152470(&self->a, x);
-        self->total++;
+        func_00152600(&self->pending, x);
+        func_00152470(&self->active, x);
+        self->activeCount++;
     }
     iter = 0;
     do {
         {
-            f32* out = self->mat;
-            for (p = (Node_153A50*)self->a.head; p; p = p->next) {
-                for (q = (Node_153A50*)self->a.head; q; q = q->next) {
+            f32* out = self->matrix;
+            for (p = (Node_153A50*)self->active.head; p; p = p->next) {
+                for (q = (Node_153A50*)self->active.head; q; q = q->next) {
                     *out = p->vec[q - (Node_153A50*)self->items];
                     out++;
                 }
             }
         }
-        func_0014B0C0(self->total, self->mat, self->vec1);
+        func_0014B0C0(self->activeCount, self->matrix, self->factor);
         {
-            f32* out = self->vec2;
-            for (p = (Node_153A50*)self->a.head; p; p = p->next) {
+            f32* out = self->rhs;
+            for (p = (Node_153A50*)self->active.head; p; p = p->next) {
                 *out = -p->val;
                 out++;
             }
         }
-        func_0014B3E0(self->total, self->vec1, self->vec2, self->vec3);
+        func_0014B3E0(self->activeCount, self->factor, self->rhs, self->solution);
         for (i = 0; i < self->count; i++) {
             f32 sum = 0.0f;
-            w = self->vec3;
-            for (p = (Node_153A50*)self->a.head; p; p = p->next) {
+            w = self->solution;
+            for (p = (Node_153A50*)self->active.head; p; p = p->next) {
                 sum += *w * p->vec[i];
                 w++;
             }
@@ -1389,8 +1389,8 @@ void func_00153A50(S153528* self, Node_153A50* x)
         Node_153A50* best = 0;
         f32 bestT = 1.0f;
         s32 code = 0;
-        w = self->vec3;
-        for (p = (Node_153A50*)self->a.head; p; p = p->next) {
+        w = self->solution;
+        for (p = (Node_153A50*)self->active.head; p; p = p->next) {
             f32 f = *w;
             w++;
             if (p->kind != 2) {
@@ -1413,7 +1413,7 @@ void func_00153A50(S153528* self, Node_153A50* x)
                 }
             }
         }
-        for (Node_153A50* n = (Node_153A50*)self->b.head; n; n = n->next) {
+        for (Node_153A50* n = (Node_153A50*)self->atLow.head; n; n = n->next) {
             f32 f = n->rate;
             if (!(-0.0001f < f)) {
                 f32 t = -n->val / f;
@@ -1424,7 +1424,7 @@ void func_00153A50(S153528* self, Node_153A50* x)
                 }
             }
         }
-        for (Node_153A50* n = (Node_153A50*)self->c.head; n; n = n->next) {
+        for (Node_153A50* n = (Node_153A50*)self->atHigh.head; n; n = n->next) {
             f32 f = n->rate;
             if (!(f < 0.0001f)) {
                 f32 t = -n->val / f;
@@ -1440,8 +1440,8 @@ void func_00153A50(S153528* self, Node_153A50* x)
             r->val += bestT * r->rate;
         }
         {
-            w = self->vec3;
-            for (p = (Node_153A50*)self->a.head; p; p = p->next) {
+            w = self->solution;
+            for (p = (Node_153A50*)self->active.head; p; p = p->next) {
                 p->lo += bestT * *w;
                 w++;
             }
@@ -1450,26 +1450,26 @@ void func_00153A50(S153528* self, Node_153A50* x)
         case 0:
             return;
         case 2:
-            self->total--;
-            func_00152600(&self->a, best);
-            func_00152470(&self->b, best);
+            self->activeCount--;
+            func_00152600(&self->active, best);
+            func_00152470(&self->atLow, best);
             if (best == x) return;
             break;
         case 1:
-            self->total++;
-            func_00152600(&self->b, best);
-            func_00152470(&self->a, best);
+            self->activeCount++;
+            func_00152600(&self->atLow, best);
+            func_00152470(&self->active, best);
             break;
         case 4:
-            self->total--;
-            func_00152600(&self->a, best);
-            func_00152470(&self->c, best);
+            self->activeCount--;
+            func_00152600(&self->active, best);
+            func_00152470(&self->atHigh, best);
             if (best == x) return;
             break;
         case 3:
-            self->total++;
-            func_00152600(&self->c, best);
-            func_00152470(&self->a, best);
+            self->activeCount++;
+            func_00152600(&self->atHigh, best);
+            func_00152470(&self->active, best);
             break;
         }
         iter++;
@@ -1731,7 +1731,7 @@ void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
 }
 
 struct Vec_152E48 { f32 x, y, z, w; };
-struct C_152E48 { u8 pad[0xC]; S169B18** tex; };
+struct C_152E48 { u8 pad[0xC]; TextureHeader** tex; };
 struct B_152E48 { u8 pad[0x14]; C_152E48* c; };
 struct Self_152E48 {
     u8 pad[0x2D0];
@@ -1747,7 +1747,7 @@ void func_001EE318(V24A0* p);
 void func_0018D608(void);
 void func_00152980(V24A0* p, s32 size);
 void func_001EE480(V24A0* p);
-void func_00169B18(S169B18* t, V24A0* p);
+void func_00169B18(TextureHeader* t, V24A0* p);
 void func_001613C0(V24A0* p, s32 a, s32 b, u64 c);
 void func_00161458(V24A0* p, s32 a);
 void func_00161588(V24A0* p, s32 a, s32 b, u64 c);
@@ -1771,7 +1771,7 @@ void func_00152E48(Self_152E48* self, S1291D0* a)
     Vec_152E48 v0;
     Vec_152E48 v1;
     Quad4 q;
-    S169B18* tex;
+    TextureHeader* tex;
     s32 i;
     u64 bits;
     s32 x0;
@@ -1819,7 +1819,7 @@ void func_00152E48(Self_152E48* self, S1291D0* a)
     func_001528C8(&pb);
     func_00152980(&pa, 0x80);
     func_00152980(&pb, 0x80);
-    bits = (tex->bits & ~0x1800000000ULL) | 0x800000000ULL;
+    bits = (tex->tex0 & ~0x1800000000ULL) | 0x800000000ULL;
     func_001613C0(&pa, 0x200, 1, 0xE);
     func_00161708(&pa, 0x3F, 0);
     func_00161708(&pa, 7, bits);
@@ -1936,8 +1936,8 @@ void func_001533A8(Self_1533A8* self)
     func_00152B80((Gfx_1533A8*)&D_002622A8, s1->f2DC, s1->f2E0);
 }
 
-struct Tab_151A88 { u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 count; G261D40* list; };
-struct Tab_261D70 { u32 w[21]; s32 count; G261D40* list; s32 f5C; };
+struct Tab_151A88 { u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 count; ThresholdRange* list; };
+struct Tab_261D70 { u32 w[21]; s32 count; ThresholdRange* list; s32 f5C; };
 Tab_261D70 D_00261D70[2] = {
     { {0x00000000,0x3F800000,0x00000000,0x3F19999A,0x3DCCCCCD,0xBF4CCCCD,0x00000000,0x00000004,0x00000006,0x00000000,0x00000002,0x3ECC49BA,0x00000001,0x3F4C8B44,0x00000002,0x3D99999A,0x3E800000,0xBE4CCCCD,0xBB449BA6,0x00000002,0x3D99999A}, 4, D_00261D40, 0 },
     { {0x00000000,0x3F000000,0x00000000,0x3E4CCCCD,0x3DCCCCCD,0xBECCCCCD,0xBECCCCCD,0x00000004,0x00000006,0x00000000,0x00000002,0x3ECC49BA,0x00000000,0x3F4C8B44,0x00000000,0x3D99999A,0x3E800000,0xBE4CCCCD,0xBB449BA6,0x00000002,0x3D99999A}, 4, D_00261D40, 0 },
@@ -1973,13 +1973,13 @@ void func_00151A88(G261EF0* self)
     else rc = d + (s32)((1.0f - t) * ((f32)c + 0.99900001f - (f32)d));
     s32 r = func_001EAA70(ra, rc);
     s32 i = 0;
-    G261D40* e = 0;
+    ThresholdRange* e = 0;
     self->f14 = r;
     for (; i < ((Tab_151A88*)self->table)->count; i++) {
         e = &((Tab_151A88*)self->table)->list[i];
-        if (e->key <= D_002623C8->f10) break;
+        if (e->threshold <= D_002623C8->f10) break;
     }
-    self->f18 = func_001EAA70(e->a, e->b);
+    self->f18 = func_001EAA70(e->low, e->high);
     self->f20 = 0;
 }
 

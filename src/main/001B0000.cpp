@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c6e.h"
-#include "t21e3.h"
+#include "cursor_animator.h"
 #include "c6c.h"
 #include "v24a0.h"
 #include "v24a2.h"
@@ -9,8 +9,8 @@
 #include "shapes.h"
 #include "globals.h"
 #include "s1291d0.h"
-#include "s1b2988.h"
-#include "s168d68.h"
+#include "texture_table.h"
+#include "bump_allocator.h"
 
 typedef void (*VFn_1B0F70)(void* self, s32 arg);
 
@@ -56,11 +56,11 @@ struct Bits_1B29E0 {
     u64 bits;
 };
 
-u64 func_001B2988(S1B2988* obj, s32 p1, s32 p2);
+u64 func_001B2988(TextureTable* obj, s32 p1, s32 p2);
 void func_00161708(void* ctx, s32 kind, u64 value);
 void func_001F5C0C(void* p, s32 v, s32 n);
 
-void func_001B29E0(S1B2988* obj, s32 p1, s32 p2, s32 flag, void* ctx)
+void func_001B29E0(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx)
 {
     Bits_1B29E0 a;
     Bits_1B29E0 b;
@@ -265,11 +265,11 @@ void func_001AECB0(void* self);
 
 struct Entry_1B2988 { u8 pad[0x18]; u64 tail; };
 struct Cell_1B2988 { u8 pad[0x10]; u64 value; };
-u64 func_001B2988(S1B2988* t, s32 i, s32 j)
+u64 func_001B2988(TextureTable* t, s32 i, s32 j)
 {
     Entry_1B2988* e = ((Entry_1B2988**)t->entries)[i];
     s32 stride = 1;
-    if (*t->flag == 0) stride = 3;
+    if (*t->singleCell == 0) stride = 3;
     Cell_1B2988* c = ((Cell_1B2988**)t->cells)[i * stride + j];
     u64 r = e->tail;
     if (c != 0) r |= c->value;
@@ -559,25 +559,25 @@ struct Elem_1B3040 {
     u8 pad0[4];
     u8 f4;
     u8 pad5[3];
-    T21E3_Rec* f8;
+    AnimRecord* f8;
     u8 pad0C[8];
 };
 extern s32 D_002744F8;
-extern T21E3_Rec* D_002744FC;
+extern AnimRecord* D_002744FC;
 extern s32 D_0027453C;
-extern T21E3** D_00274540;
+extern CursorAnimator** D_00274540;
 extern s32 D_00274520[];
 extern s32 D_00274538;
 
 void func_001B2BA8(void* self);
 void func_001B2CF8(void* self);
 void* func_0018D5C0(s32 bytes);
-void func_00137A60(void* self, s32 key, T21E3_Rec* out);
-T21E3* func_001B4A10(void* self);
+void func_00137A60(void* self, s32 key, AnimRecord* out);
+CursorAnimator* func_001B4A10(void* self);
 void func_001B2F00(void* self, Elem_1B3040* e);
 void func_001B2DF8(void* self);
-void func_00168D68(S168D68* p, s32 a, s32 b);
-s32 func_001690C0(s32 mask, S168D68* arg, s32 f);
+void func_00168D68(BumpAllocator* p, s32 a, s32 b);
+s32 func_001690C0(s32 mask, BumpAllocator* arg, s32 f);
 void func_001B3510(s32 mask);
 void func_0015E5F0(void);
 void func_001A9F78(void);
@@ -588,23 +588,23 @@ void func_001B3040(void* self)
 {
     s32 i;
     s32 j;
-    T21E3_Rec* rec;
-    T21E3** out;
-    S168D68 f;
+    AnimRecord* rec;
+    CursorAnimator** out;
+    BumpAllocator f;
 
     func_001B2BA8(self);
     func_001B2CF8(self);
     D_002744F8 = func_00137BE0(self);
-    D_002744FC = (T21E3_Rec*)func_0018D5C0(D_002744F8 * 0x28);
+    D_002744FC = (AnimRecord*)func_0018D5C0(D_002744F8 * 0x28);
     D_0027453C = func_00137BE0(self);
-    D_00274540 = (T21E3**)func_0018D5C0(D_0027453C * 4);
+    D_00274540 = (CursorAnimator**)func_0018D5C0(D_0027453C * 4);
     out = D_00274540;
     for (i = 0; i < D_002744F8; i++) {
         rec = &D_002744FC[i];
         func_00137A60(self, 0x14, rec);
         rec->owner = func_001B4A10(self);
         if (rec->owner) {
-            rec->owner->cur.rec = rec;
+            rec->owner->cursor.record = rec;
             *out++ = rec->owner;
         }
         rec->elems = func_0018D5C0(rec->nelem * 0x14);
@@ -616,7 +616,7 @@ void func_001B3040(void* self)
         rec->count = ((Elem_1B3040*)rec->elems)->f4;
         switch (rec->kind) {
         case 0:
-            rec->f18 = 3;
+            rec->entCount = 3;
             break;
         case 1:
         case 2:
@@ -627,13 +627,13 @@ void func_001B3040(void* self)
         case 8:
         case 9:
         case 10:
-            rec->f18 = 1;
+            rec->entCount = 1;
             break;
         case 4:
-            rec->f18 = 4;
+            rec->entCount = 4;
             break;
         }
-        rec->ents = func_0018D5C0(rec->f18 * 8);
+        rec->ents = func_0018D5C0(rec->entCount * 8);
         Ent_1B3040* arr = (Ent_1B3040*)rec->ents;
         Ent_1B3040* e;
         switch (rec->kind) {
@@ -688,12 +688,12 @@ void func_001B3040(void* self)
     }
     func_001B2DF8(self);
     for (s32 k = 0; k < D_0027453C; k++) {
-        D_00274540[k]->vt->m01(D_00274540[k]);
+        D_00274540[k]->methods->bind(D_00274540[k]);
     }
     func_00168D68(&f, 0x1E00, 0x4000);
     func_001690C0(0x10000000, &f, 0);
     func_001B3510(0x10000000);
-    func_00168D68(&D_002626D8, f.f4, 0x4000);
+    func_00168D68(&D_002626D8, f.next, 0x4000);
     func_0015E5F0();
     func_001A9F78();
     for (s32 m = 0; m < 6; m++) {
@@ -921,7 +921,7 @@ void func_001B3510(s32 mask)
                     func_00161708(&buf, 0x42, 0x48);
                 }
                 func_00161708(&buf, 0x3D, 0);
-                T21E3_Rec* found = (T21E3_Rec*)func_001B4688(rec->f10);
+                AnimRecord* found = (AnimRecord*)func_001B4688(rec->f10);
                 if (found) {
                     func_001B29E0((Elem_1B3510*)found->elems, j, 0, rec->kind, &buf);
                 } else {

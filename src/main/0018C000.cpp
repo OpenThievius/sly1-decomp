@@ -2,21 +2,21 @@
 #include "common.h"
 #include "c05.h"
 #include "c49.h"
-#include "g261858.h"
-#include "g264a40.h"
-#include "s124df8.h"
+#include "game_clock.h"
+#include "memory_card.h"
+#include "object_link.h"
 #include "s137290.h"
-#include "s18d410.h"
+#include "key_id.h"
 
 s32 func_0018D1F8(void* self);
 
-s32 func_0018C1A8(G264A40* self)
+s32 func_0018C1A8(MemoryCard* self)
 {
     s32 r = func_0018D1F8(self);
     if (r != 0) {
-        self->f14 = 2;
+        self->targetState = 2;
     } else {
-        self->f14 = 3;
+        self->targetState = 3;
     }
     return r;
 }
@@ -389,9 +389,9 @@ void func_0018B670(void* a, void* fn, void* self);
 void func_0018C420(void* self);
 void func_0018D0A0(void* self);
 
-void func_0018C028(G264A40* self, s32 value)
+void func_0018C028(MemoryCard* self, s32 value)
 {
-    s32 old = self->f0C;
+    s32 old = self->state;
     s32 n;
     if (value == old) return;
     if (old == 5) self->f4F48 = 0;
@@ -402,10 +402,10 @@ void func_0018C028(G264A40* self, s32 value)
 small:
     if (value >= 2) goto store;
     if (value < 0) goto store;
-    func_0018B670(D_00269990, (void*)func_0018D0A0, self);
+    func_0018B670(g_backgroundJob, (void*)func_0018D0A0, self);
     goto store;
 c420:
-    func_0018B670(D_00269990, (void*)func_0018C420, self);
+    func_0018B670(g_backgroundJob, (void*)func_0018C420, self);
     goto store;
 loop: {
     Elem_18C028* e;
@@ -425,18 +425,18 @@ loop: {
 }
 
 store:
-    self->f0C = value;
-    self->f10 = D_00261858.f10;
+    self->state = value;
+    self->stateTime = D_00261858.elapsed;
 }
 
 extern f32 D_00261868[];
 
-void func_0018C178(G264A40* self, s32 value)
+void func_0018C178(MemoryCard* self, s32 value)
 {
-    if (value != self->f18) {
+    if (value != self->displayMode) {
         if (value == 2) self->i4F44 = 0;
-        self->f18 = value;
-        self->f1C = D_00261868[0];
+        self->displayMode = value;
+        self->displayModeTime = D_00261868[0];
     }
 }
 
@@ -453,14 +453,14 @@ void func_00194D30(void* self, s32 a, s32 b);
 void func_0018B670(void* a, void* fn, void* self);
 void func_0018C638(void* self);
 
-void func_0018C7F8(G264A40* self)
+void func_0018C7F8(MemoryCard* self)
 {
     if (self->i4F44 != 0) {
         if ((D_002623C0->f19EC & 0x100) == 0) {
             D_0026FF68->f27C = -1;
             func_00194D30(D_0026FF68, 1, 0x14);
         } else {
-            func_0018B670(D_00269990, (void*)func_0018C638, self);
+            func_0018B670(g_backgroundJob, (void*)func_0018C638, self);
             u8* obj = (u8*)D_00273EB0;
             ((Pk_18C7F8*)(obj + 0x260))->v = 0;
             ((Obj_18C7F8*)obj)->vtbl[14](obj);
@@ -648,18 +648,18 @@ extern s32 func_0018CBF8(void*, const char*);
 extern s32 func_001E1FD0(char*, const char*, ...);
 extern s32 func_0018D028(void*, void*, void*, void*);
 
-s32 func_0018C250(G264A40* self)
+s32 func_0018C250(MemoryCard* self)
 {
     char name[0x50];
     s32 info[4];
-    s32 r = func_0018BD00(func_0020A078(self->f04, self->f08, "/"), 0x12, info);
+    s32 r = func_0018BD00(func_0020A078(self->port, self->slot, "/"), 0x12, info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
     s32 sz = func_0018C1E8((void*)D_00248470);
     need += 5;
     need += (sz + 1023) / 1024;
     need += 0x15;
-    if (self->f28 < need) return 1;
+    if (self->freeBlocks < need) return 1;
     const char* dir = "/BASCUS-97198YAOTWTD!";
     r = func_0018D228(self, dir);
     if (r == 0) {
@@ -675,7 +675,7 @@ s32 func_0018C250(G264A40* self)
                         r = func_0018D028(self, name, (u8*)self + 0x30 + i * 0x1A5C, (u8*)self + 0x1A30 + i * 0x1A5C);
                         if (r != 0) return r;
                     }
-                    if (self->f14 < 5) self->f14 = 5;
+                    if (self->targetState < 5) self->targetState = 5;
                 }
             }
         }
@@ -705,9 +705,9 @@ extern const char D_0024B3C8[8];
 struct Buf_18C770 { u8 bytes[0x50]; };
 
 s32 func_001E1FD0(Buf_18C770* dst, const char* fmt, ...);
-s32 func_0018D028(G264A40* self, Buf_18C770* buf, void* a2, void* a3);
+s32 func_0018D028(MemoryCard* self, Buf_18C770* buf, void* a2, void* a3);
 
-s32 func_0018C770(G264A40* self)
+s32 func_0018C770(MemoryCard* self)
 {
     Buf_18C770 buf;
     s32 f = self->i4F4C;
@@ -764,31 +764,31 @@ extern void* D_00269AEC;
 s32 func_00209CB8(void* a, void* b, s32* c, s32* d, s32* e);
 s32 func_0018BD00(s32 v, s32 code, s32 extra);
 
-s32 func_0018D0A0(G264A40* o)
+s32 func_0018D0A0(MemoryCard* o)
 {
-    s32 r = func_0018BD00(func_00209CB8(o->f04, o->f08, &o->f24, &o->f28, &o->f2C), 1, 0);
+    s32 r = func_0018BD00(func_00209CB8(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), 1, 0);
     switch (r) {
     case 9:
     case 11:
-        o->f14 = 1;
+        o->targetState = 1;
         r = 11;
         break;
     case 10:
     case 12:
-        o->f14 = 2;
+        o->targetState = 2;
         r = 12;
         break;
     case 0:
         if (o->f2C != 0) {
-            if (o->f14 < 3)
-                o->f14 = 3;
+            if (o->targetState < 3)
+                o->targetState = 3;
             else
                 break;
         } else
-            o->f14 = 2;
+            o->targetState = 2;
         break;
     }
-    o->f20 = D_00261868[0] + 0.3f;
+    o->nextPollTime = D_00261868[0] + 0.3f;
     return r;
 }
 
@@ -852,9 +852,9 @@ extern const char D_0024B3C8[8];
 
 void func_001A7E90(Ctx_18C638* ctx);
 s32 func_001E1FD0(Buf_18C638* dst, const char* fmt, ...);
-s32 func_0018CFC0(G264A40* owner, Buf_18C638* name, u8* state);
+s32 func_0018CFC0(MemoryCard* owner, Buf_18C638* name, u8* state);
 
-s32 func_0018C638(G264A40* self)
+s32 func_0018C638(MemoryCard* self)
 {
     Buf_18C638 buf;
     s32 n;
@@ -1003,8 +1003,8 @@ s32 func_0018CA10(Owner_18CA10* owner, void* a1, Obj_18CA10* a2)
 
 struct Self_18CC20 { u8 pad[16]; };
 struct Key_18CC20 { s32 w0; s32 w4; u8 pad8[0xC]; s32 w14; u8 pad18[4]; s32 w1C; };
-void func_0018D410(S18D410* p);
-struct Pair_18CC20 : S18D410 {
+void func_0018D410(KeyId* p);
+struct Pair_18CC20 : KeyId {
     s32 Set(Key_18CC20* key)
     {
         s32 has;
@@ -1027,8 +1027,8 @@ u8* func_0018D658(s32 size);
 s32 func_00137290(S137290* o, s32 a, u8* b, s32 c);
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 s32 func_0018D268(Self_18CC20* s, char* a, s32 b, s32* c);
-void func_0018D410(S18D410* p);
-s32 func_001373B0(S137290* o, S18D410* p);
+void func_0018D410(KeyId* p);
+s32 func_001373B0(S137290* o, KeyId* p);
 void func_00137A60(S137290* o, s32 n, u8* d);
 s32 func_0018D328(Self_18CC20* s, s32 a, u8* d, s32 n, s32* out);
 void func_001373D0(S137290* o);
@@ -1232,7 +1232,7 @@ void func_001300D8(Buffer_18F890*, s32);
 
 void func_001A7E90(G27C220* ctx);
 
-s32 func_0018C568(G264A40* self)
+s32 func_0018C568(MemoryCard* self)
 {
     if (self->image == 0) {
         return 0x2C;
@@ -1337,4 +1337,4 @@ extern const char D_0024B3E0[8] = "%s/%s";
 extern const char D_0024B3E8[24] = "icon.sys";
 
 s32 D_002699A8;
-S124DF8 D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };
+ObjectLink D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };

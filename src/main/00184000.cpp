@@ -2,7 +2,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "c03.h"
-#include "c51.h"
+#include "cone_volume.h"
 
 struct Vec2_1840B8 { f32 x; f32 y; };
 
@@ -16,7 +16,7 @@ void func_001840B8(Vec2_1840B8* self, f32* out0, f32* out1)
 extern s32 D_002622CC;
 extern s32 D_00264260;
 
-void func_001841B0(C51* self)
+void func_001841B0(ConeVolume* self)
 {
     if (self->value == 0) {
         D_00264260 = D_002622CC;
@@ -26,9 +26,9 @@ void func_001841B0(C51* self)
 void func_001841D0(void* self);
 void func_00184B58(void* self);
 
-void func_00184768(C51* self, s32 flag)
+void func_00184768(ConeVolume* self, s32 flag)
 {
-    self->w2d0 = flag;
+    self->mode = flag;
     if (flag == 0) {
         self->flags = (self->flags & ~(u64)0x30000000000) | ((u64)0x8000 << 25);
     } else {
@@ -40,43 +40,43 @@ void func_00184768(C51* self, s32 flag)
 
 struct Quad_001847F0 { u32 w[4]; } __attribute__((aligned(16)));
 
-void func_001847F0(C51* self, Quad_001847F0* src)
+void func_001847F0(ConeVolume* self, Quad_001847F0* src)
 {
     *(Quad_001847F0*)self->f2E0 = *src;
     func_001841D0(self);
 }
 
-void func_00184818(C51* self, f32 v)
+void func_00184818(ConeVolume* self, f32 v)
 {
     self->f2F0 = v;
     func_001841D0(self);
 }
 
-void func_00184838(C51* self, f32 v)
+void func_00184838(ConeVolume* self, f32 v)
 {
     self->f2F4 = v;
     func_001841D0(self);
 }
 
-void func_00184858(C51* self, f32 v)
+void func_00184858(ConeVolume* self, f32 v)
 {
     self->f2f8 = v;
     func_001841D0(self);
 }
 
-void func_00184878(C51* self, f32 v)
+void func_00184878(ConeVolume* self, f32 v)
 {
     self->f2fc = v;
     func_001841D0(self);
 }
 
-void func_00184898(C51* self, f32 v)
+void func_00184898(ConeVolume* self, f32 v)
 {
     self->f300 = v;
     func_001841D0(self);
 }
 
-void func_00184968(C51* self, s32 v)
+void func_00184968(ConeVolume* self, s32 v)
 {
     if (v != self->value) {
         self->value = v;
@@ -86,31 +86,31 @@ void func_00184968(C51* self, s32 v)
 
 struct __attribute__((packed)) Packed8_184990 { u64 v; };
 
-void func_00184990(C51* self, Packed8_184990* src)
+void func_00184990(ConeVolume* self, Packed8_184990* src)
 {
-    *(Packed8_184990*)&self->f330 = *src;
+    *(Packed8_184990*)&self->rangeMin = *src;
     func_001841D0(self);
     func_00184B58(self);
 }
 
 void func_00184A70(void* self);
 
-void func_001849D0(C51* self, f32 v)
+void func_001849D0(ConeVolume* self, f32 v)
 {
-    self->f338 = v;
+    self->outerAngle = v;
     func_00184A70(self);
     func_001841D0(self);
     func_00184B58(self);
 }
 
-void func_00184A08(C51* self, f32 v)
+void func_00184A08(ConeVolume* self, f32 v)
 {
-    self->f33C = v;
+    self->innerAngle = v;
     func_00184A70(self);
     func_001841D0(self);
 }
 
-void func_00184A38(C51* self, Quad16* src)
+void func_00184A38(ConeVolume* self, Quad16* src)
 
 {
     self->q340 = *src;
@@ -118,13 +118,13 @@ void func_00184A38(C51* self, Quad16* src)
     func_00184B58(self);
 }
 
-void func_00184CD0(C51* self, f32 v)
+void func_00184CD0(ConeVolume* self, f32 v)
 {
     func_00184818(self, v);
     func_00184838(self, v);
 }
 
-void func_00184D10(C51* self, f32* out)
+void func_00184D10(ConeVolume* self, f32* out)
 {
     *out = self->f2F0;
 }
@@ -378,10 +378,10 @@ struct Clamp_184A70 {
     }
 };
 
-void func_00184A70(C51* self)
+void func_00184A70(ConeVolume* self)
 {
-    f32 a = Clamp_184A70::Of(self->f338, 0.0f, 175.0f);
-    f32 b = Clamp_184A70::Of(self->f33C, 0.0f, a);
+    f32 a = Clamp_184A70::Of(self->outerAngle, 0.0f, 175.0f);
+    f32 b = Clamp_184A70::Of(self->innerAngle, 0.0f, a);
     f32 r = func_002054F0(a * 0.00872664712f);
     self->f354 = r;
     self->f350 = r;

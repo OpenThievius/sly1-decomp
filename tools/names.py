@@ -130,7 +130,10 @@ def _is_use(row, path):
     struct, a field or a local would shadow the macro, so the check looks for its definition forms."""
     text = (ROOT / path).read_text(errors="replace")
     name = re.escape(row["name"])
-    defines = re.search(r"\b(struct|class|union|enum|typedef)\s+[^;{]*\b%s\b|[\w\*&]\s+%s\s*[;=\[,)]" % (name, name), text)
+    declares = (r"(?:^|[;{}(,])\s*(?!(?:return|case|goto|else|delete|throw|sizeof)\b)"
+                r"(?:(?:extern|static|const|volatile|unsigned|signed|struct)\s+)*[A-Za-z_]\w*"
+                r"(?:\s*[\*&])*\s+[\*&]*%s\s*[;=\[,)]" % name)
+    defines = re.search(r"\b(struct|class|union|enum|typedef)\s+[^;{]*\b%s\b|%s" % (name, declares), text, re.M)
     return defines is None
 
 

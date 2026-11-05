@@ -9,9 +9,9 @@
 #include "shapes.h"
 #include "globals.h"
 #include "g27c220.h"
-#include "g275f80.h"
+#include "screen_fade.h"
 #include "g262c70.h"
-#include "s124df8.h"
+#include "object_link.h"
 
 extern s32 D_00275BF0;
 
@@ -124,15 +124,15 @@ struct Src_1F00C0 {
     s32 mid;
 };
 
-void func_001F00C0(G275F80* dst, Src_1F00C0* src, s32 last)
+void func_001F00C0(ScreenFade* dst, Src_1F00C0* src, s32 last)
 {
     s32 mid = src->mid;
     u64 lo = src->pair.lo;
     u64 hi = src->pair.hi;
-    ((QuadP*)&dst->saved)->lo = lo;
-    ((QuadP*)&dst->saved)->hi = hi;
-    dst->last = last;
-    dst->saved.flags = mid;
+    ((QuadP*)&dst->queued)->lo = lo;
+    ((QuadP*)&dst->queued)->hi = hi;
+    dst->queuedStyle = last;
+    dst->queued.flags = mid;
 }
 
 void* func_001F3830(void* self, s32 mode);
@@ -276,12 +276,12 @@ void func_001F0428(void* obj, void* value, s32 count)
     m.obj = obj;
     m.value = value;
     m.last = 0;
-    func_001EFFA0(&D_00275F80, &m, count);
+    func_001EFFA0(&g_screenFade, &m, count);
 }
 
 
 void func_00127378(void* self, s32 kind, void* msg);
-void func_001F0220(G275F80* o, s32 mode);
+void func_001F0220(ScreenFade* o, s32 mode);
 void func_001F1050(void* self, s32 mode);
 
 void func_001F0F70(C67* self, s32 kind, void* msg)
@@ -300,11 +300,11 @@ L_one:
     func_001F1050(self, self->f2E0);
     return;
 L_three:
-    func_001F0220(&D_00275F80, 2);
+    func_001F0220(&g_screenFade, 2);
     return;
 L_four:
     if ((s32)msg != self->f2EC) return;
-    G275F80* g = &D_00275F80;
+    ScreenFade* g = &g_screenFade;
     if (g->mode == 3) {
         func_001F0220(g, 0);
     }
@@ -591,7 +591,7 @@ s32 func_001F0580(void* self, s32 code)
 }
 
 struct Same_1F00F0 {
-    static s32 Of(S18E410* t, S18E410* o)
+    static s32 Of(IdentityKey* t, IdentityKey* o)
     {
         if (t == o) {
             return 1;
@@ -599,7 +599,7 @@ struct Same_1F00F0 {
         if (o == 0) {
             return 0;
         }
-        return ((o->i[2] ^ o->i[6]) ^ (t->i[2] ^ t->i[6])) == 0;
+        return ((o->signedWords[2] ^ o->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
     }
 };
 
@@ -612,14 +612,14 @@ struct Blk20_1F00F0 {
 s32 func_001DDA80(void* p);
 void func_0016EC20(G262C70* o, s32 n);
 
-s32 func_001F00F0(G275F80* self, G262C70* o, void* param2)
+s32 func_001F00F0(ScreenFade* self, G262C70* o, void* param2)
 {
-    if (func_001DDA80(D_00275710) != 0 && self->saved.kind != 0 && (o->flags & 0x800) != 0) {
+    if (func_001DDA80(D_00275710) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
         func_0016EC20(o, 0x800);
-        *(Blk20_1F00F0*)&self->cur = *(Blk20_1F00F0*)&self->saved;
-        self->f24 = self->last;
-        S1EFFA0* rr = &self->cur;
-        S18E410* kk = rr->key;
+        *(Blk20_1F00F0*)&self->active = *(Blk20_1F00F0*)&self->queued;
+        self->style = self->queuedStyle;
+        FadeRequest* rr = &self->active;
+        IdentityKey* kk = rr->key;
         if (kk == 0 || Same_1F00F0::Of(kk, &D_00275B04)) {
             rr->flags |= 8;
         } else {
@@ -646,7 +646,7 @@ void func_001F1050(void* self, s32 mode);
 void func_001DDB58(void* a);
 void func_00168B68(f32 t);
 
-void func_001F0220(G275F80* self, s32 mode)
+void func_001F0220(ScreenFade* self, s32 mode)
 {
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {
@@ -657,7 +657,7 @@ void func_001F0220(G275F80* self, s32 mode)
     if (mode == 1) goto L02E0;
     if (mode < 2) {
         if (mode == 0) {
-            self->i0C = 0;
+            self->opacityWord = 0;
             goto L0400;
         }
         self->mode = mode;
@@ -669,18 +669,18 @@ void func_001F0220(G275F80* self, s32 mode)
     goto L0404;
 
 L02A0:
-    if (self->cur.kind != 0) {
-        S1EFFA0* q = &self->cur;
+    if (self->active.kind != 0) {
+        FadeRequest* q = &self->active;
         func_001E4E80(D_00275AF0, (s32)q->key, q->f08, q->f0C, q->flags);
     }
-    self->cur.kind = 0;
-    self->scale = 1.0f;
-    self->saved.kind = 0;
+    self->active.kind = 0;
+    self->opacity = 1.0f;
+    self->queued.kind = 0;
     goto L0400;
 
 L02E0:
     {
-        s32 v = self->f24;
+        s32 v = self->style;
         if (v == 2) goto L0300;
         if (v == 3) goto L0354;
         goto L0364;
@@ -688,7 +688,7 @@ L02E0:
 
 L0300:
     {
-        s32 v = func_001601A0((s32)self->cur.key);
+        s32 v = func_001601A0((s32)self->active.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
         if (D_0026FA68 == 0) goto L034C;
@@ -701,7 +701,7 @@ L0300:
     }
 
 L034C:
-    self->f24 = 0;
+    self->style = 0;
     goto L0364;
 
 L0354:
@@ -715,7 +715,7 @@ L0364:
 
 L0374:
     {
-        s32 a = self->f24;
+        s32 a = self->style;
         if (a == 2) goto L038C;
         if (a == mode) goto L03EC;
         self->mode = mode;
@@ -724,7 +724,7 @@ L0374:
 
 L038C:
     {
-        if (self->f24 == D_00275BF0) {
+        if (self->style == D_00275BF0) {
             s32 idx = D_002623CC;
             if (idx != -1) {
                 D_0026F808.current = D_0026F808.nodes[idx];
@@ -736,19 +736,19 @@ L038C:
             self->mode = mode;
             goto L0404;
         }
-        self->f24 = 3;
+        self->style = 3;
         goto L0400;
     }
 
 L03EC:
     func_00168B68(0.25f);
-    self->f24 = 0;
+    self->style = 0;
     goto L0400;
 
 L0400:
     self->mode = mode;
 L0404:
-    self->f08 = D_00261868;
+    self->modeStartTime = D_00261868;
 L0410:
     return;
 }
@@ -1312,7 +1312,7 @@ C7A* func_001F3C38(s32 id, s32 parent)
                 found = e;
                 break;
             }
-            if (D_00275F80.mode != 0 && D_00275F80.f24 == 2 && e->id94 != 0) {
+            if (g_screenFade.mode != 0 && g_screenFade.style == 2 && e->id94 != 0) {
                 other = e;
             }
             if (e->rec != 0) {
@@ -1448,7 +1448,7 @@ void func_001F1E38(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s32* c
 
 // Globals defined from C.
 s32 D_00275FC8[6] = { 0, 2, 4, 4, 4, 0 };
-S124DF8 D_00275FE0[52] = {
+ObjectLink D_00275FE0[52] = {
     { 0x2, 0x1CB, 0x2E4 },
     { 0x2, 0x1CC, 0x2E8 },
     { 0x2, 0x1CD, 0x2F8 },

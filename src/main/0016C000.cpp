@@ -2,15 +2,15 @@
 #include "common.h"
 #include "c05.h"
 #include "c52.h"
-#include "c64.h"
+#include "entry_table_object.h"
 #include "c29.h"
 #include "c47.h"
 #include "button_code.h"
 #include "globals.h"
-#include "g261858.h"
+#include "game_clock.h"
 #include "g262c70.h"
 #include "g27c220.h"
-#include "s1be728.h"
+#include "key_record.h"
 #include "shapes.h"
 
 void func_001F3A40(void);
@@ -310,7 +310,7 @@ void func_0016DD00(void)
 
 void func_00123ED0(void* self);
 
-void func_0016DD10(C64* self)
+void func_0016DD10(EntryTableObject* self)
 {
     func_00123ED0(self);
     self->tune31C = 2.25f;
@@ -325,13 +325,13 @@ void func_0016DD10(C64* self)
 void func_001289C0(void* self);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 
-void func_0016DD90(C64* self)
+void func_0016DD90(EntryTableObject* self)
 {
     func_001289C0(self);
-    s32 r = func_0015A4F0((s32)self->world, 0x201, 0x73, self, 0x10, self->table2D0);
-    self->tableCount = r;
+    s32 r = func_0015A4F0((s32)self->world, 0x201, 0x73, self, 0x10, self->entries);
+    self->entryCount = r;
     if ((u32)r >= 0x11) {
-        self->tableCount = 0x10;
+        self->entryCount = 0x10;
     }
 }
 
@@ -425,7 +425,7 @@ void func_0016E630(G262C70* self, s32 mode, s32 n)
     }
     self->f14 = next;
     self->f18 = n;
-    self->f1C = D_00261858.f10;
+    self->f1C = D_00261858.elapsed;
 }
 
 void func_0016EC20(G262C70* self, u32 mask)
@@ -540,7 +540,7 @@ void func_0016F2E0(void)
 
 void func_00124A48(void* self);
 
-void func_0016DDE8(C64* self)
+void func_0016DDE8(EntryTableObject* self)
 {
     func_00124A48(self);
     self->desc->m03(self);
@@ -818,7 +818,7 @@ s32 func_0016EED0(G262C70* self)
             self->f2C = 0;
             goto done;
         }
-        if (self->f38 <= D_00261858.f10) {
+        if (self->f38 <= D_00261858.elapsed) {
             f32 lo = 0.1f;
             f32 hi = 0.33329999446868896f;
             f32 t = (self->f3C + self->f3C) * 0.33333334f;
@@ -830,7 +830,7 @@ s32 func_0016EED0(G262C70* self)
                 c = t;
             }
             self->f3C = c;
-            base = D_00261858.f10;
+            base = D_00261858.elapsed;
         } else {
             return 0;
         }
@@ -981,9 +981,9 @@ s32 func_0016E940(G262C70* self)
             }
         }
         AdvanceButtonCodes(self, old);
-        self->x20 = D_00261858.f10;
+        self->x20 = D_00261858.elapsed;
         if (self->keyA8 != 0 || self->f48 != 0.0f || self->f7C != 0.0f) {
-            self->f24 = D_00261858.f10;
+            self->f24 = D_00261858.elapsed;
         }
     } else {
         if (D_00261868[0] - self->x20 >= 2.0f) res = 0;
@@ -1035,7 +1035,7 @@ extern const Slot_2482D8 D_002482D8[7] = {
 
 s32 func_001BE980(void);
 s32 func_001EAA70(void* a, s32 b);
-void func_001BE728(S1BE728* slot);
+void func_001BE728(KeyRecord* slot);
 
 void func_0016D928(C47* self)
 {
@@ -1052,7 +1052,7 @@ void func_0016D928(C47* self)
         return;
     }
     r = func_001EAA70(0, 6);
-    func_001BE728((S1BE728*)((u8*)D_002482D8 + (r << 5)));
+    func_001BE728((KeyRecord*)((u8*)D_002482D8 + (r << 5)));
     self->f5CC = 1;
 }
 
@@ -1117,7 +1117,7 @@ s32 func_0016EC98(Obj_16EC98* self)
             self->f28 = 0;
             goto done;
         }
-        if (self->f30 <= D_00261858.f10) {
+        if (self->f30 <= D_00261858.elapsed) {
             f32 lo = 0.1f;
             f32 hi = 0.33329999446868896f;
             f32 t = (self->f34 + self->f34) * 0.33333334f;
@@ -1129,7 +1129,7 @@ s32 func_0016EC98(Obj_16EC98* self)
                 c = t;
             }
             self->f34 = c;
-            base = D_00261858.f10;
+            base = D_00261858.elapsed;
         } else {
             return 0;
         }
@@ -1167,7 +1167,7 @@ void func_0016E238(G262C70* self)
         ready = 1;
     }
     s32 cur = self->f18;
-    if (self->f14 != 3 && cur != 0 && 2.0f <= D_00261858.f10 - self->f1C)
+    if (self->f14 != 3 && cur != 0 && 2.0f <= D_00261858.elapsed - self->f1C)
     {
         r = 0;
     }
@@ -1369,8 +1369,8 @@ void func_0016F238(G262C70* self, s32 value)
     u16 previous = self->keyA8;
     if (id == previous || previous == 0) return;
     Advance_16F238::Of(head);
-    G261858* clock = &D_00261858;
-    D_00262E00.time = clock->f10 + 1.0f;
+    GameClock* clock = &D_00261858;
+    D_00262E00.time = clock->elapsed + 1.0f;
 }
 
 // _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.

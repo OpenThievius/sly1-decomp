@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL picks an id from a word table and resolves it with a PAL-only function instead of indexing 32-byte slots.
 extern s32 D_eu_0024AFD8[];
-S1BE728* func_eu_001DE018(s32 id);
+KeyRecord* func_eu_001DE018(s32 id);
 
 void func_0016D928(C47* self)
 {

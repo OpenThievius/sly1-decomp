@@ -4,7 +4,7 @@
 #include "c1e.h"
 #include "t219c.h"
 #include "shapes.h"
-#include "s153528.h"
+#include "active_set_solver.h"
 
 void func_00155F90();
 void func_00155FA0(C50* self);
@@ -434,13 +434,13 @@ void func_0018D608(void);
 void func_0018D6F0(void);
 void* func_0018D658(s32 size);
 void func_0018D800(void* dst, void* src, s32 size);
-void func_00153528(S153528* loc, s32 count);
+void func_00153528(ActiveSetSolver* loc, s32 count);
 void func_00152470(void* tmp, Item_154880* item);
-void func_00153EC0(S153528* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+void func_00153EC0(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
 void func_00154880(s32 count, u8* data, f32* values, f32* out)
 {
-    S153528 loc;
+    ActiveSetSolver loc;
     s32 i;
 
     func_0018D608();
@@ -450,7 +450,7 @@ void func_00154880(s32 count, u8* data, f32* values, f32* out)
         item->p44 = func_0018D658(count * 4);
         func_0018D800(item->p44, data + i * count * 4, count * 4);
         item->f38 = values[i];
-        func_00152470(&loc.d, item);
+        func_00152470(&loc.pending, item);
     }
     loc.count = count;
     func_00153EC0(&loc, 0, 0, 0, 0, 0);

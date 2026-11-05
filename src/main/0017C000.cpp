@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c7e.h"
+#include "point_object.h"
 #include "c8f.h"
 #include "c05.h"
 #include "c03.h"

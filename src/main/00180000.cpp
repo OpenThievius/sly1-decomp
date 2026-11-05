@@ -3,11 +3,11 @@
 #include "t217d.h"
 #include "c05.h"
 #include "c6e.h"
-#include "c51.h"
+#include "cone_volume.h"
 #include "c6c.h"
 #include "c20.h"
-#include "s124df8.h"
-#include "s192230.h"
+#include "object_link.h"
+#include "message_body.h"
 #include "shapes.h"
 #include "g27c220.h"
 #include "globals.h"
@@ -81,7 +81,7 @@ s32 func_00183458(C01* a)
 void func_00152600(void* a, void* b);
 void func_001841B0(void* a);
 
-void func_00183DC0(C51* self)
+void func_00183DC0(ConeVolume* self)
 {
     func_00152600((u8*)self->world + 0x1BE8, self);
     func_001841B0(self);
@@ -206,7 +206,7 @@ void* func_00183058(C01* self, void* a1, s32 a2)
 void func_001243E0(void* self);
 void func_00183DC0(void* self);
 
-void func_00183E70(C51* self)
+void func_00183E70(ConeVolume* self)
 {
     func_001243E0(self);
     func_00183DC0(self);
@@ -306,7 +306,7 @@ void func_00125138(void* self);
 void func_001841D0(void* self);
 void func_00184B58(void* self);
 
-void func_00183D88(C51* self)
+void func_00183D88(ConeVolume* self)
 {
     func_00125138(self);
     func_001841D0(self);
@@ -359,7 +359,7 @@ void func_001830D8(C01* self, C01* src)
 
 void func_00152470(void* sub, void* self);
 
-void func_00183DF8(C51* self)
+void func_00183DF8(ConeVolume* self)
 {
     void (*fn)(C01*);
 
@@ -369,9 +369,9 @@ void func_00183DF8(C51* self)
 }
 
 void func_001240F8(void* self);
-void func_00183DF8(C51* self);
+void func_00183DF8(ConeVolume* self);
 
-void func_00183E40(C51* self)
+void func_00183E40(ConeVolume* self)
 {
     func_001240F8(self);
     func_00183DF8(self);
@@ -543,15 +543,15 @@ void func_00181A58(C1A* self, void* outv)
 
 struct Sub_181D28 { u8 pad0[0x24]; s32 f24; };
 
-void func_001DAF08(void* self, s32 code, S192230* rec);
+void func_001DAF08(void* self, s32 code, MessageBody* rec);
 
-void func_00181D28(C1A* self, s32 code, S192230* rec)
+void func_00181D28(C1A* self, s32 code, MessageBody* rec)
 {
     if (code == 0x13) {
         Sub_181D28* sub = ((Sub_181D28*)self->fBBC);
-        s32 key = rec->f0;
+        s32 key = rec->sourceId;
         if (sub != 0 && key == sub->f24) {
-            s32 kind = rec->f8;
+            s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
                     self->fC00 = 0;
@@ -958,21 +958,21 @@ done:
 }
 
 
-void func_00184A70(C51* self);
-void func_00123ED0(C51* self);
+void func_00184A70(ConeVolume* self);
+void func_00123ED0(ConeVolume* self);
 
-void func_00183CC8(C51* self)
+void func_00183CC8(ConeVolume* self)
 {
     self->flags = (self->flags & ~(0x3ULL << 40)) | ((u64)0x8000 << 25);
-    self->w2d0 = 0;
+    self->mode = 0;
     self->q320 = *(const Quad16*)&D_00248D20;
     self->q340 = *(const Quad16*)&D_00248D10;
-    self->f330 = 200.0f;
-    self->f334 = 2000.0f;
+    self->rangeMin = 200.0f;
+    self->rangeMax = 2000.0f;
     self->f2fc = 240.0f;
     self->f2f8 = 180.0f;
     self->f300 = 180.0f;
-    self->f338 = 60.0f;
+    self->outerAngle = 60.0f;
     func_00184A70(self);
     func_00123ED0(self);
 }
@@ -1028,11 +1028,11 @@ void func_00181DA8(C1A* self, s32 mode)
     self->fBB4 = D_00261858[1];
 }
 
-s32 func_00182FC8(C51*);
-void func_00183DC0(C51*);
-void func_00127048(C51*, C51*);
+s32 func_00182FC8(ConeVolume*);
+void func_00183DC0(ConeVolume*);
+void func_00127048(ConeVolume*, ConeVolume*);
 
-void func_00183EA0(C51* self, C51* other)
+void func_00183EA0(ConeVolume* self, ConeVolume* other)
 {
     s32 changed = 0;
     if (func_00182FC8(self)) {
@@ -1041,7 +1041,7 @@ void func_00183EA0(C51* self, C51* other)
     if (changed) {
         func_00183DC0(self);
     }
-    Pair51 keep = self->saved;
+    ConeVolumeSaved keep = self->saved;
     func_00127048(self, other);
     self->saved = keep;
     if (changed) {
@@ -1105,9 +1105,9 @@ void func_00181818(C1A* o, void* a, void* b)
     func_00125C90(o, a, b);
 }
 
-S124DF8 D_002640B0[10] = {
+ObjectLink D_002640B0[10] = {
     { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
     { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }
 };
 f32 D_00264180[4] = { -300.0f, 0.0f, 200.0f, 0.0f };
-S124DF8 D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
+ObjectLink D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };

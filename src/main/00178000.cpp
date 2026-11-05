@@ -2,12 +2,12 @@
 #include "common.h"
 #include "c05.h"
 #include "c4a.h"
-#include "c4b.h"
+#include "countdown_collider.h"
 #include "c8f.h"
 #include "globals.h"
-#include "s124df8.h"
-#include "s192230.h"
-#include "s1bc320.h"
+#include "object_link.h"
+#include "message_body.h"
+#include "object_event.h"
 #include "shapes.h"
 #include "t217d.h"
 
@@ -89,10 +89,10 @@ void func_0017B598(C4A* self)
 extern s32 D_00263E2C;
 s32 D_00263E30 = 0;
 
-void func_0017B5D0(C4B* self)
+void func_0017B5D0(CountdownCollider* self)
 {
     func_001B7968(self);
-    self->n558 = 0x10;
+    self->countdown = 0x10;
     D_00263E2C = -1;
     D_00263E30 = 0;
 }
@@ -101,7 +101,7 @@ void func_0017B5D0(C4B* self)
 void func_00124A48(void* self);
 void func_00124DF8(void* self, int n, void* table);
 
-void func_0017B610(C4B* self)
+void func_0017B610(CountdownCollider* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 3, D_00263E08);
@@ -283,12 +283,12 @@ void func_0017A6D0(C1B* self)
     func_0017ABE8(self, 2);
 }
 
-void func_00192230(void* self, s32 kind, S192230* rec);
+void func_00192230(void* self, s32 kind, MessageBody* rec);
 
-void func_0017AB58(C1B* self, s32 kind, S192230* rec)
+void func_0017AB58(C1B* self, s32 kind, MessageBody* rec)
 {
-    if (kind == 0x13 && rec->f0 == self->f618) {
-        switch (rec->f8) {
+    if (kind == 0x13 && rec->sourceId == self->f618) {
+        switch (rec->code) {
         case 0x15E:
             self->f6E0 = 1;
             break;
@@ -413,22 +413,22 @@ extern s32 D_00263E2C;
 
 void func_001AC060(void* p);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-void func_0012C918(void* a, C4B* b, s32 c, void* d, f32 e, f32 f);
-s32 func_001BC320(void* self, S1BC320* msg);
+void func_0012C918(void* a, CountdownCollider* b, s32 c, void* d, f32 e, f32 f);
+s32 func_001BC320(void* self, ObjectEvent* msg);
 
-s32 func_0017B7A8(C4B* self, S1BC320* msg)
+s32 func_0017B7A8(CountdownCollider* self, ObjectEvent* msg)
 {
     void* p;
-    if (msg->fC & 0x20) {
-        s32 n = self->n558 - 1;
+    if (msg->eventFlags & 0x20) {
+        s32 n = self->countdown - 1;
         s32 pos = (0 < n);
-        self->n558 = pos ? n : 0;
+        self->countdown = pos ? n : 0;
         func_001AC060(&D_0026E248);
-        if (self->n558 == 0) {
+        if (self->countdown == 0) {
             D_00263E2C = 2;
             p = 0;
         } else {
-            s32 flags = msg->f10;
+            s32 flags = msg->extraFlags;
             if (flags & 2) {
                 if (D_00262E10 == 0) {
                     p = self->f55C;
@@ -446,8 +446,8 @@ s32 func_0017B7A8(C4B* self, S1BC320* msg)
                 p = self->f55C;
             }
         }
-        func_0012C918(p, self, 1, &self->f568, 0.0f, 1.0f);
-        msg->fC &= ~0x20;
+        func_0012C918(p, self, 1, &self->record, 0.0f, 1.0f);
+        msg->eventFlags &= ~0x20;
         func_001837E0(self, 2, 0, 0);
     }
     return func_001BC320(self, msg);
@@ -643,23 +643,23 @@ void func_0012E760(void* p);
 void func_0017B8C0(void* self, s32 state);
 void func_00160578(s32 n);
 
-void func_0017B648(C4B* self)
+void func_0017B648(CountdownCollider* self)
 {
-    Sub4B* p;
+    CountdownRecord* p;
 
     func_001B93F8(self);
-    p = self->f568;
+    p = self->record;
     if (p != 0) {
-        if (p->f18 == 0.0f) {
+        if (p->remaining == 0.0f) {
             func_0012E760(p);
-            self->f568 = 0;
+            self->record = 0;
         }
     }
     if (D_00263E2C != -1) {
         func_0017B8C0(self, D_00263E2C);
     }
     if (self->mode == 2) {
-        if (D_00263E04 < D_0026185C - self->f554) {
+        if (D_00263E04 < D_0026185C - self->startTime) {
             if (D_00263E30 == 0) {
                 D_00263E30 = 1;
                 func_00160578(2);
@@ -693,7 +693,7 @@ extern s32 D_00270B54;
 extern s32 D_002717CC;
 s32 func_001E9970(void* self);
 
-void func_0017B710(C4B* self)
+void func_0017B710(CountdownCollider* self)
 {
     s32 busy = 0;
     if (self->mode == 1 && func_001E9970(self) != 0) {
@@ -924,7 +924,7 @@ done:
     func_0018D6F0();
 }
 
-S124DF8 D_00263AC8[26] = {
+ObjectLink D_00263AC8[26] = {
     { 0, 0x453, 0x688 },
     { 0, 0x454, 0x694 },
     { 0, 0x455, 0x6A0 },
@@ -953,7 +953,7 @@ S124DF8 D_00263AC8[26] = {
     { 5, 0x460, 0x668 }
 };
 
-S124DF8 D_00263D58[13] = {
+ObjectLink D_00263D58[13] = {
     { 0, 0x468, 0x584 },
     { 0, 0x469, 0x56C },
     { 0, 0x46A, 0x560 },
@@ -969,7 +969,7 @@ S124DF8 D_00263D58[13] = {
     { 2, 0x474, 0x5F8 }
 };
 
-S124DF8 D_00263E08[3] = {
+ObjectLink D_00263E08[3] = {
     { 0, 0x478, 0x55C },
     { 0, 0x479, 0x560 },
     { 0, 0x47A, 0x564 }

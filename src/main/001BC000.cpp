@@ -3,9 +3,9 @@
 #include "list_iter.h"
 #include "c03.h"
 #include "c6c.h"
-#include "s1bc320.h"
-#include "s1be728.h"
-#include "s18d410.h"
+#include "object_event.h"
+#include "key_record.h"
+#include "key_id.h"
 
 void func_001BC748(C03* self, u32* out)
 {
@@ -188,12 +188,12 @@ void func_001BC088(C03* self, void* b, f32 x)
 
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
 
-s32 func_001BC320(C03* self, S1BC320* shape)
+s32 func_001BC320(C03* self, ObjectEvent* shape)
 {
-    if (shape->fC & 0x8) {
+    if (shape->eventFlags & 0x8) {
         func_001BC0E0(self, shape->radius, (u8*)shape + 0x20, (u8*)shape + 0x30);
     }
-    return shape->fC != 0;
+    return shape->eventFlags != 0;
 }
 
 void func_001BC710(C03* self, u32 flag)
@@ -536,7 +536,7 @@ void func_0011E0E0(s32 a0, void (*a1)(void), u64 a2);
 
 struct Local_1BE728 { s32 a; s32 b; };
 
-void func_001BE728(S1BE728* self)
+void func_001BE728(KeyRecord* self)
 {
     if (D_00274744 != 0) {
         return;
@@ -550,9 +550,9 @@ void func_001BE728(S1BE728* self)
     func_0018D410(p);
     s32 r = 0;
     if (self != 0) {
-        s32 b = self->w4 ^ self->w1C;
+        s32 b = self->wordB ^ self->maskB;
         p->b = b;
-        l.a = self->w0 ^ self->w14;
+        l.a = self->wordA ^ self->maskA;
         r = b != 0;
     }
     if (r == 0) {
@@ -1294,14 +1294,14 @@ void func_001BE1E8(void);
 void func_0011D450(void);
 s32 func_0011CE30(void);
 void func_0011D420(void);
-void func_0018D410(S18D410* p);
+void func_0018D410(KeyId* p);
 s32 func_00203828(s32 a);
 s32 func_0011D140(s32 a, s32 b);
 s32 func_0011D760(s32 a, s32 b);
 
 s32 func_001BE268(s32 n)
 {
-    S18D410 l;
+    KeyId l;
     s32 h;
     if (n == D_00274740) {
         return ((s32*)&D_00604790)[n];

@@ -225,10 +225,10 @@ void func_001943E8(Self_1943E8_eu* self)
         }
         break;
     case 5: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
-            if (p->f10 == 0) {
-                func_0018B670(p, (void*)(void (*)(G264A40*))func_0018C250, ((u8*)&D_00264A40));
+            if (p->result == 0) {
+                func_0018B670(p, (void*)(void (*)(MemoryCard*))func_0018C250, ((u8*)&g_memoryCard));
                 func_00194D30(self, 1, 8);
             } else {
                 func_00194D30(self, 1, 6);
@@ -237,9 +237,9 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     }
     case 8: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
-            if (p->f10 == 0) {
+            if (p->result == 0) {
                 func_00194D30(self, 1, -1);
             } else {
                 func_00194D30(self, 1, 9);
@@ -248,9 +248,9 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     }
     case 12: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
-            if (p->f10 == 0) {
+            if (p->result == 0) {
                 func_00194D30(self, 1, -1);
                 if (self->f58C == 2) {
                     func_00194398();
@@ -263,10 +263,10 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     }
     case 19: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
             D_0026998C = 0;
-            if (p->f10 == 0) {
+            if (p->result == 0) {
                 func_00194D30(self, 1, -1);
             } else {
                 func_00194D30(self, 0, 0x17);

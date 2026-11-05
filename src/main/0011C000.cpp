@@ -2,7 +2,7 @@
 #include "common.h"
 #include "t2196.h"
 #include "c6c.h"
-#include "g25c250.h"
+#include "entry_pool.h"
 #include "s137290.h"
 #include "r11b008.h"
 
@@ -103,7 +103,7 @@ s32 func_0011E2A0()
 
 s32 func_0011C0A8(s32 a, s32 b);
 
-void* func_0011C288(G25C250* self, s32 index)
+void* func_0011C288(EntryPool* self, s32 index)
 {
     return self->mem + index * self->stride;
 }
@@ -644,15 +644,15 @@ void func_0011F210(T2196_678* self, Stream83* src)
 s32 func_0011C0A8(void* p, s32 mask);
 
 void* func_0018D500(s32 bytes);
-void* func_0011C288(G25C250* p, s32 index);
+void* func_0011C288(EntryPool* p, s32 index);
 
-void func_0011C128(G25C250* p, s32 count, s32 size)
+void func_0011C128(EntryPool* p, s32 count, s32 size)
 {
     p->stride = count + 8;
     p->count = size;
     p->mem = (u8*)func_0018D500((count + 8) * size);
     void* node = func_0011C288(p, 0);
-    p->free = node;
+    p->freeList = node;
     s32 i = 1;
     if (i < size) {
         void* prev;
@@ -963,14 +963,14 @@ void* func_0011C240(void* self)
     return result;
 }
 
-void func_0011C2A0(G25C250* self)
+void func_0011C2A0(EntryPool* self)
 {
-    self->tail = self->head;
+    self->liveMark = self->liveHead;
 }
 
-void func_0011C2B0(G25C250* self)
+void func_0011C2B0(EntryPool* self)
 {
-    Node_0011C2A0* node = (Node_0011C2A0*)self->head;
+    Node_0011C2A0* node = (Node_0011C2A0*)self->liveHead;
     if (node == 0) return;
     do {
         node->state = 0;
@@ -1082,15 +1082,15 @@ struct Node_11C2E8 {
     s32 f4;
 };
 
-void func_0011C2E8(G25C250* self)
+void func_0011C2E8(EntryPool* self)
 {
-    Node_11C2E8* prev = (Node_11C2E8*)&self->head;
-    Node_11C2E8* cur = (Node_11C2E8*)self->head;
-    if (cur != 0 && cur != self->tail) {
+    Node_11C2E8* prev = (Node_11C2E8*)&self->liveHead;
+    Node_11C2E8* cur = (Node_11C2E8*)self->liveHead;
+    if (cur != 0 && cur != self->liveMark) {
         prev = cur;
         for (;;) {
             cur = cur->next;
-            if (cur == 0 || cur == self->tail) {
+            if (cur == 0 || cur == self->liveMark) {
                 break;
             }
             prev = cur;
@@ -1103,15 +1103,15 @@ void func_0011C2E8(G25C250* self)
             prev = cur;
         } else {
             prev->next = cur->next;
-            cur->next = (Node_11C2E8*)self->free;
-            self->free = cur;
-            if (self->callback != 0) {
-                ((Cb_11C2E8)self->callback)(func_0011C3B8(cur));
+            cur->next = (Node_11C2E8*)self->freeList;
+            self->freeList = cur;
+            if (self->removeCallback != 0) {
+                ((Cb_11C2E8)self->removeCallback)(func_0011C3B8(cur));
             }
         }
         cur = prev->next;
     }
-    self->tail = s2->next;
+    self->liveMark = s2->next;
 }
 
 void func_0011EF90(T2196_Scale* a0, s32* a1, s32* a2)

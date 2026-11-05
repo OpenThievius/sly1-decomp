@@ -7,9 +7,9 @@
 #include "t217d.h"
 #include "v24a2.h"
 #include "shapes.h"
-#include "g261858.h"
+#include "game_clock.h"
 #include "g27c220.h"
-#include "s15db28.h"
+#include "text_reader.h"
 #include "globals.h"
 
 // The font object's calls.
@@ -251,7 +251,7 @@ void func_001A99F8(C0D* self)
     func_001C91C8(self);
     if (self->f724 == 0xB) {
         func_001603E8(4);
-        func_0018C7F8(D_00264A40);
+        func_0018C7F8(g_memoryCard);
     }
 }
 
@@ -677,7 +677,7 @@ void func_001A9FD0(void)
         T217D* o = slots[i];
         o->vt->m02(o);
     }
-    u8* g = D_00275F80;
+    u8* g = g_screenFade;
     void* b;
     if (*(s32*)D_00262C68 & 4) {
         b = D_00262C70;
@@ -784,7 +784,7 @@ void func_001A9C68()
     for (s32 i = 0x24; i >= 0; i--) {
         ((T217D**)D_002486B0)[i]->vt->m00(((T217D**)D_002486B0)[i], i);
     }
-    func_001EFCE8(D_00275F80);
+    func_001EFCE8(g_screenFade);
 }
 
 extern s8 D_00262250[];
@@ -1098,7 +1098,7 @@ void func_001AA178(void)
             p->vt->m09(p);
         }
     }
-    func_001EFEE0(D_00275F80);
+    func_001EFEE0(g_screenFade);
     func_001AE820((u8*)&D_00273EB0);
 }
 
@@ -1688,7 +1688,7 @@ Entry_1A8718* func_001A8718(C8C* self, s32 key)
 
 s32 func_001E2100(const char*);
 void func_001E2138(char*, const char*);
-void func_0015E290(S15DB28*, f32, f32*, f32*);
+void func_0015E290(TextReader*, f32, f32*, f32*);
 void func_001AA4F0(T217D* self, const char* arg)
 {
     if (arg && func_001E2100(arg)) {
@@ -1697,7 +1697,7 @@ void func_001AA4F0(T217D* self, const char* arg)
         self->text[0] = 0;
     }
     func_0015C8B8(self->font, self->scale, self->scale);
-    S15DB28 m;
+    TextReader m;
     func_0015DB28(&m, self->text, self->font);
     f32 x, y;
     func_0015E290(&m, 0.0f, &x, &y);
@@ -1709,11 +1709,11 @@ void func_001AA4F0(T217D* self, const char* arg)
 extern f32 D_00261860;
 
 void func_001AB2B8(T217D_E30* self);
-f32 func_0015DFF8(S15DB28* loc);
+f32 func_0015DFF8(TextReader* loc);
 
 void func_001AB058(T217D_E30* self)
 {
-    S15DB28 loc;
+    TextReader loc;
     f32 frac;
     s32 n;
     s32 first;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "c05.h"
-#include "c55.h"
+#include "state_notifier.h"
 #include "c6c.h"
 #include "c6d.h"
 #include "g27c220.h"
@@ -293,7 +293,7 @@ void func_00148598(C59* self, s32 mode)
         func_001837E0(self, 2, 0, 0);
         mode = 2;
         func_00151FC8(D_00261EF0);
-        func_0018C7F8(D_00264A40);
+        func_0018C7F8(g_memoryCard);
     }
     func_00147AB0(self, mode);
 }
@@ -470,7 +470,7 @@ s32 func_00148910(const f32* first, const f32* second)
 void func_00149168(C5B* self)
 {
     func_00146340(self);
-    self->f340 = 0;
+    self->armed = 0;
 }
 
 void func_0014A8D0(T2173_3C8* self)
@@ -548,7 +548,7 @@ void func_00148888(C5A* self, s32 mode)
     if (self->state == mode) return;
     if (mode == 1) {
         func_001E02C8(&D_0026E9F8, 2);
-        Notify55* dev = self->f380;
+        StateListener* dev = self->listener;
         if (dev != 0) {
             msg.value = mode;
             msg.owner = self;
@@ -594,9 +594,9 @@ void func_00148EF8(C57* self)
     if (self->state != 0) return;
     if (self->f338 == 0) return;
     if (D_00270458 != 2) {
-        self->f398 = self->f398 - D_00261860;
+        self->timeLeft = self->timeLeft - D_00261860;
     }
-    if (self->f398 <= 0.0f) {
+    if (self->timeLeft <= 0.0f) {
         self->desc02()->m2F(self, 6);
     }
 }
@@ -695,7 +695,7 @@ void func_00148510(C59* self)
     o->f354 = o->f358 = k06;
     o->f320 = k075;
     if (fl->flags & 2) {
-        o->f2D8 = 2;
+        o->initialMode = 2;
     }
 }
 
@@ -709,9 +709,9 @@ void func_00148D90(C57* self)
     self->f348 = self->f350 = k;
     self->f358 = 0.05f;
     self->f354 = 0.5f;
-    self->f390 = 4.0f;
+    self->timeMin = 4.0f;
     self->i320 = 0;
-    self->f394 = 6.0f;
+    self->timeMax = 6.0f;
 }
 
 struct Msg_148FF0 {
@@ -742,7 +742,7 @@ void func_00148FF0(C57* self, s32 mode)
 
 zero_case:
     if (self->f338 != 0) {
-        self->f398 = func_001EAAE0(self->f390, self->f394);
+        self->timeLeft = func_001EAAE0(self->timeMin, self->timeMax);
     }
     goto call_tail;
 
@@ -763,11 +763,11 @@ one_case:
         D_0026C6C8.vt->m14(&D_0026C6C8);
         func_00141040(D_00261420, self->f37C);
         func_001BFCD8(0x69, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        if (self->f380 != 0) {
+        if (self->listener != 0) {
             Frame_148FF0 fr;
             fr.msg.kind = 1;
             fr.msg.owner = self;
-            self->f380->vtbl[31](self->f380, &fr.msg);
+            self->listener->vtbl[31](self->listener, &fr.msg);
         }
         mode = 2;
     }
@@ -834,7 +834,7 @@ void func_00148698(C5A* self)
     self->f354 = 0.6f;
     self->f320 = 0.75f;
     if (*(s32*)D_0026EC60 == 0) {
-        self->f2D8 = 2;
+        self->initialMode = 2;
     }
 }
 
@@ -1054,7 +1054,7 @@ void func_00148298(C58* self, s32 mode)
         switch (mode) {
         case 0:
             if (s->f338 != 0) {
-                s->f398 = func_001EAAE0(s->f390, s->f394);
+                s->timeLeft = func_001EAAE0(s->timeMin, s->timeMax);
             }
             break;
         case 1:
@@ -1073,11 +1073,11 @@ void func_00148298(C58* self, s32 mode)
                 D_0026CE48.vt->m14(&D_0026CE48);
                 f32 z = 0.0f;
                 func_001BFCD8(0x78, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
-                if (s->f380 != 0) {
+                if (s->listener != 0) {
                     Locals_148298 l;
                     l.args[0] = 1;
                     l.args[1] = (s32)self;
-                    s->f380->vtbl[31](s->f380, l.args);
+                    s->listener->vtbl[31](s->listener, l.args);
                 }
                 mode = 2;
             break;

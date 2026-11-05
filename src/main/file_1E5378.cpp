@@ -6,7 +6,7 @@
 #include "list_iter.h"
 #include "v24a0.h"
 #include "t217d.h"
-#include "s192230.h"
+#include "message_body.h"
 #include "shapes.h"
 extern u8* D_00262E10;
 extern u8* D_00275710;
@@ -274,21 +274,21 @@ void func_001E5C78(C16* self)
 struct Dev_1E5CE8 { u8 pad[0x24]; s32 f24; };
 struct Hdl_1E5CE8 { u8 pad[0x7E0]; s32 f7E0; };
 
-void func_00192230(void* self, s32 kind, S192230* rec);
+void func_00192230(void* self, s32 kind, MessageBody* rec);
 void func_001A8C90(void* a, s32 b);
 
-void func_001E5CE8(C16* self, s32 kind, S192230* rec)
+void func_001E5CE8(C16* self, s32 kind, MessageBody* rec)
 {
     func_00192230(self, kind, rec);
     if (kind == 0x13) {
         Dev_1E5CE8* dev = (Dev_1E5CE8*)self->f614;
-        s32 id = rec->f0;
+        s32 id = rec->sourceId;
         if (id == dev->f24) {
-            if (rec->f8 == 0x35B) {
+            if (rec->code == 0x35B) {
                 func_001A8C90(self->f618, 1);
             }
         } else if (((Hdl_1E5CE8*)self->f624) != 0 && id == ((Hdl_1E5CE8*)self->f624)->f7E0) {
-            s32 k = rec->f8;
+            s32 k = rec->code;
             if (k != 0x15E) {
                 if (k == 0x15F) {
                     self->f628 = 0;

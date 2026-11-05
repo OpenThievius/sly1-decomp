@@ -21,11 +21,11 @@ struct C46 : C03 {
     f32 delay;              // 0x568: slot 17 waits this long in state 4
     Keep46 keep56C;         // 0x56C: kept by slot 9
     void* f574;             // 0x574: not read here
-    void* field578;         // 0x578: the object whose message (kind 6) clears it (slot 13)
+    void* watched;        // 0x578: the object whose message (kind 6) clears it (slot 13)
     s32 f57C;               // 0x57C: zeroed when the state leaves 2
     s32 f580;               // 0x580
     s32 f584;               // 0x584
-    void* f588;             // 0x588: the class 0x23 object that took it (func_0014FEC0; func_0014FBE0)
+    void* taker;          // 0x588: the class 0x23 object that took it (func_0014FEC0; func_0014FBE0)
     void* member58C;        // 0x58C: the group or member func_00159478 finds (slot 10)
 };
 

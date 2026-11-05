@@ -5,14 +5,14 @@
 #include "c1e.h"
 #include "c6c.h"
 #include "c6d.h"
-#include "c41.h"
+#include "object_gatherer.h"
 #include "c05.h"
 #include "v24a0.h"
 #include "t219c.h"
 #include "globals.h"
-#include "g26ac30.h"
-#include "s19d410.h"
-#include "s159ca0.h"
+#include "group_marker.h"
+#include "deferred_request.h"
+#include "color_fade.h"
 
 struct Buf_19DF48 { u8 raw[0x30]; };
 typedef void (*Fn_19DF48)(void);
@@ -32,35 +32,35 @@ void func_0019DBB0(void);
 void func_0019DF48(void)
 {
     Buf_19DF48 buf;
-    G26AC30* rows;
+    GroupMarker* rows;
     u8* p;
     s32 i;
 
     func_001611B8(buf.raw);
     func_001529C8(buf.raw, 1, D_0026AC20);
     func_001612F8(buf.raw, 0x7D, 0, 3, 0x412, 0);
-    rows = D_0026AC30;
+    rows = g_groupMarkers;
 
-    rows[0].fn = func_0019DA30;
-    rows[1].fn = func_0019DA60;
-    rows[2].fn = func_0019DAD8;
-    rows[3].fn = func_0019DB20;
-    rows[4].fn = func_0019DB20;
-    rows[5].fn = func_0019DB68;
-    rows[6].fn = func_0019DB20;
-    rows[7].fn = func_0019DB20;
-    rows[8].fn = func_0019DB20;
-    rows[9].fn = func_0019DB68;
-    rows[12].fn = func_0019DB20;
-    rows[11].fn = func_0019DB20;
-    rows[10].fn = func_0019DB20;
-    rows[13].fn = func_0019DB20;
-    rows[14].fn = func_0019DB68;
-    rows[15].fn = func_0019DB68;
-    rows[16].fn = func_0019DB20;
-    rows[17].fn = func_0019DBB0;
+    rows[0].handler = func_0019DA30;
+    rows[1].handler = func_0019DA60;
+    rows[2].handler = func_0019DAD8;
+    rows[3].handler = func_0019DB20;
+    rows[4].handler = func_0019DB20;
+    rows[5].handler = func_0019DB68;
+    rows[6].handler = func_0019DB20;
+    rows[7].handler = func_0019DB20;
+    rows[8].handler = func_0019DB20;
+    rows[9].handler = func_0019DB68;
+    rows[12].handler = func_0019DB20;
+    rows[11].handler = func_0019DB20;
+    rows[10].handler = func_0019DB20;
+    rows[13].handler = func_0019DB20;
+    rows[14].handler = func_0019DB68;
+    rows[15].handler = func_0019DB68;
+    rows[16].handler = func_0019DB20;
+    rows[17].handler = func_0019DBB0;
 
-    p = (u8*)D_0026AC30 + 0x888;
+    p = (u8*)g_groupMarkers + 0x888;
     i = 17;
     do {
         *(s32*)p = -1;
@@ -356,8 +356,8 @@ void func_0019FDC0(T219C* self)
 
 extern u8 D_0026AC10[];
 
-struct S159CA0;
-typedef void (*VFn_19D6C0)(S159CA0* self, void* arg, s32 z);
+struct ColorFade;
+typedef void (*VFn_19D6C0)(ColorFade* self, void* arg, s32 z);
 
 struct Frame_19D6C0 {
     s32 list;
@@ -366,7 +366,7 @@ struct Frame_19D6C0 {
     s32 prev;
 };
 
-void func_00159D00(S159CA0* n);
+void func_00159D00(ColorFade* n);
 
 void func_0019D6C0(C6C* self, void* arg)
 {
@@ -386,7 +386,7 @@ void func_0019D6C0(C6C* self, void* arg)
     f1.cursor = h + link;
     s32 n = h;
     while (n != 0) {
-        S159CA0* node = (S159CA0*)n;
+        ColorFade* node = (ColorFade*)n;
         ((VFn_19D6C0*)node->obj)[40](node, arg, 0);
         s32 nx = *(s32*)f1.cursor;
         f1.cursor = nx + f1.link;
@@ -404,7 +404,7 @@ void func_0019D6C0(C6C* self, void* arg)
     f2.cursor = h2 + link2;
     n = h2;
     while (n != 0) {
-        S159CA0* node = (S159CA0*)n;
+        ColorFade* node = (ColorFade*)n;
         ((VFn_19D6C0*)node->obj)[40](node, arg, 0);
         s32 nx = *(s32*)f2.cursor;
         f2.cursor = nx + f2.link;
@@ -421,7 +421,7 @@ void func_0019D6C0(C6C* self, void* arg)
     f3.cursor = h3 + link3;
     n = h3;
     while (n != 0) {
-        func_00159D00((S159CA0*)n);
+        func_00159D00((ColorFade*)n);
         s32 nx = *(s32*)f3.cursor;
         f3.cursor = nx + f3.link;
         n = nx;
@@ -504,7 +504,7 @@ void func_0019DA60(void)
     void* self = &D_002622A8;
     func_0015EAE0(self, D_00212160, D_00215C50);
     D_00604780 = 1;
-    D_002622D8->r1C = 1;
+    g_buildFrame->r1C = 1;
     func_00152B38(self);
     func_001EE468(self);
     func_00152D70(self);
@@ -742,7 +742,7 @@ void func_0019C470(C8B* o, Stream_19C470* in)
 void func_001BE0A8(void** base, s32 count, s32 size, void* cmp);
 void func_0019D468(void);
 
-s32 func_0019D4B0(s32 n, S19D410* items, void** out)
+s32 func_0019D4B0(s32 n, DeferredRequest* items, void** out)
 {
     s32 start[18];
     s32 pos[18];
@@ -750,25 +750,25 @@ s32 func_0019D4B0(s32 n, S19D410* items, void** out)
     s32 j;
     s32 i;
     for (i = 0; i < 18; i++) cnt[i] = 0;
-    for (j = 0; j < n; j++) cnt[items[j].mode]++;
+    for (j = 0; j < n; j++) cnt[items[j].group]++;
     pos[0] = 0;
-    if (cnt[0] > 0 && D_0026AC30[0].f00 != 0) {
-        out[0] = &D_0026AC30[0];
+    if (cnt[0] > 0 && g_groupMarkers[0].handlerWord != 0) {
+        out[0] = &g_groupMarkers[0];
         pos[0] = 1;
         cnt[0]++;
     }
     start[0] = pos[0];
     for (i = 1; i < 18; i++) {
         pos[i] = cnt[i - 1];
-        if (cnt[i] > 0 && D_0026AC30[i].f00 != 0) {
-            out[pos[i]] = &D_0026AC30[i];
+        if (cnt[i] > 0 && g_groupMarkers[i].handlerWord != 0) {
+            out[pos[i]] = &g_groupMarkers[i];
             pos[i]++;
         }
         cnt[i] += pos[i];
         start[i] = pos[i];
     }
     for (j = 0; j < n; j++, items++) {
-        s32 b = items->mode;
+        s32 b = items->group;
         out[start[b]++] = items;
     }
     {
@@ -888,14 +888,14 @@ struct Ob_19C068 {
     VFn_19C068 *vtbl;
 };
 
-void func_00152600(List01 *a, C41 *b);
-void func_00152470(List01 *a, C41 *b);
+void func_00152600(List01 *a, ObjectGatherer *b);
+void func_00152470(List01 *a, ObjectGatherer *b);
 struct Buf_19C068 { s32 w[4]; };
 void func_00128018(void *a, s32 b, void *c, struct Buf_19C068 *d);
-void func_001B9860(C41 *a, struct Buf_19C068 *b, void *c);
-void func_001B7C40(C41 *self, s32 flag);
+void func_001B9860(ObjectGatherer *a, struct Buf_19C068 *b, void *c);
+void func_001B7C40(ObjectGatherer *self, s32 flag);
 
-void func_0019C068(C41 *self, s32 a1) {
+void func_0019C068(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
         func_00152600(&self->world->list1C60, self);
         ((struct Ob_19C068 *)self->f5FC)->vtbl[7](self->f5FC);
@@ -911,7 +911,7 @@ void func_0019C068(C41 *self, s32 a1) {
     Frame_19C068 it(&self->parts);
     s32 node = it.Next();
     while (node != 0) {
-        func_001B7C40((C41 *)node, a1 == 0);
+        func_001B7C40((ObjectGatherer *)node, a1 == 0);
         node = it.Next();
     }
     self->desc02()->m20(self, (Vec02 *)&D_00248D30);
@@ -1002,12 +1002,12 @@ extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(T219C* self))func_00
 
 
 // D_0026AC10 points at the next free 128-byte entry of D_005E4700 (1024 of them).
-void func_0019D410(S19D410* src)
+void func_0019D410(DeferredRequest* src)
 {
-    S19D410* cur = *(S19D410**)D_0026AC10;
+    DeferredRequest* cur = *(DeferredRequest**)D_0026AC10;
     if ((u32)(cur - D_005E4700) < 0x400) {
-        *(S19D410**)D_0026AC10 = cur + 1;
-        *(S19D410*)((u32)cur | 0x20000000) = *src;
+        *(DeferredRequest**)D_0026AC10 = cur + 1;
+        *(DeferredRequest*)((u32)cur | 0x20000000) = *src;
     }
 }
 

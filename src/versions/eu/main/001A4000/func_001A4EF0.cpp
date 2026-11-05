@@ -4,9 +4,9 @@ struct __attribute__((packed)) Packed_1A4EF0_eu { u8 pad[0x5B0]; s32 v __attribu
 struct Glob_1A4EF0_eu { u8 pad[0x5B0]; s32 v; };
 struct Tab_1A4EF0_eu { u8 pad[0x574]; void* f574; void* f578; };
 
-void func_001A4EF0(C5F* self, s32 state)
+void func_001A4EF0(PairController* self, s32 state)
 {
-    C5F* o;
+    PairController* o;
     s32 v;
     ListFrame frame;
     if (W(self, 0x650) == state) return;

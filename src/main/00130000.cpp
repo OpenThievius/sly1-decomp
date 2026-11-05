@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c01.h"
-#include "s130070.h"
+#include "stream_reader_window.h"
 
-void func_001300D8(S130070* a0, s32 a1)
+void func_001300D8(StreamReaderWindow* a0, s32 a1)
 {
-    a0->tail += a1;
+    a0->usedLength += a1;
 }
 
 void func_00130B48(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y, f32 z, s32 n, void* buf);
@@ -29,9 +29,9 @@ void func_001365A0(void* self, s32 arg);
 void func_0012FE70(void* self);
 void func_0012FFE8(void* self);
 
-void func_00130070(S130070* self)
+void func_00130070(StreamReaderWindow* self)
 {
-    switch (self->state) {
+    switch (self->sourceKind) {
     case 0:
         func_0012FE70(self);
         func_0012FFE8(self);

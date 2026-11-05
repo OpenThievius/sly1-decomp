@@ -55,7 +55,7 @@ void func_001AE820(Obj_1AE820_eu* self)
         adj = 0.0f;
         if (self->f250 == 2) {
             if (1.0f < d) {
-                if (func_0018B770(D_00269990) == 0) {
+                if (func_0018B770(g_backgroundJob) == 0) {
                     self->vtbl[0x3C / 4](self);
                 }
             }

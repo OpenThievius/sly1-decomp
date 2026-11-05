@@ -2,14 +2,14 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c83.h"
-#include "c34.h"
+#include "id_filter_object.h"
 #include "c6c.h"
 #include "c8b.h"
 #include "t2195.h"
 #include "s1dbbd8.h"
-#include "s12c288.h"
-#include "s12fcf0.h"
-#include "s18d410.h"
+#include "target_binding.h"
+#include "stream_reader.h"
+#include "key_id.h"
 #include "g27c220.h"
 #include "shapes.h"
 #include "globals.h"
@@ -82,32 +82,32 @@ void func_0012F7E0(Obj_12F7E0* a0, void* a1, s32 a2)
     func_001831E8(a0->mid->p14, (u8*)a0 + 0xE4, a1, a2);
 }
 
-void func_0012FCB0(C34* a0, s32 a1)
+void func_0012FCB0(IdFilterObject* a0, s32 a1)
 {
-    a0->objects.items[a0->objects.count++] = a1;
+    a0->objectIds.items[a0->objectIds.count++] = a1;
 }
 
-s32 func_0012FF10(S12FCF0* self);
+s32 func_0012FF10(StreamReader* self);
 void func_001F8C38(s32 h);
 s32 func_002032C8(s32 x);
-void func_0012FFE8(S12FCF0* self);
+void func_0012FFE8(StreamReader* self);
 
-void func_0012FDE8(S12FCF0* a0)
+void func_0012FDE8(StreamReader* a0)
 {
-    switch (a0->state) {
+    switch (a0->sourceKind) {
     case 0:
-        if (a0->f04 >= 0) func_001F8C38(a0->f04);
-        a0->f04 = -1;
+        if (a0->fileHandle >= 0) func_001F8C38(a0->fileHandle);
+        a0->fileHandle = -1;
         break;
     case 1:
         if (func_0012FF10(a0)) {
             func_002032C8(0);
             func_0012FFE8(a0);
         }
-        a0->f08 = 0;
+        a0->sector = 0;
         break;
     }
-    a0->state = -1;
+    a0->sourceKind = -1;
 }
 
 void func_001830D8(void);
@@ -386,7 +386,7 @@ void func_0012F810(Player2195* a0, C02** a1)
 void func_001B7968(C03* self);
 void func_001B9AE0(C03* self, s32 a, Vec02* b, s32 c, Vec02* d);
 
-void func_0012F840(C34* self)
+void func_0012F840(IdFilterObject* self)
 {
     func_001B7968(self);
     func_001B9AE0(self, 3, 0, 3, 0);
@@ -396,7 +396,7 @@ void func_0012F840(C34* self)
 void func_001BA130(C03* self);
 void func_00138F28(void* a, void* b);
 
-void func_0012F888(C34* self)
+void func_0012F888(IdFilterObject* self)
 {
     func_001BA130(self);
     if (self->parent == 0) {
@@ -404,23 +404,23 @@ void func_0012F888(C34* self)
     }
 }
 
-s32 func_0012FF10(S12FCF0* a0)
+s32 func_0012FF10(StreamReader* a0)
 {
-    return a0->f0C != 0;
+    return a0->pendingLength != 0;
 }
 
 s32 func_001F92E8(s32 a, s32 b, s32* c);
 s32 func_00203D90(void);
 
-s32 func_0012FF20(S12FCF0* a0)
+s32 func_0012FF20(StreamReader* a0)
 {
     s32 r = 0;
     s32 done = 0;
-    if (a0->f18 == a0->f20 && func_0012FF10(a0)) {
-        switch (a0->state) {
+    if (a0->readyLength == a0->usedLength && func_0012FF10(a0)) {
+        switch (a0->sourceKind) {
         case 0: {
             s32 tmp;
-            done = func_001F92E8(a0->f04, 1, &tmp);
+            done = func_001F92E8(a0->fileHandle, 1, &tmp);
             r = tmp == 0;
             break;
         }
@@ -431,8 +431,8 @@ s32 func_0012FF20(S12FCF0* a0)
         }
     }
     if (done) {
-        a0->f0C = 0;
-        a0->f10 = 0;
+        a0->pendingLength = 0;
+        a0->pendingDest = 0;
         r = 0;
     }
     return r;
@@ -444,32 +444,32 @@ void func_0012D3E8() {}
 
 void func_0012D3F0() {}
 
-void func_0012FCD0(C34* obj, s32 value) { obj->kinds.items[obj->kinds.count++] = value; }
+void func_0012FCD0(IdFilterObject* obj, s32 value) { obj->classIds.items[obj->classIds.count++] = value; }
 
-S12FCF0* func_0012FCF0(S12FCF0* obj, s32 value)
+StreamReader* func_0012FCF0(StreamReader* obj, s32 value)
 {
-    obj->f08 = 0;
-    obj->size = (value + 0x3F) & -64;
-    obj->f04 = -1;
-    obj->f10 = 0;
-    obj->f1C = 0;
-    obj->f28 = 0;
-    obj->f24 = 0;
-    obj->f0C = 0;
-    obj->f20 = 0;
-    obj->f18 = 0;
+    obj->sector = 0;
+    obj->buffer = (value + 0x3F) & -64;
+    obj->fileHandle = -1;
+    obj->pendingDest = 0;
+    obj->readyStart = 0;
+    obj->total = 0;
+    obj->remaining = 0;
+    obj->pendingLength = 0;
+    obj->usedLength = 0;
+    obj->readyLength = 0;
     return obj;
 }
 
 void func_0018D778(void* self);
 void func_0012FD30(void* self, s32 flags)
 {
-    func_0012FDE8((S12FCF0*)self);
+    func_0012FDE8((StreamReader*)self);
     if (flags & 1) func_0018D778(self);
 }
 
 s32 func_0012FDA0(void* self, s32 a, s32 b);
-s32 func_0012FD78(void* self, S18D410* pair)
+s32 func_0012FD78(void* self, KeyId* pair)
 {
     return func_0012FDA0(self, pair->first, pair->second);
 }
@@ -523,7 +523,7 @@ s32 func_001B8A08(C03* self, C03* key);
 s32 func_001833F0(void* key, s32 item);
 s32 func_001300E8(void* key, s32 kind);
 
-s32 func_0012FA88(C34* self, C03* key)
+s32 func_0012FA88(IdFilterObject* self, C03* key)
 {
     s32 hit;
     s32 i;
@@ -532,60 +532,60 @@ s32 func_0012FA88(C34* self, C03* key)
     if (func_001B8A08(self, key) != 0) {
         return 1;
     }
-    for (i = 0; i < self->objects.count; i++) {
-        if (func_001833F0(key, self->objects.items[i]) != 0) {
+    for (i = 0; i < self->objectIds.count; i++) {
+        if (func_001833F0(key, self->objectIds.items[i]) != 0) {
             break;
         }
     }
-    if (i < self->objects.count) {
+    if (i < self->objectIds.count) {
         hit = 1;
         goto tail;
     }
-    for (j = 0; j < self->kinds.count; j++) {
-        if (func_001300E8(key, self->kinds.items[j]) != 0) {
+    for (j = 0; j < self->classIds.count; j++) {
+        if (func_001300E8(key, self->classIds.items[j]) != 0) {
             break;
         }
     }
-    hit = j < self->kinds.count;
+    hit = j < self->classIds.count;
 tail:
-    if (self->accept != 0) {
+    if (self->acceptsListed != 0) {
         return hit;
     }
     return hit ^ 1;
 }
 
-void func_0012FE70(S12FCF0 *self);
+void func_0012FE70(StreamReader *self);
 
-s32 func_0012FDA0(S12FCF0 *self, s32 a1, s32 a2) {
-    self->f08 = a1;
-    s32 t = self->size;
-    self->f28 = a2;
-    self->f24 = a2;
-    self->state = 1;
-    self->f1C = t;
-    self->f18 = 0;
-    self->f20 = 0;
+s32 func_0012FDA0(StreamReader *self, s32 a1, s32 a2) {
+    self->sector = a1;
+    s32 t = self->buffer;
+    self->total = a2;
+    self->remaining = a2;
+    self->sourceKind = 1;
+    self->readyStart = t;
+    self->readyLength = 0;
+    self->usedLength = 0;
     func_0012FE70(self);
     return 1;
 }
 
-s32 func_0012FF20(S12FCF0* a0);
+s32 func_0012FF20(StreamReader* a0);
 
-void func_0012FFE8(S12FCF0* self)
+void func_0012FFE8(StreamReader* self)
 {
     if (func_0012FF20(self) == 0) {
         return;
     }
-    if (self->state == 1) {
-        self->f08 += self->f0C / 2048;
+    if (self->sourceKind == 1) {
+        self->sector += self->pendingLength / 2048;
     }
-    s32 v = self->f0C;
-    self->f24 -= v;
-    self->f18 = v;
-    self->f1C = self->f10;
-    self->f0C = 0;
-    self->f10 = 0;
-    self->f20 = 0;
+    s32 v = self->pendingLength;
+    self->remaining -= v;
+    self->readyLength = v;
+    self->readyStart = self->pendingDest;
+    self->pendingLength = 0;
+    self->pendingDest = 0;
+    self->usedLength = 0;
 }
 
 
@@ -610,28 +610,28 @@ struct Quad_12F9B8 { s32 a, b, c, d; };
 void func_001B93F8(C03* self);
 void func_00128018(void* a, s32 b, void* c, void* d);
 
-void func_0012F9B8(C34* self)
+void func_0012F9B8(IdFilterObject* self)
 {
     Quad_12F9B8 loc;
     C02* cur;
     func_001B93F8(self);
-    if (self->target != 0) {
-        self->target->desc02()->m20(self->target, (Vec02*)&D_00248D30);
-        self->target->desc02()->m21(self->target, (Vec02*)&D_00248D30);
+    if (self->pendingTarget != 0) {
+        self->pendingTarget->desc02()->m20(self->pendingTarget, (Vec02*)&D_00248D30);
+        self->pendingTarget->desc02()->m21(self->pendingTarget, (Vec02*)&D_00248D30);
         switch (self->mode) {
         case 1:
-            self->target->desc02()->m1D(self->target, &self->pos);
+            self->pendingTarget->desc02()->m1D(self->pendingTarget, &self->pos);
             break;
         case 2: {
             C02* node = self->found;
             func_00128018(node->parent, 0, &node->link40, &loc);
-            self->target->desc02()->m1D(self->target, (Vec02*)&loc);
+            self->pendingTarget->desc02()->m1D(self->pendingTarget, (Vec02*)&loc);
             break;
         }
         }
-        cur = self->target;
-        self->target = 0;
-        self->done = cur;
+        cur = self->pendingTarget;
+        self->pendingTarget = 0;
+        self->placedTarget = cur;
     }
 }
 
@@ -1261,10 +1261,10 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         break;
     }
     case 25:
-        func_001EFFA0(D_00275F80, msg->aC.i, msg->a8.h.lo);
+        func_001EFFA0(g_screenFade, msg->aC.i, msg->a8.h.lo);
         break;
     case 26:
-        func_001F00C0(D_00275F80, msg->aC.i, msg->a8.h.lo);
+        func_001F00C0(g_screenFade, msg->aC.i, msg->a8.h.lo);
         break;
     case 27: {
         C07* g = D_00262E10;
@@ -1558,12 +1558,12 @@ f32 func_0012E968(Obj_12E968* self, f32 value)
 void func_001F8DB8(void* p, s32 a, s32 b);
 void func_00140CC8(void* p, s32 n, s32 base);
 
-void func_0012FE70(S12FCF0* self)
+void func_0012FE70(StreamReader* self)
 {
     if (func_0012FF10(self) != 0) {
         return;
     }
-    s32 size = self->f24;
+    s32 size = self->remaining;
     if (size == 0) {
         return;
     }
@@ -1571,18 +1571,18 @@ void func_0012FE70(S12FCF0* self)
     if (!(size > 0x3FFF)) {
         clamp = size;
     }
-    s32 base = self->size;
-    if (self->f1C == base) {
+    s32 base = self->buffer;
+    if (self->readyStart == base) {
         base += 0x4000;
     }
-    self->f0C = clamp;
-    self->f10 = base;
-    switch (self->state) {
+    self->pendingLength = clamp;
+    self->pendingDest = base;
+    switch (self->sourceKind) {
     case 0:
-        func_001F8DB8(self->p04, base, clamp);
+        func_001F8DB8(self->fileRef, base, clamp);
         break;
     case 1:
-        func_00140CC8(self->p08, (s32)((u32)(clamp + 0x7FF) >> 11), base);
+        func_00140CC8(self->sectorRef, (s32)((u32)(clamp + 0x7FF) >> 11), base);
         break;
     }
 }
@@ -1689,7 +1689,7 @@ void func_00124A48(C02* self);
 s32 func_0015A448(void* world, s32 b, C02* c);
 s32 func_001300E8(void* n, s32 kind);
 
-void func_0012F8C8(C34* self)
+void func_0012F8C8(IdFilterObject* self)
 {
     func_00124A48(self);
     if (self->id != -1) {
@@ -1770,7 +1770,7 @@ void func_0012D5D0(Player2195* o, Item_12C288* item, s32* out);
 void func_0012F190(Player2195* o, s32 flag);
 void func_001837E0(C83* self, s32 a, s32 b, Player2195*** c);
 
-void func_0012C288(C83* self, C83* alt, s32 npairs, S12C288* pairs, s32 flags, Player2195** out, f32 fa, f32 fb)
+void func_0012C288(C83* self, C83* alt, s32 npairs, TargetBinding* pairs, s32 flags, Player2195** out, f32 fa, f32 fb)
 {
     s32 tmp;
     Player2195* obj;
@@ -1805,7 +1805,7 @@ void func_0012C288(C83* self, C83* alt, s32 npairs, S12C288* pairs, s32 flags, P
         s32 j;
         for (j = 0; j < npairs; j++) {
             if (key == pairs[j].key) {
-                h = (C02*)pairs[j].val;
+                h = (C02*)pairs[j].object;
                 goto found;
             }
         }

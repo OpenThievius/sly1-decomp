@@ -6,29 +6,29 @@ struct Glob_eu_14CF30 {
     void* f578;
 };
 
-void func_0014CF30(C68* self, s32 kind, void* key)
+void func_0014CF30(GaugeManager* self, s32 kind, void* key)
 {
     func_00127378(self, kind, key);
     switch (kind) {
     case 6: {
         s32 i;
-        for (i = 0; i < self->n2DC; i++) {
+        for (i = 0; i < self->slotCount; i++) {
             if (self->slots[i].key == key) {
                 break;
             }
         }
-        if (i < self->n2DC) {
+        if (i < self->slotCount) {
             self->slots[i].key = 0;
         }
         break;
     }
     case 0x14:
-        if (key == self->f42C) {
+        if (key == self->device) {
             s32 out;
             func_001B6598(key, &out);
             if (out == 0x3FD) {
-                (*(Glob_eu_14CF30*)&D_0026D348).f574 = &self->f2D0;
-                (*(Glob_eu_14CF30*)&D_0026D348).f578 = &self->f2D4;
+                (*(Glob_eu_14CF30*)&D_0026D348).f574 = &self->amount;
+                (*(Glob_eu_14CF30*)&D_0026D348).f578 = &self->maxAmount;
                 func_001DDC38(self->world, self);
                 func_001AB890(&D_0026E760, self->f2D8);
                 func_001AB928(&D_0026E760, 0.0f, func_0014C668);

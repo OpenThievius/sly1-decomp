@@ -4,9 +4,9 @@
 #include "v24a0.h"
 #include "globals.h"
 #include "shapes.h"
-#include "s1c30e8.h"
+#include "vertex_batch.h"
 #include "s1eb050.h"
-#include "g261858.h"
+#include "game_clock.h"
 
 struct Obj_1C29E8 { u8 pad[8]; s32 f8; s32 fC; };
 
@@ -48,18 +48,18 @@ struct Obj_1C30E8 {
 };
 struct Obj2_1C30E8 { u8 pad0[0x2A8]; f32 f2A8; };
 
-void func_001619C0(S1C30E8* b);
+void func_001619C0(VertexBatch* b);
 void func_00152B38(V24A0* g);
-void func_00161AB0(S1C30E8* b, u8* a, u8* c);
-void func_00161BB0(S1C30E8* b, s32 v);
-void func_00161B10(S1C30E8* b, u8* a, f32 f);
-void func_001626C0(S1C30E8* b, u8* src);
-void func_001626A8(S1C30E8* b, Rgba4* c);
-void func_00162680(S1C30E8* b, void* v);
-void func_001626D8(S1C30E8* b, s32 z);
-void func_00162508(S1C30E8* b);
+void func_00161AB0(VertexBatch* b, u8* a, u8* c);
+void func_00161BB0(VertexBatch* b, s32 v);
+void func_00161B10(VertexBatch* b, u8* a, f32 f);
+void func_001626C0(VertexBatch* b, u8* src);
+void func_001626A8(VertexBatch* b, Rgba4* c);
+void func_00162680(VertexBatch* b, void* v);
+void func_001626D8(VertexBatch* b, s32 z);
+void func_00162508(VertexBatch* b);
 void func_00152D70(V24A0* g);
-void func_00161A88(S1C30E8* b, s32 f);
+void func_00161A88(VertexBatch* b, s32 f);
 
 u8 D_00274998[8] = { 0, 0, 0, 0, 0, 0, 0x80, 0x3F };
 u8 D_002749A0[16] = { 0 };
@@ -79,7 +79,7 @@ ASM_FUNC(func_001C3028);
 
 void func_001C30E8(Obj_1C30E8* self)
 {
-    S1C30E8 b;
+    VertexBatch b;
     Rgba4 c;
     Rgba4 c2;
     Rec_1C30E8* r = self->f60;

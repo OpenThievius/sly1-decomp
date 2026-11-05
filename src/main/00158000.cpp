@@ -3,13 +3,13 @@
 #include "list_iter.h"
 #include "c73.h"
 #include "t219c.h"
-#include "t21e3.h"
-#include "c40.h"
+#include "cursor_animator.h"
+#include "object_cycler.h"
 #include "c60.h"
 #include "c6c.h"
 #include "globals.h"
-#include "s19d410.h"
-#include "s159ca0.h"
+#include "deferred_request.h"
+#include "color_fade.h"
 
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
@@ -115,29 +115,29 @@ void func_00158F10(C7A* self, s32 kind, C01* other)
     }
 }
 
-void func_001B4AD0(T21E3* self);
-T21E3_Rec* func_001B4688(s32 key);
-void func_00159770(T21E3_438* self, s32 mode);
+void func_001B4AD0(CursorAnimator* self);
+AnimRecord* func_001B4688(s32 key);
+void func_00159770(CrossfadeAnimator* self, s32 mode);
 
-void func_001596E0(T21E3_438* self)
+void func_001596E0(CrossfadeAnimator* self)
 {
     func_001B4AD0(self);
-    T21E3_Rec* a = func_001B4688(self->id2);
-    self->cur2.rec = a;
+    AnimRecord* a = func_001B4688(self->recordKey2);
+    self->cursor2.record = a;
     if (a != 0) {
         if (a->owner == 0) {
-            if (self->cur.rec->owner == self) {
+            if (self->cursor.record->owner == self) {
                 a->owner = self;
             }
         }
     }
     s32 lo = 0;
-    if (self->cur.rec != 0) {
-        lo = self->cur.rec->count;
+    if (self->cursor.record != 0) {
+        lo = self->cursor.record->count;
     }
     s32 hi = 0;
-    if (self->cur2.rec != 0) {
-        hi = self->cur2.rec->count;
+    if (self->cursor2.record != 0) {
+        hi = self->cursor2.record->count;
     }
     self->mode = -1;
     self->count = (hi < lo) ? lo : hi;
@@ -193,20 +193,20 @@ C01* func_0015A868(C01* list, C01* other)
     return 0;
 }
 
-Pk40 D_00262180 = { 0x4348000043480000ULL };
-Pk40 D_00262188 = { 0x42C8000042C80000ULL };
-Pk40 D_00262190 = { 0x4448000043FA0000ULL };
-Pk40 D_00262198 = { 0x43960000C3960000ULL };
-Pk40 D_002621A0 = { 0x4270000041700000ULL };
-Pk40 D_002621A8 = { 0x42F0000041F00000ULL };
-Pk40 D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
-Pk40 D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
-Pk40 D_002621C0 = { 0x4170000040A00000ULL };
+PackedFloatPair D_00262180 = { 0x4348000043480000ULL };
+PackedFloatPair D_00262188 = { 0x42C8000042C80000ULL };
+PackedFloatPair D_00262190 = { 0x4448000043FA0000ULL };
+PackedFloatPair D_00262198 = { 0x43960000C3960000ULL };
+PackedFloatPair D_002621A0 = { 0x4270000041700000ULL };
+PackedFloatPair D_002621A8 = { 0x42F0000041F00000ULL };
+PackedFloatPair D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
+PackedFloatPair D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
+PackedFloatPair D_002621C0 = { 0x4170000040A00000ULL };
 
 void func_001B7968(C03* self);
-void func_00152470(List01* a, C40* b);
+void func_00152470(List01* a, ObjectCycler* b);
 
-void func_0015AAE0(C40* self)
+void func_0015AAE0(ObjectCycler* self)
 {
     func_001B7968(self);
     self->state = -1;
@@ -214,13 +214,13 @@ void func_0015AAE0(C40* self)
     self->p618.pk = D_00262188;
     self->p620.pk = D_00262190;
     self->p628.pk = D_00262198;
-    self->f630 = -1;
-    self->p63C.pk = D_002621A0;
+    self->swapKind = -1;
+    self->checkDelay.pk = D_002621A0;
     self->p650.pk = D_002621A8;
     self->p658.pk = D_002621B0;
     self->p660.pk = D_002621B8;
     self->p670.pk = D_002621C0;
-    self->f68C = 1;
+    self->indexStep = 1;
     self->f690 = -1;
     func_00152470(&self->world->list1C48, self);
 }
@@ -408,7 +408,7 @@ tail_c:
 extern f32 D_0026185C;
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_00159770(T21E3_438* s, s32 mode)
+void func_00159770(CrossfadeAnimator* s, s32 mode)
 {
     if (s->mode == mode) return;
     if (mode == 1) goto store;
@@ -455,9 +455,9 @@ tail:
 
 extern f32 D_0026185C;
 f32 func_001EAAE0(f32 a, f32 b);
-void func_001B46E0(T21E3_Cursor* cur, s32 idx);
+void func_001B46E0(AnimCursor* cur, s32 idx);
 
-void func_00159890(T21E3_438* s, f32 dt)
+void func_00159890(CrossfadeAnimator* s, f32 dt)
 {
     s32 count = s->count;
     if (count < 2) return;
@@ -501,8 +501,8 @@ m3:
 
 call:
     func_00159770(s, mode);
-    func_001B46E0(&s->cur, (s32)s->pos);
-    func_001B46E0(&s->cur2, (s32)s->pos);
+    func_001B46E0(&s->cursor, (s32)s->pos);
+    func_001B46E0(&s->cursor2, (s32)s->pos);
 }
 
 
@@ -546,7 +546,7 @@ void func_00158C28(C79* self)
 }
 
 
-void func_00159A00(T21E3_438* a0, f32 f12)
+void func_00159A00(CrossfadeAnimator* a0, f32 f12)
 {
     a0->ratio = f12;
     if (1.0f <= f12) {
@@ -555,8 +555,8 @@ void func_00159A00(T21E3_438* a0, f32 f12)
         a0->mode = -1;
         func_00159770(a0, 0);
     }
-    func_001B46E0(&a0->cur, (s32)a0->pos);
-    func_001B46E0(&a0->cur2, (s32)a0->pos);
+    func_001B46E0(&a0->cursor, (s32)a0->pos);
+    func_001B46E0(&a0->cursor2, (s32)a0->pos);
 }
 
 
@@ -565,19 +565,19 @@ s32 D_002621E0[6] = { 4, 0x258, 0x5D8, 2, 0x25A, 0x67C };
 
 void func_00124DF8(void* self, s32 n, void* p);
 f32 func_001EAAE0(f32 a, f32 b);
-void func_0015B7B8(C40* self, s32 x);
+void func_0015B7B8(ObjectCycler* self, s32 x);
 void func_00124A48(void* self);
 
-void func_0015AEB0(C40* self)
+void func_0015AEB0(ObjectCycler* self)
 {
     func_00124DF8(self, 2, D_002621E0);
     if (self->mode == 1) {
-        f32 t = func_001EAAE0(self->p63C.a, self->p63C.b);
-        self->f688 = D_00261858[1] + t;
+        f32 t = func_001EAAE0(self->checkDelay.a, self->checkDelay.b);
+        self->nextCheckTime = D_00261858[1] + t;
         t = func_001EAAE0(self->p670.a, self->p670.b);
         self->f680 = D_00261858[1] + t;
     }
-    func_0015B7B8(self, self->f560);
+    func_0015B7B8(self, self->startState);
     func_00124A48(self);
     self->f64C = self->radius3CC + self->radius3CC;
 }
@@ -737,14 +737,14 @@ void func_0015A918(C60* self,void* other)
     func_001E4C48(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
-T21E3_Cursor* func_001B4B48(T21E3* self, const T21E3_Rec* key);
+AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key);
 
-T21E3_Cursor* func_00159A80(T21E3_438* self, const T21E3_Rec* key)
+AnimCursor* func_00159A80(CrossfadeAnimator* self, const AnimRecord* key)
 {
-    T21E3_Cursor* p = func_001B4B48(self, key);
+    AnimCursor* p = func_001B4B48(self, key);
     if (p == 0) {
-        p = &self->cur2;
-        if ((key->key ^ self->id2) != 0) {
+        p = &self->cursor2;
+        if ((key->key ^ self->recordKey2) != 0) {
             p = 0;
         }
     }
@@ -779,7 +779,7 @@ struct __attribute__((aligned(16))) Local_15B720 {
 void func_0015B7B8(void* self, s32 x);
 void func_001BC0E0(void* a0, f32 x, void* a1, void* a2);
 
-s32 func_0015B720(C40* self, Rec_15B720* r)
+s32 func_0015B720(ObjectCycler* self, Rec_15B720* r)
 {
     if (self->state != 1) {
         func_0015B7B8(self, 1);
@@ -801,13 +801,13 @@ s32 func_0015B720(C40* self, Rec_15B720* r)
 
 
 void func_001BA130();
-s32 func_001526D0(void* sub, C40* self);
-void func_00152600(void* data, C40* self);
+s32 func_001526D0(void* sub, ObjectCycler* self);
+void func_00152600(void* data, ObjectCycler* self);
 void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
 
-void func_0015AD80(C40* self)
+void func_0015AD80(ObjectCycler* self)
 {
-    Pk40 tmp;
+    PackedFloatPair tmp;
     tmp = self->f5DC;
     func_001BA130();
     self->f5DC = tmp;
@@ -826,7 +826,7 @@ void func_0015AD80(C40* self)
 void func_001BF788(void* self, s32 n);
 void func_001BFCD8(f32 f12, f32 f13, f32 f14, f32 f15, s32 a0, void* a1, void* a2, s32 a3, f32 f16, s32 a4, s32 a5);
 
-void func_0015AE38(C40* self, s32 flag)
+void func_0015AE38(ObjectCycler* self, s32 flag)
 {
     if (self->mode == 0) {
         if (flag != 0) {
@@ -843,11 +843,11 @@ extern s32 D_00275BC4;
 
 extern s32 D_00270458;
 extern f32 D_0026185C;
-void func_00152600(u8* a, S159CA0* b);
-void func_00159CA0(S159CA0* o);
+void func_00152600(u8* a, ColorFade* b);
+void func_00159CA0(ColorFade* o);
 void func_0019D410(Req_159D00* r);
 
-void func_00159D00(S159CA0* self)
+void func_00159D00(ColorFade* self)
 {
     if (D_00275BC4 != 3) return;
     s32 g = D_00270458;
@@ -855,26 +855,26 @@ void func_00159D00(S159CA0* self)
     if (g == 2) return;
     Out_159D00 out; Rgba4 a, b;
 
-    f32 t = D_0026185C - self->f54;
+    f32 t = D_0026185C - self->startTime;
     f32 d;
-    if (t < self->f48) {
-        a = self->c0; b = self->c1;
-        d = self->f48;
+    if (t < self->fadeInTime) {
+        a = self->startColor; b = self->holdColor;
+        d = self->fadeInTime;
     } else {
-        t -= self->f48;
-        if (t < self->f4C) {
-            a = self->c1; b = self->c1;
-            d = self->f4C;
+        t -= self->fadeInTime;
+        if (t < self->holdTime) {
+            a = self->holdColor; b = self->holdColor;
+            d = self->holdTime;
         } else {
-            t -= self->f4C;
-            if (!(t < self->f50)) {
+            t -= self->holdTime;
+            if (!(t < self->fadeOutTime)) {
                 u8* p = (u8*)D_00275710 + 0x1CD8;
-                self->m5C = 0;
+                self->running = 0;
                 func_00152600(p, self);
                 return;
             }
-            a = self->c1; b = self->c2;
-            d = self->f50;
+            a = self->holdColor; b = self->endColor;
+            d = self->fadeOutTime;
         }
     }
     f32 r = t / d;
@@ -883,9 +883,9 @@ void func_00159D00(S159CA0* self)
     Req_159D00 q;
     q.f = -1.0f;
 
-    q.fn = (void*)(void (*)(S159CA0*))func_00159CA0;
+    q.fn = (void*)(void (*)(ColorFade*))func_00159CA0;
     q.col = out;
-    switch (self->m58) {
+    switch (self->mode) {
     case 0: q.mode = 1; break;
     case 1: q.mode = 0x10; break;
     }
@@ -1090,20 +1090,20 @@ typedef int V128_15B128 __attribute__((mode(TI)));
 
 extern f32 D_00261858[];
 
-void func_001B93F8(C40* self);
-void func_0015B7B8(C40* self, s32 mode);
-s32 func_0015BEF0(C40* self);
-s32 func_0015BD48(C40* self, V128_15B128* out);
-void func_0015BC78(C40* self);
-s32 func_0015C0A0(C40* self);
-s32 func_0015BFC0(C40* self);
+void func_001B93F8(ObjectCycler* self);
+void func_0015B7B8(ObjectCycler* self, s32 mode);
+s32 func_0015BEF0(ObjectCycler* self);
+s32 func_0015BD48(ObjectCycler* self, V128_15B128* out);
+void func_0015BC78(ObjectCycler* self);
+s32 func_0015C0A0(ObjectCycler* self);
+s32 func_0015BFC0(ObjectCycler* self);
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-void func_0015B128(C40* self)
+void func_0015B128(ObjectCycler* self)
 {
     func_001B93F8(self);
-    if (self->f55C <= D_00261858[1]) {
+    if (self->stateEnd <= D_00261858[1]) {
         s32 a1 = self->state;
         switch (a1) {
         case 0:
@@ -1140,39 +1140,39 @@ void func_0015B128(C40* self)
             break;
         case 1:
             if (st == 0) {
-                if (self->f688 <= D_00261858[1]) {
+                if (self->nextCheckTime <= D_00261858[1]) {
                     V128_15B128 tmp;
                     if (func_0015BD48(self, &tmp)) {
                         *(V128_15B128*)&self->v5F0 = tmp;
                         func_0015B7B8(self, 5);
                     } else {
-                        self->f688 = D_00261858[1] + func_001EAAE0(self->p63C.a, self->p63C.b);
+                        self->nextCheckTime = D_00261858[1] + func_001EAAE0(self->checkDelay.a, self->checkDelay.b);
                     }
                 }
             }
-            if (self->f648 <= D_00261858[1]) {
+            if (self->nextStepTime <= D_00261858[1]) {
                 s32 n = self->count;
                 if (n >= 2) {
-                    s32 v = self->index + self->f68C;
+                    s32 v = self->index + self->indexStep;
                     self->index = v;
                     if (v >= n) {
                         self->index = n - 2;
-                        self->f68C = -1;
+                        self->indexStep = -1;
                     } else if (v < 0) {
                         self->index = 1;
-                        self->f68C = 1;
+                        self->indexStep = 1;
                     }
-                    self->f648 = D_00261858[1] + self->f644;
+                    self->nextStepTime = D_00261858[1] + self->stepInterval;
                 }
             }
             break;
         }
-        if (0.15f < D_00261858[1] - self->f558) {
+        if (0.15f < D_00261858[1] - self->stateStart) {
             ContactRow03* n = self->contacts->head;
             if (n != 0) {
                 for (; n != 0; n = n->next) {
                     if (n->head != 0) {
-                        self->f55C = D_00261858[1];
+                        self->stateEnd = D_00261858[1];
                         break;
                     }
                 }
@@ -1183,10 +1183,10 @@ void func_0015B128(C40* self)
     case 6:
         if (func_0015C0A0(self) || func_0015BFC0(self)) {
             func_0015B7B8(self, 0);
-        } else if (self->f668 <= D_00261858[1]) {
-            s32 idx = (self->index + 1) % self->count5AC;
+        } else if (self->nextAdvanceTime <= D_00261858[1]) {
+            s32 idx = (self->index + 1) % self->altCount;
             self->index = idx;
-            self->f668 = D_00261858[1];
+            self->nextAdvanceTime = D_00261858[1];
             f32 x, y;
             if (idx == 0) {
                 x = self->p660.a;
@@ -1195,7 +1195,7 @@ void func_0015B128(C40* self)
                 x = self->p658.a;
                 y = self->p658.b;
             }
-            self->f668 += func_001EAAE0(x, y);
+            self->nextAdvanceTime += func_001EAAE0(x, y);
         }
         break;
     }
@@ -1268,15 +1268,15 @@ void func_00159588(C6C* self)
 
 s32 D_002621C8[6] = { 0, 0x256, 0x5D0, 2, 0x259, 0x678 };
 
-void func_001BAC30(C40* self, void* arg);
-void func_00124DF8(C40* self, s32 n, void* table);
-void func_00159478(void** out, C40* self);
-s32 func_0015A480(u8* self, s32 kind, C40* arg);
+void func_001BAC30(ObjectCycler* self, void* arg);
+void func_00124DF8(ObjectCycler* self, s32 n, void* table);
+void func_00159478(void** out, ObjectCycler* self);
+s32 func_0015A480(u8* self, s32 kind, ObjectCycler* arg);
 void func_00182ED8(s32 a);
-s32 func_001526D0(List01* sub, C40* self);
-void func_00152600(List01* data, C40* self);
+s32 func_001526D0(List01* sub, ObjectCycler* self);
+void func_00152600(List01* data, ObjectCycler* self);
 
-void func_0015AC08(C40* self, void* arg)
+void func_0015AC08(ObjectCycler* self, void* arg)
 {
     u32 i;
     func_001BAC30(self, arg);
@@ -1289,8 +1289,8 @@ void func_0015AC08(C40* self, void* arg)
             continue;
         func_00182ED8(p);
         if (self->mode == 1) {
-            if (self->f630 == kind)
-                self->f634 = self->count;
+            if (self->swapKind == kind)
+                self->swapIndex = self->count;
         }
         self->objs[self->count++] = (C02*)p;
     }
@@ -1299,7 +1299,7 @@ void func_0015AC08(C40* self, void* arg)
             s32 p = func_0015A480((u8*)self->world, i + 0x24D, self);
             if (p) {
                 func_00182ED8(p);
-                self->objs5B0[self->count5AC++] = (C02*)p;
+                self->altObjects[self->altCount++] = (C02*)p;
             }
         }
     }
@@ -1314,17 +1314,17 @@ extern f32 D_0026185C;
 f32 D_00262230[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
 f32 D_00262240[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
 extern f32 D_00275C60[];
-void func_00125B70(C40* self, void* c, void* out);
+void func_00125B70(ObjectCycler* self, void* c, void* out);
 
-void func_0015B4D0(C40* self, void* a1, void* a2)
+void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
 {
     Out_15B4D0 out;
     func_00125B70(self, a2, &out);
     switch (self->state) {
     case 1: {
-        f32 base = self->f558;
+        f32 base = self->stateStart;
         f32 num = D_0026185C - base;
-        f32 den = self->f55C - base;
+        f32 den = self->stateEnd - base;
         f32 t = num / den;
         f32 v = D_00262230[0] + t * (D_00262230[1] + t * D_00262230[2]);
         f32 lo = D_00275C60[0];
@@ -1336,9 +1336,9 @@ void func_0015B4D0(C40* self, void* a1, void* a2)
         break;
     }
     case 3: {
-        f32 base = self->f558;
+        f32 base = self->stateStart;
         f32 num = D_0026185C - base;
-        f32 den = self->f55C - base;
+        f32 den = self->stateEnd - base;
         f32 t = num / den;
         f32 v = D_00262240[0] + t * (D_00262240[1] + t * D_00262240[2]);
         f32 lo = D_00275C60[0];
@@ -1350,14 +1350,14 @@ void func_0015B4D0(C40* self, void* a1, void* a2)
         break;
     }
     case 6: {
-        self->objs5B0[self->index]->desc02()->m24(self->objs5B0[self->index], a1, &out);
+        self->altObjects[self->index]->desc02()->m24(self->altObjects[self->index], a1, &out);
         break;
     }
     default: {
         s32 idx = self->index;
-        if (self->mode == 1 && self->f630 != -1) {
-            f32 t = (D_0026185C - self->f558) / (self->f55C - self->f558);
-            if (1.0f - self->f638 < t) idx = self->f634;
+        if (self->mode == 1 && self->swapKind != -1) {
+            f32 t = (D_0026185C - self->stateStart) / (self->stateEnd - self->stateStart);
+            if (1.0f - self->swapTail < t) idx = self->swapIndex;
         }
         self->objs[idx]->desc02()->m24(self->objs[idx], a1, &out);
         break;
@@ -1453,13 +1453,13 @@ s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found
     return c;
 }
 
-void func_001B4AA0(T21E3* self, const T21E3_Src* src);
+void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
 
-void func_00159680(T21E3_438* self, T21E3_Src* src)
+void func_00159680(CrossfadeAnimator* self, AnimatorParams* src)
 {
     func_001B4AA0(self, src);
-    self->cur2.flags = self->cur.flags;
-    self->id2 = src->s14;
+    self->cursor2.flags = self->cursor.flags;
+    self->recordKey2 = src->s14;
     self->scale = src->f4;
     self->lo = src->f8;
     self->hi = src->fC;

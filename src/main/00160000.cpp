@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "s1600a0.h"
+#include "keyed_entry.h"
 
 extern const char D_0024A2D0[];
 extern const char D_0024A2D8[];
@@ -50,7 +50,7 @@ extern const char D_0024A660[];
 extern const char D_0024A678[];
 extern const char D_0024A688[];
 
-extern const S1600A0 D_00247AF0[46] = {
+extern const KeyedEntry D_00247AF0[46] = {
     { { 0xFDC02D54, 0x0AB32899, 0x6BD9B0B8, 0x3C8FB5B8, 0x02EF0F96, 0xFDCCA9C0, 0x6BD9B0AD, 0x0AB165D8 }, 0x00000002, D_0024A2D0, 0x00000000 },
     { { 0x70692A0C, 0x7C1ADFDF, 0x8DDAB8A2, 0xFEC7AC06, 0xCF2C336D, 0x7065AED2, 0x8DDAB8A8, 0x7C53A53E }, 0x00000003, D_0024A2D8, 0x00000000 },
     { { 0x2F5A2B8C, 0x7C1B2134, 0xF6CA6520, 0x75002C27, 0xB708AA18, 0x2F5705BF, 0xF6CA6529, 0x7C35CE16 }, 0x00000004, D_0024A2E8, 0x00000000 },

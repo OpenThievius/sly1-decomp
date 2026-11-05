@@ -8,11 +8,11 @@
 #include "t217d.h"
 #include "globals.h"
 #include "shapes.h"
-#include "s124df8.h"
-#include "s1d7098.h"
-#include "g261858.h"
+#include "object_link.h"
+#include "owner_message.h"
+#include "game_clock.h"
 #include "g262c70.h"
-#include "g264a40.h"
+#include "memory_card.h"
 
 void func_001C9AF8(void);
 
@@ -63,7 +63,7 @@ void func_001EBCD8(List_1EBCD8* list, const Entry8_1EBCD8* src)
     *dst = *src;
 }
 
-S124DF8 D_00275CA0[4] = {
+ObjectLink D_00275CA0[4] = {
     { 4, 0x4D0, 0x618 }, { 4, 0x4D1, 0x61C }, { 4, 0x4D2, 0x620 }, { 4, 0x4D3, 0x624 }
 };
 void func_00124A48(void* self);
@@ -313,7 +313,7 @@ void func_001EB160(void)
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 n, void* data);
-S124DF8 D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
+ObjectLink D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
 
 void func_001EB518(C1C* self)
 {
@@ -476,7 +476,7 @@ void func_001E9E30(C6C* self)
 }
 
 extern u8 D_00261420[];
-S124DF8 D_00275B60[8] = {
+ObjectLink D_00275B60[8] = {
     { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
     { 7, 0x2E3, 0xC6C }, { 7, 0x2E4, 0xC70 }, { 7, 0x2E5, 0xC74 }, { 7, 0x2E6, 0xC78 }
 };
@@ -764,7 +764,7 @@ void* func_001B6290(void* a, s32 b, s32 c, s32 d);
 void func_001B6DF8(void* a, void* self);
 void* func_0018D568(s32 size, void* name);
 s32 func_0015A418(void* a, s32 b, s32 c, void* self);
-S124DF8 D_00275D08[5] = {
+ObjectLink D_00275D08[5] = {
     { 1, 0x4EB, 0xC50 }, { 0, 0x4E7, 0xC24 }, { 0, 0x4E8, 0xC28 }, { 0, 0x4E9, 0xC2C },
     { 0, 0x4EA, 0xC30 }
 };
@@ -845,7 +845,7 @@ extern s32 D_00274738;
 extern f32 D_00261868[];
 
 void func_001E98E8(Obj_1E96F8* a, f32 f);
-void func_0018C178(G264A40* a, s32 v);
+void func_0018C178(MemoryCard* a, s32 v);
 void func_001F0220(u8* a, s32 v);
 void func_001DDA50(void* a);
 void func_001DDA20(void* a);
@@ -869,8 +869,8 @@ void func_001E96F8(Obj_1E96F8* self, s32 state)
     self->f8 = D_00261868[0];
     switch (state) {
     case 0:
-        if (D_00264A40.f18 == 0) func_0018C178(&D_00264A40, 1);
-        func_001F0220(D_00275F80, 0);
+        if (g_memoryCard.displayMode == 0) func_0018C178(&g_memoryCard, 1);
+        func_001F0220(g_screenFade, 0);
         func_001E98E8(self, 1.0f);
         break;
     case 1:
@@ -928,7 +928,7 @@ extern void func_0016E118(s32 n);
 extern void* func_001F4378(void);
 extern void func_001F4808(void* x);
 extern void func_0016EC20(G262C70* p, s32 n);
-extern void func_0018C568(G264A40* g);
+extern void func_0018C568(MemoryCard* g);
 extern void func_001605E8(void* p);
 extern void func_00160948(void);
 extern void func_00194D30(void* self, s32 a, s32 b);
@@ -940,7 +940,7 @@ extern void func_001A9FD0(void);
 
 void func_001E9108(Obj_1E9108* obj)
 {
-    f32 d = D_00261858.f10 - obj->f8;
+    f32 d = D_00261858.elapsed - obj->f8;
     s32 s1 = obj->state;
     G262C70* s2;
     s32 s5;
@@ -959,8 +959,8 @@ void func_001E9108(Obj_1E9108* obj)
     case 0: {
         s32 a2 = 0;
         if (D_002701B8 == 0) {
-            s32 m = D_00264A40.f18;
-            if (m == 2 || (m == 1 && D_00264A40.f0C == 5)) {
+            s32 m = g_memoryCard.displayMode;
+            if (m == 2 || (m == 1 && g_memoryCard.state == 5)) {
                 a2 = 1;
             }
         }
@@ -974,10 +974,10 @@ void func_001E9108(Obj_1E9108* obj)
         if (v & 0x800) {
             s32 t;
             func_0016EC20(s2, 0x800);
-            t = D_00264A40.i4F48;
-            D_00264A40.i4F44 = t;
+            t = g_memoryCard.i4F48;
+            g_memoryCard.i4F44 = t;
             if (t) {
-                func_0018C568(&D_00264A40);
+                func_0018C568(&g_memoryCard);
             } else {
                 func_001605E8(D_002623C0);
             }
@@ -1074,7 +1074,7 @@ void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f3
 void func_001B64D8(void* a, s32 b);
 s32 func_00160C58(void);
 void func_001929D0(C07* g);
-void func_001D7098(S1D7098* out, s32 mode, C1C* self);
+void func_001D7098(OwnerMessage* out, s32 mode, C1C* self);
 void func_001EB698(void);
 void func_001ED020(C13* o);
 void func_001C0C08(s32 a, s32 b);
@@ -1140,12 +1140,12 @@ void func_001EB748(C1C* self, In_1EB748* in)
             }
             func_001BFCD8(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
             if (func_00160C58() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
-                S1D7098 msg;
+                OwnerMessage msg;
                 C13* o;
                 func_001929D0(D_00262E10);
                 func_001D7098(&msg, 0, self);
                 msg.fn = func_001EB698;
-                ((s32 (*)(C07*, S1D7098*))((GFn_1EB748*)D_00262E10->desc)[0x140 / 4])(D_00262E10, &msg);
+                ((s32 (*)(C07*, OwnerMessage*))((GFn_1EB748*)D_00262E10->desc)[0x140 / 4])(D_00262E10, &msg);
                 o = (C13*)func_0015A838(self->world, 5, 0x13, 0);
                 func_001ED020(o);
                 o->fBFC = D_0026185C[0];
@@ -1587,7 +1587,7 @@ void func_001EA0A8(C6C* self, f32 t);
 void func_001EA118(C6C* self)
 {
     Iter_1EA118 it;
-    G261858* clock = &D_00261858;
+    GameClock* clock = &D_00261858;
     func_001E9EE8(self, clock->step);
     if (clock->dt != 0.0f) {
         func_001E9C78(self, clock->dt);

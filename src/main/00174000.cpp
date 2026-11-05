@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c05.h"
-#include "s177838.h"
+#include "node_query.h"
 
 void func_00177828(C07* self, s32 value)
 {
@@ -156,7 +156,7 @@ struct Node_177838 {
     u8 b2B4;
 };
 struct Head_177838 { u32 pad0; u32 pad4; u32 flags; };
-Node_177838* func_00177838(S177838* q, s32 n, Node_177838** list) {
+Node_177838* func_00177838(NodeQuery* q, s32 n, Node_177838** list) {
     Node_177838* node;
     if (((Node_177838*)q->hold)->vt->flags & 1) {
         node = (Node_177838*)q->hold;

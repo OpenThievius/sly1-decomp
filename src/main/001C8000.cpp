@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c05.h"
-#include "c89.h"
+#include "item_keeper.h"
 #include "c62.h"
 #include "c83.h"
 #include "t2195.h"
@@ -92,12 +92,12 @@ void* func_001CB5B8(void* a0)
 
 extern u32 D_00275710;
 
-Item89* func_0015A448(u32 a, Item89* b, C89* c);
+FoundItem* func_0015A448(u32 a, FoundItem* b, ItemKeeper* c);
 
-void func_001CB7A0(C89* a0)
+void func_001CB7A0(ItemKeeper* a0)
 {
     for (s32 i = 0; i < a0->owned.wantedCount; i++) {
-        Item89* r = func_0015A448(D_00275710, a0->owned.wanted[i], a0);
+        FoundItem* r = func_0015A448(D_00275710, a0->owned.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->owned.count;
             if ((u32)n < 16) {
@@ -108,7 +108,7 @@ void func_001CB7A0(C89* a0)
         }
     }
     for (s32 i = 0; i < a0->listed.wantedCount; i++) {
-        Item89* r = func_0015A448(D_00275710, a0->listed.wanted[i], a0);
+        FoundItem* r = func_0015A448(D_00275710, a0->listed.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->listed.count;
             if ((u32)n < 16) {
@@ -177,7 +177,7 @@ s32 func_001CB3C8(void)
 
 void func_00182C18(void* self);
 
-void func_001CB618(C89* self)
+void func_001CB618(ItemKeeper* self)
 {
     func_00182C18(self);
     self->f180 = -1;
@@ -376,9 +376,9 @@ void func_001CAD28(C08* self, f32 value) { self->f74C = value * 0.017453294f; }
 
 void func_001CAD60(C08* self, s32 a, s32 b, s32 c, s32 d) { if ((u32)self->f7E4 < 8) { Group08* e = &self->f7E8[self->f7E4]; self->f7E4++; e->ids[0] = a; e->ids[1] = b; e->ids[2] = c; e->ids[3] = d; } }
 
-void func_001CB6A8(C89* self, s32 value) { u32 i = self->owned.wantedCount; if (i < 16) { self->owned.wanted[i] = (Item89*)value; self->owned.wantedCount = i + 1; } }
+void func_001CB6A8(ItemKeeper* self, s32 value) { u32 i = self->owned.wantedCount; if (i < 16) { self->owned.wanted[i] = (FoundItem*)value; self->owned.wantedCount = i + 1; } }
 
-void func_001CB6D0(C89* self, s32 value) { u32 i = self->listed.wantedCount; if (i < 16) { self->listed.wanted[i] = (Item89*)value; self->listed.wantedCount = i + 1; } }
+void func_001CB6D0(ItemKeeper* self, s32 value) { u32 i = self->listed.wantedCount; if (i < 16) { self->listed.wanted[i] = (FoundItem*)value; self->listed.wantedCount = i + 1; } }
 
 struct Obj_001CBE20 { u8 pad[0x168]; s32 count; s32 items[4]; };
 void func_001CBE20(Obj_001CBE20* self, s32 value) { for (s32 i = 0; i < self->count; i++) if (value == self->items[i]) return; s32 i = self->count; if ((u32)i < 4) { s32 next = i + 1; self->items[i] = value; self->count = next; } }

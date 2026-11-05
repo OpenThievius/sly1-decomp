@@ -2,8 +2,8 @@
 #include "common.h"
 #include "c05.h"
 #include "c6e.h"
-#include "c7e.h"
-#include "c8a.h"
+#include "point_object.h"
+#include "point_graph_object.h"
 #include "c6c.h"
 #include "c65.h"
 #include "t217d.h"
@@ -164,7 +164,7 @@ void func_00191FD8(C70* self)
 
 s32 func_00128018(void* a0, s32 a1, void* a2, void* a3);
 
-s32 func_00192128(C7E* self, void* other)
+s32 func_00192128(PointObject* self, void* other)
 {
     void* p = &self->pos;
     return func_00128018(other, 0, p, p);
@@ -359,7 +359,7 @@ s32 func_00190660(C0E* self, Item_190660* item)
 
 void func_00182F78(void* self, s32 value);
 
-void func_001920E0(C7E* self, s32 value)
+void func_001920E0(PointObject* self, s32 value)
 {
     void* sub = &self->pos;
     func_00128018(self->parent, value, sub, sub);
@@ -368,7 +368,7 @@ void func_001920E0(C7E* self, s32 value)
 
 void func_001384A0(void* other, void* sub);
 
-void func_00192150(C82* self, void* other)
+void func_00192150(TextPointObject* self, void* other)
 {
     func_00192068(self, other);
     func_001384A0(other, &self->text);
@@ -507,7 +507,7 @@ void func_00191A88(Owner_191A88* self)
 void func_00137E70(void* a, void* b);
 void func_0011EC40(void* a, void* b);
 
-void func_00192068(C7E* self, void* other)
+void func_00192068(PointObject* self, void* other)
 {
     func_00137E70(other, &self->pos);
     func_0011EC40(self, other);
@@ -746,86 +746,86 @@ s32 func_00137B90(Stream8A* in);
 void* func_0018D500(s32 n);
 f32 func_00137DF8(Stream8A* in);
 s32 func_00137D10(Stream8A* in);
-void func_001919F8(Mesh8A* m);
+void func_001919F8(PointGraph* m);
 
-void func_001916D0(C8A* o, Stream8A* in)
+void func_001916D0(PointGraphObject* o, Stream8A* in)
 {
-    Mesh8A* m = &o->m;
+    PointGraph* m = &o->graph;
     s32 i;
     s32 j;
     func_001833D0(o, in);
     i = 0;
-    o->m.nVerts = func_00137BE0(in);
-    m->verts = (Vert8A*)func_0018D5C0(o->m.nVerts << 5);
+    o->graph.pointCount = func_00137BE0(in);
+    m->points = (GraphPoint*)func_0018D5C0(o->graph.pointCount << 5);
     m->nA = func_00137BE0(in);
-    m->nEdges = func_00137BE0(in) + m->nA;
-    m->edges = (u8*)func_0018D5C0(m->nEdges * 12);
-    m->nB = func_00137BE0(in);
-    m->bs = (u8*)func_0018D5C0(m->nB * 12);
-    if (o->m.nVerts > 0) {
+    m->linkCount = func_00137BE0(in) + m->nA;
+    m->links = (u8*)func_0018D5C0(m->linkCount * 12);
+    m->triCount = func_00137BE0(in);
+    m->tris = (u8*)func_0018D5C0(m->triCount * 12);
+    if (o->graph.pointCount > 0) {
         do {
-            Vert8A* v = (Vert8A*)((u8*)m->verts + (i << 5));
+            GraphPoint* v = (GraphPoint*)((u8*)m->points + (i << 5));
             s32 k = i + 1;
             j = 0;
             func_00137E70(in, v);
-            v->n = func_00137B90(in);
-            v->list = (Edge8A**)func_0018D500((v->n + 1) << 2);
-            if (v->n > 0) {
+            v->linkCount = func_00137B90(in);
+            v->links = (GraphLink**)func_0018D500((v->linkCount + 1) << 2);
+            if (v->linkCount > 0) {
                 do {
-                    v->list[j] = (Edge8A*)(m->edges + func_00137BE0(in) * 12);
+                    v->links[j] = (GraphLink*)(m->links + func_00137BE0(in) * 12);
                     j++;
-                } while (j < v->n);
+                } while (j < v->linkCount);
             }
             i = k;
-        } while (i < m->nVerts);
+        } while (i < m->pointCount);
     }
     {
         s32 e;
-        for (e = 0; e < m->nEdges; e++) {
-            Vert8A** p = (Vert8A**)(m->edges + e * 12);
+        for (e = 0; e < m->linkCount; e++) {
+            GraphPoint** p = (GraphPoint**)(m->links + e * 12);
             j = 1;
             do {
                 j--;
-                *p = (Vert8A*)((u8*)m->verts + (func_00137BE0(in) << 5));
+                *p = (GraphPoint*)((u8*)m->points + (func_00137BE0(in) << 5));
                 p++;
             } while (j >= 0);
         }
-        for (e = 0; e < m->nB; e++) {
-            Vert8A** p = (Vert8A**)(m->bs + e * 12);
+        for (e = 0; e < m->triCount; e++) {
+            GraphPoint** p = (GraphPoint**)(m->tris + e * 12);
             j = 2;
             do {
                 j--;
-                *p = (Vert8A*)((u8*)m->verts + (func_00137BE0(in) << 5));
+                *p = (GraphPoint*)((u8*)m->points + (func_00137BE0(in) << 5));
                 p++;
             } while (j >= 0);
         }
     }
-    m->nFaces = func_00137BE0(in);
-    m->faces = (Face8A*)func_0018D5C0(m->nFaces << 5);
-    for (s32 e = 0; e < m->nFaces; e++) {
+    m->faceCount = func_00137BE0(in);
+    m->faces = (GraphFace*)func_0018D5C0(m->faceCount << 5);
+    for (s32 e = 0; e < m->faceCount; e++) {
         s32 a;
-        Face8A* f = (Face8A*)((u8*)m->faces + (e << 5));
+        GraphFace* f = (GraphFace*)((u8*)m->faces + (e << 5));
         func_00137E70(in, f);
         f->f10 = func_00137DF8(in);
         a = func_00137D10(in);
         if (a == -1) {
-            f->a = 0;
+            f->neighbourA = 0;
         } else if (a >= 0) {
-            f->a = (u8*)m->faces + (a << 5);
+            f->neighbourA = (u8*)m->faces + (a << 5);
         } else {
             a += 2;
             a = -a;
-            f->a = (void*)((u32)(m->bs + a * 12) | 1);
+            f->neighbourA = (void*)((u32)(m->tris + a * 12) | 1);
         }
         a = func_00137D10(in);
         if (a == -1) {
-            f->b = 0;
+            f->neighbourB = 0;
         } else if (a >= 0) {
-            f->b = (u8*)m->faces + (a << 5);
+            f->neighbourB = (u8*)m->faces + (a << 5);
         } else {
             a += 2;
             a = -a;
-            f->b = (void*)((u32)(m->bs + a * 12) | 1);
+            f->neighbourB = (void*)((u32)(m->tris + a * 12) | 1);
         }
     }
     func_001919F8(m);

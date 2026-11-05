@@ -2,16 +2,16 @@
 #include "common.h"
 #include "c05.h"
 #include "c2f.h"
-#include "c51.h"
-#include "c5e.h"
+#include "cone_volume.h"
+#include "redirect_object.h"
 #include "c6c.h"
 #include "t217d.h"
 #include "v24a2.h"
 #include "globals.h"
 #include "g27c220.h"
-#include "g248748.h"
-#include "s192230.h"
-#include "s1d7098.h"
+#include "level_entry.h"
+#include "message_body.h"
+#include "owner_message.h"
 #include "shapes.h"
 
 s32 func_00160850(void* obj);
@@ -259,20 +259,20 @@ void func_001DC108(u8* owner, Touch03* node)
 
 extern Quad16 D_00275730;
 
-void func_00123ED0(C5E* self);
+void func_00123ED0(RedirectObject* self);
 
-void func_001DDCE0(C5E* self)
+void func_001DDCE0(RedirectObject* self)
 {
     func_00123ED0(self);
     self->q320 = D_00275730;
 }
 
-void func_001276C0(C5E* self);
+void func_001276C0(RedirectObject* self);
 
-void func_001DE768(C5E* self)
+void func_001DE768(RedirectObject* self)
 {
-    if (self->self2D0 == self) {
-        self->flag2DC = 1;
+    if (self->target == self) {
+        self->targetIsSelf = 1;
     }
     func_001276C0(self);
 }
@@ -455,24 +455,24 @@ struct Dev_001DFB08 {
 
 void func_001B6598(void* dev, s32* out);
 void func_001B6568(void* dev, s32* out);
-void func_00192230(void* self, s32 kind, S192230* rec);
+void func_00192230(void* self, s32 kind, MessageBody* rec);
 
-void func_001DFB08(C14* self, s32 code, S192230* rec)
+void func_001DFB08(C14* self, s32 code, MessageBody* rec)
 {
     s32 loc[2];
 
     if (code != 0x13) {
         if (code == 0x14) {
-            if (rec == (S192230*)((Dev_001DFB08*)self->f75C)) {
+            if (rec == (MessageBody*)((Dev_001DFB08*)self->f75C)) {
                 func_001B6598(rec, &loc[0]);
                 func_001B6568(((Dev_001DFB08*)self->f75C), &loc[1]);
             }
         }
     } else {
         Dev_001DFB08* dev = ((Dev_001DFB08*)self->f75C);
-        s32 key = rec->f0;
+        s32 key = rec->sourceId;
         if (dev != 0 && key == dev->f24) {
-            s32 kind = rec->f8;
+            s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
                     self->f738 = 0;
@@ -608,20 +608,20 @@ extern f32 D_00275690[2];
 extern f32 D_00275698[2];
 extern f32 D_002756A0[4];
 
-C51* func_0011E580(Alloc_1DC9A0* a0, Obj_1DC9A0* a1, void* a2, s32 a3, s32 a4);
-void func_00184768(C51* p, s32 v);
-void func_001847F0(C51* p, void* q);
-void func_00184858(C51* p, f32 v);
-void func_00184818(C51* p, f32 v);
-void func_00184878(C51* p, f32 v);
-void func_00184838(C51* p, f32 v);
-void func_00184898(C51* p, f32 v);
-void func_001848B8(C51* p, void* q);
-void func_00184990(C51* p, void* q);
+ConeVolume* func_0011E580(Alloc_1DC9A0* a0, Obj_1DC9A0* a1, void* a2, s32 a3, s32 a4);
+void func_00184768(ConeVolume* p, s32 v);
+void func_001847F0(ConeVolume* p, void* q);
+void func_00184858(ConeVolume* p, f32 v);
+void func_00184818(ConeVolume* p, f32 v);
+void func_00184878(ConeVolume* p, f32 v);
+void func_00184838(ConeVolume* p, f32 v);
+void func_00184898(ConeVolume* p, f32 v);
+void func_001848B8(ConeVolume* p, void* q);
+void func_00184990(ConeVolume* p, void* q);
 
 void func_001DC9A0(Obj_1DC9A0* self)
 {
-    C51* p;
+    ConeVolume* p;
 
     if (D_00275630[0] & 1) {
         p = func_0011E580((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
@@ -961,10 +961,10 @@ void func_001DE798(C14* self)
 
 void* func_001DFE80(s32 key)
 {
-    const G248748* p = D_00248748;
-    const G248748* end = D_00248748 + 33;
+    const LevelEntry* p = D_00248748;
+    const LevelEntry* end = D_00248748 + 33;
     do {
-        if (key != p->level) {
+        if (key != p->levelId) {
             p++;
         } else {
             return (void*)p;
@@ -1029,14 +1029,14 @@ extern f32 D_002757D4;
 void func_001C4ED0(void);
 s32 func_00128230(C14* self);
 void func_001DEB30(C14* self);
-void func_001D7098(S1D7098* l, s32 zero, C03* c);
+void func_001D7098(OwnerMessage* l, s32 zero, C03* c);
 void func_001861E8(Pa_1DE910* a0, Contact03* a1);
 void func_00129E10(Pb_1DE910* a, f32 v);
 void func_00129FB0(Pb_1DE910* a, f32 v);
 
 void func_001DE910(C14* self)
 {
-    S1D7098 loc;
+    OwnerMessage loc;
     f32 f20;
     Contact03* s1;
     C03* s0;

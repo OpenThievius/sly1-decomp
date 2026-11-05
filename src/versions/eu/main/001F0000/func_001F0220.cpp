@@ -4,7 +4,7 @@ struct Sys_1F0220_eu { u8 pad0[0x30]; s32 f30; } __attribute__((packed));
 struct Tbl_1F0220_eu { u8 pad0[0x570]; void* f570; void* f574[1]; };
 extern Tbl_1F0220_eu D_eu_00274868;
 
-void func_001F0220(G275F80* self, s32 mode)
+void func_001F0220(ScreenFade* self, s32 mode)
 {
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {
@@ -15,7 +15,7 @@ void func_001F0220(G275F80* self, s32 mode)
     if (mode == 1) goto L02E0;
     if (mode < 2) {
         if (mode == 0) {
-            self->i0C = 0;
+            self->opacityWord = 0;
             goto L0400;
         }
         self->mode = mode;
@@ -27,18 +27,18 @@ void func_001F0220(G275F80* self, s32 mode)
     goto L0404;
 
 L02A0:
-    if (self->cur.kind != 0) {
-        S1EFFA0* q = &self->cur;
+    if (self->active.kind != 0) {
+        FadeRequest* q = &self->active;
         func_001E4E80(D_00275AF0, (s32)q->key, q->f08, q->f0C, q->flags);
     }
-    self->cur.kind = 0;
-    self->scale = 1.0f;
-    self->saved.kind = 0;
+    self->active.kind = 0;
+    self->opacity = 1.0f;
+    self->queued.kind = 0;
     goto L0400;
 
 L02E0:
     {
-        s32 v = self->f24;
+        s32 v = self->style;
         if (v == 2) goto L0300;
         if (v == 3) goto L0354;
         goto L0364;
@@ -46,7 +46,7 @@ L02E0:
 
 L0300:
     {
-        s32 v = func_001601A0((s32)self->cur.key);
+        s32 v = func_001601A0((s32)self->active.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
         if (D_0026FA68 == 0) goto L034C;
@@ -59,7 +59,7 @@ L0300:
     }
 
 L034C:
-    self->f24 = 0;
+    self->style = 0;
     goto L0364;
 
 L0354:
@@ -74,7 +74,7 @@ L0364:
 
 L0374:
     {
-        s32 a = self->f24;
+        s32 a = self->style;
         if (a == 2) goto L038C;
         if (a == mode) goto L03EC;
         self->mode = mode;
@@ -83,7 +83,7 @@ L0374:
 
 L038C:
     {
-        if (self->f24 == D_00275BF0) {
+        if (self->style == D_00275BF0) {
             s32 idx = D_002623CC;
             if (idx != -1) {
                 D_eu_00274868.f570 = D_eu_00274868.f574[idx];
@@ -95,19 +95,19 @@ L038C:
             self->mode = mode;
             goto L0404;
         }
-        self->f24 = 3;
+        self->style = 3;
         goto L0400;
     }
 
 L03EC:
     func_00168B68(0.25f);
-    self->f24 = 0;
+    self->style = 0;
     goto L0400;
 
 L0400:
     self->mode = mode;
 L0404:
-    self->f08 = D_00261868;
+    self->modeStartTime = D_00261868;
 L0410:
     return;
 }

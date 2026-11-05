@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c4d.h"
+#include "world_listed_object.h"
 #include "c50.h"
 #include "c6c.h"
 #include "c3b.h"
 #include "c8b.h"
 #include "v24a0.h"
-#include "s139c70.h"
-#include "s127378.h"
+#include "owned_record.h"
+#include "object_message.h"
 #include "globals.h"
 
 void func_001389C8(C6C* a0)
@@ -57,9 +57,9 @@ void func_001B5F28(void* p, void* q);
 void func_001F5C0C(void* p, s32 v, s32 n);
 void func_00152470(void* list, void* item);
 
-S139C70* func_00139C70(Obj_139C70* o)
+OwnedRecord* func_00139C70(Obj_139C70* o)
 {
-    S139C70* s = (S139C70*)func_001B5EA0(o->ctx + 0x1B40);
+    OwnedRecord* s = (OwnedRecord*)func_001B5EA0(o->ctx + 0x1B40);
     if (!s) {
         return 0;
     }
@@ -68,7 +68,7 @@ S139C70* func_00139C70(Obj_139C70* o)
         s->owner = o;
     } else {
         void* r = func_001B5EA0(o->ctx + 0x1B4C);
-        s->p1088 = r;
+        s->extraRecord = r;
         if (r) {
             func_001F5C0C(r, 0, 0x580);
             s->owner = o;
@@ -121,16 +121,16 @@ void func_00138278(void* self, In_138278* in, Tree03* out)
     }
 }
 
-void func_001832F0(C4D* self, C01* src);
+void func_001832F0(WorldListedObject* self, C01* src);
 s32 func_001300E8(C01* src, s32 kind);
 s32 func_00152720(void* sub);
 
-void func_0013A418(C4D* self, C01* src)
+void func_0013A418(WorldListedObject* self, C01* src)
 {
     func_001832F0(self, src);
     if (func_001300E8(src, 0x50) != 0) {
         C50* from = (C50*)src;
-        self->owner = from;
+        self->source = from;
         self->f80 = from->f80;
         if (func_00152720(from->list314) == 0) {
             self->flags &= 0xFFFFFFFFF3FFFFFFULL;
@@ -189,7 +189,7 @@ void func_00152600(void* sub, void* self);
 void func_00152470(void* sub, void* self);
 void func_001240F8(void* self);
 
-void func_00139E80(C4D* self)
+void func_00139E80(WorldListedObject* self)
 {
     func_00152600(&self->world->list1CC0, self);
     func_00152470(&self->world->list1CB4, self);
@@ -424,10 +424,10 @@ void func_00139F80(Obj_139F80* self, void* x)
 }
 
 
-void func_00127378(C3B* self, s32 kind, S127378* msg);
+void func_00127378(C3B* self, s32 kind, ObjectMessage* msg);
 void func_0013BE00(C3B* p, f32 delta);
 
-void func_0013B708(C3B* self, s32 kind, S127378* msg)
+void func_0013B708(C3B* self, s32 kind, ObjectMessage* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 0xA) {
@@ -443,11 +443,11 @@ void func_00152470(void* list, void* item);
 void func_00152438(void* self, s32 value);
 void func_00123ED0(void* self);
 
-void func_00139DE8(C4D* self)
+void func_00139DE8(WorldListedObject* self)
 {
     func_00152470(&self->world->list1CC0, self);
     func_00123ED0(self);
-    func_00152438(&self->list, 0x1090);
+    func_00152438(&self->members, 0x1090);
     u64 b = self->flags;
     b &= 0xFFFFFFFFCFFFFFFFull;
     b |= 0x20000000ull;
@@ -460,11 +460,11 @@ void func_00139DE8(C4D* self)
 void func_00124FC0(void* self);
 void func_00129DF8(void* self);
 
-void func_0013A3A0(C4D* self)
+void func_0013A3A0(WorldListedObject* self)
 {
     func_00124FC0(self);
     func_00129DF8(self);
-    Sub4D* sub = self->sub;
+    FlagRecord* sub = self->flagRecord;
     C6D* g = D_00261990;
     s32 hit = 0;
     u32 flags = sub->flags;
@@ -505,7 +505,7 @@ void* func_001F5C0C(void* dst, s32 value, u32 size);
 void func_0019D410(void* block);
 void func_0013AD80(void* self);
 
-void func_0013AD08(C4D* owner, s32 unused, Src_13AD08* src)
+void func_0013AD08(WorldListedObject* owner, s32 unused, Src_13AD08* src)
 {
     ParamBlock_13AD08 blk;
     func_001F5C0C(&blk, 0, (u32)0x80);
@@ -582,11 +582,11 @@ struct Frame_139EC8 {
     s32 prev;
 };
 
-void func_00139EC8(C4D* self)
+void func_00139EC8(WorldListedObject* self)
 {
-    C4D* obj = self;
+    WorldListedObject* obj = self;
     Frame_139EC8 fr;
-    s32 e = (s32)&obj->list.head;
+    s32 e = (s32)&obj->members.head;
     fr.list = e;
     fr.cursor = e;
     s32 old = *(s32*)&D_0027B314;
@@ -594,7 +594,7 @@ void func_00139EC8(C4D* self)
     fr.prev = old;
     fr.link = link;
     *(s32*)&D_0027B314 = (s32)&fr;
-    s32 head = obj->list.head;
+    s32 head = obj->members.head;
     fr.cursor = head + fr.link;
     s32 node = head;
     while (node != 0) {

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "c68.h"
+#include "gauge_manager.h"
 #include "c46.h"
 #include "c20.h"
 #include "c6c.h"
 #include "t217d.h"
-#include "s124df8.h"
+#include "object_link.h"
 #include "g261ef0.h"
 #include "shapes.h"
 
-void func_0014C838(C68* self, s32 value)
+void func_0014C838(GaugeManager* self, s32 value)
 {
-    s32 i = self->n2DC;
-    self->n2DC = i + 1;
+    s32 i = self->slotCount;
+    self->slotCount = i + 1;
     self->slots[i].obj = (void*)value;
 }
 
@@ -47,7 +47,7 @@ void func_0014EE70(C46* self)
     }
 }
 
-S124DF8 D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
+ObjectLink D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 idx, void* table);
 
@@ -66,21 +66,21 @@ void func_0014F900(C23* self)
     }
 }
 
-extern C68* D_0027C00C;
+extern GaugeManager* D_0027C00C;
 
 void func_001B6568(void* dev, s32* out);
 void func_001B6598(void* dev, s32* out);
 void func_001B64D8(void* dev, s32 value);
-void func_0014C5E8(C68* self);
+void func_0014C5E8(GaugeManager* self);
 
 void func_0014C668(void* unused, s32 mode)
 {
     if (mode == 1) {
         s32 t[2];
-        func_001B6568(D_0027C00C->f42C, &t[0]);
-        func_001B6598(D_0027C00C->f42C, &t[1]);
+        func_001B6568(D_0027C00C->device, &t[0]);
+        func_001B6598(D_0027C00C->device, &t[1]);
         if (t[0] != 0x3FE && t[1] != 0x3FE) {
-            func_001B64D8(D_0027C00C->f42C, 0x3FF);
+            func_001B64D8(D_0027C00C->device, 0x3FF);
             func_0014C5E8(D_0027C00C);
         }
     }
@@ -96,11 +96,11 @@ void* func_001925F0(void);
 typedef void (*VFn_14C6E0)(void* self);
 struct Obj_14C6E0 { VFn_14C6E0* vtbl; };
 
-void func_0014C6E0(C68* self)
+void func_0014C6E0(GaugeManager* self)
 {
     s32 tag;
     func_00124FC0(self);
-    func_001B6598(self->f42C, &tag);
+    func_001B6598(self->device, &tag);
     if (tag == 0x3FD) {
         if (self->f45C < D_00261858[1]) {
             func_0014C858(self);
@@ -117,10 +117,10 @@ void func_0014C6E0(C68* self)
 
 void* func_001E9970(void* zero);
 
-void func_0014C788(C68* self)
+void func_0014C788(GaugeManager* self)
 {
     s32 tag;
-    func_001B6598(self->f42C, &tag);
+    func_001B6598(self->device, &tag);
     void* p = 0;
     if (tag == 0x3FD) {
         p = func_001E9970(p);
@@ -134,9 +134,9 @@ void func_0014C788(C68* self)
     }
 }
 
-void* func_0014C820(C68* self)
+void* func_0014C820(GaugeManager* self)
 {
-    return (u8*)self + (self->f690 * 0xB0 + 0x480);
+    return (u8*)self + (self->setIndex * 0xB0 + 0x480);
 }
 
 extern f32 D_0026185C[];
@@ -190,7 +190,7 @@ s32 func_001B8A08(void* self, void* obj);
 s32 func_0014FBE0(C23* self, C03* obj)
 {
     if (func_001300E8(obj, 0x46) != 0) {
-        if (((C46*)obj)->f588 == self) {
+        if (((C46*)obj)->taker == self) {
             return 1;
         }
     }
@@ -332,8 +332,8 @@ void func_0014EFB8(C46* self, s32 kind, void* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 6) {
-        if (msg == self->field578) {
-            self->field578 = 0;
+        if (msg == self->watched) {
+            self->watched = 0;
             func_0014F110(self, 4);
         }
     }
@@ -375,7 +375,7 @@ struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; C01* f18; u8 pad1
 typedef void (*VFn_14F920)(void* self);
 typedef void (*VFn_14F920Arg)(void* self, s32 x);
 
-S124DF8 D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
+ObjectLink D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
 
 void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -426,25 +426,25 @@ struct Node_14C138 {
 
 extern Step_14C138* D_002623C8;
 extern f32 D_00275C60[];
-S124DF8 D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
+ObjectLink D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
-void func_00124A48(C68* self);
-void func_00124DF8(C68* self, s32 n, void* table);
+void func_00124A48(GaugeManager* self);
+void func_00124DF8(GaugeManager* self, s32 n, void* table);
 void* func_001B6290(void* a, s32 b, s32 c, s32 d);
 void func_001B6598(void* a, void* b);
 void func_001B6DF8(void* a, void* b);
-void func_0014C2F0(C68* self);
+void func_0014C2F0(GaugeManager* self);
 
-void func_0014C138(C68* self)
+void func_0014C138(GaugeManager* self)
 {
     s32 i = 0;
     func_00124A48(self);
     func_00124DF8(self, 3, D_00261CA0);
-    self->f42C = func_001B6290(self->f428, 0, 0x3FB, 0);
-    func_001B6598(self->f42C, self->buf430);
-    func_001B6DF8(self->f42C, self);
-    for (; i < self->n2DC; i++) {
-        Slot68* s = &self->slots[i];
+    self->device = func_001B6290(self->f428, 0, 0x3FB, 0);
+    func_001B6598(self->device, self->buf430);
+    func_001B6DF8(self->device, self);
+    for (; i < self->slotCount; i++) {
+        GaugeSlot* s = &self->slots[i];
         Node_14C138* n = (Node_14C138*)func_0015A448(self->world, s->obj, self);
         s->obj = n;
         s->f8 = func_0015A480(n->f14, 0x3F7, n);
@@ -492,12 +492,12 @@ void func_001B64D8(void* dev, s32 value);
 s32 func_0015A4F0(void* obj, s32 a1, s32 a2, s32 a3, s32 a4, s32* out);
 void func_001C8F20(s32 value, s32 a1, s32 a2);
 void func_001AB958(void* obj);
-void func_0014C2F0(C68* self);
+void func_0014C2F0(GaugeManager* self);
 
-void func_0014CDC8(C68* self, Arg_14CDC8* arg)
+void func_0014CDC8(GaugeManager* self, Arg_14CDC8* arg)
 {
-    s32 hi = self->f2D4;
-    s32 v = self->f2D0 + arg->fC24;
+    s32 hi = self->maxAmount;
+    s32 v = self->amount + arg->fC24;
     if (v < 0) {
         v = 0;
     } else {
@@ -505,18 +505,18 @@ void func_0014CDC8(C68* self, Arg_14CDC8* arg)
             v = hi;
         }
     }
-    self->f2D0 = v;
-    if (!(v < self->f2D4)) {
+    self->amount = v;
+    if (!(v < self->maxAmount)) {
         s32 arr[32];
         s32 t1;
         s32 t2;
-        func_001B6598(self->f42C, &t1);
-        func_001B6568(self->f42C, &t2);
+        func_001B6598(self->device, &t1);
+        func_001B6568(self->device, &t2);
         void* p = func_001925F0();
         Obj_14CDC8* o = (Obj_14CDC8*)p;
         s32 r = o->vtbl[81](p);
         if (t1 != 0x3FF && t2 != 0x3FF && r != 2) {
-            func_001B64D8(self->f42C, 0x3FE);
+            func_001B64D8(self->device, 0x3FE);
             s32 n = func_0015A4F0(self->world, 5, 0x12, 0, 0x20, arr);
             if (n > 0) {
                 s32 cnt = n;
@@ -554,7 +554,7 @@ void func_0014F110(C46* self, s32 state)
             self->f57C = 0;
             self->f580 = 0;
             self->f584 = 0;
-            self->f588 = 0;
+            self->taker = 0;
             self->state = state;
         }
         self->stateTime = D_0026185C[0];
@@ -566,10 +566,10 @@ void func_0014F110(C46* self, s32 state)
 
 void func_00151E20(void* self, f32 amount);
 
-void func_0014C5E8(C68* self)
+void func_0014C5E8(GaugeManager* self)
 {
     f32 one = 1.0f;
-    f32 ratio = (f32)self->f2D0 / (f32)self->f2D4;
+    f32 ratio = (f32)self->amount / (f32)self->maxAmount;
     f32 c;
     if (ratio < 0.0f) {
         c = 0.0f;
@@ -647,7 +647,7 @@ s32 func_0014FEC0(C23* self) {
         return 0;
     }
     s0 = (C46*)self->world->list1C78.head;
-    s0->f588 = self;
+    s0->taker = self;
     s0->desc->m02(s0);
     s0->desc->m15(s0, self->f730);
     func_001B9AE0(s0, 3, 0, 3, 0);
@@ -773,10 +773,10 @@ s32 func_001A8C90(Holder_14CBA8* h, s32 v);
 void func_001F3BD8(void* p, f32* out);
 void func_001F3C08(void* p, f32* out);
 void func_0012C7B0(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
-void func_0012F810(void* a, C68* self);
+void func_0012F810(void* a, GaugeManager* self);
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_0014CBA8(C68* self)
+void func_0014CBA8(GaugeManager* self)
 {
     Slot_14CBA8* list[16];
     f32 v0[4];
@@ -788,7 +788,7 @@ void func_0014CBA8(C68* self)
     func_001A8AF8((Holder_14CBA8*)self->f424);
     if (!((Holder_14CBA8*)self->f424)->ctl) return;
     s32 n = 0;
-    for (s32 i = 0; i < self->n2DC; i++) {
+    for (s32 i = 0; i < self->slotCount; i++) {
         Slot_14CBA8* s = (Slot_14CBA8*)&self->slots[i];
         if (!s->flag && !s->pc) list[n++] = s;
     }
@@ -823,17 +823,17 @@ struct Obj_14EC70 { void** vt; s32 f4; s32 f8; s32 fC; f32* f10; };
 void func_0014DA98(void);
 struct Step_14EC70;
 
-extern const Params68 D_00249F00;
+extern const GaugeParams D_00249F00;
 extern const f32 D_00249FB0 = 3.4028235e+38f;
 
-void func_00123ED0(C68* self);
+void func_00123ED0(GaugeManager* self);
 
-void func_0014C018(C68* self)
+void func_0014C018(GaugeManager* self)
 {
     func_00123ED0(self);
-    self->f2D4 = 50;
+    self->maxAmount = 50;
     self->f2D8 = 90.0f;
-    Params68 params = D_00249F00;
+    GaugeParams params = D_00249F00;
     self->params0 = params;
     self->params1 = params;
     self->params1.p44.Set(12.0f, 12.0f);
@@ -886,37 +886,37 @@ extern const Fn_Table D_00217708[14] = { (Fn_Table)func_0014E3D0, (Fn_Table)func
 
 typedef void (*Cb_14CF30)(void* self);
 
-void func_00127378(C68* self, s32 kind, void* key);
+void func_00127378(GaugeManager* self, s32 kind, void* key);
 void func_001B6598(void* key, s32* out);
-void func_001DDC38(void* sub, C68* self);
+void func_001DDC38(void* sub, GaugeManager* self);
 void func_001AB890(T217D_510* self, f32 v);
 void func_001AB928(T217D_510* self, f32 v, Cb_14CF30 cb);
 void func_001AB938(T217D_510* self);
 void func_0014C668(void* self);
 
-void func_0014CF30(C68* self, s32 kind, void* key)
+void func_0014CF30(GaugeManager* self, s32 kind, void* key)
 {
     func_00127378(self, kind, key);
     switch (kind) {
     case 6: {
         s32 i;
-        for (i = 0; i < self->n2DC; i++) {
+        for (i = 0; i < self->slotCount; i++) {
             if (self->slots[i].key == key) {
                 break;
             }
         }
-        if (i < self->n2DC) {
+        if (i < self->slotCount) {
             self->slots[i].key = 0;
         }
         break;
     }
     case 0x14:
-        if (key == self->f42C) {
+        if (key == self->device) {
             s32 out;
             func_001B6598(key, &out);
             if (out == 0x3FD) {
-                D_0026D348.target = &self->f2D0;
-                D_0026D348.limit = &self->f2D4;
+                D_0026D348.target = &self->amount;
+                D_0026D348.limit = &self->maxAmount;
                 func_001DDC38(self->world, self);
                 func_001AB890(&D_0026E760, self->f2D8);
                 func_001AB928(&D_0026E760, 0.0f, func_0014C668);
@@ -984,9 +984,9 @@ struct Params_14C2F0 {
 extern f32 D_00275C60[];
 extern f32 D_00261858[];
 
-void func_0014C2F0(C68* o)
+void func_0014C2F0(GaugeManager* o)
 {
-    f32 t = Util_14C2F0::Limit((f32)o->f2D0 / (f32)o->f2D4, 0.0f, 1.0f);
+    f32 t = Util_14C2F0::Limit((f32)o->amount / (f32)o->maxAmount, 0.0f, 1.0f);
     Params_14C2F0* p = (Params_14C2F0*)o->o5E0;
     f32 s;
 
@@ -1010,7 +1010,7 @@ void func_0014C2F0(C68* o)
     }
 }
 
-extern const Params68 D_00249F00 = {
+extern const GaugeParams D_00249F00 = {
     { 0x41000000, 0x40C00000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A, 0x3F19999A, 0x3F4CCCCD, 0x3FA66666, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3E99999A },
     { 3.5f, 5.0f }, { 2.0f, 2.5f },
     { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F59999A, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000, 0x3F4CCCCD, 0x3F800000, 0x00000000, 0x00000000, 0x00000000, 0x3F800000, 0x00000000, 0x00000000 }

@@ -6,9 +6,9 @@
 #include "v24a2.h"
 #include "globals.h"
 #include "g27c220.h"
-#include "g275f80.h"
+#include "screen_fade.h"
 #include "layout_137228.h"
-#include "s1b2988.h"
+#include "texture_table.h"
 #include "shapes.h"
 
 // The font object's calls (include/v24a2.h will declare them).
@@ -429,7 +429,7 @@ void func_001AE820(T217D_600* self)
         adj = 0.0f;
         if (self->mode == 2) {
             if (1.0f < d) {
-                if (func_0018B770(D_00269990) == 0) {
+                if (func_0018B770(g_backgroundJob) == 0) {
                     self->vt->m15(self);
                 }
             }
@@ -875,12 +875,12 @@ void func_001AD970(T217D_560* self, s32 newval)
     G27C220* gg;
 
     if (self->mode != newval) {
-        if (D_00275F80.mode == 1) {
+        if (g_screenFade.mode == 1) {
             if (newval == 3 || newval == 0) {
                 newval = self->mode;
             }
         }
-        if (D_00275F80.mode == 3) {
+        if (g_screenFade.mode == 3) {
             if ((u32)(newval - 1) < 2) {
                 newval = 0;
                 if ((*(s32*)D_00275B00 & 8) == 0) {
@@ -979,7 +979,7 @@ struct Pair_1ADD28 {
 
 struct Hold_1ADD28 {
     u8 pad0[0x14];
-    S1B2988* p14;
+    TextureTable* p14;
 };
 
 
@@ -988,12 +988,12 @@ void func_00161708(Ctx_1ADD28* p, u64 a, u64 b);
 void func_00161458(Ctx_1ADD28* p, u32 rgba);
 void func_001614C8(Ctx_1ADD28* p, s32 a, s32 b);
 void func_001615F0(Ctx_1ADD28* p, s32 a, s32 b, s32 c, s32 d);
-u64 func_001B2988(S1B2988* t, s32 i, s32 j);
+u64 func_001B2988(TextureTable* t, s32 i, s32 j);
 
 void func_001ADD28(T217D_470* self)
 {
     if (self->icon != 0) {
-        S1B2988* sub = ((Hold_1ADD28*)self->icon)->p14;
+        TextureTable* sub = ((Hold_1ADD28*)self->icon)->p14;
         Pair_1ADD28* pr = (Pair_1ADD28*)*sub->p0c;
         u64 v = func_001B2988(sub, 0, 0);
         u8 rgba[4];

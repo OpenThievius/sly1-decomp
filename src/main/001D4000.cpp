@@ -4,10 +4,10 @@
 #include "c2f.h"
 #include "c3b.h"
 #include "t217d.h"
-#include "s124df8.h"
-#include "s127378.h"
-#include "s1d7098.h"
-#include "s1d7190.h"
+#include "object_link.h"
+#include "object_message.h"
+#include "owner_message.h"
+#include "output_buffer.h"
 #include "shapes.h"
 #include "globals.h"
 
@@ -353,9 +353,9 @@ void func_001D73A8(C19* self)
     func_001DB290(self);
 }
 
-void func_0013B708(C3F* self, s32 kind, S127378* ref);
+void func_0013B708(C3F* self, s32 kind, ObjectMessage* ref);
 
-void func_001D7040(C3F* self, s32 kind, S127378* ref)
+void func_001D7040(C3F* self, s32 kind, ObjectMessage* ref)
 {
     func_0013B708(self, kind, ref);
     if (kind == 10 && ref->target == self) {
@@ -363,13 +363,13 @@ void func_001D7040(C3F* self, s32 kind, S127378* ref)
     }
 }
 
-void func_001F5C0C(S1D7098* p, s32 zero, s32 size);
-void func_001D7098(S1D7098* self, s32 a, s32 b) { func_001F5C0C(self, 0, 0x10); self->b = b; self->a = a; self->c = b; }
+void func_001F5C0C(OwnerMessage* p, s32 zero, s32 size);
+void func_001D7098(OwnerMessage* self, s32 mode, s32 owner) { func_001F5C0C(self, 0, 0x10); self->owner = owner; self->mode = mode; self->c = owner; }
 
-void func_001D72C8(S1D7190* a0, s32 a1);
-void func_0018D778(S1D7190* a0);
+void func_001D72C8(OutputBuffer* a0, s32 a1);
+void func_0018D778(OutputBuffer* a0);
 
-void func_001D7148(S1D7190* a0, s32 a1)
+void func_001D7148(OutputBuffer* a0, s32 a1)
 {
     func_001D72C8(a0, a1);
     if (a1 & 1) func_0018D778(a0);
@@ -606,7 +606,7 @@ void func_0018D800(void* dst, void* src, s32 bytes);
 void func_001F7B88(void* a, void* b);
 void func_001F9028(s32 a, void* b, s32 n);
 
-void func_001D72C8(S1D7190* self)
+void func_001D72C8(OutputBuffer* self)
 {
     u8 buf[0x90];
     s32 done;
@@ -614,16 +614,16 @@ void func_001D72C8(S1D7190* self)
     s32 chunk;
     s32 rem;
 
-    if (self->f14 == 0) {
+    if (self->pending == 0) {
         return;
     }
-    if (self->i0 != 0) {
+    if (self->targetWord != 0) {
         return;
     }
-    if (self->fC < 0) {
+    if (self->handle < 0) {
         p = self->buf;
-        for (done = 0; done < self->f14; done += chunk) {
-            rem = self->f14 - done;
+        for (done = 0; done < self->pending; done += chunk) {
+            rem = self->pending - done;
             chunk = 0x80;
             if (!(rem > 0x7F)) {
                 chunk = rem;
@@ -634,21 +634,21 @@ void func_001D72C8(S1D7190* self)
             func_001F7B88((void*)D_0024DC90, buf);
         }
     } else {
-        func_001F9028(self->fC, self->buf, self->f14);
+        func_001F9028(self->handle, self->buf, self->pending);
     }
-    self->f14 = 0;
+    self->pending = 0;
 }
 
 void func_0018D800(void* dst, void* src, s32 count);
-void func_001D72C8(S1D7190* self);
+void func_001D72C8(OutputBuffer* self);
 
-s32 func_001D7190(S1D7190* self, void* src, s32 size)
+s32 func_001D7190(OutputBuffer* self, void* src, s32 size)
 {
     s32 n = size;
     s32 done = 0;
 
-    if (self->f0 != 0 && self->f4 != 0 && n != 0) {
-        s32 avail = self->f4 - self->f8;
+    if (self->target != 0 && self->capacity != 0 && n != 0) {
+        s32 avail = self->capacity - self->used;
         if (avail < n) {
             n -= avail;
         }
@@ -656,21 +656,21 @@ s32 func_001D7190(S1D7190* self, void* src, s32 size)
     if (n == 0) {
         return 0;
     }
-    if (self->f0 != 0) {
-        func_0018D800(self->f0 + self->f8, src, n);
-        self->f8 += n;
+    if (self->target != 0) {
+        func_0018D800(self->target + self->used, src, n);
+        self->used += n;
         done = n;
     } else if (n > 0) {
         do {
-            s32 room = 0x400 - self->f14;
+            s32 room = 0x400 - self->pending;
             s32 rem = n - done;
             s32 take = (room < rem) ? room : rem;
             if (take != 0) {
-                func_0018D800((u8*)self + (self->f14 + 0x18), (u8*)src + done, take);
+                func_0018D800((u8*)self + (self->pending + 0x18), (u8*)src + done, take);
                 done += take;
-                self->f14 += take;
+                self->pending += take;
             }
-            if (self->f14 == 0x400) {
+            if (self->pending == 0x400) {
                 func_001D72C8(self);
             }
         } while (done < n);
@@ -679,7 +679,7 @@ s32 func_001D7190(S1D7190* self, void* src, s32 size)
     return n;
 }
 
-S124DF8 D_002752A0[20] = {
+ObjectLink D_002752A0[20] = {
     { 4, 0x416, 0x6B0 }, { 4, 0x417, 0x710 }, { 4, 0x418, 0x770 }, { 4, 0x419, 0x7D0 },
     { 0, 0x41A, 0x6B8 }, { 0, 0x41B, 0x718 }, { 0, 0x41C, 0x778 }, { 0, 0x41D, 0x7D8 },
     { 6, 0x41E, 0x6B4 }, { 6, 0x41F, 0x714 }, { 6, 0x420, 0x774 }, { 6, 0x421, 0x7D4 },

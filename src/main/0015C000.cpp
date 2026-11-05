@@ -2,12 +2,12 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c01.h"
-#include "c40.h"
+#include "object_cycler.h"
 #include "v24a0.h"
 #include "v24a2.h"
 #include "shapes.h"
-#include "g262320.h"
-#include "s15db28.h"
+#include "render_frame.h"
+#include "text_reader.h"
 #include "layout_137228.h"
 
 extern void* D_0024A220;
@@ -144,7 +144,7 @@ void func_00152B38(void* obj);
 
 s32 func_0015CAB8(V24A2* self, void* obj)
 {
-    s32 r = (D_002622D8->flags & self->mask) == 0;
+    s32 r = (g_buildFrame->flags & self->mask) == 0;
     if (r != 0) {
         func_00152D70(obj);
         func_00152B80(obj, self->f68, self->f6C);
@@ -154,7 +154,7 @@ s32 func_0015CAB8(V24A2* self, void* obj)
             func_00152B80(obj, self->imgB->fC, self->imgB->f8);
         }
         func_00152B38(obj);
-        D_002622D8->flags |= self->mask;
+        g_buildFrame->flags |= self->mask;
     }
     return r;
 }
@@ -276,7 +276,7 @@ s32 func_001419E8(s32 zero, void* p, void* q, s32 a, s32 b, s32 c);
 void func_0018D6F0(void);
 void func_001DC4D0(s32 a0, s32 a1, void* a2, Pred_15C0A0 a3, void* a4, s32* a5, s32* a6, f32 f12);
 
-s32 func_0015C0A0(C40* self)
+s32 func_0015C0A0(ObjectCycler* self)
 {
     f32* tbl = D_00261858;
     if (tbl[1] - self->f66C < 0.05f) {
@@ -335,16 +335,16 @@ extern void* D_002623B0;
 
 void func_0015EC68(void)
 {
-    func_0015EB20(D_002622A8, (u8*)D_002622D8 + 8, 0);
-    func_0015EBF0(D_00262280, D_002622D8, 0);
-    D_002622D8->l20 = D_002622E0;
+    func_0015EB20(D_002622A8, (u8*)g_buildFrame + 8, 0);
+    func_0015EBF0(D_00262280, g_buildFrame, 0);
+    g_buildFrame->l20 = D_002622E0;
     func_00152440(&D_002622E0);
-    D_002622D8->l2C = D_002622F0;
+    g_buildFrame->l2C = D_002622F0;
     func_00152440(&D_002622F0);
-    D_002622D8->l38 = D_00262300;
+    g_buildFrame->l38 = D_00262300;
     func_00152440(&D_00262300);
     D_002622D0 = 0;
-    D_002622D8 = 0;
+    g_buildFrame = 0;
     func_001F6B40(D_002623B0);
 }
 
@@ -368,7 +368,7 @@ extern s32 D_00261F1C;
 void func_001B3488(s32 value);
 void func_00202A80(s32 a, s32 b);
 
-void func_0015ED50(G262320* self)
+void func_0015ED50(RenderFrame* self)
 {
     D_002622D4 = self->i10;
     func_001B3488(self->f44);
@@ -401,7 +401,7 @@ void func_0015DFA0(Cursor_15DFA0* self, s32 n)
 void func_0015DB80(void* self);
 s32 func_0015DBE0(void* self);
 
-f32 func_0015DFF8(S15DB28* self)
+f32 func_0015DFF8(TextReader* self)
 {
     f32 acc = 0.0f;
     func_0015DB80(self);
@@ -464,9 +464,9 @@ s32 func_0015E068(Lines_15E068* self, f32 limit)
 
 s32 func_0015E068(void* self);
 
-f32 func_0015E1B0(S15DB28* self)
+f32 func_0015E1B0(TextReader* self)
 {
-    V24A2* holder = self->deffont;
+    V24A2* holder = self->defaultFont;
     f32 width = (f32)holder->height * holder->sy;
     s32 lines = func_0015E068(self);
     return width * (f32)lines;
@@ -612,8 +612,8 @@ void func_0015E290(void* self, f32 f, f32* out1, f32* out2)
 {
     s32 n = func_0015E068(self, f);
     f32 g = func_0015E1F0(self);
-    S15DB28* o = (S15DB28*)self;
-    f32 k = (f32)o->deffont->height * o->deffont->sy;
+    TextReader* o = (TextReader*)self;
+    f32 k = (f32)o->defaultFont->height * o->defaultFont->sy;
     f32 t = (f32)n * k;
     if (out1 != 0) {
         *out1 = g;
@@ -715,7 +715,7 @@ void func_0015F210(s32 flag)
         } while (--n >= 0);
         D_002626CC = 3;
     }
-    u8* p = (u8*)D_00262320;
+    u8* p = (u8*)g_renderFrames;
     u8* end = p + 0x90;
     do {
         func_0015EFE8(p);
@@ -891,9 +891,9 @@ void func_0015E678(void);
 void func_0015E810(void)
 {
     for (u32 i = 0; i < 2; i++) {
-        G262320* r = &D_00262320[i];
-        r->f04 = (u8*)D_002C3B00 + i * 0x80000;
-        r->f0C = D_003C3B00 + i * 0x100000;
+        RenderFrame* r = &g_renderFrames[i];
+        r->bufA = (u8*)D_002C3B00 + i * 0x80000;
+        r->bufB = D_003C3B00 + i * 0x100000;
         r->f10 = D_005C3B00 + i * 0x10600;
         func_00152438(&r->l20, 0x630);
         func_00152438(&r->l2C, 0x1090);
@@ -935,11 +935,11 @@ some:
     return 1;
 }
 
-void func_0015DB80(S15DB28* self)
+void func_0015DB80(TextReader* self)
 {
     s32 t;
-    self->cur = (char*)self->f00;
-    self->font = self->deffont;
+    self->cur = (char*)self->text;
+    self->font = self->defaultFont;
     t = ((U32P*)((u8*)self + 0xA4))->v;
     ((U32P*)((u8*)self + 0xA0))->v = t;
     t = ((U32P*)((u8*)self + 0xA0))->v;
@@ -947,17 +947,17 @@ void func_0015DB80(S15DB28* self)
     self->fontChanged = 0;
 }
 
-void func_0015DB80(S15DB28* self);
+void func_0015DB80(TextReader* self);
 
-S15DB28* func_0015DB28(S15DB28* self, s32 a1, s32 a2)
+TextReader* func_0015DB28(TextReader* self, s32 a1, s32 a2)
 {
-    self->inl.vt = (const V24A2_Vt*)&D_0024A220;
-    self->f00 = a1;
-    self->deffont = (V24A2*)a2;
-    self->cA8 = 0xFF808080;
-    self->cA4 = 0xFF808080;
-    self->cA0 = 0xFF808080;
-    self->c9C = 0xFF808080;
+    self->inlineFont.vt = (const V24A2_Vt*)&D_0024A220;
+    self->text = a1;
+    self->defaultFont = (V24A2*)a2;
+    self->inlineFontColorBits = 0xFF808080;
+    self->defaultColorBits = 0xFF808080;
+    self->baseColorBits = 0xFF808080;
+    self->colorBits = 0xFF808080;
     func_0015DB80(self);
     return self;
 }
@@ -1008,7 +1008,7 @@ extern s32 D_002626CC;
 
 void func_0015EDB8(void);
 s32 func_001F6B60(void* p);
-void func_0015ED50(G262320* f);
+void func_0015ED50(RenderFrame* f);
 void func_001684E8(void);
 void func_001686E8(s32 a, s32 b);
 void func_0015F320(void);
@@ -1022,16 +1022,16 @@ void func_0015EE80(void)
         D_002623B8 = 1;
         func_001F6B60(D_002623B0);
         D_002623B8 = 0;
-        D_0026231C = &D_00262320[D_00262314];
+        D_0026231C = &g_renderFrames[D_00262314];
         D_00262314++;
         if (D_00262314 >= 2) {
             D_00262314 = 0;
         }
-        func_0015ED50((G262320*)D_0026231C);
+        func_0015ED50((RenderFrame*)D_0026231C);
         func_001684E8();
-        func_001686E8(D_00261F18, ((G262320*)D_0026231C)->i0C);
+        func_001686E8(D_00261F18, ((RenderFrame*)D_0026231C)->bufBAddr);
         *(volatile s32*)0x10003010 = 0;
-        func_001686E8(D_00261F1C, ((G262320*)D_0026231C)->i04);
+        func_001686E8(D_00261F1C, ((RenderFrame*)D_0026231C)->bufAAddr);
         func_0015F320();
         func_00202C38(D_00261F18, 0, 0);
         func_001F6B40(D_002623B4);
@@ -1082,7 +1082,7 @@ struct Next_15EFE8 {
     }
 };
 
-void func_0015EFE8(G262320* self)
+void func_0015EFE8(RenderFrame* self)
 {
     Iter_15EFE8 it;
     Node_15EFE8* n;
@@ -1232,11 +1232,11 @@ public:
 };
 
 void func_001F5C0C(void* p, s32 v, s32 n);
-void func_0015DB80(S15DB28* self);
-s32 func_0015DBE0(S15DB28* self);
-void func_0015DBB8(S15DB28* self, Rgba_137248* p);
+void func_0015DB80(TextReader* self);
+s32 func_0015DBE0(TextReader* self);
+void func_0015DBB8(TextReader* self, Rgba_137248* p);
 
-void func_0015E318(S15DB28* self, Layout_137228* p, s32 x, s32 y)
+void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
 {
     f32 f[64];
     Rgba_137248 u;
@@ -1258,7 +1258,7 @@ void func_0015E318(S15DB28* self, Layout_137228* p, s32 x, s32 y)
     if (c == 0) {
         top = p->y;
     } else {
-        f32 tot = (f32)(n + 1) * ((f32)self->deffont->height * self->deffont->sy);
+        f32 tot = (f32)(n + 1) * ((f32)self->defaultFont->height * self->defaultFont->sy);
         if (c == 2)
             top = (p->y + p->h) - tot;
         else
@@ -1275,7 +1275,7 @@ void func_0015E318(S15DB28* self, Layout_137228* p, s32 x, s32 y)
         if (n == 10) {
             first = 1;
             fp++;
-            top += (f32)self->deffont->height * self->deffont->sy;
+            top += (f32)self->defaultFont->height * self->defaultFont->sy;
             continue;
         }
         if (first) {
@@ -1297,7 +1297,7 @@ void func_0015E318(S15DB28* self, Layout_137228* p, s32 x, s32 y)
             ((Font_15E318*)self->font)->Flush(y);
             self->fontChanged = 0;
         }
-        left += ((Font_15E318*)self->font)->Draw(left, top, n, self->c9C, y);
+        left += ((Font_15E318*)self->font)->Draw(left, top, n, self->colorBits, y);
     }
     ((Font_15E318*)self->font)->End(x, y);
 }
@@ -1308,11 +1308,11 @@ void func_0015C9B0(V24A2* font, V24A2* out);
 void func_0015C900(V24A2* font);
 void func_0015C8B8(V24A2* font, f32 a, f32 b);
 
-s32 func_0015DBE0(S15DB28* self)
+s32 func_0015DBE0(TextReader* self)
 {
     s32 done = 0;
     s32 changed = 1;
-    V24A2* inl = &self->inl;
+    V24A2* inl = &self->inlineFont;
     do {
         char* p = self->cur;
         switch (*p) {
@@ -1321,8 +1321,8 @@ s32 func_0015DBE0(S15DB28* self)
                 self->cur = p + 1;
                 done = 1;
             } else if (p[1] == '.') {
-                self->rgbaA0 = self->rgbaA4;
-                self->rgba9C = self->rgbaA0;
+                self->baseColor = self->defaultColor;
+                self->color = self->baseColor;
                 self->cur += 2;
             } else {
                 char* q = p + 1;
@@ -1342,14 +1342,14 @@ s32 func_0015DBE0(S15DB28* self)
                     acc = (acc << 4) + d;
                 }
                 if (q - self->cur >= 7) {
-                    self->rgbaA0.r = ((acc >> 16) & 0xFF) + 1 >> 1;
-                    self->rgbaA0.g = ((acc & 0xFF00) >> 8) + 1 >> 1;
-                    self->rgbaA0.b = (acc & 0xFF) + 1 >> 1;
-                    self->rgba9C = self->rgbaA0;
+                    self->baseColor.r = ((acc >> 16) & 0xFF) + 1 >> 1;
+                    self->baseColor.g = ((acc & 0xFF00) >> 8) + 1 >> 1;
+                    self->baseColor.b = (acc & 0xFF) + 1 >> 1;
+                    self->color = self->baseColor;
                     self->cur += 7;
                 } else {
-                    self->font = self->deffont;
-                    self->rgba9C = self->rgbaA4;
+                    self->font = self->defaultFont;
+                    self->color = self->defaultColor;
                     done = 1;
                 }
             }
@@ -1359,8 +1359,8 @@ s32 func_0015DBE0(S15DB28* self)
                 self->cur = p + 1;
                 done = 1;
             } else if (p[1] == '.') {
-                self->font = self->deffont;
-                self->rgba9C = self->rgbaA0;
+                self->font = self->defaultFont;
+                self->color = self->baseColor;
                 self->fontChanged = changed;
                 self->cur += 2;
             } else {
@@ -1368,20 +1368,20 @@ s32 func_0015DBE0(S15DB28* self)
                 if (nf != 0) {
                     func_0015C9B0(nf, inl);
                     self->cur += 2;
-                    V24A2* d = self->deffont;
+                    V24A2* d = self->defaultFont;
                     f32 ratio = ((f32)d->height * d->sy) / ((f32)inl->height * inl->sy);
                     self->font = inl;
-                    u8 al = self->rgba9C.a;
-                    self->inl.sx *= ratio;
-                    self->inl.sy *= ratio;
-                    Rgba4 t = self->rgbaA8;
+                    u8 al = self->color.a;
+                    self->inlineFont.sx *= ratio;
+                    self->inlineFont.sy *= ratio;
+                    Rgba4 t = self->inlineFontColor;
                     t.a = al;
-                    self->rgba9C = t;
+                    self->color = t;
                     self->fontChanged = changed;
                 } else {
-                    self->font = self->deffont;
+                    self->font = self->defaultFont;
                     done = 1;
-                    self->rgba9C = self->rgbaA4;
+                    self->color = self->defaultColor;
                     self->fontChanged = changed;
                 }
             }
@@ -1497,21 +1497,21 @@ void func_0015E9F0(void)
     func_001F6B60(D_002623B4);
     idx = D_00262318;
     D_00262318 = idx + 1;
-    D_002622D8 = &D_00262320[idx];
+    g_buildFrame = &g_renderFrames[idx];
     if ((u32)(idx + 1) >= 2) {
         D_00262318 = 0;
     }
-    func_0015EFE8(D_002622D8);
+    func_0015EFE8(g_buildFrame);
     {
-        G262320* slot = D_002622D8;
+        RenderFrame* slot = g_buildFrame;
         s32 v = *(s32*)(D_00261990 + 0x21C);
         slot->flags = 0;
         slot->f44 = v;
         slot->f1C = 0;
-        func_001529C8(D_00262280, 0x8000, slot->f04);
+        func_001529C8(D_00262280, 0x8000, slot->bufA);
     }
-    func_001529C8(D_002622A8, 0x10000, D_002622D8->f0C);
-    D_002622D0 = D_002622D8->i10;
+    func_001529C8(D_002622A8, 0x10000, g_buildFrame->bufB);
+    D_002622D0 = g_buildFrame->i10;
     func_00152B38(D_00262280);
     func_00152B38(D_002622A8);
 }

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: same flow with a stop flag after the device test
-void func_0018F198(Self_18F198* self, S18E410* key)
+void func_0018F198(Self_18F198* self, IdentityKey* key)
 {
-    S12FCF0 loc;
-    S18D410 pr;
+    StreamReader loc;
+    KeyId pr;
     func_00191E70(4);
     self->mode = func_0018E410(key);
     func_0012FCF0(&loc, D_002C3B00);
@@ -20,7 +20,7 @@ void func_0018F198(Self_18F198* self, S18E410* key)
             if (D_002623C0->f19F8 & m) flag = 1;
             if (flag) {
                 s32 stop = 0;
-                if (func_001F00F0(D_00275F80, &D_00262C70, 2)) {
+                if (func_001F00F0(g_screenFade, &D_00262C70, 2)) {
                     stop = 1;
                 } else if (D_00262C70.flags & 0x91F) {
                     func_0016EC20(&D_00262C70, 0x91F);

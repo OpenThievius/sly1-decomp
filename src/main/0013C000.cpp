@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c27.h"
+#include "timed_state_object.h"
 #include "c28.h"
 #include "c20.h"
 #include "c3b.h"
 #include "c05.h"
-#include "v249d.h"
-#include "s127378.h"
+#include "memory_reader.h"
+#include "object_message.h"
 
 void func_001BE4D8(void* p);
 
@@ -69,7 +69,7 @@ void func_0013CC48(Span_CC48* p, s32 n)
 
 void func_001F5A58(void* dst, void* src, s32 n);
 
-s32 func_0013CC80(V249D* self, s32 want, void* dst)
+s32 func_0013CC80(MemoryReader* self, s32 want, void* dst)
 {
     s32 n = self->remain;
     u8* base = self->base;
@@ -173,7 +173,7 @@ void func_0013DA80(C20* r, s32 value)
 extern f32 D_0026185C;
 void func_001B93F8(C03* self);
 
-void func_0013DC38(C27* self)
+void func_0013DC38(TimedStateObject* self)
 {
     s32 next;
 
@@ -186,17 +186,17 @@ void func_0013DC38(C27* self)
             }
         }
     }
-    func_0013DD78(self, next);
+    SetTimedState(self, next);
 }
 
-void func_00127378(C27* self, s32 kind, S127378* msg);
+void func_00127378(TimedStateObject* self, s32 kind, ObjectMessage* msg);
 
-void func_0013DCA8(C27* self, s32 kind, S127378* msg)
+void func_0013DCA8(TimedStateObject* self, s32 kind, ObjectMessage* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 0xF) {
-        if ((C27*)msg->target == self) {
-            func_0013DD78(self, 1);
+        if ((TimedStateObject*)msg->target == self) {
+            SetTimedState(self, 1);
         }
     }
 }
@@ -651,7 +651,7 @@ s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
 extern f32 D_0026185C;
 s32 func_00126D60(f32 value);
 
-void func_0013DD78(C27* self, s32 state)
+void func_0013DD78(TimedStateObject* self, s32 state)
 {
     if (state != self->state) {
         *(s32*)((u8*)self + 0x550) = state;
@@ -717,11 +717,11 @@ void func_0013EB68(void* a, s32 b)
 }
 
 s32 func_001300E8(C03* src, s32 kind);
-s32 func_0013DD08(C27* node, C03* src)
+s32 func_0013DD08(TimedStateObject* node, C03* src)
 {
     s32 r;
     if (src->flags538 & (1ULL << 55)) return 0;
-    if (node->f564 != 0) return 1;
+    if (node->acceptAll != 0) return 1;
     Child27* c = node->child;
     if (c == 0 || c->f694 == 0) {
         r = func_001300E8(src, 0x27);
@@ -987,13 +987,13 @@ struct Self_13CC00 { u8 pad[4]; };
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_00249D98[];
-s32 func_0013C9D0(Self_13CC00* self, void* a1, V249D* arg);
+s32 func_0013C9D0(Self_13CC00* self, void* a1, MemoryReader* arg);
 
 s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
 {
     if (a1 != 0) {
-        V249D arg;
-        arg.vt = (const V249D_Vt*)D_00249D98;
+        MemoryReader arg;
+        arg.methods = (const MemoryReaderMethods*)D_00249D98;
         arg.base = (u8*)a2;
         arg.f10 = a1;
         arg.f08 = a1;
@@ -1102,7 +1102,7 @@ struct Ring_0013C9D0 {
     u8 pad_18[0x04];
     s32 f1c;
 };
-s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, V249D* port)
+s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, MemoryReader* port)
 {
     s32 total = 0;
     s32 rem = n;
@@ -1112,7 +1112,7 @@ s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, V249D* port)
     while (rem != 0) {
         s32 avail = self->size - self->pos;
         s32 cnt = rem < avail ? rem : avail;
-        s32 r = port->vt->read((V249D*)((u8*)port + port->vt->adj1), cnt, self->buf + self->pos);
+        s32 r = port->methods->read((MemoryReader*)((u8*)port + port->methods->adj1), cnt, self->buf + self->pos);
         if (r == 0) {
             break;
         }

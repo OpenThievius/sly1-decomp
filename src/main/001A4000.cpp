@@ -1,49 +1,49 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "c05.h"
-#include "c42.h"
-#include "c43.h"
-#include "c44.h"
-#include "c45.h"
+#include "paired_object.h"
+#include "hit_target.h"
+#include "sound_state_object.h"
+#include "object_creator.h"
 #include "list_iter.h"
 #include "c8c.h"
-#include "c5f.h"
+#include "pair_controller.h"
 #include "t217d.h"
 #include "shapes.h"
-#include "s124df8.h"
-#include "s12c288.h"
+#include "object_link.h"
+#include "target_binding.h"
 #include "g27c220.h"
 #include "globals.h"
 
 void func_001A76A0(void* child, int flag);
 
-void func_001A5DD8(void* unused, C42* obj)
+void func_001A5DD8(void* unused, PairedObject* obj)
 {
-    func_001A76A0(obj->f560, 1);
+    func_001A76A0(obj->attachment, 1);
 }
 
 void* func_001A6480(void* self)
 {
-    C5F* obj = (C5F*)self;
-    return (u8*)self + (obj->f620 * 0xC0 + 0x3E0);
+    PairController* obj = (PairController*)self;
+    return (u8*)self + (obj->poseIndex * 0xC0 + 0x3E0);
 }
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, int idx, void* table);
 void func_00159478(void* sub, void* self);
 
-void func_001A64F8(C42* self)
+void func_001A64F8(PairedObject* self)
 {
     func_001BAC30(self);
     func_00124DF8(self, 6, D_0026B7E8);
-    func_00159478(&self->f5AC, self);
+    func_00159478(&self->notifyRecord, self);
 }
 
 struct Blob8_1A6540 { u8 b[8]; };
 
 void func_001BA130(void* self);
 
-void func_001A6540(C42* self)
+void func_001A6540(PairedObject* self)
 {
     Blob8_1A6540 tmp = *(Blob8_1A6540*)&self->blob5B0;
     func_001BA130(self);
@@ -53,9 +53,9 @@ void func_001A6540(C42* self)
 typedef void (*Fn_1A6588)(void* self);
 
 void func_00124A48(void* self);
-void func_001A6BE0(C42* self, int flag);
+void func_001A6BE0(PairedObject* self, int flag);
 
-void func_001A6588(C42* self)
+void func_001A6588(PairedObject* self)
 {
     func_00124A48(self);
     func_001A6BE0(self, 0);
@@ -82,18 +82,18 @@ void func_001BAC30(void* self);
 void func_00124DF8(void* self, int idx, void* table);
 void func_00159478(void* sub, void* self);
 
-void func_001A7008(C43* self)
+void func_001A7008(HitTarget* self)
 {
     func_001BAC30(self);
     func_00124DF8(self, 1, D_0026B830);
-    func_00159478(&self->f574, self);
+    func_00159478(&self->notifyRecord, self);
 }
 
 struct Blob8_1A7050 { u8 b[8]; };
 
 void func_001BA130(void* self);
 
-void func_001A7050(C43* self)
+void func_001A7050(HitTarget* self)
 {
     Blob8_1A7050 tmp = *(Blob8_1A7050*)&self->blob5A0;
     func_001BA130(self);
@@ -108,15 +108,15 @@ void func_00124DF8(void* self, int idx, void* table);
 void func_001A7480(void* self, int flag);
 s32 func_001B6290(void* a, void* b, s32 c, s32 d);
 
-void func_001A7098(C43* self)
+void func_001A7098(HitTarget* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 1, D_0026B840);
-    if (self->f578 != 0) {
-        *(Blob8_1A7098*)&self->f57C = *(Blob8_1A7098*)((u8*)self->f578 + 0x2DC);
+    if (self->scaledObject != 0) {
+        *(Blob8_1A7098*)&self->f57C = *(Blob8_1A7098*)((u8*)self->scaledObject + 0x2DC);
     }
-    if (self->f560 != 0) {
-        self->f564 = (void*)func_001B6290(self->f560, self, -1, 0);
+    if (self->soundId != 0) {
+        self->soundHandle = (void*)func_001B6290(self->soundId, self, -1, 0);
     }
     func_001A7480(self, 0);
     Fn_1A7098* vt = *(Fn_1A7098**)self;
@@ -130,7 +130,7 @@ void func_001B9338(void* self);
 void func_00189378(void* sub, int zero, void* out);
 void func_001B9D10(void* self, void* out, void* data, f32 scale);
 
-void func_001A7230(C43* self)
+void func_001A7230(HitTarget* self)
 {
     func_001B9338(self);
     if (self->parent == 0) {
@@ -142,7 +142,7 @@ void func_001A7230(C43* self)
 
 struct Obj_1A7290 { u8 pad[0x98]; f32 a98; };
 
-void func_001A7290(C43* self, Obj_1A7290* obj)
+void func_001A7290(HitTarget* self, Obj_1A7290* obj)
 {
     obj->a98 = obj->a98 * 0.6f;
 }
@@ -156,17 +156,17 @@ typedef void (*VFn_1A7798)(void* self);
 
 void func_00124A48(void* self);
 void* func_0015A838(void* a, int b, int c, void* d);
-void func_001A7998(C45* self, int flag);
+void func_001A7998(ObjectCreator* self, int flag);
 
-void func_001A7798(C45* self)
+void func_001A7798(ObjectCreator* self)
 {
     func_00124A48(self);
-    if (self->f558 == 0) {
+    if (self->createsObject == 0) {
         VFn_1A7798* vt = *(VFn_1A7798**)self;
         vt[7](self);
         return;
     }
-    self->f55C = func_0015A838(self->world, 0x101, 0x59, self->children.head);
+    self->created = func_0015A838(self->world, 0x101, 0x59, self->children.head);
     func_001A7998(self, 0);
 }
 
@@ -219,16 +219,16 @@ void func_001A5D50(void* self, void* obj);
 s32 func_001A6238(void* self, void* child);
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_001A5F78(Self_1A5F78* self, C42* obj)
+void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
 {
     func_00152600(self->a384, obj);
     func_00152470(self->a390, obj);
-    if (obj->f560 != 0) {
-        func_00152600(self->a3AC, obj->f560);
-        func_00152470(self->a3A0, obj->f560);
-        func_001A76A0(obj->f560, 0);
+    if (obj->attachment != 0) {
+        func_00152600(self->a3AC, obj->attachment);
+        func_00152470(self->a3A0, obj->attachment);
+        func_001A76A0(obj->attachment, 0);
     }
-    C42* child = (C42*)obj->f55C;
+    PairedObject* child = (PairedObject*)obj->partner;
     if (child != 0) {
         if (child->parent == obj) {
             func_001A5D50(self, obj);
@@ -236,11 +236,11 @@ void func_001A5F78(Self_1A5F78* self, C42* obj)
         func_00152600(self->a35C, child);
         func_00152470(self->a368, child);
         if (func_001A6238(self, child) == 0) {
-            child->f55C = 0;
+            child->partner = 0;
         }
     }
-    obj->f560 = 0;
-    obj->f55C = 0;
+    obj->attachment = 0;
+    obj->partner = 0;
     obj->desc->m03(obj);
     if (self->a39C == self->a628) {
         f32 r = func_001EAAE0(self->a638, self->a63C);
@@ -255,15 +255,15 @@ s32 func_001A6238(void* self, void* child);
 void func_001A6BE0(void* self, s32 mode);
 s32 func_001A6090(void* self, void* child);
 
-void func_001A6168(u8* self, C42* obj, C42* node)
+void func_001A6168(u8* self, PairedObject* obj, PairedObject* node)
 {
-    C42* cur = (C42*)obj->f55C;
+    PairedObject* cur = (PairedObject*)obj->partner;
     if (cur != 0 && cur == node) {
         return;
     }
-    C42* s2 = (C42*)node->f55C;
-    obj->f55C = node;
-    node->f55C = obj;
+    PairedObject* s2 = (PairedObject*)node->partner;
+    obj->partner = node;
+    node->partner = obj;
     if (s2 == 0) {
         func_00152600(self + 0x368, node);
         func_00152470(self + 0x35C, node);
@@ -271,11 +271,11 @@ void func_001A6168(u8* self, C42* obj, C42* node)
     if (cur != 0) {
         func_00152600(self + 0x35C, cur);
         func_00152470(self + 0x368, cur);
-        cur->f55C = 0;
+        cur->partner = 0;
         func_001A6238(self, cur);
     }
     if (s2 != 0) {
-        s2->f55C = 0;
+        s2->partner = 0;
         func_001A6BE0(s2, 2);
         if (func_001A6090(self, s2) != 0) {
             func_001A6BE0(s2, 3);
@@ -285,7 +285,7 @@ void func_001A6168(u8* self, C42* obj, C42* node)
 
 void func_001B7968(void* self);
 
-void func_001A7520(C44* self)
+void func_001A7520(SoundStateObject* self)
 {
     func_001B7968(self);
     self->state = -1;
@@ -364,12 +364,12 @@ s32 func_001A4710(void)
     return 0;
 }
 
-void func_001A4858(C5F* obj, s32 value)
+void func_001A4858(PairController* obj, s32 value)
 {
     obj->id2D0 = value;
 }
 
-void func_001A4860(C5F* obj, s32 value)
+void func_001A4860(PairController* obj, s32 value)
 {
     obj->id2D4 = value;
 }
@@ -434,16 +434,16 @@ tail:
     return ((ctx->f19EC >> 5) ^ 1) & 1;
 }
 
-void func_001A4870(C5F* obj, s32 value)
+void func_001A4870(PairController* obj, s32 value)
 {
     obj->id2DC = value;
 }
 
-void func_001A4878(C5F* list, s32 value)
+void func_001A4878(PairController* list, s32 value)
 {
-    s32 n = list->f2E0;
-    list->f2E4[n] = value;
-    list->f2E0 = n + 1;
+    s32 n = list->idCount;
+    list->ids[n] = value;
+    list->idCount = n + 1;
 }
 
 extern f32 D_00275C60[];
@@ -453,13 +453,13 @@ s32 func_001A4898(void);
 void func_001A5760(void* self, f32 t);
 void func_001A4EF0(void* self, void* p);
 
-void func_001A4B30(C5F* self)
+void func_001A4B30(PairController* self)
 {
     func_00124A48(self);
     if (self->id64C != func_001A4898()) {
         self->desc->m03(self);
     } else {
-        Kin5F* k = &self->kin;
+        BlendMotion* k = &self->kin;
         f32 dt = D_002623C8->dt;
         f32 v = k->pos + dt * (k->vel + dt * k->acc);
         f32 lo = D_00275C60[0];
@@ -487,7 +487,7 @@ void func_001A4B30(C5F* self)
 
 void* func_001E9970(void* zero);
 
-void func_001A4D60(C5F* self)
+void func_001A4D60(PairController* self)
 {
     void* p = 0;
     if (self->state == 2) {
@@ -504,51 +504,51 @@ void func_00152600(void* table, void* node);
 void func_00152470(void* table, void* node);
 void func_001A76A0(void* node, s32 flag);
 
-void func_001A5C38(u8* self, C42* obj)
+void func_001A5C38(u8* self, PairedObject* obj)
 {
-    func_00152600(self + 0x3AC, obj->f560);
-    func_00152470(self + 0x3A0, obj->f560);
-    func_001A76A0(obj->f560, 0);
-    obj->f560 = 0;
+    func_00152600(self + 0x3AC, obj->attachment);
+    func_00152470(self + 0x3A0, obj->attachment);
+    func_001A76A0(obj->attachment, 0);
+    obj->attachment = 0;
 }
 
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, int idx, void* table);
 
-void func_001A7550(C44* self)
+void func_001A7550(SoundStateObject* self)
 {
     func_001BAC30(self);
     func_00124DF8(self, 1, D_0026B888);
 }
 
-s32 func_001A7698(C44* p) { return p->state; }
+s32 func_001A7698(SoundStateObject* p) { return p->state; }
 
 void func_001BA130(void* self);
 
-void func_001A7588(C44* self)
+void func_001A7588(SoundStateObject* self)
 {
-    Pk8_44 tmp;
-    tmp = self->f568;
+    PackedWord8 tmp;
+    tmp = self->keptBytes;
     func_001BA130(self);
-    self->f568 = tmp;
+    self->keptBytes = tmp;
 }
 
 void func_00124A48(void* self);
 s32 func_001300E8(void* node, s32 kind);
 void func_001A76A0(void* node, s32 flag);
 
-void func_001A75D0(C44* self)
+void func_001A75D0(SoundStateObject* self)
 {
     ListFrame frame;
     func_00124A48(self);
-    if (self->f55C != 0) {
-        self->f560 = (void*)func_001B6290(self->f55C, self, -1, 1);
+    if (self->soundId != 0) {
+        self->soundHandle = (void*)func_001B6290(self->soundId, self, -1, 1);
     }
     C01* n = (C01*)self->children.head;
     while (n != 0) {
         if (func_001300E8(n, 0x7E) != 0) {
-            self->f564 = n;
+            self->child7E = n;
             break;
         }
         n = n->next;
@@ -557,10 +557,10 @@ void func_001A75D0(C44* self)
 }
 
 void func_001B93F8(void* self);
-s32 func_001A7698(C44* self);
-void func_001A76A0(C44* node, s32 flag);
+s32 func_001A7698(SoundStateObject* self);
+void func_001A76A0(SoundStateObject* node, s32 flag);
 
-void func_001A7648(C44* self)
+void func_001A7648(SoundStateObject* self)
 {
     func_001B93F8(self);
     s32 v;
@@ -572,7 +572,7 @@ void func_001A7648(C44* self)
 void func_001B7968(C03* self);
 void func_001B9AE0(C03* self, s32 a, s32 b, s32 c, s32 d);
 
-void func_001A7708(C45* self)
+void func_001A7708(ObjectCreator* self)
 {
     func_001B7968(self);
     self->state = -1;
@@ -604,27 +604,27 @@ struct Self_1A5B28 {
     f32 f634;
 };
 
-void func_001A5B28(Self_1A5B28* self, C43* obj)
+void func_001A5B28(Self_1A5B28* self, HitTarget* obj)
 {
     s32 n = self->i3C4 + 1;
     f32 x = (f32)self->i3B8;
     self->i3C4 = n;
     func_001A5760(self, (f32)n / x);
-    if (obj->f55C != 0) {
+    if (obj->partner != 0) {
         func_00152600(self->a35C, obj);
     } else {
         func_00152600(self->a368, obj);
     }
     func_00152470(self->a374, obj);
-    if (obj->f55C != 0) {
-        if (func_001A6090(self, obj->f55C) != 0) {
-            func_001A6BE0(obj->f55C, 3);
+    if (obj->partner != 0) {
+        if (func_001A6090(self, obj->partner) != 0) {
+            func_001A6BE0(obj->partner, 3);
         } else {
-            ((C43*)obj->f55C)->f55C = 0;
-            func_001A6BE0(obj->f55C, 2);
+            ((HitTarget*)obj->partner)->partner = 0;
+            func_001A6BE0(obj->partner, 2);
         }
     }
-    obj->f55C = 0;
+    obj->partner = 0;
     obj->desc->m03(obj);
     if (self->i380 == self->i624) {
         f32 t = func_001EAAE0(self->f62C, self->f630);
@@ -638,7 +638,7 @@ void func_001ED650(void* self, f32 x, f32 y, f32 z);
 
 struct Self_1A63F8 { u8 pad[0x348]; f32 f348; f32 f34C; };
 
-void func_001A63F8(Self_1A63F8* self, C42* b)
+void func_001A63F8(Self_1A63F8* self, PairedObject* b)
 {
     f32 r0 = func_001EAAE0(0.0f, 6.2831855f);
     f32 r1 = func_001EAAE0(0.0f, self->f348);
@@ -649,24 +649,24 @@ void func_001A63F8(Self_1A63F8* self, C42* b)
 extern f32 D_00275C60[];
 
 void func_001B93F8(void* self);
-s32 func_001A7420(C43* self);
-void func_001A7480(C43* self, int flag);
+s32 func_001A7420(HitTarget* self);
+void func_001A7480(HitTarget* self, int flag);
 void func_00155FA0(void* x);
 void func_00155F90(void* x);
 
-void func_001A7128(C43* self)
+void func_001A7128(HitTarget* self)
 {
     func_001B93F8(self);
     s32 n;
     while ((n = func_001A7420(self)) != self->state) {
         func_001A7480(self, n);
     }
-    void* sub = self->f578;
+    void* sub = self->scaledObject;
     if (sub != 0) {
         f32 t = -self->v150.z;
         if (9.99999975e-05f < t) {
             func_00155FA0(sub);
-            Poly43* v = &self->poly590;
+            TimePolynomial* v = &self->scalePoly;
             f32 p = v->x + t * (v->y + t * v->z);
             f32 lo = D_00275C60[0];
             f32 hi = D_00275C60[1];
@@ -680,7 +680,7 @@ void func_001A7128(C43* self)
             }
             f32 a = self->f57C * x;
             f32 b = self->f580 * x;
-            u8* o = (u8*)self->f578;
+            u8* o = (u8*)self->scaledObject;
             *(f32*)(o + 0x2DC) = a;
             *(f32*)(o + 0x2E0) = b;
         } else {
@@ -689,7 +689,7 @@ void func_001A7128(C43* self)
     }
 }
 
-s32 func_001A7420(C43* self)
+s32 func_001A7420(HitTarget* self)
 {
     s32 v = self->state;
     if (v > 0) {
@@ -699,8 +699,8 @@ s32 func_001A7420(C43* self)
             }
             goto end;
         }
-        f32 t = D_0026185C[0] - self->f554;
-        if (self->f56C < t) {
+        f32 t = D_0026185C[0] - self->stateTime;
+        if (self->recoverDelay < t) {
             v -= 1;
         }
         goto end;
@@ -717,17 +717,17 @@ void func_001BAC30(void* self);
 void func_00124DF8(void* self, int idx, void* table);
 void func_00159478(void* sub, void* self);
 
-void func_001A7750(C45* self)
+void func_001A7750(ObjectCreator* self)
 {
     func_001BAC30(self);
     func_00124DF8(self, 1, D_0026B8A0);
-    func_00159478(&self->f568, self);
+    func_00159478(&self->notifyRecord, self);
 }
 
 struct Q_1A7AA0 { u8 pad[0x34]; f32 f34; };
 struct P_1A7AA0 { u8 pad0[0x8]; Q_1A7AA0* q; u8 pad1[0x8]; f32 f14; };
 
-s32 func_001A7AA0(C45* self)
+s32 func_001A7AA0(ObjectCreator* self)
 {
     s32 mode = self->state;
     s32 r = mode;
@@ -745,7 +745,7 @@ s32 func_001A7AA0(C45* self)
     }
     goto out;
 acc:
-    p = (P_1A7AA0*)self->f564;
+    p = (P_1A7AA0*)self->activeHandle;
     if (p == 0) {
         goto two;
     }
@@ -826,28 +826,28 @@ struct Self_1A5DF8 {
     f32 f640;
 };
 
-void func_001A5DF8(Self_1A5DF8* self, C42* obj)
+void func_001A5DF8(Self_1A5DF8* self, PairedObject* obj)
 {
     self->i3C0 = self->i3C0 + 1;
-    func_00152600(self->a35C, obj->f55C);
-    func_00152470(self->a374, obj->f55C);
+    func_00152600(self->a35C, obj->partner);
+    func_00152470(self->a374, obj->partner);
     func_00152600(self->a384, obj);
     func_00152470(self->a390, obj);
-    func_00152600(self->a3AC, obj->f560);
-    func_00152470(self->a3A0, obj->f560);
+    func_00152600(self->a3AC, obj->attachment);
+    func_00152470(self->a3A0, obj->attachment);
     {
-        C42* p = (C42*)obj->f55C;
+        PairedObject* p = (PairedObject*)obj->partner;
         p->desc->m15(p, 0);
     }
     {
-        C42* q = (C42*)obj->f55C;
+        PairedObject* q = (PairedObject*)obj->partner;
         q->desc->m03(q);
     }
     obj->desc->m03(obj);
-    func_001A76A0(obj->f560, 0);
-    obj->f560 = 0;
-    ((C42*)obj->f55C)->f55C = 0;
-    obj->f55C = 0;
+    func_001A76A0(obj->attachment, 0);
+    obj->attachment = 0;
+    ((PairedObject*)obj->partner)->partner = 0;
+    obj->partner = 0;
     if (self->i380 == self->i624) {
         f32 t = func_001EAAE0(self->f62C, self->f630);
         self->f634 = D_0026185C[0] + t;
@@ -873,10 +873,10 @@ struct Msg_1A72B0 {
 
 typedef void (*Fn_1A72B0)(void* self, void* msg);
 
-void func_001A7480(C43* self, int flag);
+void func_001A7480(HitTarget* self, int flag);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* a4, void* a5);
 
-s32 func_001A72B0(C43* self, u8* p)
+s32 func_001A72B0(HitTarget* self, u8* p)
 {
     s32 st;
 
@@ -890,13 +890,13 @@ s32 func_001A72B0(C43* self, u8* p)
     if (st == 9) {
         goto done;
     }
-    if (D_0026185C[0] < self->f554 + self->f570) {
+    if (D_0026185C[0] < self->stateTime + self->hitInterval) {
         goto done;
     }
     st += 1;
-    if (st >= self->f568) {
+    if (st >= self->hitLimit) {
         func_001A7480(self, 9);
-        void* obj = self->f574;
+        void* obj = self->notifyRecord;
         if (obj != 0) {
             Msg_1A72B0 msg;
             msg.q10 = *(Quad_1A72B0*)(p + 0x30);
@@ -921,14 +921,14 @@ s32 D_0026B898[2] = { 688, 689 };
 void func_001B6628(void* a, s32 b);
 void func_001B64D8(void* a, s32 b);
 
-void func_001A76A0(C44* self, s32 idx)
+void func_001A76A0(SoundStateObject* self, s32 idx)
 {
     s32 old = self->state;
     if (old == idx) return;
     self->state = idx;
-    void* child = self->f560;
+    void* child = self->soundHandle;
     f32 d = D_0026185C[0];
-    self->f554 = d;
+    self->stateTime = d;
     if (child == 0) return;
     s32 v = D_0026B898[idx];
     if (old == -1) func_001B6628(child, v);
@@ -943,19 +943,19 @@ typedef void (*FnI_1A7998)(void* self, s32 arg);
 void func_0012E760(void* p);
 void func_0012C7B0(void* a, void* b, s32 c, void* d, f32 x, f32 y);
 
-void func_001A7998(C45* self, s32 idx)
+void func_001A7998(ObjectCreator* self, s32 idx)
 {
     if (self->state != idx) {
-        if (self->f564 != 0) {
-            func_0012E760(self->f564);
-            self->f564 = 0;
+        if (self->activeHandle != 0) {
+            func_0012E760(self->activeHandle);
+            self->activeHandle = 0;
         }
         self->state = idx;
         void* s2 = 0;
-        self->f554 = D_0026185C[0];
+        self->stateTime = D_0026185C[0];
         switch (idx) {
         case 1: {
-            void* a2 = self->f568;
+            void* a2 = self->notifyRecord;
             s2 = self->f560;
             if (a2 != 0) {
                 Buf_1A7998 buf;
@@ -967,14 +967,14 @@ void func_001A7998(C45* self, s32 idx)
             break;
         }
         case 2: {
-            void* a = self->f55C;
+            void* a = self->created;
             ((FnI_1A7998*)*(void**)a)[25](a, 0);
-            a = self->f55C;
+            a = self->created;
             ((FnI_1A7998*)*(void**)a)[51](a, 1);
             break;
         }
         }
-        if (s2 != 0) func_0012C7B0(s2, self, 0, &self->f564, 0.0f, 1.0f);
+        if (s2 != 0) func_0012C7B0(s2, self, 0, &self->activeHandle, 0.0f, 1.0f);
     }
 }
 
@@ -1047,18 +1047,18 @@ void func_001A5B28(void* a, void* b);
 void func_001B6628(void* self, void* item);
 void func_001B64D8(void* self, void* item);
 
-void func_001A7480(C43* self, s32 value)
+void func_001A7480(HitTarget* self, s32 value)
 {
     s32 old = self->state;
     if (value == old) {
         return;
     }
     if (old == 9) {
-        func_001A5B28(self->f558, self);
+        func_001A5B28(self->controller, self);
     }
     self->state = value;
-    self->f554 = D_0026185C[0];
-    void* a2 = self->f564;
+    self->stateTime = D_0026185C[0];
+    void* a2 = self->soundHandle;
     if (a2 != 0) {
         void* item = D_0026B860[value];
         if (old == -1) {
@@ -1128,7 +1128,7 @@ void func_001A6BE0(void* self, s32 mode);
 void func_001A76A0(void* node, s32 flag);
 extern f32 D_00261858[];
 
-void func_001A54F8(C5F* self)
+void func_001A54F8(PairController* self)
 {
     if (*(s32*)(self->list390 + 0xC) >= self->f628) {
         self->f640 = 3.4028234663852886e+38f;
@@ -1185,13 +1185,13 @@ void func_001BFCD8(Kind_1A5C90 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13,
 
 void func_001A5C90(void* a0, void* a1)
 {
-    C42* s = (C42*)a1;
-    ((C03*)s->f55C)->desc->m15((C03*)s->f55C, (C01*)a1);
-    s = (C42*)a1;
-    ((C03*)s->f55C)->desc02()->m20((C03*)s->f55C, (Vec02*)&D_00248D30);
-    s = (C42*)a1;
-    ((C03*)s->f55C)->desc02()->m21((C03*)s->f55C, (Vec02*)&D_00248D30);
-    func_001B9AE0((C03*)((C42*)a1)->f55C, 3, 0, 3, 0);
+    PairedObject* s = (PairedObject*)a1;
+    ((C03*)s->partner)->desc->m15((C03*)s->partner, (C01*)a1);
+    s = (PairedObject*)a1;
+    ((C03*)s->partner)->desc02()->m20((C03*)s->partner, (Vec02*)&D_00248D30);
+    s = (PairedObject*)a1;
+    ((C03*)s->partner)->desc02()->m21((C03*)s->partner, (Vec02*)&D_00248D30);
+    func_001B9AE0((C03*)((PairedObject*)a1)->partner, 3, 0, 3, 0);
     func_001BFCD8((Kind_1A5C90)0x151, (void*)0, 0, (void*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
@@ -1200,9 +1200,9 @@ struct Ctx_1A5D50 { u8 bytes[4]; };
 
 void func_001B9AE0(C03* self, s32 a, void* b, s32 c, s32 d);
 
-void func_001A5D50(Ctx_1A5D50* unused, C42* h)
+void func_001A5D50(Ctx_1A5D50* unused, PairedObject* h)
 {
-    C03* o = (C03*)h->f55C;
+    C03* o = (C03*)h->partner;
 
     (void)unused;
     o->desc->m15(o, 0);
@@ -1214,7 +1214,7 @@ void func_001A5D50(Ctx_1A5D50* unused, C42* h)
 void func_001B7968(C03* self);
 void func_001B9AE0(C03* self, s32 a, void* b, s32 c, void* d);
 
-void func_001A6498(C42* self)
+void func_001A6498(PairedObject* self)
 {
     func_001B7968(self);
     self->state = -1;
@@ -1226,17 +1226,17 @@ void func_001A6498(C42* self)
 // Matched: float stores in retail's order with constants loaded as locals; int stores 0x2D0..0x2DC, 0x64C, 0x650 in that order.
 
 struct __attribute__((aligned(16))) Table_1A4718 {
-    Quad5F q[12];
+    AlignedQuad q[12];
 };
 
 extern const Table_1A4718 D_0024C9D0;
-extern Quad5F D_00275C50;
+extern AlignedQuad D_00275C50;
 
-void func_00123ED0(C5F* self);
+void func_00123ED0(PairController* self);
 void func_00152438(void* self, s32 value);
 void func_0018D800(void* dst, void* src, s32 count);
 
-void func_001A4718(C5F* self)
+void func_001A4718(PairController* self)
 {
     Table_1A4718 tmp;
 
@@ -1332,19 +1332,19 @@ void func_001A4070(C15* self, s32 n)
 
 void func_001B7968(C03* self);
 void func_001B9AE0(C03* self, s32 a, void* b, s32 c, s32 d);
-void func_001A6F88(C43* self)
+void func_001A6F88(HitTarget* self)
 {
     s32* z;
     func_001B7968(self);
     func_001B9AE0(self, 2, (void*)&D_00248D20, 3, 0);
     f32 one = 1.0f;
     f32 pt2 = 0.2f;
-    z = (s32*)&self->poly590;
-self->f56C = one;
-self->poly590.x = one;
-self->f568 = 8;
+    z = (s32*)&self->scalePoly;
+self->recoverDelay = one;
+self->scalePoly.x = one;
+self->hitLimit = 8;
 self->state = -1;
-self->f570 = pt2;
+self->hitInterval = pt2;
 z[1]=0;z[2]=0;
 }
 
@@ -1399,18 +1399,18 @@ void func_001A7FE8(C8C* self)
     func_001DBCC8(self->world, (void*)func_001A8208, self, 0, 0);
 }
 
-struct Link5F { u8 pad0[0x2D4]; s32 f2D4; };
+struct LinkedObject { u8 pad0[0x2D4]; s32 f2D4; };
 extern f32 D_00261858[];
-void func_00124FC0(C5F* self);
-s32 func_001A4DC0(C5F* self);
-void func_001A4EF0(C5F* self, s32 mode);
-void func_001A5120(C5F* self);
-void func_001A54F8(C5F* self);
-void func_001A7998(C45* t, s32 flag);
+void func_00124FC0(PairController* self);
+s32 func_001A4DC0(PairController* self);
+void func_001A4EF0(PairController* self, s32 mode);
+void func_001A5120(PairController* self);
+void func_001A54F8(PairController* self);
+void func_001A7998(ObjectCreator* t, s32 flag);
 
-void func_001A4C48(C5F* self)
+void func_001A4C48(PairController* self)
 {
-    C45* t;
+    ObjectCreator* t;
     s32 st;
     func_00124FC0(self);
     while ((st = func_001A4DC0(self)) != self->state) {
@@ -1437,7 +1437,7 @@ void func_001A4C48(C5F* self)
         t = self->target;
         if (t) {
             if (t->state == 0) {
-                Link5F* s = self->link;
+                LinkedObject* s = self->link;
                 if (s == 0 || s->f2D4 != 3) {
                     func_001A7998(t, 1);
                 }
@@ -1450,7 +1450,7 @@ void func_001A4C48(C5F* self)
 
 struct Par_1A4DC0 { u8 pad[0x610]; u32 f610; };
 
-s32 func_001A4DC0(C5F* self)
+s32 func_001A4DC0(PairController* self)
 {
     u32 s = self->state;
     switch (s) {
@@ -1470,7 +1470,7 @@ s32 func_001A4DC0(C5F* self)
         break;
     case 5:
         if (self->target) {
-            if (self->target->state == 3 && self->target->f554 + 3.0f < D_0026185C[0]) s = 6;
+            if (self->target->state == 3 && self->target->stateTime + 3.0f < D_0026185C[0]) s = 6;
         } else if (self->f654 + 5.0f < D_0026185C[0]) {
             if (!self->link || self->link->f2D4 != 3) s = 6;
         }
@@ -1500,24 +1500,24 @@ struct Ev_1A6DE0 {
 };
 enum Id_1A6DE0 { id_1A6DE0_37 = 0x37 };
 
-extern void func_001A6BE0(C42* o, s32 n);
+extern void func_001A6BE0(PairedObject* o, s32 n);
 extern void func_001BFCD8(Id_1A6DE0 id, s32 a1, s32 a2, Vec_1A6DE0* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
-s32 func_001A6DE0(C42* o, Ev_1A6DE0* ev) {
+s32 func_001A6DE0(PairedObject* o, Ev_1A6DE0* ev) {
     if (ev->flags & 0x20) {
         switch (o->state) {
         case 1: case 2: case 3: case 4: case 5: case 7: case 8:
             func_001A6BE0(o, 9);
             break;
         case 6: {
-            C43* c = (C43*)o->f55C;
+            HitTarget* c = (HitTarget*)o->partner;
             func_001A6BE0(o, 9);
             if (c) func_001A7480(c, 9);
             break;
         }
         }
         if (o->state == 9) {
-            C43* t = (C43*)o->f5AC;
+            HitTarget* t = (HitTarget*)o->notifyRecord;
             if (t) {
                 Msg_1A6DE0 m;
                 m.kind = 6;
@@ -1570,15 +1570,15 @@ void func_001A7D98(Obj_1A7D98* self, s32 state)
     self->state = state;
 }
 
-struct Link_1A4EF0 { u8 pad[0x18]; C5F* f18; };
+struct Link_1A4EF0 { u8 pad[0x18]; PairController* f18; };
 
 extern u8 D_00275BC0[];
 extern u8 D_00261EF0[];
 
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_001E9498(u8* a, u8* b);
-void func_001DDC38(void* host, C5F* self);
-void func_001A6BE0(C5F* o, s32 n);
+void func_001DDC38(void* host, PairController* self);
+void func_001A6BE0(PairController* o, s32 n);
 void func_001A4070(void* a, s32 n);
 void func_00151E20(u8* a, f32 b);
 void func_00151FC8(u8* a);
@@ -1587,11 +1587,11 @@ void func_00194D30(u8* a, s32 b, s32 c);
 #define F(o, off) (*(f32*)((u8*)(o) + (off)))
 #define W(o, off) (*(s32*)((u8*)(o) + (off)))
 #define P(o, off) (*(void**)((u8*)(o) + (off)))
-#define O(o, off) (*(C5F**)((u8*)(o) + (off)))
+#define O(o, off) (*(PairController**)((u8*)(o) + (off)))
 
-void func_001A4EF0(C5F* self, s32 state)
+void func_001A4EF0(PairController* self, s32 state)
 {
-    C5F* o;
+    PairController* o;
     s32 v;
     ListFrame frame;
     if (W(self, 0x650) == state) return;
@@ -1658,44 +1658,44 @@ void func_001A4EF0(C5F* self, s32 state)
     }
 }
 
-void func_0012E760(C42* o);
-void func_001B6438(C42* o);
-void func_001A5C38(void* p, C42* o);
-void func_001A5DD8(void* p, C42* o);
-void func_001A5DF8(void* p, C42* o);
-void func_001A5F78(void* p, C42* o);
-void func_001A5C90(void* p, C42* o);
-void func_0012C288(f32 a, f32 b, void* h, C42* o, s32 n, S12C288* buf, s32 e, void** out);
-void* func_001B6290(void* a, C42* o, s32 c, s32 d);
+void func_0012E760(PairedObject* o);
+void func_001B6438(PairedObject* o);
+void func_001A5C38(void* p, PairedObject* o);
+void func_001A5DD8(void* p, PairedObject* o);
+void func_001A5DF8(void* p, PairedObject* o);
+void func_001A5F78(void* p, PairedObject* o);
+void func_001A5C90(void* p, PairedObject* o);
+void func_0012C288(f32 a, f32 b, void* h, PairedObject* o, s32 n, TargetBinding* buf, s32 e, void** out);
+void* func_001B6290(void* a, PairedObject* o, s32 c, s32 d);
 
-void func_001A6BE0(C42* self, s32 mode)
+void func_001A6BE0(PairedObject* self, s32 mode)
 {
-    S12C288 buf[2];
-    S12C288* w;
+    TargetBinding buf[2];
+    TargetBinding* w;
     void* h;
     void* s3;
 
     if (self->state == mode) return;
-    if (self->f59C) {
-        func_0012E760((C42*)self->f59C);
-        self->f59C = 0;
+    if (self->activeHandle) {
+        func_0012E760((PairedObject*)self->activeHandle);
+        self->activeHandle = 0;
     }
-    if (self->f5A8) {
-        func_001B6438((C42*)self->f5A8);
-        self->f5A8 = 0;
+    if (self->soundHandle) {
+        func_001B6438((PairedObject*)self->soundHandle);
+        self->soundHandle = 0;
     }
     switch (self->state) {
     case 1:
-        func_001A5C38(self->f558, self);
+        func_001A5C38(self->controller, self);
         break;
     case 5:
-        if (mode == 6) func_001A5DD8(self->f558, self);
+        if (mode == 6) func_001A5DD8(self->controller, self);
         break;
     case 6:
-        if (mode == 0) func_001A5DF8(self->f558, self);
+        if (mode == 0) func_001A5DF8(self->controller, self);
         break;
     case 9:
-        func_001A5F78(self->f558, self);
+        func_001A5F78(self->controller, self);
         break;
     default:
         break;
@@ -1703,7 +1703,7 @@ void func_001A6BE0(C42* self, s32 mode)
     self->state = mode;
     h = 0;
     s3 = 0;
-    self->f554 = D_0026185C[0];
+    self->stateTime = D_0026185C[0];
     w = buf;
     switch (mode) {
     case 0: case 10:
@@ -1712,12 +1712,12 @@ void func_001A6BE0(C42* self, s32 mode)
         h = self->f58C;
         break;
     case 4:
-        func_001A5C90(self->f558, self);
-        w->key = 0x2A0; w->val = self->f55C; w++;
+        func_001A5C90(self->controller, self);
+        w->key = 0x2A0; w->object = self->partner; w++;
         h = self->f594;
         break;
     case 5: case 6:
-        w->key = 0x2A0; w->val = self->f55C; w++;
+        w->key = 0x2A0; w->object = self->partner; w++;
         h = self->f590;
         break;
     case 7:
@@ -1730,8 +1730,8 @@ void func_001A6BE0(C42* self, s32 mode)
         h = self->f598;
         break;
     }
-    if (h) func_0012C288(0.0f, 1.0f, h, self, w - buf, buf, 1, &self->f59C);
-    if (s3) self->f5A8 = func_001B6290(s3, self, -1, 1);
+    if (h) func_0012C288(0.0f, 1.0f, h, self, w - buf, buf, 1, &self->activeHandle);
+    if (s3) self->soundHandle = func_001B6290(s3, self, -1, 1);
 }
 
 extern f32 D_00261858[];
@@ -1812,7 +1812,7 @@ struct Curve_1A5760 {
 
 #define P(o) ((const Poly_1A5760*)((u8*)self + (o)))
 
-void func_001A5760(C5F* self, f32 dt)
+void func_001A5760(PairController* self, f32 dt)
 {
     f32 t0;
     Curve_1A5760::Get(t0, P(0x5B0), dt);
@@ -1852,7 +1852,7 @@ void func_001A5760(C5F* self, f32 dt)
 // Data
 
 f32 D_0026B7D8[4] = { 20.0f, 0.0f, 0.30000001192092896f, 0.0f };
-S124DF8 D_0026B7E8[6] = {
+ObjectLink D_0026B7E8[6] = {
     { 0x2, 0x29C, 0x58C },
     { 0x2, 0x29D, 0x590 },
     { 0x2, 0x29E, 0x594 },
@@ -1860,10 +1860,10 @@ S124DF8 D_0026B7E8[6] = {
     { 0x2, 0x2A1, 0x5A0 },
     { 0x2, 0x2A2, 0x5A4 }
 };
-S124DF8 D_0026B830[1] = { { 0x2, 0x2A3, 0x560 } };
-S124DF8 D_0026B840[1] = { { 0x6, 0x2AE, 0x578 } };
-S124DF8 D_0026B888[1] = { { 0x2, 0x2AF, 0x55C } };
-S124DF8 D_0026B8A0[1] = { { 0x2, 0x2B3, 0x560 } };
+ObjectLink D_0026B830[1] = { { 0x2, 0x2A3, 0x560 } };
+ObjectLink D_0026B840[1] = { { 0x6, 0x2AE, 0x578 } };
+ObjectLink D_0026B888[1] = { { 0x2, 0x2AF, 0x55C } };
+ObjectLink D_0026B8A0[1] = { { 0x2, 0x2B3, 0x560 } };
 f32 D_0026B850[4] = { 2.0f, 0.0f, 0.699999988079071f, 0.0f };
 void* D_0026B860[10] = { (void*)0x2A4, (void*)0x2A5, (void*)0x2A6, (void*)0x2A7, (void*)0x2A8, (void*)0x2A9, (void*)0x2AA, (void*)0x2AB, (void*)0x2AC, (void*)0x2AD };
 Entry_26B8B0 D_0026B8B0[11] = {

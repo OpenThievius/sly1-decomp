@@ -2,12 +2,12 @@
 // PAL centres y on 234.30508f (not 246.40001f), clamps it to 452.61017f (not 476.80002f), tests
 // 468.61017f (not 492.80002f), scales y by 0.5462963f and offsets it by 1920.0f, and the frame's
 // y corners are 0x7800 and 0x8800 (not 0x7900 and 0x8700)
-void func_00180398(C8E* self, f32 t)
+void func_00180398(ColoredTriangleSet* self, f32 t)
 {
     f32 mat[16];
     Obj_180398* o;
 
-    func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->f60) + t * (4.0f / self->f60));
+    func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
     o = func_001925F0();
     if (o != 0 && (o = o->desc->m15C(o)) != 0 && o->desc->m144(o) == 2) {
         Vec_180398 v;
@@ -30,7 +30,7 @@ void func_00180398(C8E* self, f32 t)
         func_00161708(&D_00262280, 0x42, 0x44);
         vis = 0;
         for (g = 4; g >= 0; g--) {
-            Rec8E* r = &self->recs[g];
+            TriangleList* r = &self->lists[g];
             Col_180398 col = *(Col_180398*)&r->col;
             if (g == 0) {
                 Col_180398 mixed;
@@ -46,17 +46,17 @@ void func_00180398(C8E* self, f32 t)
             if (g == 0) {
                 base = col;
             }
-            if (r->n > 0) {
+            if (r->count > 0) {
                 s32 i;
                 func_001613C0(&D_00262280, 0, 1, 1);
                 func_00161458(&D_00262280, *(u32*)&col);
                 func_001613C0(&D_00262280, (s8)col.c[3] >= 0 ? 0x43 : 0x83, 1, 4);
-                for (i = 0; i < r->n; i++) {
-                    u32* idx = (u32*)&r->ents[i];
+                for (i = 0; i < r->count; i++) {
+                    u32* idx = (u32*)&r->triangles[i];
                     s32 j;
                     for (j = 2; j >= 0; j--, idx++) {
                         Q_180108 p, q;
-                        p.v = *(V128_180108*)&self->f38[*idx];
+                        p.v = *(V128_180108*)&self->points[*idx];
                         q.v = func_00188740(mat, p.v);
                         func_001615F0(&D_00262280, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
                         vis = vis || 0.0f < q.f[0] || q.f[0] < 640.0f || 0.0f < q.f[1] || q.f[1] < 468.61017f;
@@ -67,8 +67,8 @@ void func_00180398(C8E* self, f32 t)
         if (vis) {
             Q_180108 lo, hi;
             f32 d;
-            lo.v = func_00188740(mat, *(V128_180108*)&self->f40);
-            hi.v = func_00188740(mat, *(V128_180108*)&self->f50);
+            lo.v = func_00188740(mat, *(V128_180108*)&self->minX);
+            hi.v = func_00188740(mat, *(V128_180108*)&self->maxX);
             func_001613C0(&D_00262280, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
             func_00161458(&D_00262280, *(u32*)&base);
             func_001615F0(&D_00262280, 0x6C00, 0x7800, 0, 0);

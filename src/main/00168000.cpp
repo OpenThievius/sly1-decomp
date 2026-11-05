@@ -2,11 +2,11 @@
 #include "common.h"
 #include "c05.h"
 #include "c2f.h"
-#include "c3a.h"
+#include "listed_collision_part.h"
 #include "c6e.h"
-#include "c7e.h"
-#include "c69.h"
-#include "c6a.h"
+#include "point_object.h"
+#include "current_placed_object.h"
+#include "part_holder_object.h"
 #include "list_iter.h"
 #include "t217d.h"
 #include "v24a0.h"
@@ -15,15 +15,15 @@
 #include "t2195.h"
 #include "g262c70.h"
 #include "globals.h"
-#include "s1694f8.h"
-#include "s168d68.h"
-#include "s169b18.h"
+#include "strip_mesh.h"
+#include "bump_allocator.h"
+#include "texture_header.h"
 #include "shapes.h"
 
 void func_001B7B78(void* self);
 void func_00152600(void* data, void* self);
 
-void func_0016A4C8(C3A* self)
+void func_0016A4C8(ListedCollisionPart* self)
 {
     func_001B7B78(self);
     func_00152600(&D_00262708, self);
@@ -31,11 +31,11 @@ void func_0016A4C8(C3A* self)
 
 void func_001BA130(void* self);
 
-void func_0016A500(C3A* self)
+void func_0016A500(ListedCollisionPart* self)
 {
-    Link02 tmp = self->link558;
+    Link02 tmp = self->listLink;
     func_001BA130(self);
-    self->link558 = tmp;
+    self->listLink = tmp;
 }
 
 s32 func_001B8A08(C03* a, C03* b);
@@ -241,7 +241,7 @@ void func_00124DF8(void* self, s32 n, void* table);
 u32 func_001601D8(s32 idx);
 u32* func_00160810(s32 idx);
 
-void func_0016AA18(C6A* self)
+void func_0016AA18(PartHolderObject* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 9, &D_00262718);
@@ -251,7 +251,7 @@ void func_0016AA18(C6A* self)
         s32 s4 = t << 8;
 
         for (s32 i = 0; i < 9; i++) {
-            if (self->slots[i] == 0) {
+            if (self->parts[i] == 0) {
                 continue;
             }
             s32 flag;
@@ -268,7 +268,7 @@ void func_0016AA18(C6A* self)
                 }
             }
             if (flag != 0) {
-                Part6A* obj = self->slots[i];
+                PartObject* obj = self->parts[i];
                 obj->vtbl[6](obj);
             }
         }
@@ -309,16 +309,16 @@ void func_0016A140(C7F* self)
 
 void func_0016A1B0(C7F* self)
 {
-    if (self->id60 != -1) {
-        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->world, self->id60, self->parent);
-        self->found64 = r;
+    if (self->targetId != -1) {
+        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->world, self->targetId, self->parent);
+        self->target = r;
         r->f398 = 0;
     }
 }
 
 void func_0016A1F8(C7F* self)
 {
-    Keep7E saved = self->keep;
+    KeptBits saved = self->keep;
     func_001830D8(self);
     self->keep = saved;
 }
@@ -329,7 +329,7 @@ void func_0012A080(void* self, f32 k);
 void func_0012A150(void* self, f32 k);
 void func_0012A270(void* self, f32 k);
 
-void func_0016A3A8(C3A* self)
+void func_0016A3A8(ListedCollisionPart* self)
 {
     f32 k = 3.0f;
     func_001B7968(self);
@@ -342,7 +342,7 @@ void func_0016A3A8(C3A* self)
 
 void func_001B7A98(void* self);
 
-void func_0016A490(C3A* self)
+void func_0016A490(ListedCollisionPart* self)
 {
     func_001B7A98(self);
     func_00152470(&D_00262708, self);
@@ -420,12 +420,12 @@ void func_00169D58(C6F* self)
 }
 
 struct Pool_1694F8 { s32 f0; s32 f4; s32 f8; s32 fC; };
-struct Link_1694F8 { S1694F8_P1* src; Pool_1694F8* dst; Link_1694F8* next; };
+struct Link_1694F8 { MeshStrip* src; Pool_1694F8* dst; Link_1694F8* next; };
 
 void func_001694A0(void* p);
 void* func_0018D5C0(u32 n);
 
-void func_001694F8(S1694F8_P0* a0, S1694F8_P1* a1, s32 a2, s32 a3, s32 a4, S1694F8_P5* a5)
+void func_001694F8(StripMesh* a0, MeshStrip* a1, s32 a2, s32 a3, s32 a4, MeshNode* a5)
 {
     Pool_1694F8 local;
     Pool_1694F8* e;
@@ -448,7 +448,7 @@ void func_001694F8(S1694F8_P0* a0, S1694F8_P1* a1, s32 a2, s32 a3, s32 a4, S1694
     if (a0 == 0) {
         goto pool_path;
     }
-    if ((a0->f0C & 0x10000000) == 0) {
+    if ((a0->flags & 0x10000000) == 0) {
         goto pool_path;
     }
     if (link != 0) {
@@ -467,10 +467,10 @@ store:
     e->f0 = a3;
     idx = 0;
     if (a5 != 0) {
-        idx = a5->idx;
+        idx = a5->index;
     }
     scale = a1->count;
-    base = a1->f4;
+    base = a1->base;
     off = idx * scale;
     e->f8 = a2;
     e->fC = a4;
@@ -493,7 +493,7 @@ struct Link_169608 { s32 src; Pool_169608* dst; Link_169608* next; };
 void func_001694A0(void* p);
 void* func_0018D5C0(u32 n);
 
-void func_00169608(s32 a0, s32 a1, S1694F8_P5* a2)
+void func_00169608(s32 a0, s32 a1, MeshNode* a2)
 {
     Pool_169608 local;
     Pool_169608* e;
@@ -605,11 +605,11 @@ void func_00168A48(Blob_168AF8* b)
 
 u32 func_00168D30(u32 n) { u32 count = 0; u32 value = 1; while (value < n && count < 31) { value <<= 1; count++; } return count; }
 
-void func_00168D68(S168D68* p, s32 value, s32 other) { p->f4 = value; p->f0 = value; p->f8 = other; }
+void func_00168D68(BumpAllocator* p, s32 value, s32 other) { p->next = value; p->start = value; p->limit = other; }
 
-void func_00168D78(S168D68* p) { p->f4 = p->f0; }
+void func_00168D78(BumpAllocator* p) { p->next = p->start; }
 
-void func_00168D68(S168D68*,s32,s32);
+void func_00168D68(BumpAllocator*,s32,s32);
 void func_00168D00()
 {
     func_00168D68(&D_002626D8,0x1E00,0x4000);
@@ -781,7 +781,7 @@ void func_001E96F8(void* obj, s32 mode);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_0016AB38(void* self);
 
-void func_0016AED8(C69* self)
+void func_0016AED8(CurrentPlacedObject* self)
 {
     func_00124A48(self);
     self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
@@ -912,7 +912,7 @@ void func_00152B80(void* self, s32 lo, s32 hi);
 void func_00168FB0(V24A2_ImgA* e, s32 v);
 void func_00169088(V24A2_ImgA* e, s32 v, void* ctx);
 
-s32 func_001690C0(s32 mask, S168D68* b, V24A0* c)
+s32 func_001690C0(s32 mask, BumpAllocator* b, V24A0* c)
 {
     s32 saved;
 
@@ -932,15 +932,15 @@ s32 func_001690C0(s32 mask, S168D68* b, V24A0* c)
             }
         }
     }
-    if ((b->f4 & 0x7F) != 0) {
-        func_00168D88(b, 0x80 - (b->f4 & 0x7F));
+    if ((b->next & 0x7F) != 0) {
+        func_00168D88(b, 0x80 - (b->next & 0x7F));
     }
     for (s32 i = 0; i < D_00274500; i++) {
         V24A2_ImgA* e = &D_00274504[i];
         if ((e->f4 & mask) == mask) {
             s32 v;
-            if (e->f8 == 0 && (b->f4 & 0x1F) != 0) {
-                func_00168D88(b, 0x20 - (b->f4 & 0x1F));
+            if (e->f8 == 0 && (b->next & 0x1F) != 0) {
+                func_00168D88(b, 0x20 - (b->next & 0x1F));
             }
             v = func_00168D88(b, e->f0A);
             func_00168FB0(e, v);
@@ -1070,13 +1070,13 @@ void func_0016BDD0(T217D_1330* self, s32 flag)
 void func_001613C0(void* p, s32 a, s32 b, s32 c);
 void func_00161708(void* p, s32 a, u64 b);
 
-void func_00169B18(S169B18* src, void* dst)
+void func_00169B18(TextureHeader* src, void* dst)
 {
-    s32 w = 1 << (s32)((src->bits >> 26) & 0xF);
+    s32 w = 1 << (s32)((src->tex0 >> 26) & 0xF);
     s32 cap = 64;
     if (cap < w) cap = w;
-    s32 f = (s32)(src->bits & 0x3FFF) >> 5;
-    s32 m = 1 << (s32)((src->bits >> 30) & 0xF);
+    s32 f = (s32)(src->tex0 & 0x3FFF) >> 5;
+    s32 m = 1 << (s32)((src->tex0 >> 30) & 0xF);
     func_001613C0(dst, 0x200, 1, 0xE);
     func_00161708(dst, 0x4D, (u64)(cap / 64) << 16 | (u64)f);
     func_00161708(dst, 0x4F, 0x30000000 | (u64)f | (u64)0x8000 << 17);
@@ -1449,7 +1449,7 @@ void func_0016A100(C7F* self)
 {
     func_00182C18(self);
     f32 k = D_0024A798;
-    self->id60 = -1;
+    self->targetId = -1;
     self->f68 = 1;
     self->f70 = k;
 }
@@ -1457,7 +1457,7 @@ void func_0016A100(C7F* self)
 void func_001BAC30(C03* self);
 void* func_0018D5C0(s32 bytes);
 
-void func_0016A420(C3A* self)
+void func_0016A420(ListedCollisionPart* self)
 {
     Rec2195_224* b;
     Quad16* dst;
@@ -1481,7 +1481,7 @@ void func_001B9338(C03* self, f32 t);
 void func_00189378(Mat02* sub, s32 zero, Mat3U* out);
 void func_001B91A8(C03* self, Mat3U* out, s32 a, void* table, s32 b, f32 t);
 
-void func_0016A580(C3A* self, f32 t)
+void func_0016A580(ListedCollisionPart* self, f32 t)
 {
     Mat3U buf;
 
@@ -1607,7 +1607,7 @@ void func_0016B580(T217D_12E0* self, G262C70* arg)
     Sub_16B580* p = o->f2E0;
     if (o->f308 != 0) {
         if (o->f308 == o->f33C) {
-            func_0018C7F8(D_00264A40);
+            func_0018C7F8(g_memoryCard);
         }
         func_001518B8(o->f308);
         o->f308 = 0;
@@ -1842,7 +1842,7 @@ extern s32 D_00274500;
 extern s32 D_00274514;
 extern s32 D_00274510;
 
-void func_00168D68(S168D68* p, s32 a, s32 b);
+void func_00168D68(BumpAllocator* p, s32 a, s32 b);
 void func_001611B8(V24A0* f);
 void func_001EE318(V24A0* f);
 void func_0018D608(void);
@@ -1851,7 +1851,7 @@ void func_00152B38(V24A0* f);
 void func_001EE450(V24A0* f);
 void func_001528E0(V24A0* f);
 void func_001529C8(V24A0* f, s32 n, u8* buf);
-s32 func_00168D88(S168D68* p, s32 size);
+s32 func_00168D88(BumpAllocator* p, s32 size);
 void func_00168E78(V24A2_ImgB* e, s32 v);
 void func_00168F48(V24A2_ImgB* e, s32 v, V24A0* f);
 void func_00168FB0(V24A2_ImgA* e, s32 v);
@@ -1869,7 +1869,7 @@ void func_0018D6F0(void);
 
 s32 func_00169780(u32 mask)
 {
-    S168D68 span;
+    BumpAllocator span;
     V24A0 fa;
     V24A0 fb;
     u8 buf[0xA0];
@@ -1924,7 +1924,7 @@ s32 func_00169780(u32 mask)
             i++;
         } while (i < D_00274500);
     }
-    if (span.f4 > span.f0) {
+    if (span.next > span.start) {
         func_001528E0(&fa);
         func_001529C8(&fa, 0xA, buf);
         func_001613C0(&fa, 0, 1, 0xE);

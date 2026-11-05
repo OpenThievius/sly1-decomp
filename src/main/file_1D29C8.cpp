@@ -6,7 +6,7 @@
 #include "globals.h"
 #include "g27c220.h"
 #include "g262c70.h"
-#include "s127378.h"
+#include "object_message.h"
 
 s32 D_00274F38[8] = { 0x12, 0x404, 0x1008, 0x40, 0x80, 0x200, 0x8000, 0 };
 const char* D_00274F58[7] = { "&2T&.: Dive", "&2T&.: Roll", "&2T&.: Slow", "&2T&.: Mine", "&2T&.: Fast", "&2T&.: Decoy", "&2T&.: Stun" };
@@ -64,7 +64,7 @@ void func_00189378(Mat02* sub, s32 zero, void* out);
 void func_001B91A8(C03* self, void* buf, s32 a, void* p, s32 b, f32 t);
 
 
-void func_00127378(C02* self, s32 kind, S127378* msg);
+void func_00127378(C02* self, s32 kind, ObjectMessage* msg);
 void func_00185D20(f32 f, void* a0, void* a1, void* a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
 
 void func_0016EC20(G262C70* self, s32 mask);
@@ -89,7 +89,7 @@ void func_001D29C8(u32 mode);
 s32 func_001D3100(G262C70* self, s32 start, s32 count, s32* table);
 void func_001D32D8(C4C* self, void* v, s32 flag);
 void* func_001D3500(C4C* a0, Node_D3500* a1);
-void func_001D3678(C4C* self, s32 kind, S127378* msg);
+void func_001D3678(C4C* self, s32 kind, ObjectMessage* msg);
 
 void func_001D29C8(u32 mode)
 {
@@ -242,7 +242,7 @@ void* func_001D3500(C4C* a0, Node_D3500* a1)
 
 ASM_FUNC(func_001D35A8);
 
-void func_001D3678(C4C* self, s32 kind, S127378* msg)
+void func_001D3678(C4C* self, s32 kind, ObjectMessage* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 10) {
