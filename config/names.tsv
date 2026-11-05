@@ -267,3 +267,138 @@ func_001F00C0	SaveFadeRequest	copies a 0x14-byte request from its second argumen
 func_001F00F0	RestoreFadeRequest	when a queued request exists and bit 0x800 of the object's flags is set, clears that bit, copies the queued request over the active one, copies queuedStyle into style and calls func_001F0220 with its third argument
 func_001EFEE0	DrawScreenFade	when style is 0 or 1, draws a black rectangle over the screen (640 by 492.8) with an alpha of opacity times 255 through func_0019DDA0
 func_001EFD10	UpdateScreenFade	switches on the mode each frame: mode 0 tries func_001F00F0, mode 1 ramps opacity up over 0.5 or 1.5 seconds from modeStartTime, mode 3 ramps it back down over 0.25 or 1.0, then it calls func_001F0220 with the mode it reached
+func_00182C18	InitObject	slot 0 of the root class 0x01: runs its slot 1 (class defaults) then slot 2 (link into the parent's list); class 0x02's set-up func_00123ED0 calls it
+func_0011EDA8	ApplyObjectClassDefaults	slot 1: walks the entries of D_00244950 for the object's class id and, for each whose flags have 0x800, parses its body into a buffer and hands it to func_0011E680 with the object
+func_00182C80	AddObjectToParentList	slot 2: appends itself to its parent's children list (or the world's list at +0x48 when it has no parent) unless already linked, then runs slot 4 if the whole chain to the world is linked
+func_00182D50	RemoveObjectFromParentList	slot 3: unlinks itself from its parent's children list (or the world's list at +0x48) if present, running slot 5 first when the chain to the world was linked
+func_00182D00	AttachObject	slot 4: runs the hook slot 6, then slot 14 with kind 1 (class 0x02's override also attaches every child)
+func_00182E88	DetachObject	slot 5: runs the hook slot 7, then slot 14 with kind 2 (RemoveObjectFromParentList calls it)
+func_00182D48	RegisterObject	slot 6: empty in the base; class 0x02's override (func_001240F8) is what puts the object into the world's lists and AttachObject calls it first
+func_00182ED0	UnregisterObject	slot 7: empty in the base; class 0x02's override (func_001243E0) takes the object out of the world's lists and DetachObject calls it first
+func_001830B0	CloneObject	slot 8: only calls slot 9 with the source; class 0x02's override also clones the children
+func_001830D8	CopyObjectData	slot 9: copies the source's bytes after the 0x34-byte header and its two property blocks (+0x04, +0x2C), re-registers the id in the world's id lists and takes the alias
+func_001833D0	LoadObjectProperties	slot 10: calls func_0011EC40, which reads (index, value) records from the level stream until the stream ends and applies each with func_0011E680 using the table D_002505D8
+func_00183350	SendObjectNotification	slot 14: calls slot 13 (kind, arg) when it is set, then calls each callback of the list at +0x28 with the same kind and arg
+func_00182C58	StartObject	slot 16: calls func_001837E0 with index 0, which looks up the event record 0 in the table at +0x2C and queues it with the world; class 0x02's override calls it first and then starts the children
+func_00182F78	ReparentObject	slot 21: runs slot 3 (leave the old parent's list), stores the new parent at +0x18, runs slot 2 (join its list)
+func_001832F0	AddObjectListener	slot 23: adds to the callback list at +0x28 the listener's slot 13 with the listener as context (func_001831E8)
+func_00183320	RemoveObjectListener	slot 24: removes from the callback list at +0x28 the entry of the listener's slot 13 with the listener as context (func_00183238)
+func_00183290	AddObjectCallback	slot 25: adds a function and context to the callback list at +0x28 through func_001831E8
+func_001832C0	RemoveObjectCallback	slot 26: removes a function and context from the callback list at +0x28 through func_00183238
+func_00123ED0	InitPlacedObject	slot 0 of class 0x02: sets up the children and attachment lists, the placement bits by whether it has a parent, then runs the root set-up func_00182C18 and the default fields
+func_00124050	AttachPlacedObject	slot 4 of class 0x02: walks the children running the hook slot 6 first and each child's slot 4, then slot 14 with kind 1
+func_00124338	DetachPlacedObject	slot 5 of class 0x02: runs the hook slot 7, each child's slot 5, then slot 14 with kind 2
+func_001240F8	RegisterPlacedObject	slot 6 of class 0x02: appends itself to the world's lists at +0x54, +0x60, +0x6C or +0x78 (as a root), sets the root pointer, positions it from its path objects and calls slot 12 hook
+func_001243E0	UnregisterPlacedObject	slot 7 of class 0x02: the reverse of func_001240F8: removes itself from the world's lists, clears the root pointer, releases f54 and the 0x1C00 entry
+func_00126F78	ClonePlacedObject	slot 8 of class 0x02: copies from the owner with slot 9, then makes a copy of each of the owner's children for itself with func_00183058
+func_00127048	CopyPlacedObject	slot 9 of class 0x02: keeps its own links and lists, calls the root copy func_001830D8, copies the attachment block func_00165920 and duplicates the 0xC0-byte record at +0x224
+func_001289C0	LoadPlacedObject	slot 10 of class 0x02: reads from the stream the matrices at +0xD0 and +0x100, the placement bits, the floats at 0x80..0x88, then the property records and the child tables
+func_00127378	HandlePlacedObjectNotification	slot 13 of class 0x02: on kind 1, when the attachment record at +0x2AC has not started yet and the clock is non-zero, starts it with func_001BFCD8
+func_001249A8	PostLoadPlacedObject	slot 15 of class 0x02: prepares the record at +0x224 and the attachments, and runs slot 15 of each child
+func_00124A48	StartPlacedObject	slot 16 of class 0x02: runs StartObject, starts the attachments and effects, resolves the id keys at +0x2C4 and runs slot 16 of each key object and each child
+func_00124FC0	UpdatePlacedObject	slot 17 of class 0x02: advances the attachment block and the records by the frame time, calls each attached entry's update and fires event 1
+func_00125108	RecomputePlacedObjectFrame	slot 18 of class 0x02: calls slot 19 when it is set; the position, rotation and velocity setters call slot 18 after storing
+func_00125138	ComputePlacedObjectWorldFrame	slot 19 of class 0x02: builds the world position at +0x140 and matrix at +0x110 from the local ones at +0x100 and +0xD0 and the parent's frame, per the flags of the record at +0x224
+func_0015FBB8	SetPlacedObjectFrozen	slot 20 of class 0x02: on, saves the vectors at +0x150/+0x160 to +0xA0/+0xB0, zeroes them through slots 32/33 and sets bit 38 of the flags; off, clears the bit and restores them
+func_001245A8	ReparentPlacedObject	slot 21 of class 0x02: the override of ReparentObject; func_001B9B50 converts the frames around the call it makes
+func_001273F0	SetPlacedObjectPosition	slot 29 of class 0x02: stores the vector at +0x100, runs slot 18, refreshes the path object at +0x1EC and calls slot 14 with kind 3
+func_00127478	SetPlacedObjectRotation	slot 30 of class 0x02: stores the matrix at +0xD0, runs slot 18, refreshes the path object at +0x1F0 and calls slot 14 with kind 4
+func_001276C0	CopyPlacedObjectFrame	slot 31 of class 0x02: converts another object's position, matrix and rates into its own parent's frame and sets them through slots 29, 30, 32 and 33
+func_001274F8	SetPlacedObjectVelocity	slot 32 of class 0x02: stores the vector at +0x150, refreshes the path object at +0x1EC and wakes the object (func_00129DF8) when the vector is non-zero; RegisterPlacedObject sets it from the path object's rate
+func_00127590	SetPlacedObjectSpin	slot 33 of class 0x02: stores the vector at +0x160, refreshes the path object at +0x1F0 and wakes the object when non-zero; the path object's rotation rate goes here
+func_00122550	GetPlacedObjectPositionAt	slot 34 of class 0x02: at time 0 returns the position at +0x100 and rate at +0x150, otherwise asks the path object at +0x1EC or returns position + rate * time
+func_001225D0	GetPlacedObjectRotationAt	slot 35 of class 0x02: at time 0 returns the matrix at +0xD0 and rate at +0x160, otherwise asks the path object at +0x1F0 or integrates the rate
+func_001B7968	InitCollider	slot 0 of class 0x03: runs the placed-object set-up func_00123ED0, clears the mesh at 0x380 and copies it to 0x3A4, sets 0x4BC and 0x4C0 to -1, copies the world's gravity into 0x350 and picks the handler with func_001BB4A0
+func_001B7A98	RegisterCollider	slot 6 of class 0x03: counts itself in the world (+0x34), as a parentless body takes a contact table (func_001DC7D0) and joins the world's body list, then runs func_001240F8 and recomputes the body flags
+func_001B7B78	UnregisterCollider	slot 7 of class 0x03: the reverse of slot 6: leaves the body's parts list, uncounts itself, gives back its contact table and the touched-object list (func_001DC108), then runs func_001243E0
+func_001BA130	CopyCollider	slot 9 of class 0x03: saves its links, parts list, contact table and handler, calls the placed-object copy func_00127048, restores them and copies the meshes and BSP trees with func_00160EA0 and func_0013E6C8
+func_001BAC30	LoadCollider	slot 10 of class 0x03: reads the collision prefix from the stream: two meshes, mass, inertia, offset, the group, node-group and face-reference tables, then the common block (func_001289C0)
+func_001BB210	SendColliderNotification	slot 14 of class 0x03: calls the base func_00183350, then calls slot 13 (kind, arg) of each owner in its attachment list at 0x4B0
+func_001B89B8	RecomputeColliderFrame	slot 18 of class 0x03: runs func_00125108, tells the body's slot 50 that its parts changed and queues the object in the world (func_00138BE0 with 7)
+func_001B8960	ComputeColliderWorldFrame	slot 19 of class 0x03: runs func_00125138, then transforms mesh and mesh2 into their copies at 0x3A4 and 0x50C with the world position (0x140) and matrix (0x110) through func_001B8820
+func_0015FCD8	SetColliderFrozen	slot 20 of class 0x03: on, saves the anchor modes to 0x90/0x94, clears the anchors, zeroes the vectors at 0x170/0x180, gives back the touched list and calls the base func_0015FBB8(1); off, calls it with 0 and restores the modes
+func_001B9B50	ReparentCollider	slot 21 of class 0x03: converts the anchor vectors at 0x440/0x460 out of the old parent's frame (func_001280C0), calls the base func_001245A8, converts them into the new parent's frame and recomputes the body flags
+func_001B9C80	ReframeColliderAnchors	slot 22 of class 0x03: calls func_00124868 with the other object, then rotates the anchor vectors at 0x440/0x460 by the other's matrix at 0xD0 and sets them with their modes through func_001B9AE0
+func_001B9338	StepCollider	slot 28 of class 0x03: for a parentless body without flag bit 36 applies gravity (func_001BA500, func_001B9AB0), then calls slot 51 of each owner in the attachment list with the frame time
+func_001B9690	SetColliderPosition	slot 29 of class 0x03: stores the vector at 0x100 (resetting the tracker D_00261990 if a flagged body jumps more than 10 units), recomputes, updates the contacts, calls slot 68 of the parts and slot 14 with kind 3
+func_001B97E0	SetColliderRotation	slot 30 of class 0x03: copies the three matrix rows to 0x0D0, runs slot 18 when it has a root, updates the contacts (func_001B94F0) and calls slot 14 with kind 4
+func_001B9940	SetColliderVelocity	slot 32 of class 0x03: calls func_001274F8 and, when the new vector at 0x150 differs from the old by 2.0 or more on an axis, queues the object in the world (func_00138BE0 with 2)
+func_001B99F0	SetColliderSpin	slot 33 of class 0x03: calls func_00127590 and, when the new vector at 0x160 differs from the old by 0.02 or more on an axis, queues the object in the world (func_00138BE0 with 2)
+func_001B7D00	ApplyColliderPendingMove	slot 47 of class 0x03: adds the pending vector at 0x490 to the position at 0x100 and turns the matrix by the pending rotation at 0x4A0, clears them, then calls slot 47 of the parts and slot 18
+func_001B7F78	ApplyColliderPendingImpulse	slot 48 of class 0x03: adds the pending vectors at 0x490 and 0x4A0 into the vectors at 0x150 and 0x160, clears them and calls slot 48 of the parts
+func_001B8148	ApplyColliderPendingImpulseHalfStep	slot 49 of class 0x03: like slot 48 but also adds the pending vector times half the step D_00261860 to the position and turns the matrix by half the pending rotation, then calls slot 49 of the parts
+func_001B8540	UpdateColliderBounds	slot 50 of class 0x03: walks the body's parts and stores the minimum and maximum corner (0x420, 0x430), centre (0x3E0) and radii (0x3D0, 0x3D4) of their positions and mesh vertices
+func_001BC368	CopyColliderMeshesInFrame	slot 52 of class 0x03: takes another object's meshes, finds the largest vertex radius, copies them through the relative transform func_00188B08 into its own and copies the BSP trees
+func_001BC760	NumberColliderParts	slot 53 of class 0x03: stores the running index at 0x4C0, writes itself into the list at that index and recurses into the children whose descriptor has flag 2
+func_001B8A08	TestCollidersMayContact	slot 56 of class 0x03: returns 1 when the first object has flag bit 47 or 55 and the second has bit 55, otherwise 0
+func_001B8A48	NotifyContactHandlers	slot 67 of class 0x03: for each contact in the body's table whose timer exceeds 0.0001 calls slot 65 of both ends' handler (func_001BB540) and zeroes the timer
+func_001B9680	SaveColliderPreviousPosition	slot 68 of class 0x03: copies the vector at 0x140 to 0x370 (SetColliderPosition calls it for every part)
+func_001921A8	InitSwitchedCollider	slot 0 of class 0x05: runs InitCollider, stores itself at 0x598, sets 0x580 to 1 and switches on through func_00192990
+func_00192820	RegisterSwitchedCollider	slot 6 of class 0x05: runs RegisterCollider then func_001926D0
+func_00192850	UnregisterSwitchedCollider	slot 7 of class 0x05: runs UnregisterCollider then func_00192780
+func_001921E8	CopySwitchedCollider	slot 9 of class 0x05: runs CopyCollider and, if not yet on (0x550), sets it and switches on through func_00192990
+func_00192230	HandleSwitchedColliderNotification	slot 13 of class 0x05: after the base func_00127378, kind 0xB hands the object at 0x574 to func_001BF788 and kind 0x10 clears the matching entry of the list at 0x5AC
+func_00192B58	UpdateSwitchedCollider	slot 17 of class 0x05: runs the base update, then of the three objects at 0x588 starts (slot 6) the one picked by the clamped counter at D_002623C0+0x19E4 and stops (slot 7) the others
+func_001C4458	InitTurningCollider	slot 0 of class 0x06: runs InitActor, then sets 0x700 to 1.0, 0x360 from D_00274B20, the vector at 0x6F0 and the 12-byte blocks at 0x704 and 0x710 from tables
+func_001C44F0	StartTurningCollider	slot 16 of class 0x06: calls the base func_00124A48, resolves six object links (func_00124DF8), picks 0x610/0x614 from the fallbacks at 0x620/0x628 and 0x624/0x62C, loads the identity into 0x660
+func_001C4ED0	UpdateTurningCollider	slot 17 of class 0x06: runs UpdateActor then func_001C4C20
+func_001C5438	RecomputeTurningColliderFrame	slot 18 of class 0x06: runs RecomputeColliderFrame, then stores in 0x63C the polynomial of the heading difference |0x638 - atan2 of matrix row 0| (coefficients at 0x6F0) clamped to the pair D_00275C60
+func_001C5118	StepTurningCollider	slot 28 of class 0x06: runs StepCollider then func_001C5148
+func_001C4FA0	SetTurningColliderRotation	slot 30 of class 0x06: runs SetColliderRotation, stores atan2 of the row's y and x in the headings 0x630 and 0x638 and calls slot 88
+func_001C53B0	BuildTurningColliderHeadingMatrix	slot 84 of class 0x06: builds into the matrix at 0x660 the rotation by the heading 0x638 about the axis D_00248D20 (func_00188850)
+func_0016F608	InitPlayer	slot 0 of class 0x07: runs the base set-up func_001C4458, stores -1 in the state words at 0x2220, 0x2228, 0x223C and 0x224C and copies four default quads into 0x2440..0x2480
+func_00178038	RegisterPlayer	slot 6 of class 0x07: resets the animation cursor at 0x1520 (func_001C29E8) and runs the class 0x05 registration func_00192820
+func_0016F7B0	LoadPlayer	slot 10 of class 0x07: runs LoadCollider, installs the table D_00262E40 with func_00124DF8, sets the two heading floats to -1 and stores itself in the singleton D_00262E10
+func_00170960	HandlePlayerNotification	slot 13 of class 0x07: runs the base handler func_00192230, then switches on the kind (jump tables) to set state requests at 0x2254..0x2260, the flag at 0x2738 and the held object at 0x2438
+func_0016F810	StartPlayer	slot 16 of class 0x07: runs func_001C44F0, installs the table D_00263558, creates the records at 0x24FC, 0x2514 and 0x251C, sets up the animation cursor at 0x1520 and the six links through func_00139038
+func_00174808	UpdatePlayer	slot 17 of class 0x07: runs func_001C4ED0 and the per-frame helpers, then dispatches on the state word at 0x2220 (14 states) to the per-state update helpers
+func_00172530	RecomputePlayerFrame	slot 18 of class 0x07: runs the base func_001C5438, then fills the two records at 0x1190 and 0x1290 from the links at 0x610 and 0x614 (func_001C4618, constant 6.0), clearing them in state 6 mode 7
+func_00172B08	SetPlayerBoundsPoints	slot 27 of class 0x07: stores the partner at 0x23D4 position in the point list at 0x21D0, runs func_001BC088 with the frame time and, when 0x223C is 0, sets three points (own, partner) and the count 0x21CC to 3
+func_001701B0	StepPlayer	slot 28 of class 0x07: runs StepCollider, then switches on the state at 0x2220 to the per-state step helpers, some building a rotation with func_001ED650 and moving by func_001B91A8
+func_00178008	SetPlayerPosition	slot 29 of class 0x07: runs SetColliderPosition, resets the animation cursor at 0x1520 and clears the word at 0x2768
+func_001CDF78	GetPlayerPose	slot 35 of class 0x07: in state 3 returns the placed-object pose func_001225D0, otherwise the character pose func_001C5DB8 (a rotation about the heading at 0x638 into the output)
+func_001721B0	BlendPlayerPose	slot 36 of class 0x07: eases the weights 0x2724 and 0x2728 towards 1 with the frame time, drives the animation cursor 0x1520 (func_001C29F8) from the pose and then runs the base func_00125C90
+func_001725E0	DrawPlayer	slot 37 of class 0x07: updates the contact records, samples the pose four times into the part at 0x61C, then func_001D62E0 builds a parameter block for func_0019D410 (the call SubmitWorldListedObjectBlock makes)
+func_00172B88	UpdatePlayerBounds	slot 50 of class 0x07: runs UpdateColliderBounds, then widens the bounds with each of the 0x21CC extra points at 0x21D0 (func_001B8420 with the radius 0x2420)
+func_001CD088	SyncPlayerTarget	slot 51 of class 0x07: passes the vectors at 0x22D0 and 0x22E0 to func_001B9AB0 and func_001B9AC8 of the object at 0x22AC (StepCollider calls slot 51 of each owner)
+func_00172CF0	CollidePlayerWithObject	slot 58 of class 0x07: per state runs the base func_001C5C10, tests the object against the mesh from func_00172BF8 (func_001879C0 or func_00186BA8) and fills the result block at 0x2670
+func_00170820	ResolvePlayerContact	slot 61 of class 0x07: in state 4 shifts the contact position by the part of the stick vector at 0x640 along the contact normal, otherwise runs func_001C54D0 when slot 86 accepts the contact
+func_00170528	ClampPlayerContactLimit	slot 62 of class 0x07: in state 4 with flag 0x10 lowers out+0x30 to -mass*gravity z*a constant, otherwise runs the base func_001C53A8
+func_00172898	PrunePlayerContacts	slot 63 of class 0x07: walks the contact table, unlinking the contacts with the held object 0x23B0 or the object at 0x2750 (and in state 8 the one at 0x24A0) onto a list that func_001861E8 then releases
+func_00170660	ReleasePlayerContacts	slot 64 of class 0x07: releases the contact list at 0x4B4 with func_001861E8 and clears it, then runs the per-state follow-up (states 6, 7, 8)
+func_00172AE0	SavePlayerPreviousPosition	slot 68 of class 0x07: runs SaveColliderPreviousPosition and clears the extra point count 0x21CC
+func_00173708	SetPlayerTracked	slot 72 of class 0x07: runs the base func_001922E8 (registers or releases it with the tracker D_00261990) and passes the mode id from D_002623C0+0x19FC, or -1, to func_001D29C8
+func_001D54E0	IsPlayerRequestBlocked	slot 75 of class 0x07: returns 1 when the state at 0x2220 and sub-state 0x2228 refuse a request of kind n (3 or 5 have their own table), 0 when it can take it; func_001D4D08 asks it first
+func_001D4D08	AcceptPlayerRequest	slot 76 of class 0x07: after slot 75 passes, stores the request at 0x26B4 and by its kind 0..6 enters state 4 with sub-state 0x25..0x31 through func_00175170, installing a completion callback with func_001D4C90
+func_001D65D8	GetPlayerRequestPhase	slot 77 of class 0x07: returns 0 or 1 from the pending flag 0x26C4 outside state 4, and in state 4 returns 1 below sub-state 45 and 2 from there
+func_001D6608	FinishPlayerRequest	slot 80 of class 0x07: clears the flag 0x2730, runs the stored callback at 0x26C0 or else moves itself up by the minimum height and enters state 2 sub-state 6, then clears 0x226C
+func_00177EE0	GetPlayerInteractFlags	slot 81 of class 0x07: sets the two flags out[0], out[1] by the state at 0x2220 and whether the other object's word at 0x2D0 is 1 (the base sets both to 1); out[0] is cleared when D_00275BC4 is not 3
+func_00177F98	ReceivePlayerNode	slot 82 of class 0x07: for a node of kind 1 or 2 posts it through D_002701F8 to func_001E9498, otherwise requests state 0xC sub-state 0x21 (words 0x2254..0x225C) with the node stored at 0x2BD0
+func_00170790	IsPlayerGroundContact	slot 86 of class 0x07: outside state 0xD runs the base func_001C5248, in state 0xD accepts a contact whose normal times the scale passes 0.7 and whose kind is 4..6 on side 0
+func_001C6F48	InitAgent	slot 0 of class 0x08: runs func_001C4458, sets the state 0x724 and the word 0x924 to -1, the tuning floats at 0x73C..0x74C, marks the 17-entry tables at 0x758 and 0x870 with -1 and draws a record from D_00261420 into 0xB10
+func_001C74E8	RegisterAgent	slot 6 of class 0x08: runs func_00192820 and adds itself to the roster at 0x720 (func_001CB648, a list of up to 16 entries)
+func_001C7520	UnregisterAgent	slot 7 of class 0x08: runs func_00192850, ends the animation players at 0x7E0 and 0x754, removes itself from the roster at 0x720 (func_001CB6F8) and clears the state words
+func_001C7188	CopyAgent	slot 9 of class 0x08: keeps the record 0xB10 and the roster 0x720 across the base copy func_001921E8 and stores the copy source in 0xB74
+func_001C7140	LoadAgent	slot 10 of class 0x08: runs LoadCollider, installs the table D_00274C20 with func_00124DF8 and parses the two tables with func_001CA7C0 and func_001CA8E8
+func_001C9DE0	HandleAgentNotification	slot 13 of class 0x08: runs func_00192230 then switches on the message kind, setting the state fields 0x72C..0x730, 0xA74 and the animation player fields 0xB78..0xB90 (func_0012CBE8, func_0012F0A0)
+func_001C71E0	PostLoadAgent	slot 15 of class 0x08: runs func_001249A8, looks up the id at 0x924 (func_0015A448) into 0x928, resolves 0xB4C (func_001CAB10) and the id at 0xAFC into 0xB00 (func_0015A418)
+func_001C72A0	StartAgent	slot 16 of class 0x08: runs func_001C44F0, installs D_00274C30, creates the shared roster (func_001CB5B8) if 0x720 is empty and joins it, binds the 17 item slots and resolves the entries at 0xA7C
+func_001C7CB8	UpdateAgent	slot 17 of class 0x08: runs func_001C4ED0, then the per-frame helpers func_001CAB10, func_001C9A58 and func_001C7B60 and several calls through its descriptor on the state 0x724 and the players 0x754 and 0x7E0
+func_001C75B0	StepAgent	slot 28 of class 0x08: moves it by the animation player 0x7E0 and the state 0x724 (func_001B91A8, func_001B9D10) after the base step
+func_001CA5E0	DrawAgent	slot 37 of class 0x08: a tail call to func_001C49C8 with the same arguments, the draw the class 0x07 version also ends with
+func_001C96D8	HandleAgentObjectEvent	slot 45 of class 0x08: returns 1 at once when 0xBD8 is set or the target 0xB0C rejects the event's object (func_001A8820), otherwise runs func_001BC320 and, for an event with bit 0x20, matches its mask against the pending entries at 0xAC8
+func_001C7468	TestAgentMayContact	slot 56 of class 0x08: returns 1 when the base func_001B8A08 says so, when the target 0xB0C rejects the object (func_001A8820), or in state 0xB when the object lacks flag bit 55
+func_001CAD98	CollideAgentWithObject	slot 58 of class 0x08: runs func_001C5C10 unless 0xC04 is set, then tests the object against each mesh in the list at 0xA7C (func_001879C0 or func_00186BA8) into the block at 0xAAC
+func_001CACB0	ClampAgentContactLimit	slot 62 of class 0x08: runs func_001C5388 and, when 0xC04 is set with flags 0x12, clears out+0x30 if the surface value out->p0+0x88 is above 0.7
+func_001C9A48	IsAgentRequestBlocked	slot 75 of class 0x08: returns whether the word 0xBD8 is nonzero; func_001C9990 asks it before taking a request
+func_001C9990	AcceptAgentRequest	slot 76 of class 0x08: returns 0 when slot 75 refuses, otherwise fills a 0x40-byte request frame (kind, reference, position) and passes it to func_00177838 to find an accepting node
+func_001C8010	ChooseAgentState	slot 89 of class 0x08: from the current state 0x724 and func_001C96B8 returns the next state, going to 0xA while the entry 0x758[10] exists and the timer 0xBFC has run out
+func_001C8E28	UpdateAgentState	slot 90 of class 0x08: runs slot 102, then switches on the state 0x724: steps the animation player 0x754 or the path following (func_001C8920, func_001C8BC0)
+func_001C9008	LeaveAgentState	slot 91 of class 0x08: ends the animation players 0x754 and 0x7E0 and clears the path state, then per old state saves the animation time, frees the object 0xA74 or sets the timers 0x748 and 0xC00
+func_001C91C8	EnterAgentState	slot 92 of class 0x08: picks the animation for the new state from 0x758 and 0x870, starts it on the players 0x754 and 0x7E0 (func_0012C7B0, func_0012C288) and does the per-state set-up (cases 1, 2, 3, 6, 7, 10, 11, 16)
+func_001CA468	IsAgentTargetInRange	slot 93 of class 0x08: gets the target from slot 98 and returns 1 only when its distance passes the range at 0x738 (func_001EB050), the angle limit 0x74C and the clock 0x748 and the target 0xB0C allow it
+func_001C8C08	UpdateAgentGoal	slot 94 of class 0x08: per state takes the goal from the target of slot 98 (+0x140) or from the animation's end position (func_0012C9E8) and passes it to func_001C8418
+func_001C8590	BuildAgentPath	slot 95 of class 0x08: asks the path object 0x928 (func_00191A88) for points from the goal at 0xA50 to the current position, filling the 16-byte entries at 0x940 and the count 0x92C
+func_001C9CF8	RestartAgentClip	slot 96 of class 0x08: clears 0xB8C, 0xA60 and 0xBA4 and restarts the player 0x7E0 on its clip 0x1B1 (func_0012CCC0, func_0012F0A0)
+func_001C9AF8	SteerAgentAlongPath	slot 97 of class 0x08: aims at the path entry 0x940[0x930] (distance via func_001EB0F8), turns with func_001C7AE0 and stores the velocity in 0x640 and the arrival time in 0xBA4
+func_001CAA08	SelectAgentTarget	slot 98 of class 0x08: chooses the target from 0xB50, 0xB48 or the controlled object (func_001925F0), calls slot 28 of the old and slot 27 of the new one and stores it in 0xB54
