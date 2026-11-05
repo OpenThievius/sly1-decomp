@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Which functions of game code are original assembly, not C waiting to be matched.
 
-    python3 tools/classify_asm.py           # writes config/us/original_asm.tsv
-    python3 tools/classify_asm.py --check   # fails when the table is out of date
+    python3 tools/classify_asm.py           # writes config/us/original_asm.tsv and config/eu/'s
+    python3 tools/classify_asm.py --check   # fails when a table is out of date
 
 Some retail code was written as assembly, and some words are what the linker left of a
 function it stripped. Matching those bytes by compiling C would misrepresent where they
@@ -25,11 +25,15 @@ Two kinds, over game code and Sony's libraries; a function matched in C is C and
   too, whatever its alignment: no whole function frees stack it never took. So are the nops at
   the start of the code, before the entry routine, though code takes their address.
 
+PAL's functions that US has are classified through their US counterpart (tools/progress.py).
+The functions only PAL has (tools/version_src.py) go through the same rules over PAL's own
+code, into config/eu/original_asm.tsv.
+
 What these rules do not classify (kernel and cache instructions, max.s/min.s/sqrt.s,
 fragments that contain a jump) stays unmatched and is listed by tools/todo.py with its
 blocker, for a person to look at.
 
-The table needs asm/us/ (tools/setup_asm.py) only to be written or checked.
+The tables need asm/us/ and asm/eu/ (tools/setup_asm.py) only to be written or checked.
 """
 
 import argparse
@@ -44,6 +48,7 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 TABLE = ROOT / "config" / "us" / "original_asm.tsv"
+EU_TABLE = ROOT / "config" / "eu" / "original_asm.tsv"  # the functions only PAL has
 HEADER = "name\taddress\tsize\tkind\twhy"
 CODE_START = 0x100000  # the first word of game code (config/us/layout.tsv)
 BRANCH = re.compile(r"^(j|jal|jr|jalr|b|bal|beq|bne|beqz|bnez|bgez|bgtz|blez|bltz|bgezal|bltzal|beql|bnel|"
@@ -126,11 +131,11 @@ def handwritten(ops, kind, lines=()):
     return None
 
 
-def game_tail_jump(addr, lines):
+def game_tail_jump(addr, lines, key="us"):
     """Why a game-code function that ends in a tail jump is original assembly, or None: SN GCC
     2.95.3, which builds the game, never turns a call into a jump (Sony's 2.9-ee, which builds
     the libraries, does)."""
-    if addr >= todo.code_range_of(addr)[3] or todo.code_range_of(addr)[5] != "src/main":
+    if addr >= todo.code_range_of(addr, key)[3] or todo.code_range_of(addr, key)[5] != "src/main":
         return None
     ins = [line.split() for line in lines if line.split() and not line.startswith(("jlabel", ".L"))]
     while ins and ins[-1][0] == "nop":
@@ -141,7 +146,7 @@ def game_tail_jump(addr, lines):
     return None
 
 
-def classify(funcs, bodies, references, sdk=None):
+def classify(funcs, bodies, references, sdk=None, key="us"):
     """[(name, addr, size, kind, why)] for the functions given.
 
     funcs: (name, addr, size, kind) in any order; bodies: {name: listing lines};
@@ -155,7 +160,7 @@ def classify(funcs, bodies, references, sdk=None):
         lines = bodies.get(name, [])
         tags = todo.tags_of(lines, kind)
         ops = ops_of(lines)
-        why = sdk.get(name) or handwritten(ops, kind, lines) or game_tail_jump(addr, lines)
+        why = sdk.get(name) or handwritten(ops, kind, lines) or game_tail_jump(addr, lines, key)
         if why:
             out.append((name, addr, size, "handwritten", why))
             ok = ends_finished(ops)
@@ -176,11 +181,11 @@ def classify(funcs, bodies, references, sdk=None):
     return out
 
 
-def references_of(names):
-    """{name: occurrences in the asm outside its own labels}."""
+def references_of(names, key="us"):
+    """{name: occurrences in the version's asm outside its own labels}."""
     counts = {n: 0 for n in names}
     pattern = re.compile(r"\b(func_[0-9A-Fa-f]{8})\b")
-    for path in glob.glob(str(ROOT / "asm" / "us" / "**" / "*.s"), recursive=True):
+    for path in glob.glob(str(ROOT / "asm" / key / "**" / "*.s"), recursive=True):
         for line in Path(path).read_text().splitlines():
             if line.startswith(OWN_LINES):
                 continue
@@ -249,6 +254,18 @@ def derive():
     return [r for r in classify(funcs, bodies, refs, sdk_assembly(funcs)) if r[0] not in done]
 
 
+def derive_only_eu():
+    """The rows for the functions only PAL has and src/versions/eu/ does not define, under PAL's names."""
+    import version_check
+    import version_src
+    done = {"func_" + n[len("func_eu_"):] for n in version_check.only_eu()}
+    only = {name for name, _a, _s, _f in version_src.only_here("eu")} - done
+    funcs = todo.functions("eu")
+    refs = references_of([f[0] for f in funcs], "eu")
+    # Every PAL function takes part, so a remnant sees the code before it.
+    return [r for r in classify(funcs, todo.bodies("eu"), refs, key="eu") if r[0] in only]
+
+
 def render(rows):
     return HEADER + "\n" + "".join("%s\t%08X\t%d\t%s\t%s\n" % r for r in sorted(rows, key=lambda r: r[1]))
 
@@ -269,19 +286,20 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
-    text = render(derive())
+    tables = [(TABLE, render(derive())), (EU_TABLE, render(derive_only_eu()))]
     if args.check:
-        if not TABLE.exists() or TABLE.read_text() != text:
-            print("stale: %s (run python3 tools/classify_asm.py)" % TABLE.relative_to(ROOT))
-            return 1
-        return 0
-    TABLE.parent.mkdir(parents=True, exist_ok=True)
-    TABLE.write_text(text)
-    rows = read_table()
-    kinds = {}
-    for k in rows.values():
-        kinds[k] = kinds.get(k, 0) + 1
-    print("wrote %s: %s" % (TABLE.relative_to(ROOT), ", ".join("%d %s" % (v, k) for k, v in sorted(kinds.items()))))
+        stale = [t for t, text in tables if not t.exists() or t.read_text() != text]
+        for t in stale:
+            print("stale: %s (run python3 tools/classify_asm.py)" % t.relative_to(ROOT))
+        return 1 if stale else 0
+    for table, text in tables:
+        table.parent.mkdir(parents=True, exist_ok=True)
+        table.write_text(text)
+        kinds = {}
+        for k in read_table(table).values():
+            kinds[k] = kinds.get(k, 0) + 1
+        print("wrote %s: %s" % (table.relative_to(ROOT),
+                                ", ".join("%d %s" % (v, k) for k, v in sorted(kinds.items())) or "nothing"))
     return 0
 
 

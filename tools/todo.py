@@ -178,9 +178,9 @@ def classified():
     return rows
 
 
-def functions():
+def functions(key="us"):
     rows = []
-    for line in (ROOT / "config" / "us" / "functions.tsv").read_text().splitlines()[1:]:
+    for line in (ROOT / "config" / key / "functions.tsv").read_text().splitlines()[1:]:
         name, addr, size, kind, _ = line.split("\t")
         rows.append((name, int(addr, 16), int(size), kind))
     return rows

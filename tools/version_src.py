@@ -179,12 +179,14 @@ def main(argv=None):
         for name, path in overrides(args.version).items():
             print("%s\t%s" % (name, path.relative_to(ROOT)))
     else:
+        import classify_asm
         import todo
         bodies = todo.bodies(args.version)
         done = overrides(args.version)
+        assembly = classify_asm.read_table(ROOT / "config" / args.version / "original_asm.tsv")
         for name, addr, size, shared in only_here(args.version):
             own = "func_%s_%08X" % (args.version, addr)
-            if own not in done:
+            if own not in done and name not in assembly:
                 tags = ",".join(sorted(todo.tags_of(bodies.get(name, []), "code"))) or "none"
                 print("%s\t%d\t%s\t%s" % (own, size, tags, shared.relative_to(ROOT)))
     return 0

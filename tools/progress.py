@@ -67,11 +67,13 @@ def exact_c(key):
 
 
 def original_asm(key):
-    """Names of the version's functions that are original assembly (config/us/original_asm.tsv)."""
+    """Names of the version's functions that are original assembly: config/us/original_asm.tsv, and
+    for PAL its counterparts of those and config/eu/original_asm.tsv (the functions only PAL has)."""
     listed = classify_asm.read_table()
     if key == "us":
         return set(listed)
-    return {eu for us, eu in version_check.eu_names().items() if us in listed}
+    own = set(classify_asm.read_table(classify_asm.EU_TABLE))
+    return own | {eu for us, eu in version_check.eu_names().items() if us in listed}
 
 
 def finished(key):

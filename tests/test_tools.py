@@ -326,6 +326,12 @@ class SystemEvidenceTest(unittest.TestCase):
         normal = ["addiu $sp, $sp, -0x10", "sd $ra, 0x0($sp)", "nop", "sw $a0, 0x4($sp)", "jr $ra", "nop"]
         self.assertIsNone(classify_asm.handwritten(classify_asm.ops_of(normal), "code", normal))
 
+    def test_pal_counts_its_own_table(self):
+        # The functions only PAL has are classified in config/eu/original_asm.tsv, under PAL's names.
+        own = set(classify_asm.read_table(classify_asm.EU_TABLE))
+        self.assertTrue(own)
+        self.assertLessEqual(own, progress.original_asm("eu"))
+
     def test_a_multimedia_instruction_the_compiler_emits_does_not_block(self):
         # por moves a 128-bit value (a mode(TI) argument) between registers: plain C emits it.
         self.assertNotIn("mmi", todo.tags_of(["lq $a1, 0x10($sp)", "jal func_00118D30", "por $a0, $zero, $s1",
@@ -366,7 +372,7 @@ class ProgressCountTest(unittest.TestCase):
         self.assertEqual(progress.exact_c("us") & asm, set())
 
     def test_a_pal_function_follows_its_us_counterpart(self):
-        pal = progress.original_asm("eu")
+        pal = progress.original_asm("eu") - set(classify_asm.read_table(classify_asm.EU_TABLE))
         self.assertTrue(pal)
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 

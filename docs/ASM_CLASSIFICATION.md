@@ -34,7 +34,13 @@ hidden by it.
 size, kind, why.
 
 Game code and Sony's libraries are both classified; a function matched in C is C and is left
-out. Counts are of `config/us/original_asm.tsv` as written on 2026-11-01.
+out.
+
+PAL's functions that US has count through their US counterpart. The game-code functions only PAL
+has (docs/VERSIONS.md) have no counterpart, so the same rules run over PAL's own code
+(`asm/eu/`) and write `config/eu/original_asm.tsv` for them: on 2026-11-05, 7 remnants (stray
+stack increments and lone words, like US's) and 2 handwritten (`max.s`, `min.s`).
+`tools/version_src.py todo` leaves them out. Counts are of `config/us/original_asm.tsv` as written on 2026-11-01.
 
 ### handwritten
 
