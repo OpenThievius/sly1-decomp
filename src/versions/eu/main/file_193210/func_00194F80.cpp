@@ -2,7 +2,6 @@
 // PAL: draws a menu box with its title (laid out into the owner's line table), its items and a separator line.
 // PAL's layout record is 0x20 bytes (its setters differ): its own type, not Layout_137228.
 struct Out_eu_194F80 { u8 b[0x20]; };
-struct Col_eu_194F80 { s32 v[4]; };
 struct Menu_eu_194F80 { s32 title; f32 titleScale; f32 itemScale; s32 vertical; s32 count; s32* items; };
 struct Buf_eu_194F80 { u8 b[0xC0]; };
 struct Lines_eu_194F80 { f32 f0; f32 f4; f32 height; };
@@ -30,7 +29,7 @@ struct Self_eu_194F80 {
 };
 void func_00137228(Out_eu_194F80* out, f32 x, f32 y);
 void func_00137238(Out_eu_194F80* out, f32 x, f32 y);
-void func_00137248(Out_eu_194F80* out, Col_eu_194F80* value);
+void func_00137248(Out_eu_194F80* out, Rgba_137248* value);
 void func_00137268(Out_eu_194F80* out, s32 flag);
 void func_eu_001374E0(Out_eu_194F80* out, s32 v);
 void func_00137260(Out_eu_194F80* out, Lines_eu_194F80* lines);
@@ -45,8 +44,8 @@ struct Setup_eu_194F80 { static void Do(Out_eu_194F80* out, f32 x, f32 y, f32 w,
 {
     func_00137228(out, x, y);
     func_00137238(out, w, h);
-    Col_eu_194F80 tmp;
-    tmp.v[0] = color;
+    Rgba_137248 tmp;
+    tmp.value = color;
     func_00137248(out, &tmp);
     func_00137260(out, lines);
     func_00137268(out, flag);
@@ -98,8 +97,8 @@ void func_00194F80(Self_eu_194F80* self)
         func_00137228(&out, cx, cy);
         func_00137238(&out, w, h);
         {
-            Col_eu_194F80 tmp;
-            tmp.v[0] = backColor;
+            Rgba_137248 tmp;
+            tmp.value = backColor;
             func_00137248(&out, &tmp);
         }
         func_00137260(&out, 0);
