@@ -10,7 +10,7 @@
 #include "t217d.h"
 #include "c6d.h"
 #include "c6c.h"
-#include "c38.h"
+#include "flagged_object.h"
 #include "v24a0.h"
 #include "shapes.h"
 #include "globals.h"
@@ -611,11 +611,11 @@ void func_00153328(C61* self, s32 unused, void* a2)
 
 struct Part_151ED8 { u8 pad0[0x14]; f32 f14; f32 f18; };
 
-void func_00151ED8(G261EF0* obj, C38* node)
+void func_00151ED8(G261EF0* obj, FlaggedObject* node)
 {
     f32 value;
     if (node != 0) {
-        s32 idx = node->f5B4;
+        s32 idx = node->ordinal;
         s32 bit = 1 << (idx & 7);
         if (D_002623C8->bits74[idx / 8] & bit) {
             value = ((Part_151ED8*)obj->table)->f18;
@@ -627,7 +627,7 @@ have:
     func_00152410(obj, D_002623C8->dt + value);
     if (node != 0) {
         G27C230* m = D_002623C8;
-        s32 idx = node->f5B4;
+        s32 idx = node->ordinal;
         s32 bit = 1 << (idx & 7);
         u8 cur = m->bits74[idx / 8];
         if (cur & bit) return;

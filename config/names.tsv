@@ -38,3 +38,41 @@ func_001CB6D0	AddListedWantedId	appends a value to the wanted list of the 0x89 o
 D_00263E30	g_timeoutFired	defined in 00178000.cpp only: InitCountdown clears it and UpdateCountdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
 D_00263E04	g_timeoutLimit	the float 3.0 that UpdateCountdown compares the time elapsed since the object's start time against
 D_00263E08	g_countdownTable	the three-entry table InstallCountdownTable hands to func_00124DF8
+func_00146240	SetOffsetScale	Stores a new scale in the object only when it differs, then re-places the tag-6 entry through func_00146298.
+func_00146298	ApplyScaledOffset	Finds the child entry of kind 6 and sets its x and y to the negated product of scale and factorX / factorY.
+func_0016A490	AddToPartList	Slot 6: runs the base step, then appends the object to the list at D_00262708 with func_00152470.
+func_0016A4C8	RemoveFromPartList	Slot 7: runs the base step, then removes the object from the list at D_00262708 with func_00152600.
+func_0016A500	CopyKeepingListLink	Slot 9: saves the list link at +0x558, runs the base copy, and writes the link back.
+func_0016AED8	BecomeCurrentObject	Slot 16: stores itself in D_0026FCF0 after loading and registers the callback func_0016AB38 with its level.
+func_0016AA18	CallFlaggedParts	Slot 16: for kinds 0x515..0x519, calls slot 6 of every one of its nine parts whose flag is set.
+func_0014EE40	InitPooledObject	Slot 0 of class 0x46: runs the base constructor and sets the state to -1.
+func_0014EF00	AddToWorldQueue	Slot 3 of class 0x46: appends the object to the world's list at +0x1C78 (func_00152470) and sets state 0.
+func_0014EE70	RemoveFromWorldQueue	Slot 6 of class 0x46: removes the object from the world's list at +0x1C78 (func_00152600) if it is in it.
+func_0014F110	SetPooledObjectState	Stores the new state of a class 0x46 object, stamps the clock, clears the taker data when leaving state 2.
+func_0014F058	UpdatePooledObject	Slot 17 of class 0x46: switches on the state, runs func_0014F270 in state 2 and moves to state 5 after the delay in state 4.
+func_0014C018	InitGaugeManager	Slot 0 of class 0x68: sets the maximum amount to 50, copies the two parameter sets and the timer defaults and stores itself in D_0027C00C.
+func_0014C838	AppendGaugeSlot	Stores an object at slots[slotCount] of a class 0x68 object and increments the count.
+func_0014C820	GetGaugeParams	Returns the address of the parameter set at 0x480 + setIndex * 0xB0 of a class 0x68 object.
+func_0014C138	BlendParamSets	Slot 16 of class 0x68: fills o5E0 with the mix of params0 and params1 weighted by a clamped polynomial of the clock.
+func_0014CDC8	AddToGaugeAmount	Adds the argument's field to amount, clamps it to 0..maxAmount and acts when it reaches the maximum.
+func_001411A8	InitFlaggedObject	Slot 0 of class 0x38: takes a bit index from the table at D_00261420 into flagIndex, sets childId to -1, counts itself in the world.
+func_00141870	RaiseObjectFlag	Sets the object's bit (flagIndex) in the table at D_00261420 and sends the handle to state 0x548 or 0x549 depending on the old bit.
+func_001419E0	SetFlaggedChildId	Stores its argument in childId (0x5A0) of a class 0x38 object.
+func_00141338	ResolveListIds	Slot 15 of class 0x38: looks up each id of idsA and idsB in the world and appends the found objects to objsA and objsB.
+func_00141210	CollectChildLists	Slot 10 of class 0x38: walks the children and appends those of kind 0x7B to objsB and kind 0x83 to objsA.
+func_001A6BE0	SetPairedState	stops the handle and sound started for the old state, runs the leave function of states 1, 5, 6 and 9, stores the new state and its time, and starts the handle or sound of the new state
+func_001A6DE0	HandlePairedHit	slot 31 message handler: on a hit (flag 0x20) it moves a PairedObject in states 1-8 to state 9, sends its notify record a message and plays a sound
+func_001A6168	LinkPairedObjects	sets obj->partner = node and node->partner = obj, moves the lists' entries and unlinks and re-states the partner each one had before
+func_001A7480	SetHitTargetState	stores a HitTarget's new state and time, tells its controller when it leaves state 9 and changes the sound it plays by the state
+func_001A7420	ChooseHitTargetState	returns the state a HitTarget should be in: one step lower once the recovery delay has passed since the last change, 0 from 9
+func_001A72B0	ApplyHitTargetHit	on a hit (flag 0x10) after the hit interval it moves the state up one, to 9 at the hit limit where it also messages its notify record
+func_001A76A0	SetSoundStateObjectState	stores a SoundStateObject's new state and time and switches its sound to the one in D_0026B898[state]
+func_001A7698	GetSoundStateObjectState	returns the object's state field
+func_001A7998	SetObjectCreatorState	stops the active handle, stores the new state and time, and in states 1 and 2 messages the notify record or calls slots 25 and 51 of the created object
+func_001A7AA0	ChooseObjectCreatorState	returns the next state of an ObjectCreator from its current one: 1 goes to 2 when the handle's time is up, and bit 1 of the game flags gives 3
+func_001A4DC0	ChooseControllerState	returns the PairController's next state from its link, flags, counts and the target's state and time
+func_001A4EF0	SetControllerState	stores the controller's state and time and does the per-state work (messages, sets partners' states 7 and 8)
+func_001A4B30	BlendControllerPose	slot 16: steps the blend weight by the frame time, clamps it and mixes poseA and poseB into poseOut
+func_001A4878	AppendControllerId	appends its argument to the PairController's ids array and increments idCount
+func_001A6480	GetControllerPose	returns the address of pose number poseIndex in the 0xC0-byte pose records from 0x3E0
+func_001A54F8	StartPairedObjects	takes a PairedObject from one list and an attachment from another at random, links them, sets both to state 1 and sets the next time

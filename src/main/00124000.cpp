@@ -12,7 +12,7 @@
 
 #include "c6c.h"
 #include "c40.h"
-#include "c42.h"
+#include "paired_object.h"
 
 void func_00182ED0(C01* self);
 void func_00152600(void* list, void* item);
@@ -179,7 +179,7 @@ void func_00127558(C40* self, f32 x, f32 y, f32 z)
     self->desc02()->m20(self, (Vec02*)&v);
 }
 
-void func_001275F0(C42* self, f32 x, f32 y, f32 z)
+void func_001275F0(PairedObject* self, f32 x, f32 y, f32 z)
 {
     f32 v[3];
     v[0] = x;

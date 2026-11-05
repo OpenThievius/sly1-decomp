@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "c55.h"
 #include "c6c.h"
-#include "c39.h"
+#include "scaled_offset_object.h"
 #include "g27c220.h"
 #include "s124df8.h"
 
@@ -89,7 +89,7 @@ void func_00147FB0(C58* self)
 void func_001BAC30(C03* self, void* p);
 f32 func_00137DF8(void* p);
 
-void func_00146130(C39* self, void* p)
+void func_00146130(ScaledOffsetObject* self, void* p)
 {
     func_001BAC30(self, p);
     self->factorX = func_00137DF8(p);
@@ -97,9 +97,9 @@ void func_00146130(C39* self, void* p)
 }
 
 void func_00124A48(void* self);
-void func_00146298(C39* self);
+void func_00146298(ScaledOffsetObject* self);
 
-void func_00146178(C39* self)
+void func_00146178(ScaledOffsetObject* self)
 {
     func_00124A48(self);
     func_00146298(self);
@@ -108,7 +108,7 @@ void func_00146178(C39* self)
 void func_00138BE0(C6C* a, void* self, s32 n);
 void func_00129DF8(void* self);
 
-void func_00146240(C39* self, f32 v)
+void func_00146240(ScaledOffsetObject* self, f32 v)
 {
     if (v != self->scale) {
         self->scale = v;
@@ -120,7 +120,7 @@ void func_00146240(C39* self, f32 v)
 
 void func_001B7968(C03* self);
 
-void func_00146100(C39* self)
+void func_00146100(ScaledOffsetObject* self)
 {
     func_001B7968(self);
     self->scale = 100.0f;
@@ -192,7 +192,7 @@ s32 func_00146D10(void* unused, Obj_146D10* self)
 }
 
 
-void func_00146298(C39* self)
+void func_00146298(ScaledOffsetObject* self)
 {
     for (s32 i = 0; i < self->elemCount; i++) {
         if (self->elems[i]->kind == 6) {

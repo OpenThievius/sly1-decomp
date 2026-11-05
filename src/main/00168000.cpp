@@ -2,11 +2,11 @@
 #include "common.h"
 #include "c05.h"
 #include "c2f.h"
-#include "c3a.h"
+#include "listed_collision_part.h"
 #include "c6e.h"
 #include "c7e.h"
-#include "c69.h"
-#include "c6a.h"
+#include "current_placed_object.h"
+#include "part_holder_object.h"
 #include "list_iter.h"
 #include "t217d.h"
 #include "v24a0.h"
@@ -23,7 +23,7 @@
 void func_001B7B78(void* self);
 void func_00152600(void* data, void* self);
 
-void func_0016A4C8(C3A* self)
+void func_0016A4C8(ListedCollisionPart* self)
 {
     func_001B7B78(self);
     func_00152600(&D_00262708, self);
@@ -31,11 +31,11 @@ void func_0016A4C8(C3A* self)
 
 void func_001BA130(void* self);
 
-void func_0016A500(C3A* self)
+void func_0016A500(ListedCollisionPart* self)
 {
-    Link02 tmp = self->link558;
+    Link02 tmp = self->listLink;
     func_001BA130(self);
-    self->link558 = tmp;
+    self->listLink = tmp;
 }
 
 s32 func_001B8A08(C03* a, C03* b);
@@ -241,7 +241,7 @@ void func_00124DF8(void* self, s32 n, void* table);
 u32 func_001601D8(s32 idx);
 u32* func_00160810(s32 idx);
 
-void func_0016AA18(C6A* self)
+void func_0016AA18(PartHolderObject* self)
 {
     func_00124A48(self);
     func_00124DF8(self, 9, &D_00262718);
@@ -251,7 +251,7 @@ void func_0016AA18(C6A* self)
         s32 s4 = t << 8;
 
         for (s32 i = 0; i < 9; i++) {
-            if (self->slots[i] == 0) {
+            if (self->parts[i] == 0) {
                 continue;
             }
             s32 flag;
@@ -268,7 +268,7 @@ void func_0016AA18(C6A* self)
                 }
             }
             if (flag != 0) {
-                Part6A* obj = self->slots[i];
+                PartObject* obj = self->parts[i];
                 obj->vtbl[6](obj);
             }
         }
@@ -329,7 +329,7 @@ void func_0012A080(void* self, f32 k);
 void func_0012A150(void* self, f32 k);
 void func_0012A270(void* self, f32 k);
 
-void func_0016A3A8(C3A* self)
+void func_0016A3A8(ListedCollisionPart* self)
 {
     f32 k = 3.0f;
     func_001B7968(self);
@@ -342,7 +342,7 @@ void func_0016A3A8(C3A* self)
 
 void func_001B7A98(void* self);
 
-void func_0016A490(C3A* self)
+void func_0016A490(ListedCollisionPart* self)
 {
     func_001B7A98(self);
     func_00152470(&D_00262708, self);
@@ -781,7 +781,7 @@ void func_001E96F8(void* obj, s32 mode);
 void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_0016AB38(void* self);
 
-void func_0016AED8(C69* self)
+void func_0016AED8(CurrentPlacedObject* self)
 {
     func_00124A48(self);
     self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
@@ -1457,7 +1457,7 @@ void func_0016A100(C7F* self)
 void func_001BAC30(C03* self);
 void* func_0018D5C0(s32 bytes);
 
-void func_0016A420(C3A* self)
+void func_0016A420(ListedCollisionPart* self)
 {
     Rec2195_224* b;
     Quad16* dst;
@@ -1481,7 +1481,7 @@ void func_001B9338(C03* self, f32 t);
 void func_00189378(Mat02* sub, s32 zero, Mat3U* out);
 void func_001B91A8(C03* self, Mat3U* out, s32 a, void* table, s32 b, f32 t);
 
-void func_0016A580(C3A* self, f32 t)
+void func_0016A580(ListedCollisionPart* self, f32 t)
 {
     Mat3U buf;
 

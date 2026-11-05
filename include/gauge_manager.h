@@ -6,12 +6,12 @@
 //
 // Fields follow the parent's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset.
-#ifndef C68_H
-#define C68_H
+#ifndef GAUGE_MANAGER_H
+#define GAUGE_MANAGER_H
 
 #include "c02.h"
 
-struct Pair68 {
+struct GaugePair {
     f32 a;
     f32 b;
     void Set(f32 x, f32 y)
@@ -22,10 +22,10 @@ struct Pair68 {
 };
 
 // One set of 44 words (0xB0 bytes); the constructor copies D_00249F00 into both.
-struct __attribute__((aligned(16))) Params68 {
+struct __attribute__((aligned(16))) GaugeParams {
     s32 w[0x11];
-    Pair68 p44;
-    Pair68 p4C;
+    GaugePair p44;
+    GaugePair p4C;
     s32 rest[0x17];
 };
 
@@ -43,7 +43,7 @@ struct Timer68 {
 
 // The table at +0x2E0: an object, two things found from it, a key (func_0014CF30 clears the
 // key of a slot whose object goes away).
-struct Slot68 {
+struct GaugeSlot {
     void* obj;              // 0x00
     void* f4;               // 0x04
     void* f8;               // 0x08
@@ -51,16 +51,16 @@ struct Slot68 {
     u8 pad10[4];
 };
 
-struct C68 : C02 {
-    s32 f2D0;               // 0x2D0
-    s32 f2D4;               // 0x2D4: 50 at setup
+struct GaugeManager : C02 {
+    s32 amount;             // 0x2D0
+    s32 maxAmount;          // 0x2D4: 50 at setup
     f32 f2D8;               // 0x2D8: 90.0 at setup
-    s32 n2DC;               // 0x2DC: slots in use
-    Slot68 slots[16];       // 0x2E0
+    s32 slotCount;          // 0x2DC: slots in use
+    GaugeSlot slots[16];       // 0x2E0
     u8 pad420[0x424 - 0x420];
     void* f424;             // 0x424
     void* f428;             // 0x428
-    void* f42C;             // 0x42C: the device object (func_001B6290 makes it)
+    void* device;           // 0x42C: the device object (func_001B6290 makes it)
     union {
         s32 tag430;         // 0x430: what func_001B6598 reads from the device
         u8 buf430[0x1C];
@@ -78,19 +78,19 @@ struct C68 : C02 {
         f32 poly[3];        // 0x470: coefficients (func_0014C138)
     };
     u8 pad47C[0x480 - 0x47C];
-    Params68 params0;       // 0x480
-    Params68 params1;       // 0x530
+    GaugeParams params0;       // 0x480
+    GaugeParams params1;       // 0x530
     f32 o5E0[44];           // 0x5E0: the blend of the two sets (func_0014C138)
-    s32 f690;               // 0x690
+    s32 setIndex;           // 0x690
     u8 pad694[0x6A0 - 0x694];
 };
 
-typedef char check_C68[sizeof(C68) == 0x6A0 ? 1 : -1];
+typedef char check_GaugeManager[sizeof(GaugeManager) == 0x6A0 ? 1 : -1];
 
-void func_0014C018(C68* self);                       // slot 0
-void func_0014CF30(C68* self, s32 kind, void* key);  // slot 13
-void func_0014C138(C68* self);                       // slot 16
-void func_0014C6E0(C68* self);                       // slot 17
-void func_0014C788(C68* self);                       // slot 46
+void func_0014C018(GaugeManager* self);                       // slot 0
+void func_0014CF30(GaugeManager* self, s32 kind, void* key);  // slot 13
+void func_0014C138(GaugeManager* self);                       // slot 16
+void func_0014C6E0(GaugeManager* self);                       // slot 17
+void func_0014C788(GaugeManager* self);                       // slot 46
 
 #endif
