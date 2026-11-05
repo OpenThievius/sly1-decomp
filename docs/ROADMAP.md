@@ -20,7 +20,13 @@ splits are taken from other projects or from the prototype
 
 ## Next
 
-1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)).
+Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-05: the
+matching is in its long tail, the data mostly from C, the original assembly classified, 18
+source files proved, PAL close behind US, and names and types under way.
+
+1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). About a hundred
+   US functions are left, many of them near misses in `nonmatching/`; the largest,
+   func_00109488 (37 KB, the property registry fill), differs only in register allocation.
 2. **Data from C.** A C file's `.rodata` literals (float constants, strings) are linked now: the
    code takes retail's address for them and retail's bytes stay in the image (tools/rodata.py),
    which opens the functions tagged `rodata`. A C `switch` is linked too: its jump table goes with the
@@ -52,7 +58,16 @@ splits are taken from other projects or from the prototype
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
    `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)).
-6. **Names and types.** Ours, from what the code does, as the C is cleaned up.
+6. **Names and types.** Ours, from what the code does, as the C is cleaned up. Types come
+   first, one per object, so that each name is chosen once: a header per class family of
+   retail's class descriptors (`include/cNN.h`, `config/us/classes.tsv`), per kind of the other
+   method tables (`tXXXX.h`, `vXXXX.h`, `config/us/tables.tsv`), per record several files share
+   (`sXXXXXX.h`, named by the function that produces it) and per global several files read
+   (`gXXXXXX.h`), with the common shapes (`shapes.h`) and the hub globals (`globals.h`). Each
+   field line ends with its offset, which a compiled assertion checks. They replace the views
+   each matched function declared for itself; what is left is the script machine's value and
+   its built-ins, and the views kept for a stated reason. The names come after: the types are
+   named by id or address until then.
 7. **The disc's data.** Its loader and index, then each format from the code that reads it
    ([DISC.md](DISC.md)); OpenThievius's extractor is written from that.
 
