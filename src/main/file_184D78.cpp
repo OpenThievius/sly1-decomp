@@ -5,9 +5,9 @@
 #include "fpu.h"
 #include "t2195.h"
 #include "globals.h"
-#include "g261858.h"
+#include "game_clock.h"
 #include "g262c70.h"
-#include "g264a40.h"
+#include "memory_card.h"
 
 
 struct Obj_184D78 {
@@ -239,7 +239,7 @@ void func_00185758(s32 a, s32 b)
     D_00264838 = b;
     func_00185B38();
     while (1) {
-        if (D_00269A00.on != 0 && D_00275F80.mode != 1) {
+        if (D_00269A00.on != 0 && g_screenFade.mode != 1) {
             func_0015F210(1);
             func_0018F148(&D_00269A00);
         }
@@ -247,13 +247,13 @@ void func_00185758(s32 a, s32 b)
             func_0015F210(1);
             func_001E4EA8(&D_00275AF0);
         }
-        if (D_00269A00.on != 0 && D_00275F80.mode != 1) {
+        if (D_00269A00.on != 0 && g_screenFade.mode != 1) {
             func_0015F210(1);
             func_0018F148(&D_00269A00);
         }
         func_0016E238(&D_00262C70);
         func_0016F2E0();
-        func_0018BDC8(&D_00264A40);
+        func_0018BDC8(&g_memoryCard);
         func_001E9108(D_00275BC0);
         func_001607D0(D_00261858.dt);
         if (D_00275710 != 0) {

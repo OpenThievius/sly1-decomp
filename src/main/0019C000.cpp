@@ -10,7 +10,7 @@
 #include "v24a0.h"
 #include "t219c.h"
 #include "globals.h"
-#include "g26ac30.h"
+#include "group_marker.h"
 #include "deferred_request.h"
 #include "color_fade.h"
 
@@ -32,35 +32,35 @@ void func_0019DBB0(void);
 void func_0019DF48(void)
 {
     Buf_19DF48 buf;
-    G26AC30* rows;
+    GroupMarker* rows;
     u8* p;
     s32 i;
 
     func_001611B8(buf.raw);
     func_001529C8(buf.raw, 1, D_0026AC20);
     func_001612F8(buf.raw, 0x7D, 0, 3, 0x412, 0);
-    rows = D_0026AC30;
+    rows = g_groupMarkers;
 
-    rows[0].fn = func_0019DA30;
-    rows[1].fn = func_0019DA60;
-    rows[2].fn = func_0019DAD8;
-    rows[3].fn = func_0019DB20;
-    rows[4].fn = func_0019DB20;
-    rows[5].fn = func_0019DB68;
-    rows[6].fn = func_0019DB20;
-    rows[7].fn = func_0019DB20;
-    rows[8].fn = func_0019DB20;
-    rows[9].fn = func_0019DB68;
-    rows[12].fn = func_0019DB20;
-    rows[11].fn = func_0019DB20;
-    rows[10].fn = func_0019DB20;
-    rows[13].fn = func_0019DB20;
-    rows[14].fn = func_0019DB68;
-    rows[15].fn = func_0019DB68;
-    rows[16].fn = func_0019DB20;
-    rows[17].fn = func_0019DBB0;
+    rows[0].handler = func_0019DA30;
+    rows[1].handler = func_0019DA60;
+    rows[2].handler = func_0019DAD8;
+    rows[3].handler = func_0019DB20;
+    rows[4].handler = func_0019DB20;
+    rows[5].handler = func_0019DB68;
+    rows[6].handler = func_0019DB20;
+    rows[7].handler = func_0019DB20;
+    rows[8].handler = func_0019DB20;
+    rows[9].handler = func_0019DB68;
+    rows[12].handler = func_0019DB20;
+    rows[11].handler = func_0019DB20;
+    rows[10].handler = func_0019DB20;
+    rows[13].handler = func_0019DB20;
+    rows[14].handler = func_0019DB68;
+    rows[15].handler = func_0019DB68;
+    rows[16].handler = func_0019DB20;
+    rows[17].handler = func_0019DBB0;
 
-    p = (u8*)D_0026AC30 + 0x888;
+    p = (u8*)g_groupMarkers + 0x888;
     i = 17;
     do {
         *(s32*)p = -1;
@@ -504,7 +504,7 @@ void func_0019DA60(void)
     void* self = &D_002622A8;
     func_0015EAE0(self, D_00212160, D_00215C50);
     D_00604780 = 1;
-    D_002622D8->r1C = 1;
+    g_buildFrame->r1C = 1;
     func_00152B38(self);
     func_001EE468(self);
     func_00152D70(self);
@@ -752,16 +752,16 @@ s32 func_0019D4B0(s32 n, DeferredRequest* items, void** out)
     for (i = 0; i < 18; i++) cnt[i] = 0;
     for (j = 0; j < n; j++) cnt[items[j].group]++;
     pos[0] = 0;
-    if (cnt[0] > 0 && D_0026AC30[0].f00 != 0) {
-        out[0] = &D_0026AC30[0];
+    if (cnt[0] > 0 && g_groupMarkers[0].handlerWord != 0) {
+        out[0] = &g_groupMarkers[0];
         pos[0] = 1;
         cnt[0]++;
     }
     start[0] = pos[0];
     for (i = 1; i < 18; i++) {
         pos[i] = cnt[i - 1];
-        if (cnt[i] > 0 && D_0026AC30[i].f00 != 0) {
-            out[pos[i]] = &D_0026AC30[i];
+        if (cnt[i] > 0 && g_groupMarkers[i].handlerWord != 0) {
+            out[pos[i]] = &g_groupMarkers[i];
             pos[i]++;
         }
         cnt[i] += pos[i];

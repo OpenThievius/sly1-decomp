@@ -7,21 +7,21 @@
 // explicit vptr: the entries are GCC 2.95's {s16 delta; s16 index; fn}, entry 0 being
 // {offset-to-top, rtti} = {0, 0, 0}. No `virtual`, so GCC emits nothing of its own (the table is
 // defined in 0013C000.cpp as a table of functions).
-#ifndef V249D_H
-#define V249D_H
+#ifndef MEMORY_READER_H
+#define MEMORY_READER_H
 
 #include "common.h"
 
-struct V249D;
+struct MemoryReader;
 
-struct V249D_Vt {
+struct MemoryReaderMethods {
     s16 adj0; s16 idx0; void* fn0;                                              // 0x00
-    s16 adj1; s16 idx1; s32 (*read)(V249D* self, s32 count, void* dst);         // 0x08
+    s16 adj1; s16 idx1; s32 (*read)(MemoryReader* self, s32 count, void* dst);         // 0x08
     s16 adj2; s16 idx2; void* fn2;                                              // 0x10
 };
 
-struct V249D {
-    const V249D_Vt* vt;     // 0x00
+struct MemoryReader {
+    const MemoryReaderMethods* methods;   // 0x00
     u8* base;               // 0x04: the bytes
     void* f08;              // 0x08: the owner's pointer (set, never read)
     s32 pos;                // 0x0C: how far it has read

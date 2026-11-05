@@ -1261,10 +1261,10 @@ void func_0012D5D0(Player2195* self, Msg_12D5D0* msg, s32* out)
         break;
     }
     case 25:
-        func_001EFFA0(D_00275F80, msg->aC.i, msg->a8.h.lo);
+        func_001EFFA0(g_screenFade, msg->aC.i, msg->a8.h.lo);
         break;
     case 26:
-        func_001F00C0(D_00275F80, msg->aC.i, msg->a8.h.lo);
+        func_001F00C0(g_screenFade, msg->aC.i, msg->a8.h.lo);
         break;
     case 27: {
         C07* g = D_00262E10;

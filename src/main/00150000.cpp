@@ -16,7 +16,7 @@
 #include "globals.h"
 #include "g27c220.h"
 #include "g261ef0.h"
-#include "g261d40.h"
+#include "threshold_range.h"
 #include "g262c70.h"
 #include "active_set_solver.h"
 #include "s137290.h"
@@ -1936,8 +1936,8 @@ void func_001533A8(Self_1533A8* self)
     func_00152B80((Gfx_1533A8*)&D_002622A8, s1->f2DC, s1->f2E0);
 }
 
-struct Tab_151A88 { u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 count; G261D40* list; };
-struct Tab_261D70 { u32 w[21]; s32 count; G261D40* list; s32 f5C; };
+struct Tab_151A88 { u8 pad0[0x1C]; s32 f1C; s32 f20; s32 f24; s32 f28; u8 pad2C[0x54 - 0x2C]; s32 count; ThresholdRange* list; };
+struct Tab_261D70 { u32 w[21]; s32 count; ThresholdRange* list; s32 f5C; };
 Tab_261D70 D_00261D70[2] = {
     { {0x00000000,0x3F800000,0x00000000,0x3F19999A,0x3DCCCCCD,0xBF4CCCCD,0x00000000,0x00000004,0x00000006,0x00000000,0x00000002,0x3ECC49BA,0x00000001,0x3F4C8B44,0x00000002,0x3D99999A,0x3E800000,0xBE4CCCCD,0xBB449BA6,0x00000002,0x3D99999A}, 4, D_00261D40, 0 },
     { {0x00000000,0x3F000000,0x00000000,0x3E4CCCCD,0x3DCCCCCD,0xBECCCCCD,0xBECCCCCD,0x00000004,0x00000006,0x00000000,0x00000002,0x3ECC49BA,0x00000000,0x3F4C8B44,0x00000000,0x3D99999A,0x3E800000,0xBE4CCCCD,0xBB449BA6,0x00000002,0x3D99999A}, 4, D_00261D40, 0 },
@@ -1973,13 +1973,13 @@ void func_00151A88(G261EF0* self)
     else rc = d + (s32)((1.0f - t) * ((f32)c + 0.99900001f - (f32)d));
     s32 r = func_001EAA70(ra, rc);
     s32 i = 0;
-    G261D40* e = 0;
+    ThresholdRange* e = 0;
     self->f14 = r;
     for (; i < ((Tab_151A88*)self->table)->count; i++) {
         e = &((Tab_151A88*)self->table)->list[i];
-        if (e->key <= D_002623C8->f10) break;
+        if (e->threshold <= D_002623C8->f10) break;
     }
-    self->f18 = func_001EAA70(e->a, e->b);
+    self->f18 = func_001EAA70(e->low, e->high);
     self->f20 = 0;
 }
 

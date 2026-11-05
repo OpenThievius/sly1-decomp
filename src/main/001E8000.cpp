@@ -10,9 +10,9 @@
 #include "shapes.h"
 #include "object_link.h"
 #include "owner_message.h"
-#include "g261858.h"
+#include "game_clock.h"
 #include "g262c70.h"
-#include "g264a40.h"
+#include "memory_card.h"
 
 void func_001C9AF8(void);
 
@@ -845,7 +845,7 @@ extern s32 D_00274738;
 extern f32 D_00261868[];
 
 void func_001E98E8(Obj_1E96F8* a, f32 f);
-void func_0018C178(G264A40* a, s32 v);
+void func_0018C178(MemoryCard* a, s32 v);
 void func_001F0220(u8* a, s32 v);
 void func_001DDA50(void* a);
 void func_001DDA20(void* a);
@@ -869,8 +869,8 @@ void func_001E96F8(Obj_1E96F8* self, s32 state)
     self->f8 = D_00261868[0];
     switch (state) {
     case 0:
-        if (D_00264A40.f18 == 0) func_0018C178(&D_00264A40, 1);
-        func_001F0220(D_00275F80, 0);
+        if (g_memoryCard.displayMode == 0) func_0018C178(&g_memoryCard, 1);
+        func_001F0220(g_screenFade, 0);
         func_001E98E8(self, 1.0f);
         break;
     case 1:
@@ -928,7 +928,7 @@ extern void func_0016E118(s32 n);
 extern void* func_001F4378(void);
 extern void func_001F4808(void* x);
 extern void func_0016EC20(G262C70* p, s32 n);
-extern void func_0018C568(G264A40* g);
+extern void func_0018C568(MemoryCard* g);
 extern void func_001605E8(void* p);
 extern void func_00160948(void);
 extern void func_00194D30(void* self, s32 a, s32 b);
@@ -940,7 +940,7 @@ extern void func_001A9FD0(void);
 
 void func_001E9108(Obj_1E9108* obj)
 {
-    f32 d = D_00261858.f10 - obj->f8;
+    f32 d = D_00261858.elapsed - obj->f8;
     s32 s1 = obj->state;
     G262C70* s2;
     s32 s5;
@@ -959,8 +959,8 @@ void func_001E9108(Obj_1E9108* obj)
     case 0: {
         s32 a2 = 0;
         if (D_002701B8 == 0) {
-            s32 m = D_00264A40.f18;
-            if (m == 2 || (m == 1 && D_00264A40.f0C == 5)) {
+            s32 m = g_memoryCard.displayMode;
+            if (m == 2 || (m == 1 && g_memoryCard.state == 5)) {
                 a2 = 1;
             }
         }
@@ -974,10 +974,10 @@ void func_001E9108(Obj_1E9108* obj)
         if (v & 0x800) {
             s32 t;
             func_0016EC20(s2, 0x800);
-            t = D_00264A40.i4F48;
-            D_00264A40.i4F44 = t;
+            t = g_memoryCard.i4F48;
+            g_memoryCard.i4F44 = t;
             if (t) {
-                func_0018C568(&D_00264A40);
+                func_0018C568(&g_memoryCard);
             } else {
                 func_001605E8(D_002623C0);
             }
@@ -1587,7 +1587,7 @@ void func_001EA0A8(C6C* self, f32 t);
 void func_001EA118(C6C* self)
 {
     Iter_1EA118 it;
-    G261858* clock = &D_00261858;
+    GameClock* clock = &D_00261858;
     func_001E9EE8(self, clock->step);
     if (clock->dt != 0.0f) {
         func_001E9C78(self, clock->dt);

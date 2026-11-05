@@ -1607,7 +1607,7 @@ void func_0016B580(T217D_12E0* self, G262C70* arg)
     Sub_16B580* p = o->f2E0;
     if (o->f308 != 0) {
         if (o->f308 == o->f33C) {
-            func_0018C7F8(D_00264A40);
+            func_0018C7F8(g_memoryCard);
         }
         func_001518B8(o->f308);
         o->f308 = 0;

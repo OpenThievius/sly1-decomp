@@ -9,7 +9,7 @@
 #include "v24a2.h"
 #include "globals.h"
 #include "g27c220.h"
-#include "g248748.h"
+#include "level_entry.h"
 #include "message_body.h"
 #include "owner_message.h"
 #include "shapes.h"
@@ -961,10 +961,10 @@ void func_001DE798(C14* self)
 
 void* func_001DFE80(s32 key)
 {
-    const G248748* p = D_00248748;
-    const G248748* end = D_00248748 + 33;
+    const LevelEntry* p = D_00248748;
+    const LevelEntry* end = D_00248748 + 33;
     do {
-        if (key != p->level) {
+        if (key != p->levelId) {
             p++;
         } else {
             return (void*)p;

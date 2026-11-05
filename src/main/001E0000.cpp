@@ -171,7 +171,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
                 if (cam->f08 < t) {
                     cam->f08 = t;
                     id = 0x1D;
-                    func_0018C7F8(&D_00264A40);
+                    func_0018C7F8(&g_memoryCard);
                 } else {
                     id = 0x1E;
                 }
@@ -182,7 +182,7 @@ void func_001E02C8(T217D_1380* self, s32 n)
                 D_002623C4->f440 = D_002623C4->f440 + 1;
                 if (func_001602A0() & 8) {
                     func_001604B8(8);
-                    func_0018C7F8(&D_00264A40);
+                    func_0018C7F8(&g_memoryCard);
                 }
             }
         } else {

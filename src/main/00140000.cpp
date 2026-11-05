@@ -6,7 +6,7 @@
 #include "flagged_object.h"
 #include "object_gatherer.h"
 #include "c6c.h"
-#include "g261858.h"
+#include "game_clock.h"
 #include "object_event.h"
 
 extern const u32 D_00247AA0;
@@ -106,10 +106,10 @@ extern f32 D_00261854;
 s64 func_001430F8(void);
 f32 func_001FB6B0(s64 value);
 
-void func_00142F10(G261858* self)
+void func_00142F10(GameClock* self)
 {
     s64 now = func_001430F8();
-    s64 delta = now - self->last;
+    s64 delta = now - self->lastTick;
     u64 half = (u64)delta >> 1;
     f32 t;
     if (delta >= 0) {
@@ -137,21 +137,21 @@ void func_00142F10(G261858* self)
     }
     f32 new_a = self->time + s;
     f32 old_b = self->dt;
-    f32 new_d = self->f10 + self->step;
+    f32 new_d = self->elapsed + self->step;
     self->time = new_a;
-    self->f0C = old_b;
+    self->previousDt = old_b;
     self->dt = s;
-    self->f10 = new_d;
-    self->last = now;
+    self->elapsed = new_d;
+    self->lastTick = now;
 }
 
 s64 func_001430F8(void);
 f32 func_001FB6B0(s64 value);
 
-void func_00143030(G261858* self)
+void func_00143030(GameClock* self)
 {
     s64 now = func_001430F8();
-    s64 delta = now - self->last;
+    s64 delta = now - self->lastTick;
     u64 half = (u64)delta >> 1;
     f32 t;
     if (delta >= 0) {
@@ -161,12 +161,12 @@ void func_00143030(G261858* self)
         t = t + t;
     }
     f32 dt = t * 0.0000000033908420f;
-    self->last = now;
+    self->lastTick = now;
     self->step = dt;
-    self->f10 = self->f10 + dt;
+    self->elapsed = self->elapsed + dt;
 }
 
-void func_001430B8(G261858* self, f32 value)
+void func_001430B8(GameClock* self, f32 value)
 {
     self->time = value;
 }
@@ -392,7 +392,7 @@ void func_00140ED0(Ring_140ED0* r)
         args.y = -1;
         args.z = 0x10;
     }
-    func_001EFFA0(D_00275F80, &args, 1);
+    func_001EFFA0(g_screenFade, &args, 1);
 }
 
 typedef signed int s32;

@@ -2,8 +2,8 @@
 #include "common.h"
 #include "c05.h"
 #include "fpu.h"
-#include "g264a40.h"
-#include "g269990.h"
+#include "memory_card.h"
+#include "background_job.h"
 #include "shapes.h"
 
 extern void func_001C7CB8(void);
@@ -183,7 +183,7 @@ void func_0018AB88(C0C* self)
         }
     } else {
         func_001603E8(2);
-        func_0018C7F8(&D_00264A40);
+        func_0018C7F8(&g_memoryCard);
     }
 }
 
@@ -258,8 +258,8 @@ void func_0018B2E8(C0C* self)
 void func_0018B580(void)
 {
 	func_002093F0();
-	func_0018B5C0(&D_00269990);
-	func_0018BD58(&D_00264A40, 0, 0);
+	func_0018B5C0(&g_backgroundJob);
+	func_0018BD58(&g_memoryCard, 0, 0);
 }
 
 struct Obj_18B720 { void* f0; void* f4; };
@@ -272,7 +272,7 @@ void func_001F6B40(void* a);
 
 void func_0018B720(Obj_18B720* a0)
 {
-    if (func_0018B770(&D_00269990)) {
+    if (func_0018B770(&g_backgroundJob)) {
         func_001F6A50(a0->f4, 1);
     }
     func_001F6B60(a0->f0);
@@ -475,28 +475,28 @@ struct Glob_18BDC8 { u8 pad0[0x25C]; s32 f25C; u8 pad260[8]; s32 f268; };
 extern f32 D_00261868[];
 extern Glob_18BDC8 D_0026FF68[];
 
-void func_0018B670(G269990* p, void* fn, G264A40* self);
-void func_0018C028(G264A40* self, s32 v);
-void func_0018D0A0(G264A40* self);
+void func_0018B670(BackgroundJob* p, void* fn, MemoryCard* self);
+void func_0018C028(MemoryCard* self, s32 v);
+void func_0018D0A0(MemoryCard* self);
 void func_00194D30(Glob_18BDC8* g, s32 a, s32 b);
 
-void func_0018BDC8(G264A40* self)
+void func_0018BDC8(MemoryCard* self)
 {
-    if (func_0018B770(&D_00269990) != 0) return;
-    if (self->f0C == self->f14) {
-        if (self->f20 <= D_00261868[0])
-            func_0018B670(&D_00269990, (void*)func_0018D0A0, self);
+    if (func_0018B770(&g_backgroundJob) != 0) return;
+    if (self->state == self->targetState) {
+        if (self->nextPollTime <= D_00261868[0])
+            func_0018B670(&g_backgroundJob, (void*)func_0018D0A0, self);
     } else {
-        func_0018C028(self, self->f14);
+        func_0018C028(self, self->targetState);
     }
-    if (func_0018B770(&D_00269990) != 0) return;
-    if (self->f18 == 1 && D_00261868[0] - self->f10 >= 0.3f) {
+    if (func_0018B770(&g_backgroundJob) != 0) return;
+    if (self->displayMode == 1 && D_00261868[0] - self->stateTime >= 0.3f) {
         if (self->i4F44 != 0) {
-            if (self->f0C != 5) func_00194D30(D_0026FF68, 1, 0x15);
+            if (self->state != 5) func_00194D30(D_0026FF68, 1, 0x15);
         } else if (D_0026FF68->f25C != 0 && D_0026FF68->f268 == 0x11) {
-            if (self->f0C != 5) func_00194D30(D_0026FF68, 1, 0x20);
+            if (self->state != 5) func_00194D30(D_0026FF68, 1, 0x20);
         } else {
-            switch (self->f0C) {
+            switch (self->state) {
             case 1: func_00194D30(D_0026FF68, 1, 3); break;
             case 2: func_00194D30(D_0026FF68, 1, 4); break;
             case 3: func_00194D30(D_0026FF68, 1, 7); break;
@@ -569,23 +569,23 @@ second:
 
 s32 func_001E2268(s32 a, s32 b);
 
-void func_0018B5C0(G269990* self)
+void func_0018B5C0(BackgroundJob* self)
 {
     s32 r = func_001E2268(1, 1);
-    self->i00 = r; self->f04 = -1; self->f10 = 0x22;
+    self->semaphoreId = r; self->thread = -1; self->result = 0x22;
 }
 
 void* func_001F5C0C(void* p, s32 zero, s32 size);
 void func_0018C178(void* self, s32 value);
 
-void func_0018BD58(G264A40* self, s32 a, s32 b)
+void func_0018BD58(MemoryCard* self, s32 a, s32 b)
 {
     func_001F5C0C(self, 0, 0x4F50);
-    self->f0C = -1;
-    self->f14 = 0;
+    self->state = -1;
+    self->targetState = 0;
     func_0018C178(self, 0);
-    self->f04 = (void*)a;
-    self->f08 = (void*)b;
+    self->port = (void*)a;
+    self->slot = (void*)b;
     self->i4F48 = 0;
     self->i4F44 = 0;
 }
@@ -970,15 +970,15 @@ s32 func_001F6A30();
 
 void func_0018B600()
 {
-    func_001F6B60(D_00269990.f00);
-    G269990* o = &D_00269990;
-    s32 r = o->fn(o->f0C);
-    o->f10 = r;
+    func_001F6B60(g_backgroundJob.semaphore);
+    BackgroundJob* o = &g_backgroundJob;
+    s32 r = o->job(o->arg);
+    o->result = r;
     *(s32*)D_00275960 = -1;
-    o->f04 = -1;
-    o->f0C = 0;
-    o->fn = 0;
-    func_001F6B40(D_00269990.f00);
+    o->thread = -1;
+    o->arg = 0;
+    o->job = 0;
+    func_001F6B40(g_backgroundJob.semaphore);
     func_001F6A30();
 }
 

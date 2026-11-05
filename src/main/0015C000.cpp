@@ -6,7 +6,7 @@
 #include "v24a0.h"
 #include "v24a2.h"
 #include "shapes.h"
-#include "g262320.h"
+#include "render_frame.h"
 #include "text_reader.h"
 #include "layout_137228.h"
 
@@ -144,7 +144,7 @@ void func_00152B38(void* obj);
 
 s32 func_0015CAB8(V24A2* self, void* obj)
 {
-    s32 r = (D_002622D8->flags & self->mask) == 0;
+    s32 r = (g_buildFrame->flags & self->mask) == 0;
     if (r != 0) {
         func_00152D70(obj);
         func_00152B80(obj, self->f68, self->f6C);
@@ -154,7 +154,7 @@ s32 func_0015CAB8(V24A2* self, void* obj)
             func_00152B80(obj, self->imgB->fC, self->imgB->f8);
         }
         func_00152B38(obj);
-        D_002622D8->flags |= self->mask;
+        g_buildFrame->flags |= self->mask;
     }
     return r;
 }
@@ -335,16 +335,16 @@ extern void* D_002623B0;
 
 void func_0015EC68(void)
 {
-    func_0015EB20(D_002622A8, (u8*)D_002622D8 + 8, 0);
-    func_0015EBF0(D_00262280, D_002622D8, 0);
-    D_002622D8->l20 = D_002622E0;
+    func_0015EB20(D_002622A8, (u8*)g_buildFrame + 8, 0);
+    func_0015EBF0(D_00262280, g_buildFrame, 0);
+    g_buildFrame->l20 = D_002622E0;
     func_00152440(&D_002622E0);
-    D_002622D8->l2C = D_002622F0;
+    g_buildFrame->l2C = D_002622F0;
     func_00152440(&D_002622F0);
-    D_002622D8->l38 = D_00262300;
+    g_buildFrame->l38 = D_00262300;
     func_00152440(&D_00262300);
     D_002622D0 = 0;
-    D_002622D8 = 0;
+    g_buildFrame = 0;
     func_001F6B40(D_002623B0);
 }
 
@@ -368,7 +368,7 @@ extern s32 D_00261F1C;
 void func_001B3488(s32 value);
 void func_00202A80(s32 a, s32 b);
 
-void func_0015ED50(G262320* self)
+void func_0015ED50(RenderFrame* self)
 {
     D_002622D4 = self->i10;
     func_001B3488(self->f44);
@@ -715,7 +715,7 @@ void func_0015F210(s32 flag)
         } while (--n >= 0);
         D_002626CC = 3;
     }
-    u8* p = (u8*)D_00262320;
+    u8* p = (u8*)g_renderFrames;
     u8* end = p + 0x90;
     do {
         func_0015EFE8(p);
@@ -891,9 +891,9 @@ void func_0015E678(void);
 void func_0015E810(void)
 {
     for (u32 i = 0; i < 2; i++) {
-        G262320* r = &D_00262320[i];
-        r->f04 = (u8*)D_002C3B00 + i * 0x80000;
-        r->f0C = D_003C3B00 + i * 0x100000;
+        RenderFrame* r = &g_renderFrames[i];
+        r->bufA = (u8*)D_002C3B00 + i * 0x80000;
+        r->bufB = D_003C3B00 + i * 0x100000;
         r->f10 = D_005C3B00 + i * 0x10600;
         func_00152438(&r->l20, 0x630);
         func_00152438(&r->l2C, 0x1090);
@@ -1008,7 +1008,7 @@ extern s32 D_002626CC;
 
 void func_0015EDB8(void);
 s32 func_001F6B60(void* p);
-void func_0015ED50(G262320* f);
+void func_0015ED50(RenderFrame* f);
 void func_001684E8(void);
 void func_001686E8(s32 a, s32 b);
 void func_0015F320(void);
@@ -1022,16 +1022,16 @@ void func_0015EE80(void)
         D_002623B8 = 1;
         func_001F6B60(D_002623B0);
         D_002623B8 = 0;
-        D_0026231C = &D_00262320[D_00262314];
+        D_0026231C = &g_renderFrames[D_00262314];
         D_00262314++;
         if (D_00262314 >= 2) {
             D_00262314 = 0;
         }
-        func_0015ED50((G262320*)D_0026231C);
+        func_0015ED50((RenderFrame*)D_0026231C);
         func_001684E8();
-        func_001686E8(D_00261F18, ((G262320*)D_0026231C)->i0C);
+        func_001686E8(D_00261F18, ((RenderFrame*)D_0026231C)->bufBAddr);
         *(volatile s32*)0x10003010 = 0;
-        func_001686E8(D_00261F1C, ((G262320*)D_0026231C)->i04);
+        func_001686E8(D_00261F1C, ((RenderFrame*)D_0026231C)->bufAAddr);
         func_0015F320();
         func_00202C38(D_00261F18, 0, 0);
         func_001F6B40(D_002623B4);
@@ -1082,7 +1082,7 @@ struct Next_15EFE8 {
     }
 };
 
-void func_0015EFE8(G262320* self)
+void func_0015EFE8(RenderFrame* self)
 {
     Iter_15EFE8 it;
     Node_15EFE8* n;
@@ -1497,21 +1497,21 @@ void func_0015E9F0(void)
     func_001F6B60(D_002623B4);
     idx = D_00262318;
     D_00262318 = idx + 1;
-    D_002622D8 = &D_00262320[idx];
+    g_buildFrame = &g_renderFrames[idx];
     if ((u32)(idx + 1) >= 2) {
         D_00262318 = 0;
     }
-    func_0015EFE8(D_002622D8);
+    func_0015EFE8(g_buildFrame);
     {
-        G262320* slot = D_002622D8;
+        RenderFrame* slot = g_buildFrame;
         s32 v = *(s32*)(D_00261990 + 0x21C);
         slot->flags = 0;
         slot->f44 = v;
         slot->f1C = 0;
-        func_001529C8(D_00262280, 0x8000, slot->f04);
+        func_001529C8(D_00262280, 0x8000, slot->bufA);
     }
-    func_001529C8(D_002622A8, 0x10000, D_002622D8->f0C);
-    D_002622D0 = D_002622D8->i10;
+    func_001529C8(D_002622A8, 0x10000, g_buildFrame->bufB);
+    D_002622D0 = g_buildFrame->i10;
     func_00152B38(D_00262280);
     func_00152B38(D_002622A8);
 }

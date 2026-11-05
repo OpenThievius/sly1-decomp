@@ -2,7 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "c63.h"
-#include "g261858.h"
+#include "game_clock.h"
 
 void func_001DDA20(void* a);
 void func_001DDB58(void* a);

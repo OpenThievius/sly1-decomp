@@ -8,7 +8,7 @@
 #include "list_iter.h"
 #include "v24a0.h"
 #include "g27c220.h"
-#include "g275f80.h"
+#include "screen_fade.h"
 #include "keyed_entry.h"
 #include "identity_key.h"
 #include "strip_mesh.h"
@@ -345,7 +345,7 @@ extern u8 D_0026FF68[];
 
 void func_001DDAD0(Call_160DA0* x);
 void func_001BE708(void);
-void func_001EFFA0(Call_160DA0* dst, S1EFFA0* args, s32 count);
+void func_001EFFA0(Call_160DA0* dst, FadeRequest* args, s32 count);
 void func_00140ED0(Call_160DA0* r);
 void func_00194D30(Call_160DA0* self, s32 a, s32 b);
 void func_00151E20(Call_160DA0* self, f32 amount);
@@ -1630,14 +1630,14 @@ void func_00160DA0(void)
     G27C220* p = D_002623C0;
     s32 m = p->f19DC;
     if (m == 1) {
-        S1EFFA0 args;
+        FadeRequest args;
         args.kind = m;
         args.text = (u8*)&D_00275B04;
         u8* base = args.text - 0x14;
         args.f08 = *(s32*)(base + 0x8);
         args.f0C = *(s32*)(base + 0xC);
         args.flags = 0x10;
-        func_001EFFA0((Call_160DA0*)&D_00275F80, &args, 1);
+        func_001EFFA0((Call_160DA0*)&g_screenFade, &args, 1);
     } else if (p->f19E0 >= 0) {
         func_00140ED0((Call_160DA0*)D_00261420);
     } else {

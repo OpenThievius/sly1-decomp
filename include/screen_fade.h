@@ -9,8 +9,12 @@
 // (001EC000.cpp), func_001F00C0, func_001F00F0 and func_001F0220 (001F0000.cpp), each taking it
 // as the first parameter; func_001AD970, func_001F3C38 and func_001F4408 name it.
 // 001E4000.cpp defines its first word (`s32 D_00275F80 = 0`); the rest is D_00275F84's.
-#ifndef G275F80_H
-#define G275F80_H
+//
+// A black fade over the screen: `opacity` goes from 0 to 1 over the time since
+// modeStartTime (func_001EFD10), func_001EFEE0 draws the black rectangle with it, and the
+// request it was started for is carried out (func_001F0220, mode 2) once the fade is done.
+#ifndef SCREEN_FADE_H
+#define SCREEN_FADE_H
 
 #include "common.h"
 #include "identity_key.h"
@@ -19,7 +23,7 @@
 // (its callers build it on their stacks: func_00160DA0, func_001F4408, func_001F4A30), and
 // func_001F00F0 copies the saved one over the current one as 0x14 bytes (Blk20_1F00F0: two
 // unaligned doublewords and a word).
-struct S1EFFA0 {
+struct FadeRequest {
     s32 kind;               // 0x00
     union {
         IdentityKey* key;       // 0x04: func_001EFFA0 (Text_1EFFA0 reads words 2 and 6), func_001F00F0
@@ -30,23 +34,23 @@ struct S1EFFA0 {
     s32 flags;              // 0x10: func_001EFFA0 and func_001F00F0 set 8 when there is no key or it is D_00275B04, clear it otherwise
 };
 
-struct G275F80 {
+struct ScreenFade {
     s32 f00;                // 0x00: func_001AD970, func_001EFFA0
     s32 mode;               // 0x04: func_001AD970, func_001EFCE8, func_001EFD10, func_001F0220, func_001F3C38
-    f32 f08;                // 0x08: func_001EFD10, func_001F0220
+    f32 modeStartTime;      // 0x08: func_001EFD10, func_001F0220 (the clock when mode was set)
     union {
-        f32 scale;          // 0x0C: func_001EFD10, func_001EFEE0
-        s32 i0C;            // 0x0C: func_001F0220
+        f32 opacity;        // 0x0C: func_001EFD10, func_001EFEE0
+        s32 opacityWord;    // 0x0C: func_001F0220
     };
-    S1EFFA0 cur;            // 0x10: func_001EFFA0 (args), func_001F00F0 (pair, flags)
-    s32 f24;                // 0x24: func_001EFEE0, func_001EFFA0, func_001F3C38; func_001F00F0 copies last into it
-    S1EFFA0 saved;          // 0x28: func_001F00C0, func_001F00F0 (spair, mid)
-    s32 last;               // 0x3C: func_001F00C0, func_001F00F0
+    FadeRequest active;     // 0x10: func_001EFFA0 (args), func_001F00F0 (pair, flags)
+    s32 style;              // 0x24: func_001EFEE0, func_001EFFA0 (its count), func_001F3C38; func_001F00F0 copies queuedStyle into it
+    FadeRequest queued;     // 0x28: func_001F00C0, func_001F00F0 (spair, mid)
+    s32 queuedStyle;        // 0x3C: func_001F00C0, func_001F00F0
 };
 
-typedef char check_S1EFFA0[sizeof(S1EFFA0) == 0x14 ? 1 : -1];
-typedef char check_G275F80[sizeof(G275F80) == 0x40 ? 1 : -1];
+typedef char check_FadeRequest[sizeof(FadeRequest) == 0x14 ? 1 : -1];
+typedef char check_ScreenFade[sizeof(ScreenFade) == 0x40 ? 1 : -1];
 
-extern G275F80 D_00275F80;
+extern ScreenFade D_00275F80;
 
 #endif

@@ -56,7 +56,7 @@ void func_0017B8C0(Obj_17B8C0* self, s32 state)
         break;
     case 2:
         func_001603E8(5);
-        func_0018C7F8(D_00264A40);
+        func_0018C7F8(g_memoryCard);
         self->f550 = state;
         break;
     default:

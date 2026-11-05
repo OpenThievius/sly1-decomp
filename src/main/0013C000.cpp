@@ -6,7 +6,7 @@
 #include "c20.h"
 #include "c3b.h"
 #include "c05.h"
-#include "v249d.h"
+#include "memory_reader.h"
 #include "object_message.h"
 
 void func_001BE4D8(void* p);
@@ -69,7 +69,7 @@ void func_0013CC48(Span_CC48* p, s32 n)
 
 void func_001F5A58(void* dst, void* src, s32 n);
 
-s32 func_0013CC80(V249D* self, s32 want, void* dst)
+s32 func_0013CC80(MemoryReader* self, s32 want, void* dst)
 {
     s32 n = self->remain;
     u8* base = self->base;
@@ -987,13 +987,13 @@ struct Self_13CC00 { u8 pad[4]; };
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
 extern const Fn_Table D_00249D98[];
-s32 func_0013C9D0(Self_13CC00* self, void* a1, V249D* arg);
+s32 func_0013C9D0(Self_13CC00* self, void* a1, MemoryReader* arg);
 
 s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
 {
     if (a1 != 0) {
-        V249D arg;
-        arg.vt = (const V249D_Vt*)D_00249D98;
+        MemoryReader arg;
+        arg.methods = (const MemoryReaderMethods*)D_00249D98;
         arg.base = (u8*)a2;
         arg.f10 = a1;
         arg.f08 = a1;
@@ -1102,7 +1102,7 @@ struct Ring_0013C9D0 {
     u8 pad_18[0x04];
     s32 f1c;
 };
-s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, V249D* port)
+s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, MemoryReader* port)
 {
     s32 total = 0;
     s32 rem = n;
@@ -1112,7 +1112,7 @@ s32 func_0013C9D0(Ring_0013C9D0* self, s32 n, V249D* port)
     while (rem != 0) {
         s32 avail = self->size - self->pos;
         s32 cnt = rem < avail ? rem : avail;
-        s32 r = port->vt->read((V249D*)((u8*)port + port->vt->adj1), cnt, self->buf + self->pos);
+        s32 r = port->methods->read((MemoryReader*)((u8*)port + port->methods->adj1), cnt, self->buf + self->pos);
         if (r == 0) {
             break;
         }

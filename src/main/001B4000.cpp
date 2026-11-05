@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "r11b008.h"
-#include "t21e3.h"
+#include "cursor_animator.h"
 #include "c05.h"
 #include "list_iter.h"
 #include "c03.h"
@@ -12,35 +12,35 @@
 #include "s1b6290.h"
 #include "globals.h"
 
-void func_001B4AA0(T21E3* self, const T21E3_Src* src);
-void func_001B4AD0(T21E3* self);
-void func_001B46E0(T21E3_Cursor* cur, s32 idx);
-void func_001B4750(T21E3_Cursor* cur, f32 x, f32 y);
-T21E3_Rec* func_001B4688(s32 key);
-extern T21E3_Cursor* D_00274544;
-extern T21E3_Cursor* D_0027451C;
+void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
+void func_001B4AD0(CursorAnimator* self);
+void func_001B46E0(AnimCursor* cur, s32 idx);
+void func_001B4750(AnimCursor* cur, f32 x, f32 y);
+AnimRecord* func_001B4688(s32 key);
+extern AnimCursor* D_00274544;
+extern AnimCursor* D_0027451C;
 
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_001B4BC8(T21E3_358* p)
+void func_001B4BC8(FrameRunAnimator* p)
 {
     func_001B4AD0(p);
-    if (p->cur.rec != 0) {
+    if (p->cursor.record != 0) {
         f32 a = func_001EAAE0(p->durMin, p->durMax);
-        p->rate = (f32)p->cur.rec->count / a;
+        p->rate = (f32)p->cursor.record->count / a;
         f32 b = func_001EAAE0(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
     }
 }
 
-f32 func_001B4D18(T21E3_358* p)
+f32 func_001B4D18(FrameRunAnimator* p)
 {
-    return (p->pos / p->rate) / ((f32)p->cur.rec->count / p->rate + p->wait0);
+    return (p->pos / p->rate) / ((f32)p->cursor.record->count / p->rate + p->wait0);
 }
 
 
-void func_001B4D48(T21E3_378* p, T21E3_Src* s)
+void func_001B4D48(FramePingPongAnimator* p, AnimatorParams* s)
 {
     func_001B4AA0(p, s);
     p->durMin = s->f4;
@@ -50,21 +50,21 @@ void func_001B4D48(T21E3_378* p, T21E3_Src* s)
     p->pos = (f32)s->u14;
 }
 
-f32 func_001B4F18(T21E3_378* p)
+f32 func_001B4F18(FramePingPongAnimator* p)
 {
     f32 x = p->rate;
     f32 a;
     if (x < 0.0f) {
         x = -x;
-        a = (f32)(p->cur.rec->count << 1) - p->pos;
+        a = (f32)(p->cursor.record->count << 1) - p->pos;
     } else {
         a = p->pos;
     }
-    return (a / x) / ((f32)(p->cur.rec->count << 1) / x + p->wait0);
+    return (a / x) / ((f32)(p->cursor.record->count << 1) / x + p->wait0);
 }
 
 
-void func_001B4F80(T21E3_398* p, T21E3_Src* s)
+void func_001B4F80(RandomJumpAnimator* p, AnimatorParams* s)
 {
     func_001B4AA0(p, s);
     p->waitMin = s->f4;
@@ -72,11 +72,11 @@ void func_001B4F80(T21E3_398* p, T21E3_Src* s)
 }
 
 
-void func_001B5108(T21E3_3B8* p)
+void func_001B5108(AngleFrameAnimator* p)
 {
     func_001B4AD0(p);
-    if (p->cur.rec != 0) {
-        s32 n = p->cur.rec->count;
+    if (p->cursor.record != 0) {
+        s32 n = p->cursor.record->count;
         if (n >= 2) {
             p->step = p->sector / (f32)n;
         }
@@ -93,12 +93,12 @@ extern u8 func_00166690[];
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EAFE0(f32 a, f32 b);
 
-void func_001B5160(T21E3_3B8* p, void* unused, Other_1B5160* q)
+void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
 {
-    if (p->cur.rec == 0) {
+    if (p->cursor.record == 0) {
         return;
     }
-    if (p->cur.rec->count < 2) {
+    if (p->cursor.record->count < 2) {
         return;
     }
     if (*(void**)q != (void*)func_00166690) {
@@ -113,34 +113,34 @@ void func_001B5160(T21E3_3B8* p, void* unused, Other_1B5160* q)
     f32 t = func_00205778(vv->y, vv->x);
     f32 r = func_001EAFE0(p->phase - t, p->sector);
     s32 k = (s32)(r / p->step);
-    func_001B46E0(&p->cur, k);
+    func_001B46E0(&p->cursor, k);
 }
 
 f32 func_002058A0(f32 a, f32 b);
 
-void func_001B5278(T21E3_3D8* p, f32 t)
+void func_001B5278(ScrollAnimator* p, f32 t)
 {
-    if (p->cur.rec != 0) {
-        f32 r1 = func_002058A0(p->cur.x + p->velU * p->mulU * t, p->wrapU);
-        f32 r2 = func_002058A0(p->cur.y + p->velV * p->mulV * t, p->wrapV);
-        func_001B4750(&p->cur, r1, r2);
+    if (p->cursor.record != 0) {
+        f32 r1 = func_002058A0(p->cursor.u + p->velU * p->mulU * t, p->wrapU);
+        f32 r2 = func_002058A0(p->cursor.v + p->velV * p->mulV * t, p->wrapV);
+        func_001B4750(&p->cursor, r1, r2);
     }
 }
 
-void func_001B5388(T21E3_3D8* p, f32 a, f32 b)
+void func_001B5388(ScrollAnimator* p, f32 a, f32 b)
 {
     p->mulU = a;
     p->mulV = b;
 }
 
 
-void func_001B4750(T21E3_Cursor* a0, f32 a, f32 b)
+void func_001B4750(AnimCursor* a0, f32 a, f32 b)
 {
-    if (a0->rec == 0) return;
-    if (a0->x == a && a0->y == b) return;
-    a0->x = a;
-    T21E3_Cursor* v = a0->next;
-    a0->y = b;
+    if (a0->record == 0) return;
+    if (a0->u == a && a0->v == b) return;
+    a0->u = a;
+    AnimCursor* v = a0->next;
+    a0->v = b;
     if (v != 0) return;
     if (a0 == D_00274544) return;
     if (D_00274544 == 0) D_00274544 = a0;
@@ -150,7 +150,7 @@ void func_001B4750(T21E3_Cursor* a0, f32 a, f32 b)
 
 extern f32 D_0026185C;
 
-s32 func_001B4B08(T21E3* a0)
+s32 func_001B4B08(CursorAnimator* a0)
 {
     if (a0->stamp != D_0026185C) {
         a0->stamp = D_0026185C;
@@ -367,18 +367,18 @@ void func_001B6E28(Node_1B6E28* self, s32 idx1, s32 idx2)
 }
 
 
-void func_001B46E0(T21E3_Cursor* a0, s32 a1)
+void func_001B46E0(AnimCursor* a0, s32 a1)
 {
-    if (a0->rec != 0) {
-        s32 hi = a0->rec->count - 1;
+    if (a0->record != 0) {
+        s32 hi = a0->record->count - 1;
         if (a1 < 0) {
             a1 = 0;
         } else {
             a1 = (hi < a1) ? hi : a1;
         }
-        if (a0->idx != a1) {
-            T21E3_Cursor* n = a0->next;
-            a0->idx = a1;
+        if (a0->frame != a1) {
+            AnimCursor* n = a0->next;
+            a0->frame = a1;
             if (n == 0) {
                 if (a0 != D_00274544) {
                     if (D_00274544 == 0) {
@@ -397,15 +397,15 @@ void func_001694A0(void* p);
 
 void func_001B47C0(void)
 {
-    T21E3_Cursor* n = D_0027451C;
+    AnimCursor* n = D_0027451C;
     while (n != 0) {
-        for (T21E3_Link* e = n->links; e != 0; e = e->next) {
+        for (FrameLink* e = n->links; e != 0; e = e->next) {
             if (n->flags & 1) {
-                e->dst->value = e->src->base + ((n->idx * e->src->stride) << 4);
+                e->dst->value = e->src->base + ((n->frame * e->src->stride) << 4);
             }
             func_001694A0(e->dst);
         }
-        T21E3_Cursor* nx = n->next;
+        AnimCursor* nx = n->next;
         n->next = 0;
         n = nx;
     }
@@ -414,16 +414,16 @@ void func_001B47C0(void)
 }
 
 extern s32 D_0027453C;
-extern T21E3** D_00274540;
+extern CursorAnimator** D_00274540;
 
-s32 func_001B4B08(T21E3* p);
+s32 func_001B4B08(CursorAnimator* p);
 
 void func_001B4878(f32 t)
 {
     for (s32 i = 0; i < D_0027453C; i++) {
-        T21E3* o = D_00274540[i];
+        CursorAnimator* o = D_00274540[i];
         if (func_001B4B08(o) != 0) {
-            void (*fn)(T21E3*, f32) = o->vt->m02;
+            void (*fn)(CursorAnimator*, f32) = o->methods->step;
             if (fn != 0) {
                 fn(o, t);
             }
@@ -437,18 +437,18 @@ void* func_0018D5C0(s32 size);
 void* func_001B4980(s32 type);
 void func_00137A60(void* owner, s32 key, void* out);
 
-T21E3* func_001B4A10(void* a0)
+CursorAnimator* func_001B4A10(void* a0)
 {
     s32 type = func_00137BE0(a0);
-    T21E3* result = 0;
+    CursorAnimator* result = 0;
     if (type != 0) {
-        T21E3* o = (T21E3*)func_0018D5C0(func_001B4920(type));
+        CursorAnimator* o = (CursorAnimator*)func_0018D5C0(func_001B4920(type));
         void* vt = func_001B4980(type);
         o->type = type;
-        o->vt = (const T21E3_Vt*)vt;
+        o->methods = (const CursorAnimatorMethods*)vt;
         u32 buf[8];
         func_00137A60(a0, 0x1C, buf);
-        o->vt->m00(o, (T21E3_Src*)buf);
+        o->methods->load(o, (AnimatorParams*)buf);
         result = o;
     }
     return result;
@@ -565,21 +565,21 @@ void func_001B7C40(C03* self, s32 flag)
     sub->desc03()->m32(sub);
 }
 
-void func_001B4AA0(T21E3* self, const T21E3_Src* src)
+void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src)
 {
-    s32 old = self->cur.flags;
-    self->id = src->id;
-    self->cur.flags = old | 1;
+    s32 old = self->cursor.flags;
+    self->recordKey = src->recordKey;
+    self->cursor.flags = old | 1;
     if (src->flag != 0) {
-        self->cur.flags = old | 5;
+        self->cursor.flags = old | 5;
     }
 }
 
 
-void func_001B4AD0(T21E3* self)
+void func_001B4AD0(CursorAnimator* self)
 {
-    if (self->cur.rec == 0) {
-        self->cur.rec = func_001B4688(self->id);
+    if (self->cursor.record == 0) {
+        self->cursor.record = func_001B4688(self->recordKey);
     }
 }
 
@@ -588,10 +588,10 @@ f32 func_001B4B38(void)
     return 0.0f;
 }
 
-T21E3_Cursor* func_001B4B48(T21E3* self, const T21E3_Rec* key)
+AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key)
 {
-    if (key->key == self->id) {
-        return &self->cur;
+    if (key->key == self->recordKey) {
+        return &self->cursor;
     }
     return 0;
 }
@@ -632,7 +632,7 @@ s32 func_001B63C0(C88* self, s32 key)
 }
 
 
-void func_001B4B68(T21E3_358* p, T21E3_Src* s)
+void func_001B4B68(FrameRunAnimator* p, AnimatorParams* s)
 {
     func_001B4AA0(p, s);
     p->durMin = s->f4;
@@ -645,12 +645,12 @@ void func_001B4B68(T21E3_358* p, T21E3_Src* s)
 f32 func_001EAAE0(f32 a, f32 b);
 f32 func_001EAFE0(f32 a, f32 b);
 
-void func_001B4C30(T21E3_358* p, f32 dt)
+void func_001B4C30(FrameRunAnimator* p, f32 dt)
 {
-    if (p->cur.rec == 0) {
+    if (p->cursor.record == 0) {
         return;
     }
-    if (p->cur.rec->count < 2) {
+    if (p->cursor.record->count < 2) {
         return;
     }
     if (p->wait > 0.0f) {
@@ -658,16 +658,16 @@ void func_001B4C30(T21E3_358* p, f32 dt)
         return;
     }
     p->pos = p->pos + p->rate * dt;
-    if ((f32)p->cur.rec->count <= p->pos) {
+    if ((f32)p->cursor.record->count <= p->pos) {
         f32 a = func_001EAAE0(p->durMin, p->durMax);
-        p->rate = (f32)p->cur.rec->count / a;
+        p->rate = (f32)p->cursor.record->count / a;
         f32 b = func_001EAAE0(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
     }
-    f32 t = func_001EAFE0(p->pos, (f32)p->cur.rec->count);
+    f32 t = func_001EAFE0(p->pos, (f32)p->cursor.record->count);
     p->pos = t;
-    func_001B46E0(&p->cur, (s32)t);
+    func_001B46E0(&p->cursor, (s32)t);
 }
 
 s32 func_001B63C0(void* self, s32 key);
@@ -789,9 +789,9 @@ void func_001B7100(C09* self, s32 value)
     }
 }
 
-f32 func_001B5308(T21E3_3D8* p) { f32 result=0.0f; if (p->velU != 0.0f) result=(p->cur.x/p->wrapU)*0.5f; else result=0.5f; if (p->velV != 0.0f) result += (p->cur.y/p->wrapV)*0.5f; else result += 0.5f; return result; }
+f32 func_001B5308(ScrollAnimator* p) { f32 result=0.0f; if (p->velU != 0.0f) result=(p->cursor.u/p->wrapU)*0.5f; else result=0.5f; if (p->velV != 0.0f) result += (p->cursor.v/p->wrapV)*0.5f; else result += 0.5f; return result; }
 
-void func_001B5568(T21E3_418* self, void** out) { out[0] = &self->out44; out[1] = &self->out4C; out[2] = &self->out48; }
+void func_001B5568(TriangleAnimator* self, void** out) { out[0] = &self->out44; out[1] = &self->out4C; out[2] = &self->out48; }
 
 void func_00124A48(void* self);
 
@@ -957,12 +957,12 @@ void func_001B78C0(C09* self, s32 code, void* req)
 
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_001B4DA8(T21E3_378* p)
+void func_001B4DA8(FramePingPongAnimator* p)
 {
     func_001B4AD0(p);
-    if (p->cur.rec != 0) {
+    if (p->cursor.record != 0) {
         f32 a = func_001EAAE0(p->durMin, p->durMax);
-        p->rate = (f32)(p->cur.rec->count * 2) / a;
+        p->rate = (f32)(p->cursor.record->count * 2) / a;
         f32 b = func_001EAAE0(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
@@ -971,9 +971,9 @@ void func_001B4DA8(T21E3_378* p)
 
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_001B4E18(T21E3_378* p, f32 dt)
+void func_001B4E18(FramePingPongAnimator* p, f32 dt)
 {
-    T21E3_Rec* d = p->cur.rec;
+    AnimRecord* d = p->cursor.record;
     if (d == 0) return;
     if (d->count < 2) return;
     if (0.0f < p->wait) {
@@ -990,51 +990,51 @@ void func_001B4E18(T21E3_378* p, f32 dt)
     if (p->pos < 0.0f) {
         p->pos = 0.0f;
         f32 a = func_001EAAE0(p->durMin, p->durMax);
-        p->rate = (f32)(p->cur.rec->count * 2) / a;
+        p->rate = (f32)(p->cursor.record->count * 2) / a;
         f32 b = func_001EAAE0(p->waitMin, p->waitMax);
         p->wait0 = b;
         p->wait = b;
     }
-    func_001B46E0(&p->cur, (s32)p->pos);
+    func_001B46E0(&p->cursor, (s32)p->pos);
 }
 
 extern f32 D_0026185C;
 f32 func_001EA408(f32 a);
 void func_001EAD88(f32 angle, f32* a, f32* b);
 
-void func_001B5400(T21E3_3F8* self)
+void func_001B5400(CircleAnimator* self)
 {
-    if (self->cur.rec != 0) {
+    if (self->cursor.record != 0) {
         f32 t[2];
         f32 ang = func_001EA408(D_0026185C * self->omega);
         func_001EAD88(ang, &t[0], &t[1]);
         t[0] = t[0] * self->radius + self->centerU;
         t[1] = t[1] * self->radius + self->centerV;
-        func_001B4750(&self->cur, t[0], t[1]);
+        func_001B4750(&self->cursor, t[0], t[1]);
     }
 }
 
 extern f32 D_0026185C;
 f32 func_001EAFE0(f32 x, f32 y);
 
-f32 func_001B5488(T21E3_3F8* p)
+f32 func_001B5488(CircleAnimator* p)
 {
     f32 a = func_001EAFE0(D_0026185C * p->omega, 6.2831855f);
     return a * 0.15915494f;
 }
 
 
-void func_001B54D0(T21E3_418* self, T21E3_Src* src)
+void func_001B54D0(TriangleAnimator* self, AnimatorParams* src)
 {
     func_001B4AA0(self, src);
-    s32 fl = self->cur.flags;
+    s32 fl = self->cursor.flags;
     self->u0 = src->f4;
     self->v0 = src->f8;
     self->du1 = src->fC - src->f4;
     self->du2 = src->f10 - src->f4;
     self->dv1 = src->f14 - src->f8;
     f32 d = src->f18 - src->f8;
-    self->cur.flags = (fl & -2) | 2;
+    self->cursor.flags = (fl & -2) | 2;
     self->dv2 = d;
 }
 
@@ -1075,10 +1075,10 @@ void func_001B6EC8(C09* self)
 }
 
 
-void func_001B5398(T21E3_3F8* p, T21E3_Src* s)
+void func_001B5398(CircleAnimator* p, AnimatorParams* s)
 {
     func_001B4AA0(p, s);
-    p->omega = s->f4; p->radius = s->f8; p->centerU = s->fC; p->centerV = s->f10; p->cur.flags = (p->cur.flags & ~1) | 2;
+    p->omega = s->f4; p->radius = s->f8; p->centerU = s->fC; p->centerV = s->f10; p->cursor.flags = (p->cursor.flags & ~1) | 2;
 }
 
 extern f32 D_0026185C;
@@ -1107,16 +1107,16 @@ ret0:
 }
 
 extern s32 D_002744F8;
-extern T21E3_Rec* D_002744FC;
+extern AnimRecord* D_002744FC;
 
-T21E3_Rec* func_001B4688(s32 key)
+AnimRecord* func_001B4688(s32 key)
 {
     if (key == -1) {
         return 0;
     }
     s32 i = 0;
     if (i < D_002744F8) {
-        T21E3_Rec* p = D_002744FC;
+        AnimRecord* p = D_002744FC;
         do {
             if (p->key == key) {
                 return p;
@@ -1171,7 +1171,7 @@ void func_001B61F0(Bank_1B61F0* self)
     func_001B6290(self, r, -1, 0);
 }
 
-void func_001B5200(T21E3_3D8* p, T21E3_Src* s)
+void func_001B5200(ScrollAnimator* p, AnimatorParams* s)
 {
     func_001B4AA0(p, s);
     p->velU = s->f4;
@@ -1180,7 +1180,7 @@ void func_001B5200(T21E3_3D8* p, T21E3_Src* s)
     p->wrapV = s->f10;
     p->mulV = 1.0f;
     p->mulU = 1.0f;
-    p->cur.flags = (p->cur.flags & ~1) | 2;
+    p->cursor.flags = (p->cursor.flags & ~1) | 2;
 }
 
 u16 func_001B5B58(u8 ch);
@@ -1231,7 +1231,7 @@ void func_001B6CF0(Node_1B6CF0* self, f32 t)
 
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_001B5060(T21E3_3B8* self, T21E3_Src* key)
+void func_001B5060(AngleFrameAnimator* self, AnimatorParams* key)
 {
     func_001B4AA0(self, key);
     self->phase = key->f4;
@@ -1571,9 +1571,9 @@ struct Lo_1B4FC0 { s32 v; };
 s32 func_001EAA70(Lo_1B4FC0 lo, s32 hi);
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_001B4FC0(T21E3_398* self, f32 x)
+void func_001B4FC0(RandomJumpAnimator* self, f32 x)
 {
-    T21E3_Rec* p = self->cur.rec;
+    AnimRecord* p = self->cursor.record;
     if (p == 0)
         return;
     s32 count = p->count;
@@ -1586,8 +1586,8 @@ void func_001B4FC0(T21E3_398* self, f32 x)
     Lo_1B4FC0 lo;
     lo.v = 1;
     s32 v = func_001EAA70(lo, count - 1);
-    s32 rem = (self->cur.idx + v) % self->cur.rec->count;
-    func_001B46E0(&self->cur, rem);
+    s32 rem = (self->cursor.frame + v) % self->cursor.record->count;
+    func_001B46E0(&self->cursor, rem);
     self->wait = func_001EAAE0(self->waitMin, self->waitMax);
 }
 

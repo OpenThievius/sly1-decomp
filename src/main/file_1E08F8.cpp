@@ -1604,9 +1604,9 @@ void func_001E4EA8(Self_1E4EA8* self)
             func_001373D0(&sub);
             if (sub.owner != 0) func_00193300(sub.owner);
             if (D_002623C0->f19EC & 0x100) {
-                Cur_1E4EA8* c = D_00264A40.f4F44;
+                Cur_1E4EA8* c = g_memoryCard.f4F44;
                 if (c != 0 && (c->f19D8 != D_002623C0->f19D8 || c->f19DC != D_002623C0->f19DC))
-                    func_0018C7F8(&D_00264A40);
+                    func_0018C7F8(&g_memoryCard);
             }
             func_001372E0(&sub, 2);
         }

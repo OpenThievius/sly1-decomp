@@ -3,7 +3,7 @@
 #include "list_iter.h"
 #include "c73.h"
 #include "t219c.h"
-#include "t21e3.h"
+#include "cursor_animator.h"
 #include "object_cycler.h"
 #include "c60.h"
 #include "c6c.h"
@@ -115,29 +115,29 @@ void func_00158F10(C7A* self, s32 kind, C01* other)
     }
 }
 
-void func_001B4AD0(T21E3* self);
-T21E3_Rec* func_001B4688(s32 key);
-void func_00159770(T21E3_438* self, s32 mode);
+void func_001B4AD0(CursorAnimator* self);
+AnimRecord* func_001B4688(s32 key);
+void func_00159770(CrossfadeAnimator* self, s32 mode);
 
-void func_001596E0(T21E3_438* self)
+void func_001596E0(CrossfadeAnimator* self)
 {
     func_001B4AD0(self);
-    T21E3_Rec* a = func_001B4688(self->id2);
-    self->cur2.rec = a;
+    AnimRecord* a = func_001B4688(self->recordKey2);
+    self->cursor2.record = a;
     if (a != 0) {
         if (a->owner == 0) {
-            if (self->cur.rec->owner == self) {
+            if (self->cursor.record->owner == self) {
                 a->owner = self;
             }
         }
     }
     s32 lo = 0;
-    if (self->cur.rec != 0) {
-        lo = self->cur.rec->count;
+    if (self->cursor.record != 0) {
+        lo = self->cursor.record->count;
     }
     s32 hi = 0;
-    if (self->cur2.rec != 0) {
-        hi = self->cur2.rec->count;
+    if (self->cursor2.record != 0) {
+        hi = self->cursor2.record->count;
     }
     self->mode = -1;
     self->count = (hi < lo) ? lo : hi;
@@ -408,7 +408,7 @@ tail_c:
 extern f32 D_0026185C;
 f32 func_001EAAE0(f32 a, f32 b);
 
-void func_00159770(T21E3_438* s, s32 mode)
+void func_00159770(CrossfadeAnimator* s, s32 mode)
 {
     if (s->mode == mode) return;
     if (mode == 1) goto store;
@@ -455,9 +455,9 @@ tail:
 
 extern f32 D_0026185C;
 f32 func_001EAAE0(f32 a, f32 b);
-void func_001B46E0(T21E3_Cursor* cur, s32 idx);
+void func_001B46E0(AnimCursor* cur, s32 idx);
 
-void func_00159890(T21E3_438* s, f32 dt)
+void func_00159890(CrossfadeAnimator* s, f32 dt)
 {
     s32 count = s->count;
     if (count < 2) return;
@@ -501,8 +501,8 @@ m3:
 
 call:
     func_00159770(s, mode);
-    func_001B46E0(&s->cur, (s32)s->pos);
-    func_001B46E0(&s->cur2, (s32)s->pos);
+    func_001B46E0(&s->cursor, (s32)s->pos);
+    func_001B46E0(&s->cursor2, (s32)s->pos);
 }
 
 
@@ -546,7 +546,7 @@ void func_00158C28(C79* self)
 }
 
 
-void func_00159A00(T21E3_438* a0, f32 f12)
+void func_00159A00(CrossfadeAnimator* a0, f32 f12)
 {
     a0->ratio = f12;
     if (1.0f <= f12) {
@@ -555,8 +555,8 @@ void func_00159A00(T21E3_438* a0, f32 f12)
         a0->mode = -1;
         func_00159770(a0, 0);
     }
-    func_001B46E0(&a0->cur, (s32)a0->pos);
-    func_001B46E0(&a0->cur2, (s32)a0->pos);
+    func_001B46E0(&a0->cursor, (s32)a0->pos);
+    func_001B46E0(&a0->cursor2, (s32)a0->pos);
 }
 
 
@@ -737,14 +737,14 @@ void func_0015A918(C60* self,void* other)
     func_001E4C48(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
-T21E3_Cursor* func_001B4B48(T21E3* self, const T21E3_Rec* key);
+AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key);
 
-T21E3_Cursor* func_00159A80(T21E3_438* self, const T21E3_Rec* key)
+AnimCursor* func_00159A80(CrossfadeAnimator* self, const AnimRecord* key)
 {
-    T21E3_Cursor* p = func_001B4B48(self, key);
+    AnimCursor* p = func_001B4B48(self, key);
     if (p == 0) {
-        p = &self->cur2;
-        if ((key->key ^ self->id2) != 0) {
+        p = &self->cursor2;
+        if ((key->key ^ self->recordKey2) != 0) {
             p = 0;
         }
     }
@@ -1453,13 +1453,13 @@ s32 func_0015A4F0(C6C* world, u32 flags, s32 id, C02* root, s32 max, C02** found
     return c;
 }
 
-void func_001B4AA0(T21E3* self, const T21E3_Src* src);
+void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
 
-void func_00159680(T21E3_438* self, T21E3_Src* src)
+void func_00159680(CrossfadeAnimator* self, AnimatorParams* src)
 {
     func_001B4AA0(self, src);
-    self->cur2.flags = self->cur.flags;
-    self->id2 = src->s14;
+    self->cursor2.flags = self->cursor.flags;
+    self->recordKey2 = src->s14;
     self->scale = src->f4;
     self->lo = src->f8;
     self->hi = src->fC;

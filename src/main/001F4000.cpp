@@ -6,7 +6,7 @@
 #include "c7d.h"
 #include "c05.h"
 #include "c83.h"
-#include "g275f80.h"
+#include "screen_fade.h"
 
 void func_001451F0(u32, int, int, void*, int, void*);
 void func_00125C90();
@@ -136,11 +136,11 @@ void func_001F4760(C7D* self, s32 state)
 struct Glob_1F4A30 { s32 flags; };
 s32 func_001601A0(s32 a0);
 s32 func_00160850(s32 a0);
-void func_001EFFA0(G275F80* dst, S1EFFA0* args, s32 count);
+void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
 
 void func_001F4A30(C7D* self)
 {
-    S1EFFA0 m;
+    FadeRequest m;
     s32 ok = 0;
     m.kind = 1;
     switch (self->f304) {
@@ -157,7 +157,7 @@ void func_001F4A30(C7D* self)
     }
     m.f0C = -1;
     m.flags = 0;
-    func_001EFFA0(&D_00275F80, &m, self->f318);
+    func_001EFFA0(&g_screenFade, &m, self->f318);
 }
 
 void func_00124A48(C4E* self);
@@ -286,7 +286,7 @@ struct Key_1F4408 { s32 unused; };
 Val_1F4408* func_00160180(Key_1F4408* k);
 void func_001F0428(Val_1F4408* v, s32 m, s32 n);
 void func_001F4808(C7D* x);
-void func_001EFFA0(G275F80* dst, S1EFFA0* args, s32 count);
+void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count);
 
 void func_001F4408(s32 flag, s32 n)
 {
@@ -294,7 +294,7 @@ void func_001F4408(s32 flag, s32 n)
     Obj_1F4408* o;
     C7D* v;
     Val_1F4408* k;
-    S1EFFA0 args;
+    FadeRequest args;
     if (ctx->f19D8 == 5) {
         goto lm1;
     }
@@ -328,7 +328,7 @@ larg:
     args.f08 = -1;
     args.f0C = -1;
     args.flags = 0;
-    func_001EFFA0(&D_00275F80, &args, n);
+    func_001EFFA0(&g_screenFade, &args, n);
 }
 
 struct Ctx_1F56D8;

@@ -7,7 +7,7 @@ void func_001F4408(s32 flag, s32 n)
     Obj_1F4408* o;
     C7D* v;
     Val_1F4408* k;
-    S1EFFA0 args;
+    FadeRequest args;
     if (ctx->f19D8 == 5) {
         goto lm1;
     }
@@ -41,5 +41,5 @@ larg:
     args.f08 = -1;
     args.f0C = -1;
     args.flags = 0;
-    func_001EFFA0(&D_00275F80, &args, n);
+    func_001EFFA0(&g_screenFade, &args, n);
 }

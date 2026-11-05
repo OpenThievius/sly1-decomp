@@ -20,7 +20,7 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
             if (D_002623C0->f19F8 & m) flag = 1;
             if (flag) {
                 s32 stop = 0;
-                if (func_001F00F0(D_00275F80, &D_00262C70, 2)) {
+                if (func_001F00F0(g_screenFade, &D_00262C70, 2)) {
                     stop = 1;
                 } else if (D_00262C70.flags & 0x91F) {
                     func_0016EC20(&D_00262C70, 0x91F);

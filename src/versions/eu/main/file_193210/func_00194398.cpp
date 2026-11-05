@@ -9,5 +9,5 @@ void func_00194398(void)
     args.x = -1;
     args.y = -1;
     args.z = 4;
-    func_001EFFA0(D_00275F80, &args, 0);
+    func_001EFFA0(g_screenFade, &args, 0);
 }

@@ -46,7 +46,7 @@ void func_0016B580(Obj_16B580_eu* self, G262C70* arg)
     Sub_16B580* p = self->f2E0;
     if (self->f308 != 0) {
         if (self->f308 == self->f33C) {
-            func_0018C7F8(D_00264A40);
+            func_0018C7F8(g_memoryCard);
         }
         func_001518B8(self->f308);
         self->f308 = 0;

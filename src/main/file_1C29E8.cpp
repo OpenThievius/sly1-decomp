@@ -6,7 +6,7 @@
 #include "shapes.h"
 #include "vertex_batch.h"
 #include "s1eb050.h"
-#include "g261858.h"
+#include "game_clock.h"
 
 struct Obj_1C29E8 { u8 pad[8]; s32 f8; s32 fC; };
 

@@ -3,11 +3,11 @@
 extern s32 D_eu_002636EC;
 struct G2_1E9108_eu { u8 pad[0x570]; C67* f570; };
 extern void func_001E9498(Obj_1E9108* o, G2_1E9108_eu* g);
-extern void func_0018C178(G264A40* g, s32 a);
+extern void func_0018C178(MemoryCard* g, s32 a);
 
 void func_001E9108(Obj_1E9108* obj)
 {
-    f32 d = D_00261858.f10 - obj->f8;
+    f32 d = D_00261858.elapsed - obj->f8;
     s32 s1 = obj->state;
     G262C70* s2;
     s32 s5;
@@ -26,8 +26,8 @@ void func_001E9108(Obj_1E9108* obj)
     case 0: {
         s32 a2 = 0;
         if (D_002701B8 == 0) {
-            s32 m = D_00264A40.f18;
-            if (m == 2 || (m == 1 && D_00264A40.f0C == 5)) {
+            s32 m = g_memoryCard.displayMode;
+            if (m == 2 || (m == 1 && g_memoryCard.state == 5)) {
                 a2 = 1;
             }
         }
@@ -41,11 +41,11 @@ void func_001E9108(Obj_1E9108* obj)
         if (v & 0x800) {
             s32 t;
             func_0016EC20(s2, 0x800);
-            t = D_00264A40.i4F48;
-            D_00264A40.i4F44 = t;
+            t = g_memoryCard.i4F48;
+            g_memoryCard.i4F44 = t;
             if (t) {
-                func_0018C178(&D_00264A40, 1);
-                func_0018C568(&D_00264A40);
+                func_0018C178(&g_memoryCard, 1);
+                func_0018C568(&g_memoryCard);
             } else {
                 func_001605E8(D_002623C0);
             }

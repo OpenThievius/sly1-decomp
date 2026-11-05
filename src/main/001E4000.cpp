@@ -6,12 +6,12 @@
 #include "c6c.h"
 #include "v24a2.h"
 #include "shapes.h"
-#include "g248748.h"
-#include "g261d40.h"
+#include "level_entry.h"
+#include "threshold_range.h"
 #include "g261ef0.h"
-#include "g262320.h"
-#include "g269990.h"
-#include "g26ac30.h"
+#include "render_frame.h"
+#include "background_job.h"
+#include "group_marker.h"
 #include "g27c220.h"
 #include "bump_allocator.h"
 
@@ -4734,7 +4734,7 @@ f32 D_00261C94 = 900.0f;
 f32 D_00261C98 = 1200.0f;
 f32 D_00261CD4 = 500.0f;
 f32 D_00261CD8 = 800.0f;
-G261D40 D_00261D40[4] = {
+ThresholdRange D_00261D40[4] = {
     { 0.8f, 2, 5 }, { 0.4f, 6, 10 }, { 0.2f, 15, 25 }, { 0.0f, 50, 100 }
 };
 f32 D_00262178[2] = { 0.5f, 2.0f };
@@ -4979,7 +4979,7 @@ s32 D_002622D0 = 0;
 // size: s32 (lw/sw), 4-byte label
 s32 D_002622D4 = 0;
 // size: pointer (lw/sw), 4 bytes before an 8-aligned next label
-G262320* D_002622D8 = 0;
+RenderFrame* D_002622D8 = 0;
 // size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
 List01 D_002622E0 = {};
 // size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
@@ -4991,7 +4991,7 @@ s32 D_00262310 = 0;
 // size: s32 (lw/sw), 4-byte label
 s32 D_00262318 = 0;
 // size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
-G262320 D_00262320[2] = {};
+RenderFrame D_00262320[2] = {};
 // size: pointer (lw/sw), 4-byte label
 void* D_002623B4 = 0;
 // size: two 0x28-byte records (loop end = base + 0x50, stride 0x28 in func_001688B8)
@@ -5013,7 +5013,7 @@ s32 D_002626D0 = 0;
 // size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
 s32 D_0026A914 = 0;
 // size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
-G26AC30 D_0026AC30[18] = {};
+GroupMarker D_0026AC30[18] = {};
 // size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
 s32 D_0026EC58 = 0;
 // size: one s32 (lw, compared with 0), label 8 bytes with 4 of padding before the 8-aligned D_0026EC68
@@ -5104,13 +5104,13 @@ List01 D_00264088 = {0};
 s32 D_002649A8 = 0;
 // size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
 // size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
-G269990 D_00269990 = {0};
+BackgroundJob D_00269990 = {0};
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
 s32 D_00269C90 = 0;
 Obj_2629A8 D_002629A8 = {0};
 Obj_262C70 D_00262C70 = {};
-extern const G248748 D_00248748[33] = {
+extern const LevelEntry D_00248748[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
     { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, D_0024DCC8 },
     { 0x00000103, 139.0f, { 0x7EA0F65C, 0xD2337F06, 0xBE2AFC49, 0x12C36311, 0x7C279683, 0x7EA42098, 0xBE2AFEF0, 0xD22162E6 }, D_0024DCE8 },

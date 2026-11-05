@@ -11,7 +11,7 @@
 #include "v24a0.h"
 #include "t217d.h"
 #include "globals.h"
-#include "g275f80.h"
+#include "screen_fade.h"
 
 void func_00182C58(void);
 s32 func_0015A838(void* a, s32 b, s32 c, s32 d);
@@ -213,7 +213,7 @@ void func_001EF830(C1F* o)
 
 void func_001F0220(void* o, s32 mode);
 
-void func_001EFCE8(G275F80* o)
+void func_001EFCE8(ScreenFade* o)
 {
     o->mode = -1;
     func_001F0220(o, 0);
@@ -708,14 +708,14 @@ void func_001EEC60(C1F* self)
 extern f32 D_00261858[];
 extern s32 D_00275AF0;
 
-s32 func_001F00F0(G275F80* self, s32 a1, s32 a2);
-void func_001F0220(G275F80* self, s32 state);
+s32 func_001F00F0(ScreenFade* self, s32 a1, s32 a2);
+void func_001F0220(ScreenFade* self, s32 state);
 void func_001C0000(s32 flag, f32 x);
 
-void func_001EFD10(G275F80* self, s32 a1)
+void func_001EFD10(ScreenFade* self, s32 a1)
 {
     s32 s = self->mode;
-    f32 t = D_00261858[4] - self->f08;
+    f32 t = D_00261858[4] - self->modeStartTime;
     f32 thr;
     f32 r;
     switch (s) {
@@ -723,44 +723,44 @@ void func_001EFD10(G275F80* self, s32 a1)
         if (func_001F00F0(self, a1, 1) != 0) return;
         break;
     case 1:
-        if (self->f24 != 2) {
+        if (self->style != 2) {
             thr = 0.5f;
-            if (self->f24 == s) thr = 1.5f;
+            if (self->style == s) thr = 1.5f;
             if (thr < t) {
                 s = 2;
-                func_001C0000(((self->cur.flags >> 3) ^ 1) & 1, 0.0f);
+                func_001C0000(((self->active.flags >> 3) ^ 1) & 1, 0.0f);
             } else {
                 r = t / thr;
                 f32 hi = 1.0f;
                 f32 lo = 0.0f;
                 if (r < lo) r = lo;
                 else if (hi < r) r = hi;
-                self->scale = r;
-                func_001C0000(((self->cur.flags >> 3) ^ 1) & 1, 1.0f - r);
+                self->opacity = r;
+                func_001C0000(((self->active.flags >> 3) ^ 1) & 1, 1.0f - r);
             }
         }
         break;
     case 3: {
-        s32 v = self->f24;
+        s32 v = self->style;
         if (v != 2) {
             thr = 0.25f;
             if (v == 1) thr = 1.0f;
             if (thr < t) {
                 if (v == s) {
-                    self->f24 = 0;
-                    self->f08 = D_00261858[4];
-                    self->scale = 1.0f;
+                    self->style = 0;
+                    self->modeStartTime = D_00261858[4];
+                    self->opacity = 1.0f;
                 } else {
                     s = 0;
                 }
             } else {
-                self->scale = 1.0f - t / thr;
+                self->opacity = 1.0f - t / thr;
             }
         }
         break;
     }
     case 2:
-        if (self->cur.kind == 0 && D_00275AF0 != 0) {
+        if (self->active.kind == 0 && D_00275AF0 != 0) {
         } else {
             s = 3;
         }
@@ -960,10 +960,10 @@ extern s32 D_002640A4;
 void func_00180398(s32 a, f32 v);
 void func_0019DDA0(s32 a, s32 b, s32 c, s32 d, void* e, f32 f, f32 g, f32 h, f32 i);
 
-void func_001EFEE0(G275F80* self)
+void func_001EFEE0(ScreenFade* self)
 {
     if (D_00275710 != 0 && D_00275F84 != 0) {
-        s32 mode = self->f24;
+        s32 mode = self->style;
         if (mode != 1) {
             if (mode < 2) {
                 if (mode == 0) goto draw;
@@ -971,11 +971,11 @@ void func_001EFEE0(G275F80* self)
             return;
         }
         if (D_002640A4 != 0) {
-        func_00180398(D_002640A4, self->scale);
+        func_00180398(D_002640A4, self->opacity);
             return;
         }
         draw:
-    f32 v = self->scale * 255.0f;
+    f32 v = self->opacity * 255.0f;
     func_0019DDA0(0, 0, 0, (s32)v, &D_00262280, 0.0f, 0.0f, 640.0f, 492.80002f);
     }
 }
@@ -1243,7 +1243,7 @@ void func_001EC570(C13* self, s32 a, s32 b)
     case 0xB:
         func_001AC060(&D_0026E248);
         func_001603E8(3);
-        func_0018C7F8(D_00264A40);
+        func_0018C7F8(g_memoryCard);
         break;
     }
     func_001C91C8(self, a, b);
@@ -1402,7 +1402,7 @@ void func_001ECB18(Self_1ECB18* self)
 
 
 void func_001DDAD0(C6C* x);
-void func_001F0220(G275F80* o, s32 mode);
+void func_001F0220(ScreenFade* o, s32 mode);
 
 struct Match_1EFFA0 {
     static s32 Of(IdentityKey* t)
@@ -1419,7 +1419,7 @@ struct Match_1EFFA0 {
     }
 };
 
-void func_001EFFA0(G275F80* dst, S1EFFA0* args, s32 count)
+void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count)
 {
     IdentityKey* p;
     s32 mode;
@@ -1435,8 +1435,8 @@ void func_001EFFA0(G275F80* dst, S1EFFA0* args, s32 count)
         } else {
             args->flags &= ~8;
         }
-        dst->cur = *args;
-        dst->f24 = count;
+        dst->active = *args;
+        dst->style = count;
         mode = 2;
         if (D_00275710 != 0) {
             mode = 1;

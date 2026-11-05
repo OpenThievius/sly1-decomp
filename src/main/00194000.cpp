@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "g264a40.h"
+#include "memory_card.h"
 
 void func_001AA8F0(void* self);
 
@@ -95,18 +95,18 @@ extern f32 D_0026A708;
 extern f32 D_0026A70C;
 s32 func_001FD7A0(f32 x);
 
-G264A40 D_00264A40 = {};
+MemoryCard D_00264A40 = {};
 extern u8 D_00275BC0[];
 extern u8 D_00247AD0[];
 
 void func_001F4408(s32 a, s32 b);
 void func_001F0428(u8* a, s32 b, s32 c);
-void func_0018C178(G264A40* a, s32 b);
-void func_0018C638(G264A40* self);
-void func_0018C1A8(G264A40* self);
-void func_0018C250(G264A40* self);
-void func_0018C770(G264A40* self);
-void func_0018C568(G264A40* self);
+void func_0018C178(MemoryCard* a, s32 b);
+void func_0018C638(MemoryCard* self);
+void func_0018C1A8(MemoryCard* self);
+void func_0018C250(MemoryCard* self);
+void func_0018C770(MemoryCard* self);
+void func_0018C568(MemoryCard* self);
 void func_00160948(void);
 void* func_00193660(void);
 void* func_001925F0(void);

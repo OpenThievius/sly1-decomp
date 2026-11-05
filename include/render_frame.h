@@ -5,21 +5,25 @@
 // for this project from what retail's code does (build/swarm/st3/groups.tsv, g1808).
 //
 // The size: D_00262320 runs 0x90 bytes to the next label, two records.
-#ifndef G262320_H
-#define G262320_H
+//
+// A frame is built in one record while a thread (func_0015EE80) draws the other one:
+// func_0015E9F0 takes the next record and points the two buffer writers at its buffers,
+// func_0015EC68 hands the lists over and wakes the thread.
+#ifndef RENDER_FRAME_H
+#define RENDER_FRAME_H
 
 #include "c01.h"
 
-struct G262320 {
+struct RenderFrame {
     u8 pad00[0x04];
     union {
-        u8* f04;            // 0x04: 001E4000.cpp (Slot12_262320), func_0015E810
-        s32 i04;            // 0x04: func_0015EE80
+        u8* bufA;           // 0x04: 001E4000.cpp (Slot12_262320), func_0015E810
+        s32 bufAAddr;       // 0x04: func_0015EE80
     };
     u8 pad08[0x0C - 0x08];
     union {
-        u8* f0C;            // 0x0C: 001E4000.cpp, func_0015E810
-        s32 i0C;            // 0x0C: func_0015EE80
+        u8* bufB;           // 0x0C: 001E4000.cpp, func_0015E810
+        s32 bufBAddr;       // 0x0C: func_0015EE80
     };
     union {
         u8* f10;            // 0x10: 001E4000.cpp, func_0015E810
@@ -34,9 +38,9 @@ struct G262320 {
     s32 f44;                // 0x44: func_0015E9F0, func_0015ED50
 };
 
-typedef char check_G262320[sizeof(G262320) == 0x48 ? 1 : -1];
+typedef char check_RenderFrame[sizeof(RenderFrame) == 0x48 ? 1 : -1];
 
-extern G262320 D_00262320[2];   // 001E4000.cpp
-extern G262320* D_002622D8;     // 001E4000.cpp
+extern RenderFrame D_00262320[2];   // 001E4000.cpp
+extern RenderFrame* D_002622D8;     // 001E4000.cpp
 
 #endif

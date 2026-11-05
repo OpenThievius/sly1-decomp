@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-#include "g25c250.h"
+#include "entry_pool.h"
 #include "r11b008.h"
 #include "s137290.h"
 #include "shapes.h"
@@ -8,11 +8,11 @@
 // The five pools values are taken from (func_0011C240): func_0011BF70 sets them up, func_0011C040
 // empties them all. Built at startup: the compiler's initialiser, constructor and destructor for this
 // file are func_0011C0A8, func_0011C0E8 and func_0011C108 (config/us/generated.tsv).
-G25C250 D_0025C250;
-G25C250 D_0025C270;
-G25C250 D_0025C290;
-G25C250 D_0025C2B0;
-G25C250 D_0025C2D0;
+EntryPool D_0025C250;
+EntryPool D_0025C270;
+EntryPool D_0025C290;
+EntryPool D_0025C2B0;
+EntryPool D_0025C2D0;
 
 // The payloads of tags 0x19 and 0x1A as func_0011B258 copies them (ldl/ldr for the first two
 // words: the pool does not align them).
@@ -23,9 +23,9 @@ void func_0018D778(void* p);
 void* func_0018D5C0(s32 size);
 void* func_001F5C0C(void* p, s32 value, s32 size);
 s32 func_001F59C4(void* a, void* b, s32 n);
-void* func_0011C240(G25C250* pool);
-void func_0011C128(G25C250* pool, s32 size, s32 count);
-void func_0011C1D0(G25C250* pool);
+void* func_0011C240(EntryPool* pool);
+void func_0011C128(EntryPool* pool, s32 size, s32 count);
+void func_0011C1D0(EntryPool* pool);
 R11B008Key* func_0011C498(void);
 void func_0011C418(R11B008Key* src, R11B008Key* dst, s32 zero);
 void func_0011C4E8(void);
@@ -609,11 +609,11 @@ void func_0011BF70(void)
 {
     func_0011A6A8(D_00259F38);
     func_0011C128(&D_0025C250, 0xC, 0x2000);
-    D_0025C250.callback = (void*)func_0011AF78;
+    D_0025C250.removeCallback = (void*)func_0011AF78;
     func_0011C128(&D_0025C270, 0x1C, 0x190);
-    D_0025C270.callback = (void*)func_0011A670;
+    D_0025C270.removeCallback = (void*)func_0011A670;
     func_0011C128(&D_0025C290, 0x10, 0x800);
-    D_0025C290.callback = (void*)func_0011C4E8;
+    D_0025C290.removeCallback = (void*)func_0011C4E8;
     func_0011C128(&D_0025C2B0, 0x14, 0x800);
     func_0011CA90();
     func_0011C128(&D_0025C2D0, 0xC, 0x80);

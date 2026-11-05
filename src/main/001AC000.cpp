@@ -6,7 +6,7 @@
 #include "v24a2.h"
 #include "globals.h"
 #include "g27c220.h"
-#include "g275f80.h"
+#include "screen_fade.h"
 #include "layout_137228.h"
 #include "texture_table.h"
 #include "shapes.h"
@@ -429,7 +429,7 @@ void func_001AE820(T217D_600* self)
         adj = 0.0f;
         if (self->mode == 2) {
             if (1.0f < d) {
-                if (func_0018B770(D_00269990) == 0) {
+                if (func_0018B770(g_backgroundJob) == 0) {
                     self->vt->m15(self);
                 }
             }
@@ -875,12 +875,12 @@ void func_001AD970(T217D_560* self, s32 newval)
     G27C220* gg;
 
     if (self->mode != newval) {
-        if (D_00275F80.mode == 1) {
+        if (g_screenFade.mode == 1) {
             if (newval == 3 || newval == 0) {
                 newval = self->mode;
             }
         }
-        if (D_00275F80.mode == 3) {
+        if (g_screenFade.mode == 3) {
             if ((u32)(newval - 1) < 2) {
                 newval = 0;
                 if ((*(s32*)D_00275B00 & 8) == 0) {

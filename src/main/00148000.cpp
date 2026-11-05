@@ -293,7 +293,7 @@ void func_00148598(C59* self, s32 mode)
         func_001837E0(self, 2, 0, 0);
         mode = 2;
         func_00151FC8(D_00261EF0);
-        func_0018C7F8(D_00264A40);
+        func_0018C7F8(g_memoryCard);
     }
     func_00147AB0(self, mode);
 }

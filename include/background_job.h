@@ -1,25 +1,28 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The 18 rows of 0x80 bytes at D_0026AC30 (001E4000.cpp defines them as zeros): a function, a
-// word and the rest, which func_0019D4B0 and func_0019DF48 (0019C000.cpp) fill and call.
-// Written for this project from what retail's code does (globals.tsv). The label runs 0x900
-// bytes to D_0026B530.
-#ifndef G26AC30_H
-#define G26AC30_H
+// The 0x14-byte record at D_00269990 (001E4000.cpp defines it as zeros), read by func_0018B5C0,
+// func_0018B600 (00188000.cpp) and func_001943E8, func_00195958 (file_193210.cpp). Written for
+// this project from what retail's code does (globals.tsv). The size is the label's (0x14).
+//
+// A job that runs on a thread of its own: func_0018B670 stores the job and its argument and
+// starts a thread at func_0018B600, which calls the job, keeps its result and clears the thread.
+#ifndef BACKGROUND_JOB_H
+#define BACKGROUND_JOB_H
 
 #include "common.h"
 
-struct G26AC30 {
+struct BackgroundJob {
     union {
-        void (*fn)(void);   // 0x00: func_0019DF48 calls it
-        s32 f00;            // 0x00: func_0019D4B0
+        void* semaphore;    // 0x00: func_0018B600
+        s32 semaphoreId;    // 0x00: func_0018B5C0 stores the semaphore it creates
     };
-    s32 f04;                // 0x04: func_0019D4B0
-    s32 f08;                // 0x08: func_0019D4B0, func_0019DF48
-    u8 pad0C[0x80 - 0x0C];
+    s32 thread;             // 0x04: func_0018B5C0, func_0018B600 (-1 when no thread runs)
+    s32 (*job)(void* a);    // 0x08: func_0018B600 calls it
+    void* arg;              // 0x0C: func_0018B600
+    s32 result;             // 0x10: func_0018B5C0, func_0018B600, func_001943E8
 };
 
-typedef char check_G26AC30[sizeof(G26AC30) == 0x80 ? 1 : -1];
+typedef char check_BackgroundJob[sizeof(BackgroundJob) == 0x14 ? 1 : -1];
 
-extern G26AC30 D_0026AC30[18];  // 001E4000.cpp
+extern BackgroundJob D_00269990;      // 001E4000.cpp
 
 #endif

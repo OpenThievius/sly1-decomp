@@ -11,8 +11,8 @@
 #include "layout_137228.h"
 #include "g27c220.h"
 #include "g262c70.h"
-#include "g264a40.h"
-#include "g269990.h"
+#include "memory_card.h"
+#include "background_job.h"
 
 struct State_193288 { void* ptr; s32 scaled; s32 size; s32 value; s32 repeat; };
 void func_00168AF8(State_193288*);
@@ -149,13 +149,13 @@ void func_00194278(T217D_6D0* self, s32 a, s32 b);
 void func_001E9498(u8* a, void* b);
 void func_001F4408(s32 a, s32 b);
 void func_001F0428(u8* a, s32 b, s32 c);
-void func_0018C178(G264A40* a, s32 b);
-void func_0018B670(G269990* a, void* fn, G264A40* self);
-void func_0018C638(G264A40* self);
-void func_0018C1A8(G264A40* self);
-void func_0018C250(G264A40* self);
-void func_0018C770(G264A40* self);
-void func_0018C568(G264A40* self);
+void func_0018C178(MemoryCard* a, s32 b);
+void func_0018B670(BackgroundJob* a, void* fn, MemoryCard* self);
+void func_0018C638(MemoryCard* self);
+void func_0018C1A8(MemoryCard* self);
+void func_0018C250(MemoryCard* self);
+void func_0018C770(MemoryCard* self);
+void func_0018C568(MemoryCard* self);
 void func_00160948(void);
 void func_001936A0(T217D_6D0* self);
 void* func_001925F0(void);
@@ -221,8 +221,8 @@ void func_00194D30(T217D_6D0* self, s32 a, s32 b);
 void func_00195958(T217D_6D0* self);
 void func_001961C0(T217D_6D0* self);
 void func_00194398(void);
-s32 func_0018B770(G269990* p);
-void func_0018B670(G269990* p, void* fn, void* arg);
+s32 func_0018B770(BackgroundJob* p);
+void func_0018B670(BackgroundJob* p, void* fn, void* arg);
 Item_1943E8* func_001F6880(void* a, const char* name);
 s32 func_001AEA08(void);
 s32 func_001FD7A0(f32 x);
@@ -731,7 +731,7 @@ void func_00194278(void* a0, s32 a1, s32 a2)
             r.f8 = -1;
             r.fC = -1;
             r.f10 = 0;
-            func_001EFFA0(D_00275F80, &r, a2);
+            func_001EFFA0(g_screenFade, &r, a2);
         } else {
             void* p = func_0015A838(D_00275710, 5, 0x5F, 0);
             func_001A4EF0(p, 6);
@@ -745,7 +745,7 @@ void func_00194278(void* a0, s32 a1, s32 a2)
         r.f8 = -1;
         r.fC = -1;
         r.f10 = 0x10;
-        func_001EFFA0(D_00275F80, &r, a2);
+        func_001EFFA0(g_screenFade, &r, a2);
     } else {
         func_001F4408(0, a2);
     }
@@ -759,7 +759,7 @@ void func_00194398(void)
     args.x = -1;
     args.y = -1;
     args.z = 4;
-    func_001EFFA0(D_00275F80, &args, 0);
+    func_001EFFA0(g_screenFade, &args, 0);
 }
 
 void func_001943E8(T217D_6D0* self)
@@ -950,10 +950,10 @@ void func_001943E8(T217D_6D0* self)
         }
         break;
     case 5: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
-            if (p->f10 == 0) {
-                func_0018B670(p, (void*)(void (*)(G264A40*))func_0018C250, ((u8*)&D_00264A40));
+            if (p->result == 0) {
+                func_0018B670(p, (void*)(void (*)(MemoryCard*))func_0018C250, ((u8*)&g_memoryCard));
                 func_00194D30(self, 1, 8);
             } else {
                 func_00194D30(self, 1, 6);
@@ -962,9 +962,9 @@ void func_001943E8(T217D_6D0* self)
         break;
     }
     case 8: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
-            if (p->f10 == 0) {
+            if (p->result == 0) {
                 func_00194D30(self, 1, -1);
             } else {
                 func_00194D30(self, 1, 9);
@@ -973,9 +973,9 @@ void func_001943E8(T217D_6D0* self)
         break;
     }
     case 12: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
-            if (p->f10 == 0) {
+            if (p->result == 0) {
                 func_00194D30(self, 1, -1);
                 if (self->stage == 2) {
                     func_00194398();
@@ -988,10 +988,10 @@ void func_001943E8(T217D_6D0* self)
         break;
     }
     case 19: {
-        G269990* p = &D_00269990;
+        BackgroundJob* p = &g_backgroundJob;
         if (func_0018B770(p) == 0) {
             D_0026998C = 0;
-            if (p->f10 == 0) {
+            if (p->result == 0) {
                 func_00194D30(self, 1, -1);
             } else {
                 func_00194D30(self, 0, 0x17);
@@ -1324,15 +1324,15 @@ void func_00195958(T217D_6D0* self)
     case 23:
         switch (sel) {
         case 6:
-            func_0018C178(&D_00264A40, 1);
+            func_0018C178(&g_memoryCard, 1);
             func_00194D30(self, 0, 0x10);
             return;
         case 7:
-            func_0018C178(&D_00264A40, 1);
+            func_0018C178(&g_memoryCard, 1);
             func_00194D30(self, 0, 0x11);
             return;
         case 8:
-            func_0018C178(&D_00264A40, 1);
+            func_0018C178(&g_memoryCard, 1);
             func_00194D30(self, 0, 0xB);
             return;
         case 13:
@@ -1399,14 +1399,14 @@ void func_00195958(T217D_6D0* self)
     }
     case 2:
         if (sel == 0) {
-            G264A40* b = &D_00264A40;
+            MemoryCard* b = &g_memoryCard;
             if (b->f4F44 != 0) {
                 self->stage = 2;
                 if ((D_002623C0->u19EC & 0x100) == 0) {
                     func_00194D30(self, 1, 0x14);
                 } else {
                     func_00194D30(self, 1, 0xC);
-                    func_0018B670(&D_00269990, (void*)func_0018C638, b);
+                    func_0018B670(&g_backgroundJob, (void*)func_0018C638, b);
                 }
             } else {
                 func_00194398();
@@ -1449,14 +1449,14 @@ void func_00195958(T217D_6D0* self)
         return;
     case 4:
         if (sel == 0) {
-            func_0018B670(&D_00269990, (void*)func_0018C1A8, &D_00264A40);
+            func_0018B670(&g_backgroundJob, (void*)func_0018C1A8, &g_memoryCard);
             func_00194D30(self, 1, 5);
             return;
         }
         goto c5EC0;
     case 7:
         if (sel == 0) {
-            func_0018B670(&D_00269990, (void*)func_0018C250, &D_00264A40);
+            func_0018B670(&g_backgroundJob, (void*)func_0018C250, &g_memoryCard);
             func_00194D30(self, 1, 8);
             return;
         }
@@ -1470,7 +1470,7 @@ void func_00195958(T217D_6D0* self)
     c5EC0: {
         s32 v;
         func_00194D30(self, 1, -1);
-        func_0018C178(&D_00264A40, 2);
+        func_0018C178(&g_memoryCard, 2);
         v = self->want[0];
         if (v == 0xB) {
             goto c5F08;
@@ -1493,8 +1493,8 @@ void func_00195958(T217D_6D0* self)
         Ent_195958* e = &D_002542D8[sel];
         if (e->fC == 0.0f) {
             func_00194D30(self, 0, -1);
-            D_00264A40.f4F44 = e;
-            func_0018C568(&D_00264A40);
+            g_memoryCard.f4F44 = e;
+            func_0018C568(&g_memoryCard);
             func_00160948();
             return;
         }
@@ -1503,8 +1503,8 @@ void func_00195958(T217D_6D0* self)
     }
     case 17:
         func_00194D30(self, 0, -1);
-        D_00264A40.f4F44 = &D_002542D8[sel];
-        func_0018C568(&D_00264A40);
+        g_memoryCard.f4F44 = &D_002542D8[sel];
+        func_0018C568(&g_memoryCard);
         func_00160948();
         return;
     case 11: {
@@ -1513,18 +1513,18 @@ void func_00195958(T217D_6D0* self)
         p = sel * sizeof(Ent_195958);
         p += (u32)D_002542D8;
         e = (Ent_195958*)p;
-        D_00264A40.f4F4C = e;
+        g_memoryCard.f4F4C = e;
         if (e->fC == 0.0f) {
         c6030:
-            G264A40* b;
-            b = &D_00264A40;
+            MemoryCard* b;
+            b = &g_memoryCard;
             b->f4F44 = b->f4F4C;
             self->stage = 0xB;
             if ((D_002623C0->u19EC & 0x100) == 0) {
                 func_00194D30(self, 1, 0x14);
             } else {
                 func_00194D30(self, 1, 0xC);
-                func_0018B670(&D_00269990, (void*)func_0018C638, b);
+                func_0018B670(&g_backgroundJob, (void*)func_0018C638, b);
             }
             func_00194D30(self, 0, -1);
             return;
@@ -1534,7 +1534,7 @@ void func_00195958(T217D_6D0* self)
     }
     case 18:
         if (sel == 0) {
-            func_0018B670(&D_00269990, (void*)func_0018C770, &D_00264A40);
+            func_0018B670(&g_backgroundJob, (void*)func_0018C770, &g_memoryCard);
             func_00194D30(self, 1, 0x13);
             return;
         }
@@ -1556,7 +1556,7 @@ void func_00195958(T217D_6D0* self)
             D_00273EB0.vt->m14(&D_00273EB0);
             break;
         }
-        func_0018B670(&D_00269990, (void*)func_0018C638, &D_00264A40);
+        func_0018B670(&g_backgroundJob, (void*)func_0018C638, &g_memoryCard);
         return;
     }
     }

@@ -899,7 +899,7 @@ void func_0019AD68(C17* self)
         sel = 0x37E;
         if (self->f760 != 1) {
             sel = 0x37F;
-            func_0018C7F8(D_00264A40);
+            func_0018C7F8(g_memoryCard);
         }
 
         r = (C01*)func_0015A418(self->world, 0x101, sel, self);
