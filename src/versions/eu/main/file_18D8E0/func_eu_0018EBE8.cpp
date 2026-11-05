@@ -11,7 +11,7 @@ struct Glob_eu_18EBE8 {
 
 extern Glob_eu_18EBE8 D_eu_0026AC60;
 extern s32 D_eu_0026321C;
-void func_001F6B60(s32 a);
+s32 func_001F6B60(s32 a);
 void func_001686E8(s32 a, s32 b);
 void func_001684E8(void);
 void func_001683E8(void);

@@ -193,7 +193,7 @@ void func_001356C0(T217D_440* self, s32 mode);
 void func_00145088(void* a, s32 b, void* c, void* d, s32 e);
 void func_001495E8(void* a, s32 b);
 void func_001451F0(void* a, s32 b, s32 c, void* d, void* e, s32 f);
-void func_00149610(void* a);
+s32 func_00149610(void* a);
 void func_001B64D8(void* a, s32 b);
 
 void func_001E5750(C16* self, u8* p)
@@ -275,7 +275,7 @@ struct Dev_1E5CE8 { u8 pad[0x24]; s32 f24; };
 struct Hdl_1E5CE8 { u8 pad[0x7E0]; s32 f7E0; };
 
 void func_00192230(void* self, s32 kind, MessageBody* rec);
-void func_001A8C90(void* a, s32 b);
+s32 func_001A8C90(void* a, s32 b);
 
 void func_001E5CE8(C16* self, s32 kind, MessageBody* rec)
 {
@@ -909,7 +909,7 @@ void func_001E8840(T217D_3F0* self)
 extern u8 D_00275B50[8];
 void func_001E8878(s32 enabled, u32 value) { if (value == 0xFFFF && enabled) { D_00275B50[0] = 0x80; D_00275B50[1] = 0x80; D_00275B50[2] = 0x80; D_00275B50[3] = 0x80; } }
 
-s32 func_001E8878(s32 a0, s32 a1);
+void func_001E8878(s32 a0, s32 a1);
 
 void func_001E88B0(void)
 {

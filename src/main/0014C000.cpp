@@ -29,7 +29,7 @@ s32 func_0014DA38(void* self, f32* a, f32* b);
 
 void func_0014D680(void* a0, void* a1, s32 a2, void* a3, s32 idx, s32 a5, f32* a6, f32* a7, s32* p9, f32* p10);
 
-f32 func_00130C20(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y);
+void func_00130C20(void* p0, void* p1, void* p2, void* p3, f32 x, f32 y);
 
 void func_001B7A98(Collider* self);
 s32 func_001526D0(void* a, void* b);
@@ -382,7 +382,7 @@ void func_00124DF8(void* self, s32 n, void* table);
 Src_14F920* func_0015A480(void* a, s32 kind, void* arg);
 void* func_00183058(void* item, void* x, void* self);
 void func_0014F900(C23* self);
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 
 void func_0014F920(C23* self)
@@ -770,9 +770,9 @@ extern u8 D_00248D30[];
 void func_001A8AF8(Holder_14CBA8* p);
 s32 func_001EAA70(s32 a, s32 b);
 s32 func_001A8C90(Holder_14CBA8* h, s32 v);
-void func_001F3BD8(void* p, f32* out);
-void func_001F3C08(void* p, f32* out);
-void func_0012C7B0(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
+s32 func_001F3BD8(void* p, f32* out);
+s32 func_001F3C08(void* p, f32* out);
+s32 func_0012C7B0(void* a, void* b, s32 c, void* out, f32 fa, f32 fb);
 void func_0012F810(void* a, GaugeManager* self);
 f32 func_001EAAE0(f32 a, f32 b);
 
@@ -857,16 +857,16 @@ void func_00186320(Vec_14DB78* p, Vec_14DB78* a, Vec_14DB78* b, f32* o1, f32* o2
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 // Defined in src/main/file_14D0A8.cpp.
-void func_0014DB40();
-void func_0014DB58();
+f32 func_0014DB40();
+f32 func_0014DB58();
 void func_0014DD28();
 void func_0014DE08();
 void func_0014DE40();
 void func_0014DE78();
 void func_0014DF68();
-void func_0014DF98();
-void func_0014E000();
-void func_0014E068();
+f32 func_0014DF98();
+f32 func_0014E000();
+f32 func_0014E068();
 void func_0014E090();
 void func_0014E170();
 void func_0014E2A0();
@@ -875,8 +875,8 @@ void func_0014E5B8();
 void func_0014E6A8();
 void func_0014E710();
 void func_0014E828();
-void func_0014E910();
-void func_0014E990();
+f32 func_0014E910();
+f32 func_0014E990();
 void func_0014EA48();
 void func_0014EB10();
 void func_0014EC70();

@@ -702,7 +702,7 @@ extern u8 D_00269C10[];
 struct Scratch_192C58 { u8 bytes[0x30]; };
 
 void func_00189378(void* sub, s32 zero, void* out);
-void func_0012C7B0(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
+s32 func_0012C7B0(void* a, void* b, s32 c, s32 d, f32 fa, f32 fb);
 void func_00157EF8(void* a, void* b, s32 c, void* d, void* e, s32 f, s32 g);
 
 void func_00192C58(SwitchedCollider* self)
@@ -960,7 +960,7 @@ s32 func_00160148(s32 v);
 void func_001C8C08(C0E* self);
 void func_001C8418(C0E* self, void* p);
 s32 func_00182FC8(void* p);
-void func_001F3BD8(void* self, s32* arg);
+s32 func_001F3BD8(void* self, s32* arg);
 
 void func_00190128(C0E* self, s32 flag)
 {

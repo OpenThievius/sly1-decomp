@@ -181,9 +181,9 @@ struct Scratch_00136408 {
 };
 
 s32 func_001E2100(const char* s);
-void func_001E2138(void* dst, const char* src);
+void* func_001E2138(void* dst, const char* src);
 void func_0015C8B8(V24A2* font, f32 x, f32 y);
-void func_0015E068(void* buf, f32 x);
+s32 func_0015E068(void* buf, f32 x);
 void func_0015C900(V24A2* font);
 void func_0015DB80(void* buf);
 s32 func_0015DBE0(void* buf);

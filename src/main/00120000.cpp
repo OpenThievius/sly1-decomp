@@ -532,7 +532,7 @@ void func_00123CE0(StateTrigger* self, s32 value)
     }
 }
 
-extern void func_0013EC00(void*, s32, void*, void*, void*, void*, void*);
+extern s32 func_0013EC00(void*, s32, void*, void*, void*, void*, void*);
 
 void func_00123D08(StateTrigger* object, void* a1, void* a2, void* a3, void* a4)
 {
@@ -722,7 +722,7 @@ void func_00122488(Attachment* self, s32 val)
 }
 
 
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_00124A48(void* self);
 s32 func_001300E8(void* node, s32 kind);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
@@ -872,7 +872,7 @@ s32 func_00141008(void* a, s32 b);
 void func_00141040(void* a, s32 b);
 void func_001837E0(BaseObject* self, s32 a, s32 b, s32 c);
 s32 func_001BEEF8(s32 a);
-void func_00160CF0(void* p);
+s32 func_00160CF0(void* p);
 void func_001BFCD8(s32 a0, void* a1, StateTrigger* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 void func_00123888(StateTrigger* self, s32 mode)
@@ -1435,7 +1435,7 @@ void func_0011FED8();
 void func_0011EF48();
 void func_00120470();
 void func_0011FF08();
-void func_0011FFA8();
+void* func_0011FFA8();
 void func_0011FFD8();
 void func_0011EF68();
 void func_0011EF70();

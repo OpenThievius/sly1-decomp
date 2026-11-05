@@ -61,7 +61,7 @@ struct Obj_193318 {
 };
 struct Buf_193318 { u8 bytes[0x400]; V24A0 f; };
 
-void func_001611B8(V24A0* f);
+void* func_001611B8(V24A0* f);
 void func_001529C8(V24A0* f, s32 n, Buf_193318* b);
 void func_00152B38(V24A0* f);
 f32 func_001EAF28(f32 x);
@@ -151,11 +151,11 @@ void func_001F4408(s32 a, s32 b);
 void func_001F0428(u8* a, s32 b, s32 c);
 void func_0018C178(MemoryCard* a, s32 b);
 void func_0018B670(BackgroundJob* a, void* fn, MemoryCard* self);
-void func_0018C638(MemoryCard* self);
-void func_0018C1A8(MemoryCard* self);
-void func_0018C250(MemoryCard* self);
-void func_0018C770(MemoryCard* self);
-void func_0018C568(MemoryCard* self);
+s32 func_0018C638(MemoryCard* self);
+s32 func_0018C1A8(MemoryCard* self);
+s32 func_0018C250(MemoryCard* self);
+s32 func_0018C770(MemoryCard* self);
+s32 func_0018C568(MemoryCard* self);
 void func_00160948(void);
 void func_001936A0(T217D_6D0* self);
 void* func_001925F0(void);
@@ -169,7 +169,7 @@ void func_00160578(s32 n);
 void func_00194398(void);
 void func_001A7F50(GameProgress* g);
 void func_001C0760(s32 flag);
-void func_001C0790(s32 flag);
+s32 func_001C0790(s32 flag);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 struct Row_1943E8 {
@@ -251,7 +251,7 @@ void func_001BED48(void);
 void func_001BED70(void);
 void func_001E96F8(void* self, s32 mode);
 void func_00193EE8(T217D_6D0* self, s32 a, s32 b);
-void func_0016E0F0(Bits_1940E8 bits);
+s32 func_0016E0F0(Bits_1940E8 bits);
 void func_0016E118(Bits_1940E8 n);
 void func_0016EC88(PadRecord* p);
 

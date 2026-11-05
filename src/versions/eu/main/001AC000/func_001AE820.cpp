@@ -22,7 +22,7 @@ struct Obj_1AE820_eu {
     s32 f260;
 };
 void func_eu_001374E0(void* out, s32 flag);
-void func_0015DB28(void* out, void* p, void* handle, s32 extra);
+void* func_0015DB28(void* out, void* p, void* handle, s32 extra);
 void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* data);
 
 void func_001AE820(Obj_1AE820_eu* self)

@@ -318,7 +318,7 @@ struct Tmp_1496C0 {
 f32 D_00261BF0;
 
 void func_00189230(void* a, void* b, void* c);
-void func_001493C8(void* out, T2173_3B0* self);
+s32 func_001493C8(void* out, T2173_3B0* self);
 void func_00144B70(void* eng, void* tmp);
 void func_00143968(void* eng, f32 x);
 
@@ -378,7 +378,7 @@ void func_0014AD70(T217D_720* self)
 
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
-void func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
+void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
 
 struct Note_148770 { s32 flag; void* owner; };
 struct Frame_148770 { Note_148770 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
@@ -561,7 +561,7 @@ void func_00148888(C5A* self, s32 mode)
 
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
-void func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
+void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
 void func_00148E18(void* self);
 
 struct Note_148E40 { s32 flag; void* owner; };
@@ -620,7 +620,7 @@ struct Quad_14A7B8 {
     s32 w[4];
 };
 
-void func_001493C8(void* out, T2173_3B0* self);
+s32 func_001493C8(void* out, T2173_3B0* self);
 void func_00149458(void* out, void* self);
 void func_001BF788(void* self, s32 n);
 void func_00144938(void* self, void* a, void* b);

@@ -102,11 +102,11 @@ extern u8 D_00247AD0[];
 void func_001F4408(s32 a, s32 b);
 void func_001F0428(u8* a, s32 b, s32 c);
 void func_0018C178(MemoryCard* a, s32 b);
-void func_0018C638(MemoryCard* self);
-void func_0018C1A8(MemoryCard* self);
-void func_0018C250(MemoryCard* self);
-void func_0018C770(MemoryCard* self);
-void func_0018C568(MemoryCard* self);
+s32 func_0018C638(MemoryCard* self);
+s32 func_0018C1A8(MemoryCard* self);
+s32 func_0018C250(MemoryCard* self);
+s32 func_0018C770(MemoryCard* self);
+s32 func_0018C568(MemoryCard* self);
 void func_00160948(void);
 void* func_00193660(void);
 void* func_001925F0(void);
@@ -119,7 +119,7 @@ s32 func_001602A0(void);
 void func_00160578(s32 n);
 void func_00194398(void);
 void func_001C0760(s32 flag);
-void func_001C0790(s32 flag);
+s32 func_001C0790(s32 flag);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 struct Any_001969F8;
@@ -155,7 +155,7 @@ s32 func_0011CE30(void);
 s32 func_001BE980(void);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00194398(void);
-void func_0018C250(void* arg);
+s32 func_0018C250(void* arg);
 s32 func_001AEA08(void);
 s32 func_001FD7A0(f32 x);
 
@@ -183,7 +183,7 @@ extern u8* D_0027051C;
 
 void func_001BED48(void);
 void func_001BED70(void);
-void func_0016E0F0(Bits_1940E8 bits);
+s32 func_0016E0F0(Bits_1940E8 bits);
 void func_0016E118(Bits_1940E8 n);
 
 // func_0015DB28 builds a text buffer and returns it (a constructor's `this`).

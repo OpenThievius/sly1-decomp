@@ -230,7 +230,7 @@ struct Hd_1E0678 {
 extern u8 D_00262280[];
 extern f32 D_0027240C;
 void func_0015C8B8(V24A2* font, f32 a, f32 b);
-void func_0015DB28(void* out, void* p, V24A2* font);
+void* func_0015DB28(void* out, void* p, V24A2* font);
 void func_0015E318(void* a, void* b, s32 c, void* d);
 void func_0015C900(V24A2* font);
 

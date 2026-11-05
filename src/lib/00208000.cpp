@@ -284,7 +284,7 @@ s32 func_0020A518(Ctx_0020A518* ctx, s32 a, s32 b) { return func_0020A220(ctx, a
 
 struct Obj_0020A780;
 
-void func_002116B0(Obj_0020A780* self, s32 size);
+s64 func_002116B0(Obj_0020A780* self, s32 size);
 s32 func_002115F8(Obj_0020A780* self, s32 n);
 
 s32 func_0020A780(Obj_0020A780* self)
@@ -339,7 +339,7 @@ s32 func_0020B718(Obj_20B718* self)
 struct Buf_0020B940;
 struct Ctx_0020B940;
 s32 func_001E1FD0(Buf_0020B940* dst, const char* fmt, ...);
-void func_0020B978(Ctx_0020B940* self, char* buf);
+s32 func_0020B978(Ctx_0020B940* self, char* buf);
 
 void func_0020B940(Ctx_0020B940* self, const char* fmt)
 {
@@ -399,7 +399,7 @@ struct Obj_20BF78 {
 
 u32 func_0020DEE8(u32 value);
 u32 func_0020F5B8(struct Obj_20BF78 *self, u32 n);
-void func_0020B978(struct Obj_20BF78 *self, const void *p);
+s32 func_0020B978(struct Obj_20BF78 *self, const void *p);
 
 void func_0020BF78(struct Obj_20BF78 *self)
 {
@@ -608,7 +608,7 @@ struct Out_0020A630 { s32 w0; s32 w4; s32 w8; s32 wC; };
 s32 func_002116B0(Reader_0020A630* r, s32 bits);
 void func_00211700(Reader_0020A630* r);
 s32 func_002115F8(Reader_0020A630* r, s32 bits);
-void func_0020A780(Reader_0020A630* r, Out_0020A630* o);
+s32 func_0020A780(Reader_0020A630* r, Out_0020A630* o);
 
 s32 func_0020A630(Reader_0020A630* r, Out_0020A630* o)
 {
@@ -666,7 +666,7 @@ s32 func_00210090(Sub_20B5B8* sub);
 s32 func_0020F7F0(Sub_20B5B8* sub);
 s32 func_0020B718(Ctx_20B5B8* ctx);
 void func_00210160(Sub_20B5B8* sub, s32 a1, s32 a2);
-void func_0020B1E0(Ctx_20B5B8* ctx);
+s32 func_0020B1E0(Ctx_20B5B8* ctx);
 
 s32 func_0020B5B8(Ctx_20B5B8* self, s32 a1, s32 a2)
 {
@@ -880,7 +880,7 @@ extern const char D_00250038[];
 u32 func_002116B0(Bits_20A7F0* bs, s32 n);
 void func_00211700(Bits_20A7F0* bs);
 void func_00211748(Bits_20A7F0* bs, s32 n);
-void func_0020B978(Ctx_20A7F0* ctx, const char* msg);
+s32 func_0020B978(Ctx_20A7F0* ctx, const char* msg);
 
 s32 func_0020A7F0(Ctx_20A7F0* ctx, Bits_20A7F0* bs, Hdr_20A7F0* hdr)
 {
@@ -1059,11 +1059,11 @@ extern const char D_0024FFB8[];
 extern const char D_0024FFE0[];
 
 s32 func_001F6B20(Req_2093F0* r);
-void func_00209B80(s32 a, s32 b, s32 c);
-void func_001F6B60(s32 sema);
+s32 func_00209B80(s32 a, s32 b, s32 c);
+s32 func_001F6B60(s32 sema);
 void func_001F7BE8(s32 a);
 s32 func_001F80C0(Sema_2093F0* p, u32 flags, s32 z);
-void func_001E1F10(const char* msg);
+s32 func_001E1F10(const char* msg);
 s32 func_001F8290(Sema_2093F0* p, s32 a1, s32 a2, u8* a3, s32 a4, Info_2093F0* a5, s32 a6, s32 a7, s32 a8);
 void func_001F6B40(s32 sema);
 
@@ -1140,7 +1140,7 @@ struct Inner_20AE40 {
 };
 
 void* func_001F5C0C(s32 dst, s32 c, u32 n);
-void func_0020B978(Inner_20AE40* a, const char* msg);
+s32 func_0020B978(Inner_20AE40* a, const char* msg);
 void func_0020B240(Ring_20AE40* r, u8* start, u32 size);
 s32 func_0020B278(Inner_20AE40* a, Ring_20AE40* r, u32 size, u32 align);
 void func_0020B810(Inner_20AE40* a);
@@ -1246,7 +1246,7 @@ struct Obj_0020B790 {
     s32 f1DC;
 };
 
-void func_0020B978(struct Obj_0020B790 *self, const char *msg);
+s32 func_0020B978(struct Obj_0020B790 *self, const char *msg);
 void func_00210970(struct Obj_0020B790 *self, s32 a1, s32 a2);
 void func_00210A80(struct Obj_0020B790 *self, s32 a1, s32 a2, s32 a3);
 
@@ -1320,7 +1320,7 @@ void func_0020B780(S_20B780* s) {
     func_0020DEE8(1);
 }
 
-void func_001E1F10(const char* fmt, s32 msg);
+s32 func_001E1F10(const char* fmt, s32 msg);
 
 void func_0020B930(s32 msg) {
     func_001E1F10("[MPEG ERROR]%s\n", msg);
@@ -1346,7 +1346,7 @@ extern u8 D_0027AF80[64];
 extern u8 D_0027AFC0[64];
 
 u32 func_0020F5B8(Dec_20B9F0* d, s32 bits);
-void func_0020B978(Dec_20B9F0* d, const char* msg);
+s32 func_0020B978(Dec_20B9F0* d, const char* msg);
 void func_0020F0F0(Dec_20B9F0* d);
 void func_0020F0C0(Dec_20B9F0* d, u32 value);
 void func_0020BEA0(Dec_20B9F0* d, u32 value, u8* table);
@@ -1402,7 +1402,7 @@ void func_0020ADA0(void) {
 
 s32 func_001F9D60(void);
 s32 func_001F9DA8(void);
-void func_00211AD8(s32 a, s32 b);
+u32 func_00211AD8(s32 a, s32 b);
 
 struct Chan_20B870 {
     u8 pad0[0x1B0];
@@ -1476,7 +1476,7 @@ extern s32 D_0027AEC8;
 extern s32 D_0027AECC;
 extern u8 D_0062AD40[];
 s32 func_001F8480(Q_209B80* q);
-s32 func_00209B38(Obj_209B80* o);
+void func_00209B38(Obj_209B80* o);
 s32 func_001F6B40(Dev_209B80* d);
 
 s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
@@ -1753,7 +1753,7 @@ struct Rec_20A220 {
 void func_002115C0(Bits_20A220* s, s32 a1, s32 a2, s32 a3);
 s32 func_002115F8(Bits_20A220* s, s32 n);
 u8* func_002117A0(Bits_20A220* s, s32 n);
-void func_0020A630(Bits_20A220* s, Rec_20A220* r);
+s32 func_0020A630(Bits_20A220* s, Rec_20A220* r);
 s32 func_0020A7F0(Prog_20A220* p, Bits_20A220* s, u64* r);
 
 s32 func_0020A220(Ctx_20A220* ctx, s32 a1, s32 count, s32 a3, s32 a4)

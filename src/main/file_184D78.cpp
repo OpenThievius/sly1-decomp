@@ -32,7 +32,7 @@ extern s32 D_00261F14;
 extern u8 D_00211E10[];
 void func_001F6C20(s32 unused);
 void func_00202A80(void* dma, void* addr);
-void func_00202C38(void* dma, s32 b, s32 c);
+s32 func_00202C38(void* dma, s32 b, s32 c);
 
 
 
@@ -41,7 +41,7 @@ extern u8 D_00212110[];
 
 void func_001F6C20(s32 a);
 void func_00202A80(void* a, void* b);
-void func_00202C38(void* a, s32 b, s32 c);
+s32 func_00202C38(void* a, s32 b, s32 c);
 
 struct Flags_185AC8 {
     s32 flags;

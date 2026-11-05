@@ -734,7 +734,7 @@ struct Glob_1B3510 {
 
 extern s32 D_002744F8;
 
-void func_001611B8(V24A0* b);
+void* func_001611B8(V24A0* b);
 void func_001529C8(V24A0* b, s32 n, Quad4* q);
 void func_001612F8(V24A0* b, s32 a, s32 c, s32 d, s32 e, s32 f);
 void func_001613C0(V24A0* b, s32 a, s32 c, u64 d);

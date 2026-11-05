@@ -396,7 +396,7 @@ struct Frame_124A48 {
 
 void func_00182C58(BaseObject* self);
 void func_00124CC0(PlacedObject* self);
-void func_001DBCC8(void* owner, void* fn, PlacedObject* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, PlacedObject* arg, s32 a3, s32 a4);
 void func_00165728(void* a, PlacedObject* b);
 s32 func_001B1D38(RangeRecord* p);
 void func_001B1D70(RangeRecord* p, f32 v);

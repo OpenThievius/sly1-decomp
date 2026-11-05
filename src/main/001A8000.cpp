@@ -18,7 +18,7 @@ void func_0015C8B8(V24A2* font, f32 x, f32 y);
 f32 func_0015C418(V24A2* font, void* text);
 void func_0015C638(V24A2* font, void* text, void* out, s32 zero, void* d);
 void func_0015C900(V24A2* font);
-void func_0015DB28(void* out, void* text, V24A2* font);
+void* func_0015DB28(void* out, void* text, V24A2* font);
 void func_0015E318(void* buf, void* out, s32 zero, void* d);
 
 void func_00182ED0(void* self);
@@ -457,7 +457,7 @@ struct Obj_1A94C0 {
 };
 
 void func_001920B0(void* self, void* arg);
-void func_001F3BD8(void* self, void* arg);
+s32 func_001F3BD8(void* self, void* arg);
 void func_001F3C08(void* self, void* arg);
 void func_00128018(void* a0, void* a1, void* a2, void* a3);
 void func_00128150(void* a0, void* a1, void* a2, void* a3);
@@ -790,7 +790,7 @@ void func_001A9C68()
 extern s8 D_00262250[];
 extern u8 D_0024E879[];
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
-void func_001E2138(void* dst, void* src);
+void* func_001E2138(void* dst, void* src);
 
 void func_001AA5A0(ScreenElement* self)
 {
@@ -1567,7 +1567,7 @@ void func_001AC0E8();
 void func_001AC888();
 void func_001AC910();
 void func_001AC990();
-void func_001AC9E0();
+s32 func_001AC9E0();
 void func_001ACA30();
 void func_001ACA68();
 void func_001ACAA8();
@@ -1619,11 +1619,11 @@ void func_00136040();
 void func_00136238();
 void func_001363D0();
 void func_00136408();
-void func_001365F0();
-void func_00136648();
+f32 func_001365F0();
+f32 func_00136648();
 void func_001366A0();
 void func_00136EF8();
-void func_00136FA8();
+s32 func_00136FA8();
 void func_001821B0();
 void func_001F1960();
 void func_001F1A08();
@@ -1687,7 +1687,7 @@ Entry_1A8718* func_001A8718(ObjectPool* self, s32 key)
 }
 
 s32 func_001E2100(const char*);
-void func_001E2138(char*, const char*);
+void* func_001E2138(char*, const char*);
 void func_0015E290(TextReader*, f32, f32*, f32*);
 void func_001AA4F0(ScreenElement* self, const char* arg)
 {

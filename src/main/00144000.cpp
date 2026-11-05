@@ -128,7 +128,7 @@ void func_00146100(ScaledOffsetObject* self)
 
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* sub, s32* out);
-void func_001DBCC8(void* owner, void* fn, void* ctx, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* ctx, s32 a3, s32 a4);
 void func_00147ED0(void* self);
 
 struct Args_147EF8 { s32 flag; void* self; };

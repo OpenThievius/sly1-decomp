@@ -747,7 +747,7 @@ struct Range_165588 { u16 lo; u16 hi; };
 struct Rec_165588 { u8 pad0[0x18]; u8* f18; Range_165588* f1C; };
 struct Out_165588 { void* f0; void* f4; void* f8; void* fC; void* f10; void* f14; };
 
-void func_001EE318(void* p);
+void* func_001EE318(void* p);
 void func_00152938(void* buf, u32 count, u32 kind);
 void func_001EE498(void* b, u32 x, u32 y);
 void func_001EE5C8(void* s, u32 tag, s32 size, s32 a3, void* a4, void* a5);

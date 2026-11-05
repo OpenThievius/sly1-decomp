@@ -80,7 +80,7 @@ s32 func_001DD908(void* self, s32 index)
     return D_002623C0->levels[index].f448 & 0x20;
 }
 
-void func_00160B28(void* p);
+s32 func_00160B28(void* p);
 
 void func_001DD928(void* self)
 {
@@ -132,7 +132,7 @@ void func_001DDAB8(World* self, f32 v)
     self->f234C = v;
 }
 
-void func_001BEEF8(void* p);
+void* func_001BEEF8(void* p);
 
 void func_001DDBF8(void* self, void* p)
 {
@@ -170,7 +170,7 @@ void func_001DD610(World* self, f32 v)
 }
 
 void* func_001EAA70(void* a, void* b);
-void func_00148AC0(void* heap, int size, void* c, void* d, int e);
+s32 func_00148AC0(void* heap, int size, void* c, void* d, int e);
 
 void func_001DD950(void* unused, void* a, void* b, void* c)
 {
@@ -918,7 +918,7 @@ s32 func_001DD7A0(void* self, void* obj)
     return r;
 }
 
-void func_0016E0F0(s32 bits);
+s32 func_0016E0F0(s32 bits);
 
 void func_001DDA20(World* a0) {
     s32 n = a0->f231C + 1;

@@ -470,7 +470,7 @@ void func_001DA170(C19* self)
 
 void func_0011A800(void* a);
 s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
-void func_0011A080(ScriptValue* t, R11B008Node* n, void* c);
+void* func_0011A080(ScriptValue* t, R11B008Node* n, void* c);
 void* func_0011A400(ScriptValue* self, void* table, s32 key, ScriptValue* item);
 extern u8 D_00259F38[];
 
@@ -1011,8 +1011,8 @@ struct Obj_1DB290 {
 };
 
 void func_00118CF0(void* out, f32 f);
-void func_00118D10(void* out, void* in);
-void func_00118D20(void* dst, V128_1DB290 v);
+void* func_00118D10(void* out, void* in);
+void* func_00118D20(void* dst, V128_1DB290 v);
 V128_1DB290 func_001DB460(V128_1DB290 a, V128_1DB290 b, V128_1DB290 c, V128_1DB290 d);
 
 struct Bounds_1DB290 {

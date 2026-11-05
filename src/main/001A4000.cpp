@@ -941,7 +941,7 @@ typedef void (*FnP_1A7998)(void* self, void* arg);
 typedef void (*FnI_1A7998)(void* self, s32 arg);
 
 void func_0012E760(void* p);
-void func_0012C7B0(void* a, void* b, s32 c, void* d, f32 x, f32 y);
+s32 func_0012C7B0(void* a, void* b, s32 c, void* d, f32 x, f32 y);
 
 void func_001A7998(ObjectCreator* self, s32 idx)
 {
@@ -1277,7 +1277,7 @@ void func_00155F90(void* p);
 void func_00155FA0(void* p);
 void func_001B6628(void* p, s32 n);
 void func_001B64D8(void* p, s32 n);
-void func_0012C7B0(void* a, C15* self, s32 c, s32* out, f32 fa, f32 fb);
+s32 func_0012C7B0(void* a, C15* self, s32 c, s32* out, f32 fa, f32 fb);
 void func_001BF788(s32* p, s32 n);
 
 void func_001A4070(C15* self, s32 n)
@@ -1368,7 +1368,7 @@ extern f32 D_0024CBC4;
 void func_00182C18(ObjectPool* self);
 struct Buf_1A7FE8 { u8 b[1]; };
 s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001A8208(ObjectPool* self);
 
 void func_001A7FE8(ObjectPool* self)

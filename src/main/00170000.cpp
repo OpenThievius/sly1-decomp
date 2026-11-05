@@ -149,7 +149,7 @@ struct Vec4_171F28 {
     f32 x, y, z, w;
 } __attribute__((aligned(16)));
 
-void func_001EDEF0(void* a0, void* a1, void* a2, void* a3);
+s32 func_001EDEF0(void* a0, void* a1, void* a2, void* a3);
 
 void func_00171F28(Player* self, f32 unusedF12, f32 scale)
 {

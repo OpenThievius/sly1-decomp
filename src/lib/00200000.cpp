@@ -211,7 +211,7 @@ struct Node_200000 {
     s32 field2;
 };
 
-void func_001FF008(void);
+void* func_001FF008(void);
 void func_00200118(struct Node_200000 *self, void *a1, void *a2);
 
 void* func_00200000(void)
@@ -261,7 +261,7 @@ void* func_00200418(void)
 
 struct Self_002004A8;
 
-void func_00200530(struct Self_002004A8* a0);
+void* func_00200530(struct Self_002004A8* a0);
 void func_00200118(struct Self_002004A8* self, void* a1, void* a2);
 
 extern u8 D_0062C5E8[];
@@ -309,7 +309,7 @@ struct Obj_002005E8 {
     void *vtbl;
 };
 
-void func_001FF008(void);
+void* func_001FF008(void);
 void func_00200118(struct Obj_002005E8 *self, void *a1, void *a2);
 
 void *func_002005E8(void)
@@ -332,7 +332,7 @@ struct Node_200680 {
     void *field0;
 };
 
-void func_001FF008(void);
+void* func_001FF008(void);
 void func_00200118(struct Node_200680 *self, void *a1, void *a2);
 
 void *func_00200680(void)
@@ -545,7 +545,7 @@ void* func_002013F0(void)
 
 struct Self_00201460;
 
-void func_00200710(struct Self_00201460* a0);
+void* func_00200710(struct Self_00201460* a0);
 void func_00200118(struct Self_00201460* self, void* a1, void* a2);
 
 extern u8 D_0062C678[];
@@ -624,7 +624,7 @@ struct Tmp_202D30 {
 
 extern void* func_001F6B20(Tmp_202D30* p);
 extern void func_001F69E0(Arg_202D30* a, void* cb, void* ctx);
-extern void func_001F6B60(void* p);
+extern s32 func_001F6B60(void* p);
 extern void func_001F6B30(void* p);
 extern void func_00202D00(void);
 
@@ -653,7 +653,7 @@ struct Arg_2032C8 {
     s32 field0;
 };
 
-void func_001F7B88(void *p);
+s32 func_001F7B88(void *p);
 void func_00202D30(s32 frames);
 s32 func_001F8480(void *p);
 
@@ -684,7 +684,7 @@ extern const char D_0024F648[16];
 extern u8 D_0027AE48[];
 
 struct Ctx_203368 { s32 field0; };
-void func_001F7B88(struct Ctx_203368 *self);
+s32 func_001F7B88(struct Ctx_203368 *self);
 s32 func_001F8480(struct Ctx_203368 *self);
 void func_00202D30(struct Ctx_203368 *self);
 
@@ -1000,7 +1000,7 @@ struct Obj_201FF8 {
     u8 pad0[0x50];
 };
 
-s32 func_00201BB8(Elem_201FF8* p);
+void func_00201BB8(Elem_201FF8* p);
 s32 func_00201C78(Elem_201FF8* p);
 
 s32 func_00201FF8(Obj_201FF8* self, s32 flag)
@@ -1022,7 +1022,7 @@ extern s32 D_0027943C;
 
 s32 func_001F9D60(void);
 s32 func_001F9DA8(void);
-s32 func_001FA4A0(s32 index, void* first, s32 second);
+void func_001FA4A0(s32 index, void* first, s32 second);
 void func_00203008(void);
 
 s32 func_00203050(void)
@@ -1656,7 +1656,7 @@ extern s32 D_0027942C;
 
 s32 func_001F6B30(s32 a);
 s32 func_001F9D60(void);
-s32 func_001FA4D0(u32 a);
+void func_001FA4D0(u32 a);
 s32 func_001F9DA8(void);
 
 void func_00202F88(void) {

@@ -18,7 +18,7 @@ void func_0015C8B8(V24A2* font, f32 x, f32 y);
 f32 func_0015C418(V24A2* font, void* text);
 void func_0015C638(V24A2* font, void* text, void* out, s32 zero, void* d);
 void func_0015C900(V24A2* font);
-void func_0015DB28(void* out, void* text, V24A2* font);
+void* func_0015DB28(void* out, void* text, V24A2* font);
 void func_0015E318(void* buf, void* out, s32 zero, void* d);
 
 struct Loc_1AC638 {
@@ -28,7 +28,7 @@ struct Loc_1AC638 {
 };
 
 s32 func_001E2100(const char* p);
-void func_001E2138(char* dst, const char* p);
+void* func_001E2138(char* dst, const char* p);
 void func_0015E290(void* out, f32 t, f32* a, f32* b);
 
 void func_001AC638(T217D_330* self, const char* p)
@@ -734,7 +734,7 @@ extern const char* D_00274484;
 struct Loc_1ADFF0 { T217D_Rgba col; u8 pad[12]; u8 obj[0xB0]; };
 
 s32 func_001E1FD0(char *dst, const char *fmt, ...);
-void func_001E2138(char *dst, const char *src);
+void* func_001E2138(char *dst, const char *src);
 f32 func_0015E1F0(void *obj);
 f32 func_0015E1B0(void *obj, f32 a);
 

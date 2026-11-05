@@ -477,8 +477,8 @@ struct Self_17B9D0
 
 s32 func_001300E8(Node_17B9D0* n, s32 kind);
 void func_001920B0(Node_17B9D0* n, Vec02* out);
-void func_001F3BD8(Node_17B9D0* n, Vec02* out);
-void func_001F3C08(Node_17B9D0* n, Vec02* out);
+s32 func_001F3BD8(Node_17B9D0* n, Vec02* out);
+s32 func_001F3C08(Node_17B9D0* n, Vec02* out);
 f32 func_00205778(f32 a, f32 b);
 void func_00128018(void* a, void* b, void* c, Vec02* d);
 void func_001280C0(void* a, void* b, Vec02* c, Vec02* d);

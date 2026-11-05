@@ -416,7 +416,7 @@ struct Buf_1E8EF8 { s32 v[4]; };
 
 void func_001C8418(C0B* self, void* p);
 void func_001C8C08(C0B* self);
-void func_001F3BD8(void* self, void* arg);
+s32 func_001F3BD8(void* self, void* arg);
 
 void func_001E8EF8(C0B* self)
 {
@@ -928,7 +928,7 @@ extern void func_0016E118(s32 n);
 extern void* func_001F4378(void);
 extern void func_001F4808(void* x);
 extern void func_0016EC20(PadRecord* p, s32 n);
-extern void func_0018C568(MemoryCard* g);
+extern s32 func_0018C568(MemoryCard* g);
 extern void func_001605E8(void* p);
 extern void func_00160948(void);
 extern void func_00194D30(void* self, s32 a, s32 b);
@@ -1068,8 +1068,8 @@ struct In_1EB748 { u8 pad[0xAA]; u16 fAA; };
 s32 D_00275CD8[4] = { 1228, 1230, 1229, 1231 };
 s32 D_00275CE8[4] = { 574, 576, 575, 577 };
 
-void func_001F3BD8(void* a, Vec4U* out);
-void func_001F3C08(void* a, Mat3U* out);
+s32 func_001F3BD8(void* a, Vec4U* out);
+s32 func_001F3C08(void* a, Mat3U* out);
 void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_001B64D8(void* a, s32 b);
 s32 func_00160C58(void);

@@ -249,7 +249,7 @@ struct Out_001FD308 { s32 w[8]; };
 struct Frame_001FD308 { Out_001FD308 o0; Out_001FD308 o1; Pair_001FD308 a; Pair_001FD308 b; };
 
 void func_001FCA40(Pair_001FD308* in, Out_001FD308* out);
-void func_001FD1F0(Out_001FD308* a, Out_001FD308* b);
+s32 func_001FD1F0(Out_001FD308* a, Out_001FD308* b);
 
 void func_001FD308(Pair_001FD308 a, Pair_001FD308 b)
 {
@@ -381,7 +381,7 @@ struct Obj_1FEA88 {
 };
 
 struct Obj_1FEA88* func_001FE9D0(struct Size_1FEA88* n);
-void func_001FEA18(struct Fn_1FEA88* self);
+s32 func_001FEA18(struct Fn_1FEA88* self);
 
 void func_001FEA88(s32 a0, s32 a1, s32 a2)
 {
@@ -1385,7 +1385,7 @@ struct Handle_1FEB18 {
 };
 
 extern void func_001FE8F0(void) __attribute__((noreturn));
-void func_001FE9F8(void*);
+s32 func_001FE9F8(void*);
 s32 func_00200C40(void*);
 
 void func_001FEB18(Handle_1FEB18* self)
@@ -2072,7 +2072,7 @@ Frame_1FE198* func_001FE100(Pc_1FE198* pc, Frame_1FE198* f, Frame_1FE198* prev);
 s32 func_001FDEB0(s32 a, Tag_1FE198* t, s32 c, s32 d, s32* e);
 s32 func_001FDDD8(Pc_1FE198* pc, Tag_1FE198* t);
 s64* func_001FDFF8(u16 idx, Frame_1FE198* f, Frame_1FE198* g);
-void func_001FE080(s32 idx, Frame_1FE198* f, Frame_1FE198* g);
+s32 func_001FE080(s32 idx, Frame_1FE198* f, Frame_1FE198* g);
 void func_001FE190(void);
 void func_001FD930(void);
 

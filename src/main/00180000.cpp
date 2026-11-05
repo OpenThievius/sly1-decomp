@@ -826,7 +826,7 @@ void func_0011A800(void* d);
 s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
 void func_0011A328(Slot_1834A0* slot, s32 value);
 void* func_0011A358(ScriptValue* out, Slot_1834A0* owner, void* kind, void* body);
-void func_00119A58(ScriptValue* out, void* list, Slot_1834A0* c);
+void* func_00119A58(ScriptValue* out, void* list, Slot_1834A0* c);
 extern u8 D_00259F38[];
 
 void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list)
@@ -926,7 +926,7 @@ extern s32 D_00244DFC[];
 void func_0011A800(u8* a);
 s32 func_0011A498(void* a, s32 b, s32 c, ScriptValue* d);
 s32 func_00183668(BaseObject* self, s32 idx, s32 flag, void* out);
-void func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
+void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list);
 
 void func_001837E0(BaseObject* self, s32 idx, s32 flag, s32* out)

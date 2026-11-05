@@ -76,7 +76,7 @@ struct Frame_15EB20 {
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
 
-void func_001611B8(void* p);
+void* func_001611B8(void* p);
 void func_001529C8(void* p, s32 n, void* q);
 void func_001613C0(void* p, s32 a, s32 b, s32 c);
 void func_00161708(void* p, s32 a, s32 b);
@@ -242,8 +242,8 @@ void func_0015EF88(Pair_15EF88* self, s32 flag)
 extern u8 D_00262280[];
 extern u8 D_002622A8[];
 
-void func_001611B8(void* p);
-void func_001EE318(void* p);
+void* func_001611B8(void* p);
+void* func_001EE318(void* p);
 
 void func_0015F618(s32 flag, s32 code)
 {
@@ -1012,7 +1012,7 @@ void func_0015ED50(RenderFrame* f);
 void func_001684E8(void);
 void func_001686E8(s32 a, s32 b);
 void func_0015F320(void);
-void func_00202C38(s32 a, s32 b, s32 c);
+s32 func_00202C38(s32 a, s32 b, s32 c);
 void func_001683E8(void);
 
 void func_0015EE80(void)

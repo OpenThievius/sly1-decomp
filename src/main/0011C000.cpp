@@ -217,7 +217,7 @@ void func_0011D8B0(void* a0, s32 a1, s32 a2)
     func_0011DB00(0x29, 0xC, &args, 0, 0);
 }
 
-void func_0011D968(s32 kind, s32 a1, s32 a2);
+s32 func_0011D968(s32 kind, s32 a1, s32 a2);
 
 void func_0011E4F8()
 {
@@ -1444,7 +1444,7 @@ void func_001F6C20(s32 a);
 void func_0011D110(void* p, s32 n);
 s32 func_001F8480(void* p);
 s32 func_001E1F10(void* self, ...);
-void func_001F8290(void* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, s32 h, s32 i);
+s32 func_001F8290(void* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, s32 h, s32 i);
 s32 func_0011D078(void);
 void func_0011DE18(void);
 
@@ -1489,7 +1489,7 @@ extern const char D_00249838[56] = "snd_SendIOPCommandNoWait: continueing (%d).\
 s32 func_0011CE30(void);
 void func_001F6C20(s32 a);
 s32 func_001F8480(void* p);
-void func_001F8290(void* a, s32 b, s32 c, s32 d, s32 e, void* f, s32 g, s32 h, s32 i);
+s32 func_001F8290(void* a, s32 b, s32 c, s32 d, s32 e, void* f, s32 g, s32 h, s32 i);
 void func_0011DDD8(void);
 
 void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
@@ -1597,7 +1597,7 @@ struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
 
 extern u8 D_00244950[];
 
-void func_00137290(BufferedStream* self, s32 a, s32 b, s32 c);
+void* func_00137290(BufferedStream* self, s32 a, s32 b, s32 c);
 void func_00137398(BufferedStream* self, s32 a1, u8* a2);
 void func_0011E680(BaseObject* self, Node_11EDA8* slot, BufferedStream* obj);
 void func_001372E0(BufferedStream* self, s32 flags);
@@ -1992,7 +1992,7 @@ struct Arg_0011D078;
 
 void func_001F6C20(Arg_0011D078* a);
 s32 func_001F8480(Arg_0011D078* a);
-void func_001E1F10(Arg_0011D078* a);
+s32 func_001E1F10(Arg_0011D078* a);
 
 s32 func_0011D078(void)
 {
@@ -2062,7 +2062,7 @@ s32 func_001E1F10(Ctx_0011D2A8* p);
 s32 func_0011CE30(void);
 s32 func_001F8480(Ctx_0011D2A8* p);
 void func_001F6C20(s32 a);
-void func_001F8290(Ctx_0011D2A8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5, s32 a6, s32 a7, s32 a8);
+s32 func_001F8290(Ctx_0011D2A8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5, s32 a6, s32 a7, s32 a8);
 
 void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
 {

@@ -186,7 +186,7 @@ s32 func_001407A0(Holder_1407A0* holder)
 }
 
 extern s32 D_002613F0;
-void func_00203A20(s32 arg);
+u32 func_00203A20(s32 arg);
 
 void func_001409A8(void)
 {
@@ -202,7 +202,7 @@ void func_00140618(void* self, int value)
     func_001405D0((u8*)self + 0x5C0, self, value);
 }
 
-void func_0013E8F8(void* a, int b);
+bool func_0013E8F8(void* a, int b);
 
 void func_00140640(void* self, void* unused, int value)
 {
@@ -408,7 +408,7 @@ void func_00140238(ZoneCollider* self, s32 flag)
 typedef signed int s32;
 typedef unsigned char u8;
 
-void func_0013E8F8(void* a, s32 b);
+bool func_0013E8F8(void* a, s32 b);
 
 void func_001405D0(void* a, void* b, s32 c)
 {

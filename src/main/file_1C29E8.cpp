@@ -48,7 +48,7 @@ struct Obj_1C30E8 {
 };
 struct Obj2_1C30E8 { u8 pad0[0x2A8]; f32 f2A8; };
 
-void func_001619C0(VertexBatch* b);
+void* func_001619C0(VertexBatch* b);
 void func_00152B38(V24A0* g);
 void func_00161AB0(VertexBatch* b, u8* a, u8* c);
 void func_00161BB0(VertexBatch* b, s32 v);

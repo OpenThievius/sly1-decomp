@@ -263,6 +263,12 @@ call), do not try orders by hand: mark the lines with `/*P*/` and run
 (`--auto` marks each run of simple statements itself; `--write OUT` keeps the best). Its result
 counts like any other once `tools/check.py` prints `EXACT`.
 
+Before calling a difference a register-allocation tie, check the declarations of the functions
+it calls: `python3 tools/decls.py` lists those whose return type contradicts the function's C
+definition or retail's callers. A call to a function that returns a value sets `$v0`, so a `void`
+declaration moves the caller's registers around the call even where the value is ignored
+(func_0018F448 and func_00211348 matched once func_0020A538 and func_0020B190 were declared `s32`).
+
 For a register-allocation or scheduling tie that no reordering moves, use decomp-permuter
 (https://github.com/simonlindholm/decomp-permuter, MIT). It is never committed: fetch it once into
 `tools/ext/`, which is gitignored, with its own Python environment:
