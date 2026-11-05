@@ -371,6 +371,21 @@ class ProgressCountTest(unittest.TestCase):
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
 
+class RegdiffTest(unittest.TestCase):
+    """tools/regdiff.py tells a register-only difference from one in the code."""
+
+    def test_the_four_verdicts(self):
+        import regdiff
+        retail = [("00851021", "addu v0,a0,a1"), ("03e00008", "jr ra"), ("24420001", "addiu v0,v0,1")]
+        self.assertEqual(regdiff.classify(retail, retail)[0], "EXACT")
+        regs = [("00a41021", "addu v0,a1,a0"), ("03e00008", "jr ra"), ("24630001", "addiu v1,v1,1")]
+        self.assertEqual(regdiff.classify(regs, retail)[0], "registers")
+        moved = [retail[2], retail[0], retail[1]]
+        self.assertEqual(regdiff.classify(moved, retail)[0], "order")
+        other = [retail[0], retail[1], ("24420002", "addiu v0,v0,2")]
+        self.assertEqual(regdiff.classify(other, retail), ("code", 2, 3))
+
+
 class ExitNoteTest(unittest.TestCase):
     """A failed compile step says its exit code, and names a crash of the compiler's stack."""
 
