@@ -402,3 +402,450 @@ func_001C8590	BuildAgentPath	slot 95 of class 0x08: asks the path object 0x928 (
 func_001C9CF8	RestartAgentClip	slot 96 of class 0x08: clears 0xB8C, 0xA60 and 0xBA4 and restarts the player 0x7E0 on its clip 0x1B1 (func_0012CCC0, func_0012F0A0)
 func_001C9AF8	SteerAgentAlongPath	slot 97 of class 0x08: aims at the path entry 0x940[0x930] (distance via func_001EB0F8), turns with func_001C7AE0 and stores the velocity in 0x640 and the arrival time in 0xBA4
 func_001CAA08	SelectAgentTarget	slot 98 of class 0x08: chooses the target from 0xB50, 0xB48 or the controlled object (func_001925F0), calls slot 28 of the old and slot 27 of the new one and stores it in 0xB54
+func_00113820	TestScriptWordsEqual	builtin: returns a bool value that is args[0].i == args[1].i
+func_00113888	CompareScriptNumbers	converts the two arguments to floats (tag 0x15 as is, others from the int) and returns a bool of <, <=, > or >= by mode 0..3
+func_001139E8	TestScriptLess	builtin: calls func_00113888 with mode 0 (first < second)
+func_00113A18	TestScriptLessOrEqual	builtin: calls func_00113888 with mode 1 (first <= second)
+func_00113A48	TestScriptGreater	builtin: calls func_00113888 with mode 2 (first > second)
+func_00113A78	TestScriptGreaterOrEqual	builtin: calls func_00113888 with mode 3 (first >= second)
+func_00113AA8	TestScriptValuesIdentical	bool of equal tags and, for the word-carrying tags (20, 27..33), equal words; the operator tags compare equal; func_001194A8 (the case form) uses it per key
+func_00113B60	CompareScriptValues	deep equality of two values: same tag, then chains (tag 30) and closure records (31) element by element, hosts (33) by self and fn, plain words by value; func_00113E48 and func_001149F0 call it
+func_00113E48	TestScriptEqual	builtin: returns CompareScriptValues of its two arguments
+func_00113E78	IsScriptBool	builtin: bool of args[0].tag == 0x1B
+func_00113EE0	IsScriptNumber	builtin: bool of tag 0x14 or 0x15 (int or float)
+func_00113F48	IsScriptFloat	builtin: bool of args[0].tag == 0x15
+func_00113FB0	IsScriptInt	builtin: bool of args[0].tag == 0x14
+func_00114018	IsScriptPointer	builtin: bool of args->tag == 0x1C
+func_00114080	IsScriptVector	builtin: bool of args->tag == 0x16 (the pooled vector made from three floats by func_00115440)
+func_001140E8	IsScriptMatrix	builtin: bool of args->tag == 0x17 (the 0x40-byte block func_00115510 builds)
+func_00114150	IsScriptVector4	builtin: bool of args->tag == 0x18 (the vector func_00116EA8 builds from four floats)
+func_001141B8	IsScriptFloatPair	builtin: bool of args->tag == 0x19 (two floats, built by func_001157E0)
+func_00114220	IsScriptFloatTriple	builtin: bool of args->tag == 0x1A (three floats, built by func_001158B8)
+func_00114288	IsScriptList	builtin: bool of tag 0x1E (a chain) or 0 (the empty list)
+func_00114300	IsScriptEmptyList	builtin: bool of args->tag == 0
+func_00114360	IsScriptRef	builtin: bool of args->tag == 0x20 (an object pointer value, as func_00117AF0 builds)
+func_001143C8	IsScriptNullRef	builtin: bool, true only for a tag 0x20 value whose pointer is 0
+func_00114438	IsScriptHostFunction	builtin: bool of args[0].tag == 0x21 (the host-function tag func_00119BB0 calls through)
+func_001144A0	IsScriptFunction	builtin: bool of tag 0x1F (closure record) or 0x1D (table index of a built-in), the two kinds func_00119BB0 calls
+func_001145C8	IsScriptFalse	builtin: bool, true for a tag 0x1B value whose word is 0
+func_00114638	PrependScriptListItem	builtin: takes a node from the node pool, copies args[0] into it, links it before the chain of args[1] (or nothing for the empty list) and returns it as a chain
+func_001146E0	GetScriptListHead	builtin: assigns the first node's value (args->node) to the result
+func_00114740	GetScriptListTail	builtin: returns the chain after the first node, or the empty list (tag 0) when there is none
+func_001147B8	SetScriptListCell	sets the value of args[0]'s first node (mode 0x23) or replaces its next link with args[1]'s chain or nothing (other mode), returns the empty result
+func_00114858	SetScriptListHead	builtin: calls func_001147B8 with mode 0x23 (overwrite the first node's value)
+func_00114888	SetScriptListTail	builtin: calls func_001147B8 with mode 0x24 (replace the link to the rest of the chain)
+func_001148B8	GetScriptListLength	builtin: counts the nodes of a tag 0x1E chain and returns the int
+func_00114950	GetScriptListItem	builtin: walks the chain of args[0] i times where i is args[1].i and returns that node's value (empty list when out of range)
+func_001149F0	TestScriptListContains	builtin: compares args[0] with each node of the chain of args[1] through func_00113E48 and returns true on the first bool true
+func_00114B80	ReturnScriptArgument	builtin: copies args[0] into the result unchanged
+func_00114D18	MapScriptList	builtin: builds a call expression from args[0] and a placeholder for each element of args[1]'s chain, evaluates it per element with func_0011A080 and collects the results in a new chain
+func_00114F48	FilterScriptList	builtin: same per-element evaluation as func_00114D18 but links only the elements whose result is a true bool into a new chain
+func_001151C0	ForEachScriptListItem	builtin: evaluates args[0] applied to each element of args[1]'s chain for its effect and returns the empty result (tag 0x22)
+func_00115398	EvalScriptArgument	builtin: copies args[0] into a pool node and evaluates it as an expression with func_0011A080 in the caller's scope
+func_00115440	MakeScriptVector	builtin: converts three arguments to floats (func_0011B9A8) into a pooled 16-byte block (func_0011C508) and returns it as tag 0x16
+func_00115510	MakeScriptMatrix	builtin: fills the pooled 0x40-byte block of tag 0x17 from 3 or 4 vectors, or from 9 or 16 floats (3x3 or 4x4 with func_001884C0 on the 9 case)
+func_00115710	MakeScriptVector4FromThree	builtin: converts three arguments to floats into a pooled block (func_0011C748) and returns it as tag 0x18
+func_001157E0	MakeScriptFloatPair	builtin: converts two arguments to floats into the pooled block of func_0011C858 and returns it as tag 0x19
+func_001158B8	MakeScriptFloatTriple	builtin: converts three arguments to floats into the pooled block of func_0011C968 and returns it as tag 0x1A
+func_001159B8	GetScriptVectorElement	builtin: indexes a tag 0x16/0x18 vector, a tag 0x17 matrix (a row, or a row and column), or the floats of tags 0x19 and 0x1A by the index chain args[1]
+func_00115CA0	CallScriptMathFunction	converts the argument to a float and calls D_00259938[index] on it, returning the float result; the eight wrappers func_00115D48..func_00115E98 pass index 0..7
+func_00116D20	EvalScriptQuadratic	builtin: with a tag 0x1A triple (a, b, c) and a float t returns a + t * (b + t * c)
+func_00116DC8	EvalScriptClampedQuadratic	builtin: evaluates the quadratic of a triple at a float and clamps the result to the low and high of a pair
+func_00116EA8	MakeScriptVector4FromFour	builtin: converts four arguments to floats and passes x, y, z, w to func_001EB018 to fill a pooled block returned as tag 0x18
+func_001171F0	RoundScriptFloat	builtin: returns the int (s32)(args->f + 0.5)
+func_00117260	TruncateScriptFloat	builtin: returns the int (s32)args->f
+func_001172C8	GetScriptAbsolute	builtin: the absolute value of an int (tag 20) or a float argument, in the same type
+func_00117360	GetScriptMaximum	builtin: keeps the largest of args[0] and every element of the chain args[1], comparing ints and floats across types
+func_00117478	GetScriptMinimum	builtin: keeps the smallest of args[0] and every element of the chain args[1], comparing ints and floats across types
+func_00117598	GetScriptRemainder	builtin: returns the int args[0].i % args[1].i
+func_00117610	GetScriptClock	builtin: returns the float D_0026185C, the game clock other functions stamp their state changes with
+func_00117AF0	MakeScriptRefList	builds a chain with one tag 0x20 pointer node per entry of an array of count pointers, or the empty list when count is 0; the object-search built-ins use it
+func_00117BC8	FindScriptObject	builtin: looks an object up by id args[0].i with func_0015A418 on D_00275710 (the same call ResolveObjectLinks uses) and returns it as a tag 0x20 pointer
+func_00117C48	FindScriptObjectList	builtin: fills a 0x40-entry buffer with func_0015A198 on D_00275710 from args[0].i and returns it as a chain of pointers through func_00117AF0
+func_00117E20	GetScriptControlledObject	builtin: returns func_001925F0() (the controlled object SelectAgentTarget falls back to) as a tag 0x20 pointer
+func_00117E78	GetScriptWorld	builtin: returns D_00275710 as a tag 0x20 pointer
+func_00117ED0	GetScriptTracker	builtin: returns D_00261990 (the tracker SetPlayerTracked registers with) as a tag 0x20 pointer
+func_00118198	SearchScriptObjectHits	walks the chain args[0], tests each object with func_001419E8 and, for id 0x71, collects every hit as (object, vector, vector) triples in a chain, otherwise returns the first hit as (object, vector)
+func_001183B8	CollectScriptObjectHits	builtin: calls func_00118198 with id 0x71 (every hit)
+func_00118458	FindScriptObjectHit	builtin: calls func_00118198 with id 0x72 (the first hit only)
+func_00118720	StartScriptEffect	builtin: calls func_001BFCD8 (the effect start SetObjectCyclerHandle uses) with args[0], keeps the handle in a local, returns it as an int and releases it with func_001BF718 when non-zero
+func_001187E8	StopScriptEffect	builtin: calls func_001BF788(args[0].p, 0), the effect stop SetObjectCyclerHandle uses, and returns the empty result
+func_00118D10	CopyQuadword	copies one 128-bit value from src into out and returns out
+func_00118D20	StoreQuadword	stores a 128-bit value passed by value into out and returns out
+func_00118D48	EvalScriptVariable	evaluator case for expression tag 28: looks the name expr->i up through the scope chain (func_0011A498 with flag 1) and returns the value
+func_00118DB8	EvalScriptAssign	evaluator form 1: evaluates the value expression, then stores it in the existing variable found through the scope chain (func_0011A400)
+func_00118E80	EvalScriptDefine	evaluator form 2: evaluates the value expression, then adds a new variable at the head of the current scope (func_0011A358)
+func_00118F48	EvalScriptAssert	evaluator form 5: evaluates a condition and, when it is 0, prints the string D_00249200 through func_001E1F10 and calls func_00113730; returns the empty result
+func_00119030	EvalScriptIf	evaluator form 6: evaluates the first expression; when it equals 1 evaluates the second, otherwise the third if present, else returns the empty result
+func_00119128	EvalScriptOr	evaluator form 7: evaluates the expressions in turn and returns the first value that is not a false bool, or false
+func_00119218	EvalScriptAnd	evaluator form 8: starts from true, evaluates the expressions in turn and stops at the first false bool, returning the last value
+func_00119310	EvalScriptCond	evaluator form 9: for each clause evaluates its test (a clause tagged 10 always matches) and on the first non-false runs the rest of the clause, returning its last value
+func_001194A8	EvalScriptCase	evaluator form 11: evaluates a key, then finds the first clause (tag 10 always matches) listing a key that func_00113AA8 calls identical and runs the clause's body
+func_001196C8	EvalScriptLet	evaluator form 12: if the first element is a chain of (name value) pairs, makes a new scope with those names defined (func_0011A358) and parented to the current one, then evaluates the remaining expressions in it
+func_00119878	EvalScriptWhile	evaluator form 13: loops evaluating the first expression and, while it is not a false bool, the second; returns the empty result
+func_00119970	EvalScriptLambda	evaluator form 14: makes a tag 0x1F record holding the scope, the parameter chain, its length and whether a tag 0x13 (rest marker) is present, and the body; func_00119BB0 later calls it
+func_00119A58	EvalScriptBody	evaluates every expression of a chain in a scope and returns the last value; func_00119BB0 runs a closure's body through it
+func_00119AF8	EvalScriptSequence	evaluator form 15: evaluates the expressions after the first in order, returning the last, or the empty result when there are none
+func_00119BB0	EvalScriptCall	evaluator default case: evaluates the function expression, then the arguments (collecting the rest into a chain when the callee takes them), and calls a built-in from D_00259958, a closure (new scope, binds parameters, runs body) or a host function
+func_00119FA0	EvalScriptImportScope	evaluator form 16: finds the scope for an id on D_00275710 with func_001C1390 (creating it with func_001C13E8 when missing) and adds it as a parent of the current scope
+func_0011A080	EvalScriptExpression	the evaluator: copies literal tags, looks up variables (28) and dispatches a chain (30) on its first node's tag to the EvalScript forms, calling func_00119BB0 for any other
+func_0011A328	SetScriptScopeParent	sets the parent list to the one given scope and count to 1
+func_0011A338	AddScriptScopeParent	appends a scope to the parent list and bumps the count
+func_0011A358	DefineScriptVariable	takes a keyed value from the pool (func_0011C498), sets key and value and pushes it at the head of the scope's list
+func_0011A400	AssignScriptVariable	finds the key through the scope chain with func_0011A4D8 (flag 1) and overwrites its value if found
+func_0011A498	LookupScriptVariable	calls func_0011A4D8 and, when found, copies the value into out and returns 1, else 0
+func_0011A4D8	FindScriptVariable	searches the scope's own list for the key, then (with flag) each parent scope not already being searched (busy flag), returning the value slot or 0
+func_0011A5B0	CopyScriptScope	copies the parent count and list and duplicates the keyed-value list with func_0011C418
+func_0011A630	NewScriptScope	takes an entry from the scope pool D_0025C270 and clears its 0x1C bytes
+func_0011A670	ReleaseScriptScope	the empty removeCallback of the scope pool D_0025C270
+func_0011A6A8	ResetMarkRoots	sets both root counts of the collector state D_00259F38 (offsets 0x0 and 0x504) to 0; value.cpp calls it
+func_0011A6C0	AddUniqueMarkRoot	appends a value to the root list at 0 of D_00259F38 unless already in it; the scope creator passes the new scope to it
+func_0011A708	AddMarkRootList	appends a value to the second root list (count at 0x504) of D_00259F38; callers pass a new keyed-value list from func_0011BF30
+func_0011A728	PushMarkObject	pushes a value on the stack at 0x708 (count at 0x708, items from 0x70C); func_0011A850 pushes marked objects on it
+func_0011A748	PopMarkObject	pops from the stack at 0x708, returning 0 when empty
+func_0011A770	PushMarkChain	pushes a value on the stack at 0xF0C; the tag 0x1E payloads are pushed on it
+func_0011A790	PopMarkChain	pops from the stack at 0xF0C, returning 0 when empty
+func_0011A7B8	PushMarkRecord	pushes a value on the stack at 0x1310; the tag 0x1F payloads are pushed on it
+func_0011A7D8	PopMarkRecord	pops from the stack at 0x1310, returning 0 when empty
+func_0011A800	MarkPoolLiveEnds	calls func_0011C2A0 (MarkPoolLiveEnd) on each of the five pools D_0025C250..D_0025C2D0
+func_0011A850	DrainMarkStacks	pops the three stacks until empty, marking (func_0011C3C8 / func_0011C3F0) what each entry holds and pushing newly found entries back on their stacks
+func_0011AB58	CollectScriptPools	clears the pools' live states (func_0011C2B0), marks everything reachable from the root lists and the object table at D_00275710+0x1EC8, drains the stacks, then releases the unmarked entries (func_0011C2E8)
+D_00259938	g_scriptMathFunctions	table of eight one-float functions; CallScriptMathFunction calls D_00259938[index]
+func_00120110	GetAxisRotationCurveKeyTimes	rotation curve kind 0 (table D_002196E8) slot 3: forwards its three per-axis weight curves to func_0011F850, which gathers their key times into the count and array out-parameters
+func_00120130	EvaluateKeyedRotationCurve	rotation curve kind 1 (table D_002196F8) slot 0: evaluates its keys with func_0011F9F8 into a local buffer, converts the result into the output and state records, then calls the parent's slot 29 on them
+func_001201F0	ReadKeyedRotationCurve	rotation curve kind 1 slot 2: reads the keys from the stream with func_0011FA88, then sets closed to 1 when there are fewer than 2 keys or the first and last orientations differ by under 0.01
+func_001202C0	GetKeyedRotationCurveKeyTimes	rotation curve kind 1 slot 3: passes its count and keys to func_0011FB98 to fill the key-time count and array
+func_001202F0	EvaluateAxisScaleCurve	scale curve kind 0 (table D_00219718) slot 0: evaluates the three per-axis weight curves with func_0011F6B0 and writes the three results into a cleared 0x30-byte output
+func_00120360	ReadAxisScaleCurve	scale curve kind 0 slot 1: reads the base vector and the three per-axis weight curves from the stream with func_0011F798
+func_00120388	GetAxisScaleCurveKeyTimes	scale curve kind 0 slot 2: forwards its axis weight curves to func_0011F850 to gather their key times
+func_001203A8	EvaluateKeyedScaleCurve	scale curve kind 1 (table D_00219728) slot 0: evaluates its keys with func_0011F9F8 and writes the three results into a cleared 0x30-byte output
+func_00120418	ReadKeyedScaleCurve	scale curve kind 1 slot 1: reads count and keys from the stream with func_0011FA88
+func_00120440	GetKeyedScaleCurveKeyTimes	scale curve kind 1 slot 2: passes its count and keys to func_0011FB98 to fill the key-time count and array
+func_00120AA8	EvaluateAngleBlendCurve	weight curve kind 3 (table D_00219698) slot 0: evaluates each target curve at its scaled time, mixes the values by their weights as angles (func_001EA408 wraps) and sums the slopes
+func_00120D58	EvaluateValueBlendCurve	weight curve kind 4 (table D_002196A8) slot 0: evaluates each target curve at its scaled time and returns the weight-summed value and slope, using the owner's value at index for missing targets
+func_00120FB0	CreatePositionCurve	allocates 0x30, 0x14 or 0x18 bytes for kind 0, 1 or 2, sets the table D_002196B8, D_002196C8 or D_002196D8 and stores the kind
+func_00121050	CreateRotationCurve	allocates 0x30, 0x14 or 0x1C bytes for kind 0, 1 or 2, sets the table D_002196E8, D_002196F8 or D_00219708 and stores the kind
+func_001210F0	CreateScaleCurve	allocates 0x30 or 0x10 bytes for kind 0 or 1, sets the table D_00219718 or D_00219728 and stores the kind
+func_00121160	CreateWeightCurve	allocates 0x10, 0x14 or 0x18 bytes for kinds 0..4, sets the tables D_00219668 ... D_002196A8 and stores the kind
+func_00121228	CreatePoseSource	takes a record from the world's pool at +0x1B20, stores the given table at +0 and calls its slot 0 with the owner
+func_00121280	ClonePoseSource	creates a record with the table D_00219560 for the new owner and copies the given record into it through slot 1
+func_001212D8	CopyPoseSource	slot 1: copies the source record's bytes (the pool's record size) over itself, then restores its own link and owner
+func_00121338	InitPoseSource	slot 0 of the base: stores the owner and sets the four mode bytes at 0x10..0x13 to -1
+func_00121358	ReleasePoseSource	slot 2: takes the record out of the owner's list at +0x1E0, tells the owner (slot 43), and if it was the position or orientation source gives the owner a default one, then returns the record to the pool
+func_001214B8	GetOwnerPosition	slot 4 of the base: returns the owner's vector at +0x190 and a zero vector, then tells the owner through its slot 40
+func_00121508	GetOwnerRotation	slot 5 of the base: returns the owner's matrix at +0x1A0 and a zero vector, then tells the owner through its slot 41
+func_00121568	GetOwnerValue	slot 6 of the base: returns the value at +0x8C of the owner's record at +0x224 and a slope of 0
+func_00121580	GetIdentityMatrix	slot 7 of the base: copies the identity matrix D_002483D0 into the output
+func_001215A8	GetOwnerIndexedValue	slot 8 of the base: returns the owner's value array (+0x274) entry at the index
+func_001215C0	ChoosePoseSourceModes	sets the position and orientation modes from the owner's bytes at 0x2C9 and 0x2CA, or to 2 or 3 by the owner's mode words when those are -1
+func_00121648	ApplyPoseSource	when it is the owner's position or orientation source and the flag or mode 2 asks, gets the position or orientation (slots 4, 5) and gives it to the owner through slots 29, 30, 32, 33
+func_001226D8	SettlePoseSourceModes	turns a mode 7 of the position or the orientation into 3
+func_00122488	ApplyPoseSourceIndexedValue	reads the indexed value (slot 8) and, by mode3, stores it in the owner's value array or eases the stored one towards it with func_001EA4B8
+func_00122708	InitSnapshotPoseSource	slot 0 of D_00219588: runs the base set-up and copies the owner's position, matrix, value, identity matrix and value array pointer into its own record
+func_001227B0	GetSnapshotPosition	slot 4 of D_00219588: returns its copied position and vector, then tells the owner through its slot 40
+func_001227F0	GetSnapshotRotation	slot 5 of D_00219588: returns its copied matrix and vector, then tells the owner through its slot 41
+func_00122840	GetSnapshotValue	slot 6 of D_00219588: returns its copied value and slope from +0x80 and +0x84
+func_00122858	GetSnapshotMatrix	slot 7 of D_00219588: copies the three rows of its matrix at +0x90 into the output
+func_00122878	GetSnapshotIndexedValue	slot 8 of D_00219588: returns the entry of its copied value array at the index
+func_00122890	InitLinkedPoseSource	slot 0 of D_002195B0: runs the base set-up and stores pointers to the owner's position, matrix, count, value array and (when its flag is set) value
+func_00122920	GetLinkedPosition	slot 4 of D_002195B0: copies the vectors its pointers refer to into the outputs, then tells the owner through its slot 40
+func_00122968	GetLinkedRotation	slot 5 of D_002195B0: copies the matrix and vector its pointers refer to into the outputs and calls the owner's slot 41
+func_001229C0	GetLinkedValue	slot 6 of D_002195B0: returns the floats its two pointers refer to
+func_001229E0	GetLinkedMatrix	slot 7 of D_002195B0: copies the three rows of the matrix its pointer refers to into the output
+func_00122A00	GetLinkedIndexedValue	slot 8 of D_002195B0: returns the entry of the array its pointer holds at the index
+func_00122A18	InitIdentityPoseSource	slot 0 of D_002195D8: runs the base set-up and sets its two matrices at +0x40 and +0x90 to the identity matrix D_002483D0
+func_00122C48	GetNextPoseSourceValue	walks the owner's list from this record to the first one whose orientation mode is not -1 (0 ends the walk) and asks it for the value (slot 6), else uses the owner's value
+func_00122F28	ReleaseTrackPoseSource	slot 2 of D_002197C0: takes itself out of the player's list at +0x44, clears the player's driven pointer if it was this record, then runs the base release
+func_00122F88	CopyTrackPoseSource	slot 1 of D_002197C0: runs the common copy and restores its own player pointer and the pair at +0x20
+func_00122FE0	GetTrackPosition	slot 4 of D_002197C0: evaluates the track's position curve at the player's time (advanced by the given fraction of its speed), or falls back to the owner's position when the track has none
+func_00123120	GetTrackRotation	slot 5 of D_002197C0: evaluates the track's rotation curve at the player's time, or falls back to the owner's orientation when the track has none
+func_00123270	GetTrackValue	slot 6 of D_002197C0: evaluates the track's weight curve at the player's time, or falls back to the owner's value when the track has none
+func_001232E8	GetTrackScaleMatrix	slot 7 of D_002197C0: evaluates the track's scale curve at the player's time, or returns the identity matrix when the track has none
+func_00123358	GetTrackIndexedValue	slot 8 of D_002197C0: evaluates the indexed weight curve of the track at the player's time and returns the value
+func_001233C0	ReleaseCountedObject	slot of a class 0x22 object: unless its hold word is set, adds one to the done count of the StateTrigger in its counter field, then runs the base routine func_0013D278
+func_00123400	SetCountedObjectCounter	stores the given StateTrigger in the class 0x22 object's counter field
+func_00123408	InitStateTrigger	slot 0 of the 0x2F class: runs the collider set-up func_001B7968, sets the state to -1 and takes an id from the table D_00261420
+func_00123540	CopyStateTrigger	slot 9 of the 0x2F class: keeps its table id at 0x6B0 across the collider copy func_001BA130
+func_00123448	StartStateTrigger	slot 16 of the 0x2F class: queues func_001236C8 on the world, runs func_00124A48, finds its first child of kind 0x88 and makes a handle for it with func_001B6290
+func_00123578	UpdateStateTrigger	slot 17 of the 0x2F class: runs the collider update, then sets state 0 on timeout, state 1 when all counted objects are done, and in state 2 sends slot 76 to the objects it keeps
+func_001236C8	ResolveStateTriggerObjects	queued by StartStateTrigger: looks up the ids of the three lists (kinds 0x22, 0x30, 8) in the world, links or appends what it finds, then enters state 1 or 0 by the table D_00261420
+func_00123888	SetStateTriggerState	stores the state 0, 1 or 2 and its time; leaving state 2 stops its sounds, and each state runs its own arm (handle sounds, tells its objects, plays effects, table D_00261420)
+func_00123AB0	SetStateTriggerStateFromMessage	maps a message mode 0, 1, 2 to the state 2, 0, 1 and calls SetStateTriggerState
+func_00123B18	CountTaskObjectDone	adds one to the done count at 0x61C
+func_00123C90	AddStateTriggerCountedId	appends an id to the first list (up to 4), whose objects of kind 0x22 are counted
+func_00123CB8	AddStateTriggerItemId	appends an id to the second list (up to 16), whose objects of kind 0x30 become found items
+func_00123CE0	AddStateTriggerAgentId	appends an id to the third list (up to 6), whose objects of kind 8 are told func_001CAD40
+func_00123D08	AddStateTriggerTableEntry	passes the 8-entry table at 0x630 and its count at 0x62C to func_0013EC00 with four values
+func_001250C8	ClearObjectRecordValues	sets the word at +8 to -1 in each 0x28-byte record of the object's block at +0x22C
+func_00126A48	SetObjectTreeRecordValue	stores the value at +0x3C of the block at +0x22C, sets bit 2 of its flags and repeats for every child whose class flag bit 0 is set
+func_00126BC0	SetObjectTreeRecordsValue	sets type 2 and the value in each 0x70-byte record of the object and recurses into children whose class flag bit 0 is set
+func_001A80E0	UnregisterObjectPool	slot 7 of the 0x8C class: runs the base func_00182ED0, then clears the chosen item through func_001A93C8
+func_001A8110	GetObjectPoolShare	creates the 0x20-byte shared record at 0x3C on first use, points its first word back at the pool, and returns it
+func_001A8150	AddObjectPoolEntry	allocates the 0x50-byte entry array on first use and appends a 0x14-byte entry with an id, a count and two flag bits
+func_001A8208	SpawnObjectPoolCopies	for each entry looks its object up in the world (list 4), makes copies up to the entry's count, runs their set-up slots and stores them in the entry's list
+func_001A8590	ResolveObjectPoolIds	slot 16 of the 0x8C class: runs func_00182C58 and once looks up the ids at 0x4C, 0x50, 0x54 and 0x58, filing each object found by its kind (0x7E, 0x73, 2, 0x75) in the pool's fields
+func_001A86F8	ClearObjectPoolChoiceIfFlag	slot 20 of the 0x8C class: when the flag argument is set, clears the chosen item through func_001A93C8
+func_001A8718	FindObjectPoolEntry	returns the 0x14-byte entry whose key equals the argument, or 0
+func_001A8778	EnableObjectPoolEntry	sets bit 2 of the flags of the entry found by key
+func_001A87A8	DisableObjectPoolEntry	clears bit 2 of the flags of the entry found by key
+func_001A87E0	SetObjectPoolEntryCount	stores a value, limited to the entry's stored-copy count, in the count word of the entry found by key
+func_001A84C8	CopyObjectPool	slot 9 of the 0x8C class: runs func_001830D8, then either shares the source's record (marking it lent and linking itself in its list) or duplicates the source's entry array
+func_001A88A0	IsObjectPoolItemFree	returns 0 when another pool of the shared group holds the item as its chosen one, or the item is registered, a kind 0x3B object with word 0x678 clear, or a kind 0x20 object with word 0x680 set
+func_001A89E8	AdvanceObjectPoolEntry	starting after the current entry index at 0x44, moves it to the next enabled entry with at least one free item
+func_001A8AF8	ChooseObjectPoolItem	in the current enabled entry picks the first free item, stores it at 0x48 and removes it from the entry unless flag bit 1 is set
+func_001A8C50	HasObjectPoolChoice	returns 1 if an item is chosen at 0x48, else runs ChooseObjectPoolItem and returns whether it chose one
+func_001A93C8	ClearObjectPoolChoice	zeroes the chosen item at 0x48 and, if the shared record is lent, its word at 0x10
+func_001A9C68	InstallScreenElements	stores each of the 37 element tables in its global element, calls slot 0 on every element of D_002486B0 and resets D_00275F80
+func_001A9F78	InitScreenElements	calls slot 1 on each of the 37 elements of D_002486B0 from the last to the first
+func_001A9FD0	UpdateScreenElements	calls slot 2 on each of the 37 elements from the last to the first, then advances the screen fade g_screenFade
+func_001AA060	HideScreenElements	calls slot 16 with mode 0 on each of the 37 elements
+func_001AA0C0	ResetScreenElements	calls slot 5 on each of the 37 elements
+func_001AA178	DrawScreenElements	calls slot 9 on each element of D_002486B0 whose mode is not 0, then draws g_screenFade and D_00273EB0
+func_001AA1F0	InitScreenElement	slot 0 of the element tables: picks its 20-byte placement record from D_0026C3E0 by index, sets the slide times to 0.25, installs the default clock, places it and starts it hidden
+func_001AA268	SetupScreenElementText	slot 1 of the base element: takes the font from D_0026227C, sets scale 1, colour 0xFF808080 and an empty text
+func_001AA298	UpdateScreenElementSlide	slot 2 of the base element: advances the blend by the slide-in, hold or slide-out time, moves it between its hidden and shown positions, then sets the mode through slot 16
+func_001AA4F0	SetScreenElementText	slot 8 of the element tables: copies the text (or clears it), measures it with the font and sets the element's size
+func_001AA5A0	SubstituteScreenElementGlyphs	rewrites the text so characters missing from the font are taken from fonts 3 or 4 and digits after a slash are wrapped in colour codes
+func_001AA788	SetScreenElementScale	stores the text scale at +0x20C
+func_001AA790	DrawScreenElementText	slot 9 of the base element: builds a draw record from position, size and colour, draws the frame object behind it, then draws the text with the font
+func_001AA898	GetScreenElementSlideInTime	slot 11: returns the slide-in time at +0x240
+func_001AA8A0	GetScreenElementHoldTime	slot 12: returns the hold time at +0x244
+func_001AA8A8	GetScreenElementSlideOutTime	slot 13: returns the slide-out time at +0x248
+func_001AA8B0	SetScreenElementSlideInTime	stores the slide-in time at +0x240
+func_001AA8B8	SetScreenElementHoldTime	stores the hold time at +0x244
+func_001AA8C0	SetScreenElementSlideOutTime	stores the slide-out time at +0x248
+func_001AA8C8	ResetScreenElement	slot 5: calls slot 16 with mode 0
+func_001AA8F0	ShowScreenElement	slot 14: from mode 0 or 3 goes to mode 1 (sliding in), in mode 2 restarts the hold clock
+func_001AA958	HideScreenElement	slot 15: from mode 1 or 2 goes to mode 3 (sliding out)
+func_001AA998	SetScreenElementMode	slot 16: sets the offset into the slide for modes 1 and 3, snaps position and blend for modes 0 and 2, stores the mode and clock, and re-places anchored elements
+func_001AAAC8	AreScreenElementsTogether	slot 18: returns 1 when both are in mode 1 or 2, both in mode 3, or one in mode 3 and the other in mode 2
+func_001AAB20	SetScreenElementSize	stores the width and height when they are not negative, then places the element
+func_001AAB60	PlaceScreenElement	computes the shown position from the placement record (offset from the screen edge or the anchor element) on a 640 by 492.8 screen, the hidden position by the side it slides in from, and moves the element if hidden or shown
+func_001AAEC0	PlaceAnchoredScreenElements	for each of the 37 placement records anchored to the given element, places that element again
+func_001AAF58	SetScreenElementClock	slot 17: switches the clock pointer (default D_00261868) and restarts the mode time when the clock changes
+func_001AAF88	InitCounterCaption	slot 1 of the sixteen caption tables: sets text setup, font 2, shown -1, rate 6000 and by element index the counter it follows (game state fields or its own shown value)
+func_001AB058	UpdateCounterCaption	slot 2 of the caption tables: slides, counts the shown value towards its counter at the rate, runs the done callback once, rebuilds the text and resizes the element
+func_001AB198	DrawCounterCaption	slot 9 of the caption tables: draws the text with its alpha scaled by the screen fade
+func_001AB2B8	FormatCounterCaption	by element index formats the shown value (and limit) with a per-caption format string into the text, then substitutes glyphs
+func_001AB5D8	GetCaptionHoldTime	slot 12 of the caption tables: returns 2.5 while D_00261858 is running, else 0
+func_001AB600	InitTimerElement	slot 1 of the timer table D_00218510: text setup, font 2, last second and tenth -1, no warning time, f290 set, state 0
+func_001AB660	UpdateTimerElement	slot 2 of the timer table: slides, and when its mode is 1 or 2 hides itself after a second in state 0, else steps the timer
+func_001AB710	DrawTimerElement	slot 9 of the timer table: draws the frame, then the glyph T and the time text, in the warning colour once warned
+func_001AB890	StartTimer	clears the callbacks and warning, sets the time to the argument, rate -1 and state 1, steps once and shows the element
+func_001AB920	SetTimerRate	stores the rate (seconds per second) at +0x26C
+func_001AB928	SetTimerLimit	stores the end callback and the limit time
+func_001AB938	StartTimerCounting	sets the timer state to 2
+func_001AB958	StopTimer	sets the f290 flag and the timer state to 0
+func_001AB980	StepTimer	reads the time, plays the tick sounds, advances it by dt times the rate while counting, fires the warning and end callbacks, and rebuilds the minutes:seconds or tenths text
+func_001ABE20	SetTimerState	stores the timer state and the clock time of the change when it differs
+func_0011CBB8	InitIopCommandChannels	binds the two RPC channels D_0027B4C8 and D_0027B4F0, points the command buffers D_0025C360/D_0025C370/D_0025C378 at their storage, clears the bookkeeping and sends command 0 with the address of D_00260DC0 (001BC000's start-up calls it first)
+func_0011CE30	PollIopCommands	runs the pending reply callbacks (queued entries, the single bank-load callback), sends the buffered commands when idle and returns 1 while a reply or bank load is still outstanding (callers loop on it until 0)
+func_0011D078	IsIopReplyReady	polls the RPC, then returns 1 when no reply buffer is armed or when the armed buffer's first word and the word after its count are both 0xFFFFFFFF (clearing the buffer), else 0
+func_0011D110	ArmIopReplyBuffer	stores the reply buffer pointer in D_0025C340 and its word count in D_0025C344 and zeroes the first word and the word after the count, which IsIopReplyReady then waits to see filled
+func_0011D140	LoadSoundBankAtLocation	fails with a message while another load is pending, otherwise sends command 3 with a location word and waits for the reply word, which 001BC000 keeps as the bank handle
+func_0011D2A8	StartSoundBankLoad	the asynchronous twin of LoadSoundBankAtLocation: stores the callback and its argument in D_0025C390, sets D_0025C388.busy and sends command 3; PollIopCommands calls the callback with the reply (001BC000 passes func_001BEAC8)
+func_0011D968	SendIopCommandAndWait	copies the argument bytes into D_0025C400, waits for earlier traffic, sends the command id with that buffer over the RPC channel and returns the reply word
+func_0011DB00	QueueIopCommand	appends a command (id, length, bytes, plus a callback word and a 64-bit argument) to the current command buffer, polling and waiting while the buffer is full (it prints a buffer-full message); a zero-length command with nothing queued is sent at once
+func_0011DDD8	CommitQueuedIopCommand	adds one to the command count of the current buffer D_0025C360[D_0025C380] and polls with PollIopCommands (the last step of QueueIopCommand)
+func_0011DE18	FlushIopCommandBuffer	sends the current command buffer as command 0x4D together with its callback table, then switches D_0025C380 to the other buffer and empties it
+func_0011DF58	EnableIopDiscAccess	sends command 0x2A with four words (001BC000 passes 1, 0x2000, 1, 1 at start-up) and keeps the reply in D_0025C34C, which StartDiscRead, SyncDiscRead and GetDiscReadError test to choose the IOP path
+func_0011E138	StartDiscRead	with D_0025C34C zero it forwards to func_00203B18, otherwise it checks the drive is idle, sets busy in the shared packet and sends command 0x38 with three words; 00140000's read loops call it and repeat until it returns 1
+func_0011E1F8	SyncDiscRead	with D_0025C34C zero it forwards to func_002032C8, otherwise it polls until the shared packet's busy word clears (argument 1 only tests and returns 1 when still busy); callers loop it after StartDiscRead
+func_0011E2E8	GetDiscReadError	with D_0025C34C zero it forwards to func_00203D90, otherwise returns the word at +0x10 of the shared packet D_00260DC0; 00134000 and 00140000 read it after SyncDiscRead as the read's error
+func_0011E428	OpenIopRing	sends command 0x3B with five words (file_18D8E0 passes 0x6000, 0x400, 0, 2, 2) and returns the reply, which becomes the ring address handed to func_0018E678
+func_0011E4F8	GetIopRingPosition	sends command 0x40 and returns the reply; func_0018E838 masks it with 0xFFFFFF to find the IOP's position in its ring
+func_0011D480	SetIopVolumeChannel	sends command 9 with a channel number and a value; callers pass values scaled by 1024 (the master channel 8 from func_001C05D0, channels 0 to 3 from func_001C0600)
+func_0011D4B8	GetIopVolumeChannel	sends command 10 with a channel number and returns the reply; func_0018E940 saves channels 2 and 8 with it and func_0018EAA0 restores them with SetIopVolumeChannel
+func_0011D450	UnloadSoundBank	sends command 6 with a bank handle; 001BC000 calls it with the bank handle after stopping the voice started from that bank
+func_0011D598	StartSoundVoice	sends command 0x11 with six words (bank handle, sound index and parameters) and returns the voice handle that StopSoundVoice, IsVoiceBusy and RequestVoiceCallback later take
+func_0011D600	StopSoundVoice	sends command 0x15 with a voice handle; callers use it to stop the voice (or to cut it at once when the fade time is 0)
+func_0011D708	IsVoiceBusy	sends command 0x19 with a voice handle and returns the reply, which 001BC000 loops on after StopSoundVoice until it reads 0
+func_0011D730	RequestVoiceCallback	queues command 0x19 with a voice handle plus a callback function and a 64-bit argument for PollIopCommands to call (001C0000 passes func_001BFFC8 and a record address)
+func_0011D7D8	GetSoundPitchBase	sends command 0x1C with a bank handle and a sound index and returns the reply, which func_001BF7F8 adds to its scaled pitch term
+func_0011D810	SetVoicePitch	sends command 0x1E with a voice handle and a value func_001BF7F8 clamps to -0x8000..0x7FFF
+func_0011D8B0	SetVoiceParam	sends command 0x29 with a voice, a parameter index and a value; func_001C0C08 calls it when the cached D_006053E0[index] changes
+func_0011D8F0	GetVoiceParam	sends command 0x28 with a voice and a parameter index and returns the reply, which func_001C0C68 stores in D_006053E0[index]
+func_0011E048	StartStreamedVoice	packs seven words (location, two packed halfword pairs and three flags) and sends command 0x2C, returning the voice handle; func_001BE728 and func_001BE5F8 keep it in D_0027472C
+func_0011E0E0	RequestStreamCallback	queues command 0x4F with a stream handle plus a callback function and 64-bit argument (func_001BE5F8 passes func_001BE5D8 and the handle)
+func_0011C508	AcquireVectorAPayload	takes a 16-byte block from the pool D_0062C558 (zeroed), running func_0011AB58 first when the pool is empty; the tag 0x16 allocator
+func_0011C580	AddRefVectorAPayload	adds one to the byte count at (addr - pool origin) >> 4 in D_0027B300[0] and returns it
+func_0011C5B0	ReleaseVectorAPayload	subtracts one from that byte count and returns the block to the pool D_0062C558 when it reaches 0
+func_0011C618	AcquireMatrixPayload	takes a 0x40-byte block from the pool D_0062C568, zeroed, collecting first when empty; the tag 0x17 allocator
+func_0011C690	AddRefMatrixPayload	adds one to the count at (addr - pool origin) >> 6 in D_0027B300[1] and returns it
+func_0011C6C0	ReleaseMatrixPayload	subtracts one from that count and returns the block to the pool D_0062C568 at 0
+func_0011C720	FreeMatrixPayload	hands a block straight back to the pool D_0062C568 through func_001B5F28
+func_0011C748	AcquireVectorBPayload	takes a 16-byte block from the pool D_0062C578; the tag 0x18 allocator
+func_0011C7C0	AddRefVectorBPayload	adds one to the count at (addr - pool origin) >> 4 in D_0027B300[2] and returns it
+func_0011C7F0	ReleaseVectorBPayload	subtracts one from that count and returns the block to the pool D_0062C578 at 0
+func_0011C858	AcquirePairPayload	takes an 8-byte block from the pool D_0062C588; the tag 0x19 allocator (two floats)
+func_0011C8D0	AddRefPairPayload	adds one to the count at (addr - pool origin) >> 3 in D_0027B300[3] and returns it
+func_0011C900	ReleasePairPayload	subtracts one from that count and returns the block to the pool D_0062C588 at 0
+func_0011C968	AcquireTriplePayload	takes a 12-byte block from the pool D_0062C598; the tag 0x1A allocator (three floats)
+func_0011C9E0	AddRefTriplePayload	adds one to the count at (addr - pool origin) / 12 in D_0027B310 and returns it
+func_0011CA20	ReleaseTriplePayload	subtracts one from that count and returns the block to the pool D_0062C598 at 0
+func_0011CA90	InitPayloadPools	sets up the five payload pools (entry sizes 0x10, 0x40, 0x10, 0x8, 0xC) with func_001B5DD0 and allocates a count byte for each entry in D_0027B300[0..3] and D_0027B310
+func_0011C1D8	PopPoolFreeEntry	takes the first entry off the pool's free list (collecting with func_0011AB58 first when empty), pushes it on the used list and returns its payload address
+func_0011C3B8	GetPoolEntryPayload	returns the address 8 bytes past a pool entry's header
+func_0011C3C0	GetPoolEntryHeader	returns the address 8 bytes before a payload
+func_0011C3F0	MarkPoolEntryUsed	sets the state word at +4 of the entry header of a payload to 1, the word ReleaseDeadPoolEntries tests
+func_0011AF28	NewScriptValueNode	takes a 0xC-byte node from the pool D_0025C250, clears it and sets its value to unset (tag -1)
+func_0011AF78	DestroyScriptValueNode	the node pool's removeCallback: destroys the node's value with DestroyValue (flags 2)
+func_0011AEB8	CopyScriptValueChain	deep-copies a value with CloneValue, then recurses over the next pointer, making a new node for each
+func_0011AF98	CopyScriptValueRecord	copies the five words of a tag 0x1F record, using a given first word unless it is 0
+func_0011AFC8	NewScriptValueRecord	takes a 0x14-byte record from the pool D_0025C2B0 and clears it
+func_0011B008	InitScriptValue	constructor: sets the tag to -1 and returns the value
+func_0011B018	CopyConstructScriptValue	copy constructor: takes a reference on the source's payload, then copies tag and word
+func_0011B060	DestroyScriptValue	destructor: releases the payload and, when bit 0 of the flags is set, deletes the value with func_0018D778
+func_0011B0A8	AssignScriptValue	assignment: references the source's payload, releases the old one and copies tag and word
+func_0011B0F8	AreScriptValuesEqual	0 when the tags differ; then compares by tag: float equality (0x15), bytes (0x17), 2 or 3 floats (0x19, 0x16/0x18/0x1A), booleans (0x1B), words for the integer and pointer tags
+func_0011B258	CloneScriptValue	copies the tag and, per tag, makes a fresh node chain (0x1E), a fresh pooled payload (0x16..0x1A) or a fresh record (0x1F), else copies the word
+func_0011B418	ReleaseScriptValuePayload	for tags 0x16..0x1A calls the matching Release...Payload on the word
+func_0011B4A8	AddRefScriptValuePayload	for tags 0x16..0x1A calls the matching AddRef...Payload on the word
+func_0011B538	SetScriptValueTag	releases the payload and sets only the tag (BD28 uses it to make the empty result, 0x22)
+func_0011B570	SetScriptValueInt	releases the payload, stores the integer and sets tag 0x14
+func_0011B5B0	SetScriptValueFloat	releases the payload, stores the float and sets tag 0x15
+func_0011B5F0	SetScriptValueBool	releases the payload, stores 1 or 0 from the flag and sets tag 0x1B
+func_0011B640	SetScriptValuePointer	releases the payload, stores the pointer and sets tag 0x1C
+func_0011B680	SetScriptValueIntB	releases the payload, stores the integer and sets tag 0x1D (the stream reader's case 29)
+func_0011B6C0	SetScriptValueChain	releases the payload, stores the first node and sets tag 0x1E
+func_0011B700	SetScriptValueRecord	releases the payload, stores a tag 0x1F record and sets tag 0x1F
+func_0011B740	SetScriptValueVectorA	references the pooled block, releases the old payload, stores it and sets tag 0x16
+func_0011B788	SetScriptValueMatrix	references the pooled block, releases the old payload, stores it and sets tag 0x17
+func_0011B7D0	SetScriptValueVectorB	references the pooled block, releases the old payload, stores it and sets tag 0x18
+func_0011B818	SetScriptValuePair	references the pooled block, releases the old payload, stores it and sets tag 0x19
+func_0011B860	SetScriptValueTriple	references the pooled block, releases the old payload, stores it and sets tag 0x1A
+func_0011B8A8	SetScriptValuePointerB	releases the payload, stores the pointer and sets tag 0x20 (the stream reader's case 32)
+func_0011B8E8	SetScriptValueIntC	releases the payload, stores the integer and sets tag 0x21
+func_0011B928	ConvertScriptValueToInt	gives back a copy when the tag is already 0x14, otherwise a tag 0x14 value holding the float truncated to an integer
+func_0011B9A8	ConvertScriptValueToFloat	gives back a copy when the tag is already 0x15, otherwise a tag 0x15 value holding the integer converted to float
+func_0011BA28	ReadScriptValueChain	reads a tag byte from the stream (0xFF ends, bit 7 means another node follows), reads the payload that tag needs into a new node (integers, floats, pooled vectors, a nested chain) and links the next node
+func_0011BD28	AddKeyedValue	makes a keyed node holding a copy of the value and pushes it at the head of the list without looking for the key; gives back an empty (0x22) value
+func_0011BDD0	UpdateKeyedValue	walks the list for the key and assigns the value to the node found; gives back an empty (0x22) value either way
+func_0011BE90	FindKeyedValue	walks the list for the key and, when found, copies its value to the out value (if given) and returns 1, else 0
+func_0011BEE0	CopyKeyedList	makes a keyed node, copies the list into it with CopyKeyedValueChain and stores it as the head of the out list
+func_0011BF30	NewKeyedList	allocates the 4-byte list head with func_0018D5C0 and clears it
+func_0011BF70	InitScriptValuePools	sets up the five pools D_0025C250..D_0025C2D0 with InitEntryPool and installs the removeCallbacks of the node, scope and keyed pools
+func_0011C040	ShutDownScriptValuePools	calls the pools' teardown func_0011C1D0 for each, func_0011CBB0 and func_0011A6B8 (mirror of InitValuePools)
+func_0011C418	CopyKeyedValueChain	copies the key, clones the value with CloneValue and recurses over next, making a new keyed node for each
+func_0011C498	NewKeyedValue	takes a 0x10-byte node from the pool D_0025C290, clears it and sets its value unset
+func_0011C4E8	DestroyKeyedValue	the keyed pool's removeCallback: destroys the node's value with DestroyValue (flags 2)
+func_0011EE70	FindCurveSegment	binary-searches the key times (a float at the start of each stride-byte record) for the segment holding the key, steps back one when exactly on a key if bit 0 of flags is set, and gives the offset in the segment, the segment length and the record pointer
+func_0011EFC8	ReadTangentWeightCurve	reads count and keys (time, value, two kind words and two tangent floats) from the stream into 0x18-byte keys
+func_0011F0C8	EvaluateTangentWeightCurve	finds the segment of the kind 0 keys and returns the key's constant value when its kind is 5, else interpolates with func_001303F0 from the two values and tangents
+func_0011F180	GetTangentWeightCurveTimes	gives the key count and, if asked, a new array of the keys' times
+func_0011F210	ReadControlPointWeightCurve	reads count and keys from the stream, turning two of the read values into control points value-t and value+u around the key value
+func_0011F320	EvaluateControlPointWeightCurve	finds the segment of the kind 1 keys and returns the constant value for kind 5, else interpolates with func_00130168 from values and control points
+func_0011F3E8	GetControlPointWeightCurveTimes	gives the key count and, if asked, a new array of the keys' times
+func_0011F478	EvaluateLinearWeightCurve	finds the segment of the kind 2 keys and returns the linear blend of the two values with its slope (zero for a segment shorter than 0.0001)
+func_0011F568	ReadLinearWeightCurve	reads count and (time, value) keys of 8 bytes from the stream, scaling the times by 1/60
+func_0011F620	GetLinearWeightCurveTimes	gives the key count and, if asked, a new array of the keys' times
+func_0011F798	ReadAxisCurves	reads a presence mask and a base vector, then for each set bit makes a weight curve with func_00121160 and reads it from the stream into the axis slot
+func_0011F850	GatherAxisCurveTimes	asks each of three weight curves for its key times, joins them, sorts with func_001F5CD0 and drops repeated times
+func_0011F9F8	EvaluateVectorKeyCurve	finds the segment among 0x40-byte vector keys with FindCurveSegment and interpolates their vectors with func_00130540
+func_0011FA88	ReadVectorKeys	reads a count and, per key, a time (scaled by 1/60) and three vectors into 0x40-byte keys
+func_0011FB98	GetVectorKeyTimes	gives the count and, if asked, a new array of the keys' times (stride 0x40)
+func_0011FC20	EvaluateAxisPositionCurve	evaluates the three axis curves around the base vector with func_0011F6B0, then tells the owner's slot 44
+func_0011FDB8	GetAxisPositionCurveTimes	passes the axis curves to GatherAxisCurveTimes
+func_0011FDD8	EvaluateVectorKeyPositionCurve	evaluates the key list with EvaluateVectorKeyCurve, then tells the owner's slot 44
+func_0011FED8	GetVectorKeyPositionCurveTimes	passes the key count and keys to GetVectorKeyTimes
+func_0011FF08	EvaluateAxisRotationCurve	evaluates the three axis curves with func_0011F6B0 into temporaries, converts them with func_00188A20 and func_001EDE38, then tells the owner's slot 45
+func_0011FFA8	GetAxisRotationCurve	returns func_0011F6B0 of the axis curves and base vector with four given words
+func_0011FFD8	ReadAxisRotationCurve	reads the axis curves, evaluates the curve at its first and last key times and sets closed to 1 when the two results differ by less than 0.01 (or there are no keys)
+func_0011EF48	GetNoPositionCurveTimes	slot 2 of the empty position curve: sets the count to 0 and the times pointer to 0
+func_0011EF70	GetNoRotationCurveTimes	sets the count to 0 and the times pointer to 0 for the empty rotation curve
+func_0011EF90	GetNoScaleCurveTimes	sets the count to 0 and the times pointer to 0 for the empty scale curve
+func_0011EFB0	GetNoWeightCurveTimes	sets the count to 0 and the times pointer to 0 for a blended weight curve
+func_0011EC40	ReadPropertyRecords	reads indices from the stream while they are not negative and applies each to the record D_002505D8 + (index << 5) with ApplyPropertyRecord
+func_0011E680	ApplyPropertyRecord	reads one value from the stream per the record's type and flags and stores it to a field at an offset, passes it to a setter at a table slot or a given function, or calls a multi-value setter with an array of script values
+func_0011ECA0	MapKeyToSlotIndex	subtracts 12 from the key and gives -1 unless the result is 0..30
+func_0011ECB8	ReadSlotObjects	reads a count of (type, key, flag) entries, makes each object with CreateTypedRecord, runs its slot 14 on the stream and files it in slot1CE8 at MapKeyToSlotIndex(key) when that is valid
+func_0011E580	CreateTypedRecord	allocates a record of the size in D_00247448[type], links it into the type's list at +0x1884 + type * 4 of its context and runs the type's initialiser
+D_0025C34C	g_iopDiscAccess	set to the reply of EnableIopDiscAccess; zero sends StartDiscRead, SyncDiscRead and GetDiscReadError to the plain disc functions
+D_0025C340	g_iopReplyBuffer	the armed reply buffer pointer: ArmIopReplyBuffer sets it, IsIopReplyReady clears it, PollIopCommands and SendIopCommandAndWait test it
+D_0025C380	g_iopBufferIndex	0 or 1: the command buffer QueueIopCommand fills, switched by FlushIopCommandBuffer
+D_00260DC0	g_iopSharedPacket	the packet whose address InitIopCommandChannels sends to the IOP; StartDiscRead sets its busy word, GetDiscReadError reads +0x10
+D_0027B300	g_payloadRefCounts	the per-entry reference counts of the payload pools: AddRef/Release...Payload index them by the block's offset in its pool
+D_0062C558	g_vectorAPayloadPool	the pool of 16-byte tag 0x16 blocks (AcquireVectorAPayload)
+D_0062C568	g_matrixPayloadPool	the pool of 0x40-byte tag 0x17 blocks (AcquireMatrixPayload)
+D_0062C578	g_vectorBPayloadPool	the pool of 16-byte tag 0x18 blocks (AcquireVectorBPayload)
+D_0062C588	g_pairPayloadPool	the pool of 8-byte tag 0x19 blocks (AcquirePairPayload)
+D_0062C598	g_triplePayloadPool	the pool of 12-byte tag 0x1A blocks (AcquireTriplePayload)
+func_00128998	CreateTrackAttachment	takes an attachment from the world's pool with the table D_002197C0 (the animation-track variant) for the item and does nothing else
+func_0012A478	SetOrientationSourceEnabled	calls SetOrientationSourceMode with 1 for a non-zero argument and -1 for zero
+func_0012A3A0	SetPositionSourceEnabled	calls SetPositionSourceMode with 1 for a non-zero argument and -1 for zero
+func_0012A430	SetPositionSourceMode	makes the base attachment at +0x1FC (EnsureBaseAttachment) and stores its argument in mode0 (+0x10), then runs slot 43 refresh
+func_0012A4A0	SetOrientationSourceMode	stores its argument in mode1 (+0x11) of the base attachment at +0x1FC, then runs slot 43 refresh
+func_0012A4E8	SetBaseAttachmentSortKey	stores its argument in the key word (+0x14) of the base attachment at +0x1FC, then re-sorts the attachment list with SortAttachments
+func_001296E0	EnsureBaseAttachment	when +0x1FC is empty takes an attachment from the pool with the base table D_00219560 and inserts it into the attachment list
+func_00129730	EnsureAimAttachment	when +0x200 is empty takes an attachment from the pool with the aim table D_0021A790 and inserts it into the attachment list
+func_001299E0	InsertAttachment	walks list1E0 past the records whose key (+0x14) is greater than the new one's, links it in there (func_00152540) and runs slot 43
+func_00129A58	SortAttachments	unlinks every record of list1E0 into a local array and re-links each in descending key (+0x14) order, then runs slot 43
+func_00129D00	AddMatrixAttachment	takes an attachment with the two-matrix table D_002195D8, stores its argument at +0x14 (the key), inserts it into list1E0 and returns it through the pointer
+func_0012A8D8	SetValueAttachment	makes the attachment at +0x204 from the own-value table D_00219600 on first use, stores mode1, a float at +0x1C and a float at +0x20, runs slot 43
+func_0012B2F8	SelectValueEntryByKey	looks the key up in the (key, value) table at +0x2BC; -1 clears mode3 of the attachment at +0x2C0, a hit makes it (table D_002195B0), sets mode3 to 3 and gives it the value
+func_00129780	ChooseActiveAttachments	slot 43 of class 0x02: scans list1E0 for the first record with a set mode0, mode1, mode2 and fills the per-value table at +0x1F8, then stores the chosen ones in +0x1EC, +0x1F0, +0x1F4
+func_00129C20	FindObjectHandle	walks the world's handle list (+0x1B94) for the first handle owned by the object (+0x1C) whose item matches the key (-1 matches any)
+func_00129B98	FindObjectAnimationPlayer	walks the world's animation-player list (+0x1B64) for the first player owned by the object whose animation matches the key (-1 matches any)
+func_00129CA8	FindTrackPlayer	walks up the parent chain to the first object whose position or orientation attachment uses the track table D_002197C0 and returns that attachment's player
+func_00129DF8	ResetRootTries	sets the tries counter of the object's root to 0 when it has one; ChooseActiveAttachments and the +0x150/+0x160 setters call it
+func_0012A580	SetAimRange	makes the aim attachment (EnsureAimAttachment) and stores a float at +0x40, the distance whose square func_00185498 compares with the squared distance to the target
+func_0012A5B8	GetAimRange	reads the float at +0x40 of the aim attachment, 0.0 when there is none
+func_0012A770	SetAimNearKey	makes the aim attachment and stores its argument at +0x44, the key func_00185498 takes when the target is within +0x40
+func_0012A7A8	GetAimNearKey	reads +0x44 of the aim attachment, 0 when there is none
+func_0012A7C0	SetAimFarKey	makes the aim attachment and stores its argument at +0x48, the key func_00185498 takes when the target is beyond +0x40
+func_0012A7F8	GetAimFarKey	reads +0x48 of the aim attachment, 0 when there is none
+func_0012A8B8	ClearAimHold	stores 0 in the flag at +0x4C of the aim attachment (the flag that makes func_00185538 hand back the owner's own matrix)
+func_0012A8C8	SetAimHold	stores 1 in the flag at +0x4C of the aim attachment (the flag that makes func_00185538 hand back the owner's own matrix)
+func_0012A860	SetAimTarget	gives the aim attachment its target object and a zero point through func_001853F0
+func_0012A888	GetAimTarget	stores func_00185468 of the aim attachment (its target, or the default object when none) through the pointer
+func_0012A528	SetAimOrientationMode	makes the aim attachment, stores its argument (3 becomes 9) in mode1 (+0x11) and runs slot 43
+func_001291D0	EnsureRangeRecord	when +0x284 is empty takes a 0x2E0-byte record from the world's pool at +0x1BF4, sets it up with func_001B1AC8 and appends it to the world's list at +0x1C00
+func_00129400	GetRangeRecord	returns the record at +0x284, or the shared default D_0027B520 (set up with func_001B1AC8) when there is none
+func_00129228	SetRangeRecordPresent	a non-zero argument makes the record at +0x284; zero takes it out of the list at +0x1C00, appends it to D_00262300 and clears +0x284
+func_00129440	HasRangeRecord	stores whether +0x284 is non-zero
+func_00129288	SetRangeRecordKey	passes its argument to func_001B1CF8, which looks the key up (0x2C for -1) and links the record to what it finds
+func_001292B8	SetRangeRecordNear	makes the record and stores a float at +0x04 through func_001B1D70, which also copies it to +0x08 while that is negative
+func_001292E8	SetRangeRecordFar	makes the record and stores a float at +0x08 through func_001B1DA8
+func_00129318	SetRangeRecordInner	makes the record and stores a float at +0x40 through func_001B1FB0 (100 at set-up)
+func_00129348	SetRangeRecordOuter	makes the record and stores a float at +0x44 through func_001B1FE0 (400 at set-up)
+func_00129378	SetRangeRecordInnerAndOuter	makes the record and stores a float through func_001B2010, which writes both +0x40 and +0x44
+func_001293A8	SetRangeRecordVector	makes the record and copies a 16-byte vector to +0x30 through func_001B2068
+func_001293D8	SetRangeRecordCode	makes the record and stores its argument in the word at +0xB0 (-1 at set-up)
+func_00129450	GetRangeRecordKeyValue	stores the halfword at +2 of the record's linked entry, -1 when there is no record or no link
+func_00129480	GetRangeRecordNear	stores the float at +0x04 of GetRangeRecord
+func_001294B0	GetRangeRecordFar	stores the float at +0x08 of GetRangeRecord
+func_001294E0	GetRangeRecordInner	stores the float at +0x40 of GetRangeRecord
+func_00129510	GetRangeRecordOuter	stores the float at +0x44 of GetRangeRecord
+func_00129540	GetRangeRecordAngle	stores twice func_00205778 of (+0x04 / +0x40, 1.0) in degrees (times 57.2958) for the record from GetRangeRecord
+func_00129598	GetRangeRecordVector	copies the 16 bytes at +0x30 of GetRangeRecord
+func_00129108	EnsureTimerRecord	when +0x2A0 is empty takes a 0x14-byte record with +4 = -1, +8 = 0, +0xC = 0 and +0x10 = 1.0 and returns it
+func_0012A1A0	UpdateMoveRangeEw	copies the four floats at +0x21C and replaces w by the argument times (x - y) / z
+func_0012A2C0	UpdateMoveRangeFw	copies the four floats at +0x220 and replaces w by the argument times (x - y) / z
+func_0012ABA8	EnsureSoundRecord	when +0x2AC is empty makes the 0x24-byte record with func_001BE4D8
+func_0012ABD0	SetSoundRecordId	makes the sound record and stores its argument in the word at +0x00 (the id func_001BFCD8 plays)
+func_0012AC88	GetSoundRecordId	stores the word at +0x00 of the sound record, -1 when there is none
+func_0012AC08	RestartSoundWithId	stops the sound handle at +0x1C (func_001BF788), stores the new id at +0x00 and starts the sound again with func_001BFCD8 from the record's floats
+func_0012AF38	StartSoundWithParams	makes the sound record, stores id, three floats and an eight-byte pair, stops the old handle and starts it with func_001BFCD8
+func_0012ACD8	GetSoundOuterRange	float at +0x04 of the sound record, 3000.0 when there is none
+func_0012AD78	GetSoundInnerRange	float at +0x08 of the sound record, 300.0 when there is none
+func_0012AD98	SetSoundRecordScale	makes the sound record and stores a float at +0x0C
+func_0012AE58	GetSoundRecordScale	float at +0x0C of the sound record, 1.0 when there is none
+func_0012AD30	SetSoundRecordPair	makes the sound record and copies eight bytes to +0x14
+func_0012AF00	GetSoundRecordPair	copies the eight bytes at +0x14 of the sound record, or two floats of -1.0 when there is none
+func_0012B010	StopPlayingSound	calls func_001BF788 with 0 on the sound handle at +0x1C of the sound record, if it exists
+func_0012B040	EnsureColorRecord	when +0x288 is empty allocates 64 bytes, copies the preset D_00261000[0] into them and sets the index word to -1
+func_0012B0B0	SetColorPreset	makes the color record, stores the index and, unless it is -1, copies the 64-byte preset D_00260F00[index] over the record
+func_0012B128	GetColorPreset	stores the first word of the color record, -1 when there is none
+func_0012B200	SetColorRecordFactor	makes the color record and stores a float at +0x30 (2.0 in the presets)
+func_0012B238	GetColorRecordFactor	float at +0x30 of the color record, 0.0 when there is none
+func_0012B250	SetTintRgb	stores its argument in tint bytes 0, 1 and 2 (+0x2B0..+0x2B2)
+func_0012B2E8	TestOtherFlagged	slot 45 of class 0x02: true when the other object's word at +0x0C is non-zero
+func_001288F0	TestChildrenAccepted	walks the children with the list iterator and returns 0 as soon as func_001C1A28 refuses one, else 1
+func_001295C8	GetRotationDegrees	copies the three rotation rows, calls slot 42 (matrix to angles, func_00188FD8) and converts the three results to degrees
+func_00129648	SetRotationDegrees	converts three angles from degrees to radians, builds a matrix (func_00188A20) and applies it through slots 41 and 30
+func_00128C10	LoadFollowRecord	reads a flag word from the stream; when non-zero allocates the 0xC0-byte record at +0x224 and fills its matrices, object ids and numbers by flag bits 1 to 0x80
+func_00128DB8	ResolveFollowRecordObjects	turns the ids in the +0x224 record into objects with func_0015A448 according to its flag bits 0x10, 0x20 and 0x40
+func_0012B5B8	SetFollowObjects	makes the +0x224 record when either argument is set, stores them as the followed objects (flag bits 4 and 8, none when it is the parent) and refreshes the two matrices
+func_0012B870	InitAnimation	slot 0 of class 0x83: runs the base set-up, sets the property list's element size to 0x3C, and the value at +0x80 to 1.0, +0x84 and +0x88 to 0, +0x90 to 0, +0x94 and +0x98 to 1.0
+func_0012B8C8	LoadAnimation	slot 10 of class 0x83: reads id, length, the target ids, the tracks with their position, rotation, scale, weight and morph curves, and the start, timed and end event lists
+func_0012BC38	ReadAnimationEvents	reads a count and that many 16-byte events from the stream, each by its kind in a large switch, merging equal-time kind 0 events into one group
