@@ -24,6 +24,7 @@ maintainers, used here under the AGPL-3.0-or-later.
 | `tools/volatile_slots.py`, docs/TOOLCHAIN.md ("Sony's libraries had another assembler") | rac1-decomp's `tools/fix_volatile_slot.py` (a volatile store moved into the slot of the `jal` after it, as the assembler of Sony's objects did) | the idea only, stores only; written anew for this build, no code copied |
 | `include/asm_func.h`, `tools/asm_func.py`, a whole file's `INCLUDE_ASM` lines | rac3-decomp's source files (its `docs/us/source_files.md`: a real file holds its C and its assembly functions' `INCLUDE_ASM` lines in address order; a file named after its first address until its name is known) | the layout and naming only; the header and the extractor written anew for this build, no code copied |
 | `tools/permute.py` | rac1-decomp's `tools/permute.py` (its `docs/agents/PERMUTER.md`: every order of the lines marked `/*P*/`) | the idea and the marker only; written anew for this build, with `--auto` |
+| `config/names.tsv`, `include/names.h`, `tools/names.py`, docs/NAMING.md | rac1-decomp's readable names (its `docs/NAMES.md`: address names kept, readable names as generated macros over them, a table with each name's source) | the scheme only, with names we give from reading the code; none of its sources of names (symbol files, another decompilation), and the tool written anew, no code copied |
 | `.gitignore`, `baserom/README.md` | OpenRAC's and rac3-decomp's | this repository's paths |
 
 ## Tools
