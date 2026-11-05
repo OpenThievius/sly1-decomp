@@ -6,12 +6,12 @@
 //
 // Its fields follow class 0x02's and end at the size its descriptor gives; the pads keep every
 // field at its retail offset.
-#ifndef C6B_H
-#define C6B_H
+#ifndef CODE_CHECKSUM_H
+#define CODE_CHECKSUM_H
 
 #include "c02.h"
 
-struct C6B : C02 {
+struct CodeChecksum : C02 {
     u32 crc;                // 0x2D0: the running sum, 0xFFFFFFFF at the start
     union {
         s32 start;          // 0x2D4: where the range starts (func_0012B6B8 sets it)
@@ -25,10 +25,10 @@ struct C6B : C02 {
     u8 pad6DC[0x6E0 - 0x6DC];
 };
 
-typedef char check_C6B[sizeof(C6B) == 0x6E0 ? 1 : -1];
+typedef char check_CodeChecksum[sizeof(CodeChecksum) == 0x6E0 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0012B6B8(C6B* self);                       // 0x6B slot 0
-void func_0012B760(C6B* self);                       // 0x6B slot 17
+void func_0012B6B8(CodeChecksum* self);                       // 0x6B slot 0
+void func_0012B760(CodeChecksum* self);                       // 0x6B slot 17
 
 #endif

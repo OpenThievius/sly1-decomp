@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "list_iter.h"
-#include "c27.h"
+#include "timed_state_object.h"
 #include "c28.h"
 #include "c20.h"
 #include "c3b.h"
@@ -173,7 +173,7 @@ void func_0013DA80(C20* r, s32 value)
 extern f32 D_0026185C;
 void func_001B93F8(C03* self);
 
-void func_0013DC38(C27* self)
+void func_0013DC38(TimedStateObject* self)
 {
     s32 next;
 
@@ -186,17 +186,17 @@ void func_0013DC38(C27* self)
             }
         }
     }
-    func_0013DD78(self, next);
+    SetTimedState(self, next);
 }
 
-void func_00127378(C27* self, s32 kind, S127378* msg);
+void func_00127378(TimedStateObject* self, s32 kind, S127378* msg);
 
-void func_0013DCA8(C27* self, s32 kind, S127378* msg)
+void func_0013DCA8(TimedStateObject* self, s32 kind, S127378* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 0xF) {
-        if ((C27*)msg->target == self) {
-            func_0013DD78(self, 1);
+        if ((TimedStateObject*)msg->target == self) {
+            SetTimedState(self, 1);
         }
     }
 }
@@ -651,7 +651,7 @@ s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
 extern f32 D_0026185C;
 s32 func_00126D60(f32 value);
 
-void func_0013DD78(C27* self, s32 state)
+void func_0013DD78(TimedStateObject* self, s32 state)
 {
     if (state != self->state) {
         *(s32*)((u8*)self + 0x550) = state;
@@ -717,11 +717,11 @@ void func_0013EB68(void* a, s32 b)
 }
 
 s32 func_001300E8(C03* src, s32 kind);
-s32 func_0013DD08(C27* node, C03* src)
+s32 func_0013DD08(TimedStateObject* node, C03* src)
 {
     s32 r;
     if (src->flags538 & (1ULL << 55)) return 0;
-    if (node->f564 != 0) return 1;
+    if (node->acceptAll != 0) return 1;
     Child27* c = node->child;
     if (c == 0 || c->f694 == 0) {
         r = func_001300E8(src, 0x27);

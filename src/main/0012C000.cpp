@@ -2,7 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c83.h"
-#include "c34.h"
+#include "id_filter_object.h"
 #include "c6c.h"
 #include "c8b.h"
 #include "t2195.h"
@@ -82,9 +82,9 @@ void func_0012F7E0(Obj_12F7E0* a0, void* a1, s32 a2)
     func_001831E8(a0->mid->p14, (u8*)a0 + 0xE4, a1, a2);
 }
 
-void func_0012FCB0(C34* a0, s32 a1)
+void func_0012FCB0(IdFilterObject* a0, s32 a1)
 {
-    a0->objects.items[a0->objects.count++] = a1;
+    a0->objectIds.items[a0->objectIds.count++] = a1;
 }
 
 s32 func_0012FF10(S12FCF0* self);
@@ -386,7 +386,7 @@ void func_0012F810(Player2195* a0, C02** a1)
 void func_001B7968(C03* self);
 void func_001B9AE0(C03* self, s32 a, Vec02* b, s32 c, Vec02* d);
 
-void func_0012F840(C34* self)
+void func_0012F840(IdFilterObject* self)
 {
     func_001B7968(self);
     func_001B9AE0(self, 3, 0, 3, 0);
@@ -396,7 +396,7 @@ void func_0012F840(C34* self)
 void func_001BA130(C03* self);
 void func_00138F28(void* a, void* b);
 
-void func_0012F888(C34* self)
+void func_0012F888(IdFilterObject* self)
 {
     func_001BA130(self);
     if (self->parent == 0) {
@@ -444,7 +444,7 @@ void func_0012D3E8() {}
 
 void func_0012D3F0() {}
 
-void func_0012FCD0(C34* obj, s32 value) { obj->kinds.items[obj->kinds.count++] = value; }
+void func_0012FCD0(IdFilterObject* obj, s32 value) { obj->classIds.items[obj->classIds.count++] = value; }
 
 S12FCF0* func_0012FCF0(S12FCF0* obj, s32 value)
 {
@@ -523,7 +523,7 @@ s32 func_001B8A08(C03* self, C03* key);
 s32 func_001833F0(void* key, s32 item);
 s32 func_001300E8(void* key, s32 kind);
 
-s32 func_0012FA88(C34* self, C03* key)
+s32 func_0012FA88(IdFilterObject* self, C03* key)
 {
     s32 hit;
     s32 i;
@@ -532,23 +532,23 @@ s32 func_0012FA88(C34* self, C03* key)
     if (func_001B8A08(self, key) != 0) {
         return 1;
     }
-    for (i = 0; i < self->objects.count; i++) {
-        if (func_001833F0(key, self->objects.items[i]) != 0) {
+    for (i = 0; i < self->objectIds.count; i++) {
+        if (func_001833F0(key, self->objectIds.items[i]) != 0) {
             break;
         }
     }
-    if (i < self->objects.count) {
+    if (i < self->objectIds.count) {
         hit = 1;
         goto tail;
     }
-    for (j = 0; j < self->kinds.count; j++) {
-        if (func_001300E8(key, self->kinds.items[j]) != 0) {
+    for (j = 0; j < self->classIds.count; j++) {
+        if (func_001300E8(key, self->classIds.items[j]) != 0) {
             break;
         }
     }
-    hit = j < self->kinds.count;
+    hit = j < self->classIds.count;
 tail:
-    if (self->accept != 0) {
+    if (self->acceptsListed != 0) {
         return hit;
     }
     return hit ^ 1;
@@ -610,28 +610,28 @@ struct Quad_12F9B8 { s32 a, b, c, d; };
 void func_001B93F8(C03* self);
 void func_00128018(void* a, s32 b, void* c, void* d);
 
-void func_0012F9B8(C34* self)
+void func_0012F9B8(IdFilterObject* self)
 {
     Quad_12F9B8 loc;
     C02* cur;
     func_001B93F8(self);
-    if (self->target != 0) {
-        self->target->desc02()->m20(self->target, (Vec02*)&D_00248D30);
-        self->target->desc02()->m21(self->target, (Vec02*)&D_00248D30);
+    if (self->pendingTarget != 0) {
+        self->pendingTarget->desc02()->m20(self->pendingTarget, (Vec02*)&D_00248D30);
+        self->pendingTarget->desc02()->m21(self->pendingTarget, (Vec02*)&D_00248D30);
         switch (self->mode) {
         case 1:
-            self->target->desc02()->m1D(self->target, &self->pos);
+            self->pendingTarget->desc02()->m1D(self->pendingTarget, &self->pos);
             break;
         case 2: {
             C02* node = self->found;
             func_00128018(node->parent, 0, &node->link40, &loc);
-            self->target->desc02()->m1D(self->target, (Vec02*)&loc);
+            self->pendingTarget->desc02()->m1D(self->pendingTarget, (Vec02*)&loc);
             break;
         }
         }
-        cur = self->target;
-        self->target = 0;
-        self->done = cur;
+        cur = self->pendingTarget;
+        self->pendingTarget = 0;
+        self->placedTarget = cur;
     }
 }
 
@@ -1689,7 +1689,7 @@ void func_00124A48(C02* self);
 s32 func_0015A448(void* world, s32 b, C02* c);
 s32 func_001300E8(void* n, s32 kind);
 
-void func_0012F8C8(C34* self)
+void func_0012F8C8(IdFilterObject* self)
 {
     func_00124A48(self);
     if (self->id != -1) {

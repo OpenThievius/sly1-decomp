@@ -7,11 +7,44 @@
 #ifndef NAMES_H
 #define NAMES_H
 
-#define g_buttonCodes          D_00262DFC
-#define AddButtonCode          func_0016F188
-#define ResetButtonCodes       func_0016F1F8
-#define AdvanceButtonCodes     func_0016F238
-#define RunCompletedButtonCode func_0016F2E0
-#define RegisterButtonCodes    func_0016F588
+#define g_checksumMismatch           D_00261080
+#define g_buttonCodes                D_00262DFC
+#define g_timeoutLimit               D_00263E04
+#define g_countdownTable             D_00263E08
+#define g_timeoutFired               D_00263E30
+#define InitCodeChecksum             func_0012B6B8
+#define StepCodeChecksum             func_0012B760
+#define InitIdFilterObject           func_0012F840
+#define RemoveIdFilterObject         func_0012F888
+#define ResolveIdFilterPlacement     func_0012F8C8
+#define ApplyIdFilterPlacement       func_0012F9B8
+#define TestIdFilterMatch            func_0012FA88
+#define AddIdFilterObjectId          func_0012FCB0
+#define AddIdFilterClassId           func_0012FCD0
+#define InitWorldListedObject        func_00139DE8
+#define LeaveWorldLists              func_00139E80
+#define ReleaseWorldListedObject     func_00139EC8
+#define UpdateWorldListedObject      func_0013A3A0
+#define CopyWorldListedObject        func_0013A418
+#define SubmitWorldListedObjectBlock func_0013AD08
+#define UpdateTimedState             func_0013DC38
+#define HandleTimedStateMessage      func_0013DCA8
+#define TestTimedStateContact        func_0013DD08
+#define SetTimedState                func_0013DD78
+#define InitEntryTableTuning         func_0016DD10
+#define LoadEntryTable               func_0016DD90
+#define AddButtonCode                func_0016F188
+#define ResetButtonCodes             func_0016F1F8
+#define AdvanceButtonCodes           func_0016F238
+#define RunCompletedButtonCode       func_0016F2E0
+#define RegisterButtonCodes          func_0016F588
+#define InitCountdown                func_0017B5D0
+#define InstallCountdownTable        func_0017B610
+#define UpdateCountdown              func_0017B648
+#define HandleCountdownMessage       func_0017B7A8
+#define InitItemKeeper               func_001CB618
+#define AddOwnedWantedId             func_001CB6A8
+#define AddListedWantedId            func_001CB6D0
+#define FindWantedItems              func_001CB7A0
 
 #endif

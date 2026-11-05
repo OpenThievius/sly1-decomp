@@ -2,7 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "c83.h"
-#include "c6b.h"
+#include "code_checksum.h"
 #include "c02.h"
 #include "c05.h"
 #include "c6c.h"
@@ -1304,7 +1304,7 @@ s32 D_00261080[4];
 
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
-void func_0012B760(C6B* self)
+void func_0012B760(CodeChecksum* self)
 {
     if (self->remaining != 0) {
         s32 n = self->remaining;
@@ -1329,7 +1329,7 @@ void func_0012B760(C6B* self)
         self->crc = crc;
         self->remaining = n;
         if (n == 0 && crc != 0) {
-            D_00261080[0] = 1;
+            g_checksumMismatch[0] = 1;
             func_001837E0(self, 2, 0, 0);
         }
     }
@@ -2103,7 +2103,7 @@ extern const Fn_2197C0 D_002197C0[10] = {
 extern u8 D_00148D64[];
 void func_00123ED0(void* self);
 
-void func_0012B6B8(C6B* self)
+void func_0012B6B8(CodeChecksum* self)
 {
     u32 c;
     func_00123ED0(self);

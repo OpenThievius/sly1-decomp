@@ -5,3 +5,36 @@ func_0016F238	AdvanceButtonCodes	on a pad button change, moves each listed recor
 func_0016F2E0	RunCompletedButtonCode	once the delay AdvanceButtonCodes set has passed, unlinks the records marked for removal, runs the callback of the completed record with the longest sequence, then resets every position
 func_0016F588	RegisterButtonCodes	adds the nine static button-code records D_00262A80 .. D_00262C48 to the list, one AddButtonCode each
 D_00262DFC	g_buttonCodes	the head of the button-code list: AddButtonCode pushes onto it, AdvanceButtonCodes and RunCompletedButtonCode walk it
+func_0013DD78	SetTimedState	changes the state word at +0x550 only when it differs, stamps the clock D_0026185C, and calls func_00126D60 with param when the state becomes 2 (slot 17 and the message handler call it)
+func_0013DC38	UpdateTimedState	slot 17: after the base update, moves state 1 on to 2 once the elapsed clock exceeds limit or tries reaches 2, via SetTimedState
+func_0013DCA8	HandleTimedStateMessage	slot 13: runs the base message handler, then on message kind 0xF aimed at itself sets state 1
+func_0013DD08	TestTimedStateContact	slot 57: returns 0 for a flagged object, 1 when acceptAll is set, otherwise tests the child's +0x694 and class 0x27 of the other object to say whether it counts
+func_0012F840	InitIdFilterObject	slot 0: runs the base set-up, clears two ranges with func_001B9AE0 and sets id to -1
+func_0012F888	RemoveIdFilterObject	slot 9: runs the base removal and, with no parent, hands itself to func_00138F28 with its world
+func_0012F8C8	ResolveIdFilterPlacement	slot 16: finds the object by id (mode 2) or takes the placement of its single child of class 0x7E into pos (mode 1)
+func_0012F9B8	ApplyIdFilterPlacement	slot 17: gives pendingTarget its placement (from pos or the found object) through the target's methods 0x1D/0x20/0x21, then moves it to placedTarget
+func_0012FA88	TestIdFilterMatch	slot 56: true when the key object's id is in objectIds or its class is in classIds, inverted when acceptsListed is 0
+func_0012FCB0	AddIdFilterObjectId	appends a value to the objectIds list
+func_0012FCD0	AddIdFilterClassId	appends a value to the classIds list
+func_00139DE8	InitWorldListedObject	slot 0: adds itself to its world's list at +0x1CC0, sets up members and sets flags and the float at 0x80
+func_00139E80	LeaveWorldLists	slot 6: removes itself from its world's lists at +0x1CC0 and +0x1CB4
+func_00139EC8	ReleaseWorldListedObject	slot 7: walks the members list calling func_00139D28 on each, then removes itself from the world list at +0x1CB4 and D_002622E0
+func_0013A3A0	UpdateWorldListedObject	slot 17: runs base updates then, unless the flagRecord's flags satisfy the global mask, calls its own method 3
+func_0013A418	CopyWorldListedObject	slot 23: copies from the source object and, when it is of class 0x50, keeps it as source and takes its float at 0x80
+func_0013AD08	SubmitWorldListedObjectBlock	slot 37: builds a zeroed 0x80-byte parameter block (count 0xF, radius from the source or 1.0, owner itself) and passes it to func_0019D410
+func_0012B6B8	InitCodeChecksum	slot 0: sets range 0x100018 .. D_00148D64, crc to 0xFFFFFFFF and fills table with the CRC-32 table
+func_0012B760	StepCodeChecksum	slot 17: folds up to 64 words of the range into crc and flags a mismatch when the sum is nonzero at the end
+D_00261080	g_checksumMismatch	written with 1 by StepCodeChecksum when the finished sum is nonzero; no other reader in src
+func_0016DD10	InitEntryTableTuning	slot 0 of the 0x64 class: calls the base set-up func_00123ED0 then stores the seven tuning floats at 0x31C..0x334
+func_0016DD90	LoadEntryTable	slot 10 of the 0x64 class: after the base load, func_0015A4F0 fills the sixteen-entry table at 0x2D0 and the count (clamped to 0x10) is stored at 0x310
+func_0017B5D0	InitCountdown	slot 0 of the 0x4B class: after the base set-up it stores 0x10 in the counter at 0x558 and resets the globals D_00263E2C (-1) and D_00263E30 (0)
+func_0017B610	InstallCountdownTable	slot 16 of the 0x4B class: calls the base func_00124A48 then func_00124DF8 with a count of 3 and the three-entry table D_00263E08
+func_0017B648	UpdateCountdown	slot 17 of the 0x4B class: frees the record at 0x568 when its value at 0x18 is zero, applies the state D_00263E2C, and fires the one-shot D_00263E30 once the time since 0x554 passes D_00263E04
+func_0017B7A8	HandleCountdownMessage	slot 45 of the 0x4B class: on a message with bit 0x20 it counts the counter at 0x558 down (floor 0), picks one of three handles by the message flags, passes it to func_0012C918 and clears the bit
+func_001CB618	InitItemKeeper	slot 0 of the 0x89 class: after the base set-up it stores -1 in the field at 0x180
+func_001CB7A0	FindWantedItems	slot 15 of the 0x89 class: looks each wanted id of both groups up with func_0015A448 and appends what it finds to the group (setting the owner for the first group)
+func_001CB6A8	AddOwnedWantedId	appends a value to the wanted list of the 0x89 object's first group (0x58 block) while it has fewer than 16
+func_001CB6D0	AddListedWantedId	appends a value to the wanted list of the 0x89 object's second group (0xE0 block) while it has fewer than 16
+D_00263E30	g_timeoutFired	defined in 00178000.cpp only: InitCountdown clears it and UpdateCountdown sets it to 1 once, calling func_00160578(2), when the elapsed time passes the limit
+D_00263E04	g_timeoutLimit	the float 3.0 that UpdateCountdown compares the time elapsed since the object's start time against
+D_00263E08	g_countdownTable	the three-entry table InstallCountdownTable hands to func_00124DF8

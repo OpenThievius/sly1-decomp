@@ -2,7 +2,7 @@
 #include "common.h"
 #include "c05.h"
 #include "c52.h"
-#include "c64.h"
+#include "entry_table_object.h"
 #include "c29.h"
 #include "c47.h"
 #include "button_code.h"
@@ -310,7 +310,7 @@ void func_0016DD00(void)
 
 void func_00123ED0(void* self);
 
-void func_0016DD10(C64* self)
+void func_0016DD10(EntryTableObject* self)
 {
     func_00123ED0(self);
     self->tune31C = 2.25f;
@@ -325,13 +325,13 @@ void func_0016DD10(C64* self)
 void func_001289C0(void* self);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 
-void func_0016DD90(C64* self)
+void func_0016DD90(EntryTableObject* self)
 {
     func_001289C0(self);
-    s32 r = func_0015A4F0((s32)self->world, 0x201, 0x73, self, 0x10, self->table2D0);
-    self->tableCount = r;
+    s32 r = func_0015A4F0((s32)self->world, 0x201, 0x73, self, 0x10, self->entries);
+    self->entryCount = r;
     if ((u32)r >= 0x11) {
-        self->tableCount = 0x10;
+        self->entryCount = 0x10;
     }
 }
 
@@ -540,7 +540,7 @@ void func_0016F2E0(void)
 
 void func_00124A48(void* self);
 
-void func_0016DDE8(C64* self)
+void func_0016DDE8(EntryTableObject* self)
 {
     func_00124A48(self);
     self->desc->m03(self);

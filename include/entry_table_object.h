@@ -5,16 +5,16 @@
 //
 // Its fields follow class 0x02's and end at the size its descriptor gives; the pads keep every
 // field at its retail offset.
-#ifndef C64_H
-#define C64_H
+#ifndef ENTRY_TABLE_OBJECT_H
+#define ENTRY_TABLE_OBJECT_H
 
 #include "c02.h"
 
 // 0x64: func_0016DD10 sets the tuning values; func_0016DD90 loads the table (the entries
 // func_0015A4F0 finds for the object, at most 0x10 of them) after the common load.
-struct C64 : C02 {
-    u8 table2D0[0x310 - 0x2D0];  // 0x2D0: sixteen 32-bit entries
-    s32 tableCount;         // 0x310: how many were found (at most 0x10)
+struct EntryTableObject : C02 {
+    u8 entries[0x310 - 0x2D0];  // 0x2D0: sixteen 32-bit entries
+    s32 entryCount;         // 0x310: how many were found (at most 0x10)
     u8 pad314[0x31C - 0x314];
     f32 tune31C;            // 0x31C
     f32 tune320;            // 0x320
@@ -26,11 +26,11 @@ struct C64 : C02 {
     u8 pad338[0x340 - 0x338];
 };
 
-typedef char check_C64[sizeof(C64) == 0x340 ? 1 : -1];
+typedef char check_EntryTableObject[sizeof(EntryTableObject) == 0x340 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
-void func_0016DD10(C64* self);                       // 0x64 slot 0
-void func_0016DD90(C64* self);                       // 0x64 slot 10
-void func_0016DDE8(C64* self);                       // 0x64 slot 16
+void func_0016DD10(EntryTableObject* self);                       // 0x64 slot 0
+void func_0016DD90(EntryTableObject* self);                       // 0x64 slot 10
+void func_0016DDE8(EntryTableObject* self);                       // 0x64 slot 16
 
 #endif
