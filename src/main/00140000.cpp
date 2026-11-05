@@ -7,7 +7,7 @@
 #include "object_gatherer.h"
 #include "c6c.h"
 #include "g261858.h"
-#include "s1bc320.h"
+#include "object_event.h"
 
 extern const u32 D_00247AA0;
 s32 D_002613F4;
@@ -242,15 +242,15 @@ void func_001415D0(FlaggedObject* self)
 extern u8 D_00262C70[];
 
 void func_00141870(FlaggedObject* self);
-s32 func_001925F0(void* self, S1BC320* ev);
-s32 func_001BC320(void* self, S1BC320* ev);
+s32 func_001925F0(void* self, ObjectEvent* ev);
+s32 func_001BC320(void* self, ObjectEvent* ev);
 void func_0016EC38(void* p, f32 f, s32 n);
 
-s32 func_001417F0(FlaggedObject* self, S1BC320* ev)
+s32 func_001417F0(FlaggedObject* self, ObjectEvent* ev)
 {
     s32 r = func_001925F0(self, ev);
     if (ev->type == r) {
-        if ((ev->f10 & 0x10) == 0) {
+        if ((ev->extraFlags & 0x10) == 0) {
             func_0016EC38(D_00262C70, 0.2f, 2);
         }
         func_00141870(self);

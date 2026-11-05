@@ -6,8 +6,8 @@
 #include "cone_volume.h"
 #include "c6c.h"
 #include "c20.h"
-#include "s124df8.h"
-#include "s192230.h"
+#include "object_link.h"
+#include "message_body.h"
 #include "shapes.h"
 #include "g27c220.h"
 #include "globals.h"
@@ -543,15 +543,15 @@ void func_00181A58(C1A* self, void* outv)
 
 struct Sub_181D28 { u8 pad0[0x24]; s32 f24; };
 
-void func_001DAF08(void* self, s32 code, S192230* rec);
+void func_001DAF08(void* self, s32 code, MessageBody* rec);
 
-void func_00181D28(C1A* self, s32 code, S192230* rec)
+void func_00181D28(C1A* self, s32 code, MessageBody* rec)
 {
     if (code == 0x13) {
         Sub_181D28* sub = ((Sub_181D28*)self->fBBC);
-        s32 key = rec->f0;
+        s32 key = rec->sourceId;
         if (sub != 0 && key == sub->f24) {
-            s32 kind = rec->f8;
+            s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
                     self->fC00 = 0;
@@ -1105,9 +1105,9 @@ void func_00181818(C1A* o, void* a, void* b)
     func_00125C90(o, a, b);
 }
 
-S124DF8 D_002640B0[10] = {
+ObjectLink D_002640B0[10] = {
     { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
     { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }
 };
 f32 D_00264180[4] = { -300.0f, 0.0f, 200.0f, 0.0f };
-S124DF8 D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
+ObjectLink D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };

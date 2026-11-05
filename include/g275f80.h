@@ -13,7 +13,7 @@
 #define G275F80_H
 
 #include "common.h"
-#include "s18e410.h"
+#include "identity_key.h"
 
 // A request: func_001EFFA0 takes one as its second parameter and copies it into the record
 // (its callers build it on their stacks: func_00160DA0, func_001F4408, func_001F4A30), and
@@ -22,7 +22,7 @@
 struct S1EFFA0 {
     s32 kind;               // 0x00
     union {
-        S18E410* key;       // 0x04: func_001EFFA0 (Text_1EFFA0 reads words 2 and 6), func_001F00F0
+        IdentityKey* key;       // 0x04: func_001EFFA0 (Text_1EFFA0 reads words 2 and 6), func_001F00F0
         u8* text;           // 0x04: func_00160DA0
     };
     s32 f08;                // 0x08

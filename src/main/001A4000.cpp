@@ -10,8 +10,8 @@
 #include "pair_controller.h"
 #include "t217d.h"
 #include "shapes.h"
-#include "s124df8.h"
-#include "s12c288.h"
+#include "object_link.h"
+#include "target_binding.h"
 #include "g27c220.h"
 #include "globals.h"
 
@@ -1665,13 +1665,13 @@ void func_001A5DD8(void* p, PairedObject* o);
 void func_001A5DF8(void* p, PairedObject* o);
 void func_001A5F78(void* p, PairedObject* o);
 void func_001A5C90(void* p, PairedObject* o);
-void func_0012C288(f32 a, f32 b, void* h, PairedObject* o, s32 n, S12C288* buf, s32 e, void** out);
+void func_0012C288(f32 a, f32 b, void* h, PairedObject* o, s32 n, TargetBinding* buf, s32 e, void** out);
 void* func_001B6290(void* a, PairedObject* o, s32 c, s32 d);
 
 void func_001A6BE0(PairedObject* self, s32 mode)
 {
-    S12C288 buf[2];
-    S12C288* w;
+    TargetBinding buf[2];
+    TargetBinding* w;
     void* h;
     void* s3;
 
@@ -1713,11 +1713,11 @@ void func_001A6BE0(PairedObject* self, s32 mode)
         break;
     case 4:
         func_001A5C90(self->controller, self);
-        w->key = 0x2A0; w->val = self->partner; w++;
+        w->key = 0x2A0; w->object = self->partner; w++;
         h = self->f594;
         break;
     case 5: case 6:
-        w->key = 0x2A0; w->val = self->partner; w++;
+        w->key = 0x2A0; w->object = self->partner; w++;
         h = self->f590;
         break;
     case 7:
@@ -1852,7 +1852,7 @@ void func_001A5760(PairController* self, f32 dt)
 // Data
 
 f32 D_0026B7D8[4] = { 20.0f, 0.0f, 0.30000001192092896f, 0.0f };
-S124DF8 D_0026B7E8[6] = {
+ObjectLink D_0026B7E8[6] = {
     { 0x2, 0x29C, 0x58C },
     { 0x2, 0x29D, 0x590 },
     { 0x2, 0x29E, 0x594 },
@@ -1860,10 +1860,10 @@ S124DF8 D_0026B7E8[6] = {
     { 0x2, 0x2A1, 0x5A0 },
     { 0x2, 0x2A2, 0x5A4 }
 };
-S124DF8 D_0026B830[1] = { { 0x2, 0x2A3, 0x560 } };
-S124DF8 D_0026B840[1] = { { 0x6, 0x2AE, 0x578 } };
-S124DF8 D_0026B888[1] = { { 0x2, 0x2AF, 0x55C } };
-S124DF8 D_0026B8A0[1] = { { 0x2, 0x2B3, 0x560 } };
+ObjectLink D_0026B830[1] = { { 0x2, 0x2A3, 0x560 } };
+ObjectLink D_0026B840[1] = { { 0x6, 0x2AE, 0x578 } };
+ObjectLink D_0026B888[1] = { { 0x2, 0x2AF, 0x55C } };
+ObjectLink D_0026B8A0[1] = { { 0x2, 0x2B3, 0x560 } };
 f32 D_0026B850[4] = { 2.0f, 0.0f, 0.699999988079071f, 0.0f };
 void* D_0026B860[10] = { (void*)0x2A4, (void*)0x2A5, (void*)0x2A6, (void*)0x2A7, (void*)0x2A8, (void*)0x2A9, (void*)0x2AA, (void*)0x2AB, (void*)0x2AC, (void*)0x2AD };
 Entry_26B8B0 D_0026B8B0[11] = {

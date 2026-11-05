@@ -5,8 +5,8 @@
 #include "t2195.h"
 #include "s1291d0.h"
 #include "s1be4d8.h"
-#include "s124df8.h"
-#include "s12c288.h"
+#include "object_link.h"
+#include "target_binding.h"
 #include "c83.h"
 #include "globals.h"
 
@@ -593,13 +593,13 @@ void* func_0015A418(C6C* host, s32 kind, u32 id, C01* ctx);
 void func_00182ED8(void* node);
 void func_001832F0(void* node, C01* ctx);
 
-void func_00124DF8(C01* self, s32 count, S124DF8* item)
+void func_00124DF8(C01* self, s32 count, ObjectLink* item)
 {
     C6C* host = self->world;
     if (count <= 0) {
         return;
     }
-    S124DF8* it = item;
+    ObjectLink* it = item;
     s32 n = count;
     do {
         u32 f = it->flags;
@@ -807,7 +807,7 @@ struct Ctx_124CC0 { C83* node; void* key; s32 mode; f32 value; f32 f10; };
 
 C83* func_0015A418(void* a, s32 b, void* c, C02* d);
 void func_0012C9E8(C83* a, C02* b, f32 c, void* d, f32* e, s32 f, s32 g);
-void func_0012C288(C83* a, C02* b, s32 c, S12C288* d, f32 e, f32 f, s32 g, s32 h);
+void func_0012C288(C83* a, C02* b, s32 c, TargetBinding* d, f32 e, f32 f, s32 g, s32 h);
 
 struct Clamp_124CC0 {
     static f32 Of(f32 x, f32 lo, f32 hi)
@@ -832,7 +832,7 @@ struct Find_124CC0 {
     }
 };
 
-struct Frame_124CC0 : S12C288 { u8 pad0[8]; f32 tmp; };
+struct Frame_124CC0 : TargetBinding { u8 pad0[8]; f32 tmp; };
 
 void func_00124CC0(C02* self)
 {
@@ -856,7 +856,7 @@ void func_00124CC0(C02* self)
         return;
     }
     fr.key = node->id;
-    fr.val = self;
+    fr.object = self;
     func_0012C288(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
 }
 

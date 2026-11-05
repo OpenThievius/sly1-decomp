@@ -11,8 +11,8 @@
 #include "t219c.h"
 #include "globals.h"
 #include "g26ac30.h"
-#include "s19d410.h"
-#include "s159ca0.h"
+#include "deferred_request.h"
+#include "color_fade.h"
 
 struct Buf_19DF48 { u8 raw[0x30]; };
 typedef void (*Fn_19DF48)(void);
@@ -356,8 +356,8 @@ void func_0019FDC0(T219C* self)
 
 extern u8 D_0026AC10[];
 
-struct S159CA0;
-typedef void (*VFn_19D6C0)(S159CA0* self, void* arg, s32 z);
+struct ColorFade;
+typedef void (*VFn_19D6C0)(ColorFade* self, void* arg, s32 z);
 
 struct Frame_19D6C0 {
     s32 list;
@@ -366,7 +366,7 @@ struct Frame_19D6C0 {
     s32 prev;
 };
 
-void func_00159D00(S159CA0* n);
+void func_00159D00(ColorFade* n);
 
 void func_0019D6C0(C6C* self, void* arg)
 {
@@ -386,7 +386,7 @@ void func_0019D6C0(C6C* self, void* arg)
     f1.cursor = h + link;
     s32 n = h;
     while (n != 0) {
-        S159CA0* node = (S159CA0*)n;
+        ColorFade* node = (ColorFade*)n;
         ((VFn_19D6C0*)node->obj)[40](node, arg, 0);
         s32 nx = *(s32*)f1.cursor;
         f1.cursor = nx + f1.link;
@@ -404,7 +404,7 @@ void func_0019D6C0(C6C* self, void* arg)
     f2.cursor = h2 + link2;
     n = h2;
     while (n != 0) {
-        S159CA0* node = (S159CA0*)n;
+        ColorFade* node = (ColorFade*)n;
         ((VFn_19D6C0*)node->obj)[40](node, arg, 0);
         s32 nx = *(s32*)f2.cursor;
         f2.cursor = nx + f2.link;
@@ -421,7 +421,7 @@ void func_0019D6C0(C6C* self, void* arg)
     f3.cursor = h3 + link3;
     n = h3;
     while (n != 0) {
-        func_00159D00((S159CA0*)n);
+        func_00159D00((ColorFade*)n);
         s32 nx = *(s32*)f3.cursor;
         f3.cursor = nx + f3.link;
         n = nx;
@@ -742,7 +742,7 @@ void func_0019C470(C8B* o, Stream_19C470* in)
 void func_001BE0A8(void** base, s32 count, s32 size, void* cmp);
 void func_0019D468(void);
 
-s32 func_0019D4B0(s32 n, S19D410* items, void** out)
+s32 func_0019D4B0(s32 n, DeferredRequest* items, void** out)
 {
     s32 start[18];
     s32 pos[18];
@@ -750,7 +750,7 @@ s32 func_0019D4B0(s32 n, S19D410* items, void** out)
     s32 j;
     s32 i;
     for (i = 0; i < 18; i++) cnt[i] = 0;
-    for (j = 0; j < n; j++) cnt[items[j].mode]++;
+    for (j = 0; j < n; j++) cnt[items[j].group]++;
     pos[0] = 0;
     if (cnt[0] > 0 && D_0026AC30[0].f00 != 0) {
         out[0] = &D_0026AC30[0];
@@ -768,7 +768,7 @@ s32 func_0019D4B0(s32 n, S19D410* items, void** out)
         start[i] = pos[i];
     }
     for (j = 0; j < n; j++, items++) {
-        s32 b = items->mode;
+        s32 b = items->group;
         out[start[b]++] = items;
     }
     {
@@ -1002,12 +1002,12 @@ extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(T219C* self))func_00
 
 
 // D_0026AC10 points at the next free 128-byte entry of D_005E4700 (1024 of them).
-void func_0019D410(S19D410* src)
+void func_0019D410(DeferredRequest* src)
 {
-    S19D410* cur = *(S19D410**)D_0026AC10;
+    DeferredRequest* cur = *(DeferredRequest**)D_0026AC10;
     if ((u32)(cur - D_005E4700) < 0x400) {
-        *(S19D410**)D_0026AC10 = cur + 1;
-        *(S19D410*)((u32)cur | 0x20000000) = *src;
+        *(DeferredRequest**)D_0026AC10 = cur + 1;
+        *(DeferredRequest*)((u32)cur | 0x20000000) = *src;
     }
 }
 

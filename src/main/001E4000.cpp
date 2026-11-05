@@ -13,7 +13,7 @@
 #include "g269990.h"
 #include "g26ac30.h"
 #include "g27c220.h"
-#include "s168d68.h"
+#include "bump_allocator.h"
 
 // Class descriptors (parent, class id, flags, object size, then the class's methods) and the
 // method tables of .rodata from 0x217380, defined here until their own files are found.
@@ -5072,7 +5072,7 @@ struct Obj_262C70 {
 struct Obj_2629A8 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
 
 // size: func_00168D68 sets three words (a, b, c) of it
-S168D68 D_002626D8 = {0};
+BumpAllocator D_002626D8 = {0};
 // size: list head of three words, func_00152438 sets the link offset at +8 (0x38)
 List01 D_002626E8 = {0};
 // size: list head of three words, link offset at +8 (0x50)

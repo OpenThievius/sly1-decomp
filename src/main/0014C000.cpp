@@ -5,7 +5,7 @@
 #include "c20.h"
 #include "c6c.h"
 #include "t217d.h"
-#include "s124df8.h"
+#include "object_link.h"
 #include "g261ef0.h"
 #include "shapes.h"
 
@@ -47,7 +47,7 @@ void func_0014EE70(C46* self)
     }
 }
 
-S124DF8 D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
+ObjectLink D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 idx, void* table);
 
@@ -375,7 +375,7 @@ struct Src_14F920 { void** vtbl; u8 pad0[0x14 - 4]; void* p14; C01* f18; u8 pad1
 typedef void (*VFn_14F920)(void* self);
 typedef void (*VFn_14F920Arg)(void* self, s32 x);
 
-S124DF8 D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
+ObjectLink D_00261CE0[3] = { { 4, 0x2B4, 0x734 }, { 4, 0x2B5, 0x738 }, { 0, 0x2B6, 0x73C } };
 
 void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -426,7 +426,7 @@ struct Node_14C138 {
 
 extern Step_14C138* D_002623C8;
 extern f32 D_00275C60[];
-S124DF8 D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
+ObjectLink D_00261CA0[3] = { { 5, 0x3F8, 0x420 }, { 5, 0x3F9, 0x424 }, { 1, 0x3FA, 0x428 } };
 
 void func_00124A48(GaugeManager* self);
 void func_00124DF8(GaugeManager* self, s32 n, void* table);

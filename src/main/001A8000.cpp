@@ -9,7 +9,7 @@
 #include "shapes.h"
 #include "g261858.h"
 #include "g27c220.h"
-#include "s15db28.h"
+#include "text_reader.h"
 #include "globals.h"
 
 // The font object's calls.
@@ -1688,7 +1688,7 @@ Entry_1A8718* func_001A8718(C8C* self, s32 key)
 
 s32 func_001E2100(const char*);
 void func_001E2138(char*, const char*);
-void func_0015E290(S15DB28*, f32, f32*, f32*);
+void func_0015E290(TextReader*, f32, f32*, f32*);
 void func_001AA4F0(T217D* self, const char* arg)
 {
     if (arg && func_001E2100(arg)) {
@@ -1697,7 +1697,7 @@ void func_001AA4F0(T217D* self, const char* arg)
         self->text[0] = 0;
     }
     func_0015C8B8(self->font, self->scale, self->scale);
-    S15DB28 m;
+    TextReader m;
     func_0015DB28(&m, self->text, self->font);
     f32 x, y;
     func_0015E290(&m, 0.0f, &x, &y);
@@ -1709,11 +1709,11 @@ void func_001AA4F0(T217D* self, const char* arg)
 extern f32 D_00261860;
 
 void func_001AB2B8(T217D_E30* self);
-f32 func_0015DFF8(S15DB28* loc);
+f32 func_0015DFF8(TextReader* loc);
 
 void func_001AB058(T217D_E30* self)
 {
-    S15DB28 loc;
+    TextReader loc;
     f32 frac;
     s32 n;
     s32 first;

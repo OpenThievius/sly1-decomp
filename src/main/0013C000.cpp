@@ -7,7 +7,7 @@
 #include "c3b.h"
 #include "c05.h"
 #include "v249d.h"
-#include "s127378.h"
+#include "object_message.h"
 
 void func_001BE4D8(void* p);
 
@@ -189,9 +189,9 @@ void func_0013DC38(TimedStateObject* self)
     SetTimedState(self, next);
 }
 
-void func_00127378(TimedStateObject* self, s32 kind, S127378* msg);
+void func_00127378(TimedStateObject* self, s32 kind, ObjectMessage* msg);
 
-void func_0013DCA8(TimedStateObject* self, s32 kind, S127378* msg)
+void func_0013DCA8(TimedStateObject* self, s32 kind, ObjectMessage* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 0xF) {

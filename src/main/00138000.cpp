@@ -7,8 +7,8 @@
 #include "c3b.h"
 #include "c8b.h"
 #include "v24a0.h"
-#include "s139c70.h"
-#include "s127378.h"
+#include "owned_record.h"
+#include "object_message.h"
 #include "globals.h"
 
 void func_001389C8(C6C* a0)
@@ -57,9 +57,9 @@ void func_001B5F28(void* p, void* q);
 void func_001F5C0C(void* p, s32 v, s32 n);
 void func_00152470(void* list, void* item);
 
-S139C70* func_00139C70(Obj_139C70* o)
+OwnedRecord* func_00139C70(Obj_139C70* o)
 {
-    S139C70* s = (S139C70*)func_001B5EA0(o->ctx + 0x1B40);
+    OwnedRecord* s = (OwnedRecord*)func_001B5EA0(o->ctx + 0x1B40);
     if (!s) {
         return 0;
     }
@@ -68,7 +68,7 @@ S139C70* func_00139C70(Obj_139C70* o)
         s->owner = o;
     } else {
         void* r = func_001B5EA0(o->ctx + 0x1B4C);
-        s->p1088 = r;
+        s->extraRecord = r;
         if (r) {
             func_001F5C0C(r, 0, 0x580);
             s->owner = o;
@@ -424,10 +424,10 @@ void func_00139F80(Obj_139F80* self, void* x)
 }
 
 
-void func_00127378(C3B* self, s32 kind, S127378* msg);
+void func_00127378(C3B* self, s32 kind, ObjectMessage* msg);
 void func_0013BE00(C3B* p, f32 delta);
 
-void func_0013B708(C3B* self, s32 kind, S127378* msg)
+void func_0013B708(C3B* self, s32 kind, ObjectMessage* msg)
 {
     func_00127378(self, kind, msg);
     if (kind == 0xA) {

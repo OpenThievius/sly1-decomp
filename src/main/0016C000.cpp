@@ -10,7 +10,7 @@
 #include "g261858.h"
 #include "g262c70.h"
 #include "g27c220.h"
-#include "s1be728.h"
+#include "key_record.h"
 #include "shapes.h"
 
 void func_001F3A40(void);
@@ -1035,7 +1035,7 @@ extern const Slot_2482D8 D_002482D8[7] = {
 
 s32 func_001BE980(void);
 s32 func_001EAA70(void* a, s32 b);
-void func_001BE728(S1BE728* slot);
+void func_001BE728(KeyRecord* slot);
 
 void func_0016D928(C47* self)
 {
@@ -1052,7 +1052,7 @@ void func_0016D928(C47* self)
         return;
     }
     r = func_001EAA70(0, 6);
-    func_001BE728((S1BE728*)((u8*)D_002482D8 + (r << 5)));
+    func_001BE728((KeyRecord*)((u8*)D_002482D8 + (r << 5)));
     self->f5CC = 1;
 }
 

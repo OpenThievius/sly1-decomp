@@ -2,7 +2,7 @@
 #include "common.h"
 #include "list_iter.h"
 #include "s137290.h"
-#include "s18d410.h"
+#include "key_id.h"
 
 void func_001AA8C8(void* self);
 s32 func_00150790(void* obj, s32 mode);
@@ -13,7 +13,7 @@ void func_00150790(Child_136EF8* obj, s32 mode);
 
 void func_00137328(void* a, void* b, s32 c);
 
-void func_001373B0(void* a, S18D410* pair)
+void func_001373B0(void* a, KeyId* pair)
 {
     func_00137328(a, pair->p0, pair->second);
 }

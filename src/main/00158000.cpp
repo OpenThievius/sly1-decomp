@@ -8,8 +8,8 @@
 #include "c60.h"
 #include "c6c.h"
 #include "globals.h"
-#include "s19d410.h"
-#include "s159ca0.h"
+#include "deferred_request.h"
+#include "color_fade.h"
 
 struct Item_158108 { u8 pad0[0xC]; s32 fC; };
 struct Owner_158108 { u8 pad0[0x278]; Item_158108* f278; };
@@ -843,11 +843,11 @@ extern s32 D_00275BC4;
 
 extern s32 D_00270458;
 extern f32 D_0026185C;
-void func_00152600(u8* a, S159CA0* b);
-void func_00159CA0(S159CA0* o);
+void func_00152600(u8* a, ColorFade* b);
+void func_00159CA0(ColorFade* o);
 void func_0019D410(Req_159D00* r);
 
-void func_00159D00(S159CA0* self)
+void func_00159D00(ColorFade* self)
 {
     if (D_00275BC4 != 3) return;
     s32 g = D_00270458;
@@ -855,26 +855,26 @@ void func_00159D00(S159CA0* self)
     if (g == 2) return;
     Out_159D00 out; Rgba4 a, b;
 
-    f32 t = D_0026185C - self->f54;
+    f32 t = D_0026185C - self->startTime;
     f32 d;
-    if (t < self->f48) {
-        a = self->c0; b = self->c1;
-        d = self->f48;
+    if (t < self->fadeInTime) {
+        a = self->startColor; b = self->holdColor;
+        d = self->fadeInTime;
     } else {
-        t -= self->f48;
-        if (t < self->f4C) {
-            a = self->c1; b = self->c1;
-            d = self->f4C;
+        t -= self->fadeInTime;
+        if (t < self->holdTime) {
+            a = self->holdColor; b = self->holdColor;
+            d = self->holdTime;
         } else {
-            t -= self->f4C;
-            if (!(t < self->f50)) {
+            t -= self->holdTime;
+            if (!(t < self->fadeOutTime)) {
                 u8* p = (u8*)D_00275710 + 0x1CD8;
-                self->m5C = 0;
+                self->running = 0;
                 func_00152600(p, self);
                 return;
             }
-            a = self->c1; b = self->c2;
-            d = self->f50;
+            a = self->holdColor; b = self->endColor;
+            d = self->fadeOutTime;
         }
     }
     f32 r = t / d;
@@ -883,9 +883,9 @@ void func_00159D00(S159CA0* self)
     Req_159D00 q;
     q.f = -1.0f;
 
-    q.fn = (void*)(void (*)(S159CA0*))func_00159CA0;
+    q.fn = (void*)(void (*)(ColorFade*))func_00159CA0;
     q.col = out;
-    switch (self->m58) {
+    switch (self->mode) {
     case 0: q.mode = 1; break;
     case 1: q.mode = 0x10; break;
     }

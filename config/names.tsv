@@ -120,3 +120,62 @@ func_00180398	DrawColoredTriangles	transforms the points by a matrix built from 
 func_001EE930	LoadValueList	reads a block, a count and that many s32 values from the stream into valueCount and values, then the base load; slot 10
 func_0015FF88	ResolveLookupIds	looks each of the idCount ids up with func_0015A480 and appends the non-null hits to found, then passes found to func_0015F8B0; slot 16
 func_00160050	AddLookupId	stores a value at ids[idCount] and increments idCount
+func_0018D410	ClearKeyId	clears the two words of a KeyId (an 8-byte memset through func_001F5C0C); callers call it before filling words 0 ^ 5 and 1 ^ 7 of a key
+func_0018E410	FindKeyIndex	walks the 16 keys at D_002484B0 comparing words 2 ^ 6 with the argument's and returns the index of the match, or -1
+func_001600A0	FindKeyEntry	walks the 46 entries (stride 0x2C) of D_00247AF0 and returns the one whose key has the same words 2 ^ 6 as the argument's, or 0
+func_00177838	FindNodeForQuery	walks the node chain from the query's hold, stores a byte of each node chosen by the query's kind into out, and returns the first node whose vtable +0xC4 method accepts the query
+func_0019D410	QueueDeferredRequest	copies a 0x80-byte request to the next free entry of D_005E4700 (1024 of them, uncached alias) and advances D_0026AC10
+D_005E4700	g_deferredRequests	the 1024-entry table of 0x80-byte requests QueueDeferredRequest fills and func_0019D4B0 sorts into buckets by group
+func_001B2988	GetTextureRegisterBits	returns the entry's word at 0x18 ORed with the selected cell's word at 0x10; func_001B29E0 and func_001ADD28 send it as GS register 6 (TEX0_1)
+func_001B29E0	SendTextureRegisters	builds register words from GetTextureRegisterBits and the table's flags and sends them through func_00161708 as registers 6/7, 0x14/0x15 and 9 (TEX0, TEX1, TEX2 range)
+func_001BC320	HandleObjectEvent	slot of class 3: when eventFlags has 8 it calls func_001BC0E0 with the event's radius, and returns whether eventFlags is non-zero; the overrides call it as their base
+func_001BE728	OpenKeyRecord	decodes two words of a KeyRecord (wordA^maskA, wordB^maskB), and when the second is non-zero opens a handle with func_0011E048, stores it in D_0027472C and registers func_001BE5D8 for it
+func_001619C0	InitVertexBatch	clears the current vertex (0x28 bytes at 0xFC) and 0xB0 bytes, sets the 1.0 and flag words, copies 16 bytes in and calls func_00161B80 to empty the vertex list
+func_00161A88	DestroyVertexBatch	does nothing but free the batch with func_0018D778 when flag bit 0 is set (the destructor form func_001D7148 shares)
+func_00162508	FlushVertexBatch	when a shape is set and at least 3 vertices are in, copies the batch into the packet and dispatches on the shape (func_00161C00 or func_00161F70); otherwise empties it
+func_00162680	SetVertexPosition	copies a three-float vector into the current vertex's x, y and z at 0xFC
+func_001626A8	SetVertexColor	stores a 32-bit colour into the current vertex at 0x114 (func_00161BB0 and func_001C30E8 pass 0xFFFFFFFF or a colour whose alpha they set)
+func_001626C0	SetVertexTexCoord	copies 8 bytes into the current vertex at 0x118; func_001C30E8 passes a float pair (0,1.0) for one edge and (0,0) for the other
+func_001626D8	AddVertex	stores the current vertex into the list and, when the list is full, flushes and restarts it keeping its last two
+func_001D7098	InitOwnerMessage	clears 0x10 bytes then stores a mode (0 or 2 from callers) at 0 and the owner object at 4 and 8; callers pass it to a virtual slot of another object
+func_001D7148	DestroyOutputBuffer	flushes the buffer with func_001D72C8 and, when flag bit 0 is set, frees it with func_0018D778
+func_001D7190	AppendToOutputBuffer	copies n bytes into target at used when a target is set, else into the 0x18 buffer, flushing at 0x400, and adds the count written to count
+func_001D72C8	FlushOutputBuffer	writes the pending bytes of buf to the handle with func_001F9028 (or to func_001F7B88 in 0x80-byte pieces when handle is negative) and zeroes pending
+func_00124DF8	ResolveObjectLinks	walks count ObjectLink entries, finds each object by id with func_0015A418, stores it at self + offset unless flag 8, and calls func_00182ED8 / func_001832F0 by flags 4 and 0x10
+func_0012FCF0	InitStreamReader	aligns its buffer argument to 64 into 0x14, sets 0x04 to -1, clears every other field and returns the record
+func_0012FD30	DestroyStreamReader	calls func_0012FDE8 to close the reader and, with bit 1 of its flags, calls func_0018D778 on it
+func_0012FD78	OpenSectorStreamRange	passes a pair's two words (first sector, byte count) to func_0012FDA0
+func_0012FDA0	OpenSectorStream	sets kind 1, stores the start sector at 0x08 and the byte count at 0x24 and 0x28, points the ready start at the buffer, then calls func_0012FE70 to start the first read
+func_0012FDE8	CloseStreamReader	releases the file handle (func_001F8C38) of kind 0, or finishes the pending sector read of kind 1, and sets the kind to -1
+func_0012FE70	StartChunkRead	if no read is pending and bytes remain, picks the buffer half not holding the ready data and starts a read of at most 0x4000 bytes into it
+func_0012FF10	IsReadPending	returns whether the pending length at 0x0C is nonzero
+func_0012FFE8	CommitChunk	after func_0012FF20 reports a finished read, subtracts its length from the remaining bytes and moves the pending length and destination to the ready length and start
+func_00130070	PumpStreamReader	by the source kind calls func_0012FE70 and func_0012FFE8 (kind 0) or func_0012FFE8 and func_0012FE70 (kind 1) on the reader
+func_001300D8	ConsumeStreamBytes	adds its count to the used length at 0x20
+func_00139C70	AcquireOwnedRecord	takes a 0x10C0-byte record from the pool at +0x1B40, clears it, sets its owner (and an extra 0x580-byte record when the owner's mode is 2) and links it into the owner's list at +0x624
+func_00139D28	DetachOwnedRecord	removes the record from its owner's list at +0x624 (owner at 0x108C) and appends it to the list D_002622F0
+func_00153528	InitActiveSetSolver	clears the 0x50-byte solver record, allocates 2n items of 0x60 bytes, makes its four lists and allocates the matrix, factor, right-hand-side and solution arrays
+func_00153A50	PivotActiveSet	up to ten rounds: builds the active items' matrix, calls the factor and solve functions, then moves the item that first reaches a bound between the active, at-low, at-high lists
+func_00153EC0	RunActiveSetSolver	moves the pending items of kind 2 into the active list, calls func_00153A50, then repeatedly takes the pending item with the most negative value (below -0.01) and pivots it in until none is left
+func_00159D00	UpdateColorFade	blends the fade record's start, hold and end colours by the time since its start time and sends the colour request, or clears the running flag and unlinks it when the fade is over
+func_00159ED0	StartColorFade	if the fade record is not running, sets its running flag, stores the clock as its start time and links it into the list at D_00275710 + 0x1CD8
+func_0015DB28	InitTextReader	stores the text and default font in the reader, sets its four colours to 0xFF808080, points the inline font at the font vtable and rewinds it
+func_0015DB80	RewindTextReader	puts the cursor back at the text's start, the font back to the default one and the colours back to the default colour
+func_0015DBB8	SetTextDefaultColor	stores a colour word at +0xA4 of the reader, the colour the codes in the text go back to
+func_0015DBE0	ReadTextChar	returns the next character of the reader's text, applying the ~ colour, & font and ^ scale codes it passes
+func_0015DFF8	SumTextWidth	rewinds the reader and adds the font's width of every character ReadTextChar returns
+func_0015E1B0	MeasureTextHeight	multiplies the default font's height times its scale by the number of lines func_0015E068 counts
+func_0015E290	MeasureText	counts the lines, asks func_0015E1F0 for the width and writes the width and the lines times the default font's line height through its two out pointers
+func_0015E318	DrawAlignedText	measures each line of the reader's text then draws every character with the font inside a layout rectangle, aligning each line left, centre or right and the block top, centre or bottom
+func_00160110	FindEntryById	walks the 46 keyed entries of D_00247AF0 and returns the one whose id equals its argument
+func_00160148	GetEntryName	returns the name field (+0x24) of the entry func_00160110 finds, or D_002623D0 when there is none
+func_001601A0	GetEntryIdByKey	returns the id of the entry func_001600A0 finds, or -1 when there is none
+func_001601D8	GetEntryFlags	returns the flags field (+0x28) of the entry func_00160110 finds, or 0
+func_00160208	CountCategoryFlags	over the entries whose id >> 8 equals the key, counts those with flag bit 2, 4 and 8 into its three out pointers
+D_00247AF0	g_keyedEntries	the table of 46 keyed entries (0x2C bytes each) that func_001600A0, func_00160110 and func_00160208 walk
+func_00168D68	InitBumpAllocator	stores its first argument as the start and the cursor and its second as the limit
+func_00168D78	ResetBumpAllocator	copies the start back into the cursor
+func_00168D88	AllocateBump	returns the cursor and moves it on by the size
+D_002626D8	g_bumpAllocator	a bump allocator set to 0x1E00..0x4000 by func_00168D00, reset by func_00168D78 and read by func_001B3040
+func_001694F8	QueueMeshStrip	fills a 16-byte record from a mesh strip (count, base, node index) in the pool D_0027DC20 or on the stack and, for a linked node, links it into the node's list
+func_00169608	QueueNodeLink	fills a 16-byte record for the node in the pool D_0027DC20 or on the stack and links it into the node's list

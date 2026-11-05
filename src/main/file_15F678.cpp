@@ -9,10 +9,10 @@
 #include "v24a0.h"
 #include "g27c220.h"
 #include "g275f80.h"
-#include "s1600a0.h"
-#include "s18e410.h"
-#include "s1694f8.h"
-#include "s1c30e8.h"
+#include "keyed_entry.h"
+#include "identity_key.h"
+#include "strip_mesh.h"
+#include "vertex_batch.h"
 #include "shapes.h"
 
 struct Owner_15F678
@@ -193,7 +193,7 @@ struct Obj_00161BB0 {
 void func_00162508(void* self);
 void func_001626A8(void* self, u32* value);
 
-S1600A0* func_001600A0(void);
+KeyedEntry* func_001600A0(void);
 
 struct __attribute__((packed)) Word_269984 { u32 value; };
 
@@ -261,8 +261,8 @@ void func_001EE3F0(void* obj, void* text);
 
 void func_001A7E90(void* self);
 
-// the key keeps the file's comparison (S18E410 has no method of its own: the forms differ per file)
-struct Key_160948 : S18E410 {
+// the key keeps the file's comparison (IdentityKey has no method of its own: the forms differ per file)
+struct Key_160948 : IdentityKey {
     s32 Same(Key_160948* o)
     {
         if (this == o) {
@@ -274,7 +274,7 @@ struct Key_160948 : S18E410 {
         if (o == 0) {
             return 0;
         }
-        return ((i[2] ^ i[6]) ^ (o->i[2] ^ o->i[6])) == 0;
+        return ((signedWords[2] ^ signedWords[6]) ^ (o->signedWords[2] ^ o->signedWords[6])) == 0;
     }
 };
 
@@ -634,7 +634,7 @@ struct Info_163ED8 {
     s32 f18;
 };
 struct Hook_163ED8;
-typedef S1694F8_P5* (*HookFn_163ED8)(Hook_163ED8* self, S1694F8_P0* mesh);
+typedef MeshNode* (*HookFn_163ED8)(Hook_163ED8* self, StripMesh* mesh);
 struct Hook_163ED8 {
     HookFn_163ED8* vt;
 };
@@ -691,8 +691,8 @@ void func_001EE668(Pkt_163ED8* s, s32 a, s32 b, void* data, s32 flags);
 void func_001EE718(Pkt_163ED8* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* func_0018D5C0(s32 bytes);
 void func_00163938(s32 mode, Pkt_163ED8* pkt);
-void func_00169608(s32 a, s32 b, S1694F8_P5* node);
-void func_001694F8(S1694F8_P0* mesh, S1694F8_P1* strip, s32 a, s32 b, s32 n, S1694F8_P5* node);
+void func_00169608(s32 a, s32 b, MeshNode* node);
+void func_001694F8(StripMesh* mesh, MeshStrip* strip, s32 a, s32 b, s32 n, MeshNode* node);
 
 void func_001EE3B8(void* obj, s32 size, s32 flags);
 
@@ -820,7 +820,7 @@ struct Info_164868 {
     s32 f18;
 };
 struct Hook_164868;
-typedef S1694F8_P5* (*HookFn_164868)(Hook_164868* self, S1694F8_P0* mesh);
+typedef MeshNode* (*HookFn_164868)(Hook_164868* self, StripMesh* mesh);
 struct Hook_164868 {
     HookFn_164868* vt;
 };
@@ -883,8 +883,8 @@ void func_001EE668(Pkt_164868* s, s32 a, s32 b, void* data, s32 flags);
 void func_001EE718(Pkt_164868* s, s32 a, s32 b, s32 c, s32 d, s32* out);
 void* func_0018D5C0(s32 bytes);
 void func_00163938(s32 mode, Pkt_164868* pkt);
-void func_00169608(s32 a, s32 b, S1694F8_P5* node);
-void func_001694F8(S1694F8_P0* mesh, S1694F8_P1* strip, s32 a, s32 b, s32 n, S1694F8_P5* node);
+void func_00169608(s32 a, s32 b, MeshNode* node);
+void func_001694F8(StripMesh* mesh, MeshStrip* strip, s32 a, s32 b, s32 n, MeshNode* node);
 
 void func_0015F678(Owner_15F678* owner, u8* obj);
 void func_0015F6C0(void* ctx, Owner_15F6C0* self, Owner_15F6C0* other);
@@ -900,7 +900,7 @@ void func_0015FBB8(C02* self, s32 flag);
 void func_0015FF58(void* self);
 void func_00160050(IdLookupObject* obj, s32 value);
 void func_00160070();
-S1600A0* func_001600A0(S1600A0* key);
+KeyedEntry* func_001600A0(KeyedEntry* key);
 void* func_00160110(s32 key);
 void* func_00160148();
 s32 func_00160180(void);
@@ -960,21 +960,21 @@ void func_00161BB0(Obj_00161BB0* self, s32 value);
 void func_00161C00(Self_161C00* self);
 void func_00161F70(Self_161F70* self);
 void func_00162508(Self_162508* self);
-void func_00162680(S1C30E8* body, Vec3_162680* v);
+void func_00162680(VertexBatch* body, Vec3_162680* v);
 void func_001626A8(u8* dst, u8* src);
-void func_001626C0(S1C30E8* dst, U64P* src);
+void func_001626C0(VertexBatch* dst, U64P* src);
 void func_001626D8(Obj_1626D8* self, s32 value);
 void func_00162810(Owner_162810* owner);
 void func_00163938(s32 mode, void* obj);
 void func_00163990(s32 mode, void* obj);
 void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_1639E8* vecs, s32 extra,
                    void* extraData, Ent_1639E8* ents, Vec3_1639E8* verts, void* data, Pkt_1639E8* pkt);
-void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr, S1694F8_P0* mesh,
+void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr, StripMesh* mesh,
                    Vec3_163ED8* vecs, s32 unused6, u8 (*tints)[4], Uv_163ED8* uvs, s32 n, Rec_163ED8* recs,
                    Ent_163ED8* ents, Vec3_163ED8* verts, s32 unused13, f32* weights, Pkt_163ED8* pkt,
                    s32** outs);
 void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hdr_164868* hdr,
-                   S1694F8_P0* mesh, Vec3_164868* vecs, Vec3_164868* nrms, u8 (*tints)[4], Uv_164868* uvs,
+                   StripMesh* mesh, Vec3_164868* vecs, Vec3_164868* nrms, u8 (*tints)[4], Uv_164868* uvs,
                    s32 n, Rec_164868* recs, Ent_164868* ents, Vec3_164868* verts, Vec3_164868* vnrms,
                    f32* weights, Pkt_164868* pkt, s32** outs);
 void func_00165588(Ctx_165588* a, Rec_165588* b, Out_165588* c);
@@ -1202,10 +1202,10 @@ void func_00160070() { func_00160918(); }
 
 LINKER_REMNANT(func_00160090);
 
-S1600A0* func_001600A0(S1600A0* key)
+KeyedEntry* func_001600A0(KeyedEntry* key)
 {
-    S1600A0* p = (S1600A0*)D_00247AF0;
-    S1600A0* end = (S1600A0*)((u8*)D_00247AF0 + 0x7E8);
+    KeyedEntry* p = (KeyedEntry*)D_00247AF0;
+    KeyedEntry* end = (KeyedEntry*)((u8*)D_00247AF0 + 0x7E8);
     s32 m;
 
     do {
@@ -1214,10 +1214,10 @@ S1600A0* func_001600A0(S1600A0* key)
         } else if (key == 0 || p == 0) {
             m = 0;
         } else {
-            m = ((key->key.i[2] ^ key->key.i[6]) ^ (p->key.i[2] ^ p->key.i[6])) == 0;
+            m = ((key->key.signedWords[2] ^ key->key.signedWords[6]) ^ (p->key.signedWords[2] ^ p->key.signedWords[6])) == 0;
         }
         if (!m) {
-            p = (S1600A0*)((u8*)p + 0x2C);
+            p = (KeyedEntry*)((u8*)p + 0x2C);
         } else {
             return p;
         }
@@ -1261,7 +1261,7 @@ s32 func_00160180(void)
 s32 func_001601A0(void)
 {
     s32 v;
-    S1600A0* r = func_001600A0();
+    KeyedEntry* r = func_001600A0();
     v = -1;
     if (r != 0) v = r->id;
     return v;
@@ -1281,14 +1281,14 @@ s32 func_001601D8(void* a0)
 
 void func_00160208(s32 key, s32* a1, s32* a2, s32* a3)
 {
-    S1600A0* p;
-    S1600A0* end;
+    KeyedEntry* p;
+    KeyedEntry* end;
 
     *a3 = 0;
     *a2 = 0;
-    p = (S1600A0*)D_00247AF0;
+    p = (KeyedEntry*)D_00247AF0;
     *a1 = 0;
-    end = (S1600A0*)((u8*)D_00247AF0 + 0x7E8);
+    end = (KeyedEntry*)((u8*)D_00247AF0 + 0x7E8);
     do {
         if ((p->id >> 8) == key) {
             if (p->i28 & 2) {
@@ -2143,7 +2143,7 @@ void func_00162508(Self_162508* self)
     func_00161B80(self);
 }
 
-void func_00162680(S1C30E8* body, Vec3_162680* v)
+void func_00162680(VertexBatch* body, Vec3_162680* v)
 {
     body->x = v->x;
     body->y = v->y;
@@ -2157,9 +2157,9 @@ void func_001626A8(u8* dst, u8* src)
     *(U32P*)(dst + 0x114) = *(U32P*)src;
 }
 
-void func_001626C0(S1C30E8* dst, U64P* src)
+void func_001626C0(VertexBatch* dst, U64P* src)
 {
-    dst->tail.v = src->v;
+    dst->texCoord.v = src->v;
 }
 
 void func_001626D8(Obj_1626D8* self, s32 value)
@@ -2302,7 +2302,7 @@ void func_001639E8(Self_1639E8* self, s32 mode, Hdr_1639E8* hdr, s32 n, Vec3_163
     func_001EE3F0(pkt, D_00000ED8);
 }
 
-void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr, S1694F8_P0* mesh,
+void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr, StripMesh* mesh,
                    Vec3_163ED8* vecs, s32 unused6, u8 (*tints)[4], Uv_163ED8* uvs, s32 n, Rec_163ED8* recs,
                    Ent_163ED8* ents, Vec3_163ED8* verts, s32 unused13, f32* weights, Pkt_163ED8* pkt,
                    s32** outs)
@@ -2323,7 +2323,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
     s32 tinted;
     void* tail;
     void* head;
-    S1694F8_P5* node;
+    MeshNode* node;
     s32 i;
     Rec_163ED8* r;
 
@@ -2495,7 +2495,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
         }
     }
     for (s32 i = 0; i < mesh->nstrips; i++) {
-        S1694F8_P1* s = &mesh->strips[i];
+        MeshStrip* s = &mesh->strips[i];
         func_001EE5C8(pkt, 0xC, s->count, off, &c, &d);
         func_001694F8(mesh, s, d, c, n, node);
         hdr->p->strip[i] = off;
@@ -2509,7 +2509,7 @@ void func_00163ED8(Self_163ED8* self, Obj_163ED8* obj, s32 mode, Hdr_163ED8* hdr
 }
 
 void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hdr_164868* hdr,
-                   S1694F8_P0* mesh, Vec3_164868* vecs, Vec3_164868* nrms, u8 (*tints)[4], Uv_164868* uvs,
+                   StripMesh* mesh, Vec3_164868* vecs, Vec3_164868* nrms, u8 (*tints)[4], Uv_164868* uvs,
                    s32 n, Rec_164868* recs, Ent_164868* ents, Vec3_164868* verts, Vec3_164868* vnrms,
                    f32* weights, Pkt_164868* pkt, s32** outs)
 {
@@ -2528,7 +2528,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     s32 c;
     s32 d;
     s32 off;
-    S1694F8_P5* node;
+    MeshNode* node;
     s32 i;
     Rec_164868* r;
 
@@ -2733,7 +2733,7 @@ void func_00164868(Self_164868* self, Obj_164868* obj, s32 unused2, s32 mode, Hd
     func_001EE3F0(&pkt[2], D_00001AB0);
     s32 slot = 0;
     for (s32 i = 0; i < mesh->nstrips; i++) {
-        S1694F8_P1* s = &mesh->strips[i];
+        MeshStrip* s = &mesh->strips[i];
         func_001EE5C8(&pkt[2], 0xC, s->count, off, &c, &d);
         func_001694F8(mesh, s, d, c, n, node);
         hdr->p->strip[slot++] = off;

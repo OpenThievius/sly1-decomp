@@ -7,7 +7,7 @@
 #include "v24a2.h"
 #include "shapes.h"
 #include "s193210.h"
-#include "s15db28.h"
+#include "text_reader.h"
 #include "layout_137228.h"
 #include "g27c220.h"
 #include "g262c70.h"
@@ -278,11 +278,11 @@ void func_00137260(Layout_137228* out, s32 flag);
 void func_00137268(Layout_137228* out, s32 flag);
 f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
 void func_0015C8B8(V24A2* font, f32 a, f32 b);
-S15DB28* func_0015DB28(S15DB28* out, void* str, V24A2* font);
-void func_0015E318(S15DB28* buf, Layout_137228* out, s32 zero, void* data);
-f32 func_0015E1B0(S15DB28* buf, f32 w);
+TextReader* func_0015DB28(TextReader* out, void* str, V24A2* font);
+void func_0015E318(TextReader* buf, Layout_137228* out, s32 zero, void* data);
+f32 func_0015E1B0(TextReader* buf, f32 w);
 void func_0015C900(V24A2* font);
-f32 func_0015DFF8(S15DB28* buf);
+f32 func_0015DFF8(TextReader* buf);
 char* func_00193598(s32 index);
 void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba_194F80* c, s32 k);
 
@@ -1161,7 +1161,7 @@ void func_00194F80(T217D_6D0* self)
         ((Owner_194F80*)self->frame)->f18 = saved;
     }
     if (menu->title != 0) {
-        S15DB28 buf;
+        TextReader buf;
         Layout_137228 out;
         Rgba_194F80 c;
         f32 sc = menu->titleScale * self->blend;
@@ -1185,7 +1185,7 @@ void func_00194F80(T217D_6D0* self)
     if (menu->vertical == 0) {
         f32 total = 0.0f;
         for (s32 k = 0; k < menu->count; k++) {
-            S15DB28 buf;
+            TextReader buf;
             if (k != 0) {
                 total += (f32)self->font->advance * self->font->sx + (f32)self->font->advance * self->font->sx;
             }
@@ -1218,7 +1218,7 @@ void func_00194F80(T217D_6D0* self)
             col = c;
             grow = 1.0f;
         }
-        S15DB28 buf;
+        TextReader buf;
         str = func_00193598(menu->items[i]);
         func_0015DB28(&buf, str, self->font);
         width = func_0015DFF8(&buf);

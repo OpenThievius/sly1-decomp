@@ -7,7 +7,7 @@
 #include "c05.h"
 #include "c6c.h"
 #include "globals.h"
-#include "s124df8.h"
+#include "object_link.h"
 
 void func_001B7968(C03* self);
 void func_001B93F8(C03* self);
@@ -16,7 +16,7 @@ Node30* func_00129CA8(C30* self);
 // passes it (retail's frame shows the argument live).
 void func_001AEFA0(C30* self, f32 dt);
 
-S124DF8 D_002744B8[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
+ObjectLink D_002744B8[2] = { { 2, 0x28A, 0xAE4 }, { 2, 0x28B, 0xAE8 } };
 
 void func_001BAC30(C03* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -48,7 +48,7 @@ struct Rec_1B0EE0 {
     f32 f554;
 };
 
-S124DF8 D_002744D8[2] = {
+ObjectLink D_002744D8[2] = {
     { 2, 0x28C, 0x5D0 },
     { 2, 0x28D, 0x5D4 },
 };

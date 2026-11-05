@@ -4,9 +4,9 @@
 #include "c49.h"
 #include "g261858.h"
 #include "g264a40.h"
-#include "s124df8.h"
+#include "object_link.h"
 #include "s137290.h"
-#include "s18d410.h"
+#include "key_id.h"
 
 s32 func_0018D1F8(void* self);
 
@@ -1003,8 +1003,8 @@ s32 func_0018CA10(Owner_18CA10* owner, void* a1, Obj_18CA10* a2)
 
 struct Self_18CC20 { u8 pad[16]; };
 struct Key_18CC20 { s32 w0; s32 w4; u8 pad8[0xC]; s32 w14; u8 pad18[4]; s32 w1C; };
-void func_0018D410(S18D410* p);
-struct Pair_18CC20 : S18D410 {
+void func_0018D410(KeyId* p);
+struct Pair_18CC20 : KeyId {
     s32 Set(Key_18CC20* key)
     {
         s32 has;
@@ -1027,8 +1027,8 @@ u8* func_0018D658(s32 size);
 s32 func_00137290(S137290* o, s32 a, u8* b, s32 c);
 s32 func_001E1FD0(char* dst, const char* fmt, ...);
 s32 func_0018D268(Self_18CC20* s, char* a, s32 b, s32* c);
-void func_0018D410(S18D410* p);
-s32 func_001373B0(S137290* o, S18D410* p);
+void func_0018D410(KeyId* p);
+s32 func_001373B0(S137290* o, KeyId* p);
 void func_00137A60(S137290* o, s32 n, u8* d);
 s32 func_0018D328(Self_18CC20* s, s32 a, u8* d, s32 n, s32* out);
 void func_001373D0(S137290* o);
@@ -1337,4 +1337,4 @@ extern const char D_0024B3E0[8] = "%s/%s";
 extern const char D_0024B3E8[24] = "icon.sys";
 
 s32 D_002699A8;
-S124DF8 D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };
+ObjectLink D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };

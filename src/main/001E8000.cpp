@@ -8,8 +8,8 @@
 #include "t217d.h"
 #include "globals.h"
 #include "shapes.h"
-#include "s124df8.h"
-#include "s1d7098.h"
+#include "object_link.h"
+#include "owner_message.h"
 #include "g261858.h"
 #include "g262c70.h"
 #include "g264a40.h"
@@ -63,7 +63,7 @@ void func_001EBCD8(List_1EBCD8* list, const Entry8_1EBCD8* src)
     *dst = *src;
 }
 
-S124DF8 D_00275CA0[4] = {
+ObjectLink D_00275CA0[4] = {
     { 4, 0x4D0, 0x618 }, { 4, 0x4D1, 0x61C }, { 4, 0x4D2, 0x620 }, { 4, 0x4D3, 0x624 }
 };
 void func_00124A48(void* self);
@@ -313,7 +313,7 @@ void func_001EB160(void)
 
 void func_001BAC30(void* self);
 void func_00124DF8(void* self, s32 n, void* data);
-S124DF8 D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
+ObjectLink D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
 
 void func_001EB518(C1C* self)
 {
@@ -476,7 +476,7 @@ void func_001E9E30(C6C* self)
 }
 
 extern u8 D_00261420[];
-S124DF8 D_00275B60[8] = {
+ObjectLink D_00275B60[8] = {
     { 3, 0x2D5, 0xC50 }, { 3, 0x2E7, 0xC60 }, { 7, 0x2E1, 0xC64 }, { 7, 0x2E2, 0xC68 },
     { 7, 0x2E3, 0xC6C }, { 7, 0x2E4, 0xC70 }, { 7, 0x2E5, 0xC74 }, { 7, 0x2E6, 0xC78 }
 };
@@ -764,7 +764,7 @@ void* func_001B6290(void* a, s32 b, s32 c, s32 d);
 void func_001B6DF8(void* a, void* self);
 void* func_0018D568(s32 size, void* name);
 s32 func_0015A418(void* a, s32 b, s32 c, void* self);
-S124DF8 D_00275D08[5] = {
+ObjectLink D_00275D08[5] = {
     { 1, 0x4EB, 0xC50 }, { 0, 0x4E7, 0xC24 }, { 0, 0x4E8, 0xC28 }, { 0, 0x4E9, 0xC2C },
     { 0, 0x4EA, 0xC30 }
 };
@@ -1074,7 +1074,7 @@ void func_001BFCD8(s32 a0, s32 a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f3
 void func_001B64D8(void* a, s32 b);
 s32 func_00160C58(void);
 void func_001929D0(C07* g);
-void func_001D7098(S1D7098* out, s32 mode, C1C* self);
+void func_001D7098(OwnerMessage* out, s32 mode, C1C* self);
 void func_001EB698(void);
 void func_001ED020(C13* o);
 void func_001C0C08(s32 a, s32 b);
@@ -1140,12 +1140,12 @@ void func_001EB748(C1C* self, In_1EB748* in)
             }
             func_001BFCD8(0x51, 0, 0, 0, 30000.0f, 20000.0f, 1.5f, 0.3f, 0.0f, 0, 0);
             if (func_00160C58() == 0 && ((Fn_1EB748*)self->desc)[0x13C / 4](self, 0) == 0) {
-                S1D7098 msg;
+                OwnerMessage msg;
                 C13* o;
                 func_001929D0(D_00262E10);
                 func_001D7098(&msg, 0, self);
                 msg.fn = func_001EB698;
-                ((s32 (*)(C07*, S1D7098*))((GFn_1EB748*)D_00262E10->desc)[0x140 / 4])(D_00262E10, &msg);
+                ((s32 (*)(C07*, OwnerMessage*))((GFn_1EB748*)D_00262E10->desc)[0x140 / 4])(D_00262E10, &msg);
                 o = (C13*)func_0015A838(self->world, 5, 0x13, 0);
                 func_001ED020(o);
                 o->fBFC = D_0026185C[0];

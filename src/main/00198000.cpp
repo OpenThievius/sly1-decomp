@@ -14,8 +14,8 @@
 #include "list_iter.h"
 #include "globals.h"
 #include "g27c220.h"
-#include "s127378.h"
-#include "s1bc320.h"
+#include "object_message.h"
+#include "object_event.h"
 
 void func_001B7968(void* self);
 
@@ -147,13 +147,13 @@ typedef void (*VFn_198EF8)(void* self, void* other);
 struct Ctx_198EF8 {
     VFn_198EF8* vtbl;
     u8 pad_04[0x2230 - 4];
-    S127378* watched_2230;
+    ObjectMessage* watched_2230;
 };
 
 
-void func_00127378(C2C* self, s32 msg, S127378* m);
+void func_00127378(C2C* self, s32 msg, ObjectMessage* m);
 
-void func_00198EF8(C2C* self, s32 msg, S127378* m)
+void func_00198EF8(C2C* self, s32 msg, ObjectMessage* m)
 {
     (void)func_00127378(self, msg, m);
     if (msg == 5) {
@@ -670,16 +670,16 @@ typedef void (*VFnA_199C78)(void* self, s32 a);
 typedef void (*VFnB_199C78)(void* self);
 
 void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-s32 func_001BC320(void* self, S1BC320* ev);
+s32 func_001BC320(void* self, ObjectEvent* ev);
 
-s32 func_00199C78(C2E* self, S1BC320* a1)
+s32 func_00199C78(C2E* self, ObjectEvent* a1)
 {
-    if (a1->fC & 0x8) {
+    if (a1->eventFlags & 0x8) {
         ((VFnA_199C78)((void**)self->desc)[25])(self, 0);
         func_001B9AE0(self, 0, 0, 3, 0);
     }
     func_001BC320(self, a1);
-    if (a1->fC & 0x10) {
+    if (a1->eventFlags & 0x10) {
         ((VFnB_199C78)((void**)self->desc)[77])(self);
     }
     return 1;

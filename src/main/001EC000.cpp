@@ -1405,9 +1405,9 @@ void func_001DDAD0(C6C* x);
 void func_001F0220(G275F80* o, s32 mode);
 
 struct Match_1EFFA0 {
-    static s32 Of(S18E410* t)
+    static s32 Of(IdentityKey* t)
     {
-        S18E410* p;
+        IdentityKey* p;
         p = &D_00275B04;
         if (t == p) {
             return 1;
@@ -1415,13 +1415,13 @@ struct Match_1EFFA0 {
         if (p == 0) {
             return 0;
         }
-        return ((p->i[2] ^ p->i[6]) ^ (t->i[2] ^ t->i[6])) == 0;
+        return ((p->signedWords[2] ^ p->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
     }
 };
 
 void func_001EFFA0(G275F80* dst, S1EFFA0* args, s32 count)
 {
-    S18E410* p;
+    IdentityKey* p;
     s32 mode;
 
     if (dst->mode == 0) {

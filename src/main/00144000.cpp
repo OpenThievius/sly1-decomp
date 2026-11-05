@@ -3,7 +3,7 @@
 #include "c6c.h"
 #include "scaled_offset_object.h"
 #include "g27c220.h"
-#include "s124df8.h"
+#include "object_link.h"
 
 void func_0012AA28(void* a, s32 b);
 void func_001289C0(void* a, void* b);
@@ -228,7 +228,7 @@ void func_00146340(StateNotifier* self)
     self->armed = 1;
 }
 
-S124DF8 D_002619A0[5] = {
+ObjectLink D_002619A0[5] = {
 
     { 0, 0x25F, 0x2E4 },
     { 2, 0x25B, 0x324 },

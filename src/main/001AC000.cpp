@@ -8,7 +8,7 @@
 #include "g27c220.h"
 #include "g275f80.h"
 #include "layout_137228.h"
-#include "s1b2988.h"
+#include "texture_table.h"
 #include "shapes.h"
 
 // The font object's calls (include/v24a2.h will declare them).
@@ -979,7 +979,7 @@ struct Pair_1ADD28 {
 
 struct Hold_1ADD28 {
     u8 pad0[0x14];
-    S1B2988* p14;
+    TextureTable* p14;
 };
 
 
@@ -988,12 +988,12 @@ void func_00161708(Ctx_1ADD28* p, u64 a, u64 b);
 void func_00161458(Ctx_1ADD28* p, u32 rgba);
 void func_001614C8(Ctx_1ADD28* p, s32 a, s32 b);
 void func_001615F0(Ctx_1ADD28* p, s32 a, s32 b, s32 c, s32 d);
-u64 func_001B2988(S1B2988* t, s32 i, s32 j);
+u64 func_001B2988(TextureTable* t, s32 i, s32 j);
 
 void func_001ADD28(T217D_470* self)
 {
     if (self->icon != 0) {
-        S1B2988* sub = ((Hold_1ADD28*)self->icon)->p14;
+        TextureTable* sub = ((Hold_1ADD28*)self->icon)->p14;
         Pair_1ADD28* pr = (Pair_1ADD28*)*sub->p0c;
         u64 v = func_001B2988(sub, 0, 0);
         u8 rgba[4];

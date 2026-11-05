@@ -4,11 +4,11 @@
 #include "c3b.h"
 #include "t2195.h"
 #include "shapes.h"
-#include "s124df8.h"
-#include "s12fcf0.h"
-#include "s130070.h"
-#include "s18d410.h"
-#include "s18e410.h"
+#include "object_link.h"
+#include "stream_reader.h"
+#include "stream_reader_window.h"
+#include "key_id.h"
+#include "identity_key.h"
 #include "g262c70.h"
 #include "g27c220.h"
 #include "globals.h"
@@ -77,7 +77,7 @@ struct Movie_269A00 {
     u8 pad144[4];  // to the label after it, D_00269B48
 };
 
-S124DF8 D_002699B0[1] = { { 2, 0x317, 0x6B0 } };
+ObjectLink D_002699B0[1] = { { 2, 0x317, 0x6B0 } };
 f32 D_002699BC = 0.5f;
 const char* D_002699C0[16] = {
     "The Secret Police File",
@@ -273,27 +273,27 @@ struct Obj_18ECA8 { u8 pad0[0x60]; u8 sub[0x14]; s32 f74; };
 void* func_001F5C0C(void* dst, s32 value, s32 size);
 void func_0013CC48(void* queue, s32 n);
 
-void func_0018D410(S18D410* p);
+void func_0018D410(KeyId* p);
 struct Same_18F198 {
-    static s32 Of(S18E410* a, S18E410* b)
+    static s32 Of(IdentityKey* a, IdentityKey* b)
     {
         if (a == b) return 1;
         if (!a) return 0;
         if (!b) return 0;
-        return ((a->w[2] ^ a->w[6]) ^ (b->w[2] ^ b->w[6])) == 0;
+        return ((a->words[2] ^ a->words[6]) ^ (b->words[2] ^ b->words[6])) == 0;
     }
 };
 struct Fill_18F198 {
-    static s32 Of(S18D410* p, S18E410* key)
+    static s32 Of(KeyId* p, IdentityKey* key)
     {
         func_0018D410(p);
         s32 ok;
         if (!key) {
             ok = 0;
         } else {
-            u32 t = key->w[1] ^ key->w[7];
+            u32 t = key->words[1] ^ key->words[7];
             p->k1 = t;
-            p->k0 = key->w[0] ^ key->w[5];
+            p->k0 = key->words[0] ^ key->words[5];
             ok = t != 0;
         }
         return ok;
@@ -310,18 +310,18 @@ extern u8 D_00275F80[];
 extern s32 D_002613EC;
 
 void func_00191E70(s32 v);
-void func_0012FCF0(S12FCF0* o, u8* d);
-s32 func_0012FD78(S12FCF0* o, S18D410* k);
+void func_0012FCF0(StreamReader* o, u8* d);
+s32 func_0012FD78(StreamReader* o, KeyId* k);
 void func_0016EC20(G262C70* d, s32 n);
 void func_00143030(u8* t);
 void func_0016E238(G262C70* d);
 s32 func_001F00F0(u8* a, G262C70* b, s32 c);
 void func_001409E0();
 s32 func_0020B0B0(u8* l);
-void func_0012FDE8(S12FCF0* o);
+void func_0012FDE8(StreamReader* o);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00191EB0(s32 v);
-void func_0012FD30(S12FCF0* o, s32 f);
+void func_0012FD30(StreamReader* o, s32 f);
 
 extern u8 D_002C2B00[];
 extern u8 D_002832F0[];
@@ -342,13 +342,13 @@ struct Frame_18EDA8 { u8 buf[0x30]; };
 void func_00189350(void* a, void* b);
 s32 func_001BC088(C03* self, f32 x, void* b);
 
-struct Object_18F890 { u8 pad00[0x0C]; S130070* buffer; u8 pad10[4]; };
+struct Object_18F890 { u8 pad00[0x0C]; StreamReaderWindow* buffer; u8 pad10[4]; };
 struct Empty_18F890 {
-    static bool Of(S130070* b) { return b->head == b->tail; }
+    static bool Of(StreamReaderWindow* b) { return b->readyLength == b->usedLength; }
 };
-void func_00130070(S130070*);
+void func_00130070(StreamReaderWindow*);
 s32 func_0020A518(void*, s32, s32);
-void func_001300D8(S130070*, s32);
+void func_001300D8(StreamReaderWindow*, s32);
 
 struct Obj_18F6E8 {
     u8 pad0[0x10];
@@ -391,7 +391,7 @@ void func_0020AE40(void* self, void* a, s32 b);
 void func_0020A538(void* self, s32 a, s32 b, void* fn, void* arg);
 void func_0020B168(void* self, s32 a, void* fn, void* arg);
 
-s32 func_0018E410(S18E410* key);
+s32 func_0018E410(IdentityKey* key);
 u8* func_0018E480(s32 index);
 void func_0018E4C0(s32 idx);
 void func_0018E4F0(s32 idx, u32 n);
@@ -415,7 +415,7 @@ void func_0018EDA8(void* p, s32 addr, s32 w, s32 h);
 void func_0018EF78(void* self, s32 a1, s32 a2);
 void func_0018F0E8(void* self, void* p);
 void func_0018F148(Obj_18F148* self);
-void func_0018F198(Self_18F198* self, S18E410* key);
+void func_0018F198(Self_18F198* self, IdentityKey* key);
 void func_0018F448(Obj_18F448* self, void* v);
 void func_0018F610(Obj_18F610* self);
 void func_0018F6E8(Obj_18F6E8* self);
@@ -546,9 +546,9 @@ ASM_FUNC(func_0018DEE8);
 
 ASM_FUNC(func_0018E040);
 
-s32 func_0018E410(S18E410* key)
+s32 func_0018E410(IdentityKey* key)
 {
-    S18E410* p = (S18E410*)(u8*)D_002484B0;
+    IdentityKey* p = (IdentityKey*)(u8*)D_002484B0;
     s32 i = 0;
     s32 m;
 
@@ -558,7 +558,7 @@ s32 func_0018E410(S18E410* key)
         } else if (p == 0 || key == 0) {
             m = 0;
         } else {
-            m = ((p->i[2] ^ p->i[6]) ^ (key->i[2] ^ key->i[6])) == 0;
+            m = ((p->signedWords[2] ^ p->signedWords[6]) ^ (key->signedWords[2] ^ key->signedWords[6])) == 0;
         }
         if (!m) {
             i++;
@@ -929,7 +929,7 @@ void func_0018F0E8(void* self, void* p)
         return;
     }
     *(void**)((u8*)self + 4) = p;
-    v = func_0018E410((S18E410*)p);
+    v = func_0018E410((IdentityKey*)p);
     if ((u32)v >= 16) {
         m = 0;
     } else {
@@ -944,16 +944,16 @@ void func_0018F148(Obj_18F148* self)
     s32 first = self->f04;
     self->f04 = 0;
     self->f08 = 0;
-    func_0018F198((Self_18F198*)self, (S18E410*)first);
+    func_0018F198((Self_18F198*)self, (IdentityKey*)first);
     if (pending != 0) {
-        func_0018F198((Self_18F198*)self, (S18E410*)pending);
+        func_0018F198((Self_18F198*)self, (IdentityKey*)pending);
     }
 }
 
-void func_0018F198(Self_18F198* self, S18E410* key)
+void func_0018F198(Self_18F198* self, IdentityKey* key)
 {
-    S12FCF0 loc;
-    S18D410 pr;
+    StreamReader loc;
+    KeyId pr;
     func_00191E70(4);
     self->mode = func_0018E410(key);
     func_0012FCF0(&loc, D_002C3B00);
@@ -1114,9 +1114,9 @@ s32 func_0018F890(Object_18F890* self, s32 wait)
         if (Empty_18F890::Of(self->buffer) && !wait) return 0;
     }
     func_001F6C20(0);
-    S130070* buffer = self->buffer;
-    s32 count = buffer->head - buffer->tail;
-    s32 result = func_0020A518(self->pad10, buffer->base + buffer->tail, count);
+    StreamReaderWindow* buffer = self->buffer;
+    s32 count = buffer->readyLength - buffer->usedLength;
+    s32 result = func_0020A518(self->pad10, buffer->readyStart + buffer->usedLength, count);
     func_001300D8(self->buffer, result);
     return result;
 }

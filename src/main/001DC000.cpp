@@ -10,8 +10,8 @@
 #include "globals.h"
 #include "g27c220.h"
 #include "g248748.h"
-#include "s192230.h"
-#include "s1d7098.h"
+#include "message_body.h"
+#include "owner_message.h"
 #include "shapes.h"
 
 s32 func_00160850(void* obj);
@@ -455,24 +455,24 @@ struct Dev_001DFB08 {
 
 void func_001B6598(void* dev, s32* out);
 void func_001B6568(void* dev, s32* out);
-void func_00192230(void* self, s32 kind, S192230* rec);
+void func_00192230(void* self, s32 kind, MessageBody* rec);
 
-void func_001DFB08(C14* self, s32 code, S192230* rec)
+void func_001DFB08(C14* self, s32 code, MessageBody* rec)
 {
     s32 loc[2];
 
     if (code != 0x13) {
         if (code == 0x14) {
-            if (rec == (S192230*)((Dev_001DFB08*)self->f75C)) {
+            if (rec == (MessageBody*)((Dev_001DFB08*)self->f75C)) {
                 func_001B6598(rec, &loc[0]);
                 func_001B6568(((Dev_001DFB08*)self->f75C), &loc[1]);
             }
         }
     } else {
         Dev_001DFB08* dev = ((Dev_001DFB08*)self->f75C);
-        s32 key = rec->f0;
+        s32 key = rec->sourceId;
         if (dev != 0 && key == dev->f24) {
-            s32 kind = rec->f8;
+            s32 kind = rec->code;
             if (kind != 0x15E) {
                 if (kind == 0x15F) {
                     self->f738 = 0;
@@ -1029,14 +1029,14 @@ extern f32 D_002757D4;
 void func_001C4ED0(void);
 s32 func_00128230(C14* self);
 void func_001DEB30(C14* self);
-void func_001D7098(S1D7098* l, s32 zero, C03* c);
+void func_001D7098(OwnerMessage* l, s32 zero, C03* c);
 void func_001861E8(Pa_1DE910* a0, Contact03* a1);
 void func_00129E10(Pb_1DE910* a, f32 v);
 void func_00129FB0(Pb_1DE910* a, f32 v);
 
 void func_001DE910(C14* self)
 {
-    S1D7098 loc;
+    OwnerMessage loc;
     f32 f20;
     Contact03* s1;
     C03* s0;

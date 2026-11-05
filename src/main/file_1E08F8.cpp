@@ -6,9 +6,9 @@
 #include "t2173.h"
 #include "globals.h"
 #include "s137290.h"
-#include "s18d410.h"
+#include "key_id.h"
 #include "s193210.h"
-#include "s1d7190.h"
+#include "output_buffer.h"
 
 
 void func_001D7120(u8* buf, char* dst, s32 cap);
@@ -212,12 +212,12 @@ struct Locals_1E1DB8 {
 
 struct Str_1E1DB8;
 
-void func_001D72C8(S1D7190* ctx);
-s32 func_001D7190(S1D7190* ctx, const char* p, s32 n);
+void func_001D72C8(OutputBuffer* ctx);
+s32 func_001D7190(OutputBuffer* ctx, const char* p, s32 n);
 char* func_001E21D8(Str_1E1DB8* s, s32 c);
 s32 func_001E2100(Str_1E1DB8* s);
 s32 func_001E0978(const char* at, u8* spec, void* va);
-void func_001E1A08(u8* spec, S1D7190* ctx, void* va, const char* at, s32 len);
+void func_001E1A08(u8* spec, OutputBuffer* ctx, void* va, const char* at, s32 len);
 
 
 
@@ -256,7 +256,7 @@ s32 func_001E0E18(Fmt_1E1028* self, Val_1E1028* v);
 s32 func_001E2100(char* p);
 s32 func_001E0EF8(s8 c);
 s32 func_001E0F58(char* buf, s32 len, u64 value, u32 radix);
-s32 func_001D7190(S1D7190* sink, const char* p, s32 n);
+s32 func_001D7190(OutputBuffer* sink, const char* p, s32 n);
 void func_001E2218(char* p);
 
 
@@ -292,18 +292,18 @@ struct Spec_001E1A08 {
 
 
 s32 func_001E2100(const char* s);
-s32 func_001D7190(S1D7190* c, const char* s, s32 n);
-void func_001E0CD0(Spec_001E1A08* sp, S1D7190* c, const char* s);
-void func_001E1028(Spec_001E1A08* sp, S1D7190* c, u64 v);
-void func_001E17A8(Spec_001E1A08* sp, S1D7190* c, s64 s);
-void func_001E17A8(Spec_001E1A08* sp, S1D7190* c, double value);
+s32 func_001D7190(OutputBuffer* c, const char* s, s32 n);
+void func_001E0CD0(Spec_001E1A08* sp, OutputBuffer* c, const char* s);
+void func_001E1028(Spec_001E1A08* sp, OutputBuffer* c, u64 v);
+void func_001E17A8(Spec_001E1A08* sp, OutputBuffer* c, s64 s);
+void func_001E17A8(Spec_001E1A08* sp, OutputBuffer* c, double value);
 s32 func_001E1498(char* buf, s32 n, Spec_001E1A08* sp, double value);
 void func_001E2218(char* p);
 double func_001FD868(f32 f);
 
 
 
-struct Ctx_1E0CD0 : S1D7190 {
+struct Ctx_1E0CD0 : OutputBuffer {
     void Pad(u8 ch, s32 count)
     {
         u8 buf = ch;
@@ -466,11 +466,11 @@ extern Cur2_1E4EA8* D_002623C0;
 extern Pl_1E4EA8 D_00264A40;
 
 void func_00191E70(s32 a);
-void func_0018D410(S18D410* q);
+void func_0018D410(KeyId* q);
 S193210* func_00193210(S193210* q, U32P* a, U32P* b, U32P* c, U32P* d);
 void func_00137290(S137290* q, s32 a, u8* b, s32 c);
 void func_00193270(void* q);
-s32 func_001373B0(S137290* q, S18D410* k);
+s32 func_001373B0(S137290* q, KeyId* k);
 void func_001372E0(S137290* q, s32 n);
 void func_001DB838(C6C* q);
 void func_001DB928(s32 a, S137290* q);
@@ -818,7 +818,7 @@ s32 func_001E0F58(u8* buf, s32 len, u64 value, u32 radixArg)
 }
 
 
-void func_001E1028(Fmt_1E1028* self, S1D7190* sink, u64 value)
+void func_001E1028(Fmt_1E1028* self, OutputBuffer* sink, u64 value)
 {
     char buf[0x50];
     char pfx[0x10];
@@ -1023,7 +1023,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
 }
 
 
-void func_001E17A8(Spec_001E1A08* spec, S1D7190* ctx, double value)
+void func_001E17A8(Spec_001E1A08* spec, OutputBuffer* ctx, double value)
 {
     char buf[0x1C0];
     char sign[16];
@@ -1082,7 +1082,7 @@ void func_001E17A8(Spec_001E1A08* spec, S1D7190* ctx, double value)
 }
 
 
-void func_001E1A08(Spec_001E1A08* sp, S1D7190* c, u8** va, const char* fmt, s32 len) {
+void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt, s32 len) {
     u64 v;
     switch (sp->ch) {
     case '%':
@@ -1168,7 +1168,7 @@ void func_001E1A08(Spec_001E1A08* sp, S1D7190* c, u8** va, const char* fmt, s32 
 }
 
 
-s32 func_001E1DB8(S1D7190* ctx, const char* fmt, void* a2)
+s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
 {
     Locals_1E1DB8 loc;
     const char* s1 = fmt;
@@ -1563,7 +1563,7 @@ void func_001E4E80(Blk_1E4E80* self, s32 a1, s32 a2, s32 a3, s32 a4)
 
 void func_001E4EA8(Self_1E4EA8* self)
 {
-    S18D410 key;
+    KeyId key;
     Blob_1E4EA8 blob;
     S193210 o30;
     U32P w60, w70, w80, w90;

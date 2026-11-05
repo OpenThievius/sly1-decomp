@@ -4,12 +4,12 @@
 // func_00162680, func_001626A8, func_001626C0 and func_001626D8 (file_15F678.cpp). Written for this
 // project from what retail's code does (build/swarm/st3/groups.tsv, g4664). Only a few of its
 // words are known; the frame gives the size, no code checks it.
-#ifndef S1C30E8_H
-#define S1C30E8_H
+#ifndef VERTEX_BATCH_H
+#define VERTEX_BATCH_H
 
 #include "shapes.h"
 
-struct S1C30E8 {
+struct VertexBatch {
     u8 pad000[0x98];
     s32 f98;                // 0x98: func_001C30E8
     u8 pad09C[0xFC - 0x9C];
@@ -17,7 +17,7 @@ struct S1C30E8 {
     f32 y;                  // 0x100
     f32 z;                  // 0x104
     u8 pad108[0x118 - 0x108];
-    U64P tail;              // 0x118: func_001626C0 (ldl/ldr)
+    U64P texCoord;          // 0x118: func_001626C0 (ldl/ldr; the pair of floats the caller copies in)
     u8 pad120[0x1850 - 0x120];
 };
 

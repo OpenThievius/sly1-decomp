@@ -9,21 +9,21 @@
 // D_00248490 is one (0018C000.cpp defines it), D_00275B04 another (its label is 0x1C bytes: its
 // readers stop at the seventh word), and every entry of D_00247AF0 begins with one (s1600a0.h).
 // The same-key test stays with its views: their forms differ (Key_160948 also tests this).
-#ifndef S18E410_H
-#define S18E410_H
+#ifndef IDENTITY_KEY_H
+#define IDENTITY_KEY_H
 
 #include "common.h"
 
-struct S18E410 {
+struct IdentityKey {
     union {
-        u32 w[8];           // 0x00: Key_18F198, Entry_247AF0 (u32)
-        s32 i[8];           // 0x00: Ent_18E410, Key_1F00F0, Key_160948, Ent_1600A0 (s32 words 2 and 6)
+        u32 words[8];           // 0x00: Key_18F198, Entry_247AF0 (u32)
+        s32 signedWords[8];           // 0x00: Ent_18E410, Key_1F00F0, Key_160948, Ent_1600A0 (s32 words 2 and 6)
     };
 };
 
-typedef char check_S18E410[sizeof(S18E410) == 0x20 ? 1 : -1];
+typedef char check_IdentityKey[sizeof(IdentityKey) == 0x20 ? 1 : -1];
 
-extern S18E410 D_00248490;      // 0018C000.cpp
-extern S18E410 D_00275B04;      // 001F0000.cpp, file_15F678.cpp (label of 0x1C bytes)
+extern IdentityKey D_00248490;      // 0018C000.cpp
+extern IdentityKey D_00275B04;      // 001F0000.cpp, file_15F678.cpp (label of 0x1C bytes)
 
 #endif

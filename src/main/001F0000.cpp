@@ -11,7 +11,7 @@
 #include "g27c220.h"
 #include "g275f80.h"
 #include "g262c70.h"
-#include "s124df8.h"
+#include "object_link.h"
 
 extern s32 D_00275BF0;
 
@@ -591,7 +591,7 @@ s32 func_001F0580(void* self, s32 code)
 }
 
 struct Same_1F00F0 {
-    static s32 Of(S18E410* t, S18E410* o)
+    static s32 Of(IdentityKey* t, IdentityKey* o)
     {
         if (t == o) {
             return 1;
@@ -599,7 +599,7 @@ struct Same_1F00F0 {
         if (o == 0) {
             return 0;
         }
-        return ((o->i[2] ^ o->i[6]) ^ (t->i[2] ^ t->i[6])) == 0;
+        return ((o->signedWords[2] ^ o->signedWords[6]) ^ (t->signedWords[2] ^ t->signedWords[6])) == 0;
     }
 };
 
@@ -619,7 +619,7 @@ s32 func_001F00F0(G275F80* self, G262C70* o, void* param2)
         *(Blk20_1F00F0*)&self->cur = *(Blk20_1F00F0*)&self->saved;
         self->f24 = self->last;
         S1EFFA0* rr = &self->cur;
-        S18E410* kk = rr->key;
+        IdentityKey* kk = rr->key;
         if (kk == 0 || Same_1F00F0::Of(kk, &D_00275B04)) {
             rr->flags |= 8;
         } else {
@@ -1448,7 +1448,7 @@ void func_001F1E38(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s32* c
 
 // Globals defined from C.
 s32 D_00275FC8[6] = { 0, 2, 4, 4, 4, 0 };
-S124DF8 D_00275FE0[52] = {
+ObjectLink D_00275FE0[52] = {
     { 0x2, 0x1CB, 0x2E4 },
     { 0x2, 0x1CC, 0x2E8 },
     { 0x2, 0x1CD, 0x2F8 },
