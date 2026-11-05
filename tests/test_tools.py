@@ -371,6 +371,16 @@ class ProgressCountTest(unittest.TestCase):
         self.assertLessEqual(len(pal), len(progress.original_asm("us")))
 
 
+class ExitNoteTest(unittest.TestCase):
+    """A failed compile step says its exit code, and names a crash of the compiler's stack."""
+
+    def test_the_note_says_the_code_and_names_a_stack_crash(self):
+        self.assertEqual(compile.exit_note(0), "")
+        self.assertEqual(compile.exit_note(1), " (exit 1)")
+        self.assertIn("1 MiB stack", compile.exit_note(-11))
+        self.assertIn("1 MiB stack", compile.exit_note(0xC00000FD))
+
+
 class CompilerTagTest(unittest.TestCase):
     """`compiler` marks Sony's library code; config/cflags.tsv builds it with Sony's compiler."""
 

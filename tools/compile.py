@@ -177,6 +177,17 @@ def linux_runner(mounts):
     return cmd + ["-w", str(ROOT.resolve()), LINUX_IMAGE]
 
 
+def exit_note(code):
+    """What a step's exit code says, for its error. cc1plus.exe reserves a 1 MiB stack (its PE
+    header): a very large function can overflow it, which wibo reports as SIGSEGV and Windows as
+    STATUS_STACK_OVERFLOW (0xC00000FD)."""
+    if not code:
+        return ""
+    if code in (-signal.SIGSEGV, 0xC00000FD, 0xC00000FD - (1 << 32)):
+        return " (exit %d: crashed, likely cc1plus.exe's 1 MiB stack overflowing)" % code
+    return " (exit %d)" % code
+
+
 def run_step(cmd, **kw):
     """Run one step with the time limit; a hung step is killed and raises CompileError.
 
@@ -255,7 +266,8 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
                           (compiler + ["-quiet"] + flags + ([] if whole else LAYOUT_FLAGS) + [str(ii), "-o", str(s)], "cc1plus")):
             proc = run_step(cmd, cwd=ROOT)
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
-                raise CompileError((proc.stderr or proc.stdout).strip() or "%s failed" % name)
+                raise CompileError(((proc.stderr or proc.stdout).strip() or "%s failed" % name)
+                                   + exit_note(proc.returncode))
         asm = s.read_text()
         placed = place_remnants(asm)
         if placed != asm:
