@@ -32,21 +32,8 @@ void func_00183F40(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d)
 
 void func_001830D8(void* self);
 
-void func_00180F20(C72* self)
-{
-    Keep6E saved = self->keep;
-    CopyObjectData(self);
-    self->keep = saved;
-}
-
 void func_00192C58(void* self);
 void func_00181DA8(C1A* self, s32 n);
-
-void func_00181AF0(C1A* self)
-{
-    func_00192C58(self);
-    SetModeWalkerMode(self, 1);
-}
 
 void func_00182D00(BaseObject* self)
 {
@@ -110,7 +97,6 @@ void func_001C5D58(void* obj);
 void func_00175170(void* obj, s32 a, s32 b);
 
 extern f32 D_00264180[];
-f32 D_00264190 = 150.0f;
 
 struct Vec_181B20 {
     f32 x;
@@ -125,44 +111,13 @@ struct Obj_181B20 {
     f32 x638;
 };
 
-void func_00181B20(void* unused, void* obj_)
-{
-    Obj_181B20* obj = (Obj_181B20*)obj_;
-    Vec_181B20 first;
-    Vec_181B20 second;
-
-    func_00128018(unused, 0, D_00264180, &first);
-    func_001BC260(D_00264190, obj, &first, &second);
-    ((void (*)(void*, void*))obj->vtbl[0x90 / 4])(obj, &second);
-    f32 r = func_00205778(second.y, second.x);
-    obj->x638 = WrapAngle(r + 3.1415927f);
-    func_001C5D58(obj);
-    func_00175170(obj, 4, 0x2B);
-}
-
 void func_001BC4D8(void* self, void* sub);
-
-void func_00181D88(C1A* self)
-{
-    ExtractContactsByPartMode(self, (u8*)self + 0xC04);
-}
 
 void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 a, void* table);
 s32 func_001B6290(void* a0, void* self, s32 b, s32 c);
 s32 func_00121160(s32 a);
 void* func_0018D500(s32 size);
-
-void func_001824D8(C24* self)
-{
-    func_0013CE40(self);
-    ResolveObjectLinks(self, 2, D_00264230);
-    self->x6C8 = (StateWalker*)CreateStateWalker(self->x6C4, self, 0x36E, 0);
-    Alloc24* n = (Alloc24*)CreateWeightCurve(0);
-    self->x6E8 = n;
-    n->field8 = 0;
-    self->x6E8->field_c = AllocateFrontMemory(0xC00);
-}
 
 void func_00182C18(BaseObject* self)
 {
@@ -380,12 +335,6 @@ void func_00183E40(ConeVolume* self)
 void func_00182D48(void* self);
 void func_00152470(u8* table, void* self);
 
-void func_00180EB0(C72* self)
-{
-    RegisterObject(self);
-    AppendToList(&self->world->list1C9C, self);
-}
-
 void func_00182D48(BaseObject* self)
 {
     (void)self;
@@ -448,19 +397,7 @@ s32 func_00183438(BaseObject* self)
 void func_00182ED0(void* self);
 void func_00152600(u8* table, void* self);
 
-void func_00180EE8(C72* self)
-{
-    UnregisterObject(self);
-    RemoveFromList(&self->world->list1C9C, self);
-}
-
 void func_001D73A8(void* self);
-
-void func_00180F68(C1A* self)
-{
-    func_001D73A8(self);
-    self->fBF4 = -10.0f;
-}
 
 void* func_0018D500(s32 size);
 
@@ -527,55 +464,16 @@ void func_00183910(BaseObject* a0, s32 a1, s32 a2)
     DestroyScriptValue(&a, 2);
 }
 
-s32 func_00181AE0(C1A* p) { return p->fBF0 != 0; }
-
 void func_001DAE48(void);
 
 struct __attribute__((aligned(16))) Quad_181A58 { s32 q[4]; };
 struct Inner_181A58 { u8 pad000[0x140]; Quad_181A58 q140; };
 
-void func_00181A58(C1A* self, void* outv)
-{
-    Quad_181A58* out = (Quad_181A58*)((u8*)outv + 0x10);
-    func_001DAE48();
-    *out = ((Inner_181A58*)self->fBC0)->q140;
-}
-
 struct Sub_181D28 { u8 pad0[0x24]; s32 f24; };
 
 void func_001DAF08(void* self, s32 code, MessageBody* rec);
 
-void func_00181D28(C1A* self, s32 code, MessageBody* rec)
-{
-    if (code == 0x13) {
-        Sub_181D28* sub = ((Sub_181D28*)self->fBBC);
-        s32 key = rec->sourceId;
-        if (sub != 0 && key == sub->f24) {
-            s32 kind = rec->code;
-            if (kind != 0x15E) {
-                if (kind == 0x15F) {
-                    self->fC00 = 0;
-                }
-            } else {
-                self->fC00 = 1;
-            }
-        }
-    }
-    func_001DAF08(self, code, rec);
-}
-
 void func_0013DDB8(void* self);
-
-void func_00182470(C24* self)
-{
-    func_0013DDB8(self);
-    self->f6DC = 10.0f;
-    self->f6E0 = 1.0f;
-    self->f6D8 = 3000.0f;
-    self->f6CC = 1000.0f;
-    self->f6D0 = 0;
-    self->f6D4 = 0.5f;
-}
 
 void func_00152470(List01* list, BaseObject* item);
 
@@ -712,51 +610,6 @@ extern f32 D_0026185C;
 struct Vt_181BC8 { void** vt; };
 struct Loc_181BC8 { void* self; s32 val; s32 pad8; Fn_181BC8 fn; };
 
-s32 func_00181BC8(C1A* self, s32* arg)
-{
-    Loc_181BC8 loc;
-    s32 r;
-    Player* g;
-    Vt_181BC8* gp;
-    VFnP_181BC8 f;
-    void** vt2;
-
-    if (((VFnQ_181BC8)((void**)self->desc)[79])(self, arg[0])) {
-        return 0;
-    }
-    if (func_00160C58()) {
-        self->fBF0 = 1;
-    }
-    self->fBF4 = g_gameTime;
-    r = func_00160C58();
-    if (r == 0) {
-        g = g_player;
-        if (g != 0) {
-            goto then_block;
-        }
-    }
-    SetModeWalkerMode(self, 2);
-    goto tail;
-then_block:
-    ((VFnV_181BC8)((Vt_181BC8*)g_player)->vt[6])((void*)g_player);
-    ((VFnP_181BC8)((Vt_181BC8*)g_player)->vt[35])((void*)g_player, self->fBC8);
-    ((VFnV_181BC8)((Vt_181BC8*)self->fBC8)->vt[7])(self->fBC8);
-    SetSwitchedColliderEnabled((void*)g_player, 1);
-    func_00175170((void*)g_player, 2, 2);
-    ActivateSwitchedCollider((void*)g_player);
-    SetModeWalkerMode(self, 3);
-    InitOwnerMessage(&loc, 0, self);
-    gp = (Vt_181BC8*)g_player;
-    gp = (Vt_181BC8*)g_player;
-    loc.fn = func_00181B20;
-    (void)((VFnR_181BC8)gp->vt[80])(gp, &loc);
-tail:
-    loc.self = self;
-    loc.val = arg[1];
-    ((VFnPPP_181BC8)self->desc->m0E)(self, 0x17, &loc);
-    return 1;
-}
-
 typedef s32 (*Fn_181448)(C1A*, void*, void*);
 struct Vt_181448 { u8 pad0[0x12C]; Fn_181448 f12C; };
 struct Slot_181448 { Collider* p; u8 pad[0x3C]; };
@@ -768,8 +621,6 @@ struct Node_181448 {
 };
 
 extern f32 D_00261858[];
-f32 D_00264140[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
-f32 D_00264150[1] = { 6.0f };
 extern f32 D_00264154[];
 extern f32 D_00275C60[];
 
@@ -778,43 +629,6 @@ void func_001D7098(void* out, s32 mode, Collider* c);
 void func_001861E8(void* a, void* head);
 void func_00129E10(void* o, f32 v);
 void func_00129FB0(void* o, f32 v);
-
-void func_00181448(C1A* self, f32 dt)
-{
-    s32 buf[4];
-    UpdatePathFollower(self, dt);
-    if (self->fC04 != 0) {
-        Node_181448* n = (Node_181448*)self->fC04;
-        do {
-            s32 j = (n->owner != self);
-            Collider* c = n->s[1 - j].p;
-            while (c != 0 && c->f4E0 == 0) c = (Collider*)c->parent;
-            if (c != 0 && (c->f4E0 == 1 || c->f4E0 == 4)) {
-                InitOwnerMessage(buf, 0, c);
-                while (c != 0) {
-                    if (((Vt_181448*)c->desc)->f12C((C1A*)c, n, buf) != 0) break;
-                    c = (Collider*)c->parent;
-                }
-                ((Desc05*)self->desc)->m4C(self, buf);
-            }
-            n = n->next;
-        } while (n != 0);
-        FreePooledContactChain(self->world, self->fC04);
-        self->fC04 = 0;
-    }
-    f32 t = g_gameClock[1] - self->fBF4;
-    f32 v = D_00264140[0] + t * (D_00264140[1] + t * D_00264140[2]);
-    f32* r = g_unitRange;
-    f32 lo = g_unitRange[0];
-    f32 hi = r[1];
-    f32 x;
-    if (v < lo) x = lo;
-    else if (hi < v) x = hi;
-    else x = v;
-    func_00129E10(self->fBCC, x * D_00264150[0]);
-    func_00129FB0(self->fBCC, x * D_00264154[0]);
-    if (self->fBF0 != 0 && self->fBB0 != 2 && g_gameClock[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
-}
 
 struct Link_1834A0 { s32 a; void* b; Link_1834A0* next; };
 struct Mid_1834A0 { s32 pad0; void* kind; Link_1834A0* head; };
@@ -873,12 +687,6 @@ void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list)
 
 s32 func_001DDA80(void* p);
 
-s32 func_00181A98(C1A* self)
-{
-    if (self->fBB0 != 1 || self->fBF0 != 0 || func_001DDA80(self->world) != 0) return 1;
-    return 0;
-}
-
 typedef void (*VFn_180F98)(void* self);
 
 struct Vt_180F98 {
@@ -893,23 +701,6 @@ void func_00129D00(void* a, s32 b, void* c);
 void func_00128018(void* a, void* b, void* c, void* d);
 void func_00181DA8(C1A* self, s32 n);
 s32 func_001B4688(s32 key);
-
-void func_00180F98(C1A* self)
-{
-    func_001D7440(self);
-    ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
-    self->fBBC = (StateWalker*)CreateStateWalker(self->fBB8, self, -1, 0);
-    AddMatrixAttachment(self->fBCC, 5, &self->fBD0);
-    ((u8*)self->fBD0)[0x10] = 9;
-    ((u8*)self->fBD0)[0x11] = 9;
-    ((Vt_180F98*)self->fBCC)->vtbl[0xBC / 4](self->fBCC);
-    func_00128018(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
-    SetModeWalkerMode(self, 1);
-    self->f864 = 3.4028234663852886e+38f;
-    T217D_BF0* base = &D_00270650;
-    ((Packed_180F98*)&base->f288)->v = 0.0f;
-    base->icon = FindAnimRecord(0x36A);
-}
 
 void func_00183350(BaseObject* self, s32 kind, void* arg)
 {
@@ -980,53 +771,8 @@ void func_00183CC8(ConeVolume* self)
 // EXACT: switch (mode) for the call dispatch; flag tail as mode==0, mode<0, mode>=4, mode>=2 chain
 
 extern f32 D_00261858[];
-extern const f32 D_0024B168 = 3.4028235e+38f;
 void func_001B64D8(void* p, s32 n);
 void func_001B6628(void* p, s32 n);
-
-void func_00181DA8(C1A* self, s32 mode)
-{
-    s32 old;
-
-    if (mode == self->fBB0) {
-        return;
-    }
-    old = self->fBB0;
-    if (old < 4) {
-        if (old >= 2) {
-            self->fBF8 = g_gameClock[1];
-        }
-    }
-    switch (mode) {
-    case 0:
-        SetStateWalkerTarget(self->fBBC, 0x35E);
-        break;
-    case 1:
-        SetStateWalkerTarget(self->fBBC, 0x35F);
-        break;
-    case 2:
-        TeleportStateWalker(self->fBBC, 0x361);
-        self->fBF8 = D_0024B168;
-        break;
-    case 3:
-        TeleportStateWalker(self->fBBC, 0x362);
-        self->fBF8 = D_0024B168;
-        break;
-    }
-    if (mode == 0) {
-        self->f580 = 0;
-    } else if (mode < 0) {
-        self->f580 = 1;
-    } else if (mode >= 4) {
-        self->f580 = 1;
-    } else if (mode >= 2) {
-        self->f580 = 0;
-    } else {
-        self->f580 = 1;
-    }
-    self->fBB0 = mode;
-    self->fBB4 = g_gameClock[1];
-}
 
 s32 func_00182FC8(ConeVolume*);
 void func_00183DC0(ConeVolume*);
@@ -1066,8 +812,6 @@ struct Clamp_181818
 };
 
 extern f32 D_00261858[];
-f32 D_00264160[4] = { 1.0f, 0.0f, -0.75f, 0.0f };
-f32 D_00264170[4] = { 0.699999988f, 0.300000012f, 0.0f, 0.0f };
 extern f32 D_00275C60[];
 extern Rgba4 D_002623E0[];
 
@@ -1075,39 +819,3 @@ f32 func_00205210(f32 x);
 void func_00126A48(C1A* o, u32 c);
 void func_00125C90(C1A* o, void* a, void* b);
 
-void func_00181818(C1A* o, void* a, void* b)
-{
-    Rgba4 c;
-    u8 from[4];
-    *(u32*)from = 0x800000A0;
-    if (o->fBF0) {
-        f32 t;
-        if (o->fBB0 != 2) {
-            t = (g_gameClock[1] - o->fBF8) * 0.5f;
-        } else {
-            t = 0.0f;
-        }
-        f32 s = func_00205210((g_gameClock[1] - o->fBF4) * 10.0f);
-        f32 p = D_00264160[0] + t * (D_00264160[1] + t * D_00264160[2]);
-        f32 x = Clamp_181818::Of(p, g_unitRange[0], g_unitRange[1]);
-        f32 q = D_00264170[0] + s * (D_00264170[1] + s * D_00264170[2]);
-        f32 y = Clamp_181818::Of(q, g_unitRange[0], g_unitRange[1]);
-        f32 w = x * y;
-        f32 u = 1.0f - w;
-        c.r = (u8)(u * D_002623E0[0].r + w * from[0]);
-        c.g = (u8)(u * D_002623E0[0].g + w * from[1]);
-        c.b = (u8)(u * D_002623E0[0].b + w * from[2]);
-        c.a = D_002623E0[0].a;
-    } else {
-        c = D_002623E0[0];
-    }
-    SetObjectTreeRecordValue(o, *(u32*)&c);
-    func_00125C90(o, a, b);
-}
-
-ObjectLink D_002640B0[10] = {
-    { 0, 0x35D, 0xBB8 }, { 4, 0x363, 0xBC0 }, { 4, 0x364, 0xBC4 }, { 4, 0x60, 0xBCC }, { 4, 0x365, 0xBC8 },
-    { 2, 0x161, 0x588 }, { 2, 0x162, 0x58C }, { 2, 0x163, 0x590 }, { 4, 0x160, 0x584 }, { 7, 0x366, 0xC08 }
-};
-f32 D_00264180[4] = { -300.0f, 0.0f, 200.0f, 0.0f };
-ObjectLink D_00264230[2] = { { 0, 0x36B, 0x6C4 }, { 0x20, 0x36C, 0x6EC } };
