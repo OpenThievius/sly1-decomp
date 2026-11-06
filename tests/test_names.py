@@ -60,7 +60,8 @@ class UseOrDefinitionTest(unittest.TestCase):
 
     def test_uses_are_uses(self):
         for text in ("if (n > 0 && g_buttonCodes[0].x != 0) {}", "return g_buttonCodes;",
-                     "p = (u8*)g_buttonCodes + 8;", "f(a, g_buttonCodes);"):
+                     "p = (u8*)g_buttonCodes + 8;", "f(a, g_buttonCodes);",
+                     "f((struct Head *)p, 1, g_buttonCodes, 8);", "s = s * (g_scale * g_buttonCodes);"):
             self.assertTrue(self.check(text), text)
 
     def test_declarations_are_not(self):
