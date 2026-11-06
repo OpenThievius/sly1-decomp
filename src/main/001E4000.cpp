@@ -3900,9 +3900,6 @@ extern const f32 D_0024CAF0 = 3.40282347e+38f;
 extern const f32 D_0024CAF4 = 3.40282347e+38f;
 extern const f32 D_0024CAF8 = 3.40282347e+38f;
 extern const f32 D_0024CAFC = 3.40282347e+38f;
-extern const f32 D_0024D164 = -3.40282347e+38f;
-extern const f32 D_0024D168 = 3.40282347e+38f;
-extern const f32 D_0024D260 = 3.40282347e+38f;
 
 // Globals typed by worker dv08, from retail's bytes and their readers.
 struct VtEnt_24F0D8 { s32 delta; void (*fn)(); };
@@ -3965,7 +3962,6 @@ extern const u8 D_0026A108[];
 extern const u8 D_0026A110[];
 void func_00199850();
 struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
-struct Sjis_274588 { u16 code; u16 id; };
 
 f32 D_0026A910 = 100.0f;
 f32 D_0026A968 = 300.0f;
@@ -4004,29 +4000,6 @@ f32 D_0026B740[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 f32 D_0026B750[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
 f32 D_0026B760[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
 f32 D_0026B770[2] = { 0.5f, 1.0f };
-f32 D_002744F0 = 50.0f;
-s32 D_00274548[4] = { 0, 1, 2, 0 };
-s32 D_00274558[4] = { 2, 0, 1, 0 };
-s32 D_00274568[4] = { 0, 2, 1, 0 };
-s32 D_00274578[4] = { 1, 0, 2, 0 };
-Sjis_274588 D_00274588[34] = {
-    { 0x8140, 0x0020 }, { 0x8149, 0x0021 }, { 0x8168, 0x0022 }, { 0x8194, 0x0023 },
-    { 0x8190, 0x0024 }, { 0x8193, 0x0025 }, { 0x8195, 0x0026 }, { 0x8166, 0x0027 },
-    { 0x8169, 0x0028 }, { 0x816A, 0x0029 }, { 0x8196, 0x002A }, { 0x817B, 0x002B },
-    { 0x8143, 0x002C }, { 0x817C, 0x002D }, { 0x8144, 0x002E }, { 0x815E, 0x002F },
-    { 0x8146, 0x003A }, { 0x8147, 0x003B }, { 0x8171, 0x003C }, { 0x8181, 0x003D },
-    { 0x8172, 0x003E }, { 0x8148, 0x003F }, { 0x8197, 0x0040 }, { 0x816D, 0x005B },
-    { 0x818F, 0x005C }, { 0x816E, 0x005D }, { 0x814F, 0x005E }, { 0x8151, 0x005F },
-    { 0x8165, 0x0060 }, { 0x816F, 0x007B }, { 0x8162, 0x007C }, { 0x8170, 0x007D },
-    { 0x8150, 0x007E }, { 0x0000, 0x0000 }
-};
-Sjis_274588 D_00274610[4] = {
-    { 0x824F, 0x0030 }, { 0x8260, 0x0041 }, { 0x8281, 0x0061 }, { 0x0000, 0x0000 }
-};
-f32 D_00274620[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
-f32 D_00274660[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
-f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
-f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 
 // Globals typed by worker dv05, from retail's bytes and their readers.
 void func_0020D138();
@@ -4365,49 +4338,13 @@ f32 D_00263700 = 1.29999995f;
 f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
 
 // Globals typed by worker dz06, from retail's bytes and their readers.
-// size: 8-byte label, readers (001AC000, 001B0000) only lw/sw word at +0 (s32), next label 8-aligned
-// count: word reader, 0x28-stride record count
-s32 D_002744F8 = 0;
-// pointer from allocator (func_0018D5C0), indexed array base; 4-byte word
-void* D_002744FC = 0;
-// count: loop bound word
-s32 D_00274500 = 0;
-// pointer from allocator (count*0x20), word
-V24A2_ImgA* D_00274504 = 0;
-// count: loop bound word
-s32 D_00274508 = 0;
-// pointer from allocator (count*0x18), word
-V24A2_ImgB* D_0027450C = 0;
-// word counter
-s32 D_00274510 = 0;
-// word value
-s32 D_00274514 = 0;
-// word, compared with (s32)self
-s32 D_00274518 = 0;
-// list head pointer, word
-void* D_0027451C = 0;
-// size: loop m<6 stores D_00274520[m] (24 bytes)
-s32 D_00274520[6] = {0};
-// word handle
-s32 D_00274538 = 0;
-// word count
-s32 D_0027453C = 0;
-// pointer array allocator result, word
-void* D_00274540 = 0;
-// list pointer, word
-void* D_00274544 = 0;
-// word handle
-s32 D_00274728 = 0;
 // word
-s32 D_0027472C = 0;
 // word flag
-s32 D_00274730 = 0;
 // word
-s32 D_00274734 = 0;
 // word
-s32 D_00274738 = 0;
 // word flag
-s32 D_00274744 = 0;
+// word flag
+// word
 
 // Globals typed by worker dz07, from retail's bytes and their readers.
 
