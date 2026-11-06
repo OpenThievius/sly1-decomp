@@ -1,228 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+
 #include "t2196.h"
+
 #include "world.h"
+
 #include "entry_pool.h"
+
 #include "buffered_stream.h"
+
 #include "script_value.h"
-
-extern u8 D_0062C568[];
-void func_001B5F28(void* list, void* item);
-
-void func_0011C720(void* item)
-{
-    PushFreeSlot(g_matrixPayloadPool, item);
-}
-
-// D_0025C360 and D_0025C378 are arrays of buffer pointers, one per IOP command buffer.
-s32 D_0025C380 = 0;
-s32 D_0025C540[1024] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-s32 D_0025D540[1024] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-s32* D_0025C360[2] = { D_0025C540, D_0025D540 };
-extern s32 D_00260540[];
-extern s32 D_00260980[];
-s32* D_0025C378[2] = { D_00260540, D_00260980 };
-s32 func_0011CE30(void);
-
-void func_0011DDD8()
-{
-    s32* p = D_0025C360[g_iopBufferIndex];
-    p[0]++;
-    PollIopCommands();
-}
-
-s32 D_0025C34C = 0;
-struct Flag_25C388 { s32 busy; s32 pad; };
-Flag_25C388 D_0025C388 = { 0, 0 };
-s32 func_0011CE30(void);
-s32 func_0011E1F8(s32 flag);
-s32 func_0011D968(s32 id, s32 size, void* data);
-
-s32 func_0011DF58(s32 a, s32 b, s32 c, s32 d)
-{
-    s32 buf[4];
-    s32 r;
-    if (g_iopDiscAccess == 1)
-        return 0;
-    if (D_0025C388.busy) {
-        do {
-        } while (PollIopCommands());
-    }
-    SyncDiscRead(0);
-    buf[0] = a;
-    buf[1] = b;
-    buf[2] = c;
-    buf[3] = d;
-    r = SendIopCommandAndWait(0x2A, 0x10, buf);
-    g_iopDiscAccess = r;
-    return r;
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011E010()
-{
-    QueueIopCommand(0x34, 0, 0, 0, 0);
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011E0B0(s32 a0)
-{
-    s32 buf = a0;
-    QueueIopCommand(0x2E, 4, &buf, 0, 0);
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011E0E0(s32 a0, s32 a1, s32 a2)
-{
-    s32 buf = a0;
-    QueueIopCommand(0x4F, 4, &buf, a1, a2);
-}
-
-s32 func_0011D968(s32 id, s32 size, void* data);
-
-void func_0011E110(s32 a0)
-{
-    s32 buf = a0;
-    SendIopCommandAndWait(0x36, 4, &buf);
-}
-
-extern s32 D_0025C34C;
-s32 func_00203E28(void);
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-s32 func_0011E2A0()
-{
-    if (g_iopDiscAccess == 0)
-        return func_00203E28();
-    QueueIopCommand(0x37, 0, 0, 0, 0);
-    return 1;
-}
-
-s32 func_0011C0A8(s32 a, s32 b);
-
-void* func_0011C288(EntryPool* self, s32 index)
-{
-    return self->mem + index * self->stride;
-}
-
-struct Cell_11C3C8 { s32 pad0; s32 value; };
-
-Cell_11C3C8* func_0011C3C0(void);
-
-s32 func_0011C3C8(void)
-{
-    return GetPoolEntryHeader()->value == 0;
-}
-
-extern u32 D_0062C55C;
-extern u8* D_0027B300[];
-
-s32 func_0011C580(u32 addr)
-{
-    u8* p = g_payloadRefCounts[0] + ((addr - D_0062C55C) >> 4);
-    s32 v = *p;
-    v++;
-    *p = v;
-    return v;
-}
-
-extern u32 D_0062C57C;
-extern u8* D_0027B300[];
-
-s32 func_0011C7C0(u32 addr)
-{
-    u8* p = g_payloadRefCounts[2] + ((addr - D_0062C57C) >> 4);
-    s32 v = *p;
-    v++;
-    *p = v;
-    return v;
-}
-
-s32 func_0011DB00(s32 a, s32 b, void* c, s32 d, s32 e);
-
-void func_0011D450(s32 arg)
-{
-    s32 local = arg;
-    QueueIopCommand(6, 4, &local, 0, 0);
-}
-
-s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
-
-struct Args_11D558
-{
-    void* a0;
-    s32 a1;
-    s32 a2;
-};
-
-void func_0011D558(void* a0, s32 a1, s32 a2)
-{
-    Args_11D558 args;
-    args.a0 = a0;
-    args.a1 = a1;
-    args.a2 = a2;
-    QueueIopCommand(0x4E, 0xC, &args, 0, 0);
-}
-
-s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
-
-struct Args_11D670
-{
-    void* a0;
-};
-
-void func_0011D670(void* a0)
-{
-    Args_11D670 args;
-    args.a0 = a0;
-    QueueIopCommand(0x14, 4, &args, 0, 0);
-}
-
-s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
-
-struct Args_11D798
-{
-    void* a0;
-    s32 a1;
-    s32 a2;
-};
-
-void func_0011D798(void* a0, s32 a1, s32 a2)
-{
-    Args_11D798 args;
-    args.a0 = a0;
-    args.a1 = a1;
-    args.a2 = a2;
-    QueueIopCommand(0x1B, 0xC, &args, 0, 0);
-}
-
-s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
-
-struct Args_11D8B0
-{
-    void* a0;
-    s32 a1;
-    s32 a2;
-};
-
-void func_0011D8B0(void* a0, s32 a1, s32 a2)
-{
-    Args_11D8B0 args;
-    args.a0 = a0;
-    args.a1 = a1;
-    args.a2 = a2;
-    QueueIopCommand(0x29, 0xC, &args, 0, 0);
-}
-
-s32 func_0011D968(s32 kind, s32 a1, s32 a2);
-
-void func_0011E4F8()
-{
-    SendIopCommandAndWait(0x40, 0, 0);
-}
 
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr)
 {
@@ -328,6 +115,7 @@ void func_0011E560(void)
 extern u8 D_002505D8[];
 
 void func_0011E680(void* self, void* slot, void* obj);
+
 s32 func_00137D10(void* p);
 
 void func_0011EC40(void* self, void* obj)
@@ -358,83 +146,6 @@ void func_0011EF48(T2196_Pos* unused, s32* a, s32* b)
 
 void func_0011EF60(void)
 {
-}
-
-extern u8 D_00259F38[];
-
-void func_0011A6B8(void* p);
-void func_0011C1D0(void* p);
-void func_0011CBB0(void);
-
-extern u8 D_0062C568[];
-extern u8 D_00259F38[];
-
-void* func_001B5EA0(void* pool);
-void* func_001B5EE0(void* pool);
-void func_001F5C0C(void* p, s32 zero, u32 count);
-void func_0011AB58(void* p);
-
-void* func_0011C618(void)
-{
-    void* s0 = PopFreeSlot(g_matrixPayloadPool);
-    if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)g_matrixPayloadPool);
-    } else {
-        CollectScriptPools(D_00259F38);
-        s0 = PopZeroedFreeSlot(g_matrixPayloadPool);
-    }
-    return s0;
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011D6A8(s32 a0)
-{
-    s32 buf = a0;
-    QueueIopCommand(0x16, 4, &buf, 0, 0);
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011D6D8(s32 a0)
-{
-    s32 buf = a0;
-    QueueIopCommand(0x17, 4, &buf, 0, 0);
-}
-
-s32 func_0011D968(s32 id, s32 size, void* data);
-
-void func_0011D708(s32 a0)
-{
-    s32 buf = a0;
-    SendIopCommandAndWait(0x19, 4, &buf);
-}
-
-s32 func_0011D968(s32 id, s32 flags, void* args);
-
-void func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
-{
-    s32 args[5];
-    args[0] = a0;
-    args[1] = a1;
-    args[2] = a2;
-    args[3] = a3;
-    args[4] = a4;
-    SendIopCommandAndWait(0x3B, 0x14, args);
-}
-
-s32 func_0011D968(s32 id, s32 flags, void* args);
-
-void func_0011E460(void)
-{
-    SendIopCommandAndWait(0x3D, 0, 0);
-}
-
-s32 func_0011D968(s32 id, s32 flags, void* args);
-
-void func_0011E498(void)
-{
-    SendIopCommandAndWait(0x3C, 0, 0);
 }
 
 void* func_0018D658(s32 size);
@@ -484,110 +195,6 @@ void func_0011FED8(T2196_6C8* self, s32* outCount, f32** outArr)
     GetVectorKeyTimes(self->count, self->keys, outCount, outArr);
 }
 
-extern s32 D_0025C268;
-extern s32 D_0025C288;
-extern s32 D_0025C2A8;
-extern s32 D_0025C2C8;
-extern s32 D_0025C2E8;
-
-R11B008Key* func_0011C498(void);
-void func_0011C418(R11B008Key* a, R11B008Key* b, s32 c);
-
-void func_0011C418(R11B008Key* a, R11B008Key* b, s32 c)
-{
-    b->key = a->key;
-    CloneScriptValue(&a->value, &b->value, c);
-    if (a->next != 0) {
-        R11B008Key* n = NewKeyedValue();
-        CopyKeyedValueChain(a->next, n, c);
-        b->next = n;
-    }
-}
-
-void* func_0011C240(void* pool);
-void func_001F5C0C(void* dst, s32 value, u32 size);
-
-R11B008Key* func_0011C498(void)
-{
-    R11B008Key* n = (R11B008Key*)TakePoolEntry(&g_keyedValuePool);
-    func_001F5C0C(n, 0, 16);
-    InitScriptValue(&n->value);
-    n->value.tag = -1;
-    return n;
-}
-
-
-void func_0011C4E8(R11B008Key* a)
-{
-    DestroyScriptValue(&a->value, 2);
-}
-
-extern s32 D_0062C558;
-extern u8 D_00259F38[];
-void* func_001B5EA0(void* pool);
-void* func_001B5EE0(void* pool);
-void func_0011AB58(void* arg);
-void func_001F5C0C(void* dst, s32 value, u32 size);
-
-void* func_0011C508(void)
-{
-    void* p = PopFreeSlot(&g_vectorAPayloadPool);
-    if (p != 0) {
-        func_001F5C0C(p, 0, g_vectorAPayloadPool);
-    } else {
-        CollectScriptPools(D_00259F38);
-        p = PopZeroedFreeSlot(&g_vectorAPayloadPool);
-    }
-    return p;
-}
-
-void func_0011DB00(s32 a, s32 b, void* args, void* c, void* d);
-
-void func_0011D520(s32 x, s32 y)
-{
-    s32 args[2];
-    args[0] = x;
-    args[1] = y;
-    QueueIopCommand(0xD, 8, args, 0, 0);
-}
-
-s32 func_0011D968(s32 a, s32 b, void* args);
-
-void func_0011D598(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
-{
-    s32 args[6];
-    args[0] = a0;
-    args[1] = a1;
-    args[2] = a2;
-    args[3] = a3;
-    args[4] = a4;
-    args[5] = a5;
-    SendIopCommandAndWait(0x11, 0x18, args);
-}
-
-struct Words_11D8F0 { s32 a; s32 b; };
-
-s32 func_0011D968(s32 kind, s32 count, void* words);
-
-void func_0011D8F0(s32 a, s32 b)
-{
-    Words_11D8F0 w;
-    w.a = a;
-    w.b = b;
-    SendIopCommandAndWait(0x28, 8, &w);
-}
-
-struct Word_11D928 { s32 a; };
-
-s32 func_0011DB00(s32 kind, s32 count, void* words, s32 x, s32 y);
-
-void func_0011D928(s32 a)
-{
-    Word_11D928 w;
-    w.a = a;
-    QueueIopCommand(0x27, 4, &w, 0, 0);
-}
-
 void func_0011EFB0(T2196_Weight* unused, s32* a, s32* b)
 {
     *a = 0;
@@ -596,9 +203,13 @@ void func_0011EFB0(T2196_Weight* unused, s32* a, s32* b)
 }
 
 s32 func_00137BE0(void* src);
+
 s32 func_00137D10(void* src);
+
 f32 func_00137DF8(void* src);
+
 s32 func_00137CC0(void* src);
+
 void* func_0018D500(s32 size);
 
 void func_0011EFC8(T2196_668* self, Stream83* src)
@@ -617,9 +228,13 @@ void func_0011EFC8(T2196_668* self, Stream83* src)
 }
 
 s32 func_00137BE0(void* src);
+
 s32 func_00137D10(void* src);
+
 f32 func_00137DF8(void* src);
+
 s32 func_00137CC0(void* src);
+
 void* func_0018D500(s32 size);
 
 void func_0011F210(T2196_678* self, Stream83* src)
@@ -641,74 +256,6 @@ void func_0011F210(T2196_678* self, Stream83* src)
     }
 }
 
-s32 func_0011C0A8(void* p, s32 mask);
-
-void* func_0018D500(s32 bytes);
-void* func_0011C288(EntryPool* p, s32 index);
-
-void func_0011C128(EntryPool* p, s32 count, s32 size)
-{
-    p->stride = count + 8;
-    p->count = size;
-    p->mem = (u8*)AllocateFrontMemory((count + 8) * size);
-    void* node = GetPoolEntry(p, 0);
-    p->freeList = node;
-    s32 i = 1;
-    if (i < size) {
-        void* prev;
-        do {
-            prev = node;
-            node = GetPoolEntry(p, i);
-            i++;
-            *(void**)prev = node;
-        } while (i < size);
-    }
-    *(void**)node = 0;
-    p->live = 0;
-    p->high = 0;
-}
-
-extern u8* D_0027B300[];
-void func_001B5F28(void* list, void* item);
-
-void func_0011C5B0(u32 addr)
-{
-    u8* pool = (u8*)&g_vectorAPayloadPool;
-    u8* p = g_payloadRefCounts[0] + ((addr - *(u32*)(pool + 4)) >> 4);
-    s32 v = *p - 1;
-    *p = v;
-    if ((u8)v == 0) {
-        PushFreeSlot(pool, (void*)addr);
-    }
-}
-
-extern u8 D_0062C578[];
-extern u8 D_00259F38[];
-void* func_001B5EA0(void* pool);
-void* func_001B5EE0(void* pool);
-void func_001F5C0C(void* p, s32 zero, u32 count);
-void func_0011AB58(void* p);
-
-void* func_0011C748(void)
-{
-    void* s0 = PopFreeSlot(g_vectorBPayloadPool);
-    if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)g_vectorBPayloadPool);
-    } else {
-        CollectScriptPools(D_00259F38);
-        s0 = PopZeroedFreeSlot(g_vectorBPayloadPool);
-    }
-    return s0;
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011D600(s32 value)
-{
-    s32 buf = value;
-    QueueIopCommand(0x15, 4, &buf, 0, 0);
-}
-
 void* func_0018D658(s32 size);
 
 void func_0011F3E8(T2196_678* self, s32* outCount, f32** outArr)
@@ -728,64 +275,10 @@ void func_0011F3E8(T2196_678* self, s32* outCount, f32** outArr)
     }
 }
 
-struct Entry_11C3B8 { u8 pad[8]; };
-
-Entry_11C3B8* func_0011C3B8(u8* base)
-{
-    return (Entry_11C3B8*)(base + 8);
-}
-
-struct Entry_11C3C0 { u8 pad[8]; };
-
-Entry_11C3C0* func_0011C3C0(u8* base)
-{
-    return (Entry_11C3C0*)(base - 8);
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011D420(void)
-{
-    QueueIopCommand(0x8, 0, 0, 0, 0);
-}
-
-s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
-
-void func_0011D480(s32 a0, s32 a1)
-{
-    s32 buf[2];
-    buf[0] = a0;
-    buf[1] = a1;
-    QueueIopCommand(0x9, 0x8, buf, 0, 0);
-}
-
-s32 func_0011D968(s32 kind, s32 count, void* words);
-
-struct Words_11D7D8 { s32 a; s32 b; };
-
-s32 func_0011D7D8(s32 a, s32 b)
-{
-    Words_11D7D8 w;
-    w.a = a;
-    w.b = b;
-    return SendIopCommandAndWait(0x1C, 8, &w);
-}
-
-s32 func_0011D968(s32 id, s32 flags, void* args);
-
-void func_0011E4C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
-{
-    s32 args[5];
-    args[0] = a0;
-    args[1] = a1;
-    args[2] = a2;
-    args[3] = a3;
-    args[4] = a4;
-    SendIopCommandAndWait(0x3E, 0x14, args);
-}
-
 s32 func_00137B90(void* src);
+
 void func_00137E70(void* src, void* dst);
+
 T2196_Weight* func_00121160(s32 index);
 
 void func_0011F798(T2196_Weight** out, Vec02* dst, Stream83* src)
@@ -812,6 +305,7 @@ void func_0011F798(T2196_Weight** out, Vec02* dst, Stream83* src)
 struct Scratch_11F9F8 { f32 diff; f32 delta; u8* ptr; };
 
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
+
 void func_00130540(u8* a, u8* b, u8* c, u8* d, f32 f12, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
 
 void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 scale)
@@ -820,69 +314,6 @@ void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 sc
     FindCurveSegment(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
     func_00130540(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
-}
-
-void func_0011C1D0(void* p)
-{
-}
-
-struct Link_11C1D8 { struct Link_11C1D8* next; };
-struct Pool_11C1D8 { u8 pad0[0xC]; Link_11C1D8* free; Link_11C1D8* used; };
-
-extern u8 D_00259F38[];
-void func_0011AB58(void* p);
-void* func_0011C3B8(void* base);
-
-void* func_0011C1D8(Pool_11C1D8* self)
-{
-    if (self->free == 0) {
-        CollectScriptPools(D_00259F38);
-    }
-    Link_11C1D8* n = self->free;
-    if (n != 0) {
-        self->free = n->next;
-        n->next = self->used;
-        self->used = n;
-        return GetPoolEntryPayload(n);
-    }
-    return 0;
-}
-
-struct Link_11C3C0 { s32 pad0; s32 value; };
-
-void func_0011C3F0(u8* base)
-{
-    ((Link_11C3C0*)GetPoolEntryHeader(base))->value = 1;
-}
-
-void func_0011CBB0(void)
-{
-}
-
-s32 func_0011D968(s32 id, s32 size, void* data);
-
-void func_0011D4B8(s32 arg)
-{
-    s32 local = arg;
-    SendIopCommandAndWait(10, 4, &local);
-}
-
-s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
-
-s32 func_0011D4E0(s32 arg)
-{
-    s32 local = arg;
-    return QueueIopCommand(11, 4, &local, 0, 0);
-}
-
-void func_0011DB00(s32 a, s32 b, void* args, void* c, void* d);
-
-void func_0011D810(s32 x, s32 y)
-{
-    s32 args[2];
-    args[0] = x;
-    args[1] = y;
-    QueueIopCommand(0x1E, 8, args, 0, 0);
 }
 
 void func_0011EF68(void)
@@ -898,8 +329,11 @@ void func_0011EF70(T2196_Rot* self, s32* first, s32* second)
 }
 
 s32 func_00137BE0(void* src);
+
 s32 func_00137D10(void* src);
+
 void func_00137E70(void* src, void* dst);
+
 void* func_0018D500(s32 size);
 
 void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
@@ -930,10 +364,13 @@ void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
 
 // The owner's slot 45 (Desc02::m29) is told what was asked.
 typedef void (*Method_11FF08)(PlacedObject* self, void* a, void* b);
+
 struct Scratch_11FF08 { s32 a[4]; s32 b[4]; };
 
 void func_0011F6B0(T2196_Weight** a, PlacedObject* b, s32 c, Vec02* d, void* e, void* f);
+
 void func_00188A20(void* a, void* b);
+
 void func_001EDE38(void* a, void* b, void* c);
 
 void func_0011FF08(T2196_6E8* self, PlacedObject* other, s32 c, void* p3, void* p4)
@@ -948,170 +385,15 @@ void func_0011FF08(T2196_6E8* self, PlacedObject* other, s32 c, void* p3, void* 
         ((Method_11FF08)other->desc02()->m29)(other, p3, p4);
 }
 
-// Newly matched US functions from the small-function wave.
-extern void* func_0011C1D8(void*);
-extern void* func_0011F6B0(void*, u32, u32, void*, u32, u32);
-struct Node_0011C2A0 {
-    Node_0011C2A0* next;
-    s32 state;
-};
-
-void* func_0011C240(void* self)
-{
-    void* result = PopPoolFreeEntry(self);
-    func_001F5C0C(result, 0, *(s32*)self - 8);
-    return result;
-}
-
-void func_0011C2A0(EntryPool* self)
-{
-    self->liveMark = self->liveHead;
-}
-
-void func_0011C2B0(EntryPool* self)
-{
-    Node_0011C2A0* node = (Node_0011C2A0*)self->liveHead;
-    if (node == 0) return;
-    do {
-        node->state = 0;
-        node = node->next;
-    } while (node != 0);
-}
-
-void func_0011D640(s32 value)
-{
-    s32 local = value;
-    QueueIopCommand(0x13, 4, &local, 0, 0);
-}
-
-void func_0011D730(s32 value, s32 a1, s32 a2)
-{
-    s32 local = value;
-    QueueIopCommand(0x19, 4, &local, a1, a2);
-}
-
-void func_0011D760(s32 a0, s32 a1)
-{
-    s32 local[2];
-    local[0] = a0;
-    local[1] = a1;
-    SendIopCommandAndWait(0x1A, 8, local);
-}
-
-void func_0011D860(s32 a0, s32 a1, s32 a2, s32 a3)
-{
-    s32 local[4];
-    local[0] = a0;
-    local[1] = a1;
-    local[2] = a2;
-    local[3] = a3;
-    QueueIopCommand(0x22, 16, local, 0, 0);
-}
-
-void func_0011E328(s32 a0, s32 a1)
-{
-    s32 local[2];
-    local[0] = a0;
-    local[1] = a1;
-    QueueIopCommand(0xE, 8, local, 0, 0);
-}
-
-void func_0011E360(s32 a0, s32 a1, s32 a2)
-{
-    s32 local[3];
-    local[0] = a0;
-    local[1] = a1;
-    local[2] = a2;
-    QueueIopCommand(0xF, 12, local, 0, 0);
-}
-
-void func_0011E3A0(s32 a0, s32 a1)
-{
-    s32 local[2];
-    local[0] = a0;
-    local[1] = a1;
-    QueueIopCommand(0x51, 8, local, 0, 0);
-}
-
 void func_0011EFA8()
 {
 }
 
+extern void* func_0011F6B0(void*, u32, u32, void*, u32, u32);
+
 void* func_0011FFA8(T2196_6E8* self, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     return func_0011F6B0(self->axis, a1, a2, &self->base, a3, a4);
-}
-
-extern u32 D_0062C56C;
-s32 func_0011C690(u32 addr)
-{
-    u8* p = g_payloadRefCounts[1] + ((addr - D_0062C56C) >> 6);
-    s32 v = *p;
-    v++;
-    *p = v;
-    return v;
-}
-
-extern u32 D_0062C58C;
-s32 func_0011C8D0(u32 addr)
-{
-    u8* p = g_payloadRefCounts[3] + ((addr - D_0062C58C) >> 3);
-    s32 v = *p;
-    v++;
-    *p = v;
-    return v;
-}
-
-s32* D_0025C340 = 0;
-s32 D_0025C344 = 0;
-void func_0011D110(s32* ptr, s32 count)
-{
-    D_0025C344 = count;
-    g_iopReplyBuffer = ptr;
-    ptr[count + 1] = 0;
-    ptr[0] = 0;
-}
-
-void* func_0011C3B8(void* base);
-
-struct Node_11C2E8;
-typedef void (*Cb_11C2E8)(void* p);
-
-struct Node_11C2E8 {
-    Node_11C2E8* next;
-    s32 f4;
-};
-
-void func_0011C2E8(EntryPool* self)
-{
-    Node_11C2E8* prev = (Node_11C2E8*)&self->liveHead;
-    Node_11C2E8* cur = (Node_11C2E8*)self->liveHead;
-    if (cur != 0 && cur != self->liveMark) {
-        prev = cur;
-        for (;;) {
-            cur = cur->next;
-            if (cur == 0 || cur == self->liveMark) {
-                break;
-            }
-            prev = cur;
-        }
-    }
-    Node_11C2E8* s2 = prev;
-    cur = s2->next;
-    while (cur != 0) {
-        if (cur->f4 != 0) {
-            prev = cur;
-        } else {
-            prev->next = cur->next;
-            cur->next = (Node_11C2E8*)self->freeList;
-            self->freeList = cur;
-            if (self->removeCallback != 0) {
-                ((Cb_11C2E8)self->removeCallback)(GetPoolEntryPayload(cur));
-            }
-        }
-        cur = prev->next;
-    }
-    self->liveMark = s2->next;
 }
 
 void func_0011EF90(T2196_Scale* a0, s32* a1, s32* a2)
@@ -1119,51 +401,6 @@ void func_0011EF90(T2196_Scale* a0, s32* a1, s32* a2)
     *a1 = 0;
     if (a2 != 0) {
         *a2 = 0;
-    }
-}
-
-extern u8 D_0062C568[];
-
-void func_001B5F28(void* list, void* item);
-
-void func_0011C6C0(s32 a)
-{
-    u8* base = g_matrixPayloadPool;
-    s32 idx = (s32)((u32)(a - *(s32*)(base + 4)) >> 6);
-    u8* p = (u8*)(*(s32*)((u8*)g_payloadRefCounts + 4) + idx);
-    *p = *p - 1;
-    if (*p == 0) {
-        PushFreeSlot(base, (void*)a);
-    }
-}
-
-extern u8 D_0062C578[];
-extern u8* D_0027B300[];
-void func_001B5F28(void* list, void* item);
-
-void func_0011C7F0(u32 addr)
-{
-    u8* pool = g_vectorBPayloadPool;
-    u8* p = g_payloadRefCounts[2] + ((addr - *(u32*)(pool + 4)) >> 4);
-    s32 v = *p - 1;
-    *p = v;
-    if ((u8)v == 0) {
-        PushFreeSlot(pool, (void*)addr);
-    }
-}
-
-extern u8 D_0062C588[];
-extern u8* D_0027B300[];
-void func_001B5F28(void* list, void* item);
-
-void func_0011C900(u32 addr)
-{
-    u8* pool = g_pairPayloadPool;
-    u8* p = g_payloadRefCounts[3] + ((addr - *(u32*)(pool + 4)) >> 3);
-    s32 v = *p - 1;
-    *p = v;
-    if ((u8)v == 0) {
-        PushFreeSlot(pool, (void*)addr);
     }
 }
 
@@ -1194,8 +431,11 @@ void func_0011F478(T2196_688* self, s32 unused, s32 flags, f32* outF, f32* outI,
 }
 
 s32 func_00137BE0(void* src);
+
 s32 func_00137D10(void* src);
+
 f32 func_00137DF8(void* src);
+
 void* func_0018D500(s32 size);
 
 void func_0011F568(T2196_688* self, Stream83* src)
@@ -1218,10 +458,15 @@ struct Locals_11FFD8 {
     f32* values;
     f32 first;
 };
+
 extern void func_0011F798(T2196_Weight**, Vec02*, Stream83*);
+
 extern void func_00189150(void*, void*, void*);
+
 extern void func_00188D28(void*, void*, void*);
+
 extern void func_0018D608(void);
+
 extern void func_0018D6F0(void);
 
 void func_0011FFD8(T2196_6E8* self, Stream83* arg)
@@ -1248,6 +493,7 @@ void func_0011FFD8(T2196_6E8* self, Stream83* arg)
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f18` and the `move $a0`); the argument setup is scheduled differently.
 
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
+
 void func_001303F0(f32 delta, f32 diff, f32 scale, f32 p4, f32 p14, f32 p1C, f32 p24, f32* outF, f32* outI, s32 zero);
 
 void func_0011F0C8(T2196_668* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
@@ -1271,6 +517,7 @@ void func_0011F0C8(T2196_668* self, s32 unused, s32 flags, f32* outF, f32* outI,
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
 
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr);
+
 void func_00130168(f32 delta, f32 diff, f32 scale, f32 p4, f32 p18, f32 p1C, f32 p24, f32 p2C, f32 p30, f32* outF, f32* outI, s32 zero);
 
 void func_0011F320(T2196_678* self, s32 unused, s32 flags, f32* outF, f32* outI, f32 key, f32 scale)
@@ -1291,33 +538,18 @@ void func_0011F320(T2196_678* self, s32 unused, s32 flags, f32* outF, f32* outI,
     SolveBezierSegment(delta, diff, scale, ((Key2196_678*)p)->value, ((Key2196_678*)p)->g, ((Key2196_678*)p)->h, ((Key2196_678*)p + 1)->value, ((Key2196_678*)p + 1)->d, ((Key2196_678*)p + 1)->e, outF, outI, 0);
 }
 
-struct Pack7_11E048 { void* w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
-
-s32 func_0011D968(s32 id, s32 size, void* data);
-
-s32 func_0011E048(void* a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
-{
-    Pack7_11E048 buf;
-    buf.w0 = a0;
-    buf.w1 = a1;
-    buf.w2 = (a4 << 16) | (a2 & 0xFFFF);
-    buf.w3 = (a5 << 16) | (a3 & 0xFFFF);
-    buf.w4 = a6;
-    buf.w5 = a7;
-    buf.w6 = a8;
-    return SendIopCommandAndWait(0x2C, 0x1C, &buf);
-}
-
 typedef void (*Slot_11ECB8)(void* self, void* arg);
 
 struct Obj_11ECB8 {
     Slot_11ECB8* vtbl;
 };
 
-
 s32 func_00137D10(void* p);
+
 void* func_0011E580(s32 slot, void* self, void* a1, s32 key, s32 flag);
+
 s32 func_0011ECA0(s32 value);
+
 void func_00182ED8(void* obj);
 
 void func_0011ECB8(World* self, void* a1, void* a2)
@@ -1341,265 +573,18 @@ void func_0011ECB8(World* self, void* a1, void* a2)
     }
 }
 
-struct Entry_11CE30 { s32 fn; s32 pad; u64 arg; };
-struct Pend_11CE30 { s32 fn; s32 pad; u64 arg; };
-typedef s32 (*Cb_11CE30)(s32 ctx, u64 arg);
-typedef void (*Cb1_11CE30)(s32 a0);
-
-s32 D_0025C35C;
-extern s32 D_0025C380;
-s32 D_0025C384 = 0;
-
-s32 D_0025C354 = 0;
-s32 D_0025C358 = 0;
-s32 D_0025C350;
-struct Cb_25C3A0 { s32 fn; s32 pad; };
-Cb_25C3A0 D_0025C3A0 = { 0, 0 };
-struct Res_25C3C4 { s32 result; s32 pad[14]; };
-extern Res_25C3C4 D_0025C3C4;
-u64 D_0025C3A8[3] = { 0, 0, 0 };
-extern s32 D_0025E540[];
-extern s32 D_0025F540[];
-s32* D_0025C370[2] = { D_0025E540, D_0025F540 };
-struct Rpc_260E00 { s32 result; s32 pad[15]; };
-Rpc_260E00 D_00260E00 = { 0 };
-Pend_11CE30 D_0025C390 = { 0, 0, 0 };
-
-s32 func_0011D078(void);
-void func_0011DE18(void);
-s32 func_0011E1F8(s32 flag);
-void func_001F6C20(s32 a0);
-
-s32 func_0011CE30(void)
-{
-    s32 i;
-    s32 idx;
-    s32 k;
-    Cb_11CE30 f;
-    if (g_iopReplyBuffer != 0 && IsIopReplyReady() != 0) {
-        if (D_0025C35C != 0) {
-            if (D_0025C3A0.fn != 0)
-                ((Cb_11CE30)D_0025C3A0.fn)(g_iopBankLoadResult.result, D_0025C3A8[0]);
-            D_0025C3A0.fn = 0;
-            D_0025C35C = 0;
-        } else {
-            idx = g_iopBufferIndex != 1;
-            i = 0;
-            if (D_0025C360[idx][0] > 0) {
-                do {
-                    Entry_11CE30* e = (Entry_11CE30*)(i * 16 + (s32)D_0025C370[idx]);
-                    if (e->fn != 0)
-                        ((Cb_11CE30)e->fn)(D_0025C378[idx][i + 1], e->arg);
-                    i++;
-                } while (i < D_0025C360[idx][0]);
-            }
-        }
-    }
-    if (D_0025C388.busy != 0) {
-        func_001F6C20(0);
-        k = g_iopChannel2Result.result;
-        if ((u32)k != 0xFFFFFFFFu) {
-            if (D_0025C390.fn != 0) {
-                u64 a = D_0025C390.arg;
-                Cb_11CE30 g = (Cb_11CE30)D_0025C390.fn;
-                D_0025C390.fn = 0;
-                D_0025C390.arg = 0;
-                g(k, a);
-            }
-            g_iopChannel2Result.result = 0;
-            D_0025C388.busy = 0;
-        }
-    }
-    if (g_iopReplyBuffer == 0) {
-        s32* p = D_0025C360[g_iopBufferIndex];
-        if (p[0] != 0 && D_0025C384 == 0)
-            FlushIopCommandBuffer();
-    }
-    if (D_0025C354 != 0) {
-        SyncDiscRead(1);
-        if (D_0025C358 != 0) {
-            D_0025C354 = 0;
-            f = (Cb_11CE30)D_0025C350;
-            D_0025C358 = 0;
-            if (f != 0)
-                ((Cb1_11CE30)f)(1);
-        }
-    }
-    if (g_iopReplyBuffer != 0 || D_0025C388.busy != 0)
-        return 1;
-    return 0;
-}
-
-struct Req_0025C3C0 { s32 a; s32 result; };
-
-s32 D_0025C3C0 = 0;
-u8 D_0025C400[320] = { 0 };
-extern s32 D_0025C380;
-extern s32 D_0025C384;
-extern u8 D_0027B4C8[];
-extern const char D_002494E8[136] = "989snd.c: RPC collision!\n\000\000\000\000\000\000\000989snd.c: RPC call has failed inside snd_BankLoad\n\000\000\000\000\000\000snd_BankLoad_CB: Load already in progress!\n";
-
-s32 func_0011CE30(void);
-void func_001F6C20(s32 a);
-void func_0011D110(void* p, s32 n);
-s32 func_001F8480(void* p);
-s32 func_001E1F10(void* self, ...);
-s32 func_001F8290(void* a, s32 b, s32 c, void* d, s32 e, void* f, s32 g, s32 h, s32 i);
-s32 func_0011D078(void);
-void func_0011DE18(void);
-
-s32 func_0011D968(s32 id, s32 size, u8* data)
-{
-    s32 i;
-    s32 r;
-    for (i = 0; i < size; i++)
-        g_iopCommandArgs[i] = data[i];
-    while ((s32)g_iopReplyBuffer) {
-        PollIopCommands();
-        func_001F6C20(0);
-    }
-    ArmIopReplyBuffer(&D_0025C3C0, 1);
-    while (func_001F8480(D_0027B4C8)) {
-        PrintFormatted((void*)D_002494E8);
-        PollIopCommands();
-        func_001F6C20(0);
-    }
-    if (size)
-        func_001F8290(D_0027B4C8, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
-    else
-        func_001F8290(D_0027B4C8, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
-    while (!IsIopReplyReady()) {
-    }
-    r = ((Req_0025C3C0*)&D_0025C3C0)->result;
-    if (*D_0025C360[g_iopBufferIndex] != 0 && D_0025C384 == 0)
-        FlushIopCommandBuffer();
-    return r;
-}
-
-extern s32 D_0025C384;
-extern s32* D_0025C340;
-extern s32 D_0025C380;
-s32 D_0025C368[2] = { 0xFFC, 0xFFC };
-extern u8 D_0027B4C8[];
-
-void func_0011D110(void* ptr, s32 count);
-s32 func_001E1F10(const char* fmt, ...);
-extern const char D_002497D8[96] = "snd_SendIOPCommandNoWait: BUFFER %d FULL(%d)! Sound stalled waiting for IOP comands to finish!\n";
-extern const char D_00249838[56] = "snd_SendIOPCommandNoWait: continueing (%d).\n";
-s32 func_0011CE30(void);
-void func_001F6C20(s32 a);
-s32 func_001F8480(void* p);
-s32 func_001F8290(void* a, s32 b, s32 c, s32 d, s32 e, void* f, s32 g, s32 h, s32 i);
-void func_0011DDD8(void);
-
-void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
-{
-    s32 flag = 0;
-    s32 i;
-
-    if (D_0025C384 == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
-        ArmIopReplyBuffer((&D_0025C3C0), 1);
-        while (func_001F8480(D_0027B4C8) != 0) {
-            PrintFormatted(D_002494E8);
-            PollIopCommands();
-            func_001F6C20(0);
-        }
-        func_001F8290(D_0027B4C8, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
-        return;
-    }
-
-    s32 size = len + 4;
-    i = 0;
-    if ((size & 3) != 0)
-    {
-        s32 t = len + 8;
-        size = t - size % 4;
-    }
-
-    for (;; i++) {
-        if (*D_0025C360[g_iopBufferIndex] != 0x100 && D_0025C368[g_iopBufferIndex] >= size)
-            break;
-        if (D_0025C384 != 0) {
-            D_0025C384 = 0;
-            flag = 1;
-        }
-        PollIopCommands();
-        if (i == 1)
-            PrintFormatted(D_002497D8, g_iopBufferIndex, *D_0025C360[g_iopBufferIndex]);
-    }
-    if (i != 0)
-        PrintFormatted(D_00249838, i);
-    if (flag != 0)
-        D_0025C384 = 1;
-
-    {
-        s16* p = (s16*)(((u8*)D_0025C360[g_iopBufferIndex]) - (D_0025C368[g_iopBufferIndex] - 0x1000));
-        s32 j;
-        *p = cmd;
-        p++;
-        *p = len;
-        p++;
-        for (j = 0; j < len; j++)
-            ((u8*)p)[j] = data[j];
-    }
-    {
-        s32 k = g_iopBufferIndex;
-        D_0025C368[k] -= size;
-        *(s32*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16) = arg;
-        *(u64*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16 + 8) = val;
-    }
-    CommitQueuedIopCommand();
-}
-
-extern u8 D_0062C588[];
-extern u8 D_00259F38[];
-
-void* func_001B5EA0(void* pool);
-void* func_001B5EE0(void* pool);
-void func_001F5C0C(void* p, s32 zero, u32 count);
-void func_0011AB58(void* p);
-
-void* func_0011C858(void)
-{
-    void* s0 = PopFreeSlot(g_pairPayloadPool);
-    if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)g_pairPayloadPool);
-    } else {
-        CollectScriptPools(D_00259F38);
-        s0 = PopZeroedFreeSlot(g_pairPayloadPool);
-    }
-    return s0;
-}
-
-extern s32 D_0062C598[];
-extern u8 D_00259F38[];
-
-struct Pool_11C968;
-Pool_11C968* func_001B5EA0(s32* pool);
-void func_001F5C0C(Pool_11C968* p, s32 zero, s32 size);
-void func_0011AB58(u8* p);
-Pool_11C968* func_001B5EE0(s32* pool);
-
-Pool_11C968* func_0011C968(void)
-{
-    Pool_11C968* p = PopFreeSlot(g_triplePayloadPool);
-    if (p) {
-        func_001F5C0C(p, 0, g_triplePayloadPool[0]);
-    } else {
-        CollectScriptPools(D_00259F38);
-        p = PopZeroedFreeSlot(g_triplePayloadPool);
-    }
-    return p;
-}
-
 struct Pair_11EDA8 { void* node; s32 pad; };
+
 struct Node_11EDA8 { u8 pad0[4]; s32 flags; u8 body[4]; };
 
 extern u8 D_00244950[];
 
 void* func_00137290(BufferedStream* self, s32 a, s32 b, s32 c);
+
 void func_00137398(BufferedStream* self, s32 a1, u8* a2);
+
 void func_0011E680(BaseObject* self, Node_11EDA8* slot, BufferedStream* obj);
+
 void func_001372E0(BufferedStream* self, s32 flags);
 
 void func_0011EDA8(BaseObject* self)
@@ -1622,66 +607,6 @@ void func_0011EDA8(BaseObject* self)
             p++;
         } while (--i != 0);
     }
-}
-
-struct Ptr_11D140 { s32 field0; };
-
-s32 D_0025C348 = 0;
-
-s32 D_00260E40[8];
-extern const char D_00249570[48] = "snd_BankLoadByLoc: Load already in progress!\n";
-extern const char D_002495A0[32] = "snd_BankLoadByLoc: CD BUSY!\n";
-extern const char D_002495C0[536] = "989snd.c: RPC call has failed inside snd_BankLoadByLoc\n\000snd_BankLoadFromEE: Load already in progress!\n\000\000snd_BankLoadFromEE: CD BUSY!\n\000\000\000989snd.c: RPC call has failed inside snd_BankLoadFromEE\n\000\000\000\000\000\000\000\000snd_BankLoadFromEE_CB: Load already in progress!\n\000\000\000\000\000\000\000snd_BankLoadFromEE_CB: CD BUSY!\n\000\000\000\000\000\000\000\000snd_BankLoadFromIOP: Load already in progress!\n\000snd_BankLoadFromIOP: CD BUSY!\n\000\000989snd.c: RPC call has failed inside snd_BankLoadFromIOP\n\000\000\000\000\000\000\000snd_BankLoadFromIOP_CB: Load already in progress!\n\000\000\000\000\000\000snd_BankLoadFromIOP_CB: CD BUSY!\n";
-extern const char D_002494E8[];
-extern u8 D_0027B4F0[];
-
-s32 func_0011E1F8(s32 flag);
-s32 func_001E1F10(struct Ptr_11D140 *fmt, ...);
-s32 func_0011CE30(void);
-void func_001F6C20(s32 a0);
-s32 func_001F8480(struct Ptr_11D140 *p);
-s32 func_001F8290(struct Ptr_11D140 *a, s32 b, s32 c, s32 *d, s32 e, s32 *f, s32 g, s32 h, s32 i);
-
-s32 func_0011D140(s32 a0, s32 a1)
-{
-    s32 v;
-    s32 w;
-    s32 v1;
-    u32 m;
-
-    D_0025C348 = 0;
-    if (D_0025C388.busy != 0) {
-        PrintFormatted((struct Ptr_11D140 *)D_00249570);
-        return 0;
-    }
-    v = SyncDiscRead(1);
-    if (v == 1) {
-        PrintFormatted((struct Ptr_11D140 *)D_002495A0);
-        return 0;
-    }
-    s32* p = &g_iopChannel2Result.result;
-    m = 0xFFFFFFFFu;
-    *p = (s32)m;
-    g_iopChannel2Args[1] = a1;
-    g_iopChannel2Args[0] = a0;
-    while (func_001F8480((struct Ptr_11D140 *)D_0027B4F0)) {
-        PrintFormatted((struct Ptr_11D140 *)D_002494E8);
-        PollIopCommands();
-        func_001F6C20(0);
-    }
-    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
-    v1 = g_iopChannel2Result.result;
-    if (w < 0) {
-        PrintFormatted((struct Ptr_11D140 *)D_002495C0);
-        D_0025C348 = 0x106;
-        return 0;
-    }
-    if ((u32)v1 == 0xFFFFFFFFu) {
-        do {
-            func_001F6C20(0);
-        } while ((u32)g_iopChannel2Result.result == 0xFFFFFFFFu);
-    }
-    return g_iopChannel2Result.result;
 }
 
 // EXACT: reuse parameter a1 directly instead of a local copy
@@ -1710,9 +635,13 @@ struct Rec_11E580 {
 struct Arg_11E580 { s32 v; };
 
 void* func_0018D5C0(s32 bytes);
+
 void func_001DB480(void* self);
+
 void* func_001C1390(Arg_11E580* id, void* ctx);
+
 void* func_00159F20(void* base, s32 n);
+
 void func_00152470(void* list, void* item);
 
 Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
@@ -1751,14 +680,25 @@ struct Dsc_11E680 {
     s32 off;
     void* (*f1C)(void* obj, s32 one);
 };
+
+void* func_0011C508(void);
+void* func_0011C748(void);
+void* func_0011C858(void);
+
 typedef void (*Fn_11E680)(void);
+
 union Sc_11E680 { ScriptValue buf[32]; f32 f[8]; s32 i[2]; };
 
 s32 func_00137D10(BufferedStream* r);
+
 s32 func_00137B90(BufferedStream* r);
+
 s32 func_00137D78(BufferedStream* r);
+
 s32 func_00137C40(BufferedStream* r);
+
 f32 func_00137DF8(BufferedStream* r);
+
 void func_00188978(f32* in, f32* out);
 
 void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
@@ -1984,321 +924,10 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
     }
 }
 
-extern s32 D_0025C344;
-extern const char D_00249460[136] = "989snd.c: Sif says RPC isn't busy, but we still don't have returns from the IOP!\n\000\000\000\000\000\000\000snd_BankLoad: Load already in progress!\n";
-extern u8 D_0027B4C8[];
-
-struct Arg_0011D078;
-
-void func_001F6C20(Arg_0011D078* a);
-s32 func_001F8480(Arg_0011D078* a);
-s32 func_001E1F10(Arg_0011D078* a);
-
-s32 func_0011D078(void)
-{
-    u32* table;
-
-    func_001F6C20(0);
-    if (g_iopReplyBuffer == 0) {
-        return 1;
-    }
-    if (func_001F8480((Arg_0011D078*)D_0027B4C8) != 0) {
-        return 0;
-    }
-    table = (u32*)g_iopReplyBuffer;
-    if (table[0] == 0xFFFFFFFF) {
-        if (table[D_0025C344 + 1] == table[0]) {
-            g_iopReplyBuffer = 0;
-            return 1;
-        }
-    }
-    PrintFormatted((Arg_0011D078*)D_00249460);
-    return 0;
-}
-
-struct Sync_11DE18;
-struct Cfg_11DE18;
-
-extern s32 D_0025C380;
-extern s32 D_0025C368[2];
-extern u8 D_0027B4C8[];
-extern const char D_002494E8[];
-
-void func_0011D110(s32* ptr, s32 count);
-s32 func_001F8480(Sync_11DE18* p);
-s32 func_001E1F10(Cfg_11DE18* p);
-void func_001F6C20(s32 a);
-s32 func_001F8290(Sync_11DE18* a0, s32 a1, s32 a2, s32* a3, s32 a4, s32* a5, s32 a6, s32 a7, s32 a8);
-
-void func_0011DE18(void)
-{
-    ArmIopReplyBuffer(D_0025C378[g_iopBufferIndex], *D_0025C360[g_iopBufferIndex]);
-    while (func_001F8480((Sync_11DE18*)D_0027B4C8)) {
-        PrintFormatted((Cfg_11DE18*)D_002494E8);
-        func_001F6C20(0);
-    }
-    (void)func_001F8290((Sync_11DE18*)D_0027B4C8, 0x4D, 1, D_0025C360[g_iopBufferIndex],
-                  0x1000 - D_0025C368[g_iopBufferIndex], D_0025C378[g_iopBufferIndex],
-                  *D_0025C360[g_iopBufferIndex] * 4 + 8, 0, 0);
-    s32 n = (g_iopBufferIndex ^ 1) != 0;
-    g_iopBufferIndex = n;
-    *D_0025C360[n] = 0;
-    D_0025C368[n] = 0xFFC;
-}
-
-struct Ctx_0011D2A8;
-
-extern s32 D_0025C348;
-
-struct Pair_11D2A8 { s32 a; s32 b; };
-struct Args_11D2A8 { s32 a; s32 pad; s64 c; };
-extern const char D_00249570[];
-extern const char D_002495A0[];
-extern const char D_002494E8[];
-extern u8 D_0027B4F0[];
-
-s32 func_0011E1F8(s32 flag);
-s32 func_001E1F10(Ctx_0011D2A8* p);
-s32 func_0011CE30(void);
-s32 func_001F8480(Ctx_0011D2A8* p);
-void func_001F6C20(s32 a);
-s32 func_001F8290(Ctx_0011D2A8* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5, s32 a6, s32 a7, s32 a8);
-
-void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
-{
-    D_0025C348 = 0;
-    if (D_0025C388.busy != 0) {
-        PrintFormatted((Ctx_0011D2A8*)D_00249570);
-        return;
-    }
-    if (SyncDiscRead(1) == 1) {
-        PrintFormatted((Ctx_0011D2A8*)D_002495A0);
-        return;
-    }
-    (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
-    (*(Pair_11D2A8*)&g_iopChannel2Args).a = (s32)a0;
-    (*(Pair_11D2A8*)&g_iopChannel2Args).b = a1;
-    (*(Args_11D2A8*)&D_0025C390).a = a2;
-    (*(Args_11D2A8*)&D_0025C390).c = a3;
-    while (func_001F8480((Ctx_0011D2A8*)D_0027B4F0)) {
-        PrintFormatted((Ctx_0011D2A8*)D_002494E8);
-        PollIopCommands();
-        func_001F6C20(0);
-    }
-    D_0025C388.busy = 1;
-    func_001F8290((Ctx_0011D2A8*)D_0027B4F0, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
-}
-
-extern s32 D_0062C59C;
-extern u8* D_0027B310;
-
-s32 func_0011C9E0(u32 offset)
-{
-    u32 n = 12;
-    u8* p = D_0027B310 + (offset - D_0062C59C) / n;
-    s32 v = *p + 1;
-    *p = v;
-    return v;
-}
-
-struct Table_0011CA20 {
-    s32 pad_00;
-    u32 origin;
-};
-
-extern u8* D_0027B310;
-
-void func_001B5F28(Table_0011CA20* t, u8* item);
-
-void func_0011CA20(u8* p)
-{
-    Table_0011CA20* t = (Table_0011CA20*)((u8*)&g_triplePayloadPool);
-    u32 index = ((u32)p - t->origin) / 12;
-    u8* cell = D_0027B310 + index;
-    *cell = (u8)(*cell - 1);
-    if (*cell != 0) {
-        return;
-    }
-    PushFreeSlot(t, p);
-}
-
-s32 func_0011E538(s32 a0)
-{
-    return (a0 * 0x5F4) / 0x2E5;
-}
-
-struct Rpc_0011CBB8 { u8 pad[0x24]; s32 f24; };
-struct Packet_0011CBB8 { s32 f00; u8 pad[0xC]; s32 f10; u8 pad2[0x2C]; };
-
-extern s32* D_0025C360[2];
-extern s32 D_0025C368[2];
-extern s32* D_0025C378[2];
-
-volatile Packet_0011CBB8 D_00260DC0 = { 0 };
-extern s32 D_0025C540[];
-extern s32 D_0025D540[];
-s32 D_0025E540[1024];
-s32 D_0025F540[1024];
-s32 D_00260540[272];
-s32 D_00260980[272];
-extern const char D_00249428[40] = "error: sceSifBindRpc in %s, at line %d\n";
-extern const char D_00249450[16] = "989snd.c";
-
-void func_001F7BE8(s32 mode);
-s32 func_001F80C0(Rpc_0011CBB8* rpc, u32 id, s32 mode);
-s32 func_0011D968(s32 id, s32 size, void* data);
-
-#define ASSERT_0011CBB8(cond, line) \
-    if (!(cond)) { \
-        func_001E1F10(D_00249428, D_00249450, line); \
-        for (;;) { \
-        } \
-    }
-
-void func_0011CBB8(void)
-{
-    s32 n;
-
-    D_0025C360[0] = (s32*)D_0025C540;
-    D_0025C360[1] = (s32*)D_0025D540;
-    D_0025C378[0] = D_00260540;
-    D_0025C378[1] = D_00260980;
-    D_0025C370[0] = D_0025E540;
-    D_0025C370[1] = D_0025F540;
-    func_001F7BE8(0);
-    do {
-        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4C8, 0x123456, 0) >= 0, 0x6E);
-        for (n = 10000; --n != -1;) {
-        }
-    } while (((Rpc_0011CBB8*)D_0027B4C8)->f24 == 0);
-    D_0025C388.busy = 0;
-    D_0025C390.fn = 0;
-    D_0025C390.arg = 0;
-    g_iopChannel2Result.result = 0;
-    do {
-        ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4F0, 0x123457, 0) >= 0, 0x83);
-        for (n = 10000; --n != -1;) {
-        }
-    } while (((Rpc_0011CBB8*)D_0027B4F0)->f24 == 0);
-    g_iopSharedPacket.f00 = 0;
-    D_0025C540[0] = 0;
-    D_0025D540[0] = 0;
-    D_0025C368[0] = 0xFFC;
-    D_0025C368[1] = 0xFFC;
-    g_iopSharedPacket.f10 = 0;
-    n = (s32)&g_iopSharedPacket;
-    SendIopCommandAndWait(0, 4, &n);
-}
-
-// D_00260DC0 is the RPC packet shared with the IOP, declared volatile above; the volatile
-// access keeps lui+addiu+lw 16(base).
-s32 func_00203D90();
-
-s32 func_0011E2E8()
-{
-    if (g_iopDiscAccess == 0)
-        return func_00203D90();
-    return g_iopSharedPacket.f10;
-}
-
-extern s32 D_0025C34C;
-s32 func_002032C8(s32 value);
-void func_001F6C20(s32 value);
-s32 func_0011CE30(void);
-
-s32 func_0011E1F8(s32 flag)
-{
-    if (g_iopDiscAccess == 0) {
-        return func_002032C8(flag);
-    }
-    func_001F6C20(0);
-    u32 ready = (*(volatile u32*)&g_iopSharedPacket) < 1;
-    (*(u32*)&D_0025C358) = ready;
-    if (ready == 1) {
-        return 0;
-    }
-    if (flag == 1) {
-        return 1;
-    }
-    while ((*(u32*)&D_0025C358) == 0) {
-        PollIopCommands();
-        func_001F6C20(0);
-        (*(u32*)&D_0025C358) = (*(volatile u32*)&g_iopSharedPacket) < 1;
-    }
-    return 0;
-}
-
-// The RPC completion flag: func_0011E1F8 waits for another thread to clear it.
-struct Sync_11E138 {
-    s32 busy;
-    s32 pad[3];
-    s32 result;
-};
-
-extern s32 D_0025C34C;
-extern s32 D_0025C354;
-extern s32 D_0025C358;
-s32 func_00203B18(s32 a0, s32 a1, s32 a2, u8* a3);
-s32 func_0011E1F8(s32 flag);
-void func_0011DB00(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
-
-s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
-{
-    if (g_iopDiscAccess == 0) {
-        return func_00203B18(a0, a1, a2, a3);
-    }
-    if (SyncDiscRead(1) == 1) {
-        return 0;
-    }
-    s32 args[3];
-    args[0] = a0;
-    (*(volatile Sync_11E138*)&g_iopSharedPacket).busy = 1;
-    (*(volatile Sync_11E138*)&g_iopSharedPacket).result = 0;
-    args[1] = a1;
-    args[2] = a2;
-    QueueIopCommand(0x38, 0xC, args, 0, 0);
-    D_0025C354 = 1;
-    D_0025C358 = 0;
-    return 1;
-}
-
-struct Dst_11CA90 { u8 pad[4]; };
-
-extern u8 D_0062C568[];
-extern u8 D_0062C578[];
-extern u8 D_0062C588[];
-s32 D_0025C2F0 = 256;
-s32 D_0025C2F4 = 256;
-s32 D_0025C2F8 = 64;
-s32 D_0025C2FC = 64;
-s32 D_0025C300[16] = { 32 };
-extern u8* D_0027B300[];
-extern u8* D_0027B304;
-extern u8* D_0027B308;
-extern u8* D_0027B30C;
-extern u8* D_0027B310;
-
-void func_001B5DD0(Dst_11CA90* p, s32 size, s32 val);
-
-struct Init_11CA90 {
-    static void Load(void* buf, s32 size, s32* id, u8** out)
-    {
-        func_001B5DD0((Dst_11CA90*)buf, size, *id);
-        *out = (u8*)func_0018D5C0(*id);
-    }
-};
-
-void func_0011CA90(void)
-{
-    Init_11CA90::Load(((u8*)&g_vectorAPayloadPool), 0x10, &D_0025C2F0, &g_payloadRefCounts[0]);
-    Init_11CA90::Load(g_matrixPayloadPool, 0x40, &D_0025C2F4, &D_0027B304);
-    Init_11CA90::Load(g_vectorBPayloadPool, 0x10, &D_0025C2F8, &D_0027B308);
-    Init_11CA90::Load(g_pairPayloadPool, 0x08, &D_0025C2FC, &D_0027B30C);
-    Init_11CA90::Load(((u8*)&g_triplePayloadPool), 0x0C, D_0025C300, &D_0027B310);
-}
-
 void func_0018D800(f32* dst, f32* src, s32 n);
+
 void func_001F5CD0(f32* base, s32 n, s32 size, void* cmp);
+
 extern u8 func_001EB128[];
 
 void func_0011F850(T2196_Weight** objs, s32* outCount, f32** outArr)
