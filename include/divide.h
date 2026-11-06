@@ -2,8 +2,8 @@
 /* The toolchain runtime's 64-bit division in 32-bit halves: one helper, divide(), and its
  * statement macros, which each of the runtime's division files compiles in (src/lib/divide.c,
  * remainder.c, divide_unsigned.c, remainder_unsigned.c), as retail has one copy of the code, and
- * of its table of significant bits, per routine. A file names its table BITS_TABLE before it
- * includes this. C, for cc1 (docs/TOOLCHAIN.md). Written for this project from retail's code. */
+ * of its table of significant bits, per routine: each file that includes this gets its own copy
+ * of the table. C, for cc1 (docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #ifndef DIVIDE_H
 #define DIVIDE_H
 
@@ -24,8 +24,26 @@ typedef union {
     } h;
 } Halves;
 
-/* Significant bits of each byte value: the including file's copy. */
-extern const u8 BITS_TABLE[];
+/* The number of significant bits of each byte value. Static: each division file has its own
+ * copy, as each of retail's objects has its own table in .rodata. */
+static const u8 bits_table[256] = {
+    0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+};
 
 /* (high:low) -= (sub_high:sub_low), the borrow carried by hand. */
 #define SUBTRACT_WIDE(high, low, sub_high, sub_low)                         \
@@ -51,7 +69,7 @@ extern const u8 BITS_TABLE[];
                 if (((x) >> shift_) & 0xFF)                     \
                     break;                                      \
         }                                                       \
-        (count) = 32 - (BITS_TABLE[(x) >> shift_] + shift_);    \
+        (count) = 32 - (bits_table[(x) >> shift_] + shift_);    \
     } while (0)
 
 /* (high:low) / den in two 16-bit steps; den is normalised. */
