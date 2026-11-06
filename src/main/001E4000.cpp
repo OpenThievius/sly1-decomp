@@ -3880,8 +3880,6 @@ void func_0015CF70();
 void func_0015D4E0();
 void func_001FBDF8();
 
-extern const f32 D_00249A1C = 3.4028235e+38f;
-extern const f32 D_00249B10[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249E4C = 3.4028235e+38f;
 extern const char D_0024A2D0[8] = "Splash";
 extern const char D_0024A2D8[16] = "Paris, France";
@@ -4403,15 +4401,6 @@ extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e
 // Globals typed by worker dv01, from retail's bytes and their readers.
 struct Rec_263558 { s32 f0; s32 f4; s32 f8; };
 
-f32 D_00260E70[4] = { 0.0f, 15.0f, 0.0149999997f, 0.0f };
-f32 D_00260E80[4] = { 0.0f, 2.5f, 0.00249999994f, 0.0f };
-f32 D_00260E90[4] = { 0.0f, 15.0f, 1.5f, 0.0f };
-f32 D_00260EA0[4] = { 0.0f, 2.5f, 0.25f, 0.0f };
-f32 D_00260EB0[4] = { 1500.0f, 0.0f, 0.5f, 4500.0f };
-f32 D_00260EC0[4] = { 15.0f, 0.0f, 0.5f, 45.0f };
-f32 D_00260ED0[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00260EE0[4] = { -50.0f, 4.0f, 0.0f, 0.0f };
-f32 D_00260EF0[4] = { 0.0f, 400.0f, 0.0f, 0.0f };
 f32 D_00261CD4 = 500.0f;
 f32 D_00261CD8 = 800.0f;
 ThresholdRange D_00261D40[4] = {
