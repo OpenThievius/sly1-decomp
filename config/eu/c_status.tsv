@@ -2372,7 +2372,7 @@ func_001A7E70	func_001A8BB8	match
 func_001A7E90	func_001A8BD8	match	
 func_001A7EE8	func_001A8C30	match	
 func_001A7F50	func_001A8C98	match	
-func_001A7FE8	func_001A8D30	match	
+func_001A7FE8	func_001A8D30	match	rodata
 func_001A80E0	func_001A8E28	match	
 func_001A8110	func_001A8E58	match	
 func_001A8150	func_001A8E98	match	

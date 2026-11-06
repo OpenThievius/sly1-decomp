@@ -233,6 +233,6 @@ void func_001C0070(void)
 }
 
 // Data definitions (retail values)
-s32 D_0026E228[8] = { 0 };
+extern s32 D_0026E228[8];
 
 // Data of src/main/file_1C05D0.cpp, defined here until the file's own data is proved.

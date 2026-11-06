@@ -710,7 +710,7 @@ void func_00169718(void)
 
 struct Obj_16AED8Glob { u8 pad0[0x30]; s32 f30; };
 
-s32 D_0026FCF0;
+extern s32 D_0026FCF0;
 struct Ent_262788 { s32 a; s32 b; s32 c; };
 extern Ent_262788 D_00262788[18];
 extern u8 D_00275BC0[];

@@ -279,7 +279,7 @@ struct T217D_440 : ScreenElement {
     s32 countA;                 // 0x350
     s32 count;                  // 0x354: the entries below
     u8 pad358[0x35C - 0x358];
-    T217D_440_Slot entries[1];  // 0x35C: `count` of them (the capacity is not known)
+    T217D_440_Slot entries[31]; // 0x35C: `count` of them; 31 fill the object to D_00270650 (0x458 bytes)
 };
 
 // The pause menu (D_002186D0, D_0026FF68): three layers each ask for a screen, the lowest answer
@@ -361,7 +361,8 @@ void func_001AAB60(ScreenElement* self);
 void func_001AAEC0(ScreenElement* changed);
 void func_001AAF58(ScreenElement* self, f32* clock);
 
-// The 37 objects, in .data (D_002486B0 lists them in this order). Each is of the variant of
+// The 37 objects, in .data in address order (GCC writes uninitialised globals in the order
+// they are first declared; D_002486B0 lists them in its own order). Each is of the variant of
 // its table (D_0026EC70 and the four sub-elements of D_00272E08 have the base's table D_00218330).
 extern T217D_E30 D_0026C6C8;    // D_00217E30
 extern T217D_E30 D_0026C948;    // D_00217E80
@@ -390,11 +391,11 @@ extern T217D_440 D_002701F8;    // D_0021A440
 extern T217D_BF0 D_00270650;    // D_00220BF0
 extern T217D_3F0 D_002708E0;    // D_0021A3F0
 extern T217D_3F0 D_00271558;    // D_0021A3F0
+extern T217D_560 D_002721D0;    // D_00218560
 extern T217D_E30 D_00272430;    // D_00218240
 extern T217D_E30 D_002726B0;    // D_00218290
 extern T217D_470 D_00272930;    // D_00218470
 extern T217D_4C0 D_00272B98;    // D_002184C0
-extern T217D_560 D_002721D0;    // D_00218560
 extern T217D_720 D_00272E08;    // D_00218720
 extern T217D_5B0 D_002739F0;    // D_002185B0
 extern T217D_5B0 D_00273C50;    // D_002185B0

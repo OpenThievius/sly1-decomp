@@ -1194,4 +1194,4 @@ void* D_00261B60[28] = {
     (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
     (void*)(void (*)(void))func_00148F80, 0, 0, 0
 };
-void* D_0026EC68;
+extern void* D_0026EC68;
