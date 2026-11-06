@@ -4034,9 +4034,6 @@ extern const char D_0024CBE8[8] = "~.^.\000\000\000";
 extern const f32 D_0024D164 = -3.40282347e+38f;
 extern const f32 D_0024D168 = 3.40282347e+38f;
 extern const f32 D_0024D260 = 3.40282347e+38f;
-extern const f32 D_0024D588 = 3.40282347e+38f;
-extern const f32 D_0024D58C = 3.40282347e+38f;
-extern const f32 D_0024D590 = 3.40282347e+38f;
 
 // Globals typed by worker dv08, from retail's bytes and their readers.
 struct VtEnt_24F0D8 { s32 delta; void (*fn)(); };
@@ -4224,10 +4221,6 @@ f32 D_00274620[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f,
 f32 D_00274660[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
 f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
 f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
-f32 D_00274AD0[2] = { 1.0f, -1.0f };
-f32 D_00274B20[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
-f32 D_00274B64 = -0.033f;
-f32 D_00274B68[3] = { 300.0f, 0.0f, 0.25f };
 f32 D_00274B90 = 0.06666667f;
 f32 D_00274B94 = 0.16666667f;
 f32 D_00274B98 = 0.116666675f;
@@ -4804,8 +4797,6 @@ s32 D_00274734 = 0;
 s32 D_00274738 = 0;
 // word flag
 s32 D_00274744 = 0;
-// lwc1/swc1 word
-f32 D_00274B5C = 0;
 // lw word
 s32 D_00274C10 = 0;
 // lw/sw word
