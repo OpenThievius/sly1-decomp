@@ -8,145 +8,24 @@ struct Vec2_1840B8 { f32 x; f32 y; };
 
 void func_00183F40(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d);
 
-void func_001840B8(Vec2_1840B8* self, f32* out0, f32* out1)
-{
-    FitLineThroughPoints(out0, out1, self->x, 1.0f, self->y, 0.0f);
-}
-
 extern s32 D_002622CC;
 extern s32 D_00264260;
-
-void func_001841B0(ConeVolume* self)
-{
-    if (self->value == 0) {
-        D_00264260 = D_002622CC;
-    }
-}
 
 void func_001841D0(void* self);
 void func_00184B58(void* self);
 
-void func_00184768(ConeVolume* self, s32 flag)
-{
-    self->mode = flag;
-    if (flag == 0) {
-        self->flags = (self->flags & ~(u64)0x30000000000) | ((u64)0x8000 << 25);
-    } else {
-        self->flags = self->flags & ~(u64)0x30000000000;
-    }
-    func_001841D0(self);
-    func_00184B58(self);
-}
-
 struct Quad_001847F0 { u32 w[4]; } __attribute__((aligned(16)));
-
-void func_001847F0(ConeVolume* self, Quad_001847F0* src)
-{
-    *(Quad_001847F0*)self->f2E0 = *src;
-    func_001841D0(self);
-}
-
-void func_00184818(ConeVolume* self, f32 v)
-{
-    self->f2F0 = v;
-    func_001841D0(self);
-}
-
-void func_00184838(ConeVolume* self, f32 v)
-{
-    self->f2F4 = v;
-    func_001841D0(self);
-}
-
-void func_00184858(ConeVolume* self, f32 v)
-{
-    self->f2f8 = v;
-    func_001841D0(self);
-}
-
-void func_00184878(ConeVolume* self, f32 v)
-{
-    self->f2fc = v;
-    func_001841D0(self);
-}
-
-void func_00184898(ConeVolume* self, f32 v)
-{
-    self->f300 = v;
-    func_001841D0(self);
-}
-
-void func_00184968(ConeVolume* self, s32 v)
-{
-    if (v != self->value) {
-        self->value = v;
-        func_001841D0(self);
-    }
-}
 
 struct __attribute__((packed)) Packed8_184990 { u64 v; };
 
-void func_00184990(ConeVolume* self, Packed8_184990* src)
-{
-    *(Packed8_184990*)&self->rangeMin = *src;
-    func_001841D0(self);
-    func_00184B58(self);
-}
-
 void func_00184A70(void* self);
-
-void func_001849D0(ConeVolume* self, f32 v)
-{
-    self->outerAngle = v;
-    UpdateConeVolumeTangents(self);
-    func_001841D0(self);
-    func_00184B58(self);
-}
-
-void func_00184A08(ConeVolume* self, f32 v)
-{
-    self->innerAngle = v;
-    UpdateConeVolumeTangents(self);
-    func_001841D0(self);
-}
-
-void func_00184A38(ConeVolume* self, Quad16* src)
-
-{
-    self->q340 = *src;
-    func_001841D0(self);
-    func_00184B58(self);
-}
-
-void func_00184CD0(ConeVolume* self, f32 v)
-{
-    func_00184818(self, v);
-    func_00184838(self, v);
-}
-
-void func_00184D10(ConeVolume* self, f32* out)
-{
-    *out = self->f2F0;
-}
 
 struct __attribute__((aligned(16))) Quad_00184D20 { s32 a, b, c, d; };
 
 void func_001B4600(void* a0, void* a1);
 void func_001847F0(void* self, void* a1);
 
-void func_00184D20(void* self, void* a1)
-{
-    Quad_00184D20 q;
-    func_001B4600(a1, &q);
-    func_001847F0(self, &q);
-}
-
 void func_001B4580(void* self);
-
-void func_00184D58(u8* self)
-{
-    func_001B4580(self + 736);
-}
 
 void func_00121338(void* self);
 
@@ -378,21 +257,6 @@ struct Clamp_184A70 {
     }
 };
 
-void func_00184A70(ConeVolume* self)
-{
-    f32 a = Clamp_184A70::Of(self->outerAngle, 0.0f, 175.0f);
-    f32 b = Clamp_184A70::Of(self->innerAngle, 0.0f, a);
-    f32 r = func_002054F0(a * 0.00872664712f);
-    self->f354 = r;
-    self->f350 = r;
-    f32 q = func_002054F0(b * 0.00872664712f);
-    self->f360 = q / self->f350;
-    self->f368 = q / self->f354;
-    self->f36C = self->f364 = 1.0f;
-    self->f358 = Fpu::Sqrt(self->f360);
-    self->f35C = 1.0f;
-}
-
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 void func_0011E560();
 void func_0012B868();
@@ -424,15 +288,6 @@ void func_001E9088();
 struct Out_1840F0;
 f32 func_00205210(f32 value);
 void func_00183F40(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1);
-
-void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
-{
-    f32 x = func_00205210(a * 0.0087266471f);
-    x = x + x * x * x;
-    f32 y = func_00205210(c * 0.0087266471f);
-    y = y + y * y * y;
-    FitLineThroughPoints(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
-}
 
 struct Pair_00186A70 { u8 pad0[4]; s16 k1; s16 k2; };
 struct Grp_00186A70 { u8 pad0[0x58]; Pair_00186A70* pair; u8 pad1[4]; Grp_00186A70* next; };
