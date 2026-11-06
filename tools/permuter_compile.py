@@ -32,7 +32,7 @@ def main(argv=None):
     work = ROOT / "build" / "permuter" / "cc"
     work.mkdir(parents=True, exist_ok=True)
     copy = work / ("%s_%d.cpp" % (func, os.getpid()))
-    copy.write_text(only_definition(Path(src).read_text(), func))
+    copy.write_text(with_aliases(only_definition(Path(src).read_text(), func)))
     try:
         cc.compile_file(copy, out, source=check.source_for(copy, func))
     except cc.CompileError as e:
@@ -45,16 +45,25 @@ def main(argv=None):
     return 0
 
 
+ALIAS = re.compile(r'static const char permuter_alias_\d+\[\] = "(\w+)=([^"]+)";')
+
+
+def with_aliases(text):
+    """The candidate with permuter_setup.py's call aliases as #defines again (Fpu__Sqrt -> Fpu::Sqrt)."""
+    defines = ["#define %s %s" % m.groups() for m in ALIAS.finditer(text)]
+    return "\n".join(defines) + "\n" + ALIAS.sub("", text) if defines else text
+
+
 def only_definition(text, func):
     """The candidate with every other function definition cut down to its declaration: a near miss
     holds its whole unit, and the permuter scores all the code in the object against retail's one
-    function. Inline helpers keep their bodies (todo.definitions finds only address names)."""
+    function. Inline helpers, which have readable names, keep their bodies."""
     import todo
     import version_src
     spans = []
     for m in todo.definitions(text):
         name = m.group(1)
-        if name == func or text[:m.start(1)].endswith("::"):
+        if name == func or not name.startswith("func_") or text[:m.start(1)].endswith("::"):
             continue        # FUNC itself, or a class's method, which only its class may declare
         try:
             start, end = version_src.definition_span(text[m.start():], name)

@@ -83,17 +83,45 @@ def items(text):
     return out
 
 
+def plain_calls(body, tags):
+    """FUNC's body with the C++ calls in it given plain names, and the macros that turn them back:
+    `Fpu::Sqrt(x)` becomes `Fpu__Sqrt(x)`, a type called like a function `T()` becomes `make_T()`."""
+    aliases = {}
+
+    def scoped(m):
+        alias = "%s__%s" % (m.group(1), m.group(2))
+        aliases[alias] = "%s::%s" % (m.group(1), m.group(2))
+        return alias + "("
+    body = re.sub(r"\b([A-Za-z_]\w*)::([A-Za-z_]\w*)\s*\(", scoped, body)
+    head, brace, rest = body.partition("{")
+
+    def construct(m):
+        if m.group(1) not in tags:
+            return m.group(0)
+        aliases["make_" + m.group(1)] = m.group(1)
+        return "make_%s(" % m.group(1)
+    rest = re.sub(r"(?<![\w.>])([A-Za-z_]\w*)\s*\((?=\s*\))", construct, rest)
+    return head + brace + rest, sorted(aliases.items())
+
+
 def isolate(text, func):
     """The unit with everything the permuter's C parser cannot read, or need, inside PERM_IGNORE:
     all but FUNC's definition and plain C typedefs. Our C++ (classes with bases and methods,
     references, templates) then reaches the compiler untouched."""
+    tags = {m.group(2) for m in STRUCT.finditer(text)}
     out = []
     for item in items(text):
         stripped = item.strip()
         if not stripped:
             out.append(item)
         elif re.search(r"\b%s\s*\(" % func, stripped) and stripped.endswith("}"):
-            out.append(item)
+            body, aliases = plain_calls(item, tags)
+            if aliases:
+                # The permuter preprocesses its input, so a #define would undo the alias before
+                # it parses; permuter_compile.py turns these strings back into #defines.
+                out.append("\nPERM_IGNORE(%s)\n" % " ".join('static const char permuter_alias_%d[] = "%s=%s";' % (i, a, b)
+                                                         for i, (a, b) in enumerate(aliases)))
+            out.append(body)
         elif C_TYPEDEF.match(stripped) and "class" not in stripped:
             out.append(item)
         else:

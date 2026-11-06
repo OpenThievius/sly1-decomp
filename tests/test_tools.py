@@ -412,6 +412,17 @@ class PermuterTest(unittest.TestCase):
     def test_a_class_with_a_base_gets_its_typedef(self):
         self.assertEqual({m.group(2) for m in permuter_setup.STRUCT.finditer(self.UNIT)}, {"Base", "Obj"})
 
+    def test_cpp_calls_reach_the_compiler_through_aliases(self):
+        body = "f32 func_00100020(f32 x)\n{\n    Obj o = Obj();\n    return Fpu::Sqrt(x);\n}"
+        plain, aliases = permuter_setup.plain_calls(body, {"Obj"})
+        self.assertIn("Obj o = make_Obj();", plain)
+        self.assertIn("return Fpu__Sqrt(x);", plain)
+        self.assertEqual(aliases, [("Fpu__Sqrt", "Fpu::Sqrt"), ("make_Obj", "Obj")])
+        text = permuter_setup.isolate("struct Obj { s32 a; };\n" + body + "\n", "func_00100020")
+        compiled = permuter_compile.with_aliases(text)
+        self.assertIn("#define Fpu__Sqrt Fpu::Sqrt", compiled)
+        self.assertNotIn("permuter_alias_", compiled)
+
     def test_only_the_function_keeps_its_body(self):
         text = permuter_compile.only_definition(self.UNIT, "func_00100010")
         self.assertIn("void func_00100000(Obj* o)\n;", text)
