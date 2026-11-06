@@ -3899,10 +3899,6 @@ void func_001FBDF8();
 
 extern const f32 D_00249A1C = 3.4028235e+38f;
 extern const f32 D_00249B10[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
-extern const f32 D_00249D64 = 3.4028235e+38f;
-extern const f32 D_00249D68 = -3.4028235e+38f;
-extern const f32 D_00249D6C = 3.4028235e+38f;
-extern const f32 D_00249D70 = -3.4028235e+38f;
 extern const f32 D_00249E4C = 3.4028235e+38f;
 extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
@@ -4806,10 +4802,6 @@ s32 D_0026FA64 = 0;
 // size: same Span type, 0x30, filled by func_00130F48 at 0x131418 and read by func_00131000
 // size: same Span type, 0x30, filled by func_00130F48 at 0x131444 and read by func_00131000
 // size: one f32, read and written only with lwc1/swc1 (0x1312B8..0x131B48)
-// size: one word, address passed to func_00139B70 (which func_001529E0 fills with sw) and read with lw at 0x13B1D0
-s32 D_00261314 = 0;
-// size: one word (sw by func_001529E0, lw at 0x13B1D8), then 4 bytes of padding before the 8-aligned next label
-s32 D_00261318 = 0;
 
 // Globals typed by worker dz03, from retail's bytes and their readers.
 // A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
