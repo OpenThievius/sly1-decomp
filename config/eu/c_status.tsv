@@ -1056,7 +1056,7 @@ func_00141870	func_00141B70	match
 func_001419A0	func_00141CA0	match	
 func_001419C0	func_00141CC0	match	
 func_001419E0	func_00141CE0	match	
-func_001419E8	func_00141CE8	match	
+func_001419E8	func_00141CE8	match	rodata
 func_00141B48	func_00141E48	match	
 func_00141C28	func_00141F28	match	
 func_00141C90	func_00141F90	match	
