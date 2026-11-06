@@ -2,7 +2,7 @@
 // The 0x14-byte entries of the lists at World+0x1EC8 and World+0x1ECC: func_001DBBD8 takes one from
 // the world's pool at +0x1B14 (func_001B5EC0; func_001DB4C8 makes the pool of 0x400 entries of
 // 0x14 bytes) and clears its 0x14 bytes; func_001DBC60, func_001DBCC8, func_001DBD40,
-// func_001DBE48 (001D8000.cpp) and func_0011AB58 (file_112698.cpp) walk them. Written for this
+// func_001DBE48 (file_1D62E0.cpp) and func_0011AB58 (file_112698.cpp) walk them. Written for this
 // project from what retail's code does (build/swarm/st3/groups.tsv, g3296).
 #ifndef S1DBBD8_H
 #define S1DBBD8_H
