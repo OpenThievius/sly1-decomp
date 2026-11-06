@@ -60,6 +60,14 @@ name seems obviously right. If a name comes to mind before the evidence does, ch
 word from the code. A name that only restates the address (`Fn16F588`) is better than one
 remembered. Reviewers, human and agent, check new names against this before they land.
 
+One kind of name is retail's own: the type-name strings the C++ runtime's type information keeps
+in `.rodata` (`9bad_alloc`, `13bad_exception`, `9exception`: a length, then the class's name).
+GCC writes that string from the class's name, so a whole file that defines the class (a proved
+file, config/us/files.tsv) can only match retail's `.rodata` under that name. Such a name is
+allowed only where retail's bytes spell it and a proved file needs it, and the mangled names
+that follow from it (`_vt$9bad_alloc`, `__tf9bad_alloc`) go into `config/us/libcalls.tsv` with
+it. It is read from retail's data, never remembered, and it opens no door to any other name.
+
 ## Workflow
 
 1. Give a family its names: its types and fields in place (they are ours), its functions and
