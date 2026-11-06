@@ -4093,11 +4093,6 @@ f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.
 f32 D_00264248 = 2.5f;
 f32 D_0026424C = 300.0f;
 f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
-f32 D_002649D0[2] = { 0.0f, 0.25f };
-f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
-f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
-f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
-f32 D_00264A38 = 20.0f;
 f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
 f32 D_0026A910 = 100.0f;
@@ -4898,7 +4893,6 @@ List01 D_00264088 = {0};
 // size: s32 count, tested < 0x10 against the D_00264670 table in func_00184DE8
 // size: func_00184DE8 adds entries while count < 0x10, stride 0x10 (sll 4)
 // size: s32 flag, word load/store only
-s32 D_002649A8 = 0;
 // size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
 // size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
 extern BackgroundJob D_00269990;
