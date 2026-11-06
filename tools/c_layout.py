@@ -549,6 +549,9 @@ def except_entries(text, tables):
         at = addr + length
     if at < start + size:
         run_of(at, start + size)
+    for stale in out_dir.glob("except_*.s"):
+        if stale not in runs:
+            stale.unlink()
     return text.replace(EXCEPT_ASSET, "\n".join(e.strip() for e in entries), 1), runs
 
 
