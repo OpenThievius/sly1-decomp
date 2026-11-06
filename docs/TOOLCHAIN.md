@@ -116,7 +116,7 @@ with `-march=r5900 -mabi=eabi`. splat writes n32 register names for it.
    float support among them) are decompiled from retail like the rest
    (LEGAL.md).
 
-   **The C++ runtime in src/lib/001FC000.cpp was built with exceptions on**
+   **The C++ runtime (once src/lib/001FC000.cpp, now its whole files) was built with exceptions on**
    (measured on 2026-11-02), 2.9-ee-991111's default. Its throw and
    exception-specification functions (func_001FEC10, func_001FEE48, and
    func_001FEDC8, which splat joins to func_001FEC10) match only so, and so
@@ -252,8 +252,14 @@ the unwinder (unwind.c, no frame tables, so no -fexceptions). Each boundary is w
 code and data end: its own tables and literals in .rodata, its frame tables in .data, its statics
 in .bss; most are also one member of the toolchain's `libgcc.a`, equal word for word with
 relocations masked (only that equality is used). Padding is no evidence here: the runtime's
-functions are all 8-byte aligned, inside an object as between objects. The C++ runtime that
-follows (0x1FD8A8, and 0x1FE8F0 to 0x2014D0) is not proved yet: two of its objects carry a
-`.gcc_except_table` the build does not place, and the type-name strings its compiler-written
-type-information functions emit ("9bad_alloc", "13bad_exception", "9exception") are the classes'
-own names, so their whole files need those names rather than ours.
+functions are all 8-byte aligned, inside an object as between objects. The C++ runtime's
+objects are proved too, each C++ built by the Linux cc1plus with exceptions on: allocate.cpp
+(0x1FD8A8), exception.cpp (0x1FE8F0), new_handler.cpp (0x1FFFD0), type_info.cpp (0x200080) and
+type_info_kinds.cpp (0x200750). Their classes take the names their type-name strings spell
+(docs/NAMING.md); `#pragma implementation` writes the inline members, vtables and
+type-information functions of include/exception.h, new.h and typeinfo.h where retail has them,
+config/us/generated.tsv gives those functions retail's names, the common type-information
+objects take their addresses from config/us/libcalls.tsv, and two of the files place their
+`.gcc_except_table` (config/us/files.tsv's `except` column). cc1plus of 2.9-ee-991111 refuses
+`#pragma implementation` after the preprocessor's line marker for the source, so tools/compile.py
+names the unit itself in those markers.
