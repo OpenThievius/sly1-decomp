@@ -679,6 +679,7 @@ D_0024ECB0	0024ECB0	256	.rodata	src/lib/divide.c
 D_0024EDB0	0024EDB0	256	.rodata	src/lib/remainder.c
 D_0024EEB0	0024EEB0	256	.rodata	src/lib/divide_unsigned.c
 D_0024EFB0	0024EFB0	256	.rodata	src/lib/remainder_unsigned.c
+D_0024F0B0	0024F0B0	10	.rodata	src/lib/allocate.cpp
 D_0024F0C0	0024F0C0	24	.rodata.D_0024F0C0	src/lib/001FC000.cpp
 D_0024F0D8	0024F0D8	24	.rodata.D_0024F0D8	src/main/001E4000.cpp
 D_0024F0F0	0024F0F0	16	.rodata.D_0024F0F0	src/lib/001FC000.cpp
@@ -1786,6 +1787,7 @@ D_002779B8	002779B8	8	.data.D_002779B8	src/lib/001F8000.cpp
 D_002779C0	002779C0	880	.data.D_002779C0	src/lib/001F8000.cpp
 D_00277D30	00277D30	64	.data.D_00277D30	src/lib/001F8000.cpp
 D_00277FE0	00277FE0	32	.data.D_00277FE0	src/lib/001F8000.cpp
+D_00278000	00278000	72	.data	src/lib/allocate.cpp
 D_00278048	00278048	1528	.data	src/lib/throw.c
 D_00278640	00278640	4	.data.D_00278640	src/lib/001FC000.cpp
 D_002789D8	002789D8	164	.data	src/lib/new_handler.cpp
@@ -1835,6 +1837,7 @@ D_0027B040	0027B040	40	.data.D_0027B040	src/lib/0020C000.cpp
 D_0027B0C0	0027B0C0	80	.data.D_0027B0C0	src/lib/00210000.cpp
 D_0027B110	0027B110	32	.data.D_0027B110	src/lib/00210000.cpp
 D_0027B130	0027B130	84	.data.D_0027B130	src/lib/001F8000.cpp
+D_0027B200	0027B200	56	.gcc_except_table	src/lib/allocate.cpp
 D_0027C008	0027C008	4	.bss	src/main/00148000.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c

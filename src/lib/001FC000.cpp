@@ -395,22 +395,6 @@ s32 func_001FE9D0(Arg_1FE9D0* size)
     return p;
 }
 
-// The exception an allocation failure throws (its typeinfo function is func_00200000).
-class bad_alloc {
-public:
-    virtual ~bad_alloc();
-};
-
-struct Arg_001FD8A8;
-
-void* func_0018D758(Arg_001FD8A8* q);
-
-void* func_001FD8A8(Arg_001FD8A8* a) throw(bad_alloc)
-{
-    return func_0018D758(a);
-}
-
-
 struct Handle_1FEB18 {
     u8 pad_00[0x8];
     void* object;

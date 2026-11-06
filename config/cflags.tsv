@@ -34,3 +34,4 @@ src/lib/multiply.c	-O2 -G0	2.9-ee-991111-01
 src/lib/new_handler.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/type_info.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/type_info_kinds.cpp	-O2 -G0	2.9-ee-991111-01
+src/lib/allocate.cpp	-O2 -G0	2.9-ee-991111-01
