@@ -19,6 +19,15 @@
 //
 // decomp-permuter has not been run on this function.
 //
+// Compile conditions ruled out (2026-11-06, build/swarm/o101/sweep.txt): 129 flag sets on top of
+// the default and the other compiler releases; none is closer (2.95.2 gains 2 li but breaks
+// matched Vec/Mat code; 2.9-ee-991111 saves in 8 bytes). The extra rebuilt constants come from
+// the inliner's argument pseudos (each constant 4 is one; only the first gets a register), so
+// they follow the source's shape. Lead: in every call fC = f14 = f18 (Set10, Set11, Set14) and
+// fC = f18 (Set16, Set17); the original may pass one offset stored to several fields. Merging
+// Set16's alone gives opcode counts much closer to retail's (9 off, against 42) but fewer exact
+// instructions; a search would have to be redone on that shape.
+//
 // Same scores as this file: a reference per entry; s16/u16 for flags, s16/s8 for an integer f8; a
 // shared base helper for f0 and flags (the last overflows the stock compiler, below). Nothing
 // here moved the RTL. Function-pointer types were tried earlier and compile to the same bytes.

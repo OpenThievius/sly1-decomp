@@ -55,6 +55,12 @@ func_001B9940 = 0x001B9940; // type:func
 // menu strings, pointed to by its menu table D_00269D50).
 D_00249CA0 = 0x00249CA0;
 D_0024B660 = 0x0024B660;
+// The end of a proved file's .rodata inside a coarse label: remainder_unsigned.c's table of
+// significant bits (D_0024EFB0) is followed by the next object's string at 0x24F0B0.
+D_0024F0B0 = 0x0024F0B0;
+// The end of soft_float.c's .bss inside a coarse label: the double routines' NaN result
+// (D_0062A770, 0x18 bytes, the unpacked double type) is followed by 0x10 bytes no code reads.
+D_0062A788 = 0x0062A788;
 
 // Constructors (_GLOBAL_$I$) behind the linker's leftovers: retail's constructor list
 // (D_0027B130) names each as func_X + 0x10, after the two 8-byte runs (a store, then a nop) the

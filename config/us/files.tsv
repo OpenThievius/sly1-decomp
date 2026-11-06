@@ -17,3 +17,16 @@ src/main/file_1000C8.cpp	001000C8	00112698	00248D80	002505D8	-
 src/main/file_18D8E0.cpp	0018D8E0	0018F988	0024B438	002699B0	-
 src/main/file_1963D8.cpp	001963D8	00198980	0024C860	0026A710	-
 src/main/file_193210.cpp	00193210	001963D8	0024B660	00269CD8	-
+src/lib/divide.c	001FAE38	001FB528	0024ECB0	-	-
+src/lib/remainder.c	001FB790	001FBDF8	0024EDB0	-	-
+src/lib/divide_unsigned.c	001FBE00	001FC3D0	0024EEB0	-	-
+src/lib/remainder_unsigned.c	001FC3D0	001FC910	0024EFB0	-	-
+src/lib/double_to_u64.c	001FB528	001FB618	-	-	-
+src/lib/s64_to_double.c	001FB618	001FB6B0	-	-	-
+src/lib/s64_to_float.c	001FB6B0	001FB790	-	-	-
+src/lib/file_1FBDF8.c	001FBDF8	001FBE00	-	-	-
+src/lib/multiply.c	001FE890	001FE8F0	-	-	-
+src/lib/throw.c	001FD920	001FE890	-	00278048	0062A798
+src/lib/soft_float.c	001FC910	001FD5D0	-	-	0062A770
+src/lib/soft_float_single.c	001FD5D0	001FD8A8	-	-	-
+src/lib/unwind.c	001FF048	001FFFD0	0024F110	-	0062A7B8

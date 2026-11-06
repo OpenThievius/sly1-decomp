@@ -3,9 +3,6 @@
  * own object in retail with its own table (include/divide.h). C, built by the Linux cc1 of
  * 2.9-ee-991111 (config/cflags.tsv, docs/TOOLCHAIN.md). Written for this project from retail's
  * code. */
-/* Its table of significant bits. */
-#define BITS_TABLE D_0024EFB0
-
 #include "divide.h"
 
 u64 func_001FC3D0(u64 num, u64 den)

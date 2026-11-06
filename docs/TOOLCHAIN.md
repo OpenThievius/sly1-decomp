@@ -242,3 +242,18 @@ divide helpers multiply with one `multu`, read from lo and hi, which no C produc
 multiplies twice or splits a 64-bit product): include/mul_wide.h is that helper, the second
 inline assembly AGENTS.md allows. As with libc and libm, nothing is taken from the archive but
 the kind of its source; the C is written from retail's code.
+
+**The runtime's files (2026-11-06).** From 0x1FAE38 to 0x1FFFD0 the runtime is proved file by file
+(config/us/files.tsv), every file C built by the Linux cc1: the four division files, three
+conversions (src/lib/double_to_u64.c, s64_to_double.c, s64_to_float.c), file_1FBDF8.c, the double
+and single software floating point (soft_float.c, soft_float_single.c), the exception runtime
+(throw.c, with its frame tables in .data from -fexceptions), the 64-bit product (multiply.c) and
+the unwinder (unwind.c, no frame tables, so no -fexceptions). Each boundary is where one object's
+code and data end: its own tables and literals in .rodata, its frame tables in .data, its statics
+in .bss; most are also one member of the toolchain's `libgcc.a`, equal word for word with
+relocations masked (only that equality is used). Padding is no evidence here: the runtime's
+functions are all 8-byte aligned, inside an object as between objects. The C++ runtime that
+follows (0x1FD8A8, and 0x1FE8F0 to 0x2014D0) is not proved yet: two of its objects carry a
+`.gcc_except_table` the build does not place, and the type-name strings its compiler-written
+type-information functions emit ("9bad_alloc", "13bad_exception", "9exception") are the classes'
+own names, so their whole files need those names rather than ours.

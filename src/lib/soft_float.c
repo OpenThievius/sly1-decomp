@@ -1,22 +1,92 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
-/* The toolchain runtime's software floating point: a double taken apart, for the double routines
- * of src/lib/001FC000.cpp. C, built by cc1 (config/cflags.tsv), as the runtime was compiled
- * (docs/TOOLCHAIN.md). Written for this project from retail's code. FLUSH_TINY is the runtime's
- * build switch that reads denormals as zero: the code it disables leaves its loop's alignment in
- * retail. */
+/* The toolchain runtime's software floating point, double precision: the whole object,
+ * 0x1FC910-0x1FD5D0 (pack, add, subtract, compare, multiply, divide, and the conversions to and
+ * from integers and single precision). A double travels as its 64 bits. C, built by cc1
+ * (config/cflags.tsv), as the runtime was compiled (docs/TOOLCHAIN.md). Written for this project
+ * from retail's code. FLUSH_TINY is the runtime's build switch that reads denormals as zero: the
+ * code it disables leaves its loop's alignment in retail. */
 #include "common.h"
 
-/* A double taken apart: its kind, sign, unbiased exponent and fraction. */
+/* A double taken apart: its kind (0 signalling NaN, 1 quiet NaN, 2 zero, 3 finite, 4 infinity),
+ * sign, unbiased exponent and fraction. */
 typedef struct Unpacked {
-    s32 kind;
+    u32 kind;
     s32 sign;
     s32 exponent;
     s32 pad;
-    u64 fraction;
+    union {
+        u64 ll;
+        u32 l[2];
+    } fraction;
 } Unpacked;
+
+#define IS_NAN(p) ((p)->kind < 2)
+#define IS_ZERO(p) (((p)->kind ^ 2) == 0)
+#define IS_INF(p) (((p)->kind ^ 4) == 0)
+
+/* The NaN that an invalid operation returns. */
+static Unpacked D_0062A770;
 
 /* Tiny values read as zero. */
 #define FLUSH_TINY 1
+
+u64 func_001FC910(Unpacked* p)
+{
+    union {
+        u64 u;
+        struct {
+            u64 mant : 52;
+            u64 expo : 11;
+            u64 sign : 1;
+        } b;
+    } bits;
+    u64 mant = p->fraction.ll;
+    s32 expo = 0;
+    u32 sign = p->sign;
+
+    if (IS_NAN(p)) {
+        expo = 0x7FF;
+        mant = mant | ((u64)1 << 51);
+    } else if (IS_INF(p)) {
+        expo = 0x7FF;
+        mant = 0;
+    } else if (IS_ZERO(p)) {
+        mant = 0;
+    } else if (mant != 0) {
+        s32 e = p->exponent;
+        if (e < -0x3FE) {
+            s32 sh = -0x3FE - e;
+            if (sh > 0x38) {
+                mant = 0;
+            } else {
+                mant = mant >> sh;
+            }
+            mant = mant >> 8;
+        } else if (e >= 0x400) {
+            expo = 0x7FF;
+            mant = 0;
+        } else {
+            expo = e + 0x3FF;
+            if ((mant & 0xFF) == 0x80) {
+                if ((mant & 0x100) != 0) {
+                    mant = mant + 0x80;
+                }
+            } else {
+                mant = mant + 0x7F;
+            }
+            if (mant > 0x1FFFFFFFFFFFFFFFull) {
+                mant = mant >> 1;
+                expo = expo + 1;
+            }
+            mant = mant >> 8;
+        }
+    }
+
+    bits.b.mant = mant;
+    bits.b.expo = expo;
+    bits.b.sign = sign;
+    return bits.u;
+}
 
 void func_001FCA40(u64* in, Unpacked* out)
 {
@@ -37,7 +107,7 @@ void func_001FCA40(u64* in, Unpacked* out)
                 exponent--;
             }
             out->exponent = exponent;
-            out->fraction = fraction;
+            out->fraction.ll = fraction;
         }
     } else if (exponent == 0x7FF) {
         if (fraction == 0) {
@@ -47,11 +117,462 @@ void func_001FCA40(u64* in, Unpacked* out)
                 out->kind = 1;
             else
                 out->kind = 0;
-            out->fraction = fraction;
+            out->fraction.ll = fraction;
         }
     } else {
         out->exponent = exponent - 0x3FF;
         out->kind = 3;
-        out->fraction = (fraction << 8) | 0x1000000000000000ull;
+        out->fraction.ll = (fraction << 8) | 0x1000000000000000ull;
     }
+}
+
+Unpacked* func_001FCAE0(Unpacked* a, Unpacked* b, Unpacked* tmp)
+{
+    s32 ae, be;
+    u64 af, bf;
+    s64 tf;
+    s32 diff;
+
+    if (IS_NAN(a)) return a;
+    if (IS_NAN(b)) return b;
+    if (IS_INF(a)) {
+        if (IS_INF(b) && a->sign != b->sign) return &D_0062A770;
+        return a;
+    }
+    if (IS_INF(b)) return b;
+    if (IS_ZERO(b)) {
+        if (IS_ZERO(a)) {
+            *tmp = *a;
+            tmp->sign = a->sign & b->sign;
+            return tmp;
+        }
+        return a;
+    }
+    if (IS_ZERO(a)) return b;
+
+    ae = a->exponent;
+    be = b->exponent;
+    af = a->fraction.ll;
+    bf = b->fraction.ll;
+    diff = ae - be;
+    if (diff < 0) diff = -diff;
+    if (diff < 64) {
+        while (ae > be) {
+            be++;
+            bf = (bf & 1) | (bf >> 1);
+        }
+        while (be > ae) {
+            ae++;
+            af = (af & 1) | (af >> 1);
+        }
+    } else {
+        if (ae > be) {
+            bf = 0;
+        } else {
+            ae = be;
+            af = 0;
+        }
+    }
+    if (a->sign != b->sign) {
+        if (a->sign) tf = -af + bf;
+        else tf = af - bf;
+        if (tf >= 0) {
+            tmp->sign = 0;
+            tmp->exponent = ae;
+            tmp->fraction.ll = tf;
+        } else {
+            tmp->sign = 1;
+            tmp->exponent = ae;
+            tmp->fraction.ll = -tf;
+        }
+        while (tmp->fraction.ll < 0x1000000000000000ULL && tmp->fraction.ll) {
+            tmp->fraction.ll <<= 1;
+            tmp->exponent--;
+        }
+    } else {
+        tmp->sign = a->sign;
+        tmp->exponent = ae;
+        tmp->fraction.ll = af + bf;
+    }
+    tmp->kind = 3;
+    if (tmp->fraction.ll >= 0x2000000000000000ULL) {
+        tmp->fraction.ll = (tmp->fraction.ll & 1) | (tmp->fraction.ll >> 1);
+        tmp->exponent++;
+    }
+    return tmp;
+}
+
+u64 func_001FCD20(u64 pa, u64 pb)
+{
+    Unpacked a;
+    Unpacked b;
+    Unpacked c;
+
+    func_001FCA40(&pa, &a);
+    func_001FCA40(&pb, &b);
+    return func_001FC910(func_001FCAE0(&a, &b, &c));
+}
+
+u64 func_001FCD78(u64 pa, u64 pb)
+{
+    Unpacked a;
+    Unpacked b;
+    Unpacked c;
+
+    func_001FCA40(&pa, &a);
+    func_001FCA40(&pb, &b);
+    b.sign ^= 1;
+    return func_001FC910(func_001FCAE0(&a, &b, &c));
+}
+
+u64 func_001FE890(u64 a, u64 b);
+static inline Unpacked* Multiply(Unpacked* a, Unpacked* b, Unpacked* tmp)
+{
+    u64 high;
+    u64 low;
+    u64 alo, ahi, blo, bhi;
+    u64 p0, p1, p2, p3;
+    u64 mid, hi, lo;
+
+    if (IS_NAN(a)) {
+        a->sign = a->sign != b->sign;
+        return a;
+    }
+    if (IS_NAN(b)) {
+        b->sign = a->sign != b->sign;
+        return b;
+    }
+    if (IS_INF(a)) {
+        if (IS_ZERO(b)) {
+            return (Unpacked*)&D_0062A770;
+        }
+        a->sign = a->sign != b->sign;
+        return a;
+    }
+    if (IS_INF(b)) {
+        if (IS_ZERO(a)) {
+            return (Unpacked*)&D_0062A770;
+        }
+        b->sign = a->sign != b->sign;
+        return b;
+    }
+    if (IS_ZERO(a)) {
+        a->sign = a->sign != b->sign;
+        return a;
+    }
+    if (IS_ZERO(b)) {
+        b->sign = a->sign != b->sign;
+        return b;
+    }
+    alo = a->fraction.ll & 0xFFFFFFFF;
+    ahi = a->fraction.ll >> 32;
+    blo = b->fraction.ll & 0xFFFFFFFF;
+    bhi = b->fraction.ll >> 32;
+    p0 = func_001FE890(blo, alo);
+    p1 = func_001FE890(bhi, alo);
+    p2 = func_001FE890(blo, ahi);
+    p3 = func_001FE890(bhi, ahi);
+    mid = p1 + p2;
+    hi = 0;
+    if (mid < p1) {
+        hi += (u64)1 << 32;
+    }
+    lo = p0 + (mid << 32);
+    if (lo < p0) {
+        hi++;
+    }
+    hi += ((mid >> 32) & 0xFFFFFFFF) + p3;
+    high = hi;
+    low = lo;
+    tmp->exponent = a->exponent + b->exponent;
+    tmp->sign = a->sign != b->sign;
+    tmp->exponent += 4;
+    while (high > (~(u64)0 >> 3)) {
+        tmp->exponent++;
+        if (high & 1) {
+            low >>= 1;
+            low |= 0x8000000000000000ull;
+        }
+        high >>= 1;
+    }
+    while (high <= (~(u64)0 >> 4)) {
+        tmp->exponent--;
+        high <<= 1;
+        if (low & 0x8000000000000000ull) {
+            high |= 1;
+        }
+        low <<= 1;
+    }
+    if ((high & 0xFF) == 0x80) {
+        if (high & 0x100) {
+            high += 0x80;
+        } else if (low) {
+            high += 0x80;
+        }
+    }
+    tmp->fraction.ll = high;
+    tmp->kind = 3;
+    return tmp;
+}
+
+u64 func_001FCDE0(u64 x, u64 y)
+{
+    Unpacked a;
+    Unpacked b;
+    Unpacked tmp;
+    u64 xa;
+    u64 xb;
+
+    xa = x;
+    xb = y;
+    func_001FCA40(&xa, &a);
+    func_001FCA40(&xb, &b);
+    return func_001FC910((Unpacked*)Multiply(&a, &b, &tmp));
+}
+
+
+static inline Unpacked* Divide(Unpacked* a, Unpacked* b)
+{
+    u64 rem;
+    u64 div;
+    u64 bit;
+    u64 quo;
+
+    if (IS_NAN(a)) {
+        return a;
+    }
+    if (IS_NAN(b)) {
+        return b;
+    }
+    a->sign ^= b->sign;
+    if (IS_INF(a) || IS_ZERO(a)) {
+        if (a->kind == b->kind) {
+            return &D_0062A770;
+        }
+        return a;
+    }
+    if (IS_INF(b)) {
+        a->fraction.ll = 0;
+        a->exponent = 0;
+        return a;
+    }
+    if (IS_ZERO(b)) {
+        a->kind = 4;
+        return a;
+    }
+    a->exponent = a->exponent - b->exponent;
+    rem = a->fraction.ll;
+    div = b->fraction.ll;
+    if (rem < div) {
+        a->exponent--;
+        rem <<= 1;
+    }
+    bit = (u64)1 << 60;
+    quo = 0;
+    while (bit) {
+        if (rem >= div) {
+            quo |= bit;
+            rem -= div;
+        }
+        bit >>= 1;
+        rem <<= 1;
+    }
+    if ((quo & 0xFF) == 0x80) {
+        if (quo & 0x100) {
+            quo += 0x80;
+        } else if (rem) {
+            quo += 0x80;
+        }
+    }
+    a->fraction.ll = quo;
+    return a;
+}
+
+u64 func_001FD088(u64 x, u64 y)
+{
+    Unpacked pa;
+    Unpacked pb;
+
+    func_001FCA40(&x, &pa);
+    func_001FCA40(&y, &pb);
+    return func_001FC910((Unpacked*)Divide(&pa, &pb));
+}
+
+s32 func_001FD1F0(Unpacked* a, Unpacked* b)
+{
+    if (a->kind < 2) {
+        return 1;
+    }
+    if (b->kind < 2) {
+        return 1;
+    }
+    if ((a->kind ^ 4) == 0) {
+        if ((b->kind ^ 4) == 0) {
+            return b->sign - a->sign;
+        }
+        return a->sign != 0 ? -1 : 1;
+    }
+    if ((b->kind ^ 4) == 0) {
+        return b->sign != 0 ? 1 : -1;
+    }
+    if ((a->kind ^ 2) == 0) {
+        if ((b->kind ^ 2) == 0) {
+            return 0;
+        }
+        return b->sign == 0 ? -1 : 1;
+    }
+    if ((b->kind ^ 2) == 0) {
+        return a->sign != 0 ? -1 : 1;
+    }
+    if (a->sign != b->sign) {
+        return a->sign != 0 ? -1 : 1;
+    }
+    if (a->exponent > b->exponent) {
+        return a->sign != 0 ? -1 : 1;
+    }
+    if (a->exponent < b->exponent) {
+        return a->sign != 0 ? 1 : -1;
+    }
+    if (a->fraction.ll > b->fraction.ll) {
+        return a->sign != 0 ? -1 : 1;
+    }
+    if (a->fraction.ll < b->fraction.ll) {
+        return a->sign != 0 ? 1 : -1;
+    }
+    return 0;
+}
+
+s32 func_001FD308(u64 pa, u64 pb)
+{
+    Unpacked a;
+    Unpacked b;
+
+    func_001FCA40(&pa, &a);
+    func_001FCA40(&pb, &b);
+    return func_001FD1F0(&a, &b);
+}
+
+u64 func_001FD358(s32 value)
+{
+    Unpacked parts;
+    u64 m;
+    s32 e;
+    u64 n;
+
+    parts.kind = 3;
+    parts.sign = (u32)value >> 31;
+    if (value == 0) {
+        parts.kind = 2;
+    } else {
+        parts.exponent = 0x3C;
+        if (parts.sign != 0) {
+            if (value == (s32)0x80000000) {
+                return 0xC1E0000000000000ULL;
+            }
+            parts.fraction.ll = (s32)-value;
+        } else {
+            parts.fraction.ll = value;
+        }
+        m = parts.fraction.ll;
+        if (m <= 0x0FFFFFFFFFFFFFFFULL) {
+            e = parts.exponent;
+            do {
+                n = m << 1;
+                e--;
+                m = n;
+            } while (n <= 0x0FFFFFFFFFFFFFFFULL);
+            parts.exponent = e;
+            parts.fraction.ll = m;
+        }
+    }
+    return func_001FC910(&parts);
+}
+
+s32 func_001FD410(u64 value)
+{
+    u64 in = value;
+    Unpacked out;
+    s32 v;
+
+    func_001FCA40(&in, &out);
+    if ((out.kind ^ 2) == 0) {
+        return 0;
+    }
+    if (out.kind < 2) {
+        return 0;
+    }
+    if ((out.kind ^ 4) == 0) {
+        goto saturate;
+    }
+    if (out.exponent < 0) {
+        return 0;
+    }
+    if (out.exponent < 0x1F) {
+        goto compute;
+    }
+saturate:
+    return (out.sign != 0) ? (s32)0x80000000 : 0x7FFFFFFF;
+compute:
+    v = (s32)(out.fraction.ll >> (0x3C - out.exponent));
+    if (out.sign != 0) {
+        v = -v;
+    }
+    return v;
+}
+
+u32 func_001FD4A8(u64 value)
+{
+    Unpacked d;
+    u64 b;
+    s32 e;
+
+    b = value;
+    func_001FCA40(&b, &d);
+    if ((d.kind ^ 2) == 0) {
+        return 0;
+    }
+    if (d.kind < 2) {
+        return 0;
+    }
+    if (d.sign != 0) {
+        return 0;
+    }
+    if ((d.kind ^ 4) == 0) {
+        return 0xFFFFFFFF;
+    }
+    if (d.exponent < 0) {
+        return 0;
+    }
+    if (d.exponent >= 0x20) {
+        return 0xFFFFFFFF;
+    }
+    e = d.exponent;
+    if (e >= 0x3D) {
+        return (u32)(d.fraction.ll << (e - 0x3C));
+    }
+    return (u32)(d.fraction.ll >> (0x3C - e));
+}
+
+u64 func_001FD548(s32 a0, s32 a1, s32 a2, u64 a3)
+{
+    Unpacked args;
+
+    args.kind = a0;
+    args.sign = a1;
+    args.exponent = a2;
+    args.fraction.ll = a3;
+    return func_001FC910(&args);
+}
+
+f32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3);
+
+f32 func_001FD578(u64 bits)
+{
+    Unpacked u;
+    s32 fraction;
+
+    func_001FCA40(&bits, &u);
+    fraction = (s32)(u.fraction.ll >> 30) | 1;
+    if ((u.fraction.ll & 0x3FFFFFFFULL) == 0) fraction = (s32)(u.fraction.ll >> 30);
+    return func_001FD838(u.kind, u.sign, u.exponent, fraction);
 }
