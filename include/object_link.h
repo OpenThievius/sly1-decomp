@@ -75,7 +75,6 @@ extern ObjectLink D_00275B60[];
 extern ObjectLink D_00275C90[];
 extern ObjectLink D_00275CA0[];
 extern ObjectLink D_00275D08[];
-extern ObjectLink D_00275E10[];
 extern ObjectLink D_00275FE0[];
 
 #endif

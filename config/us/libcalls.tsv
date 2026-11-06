@@ -15,16 +15,16 @@ __uncatch_exception	func_001FEBE0	leave a handler without catching
 __cp_pop_exception	func_001FEB18	pop the caught exception
 __terminate	func_001FE8F0	terminate
 terminate__Fv	func_001FE8F0	terminate
-_vt$12Error_1FEC10	D_0024F0D8	vtable of the runtime's exception base class
-_vt$15Unlisted_1FEC10	D_0024F0C0	vtable of the exception func_001FEC10 throws
-_$_15Unlisted_1FEC10	func_001FEF28	its destructor
-_vt$12Fault_1FEDC8	D_0024F290	vtable of the exception func_001FEDC8 throws
-_$_12Fault_1FEDC8	func_00200638	its destructor
-_vt$12Fault_1FEE48	D_0024F278	vtable of the exception func_001FEE48 throws
-_$_12Fault_1FEE48	func_002005A0	its destructor
+_vt$9exception	D_0024F0D8	vtable of the runtime's exception base class
+_vt$13bad_exception	D_0024F0C0	vtable of the exception func_001FEC10 throws
+_$_13bad_exception	func_001FEF28	its destructor
+_vt$8bad_cast	D_0024F290	vtable of the exception func_001FEDC8 throws
+_$_8bad_cast	func_00200638	its destructor
+_vt$10bad_typeid	D_0024F278	vtable of the exception func_001FEE48 throws
+_$_10bad_typeid	func_002005A0	its destructor
 memset	func_001F5C0C	fill memory (the compiler clears an aggregate with it)
 __check_eh_spec	func_001FEC10	the exception-specification check the compiler calls
-__tf12Fault_1FD8A8	func_00200000	the type-information function of the allocation-failure exception (our class name)
+__tf9bad_alloc	func_00200000	the type-information function of the allocation-failure exception
 litodp	func_001FD358	long to double
 dpmul	func_001FCDE0	double multiply
 dpadd	func_001FCD20	double add
@@ -32,3 +32,28 @@ dptofp	func_001FD578	double to float
 __10Val_114F48	func_0011B008	constructor of the value func_00114F48 builds
 _$_10Val_114F48	func_0011B060	its destructor
 __builtin_delete	func_0018D778	operator delete
+__tf9exception	func_001FF008	the type-information function of the exception base class
+__ti9exception	D_0027B318	its type information
+__rtti_si	func_00200118	fill in the type information of a class with one public base
+__ti9bad_alloc	D_0062C5B8	the type information of bad_alloc (a common symbol)
+__ti17__class_type_info	D_0062C5C8	the type information of __class_type_info (a common symbol)
+__ti16__user_type_info	D_0062C5D8	the type information of __user_type_info (a common symbol)
+__ti14__si_type_info	D_0062C5E8	the type information of __si_type_info (a common symbol)
+__ti10bad_typeid	D_0062C5F8	the type information of bad_typeid (a common symbol)
+__ti8bad_cast	D_0062C608	the type information of bad_cast (a common symbol)
+__ti9type_info	D_0027B320	the type information of type_info (a common symbol)
+what__C9exception	func_001FEF00	what() of the exception base class
+__ti17__array_type_info	D_0062C618	the type information of __array_type_info (a common symbol)
+__ti16__ptmd_type_info	D_0062C628	the type information of __ptmd_type_info (a common symbol)
+__ti16__ptmf_type_info	D_0062C638	the type information of __ptmf_type_info (a common symbol)
+__ti16__func_type_info	D_0062C648	the type information of __func_type_info (a common symbol)
+__ti19__builtin_type_info	D_0062C658	the type information of __builtin_type_info (a common symbol)
+__ti16__attr_type_info	D_0062C668	the type information of __attr_type_info (a common symbol)
+__ti19__pointer_type_info	D_0062C678	the type information of __pointer_type_info (a common symbol)
+__tf9type_info	func_00200710	the type-information function of type_info
+__tf16__user_type_info	func_00200530	the type-information function of __user_type_info
+_$_9type_info	func_00200080	type_info's destructor
+__eq__C9type_infoRC9type_info	func_002000B0	type_info's comparison
+__ti13bad_exception	D_0062C5A8	the type information of bad_exception (a common symbol)
+__rtti_user	func_00200138	fill in the type information of a class with no base
+__rtti_class	func_002000F0	fill in the type information of a class with several bases

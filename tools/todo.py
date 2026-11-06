@@ -66,7 +66,8 @@ import versions  # noqa: E402
 ROOT = versions.ROOT
 WINDOW = 0x4000
 RODATA = (0x217380, 0x250580)          # US .rodata (docs/VERSIONS.md)
-DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b(?![^\n]*\bfunc_))[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
+# A C++ file's `extern "C"` definition counts as well (src/lib/type_info_kinds.cpp).
+DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b(?![^\n]*\bfunc_))(?:extern \"C\" )?[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
 
 
 def definitions(text):
@@ -79,7 +80,10 @@ def definitions(text):
         member = text[:m.start(1)].endswith("::") and not m.group(1).startswith("func_")
         # A C file's static inline helper (src/lib/divide.c) is compiled into its callers only.
         helper = m.group(0).startswith("static inline ") and not m.group(1).startswith("func_")
-        if brace >= 0 and (semi < 0 or brace < semi) and not member and not helper:
+        # An `extern "C"` routine under the name the compiler calls it by (__dynamic_cast) takes
+        # retail's name from config/us/generated.tsv, as a member does.
+        runtime = m.group(0).startswith('extern "C" ') and not m.group(1).startswith("func_")
+        if brace >= 0 and (semi < 0 or brace < semi) and not member and not helper and not runtime:
             yield m
 
 
@@ -95,8 +99,10 @@ MMI = re.compile(r"^(p[a-z]|qfsrv|mfhi1|mflo1|mthi1|mtlo1|mult1|multu1|div1|divu
 # Multimedia instructions the compiler is known to emit: six functions that contain one are
 # matched in C (por is the 128-bit |, which also moves a 128-bit value between registers), so
 # seeing it proves nothing. Add an instruction here only with such a function; a function in
-# config/us/original_asm.tsv that src/ defines is an error (tests/test_tools.py).
-COMPILER_EMITS = {"por", "pref"}
+# config/us/original_asm.tsv that src/ defines is an error (tests/test_tools.py). mult1 is the
+# second of two multiplies the compiler issues together, to the EE's second pipeline (the 64-bit
+# product, src/lib/multiply.c, and the pad library's slot readers, src/lib/00204000.cpp).
+COMPILER_EMITS = {"por", "pref", "mult1"}
 
 
 def window_of(addr):
@@ -123,9 +129,10 @@ def code_range_of(addr, key="us"):
 
 
 def whole_files():
-    """{source path: {"text", "end", "rodata", "data", "bss": address or None}} of the files
-    config/us/files.tsv lists: real source files, compiled and linked whole as the original's
-    were (tools/c_layout.py), in place of their 16 KiB windows."""
+    """{source path: {"text", "end", "rodata", "data", "bss", "except": address or None}} of the
+    files config/us/files.tsv lists: real source files, compiled and linked whole as the original's
+    were (tools/c_layout.py), in place of their 16 KiB windows. "except" is where the file's
+    .gcc_except_table goes (a C++ file with a handler or an exception specification)."""
     path = ROOT / "config" / "us" / "files.tsv"
     if not path.exists():
         return {}
@@ -134,7 +141,8 @@ def whole_files():
         if not line.strip():
             continue
         f, *cols = line.split("\t")
-        out[f] = dict(zip(("text", "end", "rodata", "data", "bss"),
+        cols += [""] * (6 - len(cols))
+        out[f] = dict(zip(("text", "end", "rodata", "data", "bss", "except"),
                           (None if c in ("-", "") else int(c, 16) for c in cols)))
     return out
 

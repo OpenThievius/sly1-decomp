@@ -60,7 +60,7 @@ COMPILER_EMITS = todo.COMPILER_EMITS
 # function matched in C holds one, and neither compiler emits them from plain C (docs/
 # ASM_CLASSIFICATION.md, "Kernel and system code"). sqrt.s is not here: __builtin_sqrtf gives it.
 SYSTEM = {"syscall", "eret", "ei", "di", "mfc0", "mtc0", "cache", "sync", "sync.l", "sync.p", "mtsa", "mfsa",
-          "mult1", "multu1", "div1", "divu1", "mfhi1", "mflo1", "mthi1", "mtlo1", "max.s", "min.s"}
+          "multu1", "div1", "divu1", "mfhi1", "mflo1", "mthi1", "mtlo1", "max.s", "min.s"}
 FRAME = re.compile(r"^addiu\s+\$sp, \$sp, -0x")
 STORES = {"sw", "swc1", "sd", "sq", "sh", "sb"}
 

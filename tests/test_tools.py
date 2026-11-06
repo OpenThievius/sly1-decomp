@@ -534,8 +534,9 @@ class CompilerTagTest(unittest.TestCase):
 
     def test_the_library_files_name_sonys_compiler(self):
         import compile as cc
+        # Sony's release, in its Windows build or (the toolchain's runtime) its Linux build.
         for path in sorted((versions.ROOT / "src" / "lib").glob("*.cpp")):
-            self.assertEqual(cc.row_for(path)[1], "2.9-ee-991111", path.name)
+            self.assertIn(cc.row_for(path)[1], ("2.9-ee-991111", "2.9-ee-991111-01"), path.name)
         self.assertEqual(cc.row_for(versions.ROOT / "src" / "main" / "00100000.cpp")[1], "2.95.3")
 
 

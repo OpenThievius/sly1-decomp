@@ -2,11 +2,10 @@
 // PAL: the two gate fields of each global are at 0x560 and 0x56C (US 0x250, 0x25C).
 struct Gate_1E9A10_eu { u8 pad0[0x560]; s32 f560; u8 pad1[8]; s32 f56C; };
 
-extern s32 D_00275F84;
 
 s32 func_001E9A10(void)
 {
-    if (D_00275F84 != 0) goto fail;
+    if (g_screenFade.mode != 0) goto fail;
     if (((Gate_1E9A10_eu*)&g_pauseMenuElement)->f56C != 0) goto fail;
     if (((Gate_1E9A10_eu*)&g_pauseMenuElement)->f560 != 0) goto fail;
     if (((Gate_1E9A10_eu*)&g_mapScreenList)->f56C != 0) goto fail;

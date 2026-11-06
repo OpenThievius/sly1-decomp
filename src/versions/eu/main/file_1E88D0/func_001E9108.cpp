@@ -64,7 +64,7 @@ void func_001E9108(Obj_1E9108* obj)
     }
     case 3: {
         if (D_00262C6C & 2) break;
-        if (D_00275F84) break;
+        if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;
             if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= g_gameClock.time)) {

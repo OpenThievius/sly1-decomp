@@ -137,6 +137,10 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   readable names are macros from `config/names.tsv`, each with its evidence, and docs/NAMING.md
   is the convention. Never write a name you remember from the original game, its prototype or
   another project (a Hungarian prefix such as `psw`, `plo`, `grf` is a sign of one).
+  The one exception is a name retail's own bytes spell: the type-name strings of the C++
+  runtime's type information in retail's `.rodata` (`9bad_alloc` is the class `bad_alloc`), used
+  only where a proved file needs it, because the compiler writes that string from the class's
+  name (docs/NAMING.md). Never a name recalled from the game or another project.
 - If you get close but not exact, keep the attempt in `nonmatching/` with what still differs,
   and move on. Stop on a function after about ten compiles without getting closer.
 

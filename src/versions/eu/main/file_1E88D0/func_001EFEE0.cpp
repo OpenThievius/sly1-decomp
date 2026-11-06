@@ -2,7 +2,7 @@
 // PAL's overlay height is 468.61017 where US has 492.80002.
 void func_001EFEE0(ScreenFade* self)
 {
-    if (g_currentWorld != 0 && D_00275F84 != 0) {
+    if (g_currentWorld != 0 && g_screenFade.mode != 0) {
         s32 mode = self->style;
         if (mode != 1) {
             if (mode < 2) {

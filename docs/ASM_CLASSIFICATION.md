@@ -48,14 +48,15 @@ The function holds an instruction the compiler cannot emit, or other evidence sa
 written as assembly:
 
 - a VU0 macro-mode instruction (COP2: `vaddx`, `lqc2`, `ctc2`, ...): 563 functions;
-- a 128-bit multimedia (MMI) instruction that no function matched in C contains: 56. The
-  runtime's 64-bit product (func_001FE890, src/lib/multiply.c) was one until its C matched:
-  the Linux cc1 of 2.9-ee-991111 issues its second cross product as `mult1`, so `mult1` alone
-  does not prove assembly, and the 16 other functions that hold one (from 0x202140 on) may be C;
+- a 128-bit multimedia (MMI) instruction that no function matched in C contains: 40. `mult1`
+  is not one: the compiler issues the second of two multiplies to the EE's second pipeline as
+  `mult1` (the 64-bit product, func_001FE890 in src/lib/multiply.c, and the pad library's slot
+  readers in src/lib/00204000.cpp matched with it), so tools/todo.py counts it among the
+  instructions the compiler emits, and the functions that held only it are code to match;
 - the disassembler's own "handwritten" mark: 103, among them the crt0 entry (func_00100008),
   func_001000C0 at the start of game code and the library's kernel call stubs;
 - a kernel, cache or system-control instruction (`syscall`, `ei`, `di`, `eret`, `mfc0`, `mtc0`,
-  `cache`, `sync`), a paired-pipeline instruction (`mult1`, `mtsa`, ...) or `max.s`/`min.s`:
+  `cache`, `sync`), a paired-pipeline instruction (`multu1`, `mtsa`, ...) or `max.s`/`min.s`:
   35. No function matched in C holds one, and neither compiler emits them from plain C;
 - stores and `nop`s before the stack frame is set up (`swc1`, `nop`, then `addiu $sp`): 5.
   Neither compiler ever schedules a store before its prologue, and no function matched in C

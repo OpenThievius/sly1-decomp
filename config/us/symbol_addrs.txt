@@ -58,9 +58,20 @@ D_0024B660 = 0x0024B660;
 // The end of a proved file's .rodata inside a coarse label: remainder_unsigned.c's table of
 // significant bits (D_0024EFB0) is followed by the next object's string at 0x24F0B0.
 D_0024F0B0 = 0x0024F0B0;
+// The end of src/lib/new_handler.cpp's .rodata (its type name "9bad_alloc"), where the next
+// object's string begins.
+D_0024F220 = 0x0024F220;
+// The end of src/lib/type_info.cpp's .rodata (its type name "9type_info"), where the next
+// object's string begins.
+D_0024F330 = 0x0024F330;
 // The end of soft_float.c's .bss inside a coarse label: the double routines' NaN result
 // (D_0062A770, 0x18 bytes, the unpacked double type) is followed by 0x10 bytes no code reads.
 D_0062A788 = 0x0062A788;
+// Floats no instruction names inside a coarse label, which a proved file defines in C: after
+// the float at 0x274B74 that func_001C5338 reads, two more (2.0 and 1/30) that no code reads,
+// each a 4-byte global of its own (an object of 8 bytes or more would sit on 8).
+D_00274B78 = 0x00274B78;
+D_00274B7C = 0x00274B7C;
 
 // Constructors (_GLOBAL_$I$) behind the linker's leftovers: retail's constructor list
 // (D_0027B130) names each as func_X + 0x10, after the two 8-byte runs (a store, then a nop) the
@@ -70,3 +81,10 @@ func_001963B8 = 0x001963B8; // type:func
 func_001AEC90 = 0x001AEC90; // type:func
 func_001E08D8 = 0x001E08D8; // type:func
 func_001F2738 = 0x001F2738; // type:func
+// The end of the game's last .data before the libraries' inside a coarse label: file_1E88D0's
+// last global D_00276654 (the warp entry func_001F08F0 stores) is followed by a build stamp
+// ("jojo", a date and time) that no code reads.
+D_00276658 = 0x00276658;
+// Two ranges at D_00275C60 (0 to 1, then -1 to 1): every reader takes the first (g_unitRange,
+// S1EB050); the second has no reader, so the disassembly has no label for it.
+D_00275C68 = 0x00275C68;

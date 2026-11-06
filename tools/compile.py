@@ -218,6 +218,9 @@ def run_step(cmd, **kw):
 
 
 REMNANT_BLOCK = re.compile(r" #APP\n\s*# linker remnant\n.*?\n #NO_APP\n", re.S)
+# The same block when GCC wrote it in one #APP run with the file-scope asm before it (an ASM_FUNC
+# just before the remnant): only its own lines move.
+REMNANT_LINES = re.compile(r"^\t# linker remnant\n.*?^\t\.set at\n", re.S | re.M)
 STATIC_INIT = re.compile(r"^\t\.ent\t__static_initialization_and_destruction_0$", re.M)
 CONSTRUCTOR = re.compile(r"^\t\.align\t\d+\n\t\.globl\t_GLOBAL_\$I\$", re.M)
 
@@ -231,13 +234,30 @@ def place_remnants(asm):
         return asm
     last_end = asm.rfind("\t.end\t", 0, init.start())
     blocks = [m for m in REMNANT_BLOCK.finditer(asm) if last_end < m.start() < init.start()]
-    if not blocks:
-        return asm
-    moved = "".join(m.group(0) for m in blocks)
+    if blocks:
+        moved = "".join(m.group(0) for m in blocks)
+    else:
+        blocks = [m for m in REMNANT_LINES.finditer(asm) if last_end < m.start() < init.start()]
+        if not blocks:
+            return asm
+        moved = "".join(" #APP\n" + m.group(0) + " #NO_APP\n" for m in blocks)
     for m in reversed(blocks):
         asm = asm[:m.start()] + asm[m.end():]
     at = CONSTRUCTOR.search(asm).start()
     return asm[:at] + moved + asm[at:]
+
+
+def implementation_marker(ii):
+    """Name the preprocessed unit's main file as the compiler is given it. cc1plus of 2.9-ee-991111
+    takes a line marker that names the source for an included file, and then refuses
+    `#pragma implementation` as not at top level (2.95.3 does not); markers naming the unit itself
+    keep the pragma at top level. The name only reaches the debugging sections."""
+    text = ii.read_text()
+    first = text.split("\n", 1)[0]
+    if first.startswith("# 1 \""):
+        main = first[4:]
+        text = re.sub(r'^(# \d+ )%s' % re.escape(main), lambda m: m.group(1) + '"%s"' % ii, text, flags=re.M)
+        ii.write_text(text)
 
 
 def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
@@ -280,6 +300,8 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
                 raise CompileError(((proc.stderr or proc.stdout).strip() or "%s failed" % name)
                                    + exit_note(proc.returncode))
+            if name == "cpp" and "#pragma implementation" in text:
+                implementation_marker(ii)
         asm = s.read_text()
         placed = place_remnants(asm)
         if placed != asm:

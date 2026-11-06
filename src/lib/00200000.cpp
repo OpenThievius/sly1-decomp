@@ -13,15 +13,6 @@ struct Node_2000F0 {
     s32 field3;
 };
 
-void func_002000F0(struct Node_2000F0 *self, s32 a1, s32 a2, s32 a3) {
-    if (self != 0) {
-        self->field0 = a1;
-        self->vtbl = (u8*)D_0024F230;
-        self->field2 = a2;
-        self->field3 = a3;
-    }
-}
-
 extern const Fn_Table D_0024F248[6];
 
 struct Node_200118 {
@@ -30,24 +21,7 @@ struct Node_200118 {
     s32 field2;
 };
 
-void func_00200118(struct Node_200118 *self, s32 a1, s32 a2) {
-    if (self != 0) {
-        self->field2 = a2;
-        self->field0 = a1;
-        self->vtbl = (u8*)D_0024F248;
-    }
-}
-
 extern const Fn_Table D_0024F260[6];
-
-void func_00200138(void* self, void* value)
-{
-    if (self != 0) {
-        *(void**)self = value;
-        *(void**)((u8*)self + 4) = (u8*)D_0024F260;
-    }
-}
-
 
 struct Node_2003F8 {
     s32 field0;
@@ -56,55 +30,11 @@ struct Node_2003F8 {
     s32 field3;
 };
 
-struct Node_2003F8 *func_002003F8(struct Node_2003F8 *self, s32 a1, s32 a2, s32 a3) {
-    self->field0 = a1;
-    self->vtbl = (u8*)D_0024F230;
-    self->field2 = a2;
-    self->field3 = a3;
-    return self;
-}
-
-
-void* func_00200488(void* self, void* a, void* b)
-{
-    *(void**)self = a;
-    *(void**)((u8*)self + 4) = (u8*)D_0024F248;
-    *(void**)((u8*)self + 8) = b;
-    return self;
-}
-
-
-void* func_00200518(void* self, void* value)
-{
-    *(void**)self = value;
-    *(void**)((u8*)self + 4) = (u8*)D_0024F260;
-    return self;
-}
-
 extern u8 D_0024F278[];
-
-void* func_002005D0(void* self)
-{
-    *(void**)self = D_0024F278;
-    return self;
-}
 
 extern u8 D_0024F290[];
 
-void* func_00200668(void* self)
-{
-    *(void**)self = D_0024F290;
-    return self;
-}
-
 extern const Fn_Table D_0024F2A8[4];
-
-void* func_002006F8(void* self, void* value)
-{
-    *(void**)self = value;
-    *(void**)((u8*)self + 4) = (u8*)D_0024F2A8;
-    return self;
-}
 
 // An entry of a table of functions defined at the end of this file.
 extern const Fn_Table D_0024F428[];
@@ -115,27 +45,12 @@ struct Node_200C90 {
     s32 field2;
 };
 
-void func_00200C90(struct Node_200C90 *self, s32 a1, s32 a2) {
-    if (self != 0) {
-        self->field2 = a2;
-        self->field0 = a1;
-        self->vtbl = ((u8*)D_0024F428);
-    }
-}
-
 extern const Fn_Table D_0024F3F8[];
 
 struct Node_200CD8 {
     s32 field0;
     void *vtbl;
 };
-
-void func_00200CD8(struct Node_200CD8 *self, s32 a1) {
-    if (self != 0) {
-        self->field0 = a1;
-        self->vtbl = ((u8*)D_0024F3F8);
-    }
-}
 
 extern const Fn_Table D_0024F3E8[];
 
@@ -144,13 +59,6 @@ struct Node_200CF8 {
     void *vtbl;
 };
 
-void func_00200CF8(struct Node_200CF8 *self, s32 a1) {
-    if (self != 0) {
-        self->field0 = a1;
-        self->vtbl = ((u8*)D_0024F3E8);
-    }
-}
-
 extern const Fn_Table D_0024F3D8[];
 
 struct Node_200D18 {
@@ -158,26 +66,12 @@ struct Node_200D18 {
     void *vtbl;
 };
 
-void func_00200D18(struct Node_200D18 *self, s32 a1) {
-    if (self != 0) {
-        self->field0 = a1;
-        self->vtbl = ((u8*)D_0024F3D8);
-    }
-}
-
 extern const Fn_Table D_0024F3C8[];
 
 struct Node_200D38 {
     s32 field0;
     void *vtbl;
 };
-
-void func_00200D38(struct Node_200D38 *self, s32 a1) {
-    if (self != 0) {
-        self->field0 = a1;
-        self->vtbl = ((u8*)D_0024F3C8);
-    }
-}
 
 extern const Fn_Table D_0024F418[];
 
@@ -188,53 +82,12 @@ struct Node_200CB0 {
     s32 field3;
 };
 
-void func_00200CB0(struct Node_200CB0 *self, s32 a1, s32 a2, s32 a3) {
-    if (self != 0) {
-        self->field0 = a1;
-        self->vtbl = ((u8*)D_0024F418);
-        self->field2 = a3;
-        self->field3 = a2;
-    }
-}
-
 // NEAR: retail saves $s0 and $ra with 8-byte sd (ld to restore); 2.95.3 saves
 // them with 16-byte sq/lq, and no source form tried changed that. Otherwise
 // the body matches.
 
-extern u8 D_0062C5B8[];
-extern const Strs_24F210 D_0024F210;
-extern u8 D_0027B318[];
-
-struct Node_200000 {
-    s32 field0;
-    void *vtbl;
-    s32 field2;
-};
-
-void* func_001FF008(void);
-void func_00200118(struct Node_200000 *self, void *a1, void *a2);
-
-void* func_00200000(void)
-{
-    struct Node_200000 *self = (struct Node_200000 *)D_0062C5B8;
-    if (*(void**)D_0062C5B8 == 0) {
-        func_001FF008();
-        func_00200118(self, (u8*)&D_0024F210, D_0027B318);
-    }
-    return self;
-}
-
 struct Obj_200158;
 s32 func_002000B0(Obj_200158* self, s32 a1, s32 a2);
-
-s32 func_00200158(Obj_200158* self, s32 a1, s32 a2, s32 fallback)
-{
-    s32 result = fallback;
-    if (func_002000B0(self, a1, a2) == 0) {
-        result = 0;
-    }
-    return result;
-}
 
 // NEAR: identical except the register saves: retail saves s0/ra with sd (8 bytes), ours with sq (16 bytes); only the Sony 2.9-ee build saves in 8 bytes (docs/TOOLCHAIN.md), so the SN build cannot match this function.
 
@@ -247,16 +100,6 @@ struct Node_200418 { s32 field0; };
 void func_00200118(struct Node_200418* self, void* a1, void* a2);
 
 void* func_00200530(void);
-void* func_00200418(void)
-{
-    u8* obj = D_0062C5C8;
-    if (*(void**)obj == 0) {
-        func_00200530();
-        func_00200118((struct Node_200418*)obj, (u8*)D_0024F2B8, D_0062C5D8);
-    }
-    return obj;
-}
-
 // NEAR: US: retail saves s0 and ra with sd (8 bytes, the Sony 2.9-ee compiler), the default compiler saves sq; the body matches.
 
 struct Self_002004A8;
@@ -267,16 +110,6 @@ void func_00200118(struct Self_002004A8* self, void* a1, void* a2);
 extern u8 D_0062C5E8[];
 extern u8 D_0062C5D8[];
 extern const char D_0024F2D0[24];
-
-void* func_002004A8(struct Self_002004A8* a0)
-{
-    u8* self = D_0062C5E8;
-    if (*(s32*)self == 0) {
-        func_00200530(a0);
-        func_00200118((struct Self_002004A8*)self, (u8*)D_0024F2D0, D_0062C5D8);
-    }
-    return self;
-}
 
 // NEAR: every instruction matches except the two register saves: retail
 // saves $s0 and $ra with sd (8 bytes), ours with sq (16 bytes): the Sony SDK
@@ -291,14 +124,6 @@ struct Ctx_200530 { s32 field0; };
 void func_00200118(struct Ctx_200530 *self, void *a1, void *a2);
 
 void* func_00200710(void);
-void *func_00200530(void) {
-    if (*(void **)D_0062C5D8 == 0) {
-        func_00200710();
-        func_00200118((struct Ctx_200530 *)D_0062C5D8, (u8*)D_0024F2E8, D_0027B320);
-    }
-    return D_0062C5D8;
-}
-
 // NEAR: the body is EXACT as far as the listing goes; retail saves $s0 and $ra with sd (8 bytes), ours with sq: only the prologue and epilogue differ.
 
 extern u8 D_0062C5F8[];
@@ -311,16 +136,6 @@ struct Obj_002005E8 {
 
 void* func_001FF008(void);
 void func_00200118(struct Obj_002005E8 *self, void *a1, void *a2);
-
-void *func_002005E8(void)
-{
-    struct Obj_002005E8 *p = (struct Obj_002005E8 *)D_0062C5F8;
-    if (p->vtbl == 0) {
-        func_001FF008();
-        func_00200118(p, (u8*)D_0024F300, D_0027B318);
-    }
-    return p;
-}
 
 // NEAR: retail saves $ra and $s0 with sd (8 bytes); this compiler saves them with sq (16 bytes). The body is otherwise identical.
 
@@ -335,24 +150,9 @@ struct Node_200680 {
 void* func_001FF008(void);
 void func_00200118(struct Node_200680 *self, void *a1, void *a2);
 
-void *func_00200680(void)
-{
-    struct Node_200680 *self = (struct Node_200680 *)D_0062C608;
-    if (self->field0 == 0) {
-        func_001FF008();
-        func_00200118(self, (u8*)D_0024F310, D_0027B318);
-    }
-    return self;
-}
-
 // NEAR: retail saves $ra with sd, default compiler with sq; body identical
 struct Ctx_002006D0;
 s32 func_002000B0(Ctx_002006D0* a, Ctx_002006D0* b);
-
-s32 func_002006D0(Ctx_002006D0* a, Ctx_002006D0* b)
-{
-	return func_002000B0(a, b) ^ 1;
-}
 
 // NEAR: body matches; retail saves $s0 and $ra with sd/ld (8 bytes), this compiler saves sq/lq: a lib-code compiler difference
 
@@ -365,20 +165,10 @@ struct Node_200710 {
 
 void func_00200138(struct Node_200710 *self, void *value);
 
-void *func_00200710(void) {
-    void **p = (void **)D_0027B320;
-    if (*p == 0) {
-        func_00200138((struct Node_200710 *)D_0027B320, (u8*)&D_0024F320);
-    }
-    return D_0027B320;
-}
-
 // NEAR: retail saves $ra with sd (Sony 2.9-ee-991111 library code, 0x1F59C4 on); the default compiler saves it with sq. Nothing else differs.
 
 struct Key_200750;
 s32 func_001F6738(Key_200750* p, s32 v);
-
-s32 func_00200750(Key_200750** a, s32* b) { return (s32)((u32)func_001F6738(*a, *b) >> 31); }
 
 // NEAR: retail saves and restores ra with sd/ld (8-byte); the SN build uses sq/lq. The body matches otherwise.
 
@@ -396,16 +186,6 @@ struct Obj_00200C40 {
 s32 func_00200D58(void* a0, void* a1, s32 a2, void* a3, void* a4, struct Obj_00200C40* a5);
 void* func_00201460(void);
 
-s32 func_00200C40(struct Obj_00200C40* p) {
-    s32 r = 0;
-    if (p != 0) {
-        struct Sub_00200C40* sub = p->sub;
-        r = func_00200D58(sub->ptr, (void*)func_00201460, 1,
-                          (u8*)p + sub->off, (void*)func_00200710, p);
-    }
-    return r != 0;
-}
-
 // NEAR: ra and s0 saved with sq, retail sd (the body matches).
 
 extern u8 D_0062C618[];
@@ -419,15 +199,6 @@ struct Node_2011C0 {
 
 void func_00200118(struct Node_2011C0 *self, s32 a1, s32 a2);
 
-struct Node_2011C0 *func_002011C0(void) {
-    struct Node_2011C0 *self = (struct Node_2011C0 *)D_0062C618;
-    if (*(s32 *)D_0062C618 == 0) {
-        func_00200710();
-        func_00200118(self, (s32)(u8*)D_0024F438, (s32)D_0027B320);
-    }
-    return self;
-}
-
 // NEAR: only the s0 and ra saves differ: retail saves ra and s0 with sd (8 bytes), the SN builds with sq; the 8-byte save is the Sony 2.9-ee-991111 form (docs/TOOLCHAIN.md), not used here.
 
 extern u8 D_0062C628[];
@@ -440,15 +211,6 @@ struct Node_201230 {
 };
 
 void func_00200118(struct Node_201230 *self, void *a1, void *a2);
-
-void *func_00201230(void) {
-    struct Node_201230 *node = (struct Node_201230 *)D_0062C628;
-    if (*(void **)D_0062C628 == 0) {
-        func_00200710();
-        func_00200118(node, (u8*)D_0024F450, D_0027B320);
-    }
-    return node;
-}
 
 // NEAR: body matches; retail saves $s0 and $ra with sd/ld (8 bytes), this compiler saves sq/lq: a lib-code compiler difference
 
@@ -465,15 +227,6 @@ struct Node_2012A0 {
 void *func_00200710(void);
 void func_00200118(struct Node_2012A0 *self, void *a1, void *a2);
 
-void *func_002012A0(void) {
-    void **p = (void **)D_0062C638;
-    if (*p == 0) {
-        func_00200710();
-        func_00200118((struct Node_2012A0 *)D_0062C638, (u8*)D_0024F468, D_0027B320);
-    }
-    return D_0062C638;
-}
-
 // NEAR: only the $ra and $s0 saves differ: retail sd/ld, ours sq/lq
 
 extern u8 D_0062C648[];
@@ -485,15 +238,6 @@ struct Node_201310 {
 };
 
 void func_00200118(struct Node_201310 *self, void *a1, void *a2);
-
-void* func_00201310(void) {
-    struct Node_201310 *node = (struct Node_201310 *)D_0062C648;
-    if (node->field0 == 0) {
-        func_00200710();
-        func_00200118(node, (u8*)D_0024F480, D_0027B320);
-    }
-    return node;
-}
 
 // NEAR: retail saves $s0 and $ra with 8-byte sd (ld to restore); 2.95.3 saves
 // them with 16-byte sq/lq, and no source form tried changed that. Otherwise
@@ -511,16 +255,6 @@ struct Node_201380 {
 
 void func_00200118(struct Node_201380 *self, void *a1, void *a2);
 
-void* func_00201380(void)
-{
-    struct Node_201380 *self = (struct Node_201380 *)D_0062C658;
-    if (*(void**)D_0062C658 == 0) {
-        func_00200710();
-        func_00200118(self, (u8*)D_0024F498, D_0027B320);
-    }
-    return self;
-}
-
 // NEAR: identical except the register saves: retail saves s0/ra with sd (8 bytes), ours with sq (16 bytes); only the Sony 2.9-ee build saves in 8 bytes (docs/TOOLCHAIN.md), so the SN build cannot match this function.
 
 extern u8 D_0062C668[];
@@ -530,16 +264,6 @@ extern u8 D_0027B320[];
 struct Node_2013F0 { s32 field0; };
 
 void func_00200118(struct Node_2013F0* self, void* a1, void* a2);
-
-void* func_002013F0(void)
-{
-    u8* obj = D_0062C668;
-    if (*(void**)obj == 0) {
-        func_00200710();
-        func_00200118((struct Node_2013F0*)obj, (u8*)D_0024F4B0, D_0027B320);
-    }
-    return obj;
-}
 
 // NEAR: US: retail saves s0 and ra with sd (8 bytes, the Sony 2.9-ee compiler), the default compiler saves sq; the body matches.
 
@@ -551,16 +275,6 @@ void func_00200118(struct Self_00201460* self, void* a1, void* a2);
 extern u8 D_0062C678[];
 extern const char D_0024F4C8[24];
 extern u8 D_0027B320[];
-
-void* func_00201460(struct Self_00201460* a0)
-{
-    u8* self = D_0062C678;
-    if (*(s32*)self == 0) {
-        func_00200710(a0);
-        func_00200118((struct Self_00201460*)self, (u8*)D_0024F4C8, D_0027B320);
-    }
-    return self;
-}
 
 // NEAR: EXACT only with SLY1_COMPILER=2.9-ee-991111 (Sony's release, saves in 8 bytes, as in the libraries); the default 2.9.3 build saves with sq/lq and differs (docs/TOOLCHAIN.md, lib compiler row not supported by tools/compile.py).
 
@@ -757,93 +471,28 @@ extern u8 D_0024F0D8[];
 
 s32 func_0018D778(void* self);
 
-s32 func_00200050(void* self, s32 flags)
-{
-    void* v = D_0024F0D8;
-    *(void**)self = v;
-    if (flags & 1) {
-        return func_0018D778(self);
-    }
-    return (s32)v;
-}
-
 struct Ctx_002004F8;
 s32 func_00200080(Ctx_002004F8* ctx);
 
-s32 func_002004F8(Ctx_002004F8* ctx)
-{
-    return func_00200080(ctx);
-}
-
 extern s32 func_00200080(void);
-s32 func_00200580(void)
-{
-    return func_00200080();
-}
-
 struct Obj_002005A0 { u8* f0; };
 
 s32 func_0018D778(Obj_002005A0* self);
 extern u8 D_0024F0D8[];
 
-u8* func_002005A0(Obj_002005A0* self, s32 flag)
-{
-    u8* value = D_0024F0D8;
-    self->f0 = value;
-    if (flag & 1) {
-        return (u8*)func_0018D778(self);
-    }
-    return value;
-}
-
 extern u8 D_0024F0D8[];
 
 s32 func_0018D778(void* self);
 
-s32 func_00200638(void* self, s32 flags)
-{
-    void* v = D_0024F0D8;
-    *(void**)self = v;
-    if (flags & 1) {
-        return func_0018D778(self);
-    }
-    return (s32)v;
-}
-
 s32 func_00200080(void);
-
-s32 func_00201210(void)
-{
-    return func_00200080();
-}
 
 struct Ctx_002004F8;
 s32 func_00200080(Ctx_002004F8* ctx);
 
-s32 func_002012F0(Ctx_002004F8* ctx)
-{
-    return func_00200080(ctx);
-}
-
 extern s32 func_00200080(void);
-s32 func_00201360(void)
-{
-    return func_00200080();
-}
-
 s32 func_00200080(void);
 
-s32 func_002013D0(void)
-{
-    return func_00200080();
-}
-
 s32 func_00200080(void);
-
-s32 func_00201440(void)
-{
-    return func_00200080();
-}
 
 struct Cfg_00202120;
 s32 func_001F6C60(Cfg_00202120* c);
@@ -889,24 +538,8 @@ void func_00201BB8(void* self)
 
 struct Obj_200080 { void* f0; void* f4; };
 u8* func_0018D778(struct Obj_200080* self);
-u8* func_00200080(struct Obj_200080* self, s32 flag)
-{
-    u8* p = (u8*)D_0024F2A8;
-    self->f4 = p;
-    if ((flag & 1) != 0) return func_0018D778(self);
-    return p;
-}
-
 struct Key_2000B0;
 s32 func_001F6738(Key_2000B0* p, s32 v);
-
-s32 func_002000B0(s32* a, s32* b)
-{
-    s32 r = 0;
-    if (b == a || func_001F6738((Key_2000B0*)*a, *b) == 0)
-        r = 1;
-    return r;
-}
 
 extern s32 func_002000B0(void*, void*);
 struct VTable {
@@ -917,59 +550,21 @@ struct VTable {
 };
 struct Object { u8 pad[4]; VTable* vtable; };
 struct Handler { u8 pad[8]; Object* object; };
-s32 func_00200188(Handler* handler, void* first, void* second, s32 fallback,
-                  void* arg4, void* last)
-{
-    if (func_002000B0(handler, first)) {
-        return fallback;
-    }
-    Object* object = handler->object;
-    VTable* vtable = object->vtable;
-    void* self = (u8*)object + vtable->offset;
-    return vtable->method(self, first, second, (void*)fallback, arg4, last);
-}
-
 struct Callee_200468 { u8 pad[4]; s32 f4; };
 
 s32 func_00200080(Callee_200468* self, s32 flag);
-
-s32 func_00200468(Callee_200468* self, s32 flag) {
-    return func_00200080(self, flag);
-}
 
 // func_00200D58: the callee pointers keep their order; the offset is read as an s32 local before the two calls.
 typedef void* (*Factory_200D58)(void);
 typedef s32 (*Value_200D58)(void);
 typedef void (*Apply_200D58)(void*, s32, s32, s32, s32, s32);
 
-void func_00200D58(Factory_200D58 factory, Value_200D58 firstValue, s32 arg2, s32 arg3, Value_200D58 secondValue, s32 arg5)
-{
-    void* object = factory();
-    u8* state = *(u8**)((u8*)object + 4);
-    s32 off = *(s16*)(state + 0x10);
-    state += 0x10;
-    object = (u8*)object + off;
-    s32 first = firstValue();
-    s32 second = secondValue();
-    Apply_200D58 apply = *(Apply_200D58*)(state + 4);
-    apply(object, first, arg2, arg3, second, arg5);
-}
-
 struct Callee_201280 { u8 pad[4]; s32 f4; };
 
 s32 func_00200080(Callee_201280* self, s32 flag);
 
-s32 func_00201280(Callee_201280* self, s32 flag) {
-    return func_00200080(self, flag);
-}
-
 struct Obj_002014B0 { void* f0; void* f4; };
 s32 func_00200080(struct Obj_002014B0* self, s32 flag);
-
-s32 func_002014B0(struct Obj_002014B0* self, s32 flag)
-{
-    return func_00200080(self, flag);
-}
 
 struct Obj_201500 { u8 pad[0x1D4]; s32 buf; };
 s32 func_0018D748(Obj_201500* o, s32 size);
@@ -1314,189 +909,53 @@ struct TypeName_200E08 : TypeName_Raw_200E08 {
 extern TypeName_Raw_200E08 D_00278E00;
 extern const char D_0024F340[];
 
-TypeName_200E08* func_00200E08(void)
-{
-    if (D_00278E00.name == 0) {
-        new (&D_00278E00) TypeName_200E08(D_0024F340);
-    }
-    return (TypeName_200E08*)&D_00278E00;
-}
-
 extern TypeName_Raw_200E08 D_00278E08;
 extern const char D_0024F348[];
-
-TypeName_200E08* func_00200E40(void)
-{
-    if (D_00278E08.name == 0) {
-        new (&D_00278E08) TypeName_200E08(D_0024F348);
-    }
-    return (TypeName_200E08*)&D_00278E08;
-}
 
 extern TypeName_Raw_200E08 D_00278E10;
 extern const char D_0024F350[];
 
-TypeName_200E08* func_00200E78(void)
-{
-    if (D_00278E10.name == 0) {
-        new (&D_00278E10) TypeName_200E08(D_0024F350);
-    }
-    return (TypeName_200E08*)&D_00278E10;
-}
-
 extern TypeName_Raw_200E08 D_00278E18;
 extern const char D_0024F358[];
-
-TypeName_200E08* func_00200EB0(void)
-{
-    if (D_00278E18.name == 0) {
-        new (&D_00278E18) TypeName_200E08(D_0024F358);
-    }
-    return (TypeName_200E08*)&D_00278E18;
-}
 
 extern TypeName_Raw_200E08 D_00278E20;
 extern const char D_0024F360[];
 
-TypeName_200E08* func_00200EE8(void)
-{
-    if (D_00278E20.name == 0) {
-        new (&D_00278E20) TypeName_200E08(D_0024F360);
-    }
-    return (TypeName_200E08*)&D_00278E20;
-}
-
 extern TypeName_Raw_200E08 D_00278E28;
 extern const char D_0024F368[];
-
-TypeName_200E08* func_00200F20(void)
-{
-    if (D_00278E28.name == 0) {
-        new (&D_00278E28) TypeName_200E08(D_0024F368);
-    }
-    return (TypeName_200E08*)&D_00278E28;
-}
 
 extern TypeName_Raw_200E08 D_00278E30;
 extern const char D_0024F370[];
 
-TypeName_200E08* func_00200F58(void)
-{
-    if (D_00278E30.name == 0) {
-        new (&D_00278E30) TypeName_200E08(D_0024F370);
-    }
-    return (TypeName_200E08*)&D_00278E30;
-}
-
 extern TypeName_Raw_200E08 D_00278E38;
 extern const char D_0024F378[];
-
-TypeName_200E08* func_00200F90(void)
-{
-    if (D_00278E38.name == 0) {
-        new (&D_00278E38) TypeName_200E08(D_0024F378);
-    }
-    return (TypeName_200E08*)&D_00278E38;
-}
 
 extern TypeName_Raw_200E08 D_00278E40;
 extern const char D_0024F380[];
 
-TypeName_200E08* func_00200FC8(void)
-{
-    if (D_00278E40.name == 0) {
-        new (&D_00278E40) TypeName_200E08(D_0024F380);
-    }
-    return (TypeName_200E08*)&D_00278E40;
-}
-
 extern TypeName_Raw_200E08 D_00278E48;
 extern const char D_0024F388[];
-
-TypeName_200E08* func_00201000(void)
-{
-    if (D_00278E48.name == 0) {
-        new (&D_00278E48) TypeName_200E08(D_0024F388);
-    }
-    return (TypeName_200E08*)&D_00278E48;
-}
 
 extern TypeName_Raw_200E08 D_00278E50;
 extern const char D_0024F390[];
 
-TypeName_200E08* func_00201038(void)
-{
-    if (D_00278E50.name == 0) {
-        new (&D_00278E50) TypeName_200E08(D_0024F390);
-    }
-    return (TypeName_200E08*)&D_00278E50;
-}
-
 extern TypeName_Raw_200E08 D_00278E58;
 extern const char D_0024F398[];
-
-TypeName_200E08* func_00201070(void)
-{
-    if (D_00278E58.name == 0) {
-        new (&D_00278E58) TypeName_200E08(D_0024F398);
-    }
-    return (TypeName_200E08*)&D_00278E58;
-}
 
 extern TypeName_Raw_200E08 D_00278E60;
 extern const char D_0024F3A0[];
 
-TypeName_200E08* func_002010A8(void)
-{
-    if (D_00278E60.name == 0) {
-        new (&D_00278E60) TypeName_200E08(D_0024F3A0);
-    }
-    return (TypeName_200E08*)&D_00278E60;
-}
-
 extern TypeName_Raw_200E08 D_00278E68;
 extern const char D_0024F3A8[];
-
-TypeName_200E08* func_002010E0(void)
-{
-    if (D_00278E68.name == 0) {
-        new (&D_00278E68) TypeName_200E08(D_0024F3A8);
-    }
-    return (TypeName_200E08*)&D_00278E68;
-}
 
 extern TypeName_Raw_200E08 D_00278E70;
 extern const char D_0024F3B0[];
 
-TypeName_200E08* func_00201118(void)
-{
-    if (D_00278E70.name == 0) {
-        new (&D_00278E70) TypeName_200E08(D_0024F3B0);
-    }
-    return (TypeName_200E08*)&D_00278E70;
-}
-
 extern TypeName_Raw_200E08 D_00278E78;
 extern const char D_0024F3B8[];
 
-TypeName_200E08* func_00201150(void)
-{
-    if (D_00278E78.name == 0) {
-        new (&D_00278E78) TypeName_200E08(D_0024F3B8);
-    }
-    return (TypeName_200E08*)&D_00278E78;
-}
-
 extern TypeName_Raw_200E08 D_00278E80;
 extern const char D_0024F3C0[];
-
-TypeName_200E08* func_00201188(void)
-{
-    if (D_00278E80.name == 0) {
-        new (&D_00278E80) TypeName_200E08(D_0024F3C0);
-    }
-    return (TypeName_200E08*)&D_00278E80;
-}
 
 // An EE DMA channel's register block (CHCR at 0x00, QWC at 0x20, TADR at 0x30; bit 8 of CHCR
 // is STR), passed in by pointer: CHCR is a hardware register, read again at every use.
@@ -1675,12 +1134,6 @@ void func_00202F88(void) {
 }
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
-extern const Fn_Table D_0024F3C8[4] = { 0, (Fn_Table)func_002011C0, 0, (Fn_Table)func_00201210 };
-extern const Fn_Table D_0024F3D8[4] = { 0, (Fn_Table)func_00201230, 0, (Fn_Table)func_00201280 };
-extern const Fn_Table D_0024F3E8[4] = { 0, (Fn_Table)func_002012A0, 0, (Fn_Table)func_002012F0 };
-extern const Fn_Table D_0024F3F8[4] = { 0, (Fn_Table)func_00201310, 0, (Fn_Table)func_00201360 };
-extern const Fn_Table D_0024F418[4] = { 0, (Fn_Table)func_002013F0, 0, (Fn_Table)func_00201440 };
-extern const Fn_Table D_0024F428[4] = { 0, (Fn_Table)(void* (*)(struct Self_00201460* a0))func_00201460, 0, (Fn_Table)func_002014B0 };
 
 struct Obj_202098 { u8 pad0[0x20]; u64 out; u8 pad1[0x8]; u64 in; };
 
@@ -1814,50 +1267,6 @@ struct Tab_200220 { s32 p0; s32 p4; Ent_200220* ents; u32 count; };
 
 s32 func_002000B0(Tab_200220* a, Obj_200220* b);
 
-s32 func_00200220(Tab_200220* self, Obj_200220* o, s32 flag, u8* base, s32 p, s32 q)
-{
-    s32 res;
-    u32 i;
-
-    if (func_002000B0(self, o)) {
-        return (s32)base;
-    }
-    res = 0;
-    for (i = 0; i < self->count; i++) {
-        s32 r;
-        Obj_200220* ob;
-        if (flag && (self->ents[i].w >> 30) != 1) {
-            continue;
-        }
-        r = (s32)(base + (self->ents[i].w & 0x1FFFFFFF));
-        if ((self->ents[i].w >> 29) & 1) {
-            r = *(s32*)r;
-        }
-        ob = self->ents[i].obj;
-        r = ob->vt->fn((Obj_200220*)((u8*)ob + ob->vt->delta), (s32)o, flag, r, p, q);
-        if (r != 0) {
-            if (res == 0) {
-                res = r;
-            } else if (res != r) {
-                if (p != 0) {
-                    s32 a, b;
-                    a = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, res, 0, 0);
-                    b = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, r, 0, 0);
-                    if (a == b) {
-                    } else if (a == q) {
-                        continue;
-                    } else if (b == q) {
-                        res = r;
-                        continue;
-                    }
-                }
-                return 0;
-            }
-        }
-    }
-    return res;
-}
-
 struct Cfg_2028A8 {
     u8 a, b, c, d;
     u16 e, f;
@@ -1939,178 +1348,12 @@ template <void* (*TF)(void)> struct Cast_200778
     }
 };
 
-void* func_00200778(Obj_200778* want, Obj_200778* have, void* obj)
-{
-    void* ret;
-    Obj_200778* p;
-
-    if (func_002000B0(want, have) != 0)
-        return obj;
-    ret = 0;
-    p = Cast_200778<func_00200530>::To(have);
-    if (p != 0)
-    {
-        Slot_200778* s = &p->vtbl[2];
-        ret = ((Fn_200778)s->fn)((Obj_200778*)((u8*)p + s->off), want, 1, obj, 0, 0);
-    }
-    else
-    {
-        Obj_200778* fr = Cast_200778<func_00201460>::To(have);
-        if (fr != 0)
-        {
-            Obj_200778* to = Cast_200778<func_00201460>::To(want);
-            if (to != 0)
-            {
-                Obj_200778* subfr = fr->type;
-                Obj_200778* subto = to->type;
-                s32 cvfrom;
-                s32 cvto;
-                Obj_200778* at = Cast_200778<func_002013F0>::To(subfr);
-                if (at != 0)
-                {
-                    cvfrom = at->attr;
-                    subfr = at->type;
-                }
-                else
-                    cvfrom = 0;
-                at = Cast_200778<func_002013F0>::To(subto);
-                if (at != 0)
-                {
-                    cvto = at->attr;
-                    subto = at->type;
-                }
-                else
-                    cvto = 0;
-                if ((cvfrom & 1) <= (cvto & 1) && (cvfrom & 2) <= (cvto & 2))
-                {
-                    if (func_002000B0(subto, subfr) != 0)
-                        ret = obj;
-                    else if (func_002000B0(subto, (Obj_200778*)func_00200E08()) != 0
-                             && (subfr == 0 || Cast_200778<func_00201310>::To(subfr) == 0))
-                        ret = obj;
-                    else if ((p = Cast_200778<func_00200530>::To(subfr)) != 0)
-                    {
-                        Slot_200778* s = &p->vtbl[2];
-                        ret = ((Fn_200778)s->fn)((Obj_200778*)((u8*)p + s->off), subto, 1, obj, 0, 0);
-                    }
-                    else
-                    {
-                        Obj_200778* pfr = Cast_200778<func_00201460>::To(subfr);
-                        if (pfr != 0)
-                        {
-                            Obj_200778* pto;
-                            pto = Cast_200778<func_00201460>::To(subto);
-                            if (pto != 0)
-                            {
-                                s32 constp = cvto & 1;
-                                subto = pto->type;
-                                subfr = pfr->type;
-                                for (;;)
-                                {
-                                    at = Cast_200778<func_002013F0>::To(subfr);
-                                    if (at != 0)
-                                    {
-                                        cvfrom = at->attr;
-                                        subfr = at->type;
-                                    }
-                                    else
-                                        cvfrom = 0;
-                                    at = Cast_200778<func_002013F0>::To(subto);
-                                    if (at != 0)
-                                    {
-                                        cvto = at->attr;
-                                        subto = at->type;
-                                    }
-                                    else
-                                        cvto = 0;
-                                    if ((cvfrom & 1) > (cvto & 1) || (cvfrom & 2) > (cvto & 2))
-                                        goto done;
-                                    if (!constp && ((cvfrom & 1) < (cvto & 1) || (cvfrom & 2) < (cvto & 2)))
-                                        goto done;
-                                    if (func_002000B0(subto, subfr) != 0)
-                                    {
-                                        ret = obj;
-                                        break;
-                                    }
-                                    pto = Cast_200778<func_00201460>::To(subto);
-                                    pfr = Cast_200778<func_00201460>::To(subfr);
-                                    if (pto == 0 || pfr == 0)
-                                        goto done;
-                                    if (!(cvto & 1))
-                                        constp = 0;
-                                    subto = pto->type;
-                                    subfr = pfr->type;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-done:
-    return ret;
-}
-
 // Data of this file: type-name strings, class tables and the runtime's zero-initialised objects.
-extern const Strs_24F210 D_0024F210 = { "9bad_alloc", "bad_alloc" };
-extern const Strs_24F210 D_0024F320 = { "9type_info", "bad_alloc" };
-extern const Fn_Table D_0024F230[6] = { 0, (Fn_Table)func_00200418, 0, (Fn_Table)func_00200468, 0, (Fn_Table)func_00200220 };
-extern const Fn_Table D_0024F248[6] = { 0, (Fn_Table)func_002004A8, 0, (Fn_Table)func_002004F8, 0, (Fn_Table)func_00200188 };
-extern const Fn_Table D_0024F260[6] = { 0, (Fn_Table)(void* (*)(void))func_00200530, 0, (Fn_Table)func_00200580, 0, (Fn_Table)func_00200158 };
-extern const Fn_Table D_0024F2A8[4] = { 0, (Fn_Table)(void* (*)(void))func_00200710, 0, (Fn_Table)(u8* (*)(struct Obj_200080*, s32))func_00200080 };
-extern const void* const D_0024F408[4] = { 0, (void*)func_00201380, 0, (void*)func_002013D0 };
-extern const char D_0024F2B8[24] = "17__class_type_info";
-extern const char D_0024F2D0[24] = "14__si_type_info";
-extern const char D_0024F2E8[24] = "16__user_type_info";
-extern const char D_0024F300[16] = "10bad_typeid";
-extern const char D_0024F310[16] = "8bad_cast";
-extern const char D_0024F438[24] = "17__array_type_info";
-extern const char D_0024F450[24] = "16__ptmd_type_info";
-extern const char D_0024F468[24] = "16__ptmf_type_info";
-extern const char D_0024F480[24] = "16__func_type_info";
-extern const char D_0024F498[24] = "19__builtin_type_info";
-extern const char D_0024F4B0[24] = "16__attr_type_info";
-extern const char D_0024F4C8[24] = "19__pointer_type_info";
 extern const char D_0024F4E0[48] = "sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n";
 extern const char D_0024F638[16] = "N cmd wait\n";
 extern const char D_0024F648[16] = "S cmd wait\n";
-extern const char D_0024F340[8] = "v";
-extern const char D_0024F348[8] = "x";
-extern const char D_0024F350[8] = "l";
-extern const char D_0024F358[8] = "i";
-extern const char D_0024F360[8] = "s";
-extern const char D_0024F368[8] = "b";
-extern const char D_0024F370[8] = "c";
-extern const char D_0024F378[8] = "w";
-extern const char D_0024F380[8] = "r";
-extern const char D_0024F388[8] = "d";
-extern const char D_0024F390[8] = "f";
-extern const char D_0024F398[8] = "Ui";
-extern const char D_0024F3A0[8] = "Ul";
-extern const char D_0024F3A8[8] = "Ux";
-extern const char D_0024F3B0[8] = "Us";
-extern const char D_0024F3B8[8] = "Uc";
-extern const char D_0024F3C0[8] = "Sc";
 struct Strs_24F548 { char s0[24]; char s1[40]; char s2[32]; char s3[24]; char s4[16]; char s5[16]; char s6[24]; };
 extern const Strs_24F548 D_0024F548 = { "libdma: sync timeout\n", "sceCdCbfunc= %d sceCdCbfunc_num= %d\n", "Libcdvd bind err CdSearchFile\n", "ee call cmd search %s\n", "search name %s\n", "search size %d\n", "search loc lbn %d\n" };
-TypeName_Raw_200E08 D_00278E00;
-TypeName_Raw_200E08 D_00278E08;
-TypeName_Raw_200E08 D_00278E10;
-TypeName_Raw_200E08 D_00278E18;
-TypeName_Raw_200E08 D_00278E20;
-TypeName_Raw_200E08 D_00278E28;
-TypeName_Raw_200E08 D_00278E30;
-TypeName_Raw_200E08 D_00278E38;
-TypeName_Raw_200E08 D_00278E40;
-TypeName_Raw_200E08 D_00278E48;
-TypeName_Raw_200E08 D_00278E50;
-TypeName_Raw_200E08 D_00278E58;
-TypeName_Raw_200E08 D_00278E60;
-TypeName_Raw_200E08 D_00278E68;
-TypeName_Raw_200E08 D_00278E70;
-TypeName_Raw_200E08 D_00278E78;
-TypeName_Raw_200E08 D_00278E80;
 u16 D_00279330[8] = { 1, 2, 1, 3, 0, 0, 0, 0 };
 Tbl_279340 D_00279340 = { { (Slot_2027C8*)0x10008000, (Slot_2027C8*)0x10009000, (Slot_2027C8*)0x1000A000, (Slot_2027C8*)0x1000B000, (Slot_2027C8*)0x1000B400, (Slot_2027C8*)0x1000C000, (Slot_2027C8*)0x1000C400, (Slot_2027C8*)0x1000C800, (Slot_2027C8*)0x1000D000, (Slot_2027C8*)0x1000D400 }, { 0 }, { 'P', 's', 'I', 'I', 'l', 'i', 'b', 'd', 'm', 'a', ' ', ' ', '2', '4', '0', '0' } };
 u8 D_002793A8[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
