@@ -120,7 +120,31 @@ void func_0018B600()
     func_001F6A30();
 }
 
-INCLUDE_ASM(func_0018B670);
+// The parameters of the thread a job runs on (func_001F6A10 creates it from them).
+struct ThreadParam_18B670 { s32 f00; void (*entry)(); void* stack; s32 stackSize; void* gp; s32 priority; u8 pad18[0x18]; };
+
+extern u8 D_002BEA10[];
+extern u8 D_002832F0[];
+s32 func_001F6A10(ThreadParam_18B670* param);
+void func_001F6A20(s32 thread, void* arg);
+
+void func_0018B670(BackgroundJob* job, void* fn, void* arg)
+{
+    ThreadParam_18B670 param;
+    func_0018B720((Obj_18B720*)job);
+    job->job = (s32 (*)(void*))fn;
+    job->arg = arg;
+    job->result = 0x20;
+    func_001F5C0C(&param, 0, 0x30);
+    param.entry = func_0018B600;
+    param.stack = D_002BEA10;
+    param.stackSize = 0x4000;
+    param.gp = D_002832F0;
+    param.priority = 3;
+    job->thread = func_001F6A10(&param);
+    *(s32*)D_00275960 = job->thread;
+    func_001F6A20(job->thread, job);
+}
 
 void func_0018B720(Obj_18B720* a0)
 {
