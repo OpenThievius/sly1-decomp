@@ -4139,8 +4139,6 @@ f32 D_002743B8 = 26.0f;
 f32 D_002743BC = 340.0f;
 f32 D_002744A4 = 0.1f;
 f32 D_002744A8 = 1.3f;
-f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
-f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 
 // Globals typed by worker dv05, from retail's bytes and their readers.
 void func_0020D138();
@@ -4591,18 +4589,6 @@ f32 D_00263700 = 1.29999995f;
 f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
 
 // Globals typed by worker dz06, from retail's bytes and their readers.
-// word handle
-s32 D_00274728 = 0;
-// word
-s32 D_0027472C = 0;
-// word flag
-s32 D_00274730 = 0;
-// word
-s32 D_00274734 = 0;
-// word
-s32 D_00274738 = 0;
-// word flag
-s32 D_00274744 = 0;
 // lw/sw word
 s32 D_00275130 = 0;
 // lw/sw word
