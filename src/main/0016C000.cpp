@@ -616,33 +616,6 @@ void func_0016D040(TargetFollower* self, void* x)
     }
 }
 
-extern u8 D_00262988[];
-extern u8 D_002629A8[];
-void func_001F5C0C(void* p, s32 v, s32 n);
-
-struct Rec_16C360 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
-
-void func_0016C360(s32 a0, s32 a1)
-{
-    if (a1 == 0xFFFF && a0 != 0) {
-        Rec_16C360* p = (Rec_16C360*)D_00262988;
-        func_001F5C0C(p, 0, 0x1C);
-        p->b4 = 0x2D;
-        p->f8 = 2.0f;
-        p->fC = 1.0f;
-        p->f10 = 0.3f;
-        p->f14 = 0.3f;
-        p->w18 = (s32)0xFF7D4B00;
-        Rec_16C360* q = (Rec_16C360*)D_002629A8;
-        func_001F5C0C(q, 0, 0x1C);
-        q->b4 = 0x2D;
-        q->f8 = 2.0f;
-        q->fC = 1.0f;
-        q->f10 = 0.3f;
-        q->f14 = 0.3f;
-        q->w18 = (s32)0xFF7D4B00;
-    }
-}
 
 void func_001B7968(void* self);
 void func_00152438(void* self, s32 value);
@@ -1371,10 +1344,4 @@ void func_0016F238(PadRecord* self, s32 value)
     Advance_16F238::Of(head);
     GameClock* clock = &g_gameClock;
     D_00262E00.time = clock->elapsed + 1.0f;
-}
-
-// _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.
-void func_0016C450(void)
-{
-    func_0016C360(1, 0xFFFF);
 }

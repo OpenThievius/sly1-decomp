@@ -4039,7 +4039,6 @@ extern const char D_0024A648[24] = "Bentley Comes Through";
 extern const char D_0024A660[24] = "A Temporary Truce";
 extern const char D_0024A678[16] = "Sinking Peril";
 extern const char D_0024A688[24] = "A Strange Reunion";
-extern const char D_0024A7D8[4] = "???";
 
 // Globals typed by worker dv07, from retail's bytes and their readers.
 extern const f32 D_0024A844 = 3.40282347e+38f;
@@ -4741,8 +4740,6 @@ GameProgress* D_002623C0 = &D_0027C220;
 G27C230* D_002623C4 = D_0027C230;
 G27C230* D_002623C8 = D_0027C230;
 s32 D_002623CC = -1;
-f32 D_00262970[6] = { 20.0f, 0.5f, 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00262988[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f };
 f32 D_00262A28[2] = { 1.25f, 1.5f };
 f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.699999988f, -0.699999988f };
 u32 D_00262A68[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
@@ -5102,7 +5099,6 @@ BackgroundJob D_00269990 = {0};
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
 s32 D_00269C90 = 0;
-Obj_2629A8 D_002629A8 = {0};
 Obj_262C70 D_00262C70 = {};
 extern const LevelEntry D_00248748[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
