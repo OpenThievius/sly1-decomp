@@ -1258,7 +1258,7 @@ func_0014FC38	func_0014FEE8	match
 func_0014FCE8	func_0014FF98	match	
 func_0014FDA8	func_00150058	match	
 func_0014FEC0	func_00150170	match	
-func_00150298	func_00150548	match	
+func_00150298	func_00150548	match	rodata
 func_00150338	func_001505E8	match	
 func_001503E0	func_00150690	match	
 func_00150408	func_001506B8	match	
