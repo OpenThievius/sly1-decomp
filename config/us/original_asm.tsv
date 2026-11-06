@@ -835,7 +835,6 @@ func_001FA9B0	001FA9B0	16	handwritten	marked handwritten by the disassembler
 func_001FAA00	001FAA00	500	handwritten	marked handwritten by the disassembler
 func_001FAC00	001FAC00	536	handwritten	128-bit MMI instruction
 func_001FD770	001FD770	44	remnant	stripped-function leftover
-func_001FE890	001FE890	96	handwritten	128-bit MMI instruction
 func_00201570	00201570	4	remnant	stripped-function leftover
 func_00201690	00201690	12	remnant	stripped-function leftover
 func_00201720	00201720	444	handwritten	assembled from a .S source (the toolchain's libc.a)

@@ -25,3 +25,4 @@ src/lib/double_to_u64.c	001FB528	001FB618	-	-	-
 src/lib/s64_to_double.c	001FB618	001FB6B0	-	-	-
 src/lib/s64_to_float.c	001FB6B0	001FB790	-	-	-
 src/lib/file_1FBDF8.c	001FBDF8	001FBE00	-	-	-
+src/lib/multiply.c	001FE890	001FE8F0	-	-	-
