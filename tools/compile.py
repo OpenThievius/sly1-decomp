@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Compile one C++ file to an object the way the game was built.
+"""Compile one C++ file (or C file) to an object the way the game was built.
 
     python3 tools/compile.py FILE.cpp OUT.o [--flags "-O2 ..."]
 
@@ -16,6 +16,10 @@ own 2.9-ee-991111, as OpenRAC builds its SDK objects. Every file also gets
 function and each global it defines at its address (tools/build.py). The
 functions the compiler makes for a file (a static initialiser, the constructor
 that calls it) take retail's names from config/us/generated.tsv.
+
+A `.c` file is C, built by the release's cc1.exe with the driver's C predefines: the
+toolchain's own runtime (libgcc, compiled from C) has C that only the C front end gives, such
+as __builtin_eh_return, which cc1plus lacks.
 
 A compiler that only exists as Sony's Linux build (2.9-ee-991111-01, the math
 library's) runs the way OpenRAC's rac1-decomp runs it: its own 32-bit Linux
@@ -50,6 +54,8 @@ CPP_DEFINES = ["-lang-c++", "-undef", "-D__GNUC__=2", "-D__GNUC_MINOR__=9", "-D_
                "-D__mips_single_float", "-D__SIZE_TYPE__=unsigned", "-D__PTRDIFF_TYPE__=int",
                "-D__LANGUAGE_C", "-D_LANGUAGE_C", "-DLANGUAGE_C",
                "-I", "include", "-I", "src"]
+# What it passes for a C unit: the same, without the C++ ones.
+C_DEFINES = [d for d in CPP_DEFINES if d not in ("-lang-c++", "-D__GNUG__=2", "-D__cplusplus")]
 LAYOUT_FLAGS = ["-ffunction-sections", "-fdata-sections"]
 # A compile takes a second or two; a run under the Windows runner can hang for good (seen with
 # wibo), so every step gives up after this many seconds and the file counts as not compiling.
@@ -247,6 +253,13 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     # build still works, but what only the Linux build gives cannot match.
     linux = linux_cc1plus(release) if release in LINUX_COMPANION else None
     run, cpp, cc1plus, ee_as = tools(LINUX_COMPANION.get(release, release))
+    is_c = src.suffix == ".c"
+    if is_c:
+        if linux:
+            raise CompileError("a .c file needs a Windows release's cc1.exe, not %s" % release)
+        cc1plus = cc1plus.parent / "cc1.exe"
+        if not cc1plus.exists():
+            raise CompileError("no %s" % cc1plus)
     flags = flags if flags is not None else flags_for(source)
     # The original assembly functions the file includes (include/asm_func.h), written from the
     # disassembly before the assembler reads them.
@@ -262,7 +275,7 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
         else:
             compiler = run + [str(cc1plus)]
         # The Windows tools get paths relative to the repository root, where they run.
-        for cmd, name in ((run + [str(cpp)] + CPP_DEFINES + [os.path.relpath(src, ROOT), str(ii)], "cpp"),
+        for cmd, name in ((run + [str(cpp)] + (C_DEFINES if is_c else CPP_DEFINES) + [os.path.relpath(src, ROOT), str(ii)], "cpp"),
                           (compiler + ["-quiet"] + flags + ([] if whole else LAYOUT_FLAGS) + [str(ii), "-o", str(s)], "cc1plus")):
             proc = run_step(cmd, cwd=ROOT)
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):

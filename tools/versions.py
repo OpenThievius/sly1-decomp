@@ -39,7 +39,7 @@ def sources():
     src = ROOT / "src"
     if not src.exists():
         return []
-    return sorted(p for p in src.rglob("*.cpp") if (src / "versions") not in p.parents)
+    return sorted(p for p in src.rglob("*") if p.suffix in (".cpp", ".c") and (src / "versions") not in p.parents)
 
 
 def boot_path(key):
