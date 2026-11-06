@@ -11,78 +11,21 @@
 
 void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
 
-void func_00120110(T2196_6E8* self, s32* outCount, f32** outTimes)
-{
-    GatherAxisCurveTimes(self->axis, outCount, outTimes);
-}
-
 struct Buffer_00120130 { u8 bytes[0x20]; };
 typedef void (*Finish_00120130)(PlacedObject* self, void* output, void* state);
 extern void func_0011F9F8(s32, Key2196_Vec*, s32, void*, void*);
 extern void func_00188A20(void*, void*);
 extern void func_001EDE38(void*, void*, void*);
 
-void func_00120130(T2196_6F8* self, PlacedObject* parent, s32 mode,
-                   void* output, void* state)
-{
-    Buffer_00120130 buffer;
-    EvaluateVectorKeyCurve(self->count, self->keys, mode,
-                  output ? &buffer.bytes[0] : 0,
-                  state ? &buffer.bytes[0x10] : 0);
-    if (output) {
-        BuildEulerRotationMatrix(&buffer.bytes[0], output);
-    }
-    if (state) {
-        RotateVectorByTwoAngles(&buffer.bytes[0], &buffer.bytes[0x10], state);
-    }
-    if (parent) {
-        ((Finish_00120130)parent->desc02()->m29)(parent, output, state);
-    }
-}
-
 extern void func_0011F9F8(s32, Key2196_Vec*);
 extern void func_0011FB98(s32, Key2196_Vec*, s32*, f32**);
-
-void func_001201D0(T2196_6F8* self)
-{
-	EvaluateVectorKeyCurve(self->count, self->keys);
-}
-
-void func_001202C0(T2196_6F8* self, s32* outCount, f32** outTimes)
-{
-	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
-}
 
 struct Result_001202F0 { f32 x; f32 y; f32 z; };
 struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
 extern void func_0011F6B0(T2196_Weight**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
-void func_001202F0(T2196_718* self, PlacedObject* second, void* third,
-                   Output_001202F0* output, f32 factor)
-{
-    Result_001202F0 result;
-    func_0011F6B0(self->axis, second, third, &self->base,
-                  output ? &result : 0, 0, factor, 1.0f);
-    if (output) {
-        func_001F5C0C(output, 0, 0x30);
-        output->x = result.x;
-        output->y = result.y;
-        output->z = result.z;
-    }
-}
-
 void func_0011F798(T2196_Weight** a, Vec02* b, Stream83* c);
-
-void func_00120360(T2196_718* self, Stream83* p)
-{
-    ReadAxisCurves(self->axis, &self->base, p);
-}
-
-void func_00120388(T2196_718* self, s32* outCount, f32** outTimes)
-{
-	GatherAxisCurveTimes(self->axis, outCount, outTimes);
-}
 
 struct Result_001203A8 {
     f32 first;
@@ -97,68 +40,14 @@ struct Output_001203A8 {
     f32 third;
 };
 extern void func_0011F9F8(s32, Key2196_Vec*, void*, f32*, s32, f32, f32);
-extern void func_001F5C0C(void*, s32, s32);
-
-void func_001203A8(T2196_728* self, PlacedObject* unused, void* mode,
-                   Output_001203A8* output, f32 factor)
-{
-    Result_001203A8 result;
-    EvaluateVectorKeyCurve(self->count, self->keys, mode,
-                  output ? &result.first : 0, 0, factor, 1.0f);
-    if (output) {
-        func_001F5C0C(output, 0, 0x30);
-        output->first = result.first;
-        output->second = result.second;
-        output->third = result.third;
-    }
-}
 
 extern void func_0011FA88(s32*, Key2196_Vec**, Stream83*);
 
-void func_00120418(T2196_728* self, Stream83* stream)
-{
-	ReadVectorKeys(&self->count, &self->keys, stream);
-}
-
-void func_00120440(T2196_728* self, s32* outCount, f32** outTimes)
-{
-	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
-}
-
 extern void* func_001B5EE0(void*);
-
-Attachment* func_00121228(World* root, PlacedObject* value, const T2195_Vt* table)
-{
-	Attachment* node = (Attachment*)PopZeroedFreeSlot(&root->pool1B20);
-	node->vt = table;
-	table->init(node, value);
-	return node;
-}
 
 extern World* D_00275710;
 
 void func_0018D800(Attachment* self, Attachment* src, s32 size);
-
-void func_001212D8(Attachment* self, Attachment* src)
-{
-    Link2195 tmp = self->link;
-    PlacedObject* saved = self->owner;
-    CopyMemory(self, src, g_currentWorld->pool1B20.size);
-    self->link = tmp;
-    self->owner = saved;
-}
-
-void func_00121568(Attachment* self, f32* value, f32* slope)
-{
-	Rec2195_224* rec = (Rec2195_224*)self->owner->f224;
-	*value = rec->f8C;
-	*slope = 0.0f;
-}
-
-f32 func_001215A8(Attachment* self, s32 index)
-{
-	return (*(f32**)((u8*)self->owner + 0x274))[index];
-}
 
 // Gives the owner the position and the orientation this attachment gives (slots 29, 30, 32, 33).
 struct Locals_121648 {
@@ -167,226 +56,23 @@ struct Locals_121648 {
     Mat02 rot;
 };
 
-void func_00121648(Attachment* self, s32 flag)
-{
-    Locals_121648 loc;
-    PlacedObject* s2 = self->owner;
-
-    if (self == s2->f1EC) {
-        if (flag != 0 || self->mode0 == 2) {
-            self->vt->getPos(self, 0.0f, &loc.pos, &loc.vec);
-            s2->desc02()->m1D(s2, &loc.pos);
-            s2->desc02()->m20(s2, &loc.vec);
-        }
-    }
-    if (self == s2->f1F0) {
-        if (flag != 0 || self->mode1 == 2) {
-            self->vt->getRot(self, 0.0f, &loc.rot, &loc.pos);
-
-            s2->desc02()->m1E(s2, &loc.rot);
-            s2->desc02()->m21(s2, &loc.pos);
-        }
-    }
-}
-
-void func_001226D8(Attachment* self)
-{
-    if (self->mode0 == 7) {
-        self->mode0 = 3;
-    }
-    if (self->mode1 == 7) {
-        self->mode1 = 3;
-    }
-}
-
 // The owner's slot 44 (Desc02::m28) and 45 (m29) are told what was asked.
 typedef void (*Told_1227B0)(PlacedObject* self, Vec02* a, Vec02* b);
 
-void func_001227B0(T2195_588* src, Vec02* d0, Vec02* d1)
-{
-    *d0 = src->pos;
-    *d1 = src->vec;
-    PlacedObject* obj = src->owner;
-    Told_1227B0 fn = obj->desc02()->m28;
-    if (fn != 0) {
-        fn(obj, d0, d1);
-    }
-}
-
 typedef void (*Told_1227F0)(PlacedObject* self, Mat02* b, Vec02* q);
-
-void func_001227F0(T2195_588* src, Mat02* d0, Vec02* d1)
-{
-    d0->r[0] = src->rot.r[0];
-    d0->r[1] = src->rot.r[1];
-    d0->r[2] = src->rot.r[2];
-    *d1 = src->v70;
-    PlacedObject* obj = src->owner;
-    Told_1227F0 fn = (Told_1227F0)obj->desc02()->m29;
-    fn(obj, d0, d1);
-}
-
-void func_00122840(T2195_588* self, f32* first, f32* second)
-{
-	*first = self->f80;
-	*second = self->f84;
-}
-
-void func_00122858(T2195_588* self, Mat02* output)
-{
-	output->r[0] = self->m90.r[0];
-	output->r[1] = self->m90.r[1];
-	output->r[2] = self->m90.r[2];
-}
-
-f32 func_00122878(T2195_588* self, s32 i)
-{
-    return self->valuesC4[i];
-}
 
 typedef void (*Told_122920)(PlacedObject* self);
 
-void func_00122920(T2195_5B0* self, Vec02* first, Vec02* second)
-{
-	*first = *self->pos;
-	*second = *self->vec;
-	Told_122920 callback = (Told_122920)self->owner->desc02()->m28;
-	if (callback)
-		callback(self->owner);
-}
-
-
-
-void func_00122968(T2195_5B0* self, Mat02* d1, Vec02* d2)
-{
-    Mat02* s = self->rot;
-    d1->r[0] = s->r[0];
-    d1->r[1] = s->r[1];
-    d1->r[2] = s->r[2];
-    *d2 = *self->vec2;
-    self->owner->desc02()->m29(self->owner, d1, d2);
-
-}
-
-void func_001229C0(T2195_5B0* self, f32* a, f32* b)
-{
-    *a = *self->p2C;
-    *b = *self->p30;
-}
-
-void func_001229E0(T2195_5B0* self, Mat02* dst)
-{
-    Mat02* s = self->ident;
-    dst->r[0] = s->r[0];
-    dst->r[1] = s->r[1];
-    dst->r[2] = s->r[2];
-}
-
-f32 func_00122A00(T2195_5B0* self, s32 i)
-{
-    return self->values[i];
-}
-
-f32 func_00122D90(void)
-{
-    return 0.0f;
-}
-
 void func_00121338(Attachment* self, PlacedObject* a1);
-
-void func_00122DA0(T2195_600* self, PlacedObject* a1)
-{
-    InitPoseSource(self, a1);
-    self->f1C = 1.0f;
-    self->f20 = 0.25f;
-}
 
 void func_00152600(void* list, void* item);
 void func_00121358(Attachment* self, s32 flags);
-
-void func_00122F28(T2195_7C0* self, s32 a1)
-{
-    AnimationPlayer* o = self->player;
-    RemoveFromList(&o->list44, self);
-    if (o->driven == self) {
-        o->driven = 0;
-    }
-    ReleasePoseSource(self, a1);
-}
 
 extern f32 D_0026185C[];
 void func_001214B8(Attachment* self, Vec02* a1, Vec02* a2);
 s32 func_0012E9E0(AnimationPlayer* t, f32* a, f32* b);
 
-void func_00122FE0(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
-{
-    AnimationPlayer* track = self->player;
-    Track83* e = &track->anim->tracks[self->index];
-    if (e->pos != 0) {
-        f32 tmp[2];
-        if (f != 0.0f) {
-            f32 c14 = track->time;
-            f32 c18 = track->speed;
-            tmp[1] = c18;
-            tmp[0] = c14 + f * c18;
-            ApplyAnimationLoopMode(track, &tmp[0], &tmp[1]);
-        } else {
-            tmp[0] = track->time;
-        }
-        if (self->mode0 == 4) {
-            f32 d = self->f18 - g_gameTime[0] - track->f10;
-            if (0.0f < d) {
-                tmp[0] = tmp[0] + d * track->speed;
-            }
-        }
-        e->pos->vt->eval(e->pos, self->owner, 0, a1, a2, tmp[0], track->speed);
-        return;
-    }
-    GetOwnerPosition(self, a1, a2);
-}
-
-extern f32 D_0026185C[];
 void func_00121508(Attachment* self, Mat02* a, Vec02* b);
-s32 func_0012E9E0(AnimationPlayer* t, f32* a, f32* b);
-
-void func_00123120(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
-{
-    PlacedObject* p4 = self->owner;
-    AnimationPlayer* track = self->player;
-    Track83* e = &track->anim->tracks[self->index];
-    if (e->rot != 0) {
-        f32 tmp[2];
-        if (f != 0.0f) {
-            f32 c14 = track->time;
-            f32 c18 = track->speed;
-            tmp[1] = c18;
-            tmp[0] = c14 + f * c18;
-            ApplyAnimationLoopMode(track, &tmp[0], &tmp[1]);
-        } else {
-            tmp[0] = track->time;
-        }
-        if (self->mode1 == 4) {
-            f32 d = self->f18 - g_gameTime[0] - track->f10;
-            if (0.0f < d) {
-                tmp[0] = tmp[0] + d * track->speed;
-            }
-        }
-        e->rot->vt->eval(e->rot, p4, 0, a1, a2, tmp[0], track->speed);
-        return;
-    }
-    GetOwnerRotation(self, a1, a2);
-}
-
-f32 func_00123358(T2195_7C0* self, s32 index)
-{
-    AnimationPlayer* track = self->player;
-    Track83* row = &track->anim->tracks[self->index];
-    T2196_Weight** values = row->morph;
-    T2196_Weight* object = values[index];
-    f32 result;
-    object->vt->eval(object, self->owner, 0, &result, 0, track->time, track->speed);
-    return result;
-}
 
 extern void func_0013D278(void*);
 
@@ -426,7 +112,6 @@ typedef void (*VFn_123578)(void* self);
 struct Obj_123578 { VFn_123578* vtbl; };
 struct Ctx_123578 { u8 pad[0x2220]; s32 f2220; };
 
-extern f32 D_0026185C[];
 extern Ctx_123578* D_00262E10;
 
 void func_001B93F8(Collider* self);
@@ -604,41 +289,6 @@ void func_00126BC0(Object_00126BC0* object, s32 value)
     }
 }
 
-void func_001215C0(Attachment* obj)
-{
-    PlacedObject* node = obj->owner;
-    Collider* a2 = (node->desc->flags & 2) ? (Collider*)node : 0;
-    s8 b2C9 = node->b2C9;
-    if (b2C9 != -1) {
-        obj->mode0 = b2C9;
-    } else {
-        if (a2 == 0 || a2->mode450 == 3) {
-            obj->mode0 = 2;
-        } else {
-            obj->mode0 = 3;
-        }
-    }
-    s8 b2CA = node->b2CA;
-    if (b2CA != -1) {
-        obj->mode1 = b2CA;
-        return;
-    }
-    if (a2 == 0 || a2->mode470 == 3) {
-        obj->mode1 = 2;
-    } else {
-        obj->mode1 = 3;
-    }
-}
-
-void func_00122F88(T2195_7C0* self, Attachment* a1)
-{
-    AnimationPlayer* saved = self->player;
-    Pair2195 tmp = self->w20;
-    CopyPoseSource(self, a1);
-    self->w20 = tmp;
-    self->player = saved;
-}
-
 struct Child_00123BB0 { void** vt; };
 
 void func_00123BB0(StateTrigger* self)
@@ -676,55 +326,16 @@ struct Locals_001201F0 {
     f32 first;
 };
 
-extern void func_00188A20(void*, void*);
 extern void func_00189150(void*, void*, void*);
 extern void func_00188D28(void*, void*, void*);
-
-void func_001201F0(T2196_6F8* self, Stream83* arg)
-{
-    Locals_001201F0 loc;
-    s32 result;
-
-    ReadVectorKeys(&self->count, &self->keys, arg);
-    if (self->count < 2) {
-        result = 1;
-    } else {
-        BuildEulerRotationMatrix((u8*)self->keys + 0x10, loc.a);
-        u8* tail = (u8*)((self->count << 6) + (s32)self->keys) - 0x30;
-        BuildEulerRotationMatrix(tail, loc.b);
-        func_00189150(loc.a, loc.b, loc.c);
-        func_00188D28(loc.c, &loc.first, loc.d);
-        result = (loc.first < 0.01f) ? 1 : 0;
-    }
-    self->closed = result;
-}
-
 
 extern f32 D_00260E60[4];
 extern f32 D_0026186C;
 extern f32 D_00261860;
 extern f32 func_001EA4B8(void*, s32, f32, f32, f32);
 
-void func_00122488(Attachment* self, s32 val)
-{
-    f32 ret = self->vt->getIndexed(self, val);
-    switch (self->mode3) {
-    case 2:
-        self->owner->f270[val] = ret;
-        break;
-    case 3: {
-        f32 cur = self->owner->f270[val];
-        f32 limit = self->owner->f294 ? g_frameStep : g_frameDt;
-        self->owner->f270[val] = ApproachValueWithRamp(g_valueRampProfile, 0, cur, ret, limit);
-        break;
-    }
-    }
-}
-
-
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_00124A48(void* self);
-s32 func_001300E8(void* node, s32 kind);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_00182ED8(void* a);
 
@@ -768,58 +379,13 @@ void func_00123448(StateTrigger* self)
 
 void func_00121568(Attachment* self, f32* value, f32* slope);
 
-void func_00122C48(Attachment* self, f32* a1, f32* a2)
-{
-    Attachment* p = self;
-    while ((p = p->link.next) != 0) {
-        s8 f = p->mode1;
-        if (f == 0) { p = 0; break; }
-        if (f != -1) break;
-    }
-    if (p != 0) {
-        p->vt->getValue(p, a1, a2);
-    } else {
-        GetOwnerValue(self, a1, a2);
-    }
-}
-
 extern void func_00121568(Attachment* self, f32* a1, f32* a2);
-
-void func_00123270(T2195_7C0* self, f32* a1, f32* a2)
-{
-    f32* saved = a1;
-    PlacedObject* f4 = self->owner;
-    AnimationPlayer* player = self->player;
-    Track83* e = &player->anim->tracks[self->index];
-    T2196_Weight* target = e->weight;
-    if (target) {
-        target->vt->eval(target, f4, 0, saved, a2, player->time, player->speed);
-    } else {
-        GetOwnerValue(self, saved, a2);
-    }
-}
 
 extern void func_00121580(Attachment* self, Mat02* a1);
 
-void func_001232E8(T2195_7C0* self, Mat02* a1)
-{
-    Mat02* saved = a1;
-    PlacedObject* f4 = self->owner;
-    AnimationPlayer* player = self->player;
-    Track83* e = &player->anim->tracks[self->index];
-    T2196_Scale* target = e->scale;
-    if (target) {
-        target->vt->eval(target, f4, 0, saved, player->time);
-    } else {
-        GetIdentityMatrix(self, saved);
-    }
-}
-
 typedef void (*VFn_1236C8)(void* self, void* arg);
 struct Obj_1236C8 { VFn_1236C8* vt; };
-extern u8 D_00261420[];
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-s32 func_001300E8(void* node, s32 kind);
 void func_00123400(C22* node, StateTrigger* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
@@ -858,9 +424,7 @@ void func_001236C8(StateTrigger* self)
     }
 }
 
-extern f32 D_0026185C[];
 extern u8 D_002623D8[];
-extern u8 D_00261420[];
 
 void func_001BF788(s32 a, s32 b);
 void func_001BF048(s32 a);
@@ -950,32 +514,6 @@ extern const T2196_PosVt D_002196C8;
 extern const T2196_PosVt D_002196D8;
 void* func_0018D5C0(s32 bytes);
 
-T2196_Pos* func_00120FB0(s32 kind)
-{
-    T2196_Pos* p;
-    switch (kind) {
-    case 0:
-        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x30);
-        p->vt = &g_positionCurveKind0Methods;
-        break;
-    case 1:
-        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x14);
-        p->vt = &g_positionCurveKind1Methods;
-        break;
-    case 2:
-        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x18);
-        p->vt = &g_positionCurveKind2Methods;
-        break;
-    default:
-        p = 0;
-        break;
-    }
-    if (p != 0) {
-        p->kind = kind;
-    }
-    return p;
-}
-
 extern u8 D_00248D30[];
 void func_00152600(void* a, void* b);
 void func_001BA500(void* a, void* b, void* c, void* d, s32 e);
@@ -983,337 +521,24 @@ void func_001274F8(void* a, void* b);
 void func_00127590(void* a, void* b);
 void func_001B5F28(void* a, void* b);
 
-void func_00121358(Attachment* self, s32 flags)
-{
-    PlacedObject* m = self->owner;
-    s32 local[4];
-    RemoveFromList(&m->list1E0, self);
-    Attachment* a = m->f1EC;
-    Attachment* b = m->f1F0;
-    m->desc02()->m2B(m);
-    if (self == a && m->f1EC == 0 && (flags & 1) != 0) {
-        if ((m->desc->flags & 2) != 0) {
-            func_001BA500(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
-            m->desc02()->m20(m, (Vec02*)local);
-        } else {
-            SetPlacedObjectVelocity(m, D_00248D30);
-        }
-    }
-    if (self == b && m->f1F0 == 0 && (flags & 2) != 0) {
-        if ((m->desc->flags & 2) != 0) {
-            func_001BA500(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
-            m->desc02()->m21(m, (Vec02*)local);
-        } else {
-            SetPlacedObjectSpin(m, D_00248D30);
-        }
-    }
-    PushFreeSlot(&m->world->pool1B20, self);
-}
-
 extern u8 D_002483D0[];
-void func_00121338(Attachment* self, PlacedObject* a1);
-
-void func_00122708(T2195_588* self, PlacedObject* src)
-{
-    InitPoseSource(self, src);
-    self->pos = src->v190;
-    self->rot.r[0] = src->m1A0.r[0];
-    self->rot.r[1] = src->m1A0.r[1];
-    self->rot.r[2] = src->m1A0.r[2];
-    Rec2195_224* p = (Rec2195_224*)src->f224;
-    if (p != 0) {
-        if (p->fB0 & 0x20) {
-            self->f80 = p->f8C;
-        }
-    }
-    Vec02* table = (Vec02*)g_identityMatrix;
-    self->m90.r[0] = table[0];
-    self->m90.r[1] = table[1];
-    self->m90.r[2] = table[2];
-    self->countC0 = src->f26C;
-    self->valuesC4 = *(f32**)((u8*)src + 0x274);
-}
 
 s32 func_00139970(f32 x, f32 period, s32 count, Pair2196* p, f32* out);
 f32 func_001EA408(f32 a);
-
-void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
-{
-    f32 sum1 = 0.0f;
-    f32 v0 = sum1;
-    f32 x0;
-    f32 x1;
-    f32 x2;
-    f32* p0;
-    f32* p1;
-    if (out0) {
-        p0 = &x0;
-    } else {
-        x0 = sum1;
-        p0 = 0;
-    }
-    if (out1) {
-        p1 = &x1;
-    } else {
-        x1 = 0.0f;
-        p1 = 0;
-    }
-    BlendSeq2196* seq = o->seq;
-    BlendCfg2196* cfg = o->cfg;
-    f32 w = 0.0f;
-    f32 t;
-    s32 idx;
-    if (!seq) {
-        t = dt / cfg->length;
-    } else {
-        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
-        t = x2 / seq->pairs[idx].b;
-    }
-    for (s32 i = 0; i < cfg->count; i++) {
-        BlendRec2196* e = (BlendRec2196*)(cfg->base + i * cfg->stride);
-        if (e->weight == 0.0f)
-            continue;
-        T2196_Weight* tg = o->targets[i];
-        if (!tg) {
-            if (cam) {
-                f32 r = WrapAngle(((Rec2195_224*)cam->f224)->f90 - v0);
-                v0 += r * e->weight / (w + e->weight);
-            }
-        } else {
-            f32 a, b;
-            if (!seq) {
-                f32 s = e->sub->length;
-                b = s / cfg->length;
-                a = t * s;
-            } else {
-                Pair2196* q = (Pair2196*)((u8*)e + seq->stride + idx * 8);
-                b = q->b;
-                a = q->a + t * b;
-                if (e->sub->length < a)
-                    a -= e->sub->length;
-                b = b / seq->pairs[idx].b;
-            }
-            tg->vt->eval(tg, cam, c, p0, p1, a, b * scale);
-            if (w == 0.0f) {
-                v0 = x0;
-            } else {
-                f32 r = WrapAngle(WrapAngle(x0) - v0);
-                v0 += r * e->weight / (w + e->weight);
-            }
-            sum1 += e->weight * x1;
-        }
-        w += e->weight;
-        v0 = WrapAngle(v0);
-    }
-    if (out0)
-        *out0 = v0;
-    if (out1)
-        *out1 = sum1;
-}
-
-s32 func_00139970(f32 x, f32 period, s32 count, Pair2196* p, f32* out);
-f32 func_001EA408(f32 a);
-
-void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1, f32 dt, f32 scale)
-{
-    f32 sum1 = 0.0f;
-    f32 sum0 = sum1;
-    f32 x0;
-    f32 x1;
-    f32 x2;
-    f32* p0;
-    f32* p1;
-    if (out0) {
-        p0 = &x0;
-    } else {
-        x0 = sum1;
-        p0 = 0;
-    }
-    if (out1) {
-        p1 = &x1;
-    } else {
-        x1 = 0.0f;
-        p1 = 0;
-    }
-    BlendSeq2196* seq = o->seq;
-    BlendCfg2196* cfg = o->cfg;
-    f32 t;
-    s32 idx;
-    if (!seq) {
-        t = dt / cfg->length;
-    } else {
-        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
-        t = x2 / seq->pairs[idx].b;
-    }
-    for (s32 i = 0; i < cfg->count; i++) {
-        BlendRec2196* e = (BlendRec2196*)(cfg->base + i * cfg->stride);
-        f32 zero = 0.0f;
-        if (e->weight == zero)
-            continue;
-        T2196_Weight* tg = o->targets[i];
-        if (!tg) {
-            if (cam)
-                sum0 += e->weight * (*(f32**)((u8*)cam + 0x274))[o->index];
-        } else {
-            f32 a, b;
-            if (!seq) {
-                f32 s = e->sub->length;
-                b = s / cfg->length;
-                a = t * s;
-            } else {
-                Pair2196* q = (Pair2196*)((u8*)e + seq->stride + idx * 8);
-                b = q->b;
-                a = q->a + t * b;
-                if (e->sub->length < a)
-                    a -= e->sub->length;
-                b = b / seq->pairs[idx].b;
-            }
-            tg->vt->eval(tg, cam, c, p0, p1, a, b * scale);
-            sum0 += e->weight * x0;
-            sum1 += e->weight * x1;
-        }
-    }
-    if (out0)
-        *out0 = sum0;
-    if (out1)
-        *out1 = sum1;
-}
-
-void func_00121338(Attachment* self, PlacedObject* value)
-{
-	s8 m = -1;
-	self->owner = value;
-	self->mode2 = m;
-	self->mode3 = -1;
-	self->mode1 = m;
-	self->mode0 = m;
-}
 
 extern const T2196_RotVt D_002196E8;
 extern const T2196_RotVt D_002196F8;
 extern const T2196_RotVt D_00219708;
-void* func_0018D5C0(s32 bytes);
-
-T2196_Rot* func_00121050(s32 kind) {
-    T2196_Rot* p;
-    switch (kind) {
-    case 0:
-        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x30);
-        p->vt = &g_rotationCurveKind0Methods;
-        break;
-    case 1:
-        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x14);
-        p->vt = &g_rotationCurveKind1Methods;
-        break;
-    case 2:
-        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x1C);
-        p->vt = &g_rotationCurveKind2Methods;
-        break;
-    default:
-        p = 0;
-        break;
-    }
-    if (p) {
-        p->kind = kind;
-    }
-    return p;
-}
 
 extern const T2196_ScaleVt D_00219718;
 extern const T2196_ScaleVt D_00219728;
 void* func_0018D5C0(u32 n);
-T2196_Scale* func_001210F0(s32 kind)
-{
-    T2196_Scale* p;
-    switch (kind) {
-    case 0:
-        p = (T2196_Scale*)AllocateZeroedFrontMemory(0x30);
-        p->vt = &g_scaleCurveKind0Methods;
-        break;
-    case 1:
-        p = (T2196_Scale*)AllocateZeroedFrontMemory(0x10);
-        p->vt = &g_scaleCurveKind1Methods;
-        break;
-    default:
-        p = 0;
-        break;
-    }
-    if (p != 0) {
-        p->kind = kind;
-    }
-    return p;
-}
 
 extern u8 D_00219560[];
 
-Attachment* func_00121280(Attachment* self, World* a, PlacedObject* b)
-{
-    Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)D_00219560);
-    node->vt->copy(node, self);
-    return node;
-}
-
 typedef void (*Told_1214B8)(PlacedObject* self, Vec02* out);
-extern u8 D_00248D30[];
-
-void func_001214B8(Attachment* self, Vec02* out1, Vec02* out2)
-{
-    *out1 = self->owner->v190;
-    *out2 = *(Vec02*)D_00248D30;
-    if (self->owner->desc02()->m28 != 0) {
-        ((Told_1214B8)self->owner->desc02()->m28)(self->owner, out1);
-    }
-}
-
-extern u8 D_002483D0[];
-
-void func_00121580(Attachment* unused, Mat02* out)
-{
-    Mat02* src = (Mat02*)g_identityMatrix;
-    out->r[0] = src->r[0];
-    out->r[1] = src->r[1];
-    out->r[2] = src->r[2];
-}
-
-extern u8 D_00248D30[];
-extern u8 D_002483D0[];
-
-void func_00121338(Attachment* self, PlacedObject* a1);
-
-void func_00122890(T2195_5B0* self, PlacedObject* src)
-{
-    InitPoseSource(self, src);
-    self->pos = &src->v190;
-    self->rot = &src->m1A0;
-    self->count = &src->f26C;
-    self->vec = (Vec02*)D_00248D30;
-    self->vec2 = (Vec02*)D_00248D30;
-    self->values = *(f32**)((u8*)src + 0x274);
-    Rec2195_224* o = (Rec2195_224*)src->f224;
-    if (o != 0) {
-        if (o->fB0 & 0x20) {
-            self->p30 = (f32*)D_00248D30;
-            self->p2C = &o->f8C;
-        }
-    }
-    self->ident = (Mat02*)g_identityMatrix;
-}
 
 void func_00121338(Attachment* self);
-
-void func_00122A18(T2195_5D8* self)
-{
-    InitPoseSource(self);
-    Vec02* src = (Vec02*)g_identityMatrix;
-    Vec02* d1 = self->m40.r;
-    Vec02* d2 = self->m90.r;
-    self->m40.r[0] = src[0];
-    d1[1] = src[1];
-    d1[2] = src[2];
-    self->m90.r[0] = src[0];
-    d2[1] = src[1];
-    d2[2] = src[2];
-}
 
 // The dispatch tables func_00121160 gives each kind of curve: three functions, or one and a
 // shared one, each table followed by a zero word.
@@ -1327,6 +552,19 @@ void func_0011F478();
 void func_0011F568();
 void func_0011F620();
 void func_0011EFB0();
+void func_00120AA8();
+void func_00120D58();
+void func_00120110();
+void func_00120130();
+void func_001201D0();
+void func_001201F0();
+void func_001202C0();
+void func_001202F0();
+void func_00120360();
+void func_00120388();
+void func_001203A8();
+void func_00120418();
+void func_00120440();
 extern const T2196_WeightVt D_00219668 = { (T2196_WeightEval)func_0011F0C8, (T2196_WeightRead)func_0011EFC8, (T2196_WeightTimes)func_0011F180, 0 };
 extern const T2196_WeightVt D_00219678 = { (T2196_WeightEval)func_0011F320, (T2196_WeightRead)func_0011F210, (T2196_WeightTimes)func_0011F3E8, 0 };
 extern const T2196_WeightVt D_00219688 = { (T2196_WeightEval)func_0011F478, (T2196_WeightRead)func_0011F568, (T2196_WeightTimes)func_0011F620, 0 };
@@ -1334,48 +572,7 @@ extern const T2196_WeightVt D_00219698 = { (T2196_WeightEval)func_00120AA8, 0, (
 extern const T2196_WeightVt D_002196A8 = { (T2196_WeightEval)func_00120D58, 0, (T2196_WeightTimes)func_0011EFB0, 0 };
 void* func_0018D5C0(T2196_Weight* n);
 
-T2196_Weight* func_00121160(u32 kind)
-{
-    T2196_Weight* o;
-    switch (kind) {
-    case 0:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
-        o->vt = &g_weightCurveKind0Methods;
-        break;
-    case 1:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
-        o->vt = &g_weightCurveKind1Methods;
-        break;
-    case 3:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x14);
-        o->vt = &g_weightCurveKind3Methods;
-        break;
-    case 4:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x18);
-        o->vt = &g_weightCurveKind4Methods;
-        break;
-    case 2:
-        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
-        o->vt = &g_weightCurveKind2Methods;
-        break;
-    default:
-        o = 0;
-    }
-    if (o)
-        o->kind = kind;
-    return o;
-}
-
 typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
-
-extern u8 D_00248D30[];
-
-void func_00121508(Attachment* self, Mat02* out1, Vec02* out2)
-{
-    *out1 = self->owner->m1A0;
-    *out2 = *(Vec02*)D_00248D30;
-    ((Told_121508)self->owner->desc02()->m29)(self->owner, out1, out2);
-}
 
 extern const f32 D_002499F0 = 3.4028235e+38f;
 extern u8 D_00260E70[];
@@ -1449,4 +646,3 @@ extern const T2196_RotVt D_00219708 = { (T2196_RotEval)func_00120700, (T2196_Rot
 extern const T2196_ScaleVt D_00219718 = { (T2196_ScaleEval)func_001202F0, (T2196_ScaleRead)func_00120360, (T2196_ScaleTimes)func_00120388, 0 };
 extern const T2196_ScaleVt D_00219728 = { (T2196_ScaleEval)func_001203A8, (T2196_ScaleRead)func_00120418, (T2196_ScaleTimes)func_00120440, 0 };
 
-f32 D_00260E60[4] = { 3.0f, 1.0f, 0.1f, 0.0f };
