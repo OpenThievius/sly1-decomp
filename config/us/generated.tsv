@@ -84,3 +84,5 @@ src/lib/exception.cpp	__tf13bad_exception	func_001FEF70
 src/lib/exception.cpp	_$_9exception	func_001FEFC0
 src/lib/exception.cpp	__9exception	func_001FEFF0
 src/lib/exception.cpp	__tf9exception	func_001FF008
+src/main/file_16AA18.cpp	__static_initialization_and_destruction_0	func_0016C360
+src/main/file_16AA18.cpp	_GLOBAL_$I$*	func_0016C450

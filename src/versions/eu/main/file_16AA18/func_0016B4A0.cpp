@@ -18,7 +18,7 @@ void func_0016B4A0(Obj_16B4A0_eu* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->f520 = D_00262988;
+        self->f520 = (s32*)&D_00262988;
         *self->f520 = (s32)GetFontById(2);
     }
     SetScreenElementHoldTime(self, 0.0f);
