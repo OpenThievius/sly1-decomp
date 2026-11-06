@@ -91,3 +91,6 @@ D_00275C68 = 0x00275C68;
 // A second FLT_MAX after func_001419E8's (D_00249E44) that no code loads: the constant of a
 // function the linker stripped, ending file_1419E8's .rodata.
 D_00249E48 = 0x00249E48;
+// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): file_13C988's
+// .rodata starts with it, after class 0x3B's FLT_MAX at D_00249D78.
+D_00249D80 = 0x00249D80;

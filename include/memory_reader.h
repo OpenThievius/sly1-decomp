@@ -6,7 +6,7 @@
 // through entry 1 (func_0013CC80): `fn((u8*)port + delta, count, dst)`. A plain struct with an
 // explicit vptr: the entries are GCC 2.95's {s16 delta; s16 index; fn}, entry 0 being
 // {offset-to-top, rtti} = {0, 0, 0}. No `virtual`, so GCC emits nothing of its own (the table is
-// defined in 0013C000.cpp as a table of functions).
+// defined in file_13C988.cpp as a table of functions).
 #ifndef MEMORY_READER_H
 #define MEMORY_READER_H
 
