@@ -228,9 +228,16 @@ one inline assembly AGENTS.md allows; with it, under the files' own flags, the f
 the toolchain's `libgcc.a` (2.95.x and 2.9-ee-991111 alike), whose debug sections name a `.c`
 source; the C++ runtime's throw and rethrow (func_001FE6A8, func_001FE4C8) need
 `__builtin_unwind_init` and `__builtin_eh_return`, which `cc1.exe` has and `cc1plus.exe` lacks.
-So that code is C: tools/compile.py builds a `.c` file with the release's `cc1.exe` and the
-driver's C predefines. src/lib/throw.c matches with `-O2 -G0 -fexceptions` under 2.9-ee-991111;
-without `-fexceptions` the stub of func_001FE4C8 moves and cc1 fails on func_001FE6A8. The
+So that code is C: tools/compile.py builds a `.c` file with the release's `cc1` and the
+driver's C predefines. Like the math library, the runtime was built by Sony's Linux build,
+2.9-ee-991111-01: with the Windows `cc1.exe` of the same release the remainders and the unsigned
+quotient keep their code but lose the unused stack slots retail's frames have (48 bytes for
+func_001FC3D0, where cc1.exe gives 16), and with the Linux `cc1` all four divisions match. Each
+division is its own file, as each is its own object in retail with its own copy of the table of
+significant bits (src/lib/divide.c, remainder.c, divide_unsigned.c, remainder_unsigned.c, on
+include/divide.h). src/lib/throw.c matches with `-O2 -G0 -fexceptions`; without `-fexceptions`
+the stub of func_001FE4C8 moves and cc1 fails on func_001FE6A8. Without the Linux build these
+files stay assembly in the build, as the math library's do. The
 divide helpers multiply with one `multu`, read from lo and hi, which no C product gives (GCC
 multiplies twice or splits a 64-bit product): include/mul_wide.h is that helper, the second
 inline assembly AGENTS.md allows. As with libc and libm, nothing is taken from the archive but

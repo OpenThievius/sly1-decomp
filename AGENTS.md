@@ -86,7 +86,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
   one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
   and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
   The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a
-  `.c` file under `src/lib/`, built by the release's `cc1` with its own row in config/cflags.tsv
+  `.c` file under `src/lib/`, built by Sony's Linux `cc1` with its own row in config/cflags.tsv
   (docs/TOOLCHAIN.md); its statement macros (`do { } while (0)`) are allowed as in the math
   library, where they are the runtime's helpers of that form and retail's code needs them.
   A whole file (`config/us/files.tsv`) holds the original assembly functions inside its range

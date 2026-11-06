@@ -25,12 +25,11 @@ matching is in its long tail, the data mostly from C (88.7%), the original assem
 source files proved, PAL close behind US, and names and types under way.
 
 1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). On 2026-11-06,
-   82 US functions are left (about 84 KB: 53 in game code, 29 in the libraries), 36 of them with
+   77 US functions are left (about 79 KB: 53 in game code, 24 in the libraries), 34 of them with
    a near miss in `nonmatching/`. The largest, func_00109488 (37 KB, the property registry fill,
-   44% of what is left), is close but differs in code as well as registers: 9,336 instructions
+   47% of what is left), is close but differs in code as well as registers: 9,336 instructions
    against retail's 9,348. The toolchain's own runtime (`libgcc`) is C, built by `cc1` in `.c`
-   files under `src/lib/` (docs/TOOLCHAIN.md); its 64-bit remainders and unsigned divide are
-   near misses whose frames retail makes larger.
+   files under `src/lib/`, by Sony's Linux build of 2.9-ee-991111 (docs/TOOLCHAIN.md).
 2. **Data from C.** A C file's `.rodata` literals (float constants, strings) are linked now: the
    code takes retail's address for them and retail's bytes stay in the image (tools/rodata.py),
    which opens the functions tagged `rodata`. A C `switch` is linked too: its jump table goes with the
