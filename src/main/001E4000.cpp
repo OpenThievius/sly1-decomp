@@ -3702,7 +3702,6 @@ extern const Ent_1BFAF8 D_00245020[771] = {
 };
 
 // Globals typed by worker dv04, from retail's bytes and their readers.
-float D_00274BD4 = -250.0f;
 float D_00274C50[4] = {1.0f, -1.0f, 0.0f, 0.0f};
 float D_00274C60[4] = {0.0f, 0.0f, 1.0f, 0.0f};
 float D_00274C70[4] = {0.0f, 15.0f, 1.5f, 0.0f};
@@ -4117,7 +4116,6 @@ extern const u8 D_0026A110[];
 void func_00199850();
 struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
 struct Sjis_274588 { u16 code; u16 id; };
-struct Rec_274BA0 { s32 a[12]; f32 b; };
 
 f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
 f32 D_00264248 = 2.5f;
@@ -4196,10 +4194,6 @@ f32 D_00274620[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f,
 f32 D_00274660[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
 f32 D_002746C0[4] = { 0.0f, 3.0f, 0.0f, 0.0f };
 f32 D_002746D0[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
-f32 D_00274B90 = 0.06666667f;
-f32 D_00274B94 = 0.16666667f;
-f32 D_00274B98 = 0.116666675f;
-Rec_274BA0 D_00274BA0 = { { (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, 6, 7, 4, 5, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF, (s32)0xFFFFFFFF }, 0.15f };
 
 // Globals typed by worker dv05, from retail's bytes and their readers.
 void func_0020D138();
@@ -4772,8 +4766,6 @@ s32 D_00274734 = 0;
 s32 D_00274738 = 0;
 // word flag
 s32 D_00274744 = 0;
-// lw word
-s32 D_00274C10 = 0;
 // lw/sw word
 s32 D_00275130 = 0;
 // lw/sw word
