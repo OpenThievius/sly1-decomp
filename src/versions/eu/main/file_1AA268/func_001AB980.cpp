@@ -61,14 +61,14 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
         self->time = self->time + dt * rate;
         if (rate < 0.0f)
         {
-            if (self->warn != D_0024CD6C && self->time <= self->warn)
+            if (self->warn != 3.4028235e+38f && self->time <= self->warn)
                 warn = 1;
             if (self->time <= self->limit)
                 end = 1;
         }
         else if (rate > 0.0f)
         {
-            if (self->warn != D_0024CD6C && self->warn <= self->time)
+            if (self->warn != 3.4028235e+38f && self->warn <= self->time)
                 warn = 1;
             if (self->time >= self->limit)
                 end = 1;
@@ -117,7 +117,7 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
     }
     if (show)
     {
-        FormatToStringBounded(buf, 0x10, D_0024CD50, 0x54, hi, sep, (lo < 10 && !tenths) ? D_0024CD60 : D_0024CD68, lo);
+        FormatToStringBounded(buf, 0x10, "%c%d%c%s%d", 0x54, hi, sep, (lo < 10 && !tenths) ? "0" : "", lo);
         func_eu_001AB238(self, buf);
     }
 }

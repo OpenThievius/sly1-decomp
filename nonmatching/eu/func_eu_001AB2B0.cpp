@@ -3,6 +3,8 @@
 // NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AB2B0.cpp func_eu_001AB2B0 --unit src/main/001A8000.cpp
 // Still differs: Key-gated sub-object work; layout offset fixed (f51C at 0x51C), all instructions match except self and key are in swapped s-registers (retail self in s2).
 // With a key that func_eu_001E3018 accepts, runs the PAL-only calls on the sub-object at +0x8 and on the buffer they fill, then func_001AAB20 and func_0015C900; otherwise clears the s16 at +0x8 and calls func_001AAB20 with 0.0 and 0.0.
+struct Obj_001AAB20_eu;
+void func_001AAB20(Obj_001AAB20_eu* self, f32 x, f32 y);
 s32 func_eu_001E3018(void* key);
 void func_eu_001E3050(void* p, void* key);
 void func_eu_0015DCB8(void* buf, void* name, void* p, s32 zero);

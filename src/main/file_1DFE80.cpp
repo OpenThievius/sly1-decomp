@@ -1,36 +1,153 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The bonus commentary and the Master Thief Sprint's best time, as the level's screen element
+// shows them. Its .rodata opens with the names the commentary table (D_00248748, read only by
+// func_001DFE80 here) points to; its .data is the style its static initialiser builds and the
+// buffer the best time is written into.
 #include "common.h"
+#include "asm_func.h"
+#include "switched_collider.h"
+#include "state_trigger.h"
+#include "world.h"
 #include "screen_element.h"
 #include "v24a2.h"
+#include "globals.h"
 #include "game_progress.h"
+#include "level_entry.h"
 
-struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
-extern Config_1E0848 D_002758E0;
-void func_001F5C0C(void* dst, s32 value, s32 size);
-void func_001E0848(void* self, u32 mode)
+extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
+extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
+extern const char D_0024DCE8[80] = "Rob McDaniel\nDev Madan\nAugie Pagan\nKarin Yamagiwa\nHokyo Lim\nSuzanne Kaufmann";
+extern const char D_0024DD38[40] = "Bruce Oberg\nRob McDaniel\nHokyo Lim";
+extern const char D_0024DD60[32] = "Rob McDaniel\nChris Heidorn";
+extern const char D_0024DD80[32] = "Brian Fleming\nChris Bentzel";
+extern const char D_0024DDA0[40] = "Brian Fleming\nDJ Stiner\nRob McDaniel";
+extern const char D_0024DDC8[40] = "Brian Fleming\nNate Fox\nTravis Kotzesbue";
+extern const char D_0024DDF0[32] = "Bruce Oberg\nNate Fox\nMatt Olsen";
+extern const char D_0024DE10[40] = "Chris Zimmerman\nMatt Olsen\nBruce Oberg";
+extern const char D_0024DE38[24] = "Nate Fox\nChris Bentzel";
+extern const char D_0024DE50[32] = "Rob McDaniel\nBrian Fleming";
+extern const char D_0024DE70[40] = "Nate Fox\nMatt Olsen\nAndrew Woods";
+extern const char D_0024DE98[40] = "Nate Fox\nBrian Fleming\nReid Johnson";
+extern const char D_0024DEC0[48] = "Suzanne Kaufmann\nKelle DeForrest\nRob McDaniel";
+extern const char D_0024DEF0[32] = "Chris Bentzel\nKelle DeForrest";
+extern const char D_0024DF10[64] = "Rob McDaniel\nSuzanne Kaufmann\nAndrew Woods\nKarin Yamagiwa";
+extern const char D_0024DF50[40] = "Nate Fox\nMatthew Morgaine\nChris Heidorn";
+extern const char D_0024DF78[40] = "Bruce Oberg\nGary Burd\nChris Bentzel";
+extern const char D_0024DFA0[24] = "Nate Fox\nMatt Olsen";
+extern const char D_0024DFB8[32] = "Rob McDaniel\nDarrell Plank";
+extern const char D_0024DFD8[24] = "Nate Fox\nAndrew Woods";
+extern const char D_0024DFF0[40] = "Chris Bentzel\nIan Stout\nKelle DeForrest";
+extern const char D_0024E018[32] = "Chris Bentzel\nRob McDaniel";
+extern const char D_0024E038[40] = "Rob McDaniel\nAugie Pagan\nAndrew Woods";
+extern const char D_0024E060[40] = "Matthew Morgaine\nChris Zimmerman";
+extern const char D_0024E088[32] = "Nate Fox\nChris Zimmerman";
+extern const char D_0024E0A8[32] = "Nate Fox\nMatthew Morgaine";
+extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel";
+extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
+extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
+
+void func_001F5C0C(void* p, s32 zero, s32 size);
+
+// The text style the best time draws with: the static initialiser (func_001E0848) zeroes it,
+// then sets its kind, two sizes given as integers, 0.3 twice and its colour.
+struct Style_1E0848 {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[3];
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    s32 f18;
+    Style_1E0848(s32 a, s32 b)
+    {
+        func_001F5C0C(this, 0, 0x1C);
+        kind = 0x2D;
+        f8 = a;
+        fC = b;
+        f14 = f10 = 0.3f;
+        f18 = (s32)0xFF7D4B00;
+    }
+};
+Style_1E0848 D_002758E0(2, 1);
+
+struct Buf_1E02C8 { char c[0x40]; };
+Buf_1E02C8 D_00275900 = {};
+
+void* func_001DFE80(s32 key)
 {
-	if (mode != 0xFFFF || self == 0) return;
-	func_001F5C0C(&D_002758E0, 0, 0x1C);
-	D_002758E0.marker04 = 0x2D;
-	D_002758E0.value08 = 2.0f;
-	D_002758E0.value0C = 1.0f;
-	D_002758E0.value10 = 0.3f;
-	D_002758E0.value14 = 0.3f;
-	D_002758E0.value18 = 0xFF7D4B00;
+    const LevelEntry* p = g_levelEntries;
+    const LevelEntry* end = g_levelEntries + 33;
+    do {
+        if (key != p->levelId) {
+            p++;
+        } else {
+            return (void*)p;
+        }
+    } while (p < end);
+    return 0;
+}
+
+struct Ent_11A338 { u32 pad0; f32 f4; u8 pad1[0x1C - 8]; s32 w1c; u8 pad2[0x28 - 0x20]; void* w28; };
+struct Cur_11A338 { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() { if (this == 0) return 0; return a != b; } };
+
+
+void* func_001DFE80(s32 k);
+s32 func_001E2100(void* p);
+s32 func_0015C188(s32 k);
+V24A2* func_0015C1C0(s32 k);
+s32 func_001DD7A0(World* g, s32 k);
+void func_001E02C8(T217D_1380* self, s32 n);
+
+void func_001DFEB8(T217D_1380* self)
+{
+    Ent_11A338* e;
+
+    SetupScreenElementText(self);
+    e = (Ent_11A338*)FindLevelEntry((g_saveData->f19D8 << 8) | g_saveData->f19DC);
+    if (e) {
+        if (e->f4 != 0.0f) {
+            g_currentWorld->f230C = e->f4;
+        }
+        if (!(((Cur_11A338*)g_currentWorld->f2310)->differs())) {
+            g_currentWorld->f2310 = (Cur_11A338*)((u8*)e + 8);
+        }
+        if (g_currentWorld->f2314 == 0 || !GetStringLength(g_currentWorld->f2314)) {
+            g_currentWorld->f2314 = e->w28;
+        }
+    }
+    if (IsFontLoaded(2)) {
+        self->frame = (V24A2**)&D_002758E0;
+        *self->frame = GetFontById(2);
+    }
+    SetScreenElementScale(self, 0.6f);
+    *(s32*)((u8*)self + 0x208) = (s32)0xDF7F7F7Fu;
+    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->f19D8 << 8) | g_saveData->f19DC)) {
+        SetBestTimeState(self, 1);
+    } else {
+        SetBestTimeState(self, 0);
+    }
+    if (g_currentEntry->bits & 8) {
+        if (((Cur_11A338*)g_currentWorld->f2310)->differs()) {
+            self->vt->m08(self, "Press &2L&. for Bonus Commentary");
+            SetScreenElementHoldTime(self, 5.0f);
+            self->vt->m14(self);
+            self->pressed = 1;
+        } else {
+            self->pressed = 0;
+        }
+    } else {
+        self->pressed = 0;
+    }
+    self->f270 = 0;
 }
 
 void func_001E02C8(void* self, s32 n);
-
-void func_001E0828(void* self)
-{
-    SetBestTimeState(self, 3);
-}
 
 void func_001F5C0C(void* p, s32 zero, s32 size);
 
 struct Glob_1E00B0 { u8 pad[0x230C]; f32 f230C; s32 f2310; void* f2314; };
 struct Pool_1E00B0 { u8 pad[0xAA]; u16 fAA; };
-extern Glob_1E00B0* D_00275710;
 extern Pool_1E00B0 D_00262C70;
 extern f32 D_0026185C;
 extern s32 D_002701C4;
@@ -53,7 +170,7 @@ void func_001E00B0(T217D_1380* self)
         if (self->pressed != 0) {
         if (g_padRecord.fAA & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
-            StartLockedStreamVoice(g_currentWorld->f2310);
+            StartLockedStreamVoice((s32)g_currentWorld->f2310);
             if (g_currentWorld->f2314 != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
                 self->vt->m08(self, (const char*)g_currentWorld->f2314);
@@ -89,17 +206,15 @@ void func_001E00B0(T217D_1380* self)
     }
 }
 
-struct Buf_1E02C8 { char c[0x40]; };
 struct X_1E02C8 { u8 pad[4]; };
 
 extern s32 D_002623DC;
-Buf_1E02C8 D_00275900 = {};
 extern X_1E02C8 D_00264A40;
 
 void func_001AB958(T217D_510* o);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_00160C48(s32 v);
-void func_001DDAD0(Glob_1E00B0* g);
+void func_001DDAD0(World* g);
 void func_001AB890(T217D_510* o, f32 v);
 f32 func_00205C78(f32 a, f32 b);
 void func_001AB920(T217D_510* o, f32 v);
@@ -110,7 +225,7 @@ void func_0018C7F8(X_1E02C8* x);
 s32 func_001602A0(void);
 void func_001604B8(s32 m);
 void func_00194D30(T217D_6D0* y, s32 a, s32 b);
-void func_00148CE0(Glob_1E00B0* g);
+void func_00148CE0(World* g);
 
 void func_001E02C8(T217D_1380* self, s32 n)
 {
@@ -227,7 +342,6 @@ struct Hd_1E0678 {
     }
 };
 
-extern u8 D_00262280[];
 extern f32 D_0027240C;
 void func_0015C8B8(V24A2* font, f32 a, f32 b);
 void* func_0015DB28(void* out, void* p, V24A2* font);
@@ -259,17 +373,23 @@ void func_001E0678(T217D_1380* self)
         if (h != 0) {
             slot = *(T217D_Word*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
-            Hd_1E0678::Draw(self->frame, &out, g_gsPacketWriter);
+            Hd_1E0678::Draw(self->frame, &out, &g_gsPacketWriter);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
         InitTextReader(loc, &self->text[0], self->font);
-        DrawAlignedText(loc, &out, 0, g_gsPacketWriter);
+        DrawAlignedText(loc, &out, 0, &g_gsPacketWriter);
         PopFontScale(self->font);
     }
 }
 
-// _GLOBAL_$I$ of the file, after the 16 bytes the linker left of two layout setters.
-void func_001E08D8(void)
+LINKER_REMNANT(func_001E0820);
+
+void func_001E0828(void* self)
 {
-    func_001E0848((void*)1, 0xFFFF);
+    SetBestTimeState(self, 3);
 }
+
+// The style above is built by the static initialiser GCC writes here (func_001E0848), and its
+// _GLOBAL_$I$ (func_001E08D8) follows the 12 bytes the linker left of a function this file wrote
+// out after it (tools/compile.py moves the block there).
+LINKER_REMNANT_AFTER_INIT(func_001E08C8);

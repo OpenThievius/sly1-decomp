@@ -3702,14 +3702,6 @@ extern const Ent_1BFAF8 D_00245020[771] = {
 };
 
 // Globals typed by worker dv04, from retail's bytes and their readers.
-s32 D_00274FA0[2] = {286, 287};
-s32 D_00274FA8[2] = {288, 289};
-s32 D_00274FB0[2] = {2, 2};
-s32 D_00274FB8[2] = {48, 64};
-float D_00275020[4] = {0.0f, 10.0f, 0.00999999978f, 0.0f};
-float D_0027506C = 0.25f;
-float D_00275070[14] = {0.0f, 1.0f, 0.781831503f, 0.623489797f, 0.974927902f, -0.222520933f, 0.433883727f, -0.90096885f, -0.433883727f, -0.90096885f, -0.974927902f, -0.222520933f, -0.781831503f, 0.623489797f};
-float D_002750A8[34] = {1.0f, 0.0f, 0.932472229f, 0.361241668f, 0.739008904f, 0.673695624f, 0.445738345f, 0.895163298f, 0.0922683626f, 0.995734155f, -0.273662984f, 0.961825669f, -0.602634609f, 0.798017204f, -0.850217164f, 0.526432157f, -0.982973099f, 0.183749512f, -0.982973099f, -0.183749512f, -0.850217164f, -0.526432157f, -0.602634609f, -0.798017204f, -0.273662984f, -0.961825669f, 0.0922683626f, -0.995734155f, 0.445738345f, -0.895163298f, 0.739008904f, -0.673695624f, 0.932472229f, -0.361241668f};
 float D_00275140[4] = {1.0f, 0.0f, -0.75f, 0.0f};
 float D_00275150[4] = {0.699999988f, 0.300000012f, 0.0f, 0.0f};
 float D_00275160 = 650.0f;
@@ -3870,15 +3862,6 @@ f32 D_00264050[4] = { 682.0f, 0.5f, 0.0f, 0.0f };
 f32 D_00264060[4] = { -3.40282347e+38f, 682.0f, 0.0f, 0.0f };
 f32 D_00264070[4] = { 682.0f, 1.0f, 0.0f, 0.0f };
 f32 D_00264080[2] = { -3.40282347e+38f, 682.0f };
-f32 D_00264128[2] = { 0.150000006f, 0.0f };
-f32 D_00264130[3] = { 30.0f, 0.0f, 0.5f };
-f32 D_0026413C = 0.5f;
-f32 D_00264198[3] = { 20.0f, 0.0f, 0.100000001f };
-f32 D_002641A4 = 1.5f;
-f32 D_002641A8[4] = { 5000.0f, 500.0f, 0.150000006f, 0.0f };
-f32 D_002641B8[3] = { 5.0f, 0.0f, 0.100000001f };
-f32 D_002641C4 = 3.0f;
-f32 D_002641C8[10] = { 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
 
 // Globals typed by worker dv06, from retail's bytes and their readers.
 struct VEnt_0024A0E0 { s32 delta; void (*fn)(); };
@@ -3912,11 +3895,6 @@ extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
 extern const f32 D_00249EF0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249FB4 = 3.4028235e+38f;
-extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
-extern const f32 D_0024A120 = 3.4028235e+38f;
-extern const Vec2_24A210 D_0024A210 = {0.0f, 4.73242188f};
-extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};
-extern const VEnt_0024A220 D_0024A220[22] = {{0, 0}, {0, func_0015C930}, {0, func_0015CA38}, {0, func_0015CA60}, {0, func_0015CB88}, {0, func_0015CC80}, {0, func_0015CD18}, {0, func_0015C3C0}, {0, func_0015CF70}, {0, func_0015D4E0}, {0, 0}, {0, 0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C2E8}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, func_0015C3C0}, {0, func_001FBDF8}, {0, func_001FBDF8}, {0, 0}};
 extern const char D_0024A2D0[8] = "Splash";
 extern const char D_0024A2D8[16] = "Paris, France";
 extern const char D_0024A2E8[16] = "The Hideout";
@@ -3968,10 +3946,7 @@ extern const char D_0024A688[24] = "A Strange Reunion";
 extern const f32 D_0024A844 = 3.40282347e+38f;
 extern const f32 D_0024AB7C = 3.40282347e+38f;
 extern const f32 D_0024AFA0 = 3.40282347e+38f;
-extern const f32 D_0024B164 = 3.40282347e+38f;
-extern const f32 D_0024B16C = 3.40282347e+38f;
 extern const f32 D_0024B258 = -3.40282347e+38f;
-extern const f32 D_0024B64C = 3.40282347e+38f;
 extern const f32 D_0024C930 = 3.40282347e+38f;
 extern const f32 D_0024C9B0 = 3.40282347e+38f;
 extern const f32 D_0024C9B4 = 3.40282347e+38f;
@@ -3981,9 +3956,6 @@ extern const f32 D_0024CAF0 = 3.40282347e+38f;
 extern const f32 D_0024CAF4 = 3.40282347e+38f;
 extern const f32 D_0024CAF8 = 3.40282347e+38f;
 extern const f32 D_0024CAFC = 3.40282347e+38f;
-extern const char D_0024CBD0[8] = "&%c%c&.";
-extern const char D_0024CBD8[16] = "^05~b2a83d/\000\000\000\000";
-extern const char D_0024CBE8[8] = "~.^.\000\000\000";
 extern const f32 D_0024D164 = -3.40282347e+38f;
 extern const f32 D_0024D168 = 3.40282347e+38f;
 extern const f32 D_0024D260 = 3.40282347e+38f;
@@ -3998,43 +3970,7 @@ void func_002005E8();
 void func_00200638();
 void func_00200680();
 
-extern const f32 D_0024DC88[2] = {3.40282347e+38f, 0.0f};
 extern const f32 D_0024DC94 = 3.40282347e+38f;
-extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
-extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
-extern const char D_0024DCE8[80] = "Rob McDaniel\nDev Madan\nAugie Pagan\nKarin Yamagiwa\nHokyo Lim\nSuzanne Kaufmann";
-extern const char D_0024DD38[40] = "Bruce Oberg\nRob McDaniel\nHokyo Lim";
-extern const char D_0024DD60[32] = "Rob McDaniel\nChris Heidorn";
-extern const char D_0024DD80[32] = "Brian Fleming\nChris Bentzel";
-extern const char D_0024DDA0[40] = "Brian Fleming\nDJ Stiner\nRob McDaniel";
-extern const char D_0024DDC8[40] = "Brian Fleming\nNate Fox\nTravis Kotzesbue";
-extern const char D_0024DDF0[32] = "Bruce Oberg\nNate Fox\nMatt Olsen";
-extern const char D_0024DE10[40] = "Chris Zimmerman\nMatt Olsen\nBruce Oberg";
-extern const char D_0024DE38[24] = "Nate Fox\nChris Bentzel";
-extern const char D_0024DE50[32] = "Rob McDaniel\nBrian Fleming";
-extern const char D_0024DE70[40] = "Nate Fox\nMatt Olsen\nAndrew Woods";
-extern const char D_0024DE98[40] = "Nate Fox\nBrian Fleming\nReid Johnson";
-extern const char D_0024DEC0[48] = "Suzanne Kaufmann\nKelle DeForrest\nRob McDaniel";
-extern const char D_0024DEF0[32] = "Chris Bentzel\nKelle DeForrest";
-extern const char D_0024DF10[64] = "Rob McDaniel\nSuzanne Kaufmann\nAndrew Woods\nKarin Yamagiwa";
-extern const char D_0024DF50[40] = "Nate Fox\nMatthew Morgaine\nChris Heidorn";
-extern const char D_0024DF78[40] = "Bruce Oberg\nGary Burd\nChris Bentzel";
-extern const char D_0024DFA0[24] = "Nate Fox\nMatt Olsen";
-extern const char D_0024DFB8[32] = "Rob McDaniel\nDarrell Plank";
-extern const char D_0024DFD8[24] = "Nate Fox\nAndrew Woods";
-extern const char D_0024DFF0[40] = "Chris Bentzel\nIan Stout\nKelle DeForrest";
-extern const char D_0024E018[32] = "Chris Bentzel\nRob McDaniel";
-extern const char D_0024E038[40] = "Rob McDaniel\nAugie Pagan\nAndrew Woods";
-extern const char D_0024E060[40] = "Matthew Morgaine\nChris Zimmerman";
-extern const char D_0024E088[32] = "Nate Fox\nChris Zimmerman";
-extern const char D_0024E0A8[32] = "Nate Fox\nMatthew Morgaine";
-extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel";
-extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
-extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
-extern const char D_0024E140[40] = "Press &2L&. for Bonus Commentary";
-extern const char D_0024E168[24] = "Best time: &10.%d";
-extern const char D_0024E180[24] = "Best time: &1%d:%02d";
-extern const char D_0024E198[40] = "Beginning Master Thief Sprint!";
 extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
@@ -4089,17 +4025,11 @@ void func_00199850();
 struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
 struct Sjis_274588 { u16 code; u16 id; };
 
-f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
-f32 D_00264248 = 2.5f;
-f32 D_0026424C = 300.0f;
-f32 D_00264250[4] = { 20.0f, 0.0f, 0.5f, 0.0f };
 f32 D_002649D0[2] = { 0.0f, 0.25f };
 f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
 f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
 f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
 f32 D_00264A38 = 20.0f;
-f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
-f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
 f32 D_0026A910 = 100.0f;
 f32 D_0026A968 = 300.0f;
 Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
@@ -4137,12 +4067,6 @@ f32 D_0026B740[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 f32 D_0026B750[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
 f32 D_0026B760[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
 f32 D_0026B770[2] = { 0.5f, 1.0f };
-f32 D_002743B0 = 18.0f;
-f32 D_002743B4 = 8.0f;
-f32 D_002743B8 = 26.0f;
-f32 D_002743BC = 340.0f;
-f32 D_002744A4 = 0.1f;
-f32 D_002744A8 = 1.3f;
 f32 D_002744F0 = 50.0f;
 s32 D_00274548[4] = { 0, 1, 2, 0 };
 s32 D_00274558[4] = { 2, 0, 1, 0 };
@@ -4659,12 +4583,6 @@ s32 D_00274734 = 0;
 s32 D_00274738 = 0;
 // word flag
 s32 D_00274744 = 0;
-// lw/sw word
-s32 D_00275130 = 0;
-// lw/sw word
-s32 D_00275134 = 0;
-// 8-byte label, only lw/sw at +0; next label 8-aligned
-s32 D_00275138 = 0;
 // f32 reader
 f32 D_00275650 = 0;
 // f32 reader
@@ -4677,10 +4595,7 @@ s32 D_00275714 = 0;
 s32 D_00275718 = 0;
 
 // Globals typed by worker dz07, from retail's bytes and their readers.
-struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
 
-// size: func_001E0848 clears 0x1C bytes and sets fields through 0x18 (label 0x20, 4 bytes padding before 8-aligned next label)
-Config_1E0848 D_002758E0 = {0};
 // size: s32 read as one word (func_00150000.cpp and 001AC000.cpp test bit 8)
 // size: s32 compared with 1/2 in 00148000 and 00194000
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
@@ -4701,18 +4616,6 @@ s32 D_00279430 = 0;
 s32 D_00279454 = 0;
 
 // Globals typed by worker dz05, from retail's bytes and their readers.
-// A 28-byte record func_001AEA70 clears (func_001F5C0C with 0x1C) and then fills.
-struct Obj_2743D0 {
-    void* f00;
-    u8 f04;
-    u8 pad05[3];
-    f32 f08;
-    f32 f0C;
-    f32 f10;
-    f32 f14;
-    u32 f18;
-};
-
 // size: lw at offset 0 only, a 4-byte scalar of its own label
 s32 D_00270454 = 0;
 // size: lw at offset 0 (a pointer, read with lqc2 0x140 off it), 4-byte label
@@ -4723,16 +4626,6 @@ s32 D_00270518 = 0;
 s32 D_002726AC = 0;
 // size: lw at offset 0 compared with a count, 4-byte label
 s32 D_0027292C = 0;
-// size: memset 0x1C bytes (label 32, 8-aligned next label)
-Obj_2743D0 D_002743D0 = {0};
-// size: memset 0x1C bytes (label 32, 8-aligned next label)
-Obj_2743D0 D_002743F0 = {0};
-// size: memset 0x1C bytes (label 32, 8-aligned next label)
-Obj_2743D0 D_00274410 = {0};
-// size: memset 0x1C bytes
-Obj_2743D0 D_00274450 = {0};
-// size: memset 0x1C bytes
-Obj_2743D0 D_00274488 = {0};
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
 struct Rec_262490 {
@@ -4904,7 +4797,6 @@ s32 D_002649A8 = 0;
 BackgroundJob D_00269990 = {0};
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
-s32 D_00269C90 = 0;
 Obj_262C70 D_00262C70 = {};
 extern const LevelEntry D_00248748[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
@@ -4970,7 +4862,6 @@ u8 D_002625F0[208] = {0};
 // 8 bytes, one word read whole
 Obj_2639B8 D_002639B8 = {0};
 // 24 bytes, byte array in readers
-u8 D_00269BA8[24] = {0};
 // 24 bytes, byte array in readers
 
 // Globals typed by worker dz202, from retail's bytes and their readers.
@@ -5079,8 +4970,6 @@ u8 D_00273C50[608] = {0};
 u8 D_00273EB0[616] = {0};
 // readers pass only its address; byte buffer, size to next label
 u8 D_00274118[648] = {0};
-// readers pass only its address; byte buffer, size to next label
-u8 D_002758D0[16] = {0};
 // word read whole / address only, 4 bytes to next label
 // readers pass only its address; byte buffer, size to next label
 // word read whole / address only, 4 bytes to next label

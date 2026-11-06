@@ -11,7 +11,6 @@ struct Self_001AB600_eu {
     s32 f290;
 };
 
-extern const f32 D_0024CD48;
 void func_001AA268(Self_001AB600_eu* self);
 void func_001ABE20(Self_001AB600_eu* self, s32 state);
 
@@ -20,7 +19,7 @@ void func_001AB600(Self_001AB600_eu* self)
     SetupScreenElementText(self);
     self->p4 = (void*)GetFontById(2);
     self->f274 = self->f270 = -1;
-    self->f278 = D_0024CD48;
+    self->f278 = 3.4028235e+38f;
     self->f290 = 1;
     SetTimerState(self, 0);
 }

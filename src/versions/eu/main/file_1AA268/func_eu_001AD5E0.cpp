@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Calls PAL-only func_eu_001AAFB0, replaces f4 with the result of the callback at +0xC of the object at f4 + 0x4C (given f4 + f8 and 0.9, 0.9), sets f518, and when func_0015C188(2) is set stores func_0015C1C0(2) through the pointer at f520 (= D_002743F0).
-extern u8 D_002743F0[];
 void func_eu_001AAFB0(void* self);
 s32 func_0015C188(s32 k);
 
@@ -17,7 +16,7 @@ void func_eu_001AD5E0(Obj_eu_001AD5E0* self)
     self->f4 = b->fC((u8*)a + b->f8, 0.9f, 0.9f);
     self->f518 = 0xDF7F7F7F;
     if (IsFontLoaded(2) != 0) {
-        self->f520 = (void**)D_002743F0;
+        self->f520 = (void**)&D_002743F0;
         *self->f520 = GetFontById(2);
     }
 }
