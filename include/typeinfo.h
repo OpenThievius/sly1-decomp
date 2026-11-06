@@ -18,6 +18,7 @@ protected:
 public:
     virtual ~type_info();
     const char* name() const { return name_; }
+    bool before(const type_info& other) const;
     bool operator==(const type_info& other) const;
     bool operator!=(const type_info& other) const { return !operator==(other); }
 };

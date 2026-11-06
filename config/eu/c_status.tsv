@@ -3592,43 +3592,43 @@ func_00200710	func_00201AD0	match	rodata
 func_00200750	func_00201B10	match	
 func_00200778	func_00201B38	match	
 func_00200C40	func_00202000	match	
-func_00200C90	func_00202050	match	
-func_00200CB0	func_00202070	match	
-func_00200CD8	func_00202098	match	
-func_00200CF8	func_002020B8	match	
-func_00200D18	func_002020D8	match	
-func_00200D38	func_002020F8	match	
+func_00200C90	func_00202050	match	rodata
+func_00200CB0	func_00202070	match	rodata
+func_00200CD8	func_00202098	match	rodata
+func_00200CF8	func_002020B8	match	rodata
+func_00200D18	func_002020D8	match	rodata
+func_00200D38	func_002020F8	match	rodata
 func_00200D58	func_00202118	match	
-func_00200E08	func_002021C8	match	
-func_00200E40	func_00202200	match	
-func_00200E78	func_00202238	match	
-func_00200EB0	func_00202270	match	
-func_00200EE8	func_002022A8	match	
-func_00200F20	func_002022E0	match	
-func_00200F58	func_00202318	match	
-func_00200F90	func_00202350	match	
-func_00200FC8	func_00202388	match	
-func_00201000	func_002023C0	match	
-func_00201038	func_002023F8	match	
-func_00201070	func_00202430	match	
-func_002010A8	func_00202468	match	
-func_002010E0	func_002024A0	match	
-func_00201118	func_002024D8	match	
-func_00201150	func_00202510	match	
-func_00201188	func_00202548	match	
-func_002011C0	func_00202580	match	
+func_00200E08	func_002021C8	match	rodata
+func_00200E40	func_00202200	match	rodata
+func_00200E78	func_00202238	match	rodata
+func_00200EB0	func_00202270	match	rodata
+func_00200EE8	func_002022A8	match	rodata
+func_00200F20	func_002022E0	match	rodata
+func_00200F58	func_00202318	match	rodata
+func_00200F90	func_00202350	match	rodata
+func_00200FC8	func_00202388	match	rodata
+func_00201000	func_002023C0	match	rodata
+func_00201038	func_002023F8	match	rodata
+func_00201070	func_00202430	match	rodata
+func_002010A8	func_00202468	match	rodata
+func_002010E0	func_002024A0	match	rodata
+func_00201118	func_002024D8	match	rodata
+func_00201150	func_00202510	match	rodata
+func_00201188	func_00202548	match	rodata
+func_002011C0	func_00202580	match	rodata
 func_00201210	func_002025D0	match	
-func_00201230	func_002025F0	match	
+func_00201230	func_002025F0	match	rodata
 func_00201280	func_00202640	match	
-func_002012A0	func_00202660	match	
+func_002012A0	func_00202660	match	rodata
 func_002012F0	func_002026B0	match	
-func_00201310	func_002026D0	match	
+func_00201310	func_002026D0	match	rodata
 func_00201360	func_00202720	match	
-func_00201380	func_00202740	match	
+func_00201380	func_00202740	match	rodata
 func_002013D0	func_00202790	match	
-func_002013F0	func_002027B0	match	
+func_002013F0	func_002027B0	match	rodata
 func_00201440	func_00202800	match	
-func_00201460	func_00202820	match	
+func_00201460	func_00202820	match	rodata
 func_002014B0	func_00202870	match	
 func_002014D0	func_00202890	match	
 func_002014F0	func_002028B0	match	
