@@ -54,8 +54,9 @@ extern V24A0 D_00262280;
 extern V24A2_ImgA* D_00274504;
 extern V24A2_ImgB* D_0027450C;
 
-// List heads (List01, c01.h), defined in 001E4000.cpp: each label is 0xC bytes (D_00262300's
-// and D_00264088's run to the next label with a word or a pad after them).
+// List heads (List01, c01.h), defined in 001E4000.cpp (D_002626E8, D_002626F8 and D_00262708
+// in file_167D68.cpp): each label is 0xC bytes (D_00262300's and D_00264088's run to the next
+// label with a word or a pad after them).
 extern List01 D_002622E0;
 extern List01 D_002622F0;
 extern List01 D_00262300;

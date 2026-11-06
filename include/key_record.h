@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // The 0x20-byte slots func_001BE728 (001BC000.cpp) takes as the first parameter: the six at
-// D_00262890, the one at D_00262950 (00168000.cpp, func_0016B300) and the one at D_0026A118.
+// D_00262890, the one at D_00262950 (file_16AA18.cpp, func_0016B300) and the one at D_0026A118.
 // Written for this project from what retail's code does (build/swarm/st3/groups.tsv, g1915). The
 // labels give the size: D_00262890 runs 0xC0 bytes, D_00262950 and D_0026A118 0x20.
 #ifndef KEY_RECORD_H

@@ -4646,15 +4646,6 @@ s32 D_002726AC = 0;
 s32 D_0027292C = 0;
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
-struct Rec_262490 {
-    u32 f0;
-    u32 f4;
-    u8 pad08[8];
-    u64 f10;
-    u64 f18;
-    u8 pad20[8];
-};
-
 // size: f32 read by lwc1 (game clock), 4-byte label
 f32 D_00261868 = 0;
 // size: f32 read by lwc1, 4-byte label
@@ -4702,16 +4693,6 @@ s32 D_00262318 = 0;
 RenderFrame D_00262320[2] = {};
 // size: pointer (lw/sw), 4-byte label
 void* D_002623B4 = 0;
-// size: two 0x28-byte records (loop end = base + 0x50, stride 0x28 in func_001688B8)
-Rec_262490 D_00262490[2] = {};
-// size: s32 (lw/sw), 4-byte label
-s32 D_002626C0 = 0;
-// size: s32 (lw/sw), 4-byte label
-s32 D_002626C8 = 0;
-// size: s32 (lw/sw), 4-byte label
-s32 D_002626CC = 0;
-// size: s32 count (lw/sw), 4 bytes before an 8-aligned next label
-s32 D_002626D0 = 0;
 
 // Globals typed by worker dz04, from retail's bytes and their readers.
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
@@ -4779,14 +4760,6 @@ struct Obj_262C70 {
 };
 struct Obj_2629A8 { u8 pad0[4]; u8 b4; u8 pad5[3]; f32 f8; f32 fC; f32 f10; f32 f14; s32 w18; };
 
-// size: func_00168D68 sets three words (a, b, c) of it
-BumpAllocator D_002626D8 = {0};
-// size: list head of three words, func_00152438 sets the link offset at +8 (0x38)
-List01 D_002626E8 = {0};
-// size: list head of three words, link offset at +8 (0x50)
-List01 D_002626F8 = {0};
-// size: list head of three words, link offset at +8 (0x558); func_00150298 walks it
-List01 D_00262708 = {0};
 // size: s32 pointer, loaded and stored as a word (func_0016DD00 clears it)
 s32 D_002629C8 = 0;
 // size: s32 flags, word accesses only
@@ -4871,13 +4844,9 @@ u8 D_00261420[528] = {0};
 u8 D_00261630[544] = {0};
 // 16 bytes, a pointer word read whole, rest padding
 // 16 bytes, address passed (byte array in readers)
-u8 D_002624F0[16] = {0};
 // 208 bytes, address only
-u8 D_00262500[208] = {0};
 // 16 bytes, byte array in readers
-u8 D_002625E0[16] = {0};
 // 208 bytes, address only
-u8 D_002625F0[208] = {0};
 // 8 bytes, one word read whole
 Obj_2639B8 D_002639B8 = {0};
 // 24 bytes, byte array in readers
@@ -4949,6 +4918,9 @@ Obj_26FA68 D_0026FA68 = {};
 
 // object with vtable; size to next label
 u8 D_0026FA90[608] = {0};
+
+// size: s32, the current placed object (g_currentPlacedObject), 4 bytes before the 16-aligned next label
+s32 D_0026FCF0 = 0;
 
 // object; size to next label
 u8 D_0026FD00[616] = {0};
