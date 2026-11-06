@@ -404,7 +404,8 @@ f32 func_00208D50(f32 x, f32 y, s32 k)
     return a + t * (s + a * v);
 }
 
-extern const double D_0024FF80[];
+struct Tab_24FF80 { double d[2]; f32 f[4]; };
+extern const Tab_24FF80 D_0024FF80 = { { 4503599627370496.0, -4503599627370496.0 }, { 33554432.0f, 2.9802322e-08f, 1.0e+30f, 1.0e-30f } };
 double func_001FCD20(double a, double b);
 double func_001FCD78(double a, double b);
 
@@ -424,7 +425,7 @@ double func_00209010(double x)
             hi &= 0xFFFE0000;
             hi |= ((u32)(lo | -lo) >> 12) & 0x80000;
             SET_DOUBLE_HIGH(x, hi);
-            double w = D_0024FF80[sign];
+            double w = D_0024FF80.d[sign];
             double y = func_001FCD78(func_001FCD20(w, x), w);
             DOUBLE_HIGH(hi, y);
             SET_DOUBLE_HIGH(y, (hi & 0x7FFFFFFF) | (sign << 31));
@@ -447,6 +448,6 @@ double func_00209010(double x)
         if ((lo & m) != 0) lo = (lo & ~m) | (0x40000000 >> (e - 20));
     }
     WORDS_TO_DOUBLE(x, hi, lo);
-    t = D_0024FF80[sign];
+    t = D_0024FF80.d[sign];
     return func_001FCD78(func_001FCD20(t, x), t);
 }

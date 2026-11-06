@@ -1366,7 +1366,7 @@ found:
 extern const f32 D_0024CD6C = 3.4028235e+38f;
 extern const char D_0024CD50[];
 extern const char D_0024CD60[];
-extern char D_0024CD68[];
+extern const char D_0024CD68[4] = "";
 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, void* a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...);
