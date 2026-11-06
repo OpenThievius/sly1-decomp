@@ -3702,26 +3702,6 @@ extern const Ent_1BFAF8 D_00245020[771] = {
 };
 
 // Globals typed by worker dv04, from retail's bytes and their readers.
-float D_00274C50[4] = {1.0f, -1.0f, 0.0f, 0.0f};
-float D_00274C60[4] = {0.0f, 0.0f, 1.0f, 0.0f};
-float D_00274C70[4] = {0.0f, 15.0f, 1.5f, 0.0f};
-float D_00274C80[4] = {0.0f, 2.5f, 0.25f, 0.0f};
-float D_00274C90 = 40.0f;
-float D_00274C94 = 50.0f;
-float D_00274C98[2] = {0.5f, 0.0f};
-float D_00274CA0[4] = {1.0f, -0.00100000005f, 0.0f, 0.0f};
-float D_00274CB0[4] = {0.25f, 1.0f, 0.0f, 0.0f};
-float D_00274CC0[4] = {0.0f, 0.00499999989f, 0.0f, 0.0f};
-float D_00274CD0[2] = {0.0f, 1.0f};
-float D_00274CD8[2] = {1.0f, 0.0f};
-float D_00274CE0[4] = {0.0f, 0.00499999989f, 0.0f, 0.0f};
-float D_00274CF0 = 0.349999994f;
-float D_00274CFC = 0.25f;
-float D_00274D00 = 700.0f;
-float D_00274D04 = 1200.0f;
-float D_00274D20[2] = {700.0f, 0.0f};
-float D_00274D28[2] = {-0.200000003f, 0.200000003f};
-float D_00274D30[4] = {0.800000012f, 1.20000005f, 0.0f, 0.0f};
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
 s32 D_00274FB0[2] = {2, 2};
@@ -4019,7 +3999,6 @@ void func_002005E8();
 void func_00200638();
 void func_00200680();
 
-extern const f32 D_0024DA90 = 3.40282347e+38f;
 extern const f32 D_0024DC88[2] = {3.40282347e+38f, 0.0f};
 extern const f32 D_0024DC94 = 3.40282347e+38f;
 extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
