@@ -8,20 +8,6 @@
 
 #include "common.h"
 
-void func_001FD988() {}
-
-s16 func_001FDDC8(void* object)
-{
-	return *(s16*)((u8*)object + 6);
-}
-
-s16 func_001FDDD0(void* object)
-{
-	return *(s16*)((u8*)object + 4);
-}
-
-void func_001FE190() {}
-
 u8* func_001FF048(u8* input, u32* output)
 {
 	u8 byte = *input;
@@ -299,41 +285,9 @@ s32 func_001FD838(s32 a0, s32 a1, s32 a2, s32 a3)
     return func_001FD5D0(&args);
 }
 
-// NEAR: retail saves $ra with sd (Sony 2.9-ee-991111 library code, 0x1F59C4 on); the default compiler saves it with sq. Nothing else differs.
-
 extern void (*D_00278048)();
 
-void func_001FD930() { D_00278048(); }
-
-struct Obj_1FD958;
-s32 func_001F6738(Obj_1FD958* self, s32 v);
-
-s32 func_001FD958(Obj_1FD958* self, s32 v, s32 fallback)
-{
-    s32 result = fallback;
-    if (func_001F6738(self, v) != 0) {
-        result = 0;
-    }
-    return result;
-}
-
-// NEAR: ra is saved with sq/lq, retail sd/ld (Sony 2.9-ee-991111 lib build); body otherwise EXACT
-
-extern void* D_0027804C;
-
-u8* func_001FDA10(void)
-{
-    return ((u8* (*)(void))D_0027804C)() + 8;
-}
-
-// NEAR: ra is saved with sq/lq, retail sd/ld (Sony 2.9-ee-991111 lib build); body otherwise EXACT
-
-extern void* D_0027804C;
-
-u8* func_001FDAC8(void)
-{
-    return ((u8* (*)(void))D_0027804C)() + 4;
-}
+u8* func_001FDA10(void);
 
 // NEAR: retail saves $ra with sd, default compiler with sq; body identical
 struct Ctx_001FE978;
@@ -551,63 +505,6 @@ u32 func_001FD7A0(f32 value)
     return p.mant >> (0x1E - p.exp);
 }
 
-typedef s32 (*FnPtr_001FD9E8)(void);
-
-s32 func_001FD9E8(void)
-{
-    return (*(FnPtr_001FD9E8*)&D_0027804C)();
-}
-
-typedef void (*Fn_1FDA38)(void);
-struct Once_1FDA60;
-Once_1FDA60* func_001FDA60(void);
-
-void func_001FDA38(void)
-{
-    Fn_1FDA38 f = (Fn_1FDA38)func_001FDA60;
-    (*(Fn_1FDA38*)&D_0027804C) = f;
-    f();
-}
-
-struct Once_1FDA60 { s32 a; void* b; };
-
-extern s32 D_0062A7A8;
-extern Once_1FDA60 D_0062A798;
-extern u8 D_0062A7B0[];
-
-s32 func_001F5C0C(Once_1FDA60* p, s32 v, s32 n);
-
-Once_1FDA60* func_001FDA60(void)
-{
-    if (D_0062A7A8 == 0) {
-        D_0062A7A8 = 1;
-        (void)func_001F5C0C(&D_0062A798, 0, 0x10);
-        D_0062A798.b = D_0062A7B0;
-    }
-    return &D_0062A798;
-}
-
-struct Ctx_001FE100 { s32 f0; u8 pad4[4]; s32 f8; u8 padC[0x298 - 0xC]; u16 f298; u8 pad29A[2]; s8 f29C; };
-
-Ctx_001FE100* func_001FFC80(Ctx_001FE100* ctx, s32 a2);
-void* func_001FDFF8(u16 idx, s32* base, s32 flag);
-
-Ctx_001FE100* func_001FE100(Ctx_001FE100* a0, s32* a1, s32 a2)
-{
-    Ctx_001FE100* s0 = func_001FFC80(a0, a2);
-    if (s0 == 0) {
-        return 0;
-    }
-    u16 idx = s0->f298;
-    if (*(s8*)((u8*)a1 + idx + 0x29C) != 0) {
-        s64 v = *(s64*)func_001FDFF8(idx, a1, 0);
-        s0->f0 = (s32)v;
-    } else {
-        s0->f0 = *a1;
-    }
-    s0->f0 += s0->f8;
-    return s0;
-}
 
 s32 func_0018D750(void);
 
@@ -643,69 +540,6 @@ s32 func_001FEFC0(void* self, s32 flags)
         return func_0018D778(self);
     }
     return (s32)v;
-}
-
-struct Node_001FD990 { s32 f0; u8* f4; s32 f8; s32 fc; s32 f10; s32 f14; };
-
-Node_001FD990* func_0018D740(s32 size);
-void func_001FD930(void);
-void* func_001F5C0C(Node_001FD990* p, s32 value, u32 size);
-
-Node_001FD990* func_001FD990(void)
-{
-    Node_001FD990* p = (Node_001FD990*)func_0018D740(0x18);
-    if (p == 0) {
-        func_001FD930();
-    }
-    (void)func_001F5C0C(p, 0, 0x18);
-    p->f4 = (u8*)p + 0x10;
-    return p;
-}
-
-struct Range_1FDDD8 { u32 lo; u32 hi; s32 value; };
-
-s32 func_001FDDD8(u32 key, Range_1FDDD8* t)
-{
-    s32 best, i;
-    if (t == 0) goto none;
-    best = -1;
-    i = 0;
-    if (t[0].lo == 0xFFFFFFFF) goto check;
-    do {
-        if (key >= t[i].lo && key < t[i].hi) {
-            if (best == -1 || (t[best].hi >= t[i].hi && t[best].lo <= t[i].lo)) best = i;
-        } else if (best >= 0 && key < t[i].lo) {
-            break;
-        }
-        i++;
-    } while (t[i].lo != 0xFFFFFFFF);
-check:
-    if (best == -1) goto none;
-    return t[best].value;
-none:
-    return 0;
-}
-
-struct Arg_1FE080 { u8 pad[4]; };
-struct Dst_1FE080 { u8 pad[4]; };
-
-extern u32 func_001FDFF8(Arg_1FE080* a, u32 b, s32 c);
-extern s32 func_001F5A58(Dst_1FE080* dst, Arg_1FE080* src, s32 n);
-
-s32 func_001FE080(s32 a0, u32 a1, u32 a2)
-{
-    u32 r1 = func_001FDFF8((Arg_1FE080*)a0, a1, 0);
-    u32 r2 = func_001FDFF8((Arg_1FE080*)a0, a2, 0);
-    s32 n;
-    if (a0 >= 0x1F) {
-        n = 8;
-        if (!(0x3F < a0)) {
-            n = 4;
-        }
-    } else {
-        n = 16;
-    }
-    return func_001F5A58((Dst_1FE080*)r2, (Arg_1FE080*)r1, n);
 }
 
 // NEAR: retail saves with sd/ld (ours sq/lq); jalr's delay slot is a nop in retail, ours moves a0 there
@@ -930,6 +764,7 @@ struct Cur_1FF518 { s32 pad[1]; };
 s32 func_001FF448(Cur_1FF518* cur);
 void func_001FF490(Cur_1FF518* cur, Acc_1FF518* list, u32* lo, s32* hi);
 s32 func_001FF1E0(Acc_1FF518* acc, s32 n);
+void* func_0018D740(s32 size);
 
 void func_001FF518(Obj_1FF518* self)
 {
@@ -1169,11 +1004,6 @@ u8 *func_001FF848(u8 *p, struct RuleSet_1FF848 *rs, struct Cie_1FF848 *cie, u32 
 
 void func_002014D0(void) __attribute__((noreturn));
 
-void func_001FD920(void)
-{
-    func_002014D0();
-}
-
 struct Info_001FEC10 {
     u8 pad[8];
     void* value;
@@ -1357,20 +1187,6 @@ void* func_001FD8A8(Arg_001FD8A8* a) throw(Fault_1FD8A8)
     return func_0018D758(a);
 }
 
-struct Obj_1FDFF8 { u8* f0; u8 pad[0x14]; s64 tbl[80]; s32 pad2; s8 st[64]; };
-
-void func_002014D0(void);
-
-u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
-{
-    while (self->st[idx] == 2) {
-        idx = self->tbl[idx];
-    }
-    if (self->st[idx] == 1) {
-        return self->f0 + self->tbl[idx];
-    }
-    func_002014D0();
-}
 
 struct Handle_1FEB18 {
     u8 pad_00[0x8];
@@ -1585,55 +1401,6 @@ double func_001FC910(Packed_1FC910* p)
     return bits.d;
 }
 
-struct Span_001FDEB0 { u32 lo; u32 hi; s32 value; void* cb; };
-struct Ctx_001FDEB0 { void* fn; };
-struct Cur_001FDEB0 { s32 pad0; s32 count; };
-
-s32 func_001FDEB0(s32 a0, void* a1, Ctx_001FDEB0* a2, s32 a3, s32* a4)
-{
-    s32 result = 0;
-    s32 key = a0;
-    Span_001FDEB0* base;
-    s32 idx;
-    s32 r;
-
-    *a4 = 1;
-    if (a1 != 0) {
-        idx = 0;
-        base = (Span_001FDEB0*)((u8*)a1 + 8);
-        if (a3 != 0) {
-            idx = ((u8*)a0 - (u8*)base) >> 4;
-            key = ((Cur_001FDEB0*)a0)->count - 1;
-            if (base[idx].lo != 0xFFFFFFFF) {
-                idx++;
-            }
-        } else {
-            key = key - 1;
-        }
-        while (base[idx].lo != 0xFFFFFFFF) {
-            if ((u32)key >= base[idx].lo && (u32)key < base[idx].hi) {
-                if (base[idx].cb != 0) {
-                    if (a2->fn != 0) {
-                        r = ((s32 (*)(Ctx_001FDEB0*, void*, void*))a2->fn)(a2, base[idx].cb, a1);
-                        if (r != 0) {
-                            if (result == 0) {
-                                result = base[idx].value;
-                            }
-                            *a4 = 0;
-                            return result;
-                        }
-                    }
-                } else {
-                    if (result == 0) {
-                        result = base[idx].value;
-                    }
-                }
-            }
-            idx++;
-        }
-    }
-    return result;
-}
 
 struct Sf_1FD088 { u32 cls; s32 sign; s32 exp; u8 pad[4]; u64 mant; u8 tail[8]; };
 struct Pk_1FD088 { u64 bits; };
@@ -1952,242 +1719,9 @@ u64 func_001FCDE0(u64 x, u64 y)
     return func_001FC910(Mul_1FCDE0::Parts(&a, &b, &tmp));
 }
 
-// The runtime's exception context: the handler chain at +4, the active exception at +8.
-struct Ctx_1FDAF0 {
-    s32 f0;
-    void** chain;
-    void* active;
-};
 
-typedef Ctx_1FDAF0* (*GetCtx_1FDAF0)(void);
-extern void* D_0027804C;
-
-void func_001FD930();
-void func_001FDAF0(void) __attribute__((noreturn));
-
-// Throws: runs the cleanups registered in the top handler, then jumps to that handler.
-void func_001FDAF0(void)
-{
-    Ctx_1FDAF0* ctx = ((GetCtx_1FDAF0)D_0027804C)();
-    void*** chain = &ctx->chain;
-    void*** cleanups = (void***)&(*chain)[1];
-
-    if (cleanups[0] != 0) {
-        double space[200];
-        void** frame = (void**)space;
-        frame[1] = 0;
-        frame[0] = *chain;
-        if (!__builtin_setjmp(&frame[2])) {
-            *chain = frame;
-            while (cleanups[0] != 0) {
-                void (*fn)(void*, s32) = (void (*)(void*, s32))cleanups[0][1];
-                void* arg = cleanups[0][2];
-                cleanups[0] = (void**)cleanups[0][0];
-                fn(arg, 2);
-            }
-            *chain = (void**)frame[0];
-        } else {
-            func_001FD930();
-        }
-    }
-
-    if (ctx->active == 0 || (*chain)[0] == 0) {
-        func_001FD930();
-    }
-
-    void* buf = &(*chain)[2];
-    *chain = (void**)(*chain)[0];
-    __builtin_longjmp(buf, 1);
-}
-
-// Pops the top handler after running its cleanups, then throws again.
-void func_001FDC68(void)
-{
-    Ctx_1FDAF0* ctx = ((GetCtx_1FDAF0)D_0027804C)();
-    void*** chain = &ctx->chain;
-    void*** cleanups = (void***)&(*chain)[1];
-
-    if (cleanups[0] != 0) {
-        double space[200];
-        void** frame = (void**)space;
-        frame[1] = 0;
-        frame[0] = *chain;
-        if (!__builtin_setjmp(&frame[2])) {
-            *chain = frame;
-            while (cleanups[0] != 0) {
-                void (*fn)(void*, s32) = (void (*)(void*, s32))cleanups[0][1];
-                void* arg = cleanups[0][2];
-                cleanups[0] = (void**)cleanups[0][0];
-                fn(arg, 2);
-            }
-            *chain = (void**)frame[0];
-        } else {
-            func_001FD930();
-        }
-    }
-
-    *chain = (void**)(*chain)[0];
-    func_001FDAF0();
-}
-
-// The active exception, asked whether it matches a runtime type through its matcher.
-struct Info_1FDD80 {
-    void* (*match)(Info_1FDD80* info, void* type, void* extra);
-};
-
-s32 func_001FDD80(void* type)
-{
-    Info_1FDD80* info = *(struct Info_1FDD80 **)func_001FDA10();
-    void* (*match)(Info_1FDD80*, void*, void*) = info->match;
-    if (match == 0) {
-        return 0;
-    }
-    return match(info, type, 0) != 0;
-}
-
-struct Tag_1FE198 {
-    u32 word;
-};
-
-struct __attribute__((aligned(8))) Frame_1FE198 {
-    s32 f0;
-    Tag_1FE198* f4;
-    s32 f8;
-    s32 fC;
-    s32 f10[0xA2];
-    u16 f298;
-    u16 f29A;
-    s8 f29C[0x54];
-};
-
-struct Obj_1FE198 {
-    s32 f0;
-    s32 f4;
-    s32 f8;
-    s32 fC;
-};
-
-struct Pc_1FE198;
-Frame_1FE198* func_001FE100(Pc_1FE198* pc, Frame_1FE198* f, Frame_1FE198* prev);
-s32 func_001FDEB0(s32 a, Tag_1FE198* t, s32 c, s32 d, s32* e);
-s32 func_001FDDD8(Pc_1FE198* pc, Tag_1FE198* t);
-s64* func_001FDFF8(u16 idx, Frame_1FE198* f, Frame_1FE198* g);
-s32 func_001FE080(s32 idx, Frame_1FE198* f, Frame_1FE198* g);
-void func_001FE190(void);
-void func_001FD930(void);
-
-struct ReturnAddr_1FE198 {
-    static Pc_1FE198* Of(Frame_1FE198* f, Frame_1FE198* g)
-    {
-        s64 w = *func_001FDFF8(f->f29A, f, g);
-        return (Pc_1FE198*)(s32)w;
-    }
-};
-
-struct RegWindow_1FE198 {
-    static s32 In(s32 i, Frame_1FE198* f) { return 0; }
-};
-
-s32 func_001FE198(Obj_1FE198* obj, Pc_1FE198* pc, Frame_1FE198* fb, Frame_1FE198** pout)
-{
-    Frame_1FE198 sub;
-    Frame_1FE198 saved;
-    Frame_1FE198* udata = *pout;
-    Frame_1FE198* subp = &sub;
-    Pc_1FE198* startPc = pc;
-    s32 res = 0;
-    s32 pending = obj->fC != 0;
-    s32 a8 = obj->f8;
-    s32 cleanup;
-    s32 savedRes;
-    Pc_1FE198* savedPc;
-    s32 onlyCleanup;
-    s32 savedState;
-    s32 i;
-
-    onlyCleanup = 0;
-    savedState = 0;
-    cleanup = 0;
-    for (;;) {
-        Frame_1FE198* p = udata;
-        s32 isNew;
-        udata = func_001FE100(pc, udata, subp);
-        subp = p;
-        if (udata == 0) {
-            break;
-        }
-        if (udata->f4 == 0) {
-            isNew = 0;
-        } else {
-            isNew = udata->f4->word == 0xFFFFFFFEu;
-        }
-        if (pending) {
-            pending = 0;
-            res = func_001FDEB0(obj->fC, udata->f4, a8, 1, &cleanup);
-            obj->fC = 0;
-        } else if (isNew) {
-            res = func_001FDEB0((s32)pc, udata->f4, a8, 0, &cleanup);
-        } else {
-            res = func_001FDDD8(pc, udata->f4);
-        }
-        if (res != 0) {
-            if (cleanup != 0) {
-                if (savedState == 0) {
-                    saved = *udata;
-                    savedPc = pc;
-                    savedRes = res;
-                    savedState = 1;
-                    onlyCleanup = 1;
-                }
-            } else {
-                onlyCleanup = 0;
-                break;
-            }
-        }
-        pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198::Of(udata, subp) - 1);
-    }
-    if (savedState != 0) {
-        udata = &saved;
-        res = savedRes;
-        pc = savedPc;
-        if (onlyCleanup != 0) {
-            func_001FE190();
-        }
-    }
-    if (res == 0) {
-        func_001FD930();
-    }
-    obj->f0 = res;
-    if (pc == startPc) {
-        udata = fb;
-    } else {
-        Pc_1FE198* handlerPc = pc;
-        pc = startPc;
-        *udata = *fb;
-        while (pc != handlerPc) {
-            Frame_1FE198* p = udata;
-            udata = func_001FE100(pc, udata, subp);
-            subp = p;
-            for (i = 0; i < 0x4F; i++) {
-                if (i != udata->f29A && udata->f29C[i] != 0) {
-                    func_001FE080(i, udata, fb);
-                }
-            }
-            pc = (Pc_1FE198*)((s8*)ReturnAddr_1FE198::Of(udata, subp) - 1);
-        }
-        if (udata->f29C[udata->f29A] == 2) {
-            i = udata->f10[udata->f29A];
-            if (RegWindow_1FE198::In(i, udata)) {
-                func_001FE080(i, udata, fb);
-            }
-        }
-    }
-    *pout = udata;
-    return res;
-}
 
 // Globals defined from C.
-void (*D_00278048)() = func_001FD920;
 s32 D_00278640 = (s32)func_001FE908;
 extern const char D_0024F0F0[16] = "13bad_exception";
 extern const char D_0024F100[16] = "9exception";
