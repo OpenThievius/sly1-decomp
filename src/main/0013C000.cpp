@@ -11,13 +11,6 @@
 
 void func_001BE4D8(void* p);
 
-s32 func_0013C950(ChildGroupObject* self)
-{
-    if (self->slot == 0) {
-        InitSoundParams(&self->slot);
-    }
-    return (s32)self->slot;
-}
 
 
 typedef void (*Hook_CE40)(void* self);

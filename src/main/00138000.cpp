@@ -198,19 +198,10 @@ void func_00139E80(WorldListedObject* self)
 
 extern f32 D_0026185C;
 
-void func_0013BE00(ChildGroupObject* self, f32 delta)
-{
-    self->f554 = g_gameTime + delta;
-}
 
 void func_001BAC30(void* self);
 void func_00159478(void* sub, void* self);
 
-void func_0013B598(ChildGroupObject* self)
-{
-    LoadCollider(self);
-    FindOrBuildMemberGroup(&self->member5BC, self);
-}
 
 s32 func_00137BE0(void* src);
 void func_00137A60(void* self, s32 size, void* obj);
@@ -297,11 +288,6 @@ ContactRow03* func_00138788(void* unused, ContactRow03** head, Contacts03* key)
 }
 
 void func_001BA130(void* self, void* other);
-void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other)
-{
-    CopyCollider(self, other);
-    if (other->slot) self->slot = (void*)CopyToFrontMemory(0x24, other->slot);
-}
 
 struct Item_138398 {
     u8 pad0[0x10];
@@ -427,17 +413,6 @@ void func_00139F80(Obj_139F80* self, void* x)
 void func_00127378(ChildGroupObject* self, s32 kind, ObjectMessage* msg);
 void func_0013BE00(ChildGroupObject* p, f32 delta);
 
-void func_0013B708(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
-{
-    HandlePlacedObjectNotification(self, kind, msg);
-    if (kind == 0xA) {
-        if ((ChildGroupObject*)msg->target == self) {
-            if (((ChildGroupObject*)msg->target)->f550 == 0) {
-                StartChildGroupDelay((ChildGroupObject*)msg->target, 0.0f);
-            }
-        }
-    }
-}
 
 void func_00152470(void* list, void* item);
 void func_00152438(void* self, s32 value);
@@ -521,52 +496,6 @@ void func_0013AD08(WorldListedObject* owner, s32 unused, Src_13AD08* src)
     QueueDeferredRequest(&blk);
 }
 
-struct List_13B610 { s32 head; s32 pad; s32 off; };
-struct Frame_13B610;
-struct Frame_13B610 {
-    void* base; void* cur; s32 off; Frame_13B610* prev;
-    Frame_13B610(List_13B610* l) {
-        cur = l;
-        base = l;
-        Frame_13B610* p = (Frame_13B610*)D_0027B314;
-        off = l->off;
-        D_0027B314 = (ListFrame*)this;
-        prev = p;
-    }
-    ~Frame_13B610() { D_0027B314 = (ListFrame*)prev; }
-};
-
-void func_00124A48(void* self);
-s32 func_001300E8(void* node, s32 kind);
-void func_00182ED8(s32 a);
-void* func_0018D500(s32 size);
-
-void func_0013B610(ChildGroupObject* self)
-{
-    StartPlacedObject(self);
-    Frame_13B610 f((List_13B610*)&self->children);
-    void* n;
-    void* t = *(void**)f.base;
-    f.cur = (u8*)t + f.off;
-    n = t;
-    if (n != 0) {
-        do {
-            if (IsObjectOfKind(n, 0x27)) {
-                s32 c = self->count;
-                if ((u32)c < 16) {
-                    self->arr[c] = (s32)n;
-                    self->count = c + 1;
-                    func_00182ED8((s32)n);
-                }
-            }
-            void* c = f.cur; s32 o = f.off; void* a = *(void**)c;
-            f.cur = (u8*)a + o; n = a;
-        } while (n != 0);
-    }
-    if (self->active != 0) {
-        self->entries = (Entry3B*)AllocateFrontMemory(0xC0);
-    }
-}
 
 
 
@@ -664,31 +593,6 @@ void func_00138F28(World* self, Collider* obj)
 
 void func_001B7968(Collider* self);
 
-extern const f32 D_00249D74 = 3.4028235e+38f;
-Quad3B D_00261320 = { 0x42480000, 0x459C4000, 0, 0 };
-Quad3B D_00261330 = { 0x43FA0000, 0x3FE66666, 0, 0 };
-Quad3B D_00261340 = { 0x3F000000, 0x3E4CCCCD, 0, 0 };
-Pair3B D_00261350 = { 0x44160000, 0x44AF0000 };
-Pair3B D_00261358 = { 0x41A00000, 0x42480000 };
-
-void func_0013B4C0(ChildGroupObject* self)
-{
-    InitCollider(self);
-    self->f554 = D_00249D74;
-    self->f55C = 200.0f;
-    self->f560 = 200.0f;
-    self->f550 = 0;
-    self->f56C = *(Pair3B*)&D_00261320;
-    self->f568 = 800.0f;
-    self->f574 = 5000.0f;
-    self->f5D0 = *(Quad3B*)&D_00261330;
-    self->f5E0 = *(Pair3B*)&D_00261350;
-    self->f5F0 = *(Quad3B*)&D_00261340;
-    self->f600 = *(Pair3B*)&D_00261358;
-    self->f674 = 1;
-    self->f678 = 1;
-    self->f67C = 0;
-}
 
 struct Link_1385A0 { s32 f0; s32 f4; Link_1385A0* f8; Collider* fC; };
 
@@ -939,19 +843,6 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
 
 s32 func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
 
-void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void* arg5)
-{
-    s32 i;
-    if (self->active) {
-        for (i = 0; i < self->entryCount; i++) {
-            if (self->entries[i].key == key) break;
-        }
-        if (i < self->entryCount) {
-            Entry3B* e = &self->entries[i];
-            func_00185D20(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
-        }
-    }
-}
 
 struct __attribute__((aligned(16))) Entry_13A008 {
     u64 value;
