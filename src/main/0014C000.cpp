@@ -23,9 +23,13 @@ s32 func_001526D0(void* a, void* b);
 void func_00152600(void* a, void* b);
 s32 func_001300E8(void* a, s32 b);
 
+
+
 ObjectLink D_00261CC8[1] = { { 2, 0x2BC, 0x574 } };
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 idx, void* table);
+
+
 
 extern u8* D_00262E10;
 
@@ -47,7 +51,11 @@ void func_001249A8(void* self);
 void* func_0015A448(void* a, void* b, void* c);
 s32 func_001300E8(void* obj, s32 kind);
 
+
+
 s32 func_001B8A08(void* self, void* obj);
+
+
 
 typedef void (*VFn2_0014FC38)(void* self, s32 arg);
 
@@ -56,8 +64,12 @@ void func_001B6598(void* h, s32* out);
 void func_001B6438(void* h);
 void func_0013D278(void* self);
 
+
+
 void func_001B6568(void* h, s32* out);
 void func_001B64D8(void* h, s32 code);
+
+
 
 void func_0014D280(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
@@ -67,9 +79,13 @@ void func_00188700(void* a, void* b, void* c, f32 w);
 
 void func_001B7968(Collider* self);
 
+
+
 void func_00188700(void* a, void* b, void* c, f32 w);
 
 void func_0013DDB8(void* self);
+
+
 
 s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
@@ -84,16 +100,23 @@ void* func_0018D500(s32 size);
 void func_00182D50(void*);
 void func_00152470(void*,void*);
 
+
 void func_001BA130(Collider* self, Collider* other);
+
 
 void func_001BAC30(Collider* self);
 void func_00159478(void** out, void* self);
 
+
 void func_00127378(void* self, s32 kind, void* msg);
+
+
 
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6568(void* dev, s32* out);
 void func_001B6438(void* h);
+
+
 
 s32 func_0014D1A0(f32 x, s32 n, f32* arr, void* p2, f32* lo, f32* hi);
 
@@ -111,7 +134,6 @@ void* func_00183058(void* item, void* x, void* self);
 void func_0014F900(C23* self);
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
-
 
 
 
@@ -138,14 +160,7 @@ extern f32 D_0026185C[];
 
 s32 func_00126D60(Sub_14F110* sub, f32 value);
 
-{
-    }
-}
 
-
-{
-    }
-}
 
 // An entry of a table of functions defined at the end of this file.
 typedef void (*Fn_Table)();
@@ -161,6 +176,8 @@ PooledObject* func_00150338(C23* self);
 s32 func_00182FC8(PooledObject* p);
 void func_001853F0(Held23* a, PooledObject* b, u8* c);
 
+
+
 // NEAR: the tail stores differ in order and register: retail does sw f6C8, then lui v1 / li v0,1 / lwc1 v1, we do lui v0 before the sw and use v0 for the address.
 
 extern u8 D_00248D30[];
@@ -169,10 +186,14 @@ s32 func_00152720(void* p);
 void func_00150298(C23* self);
 void func_001B9AE0(Collider* o, s32 a, s32 b, s32 c, s32 d);
 
+
+
 // NEAR: the search index is kept in a0 where retail uses a2, and hi is saved in s3 before the call in retail; the loop shape is otherwise the same.
 
 void func_001B93F8(Collider* self);
 void func_0014F270(PooledObject* self, f32 f);
+
+
 
 void func_0013D068(C23* self);
 void func_001B6598(void* p, s32* out);
@@ -180,6 +201,8 @@ void func_001B6568(void* p, s32* out);
 void func_0014FDA8(C23* self, s32* state);
 void func_00150008(C23* self);
 void func_0014FCE8(C23* self, s32 state);
+
+
 
 struct Slot_14CBA8 {
     void* p0;
