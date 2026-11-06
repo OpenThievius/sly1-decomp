@@ -841,7 +841,6 @@ func_00201720	00201720	444	handwritten	assembled from a .S source (the toolchain
 func_002018E0	002018E0	4	remnant	stripped-function leftover
 func_002018E8	002018E8	160	handwritten	VU0 macro instruction
 func_00201988	00201988	140	handwritten	VU0 macro instruction
-func_00202140	00202140	624	handwritten	128-bit MMI instruction
 func_00202478	00202478	484	handwritten	kernel or system instruction (sync)
 func_00202660	00202660	260	handwritten	kernel or system instruction (sync)
 func_00202B58	00202B58	12	remnant	stripped-function leftover
@@ -852,15 +851,9 @@ func_00202D98	00202D98	4	remnant	stripped-function leftover
 func_00202E40	00202E40	12	remnant	stripped-function leftover
 func_00203008	00203008	4	remnant	stripped-function leftover
 func_002030B8	002030B8	4	remnant	stripped-function leftover
-func_00203FD0	00203FD0	276	handwritten	128-bit MMI instruction
-func_002042C8	002042C8	484	handwritten	128-bit MMI instruction
 func_00204608	00204608	4	remnant	stripped-function leftover
 func_002046C8	002046C8	4	remnant	stripped-function leftover
-func_002046D0	002046D0	288	handwritten	128-bit MMI instruction
 func_002047F0	002047F0	4	remnant	stripped-function leftover
-func_002047F8	002047F8	312	handwritten	128-bit MMI instruction
-func_002049E8	002049E8	192	handwritten	128-bit MMI instruction
-func_00204B80	00204B80	180	handwritten	128-bit MMI instruction
 func_00204DA0	00204DA0	20	remnant	stripped-function leftover
 func_00204E20	00204E20	164	handwritten	marked handwritten by the disassembler
 func_00204EC8	00204EC8	124	handwritten	marked handwritten by the disassembler
@@ -875,7 +868,6 @@ func_0020A218	0020A218	4	remnant	stripped-function leftover
 func_0020B050	0020B050	4	remnant	stripped-function leftover
 func_0020B0A0	0020B0A0	12	remnant	stripped-function leftover
 func_0020B208	0020B208	52	remnant	stripped-function leftover
-func_0020CF18	0020CF18	540	handwritten	128-bit MMI instruction
 func_0020D138	0020D138	116	handwritten	128-bit MMI instruction
 func_0020D1B0	0020D1B0	148	handwritten	128-bit MMI instruction
 func_0020D248	0020D248	180	handwritten	128-bit MMI instruction
@@ -894,6 +886,5 @@ func_0020DBF0	0020DBF0	288	handwritten	128-bit MMI instruction
 func_0020DD10	0020DD10	276	handwritten	128-bit MMI instruction
 func_0020DE28	0020DE28	92	handwritten	128-bit MMI instruction
 func_0020DE88	0020DE88	96	handwritten	128-bit MMI instruction
-func_00210548	00210548	624	handwritten	128-bit MMI instruction
 func_00210C38	00210C38	340	handwritten	kernel or system instruction (sync)
 func_00210F18	00210F18	372	handwritten	marked handwritten by the disassembler
