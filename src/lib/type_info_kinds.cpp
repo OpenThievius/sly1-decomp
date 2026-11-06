@@ -83,7 +83,7 @@ extern "C" void* func_00200778(const type_info* want, const type_info* have, voi
     found = 0;
     user = dynamic_cast<const __user_type_info*>(have);
     if (user != 0) {
-        found = user->dcast(*want, 1, object, 0, 0);
+        found = user->findBase(*want, 1, object, 0, 0);
     } else {
         const __pointer_type_info* from = dynamic_cast<const __pointer_type_info*>(have);
         if (from != 0) {
@@ -114,7 +114,7 @@ extern "C" void* func_00200778(const type_info* want, const type_info* have, voi
                                && dynamic_cast<const __func_type_info*>(subFrom) == 0) {
                         found = object;
                     } else if ((user = dynamic_cast<const __user_type_info*>(subFrom)) != 0) {
-                        found = user->dcast(*subTo, 1, object, 0, 0);
+                        found = user->findBase(*subTo, 1, object, 0, 0);
                     } else {
                         const __pointer_type_info* pointerFrom = dynamic_cast<const __pointer_type_info*>(subFrom);
                         if (pointerFrom != 0) {
@@ -208,7 +208,7 @@ extern "C" void func_00200D38(void* at, const char* name)
 extern "C" void* __dynamic_cast(const type_info& (*from)(void), const type_info& (*to)(void), int publicOnly,
                                 void* address, const type_info& (*sub)(void), void* subObject)
 {
-    return static_cast<const __user_type_info&>(from()).dcast(to(), publicOnly, address, &sub(), subObject);
+    return static_cast<const __user_type_info&>(from()).findBase(to(), publicOnly, address, &sub(), subObject);
 }
 
 // The type information of the builtin types, each built in its own storage when first asked for.

@@ -43,7 +43,7 @@ class __user_type_info : public type_info {
 public:
     __user_type_info(const char* name) : type_info(name) {}
     // The address of the `target` subobject of the object at `object`, or 0.
-    virtual void* dcast(const type_info& target, int publicOnly, void* object,
+    virtual void* findBase(const type_info& target, int publicOnly, void* object,
                         const type_info* sub = 0, void* subObject = 0) const;
 };
 
@@ -54,7 +54,7 @@ class __si_type_info : public __user_type_info {
 public:
     __si_type_info(const char* name, const __user_type_info& base)
         : __user_type_info(name), base_(base) {}
-    virtual void* dcast(const type_info& target, int publicOnly, void* object,
+    virtual void* findBase(const type_info& target, int publicOnly, void* object,
                         const type_info* sub = 0, void* subObject = 0) const;
 };
 
@@ -76,7 +76,7 @@ private:
 public:
     __class_type_info(const char* name, const Base* bases, size_t count)
         : __user_type_info(name), bases_(bases), count_(count) {}
-    virtual void* dcast(const type_info& target, int publicOnly, void* object,
+    virtual void* findBase(const type_info& target, int publicOnly, void* object,
                         const type_info* sub = 0, void* subObject = 0) const;
 };
 

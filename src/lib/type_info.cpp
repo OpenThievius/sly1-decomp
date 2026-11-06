@@ -38,20 +38,20 @@ extern "C" void __rtti_user(void* at, const char* name)
     new (at) __user_type_info(name);
 }
 
-void* __user_type_info::dcast(const type_info& target, int, void* object, const type_info*, void*) const
+void* __user_type_info::findBase(const type_info& target, int, void* object, const type_info*, void*) const
 {
     return *this == target ? object : 0;
 }
 
-void* __si_type_info::dcast(const type_info& target, int publicOnly, void* object, const type_info* sub,
+void* __si_type_info::findBase(const type_info& target, int publicOnly, void* object, const type_info* sub,
                             void* subObject) const
 {
     if (*this == target)
         return object;
-    return base_.dcast(target, publicOnly, object, sub, subObject);
+    return base_.findBase(target, publicOnly, object, sub, subObject);
 }
 
-void* __class_type_info::dcast(const type_info& target, int publicOnly, void* object, const type_info* sub,
+void* __class_type_info::findBase(const type_info& target, int publicOnly, void* object, const type_info* sub,
                                void* subObject) const
 {
     void* found;
@@ -67,15 +67,15 @@ void* __class_type_info::dcast(const type_info& target, int publicOnly, void* ob
         p = (char*)object + bases_[i].offset;
         if (bases_[i].isVirtual)
             p = *(void**)p;
-        p = bases_[i].type->dcast(target, publicOnly, p, sub, subObject);
+        p = bases_[i].type->findBase(target, publicOnly, p, sub, subObject);
         if (p != 0) {
             if (found == 0) {
                 found = p;
             } else if (found != p) {
                 if (sub != 0) {
                     const __user_type_info& t = static_cast<const __user_type_info&>(target);
-                    void* a = t.dcast(*sub, 1, found);
-                    void* b = t.dcast(*sub, 1, p);
+                    void* a = t.findBase(*sub, 1, found);
+                    void* b = t.findBase(*sub, 1, p);
                     if (a == b) {
                     } else if (a == subObject) {
                         continue;

@@ -39,9 +39,9 @@ src/lib/type_info.cpp	__eq__C9type_infoRC9type_info	func_002000B0
 src/lib/type_info.cpp	__rtti_class	func_002000F0
 src/lib/type_info.cpp	__rtti_si	func_00200118
 src/lib/type_info.cpp	__rtti_user	func_00200138
-src/lib/type_info.cpp	dcast__C16__user_type_infoRC9type_infoiPvPC9type_infoT3	func_00200158
-src/lib/type_info.cpp	dcast__C14__si_type_infoRC9type_infoiPvPC9type_infoT3	func_00200188
-src/lib/type_info.cpp	dcast__C17__class_type_infoRC9type_infoiPvPC9type_infoT3	func_00200220
+src/lib/type_info.cpp	findBase__C16__user_type_infoRC9type_infoiPvPC9type_infoT3	func_00200158
+src/lib/type_info.cpp	findBase__C14__si_type_infoRC9type_infoiPvPC9type_infoT3	func_00200188
+src/lib/type_info.cpp	findBase__C17__class_type_infoRC9type_infoiPvPC9type_infoT3	func_00200220
 src/lib/type_info.cpp	__17__class_type_infoPCcPCQ217__class_type_info4BaseUi	func_002003F8
 src/lib/type_info.cpp	__tf17__class_type_info	func_00200418
 src/lib/type_info.cpp	_$_17__class_type_info	func_00200468
