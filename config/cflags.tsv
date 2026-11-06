@@ -16,6 +16,7 @@ src/lib/divide_unsigned.c	-O2 -G0	2.9-ee-991111-01
 src/lib/remainder.c	-O2 -G0	2.9-ee-991111-01
 src/lib/remainder_unsigned.c	-O2 -G0	2.9-ee-991111-01
 src/lib/soft_float.c	-O2 -G0	2.9-ee-991111-01
+src/lib/soft_float_single.c	-O2 -G0	2.9-ee-991111-01
 src/lib/unwind.c	-O2 -G0	2.9-ee-991111-01
 src/lib/throw.c	-O2 -G0 -fexceptions	2.9-ee-991111-01
 src/lib/00200000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
