@@ -68,6 +68,13 @@ def numeric(line):
     if j:  # a jump table's target: a plain label
         return "%s%s:" % j.groups()
     m = ENCODED.match(line)
+    # A short backward branch (a loop of a few instructions) is written as its word too: that
+    # assembler pads a short loop with nops for the R5900's short-loop erratum, which retail's
+    # hand-written loops do not have (func_001D5678). Its offset is relative, so the word is exact.
+    loop = re.match(r"^\s*/\*\s*[0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/\s*b\S*\s+(?:\S+,\s*)*\.L([0-9A-F]{8})\s*$", line)
+    if m and loop and 0 < int(loop.group(1), 16) - int(loop.group(2), 16) <= 0x20:
+        b = m.group(2)
+        return "%s.word\t0x%s%s%s%s\t# %s" % (m.group(1), b[6:8], b[4:6], b[2:4], b[0:2], line.split("*/", 1)[1].strip())
     if m and m.group(3).startswith("v"):
         b = m.group(2)
         return "%s.word\t0x%s%s%s%s\t# %s" % (m.group(1), b[6:8], b[4:6], b[2:4], b[0:2], line.split("*/", 1)[1].strip())

@@ -26,7 +26,7 @@ void func_001DFEB8(Obj_11A338_eu* self)
         }
     }
     if (IsFontLoaded(2)) {
-        self->slot = (void**)D_002758E0;
+        self->slot = (void**)&D_002758E0;
         *self->slot = GetFontById(2);
     }
     SetScreenElementScale(self, 0.6f);
