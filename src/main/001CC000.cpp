@@ -53,61 +53,6 @@ void func_001CD7E0(Owner_001CD7E0* self, Node_001CD7E0* node, s32 flag)
     self->b4B8 = 0;
 }
 
-struct Ref_001CE9E8 { u8 pad0[0x18]; void* p18; };
-struct Obj_001CE9E8 { void* p0; Ref_001CE9E8* p4; u8 pad1[0x10 - 8]; };
-struct Frame_001CE9E8 { u8 vecA[0x10]; u8 vecB[0x10]; f32 result; };
-
-void func_001CE800(void* a0, void* a1, void* a2, void* a3);
-void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
-
-f32 func_001CE9E8(Obj_001CE9E8* self)
-{
-    Frame_001CE9E8 f;
-    func_001CE800(self->p0, self->p4, f.vecA, f.vecB);
-    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, f.vecB, 0, &f.result, 0, 0);
-    return f.result;
-}
-
-struct Ref_001CEA58 { u8 pad0[0x18]; void* p18; };
-struct Obj_001CEA58 { void* p0; Ref_001CEA58* p4; u8 pad1[0x10 - 8]; };
-struct Frame_001CEA58 { u8 vecA[0x10]; f32 result; };
-
-void func_0016A240(void* a0, void* a1, s32 a2);
-void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
-
-f32 func_001CEA58(Obj_001CEA58* self)
-{
-    Frame_001CEA58 f;
-    func_0016A240(self->p4, f.vecA, 0);
-    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, 0, 0, &f.result, 0, 0);
-    return f.result;
-}
-
-
-void func_00169E20(void* a0, void* a1, s32 a2);
-void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
-
-f32 func_001CEAB8(Obj_001CEA58* self)
-{
-    Frame_001CEA58 f;
-    func_00169E20(self->p4, f.vecA, 0);
-    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, 0, 0, &f.result, 0, 0);
-    return f.result;
-}
-
-struct Obj_001CF138 { u8 pad0[0x2BDC]; s32 key; };
-
-f32 D_00274E3C = 1e+03f;
-
-f32 func_001CF138(Obj_001CF138* self, s32 id, f32 a, f32 b)
-{
-    f32 r = a + b;
-    if (id == self->key) {
-        r = r + D_00274E3C;
-    }
-    return r;
-}
-
 void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void** a7);
 void func_001399F8(void* obj, s32 a1, s32 a2, void* a3);
 
@@ -124,68 +69,6 @@ void func_001CC410(void* a0, Obj_1CC410* a1, void** a2)
     if (a2 != 0) {
         *a2 = tmp;
     }
-}
-
-typedef void (*VFn_1CEE30)(void* self, void* out, s32 x);
-
-struct Obj_1CEE30 {
-    VFn_1CEE30* vtbl;
-};
-
-struct Node_1CEE30 {
-    u8 pad0[0x18];
-    s32 f18;
-    u8 pad1C[0x34 - 0x1C];
-    Obj_1CEE30* f34;
-};
-
-struct Self_1CEE30 {
-    s32 f0;
-    Node_1CEE30* node;
-};
-
-struct __attribute__((aligned(16))) Quad_1CEE30 {
-    s32 a, b, c, d;
-};
-
-struct Locals_1CEE30 {
-    Quad_1CEE30 a;
-    s32 b[2];
-    u8 pad18[8];
-    Quad_1CEE30 c;
-    f32 out;
-};
-
-f32 func_001CEDF8(void);
-void func_001EB168(f32 f12, f32 f13, f32 f14, f32 f15, void* fn, void* b, s32 c, void* out);
-
-f32 func_001CEE30(Self_1CEE30* self)
-{
-    Locals_1CEE30 l;
-    Node_1CEE30* n = self->node;
-    Obj_1CEE30* o = n->f34;
-    if (o->vtbl[2] != 0) {
-        o->vtbl[2](o, &l.a, 0);
-    }
-    f32 q = 0.25f;
-    l.b[0] = self->f0;
-    l.b[1] = n->f18;
-    l.c = l.a;
-    
-    func_001EB168(0.5f, q, q, 3.0f, (void*)func_001CEDF8, l.b, 0, &l.out);
-    return l.out;
-}
-
-// func_001CEB18 also takes a float in $f12 (it reads $f12 at entry); this
-// function passes its own float parameter straight through.
-struct Obj_1CEDF8 { s32 a; s32 b; s32 pad[2]; s32 c[4]; };
-void func_001CEB18(f32 t, s32 a, s32 b, s32* c, f32* out, s32 d, s32 e);
-
-f32 func_001CEDF8(Obj_1CEDF8* o, f32 t)
-{
-    f32 out;
-    func_001CEB18(t, o->a, o->b, o->c, &out, 0, 0);
-    return out;
 }
 
 void func_001225D0(Player* self, f32 t, void* out, void* extra);

@@ -3748,28 +3748,6 @@ float D_00274DD4 = 3.5f;
 float D_00274DD8[2] = {-1.70000005f, 0.0f};
 float D_00274DE0[4] = {3000.0f, 1000.0f, 0.150000006f, 0.0f};
 float D_00274DF0[4] = {30.0f, 10.0f, 0.150000006f, 0.0f};
-float D_00274E00 = 150.0f;
-float D_00274E04 = 50.0f;
-float D_00274E08 = 250.0f;
-float D_00274E0C = 1000.0f;
-float D_00274E10 = 1.25f;
-float D_00274E14 = 2.0f;
-float D_00274E18 = 250.0f;
-float D_00274E1C = 0.200000003f;
-float D_00274E20 = 2500.0f;
-float D_00274E24 = -250.0f;
-float D_00274E30 = 1250.0f;
-float D_00274E34 = 500.0f;
-float D_00274E38 = 500.0f;
-float D_00274E40 = 100.0f;
-float D_00274E44 = 100.0f;
-float D_00274E48 = 0.300000012f;
-float D_00274E4C = 25.0f;
-float D_00274E50 = 1.5f;
-float D_00274E54 = 0.25f;
-float D_00274E58 = 0.5f;
-float D_00274E5C = 0.200000003f;
-float D_00274EF0[4] = {2500.0f, 0.0f, 1.0f, 0.0f};
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
 s32 D_00274FB0[2] = {2, 2};
@@ -4071,8 +4049,6 @@ void func_00200638();
 void func_00200680();
 
 extern const f32 D_0024DA90 = 3.40282347e+38f;
-extern const f32 D_0024DAA0[4] = {-3.40282347e+38f, 0.0f, 0.0f, 0.0f};
-extern const f32 D_0024DAD0 = -3.40282347e+38f;
 extern const f32 D_0024DC88[2] = {3.40282347e+38f, 0.0f};
 extern const f32 D_0024DC94 = 3.40282347e+38f;
 extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
@@ -4832,10 +4808,6 @@ s32 D_00274744 = 0;
 f32 D_00274B5C = 0;
 // lw word
 s32 D_00274C10 = 0;
-// lwc1 word
-f32 D_00274E28 = 0;
-// lwc1 word
-f32 D_00274E2C = 0;
 // lw/sw word
 s32 D_00275130 = 0;
 // lw/sw word
