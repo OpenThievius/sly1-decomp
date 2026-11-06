@@ -705,23 +705,6 @@ s32 func_001FA4F8(s32 p1, s32 flags, Obj_1FA4F8* obj, s32 p4, Ctx_1FA4F8* p5, s3
     return result;
 }
 
-double func_001FD358(s64 a);
-double func_001FCDE0(double a, double b);
-double func_001FCD20(double a, double b);
-
-double func_001FB618(u64 x)
-{
-    double k = 65536.0;
-    double t = func_001FCDE0(func_001FD358((s32)((s64)x >> 32)), k);
-    double c = func_001FCDE0(t, k);
-    s64 lo = (s32)(x & 0xFFFFFFFFULL);
-    double u = func_001FD358(lo);
-    if (lo < 0) {
-        u = func_001FCD20(u, 4294967296.0);
-    }
-    return func_001FCD20(c, u);
-}
-
 struct Span_1F9AD8 {
     void* a;
     s32 b;
@@ -952,9 +935,6 @@ struct A_1FA190 { u8 p[0x10]; s32 i; s32 v; };
 struct B_1FA190 { u8 p[0x1C]; s32* t; };
 void func_001FA190(A_1FA190* a, B_1FA190* b) { b->t[a->i] = a->v; }
 
-void func_001FD930();
-void func_001FBDF8() { func_001FD930(); }
-
 struct Ring_1F8010;
 struct Node_1F8010 { u8 p0[8]; s32 f8; u8 pC[8]; s32 f14; };
 struct Msg_1F8010 { u8 p0[0x14]; s32 f14; u8 p18[4]; s32 f1C; u32 f20; s32 f24; s32 f28; s32 f2C; };
@@ -1094,45 +1074,6 @@ s32* func_001F9E08(s32 value)
     return p;
 }
 
-f32 func_001FB6B0(s64 x)
-{
-    if ((u64)(x + 0x1FFFFFFFFFFFFFL) > 0x3FFFFFFFFFFFFEUL) {
-        if ((s32)x & 0x7FF) x |= 0x800;
-    }
-    double f = (s32)(x >> 32);
-    f *= 65536.0;
-    f *= 65536.0;
-    f += (u32)(x & 0xFFFFFFFFUL);
-    return (f32)f;
-}
-
-u32 func_001FD4A8(double a);
-double func_001FB618(u64 x);
-
-u64 func_001FB528(double a)
-{
-    double t;
-    u64 v;
-
-    if (a < 0) {
-        return 0;
-    }
-    v = func_001FD4A8(a * (1.0 / 4294967296.0));
-    v <<= 32;
-    if ((s64)v >= 0) {
-        t = func_001FB618(v);
-    } else {
-        t = func_001FB618((v & 1) | (v >> 1));
-        t = t + t;
-    }
-    a -= t;
-    if (a < 0) {
-        v -= func_001FD4A8(-a);
-    } else {
-        v += func_001FD4A8(a);
-    }
-    return v;
-}
 
 struct Node_001F8C38 { s32 f0; s32 f4; };
 struct Ctor_001F8C38 { s32 a0; s32 a1; s32 a2; s32 a3; s32 a4; s32 a5; };
