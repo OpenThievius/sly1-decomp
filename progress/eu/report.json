@@ -37495,8 +37495,7 @@
     "complete": false,
     "progress_categories": [
      "game"
-    ],
-    "source_path": "src/main/001E8000.cpp"
+    ]
    }
   },
   {
@@ -38470,8 +38469,7 @@
     "complete": false,
     "progress_categories": [
      "game"
-    ],
-    "source_path": "src/main/001EC000.cpp"
+    ]
    }
   },
   {
@@ -39031,8 +39029,7 @@
     "complete": false,
     "progress_categories": [
      "game"
-    ],
-    "source_path": "src/main/001F0000.cpp"
+    ]
    }
   },
   {

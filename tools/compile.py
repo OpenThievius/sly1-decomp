@@ -218,6 +218,9 @@ def run_step(cmd, **kw):
 
 
 REMNANT_BLOCK = re.compile(r" #APP\n\s*# linker remnant\n.*?\n #NO_APP\n", re.S)
+# The same block when GCC wrote it in one #APP run with the file-scope asm before it (an ASM_FUNC
+# just before the remnant): only its own lines move.
+REMNANT_LINES = re.compile(r"^\t# linker remnant\n.*?^\t\.set at\n", re.S | re.M)
 STATIC_INIT = re.compile(r"^\t\.ent\t__static_initialization_and_destruction_0$", re.M)
 CONSTRUCTOR = re.compile(r"^\t\.align\t\d+\n\t\.globl\t_GLOBAL_\$I\$", re.M)
 
@@ -231,9 +234,13 @@ def place_remnants(asm):
         return asm
     last_end = asm.rfind("\t.end\t", 0, init.start())
     blocks = [m for m in REMNANT_BLOCK.finditer(asm) if last_end < m.start() < init.start()]
-    if not blocks:
-        return asm
-    moved = "".join(m.group(0) for m in blocks)
+    if blocks:
+        moved = "".join(m.group(0) for m in blocks)
+    else:
+        blocks = [m for m in REMNANT_LINES.finditer(asm) if last_end < m.start() < init.start()]
+        if not blocks:
+            return asm
+        moved = "".join(" #APP\n" + m.group(0) + " #NO_APP\n" for m in blocks)
     for m in reversed(blocks):
         asm = asm[:m.start()] + asm[m.end():]
     at = CONSTRUCTOR.search(asm).start()

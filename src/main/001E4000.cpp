@@ -4035,9 +4035,6 @@ extern const char D_0024E140[40] = "Press &2L&. for Bonus Commentary";
 extern const char D_0024E168[24] = "Best time: &10.%d";
 extern const char D_0024E180[24] = "Best time: &1%d:%02d";
 extern const char D_0024E198[40] = "Beginning Master Thief Sprint!";
-extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
-extern const s32 D_0024E830 = 107;
-extern const s32 D_0024E838 = 108;
 extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
@@ -4283,82 +4280,6 @@ f32 D_002758A0 = 300.0f;
 f32 D_002758A4 = 400.0f;
 f32 D_002758A8 = -100.0f;
 f32 D_002758AC = 5.0f;
-s32 D_00275BF0[10] = { 0, 0, 3, 10, 6, 63, 3, 11, 5, 31 };
-f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
-f32 D_00275C60[4] = { 0.0f, 1.0f, -1.0f, 1.0f };
-f32 D_00275CD0 = 700.0f;
-f32 D_00275CD4 = 650.0f;
-s32 D_00275CF8[4] = { 1247, 1248, 1249, 1250 };
-f32 D_00276258[4] = { 600.0f, 0.0f, 0.25f, 0.0f };
-f32 D_00276268[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00276278[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
-f32 D_00276288[4] = { 1.0f, 0.0f, 0.200000003f, 0.0f };
-s32 D_00276298[11][4] = {
-    { 1, 10, 10, 5 },
-    { 2, 0, 3, 5 },
-    { -1, 1, 3, 5 },
-    { 2, 10, -1, 1 },
-    { 8, -1, 5, 7 },
-    { 2, 0, 1, 4 },
-    { -1, 7, 7, 8 },
-    { 6, 8, 4, 6 },
-    { 6, -1, 7, -1 },
-    { -1, -1, -1, -1 },
-    { 0, -1, -1, 0 }
-};
-s32 D_00276348[11][4] = {
-    { 4, 10, 4, 10 },
-    { 8, 0, 4, 3 },
-    { 5, 3, 1, -1 },
-    { 2, 10, 1, -1 },
-    { 7, 0, -1, 1 },
-    { 8, 2, 8, -1 },
-    { 8, 7, -1, 8 },
-    { 6, 4, -1, 1 },
-    { -1, 1, 6, 5 },
-    { -1, -1, -1, -1 },
-    { 3, -1, 0, -1 }
-};
-s32 D_002763F8[11][4] = {
-    { 1, 10, 10, 1 },
-    { 3, 0, 7, 2 },
-    { 4, 0, 1, -1 },
-    { 8, 1, 1, 4 },
-    { 3, 2, 1, 2 },
-    { 6, 10, -1, 8 },
-    { -1, 5, -1, 8 },
-    { -1, 0, 8, 1 },
-    { -1, 7, 5, 7 },
-    { -1, -1, -1, -1 },
-    { 5, -1, -1, 0 }
-};
-s32 D_002764A8[11][4] = {
-    { 1, 10, 10, 2 },
-    { 7, 0, 4, 2 },
-    { 5, 0, 1, 5 },
-    { 8, 4, -1, 4 },
-    { 3, 10, 3, 1 },
-    { 6, 2, 1, -1 },
-    { -1, 5, 7, -1 },
-    { 8, 1, 8, 6 },
-    { -1, 4, 3, 1 },
-    { -1, -1, -1, -1 },
-    { 4, -1, -1, 0 }
-};
-s32 D_00276558[11][4] = {
-    { 2, 10, 2, 4 },
-    { -1, -1, -1, -1 },
-    { 3, 0, -1, 3 },
-    { 8, 0, 2, 4 },
-    { 5, 0, 3, 5 },
-    { 6, 4, 4, -1 },
-    { 8, 5, 8, -1 },
-    { -1, -1, -1, -1 },
-    { -1, 3, -1, 6 },
-    { -1, -1, -1, -1 },
-    { 0, -1, -1, 0 }
-};
-f32 D_00276648 = 24.0f;
 volatile s32 D_00277138[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 s32 D_002771CC = -1;
 s32 D_00279420 = -1;
@@ -4570,7 +4491,6 @@ extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e
 // Globals typed by worker dv01, from retail's bytes and their readers.
 struct Rec_263558 { s32 f0; s32 f4; s32 f8; };
 
-
 f32 D_00260E70[4] = { 0.0f, 15.0f, 0.0149999997f, 0.0f };
 f32 D_00260E80[4] = { 0.0f, 2.5f, 0.00249999994f, 0.0f };
 f32 D_00260E90[4] = { 0.0f, 15.0f, 1.5f, 0.0f };
@@ -4763,11 +4683,8 @@ struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32
 Config_1E0848 D_002758E0 = {0};
 // size: s32 read as one word (func_00150000.cpp and 001AC000.cpp test bit 8)
 // size: s32 compared with 1/2 in 00148000 and 00194000
-s32 D_00275BEC = 0;
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
-Quad16 D_00275C40 = {0};
 // size: s32 state compared/assigned in 001EC000
-s32 D_00275DB8 = 0;
 // size: u32 cleared by func_001F7D88
 u32 D_00277134 = 0;
 // size: s32 flag set/cleared in 001F8000
@@ -5166,11 +5083,8 @@ u8 D_00274118[648] = {0};
 u8 D_002758D0[16] = {0};
 // word read whole / address only, 4 bytes to next label
 // readers pass only its address; byte buffer, size to next label
-u8 D_00275BC0[4] = {0};
 // word read whole / address only, 4 bytes to next label
-s32 D_00275DB4 = 0;
 // word read whole / address only, 4 bytes to next label
-s32 D_00275F80 = 0;
 
 // Globals typed by worker dz206, from retail's bytes and their readers.
 // scalar words read whole (lw/sw in func_00203xxx)
@@ -5190,3 +5104,6 @@ u32 D_0027A5C0[4] = {0};
 u8 D_0027A5D0[48] = {0};
 // 1088-byte buffer, address passed only
 u8 D_0027A600[1088] = {0};
+
+// Defined in the old 001EC000.cpp; outside file_1E88D0.cpp's data.
+void* D_002505C0[6];

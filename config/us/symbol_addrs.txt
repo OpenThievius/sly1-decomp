@@ -81,3 +81,10 @@ func_001963B8 = 0x001963B8; // type:func
 func_001AEC90 = 0x001AEC90; // type:func
 func_001E08D8 = 0x001E08D8; // type:func
 func_001F2738 = 0x001F2738; // type:func
+// The end of the game's last .data before the libraries' inside a coarse label: file_1E88D0's
+// last global D_00276654 (the warp entry func_001F08F0 stores) is followed by a build stamp
+// ("jojo", a date and time) that no code reads.
+D_00276658 = 0x00276658;
+// Two ranges at D_00275C60 (0 to 1, then -1 to 1): every reader takes the first (g_unitRange,
+// S1EB050); the second has no reader, so the disassembly has no label for it.
+D_00275C68 = 0x00275C68;

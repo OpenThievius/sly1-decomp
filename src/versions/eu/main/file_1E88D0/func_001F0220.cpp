@@ -29,7 +29,7 @@ void func_001F0220(ScreenFade* self, s32 mode)
 L02A0:
     if (self->active.kind != 0) {
         FadeRequest* q = &self->active;
-        QueueWorldLoad(g_worldLoadRequest, (s32)q->key, q->f08, q->f0C, q->flags);
+        QueueWorldLoad((u8*)&g_worldLoadRequest, (s32)q->key, q->f08, q->f0C, q->flags);
     }
     self->active.kind = 0;
     self->opacity = 1.0f;
@@ -83,7 +83,7 @@ L0374:
 
 L038C:
     {
-        if (self->style == D_00275BF0) {
+        if (self->style == D_00275BF0[0]) {
             s32 idx = g_previousLevelIndex;
             if (idx != -1) {
                 D_eu_00274868.f570 = D_eu_00274868.f574[idx];
@@ -107,7 +107,7 @@ L03EC:
 L0400:
     self->mode = mode;
 L0404:
-    self->modeStartTime = g_elapsedTime;
+    self->modeStartTime = g_elapsedTime[0];
 L0410:
     return;
 }
