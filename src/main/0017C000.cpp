@@ -58,42 +58,9 @@ void func_0017D148(void* self, s32 a, s32 b, f32 value)
     o->f0Cf = value;
 }
 
-void func_00152440(void* p);
-
-void func_0017FD70(void)
-{
-    ClearList(&g_pointObjects);
-}
-
-void func_00152438(void* self, s32 value);
-
-void func_0017FD48(void)
-{
-    func_00152438(&g_pointObjects, 0x50);
-}
-
-void func_00182D48(void* self);
-void func_00152470(void* table, void* self);
-
-void func_0017FD90(C80* self)
-{
-    RegisterObject(self);
-    AppendToList(&g_pointObjects, self);
-}
-
 s32 func_0017D220(void* self)
 {
     return (s32)AddQueueEntry(self, 0xC, -1, 0);
-}
-
-
-void func_00182ED0(void* self);
-void func_00152600(void* table, void* self);
-
-void func_0017FDC8(C80* self)
-{
-    UnregisterObject(self);
-    RemoveFromList(&g_pointObjects, self);
 }
 
 void func_0017C660(EntryQueue* self);
@@ -234,65 +201,6 @@ void* func_0017CF38(EntryQueue* pool, s32 a, s32 b, s32 c)
     return e;
 }
 
-s32 func_0017E6D0(Player* self)
-{
-    s32 r;
-    if (0.0f < self->f634) {
-        if (self->f900 != 0) {
-            r = 1;
-        } else {
-            r = self->fA10 ? 5 : 0;
-        }
-    } else r = 0;
-    return r;
-}
-
-struct Node_17DE88 { Collider* f0; Node_17DE88* f4; u8 pad[4]; Collider* fC; };
-struct List_17DE88 { Node_17DE88* head; };
-struct Obj_17DE88 { u8 pad[0x480]; List_17DE88* f480; };
-struct Ctx_17DE88 { u8 pad[1]; };
-struct Mat_17DE88 { f32 m[16]; };
-
-void func_001ED780(Quad16* q, void* out, const Vec02* a, const Vec02* b);
-void func_00188B08(Ctx_17DE88* a, Quad16* b, void* out);
-void func_00188700(Mat_17DE88* a, f32 w, void* b, void* c);
-s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, void* a4);
-struct Vec_263EC0 { f32 x, y, z, w; };
-extern Vec_263EC0 D_00263EC0[22];
-
-s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
-{
-    u8 buf[0x100] __attribute__((aligned(16)));
-    Quad16& q = *(Quad16*)buf;
-    q = *src;
-    s32 hits = 0;
-    func_001ED780(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
-    BuildMatrixFromRotationAndTranslation(ctx, &q, buf + 0x30);
-    for (s32 i = 0; (u32)i < 0x16; i += 2) {
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i], buf + 0x70);
-        func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i + 1], buf + 0x80);
-        Node_17DE88* n = self->f480->head;
-        while (n) {
-            Collider* a = n->fC;
-            if (!(a->flags538 & 0x40000000000ULL)) {
-                Collider* c = (Collider*)a->parts.head;
-                while (c) {
-                    if (!(c->flags538 & 0x80000000000ULL)) {
-                        if (CollectColliderSpans(c, buf + 0x70, buf + 0x80, 1, buf + 0x90) > 0) {
-                            if (i < 4) return 0;
-                            if (*(f32*)(buf + 0xD0) == 0.0f) return 0;
-                            if (0.7f < *(f32*)(buf + 0xB8)) hits++;
-                        }
-                    }
-                    c = (Collider*)c->link2E4.next;
-                }
-            }
-            n = n->f4;
-        }
-    }
-    return hits >= 2;
-}
-
 struct Entry_17C660 { u8 pad[8]; s32 state; u8 tail[8]; };
 void func_0017BCD0(EntryQueue* self);
 s32 func_0017C428(EntryQueue* self, void* item);
@@ -310,28 +218,3 @@ void func_0017C660(EntryQueue* self)
     if (self->f48 && func_0017C428(self, self->f48))
         self->f48 = 0;
 }
-
-Vec_263EC0 D_00263EC0[22] = {
-    { 50.0f, 0.0f, 75.0f, 0.0f },
-    { 50.0f, 0.0f, -150.0f, 0.0f },
-    { 50.0f, 0.0f, 75.0f, 0.0f },
-    { -60.0f, 0.0f, 75.0f, 0.0f },
-    { -60.0f, 0.0f, 75.0f, 0.0f },
-    { -60.0f, 0.0f, -50.0f, 0.0f },
-    { -57.96f, 15.53f, 75.0f, 0.0f },
-    { -57.96f, 15.53f, -50.0f, 0.0f },
-    { -51.96f, 30.0f, 75.0f, 0.0f },
-    { -51.96f, 30.0f, -50.0f, 0.0f },
-    { -42.43f, 42.43f, 75.0f, 0.0f },
-    { -42.43f, 42.43f, -50.0f, 0.0f },
-    { -30.0f, 51.96f, 75.0f, 0.0f },
-    { -30.0f, 51.96f, -50.0f, 0.0f },
-    { -57.96f, -15.53f, 75.0f, 0.0f },
-    { -57.96f, -15.53f, -50.0f, 0.0f },
-    { -51.96f, -30.0f, 75.0f, 0.0f },
-    { -51.96f, -30.0f, -50.0f, 0.0f },
-    { -42.43f, -42.43f, 75.0f, 0.0f },
-    { -42.43f, -42.43f, -50.0f, 0.0f },
-    { -30.0f, -51.96f, 75.0f, 0.0f },
-    { -30.0f, -51.96f, -50.0f, 0.0f },
-};
