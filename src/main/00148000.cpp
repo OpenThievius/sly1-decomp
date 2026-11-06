@@ -8,93 +8,9 @@
 #include "screen_element.h"
 #include "v24a2.h"
 
-void func_00148178(void)
-{
-    GameProgress* g = g_saveData;
-    s32 r = 99;
-    if (g->f19E0 + 1 <= 98) r = g->f19E0 + 1;
-    g->f19E0 = r;
-}
-
-struct __attribute__((packed)) PSys_1481A0 {
-    u8 pad0[0x26C];
-    f32 f26C;
-};
-
-void func_00148038(void);
-void func_00148178(void);
 s32 func_00160D98(void);
 
-void func_001481A0(void* self)
-{
-    Effect* s = (Effect*)self;
-    GameProgress* g = g_saveData;
-    s32 c = g->f19E8 + 1;
-    s32 r;
-    g->f19E8 = c;
-    if (c >= 100) {
-        r = func_00160D98();
-        if (g->f19E4 < r) {
-            g_saveData->f19E8 = 0;
-            ((PSys_1481A0*)&D_0026CE48)->f26C = 250.0f;
-            D_0026CE48.onDone = (void (*)(void*))func_00148038;
-            D_0026CE48.doneArg = s->prev;
-            return;
-        }
-        if (g_saveData->f19E0 < 99) {
-            g_saveData->f19E8 = 0;
-            D_0026CE48.rate = 250.0f;
-            D_0026CE48.doneArg = 0;
-            D_0026CE48.onDone = (void (*)(void*))func_00148178;
-            {
-                D_0026C6C8.vt->m14(&D_0026C6C8);
-            }
-        } else {
-            g_saveData->f19E8 = 99;
-        }
-    }
-}
-
-typedef void (*VFn_148CE0)(void* self, s32 arg);
-
-struct Node_148CE0 {
-    VFn_148CE0* vtbl;
-    u8 pad0[0x374 - 4];
-    Node_148CE0* next;
-};
-
-extern s32 D_0026EC58;
-
 s32 func_001300E8(void* node, s32 kind);
-
-void func_00148CE0(World* self)
-{
-    GameProgress* g = g_saveData;
-    if (((g->f19D8 << 8) | g->f19DC) == 0x308) return;
-    s32 r = func_00160D98();
-    if (g->f19E4 < r) {
-        if (D_0026EC58 < 2) return;
-    }
-    Node_148CE0* p = (Node_148CE0*)self->list1C54.head;
-    if (p == 0) return;
-    do {
-        if (IsObjectOfKind(p, 0x56) != 0) {
-            p->vtbl[51](p, 2);
-        }
-        p = p->next;
-    } while (p != 0);
-}
-
-typedef void (*VFn_148E18)(void* self, s32 arg);
-
-struct Obj_148E18 {
-    VFn_148E18* vtbl;
-};
-
-void func_00148E18(Obj_148E18* self)
-{
-    self->vtbl[51](self, 2);
-}
 
 extern s32 D_00275BEC;
 extern f32 D_00261850;
@@ -258,45 +174,7 @@ s32 func_0014BEF8(C12* self, Node_0014BEF8** slot)
     return 1;
 }
 
-typedef void (*VFn_148598)(void* self);
-typedef void (*VFn3_148598)(void* self, s32 a, void* b);
-struct VObj_148598 {
-    VFn_148598* vtbl;
-};
-struct VObj3_148598 {
-    VFn3_148598* vtbl;
-};
-
-extern s32 D_00275C34;
-extern u8 D_00261EF0[];
-extern u8 D_00264A40[];
-
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-void func_00151FC8(void* p);
-void func_0018C7F8(void* p);
-void func_00148598(C59* self, s32 mode)
-{
-    if (self->state == mode) return;
-    if (mode == 1) {
-        G27C230* fl = g_currentEntry;
-        s32 bits = fl->flags;
-        if ((bits & 2) == 0) {
-            G27C230* cx = g_currentLevelRecord;
-            fl->flags = bits | 2;
-            s32 g = D_00275C34; s32 old = cx->f438; cx->f438 = old + 1; if (g != 0) cx->f438 = old;
-        }
-        D_0026CBC8.vt->m14(&D_0026CBC8);
-        void* r = (void*)GetActiveSwitchedCollider();
-        if (r != 0) {
-            ((VObj3_148598*)r)->vtbl[82](r, 0, self);
-        }
-        TriggerScriptEvent(self, 2, 0, 0);
-        mode = 2;
-        func_00151FC8(D_00261EF0);
-        StartMemoryCardSave(g_memoryCard);
-    }
-    SetStateNotifierState(self, mode);
-}
 
 void func_00149398(T2173* self, Camera* owner);
 
@@ -343,19 +221,6 @@ void func_001496C0(T2173_3B0* self)
 }
 
 extern void* D_0026EC68;
-void func_00148718(C5A* self)
-{
-    StartStateNotifier(self);
-    D_0026EC68 = self;
-}
-
-typedef void (*VFn_148748)(void* self, s32 arg);
-struct Dispatch_148748 { VFn_148748* vtbl; };
-
-void func_00148748(Dispatch_148748* self)
-{
-    self->vtbl[51](self, 2);
-}
 
 void func_00149398(T2173* self, Camera* owner)
 {
@@ -379,35 +244,6 @@ void func_0014AD70(T217D_720* self)
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
 void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
-
-struct Note_148770 { s32 flag; void* owner; };
-struct Frame_148770 { Note_148770 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
-
-void func_00148770(C5A* self, s32 kind, void* msg)
-{
-    Frame_148770 fr;
-    HandlePlacedObjectNotification(self, kind, msg);
-    if (kind != 0x14) return;
-    if (msg != self->f2E8) return;
-    func_001B6598(msg, &fr.code);
-    if (fr.code != 0x263) return;
-    BaseObject* dev = self->world->f1D60;
-    if (dev != 0) {
-        fr.note.flag = 1;
-        fr.note.owner = self;
-        dev->desc->m1B(dev, &fr.note);
-    }
-    AppendQueuedCall(self->world, (void*)func_00148748, self, 0, 0);
-}
-
-extern f32 D_0026185C;
-
-void func_00148828(C5A* self)
-{
-    UpdateStateNotifier(self);
-    if (self->state != 0) return;
-    if (self->world->f2308 <= g_gameTime) self->desc02()->m2F(self, 6);
-}
 
 void func_001493B8(T2173* self, s32 value)
 {
@@ -460,19 +296,6 @@ void func_0014AA90(T2173_3E0* obj, s32 value) { obj->value = value; }
 
 void func_0014AA98(T2173_3E0* obj) { obj->value = 0; }
 
-s32 func_00148910(const f32* first, const f32* second)
-{
-    s32 result = -1;
-    if (*first < *second) result = 1;
-    return result;
-}
-
-void func_00149168(C5B* self)
-{
-    InitStateNotifier(self);
-    self->armed = 0;
-}
-
 void func_0014A8D0(T2173_3C8* self)
 {
     Camera* parent = self->owner;
@@ -501,120 +324,12 @@ void func_0014B608(C11* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
 void func_001C72A0(void*);
 void func_0014B640(C11* self) { StartAgent(self); self->fC2C=D_0027C008++; }
 
-
-void func_00148400(C56* self)
-{
-    C56* o = self;
-    InitStateNotifier(o);
-    f32 k60 = 60.0f;
-    f32 k300 = 300.0f;
-    f32 k075 = 0.75f;
-    f32 k05 = 0.5f;
-    f32 k035 = 0.35f;
-    o->f320 = k035;
-    o->f344 = k300;
-    o->f358 = k075;
-    o->f354 = k05;
-    o->f34C = k60;
-    o->i348 = 0;
-    o->f350 = k60;
-}
-
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, s32 a4, s32 a5, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-
-void func_00148470(C56* self, s32 mode)
-{
-    if (self->state == mode) return;
-    if (mode == 1) {
-        StartSoundEffect(0x74, 0, (s32)self, 0, 0, 0, 1500.0f, 0.0f, 1.0f, 0.0f, 0.0f);
-        mode = 4;
-        TriggerScriptEvent(self, 2, 0, 0);
-    }
-    SetStateNotifierState(self, mode);
-}
-
-void func_001E02C8(T217D_1380* self, s32 n);
-
-struct Msg_148888 {
-    s32 value;
-    void* owner;
-    u8 pad0[0x50 - 8];
-};
-
-void func_00148888(C5A* self, s32 mode)
-{
-    Msg_148888 msg;
-    if (self->state == mode) return;
-    if (mode == 1) {
-        SetBestTimeState(&g_timerCaption, 2);
-        StateListener* dev = self->listener;
-        if (dev != 0) {
-            msg.value = mode;
-            msg.owner = self;
-            dev->vtbl[31](dev, &msg);
-        }
-        mode = 2;
-    }
-    SetStateNotifierState(self, mode);
-}
 
 void func_00127378(void* self, s32 kind, void* msg);
 void func_001B6598(void* dev, s32* out);
 void* func_001DBCC8(void* target, void* fn, void* ctx, s32 a, s32 b);
-void func_00148E18(void* self);
-
-struct Note_148E40 { s32 flag; void* owner; };
-struct Frame_148E40 { Note_148E40 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x60 - 0x54]; };
-
-void func_00148E40(C57* self, s32 kind, void* msg)
-{
-    Frame_148E40 fr;
-    HandlePlacedObjectNotification(self, kind, msg);
-    if (kind != 0x14) return;
-    if (msg != self->f2E8) return;
-    func_001B6598(msg, &fr.code);
-    if (fr.code != 0x263) return;
-    BaseObject* dev = self->world->f1D60;
-    if (dev != 0) {
-        fr.note.flag = 1;
-        fr.note.owner = self;
-        dev->desc->m1B(dev, &fr.note);
-    }
-    AppendQueuedCall(self->world, (void*)(void (*)(void*))func_00148E18, self, 0, 0);
-}
-
-extern s32 D_00270458;
-extern f32 D_00261860;
-
-
-void func_00148EF8(C57* self)
-{
-    UpdateStateNotifier(self);
-    if (self->state != 0) return;
-    if (self->f338 == 0) return;
-    if (D_00270458 != 2) {
-        self->timeLeft = self->timeLeft - g_frameDt;
-    }
-    if (self->timeLeft <= 0.0f) {
-        self->desc02()->m2F(self, 6);
-    }
-}
-
-void func_00148F80(void)
-{
-    T217D_E30* obj = &D_0026C6C8;
-    obj->vt->m14(obj);
-    GameProgress* g = g_saveData;
-    if (g->f19E0 < 0x63) {
-        g->f19E0 = g->f19E0 + 1;
-        obj->rate = 250.0f;
-        obj->onDone = 0;
-        obj->doneArg = 0;
-    } else {
-        g->f19E0 = 0x63;
-    }
-}
 
 struct Quad_14A7B8 {
     s32 w[4];
@@ -679,102 +394,9 @@ void func_0014BF88(C12* self)
     }
 }
 
-void func_00148510(C59* self)
-{
-    C59* o = self;
-    InitStateNotifier(o);
-    f32 k35 = 35.0f;
-    f32 k06 = 0.6f;
-    f32 k500 = 500.0f;
-    f32 k250 = 250.0f;
-    f32 k075 = 0.75f;
-    G27C230* fl = g_currentEntry;
-    o->f350 = o->f34C = k35;
-    o->f344 = k500;
-    o->f348 = k250;
-    o->f354 = o->f358 = k06;
-    o->f320 = k075;
-    if (fl->flags & 2) {
-        o->initialMode = 2;
-    }
-}
-
-
-void func_00148D90(C57* self)
-{
-    InitStateNotifier(self);
-    f32 k = 50.0f;
-    self->f34C = 45.0f;
-    self->f344 = 250.0f;
-    self->f348 = self->f350 = k;
-    self->f358 = 0.05f;
-    self->f354 = 0.5f;
-    self->timeMin = 4.0f;
-    self->i320 = 0;
-    self->timeMax = 6.0f;
-}
-
-struct Msg_148FF0 {
-    s32 kind;
-    void* owner;
-};
-
-extern void* D_00261B60[28];
-extern u8 D_00261420[];
-
 f32 func_001EAAE0(f32 a, f32 b);
 Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-void func_00141040(void* table, s32 v);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-void func_00148F80(void* self);
-
-struct Frame_148FF0 {
-    Msg_148FF0 msg;
-    u8 pad008[0x50 - 0x008];
-};
-
-void func_00148FF0(C57* self, s32 mode)
-{
-    if (self->state == mode) return;
-    if (mode == 0) goto zero_case;
-    if (mode == 1) goto one_case;
-    goto call_tail;
-
-zero_case:
-    if (self->f338 != 0) {
-        self->timeLeft = RandomFloatInRange(self->timeMin, self->timeMax);
-    }
-    goto call_tail;
-
-one_case:
-    {
-        Effect* c = CreateEffect(0x10, 0);
-        if (c != 0) {
-            c->p134 = self;
-            c->params = (const T219C_Params*)D_00261B60;
-            c->vt->m00(c, &self->v140, 1.0f, 0);
-            c->p20 = self;
-            c->rot50[0] = self->m110.r[0];
-            c->rot50[1] = self->m110.r[1];
-            c->rot50[2] = self->m110.r[2];
-        } else {
-            func_00148F80(self);
-        }
-        D_0026C6C8.vt->m14(&D_0026C6C8);
-        SetFlagTableBit(g_flagTable, self->f37C);
-        StartSoundEffect(0x69, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-        if (self->listener != 0) {
-            Frame_148FF0 fr;
-            fr.msg.kind = 1;
-            fr.msg.owner = self;
-            self->listener->vtbl[31](self->listener, &fr.msg);
-        }
-        mode = 2;
-    }
-
-call_tail:
-    SetStateNotifierState(self, mode);
-}
 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_0011D640(s32 a);
@@ -817,24 +439,6 @@ void func_0014AC48(T217D_720* self)
         SetScreenElementSlideOutTime(e, 1.0f);
         SetScreenElementHoldTime(e, 0.0f);
         e++;
-    }
-}
-
-
-extern u8 D_0026EC60[];
-
-void func_00148698(C5A* self)
-{
-    InitStateNotifier(self);
-    self->f34C = 60.0f;
-    self->f350 = 60.0f;
-    self->f344 = 500.0f;
-    self->f358 = 0.6f;
-    self->f348 = 250.0f;
-    self->f354 = 0.6f;
-    self->f320 = 0.75f;
-    if (*(s32*)D_0026EC60 == 0) {
-        self->initialMode = 2;
     }
 }
 
@@ -887,7 +491,6 @@ void func_0014AD00(T217D_720* self, f32* clock)
     }
 }
 
-
 extern u8 D_002483D0[];
 void func_0014A888(T2173_3C8* self, Camera* a1)
 {
@@ -923,67 +526,12 @@ struct Obj_148AC0 {
 };
 extern u8 D_002483D0[];
 extern u8 D_00248D30[];
-extern f32 D_00261B40;
-f32 D_00261B48[2] = { 75.0f, 1e+02f };
-f32 D_00261B50[4] = { 1e+03f, 1.3e+03f, 0.0f, 0.0f };
 
-void func_0018D608(void);
-Obj_148AC0** func_0018D658(s32 size);
 s32 func_00148938(World* self, s32 a1, s32 n, Obj_148AC0** arr);
 f32 func_001EAAE0(f32 a, f32 b);
-void func_001ED650(void* out, f32 x, f32 y, f32 z);
 void func_001EEB60(World* a, f32 f, void* b, void* c);
-void func_0018D6F0(void);
-
-s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
-{
-    Obj_148AC0** p;
-    s32 i;
-    s32 count;
-    f32 ang;
-    f32 step;
-    PushBackMemoryMark();
-    if (arr == 0) {
-        arr = AllocateBackMemory(n * 4);
-    }
-    count = func_00148938(self, a1, n, arr);
-    i = 0;
-    step = 6.2831855f / (f32)n;
-    ang = RandomFloatInRange(0.0f, 6.2831855f);
-    {
-        for (; i < count;) {
-            Obj_148AC0* o = arr[i];
-            u8* q = (u8*)o + 0x300;
-            f32 a;
-            f32 b;
-            o->vt->f18(o);
-            o->vt->f64(o, 0);
-            o->vt->f84(o, a2);
-            o->vt->f88(o, g_identityMatrix);
-            o->vt->f90(o, D_00248D30);
-            o->vt->f94(o, D_00248D30);
-            o->f2E0 = (f32)i * D_00261B40;
-            o->f33C = 0;
-            i++;
-            o->vt->fCC(o, 3);
-            a = RandomFloatInRange(D_00261B48[0], D_00261B48[1]);
-            b = RandomFloatInRange(D_00261B50[0], D_00261B50[1]);
-            ComputePolarOffset(q, ang, a, b);
-            ang += step;
-            func_001EEB60((World*)self->f1EC4, o->f2A8, (u8*)o + 0x140, (u8*)o + 0x88);
-        }
-    }
-    PopBackMemoryMark();
-    return count;
-}
 
 // NEAR: every instruction matches except the setup of the last call: retail loads obj into $a1 and derives $a2 from it, we load it into $a2 and derive $a1
-
-struct Obj_148038 {
-    void** vtbl;
-    u8 pad0[0x2A8 - 4];
-    f32 f2A8;
-};
 
 struct __attribute__((aligned(16))) Quad_148038 {
     s32 a, b, c, d;
@@ -991,100 +539,18 @@ struct __attribute__((aligned(16))) Quad_148038 {
 
 struct Ctx_148038;
 
-typedef void (*Fn0_148038)(void* self);
-typedef void (*Fn1_148038)(void* self, void* a);
-typedef void (*Fn1s_148038)(void* self, s32 a);
-
-extern f32 D_00261AB0[4];
 extern u8 D_002483D0[];
 extern u8 D_00248D30[];
-extern Quad_148038 D_00261AC0;
 
 s32 func_00148938(World* self, s32 a1, s32 a2, void** out);
 s32 func_00160D98(void);
-void func_00144128(Ctx_148038* a, void* b, void* c);
 s32 func_001EEB60(Ctx_148038* self, f32 x, void* vec, void* out);
-
-void func_00148038(World* self)
-{
-    void* obj;
-    s32 buf[4];
-    GameProgress* g;
-    s32 n;
-    s32 c;
-
-    if (func_00148938(self, 0x56, 1, &obj) == 0) {
-        g = g_saveData;
-        n = func_00160D98();
-        c = g->f19E4 + 1;
-        c = (c < n) ? c : n;
-        g_saveData->f19E4 = c;
-    } else {
-        ((Fn0_148038)((Obj_148038*)obj)->vtbl[6])(obj);
-        ((Fn1s_148038)((Obj_148038*)obj)->vtbl[25])(obj, 0);
-        func_00144128(*(Ctx_148038**)g_camera, (void*)D_00261AB0, buf);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[33])(obj, buf);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[34])(obj, g_identityMatrix);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[36])(obj, D_00248D30);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[37])(obj, D_00248D30);
-        ((Fn1s_148038)((Obj_148038*)obj)->vtbl[51])(obj, 4);
-        *(Quad_148038*)((u8*)obj + 0x300) = D_00261AC0;
-        func_001EEB60((Ctx_148038*)self->f1EC4, ((Obj_148038*)obj)->f2A8, (u8*)obj + 0x140, (u8*)obj + 0x88);
-    }
-}
 
 // EXACT: callee declared with a4,a5 after the float parameters
 
-struct Locals_148298 {
-    s32 args[2];
-    s32 scratch[16];
-};
-
-extern void* D_00261AD0[28];
-
 Effect* func_0019EA78(s32 kind, EffectOwner* sys);
-void func_001481A0(void* self);
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
-
-void func_00148298(C58* self, s32 mode)
-{
-    C58* s = self;
-    if (s->state != mode) {
-        switch (mode) {
-        case 0:
-            if (s->f338 != 0) {
-                s->timeLeft = RandomFloatInRange(s->timeMin, s->timeMax);
-            }
-            break;
-        case 1:
-                Effect* n = CreateEffect(0x10, 0);
-                if (n != 0) {
-                    n->params = (const T219C_Params*)D_00261AD0;
-                    n->p134 = self;
-                    n->vt->m00(n, &s->v140, 1.0f, 0);
-                    n->p20 = self;
-                    n->rot50[0] = s->m110.r[0];
-                    n->rot50[1] = s->m110.r[1];
-                    n->rot50[2] = s->m110.r[2];
-                } else {
-                    func_001481A0(self);
-                }
-                D_0026CE48.vt->m14(&D_0026CE48);
-                f32 z = 0.0f;
-                StartSoundEffect(0x78, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
-                if (s->listener != 0) {
-                    Locals_148298 l;
-                    l.args[0] = 1;
-                    l.args[1] = (s32)self;
-                    s->listener->vtbl[31](s->listener, l.args);
-                }
-                mode = 2;
-            break;
-        }
-        SetStateNotifierState(self, mode);
-    }
-}
 
 extern T217D_Vt D_00218330;
 
@@ -1173,25 +639,5 @@ void func_0014B0C0(s32 n, f32* a, f32* l)
     }
 }
 
-f32 D_00261AB0[4] = { -0.6f, 0.85f, 300.0f, 0.0f };
-Quad_148038 D_00261AC0 = { 0x40A00000, (s32)0xC3FA0000, 0, 0 };
-void* D_00261AD0[28] = {
-    (void*)0xBF59999A, (void*)0x3F4CCCCD, (void*)0x42C80000, 0,
-    (void*)0xBF800000, (void*)0xBF800000, 0, 0,
-    (void*)0xBF800000, (void*)0x40000000, 0, 0,
-    (void*)0x3F800000, (void*)0x40400000, 0, 0,
-    0, 0, (void*)0x3F800000, 0,
-    (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
-    (void*)func_001481A0, 0, 0, 0
-};
-f32 D_00261B40 = 0.05f;
-void* D_00261B60[28] = {
-    (void*)0xBD4CCCCD, (void*)0x3F4CCCCD, (void*)0x42C80000, 0,
-    (void*)0xBF800000, (void*)0xBF800000, 0, 0,
-    (void*)0xBF800000, (void*)0x40000000, 0, 0,
-    (void*)0x3F800000, (void*)0x40400000, 0, 0,
-    0, 0, (void*)0x3F800000, 0,
-    (void*)0x3F800000, (void*)0xBF4CCCCD, 0, 0,
-    (void*)(void (*)(void))func_00148F80, 0, 0, 0
-};
 void* D_0026EC68;
+

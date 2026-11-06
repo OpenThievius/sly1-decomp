@@ -29,7 +29,7 @@ void func_001481A0(void* self)
         if (g->f19E4 < r) {
             g_saveData->f19E8 = 0;
             ((PSys_1481A0_eu*)&D_0026CE48)->f26C = 250.0f;
-            ((Sys_1481A0_eu*)&D_0026CE48)->fn274 = func_00148038;
+            ((Sys_1481A0_eu*)&D_0026CE48)->fn274 = (void (*)(void))func_00148038;
             ((Sys_1481A0_eu*)&D_0026CE48)->p278 = s->prev;
             return;
         }
