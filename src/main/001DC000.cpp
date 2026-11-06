@@ -154,14 +154,6 @@ void func_001DF290(C14* self, void* p)
     }
 }
 
-extern u8 D_002758D0[];
-
-void func_00152438(void* p, s32 n);
-
-void func_001DFD48()
-{
-    func_00152438(D_002758D0, 0x80);
-}
 
 void func_001DD610(World* self, f32 v)
 {
@@ -352,26 +344,7 @@ void func_001DDB58(World* self)
     }
 }
 
-extern u8 D_002758D0[];
 
-void func_00152440(void* p);
-
-void func_001DFD70()
-{
-    ClearList(D_002758D0);
-}
-
-struct Obj_001DFD90 { u8 pad[0x88]; s32 count; f32 scale; };
-
-void func_001F39F8(void* self);
-
-void func_001DFD90(void* self)
-{
-    Obj_001DFD90* o = (Obj_001DFD90*)self;
-    InitTransformObject(self);
-    o->count = 30;
-    o->scale = 25.0f;
-}
 
 struct Stack_001DC208 { s32 count; s32* values; };
 s32 func_001DC208(World* self, s32 index) { Stack_001DC208* s = &((Stack_001DC208*)self->f1F00)[index]; s->count--; return s->values[s->count]; }
@@ -485,24 +458,6 @@ void func_001DFB08(C14* self, s32 code, MessageBody* rec)
     HandleSwitchedColliderNotification(self, code, rec);
 }
 
-struct __attribute__((packed)) Pk8_001DFE38 {
-    s64 v;
-};
-
-struct Obj_001DFE38 {
-    u8 pad0[0x80];
-    Pk8_001DFE38 f80;
-};
-
-void func_001830D8(void* self);
-
-void func_001DFE38(Obj_001DFE38* self)
-{
-    Pk8_001DFE38 tmp;
-    tmp = self->f80;
-    CopyObjectData(self);
-    self->f80 = tmp;
-}
 
 struct __attribute__((aligned(16))) Quad_1DD548 { s32 v[4]; };
 struct __attribute__((packed)) Pack4_1DD548 { s32 v; };
@@ -546,25 +501,7 @@ void func_001DD628(void* self, f32 x)
     func_0011D928((s32)(s->f2318 + 0.5f));
 }
 
-extern u8 D_002758D0[];
-void func_00182D48(void* self);
-void func_00152470(void* table, void* self);
 
-void func_001DFDC8(void* self)
-{
-    RegisterObject(self);
-    AppendToList(D_002758D0, self);
-}
-
-extern u8 D_002758D0[];
-void func_00182ED0(void* self);
-void func_00152600(void* table, void* self);
-
-void func_001DFE00(void* self)
-{
-    UnregisterObject(self);
-    RemoveFromList(D_002758D0, self);
-}
 
 // NEAR: the loop, the calls and the frame match; retail stores the new block to 0x1AE4 before 0x1AE0 (the compiler emits 0x1AE0 first, and so does a store through a separate struct type).
 

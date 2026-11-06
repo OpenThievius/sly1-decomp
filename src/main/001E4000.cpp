@@ -5026,8 +5026,6 @@ u8 D_00273C50[608] = {0};
 u8 D_00273EB0[616] = {0};
 // readers pass only its address; byte buffer, size to next label
 u8 D_00274118[648] = {0};
-// readers pass only its address; byte buffer, size to next label
-u8 D_002758D0[16] = {0};
 // word read whole / address only, 4 bytes to next label
 // readers pass only its address; byte buffer, size to next label
 // word read whole / address only, 4 bytes to next label
