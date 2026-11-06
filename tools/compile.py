@@ -240,6 +240,19 @@ def place_remnants(asm):
     return asm[:at] + moved + asm[at:]
 
 
+def implementation_marker(ii):
+    """Name the preprocessed unit's main file as the compiler is given it. cc1plus of 2.9-ee-991111
+    takes a line marker that names the source for an included file, and then refuses
+    `#pragma implementation` as not at top level (2.95.3 does not); markers naming the unit itself
+    keep the pragma at top level. The name only reaches the debugging sections."""
+    text = ii.read_text()
+    first = text.split("\n", 1)[0]
+    if first.startswith("# 1 \""):
+        main = first[4:]
+        text = re.sub(r'^(# \d+ )%s' % re.escape(main), lambda m: m.group(1) + '"%s"' % ii, text, flags=re.M)
+        ii.write_text(text)
+
+
 def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     """Compile `src` to the object `out`. Returns the cc1plus assembly text.
 
@@ -280,6 +293,8 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
             if proc.returncode or (proc.stderr.strip() and not s.exists() and cmd[-1] == str(s)):
                 raise CompileError(((proc.stderr or proc.stdout).strip() or "%s failed" % name)
                                    + exit_note(proc.returncode))
+            if name == "cpp" and "#pragma implementation" in text:
+                implementation_marker(ii)
         asm = s.read_text()
         placed = place_remnants(asm)
         if placed != asm:

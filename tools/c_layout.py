@@ -488,8 +488,13 @@ def layout(ld_script, objects):
     if aliases:
         text += "\n" + "\n".join("PROVIDE(%s = %s);" % (a, b) for a, b in sorted(aliases.items())) + "\n"
     libcalls = check.load_libcalls("us")
+    commons = common_symbols(objects)
+    missing = sorted(commons - set(libcalls))
+    if missing:
+        raise LayoutError("%s is a common symbol, which config/us/libcalls.tsv gives no address" % missing[0])
     if libcalls:
-        text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(libcalls.items())) + "\n"
+        text += "\n" + "\n".join(("%s = 0x%X;" if n in commons else "PROVIDE(%s = 0x%X);") % (n, a)
+                                  for n, a in sorted(libcalls.items())) + "\n"
     # A global C names by its address that the disassembly has no label for (an address inside
     # another label): defined at that address, unless something else defines it.
     named = address_names(objects)
@@ -498,6 +503,21 @@ def layout(ld_script, objects):
     out = ld_script.with_name(ld_script.name.replace(".splat.ld", ".ld"))
     write_if_changed(out, text)
     return out, runs, placed, data_placed
+
+
+SHN_COMMON = 0xFFF2
+
+
+def common_symbols(objects):
+    """The common symbols the C objects define (a C++ class's type information, which GCC 2.95
+    leaves to the linker as a common symbol). The linker script discards COMMON, so each is set to
+    its retail address from config/us/libcalls.tsv, outright, as PROVIDE would not override it."""
+    out = set()
+    for path in objects.values():
+        for sym in elf.Elf(path.read_bytes()).symbols:
+            if sym["shndx"] == SHN_COMMON and sym["name"]:
+                out.add(sym["name"])
+    return out
 
 
 def address_names(objects):
