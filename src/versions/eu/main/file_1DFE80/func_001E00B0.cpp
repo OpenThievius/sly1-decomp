@@ -18,7 +18,7 @@ void func_001E00B0(Obj_1E00B0_eu* self)
         if (self->f57C != 0) {
         if (g_padRecord.fAA & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
-            StartLockedStreamVoice(g_currentWorld->f2310);
+            StartLockedStreamVoice((s32)g_currentWorld->f2310);
             if (g_currentWorld->f2314 != 0) {
                 SetScreenElementHoldTime(self, 15.0f);
                 func_eu_001AB238(self, g_currentWorld->f2314);

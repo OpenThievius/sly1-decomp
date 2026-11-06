@@ -3991,41 +3991,6 @@ void func_00200638();
 void func_00200680();
 
 extern const f32 D_0024DC94 = 3.40282347e+38f;
-extern const char D_0024DCB0[24] = "Nate Fox\nHokyo Lim";
-extern const char D_0024DCC8[32] = "Rob McDaniel\nSuzanne Kaufmann";
-extern const char D_0024DCE8[80] = "Rob McDaniel\nDev Madan\nAugie Pagan\nKarin Yamagiwa\nHokyo Lim\nSuzanne Kaufmann";
-extern const char D_0024DD38[40] = "Bruce Oberg\nRob McDaniel\nHokyo Lim";
-extern const char D_0024DD60[32] = "Rob McDaniel\nChris Heidorn";
-extern const char D_0024DD80[32] = "Brian Fleming\nChris Bentzel";
-extern const char D_0024DDA0[40] = "Brian Fleming\nDJ Stiner\nRob McDaniel";
-extern const char D_0024DDC8[40] = "Brian Fleming\nNate Fox\nTravis Kotzesbue";
-extern const char D_0024DDF0[32] = "Bruce Oberg\nNate Fox\nMatt Olsen";
-extern const char D_0024DE10[40] = "Chris Zimmerman\nMatt Olsen\nBruce Oberg";
-extern const char D_0024DE38[24] = "Nate Fox\nChris Bentzel";
-extern const char D_0024DE50[32] = "Rob McDaniel\nBrian Fleming";
-extern const char D_0024DE70[40] = "Nate Fox\nMatt Olsen\nAndrew Woods";
-extern const char D_0024DE98[40] = "Nate Fox\nBrian Fleming\nReid Johnson";
-extern const char D_0024DEC0[48] = "Suzanne Kaufmann\nKelle DeForrest\nRob McDaniel";
-extern const char D_0024DEF0[32] = "Chris Bentzel\nKelle DeForrest";
-extern const char D_0024DF10[64] = "Rob McDaniel\nSuzanne Kaufmann\nAndrew Woods\nKarin Yamagiwa";
-extern const char D_0024DF50[40] = "Nate Fox\nMatthew Morgaine\nChris Heidorn";
-extern const char D_0024DF78[40] = "Bruce Oberg\nGary Burd\nChris Bentzel";
-extern const char D_0024DFA0[24] = "Nate Fox\nMatt Olsen";
-extern const char D_0024DFB8[32] = "Rob McDaniel\nDarrell Plank";
-extern const char D_0024DFD8[24] = "Nate Fox\nAndrew Woods";
-extern const char D_0024DFF0[40] = "Chris Bentzel\nIan Stout\nKelle DeForrest";
-extern const char D_0024E018[32] = "Chris Bentzel\nRob McDaniel";
-extern const char D_0024E038[40] = "Rob McDaniel\nAugie Pagan\nAndrew Woods";
-extern const char D_0024E060[40] = "Matthew Morgaine\nChris Zimmerman";
-extern const char D_0024E088[32] = "Nate Fox\nChris Zimmerman";
-extern const char D_0024E0A8[32] = "Nate Fox\nMatthew Morgaine";
-extern const char D_0024E0C8[48] = "Matthew Morgaine\nMatt Olsen\nChris Bentzel";
-extern const char D_0024E0F8[32] = "Suzanne Kaufmann\nChris Bentzel";
-extern const char D_0024E118[40] = "Rob McDaniel\nDev Madan\nTravis Kotzesbue";
-extern const char D_0024E140[40] = "Press &2L&. for Bonus Commentary";
-extern const char D_0024E168[24] = "Best time: &10.%d";
-extern const char D_0024E180[24] = "Best time: &1%d:%02d";
-extern const char D_0024E198[40] = "Beginning Master Thief Sprint!";
 extern const double D_0024E9C8 = 0.1;
 extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
@@ -4662,10 +4627,7 @@ s32 D_00275714 = 0;
 s32 D_00275718 = 0;
 
 // Globals typed by worker dz07, from retail's bytes and their readers.
-struct Config_1E0848 { u8 pad000[4]; s8 marker04; u8 pad005[3]; f32 value08; f32 value0C; f32 value10; f32 value14; s32 value18; };
 
-// size: func_001E0848 clears 0x1C bytes and sets fields through 0x18 (label 0x20, 4 bytes padding before 8-aligned next label)
-Config_1E0848 D_002758E0 = {0};
 // size: s32 read as one word (func_00150000.cpp and 001AC000.cpp test bit 8)
 // size: s32 compared with 1/2 in 00148000 and 00194000
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
