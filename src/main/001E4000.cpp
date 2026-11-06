@@ -3984,8 +3984,8 @@ extern const f32 D_0024CAFC = 3.40282347e+38f;
 extern const char D_0024CBD0[8] = "&%c%c&.";
 extern const char D_0024CBD8[16] = "^05~b2a83d/\000\000\000\000";
 extern const char D_0024CBE8[8] = "~.^.\000\000\000";
-extern const f32 D_0024D164 = -3.40282347e+38f;
-extern const f32 D_0024D168 = 3.40282347e+38f;
+extern const f32 D_0024D164;
+extern const f32 D_0024D168;
 extern const f32 D_0024D260 = 3.40282347e+38f;
 
 // Globals typed by worker dv08, from retail's bytes and their readers.
@@ -4143,7 +4143,7 @@ f32 D_002743B8 = 26.0f;
 f32 D_002743BC = 340.0f;
 f32 D_002744A4 = 0.1f;
 f32 D_002744A8 = 1.3f;
-f32 D_002744F0 = 50.0f;
+extern f32 D_002744F0;
 s32 D_00274548[4] = { 0, 1, 2, 0 };
 s32 D_00274558[4] = { 2, 0, 1, 0 };
 s32 D_00274568[4] = { 0, 2, 1, 0 };
