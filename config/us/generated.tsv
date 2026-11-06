@@ -77,3 +77,10 @@ src/lib/type_info_kinds.cpp	__tf16__attr_type_info	func_002013F0
 src/lib/type_info_kinds.cpp	_$_16__attr_type_info	func_00201440
 src/lib/type_info_kinds.cpp	__tf19__pointer_type_info	func_00201460
 src/lib/type_info_kinds.cpp	_$_19__pointer_type_info	func_002014B0
+src/lib/exception.cpp	what__C9exception	func_001FEF00
+src/lib/exception.cpp	_$_13bad_exception	func_001FEF28
+src/lib/exception.cpp	__13bad_exception	func_001FEF58
+src/lib/exception.cpp	__tf13bad_exception	func_001FEF70
+src/lib/exception.cpp	_$_9exception	func_001FEFC0
+src/lib/exception.cpp	__9exception	func_001FEFF0
+src/lib/exception.cpp	__tf9exception	func_001FF008

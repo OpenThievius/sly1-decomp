@@ -10,7 +10,6 @@ compiler	2.95.3
 default	-O2 -G0 -fno-exceptions -fno-rtti
 src/lib/001F4000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/001F8000.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
-src/lib/001FC000.cpp	-O2 -G0	2.9-ee-991111
 src/lib/divide.c	-O2 -G0	2.9-ee-991111-01
 src/lib/divide_unsigned.c	-O2 -G0	2.9-ee-991111-01
 src/lib/remainder.c	-O2 -G0	2.9-ee-991111-01
@@ -35,3 +34,4 @@ src/lib/new_handler.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/type_info.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/type_info_kinds.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/allocate.cpp	-O2 -G0	2.9-ee-991111-01
+src/lib/exception.cpp	-O2 -G0	2.9-ee-991111-01

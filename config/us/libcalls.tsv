@@ -54,3 +54,6 @@ __tf9type_info	func_00200710	the type-information function of type_info
 __tf16__user_type_info	func_00200530	the type-information function of __user_type_info
 _$_9type_info	func_00200080	type_info's destructor
 __eq__C9type_infoRC9type_info	func_002000B0	type_info's comparison
+__ti13bad_exception	D_0062C5A8	the type information of bad_exception (a common symbol)
+__rtti_user	func_00200138	fill in the type information of a class with no base
+__rtti_class	func_002000F0	fill in the type information of a class with several bases

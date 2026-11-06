@@ -3534,17 +3534,17 @@ func_001FEA18	func_001FFDD8	match
 func_001FEA88	func_001FFE48	match	
 func_001FEB18	func_001FFED8	match	
 func_001FEBE0	func_001FFFA0	match	
-func_001FEC10	func_001FFFD0	match	
-func_001FEDC8	func_00200188	match	
-func_001FEE48	func_00200208	match	
+func_001FEC10	func_001FFFD0	match	rodata
+func_001FEDC8	func_00200188	match	rodata
+func_001FEE48	func_00200208	match	rodata
 func_001FEEC8	func_00200288	match	
 func_001FEF00	func_002002C0	match	
-func_001FEF28	func_002002E8	match	
-func_001FEF58	func_00200318	match	
-func_001FEF70	func_00200330	match	
-func_001FEFC0	func_00200380	match	
-func_001FEFF0	func_002003B0	match	
-func_001FF008	func_002003C8	match	
+func_001FEF28	func_002002E8	match	rodata
+func_001FEF58	func_00200318	match	rodata
+func_001FEF70	func_00200330	match	rodata
+func_001FEFC0	func_00200380	match	rodata
+func_001FEFF0	func_002003B0	match	rodata
+func_001FF008	func_002003C8	match	rodata
 func_001FF048	func_00200408	match	
 func_001FF090	func_00200450	match	
 func_001FF0E0	func_002004A0	match	

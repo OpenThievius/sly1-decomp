@@ -8,6 +8,7 @@
 #pragma interface
 
 #include "exception.h"
+#include "placement.h"
 
 class type_info {
     const char* name_;
