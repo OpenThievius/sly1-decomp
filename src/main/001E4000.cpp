@@ -3952,7 +3952,6 @@ extern const char D_0024A678[16] = "Sinking Peril";
 extern const char D_0024A688[24] = "A Strange Reunion";
 
 // Globals typed by worker dv07, from retail's bytes and their readers.
-extern const f32 D_0024A844 = 3.40282347e+38f;
 extern const f32 D_0024AB7C = 3.40282347e+38f;
 extern const f32 D_0024AFA0 = 3.40282347e+38f;
 extern const f32 D_0024B164 = 3.40282347e+38f;
@@ -4499,7 +4498,6 @@ GameProgress* D_002623C0 = &D_0027C220;
 G27C230* D_002623C4 = D_0027C230;
 G27C230* D_002623C8 = D_0027C230;
 s32 D_002623CC = -1;
-f32 D_00262A28[2] = { 1.25f, 1.5f };
 f32 D_00262E14 = 455.0f;
 f32 D_00262E18 = 0.699999988f;
 f32 D_00262E1C = 0.600000024f;
@@ -4777,8 +4775,6 @@ List01 D_002626E8 = {0};
 List01 D_002626F8 = {0};
 // size: list head of three words, link offset at +8 (0x558); func_00150298 walks it
 List01 D_00262708 = {0};
-// size: s32 pointer, loaded and stored as a word (func_0016DD00 clears it)
-s32 D_002629C8 = 0;
 // size: pointer, word accesses only
 Player* D_00262E10 = 0;
 // size: s32, word load/store only

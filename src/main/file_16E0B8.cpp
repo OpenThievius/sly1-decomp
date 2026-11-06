@@ -19,7 +19,6 @@ f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.6999
 u16 D_00262A50[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
 u32 D_00262A68[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
 
-
 void func_001E5278(s32 mode);
 void func_0016F408(void);
 void func_0016F430(s32 flags);
@@ -131,7 +130,6 @@ void func_0016E1A0(PadRecord* self, s32 a, s32 b)
     self->fBC = ReservePermanentMemory(0x20);
     self->fC0 = 1;
 }
-
 
 s32 func_00204590(s32 a, s32 b);
 s32 func_002047F8(s32 a, s32 b, s32 c, s32 d);
@@ -294,7 +292,6 @@ void func_0016E238(PadRecord* self)
     SetPadConnectionState(self, mode, n);
 }
 
-
 void func_001A7B20(void* a, s32 b, s32 c);
 
 void func_0016E630(PadRecord* self, s32 mode, s32 n)
@@ -336,7 +333,6 @@ void func_0016E630(PadRecord* self, s32 mode, s32 n)
 }
 
 INCLUDE_ASM(func_0016E738);
-
 
 void func_001F5C0C(u8* p, s32 a, s32 b);
 s32 func_00204510(s32 a, s32 b, u8* c);
