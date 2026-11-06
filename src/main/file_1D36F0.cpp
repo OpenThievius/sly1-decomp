@@ -11,6 +11,7 @@
 #include "output_buffer.h"
 #include "shapes.h"
 #include "globals.h"
+#include "game_clock.h"
 
 s32 D_00274FA0[2] = {286, 287};
 s32 D_00274FA8[2] = {288, 289};
@@ -152,7 +153,6 @@ void func_001D4848(Player* self)
 INCLUDE_RODATA(jtbl_0024DBF0);
 ASM_FUNC(func_001D48E8);
 
-extern f32 D_00261858[];
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA728(f32* p, s32 a, f32 b, f32 c, f32 d);
 s32 func_001300E8(void* e, s32 k);
@@ -165,17 +165,17 @@ void func_001D4A98(Player* self) {
     switch (self->f2228) {
     case 0x2B: {
         f32 t = func_00205778(self->v150.y, self->v150.x);
-        self->f638 = ApproachAngleWithRamp(D_00275030, 0, self->f638, t + 3.1415927f, g_gameClock[2]);
-        if (0.25f < g_gameClock[1] - self->f222C && self->f690 != 0) {
+        self->f638 = ApproachAngleWithRamp(D_00275030, 0, self->f638, t + 3.1415927f, g_gameClock.dt);
+        if (0.25f < g_gameClock.time - self->f222C && self->f690 != 0) {
 
             RunPlayerCallback(self);
         }
         break;
     }
     case 0x2C: {
-        if (*(f32*)((u8*)self->f2514 + 0x18) < g_gameClock[1]) {
+        if (*(f32*)((u8*)self->f2514 + 0x18) < g_gameClock.time) {
             RunPlayerCallback(self);
-        } else if (self->f2B70 != 0 && *(f32*)((u8*)self->f2514 + 0x18) < g_gameClock[1] + 0.25f &&
+        } else if (self->f2B70 != 0 && *(f32*)((u8*)self->f2514 + 0x18) < g_gameClock.time + 0.25f &&
                    (IsObjectOfKind(self->f2B70, 0x76) || IsObjectOfKind(self->f2B70, 0x70) ||
                     IsObjectOfKind(self->f2B70, 0x71) || IsObjectOfKind(self->f2B70, 0x81) ||
                     IsObjectOfKind(self->f2B70, 0x6F) || IsObjectOfKind(self->f2B70, 0x7F))) {
@@ -188,7 +188,7 @@ void func_001D4A98(Player* self) {
                 func_00175170(self, 2, r);
             }
         } else {
-            func_001782C0(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock[1], 0, (u8*)self->f2514 + 0x20, 0);
+            func_001782C0(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock.time, 0, (u8*)self->f2514 + 0x20, 0);
         }
         break;
     }
