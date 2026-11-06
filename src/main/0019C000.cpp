@@ -153,13 +153,6 @@ void func_0019FE10(Effect* self)
     self->i20 = v;
 }
 
-void func_0019CE38(C8B* self, f32 x, f32 y, f32 z)
-{
-    self->f80 = 1;
-    self->f54 = x;
-    self->f58 = y;
-    self->f5C = z;
-}
 
 struct __attribute__((aligned(16))) Vec_19D2A8 { s32 a, b, c, d; };
 struct Frame_19D2A8 { Vec_19D2A8 q0; Vec_19D2A8 q1; s32 w20; s32 w24; };
@@ -170,19 +163,6 @@ void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
 void func_0019C9C8(void* a, s32 b, void* c);
 
-void func_0019D2A8(Player* self, void* x, void* y)
-{
-    Frame_19D2A8 f;
-    if (y != 0) {
-        f32 d = self->f2424 - g_gameClock[1];
-        if (d < g_gameClock[2]) {
-            d = g_gameClock[2];
-        }
-        func_0019CEC0(x, y, &f.q0, d);
-        func_0019D0E0(x, &f.q0, &f.q1, &f.w20, &f.w24);
-        func_0019C9C8(x, f.w20, &f.q1);
-    }
-}
 
 extern f32 D_0026185C;
 
@@ -434,18 +414,6 @@ s32 func_00128018(void* a, s32 b, void* c, void* d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
 void func_0019C9C8(void* a, s32 b, void* c);
 
-void func_0019D338(void* self, void* dst, Src_19D338* src, f32* k)
-{
-    Frame_19D338 f;
-    func_00128018(0, src->f18, (u8*)self + 0x140, &f.q0);
-    Obj_19D338* o = src->f34;
-    if (o->vtbl[12] != 0) {
-        o->vtbl[12](o, &f.q0, 0, &f.q1, 0, 0, *k, k);
-    }
-    func_00128018((void*)src->f18, (s32)self, &f.q1, &f.q2);
-    func_0019D0E0(dst, &f.q2, &f.q3, &f.w40, &f.w44);
-    func_0019C9C8(dst, f.w40, &f.q3);
-}
 
 struct Cursor_19E168;
 struct Cursor_19E168 {
@@ -503,69 +471,6 @@ void func_0019CC10(f32 x, f32 y, f32 z, C8B* o, void* p);
 f32 func_00137DF8(Stream_19C470* in);
 void func_0011EC40(C8B* o, Stream_19C470* in);
 
-void func_0019C470(C8B* o, Stream_19C470* in)
-{
-    {
-        s32 i = 0x17;
-        s32* p = (s32*)((u8*)o + 0xF0);
-        do {
-            i--;
-            *p = ReadBufferedS16(in);
-            p += 8;
-        } while (i >= 0);
-    }
-    s32 i = 0;
-    o->f48 = ReadBufferedS16(in);
-    func_00137FB0(in, o->fA0);
-    o->fC4 = (Rec8B*)AllocateZeroedFrontMemory(o->fA4 * 100);
-    for (i = 0; i < o->fA4; i++) {
-        f32 x;
-        f32 y;
-        f32 z;
-        Rec8B* r = &o->fC4[i];
-        o->fC4[i].id = ReadBufferedS8(in);
-        func_0019CD90(o, i, &x, &y, &z);
-        func_0019CC10(x, y, z, o, r->pos);
-    }
-    o->fC8 = ReadBufferedS16(in);
-    o->fCC = (u8*)AllocateZeroedFrontMemory(o->fC8 << 4);
-    for (s32 e = 0; e < o->fC8; e++) {
-        s32* r = (s32*)(o->fCC + (e << 4));
-        s32 j = 3;
-        do {
-            j--;
-            *r = ReadBufferedS16(in);
-            r++;
-        } while (j >= 0);
-    }
-    o->fD0 = o->fD4 = ReadBufferedS16(in);
-    o->fD8 = (Tri8B*)AllocateZeroedFrontMemory(o->fD0 * 12);
-    o->fDC = (Edge8B*)AllocateZeroedFrontMemory(o->fD0 << 3);
-    for (s32 n = 0; n < o->fD0; n++) {
-        Tri8B* t = &o->fD8[n];
-        Edge8B* e = &o->fDC[n];
-        s32 a = ReadBufferedS16(in);
-        s32 b = ReadBufferedS16(in);
-        s32 c = ReadBufferedS16(in);
-        t->a = o->fB0 + (a << 5);
-        if (b > 0) {
-            b--;
-            t->b = (u8*)&o->fD8[b];
-        } else if (b < 0) {
-            b = ~b;
-            e->a = o->fCC + (b << 4);
-        }
-        if (c > 0) {
-            c--;
-            t->c = (u8*)&o->fD8[c];
-        } else if (c < 0) {
-            c = ~c;
-            e->b = o->fCC + (c << 4);
-        }
-    }
-    o->fE0 = ReadBufferedFloat(in);
-    ReadPropertyRecords(o, in);
-}
 
 // NEAR: 3 lines: prologue schedules "li t0,17" before the two addiu sp addresses (retail after them)
 
@@ -680,28 +585,6 @@ void func_00128018(void *a, s32 b, void *c, struct Buf_19C068 *d);
 void func_001B9860(ObjectGatherer *a, struct Buf_19C068 *b, void *c);
 void func_001B7C40(ObjectGatherer *self, s32 flag);
 
-void func_0019C068(ObjectGatherer *self, s32 a1) {
-    if (a1 != 0) {
-        RemoveFromList(&self->world->list1C60, self);
-        ((struct Ob_19C068 *)self->f5FC)->vtbl[7](self->f5FC);
-    } else {
-        struct Buf_19C068 buf;
-        AppendToList(&self->world->list1C60, self);
-        ((struct Ob_19C068 *)self->f5FC)->vtbl[6](self->f5FC);
-        func_00128018(*(void **)((u8 *)self->f660 + 0x18), 0,
-                      (u8 *)self->f660 + 0x40, &buf);
-        func_001B9860(self, &buf, (void*)&g_unitZVector);
-    }
-    SetColliderPartListed(self, a1 == 0);
-    Frame_19C068 it(&self->parts);
-    s32 node = it.Next();
-    while (node != 0) {
-        SetColliderPartListed((ObjectGatherer *)node, a1 == 0);
-        node = it.Next();
-    }
-    self->desc02()->m20(self, (Vec02 *)&D_00248D30);
-    self->desc02()->m21(self, (Vec02 *)&D_00248D30);
-}
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
 void func_0019ECE0();
@@ -787,17 +670,6 @@ extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(Effect* self))func_0
 
 
 
-void func_0019CD90(C8B* self, s32 p, f32* out0, f32* out1, f32* out2)
-{
-    s32 n = self->f48;
-    s32 q = p / ((n + 1) * (3 * n + 1));
-    s32 r = p - q * (n + 1) * (3 * n + 1);
-    s32 m = r / (3 * n + 1);
-    s32 s = r - m * (3 * n + 1);
-    *out0 = (f32)(q - n) / (f32)self->f48;
-    *out1 = (f32)m / (f32)self->f48;
-    *out2 = (f32)s / (f32)self->f48;
-}
 
 extern f32 D_00261858[];
 
@@ -867,46 +739,6 @@ extern s32 D_0026ABD0[];
 extern s32 D_0026ABE0[];
 extern s32 D_0026ABD8[];
 
-void func_0019C728(C8B* self)
-{
-    Slot8B* s;
-    s32 i;
-    StartObject(self);
-    self->f3C = func_0015A448(self->world, self->first34, self);
-    if (self->f3C == 0) return;
-    self->f40 = func_0015A480(self->world, self->second38, self->f3C);
-    if (self->f40 == 0) return;
-    for (i = 0; i < 24; i++) {
-        s = &self->slots[i];
-        Node8B* n = (Node8B*)func_0015A480(self->world, s->fC, self->f3C);
-        s->n4 = n;
-        if (n != 0) n->vtbl[7](n);
-    }
-    ComputeWrappedDeltas(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
-    func_00139038(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
-    if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
-    void* nd = func_0015A480(self->world, 0x36, self->f3C);
-    if (nd != 0) func_00139B38(self->f3E4, nd);
-    f32 buf[24];
-    func_0019CC10(self, buf, self->f54, self->f58, self->f5C);
-    Slot8B* d = self->slots;
-    f32* src = buf;
-    for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
-    func_001399F8(self->f3E4, 0x20, 0x18, self->slots);
-    func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q70, 0, 0, 0);
-    self->f60 = self->f3E4->pC0->p8->f8;
-    if (self->f80 != 0) {
-        func_0019CC10(self, buf, self->f84, self->f88, self->f8C);
-        d = self->slots;
-        src = buf;
-        for (i = 0; i < 24; i++, d++) *(f32*)d = *src++;
-        func_001399F8(self->f3E4, 0x20, 0x18, self->slots);
-        func_0012CD78(self->f3E4->pC0->p8->f8, 0.0f, self->f3E4, self->f40, self->f3C, 1, &self->q90, 0, 0, 0);
-    } else {
-        self->q90 = self->q70;
-    }
-    self->f50 = 1;
-}
 
 struct Iter_19E558 { List01* list; u8* link; s32 offset; Iter_19E558* prev; };
 
@@ -1002,14 +834,12 @@ void func_0019E558(EffectOwner* self)
     }
 }
 
-s32 D_0026ABD0[2] = { 0x130, 0x132 };
-s32 D_0026ABD8[2] = { 2, 0 };
-s32 D_0026ABE0[4] = { 0x10, 0, 0, 0 };
 
 struct Pkt_19DDA0;
 void func_001613C0(Pkt_19DDA0* p, s32 a, s32 b, u64 c);
 void func_00161708(Pkt_19DDA0* p, s32 reg, u64 value);
 void func_00161458(Pkt_19DDA0* p, u32 c);
 void func_001615F0(Pkt_19DDA0* p, s32 a, s32 b, s32 c, s32 d);
+
 
 

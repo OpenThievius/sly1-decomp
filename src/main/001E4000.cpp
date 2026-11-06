@@ -4033,8 +4033,6 @@ extern const u8 D_0026A0F8[];
 extern const u8 D_0026A100[];
 extern const u8 D_0026A108[];
 extern const u8 D_0026A110[];
-void func_00199850();
-struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
 struct Sjis_274588 { u16 code; u16 id; };
 
 f32 D_002641F0[16] = { 24.0f, -24.0f, 0.0f, 0.0f, 24.0f, 24.0f, 0.0f, 0.0f, -24.0f, -24.0f, 0.0f, 0.0f, -24.0f, 24.0f, 0.0f, 0.0f };
@@ -4048,11 +4046,6 @@ f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
 f32 D_00264A38 = 20.0f;
 f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
 f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
-f32 D_0026A910 = 100.0f;
-f32 D_0026A968 = 300.0f;
-Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
-f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
-f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
 f32 D_0026B530[4] = { 1.0f, 1.666667f, -2.666667f, 0.0f };
 f32 D_0026B540 = 0.5f;
 f32 D_0026B544 = 0.5f;
@@ -4716,8 +4709,6 @@ s32 D_002626D0 = 0;
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
 // size: readers use it as an f32 (lwc1/swc1), label is 4 bytes
-// size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
-s32 D_0026A914 = 0;
 // size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
 // size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
 extern s32 D_0026EC58;
