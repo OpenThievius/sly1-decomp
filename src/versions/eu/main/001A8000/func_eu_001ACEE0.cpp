@@ -59,12 +59,12 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     f32 t = 0.0f;
     s32 flag = 0;
     if (self->f58C != t) {
-        f32 d = ((Clock_eu_1ACEE0*)&D_00261858)->f4 - self->f58C;
+        f32 d = ((Clock_eu_1ACEE0*)&g_gameClock)->f4 - self->f58C;
         if (d < 0.5f) t = 1.0f - (d + d);
         flag = d < 0.75f;
     }
     u32 grey = 0xFF808080;
-    self->f584 = func_001EA4B8(&D_eu_0027DB10, 0, self->f584, self->f588, ((Clock_eu_1ACEE0*)&D_00261858)->f8);
+    self->f584 = ApproachValueWithRamp(&D_eu_0027DB10, 0, self->f584, self->f588, ((Clock_eu_1ACEE0*)&g_gameClock)->f8);
     f32 y = self->f59C;
     f32 h = self->f584 * y;
     y -= h;
@@ -82,7 +82,7 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     {
     Rgba_eu_1ACEE0 col;
     col.c[0] = 0x20; col.c[1] = 0x20; col.c[2] = 0x20; col.c[3] = 0xC0;
-    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, (u8*)&D_00262280);
+    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, 0x20, 0x20, 0x20, 0xC0, (u8*)&g_gsPacketWriter);
     {
         out.x = self->f52C + self->f590;
         out.y = self->f530 + self->f594 + y;
@@ -93,16 +93,16 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
         b.c[0] = 0xC0; b.c[1] = 0xC0; b.c[2] = 0xC0; b.c[3] = 0xFF;
         LerpRgba_eu_1ACEE0::Do(&col, &a, &b, t);
     }
-    func_0019DDA0(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], (u8*)&D_00262280);
+    WriteColoredSpritePacket(out.x, out.y, out.x + out.w, out.y + out.h, col.c[0], col.c[1], col.c[2], col.c[3], (u8*)&g_gsPacketWriter);
     }
-    func_0015C8B8(self->text, self->f51C, self->f51C);
+    PushFontScale(self->text, self->f51C, self->f51C);
     VEnt_eu_1ACEE0* ve = &self->text->vtbl[8];
-    ve->fn((u8*)self->text + ve->delta, self->f52C, self->f530, 0x7A, out.f10, (u8*)&D_00262280);
+    ve->fn((u8*)self->text + ve->delta, self->f52C, self->f530, 0x7A, out.f10, (u8*)&g_gsPacketWriter);
     f32 dx = 0.0f;
     f32 dy = dx;
     if (flag) {
-        dx = func_00205400(((Clock_eu_1ACEE0*)&D_00261858)->f10 * 40.0f) * 8.0f;
-        dy = func_00205210(((Clock_eu_1ACEE0*)&D_00261858)->f10 * 15.0f) * 4.0f;
+        dx = func_00205400(((Clock_eu_1ACEE0*)&g_gameClock)->f10 * 40.0f) * 8.0f;
+        dy = func_00205210(((Clock_eu_1ACEE0*)&g_gameClock)->f10 * 15.0f) * 4.0f;
     }
     out.x = self->f52C + self->f5A0 + dx;
     out.y = self->f530 + self->f5A4 + dy;
@@ -111,6 +111,6 @@ void func_eu_001ACEE0(Self_eu_1ACEE0* self)
     out.f18 = 1;
     out.f1C = 1;
     char str[2] = { self->f57C + 0x72, 0 };
-    func_eu_0015C778(self->text, str, &out, 0, (u8*)&D_00262280);
-    func_0015C900(self->text);
+    func_eu_0015C778(self->text, str, &out, 0, (u8*)&g_gsPacketWriter);
+    PopFontScale(self->text);
 }

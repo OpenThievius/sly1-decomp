@@ -7,10 +7,10 @@ extern s32 D_00275F84;
 s32 func_001E9A10(void)
 {
     if (D_00275F84 != 0) goto fail;
-    if (((Gate_1E9A10_eu*)&D_0026FF68)->f56C != 0) goto fail;
-    if (((Gate_1E9A10_eu*)&D_0026FF68)->f560 != 0) goto fail;
-    if (((Gate_1E9A10_eu*)&D_0026F808)->f56C != 0) goto fail;
-    if (((Gate_1E9A10_eu*)&D_0026F808)->f560 == 0) goto ok;
+    if (((Gate_1E9A10_eu*)&g_pauseMenuElement)->f56C != 0) goto fail;
+    if (((Gate_1E9A10_eu*)&g_pauseMenuElement)->f560 != 0) goto fail;
+    if (((Gate_1E9A10_eu*)&g_mapScreenList)->f56C != 0) goto fail;
+    if (((Gate_1E9A10_eu*)&g_mapScreenList)->f560 == 0) goto ok;
 fail:
     return 0;
 ok:

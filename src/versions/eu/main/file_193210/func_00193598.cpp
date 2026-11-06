@@ -39,7 +39,7 @@ void* func_00193598(s32 x, s32 index)
             id = D_eu_0026ABE4 != 0 ? row->ids[1] : row->ids[0];
             break;
         case 13:
-            id = row->ids[func_001A7EE8(D_eu_002636F0) == 0];
+            id = row->ids[IsPadPatternEnabled(D_eu_002636F0) == 0];
             break;
         case 15:
             id = row->ids[(D_eu_002636F0->flags & 0x80) != 0];
@@ -63,7 +63,7 @@ void* func_00193598(s32 x, s32 index)
         Slot_193598_eu* slot = &D_eu_00265CD0[n];
         if (slot->f0C != 0.0f) {
             out = D_eu_0026B530[n];
-            func_001935B0(slot, out);
+            FormatGameSummary(slot, out);
         } else {
             id = 0x87;
             if (x < 0x12) {

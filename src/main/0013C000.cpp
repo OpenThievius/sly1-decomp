@@ -14,7 +14,7 @@ void func_001BE4D8(void* p);
 s32 func_0013C950(ChildGroupObject* self)
 {
     if (self->slot == 0) {
-        func_001BE4D8(&self->slot);
+        InitSoundParams(&self->slot);
     }
     return (s32)self->slot;
 }
@@ -35,7 +35,7 @@ extern void func_0013C9B0(InitialState* state);
 void func_0013C988(InitialState* state, s32 initialValue, s32 secondaryValue) {
 	state->field_04 = initialValue;
 	state->field_00 = secondaryValue;
-	func_0013C9B0(state);
+	ResetRingBuffer(state);
 }
 
 void func_0013C9B0(InitialState* state)
@@ -95,15 +95,15 @@ void* func_001DBCC8(void* target, Hook_CE40 fn, MaskedCollider* ctx, s32 a3, s32
 
 void func_0013CE40(MaskedCollider* self)
 {
-    func_00124A48(self);
-    func_001DBCC8(self->world, func_0013CE80, self, 0, 0);
+    StartPlacedObject(self);
+    AppendQueuedCall(self->world, func_0013CE80, self, 0, 0);
 }
 
 void func_001B93F8(void* self);
 
 void func_0013D068(MaskedCollider* self)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
     if (self->f678 != 0) {
         self->f678 = 0;
         self->desc20()->m48(self);
@@ -119,9 +119,9 @@ void func_0013D820(MaskedCollider* self, s32 v)
 {
     self->hold = v;
     if (v != 0) {
-        func_00141040(D_00261420, self->id688);
+        SetFlagTableBit(g_flagTable, self->id688);
     } else {
-        func_001410A0(D_00261420, self->id688);
+        ClearFlagTableBit(g_flagTable, self->id688);
     }
 }
 
@@ -177,11 +177,11 @@ void func_0013DC38(TimedStateObject* self)
 {
     s32 next;
 
-    func_001B93F8(self);
+    UpdateCollider(self);
     next = self->state;
     if (next != 0) {
         if (next == 1) {
-            if (self->tries >= 2 || self->limit < D_0026185C - self->stamp) {
+            if (self->tries >= 2 || self->limit < g_gameTime - self->stamp) {
                 next = 2;
             }
         }
@@ -193,7 +193,7 @@ void func_00127378(TimedStateObject* self, s32 kind, ObjectMessage* msg);
 
 void func_0013DCA8(TimedStateObject* self, s32 kind, ObjectMessage* msg)
 {
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0xF) {
         if ((TimedStateObject*)msg->target == self) {
             SetTimedState(self, 1);
@@ -205,14 +205,14 @@ void func_0013CCF8(MaskedCollider* self);
 
 void func_0013DDB8(C21* self)
 {
-    func_0013CCF8(self);
+    InitMaskedCollider(self);
     self->mask = 5;
     self->f698 = -1;
 }
 
 void func_0013DDF0(C25* self)
 {
-    func_0013CCF8(self);
+    InitMaskedCollider(self);
     self->mask = 1;
     self->scale = 1.0f;
     self->sel6C4 = -1;
@@ -227,11 +227,11 @@ void func_0013DEE8(C26* self, u8* table, s32 index)
 {
     s32 value;
 
-    func_0013DE38(self, table, index);
+    LatchContactObject(self, table, index);
     if (self->hold != 0) return;
     value = *(s32*)(table + ((1 - index) << 6));
-    if (func_001300E8((void*)value, 5) != 0) {
-        if (func_0013DB28(self, value) != 0) {
+    if (IsObjectOfKind((void*)value, 5) != 0) {
+        if (IsObjectAccepted(self, value) != 0) {
             self->sel6D4 = (SwitchedCollider*)value;
         }
     }
@@ -246,11 +246,11 @@ void func_0013DF68(C26* self)
     s32 local[4];
     func_0013D068(self);
     if (self->sel6D4 != 0) {
-        if (self->sel6D4 != func_001925F0()) {
+        if (self->sel6D4 != GetActiveSwitchedCollider()) {
             self->sel6D4 = 0;
             return;
         }
-        func_001D7098(local, self->f6D0, self);
+        InitOwnerMessage(local, self->f6D0, self);
         SwitchedCollider* p = self->sel6D4;
         p->desc05()->m4C(p, local);
         self->sel6D4 = 0;
@@ -268,7 +268,7 @@ s32 func_0013E868(Set_0013E868* set, void* key)
     if (i >= 0) {
         s32* p = (s32*)(i * 4 + (s32)base);
         do {
-            if (func_001833F0(key, *p) != 0) {
+            if (MatchesObjectId(key, *p) != 0) {
                 return 1;
             }
             i--;
@@ -305,7 +305,7 @@ void* func_00140FF8(void* p);
 void func_0013E918(void* self)
 {
     Zone28* s = (Zone28*)self;
-    s->id120 = (s32)func_00140FF8(D_00261420);
+    s->id120 = (s32)TakeFlagTableIndex(g_flagTable);
     s->f140 = -1;
 }
 
@@ -327,12 +327,12 @@ void func_0013EA38(Zone28* self)
     p = self->pairs;
     n = 1;
     do {
-        func_0013E7C0(target, p, self->owner);
+        ResolveZoneObjects(target, p, self->owner);
         p++;
     } while (--n >= 0);
     if (self->f11C != 0) {
-        if (func_00141008(D_00261420, self->id120)) {
-            func_001DBCC8(target, (void*)func_0013EAE0, self, 0, 0);
+        if (TestFlagTableBit(g_flagTable, self->id120)) {
+            AppendQueuedCall(target, (void*)func_0013EAE0, self, 0, 0);
         }
     }
 }
@@ -344,7 +344,7 @@ void func_0013EAE0(void* selfp, s32 mode)
 {
     Zone28* self = (Zone28*)selfp;
     if (mode == 0) {
-        func_001DBCC8(self->owner->world, (void*)func_0013EAE0, self, 0xC, 0);
+        AppendQueuedCall(self->owner->world, (void*)func_0013EAE0, self, 0xC, 0);
     } else {
         func_0013EF50(self, 1, 1);
     }
@@ -355,7 +355,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q);
 
 void func_0013F070(Zone28* self, void* p)
 {
-    func_001837E0(self->owner, 3, 0, 0);
+    TriggerScriptEvent(self->owner, 3, 0, 0);
     func_0013ED90(self, 1, p, 0);
     Collider* o = self->owner;
     o->desc->m0E(o, 13, self);
@@ -366,8 +366,8 @@ void func_0013E918(void* p);
 
 void func_0013F0E0(TriggerZone* self)
 {
-    func_001B7968(self);
-    func_0013E918(&self->zone);
+    InitCollider(self);
+    InitZoneRecord(&self->zone);
 }
 
 void func_001BAC30(Collider* self);
@@ -375,8 +375,8 @@ void func_0013E950(Zone28* p, Collider* self);
 
 void func_0013F110(TriggerZone* self)
 {
-    func_001BAC30(self);
-    func_0013E950(&self->zone, self);
+    LoadCollider(self);
+    CollectZoneChildren(&self->zone, self);
 }
 
 void func_001BA130(Collider* self);
@@ -384,7 +384,7 @@ void func_001BA130(Collider* self);
 void func_0013F6C0(TriggerZone* self)
 {
     s32 keep = self->zone.id120;
-    func_001BA130(self);
+    CopyCollider(self);
     self->zone.id120 = keep;
     self->zone.owner = self;
 }
@@ -392,7 +392,7 @@ void func_0013F6C0(TriggerZone* self)
 extern void func_0013EB68(void* state);
 
 void func_0013F6F8(TriggerZone* state) {
-	func_0013EB68(&state->zone);
+	SetZoneMode(&state->zone);
 }
 
 void func_0013DA48(MaskedCollider* obj, s32 value) { if ((u32)obj->count640 < 4) { obj->list644[obj->count640++] = (void*)value; obj->mask |= 2; } }
@@ -430,14 +430,14 @@ void func_0013D9F0(MaskedCollider* self, s32 enabled)
 
 void* func_0013DAF0(MaskedCollider* self)
 {
-    if (!self->f6B4) func_001BE4D8(&self->f6B4);
+    if (!self->f6B4) InitSoundParams(&self->f6B4);
     return self->f6B4;
 }
 
 s32 func_0013EC00(void* list, s32 size, void* count, s32 a, s32 b, s32 c, s32 d);
 void func_0013EB30(Zone28* self, s32 a, s32 b, s32 c, s32 d)
 {
-    func_0013EC00(self->table14C, 8, &self->count148, a, b, c, d);
+    UpsertKeyedEntry(self->table14C, 8, &self->count148, a, b, c, d);
 }
 
 void func_001BAC30(void* self);
@@ -447,12 +447,12 @@ void func_00182ED8(s32 a);
 
 void func_0013CD80(MaskedCollider* self)
 {
-    func_001BAC30(self);
+    LoadCollider(self);
     if (self->f614 == -1) {
-        func_00159478(&self->f618, self);
+        FindOrBuildMemberGroup(&self->f618, self);
         return;
     }
-    s32 v = func_0015A418(self->world, 0x101, self->f614, self);
+    s32 v = FindFirstObjectById(self->world, 0x101, self->f614, self);
     self->f618 = v;
     if (v != 0) {
         func_00182ED8(v);
@@ -468,7 +468,7 @@ void func_0013E6C8(Self_13E6C8* self, Tree03* src, Base_13E6C8* base, Tree03* ds
 {
     dst->count = src->count;
     dst->count2 = src->count2;
-    dst->nodes = (TreeNode03*)func_0018D500(src->count * 12);
+    dst->nodes = (TreeNode03*)AllocateFrontMemory(src->count * 12);
     for (s32 i = 0; i < dst->count; i++) {
         TreeNode03* s = &src->nodes[i];
         TreeNode03* d = &dst->nodes[i];
@@ -519,7 +519,7 @@ void* func_00140FF8(void* p);
 void func_0013CCF8(MaskedCollider* self)
 {
     MaskedCollider* o = self;
-    func_001B7968(self);
+    InitCollider(self);
     o->f628 = 0.8f;
     o->f62C = 1.2f;
     o->f68C = 1;
@@ -529,7 +529,7 @@ void func_0013CCF8(MaskedCollider* self)
     o->tint[2] = 16;
     o->tint[1] = 16;
     o->tint[0] = 16;
-    o->id688 = (s32)func_00140FF8(D_00261420);
+    o->id688 = (s32)TakeFlagTableIndex(g_flagTable);
     o->f614 = -1;
 }
 
@@ -545,7 +545,7 @@ s32 func_0013DB28(MaskedCollider* self, C19* msg)
         return 1;
     }
     if (self->mask & 1) {
-        if (msg == func_001925F0()) {
+        if (msg == GetActiveSwitchedCollider()) {
             return 1;
         }
     }
@@ -558,12 +558,12 @@ s32 func_0013DB28(MaskedCollider* self, C19* msg)
         return 0;
     }
     for (s32 i = 0; i < self->count640; i++) {
-        if (func_001833F0(msg, self->list644[i]) != 0) {
+        if (MatchesObjectId(msg, self->list644[i]) != 0) {
             return 1;
         }
     }
     for (s32 i = 0; i < self->count654; i++) {
-        if (func_001300E8(msg, self->list658[i]) != 0) {
+        if (IsObjectOfKind(msg, self->list658[i]) != 0) {
             return 1;
         }
     }
@@ -626,7 +626,7 @@ s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
             if (r != 1) {
                 return r;
             }
-            void* v = func_00129C20(out, p->f4);
+            void* v = FindObjectHandle(out, p->f4);
             if (v == 0) {
                 count++;
             } else {
@@ -637,7 +637,7 @@ s32 func_0013ECB0(void* self, s32 n, Ent_13ECB0* ent, void* arg, s32 flag)
                     k = p->fC;
                 }
                 if (k != -1) {
-                    func_001B64D8(v, k);
+                    SetStateWalkerTarget(v, k);
                 }
                 count++;
             }
@@ -655,7 +655,7 @@ void func_0013DD78(TimedStateObject* self, s32 state)
 {
     if (state != self->state) {
         *(s32*)((u8*)self + 0x550) = state;
-        f32 t = D_0026185C;
+        f32 t = g_gameTime;
         self->stamp = t;
         if (state == 2) {
             (void)func_00126D60(self->param);
@@ -675,7 +675,7 @@ void func_0013DE38(C25* self, u8* table, s32 index)
     one = 1;
     value = *(s32*)(table + ((one - index) << 6));
     if (self->f678 != 0) return;
-    if (func_0013DB28(self, value) == 0) return;
+    if (IsObjectAccepted(self, value) == 0) return;
     if (self->sel6C4 != -1) func_001BB058(self, self->sel6C4);
     if (self->sel6C8 != -1) func_001BB0C8(self, self->sel6C8);
     self->f678 = one;
@@ -706,7 +706,7 @@ void func_0013EB68(void* a, s32 b)
         }
     }
     *(s32*)((u8*)self + 0x12C) = b;
-    self->stamp = D_0026185C;
+    self->stamp = g_gameTime;
     func_00129DF8(self->owner);
     if (s1 != 0) {
         func_0013EF50(self, 0, 0);
@@ -724,7 +724,7 @@ s32 func_0013DD08(TimedStateObject* node, Collider* src)
     if (node->acceptAll != 0) return 1;
     Child27* c = node->child;
     if (c == 0 || c->f694 == 0) {
-        r = func_001300E8(src, 0x27);
+        r = IsObjectOfKind(src, 0x27);
         if (r != 0) return 0;
     }
     return 1;
@@ -737,7 +737,7 @@ void func_0013F140(TriggerZone* self, void* a1, Quad28* q)
 {
     s32 n = self->f7B4;
     s32 idx;
-    if (func_001833F0(a1, 0x200)) {
+    if (MatchesObjectId(a1, 0x200)) {
         idx = 0;
         if (n > 0) {
             u8* p = (u8*)self + n * 16;
@@ -764,21 +764,21 @@ void func_00141040(Tab_13EF50* t, s32 v);
 void func_0013EF50(Zone28* self, void* p, void* q)
 {
     if (q != 0) {
-        func_001837E0(self->owner, 0x16, 0, 0);
+        TriggerScriptEvent(self->owner, 0x16, 0, 0);
     } else {
-        func_001837E0(self->owner, 2, 0, 0);
+        TriggerScriptEvent(self->owner, 2, 0, 0);
     }
     if (self->f134 == 0) {
         if (q == 0) {
-            func_001BFCD8(kind_13EF50_2, 0, (s32)self->owner, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(kind_13EF50_2, 0, (s32)self->owner, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
     }
     func_0013ED90(self, 0, p, q);
     if (self->f13C == 0) {
-        func_0013EB68(self, 2);
+        SetZoneMode(self, 2);
     }
     if (self->f11C != 0) {
-        func_00141040((Tab_13EF50*)D_00261420, self->id120);
+        SetFlagTableBit((Tab_13EF50*)g_flagTable, self->id120);
     }
     self->owner->desc->m0E(self->owner, 0xC, self);
 }
@@ -791,7 +791,7 @@ void func_001B91A8(Collider* self, void* buf, s32 a, void* table, s32 b, f32 t);
 
 void func_0013FA10(TriggerZone* self, f32 t)
 {
-    func_001B9338(self, t);
+    StepCollider(self, t);
     switch (self->state) {
     case 0:
         if (self->f7B4 != 0) {
@@ -828,13 +828,13 @@ void func_0013CE80(MaskedCollider* self)
     MaskedCollider* n;
     s32 i;
     Slot20* e;
-    if (func_00141008((Frame_13CE80*)D_00261420, self->id688)) self->f678 = 1;
+    if (TestFlagTableBit((Frame_13CE80*)g_flagTable, self->id688)) self->f678 = 1;
     s32 l = (s32)&self->children;
     fr.cursor = l;
     fr.list = l;
-    s32 old = *(s32*)&D_0027B314;
+    s32 old = *(s32*)&g_activeListFrames;
     s32 link = *(s32*)(l + 8);
-    *(s32*)&D_0027B314 = (s32)&fr;
+    *(s32*)&g_activeListFrames = (s32)&fr;
     fr.prev = old;
     s32 h = (s32)self->children.head;
     fr.link = link;
@@ -842,17 +842,17 @@ void func_0013CE80(MaskedCollider* self)
     n = (MaskedCollider*)h;
     while (n != 0) {
         if (self->f678) {
-            if (!func_001300E8(n, 0x2E)) goto next;
-            func_00199C10(n, &fr.out);
+            if (!IsObjectOfKind(n, 0x2E)) goto next;
+            GetNumberedItemFlag(n, &fr.out);
             if (fr.out) goto next;
         }
-        if (func_001300E8(n, 0x75)) goto next;
-        if (func_001300E8(n, 0x7A)) goto next;
-        if (func_001300E8(n, 0x53)) goto next;
-        if (func_001300E8(n, 0x27)) n->slots[1].kind = (s32)self;
+        if (IsObjectOfKind(n, 0x75)) goto next;
+        if (IsObjectOfKind(n, 0x7A)) goto next;
+        if (IsObjectOfKind(n, 0x53)) goto next;
+        if (IsObjectOfKind(n, 0x27)) n->slots[1].kind = (s32)self;
         for (i = 0; i < self->count550; i++) {
             e = &self->slots[i];
-            if (func_001833F0(n, e->key)) {
+            if (MatchesObjectId(n, e->key)) {
                 e->node = (s32)n;
                 switch (e->kind) {
                 case 0:
@@ -879,7 +879,7 @@ void func_0013CE80(MaskedCollider* self)
         fr.cursor = nx + fr.link;
         n = (MaskedCollider*)nx;
     }
-    *(s32*)&D_0027B314 = fr.prev;
+    *(s32*)&g_activeListFrames = fr.prev;
 }
 
 extern u8* D_00262E10;
@@ -894,17 +894,17 @@ void func_00129DF8(void* self);
 
 void func_0013FD20(TriggerZone* self)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
     switch (self->zone.mode) {
     case 2: {
-        u8* g = D_00262E10;
+        u8* g = g_player;
         f32 t;
         if (g) {
-            if (*(s32*)(g + 0x2220) == 3 && *(s32*)(g + 0x2204) == self->id880) self->zone.stamp = D_0026185C;
+            if (*(s32*)(g + 0x2220) == 3 && *(s32*)(g + 0x2204) == self->id880) self->zone.stamp = g_gameTime;
         }
         t = self->zone.duration;
         if (0.0f <= t) {
-            if (t < D_0026185C - self->zone.stamp) func_0013F6F8(self, 4);
+            if (t < g_gameTime - self->zone.stamp) SetTriggerZoneMode(self, 4);
         }
         break;
     }
@@ -914,12 +914,12 @@ void func_0013FD20(TriggerZone* self)
         s32 r = -1;
         switch (self->state) {
         case 0: if (!func_0013F8A0(self, 0)) r = 1; break;
-        case 1: if (!func_0013F940(self, 0)) r = 1; break;
+        case 1: if (!FindLargestEntryIndex(self, 0)) r = 1; break;
         case 2:
         case 4: r = 1; break;
         case 3: r = 0; break;
         }
-        if (r != -1) func_0013F6F8(self, r);
+        if (r != -1) SetTriggerZoneMode(self, r);
         break;
     }
     case 0:
@@ -930,7 +930,7 @@ void func_0013FD20(TriggerZone* self)
         case 3:
             break;
         case 4: {
-            u8* g = D_00262E10;
+            u8* g = g_player;
             r = 0;
             if (g) {
                 if (*(s32*)(g + 0x2220) == 3) r = *(s32*)(g + 0x2204) == self->id880;
@@ -946,7 +946,7 @@ void func_0013FD20(TriggerZone* self)
                 for (; n; n = n->next) {
                     s32 k = n->end[0].body != s4;
                     if (((ContactEnd03*)((u8*)n + (k << 6)))->part == self) {
-                        if (func_0013F718(self, n->end[1 - k].body)) { r = 1; goto done; }
+                        if (PassesTriggerFilters(self, n->end[1 - k].body)) { r = 1; goto done; }
                     }
                 }
             }
@@ -962,7 +962,7 @@ void func_0013FD20(TriggerZone* self)
                 s0 = func_0013F8A0(self, &v[0]);
                 lt = v[0] < 2.0f;
             } else {
-                s0 = func_0013F940(self, &v[1]);
+                s0 = FindLargestEntryIndex(self, &v[1]);
                 lt = v[1] < 0.1f;
             }
             if (lt) {
@@ -977,7 +977,7 @@ void func_0013FD20(TriggerZone* self)
         }
         }
     done:
-        func_0013F6F8(self, r);
+        SetTriggerZoneMode(self, r);
         break;
     }
     }
@@ -993,12 +993,12 @@ s32 func_0013CC00(Self_13CC00* self, void* a1, void* a2)
 {
     if (a1 != 0) {
         MemoryReader arg;
-        arg.methods = (const MemoryReaderMethods*)D_00249D98;
+        arg.methods = (const MemoryReaderMethods*)g_memoryReaderMethods;
         arg.base = (u8*)a2;
         arg.f10 = a1;
         arg.f08 = a1;
         arg.pos = 0;
-        return func_0013C9D0(self, a1, &arg);
+        return FillRingBuffer(self, a1, &arg);
     }
     return 0;
 }
@@ -1013,10 +1013,10 @@ void* func_0018D568(s32 size, void* owner);
 void func_0013CDE8(MaskedCollider* self, MaskedCollider* other)
 {
     s32 saved = self->id688;
-    func_001BA130(self, other);
+    CopyCollider(self, other);
     self->id688 = saved;
     if (other->f6B4)
-        self->f6B4 = func_0018D568(0x24, other->f6B4);
+        self->f6B4 = CopyToFrontMemory(0x24, other->f6B4);
 }
 
 struct IntList_13E7C0 { s32 count; void* items[1]; };
@@ -1029,9 +1029,9 @@ void func_0013E7C0(void* self, IntList_13E7C0* list, void* context)
     s32 n = list->count;
     void** items = list->items;
     for (s32 i = 0; i < n; i++) {
-        void* object = func_0015A418(self, 0x104, items[i], context);
+        void* object = FindFirstObjectById(self, 0x104, items[i], context);
         if (object) {
-            func_0013E8D8(list, object);
+            AppendToQueuedObjects(list, object);
             func_00182ED8(object);
         }
     }
@@ -1082,14 +1082,14 @@ void func_0013E950(Zone28* self, Collider* a1)
     Node_13E950* node;
     while ((node = Next_13E950::Of(&it)) != 0) {
         if (node->f0->f8 & 0x40) {
-            if (func_0013E868((Call_13E950*)((u8*)self + 0x90), node) == 0) {
-                if (func_0013E868((Call_13E950*)((u8*)self + 8), node) == 0) {
-                    func_0013E8D8((Call_13E950*)((u8*)self + 8), node);
+            if (IsObjectInIdList((Call_13E950*)((u8*)self + 0x90), node) == 0) {
+                if (IsObjectInIdList((Call_13E950*)((u8*)self + 8), node) == 0) {
+                    AppendToQueuedObjects((Call_13E950*)((u8*)self + 8), node);
                 }
             }
         }
     }
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 struct Ring_0013C9D0 {
@@ -1191,7 +1191,7 @@ s32 func_0013F718(TriggerZone* self, void* arg)
     if (self->countIdsIn > 0) {
         s32 i;
         for (i = 0; i < self->countIdsIn; i++) {
-            if (func_001833F0(arg, self->idsIn[i]) != 0) {
+            if (MatchesObjectId(arg, self->idsIn[i]) != 0) {
                 break;
             }
         }
@@ -1201,7 +1201,7 @@ s32 func_0013F718(TriggerZone* self, void* arg)
     } else if (self->countIdsOut > 0) {
         s32 i;
         for (i = 0; i < self->countIdsOut; i++) {
-            if (func_001833F0(arg, self->idsOut[i]) != 0) {
+            if (MatchesObjectId(arg, self->idsOut[i]) != 0) {
                 break;
             }
         }
@@ -1212,7 +1212,7 @@ s32 func_0013F718(TriggerZone* self, void* arg)
     if (self->countKindsIn > 0) {
         s32 i;
         for (i = 0; i < self->countKindsIn; i++) {
-            if (func_001300E8(arg, self->kindsIn[i]) != 0) {
+            if (IsObjectOfKind(arg, self->kindsIn[i]) != 0) {
                 break;
             }
         }
@@ -1222,7 +1222,7 @@ s32 func_0013F718(TriggerZone* self, void* arg)
     } else if (self->countKindsOut > 0) {
         s32 i;
         for (i = 0; i < self->countKindsOut; i++) {
-            if (func_001300E8(arg, self->kindsOut[i]) != 0) {
+            if (IsObjectOfKind(arg, self->kindsOut[i]) != 0) {
                 break;
             }
         }
@@ -1251,7 +1251,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
             Obj_13ED90* obj = *(Obj_13ED90**)&list[i];
             void* other;
             s32 dir;
-            if (func_001833F0(self->owner, obj->key40)) {
+            if (MatchesObjectId(self->owner, obj->key40)) {
                 other = self->owner;
             } else if (obj->key40 != -1) {
                 other = func_0015A448(self->owner->world, obj->key40, self->owner);
@@ -1282,10 +1282,10 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
         void* t = func_0015A448(self->owner->world, self->f140, self->owner);
         if (mode != 0) {
             if (mode == 1) {
-                func_001519A8(t);
+                ResetStepSequence(t);
             }
             return;
         }
-        func_001518B8(t);
+        ChooseStepSequenceState(t);
     }
 }

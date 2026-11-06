@@ -2,9 +2,9 @@
 // PAL passes 0.975 where US passes 1.0.
 void func_0019DBB0(void)
 {
-    V24A0* self = &D_002622A8;
-    func_0015EAE0(self, D_00212160, D_00215C50);
-    func_0019D860();
+    V24A0* self = &g_vifPacketWriter;
+    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
+    UploadProjectionConstants();
     func_0019D930();
 
     if (D_0026FA68 != 0) {
@@ -16,12 +16,12 @@ void func_0019DBB0(void)
     }
 
     {
-        Camera* o = D_00261990;
+        Camera* o = g_camera;
         f32 keep20 = o->f1C4;
         f32 keep21 = o->f1C8;
-        func_00143940(o, 0.975f);
-        func_00144848(D_00261990);
-        func_00143940(D_00261990, keep20);
-        D_00261990->f1C8 = keep21;
+        SnapCameraZoom(o, 0.975f);
+        func_00144848(g_camera);
+        SnapCameraZoom(g_camera, keep20);
+        g_camera->f1C8 = keep21;
     }
 }

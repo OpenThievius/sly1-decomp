@@ -10,23 +10,23 @@ void func_001AB920(Obj_1E00B0_eu* q, f32 v);
 
 void func_001E00B0(Obj_1E00B0_eu* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     switch (self->f570) {
     case 0:
     case 1:
     {
         if (self->f57C != 0) {
-        if (D_00262C70.fAA & 4) {
-            func_0016EC20(&D_00262C70, 4);
-            func_001BE5F8(D_00275710->f2310);
-            if (D_00275710->f2314 != 0) {
-                func_001AA8B8(self, 15.0f);
-                func_eu_001AB238(self, D_00275710->f2314);
+        if (g_padRecord.fAA & 4) {
+            ClearPadPressedBits(&g_padRecord, 4);
+            StartLockedStreamVoice(g_currentWorld->f2310);
+            if (g_currentWorld->f2314 != 0) {
+                SetScreenElementHoldTime(self, 15.0f);
+                func_eu_001AB238(self, g_currentWorld->f2314);
             } else {
                 self->vt->m3C(self);
             }
             self->f57C = 0;
-        } else if (D_0026185C >= 5.0f) {
+        } else if (g_gameTime >= 5.0f) {
             self->vt->m3C(self);
             self->f57C = 0;
         }
@@ -35,19 +35,19 @@ void func_001E00B0(Obj_1E00B0_eu* self)
     }
     case 2:
     {
-        Obj_1E00B0_eu* o = (Obj_1E00B0_eu*)&D_0026E760;
+        Obj_1E00B0_eu* o = (Obj_1E00B0_eu*)&g_timerElement;
         s32 r;
         if (o->f570 == 0) {
-            func_001E02C8(self, 3);
+            SetBestTimeState(self, 3);
             return;
         }
-        func_001AB920(o, -func_00205C78(2.0f, (f32)D_002623DC));
-        r = func_001E9970();
+        SetTimerRate(o, -func_00205C78(2.0f, (f32)D_002623DC));
+        r = AreMenusAndFadeClear();
         if (r) o->vt->m38(o); else o->vt->m3C(o);
-        if (D_002623C8->flags & 8) {
+        if (g_currentEntry->flags & 8) {
             s32 b = 0;
-            if (r && D_002701C4 == 0 && D_002623C8->f08 < ((Obj_1E00B0_eu*)&D_0026E760)->f578) b = 1;
-            if (b) D_0026E9F8.vt->m14(&D_0026E9F8); else D_0026E9F8.vt->m15(&D_0026E9F8);
+            if (r && D_002701C4 == 0 && g_currentEntry->f08 < ((Obj_1E00B0_eu*)&g_timerElement)->f578) b = 1;
+            if (b) g_timerCaption.vt->m14(&g_timerCaption); else g_timerCaption.vt->m15(&g_timerCaption);
         }
     }
     break;

@@ -22,7 +22,7 @@ void func_0018EB98(Self_18EB98* self_)
     Self_18EB98_eu* self = (Self_18EB98_eu*)self_;
     switch (self->state) {
     case 2:
-        func_0013CAD8(&self->f50, self->f94, (u8*)&self->f50 + 0x20);
+        DrainRingBuffer(&self->f50, self->f94, (u8*)&self->f50 + 0x20);
         if (self->f94 != 0) {
             break;
         }
@@ -36,7 +36,7 @@ void func_0018EB98(Self_18EB98* self_)
     case 3: {
         void* s0 = (u8*)&self->f50 + 0x20;
         func_eu_0018F210((Obj_eu_18F210*)s0);
-        func_0013CAD8(&self->f50, self->f94, s0);
+        DrainRingBuffer(&self->f50, self->f94, s0);
         break;
     }
     }

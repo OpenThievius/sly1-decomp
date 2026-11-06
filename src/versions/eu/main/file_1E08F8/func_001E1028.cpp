@@ -40,7 +40,7 @@ void func_001E1028(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
         zeros = 0;
         ndig = 0;
     } else {
-        s32 neg = func_001E0E18(self, &val);
+        s32 neg = ExtractIntegerSign(self, &val);
         zeros = self->f1C;
         pfx[0] = 0;
         switch ((u8)self->mode) {
@@ -53,7 +53,7 @@ void func_001E1028(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
             } else if (self->f8) {
                 __builtin_strcpy(pfx, " ");
             }
-            zeros -= func_001E2100(pfx);
+            zeros -= GetStringLength(pfx);
             break;
         case 'b':
             if (self->fC) {
@@ -71,15 +71,15 @@ void func_001E1028(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
             }
             break;
         }
-        plen = func_001E2100(pfx);
-        ndig = func_001E0F58(buf, 0x40, val.v, func_001E0EF8(self->mode));
+        plen = GetStringLength(pfx);
+        ndig = WriteIntegerDigits(buf, 0x40, val.v, GetConversionRadix(self->mode));
         zeros -= ndig;
         zeros = zeros >= 0 ? zeros : 0;
     }
     buf[ndig] = 0;
     if (self->f30) {
-        func_001E2218(pfx);
-        func_001E2218(buf);
+        UppercaseString(pfx);
+        UppercaseString(buf);
     }
     total = plen + zeros + ndig;
     lead = 0;
@@ -99,23 +99,23 @@ void func_001E1028(Fmt_1E1028_eu* self, OutputBuffer* sink, u64 value)
     padc[0] = ' ';
     n = lead;
     while (n-- > 0) {
-        if (func_001D7190(sink, padc, 1) != 1) {
+        if (AppendToOutputBuffer(sink, padc, 1) != 1) {
             break;
         }
     }
-    func_001D7190(sink, pfx, plen);
+    AppendToOutputBuffer(sink, pfx, plen);
     padc[0] = '0';
     n = zeros;
     while (n-- > 0) {
-        if (func_001D7190(sink, padc, 1) != 1) {
+        if (AppendToOutputBuffer(sink, padc, 1) != 1) {
             break;
         }
     }
-    func_001D7190(sink, buf, ndig);
+    AppendToOutputBuffer(sink, buf, ndig);
     padc[0] = ' ';
     n = trail;
     while (n-- > 0) {
-        if (func_001D7190(sink, padc, 1) != 1) {
+        if (AppendToOutputBuffer(sink, padc, 1) != 1) {
             break;
         }
     }

@@ -9,7 +9,7 @@ void func_001685B8(void)
     D_002BE470 = 0;
     func_00201A18(0, 1, 3, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
-    s32 cnt = D_002626C0;
+    s32 cnt = g_displayFrameCounter;
     D_002626CC = 0;
     D_00262484 = 0;
     D_002626C8 = flag;
@@ -23,7 +23,7 @@ void func_001685B8(void)
     s16 half = *(s16*)&D_002626C4;
     func_00202098(ptr, 0x800, 0x800, half);
     func_001F6C20(0);
-    D_002626C0 = D_002626C0 + 1;
-    func_00201FF8(D_00262490, D_002626C0);
+    g_displayFrameCounter = g_displayFrameCounter + 1;
+    func_00201FF8(D_00262490, g_displayFrameCounter);
 }
 

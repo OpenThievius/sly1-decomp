@@ -12,7 +12,7 @@ struct Obj_eu_001AD738 {
 s32 func_eu_001AD738(Obj_eu_001AD738* self)
 {
     s32 r = 0;
-    if (func_001AAAC8(self) != 0 || self->flag != 0) {
+    if (AreScreenElementsTogether(self) != 0 || self->flag != 0) {
         r = 1;
     }
     return r;

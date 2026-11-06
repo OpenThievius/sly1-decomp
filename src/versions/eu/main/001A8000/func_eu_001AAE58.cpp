@@ -5,7 +5,7 @@ struct Obj_eu_001AAE58 { VFn_eu_001AAE58* vtbl; u8 pad[0x560 - 4]; s32 f560; };
 
 void func_eu_001AAE58(void)
 {
-    void** p = (void**)D_002486B0;
+    void** p = (void**)g_screenElements;
     s32 n = 0x24;
     do {
         Obj_eu_001AAE58* o = (Obj_eu_001AAE58*)*p;

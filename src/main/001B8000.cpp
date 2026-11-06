@@ -11,9 +11,9 @@ void func_001389C8(void* a);
 
 void func_001B89B8(Collider* self)
 {
-    func_00125108(self);
+    RecomputePlacedObjectFrame(self);
     self->root03()->desc03()->m32(self->root03());
-    func_00138BE0(self->world, self, 7);
+    ClearRootObjectStateBits(self->world, self, 7);
     func_001389C8(self->world);
 }
 
@@ -42,7 +42,7 @@ void func_001BB400(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 43;
     self->flags538 = (self->flags538 & ~(1ULL << 43)) | bit;
-    func_001B94F0(self, value != 0 ? 2 : 0);
+    DropColliderContacts(self, value != 0 ? 2 : 0);
 }
 
 s32 func_001BB9A0(Touch03* node, Collider* value)
@@ -63,14 +63,14 @@ void func_001BB3B0(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 42;
     self->flags538 = (self->flags538 & ~(1ULL << 42)) | bit;
-    func_001B94F0(self, value != 0);
+    DropColliderContacts(self, value != 0);
 }
 
 void func_001BB450(Collider* self, s32 value)
 {
     u64 bit = (u64)(value & 1) << 44;
     self->flags538 = (self->flags538 & ~(1ULL << 44)) | bit;
-    func_001B94F0(self, value != 0 ? 3 : 0);
+    DropColliderContacts(self, value != 0 ? 3 : 0);
 }
 
 void func_001BB4A0(Collider* self)
@@ -91,7 +91,7 @@ void func_001BB4A0(Collider* self)
     }
     Collider* c = (Collider*)self->children.head;
     while (c != 0) {
-        if (c->desc->flags & 2) func_001BB4A0(c);
+        if (c->desc->flags & 2) ResolveContactHandler(c);
         c = (Collider*)c->next;
     }
 }
@@ -125,7 +125,7 @@ void func_001BB580(Collider* self)
     Collider* c = (Collider*)self->children.head;
     while (c != 0) {
         if (c->desc->flags & 2) {
-            func_001BB580(c);
+            UpdateAnchorModeFlags(c);
             if ((c->flags538 & (1ULL << 55)) == 0) s2 = 0;
         }
         c = (Collider*)c->next;
@@ -134,7 +134,7 @@ void func_001BB580(Collider* self)
     if (bit != (u64)s2) {
         self->flags538 = (self->flags538 & ~(1ULL << 55)) | ((u64)(s2 & 1) << 55);
         if (self->parent == 0 && self->root != 0) {
-            func_00138F28(self->world, self);
+            InitContactPairFlags(self->world, self);
         }
     }
 }
@@ -153,8 +153,8 @@ s32 func_001BB710(Collider* self, s32 value)
             ContactEnd03* s = &e->end[idx];
             if (s->part == self) {
                 void* tmp = e->end[1 - idx].part;
-                if (func_001C1AD8(value, &tmp) == 0) {
-                    if (func_001C1A28(value, &tmp) == 0) return 0;
+                if (ScriptListContainsValue(value, &tmp) == 0) {
+                    if (AppendPropertyToScriptList(value, &tmp) == 0) return 0;
                 }
             }
             e = e->next;
@@ -188,7 +188,7 @@ void func_001B8A48(Collider* self)
         while (it != 0) {
             if (0.0001f < it->timer) {
                 for (s32 i = 0; i < 2; i++) {
-                    Collider* obj = func_001BB540(it->end[i].part, 0x114);
+                    Collider* obj = FindHandlerForSlot(it->end[i].part, 0x114);
                     if (obj != 0) {
                         void (*fn)(Collider*, Contact03*, s32) = obj->desc03()->m41;
                         if (fn != 0) {
@@ -245,7 +245,7 @@ void func_00124FC0(void* self);
 
 void func_001B93F8(Collider* self)
 {
-    func_00124FC0(self);
+    UpdatePlacedObject(self);
 }
 
 void func_001B9680(Collider* self)
@@ -283,7 +283,7 @@ void func_001B97E0(Collider* self, Mat02* src)
         if (self->desc->m12 != 0) {
             self->desc->m12(self);
         }
-        func_001B94F0(self, 1);
+        DropColliderContacts(self, 1);
     }
     self->desc->m0E(self, 4, self);
 }
@@ -309,7 +309,7 @@ void func_001B8820(Mesh03* a, Mesh03* b, Quad_1B8960 q, Mat02* c);
 
 void func_001B8960(Collider* self)
 {
-    func_00125138(self);
+    ComputePlacedObjectWorldFrame(self);
     func_001B8820(&self->mesh, &self->meshCopy, *(Quad_1B8960*)&self->v140, &self->m110);
     func_001B8820(&self->mesh2, &self->mesh2Copy, *(Quad_1B8960*)&self->v140, &self->m110);
 }
@@ -329,21 +329,21 @@ void func_001B9B50(Collider* self, BaseObject* p)
     Collider* s5 = self->root03();
     func_001280C0(self->parent, 0, &self->v440, &local0);
     func_001280C0(self->parent, 0, &self->v460, &local1);
-    func_001245A8(self, p);
+    ReparentPlacedObject(self, p);
     func_001280C0(0, p, &local0, &self->v440);
     func_001280C0(0, p, &local1, &self->v460);
     if (self->root != 0) {
         if ((self->flags538 & (1ULL << 54)) != 0 && s5 != 0) {
-            func_001BB580(s5);
+            UpdateAnchorModeFlags(s5);
         }
         Collider* f = self->root03();
         if ((f->flags538 & (1ULL << 55)) != 0) {
-            func_001BB580(f);
+            UpdateAnchorModeFlags(f);
         } else {
-            func_001BB580(self);
+            UpdateAnchorModeFlags(self);
         }
     }
-    func_001BB4A0(self);
+    ResolveContactHandler(self);
 }
 
 s32 func_00182F40(void* e, void* b);
@@ -356,7 +356,7 @@ void* func_001BA068(Collider* self)
         Contact03* s0 = s2->head;
         while (s0 != 0) {
             s32 s1 = ((u32)s3 ^ (u32)s0->end[0].body) != 0;
-            if (func_00182F40(*(void**)((u8*)(s0) + (s1 << 6) + 4), self) != 0) {
+            if (IsObjectDescendantOf(*(void**)((u8*)(s0) + (s1 << 6) + 4), self) != 0) {
                 return *(void**)((u8*)(s0) + ((1 - s1) << 6) + 4);
             }
             s0 = s0->next;
@@ -369,14 +369,14 @@ void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001BB000(void* self)
 {
-    func_001B9AE0(self, 3, 0, 3, 0);
+    SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
 void func_00183350(void* self, s32 kind, void* arg);
 
 void func_001BB210(Collider* self, s32 kind, void* arg)
 {
-    func_00183350(self, kind, arg);
+    SendObjectNotification(self, kind, arg);
     Attach03* n = self->attached;
     if (n != 0) {
         do {
@@ -412,16 +412,16 @@ s32 func_001BB800(Collider* obj, s32* outCount, void*** outArr)
     for (nd = own->contacts->head; nd; nd = nd->next) {
         for (it = nd->head; it; it = it->next) {
             s32 g = it->end[0].body != own;
-            if (func_00182F40(*(void**)((u8*)it + (g << 6) + 4), obj))
+            if (IsObjectDescendantOf(*(void**)((u8*)it + (g << 6) + 4), obj))
                 n++;
         }
     }
-    void** arr = (void**)func_0018D658(n << 2);
+    void** arr = (void**)AllocateBackMemory(n << 2);
     void** end = arr;
     for (nd = own->contacts->head; nd; nd = nd->next) {
         for (Contact03* it2 = nd->head; it2; it2 = it2->next) {
             s32 f = it2->end[0].body != own;
-            if (func_00182F40(*(void**)((u8*)it2 + (f << 6) + 4), obj)) {
+            if (IsObjectDescendantOf(*(void**)((u8*)it2 + (f << 6) + 4), obj)) {
                 void* v = *(void**)((u8*)it2 + ((1 - f) << 6) + 4);
                 void** p;
                 for (p = arr; p < end; p++)
@@ -473,12 +473,12 @@ s32 func_001B9FB0(Collider* self, void* other)
 {
     s32 key;
     Contact03* n;
-    for (n = (Contact03*)func_001387F8(self, other), key = (s32)self->root; n != 0; n = n->next) {
+    for (n = (Contact03*)GetContactRowHead(self, other), key = (s32)self->root; n != 0; n = n->next) {
         s32 s1 = (key ^ (s32)n->end[0].body) != 0;
         s32 o0 = s1 * 64;
-        if (func_00182F40(*(void**)((u8*)n + o0 + 4), self) != 0) {
+        if (IsObjectDescendantOf(*(void**)((u8*)n + o0 + 4), self) != 0) {
             s32 o1 = (1 - s1) * 64;
-            if (func_00182F40(*(void**)((u8*)n + o1 + 4), other) != 0) {
+            if (IsObjectDescendantOf(*(void**)((u8*)n + o1 + 4), other) != 0) {
                 return 1;
             }
         }
@@ -506,9 +506,9 @@ void func_001BB9D0(Collider* self)
             s32 i = e->end[0].body != core;
             if (((ContactEnd03*)((u32)e + (i << 6)))->part == self) {
                 other = ((ContactEnd03*)((u32)e + ((1 - i) << 6)))->part;
-                if (!func_001BB9A0(self->touching, other)) {
+                if (!IsInTouchingList(self->touching, other)) {
                     args = &other;
-                    func_001837E0(self, 6, 1, &args);
+                    TriggerScriptEvent(self, 6, 1, &args);
                 }
             }
         }
@@ -526,17 +526,17 @@ void func_001BB9D0(Collider* self)
         }
         if (!found) {
             args = m;
-            func_001837E0(self, 7, 1, &args);
+            TriggerScriptEvent(self, 7, 1, &args);
         }
     }
-    func_001DC108(self->world, self->touching);
+    FreeTouchNodes(self->world, self->touching);
     self->touching = 0;
     for (o = core->contacts->head; o != 0; o = o->next) {
         for (e = o->head; e != 0; e = e->next) {
             s32 i = e->end[0].body != core;
             if (((ContactEnd03*)((u32)e + (i << 6)))->part == self) {
                 other = ((ContactEnd03*)((u32)e + ((1 - i) << 6)))->part;
-                Touch03* n = func_001DC0C8(self->world);
+                Touch03* n = AllocateTouchNode(self->world);
                 n->obj = other;
                 if (self->touching != 0) prev->next = n; else self->touching = n;
                 prev = n;
@@ -561,7 +561,7 @@ void func_001BA130(Collider* self, Collider* other)
     Contacts03* s480 = self->contacts;
     Collider* s4E4 = self->handler;
     d = self->link414;
-    func_00127048(self, other);
+    CopyPlacedObject(self, other);
     self->contacts = s480;
     self->link2D0 = a;
     self->parts = b;
@@ -571,11 +571,11 @@ void func_001BA130(Collider* self, Collider* other)
     self->attached = 0;
     self->f4B8 = 0;
     self->flags538 = (self->flags538 & 0xFFFBFFFFFFFFFFFFULL) | (bit << 50);
-    func_001B7C40(self, 1);
+    SetColliderPartListed(self, 1);
     if (self->meshCopy.vertCount) func_00160EA0(&other->meshCopy, 0, &self->meshCopy);
-    if (self->tree.nodes) func_0013E6C8(&other->meshCopy, &other->tree, &self->meshCopy, &self->tree);
+    if (self->tree.nodes) CloneTreeNodes(&other->meshCopy, &other->tree, &self->meshCopy, &self->tree);
     if (self->mesh2Copy.vertCount) func_00160EA0(&other->mesh2Copy, 0, &self->mesh2Copy);
-    if ((s32)self->flags538) func_0013E6C8(&other->mesh2Copy, &other->tree2, &self->mesh2Copy, &self->tree2);
+    if ((s32)self->flags538) CloneTreeNodes(&other->mesh2Copy, &other->tree2, &self->mesh2Copy, &self->tree2);
     self->touching = 0;
     self->flags538 |= 0x20000000000ULL;
 }
@@ -603,7 +603,7 @@ void func_001BAC30(Collider* self, BufferedStream* in)
     s32 j;
     s32 n;
     Pair03* e;
-    u8 flag = func_00137B90(in) & 1;
+    u8 flag = ReadBufferedU8(in) & 1;
     self->flags = (self->flags & ~(1ULL << 33)) | ((u64)flag << 33);
     func_00137FB0(in, &self->mesh);
     self->radius3D0 = self->mesh.radius;
@@ -613,47 +613,47 @@ void func_001BAC30(Collider* self, BufferedStream* in)
     } else {
         func_00160EA0(&self->mesh, 0, &self->meshCopy);
     }
-    func_00138278(in, &self->meshCopy, &self->tree);
+    ReadFaceTree(in, &self->meshCopy, &self->tree);
     i = 0;
-    self->mass = func_00137DF8(in);
-    func_00137EB0(in, &self->inertia);
-    func_00137E70(in, &self->offset);
+    self->mass = ReadBufferedFloat(in);
+    ReadBufferedRotation3(in, &self->inertia);
+    ReadBufferedVector3(in, &self->offset);
     func_001B9448(self, 1.0f);
-    self->groupCount = func_00137BE0(in);
-    self->groups = (Pair03*)func_0018D500(self->groupCount << 3);
+    self->groupCount = ReadBufferedU16(in);
+    self->groups = (Pair03*)AllocateFrontMemory(self->groupCount << 3);
     if (self->groupCount > 0) {
         do {
             e = self->groups;
             e += i++;
-            e->a = func_00137D10(in);
-            e->b = func_00137BE0(in);
+            e->a = ReadBufferedS16(in);
+            e->b = ReadBufferedU16(in);
         } while (i < self->groupCount);
     }
-    n = func_00137C40(in);
+    n = ReadBufferedU32(in);
     j = 0;
-    self->nodeGroups = (s32*)func_0018D500(n << 2);
+    self->nodeGroups = (s32*)AllocateFrontMemory(n << 2);
     if (n > 0) {
         do {
-            s32 v = func_00137D10(in);
+            s32 v = ReadBufferedS16(in);
             self->nodeGroups[j] = v;
             j++;
         } while (j < n);
     }
-    self->refCount = func_00137C40(in);
+    self->refCount = ReadBufferedU32(in);
     i = 0;
-    self->refs = (Pair03*)func_0018D500(self->refCount << 3);
+    self->refs = (Pair03*)AllocateFrontMemory(self->refCount << 3);
     while (i < self->refCount) {
         e = self->refs;
         e += i++;
-        e->a = func_00137D10(in);
-        e->b = func_00137D10(in);
+        e->a = ReadBufferedS16(in);
+        e->b = ReadBufferedS16(in);
     }
     if (self->refCount > 0) {
         j = 0;
-        self->faceStarts = (s32*)func_0018D500((self->meshCopy.faceCount + 1) << 2);
+        self->faceStarts = (s32*)AllocateFrontMemory((self->meshCopy.faceCount + 1) << 2);
         if (self->meshCopy.faceCount >= 0) {
             do {
-                s32 v = func_00137D10(in);
+                s32 v = ReadBufferedS16(in);
                 self->faceStarts[j] = v;
                 j++;
             } while (self->meshCopy.faceCount >= j);
@@ -665,13 +665,13 @@ void func_001BAC30(Collider* self, BufferedStream* in)
     } else {
         func_00160EA0(&self->mesh2, 0, &self->mesh2Copy);
     }
-    func_00138278(in, &self->mesh2Copy, &self->tree2);
-    func_001289C0(self, in);
-    func_001B7C40(self, 1);
+    ReadFaceTree(in, &self->mesh2Copy, &self->tree2);
+    LoadPlacedObject(self, in);
+    SetColliderPartListed(self, 1);
     self->desc03()->m44(self);
     if (self->parent == 0) {
         self->desc03()->m32(self);
-        func_00138F28(self->world, self);
+        InitContactPairFlags(self->world, self);
     }
 }
 
@@ -699,7 +699,7 @@ void func_001B9F30(Collider* self, Out_1B9F30* out)
     out->f30 = func_00205778(-tmp[0].y, -tmp[0].x);
     out->f34 = 100.0f;
     out->f00 = 0;
-    out->f38 = D_0026185C[0];
+    out->f38 = g_gameTime[0];
     out->f3C = 0;
 }
 
@@ -721,7 +721,7 @@ void func_001B9AE0(Collider* self, s32 a1, Vec02* a2, s32 a3, Vec02* a4)
             f2 = (a3 == 3);
         }
         if (flag != f2) {
-            func_001BB580(sub);
+            UpdateAnchorModeFlags(sub);
         }
     }
 }
@@ -745,7 +745,7 @@ void func_001B94F0(Collider* self, s32 mode)
                 s32 hit;
                 switch (mode) {
                 case 1:
-                    hit = func_00182F40(p->part, self);
+                    hit = IsObjectDescendantOf(p->part, self);
                     break;
                 case 2:
                     hit = p->part == self;
@@ -772,7 +772,7 @@ void func_001B94F0(Collider* self, s32 mode)
             }
             *o->link = o->head;
         }
-        func_001861E8(self->world, freed);
+        FreePooledContactChain(self->world, freed);
     }
     ctx->f4B8 = 0;
 }

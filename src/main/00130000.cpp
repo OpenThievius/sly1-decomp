@@ -14,8 +14,8 @@ void func_0014D0A8(s32 n, void* buf, s32 zero);
 void func_00130C20(s32 a, s32 b, s32 c, s32 d, f32 x, f32 y)
 {
     u8 buf[0x140];
-    func_00130B48(a, b, c, d, x, 0.0f, y, 20, buf);
-    func_0014D0A8(20, buf, 0);
+    SampleCurvePoints(a, b, c, d, x, 0.0f, y, 20, buf);
+    AccumulateSegmentLengths(20, buf, 0);
 }
 
 struct Quad_130F48 {
@@ -33,12 +33,12 @@ void func_00130070(StreamReaderWindow* self)
 {
     switch (self->sourceKind) {
     case 0:
-        func_0012FE70(self);
-        func_0012FFE8(self);
+        StartChunkRead(self);
+        CommitChunk(self);
         break;
     case 1:
-        func_0012FFE8(self);
-        func_0012FE70(self);
+        CommitChunk(self);
+        StartChunkRead(self);
         break;
     }
 }
@@ -62,9 +62,9 @@ void func_0011A708(void* dst, void* value);
 void func_00130110(BaseObject* self)
 {
     if (self->f04 == 0) {
-        void* v = func_0011BF30();
+        void* v = NewKeyedList();
         self->f04 = v;
-        func_0011A708(D_00259F38, v);
+        AddMarkRootList(D_00259F38, v);
 
     }
 }

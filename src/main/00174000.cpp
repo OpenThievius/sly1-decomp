@@ -35,7 +35,7 @@ s32 func_001493A0(u8* p);
 s32 func_00177E20(Player* self)
 {
     if (self->f2220 == 12 && self->f2228 == 0x22) return 0;
-    return func_001493A0(D_00261990 + 0x454) == 0;
+    return IsTopCameraController(g_camera + 0x454) == 0;
 }
 
 void func_001924C8(void* self, s32 mode);
@@ -123,8 +123,8 @@ void func_001E9498(void* a, void* b);
 void func_00177F98(Player* self, Node_177F98* node)
 {
     if ((u32)(node->kind - 1) < 2) {
-        D_002701F8.f324 = node;
-        func_001E9498(D_00275BC0, &D_002701F8);
+        g_typedTextCaptionBox.f324 = node;
+        PushStackElement(g_elementStack, &g_typedTextCaptionBox);
         return;
     }
     if (self->f2220 != 0xC) {

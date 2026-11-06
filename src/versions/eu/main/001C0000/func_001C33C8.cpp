@@ -2,10 +2,10 @@
 // PAL: the two global pointer slots are at 0x574 and 0x578 (US 0x264, 0x268), and the float at 0x57C (US 0x26C).
 void func_001C33C8(C1D* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     self->f68C = self->radius3CC;
-    func_00124DF8(self, 0xC, D_002749B0);
-    self->f668 = func_001B6290(self->f664, self, -1, 0);
+    ResolveObjectLinks(self, 0xC, D_002749B0);
+    self->f668 = CreateStateWalker(self->f664, self, -1, 0);
     self->f644 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = (PlacedObject*)self->f660;
     self->f648 = func_00205778(v->rot.r[0].y, v->rot.r[0].x);

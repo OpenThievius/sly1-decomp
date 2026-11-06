@@ -12,7 +12,7 @@ void func_eu_0018ECA8(void)
     Init_18E5E8 l;
     s32 v;
 
-    D_eu_0026AC60.f144 = func_001E2268((Init_18E5E8*)0, (void*)1);
+    D_eu_0026AC60.f144 = CreateLockSemaphore((Init_18E5E8*)0, (void*)1);
     ((Head_eu_18ECA8*)&D_eu_0026AC60)->f0C = 0;
     (void)func_001F5C0C(&l, 0, sizeof(l));
     l.f04 = func_eu_0018EBE8;

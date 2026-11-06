@@ -15,10 +15,10 @@ struct Obj_193E58_eu {
 
 void func_00193E58(Obj_193E58_eu* self)
 {
-    func_001AA268((ScreenElement*)self);
-    if (func_0015C188(2)) {
+    SetupScreenElementText((ScreenElement*)self);
+    if (IsFontLoaded(2)) {
         self->f520 = (void**)&D_0026A210;
-        *self->f520 = func_0015C1C0(2);
+        *self->f520 = GetFontById(2);
     }
     self->f570 = -1;
     self->f58C = -1;

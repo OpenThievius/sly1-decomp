@@ -20,7 +20,7 @@ void func_eu_001ADF10(Obj_eu_001ADF10* self, s32 id)
     char buf2[0x100];
     s32 a, b, c;
     func_eu_00160830(id, &a, &b, &c);
-    Row_eu_001ADF10* r = (Row_eu_001ADF10*)((u8*)D_002623C0 + 0x10 + id * 0x44C);
+    Row_eu_001ADF10* r = (Row_eu_001ADF10*)((u8*)g_saveData + 0x10 + id * 0x44C);
     char* s0 = buf1;
     buf1[0] = 0;
     if (a != 0) {

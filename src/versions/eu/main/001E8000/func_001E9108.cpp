@@ -7,19 +7,19 @@ extern void func_0018C178(MemoryCard* g, s32 a);
 
 void func_001E9108(Obj_1E9108* obj)
 {
-    f32 d = D_00261858.elapsed - obj->f8;
+    f32 d = g_gameClock.elapsed - obj->f8;
     s32 s1 = obj->state;
     PadRecord* s2;
     s32 s5;
     if (D_00262C68 & 4) {
-        s2 = &D_00262C70;
+        s2 = &g_padRecord;
     } else {
-        s2 = &D_00262D38;
+        s2 = &g_blankPadRecord;
     }
     s5 = 0;
     if (D_00262C6C & 0x80) {
-        if (0.1f < D_00261858.time) {
-            func_0016E118(0x80);
+        if (0.1f < g_gameClock.time) {
+            ClearPadSelectFlags(0x80);
         }
     }
     switch (obj->state) {
@@ -32,7 +32,7 @@ void func_001E9108(Obj_1E9108* obj)
             }
         }
         if (a2) {
-            func_001F4808(func_001F4378());
+            func_001F4808(FindActiveObjectSubGroup());
         }
         break;
     }
@@ -40,24 +40,24 @@ void func_001E9108(Obj_1E9108* obj)
         u32 v = s2->flags;
         if (v & 0x800) {
             s32 t;
-            func_0016EC20(s2, 0x800);
+            ClearPadPressedBits(s2, 0x800);
             t = g_memoryCard.i4F48;
             g_memoryCard.i4F44 = t;
             if (t) {
-                func_0018C178(&g_memoryCard, 1);
-                func_0018C568(&g_memoryCard);
+                SetMemoryCardDisplayMode(&g_memoryCard, 1);
+                ApplyMemoryCardImage(&g_memoryCard);
             } else {
-                func_001605E8(D_002623C0);
+                ResetGameProgress(g_saveData);
             }
             func_00160948();
             s1 = obj->state;
         } else if (v & 0x100) {
-            func_0016EC20(s2, 0x100);
-            func_00194D30(&D_0026FF68, 0, 0x17);
+            ClearPadPressedBits(s2, 0x100);
+            SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x17);
             s1 = obj->state;
         } else if (D_eu_002636EC >= 2 && (v & 0x10)) {
-            func_0016EC20(s2, 0x10);
-            func_00194D30(&D_0026FF68, 0, 0x21);
+            ClearPadPressedBits(s2, 0x10);
+            SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x21);
             s1 = obj->state;
         }
         break;
@@ -67,32 +67,32 @@ void func_001E9108(Obj_1E9108* obj)
         if (D_00275F84) break;
         {
             u32 v = s2->flags;
-            if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= D_00261858.time)) {
-                func_00194D30(&D_0026FF68, 0, 0);
+            if ((v & 0x800) || (s2->f14 == 1 && 5.0f <= g_gameClock.time)) {
+                SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0);
                 s1 = obj->state;
-                func_0016EC20(s2, 0x800);
+                ClearPadPressedBits(s2, 0x800);
             } else if ((v = s2->flags) & 0x100) {
-                G2_1E9108_eu* g2 = (G2_1E9108_eu*)&D_0026F808;
+                G2_1E9108_eu* g2 = (G2_1E9108_eu*)&g_mapScreenList;
                 C67* x = g2->f570;
                 if (x == 0) break;
                 if (x->mode) break;
-                func_001E9498(obj, g2);
+                PushStackElement(obj, g2);
                 s1 = obj->state;
-                func_0016EC20(s2, 0x100);
+                ClearPadPressedBits(s2, 0x100);
             }
         }
         break;
     }
     case 4:
         if (d <= 0.2f) {
-            func_001E98E8(obj, (0.2f - d) * 5.0f);
+            ApplyStackTimeScale(obj, (0.2f - d) * 5.0f);
         } else {
             s1 = 5;
         }
         break;
     case 6:
         if (d <= 0.5f) {
-            func_001E98E8(obj, d + d);
+            ApplyStackTimeScale(obj, d + d);
         } else {
             s1 = 3;
         }
@@ -106,7 +106,7 @@ void func_001E9108(Obj_1E9108* obj)
     default:
         break;
     }
-    func_001E96F8(obj, s1);
+    SetElementStackState(obj, s1);
     {
         Elem_1E9108* e = obj->stack[obj->count - 1];
         if (e) {
@@ -114,9 +114,9 @@ void func_001E9108(Obj_1E9108* obj)
                 e->vt->fn(e, s2);
             }
         } else if (s5) {
-            func_001E96F8(obj, 3);
+            SetElementStackState(obj, 3);
         }
     }
-    func_001409E0();
-    func_001A9FD0();
+    StepDiscSectorCheck();
+    UpdateScreenElements();
 }

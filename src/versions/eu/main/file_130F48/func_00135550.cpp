@@ -9,28 +9,28 @@ void func_00135550(Obj_135550_eu* self, s32 value)
         return;
     }
     if (self->f560 == 0) {
-        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
             Iter_135550 it;
             Begin_135550::Of(&it, &g->list);
             Item_135550* obj;
             while ((obj = Next_135550::Of(&it)) != 0) {
-                func_0012F6B0(obj, 0.0f);
+                SetAnimationPlayerSpeed(obj, 0.0f);
             }
-            D_0027B314 = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.saved;
         }
     }
     if (value == 0) {
-        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
             Iter_135550 it;
             Begin_135550::Of(&it, &g->list);
             Item_135550* obj;
             while ((obj = Next_135550::Of(&it)) != 0) {
-                func_0012F6B0(obj, 1.0f);
+                SetAnimationPlayerSpeed(obj, 1.0f);
             }
-            D_0027B314 = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.saved;
         }
     }
-    func_001AA998(self, value);
+    SetScreenElementMode(self, value);
 }

@@ -16,8 +16,8 @@ void func_0015C9B0(V24A2*, V24A2*);
 V24A2* func_0015C930(V24A2* owner, f32 x, f32 y)
 {
 	V24A2* out = (V24A2*)func_0018D758(0x88);
-	out->vt = (const V24A2_Vt*)&D_0024A220;
-	func_0015C9B0(owner, out);
+	out->vt = (const V24A2_Vt*)&g_fontMethods;
+	CopyFont(owner, out);
 	out->sx *= x;
 	out->sy *= y;
 	return out;
@@ -41,18 +41,18 @@ s32 func_0015C1C0(s32 a)
     if (a == -1) {
         return 0;
     }
-    s32 v = D_00262268[a];
+    s32 v = g_fonts[a];
     if (v != 0) {
         return v;
     }
-    return D_0026227C;
+    return g_defaultFont;
 }
 
 V24A2_Glyph* func_0015DAB8(V24A2* a, s32 b);
 
 s32 func_0015CA38(V24A2* a, s32 b)
 {
-    return func_0015DAB8(a, (s8)b) != 0;
+    return FindFontGlyph(a, (s8)b) != 0;
 }
 
 void func_0015DB80(void* self);
@@ -61,8 +61,8 @@ s32 func_0015DBE0(void* self);
 s32 func_0015DF58(void* self)
 {
     s32 n = 0;
-    func_0015DB80(self);
-    while (func_0015DBE0(self) != 0) {
+    RewindTextReader(self);
+    while (ReadTextChar(self) != 0) {
         n++;
     }
     return n;
@@ -91,23 +91,23 @@ void func_0015EB20(void* self, void* p, s32 n)
 {
     Frame_15EB20 fr;
     void* buf = fr.obj;
-    func_001611B8(buf);
-    func_001529C8(buf, 8, fr.scratch);
-    func_001613C0(buf, 0, 1, 0xE);
-    func_00161708(buf, 0x61, 0);
-    func_00161200(buf);
-    func_001EE450(self);
-    func_001EE8D0(self, buf);
-    func_0015EAE0(self, D_00212160, D_00215C50);
-    func_00152D30(self);
-    func_001529E0(self, p, n);
+    InitGifPacket(buf);
+    UsePacketBufferMemory(buf, 8, fr.scratch);
+    BeginGifTag(buf, 0, 1, 0xE);
+    AddGifRegisterWrite(buf, 0x61, 0);
+    EndGifPacket(buf);
+    WriteVifFlush(self);
+    WriteVifDirectFromWriter(self, buf);
+    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
+    AddDmaEndTag(self);
+    DetachPacketBuffer(self, p, n);
 }
 
 void func_0015C260(V24A2* self, V24A2* dst);
 
 void func_0015C9B0(V24A2* self, V24A2* dst)
 {
-    func_0015C260(self, dst);
+    CopyFontMetrics(self, dst);
     dst->id = self->id;
     dst->imgA = self->imgA;
     dst->imgB = self->imgB;
@@ -125,7 +125,7 @@ V24A2_Glyph* func_0015DAB8(V24A2* table, s8 key);
 
 f32 func_0015CA60(V24A2* self, s8 key)
 {
-    V24A2_Glyph* e = func_0015DAB8(self, key);
+    V24A2_Glyph* e = FindFontGlyph(self, key);
     f32 x;
     f32 y;
     if (e == 0) {
@@ -146,14 +146,14 @@ s32 func_0015CAB8(V24A2* self, void* obj)
 {
     s32 r = (g_buildFrame->flags & self->mask) == 0;
     if (r != 0) {
-        func_00152D70(obj);
-        func_00152B80(obj, self->f68, self->f6C);
-        func_00152B80(obj, self->imgA->f14, self->imgA->f10);
+        CloseDmaTag(obj);
+        AddDmaRefTag(obj, self->f68, self->f6C);
+        AddDmaRefTag(obj, self->imgA->f14, self->imgA->f10);
         if (self->imgB != 0) {
-            func_00152B80(obj, self->f70, self->f74);
-            func_00152B80(obj, self->imgB->fC, self->imgB->f8);
+            AddDmaRefTag(obj, self->f70, self->f74);
+            AddDmaRefTag(obj, self->imgB->fC, self->imgB->f8);
         }
-        func_00152B38(obj);
+        BeginDmaTag(obj);
         g_buildFrame->flags |= self->mask;
     }
     return r;
@@ -167,42 +167,42 @@ void func_00161768(void* obj, s32 tag, s64 value);
 
 void func_0015CB88(V24A2* self, s32 a1, void* obj)
 {
-    func_0015C2E8(self, a1, obj);
-    s32 ok = func_0015CAB8(self, obj);
-    func_001613C0(obj, 6, 1, 0xE);
+    SetFontClipRect(self, a1, obj);
+    s32 ok = AddFontImagesToFrame(self, obj);
+    BeginGifTag(obj, 6, 1, 0xE);
     if (ok != 0) {
-        func_00161708(obj, 0x3F, 0);
+        AddGifRegisterWrite(obj, 0x3F, 0);
     }
     s64 v = 0x31001;
     if (self->f30 != 0) {
         v = self->f38;
     }
-    func_00161708(obj, 0x47, v);
-    func_00161708(obj, 0x42, 0x44);
-    func_00161708(obj, 6, self->f60);
-    func_00161708(obj, 0x14, 0x60);
-    func_00161708(obj, 8, 5);
-    func_00161708(obj, 0, 0x1D6);
-    func_00161768(obj, 5, 0x43431);
+    AddGifRegisterWrite(obj, 0x47, v);
+    AddGifRegisterWrite(obj, 0x42, 0x44);
+    AddGifRegisterWrite(obj, 6, self->f60);
+    AddGifRegisterWrite(obj, 0x14, 0x60);
+    AddGifRegisterWrite(obj, 8, 5);
+    AddGifRegisterWrite(obj, 0, 0x1D6);
+    BeginGifRegListTag(obj, 5, 0x43431);
 }
 
 void func_0015CC80(V24A2* self, void* obj)
 {
-    s32 ok = func_0015CAB8(self, obj);
-    func_001613C0(obj, 6, 1, 0xE);
+    s32 ok = AddFontImagesToFrame(self, obj);
+    BeginGifTag(obj, 6, 1, 0xE);
     if (ok != 0) {
-        func_00161708(obj, 0x3F, 0);
+        AddGifRegisterWrite(obj, 0x3F, 0);
     }
-    func_00161708(obj, 6, self->f60);
-    func_00161708(obj, 0, 0x1D6);
-    func_00161768(obj, 5, 0x43431);
+    AddGifRegisterWrite(obj, 6, self->f60);
+    AddGifRegisterWrite(obj, 0, 0x1D6);
+    BeginGifRegListTag(obj, 5, 0x43431);
 }
 
 extern s32 D_0026227C;
 
 void func_0015C178(void)
 {
-    D_0026227C = 0;
+    g_defaultFont = 0;
 }
 
 void func_0018D800(void* dst, void* src, s32 size);
@@ -215,7 +215,7 @@ void func_0015C260(V24A2* src, V24A2* dst)
     dst->sx = src->sx;
     dst->sy = src->sy;
     dst->depth = src->depth;
-    func_0018D800(dst->stack, src->stack, src->depth << 3);
+    CopyMemory(dst->stack, src->stack, src->depth << 3);
     dst->f30 = src->f30;
     dst->f38 = src->f38;
     dst->f40 = src->f40;
@@ -232,10 +232,10 @@ void func_001686E8(s32 a, s32 b);
 void func_0015EF88(Pair_15EF88* self, s32 flag)
 {
     func_0015ED50(self, flag);
-    func_001686E8(D_00261F18, self->fC);
+    func_001686E8(g_vif1Channel, self->fC);
     if (flag != 0) {
         *(volatile s32*)0x10003010 = 0;
-        func_001686E8(D_00261F1C, self->f4);
+        func_001686E8(g_gifChannel, self->f4);
     }
 }
 
@@ -248,8 +248,8 @@ void* func_001EE318(void* p);
 void func_0015F618(s32 flag, s32 code)
 {
     if (code == 0xFFFF && flag != 0) {
-        func_001611B8(D_00262280);
-        func_001EE318(D_002622A8);
+        InitGifPacket(g_gsPacketWriter);
+        InitPacketWriter(g_vifPacketWriter);
     }
 }
 
@@ -278,17 +278,17 @@ void func_001DC4D0(s32 a0, s32 a1, void* a2, Pred_15C0A0 a3, void* a4, s32* a5, 
 
 s32 func_0015C0A0(ObjectCycler* self)
 {
-    f32* tbl = D_00261858;
+    f32* tbl = g_gameClock;
     if (tbl[1] - self->f66C < 0.05f) {
         return 0;
     }
-    func_0018D608(self);
+    PushBackMemoryMark(self);
     Frame_15C0A0 fr;
     func_001DC4D0((s32)self->world, 0, &self->v140, func_0015C058, self, &fr.a, &fr.b, self->f64C);
     fr.q = self->v140;
     fr.q.z = fr.q.z - self->f64C;
-    s32 r = func_001419E8(0, &self->v140, &fr.q, fr.a, fr.b, 0);
-    func_0018D6F0();
+    s32 r = FindNearestSpanObject(0, &self->v140, &fr.q, fr.a, fr.b, 0);
+    PopBackMemoryMark();
     self->f66C = tbl[1];
     return r == 0;
 }
@@ -301,7 +301,7 @@ void func_0015EAE0(void* list, s32 value, s32 end)
 {
     if (D_0026230C != value) {
         D_0026230C = value;
-        func_00152B80(list, ((u32)(end - value) + 15) >> 4, value);
+        AddDmaRefTag(list, ((u32)(end - value) + 15) >> 4, value);
     }
 }
 
@@ -313,11 +313,11 @@ void func_001529E0(void* obj, void* a, s32 b);
 
 void func_0015EBF0(void* obj, void* a, s32 b)
 {
-    func_001613C0(obj, 0, 1, 0xE);
-    func_00161708(obj, 0x61, 0);
-    func_00161200(obj);
-    func_00152D30(obj);
-    func_001529E0(obj, a, b);
+    BeginGifTag(obj, 0, 1, 0xE);
+    AddGifRegisterWrite(obj, 0x61, 0);
+    EndGifPacket(obj);
+    AddDmaEndTag(obj);
+    DetachPacketBuffer(obj, a, b);
 }
 
 void func_0015EB20(void* list, void* a, s32 b);
@@ -335,17 +335,17 @@ extern void* D_002623B0;
 
 void func_0015EC68(void)
 {
-    func_0015EB20(D_002622A8, (u8*)g_buildFrame + 8, 0);
-    func_0015EBF0(D_00262280, g_buildFrame, 0);
+    WriteGsFinishPacket(g_vifPacketWriter, (u8*)g_buildFrame + 8, 0);
+    CloseDrawBuffer(g_gsPacketWriter, g_buildFrame, 0);
     g_buildFrame->l20 = D_002622E0;
-    func_00152440(&D_002622E0);
+    ClearList(&D_002622E0);
     g_buildFrame->l2C = D_002622F0;
-    func_00152440(&D_002622F0);
-    g_buildFrame->l38 = D_00262300;
-    func_00152440(&D_00262300);
-    D_002622D0 = 0;
+    ClearList(&D_002622F0);
+    g_buildFrame->l38 = g_deferredReleaseListC;
+    ClearList(&g_deferredReleaseListC);
+    g_buildFrameData = 0;
     g_buildFrame = 0;
-    func_001F6B40(D_002623B0);
+    func_001F6B40(g_frameReadySemaphore);
 }
 
 struct Obj_0015C3C0;
@@ -356,8 +356,8 @@ void func_00161708(Obj_0015C3C0* obj, s32 a1, u64 key);
 void func_0015C3C0(V24A2* unused, s32 flag, Obj_0015C3C0* obj)
 {
     if (flag != 0) {
-        func_001613C0(obj, 0, 1, 0xE);
-        func_00161708(obj, 0x40, 0xDF0000027F0000UL);
+        BeginGifTag(obj, 0, 1, 0xE);
+        AddGifRegisterWrite(obj, 0x40, 0xDF0000027F0000UL);
     }
 }
 
@@ -370,11 +370,11 @@ void func_00202A80(s32 a, s32 b);
 
 void func_0015ED50(RenderFrame* self)
 {
-    D_002622D4 = self->i10;
-    func_001B3488(self->f44);
+    g_drawFrameData = self->i10;
+    SwitchActiveImageMask(self->f44);
     if (self->f1C != 0 && D_00274538 != 0) {
         *(volatile s32*)0x10003010 = 4;
-        func_00202A80(D_00261F1C, D_00274538);
+        func_00202A80(g_gifChannel, D_00274538);
     }
 }
 
@@ -385,9 +385,9 @@ s32 func_0015DBE0(void* self);
 
 void func_0015DFA0(Cursor_15DFA0* self, s32 n)
 {
-    func_0015DB80(self);
+    RewindTextReader(self);
     for (;;) {
-        if (func_0015DBE0(self) == 0) {
+        if (ReadTextChar(self) == 0) {
             break;
         }
         if (n == 0) {
@@ -404,9 +404,9 @@ s32 func_0015DBE0(void* self);
 f32 func_0015DFF8(TextReader* self)
 {
     f32 acc = 0.0f;
-    func_0015DB80(self);
+    RewindTextReader(self);
     s32 item;
-    while ((item = func_0015DBE0(self)) != 0) {
+    while ((item = ReadTextChar(self)) != 0) {
         V24A2* holder = self->font;
         const V24A2_Vt* disp = holder->vt;
         acc += disp->width((V24A2*)((u8*)holder + disp->adj3), item);
@@ -426,9 +426,9 @@ s32 func_0015E068(Lines_15E068* self, f32 limit)
     s32 newline = 10;
     s32 space = 32;
     s32 tab = 9;
-    func_0015DB80(self);
+    RewindTextReader(self);
     s32 c;
-    while ((c = func_0015DBE0(self)) != 0) {
+    while ((c = ReadTextChar(self)) != 0) {
         if (c == newline) {
             width = 0.0f;
             lines++;
@@ -468,7 +468,7 @@ f32 func_0015E1B0(TextReader* self)
 {
     V24A2* holder = self->defaultFont;
     f32 width = (f32)holder->height * holder->sy;
-    s32 lines = func_0015E068(self);
+    s32 lines = WrapTextLines(self);
     return width * (f32)lines;
 }
 
@@ -489,11 +489,11 @@ s32 func_0015C200(s32 a0)
 {
     s8 key = (s8)a0;
     s32 i = 0;
-    while (i < 5 && key != D_00262250[i]) {
+    while (i < 5 && key != g_fontEscapeKeys[i]) {
         i++;
     }
     if (i < 5) {
-        return D_00262268[i];
+        return g_fonts[i];
     }
     return 0;
 }
@@ -503,7 +503,7 @@ s32 func_0015C4E8(V24A2* self, u8* s);
 f32 func_0015C4A8(V24A2* self, u8* s)
 {
     f32 a = (f32)self->height * self->sy;
-    s32 n = func_0015C4E8(self, s);
+    s32 n = WrapFontString(self, s);
     return a * (f32)n;
 }
 
@@ -525,23 +525,23 @@ void func_0015D998(V24A2* self, void* arg)
     Frame_15D998 f;
     s32 n;
 
-    (void)func_001611B8(&f.a);
+    (void)InitGifPacket(&f.a);
     V24A2_ImgA* q = self->imgA;
-    n = func_00168D88(arg, q->f0A);
-    func_00168FB0(self->imgA, n);
+    n = AllocateBump(arg, q->f0A);
+    BuildImageTexRegister(self->imgA, n);
     self->f60u = self->imgA->f18;
-    func_001529C8(&f.a, 16, f.buf);
-    func_00169088(self->imgA, n, &f.a);
-    func_00152A50(&f.a, &self->f68, 0, &self->f6C, 7);
+    UsePacketBufferMemory(&f.a, 16, f.buf);
+    StartImageUpload(self->imgA, n, &f.a);
+    DetachPacketBufferCopy(&f.a, &self->f68, 0, &self->f6C, 7);
     if (self->imgB != 0) {
-        n = func_00168D88(arg, self->imgB->f6);
-        func_00168E78(self->imgB, n);
+        n = AllocateBump(arg, self->imgB->f6);
+        BuildPaletteTexRegister(self->imgB, n);
         u64 t = self->f60u;
         t |= self->imgB->f10;
         self->f60u = t;
-        func_001529C8(&f.a, 16, f.buf);
-        func_00168F48(self->imgB, n, &f.a);
-        func_00152A50(&f.a, &self->f70, 0, &self->f74, 7);
+        UsePacketBufferMemory(&f.a, 16, f.buf);
+        StartPaletteUpload(self->imgB, n, &f.a);
+        DetachPacketBufferCopy(&f.a, &self->f70, 0, &self->f74, 7);
     }
 }
 
@@ -556,9 +556,9 @@ void func_0015D998(void* item, void* buf);
 void func_0015E5F0(void)
 {
     u8 buf[16];
-    func_00168D68(buf, 0x1400, 0x1E00);
-    for (s32 i = 0; i < D_00262260; i++) {
-        func_0015D998(D_00262264 + i * 0x88, buf);
+    InitBumpAllocator(buf, 0x1400, 0x1E00);
+    for (s32 i = 0; i < g_fontCount; i++) {
+        UploadFontImages(g_fontRecords + i * 0x88, buf);
     }
 }
 
@@ -571,7 +571,7 @@ void func_0015D338(V24A2* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
                    f32 u0, f32 v0, f32 u1, f32 v1, V24A0* s)
 {
     color = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
-    func_001617E8(s, color, 0.0f);
+    AddGifRegListFloat(s, color, 0.0f);
     func_00161860(s, (s32)(u0 * 16.0f), (s32)(v0 * 16.0f));
     func_001618C0(s, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
     func_00161860(s, (s32)(u1 * 16.0f), (s32)(v1 * 16.0f));
@@ -582,7 +582,7 @@ V24A2_Glyph* func_0015DAB8(V24A2* self, s8 key);
 
 f32 func_0015CD18(f32 x, f32 y, V24A2* self, s8 key, u32 color, V24A0* s)
 {
-    V24A2_Glyph* e = func_0015DAB8(self, key);
+    V24A2_Glyph* e = FindFontGlyph(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->f60u >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -592,7 +592,7 @@ f32 func_0015CD18(f32 x, f32 y, V24A2* self, s8 key, u32 color, V24A0* s)
         f32 py = y + h;
         if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 492.80002f) {
             u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
-            func_001617E8(s, tag, 0.0f);
+            AddGifRegListFloat(s, tag, 0.0f);
             func_00161860(s, e->u << 4, (s4 - e->v) << 4);
             func_001618C0(s, (s32)((x + 1728.0f) * 16.0f),
                           (s32)((y * 0.45454547f + 1936.0f) * 16.0f), self->f40, 0);
@@ -610,7 +610,7 @@ f32 func_0015E1F0(void* self);
 
 void func_0015E290(void* self, f32 f, f32* out1, f32* out2)
 {
-    s32 n = func_0015E068(self, f);
+    s32 n = WrapTextLines(self, f);
     f32 g = func_0015E1F0(self);
     TextReader* o = (TextReader*)self;
     f32 k = (f32)o->defaultFont->height * o->defaultFont->sy;
@@ -636,9 +636,9 @@ void func_0015C2E8(V24A2* unused, Vec4_0015C2E8* v, Obj_0015C2E8* obj)
         s32 pz = (s32)((v->y + v->w) * 0.454545468f) - 1;
         s32 py = (s32)(v->y * 0.454545468f);
         s32 px = (s32)v->x;
-        func_001613C0(obj, 0, 1, 0xE);
+        BeginGifTag(obj, 0, 1, 0xE);
         u64 key = (u64)px | ((u64)pw << 16) | ((u64)py << 32) | ((u64)pz << 48);
-        func_00161708(obj, 0x40, key);
+        AddGifRegisterWrite(obj, 0x40, key);
     }
 }
 
@@ -664,7 +664,7 @@ void func_0015EDB8(void)
         } while (n > 0);
     }
     if (crc != 0) {
-        D_00262310 = 1;
+        g_codeChecksumFailed = 1;
     }
 }
 
@@ -699,30 +699,30 @@ void func_00191EB0(s32 a);
 void func_0015F210(s32 flag)
 {
     for (s32 i = 0; (u32)i < 2; i++) {
-        func_001F6B60(D_002623B4);
+        func_001F6B60(g_frameDoneSemaphore);
     }
     for (s32 i = 0; (u32)i < 2; i++) {
-        func_001F6B40(D_002623B4);
+        func_001F6B40(g_frameDoneSemaphore);
     }
-    while (D_002623B8 == 0) {
+    while (g_renderThreadWaiting == 0) {
     }
-    if (flag != 0 && D_0026231C != 0) {
+    if (flag != 0 && g_drawingFrame != 0) {
         s32 n = 2;
         do {
-            func_0015EF88(D_0026231C, 1);
+            SendRenderFrameToDma(g_drawingFrame, 1);
             func_0015F320();
-            func_001683E8();
+            FlipDisplayFrame();
         } while (--n >= 0);
         D_002626CC = 3;
     }
     u8* p = (u8*)g_renderFrames;
     u8* end = p + 0x90;
     do {
-        func_0015EFE8(p);
+        ReleaseFrameNodes(p);
         p += 0x48;
     } while (p < end);
     func_00191EB0(3);
-    D_0026231C = 0;
+    g_drawingFrame = 0;
 }
 
 struct Local_15D8A8 {
@@ -747,14 +747,14 @@ void* func_0018D500(s32 n);
 void func_0015D8A8(V24A2* obj, void* src)
 {
     Local_15D8A8 l;
-    func_00137A60(src, 0x10, &l);
+    ReadBufferedStreamBytes(src, 0x10, &l);
     s32 idx = l.b7;
     obj->id = idx;
-    D_00262268[idx] = (s32)obj;
-    obj->imgA = (V24A2_ImgA*)(D_00274504 + l.u0 * 32);
+    g_fonts[idx] = (s32)obj;
+    obj->imgA = (V24A2_ImgA*)(g_imageRecordsA + l.u0 * 32);
     void* t;
     if (l.u2 != 0xFFFF) {
-        t = D_0027450C + l.u2 * 24;
+        t = g_imageRecordsB + l.u2 * 24;
     } else {
         t = 0;
     }
@@ -767,8 +767,8 @@ void func_0015D8A8(V24A2* obj, void* src)
     obj->height = C;
     obj->advance = B;
     obj->sy = F;
-    obj->glyphs = (V24A2_Glyph*)func_0018D500(n << 3);
-    func_00137A60(src, obj->glyphCount << 3, obj->glyphs);
+    obj->glyphs = (V24A2_Glyph*)AllocateFrontMemory(n << 3);
+    ReadBufferedStreamBytes(src, obj->glyphCount << 3, obj->glyphs);
 }
 
 s32 D_00262258 = -8;
@@ -786,7 +786,7 @@ void func_001618C0(V24A0* s, s32 a, s32 b, s32 c, s32 d);
 
 void func_0015CF70(V24A2* self, s8 key, u32 color, V24A0* s, f32 x, f32 y)
 {
-    V24A2_Glyph* e = func_0015DAB8(self, key);
+    V24A2_Glyph* e = FindFontGlyph(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->f60u >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -799,24 +799,24 @@ void func_0015CF70(V24A2* self, s8 key, u32 color, V24A0* s, f32 x, f32 y)
             s32 v0 = ((s4 - e->v) << 4) + D_0026225C;
             s32 u1 = ((e->u + e->w) << 4) + D_00262258;
             s32 v1 = ((s4 - (e->v + self->height)) << 4) + D_0026225C;
-            s32 ok = func_0015CAB8(self, s);
-            func_001613C0(s, 6, 1, 0xE);
+            s32 ok = AddFontImagesToFrame(self, s);
+            BeginGifTag(s, 6, 1, 0xE);
             if (ok != 0) {
-                func_00161708(s, 0x3F, (u64)0);
+                AddGifRegisterWrite(s, 0x3F, (u64)0);
             }
             u64 v = 0x31001;
             if (self->f30 != 0) {
                 v = self->f38;
             }
-            func_00161708(s, 0x47, (u64)v);
-            func_00161708(s, 0x42, (u64)0x44);
-            func_00161708(s, 6, (u64)self->f60u);
-            func_00161708(s, 0x14, (u64)0x60);
-            func_00161708(s, 8, (u64)5);
-            func_00161708(s, 0, (u64)0x1D4);
-            func_00161768(s, 9, 0x434343431ULL);
+            AddGifRegisterWrite(s, 0x47, (u64)v);
+            AddGifRegisterWrite(s, 0x42, (u64)0x44);
+            AddGifRegisterWrite(s, 6, (u64)self->f60u);
+            AddGifRegisterWrite(s, 0x14, (u64)0x60);
+            AddGifRegisterWrite(s, 8, (u64)5);
+            AddGifRegisterWrite(s, 0, (u64)0x1D4);
+            BeginGifRegListTag(s, 9, 0x434343431ULL);
             u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
-            func_001617E8(s, tag, 0.0f);
+            AddGifRegListFloat(s, tag, 0.0f);
             func_00161860(s, u0, v0);
             s32 sx = (s32)((x + 1728.0f) * 16.0f);
             s32 sy = (s32)((py * 0.45454547f + 1936.0f) * 16.0f);
@@ -829,7 +829,7 @@ void func_0015CF70(V24A2* self, s8 key, u32 color, V24A0* s, f32 x, f32 y)
             func_001618C0(s, sx2, sy, self->f40, 0);
             func_00161860(s, u1, v1);
             func_001618C0(s, sx2, sy2, self->f40, 0);
-            self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)D_00262280);
+            self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)g_gsPacketWriter);
         }
     }
 }
@@ -901,11 +901,11 @@ void func_0015E810(void)
     }
     func_00152438(&D_002622E0, 0x630);
     func_00152438(&D_002622F0, 0x1090);
-    func_00152438(&D_00262300, 0xB8);
+    func_00152438(&g_deferredReleaseListC, 0xB8);
     func_001F6950(5, (void (*)(void))((u8*)func_0015E678 + 0x30), 0);
     func_001F6DA8(5);
-    D_002623B0 = func_001E2268(0, 2);
-    D_002623B4 = func_001E2268(2, 2);
+    g_frameReadySemaphore = CreateLockSemaphore(0, 2);
+    g_frameDoneSemaphore = CreateLockSemaphore(2, 2);
     u32* tab = (u32*)D_002C3B00;
     s32 n = 0;
     do {
@@ -918,7 +918,7 @@ void func_0015E810(void)
         *(u32*)((u8*)tab + off) = c;
         n++;
     } while (n < 256);
-    func_001F6A20(D_00275958[1], 0);
+    func_001F6A20(g_mainAndRenderThreads[1], 0);
 }
 
 s32 func_0015C188(s32 a0)
@@ -926,7 +926,7 @@ s32 func_0015C188(s32 a0)
     if (a0 == -1) {
         goto none;
     }
-    if (((s32*)D_00262268)[a0] != 0) {
+    if (((s32*)g_fonts)[a0] != 0) {
         goto some;
     }
 none:
@@ -951,14 +951,14 @@ void func_0015DB80(TextReader* self);
 
 TextReader* func_0015DB28(TextReader* self, s32 a1, s32 a2)
 {
-    self->inlineFont.vt = (const V24A2_Vt*)&D_0024A220;
+    self->inlineFont.vt = (const V24A2_Vt*)&g_fontMethods;
     self->text = a1;
     self->defaultFont = (V24A2*)a2;
     self->inlineFontColorBits = 0xFF808080;
     self->defaultColorBits = 0xFF808080;
     self->baseColorBits = 0xFF808080;
     self->colorBits = 0xFF808080;
-    func_0015DB80(self);
+    RewindTextReader(self);
     return self;
 }
 
@@ -1017,25 +1017,25 @@ void func_001683E8(void);
 
 void func_0015EE80(void)
 {
-    func_0015EDB8();
+    VerifyCodeChecksum();
     for (;;) {
-        D_002623B8 = 1;
-        func_001F6B60(D_002623B0);
-        D_002623B8 = 0;
-        D_0026231C = &g_renderFrames[D_00262314];
+        g_renderThreadWaiting = 1;
+        func_001F6B60(g_frameReadySemaphore);
+        g_renderThreadWaiting = 0;
+        g_drawingFrame = &g_renderFrames[D_00262314];
         D_00262314++;
         if (D_00262314 >= 2) {
             D_00262314 = 0;
         }
-        func_0015ED50((RenderFrame*)D_0026231C);
+        func_0015ED50((RenderFrame*)g_drawingFrame);
         func_001684E8();
-        func_001686E8(D_00261F18, ((RenderFrame*)D_0026231C)->bufBAddr);
+        func_001686E8(g_vif1Channel, ((RenderFrame*)g_drawingFrame)->bufBAddr);
         *(volatile s32*)0x10003010 = 0;
-        func_001686E8(D_00261F1C, ((RenderFrame*)D_0026231C)->bufAAddr);
+        func_001686E8(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufAAddr);
         func_0015F320();
-        func_00202C38(D_00261F18, 0, 0);
-        func_001F6B40(D_002623B4);
-        func_001683E8();
+        func_00202C38(g_vif1Channel, 0, 0);
+        func_001F6B40(g_frameDoneSemaphore);
+        FlipDisplayFrame();
         D_002626CC = 1;
     }
 }
@@ -1086,34 +1086,34 @@ void func_0015EFE8(RenderFrame* self)
 {
     Iter_15EFE8 it;
     Node_15EFE8* n;
-    if (func_00152720(&self->l20) == 0) {
+    if (IsListEmpty(&self->l20) == 0) {
         Begin_15EFE8::Of(&it, &self->l20);
         while ((n = Next_15EFE8::Of(&it)) != 0) {
-            func_00152600(&self->l20, n);
-            func_00152470(n->f14 + 0x1CC0, n);
+            RemoveFromList(&self->l20, n);
+            AppendToList(n->f14 + 0x1CC0, n);
         }
-        func_00152440(&self->l20);
-        D_0027B314 = (ListFrame*)it.prev;
+        ClearList(&self->l20);
+        g_activeListFrames = (ListFrame*)it.prev;
     }
-    if (func_00152720(&self->l2C) == 0) {
+    if (IsListEmpty(&self->l2C) == 0) {
         Begin_15EFE8::Of(&it, &self->l2C);
         while ((n = Next_15EFE8::Of(&it)) != 0) {
             if (n->f1088 != 0) {
-                func_001B5F28(D_00275710 + 0x1B4C, n->f1088);
+                PushFreeSlot(g_currentWorld + 0x1B4C, n->f1088);
             }
-            func_00152600(&self->l2C, n);
-            func_001B5F28(D_00275710 + 0x1B40, n);
+            RemoveFromList(&self->l2C, n);
+            PushFreeSlot(g_currentWorld + 0x1B40, n);
         }
-        func_00152440(&self->l2C);
-        D_0027B314 = (ListFrame*)it.prev;
+        ClearList(&self->l2C);
+        g_activeListFrames = (ListFrame*)it.prev;
     }
-    if (func_00152720(&self->l38) == 0) {
+    if (IsListEmpty(&self->l38) == 0) {
         Begin_15EFE8::Of(&it, &self->l38);
         while ((n = Next_15EFE8::Of(&it)) != 0) {
-            func_00152600(&self->l38, n);
-            func_001B5F28(D_00275710 + 0x1BF4, n);
+            RemoveFromList(&self->l38, n);
+            PushFreeSlot(g_currentWorld + 0x1BF4, n);
         }
-        D_0027B314 = (ListFrame*)it.prev;
+        g_activeListFrames = (ListFrame*)it.prev;
     }
 }
 
@@ -1246,8 +1246,8 @@ void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
     f32 left;
     s32 c;
     func_001F5C0C(f, 0, 0x100);
-    func_0015DB80(self);
-    while ((c = func_0015DBE0(self)) != 0) {
+    RewindTextReader(self);
+    while ((c = ReadTextChar(self)) != 0) {
         if (c == 10) {
             n++;
         } else {
@@ -1265,13 +1265,13 @@ void func_0015E318(TextReader* self, Layout_137228* p, s32 x, s32 y)
             top = p->y + (p->h - tot) * 0.5f;
     }
     u = p->color;
-    func_0015DBB8(self, &u);
+    SetTextDefaultColor(self, &u);
     Font_15E318* started = 0;
     f32 half = 0.5f;
-    func_0015DB80(self);
+    RewindTextReader(self);
     s32 right = 2;
     f32* fp = f;
-    while ((n = func_0015DBE0(self)) != 0) {
+    while ((n = ReadTextChar(self)) != 0) {
         if (n == 10) {
             first = 1;
             fp++;
@@ -1364,9 +1364,9 @@ s32 func_0015DBE0(TextReader* self)
                 self->fontChanged = changed;
                 self->cur += 2;
             } else {
-                V24A2* nf = (V24A2*)func_0015C200(p[1]);
+                V24A2* nf = (V24A2*)FindFontByKeyChar(p[1]);
                 if (nf != 0) {
-                    func_0015C9B0(nf, inl);
+                    CopyFont(nf, inl);
                     self->cur += 2;
                     V24A2* d = self->defaultFont;
                     f32 ratio = ((f32)d->height * d->sy) / ((f32)inl->height * inl->sy);
@@ -1391,12 +1391,12 @@ s32 func_0015DBE0(TextReader* self)
                 self->cur = p + 1;
                 done = 1;
             } else if (p[1] == '.') {
-                func_0015C900(self->font);
+                PopFontScale(self->font);
                 self->cur += 2;
             } else {
                 f32 a = (f32)(p[1] - '0') + (f32)(p[2] - '0') * 0.1f;
                 V24A2* f = self->font;
-                func_0015C8B8(f, a * f->sx, a * f->sy);
+                PushFontScale(f, a * f->sx, a * f->sy);
                 self->cur += 3;
             }
             break;
@@ -1431,9 +1431,9 @@ void func_0015D338(V24A2* self, u32 color, f32 x0, f32 y0, f32 x1, f32 y1,
 
 void func_0015D4E0(V24A2* self, Item_15D4E0* item, Rect_15D4E0* r, V24A0* s)
 {
-    V24A2_Glyph* e = func_0015DAB8(self, item->key);
+    V24A2_Glyph* e = FindFontGlyph(self, item->key);
     if (e != 0) {
-        func_0015C8B8(item->f0, item->f10, item->f14);
+        PushFontScale(item->f0, item->f10, item->f14);
         f32 top = r->y;
         f32 sx = self->sx;
         f32 left = r->x;
@@ -1459,16 +1459,16 @@ void func_0015D4E0(V24A2* self, Item_15D4E0* item, Rect_15D4E0* r, V24A0* s)
         self->vt->begin((V24A2*)((u8*)self + self->vt->adj4), 0, (s32)s);
         f32 v2 = (f32)v2i;
         f32 u2 = (f32)u2i;
-        func_0015D338(self, item->color, x0, y0, x1, y1, u0, v0, u1, v1, s);
-        func_0015D338(self, item->color, x2, y0, x3, y1, u1, v0, u2, v1, s);
-        func_0015D338(self, item->color, x0, y2, x1, y3, u0, v1, u1, v2, s);
-        func_0015D338(self, item->color, x2, y2, x3, y3, u1, v1, u2, v2, s);
-        func_0015D338(self, item->color, x1, y0, x2, y1, u1, v0, u1, v1, s);
-        func_0015D338(self, item->color, x1, y2, x2, y3, u1, v1, u1, v2, s);
-        func_0015D338(self, item->color, x0, y1, x1, y2, u0, v1, u1, v1, s);
-        func_0015D338(self, item->color, x2, y1, x3, y2, u1, v1, u2, v1, s);
-        func_0015D338(self, item->color, x1, y1, x2, y2, u1, v1, u1, v1, s);
-        func_0015C900(item->f0);
+        DrawFontQuad(self, item->color, x0, y0, x1, y1, u0, v0, u1, v1, s);
+        DrawFontQuad(self, item->color, x2, y0, x3, y1, u1, v0, u2, v1, s);
+        DrawFontQuad(self, item->color, x0, y2, x1, y3, u0, v1, u1, v2, s);
+        DrawFontQuad(self, item->color, x2, y2, x3, y3, u1, v1, u2, v2, s);
+        DrawFontQuad(self, item->color, x1, y0, x2, y1, u1, v0, u1, v1, s);
+        DrawFontQuad(self, item->color, x1, y2, x2, y3, u1, v1, u1, v2, s);
+        DrawFontQuad(self, item->color, x0, y1, x1, y2, u0, v1, u1, v1, s);
+        DrawFontQuad(self, item->color, x2, y1, x3, y2, u1, v1, u2, v1, s);
+        DrawFontQuad(self, item->color, x1, y1, x2, y2, u1, v1, u1, v1, s);
+        PopFontScale(item->f0);
         self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)s);
     }
 }
@@ -1494,24 +1494,24 @@ void func_0015E9F0(void)
     s32 idx;
 
     func_00191E70(3);
-    func_001F6B60(D_002623B4);
-    idx = D_00262318;
-    D_00262318 = idx + 1;
+    func_001F6B60(g_frameDoneSemaphore);
+    idx = g_nextBuildFrameIndex;
+    g_nextBuildFrameIndex = idx + 1;
     g_buildFrame = &g_renderFrames[idx];
     if ((u32)(idx + 1) >= 2) {
-        D_00262318 = 0;
+        g_nextBuildFrameIndex = 0;
     }
-    func_0015EFE8(g_buildFrame);
+    ReleaseFrameNodes(g_buildFrame);
     {
         RenderFrame* slot = g_buildFrame;
-        s32 v = *(s32*)(D_00261990 + 0x21C);
+        s32 v = *(s32*)(g_camera + 0x21C);
         slot->flags = 0;
         slot->f44 = v;
         slot->f1C = 0;
-        func_001529C8(D_00262280, 0x8000, slot->bufA);
+        UsePacketBufferMemory(g_gsPacketWriter, 0x8000, slot->bufA);
     }
-    func_001529C8(D_002622A8, 0x10000, g_buildFrame->bufB);
-    D_002622D0 = g_buildFrame->i10;
-    func_00152B38(D_00262280);
-    func_00152B38(D_002622A8);
+    UsePacketBufferMemory(g_vifPacketWriter, 0x10000, g_buildFrame->bufB);
+    g_buildFrameData = g_buildFrame->i10;
+    BeginDmaTag(g_gsPacketWriter);
+    BeginDmaTag(g_vifPacketWriter);
 }

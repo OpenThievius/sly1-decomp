@@ -39,12 +39,12 @@ void func_00136238(Obj_136238_eu* self, s32 on)
     self->f5AC = 0;
     if (on != 0) {
         self->vt->f40(self, 2);
-        func_00160D30(&in);
+        GetCurrentLevelBit(&in);
         if (func_00160D10() & in.a) {
-            if (func_00160D10() & D_00261120[self->f5B8]) func_00135E78(self, self->f5B8, 1);
+            if (func_00160D10() & D_00261120[self->f5B8]) ReleasePanelEntries(self, self->f5B8, 1);
         }
         if (func_00160D10() & 0x800) {
-            n = func_0015A4F0(*(s32*)D_00275710, 0x205, 0x82, 0, 0x100, arr);
+            n = GatherObjectsById(*(s32*)g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
             n = Min_136238_eu::Of(n, 0x100);
             if (n > 0) {
                 void** p = arr;
@@ -55,7 +55,7 @@ void func_00136238(Obj_136238_eu* self, s32 on)
     } else {
         self->vt->f40(self, 0);
         self->f5B8 = self->f5B4;
-        func_00135E78(self, 0, 1);
+        ReleasePanelEntries(self, 0, 1);
     }
 }
 

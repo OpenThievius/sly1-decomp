@@ -18,8 +18,8 @@ s32 func_001F0490(C67* self, s32 kind, s32* outA, s32* outB)
         if (kind == 9) {
             if (allowed != 0) {
                 s32 m = mode * 0x44C;
-                if (*(s32*)((u8*)D_002623C0 + m + 0x88) & 1) {
-                    s32 q = D_002623C0->levels[mode].f448;
+                if (*(s32*)((u8*)g_saveData + m + 0x88) & 1) {
+                    s32 q = g_saveData->levels[mode].f448;
                     flag = (q & D_00275FC8[mode]) != 0;
                 }
             }
@@ -32,7 +32,7 @@ s32 func_001F0490(C67* self, s32 kind, s32* outA, s32* outB)
             sel = mode;
             flag = 0;
             if (allowed != 0) {
-                flag = *(s32*)((u8*)D_002623C0 + (sel * 0x44C + idx * 0x78) + 0x10) & 1;
+                flag = *(s32*)((u8*)g_saveData + (sel * 0x44C + idx * 0x78) + 0x10) & 1;
             }
         }
     }

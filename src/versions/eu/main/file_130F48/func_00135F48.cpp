@@ -12,16 +12,16 @@ void func_001358D0(Self_135F48_eu* self, s32 a1, void* a2, void* a3, s32 a4, s32
 void func_00135F48(Self_135F48_eu* self)
 {
     Flag_135F48 flag;
-    func_00160D30(&flag);
+    GetCurrentLevelBit(&flag);
     if ((func_00160D10() & flag.v) == 0) {
-        func_00135E78(self, 0, 1);
+        ReleasePanelEntries(self, 0, 1);
         return;
     }
-    func_00135E78(self, 1, 0);
+    ReleasePanelEntries(self, 1, 0);
     if (self->f5B4 == 1) {
         f32 k = D_00249CFC;
-        Ctx_135F48* ctx = *(Ctx_135F48**)D_00275710;
+        Ctx_135F48* ctx = *(Ctx_135F48**)g_currentWorld;
         func_001358D0(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, ctx->f1D44, k);
-        func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)D_00275710)->f1D54, k);
+        func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)g_currentWorld)->f1D54, k);
     }
 }

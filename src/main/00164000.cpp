@@ -7,7 +7,7 @@ void func_001CA5E0(void);
 
 void func_00167EF0(void)
 {
-    func_001CA5E0();
+    DrawAgent();
 }
 
 struct Ent_167E08 { u8 pad0[0x328]; s32 f328; };
@@ -26,7 +26,7 @@ void func_00167E08(C0A* self)
     Out_167E08 out;
     s32 i;
 
-    func_001C72A0(self);
+    StartAgent(self);
     if (self->fC18 != -1) {
         self->fC1C = (s32)func_0015A448(self->world, self->fC18, self);
     }
@@ -34,17 +34,17 @@ void func_00167E08(C0A* self)
         self->fC34 = (s32)func_0015A448(self->world, self->fC30, self);
     }
     if (self->f750 != 0) {
-        func_0018D608();
-        func_0012D1B0(self->f750, self, &out.count, (void**)&out.items);
+        PushBackMemoryMark();
+        GatherAnimationEventObjects(self->f750, self, &out.count, (void**)&out.items);
         for (i = 0; i < out.count; i++) {
             Ent_167E08* e = out.items[i];
             if (e->f328 == 0) {
                 void* t = func_001EFA30();
                 e->f328 = (s32)t;
-                func_001EFA60(t, e);
+                AppendToSmallList(t, e);
             }
         }
-        func_0018D6F0();
+        PopBackMemoryMark();
     }
 }
 
@@ -53,7 +53,7 @@ void func_00167D68(C0A* self);
 
 void func_00167D68(C0A* self)
 {
-    func_001C6F48(self);
+    InitAgent(self);
     self->fC20 = 1000.0f;
     self->fC24 = 1500.0f;
     self->fC28 = 0.78539816f;

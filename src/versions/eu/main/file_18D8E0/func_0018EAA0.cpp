@@ -12,8 +12,8 @@ void func_0018EAA0(Obj_18EAA0* self_)
     Obj_18EAA0_eu* self = (Obj_18EAA0_eu*)self_;
     self->f00 = 0;
     func_0011E498();
-    func_0011D480(2, self->fA0);
-    func_0011D480(16, self->fA4);
-    func_001C0950(D_00275710);
+    SetIopVolumeChannel(2, self->fA0);
+    SetIopVolumeChannel(16, self->fA4);
+    PopIopChannel2Setting(g_currentWorld);
     func_0011D6D8(0xFFFFFFFF);
 }

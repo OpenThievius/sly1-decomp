@@ -3,6 +3,6 @@
 void func_eu_001387C8(void* other, void* sub);
 void func_00192150(TextPointObject* self, void* other)
 {
-    func_00192068(self, other);
+    LoadPointObject(self, other);
     func_eu_001387C8(other, &self->text);
 }

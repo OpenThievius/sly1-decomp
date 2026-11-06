@@ -5,11 +5,11 @@ struct Gx_18C7F8_eu { u8 pad0[0x58C]; s32 f58C; };
 void func_0018C7F8(MemoryCard* self)
 {
     if (self->i4F44 != 0) {
-        if ((D_002623C0->f19EC & 0x100) == 0) {
-            ((Gx_18C7F8_eu*)D_0026FF68)->f58C = -1;
-            func_00194D30(D_0026FF68, 1, 0x14);
+        if ((g_saveData->f19EC & 0x100) == 0) {
+            ((Gx_18C7F8_eu*)g_pauseMenuElement)->f58C = -1;
+            SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x14);
         } else {
-            func_0018B670(g_backgroundJob, (void*)func_0018C638, self);
+            StartBackgroundJob(g_backgroundJob, (void*)SaveGameToMemoryCardSlot, self);
             u8* obj = (u8*)D_00273EB0;
             ((Pk_18C7F8*)(obj + 0x570))->v = 0;
             ((Obj_18C7F8*)obj)->vtbl[14](obj);

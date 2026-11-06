@@ -80,7 +80,7 @@ void func_eu_001AAFE0(Obj_eu_1AAFE0* self)
         f32 s = D_eu_0027DAF0.c0 + e * (D_eu_0027DAF0.c1 + e * D_eu_0027DAF0.c2);
         self->a52C = self->a53C + s * (self->a534 - self->a53C);
         self->a530 = self->a540 + s * (self->a538 - self->a540);
-        func_001AAEC0(self);
+        PlaceAnchoredScreenElements(self);
     }
     self->vt->setState(self, state);
 }

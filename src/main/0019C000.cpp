@@ -36,9 +36,9 @@ void func_0019DF48(void)
     u8* p;
     s32 i;
 
-    func_001611B8(buf.raw);
-    func_001529C8(buf.raw, 1, D_0026AC20);
-    func_001612F8(buf.raw, 0x7D, 0, 3, 0x412, 0);
+    InitGifPacket(buf.raw);
+    UsePacketBufferMemory(buf.raw, 1, D_0026AC20);
+    ReserveGifPackedData(buf.raw, 0x7D, 0, 3, 0x412, 0);
     rows = g_groupMarkers;
 
     rows[0].handler = func_0019DA30;
@@ -91,7 +91,7 @@ void func_00152438(void* p, s32 n);
 
 void func_0019E0B8(EffectOwner* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     func_00152438(&self->list558, 0x10);
     u64 flags = self->flags;
     flags &= (u64)(s64)(s32)0xCFFFFFFF;
@@ -117,17 +117,17 @@ void func_0019EC20(Effect* self);
 Effect* func_0019EA78(s32 kind, EffectOwner* sys)
 {
     if (sys == 0) {
-        sys = func_0019E040(D_00275710, 0);
+        sys = AcquireEffectOwner(g_currentWorld, 0);
         if (sys == 0) return 0;
     }
-    Effect* o = (Effect*)func_001B5EA0(&sys->world->pool1B2C);
+    Effect* o = (Effect*)PopFreeSlot(&sys->world->pool1B2C);
     if (o != 0) {
         func_001F5C0C(o, 0, sys->world->pool1B2C.size);
-        const Vt219C* r = func_0019E908(kind);
+        const Vt219C* r = GetEffectKindTable(kind);
         o->kind = kind;
         o->owner = sys;
         o->vt = r;
-        func_00152470(&sys->list558, o);
+        AppendToList(&sys->list558, o);
         func_0019EC20(o);
     }
     return o;
@@ -138,8 +138,8 @@ void func_0019EC30(Effect* self);
 
 void func_0019EBE8(Effect* self)
 {
-    func_00152600(&self->owner->list558, self);
-    func_0019EC30(self);
+    RemoveFromList(&self->owner->list558, self);
+    ReleaseEffect(self);
 }
 
 void func_001DBC18(void* a, void* b);
@@ -162,22 +162,22 @@ void func_0019EC30(Effect* self)
         for (T219CHook* it = head; it != 0; it = it->next) {
             it->fn(it->payload, 0x10, self);
         }
-        func_001DBC18(D_00275710, head);
+        ReleaseCallRecords(g_currentWorld, head);
     }
-    func_001B5F28(&self->owner->world->pool1B2C, self);
+    PushFreeSlot(&self->owner->world->pool1B2C, self);
 }
 
 extern f32 D_00261858[];
 
 void func_0019ED00(Effect* self, f32 x)
 {
-    f32 span = D_00261858[1] - self->start;
+    f32 span = g_gameClock[1] - self->start;
     f32 t = self->life - span;
     if (x < t) {
         f32 r = t / self->life;
         f32 q = x / r;
         self->life = q;
-        self->start = D_00261858[1] - (1.0f - r) * q;
+        self->start = g_gameClock[1] - (1.0f - r) * q;
     }
 }
 
@@ -186,7 +186,7 @@ void func_0019EB28(Effect* self);
 void func_0019FE10(Effect* self)
 {
     func_0019EB28(self);
-    World* g = D_00275710;
+    World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[6];
     self->life = 0.5f;
     self->i20 = v;
@@ -213,9 +213,9 @@ void func_0019D2A8(Player* self, void* x, void* y)
 {
     Frame_19D2A8 f;
     if (y != 0) {
-        f32 d = self->f2424 - D_00261858[1];
-        if (d < D_00261858[2]) {
-            d = D_00261858[2];
+        f32 d = self->f2424 - g_gameClock[1];
+        if (d < g_gameClock[2]) {
+            d = g_gameClock[2];
         }
         func_0019CEC0(x, y, &f.q0, d);
         func_0019D0E0(x, &f.q0, &f.q1, &f.w20, &f.w24);
@@ -231,9 +231,9 @@ s32 func_0013E658(void* a, s32 b);
 
 void func_0019F560(Effect* self)
 {
-    f32 t = D_0026185C - self->start;
+    f32 t = g_gameTime - self->start;
     if (self->life < t) {
-        func_0019EBE8(self);
+        RemoveEffect(self);
         return;
     }
     EffectOwner* c = self->owner;
@@ -248,7 +248,7 @@ void func_0019F560(Effect* self)
         return;
     }
     s32 flag = 0;
-    if (func_00182FC8(h) != 0) {
+    if (IsObjectAttached(h) != 0) {
         if (func_0013E658(&self->q80, (s32)self->target->tree.nodes) != 0) {
             flag = 1;
         }
@@ -276,7 +276,7 @@ void func_0019F858(Effect* self, void* a1)
     }
     s32 r = func_0019F620(self, a1, a2, a3);
     if (r == 0) {
-        func_0019EBE8(self);
+        RemoveEffect(self);
     }
 }
 
@@ -287,7 +287,7 @@ void func_0019F988(Effect* self)
 {
     func_0019EB28(self);
     self->life = 5.0f;
-    World* g = D_00275710;
+    World* g = g_currentWorld;
     self->i20 = (s32)g->slot1CE8[1];
     self->qC0 = *(Quad219C*)&g->gravity;
 }
@@ -299,7 +299,7 @@ void func_0019FD70(Effect* self)
 {
     func_0019EB28(self);
     self->life = 3.0f;
-    World* g = D_00275710;
+    World* g = g_currentWorld;
     s32 v = (s32)g->slot1CE8[3];
     self->m30[1] = 0.6f;
     self->i20 = v;
@@ -320,9 +320,9 @@ void func_0019E848(EffectOwner* self, void* arg)
     s32 e = (s32)&self->list558;
     fr.cursor = e;
     fr.list = e;
-    s32 old = (s32)D_0027B314;
+    s32 old = (s32)g_activeListFrames;
     s32 link = *(s32*)(e + 8);
-    D_0027B314 = (ListFrame*)&fr;
+    g_activeListFrames = (ListFrame*)&fr;
     fr.prev = old;
     s32 h = *(s32*)e;
     fr.link = link;
@@ -330,7 +330,7 @@ void func_0019E848(EffectOwner* self, void* arg)
     s32 n = h;
     while (n != 0) {
         Effect* node = (Effect*)n;
-        if (node->start >= D_00261858[1]) {
+        if (node->start >= g_gameClock[1]) {
         } else {
             node->vt->m05(node, arg);
         }
@@ -339,7 +339,7 @@ void func_0019E848(EffectOwner* self, void* arg)
         fr.cursor = nx + lk;
         n = nx;
     }
-    D_0027B314 = (ListFrame*)fr.prev;
+    g_activeListFrames = (ListFrame*)fr.prev;
 }
 
 
@@ -349,7 +349,7 @@ void func_0019FDC0(Effect* self)
 {
     func_0019EB28(self);
     self->life = 2.0f;
-    World* g = D_00275710;
+    World* g = g_currentWorld;
     self->qC0 = *(Quad219C*)&g->gravity;
     self->m30[2] = -1.0f;
 }
@@ -376,10 +376,10 @@ void func_0019D6C0(World* self, void* arg)
     s32 e = (s32)self + 0x60;
     f1.cursor = e;
     f1.list = e;
-    s32 old = (s32)D_0027B314;
+    s32 old = (s32)g_activeListFrames;
     s32 link = *(s32*)(e + 8);
-    *(s32*)D_0026AC10 = (s32)D_005E4700;
-    D_0027B314 = (ListFrame*)&f1;
+    *(s32*)g_nextDeferredRequest = (s32)g_deferredRequests;
+    g_activeListFrames = (ListFrame*)&f1;
     f1.prev = old;
     f1.link = link;
     s32 h = *(s32*)e;
@@ -393,11 +393,11 @@ void func_0019D6C0(World* self, void* arg)
         n = nx;
     }
     s32 e2 = (s32)self + 0x78;
-    s32 old2 = (s32)D_0027B314;
+    s32 old2 = (s32)g_activeListFrames;
     f2.cursor = e2;
     f2.list = e2;
     s32 link2 = *(s32*)(e2 + 8);
-    D_0027B314 = (ListFrame*)&f2;
+    g_activeListFrames = (ListFrame*)&f2;
     f2.prev = old2;
     s32 h2 = *(s32*)((s32)self + 0x78);
     f2.link = link2;
@@ -411,22 +411,22 @@ void func_0019D6C0(World* self, void* arg)
         n = nx;
     }
     s32 e3 = (s32)self + 0x1CD8;
-    s32 old3 = (s32)D_0027B314;
+    s32 old3 = (s32)g_activeListFrames;
     s32 link3 = *(s32*)(e3 + 8);
     f3.prev = old3;
-    D_0027B314 = (ListFrame*)&f3;
+    g_activeListFrames = (ListFrame*)&f3;
     f3.list = e3;
     s32 h3 = *(s32*)((s32)self + 0x1CD8);
     f3.link = link3;
     f3.cursor = h3 + link3;
     n = h3;
     while (n != 0) {
-        func_00159D00((ColorFade*)n);
+        UpdateColorFade((ColorFade*)n);
         s32 nx = *(s32*)f3.cursor;
         f3.cursor = nx + f3.link;
         n = nx;
     }
-    D_0027B314 = (ListFrame*)f1.prev;
+    g_activeListFrames = (ListFrame*)f1.prev;
 }
 
 extern u8 D_0060478C[];
@@ -443,14 +443,14 @@ void func_0019D860(void)
 {
     if (*(s32*)D_0060478C == 0) {
         *(s32*)D_0060478C = 1;
-        void* obj = &D_002622A8;
-        func_00152B38(obj);
-        func_001EE3B8(obj, 0, 0);
-        func_001EE668(obj, 8, 1, D_0026ABF0, 0);
-        func_001EE668(obj, 8, 1, D_0026AC00, 1);
-        func_001EE668(obj, 0xC, 1, D_0026AC20, 0xC);
-        func_001EE668(obj, 4, 1, &D_00275710->f1D68, 3);
-        func_00152D70(obj);
+        void* obj = &g_vifPacketWriter;
+        BeginDmaTag(obj);
+        WriteVifBaseOffset(obj, 0, 0);
+        CopyWordsToWriter(obj, 8, 1, g_projectionScale, 0);
+        CopyWordsToWriter(obj, 8, 1, g_projectionOffset, 1);
+        CopyWordsToWriter(obj, 0xC, 1, D_0026AC20, 0xC);
+        CopyWordsToWriter(obj, 4, 1, &g_currentWorld->f1D68, 3);
+        CloseDmaTag(obj);
     }
 }
 
@@ -467,18 +467,18 @@ void func_00152D70(void* self);
 void func_0019D968(void)
 {
     if (D_00604780 == 0) {
-        void* self = &D_002622A8;
-        func_00152B38(self);
+        void* self = &g_vifPacketWriter;
+        BeginDmaTag(self);
         func_001EE7D0(self, 0x2C, D_002BDC20, 0);
-        func_00152D70(self);
+        CloseDmaTag(self);
         D_00604780 = 1;
         D_00604784 = 1;
     } else if (D_00604784 == 0) {
-        void* self = &D_002622A8;
-        func_00152B38(self);
-        func_001EE450(self);
+        void* self = &g_vifPacketWriter;
+        BeginDmaTag(self);
+        WriteVifFlush(self);
         func_001EE7D0(self, 0x2C, D_002BDEE0, 0);
-        func_00152D70(self);
+        CloseDmaTag(self);
         D_00604784 = 1;
     }
 }
@@ -499,15 +499,15 @@ void func_00152D70(void* self);
 
 void func_0019DA60(void)
 {
-    func_0019D860();
+    UploadProjectionConstants();
     func_0019D930();
-    void* self = &D_002622A8;
-    func_0015EAE0(self, D_00212160, D_00215C50);
+    void* self = &g_vifPacketWriter;
+    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
     D_00604780 = 1;
     g_buildFrame->r1C = 1;
-    func_00152B38(self);
-    func_001EE468(self);
-    func_00152D70(self);
+    BeginDmaTag(self);
+    WriteVifFlushA(self);
+    CloseDmaTag(self);
 }
 
 struct Scratch_19F9D0 { Quad219C head; u8 rest[0x700 - 16]; };
@@ -524,7 +524,7 @@ void func_0019F9D0(Effect* self, s32 flag)
         if (self->target->tree.nodes != 0) {
             func_0013DFD8(self->target->tree.nodes, &self->q90, &self->q80, 0, 0x10, &s);
         }
-        Effect* p = func_0019EA78(4, 0);
+        Effect* p = CreateEffect(4, 0);
         if (p != 0) {
             p->vt->m00(p, &s, 40.0f, 0);
             p->life = 0.75f;
@@ -533,7 +533,7 @@ void func_0019F9D0(Effect* self, s32 flag)
                 p->p114 = (void*)((s32*)self->target->f278)[3];
             }
         }
-        func_0019EBE8(self);
+        RemoveEffect(self);
     }
 }
 
@@ -553,9 +553,9 @@ void func_00144848(Camera* self);
 
 void func_0019DBB0(void)
 {
-    V24A0* self = &D_002622A8;
-    func_0015EAE0(self, D_00212160, D_00215C50);
-    func_0019D860();
+    V24A0* self = &g_vifPacketWriter;
+    AddDmaRefTagIfChanged(self, D_00212160, D_00215C50);
+    UploadProjectionConstants();
     func_0019D930();
 
     if (D_0026FA68 != 0) {
@@ -567,13 +567,13 @@ void func_0019DBB0(void)
     }
 
     {
-        Camera* o = D_00261990;
+        Camera* o = g_camera;
         f32 keep20 = o->f1C4;
         f32 keep21 = o->f1C8;
-        func_00143940(o, 1.0f);
-        func_00144848(D_00261990);
-        func_00143940(D_00261990, keep20);
-        D_00261990->f1C8 = keep21;
+        SnapCameraZoom(o, 1.0f);
+        func_00144848(g_camera);
+        SnapCameraZoom(g_camera, keep20);
+        g_camera->f1C8 = keep21;
     }
 }
 
@@ -650,7 +650,7 @@ void func_0019E168(EffectOwner* self)
     Cursor_19E168 cur(&self->list558);
     Effect* node = cur.first();
     while (node != 0) {
-        func_0019EBE8(node);
+        RemoveEffect(node);
         node = cur.next();
     }
     self->saved564 = self->world->f1B38;
@@ -658,7 +658,7 @@ void func_0019E168(EffectOwner* self)
     if (self == self->world->f1B3C) {
         self->world->f1B3C = 0;
     }
-    func_001B7B78(self);
+    UnregisterCollider(self);
 }
 
 struct Stream_19C470;
@@ -678,43 +678,43 @@ void func_0019C470(C8B* o, Stream_19C470* in)
         s32* p = (s32*)((u8*)o + 0xF0);
         do {
             i--;
-            *p = func_00137D10(in);
+            *p = ReadBufferedS16(in);
             p += 8;
         } while (i >= 0);
     }
     s32 i = 0;
-    o->f48 = func_00137D10(in);
+    o->f48 = ReadBufferedS16(in);
     func_00137FB0(in, o->fA0);
-    o->fC4 = (Rec8B*)func_0018D5C0(o->fA4 * 100);
+    o->fC4 = (Rec8B*)AllocateZeroedFrontMemory(o->fA4 * 100);
     for (i = 0; i < o->fA4; i++) {
         f32 x;
         f32 y;
         f32 z;
         Rec8B* r = &o->fC4[i];
-        o->fC4[i].id = func_00137CC0(in);
+        o->fC4[i].id = ReadBufferedS8(in);
         func_0019CD90(o, i, &x, &y, &z);
         func_0019CC10(x, y, z, o, r->pos);
     }
-    o->fC8 = func_00137D10(in);
-    o->fCC = (u8*)func_0018D5C0(o->fC8 << 4);
+    o->fC8 = ReadBufferedS16(in);
+    o->fCC = (u8*)AllocateZeroedFrontMemory(o->fC8 << 4);
     for (s32 e = 0; e < o->fC8; e++) {
         s32* r = (s32*)(o->fCC + (e << 4));
         s32 j = 3;
         do {
             j--;
-            *r = func_00137D10(in);
+            *r = ReadBufferedS16(in);
             r++;
         } while (j >= 0);
     }
-    o->fD0 = o->fD4 = func_00137D10(in);
-    o->fD8 = (Tri8B*)func_0018D5C0(o->fD0 * 12);
-    o->fDC = (Edge8B*)func_0018D5C0(o->fD0 << 3);
+    o->fD0 = o->fD4 = ReadBufferedS16(in);
+    o->fD8 = (Tri8B*)AllocateZeroedFrontMemory(o->fD0 * 12);
+    o->fDC = (Edge8B*)AllocateZeroedFrontMemory(o->fD0 << 3);
     for (s32 n = 0; n < o->fD0; n++) {
         Tri8B* t = &o->fD8[n];
         Edge8B* e = &o->fDC[n];
-        s32 a = func_00137D10(in);
-        s32 b = func_00137D10(in);
-        s32 c = func_00137D10(in);
+        s32 a = ReadBufferedS16(in);
+        s32 b = ReadBufferedS16(in);
+        s32 c = ReadBufferedS16(in);
         t->a = o->fB0 + (a << 5);
         if (b > 0) {
             b--;
@@ -731,8 +731,8 @@ void func_0019C470(C8B* o, Stream_19C470* in)
             e->b = o->fCC + (c << 4);
         }
     }
-    o->fE0 = func_00137DF8(in);
-    func_0011EC40(o, in);
+    o->fE0 = ReadBufferedFloat(in);
+    ReadPropertyRecords(o, in);
 }
 
 // NEAR: 3 lines: prologue schedules "li t0,17" before the two addiu sp addresses (retail after them)
@@ -773,19 +773,19 @@ s32 func_0019D4B0(s32 n, DeferredRequest* items, void** out)
     }
     {
         s32 c = cnt[4] - pos[4];
-        func_001BE0A8(&out[pos[4]], c, 4, (void*)func_0019D468);
+        HeapSortRecords(&out[pos[4]], c, 4, (void*)CompareEntriesByValueDescending);
     }
     {
         s32 c = cnt[8] - pos[8];
-        func_001BE0A8(&out[pos[8]], c, 4, (void*)func_0019D468);
+        HeapSortRecords(&out[pos[8]], c, 4, (void*)CompareEntriesByValueDescending);
     }
     {
         s32 c = cnt[13] - pos[13];
-        func_001BE0A8(&out[pos[13]], c, 4, (void*)func_0019D468);
+        HeapSortRecords(&out[pos[13]], c, 4, (void*)CompareEntriesByValueDescending);
     }
     {
         s32 c = cnt[1] - pos[1];
-        func_001BE0A8(&out[pos[1]], c, 4, (void*)func_0019D468);
+        HeapSortRecords(&out[pos[1]], c, 4, (void*)CompareEntriesByValueDescending);
     }
     return cnt[17];
 }
@@ -897,21 +897,21 @@ void func_001B7C40(ObjectGatherer *self, s32 flag);
 
 void func_0019C068(ObjectGatherer *self, s32 a1) {
     if (a1 != 0) {
-        func_00152600(&self->world->list1C60, self);
+        RemoveFromList(&self->world->list1C60, self);
         ((struct Ob_19C068 *)self->f5FC)->vtbl[7](self->f5FC);
     } else {
         struct Buf_19C068 buf;
-        func_00152470(&self->world->list1C60, self);
+        AppendToList(&self->world->list1C60, self);
         ((struct Ob_19C068 *)self->f5FC)->vtbl[6](self->f5FC);
         func_00128018(*(void **)((u8 *)self->f660 + 0x18), 0,
                       (u8 *)self->f660 + 0x40, &buf);
-        func_001B9860(self, &buf, (void*)&D_00248D20);
+        func_001B9860(self, &buf, (void*)&g_unitZVector);
     }
-    func_001B7C40(self, a1 == 0);
+    SetColliderPartListed(self, a1 == 0);
     Frame_19C068 it(&self->parts);
     s32 node = it.Next();
     while (node != 0) {
-        func_001B7C40((ObjectGatherer *)node, a1 == 0);
+        SetColliderPartListed((ObjectGatherer *)node, a1 == 0);
         node = it.Next();
     }
     self->desc02()->m20(self, (Vec02 *)&D_00248D30);
@@ -1004,9 +1004,9 @@ extern const Fn_Table D_00219F60[8] = { (Fn_Table)(void (*)(Effect* self))func_0
 // D_0026AC10 points at the next free 128-byte entry of D_005E4700 (1024 of them).
 void func_0019D410(DeferredRequest* src)
 {
-    DeferredRequest* cur = *(DeferredRequest**)D_0026AC10;
-    if ((u32)(cur - D_005E4700) < 0x400) {
-        *(DeferredRequest**)D_0026AC10 = cur + 1;
+    DeferredRequest* cur = *(DeferredRequest**)g_nextDeferredRequest;
+    if ((u32)(cur - g_deferredRequests) < 0x400) {
+        *(DeferredRequest**)g_nextDeferredRequest = cur + 1;
         *(DeferredRequest*)((u32)cur | 0x20000000) = *src;
     }
 }
@@ -1059,22 +1059,22 @@ void func_0019E420(EffectOwner* self, f32 t)
     Begin_19E420::Of(&it, &self->list558);
     Effect* node;
     while ((node = Next_19E420::Of(&it)) != 0) {
-        if (node->start >= D_00261858[1]) {
+        if (node->start >= g_gameClock[1]) {
             continue;
         }
         func_0019EC20(node);
         node->vt->m04(node, t);
-        func_0019EC30(node);
+        ReleaseEffect(node);
     }
     s64 m = 0x8000;
     m <<= 23;
-    if ((self->flags & m) != 0 || func_00152720(&self->list558) != 0) {
+    if ((self->flags & m) != 0 || IsListEmpty(&self->list558) != 0) {
         self->desc->m03(self);
     } else {
-        func_0019E558(self);
+        CollideEffects(self);
     }
     func_00129DF8(self);
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 void func_00182C58(void* self);
@@ -1095,7 +1095,7 @@ void func_0019C728(C8B* self)
 {
     Slot8B* s;
     s32 i;
-    func_00182C58(self);
+    StartObject(self);
     self->f3C = func_0015A448(self->world, self->first34, self);
     if (self->f3C == 0) return;
     self->f40 = func_0015A480(self->world, self->second38, self->f3C);
@@ -1106,7 +1106,7 @@ void func_0019C728(C8B* self)
         s->n4 = n;
         if (n != 0) n->vtbl[7](n);
     }
-    func_00139600(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
+    ComputeWrappedDeltas(0x20, 0x18, self->slots, 0x10, 2, D_0026ABD0);
     func_00139038(self->f3C, 0x20, 0x18, self->slots, 1, D_0026ABE0, D_0026ABD8, &self->f3E4);
     if (self->f3E4->f78 == 0) self->f3E4->f78 = 1;
     void* nd = func_0015A480(self->world, 0x36, self->f3C);
@@ -1194,9 +1194,9 @@ void func_0019E558(EffectOwner* self)
                 End_19E558::Of(&it1);
                 continue;
             }
-            func_0018D608();
+            PushBackMemoryMark();
             if (s2->tree.count > 0) {
-                buf = func_0018D658(s2->tree.count2 * 12);
+                buf = AllocateBackMemory(s2->tree.count2 * 12);
                 if (func_0013E430((u8*)s2->tree.nodes, (u8*)&self->v140, &buf, self->radius3D0) != 2) goto skip;
                 buf = (u8*)buf - 12;
             } else {
@@ -1205,8 +1205,8 @@ void func_0019E558(EffectOwner* self)
             {
                 Effect* n;
                 for (n = (Effect*)Next_19E558::Of(&it1); n != 0; n = (Effect*)Next_19E558::Of(&it1)) {
-                    if (n->start >= D_00261858[1]) continue;
-                    s32 cnt = func_00141C90(s2, buf, &n->q90, &n->q80, 4, hits);
+                    if (n->start >= g_gameClock[1]) continue;
+                    s32 cnt = CollectColliderSpansInTree(s2, buf, &n->q90, &n->q80, 4, hits);
                     s32 i;
                     for (i = 0; i < cnt; i++) {
                         Hit_19E558* h = &hits[i];
@@ -1216,12 +1216,12 @@ void func_0019E558(EffectOwner* self)
                 }
             }
         skip:
-            func_0018D6F0();
+            PopBackMemoryMark();
             End_19E558::Of(&it1);
         }
         End_19E558::Of(&it0);
     }
-    if (func_00152720(&self->list558) != 0) {
+    if (IsListEmpty(&self->list558) != 0) {
         self->desc->m03(self);
     }
 }
@@ -1240,11 +1240,11 @@ void func_001615F0(Pkt_19DDA0* p, s32 a, s32 b, s32 c, s32 d);
 void func_0019DDA0(f32 x0, f32 y0, f32 x1, f32 y1, s32 r, s32 g, s32 b, s32 a, Pkt_19DDA0* p)
 {
     u32 col;
-    func_001613C0(p, a <= 0xFE ? 0x46 : 6, 5, 0x441EE);
+    BeginGifTag(p, a <= 0xFE ? 0x46 : 6, 5, 0x441EE);
     col = (((a + 1) & 0x1FE) << 23) | (b << 16) | (g << 8) | r;
-    func_00161708(p, 0x47, 0x31001);
-    func_00161708(p, 0x42, 0x44);
-    func_00161458(p, col);
-    func_001615F0(p, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-    func_001615F0(p, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    AddGifRegisterWrite(p, 0x47, 0x31001);
+    AddGifRegisterWrite(p, 0x42, 0x44);
+    AddGifRgbaEntry(p, col);
+    AddGifXyzfEntry(p, (s32)((x0 + 1728.0f) * 16.0f), (s32)((y0 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+    AddGifXyzfEntry(p, (s32)((x1 + 1728.0f) * 16.0f), (s32)((y1 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
 }

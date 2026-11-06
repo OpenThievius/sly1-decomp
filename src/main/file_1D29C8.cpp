@@ -95,39 +95,39 @@ void func_001D29C8(u32 mode)
 {
     switch (D_00274F74) {
     case 1:
-        if (D_00262E10 == 0)
+        if (g_player == 0)
             goto tail;
-        if (D_00262E10->f2220 == 0xD)
-            func_00175170(D_00262E10, 0, -1);
+        if (g_player->f2220 == 0xD)
+            func_00175170(g_player, 0, -1);
         break;
     case 3:
-        if (D_00262E10 == 0)
+        if (g_player == 0)
             goto tail;
-        if (((Sub_1D29C8*)D_00262E10->f1518) != 0) {
-            if (func_00182FC8(((Sub_1D29C8*)D_00262E10->f1518)) != 0)
-                func_00126D60(((Sub_1D29C8*)D_00262E10->f1518), 0.5f);
+        if (((Sub_1D29C8*)g_player->f1518) != 0) {
+            if (IsObjectAttached(((Sub_1D29C8*)g_player->f1518)) != 0)
+                func_00126D60(((Sub_1D29C8*)g_player->f1518), 0.5f);
         }
         break;
     }
-    if (D_00262E10 != 0) {
-        D_00261854 = 1.0f;
-        if (((Sub_1D29C8*)D_00262E10->f2750) != 0) {
-            if (func_00182FC8(((Sub_1D29C8*)D_00262E10->f2750)) != 0)
-                func_001D32D8(((Sub_1D29C8*)D_00262E10->f2750), D_00262E10, 1);
+    if (g_player != 0) {
+        g_stepScale = 1.0f;
+        if (((Sub_1D29C8*)g_player->f2750) != 0) {
+            if (IsObjectAttached(((Sub_1D29C8*)g_player->f2750)) != 0)
+                func_001D32D8(((Sub_1D29C8*)g_player->f2750), g_player, 1);
         }
-        func_001D31D0(D_00262E10, 0);
-        if (D_00262E10 != 0) {
-            if ((void*)D_00262E10 == func_001925F0())
+        func_001D31D0(g_player, 0);
+        if (g_player != 0) {
+            if ((void*)g_player == GetActiveSwitchedCollider())
                 D_00274F74 = mode;
         }
     }
 tail:
-    if (mode != D_002623C0->f19FC && mode < 7) {
-        func_001AA8B8(&D_0026EC70, (D_00262E10 != 0 && (void*)D_00262E10 == func_001925F0()) ? 3.0f : 8.0f);
-        func_001AA788(&D_0026EC70, 0.6f);
+    if (mode != g_saveData->f19FC && mode < 7) {
+        SetScreenElementHoldTime(&D_0026EC70, (g_player != 0 && (void*)g_player == GetActiveSwitchedCollider()) ? 3.0f : 8.0f);
+        SetScreenElementScale(&D_0026EC70, 0.6f);
         D_0026EC70.vt->fn20(&D_0026EC70, (s32)D_00274F58[mode]);
         D_0026EC70.vt->fn38(&D_0026EC70);
-        D_002623C0->f19FC = mode;
+        g_saveData->f19FC = mode;
     }
 }
 
@@ -145,7 +145,7 @@ s32 func_001D3100(PadRecord* self, s32 start, s32 count, s32* table)
         return start;
     }
     step = (self->flags & 1) ? -1 : 1;
-    func_0016EC20(self, 3);
+    ClearPadPressedBits(self, 3);
     idx = start;
     left = count;
     do {
@@ -168,21 +168,21 @@ void func_001D31D0(Player* self, s32 value)
     if (value == self->f275C) {
         return;
     }
-    s32 n = func_0015A4F0(self->world, 0x105, 8, 0, 0x100, buf);
+    s32 n = GatherObjectsById(self->world, 0x105, 8, 0, 0x100, buf);
     for (s32 i = 0; i < n; i++) {
         Item_1D31D0* item = (Item_1D31D0*)buf[i];
         if (item->obj != 0) {
-            func_0012F0A0(item->obj, 1, 0.0f, value != 0 ? 0.0f : 1.0f);
+            SeekAnimationPlayer(item->obj, 1, 0.0f, value != 0 ? 0.0f : 1.0f);
         }
     }
     self->f275C = value;
-    self->f2758 = D_00261858.b;
+    self->f2758 = g_gameClock.b;
 }
 
 void func_001D3290(C4C* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 1, D_00274F90);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 1, D_00274F90);
     self->desc->m03(self);
 }
 
@@ -198,9 +198,9 @@ void func_001D32D8(C4C* self, void* v, s32 flag)
             return;
         }
     }
-    func_00158730(self->f558);
-    func_001BFCD8(0x67, 0, 0, (s32)&self->v140, 0, 0, 4000.0f, 750.0f, 1.0f, 0.0f, 0.0f);
-    func_001837E0(self, 2, 0, 0);
+    SendEmptyMessage(self->f558);
+    StartSoundEffect(0x67, 0, 0, (s32)&self->v140, 0, 0, 4000.0f, 750.0f, 1.0f, 0.0f, 0.0f);
+    TriggerScriptEvent(self, 2, 0, 0);
     self->desc->m03(self);
 }
 
@@ -210,7 +210,7 @@ void func_001D3470(C4C* self, f32 t)
 {
     u8 buf[0x30];
 
-    func_001B9338(self, t);
+    StepCollider(self, t);
     if (self->parent == 0) {
         func_00189378(&self->rot, 0, buf);
         func_001B91A8(self, buf, (s32)self->p214, (void*)&D_00248D30, (s32)self->p218, t);
@@ -219,12 +219,12 @@ void func_001D3470(C4C* self, f32 t)
 
 void func_001D34E0(C4C* self)
 {
-    func_001BC4D8(self, &self->f554);
+    ExtractContactsByPartMode(self, &self->f554);
 }
 
 void* func_001D3500(C4C* a0, Node_D3500* a1)
 {
-    void* r = func_001BC320(a0);
+    void* r = HandleObjectEvent(a0);
     if (r != 0 && (a1->flags & 0x20)) {
         Ref_D3500* a2 = a1->ref;
         s32 v1;
@@ -233,8 +233,8 @@ void* func_001D3500(C4C* a0, Node_D3500* a1)
         } else {
             v1 = a2->f18->f50;
         }
-        func_001D32D8(a0, a1->ref, (v1 ^ (s32)D_00262E10) == 0);
-        func_001861E8(a0->world, a0->f554);
+        func_001D32D8(a0, a1->ref, (v1 ^ (s32)g_player) == 0);
+        FreePooledContactChain(a0->world, a0->f554);
         a0->f554 = 0;
     }
     return r;
@@ -244,8 +244,8 @@ ASM_FUNC(func_001D35A8);
 
 void func_001D3678(C4C* self, s32 kind, ObjectMessage* msg)
 {
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 10) {
-        func_00185D20(0.0f, self, (void*)msg->kind, &self->v140, (void*)&D_00248D20, 10, 0, 0, &self->f554);
+        func_00185D20(0.0f, self, (void*)msg->kind, &self->v140, (void*)&g_unitZVector, 10, 0, 0, &self->f554);
     }
 }

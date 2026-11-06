@@ -10,15 +10,15 @@ void func_0016B7A8(Obj_16B7A8_eu* self, s32 v)
         return;
     }
     if (v != 0) {
-        func_0016B300(self->f570, ((Node_16B7A8*)self->f570)->f2D0, 0);
-        func_0016E0F0(1);
-        func_0016EC88(&D_00262C70);
+        SetCurrentObjectChoice(self->f570, ((Node_16B7A8*)self->f570)->f2D0, 0);
+        SetPadSelectFlags(1);
+        ResetPadStepRepeat(&g_padRecord);
     } else {
         if (self->f574 != 0) {
-            func_001BE998();
+            StopStreamVoice();
             self->f574 = 0;
         }
-        func_0016E118(1);
+        ClearPadSelectFlags(1);
         self->vtbl[15](self);
         D_0026F138.vt->m15(&D_0026F138);
     }

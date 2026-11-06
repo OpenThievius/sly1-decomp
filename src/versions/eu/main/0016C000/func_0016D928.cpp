@@ -11,15 +11,15 @@ void func_0016D928(TargetFollower* self)
     if (self->f5C0 == 0) {
         return;
     }
-    if (func_001BE980() != 0) {
+    if (HasStreamVoice() != 0) {
         return;
     }
-    r = func_001EAA70(0, 0x64);
+    r = RandomIntInRange(0, 0x64);
     if (r >= 0x14) {
         return;
     }
     tbl = D_eu_0024AFD8;
-    r = func_001EAA70(0, 6);
-    func_001BE728(func_eu_001DE018(tbl[r]));
+    r = RandomIntInRange(0, 6);
+    OpenKeyRecord(func_eu_001DE018(tbl[r]));
     self->f5CC = 1;
 }

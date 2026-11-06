@@ -18,21 +18,21 @@ void func_0017B410(C4A* self, s32 mode)
     }
     if (mode >= 0) {
         if (mode < 2) {
-            Sys_17B410_eu* sys = (Sys_17B410_eu*)&D_0026E248;
+            Sys_17B410_eu* sys = (Sys_17B410_eu*)&g_gaugeBarElement;
             sys->f588 = 1.0f;
             sys->f57C = sys->f570;
             sys->f580 = sys->f574;
             sys->f584 = 0;
             func_001DDC38(self->world, self);
         } else if (mode < 4) {
-            Sys_17B410_eu* sys = (Sys_17B410_eu*)&D_0026E248;
+            Sys_17B410_eu* sys = (Sys_17B410_eu*)&g_gaugeBarElement;
             sys->vtbl[15](sys);
             func_001DDC38(self->world, 0);
         }
     }
-    (void)func_0012C918(x, self, 1, self->f558, 0.0f, 1.0f);
+    (void)ReplaceAnimationPlayer(x, self, 1, self->f558, 0.0f, 1.0f);
     *(s32*)((u8*)self + 0x550) = mode;
-    self->f554 = D_0026185C;
+    self->f554 = g_gameTime;
 done:
     return;
 }

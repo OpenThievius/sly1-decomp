@@ -38,9 +38,9 @@ s32 func_001300E8(void* a, s32 b);
 
 void func_0014EE70(PooledObject* self)
 {
-    func_001B7A98(self);
-    if (func_001526D0(&self->world->list1C78, self)) func_00152600(&self->world->list1C78, self);
-    if (self->parent != 0 && func_001300E8(self->parent, 0x3A) != 0) {
+    RegisterCollider(self);
+    if (IsInList(&self->world->list1C78, self)) RemoveFromList(&self->world->list1C78, self);
+    if (self->parent != 0 && IsObjectOfKind(self->parent, 0x3A) != 0) {
         self->flags538 |= (u64)0x8000 << 28;
     } else {
         self->flags538 &= ~((u64)1 << 43);
@@ -53,16 +53,16 @@ void func_00124DF8(void* self, s32 idx, void* table);
 
 void func_0014F020(PooledObject* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 1, D_00261CC8);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 1, g_pooledObjectLinks);
 }
 
 extern u8* D_00262E10;
 
 void func_0014F900(C23* self)
 {
-    if (D_00262E10 != 0) {
-        self->f6DC = *(s32*)(D_00262E10 + 0x24F8);
+    if (g_player != 0) {
+        self->f6DC = *(s32*)(g_player + 0x24F8);
     }
 }
 
@@ -80,8 +80,8 @@ void func_0014C668(void* unused, s32 mode)
         func_001B6568(D_0027C00C->device, &t[0]);
         func_001B6598(D_0027C00C->device, &t[1]);
         if (t[0] != 0x3FE && t[1] != 0x3FE) {
-            func_001B64D8(D_0027C00C->device, 0x3FF);
-            func_0014C5E8(D_0027C00C);
+            SetStateWalkerTarget(D_0027C00C->device, 0x3FF);
+            ApplyGaugeRatioToEffect(D_0027C00C);
         }
     }
 }
@@ -99,16 +99,16 @@ struct Obj_14C6E0 { VFn_14C6E0* vtbl; };
 void func_0014C6E0(GaugeManager* self)
 {
     s32 tag;
-    func_00124FC0(self);
+    UpdatePlacedObject(self);
     func_001B6598(self->device, &tag);
     if (tag == 0x3FD) {
-        if (self->f45C < D_00261858[1]) {
+        if (self->f45C < g_gameClock[1]) {
             func_0014C858(self);
         }
-        if (self->f460 < D_00261858[1]) {
-            func_0014CBA8(self);
+        if (self->f460 < g_gameClock[1]) {
+            ActivateRandomGaugeSlot(self);
         }
-        void* p = func_001925F0();
+        void* p = GetActiveSwitchedCollider();
         Obj_14C6E0* o = (Obj_14C6E0*)p;
         o->vtbl[81](p);
     }
@@ -123,14 +123,14 @@ void func_0014C788(GaugeManager* self)
     func_001B6598(self->device, &tag);
     void* p = 0;
     if (tag == 0x3FD) {
-        p = func_001E9970(p);
+        p = AreMenusAndFadeClear(p);
     }
     if (p) {
-        D_0026D348.vt->m14(&D_0026D348);
-        D_0026E760.vt->m14(&D_0026E760);
+        g_gaugeAmountCaption.vt->m14(&g_gaugeAmountCaption);
+        g_timerElement.vt->m14(&g_timerElement);
     } else {
-        D_0026D348.vt->m15(&D_0026D348);
-        D_0026E760.vt->m15(&D_0026E760);
+        g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
+        g_timerElement.vt->m15(&g_timerElement);
     }
 }
 
@@ -157,7 +157,7 @@ struct Mgr_14CD70 {
 void func_0014CD70(Mgr_14CD70* self)
 {
     if (self->f458 == self->f450) {
-        self->f45C = D_0026185C[0] + func_001EAAE0(self->f43C, self->f440);
+        self->f45C = g_gameTime[0] + RandomFloatInRange(self->f43C, self->f440);
     }
     self->f458 = self->f458 - 1;
 }
@@ -169,12 +169,12 @@ s32 func_001300E8(void* obj, s32 kind);
 void func_0014F850(C23* self)
 {
     s32 i = 0;
-    func_001249A8(self);
+    PostLoadPlacedObject(self);
     if (self->count744 > 0) {
         do {
             void* p = func_0015A448(self->world, self->items748[i], self);
             if (p != 0) {
-                if (func_001300E8(p, 0x41) != 0) {
+                if (IsObjectOfKind(p, 0x41) != 0) {
                     s32 n = self->count768;
                     self->items76C[n] = p;
                     self->count768 = n + 1;
@@ -189,12 +189,12 @@ s32 func_001B8A08(void* self, void* obj);
 
 s32 func_0014FBE0(C23* self, Collider* obj)
 {
-    if (func_001300E8(obj, 0x46) != 0) {
+    if (IsObjectOfKind(obj, 0x46) != 0) {
         if (((PooledObject*)obj)->taker == self) {
             return 1;
         }
     }
-    return func_001B8A08(self, obj);
+    return TestCollidersMayContact(self, obj);
 }
 
 typedef void (*VFn2_0014FC38)(void* self, s32 arg);
@@ -213,10 +213,10 @@ void func_0014FC38(C23* self)
         self->p6C8->desc->m03(self->p6C8);
     }
     if (self->p740 != 0) {
-        func_001B6628(self->p740, 0x2B7);
+        TeleportStateWalker(self->p740, 0x2B7);
         func_001B6598(self->p740, &status);
         if (status == 0x2B7) {
-            func_001B6438(self->p740);
+            DestroyStateWalker(self->p740);
             self->p740 = 0;
         }
     }
@@ -252,7 +252,7 @@ void func_0014FCE8(C23* self, s32 code)
             }
         }
     }
-    func_001B64D8(self->p740, code);
+    SetStateWalkerTarget(self->p740, code);
 }
 
 void func_0014D280(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
@@ -272,8 +272,8 @@ void func_001B7968(Collider* self);
 
 void func_0014EE40(PooledObject* self)
 {
-    func_001B7968(self);
-    func_0014F110(self, -1);
+    InitCollider(self);
+    SetPooledObjectState(self, -1);
 }
 
 void func_00188700(void* a, void* b, void* c, f32 w);
@@ -305,16 +305,16 @@ void func_00182D50(void*);
 void func_00152470(void*,void*);
 void func_0014EF00(PooledObject* self)
 {
-    func_00182D50(self);
-    func_00152470(&self->world->list1C78, self);
-    func_0014F110(self, 0);
+    RemoveObjectFromParentList(self);
+    AppendToList(&self->world->list1C78, self);
+    SetPooledObjectState(self, 0);
 }
 
 void func_001BA130(Collider* self, Collider* other);
 void func_0014EF40(PooledObject* self, Collider* other)
 {
     Keep46 save = self->keep56C;
-    func_001BA130(self, other);
+    CopyCollider(self, other);
     self->keep56C = save;
 }
 
@@ -322,19 +322,19 @@ void func_001BAC30(Collider* self);
 void func_00159478(void** out, void* self);
 void func_0014EF88(PooledObject* self)
 {
-    func_001BAC30(self);
-    func_00159478(&self->member58C, self);
+    LoadCollider(self);
+    FindOrBuildMemberGroup(&self->member58C, self);
 }
 
 void func_00127378(void* self, s32 kind, void* msg);
 
 void func_0014EFB8(PooledObject* self, s32 kind, void* msg)
 {
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 6) {
         if (msg == self->watched) {
             self->watched = 0;
-            func_0014F110(self, 4);
+            SetPooledObjectState(self, 4);
         }
     }
 }
@@ -347,13 +347,13 @@ void func_0014F770(C23* self, s32 kind, void* msg)
 {
     s32 result;
 
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0x14) {
         if (msg == self->p740) {
             func_001B6568(msg, &result);
             if (result == 0x2B7) {
                 if (self->hold != 0) {
-                    func_001B6438(self->p740);
+                    DestroyStateWalker(self->p740);
                     self->p740 = 0;
                 } else {
                     ((Held23*)self->p734->f200)->f4C = 1;
@@ -388,7 +388,7 @@ void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_0014F920(C23* self)
 {
     func_0013CE40(self);
-    func_00124DF8(self, 3, D_00261CE0);
+    ResolveObjectLinks(self, 3, g_takerLinks);
     ((Held23*)self->p734->f200)->f4C = 1;
     Src_14F920* s2 = func_0015A480(self->world, self->f6C0, self);
     *(Quad16*)&self->q6F0[0] = s2->q190[0];
@@ -399,7 +399,7 @@ void func_0014F920(C23* self)
     s32 i = 1;
     if (i < self->cnt) {
         do {
-            BaseObject* e = (BaseObject*)func_00183058(s2, s2->p14, 0);
+            BaseObject* e = (BaseObject*)CreateObjectCopy(s2, s2->p14, 0);
             if (e->desc->m0F != 0) {
                 e->desc->m0F(e);
             }
@@ -410,8 +410,8 @@ void func_0014F920(C23* self)
     }
     ((VFn_14F920Arg)s2->vtbl[25])(s2, 0);
     ((VFn_14F920)s2->vtbl[7])(s2);
-    func_001DBCC8(self->world, (void*)(void (*)(void*))func_0014F900, self, 0, 0);
-    self->p740 = func_001B6290(self->p73C, self, 0x2B7, 1);
+    AppendQueuedCall(self->world, (void*)(void (*)(void*))func_0014F900, self, 0, 0);
+    self->p740 = CreateStateWalker(self->p73C, self, 0x2B7, 1);
 }
 
 struct Step_14C138 {
@@ -438,9 +438,9 @@ void func_0014C2F0(GaugeManager* self);
 void func_0014C138(GaugeManager* self)
 {
     s32 i = 0;
-    func_00124A48(self);
-    func_00124DF8(self, 3, D_00261CA0);
-    self->device = func_001B6290(self->f428, 0, 0x3FB, 0);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 3, g_gaugeManagerLinks);
+    self->device = CreateStateWalker(self->f428, 0, 0x3FB, 0);
     func_001B6598(self->device, self->buf430);
     func_001B6DF8(self->device, self);
     for (; i < self->slotCount; i++) {
@@ -451,10 +451,10 @@ void func_0014C138(GaugeManager* self)
         s->f4 = func_0015A480(n->f14, 0x3F6, n);
     }
     f32* p = self->poly;
-    f32 g = D_002623C8->dt;
+    f32 g = g_currentEntry->dt;
     f32 v = self->poly[0] + g * (p[1] + g * p[2]);
-    f32 lo = D_00275C60[0];
-    f32 hi = D_00275C60[1];
+    f32 lo = g_unitRange[0];
+    f32 hi = g_unitRange[1];
     f32 t;
     if (v < lo) {
         t = lo;
@@ -471,7 +471,7 @@ void func_0014C138(GaugeManager* self)
         *po++ = u * *pa++ + t * *pb++;
     }
     self->f44C = (s32)self->o5E0[0];
-    func_0014C2F0(self);
+    ComputeGaugeOutputs(self);
 }
 
 extern f32 D_0026185C[];
@@ -512,26 +512,26 @@ void func_0014CDC8(GaugeManager* self, Arg_14CDC8* arg)
         s32 t2;
         func_001B6598(self->device, &t1);
         func_001B6568(self->device, &t2);
-        void* p = func_001925F0();
+        void* p = GetActiveSwitchedCollider();
         Obj_14CDC8* o = (Obj_14CDC8*)p;
         s32 r = o->vtbl[81](p);
         if (t1 != 0x3FF && t2 != 0x3FF && r != 2) {
-            func_001B64D8(self->device, 0x3FE);
-            s32 n = func_0015A4F0(self->world, 5, 0x12, 0, 0x20, arr);
+            SetStateWalkerTarget(self->device, 0x3FE);
+            s32 n = GatherObjectsById(self->world, 5, 0x12, 0, 0x20, arr);
             if (n > 0) {
                 s32 cnt = n;
                 s32* q = arr;
                 do {
-                    func_001C8F20(*q, 0xB, 0);
+                    ChangeAgentState(*q, 0xB, 0);
                     q++;
                 } while (--cnt != 0);
             }
         }
-        func_001AB958(&D_0026E760);
+        StopTimer(&g_timerElement);
     }
-    func_0014C2F0(self);
+    ComputeGaugeOutputs(self);
     if (self->f454 == self->f44C) {
-        self->f460 = D_0026185C[0] + func_001EAAE0(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
+        self->f460 = g_gameTime[0] + RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
     }
     self->f454 = self->f454 - 1;
 }
@@ -557,7 +557,7 @@ void func_0014F110(PooledObject* self, s32 state)
             self->taker = 0;
             self->state = state;
         }
-        self->stateTime = D_0026185C[0];
+        self->stateTime = g_gameTime[0];
         if (state == 5) {
             (void)func_00126D60((Sub_14F110*)self, self->f564);
         }
@@ -601,23 +601,23 @@ void func_0014FDA8(C23* self, s32* state)
 {
     if (*state == 0x2B8) {
         ((Held23*)self->p734->f200)->f1C = 0;
-        if (self->f6D0 < D_0026185C[0] - self->f6D8) {
-            if (func_0014FEC0(self)) {
+        if (self->f6D0 < g_gameTime[0] - self->f6D8) {
+            if (AcquirePooledObject(self)) {
                 *state = 0x2BA;
             }
         }
         return;
     }
-    if (self->p6E0 == 0 || func_00182FC8(self->p6E0) == 0
+    if (self->p6E0 == 0 || IsObjectAttached(self->p6E0) == 0
         || self->p6E0->state == 3 || self->p6E0->state == 4) {
-        self->p6E0 = func_00150338(self);
+        self->p6E0 = FindFirstAttachedPooledObject(self);
     }
     if (self->p6E0 == 0) {
         return;
     }
-    func_001853F0((Held23*)self->p734->f200, self->p6E0, D_00248D30);
-    if (self->f6D0 < D_0026185C[0] - self->f6D8) {
-        if (func_0014FEC0(self)) {
+    AssignAimTarget((Held23*)self->p734->f200, self->p6E0, D_00248D30);
+    if (self->f6D0 < g_gameTime[0] - self->f6D8) {
+        if (AcquirePooledObject(self)) {
             *state = 0x2BB;
         }
     }
@@ -642,22 +642,22 @@ s32 func_0014FEC0(C23* self) {
             self->p6CC = 0;
         }
     }
-    if (func_00152720(&self->world->list1C78) != 0 || self->p6CC != 0) {
-        func_00150298(self);
+    if (IsListEmpty(&self->world->list1C78) != 0 || self->p6CC != 0) {
+        SelectEarliestPooledObject(self);
         return 0;
     }
     s0 = (PooledObject*)self->world->list1C78.head;
     s0->taker = self;
     s0->desc->m02(s0);
     s0->desc->m15(s0, self->f730);
-    func_001B9AE0(s0, 3, 0, 3, 0);
+    SetColliderAnchors(s0, 3, 0, 3, 0);
     s0->desc03()->m1D(s0, &self->q6F0[0]);
     s0->desc03()->m1E(s0, (Mat02*)&self->q6F0[1]);
     s0->desc03()->m20(s0, (Vec02*)D_00248D30);
     s0->desc03()->m21(s0, (Vec02*)D_00248D30);
-    func_0014F110(s0, 1);
+    SetPooledObjectState(s0, 1);
     self->p6C8 = s0;
-    self->f6D8 = D_0026185C[0];
+    self->f6D8 = g_gameTime[0];
     return 1;
 }
 
@@ -672,7 +672,7 @@ void func_0014F270(PooledObject* self, f32 f);
 
 void func_0014F058(PooledObject* self, f32 f)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
     switch (self->state) {
     case 0:
     case 1:
@@ -683,9 +683,9 @@ void func_0014F058(PooledObject* self, f32 f)
         func_0014F270(self, f);
         break;
     case 4:
-        if (self->delay < D_0026185C[0] - self->stateTime) {
-            if (D_00262E10 == 0 || self->parent != *(BaseObject**)(D_00262E10 + 0x23B0))
-                func_0014F110(self, 5);
+        if (self->delay < g_gameTime[0] - self->stateTime) {
+            if (g_player == 0 || self->parent != *(BaseObject**)(g_player + 0x23B0))
+                SetPooledObjectState(self, 5);
         }
         break;
     }
@@ -734,7 +734,7 @@ void func_0014FA88(C23* self)
                 st[1] = 0x2B9;
                 break;
             }
-            if (st[1] != st[0]) func_0014FCE8(self, st[1]);
+            if (st[1] != st[0]) SetPooledHolderWalkerState(self, st[1]);
         }
     }
 }
@@ -785,7 +785,7 @@ void func_0014CBA8(GaugeManager* self)
         self->f460 = D_00249FB8;
         return;
     }
-    func_001A8AF8((Holder_14CBA8*)self->f424);
+    ChooseObjectPoolItem((Holder_14CBA8*)self->f424);
     if (!((Holder_14CBA8*)self->f424)->ctl) return;
     s32 n = 0;
     for (s32 i = 0; i < self->slotCount; i++) {
@@ -793,22 +793,22 @@ void func_0014CBA8(GaugeManager* self)
         if (!s->flag && !s->pc) list[n++] = s;
     }
     if (n <= 0) return;
-    s32 idx = func_001EAA70(0, n - 1);
+    s32 idx = RandomIntInRange(0, n - 1);
     Holder_14CBA8* h = (Holder_14CBA8*)self->f424;
     Ctl_14CBA8* c = h->ctl;
     Slot_14CBA8* s = list[idx];
     (void)func_001A8C90(h, 0);
-    func_001F3BD8(s->obj, v0);
-    func_001F3C08(s->obj, v1);
+    GetObjectWorldPosition(s->obj, v0);
+    GetObjectWorldRotation(s->obj, v1);
     c->vt->f84(c, v0);
     c->vt->f88(c, v1);
     c->vt->f90(c, D_00248D30);
     c->vt->f94(c, D_00248D30);
-    func_0012C7B0(s->p8, s->p0, 0, &s->pc, 0.0f, 1.0f);
+    CreateAnimationPlayerWithoutPresetTargets(s->p8, s->p0, 0, &s->pc, 0.0f, 1.0f);
     func_0012F810(s->pc, self);
     self->f454 = self->f454 + 1;
-    f32 r = func_001EAAE0(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
-    self->f460 = (*(f32*)&D_0026185C) + r;
+    f32 r = RandomFloatInRange(*(f32*)(self->buf430 + 4), *(f32*)(self->buf430 + 8));
+    self->f460 = (*(f32*)&g_gameTime) + r;
     c->cur = s;
     s->flag = 1;
 }
@@ -830,10 +830,10 @@ void func_00123ED0(GaugeManager* self);
 
 void func_0014C018(GaugeManager* self)
 {
-    func_00123ED0(self);
+    InitPlacedObject(self);
     self->maxAmount = 50;
     self->f2D8 = 90.0f;
-    GaugeParams params = D_00249F00;
+    GaugeParams params = g_defaultGaugeParams;
     self->params0 = params;
     self->params1 = params;
     self->params1.p44.Set(12.0f, 12.0f);
@@ -896,7 +896,7 @@ void func_0014C668(void* self);
 
 void func_0014CF30(GaugeManager* self, s32 kind, void* key)
 {
-    func_00127378(self, kind, key);
+    HandlePlacedObjectNotification(self, kind, key);
     switch (kind) {
     case 6: {
         s32 i;
@@ -915,16 +915,16 @@ void func_0014CF30(GaugeManager* self, s32 kind, void* key)
             s32 out;
             func_001B6598(key, &out);
             if (out == 0x3FD) {
-                D_0026D348.target = &self->amount;
-                D_0026D348.limit = &self->maxAmount;
+                g_gaugeAmountCaption.target = &self->amount;
+                g_gaugeAmountCaption.limit = &self->maxAmount;
                 func_001DDC38(self->world, self);
-                func_001AB890(&D_0026E760, self->f2D8);
-                func_001AB928(&D_0026E760, 0.0f, func_0014C668);
-                func_001AB938(&D_0026E760);
+                StartTimer(&g_timerElement, self->f2D8);
+                SetTimerLimit(&g_timerElement, 0.0f, func_0014C668);
+                StartTimerCounting(&g_timerElement);
             }
             if (self->tag430 == 0x3FD) {
-                D_0026D348.vt->m15(&D_0026D348);
-                D_0026E760.vt->m15(&D_0026E760);
+                g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
+                g_timerElement.vt->m15(&g_timerElement);
                 func_001DDC38(self->world, 0);
             }
             self->tag430 = out;
@@ -990,23 +990,23 @@ void func_0014C2F0(GaugeManager* o)
     Params_14C2F0* p = (Params_14C2F0*)o->o5E0;
     f32 s;
 
-    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q30, t), D_00275C60[0], D_00275C60[1]);
+    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q30, t), g_unitRange[0], g_unitRange[1]);
     *(f32*)(o->buf430 + 4) = Util_14C2F0::Lerp(s, p->f20, p->f28);
     *(f32*)(o->buf430 + 8) = Util_14C2F0::Lerp(s, p->f24, p->f2C);
 
-    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q60, t), D_00275C60[0], D_00275C60[1]);
+    s = Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q60, t), g_unitRange[0], g_unitRange[1]);
     *(f32*)(o->buf430 + 0xC) = Util_14C2F0::Lerp(s, p->f44, p->f4C);
     *(f32*)(o->buf430 + 0x10) = Util_14C2F0::Lerp(s, p->f48, p->f50);
 
-    *(f32*)(o->buf430 + 0x14) = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q80, t), D_00275C60[0], D_00275C60[1]), p->f70, p->f74);
+    *(f32*)(o->buf430 + 0x14) = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q80, t), g_unitRange[0], g_unitRange[1]), p->f70, p->f74);
 
-    *(f32*)(o->buf430 + 0x18) = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->qA0, t), D_00275C60[0], D_00275C60[1]), p->f90, p->f94);
+    *(f32*)(o->buf430 + 0x18) = Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->qA0, t), g_unitRange[0], g_unitRange[1]), p->f90, p->f94);
 
-    o->f44C = (s32)Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q10, t), D_00275C60[0], D_00275C60[1]), p->f00, p->f04);
+    o->f44C = (s32)Util_14C2F0::Lerp(Util_14C2F0::Limit(Util_14C2F0::Eval(&p->q10, t), g_unitRange[0], g_unitRange[1]), p->f00, p->f04);
 
     if (p->f40 < t && o->f464 == 0) {
         o->f464 = 1;
-        o->f45C = D_00261858[1];
+        o->f45C = g_gameClock[1];
     }
 }
 

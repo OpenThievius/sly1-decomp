@@ -64,15 +64,15 @@ void func_001AB058(Obj_eu_1AB058* self)
         self->f584 = 0;
         self->f588 = 0;
     }
-    func_001AB2B8(self);
+    FormatCounterCaption(self);
     if (self->flag != 0) {
-        func_0015C8B8(self->handle, self->f51c, self->f51c);
+        PushFontScale(self->handle, self->f51c, self->f51c);
         func_eu_0015DCB8(&loc, &self->flag, self->handle, 0);
         f32 x = func_eu_0015E438(&loc);
         f32 y = (f32)self->handle->count * self->handle->scale;
-        func_001AAB20(self, x, y);
-        func_0015C900(self->handle);
+        SetScreenElementSize(self, x, y);
+        PopFontScale(self->handle);
     } else {
-        func_001AAB20(self, 0.0f, 0.0f);
+        SetScreenElementSize(self, 0.0f, 0.0f);
     }
 }

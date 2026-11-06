@@ -21,7 +21,7 @@ struct Obj_eu_0015DD18 {
 void* func_eu_0015DD18(Obj_eu_0015DD18* self, s32 id, s32 a, s32 b)
 {
     self->f0 = 1;
-    self->vt64 = &D_0024A220;
+    self->vt64 = &g_fontMethods;
     self->f4 = func_eu_001DDAB0(id);
     self->f10 = a;
     self->fB4 = b;

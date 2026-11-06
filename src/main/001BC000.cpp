@@ -19,8 +19,8 @@ void func_001BE998(void);
 
 void func_001BE708(void)
 {
-    D_00274744 = 0;
-    func_001BE998();
+    g_streamVoiceLocked = 0;
+    StopStreamVoice();
 }
 
 s32 D_00274720 = 0;
@@ -34,16 +34,16 @@ s32 func_0011D598(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
 
 void func_001BEC58(void* self)
 {
-    func_001BEB10(self);
+    RequestStagedBank(self);
     if (self == 0) return;
-    while (func_0011CE30() != 0 && D_00274720 == 1) {
+    while (PollIopCommands() != 0 && g_stagedBankState == 1) {
         func_001F6C20(0);
     }
-    if (D_00274720 == 2) {
-        s32 h = func_0011D598(D_0027473C, 0, 0x400, -1, 0, 0);
-        D_00274728 = h;
+    if (g_stagedBankState == 2) {
+        s32 h = StartSoundVoice(g_stagedBankHandle, 0, 0x400, -1, 0, 0);
+        g_stagedBankVoice = h;
         if (h == 0) return;
-        D_00274720 = 3;
+        g_stagedBankState = 3;
     }
 }
 
@@ -54,8 +54,8 @@ void func_001B5F28(u8* a, void* b);
 
 void func_001BEDF8(void* self)
 {
-    func_00152600(D_00275710 + 0x1BC4, self);
-    func_001B5F28(D_00275710 + 0x1BB8, self);
+    RemoveFromList(g_currentWorld + 0x1BC4, self);
+    PushFreeSlot(g_currentWorld + 0x1BB8, self);
 }
 
 extern u8 D_00604790[];
@@ -72,12 +72,12 @@ void func_0011E3A0(s32 a, s32 b);
 
 void func_001BF130(void)
 {
-    func_001F5C0C(D_00604790, 0, 0x1C);
-    func_0011CBB8();
-    func_001BE268(0);
-    func_0011DF58(1, 0x2000, 1, 1);
+    func_001F5C0C(g_soundBankHandles, 0, 0x1C);
+    InitIopCommandChannels();
+    EnsureSoundBankLoaded(0);
+    EnableIopDiscAccess(1, 0x2000, 1, 1);
     func_0011D928(0x14);
-    func_001C06D8();
+    ResetVolumeChannelFactors();
     func_0011D520(0, 1);
     func_0011D558(0, 0, 0x2F);
     func_0011D558(1, 0x18, 0x2F);
@@ -92,10 +92,10 @@ void func_00152470(void* list, void* item);
 
 void* func_001BF6B8(void)
 {
-    void* s = func_001B5EA0(D_00275710 + 0x1BA0);
+    void* s = PopFreeSlot(g_currentWorld + 0x1BA0);
     if (s) {
         func_001F5C0C(s, 0, 0x90);
-        func_00152470(D_00275710 + 0x1BAC, s);
+        AppendToList(g_currentWorld + 0x1BAC, s);
     }
     return s;
 }
@@ -123,8 +123,8 @@ void func_001BF728(Obj_1BF728* self)
         *(s32*)self->f0C = 0;
     }
     self->f04 = -1;
-    func_00152600(D_00275710 + 0x1BAC, self);
-    func_001B5F28(D_00275710 + 0x1BA0, self);
+    RemoveFromList(g_currentWorld + 0x1BAC, self);
+    PushFreeSlot(g_currentWorld + 0x1BA0, self);
 }
 
 struct Obj_1BF788 { u8 pad[0x18]; u8* f18; };
@@ -137,13 +137,13 @@ void func_001BF788(Obj_1BF788* self, s32 n)
 {
     if (self != 0) {
         if (n == 0) {
-            func_0011D600(self->f18);
+            StopSoundVoice(self->f18);
         } else {
             f32 t = (f32)n * 0.24000001f;
             s32 q = (s32)t;
             func_0011D860(self->f18, -4, q, 2);
         }
-        func_001BF728(self);
+        FreeSoundRecord(self);
     }
 }
 
@@ -158,7 +158,7 @@ void func_001BF8E8(Obj_1BF8E8* self, f32 a)
         f32 base = self->f50;
         self->f14 = a;
         self->f50 = base * scale;
-        func_001BE860(self);
+        ApplySoundRecordVolumePan(self);
     }
 }
 
@@ -205,7 +205,7 @@ void func_001C06A0(s32 a, s32 b, f32 x);
 
 void func_001BED20(void)
 {
-    func_001C06A0(2, 1, 1.0f);
+    SetVolumeChannelFactor(2, 1, 1.0f);
 }
 
 extern s32 D_00274728;
@@ -214,7 +214,7 @@ void func_0011D640(s32 a);
 
 void func_001BED48(void)
 {
-    func_0011D640(D_00274728);
+    func_0011D640(g_stagedBankVoice);
 }
 
 extern s32 D_00274728;
@@ -223,7 +223,7 @@ void func_0011D670(s32 a);
 
 void func_001BED70(void)
 {
-    func_0011D670(D_00274728);
+    func_0011D670(g_stagedBankVoice);
 }
 
 extern u8* D_00275710;
@@ -234,10 +234,10 @@ void func_00152470(u8* a, void* b);
 
 void* func_001BED98(void)
 {
-    void* p = func_001B5EA0(D_00275710 + 0x1BB8);
+    void* p = PopFreeSlot(g_currentWorld + 0x1BB8);
     if (p != 0) {
         func_001F5C0C((u8*)p, 0, 12);
-        func_00152470(D_00275710 + 0x1BC4, p);
+        AppendToList(g_currentWorld + 0x1BC4, p);
     }
     return p;
 }
@@ -270,17 +270,17 @@ void func_001BF048(Entry_1BF048* self)
 {
     if (self != 0) {
         s32 key = self->key;
-        func_001BEDF8(self);
-        if (key == D_00274734) {
-            func_001BEF88(self);
-            s32 cur = D_00274734;
+        RemoveSoundLevelEntry(self);
+        if (key == g_currentSoundLevel) {
+            RecomputeSoundLevel(self);
+            s32 cur = g_currentSoundLevel;
             if (cur >= 0) {
                 D_002748EC = 0;
             }
-            D_00274738 = cur;
+            g_previousSoundLevel = cur;
             func_0011D928(cur + 0x14);
-            func_001C06A0(7, 1, 1.0f);
-            D_00274738 = -0x64;
+            SetVolumeChannelFactor(7, 1, 1.0f);
+            g_previousSoundLevel = -0x64;
         }
     }
 }
@@ -314,17 +314,17 @@ void func_0011D600(s32 handle);
 
 void func_001BE1E8(void)
 {
-    if (D_0027473C != 0) {
-        if (D_00274728 != 0) {
-            func_0011D600(D_00274728);
+    if (g_stagedBankHandle != 0) {
+        if (g_stagedBankVoice != 0) {
+            StopSoundVoice(g_stagedBankVoice);
         }
-        func_0011D450(D_0027473C);
-        while (func_0011CE30() != 0) {
+        UnloadSoundBank(g_stagedBankHandle);
+        while (PollIopCommands() != 0) {
         }
-        D_0027473C = 0;
+        g_stagedBankHandle = 0;
     }
-    D_00274720 = 0;
-    D_00274728 = 0;
+    g_stagedBankState = 0;
+    g_stagedBankVoice = 0;
 }
 
 struct Obj_1BF0D8 { s32 kind; };
@@ -341,10 +341,10 @@ void func_001BF0D8(Obj_1BF0D8* self)
         return;
     }
     s32 k = self->kind;
-    func_001BEDF8(self);
-    if (k == D_00274734) {
-        D_00274738 = k;
-        func_001BEF88(self);
+    RemoveSoundLevelEntry(self);
+    if (k == g_currentSoundLevel) {
+        g_previousSoundLevel = k;
+        RecomputeSoundLevel(self);
     }
 }
 
@@ -352,7 +352,7 @@ extern s32 D_0027472C;
 
 s32 func_001BE980(void)
 {
-    return D_0027472C != 0;
+    return g_streamVoice != 0;
 }
 
 typedef void (*Fn_001BF578)(void);
@@ -366,8 +366,8 @@ void func_001BF2E0(void);
 Fn_001BF578 func_001BF578(void)
 {
     s32 n;
-    if (func_001493A0(D_00261990 + 0x460) == 0) return func_001BF398;
-    n = func_00149638(D_00261990 + 0x460);
+    if (IsTopCameraController(g_camera + 0x460) == 0) return func_001BF398;
+    n = PeekStackValue(g_camera + 0x460);
     if (n >= 3) return func_001BF398;
     if (n <= 0) return func_001BF398;
     return func_001BF2E0;
@@ -393,7 +393,7 @@ void* func_0018D5C0(s32 bytes);
 
 void func_001BE4D8(Owner_1BE4D8* self)
 {
-    self->rec = (Rec_1BE4D8*)func_0018D5C0(0x24);
+    self->rec = (Rec_1BE4D8*)AllocateZeroedFrontMemory(0x24);
     self->rec->f00 = -1;
     self->rec->f04 = 3000.0f;
     self->rec->f08 = 300.0f;
@@ -408,7 +408,7 @@ extern s32 D_00274730;
 
 void func_001BE5D8(void)
 {
-    D_00274730 = 0;
+    g_streamVoicePending = 0;
 }
 
 extern s32 D_0027472C;
@@ -417,8 +417,8 @@ void func_0011D640(s32 a);
 
 void func_001BEA28(void)
 {
-    if (D_0027472C != 0) {
-        func_0011D640(D_0027472C);
+    if (g_streamVoice != 0) {
+        func_0011D640(g_streamVoice);
     }
 }
 
@@ -428,13 +428,13 @@ void func_0011D670(s32 a);
 
 void func_001BEA50(void)
 {
-    if (D_0027472C != 0) {
-        func_0011D670(D_0027472C);
+    if (g_streamVoice != 0) {
+        func_0011D670(g_streamVoice);
     }
 }
 
 extern s32 D_00274744;
-s32 func_001BE5E8(void) { return D_00274744; }
+s32 func_001BE5E8(void) { return g_streamVoiceLocked; }
 
 s32 D_00274748;
 s32 func_001BF1F0(void) { return D_00274748; }
@@ -452,7 +452,7 @@ void func_001BE0A8(u8* base, s32 n, s32 size, Cmp_1BE0A8 cmp)
         if (start > 0) {
             start--;
         } else {
-            func_001BE068(base, size, end, 0);
+            SwapSortRecords(base, size, end, 0);
             s32 t = end;
             end = t - 1;
             if (t < 2) return;
@@ -466,7 +466,7 @@ void func_001BE0A8(u8* base, s32 n, s32 size, Cmp_1BE0A8 cmp)
                 if (cmp(base + c * size, base + s0 * size) < 0) c = s0;
             }
             if (cmp(base + i * size, base + c * size) < 0) {
-                func_001BE068(base, size, i, c);
+                SwapSortRecords(base, size, i, c);
                 i = c;
                 c = c + (c + 1);
                 if (end < c) break;
@@ -492,7 +492,7 @@ struct Local_1BE5F8 { s32 a; s32 b; };
 
 void func_001BE5F8(Obj_1BE5F8* self)
 {
-    if (D_00274744 != 0) {
+    if (g_streamVoiceLocked != 0) {
         return;
     }
     if (self == 0) {
@@ -500,27 +500,27 @@ void func_001BE5F8(Obj_1BE5F8* self)
     }
     Local_1BE5F8 l;
     Local_1BE5F8* p;
-    if (func_001BE980() != 0) {
-        func_001BE998();
+    if (HasStreamVoice() != 0) {
+        StopStreamVoice();
     }
     p = &l;
-    func_0018D410(p);
+    ClearKeyId(p);
     s32 b = self->w4 ^ self->w1C;
     p->b = b;
     p->a = self->w0 ^ self->w14;
     if (b == 0) {
         return;
     }
-    s32 h = func_0011E048(p->a, 0, 0, 0, 0x400, 0, 2, 0, 0);
+    s32 h = StartStreamedVoice(p->a, 0, 0, 0, 0x400, 0, 2, 0, 0);
     if (h == 0) {
         return;
     }
-    D_0027472C = h;
-    D_00274744 = 1;
-    D_00274730 = 0;
-    func_001C06A0(8, 1, 0.5f);
-    func_001C06A0(8, 0, 0.5f);
-    func_001C06A0(8, 3, 0.5f);
+    g_streamVoice = h;
+    g_streamVoiceLocked = 1;
+    g_streamVoicePending = 0;
+    SetVolumeChannelFactor(8, 1, 0.5f);
+    SetVolumeChannelFactor(8, 0, 0.5f);
+    SetVolumeChannelFactor(8, 3, 0.5f);
 }
 
 extern s32 D_00274744;
@@ -538,16 +538,16 @@ struct Local_1BE728 { s32 a; s32 b; };
 
 void func_001BE728(KeyRecord* self)
 {
-    if (D_00274744 != 0) {
+    if (g_streamVoiceLocked != 0) {
         return;
     }
     Local_1BE728 l;
     Local_1BE728* p;
-    if (func_001BE980() != 0) {
-        func_001BE998();
+    if (HasStreamVoice() != 0) {
+        StopStreamVoice();
     }
     p = &l;
-    func_0018D410(p);
+    ClearKeyId(p);
     s32 r = 0;
     if (self != 0) {
         s32 b = self->wordB ^ self->maskB;
@@ -558,13 +558,13 @@ void func_001BE728(KeyRecord* self)
     if (r == 0) {
         return;
     }
-    s32 h = func_0011E048(l.a, 0, 0, 0, 0x400, 0, 2, 0, 1);
+    s32 h = StartStreamedVoice(l.a, 0, 0, 0, 0x400, 0, 2, 0, 1);
     if (h == 0) {
         return;
     }
-    D_0027472C = h;
-    D_00274730 = 1;
-    func_0011E0E0(h, func_001BE5D8, (u32)h);
+    g_streamVoice = h;
+    g_streamVoicePending = 1;
+    RequestStreamCallback(h, ClearStreamVoicePending, (u32)h);
 }
 
 extern s32 D_00274720;
@@ -574,10 +574,10 @@ void func_0011D600(s32 handle);
 
 void func_001BEA78(void)
 {
-    if (D_00274720 == 3) {
-        func_0011D600(D_00274728);
-        D_00274728 = 0;
-        D_00274720 = 2;
+    if (g_stagedBankState == 3) {
+        StopSoundVoice(g_stagedBankVoice);
+        g_stagedBankVoice = 0;
+        g_stagedBankState = 2;
     }
 }
 
@@ -589,13 +589,13 @@ void func_0011D420(void);
 
 void func_001BEAC8(s32 h)
 {
-    D_0027473C = h;
+    g_stagedBankHandle = h;
     if (h != 0) {
         func_0011D420();
-        D_00274720 = 2;
+        g_stagedBankState = 2;
     } else {
-        D_00274724 = 0;
-        D_00274720 = 0;
+        g_stagedBankRecord = 0;
+        g_stagedBankState = 0;
     }
 }
 
@@ -603,7 +603,7 @@ void func_001C06A0(s32 a, s32 b, f32 x);
 
 void func_001BECF8(void)
 {
-    func_001C06A0(2, 1, 0.0f);
+    SetVolumeChannelFactor(2, 1, 0.0f);
 }
 
 extern u8* D_00261990;
@@ -618,12 +618,12 @@ struct Obj_001BF3D0 {
 
 void* func_001BF3D0(void)
 {
-    Obj_001BF3D0* p = (Obj_001BF3D0*)func_001925F0();
+    Obj_001BF3D0* p = (Obj_001BF3D0*)GetActiveSwitchedCollider();
     u8* r;
     if (p != 0 && p->vtbl[78](p) != 0) {
         r = (u8*)p + 0x140;
     } else {
-        r = D_00261990 + 0x40;
+        r = g_camera + 0x40;
     }
     return r;
 }
@@ -634,7 +634,7 @@ void func_001BF200(f32 r, void* self, f32* out, s32* flag, f32 a, f32 b, f32 c);
 void func_001BF620(void* self, f32* out, s32* flag, f32 a, f32 b, f32 c)
 {
     if (self != 0) {
-        f32 r = func_001BF5E0(self);
+        f32 r = ComputeSoundListenerFactor(self);
         func_001BF200(r, self, out, flag, a, b, c);
     } else {
         *out = a;
@@ -655,7 +655,7 @@ void func_001BE860(Obj_1BE860* self)
     } else {
         a2 = (s32)((self->f54 + 2.0f) * 179.5f);
     }
-    func_0011D798(self->f18, a1, a2);
+    SetVoiceVolumePan(self->f18, a1, a2);
 }
 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -671,11 +671,11 @@ void func_001BE8F8(s32 a0, void** a1, f32 f12, f32 f13)
         flag = 1;
         p = (void**)&local;
     }
-    func_001BFCD8(-2, p, a0, 0, f12, f13, 1.0f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(-2, p, a0, 0, f12, f13, 1.0f, 0.0f, 0.0f, 0, 0);
     if (*p != 0) {
-        func_001BE860(*p);
+        ApplySoundRecordVolumePan(*p);
         if (flag != 0) {
-            func_001BF718(p);
+            ClearSoundRecordHandle(p);
         }
     }
 }
@@ -700,10 +700,10 @@ void func_001BEB10(Rec_1BEB10* self)
     s32 flag;
 
     if (self == 0) {
-        func_001BEA78();
+        StopStagedBankVoice();
         return;
     }
-    Rec_1BEB10* old = (Rec_1BEB10*)D_00274724;
+    Rec_1BEB10* old = (Rec_1BEB10*)g_stagedBankRecord;
     if (self == old) {
         same = 1;
     } else if (self == 0) {
@@ -713,15 +713,15 @@ void func_001BEB10(Rec_1BEB10* self)
     } else {
         same = ((self->f8 ^ self->f18) ^ (old->f8 ^ old->f18)) == 0;
     }
-    if (same != 0 && D_00274720 != 0) {
+    if (same != 0 && g_stagedBankState != 0) {
         return;
     }
-    while (func_0011CE30() != 0 && D_00274720 == 1) {
+    while (PollIopCommands() != 0 && g_stagedBankState == 1) {
         func_001F6C20(0);
     }
-    func_001BE1E8();
-    D_00274724 = (s32)self;
-    func_0018D410(local);
+    UnloadStagedBank();
+    g_stagedBankRecord = (s32)self;
+    ClearKeyId(local);
     if (self == 0) {
         flag = 0;
     } else {
@@ -731,9 +731,9 @@ void func_001BEB10(Rec_1BEB10* self)
         flag = x != 0;
     }
     if (flag != 0) {
-        D_00274720 = 1;
-        func_0011E1F8(0);
-        func_0011D2A8(local[0], 0, (void*)func_001BEAC8, 0);
+        g_stagedBankState = 1;
+        SyncDiscRead(0);
+        StartSoundBankLoad(local[0], 0, (void*)StoreStagedBankHandle, 0);
     }
 }
 
@@ -757,9 +757,9 @@ void func_001BD888(s32 n, Obj_1BD888** objs)
     if (n < 2) {
         return;
     }
-    func_0018D608();
-    sorted = (Obj_1BD888**)func_0018D658(n * 4);
-    counts = (s32*)func_0018D658(n * 4);
+    PushBackMemoryMark();
+    sorted = (Obj_1BD888**)AllocateBackMemory(n * 4);
+    counts = (s32*)AllocateBackMemory(n * 4);
     func_001F5C0C(counts, 0, n * 4);
     func_001F5C0C(local, 0, 20);
     for (i = 0; i < n; i++) {
@@ -791,8 +791,8 @@ void func_001BD888(s32 n, Obj_1BD888** objs)
         sorted[idx] = objs[i];
         local[cnt] = idx + 1;
     }
-    func_0018D800(objs, sorted, n * 4);
-    func_0018D6F0();
+    CopyMemory(objs, sorted, n * 4);
+    PopBackMemoryMark();
 }
 
 extern u8* D_00275710;
@@ -804,8 +804,8 @@ void* func_001BED98(void);
 
 void* func_001BEEF8(s32 x)
 {
-    s32 flag = func_00152720(D_00275710 + 0x1BC4);
-    void* p = func_001BED98();
+    s32 flag = IsListEmpty(g_currentWorld + 0x1BC4);
+    void* p = AllocateSoundLevelEntry();
     s32 hi = 0x6B;
     s32 v = -20;
     if (x >= -20) {
@@ -813,10 +813,10 @@ void* func_001BEEF8(s32 x)
     }
     if (p != 0) {
         *(s32*)p = v;
-        s32 cur = D_00274734;
+        s32 cur = g_currentSoundLevel;
         if (cur < v || flag != 0) {
-            D_00274734 = v;
-            D_00274738 = cur;
+            g_currentSoundLevel = v;
+            g_previousSoundLevel = cur;
         }
     }
     return p;
@@ -875,16 +875,16 @@ s32 func_0011D708(s32 handle);
 void func_001BE998(void)
 {
     s32 r;
-    if (D_00274744 != 0) return;
-    if (D_0027472C == 0) return;
-    func_0011D600(D_0027472C);
-    while ((r = func_0011D708(D_0027472C)) != 0) {
+    if (g_streamVoiceLocked != 0) return;
+    if (g_streamVoice == 0) return;
+    StopSoundVoice(g_streamVoice);
+    while ((r = IsVoiceBusy(g_streamVoice)) != 0) {
         r = 0x4E20;
         while (--r >= 0) {
         }
     }
-    D_0027472C = 0;
-    D_00274730 = 0;
+    g_streamVoice = 0;
+    g_streamVoicePending = 0;
 }
 
 void func_001BD790(Collider* obj, s32 mode)
@@ -960,19 +960,19 @@ void func_001BDD00(World* self, s32 flags, f32 f)
     s32 j;
     s32 i;
     Node_1BDD00* s;
-    func_0018D608();
-    arr1 = (Node_1BDD00**)func_0018D658(self->count38 * 4);
+    PushBackMemoryMark();
+    arr1 = (Node_1BDD00**)AllocateBackMemory(self->count38 * 4);
     c.n1 = 0;
-    arr2 = (Node_1BDD00**)func_0018D658(self->count38 * 4);
+    arr2 = (Node_1BDD00**)AllocateBackMemory(self->count38 * 4);
     c.n2 = 0;
     func_001F6C20(0);
     if (flags & 1) {
         s32 e = (s32)&self->list60;
         fr.cursor = e;
         fr.list = e;
-        s32 old = (s32)D_0027B314;
+        s32 old = (s32)g_activeListFrames;
         s32 link = *(s32*)(e + 8);
-        D_0027B314 = (ListFrame*)&fr;
+        g_activeListFrames = (ListFrame*)&fr;
         fr.prev = old;
         s32 h = *(s32*)e;
         fr.link = link;
@@ -982,19 +982,19 @@ void func_001BDD00(World* self, s32 flags, f32 f)
             Node_1BDD00* node = (Node_1BDD00*)p;
             if (!(node->cls->flags & 2) || (node->flags538 & (1ULL << 55))) {
                 if (node->f228 < 2) {
-                    node->cls->fn7C(node, 0, D_00261858[2]);
+                    node->cls->fn7C(node, 0, g_gameClock[2]);
                 }
             }
             s32 nx = *(s32*)fr.cursor;
             fr.cursor = nx + fr.link;
             p = nx;
         }
-        D_0027B314 = (ListFrame*)fr.prev;
+        g_activeListFrames = (ListFrame*)fr.prev;
     }
     for (s = (Node_1BDD00*)self->list6C.head; s != 0; s = (Node_1BDD00*)((Item_1BDD00*)s)->next) {
         if (s->flags538 & (1ULL << 57)) continue;
         if (s->flags538 & (1ULL << 55)) continue;
-        func_001BD678(s, &c.n1, arr1, &c.n2, arr2);
+        CollectConnectedColliders(s, &c.n1, arr1, &c.n2, arr2);
         if (flags & 1) {
             for (i = 0; i < c.n1; i++) {
                 if (arr1[i]->f228 < 2) break;
@@ -1006,10 +1006,10 @@ void func_001BDD00(World* self, s32 flags, f32 f)
                 if (j >= c.n2) continue;
             }
             for (i = 0; i < c.n1; i++) {
-                arr1[i]->cls->fn7C(arr1[i], 0, D_00261858[2]);
+                arr1[i]->cls->fn7C(arr1[i], 0, g_gameClock[2]);
             }
         }
-        func_001BDA50(self, c.n1, arr1, f, flags);
+        ProcessColliderGroup(self, c.n1, arr1, f, flags);
         for (i = 0; i < c.n1; i++) {
             if (!func_00129D70(arr1[i])) {
                 func_00129DF8(arr1[i]);
@@ -1019,7 +1019,7 @@ void func_001BDD00(World* self, s32 flags, f32 f)
     for (s = (Node_1BDD00*)self->bodies.head; s != 0; s = *(Node_1BDD00**)((u8*)s + 0x2D0)) {
         s->flags538 &= ~(1ULL << 57);
     }
-    func_0018D6F0();
+    PopBackMemoryMark();
 }
 
 extern s32 D_00274744;
@@ -1030,12 +1030,12 @@ void func_0011E0B0(s32 a0);
 
 s32 func_001BE810(void)
 {
-    if (D_00274744 != 0)
+    if (g_streamVoiceLocked != 0)
         return 0;
-    if (D_0027472C != 0) {
-        if (D_00274730 != 0)
+    if (g_streamVoice != 0) {
+        if (g_streamVoicePending != 0)
             return 1;
-        func_0011E0B0(D_0027472C);
+        func_0011E0B0(g_streamVoice);
     }
     return 0;
 }
@@ -1048,7 +1048,7 @@ s32 func_001BE268(Ent_1BE4A8* e);
 
 void func_001BE4A8(s32 idx)
 {
-    func_001BE268(*(Ent_1BE4A8**)((u8*)D_00245020 + idx * 8));
+    EnsureSoundBankLoaded(*(Ent_1BE4A8**)((u8*)g_soundEntries + idx * 8));
 }
 
 struct Sel_1BE568;
@@ -1060,12 +1060,12 @@ void func_001BE4A8(Sel_1BE568* self);
 
 s32 func_001BE568(s32 idx)
 {
-    Pair_1BE568* p = (Pair_1BE568*)D_00245020 + idx;
+    Pair_1BE568* p = (Pair_1BE568*)g_soundEntries + idx;
 
-    if (((s32*)D_006047B0)[p->key] == 0) {
-        func_001BE4A8((Sel_1BE568*)idx);
+    if (((s32*)g_soundBankLoaded)[p->key] == 0) {
+        EnsureSoundEntryBankLoaded((Sel_1BE568*)idx);
     }
-    return ((s32*)D_006047D0)[idx];
+    return ((s32*)g_soundEntryAvailable)[idx];
 }
 
 // NEAR: the lui of D_0026185C is scheduled before the sw of self->idx; retail stores idx first. Otherwise every instruction matches.
@@ -1104,25 +1104,25 @@ void func_001BFAF8(Node_1BFAF8* self, s32 idx)
     s32 link;
     s32 v3;
     if (idx != -2) {
-        link = func_001BE4A8((Idx_1BFAF8*)idx);
-        v3 = D_00245020[idx].b;
+        link = EnsureSoundEntryBankLoaded((Idx_1BFAF8*)idx);
+        v3 = g_soundEntries[idx].b;
         self->link = link;
     }
     self->idx = idx;
-    self->f10 = D_0026185C[0];
+    self->f10 = g_gameTime[0];
     if (idx == -2) {
-        v3 = D_0027472C;
+        v3 = g_streamVoice;
         self->f40 = 0;
         self->f18 = v3;
         return;
     }
     if (self->f50 != 0.0f && self->f78 < 0.0f) {
-        s32 r = func_0011D598((Link_1BFAF8*)link, v3, 0, 0, 0, 0);
+        s32 r = StartSoundVoice((Link_1BFAF8*)link, v3, 0, 0, 0, 0);
         self->f40 = 0;
         self->f18 = r;
         func_001BF428(self);
-        func_001BF7F8(self, self->f58);
-        func_001BE860(self);
+        SetSoundRecordPitch(self, self->f58);
+        ApplySoundRecordVolumePan(self);
     } else {
         self->f18 = 0;
         self->f40 = 1;
@@ -1140,25 +1140,25 @@ s32 func_00152720(Frame_1BEF88* p);
 void func_001BEF88(void)
 {
     Frame_1BEF88 f;
-    s32 P = (s32)D_00275710 + 0x1BC4;
+    s32 P = (s32)g_currentWorld + 0x1BC4;
     s32 x;
     f.f0 = P;
     f.f4 = P;
     f.f8 = *(s32*)(P + 8);
-    f.fC = (s32)D_0027B314;
-    D_0027B314 = (ListFrame*)&f;
-    if (func_00152720((Frame_1BEF88*)P) != 0) {
-        D_00274734 = 0;
+    f.fC = (s32)g_activeListFrames;
+    g_activeListFrames = (ListFrame*)&f;
+    if (IsListEmpty((Frame_1BEF88*)P) != 0) {
+        g_currentSoundLevel = 0;
     } else {
-        D_00274734 = -20;
+        g_currentSoundLevel = -20;
         s32 x0 = *(s32*)f.f4;
         f.f4 = x0 + f.f8;
         x = x0;
         if (x != 0) {
             do {
                 s32 v = *(s32*)x;
-                if (D_00274734 < v) {
-                    D_00274734 = v;
+                if (g_currentSoundLevel < v) {
+                    g_currentSoundLevel = v;
                 }
                 s32 y = *(s32*)f.f4;
                 f.f4 = y + f.f8;
@@ -1166,7 +1166,7 @@ void func_001BEF88(void)
             } while (x != 0);
         }
     }
-    D_0027B314 = (ListFrame*)f.fC;
+    g_activeListFrames = (ListFrame*)f.fC;
 }
 
 // NEAR: 23 diff lines, register allocation only: queue index in t1 (retail) vs v1 (ours), mask built in a0 vs a2, cleanup counter in t1 vs a0
@@ -1276,11 +1276,11 @@ void func_001BF7F8(Ent_1BF7F8* p, f32 a)
     s32 v0 = p->flag6C;
     p->f58 = a;
     if (v0 == 0) {
-        p->f70 = func_0011D7D8(p->f8, D_00245020[p->idx].b);
+        p->f70 = GetSoundPitchBase(p->f8, g_soundEntries[p->idx].b);
         p->flag6C = 1;
     }
     s32 v = p->f70 + (s32)(p->f58 * 1524.0f) + p->f60;
-    func_0011D810(p->f18, p->clampv(v, -0x8000, 0x7FFF));
+    SetVoicePitch(p->f18, p->clampv(v, -0x8000, 0x7FFF));
 }
 
 struct Ent_1BE268 { s32 w0; s32 w4; s32 w8; s32 wC; s32 w10; s32 w14; s32 w18; s32 w1C; };
@@ -1303,27 +1303,27 @@ s32 func_001BE268(s32 n)
 {
     KeyId l;
     s32 h;
-    if (n == D_00274740) {
-        return ((s32*)&D_00604790)[n];
+    if (n == g_loadedSoundBank) {
+        return ((s32*)&g_soundBankHandles)[n];
     }
     if (n == 0) {
-        h = ((s32*)&D_00604790)[0];
+        h = ((s32*)&g_soundBankHandles)[0];
         if (h != 0) {
             return h;
         }
     } else {
-        func_001BE1E8();
-        if (D_00274740 >= 0 && (h = ((s32*)&D_00604790)[D_00274740]) != 0) {
-            func_0011D450();
-            while (func_0011CE30() != 0) {
+        UnloadStagedBank();
+        if (g_loadedSoundBank >= 0 && (h = ((s32*)&g_soundBankHandles)[g_loadedSoundBank]) != 0) {
+            UnloadSoundBank();
+            while (PollIopCommands() != 0) {
             }
-            ((s32*)&D_00604790)[D_00274740] = 0;
+            ((s32*)&g_soundBankHandles)[g_loadedSoundBank] = 0;
             func_0011D420();
         }
-        D_00274740 = n;
+        g_loadedSoundBank = n;
     }
-    func_0018D410(&l);
-    const Ent_1BE268* e = &D_00244F40[n];
+    ClearKeyId(&l);
+    const Ent_1BE268* e = &g_soundBankKeys[n];
     s32 ok;
     if (e == 0) {
         ok = 0;
@@ -1335,22 +1335,22 @@ s32 func_001BE268(s32 n)
     if (ok) {
         while (func_00203828(0) != 2) {
         }
-        func_0011E1F8(0);
-        s32 r = func_0011D140(l.first, 0);
-        ((s32*)&D_00604790)[n] = r;
+        SyncDiscRead(0);
+        s32 r = LoadSoundBankAtLocation(l.first, 0);
+        ((s32*)&g_soundBankHandles)[n] = r;
         if (r != 0) {
             func_0011D420();
-            if (((s32*)&D_006047B0)[n] == 0) {
-                ((s32*)&D_006047B0)[n] = 1;
+            if (((s32*)&g_soundBankLoaded)[n] == 0) {
+                ((s32*)&g_soundBankLoaded)[n] = 1;
                 for (s32 i = 0; i < 0x303; i++) {
-                    if (((Pair_1BE268*)&D_00245020)[i].id == n) {
-                        ((s32*)&D_006047D0)[i] = func_0011D760(((s32*)&D_00604790)[n], ((Pair_1BE268*)&D_00245020)[i].arg) != 0 || D_00246838[i] != 0;
+                    if (((Pair_1BE268*)&g_soundEntries)[i].id == n) {
+                        ((s32*)&g_soundEntryAvailable)[i] = func_0011D760(((s32*)&g_soundBankHandles)[n], ((Pair_1BE268*)&g_soundEntries)[i].arg) != 0 || g_soundEntryForcedAvailable[i] != 0;
                     }
                 }
             }
         }
     }
-    return ((s32*)&D_00604790)[n];
+    return ((s32*)&g_soundBankHandles)[n];
 }
 
 struct Eight_1BFCD8 { u8 b[8]; };
@@ -1379,9 +1379,9 @@ void func_001BFCD8(s32 id, Buf_1BFCD8** out, s32 p2, s32 p3,
     s32 s0;
     if (id == -1) return;
     if (id != -2) {
-        s32 a1 = D_00245020[id].a;
-        if (a1 > 0 && a1 != (*(Glob_1BFCD8**)&D_00275710)->f1D70) return;
-        s0 = func_001BE568((Id_1BFCD8)id);
+        s32 a1 = g_soundEntries[id].a;
+        if (a1 > 0 && a1 != (*(Glob_1BFCD8**)&g_currentWorld)->f1D70) return;
+        s0 = IsSoundEntryAvailable((Id_1BFCD8)id);
     } else {
         s0 = 0;
     }
@@ -1389,32 +1389,32 @@ void func_001BFCD8(s32 id, Buf_1BFCD8** out, s32 p2, s32 p3,
     if (p3 || p2 || out) {
         if (s0 == 0 && (p4 == 0 || *p4 < 0.0f)) {
             Buf_1BFCD8 tmp;
-            func_001BF920(&tmp, out, 0, p2, p3, fa, fb, fc, fd, fe, 0, 0);
+            InitSoundRecord(&tmp, out, 0, p2, p3, fa, fb, fc, fd, fe, 0, 0);
             if (tmp.f50 != 0.0f) {
-                s1 = (Buf_1BFCD8*)func_001BF6B8();
+                s1 = (Buf_1BFCD8*)AllocateSoundRecord();
                 if (s1) {
                     tmp.f64 = s1->f64;
                     *s1 = tmp;
                 }
             } else if (id == -2) {
-                func_0011D798((Id_1BFCD8)D_0027472C, 0, 0);
+                SetVoiceVolumePan((Id_1BFCD8)g_streamVoice, 0, 0);
             }
             if (out) *out = s1;
         } else {
-            s1 = (Buf_1BFCD8*)func_001BF6B8();
+            s1 = (Buf_1BFCD8*)AllocateSoundRecord();
             if (!s1) return;
-            func_001BF920(s1, out, s0, p2, p3, fa, fb, fc, fd, fe, p4, p5);
+            InitSoundRecord(s1, out, s0, p2, p3, fa, fb, fc, fd, fe, p4, p5);
         }
         if (s1) {
             if (0.0f <= s1->f78) {
                 func_001BFBF8(s1);
-                s1->f74 = (*(f32*)&D_0026185C) + func_001EAAE0(0.0f, s1->f78);
+                s1->f74 = (*(f32*)&g_gameTime) + RandomFloatInRange(0.0f, s1->f78);
             }
-            func_001BFAF8(s1, id);
+            StartSoundRecordVoice(s1, id);
         }
     } else {
-        s32 v = func_001BE4A8((Id_1BFCD8)id);
-        func_0011D598((Id_1BFCD8)v, D_00245020[id].b, (s32)(fc * 1024.0f), 0, (s32)(fd * 1524.0f), 0);
+        s32 v = EnsureSoundEntryBankLoaded((Id_1BFCD8)id);
+        StartSoundVoice((Id_1BFCD8)v, g_soundEntries[id].b, (s32)(fc * 1024.0f), 0, (s32)(fd * 1524.0f), 0);
     }
 }
 
@@ -1424,8 +1424,8 @@ typedef f32 (*Fn_1BF5E0)(Obj_1BF5E0* self, Arg_1BF5E0* arg);
 
 f32 func_001BF5E0(Arg_1BF5E0* arg)
 {
-    Obj_1BF5E0* obj = (Obj_1BF5E0*)func_001BF3D0();
-    return ((Fn_1BF5E0)func_001BF578())(obj, arg);
+    Obj_1BF5E0* obj = (Obj_1BF5E0*)GetSoundListenerPosition();
+    return ((Fn_1BF5E0)ChooseSoundListenerFunction())(obj, arg);
 }
 
 struct Node_1BEE48;
@@ -1458,16 +1458,16 @@ struct Begin_1BEE48 {
 void func_001BEE48(void)
 {
     Iter_1BEE48 it;
-    Begin_1BEE48::Of(&it, &(*(World_1BEE48**)&D_00275710)->list);
+    Begin_1BEE48::Of(&it, &(*(World_1BEE48**)&g_currentWorld)->list);
     Node_1BEE48* node;
     for (node = Next_1BEE48::Of(&it); node != 0; node = Next_1BEE48::Of(&it)) {
-        func_001BEDF8(node);
+        RemoveSoundLevelEntry(node);
     }
     func_0011D928(0x14);
     D_002748EC = 0;
-    D_0027B314 = (ListFrame*)it.saved;
-    D_00274738 = 0;
-    D_00274734 = 0;
+    g_activeListFrames = (ListFrame*)it.saved;
+    g_previousSoundLevel = 0;
+    g_currentSoundLevel = 0;
 
 }
 
@@ -1514,7 +1514,7 @@ void func_001BC4D8(Collider* self, Contact03** out)
                 h = h->next;
             } while (h);
         }
-        func_001861E8((u8*)self->world, freed);
+        FreePooledContactChain((u8*)self->world, freed);
     }
 }
 
@@ -1565,7 +1565,7 @@ void func_001BF920(Obj_1BF920* self, Obj_1BF920* parent, s32 a2, u8* a3, Q16_1BF
     if (parent) *(Obj_1BF920**)parent = self;
     self->f58 = f15;
     self->f5C = f16;
-    s32 id = D_0027474C;
+    s32 id = g_nextSoundRecordId;
     self->f04 = id++;
     self->f3C = a2;
     self->f30 = a3;
@@ -1573,15 +1573,15 @@ void func_001BF920(Obj_1BF920* self, Obj_1BF920* parent, s32 a2, u8* a3, Q16_1BF
     self->f38 = f13;
     self->f14 = f14;
     self->f48 = 0;
-    D_0027474C = id;
-    self->f4C = func_001EAA70(0, 3);
+    g_nextSoundRecordId = id;
+    self->f4C = RandomIntInRange(0, 3);
     if (p78) self->f78.v = *p78; else self->f78.f = -1.0f;
     if (p80) self->f80.v = *p80; else self->f80.f = -1.0f;
     if (q) self->f20 = *q;
     s32 fl = 0;
     if (q || self->f78.f >= 0.0f) fl = 1;
     self->f44 = fl;
-    func_001BF620(q, &self->f50, &self->f54, f14, f12, f13);
+    ComputeSoundAttenuation(q, &self->f50, &self->f54, f14, f12, f13);
     func_001BF428(self);
 }
 
@@ -1629,34 +1629,34 @@ void func_001BDA50(Ctx_1BDA50* ctx, s32 n, Item_1BDA50** arr, f32 f, s32 ex)
 {
     Buf_1BDA50 buf;
     Frame_1BDA50 it;
-    s32 v = func_001BD558(n, arr, 0x40, &buf);
+    s32 v = CollectGroupItems(n, arr, 0x40, &buf);
     if (v < 0x40 || n < 2) {
         func_001BCD00(ctx, n, arr, v, &buf, f, ex);
         return;
     }
-    func_001BD888(n, arr);
+    SortCollidersByContactCount(n, arr);
     s32 half = n / 2;
     s32 i;
     u8* p;
     for (i = 0; i < half; i++) {
         arr[i]->flags |= 1ULL << 58;
     }
-    func_001BDA50(ctx, n - half, arr + half, f, ex);
+    ProcessColliderGroup(ctx, n - half, arr + half, f, ex);
     for (i = 0; i < half; i++) {
         arr[i]->flags &= ~(1ULL << 58);
     }
     for (i = half; i < n; i++) {
         Begin_1BDA50::Of(&it, &arr[i]->list);
         for (p = Next_1BDA50::Of(&it); p; p = Next_1BDA50::Of(&it)) {
-            func_001BD790(p, 1);
+            SetColliderForcedState(p, 1);
         }
         End_1BDA50::Of(&it);
     }
-    func_001BDA50(ctx, half, arr, f, ex);
+    ProcessColliderGroup(ctx, half, arr, f, ex);
     for (i = half; i < n; i++) {
         Begin_1BDA50::Of(&it, &arr[i]->list);
         for (p = Next_1BDA50::Of(&it); p; p = Next_1BDA50::Of(&it)) {
-            func_001BD790(p, 0);
+            SetColliderForcedState(p, 0);
         }
         End_1BDA50::Of(&it);
     }

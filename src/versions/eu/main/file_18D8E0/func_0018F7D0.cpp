@@ -15,8 +15,8 @@ void func_0018F7D0(Obj_18F7D0* self_)
     s32 mask;
 
     self->f0C = 0;
-    func_0018EA48((Obj_18EA48*)(base + 0x80));
-    func_0018EAA0((Obj_18EAA0*)(base + 0x80));
+    ResetMovieStream((Obj_18EA48*)(base + 0x80));
+    StopMovieStream((Obj_18EAA0*)(base + 0x80));
     func_0020B0C0((Obj_18F7D0*)(base + 0x10));
     (void)func_0020B048((Obj_18F7D0*)(base + 0x10));
     if (self->f148 != 0) {
@@ -30,5 +30,5 @@ void func_0018F7D0(Obj_18F7D0* self_)
     } else {
         mask = 1 << self->f00;
     }
-    D_002623C0->f19F8 |= mask;
+    g_saveData->f19F8 |= mask;
 }

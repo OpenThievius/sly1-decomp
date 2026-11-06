@@ -7,8 +7,8 @@ void func_00151860(void* value, Object_151860* object)
     if (object != 0) {
         object->vtable->callback(object, value);
     } else {
-        ((Global_2701F8_eu*)&D_002701F8)->value = value;
-        func_001E9498(D_00275BC0, &D_002701F8);
+        ((Global_2701F8_eu*)&g_typedTextCaptionBox)->value = value;
+        PushStackElement(g_elementStack, &g_typedTextCaptionBox);
     }
 }
 

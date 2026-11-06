@@ -98,8 +98,8 @@ void func_eu_001AE138(Actor_eu_1AE138* self)
         func_eu_00161C50(ctx, 0x9400, 0x8800, 0xFFFFFF0, 0);
     }
     f12 = self->f51C;
-    func_0015C8B8(self->p4, f12, f12);
+    PushFontScale(self->p4, f12, f12);
     func_eu_0015DCB8(buf, (u8*)self + 8, self->p4, 0);
     func_eu_0015E7E0(buf, &L, 0, D_eu_00263590);
-    func_0015C900(self->p4);
+    PopFontScale(self->p4);
 }

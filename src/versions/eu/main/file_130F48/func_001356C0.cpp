@@ -11,15 +11,15 @@ void func_001356C0(Obj_1356C0_eu* self, s32 mode)
         if (self->state != 1) {
             if (self->state < 2) {
                 if (self->state == 0) {
-                    func_00131140(self);
+                    ClearTextPanel(self);
                 }
             }
         } else {
-            func_001BFCD8(0x8F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x8F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
         switch (mode) {
         case 1:
-            func_001BFCD8(0x8E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x8E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             self->state = mode;
             break;
         case 4:
@@ -31,6 +31,6 @@ void func_001356C0(Obj_1356C0_eu* self, s32 mode)
             self->state = mode;
             break;
         }
-        self->timer = D_0026185C;
+        self->timer = g_gameTime;
     }
 }

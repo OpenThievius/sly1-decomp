@@ -3,13 +3,13 @@
 s32 func_001407A8(s8* path)
 {
     u8* p = (u8*)path;
-    func_001E2218(path);
-    s32 len = func_001E2100(path);
+    UppercaseString(path);
+    s32 len = GetStringLength(path);
     if (len != 0) {
         u8 last = p[len - 1];
         if (last != '\\' && last != '/') {
-            func_001E2180(path, ";1");
-            len = func_001E2100(path);
+            AppendString(path, ";1");
+            len = GetStringLength(path);
         }
     }
     u8* end = p + len;

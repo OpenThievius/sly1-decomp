@@ -16,12 +16,12 @@ void func_001AA8B8(Obj_16B4A0_eu* self, f32 zero);
 
 void func_0016B4A0(Obj_16B4A0_eu* self)
 {
-    func_001AA268(self);
-    if (func_0015C188(2)) {
+    SetupScreenElementText(self);
+    if (IsFontLoaded(2)) {
         self->f520 = D_00262988;
-        *self->f520 = (s32)func_0015C1C0(2);
+        *self->f520 = (s32)GetFontById(2);
     }
-    func_001AA8B8(self, 0.0f);
+    SetScreenElementHoldTime(self, 0.0f);
     self->f570 = 0;
     *(u32*)self->f518 = 0xDF7F7F7F;
     self->f574 = 0;

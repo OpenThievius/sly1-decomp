@@ -4,5 +4,5 @@ extern s32 D_eu_00263710;
 void func_00160918(void)
 {
     func_00160880();
-    func_001F0428((Obj_160918*)((u8*)&D_00247AB0 + D_eu_00263710 * 32), -1, 0);
+    StartObjectFade((Obj_160918*)((u8*)&D_00247AB0 + D_eu_00263710 * 32), -1, 0);
 }

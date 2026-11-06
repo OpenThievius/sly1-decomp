@@ -7,6 +7,6 @@ void func_eu_001AD7C0(Obj_eu_001AD7C0* self)
     if (self->f560 == 3 && self->f570 != 0) {
         self->f570 = 0;
     } else {
-        func_001AA958((Obj_1AA958_eu*)self);
+        HideScreenElement((Obj_1AA958_eu*)self);
     }
 }

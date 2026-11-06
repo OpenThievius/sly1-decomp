@@ -48,7 +48,7 @@ void func_001D6CB0(Player* self)
         u32 i = 0;
         while (i < 4) {
             s0 = (Node_1D6CB0*)self->f1508[i];
-            if (s0 != 0 && func_00182FC8(s0) != 0) {
+            if (s0 != 0 && IsObjectAttached(s0) != 0) {
                 break;
             }
             i++;
@@ -59,7 +59,7 @@ void func_001D6CB0(Player* self)
         obj->desc->m02(obj);
         ((VFnB)((void**)obj->desc)[25])(obj, 0);
         ((VFnB)((void**)obj->desc)[35])(obj, s0);
-        obj->f690 = D_00261858[1];
+        obj->f690 = g_gameClock[1];
         obj->f694 = 1;
         if (s0 != self->f1504) {
             ((VFnA)s0->vtbl[7])(s0);
@@ -71,10 +71,10 @@ s32 func_001B8A08(void* self, s32 value);
 
 s32 func_001D6DA0(C3F* self, s32 value)
 {
-    if (value == (s32)D_00262E10) {
+    if (value == (s32)g_player) {
         return 1;
     }
-    return func_001B8A08(self, value);
+    return TestCollidersMayContact(self, value);
 }
 
 
@@ -129,9 +129,9 @@ void func_001D4C90(void* self, s32 value);
 
 void func_001D5398(Obj_1D5398* self)
 {
-    func_001BFCD8(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+    StartSoundEffect(0xA6, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
     func_00175170(self, 4, 0x2A);
-    func_001D4C90(self, (s32)func_001D5418);
+    SetPlayerCallback(self, (s32)func_001D5418);
 }
 
 typedef void (*VFnA_1D5468)(void* self);
@@ -219,10 +219,10 @@ s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_001D4848(Player* self)
 {
     self->f26A8 = 7;
-    self->f26AC = func_0018D568(0x54, D_00274FC0);
+    self->f26AC = CopyToFrontMemory(0x54, D_00274FC0);
     for (s32 i = 0; i < self->f26A8; i++) {
         Item_1D4848* it = (Item_1D4848*)self->f26AC + i;
-        it->f8 = func_0015A418(self->world, 1, it->f0, self);
+        it->f8 = FindFirstObjectById(self->world, 1, it->f0, self);
     }
 }
 
@@ -250,22 +250,22 @@ void func_001D4A98(Player* self) {
     switch (self->f2228) {
     case 0x2B: {
         f32 t = func_00205778(self->v150.y, self->v150.x);
-        self->f638 = func_001EA728(D_00275030, 0, self->f638, t + 3.1415927f, D_00261858[2]);
-        if (0.25f < D_00261858[1] - self->f222C && self->f690 != 0) {
+        self->f638 = ApproachAngleWithRamp(D_00275030, 0, self->f638, t + 3.1415927f, g_gameClock[2]);
+        if (0.25f < g_gameClock[1] - self->f222C && self->f690 != 0) {
 
-            func_001D4C98(self);
+            RunPlayerCallback(self);
         }
         break;
     }
     case 0x2C: {
-        if (*(f32*)((u8*)self->f2514 + 0x18) < D_00261858[1]) {
-            func_001D4C98(self);
-        } else if (self->f2B70 != 0 && *(f32*)((u8*)self->f2514 + 0x18) < D_00261858[1] + 0.25f &&
-                   (func_001300E8(self->f2B70, 0x76) || func_001300E8(self->f2B70, 0x70) ||
-                    func_001300E8(self->f2B70, 0x71) || func_001300E8(self->f2B70, 0x81) ||
-                    func_001300E8(self->f2B70, 0x6F) || func_001300E8(self->f2B70, 0x7F))) {
+        if (*(f32*)((u8*)self->f2514 + 0x18) < g_gameClock[1]) {
+            RunPlayerCallback(self);
+        } else if (self->f2B70 != 0 && *(f32*)((u8*)self->f2514 + 0x18) < g_gameClock[1] + 0.25f &&
+                   (IsObjectOfKind(self->f2B70, 0x76) || IsObjectOfKind(self->f2B70, 0x70) ||
+                    IsObjectOfKind(self->f2B70, 0x71) || IsObjectOfKind(self->f2B70, 0x81) ||
+                    IsObjectOfKind(self->f2B70, 0x6F) || IsObjectOfKind(self->f2B70, 0x7F))) {
             if (self->f26B0 != 0) {
-                func_001D4C98(self);
+                RunPlayerCallback(self);
             } else {
                 void* o = self->f2B70;
                 func_00175170(self, 2, 2);
@@ -273,7 +273,7 @@ void func_001D4A98(Player* self) {
                 func_00175170(self, 2, r);
             }
         } else {
-            func_001782C0(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - D_00261858[1], 0, (u8*)self->f2514 + 0x20, 0);
+            func_001782C0(self, &self->f2B70, *(f32*)((u8*)self->f2514 + 0x18) - g_gameClock[1], 0, (u8*)self->f2514 + 0x20, 0);
         }
         break;
     }
@@ -294,9 +294,9 @@ f32 D_00275068[1];
 void func_001D51A0(Player* self)
 {
     if (self->f2228 == 0x2C && self->f2B70 != 0 &&
-        (func_001300E8(self->f2B70, 0x70) || func_001300E8(self->f2B70, 0x71) ||
-         func_001300E8(self->f2B70, 0x81) || func_001300E8(self->f2B70, 0x6F) ||
-         func_001300E8(self->f2B70, 0x7F) || func_001300E8(self->f2B70, 0x76))) {
+        (IsObjectOfKind(self->f2B70, 0x70) || IsObjectOfKind(self->f2B70, 0x71) ||
+         IsObjectOfKind(self->f2B70, 0x81) || IsObjectOfKind(self->f2B70, 0x6F) ||
+         IsObjectOfKind(self->f2B70, 0x7F) || IsObjectOfKind(self->f2B70, 0x76))) {
         if (func_00160C58()) {
             func_00192C58(self);
             void* p = self->f2B70;
@@ -308,7 +308,7 @@ void func_001D51A0(Player* self)
     } else {
         if (func_00160C58()) {
             func_00175170(self, 4, 0x24);
-            func_001D4C90(self, (s32)func_001D6608);
+            SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
             func_00175170(self, 4, 0x2D);
         }
@@ -324,7 +324,7 @@ void func_001D51A0(Player* self)
             x = hi;
         }
         f32 z = 0.0f;
-        func_001BFCD8(0x49, 0, 0, 0, z, z, x, D_00275068[0], z, 0, 0);
+        StartSoundEffect(0x49, 0, 0, 0, z, z, x, D_00275068[0], z, 0, 0);
     }
 }
 
@@ -341,7 +341,7 @@ void func_001DB290(void* self);
 
 void func_001D73A8(C19* self)
 {
-    func_001921A8(self);
+    InitSwitchedCollider(self);
     self->f614 = 50.0f;
     self->f610 = 50.0f;
     self->f618 = 3000.0f;
@@ -349,15 +349,15 @@ void func_001D73A8(C19* self)
     self->f868 = 2.0f;
     self->fB04 = 3;
     (*(Quad_1D73A8*)&self->v620) = *(Quad_1D73A8*)D_00275290;
-    func_0018D800(self->f630, D_00275250, 0x40);
-    func_001DB290(self);
+    CopyMemory(self->f630, D_00275250, 0x40);
+    ResetPathFollower(self);
 }
 
 void func_0013B708(C3F* self, s32 kind, ObjectMessage* ref);
 
 void func_001D7040(C3F* self, s32 kind, ObjectMessage* ref)
 {
-    func_0013B708(self, kind, ref);
+    HandleChildGroupNotification(self, kind, ref);
     if (kind == 10 && ref->target == self) {
         ((C3F*)ref->target)->f694 = 0;
     }
@@ -371,7 +371,7 @@ void func_0018D778(OutputBuffer* a0);
 
 void func_001D7148(OutputBuffer* a0, s32 a1)
 {
-    func_001D72C8(a0, a1);
+    FlushOutputBuffer(a0, a1);
     if (a1 & 1) func_0018D778(a0);
 }
 
@@ -419,12 +419,12 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     }
     if (self->f2220 == 6 && self->f239C == 2) {
         Ev07* tmp = msg;
-        func_001837E0((s32)self->f23B0, 0x13, 1, &tmp);
+        TriggerScriptEvent((s32)self->f23B0, 0x13, 1, &tmp);
         func_00175170(self, 2, 5);
         return 0;
     }
     self->f26B4 = *msg;
-    if (self->f2220 != 4 && self->f2220 != 0xB && self->f26C4 == 0 && (D_00262C64 & 1) == 0 &&
+    if (self->f2220 != 4 && self->f2220 != 0xB && self->f26C4 == 0 && (g_buttonCodeFlags & 1) == 0 &&
         func_001DDA80((s32)self->world) == 0) {
         s32 c;
         switch (self->f26B4.kind) {
@@ -445,14 +445,14 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         if (self->f2730 != 0) {
             if (func_00160C58() != 0) {
                 self->f26C4 = 1;
-                self->f26C8 = D_0026185C[0];
+                self->f26C8 = g_gameTime[0];
             }
         }
     }
-    func_001D4C90(self, 0);
+    SetPlayerCallback(self, 0);
     switch (msg->kind) {
     case 0:
-        func_001BFCD8(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         {
             Cb_1D4D08 fn = (Cb_1D4D08)self->f26B4.fn;
             if (fn != 0) {
@@ -462,7 +462,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
                 func_00175170(self, 4, 0x2B);
             }
         }
-        func_001D4C90(self, (s32)func_001D51A0);
+        SetPlayerCallback(self, (s32)func_001D51A0);
         break;
     case 6:
         {
@@ -475,9 +475,9 @@ s32 func_001D4D08(Player* self, Ev07* msg)
             }
         }
         if (400.0f < self->v150.z) {
-            func_001BFCD8(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0xA3, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
-        func_001D4C90(self, (s32)func_001D5398);
+        SetPlayerCallback(self, (s32)func_001D5398);
         break;
     case 1:
     case 2: {
@@ -499,13 +499,13 @@ s32 func_001D4D08(Player* self, Ev07* msg)
             break;
         }
         func_00175170(self, 4, id);
-        func_001D4C90(self, (s32)func_001D5468);
+        SetPlayerCallback(self, (s32)func_001D5468);
         break;
     }
     case 3:
         if (self->f2730 == 0 || func_00160C58() != 0) {
             func_00175170(self, 4, 0x27);
-            func_001D4C90(self, (s32)func_001D6608);
+            SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
             func_00175170(self, 4, 0x2F);
         }
@@ -514,7 +514,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
         self->desc02()->m20(self, (Vec02*)D_00275040);
         if (func_00160C58() != 0) {
             func_00175170(self, 4, 0x28);
-            func_001D4C90(self, (s32)func_001D6608);
+            SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
             func_00175170(self, 4, 0x31);
         }
@@ -522,7 +522,7 @@ s32 func_001D4D08(Player* self, Ev07* msg)
     case 5:
         if (self->f2730 == 0 || func_00160C58() != 0) {
             func_00175170(self, 4, 0x29);
-            func_001D4C90(self, (s32)func_001D6608);
+            SetPlayerCallback(self, (s32)FinishPlayerRequest);
         } else {
             func_00175170(self, 4, 0x30);
         }
@@ -591,7 +591,7 @@ set:
     if (v == 4) goto one;
     if (v == 11) goto one;
     if (self->f26C4 != 0) goto one;
-    if ((D_00262C64 & 1) != 0) goto one;
+    if ((g_buttonCodeFlags & 1) != 0) goto one;
     if (func_001DDA80((Key_1D54E0*)self->world) != 0) goto one;
     goto zero;
 one:
@@ -628,7 +628,7 @@ void func_001D72C8(OutputBuffer* self)
             if (!(rem > 0x7F)) {
                 chunk = rem;
             }
-            func_0018D800(buf, p, chunk);
+            CopyMemory(buf, p, chunk);
             p += chunk;
             buf[chunk] = 0;
             func_001F7B88((void*)D_0024DC90, buf);
@@ -657,7 +657,7 @@ s32 func_001D7190(OutputBuffer* self, void* src, s32 size)
         return 0;
     }
     if (self->target != 0) {
-        func_0018D800(self->target + self->used, src, n);
+        CopyMemory(self->target + self->used, src, n);
         self->used += n;
         done = n;
     } else if (n > 0) {
@@ -666,12 +666,12 @@ s32 func_001D7190(OutputBuffer* self, void* src, s32 size)
             s32 rem = n - done;
             s32 take = (room < rem) ? room : rem;
             if (take != 0) {
-                func_0018D800((u8*)self + (self->pending + 0x18), (u8*)src + done, take);
+                CopyMemory((u8*)self + (self->pending + 0x18), (u8*)src + done, take);
                 done += take;
                 self->pending += take;
             }
             if (self->pending == 0x400) {
-                func_001D72C8(self);
+                FlushOutputBuffer(self);
             }
         } while (done < n);
     }
@@ -716,15 +716,15 @@ void func_001D7440(C19* self)
     s32 id0;
     s32 id1;
     s32 id2;
-    func_00124A48(self);
-    func_00124DF8(self, 0x14, D_002752A0);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 0x14, D_002752A0);
     self->f694 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     if (((Snd_1D7440*)self->fB44) != 0) {
-        StateTrigger* v = func_001B6290(((Snd_1D7440*)self->fB44), self, -1, 0);
+        StateTrigger* v = CreateStateWalker(((Snd_1D7440*)self->fB44), self, -1, 0);
         self->fB48 = v;
-        func_001B64D8(v, self->fB30 == 1 ? 0x484 : 0x384);
+        SetStateWalkerTarget(v, self->fB30 == 1 ? 0x484 : 0x384);
     }
-    switch (D_00275710->f1D70) {
+    switch (g_currentWorld->f1D70) {
     case 3:
         id0 = self->f550 ? 0x1D2 : 0x1AD;
         id1 = 0x1BB;
@@ -740,11 +740,11 @@ void func_001D7440(C19* self)
         id1 = 0x2DB;
         id2 = 0x2DD;
     spawn:
-        func_001BFCD8(id0, self->fB80, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        func_001BFCD8(id1, self->fB84, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
-        func_001BFCD8(id2, self->fB7C, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id0, self->fB80, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id1, self->fB84, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
+        StartSoundEffect(id2, self->fB7C, self, 0, 6000.0f, 1000.0f, 1.0f, 0.0f, 0.5f, 0, 0);
         {
-            f32 r = func_001EAAE0(-0.1f, 0.1f);
+            f32 r = RandomFloatInRange(-0.1f, 0.1f);
             self->fB8C = self->fB90 = self->fB94 = self->fB98 = r;
         }
         break;
@@ -752,7 +752,7 @@ void func_001D7440(C19* self)
         break;
     }
     {
-        void* c = func_0015A418(D_00275710, 0x104, 7, self);
+        void* c = FindFirstObjectById(g_currentWorld, 0x104, 7, self);
         if (c != 0) {
             self->f594 = 200.0f;
             self->fB78 = c;
@@ -775,7 +775,7 @@ void func_001D7440(C19* self)
         Slot_1D7440* s = (Slot_1D7440*)&self->f6B0[k];
         s->q = s->p->q;
     }
-    func_001DB290(self);
+    ResetPathFollower(self);
 }
 
 extern const char D_0024DC90[4] = "%s";

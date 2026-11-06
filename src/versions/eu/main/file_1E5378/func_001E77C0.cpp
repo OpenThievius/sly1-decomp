@@ -32,7 +32,7 @@ void func_001E7518(Obj_1E77C0_eu* self, s32 mode);
 
 void func_001E77C0(Obj_1E77C0_eu* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     s32 state = self->f250;
     s32 sub = self->f268;
     switch (state)
@@ -55,7 +55,7 @@ void func_001E77C0(Obj_1E77C0_eu* self)
         {
         case 0:
         {
-            f32 f = self->fC70 + D_00261858[5] * 5.0f;
+            f32 f = self->fC70 + g_gameClock[5] * 5.0f;
             self->fC70 = f;
             if (1.0f <= f)
             {
@@ -66,7 +66,7 @@ void func_001E77C0(Obj_1E77C0_eu* self)
         }
         case 2:
         {
-            f32 f = self->fC70 - D_00261858[5] * 5.0f;
+            f32 f = self->fC70 - g_gameClock[5] * 5.0f;
             self->fC70 = f;
             if (f <= 0.0f)
             {
@@ -88,25 +88,25 @@ void func_001E77C0(Obj_1E77C0_eu* self)
         }
         if (D_00270458 != 4)
         {
-            self->fC5C = func_001EA4B8(&self->fC64, 0, self->fC5C, self->fC60, D_00261858[5]);
+            self->fC5C = ApproachValueWithRamp(&self->fC64, 0, self->fC5C, self->fC60, g_gameClock[5]);
             if (func_001EAC68(self->fC5C, self->fC60, 1e-4f) != 0)
             {
                 self->fC5C = 1.0f;
                 if (self->f214 == 0x1A)
                 {
-                    self->fC64 = func_001EAAE0(1.0f, 1.4f);
-                    self->fC68 = func_001EAAE0(0.6f, 0.8f);
-                    self->fC6C = func_001EAAE0(0.1f, 0.2f);
+                    self->fC64 = RandomFloatInRange(1.0f, 1.4f);
+                    self->fC68 = RandomFloatInRange(0.6f, 0.8f);
+                    self->fC6C = RandomFloatInRange(0.1f, 0.2f);
                 }
                 else
                 {
-                    self->fC64 = func_001EAAE0(0.5f, 0.7f);
-                    self->fC68 = func_001EAAE0(0.2f, 0.3f);
-                    self->fC6C = func_001EAAE0(0.3f, 0.5f);
+                    self->fC64 = RandomFloatInRange(0.5f, 0.7f);
+                    self->fC68 = RandomFloatInRange(0.2f, 0.3f);
+                    self->fC6C = RandomFloatInRange(0.3f, 0.5f);
                 }
             }
             s32 idx = (s32)(self->fC5C * 68.999f);
-            f32 d = func_001EAAE0(0.1f, 0.2f);
+            f32 d = RandomFloatInRange(0.1f, 0.2f);
             if (self->f214 == 0x1A)
             {
                 d = d + d;
@@ -133,26 +133,26 @@ void func_001E77C0(Obj_1E77C0_eu* self)
                 {
                     if (self->f214 == big)
                     {
-                        e->f20 = func_001EAAE0(0.6f, 0.8f);
-                        e->f24 = func_001EAAE0(0.4f, 0.6f);
-                        e->f28 = func_001EAAE0(0.05f, 0.2f);
+                        e->f20 = RandomFloatInRange(0.6f, 0.8f);
+                        e->f24 = RandomFloatInRange(0.4f, 0.6f);
+                        e->f28 = RandomFloatInRange(0.05f, 0.2f);
                     }
                     else
                     {
-                        e->f20 = func_001EAAE0(0.3f, 0.4f);
-                        e->f24 = func_001EAAE0(0.2f, 0.3f);
-                        e->f28 = func_001EAAE0(0.1f, 0.4f);
+                        e->f20 = RandomFloatInRange(0.3f, 0.4f);
+                        e->f24 = RandomFloatInRange(0.2f, 0.3f);
+                        e->f28 = RandomFloatInRange(0.1f, 0.4f);
                     }
-                    e->f1C = func_001EAAE0(0.0f, 0.05f);
+                    e->f1C = RandomFloatInRange(0.0f, 0.05f);
                 }
                 else
                 {
-                    e->f18 = func_001EA4B8(q, 0, e->f18, e->f1C, D_00261858[5]);
+                    e->f18 = ApproachValueWithRamp(q, 0, e->f18, e->f1C, g_gameClock[5]);
                 }
             }
         }
         break;
     }
     self->vtbl[16](self, state);
-    func_001E7518(self, sub);
+    SetArcPhase(self, sub);
 }

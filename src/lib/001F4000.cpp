@@ -6,8 +6,8 @@ extern RandomState_1F6708* D_0027696C;
 
 u32 func_001F6708(void)
 {
-    u32 state = D_0027696C->state * 0x41C64E6Du + 0x3039u;
-    D_0027696C->state = state;
+    u32 state = g_randomState->state * 0x41C64E6Du + 0x3039u;
+    g_randomState->state = state;
     return state & 0x7FFFFFFFu;
 }
 

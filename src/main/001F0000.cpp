@@ -18,7 +18,7 @@ extern s32 D_00275BF0;
 s32 func_001F0468(void)
 {
     if (D_00275BF0 != 2) {
-        return D_002623C0->f19DC;
+        return g_saveData->f19DC;
     }
     return 10;
 }
@@ -33,15 +33,15 @@ void func_00125C90(void* obj, void* s, void* out);
 void func_001F0EB8(C67* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
-    Camera* p = D_00261990;
+    Camera* p = g_camera;
     f32 keep1 = p->f1C4;
     f32 keep2 = p->f1C8;
-    func_00143940(p, 1.0f);
-    func_00125B70(obj, c, tmp);
-    func_00188B08(s + 0x40, s + 0x80, tmp);
+    SnapCameraZoom(p, 1.0f);
+    BuildPlacedObjectTransform(obj, c, tmp);
+    BuildMatrixFromRotationAndTranslation(s + 0x40, s + 0x80, tmp);
     func_00125C90(obj, s, tmp);
-    func_00143940(D_00261990, keep1);
-    D_00261990->f1C8 = keep2;
+    SnapCameraZoom(g_camera, keep1);
+    g_camera->f1C8 = keep2;
 }
 
 struct Entry_1F3358 { f32 w; f32 x; f32 y; f32 z; };
@@ -56,11 +56,11 @@ f32 func_001F3358(Blob_1F3358* obj)
     f32 den = 0.0f;
     for (s32 i = 0; i < obj->count; i++) {
         Entry_1F3358* e = &obj->items[i];
-        f32 r = func_001F3250(e->x, e->y, e->z);
+        f32 r = SampleSmoothNoise(e->x, e->y, e->z);
         num += e->w * r;
         den += e->w;
     }
-    f32 t = func_001F3328(num / den, obj->scale);
+    f32 t = ApplyBiasCurve(num / den, obj->scale);
     return obj->lo + t * (obj->hi - obj->lo);
 }
 
@@ -116,7 +116,7 @@ void func_001F38F0(void* buf, f32 a, f32 b, f32 c, f32 d);
 void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d)
 {
     u8* p = (u8*)func_001F3830(self, 1);
-    func_001F38F0(p + 0x30, a, b, c, d);
+    AppendVector4ToBuffer(p + 0x30, a, b, c, d);
 }
 
 struct Src_1F00C0 {
@@ -141,7 +141,7 @@ void func_001F38F0(void* buf, f32 x, f32 y, f32 z, f32 w);
 void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d)
 {
     u8* p = (u8*)func_001F3830(self, 1);
-    func_001F38F0(p + 0x80, a, b, c, d);
+    AppendVector4ToBuffer(p + 0x80, a, b, c, d);
 }
 
 void func_00137EB0(void* a, void* b);
@@ -150,9 +150,9 @@ void func_0011EC40(void* a, void* b);
 
 void func_001F3A40(TransformObject* self, void* stream)
 {
-    func_00137EB0(stream, &self->rot);
-    func_00137E70(stream, &self->pos);
-    func_0011EC40(self, stream);
+    ReadBufferedRotation3(stream, &self->rot);
+    ReadBufferedVector3(stream, &self->pos);
+    ReadPropertyRecords(self, stream);
 }
 
 void func_00128018(void* a0, void* a1, void* a2, void* a3);
@@ -163,7 +163,7 @@ void func_001F3A90(TransformObject* self, BaseObject* other)
 {
     func_00128018(self->parent, other, &self->pos, &self->pos);
     func_00128150(self->parent, other, &self->rot, &self->rot);
-    func_00182F78(self, other);
+    ReparentObject(self, other);
 }
 
 void func_001F3AF0(TransformObject* self, BaseObject* other)
@@ -190,7 +190,7 @@ void func_00182C18(void* self);
 
 void func_001F2758(C8D* self)
 {
-    func_00182C18(self);
+    InitObject(self);
     self->index40 = -1;
     self->scale34 = -1.0f;
     self->index6D0 = -1;
@@ -229,14 +229,14 @@ void func_001F18B0(void* self, s32 value);
 void func_001F0878(C67* self, s32 value)
 {
     if (value == 10) {
-        func_001AD0D0(&D_0026F138, 0, 4);
+        SetElementTextFromEntry(&D_0026F138, 0, 4);
     } else {
         T217D_3D0* base = &D_0026F138;
         s32 t = value < 9;
         s32 idx = t ? value : -1;
-        func_001AD0D0(base, self->slot, idx);
+        SetElementTextFromEntry(base, self->slot, idx);
     }
-    func_001F18B0(self, value);
+    SetWarpPageSelectedEntry(self, value);
 }
 
 extern s32 D_00276250;
@@ -276,7 +276,7 @@ void func_001F0428(void* obj, void* value, s32 count)
     m.obj = obj;
     m.value = value;
     m.last = 0;
-    func_001EFFA0(&g_screenFade, &m, count);
+    StartScreenFade(&g_screenFade, &m, count);
 }
 
 
@@ -286,7 +286,7 @@ void func_001F1050(void* self, s32 mode);
 
 void func_001F0F70(C67* self, s32 kind, void* msg)
 {
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 5) return;
     s32 v = self->mode;
     if (v == 3) goto L_three;
@@ -297,18 +297,18 @@ L_ge4:
     if (v == 4) goto L_four;
     return;
 L_one:
-    func_001F1050(self, self->f2E0);
+    SetWarpPageMode(self, self->f2E0);
     return;
 L_three:
-    func_001F0220(&g_screenFade, 2);
+    SetScreenFadeMode(&g_screenFade, 2);
     return;
 L_four:
     if ((s32)msg != self->f2EC) return;
     ScreenFade* g = &g_screenFade;
     if (g->mode == 3) {
-        func_001F0220(g, 0);
+        SetScreenFadeMode(g, 0);
     }
-    func_001F1050(self, 0);
+    SetWarpPageMode(self, 0);
 }
 
 void func_001F1050(void* self, s32 mode);
@@ -326,12 +326,12 @@ void func_001F1590(C67* self, s32 a1, s32 a2)
 L_store:
     self->f2DC = a1;
     self->f2E0 = a2;
-    func_001F1050(self, 1);
+    SetWarpPageMode(self, 1);
     return;
 L_two:
     self->f2DC = a1;
     if (a2 == 3) {
-        func_001F1050(self, 3);
+        SetWarpPageMode(self, 3);
     }
 }
 
@@ -342,7 +342,7 @@ void func_001F1610(C67* self)
     s32 v = self->mode;
     if (v < 3) {
         if (v > 0) {
-            func_001F1050(self, 4);
+            SetWarpPageMode(self, 4);
         }
     }
 }
@@ -371,24 +371,24 @@ void func_00138518(void* self);
 
 void func_001F3D80(Obj_1F3D80* self, void* other)
 {
-    func_00137EB0(other, (u8*)self + 0x50);
-    func_00137E70(other, (u8*)self + 0x40);
-    func_0011EC40(self, other);
-    self->count = func_00137D10(other);
-    self->arr = (Item_1F3D80**)func_0018D500(self->count << 2);
+    ReadBufferedRotation3(other, (u8*)self + 0x50);
+    ReadBufferedVector3(other, (u8*)self + 0x40);
+    ReadPropertyRecords(self, other);
+    self->count = ReadBufferedS16(other);
+    self->arr = (Item_1F3D80**)AllocateFrontMemory(self->count << 2);
     for (s32 i = 0; i < self->count; i++) {
-        s32 a = func_00137D10(other);
-        s32 b = func_00137D10(other);
-        s32 c = func_00137D10(other);
-        Item_1F3D80* it = (Item_1F3D80*)func_0011E580(a, self->f14, 0, b, c);
+        s32 a = ReadBufferedS16(other);
+        s32 b = ReadBufferedS16(other);
+        s32 c = ReadBufferedS16(other);
+        Item_1F3D80* it = (Item_1F3D80*)CreateTypedRecord(a, self->f14, 0, b, c);
         self->arr[i] = it;
         it->vtbl[14](it, other);
     }
-    func_00138518(other);
-    self->count2 = func_00137D10(other);
-    self->arr2 = (void**)func_0018D500(self->count2 << 2);
+    SkipBufferedBlock(other);
+    self->count2 = ReadBufferedS16(other);
+    self->arr2 = (void**)AllocateFrontMemory(self->count2 << 2);
     for (s32 i = 0; i < self->count2; i++) {
-        self->arr2[i] = (void*)func_00137D10(other);
+        self->arr2[i] = (void*)ReadBufferedS16(other);
     }
 }
 
@@ -401,7 +401,7 @@ void func_00182ED8(void* a);
 
 void func_001F3F80(Obj_1F3F80* self)
 {
-    func_00182C58(self);
+    StartObject(self);
     for (s32 i = 0; i < self->count; i++) {
         Item_1F3F80* item = (Item_1F3F80*)self->arr[i];
         item->vtbl[25](item, self->f18);
@@ -445,39 +445,39 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
     if (self->current->mode != 2) return;
     if (self->current->f560 != 0) return;
     if ((t->flags & 0x910) != 0 || t->f14 == 1) {
-        func_001E9570((Q_1F1A08*)D_00275BC0);
-        func_0016EC20((Pool_1F1A08*)&D_00262C70, 0x910);
+        PopStackElement((Q_1F1A08*)g_elementStack);
+        ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x910);
         return;
     }
     if (self->mode != self->current->mode) return;
 
-    s3 = func_001F0490(self->current, self->current->f2DC, &loc[0], &loc[1]);
-    s2 = func_0016EC98(t);
-    v1 = func_0016EED0(t);
-    t->f30 = D_00261858[4] + t->f34;
-    t->f38 = D_00261858[4] + t->f3C;
+    s3 = IsWarpEntryAvailable(self->current, self->current->f2DC, &loc[0], &loc[1]);
+    s2 = GetPadHorizontalStep(t);
+    v1 = GetPadVerticalStep(t);
+    t->f30 = g_gameClock[4] + t->f34;
+    t->f38 = g_gameClock[4] + t->f3C;
 
     if (v1 < 0) {
-        func_001F1648(self->current, 0);
+        MoveWarpCursor(self->current, 0);
     } else if (v1 > 0) {
-        func_001F1648(self->current, 1);
+        MoveWarpCursor(self->current, 1);
     } else if (s2 < 0) {
-        func_001F1648(self->current, 2);
+        MoveWarpCursor(self->current, 2);
     } else if (s2 > 0) {
-        func_001F1648(self->current, 3);
+        MoveWarpCursor(self->current, 3);
     } else if ((t->flags & 0x40) != 0) {
-        func_0016EC20((Pool_1F1A08*)&D_00262C70, 0x40);
-        if (self->current->f2DC != func_001F0468()) {
+        ClearPadPressedBits((Pool_1F1A08*)&g_padRecord, 0x40);
+        if (self->current->f2DC != GetCurrentWarpEntry()) {
             if (s3 != 0) {
                 Val_1F1A08* v = func_00160180((loc[0] << 8) | loc[1]);
                 self->current->f560 = 1;
-                func_001E9570((Q_1F1A08*)D_00275BC0);
-                func_001F0428(v, -1, 2);
+                PopStackElement((Q_1F1A08*)g_elementStack);
+                StartObjectFade(v, -1, 2);
             } else {
-                func_001BFCD8(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         } else {
-            func_001E9570((Q_1F1A08*)D_00275BC0);
+            PopStackElement((Q_1F1A08*)g_elementStack);
         }
     }
 
@@ -486,7 +486,7 @@ void func_001F1A08(T217D_0F0* self, PadRecord* t)
     } else {
         self->scaleTarget = D_00275FC0;
     }
-    self->scale = func_001EA4B8((Q3_1F1A08*)D_00276278, 0, self->scale, self->scaleTarget, D_00261858[5]);
+    self->scale = ApproachValueWithRamp((Q3_1F1A08*)D_00276278, 0, self->scale, self->scaleTarget, g_gameClock[5]);
 }
 
 struct Anim_1F1C90 { u8 pad[0x34]; f32 f34; };
@@ -513,37 +513,37 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
 {
     if ((a1 != 0) != (self->open == 0)) return;
     if (a1 != 0) {
-        func_001AA060(self);
-        s32 r = func_001F0468();
+        HideScreenElements(self);
+        s32 r = GetCurrentWarpEntry();
         if (r == 10) {
-            r = (func_001F0490(self->current, 1, 0, 0) != 0);
+            r = (IsWarpEntryAvailable(self->current, 1, 0, 0) != 0);
         }
-        func_001F1590(self->current, r, 2);
+        SetWarpCursor(self->current, r, 2);
         self->scaleTarget = 1.0f;
         self->scale = 1.0f;
         Anim_1F1C90* an = (Anim_1F1C90*)self->current->f2E4;
         if (an != 0) {
-            func_001AA8B0(self, an->f34);
+            SetScreenElementSlideInTime(self, an->f34);
         }
-        GameProgress* g = D_002623C0;
+        GameProgress* g = g_saveData;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
             func_001BED48();
         }
         self->vt->m14(self);
-        func_0016E0F0(1);
-        func_0016EC88(&D_00262C70);
-        func_001E96F8(D_00275BC0, 7);
+        SetPadSelectFlags(1);
+        ResetPadStepRepeat(&g_padRecord);
+        SetElementStackState(g_elementStack, 7);
     } else {
         self->vt->m15(self);
         if (self->current->f560 == 0) {
-            func_001F1610(self->current);
+            BeginWarpPageClose(self->current);
             Anim_1F1C90* an = (Anim_1F1C90*)self->current->f2E8;
             if (an != 0) {
-                func_001AA8C0(self, an->f34);
+                SetScreenElementSlideOutTime(self, an->f34);
             }
-            func_0016E118(1);
-            func_001E96F8(D_00275BC0, 3);
-            GameProgress* g = D_002623C0;
+            ClearPadSelectFlags(1);
+            SetElementStackState(g_elementStack, 3);
+            GameProgress* g = g_saveData;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
                 func_001BED70();
             }
@@ -562,15 +562,15 @@ s32 func_001F0580(void* self, s32 code)
     if (code == 9) {
         return 0;
     }
-    r = func_001F0490(self, code, 0, 0);
+    r = IsWarpEntryAvailable(self, code, 0, 0);
     if (r == 0) {
         switch (((Obj_1F0580*)self)->mode) {
         case 1:
             if (code >= 2) {
                 if (code < 6) {
-                    r = func_001F0490(self, 1, 0, 0);
+                    r = IsWarpEntryAvailable(self, 1, 0, 0);
                 } else if (code < 8) {
-                    r = func_001F0490(self, 9, 0, 0);
+                    r = IsWarpEntryAvailable(self, 9, 0, 0);
                 }
             }
             break;
@@ -579,9 +579,9 @@ s32 func_001F0580(void* self, s32 code)
         case 4:
             if (code >= 2) {
                 if (code < 5) {
-                    r = func_001F0490(self, 1, 0, 0);
+                    r = IsWarpEntryAvailable(self, 1, 0, 0);
                 } else if (code < 8) {
-                    r = func_001F0490(self, 9, 0, 0);
+                    r = IsWarpEntryAvailable(self, 9, 0, 0);
                 }
             }
             break;
@@ -614,8 +614,8 @@ void func_0016EC20(PadRecord* o, s32 n);
 
 s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2)
 {
-    if (func_001DDA80(D_00275710) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
-        func_0016EC20(o, 0x800);
+    if (func_001DDA80(g_currentWorld) != 0 && self->queued.kind != 0 && (o->flags & 0x800) != 0) {
+        ClearPadPressedBits(o, 0x800);
         *(Blk20_1F00F0*)&self->active = *(Blk20_1F00F0*)&self->queued;
         self->style = self->queuedStyle;
         FadeRequest* rr = &self->active;
@@ -625,7 +625,7 @@ s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2)
         } else {
             rr->flags &= ~8;
         }
-        func_001F0220(self, (s32)param2);
+        SetScreenFadeMode(self, (s32)param2);
         return 1;
     }
     return 0;
@@ -651,7 +651,7 @@ void func_001F0220(ScreenFade* self, s32 mode)
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {
         if (D_0026FA68 != 0) {
-            func_001F1050(D_0026FA68, 0);
+            SetWarpPageMode(D_0026FA68, 0);
         }
     }
     if (mode == 1) goto L02E0;
@@ -671,7 +671,7 @@ void func_001F0220(ScreenFade* self, s32 mode)
 L02A0:
     if (self->active.kind != 0) {
         FadeRequest* q = &self->active;
-        func_001E4E80(D_00275AF0, (s32)q->key, q->f08, q->f0C, q->flags);
+        QueueWorldLoad(g_worldLoadRequest, (s32)q->key, q->f08, q->f0C, q->flags);
     }
     self->active.kind = 0;
     self->opacity = 1.0f;
@@ -688,15 +688,15 @@ L02E0:
 
 L0300:
     {
-        s32 v = func_001601A0((s32)self->active.key);
+        s32 v = GetEntryIdByKey((s32)self->active.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
         if (D_0026FA68 == 0) goto L034C;
         if (v == -1) goto L034C;
         s32 a1 = 10;
         if (a3 != 0) a1 = a2;
-        func_001F1590(D_0026FA68, a1, 3);
-        func_001DDB58(D_00275710);
+        SetWarpCursor(D_0026FA68, a1, 3);
+        ShowCountedScreenElement(g_currentWorld);
         goto L0364;
     }
 
@@ -709,7 +709,7 @@ L0354:
     goto L02A0;
 
 L0364:
-    func_001E96F8(D_00275BC0, 8);
+    SetElementStackState(g_elementStack, 8);
     self->mode = mode;
     goto L0404;
 
@@ -725,14 +725,14 @@ L0374:
 L038C:
     {
         if (self->style == D_00275BF0) {
-            s32 idx = D_002623CC;
+            s32 idx = g_previousLevelIndex;
             if (idx != -1) {
-                D_0026F808.current = D_0026F808.nodes[idx];
+                g_mapScreenList.current = g_mapScreenList.nodes[idx];
             }
         }
-        if (D_0026F808.current != 0) {
-            D_0026F808.current->f2E0 = 3;
-            func_001F1050(D_0026F808.current, 4);
+        if (g_mapScreenList.current != 0) {
+            g_mapScreenList.current->f2E0 = 3;
+            SetWarpPageMode(g_mapScreenList.current, 4);
             self->mode = mode;
             goto L0404;
         }
@@ -741,14 +741,14 @@ L038C:
     }
 
 L03EC:
-    func_00168B68(0.25f);
+    FadeScreenToBlack(0.25f);
     self->style = 0;
     goto L0400;
 
 L0400:
     self->mode = mode;
 L0404:
-    self->modeStartTime = D_00261868;
+    self->modeStartTime = g_elapsedTime;
 L0410:
     return;
 }
@@ -827,13 +827,13 @@ V24A2* func_0015C1C0(s32 n);
 void func_001F5C0C(Clr_1F1960* p, s32 v, s32 size);
 
 void func_001F1960(T217D_0F0* self) {
-    func_001AA268(self);
-    if (func_0015C188(2) != 0) {
+    SetupScreenElementText(self);
+    if (IsFontLoaded(2) != 0) {
         self->frame = (V24A2**)&D_00276620;
-        *self->frame = func_0015C1C0(2);
+        *self->frame = GetFontById(2);
     }
-    func_001AA8B8(self, 0.0f);
-    func_001AA788(self, 0.6f);
+    SetScreenElementHoldTime(self, 0.0f);
+    SetScreenElementScale(self, 0.6f);
     self->color = 0xDF7F7F7F;
     self->vt->m08(self, D_0024E808);
     self->current = 0;
@@ -861,7 +861,7 @@ void func_001F36E8(C8D* o)
     off += 0x50;
     node = (Node_1F36E8*)((u8*)o + off);
     node->f0 = 0;
-    node->q10 = *(Quad16*)&D_00248D00;
+    node->q10 = *(Quad16*)&g_unitXVector;
     if (o->index40 >= 0) {
         node->f4 = o->index40;
         o->index40 = -1;
@@ -880,9 +880,9 @@ void func_00182C18(BaseObject* self);
 
 void func_001F39F8(TransformObject* self)
 {
-    func_00182C18(self);
+    InitObject(self);
     Mat3_73* dst = &self->rot;
-    *dst = *(Mat3_73*)&D_002483D0;
+    *dst = *(Mat3_73*)&g_identityMatrix;
 }
 
 // NEAR: the two counter increments (0x38 and 0x6D0) are computed in the reverse
@@ -909,8 +909,8 @@ void func_001F3768(C8D* self)
     self->f38 = idx;
     self->index6D0 = n6;
     e->a = 1;
-    e->q10 = *(Quad16*)&D_00248D10;
-    e->q20 = *(Quad16*)&D_00248D20;
+    e->q10 = *(Quad16*)&g_unitYVector;
+    e->q20 = *(Quad16*)&g_unitZVector;
     e->f38 = 0.5f;
     e->f88 = 0.5f;
     self->f3C = self->f3C + 1;
@@ -928,10 +928,10 @@ struct __attribute__((packed)) Ptr_1F0660 { C67* p; };
 extern void func_00124A48(C67* o);
 
 void func_001F0660(C67* o) {
-    func_00124A48(o);
+    StartPlacedObject(o);
     o->flags = (o->flags & ~(3UL << 40)) | (1UL << 40);
-    if (D_002623C0->f19D8) {
-        u8* t = (u8*)&D_0026F808;
+    if (g_saveData->f19D8) {
+        u8* t = (u8*)&g_mapScreenList;
         ((Ptr_1F0660*)(t + 0x260))->p = o;
     }
     switch (o->id) {
@@ -940,9 +940,9 @@ void func_001F0660(C67* o) {
     case 0x1C9: o->slot = 3; break;
     case 0x1C6: o->slot = 4; break;
     case 0x1CA: o->slot = 5; break;
-    default: o->slot = D_002623C0->f19D8; break;
+    default: o->slot = g_saveData->f19D8; break;
     }
-    D_0026F808.nodes[o->slot] = o;
+    g_mapScreenList.nodes[o->slot] = o;
 }
 
 struct Rec_1F1050 { s32 f0; f32 f4; s32 f8; };
@@ -979,7 +979,7 @@ void func_001F1050(C67* self, u32 next)
     switch (cur) {
     case 1:
     case 4:
-        func_001BF788(self->f564, 0);
+        StopSoundRecord(self->f564, 0);
         break;
     case 2:
         if (self->f560 == 0) {
@@ -994,11 +994,11 @@ void func_001F1050(C67* self, u32 next)
         self->desc->m02(self);
         for (s32 n = 0; n < 11; n++) {
             Elem67* s = &self->elems[n];
-            if (func_001F0490(self, n, (s32*)0, (s32*)0)) {
+            if (IsWarpEntryAvailable(self, n, (s32*)0, (s32*)0)) {
                 s->f08 = one;
                 s32 want;
                 if (self->f2E0 == 3) {
-                    want = func_001F0468();
+                    want = GetCurrentWarpEntry();
                 } else {
                     want = self->f2DC;
                 }
@@ -1019,13 +1019,13 @@ void func_001F1050(C67* self, u32 next)
             Sub_1F1050* b = (Sub_1F1050*)s->f0C;
             if (a) {
                 a->vtbl[6](a);
-                func_00126C58(a);
+                EnsureObjectWorldNode(a);
                 a->f298->f8 = 0;
                 a->f298->f4 = s->f08;
             }
             if (b) {
                 b->vtbl[6](b);
-                func_00126C58(b);
+                EnsureObjectWorldNode(b);
                 b->f298->f8 = 0;
                 b->f298->f4 = s->f10;
             }
@@ -1042,7 +1042,7 @@ void func_001F1050(C67* self, u32 next)
             if (ne) {
                 off = self->f2DC * 52;
             } else {
-                off = func_001F0468() * 52;
+                off = GetCurrentWarpEntry() * 52;
             }
             a = *(Sub_1F1050**)((u8*)self + off + 0x2F8);
             if (a) {
@@ -1050,23 +1050,23 @@ void func_001F1050(C67* self, u32 next)
                 if (ne) {
                     fa = a->f34;
                 }
-                func_0012C918(a, self, 0, &self->f2F0, fa, 0.0f);
+                ReplaceAnimationPlayer(a, self, 0, &self->f2F0, fa, 0.0f);
             }
         } else {
             Sub_1F1050* a = (Sub_1F1050*)self->elems[1].f00;
             if (a) {
-                func_0012C918(a, self, 0, &self->f2F0, 0.0f, 0.0f);
+                ReplaceAnimationPlayer(a, self, 0, &self->f2F0, 0.0f, 0.0f);
             }
             f32 z = 0.0f;
-            func_001F18B0(self, self->f2DC);
+            SetWarpPageSelectedEntry(self, self->f2DC);
             self->q540 = self->q550;
-            func_001F0878(self, self->f2DC);
-            func_001AA8B8(&D_0026F138, z);
+            SelectWarpPageEntry(self, self->f2DC);
+            SetScreenElementHoldTime(&D_0026F138, z);
             D_0026F138.vt->m14(&D_0026F138);
-            func_001BFCD8(0x8A, &self->f564, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
+            StartSoundEffect(0x8A, &self->f564, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
             for (i = 0; i < 11; i++) {
                 Elem67* s = &self->elems[i];
-                s32 r = func_001F0580(self, i);
+                s32 r = IsWarpEntryReachable(self, i);
                 s->f1C = r;
                 s32 v = 0;
                 if (r != 0 && ((u32)(i - 2) < 6 || i == 0)) {
@@ -1087,7 +1087,7 @@ void func_001F1050(C67* self, u32 next)
         if (self->f560 == 0) {
             D_0026F138.vt->m15(&D_0026F138);
             if (self->f2E0 == 2) {
-                func_001BFCD8(0x8B, &self->f564, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x8B, &self->f564, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
         func_001F0908(self);
@@ -1096,7 +1096,7 @@ void func_001F1050(C67* self, u32 next)
             goto Lz;
         }
     L146C:
-        func_0012C918(t, self, 0, &self->f2EC, 0.0f, 1.0f);
+        ReplaceAnimationPlayer(t, self, 0, &self->f2EC, 0.0f, 1.0f);
         self->mode = next;
         goto L1550;
     }
@@ -1117,13 +1117,13 @@ void func_001F1050(C67* self, u32 next)
             Sub_1F1050* b = (Sub_1F1050*)self->elems[i].f0C;
             if (a) {
                 if (a->f298) {
-                    func_00159C28(a->f298);
+                    RemoveObjectNodeFromWorld(a->f298);
                 }
                 a->vtbl[7](a);
             }
             if (b) {
                 if (b->f298) {
-                    func_00159C28(b->f298);
+                    RemoveObjectNodeFromWorld(b->f298);
                 }
                 b->vtbl[7](b);
             }
@@ -1135,7 +1135,7 @@ void func_001F1050(C67* self, u32 next)
 L154C:
     self->mode = next;
 L1550:
-    self->f2D4 = D_00261858[4];
+    self->f2D4 = g_gameClock[4];
     return;
 Lz:
     next = 0;
@@ -1149,10 +1149,10 @@ s32 func_00183058(s32 a, s32 b, s32 c);
 
 void func_001F3EE0(Tbl_1F3EE0* self, Tbl_1F3EE0* other)
 {
-    func_001830D8(self, other);
-    self->arr = (s32*)func_0018D500(self->count << 2);
+    CopyObjectData(self, other);
+    self->arr = (s32*)AllocateFrontMemory(self->count << 2);
     for (s32 i = 0; i < self->count; i++) {
-        self->arr[i] = func_00183058(other->arr[i], self->f14, 0);
+        self->arr[i] = CreateObjectCopy(other->arr[i], self->f14, 0);
     }
 }
 
@@ -1162,10 +1162,10 @@ f32 func_001F31F8(s32 i);
 
 f32 func_001F3250(f32 x, f32 y, f32 z)
 {
-    f32 t = (x + x) * D_0026185C + y;
+    f32 t = (x + x) * g_gameTime + y;
     s32 i = (s32)t;
-    f32 a = func_001F31F8(i);
-    f32 b = func_001F31F8(i + 1);
+    f32 a = HashToUnitFloat(i);
+    f32 b = HashToUnitFloat(i + 1);
     if (i & 1) {
         a = a * z;
         b = z * (b - 1.0f) + 1.0f;
@@ -1198,8 +1198,8 @@ s32 func_001F0490(C67* self, s32 kind, s32* outA, s32* outB)
         if (kind == 9) {
             if (allowed != 0) {
                 s32 m = mode * 0x44C;
-                if (*(s32*)((u8*)D_002623C0 + m + 0x88) & 1) {
-                    s32 q = D_002623C0->levels[mode].f448;
+                if (*(s32*)((u8*)g_saveData + m + 0x88) & 1) {
+                    s32 q = g_saveData->levels[mode].f448;
                     flag = (q & D_00275FC8[mode]) != 0;
                 }
             }
@@ -1212,7 +1212,7 @@ s32 func_001F0490(C67* self, s32 kind, s32* outA, s32* outB)
             sel = mode;
             flag = 0;
             if (allowed != 0) {
-                flag = *(s32*)((u8*)D_002623C0 + (sel * 0x44C + idx * 0x78) + 0x10) & 1;
+                flag = *(s32*)((u8*)g_saveData + (sel * 0x44C + idx * 0x78) + 0x10) & 1;
             }
         }
     }
@@ -1261,8 +1261,8 @@ void func_001F0758(C67* self)
     Elem67* el;
     s32 i;
 
-    func_001249A8(self);
-    func_00124DF8(self, 0x34, D_00275FE0);
+    PostLoadPlacedObject(self);
+    ResolveObjectLinks(self, 0x34, D_00275FE0);
     Begin_1F0758::Of(&it, &self->children);
     while ((node = Next_1F0758::Of(&it)) != 0) {
         func_00182ED8(node);
@@ -1272,12 +1272,12 @@ void func_001F0758(C67* self)
         f32 zero = 0.0f;
         el->f28 = zero;
         el->f24 = zero;
-        el->f2C = func_001EAAE0(zero, 6.2831855f);
-        el->f30 = func_001EAAE0(0.5f, 0.7f);
+        el->f2C = RandomFloatInRange(zero, 6.2831855f);
+        el->f30 = RandomFloatInRange(0.5f, 0.7f);
         el++;
     }
     self->f534 = -1;
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 
@@ -1299,12 +1299,12 @@ C7A* func_001F3C38(s32 id, s32 parent)
     s32 i;
 
     if (id != -1) {
-        found = func_0015A418(D_00275710, 0x101, id, func_0015A418(D_00275710, 0x101, parent, 0));
+        found = FindFirstObjectById(g_currentWorld, 0x101, id, FindFirstObjectById(g_currentWorld, 0x101, parent, 0));
     }
     if (found == 0) {
         any = 0;
         other = 0;
-        n = func_0015A4F0(D_00275710, 0x205, 0x74, 0, 0x100, buf);
+        n = GatherObjectsById(g_currentWorld, 0x205, 0x74, 0, 0x100, buf);
         n = Min_1F3C38::Of(n, 0x40);
         for (i = 0; i < n; i++) {
             C7A* e = buf[i];
@@ -1343,7 +1343,7 @@ void func_001F1648(Obj_1F1648* self, s32 idx)
 {
     s32 (*table)[4] = D_00276608[self->f2F4];
     if (table == 0) {
-        func_001BFCD8(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     s32 e = table[self->f2DC][idx];
@@ -1351,10 +1351,10 @@ void func_001F1648(Obj_1F1648* self, s32 idx)
         e = table[e][idx];
     }
     if (e != -1 && self->ents[e].f0 != 0) {
-        func_001F1590(self, e, 2);
-        func_001BFCD8(SOUND_1F1648_OK, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        SetWarpCursor(self, e, 2);
+        StartSoundEffect(SOUND_1F1648_OK, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     } else {
-        func_001BFCD8(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(SOUND_1F1648_FAIL, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
 }
 
@@ -1381,26 +1381,26 @@ BaseObject* func_0015A418(void* o, s32 a, s32 b, Obj_1F0908* c);
 void func_001F0908(Obj_1F0908* self)
 {
     if (D_00276250 == -1) return;
-    func_001AA8B8(&D_002721D0, ((D_002623C0->f19D8 << 8) | D_002623C0->f19DC) == 4 ? 0.5f : 2.0f);
+    SetScreenElementHoldTime(&D_002721D0, ((g_saveData->f19D8 << 8) | g_saveData->f19DC) == 4 ? 0.5f : 2.0f);
     D_002721D0.vt->m16(&D_002721D0, 2);
     T217D_3D0* e = &D_0026F138;
     e->pending = 0;
     e->vt->m16(e, 0);
-    func_001AD0D0(e, D_002623C0->f19D8, D_002623C0->f19DC);
+    SetElementTextFromEntry(e, g_saveData->f19D8, g_saveData->f19DC);
     e->announce = 1;
-    func_001AA8B8(e, 0.0f);
+    SetScreenElementHoldTime(e, 0.0f);
     e->vt->m16(e, 2);
     Slot_1F0908* sl = self->slots[D_00276250].s;
     if (sl != 0) {
         f32 f = 0.0f;
         if (D_00276654 == 0) f = sl->f34;
-        func_0012C918(sl, self, 0, self->f2F0, f, 0.0f);
+        ReplaceAnimationPlayer(sl, self, 0, self->f2F0, f, 0.0f);
     }
     if (self->tbl != 0) {
         for (s32 i = 0; i < self->tbl->count; i++) {
             Ent_1F0908* en = &self->tbl->ents[i];
             if (en->type == 10) {
-                BaseObject* n = func_0015A418(self->f14, 0x104, en->id, self);
+                BaseObject* n = FindFirstObjectById(self->f14, 0x104, en->id, self);
                 if (n != 0) n->desc->m02(n);
             }
         }
@@ -1423,25 +1423,25 @@ void func_001F1E38(f32 cx, f32 cy, f32 radius, f32 angle, s32 n, s32* c1, s32* c
     Locals_1F1E38 loc;
     s32 i;
     f32 step = 6.2831855f / (f32)n;
-    func_001613C0(&D_00262280, 0, 1, 0xE);
-    func_00161708(&D_00262280, 0x47, 0x31001);
-    func_00161708(&D_00262280, 0x42, (flags & 1) ? 0x48 : 0x44);
-    func_001613C0(&D_00262280, 0x4D, 2, 0x41);
-    func_00161458(&D_00262280, *c1);
-    func_001615F0(&D_00262280, (u32)(s32)((cx + 1728.0f) * 16.0f),
+    BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
+    AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x31001);
+    AddGifRegisterWrite(&g_gsPacketWriter, 0x42, (flags & 1) ? 0x48 : 0x44);
+    BeginGifTag(&g_gsPacketWriter, 0x4D, 2, 0x41);
+    AddGifRgbaEntry(&g_gsPacketWriter, *c1);
+    AddGifXyzfEntry(&g_gsPacketWriter, (u32)(s32)((cx + 1728.0f) * 16.0f),
                   (u32)(s32)((cy * 0.454545468f + 1936.0f) * 16.0f), 0, 0);
     loc.k = 0;
     for (i = 0; i < n + 1; i++) {
-        func_001EAD88(func_001EA408(angle), &loc.x, &loc.y);
+        ComputeSinCos(WrapAngle(angle), &loc.x, &loc.y);
         loc.x = loc.x * radius + cx;
         loc.y = loc.y * radius + cy;
         if ((i & 1) && (flags & 2)) {
-            func_00161458(&D_00262280, loc.k);
+            AddGifRgbaEntry(&g_gsPacketWriter, loc.k);
         } else {
-            func_00161458(&D_00262280, *c2);
+            AddGifRgbaEntry(&g_gsPacketWriter, *c2);
         }
         angle += step;
-        func_001615F0(&D_00262280, (u32)(s32)((loc.x + 1728.0f) * 16.0f),
+        AddGifXyzfEntry(&g_gsPacketWriter, (u32)(s32)((loc.x + 1728.0f) * 16.0f),
                       (u32)(s32)((loc.y * 0.454545468f + 1936.0f) * 16.0f), 0, 0);
     }
 }

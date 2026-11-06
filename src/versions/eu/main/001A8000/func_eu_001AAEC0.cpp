@@ -20,6 +20,6 @@ void func_eu_001AAEC0(void)
             o->vtbl[9](o);
         }
     }
-    func_001EFEE0(D_eu_0027F700);
+    DrawScreenFade(D_eu_0027F700);
     func_001AE820(D_eu_0027CFE8);
 }

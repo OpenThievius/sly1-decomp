@@ -21,7 +21,7 @@ void func_eu_001AEA90(Obj_eu_1AEA90* self)
     s32 tmp[4];
     if (self->peer != 0) {
         Inner_eu_1AEA90* r = *self->peer->link->rect;
-        s32 id = func_001B2988(self->peer->link, 0, 0);
+        s32 id = GetTextureRegisterBits(self->peer->link, 0, 0);
         u8* ctx = D_eu_00263590;
         func_eu_00161A20(ctx, 0x156, 10, 0x43431EEEEEULL);
         func_eu_00161D68(ctx, 0x47, 0x33001);

@@ -12,34 +12,34 @@ s32 func_0011D140(s32 a0, s32 a1)
     D_0025C348 = 0;
     if (D_0025C388.busy != 0) {
         if (D_eu_0025D6B8 == 0) {
-            func_001E1F10((struct Ptr_11D140 *)D_00249570);
+            PrintFormatted((struct Ptr_11D140 *)D_00249570);
         }
         return 0;
     }
-    v = func_0011E1F8(1);
+    v = SyncDiscRead(1);
     if (v == 1) {
         if (D_eu_0025D6B8 == 0) {
-            func_001E1F10((struct Ptr_11D140 *)D_002495A0);
+            PrintFormatted((struct Ptr_11D140 *)D_002495A0);
         }
         return 0;
     }
-    s32* p = &D_00260E00.result;
+    s32* p = &g_iopChannel2Result.result;
     m = 0xFFFFFFFFu;
     *p = (s32)m;
-    D_00260E40[1] = a1;
-    D_00260E40[0] = a0;
+    g_iopChannel2Args[1] = a1;
+    g_iopChannel2Args[0] = a0;
     while (func_001F8480((struct Ptr_11D140 *)D_0027B4F0)) {
         if (D_eu_0025D6B8 == 0) {
-            func_001E1F10((struct Ptr_11D140 *)D_002494E8);
+            PrintFormatted((struct Ptr_11D140 *)D_002494E8);
         }
-        func_0011CE30();
+        PollIopCommands();
         func_001F6C20(0);
     }
-    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, D_00260E40, 8, &D_00260E00.result, 4, 0, 0);
-    v1 = D_00260E00.result;
+    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
+    v1 = g_iopChannel2Result.result;
     if (w < 0) {
         if (D_eu_0025D6B8 == 0) {
-            func_001E1F10((struct Ptr_11D140 *)D_002495C0);
+            PrintFormatted((struct Ptr_11D140 *)D_002495C0);
         }
         D_0025C348 = 0x106;
         return 0;
@@ -47,7 +47,7 @@ s32 func_0011D140(s32 a0, s32 a1)
     if ((u32)v1 == 0xFFFFFFFFu) {
         do {
             func_001F6C20(0);
-        } while ((u32)D_00260E00.result == 0xFFFFFFFFu);
+        } while ((u32)g_iopChannel2Result.result == 0xFFFFFFFFu);
     }
-    return D_00260E00.result;
+    return g_iopChannel2Result.result;
 }

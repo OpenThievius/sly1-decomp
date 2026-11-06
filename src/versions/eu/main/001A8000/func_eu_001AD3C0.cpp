@@ -27,8 +27,8 @@ void func_eu_001AD3C0(Obj_eu_1AD3C0* self)
     func_eu_001AAFB0(self);
     Sub_eu_1AD3C0* sub = self->sub;
     self->sub = (Sub_eu_1AD3C0*)sub->info->fn((u8*)sub + sub->info->off, 1.25f, 1.25f);
-    if (func_0015C188(2) != 0) {
+    if (IsFontLoaded(2) != 0) {
         self->f520 = (s32*)D_eu_0027DB20;
-        *self->f520 = (s32)func_0015C1C0(2);
+        *self->f520 = (s32)GetFontById(2);
     }
 }

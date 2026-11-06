@@ -11,9 +11,9 @@ void func_0012D448(Obj_12D448_eu* self, s32 v)
         return;
     }
     if (v != 0) {
-        func_001DDA20(*(void**)&D_00275710);
+        AcquirePadSelectFlag(*(void**)&g_currentWorld);
     } else {
-        func_001DDA50(*(void**)&D_00275710);
+        ReleasePadSelectFlag(*(void**)&g_currentWorld);
     }
     self->state = (s8)v;
 }

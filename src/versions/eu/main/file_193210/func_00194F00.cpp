@@ -5,5 +5,5 @@ struct Ctl_194F00_eu { u8 pad[0x560]; s32 mode560; u8 pad2[0x20]; s32 f584; };
 void func_00194F00(Ctl_194F00_eu* self)
 {
     if (self->mode560 == 3 && self->f584 != 0) return;
-    func_001AA8F0((ScreenElement*)self);
+    ShowScreenElement((ScreenElement*)self);
 }

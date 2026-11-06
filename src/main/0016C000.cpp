@@ -17,20 +17,20 @@ void func_001F3A40(void);
 
 void func_0016C4B8(void)
 {
-    func_001F3A40();
+    ReadTransformObject();
 }
 
 extern s32 D_002629C8;
 
 void func_0016DCF0(s32 value)
 {
-    D_002629C8 = value;
+    g_currentTargetFollower = value;
 }
 
 
 void func_0016DF30(C2A* self)
 {
-    func_001400A8(self);
+    InitZoneCollider(self);
     self->zone.duration = 0;
     self->id7A0 = -1;
     self->id7A8 = -1;
@@ -43,7 +43,7 @@ void func_0016EC38(PadRecord* self)
     if (self->pC0 == 0) return;
     if (self->f18 < 3) return;
     if (self->f14 != 3) return;
-    func_001A7CE8(self->fBC);
+    StartPadPatternFromTable(self->fBC);
 }
 
 struct Row_262E40 { s32 a; s32 b; s32 c; };
@@ -211,12 +211,12 @@ void func_00159478(void* a, void* b);
 
 void func_0016F7B0(Player* self)
 {
-    func_001BAC30(self);
-    func_00124DF8(self, 0x97, &D_00262E40);
-    func_00159478((u8*)self + 0x2428, self);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 0x97, &g_playerCharacterLinks);
+    FindOrBuildMemberGroup((u8*)self + 0x2428, self);
     self->f2284 = -1.0f;
     self->f21C8 = -1.0f;
-    D_00262E10 = self;
+    g_player = self;
 }
 
 
@@ -250,15 +250,15 @@ void func_0016F188(ButtonCode* entry);
 
 void func_0016F588(void)
 {
-    AddButtonCode(&D_00262A80.rec);
-    AddButtonCode(&D_00262AB8.rec);
+    AddButtonCode(&g_worldLoadButtonCode.rec);
+    AddButtonCode(&g_clearFlagsButtonCode.rec);
     AddButtonCode(&D_00262AF0.rec);
     AddButtonCode(&D_00262B28.rec);
-    AddButtonCode(&D_00262B60.rec);
-    AddButtonCode(&D_00262B98.rec);
+    AddButtonCode(&g_setFlagsButtonCodeC.rec);
+    AddButtonCode(&g_flagNumberedItemsButtonCode.rec);
     AddButtonCode(&D_00262BD0.rec);
     AddButtonCode(&D_00262C08.rec);
-    AddButtonCode(&D_00262C48);
+    AddButtonCode(&g_passwordMessageButtonCode);
 }
 
 
@@ -270,7 +270,7 @@ void func_0016DAC0(void* self, s32 mode);
 
 void func_0016DA00(TargetFollower* self, s32 type, Packet47* packet)
 {
-    func_00127378(self, type, packet);
+    HandlePlacedObjectNotification(self, type, packet);
     if (type != 0x13) {
         return;
     }
@@ -298,21 +298,21 @@ callDAC0:
     func_0016DAC0(self, 2);
     return;
 call928:
-    func_0016D928(self);
+    StartRandomStreamVoice(self);
 }
 
 extern s32 D_002629C8;
 
 void func_0016DD00(void)
 {
-    D_002629C8 = 0;
+    g_currentTargetFollower = 0;
 }
 
 void func_00123ED0(void* self);
 
 void func_0016DD10(EntryTableObject* self)
 {
-    func_00123ED0(self);
+    InitPlacedObject(self);
     self->tune31C = 2.25f;
     self->tune320 = 2.0f;
     self->tune324 = 0.8f;
@@ -327,8 +327,8 @@ s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 
 void func_0016DD90(EntryTableObject* self)
 {
-    func_001289C0(self);
-    s32 r = func_0015A4F0((s32)self->world, 0x201, 0x73, self, 0x10, self->entries);
+    LoadPlacedObject(self);
+    s32 r = GatherObjectsById((s32)self->world, 0x201, 0x73, self, 0x10, self->entries);
     self->entryCount = r;
     if ((u32)r >= 0x11) {
         self->entryCount = 0x10;
@@ -377,13 +377,13 @@ void func_0016E630(PadRecord* self, s32 mode, s32 n);
 void func_0016E1A0(PadRecord* self, s32 a, s32 b)
 {
     func_001F5C0C(self, 0, 0xC4);
-    func_0016E630(self, 1, 0);
+    SetPadConnectionState(self, 1, 0);
     self->f04 = a;
     self->f08 = b;
-    s32 size = ((s32)func_0018D4B0(0x140) + 0x3F) & -0x40;
+    s32 size = ((s32)ReservePermanentMemory(0x140) + 0x3F) & -0x40;
     self->f0C = size;
     func_002042C8(self->f04, self->f08, size);
-    self->fBC = func_0018D4B0(0x20);
+    self->fBC = ReservePermanentMemory(0x20);
     self->fC0 = 1;
 }
 
@@ -407,7 +407,7 @@ void func_0016E630(PadRecord* self, s32 mode, s32 n)
     }
     if (self->f18 < 3 && n >= 3)
     {
-        func_001A7B20(self->fBC, self->f04, self->f08);
+        RequestPadPattern(self->fBC, self->f04, self->f08);
     }
     if (next == 3)
     {
@@ -425,7 +425,7 @@ void func_0016E630(PadRecord* self, s32 mode, s32 n)
     }
     self->f14 = next;
     self->f18 = n;
-    self->f1C = D_00261858.elapsed;
+    self->f1C = g_gameClock.elapsed;
 }
 
 void func_0016EC20(PadRecord* self, u32 mask)
@@ -456,14 +456,14 @@ void func_0016D3F0(TargetFollower* self, C2A* x)
     self->f558 = x;
     if (v != 0) {
         self->f570->f44 = ((Item_16D3F0*)x->f7AC)->f318;
-        func_001A8AF8(self->f570);
+        ChooseObjectPoolItem(self->f570);
         if (self->f5BC != 0) {
             return;
         }
-        self->f5BC = func_001BEEF8(0x6B);
+        self->f5BC = PushSoundLevel(0x6B);
     } else {
         if (self->f5BC != 0) {
-            func_001BF0D8(self->f5BC);
+            RemoveSoundLevelAndRecompute(self->f5BC);
             self->f5BC = 0;
         }
     }
@@ -478,7 +478,7 @@ void func_0016D9A8(TargetFollower* self)
     if (self->f5CC != 0) {
         if (func_001BE810(self) == 0) {
             self->f5CC = 0;
-            func_001BE8F8(self, 0, self->f5C4, self->f5C8);
+            PlaySoundAndApplyVolumePan(self, 0, self->f5C4, self->f5C8);
         }
     }
 }
@@ -508,7 +508,7 @@ void func_0016F2E0(void)
     if (D_00262E00.time == 0.0f) {
         return;
     }
-    if (!(D_00262E00.time <= D_00261868[0])) {
+    if (!(D_00262E00.time <= g_elapsedTime[0])) {
         return;
     }
     ButtonCode* best = 0;
@@ -531,7 +531,7 @@ void func_0016F2E0(void)
         p = *link;
     }
     if (best != 0) {
-        func_001BFCD8(0x79, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+        StartSoundEffect(0x79, 0, 0, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
         best->fn(best->arg);
     }
     ResetButtonCodes();
@@ -542,7 +542,7 @@ void func_00124A48(void* self);
 
 void func_0016DDE8(EntryTableObject* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     self->desc->m03(self);
 }
 
@@ -553,13 +553,13 @@ s32 func_0015A838(void* a0, s32 a1, s32 a2, void* a3);
 
 void func_0016DF68(C2A* self)
 {
-    func_001249A8(self);
+    PostLoadPlacedObject(self);
     if (self->id7A0 != -1) {
-        self->f7A4 = (void*)func_0015A418(self->world, 4, self->id7A0, self);
+        self->f7A4 = (void*)FindFirstObjectById(self->world, 4, self->id7A0, self);
     } else {
-        self->f7A4 = (void*)func_0015A838(self->world, 2, 0x7E, self);
+        self->f7A4 = (void*)FindFirstObjectByIdGathered(self->world, 2, 0x7E, self);
     }
-    self->f7AC = (void*)func_0015A418(self->world, 4, self->id7A8, self);
+    self->f7AC = (void*)FindFirstObjectById(self->world, 4, self->id7A8, self);
 }
 
 extern s32 D_00262C64;
@@ -568,8 +568,8 @@ void func_001E5278(s32 mode);
 
 void func_0016F408(void)
 {
-    D_00262C64 = 0;
-    func_001E5278(0);
+    g_buttonCodeFlags = 0;
+    RequestWorldLoadByMode(0);
 }
 
 extern s32 D_00262C64;
@@ -578,10 +578,10 @@ void func_001E5278(s32 mode);
 
 void func_0016F430(s32 flags)
 {
-    D_00262C64 = D_00262C64 | (flags & ~0x4000);
+    g_buttonCodeFlags = g_buttonCodeFlags | (flags & ~0x4000);
     if (flags & 0x4000)
     {
-        func_001E5278(0);
+        RequestWorldLoadByMode(0);
     }
 }
 
@@ -606,7 +606,7 @@ void func_0016D040(TargetFollower* self, void* x)
     self->f578 = (s32)x;
     C2A* p = (C2A*)func_0015A448(self->world, x, self);
     if (p != 0) {
-        func_0016D3F0(self, p);
+        SetFollowedObject(self, p);
         func_0016D788(self);
         if (p->f7AC != 0) {
             func_0016DAC0(self, 2);
@@ -652,7 +652,7 @@ extern s32 D_002629C8;
 
 void func_0016CE00(TargetFollower* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->f578 = -1;
     self->f598 = -1;
     self->f5C4 = 3000.0f;
@@ -662,7 +662,7 @@ void func_0016CE00(TargetFollower* self)
     q->a = 25.0f;
     q->c = 0.25f;
     q->b = 0;
-    D_002629C8 = 0;
+    g_currentTargetFollower = 0;
 }
 
 
@@ -679,21 +679,21 @@ void func_0016CF70(TargetFollower* self)
 {
     f32 scratch[4];
 
-    func_00124A48(self);
-    func_00124DF8(self, 2, D_00262A10);
-    self->f554 = func_001B6290(self->list550, self, -1, 1);
-    self->f570 = (Sub47*)func_0015A838(self->world, 1, 0x8C, self);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 2, g_targetFollowerResolveLinks);
+    self->f554 = CreateStateWalker(self->list550, self, -1, 1);
+    self->f570 = (Sub47*)FindFirstObjectByIdGathered(self->world, 1, 0x8C, self);
     func_001920B0(self->f568, scratch);
     self->f56C = self->v140.z - scratch[2];
     if (self->f578 != -1)
     {
-        func_0016D040(self, (void*)self->f578);
+        FollowObjectById(self, (void*)self->f578);
     }
     u64 m = 0x8000;
     s32 sh = 27;
     m <<= sh;
     self->flags538 |= m;
-    self->f594 = func_0011E580(0x73, D_00275710, 0, 0x302, -1);
+    self->f594 = CreateTypedRecord(0x73, g_currentWorld, 0, 0x302, -1);
 }
 
 extern s32 D_002629C8;
@@ -705,28 +705,28 @@ void func_00152600(void* table, void* self);
 
 void func_0016DFE0(C2A* self, s32 kind)
 {
-    func_00127378(self, kind);
+    HandlePlacedObjectNotification(self, kind);
     switch (kind)
     {
     case 2:
-        if (D_002629C8 != 0)
+        if (g_currentTargetFollower != 0)
         {
-            if (func_001526D0(&((TargetFollower*)D_002629C8)->list55C, self) != 0)
+            if (IsInList(&((TargetFollower*)g_currentTargetFollower)->list55C, self) != 0)
             {
-                func_00152600(&((TargetFollower*)D_002629C8)->list55C, self);
+                RemoveFromList(&((TargetFollower*)g_currentTargetFollower)->list55C, self);
             }
         }
         break;
     case 0xC:
-        if (D_002629C8 != 0)
+        if (g_currentTargetFollower != 0)
         {
-            func_00152470(&((TargetFollower*)D_002629C8)->list55C, self);
+            AppendToList(&((TargetFollower*)g_currentTargetFollower)->list55C, self);
         }
         break;
     case 0xD:
-        if (D_002629C8 != 0)
+        if (g_currentTargetFollower != 0)
         {
-            func_00152600(&((TargetFollower*)D_002629C8)->list55C, self);
+            RemoveFromList(&((TargetFollower*)g_currentTargetFollower)->list55C, self);
         }
         break;
     }
@@ -739,14 +739,14 @@ void func_0016E0B8(void)
 {
     func_0016E148();
     func_002040E8(0);
-    func_0016E1A0(&D_00262C70, 0, 0);
+    InitPadRecord(&g_padRecord, 0, 0);
 }
 
 u16 D_00262A50[12] = { 0x2000, 0x8000, 0x1000, 0x4000, 0x0010, 0x0020, 0x0040, 0x0080, 0x0004, 0x0008, 0x0001, 0x0002 };
 
 f32 func_0016F108(PadRecord* self, s32 idx)
 {
-    if (self->keyA8 & D_00262A50[idx]) {
+    if (self->keyA8 & g_padButtonMasks[idx]) {
         if (self->f18 >= 4) {
             s32 v = 1;
             s32 b = self->fAE[idx];
@@ -769,10 +769,10 @@ s32 func_0016EED0(PadRecord* self)
     if (self->f2C == 0) {
         u16 fl = self->flags;
         if (fl & 0x1000) {
-            func_0016EC20(self, 0x1000);
+            ClearPadPressedBits(self, 0x1000);
             self->f2C = -1;
         } else if (fl & 0x4000) {
-            func_0016EC20(self, 0x4000);
+            ClearPadPressedBits(self, 0x4000);
             self->f2C = 1;
         } else if (0.8f <= self->f48) {
             f32 a = fabsf(self->f44);
@@ -790,7 +790,7 @@ s32 func_0016EED0(PadRecord* self)
         }
         c = 0.33329999446868896f;
         self->f3C = c;
-        base = D_00261868[0];
+        base = g_elapsedTime[0];
     } else {
         s32 v1 = 0;
         if (self->f2C < 0) {
@@ -818,7 +818,7 @@ s32 func_0016EED0(PadRecord* self)
             self->f2C = 0;
             goto done;
         }
-        if (self->f38 <= D_00261858.elapsed) {
+        if (self->f38 <= g_gameClock.elapsed) {
             f32 lo = 0.1f;
             f32 hi = 0.33329999446868896f;
             f32 t = (self->f3C + self->f3C) * 0.33333334f;
@@ -830,7 +830,7 @@ s32 func_0016EED0(PadRecord* self)
                 c = t;
             }
             self->f3C = c;
-            base = D_00261858.elapsed;
+            base = g_gameClock.elapsed;
         } else {
             return 0;
         }
@@ -883,14 +883,14 @@ void func_0016CE80(TargetFollower* self)
     s32 k2 = 0x2F0;
     s32 i = 0;
     s32 off = 0;
-    func_001BAC30(self);
-    func_00124DF8(self, 5, D_002629D0);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 5, g_targetFollowerLoadLinks);
     for (;;) {
         if (i >= self->list550->count) {
             return;
         }
         Entry47* e = (Entry47*)((u8*)self->list550->items + off);
-        if (func_001B6420(self->list550, e->a) == k1 && func_001B6420(self->list550, e->b) == k2) {
+        if (GetStateEntryKey(self->list550, e->a) == k1 && GetStateEntryKey(self->list550, e->b) == k2) {
             break;
         }
         off += 0x14;
@@ -949,7 +949,7 @@ s32 func_0016E940(PadRecord* self)
         }
         self->f10 = buf[1];
         if (self->f18 == 4) {
-            func_0018D800(self->fAE, buf + 8, 0xC);
+            CopyMemory(self->fAE, buf + 8, 0xC);
         }
         cur = self->keyA8;
         self->flags = cur & ~old;
@@ -960,7 +960,7 @@ s32 func_0016E940(PadRecord* self)
         } else {
             self->f74 = self->f78 = self->f7C = self->f40 = self->f44 = self->f48 = 0.0f;
         }
-        if (D_00261990 == 0 || D_00261990->stackCount == 0 || D_00261990->stack[0].ctl != &D_00261990->ctl454) {
+        if (g_camera == 0 || g_camera->stackCount == 0 || g_camera->stack[0].ctl != &g_camera->ctl454) {
             if ((self->keyA8 & 0xF000) != 0) {
                 self->f40 = self->f44 = self->f48 = 0.0f;
                 if ((self->keyA8 & 0x8000) != 0) {
@@ -981,12 +981,12 @@ s32 func_0016E940(PadRecord* self)
             }
         }
         AdvanceButtonCodes(self, old);
-        self->x20 = D_00261858.elapsed;
+        self->x20 = g_gameClock.elapsed;
         if (self->keyA8 != 0 || self->f48 != 0.0f || self->f7C != 0.0f) {
-            self->f24 = D_00261858.elapsed;
+            self->f24 = g_gameClock.elapsed;
         }
     } else {
-        if (D_00261868[0] - self->x20 >= 2.0f) res = 0;
+        if (g_elapsedTime[0] - self->x20 >= 2.0f) res = 0;
     }
     return res;
 }
@@ -999,11 +999,11 @@ void func_0016D0C0(TargetFollower* self, f32 t)
 {
     Mat3U buf;
 
-    func_001B9338(self, t);
+    StepCollider(self, t);
     if (self->w5D8 != 0) {
         return;
     }
-    func_00188850(&D_00248D20, &buf, self->f5A0);
+    BuildAxisAngleMatrix(&g_unitZVector, &buf, self->f5A0);
     func_001B9D10(self, t, &buf, self->sub5B0);
 }
 
@@ -1014,7 +1014,7 @@ void func_001920B0(void* arg, Vec3* out);
 
 void func_0016D788(TargetFollower* self) {
     Vec3 v;
-    func_001B9AE0(self, 3, 0, 3, 0);
+    SetColliderAnchors(self, 3, 0, 3, 0);
     ((VFn_16D788*)self->desc)[36](self, &D_00248D30);
     ((VFn_16D788*)self->desc)[37](self, &D_00248D30);
     func_001920B0(self->f558->f7A4, &v);
@@ -1044,15 +1044,15 @@ void func_0016D928(TargetFollower* self)
     if (self->f5C0 == 0) {
         return;
     }
-    if (func_001BE980() != 0) {
+    if (HasStreamVoice() != 0) {
         return;
     }
-    r = func_001EAA70(0, 0x64);
+    r = RandomIntInRange(0, 0x64);
     if (r >= 0x14) {
         return;
     }
-    r = func_001EAA70(0, 6);
-    func_001BE728((KeyRecord*)((u8*)D_002482D8 + (r << 5)));
+    r = RandomIntInRange(0, 6);
+    OpenKeyRecord((KeyRecord*)((u8*)g_streamVoiceKeys + (r << 5)));
     self->f5CC = 1;
 }
 
@@ -1068,10 +1068,10 @@ s32 func_0016EC98(Obj_16EC98* self)
     if (self->f28 == 0) {
         u16 fl = self->fAA;
         if (fl & 0x8000) {
-            func_0016EC20(self, 0x8000);
+            ClearPadPressedBits(self, 0x8000);
             self->f28 = -1;
         } else if (fl & 0x2000) {
-            func_0016EC20(self, 0x2000);
+            ClearPadPressedBits(self, 0x2000);
             self->f28 = 1;
         } else if (0.8f <= self->f48) {
             f32 a = fabsf(self->f40);
@@ -1089,7 +1089,7 @@ s32 func_0016EC98(Obj_16EC98* self)
         }
         c = 0.33329999446868896f;
         self->f34 = c;
-        base = D_00261868[0];
+        base = g_elapsedTime[0];
     } else {
         s32 v1 = 0;
         if (self->f28 < 0) {
@@ -1117,7 +1117,7 @@ s32 func_0016EC98(Obj_16EC98* self)
             self->f28 = 0;
             goto done;
         }
-        if (self->f30 <= D_00261858.elapsed) {
+        if (self->f30 <= g_gameClock.elapsed) {
             f32 lo = 0.1f;
             f32 hi = 0.33329999446868896f;
             f32 t = (self->f34 + self->f34) * 0.33333334f;
@@ -1129,7 +1129,7 @@ s32 func_0016EC98(Obj_16EC98* self)
                 c = t;
             }
             self->f34 = c;
-            base = D_00261858.elapsed;
+            base = g_gameClock.elapsed;
         } else {
             return 0;
         }
@@ -1167,13 +1167,13 @@ void func_0016E238(PadRecord* self)
         ready = 1;
     }
     s32 cur = self->f18;
-    if (self->f14 != 3 && cur != 0 && 2.0f <= D_00261858.elapsed - self->f1C)
+    if (self->f14 != 3 && cur != 0 && 2.0f <= g_gameClock.elapsed - self->f1C)
     {
         r = 0;
     }
     if (cur != 0 && r == 0)
     {
-        func_0016E630(self, 1, 0);
+        SetPadConnectionState(self, 1, 0);
     }
     if (!ready)
     {
@@ -1284,11 +1284,11 @@ void func_0016E238(PadRecord* self)
         }
         break;
     case 3:
-        if (func_0016E940(self) != 0)
+        if (PollPadInput(self) != 0)
         {
             if (self->fC0 != 0 && self->f18 >= 3)
             {
-                func_001A7B88(self->fBC);
+                UpdatePadPattern(self->fBC);
             }
         }
         else
@@ -1298,7 +1298,7 @@ void func_0016E238(PadRecord* self)
         }
         break;
     }
-    func_0016E630(self, mode, n);
+    SetPadConnectionState(self, mode, n);
 }
 
 void func_001B93D8(void);
@@ -1326,18 +1326,18 @@ void func_0016F478(void)
     char text[0x40];
     char buf[0x10];
 
-    if ((D_002623C0->f19D8 << 8 | D_002623C0->f19DC) == 0x400) {
+    if ((g_saveData->f19D8 << 8 | g_saveData->f19DC) == 0x400) {
         if ((func_001602A0() & 6) == 6) {
-            if (D_002623C0->f19E8 == 99 && D_002623C0->f19E0 == 0) {
+            if (g_saveData->f19E8 == 99 && g_saveData->f19E0 == 0) {
                 char* p = buf;
-                func_001E2138(p, (const u8*)D_002483B8);
+                CopyString(p, (const u8*)D_002483B8);
                 while (*p != 0) {
                     *p ^= 0x23;
                     p++;
                 }
-                func_001E1FD0(text, (const u8*)D_0024A848, buf);
+                FormatToString(text, (const u8*)D_0024A848, buf);
                 D_0026EC70.vt->f20(&D_0026EC70, text);
-                func_001AA8B8(&D_0026EC70, 10.0f);
+                SetScreenElementHoldTime(&D_0026EC70, 10.0f);
                 D_0026EC70.vt->f38(&D_0026EC70);
             }
         }
@@ -1365,11 +1365,11 @@ void func_0016F238(PadRecord* self, s32 value)
     u16 id = (u16)value;
     ButtonCode* head = g_buttonCodes;
     if (head == 0) return;
-    if (self != &D_00262C70) return;
+    if (self != &g_padRecord) return;
     u16 previous = self->keyA8;
     if (id == previous || previous == 0) return;
     Advance_16F238::Of(head);
-    GameClock* clock = &D_00261858;
+    GameClock* clock = &g_gameClock;
     D_00262E00.time = clock->elapsed + 1.0f;
 }
 

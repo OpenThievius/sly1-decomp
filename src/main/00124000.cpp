@@ -24,31 +24,31 @@ void func_001837E0(PlacedObject* self, s32 a1, s32 a2, s32 a3);
 
 void func_001243E0(PlacedObject* self)
 {
-    func_00182ED0(self);
+    UnregisterObject(self);
     World* s1 = self->world;
     if (self->parent == 0) {
         if (self->f294 != 0) {
-            func_00152600(&s1->list78, self);
+            RemoveFromList(&s1->list78, self);
         } else {
-            func_00152600(&s1->list54, self);
+            RemoveFromList(&s1->list54, self);
             u64 fl = self->flags;
             if ((fl & (1ull << 37)) != 0) {
                 self->flags = fl & ~(1ull << 37);
-                func_00152600(&s1->list60, self);
+                RemoveFromList(&s1->list60, self);
                 if ((self->desc->flags & 2) != 0) {
-                    func_00152600(&s1->list6C, self);
+                    RemoveFromList(&s1->list6C, self);
                 }
             }
-            func_0015F710(s1, self->f54);
+            DissolveObjectLinkList(s1, self->f54);
             self->f54 = 0;
-            func_00152440(&self->list60);
+            ClearList(&self->list60);
         }
     }
     if ((self->flags & (1ull << 36)) != 0) {
-        func_00143B20(D_00261990, self);
+        RemoveCameraObject(g_camera, self);
     }
     if (self->f284 != 0) {
-        func_00152600(&self->world->list1C00, self->f284);
+        RemoveFromList(&self->world->list1C00, self->f284);
     }
     if ((self->flags & (1ull << 38)) != 0) {
         void (*fn)(BaseObject* self, s32 on) = self->desc->m14;
@@ -58,7 +58,7 @@ void func_001243E0(PlacedObject* self)
     }
     func_00129DF8(self);
     self->root = 0;
-    func_001837E0(self, 5, 0, 0);
+    TriggerScriptEvent(self, 5, 0, 0);
 }
 
 extern void* func_00159BB0();
@@ -73,7 +73,7 @@ void func_00124540(PlacedObject* object)
 	object->m1A0.r[1] = object->rot.r[1];
 	object->m1A0.r[2] = object->rot.r[2];
 	object->desc02()->m2A(object, &object->m1A0);
-	func_00188FD8(&object->m1A0, &object->v1D0);
+	MatrixToEulerAngles(&object->m1A0, &object->v1D0);
 }
 
 void func_00125108(PlacedObject* self)
@@ -106,8 +106,8 @@ struct Sub_126C58 {
 void func_00126C58(PlacedObject* self)
 {
     if (self->f298 == 0) {
-        self->f298 = func_00159BB0();
-        if (func_00182FC8(self) != 0) {
+        self->f298 = AddObjectNodeToWorld();
+        if (IsObjectAttached(self) != 0) {
             ((Sub_126C58*)self->f298)->f4 = 1.0f;
         } else {
             ((Sub_126C58*)self->f298)->f4 = 0.0f;
@@ -134,7 +134,7 @@ void func_001273F0(PlacedObject* self, Vec02* src)
         self->desc->m12(self);
     }
     if (self->f1EC != 0) {
-        func_001226D8(self->f1EC);
+        SettlePoseSourceModes(self->f1EC);
     }
     self->desc->m0E(self, 3, &f);
 }
@@ -147,7 +147,7 @@ void func_001274F8(PlacedObject* self, Vec02* src)
 {
     self->v150 = *src;
     if (self->f1EC != 0) {
-        func_001226D8(self->f1EC);
+        SettlePoseSourceModes(self->f1EC);
     }
     if (func_00123DC0(src) == 0) {
         func_00129DF8(self);
@@ -162,7 +162,7 @@ void func_00127590(PlacedObject* self, Vec02* src)
 {
     self->v160 = *src;
     if (self->f1F0 != 0) {
-        func_001226D8(self->f1F0);
+        SettlePoseSourceModes(self->f1F0);
     }
     if (func_00123E00(src) == 0) {
         func_00129DF8(self);
@@ -230,17 +230,17 @@ void func_00124EE8(void* self, f32 f)
     if (pre != 0) {
         pre(self);
     }
-    if (func_00182FC8(self) == 0) {
+    if (IsObjectAttached(self) == 0) {
         return;
     }
     s32 e = (s32)&obj->list;
     fr.list = e;
     fr.cursor = e;
-    s32 old = *(s32*)&D_0027B314;
+    s32 old = *(s32*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
     fr.link = link;
-    *(s32*)&D_0027B314 = (s32)&fr;
+    *(s32*)&g_activeListFrames = (s32)&fr;
     s32 head = obj->list.head;
     fr.cursor = head + fr.link;
     Node_124EE8* node = (Node_124EE8*)head;
@@ -252,7 +252,7 @@ void func_00124EE8(void* self, f32 f)
         fr.cursor = nx + fr.link;
         node = (Node_124EE8*)nx;
     }
-    *(s32*)&D_0027B314 = fr.prev;
+    *(s32*)&g_activeListFrames = fr.prev;
 }
 
 struct __attribute__((aligned(16))) Quad_1261C0 { s32 w[4]; };
@@ -292,16 +292,16 @@ struct Sub_1249A8 {
 void func_001249A8(PlacedObject* self)
 {
     ListFrame frame;
-    func_00128DB8(self);
-    func_00124540(self);
+    ResolveFollowRecordObjects(self);
+    SavePlacedObjectInitialFrame(self);
     Sub_1249A8* sub = (Sub_1249A8*)self->f200;
     if (sub != 0 && sub->f20 != -1) {
         void* v = func_0015A448(self->world, sub->f20, self);
         if (v != 0) {
-            func_0012A860(self, v);
+            SetAimTarget(self, v);
         }
     }
-    func_00165828(self->sub22C, self);
+    BindAttachmentTargets(self->sub22C, self);
     for (BaseObject* p = (BaseObject*)self->children.head; p != 0; p = p->next) {
         void (*fn)(BaseObject* self) = p->desc->m0F;
         if (fn != 0) {
@@ -319,9 +319,9 @@ void func_00127378(PlacedObject* self, s32 mode)
     if (mode == 1) {
         SoundRecord* s = self->f2AC;
         if (s != 0) {
-            if (D_0026185C != 0.0f) {
+            if (g_gameTime != 0.0f) {
                 if (s->f1C == 0) {
-                    func_001BFCD8(s->f00, &s->f1C, self, 0, s->f04, s->f08, s->f0C, s->f10, s->f20, &s->b14, 0);
+                    StartSoundEffect(s->f00, &s->f1C, self, 0, s->f04, s->f08, s->f0C, s->f10, s->f20, &s->b14, 0);
                 }
             }
         }
@@ -341,23 +341,23 @@ void func_001240F8(PlacedObject* self)
     f32 v2[4];
     s32 scratch[8];
     (void)scratch;
-    func_00182D48(self);
+    RegisterObject(self);
     World* ctx = self->world;
     if (!self->parent) {
         self->root = self;
         if (self->f294) {
-            func_00152470(&ctx->list78, self);
+            AppendToList(&ctx->list78, self);
         } else {
-            func_00152470(&ctx->list54, self);
+            AppendToList(&ctx->list54, self);
             self->flags |= 0x2000000000ULL;
-            func_00152470(&ctx->list60, self);
-            if (self->desc->flags & 2) func_00152470(&ctx->list6C, self);
+            AppendToList(&ctx->list60, self);
+            if (self->desc->flags & 2) AppendToList(&ctx->list6C, self);
             s32 n = self->count6C;
             self->f54 = self;
             self->list60.tail = self;
             n--;
             self->list60.head = self;
-            for (; n >= 0; n--) func_0015F7D8(ctx, self->items70[n]);
+            for (; n >= 0; n--) MergeObjectGroupMembers(ctx, self->items70[n]);
         }
     } else {
         self->root = ((PlacedObject*)self->parent)->root;
@@ -376,10 +376,10 @@ void func_001240F8(PlacedObject* self)
         self->desc02()->m1E(self, (Mat02*)v2);
         self->desc02()->m21(self, (Vec02*)v0);
     }
-    if (self->flags & 0x1000000000ULL) func_00143AF8((PlacedObject*)D_00261990, self);
-    if (self->f284) func_00152470(&self->world->list1C00, self->f284);
+    if (self->flags & 0x1000000000ULL) AddCameraObject((PlacedObject*)g_camera, self);
+    if (self->f284) AppendToList(&self->world->list1C00, self->f284);
     if (self->desc->m12) self->desc->m12(self);
-    func_001837E0(self, 4, 0, 0);
+    TriggerScriptEvent(self, 4, 0, 0);
     func_00129DF8(self);
 }
 
@@ -415,20 +415,20 @@ void func_00124A48(PlacedObject* self)
     Frame_124A48 fr;
     Key02* k;
     BaseObject* s0;
-    s32 old = (s32)D_0027B314;
+    s32 old = (s32)g_activeListFrames;
     s32 e = (s32)&self->children;
     fr.f00 = e;
     fr.f04 = e;
     fr.f08 = *(s32*)(e + 8);
     fr.f0C = old;
-    D_0027B314 = (ListFrame*)&fr;
-    func_00182C58(self);
+    g_activeListFrames = (ListFrame*)&fr;
+    StartObject(self);
     if (self->f2A0 != 0) {
         if (((Pair_124A48*)self->f2A0)->a != 0 || ((Pair_124A48*)self->f2A0)->b != -1) {
-            func_001DBCC8(self->world, (void*)func_00124CC0, self, 0, 0);
+            AppendQueuedCall(self->world, (void*)StartAnimationFromContext, self, 0, 0);
         }
     }
-    func_00165728(self->sub22C, self);
+    StartAttachments(self->sub22C, self);
     if (self->f284 != 0) {
         if (func_001B1D38(self->f284) == 0) {
             func_001B1D70(self->f284, self->f2A8);
@@ -437,7 +437,7 @@ void func_00124A48(PlacedObject* self)
         if ((self->f284)->fB0 != -1) {
             (self->f284)->fB4 = func_0015A448(self->world, (self->f284)->fB0, self);
             if ((self->f284)->fB4 != 0) {
-                func_00152E48((self->f284)->fB4, self->f284);
+                BuildTexturePackets((self->f284)->fB4, self->f284);
             }
         }
         func_001B1B38(self->f284);
@@ -448,22 +448,22 @@ void func_00124A48(PlacedObject* self)
         }
         if (self->f2AC != 0) {
             SoundRecord* q = self->f2AC;
-            func_001BFCD8(q->f00, q->f04, q->f08, q->f0C, q->f10, q->f20, &q->f1C, self, 0, q->b14, 0);
+            StartSoundEffect(q->f00, q->f04, q->f08, q->f0C, q->f10, q->f20, &q->f1C, self, 0, q->b14, 0);
         }
     }
     if (self->f26C != 0) {
-        self->f1F8 = (void**)func_0018D5C0(self->f26C << 2);
+        self->f1F8 = (void**)AllocateZeroedFrontMemory(self->f26C << 2);
     }
     for (k = self->keys; k != 0; k = k->next) {
-        if (func_001833F0(self, k->key) != 0) {
+        if (MatchesObjectId(self, k->key) != 0) {
             s0 = self;
         } else {
-            s0 = func_0015A418(self->world, 1, k->key, self);
+            s0 = FindFirstObjectById(self->world, 1, k->key, self);
             if (s0 == 0) {
                 continue;
             }
         }
-        if (func_00182FC8(s0) != 0 && s0 != self) {
+        if (IsObjectAttached(s0) != 0 && s0 != self) {
             s0->desc->m10(s0);
         }
         s0->desc->m03(s0);
@@ -481,7 +481,7 @@ void func_00124A48(PlacedObject* self)
             p = nx;
         }
     }
-    D_0027B314 = (ListFrame*)fr.f0C;
+    g_activeListFrames = (ListFrame*)fr.f0C;
 }
 
 void func_001830D8(BaseObject* self, BaseObject* src);
@@ -508,12 +508,12 @@ void func_00127048(PlacedObject* self, PlacedObject* src)
     Link02 t58 = self->link58;
     List01 t60 = self->list60;
     List01 t1E0 = self->list1E0;
-    func_001830D8(self, src);
-    func_00165920(self->sub22C, self, src->sub22C);
+    CopyObjectData(self, src);
+    CopyAttachmentBlock(self->sub22C, self, src->sub22C);
     if (self->f224) {
-        self->f224 = (Rec2195_224*)func_0018D568(0xC0, self->f224);
+        self->f224 = (Rec2195_224*)CopyToFrontMemory(0xC0, self->f224);
     }
-    func_00152440(&self->children);
+    ClearList(&self->children);
     self->link48 = t48;
     self->link40 = t40;
     self->link58 = t58;
@@ -524,40 +524,40 @@ void func_00127048(PlacedObject* self, PlacedObject* src)
     self->list1E0 = t1E0;
     self->desc02()->m2B(self);
     if (src->f1FC) {
-        self->f1FC = func_00121280(src->f1FC, self->world, self);
-        func_001299E0(self, self->f1FC);
+        self->f1FC = ClonePoseSource(src->f1FC, self->world, self);
+        InsertAttachment(self, self->f1FC);
     }
     if (src->f200) {
-        self->f200 = func_00121280(src->f200, self->world, self);
-        func_001299E0(self, self->f200);
+        self->f200 = ClonePoseSource(src->f200, self->world, self);
+        InsertAttachment(self, self->f200);
     }
     if (src->f204) {
-        self->f204 = func_00121280(src->f204, self->world, self);
-        func_001299E0(self, self->f204);
+        self->f204 = ClonePoseSource(src->f204, self->world, self);
+        InsertAttachment(self, self->f204);
     }
     if (src->f284) {
         u8* p = func_001B5EC0(&self->world->pool1BF4);
-        func_0018D800(p, src->f284, 0x2E0);
+        CopyMemory(p, src->f284, 0x2E0);
         func_00152450(p + 0xB8);
         self->f284 = (RangeRecord*)p;
-        func_00152470(&self->world->list1C00, p);
+        AppendToList(&self->world->list1C00, p);
     }
     if (src->f2AC) {
-        self->f2AC = (SoundRecord*)func_0018D568(0x24, src->f2AC);
+        self->f2AC = (SoundRecord*)CopyToFrontMemory(0x24, src->f2AC);
 
     }
     if (src->f288) {
-        self->f288 = func_0018D568(0x40, src->f288);
+        self->f288 = CopyToFrontMemory(0x40, src->f288);
     }
     if (self->flags & (1ULL << 36)) {
-        if (func_00182FC8(self)) {
-            func_00143AF8(D_00261990, self);
+        if (IsObjectAttached(self)) {
+            AddCameraObject(g_camera, self);
         }
     }
-    if (self->p20C != D_00260E70) self->p20C = (u8*)func_0018D568(0x10, self->p20C);
-    if (self->p210 != D_00260E80) self->p210 = (u8*)func_0018D568(0x10, self->p210);
-    if (self->p214 != D_00260E90) self->p214 = (u8*)func_0018D568(0x10, self->p214);
-    if (self->p218 != D_00260EA0) self->p218 = (u8*)func_0018D568(0x10, self->p218);
+    if (self->p20C != D_00260E70) self->p20C = (u8*)CopyToFrontMemory(0x10, self->p20C);
+    if (self->p210 != D_00260E80) self->p210 = (u8*)CopyToFrontMemory(0x10, self->p210);
+    if (self->p214 != D_00260E90) self->p214 = (u8*)CopyToFrontMemory(0x10, self->p214);
+    if (self->p218 != D_00260EA0) self->p218 = (u8*)CopyToFrontMemory(0x10, self->p218);
 }
 
 // NEAR: the branches and the 0x40-byte copy loop match; retail loads both quads of a pair before
@@ -583,7 +583,7 @@ void func_00125B70(PlacedObject* self, Quad_00125B70* src, Dst_00125B70* dst)
             *dst = *(Dst_00125B70*)src;
         }
     } else {
-        func_00188C10(&self->v140, &self->m110, D_00248D40, dst);
+        BuildScaledTransformMatrix(&self->v140, &self->m110, D_00248D40, dst);
         dst->f44 = 1.0f;
         dst->f40 = 1.0f;
     }
@@ -607,7 +607,7 @@ void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
         if (f & 0x20) {
             kind |= 0x100;
         }
-        void* node = func_0015A418(host, kind, it->id, self);
+        void* node = FindFirstObjectById(host, kind, it->id, self);
         if (node) {
             if (!(it->flags & 8)) {
                 *(void**)((u8*)self + it->offset) = node;
@@ -616,7 +616,7 @@ void func_00124DF8(BaseObject* self, s32 count, ObjectLink* item)
                 func_00182ED8(node);
             }
             if (it->flags & 0x10) {
-                func_001832F0(node, self);
+                AddObjectListener(node, self);
             }
         }
         n--;
@@ -632,7 +632,7 @@ void func_00127478(PlacedObject* self, Mat02* src)
     if (self->desc->m12)
         self->desc->m12(self);
     if (self->f1F0)
-        func_001226D8(self->f1F0);
+        SettlePoseSourceModes(self->f1F0);
     self->desc->m0E(self, 4, self);
 }
 
@@ -668,7 +668,7 @@ void func_00124050(PlacedObject* self)
         obj->desc->m04(obj);
     }
     self->desc->m0E(self, 1, self);
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 struct Iter_00124338 { List01* list; u8* link; s32 offset; Iter_00124338* saved; };
@@ -703,7 +703,7 @@ void func_00124338(PlacedObject* self)
         obj->desc->m05(obj);
     }
     self->desc->m0E(self, 2, self);
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 struct Iter_00126F78 { List01* list; u8* link; s32 offset; Iter_00126F78* saved; };
@@ -738,13 +738,13 @@ void func_00126F78(PlacedObject* self, PlacedObject* owner)
     self->desc->m09(self, owner);
     BaseObject* obj = Next_00126F78::Of(&it);
     while (obj != 0) {
-        (void)func_00183058(obj, self->world, self);
+        (void)CreateObjectCopy(obj, self->world, self);
         obj = Next_00126F78::Of(&it);
     }
     if ((self->desc->flags & 2) && self->parent == 0) {
-        func_001BB580(self);
+        UpdateAnchorModeFlags(self);
     }
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 struct Object_124FC0;
@@ -782,7 +782,7 @@ void func_001837E0(PlacedObject* self, s32 a, s32 b, void** args);
 
 void func_00124FC0(PlacedObject* self, f32 f)
 {
-    func_00165FE0(self->sub22C, self, f);
+    UpdateAttachments(self->sub22C, self, f);
     if (self->f284 != 0) {
         func_001B2140(self->f284, f);
     }
@@ -797,10 +797,10 @@ void func_00124FC0(PlacedObject* self, f32 f)
             obj->vtable->update(obj, f);
         }
     }
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
     void* args[1];
     args[0] = &f;
-    func_001837E0(self, 1, 1, args);
+    TriggerScriptEvent(self, 1, 1, args);
 }
 
 struct Ctx_124CC0 { Animation* node; void* key; s32 mode; f32 value; f32 f10; };
@@ -857,7 +857,7 @@ void func_00124CC0(PlacedObject* self)
     }
     fr.key = node->id;
     fr.object = self;
-    func_0012C288(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
+    CreateAnimationPlayer(node, self, 1, &fr, fr.tmp, ctx->f10, 0, 0);
 }
 
 struct Fl_1276C0 {
@@ -904,7 +904,7 @@ void func_001276C0(PlacedObject* self, PlacedObject* other)
         do {
             if ((n->desc->flags ^ 1) & 1)
                 continue;
-            PlacedObject* h = func_0015A418(self->world, 2, n->id, other);
+            PlacedObject* h = FindFirstObjectById(self->world, 2, n->id, other);
             if (h == 0)
                 continue;
             if ((h->desc->flags ^ 1) & 1)

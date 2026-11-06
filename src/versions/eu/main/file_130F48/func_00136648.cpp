@@ -12,6 +12,6 @@ f32 func_00136648(S_136648_eu* s) {
     case 3:
     case 4:
     default:
-        return func_001AA8A8(s);
+        return GetScreenElementSlideOutTime(s);
     }
 }

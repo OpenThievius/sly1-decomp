@@ -15,5 +15,5 @@ s32 func_0011E048(void* a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 
     buf.w5 = a7;
     buf.w6 = a8;
     buf.w7 = a9;
-    return func_0011D968(0x2C, 0x20, &buf);
+    return SendIopCommandAndWait(0x2C, 0x20, &buf);
 }

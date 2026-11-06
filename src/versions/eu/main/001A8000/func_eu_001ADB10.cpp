@@ -26,14 +26,14 @@ s32 func_0015C188(s32 i);
 void func_eu_001ADB10(Self_eu_1ADB10* self)
 {
     func_eu_001AAFB0(self);
-    V24A2* o = func_0015C1C0(0);
+    V24A2* o = GetFontById(0);
     Sub_eu_1ADB10* sub = (Sub_eu_1ADB10*)o->vt;
     self->f4 = sub->fnC((u8*)o + sub->off8, 1.0f, 1.0f);
     self->f51C = 0.8f;
     self->f558 = 0.5f;
-    if (func_0015C188(2) != 0) {
+    if (IsFontLoaded(2) != 0) {
         self->f520 = D_eu_0027DB60;
-        s32 r = (s32)func_0015C1C0(2);
+        s32 r = (s32)GetFontById(2);
         *self->f520 = r;
     }
 }

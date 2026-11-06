@@ -4,7 +4,7 @@ V24A2_Glyph* func_0015DAB8(V24A2* self, u16 key);
 
 f32 func_0015CD18(f32 x, f32 y, V24A2* self, u16 key, u32 color, V24A0* s)
 {
-    V24A2_Glyph* e = func_0015DAB8(self, key);
+    V24A2_Glyph* e = FindFontGlyph(self, key);
     if (e != 0) {
         s32 shift = (s32)((self->f60u >> 30) & 0xF);
         s32 s4 = 1 << shift;
@@ -14,7 +14,7 @@ f32 func_0015CD18(f32 x, f32 y, V24A2* self, u16 key, u32 color, V24A0* s)
         f32 py = y + h;
         if (0.0f <= px && x <= 640.0f && 0.0f <= py && y <= 468.61017f) {
             u32 tag = (color & 0xFFFFFF) | ((((color >> 24) + 1) & 0x1FE) << 23);
-            func_001617E8(s, tag, 0.0f);
+            AddGifRegListFloat(s, tag, 0.0f);
             func_00161860(s, e->u << 4, (s4 - e->v) << 4);
             func_001618C0(s, (s32)((x + 1728.0f) * 16.0f),
                           (s32)((y * 0.5462963f + 1920.0f) * 16.0f), self->f40, 0);

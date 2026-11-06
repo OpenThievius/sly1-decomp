@@ -10,11 +10,11 @@ void func_0016BDD0(Mgr_16BDD0_eu* self, s32 flag)
     }
     if (flag != 0) {
         s32 bit = 15;
-        func_0016E0F0(1);
-        func_0016EC88(&D_00262C70);
+        SetPadSelectFlags(1);
+        ResetPadStepRepeat(&g_padRecord);
         self->vtbl[14](self);
-        s32 mask = func_0016BB78(15);
-        GameProgress* g = D_002623C0;
+        s32 mask = TestGridEntryBit(15);
+        GameProgress* g = g_saveData;
         for (; bit > 0; bit--) {
             if (g->u19F4 & mask) {
                 break;
@@ -23,7 +23,7 @@ void func_0016BDD0(Mgr_16BDD0_eu* self, s32 flag)
         }
         self->x570 = bit;
     } else {
-        func_0016E118(1);
+        ClearPadSelectFlags(1);
         self->vtbl[15](self);
     }
     self->x56C = flag;

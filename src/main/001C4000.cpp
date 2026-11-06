@@ -16,7 +16,7 @@ void func_001C4C20(void* self);
 
 void func_001C4ED0(TurningCollider* self)
 {
-    func_00192B58(self);
+    UpdateSwitchedCollider(self);
     func_001C4C20(self);
 }
 
@@ -43,7 +43,7 @@ void func_001C5D58(TurningCollider* self)
 {
     Vec02 q = self->v160;
     f32 r = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    func_001EA728((u8*)self + 0x6E0, &q.z, r, self->f638, 0.0f);
+    ApproachAngleWithRamp((u8*)self + 0x6E0, &q.z, r, self->f638, 0.0f);
     self->desc02()->m21(self, &q);
 }
 
@@ -54,11 +54,11 @@ void func_001C7B60(Agent* self)
 {
     if (self->fB84 != 0) return;
     if (self->fB88 != 0) return;
-    if (D_00262E10 != 0 && D_00262E10->f275C != 0) return;
+    if (g_player != 0 && g_player->f275C != 0) return;
     for (;;) {
         s32 v = ((VFn_C7B60*)self->desc)[0x174 / 4](self);
         if (v == self->f724) break;
-        func_001C8F20(self, v, 0);
+        ChangeAgentState(self, v, 0);
     }
 }
 
@@ -67,7 +67,7 @@ void func_001C5148(void* self);
 
 void func_001C5118(TurningCollider* self)
 {
-    func_001B9338(self);
+    StepCollider(self);
     func_001C5148(self);
 }
 
@@ -106,7 +106,7 @@ f32 func_00205778(f32 a, f32 b);
 
 void func_001C4FA0(TurningCollider* self, Vec2_1C4FA0* v)
 {
-    func_001B97E0(self, v);
+    SetColliderRotation(self, v);
     f32 r = func_00205778(v->y, v->x);
     self->f638 = r;
     self->f630 = r;
@@ -192,7 +192,7 @@ void func_00159478(s32* p, Agent* self);
 void func_001C71E0(Agent* self)
 {
     s32 v;
-    func_001249A8(self);
+    PostLoadPlacedObject(self);
     if (self->f924 != -1) {
         self->f928 = func_0015A448((s32)self->world, self->f924, self);
     }
@@ -202,10 +202,10 @@ void func_001C71E0(Agent* self)
     v = self->fAF8;
     if (v != 0) {
         if (self->fAFC != -1) {
-            self->fB00 = func_0015A418((s32)self->world, 0x101, self->fAFC, self);
+            self->fB00 = FindFirstObjectById((s32)self->world, 0x101, self->fAFC, self);
         }
     } else {
-        func_00159478(&self->fB00, self);
+        FindOrBuildMemberGroup(&self->fB00, self);
     }
 }
 
@@ -222,7 +222,7 @@ void func_001CB648(void* list, void* value);
 
 void func_001C74E8(Agent* self)
 {
-    func_00192820(self);
+    RegisterSwitchedCollider(self);
     if (self->f720 != 0) {
         func_001CB648(self->f720, self);
     }
@@ -241,7 +241,7 @@ void func_001C5E50(void* self, f32 x);
 
 void func_001C4458(TurningCollider* self)
 {
-    func_001921A8(self);
+    InitSwitchedCollider(self);
     self->f700 = 1.0f;
     self->f360 = D_00274B20;
     func_001C5E50(self, 1.0f);
@@ -295,7 +295,7 @@ void func_001C4790(void* unused, void* a1, void* a2, Obj_1C4790* self)
     s32 n;
     s32 idx;
     if (self->f50 == 0) return;
-    n = func_00141C90(a1, a2, (u8*)self + 0x70, (u8*)self + 0x60, 2, ents);
+    n = CollectColliderSpansInTree(a1, a2, (u8*)self + 0x70, (u8*)self + 0x60, 2, ents);
     idx = 0;
     if (n > 0) {
         if (ents[0].f40 == 0.0f) idx = 1;
@@ -318,21 +318,21 @@ void func_001C4A80(Player* self, f32* p, f32 f) {
     f32 old = self->f6C4;
     f32 ang;
     self->f6C4 = f;
-    if (D_0026185C[0] - self->f6C8 < D_00274B60[0]) return;
-    if (func_001EAFE0(f - p[0], 1.0f) < 0.5f && 0.5f < func_001EAFE0(old - p[0], 1.0f)) {
+    if (g_gameTime[0] - self->f6C8 < D_00274B60[0]) return;
+    if (WrapModulo(f - p[0], 1.0f) < 0.5f && 0.5f < WrapModulo(old - p[0], 1.0f)) {
         ang = p[2];
-    } else if (func_001EAFE0(self->f6C4 - p[1], 1.0f) < 0.5f && 0.5f < func_001EAFE0(old - p[1], 1.0f)) {
+    } else if (WrapModulo(self->f6C4 - p[1], 1.0f) < 0.5f && 0.5f < WrapModulo(old - p[1], 1.0f)) {
         ang = p[3];
     } else {
         return;
     }
-    s32 idx = func_001EAA70(0x47, 0x4A);
+    s32 idx = RandomIntInRange(0x47, 0x4A);
     if (idx == D_00605548) {
         s32 x = idx - 0x46;
         idx = x % 4 + 0x47;
     }
     D_00605548 = idx;
-    func_001BFCD8(idx, 0, 0, (u8*)&self->v140, 0, 0, 1000.0f, 200.0f, ang, 0.0f, 0.0f);
+    StartSoundEffect(idx, 0, 0, (u8*)&self->v140, 0, 0, 1000.0f, 200.0f, ang, 0.0f, 0.0f);
     func_001C0EC0();
 }
 
@@ -356,14 +356,14 @@ extern u8 D_00261420[];
 
 void func_001C72A0(Agent* self)
 {
-    func_001C44F0(self);
-    func_00124DF8(self, 2, (u8*)D_00274C30);
+    StartTurningCollider(self);
+    ResolveObjectLinks(self, 2, (u8*)D_00274C30);
     if (self->f720 == 0) {
         void* t = func_001CB5B8(self->world);
         self->f720 = t;
         func_001CB648(t, self);
     }
-    func_001CA7C0(self);
+    ResolveAgentClips(self);
     for (s32 i = 0; i < 17; i++) {
         void* item = self->f870[i].obj;
         if (item != 0) {
@@ -379,7 +379,7 @@ void func_001C72A0(Agent* self)
         bit <<= 28;
         Elem08* e = self->fA7C;
         do {
-            Collider* o = (Collider*)func_0015A418(self->world, 0x101, e->key, self);
+            Collider* o = (Collider*)FindFirstObjectById(self->world, 0x101, e->key, self);
             e->obj = o;
             if (o != 0) {
                 o->flags538 |= bit;
@@ -391,15 +391,15 @@ void func_001C72A0(Agent* self)
     }
     if (self->fB04 != 0) {
         if (self->fB08 != -1) {
-            self->fB0C = func_0015A418(self->world, 0x101, self->fB08, self);
+            self->fB0C = FindFirstObjectById(self->world, 0x101, self->fB08, self);
         }
     } else {
-        self->fB0C = func_0015A838(self->world, 0x101, 0x8C, self);
+        self->fB0C = FindFirstObjectByIdGathered(self->world, 0x101, 0x8C, self);
     }
     func_001C5EA8(self, self->f700);
-    func_001C8F20(self, 0, 0);
-    if (func_00141008(D_00261420, self->fB10)) {
-        func_001DBCC8(self->world, (void*)func_001C7278, self, 0, 0);
+    ChangeAgentState(self, 0, 0);
+    if (TestFlagTableBit(g_flagTable, self->fB10)) {
+        AppendQueuedCall(self->world, (void*)func_001C7278, self, 0, 0);
     }
 }
 
@@ -410,7 +410,7 @@ void func_0019D338(Player* self, s32 v, s32 w, void* blk);
 
 void func_001C6890(Player* s)
 {
-    if (s->f2200 != 0 && func_00182FC8(s->f2200) == 0) {
+    if (s->f2200 != 0 && IsObjectAttached(s->f2200) == 0) {
         s32 v = s->f223C;
         s->f2200 = 0;
         s->f2204 = 0;
@@ -497,7 +497,7 @@ void func_001C7188(Agent* self, s32 v)
 {
     s32 b = self->fB10;
     s32 a = (s32)self->f720;
-    func_001921E8(self, v);
+    CopySwitchedCollider(self, v);
     self->fB10 = b;
     self->f720 = (void*)a;
     self->fB74 = v;
@@ -510,8 +510,8 @@ void func_001C4578(void* self, s32 a1);
 
 void func_001C44F0(TurningCollider* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 6, D_00274AD8);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 6, g_turningColliderLinks);
     func_001C4578(self, 1);
     if (self->f628 == 0) {
         self->f610 = self->f620;
@@ -524,7 +524,7 @@ void func_001C44F0(TurningCollider* self)
         self->f614 = self->f62C;
     }
     Mat02* dst = &self->m660;
-    *dst = D_002483D0;
+    *dst = g_identityMatrix;
 }
 
 
@@ -534,14 +534,14 @@ void func_00188850(void* table, f32 x, void* out);
 
 void func_001C7AE0(Agent* self, f32 x, f32 y)
 {
-    if (func_001CB578(self) != 0) return;
+    if (IsAgentFacingBlocked(self) != 0) return;
     s32 t = self->fB1C;
     self->f638 = x;
     self->fB24 = y;
     if (t != 0) {
         func_001892A0(x, y, (u8*)self + 0x660);
     } else {
-        func_00188850((u8*)&D_00248D20, x, (u8*)self + 0x660);
+        BuildAxisAngleMatrix((u8*)&g_unitZVector, x, (u8*)self + 0x660);
     }
 }
 
@@ -557,7 +557,7 @@ s32 func_001A8820(void* p, Collider* obj);
 
 s32 func_001C7468(Agent* self, Collider* obj)
 {
-    if (func_001B8A08(self, obj) != 0) {
+    if (TestCollidersMayContact(self, obj) != 0) {
         return 1;
     }
     if (self->fB0C != 0) {
@@ -577,7 +577,7 @@ void func_00188850(const Vec02* t, f32 x, void* p);
 
 void func_001C53B0(TurningCollider* self)
 {
-    func_00188850(&D_00248D20, self->f638, (u8*)self + 0x660);
+    BuildAxisAngleMatrix(&g_unitZVector, self->f638, (u8*)self + 0x660);
 }
 
 extern f32 D_0024D654;
@@ -588,13 +588,13 @@ void func_001CB6F8(void* a, Agent* b);
 
 void func_001C7520(Agent* self)
 {
-    func_00192850(self);
+    UnregisterSwitchedCollider(self);
     if (self->f7E0 != 0) {
-        func_0012E760(self->f7E0);
+        StopAnimationPlayer(self->f7E0);
         self->f7E0 = 0;
     }
     if (self->f754 != 0) {
-        func_0012E760(self->f754);
+        StopAnimationPlayer(self->f754);
         self->f754 = 0;
     }
     if (self->f720 != 0) {
@@ -618,10 +618,10 @@ f32 func_001EA408(f32 a);
 
 void func_001C5438(TurningCollider* self)
 {
-    func_001B89B8(self);
+    RecomputeColliderFrame(self);
     f32 t = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    f32 ay = __builtin_fabsf(func_001EA408(self->f638 - t));
-    f32* lim = D_00275C60;
+    f32 ay = __builtin_fabsf(WrapAngle(self->f638 - t));
+    f32* lim = g_unitRange;
     Vec02* p = &self->v6F0;
     f32 v = self->v6F0.x + ay * (p->y + ay * p->z);
     f32 lo = lim[0];
@@ -679,18 +679,18 @@ void func_001C6928(Player* self, Other_1C6928* other)
         break;
     }
     if (held != 0)
-        self->f21C8 = D_0026185C[0];
+        self->f21C8 = g_gameTime[0];
 tail:
     s32 st = self->f223C;
     if (st == -1) {
         if (flag != 0) {
-            if (D_0026185C[0] - self->f21C8 < 0.35f) st = 3;
+            if (g_gameTime[0] - self->f21C8 < 0.35f) st = 3;
         }
     } else if (st >= -1) {
         if (st < 8) {
             if (st >= 4) {
                 if (flag != 0 && self->f2248 != 0) {
-                    if (D_0026185C[0] - self->f21C8 < 0.35f) st = 3;
+                    if (g_gameTime[0] - self->f21C8 < 0.35f) st = 3;
                 }
             }
         }
@@ -709,7 +709,7 @@ void func_00192990(Agent* self, s32 a);
 
 void func_001C6F48(Agent* self)
 {
-    func_001C4458(self);
+    InitTurningCollider(self);
     f32 c300 = 300.0f;
     F(s32, 0x724) = -1;
     F(s32, 0x924) = -1;
@@ -726,7 +726,7 @@ void func_001C6F48(Agent* self)
     s32 m = -1;
     for (i = 16; i >= 0; i--) F(s32, 0x870 + i * 8) = m;
     f32 one = 1.0f;
-    s32 r = func_00140FF8((Tbl_1C6F48*)D_00261420);
+    s32 r = TakeFlagTableIndex((Tbl_1C6F48*)g_flagTable);
     s32 s1 = 1;
     s32 s0 = -1;
     F(s32, 0xB10) = r;
@@ -735,7 +735,7 @@ void func_001C6F48(Agent* self)
     F(s32, 0xB4C) = s0;
     F(f32, 0xB30) = one;
     F(s32, 0xB58) = s0;
-    func_00192990(self, 0);
+    SetSwitchedColliderEnabled(self, 0);
     f32 d = D_0024D650;
     F(f32, 0x700) = 1.5f;
     F(f32, 0xB18) = -1.0f;
@@ -775,10 +775,10 @@ extern s32 D_00274C20[4];
 
 void func_001C7140(Agent* self, void* a1)
 {
-    func_001BAC30(self, a1);
-    func_00124DF8(self, 1, D_00274C20);
-    func_001CA7C0(self);
-    func_001CA8E8(self);
+    LoadCollider(self, a1);
+    ResolveObjectLinks(self, 1, D_00274C20);
+    ResolveAgentClips(self);
+    ResolveAgentSecondaryClips(self);
 }
 
 struct Arg_1C5248 { u8 pad0[0x88]; f32 f88; u8 pad1[0x9C - 0x8C]; s32 f9C; s32 fA0; s32 fA4; };

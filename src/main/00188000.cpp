@@ -103,7 +103,7 @@ void func_00188B08(Quad16* a, Quad16* b, Quad16* dst)
 
 void func_00188CE0(f32* p)
 {
-	func_001EA480((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
+	ClampToMagnitude((p[0] + p[5] + p[10] - 1.0f) * 0.5f, 1.0f);
 }
 
 struct Span_188FD8 { f32 w[11]; };
@@ -149,12 +149,12 @@ void func_001891C0(u8* self, void* arg, Quad16* out)
 
 void* func_00189AF0(void* a0, void* a1)
 {
-	return func_00189438(4, a0, a1);
+	return InvertSquareMatrix(4, a0, a1);
 }
 
 void func_0018A388(C0C* self)
 {
-	func_001C6F48(self);
+	InitAgent(self);
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
 
@@ -163,8 +163,8 @@ void func_00124DF8(void* self, s32 n, void* data);
 
 void func_0018A3B8(C0C* self)
 {
-    func_001C7140(self);
-    func_00124DF8(self, 2, D_00264910);
+    LoadAgent(self);
+    ResolveObjectLinks(self, 2, D_00264910);
 }
 
 void func_001C91C8(void* self);
@@ -173,7 +173,7 @@ void func_0018C7F8(void* p);
 
 void func_0018AB88(C0C* self)
 {
-    func_001C91C8(self);
+    EnterAgentState(self);
     s32 st = self->f724;
     if (st != 0xB) {
         if (st == 0x10) {
@@ -182,8 +182,8 @@ void func_0018AB88(C0C* self)
             self->fA68 = n + 1;
         }
     } else {
-        func_001603E8(2);
-        func_0018C7F8(&g_memoryCard);
+        MarkLevelDone(2);
+        StartMemoryCardSave(&g_memoryCard);
     }
 }
 
@@ -201,14 +201,14 @@ s32 func_0018ABF0(C0C* self)
                 return 2;
         }
     }
-    return func_001C8010(self);
+    return ChooseAgentState(self);
 }
 
 void func_001C7CB8(void);
 
 void func_0018ACD0(void)
 {
-    func_001C7CB8();
+    UpdateAgent();
 }
 
 typedef void (*VFn_18ACF0)(void* self);
@@ -230,15 +230,15 @@ void func_0018ACF0(C0C* self)
     case 0x43A:
     case 0x43C:
     case 0x43E:
-        pick = func_001E9970();
+        pick = AreMenusAndFadeClear();
         break;
     default:
         break;
     }
     if (pick)
-        D_0026E248.vtbl[14](&D_0026E248);
+        g_gaugeBarElement.vtbl[14](&g_gaugeBarElement);
     else
-        D_0026E248.vtbl[15](&D_0026E248);
+        g_gaugeBarElement.vtbl[15](&g_gaugeBarElement);
 }
 
 extern void func_001C9008(void*);
@@ -246,11 +246,11 @@ extern void func_001B64D8(s32, s32);
 
 void func_0018B2E8(C0C* self)
 {
-    func_001C9008(self);
+    LeaveAgentState(self);
     if (self->f724 == 16) {
         s32 token = self->fE3C;
         if (token == -1) return;
-        func_001B64D8((s32)self->fE10, token);
+        SetStateWalkerTarget((s32)self->fE10, token);
         self->fE3C = -1;
     }
 }
@@ -258,8 +258,8 @@ void func_0018B2E8(C0C* self)
 void func_0018B580(void)
 {
 	func_002093F0();
-	func_0018B5C0(&g_backgroundJob);
-	func_0018BD58(&g_memoryCard, 0, 0);
+	InitBackgroundJob(&g_backgroundJob);
+	InitMemoryCard(&g_memoryCard, 0, 0);
 }
 
 struct Obj_18B720 { void* f0; void* f4; };
@@ -272,7 +272,7 @@ void func_001F6B40(void* a);
 
 void func_0018B720(Obj_18B720* a0)
 {
-    if (func_0018B770(&g_backgroundJob)) {
+    if (IsBackgroundJobRunning(&g_backgroundJob)) {
         func_001F6A50(a0->f4, 1);
     }
     func_001F6B60(a0->f0);
@@ -330,7 +330,7 @@ void* func_001E2138(void* dst, void* src);
 void func_0018B780(Src_18B780* s, Dst_18B780* d)
 {
     func_001F5C0C(d, 0, 0x5C);
-    func_001E2138(d, s->sub20);
+    CopyString(d, s->sub20);
     d->f44 = s->f10;
     if (s->f14 & 0x1) {
         *(s32*)((u8*)d + 0x48) |= 0x1;
@@ -395,21 +395,21 @@ s32 func_0018B930(s32 value)
 s32 func_0018BC90(void* a0, void* a1, s32* a2)
 {
     Pair_18BC90 t;
-    s32 r = func_0018B930(func_00209B80(a0, &t.a, &t.b));
+    s32 r = ClassifyMemoryCardSyncResult(func_00209B80(a0, &t.a, &t.b));
     if (a2) {
         *a2 = t.b;
     }
     if (r == 0x21) {
-        r = func_0018B988(a1, t.b);
+        r = MapMemoryCardErrorCode(a1, t.b);
     }
     return r;
 }
 
 s32 func_0018BD00(s32 value, void* first, s32 second)
 {
-	s32 result = func_0018B910(value);
+	s32 result = ClassifyMemoryCardCallResult(value);
 	if (result == 29)
-		result = func_0018BC90(0, first, (s32*)second);
+		result = SyncMemoryCardResult(0, first, (s32*)second);
 	return result;
 }
 
@@ -462,9 +462,9 @@ void func_001C8F20(void* node, s32 kind, s32 flag);
 
 void func_0018AC58(C0C* self)
 {
-    func_001AC060((u8*)&D_0026E248);
+    DecrementGaugeCount((u8*)&g_gaugeBarElement);
     s32 idx = self->fE28;
-    func_001C8F20(self, D_002649D8[idx], self->fE30[idx]);
+    ChangeAgentState(self, D_002649D8[idx], self->fE30[idx]);
     s32 n = self->fE28;
     self->fE3C = D_002649E8[n];
     self->fE28 = n + 1;
@@ -482,25 +482,25 @@ void func_00194D30(Glob_18BDC8* g, s32 a, s32 b);
 
 void func_0018BDC8(MemoryCard* self)
 {
-    if (func_0018B770(&g_backgroundJob) != 0) return;
+    if (IsBackgroundJobRunning(&g_backgroundJob) != 0) return;
     if (self->state == self->targetState) {
-        if (self->nextPollTime <= D_00261868[0])
-            func_0018B670(&g_backgroundJob, (void*)func_0018D0A0, self);
+        if (self->nextPollTime <= g_elapsedTime[0])
+            StartBackgroundJob(&g_backgroundJob, (void*)PollMemoryCard, self);
     } else {
-        func_0018C028(self, self->targetState);
+        SetMemoryCardState(self, self->targetState);
     }
-    if (func_0018B770(&g_backgroundJob) != 0) return;
-    if (self->displayMode == 1 && D_00261868[0] - self->stateTime >= 0.3f) {
+    if (IsBackgroundJobRunning(&g_backgroundJob) != 0) return;
+    if (self->displayMode == 1 && g_elapsedTime[0] - self->stateTime >= 0.3f) {
         if (self->i4F44 != 0) {
-            if (self->state != 5) func_00194D30(D_0026FF68, 1, 0x15);
-        } else if (D_0026FF68->f25C != 0 && D_0026FF68->f268 == 0x11) {
-            if (self->state != 5) func_00194D30(D_0026FF68, 1, 0x20);
+            if (self->state != 5) SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x15);
+        } else if (g_pauseMenuElement->f25C != 0 && g_pauseMenuElement->f268 == 0x11) {
+            if (self->state != 5) SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x20);
         } else {
             switch (self->state) {
-            case 1: func_00194D30(D_0026FF68, 1, 3); break;
-            case 2: func_00194D30(D_0026FF68, 1, 4); break;
-            case 3: func_00194D30(D_0026FF68, 1, 7); break;
-            case 4: func_00194D30(D_0026FF68, 1, 10); break;
+            case 1: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 3); break;
+            case 2: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 4); break;
+            case 3: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 7); break;
+            case 4: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 10); break;
             }
         }
     }
@@ -528,7 +528,7 @@ s32 func_0018A9A8(C0C* self)
     void* sub;
     s32 code;
 
-    if (D_0026185C < *(f32*)(obj + 0x748)) {
+    if (g_gameTime < *(f32*)(obj + 0x748)) {
         return 0;
     }
     sub = ((FnSelf_18A9A8)(*(void***)obj)[0x198 / 4])(obj);
@@ -571,7 +571,7 @@ s32 func_001E2268(s32 a, s32 b);
 
 void func_0018B5C0(BackgroundJob* self)
 {
-    s32 r = func_001E2268(1, 1);
+    s32 r = CreateLockSemaphore(1, 1);
     self->semaphoreId = r; self->thread = -1; self->result = 0x22;
 }
 
@@ -583,7 +583,7 @@ void func_0018BD58(MemoryCard* self, s32 a, s32 b)
     func_001F5C0C(self, 0, 0x4F50);
     self->state = -1;
     self->targetState = 0;
-    func_0018C178(self, 0);
+    SetMemoryCardDisplayMode(self, 0);
     self->port = (void*)a;
     self->slot = (void*)b;
     self->i4F48 = 0;
@@ -605,10 +605,10 @@ s32 func_0018A910(C0C* self, void* a1, void* a2)
     u8 buf[0x70];
     s32 x;
     s32 y;
-    func_0018D608(self, a1, a2);
+    PushBackMemoryMark(self, a1, a2);
     func_001DC238(self->world, 0, a1, a2, func_0018A830, self, &x, &y);
     s32 r = func_0018A6C0(0, a1, a2, x, y, buf, D_002649C4);
-    func_0018D6F0();
+    PopBackMemoryMark();
     return r != 0;
 }
 
@@ -622,7 +622,7 @@ void func_0018B460(C0C* a0, f32* a1)
     switch (kind) {
     case 0x43A:
         {
-            f32 v = D_002623C8->dt * 1.3f - 0.3f;
+            f32 v = g_currentEntry->dt * 1.3f - 0.3f;
             f32 one = 1.0f;
             if (v < 0.0f) {
                 v = 0.0f;
@@ -634,7 +634,7 @@ void func_0018B460(C0C* a0, f32* a1)
         break;
     case 0x43C:
         {
-            f32 v = D_002623C8->dt * 1.3f - 0.3f;
+            f32 v = g_currentEntry->dt * 1.3f - 0.3f;
             f32 one = 1.0f;
             if (v < 0.0f) {
                 v = 0.0f;
@@ -645,7 +645,7 @@ void func_0018B460(C0C* a0, f32* a1)
         }
         break;
     default:
-        *a1 = D_002623C8->dt * D_002623C8->dt;
+        *a1 = g_currentEntry->dt * g_currentEntry->dt;
         break;
     }
 }
@@ -711,7 +711,7 @@ extern u8 D_00248D20[];
 
 void func_00189350(Obj_189350* self, void* value)
 {
-    func_00189C28(self, D_00248D20, value);
+    func_00189C28(self, g_unitZVector, value);
 }
 
 // was NEAR: 2 lines: retail has addiu s2 (self+0xE30) before the first call and li s3,2 in its delay slot; ours swaps them. About 20 rewrites (for/do-while, init placement, decl order, cast offsets) all give the same two swapped lines.
@@ -736,19 +736,19 @@ void func_0018A3F0(C0C* self)
     s32 n;
     s32 i;
 
-    func_001C72A0(self);
+    StartAgent(self);
     func_001DDC38(self->world, self);
-    func_00124DF8(self, 3, D_00264928);
+    ResolveObjectLinks(self, 3, D_00264928);
     func_001D36F0(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
     self->f758[12].obj = (void*)self->fE00;
-    self->fE10 = func_001B6290(self->fE0C, 0, 0x438, 0);
+    self->fE10 = CreateStateWalker(self->fE0C, 0, 0x438, 0);
     for (n = 0; n < 3; n++)
-        self->fE30[n] = func_001CA758(self, D_00264950[n]);
+        self->fE30[n] = ResolveAgentClip(self, D_00264950[n]);
     self->fE20 = 6;
-    self->fE24 = (Ent_18A3F0*)func_0018D568(0x48, D_00264960);
+    self->fE24 = (Ent_18A3F0*)CopyToFrontMemory(0x48, D_00264960);
     for (i = 0; i < self->fE20; i++) {
         Ent_18A3F0* e = ((Ent_18A3F0*)self->fE24) + i;
-        e->value = func_0015A418(self->world, 1, e->key, self);
+        e->value = FindFirstObjectById(self->world, 1, e->key, self);
     }
 }
 
@@ -910,7 +910,7 @@ s32 func_001897F0(Mat_1897F0* in, Mat_1897F0* out)
     f32 t;
     s32 ok = 0;
     m = *in;
-    *out = D_002483D0;
+    *out = g_identityMatrix;
     for (i = 0; i < 3; i++) {
         j = i;
         f32 best = __builtin_fabsf(m.f[i][j]);
@@ -1041,9 +1041,9 @@ void func_001EAD88(f32 angle, f32* a, f32* b);
 void func_00188A20(f32* in, f32* out)
 {
     f32 sc[6];
-    func_001EAD88(in[0], &sc[0], &sc[1]);
-    func_001EAD88(in[1], &sc[2], &sc[3]);
-    func_001EAD88(in[2], &sc[4], &sc[5]);
+    ComputeSinCos(in[0], &sc[0], &sc[1]);
+    ComputeSinCos(in[1], &sc[2], &sc[3]);
+    ComputeSinCos(in[2], &sc[4], &sc[5]);
     f32 sa = sc[0], ca = sc[1], sb = sc[2], cb = sc[3], cg = sc[5], sg = sc[4];
     f32 sasb = sa * sb;
     f32 casb = ca * sb;
@@ -1070,7 +1070,7 @@ s32 func_0018A830(void* self, Rec_18A830* rec)
     s32* e = D_002649B0;
     u32 i;
     for (i = 0; i < 5; e++, i++) {
-        if (func_001300E8(rec->sub, *e) != 0) {
+        if (IsObjectOfKind(rec->sub, *e) != 0) {
             break;
         }
     }
@@ -1080,12 +1080,12 @@ s32 func_0018A830(void* self, Rec_18A830* rec)
     if (rec->sub->desc->id == 3) {
         return 0;
     }
-    if (func_001300E8(rec->sub, 0x34) != 0) {
+    if (IsObjectOfKind(rec->sub, 0x34) != 0) {
         if (((VFn_18A830*)rec->sub->desc)[60](rec->sub, self) == 0) {
             return 0;
         }
     }
-    if (func_001833F0(rec->sub, 0x449) != 0 || func_001833F0(rec->sub, 0x44A) != 0) {
+    if (MatchesObjectId(rec->sub, 0x449) != 0 || MatchesObjectId(rec->sub, 0x44A) != 0) {
         return 0;
     }
     return 1;
@@ -1101,7 +1101,7 @@ void func_00188850(f32* axis, Mat4* mat, f32 angle)
     s32 j;
     f32 t;
 
-    func_001EAD88(angle, &s, &c);
+    ComputeSinCos(angle, &s, &c);
     t = 1.0f - c;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
@@ -1177,7 +1177,7 @@ void func_0018B340(C0C* self, s32 a1, Key_18B340* key)
             break;
         }
     }
-    func_001C9DE0(self, a1, key);
+    HandleAgentNotification(self, a1, key);
 }
 
 void func_0018D608(void);
@@ -1190,10 +1190,10 @@ void func_0018D6F0(void);
 s32 func_00189438(s32 n, f32* a, f32* b)
 {
     s32 ok = 0;
-    func_0018D608();
+    PushBackMemoryMark();
     s32 size = n * n * 4;
-    f32* m = (f32*)func_0018D658(size);
-    func_0018D800(m, a, size);
+    f32* m = (f32*)AllocateBackMemory(size);
+    CopyMemory(m, a, size);
     s32 i, j, k;
     f32 r;
     for (i = 0; i < n; i++) {
@@ -1248,7 +1248,7 @@ s32 func_00189438(s32 n, f32* a, f32* b)
     }
     ok = 1;
 done:
-    func_0018D6F0();
+    PopBackMemoryMark();
     return ok;
 }
 

@@ -6,16 +6,16 @@ struct Row_eu_001608C8 { s32 f0; u8 pad[0x448]; };
 
 s32 func_eu_001608C8(void)
 {
-    Ent_eu_001608C8* e = (Ent_eu_001608C8*)D_00247AF0;
-    Ent_eu_001608C8* end = (Ent_eu_001608C8*)((u8*)D_00247AF0 + 0x1EE8);
+    Ent_eu_001608C8* e = (Ent_eu_001608C8*)g_keyedEntries;
+    Ent_eu_001608C8* end = (Ent_eu_001608C8*)((u8*)g_keyedEntries + 0x1EE8);
     s32 mask = 0xE;
     do {
-        s32* p = (s32*)func_00160810(e->key);
+        s32* p = (s32*)GetLevelEntryByKey(e->key);
         mask &= (~e->flags | *p);
         e++;
     } while (e < end);
     s32 keep = ~2;
-    u8* base = (u8*)D_002623C0;
+    u8* base = (u8*)g_saveData;
     Row_eu_001608C8* r = (Row_eu_001608C8*)(base + 0x8A4);
     for (s32 i = 4; i >= 0; i--) {
         if ((r->f0 & 0x20) == 0) {

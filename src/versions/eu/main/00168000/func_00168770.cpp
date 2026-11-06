@@ -5,15 +5,15 @@ void func_00168770(V24A0* self, u8* color, s32 flag)
     V24A0 f;
     s32 x;
 
-    func_001611B8(&f);
-    func_001529C8(&f, 0x2C, self);
-    func_001613C0(&f, (s8)color[3] >= 0 ? 0x46 : 6, 1, 0xE);
-    func_00161708(&f, 1, (u64)color[0] | ((u64)color[1] << 8) | ((u64)color[2] << 16) | ((u64)color[3] << 24));
-    func_00161708(&f, 0x47, flag != 0 ? 0x32001 : 0x32000);
+    InitGifPacket(&f);
+    UsePacketBufferMemory(&f, 0x2C, self);
+    BeginGifTag(&f, (s8)color[3] >= 0 ? 0x46 : 6, 1, 0xE);
+    AddGifRegisterWrite(&f, 1, (u64)color[0] | ((u64)color[1] << 8) | ((u64)color[2] << 16) | ((u64)color[3] << 24));
+    AddGifRegisterWrite(&f, 0x47, flag != 0 ? 0x32001 : 0x32000);
     for (x = 0; x < 0x280; x += 0x20) {
-        func_00161708(&f, 5, (u64)((0x6C0 + x) << 4) | ((u64)(0x780 << 4) << 16));
-        func_00161708(&f, 5, (u64)((0x6E0 + x) << 4) | ((u64)(0x880 << 4) << 16));
+        AddGifRegisterWrite(&f, 5, (u64)((0x6C0 + x) << 4) | ((u64)(0x780 << 4) << 16));
+        AddGifRegisterWrite(&f, 5, (u64)((0x6E0 + x) << 4) | ((u64)(0x880 << 4) << 16));
     }
-    func_00161708(&f, 0x47, 0x70000);
-    func_00161200(&f);
+    AddGifRegisterWrite(&f, 0x47, 0x70000);
+    EndGifPacket(&f);
 }

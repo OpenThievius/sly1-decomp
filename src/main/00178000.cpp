@@ -16,8 +16,8 @@ void func_001C29E8(void* sub);
 
 void func_00178008(Player* self)
 {
-    func_001B9690(self);
-    func_001C29E8(self->f1520);
+    SetColliderPosition(self);
+    ResetTrailRing(self->f1520);
     self->f2768 = 0;
 }
 
@@ -25,7 +25,7 @@ void func_001B7968(void* self);
 
 void func_0017ADD0(C4A* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->mode = -1;
 }
 
@@ -37,7 +37,7 @@ s32 func_0017B510(C4A* self, s32 flag)
     if (flag != 0) {
         p = self->ptrC;
     }
-    return func_0012C918(p, self, 1, self->f604, 0.0f, 1.0f);
+    return ReplaceAnimationPlayer(p, self, 1, self->f604, 0.0f, 1.0f);
 }
 
 typedef void (*VFn_17BC20)(void* self);
@@ -62,7 +62,7 @@ s32 func_00182FC8(void* p);
 void func_0017BC20(Obj_17BC20* self, Comp_17BC20* next)
 {
     if (self->f58 != 0) {
-        func_001E2840(self->f58, -1);
+        SetOnOffObjectForcedState(self->f58, -1);
         self->f58->f2D0 = 0;
         if (self->f5C != 0) {
             self->f58->vtbl[7](self->f58);
@@ -71,19 +71,19 @@ void func_0017BC20(Obj_17BC20* self, Comp_17BC20* next)
     }
     if (next != 0) {
         self->f58 = next;
-        s32 isNull = func_00182FC8(next) == 0;
+        s32 isNull = IsObjectAttached(next) == 0;
         self->f5C = isNull;
         if (isNull != 0) {
             next->vtbl[6](next);
         }
         next->f2D0 = self->f3C;
-        func_001E2840(next, 1);
+        SetOnOffObjectForcedState(next, 1);
     }
 }
 
 void func_0017B598(C4A* self)
 {
-    func_0012C918(self->f60C, self, 1, self->f610, 0.0f, 1.0f);
+    ReplaceAnimationPlayer(self->f60C, self, 1, self->f610, 0.0f, 1.0f);
 }
 
 extern s32 D_00263E2C;
@@ -91,10 +91,10 @@ s32 D_00263E30 = 0;
 
 void func_0017B5D0(CountdownCollider* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->countdown = 0x10;
     D_00263E2C = -1;
-    D_00263E30 = 0;
+    g_timeoutFired = 0;
 }
 
 
@@ -103,8 +103,8 @@ void func_00124DF8(void* self, int n, void* table);
 
 void func_0017B610(CountdownCollider* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 3, D_00263E08);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 3, g_countdownTable);
 }
 
 void func_00182C18(void* self);
@@ -112,8 +112,8 @@ void* func_0018D500(int size);
 
 void func_0017B998(EntryQueue* self)
 {
-    func_00182C18(self);
-    self->buffer = func_0018D500(0xA00);
+    InitObject(self);
+    self->buffer = AllocateFrontMemory(0xA00);
     self->flag68 = 1;
 }
 
@@ -145,9 +145,9 @@ s32 func_0017B510(C4A* self, s32 a1);
 
 void func_0017AE00(C4A* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     f32 one = 1.0f;
-    func_00124DF8(self, 13, D_00263D58);
+    ResolveObjectLinks(self, 13, g_gaugeHolderLinks);
 
     func_00139038(self, 12, 4, self->grpA, 0, 0, 0, &self->ptrA);
     self->fA = one;
@@ -181,9 +181,9 @@ s32 func_0017B3A8(C4A* self, Msg_17B3A8* msg)
 {
     if (msg->f10 & 0x10) {
         if (msg->f4 == self->f608) {
-            func_001AC060(&D_0026E248);
+            DecrementGaugeCount(&g_gaugeBarElement);
             func_0017B598(self);
-            func_001837E0(self, 2, 0, 0);
+            TriggerScriptEvent(self, 2, 0, 0);
         }
     }
     return 1;
@@ -196,7 +196,7 @@ void func_0017B550(C4A* self, s32 index)
     if (index == -1) {
         self->f60C = 0;
     } else {
-        self->f60C = (void*)func_0015A418(self->world, 0x101, index, self);
+        self->f60C = (void*)FindFirstObjectById(self->world, 0x101, index, self);
     }
 }
 
@@ -222,7 +222,7 @@ void func_001921A8(void* self);
 
 void func_001793C0(C1B* self)
 {
-    func_001921A8(self);
+    InitSwitchedCollider(self);
     self->f610 = -1;
 }
 
@@ -240,18 +240,18 @@ s32 func_001B4688(s32 key);
 
 void func_001793F0(C1B* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 0x1A, D_00263AC8);
-    func_0012B5B8(self->f6E8, self->f680, self->f680);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);
+    SetFollowObjects(self->f6E8, self->f680, self->f680);
     ((Sub_1793F0*)self->f650)->fE0 = self->f660;
-    self->f658 = func_001B6290(self->f654, self, -1, 0);
+    self->f658 = CreateStateWalker(self->f654, self, -1, 0);
     func_00139038(self, 0xC, 5, &self->f684, 0, 0, 0, &self->f6C0);
     self->f684 = 1.0f;
     func_001399F8(self->f6C0, 0xC, 5, &self->f684);
     func_0017ABE8(self, 2);
     u8* base = (u8*)&D_00270650;
     ((Packed_1793F0*)(base + 0x288))->v = 0.0f;
-    *(s32*)(base + 0x284) = func_001B4688(0x36A);
+    *(s32*)(base + 0x284) = FindAnimRecord(0x36A);
 }
 
 void func_001C29E8(void* sub);
@@ -259,8 +259,8 @@ void func_00192820(void* self);
 
 void func_00178038(Player* self)
 {
-    func_001C29E8(self->f1520);
-    func_00192820(self);
+    ResetTrailRing(self->f1520);
+    RegisterSwitchedCollider(self);
 }
 
 typedef void (*VFn_179690)(void*);
@@ -300,7 +300,7 @@ void func_0017AB58(C1B* self, s32 kind, MessageBody* rec)
             break;
         }
     }
-    func_00192230(self, kind, rec);
+    HandleSwitchedColliderNotification(self, kind, rec);
 }
 
 struct __attribute__((aligned(16))) Quad_178598 {
@@ -341,12 +341,12 @@ void func_00178598(Player* self, Pair_178598* s2, f32 f)
     Frame_178598 fr;
     fr.fl = f;
     if (s2 == 0) {
-        func_00178D98(self, 0, 0, &fr.p0, &fr.fl);
+        ChooseBestTargetCandidate(self, 0, 0, &fr.p0, &fr.fl);
         s2 = (Pair_178598*)&fr.p0;
     }
     void* q1 = &fr.q1;
     func_001782C0(self, s2, fr.fl, q1, &fr.q0, &fr.q2);
-    ((Sub_178598*)self->f2514)->f18 = D_0026185C + fr.fl;
+    ((Sub_178598*)self->f2514)->f18 = g_gameTime + fr.fl;
     ((Sub_178598*)self->f2514)->q20 = fr.q0;
     ((Sub_178598*)self->f2514)->q30 = fr.q2;
     self->desc02()->m20(self, (Vec02*)q1);
@@ -384,7 +384,7 @@ s32 func_0017AA40(C1B* self, s32* arg)
     }
     if (func_00160C58() != 0) {
         self->f6D0 = 1;
-        self->f6D4 = *(f32*)&D_0026185C;
+        self->f6D4 = *(f32*)&g_gameTime;
     }
     if (self->f6D0 != 0) {
         self->f704 = 0;
@@ -423,17 +423,17 @@ s32 func_0017B7A8(CountdownCollider* self, ObjectEvent* msg)
         s32 n = self->countdown - 1;
         s32 pos = (0 < n);
         self->countdown = pos ? n : 0;
-        func_001AC060(&D_0026E248);
+        DecrementGaugeCount(&g_gaugeBarElement);
         if (self->countdown == 0) {
             D_00263E2C = 2;
             p = 0;
         } else {
             s32 flags = msg->extraFlags;
             if (flags & 2) {
-                if (D_00262E10 == 0) {
+                if (g_player == 0) {
                     p = self->f55C;
                 } else {
-                    s32 t = D_00262E10->f223C;
+                    s32 t = g_player->f223C;
                     if (t == 4 || t == 6) {
                         p = self->f55C;
                     } else {
@@ -446,11 +446,11 @@ s32 func_0017B7A8(CountdownCollider* self, ObjectEvent* msg)
                 p = self->f55C;
             }
         }
-        func_0012C918(p, self, 1, &self->record, 0.0f, 1.0f);
+        ReplaceAnimationPlayer(p, self, 1, &self->record, 0.0f, 1.0f);
         msg->eventFlags &= ~0x20;
-        func_001837E0(self, 2, 0, 0);
+        TriggerScriptEvent(self, 2, 0, 0);
     }
-    return func_001BC320(self, msg);
+    return HandleObjectEvent(self, msg);
 }
 
 struct Vt_17B9D0
@@ -496,18 +496,18 @@ void func_0017B9D0(Self_17B9D0* self, Node_17B9D0* n, Vec02* out, f32* outf)
     {
         goto tail;
     }
-    if (func_001300E8(n, 0x7E))
+    if (IsObjectOfKind(n, 0x7E))
     {
         func_001920B0(n, &v);
         r = *(f32*)(s1 + 0x638);
     }
-    else if (func_001300E8(n, 0x73))
+    else if (IsObjectOfKind(n, 0x73))
     {
-        func_001F3BD8(n, &v);
-        func_001F3C08(n, &a);
+        GetObjectWorldPosition(n, &v);
+        GetObjectWorldRotation(n, &a);
         r = func_00205778(a.y, a.x);
     }
-    else if (func_001300E8(n, 0x6E))
+    else if (IsObjectOfKind(n, 0x6E))
     {
         func_00128018(0, n->f18, s1 + 0x100, &a);
         {
@@ -522,7 +522,7 @@ void func_0017B9D0(Self_17B9D0* self, Node_17B9D0* n, Vec02* out, f32* outf)
         func_001280C0(n->f18, 0, &b, &c);
         r = func_00205778(c.y, c.x);
     }
-    else if (func_001300E8(n, 2))
+    else if (IsObjectOfKind(n, 2))
     {
         v = n->f140;
         r = func_00205778(((f32*)n)[0x114 / 4], ((f32*)n)[0x110 / 4]);
@@ -614,21 +614,21 @@ void func_0017B410(C4A* self, s32 mode)
     }
     if (mode >= 0) {
         if (mode < 2) {
-            Sys_17B410* sys = (Sys_17B410*)&D_0026E248;
+            Sys_17B410* sys = (Sys_17B410*)&g_gaugeBarElement;
             sys->f278 = 1.0f;
             sys->f26C = sys->f260;
             sys->f270 = sys->f264;
             sys->f274 = 0;
             func_001DDC38(self->world, self);
         } else if (mode < 4) {
-            Sys_17B410* sys = (Sys_17B410*)&D_0026E248;
+            Sys_17B410* sys = (Sys_17B410*)&g_gaugeBarElement;
             sys->vtbl[15](sys);
             func_001DDC38(self->world, 0);
         }
     }
-    (void)func_0012C918(x, self, 1, self->f558, 0.0f, 1.0f);
+    (void)ReplaceAnimationPlayer(x, self, 1, self->f558, 0.0f, 1.0f);
     *(s32*)((u8*)self + 0x550) = mode;
-    self->f554 = D_0026185C;
+    self->f554 = g_gameTime;
 done:
     return;
 }
@@ -647,11 +647,11 @@ void func_0017B648(CountdownCollider* self)
 {
     CountdownRecord* p;
 
-    func_001B93F8(self);
+    UpdateCollider(self);
     p = self->record;
     if (p != 0) {
         if (p->remaining == 0.0f) {
-            func_0012E760(p);
+            StopAnimationPlayer(p);
             self->record = 0;
         }
     }
@@ -659,9 +659,9 @@ void func_0017B648(CountdownCollider* self)
         func_0017B8C0(self, D_00263E2C);
     }
     if (self->mode == 2) {
-        if (D_00263E04 < D_0026185C - self->startTime) {
-            if (D_00263E30 == 0) {
-                D_00263E30 = 1;
+        if (g_timeoutLimit < g_gameTime - self->startTime) {
+            if (g_timeoutFired == 0) {
+                g_timeoutFired = 1;
                 func_00160578(2);
             }
         }
@@ -679,13 +679,13 @@ void func_0017B308(C4A* self)
     s32 mode = self->mode;
     if (mode < 2) {
         if (mode >= 0) {
-            if (func_001E9970(self) != 0) {
+            if (AreMenusAndFadeClear(self) != 0) {
                 if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
             }
         }
     }
-    if (busy) D_0026E248.vt->m14(&D_0026E248);
-    else D_0026E248.vt->m15(&D_0026E248);
+    if (busy) g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
+    else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
 extern s32 D_00270458;
@@ -696,11 +696,11 @@ s32 func_001E9970(void* self);
 void func_0017B710(CountdownCollider* self)
 {
     s32 busy = 0;
-    if (self->mode == 1 && func_001E9970(self) != 0) {
+    if (self->mode == 1 && AreMenusAndFadeClear(self) != 0) {
         if (D_00270458 != 3 || (D_00270B54 == 0 && D_002717CC == 0)) busy = 1;
     }
-    if (busy) D_0026E248.vt->m14(&D_0026E248);
-    else D_0026E248.vt->m15(&D_0026E248);
+    if (busy) g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
+    else g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
 }
 
 extern f32 D_00261858[];
@@ -730,23 +730,23 @@ void func_0017A788(C1B* self, void* s, void* out)
     *(u32*)col = 0x800000A0;
     if (self->f6D0 != 0) {
         if (self->f610 != 3) {
-            t = (D_00261858[1] - self->f6D8) * 0.5f;
+            t = (g_gameClock[1] - self->f6D8) * 0.5f;
         } else {
             t = 0.0f;
         }
-        u = func_00205210((D_00261858[1] - self->f6D4) * 10.0f);
+        u = func_00205210((g_gameClock[1] - self->f6D4) * 10.0f);
         a = D_00263D30[0] + t * (D_00263D30[1] + t * D_00263D30[2]);
-        hi = D_00275C60[1];
-        if (a < D_00275C60[0]) {
-            c1 = D_00275C60[0];
+        hi = g_unitRange[1];
+        if (a < g_unitRange[0]) {
+            c1 = g_unitRange[0];
         } else if (hi < a) {
             c1 = hi;
         } else {
             c1 = a;
         }
         b = D_00263D40[0] + u * (D_00263D40[1] + u * D_00263D40[2]);
-        lo = D_00275C60[0];
-        hi = D_00275C60[1];
+        lo = g_unitRange[0];
+        hi = g_unitRange[1];
         if (b < lo) {
             b = lo;
         } else if (hi < b) {
@@ -760,7 +760,7 @@ void func_0017A788(C1B* self, void* s, void* out)
     } else {
         res = D_002623E0;
     }
-    func_00126A48(self, *(u32*)&res);
+    SetObjectTreeRecordValue(self, *(u32*)&res);
     func_00125C90(self, s, out);
 }
 
@@ -792,7 +792,7 @@ void func_00179590(C1B* self, f32 f)
         goto path3;
     }
 single:
-    func_001B9338(self, f);
+    StepCollider(self, f);
     return;
 path2:
     func_001794E0(self, &a, &b);
@@ -865,16 +865,16 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
     f32 best;
     s32 cnt = 0;
 
-    v = func_0015A4F0(self->world, 5, 8, 0, 0x20, scratch);
-    func_0018D608();
-    buf = func_0018D6A8(n << 5);
+    v = GatherObjectsById(self->world, 5, 8, 0, 0x20, scratch);
+    PushBackMemoryMark();
+    buf = AllocateZeroedBackMemory(n << 5);
     for (s32 i = 0; i < n; i++) {
         Node_178D98* node = items[i];
-        if (func_00182FC8(node) != 0) {
+        if (IsObjectAttached(node) != 0) {
             Entry_178D98* e = buf + cnt;
             cnt = cnt + 1;
             e->node = node;
-            if (func_001300E8(node, 0x6E) != 0) {
+            if (IsObjectOfKind(node, 0x6E) != 0) {
                 func_00128018(0, node->f18, (Q_178D98*)&self->v140, &tmp);
                 Sub_178D98* s = node->f34;
                 if (s->vt->f28 != 0) {
@@ -902,7 +902,7 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
         goto done;
     for (s32 i = 0; i < self->f2768; i++) {
         Slot_178D98* q = &((Slot_178D98*)self->f2770)[i];
-        if (q->node == 0 || func_00182FC8(q->node) != 0) {
+        if (q->node == 0 || IsObjectAttached(q->node) != 0) {
             r = func_001788F0(self, q, v, scratch, &hit, &dist);
             if (r < best) {
                 best = r;
@@ -921,7 +921,7 @@ void func_00178D98(Player* self, s32 n, Node_178D98** items, Hit_178D98* out, f3
         *outf = 0.75f;
     }
 done:
-    func_0018D6F0();
+    PopBackMemoryMark();
 }
 
 ObjectLink D_00263AC8[26] = {

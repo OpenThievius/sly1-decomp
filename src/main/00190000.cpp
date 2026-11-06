@@ -20,9 +20,9 @@ extern void* D_00269C98[16];
 
 void* func_001925F0()
 {
-    s32 i = D_00269BCC;
+    s32 i = g_activeSwitchedCollider;
     if (i < 0) return 0;
-    return D_00269C98[i];
+    return g_switchedColliders[i];
 }
 
 extern s32 D_00269C90;
@@ -33,14 +33,14 @@ void func_001926D0(SwitchedCollider* self)
 {
     if (self->f550 == 0) return;
     if (self->parent != 0) return;
-    if (!func_00182FC8()) return;
-    if (func_00192688(self) >= 0) return;
-    s32 n = D_00269C90;
+    if (!IsObjectAttached()) return;
+    if (FindSwitchedColliderIndex(self) >= 0) return;
+    s32 n = g_switchedColliderCount;
     if ((u32)n < 16) {
-        D_00269C98[n] = self;
-        D_00269C90 = n + 1;
-    } else if (self->id == 5 && D_00262E10 == 0) {
-        D_00269C98[0] = self;
+        g_switchedColliders[n] = self;
+        g_switchedColliderCount = n + 1;
+    } else if (self->id == 5 && g_player == 0) {
+        g_switchedColliders[0] = self;
     }
 }
 
@@ -50,13 +50,13 @@ void func_001F5B08(void* dst, void* src, s32 size);
 
 void func_00192780(void* value)
 {
-    s32 idx = func_00192688(value);
+    s32 idx = FindSwitchedColliderIndex(value);
     if (idx < 0) return;
-    if (idx == D_00269BCC) func_00192880(-1);
-    s32 n = D_00269C90;
-    func_001F5B08(&D_00269C98[idx], &D_00269C98[idx + 1], (n - idx) * 4 - 4);
-    if (idx < D_00269BCC) D_00269BCC = D_00269BCC - 1;
-    D_00269C90 = D_00269C90 - 1;
+    if (idx == g_activeSwitchedCollider) ActivateSwitchedColliderIndex(-1);
+    s32 n = g_switchedColliderCount;
+    func_001F5B08(&g_switchedColliders[idx], &g_switchedColliders[idx + 1], (n - idx) * 4 - 4);
+    if (idx < g_activeSwitchedCollider) g_activeSwitchedCollider = g_activeSwitchedCollider - 1;
+    g_switchedColliderCount = g_switchedColliderCount - 1;
 }
 
 void func_001B7A98(void* self);
@@ -64,8 +64,8 @@ void func_001926D0(void* self);
 
 void func_00192820(SwitchedCollider* self)
 {
-    func_001B7A98(self);
-    func_001926D0(self);
+    RegisterCollider(self);
+    AddToSwitchedColliderList(self);
 }
 
 void func_001B7B78(void* self);
@@ -73,8 +73,8 @@ void func_00192780(void* self);
 
 void func_00192850(SwitchedCollider* self)
 {
-    func_001B7B78(self);
-    func_00192780(self);
+    UnregisterCollider(self);
+    RemoveFromSwitchedColliderList(self);
 }
 
 void func_001926D0(SwitchedCollider* self);
@@ -84,13 +84,13 @@ void func_00192990(SwitchedCollider* self, s32 value)
 {
     if (self->f550 == value) return;
     self->f550 = value;
-    if (value) func_001926D0(self);
-    else func_00192780(self);
+    if (value) AddToSwitchedColliderList(self);
+    else RemoveFromSwitchedColliderList(self);
 }
 
 void func_001929D0(void* value)
 {
-    func_00192880(func_00192688(value));
+    ActivateSwitchedColliderIndex(FindSwitchedColliderIndex(value));
 }
 
 extern u8 D_00604700[];
@@ -98,7 +98,7 @@ void* func_001925F0();
 
 void* func_001929F8()
 {
-    void* r = func_001925F0();
+    void* r = GetActiveSwitchedCollider();
     if (r) return (u8*)r + 0x580;
     return D_00604700;
 }
@@ -131,7 +131,7 @@ s32 func_00190450(C0E* self, s32* arg)
             self->fC34 = 1;
         }
     }
-    return func_001C9990(self, arg);
+    return AcceptAgentRequest(self, arg);
 }
 
 void func_001906E8(C0E* self, s32 value)
@@ -156,9 +156,9 @@ s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 
 void func_00191FD8(C70* self)
 {
-    func_00182C58(self);
+    StartObject(self);
     if (self->id64 != -1) {
-        self->found68 = func_0015A418(self->world, 4, self->id64, self);
+        self->found68 = FindFirstObjectById(self->world, 4, self->id64, self);
     }
 }
 
@@ -181,7 +181,7 @@ void func_001C9008(void* self);
 
 void func_001900A0(C0E* self)
 {
-    func_001C9008(self);
+    LeaveAgentState(self);
     s32 kind = self->f724;
     if (kind != 8) {
         if (kind == 0x10) {
@@ -204,11 +204,11 @@ s32 func_001C9A48(void* self, s32 a);
 
 s32 func_001903F0(C0E* self, s32 a1)
 {
-    if (D_00262C64 & 1) {
+    if (g_buttonCodeFlags & 1) {
         return 1;
     }
     if (func_001DDA80(self->world) == 0) {
-        return func_001C9A48(self, a1);
+        return IsAgentRequestBlocked(self, a1);
     }
     return 1;
 }
@@ -243,7 +243,7 @@ void func_001924C8(SwitchedCollider* self, s32 mode, PlacedObject* other)
         if (self->f5F0 == 0)
             return;
         {
-            Node_001924C8* n = (Node_001924C8*)func_0019EA78(0x1A, 0);
+            Node_001924C8* n = (Node_001924C8*)CreateEffect(0x1A, 0);
             self->f5AC[0] = n;
             self->f5D0 = 1;
             if (n != 0) {
@@ -272,25 +272,25 @@ struct Entry_00269C98 { Hook_00192880* vtbl; u8 pad[0x538 - 4]; u64 flags; };
 
 void func_00192880(s32 index)
 {
-    if (index == D_00269BCC)
+    if (index == g_activeSwitchedCollider)
         return;
-    if (D_00269BCC >= 0) {
+    if (g_activeSwitchedCollider >= 0) {
         u64 mask = (u64)(s64)-8193;
         mask = (mask << 16) | 0xFFFF;
         mask = (mask << 16) | 0xFFFF;
-        Entry_00269C98** slot = (Entry_00269C98**)&D_00269C98[D_00269BCC];
+        Entry_00269C98** slot = (Entry_00269C98**)&g_switchedColliders[g_activeSwitchedCollider];
         (*slot)->flags &= mask;
         Hook_00192880* vt = (*slot)->vtbl;
-        Entry_00269C98* next = index >= 0 ? (Entry_00269C98*)D_00269C98[index] : 0;
+        Entry_00269C98* next = index >= 0 ? (Entry_00269C98*)g_switchedColliders[index] : 0;
         vt[0x130 / 4]((*slot), 0, next);
     }
-    s32 old = D_00269BCC;
-    D_00269BCC = index;
+    s32 old = g_activeSwitchedCollider;
+    g_activeSwitchedCollider = index;
     if (index >= 0) {
-        Entry_00269C98** slot = (Entry_00269C98**)&D_00269C98[index];
+        Entry_00269C98** slot = (Entry_00269C98**)&g_switchedColliders[index];
         (*slot)->flags |= 1ULL << 45;
         Hook_00192880* vt = (*slot)->vtbl;
-        Entry_00269C98* prev = old >= 0 ? (Entry_00269C98*)D_00269C98[old] : 0;
+        Entry_00269C98* prev = old >= 0 ? (Entry_00269C98*)g_switchedColliders[old] : 0;
         vt[0x130 / 4]((*slot), 1, prev);
     }
 }
@@ -301,9 +301,9 @@ void func_001E9498(void* a, void* b);
 
 void func_00192A38(SwitchedCollider* self, u32 value)
 {
-    T217D_440* block = &D_002701F8;
+    T217D_440* block = &g_typedTextCaptionBox;
     ((T217D_Word*)&block->child)->v = value;
-    func_001E9498(D_00275BC0, &D_002701F8);
+    PushStackElement(g_elementStack, &g_typedTextCaptionBox);
 }
 
 extern s32 D_00262C68;
@@ -319,17 +319,17 @@ void func_0016EC20(PadRecord* rec, s32 n);
 
 void func_00192A70(void* self, PadRecord* rec)
 {
-    if (func_001493A0(&D_00261990->ctl454) != 0)
+    if (IsTopCameraController(&g_camera->ctl454) != 0)
         return;
-    PadRecord* a1 = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
+    PadRecord* a1 = (D_00262C68 & 4) ? &g_padRecord : &g_blankPadRecord;
     StepSequence* ctx = D_0027051C;
     if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {
-        func_001516C0(ctx, a1);
+        SkipRemainingSteps(ctx, a1);
     } else if ((rec->flags & 0xC) != 0 && D_0026F800 != 0) {
-        func_00150790(D_0026F800, 1);
+        SetStepSequenceState(D_0026F800, 1);
     }
-    func_0016EC20(rec, 0xC);
+    ClearPadPressedBits(rec, 0xC);
 }
 
 s32 func_00190658(void)
@@ -344,8 +344,8 @@ s32 func_001300E8(void* a, s32 b);
 
 s32 func_00190660(C0E* self, Item_190660* item)
 {
-    if (item != 0 && func_00182FC8(item) != 0) {
-        if (func_001300E8(item, 8) == 0 || item->kind != 0xB) {
+    if (item != 0 && IsObjectAttached(item) != 0) {
+        if (IsObjectOfKind(item, 8) == 0 || item->kind != 0xB) {
             s32 n = self->fC10;
             if ((u32)n < 4) {
                 self->fC14[n] = item;
@@ -363,15 +363,15 @@ void func_001920E0(PointObject* self, s32 value)
 {
     void* sub = &self->pos;
     func_00128018(self->parent, value, sub, sub);
-    func_00182F78(self, value);
+    ReparentObject(self, value);
 }
 
 void func_001384A0(void* other, void* sub);
 
 void func_00192150(TextPointObject* self, void* other)
 {
-    func_00192068(self, other);
-    func_001384A0(other, &self->text);
+    LoadPointObject(self, other);
+    ReadBufferedString(other, &self->text);
 }
 
 struct Obj_00192190 { u8 pad0[0x54]; f32 f54; f32 f58; };
@@ -387,10 +387,10 @@ void func_00192990(SwitchedCollider* self, s32 value);
 
 void func_001921A8(SwitchedCollider* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->f598 = self;
     self->f580 = 1;
-    func_00192990(self, 1);
+    SetSwitchedColliderEnabled(self, 1);
 }
 
 void func_001906F0(C0E* self, s32 value)
@@ -404,7 +404,7 @@ void func_001906F8(C0E* self, s32 flag, PlacedObject* extra)
 {
     func_001924C8(self, flag, extra);
     if (flag == 0) {
-        func_001C8F20(self, 8, (s32)self->f5F0);
+        ChangeAgentState(self, 8, (s32)self->f5F0);
     }
 }
 
@@ -415,7 +415,7 @@ extern void func_00160DA0(void);
 
 void func_00190770(C0E* self, s32 code, Req_190770* req)
 {
-    func_001C9DE0(self, code, req);
+    HandleAgentNotification(self, code, req);
     if (code == 0x13) {
         if (req->f_0 == (s32)self->f7E0) {
             if (req->f_8 == 0x53A) {
@@ -430,12 +430,12 @@ void func_00192990(SwitchedCollider* self, s32 mode);
 
 void func_001921E8(SwitchedCollider* self)
 {
-    func_001BA130(self);
+    CopyCollider(self);
     if (self->f550 != 0) {
         return;
     }
     self->f550 = 1;
-    func_00192990(self, 0);
+    SetSwitchedColliderEnabled(self, 0);
 }
 
 void func_00145088(void* mgr, s32 a1, void* a2, SwitchedCollider* self, s32 a4);
@@ -445,11 +445,11 @@ void func_001922E8(SwitchedCollider* self, s32 mode)
 {
     if (mode != 0) {
         self->v560 = self->v140;
-        func_00145088(D_00261990, 1, &D_00261990->ctl520, self, 0);
+        PushCameraController(g_camera, 1, &g_camera->ctl520, self, 0);
         return;
     }
     for (s32 i = 1; i < 7; i++) {
-        func_001451F0(D_00261990, 5, i, 0, self, 0);
+        RemoveCameraControllers(g_camera, 5, i, 0, self, 0);
     }
 }
 
@@ -476,7 +476,7 @@ void func_001929D0(void* value);
 
 void func_00192418(void* self)
 {
-    if (self != func_001925F0()) func_001929D0(self);
+    if (self != GetActiveSwitchedCollider()) ActivateSwitchedCollider(self);
 }
 
 s32 func_00192488(SwitchedCollider* self)
@@ -509,8 +509,8 @@ void func_0011EC40(void* a, void* b);
 
 void func_00192068(PointObject* self, void* other)
 {
-    func_00137E70(other, &self->pos);
-    func_0011EC40(self, other);
+    ReadBufferedVector3(other, &self->pos);
+    ReadPropertyRecords(self, other);
 }
 
 s32 func_00128018(void* a, s32 b, void* c, s32 d);
@@ -574,7 +574,7 @@ void func_00192020(C70* self)
 {
     Keep6E tmp;
     tmp = self->keep;
-    func_001830D8(self);
+    CopyObjectData(self);
     self->keep = tmp;
 }
 
@@ -583,14 +583,14 @@ void func_00152438(void* self, s32 value);
 
 void func_00191EC0()
 {
-    func_00152438(&D_00269BA8, 0x38);
+    func_00152438(&g_targetVectors, 0x38);
 }
 
 void func_00152440(void* p);
 
 void func_00191EE8(void)
 {
-    func_00152440(&D_00269BA8);
+    ClearList(&g_targetVectors);
 }
 
 void func_00182D48(void* self);
@@ -598,8 +598,8 @@ void func_00152470(void* table, void* self);
 
 void func_00191F68(C70* self)
 {
-    func_00182D48(self);
-    func_00152470(&D_00269BA8, self);
+    RegisterObject(self);
+    AppendToList(&g_targetVectors, self);
 }
 
 void func_00182ED0(void* self);
@@ -607,8 +607,8 @@ void func_00152600(void* table, void* self);
 
 void func_00191FA0(C70* self)
 {
-    func_00182ED0(self);
-    func_00152600(&D_00269BA8, self);
+    UnregisterObject(self);
+    RemoveFromList(&g_targetVectors, self);
 }
 
 extern s32 D_0026A068[];
@@ -628,7 +628,7 @@ s32 func_001DDA80(void* p);
 
 s32 func_00192450(SwitchedCollider* self)
 {
-    if ((D_00262C64 & 1) || func_001DDA80(self->world)) return 1;
+    if ((g_buttonCodeFlags & 1) || func_001DDA80(self->world)) return 1;
     return 0;
 }
 
@@ -641,14 +641,14 @@ f32 func_001EA4B8(f32 a, f32 b, f32 c, Quad_192380* p, s32 zero);
 
 void func_00192380(SwitchedCollider* self, u8* out, f32 a)
 {
-    func_001B9F30();
+    CaptureColliderPose();
     if (self->f554 != 0) {
         *(Quad_192380*)(out + 0x10) = *(Quad_192380*)((u8*)self + 0x560);
         return;
     }
-    Camera* base = D_00261990;
+    Camera* base = g_camera;
     if (base->f224 == 0) {
-        *(f32*)(out + 0x18) = func_001EA4B8(self->v560.z, self->v140.z, a, (Quad_192380*)D_00269BC0, 0);
+        *(f32*)(out + 0x18) = ApproachValueWithRamp(self->v560.z, self->v140.z, a, (Quad_192380*)D_00269BC0, 0);
     }
     *(Quad_192380*)((u8*)self + 0x560) = *(Quad_192380*)(out + 0x10);
 }
@@ -658,8 +658,8 @@ extern s32 D_00269C90;
 s32 func_00192688(s32 key)
 {
     s32 i;
-    for (i = 0; i < D_00269C90; i++) {
-        if (key == (s32)D_00269C98[i]) {
+    for (i = 0; i < g_switchedColliderCount; i++) {
+        if (key == (s32)g_switchedColliders[i]) {
             return i;
         }
     }
@@ -684,7 +684,7 @@ s32 func_001904E0(C0E* self, Msg_1904E0* msg)
     } else {
         self->fA68 = 0;
     }
-    if (func_001C96D8(self, msg) == 0) {
+    if (HandleAgentObjectEvent(self, msg) == 0) {
         return 0;
     }
     args.self = self;
@@ -707,9 +707,9 @@ void func_00157EF8(void* a, void* b, s32 c, void* d, void* e, s32 f, s32 g);
 
 void func_00192C58(SwitchedCollider* self)
 {
-    s32 flags = D_00262C64 & 2;
+    s32 flags = g_buttonCodeFlags & 2;
     if (flags == 0) {
-        u8* g = D_002623C0;
+        u8* g = g_saveData;
         s32 n = *(s32*)(g + 0x19E4) - 1;
         *(s32*)(g + 0x19E4) = flags < n ? n : 0;
     }
@@ -724,16 +724,16 @@ void func_00192C58(SwitchedCollider* self)
         s1->desc02()->m1E(s1, (Mat02*)&tmp);
         s1->desc02()->m20(s1, (Vec02*)&D_00248D30);
         s1->desc02()->m21(s1, (Vec02*)&D_00248D30);
-        void* r = (void*)func_0015A418(self->world, 1, 0x18C, s1);
+        void* r = (void*)FindFirstObjectById(self->world, 1, 0x18C, s1);
         if (r != 0) {
-            func_0012C7B0(r, s1, 0, 0, 0.0f, 1.0f);
+            CreateAnimationPlayerWithoutPresetTargets(r, s1, 0, 0, 0.0f, 1.0f);
         }
     } else {
         s32 v = (s32)self->f588[1];
         if (v != 0) {
             u8* g = (u8*)&D_00269BD0;
             *(s32*)(g + 0x28) = v;
-            func_00157EF8(((u8*)self->f584) + 0x140, (void*)&D_00248D20, 1, g, D_00269C10, 0, 0);
+            SpawnEffectsAt(((u8*)self->f584) + 0x140, (void*)&g_unitZVector, 1, g, D_00269C10, 0, 0);
         }
     }
 }
@@ -753,26 +753,26 @@ void func_001916D0(PointGraphObject* o, Stream8A* in)
     PointGraph* m = &o->graph;
     s32 i;
     s32 j;
-    func_001833D0(o, in);
+    LoadObjectProperties(o, in);
     i = 0;
-    o->graph.pointCount = func_00137BE0(in);
-    m->points = (GraphPoint*)func_0018D5C0(o->graph.pointCount << 5);
-    m->nA = func_00137BE0(in);
-    m->linkCount = func_00137BE0(in) + m->nA;
-    m->links = (u8*)func_0018D5C0(m->linkCount * 12);
-    m->triCount = func_00137BE0(in);
-    m->tris = (u8*)func_0018D5C0(m->triCount * 12);
+    o->graph.pointCount = ReadBufferedU16(in);
+    m->points = (GraphPoint*)AllocateZeroedFrontMemory(o->graph.pointCount << 5);
+    m->nA = ReadBufferedU16(in);
+    m->linkCount = ReadBufferedU16(in) + m->nA;
+    m->links = (u8*)AllocateZeroedFrontMemory(m->linkCount * 12);
+    m->triCount = ReadBufferedU16(in);
+    m->tris = (u8*)AllocateZeroedFrontMemory(m->triCount * 12);
     if (o->graph.pointCount > 0) {
         do {
             GraphPoint* v = (GraphPoint*)((u8*)m->points + (i << 5));
             s32 k = i + 1;
             j = 0;
-            func_00137E70(in, v);
-            v->linkCount = func_00137B90(in);
-            v->links = (GraphLink**)func_0018D500((v->linkCount + 1) << 2);
+            ReadBufferedVector3(in, v);
+            v->linkCount = ReadBufferedU8(in);
+            v->links = (GraphLink**)AllocateFrontMemory((v->linkCount + 1) << 2);
             if (v->linkCount > 0) {
                 do {
-                    v->links[j] = (GraphLink*)(m->links + func_00137BE0(in) * 12);
+                    v->links[j] = (GraphLink*)(m->links + ReadBufferedU16(in) * 12);
                     j++;
                 } while (j < v->linkCount);
             }
@@ -786,7 +786,7 @@ void func_001916D0(PointGraphObject* o, Stream8A* in)
             j = 1;
             do {
                 j--;
-                *p = (GraphPoint*)((u8*)m->points + (func_00137BE0(in) << 5));
+                *p = (GraphPoint*)((u8*)m->points + (ReadBufferedU16(in) << 5));
                 p++;
             } while (j >= 0);
         }
@@ -795,19 +795,19 @@ void func_001916D0(PointGraphObject* o, Stream8A* in)
             j = 2;
             do {
                 j--;
-                *p = (GraphPoint*)((u8*)m->points + (func_00137BE0(in) << 5));
+                *p = (GraphPoint*)((u8*)m->points + (ReadBufferedU16(in) << 5));
                 p++;
             } while (j >= 0);
         }
     }
-    m->faceCount = func_00137BE0(in);
-    m->faces = (GraphFace*)func_0018D5C0(m->faceCount << 5);
+    m->faceCount = ReadBufferedU16(in);
+    m->faces = (GraphFace*)AllocateZeroedFrontMemory(m->faceCount << 5);
     for (s32 e = 0; e < m->faceCount; e++) {
         s32 a;
         GraphFace* f = (GraphFace*)((u8*)m->faces + (e << 5));
-        func_00137E70(in, f);
-        f->f10 = func_00137DF8(in);
-        a = func_00137D10(in);
+        ReadBufferedVector3(in, f);
+        f->f10 = ReadBufferedFloat(in);
+        a = ReadBufferedS16(in);
         if (a == -1) {
             f->neighbourA = 0;
         } else if (a >= 0) {
@@ -817,7 +817,7 @@ void func_001916D0(PointGraphObject* o, Stream8A* in)
             a = -a;
             f->neighbourA = (void*)((u32)(m->tris + a * 12) | 1);
         }
-        a = func_00137D10(in);
+        a = ReadBufferedS16(in);
         if (a == -1) {
             f->neighbourB = 0;
         } else if (a >= 0) {
@@ -835,16 +835,16 @@ void* func_001925F0(void);
 
 void* func_00192620(void)
 {
-    void* r = func_001925F0();
+    void* r = GetActiveSwitchedCollider();
     if (r == 0) {
-        Player* q = D_00262E10;
+        Player* q = g_player;
         if (q != 0) {
             s32 t = q->f550;
             if (t != 0) r = q;
         }
     }
-    if (r == 0 && D_00269C90 != 0) {
-        r = D_00269C98[0];
+    if (r == 0 && g_switchedColliderCount != 0) {
+        r = g_switchedColliders[0];
     }
     return r;
 }
@@ -854,8 +854,8 @@ void func_00182C18(BaseObject* self);
 
 void func_00191F08(C70* self)
 {
-    func_00182C18(self);
-    self->q40 = *(Quad70*)&D_00248D00;
+    InitObject(self);
+    self->q40 = *(Quad70*)&g_unitXVector;
     self->f54 = 9;
     self->f50 = 8;
     self->f58 = -1;
@@ -873,10 +873,10 @@ void func_001BF788(Sub_192230* self, s32 n);
 
 void func_00192230(SwitchedCollider* self, s32 kind, void* msg)
 {
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     switch (kind) {
     case 0xB:
-        func_001BF788(((Sub_192230*)self->f574), 0);
+        StopSoundRecord(((Sub_192230*)self->f574), 0);
         break;
     case 0x10: {
         s32 i;
@@ -922,9 +922,9 @@ void func_00191128(void* a0, s32* a1, s32* a2)
     base = a2;
     p = base + 1;
     q = base + 2;
-    func_0018D608();
+    PushBackMemoryMark();
     n = *a1;
-    out = func_0018D658(n << 2);
+    out = AllocateBackMemory(n << 2);
     end = base + n;
     out[0] = base[0];
     count = 1;
@@ -947,12 +947,12 @@ void func_00191128(void* a0, s32* a1, s32* a2)
     count++;
     if (count < n) {
         if (count >= 3) {
-            func_00191128(a0, &count, out);
+            SimplifyPointPath(a0, &count, out);
         }
     }
-    func_0018D800(base, out, count * 4);
+    CopyMemory(base, out, count * 4);
     *a1 = count;
-    func_0018D6F0();
+    PopBackMemoryMark();
 }
 
 s32 func_00160148(s32 v);
@@ -973,7 +973,7 @@ void func_00190128(C0E* self, s32 flag)
             void** slot;
             for (i = 0, slot = self->fC14; i < self->fC10; slot++, i++) {
                 void* n = *slot;
-                if (func_00182FC8(n) != 0) {
+                if (IsObjectAttached(n) != 0) {
                     func_001C8418(self, (u8*)n + 0x140);
                     break;
                 }
@@ -983,24 +983,24 @@ void func_00190128(C0E* self, s32 flag)
     case 4:
         if (self->f750 == 0) {
             if (self->fC24 != 0) {
-                func_001F3BD8(self->fC24, tmp);
+                GetObjectWorldPosition(self->fC24, tmp);
                 func_001C8418(self, tmp);
             } else {
                 func_001C8418(self, &self->v140);
             }
         } else {
-            func_001C8C08(self);
+            UpdateAgentGoal(self);
         }
         break;
     case 12:
     case 13:
         if (self->fC28 != 0) {
-            func_001F3BD8(self->fC28, tmp);
+            GetObjectWorldPosition(self->fC28, tmp);
             func_001C8418(self, tmp);
         }
         break;
     default:
-        func_001C8C08(self);
+        UpdateAgentGoal(self);
         break;
     }
 }
@@ -1019,16 +1019,16 @@ s32 func_00190570(C0E* self)
     if (self->fC28 != 0) {
         for (i = 0; i < self->fC10; i++) {
             Elem_190570* n = (Elem_190570*)self->fC14[i];
-            if (func_001300E8(n, 8) != 0) {
+            if (IsObjectOfKind(n, 8) != 0) {
                 s32 k = n->kind;
                 if (k == 0xB) {
                     continue;
                 }
-                if (func_001300E8(n, 9) == 0 && k == 0xA) {
+                if (IsObjectOfKind(n, 9) == 0 && k == 0xA) {
                     continue;
                 }
             }
-            if (func_00182FC8(n) != 0) {
+            if (IsObjectAttached(n) != 0) {
                 break;
             }
         }
@@ -1085,9 +1085,9 @@ struct Clamp_192B58 {
 
 void func_00192B58(SwitchedCollider* self)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
 
-    u8* ctx = D_002623C0;
+    u8* ctx = g_saveData;
     s32 cnt = *(s32*)(ctx + 0x19E4);
     s32 lim = Clamp_192B58::Of(cnt, 0, 2);
 

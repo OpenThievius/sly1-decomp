@@ -89,7 +89,7 @@ void func_001AF508();
 void func_001B1898(C33* self);
 
 void func_001AECB0(TimedObject* a0) {
-    func_001B7968(a0);
+    InitCollider(a0);
     a0->f554 = 0;
     a0->state = -1;
 }
@@ -104,13 +104,13 @@ void func_001AECE8(TimedObject* self, s32 state)
     if (self->state == state) return;
     if (self->state == 1 && state == 2) {
         if (self->f550 != 0) {
-            func_00123AB0(self->f550, 0);
+            SetStateTriggerStateFromMessage(self->f550, 0);
             if (self->state != 1) state = self->state;
         }
-        func_001837E0(self, 2, 0, 0);
+        TriggerScriptEvent(self, 2, 0, 0);
     }
     self->state = state;
-    self->f55C = D_0026185C[0];
+    self->f55C = g_gameTime[0];
 }
 
 s32 func_001AED78(TimedObject* self, void* value)
@@ -119,16 +119,16 @@ s32 func_001AED78(TimedObject* self, void* value)
     if (self->f5B4 != 0) {
         return 1;
     }
-    if (func_001AEE50(self, value) != 0) {
+    if (IsObjectExcluded(self, value) != 0) {
         return 0;
     }
     for (s32 i = 0; i < self->ids564.count; i++) {
-        if (func_001833F0(value, self->ids564.items[i]) != 0) {
+        if (MatchesObjectId(value, self->ids564.items[i]) != 0) {
             return 1;
         }
     }
     for (s32 i = 0; i < self->ids58C.count; i++) {
-        if (func_001300E8(value, self->ids58C.items[i]) != 0) {
+        if (IsObjectOfKind(value, self->ids58C.items[i]) != 0) {
             return 1;
         }
     }
@@ -138,12 +138,12 @@ s32 func_001AED78(TimedObject* self, void* value)
 s32 func_001AEE50(TimedObject* self, void* key)
 {
     for (s32 i = 0; i < self->ids578.count; i++) {
-        if (func_001833F0(key, self->ids578.items[i]) != 0) {
+        if (MatchesObjectId(key, self->ids578.items[i]) != 0) {
             return 1;
         }
     }
     for (s32 i = 0; i < self->ids5A0.count; i++) {
-        if (func_001300E8(key, self->ids5A0.items[i]) != 0) {
+        if (IsObjectOfKind(key, self->ids5A0.items[i]) != 0) {
             return 1;
         }
     }
@@ -153,13 +153,13 @@ s32 func_001AEE50(TimedObject* self, void* key)
 s32 func_001AEF00(TimedObject* o, void* p)
 {
     if (p == 0) return 0;
-    if (o->f5B4 == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && func_001833F0(p, o->ids564.items[0]) != 0) return 1;
+    if (o->f5B4 == 0 && o->ids564.count == 1 && o->ids58C.count == 0 && MatchesObjectId(p, o->ids564.items[0]) != 0) return 1;
     return 0;
 }
 
 void func_001AEF68(TimedObject* self)
 {
-    Node30* node = func_00129CA8(self);
+    Node30* node = FindTrackPlayer(self);
 
     if (node != 0) {
         self->f5CC = node->f18.f;
@@ -170,10 +170,10 @@ void func_001AEF68(TimedObject* self)
 
 void func_001AEFA0(TimedObject* self)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
     Node30* sink = self->f5C8;
     if (sink != 0) {
-        Player* g = D_00262E10;
+        Player* g = g_player;
         if (g != 0) {
             if (g->f2220 != 4) {
                 sink->f18.f = self->f5CC;
@@ -222,14 +222,14 @@ void func_001AF078(TimedObject* q, u32 value)
 
 void func_001AF0A0(C31* self)
 {
-    func_001AECB0(self);
+    InitTimedObject(self);
     self->fB04 = 1.0f;
 }
 
 void func_001AF0D0(C31* self)
 {
-    func_001BAC30(self);
-    func_00124DF8(self, 2, D_002744B8);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 2, D_002744B8);
 }
 
 ASM_FUNC(func_001AF108);
@@ -237,7 +237,7 @@ ASM_FUNC(func_001AF108);
 void func_001AF3B8(C31* self)
 {
     Group31* src = &self->groups[0];
-    func_00124A48(self);
+    StartPlacedObject(self);
     for (s32 i = 0; i < self->groupCount; i++) {
         Group31* g = &self->groups[i];
         BaseObject* c = g->child;
@@ -248,7 +248,7 @@ void func_001AF3B8(C31* self)
                 for (j = 0; j < src->count; j++) {
                     Entry31* s = src->items + j;
                     Entry31* d = g->items + j;
-                    BaseObject* o = (BaseObject*)func_00183058(s->obj, self->world, self);
+                    BaseObject* o = (BaseObject*)CreateObjectCopy(s->obj, self->world, self);
                     d->obj = o;
                     if (o->desc->m0F != 0) {
                         o->desc->m0F(o);
@@ -261,7 +261,7 @@ void func_001AF3B8(C31* self)
             g->count = src->count;
         }
     }
-    self->fB00 = func_001AEF00(self, (void*)D_00262E10);
+    self->fB00 = IsSoleAcceptedObject(self, (void*)g_player);
     self->desc30()->m4D(self, self->f560);
 }
 
@@ -269,7 +269,7 @@ void func_001AF508()
 {
     ListFrame frame;
     s32 count = 0;
-    C31* n = (C31*)D_00275710->list1CA8.head;
+    C31* n = (C31*)g_currentWorld->list1CA8.head;
     while (n != 0) {
         s32 t = count + 1;
         count = (n->state != 8) ? t : count;
@@ -277,16 +277,16 @@ void func_001AF508()
     }
     if (count != 0) {
         s32 idx = 0;
-        n = (C31*)D_00275710->list1CA8.head;
+        n = (C31*)g_currentWorld->list1CA8.head;
         while (n != 0) {
             if (n->state != 8) {
-                n->fAFC = D_00261858[1] + (0.03333333507180214f / (f32)count) * (f32)idx;
+                n->fAFC = g_gameClock[1] + (0.03333333507180214f / (f32)count) * (f32)idx;
                 idx++;
             }
             n = n->listNext;
         }
     }
-    D_002744D0 = 0;
+    g_groupStaggerDirty = 0;
 }
 
 void func_001AF5C8(C31* self, f32 amount)
@@ -305,12 +305,12 @@ void func_001AF5C8(C31* self, f32 amount)
     else if (hi < v)
         v = hi;
     self->fB04 = v;
-    if (D_002744D0)
-        func_001AF508();
+    if (g_groupStaggerDirty)
+        StaggerGroupOffsets();
     cmd = self->state;
     switch (cmd) {
     case 0:
-        if (self->f5B8 < D_0026185C[0] - self->f55C)
+        if (self->f5B8 < g_gameTime[0] - self->f55C)
             cmd = 1;
         if (self->desc30()->m48)
             self->desc30()->m48(self, &cmd);
@@ -321,7 +321,7 @@ void func_001AF5C8(C31* self, f32 amount)
             self->desc30()->m48(self, &cmd);
         break;
     case 3:
-        if (self->f5BC < D_0026185C[0] - self->f55C) {
+        if (self->f5BC < g_gameTime[0] - self->f55C) {
             if (self->f554 == 0) {
                 cmd = 8;
                 break;
@@ -337,7 +337,7 @@ void func_001AF5C8(C31* self, f32 amount)
             self->desc30()->m48(self, &cmd);
         break;
     case 4:
-        if (self->f5B8 < D_0026185C[0] - self->f55C)
+        if (self->f5B8 < g_gameTime[0] - self->f55C)
             cmd = 5;
         if (self->desc30()->m48)
             self->desc30()->m48(self, &cmd);
@@ -349,7 +349,7 @@ void func_001AF5C8(C31* self, f32 amount)
             self->desc30()->m48(self, &cmd);
         break;
     case 7:
-        if (self->fAEC < D_0026185C[0] - self->f55C)
+        if (self->fAEC < g_gameTime[0] - self->f55C)
             cmd = 8;
         else if (self->desc30()->m48)
             self->desc30()->m48(self, &cmd);
@@ -362,17 +362,17 @@ void func_001AF5C8(C31* self, f32 amount)
 
 void func_001AF7A8(C31* self, void* p)
 {
-    func_0015FCD8(self, p);
+    SetColliderFrozen(self, p);
     if (p != 0) {
         if (self->flagAF8 != 0) {
-            func_00152600(&self->world->list1CA8, self);
+            RemoveFromList(&self->world->list1CA8, self);
             self->flagAF8 = 0;
         }
     } else {
-        func_00152470(&self->world->list1CA8, self);
+        AppendToList(&self->world->list1CA8, self);
         self->flagAF8 = 1;
     }
-    D_002744D0 = 1;
+    g_groupStaggerDirty = 1;
 }
 
 ASM_FUNC(func_001AF820);
@@ -381,10 +381,10 @@ s32 func_001AFAF8(TimedObject* a0, Collider* a1)
 {
     u64 m = 0x8000;
     m <<= 28;
-    if ((a1->flags538 & m) != 0 || a1->root == a0->root || func_001AEE50(a0, a1) != 0) {
+    if ((a1->flags538 & m) != 0 || a1->root == a0->root || IsObjectExcluded(a0, a1) != 0) {
         return 0;
     }
-    if ((void*)a1 == (void*)D_00262E10 && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->f239C == 3) {
+    if ((void*)a1 == (void*)g_player && ((Player*)a1)->f2220 == 6 && ((Player*)a1)->f239C == 3) {
         if ((func_00160D10() & 0x12000) != 0) {
             return 0;
         }
@@ -436,28 +436,28 @@ void func_001B01B0(C31* self, s32 s)
     if (st == -1 || st == 8) {
         f32 z = 0.0f;
         f32 a = 1000.0f, c = 100.0f, d = 0.4f;
-        func_001BFCD8(0x1A, &self->f5C4, self, 0, a, c, d, z, z, 0, 0);
+        StartSoundEffect(0x1A, &self->f5C4, self, 0, a, c, d, z, z, 0, 0);
     }
     switch (s) {
     case 3:
     case 7:
         for (s32 i = 0; i < self->groupCount; i++) {
             Group31* e = &self->groups[i];
-            for (s32 j = 0; j < e->count; j++) func_00155F90(e->items[j].obj);
+            for (s32 j = 0; j < e->count; j++) SetEffectSpawnerActiveForever(e->items[j].obj);
         }
         break;
     case 8: {
         f32 v;
         if (self->f554 == 0) v = self->f5BC; else v = self->fAEC;
-        func_001BF788(self->f5C4, (s32)v * 1000);
+        StopSoundRecord(self->f5C4, (s32)v * 1000);
         self->desc->m03(self);
-        D_002744D0 = 1;
+        g_groupStaggerDirty = 1;
         break;
     }
     default:
         break;
     }
-    func_001AECE8(self, s);
+    EnterTimedObjectState(self, s);
 }
 
 f32 func_001B0360(C31* o, Cfg_1B0360* c)
@@ -473,7 +473,7 @@ f32 func_001B0360(C31* o, Cfg_1B0360* c)
         if (t0 == 0.0f) {
             r = o->fB04;
         } else {
-            f32 q = (D_0026185C[0] - o->f55C) / t0;
+            f32 q = (g_gameTime[0] - o->f55C) / t0;
             m = o->fB04;
             if (q < 0.0f)
                 r = 0.0f;
@@ -497,7 +497,7 @@ f32 func_001B0360(C31* o, Cfg_1B0360* c)
             r = 0.0f;
         } else {
             f32 m = o->fB04;
-            r = 1.0f - (D_0026185C[0] - o->f55C) / t;
+            r = 1.0f - (g_gameTime[0] - o->f55C) / t;
             if (r < 0.0f)
                 r = 0.0f;
             else if (m < r)
@@ -521,14 +521,14 @@ void func_001B0488(C31* p, f32 x) { p->fB08 = 1.0f / x; }
 
 void func_001B04A0(C32* o)
 {
-    func_001AECB0(o);
+    InitTimedObject(o);
     o->state5D8 = -1;
 }
 
 void func_001B04D0(C32* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 2, D_002744D8);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 2, g_sequencedObjectLinks);
     if (self->f5D0 == 0) {
         self->f5D0 = self;
     }
@@ -541,7 +541,7 @@ void func_001B04D0(C32* self)
     u64 m = 0x8000;
     m <<= 28;
     self->flags538 |= m;
-    func_001B9AE0(self, 3, 0, 3, 0);
+    SetColliderAnchors(self, 3, 0, 3, 0);
     self->desc30()->m4D(self, self->f560);
 }
 
@@ -552,16 +552,16 @@ void func_001B0578(C32* self) {
     st = self->state;
     switch (self->state) {
     case 0:
-        if (self->f5B8 < D_0026185C[0] - self->f55C) st = 1;
+        if (self->f5B8 < g_gameTime[0] - self->f55C) st = 1;
         break;
     case 2:
         st = 3;
         break;
     case 3:
-        if (self->f5BC < D_0026185C[0] - self->f55C) st = 8;
+        if (self->f5BC < g_gameTime[0] - self->f55C) st = 8;
         break;
     case 4:
-        if (self->f5B8 < D_0026185C[0] - self->f55C) st = 5;
+        if (self->f5B8 < g_gameTime[0] - self->f55C) st = 5;
         break;
     case 1:
     case 5:
@@ -573,13 +573,13 @@ void func_001B0578(C32* self) {
         s1 = self->state5D8;
         switch (s1) {
         case 0:
-            if (D_00262E10 && D_00262E10->desc06()->m4B(D_00262E10, 2)) {
+            if (g_player && g_player->desc06()->m4B(g_player, 2)) {
                 s1 = 2;
-            } else if (self->f5E0 < D_0026185C[0] - self->f5DC) {
-                if (D_00262E10) {
+            } else if (self->f5E0 < g_gameTime[0] - self->f5DC) {
+                if (g_player) {
                     u8 buf[16];
-                    func_001D7098(buf, 2, self);
-                    if (D_00262E10->desc06()->m4C(D_00262E10, buf)) {
+                    InitOwnerMessage(buf, 2, self);
+                    if (g_player->desc06()->m4C(g_player, buf)) {
                         s1 = 1;
                         func_001AEF68(self);
                     }
@@ -589,19 +589,19 @@ void func_001B0578(C32* self) {
             }
             break;
         case 1:
-            if (self->f5E4 < D_0026185C[0] - self->f5DC) s1 = 2;
+            if (self->f5E4 < g_gameTime[0] - self->f5DC) s1 = 2;
             break;
         case 2:
-            if (self->f5E8 < D_0026185C[0] - self->f5DC) {
+            if (self->f5E8 < g_gameTime[0] - self->f5DC) {
                 s1 = -1;
                 st = 5;
             }
             break;
         }
-        func_001B1070(self, s1);
+        EnterSequencedSubstate(self, s1);
         goto tail;
     case 7:
-        if (self->f5BC < D_0026185C[0] - self->f55C) st = 8;
+        if (self->f5BC < g_gameTime[0] - self->f55C) st = 8;
         break;
     case 8:
         if (self->f5C0 == 0) {
@@ -623,7 +623,7 @@ s32 func_001B0BD8() { return 1; }
 
 s32 func_001B0BE0(TimedObject* self, Collider* other)
 {
-    if ((other->flags538 & (1UL << 43)) != 0 || (s32)other->root == func_001925F0() || other->root == self->root || func_001AEE50(self, other) != 0) {
+    if ((other->flags538 & (1UL << 43)) != 0 || (s32)other->root == GetActiveSwitchedCollider() || other->root == self->root || IsObjectExcluded(self, other) != 0) {
         return 0;
     }
     s64 t = (s64)other->flagsHi;
@@ -650,7 +650,7 @@ void func_001B0EE0(C32* self)
     Rec_1B0EE0* r = (Rec_1B0EE0*)self->f550;
     if (r != 0) {
         if (r->f550 == 1) {
-            if (__builtin_fabsf(D_0026185C[0] - r->f554) < 0.2f) {
+            if (__builtin_fabsf(g_gameTime[0] - r->f554) < 0.2f) {
                 self->f5C0 = r->f550;
             }
         }
@@ -674,7 +674,7 @@ void func_001B0FC0(C32* self, s32 s)
         case -1: case 0: case 1: case 2: case 3: case 4: case 5: case 7:
             break;
         case 6:
-            func_001B1070(self, -1);
+            EnterSequencedSubstate(self, -1);
             break;
         case 8:
             self->f5C0 = 0;
@@ -682,12 +682,12 @@ void func_001B0FC0(C32* self, s32 s)
         }
         switch (s) {
         case 6:
-            func_001B1070(self, 0);
+            EnterSequencedSubstate(self, 0);
             break;
         case 0: case 1: case 2: case 3: case 4: case 5: case 7: case 8:
             break;
         }
-        func_001AECE8(self, s);
+        EnterTimedObjectState(self, s);
     }
 }
 
@@ -700,7 +700,7 @@ void func_001B1070(C32* self, s32 arg)
     case 0:
         break;
     case 1:
-        func_001BF788(self->f5C4, 0);
+        StopSoundRecord(self->f5C4, 0);
         break;
     case 2:
         break;
@@ -714,7 +714,7 @@ void func_001B1070(C32* self, s32 arg)
         }
         break;
     case 1:
-        func_001BFCD8(0x1B, &self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x1B, &self->f5C4, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 2:
         if (self->f200 != 0) {
@@ -723,12 +723,12 @@ void func_001B1070(C32* self, s32 arg)
         break;
     }
     self->state5D8 = arg;
-    self->f5DC = (*(Clk_1B1070*)D_0026185C).t;
+    self->f5DC = (*(Clk_1B1070*)g_gameTime).t;
 }
 
 void func_001B1158(C33* self)
 {
-    func_001AECB0(self);
+    InitTimedObject(self);
     self->animB.first = -1;
     self->animB.last = -1;
     self->animC.first = -1;
@@ -740,7 +740,7 @@ void func_001B1158(C33* self)
 
 void func_001B11A0(C33* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     for (s32 i = 0; i < self->elemCount; i++) {
         Elem02* it = self->elems[i];
         if (it->kind == 1 && it->f14 != 0) {
@@ -759,13 +759,13 @@ void func_001B1238(C33* self)
     state = self->state;
     switch (state) {
     case 0:
-        if (self->f5B8 < D_0026185C[0] - self->f55C) {
+        if (self->f5B8 < g_gameTime[0] - self->f55C) {
             state = 1;
         }
         break;
     case 1:
         if (0.0f <= self->f608) {
-            if (self->f608 < D_0026185C[0] - self->f55C) {
+            if (self->f608 < g_gameTime[0] - self->f55C) {
                 state = 3;
                 break;
             }
@@ -775,18 +775,18 @@ void func_001B1238(C33* self)
         }
         break;
     case 3:
-        if (self->f5BC < D_0026185C[0] - self->f55C) {
+        if (self->f5BC < g_gameTime[0] - self->f55C) {
             state = 8;
         }
         break;
     case 4:
-        if (self->f5B8 < D_0026185C[0] - self->f55C) {
+        if (self->f5B8 < g_gameTime[0] - self->f55C) {
             state = 5;
         }
         break;
     case 5:
         if (0.0f <= self->f608) {
-            if (self->f608 < D_0026185C[0] - self->f55C) {
+            if (self->f608 < g_gameTime[0] - self->f55C) {
                 state = 7;
                 break;
             }
@@ -796,13 +796,13 @@ void func_001B1238(C33* self)
         }
         break;
     case 7:
-        if (self->f5BC < D_0026185C[0] - self->f55C) {
+        if (self->f5BC < g_gameTime[0] - self->f55C) {
             state = 8;
         }
         break;
     case 8:
         if (self->f5C0 == 0) {
-            if (self->f60C < D_0026185C[0] - self->f55C) {
+            if (self->f60C < g_gameTime[0] - self->f55C) {
                 switch (self->f554) {
                 case 0:
                     state = 0;
@@ -816,7 +816,7 @@ void func_001B1238(C33* self)
         break;
     }
     self->desc30()->m4D(self, state);
-    func_001B1898(self);
+    SetBlinkObjectFrame(self);
 }
 
 INCLUDE_ASM(func_001B1438);
@@ -835,7 +835,7 @@ void func_001B1608(C33* self)
     Rec_1B0EE0* r = (Rec_1B0EE0*)self->f550;
     if (r != 0) {
         if (r->f550 == 1) {
-            if (__builtin_fabsf(D_0026185C[0] - r->f554) < 0.2f) {
+            if (__builtin_fabsf(g_gameTime[0] - r->f554) < 0.2f) {
                 self->f5C0 = r->f550;
             }
         }
@@ -864,7 +864,7 @@ void func_001B1710(C33* self, s32 n)
     switch (self->state) {
     case 1:
     case 5:
-        func_001BF788(self->f5C4, 0);
+        StopSoundRecord(self->f5C4, 0);
         self->f614 = self->f55C;
         break;
     case 8:
@@ -874,7 +874,7 @@ void func_001B1710(C33* self, s32 n)
     }
     switch (n) {
     case 1:
-        func_001BFCD8(15, &self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(15, &self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 2:
     case 6:
@@ -885,10 +885,10 @@ void func_001B1710(C33* self, s32 n)
     case 7:
         break;
     case 5:
-        func_001BFCD8(27, &self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(27, &self->f5C4, self, 0, 2000.0f, 500.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     }
-    func_001AECE8(self, n);
+    EnterTimedObjectState(self, n);
     if (self->f618 != 0 && (n == 2 || n == 6)) {
         self->state = (n == 2) ? 1 : 5;
         self->f55C = self->f614;
@@ -918,7 +918,7 @@ void func_001B1898(C33* self)
         start = self->f55C;
         break;
     case 3:
-        frame = (s32)((D_0026185C[0] - self->f55C) / (1.0f / self->blinkRate)) % 2;
+        frame = (s32)((g_gameTime[0] - self->f55C) / (1.0f / self->blinkRate)) % 2;
         if (frame != 0) {
             first = self->animB.first;
             last = self->animB.last;
@@ -931,7 +931,7 @@ void func_001B1898(C33* self)
         }
         break;
     case 7:
-        frame = (s32)((D_0026185C[0] - self->f55C) / (1.0f / self->blinkRate)) % 2;
+        frame = (s32)((g_gameTime[0] - self->f55C) / (1.0f / self->blinkRate)) % 2;
         if (frame != 0) {
             first = self->animC.first;
             last = self->animC.last;
@@ -958,11 +958,11 @@ void func_001B1898(C33* self)
     } else {
         switch (mode) {
         case 0:
-            frame = (s32)((D_0026185C[0] - start) / (duration / (f32)count)) % count;
+            frame = (s32)((g_gameTime[0] - start) / (duration / (f32)count)) % count;
             break;
         case 1: {
             s32 period = count * 2 - 2;
-            frame = (s32)((D_0026185C[0] - start) / (duration / (f32)period)) % period;
+            frame = (s32)((g_gameTime[0] - start) / (duration / (f32)period)) % period;
             if (frame >= count)
                 frame -= (frame - count + 1) * 2;
             break;
@@ -970,5 +970,5 @@ void func_001B1898(C33* self)
         }
         frame += first;
     }
-    func_001B46E0((s32)self->f610 + 0x10, frame);
+    SetCursorFrame((s32)self->f610 + 0x10, frame);
 }

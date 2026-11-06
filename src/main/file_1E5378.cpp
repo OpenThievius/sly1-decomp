@@ -16,10 +16,10 @@ void* func_0018D500(s32 size);
 
 void func_001E5378(C16* self)
 {
-    func_001921A8(self);
+    InitSwitchedCollider(self);
     self->f644 = 1;
-    self->f63C = func_0018D500(0x40);
-    self->f640 = func_0018D500(0x40);
+    self->f63C = AllocateFrontMemory(0x40);
+    self->f640 = AllocateFrontMemory(0x40);
     self->f658 = -1.5f;
     self->f65C = 1.5f;
     self->f650 = -0.7f;
@@ -62,25 +62,25 @@ void func_001E5428(C16* self)
     s32 n;
     void* r;
 
-    func_00124A48(self);
-    func_00124DF8(self, 3, D_00275B28);
-    self->f614 = func_001B6290(self->f610, self, -1, 1);
-    r = func_0015A448(D_00275710, 7, self);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 3, D_00275B28);
+    self->f614 = CreateStateWalker(self->f610, self, -1, 1);
+    r = func_0015A448(g_currentWorld, 7, self);
     if (r != 0) {
         self->f620 = r;
         self->f624 = r;
         ((Peer_1E5428*)r)->owner = self;
         self->f598 = r;
-        self->f584 = (void*)func_0015A418(self->world, 1, 0x160, r);
+        self->f584 = (void*)FindFirstObjectById(self->world, 1, 0x160, r);
         i = 0;
         do {
-            self->f588[i] = (void*)func_0015A418(self->world, 1, i + 0x161, r);
+            self->f588[i] = (void*)FindFirstObjectById(self->world, 1, i + 0x161, r);
             i++;
         } while (i < 3);
         self->f594 = 300.0f;
         ((Vt_1E5428*)r)->vtbl[27](r, self);
     } else {
-        self->f620 = (void*)D_00262E10;
+        self->f620 = (void*)g_player;
     }
 
     n = 0;
@@ -92,7 +92,7 @@ void func_001E5428(C16* self)
         }
     }
     self->f638 = n;
-    func_00189230((u8*)self + 0x110, (u8*)self + 0x648, (u8*)self + 0x64C);
+    VectorToAngles((u8*)self + 0x110, (u8*)self + 0x648, (u8*)self + 0x64C);
 }
 
 typedef s32 (*VFn_1E55D0)(void* self);
@@ -109,10 +109,10 @@ void func_001E55D0(C16* self)
     s32 count;
     s32 i;
 
-    func_00192B58(self);
+    UpdateSwitchedCollider(self);
     if (((Obj_1E55D0*)self->f620) != 0) {
         if (((Obj_1E55D0*)self->f620)->vtbl[81](((Obj_1E55D0*)self->f620))) {
-            n = func_0015A4F0(self->world, 5, 8, 0, 8, arr);
+            n = GatherObjectsById(self->world, 5, 8, 0, 8, arr);
             if (n > 0) {
                 count = n;
                 i = 0;
@@ -120,7 +120,7 @@ void func_001E55D0(C16* self)
                     void* item = arr[i];
                     if (item != ((Obj_1E55D0*)self->f620)) {
                         if (((Item_1E55D0*)item)->f724 != 0xB) {
-                            func_001C8F20(item, 0xA, 0);
+                            ChangeAgentState(item, 0xA, 0);
                         }
                     }
                     count--;
@@ -151,16 +151,16 @@ void func_001E56A0(C16* self, void* obj, f32 t)
 
     func_001E5938();
     if (*(u16*)((u8*)obj + 0xAA) & 0xC0) {
-        func_0016EC20(obj, 0xC0);
+        ClearPadPressedBits(obj, 0xC0);
         func_001E5C78(self);
     }
-    o = D_00262E10;
+    o = g_player;
     if (o != 0) {
         if (*(s32*)(o + 0x2740) != 0) {
-            if (func_00182FC8()) {
+            if (IsObjectAttached()) {
                 VFn_56A0 fn;
                 func_001F5C0C(buf, 0, 0xC4);
-                o = D_00262E10;
+                o = g_player;
                 fn = *(VFn_56A0*)(*(u8**)o + 0x134);
                 if (fn != 0) {
                     fn(o, t, buf);
@@ -198,26 +198,26 @@ void func_001B64D8(void* a, s32 b);
 
 void func_001E5750(C16* self, u8* p)
 {
-    func_001922E8(self, p);
+    HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
-        D_00261990->f480 = 100.0f;
-        func_001E9498(D_00275BC0, &D_002701F8);
-        func_001356C0(&D_002701F8, 5);
-        D_00261990->f4BC = self->f61C;
+        g_camera->f480 = 100.0f;
+        PushStackElement(g_elementStack, &g_typedTextCaptionBox);
+        SetTextPanelState(&g_typedTextCaptionBox, 5);
+        g_camera->f4BC = self->f61C;
         if (self->f630 != 0) {
-            D_00261990->q80 = *(Quad_1E5750*)&self->m110.r[0];
-            D_00261990->q90 = *(Quad_1E5750*)&self->m110.r[1];
-            D_00261990->qA0 = *(Quad_1E5750*)&self->m110.r[2];
+            g_camera->q80 = *(Quad_1E5750*)&self->m110.r[0];
+            g_camera->q90 = *(Quad_1E5750*)&self->m110.r[1];
+            g_camera->qA0 = *(Quad_1E5750*)&self->m110.r[2];
         }
-        func_00145088(D_00261990, 6, (u8*)D_00261990 + 0x460, self, 0);
-        func_001495E8((u8*)D_00261990 + 0x460, self->f644);
-        func_001B64D8(self->f614, 0x359);
+        PushCameraController(g_camera, 6, (u8*)g_camera + 0x460, self, 0);
+        PushStackValue((u8*)g_camera + 0x460, self->f644);
+        SetStateWalkerTarget(self->f614, 0x359);
     } else {
-        D_00261990->f480 = 10.0f;
-        func_001E9570(D_00275BC0);
-        func_001451F0(D_00261990, 0xF, 6, (u8*)D_00261990 + 0x460, self, 0);
-        func_00149610((u8*)D_00261990 + 0x460);
-        func_001B64D8(self->f614, 0x358);
+        g_camera->f480 = 10.0f;
+        PopStackElement(g_elementStack);
+        RemoveCameraControllers(g_camera, 0xF, 6, (u8*)g_camera + 0x460, self, 0);
+        PopStackValue((u8*)g_camera + 0x460);
+        SetStateWalkerTarget(self->f614, 0x358);
     }
 }
 
@@ -265,8 +265,8 @@ void func_001E5C78(C16* self)
     func_001B6598(self->f614, &a);
     func_001B6568(self->f614, &b);
     if (a == 0x359 && b == a) {
-        if (func_001A8C50(self->f618) != 0) {
-            func_001B64D8(self->f614, 0x35A);
+        if (HasObjectPoolChoice(self->f618) != 0) {
+            SetStateWalkerTarget(self->f614, 0x35A);
         }
     }
 }
@@ -279,7 +279,7 @@ s32 func_001A8C90(void* a, s32 b);
 
 void func_001E5CE8(C16* self, s32 kind, MessageBody* rec)
 {
-    func_00192230(self, kind, rec);
+    HandleSwitchedColliderNotification(self, kind, rec);
     if (kind == 0x13) {
         Dev_1E5CE8* dev = (Dev_1E5CE8*)self->f614;
         s32 id = rec->sourceId;
@@ -305,7 +305,7 @@ s32 func_001A8820(void* p, void* v);
 
 s32 func_001E5DA8(C16* self, void* arg)
 {
-    if (func_001B8A08(self, arg)) {
+    if (TestCollidersMayContact(self, arg)) {
         return 1;
     }
     if (self->f618 != 0) {
@@ -372,7 +372,7 @@ void func_001E5E70(T217D_3F0* self, s32 kind)
     self->w = 160.0f;
     self->h = 125.4f;
     self->lineLen = self->lineLen2 = 3.3000002f;
-    func_001AA1F0(self, kind);
+    InitScreenElement(self, kind);
     f32 sign;
     if (kind == 0x1A) {
         self->edgeTo = 0.0f;
@@ -396,13 +396,13 @@ void func_001E5E70(T217D_3F0* self, s32 kind)
         p->f3C = p->f40 = (i & 1) ? dim : 0x30808080;
         p->f44 = p->f48 = 0.0f;
         if (self->index == special) {
-            p->f4C = func_001EAAE0(0.6f, 0.8f);
-            p->f50 = func_001EAAE0(0.4f, 0.6f);
-            p->f54 = func_001EAAE0(0.05f, 0.2f);
+            p->f4C = RandomFloatInRange(0.6f, 0.8f);
+            p->f50 = RandomFloatInRange(0.4f, 0.6f);
+            p->f54 = RandomFloatInRange(0.05f, 0.2f);
         } else {
-            p->f4C = func_001EAAE0(0.3f, 0.4f);
-            p->f50 = func_001EAAE0(0.2f, 0.3f);
-            p->f54 = func_001EAAE0(0.1f, 0.4f);
+            p->f4C = RandomFloatInRange(0.3f, 0.4f);
+            p->f50 = RandomFloatInRange(0.2f, 0.3f);
+            p->f54 = RandomFloatInRange(0.1f, 0.4f);
         }
         if (i != 0) {
             p->fC = p->f34;
@@ -413,13 +413,13 @@ void func_001E5E70(T217D_3F0* self, s32 kind)
     self->pts[56].nextY = 1.0f;
     self->pts[56].nextX = 0.0f;
     if (self->index == 0x1A) {
-        self->pulseA = func_001EAAE0(1.0f, 1.4f);
-        self->pulseB = func_001EAAE0(0.6f, 0.8f);
-        self->pulseC = func_001EAAE0(0.1f, 0.2f);
+        self->pulseA = RandomFloatInRange(1.0f, 1.4f);
+        self->pulseB = RandomFloatInRange(0.6f, 0.8f);
+        self->pulseC = RandomFloatInRange(0.1f, 0.2f);
     } else {
-        self->pulseA = func_001EAAE0(0.5f, 0.7f);
-        self->pulseB = func_001EAAE0(0.2f, 0.3f);
-        self->pulseC = func_001EAAE0(0.3f, 0.5f);
+        self->pulseA = RandomFloatInRange(0.5f, 0.7f);
+        self->pulseB = RandomFloatInRange(0.2f, 0.3f);
+        self->pulseC = RandomFloatInRange(0.3f, 0.5f);
     }
 }
 
@@ -449,17 +449,17 @@ void func_00184968(void* p, s32 v);
 
 void func_001E6188(T217D_3F0* self)
 {
-    func_001AA268(self);
-    self->sprite = func_0011E580(0x51, D_00275710, 0, 0x201, -1);
-    func_00184768(self->sprite, 1);
+    SetupScreenElementText(self);
+    self->sprite = CreateTypedRecord(0x51, g_currentWorld, 0, 0x201, -1);
+    SetConeVolumeMode(self->sprite, 1);
     func_001847F0(self->sprite, D_00275640);
     func_00184858(self->sprite, D_00275650);
     func_00184818(self->sprite, D_00275654);
     func_00184878(self->sprite, D_00275658);
     func_00184838(self->sprite, D_0027565C);
     func_00184898(self->sprite, D_00275660);
-    func_00184990(self->sprite, D_00275B58);
-    func_00184968(self->sprite, 1);
+    SetConeVolumeRange(self->sprite, D_00275B58);
+    SetConeVolumeValue(self->sprite, 1);
     ((Inst_1E6188*)self->sprite)->vtbl[7](self->sprite);
 }
 
@@ -476,15 +476,15 @@ void func_001E62A8(T217D_3F0* self, V24A0* c, s32 k)
         f32 x = self->shownX;
         s32 x0 = (s32)((x + 1728.0f) * 16.0f);
         s32 y0 = (s32)((y * 0.45454547f + 1936.0f) * 16.0f);
-        func_00161670(c, x0, y0, k, 0);
-        func_00161670(c, x0, (s32)(((y + self->h) * 0.45454547f + 1936.0f) * 16.0f), k, 0);
-        func_001615F0(c, (s32)(((x + self->w) + 1728.0f) * 16.0f), y0, k, 0);
+        AddGifXyzfNoDrawEntry(c, x0, y0, k, 0);
+        AddGifXyzfNoDrawEntry(c, x0, (s32)(((y + self->h) * 0.45454547f + 1936.0f) * 16.0f), k, 0);
+        AddGifXyzfEntry(c, (s32)(((x + self->w) + 1728.0f) * 16.0f), y0, k, 0);
         y = y + self->h;
         x = x + self->w;
-        func_001615F0(c, (s32)((x + 1728.0f) * 16.0f), (s32)((y * 0.45454547f + 1936.0f) * 16.0f), k, 0);
+        AddGifXyzfEntry(c, (s32)((x + 1728.0f) * 16.0f), (s32)((y * 0.45454547f + 1936.0f) * 16.0f), k, 0);
     } else {
         s32 r[2];
-        func_001E6268(self, &r[0], &r[1]);
+        GetArcVisibleRange(self, &r[0], &r[1]);
         if (r[0] != r[1]) {
             f32 a = self->y + 62.7f;
             f32 b = self->x + self->edgeTo;
@@ -494,15 +494,15 @@ void func_001E62A8(T217D_3F0* self, V24A0* c, s32 k)
             y0 = (s32)(((a + self->pts[r[0]].y * 62.7f) * 0.45454547f + 1936.0f) * 16.0f);
             x0 = (s32)((b + 1728.0f) * 16.0f);
             t = bx + self->pts[r[0]].x * 62.7f;
-            func_00161670(c, x0, y0, k, 0);
-            func_00161670(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
+            AddGifXyzfNoDrawEntry(c, x0, y0, k, 0);
+            AddGifXyzfNoDrawEntry(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
             for (i = r[0]; i < r[1]; i++) {
                 T217D_3F0_Pt* p = &self->pts[i];
                 t = bx + p->nextX * 62.7f;
                 s32 x = (s32)((b + 1728.0f) * 16.0f);
                 y0 = (s32)(((a + p->nextY * 62.7f) * 0.45454547f + 1936.0f) * 16.0f);
-                func_001615F0(c, x, y0, k, 0);
-                func_001615F0(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
+                AddGifXyzfEntry(c, x, y0, k, 0);
+                AddGifXyzfEntry(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
             }
         }
     }
@@ -547,13 +547,13 @@ void func_001E6C20(T217D_3F0* self, Buf_1E6C20* buf)
     f32 t;
     switch (self->fade) {
     case 0:
-        t = Clamp_1E6C20::Of((D_00261868 - self->fadeSince) * 5.0f, 0.0f, 1.0f);
+        t = Clamp_1E6C20::Of((g_elapsedTime - self->fadeSince) * 5.0f, 0.0f, 1.0f);
         break;
     case 1:
-        t = Clamp_1E6C20::Of(1.0f - (D_00261868 - self->fadeSince) * 5.0f, 0.0f, 1.0f);
+        t = Clamp_1E6C20::Of(1.0f - (g_elapsedTime - self->fadeSince) * 5.0f, 0.0f, 1.0f);
         break;
     }
-    func_001613C0(buf, 0, 1, 1);
+    BeginGifTag(buf, 0, 1, 1);
     {
         Rgba4 a = D_002610D8;
         Rgba4 b = D_002610E0;
@@ -564,40 +564,40 @@ void func_001E6C20(T217D_3F0* self, Buf_1E6C20* buf)
         r.a = Lerp_1E6C20::Of(a.a, b.a, t);
         c = r;
     }
-    func_00161458(buf, *(u32*)&c);
-    func_001613C0(buf, 0x44, 1, 4);
+    AddGifRgbaEntry(buf, *(u32*)&c);
+    BeginGifTag(buf, 0x44, 1, 4);
     f32 x0 = self->x + self->edgeFrom;
     f32 y0 = self->y + 62.7f;
     f32 xe = self->x + self->edgeTo;
     s32 first, last;
-    func_001E6268(self, &first, &last);
+    GetArcVisibleRange(self, &first, &last);
     T217D_3F0_Pt* e = &self->pts[first];
     f32 len = self->lineLen;
     f32 xa = x0 + e->x * 62.7f;
     f32 xb = x0 + (len + 62.7f) * e->x;
     f32 ya = y0 + e->y * 62.7f;
     f32 yb = ya - len;
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
     for (s32 i = first; i < last; i++) {
         e = &self->pts[i];
         xa = x0 + e->x * 62.7f;
         ya = y0 + e->y * 62.7f;
         xb = x0 + (self->lineLen + 62.7f) * e->x;
         yb = y0 + (self->lineLen + 62.7f) * e->y;
-        func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-        func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+        AddGifXyzfEntry(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
+        AddGifXyzfEntry(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
     }
     xa = x0 + e->nextX * 62.7f;
     ya = y0 + e->nextY * 62.7f;
     yb = ya + self->lineLen;
     xb = x0 + (self->lineLen + 62.7f) * e->nextX;
-    func_001615F0(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
-    func_001615F0(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xa), SY_1E6C20(ya), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xb), SY_1E6C20(yb), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(ya), 0, 0);
+    AddGifXyzfEntry(buf, SX_1E6C20(xe), SY_1E6C20(yb), 0, 0);
 }
 
 extern u8 D_00262280[];
@@ -610,13 +610,13 @@ void func_001E6C20(void* self, void* p);
 
 void func_001E73B8(T217D_3F0* self)
 {
-    u8* s = D_00262280;
+    u8* s = g_gsPacketWriter;
     if (func_001E9A68()) {
-        func_001613C0(s, 0, 1, 0xE);
-        func_00161708(s, 0x47, 0x31001);
-        func_00161708(s, 0x42, 0x44);
+        BeginGifTag(s, 0, 1, 0xE);
+        AddGifRegisterWrite(s, 0x47, 0x31001);
+        AddGifRegisterWrite(s, 0x42, 0x44);
         func_001E6600(self, s);
-        func_001E6C20(self, s);
+        WriteArcTickVertices(self, s);
     }
 }
 
@@ -626,7 +626,7 @@ void func_001E7440(T217D_3F0* a0, s32 a1)
 {
     if (a1 != a0->fade) {
         a0->fade = a1;
-        a0->fadeSince = D_00261868;
+        a0->fadeSince = g_elapsedTime;
     }
 }
 
@@ -648,7 +648,7 @@ void func_001E7460(T217D_3F0* self)
     if (self->current != 0) {
         ((PlacedObject*)self->current)->desc->m02((PlacedObject*)self->current);
         if (D_00270458 != 4) {
-            func_00126BC0((PlacedObject*)self->current, self);
+            SetObjectTreeRecordsValue((PlacedObject*)self->current, self);
         }
         ((PlacedObject*)self->current)->flags |= 0x100000000UL;
     }
@@ -665,11 +665,11 @@ void func_001E7518(T217D_3F0* self, s32 mode)
     }
     switch (mode) {
     case 0: {
-        func_001BFCD8(0x8C, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x8C, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         for (s32 i = 0; i < 57; i++) {
             T217D_3F0_Pt* e = &self->pts[i];
             e->level = 1.0f;
-            e->target = func_001EAAE0(0.0f, 0.05f);
+            e->target = RandomFloatInRange(0.0f, 0.05f);
             e->rateA = 1.0f;
             e->rateB = 0.6f;
             e->rateC = 0.2f;
@@ -677,18 +677,18 @@ void func_001E7518(T217D_3F0* self, s32 mode)
         break;
     }
     case 2:
-        func_001BFCD8(0x8D, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x8D, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 1:
         self->size = 1.0f;
         break;
     case 3:
         self->size = 0.0f;
-        func_001E7460(self);
+        ApplyArcTarget(self);
         break;
     }
     self->phase = mode;
-    self->phaseSince = D_00261858[4];
+    self->phaseSince = g_gameClock[4];
 }
 
 extern s32 D_00270458;
@@ -697,21 +697,21 @@ void func_001AAB20(ScreenElement* self, f32 x, f32 y);
 void func_001E76E0(T217D_3F0* self, s32 value)
 {
     s32 old = self->mode;
-    func_001AA998(self, value);
+    SetScreenElementMode(self, value);
     if (old == value) return;
     if (old != 0) goto done;
     if (D_00270458 == 4) {
         self->place->dy = 0.0f;
-        func_001AAB20(self, 640.0f, 360.0f);
+        SetScreenElementSize(self, 640.0f, 360.0f);
     } else {
         self->place->dy = -20.0f;
-        func_001AAB20(self, 160.0f, 125.4f);
+        SetScreenElementSize(self, 160.0f, 125.4f);
     }
 done:
     if (value != 2) return;
     if (D_00270458 == 4) return;
     self->phase = -1;
-    func_001E7518(self, 3);
+    SetArcPhase(self, 3);
 }
 
 extern f32 D_00261858[];
@@ -725,7 +725,7 @@ f32 func_001EAAE0(f32 a, f32 b);
 
 void func_001E77C0(T217D_3F0* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     s32 state = self->mode;
     s32 sub = self->phase;
     switch (state)
@@ -748,7 +748,7 @@ void func_001E77C0(T217D_3F0* self)
         {
         case 0:
         {
-            f32 f = self->size + D_00261858[5] * 5.0f;
+            f32 f = self->size + g_gameClock[5] * 5.0f;
             self->size = f;
             if (1.0f <= f)
             {
@@ -759,7 +759,7 @@ void func_001E77C0(T217D_3F0* self)
         }
         case 2:
         {
-            f32 f = self->size - D_00261858[5] * 5.0f;
+            f32 f = self->size - g_gameClock[5] * 5.0f;
             self->size = f;
             if (f <= 0.0f)
             {
@@ -781,25 +781,25 @@ void func_001E77C0(T217D_3F0* self)
         }
         if (D_00270458 != 4)
         {
-            self->pulse = func_001EA4B8(&self->pulseA, 0, self->pulse, self->pulseTarget, D_00261858[5]);
+            self->pulse = ApproachValueWithRamp(&self->pulseA, 0, self->pulse, self->pulseTarget, g_gameClock[5]);
             if (func_001EAC68(self->pulse, self->pulseTarget, 1e-4f) != 0)
             {
                 self->pulse = 1.0f;
                 if (self->index == 0x1A)
                 {
-                    self->pulseA = func_001EAAE0(1.0f, 1.4f);
-                    self->pulseB = func_001EAAE0(0.6f, 0.8f);
-                    self->pulseC = func_001EAAE0(0.1f, 0.2f);
+                    self->pulseA = RandomFloatInRange(1.0f, 1.4f);
+                    self->pulseB = RandomFloatInRange(0.6f, 0.8f);
+                    self->pulseC = RandomFloatInRange(0.1f, 0.2f);
                 }
                 else
                 {
-                    self->pulseA = func_001EAAE0(0.5f, 0.7f);
-                    self->pulseB = func_001EAAE0(0.2f, 0.3f);
-                    self->pulseC = func_001EAAE0(0.3f, 0.5f);
+                    self->pulseA = RandomFloatInRange(0.5f, 0.7f);
+                    self->pulseB = RandomFloatInRange(0.2f, 0.3f);
+                    self->pulseC = RandomFloatInRange(0.3f, 0.5f);
                 }
             }
             s32 idx = (s32)(self->pulse * 56.999f);
-            f32 d = func_001EAAE0(0.1f, 0.2f);
+            f32 d = RandomFloatInRange(0.1f, 0.2f);
             if (self->index == 0x1A)
             {
                 d = d + d;
@@ -826,28 +826,28 @@ void func_001E77C0(T217D_3F0* self)
                 {
                     if (self->index == big)
                     {
-                        e->rateA = func_001EAAE0(0.6f, 0.8f);
-                        e->rateB = func_001EAAE0(0.4f, 0.6f);
-                        e->rateC = func_001EAAE0(0.05f, 0.2f);
+                        e->rateA = RandomFloatInRange(0.6f, 0.8f);
+                        e->rateB = RandomFloatInRange(0.4f, 0.6f);
+                        e->rateC = RandomFloatInRange(0.05f, 0.2f);
                     }
                     else
                     {
-                        e->rateA = func_001EAAE0(0.3f, 0.4f);
-                        e->rateB = func_001EAAE0(0.2f, 0.3f);
-                        e->rateC = func_001EAAE0(0.1f, 0.4f);
+                        e->rateA = RandomFloatInRange(0.3f, 0.4f);
+                        e->rateB = RandomFloatInRange(0.2f, 0.3f);
+                        e->rateC = RandomFloatInRange(0.1f, 0.4f);
                     }
-                    e->target = func_001EAAE0(0.0f, 0.05f);
+                    e->target = RandomFloatInRange(0.0f, 0.05f);
                 }
                 else
                 {
-                    e->level = func_001EA4B8(q, 0, e->level, e->target, D_00261858[5]);
+                    e->level = ApproachValueWithRamp(q, 0, e->level, e->target, g_gameClock[5]);
                 }
             }
         }
         break;
     }
     self->vt->m16(self, state);
-    func_001E7518(self, sub);
+    SetArcPhase(self, sub);
 }
 
 ASM_FUNC(func_001E7C60);
@@ -862,26 +862,26 @@ void func_001E86E0(T217D_3F0* self, void* value)
 {
     if (value == self->target) return;
     if (self->target == 0) {
-        D_002701F8.vt->m08(&D_002701F8, 0);
+        g_typedTextCaptionBox.vt->m08(&g_typedTextCaptionBox, 0);
     }
     self->target = value;
-    if (D_002701F8.state == 4) {
-        func_001E7460(self);
+    if (g_typedTextCaptionBox.state == 4) {
+        ApplyArcTarget(self);
         if (self->target != 0) {
             self->vt->m16(self, 2);
-            func_001E7518(self, 1);
-            func_001E7440(self, 0);
+            SetArcPhase(self, 1);
+            SetArcFade(self, 0);
         } else {
             self->vt->m16(self, 0);
-            func_001E7518(self, 3);
-            func_001E7440(self, 0);
-            func_001E87F0(self, 0);
+            SetArcPhase(self, 3);
+            SetArcFade(self, 0);
+            SetArcSpecialObject(self, 0);
         }
     } else {
         s32 st = self->phase;
         if (st >= 2) return;
         if (st < 0) return;
-        func_001E7518(self, 2);
+        SetArcPhase(self, 2);
     }
 }
 
@@ -899,7 +899,7 @@ void func_001E87F0(T217D_3F0* self, void* a1)
 
 void func_001E8840(T217D_3F0* self)
 {
-    func_001AA8C8(self);
+    ResetScreenElement(self);
     self->size = 0;
     self->current = 0;
     self->target = 0;

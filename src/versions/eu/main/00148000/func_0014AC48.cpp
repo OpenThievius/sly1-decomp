@@ -30,9 +30,9 @@ void func_0014AC48(Obj_14AC48_eu* self)
         e->vtbl[1](e);
         e->f520 = 0;
         func_eu_001AB550(e, 0.5f);
-        func_001AA8B0(e, 1.0f);
-        func_001AA8C0(e, 1.0f);
-        func_001AA8B8(e, 0.0f);
+        SetScreenElementSlideInTime(e, 1.0f);
+        SetScreenElementSlideOutTime(e, 1.0f);
+        SetScreenElementHoldTime(e, 0.0f);
         e++;
     }
 }

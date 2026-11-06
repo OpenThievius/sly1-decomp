@@ -28,16 +28,16 @@ void func_001AB710(Actor_001AB710_eu* self)
             SubObj_001AB710* sub = *(SubObj_001AB710**)obj;
             if (sub != 0) {
                 VDesc_001AB710* d = sub->desc4C;
-                d->fn4C((u8*)sub + d->off48, obj, &L, &D_00262280);
+                d->fn4C((u8*)sub + d->off48, obj, &L, &g_gsPacketWriter);
             }
         }
         f32 v = self->f51C;
-        u8* dp = (u8*)&D_00262280;
-        func_0015C8B8(self->p4, v, v);
+        u8* dp = (u8*)&g_gsPacketWriter;
+        PushFontScale(self->p4, v, v);
         ((u8*)&L.tag)[0] = 0x54;
         ((u8*)&L.tag)[1] = 0;
         func_eu_0015C778(self->p4, &L.tag, &L, 0, dp);
-        f32 r = func_0015C418(self->p4, &L.tag);
+        f32 r = MeasureFontString(self->p4, &L.tag);
         f32 a = self->f52C + r;
         L.y = self->f530;
         L.x = a;
@@ -47,6 +47,6 @@ void func_001AB710(Actor_001AB710_eu* self)
         }
         func_eu_0015DCB8(buf, (u8*)self + 10, self->p4, 0);
         func_eu_0015E7E0(buf, &L, 0, dp);
-        func_0015C900(self->p4);
+        PopFontScale(self->p4);
     }
 }

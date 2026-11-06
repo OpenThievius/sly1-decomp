@@ -416,40 +416,40 @@ ASM_FUNC(func_00113240);
 ScriptValue* func_00113730(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B538(&q, 0x22);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00113780(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B538(&q, 0x22);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001137D0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B538(&q, 0x22);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00113820(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, args[0].i == args[1].i);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, args[0].i == args[1].i);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -457,7 +457,7 @@ ScriptValue* func_00113888(ScriptValue* ret, ScriptValue* e, s32 mode)
 {
     f32 xy[2];
     ScriptValue obj;
-    func_0011B008(&obj);
+    InitScriptValue(&obj);
     f32* out = xy;
     for (s32 i = 1; i >= 0; i--, e++) {
         if (e->tag == 0x15) {
@@ -469,44 +469,44 @@ ScriptValue* func_00113888(ScriptValue* ret, ScriptValue* e, s32 mode)
     }
     switch (mode) {
     case 0:
-        func_0011B5F0(&obj, xy[0] < xy[1]);
+        SetScriptValueBool(&obj, xy[0] < xy[1]);
         break;
     case 1:
-        func_0011B5F0(&obj, xy[0] <= xy[1]);
+        SetScriptValueBool(&obj, xy[0] <= xy[1]);
         break;
     case 2:
-        func_0011B5F0(&obj, xy[0] > xy[1]);
+        SetScriptValueBool(&obj, xy[0] > xy[1]);
         break;
     case 3:
-        func_0011B5F0(&obj, xy[0] >= xy[1]);
+        SetScriptValueBool(&obj, xy[0] >= xy[1]);
         break;
     }
-    func_0011B018(ret, &obj);
-    func_0011B060(&obj, 2);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
     return ret;
 }
 
 ScriptValue* func_001139E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00113888(ret, args, 0);
+    CompareScriptNumbers(ret, args, 0);
     return ret;
 }
 
 ScriptValue* func_00113A18(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00113888(ret, args, 1);
+    CompareScriptNumbers(ret, args, 1);
     return ret;
 }
 
 ScriptValue* func_00113A48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00113888(ret, args, 2);
+    CompareScriptNumbers(ret, args, 2);
     return ret;
 }
 
 ScriptValue* func_00113A78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00113888(ret, args, 3);
+    CompareScriptNumbers(ret, args, 3);
     return ret;
 }
 
@@ -514,7 +514,7 @@ ScriptValue* func_00113AA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     s32 r;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     ScriptValue* k = args;
     ScriptValue* p = k + 1;
     if (k->tag != p->tag) {
@@ -532,9 +532,9 @@ ScriptValue* func_00113AA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
             break;
         }
     }
-    func_0011B5F0(&q, r);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueBool(&q, r);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -549,7 +549,7 @@ ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
     ScriptValue F;
     s32 r;
 
-    func_0011B008(&R);
+    InitScriptValue(&R);
     if (a->tag != b->tag) {
         r = 0;
     } else {
@@ -562,27 +562,27 @@ ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
             } else if ((p->next == 0) != (q->next == 0)) {
                 r = 0;
             } else {
-                func_0011B008(&A);
-                func_00113B60(&B, p, q);
-                func_0011B0A8(&A, &B);
-                func_0011B060(&B, 2);
+                InitScriptValue(&A);
+                CompareScriptValues(&B, p, q);
+                AssignScriptValue(&A, &B);
+                DestroyScriptValue(&B, 2);
                 if (A.i == 0) {
                     r = 0;
                 } else if (p->next == 0) {
                     r = 1;
                 } else {
-                    func_0011B008(&B);
-                    func_0011B008(&C);
-                    func_0011B6C0(&B, p->next);
-                    func_0011B6C0(&C, q->next);
-                    func_00113B60(&D, &B, &C);
-                    func_0011B0A8(&A, &D);
-                    func_0011B060(&D, 2);
+                    InitScriptValue(&B);
+                    InitScriptValue(&C);
+                    SetScriptValueChain(&B, p->next);
+                    SetScriptValueChain(&C, q->next);
+                    CompareScriptValues(&D, &B, &C);
+                    AssignScriptValue(&A, &D);
+                    DestroyScriptValue(&D, 2);
                     r = A.i;
-                    func_0011B060(&C, 2);
-                    func_0011B060(&B, 2);
+                    DestroyScriptValue(&C, 2);
+                    DestroyScriptValue(&B, 2);
                 }
-                func_0011B060(&A, 2);
+                DestroyScriptValue(&A, 2);
             }
             break;
         }
@@ -594,18 +594,18 @@ ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
             } else if (p->w8 != q->w8 || p->wC != q->wC || p->w0 != q->w0) {
                 r = 0;
             } else {
-                func_0011B008(&A);
-                func_0011B008(&B);
-                func_0011B008(&E);
-                func_0011B6C0(&A, (R11B008Node*)p->w10);
-                func_0011B6C0(&B, (R11B008Node*)q->w10);
-                func_00113B60(&F, &A, &B);
-                func_0011B0A8(&E, &F);
-                func_0011B060(&F, 2);
+                InitScriptValue(&A);
+                InitScriptValue(&B);
+                InitScriptValue(&E);
+                SetScriptValueChain(&A, (R11B008Node*)p->w10);
+                SetScriptValueChain(&B, (R11B008Node*)q->w10);
+                CompareScriptValues(&F, &A, &B);
+                AssignScriptValue(&E, &F);
+                DestroyScriptValue(&F, 2);
                 r = E.i;
-                func_0011B060(&E, 2);
-                func_0011B060(&B, 2);
-                func_0011B060(&A, 2);
+                DestroyScriptValue(&E, 2);
+                DestroyScriptValue(&B, 2);
+                DestroyScriptValue(&A, 2);
             }
             break;
         }
@@ -631,182 +631,182 @@ ScriptValue* func_00113B60(ScriptValue* ret, ScriptValue* a, ScriptValue* b)
             break;
         }
     }
-    func_0011B5F0(&R, r);
-    func_0011B018(ret, &R);
-    func_0011B060(&R, 2);
+    SetScriptValueBool(&R, r);
+    CopyConstructScriptValue(ret, &R);
+    DestroyScriptValue(&R, 2);
     return ret;
 }
 
 ScriptValue* func_00113E48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00113B60(ret, args, args + 1);
+    CompareScriptValues(ret, args, args + 1);
     return ret;
 }
 
 ScriptValue* func_00113E78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue local;
-    func_0011B008(&local);
-    func_0011B5F0(&local, args[0].tag == 0x1B);
-    func_0011B018(ret, &local);
-    func_0011B060(&local, 2);
+    InitScriptValue(&local);
+    SetScriptValueBool(&local, args[0].tag == 0x1B);
+    CopyConstructScriptValue(ret, &local);
+    DestroyScriptValue(&local, 2);
     return ret;
 }
 
 ScriptValue* func_00113EE0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue local;
-    func_0011B008(&local);
-    func_0011B5F0(&local, args[0].tag >= 0x14 && args[0].tag < 0x16);
-    func_0011B018(ret, &local);
-    func_0011B060(&local, 2);
+    InitScriptValue(&local);
+    SetScriptValueBool(&local, args[0].tag >= 0x14 && args[0].tag < 0x16);
+    CopyConstructScriptValue(ret, &local);
+    DestroyScriptValue(&local, 2);
     return ret;
 }
 
 ScriptValue* func_00113F48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue local;
-    func_0011B008(&local);
-    func_0011B5F0(&local, args[0].tag == 0x15);
-    func_0011B018(ret, &local);
-    func_0011B060(&local, 2);
+    InitScriptValue(&local);
+    SetScriptValueBool(&local, args[0].tag == 0x15);
+    CopyConstructScriptValue(ret, &local);
+    DestroyScriptValue(&local, 2);
     return ret;
 }
 
 ScriptValue* func_00113FB0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue local;
-    func_0011B008(&local);
-    func_0011B5F0(&local, args[0].tag == 0x14);
-    func_0011B018(ret, &local);
-    func_0011B060(&local, 2);
+    InitScriptValue(&local);
+    SetScriptValueBool(&local, args[0].tag == 0x14);
+    CopyConstructScriptValue(ret, &local);
+    DestroyScriptValue(&local, 2);
     return ret;
 }
 
 ScriptValue* func_00114018(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, args->tag == 0x1C);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, args->tag == 0x1C);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114080(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, args->tag == 0x16);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, args->tag == 0x16);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001140E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, args->tag == 0x17);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, args->tag == 0x17);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114150(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, args->tag == 0x18);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, args->tag == 0x18);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001141B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue a;
-    func_0011B008(&a);
-    func_0011B5F0(&a, args->tag == 0x19);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    InitScriptValue(&a);
+    SetScriptValueBool(&a, args->tag == 0x19);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
 ScriptValue* func_00114220(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue a;
-    func_0011B008(&a);
-    func_0011B5F0(&a, args->tag == 0x1A);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    InitScriptValue(&a);
+    SetScriptValueBool(&a, args->tag == 0x1A);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
 ScriptValue* func_00114288(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     s32 v = args->tag;
-    func_0011B5F0(&q, v == 0x1E || v == 0);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueBool(&q, v == 0x1E || v == 0);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114300(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, args->tag == 0);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, args->tag == 0);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114360(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, (args->tag ^ 0x20) == 0);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, (args->tag ^ 0x20) == 0);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001143C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     int flag = 0;
     if (args[0].tag == 0x20) {
         flag = args[0].i == 0;
     }
-    func_0011B5F0(&q, flag);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueBool(&q, flag);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114438(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5F0(&q, args[0].tag == 0x21);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueBool(&q, args[0].tag == 0x21);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001144A0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     s32 v = args->tag;
     int flag = (v == 0x1F || v == 0x1D);
-    func_0011B5F0(&q, flag);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueBool(&q, flag);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -814,7 +814,7 @@ ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     f32 out[3];
-    func_0011B008(&q);
+    InitScriptValue(&q);
     for (s32 k = 0; k < 3; k++) {
         if (args[k].tag == 0x14) {
             out[k] = (f32)args[k].i;
@@ -823,32 +823,32 @@ ScriptValue* func_00114518(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
         }
     }
     s32 flag = func_001EAC68(out[0], out[1], out[2]);
-    func_0011B5F0(&q, flag);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueBool(&q, flag);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001145C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     int flag = 0;
     if (args[0].tag == 0x1B) {
         flag = (u32)args[0].i < 1;
     }
-    func_0011B5F0(&q, flag);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueBool(&q, flag);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114638(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    R11B008Node* node = func_0011AF28();
-    func_0011B0A8(node, args);
+    InitScriptValue(&q);
+    R11B008Node* node = NewScriptValueNode();
+    AssignScriptValue(node, args);
     s32 kind = args[1].tag;
     args = args + 1;
     if (kind == 0) {
@@ -856,35 +856,35 @@ ScriptValue* func_00114638(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     } else if (kind == 0x1E) {
         node->next = args->node;
     }
-    func_0011B6C0(&q, node);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueChain(&q, node);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001146E0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B0A8(&q, args->node);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    AssignScriptValue(&q, args->node);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114740(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* in = args->node;
     R11B008Node* v = in->next;
     if (v != 0) {
-        func_0011B6C0(&q, v);
+        SetScriptValueChain(&q, v);
     } else {
-        func_0011B538(&q, 0);
+        SetScriptValueTag(&q, 0);
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -892,10 +892,10 @@ ScriptValue* func_001147B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     R11B008Node* p;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     p = args[0].node;
     if (mode == 0x23) {
-        func_0011B0A8(p, &args[1]);
+        AssignScriptValue(p, &args[1]);
     } else {
         if (args[1].tag == 0x1E) {
             p->next = args[1].node;
@@ -903,28 +903,28 @@ ScriptValue* func_001147B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
             p->next = 0;
         }
     }
-    func_0011B538(&q, 0x22);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114858(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_001147B8(ret, count, args, scope, 0x23);
+    SetScriptListCell(ret, count, args, scope, 0x23);
     return ret;
 }
 
 ScriptValue* func_00114888(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_001147B8(ret, count, args, scope, 0x24);
+    SetScriptListCell(ret, count, args, scope, 0x24);
     return ret;
 }
 
 ScriptValue* func_001148B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     s32 n = 0;
     if (args->tag == 0x1E && args->node) {
         R11B008Node* node = args->node;
@@ -933,32 +933,32 @@ ScriptValue* func_001148B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
             n++;
         } while (node);
     }
-    func_0011B570(&q, n);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueInt(&q, n);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00114950(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B538(&q, 0);
+    InitScriptValue(&q);
+    SetScriptValueTag(&q, 0);
     if (args->tag == 0x1E) {
         R11B008Node* node = args->node;
         ScriptValue* sub = &args[1];
         s32 i = 0;
         while (node != 0) {
             if (i == sub->i) {
-                func_0011B0A8(&q, node);
+                AssignScriptValue(&q, node);
                 break;
             }
             node = node->next;
             i++;
         }
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -971,49 +971,49 @@ ScriptValue* func_001149F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     s32 n;
     R11B008Node* cur;
 
-    func_0011B008(&A);
-    func_0011B008(&B);
+    InitScriptValue(&A);
+    InitScriptValue(&B);
     ScriptValue* q = C;
     n = 1;
     do {
-        func_0011B008(q);
+        InitScriptValue(q);
         n--;
         q++;
     } while (n != -1);
-    func_0011B5F0(&A, 0);
+    SetScriptValueBool(&A, 0);
     if (args[1].tag == 0x1E) {
-        func_0011B0A8(C, args);
+        AssignScriptValue(C, args);
         cur = args[1].node;
         while (cur != 0) {
-            func_0011B0A8(&C[1], cur);
-            func_00113E48(&D, 2, C, scope);
-            func_0011B0A8(&B, &D);
-            func_0011B060(&D, 2);
+            AssignScriptValue(&C[1], cur);
+            TestScriptEqual(&D, 2, C, scope);
+            AssignScriptValue(&B, &D);
+            DestroyScriptValue(&D, 2);
             if (B.tag == 0x1B) {
                 if (B.i != 0) {
-                    func_0011B5F0(&A, 1);
+                    SetScriptValueBool(&A, 1);
                     break;
                 }
             }
             cur = cur->next;
         }
     }
-    func_0011B018(ret, &A);
+    CopyConstructScriptValue(ret, &A);
     q = &D;
     if (C != q) {
         do {
             q--;
-            func_0011B060(q, 0);
+            DestroyScriptValue(q, 0);
         } while (C != q);
     }
-    func_0011B060(&B, 2);
-    func_0011B060(&A, 2);
+    DestroyScriptValue(&B, 2);
+    DestroyScriptValue(&A, 2);
     return ret;
 }
 
 ScriptValue* func_00114B80(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_0011B018(ret, args);
+    CopyConstructScriptValue(ret, args);
     return ret;
 }
 
@@ -1024,58 +1024,58 @@ ScriptValue* func_00114D18(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q;
     R11B008Node arr[5];
     R11B008Node* it;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     it = arr;
     for (s32 k = 4; k != -1; k--) {
-        func_0011B008(it);
+        InitScriptValue(it);
         it->tag = -1;
         it++;
     }
     if (args[1].tag == 0) {
-        func_0011B0A8(&q, &args[1]);
+        AssignScriptValue(&q, &args[1]);
     } else {
-        R11B008Node* list = func_0011AF28();
+        R11B008Node* list = NewScriptValueNode();
         R11B008Node* p[2];
         R11B008Node* last;
         list->tag = 0x1E;
         for (u32 i = 0; i < 2; i++) {
-            p[i] = func_0011AF28();
+            p[i] = NewScriptValueNode();
         }
-        func_0011B6C0(&arr[0], &arr[1]);
+        SetScriptValueChain(&arr[0], &arr[1]);
         arr[0].next = 0;
-        func_0011B6C0(&arr[1], &arr[3]);
+        SetScriptValueChain(&arr[1], &arr[3]);
         arr[1].next = &arr[2];
-        func_0011B6C0(&arr[2], &arr[4]);
+        SetScriptValueChain(&arr[2], &arr[4]);
         arr[2].next = 0;
         arr[3].tag = 0x11;
         arr[3].next = p[0];
-        func_0011B0A8(p[0], args);
+        AssignScriptValue(p[0], args);
         arr[4].tag = 0x11;
         arr[4].next = p[1];
         ScriptValue* m = &args[1];
         for (R11B008Node* l = m->node; l != 0; l = l->next) {
-            R11B008Node* e = func_0011AF28();
+            R11B008Node* e = NewScriptValueNode();
             ScriptValue t;
-            func_0011B0A8(p[1], l);
-            func_0011A080(&t, &arr[0], scope);
-            func_0011B0A8(e, &t);
-            func_0011B060(&t, 2);
+            AssignScriptValue(p[1], l);
+            EvalScriptExpression(&t, &arr[0], scope);
+            AssignScriptValue(e, &t);
+            DestroyScriptValue(&t, 2);
             if (list->node == 0) {
-                func_0011B6C0(list, e);
+                SetScriptValueChain(list, e);
             } else {
                 last->next = e;
             }
             last = e;
         }
-        func_0011B6C0(&q, list->node);
+        SetScriptValueChain(&q, list->node);
     }
-    func_0011B018(ret, &q);
+    CopyConstructScriptValue(ret, &q);
     R11B008Node* end = arr + 5;
     while (arr != end) {
         end--;
-        func_0011B060(end, 2);
+        DestroyScriptValue(end, 2);
     }
-    func_0011B060(&q, 2);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -1086,46 +1086,46 @@ ScriptValue* func_00114F48(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     R11B008Node* it;
     R11B008Node* p[2];
     ScriptValue r;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     it = arr;
     for (s32 k = 4; k != -1; k--) {
-        func_0011B008(it);
+        InitScriptValue(it);
         it->tag = -1;
         it++;
     }
-    func_0011B008(&r);
+    InitScriptValue(&r);
     if (args[1].tag == 0) {
-        func_0011B0A8(&q, &args[1]);
+        AssignScriptValue(&q, &args[1]);
     } else {
         R11B008Node* list = 0;
         R11B008Node* last;
         for (u32 i = 0; i < 2; i++) {
-            p[i] = func_0011AF28();
+            p[i] = NewScriptValueNode();
         }
-        func_0011B6C0(&arr[0], &arr[1]);
+        SetScriptValueChain(&arr[0], &arr[1]);
         arr[0].next = 0;
-        func_0011B6C0(&arr[1], &arr[3]);
+        SetScriptValueChain(&arr[1], &arr[3]);
         arr[1].next = &arr[2];
-        func_0011B6C0(&arr[2], &arr[4]);
+        SetScriptValueChain(&arr[2], &arr[4]);
         arr[2].next = 0;
         arr[3].tag = 0x11;
         arr[3].next = p[0];
-        func_0011B0A8(p[0], args);
+        AssignScriptValue(p[0], args);
         arr[4].tag = 0x11;
         arr[4].next = p[1];
         ScriptValue* m = &args[1];
         for (R11B008Node* l = m->node; l != 0; l = l->next) {
             ScriptValue t;
-            func_0011B0A8(p[1], l);
-            func_0011A080(&t, &arr[0], scope);
-            func_0011B0A8(&r, &t);
-            func_0011B060(&t, 2);
+            AssignScriptValue(p[1], l);
+            EvalScriptExpression(&t, &arr[0], scope);
+            AssignScriptValue(&r, &t);
+            DestroyScriptValue(&t, 2);
             if (r.tag == 0x1B && r.i != 0) {
-                R11B008Node* e = func_0011AF28();
-                func_0011B0A8(e, l);
+                R11B008Node* e = NewScriptValueNode();
+                AssignScriptValue(e, l);
                 if (list == 0) {
-                    list = func_0011AF28();
-                    func_0011B6C0(list, e);
+                    list = NewScriptValueNode();
+                    SetScriptValueChain(list, e);
                 } else {
                     last->next = e;
                 }
@@ -1133,19 +1133,19 @@ ScriptValue* func_00114F48(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
             }
         }
         if (list != 0) {
-            func_0011B6C0(&q, list->node);
+            SetScriptValueChain(&q, list->node);
         } else {
             q.tag = 0;
         }
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&r, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&r, 2);
     R11B008Node* end = arr + 5;
     while (arr != end) {
         end--;
-        func_0011B060(end, 2);
+        DestroyScriptValue(end, 2);
     }
-    func_0011B060(&q, 2);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -1154,46 +1154,46 @@ ScriptValue* func_001151C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q;
     R11B008Node arr[5];
     R11B008Node* it;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     it = arr;
     for (s32 k = 4; k != -1; k--) {
-        func_0011B008(it);
+        InitScriptValue(it);
         it->tag = -1;
         it++;
     }
     if (args[1].tag == 0x1E) {
         R11B008Node* p[2];
         for (u32 i = 0; i < 2; i++) {
-            p[i] = func_0011AF28();
+            p[i] = NewScriptValueNode();
         }
-        func_0011B6C0(&arr[0], &arr[1]);
+        SetScriptValueChain(&arr[0], &arr[1]);
         arr[0].next = 0;
-        func_0011B6C0(&arr[1], &arr[3]);
+        SetScriptValueChain(&arr[1], &arr[3]);
         arr[1].next = &arr[2];
-        func_0011B6C0(&arr[2], &arr[4]);
+        SetScriptValueChain(&arr[2], &arr[4]);
         arr[2].next = 0;
         arr[3].tag = 0x11;
         arr[3].next = p[0];
-        func_0011B0A8(p[0], args);
+        AssignScriptValue(p[0], args);
         arr[4].tag = 0x11;
         arr[4].next = p[1];
         ScriptValue* m = &args[1];
         for (R11B008Node* l = m->node; l != 0; l = l->next) {
             ScriptValue t;
-            func_0011B0A8(p[1], l);
-            func_0011A080(&t, &arr[0], scope);
-            func_0011B0A8(&q, &t);
-            func_0011B060(&t, 2);
+            AssignScriptValue(p[1], l);
+            EvalScriptExpression(&t, &arr[0], scope);
+            AssignScriptValue(&q, &t);
+            DestroyScriptValue(&t, 2);
         }
     }
     q.tag = 0x22;
-    func_0011B018(ret, &q);
+    CopyConstructScriptValue(ret, &q);
     R11B008Node* end = arr + 5;
     while (arr != end) {
         end--;
-        func_0011B060(end, 2);
+        DestroyScriptValue(end, 2);
     }
-    func_0011B060(&q, 2);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -1201,14 +1201,14 @@ ScriptValue* func_00115398(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     ScriptValue u;
-    func_0011B008(&t);
-    R11B008Node* n = func_0011AF28();
-    func_0011B0A8(n, args);
-    func_0011A080(&u, n, scope);
-    func_0011B0A8(&t, &u);
-    func_0011B060(&u, 2);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    InitScriptValue(&t);
+    R11B008Node* n = NewScriptValueNode();
+    AssignScriptValue(n, args);
+    EvalScriptExpression(&u, n, scope);
+    AssignScriptValue(&t, &u);
+    DestroyScriptValue(&u, 2);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1217,22 +1217,22 @@ ScriptValue* func_00115440(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue a;
     ScriptValue b;
     s32 n = 2;
-    func_0011B008(&a);
+    InitScriptValue(&a);
     ScriptValue* in = args;
-    f32* base = func_0011C508();
+    f32* base = AcquireVectorAPayload();
     f32* out = base;
     do {
-        func_0011B9A8(&b, in);
+        ConvertScriptValueToFloat(&b, in);
         in++;
-        func_0011B0A8(&a, &b);
+        AssignScriptValue(&a, &b);
         n--;
-        func_0011B060(&b, 2);
+        DestroyScriptValue(&b, 2);
         *out = a.f;
         out++;
     } while (n >= 0);
-    func_0011B740(&a, base);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    SetScriptValueVectorA(&a, base);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
@@ -1244,8 +1244,8 @@ struct __attribute__((aligned(16))) Row_115510 {
 ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t, u;
-    func_0011B008(&t);
-    Row_115510* a = (Row_115510*)func_0011C618();
+    InitScriptValue(&t);
+    Row_115510* a = (Row_115510*)AcquireMatrixPayload();
     R11B008Node* n = args->node;
     switch (count) {
     case 3:
@@ -1263,9 +1263,9 @@ ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
         s32 m = count == 9 ? 3 : 4;
         for (s32 i = 0; i < m; i++) {
             for (s32 j = 0; j < m; j++) {
-                func_0011B9A8(&u, n);
-                func_0011B0A8(&t, &u);
-                func_0011B060(&u, 2);
+                ConvertScriptValueToFloat(&u, n);
+                AssignScriptValue(&t, &u);
+                DestroyScriptValue(&u, 2);
                 a[i].f[j] = t.f;
                 n = n->next;
             }
@@ -1273,20 +1273,20 @@ ScriptValue* func_00115510(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
         break;
     }
     }
-    func_0011B788(&t, (f32*)a);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueMatrix(&t, (f32*)a);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_001156B0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_001C0C08(args[0].i, args[1].i);
-    func_0011B008(&q);
-    func_0011B538(&q, 0x22);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetCachedVoiceParam(args[0].i, args[1].i);
+    InitScriptValue(&q);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -1297,21 +1297,21 @@ ScriptValue* func_00115710(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     f32* base;
     f32* out;
     s32 n = 2;
-    func_0011B008(&a);
+    InitScriptValue(&a);
     ScriptValue* p = args;
-    base = func_0011C748();
+    base = AcquireVectorBPayload();
     out = base;
     do {
-        func_0011B9A8(&b, p);
+        ConvertScriptValueToFloat(&b, p);
         p++;
-        func_0011B0A8(&a, &b);
+        AssignScriptValue(&a, &b);
         n--;
-        func_0011B060(&b, 2);
+        DestroyScriptValue(&b, 2);
         *out++ = a.f;
     } while (n >= 0);
-    func_0011B7D0(&a, base);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    SetScriptValueVectorB(&a, base);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
@@ -1320,19 +1320,19 @@ ScriptValue* func_001157E0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue a;
     ScriptValue b;
     f32* out;
-    func_0011B008(&a);
-    out = func_0011C858();
-    func_0011B9A8(&b, args);
-    func_0011B0A8(&a, &b);
-    func_0011B060(&b, 2);
+    InitScriptValue(&a);
+    out = AcquirePairPayload();
+    ConvertScriptValueToFloat(&b, args);
+    AssignScriptValue(&a, &b);
+    DestroyScriptValue(&b, 2);
     out[0] = a.f;
-    func_0011B9A8(&b, args + 1);
-    func_0011B0A8(&a, &b);
-    func_0011B060(&b, 2);
+    ConvertScriptValueToFloat(&b, args + 1);
+    AssignScriptValue(&a, &b);
+    DestroyScriptValue(&b, 2);
     out[1] = a.f;
-    func_0011B818(&a, out);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    SetScriptValuePair(&a, out);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
@@ -1340,23 +1340,23 @@ ScriptValue* func_001158B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     ScriptValue u;
-    func_0011B008(&t);
-    f32* out = func_0011C968();
-    func_0011B9A8(&u, args);
-    func_0011B0A8(&t, &u);
-    func_0011B060(&u, 2);
+    InitScriptValue(&t);
+    f32* out = AcquireTriplePayload();
+    ConvertScriptValueToFloat(&u, args);
+    AssignScriptValue(&t, &u);
+    DestroyScriptValue(&u, 2);
     out[0] = t.f;
-    func_0011B9A8(&u, args + 1);
-    func_0011B0A8(&t, &u);
-    func_0011B060(&u, 2);
+    ConvertScriptValueToFloat(&u, args + 1);
+    AssignScriptValue(&t, &u);
+    DestroyScriptValue(&u, 2);
     out[1] = t.f;
-    func_0011B9A8(&u, args + 2);
-    func_0011B0A8(&t, &u);
-    func_0011B060(&u, 2);
+    ConvertScriptValueToFloat(&u, args + 2);
+    AssignScriptValue(&t, &u);
+    DestroyScriptValue(&u, 2);
     out[2] = t.f;
-    func_0011B860(&t, out);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueTriple(&t, out);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1372,70 +1372,70 @@ struct Mat_1159B8 {
 ScriptValue* func_001159B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* ix = args[1].node;
     switch (args[0].tag) {
     case 0x16:
-        func_0011B5B0(&q, ((Arr_1159B8*)args[0].v)->v[ix->i]);
+        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[ix->i]);
         break;
     case 0x17: {
         s32 i = ix->i;
         Arr_1159B8* v;
         if (count == 2) {
-            v = (Arr_1159B8*)func_0011C508();
+            v = (Arr_1159B8*)AcquireVectorAPayload();
             *v = ((Arr_1159B8*)args[0].v)[i];
-            func_0011B740(&q, (f32*)v);
+            SetScriptValueVectorA(&q, (f32*)v);
         } else {
             ix = ix->next;
             v = &((Mat_1159B8*)args[0].v)->row[i];
-            func_0011B5B0(&q, v->v[ix->i]);
+            SetScriptValueFloat(&q, v->v[ix->i]);
         }
         break;
     }
     case 0x18:
-        func_0011B5B0(&q, ((Arr_1159B8*)args[0].v)->v[ix->i]);
+        SetScriptValueFloat(&q, ((Arr_1159B8*)args[0].v)->v[ix->i]);
         break;
     case 0x19:
-        func_0011B5B0(&q, ix->i == 0 ? args[0].v[0] : args[0].v[1]);
+        SetScriptValueFloat(&q, ix->i == 0 ? args[0].v[0] : args[0].v[1]);
         break;
     case 0x1A:
         switch (ix->i) {
         case 0:
-            func_0011B5B0(&q, args[0].v[0]);
+            SetScriptValueFloat(&q, args[0].v[0]);
             break;
         case 1:
-            func_0011B5B0(&q, args[0].v[1]);
+            SetScriptValueFloat(&q, args[0].v[1]);
             break;
         case 2:
-            func_0011B5B0(&q, args[0].v[2]);
+            SetScriptValueFloat(&q, args[0].v[2]);
             break;
         }
         break;
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00115B78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     if (args->tag == 0x14) {
         func_001F66F8(args->i);
     } else {
         func_001F66F8((s32)args->f);
     }
     q.tag = 0x22;
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00115C00(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue f;
-    func_0011B008(&f);
+    InitScriptValue(&f);
     f32 x;
     f32 y;
     if (args[0].tag == 0x14) {
@@ -1448,75 +1448,75 @@ ScriptValue* func_00115C00(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     } else {
         y = args[1].f;
     }
-    f32 r = func_001EAAE0(x, y);
-    func_0011B5B0(&f, r);
-    func_0011B018(ret, &f);
-    func_0011B060(&f, 2);
+    f32 r = RandomFloatInRange(x, y);
+    SetScriptValueFloat(&f, r);
+    CopyConstructScriptValue(ret, &f);
+    DestroyScriptValue(&f, 2);
     return ret;
 }
 
 ScriptValue* func_00115CA0(ScriptValue* ret, ScriptValue* arg, s32 index)
 {
     ScriptValue f;
-    func_0011B008(&f);
+    InitScriptValue(&f);
     f32 v;
     if (arg->tag == 0x15) {
         v = arg->f;
     } else {
         v = (f32)arg->i;
     }
-    f32 r = D_00259938[index](v);
-    func_0011B5B0(&f, r);
-    func_0011B018(ret, &f);
-    func_0011B060(&f, 2);
+    f32 r = g_scriptMathFunctions[index](v);
+    SetScriptValueFloat(&f, r);
+    CopyConstructScriptValue(ret, &f);
+    DestroyScriptValue(&f, 2);
     return ret;
 }
 
 ScriptValue* func_00115D48(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 0);
+    CallScriptMathFunction(ret, args, 0);
     return ret;
 }
 
 ScriptValue* func_00115D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 1);
+    CallScriptMathFunction(ret, args, 1);
     return ret;
 }
 
 ScriptValue* func_00115DA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 2);
+    CallScriptMathFunction(ret, args, 2);
     return ret;
 }
 
 ScriptValue* func_00115DD8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 3);
+    CallScriptMathFunction(ret, args, 3);
     return ret;
 }
 
 ScriptValue* func_00115E08(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 4);
+    CallScriptMathFunction(ret, args, 4);
     return ret;
 }
 
 ScriptValue* func_00115E38(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 5);
+    CallScriptMathFunction(ret, args, 5);
     return ret;
 }
 
 ScriptValue* func_00115E68(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 6);
+    CallScriptMathFunction(ret, args, 6);
     return ret;
 }
 
 ScriptValue* func_00115E98(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00115CA0(ret, args, 7);
+    CallScriptMathFunction(ret, args, 7);
     return ret;
 }
 
@@ -1524,7 +1524,7 @@ ScriptValue* func_00115EC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue obj;
     f32 xy[2];
-    func_0011B008(&obj);
+    InitScriptValue(&obj);
     f32* out = xy;
     for (s32 i = 1; i >= 0; i--, args++) {
         if (args->tag == 0x15) {
@@ -1535,9 +1535,9 @@ ScriptValue* func_00115EC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
         out++;
     }
     f32 d = func_00205778(xy[0], xy[1]);
-    func_0011B5B0(&obj, d);
-    func_0011B018(ret, &obj);
-    func_0011B060(&obj, 2);
+    SetScriptValueFloat(&obj, d);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
     return ret;
 }
 
@@ -1561,8 +1561,8 @@ ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     ScriptValue v;
-    func_0011B008(&q);
-    f32* p = func_0011C508();
+    InitScriptValue(&q);
+    f32* p = AcquireVectorAPayload();
     void* s3;
     if (args[3].tag == 0) {
         s3 = 0;
@@ -1571,65 +1571,65 @@ ScriptValue* func_00116520(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     }
     void* s1 = args[0].p;
     void* fc = args[1].p;
-    func_0011B9A8(&v, &args[2]);
+    ConvertScriptValueToFloat(&v, &args[2]);
     func_001EDEF0(s1, fc, p, s3, v.f);
-    func_0011B060(&v, 2);
-    func_0011B740(&q, p);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    DestroyScriptValue(&v, 2);
+    SetScriptValueVectorA(&q, p);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00116600(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    R11B008Node* a = func_0011AF28();
-    R11B008Node* b = func_0011AF28();
+    InitScriptValue(&t);
+    R11B008Node* a = NewScriptValueNode();
+    R11B008Node* b = NewScriptValueNode();
     a->next = b;
-    f32* c = func_0011C508();
-    func_0011B740(b, c);
+    f32* c = AcquireVectorAPayload();
+    SetScriptValueVectorA(b, c);
     f32 d = func_001ED908(args[0].i, args[1].i, c);
-    func_0011B5B0(a, d);
-    func_0011B6C0(&t, a);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueFloat(a, d);
+    SetScriptValueChain(&t, a);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_001166C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    f32* a = func_0011C618();
-    func_00188770(args[0].i, a);
-    func_0011B788(&t, a);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    InitScriptValue(&t);
+    f32* a = AcquireMatrixPayload();
+    CopyTransposedMatrix(args[0].i, a);
+    SetScriptValueMatrix(&t, a);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_00116740(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    f32* a = func_0011C618();
-    func_00189AF0(args[0].i, a);
-    func_0011B788(&t, a);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    InitScriptValue(&t);
+    f32* a = AcquireMatrixPayload();
+    InvertMatrix4x4(args[0].i, a);
+    SetScriptValueMatrix(&t, a);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_001167C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    f32* a = func_0011C618();
+    InitScriptValue(&t);
+    f32* a = AcquireMatrixPayload();
     func_001891C0(args[0].i, args[1].i, a);
-    func_0011B788(&t, a);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueMatrix(&t, a);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1638,12 +1638,12 @@ ASM_FUNC(func_00116840);
 ScriptValue* func_00116978(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    f32* c = func_0011C508();
+    InitScriptValue(&t);
+    f32* c = AcquireVectorAPayload();
     *(Quad16*)c = *(Quad16*)((u8*)args[0].p + 0x30);
-    func_0011B740(&t, c);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueVectorA(&t, c);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1651,25 +1651,25 @@ ScriptValue* func_001169E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     f32* obj;
-    func_0011B008(&q);
-    obj = func_0011C618();
+    InitScriptValue(&q);
+    obj = AcquireMatrixPayload();
     *(Mat4A*)obj = *(Mat4A*)args[0].v;
     func_001884C0(obj);
-    func_0011B788(&q, obj);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueMatrix(&q, obj);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00116A88(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    f32* c = func_0011C508();
-    func_00188FD8(args[0].p, c);
-    func_0011B740(&t, c);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    InitScriptValue(&t);
+    f32* c = AcquireVectorAPayload();
+    MatrixToEulerAngles(args[0].p, c);
+    SetScriptValueVectorA(&t, c);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1677,17 +1677,17 @@ ScriptValue* func_00116B08(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     Vec4U vec;
-    func_0011B008(&t);
-    R11B008Node* a = func_0011AF28();
-    R11B008Node* b = func_0011AF28();
-    f32* c = func_0011C508();
-    func_0011B740(b, c);
+    InitScriptValue(&t);
+    R11B008Node* a = NewScriptValueNode();
+    R11B008Node* b = NewScriptValueNode();
+    f32* c = AcquireVectorAPayload();
+    SetScriptValueVectorA(b, c);
     a->next = b;
     func_00188D28(args[0].p, &vec.x, c);
-    func_0011B5B0(a, vec.x);
-    func_0011B6C0(&t, a);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueFloat(a, vec.x);
+    SetScriptValueChain(&t, a);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1702,13 +1702,13 @@ ScriptValue* func_00116C80(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     Vec_116C80 v;
-    func_0011B008(&t);
-    f32* a = func_0011C618();
+    InitScriptValue(&t);
+    f32* a = AcquireMatrixPayload();
     func_00189378(args[0].p, 0, &v);
-    func_00188B08((u8*)args[0].p + 0x30, &v, a);
-    func_0011B788(&t, a);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    BuildMatrixFromRotationAndTranslation((u8*)args[0].p + 0x30, &v, a);
+    SetScriptValueMatrix(&t, a);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1716,15 +1716,15 @@ ScriptValue* func_00116D20(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     ScriptValue v;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     Vec3* k = (Vec3*)args[0].v;
-    func_0011B9A8(&v, args + 1);
+    ConvertScriptValueToFloat(&v, args + 1);
     f32 x = v.f;
     f32 r = k->x + x * (k->y + x * k->z);
-    func_0011B5B0(&t, r);
-    func_0011B060(&v, 2);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueFloat(&t, r);
+    DestroyScriptValue(&v, 2);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1732,10 +1732,10 @@ ScriptValue* func_00116DC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     ScriptValue u;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     f32* poly = args[0].v;
     f32* range = args[1].v;
-    func_0011B9A8(&u, args + 2);
+    ConvertScriptValueToFloat(&u, args + 2);
     f32 k = u.f;
     f32 v = poly[0] + k * (poly[1] + k * poly[2]);
     f32 lo = range[0];
@@ -1745,10 +1745,10 @@ ScriptValue* func_00116DC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     } else if (hi < v) {
         v = hi;
     }
-    func_0011B5B0(&t, v);
-    func_0011B060(&u, 2);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueFloat(&t, v);
+    DestroyScriptValue(&u, 2);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -1759,24 +1759,24 @@ ScriptValue* func_00116EA8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q2;
     ScriptValue q3;
     ScriptValue q4;
-    func_0011B008(&q0);
-    f32* p = func_0011C748();
-    func_0011B9A8(&q1, args);
+    InitScriptValue(&q0);
+    f32* p = AcquireVectorBPayload();
+    ConvertScriptValueToFloat(&q1, args);
     f32 x = q1.f;
-    func_0011B9A8(&q2, args + 1);
+    ConvertScriptValueToFloat(&q2, args + 1);
     f32 y = q2.f;
-    func_0011B9A8(&q3, args + 2);
+    ConvertScriptValueToFloat(&q3, args + 2);
     f32 z = q3.f;
-    func_0011B9A8(&q4, args + 3);
+    ConvertScriptValueToFloat(&q4, args + 3);
     f32 w = q4.f;
-    func_001EB018(p, x, y, z, w);
-    func_0011B060(&q4, 2);
-    func_0011B060(&q3, 2);
-    func_0011B060(&q2, 2);
-    func_0011B060(&q1, 2);
-    func_0011B7D0(&q0, p);
-    func_0011B018(ret, &q0);
-    func_0011B060(&q0, 2);
+    FitQuadraticCurve(p, x, y, z, w);
+    DestroyScriptValue(&q4, 2);
+    DestroyScriptValue(&q3, 2);
+    DestroyScriptValue(&q2, 2);
+    DestroyScriptValue(&q1, 2);
+    SetScriptValueVectorB(&q0, p);
+    CopyConstructScriptValue(ret, &q0);
+    DestroyScriptValue(&q0, 2);
     return ret;
 }
 
@@ -1784,14 +1784,14 @@ ScriptValue* func_00116FE8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q0;
     ScriptValue q1;
-    func_0011B008(&q0);
+    InitScriptValue(&q0);
     void* span = args[0].p;
-    func_0011B9A8(&q1, args + 1);
-    f32 r = func_001EB0F8(span, q1.f);
-    func_0011B5B0(&q0, r);
-    func_0011B060(&q1, 2);
-    func_0011B018(ret, &q0);
-    func_0011B060(&q0, 2);
+    ConvertScriptValueToFloat(&q1, args + 1);
+    f32 r = ClampToRange(span, q1.f);
+    SetScriptValueFloat(&q0, r);
+    DestroyScriptValue(&q1, 2);
+    CopyConstructScriptValue(ret, &q0);
+    DestroyScriptValue(&q0, 2);
     return ret;
 }
 
@@ -1799,84 +1799,84 @@ ScriptValue* func_00117080(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     ScriptValue v;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     void* s1 = args[0].p;
-    func_0011B9A8(&v, &args[1]);
-    s32 flag = func_001EB050(s1, v.f);
-    func_0011B5F0(&q, flag);
-    func_0011B060(&v, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    ConvertScriptValueToFloat(&v, &args[1]);
+    s32 flag = IsInsideRange(s1, v.f);
+    SetScriptValueBool(&q, flag);
+    DestroyScriptValue(&v, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117118(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B570(&q, (s32)args->f);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueInt(&q, (s32)args->f);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117180(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     s32 n = (s32)(args->f + 1.0f);
-    func_0011B570(&t, n);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueInt(&t, n);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_001171F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     s32 n = (s32)(args->f + 0.5f);
-    func_0011B570(&t, n);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueInt(&t, n);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_00117260(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     s32 n = (s32)args->f;
-    func_0011B570(&t, n);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueInt(&t, n);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_001172C8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     if (args->tag == 20) {
         s32 v = args->i; v = v < 0 ? -v : v;
-        func_0011B570(&q, v);
+        SetScriptValueInt(&q, v);
     } else {
         f32 v = args->f;
         if (v < 0.0f) {
             v = -v;
         }
-        func_0011B5B0(&q, v);
+        SetScriptValueFloat(&q, v);
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117360(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B0A8(&q, args);
+    InitScriptValue(&q);
+    AssignScriptValue(&q, args);
     if (args[1].tag == 0) {
         args = 0;
     } else {
@@ -1888,38 +1888,38 @@ ScriptValue* func_00117360(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
             if (q.tag == 0x14) {
                 if (x->tag == 0x14) {
                     if (q.i < x->i) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 } else {
                     if ((f32)q.i < x->f) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 }
             } else {
                 if (x->tag == 0x14) {
                     if (q.f < (f32)x->i) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 } else {
                     f32 pf = x->f;
                     if (q.f < pf) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 }
             }
             x = x->next;
         } while (x != 0);
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117478(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B0A8(&q, args);
+    InitScriptValue(&q);
+    AssignScriptValue(&q, args);
     if (args[1].tag == 0) {
         args = 0;
     } else {
@@ -1931,51 +1931,51 @@ ScriptValue* func_00117478(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
             if (q.tag == 0x14) {
                 if (x->tag == 0x14) {
                     if (x->i < q.i) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 } else {
                     if (x->f < (f32)q.i) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 }
             } else {
                 if (x->tag == 0x14) {
                     if ((f32)x->i < q.f) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 } else {
                     f32 pf = x->f;
                     if (pf < q.f) {
-                        func_0011B0A8(&q, x);
+                        AssignScriptValue(&q, x);
                     }
                 }
             }
             x = x->next;
         } while (x != 0);
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117598(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     s32 v = args[0].i % args[1].i;
-    func_0011B570(&t, v);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueInt(&t, v);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_00117610(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B5B0(&q, D_0026185C);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValueFloat(&q, g_gameTime);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -1983,37 +1983,37 @@ ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     ScriptValue r;
-    func_0011B008(&q);
-    func_0011B008(&r);
-    R11B008Node* a = func_0011AF28();
-    R11B008Node* b = func_0011AF28();
-    R11B008Node* c = func_0011AF28();
-    R11B008Node* d = func_0011AF28();
+    InitScriptValue(&q);
+    InitScriptValue(&r);
+    R11B008Node* a = NewScriptValueNode();
+    R11B008Node* b = NewScriptValueNode();
+    R11B008Node* c = NewScriptValueNode();
+    R11B008Node* d = NewScriptValueNode();
     R11B008Node* e;
     R11B008Node* f;
-    e = func_0011AF28();
-    f = func_0011AF28();
-    func_0011B6C0(a, b);
+    e = NewScriptValueNode();
+    f = NewScriptValueNode();
+    SetScriptValueChain(a, b);
     ScriptValue t;
-    func_0011B9A8(&t, args);
-    func_0011B5B0(b, t.f);
-    func_0011B060(&t, 2);
+    ConvertScriptValueToFloat(&t, args);
+    SetScriptValueFloat(b, t.f);
+    DestroyScriptValue(&t, 2);
     b->next = c;
-    func_0011B6C0(c, d);
-    func_0011B6C0(d, e);
-    func_0011B538(e, 0x11);
+    SetScriptValueChain(c, d);
+    SetScriptValueChain(d, e);
+    SetScriptValueTag(e, 0x11);
     e->next = f;
-    func_0011B700(f, args[1].rec);
+    SetScriptValueRecord(f, args[1].rec);
     s32 idx = D_00259DE8;
     if (idx < count) {
         R11B008Node* n = args[idx].node;
         if (n) {
             R11B008Node* prev = d;
             do {
-                d = func_0011AF28();
-                e = func_0011AF28();
-                func_0011B6C0(d, e);
-                func_0011B538(e, 0x11);
+                d = NewScriptValueNode();
+                e = NewScriptValueNode();
+                SetScriptValueChain(d, e);
+                SetScriptValueTag(e, 0x11);
                 e->next = n;
                 prev->next = d;
                 R11B008Node* nx = n->next;
@@ -2023,16 +2023,16 @@ ScriptValue* func_00117668(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
             } while (n);
         }
     }
-    func_0011A498((R11A630*)D_00275710->f2C, D_00275710->f1EF8, 0, &r);
+    LookupScriptVariable((R11A630*)g_currentWorld->f2C, g_currentWorld->f1EF8, 0, &r);
     if (r.tag == 0x1E) {
         a->next = r.node;
     }
-    func_0011B6C0(&r, a);
-    func_0011A400(&t, (R11A630*)D_00275710->f2C, D_00275710->f1EF8, &r);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&r, 2);
-    func_0011B060(&q, 2);
+    SetScriptValueChain(&r, a);
+    AssignScriptVariable(&t, (R11A630*)g_currentWorld->f2C, g_currentWorld->f1EF8, &r);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&r, 2);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2046,14 +2046,14 @@ ScriptValue* func_00117880(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     ScriptValue u;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     Obj_117880* obj = (Obj_117880*)args[0].p;
-    func_0011B9A8(&u, args + 1);
+    ConvertScriptValueToFloat(&u, args + 1);
     f32 f = u.f;
-    func_0011B060(&u, 2);
+    DestroyScriptValue(&u, 2);
     obj->value = f;
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -2062,86 +2062,86 @@ ScriptValue* func_00117910(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q1;
     ScriptValue q2;
 
-    func_0011B008(&q1);
+    InitScriptValue(&q1);
     s32 x1 = args[0].i;
     s32 x2 = args[1].i;
     switch (kind) {
     case 0x63:
-        func_001C22B8(&q2, x1, x2, &args[2]);
-        func_0011B0A8(&q1, &q2);
-        func_0011B060(&q2, 2);
+        AddObjectProperty(&q2, x1, x2, &args[2]);
+        AssignScriptValue(&q1, &q2);
+        DestroyScriptValue(&q2, 2);
         break;
     case 0x64:
-        func_001C2320(&q2, x1, x2, &args[2]);
-        func_0011B0A8(&q1, &q2);
-        func_0011B060(&q2, 2);
+        SetExtraObjectProperty(&q2, x1, x2, &args[2]);
+        AssignScriptValue(&q1, &q2);
+        DestroyScriptValue(&q2, 2);
         break;
     case 0x65:
-        func_001C2238(&q2, x1, x2, &args[2]);
-        func_0011B0A8(&q1, &q2);
-        func_0011B060(&q2, 2);
+        UpdateObjectProperty(&q2, x1, x2, &args[2]);
+        AssignScriptValue(&q1, &q2);
+        DestroyScriptValue(&q2, 2);
         break;
     case 0x66:
-        func_001C21A0(&q2, x1, x2);
-        func_0011B0A8(&q1, &q2);
-        func_0011B060(&q2, 2);
+        GetObjectProperty(&q2, x1, x2);
+        AssignScriptValue(&q1, &q2);
+        DestroyScriptValue(&q2, 2);
         break;
     }
-    func_0011B018(ret, &q1);
-    func_0011B060(&q1, 2);
+    CopyConstructScriptValue(ret, &q1);
+    DestroyScriptValue(&q1, 2);
     return ret;
 }
 
 ScriptValue* func_00117A30(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00117910(ret, count, args, scope, 0x63);
+    DispatchScriptObjectProperty(ret, count, args, scope, 0x63);
     return ret;
 }
 
 ScriptValue* func_00117A60(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00117910(ret, count, args, scope, 0x64);
+    DispatchScriptObjectProperty(ret, count, args, scope, 0x64);
     return ret;
 }
 
 ScriptValue* func_00117A90(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00117910(ret, count, args, scope, 0x65);
+    DispatchScriptObjectProperty(ret, count, args, scope, 0x65);
     return ret;
 }
 
 ScriptValue* func_00117AC0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
-    func_00117910(ret, count, args, scope, 0x66);
+    DispatchScriptObjectProperty(ret, count, args, scope, 0x66);
     return ret;
 }
 
 ScriptValue* func_00117AF0(ScriptValue* ret, s32 count, void** values)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     if (count != 0) {
         R11B008Node* prev = 0;
         if (count > 0) {
             void** v = values;
             s32 n = count;
             do {
-                R11B008Node* node = func_0011AF28();
+                R11B008Node* node = NewScriptValueNode();
                 if (prev) {
                     prev->next = node;
                 } else {
-                    func_0011B6C0(&q, node);
+                    SetScriptValueChain(&q, node);
                 }
-                func_0011B8A8(node, *v);
+                SetScriptValuePointerB(node, *v);
                 prev = node;
                 v++;
             } while (--n != 0);
         }
     } else {
-        func_0011B538(&q, 0);
+        SetScriptValueTag(&q, 0);
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2149,14 +2149,14 @@ ScriptValue* func_00117BC8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     void* r;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     s32 flag = 0x105;
     s32 k = 0x101;
     if (args[1].i != 0) flag = k;
-    r = func_0015A418(D_00275710, flag, args[0].i, args[1].i);
-    func_0011B8A8(&q, r);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    r = FindFirstObjectById(g_currentWorld, flag, args[0].i, args[1].i);
+    SetScriptValuePointerB(&q, r);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2165,13 +2165,13 @@ ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q;
     u8 buf[0x100];
     ScriptValue t;
-    func_0011B008(&q);
-    s32 r = func_0015A198(D_00275710, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
-    func_00117AF0(&t, r, buf);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    s32 r = func_0015A198(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
+    MakeScriptRefList(&t, r, buf);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2179,11 +2179,11 @@ ScriptValue* func_00117D00(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     void* r;
-    func_0011B008(&q);
-    r = func_0015A418(D_00275710, 0x104, args[0].i, args[1].i);
-    func_0011B8A8(&q, r);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    r = FindFirstObjectById(g_currentWorld, 0x104, args[0].i, args[1].i);
+    SetScriptValuePointerB(&q, r);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2192,43 +2192,43 @@ ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q;
     u8 buf[0x100];
     ScriptValue t;
-    func_0011B008(&q);
-    s32 r = func_0015A198(D_00275710, 0x104, args[0].i, args[1].p, 0x40, buf);
-    func_00117AF0(&t, r, buf);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    s32 r = func_0015A198(g_currentWorld, 0x104, args[0].i, args[1].p, 0x40, buf);
+    MakeScriptRefList(&t, r, buf);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117E20(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B8A8(&q, func_001925F0());
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValuePointerB(&q, GetActiveSwitchedCollider());
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117E78(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B8A8(&q, D_00275710);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValuePointerB(&q, g_currentWorld);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00117ED0(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
-    func_0011B8A8(&q, D_00261990);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SetScriptValuePointerB(&q, g_camera);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2237,13 +2237,13 @@ ScriptValue* func_00117F28(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     ScriptValue q;
     u8 buf[0x400];
     ScriptValue t;
-    func_0011B008(&q);
-    s32 r = func_0015A4F0(D_00275710, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x100, buf);
-    func_00117AF0(&t, r, buf);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    s32 r = GatherObjectsById(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x100, buf);
+    MakeScriptRefList(&t, r, buf);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2256,16 +2256,16 @@ ScriptValue* func_001180C0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     s32 n;
     u8* list;
     f32 scale;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     if (args[1].tag == 0x14) scale = (f32)args[1].i; else scale = args[1].f;
-    func_0018D608();
-    func_001DC4D0(D_00275710, scale, 0, args[0].i, 0, 0, &n, &list);
-    func_00117AF0(&t, n, list);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0018D6F0();
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    PushBackMemoryMark();
+    func_001DC4D0(g_currentWorld, scale, 0, args[0].i, 0, 0, &n, &list);
+    MakeScriptRefList(&t, n, list);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    PopBackMemoryMark();
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2286,7 +2286,7 @@ RetValue func_00118198(s32 id, s32 count, ScriptValue* args, R11A630* scope)
     Hit_118198 hit;
     void* slot;
     if (args[0].tag == 0) {
-        func_0011B0A8(&l0, args);
+        AssignScriptValue(&l0, args);
     } else {
         s32 kind = 0x71;
         R11B008Node* head = 0;
@@ -2303,42 +2303,42 @@ RetValue func_00118198(s32 id, s32 count, ScriptValue* args, R11A630* scope)
             if (e == 0)
                 continue;
             slot = e;
-            if (func_001419E8(0, pa->i, pb->i, 1, &slot, &hit) == 0)
+            if (FindNearestSpanObject(0, pa->i, pb->i, 1, &slot, &hit) == 0)
                 continue;
             if (id == kind) {
-                n1 = func_0011AF28();
-                n2 = func_0011AF28();
-                n3 = func_0011AF28();
-                func_0011B8A8(n1, e);
+                n1 = NewScriptValueNode();
+                n2 = NewScriptValueNode();
+                n3 = NewScriptValueNode();
+                SetScriptValuePointerB(n1, e);
                 n1->next = n2;
-                v = (Quad16*)func_0011C508();
+                v = (Quad16*)AcquireVectorAPayload();
                 *v = hit.q[0];
-                func_0011B740(n2, (f32*)v);
+                SetScriptValueVectorA(n2, (f32*)v);
                 n2->next = n3;
-                v = (Quad16*)func_0011C508();
+                v = (Quad16*)AcquireVectorAPayload();
                 *v = hit.q[1];
-                func_0011B740(n3, (f32*)v);
-                n3 = func_0011AF28();
-                func_0011B6C0(n3, n1);
+                SetScriptValueVectorA(n3, (f32*)v);
+                n3 = NewScriptValueNode();
+                SetScriptValueChain(n3, n1);
                 if (head != 0)
                     tail->next = n3;
                 else
                     head = n3;
                 tail = n3;
             } else {
-                n1 = func_0011AF28();
-                n2 = func_0011AF28();
-                func_0011B8A8(n1, e);
+                n1 = NewScriptValueNode();
+                n2 = NewScriptValueNode();
+                SetScriptValuePointerB(n1, e);
                 n1->next = n2;
-                v = (Quad16*)func_0011C508();
+                v = (Quad16*)AcquireVectorAPayload();
                 *v = hit.q[1];
-                func_0011B740(n2, (f32*)v);
-                func_0011B6C0(&l0, n1);
+                SetScriptValueVectorA(n2, (f32*)v);
+                SetScriptValueChain(&l0, n1);
                 return l0;
             }
         }
         if (head != 0)
-            func_0011B6C0(&l0, head);
+            SetScriptValueChain(&l0, head);
         else
             l0.tag = 0;
     }
@@ -2349,12 +2349,12 @@ ScriptValue* func_001183B8(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     ScriptValue t;
-    func_0011B008(&q);
-    func_00118198(&t, 0x71, count, args, scope);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SearchScriptObjectHits(&t, 0x71, count, args, scope);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2362,36 +2362,36 @@ ScriptValue* func_00118458(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     ScriptValue t;
-    func_0011B008(&q);
-    func_00118198(&t, 0x72, count, args, scope);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    InitScriptValue(&q);
+    SearchScriptObjectHits(&t, 0x72, count, args, scope);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001184F8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    f32* p = func_0011C508();
+    InitScriptValue(&t);
+    f32* p = AcquireVectorAPayload();
     func_00128018(args[0].p, args[1].i, args[2].p, p);
-    func_0011B740(&t, p);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueVectorA(&t, p);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
 ScriptValue* func_00118580(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    f32* p = func_0011C508();
+    InitScriptValue(&t);
+    f32* p = AcquireVectorAPayload();
     func_001280C0(args[0].p, args[1].i, args[2].p, p);
-    func_0011B740(&t, p);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    SetScriptValueVectorA(&t, p);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -2399,13 +2399,13 @@ ScriptValue* func_00118608(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     f32* obj;
-    func_0011B008(&q);
-    obj = func_0011C618();
+    InitScriptValue(&q);
+    obj = AcquireMatrixPayload();
     func_00128150(args[0].i, args[1].i, args[2].i, obj);
     func_001884C0(obj);
-    func_0011B788(&q, obj);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueMatrix(&q, obj);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2415,24 +2415,24 @@ ScriptValue* func_00118720(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue q;
     s32 n;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     n = 0;
-    func_001BFCD8(args[0].i, args[1].i ? &n : 0, args[1].i, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
-    func_0011B570(&q, n);
-    if (n != 0) func_001BF718(&n);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    StartSoundEffect(args[0].i, args[1].i ? &n : 0, args[1].i, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f);
+    SetScriptValueInt(&q, n);
+    if (n != 0) ClearSoundRecordHandle(&n);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_001187E8(ScriptValue* ret, s32 count, ScriptValue* args, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    func_001BF788(args[0].p, 0);
+    InitScriptValue(&t);
+    StopSoundRecord(args[0].p, 0);
     t.tag = 0x22;
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -2440,14 +2440,14 @@ ScriptValue* func_00118850(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     ScriptValue u;
-    func_0011B008(&t);
-    void* p = D_00262C70;
+    InitScriptValue(&t);
+    void* p = g_padRecord;
     s32 n = args[0].i;
-    func_0011B9A8(&u, args + 1);
-    func_0016EC38(p, n, u.f);
-    func_0011B060(&u, 2);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    ConvertScriptValueToFloat(&u, args + 1);
+    StartPadRecordPattern(p, n, u.f);
+    DestroyScriptValue(&u, 2);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -2455,14 +2455,14 @@ ScriptValue* func_001188F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
 {
     ScriptValue t;
     ScriptValue u;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     void* s1 = args[0].p;
-    func_0011B9A8(&u, args + 1);
+    ConvertScriptValueToFloat(&u, args + 1);
     func_001566C8(s1, u.f);
-    func_0011B060(&u, 2);
-    func_0011B538(&t, 0x22);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    DestroyScriptValue(&u, 2);
+    SetScriptValueTag(&t, 0x22);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -2488,10 +2488,10 @@ ASM_FUNC(func_00118D30);
 ScriptValue* func_00118D48(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue t;
-    func_0011B008(&t);
-    func_0011A498(scope, expr->i, 1, &t);
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    InitScriptValue(&t);
+    LookupScriptVariable(scope, expr->i, 1, &t);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -2499,17 +2499,17 @@ ScriptValue* func_00118DB8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q;
     ScriptValue t;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* p = expr->node;
     R11B008Node* m = p->next;
-    func_0011A080(&t, m->next, scope);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011A400(&t, scope, m->i, &q);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    EvalScriptExpression(&t, m->next, scope);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    AssignScriptVariable(&t, scope, m->i, &q);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2517,17 +2517,17 @@ ScriptValue* func_00118E80(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q;
     ScriptValue t;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* p = expr->node;
     R11B008Node* m = p->next;
-    func_0011A080(&t, m->next, scope);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011A358(&t, scope, m->i, &q);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    EvalScriptExpression(&t, m->next, scope);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    DefineScriptVariable(&t, scope, m->i, &q);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2540,23 +2540,23 @@ ScriptValue* func_00118F48(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q;
     ScriptValue t;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* a = expr->node;
     R11B008Node* b = a->next;
     R11B008Node* c = b->next;
-    func_0011A080(&t, b, scope);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
+    EvalScriptExpression(&t, b, scope);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
     if (q.i == 0) {
         R11B008Node* v = c->node;
         R11B008Node* w = v->next;
-        func_001E1F10(D_00249200);
+        PrintFormatted(D_00249200);
         func_00113730(&t, 1, w, scope);
-        func_0011B060(&t, 2);
+        DestroyScriptValue(&t, 2);
     }
-    func_0011B538(&q, 0x22);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2567,26 +2567,26 @@ ScriptValue* func_00119030(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     R11B008Node* m;
     R11B008Node* n2;
     R11B008Node* n3;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     m = expr->node->next;
     n2 = m->next;
     n3 = n2->next;
-    func_0011A080(&t, m, scope);
-    func_0011B0A8(&q, &t);
-    func_0011B060(&t, 2);
+    EvalScriptExpression(&t, m, scope);
+    AssignScriptValue(&q, &t);
+    DestroyScriptValue(&t, 2);
     if (q.i == 1) {
-        func_0011A080(&t, n2, scope);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, n2, scope);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
     } else if (n3 != 0) {
-        func_0011A080(&t, n3, scope);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, n3, scope);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
     } else {
-        func_0011B538(&q, 0x22);
+        SetScriptValueTag(&q, 0x22);
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2596,24 +2596,24 @@ ScriptValue* func_00119128(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     ScriptValue M;
     R11B008Node* n;
 
-    func_0011B008(&L);
+    InitScriptValue(&L);
     n = expr->node->next;
     if (n != 0) {
         do {
-            func_0011A080(&M, n, scope);
-            func_0011B0A8(&L, &M);
-            func_0011B060(&M, 2);
+            EvalScriptExpression(&M, n, scope);
+            AssignScriptValue(&L, &M);
+            DestroyScriptValue(&M, 2);
             if (L.tag != 27 || L.i != 0) {
-                func_0011B018(ret, &L);
-                func_0011B060(&L, 2);
+                CopyConstructScriptValue(ret, &L);
+                DestroyScriptValue(&L, 2);
                 goto done;
             }
             n = n->next;
         } while (n != 0);
     }
-    func_0011B5F0(&L, 0);
-    func_0011B018(ret, &L);
-    func_0011B060(&L, 2);
+    SetScriptValueBool(&L, 0);
+    CopyConstructScriptValue(ret, &L);
+    DestroyScriptValue(&L, 2);
 done:
     return ret;
 }
@@ -2621,12 +2621,12 @@ done:
 RetValue func_00119218(R11B008Node* expr, R11A630* scope)
 {
     RetValue L;
-    func_0011B5F0(&L, 1);
+    SetScriptValueBool(&L, 1);
     for (R11B008Node* n = expr->node->next; n != 0; n = n->next) {
         ScriptValue t;
-        func_0011A080(&t, n, scope);
-        func_0011B0A8(&L, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, n, scope);
+        AssignScriptValue(&L, &t);
+        DestroyScriptValue(&t, 2);
         if (L.tag == 27 && L.i == 0)
             return L;
     }
@@ -2636,9 +2636,9 @@ RetValue func_00119218(R11B008Node* expr, R11A630* scope)
 ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q, r, t;
-    func_0011B008(&q);
-    func_0011B008(&r);
-    func_0011B538(&q, 0x22);
+    InitScriptValue(&q);
+    InitScriptValue(&r);
+    SetScriptValueTag(&q, 0x22);
     R11B008Node* n = expr->node->next;
     while (n) {
         R11B008Node* e = n->node;
@@ -2646,21 +2646,21 @@ ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
         if (e->tag == 10) {
             flag = 1;
         } else {
-            func_0011A080(&t, e, scope);
+            EvalScriptExpression(&t, e, scope);
             flag = 0;
-            func_0011B0A8(&r, &t);
-            func_0011B060(&t, 2);
+            AssignScriptValue(&r, &t);
+            DestroyScriptValue(&t, 2);
             if (r.tag != 0x1B || r.i != 0)
                 flag = 1;
             if (flag && e->next == 0)
-                func_0011B0A8(&q, &r);
+                AssignScriptValue(&q, &r);
         }
         if (flag) {
             e = e->next;
             while (e) {
-                func_0011A080(&t, e, scope);
-                func_0011B0A8(&q, &t);
-                func_0011B060(&t, 2);
+                EvalScriptExpression(&t, e, scope);
+                AssignScriptValue(&q, &t);
+                DestroyScriptValue(&t, 2);
                 e = e->next;
             }
             n = 0;
@@ -2668,9 +2668,9 @@ ScriptValue* func_00119310(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
             n = n->next;
         }
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&r, 2);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&r, 2);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2680,18 +2680,18 @@ ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     ScriptValue b[2];
     ScriptValue c;
     ScriptValue d;
-    func_0011B008(&a);
+    InitScriptValue(&a);
     ScriptValue* p = b;
     for (s32 k = 1; k != -1; k--) {
-        func_0011B008(p);
+        InitScriptValue(p);
         p++;
     }
-    func_0011B008(&c);
-    func_0011B538(&a, 0x22);
+    InitScriptValue(&c);
+    SetScriptValueTag(&a, 0x22);
     R11B008Node* s0 = expr->node->next;
-    func_0011A080(&d, s0, scope);
-    func_0011B0A8(&b[0], &d);
-    func_0011B060(&d, 2);
+    EvalScriptExpression(&d, s0, scope);
+    AssignScriptValue(&b[0], &d);
+    DestroyScriptValue(&d, 2);
     expr = s0->next;
     if (expr) do {
         R11B008Node* e = expr->node;
@@ -2703,10 +2703,10 @@ ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
             R11B008Node* x = e->node;
             if (x) {
                 do {
-                    func_0011B0A8(&b[1], x);
-                    func_00113AA8(&d, 2, b, scope);
-                    func_0011B0A8(&c, &d);
-                    func_0011B060(&d, 2);
+                    AssignScriptValue(&b[1], x);
+                    TestScriptValuesIdentical(&d, 2, b, scope);
+                    AssignScriptValue(&c, &d);
+                    DestroyScriptValue(&d, 2);
                     if (c.tag == 0x1B && c.i != 0) {
                         found = 1;
                         x = 0;
@@ -2720,9 +2720,9 @@ ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
             e = e->next;
             if (e) {
                 do {
-                    func_0011A080(&d, e, scope);
-                    func_0011B0A8(&a, &d);
-                    func_0011B060(&d, 2);
+                    EvalScriptExpression(&d, e, scope);
+                    AssignScriptValue(&a, &d);
+                    DestroyScriptValue(&d, 2);
                     e = e->next;
                 } while (e);
             }
@@ -2731,59 +2731,59 @@ ScriptValue* func_001194A8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
             expr = expr->next;
         }
     } while (expr);
-    func_0011B018(ret, &a);
-    func_0011B060(&c, 2);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&c, 2);
     ScriptValue* p2 = &c;
     if (b != p2) {
         do {
             p2--;
-            func_0011B060(p2, 0);
+            DestroyScriptValue(p2, 0);
         } while (b != p2);
     }
-    func_0011B060(&a, 2);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
 ScriptValue* func_001196C8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q, r, u, t;
-    func_0011B008(&q);
-    func_0011B008(&r);
-    func_0011B008(&u);
+    InitScriptValue(&q);
+    InitScriptValue(&r);
+    InitScriptValue(&u);
     R11B008Node* p = expr->node->next;
     R11A630* d;
     R11B008Node* n;
     if (p->tag == 0x1E) {
-        d = func_0011A630();
+        d = NewScriptScope();
         R11B008Node* l = p->node;
         if (l) {
             do {
                 R11B008Node* e = l->node;
                 ScriptValue* pr = &r;
-                func_0011A080(&t, e->next, scope);
-                func_0011B0A8(pr, &t);
-                func_0011B060(&t, 2);
-                func_0011A358(&t, d, e->i, pr);
-                func_0011B0A8(&u, &t);
-                func_0011B060(&t, 2);
+                EvalScriptExpression(&t, e->next, scope);
+                AssignScriptValue(pr, &t);
+                DestroyScriptValue(&t, 2);
+                DefineScriptVariable(&t, d, e->i, pr);
+                AssignScriptValue(&u, &t);
+                DestroyScriptValue(&t, 2);
                 l = l->next;
             } while (l);
         }
-        func_0011A328(d, scope);
+        SetScriptScopeParent(d, scope);
     } else {
         d = scope;
     }
     n = p->next;
     while (n) {
-        func_0011A080(&t, n, d);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, n, d);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
         n = n->next;
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&u, 2);
-    func_0011B060(&r, 2);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&u, 2);
+    DestroyScriptValue(&r, 2);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2791,13 +2791,13 @@ ScriptValue* func_00119878(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q, t;
     s32 a, b;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* first = expr->node->next;
     R11B008Node* second = first->next;
     for (;;) {
-        func_0011A080(&t, first, scope);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, first, scope);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
         a = q.tag;
         if (a != 0x1B)
             goto other;
@@ -2806,23 +2806,23 @@ ScriptValue* func_00119878(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
             goto other;
         break;
     other:
-        func_0011A080(&t, second, scope);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, second, scope);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
     }
-    func_0011B538(&q, 0x22);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00119970(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* first = expr->node->next;
     R11B008Node* after = first->next;
-    R11AFC8* p = func_0011AFC8();
+    R11AFC8* p = NewScriptValueRecord();
     p->w0 = (s32)scope;
     if (first->tag == 0)
         p->w4 = 0;
@@ -2843,42 +2843,42 @@ ScriptValue* func_00119970(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     }
     p->w8 = count;
     p->wC = found;
-    func_0011B700(&q, p);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueRecord(&q, p);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00119A58(ScriptValue* ret, R11B008Node* list, R11A630* scope)
 {
     ScriptValue q, t;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     R11B008Node* n = list;
     do {
-        func_0011A080(&t, n, scope);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, n, scope);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
         n = n->next;
     } while (n);
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
 ScriptValue* func_00119AF8(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
 {
     ScriptValue q, t;
-    func_0011B008(&q);
-    func_0011B538(&q, 0x22);
+    InitScriptValue(&q);
+    SetScriptValueTag(&q, 0x22);
     R11B008Node* n = expr->node->next;
     while (n != 0) {
-        func_0011A080(&t, n, scope);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        EvalScriptExpression(&t, n, scope);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
         n = n->next;
     }
-    func_0011B018(ret, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(ret, &q);
+    DestroyScriptValue(&q, 2);
     return ret;
 }
 
@@ -2900,17 +2900,17 @@ ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     s32 i;
     ScriptValue* p;
 
-    func_0011B008(&a);
-    func_0011B008(&b);
+    InitScriptValue(&a);
+    InitScriptValue(&b);
     p = arr;
     for (s32 k = 31; k != -1; k--) {
-        func_0011B008(p);
+        InitScriptValue(p);
         p++;
     }
     R11B008Node* first = expr->node;
-    func_0011A080(&t, first, scope);
-    func_0011B0A8(&a, &t);
-    func_0011B060(&t, 2);
+    EvalScriptExpression(&t, first, scope);
+    AssignScriptValue(&a, &t);
+    DestroyScriptValue(&t, 2);
     if (a.tag == 0x1D) {
         ent = &D_00259958[a.i];
         n = ent->count;
@@ -2929,10 +2929,10 @@ ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     count = n;
     for (i = 0; i < n; i++) {
         ScriptValue* bp = &b;
-        func_0011A080(&t, node, scope);
-        func_0011B0A8(bp, &t);
-        func_0011B060(&t, 2);
-        func_0011B0A8(&arr[i], bp);
+        EvalScriptExpression(&t, node, scope);
+        AssignScriptValue(bp, &t);
+        DestroyScriptValue(&t, 2);
+        AssignScriptValue(&arr[i], bp);
         node = node->next;
     }
     if (last) {
@@ -2940,10 +2940,10 @@ ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
         R11B008Node* head = 0;
         R11B008Node* m;
         for (m = node; m; m = m->next) {
-            R11B008Node* e = func_0011AF28();
-            func_0011A080(&t, m, scope);
-            func_0011B0A8(e, &t);
-            func_0011B060(&t, 2);
+            R11B008Node* e = NewScriptValueNode();
+            EvalScriptExpression(&t, m, scope);
+            AssignScriptValue(e, &t);
+            DestroyScriptValue(&t, 2);
             if (tail) {
                 tail->next = e;
                 tail = e;
@@ -2954,52 +2954,52 @@ ScriptValue* func_00119BB0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
             count++;
         }
         if (head) {
-            func_0011B6C0(&arr[i], head);
+            SetScriptValueChain(&arr[i], head);
         } else {
-            func_0011B538(&arr[i], 0);
+            SetScriptValueTag(&arr[i], 0);
         }
     }
     switch (a.tag) {
     case 0x1D:
         ent->fn(&t, count, arr, scope);
-        func_0011B0A8(&b, &t);
-        func_0011B060(&t, 2);
+        AssignScriptValue(&b, &t);
+        DestroyScriptValue(&t, 2);
         break;
     case 0x1F: {
         d = a.rec;
-        R11A630* s = func_0011A630();
-        func_0011A328(s, (R11A630*)d->w0);
+        R11A630* s = NewScriptScope();
+        SetScriptScopeParent(s, (R11A630*)d->w0);
         R11B008Node* q = (R11B008Node*)d->w4;
         for (i = 0; i < total; i++) {
-            func_0011B008(&t);
+            InitScriptValue(&t);
             if (0x13 == q->tag) {
                 q = q->next;
             }
-            func_0011A358(&u, s, q->i, &arr[i]);
-            func_0011B0A8(&t, &u);
-            func_0011B060(&u, 2);
+            DefineScriptVariable(&u, s, q->i, &arr[i]);
+            AssignScriptValue(&t, &u);
+            DestroyScriptValue(&u, 2);
             q = q->next;
-            func_0011B060(&t, 2);
+            DestroyScriptValue(&t, 2);
         }
-        func_00119A58(&t, (R11B008Node*)d->w10, s);
-        func_0011B0A8(&b, &t);
-        func_0011B060(&t, 2);
+        EvalScriptBody(&t, (R11B008Node*)d->w10, s);
+        AssignScriptValue(&b, &t);
+        DestroyScriptValue(&t, 2);
         break;
     }
     case 0x21:
         host->fn(&t, host->self, count, arr);
-        func_0011B0A8(&b, &t);
-        func_0011B060(&t, 2);
+        AssignScriptValue(&b, &t);
+        DestroyScriptValue(&t, 2);
         break;
     }
-    func_0011B018(ret, &b);
+    CopyConstructScriptValue(ret, &b);
     p = &t;
     while (arr != p) {
         p--;
-        func_0011B060(p, 0);
+        DestroyScriptValue(p, 0);
     }
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
@@ -3010,19 +3010,19 @@ ScriptValue* func_00119FA0(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     R11A630* found;
     s32 id;
 
-    func_0011B008(&a);
+    InitScriptValue(&a);
     id = expr->node->next->i;
-    found = func_001C1390(id, (u8*)D_00275710);
+    found = GetScriptEntryScope(id, (u8*)g_currentWorld);
     if (found == 0) {
-        func_001C13E8(&b, id, (u8*)D_00275710);
-        func_0011B0A8(&a, &b);
-        func_0011B060(&b, 2);
-        found = func_001C1390(id, (u8*)D_00275710);
+        EvalScriptEntry(&b, id, (u8*)g_currentWorld);
+        AssignScriptValue(&a, &b);
+        DestroyScriptValue(&b, 2);
+        found = GetScriptEntryScope(id, (u8*)g_currentWorld);
     }
-    func_0011A338(scope, found);
-    func_0011B538(&a, 0x22);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    AddScriptScopeParent(scope, found);
+    SetScriptValueTag(&a, 0x22);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
@@ -3032,7 +3032,7 @@ ScriptValue* func_0011A080(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
     ScriptValue u;
     ScriptValue* src;
     R11B008Node* p;
-    func_0011B008(&t);
+    InitScriptValue(&t);
     switch (expr->tag) {
     case 0:
     case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27:
@@ -3041,38 +3041,38 @@ ScriptValue* func_0011A080(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
         src = expr;
         goto copy;
     case 28:
-        func_00118D48(&u, expr, scope);
+        EvalScriptVariable(&u, expr, scope);
         goto tail;
     case 30:
         p = expr->node;
         switch (p->tag) {
-        case 1: func_00118DB8(&u, expr, scope); goto tail;
-        case 2: func_00118E80(&u, expr, scope); goto tail;
-        case 5: func_00118F48(&u, expr, scope); goto tail;
-        case 6: func_00119030(&u, expr, scope); goto tail;
-        case 7: func_00119128(&u, expr, scope); goto tail;
-        case 8: func_00119218(&u, expr, scope); goto tail;
-        case 9: func_00119310(&u, expr, scope); goto tail;
-        case 11: func_001194A8(&u, expr, scope); goto tail;
-        case 12: func_001196C8(&u, expr, scope); goto tail;
-        case 13: func_00119878(&u, expr, scope); goto tail;
-        case 15: func_00119AF8(&u, expr, scope); goto tail;
-        case 14: func_00119970(&u, expr, scope); goto tail;
+        case 1: EvalScriptAssign(&u, expr, scope); goto tail;
+        case 2: EvalScriptDefine(&u, expr, scope); goto tail;
+        case 5: EvalScriptAssert(&u, expr, scope); goto tail;
+        case 6: EvalScriptIf(&u, expr, scope); goto tail;
+        case 7: EvalScriptOr(&u, expr, scope); goto tail;
+        case 8: EvalScriptAnd(&u, expr, scope); goto tail;
+        case 9: EvalScriptCond(&u, expr, scope); goto tail;
+        case 11: EvalScriptCase(&u, expr, scope); goto tail;
+        case 12: EvalScriptLet(&u, expr, scope); goto tail;
+        case 13: EvalScriptWhile(&u, expr, scope); goto tail;
+        case 15: EvalScriptSequence(&u, expr, scope); goto tail;
+        case 14: EvalScriptLambda(&u, expr, scope); goto tail;
         case 17:
             src = p->next;
         copy:
-            func_0011B0A8(&t, src);
+            AssignScriptValue(&t, src);
             goto end;
         case 16:
-            func_00119FA0(&u, expr, scope);
+            EvalScriptImportScope(&u, expr, scope);
         tail:
-            func_0011B0A8(&t, &u);
-            func_0011B060(&u, 2);
+            AssignScriptValue(&t, &u);
+            DestroyScriptValue(&u, 2);
             goto end;
         default:
-            func_00119BB0(&u, expr, scope);
-            func_0011B0A8(&t, &u);
-            func_0011B060(&u, 2);
+            EvalScriptCall(&u, expr, scope);
+            AssignScriptValue(&t, &u);
+            DestroyScriptValue(&u, 2);
             break;
         }
         break;
@@ -3080,8 +3080,8 @@ ScriptValue* func_0011A080(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
         break;
     }
 end:
-    func_0011B018(ret, &t);
-    func_0011B060(&t, 2);
+    CopyConstructScriptValue(ret, &t);
+    DestroyScriptValue(&t, 2);
     return ret;
 }
 
@@ -3101,15 +3101,15 @@ ScriptValue* func_0011A358(ScriptValue* ret, R11A630* scope, s32 key, ScriptValu
     ScriptValue a;
     R11B008Key* node;
 
-    func_0011B008(&a);
-    node = func_0011C498();
+    InitScriptValue(&a);
+    node = NewKeyedValue();
     node->key = key;
-    func_0011B0A8(&node->value, value);
+    AssignScriptValue(&node->value, value);
     node->next = scope->head;
     scope->head = node;
-    func_0011B538(&a, 0x22);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    SetScriptValueTag(&a, 0x22);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
@@ -3118,23 +3118,23 @@ ScriptValue* func_0011A400(ScriptValue* ret, R11A630* scope, s32 key, ScriptValu
     ScriptValue a;
     ScriptValue* found;
 
-    func_0011B008(&a);
-    found = func_0011A4D8(scope, key, 1);
+    InitScriptValue(&a);
+    found = FindScriptVariable(scope, key, 1);
     if (found != 0) {
-        func_0011B0A8(found, value);
+        AssignScriptValue(found, value);
     }
-    func_0011B538(&a, 0x22);
-    func_0011B018(ret, &a);
-    func_0011B060(&a, 2);
+    SetScriptValueTag(&a, 0x22);
+    CopyConstructScriptValue(ret, &a);
+    DestroyScriptValue(&a, 2);
     return ret;
 }
 
 s32 func_0011A498(R11A630* scope, s32 key, s32 flag, ScriptValue* out)
 {
-    ScriptValue* r = func_0011A4D8(scope, key, flag);
+    ScriptValue* r = FindScriptVariable(scope, key, flag);
     if (r != 0) {
         if (out)
-            func_0011B0A8(out, r);
+            AssignScriptValue(out, r);
         return 1;
     }
     return 0;
@@ -3157,7 +3157,7 @@ ScriptValue* func_0011A4D8(R11A630* scope, s32 key, s32 flag)
         for (i = 0; i < scope->count; i++) {
             R11A630* c = scope->parents[i];
             if (c->busy == 0) {
-                found = func_0011A4D8(c, key, flag);
+                found = FindScriptVariable(c, key, flag);
                 if (found != 0)
                     goto done;
             }
@@ -3171,17 +3171,17 @@ done:
 void func_0011A5B0(R11A630* src, R11A630* dst)
 {
     dst->count = src->count;
-    func_0018D800(dst->parents, src->parents, src->count * 4);
+    CopyMemory(dst->parents, src->parents, src->count * 4);
     if (src->head != 0) {
-        R11B008Key* n = func_0011C498();
-        func_0011C418(src->head, n, (s32)dst);
+        R11B008Key* n = NewKeyedValue();
+        CopyKeyedValueChain(src->head, n, (s32)dst);
         dst->head = n;
     }
 }
 
 R11A630* func_0011A630(void)
 {
-    R11A630* p = (R11A630*)func_0011C240(D_0025C270);
+    R11A630* p = (R11A630*)TakePoolEntry(g_scopePool);
     func_001F5C0C(p, 0, 0x1C);
     return p;
 }
@@ -3256,11 +3256,11 @@ s32 func_0011A7D8(Stack_11A7D8* s)
 
 void func_0011A800(void)
 {
-    func_0011C2A0(D_0025C250);
-    func_0011C2A0(D_0025C270);
-    func_0011C2A0(D_0025C290);
-    func_0011C2A0(D_0025C2B0);
-    func_0011C2A0(D_0025C2D0);
+    MarkPoolLiveEnd(g_valueNodePool);
+    MarkPoolLiveEnd(g_scopePool);
+    MarkPoolLiveEnd(g_keyedValuePool);
+    MarkPoolLiveEnd(g_payloadPool);
+    MarkPoolLiveEnd(D_0025C2D0);
 }
 
 void func_0011A850(Stk_11A850* self)
@@ -3269,30 +3269,30 @@ void func_0011A850(Stk_11A850* self)
     Obj_11A850* other;
     Obj_11A850* group;
     for (;;) {
-        group = func_0011A748(self);
+        group = PopMarkObject(self);
         if (group) {
             Obj_11A850* link = group->f14;
             if (link) {
                 do {
-                    func_0011C3F0(link);
+                    MarkPoolEntryUsed(link);
                     Obj_11A850* ev = (Obj_11A850*)&link->f4;
                     switch (ev->f0) {
                     case 0x1E:
                         obj = ev->f4;
                         if (func_0011C3C8(obj)) {
-                            func_0011C3F0(obj);
-                            func_0011A770(self, obj);
+                            MarkPoolEntryUsed(obj);
+                            PushMarkChain(self, obj);
                         }
                         break;
                     case 0x1F:
                         other = ev->f4;
                         if (func_0011C3C8(other)) {
-                            func_0011C3F0(other);
-                            func_0011A7B8(self, other);
+                            MarkPoolEntryUsed(other);
+                            PushMarkRecord(self, other);
                         }
                         break;
                     case 0x21:
-                        func_0011C3F0(ev->f4);
+                        MarkPoolEntryUsed(ev->f4);
                         break;
                     }
                     link = link->fC;
@@ -3304,8 +3304,8 @@ void func_0011A850(Stk_11A850* self)
                 do {
                     obj = *p;
                     if (func_0011C3C8(obj)) {
-                        func_0011C3F0(obj);
-                        func_0011A728(self, obj);
+                        MarkPoolEntryUsed(obj);
+                        PushMarkObject(self, obj);
                     }
                     i++;
                     p++;
@@ -3313,65 +3313,65 @@ void func_0011A850(Stk_11A850* self)
             }
             continue;
         }
-        Batch_11A850* b = func_0011A7D8(self);
+        Batch_11A850* b = PopMarkRecord(self);
         if (b) {
             obj = b->f4;
             if (obj) {
                 do {
-                    func_0011C3F0(obj);
+                    MarkPoolEntryUsed(obj);
                     obj = obj->f8;
                 } while (obj);
             }
             obj = b->f10;
             if (func_0011C3C8(obj)) {
-                func_0011C3F0(obj);
-                func_0011A770(self, obj);
+                MarkPoolEntryUsed(obj);
+                PushMarkChain(self, obj);
             }
             group = b->f0;
             if (func_0011C3C8(group)) {
-                func_0011C3F0(group);
-                func_0011A728(self, group);
+                MarkPoolEntryUsed(group);
+                PushMarkObject(self, group);
             }
             continue;
         }
-        obj = func_0011A790(self);
+        obj = PopMarkChain(self);
         if (!obj)
             return;
         switch (obj->f0) {
         case 0x1E:
             other = obj->f4;
             if (func_0011C3C8(other)) {
-                func_0011C3F0(other);
-                func_0011A770(self, other);
+                MarkPoolEntryUsed(other);
+                PushMarkChain(self, other);
             }
             break;
         case 0x1F:
             other = obj->f4;
             if (func_0011C3C8(other)) {
-                func_0011C3F0(other);
-                func_0011A7B8(self, other);
+                MarkPoolEntryUsed(other);
+                PushMarkRecord(self, other);
             }
             break;
         case 0x21:
-            func_0011C3F0(obj->f4);
+            MarkPoolEntryUsed(obj->f4);
             break;
         }
         obj = obj->f8;
         if (obj) {
             if (func_0011C3C8(obj)) {
-                func_0011C3F0(obj);
-                func_0011A770(self, obj);
+                MarkPoolEntryUsed(obj);
+                PushMarkChain(self, obj);
             }
         }
     }
 }
 
 void func_0011AB58(World_11AB58* w) {
-    func_0011C2B0(D_0025C250);
-    func_0011C2B0(D_0025C270);
-    func_0011C2B0(D_0025C290);
-    func_0011C2B0(D_0025C2B0);
-    func_0011C2B0(D_0025C2D0);
+    ClearPoolLiveStates(g_valueNodePool);
+    ClearPoolLiveStates(g_scopePool);
+    ClearPoolLiveStates(g_keyedValuePool);
+    ClearPoolLiveStates(g_payloadPool);
+    ClearPoolLiveStates(D_0025C2D0);
     s32 i = w->count;
     *(s32*)((u8*)w + 0x708) = 0;
     *(s32*)((u8*)w + 0xF0C) = 0;
@@ -3379,53 +3379,53 @@ void func_0011AB58(World_11AB58* w) {
     for (i--; i >= 0; i--) {
         Ent_11AB58* e = w->ents[i];
         if (func_0011C3C8(e)) {
-            func_0011C3F0(e);
-            func_0011A728(w, e);
+            MarkPoolEntryUsed(e);
+            PushMarkObject(w, e);
         }
     }
     s32 j = w->n504;
     for (j--; j >= 0; j--) {
         R11B008Key* n = w->lists[j]->head;
         while (n) {
-            func_0011C3F0((Ent_11AB58*)n);
+            MarkPoolEntryUsed((Ent_11AB58*)n);
             ScriptValue* sp = &n->value;
             switch (sp->tag) {
             case 0x1E: {
                 Ent_11AB58* e = (Ent_11AB58*)sp->p;
                 if (func_0011C3C8(e)) {
-                    func_0011C3F0(e);
-                    func_0011A770(w, e);
+                    MarkPoolEntryUsed(e);
+                    PushMarkChain(w, e);
                 }
                 break;
             }
             case 0x1F: {
                 Ent_11AB58* e = (Ent_11AB58*)sp->p;
                 if (func_0011C3C8(e)) {
-                    func_0011C3F0(e);
-                    func_0011A7B8(w, e);
+                    MarkPoolEntryUsed(e);
+                    PushMarkRecord(w, e);
                 }
                 break;
             }
             case 0x21:
-                func_0011C3F0((Ent_11AB58*)sp->p);
+                MarkPoolEntryUsed((Ent_11AB58*)sp->p);
                 break;
             }
             n = n->next;
         }
     }
-    for (S1DBBD8* it = (S1DBBD8*)D_00275710->f1EC8; it; it = it->next) {
-        if ((void*)it->fn == (void*)func_001834A0) {
+    for (S1DBBD8* it = (S1DBBD8*)g_currentWorld->f1EC8; it; it = it->next) {
+        if ((void*)it->fn == (void*)RunScriptEventHandler) {
             Ent_11AB58* e = (Ent_11AB58*)it->p0C;
             if (e && func_0011C3C8(e)) {
-                func_0011C3F0(e);
-                func_0011A770(w, e);
+                MarkPoolEntryUsed(e);
+                PushMarkChain(w, e);
             }
         }
     }
-    func_0011A850(w);
-    func_0011C2E8(D_0025C250);
-    func_0011C2E8(D_0025C270);
-    func_0011C2E8(D_0025C290);
-    func_0011C2E8(D_0025C2B0);
-    func_0011C2E8(D_0025C2D0);
+    DrainMarkStacks(w);
+    ReleaseDeadPoolEntries(g_valueNodePool);
+    ReleaseDeadPoolEntries(g_scopePool);
+    ReleaseDeadPoolEntries(g_keyedValuePool);
+    ReleaseDeadPoolEntries(g_payloadPool);
+    ReleaseDeadPoolEntries(D_0025C2D0);
 }

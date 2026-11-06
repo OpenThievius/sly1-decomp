@@ -23,7 +23,7 @@ void func_0016AF80(Ctx_16AF80* self)
         void** vt = *(void***)(&D_0026F138);
         ((VFnS_16AF80)vt[8])((&D_0026F138), func_eu_001DDAB0(0x16));
     } else {
-        s32 flags = D_002623C0->levels[self->f2D0].f448;
+        s32 flags = g_saveData->levels[self->f2D0].f448;
         if (flags & 1) {
             func_eu_001ADF10((&D_0026F138));
         } else if (self->f2D0 == self->f300) {
@@ -35,7 +35,7 @@ void func_0016AF80(Ctx_16AF80* self)
         }
     }
 
-    func_001AA8B8((&D_0026F138), 0.0f);
+    SetScreenElementHoldTime((&D_0026F138), 0.0f);
     ((Obj_16AF80_eu*)(&D_0026F138))->f974 = 0;
     {
         void** vt = *(void***)(&D_0026F138);

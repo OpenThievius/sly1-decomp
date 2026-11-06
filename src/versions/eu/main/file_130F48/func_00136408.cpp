@@ -30,16 +30,16 @@ void func_00136408(Entry_00136408_eu* self, const char* name)
     wide = 4;
     scale = 1.0f;
     if (self->f570 == wide) scale = 0.8f;
-    func_0015C8B8(self->f04, scale, scale);
+    PushFontScale(self->f04, scale, scale);
     func_eu_0015DCB8(buf, self->name08, self->f04, 0);
     lim = 280.0f;
     if (self->f570 == wide) lim = 380.0f;
     func_eu_0015E4A8(buf, self->list408, lim);
-    func_0015C900(self->f04);
+    PopFontScale(self->f04);
     goto tail;
 fail:
     self->name08[0] = 0;
 tail:
-    tab = (f32*)D_00261858;
+    tab = (f32*)g_gameClock;
     self->f578 = tab[1];
 }

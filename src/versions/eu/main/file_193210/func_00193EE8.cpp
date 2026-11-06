@@ -18,7 +18,7 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
         return;
     }
     if (self->f288 != 0) {
-        func_001BE998();
+        StopStreamVoice();
         self->f288 = 0;
     }
     if (a == 11) {
@@ -37,16 +37,16 @@ void func_00193EE8(Self_193EE8_eu* self, s32 a, s32 b)
     case 16:
     case 17: {
         T217D_330* o = &D_0026EC70;
-        func_001AA8B8(o, 0.0f);
-        func_001AA788(o, 0.6f);
+        SetScreenElementHoldTime(o, 0.0f);
+        SetScreenElementScale(o, 0.6f);
         break;
     }
     case 20:
-        if (func_001BE980() != 0) {
+        if (HasStreamVoice() != 0) {
             return;
         }
-        func_001BE728(func_eu_001DE018(6));
-        self->f288 = func_001BE980();
+        OpenKeyRecord(func_eu_001DE018(6));
+        self->f288 = HasStreamVoice();
         break;
     case 24: {
         D_eu_0026BB30 = D_eu_0026BB38 = (f32)(u32)((Dev_193EE8*)&D_00262490)->a.x;

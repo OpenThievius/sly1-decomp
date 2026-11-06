@@ -3,7 +3,7 @@
 extern s32 D_eu_00263710;
 void func_001F4408(s32 flag, s32 n)
 {
-    Ctx_1F4408* ctx = *(Ctx_1F4408**)D_002623C0;
+    Ctx_1F4408* ctx = *(Ctx_1F4408**)g_saveData;
     Obj_1F4408* o;
     ObjectSubGroup* v;
     Val_1F4408* k;
@@ -14,19 +14,19 @@ void func_001F4408(s32 flag, s32 n)
     if (ctx->f19DC != 0) {
         goto l4490;
     }
-    o = *(Obj_1F4408**)D_002623C4;
+    o = *(Obj_1F4408**)g_currentLevelRecord;
     if ((o->f78 & 1) != 0) {
         goto l4470;
     }
 lm1:
-    func_001F0428((Val_1F4408*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
+    StartObjectFade((Val_1F4408*)(D_00247AD0 + 0x80 + D_eu_00263710 * 32), -1, n);
     return;
 l4470:
     k = func_00160180((Key_1F4408*)(u32)((ctx->f19D8 << 8) | 1));
-    func_001F0428(k, 0x1BD, n);
+    StartObjectFade(k, 0x1BD, n);
     return;
 l4490:
-    v = (ObjectSubGroup*)func_001F4378();
+    v = (ObjectSubGroup*)FindActiveObjectSubGroup();
     if (v == 0) {
         goto larg;
     }
@@ -41,5 +41,5 @@ larg:
     args.f08 = -1;
     args.f0C = -1;
     args.flags = 0;
-    func_001EFFA0(&g_screenFade, &args, n);
+    StartScreenFade(&g_screenFade, &args, n);
 }

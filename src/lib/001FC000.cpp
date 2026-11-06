@@ -1018,7 +1018,7 @@ u8 *func_001FF740(struct Fde_1FF740 *fde, struct Info_1FF740 *info) {
         info->augmentation[0] != 'z') {
         return 0;
     }
-    p = (u8 *)info->augmentation + func_001E2100(info->augmentation) + 1;
+    p = (u8 *)info->augmentation + GetStringLength(info->augmentation) + 1;
     if (func_001F6738(info->augmentation, "eh") == 0) {
         info->ehPtr = ((struct Unaligned_1FF740 *)p)->v;
         p += 4;

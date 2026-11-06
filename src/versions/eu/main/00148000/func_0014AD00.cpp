@@ -4,7 +4,7 @@ typedef void (*VFn2_14AD00)(void* self, s32 arg);
 void func_001AAF58(void* self, s32 arg);
 void func_0014AD00(u8* self, s32 arg)
 {
-    func_001AAF58(self, arg);
+    SetScreenElementClock(self, arg);
     self += 0x574;
     for (u32 i = 0; i < 4; i++) {
         (*(VFn2_14AD00**)self)[17](self, arg);

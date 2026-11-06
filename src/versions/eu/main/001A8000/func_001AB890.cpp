@@ -39,7 +39,7 @@ void func_001AB890(Obj_001AB890_eu* self, f32 x)
     self->f274 = -1;
     self->f278 = D_0024CD4C;
     self->f268 = x;
-    func_001ABE20(self, 1);
-    func_001AB980(self, 0.0f);
+    SetTimerState(self, 1);
+    StepTimer(self, 0.0f);
     self->vtbl[14](self);
 }

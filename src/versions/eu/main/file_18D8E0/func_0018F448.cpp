@@ -34,8 +34,8 @@ void func_0018F448(Obj_18F448* self_, void* v)
     self->fC = v;
     self->f58 = D_eu_002F52C0;
     self->f5C = D_eu_00478240;
-    func_0013C988((u8*)self + 0x60, 0x30000, (void*)((s32)D_eu_00448240 | 0x20000000));
-    func_0018E940((Obj_18E940*)((u8*)self + 0x80));
+    InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_eu_00448240 | 0x20000000));
+    StartMovieStream((Obj_18E940*)((u8*)self + 0x80));
     func_0020ADA0();
     func_0020AE40((u8*)self + 0x10, self->f58, 0x152F68);
     func_0020A538((u8*)self + 0x10, 0, 0, (void*)func_0018EC40, self);
@@ -43,17 +43,17 @@ void func_0018F448(Obj_18F448* self_, void* v)
         func_0020A538((u8*)self + 0x10, 2, n, (void*)func_0018EC80, self);
         func_0020A538((u8*)self + 0x10, 3, n, (void*)func_0018EC80, self);
     }
-    func_0020B168((u8*)self + 0x10, 1, (void*)func_0018ECA8, self);
+    func_0020B168((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
     func_0020B168((u8*)self + 0x10, 4, (void*)func_0018ED78, self);
     func_0020B168((u8*)self + 0x10, 0, (void*)func_0018EDA0, self);
-    while (func_0018F890((Object_18F890*)self, 1) == 0) {
+    while (FeedMovieDecoder((Object_18F890*)self, 1) == 0) {
     }
     self->f128 = D_eu_005A4240;
     self->f12C = D_eu_005C04C0;
     D_eu_002639FC = 0;
-    ((Tail_eu_18F448*)&D_00269A00)->cur = (u8*)0x100010;
-    ((Tail_eu_18F448*)&D_00269A00)->remain = (s32)D_eu_0014B588;
-    ((Tail_eu_18F448*)&D_00269A00)->crc = 0xFFFFFFFF;
+    ((Tail_eu_18F448*)&g_moviePlayer)->cur = (u8*)0x100010;
+    ((Tail_eu_18F448*)&g_moviePlayer)->remain = (s32)D_eu_0014B588;
+    ((Tail_eu_18F448*)&g_moviePlayer)->crc = 0xFFFFFFFF;
     u8* tb = D_eu_005C05E0;
     i = 0;
     s32 j;

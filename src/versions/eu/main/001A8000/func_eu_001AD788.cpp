@@ -12,6 +12,6 @@ void func_001AA8F0(void* self);
 void func_eu_001AD788(Obj_eu_1AD788* self)
 {
     if (self->state != 3 || self->flag == 0) {
-        func_001AA8F0(self);
+        ShowScreenElement(self);
     }
 }

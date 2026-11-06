@@ -9,7 +9,7 @@ void func_001921A8(void* self);
 
 void func_001C3390(C1D* self)
 {
-    func_001921A8(self);
+    InitSwitchedCollider(self);
     self->f610 = -1;
     self->f694 = 5;
 }
@@ -24,7 +24,7 @@ extern Obj_1C3928 D_0026DFC8;
 // NEAR: the two lui immediates for D_0026DD48 / D_0026DFC8 come out wrong in check.py (see results.tsv note).
 void func_001C3928()
 {
-    if (func_001E9970()) {
+    if (AreMenusAndFadeClear()) {
         D_0026DD48.vtbl[14]((void*)&D_0026DD48);
         D_0026DFC8.vtbl[14]((void*)&D_0026DFC8);
     } else {
@@ -40,7 +40,7 @@ s32 func_001833F0(s32 a, s32 b);
 void func_001C3C00(C1D* self, Entry_1C3C00* table, s32 idx)
 {
     Entry_1C3C00* e = (Entry_1C3C00*)((u8*)table + ((1 - idx) << 6));
-    if (func_001300E8(e->first, 0x21)) {
+    if (IsObjectOfKind(e->first, 0x21)) {
         if (self->f694 > 0) {
             self->f680 = 1;
             return;
@@ -48,7 +48,7 @@ void func_001C3C00(C1D* self, Entry_1C3C00* table, s32 idx)
         if (self->f67C == 0) self->f684 = e->first;
         return;
     }
-    if (func_001833F0(e->first, 0x52F)) self->f688 = (void*)e->first;
+    if (MatchesObjectId(e->first, 0x52F)) self->f688 = (void*)e->first;
 }
 
 void func_00192C58(void* self);
@@ -68,7 +68,7 @@ void func_001C3EB0(void* self, void* data);
 void func_001C3F68(C1D* self, s32 value)
 {
     Local_1C3F68 local;
-    func_001D7098(&local, 0, value);
+    InitOwnerMessage(&local, 0, value);
     local.value = value;
     local.fn = func_001C3EB0;
     self->desc05()->m4C(self, (void*)&local);
@@ -78,11 +78,11 @@ void func_001C06A0(s32 a, s32 b, f32 x);
 
 void func_001C0000(s32 flag, f32 x)
 {
-    func_001C06A0(6, 0, x);
-    func_001C06A0(6, 2, x);
-    func_001C06A0(6, 3, x);
+    SetVolumeChannelFactor(6, 0, x);
+    SetVolumeChannelFactor(6, 2, x);
+    SetVolumeChannelFactor(6, 3, x);
     if (flag) {
-        func_001C06A0(6, 1, x);
+        SetVolumeChannelFactor(6, 1, x);
     }
 }
 
@@ -103,10 +103,10 @@ void func_001C3FC8(void* self, s32 flag);
 
 void func_001C33C8(C1D* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     self->f68C = self->radius3CC;
-    func_00124DF8(self, 0xC, D_002749B0);
-    self->f668 = func_001B6290(self->f664, self, -1, 0);
+    ResolveObjectLinks(self, 0xC, D_002749B0);
+    self->f668 = CreateStateWalker(self->f664, self, -1, 0);
     self->f644 = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
     PlacedObject* v = (PlacedObject*)self->f660;
     self->f648 = func_00205778(v->rot.r[0].y, v->rot.r[0].x);
@@ -130,7 +130,7 @@ extern s32 D_00262C64;
 s32 func_001DDA80(void* p);
 
 s32 func_001C3D28(C1D* self)
-{ if ((D_00262C64 & 1) || func_001DDA80(self->world)) return 1; return 0; }
+{ if ((g_buttonCodeFlags & 1) || func_001DDA80(self->world)) return 1; return 0; }
 
 // EXACT: declare D_0026185C as extern f32 D_0026185C[] and read [0]
 
@@ -164,7 +164,7 @@ s32 func_001C3D60(C1D* self, Arg_1C3D60* arg)
     if (func_00160C58()) {
         func_001C3FC8(self, 2);
         self->f638 = 1;
-        self->f63C = D_0026185C[0];
+        self->f63C = g_gameTime[0];
     } else {
         func_001C3FC8(self, 3);
     }
@@ -206,10 +206,10 @@ void func_001C34C8(C1D* self, f32 t)
     f32 buf2[12];
     u32 ca[4];
     u32 cb[4];
-    func_00192B58(self, t);
+    UpdateSwitchedCollider(self, t);
     if (((Obj_1C34C8_Vt*)self->f688)) {
-        void* h = func_0015A838(self->world, 0x101, 0x77, (s32)((Obj_1C34C8_Vt*)self->f688));
-        if (h) func_00158730(h);
+        void* h = FindFirstObjectByIdGathered(self->world, 0x101, 0x77, (s32)((Obj_1C34C8_Vt*)self->f688));
+        if (h) SendEmptyMessage(h);
         self->f690 = self->f690 + 1;
         ((Obj_1C34C8_Vt*)self->f688)->vt->f1C(((Obj_1C34C8_Vt*)self->f688));
         self->f688 = 0;
@@ -220,18 +220,18 @@ void func_001C34C8(C1D* self, f32 t)
     }
     if (((Sub_1C34C8*)self->f67C)) {
         if (((Sub_1C34C8*)self->f67C)->f18 == 0.0f) {
-            func_0012E760(((Sub_1C34C8*)self->f67C));
+            StopAnimationPlayer(((Sub_1C34C8*)self->f67C));
             self->f67C = 0;
         }
     } else if (self->f680) {
-        func_0012C7B0(self->f678, self, 0, &self->f67C, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets(self->f678, self, 0, &self->f67C, 0.0f, 1.0f);
         self->f694 = self->f694 - 1;
         D_0026E228[0] = -1;
     }
     self->f680 = 0;
     f32 u;
     if (((Sub_1C34C8*)self->f67C)) {
-        f32* lim = D_00275C60;
+        f32* lim = g_unitRange;
         f32 r = ((Sub_1C34C8*)self->f67C)->f14 / ((Sub_1C34C8*)self->f67C)->p8->f34;
         f32* pp = D_00274A50;
         f32 lo = lim[0];
@@ -239,36 +239,36 @@ void func_001C34C8(C1D* self, f32 t)
         f32 v = pp[0] + r * (pp[1] + r * pp[2]);
         if (v < lo) v = lo;
         else if (hi < v) v = hi;
-        D_00261854 = v;
+        g_stepScale = v;
         u = r;
     } else {
-        D_00261854 = 1.0f;
+        g_stepScale = 1.0f;
         u = 0.0f;
     }
     f32 w = u * D_00274A44 + (1.0f - u) * self->f68C;
     self->radius3D0 = w;
     self->radius3CC = w;
     if (self->f638) {
-        if (D_0026185C[0] - self->f640 > 2.0f) self->f638 = 0;
+        if (g_gameTime[0] - self->f640 > 2.0f) self->f638 = 0;
     }
     f32 ang = func_00205778(self->rot.r[0].y, self->rot.r[0].x);
-    func_00188850((u8*)&D_00248D20, buf, self->f648 - ang);
+    BuildAxisAngleMatrix((u8*)&g_unitZVector, buf, self->f648 - ang);
     func_001EA918((u8*)((Obj_1C34C8_Vt*)self->f660) + 0xD0, buf, D_00274A60, buf2, 0, t);
     ((Obj_1C34C8_Vt*)self->f660)->vt->f88(((Obj_1C34C8_Vt*)self->f660), buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;
     if (self->f638) {
         f32 q;
-        if (self->f610 != 2) q = (D_00261858[1] - self->f614) * 0.5f;
+        if (self->f610 != 2) q = (g_gameClock[1] - self->f614) * 0.5f;
         else q = 0.0f;
-        f32 z = func_00205210((D_00261858[1] - self->f63C) * 10.0f);
+        f32 z = func_00205210((g_gameClock[1] - self->f63C) * 10.0f);
         f32 x0 = D_00274A70[0] + q * (D_00274A70[1] + q * D_00274A70[2]);
-        f32 lo = D_00275C60[0];
-        f32 hi = D_00275C60[1];
+        f32 lo = g_unitRange[0];
+        f32 hi = g_unitRange[1];
         f32 x = x0 < lo ? lo : (hi < x0 ? hi : x0);
         f32 y = D_00274A80[0] + z * (D_00274A80[1] + z * D_00274A80[2]);
-        f32 lo2 = D_00275C60[0];
-        f32 hi2 = D_00275C60[1];
+        f32 lo2 = g_unitRange[0];
+        f32 hi2 = g_unitRange[1];
         if (y < lo2) y = lo2;
         else if (hi2 < y) y = hi2;
         f32 m = x * y;
@@ -280,7 +280,7 @@ void func_001C34C8(C1D* self, f32 t)
         ((u8*)ca)[2] = (s32)r2;
         ((u8*)ca)[1] = (s32)r1;
     }
-    func_00126A48(self, ca[0]);
+    SetObjectTreeRecordValue(self, ca[0]);
     *(f32*)(((u8*)self->f62C) + 0x2DC) = self->f670 * self->f630;
     *(f32*)(((u8*)self->f62C) + 0x2E0) = self->f670 * self->f634;
     *(s32*)(((u8*)self->f62C) + 0x32C) = 0;
@@ -312,7 +312,7 @@ void func_001C3FC8(PlacedObject* self, s32 state)
     f32 f12;
     if (state == W(self, 0x610)) return;
     if (W(self, 0x610) == 2) {
-        f32 t = D_00261858[1];
+        f32 t = g_gameClock[1];
         W(self, 0x694) = 3;
         F(self, 0x640) = t;
     }
@@ -320,12 +320,12 @@ void func_001C3FC8(PlacedObject* self, s32 state)
     if (state < 4) if (state >= 2) {
         Vec02 q;
         f32 a = func_00205778(F(self, 0x154), F(self, 0x150));
-        f32 b = func_001EA408(a + 3.14159274f);
+        f32 b = WrapAngle(a + 3.14159274f);
         F(self, 0x644) = b;
         F(self, 0x648) = b;
         q = D_00248D30;
         f32 r = func_00205778(F(self, 0xD4), F(self, 0xD0));
-        func_001EA728(r, F(self, 0x644), 0.0f, D_00274AA8, (u8*)&q + 8);
+        ApproachAngleWithRamp(r, F(self, 0x644), 0.0f, D_00274AA8, (u8*)&q + 8);
         self->desc02()->m21(self, (Vec02*)&q);
         W(self, 0x694) = 0;
         D_0026E228[0] = -1;
@@ -338,14 +338,14 @@ void func_001C3FC8(PlacedObject* self, s32 state)
     case 2: s2 = P(self, 0x620); F(self, 0x640) = D_0024D560[0]; break;
     case 3: s2 = P(self, 0x624); break;
     case 4:
-        func_00194D30(D_0026FF68, 0, 0x1A);
+        SetPauseMenuLayerPage(g_pauseMenuElement, 0, 0x1A);
         s2 = P(self, 0x624);
         f12 = F(s2, 0x34);
         break;
     }
-    func_0012C918(s2, self, 1, (u8*)self + 0x628, f12, 1.0f);
+    ReplaceAnimationPlayer(s2, self, 1, (u8*)self + 0x628, f12, 1.0f);
     W(self, 0x610) = state;
-    F(self, 0x614) = D_00261858[1];
+    F(self, 0x614) = g_gameClock[1];
 }
 
 struct Elem_1C30E8 { f32 f0; f32 f4; u8 pad8[8]; f32 v10[4]; f32 v20[4]; };
@@ -433,42 +433,42 @@ void func_001C0070(void)
 {
     Frame_1C0070 f;
     if (func_001BF1F0() != 0) return;
-    void* v4 = func_001BF3D0();
-    Fn_1C0070 v5 = func_001BF578();
-    u8* P = (u8*)D_00275710 + 0x1BAC;
-    ListFrame* saved = D_0027B314;
+    void* v4 = GetSoundListenerPosition();
+    Fn_1C0070 v5 = ChooseSoundListenerFunction();
+    u8* P = (u8*)g_currentWorld + 0x1BAC;
+    ListFrame* saved = g_activeListFrames;
     f.list = P;
     f.link = P;
     f.offset = *(s32*)(P + 8);
     f.prev = saved;
-    D_0027B314 = &f;
-    if (D_0027472C != 0 && func_0011D708(D_0027472C) == 0) {
-        if (D_00274744 != 0) {
-            func_001C06A0(8, 1, 1.0f);
-            func_001C06A0(8, 0, 1.0f);
-            func_001C06A0(8, 3, 1.0f);
+    g_activeListFrames = &f;
+    if (g_streamVoice != 0 && IsVoiceBusy(g_streamVoice) == 0) {
+        if (g_streamVoiceLocked != 0) {
+            SetVolumeChannelFactor(8, 1, 1.0f);
+            SetVolumeChannelFactor(8, 0, 1.0f);
+            SetVolumeChannelFactor(8, 3, 1.0f);
         }
-        D_0027472C = 0;
-        D_00274744 = 0;
-        D_00274730 = 0;
+        g_streamVoice = 0;
+        g_streamVoiceLocked = 0;
+        g_streamVoicePending = 0;
     }
-    if (D_00274738 != -100) {
-        s32 up = D_00274738 < D_00274734;
-        if (D_00274734 > 0 && up) {
-            func_0011D928(D_00274734 + 0x14);
-            D_00274738 = D_00274734;
-            func_001C06A0(7, 1, 1.0f);
+    if (g_previousSoundLevel != -100) {
+        s32 up = g_previousSoundLevel < g_currentSoundLevel;
+        if (g_currentSoundLevel > 0 && up) {
+            func_0011D928(g_currentSoundLevel + 0x14);
+            g_previousSoundLevel = g_currentSoundLevel;
+            SetVolumeChannelFactor(7, 1, 1.0f);
             D_002748EC = 0;
         } else {
             D_00274754 = D_00274754 - 1;
             if (D_00274754 < 0) {
-                s32 a = D_00274738;
-                s32 v = (D_00274734 < a) ? a - 1 : a + 1;
+                s32 a = g_previousSoundLevel;
+                s32 v = (g_currentSoundLevel < a) ? a - 1 : a + 1;
                 D_002748EC = (u32)v >> 31;
-                D_00274738 = v;
+                g_previousSoundLevel = v;
                 func_0011D928(v + 0x14);
-                if (D_00274738 < 0) {
-                    f32 cnv = (f32)D_00274738;
+                if (g_previousSoundLevel < 0) {
+                    f32 cnv = (f32)g_previousSoundLevel;
                     f32 k = -0.05f;
                     f32 zero = 0.0f;
                     f32 one = 1.0f;
@@ -478,15 +478,15 @@ void func_001C0070(void)
                     else if (one < x) y = one;
                     else y = x;
                     f32 m = y * 0.6666667f;
-                    func_001C06A0(7, 1, (1.0f - y) + m);
+                    SetVolumeChannelFactor(7, 1, (1.0f - y) + m);
                 }
                 D_00274754 = D_00274754 + 3;
             }
         }
-        if (up ? !(D_00274738 < D_00274734) : !(D_00274738 > D_00274734)) {
-            D_002748EC = (u32)D_00274738 >> 31;
-            func_0011D928(D_00274734 + 0x14);
-            D_00274738 = -100;
+        if (up ? !(g_previousSoundLevel < g_currentSoundLevel) : !(g_previousSoundLevel > g_currentSoundLevel)) {
+            D_002748EC = (u32)g_previousSoundLevel >> 31;
+            func_0011D928(g_currentSoundLevel + 0x14);
+            g_previousSoundLevel = -100;
         }
     }
     Ent_1C0070* e;
@@ -494,8 +494,8 @@ void func_001C0070(void)
         while ((e = f.Next()) != 0) {
             u8* s1;
             f32 r;
-            if (e->f30 != 0 && func_00182FC8(e->f30) == 0) {
-                func_001BF788(e, 0);
+            if (e->f30 != 0 && IsObjectAttached(e->f30) == 0) {
+                StopSoundRecord(e, 0);
                 goto next;
             }
             if (e->f40 == 0) {
@@ -505,7 +505,7 @@ void func_001C0070(void)
                     } else {
                         if (e->f30 != 0) e->f30->desc->m0E(e->f30, 9, e);
                         if (e->f3C == 0) goto kill;
-                        func_0011D600(e->f18);
+                        StopSoundVoice(e->f18);
                         e->f18 = 0;
                     }
                     e->f48 = 0;
@@ -514,11 +514,11 @@ void func_001C0070(void)
                 }
                 e->f4C = (e->f4C + 1) % 4;
                 if (e->f4C == 0) {
-                    func_0011D730(e->f18, func_001BFFC8, ((s64)e->f4 << 32) | (s64)(s32)e);
+                    RequestVoiceCallback(e->f18, MarkSoundRecordIfIdMatches, ((s64)e->f4 << 32) | (s64)(s32)e);
                 }
             }
             if (0.0f <= e->f78) {
-                f32* s1 = D_00261858;
+                f32* s1 = g_gameClock;
                 if (s1[1] < e->f74) {
                     if (e->f40 != 0) goto next;
                 } else {
@@ -538,29 +538,29 @@ void func_001C0070(void)
                     if (0.0f <= e->f78) goto next;
                     if (e->f40 != 0) goto next;
                     if (e->f3C != 0 || 0.0f < e->f74) {
-                        func_0011D600(e->f18);
+                        StopSoundVoice(e->f18);
                         e->f18 = 0;
                         e->f40 = 1;
                         goto next;
                     }
                 kill:
-                    func_001BF788(e, 0);
+                    StopSoundRecord(e, 0);
                     goto next;
                 }
                 func_001BF200(r, s1, &e->f50, &e->f54, e->f14, e->f34, e->f38);
             }
             if (e->f40 != 0 && e->f0 != -2) {
-                e->f18 = func_0011D598(e->f8, D_00245024[e->f0].a, 0, 0, 0, 0);
+                e->f18 = StartSoundVoice(e->f8, D_00245024[e->f0].a, 0, 0, 0, 0);
                 e->f40 = 0;
             }
             func_001BF428(e);
-            func_001BF7F8(e, e->f58);
-            func_001BE860(e);
+            SetSoundRecordPitch(e, e->f58);
+            ApplySoundRecordVolumePan(e);
         next:;
         }
     }
-    func_0011CE30();
-    D_0027B314 = f.prev;
+    PollIopCommands();
+    g_activeListFrames = f.prev;
 }
 
 // Data definitions (retail values)

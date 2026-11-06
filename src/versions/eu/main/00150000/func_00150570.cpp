@@ -5,34 +5,34 @@ void func_eu_001387C8(BufferedStream* r, void* out);
 void func_00150570(void* unused, BufferedStream* rd, s32* outCount, Ent_150570** outArr)
 {
     s32 i = 0;
-    *outCount = func_00137CC0(rd);
-    *outArr = (Ent_150570*)func_0018D5C0(*outCount * 0x28);
+    *outCount = ReadBufferedS8(rd);
+    *outArr = (Ent_150570*)AllocateZeroedFrontMemory(*outCount * 0x28);
     for (i = 0; i < *outCount; i++) {
         Ent_150570* e = (Ent_150570*)((u8*)*outArr + i * 0x28);
-        e->type = func_00137CC0(rd);
+        e->type = ReadBufferedS8(rd);
         switch (e->type) {
         case 0:
         case 7:
-            func_00138550(rd, &e->w4);
+            ReadOptionalBufferedBlock(rd, &e->w4);
             break;
         case 1:
         case 2:
-            e->w4 = func_00137D10(rd);
-            e->w8 = func_00137D10(rd);
+            e->w4 = ReadBufferedS16(rd);
+            e->w8 = ReadBufferedS16(rd);
             break;
         case 3:
-            *(f32*)&e->w4 = func_00137DF8(rd);
-            *(f32*)&e->w8 = func_00137DF8(rd);
-            e->wC = func_00137B90(rd);
-            e->w10 = func_00137B90(rd);
-            e->w18 = func_00137D10(rd);
-            e->w1C = func_00137D10(rd);
-            e->w20 = func_00137D10(rd);
-            e->w24 = func_00137D10(rd);
+            *(f32*)&e->w4 = ReadBufferedFloat(rd);
+            *(f32*)&e->w8 = ReadBufferedFloat(rd);
+            e->wC = ReadBufferedU8(rd);
+            e->w10 = ReadBufferedU8(rd);
+            e->w18 = ReadBufferedS16(rd);
+            e->w1C = ReadBufferedS16(rd);
+            e->w20 = ReadBufferedS16(rd);
+            e->w24 = ReadBufferedS16(rd);
             func_eu_001387C8(rd, e->w14);
             break;
         case 4:
-            e->w4 = func_00137D10(rd);
+            e->w4 = ReadBufferedS16(rd);
             break;
         }
     }

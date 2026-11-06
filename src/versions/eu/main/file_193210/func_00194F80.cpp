@@ -82,14 +82,14 @@ void func_00194F80(Self_eu_194F80* self)
         cy = self->f228 * s + y0 * (1.0f - s); 
         h = hh * s; 
     }
-    pulse = func_00205400(D_00261858[4] * 10.0f) * 0.5f + 0.5f;
+    pulse = func_00205400(g_gameClock[4] * 10.0f) * 0.5f + 0.5f;
     page = self->f260;
-    menu = &((Menu_eu_194F80*)&D_00269D50)[page];
+    menu = &((Menu_eu_194F80*)&g_pauseMenuPages)[page];
     fade = 1.0f;
     if (page == 0 && D_00275BEC == 2) {
         fade = 1.0f - D_00262CEC;
     }
-    self->f284 = func_001EA4B8(D_00260ED0, 0, self->f284, fade, D_00261858[5]);
+    self->f284 = ApproachValueWithRamp(g_fadeRampProfile, 0, self->f284, fade, g_gameClock[5]);
     alpha = (u8)(s32)(self->f284 * 255.0f);
     if (self->f210 != 0) {
         Out_eu_194F80 out;
@@ -121,7 +121,7 @@ void func_00194F80(Self_eu_194F80* self)
             Lerp_194F80::Do(&res, cur->f18, gray, pulse * pulse);
             cur->f18 = res;
         }
-        CallHook_194F80::Do(self->f210, (Layout_137228*)&out, D_00262280);
+        CallHook_194F80::Do(self->f210, (Layout_137228*)&out, g_gsPacketWriter);
         self->f210->f18 = saved;
     }
     if (menu->title != -1) {
@@ -129,7 +129,7 @@ void func_00194F80(Self_eu_194F80* self)
         Out_eu_194F80 out;
         Rgba_194F80 c;
         f32 sc = menu->titleScale * self->f23C;
-        func_0015C8B8(self->f4, sc, sc);
+        PushFontScale(self->f4, sc, sc);
         func_eu_0015DD18(&buf, menu->title, self->f4, 0);
         func_eu_0015E4A8(&buf, &self->lines, self->f23C * 500.0f);
         c.r = 0x7F;
@@ -137,14 +137,14 @@ void func_00194F80(Self_eu_194F80* self)
         c.b = 0x7F;
         c.a = alpha;
         Setup_eu_194F80::Do(&out, cx, cy, w, h, *(s32*)&c, &self->lines, 1);
-        func_eu_0015E7E0(&buf, &out, 0, D_00262280);
+        func_eu_0015E7E0(&buf, &out, 0, g_gsPacketWriter);
         cy += self->lines.height;
-        func_0015C900(self->f4);
+        PopFontScale(self->f4);
     }
     base = cy + -1.0f;
     {
         f32 sc = menu->itemScale * self->f23C;
-        func_0015C8B8(self->f4, sc, sc);
+        PushFontScale(self->f4, sc, sc);
     }
     lineH = (f32)self->f4->height * self->f4->sy;
     if (menu->vertical == 0) {
@@ -154,7 +154,7 @@ void func_00194F80(Self_eu_194F80* self)
             if (k != 0) {
                 total += (f32)self->f4->advance * self->f4->sx + (f32)self->f4->advance * self->f4->sx;
             }
-            void* str = func_00193598(page, menu->items[k]);
+            void* str = GetMenuChoiceLabel(page, menu->items[k]);
             func_eu_0015DCB8(&buf, str, self->f4, 0);
             total += func_eu_0015E438(&buf);
         }
@@ -184,7 +184,7 @@ void func_00194F80(Self_eu_194F80* self)
             grow = 1.0f;
         }
         Buf_eu_194F80 buf;
-        str = func_00193598(page, menu->items[i]);
+        str = GetMenuChoiceLabel(page, menu->items[i]);
         func_eu_0015DCB8(&buf, str, self->f4, 0);
         width = func_eu_0015E438(&buf);
         if (menu->vertical != 0) {
@@ -192,26 +192,26 @@ void func_00194F80(Self_eu_194F80* self)
         }
         {
             f32 sc = menu->itemScale * self->f23C * grow;
-            func_0015C8B8(self->f4, sc, sc);
+            PushFontScale(self->f4, sc, sc);
         }
         func_eu_0015DCB8(&buf, str, self->f4, 0);
         f32 width2 = func_eu_0015E438(&buf);
         th = (f32)self->f4->height * self->f4->sy;
         Out_eu_194F80 out;
         Setup_eu_194F80::Do(&out, x + (width - width2) * 0.5f, cy + (lineH - th) * 0.5f, w, th, *(s32*)&col, 0, 0);
-        func_eu_0015E7E0(&buf, &out, 0, D_00262280);
-        func_0015C900(self->f4);
+        func_eu_0015E7E0(&buf, &out, 0, g_gsPacketWriter);
+        PopFontScale(self->f4);
         if (menu->vertical != 0) {
             cy += (f32)self->f4->height * self->f4->sy;
         } else {
             x += width + ((f32)self->f4->advance * self->f4->sx + (f32)self->f4->advance * self->f4->sx);
         }
     }
-    func_0015C900(self->f4);
+    PopFontScale(self->f4);
     if (menu->title != -1 && menu->count != 0) {
         Rgba_194F80 c = *(Rgba_194F80*)&D_0026A210.f18;
         c.a = alpha;
         s32 y = (s32)((base * 0.5462963f + 1920.0f) * 16.0f);
-        func_001AE3B8((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);
+        DrawLineSegment((s32)((cx + 1728.0f) * 16.0f), y, 0, (s32)((cx + w + 1728.0f) * 16.0f), y, 0, &c, 0);
     }
 }

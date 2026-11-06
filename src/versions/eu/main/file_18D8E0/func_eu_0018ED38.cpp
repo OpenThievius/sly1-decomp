@@ -31,10 +31,10 @@ s32 func_eu_0018ED38(Self_eu_0018ED38* self, Src_eu_0018ED38* src)
     self->c = src->c;
     if (kind == 16) {
         self->size = b << 12;
-        self->result = func_0011E428(0x400, 0x1000, 0x400, 0, 2, 3);
+        self->result = OpenIopRing(0x400, 0x1000, 0x400, 0, 2, 3);
     } else {
         self->size = 0x6000;
-        self->result = func_0011E428(0x6000, 0, 0x400, 0, 2, 2);
+        self->result = OpenIopRing(0x6000, 0, 0x400, 0, 2, 2);
     }
     if (self->result >= 0) {
         func_eu_0018EDE8(self);

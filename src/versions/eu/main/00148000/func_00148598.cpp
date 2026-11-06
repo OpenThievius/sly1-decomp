@@ -4,22 +4,22 @@ void func_00148598(C59* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
-        G27C230* fl = D_002623C8;
+        G27C230* fl = g_currentEntry;
         s32 bits = fl->flags;
         if ((bits & 2) == 0) {
             fl->flags = bits | 2;
-            D_002623C4->f438++;
+            g_currentLevelRecord->f438++;
         }
         VObj_148598* vo = (VObj_148598*)&D_0026CBC8;
         vo->vtbl[14](vo);
-        void* r = (void*)func_001925F0();
+        void* r = (void*)GetActiveSwitchedCollider();
         if (r != 0) {
             ((VObj3_148598*)r)->vtbl[82](r, 0, self);
         }
-        func_001837E0(self, 2, 0, 0);
+        TriggerScriptEvent(self, 2, 0, 0);
         mode = 2;
         func_00151FC8(D_00261EF0);
-        func_0018C7F8(g_memoryCard);
+        StartMemoryCardSave(g_memoryCard);
     }
-    func_00147AB0(self, mode);
+    SetStateNotifierState(self, mode);
 }

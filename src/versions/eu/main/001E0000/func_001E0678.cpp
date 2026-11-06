@@ -56,7 +56,7 @@ void func_001E0678(Obj_eu_1E0678* self)
 
     if (self->f8 != 0) {
         u8* tex = self->f408;
-        func_0015C8B8(self->f4, self->f51c, self->f51c);
+        PushFontScale(self->f4, self->f51c, self->f51c);
         tmp = self->f518;
         ((u8*)&tmp)[3] = (u8)((f32)((u8*)&tmp)[3] * self->f54c);
         f32 p = self->f544;
@@ -74,11 +74,11 @@ void func_001E0678(Obj_eu_1E0678* self)
         if (h != 0) {
             slot = *(Pk4_1E0678*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->f54c);
-            Hd_eu_1E0678::Draw(self->f520, &out, D_00262280);
+            Hd_eu_1E0678::Draw(self->f520, &out, g_gsPacketWriter);
             *(Pk4_1E0678*)((u8*)self->f520 + 0x18) = slot;
         }
         func_eu_0015DCB8(loc, &self->f8, self->f4, 0);
-        func_eu_0015E7E0(loc, &out, 0, D_00262280);
-        func_0015C900(self->f4);
+        func_eu_0015E7E0(loc, &out, 0, g_gsPacketWriter);
+        PopFontScale(self->f4);
     }
 }

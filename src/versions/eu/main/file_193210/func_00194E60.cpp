@@ -20,7 +20,7 @@ void func_00194E60(Ctl_194E60_eu* self, s32 v)
     }
     if (v == 0) {
         if (self->f584 != 0) {
-            func_00195928(self, self->f588);
+            SetPauseMenuPage(self, self->f588);
             flag = 1;
             self->f584 = 0;
             self->f588 = -1;
@@ -30,5 +30,5 @@ void func_00194E60(Ctl_194E60_eu* self, s32 v)
             }
         }
     }
-    func_001AA998(self, flag);
+    SetScreenElementMode(self, flag);
 }

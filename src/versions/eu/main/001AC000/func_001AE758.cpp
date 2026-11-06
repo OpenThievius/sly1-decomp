@@ -15,15 +15,15 @@ void func_001AE758(Obj_1AE758_eu* self)
     Flags_1AE758_eu fl;
     s32 v;
 
-    func_001AA268(self);
-    func_001AA8B0(self, k);
-    func_001AA8C0(self, k);
-    func_001AA8B8(self, 0.0f);
-    void* r = func_0015C1C0(1);
+    SetupScreenElementText(self);
+    SetScreenElementSlideInTime(self, k);
+    SetScreenElementSlideOutTime(self, k);
+    SetScreenElementHoldTime(self, 0.0f);
+    void* r = GetFontById(1);
     f32 g = *(f32*)&D_002744AC;
     self->f4 = r;
-    func_001AA788(self, g);
-    v = func_001AEA08();
+    SetScreenElementScale(self, g);
+    v = GetCyclingGlyph();
     fl.b = 0;
     fl.a = v;
     self->vtbl[8](self, &fl);

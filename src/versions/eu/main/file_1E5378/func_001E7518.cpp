@@ -21,11 +21,11 @@ void func_001E7518(Obj_1E7518_eu* self, s32 mode)
     }
     switch (mode) {
     case 0: {
-        func_001BFCD8(0x8C, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x8C, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         for (s32 i = 0; i < 69; i++) {
             Elem_1E7518_eu* e = &self->elems[i];
             e->f18 = 1.0f;
-            e->f1C = func_001EAAE0(0.0f, 0.05f);
+            e->f1C = RandomFloatInRange(0.0f, 0.05f);
             e->f20 = 1.0f;
             e->f24 = 0.6f;
             e->f28 = 0.2f;
@@ -33,16 +33,16 @@ void func_001E7518(Obj_1E7518_eu* self, s32 mode)
         break;
     }
     case 2:
-        func_001BFCD8(0x8D, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x8D, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         break;
     case 1:
         self->f1190 = 1.0f;
         break;
     case 3:
         self->f1190 = 0.0f;
-        func_001E7460(self);
+        ApplyArcTarget(self);
         break;
     }
     self->f578 = mode;
-    self->f57C = D_00261858[4];
+    self->f57C = g_gameClock[4];
 }

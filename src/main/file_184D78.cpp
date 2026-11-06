@@ -197,7 +197,7 @@ ASM_FUNC(func_00185150);
 
 void func_00185358(T2195_790* self)
 {
-    func_00121338(self);
+    InitPoseSource(self);
     self->f20 = -1;
     self->f40 = 800.0f;
     self->v50 = *(Vec02*)&D_00264770;
@@ -210,7 +210,7 @@ void func_00185358(T2195_790* self)
 
 void func_001853F0(T2195_790* self, void* obj, Vec02* src)
 {
-    if (obj == 0 || obj == (void*)func_001925F0()) {
+    if (obj == 0 || obj == (void*)GetActiveSwitchedCollider()) {
         self->hasTarget = 0;
         self->target = 0;
         self->point = D_00248D30;
@@ -223,7 +223,7 @@ void func_001853F0(T2195_790* self, void* obj, Vec02* src)
 
 s32 func_00185468(T2195_790* a0) {
     if (a0->hasTarget == 0) {
-        return func_001925F0();
+        return GetActiveSwitchedCollider();
     }
     return (s32)a0->target;
 }
@@ -237,36 +237,36 @@ void func_00185758(s32 a, s32 b)
     func_001FAE18();
     D_00264834 = a;
     D_00264838 = b;
-    func_00185B38();
+    RunStartupInitializers();
     while (1) {
-        if (D_00269A00.on != 0 && g_screenFade.mode != 1) {
-            func_0015F210(1);
-            func_0018F148(&D_00269A00);
+        if (g_moviePlayer.on != 0 && g_screenFade.mode != 1) {
+            DrainRenderFrames(1);
+            PlayQueuedMovies(&g_moviePlayer);
         }
-        if (D_00275AF0 != 0) {
-            func_0015F210(1);
-            func_001E4EA8(&D_00275AF0);
+        if (g_worldLoadRequest != 0) {
+            DrainRenderFrames(1);
+            RunPendingWorldLoad(&g_worldLoadRequest);
         }
-        if (D_00269A00.on != 0 && g_screenFade.mode != 1) {
-            func_0015F210(1);
-            func_0018F148(&D_00269A00);
+        if (g_moviePlayer.on != 0 && g_screenFade.mode != 1) {
+            DrainRenderFrames(1);
+            PlayQueuedMovies(&g_moviePlayer);
         }
-        func_0016E238(&D_00262C70);
-        func_0016F2E0();
-        func_0018BDC8(&g_memoryCard);
-        func_001E9108(D_00275BC0);
-        func_001607D0(D_00261858.dt);
-        if (D_00275710 != 0) {
-            func_00144270(D_00261990);
-            func_0015E9F0();
-            func_00142F10(&D_00261858);
-            if (D_00275710->desc->m11 != 0)
-                D_00275710->desc->m11(D_00275710, D_00261858.dt);
-            func_0019D6C0(D_00275710, D_00261990);
-            func_001E9668(D_00275BC0);
-            func_0019DC98(D_00275710, D_00261990);
-            func_001E9648(D_00275BC0);
-            func_0015EC68();
+        UpdatePadConnection(&g_padRecord);
+        RunCompletedButtonCode();
+        UpdateMemoryCard(&g_memoryCard);
+        UpdateElementStack(g_elementStack);
+        AddElapsedTime(g_gameClock.dt);
+        if (g_currentWorld != 0) {
+            func_00144270(g_camera);
+            BeginRenderFrame();
+            AdvanceGameClock(&g_gameClock);
+            if (g_currentWorld->desc->m11 != 0)
+                g_currentWorld->desc->m11(g_currentWorld, g_gameClock.dt);
+            RunWorldFrameLists(g_currentWorld, g_camera);
+            func_001E9668(g_elementStack);
+            func_0019DC98(g_currentWorld, g_camera);
+            func_001E9648(g_elementStack);
+            SubmitRenderFrame();
         }
         D_002622CC++;
     }
@@ -275,7 +275,7 @@ void func_00185758(s32 a, s32 b)
 void func_001858F8()
 {
     u8 buf[0x100];
-    func_00140B60(buf, (const u8*)"ioprp243.img", 1);
+    FormatDiscPath(buf, (const u8*)"ioprp243.img", 1);
     func_001F7BE8(0);
     func_00203548(0);
     if (func_00140968() == 0) {
@@ -298,9 +298,9 @@ void func_001858F8()
     func_001409A8();
     func_001F8BF8();
     func_00203828(0);
-    func_00140D68(1);
+    TestDiscReadDone(1);
     for (u32 i = 0; i < 6; i++) {
-        func_00140B60(buf, D_002647A8[i], 1);
+        FormatDiscPath(buf, g_iopModuleNames[i], 1);
         while (func_001F9A90(buf, 0, 0) < 0) {
         }
     }
@@ -308,23 +308,23 @@ void func_001858F8()
 
 void func_00185A58(void)
 {
-    s32* p = (s32*)D_00261F14;
+    s32* p = (s32*)g_vif0Channel;
     *p |= 0x40;
     func_001F6C20(0);
-    func_00202A80((void*)D_00261F14, D_00211E10);
-    func_00202C38((void*)D_00261F14, 0, 0);
-    s32* q = (s32*)D_00261F14;
+    func_00202A80((void*)g_vif0Channel, D_00211E10);
+    func_00202C38((void*)g_vif0Channel, 0, 0);
+    s32* q = (s32*)g_vif0Channel;
     *q &= ~0x40;
 }
 
 void func_00185AC8()
 {
-    Flags_185AC8* p = *(Flags_185AC8**)D_00261F18;
+    Flags_185AC8* p = *(Flags_185AC8**)g_vif1Channel;
     p->flags |= 0x40;
     func_001F6C20(0);
-    func_00202A80(*(void**)D_00261F18, D_00212110);
-    func_00202C38(*(void**)D_00261F18, 0, 0);
-    (*(Flags_185AC8**)D_00261F18)->flags &= ~0x40;
+    func_00202A80(*(void**)g_vif1Channel, D_00212110);
+    func_00202C38(*(void**)g_vif1Channel, 0, 0);
+    (*(Flags_185AC8**)g_vif1Channel)->flags &= ~0x40;
 }
 
 void func_00185B38(void)
@@ -338,21 +338,21 @@ void func_00185B38(void)
     fr.w[16] = 0x3F3F3F;
     fr.w[20] = 0x3F3F;
     fr.w[24] = 0x3F;
-    (void)func_00193210(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
+    (void)InitLoadProgress(&fr, &fr.w[12], &fr.w[16], &fr.w[20], &fr.w[24]);
     idx = 0x1A;
     func_00191E70(1);
     func_00193270(&fr);
-    tbl = (Fn_185B38*)((u8*)D_002647C0);
+    tbl = (Fn_185B38*)((u8*)g_startupInitializers);
     i = 0;
     do {
         if ((s32)i >= 3) {
-            func_00193288(&fr, idx);
+            UpdateLoadProgress(&fr, idx);
         }
         tbl[i]();
         i++;
         idx--;
     } while (i < 0x1D);
-    func_00193288(&fr, 0);
+    UpdateLoadProgress(&fr, 0);
     func_00193300(&fr);
     func_00191EB0(1);
 }

@@ -109,8 +109,8 @@ s32 func_002040E8(void* arg)
     s32 hi = r >> 8;
     if (hi != 4) {
         if (D_0027AE84 != 0) {
-            func_001E1F10(D_0024F780);
-            func_001E1F10(D_0024F7A8, 4, 0, hi, r & 0xFF);
+            PrintFormatted(D_0024F780);
+            PrintFormatted(D_0024F7A8, 4, 0, hi, r & 0xFF);
         }
         return 0;
     }

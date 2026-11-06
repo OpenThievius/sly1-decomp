@@ -4,10 +4,10 @@ struct Gl_0026E9F8_eu { u8 pad0[0x570]; s32 f570; u8 pad1[8]; s32 f57C; };
 
 void func_001518B8(StepSequence* self)
 {
-    Gl_0026E9F8_eu* g = (Gl_0026E9F8_eu*)&D_0026E9F8;
+    Gl_0026E9F8_eu* g = (Gl_0026E9F8_eu*)&g_timerCaption;
     if (g->f570 >= 2 || g->f57C != 0)
         return;
-    if (func_001BE5E8() != 0)
+    if (IsStreamVoiceLocked() != 0)
         return;
     if (D_00275F84 == 1)
         return;
@@ -27,6 +27,6 @@ void func_001518B8(StepSequence* self)
             }
         }
     }
-    func_00150790(self, mode);
+    SetStepSequenceState(self, mode);
 }
 

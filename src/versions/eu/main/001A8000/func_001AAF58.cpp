@@ -12,7 +12,7 @@ void func_001AAF58(Obj_1AAF58_eu* self, f32* p)
 {
     if (self->f258 != p) {
         if (p == 0) {
-            p = (f32*)D_00261868;
+            p = (f32*)g_elapsedTime;
         }
         self->f254 = *p;
     }

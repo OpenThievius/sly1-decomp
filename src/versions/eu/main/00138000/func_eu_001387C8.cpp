@@ -8,9 +8,9 @@ void func_00137A60(void* self, s32 bytes, void* buf);
 void* func_0018D500(s32 size);
 void func_eu_001387C8(void* a0, void** a1)
 {
-    s32 n = func_00137BE0(a0);
-    u16* buf = (u16*)func_0018D500((n + 1) * 2);
-    func_00137A60(a0, n * 2, buf);
+    s32 n = ReadBufferedU16(a0);
+    u16* buf = (u16*)AllocateFrontMemory((n + 1) * 2);
+    ReadBufferedStreamBytes(a0, n * 2, buf);
     buf[n] = 0;
     *a1 = buf;
 }

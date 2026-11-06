@@ -4,7 +4,7 @@ struct Counter_1DAF08_eu { u8 pad[0x58C]; s32 count; };
 
 void func_001DAF08(C19* self, s32 code, Rec_1DAF08* rec)
 {
-    func_00192230(self, code, rec);
+    HandleSwitchedColliderNotification(self, code, rec);
     if (code == 0xE && rec->kind == 0x426) {
         Counter_1DAF08_eu* a = (Counter_1DAF08_eu*)&D_00272430;
         s32 lim = D_002751D4;

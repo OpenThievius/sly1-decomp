@@ -6,38 +6,38 @@ void func_001D29C8(u32 mode)
 {
     switch (D_00274F74) {
     case 1:
-        if ((*(Player**)&D_00262E10) == 0)
+        if ((*(Player**)&g_player) == 0)
             goto tail;
-        if ((*(Player**)&D_00262E10)->f2220 == 0xD)
-            func_00175170((*(Player**)&D_00262E10), 0, -1);
+        if ((*(Player**)&g_player)->f2220 == 0xD)
+            func_00175170((*(Player**)&g_player), 0, -1);
         break;
     case 3:
-        if ((*(Player**)&D_00262E10) == 0)
+        if ((*(Player**)&g_player) == 0)
             goto tail;
-        if (((Sub_1D29C8*)(*(Player**)&D_00262E10)->f1518) != 0) {
-            if (func_00182FC8(((Sub_1D29C8*)(*(Player**)&D_00262E10)->f1518)) != 0)
-                func_00126D60(((Sub_1D29C8*)(*(Player**)&D_00262E10)->f1518), 0.5f);
+        if (((Sub_1D29C8*)(*(Player**)&g_player)->f1518) != 0) {
+            if (IsObjectAttached(((Sub_1D29C8*)(*(Player**)&g_player)->f1518)) != 0)
+                func_00126D60(((Sub_1D29C8*)(*(Player**)&g_player)->f1518), 0.5f);
         }
         break;
     }
-    if ((*(Player**)&D_00262E10) != 0) {
-        D_00261854 = 1.0f;
-        if (((Sub_1D29C8*)(*(Player**)&D_00262E10)->f2750) != 0) {
-            if (func_00182FC8(((Sub_1D29C8*)(*(Player**)&D_00262E10)->f2750)) != 0)
-                func_001D32D8(((Sub_1D29C8*)(*(Player**)&D_00262E10)->f2750), (*(Player**)&D_00262E10), 1);
+    if ((*(Player**)&g_player) != 0) {
+        g_stepScale = 1.0f;
+        if (((Sub_1D29C8*)(*(Player**)&g_player)->f2750) != 0) {
+            if (IsObjectAttached(((Sub_1D29C8*)(*(Player**)&g_player)->f2750)) != 0)
+                func_001D32D8(((Sub_1D29C8*)(*(Player**)&g_player)->f2750), (*(Player**)&g_player), 1);
         }
-        func_001D31D0((*(Player**)&D_00262E10), 0);
-        if ((*(Player**)&D_00262E10) != 0) {
-            if ((void*)(*(Player**)&D_00262E10) == func_001925F0())
+        func_001D31D0((*(Player**)&g_player), 0);
+        if ((*(Player**)&g_player) != 0) {
+            if ((void*)(*(Player**)&g_player) == GetActiveSwitchedCollider())
                 D_00274F74 = mode;
         }
     }
 tail:
-    if (mode != D_002623C0->f19FC && mode < 7) {
-        func_001AA8B8(&D_0026EC70, ((*(Player**)&D_00262E10) != 0 && (void*)(*(Player**)&D_00262E10) == func_001925F0()) ? 3.0f : 8.0f);
-        func_001AA788(&D_0026EC70, 0.6f);
+    if (mode != g_saveData->f19FC && mode < 7) {
+        SetScreenElementHoldTime(&D_0026EC70, ((*(Player**)&g_player) != 0 && (void*)(*(Player**)&g_player) == GetActiveSwitchedCollider()) ? 3.0f : 8.0f);
+        SetScreenElementScale(&D_0026EC70, 0.6f);
         D_0026EC70.vt->fn20(&D_0026EC70, (s32)func_eu_001DDAB0((s32)D_00274F58[mode]));
         D_0026EC70.vt->fn38(&D_0026EC70);
-        D_002623C0->f19FC = mode;
+        g_saveData->f19FC = mode;
     }
 }

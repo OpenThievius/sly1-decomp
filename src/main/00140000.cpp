@@ -19,9 +19,9 @@ void func_00140C28(void* a, void* b, void* c)
 {
 	s32 result;
 	do {
-		result = func_0011E138(a, b, c, (void*)&D_00247AA0);
-		D_002613F4 = result;
-		if (result != 1) { func_0011E1F8(0); D_002613F8[0] = func_0011E2E8(); }
+		result = StartDiscRead(a, b, c, (void*)&D_00247AA0);
+		g_lastDiscReadResult = result;
+		if (result != 1) { SyncDiscRead(0); g_discReadErrors[0] = GetDiscReadError(); }
 	} while (result != 1);
 }
 
@@ -33,8 +33,8 @@ void func_00140CC8(void* a, void* b, void* c)
 	s32 result;
 	do {
 		result = func_00203B18(a, b, c, (void*)&D_00247AA0);
-		D_002613F4 = result;
-		if (result != 1) { func_002032C8(0); D_002613F8[0] = func_00203D90(); }
+		g_lastDiscReadResult = result;
+		if (result != 1) { func_002032C8(0); g_discReadErrors[0] = func_00203D90(); }
 	} while (result != 1);
 }
 
@@ -49,7 +49,7 @@ struct Self_140550 {
 s32 func_00140550(Self_140550* self, void* arg)
 {
     for (s32 i = 0; i < self->f598; i++) {
-        if (func_001C1A28(arg, &self->f59C[i]) == 0) {
+        if (AppendPropertyToScriptList(arg, &self->f59C[i]) == 0) {
             return 0;
         }
     }
@@ -68,7 +68,7 @@ void func_0013EB30(void* p);
 
 void func_00140750(void* self)
 {
-    func_0013EB30((u8*)self + 0x554);
+    SetZoneEntry((u8*)self + 0x554);
 }
 
 void func_001409D8(void) {}
@@ -97,8 +97,8 @@ void func_001430C0(void* dst, s32 value);
 
 void func_00142ED0(f32 x)
 {
-    D_00261850 = x;
-    func_001430C0(&D_00261858, x > 0.0f ? 1 : 0);
+    g_timeScale = x;
+    SetGameClockRunning(&g_gameClock, x > 0.0f ? 1 : 0);
 }
 
 extern f32 D_00261850;
@@ -131,7 +131,7 @@ void func_00142F10(GameClock* self)
     if (self->running) {
         s = dt;
     }
-    s = s * (D_00261854 * D_00261850);
+    s = s * (g_stepScale * g_timeScale);
     if (0.016666668f <= s) {
         self->step = s;
     }
@@ -175,7 +175,7 @@ extern s32 D_002613EC;
 
 void func_00140790(void)
 {
-    D_002613EC = 3;
+    g_discSectorCheckState = 3;
 }
 
 struct Holder_1407A0 { u8 pad[0x4]; s32 value; };
@@ -206,7 +206,7 @@ bool func_0013E8F8(void* a, int b);
 
 void func_00140640(void* self, void* unused, int value)
 {
-    func_0013E8F8((u8*)self + 0x90, value);
+    AppendToObjectQueue((u8*)self + 0x90, value);
 }
 
 void func_00140640(void* self, void* unused, int value);
@@ -228,14 +228,14 @@ void func_001415D0(FlaggedObject* self)
 {
     s32 keepB = self->flagIndex;
     s32 keepA = self->ordinal;
-    func_001BA130(self);
+    CopyCollider(self);
     self->flagIndex = keepB;
     self->ordinal = keepA;
     for (s32 i = 0; i < self->countA; i++) {
-        self->objsA[i] = func_00183058(self->objsA[i], self->world, self);
+        self->objsA[i] = CreateObjectCopy(self->objsA[i], self->world, self);
     }
     for (s32 j = 0; j < self->countB; j++) {
-        self->objsB[j] = func_00183058(self->objsB[j], self->world, self);
+        self->objsB[j] = CreateObjectCopy(self->objsB[j], self->world, self);
     }
 }
 
@@ -248,15 +248,15 @@ void func_0016EC38(void* p, f32 f, s32 n);
 
 s32 func_001417F0(FlaggedObject* self, ObjectEvent* ev)
 {
-    s32 r = func_001925F0(self, ev);
+    s32 r = GetActiveSwitchedCollider(self, ev);
     if (ev->type == r) {
         if ((ev->extraFlags & 0x10) == 0) {
-            func_0016EC38(D_00262C70, 0.2f, 2);
+            StartPadRecordPattern(g_padRecord, 0.2f, 2);
         }
-        func_00141870(self);
+        RaiseObjectFlag(self);
         return 1;
     }
-    return func_001BC320(self, ev);
+    return HandleObjectEvent(self, ev);
 }
 
 extern u8 D_00261EF0[];
@@ -275,11 +275,11 @@ void func_00141870(FlaggedObject* self)
     func_00151ED8(D_00261EF0, self);
     s32 sel;
     if (self->handle != 0) {
-        sel = func_00141008(D_00261420, self->flagIndex) ? 0x549 : 0x548;
+        sel = TestFlagTableBit(g_flagTable, self->flagIndex) ? 0x549 : 0x548;
     }
     s32 idx = -1;
-    func_00141040(D_00261420, self->flagIndex);
-    if (func_00182F40((s32)self->child, self)) {
+    SetFlagTableBit(g_flagTable, self->flagIndex);
+    if (IsObjectDescendantOf((s32)self->child, self)) {
         for (BaseObject* n = self; n != 0; n = n->parent) {
             Alias01* sl = n->alias;
             if (sl != 0) {
@@ -290,12 +290,12 @@ void func_00141870(FlaggedObject* self)
             idx = self->id;
         }
     }
-    func_00140E10(D_00261420, self->childId, idx);
+    SaveFlagTableSnapshot(g_flagTable, self->childId, idx);
     for (s32 i = 0; i < self->countA; i++) {
-        func_0012C7B0(self->objsA[i], 0, 0, 0, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets(self->objsA[i], 0, 0, 0, 0.0f, 1.0f);
     }
     if (self->handle != 0) {
-        func_001B64D8(self->handle, sel);
+        SetStateWalkerTarget(self->handle, sel);
     }
 }
 
@@ -331,8 +331,8 @@ void* func_0015A448(void* obj, s32 id, void* ctx);
 
 void func_00140140(ZoneCollider* self)
 {
-    func_00124A48(self);
-    func_0013EA38(&self->zone);
+    StartPlacedObject(self);
+    StartZoneRecord(&self->zone);
     func_00140238(self, 0);
     for (s32 i = 0; i < self->countIds; i++) {
         void* p = func_0015A448(self->world, self->ids[i], self);
@@ -353,7 +353,7 @@ void func_001BA130(void* self);
 void func_00140200(ZoneCollider* self)
 {
     s32 saved = self->zone.id120;
-    func_001BA130(self);
+    CopyCollider(self);
     self->zone.id120 = saved;
     self->zone.owner = self;
 }
@@ -392,7 +392,7 @@ void func_00140ED0(Ring_140ED0* r)
         args.y = -1;
         args.z = 0x10;
     }
-    func_001EFFA0(g_screenFade, &args, 1);
+    StartScreenFade(g_screenFade, &args, 1);
 }
 
 typedef signed int s32;
@@ -402,7 +402,7 @@ extern void func_0013EB68(void* state);
 
 void func_00140238(ZoneCollider* self, s32 flag)
 {
-    func_0013EB68(&self->zone);
+    SetZoneMode(&self->zone);
 }
 
 typedef signed int s32;
@@ -412,7 +412,7 @@ bool func_0013E8F8(void* a, s32 b);
 
 void func_001405D0(void* a, void* b, s32 c)
 {
-    func_0013E8F8((u8*)a + 0x8, c);
+    AppendToObjectQueue((u8*)a + 0x8, c);
 }
 
 struct Ctr_140FF8 { u8 pad0[4]; s32 count; };
@@ -473,9 +473,9 @@ void func_00140730(void* self, void* value)
     *(s32*)((u8*)self + 0x550) = i + 1;
 }
 
-void func_00140770(void* self) { func_0013EB30((u8*)self + 0x5C0); }
+void func_00140770(void* self) { SetZoneEntry((u8*)self + 0x5C0); }
 
-s32 func_00140D68(s32 value) { s32 result = func_0011E1F8((u32)value < 1u); return result == 0; }
+s32 func_00140D68(s32 value) { s32 result = SyncDiscRead((u32)value < 1u); return result == 0; }
 
 void func_001405F0(u8* self, s32 value)
 {
@@ -498,8 +498,8 @@ void func_0013E950(void* p, void* self);
 
 void func_00140100(ZoneCollider* self)
 {
-    func_001BAC30(self);
-    func_0013E950(&self->zone, self);
+    LoadCollider(self);
+    CollectZoneChildren(&self->zone, self);
     if (self->f790 != 0) {
         self->zone.f13C = 1;
     }
@@ -510,9 +510,9 @@ void func_0013F6F8(TriggerZone* state, s32 mode);
 
 s32 func_00140028(TriggerZone* a0, void* a1)
 {
-    s32 r = func_001BC320(a0, a1);
+    s32 r = HandleObjectEvent(a0, a1);
     if (r != 0 && (*(s32*)((u8*)a1 + 0xC) & 4) == 0 && a0->state == 3 && a0->zone.mode == 0) {
-        func_0013F6F8(a0, 1);
+        SetTriggerZoneMode(a0, 1);
     }
     return r;
 }
@@ -524,10 +524,10 @@ void func_0011EC40(void* a, void* b);
 
 void func_00141108(void* a0, void* a1)
 {
-    func_00137EB0(a1, (u8*)a0 + 0x50);
-    func_00137E70(a1, (u8*)a0 + 0x40);
-    func_001E4C48(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
-    func_0011EC40(a0, a1);
+    ReadBufferedRotation3(a1, (u8*)a0 + 0x50);
+    ReadBufferedVector3(a1, (u8*)a0 + 0x40);
+    ReadMeshTables(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
+    ReadPropertyRecords(a0, a1);
 }
 
 extern u8 D_00261420[];
@@ -537,15 +537,15 @@ void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001411A8(FlaggedObject* self)
 {
-    func_001B7968(self);
-    self->flagIndex = func_00140FF8(D_00261420);
+    InitCollider(self);
+    self->flagIndex = TakeFlagTableIndex(g_flagTable);
     self->childId = -1;
     World* in = self->world;
     s32 n = in->count2304;
     self->ordinal = n;
     n = n + 1;
     in->count2304 = n;
-    func_001B9AE0(self, 3, 0, 3, 0);
+    SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
 s32 func_0013DFD8(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);
@@ -588,7 +588,7 @@ void* func_0015A448(void* host, s32 id, void* ctx);
 
 void func_00141338(FlaggedObject* self)
 {
-    func_001249A8(self);
+    PostLoadPlacedObject(self);
     s32 i = 0;
     while (i < self->nIdsA) {
         void* r = func_0015A448(self->world, self->idsA[i], self);
@@ -709,8 +709,8 @@ void func_00182ED8(void* node);
 
 void func_00141210(FlaggedObject* self)
 {
-    func_001BAC30(self);
-    func_00124DF8(self, 1, D_00261410);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 1, g_flaggedObjectLinks);
 
     Frame_141210 frame(&self->children);
     void* head = *(void**)((u8*)self + 0x34);
@@ -718,12 +718,12 @@ void func_00141210(FlaggedObject* self)
     void* node = head;
     if (node != 0) {
         do {
-            if (func_001300E8(node, 0x7B)) {
+            if (IsObjectOfKind(node, 0x7B)) {
                 s32 n = self->countB;
                 self->objsB[n] = node;
                 self->countB = n + 1;
             } else {
-                if (!func_001300E8(node, 0x83)) {
+                if (!IsObjectOfKind(node, 0x83)) {
                     goto skip;
                 }
                 s32 n = self->countA;
@@ -754,10 +754,10 @@ s32 func_00141B48(void* a0, void* a1, s32 count, Entry_141B48** list, s32 a4, s3
         do {
             Entry_141B48* e = *p;
             if ((e->bits & mask) == 0) {
-                s32 r = func_00141C28(e, a0, a1, a4 - result, a5 + result * 0x70);
+                s32 r = CollectColliderSpans(e, a0, a1, a4 - result, a5 + result * 0x70);
                 if (r != 0) {
                     if (result != 0) {
-                        r = func_001429F8(result + r, a5);
+                        r = MergeOverlappingSpans(result + r, a5);
                     }
                     result = r;
                 }
@@ -775,11 +775,11 @@ void func_0013E918(Zone28* p);
 void func_001400A8(ZoneCollider* self)
 {
     u64 m = 0x8000;
-    func_001B7968(self);
-    func_0013E918(&self->zone);
+    InitCollider(self);
+    InitZoneRecord(&self->zone);
     m <<= 28;
     self->flags538 = self->flags538 | m;
-    func_001B9AE0(self, 3, 0, 3, 0);
+    SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
 extern u8 D_002701B8[];
@@ -800,13 +800,13 @@ void func_001409E0(void)
 {
     s32 tmp[1];
     s32 s1;
-    switch (D_002613EC) {
+    switch (g_discSectorCheckState) {
     case 3:
         if (func_00203EE0(2, tmp) != 0) {
             if (tmp[0] != 0) {
                 if (func_00140968() == 0) {
-                    func_00194D30(D_0026FF68, 2, 0x16);
-                    D_002613EC = 1;
+                    SetPauseMenuLayerPage(g_pauseMenuElement, 2, 0x16);
+                    g_discSectorCheckState = 1;
                 }
             }
         }
@@ -815,16 +815,16 @@ void func_001409E0(void)
         s1 = *(s32*)D_002701B8;
         if (s1 == 2) {
             if (func_00140968() != 0) {
-                if (func_0011E138((s32)D_00247AA4, 1, D_0027B800, (void*)&D_00247AA0) == 1) {
-                    D_002613EC = s1;
+                if (StartDiscRead((s32)D_00247AA4, 1, D_0027B800, (void*)&D_00247AA0) == 1) {
+                    g_discSectorCheckState = s1;
                 }
             }
         }
         break;
     case 2:
-        if (func_00140D68(0) != 0) {
+        if (TestDiscReadDone(0) != 0) {
             u8* p = D_0027B800;
-            u32* tbl = D_002476A0;
+            u32* tbl = g_crc32Table;
             u32 crc = 0xFFFFFFFF;
             s32 n = 0x7FF;
             do {
@@ -833,10 +833,10 @@ void func_001409E0(void)
                 n--;
             } while (n != -1);
             if ((s32)crc != (s32)D_00247AA8[0]) {
-                D_002613EC = 1;
+                g_discSectorCheckState = 1;
             } else {
-                func_00194D30(D_0026FF68, 2, -1);
-                D_002613EC = 3;
+                SetPauseMenuLayerPage(g_pauseMenuElement, 2, -1);
+                g_discSectorCheckState = 3;
             }
         }
         break;
@@ -860,13 +860,13 @@ void func_00140B60(void* self, void* a1, s32 flag)
 {
     char buf[256];
     *(u16*)buf = D_00249E20[0];
-    func_001E2180((Buf_140B60*)buf, a1);
-    s32 n = func_001407A8((Buf_140B60*)buf);
+    AppendString((Buf_140B60*)buf, a1);
+    s32 n = NormalizeDiscPath((Buf_140B60*)buf);
     char* p = buf;
     for (s32 i = 1; i < n; i++) {
-        p[func_001E2100((Buf_140B60*)p)] = 0x5C;
+        p[GetStringLength((Buf_140B60*)p)] = 0x5C;
     }
-    func_001E1FD0((Obj_140B60*)self, D_00249E28,
+    FormatToString((Obj_140B60*)self, D_00249E28,
                   flag ? (void*)D_00249E30 : (void*)D_00249E38, buf);
 }
 
@@ -883,7 +883,7 @@ Obj_1419E8* func_001419E8(s32 flags, void* a1, void* a2, s32 count, Obj_1419E8**
     Rec_1419E8 buf[2];
     for (s32 i = 0; i < count; i++) {
         Obj_1419E8* obj = list[i];
-        s32 n = func_00141C28(obj, a1, a2, 2, buf);
+        s32 n = CollectColliderSpans(obj, a1, a2, 2, buf);
         s32 idx = 0;
         if (n > 0 && buf[0].key == 0.0f) {
             if (flags & 1) idx = 1;
@@ -905,13 +905,13 @@ void* func_001E2180(s8* dst, const char* src);
 
 s32 func_001407A8(s8* path)
 {
-    func_001E2218(path);
-    s32 len = func_001E2100(path);
+    UppercaseString(path);
+    s32 len = GetStringLength(path);
     if (len != 0) {
         s8 last = path[len - 1];
         if (last != '\\' && last != '/') {
-            func_001E2180(path, ";1");
-            len = func_001E2100(path);
+            AppendString(path, ";1");
+            len = GetStringLength(path);
         }
     }
     s8* end = path + len;
@@ -1031,7 +1031,7 @@ void* func_001B6290(void* a, void* b, s32 c, s32 d);
 
 void func_00141438(FlaggedObject* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     for (s32 i = 0; i < self->countA; i++)
         func_00182ED8((s32)self->objsA[i]);
     for (s32 i = 0; i < self->countB; i++)
@@ -1041,22 +1041,22 @@ void func_00141438(FlaggedObject* self)
         u8* obj;
         Begin_141438::Of(&it, (List_141438*)&self->children);
         while ((obj = Next_141438::Of(&it)) != 0) {
-            if (func_001300E8(obj, 0x74) != 0) {
-                self->childId = func_00183438(obj);
+            if (IsObjectOfKind(obj, 0x74) != 0) {
+                self->childId = GetAliasId(obj);
                 if (self->childId == -1)
                     self->childId = *(s32*)(obj + 8);
                 self->child = obj;
             }
         }
-        D_0027B314 = (ListFrame*)it.saved;
+        g_activeListFrames = (ListFrame*)it.saved;
     } else {
         self->child = func_0015A448(self->world, self->childId, self);
     }
     if (self->f5A8 != 0) {
-        self->handle = (StateWalker*)func_001B6290(self->f5A8, self, 0x546, 0);
+        self->handle = (StateWalker*)CreateStateWalker(self->f5A8, self, 0x546, 0);
 
-        if (func_00141008(D_00261420, self->flagIndex) != 0)
-            func_001B64D8(self->handle, 0x547);
+        if (TestFlagTableBit(g_flagTable, self->flagIndex) != 0)
+            SetStateWalkerTarget(self->handle, 0x547);
     }
 }
 
@@ -1093,8 +1093,8 @@ s32 func_001429F8(s32 count, Span_1429F8* spans)
     s32 j;
     s32 depth;
 
-    func_0018D608();
-    mem = func_0018D658(count * 0x60);
+    PushBackMemoryMark();
+    mem = AllocateBackMemory(count * 0x60);
     rec = mem;
     for (i = 0; i < count; i++) {
         for (j = 0; j < 2; j++) {
@@ -1106,7 +1106,7 @@ s32 func_001429F8(s32 count, Span_1429F8* spans)
         }
     }
 
-    func_001F5CD0(mem, count * 2, 0x30, func_00142998);
+    func_001F5CD0(mem, count * 2, 0x30, CompareSpanEndpoints);
 
     dst = spans;
     end = rec;
@@ -1133,7 +1133,7 @@ s32 func_001429F8(s32 count, Span_1429F8* spans)
         rec++;
     }
 
-    func_0018D6F0();
+    PopBackMemoryMark();
     return dst - spans;
 }
 

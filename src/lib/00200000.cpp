@@ -991,7 +991,7 @@ extern s32 D_0027696C;
 
 s32 func_00201668(s32 value)
 {
-    return func_00201578((Ctx_201668*)D_0027696C, value);
+    return func_00201578((Ctx_201668*)g_randomState, value);
 }
 
 struct Elem_201FF8;
@@ -1048,7 +1048,7 @@ s32 func_00201C78(void *self) {
     if (*(volatile u32 *)0x1000A000 & 0x100) {
         do {
             if (n++ > 0x1000000) {
-                func_001E1F10((struct Fmt_201C78 *)(u8*)D_0024F4E0);
+                PrintFormatted((struct Fmt_201C78 *)(u8*)D_0024F4E0);
                 return -1;
             }
         } while (*(volatile u32 *)0x1000A000 & 0x100);
@@ -1515,7 +1515,7 @@ void func_00202A80(DmaChan_202A80* ch, u32 tadr)
     s32 timeout = 0x1000000;
     while (ch->chcr & 0x100) {
         if (--timeout < 0) {
-            func_001E1F10("libdma: sync timeout\n");
+            PrintFormatted("libdma: sync timeout\n");
             s32 cur = ch->chcr;
             s32 next;
             if (((u32)cur >> 8) & 1) {
@@ -1549,7 +1549,7 @@ void func_00202B68(DmaChan_202B68* ch)
     s32 timeout = 0x1000000;
     while (ch->chcr & 0x100) {
         if (--timeout < 0) {
-            func_001E1F10("libdma: sync timeout\n");
+            PrintFormatted("libdma: sync timeout\n");
             s32 cur = ch->chcr;
             s32 next;
             if (((u32)cur >> 8) & 1) {
@@ -1583,7 +1583,7 @@ s32 func_00202C38(DmaChan_202C38* ch, s32 mode, s32 timeout)
     }
     while (ch->chcr & 0x100) {
         if (--timeout < 0) {
-            func_001E1F10("libdma: sync timeout\n");
+            PrintFormatted("libdma: sync timeout\n");
             s32 cur = ch->chcr;
             s32 next;
             if (((u32)cur >> 8) & 1) {
