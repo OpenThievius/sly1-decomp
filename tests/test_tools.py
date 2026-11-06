@@ -16,6 +16,8 @@ import inventory  # noqa: E402
 import progress  # noqa: E402
 import nonmatching  # noqa: E402
 import permute  # noqa: E402
+import permuter_compile  # noqa: E402
+import permuter_setup  # noqa: E402
 import todo  # noqa: E402
 import c_layout  # noqa: E402
 import compile  # noqa: E402
@@ -386,6 +388,35 @@ class EpilogueTailTest(unittest.TestCase):
         self.assertFalse(classify_asm.epilogue_tail(["jr         $ra", "addiu     $sp, $sp, -0x20"]))
         self.assertFalse(classify_asm.epilogue_tail(["addiu     $v0, $zero, 0x1", "jr         $ra",
                                                      "addiu     $sp, $sp, 0x20"]))
+
+
+class PermuterTest(unittest.TestCase):
+    """What tools/permuter_setup.py hands the permuter's C parser, and what permuter_compile.py
+    compiles for the score."""
+
+    UNIT = ("typedef int s32;\n"
+            "struct Base { s32 a; };\n"
+            "struct Obj : Base { s32 b; void Run(); };\n"
+            "void func_00100000(Obj* o)\n{\n    o->b = 1;\n}\n"
+            "void Obj::Run()\n{\n    b = 2;\n}\n"
+            "void func_00100010(Obj* o)\n{\n    func_00100000(o);\n}\n")
+
+    def test_the_parser_sees_only_c(self):
+        text = permuter_setup.isolate(self.UNIT, "func_00100010")
+        self.assertIn("typedef int s32;", text)
+        self.assertIn("PERM_IGNORE(struct Obj : Base { s32 b; void Run(); };)", text)
+        self.assertIn("PERM_IGNORE(void Obj::Run()", text)
+        self.assertIn("void func_00100010(Obj* o)\n{\n    func_00100000(o);\n}", text)
+        self.assertNotIn("PERM_IGNORE(void func_00100010", text)
+
+    def test_a_class_with_a_base_gets_its_typedef(self):
+        self.assertEqual({m.group(2) for m in permuter_setup.STRUCT.finditer(self.UNIT)}, {"Base", "Obj"})
+
+    def test_only_the_function_keeps_its_body(self):
+        text = permuter_compile.only_definition(self.UNIT, "func_00100010")
+        self.assertIn("void func_00100000(Obj* o)\n;", text)
+        self.assertIn("void Obj::Run()\n{\n    b = 2;\n}", text)
+        self.assertIn("func_00100000(o);", text)
 
 
 class DeclsTest(unittest.TestCase):
