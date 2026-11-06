@@ -8,25 +8,12 @@
 
 #include "common.h"
 
-void* func_001FFFE0(void* a0, void* a1) { return a1; }
-
-void* func_001FFFE8(void* a0, void* a1) { return a1; }
-
 extern s32 D_00278640;
 
 s32 func_001FE928(s32 value)
 {
     s32 previous = D_00278640;
     D_00278640 = value;
-    return previous;
-}
-
-s32 D_002789D8;
-
-s32 func_001FFFD0(s32 value)
-{
-    s32 previous = D_002789D8;
-    D_002789D8 = value;
     return previous;
 }
 
@@ -46,18 +33,6 @@ void* func_001FEFF0(void* self)
 {
     *(void**)self = D_0024F0D8;
     return self;
-}
-
-void func_00200000(void);
-void func_00200050(void);
-void* func_001FFFF0(void);
-struct VEnt_24F1E0 { s32 delta; void (*fn)(); };
-struct Bad_24F1E0 { char name[24]; VEnt_24F1E0 vt[3]; };
-extern const Bad_24F1E0 D_0024F1E0;
-
-void* func_001FFFF0(void)
-{
-    return (void*)&D_0024F1E0;
 }
 
 extern void (*D_00278048)();
@@ -483,4 +458,3 @@ void func_001FEB18(Handle_1FEB18* self)
 s32 D_00278640 = (s32)func_001FE908;
 extern const char D_0024F0F0[16] = "13bad_exception";
 extern const char D_0024F100[16] = "9exception";
-extern const Bad_24F1E0 D_0024F1E0 = { "bad_alloc", { { 0, func_00200000 }, { 0, func_00200050 }, { 0, (void(*)())func_001FFFF0 } } };

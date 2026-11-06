@@ -201,29 +201,6 @@ void func_00200CB0(struct Node_200CB0 *self, s32 a1, s32 a2, s32 a3) {
 // them with 16-byte sq/lq, and no source form tried changed that. Otherwise
 // the body matches.
 
-extern u8 D_0062C5B8[];
-extern const Strs_24F210 D_0024F210;
-extern u8 D_0027B318[];
-
-struct Node_200000 {
-    s32 field0;
-    void *vtbl;
-    s32 field2;
-};
-
-void* func_001FF008(void);
-void func_00200118(struct Node_200000 *self, void *a1, void *a2);
-
-void* func_00200000(void)
-{
-    struct Node_200000 *self = (struct Node_200000 *)D_0062C5B8;
-    if (*(void**)D_0062C5B8 == 0) {
-        func_001FF008();
-        func_00200118(self, (u8*)&D_0024F210, D_0027B318);
-    }
-    return self;
-}
-
 struct Obj_200158;
 s32 func_002000B0(Obj_200158* self, s32 a1, s32 a2);
 
@@ -756,16 +733,6 @@ s32 func_00203D90(void)
 extern u8 D_0024F0D8[];
 
 s32 func_0018D778(void* self);
-
-s32 func_00200050(void* self, s32 flags)
-{
-    void* v = D_0024F0D8;
-    *(void**)self = v;
-    if (flags & 1) {
-        return func_0018D778(self);
-    }
-    return (s32)v;
-}
 
 struct Ctx_002004F8;
 s32 func_00200080(Ctx_002004F8* ctx);
@@ -2053,7 +2020,7 @@ done:
 }
 
 // Data of this file: type-name strings, class tables and the runtime's zero-initialised objects.
-extern const Strs_24F210 D_0024F210 = { "9bad_alloc", "bad_alloc" };
+extern const char D_0024F220[16] = "bad_alloc";
 extern const Strs_24F210 D_0024F320 = { "9type_info", "bad_alloc" };
 extern const Fn_Table D_0024F230[6] = { 0, (Fn_Table)func_00200418, 0, (Fn_Table)func_00200468, 0, (Fn_Table)func_00200220 };
 extern const Fn_Table D_0024F248[6] = { 0, (Fn_Table)func_002004A8, 0, (Fn_Table)func_002004F8, 0, (Fn_Table)func_00200188 };

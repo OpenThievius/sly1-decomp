@@ -31,3 +31,6 @@ src/main/file_18D8E0.cpp	Put__10Dma_18E8C8iPUc	func_0018E8C8
 src/main/file_18D8E0.cpp	Idle__10Dma_18E8C8	func_0018E938
 src/main/file_193210.cpp	__static_initialization_and_destruction_0	func_00196330
 src/main/file_193210.cpp	_GLOBAL_$I$*	func_001963B8
+src/lib/new_handler.cpp	what__C9bad_alloc	func_001FFFF0
+src/lib/new_handler.cpp	__tf9bad_alloc	func_00200000
+src/lib/new_handler.cpp	_$_9bad_alloc	func_00200050

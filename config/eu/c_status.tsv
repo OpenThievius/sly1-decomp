@@ -3559,8 +3559,8 @@ func_001FFE58	func_00201218	match
 func_001FFFD0	func_00201390	match	
 func_001FFFE0	func_002013A0	match	
 func_001FFFE8	func_002013A8	match	
-func_001FFFF0	func_002013B0	match	
-func_00200000	func_002013C0	match	
+func_001FFFF0	func_002013B0	match	rodata
+func_00200000	func_002013C0	match	rodata
 func_00200050	func_00201410	match	
 func_00200080	func_00201440	match	
 func_002000B0	func_00201470	match	

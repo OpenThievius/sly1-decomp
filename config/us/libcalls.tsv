@@ -32,3 +32,7 @@ dptofp	func_001FD578	double to float
 __10Val_114F48	func_0011B008	constructor of the value func_00114F48 builds
 _$_10Val_114F48	func_0011B060	its destructor
 __builtin_delete	func_0018D778	operator delete
+__tf9exception	func_001FF008	the type-information function of the exception base class
+__ti9exception	D_0027B318	its type information
+__rtti_si	func_00200118	fill in the type information of a class with one public base
+__ti9bad_alloc	D_0062C5B8	the type information of bad_alloc (a common symbol)

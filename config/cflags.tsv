@@ -31,3 +31,4 @@ src/lib/s64_to_double.c	-O2 -G0	2.9-ee-991111-01
 src/lib/s64_to_float.c	-O2 -G0	2.9-ee-991111-01
 src/lib/file_1FBDF8.c	-O2 -G0	2.9-ee-991111-01
 src/lib/multiply.c	-O2 -G0	2.9-ee-991111-01
+src/lib/new_handler.cpp	-O2 -G0	2.9-ee-991111-01
