@@ -64,6 +64,10 @@ struct GaugeManager : PlacedObject {
     union {
         s32 tag430;         // 0x430: what func_001B6598 reads from the device
         u8 buf430[0x1C];
+        struct {
+            u8 pad430[0x18];
+            f32 speed448;   // 0x448: the animation speed class 0x11 sets (func_0014BD38)
+        };
     };
     s32 f44C;               // 0x44C
     s32 f450;               // 0x450: 2 at setup
