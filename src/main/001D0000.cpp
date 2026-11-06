@@ -4,26 +4,6 @@
 #include "on_off_object.h"
 #include "game_clock.h"
 
-void func_001DDA20(void* a);
-void func_001DDB58(void* a);
-void func_001DDA50(void* a);
-void func_001DDBB8(void* a);
-
-void func_001D27C0(Player* a0, s32 a1)
-{
-    if (a0->f2718 != a1) {
-        if (a0->f2718 == -1) {
-            AcquirePadSelectFlag(a0->world);
-            ShowCountedScreenElement(a0->world);
-        }
-        a0->f2718 = a1;
-        if (a1 == -1) {
-            ReleasePadSelectFlag(a0->world);
-            HideCountedScreenElement(a0->world);
-        }
-    }
-}
-
 void func_001861E8(void* a, s32 b);
 
 
@@ -96,39 +76,6 @@ s32 func_001D1478(Player* self)
         }
     }
     return 1;
-}
-
-// NEAR: argument setup order of the func_0012CD78 calls differs ($a1 load and the $f12/$f13 constants in the loop call, $a4 address and float moves in the two calls after it); stores and frame match.
-
-struct Entry_1D14F0 {
-    u8 pad0[4];
-    void* p4;
-    u8 pad8[4];
-    f32 fC;
-};
-
-void func_00139038(void* self, s32 a1, s32 a2, void* a3, s32 a4, s32 a5, s32 a6, void* a7);
-void func_0012CD78(f32 f12, f32 f13, void* a0, void* a1, void* a2, s32 a3, void* a4, s32 a5, void* a6, s32 a7);
-
-void func_001D14F0(Player* self)
-{
-    f32 out[4];
-    Entry_1D14F0* e = (Entry_1D14F0*)self->f103C;
-    s32 i = 1;
-    do {
-        func_0012CD78(0.0f, 1.0f, e->p4, self->f614, self, 1, 0, 0, out, 0);
-        e->fC = out[2];
-        e++;
-        i--;
-    } while (i >= 0);
-    func_00139038(self, 0x10, 2, self->f103C, 0, 0, 0, &self->f105C);
-    func_0012CD78(0.0f, 1.0f, self->f1064, self->f618, self, 1, &self->f23E0, 0, 0, 0);
-    func_0012CD78(0.0f, 1.0f, self->f1064, self->f614, self, 1, &self->f23F0, 0, 0, 0);
-    f32 avg = (self->f23E0 + self->f23F0) * 0.5f;
-    self->f23F4 = 0.0f;
-    self->f23E4 = 0.0f;
-    self->f23F0 = avg;
-    self->f23E0 = avg;
 }
 
 f32 func_001FD578(u64 v);
