@@ -127,9 +127,10 @@ def code_range_of(addr, key="us"):
 
 
 def whole_files():
-    """{source path: {"text", "end", "rodata", "data", "bss": address or None}} of the files
-    config/us/files.tsv lists: real source files, compiled and linked whole as the original's
-    were (tools/c_layout.py), in place of their 16 KiB windows."""
+    """{source path: {"text", "end", "rodata", "data", "bss", "except": address or None}} of the
+    files config/us/files.tsv lists: real source files, compiled and linked whole as the original's
+    were (tools/c_layout.py), in place of their 16 KiB windows. "except" is where the file's
+    .gcc_except_table goes (a C++ file with a handler or an exception specification)."""
     path = ROOT / "config" / "us" / "files.tsv"
     if not path.exists():
         return {}
@@ -138,7 +139,8 @@ def whole_files():
         if not line.strip():
             continue
         f, *cols = line.split("\t")
-        out[f] = dict(zip(("text", "end", "rodata", "data", "bss"),
+        cols += [""] * (6 - len(cols))
+        out[f] = dict(zip(("text", "end", "rodata", "data", "bss", "except"),
                           (None if c in ("-", "") else int(c, 16) for c in cols)))
     return out
 

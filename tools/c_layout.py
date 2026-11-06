@@ -201,7 +201,9 @@ def whole_placements(obj, w, rel, src, resolver, starts):
     placed, data = [], []
     for sec in obj.sections:
         kind = sec["name"][1:]
-        if sec["name"] in (".text", ".rodata", ".data", ".bss") and sec["size"] and w.get(kind) is None:
+        if sec["name"] == ".gcc_except_table":
+            kind = "except"
+        if sec["name"] in (".text", ".rodata", ".data", ".bss", ".gcc_except_table") and sec["size"] and w.get(kind) is None:
             raise LayoutError("%s has %s (%d bytes), which config/us/files.tsv gives no address"
                               % (name, sec["name"], sec["size"]))
     text = obj.section(".text")
@@ -219,6 +221,9 @@ def whole_placements(obj, w, rel, src, resolver, starts):
         sec = obj.section("." + kind)
         if sec is not None and sec["size"]:
             data.append((w[kind], sec["size"], rel, "." + kind, "D_%08X" % w[kind]))
+    sec = obj.section(".gcc_except_table")
+    if sec is not None and sec["size"]:
+        data.append((w["except"], sec["size"], rel, ".gcc_except_table", "D_%08X" % w["except"]))
     return placed, data
 
 
@@ -482,6 +487,10 @@ def layout(ld_script, objects):
         text = dmarker.sub(lambda m: "\n".join(data_lines), text)
         runs += data_runs
         text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(covered.items())) + "\n"
+    tables = sorted(d for d in data_placed if d[3] == ".gcc_except_table")
+    if tables:
+        text, table_runs = except_entries(text, tables)
+        runs += table_runs
     labels = case_labels(placed)
     if labels:
         text += "\n" + "\n".join("PROVIDE(%s = 0x%X);" % (n, a) for n, a in sorted(labels.items())) + "\n"
@@ -503,6 +512,44 @@ def layout(ld_script, objects):
     out = ld_script.with_name(ld_script.name.replace(".splat.ld", ".ld"))
     write_if_changed(out, text)
     return out, runs, placed, data_placed
+
+
+EXCEPT_ASSET = "build/us/assets/us/gcc_except_table.bin.o(.data);"
+
+
+def except_entries(text, tables):
+    """The linker script with the whole files' .gcc_except_table sections at their addresses in
+    place of splat's binary of that section (config/us/layout.tsv), whose other bytes stay, cut
+    into runs between them. Returns (script, run sources)."""
+    if EXCEPT_ASSET not in text:
+        raise LayoutError("the linker script has no %s to place .gcc_except_table in" % EXCEPT_ASSET)
+    row = next(r for r in todo.layout("us") if r[1] == "gcc_except_table")
+    start = row[2]
+    asset = ROOT / "assets" / "us" / "gcc_except_table.bin"
+    size = asset.stat().st_size
+    main_start = next(r[2] for r in todo.layout("us") if r[1] == "rodata")
+    entries, runs, at = [], [], start
+    out_dir = ROOT / "build" / "us" / "data"
+
+    def run_of(lo, hi):
+        path = out_dir / ("except_%08X.s" % lo)
+        write_if_changed(path, '.section .data, "wa"\n.incbin "%s", 0x%X, 0x%X\n' % (asset, lo - start, hi - lo))
+        runs.append(path)
+        entries.append("        . = 0x%X;" % (lo - main_start))
+        entries.append("        %s(.data);" % path.relative_to(ROOT).with_suffix(".s.o"))
+
+    for addr, length, obj, section, _ in tables:
+        if addr < at or addr + length > start + size:
+            raise LayoutError("%s's .gcc_except_table (0x%X, %d bytes) overlaps another or leaves the section"
+                              % (obj, addr, length))
+        if addr > at:
+            run_of(at, addr)
+        entries.append("        . = 0x%X;" % (addr - main_start))
+        entries.append("        %s(.gcc_except_table);" % obj)
+        at = addr + length
+    if at < start + size:
+        run_of(at, start + size)
+    return text.replace(EXCEPT_ASSET, "\n".join(e.strip() for e in entries), 1), runs
 
 
 SHN_COMMON = 0xFFF2
