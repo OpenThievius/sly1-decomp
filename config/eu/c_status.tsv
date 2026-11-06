@@ -3470,7 +3470,10 @@ func_001FAE38	func_001FC1F8	match
 func_001FB528	func_001FC8E8	match	
 func_001FB618	func_001FC9D8	match	
 func_001FB6B0	func_001FCA70	match	
+func_001FB790	func_001FCB50	match	
 func_001FBDF8	func_001FD1B8	match	
+func_001FBE00	func_001FD1C0	match	
+func_001FC3D0	func_001FD790	match	
 func_001FC910	func_001FDCD0	match	
 func_001FCA40	func_001FDE00	match	
 func_001FCAE0	func_001FDEA0	match	

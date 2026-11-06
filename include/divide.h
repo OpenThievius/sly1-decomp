@@ -1,17 +1,14 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 1342/1344 (99.9%), checked 2026-11-06
-#include "mul_wide.h"
-/* NEAR (o98c, 2 lines differ): every instruction matches but the frame: retail reserves 48 bytes
- * (addiu sp,-0x30 / 0x30) and uses only the remainder's slot at 0(sp); this C reserves 16. The same
- * helper gives __udivdi3 (func_001FBE00.c here) 10 lines from exact, again only retail's empty 16-byte
- * frame and its knock-on delay slot and pad, and __divdi3 (func_001FAE38) EXACT (div3.c here).
- * Retail's remainder slot sits below the extra space, so the extra space was allocated after w's
- * ADDRESSOF was purged (an inlined frame block would come first: tried, it puts w at 16). It looks
- * like reload stack slots for pseudos that later vanish, not anything from the source. Not from -g*,
- * -f flags (regmove, gcse, force-mem, schedule, exceptions, PIC), union order or const or brace
- * init, (void), a union remainder, K&R parameters or callers, non-static or pre-declared inline. */
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* The toolchain runtime's 64-bit division in 32-bit halves: one helper, divide(), and its
+ * statement macros, which each of the runtime's division files compiles in (src/lib/divide.c,
+ * remainder.c, divide_unsigned.c, remainder_unsigned.c), as retail has one copy of the code, and
+ * of its table of significant bits, per routine. A file names its table BITS_TABLE before it
+ * includes this. C, for cc1 (docs/TOOLCHAIN.md). Written for this project from retail's code. */
+#ifndef DIVIDE_H
+#define DIVIDE_H
 
-/* Unsigned 64-bit remainder, done in 32-bit halves. */
+#include "mul_wide.h"
+
 
 typedef unsigned char u8;
 typedef unsigned int u32;
@@ -27,6 +24,9 @@ typedef union {
     } h;
 } Halves;
 
+/* Significant bits of each byte value: the including file's copy. */
+extern const u8 BITS_TABLE[];
+
 /* (high:low) -= (sub_high:sub_low), the borrow carried by hand. */
 #define SUBTRACT_WIDE(high, low, sub_high, sub_low)                         \
     do {                                                                    \
@@ -36,8 +36,6 @@ typedef union {
         (low) = t_;                                                         \
     } while (0)
 
-/* Significant bits of each byte value. */
-extern const u8 D_0024EFB0[];
 
 #define LEAD_ZEROS(count, x)                                    \
     do {                                                        \
@@ -53,7 +51,7 @@ extern const u8 D_0024EFB0[];
                 if (((x) >> shift_) & 0xFF)                     \
                     break;                                      \
         }                                                       \
-        (count) = 32 - (D_0024EFB0[(x) >> shift_] + shift_);    \
+        (count) = 32 - (BITS_TABLE[(x) >> shift_] + shift_);    \
     } while (0)
 
 /* (high:low) / den in two 16-bit steps; den is normalised. */
@@ -87,6 +85,16 @@ extern const u8 D_0024EFB0[];
         (quot) = q1_ * 0x10000L | q0_;                           \
         (rem) = r0_;                                            \
     } while (0)
+
+static inline s64 negate(s64 x)
+{
+    Halves in, out;
+
+    in.all = x;
+    out.h.lo = -in.h.lo;
+    out.h.hi = -in.h.hi - ((u32)out.h.lo > 0);
+    return out.all;
+}
 
 static inline u64 divide(u64 num, u64 den, u64 *remp)
 {
@@ -189,10 +197,4 @@ static inline u64 divide(u64 num, u64 den, u64 *remp)
     return ww.all;
 }
 
-u64 func_001FC3D0(u64 num, u64 den)
-{
-    u64 rem;
-
-    divide(num, den, &rem);
-    return rem;
-}
+#endif

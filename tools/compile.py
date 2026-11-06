@@ -17,9 +17,9 @@ function and each global it defines at its address (tools/build.py). The
 functions the compiler makes for a file (a static initialiser, the constructor
 that calls it) take retail's names from config/us/generated.tsv.
 
-A `.c` file is C, built by the release's cc1.exe with the driver's C predefines: the
-toolchain's own runtime (libgcc, compiled from C) has C that only the C front end gives, such
-as __builtin_eh_return, which cc1plus lacks.
+A `.c` file is C, built by the release's cc1 (cc1.exe, or a Linux build's cc1) with the
+driver's C predefines: the toolchain's own runtime (libgcc, compiled from C) has C that only
+the C front end gives, such as __builtin_eh_return, which cc1plus lacks.
 
 A compiler that only exists as Sony's Linux build (2.9-ee-991111-01, the math
 library's) runs the way OpenRAC's rac1-decomp runs it: its own 32-bit Linux
@@ -153,15 +153,16 @@ def tools(release=None):
     return run, cc1plus.parent / "cpp.exe", cc1plus, ee_as
 
 
-def linux_cc1plus(release):
-    """(command, tree) running a Linux release's cc1plus through its own loader, or None.
+def linux_cc1plus(release, front="cc1plus"):
+    """(command, tree) running a Linux release's cc1plus (or `front`, cc1 for C) through its own
+    loader, or None.
 
     SLY1_LINUX_TOOLCHAIN names the folder; else the toolchain directory's LINUX_TREES."""
     env = os.environ.get("SLY1_LINUX_TOOLCHAIN")
     root = toolchain.toolchain_dir()
     trees = [Path(env).expanduser()] if env else [root / t for t in LINUX_TREES] if root else []
     for tree in trees:
-        cc1plus = tree / "lib" / "gcc-lib" / "ee" / release / "cc1plus.bin"
+        cc1plus = tree / "lib" / "gcc-lib" / "ee" / release / (front + ".bin")
         if cc1plus.exists():
             tree = tree.resolve()
             lib = tree / "lib"
@@ -251,12 +252,10 @@ def compile_file(src, out, flags=None, keep_asm=None, source=None, whole=False):
     release = compiler_for(source)
     # Without the Linux build, its Windows companion builds the file, as rac1-decomp does: the
     # build still works, but what only the Linux build gives cannot match.
-    linux = linux_cc1plus(release) if release in LINUX_COMPANION else None
-    run, cpp, cc1plus, ee_as = tools(LINUX_COMPANION.get(release, release))
     is_c = src.suffix == ".c"
+    linux = linux_cc1plus(release, "cc1" if is_c else "cc1plus") if release in LINUX_COMPANION else None
+    run, cpp, cc1plus, ee_as = tools(LINUX_COMPANION.get(release, release))
     if is_c:
-        if linux:
-            raise CompileError("a .c file needs a Windows release's cc1.exe, not %s" % release)
         cc1plus = cc1plus.parent / "cc1.exe"
         if not cc1plus.exists():
             raise CompileError("no %s" % cc1plus)
