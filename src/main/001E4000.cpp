@@ -4500,16 +4500,6 @@ G27C230* D_002623C4 = D_0027C230;
 G27C230* D_002623C8 = D_0027C230;
 s32 D_002623CC = -1;
 f32 D_00262A28[2] = { 1.25f, 1.5f };
-f32 D_00262A30[8] = { 1.0f, 0.0f, 0.0f, 1.0f, 0.699999988f, 0.699999988f, 0.699999988f, -0.699999988f };
-u32 D_00262A68[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x100 };
-u32 D_00262AA0[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800 };
-u32 D_00262AD8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x8000 };
-u32 D_00262B10[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x2000 };
-u32 D_00262B48[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x20 };
-u32 D_00262B80[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x1000 };
-u32 D_00262BB8[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x4000 };
-u32 D_00262BF0[6] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x10 };
-u32 D_00262C28[8] = { 0x14000, 0x400002, 0x14000, 0x400002, 0x208000, 0x800080, 0x80, 0x0 };
 f32 D_00262E14 = 455.0f;
 f32 D_00262E18 = 0.699999988f;
 f32 D_00262E1C = 0.600000024f;
@@ -4789,14 +4779,6 @@ List01 D_002626F8 = {0};
 List01 D_00262708 = {0};
 // size: s32 pointer, loaded and stored as a word (func_0016DD00 clears it)
 s32 D_002629C8 = 0;
-// size: s32 flags, word accesses only
-s32 D_00262C64 = 0;
-// size: s32 flags, word accesses only
-s32 D_00262C68 = 0;
-// size: s32 flags, word accesses only
-s32 D_00262C6C = 0;
-// size: chosen with D_00262C70 as the same pad pointer (conditional), 0xC4 to the next label
-Obj_262C70 D_00262D38 = {};
 // size: pointer, word accesses only
 Player* D_00262E10 = 0;
 // size: s32, word load/store only
@@ -4816,7 +4798,6 @@ BackgroundJob D_00269990 = {0};
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
 s32 D_00269C90 = 0;
-Obj_262C70 D_00262C70 = {};
 extern const LevelEntry D_00248748[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
     { 0x00000102, 60.0f, { 0x2D97B868, 0x3B2491E4, 0x149B5E84, 0xED6063AB, 0xEC614227, 0x2D9472EA, 0x149B5C3C, 0x3B063804 }, D_0024DCC8 },
