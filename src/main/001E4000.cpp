@@ -3932,7 +3932,6 @@ extern const char D_0024A688[24] = "A Strange Reunion";
 extern const f32 D_0024A844 = 3.40282347e+38f;
 extern const f32 D_0024AB7C = 3.40282347e+38f;
 extern const f32 D_0024AFA0 = 3.40282347e+38f;
-extern const f32 D_0024B258 = -3.40282347e+38f;
 extern const f32 D_0024C930 = 3.40282347e+38f;
 extern const f32 D_0024C9B0 = 3.40282347e+38f;
 extern const f32 D_0024C9B4 = 3.40282347e+38f;
@@ -4011,11 +4010,6 @@ void func_00199850();
 struct Rec_26A970 { f32 a[24]; void (*fn)(); f32 b[3]; };
 struct Sjis_274588 { u16 code; u16 id; };
 
-f32 D_002649D0[2] = { 0.0f, 0.25f };
-f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
-f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
-f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
-f32 D_00264A38 = 20.0f;
 f32 D_0026A910 = 100.0f;
 f32 D_0026A968 = 300.0f;
 Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
@@ -4681,10 +4675,9 @@ List01 D_00264088 = {0};
 // size: s32 count, tested < 0x10 against the D_00264670 table in func_00184DE8
 // size: func_00184DE8 adds entries while count < 0x10, stride 0x10 (sll 4)
 // size: s32 flag, word load/store only
-s32 D_002649A8 = 0;
 // size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
 // size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
-BackgroundJob D_00269990 = {0};
+extern BackgroundJob D_00269990;
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
 Obj_262C70 D_00262C70 = {};

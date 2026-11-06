@@ -14,15 +14,15 @@ void func_0018BDC8(MemoryCard* self)
     if (IsBackgroundJobRunning(&g_backgroundJob) != 0) return;
     if (self->displayMode == 1 && g_elapsedTime[0] - self->stateTime >= 0.3f) {
         if (self->i4F44 != 0) {
-            if (self->state != 5) SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x15);
-        } else if (((Glob_18BDC8_eu*)g_pauseMenuElement)->f56C != 0 && ((Glob_18BDC8_eu*)g_pauseMenuElement)->f578 == 0x11) {
-            if (self->state != 5) SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x20);
+            if (self->state != 5) SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 0x15);
+        } else if (((Glob_18BDC8_eu*)&g_pauseMenuElement)->f56C != 0 && ((Glob_18BDC8_eu*)&g_pauseMenuElement)->f578 == 0x11) {
+            if (self->state != 5) SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 0x20);
         } else {
             switch (self->state) {
-            case 1: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 3); break;
-            case 2: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 4); break;
-            case 3: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 7); break;
-            case 4: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 10); break;
+            case 1: SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 3); break;
+            case 2: SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 4); break;
+            case 3: SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 7); break;
+            case 4: SetPauseMenuLayerPage(&g_pauseMenuElement, 1, 10); break;
             }
         }
     }
