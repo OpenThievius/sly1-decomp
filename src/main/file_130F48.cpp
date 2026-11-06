@@ -8,6 +8,8 @@
 #include "screen_element.h"
 #include "step_sequence.h"
 #include "v24a0.h"
+#include "v24a2.h"
+#include "shapes.h"
 #include "pad_record.h"
 #include "game_progress.h"
 
@@ -74,7 +76,7 @@ struct Lerp_133B58
 
 struct Gs_132500;
 
-struct Clock_132500 { u8 pad[0x478]; f32 f478; };
+struct Clock_132500 { u8 pad[0x468]; f32 heading; u8 pad46C[0x478 - 0x46C]; f32 f478; };
 
 extern s32 D_00262C68;
 extern f32 D_00261860;
@@ -464,7 +466,112 @@ void func_00131140(T217D_440* self)
 
 ASM_FUNC(func_00131198);
 
-INCLUDE_ASM(func_001316E8);
+
+
+
+struct Font_1316E8 {
+    static V24A2* Of(T217D_440* self) { return *(V24A2**)((u8*)self + 0x310); }
+};
+
+f32 func_0015C418(V24A2* font, const char* text);
+void func_0015C638(V24A2* font, const char* text, Layout_137228* layout, s32 zero, Gs_132500* gs);
+
+void func_001316E8(T217D_440* self, Gs_132500* gs)
+{
+    Layout_137228 L;
+    s32 i;
+    f32 left = 273.0f;
+    f32 bottom = 42.181820f;
+    f32 top = 8.0f;
+    f32 span = 94.0f;
+    f32 step = 0.1f;
+    f32 tick = 7.52000046f;
+
+    BeginGifTag(gs, 0x46, 6, 0x441EEE);
+    AddGifRegisterWrite(gs, 0x47, 0x31001);
+    AddGifRegisterWrite(gs, 0x42, 0x5A);
+    AddGifRegisterWrite(gs, 0x40, 0x120003016E0111);
+    AddGifRgbaEntry(gs, 0);
+    AddGifXyzfEntry(gs, 0x7D10, 0x793A, 0, 0);
+    AddGifXyzfEntry(gs, 0x82F0, 0x7A32, 0, 0);
+    BeginGifTag(gs, 0x43, 4, 0x4441);
+    AddGifRgbaEntry(gs, 0x80000000);
+    AddGifXyzfEntry(gs, 0x7D10, 0x793A, 0, 0);
+    AddGifXyzfEntry(gs, 0x82F0, 0x793A, 0, 0);
+    AddGifXyzfEntry(gs, 0x8000, 0x7A32, 0, 0);
+    BeginGifTag(gs, 0, 3, 0x1EE);
+    AddGifRegisterWrite(gs, 0x47, 0x3F001);
+    AddGifRegisterWrite(gs, 0x42, 0x44);
+    AddGifRgbaEntry(gs, *(u32*)&D_002610E0);
+    BeginGifTag(gs, 0x84, 1, 4);
+
+    for (i = 0; i < 11; i++) {
+        f32 x = left + ((f32)i - self->f314) * step * span;
+        s32 x0 = Gfx_132500::ScreenX(x);
+        x += tick;
+        AddGifXyzfNoDrawEntry(gs, x0, Gfx_132500::ScreenY(top), 0, 0);
+        s32 x1 = Gfx_132500::ScreenX(x);
+        AddGifXyzfNoDrawEntry(gs, x1, Gfx_132500::ScreenY(top), 0, 0);
+        s32 y = Gfx_132500::ScreenY(bottom);
+        AddGifXyzfEntry(gs, x0, y, 0, 0);
+        AddGifXyzfEntry(gs, x1, y, 0, 0);
+    }
+
+    s32 grey = 0xFF808080;
+    f32 half = 0.5f;
+    f32 row = 6.0f;
+    f32 a = WrapModulo(g_camera->heading + 0.39269909f, 6.2831855f);
+    f32 w = D_00261310 + 4.0f;
+    s32 cur = (s32)(a / 0.78539819f);
+    s32 prev = (cur + 7) & 7;
+    s32 next = (cur + 1) & 7;
+    f32 frac = WrapModulo(a, 0.78539819f) / 0.78539819f;
+    V24A2* font;
+    f32 wCur = MeasureFontString(Font_1316E8::Of(self), D_00261128[cur]);
+    f32 off = frac * w;
+    f32 wPrev = MeasureFontString(Font_1316E8::Of(self), D_00261128[prev]);
+    f32 wNext = MeasureFontString(Font_1316E8::Of(self), D_00261128[next]);
+    f32 hPrev = (w - wPrev) * half;
+    f32 hCur = (w - wCur) * half;
+    f32 hNext = (w - wNext) * half;
+    f32 xCur = 320.0f - (off - hCur);
+    f32 xPrev = (320.0f - w) - (off - hPrev);
+    f32 xNext = (w + 320.0f) - (off - hNext);
+
+    L.Pos(0.0f, 0.0f);
+    L.Size(640.0f, 492.800018f);
+    {
+        Quad4 col;
+        col.w[0] = grey;
+        L.Color(col.w);
+    }
+    L.SetF14(0);
+    L.SetF18(0);
+
+    font = Font_1316E8::Of(self);
+    L.h = (f32)font->height * font->sy;
+    L.w = D_00261310;
+    *(Rgba_130F48*)&L.color = Rgba_130F48(D_002610D8);
+    L.x = xPrev;
+    L.y = row;
+    DrawFontString(Font_1316E8::Of(self), D_00261128[prev], &L, 0, gs);
+    L.x = xNext;
+    L.y = row;
+    DrawFontString(Font_1316E8::Of(self), D_00261128[next], &L, 0, gs);
+
+    {
+        Quad_130F48 q = { 0.0f, 4.0f, -4.0f };
+        f32 t = q.c0 + frac * (q.c1 + frac * q.c2);
+        *(Rgba_130F48*)&L.color = Lerp_133B58::Mix(D_002610D8, Rgba_130F48(0x32, 0x84, 0xB0, 0x80), t);
+    }
+    L.x = xCur;
+    L.y = row;
+    DrawFontString(Font_1316E8::Of(self), D_00261128[cur], &L, 0, gs);
+
+    BeginGifTag(gs, 0, 1, 0xE);
+    AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
+}
+
 
 INCLUDE_RODATA(D_00249CE0);
 INCLUDE_RODATA(D_00249CE8);
