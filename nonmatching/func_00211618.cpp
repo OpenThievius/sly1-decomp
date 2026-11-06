@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 148/152 (97.4%), checked 2026-11-05
+// BYTES 148/152 (97.4%), checked 2026-11-06
 #include "common.h"
 // NEAR: only the t1/t2 registers of n and w18 swap (4 lines differ); dead-end tries: s64/u64 temp, += n
 

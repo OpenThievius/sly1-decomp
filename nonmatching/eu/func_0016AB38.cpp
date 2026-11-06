@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 808/812 (99.5%), checked 2026-11-05
+// BYTES 808/812 (99.5%), checked 2026-11-06
 // NEAR (PAL, func_0016AB38 at PAL 0x16B190): PAL's own definition, built in src/main/00168000.cpp's unit
 // (python3 tools/check.py nonmatching/eu/func_0016AB38.cpp func_0016AB38 --unit src/main/00168000.cpp).
 // 2 instructions differ: GCSE hoists the high halves of D_00275BC0 and D_0026FA90 (the last

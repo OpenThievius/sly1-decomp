@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 197/280 (70.4%), checked 2026-11-05
+// BYTES 197/280 (70.4%), checked 2026-11-06
 // NEAR: order: as func_001D5FA8; the struct's first word gets 1 and a global flag is set too.
 #include "common.h"
 

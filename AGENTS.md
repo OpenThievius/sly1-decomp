@@ -60,6 +60,7 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 | `python3 tools/version_src.py todo` | the functions only PAL has, not yet defined, with their tags and file |
 | `python3 tools/permute.py FILE FUNC [--auto]` | every order of the lines marked `/*P*/` (or of each run of simple statements), compiled and scored; stops at EXACT |
 | `python3 tools/permuter_setup.py FILE FUNC` | sets a near miss up for decomp-permuter (fetched into the gitignored `tools/ext/`, never committed) |
+| `python3 tools/permute_night.py FUNC ...` | decomp-permuter on near misses one after another, unattended, with the barrier-making rewrites off; keeps each zero, spliced back and checked, in `build/permute_night/` |
 | `python3 tools/regdiff.py FILE FUNC` (or `--all`) | whether an attempt differs from retail only in its registers (`registers`), in instruction order too (`order`), or in its code (`code`) |
 | `python3 tools/decls.py` | declarations whose return type contradicts the function's C definition or retail's callers (a wrong `void` looks like a register tie in the caller) |
 | `python3 tools/nonmatching.py check` | re-scores the near misses in `nonmatching/` and writes the index (`--check` in CI) |

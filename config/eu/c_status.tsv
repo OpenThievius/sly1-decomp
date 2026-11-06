@@ -2529,6 +2529,7 @@ func_001B1070	func_001B1D60	match
 func_001B1158	func_001B1E48	match	
 func_001B11A0	func_001B1E90	match	
 func_001B1238	func_001B1F28	match	rodata
+func_001B1438	func_001B2128	match	
 func_001B15D0	func_001B22C0	match	
 func_001B1608	func_001B22F8	match	
 func_001B1698	func_001B2388	match	

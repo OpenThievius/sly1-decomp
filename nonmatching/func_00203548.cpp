@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 690/736 (93.8%), checked 2026-11-05
+// BYTES 723/736 (98.2%), checked 2026-11-06
+// NEAR: D_0027943C's store comes last before the loop, as the Ryzen PC's permuter run found
+//       (26 lines to 7). Left: the hoisted lui of D_00279444's and D_00279434's high halves
+//       take t2/t3 the other way round, and one lui/sw pair near the end is swapped.
 #include "common.h"
 // NEAR (r60f): 26 lines, same as m59e but with D_0062A7D0 stored from a local after
 // D_00279424 = 1 (retail stores 424 before 62A7D0; the C++ front end otherwise computes
@@ -71,7 +74,6 @@ s32 func_00203548(s32 mode)
     s32 id = func_001F6A90();
     D_00279424 = 1;
     D_0062A7D0 = id;
-    D_0027943C = -1;
     D_00279440 = -1;
     D_00279438 = -1;
     D_00279448 = -1;
@@ -79,6 +81,7 @@ s32 func_00203548(s32 mode)
     D_00279434 = 0;
     D_00279450++;
     D_0027944C = -1;
+    D_0027943C = -1;
     while (1) {
         r = func_001F80C0(&D_0062A9E8, 0x80000592, 0);
         if (r < 0) {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 439/480 (91.5%), checked 2026-11-05
+// BYTES 439/480 (91.5%), checked 2026-11-06
 #include "common.h"
 // NEAR (r60f): 12 lines differ (m59e's all-volatile version: 26 with the nop shift). Only
 // D_00279434 is volatile here (not declared anywhere else in src/; it is the mode word the

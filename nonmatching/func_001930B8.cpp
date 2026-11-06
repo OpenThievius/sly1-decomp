@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 228/312 (73.1%), checked 2026-11-05
+// BYTES 236/312 (75.6%), checked 2026-11-06
 // NEAR: order: the first block is exact with the destination pointer declared before the memset;
 //       the second differs only in the order its constants are loaded and stored.
 #include "common.h"
@@ -30,10 +30,10 @@ void func_001930B8(s32 a0, s32 a1)
             Cfg_1930B8 c;
             Cfg_1930B8* p = &D_00269C10;
             func_001F5C0C(&c, 0, 0x80);
-            c.f20 = -0.5f;
             c.f0 = 1000.0f;
-            c.f4 = 1200.0f;
             c.f18 = -1750.0f;
+            c.f4 = 1200.0f;
+            c.f20 = -0.5f;
             c.q30 = *(Quad16*)D_00248D20;
             c.i4c = 1;
             c.f50 = 0.5f;

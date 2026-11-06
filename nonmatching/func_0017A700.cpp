@@ -1,4 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BROKEN, checked 2026-11-05
+// BROKEN, checked 2026-11-06
 // Skipped: retail constructs its 128-bit constant with pextlw/pcpyld MMI
 // instructions that plain C++ cannot request under the workflow rules.

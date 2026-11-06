@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 117/180 (65.0%), checked 2026-11-05
+// BYTES 117/180 (65.0%), checked 2026-11-06
 // Near match: the status branches and retail's max.s instruction still differ.
 #include "common.h"
 

@@ -37,7 +37,7 @@ import versions  # noqa: E402
 
 ROOT = versions.ROOT
 OUT = ROOT / "build" / "permuter"
-STRUCT = re.compile(r"\b(struct|union)\s+(?:__attribute__\s*\(\(.*?\)\)\s*)?([A-Za-z_]\w*)\s*[{;]")
+STRUCT = re.compile(r"\b(struct|union|class)\s+(?:__attribute__\s*\(\(.*?\)\)\s*)?([A-Za-z_]\w*)\s*(?:[{;]|:[^:])")
 
 
 def target(func, dest):
@@ -52,7 +52,84 @@ def target(func, dest):
     subprocess.run([build.tool("as")] + build.AS_FLAGS + [str(src), "-o", str(dest / "target.o")], check=True)
 
 
-def base(path, dest):
+C_TYPEDEF = re.compile(r"^\s*typedef\b[^:<&]*;\s*$", re.S)
+
+
+def items(text):
+    """The top-level items of a translation unit: each declaration up to its `;`, and each function
+    definition up to its closing brace."""
+    out, start, depth, i, body = [], 0, 0, 0, False
+    while i < len(text):
+        c = text[i]
+        if c in "\"'":
+            j = i + 1
+            while j < len(text) and text[j] != c:
+                j += 2 if text[j] == "\\" else 1
+            i = j + 1
+            continue
+        if c in "({[":
+            if c == "{" and depth == 0:
+                before = text[start:i].rstrip()
+                body = before.endswith(")") or before.endswith("const")
+            depth += 1
+        elif c in ")}]":
+            depth -= 1
+            if c == "}" and depth == 0 and body:
+                out.append(text[start:i + 1]); start, body = i + 1, False
+        elif c == ";" and depth == 0:
+            out.append(text[start:i + 1]); start = i + 1
+        i += 1
+    out.append(text[start:])
+    return out
+
+
+def plain_calls(body, tags):
+    """FUNC's body with the C++ calls in it given plain names, and the macros that turn them back:
+    `Fpu::Sqrt(x)` becomes `Fpu__Sqrt(x)`, a type called like a function `T()` becomes `make_T()`."""
+    aliases = {}
+
+    def scoped(m):
+        alias = "%s__%s" % (m.group(1), m.group(2))
+        aliases[alias] = "%s::%s" % (m.group(1), m.group(2))
+        return alias + "("
+    body = re.sub(r"\b([A-Za-z_]\w*)::([A-Za-z_]\w*)\s*\(", scoped, body)
+    head, brace, rest = body.partition("{")
+
+    def construct(m):
+        if m.group(1) not in tags:
+            return m.group(0)
+        aliases["make_" + m.group(1)] = m.group(1)
+        return "make_%s(" % m.group(1)
+    rest = re.sub(r"(?<![\w.>])([A-Za-z_]\w*)\s*\((?=\s*\))", construct, rest)
+    return head + brace + rest, sorted(aliases.items())
+
+
+def isolate(text, func):
+    """The unit with everything the permuter's C parser cannot read, or need, inside PERM_IGNORE:
+    all but FUNC's definition and plain C typedefs. Our C++ (classes with bases and methods,
+    references, templates) then reaches the compiler untouched."""
+    tags = {m.group(2) for m in STRUCT.finditer(text)}
+    out = []
+    for item in items(text):
+        stripped = item.strip()
+        if not stripped:
+            out.append(item)
+        elif re.search(r"\b%s\s*\(" % func, stripped) and stripped.endswith("}"):
+            body, aliases = plain_calls(item, tags)
+            if aliases:
+                # The permuter preprocesses its input, so a #define would undo the alias before
+                # it parses; permuter_compile.py turns these strings back into #defines.
+                out.append("\nPERM_IGNORE(%s)\n" % " ".join('static const char permuter_alias_%d[] = "%s=%s";' % (i, a, b)
+                                                         for i, (a, b) in enumerate(aliases)))
+            out.append(body)
+        elif C_TYPEDEF.match(stripped) and "class" not in stripped:
+            out.append(item)
+        else:
+            out.append("\nPERM_IGNORE(%s)\n" % stripped)
+    return "".join(out)
+
+
+def base(path, dest, func):
     """FILE preprocessed, with a typedef for each struct, as dest/base.c."""
     import compile as cc
     run, cpp, _cc1plus, _as = cc.tools()
@@ -64,9 +141,9 @@ def base(path, dest):
         raise SystemExit("cpp failed:\n" + proc.stderr)
     text = ii.read_text()
     tags = sorted({m.group(2) for m in STRUCT.finditer(text)})
-    lines = ["typedef %s %s %s;" % (kind, tag, tag) for tag in tags
+    lines = ["typedef %s %s %s;" % ("union" if kind == "union" else "struct", tag, tag) for tag in tags
              for kind in [next(m.group(1) for m in STRUCT.finditer(text) if m.group(2) == tag)]]
-    (dest / "base.c").write_text("\n".join(lines) + "\n" + text)
+    (dest / "base.c").write_text("\n".join(lines) + "\n" + isolate(text, func))
     ii.unlink()
 
 
@@ -78,7 +155,7 @@ def main(argv=None):
     dest = OUT / args.func
     dest.mkdir(parents=True, exist_ok=True)
     target(args.func, dest)
-    base(args.file, dest)
+    base(args.file, dest, args.func)
     compile_sh = dest / "compile.sh"
     compile_sh.write_text('#!/bin/sh\nexec "%s" "%s" %s "$@"\n' % (sys.executable, ROOT / "tools" / "permuter_compile.py",
                                                                   args.func))

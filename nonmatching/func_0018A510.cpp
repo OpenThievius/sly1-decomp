@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 197/280 (70.4%), checked 2026-11-05
+// BYTES 197/280 (70.4%), checked 2026-11-06
 // NEAR: order: frame, calls and constants are retail's; retail keeps the constant stores in source
 //       order and loads each constant just before its store, this form loads them early and
 //       reorders the stores.
