@@ -11,7 +11,7 @@ void func_001B5F28(void* list, void* item);
 
 void func_0011C720(void* item)
 {
-    func_001B5F28(D_0062C568, item);
+    PushFreeSlot(g_matrixPayloadPool, item);
 }
 
 // D_0025C360 and D_0025C378 are arrays of buffer pointers, one per IOP command buffer.
@@ -26,9 +26,9 @@ s32 func_0011CE30(void);
 
 void func_0011DDD8()
 {
-    s32* p = D_0025C360[D_0025C380];
+    s32* p = D_0025C360[g_iopBufferIndex];
     p[0]++;
-    func_0011CE30();
+    PollIopCommands();
 }
 
 s32 D_0025C34C = 0;
@@ -42,19 +42,19 @@ s32 func_0011DF58(s32 a, s32 b, s32 c, s32 d)
 {
     s32 buf[4];
     s32 r;
-    if (D_0025C34C == 1)
+    if (g_iopDiscAccess == 1)
         return 0;
     if (D_0025C388.busy) {
         do {
-        } while (func_0011CE30());
+        } while (PollIopCommands());
     }
-    func_0011E1F8(0);
+    SyncDiscRead(0);
     buf[0] = a;
     buf[1] = b;
     buf[2] = c;
     buf[3] = d;
-    r = func_0011D968(0x2A, 0x10, buf);
-    D_0025C34C = r;
+    r = SendIopCommandAndWait(0x2A, 0x10, buf);
+    g_iopDiscAccess = r;
     return r;
 }
 
@@ -62,7 +62,7 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 
 void func_0011E010()
 {
-    func_0011DB00(0x34, 0, 0, 0, 0);
+    QueueIopCommand(0x34, 0, 0, 0, 0);
 }
 
 s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
@@ -70,7 +70,7 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 void func_0011E0B0(s32 a0)
 {
     s32 buf = a0;
-    func_0011DB00(0x2E, 4, &buf, 0, 0);
+    QueueIopCommand(0x2E, 4, &buf, 0, 0);
 }
 
 s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
@@ -78,7 +78,7 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 void func_0011E0E0(s32 a0, s32 a1, s32 a2)
 {
     s32 buf = a0;
-    func_0011DB00(0x4F, 4, &buf, a1, a2);
+    QueueIopCommand(0x4F, 4, &buf, a1, a2);
 }
 
 s32 func_0011D968(s32 id, s32 size, void* data);
@@ -86,7 +86,7 @@ s32 func_0011D968(s32 id, s32 size, void* data);
 void func_0011E110(s32 a0)
 {
     s32 buf = a0;
-    func_0011D968(0x36, 4, &buf);
+    SendIopCommandAndWait(0x36, 4, &buf);
 }
 
 extern s32 D_0025C34C;
@@ -95,9 +95,9 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 
 s32 func_0011E2A0()
 {
-    if (D_0025C34C == 0)
+    if (g_iopDiscAccess == 0)
         return func_00203E28();
-    func_0011DB00(0x37, 0, 0, 0, 0);
+    QueueIopCommand(0x37, 0, 0, 0, 0);
     return 1;
 }
 
@@ -114,7 +114,7 @@ Cell_11C3C8* func_0011C3C0(void);
 
 s32 func_0011C3C8(void)
 {
-    return func_0011C3C0()->value == 0;
+    return GetPoolEntryHeader()->value == 0;
 }
 
 extern u32 D_0062C55C;
@@ -122,7 +122,7 @@ extern u8* D_0027B300[];
 
 s32 func_0011C580(u32 addr)
 {
-    u8* p = D_0027B300[0] + ((addr - D_0062C55C) >> 4);
+    u8* p = g_payloadRefCounts[0] + ((addr - D_0062C55C) >> 4);
     s32 v = *p;
     v++;
     *p = v;
@@ -134,7 +134,7 @@ extern u8* D_0027B300[];
 
 s32 func_0011C7C0(u32 addr)
 {
-    u8* p = D_0027B300[2] + ((addr - D_0062C57C) >> 4);
+    u8* p = g_payloadRefCounts[2] + ((addr - D_0062C57C) >> 4);
     s32 v = *p;
     v++;
     *p = v;
@@ -146,7 +146,7 @@ s32 func_0011DB00(s32 a, s32 b, void* c, s32 d, s32 e);
 void func_0011D450(s32 arg)
 {
     s32 local = arg;
-    func_0011DB00(6, 4, &local, 0, 0);
+    QueueIopCommand(6, 4, &local, 0, 0);
 }
 
 s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
@@ -164,7 +164,7 @@ void func_0011D558(void* a0, s32 a1, s32 a2)
     args.a0 = a0;
     args.a1 = a1;
     args.a2 = a2;
-    func_0011DB00(0x4E, 0xC, &args, 0, 0);
+    QueueIopCommand(0x4E, 0xC, &args, 0, 0);
 }
 
 s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
@@ -178,7 +178,7 @@ void func_0011D670(void* a0)
 {
     Args_11D670 args;
     args.a0 = a0;
-    func_0011DB00(0x14, 4, &args, 0, 0);
+    QueueIopCommand(0x14, 4, &args, 0, 0);
 }
 
 s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
@@ -196,7 +196,7 @@ void func_0011D798(void* a0, s32 a1, s32 a2)
     args.a0 = a0;
     args.a1 = a1;
     args.a2 = a2;
-    func_0011DB00(0x1B, 0xC, &args, 0, 0);
+    QueueIopCommand(0x1B, 0xC, &args, 0, 0);
 }
 
 s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
@@ -214,14 +214,14 @@ void func_0011D8B0(void* a0, s32 a1, s32 a2)
     args.a0 = a0;
     args.a1 = a1;
     args.a2 = a2;
-    func_0011DB00(0x29, 0xC, &args, 0, 0);
+    QueueIopCommand(0x29, 0xC, &args, 0, 0);
 }
 
 s32 func_0011D968(s32 kind, s32 a1, s32 a2);
 
 void func_0011E4F8()
 {
-    func_0011D968(0x40, 0, 0);
+    SendIopCommandAndWait(0x40, 0, 0);
 }
 
 void func_0011EE70(f32 key, s32 flags, s32 stride, s32 n, u8* base, f32* outDiff, f32* outDelta, u8** outPtr)
@@ -289,7 +289,7 @@ void func_0011F180(T2196_668* src, s32* outCount, f32** outValues)
     *outCount = src->count;
     if (outValues != 0)
     {
-        *outValues = (f32*)func_0018D658(*outCount << 2);
+        *outValues = (f32*)AllocateBackMemory(*outCount << 2);
         for (s32 i = 0; i < *outCount; i++)
         {
             (*outValues)[i] = src->keys[i].time;
@@ -304,7 +304,7 @@ void func_0011F620(T2196_688* self, s32* count, f32** out)
     s32 n = self->count;
     *count = n;
     if (out != 0) {
-        *out = (f32*)func_0018D658(n * 4);
+        *out = (f32*)AllocateBackMemory(n * 4);
         for (s32 i = 0; i < *count; i++) {
             (*out)[i] = self->keys[i].time;
         }
@@ -315,7 +315,7 @@ void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
 
 void func_0011FDB8(T2196_6B8* self, s32* outCount, f32** outTimes)
 {
-    func_0011F850(self->axis, outCount, outTimes);
+    GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
 void func_00109488(void);
@@ -333,8 +333,8 @@ s32 func_00137D10(void* p);
 void func_0011EC40(void* self, void* obj)
 {
     s32 r;
-    while ((r = func_00137D10(obj)) >= 0) {
-        func_0011E680(self, D_002505D8 + (r << 5), obj);
+    while ((r = ReadBufferedS16(obj)) >= 0) {
+        ApplyPropertyRecord(self, D_002505D8 + (r << 5), obj);
     }
 }
 
@@ -376,12 +376,12 @@ void func_0011AB58(void* p);
 
 void* func_0011C618(void)
 {
-    void* s0 = func_001B5EA0(D_0062C568);
+    void* s0 = PopFreeSlot(g_matrixPayloadPool);
     if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)D_0062C568);
+        func_001F5C0C(s0, 0, *(u32*)g_matrixPayloadPool);
     } else {
-        func_0011AB58(D_00259F38);
-        s0 = func_001B5EE0(D_0062C568);
+        CollectScriptPools(D_00259F38);
+        s0 = PopZeroedFreeSlot(g_matrixPayloadPool);
     }
     return s0;
 }
@@ -391,7 +391,7 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 void func_0011D6A8(s32 a0)
 {
     s32 buf = a0;
-    func_0011DB00(0x16, 4, &buf, 0, 0);
+    QueueIopCommand(0x16, 4, &buf, 0, 0);
 }
 
 s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
@@ -399,7 +399,7 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 void func_0011D6D8(s32 a0)
 {
     s32 buf = a0;
-    func_0011DB00(0x17, 4, &buf, 0, 0);
+    QueueIopCommand(0x17, 4, &buf, 0, 0);
 }
 
 s32 func_0011D968(s32 id, s32 size, void* data);
@@ -407,7 +407,7 @@ s32 func_0011D968(s32 id, s32 size, void* data);
 void func_0011D708(s32 a0)
 {
     s32 buf = a0;
-    func_0011D968(0x19, 4, &buf);
+    SendIopCommandAndWait(0x19, 4, &buf);
 }
 
 s32 func_0011D968(s32 id, s32 flags, void* args);
@@ -420,21 +420,21 @@ void func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
     args[2] = a2;
     args[3] = a3;
     args[4] = a4;
-    func_0011D968(0x3B, 0x14, args);
+    SendIopCommandAndWait(0x3B, 0x14, args);
 }
 
 s32 func_0011D968(s32 id, s32 flags, void* args);
 
 void func_0011E460(void)
 {
-    func_0011D968(0x3D, 0, 0);
+    SendIopCommandAndWait(0x3D, 0, 0);
 }
 
 s32 func_0011D968(s32 id, s32 flags, void* args);
 
 void func_0011E498(void)
 {
-    func_0011D968(0x3C, 0, 0);
+    SendIopCommandAndWait(0x3C, 0, 0);
 }
 
 void* func_0018D658(s32 size);
@@ -443,7 +443,7 @@ void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr)
 {
     *outCount = count;
     if (outArr) {
-        *outArr = (f32*)func_0018D658(count * 4);
+        *outArr = (f32*)AllocateBackMemory(count * 4);
         s32 i = 0;
         if (*outCount > 0) {
             Key2196_Vec* p = src;
@@ -472,7 +472,7 @@ void func_0011F9F8(s32 a, s32 b, s32 c, s32 d, s32 e, f32 g, f32 h);
 
 void func_0011FDD8(T2196_6C8* self, PlacedObject* other, s32 a2, s32 a3, s32 a4, f32 p12, f32 p13)
 {
-    func_0011F9F8(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
+    EvaluateVectorKeyCurve(self->count, (s32)self->keys, a2, a3, a4, p12, p13);
     if (other && other->desc02()->m28)
         ((Hook_11FC20)other->desc02()->m28)(other, a3, a4);
 }
@@ -481,7 +481,7 @@ void func_0011FB98(s32 count, Key2196_Vec* src, s32* outCount, f32** outArr);
 
 void func_0011FED8(T2196_6C8* self, s32* outCount, f32** outArr)
 {
-    func_0011FB98(self->count, self->keys, outCount, outArr);
+    GetVectorKeyTimes(self->count, self->keys, outCount, outArr);
 }
 
 extern s32 D_0025C268;
@@ -496,10 +496,10 @@ void func_0011C418(R11B008Key* a, R11B008Key* b, s32 c);
 void func_0011C418(R11B008Key* a, R11B008Key* b, s32 c)
 {
     b->key = a->key;
-    func_0011B258(&a->value, &b->value, c);
+    CloneScriptValue(&a->value, &b->value, c);
     if (a->next != 0) {
-        R11B008Key* n = func_0011C498();
-        func_0011C418(a->next, n, c);
+        R11B008Key* n = NewKeyedValue();
+        CopyKeyedValueChain(a->next, n, c);
         b->next = n;
     }
 }
@@ -509,9 +509,9 @@ void func_001F5C0C(void* dst, s32 value, u32 size);
 
 R11B008Key* func_0011C498(void)
 {
-    R11B008Key* n = (R11B008Key*)func_0011C240(&D_0025C290);
+    R11B008Key* n = (R11B008Key*)TakePoolEntry(&g_keyedValuePool);
     func_001F5C0C(n, 0, 16);
-    func_0011B008(&n->value);
+    InitScriptValue(&n->value);
     n->value.tag = -1;
     return n;
 }
@@ -519,7 +519,7 @@ R11B008Key* func_0011C498(void)
 
 void func_0011C4E8(R11B008Key* a)
 {
-    func_0011B060(&a->value, 2);
+    DestroyScriptValue(&a->value, 2);
 }
 
 extern s32 D_0062C558;
@@ -531,12 +531,12 @@ void func_001F5C0C(void* dst, s32 value, u32 size);
 
 void* func_0011C508(void)
 {
-    void* p = func_001B5EA0(&D_0062C558);
+    void* p = PopFreeSlot(&g_vectorAPayloadPool);
     if (p != 0) {
-        func_001F5C0C(p, 0, D_0062C558);
+        func_001F5C0C(p, 0, g_vectorAPayloadPool);
     } else {
-        func_0011AB58(D_00259F38);
-        p = func_001B5EE0(&D_0062C558);
+        CollectScriptPools(D_00259F38);
+        p = PopZeroedFreeSlot(&g_vectorAPayloadPool);
     }
     return p;
 }
@@ -548,7 +548,7 @@ void func_0011D520(s32 x, s32 y)
     s32 args[2];
     args[0] = x;
     args[1] = y;
-    func_0011DB00(0xD, 8, args, 0, 0);
+    QueueIopCommand(0xD, 8, args, 0, 0);
 }
 
 s32 func_0011D968(s32 a, s32 b, void* args);
@@ -562,7 +562,7 @@ void func_0011D598(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     args[3] = a3;
     args[4] = a4;
     args[5] = a5;
-    func_0011D968(0x11, 0x18, args);
+    SendIopCommandAndWait(0x11, 0x18, args);
 }
 
 struct Words_11D8F0 { s32 a; s32 b; };
@@ -574,7 +574,7 @@ void func_0011D8F0(s32 a, s32 b)
     Words_11D8F0 w;
     w.a = a;
     w.b = b;
-    func_0011D968(0x28, 8, &w);
+    SendIopCommandAndWait(0x28, 8, &w);
 }
 
 struct Word_11D928 { s32 a; };
@@ -585,7 +585,7 @@ void func_0011D928(s32 a)
 {
     Word_11D928 w;
     w.a = a;
-    func_0011DB00(0x27, 4, &w, 0, 0);
+    QueueIopCommand(0x27, 4, &w, 0, 0);
 }
 
 void func_0011EFB0(T2196_Weight* unused, s32* a, s32* b)
@@ -603,16 +603,16 @@ void* func_0018D500(s32 size);
 
 void func_0011EFC8(T2196_668* self, Stream83* src)
 {
-    self->count = func_00137BE0(src);
-    self->keys = (Key2196_668*)func_0018D500(0x18 * self->count);
+    self->count = ReadBufferedU16(src);
+    self->keys = (Key2196_668*)AllocateFrontMemory(0x18 * self->count);
     for (s32 i = 0; i < self->count; i++) {
         Key2196_668* e = self->keys + i;
-        e->time = (f32)func_00137D10(src) * 0.016666668f;
-        e->value = func_00137DF8(src);
-        e->c = func_00137CC0(src);
-        e->kind = func_00137CC0(src);
-        e->d = func_00137DF8(src);
-        e->f = func_00137DF8(src);
+        e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
+        e->value = ReadBufferedFloat(src);
+        e->c = ReadBufferedS8(src);
+        e->kind = ReadBufferedS8(src);
+        e->d = ReadBufferedFloat(src);
+        e->f = ReadBufferedFloat(src);
     }
 }
 
@@ -624,19 +624,19 @@ void* func_0018D500(s32 size);
 
 void func_0011F210(T2196_678* self, Stream83* src)
 {
-    self->count = func_00137BE0(src);
-    self->keys = (Key2196_678*)func_0018D500(0x20 * self->count);
+    self->count = ReadBufferedU16(src);
+    self->keys = (Key2196_678*)AllocateFrontMemory(0x20 * self->count);
     for (s32 i = 0; i < self->count; i++) {
         Key2196_678* e = self->keys + i;
-        e->time = (f32)func_00137D10(src) * 0.016666668f;
-        e->value = func_00137DF8(src);
-        e->c = func_00137CC0(src);
-        e->kind = func_00137CC0(src);
-        e->d = func_00137DF8(src);
-        f32 t = func_00137DF8(src);
+        e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
+        e->value = ReadBufferedFloat(src);
+        e->c = ReadBufferedS8(src);
+        e->kind = ReadBufferedS8(src);
+        e->d = ReadBufferedFloat(src);
+        f32 t = ReadBufferedFloat(src);
         e->e = e->value - t;
-        e->g = func_00137DF8(src);
-        f32 u = func_00137DF8(src);
+        e->g = ReadBufferedFloat(src);
+        f32 u = ReadBufferedFloat(src);
         e->h = e->value + u;
     }
 }
@@ -650,15 +650,15 @@ void func_0011C128(EntryPool* p, s32 count, s32 size)
 {
     p->stride = count + 8;
     p->count = size;
-    p->mem = (u8*)func_0018D500((count + 8) * size);
-    void* node = func_0011C288(p, 0);
+    p->mem = (u8*)AllocateFrontMemory((count + 8) * size);
+    void* node = GetPoolEntry(p, 0);
     p->freeList = node;
     s32 i = 1;
     if (i < size) {
         void* prev;
         do {
             prev = node;
-            node = func_0011C288(p, i);
+            node = GetPoolEntry(p, i);
             i++;
             *(void**)prev = node;
         } while (i < size);
@@ -673,12 +673,12 @@ void func_001B5F28(void* list, void* item);
 
 void func_0011C5B0(u32 addr)
 {
-    u8* pool = (u8*)&D_0062C558;
-    u8* p = D_0027B300[0] + ((addr - *(u32*)(pool + 4)) >> 4);
+    u8* pool = (u8*)&g_vectorAPayloadPool;
+    u8* p = g_payloadRefCounts[0] + ((addr - *(u32*)(pool + 4)) >> 4);
     s32 v = *p - 1;
     *p = v;
     if ((u8)v == 0) {
-        func_001B5F28(pool, (void*)addr);
+        PushFreeSlot(pool, (void*)addr);
     }
 }
 
@@ -691,12 +691,12 @@ void func_0011AB58(void* p);
 
 void* func_0011C748(void)
 {
-    void* s0 = func_001B5EA0(D_0062C578);
+    void* s0 = PopFreeSlot(g_vectorBPayloadPool);
     if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)D_0062C578);
+        func_001F5C0C(s0, 0, *(u32*)g_vectorBPayloadPool);
     } else {
-        func_0011AB58(D_00259F38);
-        s0 = func_001B5EE0(D_0062C578);
+        CollectScriptPools(D_00259F38);
+        s0 = PopZeroedFreeSlot(g_vectorBPayloadPool);
     }
     return s0;
 }
@@ -706,7 +706,7 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 void func_0011D600(s32 value)
 {
     s32 buf = value;
-    func_0011DB00(0x15, 4, &buf, 0, 0);
+    QueueIopCommand(0x15, 4, &buf, 0, 0);
 }
 
 void* func_0018D658(s32 size);
@@ -717,7 +717,7 @@ void func_0011F3E8(T2196_678* self, s32* outCount, f32** outArr)
     *outCount = n;
     if (outArr) {
         s32 i;
-        *outArr = (f32*)func_0018D658(n * 4);
+        *outArr = (f32*)AllocateBackMemory(n * 4);
         i = 0;
         if (*outCount > 0) {
             do {
@@ -746,7 +746,7 @@ s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
 
 void func_0011D420(void)
 {
-    func_0011DB00(0x8, 0, 0, 0, 0);
+    QueueIopCommand(0x8, 0, 0, 0, 0);
 }
 
 s32 func_0011DB00(s32 id, s32 a1, void* a2, s32 a3, s32 a4);
@@ -756,7 +756,7 @@ void func_0011D480(s32 a0, s32 a1)
     s32 buf[2];
     buf[0] = a0;
     buf[1] = a1;
-    func_0011DB00(0x9, 0x8, buf, 0, 0);
+    QueueIopCommand(0x9, 0x8, buf, 0, 0);
 }
 
 s32 func_0011D968(s32 kind, s32 count, void* words);
@@ -768,7 +768,7 @@ s32 func_0011D7D8(s32 a, s32 b)
     Words_11D7D8 w;
     w.a = a;
     w.b = b;
-    return func_0011D968(0x1C, 8, &w);
+    return SendIopCommandAndWait(0x1C, 8, &w);
 }
 
 s32 func_0011D968(s32 id, s32 flags, void* args);
@@ -781,7 +781,7 @@ void func_0011E4C0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
     args[2] = a2;
     args[3] = a3;
     args[4] = a4;
-    func_0011D968(0x3E, 0x14, args);
+    SendIopCommandAndWait(0x3E, 0x14, args);
 }
 
 s32 func_00137B90(void* src);
@@ -790,15 +790,15 @@ T2196_Weight* func_00121160(s32 index);
 
 void func_0011F798(T2196_Weight** out, Vec02* dst, Stream83* src)
 {
-    s32 mask = func_00137B90(src);
+    s32 mask = ReadBufferedU8(src);
     T2196_Weight** slot = out;
-    func_00137E70(src, dst);
+    ReadBufferedVector3(src, dst);
     s32 i = 2;
     do {
         s32 bit = mask & 1;
         mask >>= 1;
         if (bit) {
-            T2196_Weight* o = func_00121160(func_00137B90(src));
+            T2196_Weight* o = CreateWeightCurve(ReadBufferedU8(src));
             void (*fn)(T2196_Weight*, Stream83*) = o->vt->read;
             if (fn)
                 fn(o, src);
@@ -817,7 +817,7 @@ void func_00130540(u8* a, u8* b, u8* c, u8* d, f32 f12, f32 f13, f32 f14, s32 a4
 void func_0011F9F8(s32 count, s32 base, s32 flags, s32 d, s32 e, f32 key, f32 scale)
 {
     Scratch_11F9F8 s;
-    func_0011EE70(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
+    FindCurveSegment(key, flags, 0x40, count, (u8*)base, &s.diff, &s.delta, &s.ptr);
     u8* p = s.ptr;
     func_00130540(p + 0x10, p + 0x30, p + 0x50, p + 0x60, s.delta, s.diff, scale, d, e, 0);
 }
@@ -836,14 +836,14 @@ void* func_0011C3B8(void* base);
 void* func_0011C1D8(Pool_11C1D8* self)
 {
     if (self->free == 0) {
-        func_0011AB58(D_00259F38);
+        CollectScriptPools(D_00259F38);
     }
     Link_11C1D8* n = self->free;
     if (n != 0) {
         self->free = n->next;
         n->next = self->used;
         self->used = n;
-        return func_0011C3B8(n);
+        return GetPoolEntryPayload(n);
     }
     return 0;
 }
@@ -852,7 +852,7 @@ struct Link_11C3C0 { s32 pad0; s32 value; };
 
 void func_0011C3F0(u8* base)
 {
-    ((Link_11C3C0*)func_0011C3C0(base))->value = 1;
+    ((Link_11C3C0*)GetPoolEntryHeader(base))->value = 1;
 }
 
 void func_0011CBB0(void)
@@ -864,7 +864,7 @@ s32 func_0011D968(s32 id, s32 size, void* data);
 void func_0011D4B8(s32 arg)
 {
     s32 local = arg;
-    func_0011D968(10, 4, &local);
+    SendIopCommandAndWait(10, 4, &local);
 }
 
 s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
@@ -872,7 +872,7 @@ s32 func_0011DB00(s32 kind, s32 id, void* args, s32 a3, s32 a4);
 s32 func_0011D4E0(s32 arg)
 {
     s32 local = arg;
-    return func_0011DB00(11, 4, &local, 0, 0);
+    return QueueIopCommand(11, 4, &local, 0, 0);
 }
 
 void func_0011DB00(s32 a, s32 b, void* args, void* c, void* d);
@@ -882,7 +882,7 @@ void func_0011D810(s32 x, s32 y)
     s32 args[2];
     args[0] = x;
     args[1] = y;
-    func_0011DB00(0x1E, 8, args, 0, 0);
+    QueueIopCommand(0x1E, 8, args, 0, 0);
 }
 
 void func_0011EF68(void)
@@ -904,8 +904,8 @@ void* func_0018D500(s32 size);
 
 void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
 {
-    s32 count = func_00137BE0(src);
-    Key2196_Vec* items = (Key2196_Vec*)func_0018D500(count << 6);
+    s32 count = ReadBufferedU16(src);
+    Key2196_Vec* items = (Key2196_Vec*)AllocateFrontMemory(count << 6);
     if (count > 0) {
         u8* p2 = (u8*)&items->v2;
         u8* p1 = (u8*)&items->v1;
@@ -914,12 +914,12 @@ void func_0011FA88(s32* outCount, Key2196_Vec** outItems, Stream83* src)
         s32 left = count;
         do {
             left--;
-            it->time = (f32)func_00137D10(src) * 0.016666668f;
-            func_00137E70(src, p0);
+            it->time = (f32)ReadBufferedS16(src) * 0.016666668f;
+            ReadBufferedVector3(src, p0);
             p0 += 0x40;
-            func_00137E70(src, p1);
+            ReadBufferedVector3(src, p1);
             p1 += 0x40;
-            func_00137E70(src, p2);
+            ReadBufferedVector3(src, p2);
             p2 += 0x40;
             it++;
         } while (left != 0);
@@ -941,9 +941,9 @@ void func_0011FF08(T2196_6E8* self, PlacedObject* other, s32 c, void* p3, void* 
     Scratch_11FF08 tmp;
     func_0011F6B0(self->axis, other, c, &self->base, p3 ? (void*)&tmp : 0, p4 ? (void*)tmp.b : 0);
     if (p3)
-        func_00188A20(&tmp, p3);
+        BuildEulerRotationMatrix(&tmp, p3);
     if (p4)
-        func_001EDE38(&tmp, tmp.b, p4);
+        RotateVectorByTwoAngles(&tmp, tmp.b, p4);
     if (other)
         ((Method_11FF08)other->desc02()->m29)(other, p3, p4);
 }
@@ -958,7 +958,7 @@ struct Node_0011C2A0 {
 
 void* func_0011C240(void* self)
 {
-    void* result = func_0011C1D8(self);
+    void* result = PopPoolFreeEntry(self);
     func_001F5C0C(result, 0, *(s32*)self - 8);
     return result;
 }
@@ -981,13 +981,13 @@ void func_0011C2B0(EntryPool* self)
 void func_0011D640(s32 value)
 {
     s32 local = value;
-    func_0011DB00(0x13, 4, &local, 0, 0);
+    QueueIopCommand(0x13, 4, &local, 0, 0);
 }
 
 void func_0011D730(s32 value, s32 a1, s32 a2)
 {
     s32 local = value;
-    func_0011DB00(0x19, 4, &local, a1, a2);
+    QueueIopCommand(0x19, 4, &local, a1, a2);
 }
 
 void func_0011D760(s32 a0, s32 a1)
@@ -995,7 +995,7 @@ void func_0011D760(s32 a0, s32 a1)
     s32 local[2];
     local[0] = a0;
     local[1] = a1;
-    func_0011D968(0x1A, 8, local);
+    SendIopCommandAndWait(0x1A, 8, local);
 }
 
 void func_0011D860(s32 a0, s32 a1, s32 a2, s32 a3)
@@ -1005,7 +1005,7 @@ void func_0011D860(s32 a0, s32 a1, s32 a2, s32 a3)
     local[1] = a1;
     local[2] = a2;
     local[3] = a3;
-    func_0011DB00(0x22, 16, local, 0, 0);
+    QueueIopCommand(0x22, 16, local, 0, 0);
 }
 
 void func_0011E328(s32 a0, s32 a1)
@@ -1013,7 +1013,7 @@ void func_0011E328(s32 a0, s32 a1)
     s32 local[2];
     local[0] = a0;
     local[1] = a1;
-    func_0011DB00(0xE, 8, local, 0, 0);
+    QueueIopCommand(0xE, 8, local, 0, 0);
 }
 
 void func_0011E360(s32 a0, s32 a1, s32 a2)
@@ -1022,7 +1022,7 @@ void func_0011E360(s32 a0, s32 a1, s32 a2)
     local[0] = a0;
     local[1] = a1;
     local[2] = a2;
-    func_0011DB00(0xF, 12, local, 0, 0);
+    QueueIopCommand(0xF, 12, local, 0, 0);
 }
 
 void func_0011E3A0(s32 a0, s32 a1)
@@ -1030,7 +1030,7 @@ void func_0011E3A0(s32 a0, s32 a1)
     s32 local[2];
     local[0] = a0;
     local[1] = a1;
-    func_0011DB00(0x51, 8, local, 0, 0);
+    QueueIopCommand(0x51, 8, local, 0, 0);
 }
 
 void func_0011EFA8()
@@ -1045,7 +1045,7 @@ void* func_0011FFA8(T2196_6E8* self, u32 a1, u32 a2, u32 a3, u32 a4)
 extern u32 D_0062C56C;
 s32 func_0011C690(u32 addr)
 {
-    u8* p = D_0027B300[1] + ((addr - D_0062C56C) >> 6);
+    u8* p = g_payloadRefCounts[1] + ((addr - D_0062C56C) >> 6);
     s32 v = *p;
     v++;
     *p = v;
@@ -1055,7 +1055,7 @@ s32 func_0011C690(u32 addr)
 extern u32 D_0062C58C;
 s32 func_0011C8D0(u32 addr)
 {
-    u8* p = D_0027B300[3] + ((addr - D_0062C58C) >> 3);
+    u8* p = g_payloadRefCounts[3] + ((addr - D_0062C58C) >> 3);
     s32 v = *p;
     v++;
     *p = v;
@@ -1067,7 +1067,7 @@ s32 D_0025C344 = 0;
 void func_0011D110(s32* ptr, s32 count)
 {
     D_0025C344 = count;
-    D_0025C340 = ptr;
+    g_iopReplyBuffer = ptr;
     ptr[count + 1] = 0;
     ptr[0] = 0;
 }
@@ -1106,7 +1106,7 @@ void func_0011C2E8(EntryPool* self)
             cur->next = (Node_11C2E8*)self->freeList;
             self->freeList = cur;
             if (self->removeCallback != 0) {
-                ((Cb_11C2E8)self->removeCallback)(func_0011C3B8(cur));
+                ((Cb_11C2E8)self->removeCallback)(GetPoolEntryPayload(cur));
             }
         }
         cur = prev->next;
@@ -1128,12 +1128,12 @@ void func_001B5F28(void* list, void* item);
 
 void func_0011C6C0(s32 a)
 {
-    u8* base = D_0062C568;
+    u8* base = g_matrixPayloadPool;
     s32 idx = (s32)((u32)(a - *(s32*)(base + 4)) >> 6);
-    u8* p = (u8*)(*(s32*)((u8*)D_0027B300 + 4) + idx);
+    u8* p = (u8*)(*(s32*)((u8*)g_payloadRefCounts + 4) + idx);
     *p = *p - 1;
     if (*p == 0) {
-        func_001B5F28(base, (void*)a);
+        PushFreeSlot(base, (void*)a);
     }
 }
 
@@ -1143,12 +1143,12 @@ void func_001B5F28(void* list, void* item);
 
 void func_0011C7F0(u32 addr)
 {
-    u8* pool = D_0062C578;
-    u8* p = D_0027B300[2] + ((addr - *(u32*)(pool + 4)) >> 4);
+    u8* pool = g_vectorBPayloadPool;
+    u8* p = g_payloadRefCounts[2] + ((addr - *(u32*)(pool + 4)) >> 4);
     s32 v = *p - 1;
     *p = v;
     if ((u8)v == 0) {
-        func_001B5F28(pool, (void*)addr);
+        PushFreeSlot(pool, (void*)addr);
     }
 }
 
@@ -1158,12 +1158,12 @@ void func_001B5F28(void* list, void* item);
 
 void func_0011C900(u32 addr)
 {
-    u8* pool = D_0062C588;
-    u8* p = D_0027B300[3] + ((addr - *(u32*)(pool + 4)) >> 3);
+    u8* pool = g_pairPayloadPool;
+    u8* p = g_payloadRefCounts[3] + ((addr - *(u32*)(pool + 4)) >> 3);
     s32 v = *p - 1;
     *p = v;
     if ((u8)v == 0) {
-        func_001B5F28(pool, (void*)addr);
+        PushFreeSlot(pool, (void*)addr);
     }
 }
 
@@ -1174,7 +1174,7 @@ void func_0011F478(T2196_688* self, s32 unused, s32 flags, f32* outF, f32* outI,
     f32 diff;
     f32 delta;
     u8* p;
-    func_0011EE70(key, flags, 8, self->count, (u8*)self->keys, &diff, &delta, &p);
+    FindCurveSegment(key, flags, 8, self->count, (u8*)self->keys, &diff, &delta, &p);
     if (delta < 0.0001f) {
         if (outF != 0) {
             *outF = ((Key2196_688*)p)->value;
@@ -1200,12 +1200,12 @@ void* func_0018D500(s32 size);
 
 void func_0011F568(T2196_688* self, Stream83* src)
 {
-    self->count = func_00137BE0(src);
-    self->keys = (Key2196_688*)func_0018D500(self->count << 3);
+    self->count = ReadBufferedU16(src);
+    self->keys = (Key2196_688*)AllocateFrontMemory(self->count << 3);
     for (s32 i = 0; i < self->count; i++) {
         Key2196_688* e = self->keys + i;
-        e->time = (f32)func_00137D10(src) * 0.016666668f;
-        e->value = func_00137DF8(src);
+        e->time = (f32)ReadBufferedS16(src) * 0.016666668f;
+        e->value = ReadBufferedFloat(src);
     }
 }
 
@@ -1229,8 +1229,8 @@ void func_0011FFD8(T2196_6E8* self, Stream83* arg)
     Locals_11FFD8 loc;
     s32 result;
 
-    func_0011F798(self->axis, &self->base, arg);
-    func_0018D608();
+    ReadAxisCurves(self->axis, &self->base, arg);
+    PushBackMemoryMark();
     self->vt->times(self, &loc.count, &loc.values);
     if (loc.count > 0) {
         self->vt->eval(self, 0, 0, loc.a, 0, loc.values[0], 1.0f);
@@ -1242,7 +1242,7 @@ void func_0011FFD8(T2196_6E8* self, Stream83* arg)
         result = 1;
     }
     self->closed = result;
-    func_0018D6F0();
+    PopBackMemoryMark();
 }
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f18` and the `move $a0`); the argument setup is scheduled differently.
@@ -1255,7 +1255,7 @@ void func_0011F0C8(T2196_668* self, s32 unused, s32 flags, f32* outF, f32* outI,
     f32 diff;
     f32 delta;
     u8* p;
-    func_0011EE70(key, flags, 0x18, self->count, (u8*)self->keys, &diff, &delta, &p);
+    FindCurveSegment(key, flags, 0x18, self->count, (u8*)self->keys, &diff, &delta, &p);
     if (((Key2196_668*)p)->kind == 5) {
         if (outF != 0) {
             *outF = ((Key2196_668*)p)->value;
@@ -1265,7 +1265,7 @@ void func_0011F0C8(T2196_668* self, s32 unused, s32 flags, f32* outF, f32* outI,
         }
         return;
     }
-    func_001303F0(delta, diff, scale, ((Key2196_668*)p)->value, ((Key2196_668*)p)->f, ((Key2196_668*)p + 1)->value, ((Key2196_668*)p + 1)->d, outF, outI, 0);
+    EvaluateHermiteSegment(delta, diff, scale, ((Key2196_668*)p)->value, ((Key2196_668*)p)->f, ((Key2196_668*)p + 1)->value, ((Key2196_668*)p + 1)->d, outF, outI, 0);
 }
 
 // NEAR: same bytes except the order of the float move `mov.s $f14,$f20` (retail issues it first, before the `lwc1 $f12` and the `move $a0`); the argument setup is scheduled differently.
@@ -1278,7 +1278,7 @@ void func_0011F320(T2196_678* self, s32 unused, s32 flags, f32* outF, f32* outI,
     f32 diff;
     f32 delta;
     u8* p;
-    func_0011EE70(key, flags, 0x20, self->count, (u8*)self->keys, &diff, &delta, &p);
+    FindCurveSegment(key, flags, 0x20, self->count, (u8*)self->keys, &diff, &delta, &p);
     if (((Key2196_678*)p)->kind == 5) {
         if (outF != 0) {
             *outF = ((Key2196_678*)p)->value;
@@ -1288,7 +1288,7 @@ void func_0011F320(T2196_678* self, s32 unused, s32 flags, f32* outF, f32* outI,
         }
         return;
     }
-    func_00130168(delta, diff, scale, ((Key2196_678*)p)->value, ((Key2196_678*)p)->g, ((Key2196_678*)p)->h, ((Key2196_678*)p + 1)->value, ((Key2196_678*)p + 1)->d, ((Key2196_678*)p + 1)->e, outF, outI, 0);
+    SolveBezierSegment(delta, diff, scale, ((Key2196_678*)p)->value, ((Key2196_678*)p)->g, ((Key2196_678*)p)->h, ((Key2196_678*)p + 1)->value, ((Key2196_678*)p + 1)->d, ((Key2196_678*)p + 1)->e, outF, outI, 0);
 }
 
 struct Pack7_11E048 { void* w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
@@ -1305,7 +1305,7 @@ s32 func_0011E048(void* a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 
     buf.w4 = a6;
     buf.w5 = a7;
     buf.w6 = a8;
-    return func_0011D968(0x2C, 0x1C, &buf);
+    return SendIopCommandAndWait(0x2C, 0x1C, &buf);
 }
 
 typedef void (*Slot_11ECB8)(void* self, void* arg);
@@ -1322,16 +1322,16 @@ void func_00182ED8(void* obj);
 
 void func_0011ECB8(World* self, void* a1, void* a2)
 {
-    s32 n = func_00137D10(a2);
+    s32 n = ReadBufferedS16(a2);
     if (n > 0) {
         s32 i = n;
         do {
-            s32 slot = func_00137D10(a2);
-            s32 key = func_00137D10(a2);
-            s32 flag = func_00137D10(a2);
-            Obj_11ECB8* obj = (Obj_11ECB8*)func_0011E580(slot, self, a1, key, flag);
+            s32 slot = ReadBufferedS16(a2);
+            s32 key = ReadBufferedS16(a2);
+            s32 flag = ReadBufferedS16(a2);
+            Obj_11ECB8* obj = (Obj_11ECB8*)CreateTypedRecord(slot, self, a1, key, flag);
             obj->vtbl[14](obj, a2);
-            s32 r = func_0011ECA0(key);
+            s32 r = MapKeyToSlotIndex(key);
             if (r >= 0) {
                 self->slot1CE8[r] = (BaseObject*)obj;
 
@@ -1376,14 +1376,14 @@ s32 func_0011CE30(void)
     s32 idx;
     s32 k;
     Cb_11CE30 f;
-    if (D_0025C340 != 0 && func_0011D078() != 0) {
+    if (g_iopReplyBuffer != 0 && IsIopReplyReady() != 0) {
         if (D_0025C35C != 0) {
             if (D_0025C3A0.fn != 0)
-                ((Cb_11CE30)D_0025C3A0.fn)(D_0025C3C4.result, D_0025C3A8[0]);
+                ((Cb_11CE30)D_0025C3A0.fn)(g_iopBankLoadResult.result, D_0025C3A8[0]);
             D_0025C3A0.fn = 0;
             D_0025C35C = 0;
         } else {
-            idx = D_0025C380 != 1;
+            idx = g_iopBufferIndex != 1;
             i = 0;
             if (D_0025C360[idx][0] > 0) {
                 do {
@@ -1397,7 +1397,7 @@ s32 func_0011CE30(void)
     }
     if (D_0025C388.busy != 0) {
         func_001F6C20(0);
-        k = D_00260E00.result;
+        k = g_iopChannel2Result.result;
         if ((u32)k != 0xFFFFFFFFu) {
             if (D_0025C390.fn != 0) {
                 u64 a = D_0025C390.arg;
@@ -1406,17 +1406,17 @@ s32 func_0011CE30(void)
                 D_0025C390.arg = 0;
                 g(k, a);
             }
-            D_00260E00.result = 0;
+            g_iopChannel2Result.result = 0;
             D_0025C388.busy = 0;
         }
     }
-    if (D_0025C340 == 0) {
-        s32* p = D_0025C360[D_0025C380];
+    if (g_iopReplyBuffer == 0) {
+        s32* p = D_0025C360[g_iopBufferIndex];
         if (p[0] != 0 && D_0025C384 == 0)
-            func_0011DE18();
+            FlushIopCommandBuffer();
     }
     if (D_0025C354 != 0) {
-        func_0011E1F8(1);
+        SyncDiscRead(1);
         if (D_0025C358 != 0) {
             D_0025C354 = 0;
             f = (Cb_11CE30)D_0025C350;
@@ -1425,7 +1425,7 @@ s32 func_0011CE30(void)
                 ((Cb1_11CE30)f)(1);
         }
     }
-    if (D_0025C340 != 0 || D_0025C388.busy != 0)
+    if (g_iopReplyBuffer != 0 || D_0025C388.busy != 0)
         return 1;
     return 0;
 }
@@ -1453,26 +1453,26 @@ s32 func_0011D968(s32 id, s32 size, u8* data)
     s32 i;
     s32 r;
     for (i = 0; i < size; i++)
-        D_0025C400[i] = data[i];
-    while ((s32)D_0025C340) {
-        func_0011CE30();
+        g_iopCommandArgs[i] = data[i];
+    while ((s32)g_iopReplyBuffer) {
+        PollIopCommands();
         func_001F6C20(0);
     }
-    func_0011D110(&D_0025C3C0, 1);
+    ArmIopReplyBuffer(&D_0025C3C0, 1);
     while (func_001F8480(D_0027B4C8)) {
-        func_001E1F10((void*)D_002494E8);
-        func_0011CE30();
+        PrintFormatted((void*)D_002494E8);
+        PollIopCommands();
         func_001F6C20(0);
     }
     if (size)
-        func_001F8290(D_0027B4C8, id, 1, D_0025C400, size, &D_0025C3C0, 0xC, 0, 0);
+        func_001F8290(D_0027B4C8, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
     else
         func_001F8290(D_0027B4C8, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
-    while (!func_0011D078()) {
+    while (!IsIopReplyReady()) {
     }
     r = ((Req_0025C3C0*)&D_0025C3C0)->result;
-    if (*D_0025C360[D_0025C380] != 0 && D_0025C384 == 0)
-        func_0011DE18();
+    if (*D_0025C360[g_iopBufferIndex] != 0 && D_0025C384 == 0)
+        FlushIopCommandBuffer();
     return r;
 }
 
@@ -1497,11 +1497,11 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     s32 flag = 0;
     s32 i;
 
-    if (D_0025C384 == 0 && D_0025C340 == 0 && len == 0 && arg == 0) {
-        func_0011D110((&D_0025C3C0), 1);
+    if (D_0025C384 == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
+        ArmIopReplyBuffer((&D_0025C3C0), 1);
         while (func_001F8480(D_0027B4C8) != 0) {
-            func_001E1F10(D_002494E8);
-            func_0011CE30();
+            PrintFormatted(D_002494E8);
+            PollIopCommands();
             func_001F6C20(0);
         }
         func_001F8290(D_0027B4C8, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
@@ -1517,23 +1517,23 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     }
 
     for (;; i++) {
-        if (*D_0025C360[D_0025C380] != 0x100 && D_0025C368[D_0025C380] >= size)
+        if (*D_0025C360[g_iopBufferIndex] != 0x100 && D_0025C368[g_iopBufferIndex] >= size)
             break;
         if (D_0025C384 != 0) {
             D_0025C384 = 0;
             flag = 1;
         }
-        func_0011CE30();
+        PollIopCommands();
         if (i == 1)
-            func_001E1F10(D_002497D8, D_0025C380, *D_0025C360[D_0025C380]);
+            PrintFormatted(D_002497D8, g_iopBufferIndex, *D_0025C360[g_iopBufferIndex]);
     }
     if (i != 0)
-        func_001E1F10(D_00249838, i);
+        PrintFormatted(D_00249838, i);
     if (flag != 0)
         D_0025C384 = 1;
 
     {
-        s16* p = (s16*)(((u8*)D_0025C360[D_0025C380]) - (D_0025C368[D_0025C380] - 0x1000));
+        s16* p = (s16*)(((u8*)D_0025C360[g_iopBufferIndex]) - (D_0025C368[g_iopBufferIndex] - 0x1000));
         s32 j;
         *p = cmd;
         p++;
@@ -1543,12 +1543,12 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
             ((u8*)p)[j] = data[j];
     }
     {
-        s32 k = D_0025C380;
+        s32 k = g_iopBufferIndex;
         D_0025C368[k] -= size;
         *(s32*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16) = arg;
         *(u64*)(((u8**)D_0025C370)[k] + *D_0025C360[k] * 16 + 8) = val;
     }
-    func_0011DDD8();
+    CommitQueuedIopCommand();
 }
 
 extern u8 D_0062C588[];
@@ -1561,12 +1561,12 @@ void func_0011AB58(void* p);
 
 void* func_0011C858(void)
 {
-    void* s0 = func_001B5EA0(D_0062C588);
+    void* s0 = PopFreeSlot(g_pairPayloadPool);
     if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)D_0062C588);
+        func_001F5C0C(s0, 0, *(u32*)g_pairPayloadPool);
     } else {
-        func_0011AB58(D_00259F38);
-        s0 = func_001B5EE0(D_0062C588);
+        CollectScriptPools(D_00259F38);
+        s0 = PopZeroedFreeSlot(g_pairPayloadPool);
     }
     return s0;
 }
@@ -1582,12 +1582,12 @@ Pool_11C968* func_001B5EE0(s32* pool);
 
 Pool_11C968* func_0011C968(void)
 {
-    Pool_11C968* p = func_001B5EA0(D_0062C598);
+    Pool_11C968* p = PopFreeSlot(g_triplePayloadPool);
     if (p) {
-        func_001F5C0C(p, 0, D_0062C598[0]);
+        func_001F5C0C(p, 0, g_triplePayloadPool[0]);
     } else {
-        func_0011AB58(D_00259F38);
-        p = func_001B5EE0(D_0062C598);
+        CollectScriptPools(D_00259F38);
+        p = PopZeroedFreeSlot(g_triplePayloadPool);
     }
     return p;
 }
@@ -1606,18 +1606,18 @@ void func_0011EDA8(BaseObject* self)
 {
     BufferedStream buf;
     s32 off = self->desc->id << 3;
-    s32 n = *(s32*)(D_00244950 + off);
-    u8* list = *(u8**)(D_00244950 + off + 4);
+    s32 n = *(s32*)(g_classPropertyLists + off);
+    u8* list = *(u8**)(g_classPropertyLists + off + 4);
     if (n > 0) {
         Pair_11EDA8* p = (Pair_11EDA8*)(list + 4);
         s32 i = n;
         do {
             Node_11EDA8* node = (Node_11EDA8*)p->node;
             if (node->flags & 0x800) {
-                func_00137290(&buf, 0, 0, 0);
-                func_00137398(&buf, 4, node->body);
-                func_0011E680(self, node, &buf);
-                func_001372E0(&buf, 2);
+                InitBufferedStream(&buf, 0, 0, 0);
+                OpenBufferedMemoryStream(&buf, 4, node->body);
+                ApplyPropertyRecord(self, node, &buf);
+                DestroyBufferedStream(&buf, 2);
             }
             p++;
         } while (--i != 0);
@@ -1651,37 +1651,37 @@ s32 func_0011D140(s32 a0, s32 a1)
 
     D_0025C348 = 0;
     if (D_0025C388.busy != 0) {
-        func_001E1F10((struct Ptr_11D140 *)D_00249570);
+        PrintFormatted((struct Ptr_11D140 *)D_00249570);
         return 0;
     }
-    v = func_0011E1F8(1);
+    v = SyncDiscRead(1);
     if (v == 1) {
-        func_001E1F10((struct Ptr_11D140 *)D_002495A0);
+        PrintFormatted((struct Ptr_11D140 *)D_002495A0);
         return 0;
     }
-    s32* p = &D_00260E00.result;
+    s32* p = &g_iopChannel2Result.result;
     m = 0xFFFFFFFFu;
     *p = (s32)m;
-    D_00260E40[1] = a1;
-    D_00260E40[0] = a0;
+    g_iopChannel2Args[1] = a1;
+    g_iopChannel2Args[0] = a0;
     while (func_001F8480((struct Ptr_11D140 *)D_0027B4F0)) {
-        func_001E1F10((struct Ptr_11D140 *)D_002494E8);
-        func_0011CE30();
+        PrintFormatted((struct Ptr_11D140 *)D_002494E8);
+        PollIopCommands();
         func_001F6C20(0);
     }
-    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, D_00260E40, 8, &D_00260E00.result, 4, 0, 0);
-    v1 = D_00260E00.result;
+    w = func_001F8290((struct Ptr_11D140 *)D_0027B4F0, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
+    v1 = g_iopChannel2Result.result;
     if (w < 0) {
-        func_001E1F10((struct Ptr_11D140 *)D_002495C0);
+        PrintFormatted((struct Ptr_11D140 *)D_002495C0);
         D_0025C348 = 0x106;
         return 0;
     }
     if ((u32)v1 == 0xFFFFFFFFu) {
         do {
             func_001F6C20(0);
-        } while ((u32)D_00260E00.result == 0xFFFFFFFFu);
+        } while ((u32)g_iopChannel2Result.result == 0xFFFFFFFFu);
     }
-    return D_00260E00.result;
+    return g_iopChannel2Result.result;
 }
 
 // EXACT: reuse parameter a1 directly instead of a local copy
@@ -1719,7 +1719,7 @@ Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
 {
     s32 off = index << 2;
     Owner_11E580* owner = *(Owner_11E580**)((u8*)D_00247448 + off);
-    Rec_11E580* r = (Rec_11E580*)func_0018D5C0(owner->f0C);
+    Rec_11E580* r = (Rec_11E580*)AllocateZeroedFrontMemory(owner->f0C);
     r->f00 = owner;
     r->f08 = a3;
     if (index == 0x6C) {
@@ -1729,8 +1729,8 @@ Rec_11E580* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
     r->f18 = a2;
     r->f14 = a1;
     Arg_11E580* id = (Arg_11E580*)a4;
-    r->f2C = func_001C1390(id, a1);
-    func_00152470(func_00159F20(r->f14, r->f08), r);
+    r->f2C = GetScriptEntryScope(id, a1);
+    AppendToList(GetHashedSlot(r->f14, r->f08), r);
     u8* base = (u8*)r->f14 + 0x1884;
     void** slot = (void**)(base + off);
     r->f24 = *slot;
@@ -1776,21 +1776,21 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
         i = 31;
         rp = &ret;
         for (; i != -1; i--) {
-            func_0011B008(p);
+            InitScriptValue(p);
             p++;
         }
         n = d->count;
         for (k = 0; k < n; k++) {
-            u32 t = func_00137D10(r);
+            u32 t = ReadBufferedS16(r);
             switch (t) {
             case 0:
-                { s32 v = func_00137B90(r); func_0011B5F0(&sc.buf[k], v); }
+                { s32 v = ReadBufferedU8(r); SetScriptValueBool(&sc.buf[k], v); }
                 break;
             case 5:
-                { s32 v = func_00137D78(r); func_0011B570(&sc.buf[k], v); }
+                { s32 v = ReadBufferedS32(r); SetScriptValueInt(&sc.buf[k], v); }
                 break;
             case 1:
-                { f32 v = func_00137DF8(r); func_0011B5B0(&sc.buf[k], v); }
+                { f32 v = ReadBufferedFloat(r); SetScriptValueFloat(&sc.buf[k], v); }
                 break;
             case 6:
             case 7:
@@ -1800,47 +1800,47 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
             case 17:
             case 20:
             {
-                s32 v = func_00137D10(r);
-                func_0011B570(&sc.buf[k], v);
+                s32 v = ReadBufferedS16(r);
+                SetScriptValueInt(&sc.buf[k], v);
                 break;
             }
             case 9: {
-                f32* v = (f32*)func_0011C748();
-                v[0] = func_00137DF8(r);
-                v[1] = func_00137DF8(r);
-                v[2] = func_00137DF8(r);
-                func_0011B7D0(&sc.buf[k], v);
+                f32* v = (f32*)AcquireVectorBPayload();
+                v[0] = ReadBufferedFloat(r);
+                v[1] = ReadBufferedFloat(r);
+                v[2] = ReadBufferedFloat(r);
+                SetScriptValueVectorB(&sc.buf[k], v);
                 break;
             }
             case 10: {
-                f32* v = (f32*)func_0011C858();
-                v[0] = func_00137DF8(r);
-                v[1] = func_00137DF8(r);
-                func_0011B818(&sc.buf[k], v);
+                f32* v = (f32*)AcquirePairPayload();
+                v[0] = ReadBufferedFloat(r);
+                v[1] = ReadBufferedFloat(r);
+                SetScriptValuePair(&sc.buf[k], v);
                 break;
             }
             case 2: {
-                f32* v = (f32*)func_0011C508();
-                v[0] = func_00137DF8(r);
-                v[1] = func_00137DF8(r);
-                v[2] = func_00137DF8(r);
-                func_0011B740(&sc.buf[k], v);
+                f32* v = (f32*)AcquireVectorAPayload();
+                v[0] = ReadBufferedFloat(r);
+                v[1] = ReadBufferedFloat(r);
+                v[2] = ReadBufferedFloat(r);
+                SetScriptValueVectorA(&sc.buf[k], v);
                 break;
             }
             default:
                 if (((t & 0x7FFFFFFF) >> 12) == 1) {
-                    s32 v = func_00137D10(r);
-                    func_0011B570(&sc.buf[k], v);
+                    s32 v = ReadBufferedS16(r);
+                    SetScriptValueInt(&sc.buf[k], v);
                 }
                 break;
             }
         }
         d->fC(rp, obj, n, sc.buf);
-        func_0011B060(rp, 2);
+        DestroyScriptValue(rp, 2);
         e = rp;
         while (sc.buf != e) {
             e--;
-            func_0011B060(e, 0);
+            DestroyScriptValue(e, 0);
         }
     } else if (flags & 0x80) {
         u8* dst;
@@ -1851,40 +1851,40 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
         }
         switch (d->type) {
         case 0:
-            *dst = func_00137B90(r);
+            *dst = ReadBufferedU8(r);
             break;
         case 5:
-            *(s32*)dst = func_00137D78(r);
+            *(s32*)dst = ReadBufferedS32(r);
             break;
         case 1:
-            *(f32*)dst = func_00137DF8(r);
+            *(f32*)dst = ReadBufferedFloat(r);
             break;
         case 10:
-            ((f32*)dst)[0] = func_00137DF8(r);
-            ((f32*)dst)[1] = func_00137DF8(r);
+            ((f32*)dst)[0] = ReadBufferedFloat(r);
+            ((f32*)dst)[1] = ReadBufferedFloat(r);
             break;
         case 2:
         case 9:
         case 11:
-            ((f32*)dst)[0] = func_00137DF8(r);
-            ((f32*)dst)[1] = func_00137DF8(r);
-            ((f32*)dst)[2] = func_00137DF8(r);
+            ((f32*)dst)[0] = ReadBufferedFloat(r);
+            ((f32*)dst)[1] = ReadBufferedFloat(r);
+            ((f32*)dst)[2] = ReadBufferedFloat(r);
             break;
         case 3:
         case 12:
-            ((f32*)dst)[0] = func_00137DF8(r);
-            ((f32*)dst)[1] = func_00137DF8(r);
-            ((f32*)dst)[2] = func_00137DF8(r);
-            ((f32*)dst)[3] = func_00137DF8(r);
+            ((f32*)dst)[0] = ReadBufferedFloat(r);
+            ((f32*)dst)[1] = ReadBufferedFloat(r);
+            ((f32*)dst)[2] = ReadBufferedFloat(r);
+            ((f32*)dst)[3] = ReadBufferedFloat(r);
             break;
         case 13:
-            *(s32*)dst = func_00137C40(r);
+            *(s32*)dst = ReadBufferedU32(r);
             break;
         case 4: {
             f32* t = sc.f;
-            t[0] = func_00137DF8(r);
-            t[1] = func_00137DF8(r);
-            t[2] = func_00137DF8(r);
+            t[0] = ReadBufferedFloat(r);
+            t[1] = ReadBufferedFloat(r);
+            t[2] = ReadBufferedFloat(r);
             func_00188978(t, (f32*)dst);
             break;
         }
@@ -1898,7 +1898,7 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
         case 18:
         case 19:
         default:
-            *(s32*)dst = func_00137D10(r);
+            *(s32*)dst = ReadBufferedS16(r);
             break;
         }
     } else {
@@ -1917,18 +1917,18 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
         }
         switch (d->type) {
         case 0:
-            ((void (*)(void*, s32))fn)(tgt, func_00137B90(r));
+            ((void (*)(void*, s32))fn)(tgt, ReadBufferedU8(r));
             break;
         case 5:
-            ((void (*)(void*, s32))fn)(tgt, func_00137D78(r));
+            ((void (*)(void*, s32))fn)(tgt, ReadBufferedS32(r));
             break;
         case 1:
-            ((void (*)(void*, f32))fn)(tgt, func_00137DF8(r));
+            ((void (*)(void*, f32))fn)(tgt, ReadBufferedFloat(r));
             break;
         case 10: {
             f32* t = sc.f;
-            t[0] = func_00137DF8(r);
-            t[1] = func_00137DF8(r);
+            t[0] = ReadBufferedFloat(r);
+            t[1] = ReadBufferedFloat(r);
             ((void (*)(void*, f32*))fn)(tgt, t);
             break;
         }
@@ -1936,34 +1936,34 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
         case 9:
         case 11: {
             f32* t = sc.f;
-            t[0] = func_00137DF8(r);
-            t[1] = func_00137DF8(r);
-            t[2] = func_00137DF8(r);
+            t[0] = ReadBufferedFloat(r);
+            t[1] = ReadBufferedFloat(r);
+            t[2] = ReadBufferedFloat(r);
             ((void (*)(void*, f32*))fn)(tgt, t);
             break;
         }
         case 3:
         case 12: {
             f32* t = sc.f;
-            t[0] = func_00137DF8(r);
-            t[1] = func_00137DF8(r);
-            t[2] = func_00137DF8(r);
-            t[3] = func_00137DF8(r);
+            t[0] = ReadBufferedFloat(r);
+            t[1] = ReadBufferedFloat(r);
+            t[2] = ReadBufferedFloat(r);
+            t[3] = ReadBufferedFloat(r);
             ((void (*)(void*, f32*))fn)(tgt, t);
             break;
         }
         case 13: {
             s32* t = sc.i;
-            t[0] = func_00137C40(r);
+            t[0] = ReadBufferedU32(r);
             ((void (*)(void*, s32*))fn)(tgt, t);
             break;
         }
         case 4: {
             f32* t = sc.f;
             f32* o;
-            t[0] = func_00137DF8(r);
-            t[1] = func_00137DF8(r);
-            t[2] = func_00137DF8(r);
+            t[0] = ReadBufferedFloat(r);
+            t[1] = ReadBufferedFloat(r);
+            t[2] = ReadBufferedFloat(r);
             o = sc.f + 4;
             func_00188978(t, o);
             ((void (*)(void*, f32*))fn)(tgt, o);
@@ -1975,10 +1975,10 @@ void func_0011E680(void* obj, Dsc_11E680* d, BufferedStream* r)
         case 15:
         case 16:
         case 17:
-            ((void (*)(void*, s32))fn)(tgt, func_00137D10(r));
+            ((void (*)(void*, s32))fn)(tgt, ReadBufferedS16(r));
             break;
         default:
-            ((void (*)(void*, s32))fn)(tgt, func_00137D10(r));
+            ((void (*)(void*, s32))fn)(tgt, ReadBufferedS16(r));
             break;
         }
     }
@@ -1999,20 +1999,20 @@ s32 func_0011D078(void)
     u32* table;
 
     func_001F6C20(0);
-    if (D_0025C340 == 0) {
+    if (g_iopReplyBuffer == 0) {
         return 1;
     }
     if (func_001F8480((Arg_0011D078*)D_0027B4C8) != 0) {
         return 0;
     }
-    table = (u32*)D_0025C340;
+    table = (u32*)g_iopReplyBuffer;
     if (table[0] == 0xFFFFFFFF) {
         if (table[D_0025C344 + 1] == table[0]) {
-            D_0025C340 = 0;
+            g_iopReplyBuffer = 0;
             return 1;
         }
     }
-    func_001E1F10((Arg_0011D078*)D_00249460);
+    PrintFormatted((Arg_0011D078*)D_00249460);
     return 0;
 }
 
@@ -2032,16 +2032,16 @@ s32 func_001F8290(Sync_11DE18* a0, s32 a1, s32 a2, s32* a3, s32 a4, s32* a5, s32
 
 void func_0011DE18(void)
 {
-    func_0011D110(D_0025C378[D_0025C380], *D_0025C360[D_0025C380]);
+    ArmIopReplyBuffer(D_0025C378[g_iopBufferIndex], *D_0025C360[g_iopBufferIndex]);
     while (func_001F8480((Sync_11DE18*)D_0027B4C8)) {
-        func_001E1F10((Cfg_11DE18*)D_002494E8);
+        PrintFormatted((Cfg_11DE18*)D_002494E8);
         func_001F6C20(0);
     }
-    (void)func_001F8290((Sync_11DE18*)D_0027B4C8, 0x4D, 1, D_0025C360[D_0025C380],
-                  0x1000 - D_0025C368[D_0025C380], D_0025C378[D_0025C380],
-                  *D_0025C360[D_0025C380] * 4 + 8, 0, 0);
-    s32 n = (D_0025C380 ^ 1) != 0;
-    D_0025C380 = n;
+    (void)func_001F8290((Sync_11DE18*)D_0027B4C8, 0x4D, 1, D_0025C360[g_iopBufferIndex],
+                  0x1000 - D_0025C368[g_iopBufferIndex], D_0025C378[g_iopBufferIndex],
+                  *D_0025C360[g_iopBufferIndex] * 4 + 8, 0, 0);
+    s32 n = (g_iopBufferIndex ^ 1) != 0;
+    g_iopBufferIndex = n;
     *D_0025C360[n] = 0;
     D_0025C368[n] = 0xFFC;
 }
@@ -2068,25 +2068,25 @@ void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
 {
     D_0025C348 = 0;
     if (D_0025C388.busy != 0) {
-        func_001E1F10((Ctx_0011D2A8*)D_00249570);
+        PrintFormatted((Ctx_0011D2A8*)D_00249570);
         return;
     }
-    if (func_0011E1F8(1) == 1) {
-        func_001E1F10((Ctx_0011D2A8*)D_002495A0);
+    if (SyncDiscRead(1) == 1) {
+        PrintFormatted((Ctx_0011D2A8*)D_002495A0);
         return;
     }
-    (*(u32*)&D_00260E00.result) = 0xFFFFFFFF;
-    (*(Pair_11D2A8*)&D_00260E40).a = (s32)a0;
-    (*(Pair_11D2A8*)&D_00260E40).b = a1;
+    (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
+    (*(Pair_11D2A8*)&g_iopChannel2Args).a = (s32)a0;
+    (*(Pair_11D2A8*)&g_iopChannel2Args).b = a1;
     (*(Args_11D2A8*)&D_0025C390).a = a2;
     (*(Args_11D2A8*)&D_0025C390).c = a3;
     while (func_001F8480((Ctx_0011D2A8*)D_0027B4F0)) {
-        func_001E1F10((Ctx_0011D2A8*)D_002494E8);
-        func_0011CE30();
+        PrintFormatted((Ctx_0011D2A8*)D_002494E8);
+        PollIopCommands();
         func_001F6C20(0);
     }
     D_0025C388.busy = 1;
-    func_001F8290((Ctx_0011D2A8*)D_0027B4F0, 3, 1, ((Pair_11D2A8*)&D_00260E40), 8, ((u32*)&D_00260E00.result), 4, 0, 0);
+    func_001F8290((Ctx_0011D2A8*)D_0027B4F0, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
 }
 
 extern s32 D_0062C59C;
@@ -2112,14 +2112,14 @@ void func_001B5F28(Table_0011CA20* t, u8* item);
 
 void func_0011CA20(u8* p)
 {
-    Table_0011CA20* t = (Table_0011CA20*)((u8*)&D_0062C598);
+    Table_0011CA20* t = (Table_0011CA20*)((u8*)&g_triplePayloadPool);
     u32 index = ((u32)p - t->origin) / 12;
     u8* cell = D_0027B310 + index;
     *cell = (u8)(*cell - 1);
     if (*cell != 0) {
         return;
     }
-    func_001B5F28(t, p);
+    PushFreeSlot(t, p);
 }
 
 s32 func_0011E538(s32 a0)
@@ -2174,20 +2174,20 @@ void func_0011CBB8(void)
     D_0025C388.busy = 0;
     D_0025C390.fn = 0;
     D_0025C390.arg = 0;
-    D_00260E00.result = 0;
+    g_iopChannel2Result.result = 0;
     do {
         ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4F0, 0x123457, 0) >= 0, 0x83);
         for (n = 10000; --n != -1;) {
         }
     } while (((Rpc_0011CBB8*)D_0027B4F0)->f24 == 0);
-    D_00260DC0.f00 = 0;
+    g_iopSharedPacket.f00 = 0;
     D_0025C540[0] = 0;
     D_0025D540[0] = 0;
     D_0025C368[0] = 0xFFC;
     D_0025C368[1] = 0xFFC;
-    D_00260DC0.f10 = 0;
-    n = (s32)&D_00260DC0;
-    func_0011D968(0, 4, &n);
+    g_iopSharedPacket.f10 = 0;
+    n = (s32)&g_iopSharedPacket;
+    SendIopCommandAndWait(0, 4, &n);
 }
 
 // D_00260DC0 is the RPC packet shared with the IOP, declared volatile above; the volatile
@@ -2196,9 +2196,9 @@ s32 func_00203D90();
 
 s32 func_0011E2E8()
 {
-    if (D_0025C34C == 0)
+    if (g_iopDiscAccess == 0)
         return func_00203D90();
-    return D_00260DC0.f10;
+    return g_iopSharedPacket.f10;
 }
 
 extern s32 D_0025C34C;
@@ -2208,11 +2208,11 @@ s32 func_0011CE30(void);
 
 s32 func_0011E1F8(s32 flag)
 {
-    if (D_0025C34C == 0) {
+    if (g_iopDiscAccess == 0) {
         return func_002032C8(flag);
     }
     func_001F6C20(0);
-    u32 ready = (*(volatile u32*)&D_00260DC0) < 1;
+    u32 ready = (*(volatile u32*)&g_iopSharedPacket) < 1;
     (*(u32*)&D_0025C358) = ready;
     if (ready == 1) {
         return 0;
@@ -2221,9 +2221,9 @@ s32 func_0011E1F8(s32 flag)
         return 1;
     }
     while ((*(u32*)&D_0025C358) == 0) {
-        func_0011CE30();
+        PollIopCommands();
         func_001F6C20(0);
-        (*(u32*)&D_0025C358) = (*(volatile u32*)&D_00260DC0) < 1;
+        (*(u32*)&D_0025C358) = (*(volatile u32*)&g_iopSharedPacket) < 1;
     }
     return 0;
 }
@@ -2244,19 +2244,19 @@ void func_0011DB00(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argumen
 
 s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
 {
-    if (D_0025C34C == 0) {
+    if (g_iopDiscAccess == 0) {
         return func_00203B18(a0, a1, a2, a3);
     }
-    if (func_0011E1F8(1) == 1) {
+    if (SyncDiscRead(1) == 1) {
         return 0;
     }
     s32 args[3];
     args[0] = a0;
-    (*(volatile Sync_11E138*)&D_00260DC0).busy = 1;
-    (*(volatile Sync_11E138*)&D_00260DC0).result = 0;
+    (*(volatile Sync_11E138*)&g_iopSharedPacket).busy = 1;
+    (*(volatile Sync_11E138*)&g_iopSharedPacket).result = 0;
     args[1] = a1;
     args[2] = a2;
-    func_0011DB00(0x38, 0xC, args, 0, 0);
+    QueueIopCommand(0x38, 0xC, args, 0, 0);
     D_0025C354 = 1;
     D_0025C358 = 0;
     return 1;
@@ -2290,11 +2290,11 @@ struct Init_11CA90 {
 
 void func_0011CA90(void)
 {
-    Init_11CA90::Load(((u8*)&D_0062C558), 0x10, &D_0025C2F0, &D_0027B300[0]);
-    Init_11CA90::Load(D_0062C568, 0x40, &D_0025C2F4, &D_0027B304);
-    Init_11CA90::Load(D_0062C578, 0x10, &D_0025C2F8, &D_0027B308);
-    Init_11CA90::Load(D_0062C588, 0x08, &D_0025C2FC, &D_0027B30C);
-    Init_11CA90::Load(((u8*)&D_0062C598), 0x0C, D_0025C300, &D_0027B310);
+    Init_11CA90::Load(((u8*)&g_vectorAPayloadPool), 0x10, &D_0025C2F0, &g_payloadRefCounts[0]);
+    Init_11CA90::Load(g_matrixPayloadPool, 0x40, &D_0025C2F4, &D_0027B304);
+    Init_11CA90::Load(g_vectorBPayloadPool, 0x10, &D_0025C2F8, &D_0027B308);
+    Init_11CA90::Load(g_pairPayloadPool, 0x08, &D_0025C2FC, &D_0027B30C);
+    Init_11CA90::Load(((u8*)&g_triplePayloadPool), 0x0C, D_0025C300, &D_0027B310);
 }
 
 void func_0018D800(f32* dst, f32* src, s32 n);
@@ -2321,14 +2321,14 @@ void func_0011F850(T2196_Weight** objs, s32* outCount, f32** outArr)
         return;
     }
     s32 last = total - 1;
-    f32* arr = (f32*)func_0018D658(total * 4);
+    f32* arr = (f32*)AllocateBackMemory(total * 4);
     f32* w = arr;
     for (i = 0; i < 3; i++) {
-        func_0018D800(w, ptrs[i], counts[i] * 4);
+        CopyMemory(w, ptrs[i], counts[i] * 4);
         w += counts[i];
     }
     w = arr + 1;
-    func_001F5CD0(arr, total, 4, func_001EB128);
+    func_001F5CD0(arr, total, 4, CompareFloats);
     f32* r = w;
     for (total = last - 1; total >= 0; total--) {
         if (*r != w[-1]) { *w = *r; w++; }

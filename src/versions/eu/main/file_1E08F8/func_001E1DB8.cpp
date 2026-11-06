@@ -8,25 +8,25 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
     loc.va = a2;
     if (*s1 != 0) {
         do {
-            char* s2 = func_001E21D8((Str_1E1DB8*)s1, '%');
+            char* s2 = FindCharInString((Str_1E1DB8*)s1, '%');
             s32 n = (s32)s2 - (s32)s1;
             if (s2 == 0) {
-                n = func_001E2100((Str_1E1DB8*)s1);
+                n = GetStringLength((Str_1E1DB8*)s1);
                 s2 = (char*)((s32)s1 + n);
             }
             if (n != 0) {
-                if (func_001D7190(ctx, (const char*)s1, n) < n) {
+                if (AppendToOutputBuffer(ctx, (const char*)s1, n) < n) {
                     break;
                 }
                 s1 = (const u8*)s2;
             }
             if (*s1 == '%') {
-                s32 n2 = func_001E0978((const char*)s1, loc.spec, (void*)&loc.va);
-                func_001E1A08(loc.spec, ctx, (void*)&loc.va, (const char*)s1, n2);
+                s32 n2 = ParseFormatSpec((const char*)s1, loc.spec, (void*)&loc.va);
+                FormatConversionArg(loc.spec, ctx, (void*)&loc.va, (const char*)s1, n2);
                 s1 = s1 + n2;
             }
         } while (*s1 != 0);
     }
-    func_001D72C8(ctx);
+    FlushOutputBuffer(ctx);
     return ctx->count;
 }

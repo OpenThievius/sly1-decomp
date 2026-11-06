@@ -22,95 +22,95 @@ void func_00133B58(Self_133B58_eu* self, Gs_133B58* gs)
     s32 i;
     f32 x;
 
-    func_001613C0(gs, 0x8C, 2, 0x41);
+    BeginGifTag(gs, 0x8C, 2, 0x41);
 
-    func_00161458(gs, *(u32*)&c2);
-    func_00161670(gs, 0x6C00, 0x7ABB, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x7ADE, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7ABB, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7ADE, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = func_00131000(&D_00261280, i);
+        f32 v = EvalCurveSpan(&D_00261280, i);
         f32 sx = x * 640.0f;
         f32 v2 = v + 4.0f;
-        func_00161458(gs, *(u32*)&c2);
+        AddGifRgbaEntry(gs, *(u32*)&c2);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c1);
-        func_001615F0(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c2);
-    func_001615F0(gs, 0x9400, 0x7ABB, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x7ADE, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfEntry(gs, 0x9400, 0x7ABB, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x7ADE, 0, 0);
 
-    func_00161458(gs, *(u32*)&c2);
-    func_00161670(gs, 0x6C00, 0x80C2, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x80A0, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x80C2, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x80A0, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = func_00131000(&D_002612B0, i);
+        f32 v = EvalCurveSpan(&D_002612B0, i);
         f32 sx = x * 640.0f;
         f32 v2 = v - 4.0f;
-        func_00161458(gs, *(u32*)&c2);
+        AddGifRgbaEntry(gs, *(u32*)&c2);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c1);
-        func_001615F0(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c2);
-    func_001615F0(gs, 0x9400, 0x80C2, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x80A0, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfEntry(gs, 0x9400, 0x80C2, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x80A0, 0, 0);
 
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x7ADE, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_00161670(gs, 0x6C00, 0x7B01, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7ADE, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7B01, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = func_00131000(&D_00261280, i);
+        f32 r = EvalCurveSpan(&D_00261280, i);
         f32 sx = x * 640.0f;
         f32 v = r + 4.0f;
         f32 v2 = v + 4.0f;
-        func_00161458(gs, *(u32*)&c1);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c0);
-        func_001615F0(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c0);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x7ADE, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_001615F0(gs, 0x9400, 0x7B01, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x7ADE, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfEntry(gs, 0x9400, 0x7B01, 0, 0);
 
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x80A0, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_00161670(gs, 0x6C00, 0x807D, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x80A0, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x807D, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = func_00131000(&D_002612B0, i);
+        f32 r = EvalCurveSpan(&D_002612B0, i);
         f32 sx = x * 640.0f;
         f32 v = r - 4.0f;
         f32 v2 = v - 4.0f;
-        func_00161458(gs, *(u32*)&c1);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c0);
-        func_001615F0(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c0);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x80A0, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_001615F0(gs, 0x9400, 0x807D, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x80A0, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfEntry(gs, 0x9400, 0x807D, 0, 0);
 }

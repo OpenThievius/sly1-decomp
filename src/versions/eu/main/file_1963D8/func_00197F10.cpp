@@ -3,7 +3,7 @@
 void func_00197F10(C18* self, s32 kind, void* rec)
 {
     s32 code;
-    func_00192230(self, kind, rec);
+    HandleSwitchedColliderNotification(self, kind, rec);
     switch (kind) {
     case 0xB:
         self->f644 = 0;
@@ -19,22 +19,22 @@ void func_00197F10(C18* self, s32 kind, void* rec)
         if (code == 0x3F3) {
             u8* tbl;
             *(void**)D_0026E744 = (u8*)self + 0x67C;
-            tbl = (u8*)&D_0026D348;
+            tbl = (u8*)&g_gaugeAmountCaption;
             *(void**)(tbl + 0x574) = (u8*)self + 0x680;
             *(void**)(tbl + 0x578) = (u8*)self + 0x684;
             func_001DDC38(self->world, self);
-            func_001AB890(&D_0026E760, self->f688);
-            func_001AB928(&D_0026E760, 0.0f, (void*)func_00197458);
-            func_001AB938(&D_0026E760);
+            StartTimer(&g_timerElement, self->f688);
+            SetTimerLimit(&g_timerElement, 0.0f, (void*)func_00197458);
+            StartTimerCounting(&g_timerElement);
         } else {
             if (code < 0x3F3) {
                 return;
             }
             if (code < 0x3F6) {
-                func_001AB958(&D_0026E760);
-                D_0026D348.vt->m15(&D_0026D348);
+                StopTimer(&g_timerElement);
+                g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
                 D_0026E4E0.vt->m15(&D_0026E4E0);
-                D_0026E760.vt->m15(&D_0026E760);
+                g_timerElement.vt->m15(&g_timerElement);
                 func_001DDC38(self->world, 0);
             }
         }

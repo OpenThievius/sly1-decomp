@@ -9,8 +9,8 @@ u8 func_001E13D0(Obj_1E13D0* self0, s32 a, s32 b)
     } else {
         f32 t = func_00205C78(10.0f, (f32)(-b));
         Obj_1E13D0* p = func_001FCDE0(self, func_001FD868(t));
-        self = func_001EAE78(p);
-        p = func_001EAE78(func_001FCDE0(self, 0.1));
+        self = TruncateDouble(p);
+        p = TruncateDouble(func_001FCDE0(self, 0.1));
         p = func_001FCDE0(p, (u64)0x4024000000000000ULL);
         idx = func_001FD410(func_001FCD78(self, p));
     }

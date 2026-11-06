@@ -26,8 +26,8 @@ void func_001A93C8(void* self);
 
 void func_001A80E0(ObjectPool* self)
 {
-    func_00182ED0(self);
-    func_001A93C8(self);
+    UnregisterObject(self);
+    ClearObjectPoolChoice(self);
 }
 
 void func_001F3C08(void* a, f32* out);
@@ -38,7 +38,7 @@ void func_001A97C8(u8* self, f32* out, int x)
 {
     f32 v[12];
     if (*(void**)(self + 0x10) != 0) {
-        func_001F3C08(*(void**)(self + 0x10), v);
+        GetObjectWorldRotation(*(void**)(self + 0x10), v);
         func_00128150(0, x, v, v);
         *out = func_00205778(v[1], v[0]);
     } else if (*(u8**)(self + 0x14) != 0) {
@@ -55,11 +55,11 @@ void func_0012E760(void* obj);
 void func_001A9A40(C0D* self)
 {
     u8* s = (u8*)self;
-    func_001C7CB8(self);
+    UpdateAgent(self);
     void* p = *(void**)(s + 0xC20);
     if (p != 0) {
         if (*(f32*)((u8*)p + 0x18) == 0.0f) {
-            func_0012E760(p);
+            StopAnimationPlayer(p);
             *(void**)(s + 0xC20) = 0;
         }
     }
@@ -82,19 +82,19 @@ void func_001AB980(T217D_510* self, f32 value);
 
 void func_001AB660(T217D_510* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     if (self->mode == 0) {
         return;
     }
     if (self->state == 0) {
-        s32 close = (1.0f <= D_0026185C - self->stateSince);
+        s32 close = (1.0f <= g_gameTime - self->stateSince);
         if ((u32)(self->mode - 1) < 2) {
             if (self->f290 != 0 || close) {
                 self->vt->m15(self);
             }
         }
     } else {
-        func_001AB980(self, D_00261860);
+        StepTimer(self, g_frameDt);
     }
 }
 
@@ -102,7 +102,7 @@ void func_001ABE20(T217D_510* self, s32 state)
 {
     if (self->state != state) {
         self->state = state;
-        self->stateSince = D_0026185C;
+        self->stateSince = g_gameTime;
     }
 }
 
@@ -110,7 +110,7 @@ extern s32 D_0026227C;
 
 void func_001AA268(ScreenElement* self)
 {
-    s32 value = D_0026227C;
+    s32 value = g_defaultFont;
     u32 flags = 0xFF808080;
     self->font = (V24A2*)value;
     self->scale = 1.0f;
@@ -152,13 +152,13 @@ void func_001AA790(ScreenElement* self)
                 void* vt = *(void**)((u8*)obj + 76);
                 VirtualCall_1AA790 fn = *(VirtualCall_1AA790*)((u8*)vt + 76);
                 s16 adj = *(s16*)((u8*)vt + 72);
-                fn((u8*)obj + adj, handle, out, &D_00262280);
+                fn((u8*)obj + adj, handle, out, &g_gsPacketWriter);
             }
         }
         x = self->scale;
-        func_0015C8B8(self->font, x, x);
-        func_0015C638(self->font, &self->text[0], out, 0, &D_00262280);
-        func_0015C900(self->font);
+        PushFontScale(self->font, x, x);
+        DrawFontString(self->font, &self->text[0], out, 0, &g_gsPacketWriter);
+        PopFontScale(self->font);
     }
 }
 
@@ -182,7 +182,7 @@ void func_001DDC38(void* sub, C0D* self);
 
 void func_001A98F8(C0D* self)
 {
-    func_001C72A0(self);
+    StartAgent(self);
     func_001DDC38(self->world, self);
 }
 
@@ -201,7 +201,7 @@ void func_001C8418(C0D* self, void* p);
 
 void func_001A9960(C0D* self)
 {
-    func_001C8C08(self);
+    UpdateAgentGoal(self);
     if (self->f724 == 0x10) {
         void* r = ((VFn_1A9960*)self->desc)[102](self);
         if (r != 0)
@@ -214,7 +214,7 @@ void func_001C8BC0(C0D* self);
 
 void func_001A99B8(C0D* self)
 {
-    func_001C8E28(self);
+    UpdateAgentState(self);
     if (self->f724 == 0x10)
         func_001C8BC0(self);
 }
@@ -222,7 +222,7 @@ void func_001A99B8(C0D* self)
 void func_001AB958(T217D_510* self)
 {
     self->f290 = 1;
-    func_001ABE20(self, 0);
+    SetTimerState(self, 0);
 }
 
 f32 func_001ABE40(void)
@@ -248,10 +248,10 @@ void func_0018C7F8(u8* p);
 
 void func_001A99F8(C0D* self)
 {
-    func_001C91C8(self);
+    EnterAgentState(self);
     if (self->f724 == 0xB) {
-        func_001603E8(4);
-        func_0018C7F8(g_memoryCard);
+        MarkLevelDone(4);
+        StartMemoryCardSave(g_memoryCard);
     }
 }
 
@@ -261,10 +261,10 @@ s32 func_001E9970(void);
 
 void func_001A9A98(void)
 {
-    if (func_001E9970()) {
-        D_0026E248.vt->m14(&D_0026E248);
+    if (AreMenusAndFadeClear()) {
+        g_gaugeBarElement.vt->m14(&g_gaugeBarElement);
     } else {
-        D_0026E248.vt->m15(&D_0026E248);
+        g_gaugeBarElement.vt->m15(&g_gaugeBarElement);
     }
 }
 
@@ -281,12 +281,12 @@ extern u8 D_00261868[];
 
 void func_001AA1F0(ScreenElement* self, s32 index)
 {
-    self->place = (T217D_Place*)((u8*)&D_0026C3E0 + index * 20);
+    self->place = (T217D_Place*)((u8*)&g_elementPlaces + index * 20);
     self->outTime = 0.25f;
     self->inTime = 0.25f;
-    self->clock = (f32*)D_00261868;
+    self->clock = (f32*)g_elapsedTime;
     self->index = index;
-    func_001AAB20(self, self->w, self->h);
+    SetScreenElementSize(self, self->w, self->h);
     self->x = self->hiddenX;
     self->y = self->hiddenY;
 }
@@ -296,7 +296,7 @@ void* func_0018D5C0(u32 n);
 void* func_001A8110(ObjectPool* self)
 {
     if (self->sub == 0) {
-        Sub8C* p = (Sub8C*)func_0018D5C0(0x20);
+        Sub8C* p = (Sub8C*)AllocateZeroedFrontMemory(0x20);
         self->sub = p;
         *(ObjectPool**)p = self;
     }
@@ -319,7 +319,7 @@ s32 func_001300E8(void* node, s32 kind);
 
 void func_001A8590(ObjectPool* self)
 {
-    func_00182C58(self);
+    StartObject(self);
     if (self->f168 != 0) {
         return;
     }
@@ -327,11 +327,11 @@ void func_001A8590(ObjectPool* self)
     if (self->id4C != -1) {
         void* p = func_0015A448(self->world, self->id4C, self);
         if (p != 0) {
-            if (func_001300E8(p, 0x7E) != 0) {
+            if (IsObjectOfKind(p, 0x7E) != 0) {
                 self->f60 = p;
-            } else if (func_001300E8(p, 0x73) != 0) {
+            } else if (IsObjectOfKind(p, 0x73) != 0) {
                 self->f64 = p;
-            } else if (func_001300E8(p, 2) != 0) {
+            } else if (IsObjectOfKind(p, 2) != 0) {
                 self->f68 = p;
             }
         }
@@ -339,9 +339,9 @@ void func_001A8590(ObjectPool* self)
     if (self->id50 != -1) {
         void* p = func_0015A448(self->world, self->id50, self);
         if (p != 0) {
-            if (func_001300E8(p, 2) != 0) {
+            if (IsObjectOfKind(p, 2) != 0) {
                 self->fE0 = p;
-            } else if (func_001300E8(p, 0x75) != 0) {
+            } else if (IsObjectOfKind(p, 0x75) != 0) {
                 self->fE4 = p;
             }
         }
@@ -349,9 +349,9 @@ void func_001A8590(ObjectPool* self)
     if (self->id54 != -1) {
         void* p = func_0015A448(self->world, self->id54, self);
         if (p != 0) {
-            if (func_001300E8(p, 0x73) != 0) {
+            if (IsObjectOfKind(p, 0x73) != 0) {
                 self->f160 = p;
-            } else if (func_001300E8(p, 2) != 0) {
+            } else if (IsObjectOfKind(p, 2) != 0) {
                 self->f164 = p;
             }
         }
@@ -383,7 +383,7 @@ void func_001A9498(u8* self)
 
 f32 func_001AB5D8(void)
 {
-    return D_00261858.running != 0 ? 2.5f : 0.0f;
+    return g_gameClock.running != 0 ? 2.5f : 0.0f;
 }
 
 void func_001A93C8(void* self);
@@ -391,7 +391,7 @@ void func_001A93C8(void* self);
 void func_001A86F8(ObjectPool* self, s32 flag)
 {
     if (flag) {
-        func_001A93C8(self);
+        ClearObjectPoolChoice(self);
     }
 }
 
@@ -401,7 +401,7 @@ Entry_1A8718* func_001A8718(ObjectPool* table, s32 key);
 
 void func_001A8778(ObjectPool* table, s32 key)
 {
-    Entry_1A8718* e = func_001A8718(table, key);
+    Entry_1A8718* e = FindObjectPoolEntry(table, key);
     if (e) {
         e->flags |= 2;
     }
@@ -428,7 +428,7 @@ Entry_1A87E0* func_001A8718(void* table, s32 key);
 
 void func_001A87E0(void* table, s32 key, s32 value)
 {
-    Entry_1A87E0* e = func_001A8718(table, key);
+    Entry_1A87E0* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
         if (value >= e->fC) {
             value = e->fC;
@@ -470,8 +470,8 @@ void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
         a2[1] = self->q30;
         a2[2] = self->q40;
     } else if (self->f4 != 0) {
-        func_001F3BD8(self->f4, a1);
-        func_001F3C08(self->f4, a2);
+        GetObjectWorldPosition(self->f4, a1);
+        GetObjectWorldRotation(self->f4, a2);
     } else {
         if (self->f8 != 0) {
             a1[0] = self->f8->q140;
@@ -494,7 +494,7 @@ void func_001A94C0(Obj_1A94C0* self, Quad_1A94C0* a1, Quad_1A94C0* a2, void* a3)
 
 void func_001AB938(T217D_510* self)
 {
-    func_001ABE20(self, 2);
+    SetTimerState(self, 2);
 }
 
 extern u8 D_00261868[];
@@ -503,7 +503,7 @@ void func_001AAF58(ScreenElement* self, f32* p)
 {
     if (self->clock != p) {
         if (p == 0) {
-            p = (f32*)D_00261868;
+            p = (f32*)g_elapsedTime;
         }
         self->since = *p;
     }
@@ -524,7 +524,7 @@ u8* func_0018D568(s32 size, void* src);
 
 void func_001A84C8(ObjectPool* self, ObjectPool* other)
 {
-    func_001830D8(self, other);
+    CopyObjectData(self, other);
     if (self->sub != 0 && self->sub->f4 != 0) {
         if (other->sub->f8 != 0) {
             self->sub = 0;
@@ -533,13 +533,13 @@ void func_001A84C8(ObjectPool* self, ObjectPool* other)
             func_00152438((u8*)other->sub + 0x14, 0x18);
             self->sub = 0;
         }
-        func_001A8110(self);
+        GetObjectPoolShare(self);
         self->sub->f4 = 1;
         self->sub->f8 = 2;
         self->sub->f14 = other;
-        func_00152470((u8*)other->sub + 0x14, self->sub);
+        AppendToList((u8*)other->sub + 0x14, self->sub);
     } else {
-        self->items = func_0018D568(other->count * 0x14, other->items);
+        self->items = CopyToFrontMemory(other->count * 0x14, other->items);
     }
 }
 
@@ -567,7 +567,7 @@ void func_001AB198(T217D_E30* self)
     if (self->text[0] == 0) {
         return;
     }
-    g = &D_0026FF68;
+    g = &g_pauseMenuElement;
     scale = 1.0f;
     if (g->mode != 0) {
         scale = g->fade;
@@ -583,10 +583,10 @@ void func_001AB198(T217D_E30* self)
     func_00137248(out, &tmp[0]);
     func_00137260(out, 0);
     func_00137268(out, 0);
-    func_0015C8B8(self->font, self->scale, self->scale);
-    func_0015DB28(buf, &self->text[0], self->font);
-    func_0015E318(buf, out, 0, &D_00262280);
-    func_0015C900(self->font);
+    PushFontScale(self->font, self->scale, self->scale);
+    InitTextReader(buf, &self->text[0], self->font);
+    DrawAlignedText(buf, out, 0, &g_gsPacketWriter);
+    PopFontScale(self->font);
 }
 
 void func_001AA8F0(ScreenElement* self)
@@ -640,16 +640,16 @@ void func_001AB710(T217D_510* self)
             SubObj_001AB710* sub = *(SubObj_001AB710**)obj;
             if (sub != 0) {
                 VDesc_001AB710* d = sub->desc4C;
-                d->fn4C((u8*)sub + d->off48, obj, &L, &D_00262280);
+                d->fn4C((u8*)sub + d->off48, obj, &L, &g_gsPacketWriter);
             }
         }
         f32 v = self->scale;
-        u8* dp = (u8*)&D_00262280;
-        func_0015C8B8(self->font, v, v);
+        u8* dp = (u8*)&g_gsPacketWriter;
+        PushFontScale(self->font, v, v);
         ((u8*)&L.tag)[0] = 0x54;
         ((u8*)&L.tag)[1] = 0;
-        func_0015C638(self->font, &L.tag, &L, 0, dp);
-        f32 r = func_0015C418(self->font, &L.tag);
+        DrawFontString(self->font, &L.tag, &L, 0, dp);
+        f32 r = MeasureFontString(self->font, &L.tag);
         f32 a = self->x + r;
         L.y = self->y;
         L.x = a;
@@ -657,8 +657,8 @@ void func_001AB710(T217D_510* self)
             L.w30 = self->warnColor;
             L.w10 = L.w30;
         }
-        func_0015C638(self->font, (u8*)self + 9, &L, 0, dp);
-        func_0015C900(self->font);
+        DrawFontString(self->font, (u8*)self + 9, &L, 0, dp);
+        PopFontScale(self->font);
     }
 }
 
@@ -672,7 +672,7 @@ void func_001EFD10(void* a, void* b);
 
 void func_001A9FD0(void)
 {
-    ScreenElement** slots = (ScreenElement**)D_002486B0;
+    ScreenElement** slots = (ScreenElement**)g_screenElements;
     for (s32 i = 36; i >= 0; i--) {
         ScreenElement* o = slots[i];
         o->vt->m02(o);
@@ -680,18 +680,18 @@ void func_001A9FD0(void)
     u8* g = g_screenFade;
     void* b;
     if (*(s32*)D_00262C68 & 4) {
-        b = D_00262C70;
+        b = g_padRecord;
     } else {
-        b = D_00262D38;
+        b = g_blankPadRecord;
     }
-    func_001EFD10(g, b);
+    UpdateScreenFade(g, b);
 }
 
 extern void* const D_002486B0[];
 
 void func_001AA0C0(void)
 {
-    ScreenElement** p = (ScreenElement**)D_002486B0;
+    ScreenElement** p = (ScreenElement**)g_screenElements;
     s32 n = 0x24;
     do {
         n--;
@@ -749,25 +749,25 @@ void func_001A9C68()
     D_0026CBC8.vt = (const T217D_Vt*)D_00217ED0;
     D_0026CE48.vt = (const T217D_Vt*)D_00217F20;
     D_0026D0C8.vt = (const T217D_Vt*)D_00217F70;
-    D_0026D348.vt = (const T217D_Vt*)D_00217FC0;
+    g_gaugeAmountCaption.vt = (const T217D_Vt*)D_00217FC0;
     D_0026D5C8.vt = (const T217D_Vt*)D_002180B0;
     D_0026D848.vt = (const T217D_Vt*)D_00218010;
     D_0026DAC8.vt = (const T217D_Vt*)D_00218060;
     D_0026DD48.vt = (const T217D_Vt*)D_00218100;
     D_0026DFC8.vt = (const T217D_Vt*)D_00218150;
-    D_0026E248.vt = (const T217D_Vt*)D_002182E0;
+    g_gaugeBarElement.vt = (const T217D_Vt*)D_002182E0;
     D_0026E4E0.vt = (const T217D_Vt*)D_002181A0;
-    D_0026E760.vt = (const T217D_Vt*)D_00218510;
-    D_0026E9F8.vt = (const T217D_Vt*)D_00221380;
+    g_timerElement.vt = (const T217D_Vt*)D_00218510;
+    g_timerCaption.vt = (const T217D_Vt*)D_00221380;
     D_0026EC70.vt = (const T217D_Vt*)D_00218330;
     D_0026EED0.vt = (const T217D_Vt*)D_00218380;
     D_0026F138.vt = (const T217D_Vt*)D_002183D0;
     D_0026F5A0.vt = (const T217D_Vt*)D_00218420;
-    D_0026F808.vt = (const T217D_Vt*)D_002210F0;
+    g_mapScreenList.vt = (const T217D_Vt*)D_002210F0;
     D_0026FA90.vt = (const T217D_Vt*)D_002212E0;
     D_0026FD00.vt = (const T217D_Vt*)D_00221330;
-    D_0026FF68.vt = (const T217D_Vt*)D_002186D0;
-    D_002701F8.vt = (const T217D_Vt*)D_0021A440;
+    g_pauseMenuElement.vt = (const T217D_Vt*)D_002186D0;
+    g_typedTextCaptionBox.vt = (const T217D_Vt*)D_0021A440;
     D_00270650.vt = (const T217D_Vt*)D_00220BF0;
     D_002708E0.vt = (const T217D_Vt*)D_0021A3F0;
     D_00271558.vt = (const T217D_Vt*)D_0021A3F0;
@@ -776,15 +776,15 @@ void func_001A9C68()
     D_00272930.vt = (const T217D_Vt*)D_00218470;
     D_00272B98.vt = (const T217D_Vt*)D_002184C0;
     D_002721D0.vt = (const T217D_Vt*)D_00218560;
-    D_00272E08.vt = (const T217D_Vt*)D_00218720;
+    g_stackedCaptionGroup.vt = (const T217D_Vt*)D_00218720;
     D_002739F0.vt = (const T217D_Vt*)D_002185B0;
     D_00273C50.vt = (const T217D_Vt*)D_002185B0;
     D_00273EB0.vt = (const T217D_Vt*)D_00218600;
     D_00274118.vt = (const T217D_Vt*)D_002181F0;
     for (s32 i = 0x24; i >= 0; i--) {
-        ((ScreenElement**)D_002486B0)[i]->vt->m00(((ScreenElement**)D_002486B0)[i], i);
+        ((ScreenElement**)g_screenElements)[i]->vt->m00(((ScreenElement**)g_screenElements)[i], i);
     }
-    func_001EFCE8(g_screenFade);
+    ResetScreenFade(g_screenFade);
 }
 
 extern s8 D_00262250[];
@@ -800,25 +800,25 @@ void func_001AA5A0(ScreenElement* self)
     if (*s != 0) {
         do {
             if (self->font->Has(*s) == 0) {
-                if (func_0015C1C0(3)->Has(*s) != 0) {
-                    d += func_001E1FD0(d, "&%c%c&.", D_00262250[3], *s);
+                if (GetFontById(3)->Has(*s) != 0) {
+                    d += FormatToString(d, "&%c%c&.", g_fontEscapeKeys[3], *s);
                     goto next;
                 }
-                if (func_0015C1C0(4)->Has(*s) != 0) {
-                    d += func_001E1FD0(d, "&%c%c&.", D_00262250[4], *s);
+                if (GetFontById(4)->Has(*s) != 0) {
+                    d += FormatToString(d, "&%c%c&.", g_fontEscapeKeys[4], *s);
                     goto next;
                 }
             }
             if (*s == 0x2F) {
-                if (D_0024E879[s[1]] & 4) {
-                    d += func_001E1FD0(d, "^05~b2a83d/");
+                if (g_charClassFlags[s[1]] & 4) {
+                    d += FormatToString(d, "^05~b2a83d/");
                     s++;
-                    while (*s != 0 && (D_0024E879[*s] & 4)) {
+                    while (*s != 0 && (g_charClassFlags[*s] & 4)) {
                         *d = *s;
                         s++;
                         d++;
                     }
-                    d += func_001E1FD0(d, "~.^.");
+                    d += FormatToString(d, "~.^.");
                     s--;
                 } else {
                     *d = *(u8*)s;
@@ -833,7 +833,7 @@ void func_001AA5A0(ScreenElement* self)
         } while (*s != 0);
     }
     *d = 0;
-    func_001E2138(self->text, buf);
+    CopyString(self->text, buf);
 }
 
 struct Hdr_1A8208 { u8 pad0[4]; s32 f4; s32 f8; Quad16* fC; };
@@ -854,12 +854,12 @@ void func_001A8208(Self_1A8208* self)
     s32 i;
     if (self->f3C != 0) {
         if (self->f3C->f4 != 0) {
-            self->f3C->fC = (Quad16*)func_0018D500(self->f34 << 5);
+            self->f3C->fC = (Quad16*)AllocateFrontMemory(self->f34 << 5);
         }
     }
     for (i = 0; i < self->f34; i++) {
         Ent_1A8208* e = &self->f38[i];
-        PlacedObject* obj = func_0015A418(self->f14, 4, e->f0, self);
+        PlacedObject* obj = FindFirstObjectById(self->f14, 4, e->f0, self);
         s32 n;
         s32 cnt;
         if (obj == 0) {
@@ -880,7 +880,7 @@ void func_001A8208(Self_1A8208* self)
             self->f3C->f8 = 1;
             func_00152438((u8*)self->f3C + 0x14, 0x18);
         c1: {
-                s32 r = func_001527D8((u8*)self->f3C + 0x14);
+                s32 r = CountListItems((u8*)self->f3C + 0x14);
                 s32 lim = r + 1;
                 s32 m = e->f4;
                 s32 q = lim;
@@ -893,12 +893,12 @@ void func_001A8208(Self_1A8208* self)
             cnt = n - 1;
         }
     done:
-        if (n != 0) e->f8 = (void**)func_0018D500(n << 2);
+        if (n != 0) e->f8 = (void**)AllocateFrontMemory(n << 2);
         e->f8[e->fC++] = obj;
         if (cnt > 0) {
             s32 k = cnt;
             do {
-                PlacedObject* o2 = func_00183058(obj, obj->world, obj->parent);
+                PlacedObject* o2 = CreateObjectCopy(obj, obj->world, obj->parent);
                 e->f8[e->fC++] = o2;
                 if (o2->desc->m0F != 0) o2->desc->m0F(o2);
                 o2->desc->m10(o2);
@@ -939,7 +939,7 @@ Ent_1A87A8* func_001A8718(Tab_1A87A8* table, s32 key);
 
 void func_001A87A8(Tab_1A87A8* table, s32 key)
 {
-    Ent_1A87A8* e = func_001A8718(table, key);
+    Ent_1A87A8* e = FindObjectPoolEntry(table, key);
     if (e != 0) {
         e->flags &= ~2;
     }
@@ -952,7 +952,7 @@ s32 func_001A8C50(ObjectPool* self)
     if (self->f48 != 0) {
         return 1;
     }
-    func_001A8AF8(self);
+    ChooseObjectPoolItem(self);
     return self->f48 != 0;
 }
 
@@ -973,7 +973,7 @@ void func_001AAB20(ScreenElement *self, f32 x, f32 y) {
     if (0.0f <= y) {
         self->h = y;
     }
-    func_001AAB60(self);
+    PlaceScreenElement(self);
 }
 
 struct Obj_1A93E8;
@@ -983,14 +983,14 @@ void func_001A93E8(u8* self)
 {
     u8* p = self + 0x60;
     func_001F5C0C((Obj_1A93E8*)p, 0, 0x80);
-    *(Mat02*)(p + 0x20) = D_002483D0;
+    *(Mat02*)(p + 0x20) = g_identityMatrix;
 }
 
 extern void* const D_002486B0[];
 
 void func_001A9F78(void)
 {
-    ScreenElement** base = (ScreenElement**)D_002486B0;
+    ScreenElement** base = (ScreenElement**)g_screenElements;
     ScreenElement** p = base + 36;
     s32 i = 0x24;
     do {
@@ -1004,7 +1004,7 @@ extern void* const D_002486B0[];
 
 void func_001AA060(void)
 {
-    ScreenElement** base = (ScreenElement**)D_002486B0;
+    ScreenElement** base = (ScreenElement**)g_screenElements;
     ScreenElement** p = base + 36;
     s32 i = 0x24;
     do {
@@ -1019,7 +1019,7 @@ extern void* const D_002486B0[];
 void func_001AA110(void)
 {
     s32 n = 0x24;
-    ScreenElement** p = (ScreenElement**)D_002486B0;
+    ScreenElement** p = (ScreenElement**)g_screenElements;
     do {
         ScreenElement* o = *p;
         p++;
@@ -1037,14 +1037,14 @@ extern Tab_26C3E0 D_0026C3E0;
 
 void func_001AAEC0(ScreenElement* changed)
 {
-    T217D_Place* e = (T217D_Place*)&D_0026C3E0;
+    T217D_Place* e = (T217D_Place*)&g_elementPlaces;
     s32 i;
 
     for (i = 0; i < 0x25; i++, e++) {
         s32 v = e->anchor;
         if (v != -1) {
-            if (((ScreenElement**)D_002486B0)[v] == changed) {
-                func_001AAB60(((ScreenElement**)D_002486B0)[i]);
+            if (((ScreenElement**)g_screenElements)[v] == changed) {
+                PlaceScreenElement(((ScreenElement**)g_screenElements)[i]);
             }
         }
     }
@@ -1054,12 +1054,12 @@ extern const f32 D_0024CD48 = 3.4028235e+38f;
 
 void func_001AB600(T217D_510* self)
 {
-    func_001AA268(self);
-    self->font = func_0015C1C0(2);
+    SetupScreenElementText(self);
+    self->font = GetFontById(2);
     self->lastTenth = self->lastSecond = -1;
     self->warnAt = D_0024CD48;
     self->f290 = 1;
-    func_001ABE20(self, 0);
+    SetTimerState(self, 0);
 }
 
 extern const f32 D_0024CD4C = 3.4028235e+38f;
@@ -1077,8 +1077,8 @@ void func_001AB890(T217D_510* self, f32 x)
     self->lastTenth = -1;
     self->warnAt = D_0024CD4C;
     self->time = x;
-    func_001ABE20(self, 1);
-    func_001AB980(self, 0.0f);
+    SetTimerState(self, 1);
+    StepTimer(self, 0.0f);
     self->vt->m14(self);
 }
 
@@ -1093,12 +1093,12 @@ void func_001AA178(void)
 {
     s32 i;
     for (i = 0; i < 0x25; i++) {
-        ScreenElement* p = ((ScreenElement**)D_002486B0)[i];
+        ScreenElement* p = ((ScreenElement**)g_screenElements)[i];
         if (p->mode != 0) {
             p->vt->m09(p);
         }
     }
-    func_001EFEE0(g_screenFade);
+    DrawScreenFade(g_screenFade);
     func_001AE820((u8*)&D_00273EB0);
 }
 
@@ -1145,7 +1145,7 @@ void func_001AA298(ScreenElement* self) {
         f32 k = D_002743A0[0] + p * (D_002743A0[1] + p * D_002743A0[2]);
         self->x = self->hiddenX + k * (self->shownX - self->hiddenX);
         self->y = self->hiddenY + k * (self->shownY - self->hiddenY);
-        func_001AAEC0(self);
+        PlaceAnchoredScreenElements(self);
     }
     self->vt->m16(self, s);
 }
@@ -1157,7 +1157,7 @@ void* func_0018D5C0(u32 n);
 void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
     if (self->items == 0) {
-        self->items = func_0018D5C0(0x50);
+        self->items = AllocateZeroedFrontMemory(0x50);
     }
     Entry_1A8150* e = &((Entry_1A8150*)self->items)[self->count++];
     e->f0 = a1;
@@ -1167,23 +1167,23 @@ void func_001A8150(ObjectPool* self, s32 a1, s32 a2, s32 a3, s32 a4)
 
 void func_001AAF88(T217D_E30* self)
 {
-    func_001AA268(self);
-    self->font = func_0015C1C0(2);
+    SetupScreenElementText(self);
+    self->font = GetFontById(2);
     self->shown = -1;
     self->rate = 6000.0f;
     switch (self->index) {
     case 3:
-        self->target = &D_002623C0->f19E0;
+        self->target = &g_saveData->f19E0;
         break;
     case 4:
-        self->target = &D_002623C8->count64;
-        self->limit = &D_00275710->count2300;
+        self->target = &g_currentEntry->count64;
+        self->limit = &g_currentWorld->count2300;
         break;
     case 5:
-        self->target = &D_002623C4->f438;
+        self->target = &g_currentLevelRecord->f438;
         break;
     case 6:
-        self->target = &D_002623C0->f19E8;
+        self->target = &g_saveData->f19E8;
         break;
     case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 28: case 29:
@@ -1208,71 +1208,71 @@ void func_001AB2B8(T217D_E30* self)
 {
     switch (self->index) {
     case 3:
-        func_001E20B8(self->text, 0x200, D_0024CC78, 0x4C, self->shown);
+        FormatToStringBounded(self->text, 0x200, D_0024CC78, 0x4C, self->shown);
         break;
     case 4:
         if (*self->limit != 0) {
-            func_001E20B8(self->text, 0x200, D_0024CC80, self->shown, *self->limit,
+            FormatToStringBounded(self->text, 0x200, D_0024CC80, self->shown, *self->limit,
                           self->shown < *self->limit ? 0x3F : 0x21);
         } else {
             self->text[0] = 0;
         }
         break;
     case 5:
-        if ((u32)(D_002623C0->f19D8 - 1) < 4) {
-            func_001E20B8(self->text, 0x200, D_0024CC88, self->shown, 0x4B);
+        if ((u32)(g_saveData->f19D8 - 1) < 4) {
+            FormatToStringBounded(self->text, 0x200, D_0024CC88, self->shown, 0x4B);
         } else {
             self->text[0] = 0;
         }
         break;
     case 6:
-        if (D_00275710->f2354 != 0) {
-            func_001E20B8(self->text, 0x200, D_0024CC78, 0x43, self->shown);
+        if (g_currentWorld->f2354 != 0) {
+            FormatToStringBounded(self->text, 0x200, D_0024CC78, 0x43, self->shown);
         } else {
             self->text[0] = 0;
         }
         break;
     case 7:
-        func_001E20B8(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x56);
+        FormatToStringBounded(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x56);
         break;
     case 8:
-        func_001E20B8(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x4E);
+        FormatToStringBounded(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x4E);
         break;
     case 9:
-        func_001E20B8(self->text, 0x200, D_0024CC90, 0x46, self->shown, *self->limit);
+        FormatToStringBounded(self->text, 0x200, D_0024CC90, 0x46, self->shown, *self->limit);
         break;
     case 10:
-        func_001E20B8(self->text, 0x200, D_0024CC78, 0x4E, self->shown);
+        FormatToStringBounded(self->text, 0x200, D_0024CC78, 0x4E, self->shown);
         break;
     case 11:
-        func_001E20B8(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x56);
+        FormatToStringBounded(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x56);
         break;
     case 28:
-        func_001E20B8(self->text, 0x200, D_0024CC80, self->shown, D_002751D4, 0x56);
+        FormatToStringBounded(self->text, 0x200, D_0024CC80, self->shown, D_002751D4, 0x56);
         break;
     case 29:
-        func_001E20B8(self->text, 0x200, D_0024CC90, 0x4E, self->shown, D_002751D4);
+        FormatToStringBounded(self->text, 0x200, D_0024CC90, 0x4E, self->shown, D_002751D4);
         break;
     case 12:
-        func_001E20B8(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x64);
+        FormatToStringBounded(self->text, 0x200, D_0024CC80, self->shown, *self->limit, 0x64);
         break;
     case 13:
-        func_001E20B8(self->text, 0x200, D_0024CC98, 's',
+        FormatToStringBounded(self->text, 0x200, D_0024CC98, 's',
                       self->shown >= 1 ? 'b' : 'm', self->shown >= 2 ? 'b' : 'm',
                       self->shown >= 3 ? 'b' : 'm', self->shown >= 4 ? 'b' : 'm',
                       self->shown >= 5 ? 'b' : 'm');
         break;
     case 14:
-        func_001E20B8(self->text, 0x200, D_0024CCA8);
+        FormatToStringBounded(self->text, 0x200, D_0024CCA8);
         break;
     case 15:
-        func_001E20B8(self->text, 0x200, D_0024CCB0, 0x46, self->shown);
+        FormatToStringBounded(self->text, 0x200, D_0024CCB0, 0x46, self->shown);
         break;
     case 36:
-        func_001E20B8(self->text, 0x200, D_0024CCB8, self->shown);
+        FormatToStringBounded(self->text, 0x200, D_0024CCB8, self->shown);
         break;
     }
-    func_001AA5A0(self);
+    SubstituteScreenElementGlyphs(self);
 }
 
 // EXACT: dst built as i*4 + (u32)items
@@ -1288,7 +1288,7 @@ void func_001A8AF8(ObjectPool* self)
     s32 s4 = 0;
     if (self->count != 0) {
         if (self->f40 == 0) {
-            func_001A89E8(self);
+            AdvanceObjectPoolEntry(self);
         }
         Rec_1A8AF8* rec = &((Rec_1A8AF8*)self->items)[self->f44];
 
@@ -1296,7 +1296,7 @@ void func_001A8AF8(ObjectPool* self)
             s32 i = 0;
             if (rec->count > 0) {
                 do {
-                    if (func_001A88A0(self, rec->items[i]) != 0) {
+                    if (IsObjectPoolItemFree(self, rec->items[i]) != 0) {
                         s4 = rec->items[i];
                         if (self->sub != 0 && self->sub->f4 != 0) {
                             s5 = self->sub->fC + (self->f44 << 5);
@@ -1348,7 +1348,7 @@ void func_001A89E8(ObjectPool* self)
         Rec_001A89E8* rec = &((Rec_001A89E8*)self->items)[pos];
         if ((rec->f10 & 2) != 0) {
             for (k = 0; k < rec->f04; k++) {
-                if (func_001A88A0(self, rec->f08[k]) != 0) {
+                if (IsObjectPoolItemFree(self, rec->f08[k]) != 0) {
                     goto found;
                 }
             }
@@ -1388,21 +1388,21 @@ void func_001AB980(T217D_510* self, f32 dt)
                 if (tenth != self->lastTenth)
                 {
                     if (tenth == 9)
-                        func_001BFCD8(0x7E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                        StartSoundEffect(0x7E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                     else if (tenth == 4)
-                        func_001BFCD8(0x7F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                        StartSoundEffect(0x7F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                 }
             }
             else if (sec != self->lastSecond)
             {
-                func_001BFCD8((sec & 1) ? 0x72 : 0x73, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect((sec & 1) ? 0x72 : 0x73, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
     }
     self->lastTenth = tenth;
     self->lastSecond = sec;
 
-    if (D_00261858.running != 0 && self->state == 2 && (*(s32*)D_00262C68 & 2))
+    if (g_gameClock.running != 0 && self->state == 2 && (*(s32*)D_00262C68 & 2))
     {
         s32 warn = 0;
         s32 end = 0;
@@ -1431,8 +1431,8 @@ void func_001AB980(T217D_510* self, f32 dt)
         if (end)
         {
             self->time = self->limit;
-            func_001BFCD8(1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-            func_001ABE20(self, 0);
+            StartSoundEffect(1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            SetTimerState(self, 0);
             if (self->onEnd != 0)
                 self->onEnd(self, 1);
         }
@@ -1456,7 +1456,7 @@ void func_001AB980(T217D_510* self, f32 dt)
     else
     {
         s32 s = (s32)t;
-        if (s != sec || (self->state == 1 && D_00261858.time - self->stateSince <= D_00261858.dt))
+        if (s != sec || (self->state == 1 && g_gameClock.time - self->stateSince <= g_gameClock.dt))
         {
             hi = s / 60;
             lo = s % 60;
@@ -1466,12 +1466,12 @@ void func_001AB980(T217D_510* self, f32 dt)
     }
     if (show)
     {
-        func_001E20B8(self->text, 0x200, D_0024CD50, 0x54, hi, sep, (lo < 10 && !tenths) ? D_0024CD60 : D_0024CD68, lo);
-        func_0015C8B8(self->font, self->scale, self->scale);
-        f32 w = func_0015C418(self->font, self->text);
+        FormatToStringBounded(self->text, 0x200, D_0024CD50, 0x54, hi, sep, (lo < 10 && !tenths) ? D_0024CD60 : D_0024CD68, lo);
+        PushFontScale(self->font, self->scale, self->scale);
+        f32 w = MeasureFontString(self->font, self->text);
         V24A2* f = self->font;
-        func_001AAB20(self, w, (f32)f->height * f->sy);
-        func_0015C900(self->font);
+        SetScreenElementSize(self, w, (f32)f->height * f->sy);
+        PopFontScale(self->font);
     }
 }
 
@@ -1485,8 +1485,8 @@ void func_001AAB60(ScreenElement* self) {
     f32 y0 = x0;
 
     if (r->anchor != -1) {
-        ScreenElement** objs = (ScreenElement**)D_002486B0;
-        T217D_Place* recs = (T217D_Place*)&D_0026C3E0;
+        ScreenElement** objs = (ScreenElement**)g_screenElements;
+        T217D_Place* recs = (T217D_Place*)&g_elementPlaces;
         do {
             ScreenElement* o = objs[r->anchor];
             if (o->vt->m18(o, self)) {
@@ -1525,7 +1525,7 @@ void func_001AAB60(ScreenElement* self) {
     } else {
         self->shownY = y1 + b - self->h;
     }
-    f32 t = func_001EAF28(self->shownY * 0.9090909f) * 1.1f;
+    f32 t = TruncateFloat(self->shownY * 0.9090909f) * 1.1f;
     self->hiddenX = self->shownX;
     self->shownY = t;
     self->hiddenY = t;
@@ -1545,7 +1545,7 @@ void func_001AAB60(ScreenElement* self) {
         self->x = self->hiddenX;
         self->y = self->hiddenY;
     }
-    func_001AAEC0(self);
+    PlaceAnchoredScreenElements(self);
 }
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
@@ -1691,18 +1691,18 @@ void* func_001E2138(char*, const char*);
 void func_0015E290(TextReader*, f32, f32*, f32*);
 void func_001AA4F0(ScreenElement* self, const char* arg)
 {
-    if (arg && func_001E2100(arg)) {
-        func_001E2138(self->text, arg);
+    if (arg && GetStringLength(arg)) {
+        CopyString(self->text, arg);
     } else {
         self->text[0] = 0;
     }
-    func_0015C8B8(self->font, self->scale, self->scale);
+    PushFontScale(self->font, self->scale, self->scale);
     TextReader m;
-    func_0015DB28(&m, self->text, self->font);
+    InitTextReader(&m, self->text, self->font);
     f32 x, y;
-    func_0015E290(&m, 0.0f, &x, &y);
-    func_001AAB20(self, x, y);
-    func_0015C900(self->font);
+    MeasureText(&m, 0.0f, &x, &y);
+    SetScreenElementSize(self, x, y);
+    PopFontScale(self->font);
 
 }
 
@@ -1719,13 +1719,13 @@ void func_001AB058(T217D_E30* self)
     s32 first;
     s32* p;
 
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     p = self->target;
     if (self->shown == *p) {
         return;
     }
     if (self->shown >= 0) {
-        frac = D_00261860 * self->rate + self->fraction;
+        frac = g_frameDt * self->rate + self->fraction;
         n = (s32)frac;
         self->fraction = frac - (f32)n;
         first = *self->target;
@@ -1744,16 +1744,16 @@ void func_001AB058(T217D_E30* self)
         self->onDone = 0;
         self->doneArg = 0;
     }
-    func_001AB2B8(self);
+    FormatCounterCaption(self);
     if (self->text[0] != 0) {
-        func_0015C8B8(self->font, self->scale, self->scale);
-        func_0015DB28(&loc, &self->text[0], self->font);
-        f32 x = func_0015DFF8(&loc);
+        PushFontScale(self->font, self->scale, self->scale);
+        InitTextReader(&loc, &self->text[0], self->font);
+        f32 x = SumTextWidth(&loc);
         f32 y = (f32)self->font->height * self->font->sy;
-        func_001AAB20(self, x, y);
-        func_0015C900(self->font);
+        SetScreenElementSize(self, x, y);
+        PopFontScale(self->font);
     } else {
-        func_001AAB20(self, 0.0f, 0.0f);
+        SetScreenElementSize(self, 0.0f, 0.0f);
     }
 }
 
@@ -1827,13 +1827,13 @@ s32 func_001A88A0(ObjectPool* self, Key_1A88A0* key)
         }
         End_1A88A0::Of(&it);
     }
-    if (func_00182FC8(key) != 0) {
+    if (IsObjectAttached(key) != 0) {
         return 0;
     }
-    if (func_001300E8(key, 0x3B) != 0 && key->f678 == 0) {
+    if (IsObjectOfKind(key, 0x3B) != 0 && key->f678 == 0) {
         return 0;
     }
-    if (func_001300E8(key, 0x20) != 0 && key->f680 != 0) {
+    if (IsObjectOfKind(key, 0x20) != 0 && key->f680 != 0) {
         return 0;
     }
     return 1;
@@ -1875,7 +1875,7 @@ void func_001AA998(ScreenElement* self, s32 mode)
     self->mode = mode;
     self->since = *self->clock;
     if (notify) {
-        func_001AAB60(self);
+        PlaceScreenElement(self);
     }
 }
 

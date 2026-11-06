@@ -21,24 +21,24 @@ void func_0018F6E8(Obj_18F6E8* self_)
     void* s1;
     if (self->f148 == 1) {
         do {
-            (void)func_0018F890((Object_18F890*)self, 0);
+            (void)FeedMovieDecoder((Object_18F890*)self, 0);
         } while (self->f148 == 1);
     }
     if (func_0020B058((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
         return;
     }
     if (self->f18 == 0) {
-        func_0018EDA8(self->f128, self->f5C, self->f10, self->f14);
-        func_0018EF78(self->f12C, self->f10, self->f14);
+        UploadMovieFrame(self->f128, self->f5C, self->f10, self->f14);
+        DrawMovieFrame(self->f12C, self->f10, self->f14);
         func_001F6C20(0);
     }
     s1 = (u8*)self + 0x80;
     if (self->f148 != 0) {
         do {
-            (void)func_0018F890((Object_18F890*)self, 0);
-            func_0018F610((Obj_18F610*)self);
+            (void)FeedMovieDecoder((Object_18F890*)self, 0);
+            AdvanceCodeChecksum((Obj_18F610*)self);
         } while (self->f148 != 0);
     }
     func_001F6B40(self->f144);
-    func_0018EB98((Self_18EB98*)s1);
+    UpdateMovieStream((Self_18EB98*)s1);
 }

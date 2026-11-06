@@ -43,7 +43,7 @@ void func_001AE820(Obj_1AE820_eu* self)
     if (self->f250 == 0) {
         return;
     }
-    d = D_00261868 - self->f254;
+    d = g_elapsedTime - self->f254;
     if (self->f250 == 2) {
         if (D_00272420 == self->f250) {
             self->f260 = d < 2.0f;
@@ -55,7 +55,7 @@ void func_001AE820(Obj_1AE820_eu* self)
         adj = 0.0f;
         if (self->f250 == 2) {
             if (1.0f < d) {
-                if (func_0018B770(g_backgroundJob) == 0) {
+                if (IsBackgroundJobRunning(g_backgroundJob) == 0) {
                     self->vtbl[0x3C / 4](self);
                 }
             }
@@ -73,10 +73,10 @@ void func_001AE820(Obj_1AE820_eu* self)
     func_eu_001374E0(out, 0);
     fmt = "%c&1^07~b2a83d%d%%&.";
     sp = str;
-    c = func_001AEA08();
-    func_001E1FD0(sp, fmt, c, func_00160B28(D_002623C0));
-    func_0015C8B8(self->f4, self->f20c, self->f20c);
-    func_0015DB28(buf, sp, self->f4, 0);
-    func_eu_0015E7E0(buf, out, 0, &D_00262280);
-    func_0015C900(self->f4);
+    c = GetCyclingGlyph();
+    FormatToString(sp, fmt, c, ComputeCompletionPercent(g_saveData));
+    PushFontScale(self->f4, self->f20c, self->f20c);
+    InitTextReader(buf, sp, self->f4, 0);
+    func_eu_0015E7E0(buf, out, 0, &g_gsPacketWriter);
+    PopFontScale(self->f4);
 }

@@ -60,16 +60,16 @@ void func_0016B860(Obj_16B860_eu* self)
         if (h != 0) {
             slot = *(Pk4_16B860*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->f54c);
-            Hd_16B860::Draw((V24A2**)self->f520, &out, &D_00262280);
+            Hd_16B860::Draw((V24A2**)self->f520, &out, &g_gsPacketWriter);
             *(Pk4_16B860*)((u8*)self->f520 + 0x18) = slot;
         }
-        f32 r = func_00205400(D_00261868 * 10.0f);
+        f32 r = func_00205400(g_elapsedTime * 10.0f);
         f32 t = r * 0.5f + 0.5f;
         f32 k = (1.0f - t) * 0.9f + t;
         f32 v = self->f51c * k;
-        func_0015C8B8(self->f4, v, v);
+        PushFontScale(self->f4, v, v);
         func_eu_0015DCB8(loc, &self->f8, self->f4, 0);
-        out.Draw(loc, 0, &D_00262280);
-        func_0015C900(self->f4);
+        out.Draw(loc, 0, &g_gsPacketWriter);
+        PopFontScale(self->f4);
     }
 }

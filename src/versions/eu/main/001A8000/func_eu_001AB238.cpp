@@ -6,7 +6,7 @@ void func_eu_001E3140(void* inner, const char* s);
 void func_eu_001AB238(void* self, const char* s)
 {
     if (s != 0) {
-        if (func_001E2100(s) != 0) {
+        if (GetStringLength(s) != 0) {
             func_eu_001E3140((u8*)self + 8, s);
             goto call;
         }

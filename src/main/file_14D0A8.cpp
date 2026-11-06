@@ -117,7 +117,7 @@ f32 func_0014D138(s32 count, f32* table, s32 wrap, f32 x)
 
 s32 func_0014D1A0(f32 x, s32 n, f32* arr, s32 wrap, f32* lo, f32* hi)
 {
-    f32 r = func_0014D138(n, arr, wrap, x);
+    f32 r = WrapCurveTime(n, arr, wrap, x);
     s32 i = 1;
     while (i < n && !(r < arr[i])) i++;
     if (i >= n) i--;
@@ -155,12 +155,12 @@ T2176* func_0014D9A8(s32 kind)
     T2176* p;
     switch (kind) {
     case 0:
-        p = (T2176*)func_0018D5C0(0x1C);
-        p->vt = (const T2176_Vt*)((u8*)D_002176D0);
+        p = (T2176*)AllocateZeroedFrontMemory(0x1C);
+        p->vt = (const T2176_Vt*)((u8*)g_pathCurveKind0Methods);
         break;
     case 1:
-        p = (T2176*)func_0018D5C0(0x1D0);
-        p->vt = (const T2176_Vt*)((u8*)D_00217708);
+        p = (T2176*)AllocateZeroedFrontMemory(0x1D0);
+        p->vt = (const T2176_Vt*)((u8*)g_pathCurveKind1Methods);
         break;
     default:
         p = 0;
@@ -184,12 +184,12 @@ f32 func_0014DA28(void)
 
 s32 func_0014DA38(T2176* self, f32 t, f32* a, f32* b)
 {
-    return func_0014D1A0(t, self->count, self->times, self->wrap, a, b);
+    return FindPathCurveSegment(t, self->count, self->times, self->wrap, a, b);
 }
 
 s32 func_0014DA68(T2176* self, f32 t, f32* a1, f32* a2)
 {
-    return func_0014D1A0(t, self->count, self->lengths, self->wrap, a1, a2);
+    return FindPathCurveSegment(t, self->count, self->lengths, self->wrap, a1, a2);
 }
 
 ASM_FUNC(func_0014DA98);
@@ -249,15 +249,15 @@ f32 func_0014DD00(T2176* self)
 
 void func_0014DD28(T2176* self, void* src)
 {
-    self->wrap = func_00137B90(src);
-    s32 n = func_00137B90(src);
+    self->wrap = ReadBufferedU8(src);
+    s32 n = ReadBufferedU8(src);
     self->count = n;
-    self->times = (f32*)func_0018D500(n * 4);
-    self->lengths = (f32*)func_0018D500(self->count * 4);
-    self->points = func_0018D500(self->count * 16);
+    self->times = (f32*)AllocateFrontMemory(n * 4);
+    self->lengths = (f32*)AllocateFrontMemory(self->count * 4);
+    self->points = AllocateFrontMemory(self->count * 16);
     for (s32 i = 0; i < self->count; i++) {
-        self->times[i] = func_00137DF8(src);
-        func_00137E70(src, (u8*)self->points + i * 16);
+        self->times[i] = ReadBufferedFloat(src);
+        ReadBufferedVector3(src, (u8*)self->points + i * 16);
     }
     f32 (*fn)(T2176*) = self->vt->m09;
     if (fn) fn(self);
@@ -291,15 +291,15 @@ void func_0014DE78(T2176* self, s32 idx, void* a2, s32 a3, void* a4, s32 a5)
     func_00188700(a2, (u8*)self->points + (idx << 4), &A, 1.0f);
     func_00188700(a2, (u8*)self->points + (next << 4), &B, 1.0f);
     C = *(Pack4_0014DE78*)a4;
-    func_001DD3E0(&A, &B, &C, a3, a5);
+    DrawProjectedLine(&A, &B, &C, a3, a5);
 }
 
-void func_0014DF68(T2176* self,void* a,void* b) { func_0014D938(self->count,(Quad16*)self->points,a,b); }
+void func_0014DF68(T2176* self,void* a,void* b) { TransformPointArray(self->count,(Quad16*)self->points,a,b); }
 
 f32 func_0014DF98(T2176* self, f32 t0)
 {
     f32 a, b;
-    s32 i = func_0014DA38(self, t0, &a, &b);
+    s32 i = FindPathCurveSegmentByTime(self, t0, &a, &b);
     f32 t = a / b;
     return (1.0f - t) * self->lengths[i] + t * self->lengths[i + 1];
 }
@@ -307,14 +307,14 @@ f32 func_0014DF98(T2176* self, f32 t0)
 f32 func_0014E000(T2176* self, f32 t0)
 {
     f32 lo, hi;
-    s32 idx = func_0014DA68(self, t0, &lo, &hi);
+    s32 idx = FindPathCurveSegmentByLength(self, t0, &lo, &hi);
     f32 t = lo / hi;
     return (1.0f - t) * self->times[idx] + t * self->times[idx + 1];
 }
 
 f32 func_0014E068(T2176* self)
 {
-    return func_0014D0A8(self->count, self->points, self->lengths);
+    return AccumulateSegmentLengths(self->count, self->points, self->lengths);
 }
 
 void func_0014E090(T2176* self, void* a1, void* a2, void* a3, void* a4, f32* out0, f32* out1)
@@ -331,7 +331,7 @@ void func_0014E090(T2176* self, void* a1, void* a2, void* a3, void* a4, f32* out
 
 void func_0014E170(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
 {
-    s32 idx = func_0014D1A0(t, self->count, self->times, self->wrap, 0, 0);
+    s32 idx = FindPathCurveSegment(t, self->count, self->times, self->wrap, 0, 0);
     s32 ia;
     f32 fb;
     func_0014D680(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
@@ -341,7 +341,7 @@ void func_0014E170(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32
 
 void func_0014E2A0(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32* a5, f32* a6)
 {
-    s32 idx = func_0014D1A0(t, self->count, self->lengths, self->wrap, 0, 0);
+    s32 idx = FindPathCurveSegment(t, self->count, self->lengths, self->wrap, 0, 0);
     s32 ia;
     f32 fb;
     func_0014D680(a1, a2, self->count, self->points, idx, self->wrap, a3, a4, &ia, &fb);
@@ -351,23 +351,23 @@ void func_0014E2A0(T2176* self, f32 t, void* a1, void* a2, f32* a3, f32* a4, f32
 
 void func_0014E3D0(T2176_708* self, void* src)
 {
-    self->wrap = func_00137B90(src);
-    s32 n = func_00137B90(src);
+    self->wrap = ReadBufferedU8(src);
+    s32 n = ReadBufferedU8(src);
     self->count = n;
-    self->times = (f32*)func_0018D500(n * 4);
-    self->lengths = (f32*)func_0018D500(self->count * 4);
-    self->points = func_0018D500(self->count * 16);
-    self->inTan = func_0018D500(self->count * 16);
-    self->outTan = func_0018D500(self->count * 16);
+    self->times = (f32*)AllocateFrontMemory(n * 4);
+    self->lengths = (f32*)AllocateFrontMemory(self->count * 4);
+    self->points = AllocateFrontMemory(self->count * 16);
+    self->inTan = AllocateFrontMemory(self->count * 16);
+    self->outTan = AllocateFrontMemory(self->count * 16);
     for (s32 i = 0; i < self->count; i++) {
-        self->times[i] = func_00137DF8(src);
-        func_00137E70(src, (u8*)self->points + i * 16);
-        func_00137E70(src, (u8*)self->inTan + i * 16);
-        func_00137E70(src, (u8*)self->outTan + i * 16);
+        self->times[i] = ReadBufferedFloat(src);
+        ReadBufferedVector3(src, (u8*)self->points + i * 16);
+        ReadBufferedVector3(src, (u8*)self->inTan + i * 16);
+        ReadBufferedVector3(src, (u8*)self->outTan + i * 16);
     }
     f32 (*fn)(T2176*) = self->vt->m09;
     if (fn) fn(self);
-    func_0014E500(self);
+    ResetSplineSegmentCache(self);
 }
 
 void func_0014E500(T2176_708* obj) { obj->idx1C0 = -1; }
@@ -377,9 +377,9 @@ void func_0014E510(T2176_708* self, s32 i)
     if (i != self->idx1C0) {
         f32 d = self->times[i + 1] - self->times[i];
         s32 off = i * 16;
-        func_00130B48((u8*)self->points + off, (u8*)self->outTan + off, (u8*)self->points + (off + 16),
+        SampleCurvePoints((u8*)self->points + off, (u8*)self->outTan + off, (u8*)self->points + (off + 16),
                       (u8*)self->inTan + (off + 16), d, 0.0f, d, 20, self->pts30);
-        func_0014D0A8(20, self->pts30, self->len170);
+        AccumulateSegmentLengths(20, self->pts30, self->len170);
         self->idx1C0 = i;
     }
 }
@@ -402,9 +402,9 @@ ASM_FUNC(func_0014E828);
 f32 func_0014E910(T2176_708* self, f32 t0)
 {
     f32 a, b;
-    s32 i = func_0014DA38(self, t0, &a, &b);
+    s32 i = FindPathCurveSegmentByTime(self, t0, &a, &b);
     u32 off = i * 16;
-    f32 r = func_00130C20((u8*)self->points + off, (u8*)self->outTan + off,
+    f32 r = MeasureCurveSegmentLength((u8*)self->points + off, (u8*)self->outTan + off,
                           (u8*)self->points + (off + 16), (u8*)self->inTan + (off + 16), b, a);
     return r + self->lengths[i];
 }
@@ -412,9 +412,9 @@ f32 func_0014E910(T2176_708* self, f32 t0)
 f32 func_0014E990(T2176_708* self, f32 t0)
 {
     f32 lo, a, b;
-    s32 idx = func_0014DA68(self, t0, &lo, 0);
-    func_0014E510(self, idx);
-    s32 n = func_0014D1A0(lo, 20, self->len170, 0, &a, &b);
+    s32 idx = FindPathCurveSegmentByLength(self, t0, &lo, 0);
+    SampleSplineSegment(self, idx);
+    s32 n = FindPathCurveSegment(lo, 20, self->len170, 0, &a, &b);
     f32 t = a / b;
     f32 u = ((f32)n + t) * 0.0526315793f;
     return (1.0f - u) * self->times[idx] + u * self->times[idx + 1];
@@ -432,7 +432,7 @@ void func_0014EA48(T2176_708* self)
     for (s32 i = 0; i < m; i++) {
         f32 d = self->times[i + 1] - self->times[i];
         s32 off = i * 16;
-        f32 r = func_00130C20((u8*)self->points + off, (u8*)self->outTan + off,
+        f32 r = MeasureCurveSegmentLength((u8*)self->points + off, (u8*)self->outTan + off,
                               (u8*)self->points + (off + 16), (u8*)self->inTan + (off + 16), d, d);
         self->lengths[i + 1] = self->lengths[i] + r;
     }

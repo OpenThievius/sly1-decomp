@@ -72,7 +72,8 @@ source files proved, PAL close behind US, and names and types under way.
    [NAMING.md](NAMING.md)). On 2026-11-05 about 2,480 symbols have one, and about a hundred
    types are named, from the base classes (`BaseObject`, `PlacedObject`, `Collider`) to the
    leaf families, shared records and global types; the types whose role the code does not show
-   keep their ids. Definitions still use the address names.
+   keep their ids. Function bodies use the readable names; declarations and definitions
+   still use the address names.
 7. **The disc's data.** Its loader and index, then each format from the code that reads it
    ([DISC.md](DISC.md)); OpenThievius's extractor is written from that.
 

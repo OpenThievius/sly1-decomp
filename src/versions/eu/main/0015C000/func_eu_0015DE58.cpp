@@ -8,7 +8,7 @@ s32 func_eu_0015DE58(Mode_eu_15DE58* self)
 {
     switch (self->mode) {
     case 0:
-        return func_001E2100(self->obj);
+        return GetStringLength(self->obj);
     case 1:
         return func_eu_001E3018(self->obj);
     }

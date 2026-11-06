@@ -34,10 +34,10 @@ struct Self_16BA40_eu {
 
 void func_0016BA40(Self_16BA40_eu* self)
 {
-    func_001AA268(self);
-    if (func_0015C188(2)) {
+    SetupScreenElementText(self);
+    if (IsFontLoaded(2)) {
         self->f520 = (void**)D_002629A8;
-        *self->f520 = (void*)func_0015C1C0(2);
+        *self->f520 = (void*)GetFontById(2);
     }
     Node_16BA40_eu* a1 = self->f4;
     f32 f20 = 60.0f;
@@ -47,12 +47,12 @@ void func_0016BA40(Self_16BA40_eu* self)
     self->f4 = n;
     self->f518 = (s32)0xDF7F7F7F;
     f20 = (f32)n->i8 * n->f48 + f20;
-    Node_16BA40_eu* s0 = (Node_16BA40_eu*)func_0015C1C0(4);
-    func_0015C8B8(s0, 1.3f, 1.3f);
+    Node_16BA40_eu* s0 = (Node_16BA40_eu*)GetFontById(4);
+    PushFontScale(s0, 1.3f, 1.3f);
     Vt_16BA40_eu* v = s0->vt4C;
     f32 r = v->fn1C((u8*)s0 + v->off18, 0x5F);
     f21 = r * 4.0f + f21;
     f20 = f20 + (f32)s0->i8 * s0->f48 * 4.0f;
-    func_0015C900(s0);
-    func_001AAB20(self, f21, f20);
+    PopFontScale(s0);
+    SetScreenElementSize(self, f21, f20);
 }

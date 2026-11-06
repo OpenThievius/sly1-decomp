@@ -7,7 +7,7 @@ struct Owner_14AD70_eu { u8 pad[0x570]; s32 count; Slot_14AD70_eu slots[1]; };
 
 void func_0014AD70(Owner_14AD70_eu* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     for (s32 i = 0; i < self->count; i++) {
         Slot_14AD70_eu* s = &self->slots[i];
         s->vtbl[2](s);

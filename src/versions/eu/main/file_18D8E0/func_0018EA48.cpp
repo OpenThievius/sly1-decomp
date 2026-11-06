@@ -9,8 +9,8 @@ void func_0018EA48(Obj_18EA48* self_)
         func_0011E460();
         self->flag = 1;
         self->f4 = -1;
-        func_0013C9B0((u8*)self + 0x30);
-        func_0013C9B0((u8*)self + 0x50);
+        ResetRingBuffer((u8*)self + 0x30);
+        ResetRingBuffer((u8*)self + 0x50);
         func_eu_0018EDE8((u8*)self + 0x70);
     }
 }

@@ -8,7 +8,7 @@ struct Glob_eu_14CF30 {
 
 void func_0014CF30(GaugeManager* self, s32 kind, void* key)
 {
-    func_00127378(self, kind, key);
+    HandlePlacedObjectNotification(self, kind, key);
     switch (kind) {
     case 6: {
         s32 i;
@@ -27,16 +27,16 @@ void func_0014CF30(GaugeManager* self, s32 kind, void* key)
             s32 out;
             func_001B6598(key, &out);
             if (out == 0x3FD) {
-                (*(Glob_eu_14CF30*)&D_0026D348).f574 = &self->amount;
-                (*(Glob_eu_14CF30*)&D_0026D348).f578 = &self->maxAmount;
+                (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f574 = &self->amount;
+                (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f578 = &self->maxAmount;
                 func_001DDC38(self->world, self);
-                func_001AB890(&D_0026E760, self->f2D8);
-                func_001AB928(&D_0026E760, 0.0f, func_0014C668);
-                func_001AB938(&D_0026E760);
+                StartTimer(&g_timerElement, self->f2D8);
+                SetTimerLimit(&g_timerElement, 0.0f, func_0014C668);
+                StartTimerCounting(&g_timerElement);
             }
             if (self->tag430 == 0x3FD) {
-                D_0026D348.vt->m15(&D_0026D348);
-                D_0026E760.vt->m15(&D_0026E760);
+                g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
+                g_timerElement.vt->m15(&g_timerElement);
                 func_001DDC38(self->world, 0);
             }
             self->tag430 = out;

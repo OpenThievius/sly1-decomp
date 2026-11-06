@@ -22,31 +22,31 @@ void func_00150790(StepSequence* self, s32 next)
         break;
     case 3:
         *(s32*)self->target304 = 1;
-        func_001BE998();
-        func_001837E0(self, 0x15, 0, 0);
+        StopStreamVoice();
+        TriggerScriptEvent(self, 0x15, 0, 0);
         if (self->mode2D0 == 2) {
-            func_001451F0(D_00261990, 0xF, 6, &D_00261990->ctl460, 0, 0);
-            func_001DDA50(D_00275710);
+            RemoveCameraControllers(g_camera, 0xF, 6, &g_camera->ctl460, 0, 0);
+            ReleasePadSelectFlag(g_currentWorld);
         }
-        (void)func_00149610(&D_00261990->ctl460);
+        (void)PopStackValue(&g_camera->ctl460);
         if ((self->f2E8 & 0x10) != 0 && self->value2F8 != 0) {
-            func_0012E760((void*)self->value2F8);
+            StopAnimationPlayer((void*)self->value2F8);
         }
         if (self->mode2D0 == 2 && self->f330 != 0) {
             f32 f = 1.0f;
-            func_001C06A0(9, 0, f);
-            func_001C06A0(9, 1, f);
+            SetVolumeChannelFactor(9, 0, f);
+            SetVolumeChannelFactor(9, 1, f);
         }
         break;
     case 4:
-        ((Blk_150790_eu*)&D_002701F8)->f5B0 = 0;
-        func_001356C0(&D_002701F8, 0);
+        ((Blk_150790_eu*)&g_typedTextCaptionBox)->f5B0 = 0;
+        SetTextPanelState(&g_typedTextCaptionBox, 0);
         break;
     }
     switch (next) {
     case 5:
         if (((Glob_150790_eu*)&D_0026F5A0)->f260 != 0) {
-            func_00150790(((Glob_150790_eu*)&D_0026F5A0)->f260, 0);
+            SetStepSequenceState(((Glob_150790_eu*)&D_0026F5A0)->f260, 0);
         }
         ((Glob_150790_eu*)&D_0026F5A0)->f260 = self;
         self->state2D4 = next;
@@ -61,37 +61,37 @@ void func_00150790(StepSequence* self, s32 next)
         self->step2E4 = -1;
         self->f2E8 = 0;
         if (self->mode2D0 == 2) {
-            func_001495E8(&D_00261990->ctl460, 4);
-            func_00145088(D_00261990, 6, &D_00261990->ctl460, 0, 0);
-            func_001DDA20(D_00275710);
-            func_001365A0(&D_002701F8, 0);
+            PushStackValue(&g_camera->ctl460, 4);
+            PushCameraController(g_camera, 6, &g_camera->ctl460, 0, 0);
+            AcquirePadSelectFlag(g_currentWorld);
+            func_001365A0(&g_typedTextCaptionBox, 0);
             if (self->f330 != 0) {
                 f32 f = 0.6f;
-                func_001C06A0(9, 0, f);
-                func_001C06A0(9, 1, f);
+                SetVolumeChannelFactor(9, 0, f);
+                SetVolumeChannelFactor(9, 1, f);
             }
         } else {
-            func_001495E8(&D_00261990->ctl460, 3);
+            PushStackValue(&g_camera->ctl460, 3);
             if (self->mode2D0 == 0) {
                 if (self->second300 != -1) {
-                    D_00261990->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+                    g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
                 } else {
-                    D_00261990->ctl460.f5C = 0;
+                    g_camera->ctl460.f5C = 0;
                 }
             }
         }
         self->state2D4 = next;
         break;
     case 4:
-        func_001E86E0(&D_002708E0, 0);
-        func_001E87F0(&D_002708E0, 0);
-        func_001E86E0(&D_00271558, 0);
-        func_001E87F0(&D_00271558, 0);
+        SetArcTarget(&D_002708E0, 0);
+        SetArcSpecialObject(&D_002708E0, 0);
+        SetArcTarget(&D_00271558, 0);
+        SetArcSpecialObject(&D_00271558, 0);
         self->state2D4 = next;
         break;
     default:
         self->state2D4 = next;
         break;
     }
-    self->time2D8 = D_0026185C[0];
+    self->time2D8 = g_gameTime[0];
 }

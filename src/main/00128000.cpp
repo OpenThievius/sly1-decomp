@@ -17,14 +17,14 @@ void* func_00121228(World* root, BaseObject* item, void* table);
 
 void func_00128998(BaseObject* item)
 {
-    func_00121228(item->world, item, (void*)D_002197C0);
+    CreatePoseSource(item->world, item, (void*)D_002197C0);
 }
 
 void func_0012A4A0(void* self, s32 a1);
 
 void func_0012A478(void* self, s32 a1)
 {
-    func_0012A4A0(self, a1 != 0 ? 1 : -1);
+    SetOrientationSourceMode(self, a1 != 0 ? 1 : -1);
 }
 
 void func_00129730(void* self);
@@ -33,7 +33,7 @@ struct Sub_12A580 { u8 pad[0x40]; f32 f40; };
 
 void func_0012A580(PlacedObject* self, f32 f)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((Sub_12A580*)self->f200)->f40 = f;
 }
 
@@ -53,7 +53,7 @@ struct Sub_12A5D0 { u8 pad[0x50]; Vec16_12A5D0 v50; };
 
 void func_0012A5D0(PlacedObject* self, Vec16_12A5D0* src)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((Sub_12A5D0*)self->f200)->v50 = *src;
 }
 
@@ -72,7 +72,7 @@ struct Sub_12A630 { u8 pad[0x60]; U64_12A630 v60; };
 
 void func_0012A630(PlacedObject* self, U64_12A630* src)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((Sub_12A630*)self->f200)->v60 = *src;
 }
 
@@ -80,7 +80,7 @@ extern u8 D_00275C60[];
 
 void func_0012A678(PlacedObject* self, U64P* out)
 {
-    U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x60) : (U64P*)D_00275C60;
+    U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x60) : (U64P*)g_unitRange;
     *out = *src;
 }
 
@@ -91,7 +91,7 @@ struct Sub_12A6A0 { u8 pad[0x70]; Vec16_12A6A0 v70; };
 
 void func_0012A6A0(PlacedObject* self, Vec16_12A6A0* src)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((Sub_12A6A0*)self->f200)->v70 = *src;
 }
 
@@ -131,7 +131,7 @@ void func_001B1DA8(void* p, f32 x);
 
 void func_001292E8(f32 x)
 {
-    func_001B1DA8(func_001291D0(x), x);
+    func_001B1DA8(EnsureRangeRecord(x), x);
 }
 
 extern u8 D_0027B520[];
@@ -148,7 +148,7 @@ struct Sub_129510 { u8 pad[0x44]; f32 f44; };
 
 void func_00129510(PlacedObject* self, f32* out)
 {
-    *out = ((Sub_129510*)func_00129400(self))->f44;
+    *out = ((Sub_129510*)GetRangeRecord(self))->f44;
 }
 
 extern u8 D_00260E80[];
@@ -158,7 +158,7 @@ struct __attribute__((aligned(16))) Quad_129F58 { s32 v[4]; };
 
 void func_00129F58(PlacedObject* self, Quad_129F58* src)
 {
-    if (self->p210 == D_00260E80) self->p210 = (u8*)func_0018D500(16);
+    if (self->p210 == D_00260E80) self->p210 = (u8*)AllocateFrontMemory(16);
     *(Quad_129F58*)self->p210 = *src;
 }
 
@@ -189,7 +189,7 @@ struct Sub_12A770 { u8 pad[0x44]; void* f44; };
 
 void func_0012A770(PlacedObject* self, void* v)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((Sub_12A770*)self->f200)->f44 = v;
 }
 
@@ -198,7 +198,7 @@ void* func_00185468(void* p);
 
 void func_0012A888(PlacedObject* self, void** out)
 {
-    *out = func_00185468(self->f200);
+    *out = ResolveAimTarget(self->f200);
 }
 
 struct Ctx_12AA28 { u8 pad[0x90]; void* field; };
@@ -226,7 +226,7 @@ void func_0012ABA8(void* self, f32 f);
 
 void func_0012AD98(PlacedObject* self, f32 f)
 {
-    func_0012ABA8(self, f);
+    EnsureSoundRecord(self, f);
     ((Inner_12AD98*)self->f2AC)->value = f;
 }
 
@@ -238,7 +238,7 @@ void func_0012AEB0(PlacedObject* self)
 {
     Inner_12AEB0* in = (Inner_12AEB0*)self->f2AC;
     if (in != 0) {
-        if (in->ptr != 0) func_001BF7F8(in->ptr);
+        if (in->ptr != 0) SetSoundRecordPitch(in->ptr);
     }
 }
 
@@ -250,7 +250,7 @@ void func_0012B040(void* self);
 
 void func_0012B0B0(PlacedObject* self, s32 a1)
 {
-    func_0012B040(self);
+    EnsureColorRecord(self);
     ((Entry_12B0B0*)self->f288)->w[0] = a1;
     Entry_12B0B0* e = (Entry_12B0B0*)self->f288;
     s32 k = e->w[0];
@@ -308,7 +308,7 @@ void func_00128DB8(PlacedObject* self)
         p->p84 = r;
         s32 x = (s32)r->parent;
         p->f80 = x;
-        p->p88 = func_0015A868(self, x);
+        p->p88 = FindCommonAncestor(self, x);
     }
     if (p->flags & 0x40) {
         p->p60 = func_0015A448(self->world, p->p60, self);
@@ -323,7 +323,7 @@ void* func_0018D5C0(s32 size);
 Timer_129108* func_00129108(PlacedObject* self)
 {
     if (self->f2A0 == 0) {
-        Timer_129108* t = (Timer_129108*)func_0018D5C0(0x14);
+        Timer_129108* t = (Timer_129108*)AllocateZeroedFrontMemory(0x14);
         self->f2A0 = t;
         t->f4 = -1;
         ((Timer_129108*)self->f2A0)->f8 = 0;
@@ -355,10 +355,10 @@ void func_00152470(void* a0, void* a1);
 void* func_001291D0(PlacedObject* self)
 {
     if (self->f284 == 0) {
-        void* o = func_001B5EE0((u8*)self->world + 0x1BF4);
+        void* o = PopZeroedFreeSlot((u8*)self->world + 0x1BF4);
         self->f284 = (RangeRecord*)o;
         func_001B1AC8(o);
-        func_00152470((u8*)self->world + 0x1C00, self->f284);
+        AppendToList((u8*)self->world + 0x1C00, self->f284);
     }
     return self->f284;
 }
@@ -380,7 +380,7 @@ void func_00129730(PlacedObject* self);
 
 void func_0012A810(PlacedObject* self, s32 value)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((Sub_12A810*)self->f200)->f20 = value;
 }
 
@@ -414,11 +414,11 @@ void* func_0011E580(s32 a0, s32 a1, void* a2, s32 a3, s32 a4);
 
 void* func_0012A970(PlacedObject* self)
 {
-    void* r = func_0015A418((s32)self->world, 0x102, 0x22A, self);
+    void* r = FindFirstObjectById((s32)self->world, 0x102, 0x22A, self);
     if (r != 0) {
         return r;
     }
-    return func_0011E580(0x75, (s32)self->world, self, 0x22A, -1);
+    return CreateTypedRecord(0x75, (s32)self->world, self, 0x22A, -1);
 }
 
 void func_0012A9C8(PlacedObject* self, s32 value)
@@ -434,7 +434,7 @@ void func_001B1CF8(void* self, s32 value);
 
 void func_00129288(void* self, s32 value)
 {
-    func_001B1CF8(func_001291D0(self), value);
+    func_001B1CF8(EnsureRangeRecord(self), value);
 }
 
 void* func_001291D0(void* self, f32 x);
@@ -442,7 +442,7 @@ void func_001B1D70(void* self, f32 v);
 
 void func_001292B8(void* self, f32 x)
 {
-    func_001B1D70(func_001291D0(self, x), x);
+    func_001B1D70(EnsureRangeRecord(self, x), x);
 }
 
 struct __attribute__((aligned(16))) Quad_12A028 { s32 w[4]; };
@@ -452,7 +452,7 @@ void* func_0018D500(s32 n);
 
 void func_0012A028(PlacedObject* self, Quad_12A028* src)
 {
-    if (self->p214 == D_00260E90) self->p214 = (u8*)func_0018D500(16);
+    if (self->p214 == D_00260E90) self->p214 = (u8*)AllocateFrontMemory(16);
     *(Quad_12A028*)self->p214 = *src;
 }
 
@@ -463,7 +463,7 @@ void* func_0018D500(s32 n);
 
 void func_0012A0F8(PlacedObject* self, Quad_12A0F8* src)
 {
-    if (self->p218 == D_00260EA0) self->p218 = (u8*)func_0018D500(16);
+    if (self->p218 == D_00260EA0) self->p218 = (u8*)AllocateFrontMemory(16);
     *(Quad_12A0F8*)self->p218 = *src;
 }
 
@@ -483,7 +483,7 @@ void func_0012ABA8(PlacedObject* self);
 
 void func_0012ACF8(PlacedObject* self, f32 value)
 {
-    func_0012ABA8(self);
+    EnsureSoundRecord(self);
     ((Sub_12ACF8*)self->f2AC)->value = value;
 }
 
@@ -492,7 +492,7 @@ struct Sub_12AD30 { u8 pad0[0x14]; Rec_12AD30 rec; };
 
 void func_0012AD30(PlacedObject* self, Rec_12AD30* src)
 {
-    func_0012ABA8(self);
+    EnsureSoundRecord(self);
     ((Sub_12AD30*)self->f2AC)->rec = *src;
 }
 
@@ -533,13 +533,13 @@ void func_0012B420(PlacedObject* self, s32 flag)
     }
     u64 bit = (u64)(flag & 1) << 36;
     self->flags = (self->flags & 0xFFFFFFEFFFFFFFFFULL) | bit;
-    if (func_00182FC8(self) == 0) {
+    if (IsObjectAttached(self) == 0) {
         return;
     }
     if (flag != 0) {
-        func_00143AF8(D_00261990, self);
+        AddCameraObject(g_camera, self);
     } else {
-        func_00143B20(D_00261990, self);
+        RemoveCameraObject(g_camera, self);
     }
 }
 
@@ -547,28 +547,28 @@ void func_001B1FB0(void* self, f32 x);
 
 void func_00129318(f32 x)
 {
-    func_001B1FB0(func_001291D0(x), x);
+    func_001B1FB0(EnsureRangeRecord(x), x);
 }
 
 void func_001B1FE0(void* self, f32 x);
 
 void func_00129348(f32 x)
 {
-    func_001B1FE0(func_001291D0(x), x);
+    func_001B1FE0(EnsureRangeRecord(x), x);
 }
 
 void func_001B2010(void* self, f32 x);
 
 void func_00129378(f32 x)
 {
-    func_001B2010(func_001291D0(x), x);
+    func_001B2010(EnsureRangeRecord(x), x);
 }
 
 void func_001B2068(void* self, void* src);
 
 void func_001293A8(void* self, void* src)
 {
-    func_001B2068(func_001291D0(self), src);
+    func_001B2068(EnsureRangeRecord(self), src);
 }
 
 typedef u64 Quad_129EE0 __attribute__((mode(TI)));
@@ -586,8 +586,8 @@ void func_00129EE0(void* self, void* src)
     u8* p = D_00260E80;
     func_00118CF0(&f.a, src);
     Quad_129EE0 av = f.a;
-    func_00118D10(&f.b, p);
-    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    CopyQuadword(&f.b, p);
+    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
     func_00129F58(self, &f.r);
 }
 
@@ -619,7 +619,7 @@ void* func_0018D500(s32 size);
 void func_0012A200(PlacedObject* self, Vec4_12A150* src)
 {
     if (self->p21C == (u8*)&D_00260EB0) {
-        self->p21C = (u8*)func_0018D500(16);
+        self->p21C = (u8*)AllocateFrontMemory(16);
     }
     *(Vec4_12A150*)self->p21C = *src;
 }
@@ -628,13 +628,13 @@ struct Part_0012AC08 { void* link; f32 f4; f32 f8; f32 fc; f32 f10; u8 sub14[8];
 
 void func_0012ACA0(PlacedObject* self, f32 value)
 {
-    func_0012ABA8(self);
+    EnsureSoundRecord(self);
     ((Part_0012AC08*)self->f2AC)->f4 = value;
 }
 
 void func_0012ADD0(PlacedObject* self, f32 value)
 {
-    func_0012ABA8(self);
+    EnsureSoundRecord(self);
     ((Part_0012AC08*)self->f2AC)->f20 = value;
 }
 
@@ -669,7 +669,7 @@ void func_0012B4C8(PlacedObject* self, s32 flag)
     if ((0 < (u32)flag) != (self->f294 == 0)) {
         goto done;
     }
-    if (func_00182FC8(self) == 0) {
+    if (IsObjectAttached(self) == 0) {
         goto store;
     }
     if (self->parent != 0) {
@@ -687,7 +687,7 @@ done:
 
 void func_001293D8(void* self, s32 value)
 {
-    ((RangeRecord*)func_001291D0(self))->fB0 = value;
+    ((RangeRecord*)EnsureRangeRecord(self))->fB0 = value;
 }
 
 
@@ -715,7 +715,7 @@ void* func_0018D500(u32 size);
 void func_0012A320(PlacedObject* self, Pack4_12A320* src)
 {
     if (self->p220 == D_00260EC0) {
-        self->p220 = (u8*)func_0018D500(0x10);
+        self->p220 = (u8*)AllocateFrontMemory(0x10);
     }
     *(Pack4_12A320*)self->p220 = *src;
 }
@@ -730,7 +730,7 @@ void func_0012AE20(PlacedObject* self)
     if (part != 0) {
         void* p = part->ptr;
         if (p != 0) {
-            func_001BF8E8(p);
+            SetSoundRecordVolume(p);
         }
     }
 }
@@ -796,7 +796,7 @@ void* func_00129400(void* self);
 
 void func_00129480(void* self, f32* out)
 {
-    Sub_129480* s = (Sub_129480*)func_00129400(self);
+    Sub_129480* s = (Sub_129480*)GetRangeRecord(self);
     *out = s->value_4;
 }
 
@@ -818,7 +818,7 @@ Node_129C20* func_00129C20(PlacedObject* self, s32 key)
     while (n != 0) {
         if (n->f1C == self) {
             if (key == -1) return n;
-            if (func_001833F0(n->f18, key) != 0) return n;
+            if (MatchesObjectId(n->f18, key) != 0) return n;
         }
         n = n->f10;
     }
@@ -852,7 +852,7 @@ struct Sub_12A700 { u8 pad[0x80]; U64_12A700 v80; };
 
 void func_0012A700(PlacedObject* self, U64_12A700* src)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((Sub_12A700*)self->f200)->v80 = *src;
 }
 
@@ -862,7 +862,7 @@ void func_0012ABA8(void* self, f32 f);
 
 void func_0012AE78(PlacedObject* self, f32 f)
 {
-    func_0012ABA8(self, f);
+    EnsureSoundRecord(self, f);
     ((Part_12AE78*)self->f2AC)->value = f;
 }
 
@@ -898,7 +898,7 @@ void* func_00129400(void* self);
 
 void func_001294B0(void* self, f32* out)
 {
-    *out = ((Sub_1294B0*)func_00129400(self))->f8;
+    *out = ((Sub_1294B0*)GetRangeRecord(self))->f8;
 }
 
 struct Sub_1294E0 { u8 pad[0x40]; f32 f40; };
@@ -907,7 +907,7 @@ void* func_00129400(void* self);
 
 void func_001294E0(void* self, f32* out)
 {
-    *out = ((Sub_1294E0*)func_00129400(self))->f40;
+    *out = ((Sub_1294E0*)GetRangeRecord(self))->f40;
 }
 
 void func_00129DF8(PlacedObject* self)
@@ -932,8 +932,8 @@ void func_00129E10(void* self, void* src)
     u8* p = D_00260E70;
     func_00118CF0(&f.a, src);
     Quad_129E10 av = f.a;
-    func_00118D10(&f.b, p);
-    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    CopyQuadword(&f.b, p);
+    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
     func_00129E88(self, &f.r);
 }
 
@@ -941,7 +941,7 @@ extern u8 D_00275C60[];
 
 void func_0012A748(PlacedObject* self, U64P* out)
 {
-    U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x80) : (U64P*)D_00275C60;
+    U64P* src = self->f200 != 0 ? (U64P*)((u8*)self->f200 + 0x80) : (U64P*)g_unitRange;
     *out = *src;
 }
 
@@ -1005,7 +1005,7 @@ void func_0012A390(void* self, s8 value) { *((s8*)((u8*)self + 0x2C9)) = value; 
 
 void func_0012A398(void* self, s8 value) { *((s8*)((u8*)self + 0x2CA)) = value; }
 
-void func_0012A3A0(void* self, s32 value) { func_0012A430(self, value ? 1 : -1); }
+void func_0012A3A0(void* self, s32 value) { SetPositionSourceMode(self, value ? 1 : -1); }
 
 void func_0012A3E8(PlacedObject* self, u32 value)
 {
@@ -1021,7 +1021,7 @@ void func_0012A418(PlacedObject* self, u32* out)
 
 void func_0012ABA8(PlacedObject* self)
 {
-    if (self->f2AC == 0) func_001BE4D8(&self->f2AC);
+    if (self->f2AC == 0) InitSoundParams(&self->f2AC);
 }
 
 void func_0012B128(PlacedObject* self, s32* out) { *out = self->f288 ? *(s32*)self->f288 : -1; }
@@ -1032,7 +1032,7 @@ void func_0012B868(void) {}
 
 void func_00129598(void* self, Quad_129598* out)
 {
-    *out = ((Result_129598*)func_00129400(self))->value;
+    *out = ((Result_129598*)GetRangeRecord(self))->value;
 }
 
 Node_129B98* func_00129B98(PlacedObject* self, s32 key)
@@ -1042,7 +1042,7 @@ Node_129B98* func_00129B98(PlacedObject* self, s32 key)
     while (node != 0) {
         if (node->owner == self) {
             if (key == -1) return node;
-            if (func_001833F0(node->item, key) != 0) return node;
+            if (MatchesObjectId(node->item, key) != 0) return node;
         }
         node = node->next;
     }
@@ -1051,58 +1051,58 @@ Node_129B98* func_00129B98(PlacedObject* self, s32 key)
 
 void func_0012A430(PlacedObject* self, s32 value)
 {
-    func_001296E0(self);
+    EnsureBaseAttachment(self);
     ((State_12A430*)self->f1FC)->value = value;
     self->desc02()->m2B(self);
 }
 
 void func_0012A4A0(PlacedObject* self, s32 value)
 {
-    func_001296E0(self);
+    EnsureBaseAttachment(self);
     ((State_12A4A0*)self->f1FC)->value = value;
     self->desc02()->m2B(self);
 }
 
 void func_0012A4E8(PlacedObject* self, s32 value)
 {
-    func_001296E0(self);
+    EnsureBaseAttachment(self);
     ((State_12A4E8*)self->f1FC)->value = value;
-    func_00129A58(self);
+    SortAttachments(self);
 }
 
 void func_0012A7C0(PlacedObject* self, s32 value)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     ((State_12A7C0*)self->f200)->value = value;
 }
 
 void func_0012ABD0(PlacedObject* self, s32 value)
 {
-    func_0012ABA8(self);
+    EnsureSoundRecord(self);
     ((Inner_12ABD0*)self->f2AC)->value = value;
 }
 
 void func_0012B010(PlacedObject* self)
 {
     Inner_12B010* inner = (Inner_12B010*)self->f2AC;
-    if (inner != 0) func_001BF788(inner->resource, 0);
+    if (inner != 0) StopSoundRecord(inner->resource, 0);
 }
 
 void func_0012B140(PlacedObject* self, Vec_12B140* input)
 {
-    func_0012B040(self);
+    EnsureColorRecord(self);
     *(Vec_12B140*)((u8*)self->f288 + 0x10) = *input;
 }
 
 void func_0012B1A0(PlacedObject* self, Vec_12B1A0* input)
 {
-    func_0012B040(self);
+    EnsureColorRecord(self);
     *(Vec_12B1A0*)((u8*)self->f288 + 0x20) = *input;
 }
 
 void func_0012B200(PlacedObject* self, f32 value)
 {
-    func_0012B040(self);
+    EnsureColorRecord(self);
     ((Inner_0012B238*)self->f288)->value = value;
 }
 
@@ -1110,14 +1110,14 @@ struct Sub_00129540 { u8 pad[4]; f32 value; u8 gap[0x38]; f32 scale; };
 f32 func_00205778(f32 a, f32 b);
 void func_00129540(void* self, f32* out)
 {
-    Sub_00129540* sub = (Sub_00129540*)func_00129400(self);
+    Sub_00129540* sub = (Sub_00129540*)GetRangeRecord(self);
     f32 value = func_00205778(sub->value / sub->scale, 1.0f) * 57.2957763671875f;
     *out = value + value;
 }
 
 void func_0012A528(PlacedObject* self, s32 value)
 {
-    func_00129730(self);
+    EnsureAimAttachment(self);
     if (value == 3) value = 9;
     ((u8*)self->f200)[0x11] = value;
     self->desc02()->m2B(self);
@@ -1132,7 +1132,7 @@ void func_0012AA00(void* self, f32 value)
 void func_00129E88(PlacedObject* self, Vec16_12A5D0* value)
 {
     if (self->p20C == D_00260E70)
-        self->p20C = (u8*)func_0018D500(16);
+        self->p20C = (u8*)AllocateFrontMemory(16);
     *(Vec16_12A5D0*)self->p20C = *value;
 }
 
@@ -1141,7 +1141,7 @@ void func_0012AA50(PlacedObject* self, f32 a, f32 b)
 {
     for (s32 i = 0; i < self->elemCount; i++) {
         Elem02* p = self->elems[i];
-        if (p->kind == 6) func_001B5388(p, a, b);
+        if (p->kind == 6) SetScrollScale(p, a, b);
     }
 }
 
@@ -1151,7 +1151,7 @@ void func_0012AAE8(PlacedObject* self, f32 value)
     ListFrame frame;
     for (s32 i = 0; i < self->elemCount; i++) {
         Elem02* p = self->elems[i];
-        if (p->kind == 5) func_00159A00(p, value);
+        if (p->kind == 5) SetCrossfadeRatio(p, value);
     }
     for (PlacedObject* child = (PlacedObject*)self->children.head; child; child = (PlacedObject*)child->next) {
         if (child->desc->flags & 1) func_0012AAE8(child, value);
@@ -1163,7 +1163,7 @@ void func_0012B040(void* ptr)
 {
     PlacedObject* self = (PlacedObject*)ptr;
     if (!self->f288) {
-        self->f288 = (Entry_12B0B0*)func_0018D500(64);
+        self->f288 = (Entry_12B0B0*)AllocateFrontMemory(64);
         *(Entry_12B0B0*)self->f288 = D_00261000[0];
         ((Entry_12B0B0*)self->f288)->w[0] = -1;
     }
@@ -1185,7 +1185,7 @@ void func_001299E0(PlacedObject* self, Node_1299E0* src)
             node = node->next;
         }
     }
-    func_00152540(&self->list1E0, node, src);
+    InsertBeforeInList(&self->list1E0, node, src);
     self->desc02()->m2B(self);
 }
 
@@ -1195,14 +1195,14 @@ void func_00152470(void* list, void* item);
 void func_00129228(PlacedObject* self, s32 flag)
 {
     if (flag != 0) {
-        func_001291D0(self);
+        EnsureRangeRecord(self);
         return;
     }
     if (self->f284 == 0) {
         return;
     }
-    func_00152600((u8*)self->world + 0x1C00, self->f284);
-    func_00152470(&D_00262300, self->f284);
+    RemoveFromList((u8*)self->world + 0x1C00, self->f284);
+    AppendToList(&g_deferredReleaseListC, self->f284);
     self->f284 = 0;
 }
 
@@ -1215,7 +1215,7 @@ void func_001295C8(PlacedObject* self, f32* out)
     a[1] = self->rot.r[1];
     a[2] = self->rot.r[2];
     self->desc02()->m2A(self, a);
-    func_00188FD8(a, out);
+    MatrixToEulerAngles(a, out);
     s32 n = 2;
     f32* p = out;
     do {
@@ -1243,7 +1243,7 @@ void func_00129648(PlacedObject* self, f32* src)
         src++;
         dst++;
     } while (i >= 0);
-    func_00188A20(l.tmp, out);
+    BuildEulerRotationMatrix(l.tmp, out);
     self->desc02()->m29(self, (Mat02*)out, 0);
     self->desc02()->m1E(self, (Mat02*)out);
 }
@@ -1253,7 +1253,7 @@ void func_00152438(void* self, s32 value);
 
 void func_0012B870(Animation* self)
 {
-    func_00182C18(self);
+    InitObject(self);
     func_00152438(&self->props6C, 0x3C);
     Kin83* k = &self->kin;
     k->pos = 1.0f;
@@ -1272,11 +1272,11 @@ void func_001BFCD8(void* a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* 
 
 void func_0012AC08(PlacedObject* self, void* value)
 {
-    func_0012ABA8(self);
-    func_001BF788(((Part_0012AC08R*)self->f2AC)->sub1C, 0);
+    EnsureSoundRecord(self);
+    StopSoundRecord(((Part_0012AC08R*)self->f2AC)->sub1C, 0);
     ((Part_0012AC08R*)self->f2AC)->link = value;
     Part_0012AC08R* p = (Part_0012AC08R*)self->f2AC;
-    func_001BFCD8(p->link, p->f4, p->f8, p->fc, p->f10, p->f20, &p->sub1C, self, 0, p->sub14, 0);
+    StartSoundEffect(p->link, p->f4, p->f8, p->fc, p->f10, p->f20, &p->sub1C, self, 0, p->sub14, 0);
 }
 
 // NEAR: same bytes except the load order of the arguments to func_001BFCD8 (retail loads a0, a4, f12, a1, f13..f15 and f16 last, in the delay slot)
@@ -1288,15 +1288,15 @@ void func_001BFCD8(void* a0, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, void* 
 
 void func_0012AF38(PlacedObject* self, void* value, Rec_0012AF38* src, f32 x, f32 y, f32 z)
 {
-    func_0012ABA8(self);
+    EnsureSoundRecord(self);
     ((Part_0012AF38*)self->f2AC)->link = value;
     ((Part_0012AF38*)self->f2AC)->f4 = x;
     ((Part_0012AF38*)self->f2AC)->f8 = y;
     ((Part_0012AF38*)self->f2AC)->fc = z;
     ((Part_0012AF38*)self->f2AC)->rec14 = *src;
-    func_001BF788(((Part_0012AF38*)self->f2AC)->sub1C, 0);
+    StopSoundRecord(((Part_0012AF38*)self->f2AC)->sub1C, 0);
     Part_0012AF38* p = (Part_0012AF38*)self->f2AC;
-    func_001BFCD8(p->link, p->f4, p->f8, p->fc, p->f10, p->f20, &p->sub1C, self, 0, &p->rec14, 0);
+    StartSoundEffect(p->link, p->f4, p->f8, p->fc, p->f10, p->f20, &p->sub1C, self, 0, &p->rec14, 0);
 }
 
 // NEAR: same bytes except the prologue order: retail loads the crc word and the table base before the n > 0 test (lw v0, addiu t1, then blez); ours tests first
@@ -1330,7 +1330,7 @@ void func_0012B760(CodeChecksum* self)
         self->remaining = n;
         if (n == 0 && crc != 0) {
             g_checksumMismatch[0] = 1;
-            func_001837E0(self, 2, 0, 0);
+            TriggerScriptEvent(self, 2, 0, 0);
         }
     }
 }
@@ -1363,50 +1363,50 @@ void func_0012B8C8(Animation* self, Stream83* other)
     s32 t;
     s32 flags;
 
-    t = func_00137D10(other);
+    t = ReadBufferedS16(other);
     self->id = t;
-    t = func_00137D10(other);
+    t = ReadBufferedS16(other);
     self->length = (f32)t * 0.01666666753590107f;
-    t = func_00137BE0(other);
+    t = ReadBufferedU16(other);
     self->targetCount = t;
-    self->targets = (s32*)func_0018D500(t << 2);
+    self->targets = (s32*)AllocateFrontMemory(t << 2);
     for (k = 0; k < self->targetCount; k++) {
-        self->targets[k] = func_00137D10(other);
+        self->targets[k] = ReadBufferedS16(other);
     }
-    t = func_00137CC0(other);
+    t = ReadBufferedS8(other);
     self->trackCount = t;
-    self->tracks = (Track83*)func_0018D5C0(t * 28);
+    self->tracks = (Track83*)AllocateZeroedFrontMemory(t * 28);
     for (i = 0; i < self->trackCount; i++) {
         e = &self->tracks[i];
-        e->target = func_00137D10(other);
-        flags = func_00137CC0(other);
+        e->target = ReadBufferedS16(other);
+        flags = ReadBufferedS8(other);
         if (flags & 1) {
-            qp = func_00120FB0(func_00137CC0(other));
+            qp = CreatePositionCurve(ReadBufferedS8(other));
             e->pos = qp;
             if (qp->vt->read) qp->vt->read(qp, other);
         }
         if (flags & 2) {
-            qr = func_00121050(func_00137CC0(other));
+            qr = CreateRotationCurve(ReadBufferedS8(other));
             e->rot = qr;
             if (qr->vt->read) qr->vt->read(qr, other);
         }
         if (flags & 4) {
-            qs = func_001210F0(func_00137CC0(other));
+            qs = CreateScaleCurve(ReadBufferedS8(other));
             e->scale = qs;
             if (qs->vt->read) qs->vt->read(qs, other);
         }
         if (flags & 8) {
-            qw = func_00121160(func_00137CC0(other));
+            qw = CreateWeightCurve(ReadBufferedS8(other));
             e->weight = qw;
             if (qw->vt->read) qw->vt->read(qw, other);
         }
         if (flags & 0x10) {
-            e->morphCount = func_00137B90(other);
-            e->morph = (T2196_Weight**)func_0018D5C0(e->morphCount << 2);
+            e->morphCount = ReadBufferedU8(other);
+            e->morph = (T2196_Weight**)AllocateZeroedFrontMemory(e->morphCount << 2);
             for (j = 0; j < e->morphCount; j++) {
-                t = func_00137CC0(other);
+                t = ReadBufferedS8(other);
                 if (t != -1) {
-                    e->morph[j] = func_00121160(t);
+                    e->morph[j] = CreateWeightCurve(t);
                     qw = e->morph[j];
                     if (qw->vt->read) qw->vt->read(qw, other);
                 }
@@ -1414,11 +1414,11 @@ void func_0012B8C8(Animation* self, Stream83* other)
         }
         sel = (flags & 0x20) ? e : sel;
     }
-    if (sel != 0) func_0012D2A8(self, sel);
-    func_0012BC38(self, other, 0, &self->startCount, &self->startList);
-    func_0012BC38(self, other, 1, &self->timedCount, &self->timedList);
-    func_0012BC38(self, other, 0, &self->endCount, &self->endList);
-    func_0011EC40(self, other);
+    if (sel != 0) MoveAnimationTrackToEnd(self, sel);
+    ReadAnimationEvents(self, other, 0, &self->startCount, &self->startList);
+    ReadAnimationEvents(self, other, 1, &self->timedCount, &self->timedList);
+    ReadAnimationEvents(self, other, 0, &self->endCount, &self->endList);
+    ReadPropertyRecords(self, other);
 }
 
 struct Sub_12B5B8 {
@@ -1438,7 +1438,7 @@ void func_0012B5B8(PlacedObject* self, void* a1, void* a2)
     if (a1 == t || a2 == t || a1 == a2) {
         if (a1 != 0 || a2 != 0) {
             if (self->f224 == 0) {
-                self->f224 = (Rec2195_224*)func_0018D5C0(0xC0);
+                self->f224 = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
             }
         }
         Sub_12B5B8* p = (Sub_12B5B8*)self->f224;
@@ -1471,41 +1471,41 @@ s32 func_00137B90(void* a);
 
 void func_00128C10(PlacedObject* self, void* a1)
 {
-    s32 flags = func_00137C40(a1);
+    s32 flags = ReadBufferedU32(a1);
     if (flags) {
-        u8* p = (u8*)func_0018D5C0(0xC0);
+        u8* p = (u8*)AllocateZeroedFrontMemory(0xC0);
         self->f224 = (Rec2195_224*)p;
         *(s32*)(p + 0xB0) = flags;
 
         u8* q = p + 0x30;
-        *(Mat02*)p = D_002483D0;
-        *(Mat02*)q = D_002483D0;
-        if (flags & 1) func_00137EB0(a1, p);
-        if (flags & 2) func_00137EB0(a1, q);
+        *(Mat02*)p = g_identityMatrix;
+        *(Mat02*)q = g_identityMatrix;
+        if (flags & 1) ReadBufferedRotation3(a1, p);
+        if (flags & 2) ReadBufferedRotation3(a1, q);
         if (flags & 0xC) {
-            s32 r = func_00137D10(a1);
+            s32 r = ReadBufferedS16(a1);
             if (r != -1) {
-                *(s32*)(p + 0x60) = func_0015A418(self->world, 3, r, self);
+                *(s32*)(p + 0x60) = FindFirstObjectById(self->world, 3, r, self);
             }
         }
         if (flags & 0x10) {
-            *(s32*)(p + 0x60) = func_00137D10(a1);
+            *(s32*)(p + 0x60) = ReadBufferedS16(a1);
         }
         if (flags & 0x20) {
-            *(s32*)(p + 0x84) = func_00137D10(a1);
-            func_00137E70(a1, p + 0x60);
-            func_00137E70(a1, p + 0x70);
-            f32 f = func_001EA408(func_00137DF8(a1));
+            *(s32*)(p + 0x84) = ReadBufferedS16(a1);
+            ReadBufferedVector3(a1, p + 0x60);
+            ReadBufferedVector3(a1, p + 0x70);
+            f32 f = WrapAngle(ReadBufferedFloat(a1));
             *(s32*)(p + 0x98) = 0;
             *(f32*)(p + 0x8C) = f;
             *(f32*)(p + 0x90) = f;
         }
         if (flags & 0x40) {
-            *(s32*)(p + 0x60) = func_00137D10(a1);
-            *(s32*)(p + 0x64) = func_00137D10(a1);
+            *(s32*)(p + 0x60) = ReadBufferedS16(a1);
+            *(s32*)(p + 0x64) = ReadBufferedS16(a1);
         }
         if (flags & 0x80) {
-            *(s32*)(p + 0xA0) = func_00137B90(a1);
+            *(s32*)(p + 0xA0) = ReadBufferedU8(a1);
         }
     }
 }
@@ -1540,8 +1540,8 @@ void func_00129FB0(PlacedObject* self, void* src)
     u8* p = D_00260E90;
     func_00118CF0(&f.a, src);
     Quad_129FB0 av = f.a;
-    func_00118D10(&f.b, p);
-    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    CopyQuadword(&f.b, p);
+    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
     func_0012A028(self, &f.r);
 }
 
@@ -1561,8 +1561,8 @@ void func_0012A080(PlacedObject* self, void* src)
     u8* p = D_00260EA0;
     func_00118CF0(&f.a, src);
     Quad_12A080 av = f.a;
-    func_00118D10(&f.b, p);
-    (void)func_00118D20(&f.r, func_00118D30(av, f.b));
+    CopyQuadword(&f.b, p);
+    (void)StoreQuadword(&f.r, func_00118D30(av, f.b));
     func_0012A0F8(self, &f.r);
 }
 
@@ -1573,9 +1573,9 @@ void func_001299E0(PlacedObject* self, void* src);
 void func_001296E0(PlacedObject* self)
 {
     if (self->f1FC == 0) {
-        void* v = func_00121228(self->world, self, D_00219560);
+        void* v = CreatePoseSource(self->world, self, D_00219560);
         self->f1FC = v;
-        func_001299E0(self, v);
+        InsertAttachment(self, v);
     }
 }
 
@@ -1586,9 +1586,9 @@ void func_001299E0(PlacedObject* self, void* src);
 void func_00129730(PlacedObject* self)
 {
     if (self->f200 == 0) {
-        void* v = func_00121228(self->world, self, D_0021A790);
+        void* v = CreatePoseSource(self->world, self, D_0021A790);
         self->f200 = v;
-        func_001299E0(self, v);
+        InsertAttachment(self, v);
     }
 }
 
@@ -1622,9 +1622,9 @@ void func_00129D00(PlacedObject* self, void* v, Node_129D00** out)
     Node_129D00* n;
 
     if (self != 0) {
-        n = (Node_129D00*)func_00121228(self->world, self, ((u8*)D_002195D8));
+        n = (Node_129D00*)CreatePoseSource(self->world, self, ((u8*)D_002195D8));
         n->w14 = v;
-        func_001299E0(self, n);
+        InsertAttachment(self, n);
         *out = n;
     }
 }
@@ -1634,7 +1634,7 @@ void func_001853F0(void* a, void* b, void* c);
 
 void func_0012A860(PlacedObject* self, void* b)
 {
-    func_001853F0(self->f200, b, (void*)&D_00248D30);
+    AssignAimTarget(self->f200, b, (void*)&D_00248D30);
 }
 
 extern const Fn_Table D_00219600[];
@@ -1652,9 +1652,9 @@ void func_001299E0(PlacedObject* self, Inner_0012A8D8* src);
 void func_0012A8D8(PlacedObject* self, s32 a1, f32 x, f32 y)
 {
     if (self->f204 == 0) {
-        Inner_0012A8D8* r = (Inner_0012A8D8*)func_00121228(self->world, self, ((u8*)D_00219600));
+        Inner_0012A8D8* r = (Inner_0012A8D8*)CreatePoseSource(self->world, self, ((u8*)D_00219600));
         self->f204 = r;
-        func_001299E0(self, r);
+        InsertAttachment(self, r);
     }
     ((Inner_0012A8D8*)self->f204)->f11 = a1;
     ((Inner_0012A8D8*)self->f204)->f1C = x;
@@ -1722,11 +1722,11 @@ void func_00129780(PlacedObject* self)
         func_00129DF8(self);
         if (s1 != self->f1EC) {
             self->f1EC = s1;
-            if (s1) func_001226D8(s1);
+            if (s1) SettlePoseSourceModes(s1);
         }
         if (s2 != self->f1F0) {
             self->f1F0 = s2;
-            if (s2) func_001226D8(s2);
+            if (s2) SettlePoseSourceModes(s2);
         }
     }
 }
@@ -1765,16 +1765,16 @@ void func_0012BC38(void* unused, Rd_12BC38* r, s32 flag, s32* count, Rec_12BC38*
     Rec_12BC38* e;
     s32 i;
     s32 merged;
-    *count = func_00137CC0(r);
-    *out = (Rec_12BC38*)func_0018D5C0(*count * 16);
+    *count = ReadBufferedS8(r);
+    *out = (Rec_12BC38*)AllocateZeroedFrontMemory(*count * 16);
     for (i = 0; i < *count; i++) {
         e = &(*out)[i];
-        e->kind = func_00137CC0(r);
-        if (flag) e->t = (f32)func_00137D10(r) * 0.016666668f;
+        e->kind = ReadBufferedS8(r);
+        if (flag) e->t = (f32)ReadBufferedS16(r) * 0.016666668f;
         switch (e->kind) {
         case 44:
         case 51:
-            func_00138550(r, &e->w8);
+            ReadOptionalBufferedBlock(r, &e->w8);
             break;
         case 0: {
             Ev_12BC38 t;
@@ -1783,13 +1783,13 @@ void func_0012BC38(void* unused, Rd_12BC38* r, s32 flag, s32* count, Rec_12BC38*
             s32 k;
             Rec_12BC38* q;
             merged = 0;
-            t.h2 = func_00137D10(r);
-            t.h10 = func_00137D10(r);
-            t.w14 = func_00137D78(r);
-            t.w18 = func_00137D78(r);
-            t.f24 = func_00137DF8(r);
-            t.f1C = func_00137DF8(r);
-            t.f20 = func_00137DF8(r);
+            t.h2 = ReadBufferedS16(r);
+            t.h10 = ReadBufferedS16(r);
+            t.w14 = ReadBufferedS32(r);
+            t.w18 = ReadBufferedS32(r);
+            t.f24 = ReadBufferedFloat(r);
+            t.f1C = ReadBufferedFloat(r);
+            t.f20 = ReadBufferedFloat(r);
             t.h0 = 1;
             t.hE = 0;
             k = i - 1;
@@ -1815,101 +1815,101 @@ void func_0012BC38(void* unused, Rd_12BC38* r, s32 flag, s32* count, Rec_12BC38*
             if (g->n < 6) goto ins;
         done:
             if (!merged) {
-                e->w8 = (s32)func_0018D500(0x28);
+                e->w8 = (s32)AllocateFrontMemory(0x28);
                 *(Ev_12BC38*)e->w8 = t;
             }
             break;
         }
         case 4:
         case 7:
-            F32(e->w8) = (f32)func_00137D10(r) * 0.016666668f;
-            F32(e->wC) = func_00137DF8(r);
+            F32(e->w8) = (f32)ReadBufferedS16(r) * 0.016666668f;
+            F32(e->wC) = ReadBufferedFloat(r);
             break;
         case 19:
         case 20:
-            e->w8 = func_00137D10(r);
-            e->wC = func_00137B90(r);
+            e->w8 = ReadBufferedS16(r);
+            e->wC = ReadBufferedU8(r);
             break;
         case 16:
-            e->w8 = func_00137D10(r);
-            H0(e->wC) = func_00137CC0(r);
-            H2(e->wC) = func_00137CC0(r);
+            e->w8 = ReadBufferedS16(r);
+            H0(e->wC) = ReadBufferedS8(r);
+            H2(e->wC) = ReadBufferedS8(r);
             break;
         case 21:
         case 23:
-            e->w8 = (s32)func_0018D5C0(0xC);
-            ((Sub_12BC38*)e->w8)->w0 = func_00137D10(r);
-            F32(((Sub_12BC38*)e->w8)->w4) = func_00137DF8(r);
-            F32(((Sub_12BC38*)e->w8)->w8) = func_00137DF8(r);
+            e->w8 = (s32)AllocateZeroedFrontMemory(0xC);
+            ((Sub_12BC38*)e->w8)->w0 = ReadBufferedS16(r);
+            F32(((Sub_12BC38*)e->w8)->w4) = ReadBufferedFloat(r);
+            F32(((Sub_12BC38*)e->w8)->w8) = ReadBufferedFloat(r);
             break;
         case 25:
         case 26:
-            H0(e->w8) = func_00137D10(r);
-            e->wC = (s32)func_0018D5C0(0x14);
+            H0(e->w8) = ReadBufferedS16(r);
+            e->wC = (s32)AllocateZeroedFrontMemory(0x14);
             ((Sub_12BC38*)e->wC)->w0 = 1;
-            ((Sub_12BC38*)e->wC)->w8 = func_00137D10(r);
+            ((Sub_12BC38*)e->wC)->w8 = ReadBufferedS16(r);
             ((Sub_12BC38*)e->wC)->wC = -1;
             ((Sub_12BC38*)e->wC)->w10 = 0;
-            ((Sub_12BC38*)e->wC)->w4 = (s32)func_0018D5C0(0x20);
-            func_00137A60(r, 0x20, (void*)((Sub_12BC38*)e->wC)->w4);
+            ((Sub_12BC38*)e->wC)->w4 = (s32)AllocateZeroedFrontMemory(0x20);
+            ReadBufferedStreamBytes(r, 0x20, (void*)((Sub_12BC38*)e->wC)->w4);
             break;
         case 27:
-            e->w8 = func_00137B90(r);
-            e->wC = func_00137D10(r);
+            e->w8 = ReadBufferedU8(r);
+            e->wC = ReadBufferedS16(r);
             break;
         case 28:
-            e->w8 = (s32)func_0018D5C0(0x10);
-            ((Sub_12BC38*)e->w8)->w0 = func_00137D10(r);
-            ((Sub_12BC38*)e->w8)->w4 = func_00137D10(r);
-            F32(((Sub_12BC38*)e->w8)->w8) = func_00137DF8(r);
-            F32(((Sub_12BC38*)e->w8)->wC) = func_00137DF8(r);
+            e->w8 = (s32)AllocateZeroedFrontMemory(0x10);
+            ((Sub_12BC38*)e->w8)->w0 = ReadBufferedS16(r);
+            ((Sub_12BC38*)e->w8)->w4 = ReadBufferedS16(r);
+            F32(((Sub_12BC38*)e->w8)->w8) = ReadBufferedFloat(r);
+            F32(((Sub_12BC38*)e->w8)->wC) = ReadBufferedFloat(r);
             break;
         case 37:
-            H0(e->w8) = func_00137D10(r);
-            H2(e->w8) = func_00137D10(r);
+            H0(e->w8) = ReadBufferedS16(r);
+            H2(e->w8) = ReadBufferedS16(r);
             break;
         case 6: case 12: case 13: case 17: case 18: case 22: case 24:
         case 29: case 30: case 31: case 32: case 35: case 36: case 39:
         case 41: case 59:
-            e->w8 = func_00137D10(r);
+            e->w8 = ReadBufferedS16(r);
             break;
         case 40:
-            e->w8 = func_00137BE0(r);
+            e->w8 = ReadBufferedU16(r);
             break;
         case 38:
         case 45:
         case 47:
-            e->w8 = func_00137D10(r);
-            e->wC = func_00137D10(r);
+            e->w8 = ReadBufferedS16(r);
+            e->wC = ReadBufferedS16(r);
             break;
         case 48:
-            e->w8 = (s32)func_0018D5C0(0x10);
-            ((Sub_12BC38*)e->w8)->w0 = func_00137D10(r);
-            ((Sub_12BC38*)e->w8)->w4 = func_00137D10(r);
-            ((Sub_12BC38*)e->w8)->w8 = func_00137D10(r);
-            F32(((Sub_12BC38*)e->w8)->wC) = func_00137DF8(r);
+            e->w8 = (s32)AllocateZeroedFrontMemory(0x10);
+            ((Sub_12BC38*)e->w8)->w0 = ReadBufferedS16(r);
+            ((Sub_12BC38*)e->w8)->w4 = ReadBufferedS16(r);
+            ((Sub_12BC38*)e->w8)->w8 = ReadBufferedS16(r);
+            F32(((Sub_12BC38*)e->w8)->wC) = ReadBufferedFloat(r);
             break;
         case 9:
         case 10:
-            e->w8 = func_00137D10(r);
-            F32(e->wC) = func_00137DF8(r);
+            e->w8 = ReadBufferedS16(r);
+            F32(e->wC) = ReadBufferedFloat(r);
             break;
         case 46:
         case 52:
-            H0(e->w8) = func_00137D10(r);
-            H2(e->w8) = func_00137D10(r);
-            H0(e->wC) = func_00137D10(r);
+            H0(e->w8) = ReadBufferedS16(r);
+            H2(e->w8) = ReadBufferedS16(r);
+            H0(e->wC) = ReadBufferedS16(r);
             break;
         case 54:
-            H0(e->w8) = func_00137D10(r);
-            H2(e->w8) = func_00137D10(r);
-            func_001384A0(r, &e->wC);
+            H0(e->w8) = ReadBufferedS16(r);
+            H2(e->w8) = ReadBufferedS16(r);
+            ReadBufferedString(r, &e->wC);
             break;
         case 5:
         case 33:
         case 57:
         case 58:
-            F32(e->w8) = func_00137DF8(r);
+            F32(e->w8) = ReadBufferedFloat(r);
             break;
         }
     }
@@ -1941,8 +1941,8 @@ void func_0012B2F8(PlacedObject* self, s32 key)
         }
         if (i < self->f2B8) {
             if (self->f2C0 == 0) {
-                self->f2C0 = (St_12B2F8*)func_00121228(self->world, self, ((u8*)D_002195B0));
-                func_001299E0(self, self->f2C0);
+                self->f2C0 = (St_12B2F8*)CreatePoseSource(self->world, self, ((u8*)D_002195B0));
+                InsertAttachment(self, self->f2C0);
             }
             callVt = ((St_12B2F8*)self->f2C0)->Set(3);
             ((St_12B2F8*)self->f2C0)->f38 = (u8*)self + 0x26C;
@@ -2019,12 +2019,12 @@ s32 func_001288F0(PlacedObject* self, Context_001288F0* context)
     Begin_001288F0::Of(&it, (List_001288F0*)&self->children);
     PlacedObject* obj;
     for (obj = Next_001288F0::Of(&it); obj != 0; obj = Next_001288F0::Of(&it)) {
-        if (func_001C1A28(context, &obj) == 0) {
-            D_0027B314 = (ListFrame*)it.saved;
+        if (AppendPropertyToScriptList(context, &obj) == 0) {
+            g_activeListFrames = (ListFrame*)it.saved;
             return 0;
         }
     }
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
     return 1;
 }
 
@@ -2062,17 +2062,17 @@ void func_00129A58(PlacedObject* self)
     Begin_129A58::Of(&it, &self->list1E0);
     for (node = Next_129A58::Of(&it); node != 0; node = Next_129A58::Of(&it)) {
         nodes[n] = node;
-        func_00152600(&self->list1E0, node);
+        RemoveFromList(&self->list1E0, node);
         n++;
     }
     while (--n >= 0) {
         Node_129A58* c = (Node_129A58*)self->list1E0.head;
         node = nodes[n];
         while (c != 0 && c->key > node->key) c = c->next;
-        func_00152540(&self->list1E0, c, node);
+        InsertBeforeInList(&self->list1E0, c, node);
     }
     self->desc02()->m2B(self);
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 Entry_12B0B0 D_00260F00[4] = {
@@ -2106,7 +2106,7 @@ void func_00123ED0(void* self);
 void func_0012B6B8(CodeChecksum* self)
 {
     u32 c;
-    func_00123ED0(self);
+    InitPlacedObject(self);
     self->start = 0x100018;
     self->end = D_00148D64;
     self->crc = 0xFFFFFFFF;

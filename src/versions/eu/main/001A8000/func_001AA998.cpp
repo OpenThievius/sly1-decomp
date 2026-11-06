@@ -63,6 +63,6 @@ void func_001AA998(Obj_eu_1AA998* self, s32 mode)
     self->f560 = mode;
     self->f564 = *self->f568;
     if (notify) {
-        func_001AAB60(self);
+        PlaceScreenElement(self);
     }
 }

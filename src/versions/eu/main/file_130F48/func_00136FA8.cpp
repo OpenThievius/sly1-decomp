@@ -8,10 +8,10 @@ s32 func_00136FA8(Owner_136FA8_eu* self)
 {
     s32 r;
     if (self->child != 0) {
-        r = func_00150790(self->child, 4);
+        r = SetStepSequenceState(self->child, 4);
         goto done;
     }
-    r = func_001356C0(self, 0);
+    r = SetTextPanelState(self, 0);
 done:
     return r;
 }

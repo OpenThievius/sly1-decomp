@@ -19,7 +19,7 @@ void func_001A76A0(void* child, int flag);
 
 void func_001A5DD8(void* unused, PairedObject* obj)
 {
-    func_001A76A0(obj->attachment, 1);
+    SetSoundStateObjectState(obj->attachment, 1);
 }
 
 void* func_001A6480(void* self)
@@ -34,9 +34,9 @@ void func_00159478(void* sub, void* self);
 
 void func_001A64F8(PairedObject* self)
 {
-    func_001BAC30(self);
-    func_00124DF8(self, 6, D_0026B7E8);
-    func_00159478(&self->notifyRecord, self);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 6, g_pairedObjectLinks);
+    FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
 struct Blob8_1A6540 { u8 b[8]; };
@@ -46,7 +46,7 @@ void func_001BA130(void* self);
 void func_001A6540(PairedObject* self)
 {
     Blob8_1A6540 tmp = *(Blob8_1A6540*)&self->blob5B0;
-    func_001BA130(self);
+    CopyCollider(self);
     *(Blob8_1A6540*)&self->blob5B0 = tmp;
 }
 
@@ -57,8 +57,8 @@ void func_001A6BE0(PairedObject* self, int flag);
 
 void func_001A6588(PairedObject* self)
 {
-    func_00124A48(self);
-    func_001A6BE0(self, 0);
+    StartPlacedObject(self);
+    SetPairedState(self, 0);
     Fn_1A6588* vt = *(Fn_1A6588**)self;
     vt[7](self);
 }
@@ -71,7 +71,7 @@ void* func_001A6F28(u8* self)
 {
     Node_1A6F28* cur = *(Node_1A6F28**)(*(u8**)(self + 0x480));
     while (cur) {
-        if (cur->flags != 0 && func_001300E8(cur->data, 0x43) != 0)
+        if (cur->flags != 0 && IsObjectOfKind(cur->data, 0x43) != 0)
             return cur->data;
         cur = cur->next;
     }
@@ -84,9 +84,9 @@ void func_00159478(void* sub, void* self);
 
 void func_001A7008(HitTarget* self)
 {
-    func_001BAC30(self);
-    func_00124DF8(self, 1, D_0026B830);
-    func_00159478(&self->notifyRecord, self);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 1, g_hitTargetLoadLinks);
+    FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
 struct Blob8_1A7050 { u8 b[8]; };
@@ -96,7 +96,7 @@ void func_001BA130(void* self);
 void func_001A7050(HitTarget* self)
 {
     Blob8_1A7050 tmp = *(Blob8_1A7050*)&self->blob5A0;
-    func_001BA130(self);
+    CopyCollider(self);
     *(Blob8_1A7050*)&self->blob5A0 = tmp;
 }
 
@@ -110,15 +110,15 @@ s32 func_001B6290(void* a, void* b, s32 c, s32 d);
 
 void func_001A7098(HitTarget* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 1, D_0026B840);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 1, g_hitTargetStartLinks);
     if (self->scaledObject != 0) {
         *(Blob8_1A7098*)&self->f57C = *(Blob8_1A7098*)((u8*)self->scaledObject + 0x2DC);
     }
     if (self->soundId != 0) {
-        self->soundHandle = (void*)func_001B6290(self->soundId, self, -1, 0);
+        self->soundHandle = (void*)CreateStateWalker(self->soundId, self, -1, 0);
     }
-    func_001A7480(self, 0);
+    SetHitTargetState(self, 0);
     Fn_1A7098* vt = *(Fn_1A7098**)self;
     vt[7](self);
 }
@@ -132,11 +132,11 @@ void func_001B9D10(void* self, void* out, void* data, f32 scale);
 
 void func_001A7230(HitTarget* self)
 {
-    func_001B9338(self);
+    StepCollider(self);
     if (self->parent == 0) {
         u8 buf[0x30];
         func_00189378(&self->m110, 0, buf);
-        func_001B9D10(self, buf, D_0026B850, D_00261860);
+        func_001B9D10(self, buf, D_0026B850, g_frameDt);
     }
 }
 
@@ -160,14 +160,14 @@ void func_001A7998(ObjectCreator* self, int flag);
 
 void func_001A7798(ObjectCreator* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     if (self->createsObject == 0) {
         VFn_1A7798* vt = *(VFn_1A7798**)self;
         vt[7](self);
         return;
     }
-    self->created = func_0015A838(self->world, 0x101, 0x59, self->children.head);
-    func_001A7998(self, 0);
+    self->created = FindFirstObjectByIdGathered(self->world, 0x101, 0x59, self->children.head);
+    SetObjectCreatorState(self, 0);
 }
 
 struct Vec_1A7D18 { s32 count; s32 pad; f32 x; };
@@ -179,14 +179,14 @@ void func_001A7D18(void* self, Vec_1A7D18* p, f32 f)
 {
     u8* s = (u8*)self;
     if (*(s32*)(s + 0xC) != 0 && p->count > 0) {
-        if (func_001A7EE8((void*)D_002623C0) != 0) {
+        if (IsPadPatternEnabled((void*)g_saveData) != 0) {
             *(f32*)(s + 0x18) = f;
             *(Vec_1A7D18**)(s + 0x10) = p;
             *(s32*)(s + 0x14) = 0;
             f32 x = p->x;
             *(s32*)(s + 0xC) = -1;
             *(f32*)(s + 0x1C) = x;
-            func_001A7D98(self, 2);
+            SetPadPatternState(self, 2);
         }
     }
 }
@@ -221,20 +221,20 @@ f32 func_001EAAE0(f32 a, f32 b);
 
 void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
 {
-    func_00152600(self->a384, obj);
-    func_00152470(self->a390, obj);
+    RemoveFromList(self->a384, obj);
+    AppendToList(self->a390, obj);
     if (obj->attachment != 0) {
-        func_00152600(self->a3AC, obj->attachment);
-        func_00152470(self->a3A0, obj->attachment);
-        func_001A76A0(obj->attachment, 0);
+        RemoveFromList(self->a3AC, obj->attachment);
+        AppendToList(self->a3A0, obj->attachment);
+        SetSoundStateObjectState(obj->attachment, 0);
     }
     PairedObject* child = (PairedObject*)obj->partner;
     if (child != 0) {
         if (child->parent == obj) {
             func_001A5D50(self, obj);
         }
-        func_00152600(self->a35C, child);
-        func_00152470(self->a368, child);
+        RemoveFromList(self->a35C, child);
+        AppendToList(self->a368, child);
         if (func_001A6238(self, child) == 0) {
             child->partner = 0;
         }
@@ -243,8 +243,8 @@ void func_001A5F78(Self_1A5F78* self, PairedObject* obj)
     obj->partner = 0;
     obj->desc->m03(obj);
     if (self->a39C == self->a628) {
-        f32 r = func_001EAAE0(self->a638, self->a63C);
-        self->a640 = D_0026185C[0] + r;
+        f32 r = RandomFloatInRange(self->a638, self->a63C);
+        self->a640 = g_gameTime[0] + r;
     }
     self->a39C = self->a39C - 1;
 }
@@ -265,20 +265,20 @@ void func_001A6168(u8* self, PairedObject* obj, PairedObject* node)
     obj->partner = node;
     node->partner = obj;
     if (s2 == 0) {
-        func_00152600(self + 0x368, node);
-        func_00152470(self + 0x35C, node);
+        RemoveFromList(self + 0x368, node);
+        AppendToList(self + 0x35C, node);
     }
     if (cur != 0) {
-        func_00152600(self + 0x35C, cur);
-        func_00152470(self + 0x368, cur);
+        RemoveFromList(self + 0x35C, cur);
+        AppendToList(self + 0x368, cur);
         cur->partner = 0;
         func_001A6238(self, cur);
     }
     if (s2 != 0) {
         s2->partner = 0;
-        func_001A6BE0(s2, 2);
+        SetPairedState(s2, 2);
         if (func_001A6090(self, s2) != 0) {
-            func_001A6BE0(s2, 3);
+            SetPairedState(s2, 3);
         }
     }
 }
@@ -287,7 +287,7 @@ void func_001B7968(void* self);
 
 void func_001A7520(SoundStateObject* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->state = -1;
 }
 
@@ -319,9 +319,9 @@ void func_001B9D10(C15* self, f32* buf, u8* table, f32 scale);
 void func_001A44E8(C15* self)
 {
     f32 buf[12];
-    func_001B9338(self);
+    StepCollider(self);
     func_001892A0(buf, self->f618, 0.0f);
-    func_001B9D10(self, buf, D_0026B7D8, D_00261860);
+    func_001B9D10(self, buf, D_0026B7D8, g_frameDt);
 }
 
 void func_001A7D18(void* self, void* entry);
@@ -330,7 +330,7 @@ extern Entry_26B8B0 D_0026B8B0[11];
 
 void func_001A7CE8(void* self, s32 index)
 {
-    func_001A7D18(self, (u8*)D_0026B8B0 + index * 0x104);
+    StartPadPattern(self, (u8*)g_padPatterns + index * 0x104);
 }
 
 s32 func_002049E8(void* owner, s32 channel, u8* bytes);
@@ -378,8 +378,8 @@ s32 D_0026C3DC = 0;
 
 void func_001A7E70(void)
 {
-    if (D_0026C3DC == 0) {
-        D_0026C3DC = 1;
+    if (g_padPatternSetting == 0) {
+        g_padPatternSetting = 1;
     }
 }
 
@@ -387,7 +387,7 @@ extern s32 D_0026C3DC;
 
 void func_001A7E90(GameProgress* ctx)
 {
-    s32 v = D_0026C3DC;
+    s32 v = g_padPatternSetting;
     if (v == 2) {
         goto clear;
     }
@@ -409,7 +409,7 @@ extern s32 D_0026C3DC;
 
 s32 func_001A7EE8(GameProgress* ctx)
 {
-    s32 v = D_0026C3DC;
+    s32 v = g_padPatternSetting;
     if (v == 1) {
         goto tail;
     }
@@ -455,15 +455,15 @@ void func_001A4EF0(void* self, void* p);
 
 void func_001A4B30(PairController* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     if (self->id64C != func_001A4898()) {
         self->desc->m03(self);
     } else {
         BlendMotion* k = &self->kin;
-        f32 dt = D_002623C8->dt;
+        f32 dt = g_currentEntry->dt;
         f32 v = k->pos + dt * (k->vel + dt * k->acc);
-        f32 lo = D_00275C60[0];
-        f32 hi = D_00275C60[1];
+        f32 lo = g_unitRange[0];
+        f32 hi = g_unitRange[1];
         f32 t;
         if (v < lo) {
             t = lo;
@@ -479,8 +479,8 @@ void func_001A4B30(PairController* self)
         for (u32 i = 0; i < 48; i++) {
             *po++ = u * *pa++ + t * *pb++;
         }
-        func_001A5760(self, 0.0f);
-        func_001A4EF0(self, 0);
+        UpdatePairControllerTuning(self, 0.0f);
+        SetPairControllerState(self, 0);
     }
 }
 
@@ -491,7 +491,7 @@ void func_001A4D60(PairController* self)
 {
     void* p = 0;
     if (self->state == 2) {
-        p = func_001E9970(p);
+        p = AreMenusAndFadeClear(p);
     }
     if (p != 0) {
         D_0026D0C8.vt->m14(&D_0026D0C8);
@@ -506,9 +506,9 @@ void func_001A76A0(void* node, s32 flag);
 
 void func_001A5C38(u8* self, PairedObject* obj)
 {
-    func_00152600(self + 0x3AC, obj->attachment);
-    func_00152470(self + 0x3A0, obj->attachment);
-    func_001A76A0(obj->attachment, 0);
+    RemoveFromList(self + 0x3AC, obj->attachment);
+    AppendToList(self + 0x3A0, obj->attachment);
+    SetSoundStateObjectState(obj->attachment, 0);
     obj->attachment = 0;
 }
 
@@ -518,8 +518,8 @@ void func_00124DF8(void* self, int idx, void* table);
 
 void func_001A7550(SoundStateObject* self)
 {
-    func_001BAC30(self);
-    func_00124DF8(self, 1, D_0026B888);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 1, g_soundStateObjectLinks);
 }
 
 s32 func_001A7698(SoundStateObject* p) { return p->state; }
@@ -530,7 +530,7 @@ void func_001A7588(SoundStateObject* self)
 {
     PackedWord8 tmp;
     tmp = self->keptBytes;
-    func_001BA130(self);
+    CopyCollider(self);
     self->keptBytes = tmp;
 }
 
@@ -541,19 +541,19 @@ void func_001A76A0(void* node, s32 flag);
 void func_001A75D0(SoundStateObject* self)
 {
     ListFrame frame;
-    func_00124A48(self);
+    StartPlacedObject(self);
     if (self->soundId != 0) {
-        self->soundHandle = (void*)func_001B6290(self->soundId, self, -1, 1);
+        self->soundHandle = (void*)CreateStateWalker(self->soundId, self, -1, 1);
     }
     BaseObject* n = (BaseObject*)self->children.head;
     while (n != 0) {
-        if (func_001300E8(n, 0x7E) != 0) {
+        if (IsObjectOfKind(n, 0x7E) != 0) {
             self->child7E = n;
             break;
         }
         n = n->next;
     }
-    func_001A76A0(self, 0);
+    SetSoundStateObjectState(self, 0);
 }
 
 void func_001B93F8(void* self);
@@ -562,10 +562,10 @@ void func_001A76A0(SoundStateObject* node, s32 flag);
 
 void func_001A7648(SoundStateObject* self)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
     s32 v;
-    while ((v = func_001A7698(self)) != self->state) {
-        func_001A76A0(self, v);
+    while ((v = GetSoundStateObjectState(self)) != self->state) {
+        SetSoundStateObjectState(self, v);
     }
 }
 
@@ -574,9 +574,9 @@ void func_001B9AE0(Collider* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001A7708(ObjectCreator* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->state = -1;
-    func_001B9AE0(self, 3, 0, 3, 0);
+    SetColliderAnchors(self, 3, 0, 3, 0);
 }
 
 f32 func_001EAAE0(f32 a, f32 b);
@@ -609,26 +609,26 @@ void func_001A5B28(Self_1A5B28* self, HitTarget* obj)
     s32 n = self->i3C4 + 1;
     f32 x = (f32)self->i3B8;
     self->i3C4 = n;
-    func_001A5760(self, (f32)n / x);
+    UpdatePairControllerTuning(self, (f32)n / x);
     if (obj->partner != 0) {
-        func_00152600(self->a35C, obj);
+        RemoveFromList(self->a35C, obj);
     } else {
-        func_00152600(self->a368, obj);
+        RemoveFromList(self->a368, obj);
     }
-    func_00152470(self->a374, obj);
+    AppendToList(self->a374, obj);
     if (obj->partner != 0) {
         if (func_001A6090(self, obj->partner) != 0) {
-            func_001A6BE0(obj->partner, 3);
+            SetPairedState(obj->partner, 3);
         } else {
             ((HitTarget*)obj->partner)->partner = 0;
-            func_001A6BE0(obj->partner, 2);
+            SetPairedState(obj->partner, 2);
         }
     }
     obj->partner = 0;
     obj->desc->m03(obj);
     if (self->i380 == self->i624) {
-        f32 t = func_001EAAE0(self->f62C, self->f630);
-        self->f634 = D_0026185C[0] + t;
+        f32 t = RandomFloatInRange(self->f62C, self->f630);
+        self->f634 = g_gameTime[0] + t;
     }
     self->i380 = self->i380 - 1;
 }
@@ -640,9 +640,9 @@ struct Self_1A63F8 { u8 pad[0x348]; f32 f348; f32 f34C; };
 
 void func_001A63F8(Self_1A63F8* self, PairedObject* b)
 {
-    f32 r0 = func_001EAAE0(0.0f, 6.2831855f);
-    f32 r1 = func_001EAAE0(0.0f, self->f348);
-    func_001ED650((u8*)b + 0x570, r0, r1, 0.0f);
+    f32 r0 = RandomFloatInRange(0.0f, 6.2831855f);
+    f32 r1 = RandomFloatInRange(0.0f, self->f348);
+    ComputePolarOffset((u8*)b + 0x570, r0, r1, 0.0f);
     b->f574 = b->f574 * self->f34C;
 }
 
@@ -656,10 +656,10 @@ void func_00155F90(void* x);
 
 void func_001A7128(HitTarget* self)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
     s32 n;
-    while ((n = func_001A7420(self)) != self->state) {
-        func_001A7480(self, n);
+    while ((n = ChooseHitTargetState(self)) != self->state) {
+        SetHitTargetState(self, n);
     }
     void* sub = self->scaledObject;
     if (sub != 0) {
@@ -668,8 +668,8 @@ void func_001A7128(HitTarget* self)
             func_00155FA0(sub);
             TimePolynomial* v = &self->scalePoly;
             f32 p = v->x + t * (v->y + t * v->z);
-            f32 lo = D_00275C60[0];
-            f32 hi = D_00275C60[1];
+            f32 lo = g_unitRange[0];
+            f32 hi = g_unitRange[1];
             f32 x;
             if (p < lo) {
                 x = lo;
@@ -684,7 +684,7 @@ void func_001A7128(HitTarget* self)
             *(f32*)(o + 0x2DC) = a;
             *(f32*)(o + 0x2E0) = b;
         } else {
-            func_00155F90(sub);
+            SetEffectSpawnerActiveForever(sub);
         }
     }
 }
@@ -699,7 +699,7 @@ s32 func_001A7420(HitTarget* self)
             }
             goto end;
         }
-        f32 t = D_0026185C[0] - self->stateTime;
+        f32 t = g_gameTime[0] - self->stateTime;
         if (self->recoverDelay < t) {
             v -= 1;
         }
@@ -719,9 +719,9 @@ void func_00159478(void* sub, void* self);
 
 void func_001A7750(ObjectCreator* self)
 {
-    func_001BAC30(self);
-    func_00124DF8(self, 1, D_0026B8A0);
-    func_00159478(&self->notifyRecord, self);
+    LoadCollider(self);
+    ResolveObjectLinks(self, 1, g_objectCreatorLinks);
+    FindOrBuildMemberGroup(&self->notifyRecord, self);
 }
 
 struct Q_1A7AA0 { u8 pad[0x34]; f32 f34; };
@@ -755,7 +755,7 @@ acc:
 two:
     r = 2;
 flags:
-    g = *(s32**)&D_002623C8;
+    g = *(s32**)&g_currentEntry;
     bits = *g;
     r = (bits & 2) ? 3 : r;
 out:
@@ -769,7 +769,7 @@ void func_00155FA0(void* self);
 struct Rec_1A43C8 { u8 pad[8]; s32 kind; };
 void func_001A43C8(C15* self, s32 code, Rec_1A43C8* rec)
 {
-    func_00192230(self, code, rec);
+    HandleSwitchedColliderNotification(self, code, rec);
     if (code == 5) {
         goto code5;
     }
@@ -784,11 +784,11 @@ void func_001A43C8(C15* self, s32 code, Rec_1A43C8* rec)
     }
     return;
 kind295:
-    func_001BFCD8(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
     func_00155FA0(self->f65C);
     return;
 kind296:
-    func_001BFCD8(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
     func_00155FA0(self->f660);
     return;
 code5:
@@ -829,12 +829,12 @@ struct Self_1A5DF8 {
 void func_001A5DF8(Self_1A5DF8* self, PairedObject* obj)
 {
     self->i3C0 = self->i3C0 + 1;
-    func_00152600(self->a35C, obj->partner);
-    func_00152470(self->a374, obj->partner);
-    func_00152600(self->a384, obj);
-    func_00152470(self->a390, obj);
-    func_00152600(self->a3AC, obj->attachment);
-    func_00152470(self->a3A0, obj->attachment);
+    RemoveFromList(self->a35C, obj->partner);
+    AppendToList(self->a374, obj->partner);
+    RemoveFromList(self->a384, obj);
+    AppendToList(self->a390, obj);
+    RemoveFromList(self->a3AC, obj->attachment);
+    AppendToList(self->a3A0, obj->attachment);
     {
         PairedObject* p = (PairedObject*)obj->partner;
         p->desc->m15(p, 0);
@@ -844,21 +844,21 @@ void func_001A5DF8(Self_1A5DF8* self, PairedObject* obj)
         q->desc->m03(q);
     }
     obj->desc->m03(obj);
-    func_001A76A0(obj->attachment, 0);
+    SetSoundStateObjectState(obj->attachment, 0);
     obj->attachment = 0;
     ((PairedObject*)obj->partner)->partner = 0;
     obj->partner = 0;
     if (self->i380 == self->i624) {
-        f32 t = func_001EAAE0(self->f62C, self->f630);
-        self->f634 = D_0026185C[0] + t;
+        f32 t = RandomFloatInRange(self->f62C, self->f630);
+        self->f634 = g_gameTime[0] + t;
     }
     self->i380 = self->i380 - 1;
     if (self->i39C == self->i628) {
-        f32 t2 = func_001EAAE0(self->f638, self->f63C);
-        self->f640 = D_0026185C[0] + t2;
+        f32 t2 = RandomFloatInRange(self->f638, self->f63C);
+        self->f640 = g_gameTime[0] + t2;
     }
     self->i39C = self->i39C - 1;
-    func_001BFCD8(0x51, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x51, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
 struct __attribute__((aligned(16))) Quad_1A72B0 { s32 a; s32 b; f32 f; s32 d; };
@@ -890,12 +890,12 @@ s32 func_001A72B0(HitTarget* self, u8* p)
     if (st == 9) {
         goto done;
     }
-    if (D_0026185C[0] < self->stateTime + self->hitInterval) {
+    if (g_gameTime[0] < self->stateTime + self->hitInterval) {
         goto done;
     }
     st += 1;
     if (st >= self->hitLimit) {
-        func_001A7480(self, 9);
+        SetHitTargetState(self, 9);
         void* obj = self->notifyRecord;
         if (obj != 0) {
             Msg_1A72B0 msg;
@@ -907,10 +907,10 @@ s32 func_001A72B0(HitTarget* self, u8* p)
             Fn_1A72B0* vt = *(Fn_1A72B0**)obj;
             vt[31](obj, &msg);
         }
-        func_001BFCD8(0x23, 0, 0, p + 0x20, 12000.0f, 8000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x23, 0, 0, p + 0x20, 12000.0f, 8000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     } else {
-        func_001A7480(self, st);
-        func_001BFCD8(0x14F, 0, 0, p + 0x20, 12000.0f, 8000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        SetHitTargetState(self, st);
+        StartSoundEffect(0x14F, 0, 0, p + 0x20, 12000.0f, 8000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
 done:
     return *(s32*)(p + 0xC) != 0;
@@ -927,12 +927,12 @@ void func_001A76A0(SoundStateObject* self, s32 idx)
     if (old == idx) return;
     self->state = idx;
     void* child = self->soundHandle;
-    f32 d = D_0026185C[0];
+    f32 d = g_gameTime[0];
     self->stateTime = d;
     if (child == 0) return;
-    s32 v = D_0026B898[idx];
-    if (old == -1) func_001B6628(child, v);
-    else func_001B64D8(child, v);
+    s32 v = g_soundStateSoundIds[idx];
+    if (old == -1) TeleportStateWalker(child, v);
+    else SetStateWalkerTarget(child, v);
 }
 
 struct Quad_1A7998 { s32 a, b, c, d; } __attribute__((aligned(16)));
@@ -947,12 +947,12 @@ void func_001A7998(ObjectCreator* self, s32 idx)
 {
     if (self->state != idx) {
         if (self->activeHandle != 0) {
-            func_0012E760(self->activeHandle);
+            StopAnimationPlayer(self->activeHandle);
             self->activeHandle = 0;
         }
         self->state = idx;
         void* s2 = 0;
-        self->stateTime = D_0026185C[0];
+        self->stateTime = g_gameTime[0];
         switch (idx) {
         case 1: {
             void* a2 = self->notifyRecord;
@@ -974,7 +974,7 @@ void func_001A7998(ObjectCreator* self, s32 idx)
             break;
         }
         }
-        if (s2 != 0) func_0012C7B0(s2, self, 0, &self->activeHandle, 0.0f, 1.0f);
+        if (s2 != 0) CreateAnimationPlayerWithoutPresetTargets(s2, self, 0, &self->activeHandle, 0.0f, 1.0f);
     }
 }
 
@@ -1004,9 +1004,9 @@ void func_001A42C8(C15* self, s32 state)
     }
     if (self->f654 != 0) {
         if (old == -1) {
-            func_001B6628(self->f654, a2);
+            TeleportStateWalker(self->f654, a2);
         } else {
-            func_001B64D8(self->f654, a2);
+            SetStateWalkerTarget(self->f654, a2);
         }
     }
     s32 cur = -1;
@@ -1015,7 +1015,7 @@ void func_001A42C8(C15* self, s32 state)
         if (s1 == cur) {
             return;
         }
-        func_001BF788(self->f658, 0);
+        StopSoundRecord(self->f658, 0);
         self->f658 = 0;
         cur = -1;
     }
@@ -1023,7 +1023,7 @@ void func_001A42C8(C15* self, s32 state)
         return;
     }
     f32 zero = 0.0f;
-    func_001BFCD8(s1, &self->f658, self, 0, 10000.0f, 6000.0f, 1.0f, zero, zero, 0, 0);
+    StartSoundEffect(s1, &self->f658, self, 0, 10000.0f, 6000.0f, 1.0f, zero, zero, 0, 0);
 }
 
 void func_001A7D98(void* self, s32 mode);
@@ -1033,9 +1033,9 @@ struct Track_001A7B20 { u8 pad0[4]; s32 value4; s32 value8; s32 state; };
 void func_001A7B20(Track_001A7B20* self, s32 a1, s32 a2)
 {
     if (self->state == 0) {
-        func_001A7D98(self, 1);
+        SetPadPatternState(self, 1);
     } else {
-        func_001A7D98(self, 3);
+        SetPadPatternState(self, 3);
     }
     self->value4 = a1;
     self->value8 = a2;
@@ -1054,17 +1054,17 @@ void func_001A7480(HitTarget* self, s32 value)
         return;
     }
     if (old == 9) {
-        func_001A5B28(self->controller, self);
+        RemoveFinishedHitTarget(self->controller, self);
     }
     self->state = value;
-    self->stateTime = D_0026185C[0];
+    self->stateTime = g_gameTime[0];
     void* a2 = self->soundHandle;
     if (a2 != 0) {
-        void* item = D_0026B860[value];
+        void* item = g_hitTargetStateIds[value];
         if (old == -1) {
-            func_001B6628(a2, item);
+            TeleportStateWalker(a2, item);
         } else {
-            func_001B64D8(a2, item);
+            SetStateWalkerTarget(a2, item);
         }
     }
 }
@@ -1080,9 +1080,9 @@ void func_001A4610(C15* self, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     s0 = self->v440;
     s1 = self->q450;
     if (n != 0) {
-        if (func_001300E8((void*)n, 0x43) || func_001300E8((void*)n, 0x42)) {
+        if (IsObjectOfKind((void*)n, 0x43) || IsObjectOfKind((void*)n, 0x42)) {
             self->mode450 = 1;
-            self->v440 = D_00248D20;
+            self->v440 = g_unitZVector;
         }
     }
     func_001BC828(self, a1, a2, a3, a4, a5);
@@ -1134,11 +1134,11 @@ void func_001A54F8(PairController* self)
         self->f640 = 3.4028234663852886e+38f;
     } else {
         Node_1A54F8* owner = *(Node_1A54F8**)(self->list390);
-        s32 count = func_001527D8((List01*)self->list3A0);
+        s32 count = CountListItems((List01*)self->list3A0);
         if (count != 0) {
             Frame_1A54F8 w((List01*)self->list3A0);
             u8* node;
-            s32 r = func_001EAA70(0, count - 1);
+            s32 r = RandomIntInRange(0, count - 1);
             s32 j = r;
             j--;
             if (r >= 0) {
@@ -1146,30 +1146,30 @@ void func_001A54F8(PairController* self)
                     node = (u8*)w.Next();
                 } while (j-- >= 0);
             }
-            func_00152600(self->list3A0, node);
-            func_00152470(self->list3AC, node);
-            func_00152600(self->list390, owner);
-            func_00152470(self->list384, owner);
+            RemoveFromList(self->list3A0, node);
+            AppendToList(self->list3AC, node);
+            RemoveFromList(self->list390, owner);
+            AppendToList(self->list384, owner);
             *(void**)((u8*)owner + 0x560) = node;
             (*(s32*)(self->list390 + 0xC))++;
             ((void (*)(void*))owner->vtbl[0x18 / 4])(owner);
             ((void (*)(void*, void*))owner->vtbl[0x84 / 4])(owner, node + 0x140);
             ((void (*)(void*, void*))owner->vtbl[0x88 / 4])(owner, node + 0x110);
-            func_001A6BE0(owner, 1);
-            func_001A76A0(*(void**)((u8*)owner + 0x560), 1);
+            SetPairedState(owner, 1);
+            SetSoundStateObjectState(*(void**)((u8*)owner + 0x560), 1);
             *(f32*)((u8*)owner + 0x564) = self->f644;
             *(f32*)((u8*)owner + 0x568) = self->f648;
             f32* fp = &self->f638;
-            self->f640 = D_00261858[1] + func_001EAAE0(self->f638, fp[1]);
-            func_001BFCD8(-1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-            func_001BFCD8(0x14E, 0, (s32)node, 0, 12000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            self->f640 = g_gameClock[1] + RandomFloatInRange(self->f638, fp[1]);
+            StartSoundEffect(-1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x14E, 0, (s32)node, 0, 12000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
     }
 }
 
 s32 func_001A4898(void)
 {
-    s32 flags = D_002623C8->flags;
+    s32 flags = g_currentEntry->flags;
     if ((flags & 4) == 0) {
         s32 bit = flags & 2;
         return bit != 0;
@@ -1191,8 +1191,8 @@ void func_001A5C90(void* a0, void* a1)
     ((Collider*)s->partner)->desc02()->m20((Collider*)s->partner, (Vec02*)&D_00248D30);
     s = (PairedObject*)a1;
     ((Collider*)s->partner)->desc02()->m21((Collider*)s->partner, (Vec02*)&D_00248D30);
-    func_001B9AE0((Collider*)((PairedObject*)a1)->partner, 3, 0, 3, 0);
-    func_001BFCD8((Kind_1A5C90)0x151, (void*)0, 0, (void*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    SetColliderAnchors((Collider*)((PairedObject*)a1)->partner, 3, 0, 3, 0);
+    StartSoundEffect((Kind_1A5C90)0x151, (void*)0, 0, (void*)0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
 
@@ -1208,7 +1208,7 @@ void func_001A5D50(Ctx_1A5D50* unused, PairedObject* h)
     o->desc->m15(o, 0);
     o->desc02()->m20(o, (Vec02*)&D_00248D30);
     o->desc02()->m21(o, (Vec02*)&D_00248D30);
-    func_001B9AE0(o, 2, (void*)&D_00248D20, 3, 0);
+    SetColliderAnchors(o, 2, (void*)&g_unitZVector, 3, 0);
 }
 
 void func_001B7968(Collider* self);
@@ -1216,11 +1216,11 @@ void func_001B9AE0(Collider* self, s32 a, void* b, s32 c, void* d);
 
 void func_001A6498(PairedObject* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->state = -1;
     self->f584 = 1.0f;
     self->f588 = 2.5f;
-    func_001B9AE0(self, 1, (void*)&D_00248D20, 2, (void*)&D_00248D20);
+    SetColliderAnchors(self, 1, (void*)&g_unitZVector, 2, (void*)&g_unitZVector);
 }
 
 // Matched: float stores in retail's order with constants loaded as locals; int stores 0x2D0..0x2DC, 0x64C, 0x650 in that order.
@@ -1240,7 +1240,7 @@ void func_001A4718(PairController* self)
 {
     Table_1A4718 tmp;
 
-    func_00123ED0(self);
+    InitPlacedObject(self);
     func_00152438(self->list35C, 0x5A0);
     func_00152438(self->list368, 0x5A0);
     func_00152438(self->list374, 0x5A0);
@@ -1255,9 +1255,9 @@ void func_001A4718(PairController* self)
     self->id64C = -1;
     self->state = -1;
     self->limit3B8 = 0x28;
-    tmp = D_0024C9D0;
-    func_0018D800(self->poseA, &tmp, 0xC0);
-    func_0018D800(self->poseB, &tmp, 0xC0);
+    tmp = g_pairControllerPoseTable;
+    CopyMemory(self->poseA, &tmp, 0xC0);
+    CopyMemory(self->poseB, &tmp, 0xC0);
     self->q3D0 = D_00275C50;
     f32 k2300 = 2300.0f;
     f32 k1500 = 1500.0f;
@@ -1309,23 +1309,23 @@ void func_001A4070(C15* self, s32 n)
         break;
     }
     for (s32 i = 0; i < self->f668; i++) {
-        if (flag) func_00155F90(((void**)self->f66C)[i]);
+        if (flag) SetEffectSpawnerActiveForever(((void**)self->f66C)[i]);
         else func_00155FA0(((void**)self->f66C)[i]);
     }
     if (self->f644) {
-        if (old == -1) func_001B6628(self->f644, snd);
-        else func_001B64D8(self->f644, snd);
+        if (old == -1) TeleportStateWalker(self->f644, snd);
+        else SetStateWalkerTarget(self->f644, snd);
     }
     if (h) {
-        func_0012C7B0(h, self, 1, (s32*)&self->f684, 0.0f, 1.0f);
+        CreateAnimationPlayerWithoutPresetTargets(h, self, 1, (s32*)&self->f684, 0.0f, 1.0f);
     }
     if (self->f648) {
         if (kind == *self->f648) return;
-        func_001BF788(self->f648, 0);
+        StopSoundRecord(self->f648, 0);
         self->f648 = 0;
     }
     if (kind != -1) {
-        func_001BFCD8((s32)(Kind_1A4070)kind, (void*)&self->f648, (void*)self, 0, 10000.0f, 6000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect((s32)(Kind_1A4070)kind, (void*)&self->f648, (void*)self, 0, 10000.0f, 6000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
     }
 }
 
@@ -1335,8 +1335,8 @@ void func_001B9AE0(Collider* self, s32 a, void* b, s32 c, s32 d);
 void func_001A6F88(HitTarget* self)
 {
     s32* z;
-    func_001B7968(self);
-    func_001B9AE0(self, 2, (void*)&D_00248D20, 3, 0);
+    InitCollider(self);
+    SetColliderAnchors(self, 2, (void*)&g_unitZVector, 3, 0);
     f32 one = 1.0f;
     f32 pt2 = 0.2f;
     z = (s32*)&self->scalePoly;
@@ -1350,17 +1350,17 @@ z[1]=0;z[2]=0;
 
 void func_001A7F50(GameProgress* self)
 {
-    s32 g = D_0026C3DC;
+    s32 g = g_padPatternSetting;
     switch (g) {
     case 1: self->f19EC = self->f19EC ^ 0x20; break;
     case 2: self->f19EC = self->f19EC | 0x20; break;
     case 3: self->f19EC = self->f19EC & 0xFFFFFFDF; break;
     }
     if (self->f19EC & 0x20) {
-        D_0026C3DC = 3;
+        g_padPatternSetting = 3;
         return;
     }
-    D_0026C3DC = 2;
+    g_padPatternSetting = 2;
 }
 
 extern f32 D_0024CBC4;
@@ -1373,14 +1373,14 @@ void func_001A8208(ObjectPool* self);
 
 void func_001A7FE8(ObjectPool* self)
 {
-    func_00182C18(self);
+    InitObject(self);
     u8* s1 = (u8*)self + 0x60;
     self->id4C = -1;
     self->id50 = -1;
     self->id54 = -1;
     self->id58 = -1;
     (void)func_001F5C0C((Buf_1A7FE8*)s1, 0, 0x80);
-    const Quad16* src = (const Quad16*)&D_002483D0;
+    const Quad16* src = (const Quad16*)&g_identityMatrix;
     *(Quad16*)(s1 + 0x20) = src[0];
     *(Quad16*)(s1 + 0x30) = src[1];
     *(Quad16*)(s1 + 0x40) = src[2];
@@ -1396,7 +1396,7 @@ void func_001A7FE8(ObjectPool* self)
     self->fD8 = 5.0f;
     self->f168 = 0;
     self->f144 = d;
-    func_001DBCC8(self->world, (void*)func_001A8208, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)SpawnObjectPoolCopies, self, 0, 0);
 }
 
 struct LinkedObject { u8 pad0[0x2D4]; s32 f2D4; };
@@ -1412,9 +1412,9 @@ void func_001A4C48(PairController* self)
 {
     ObjectCreator* t;
     s32 st;
-    func_00124FC0(self);
-    while ((st = func_001A4DC0(self)) != self->state) {
-        func_001A4EF0(self, st);
+    UpdatePlacedObject(self);
+    while ((st = ChoosePairControllerState(self)) != self->state) {
+        SetPairControllerState(self, st);
     }
     switch (st) {
     case 0:
@@ -1425,12 +1425,12 @@ void func_001A4C48(PairController* self)
         break;
     case 2:
         if (self->count3BC < self->limit3B8) {
-            if (self->f634 < D_00261858[1]) {
+            if (self->f634 < g_gameClock[1]) {
                 func_001A5120(self);
             }
         }
-        if (self->f640 < D_00261858[1]) {
-            func_001A54F8(self);
+        if (self->f640 < g_gameClock[1]) {
+            StartPairedObjects(self);
         }
         break;
     case 5: {
@@ -1439,7 +1439,7 @@ void func_001A4C48(PairController* self)
             if (t->state == 0) {
                 LinkedObject* s = self->link;
                 if (s == 0 || s->f2D4 != 3) {
-                    func_001A7998(t, 1);
+                    SetObjectCreatorState(t, 1);
                 }
             }
         }
@@ -1470,8 +1470,8 @@ s32 func_001A4DC0(PairController* self)
         break;
     case 5:
         if (self->target) {
-            if (self->target->state == 3 && self->target->stateTime + 3.0f < D_0026185C[0]) s = 6;
-        } else if (self->f654 + 5.0f < D_0026185C[0]) {
+            if (self->target->state == 3 && self->target->stateTime + 3.0f < g_gameTime[0]) s = 6;
+        } else if (self->f654 + 5.0f < g_gameTime[0]) {
             if (!self->link || self->link->f2D4 != 3) s = 6;
         }
         break;
@@ -1507,12 +1507,12 @@ s32 func_001A6DE0(PairedObject* o, Ev_1A6DE0* ev) {
     if (ev->flags & 0x20) {
         switch (o->state) {
         case 1: case 2: case 3: case 4: case 5: case 7: case 8:
-            func_001A6BE0(o, 9);
+            SetPairedState(o, 9);
             break;
         case 6: {
             HitTarget* c = (HitTarget*)o->partner;
-            func_001A6BE0(o, 9);
-            if (c) func_001A7480(c, 9);
+            SetPairedState(o, 9);
+            if (c) SetHitTargetState(c, 9);
             break;
         }
         }
@@ -1526,7 +1526,7 @@ s32 func_001A6DE0(PairedObject* o, Ev_1A6DE0* ev) {
                 m.a.z += 3000.0f;
                 t->desc->m1B(t, &m);
             }
-            func_001BFCD8(id_1A6DE0_37, 0, 0, &ev->b, 12000.0f, 8000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(id_1A6DE0_37, 0, 0, &ev->b, 12000.0f, 8000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
     }
     return ev->flags != 0;
@@ -1560,8 +1560,8 @@ void func_001A7D98(Obj_1A7D98* self, s32 state)
         return;
     case 3:
     case 4:
-        func_001A7E40(self);
-        self->f1C = D_0026186C * 4.0f;
+        StopPadPatternOutput(self);
+        self->f1C = g_frameStep * 4.0f;
         break;
     case 0:
     case 1:
@@ -1596,7 +1596,7 @@ void func_001A4EF0(PairController* self, s32 state)
     ListFrame frame;
     if (W(self, 0x650) == state) return;
     W(self, 0x650) = state;
-    F(self, 0x654) = D_0026185C[0];
+    F(self, 0x654) = g_gameTime[0];
     W(self, 0x658) = 0;
     switch (state) {
     case 0:
@@ -1604,18 +1604,18 @@ void func_001A4EF0(PairController* self, s32 state)
     case 1: {
         if (W(self, 0x64C) < 3) {
             if (W(self, 0x64C) >= 0) {
-                if (D_002623C8->f14) {
+                if (g_currentEntry->f14) {
                     W(self, 0x658) = 0;
                 } else {
-                    W(self, 0x658) = func_0015A418(self->world, 0x105, 0x33B, 0);
+                    W(self, 0x658) = FindFirstObjectById(self->world, 0x105, 0x33B, 0);
                 }
             }
         }
         s32 w = W(self, 0x658);
         if (w) {
-            T217D_440* box = &D_002701F8;
+            T217D_440* box = &g_typedTextCaptionBox;
             ((U32P*)&box->child)->v = w;
-            func_001E9498(D_00275BC0, (u8*)box);
+            PushStackElement(g_elementStack, (u8*)box);
         }
         break;
     }
@@ -1626,30 +1626,30 @@ void func_001A4EF0(PairController* self, s32 state)
         break;
     }
     case 5:
-        v = func_0015A418(self->world, 0x105, 0x33D, 0);
+        v = FindFirstObjectById(self->world, 0x105, 0x33D, 0);
         W(self, 0x658) = v;
         if (v) {
-            D_002701F8.child = (void*)v;
-            func_001E9498(D_00275BC0, (u8*)&D_002701F8);
+            g_typedTextCaptionBox.child = (void*)v;
+            PushStackElement(g_elementStack, (u8*)&g_typedTextCaptionBox);
         }
-        for (o = O(self, 0x384); o; o = O(o, 0x5B0)) func_001A6BE0(o, 8);
+        for (o = O(self, 0x384); o; o = O(o, 0x5B0)) SetPairedState(o, 8);
         func_00151FC8(D_00261EF0);
         break;
     case 3:
-        v = func_0015A418(self->world, 0x105, 0x33E, 0);
+        v = FindFirstObjectById(self->world, 0x105, 0x33E, 0);
         W(self, 0x658) = v;
         if (v) {
-            D_002701F8.child = (void*)v;
-            func_001E9498(D_00275BC0, (u8*)&D_002701F8);
+            g_typedTextCaptionBox.child = (void*)v;
+            PushStackElement(g_elementStack, (u8*)&g_typedTextCaptionBox);
         }
         for (o = O(self, 0x384); o; o = O(o, 0x5B0)) {
             Link_1A4EF0* l = (Link_1A4EF0*)P(o, 0x55C);
-            if (l == 0 || l->f18 != o) func_001A6BE0(o, 7);
+            if (l == 0 || l->f18 != o) SetPairedState(o, 7);
         }
         func_00151E20(D_00261EF0, 1.0f);
         break;
     case 4:
-        func_00194D30((u8*)&D_0026FF68, 0, 0x1A);
+        SetPauseMenuLayerPage((u8*)&g_pauseMenuElement, 0, 0x1A);
         break;
     case 6:
         func_001A4070(P(self, 0x354), 3);
@@ -1677,25 +1677,25 @@ void func_001A6BE0(PairedObject* self, s32 mode)
 
     if (self->state == mode) return;
     if (self->activeHandle) {
-        func_0012E760((PairedObject*)self->activeHandle);
+        StopAnimationPlayer((PairedObject*)self->activeHandle);
         self->activeHandle = 0;
     }
     if (self->soundHandle) {
-        func_001B6438((PairedObject*)self->soundHandle);
+        DestroyStateWalker((PairedObject*)self->soundHandle);
         self->soundHandle = 0;
     }
     switch (self->state) {
     case 1:
-        func_001A5C38(self->controller, self);
+        ReleasePairedAttachment(self->controller, self);
         break;
     case 5:
-        if (mode == 6) func_001A5DD8(self->controller, self);
+        if (mode == 6) ActivatePairedAttachment(self->controller, self);
         break;
     case 6:
-        if (mode == 0) func_001A5DF8(self->controller, self);
+        if (mode == 0) FinishPairedObjectTransition(self->controller, self);
         break;
     case 9:
-        func_001A5F78(self->controller, self);
+        RemovePairedObject(self->controller, self);
         break;
     default:
         break;
@@ -1703,7 +1703,7 @@ void func_001A6BE0(PairedObject* self, s32 mode)
     self->state = mode;
     h = 0;
     s3 = 0;
-    self->stateTime = D_0026185C[0];
+    self->stateTime = g_gameTime[0];
     w = buf;
     switch (mode) {
     case 0: case 10:
@@ -1730,8 +1730,8 @@ void func_001A6BE0(PairedObject* self, s32 mode)
         h = self->f598;
         break;
     }
-    if (h) func_0012C288(0.0f, 1.0f, h, self, w - buf, buf, 1, &self->activeHandle);
-    if (s3) self->soundHandle = func_001B6290(s3, self, -1, 1);
+    if (h) CreateAnimationPlayer(0.0f, 1.0f, h, self, w - buf, buf, 1, &self->activeHandle);
+    if (s3) self->soundHandle = CreateStateWalker(s3, self, -1, 1);
 }
 
 extern f32 D_00261858[];
@@ -1746,10 +1746,10 @@ s32 func_002049E8(void* owner, s32 channel, u8* bytes);
 
 void func_001A7B88(Obj_1A7B88* s)
 {
-    f32 dt = D_00261858[5];
+    f32 dt = g_gameClock[5];
     switch (s->state) {
     case 2:
-        if (*(s32*)D_00261858 != 0 && s->f18 > 0.0f) {
+        if (*(s32*)g_gameClock != 0 && s->f18 > 0.0f) {
             s->f1C -= dt;
             if (s->f1C <= 0.0f) {
                 s->index++;
@@ -1765,16 +1765,16 @@ void func_001A7B88(Obj_1A7B88* s)
             }
             s->f18 -= dt;
         } else {
-            func_001A7D98(s, 3);
+            SetPadPatternState(s, 3);
         }
         break;
     case 3:
     case 4:
         if (s->f1C > 0.0f) {
-            func_001A7E40(s);
+            StopPadPatternOutput(s);
             s->f1C -= dt;
         } else {
-            func_001A7D98(s, s->state == 3);
+            SetPadPatternState(s, s->state == 3);
         }
         break;
     }
@@ -1836,7 +1836,7 @@ void func_001A5760(PairController* self, f32 dt)
     Curve_1A5760::Get(t4, P(0x570), dt);
     s32 n = (s32)((1.0f - t4) * F(0x560) + t4 * F(0x564));
     if (I(0x624) < n && I(0x380) == I(0x624)) {
-        F(0x634) = (*(f32*)&D_0026185C) + func_001EAAE0(F(0x62C), F(0x630));
+        F(0x634) = (*(f32*)&g_gameTime) + RandomFloatInRange(F(0x62C), F(0x630));
     }
     I(0x624) = n;
 
@@ -1844,7 +1844,7 @@ void func_001A5760(PairController* self, f32 dt)
     Curve_1A5760::Get(t5, P(0x590), dt);
     n = (s32)((1.0f - t5) * F(0x580) + t5 * F(0x584));
     if (I(0x628) < n && I(0x39C) == I(0x628)) {
-        F(0x640) = (*(f32*)&D_0026185C) + func_001EAAE0(F(0x638), F(0x63C));
+        F(0x640) = (*(f32*)&g_gameTime) + RandomFloatInRange(F(0x638), F(0x63C));
     }
     I(0x628) = n;
 }

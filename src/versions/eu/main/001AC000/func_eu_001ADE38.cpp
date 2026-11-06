@@ -27,8 +27,8 @@ void func_eu_001ADE38(void* self, s32 a1, s32 a2)
     s32 name = func_eu_00160750(key);
     func_eu_001E3050(f.first, name);
     u8* text = f.second;
-    func_001ACEE0(text, rec, s2);
-    if (func_001E2100(text) != 0) {
+    FormatFlagGlyphs(text, rec, s2);
+    if (GetStringLength(text) != 0) {
         func_eu_001E3178(f.first, D_eu_0024E2E0);
         func_eu_001E3178(f.first, text);
     }

@@ -8,20 +8,20 @@ void func_00150AE8(StepSequence* self)
     s32 s1;
     Ent65* s2;
 
-    func_00124FC0(self);
-    if (!(((Gl_150AE8_eu*)&D_0026E9F8)->f570 < 2 && ((Gl_150AE8_eu*)&D_0026E9F8)->f57C == 0 && func_001BE5E8() == 0 && D_00275F84 != 1)) {
+    UpdatePlacedObject(self);
+    if (!(((Gl_150AE8_eu*)&g_timerCaption)->f570 < 2 && ((Gl_150AE8_eu*)&g_timerCaption)->f57C == 0 && IsStreamVoiceLocked() == 0 && D_00275F84 != 1)) {
         s32 st = self->state2D4;
         switch (st) {
         case 1:
         case 5:
         case 6:
-            func_00150790(self, 0);
+            SetStepSequenceState(self, 0);
             return;
         }
     }
     func_001F5C0C(q, 0, 8);
-    s2 = func_001925F0();
-    if (func_001493A0(&((Camera*)D_00261990)->ctl454) != 0) {
+    s2 = GetActiveSwitchedCollider();
+    if (IsTopCameraController(&((Camera*)g_camera)->ctl454) != 0) {
         q[1] = 0;
         q[0] = 0;
     } else if (s2 != 0) {
@@ -35,7 +35,7 @@ void func_00150AE8(StepSequence* self)
         if (self->f324 != 0) {
             if (D_00275F84 == 0 && q[1] != 0) {
                 self->f324 = 0;
-                func_001518B8(self);
+                ChooseStepSequenceState(self);
                 s1 = self->state2D4;
             }
         }
@@ -60,18 +60,18 @@ void func_00150AE8(StepSequence* self)
                 s1 = self->state2D4;
             } else if (o != self) {
                 if (o->f328 == 0 && o->state2D4 == 3) {
-                    func_001516C0(o);
+                    SkipRemainingSteps(o);
                 }
             }
             break;
         }
     timer:
-        if (D_0026185C[0] - self->time2D8 >= 5.0f) s1 = 0;
+        if (g_gameTime[0] - self->time2D8 >= 5.0f) s1 = 0;
         break;
     case 3:
         if (self->mode2D0 != 2) {
             if (!(self->step2E4 < self->count2DC) || D_00275F84 == 1) {
-                func_001E9570(D_00275BC0);
+                PopStackElement(g_elementStack);
                 s1 = self->state2D4;
             }
         }
@@ -82,7 +82,7 @@ void func_00150AE8(StepSequence* self)
         }
         break;
     }
-    func_00150790(self, s1);
+    SetStepSequenceState(self, s1);
     switch (self->state2D4) {
     case 0:
     case 1:
@@ -92,7 +92,7 @@ void func_00150AE8(StepSequence* self)
     case 6:
         break;
     case 3:
-        func_001517C0(self);
+        RunStepSequence(self);
         break;
     }
 }

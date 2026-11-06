@@ -4,5 +4,5 @@ s32 func_0011D968(s32 id, s32 size, void* data);
 
 void func_eu_0011E628(void)
 {
-    func_0011D968(0x5B, 0, 0);
+    SendIopCommandAndWait(0x5B, 0, 0);
 }

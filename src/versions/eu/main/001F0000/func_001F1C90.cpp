@@ -29,37 +29,37 @@ void func_001F1C90(Obj_1F1C90_eu* self, s32 a1)
 {
     if ((a1 != 0) != (self->f56C == 0)) return;
     if (a1 != 0) {
-        func_001AA060(self);
-        s32 r = func_001F0468();
+        HideScreenElements(self);
+        s32 r = GetCurrentWarpEntry();
         if (r == 10) {
-            r = (func_001F0490(self->f570, 1, 0, 0) != 0);
+            r = (IsWarpEntryAvailable(self->f570, 1, 0, 0) != 0);
         }
-        func_001F1590(self->f570, r, 2);
+        SetWarpCursor(self->f570, r, 2);
         self->f590 = 1.0f;
         self->f58C = 1.0f;
         Anim_1F1C90* an = (Anim_1F1C90*)self->f570->f2E4;
         if (an != 0) {
-            func_001AA8B0(self, an->f34);
+            SetScreenElementSlideInTime(self, an->f34);
         }
-        GameProgress* g = D_002623C0;
+        GameProgress* g = g_saveData;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
             func_001BED48();
         }
         self->vtbl[14](self);
-        func_0016E0F0(1);
-        func_0016EC88(&D_00262C70);
-        func_001E96F8(D_00275BC0, 7);
+        SetPadSelectFlags(1);
+        ResetPadStepRepeat(&g_padRecord);
+        SetElementStackState(g_elementStack, 7);
     } else {
         self->vtbl[15](self);
         if (self->f570->f560 == 0) {
-            func_001F1610(self->f570);
+            BeginWarpPageClose(self->f570);
             Anim_1F1C90* an = (Anim_1F1C90*)self->f570->f2E8;
             if (an != 0) {
-                func_001AA8C0(self, an->f34);
+                SetScreenElementSlideOutTime(self, an->f34);
             }
-            func_0016E118(1);
-            func_001E96F8(D_00275BC0, 3);
-            GameProgress* g = D_002623C0;
+            ClearPadSelectFlags(1);
+            SetElementStackState(g_elementStack, 3);
+            GameProgress* g = g_saveData;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
                 func_001BED70();
             }

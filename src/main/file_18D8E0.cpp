@@ -428,7 +428,7 @@ s32 func_0018F890(Object_18F890* self, s32 wait);
 
 void func_0018D8E0(C3C* self)
 {
-    func_0013B4C0(self);
+    InitChildGroupObject(self);
     self->ready = 1;
 }
 
@@ -436,8 +436,8 @@ void func_0018D910(C3C* self)
 {
     u64 mask = (u64)(s64)-0x301;
     u64 set = 0x8000;
-    func_0013B598(self);
-    func_00124DF8(self, 1, D_002699B0);
+    LoadChildGroupObject(self);
+    ResolveObjectLinks(self, 1, D_002699B0);
     mask <<= 16;
     mask |= 0xFFFF;
     mask <<= 16;
@@ -448,10 +448,10 @@ void func_0018D910(C3C* self)
 
 void func_0018D978(C3C* self)
 {
-    func_001B7B78(self);
+    UnregisterCollider(self);
     void* p = self->f6B4;
     if (p != 0) {
-        func_0012E760(p);
+        StopAnimationPlayer(p);
         self->f6B4 = 0;
     }
 }
@@ -489,10 +489,10 @@ void func_0018DB20(C3C* self, void* in1, void* in2)
                 self->f1F0->vt->getRot(self->f1F0, 0.0f, &f.tbl30, &f.q20);
 
             } else {
-                f.tbl30 = D_002483D0;
+                f.tbl30 = g_identityMatrix;
             }
-            func_00125B70(self, in2, &f.blkA0);
-            func_00188B08(&f, &f.tbl30, &f.q60);
+            BuildPlacedObjectTransform(self, in2, &f.blkA0);
+            BuildMatrixFromRotationAndTranslation(&f, &f.tbl30, &f.q60);
             func_00188668(&f.blkF0, &f.blkA0, &f.q60);
             f.blkA0 = f.blkF0;
             func_00125C90(self, in1, &f.blkA0);
@@ -506,16 +506,16 @@ s32 func_0018DC88(C3C* self, void* key)
         return 1;
     }
     for (s32 i = 0; i < self->count6BC; i++) {
-        if (func_001833F0(key, self->items6C0[i]) != 0) {
+        if (MatchesObjectId(key, self->items6C0[i]) != 0) {
             return 1;
         }
     }
     for (s32 j = 0; j < self->count6D0; j++) {
-        if (func_001300E8(key, self->items6D4[j]) != 0) {
+        if (IsObjectOfKind(key, self->items6D4[j]) != 0) {
             return 1;
         }
     }
-    return func_001B8A08(self, key);
+    return TestCollidersMayContact(self, key);
 }
 
 void func_0018DD50(C3C* self, void* item)
@@ -552,7 +552,7 @@ ASM_FUNC(func_0018E040);
 
 s32 func_0018E410(IdentityKey* key)
 {
-    IdentityKey* p = (IdentityKey*)(u8*)D_002484B0;
+    IdentityKey* p = (IdentityKey*)(u8*)g_movieKeys;
     s32 i = 0;
     s32 m;
 
@@ -577,7 +577,7 @@ s32 func_0018E410(IdentityKey* key)
 u8* func_0018E480(s32 index)
 {
     if ((u32)index < 16) {
-        return (u8*)D_002699C0[index];
+        return (u8*)g_movieTitles[index];
     }
     if (index == -1) {
         return (u8*)"Nil";
@@ -587,7 +587,7 @@ u8* func_0018E480(s32 index)
 
 void func_0018E4C0(s32 idx)
 {
-    func_0018F0E8(&D_00269A00, (u8*)D_002484B0 + (idx << 5));
+    QueueMovie(&g_moviePlayer, (u8*)g_movieKeys + (idx << 5));
 }
 
 void func_0018E4F0(s32 idx, u32 n)
@@ -595,28 +595,28 @@ void func_0018E4F0(s32 idx, u32 n)
     GameProgress* dev;
     s32 m;
 
-    func_0018E4C0(idx);
-    D_00269A00.f08 = (void*)((u8*)D_002484B0 + (n << 5));
+    QueueMovieByIndex(idx);
+    g_moviePlayer.f08 = (void*)((u8*)g_movieKeys + (n << 5));
     if (n >= 16) { m = 0; } else { m = 1 << n; }
-    dev = D_002623C0;
+    dev = g_saveData;
     dev->u19F4 |= m;
 }
 
 void func_0018E558(void)
 {
-    Task_18E558* t = (Task_18E558*)&D_00269A00;
+    Task_18E558* t = (Task_18E558*)&g_moviePlayer;
 
     for (;;) {
         t->f134 = 0;
         func_001F6B60(t->f130);
         t->f134 = 1;
-        func_001686E8(D_00261F1C, t->f114);
+        func_001686E8(g_gifChannel, t->f114);
         t->f134 = 2;
         func_001684E8();
-        func_001686E8(D_00261F1C, t->f118);
-        func_001683E8();
-        func_001686E8(D_00261F1C, t->f118);
-        func_001683E8();
+        func_001686E8(g_gifChannel, t->f118);
+        FlipDisplayFrame();
+        func_001686E8(g_gifChannel, t->f118);
+        FlipDisplayFrame();
     }
 }
 
@@ -625,16 +625,16 @@ void func_0018E5E8(void)
     Init_18E5E8 l;
     s32 v;
 
-    ((Glob_18E5E8*)&D_00269A00)->f130 = func_001E2268((Init_18E5E8*)0, (void*)1);
-    ((Glob_18E5E8*)&D_00269A00)->f0C = 0;
+    ((Glob_18E5E8*)&g_moviePlayer)->f130 = CreateLockSemaphore((Init_18E5E8*)0, (void*)1);
+    ((Glob_18E5E8*)&g_moviePlayer)->f0C = 0;
     (void)func_001F5C0C(&l, 0, sizeof(l));
-    l.f04 = func_0018E558;
-    l.f08 = (s32)D_002C2B00;
+    l.f04 = RunMovieDecodeThread;
+    l.f08 = (s32)g_movieDecodeThreadStack;
     l.f10 = (s32)D_002832F0;
     l.f0C = 0x1000;
     l.f14 = 2;
     v = func_001F6A10(&l);
-    D_00275964 = v;
+    g_movieDecodeThread = v;
     func_001F6A20((Mgr_18E5E8*)v, 0);
 }
 
@@ -642,7 +642,7 @@ void func_0018E678(Ring_18E6C0* self, s32 a1, s32 a2)
 {
     self->f04 = a2;
     self->f08 = a1;
-    func_0018E6A0(self);
+    ResetIopRingSink(self);
 }
 
 void func_0018E6A0(Ring_18E6C0* c)
@@ -701,7 +701,7 @@ s32 func_0018E7C0(Ring_18E6C0* p, s32 size, u8* buf)
     return size;
 }
 
-void func_0018E838(Ring_18E6C0* self) { s32 raw = func_0011E4F8(self); s32 x = (raw & 0xFFFFFF) - self->f04; x = x - self->f0C; x = x - 0x400; x = x + self->f08; self->f14 = x; self->f14 = x % self->f08; s32 d = self->f08 - self->f14; self->f18 = d; s32 y = self->f0C - d; y += self->f08; self->f10 = y; self->f10 = y % self->f08; }
+void func_0018E838(Ring_18E6C0* self) { s32 raw = GetIopRingPosition(self); s32 x = (raw & 0xFFFFFF) - self->f04; x = x - self->f0C; x = x - 0x400; x = x + self->f08; self->f14 = x; self->f14 = x % self->f08; s32 d = self->f08 - self->f14; self->f18 = d; s32 y = self->f0C - d; y += self->f08; self->f10 = y; self->f10 = y % self->f08; }
 
 s32 Ring_18E6C0::Idle()
 {
@@ -733,24 +733,24 @@ s32 func_0018E940(Obj_18E940* self)
 {
     s32 r;
     func_0011D6A8(0xFFFFFFFF);
-    func_001C08B0(D_00275710, 0, 0);
+    PushIopChannel2Setting(g_currentWorld, 0, 0);
     func_0011E010();
-    while (func_0011CE30() != 0) {
+    while (PollIopCommands() != 0) {
     }
     func_0011E110(1);
-    func_0011E1F8(0);
-    self->f8C = func_0011D4B8(2);
-    self->f90 = func_0011D4B8(8);
-    func_0011D480(2, 0x400);
-    func_0011D480(8, 0x200);
-    r = func_0011E428(0x6000, 0x400, 0, 2, 2);
+    SyncDiscRead(0);
+    self->f8C = GetIopVolumeChannel(2);
+    self->f90 = GetIopVolumeChannel(8);
+    SetIopVolumeChannel(2, 0x400);
+    SetIopVolumeChannel(8, 0x200);
+    r = OpenIopRing(0x6000, 0x400, 0, 2, 2);
     if (r < 0) {
         self->f00 = 0;
     } else {
         self->f00 = 1;
-        func_0013C988(self->sub2C, 0x28, &self->f04);
-        func_0013C988(self->sub4C, 0xC000, D_002CBB40);
-        func_0018E678(&self->sub6C, 0x6000, r);
+        InitRingBuffer(self->sub2C, 0x28, &self->f04);
+        InitRingBuffer(self->sub4C, 0xC000, D_002CBB40);
+        InitIopRingSink(&self->sub6C, 0x6000, r);
     }
 }
 
@@ -759,9 +759,9 @@ void func_0018EA48(Obj_18EA48* self)
     if (self->flag != 0) {
         func_0011E460();
         self->flag = 1;
-        func_0013C9B0((u8*)self + 0x2C);
-        func_0013C9B0((u8*)self + 0x4C);
-        func_0018E6A0((Ring_18E6C0*)((u8*)self + 0x6C));
+        ResetRingBuffer((u8*)self + 0x2C);
+        ResetRingBuffer((u8*)self + 0x4C);
+        ResetIopRingSink((Ring_18E6C0*)((u8*)self + 0x6C));
     }
 }
 
@@ -769,9 +769,9 @@ void func_0018EAA0(Obj_18EAA0* self)
 {
     self->f00 = 0;
     func_0011E498();
-    func_0011D480(2, self->f8C);
-    func_0011D480(8, self->f90);
-    func_001C0950(D_00275710);
+    SetIopVolumeChannel(2, self->f8C);
+    SetIopVolumeChannel(8, self->f90);
+    PopIopChannel2Setting(g_currentWorld);
     func_0011D6D8(0xFFFFFFFF);
 }
 
@@ -785,7 +785,7 @@ s32 func_0018EAF8(Stream_18EAF8* self, s32 left, u8* right)
     left -= 4;
     right += 4;
     if (self->mode == 1) {
-        n = func_0013CC00(self->sub2C, left, right);
+        n = FillRingBufferFromMemory(self->sub2C, left, right);
         left -= n;
         right += n;
         if (self->v3C > 0) {
@@ -799,7 +799,7 @@ s32 func_0018EAF8(Stream_18EAF8* self, s32 left, u8* right)
 zero:
     return 0;
 call:
-    func_0013CC00(self->sub4C, left, right);
+    FillRingBufferFromMemory(self->sub4C, left, right);
 one:
     return 1;
 }
@@ -808,7 +808,7 @@ void func_0018EB98(Self_18EB98* self)
 {
     switch (self->state) {
     case 2:
-        func_0013CAD8(&self->f4C, self->f80, (u8*)&self->f4C + 0x20);
+        DrainRingBuffer(&self->f4C, self->f80, (u8*)&self->f4C + 0x20);
         if (self->f80 != 0) {
             break;
         }
@@ -817,8 +817,8 @@ void func_0018EB98(Self_18EB98* self)
         break;
     case 3: {
         void* s0 = (u8*)&self->f4C + 0x20;
-        func_0018E838((Ring_18E6C0*)s0);
-        func_0013CAD8(&self->f4C, self->f80, s0);
+        UpdateIopRingSink((Ring_18E6C0*)s0);
+        DrainRingBuffer(&self->f4C, self->f80, s0);
         break;
     }
     }
@@ -827,7 +827,7 @@ void func_0018EB98(Self_18EB98* self)
 s32 func_0018EC40(void* a0, void* a1, void* a2)
 {
     if (*(u32*)((u8*)a2 + 0x70) >= *(u32*)((u8*)a1 + 0xC)) {
-        func_0013CC00((u8*)a2 + 0x60, *(u32*)((u8*)a1 + 0xC), *(void**)((u8*)a1 + 0x8));
+        FillRingBufferFromMemory((u8*)a2 + 0x60, *(u32*)((u8*)a1 + 0xC), *(void**)((u8*)a1 + 0x8));
         return 1;
     }
     return 0;
@@ -835,32 +835,32 @@ s32 func_0018EC40(void* a0, void* a1, void* a2)
 
 void func_0018EC80(void* a0, Args_18EC80* a1, void* a2)
 {
-    func_0018EAF8((Stream_18EAF8*)((u8*)a2 + 0x80), a1->fC, a1->f8);
+    FeedMovieStream((Stream_18EAF8*)((u8*)a2 + 0x80), a1->fC, a1->f8);
 }
 
 s32 func_0018ECA8(void* u0, void* u1, Obj_18ECA8* self)
 {
     s32 total = 0x40;
     while (self->f74 < 0x1000) {
-        if (func_0018F890((Object_18F890*)self, 1) == 0) {
+        if (FeedMovieDecoder((Object_18F890*)self, 1) == 0) {
             u8 zero[0x40];
             func_001F5C0C(zero, 0, 0x40);
             s32 k = self->f74;
-            func_0013CC00(&self->sub, total - (k % 32), zero);
+            FillRingBufferFromMemory(&self->sub, total - (k % 32), zero);
             break;
         }
     }
     {
         Dma_18E8C8 dma;
-        func_0013CC48(&self->sub, 0);
-        func_0013CAD8(&self->sub, 0, &dma);
+        ConsumeSpan(&self->sub, 0);
+        DrainRingBuffer(&self->sub, 0, &dma);
     }
     return 1;
 }
 
 s32 func_0018ED78(void* a0, s32 a1, void* a2)
 {
-    func_0018F890((Object_18F890*)a2, 0);
+    FeedMovieDecoder((Object_18F890*)a2, 0);
     return 1;
 }
 
@@ -877,51 +877,51 @@ void func_0018EDA8(void* p, s32 addr, s32 w, s32 h)
     s32 y;
     Frame_18EDA8 f;
 
-    func_001611B8(&f);
-    func_001529C8(&f, 0x1C28, p);
-    func_00152B38(&f);
-    func_001613C0(&f, 0, 1, 0xE);
-    func_00161708(&f, 0x50, (u64)0xA1E0 << 36);
-    func_00161708(&f, 0x52, ((u64)0x10 << 32) | 0x10);
+    InitGifPacket(&f);
+    UsePacketBufferMemory(&f, 0x1C28, p);
+    BeginDmaTag(&f);
+    BeginGifTag(&f, 0, 1, 0xE);
+    AddGifRegisterWrite(&f, 0x50, (u64)0xA1E0 << 36);
+    AddGifRegisterWrite(&f, 0x52, ((u64)0x10 << 32) | 0x10);
     for (y = 0; y < ny; y++) {
         for (x = 0; x < nx; x++) {
-            func_001613C0(&f, 0, 1, 0xE);
-            func_00161708(&f, 0x51, ((u64)(y << 4) << 32) | ((u64)(x << 4) << 48));
-            func_00161708(&f, 0x53, 0);
-            func_00161958(&f, 0x40);
-            func_00152B80(&f, 0x40, addr & 0xFFFFFFF);
+            BeginGifTag(&f, 0, 1, 0xE);
+            AddGifRegisterWrite(&f, 0x51, ((u64)(y << 4) << 32) | ((u64)(x << 4) << 48));
+            AddGifRegisterWrite(&f, 0x53, 0);
+            AddGifImageTag(&f, 0x40);
+            AddDmaRefTag(&f, 0x40, addr & 0xFFFFFFF);
             addr += 0x400;
         }
     }
-    func_001613C0(&f, 0, 1, 0xE);
-    func_00161708(&f, 0x3F, 0);
-    func_00161708(&f, 0x61, 0);
-    func_00161200(&f);
-    func_00152D30(&f);
-    func_001529E0(&f, 0, 0);
+    BeginGifTag(&f, 0, 1, 0xE);
+    AddGifRegisterWrite(&f, 0x3F, 0);
+    AddGifRegisterWrite(&f, 0x61, 0);
+    EndGifPacket(&f);
+    AddDmaEndTag(&f);
+    DetachPacketBuffer(&f, 0, 0);
 }
 
 void func_0018EF78(void* self, s32 a1, s32 a2)
 {
     Local_18EF78 buf;
-    func_001611B8(&buf);
-    func_001529C8(&buf, 0x12, self);
-    func_00152B38(&buf);
-    func_001613C0(&buf, 6, 1, 0xE);
-    func_00161708(&buf, 6, 0x0AA8029E00ULL);
-    func_00161708(&buf, 0x14, 0x61);
-    func_00161708(&buf, 8, 5);
-    func_00161708(&buf, 0x42, 0x44);
-    func_00161708(&buf, 0x47, 0x31001);
-    func_001613C0(&buf, 0x116, 5, 0xE4343);
-    func_001614C8(&buf, 8, 8);
-    func_001615F0(&buf, 0x6C00, 0x7900, 0, 0);
-    func_001614C8(&buf, (a1 << 4) | 8, (a2 << 4) | 8);
-    func_001615F0(&buf, 0x9400, 0x8700, 0, 0);
-    func_00161708(&buf, 0x61, 0);
-    func_00161200(&buf);
-    func_00152D30(&buf);
-    func_001529E0(&buf, 0, 0);
+    InitGifPacket(&buf);
+    UsePacketBufferMemory(&buf, 0x12, self);
+    BeginDmaTag(&buf);
+    BeginGifTag(&buf, 6, 1, 0xE);
+    AddGifRegisterWrite(&buf, 6, 0x0AA8029E00ULL);
+    AddGifRegisterWrite(&buf, 0x14, 0x61);
+    AddGifRegisterWrite(&buf, 8, 5);
+    AddGifRegisterWrite(&buf, 0x42, 0x44);
+    AddGifRegisterWrite(&buf, 0x47, 0x31001);
+    BeginGifTag(&buf, 0x116, 5, 0xE4343);
+    AddGifUvEntry(&buf, 8, 8);
+    AddGifXyzfEntry(&buf, 0x6C00, 0x7900, 0, 0);
+    AddGifUvEntry(&buf, (a1 << 4) | 8, (a2 << 4) | 8);
+    AddGifXyzfEntry(&buf, 0x9400, 0x8700, 0, 0);
+    AddGifRegisterWrite(&buf, 0x61, 0);
+    EndGifPacket(&buf);
+    AddDmaEndTag(&buf);
+    DetachPacketBuffer(&buf, 0, 0);
 }
 
 void func_0018F0E8(void* self, void* p)
@@ -933,13 +933,13 @@ void func_0018F0E8(void* self, void* p)
         return;
     }
     *(void**)((u8*)self + 4) = p;
-    v = func_0018E410((IdentityKey*)p);
+    v = FindKeyIndex((IdentityKey*)p);
     if ((u32)v >= 16) {
         m = 0;
     } else {
         m = 1 << v;
     }
-    D_002623C0->u19F4 |= m;
+    g_saveData->u19F4 |= m;
 }
 
 void func_0018F148(Obj_18F148* self)
@@ -948,9 +948,9 @@ void func_0018F148(Obj_18F148* self)
     s32 first = self->f04;
     self->f04 = 0;
     self->f08 = 0;
-    func_0018F198((Self_18F198*)self, (IdentityKey*)first);
+    PlayMovie((Self_18F198*)self, (IdentityKey*)first);
     if (pending != 0) {
-        func_0018F198((Self_18F198*)self, (IdentityKey*)pending);
+        PlayMovie((Self_18F198*)self, (IdentityKey*)pending);
     }
 }
 
@@ -959,38 +959,38 @@ void func_0018F198(Self_18F198* self, IdentityKey* key)
     StreamReader loc;
     KeyId pr;
     func_00191E70(4);
-    self->mode = func_0018E410(key);
-    func_0012FCF0(&loc, D_002C3B00);
-    if (Fill_18F198::Of(&pr, key) && func_0012FD78(&loc, &pr)) {
-        func_0018F448((Obj_18F448*)self, &loc);
+    self->mode = FindKeyIndex(key);
+    InitStreamReader(&loc, D_002C3B00);
+    if (Fill_18F198::Of(&pr, key) && OpenSectorStreamRange(&loc, &pr)) {
+        InitMoviePlayback((Obj_18F448*)self, &loc);
         while (!func_0020B0B0(self->list)) {
-            func_00143030(((u8*)D_00261858));
-            func_0016E238(&D_00262C70);
+            AdvanceGameClockElapsed(((u8*)g_gameClock));
+            UpdatePadConnection(&g_padRecord);
             s32 flag = 0;
             if (Same_18F198::Of(key, &D_00248490)) flag = D_00269B4C != 0;
             u32 m;
             if (self->mode >= 16) m = 0;
             else m = 1u << self->mode;
-            if (D_002623C0->f19F8 & m) flag = 1;
+            if (g_saveData->f19F8 & m) flag = 1;
             if (flag) {
-                if (func_001F00F0(g_screenFade, &D_00262C70, 2)) break;
-                if (D_00262C70.flags & 0x91F) {
-                    func_0016EC20(&D_00262C70, 0x91F);
+                if (RestoreFadeRequest(g_screenFade, &g_padRecord, 2)) break;
+                if (g_padRecord.flags & 0x91F) {
+                    ClearPadPressedBits(&g_padRecord, 0x91F);
                     break;
                 }
             }
-            func_001409E0();
-            if (D_002613EC != 3) break;
-            func_0018F6E8((Obj_18F6E8*)self);
+            StepDiscSectorCheck();
+            if (g_discSectorCheckState != 3) break;
+            StepMovieFrame((Obj_18F6E8*)self);
         }
         if (Same_18F198::Of(key, &D_00248490)) D_00269B4C = 1;
-        func_0018F7D0((Obj_18F7D0*)self);
-        func_0012FDE8(&loc);
+        FinishMovie((Obj_18F7D0*)self);
+        CloseStreamReader(&loc);
     } else {
-        func_001BFCD8(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
     func_00191EB0(4);
-    func_0012FD30(&loc, 2);
+    DestroyStreamReader(&loc, 2);
 }
 
 void func_0018F448(Obj_18F448* self, void* v)
@@ -1000,23 +1000,23 @@ void func_0018F448(Obj_18F448* self, void* v)
     self->fC = v;
     self->f58 = D_002D7B40;
     self->f5C = D_0045AAC0;
-    func_0013C988((u8*)self + 0x60, 0x30000, (void*)((s32)D_0042AAC0 | 0x20000000));
-    func_0018E940((Obj_18E940*)((u8*)self + 0x80));
+    InitRingBuffer((u8*)self + 0x60, 0x30000, (void*)((s32)D_0042AAC0 | 0x20000000));
+    StartMovieStream((Obj_18E940*)((u8*)self + 0x80));
     func_0020ADA0();
     func_0020AE40((u8*)self + 0x10, self->f58, 0x152F68);
     func_0020A538((u8*)self + 0x10, 0, 0, (void*)func_0018EC40, self);
     func_0020A538((u8*)self + 0x10, 2, 0, (void*)func_0018EC80, self);
-    func_0020B168((u8*)self + 0x10, 1, (void*)func_0018ECA8, self);
+    func_0020B168((u8*)self + 0x10, 1, (void*)FlushMovieToIpu, self);
     func_0020B168((u8*)self + 0x10, 4, (void*)func_0018ED78, self);
     func_0020B168((u8*)self + 0x10, 0, (void*)func_0018EDA0, self);
-    while (func_0018F890((Object_18F890*)self, 1) != 0) {
+    while (FeedMovieDecoder((Object_18F890*)self, 1) != 0) {
     }
     self->f114 = D_00586AC0;
     self->f118 = D_005A2D40;
     D_002626CC = 0;
-    D_00269A00.cur = (u8*)0x100010;
-    D_00269A00.remain = (s32)D_00148D68;
-    D_00269A00.crc = 0xFFFFFFFF;
+    g_moviePlayer.cur = (u8*)0x100010;
+    g_moviePlayer.remain = (s32)D_00148D68;
+    g_moviePlayer.crc = 0xFFFFFFFF;
     u8* tb = D_005A2E60;
     i = 0;
     s32 j;
@@ -1065,26 +1065,26 @@ void func_0018F6E8(Obj_18F6E8* self)
     void* s1;
     if (self->f134 == 1) {
         do {
-            (void)func_0018F890((Object_18F890*)self, 0);
+            (void)FeedMovieDecoder((Object_18F890*)self, 0);
         } while (self->f134 == 1);
     }
     if (func_0020B058((u8*)self + 0x10, self->f5C, 0x4B0) < 0) {
         return;
     }
     if (self->f18 == 0) {
-        func_0018EDA8(self->f114, self->f5C, self->f10, self->f14);
-        func_0018EF78(self->f118, self->f10, self->f14);
+        UploadMovieFrame(self->f114, self->f5C, self->f10, self->f14);
+        DrawMovieFrame(self->f118, self->f10, self->f14);
         func_001F6C20(0);
     }
     s1 = (u8*)self + 0x80;
     if (self->f134 != 0) {
         do {
-            (void)func_0018F890((Object_18F890*)self, 0);
-            func_0018F610((Obj_18F610*)self);
+            (void)FeedMovieDecoder((Object_18F890*)self, 0);
+            AdvanceCodeChecksum((Obj_18F610*)self);
         } while (self->f134 != 0);
     }
     func_001F6B40(self->f130);
-    func_0018EB98((Self_18EB98*)s1);
+    UpdateMovieStream((Self_18EB98*)s1);
 }
 
 void func_0018F7D0(Obj_18F7D0* self)
@@ -1093,8 +1093,8 @@ void func_0018F7D0(Obj_18F7D0* self)
     s32 mask;
 
     self->f0C = 0;
-    func_0018EA48((Obj_18EA48*)(base + 0x80));
-    func_0018EAA0((Obj_18EAA0*)(base + 0x80));
+    ResetMovieStream((Obj_18EA48*)(base + 0x80));
+    StopMovieStream((Obj_18EAA0*)(base + 0x80));
     func_0020B0C0(base + 0x10);
     (void)func_0020B048(base + 0x10);
     if (self->f134 != 0) {
@@ -1108,20 +1108,20 @@ void func_0018F7D0(Obj_18F7D0* self)
     } else {
         mask = 1 << self->f00;
     }
-    D_002623C0->f19F8 |= mask;
+    g_saveData->f19F8 |= mask;
 }
 
 s32 func_0018F890(Object_18F890* self, s32 wait)
 {
     while (Empty_18F890::Of(self->buffer)) {
-        func_00130070(self->buffer);
+        PumpStreamReader(self->buffer);
         if (Empty_18F890::Of(self->buffer) && !wait) return 0;
     }
     func_001F6C20(0);
     StreamReaderWindow* buffer = self->buffer;
     s32 count = buffer->readyLength - buffer->usedLength;
     s32 result = func_0020A518(self->pad10, buffer->readyStart + buffer->usedLength, count);
-    func_001300D8(self->buffer, result);
+    ConsumeStreamBytes(self->buffer, result);
     return result;
 }
 

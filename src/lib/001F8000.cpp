@@ -914,8 +914,8 @@ void func_001F85A8(void) {
         sema = -sema;
         i = 0;
         for (;;) {
-            if (D_00277138[i] == sema) {
-                D_00277138[i] = -1;
+            if (g_semaphoreSlots[i] == sema) {
+                g_semaphoreSlots[i] = -1;
                 break;
             }
             if (++i >= 32) return;
@@ -1322,7 +1322,7 @@ s32 func_001F92E8(s32 a0, s32 mode, u32* out)
     case 1: {
         (void)func_001F6B60(D_002771C4);
         s32 i = 0;
-        while (i < 32 && D_00277138[i] == -1) {
+        while (i < 32 && g_semaphoreSlots[i] == -1) {
             i++;
         }
         if (i == 32) {

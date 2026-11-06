@@ -15,7 +15,7 @@ s32 func_00137328(void* a, void* b, s32 c);
 
 void func_001373B0(void* a, KeyId* pair)
 {
-    func_00137328(a, pair->p0, pair->second);
+    OpenBufferedSectorStream(a, pair->p0, pair->second);
 }
 
 struct Ring_137B60 { u8 pad0[0x18]; s32 head; s32 size; };
@@ -79,7 +79,7 @@ s32 func_00137D10(BufferedStream* self)
         return lo | ((s16)(hi << 8));
     }
     s16 tmp;
-    func_00137A60(self, 2, &tmp);
+    ReadBufferedStreamBytes(self, 2, &tmp);
     return tmp;
 }
 
@@ -96,7 +96,7 @@ f32 func_00137DF8(BufferedStream* r)
         return *(f32*)&v;
     }
     f32 tmp;
-    func_00137A60(r, 4, &tmp);
+    ReadBufferedStreamBytes(r, 4, &tmp);
     return tmp;
 }
 
@@ -104,7 +104,7 @@ void func_00137A60(void* self, s32 size, void* dst);
 
 void func_00137E70(void* src, void* dst)
 {
-    func_00137A60(src, 12, dst);
+    ReadBufferedStreamBytes(src, 12, dst);
 }
 
 // Newly matched US functions from the small-function wave.
@@ -115,19 +115,19 @@ extern void func_00137A60(void*, s32, void*);
 
 void func_001372E0(void* self, s32 flags)
 {
-    func_001373D0(self);
+    CloseBufferedStream(self);
     if (flags & 1) func_0018D778(self);
 }
 
 void func_00137398(BufferedStream* self, s32 a1, s32 a2) { self->remaining = a1; self->ptr = a2; self->mode = 2; }
 
-void func_00137E90(void* self, void* out) { func_00137A60(self, 0x10, out); }
+void func_00137E90(void* self, void* out) { ReadBufferedStreamBytes(self, 0x10, out); }
 
 void func_00137EB0(void* self, u8* buffer)
 {
-    func_00137A60(self, 0xC, buffer);
-    func_00137A60(self, 0xC, buffer + 0x10);
-    func_00137A60(self, 0xC, buffer + 0x20);
+    ReadBufferedStreamBytes(self, 0xC, buffer);
+    ReadBufferedStreamBytes(self, 0xC, buffer + 0x10);
+    ReadBufferedStreamBytes(self, 0xC, buffer + 0x20);
 }
 
 struct State_001365A8 { u8 pad[0x300]; f32 value;
@@ -145,13 +145,13 @@ void func_00193288(void* self, s32 value);
 void func_00137820(BufferedStream* self)
 {
     switch (self->mode) {
-    case 0: func_001377C0(self); break;
-    case 1: func_00137490(self); break;
+    case 0: RefillBufferedStreamFromFile(self); break;
+    case 1: RefillBufferedStreamFromSectors(self); break;
     }
     s32 value = self->f14 - self->nextCount;
     value = Max_137820::Of(0, value);
     self->f14 = value;
-    if (self->f30) func_00193288((void*)self->f30, value);
+    if (self->f30) UpdateLoadProgress((void*)self->f30, value);
 }
 
 s32 func_00137B90(BufferedStream* self)
@@ -165,7 +165,7 @@ s32 func_00137B90(BufferedStream* self)
         return value;
     }
     u8 value;
-    func_00137A60(self, 1, &value);
+    ReadBufferedStreamBytes(self, 1, &value);
     return value;
 }
 
@@ -180,7 +180,7 @@ s32 func_00137BE0(BufferedStream* self)
         return value;
     }
     u16 value;
-    func_00137A60(self, 2, &value);
+    ReadBufferedStreamBytes(self, 2, &value);
     return value;
 }
 
@@ -195,7 +195,7 @@ u32 func_00137C40(BufferedStream* self)
         return value;
     }
     u32 value;
-    func_00137A60(self, 4, &value);
+    ReadBufferedStreamBytes(self, 4, &value);
     return value;
 }
 
@@ -210,7 +210,7 @@ s32 func_00137CC0(BufferedStream* self)
         return value;
     }
     s8 value;
-    func_00137A60(self, 1, &value);
+    ReadBufferedStreamBytes(self, 1, &value);
     return value;
 }
 
@@ -225,7 +225,7 @@ s32 func_00137D78(BufferedStream* self)
         return value;
     }
     s32 value;
-    func_00137A60(self, 4, &value);
+    ReadBufferedStreamBytes(self, 4, &value);
     return value;
 }
 
@@ -242,10 +242,10 @@ void func_00137F08(void* self, u8* p)
     u8* b = p + 0x20;
     u8* c = p + 0x30;
 
-    func_00137A60(self, 12, p);
-    func_00137A60(self, 12, a);
-    func_00137A60(self, 12, b);
-    func_00137A60(self, 12, c);
+    ReadBufferedStreamBytes(self, 12, p);
+    ReadBufferedStreamBytes(self, 12, a);
+    ReadBufferedStreamBytes(self, 12, b);
+    ReadBufferedStreamBytes(self, 12, c);
     *(s32*)(p + 0xC) = 0;
     *(s32*)(a + 0xC) = 0;
     *(s32*)(b + 0xC) = 0;
@@ -374,9 +374,9 @@ void func_00137A60(BufferedStream* self, s32 remaining, Dst_137A60* dst)
         s32 cnt = self->remaining;
         if (cnt == 0) {
             if (self->flags & 4) {
-                func_001378A0(self);
+                UnpackBufferedStream(self);
             } else {
-                func_00137820(self);
+                RefillBufferedStream(self);
                 s32 nc = self->nextCount;
                 s32 np = self->nextPtr;
                 self->remaining = nc;
@@ -397,7 +397,7 @@ void func_00137A60(BufferedStream* self, s32 remaining, Dst_137A60* dst)
             n = cnt;
         }
         if (dst != 0) {
-            func_0018D800(dst, (void*)self->ptr, n);
+            CopyMemory(dst, (void*)self->ptr, n);
             dst = (Dst_137A60*)((u8*)dst + n);
         }
         remaining -= n;
@@ -516,7 +516,7 @@ void func_001378A0(BufferedStream* d)
         flags >>= 1;
         if (!(flags & 0x100)) {
             if (--n < 0) {
-                func_00137820(d);
+                RefillBufferedStream(d);
                 if (d->nextCount <= 0) break;
                 p = d->next;
                 n = d->nextCount - 1;
@@ -524,7 +524,7 @@ void func_001378A0(BufferedStream* d)
             flags = *p++ + 0xFF00;
         }
         if (--n < 0) {
-            func_00137820(d);
+            RefillBufferedStream(d);
             if (d->nextCount <= 0) break;
             p = d->next;
             n = d->nextCount - 1;
@@ -534,7 +534,7 @@ void func_001378A0(BufferedStream* d)
             base[pos++] = b;
         } else {
             if (--n < 0) {
-                func_00137820(d);
+                RefillBufferedStream(d);
                 p = d->next;
                 n = d->nextCount - 1;
             }
@@ -628,11 +628,11 @@ void func_00137490(Strm_137490* self)
             } else {
                 s32 busy;
                 if (self->flags & 2) busy = func_002032C8(1);
-                else busy = func_0011E1F8(1);
+                else busy = SyncDiscRead(1);
                 if (busy == 0) {
                     s32 err;
                     if (self->flags & 2) err = func_00203D90();
-                    else err = func_0011E2E8();
+                    else err = GetDiscReadError();
                     if (err == 0) {
                         s32 size = self->size;
                         self->done = size;

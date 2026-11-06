@@ -12,14 +12,14 @@ void func_001961C0(Self_1961C0_eu* self)
 {
     switch (self->state) {
     case 0:
-        func_00194D30(self, 0, -1);
+        SetPauseMenuLayerPage(self, 0, -1);
         break;
     case 23:
         if ((u32)(D_00275BF0 - 1) < 2) {
-            func_00194D30(self, 0, -1);
+            SetPauseMenuLayerPage(self, 0, -1);
             break;
         }
-        func_00194D30(self, 0, 0);
+        SetPauseMenuLayerPage(self, 0, 0);
         break;
     case 24: {
         Gs_1961C0* g = &D_00262490;
@@ -35,27 +35,27 @@ void func_001961C0(Self_1961C0_eu* self)
         b.mid = w;
         g->f40 = a;
         g->f18 = b;
-        func_00194D30(self, 0, 0x17);
+        SetPauseMenuLayerPage(self, 0, 0x17);
         break;
     }
     case 2:
-        func_00194D30(self, 0, 0);
+        SetPauseMenuLayerPage(self, 0, 0);
         break;
     case 33:
-        func_00194D30(self, 0, -1);
+        SetPauseMenuLayerPage(self, 0, -1);
         break;
     case 13:
-        func_00194D30(self, 1, -1);
+        SetPauseMenuLayerPage(self, 1, -1);
         break;
     case 11:
     case 16:
     case 17:
     case 31:
-        func_00194D30(self, 0, 0x17);
+        SetPauseMenuLayerPage(self, 0, 0x17);
         break;
     case 14:
     case 18:
-        func_00194D30(self, 1, -1);
+        SetPauseMenuLayerPage(self, 1, -1);
         break;
     }
 }

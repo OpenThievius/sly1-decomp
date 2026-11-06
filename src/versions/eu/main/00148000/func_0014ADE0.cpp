@@ -31,7 +31,7 @@ void func_0014ADE0(Obj_14ADE0_eu* self)
             Elem_14ADE0_eu* e = &self->items[i];
             f32 saved = e->f23C;
             f32 base = self->f21C;
-            f32 scaled = saved * D_00261850;
+            f32 scaled = saved * g_timeScale;
             e->f220 = acc;
             e->f21C = base;
             e->f23C = scaled;

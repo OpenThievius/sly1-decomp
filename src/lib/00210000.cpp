@@ -252,7 +252,7 @@ s32 func_002104A8(struct Node_2104A8 *self, struct Rec_2104A8 *rec) {
     else
         flag = self->fE4 >= rec->fC * rec->f10;
     if (flag == 0) {
-        func_001E1FD0(buf, "Too small buffer size for %dx%d picture\n", rec->f4, rec->f8);
+        FormatToString(buf, "Too small buffer size for %dx%d picture\n", rec->f4, rec->f8);
         func_0020B978(self, buf);
     }
     return flag;

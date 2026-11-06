@@ -16,8 +16,8 @@ void func_eu_001AD5E0(Obj_eu_001AD5E0* self)
     Sub_eu_001AD5E0* b = a->f4C;
     self->f4 = b->fC((u8*)a + b->f8, 0.9f, 0.9f);
     self->f518 = 0xDF7F7F7F;
-    if (func_0015C188(2) != 0) {
+    if (IsFontLoaded(2) != 0) {
         self->f520 = (void**)D_002743F0;
-        *self->f520 = func_0015C1C0(2);
+        *self->f520 = GetFontById(2);
     }
 }

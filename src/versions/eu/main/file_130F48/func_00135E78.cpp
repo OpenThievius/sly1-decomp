@@ -21,10 +21,10 @@ void func_00135E78(SlotBank_135E78_eu* self, s32 state, s32 flag)
         T217D_440_Slot* e = self->entries;
         do {
             if (flag != 0) {
-                func_0019EBE8(e->handle);
+                RemoveEffect(e->handle);
                 func_001F5C0C(self->blockB, 0, 16);
             } else {
-                func_001A1DF0(e->handle, 2);
+                SetEffectPhase(e->handle, 2);
             }
             i++;
             e++;

@@ -33,8 +33,8 @@ const char* func_eu_001DDAB0(s32 id);
 #define HUD_EU ((Hud_1943E8_eu*)&D_00274118)
 void func_001943E8(Self_1943E8_eu* self)
 {
-    GameProgress* g = D_002623C0;
-    Row_1943E8* row = &((Row_1943E8*)&D_00269D50)[self->f570];
+    GameProgress* g = g_saveData;
+    Row_1943E8* row = &((Row_1943E8*)&g_pauseMenuPages)[self->f570];
     s32 on;
     s32 n;
     PadRecord* pad;
@@ -68,7 +68,7 @@ void func_001943E8(Self_1943E8_eu* self)
     case 0:
     case 11:
     case 17:
-        HUD_EU->f58C = func_00160B28(D_002623C0);
+        HUD_EU->f58C = ComputeCompletionPercent(g_saveData);
         HUD_EU->f574 = &HUD_EU->f58C;
         D_00274118.vt->m14(&D_00274118);
         break;
@@ -78,62 +78,62 @@ void func_001943E8(Self_1943E8_eu* self)
     }
     if (self->f598 != 0) {
         if (func_001BE810() != 0) {
-            func_0011CE30();
+            PollIopCommands();
         }
-        self->f598 = func_001BE980();
+        self->f598 = HasStreamVoice();
     }
     s32 ready = 1;
-    if (self->f584 != 0 || self->f560 != 2 || !(0.1f < D_00261868 - self->f564)) {
+    if (self->f584 != 0 || self->f560 != 2 || !(0.1f < g_elapsedTime - self->f564)) {
         ready = 0;
     }
-    pad = &D_00262C70;
+    pad = &g_padRecord;
     if (row->f10 == 0) {
         n = 0;
     } else if (row->fC != 0) {
-        n = func_0016EED0(pad);
+        n = GetPadVerticalStep(pad);
     } else {
-        n = func_0016EC98(pad);
+        n = GetPadHorizontalStep(pad);
     }
     if (n > 0) {
         self->f574 = (self->f574 + 1) % row->f10;
-        func_001BFCD8(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     if (n < 0) {
         self->f574 = (self->f574 + row->f10 - 1) % row->f10;
-        func_001BFCD8(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     if (!ready) {
         return;
     }
     if (pad->flags & 0x810) {
-        func_0016EC20(&D_00262C70, 0x810);
-        func_001961C0(self);
+        ClearPadPressedBits(&g_padRecord, 0x810);
+        CancelPauseMenuPage(self);
         return;
     }
     if (pad->flags & 0x80) {
-        func_0016EC20(&D_00262C70, 0x80);
+        ClearPadPressedBits(&g_padRecord, 0x80);
         if (self->f570 == 11 || self->f570 == 16) {
             Ent_1943E8* e = &((Ent_1943E8*)&D_eu_00255538)[row->items[self->f574]];
             if (e->fC != 0.0f) {
                 D_0026998C = e;
-                func_00194D30(self, 1, 0x12);
+                SetPauseMenuLayerPage(self, 1, 0x12);
             }
         }
         return;
     }
     if (pad->flags & 0x40) {
-        func_0016EC20(&D_00262C70, 0x40);
-        func_00195958(self);
+        ClearPadPressedBits(&g_padRecord, 0x40);
+        ActivatePauseMenuSelection(self);
         return;
     }
     switch (self->f570) {
     case 24: {
-        f32 a = func_0016F108(pad, 0);
-        f32 dx = a - func_0016F108(pad, 1);
-        f32 b = func_0016F108(pad, 3);
-        f32 dy = b - func_0016F108(pad, 2);
+        f32 a = GetPadButtonAnalog(pad, 0);
+        f32 dx = a - GetPadButtonAnalog(pad, 1);
+        f32 b = GetPadButtonAnalog(pad, 3);
+        f32 dy = b - GetPadButtonAnalog(pad, 2);
         f32 v;
         if (dx == 0.0f && dy == 0.0f) {
             return;
@@ -162,7 +162,7 @@ void func_001943E8(Self_1943E8_eu* self)
     case 16:
     case 17:
         if (D_00264A58.v[0] != 1) {
-            func_001961C0(self);
+            CancelPauseMenuPage(self);
             return;
         } else {
             s32 id = row->items[self->f574];
@@ -183,14 +183,14 @@ void func_001943E8(Self_1943E8_eu* self)
         break;
     case 18:
         if (D_00264A58.v[0] != 1) {
-            func_001961C0(self);
+            CancelPauseMenuPage(self);
         }
         break;
     case 20: {
         u16* p;
         s32 found;
         if (D_00264A58.v[0] != 1) {
-            func_001961C0(self);
+            CancelPauseMenuPage(self);
         }
         found = 0;
         p = (u16*)func_eu_001DDAB0((s32)row->f0);
@@ -211,7 +211,7 @@ void func_001943E8(Self_1943E8_eu* self)
             p++;
         }
         if (found) {
-            p[2] = func_001AEA08();
+            p[2] = GetCyclingGlyph();
         }
         break;
     }
@@ -221,56 +221,56 @@ void func_001943E8(Self_1943E8_eu* self)
     case 10:
     case 32:
         if (D_00264A4C == 5) {
-            func_00194D30((Self_1943E8_eu*)&D_0026FF68, 1, -1);
+            SetPauseMenuLayerPage((Self_1943E8_eu*)&g_pauseMenuElement, 1, -1);
         }
         break;
     case 5: {
         BackgroundJob* p = &g_backgroundJob;
-        if (func_0018B770(p) == 0) {
+        if (IsBackgroundJobRunning(p) == 0) {
             if (p->result == 0) {
-                func_0018B670(p, (void*)(void (*)(MemoryCard*))func_0018C250, ((u8*)&g_memoryCard));
-                func_00194D30(self, 1, 8);
+                StartBackgroundJob(p, (void*)(void (*)(MemoryCard*))CreateMemoryCardSaveFiles, ((u8*)&g_memoryCard));
+                SetPauseMenuLayerPage(self, 1, 8);
             } else {
-                func_00194D30(self, 1, 6);
+                SetPauseMenuLayerPage(self, 1, 6);
             }
         }
         break;
     }
     case 8: {
         BackgroundJob* p = &g_backgroundJob;
-        if (func_0018B770(p) == 0) {
+        if (IsBackgroundJobRunning(p) == 0) {
             if (p->result == 0) {
-                func_00194D30(self, 1, -1);
+                SetPauseMenuLayerPage(self, 1, -1);
             } else {
-                func_00194D30(self, 1, 9);
+                SetPauseMenuLayerPage(self, 1, 9);
             }
         }
         break;
     }
     case 12: {
         BackgroundJob* p = &g_backgroundJob;
-        if (func_0018B770(p) == 0) {
+        if (IsBackgroundJobRunning(p) == 0) {
             if (p->result == 0) {
-                func_00194D30(self, 1, -1);
+                SetPauseMenuLayerPage(self, 1, -1);
                 if (self->f58C == 2) {
                     func_00194398();
                 }
             } else {
-                func_00194D30(self, 0, 0x17);
-                func_00194D30(self, 1, 0xF);
+                SetPauseMenuLayerPage(self, 0, 0x17);
+                SetPauseMenuLayerPage(self, 1, 0xF);
             }
         }
         break;
     }
     case 19: {
         BackgroundJob* p = &g_backgroundJob;
-        if (func_0018B770(p) == 0) {
+        if (IsBackgroundJobRunning(p) == 0) {
             D_0026998C = 0;
             if (p->result == 0) {
-                func_00194D30(self, 1, -1);
+                SetPauseMenuLayerPage(self, 1, -1);
             } else {
-                func_00194D30(self, 0, 0x17);
-                func_00194D30(self, 1, 0xF);
+                SetPauseMenuLayerPage(self, 0, 0x17);
+                SetPauseMenuLayerPage(self, 1, 0xF);
             }
         }
         break;

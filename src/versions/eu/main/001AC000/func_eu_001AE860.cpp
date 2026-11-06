@@ -11,12 +11,12 @@ void func_eu_001AE860(u8* a0)
 {
     f32 f20 = *(f32*)(a0 + 0x54C) * 54.305084228515625f;
     f32 f21 = 468.61016845703125f - f20;
-    func_001613C0(D_eu_00263590, 6, 7, 0x44441EE);
-    func_00161708(D_eu_00263590, 0x47, 0x30000);
-    func_00161708(D_eu_00263590, 0x42, 0x44);
-    func_00161458(D_eu_00263590, 0x80000000u);
-    func_001615F0(D_eu_00263590, 0x6C00, 0x7800, 0x0FFFFFF0, 0);
-    func_001615F0(D_eu_00263590, 0x9400, (s32)((f20 * 0.5462962985038757f + 1920.0f) * 16.0f), 0x0FFFFFF0, 0);
-    func_001615F0(D_eu_00263590, 0x6C00, (s32)((f21 * 0.5462962985038757f + 1920.0f) * 16.0f), 0x0FFFFFF0, 0);
-    func_001615F0(D_eu_00263590, 0x9400, 0x8800, 0x0FFFFFF0, 0);
+    BeginGifTag(D_eu_00263590, 6, 7, 0x44441EE);
+    AddGifRegisterWrite(D_eu_00263590, 0x47, 0x30000);
+    AddGifRegisterWrite(D_eu_00263590, 0x42, 0x44);
+    AddGifRgbaEntry(D_eu_00263590, 0x80000000u);
+    AddGifXyzfEntry(D_eu_00263590, 0x6C00, 0x7800, 0x0FFFFFF0, 0);
+    AddGifXyzfEntry(D_eu_00263590, 0x9400, (s32)((f20 * 0.5462962985038757f + 1920.0f) * 16.0f), 0x0FFFFFF0, 0);
+    AddGifXyzfEntry(D_eu_00263590, 0x6C00, (s32)((f21 * 0.5462962985038757f + 1920.0f) * 16.0f), 0x0FFFFFF0, 0);
+    AddGifXyzfEntry(D_eu_00263590, 0x9400, 0x8800, 0x0FFFFFF0, 0);
 }

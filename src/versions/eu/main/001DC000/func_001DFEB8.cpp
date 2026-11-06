@@ -15,31 +15,31 @@ void func_001DFEB8(Obj_11A338_eu* self)
 {
     Ent_11A338_eu* e;
 
-    func_001AA268(self);
-    e = (Ent_11A338_eu*)func_001DFE80((D_002623C0->f19D8 << 8) | D_002623C0->f19DC);
+    SetupScreenElementText(self);
+    e = (Ent_11A338_eu*)FindLevelEntry((g_saveData->f19D8 << 8) | g_saveData->f19DC);
     if (e) {
         if (e->f4 != 0.0f) {
-            D_00275710->f230C = e->f4;
+            g_currentWorld->f230C = e->f4;
         }
-        if (D_00275710->f2314 == 0 || !func_001E2100(D_00275710->f2314)) {
-            D_00275710->f2314 = e->w8;
+        if (g_currentWorld->f2314 == 0 || !GetStringLength(g_currentWorld->f2314)) {
+            g_currentWorld->f2314 = e->w8;
         }
     }
-    if (func_0015C188(2)) {
+    if (IsFontLoaded(2)) {
         self->slot = (void**)D_002758E0;
-        *self->slot = func_0015C1C0(2);
+        *self->slot = GetFontById(2);
     }
-    func_001AA788(self, 0.6f);
+    SetScreenElementScale(self, 0.6f);
     *(s32*)((u8*)self + 0x518) = (s32)0xDF7F7F7Fu;
-    if (func_001DD7A0(D_00275710, (D_002623C0->f19D8 << 8) | D_002623C0->f19DC)) {
-        func_001E02C8(self, 1);
+    if (CheckEntryThreeBitRequirement(g_currentWorld, (g_saveData->f19D8 << 8) | g_saveData->f19DC)) {
+        SetBestTimeState(self, 1);
     } else {
-        func_001E02C8(self, 0);
+        SetBestTimeState(self, 0);
     }
-    if (D_002623C8->bits & 8) {
-        if (((Cur_11A338*)D_00275710->f2310)->differs()) {
+    if (g_currentEntry->bits & 8) {
+        if (((Cur_11A338*)g_currentWorld->f2310)->differs()) {
             self->vt->f20(self, func_eu_001DDAB0(0xAA));
-            func_001AA8B8(self, 5.0f);
+            SetScreenElementHoldTime(self, 5.0f);
             self->vt->f38(self);
             self->f26c = 1;
         } else {

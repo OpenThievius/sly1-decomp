@@ -344,7 +344,7 @@ s32 func_0020B978(Ctx_0020B940* self, char* buf);
 void func_0020B940(Ctx_0020B940* self, const char* fmt)
 {
     char buf[0x100];
-    func_001E1FD0((Buf_0020B940*)buf, fmt);
+    FormatToString((Buf_0020B940*)buf, fmt);
     func_0020B978(self, buf);
 }
 
@@ -1081,7 +1081,7 @@ s32 func_002093F0(void)
     func_001F7BE8(0);
     for (;;) {
         if (func_001F80C0((Sema_2093F0*)D_0062AD40, 0x80000400, 0) < 0) {
-            func_001E1F10(D_0024FFA0);
+            PrintFormatted(D_0024FFA0);
             for (;;) {
             }
         }
@@ -1098,12 +1098,12 @@ s32 func_002093F0(void)
         return r - 100;
     }
     if (((Info_2093F0*)D_0062C300)->f4 < 0x20A) {
-        func_001E1F10(D_0024FFB8);
+        PrintFormatted(D_0024FFB8);
         ((Sema_2093F0*)D_0062AD40)->f24 = 0;
         return -0x78;
     }
     if (((Info_2093F0*)D_0062C300)->f8 < 0x20E) {
-        func_001E1F10(D_0024FFE0);
+        PrintFormatted(D_0024FFE0);
         ((Sema_2093F0*)D_0062AD40)->f24 = 0;
         return -0x79;
     }
@@ -1323,7 +1323,7 @@ void func_0020B780(S_20B780* s) {
 s32 func_001E1F10(const char* fmt, s32 msg);
 
 void func_0020B930(s32 msg) {
-    func_001E1F10("[MPEG ERROR]%s\n", msg);
+    PrintFormatted("[MPEG ERROR]%s\n", msg);
 }
 
 struct Dec_20B9F0 {

@@ -10,7 +10,7 @@
 
 void func_00148178(void)
 {
-    GameProgress* g = D_002623C0;
+    GameProgress* g = g_saveData;
     s32 r = 99;
     if (g->f19E0 + 1 <= 98) r = g->f19E0 + 1;
     g->f19E0 = r;
@@ -28,21 +28,21 @@ s32 func_00160D98(void);
 void func_001481A0(void* self)
 {
     Effect* s = (Effect*)self;
-    GameProgress* g = D_002623C0;
+    GameProgress* g = g_saveData;
     s32 c = g->f19E8 + 1;
     s32 r;
     g->f19E8 = c;
     if (c >= 100) {
         r = func_00160D98();
         if (g->f19E4 < r) {
-            D_002623C0->f19E8 = 0;
+            g_saveData->f19E8 = 0;
             ((PSys_1481A0*)&D_0026CE48)->f26C = 250.0f;
             D_0026CE48.onDone = (void (*)(void*))func_00148038;
             D_0026CE48.doneArg = s->prev;
             return;
         }
-        if (D_002623C0->f19E0 < 99) {
-            D_002623C0->f19E8 = 0;
+        if (g_saveData->f19E0 < 99) {
+            g_saveData->f19E8 = 0;
             D_0026CE48.rate = 250.0f;
             D_0026CE48.doneArg = 0;
             D_0026CE48.onDone = (void (*)(void*))func_00148178;
@@ -50,7 +50,7 @@ void func_001481A0(void* self)
                 D_0026C6C8.vt->m14(&D_0026C6C8);
             }
         } else {
-            D_002623C0->f19E8 = 99;
+            g_saveData->f19E8 = 99;
         }
     }
 }
@@ -69,7 +69,7 @@ s32 func_001300E8(void* node, s32 kind);
 
 void func_00148CE0(World* self)
 {
-    GameProgress* g = D_002623C0;
+    GameProgress* g = g_saveData;
     if (((g->f19D8 << 8) | g->f19DC) == 0x308) return;
     s32 r = func_00160D98();
     if (g->f19E4 < r) {
@@ -78,7 +78,7 @@ void func_00148CE0(World* self)
     Node_148CE0* p = (Node_148CE0*)self->list1C54.head;
     if (p == 0) return;
     do {
-        if (func_001300E8(p, 0x56) != 0) {
+        if (IsObjectOfKind(p, 0x56) != 0) {
             p->vtbl[51](p, 2);
         }
         p = p->next;
@@ -108,7 +108,7 @@ void func_0014ADE0(T217D_720* self)
             T217D_330* e = &self->items[i];
             f32 saved = e->blend;
             f32 base = self->x;
-            f32 scaled = saved * D_00261850;
+            f32 scaled = saved * g_timeScale;
             e->y = acc;
             e->x = base;
             e->blend = scaled;
@@ -125,7 +125,7 @@ void func_0014AEA0(T217D_720* self, s32 n, f32 x, f32 y)
     self->place->dy = y;
     self->count = n;
     V24A2* q = self->font;
-    func_001AAB20(self, self->w, (f32)q->height * q->sy * (f32)n);
+    SetScreenElementSize(self, self->w, (f32)q->height * q->sy * (f32)n);
     self->vt->m16(self, 2);
 }
 
@@ -172,15 +172,15 @@ void func_0012F6B0(void* handle, f32 scale);
 
 void func_0014BD38(C11* self)
 {
-    func_001C91C8(self);
+    EnterAgentState(self);
     switch (self->f724) {
     case 0xB:
-        func_0014CDC8(D_0027C00C, self);
+        AddToGaugeAmount(D_0027C00C, self);
         if (((Pending_0014BD38*)self->fC28) != 0) { ((Pending_0014BD38*)self->fC28)->f10 = 0; self->fC28 = 0; }
         break;
     case 0xC:
         if (((Pending_0014BD38*)self->fC28) != 0) { ((Pending_0014BD38*)self->fC28)->f10 = 0; self->fC28 = 0; }
-        func_0012F6B0(self->f7E0, D_0027C00C->scale);
+        SetAnimationPlayerSpeed(self->f7E0, D_0027C00C->scale);
         break;
     }
 }
@@ -205,18 +205,18 @@ void func_001C8F20(void* node, s32 kind, s32 flag);
 
 s32 func_0014BDC8(C12* self)
 {
-    s32 result = func_001C8010(self);
+    s32 result = ChooseAgentState(self);
     if (result == 0xB) return result;
-    Node_0014BDC8* n = func_001925F0();
-    if (n != 0 && func_001B9FB0(self, n) != 0) {
+    Node_0014BDC8* n = GetActiveSwitchedCollider();
+    if (n != 0 && IsContactBetweenParts(self, n) != 0) {
         Scratch_0014BDC8 buf;
-        func_001D7098(&buf, 0, self);
+        InitOwnerMessage(&buf, 0, self);
         result = 0xB;
         n->vtbl[0x50](n, &buf);
     }
     for (Node_0014BDC8* x = (Node_0014BDC8*)self->world->list1CCC.head; x != 0; x = x->next) {
-        if ((void*)x != (void*)self && func_001300E8(x, 0x12) != 0 && func_001B9FB0(self, x) != 0) {
-            func_001C8F20(x, 0xB, 0);
+        if ((void*)x != (void*)self && IsObjectOfKind(x, 0x12) != 0 && IsContactBetweenParts(self, x) != 0) {
+            ChangeAgentState(x, 0xB, 0);
         }
     }
     return result;
@@ -247,12 +247,12 @@ void func_001D7098(void* out, s32 mode, C12* owner);
 s32 func_0014BEF8(C12* self, Node_0014BEF8** slot)
 {
     if (self->f724 == 0x10 || self->f724 == 0xB) return 1;
-    if (func_001C96D8(self, slot) == 0) return 0;
-    Node_0014BEF8* found = (Node_0014BEF8*)func_001925F0();
+    if (HandleAgentObjectEvent(self, slot) == 0) return 0;
+    Node_0014BEF8* found = (Node_0014BEF8*)GetActiveSwitchedCollider();
     Node_0014BEF8* n = *slot;
     if (n == found) {
         Scratch_0014BEF8 buf;
-        func_001D7098(&buf, 0, self);
+        InitOwnerMessage(&buf, 0, self);
         n->vtbl[0x50](n, &buf);
     }
     return 1;
@@ -278,34 +278,34 @@ void func_00148598(C59* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
-        G27C230* fl = D_002623C8;
+        G27C230* fl = g_currentEntry;
         s32 bits = fl->flags;
         if ((bits & 2) == 0) {
-            G27C230* cx = D_002623C4;
+            G27C230* cx = g_currentLevelRecord;
             fl->flags = bits | 2;
             s32 g = D_00275C34; s32 old = cx->f438; cx->f438 = old + 1; if (g != 0) cx->f438 = old;
         }
         D_0026CBC8.vt->m14(&D_0026CBC8);
-        void* r = (void*)func_001925F0();
+        void* r = (void*)GetActiveSwitchedCollider();
         if (r != 0) {
             ((VObj3_148598*)r)->vtbl[82](r, 0, self);
         }
-        func_001837E0(self, 2, 0, 0);
+        TriggerScriptEvent(self, 2, 0, 0);
         mode = 2;
         func_00151FC8(D_00261EF0);
-        func_0018C7F8(g_memoryCard);
+        StartMemoryCardSave(g_memoryCard);
     }
-    func_00147AB0(self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 void func_00149398(T2173* self, Camera* owner);
 
 void func_00149660(T2173_3B0* self, Camera* owner)
 {
-    func_00149398(self, owner);
+    SetCameraControllerOwner(self, owner);
     self->count = 0;
     self->f20 = 10.0f;
-    func_001495E8(self, 0);
+    PushStackValue(self, 0);
     self->f54 = 0.5f;
     self->f58 = -1.0f;
     self->f50 = 0;
@@ -326,7 +326,7 @@ void func_001496C0(T2173_3B0* self)
 {
     Tmp_1496C0 tmp;
     Camera* eng = (Camera*)self->owner;
-    func_00189230((u8*)eng + 0x80, (u8*)self + 8, (u8*)self + 0x10);
+    VectorToAngles((u8*)eng + 0x80, (u8*)self + 8, (u8*)self + 0x10);
     f32 d = self->f20;
     self->f10 = D_00261BF0;
     self->f0C = 0;
@@ -336,16 +336,16 @@ void func_001496C0(T2173_3B0* self)
     f32 a = eng->f1C8;
     self->f28 = a;
     self->f24 = a / d;
-    func_001493C8(&tmp, self);
+    GetCameraControllerTargetPoint(&tmp, self);
     func_00144B70(eng, &tmp);
     self->f2C = eng->f1E4;
-    func_00143968(eng, 49.0f);
+    SetCameraNearDistance(eng, 49.0f);
 }
 
 extern void* D_0026EC68;
 void func_00148718(C5A* self)
 {
-    func_00146470(self);
+    StartStateNotifier(self);
     D_0026EC68 = self;
 }
 
@@ -369,7 +369,7 @@ s32 func_001493A0(T2173* self)
 
 void func_0014AD70(T217D_720* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     for (s32 i = 0; i < self->count; i++) {
         T217D_330* s = &self->items[i];
         s->vt->m02(s);
@@ -386,7 +386,7 @@ struct Frame_148770 { Note_148770 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x6
 void func_00148770(C5A* self, s32 kind, void* msg)
 {
     Frame_148770 fr;
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 0x14) return;
     if (msg != self->f2E8) return;
     func_001B6598(msg, &fr.code);
@@ -397,16 +397,16 @@ void func_00148770(C5A* self, s32 kind, void* msg)
         fr.note.owner = self;
         dev->desc->m1B(dev, &fr.note);
     }
-    func_001DBCC8(self->world, (void*)func_00148748, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)func_00148748, self, 0, 0);
 }
 
 extern f32 D_0026185C;
 
 void func_00148828(C5A* self)
 {
-    func_00147428(self);
+    UpdateStateNotifier(self);
     if (self->state != 0) return;
-    if (self->world->f2308 <= D_0026185C) self->desc02()->m2F(self, 6);
+    if (self->world->f2308 <= g_gameTime) self->desc02()->m2F(self, 6);
 }
 
 void func_001493B8(T2173* self, s32 value)
@@ -452,8 +452,8 @@ void func_00152470(void* table, void* self);
 
 void func_0014B550(C10* self)
 {
-    func_001C74E8(self);
-    func_00152470(&self->world->list1CCC, self);
+    RegisterAgent(self);
+    AppendToList(&self->world->list1CCC, self);
 }
 
 void func_0014AA90(T2173_3E0* obj, s32 value) { obj->value = value; }
@@ -469,7 +469,7 @@ s32 func_00148910(const f32* first, const f32* second)
 
 void func_00149168(C5B* self)
 {
-    func_00146340(self);
+    InitStateNotifier(self);
     self->armed = 0;
 }
 
@@ -483,29 +483,29 @@ struct State_0014B678 { f32 a; f32 b; s32 value; };
 void func_001EAD88(void* a, void* b, f32 value);
 void func_0014B678(State_0014B678* self, f32 value)
 {
-    func_001EAD88(&self->b, self, value);
+    ComputeSinCos(&self->b, self, value);
     self->value = 0;
 }
 
 void func_001C7520(void*);
 void func_00152600(void*, void*);
-void func_0014B588(C10* self) { func_001C7520(self); func_00152600(&self->world->list1CCC, self); }
+void func_0014B588(C10* self) { UnregisterAgent(self); RemoveFromList(&self->world->list1CCC, self); }
 
 void func_001C7188(void*, void*);
-void func_0014B5C0(C10* self, void* other) { Pack10 save=self->fC10; func_001C7188(self,other); self->fC10=save; }
+void func_0014B5C0(C10* self, void* other) { Pack10 save=self->fC10; CopyAgent(self,other); self->fC10=save; }
 
 void func_001C6F48(void*);
 static s32 D_0027C008;  // a running count, reset by func_0014B608
-void func_0014B608(C11* self) { func_001C6F48(self); self->fC24=1; D_0027C008=0; }
+void func_0014B608(C11* self) { InitAgent(self); self->fC24=1; D_0027C008=0; }
 
 void func_001C72A0(void*);
-void func_0014B640(C11* self) { func_001C72A0(self); self->fC2C=D_0027C008++; }
+void func_0014B640(C11* self) { StartAgent(self); self->fC2C=D_0027C008++; }
 
 
 void func_00148400(C56* self)
 {
     C56* o = self;
-    func_00146340(o);
+    InitStateNotifier(o);
     f32 k60 = 60.0f;
     f32 k300 = 300.0f;
     f32 k075 = 0.75f;
@@ -527,11 +527,11 @@ void func_00148470(C56* self, s32 mode)
 {
     if (self->state == mode) return;
     if (mode == 1) {
-        func_001BFCD8(0x74, 0, (s32)self, 0, 0, 0, 1500.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        StartSoundEffect(0x74, 0, (s32)self, 0, 0, 0, 1500.0f, 0.0f, 1.0f, 0.0f, 0.0f);
         mode = 4;
-        func_001837E0(self, 2, 0, 0);
+        TriggerScriptEvent(self, 2, 0, 0);
     }
-    func_00147AB0(self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 void func_001E02C8(T217D_1380* self, s32 n);
@@ -547,7 +547,7 @@ void func_00148888(C5A* self, s32 mode)
     Msg_148888 msg;
     if (self->state == mode) return;
     if (mode == 1) {
-        func_001E02C8(&D_0026E9F8, 2);
+        SetBestTimeState(&g_timerCaption, 2);
         StateListener* dev = self->listener;
         if (dev != 0) {
             msg.value = mode;
@@ -556,7 +556,7 @@ void func_00148888(C5A* self, s32 mode)
         }
         mode = 2;
     }
-    func_00147AB0(self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 void func_00127378(void* self, s32 kind, void* msg);
@@ -570,7 +570,7 @@ struct Frame_148E40 { Note_148E40 note; u8 pad0[0x50 - 8]; s32 code; u8 pad1[0x6
 void func_00148E40(C57* self, s32 kind, void* msg)
 {
     Frame_148E40 fr;
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind != 0x14) return;
     if (msg != self->f2E8) return;
     func_001B6598(msg, &fr.code);
@@ -581,7 +581,7 @@ void func_00148E40(C57* self, s32 kind, void* msg)
         fr.note.owner = self;
         dev->desc->m1B(dev, &fr.note);
     }
-    func_001DBCC8(self->world, (void*)(void (*)(void*))func_00148E18, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)(void (*)(void*))func_00148E18, self, 0, 0);
 }
 
 extern s32 D_00270458;
@@ -590,11 +590,11 @@ extern f32 D_00261860;
 
 void func_00148EF8(C57* self)
 {
-    func_00147428(self);
+    UpdateStateNotifier(self);
     if (self->state != 0) return;
     if (self->f338 == 0) return;
     if (D_00270458 != 2) {
-        self->timeLeft = self->timeLeft - D_00261860;
+        self->timeLeft = self->timeLeft - g_frameDt;
     }
     if (self->timeLeft <= 0.0f) {
         self->desc02()->m2F(self, 6);
@@ -605,7 +605,7 @@ void func_00148F80(void)
 {
     T217D_E30* obj = &D_0026C6C8;
     obj->vt->m14(obj);
-    GameProgress* g = D_002623C0;
+    GameProgress* g = g_saveData;
     if (g->f19E0 < 0x63) {
         g->f19E0 = g->f19E0 + 1;
         obj->rate = 250.0f;
@@ -634,18 +634,18 @@ void func_0014A7B8(T2173_3B0* self)
     Quad_14A7B8 b;
     Camera* n;
 
-    func_001493C8(&a, self);
+    GetCameraControllerTargetPoint(&a, self);
     func_00149458(&b, self);
     n = (Camera*)self->owner;
-    func_001BF788(self->p48, 0);
-    func_001BF788(self->p4C, 500);
+    StopSoundRecord(self->p48, 0);
+    StopSoundRecord(self->p4C, 500);
     func_00144938(n, &b, &a);
     if (func_001EAC68(n->f1C4, self->f28, 1e-4f) == 0) {
-        func_00143940(n, self->f28);
+        SnapCameraZoom(n, self->f28);
     }
     self->f5C = 0;
     if (n->f1E4 == 49.0f) {
-        func_00143968(n, self->f2C);
+        SetCameraNearDistance(n, self->f2C);
     }
 }
 
@@ -660,7 +660,7 @@ void func_0012F6B0(void* sub, f32 x);
 
 void func_0014BF88(C12* self)
 {
-    func_001C91C8(self);
+    EnterAgentState(self);
     switch (self->f724) {
     case 0xB:
         func_0014CD70((void*)D_0027C00C, self);
@@ -674,7 +674,7 @@ void func_0014BF88(C12* self)
             ((Slot_14BF88*)self->fC20)->v10 = 0;
             self->fC20 = 0;
         }
-        func_0012F6B0(self->f7E0, self->fC24);
+        SetAnimationPlayerSpeed(self->f7E0, self->fC24);
         break;
     }
 }
@@ -682,13 +682,13 @@ void func_0014BF88(C12* self)
 void func_00148510(C59* self)
 {
     C59* o = self;
-    func_00146340(o);
+    InitStateNotifier(o);
     f32 k35 = 35.0f;
     f32 k06 = 0.6f;
     f32 k500 = 500.0f;
     f32 k250 = 250.0f;
     f32 k075 = 0.75f;
-    G27C230* fl = D_002623C8;
+    G27C230* fl = g_currentEntry;
     o->f350 = o->f34C = k35;
     o->f344 = k500;
     o->f348 = k250;
@@ -702,7 +702,7 @@ void func_00148510(C59* self)
 
 void func_00148D90(C57* self)
 {
-    func_00146340(self);
+    InitStateNotifier(self);
     f32 k = 50.0f;
     self->f34C = 45.0f;
     self->f344 = 250.0f;
@@ -742,13 +742,13 @@ void func_00148FF0(C57* self, s32 mode)
 
 zero_case:
     if (self->f338 != 0) {
-        self->timeLeft = func_001EAAE0(self->timeMin, self->timeMax);
+        self->timeLeft = RandomFloatInRange(self->timeMin, self->timeMax);
     }
     goto call_tail;
 
 one_case:
     {
-        Effect* c = func_0019EA78(0x10, 0);
+        Effect* c = CreateEffect(0x10, 0);
         if (c != 0) {
             c->p134 = self;
             c->params = (const T219C_Params*)D_00261B60;
@@ -761,8 +761,8 @@ one_case:
             func_00148F80(self);
         }
         D_0026C6C8.vt->m14(&D_0026C6C8);
-        func_00141040(D_00261420, self->f37C);
-        func_001BFCD8(0x69, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        SetFlagTableBit(g_flagTable, self->f37C);
+        StartSoundEffect(0x69, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         if (self->listener != 0) {
             Frame_148FF0 fr;
             fr.msg.kind = 1;
@@ -773,7 +773,7 @@ one_case:
     }
 
 call_tail:
-    func_00147AB0(self, mode);
+    SetStateNotifierState(self, mode);
 }
 
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
@@ -792,11 +792,11 @@ struct Obj_149508 {
 };
 void func_00149508(Obj_149508* self)
 {
-    func_001BFCD8(0x71, &self->f48, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x71, &self->f48, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     if (self->f48 != 0) {
         func_0011D640(self->f48->f18);
     }
-    func_001BFCD8(0x70, &self->f4C, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x70, &self->f4C, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     self->f44 = 1;
 }
 
@@ -806,16 +806,16 @@ void func_0014AC48(T217D_720* self)
     u32 i;
 
     e = (T217D_330*)self;
-    func_001AA268(e);
+    SetupScreenElementText(e);
     e = self->items;
     for (i = 0; i < 4; i++) {
         e->vt->m01(e);
         e->frame = 0;
         e->font->sx = 0.8f;
         e->font->sy = 0.8f;
-        func_001AA8B0(e, 1.0f);
-        func_001AA8C0(e, 1.0f);
-        func_001AA8B8(e, 0.0f);
+        SetScreenElementSlideInTime(e, 1.0f);
+        SetScreenElementSlideOutTime(e, 1.0f);
+        SetScreenElementHoldTime(e, 0.0f);
         e++;
     }
 }
@@ -825,7 +825,7 @@ extern u8 D_0026EC60[];
 
 void func_00148698(C5A* self)
 {
-    func_00146340(self);
+    InitStateNotifier(self);
     self->f34C = 60.0f;
     self->f350 = 60.0f;
     self->f344 = 500.0f;
@@ -848,7 +848,7 @@ s32 func_0014BCE8(C11* self)
     if (self->f724 == 0xB) {
         return 1;
     }
-    if (func_001C96D8(self) == 0) {
+    if (HandleAgentObjectEvent(self) == 0) {
         return 0;
     }
     self->fC20 = 0;
@@ -867,11 +867,11 @@ Quad_1493C8 func_001493C8(T2173_3B0* self)
     if (self->f5C != 0) {
         func_001920B0(self->f5C, &r);
     } else {
-        if (func_001925F0() != 0) {
-            r = *(Quad_1493C8*)((u8*)func_001925F0() + 0x140);
+        if (GetActiveSwitchedCollider() != 0) {
+            r = *(Quad_1493C8*)((u8*)GetActiveSwitchedCollider() + 0x140);
             *(f32*)&r.c = *(f32*)&r.c + D_00261BF8;
         } else {
-            r = *(Quad_1493C8*)(*(u8**)D_00261990 + 0x40);
+            r = *(Quad_1493C8*)(*(u8**)g_camera + 0x40);
         }
     }
     return r;
@@ -879,7 +879,7 @@ Quad_1493C8 func_001493C8(T2173_3B0* self)
 
 void func_0014AD00(T217D_720* self, f32* clock)
 {
-    func_001AAF58(self, clock);
+    SetScreenElementClock(self, clock);
     T217D_330* e = self->items;
     for (u32 i = 0; i < 4; i++) {
         e->vt->m17(e, clock);
@@ -891,9 +891,9 @@ void func_0014AD00(T217D_720* self, f32* clock)
 extern u8 D_002483D0[];
 void func_0014A888(T2173_3C8* self, Camera* a1)
 {
-    func_00149398(self, a1);
+    SetCameraControllerOwner(self, a1);
     Blk2173* dst = &self->frame20;
-    *dst = *(Blk2173*)D_002483D0;
+    *dst = *(Blk2173*)g_identityMatrix;
 }
 
 struct Obj_148AC0;
@@ -942,14 +942,14 @@ s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
     s32 count;
     f32 ang;
     f32 step;
-    func_0018D608();
+    PushBackMemoryMark();
     if (arr == 0) {
-        arr = func_0018D658(n * 4);
+        arr = AllocateBackMemory(n * 4);
     }
     count = func_00148938(self, a1, n, arr);
     i = 0;
     step = 6.2831855f / (f32)n;
-    ang = func_001EAAE0(0.0f, 6.2831855f);
+    ang = RandomFloatInRange(0.0f, 6.2831855f);
     {
         for (; i < count;) {
             Obj_148AC0* o = arr[i];
@@ -959,21 +959,21 @@ s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
             o->vt->f18(o);
             o->vt->f64(o, 0);
             o->vt->f84(o, a2);
-            o->vt->f88(o, D_002483D0);
+            o->vt->f88(o, g_identityMatrix);
             o->vt->f90(o, D_00248D30);
             o->vt->f94(o, D_00248D30);
             o->f2E0 = (f32)i * D_00261B40;
             o->f33C = 0;
             i++;
             o->vt->fCC(o, 3);
-            a = func_001EAAE0(D_00261B48[0], D_00261B48[1]);
-            b = func_001EAAE0(D_00261B50[0], D_00261B50[1]);
-            func_001ED650(q, ang, a, b);
+            a = RandomFloatInRange(D_00261B48[0], D_00261B48[1]);
+            b = RandomFloatInRange(D_00261B50[0], D_00261B50[1]);
+            ComputePolarOffset(q, ang, a, b);
             ang += step;
             func_001EEB60((World*)self->f1EC4, o->f2A8, (u8*)o + 0x140, (u8*)o + 0x88);
         }
     }
-    func_0018D6F0();
+    PopBackMemoryMark();
     return count;
 }
 
@@ -1014,17 +1014,17 @@ void func_00148038(World* self)
     s32 c;
 
     if (func_00148938(self, 0x56, 1, &obj) == 0) {
-        g = D_002623C0;
+        g = g_saveData;
         n = func_00160D98();
         c = g->f19E4 + 1;
         c = (c < n) ? c : n;
-        D_002623C0->f19E4 = c;
+        g_saveData->f19E4 = c;
     } else {
         ((Fn0_148038)((Obj_148038*)obj)->vtbl[6])(obj);
         ((Fn1s_148038)((Obj_148038*)obj)->vtbl[25])(obj, 0);
-        func_00144128(*(Ctx_148038**)D_00261990, (void*)D_00261AB0, buf);
+        func_00144128(*(Ctx_148038**)g_camera, (void*)D_00261AB0, buf);
         ((Fn1_148038)((Obj_148038*)obj)->vtbl[33])(obj, buf);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[34])(obj, D_002483D0);
+        ((Fn1_148038)((Obj_148038*)obj)->vtbl[34])(obj, g_identityMatrix);
         ((Fn1_148038)((Obj_148038*)obj)->vtbl[36])(obj, D_00248D30);
         ((Fn1_148038)((Obj_148038*)obj)->vtbl[37])(obj, D_00248D30);
         ((Fn1s_148038)((Obj_148038*)obj)->vtbl[51])(obj, 4);
@@ -1054,11 +1054,11 @@ void func_00148298(C58* self, s32 mode)
         switch (mode) {
         case 0:
             if (s->f338 != 0) {
-                s->timeLeft = func_001EAAE0(s->timeMin, s->timeMax);
+                s->timeLeft = RandomFloatInRange(s->timeMin, s->timeMax);
             }
             break;
         case 1:
-                Effect* n = func_0019EA78(0x10, 0);
+                Effect* n = CreateEffect(0x10, 0);
                 if (n != 0) {
                     n->params = (const T219C_Params*)D_00261AD0;
                     n->p134 = self;
@@ -1072,7 +1072,7 @@ void func_00148298(C58* self, s32 mode)
                 }
                 D_0026CE48.vt->m14(&D_0026CE48);
                 f32 z = 0.0f;
-                func_001BFCD8(0x78, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
+                StartSoundEffect(0x78, 0, 0, 0, 3000.0f, 300.0f, 1.0f, z, z, 0, 0);
                 if (s->listener != 0) {
                     Locals_148298 l;
                     l.args[0] = 1;
@@ -1082,7 +1082,7 @@ void func_00148298(C58* self, s32 mode)
                 mode = 2;
             break;
         }
-        func_00147AB0(self, mode);
+        SetStateNotifierState(self, mode);
     }
 }
 
@@ -1092,7 +1092,7 @@ void func_0014ABD0(T217D_720* self)
 {
     u32 n;
 
-    func_001AA1F0(self, 0x20);
+    InitScreenElement(self, 0x20);
     T217D_330* e = self->items;
     for (n = 0; n < 4; n++) {
         e->vt = &D_00218330;

@@ -33,10 +33,10 @@ void func_00194D30(Self_194D30_eu* self, s32 idx, s32 value)
     } else {
         s1 = self->f570;
     }
-    func_00193EE8(self, s1, s2);
+    ChangePauseMenuPage(self, s1, s2);
     if (s1 != s2) {
         if (self->f560 == 0) {
-            func_00195928(self, s2);
+            SetPauseMenuPage(self, s2);
         } else if (self->f560 >= 0) {
           if (self->f560 < 4) {
             if (s2 == -1) {
@@ -52,11 +52,11 @@ void func_00194D30(Self_194D30_eu* self, s32 idx, s32 value)
     }
     if (s2 == -1) {
         if (self->f56C != 0) {
-            func_001E9570(D_00275BC0);
+            PopStackElement(g_elementStack);
         }
     } else {
         if (self->f56C == 0) {
-            func_001E9498(D_00275BC0, self);
+            PushStackElement(g_elementStack, self);
         }
     }
 }

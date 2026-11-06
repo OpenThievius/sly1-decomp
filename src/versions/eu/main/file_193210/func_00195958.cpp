@@ -29,41 +29,41 @@ u8* func_eu_00160788(s32 a);
 
 void func_00195958(Menu_195958_eu* self)
 {
-    s32 sel = D_00269D50[self->f260].items ? D_00269D50[self->f260].items[self->f264] : -1;
+    s32 sel = g_pauseMenuPages[self->f260].items ? g_pauseMenuPages[self->f260].items[self->f264] : -1;
     if (sel == 0x11) {
-        func_001961C0(self);
+        CancelPauseMenuPage(self);
         return;
     }
     switch (self->f260) {
     case 0:
         switch (sel) {
         case 3:
-            func_00194D30(self, 0, -1);
+            SetPauseMenuLayerPage(self, 0, -1);
             return;
         case 4: {
-            Sub_195958_eu* s = (Sub_195958_eu*)&D_0026F808;
+            Sub_195958_eu* s = (Sub_195958_eu*)&g_mapScreenList;
             if (s->f260 != 0) {
-                func_00194D30(self, 0, -1);
-                func_001E9498(D_00275BC0, s);
+                SetPauseMenuLayerPage(self, 0, -1);
+                PushStackElement(g_elementStack, s);
                 return;
             }
-            func_001BFCD8(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             return;
         }
         case 18: {
             s32 v;
             void* s2 = (void*)func_00193660();
-            void* s0 = func_001925F0();
-            if (s2 != 0 && s0 != 0 && func_001300E8(s0, 0x19) != 0) {
+            void* s0 = GetActiveSwitchedCollider();
+            if (s2 != 0 && s0 != 0 && IsObjectOfKind(s0, 0x19) != 0) {
                 func_001B6598(s2, &v);
                 if (v < 0x431) {
                     if (v >= 0x42F) {
                         func_001D9338(s0);
-                        func_001B6628(s2, 0x42E);
+                        TeleportStateWalker(s2, 0x42E);
                     }
                 }
             }
-            func_00194D30(self, 0, -1);
+            SetPauseMenuLayerPage(self, 0, -1);
             return;
         }
         case 19:
@@ -71,40 +71,40 @@ void func_00195958(Menu_195958_eu* self)
             func_00194278(self, 1, 1);
             return;
         case 21:
-            func_00194D30(self, 0, -1);
+            SetPauseMenuLayerPage(self, 0, -1);
             func_001F4408(1, 2);
             return;
         case 22:
-            func_00194D30(self, 0, -1);
-            func_001F0428(D_eu_00249050[D_eu_00263710], -1, 2);
+            SetPauseMenuLayerPage(self, 0, -1);
+            StartObjectFade(D_eu_00249050[D_eu_00263710], -1, 2);
             return;
         case 9:
-            func_00194D30(self, 0, 2);
+            SetPauseMenuLayerPage(self, 0, 2);
             return;
         case 5:
-            func_00194D30(self, 0, 0x17);
+            SetPauseMenuLayerPage(self, 0, 0x17);
             return;
         case 23:
-            func_00194D30(self, 0, 0x1F);
+            SetPauseMenuLayerPage(self, 0, 0x1F);
             return;
         }
         return;
     case 23:
         switch (sel) {
         case 6:
-            func_0018C178(&g_memoryCard, 1);
-            func_00194D30(self, 0, 0x10);
+            SetMemoryCardDisplayMode(&g_memoryCard, 1);
+            SetPauseMenuLayerPage(self, 0, 0x10);
             return;
         case 7:
-            func_0018C178(&g_memoryCard, 1);
-            func_00194D30(self, 0, 0x11);
+            SetMemoryCardDisplayMode(&g_memoryCard, 1);
+            SetPauseMenuLayerPage(self, 0, 0x11);
             return;
         case 8:
-            func_0018C178(&g_memoryCard, 1);
-            func_00194D30(self, 0, 0xB);
+            SetMemoryCardDisplayMode(&g_memoryCard, 1);
+            SetPauseMenuLayerPage(self, 0, 0xB);
             return;
         case 13:
-            func_001A7F50(D_002623C0);
+            TogglePadPatternSetting(g_saveData);
             {
                 s32 keep;
                 keep = self->f264;
@@ -113,7 +113,7 @@ void func_00195958(Menu_195958_eu* self)
             }
             return;
         case 15: {
-            GameProgress* g = D_002623C0;
+            GameProgress* g = g_saveData;
             g->u19EC ^= 0x80;
             func_001C0760(g->u19EC & 0x80);
             {
@@ -125,7 +125,7 @@ void func_00195958(Menu_195958_eu* self)
             return;
         }
         case 16: {
-            GameProgress* g = D_002623C0;
+            GameProgress* g = g_saveData;
             g->u19EC ^= 0x40;
             func_001C0790(g->u19EC & 0x40);
             {
@@ -137,10 +137,10 @@ void func_00195958(Menu_195958_eu* self)
             return;
         }
         case 14:
-            func_00194D30(self, 0, 0x18);
+            SetPauseMenuLayerPage(self, 0, 0x18);
             return;
         case 23:
-            func_00194D30(self, 0, 0x1F);
+            SetPauseMenuLayerPage(self, 0, 0x1F);
             return;
         }
         return;
@@ -161,8 +161,8 @@ void func_00195958(Menu_195958_eu* self)
     case 25: {
         s32 a = self->f280;
         self->f280 = 0;
-        func_001B64D8(a, sel == 0 ? 0x434 : 0x435);
-        func_00194D30(self, 0, -1);
+        SetStateWalkerTarget(a, sel == 0 ? 0x434 : 0x435);
+        SetPauseMenuLayerPage(self, 0, -1);
         return;
     }
     case 2:
@@ -170,38 +170,38 @@ void func_00195958(Menu_195958_eu* self)
             MemoryCard* b = &g_memoryCard;
             if (b->f4F44 != 0) {
                 self->f27C = 2;
-                if ((D_002623C0->u19EC & 0x100) == 0) {
-                    func_00194D30(self, 1, 0x14);
+                if ((g_saveData->u19EC & 0x100) == 0) {
+                    SetPauseMenuLayerPage(self, 1, 0x14);
                 } else {
-                    func_00194D30(self, 1, 0xC);
-                    func_0018B670(&g_backgroundJob, (void*)func_0018C638, b);
+                    SetPauseMenuLayerPage(self, 1, 0xC);
+                    StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, b);
                 }
             } else {
                 func_00194398();
             }
-            func_00194D30(self, 0, -1);
+            SetPauseMenuLayerPage(self, 0, -1);
             return;
         }
-        func_00194D30(self, 0, -1);
+        SetPauseMenuLayerPage(self, 0, -1);
         return;
     case 31:
         switch (sel) {
         case 0x18: {
-            D_002623C0->u19EC ^= 0x200;
+            g_saveData->u19EC ^= 0x200;
             s32 keep = self->f264;
             func_001936A0(self);
             self->f264 = keep;
             return;
         }
         case 0x19: {
-            D_002623C0->u19EC ^= 0x400;
+            g_saveData->u19EC ^= 0x400;
             s32 keep = self->f264;
             func_001936A0(self);
             self->f264 = keep;
             return;
         }
         case 0x1A: {
-            D_002623C0->u19EC ^= 0x800;
+            g_saveData->u19EC ^= 0x800;
             s32 keep = self->f264;
             func_001936A0(self);
             self->f264 = keep;
@@ -210,7 +210,7 @@ void func_00195958(Menu_195958_eu* self)
         }
         return;
     case 33:
-        func_00194D30(self, 0, -1);
+        SetPauseMenuLayerPage(self, 0, -1);
         if (sel >= 0x22) {
             break;
         }
@@ -218,29 +218,29 @@ void func_00195958(Menu_195958_eu* self)
             return;
         }
         func_eu_00160620(sel - 0x1B);
-        func_001F0428(func_eu_00160788(3), 0x1BE, 1);
+        StartObjectFade(func_eu_00160788(3), 0x1BE, 1);
         return;
     case 34:
-        func_00194D30(self, 0, -1);
+        SetPauseMenuLayerPage(self, 0, -1);
         D_eu_00263624 = 1;
         return;
     case 14:
         if (sel == 0) {
             goto c6030;
         }
-        func_00194D30(self, 1, -1);
+        SetPauseMenuLayerPage(self, 1, -1);
         return;
     case 4:
         if (sel == 0) {
-            func_0018B670(&g_backgroundJob, (void*)func_0018C1A8, &g_memoryCard);
-            func_00194D30(self, 1, 5);
+            StartBackgroundJob(&g_backgroundJob, (void*)func_0018C1A8, &g_memoryCard);
+            SetPauseMenuLayerPage(self, 1, 5);
             return;
         }
         goto c5EC0;
     case 7:
         if (sel == 0) {
-            func_0018B670(&g_backgroundJob, (void*)func_0018C250, &g_memoryCard);
-            func_00194D30(self, 1, 8);
+            StartBackgroundJob(&g_backgroundJob, (void*)CreateMemoryCardSaveFiles, &g_memoryCard);
+            SetPauseMenuLayerPage(self, 1, 8);
             return;
         }
         goto c5EC0;
@@ -253,8 +253,8 @@ void func_00195958(Menu_195958_eu* self)
     case 32:
     c5EC0: {
         s32 v;
-        func_00194D30(self, 1, -1);
-        func_0018C178(&g_memoryCard, 2);
+        SetPauseMenuLayerPage(self, 1, -1);
+        SetMemoryCardDisplayMode(&g_memoryCard, 2);
         v = self->f268;
         if (v == 0xB) {
             goto c5F08;
@@ -271,24 +271,24 @@ void func_00195958(Menu_195958_eu* self)
     }
     case 24:
     c5F08:
-        func_00194D30(self, 0, 0x17);
+        SetPauseMenuLayerPage(self, 0, 0x17);
         return;
     case 16: {
         Ent_195958* e = &D_eu_00255538[sel];
         if (e->fC == 0.0f) {
-            func_00194D30(self, 0, -1);
+            SetPauseMenuLayerPage(self, 0, -1);
             g_memoryCard.f4F44 = e;
-            func_0018C568(&g_memoryCard);
+            ApplyMemoryCardImage(&g_memoryCard);
             func_00160948();
             return;
         }
-        func_001BFCD8(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     case 17:
-        func_00194D30(self, 0, -1);
+        SetPauseMenuLayerPage(self, 0, -1);
         g_memoryCard.f4F44 = &D_eu_00255538[sel];
-        func_0018C568(&g_memoryCard);
+        ApplyMemoryCardImage(&g_memoryCard);
         func_00160948();
         return;
     case 11: {
@@ -304,43 +304,43 @@ void func_00195958(Menu_195958_eu* self)
             b = &g_memoryCard;
             b->f4F44 = b->f4F4C;
             self->f27C = 0xB;
-            if ((D_002623C0->u19EC & 0x100) == 0) {
-                func_00194D30(self, 1, 0x14);
+            if ((g_saveData->u19EC & 0x100) == 0) {
+                SetPauseMenuLayerPage(self, 1, 0x14);
             } else {
-                func_00194D30(self, 1, 0xC);
-                func_0018B670(&g_backgroundJob, (void*)func_0018C638, b);
+                SetPauseMenuLayerPage(self, 1, 0xC);
+                StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, b);
             }
-            func_00194D30(self, 0, -1);
+            SetPauseMenuLayerPage(self, 0, -1);
             return;
         }
-        func_00194D30(self, 1, 0xE);
+        SetPauseMenuLayerPage(self, 1, 0xE);
         return;
     }
     case 18:
         if (sel == 0) {
-            func_0018B670(&g_backgroundJob, (void*)func_0018C770, &g_memoryCard);
-            func_00194D30(self, 1, 0x13);
+            StartBackgroundJob(&g_backgroundJob, (void*)WriteSelectedMemoryCardSlot, &g_memoryCard);
+            SetPauseMenuLayerPage(self, 1, 0x13);
             return;
         }
-        func_00194D30(self, 1, -1);
+        SetPauseMenuLayerPage(self, 1, -1);
         return;
     case 13:
-        func_00194D30(self, 1, -1);
+        SetPauseMenuLayerPage(self, 1, -1);
         return;
     case 20: {
-        D_002623C0->u19EC |= 0x100;
+        g_saveData->u19EC |= 0x100;
         s32 v = self->f27C;
         switch (v) {
         case 2:
         case 0xB:
-            func_00194D30(self, 1, 0xC);
+            SetPauseMenuLayerPage(self, 1, 0xC);
             break;
         case -1:
-            func_00194D30(self, 1, -1);
+            SetPauseMenuLayerPage(self, 1, -1);
             D_00273EB0.vt->m14(&D_00273EB0);
             break;
         }
-        func_0018B670(&g_backgroundJob, (void*)func_0018C638, &g_memoryCard);
+        StartBackgroundJob(&g_backgroundJob, (void*)SaveGameToMemoryCardSlot, &g_memoryCard);
         return;
     }
     }

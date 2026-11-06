@@ -14,6 +14,6 @@ f32 func_001365F0(Obj_1365F0_eu* self)
     case 3:
     case 4:
     default:
-        return func_001AA898(self);
+        return GetScreenElementSlideInTime(self);
     }
 }

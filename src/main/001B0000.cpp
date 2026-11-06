@@ -47,7 +47,7 @@ void func_00137A60(void* a, s32 b, void* c);
 
 void func_001B2B50(void* a0, V24A2_ImgB* a1)
 {
-    func_00137A60(a0, 12, a1);
+    ReadBufferedStreamBytes(a0, 12, a1);
     a1->f8 = D_00275718 + a1->f8;
     a1->fC = (u32)((a1->f4 << 2) + 15) >> 4;
 }
@@ -76,19 +76,19 @@ void func_001B29E0(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx)
     func_001F5C0C(&d, 0, 8);
     func_001F5C0C(&e, 0, 8);
 
-    a.bits = func_001B2988(obj, p1, p2);
+    a.bits = GetTextureRegisterBits(obj, p1, p2);
     s32 kindA = 7;
     if (sel != 0) {
         kindA = 6;
     }
-    func_00161708(ctx, kindA, a.bits);
+    AddGifRegisterWrite(ctx, kindA, a.bits);
 
     b.bits = ((b.bits | one | 0x20) & ~0x1C0ULL) | 0x40;
     s32 kindB = 0x15;
     if (sel != 0) {
         kindB = 0x14;
     }
-    func_00161708(ctx, kindB, b.bits);
+    AddGifRegisterWrite(ctx, kindB, b.bits);
 
     if (obj->flags & 1) {
         e.bits = (e.bits & ~3ULL) | one;
@@ -100,7 +100,7 @@ void func_001B29E0(TextureTable* obj, s32 p1, s32 p2, s32 flag, void* ctx)
     if (sel != 0) {
         kindC = 8;
     }
-    func_00161708(ctx, kindC, e.bits);
+    AddGifRegisterWrite(ctx, kindC, e.bits);
 }
 
 extern s32 D_00274508;
@@ -112,19 +112,19 @@ void* func_0018D5C0(s32 bytes);
 void func_001B2BA8(void* self)
 {
     s32 i;
-    s32 count = func_00137BE0(self);
-    D_00274508 = count;
-    D_0027450C = (V24A2_ImgB*)func_0018D5C0(count * 0x18);
+    s32 count = ReadBufferedU16(self);
+    g_imageRecordCountB = count;
+    g_imageRecordsB = (V24A2_ImgB*)AllocateZeroedFrontMemory(count * 0x18);
     D_00274514 = 0;
-    for (i = 0; i < D_00274508; i++) {
-        func_001B2B50(self, &D_0027450C[i]);
-        if (D_0027450C[i].f0 & 0x10000000) {
+    for (i = 0; i < g_imageRecordCountB; i++) {
+        func_001B2B50(self, &g_imageRecordsB[i]);
+        if (g_imageRecordsB[i].f0 & 0x10000000) {
             D_00274514++;
         }
     }
     {
         s32 done = D_00274514;
-        s32 left = D_00274508 - done;
+        s32 left = g_imageRecordCountB - done;
         if (done < left) {
             D_00274514 = left;
         }
@@ -135,7 +135,7 @@ void func_00137A60(void* self, s32 size, void* obj);
 
 void func_001B2CA8(void* self, V24A2_ImgA* obj)
 {
-    func_00137A60(self, 0x14, obj);
+    ReadBufferedStreamBytes(self, 0x14, obj);
     s32 base = D_00275718;
     u32 bytes = obj->bytes;
     s32 off = obj->f10;
@@ -153,19 +153,19 @@ void* func_0018D5C0(s32 bytes);
 void func_001B2CF8(void* self)
 {
     s32 i;
-    s32 count = func_00137BE0(self);
-    D_00274500 = count;
-    D_00274504 = (V24A2_ImgA*)func_0018D5C0(count * 0x20);
+    s32 count = ReadBufferedU16(self);
+    g_imageRecordCountA = count;
+    g_imageRecordsA = (V24A2_ImgA*)AllocateZeroedFrontMemory(count * 0x20);
     D_00274510 = 0;
-    for (i = 0; i < D_00274500; i++) {
-        func_001B2CA8(self, &D_00274504[i]);
-        if (D_00274504[i].f4 & 0x10000000) {
+    for (i = 0; i < g_imageRecordCountA; i++) {
+        func_001B2CA8(self, &g_imageRecordsA[i]);
+        if (g_imageRecordsA[i].f4 & 0x10000000) {
             D_00274510++;
         }
     }
     {
         s32 done = D_00274510;
-        s32 left = D_00274500 - done;
+        s32 left = g_imageRecordCountA - done;
         if (done < left) {
             D_00274510 = left;
         }
@@ -180,8 +180,8 @@ void func_001692B0(s32 a, void* b);
 void func_001B3450(void)
 {
     s32 scratch[4];
-    func_00168D68(scratch, 0x1E00, 0x4000);
-    func_001692B0(0x10000000, scratch);
+    InitBumpAllocator(scratch, 0x1E00, 0x4000);
+    SendMaskedImagesToGif(0x10000000, scratch);
     D_00274518 = 0;
 }
 
@@ -219,11 +219,11 @@ void func_001B1B38(RangeRecord* self)
         func_001B1DA8(self, 400.0f);
     }
     if ((((Hdr_1B1B38*)self->link)->f0C & 0x10000000) == 0) {
-        s32 idx = D_002626D0;
+        s32 idx = g_meshQueueCount;
         if (idx < 0x4000) {
             u8* p = D_0027DC20 + idx * 16;
             self->f2D0 = p;
-            D_002626D0 = idx + 1;
+            g_meshQueueCount = idx + 1;
             func_001F5C0C(p, 0, 16);
         }
     }
@@ -237,7 +237,7 @@ void func_001B1BF0(RangeRecord* self)
 void* func_001B4688(s32 key);
 void func_001B1CF8(RangeRecord* self, s32 key)
 {
-    void* found = func_001B4688(key != -1 ? key : 0x2C);
+    void* found = FindAnimRecord(key != -1 ? key : 0x2C);
     self->link = found;
     if (found)
         func_001B1BF0(self);
@@ -302,13 +302,13 @@ void func_0011EC40(void* self, void* obj);
 
 void func_001B2840(C6E* self, void* obj)
 {
-    T2176* p = func_0014D9A8(func_00137B90(obj));
+    T2176* p = CreatePathCurve(ReadBufferedU8(obj));
     self->curve = p;
     void (*fn)(T2176* self, void* stream) = p->vt->m00;
     if (fn != 0) {
         fn(p, obj);
     }
-    func_0011EC40(self, obj);
+    ReadPropertyRecords(self, obj);
 }
 
 void func_00124A48(void* self);
@@ -339,7 +339,7 @@ void func_001B2358(void* o);
 void func_001B2640(Obj_1B2640* o)
 {
     if (o->f0 != 0) {
-        Camera* c = D_00261990;
+        Camera* c = g_camera;
         s32 bits = o->f0->f0C;
         s32 need = c->f21C;
         s32 a2 = 0;
@@ -359,7 +359,7 @@ void func_001B2640(Obj_1B2640* o)
                     goto done;
                 }
             }
-            V24A0* g = &D_002622A8;
+            V24A0* g = &g_vifPacketWriter;
             u64 hi = (u64)(u32)((u8*)o + 0xD0) << 32;
             u64 v = (u64)(s64)(o->fC0 | 0x40000000) | hi;
             *(u64*)g->cur = v;
@@ -414,7 +414,7 @@ s32 func_001B2090(Obj_1B2090** self, u32 bits)
     s32 r = 0;
     if (*self != 0) {
         u32 flags = (*self)->flags_C;
-        Camera* g = D_00261990;
+        Camera* g = g_camera;
         u32 mask = g->f21C;
         s32 ok = 0;
         if ((flags & 0x10000000) != 0 || (mask & flags) == mask) {
@@ -443,22 +443,22 @@ u32* func_0018D500(s32 bytes);
 
 void func_001B2F00(void* self, Obj_1B2F00* o)
 {
-    func_00137A60(self, 6, o);
+    ReadBufferedStreamBytes(self, 6, o);
     if (o->countA != 0) {
-        o->ptrC = func_0018D500(o->countA * 4);
+        o->ptrC = AllocateFrontMemory(o->countA * 4);
         for (s32 i = 0; i < o->countA; i++) {
-            u16 idx = func_00137BE0(self);
-            o->ptrC[i] = (u32)D_00274504 + (idx << 5);
+            u16 idx = ReadBufferedU16(self);
+            o->ptrC[i] = (u32)g_imageRecordsA + (idx << 5);
         }
     }
     if (o->countB != 0) {
-        o->ptr10 = func_0018D500(o->countB * 4);
+        o->ptr10 = AllocateFrontMemory(o->countB * 4);
         for (s32 i = 0; i < o->countB; i++) {
-            u16 idx = func_00137BE0(self);
+            u16 idx = ReadBufferedU16(self);
             if (idx == 0xFFFF) {
                 o->ptr10[i] = 0;
             } else {
-                o->ptr10[i] = (u32)D_0027450C + idx * 0x18;
+                o->ptr10[i] = (u32)g_imageRecordsB + idx * 0x18;
             }
         }
     }
@@ -494,13 +494,13 @@ void func_0013B430(Obj_1B3488* mask);
 
 void func_001B3488(Obj_1B3488* self)
 {
-    func_001B47C0();
+    FlushCursors();
     if ((s32)self != D_00274518) {
-        func_00168D78((Obj_1B3488*)&D_002626D8);
-        func_001692B0(self, (u8*)&D_002626D8);
-        func_001B3510(self);
-        func_00169718();
-        func_0013B430(self);
+        ResetBumpAllocator((Obj_1B3488*)&g_bumpAllocator);
+        SendMaskedImagesToGif(self, (u8*)&g_bumpAllocator);
+        BuildAnimRecordGifPackets(self);
+        FlushMeshQueue();
+        UpdateMatchingListedObjects(self);
         D_002626CC = 2;
         D_00274518 = (s32)self;
     }
@@ -517,12 +517,12 @@ void func_001B28A8(C6E* self, BaseObject* other)
     Mat4A b;
     T2176* h;
     if (self->parent) {
-        func_00188B08((u8*)self->parent + 0x140, (u8*)self->parent + 0x110, &a);
+        BuildMatrixFromRotationAndTranslation((u8*)self->parent + 0x140, (u8*)self->parent + 0x110, &a);
     } else {
         a = *(Mat4A*)D_00248400;
     }
     if (other) {
-        func_00188B08((u8*)other + 0x140, (u8*)other + 0x110, &b);
+        BuildMatrixFromRotationAndTranslation((u8*)other + 0x140, (u8*)other + 0x110, &b);
     } else {
         b = *(Mat4A*)D_00248400;
     }
@@ -530,7 +530,7 @@ void func_001B28A8(C6E* self, BaseObject* other)
     if (h->vt->m04) {
         h->vt->m04(h, &a, &b);
     }
-    func_00182F78(self, other);
+    ReparentObject(self, other);
 }
 
 extern s32 D_002744D0;
@@ -594,20 +594,20 @@ void func_001B3040(void* self)
 
     func_001B2BA8(self);
     func_001B2CF8(self);
-    D_002744F8 = func_00137BE0(self);
-    D_002744FC = (AnimRecord*)func_0018D5C0(D_002744F8 * 0x28);
-    D_0027453C = func_00137BE0(self);
-    D_00274540 = (CursorAnimator**)func_0018D5C0(D_0027453C * 4);
-    out = D_00274540;
-    for (i = 0; i < D_002744F8; i++) {
-        rec = &D_002744FC[i];
-        func_00137A60(self, 0x14, rec);
-        rec->owner = func_001B4A10(self);
+    g_animRecordCount = ReadBufferedU16(self);
+    g_animRecords = (AnimRecord*)AllocateZeroedFrontMemory(g_animRecordCount * 0x28);
+    g_cursorAnimatorCount = ReadBufferedU16(self);
+    g_cursorAnimators = (CursorAnimator**)AllocateZeroedFrontMemory(g_cursorAnimatorCount * 4);
+    out = g_cursorAnimators;
+    for (i = 0; i < g_animRecordCount; i++) {
+        rec = &g_animRecords[i];
+        ReadBufferedStreamBytes(self, 0x14, rec);
+        rec->owner = ReadAnimator(self);
         if (rec->owner) {
             rec->owner->cursor.record = rec;
             *out++ = rec->owner;
         }
-        rec->elems = func_0018D5C0(rec->nelem * 0x14);
+        rec->elems = AllocateZeroedFrontMemory(rec->nelem * 0x14);
         for (j = 0; j < rec->nelem; j++) {
             Elem_1B3040* e = (Elem_1B3040*)((u8*)rec->elems + j * 0x14);
             func_001B2F00(self, e);
@@ -633,7 +633,7 @@ void func_001B3040(void* self)
             rec->entCount = 4;
             break;
         }
-        rec->ents = func_0018D5C0(rec->entCount * 8);
+        rec->ents = AllocateZeroedFrontMemory(rec->entCount * 8);
         Ent_1B3040* arr = (Ent_1B3040*)rec->ents;
         Ent_1B3040* e;
         switch (rec->kind) {
@@ -643,63 +643,63 @@ void func_001B3040(void* self)
         case 8:
         case 10:
             arr[0].type = 8;
-            arr[0].data = (s32)func_0018D5C0(rec->count << 7);
+            arr[0].data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             break;
         case 4: {
             s32 n = (rec->flags & 2) ? 3 : 0;
             n += 5;
             e = arr + 1;
             arr[0].type = n;
-            arr[0].data = (s32)func_0018D5C0((rec->count * arr[0].type) << 4);
+            arr[0].data = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
             e->type = 5;
-            e->data = (s32)func_0018D5C0((rec->count * e->type) << 4);
+            e->data = (s32)AllocateZeroedFrontMemory((rec->count * e->type) << 4);
             e = arr + 2;
             e->type = 7;
-            e->data = (s32)func_0018D5C0((rec->count * e->type) << 4);
+            e->data = (s32)AllocateZeroedFrontMemory((rec->count * e->type) << 4);
             e = arr + 3;
             e->type = 4;
-            e->data = (s32)func_0018D5C0(rec->count << 6);
+            e->data = (s32)AllocateZeroedFrontMemory(rec->count << 6);
             break;
         }
         case 2:
         case 3:
             arr[0].type = 6;
-            arr[0].data = (s32)func_0018D5C0((rec->count * arr[0].type) << 4);
+            arr[0].data = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
             break;
         case 0:
             e = arr + 1;
             arr[0].type = 8;
-            arr[0].data = (s32)func_0018D5C0(rec->count << 7);
+            arr[0].data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             e->type = 8;
-            e->data = (s32)func_0018D5C0(rec->count << 7);
+            e->data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             e = arr + 2;
             e->type = 8;
-            e->data = (s32)func_0018D5C0(rec->count << 7);
+            e->data = (s32)AllocateZeroedFrontMemory(rec->count << 7);
             break;
         case 5:
             arr[0].type = 7;
-            arr[0].data = (s32)func_0018D5C0((rec->count * arr[0].type) << 4);
+            arr[0].data = (s32)AllocateZeroedFrontMemory((rec->count * arr[0].type) << 4);
             break;
         case 9:
             arr[0].type = 4;
-            arr[0].data = (s32)func_0018D5C0(0x40);
+            arr[0].data = (s32)AllocateZeroedFrontMemory(0x40);
             break;
         }
     }
-    func_001B2DF8(self);
-    for (s32 k = 0; k < D_0027453C; k++) {
-        D_00274540[k]->methods->bind(D_00274540[k]);
+    LoadFonts(self);
+    for (s32 k = 0; k < g_cursorAnimatorCount; k++) {
+        g_cursorAnimators[k]->methods->bind(g_cursorAnimators[k]);
     }
-    func_00168D68(&f, 0x1E00, 0x4000);
-    func_001690C0(0x10000000, &f, 0);
-    func_001B3510(0x10000000);
-    func_00168D68(&D_002626D8, f.next, 0x4000);
-    func_0015E5F0();
-    func_001A9F78();
+    InitBumpAllocator(&f, 0x1E00, 0x4000);
+    PlaceMaskedImages(0x10000000, &f, 0);
+    BuildAnimRecordGifPackets(0x10000000);
+    InitBumpAllocator(&g_bumpAllocator, f.next, 0x4000);
+    UploadAllFontImages();
+    InitScreenElements();
     for (s32 m = 0; m < 6; m++) {
-        D_00274520[m] = func_00169780((1 << m) | 0x40000000);
+        D_00274520[m] = UploadImagesByMask((1 << m) | 0x40000000);
     }
-    D_00274538 = func_001693A8(0x20000000);
+    D_00274538 = BuildMaskedImagesPacket(0x20000000);
 }
 
 struct Ent_1B3510 {
@@ -761,8 +761,8 @@ void func_001B3510(s32 mask)
     if (mask == 0) {
         return;
     }
-    for (i = 0; i < D_002744F8; i++) {
-        rec = &((Rec_1B3510*)D_002744FC)[i];
+    for (i = 0; i < g_animRecordCount; i++) {
+        rec = &((Rec_1B3510*)g_animRecords)[i];
         if ((rec->mask & mask) != (u32)mask) {
             continue;
         }
@@ -774,180 +774,180 @@ void func_001B3510(s32 mask)
             case 7:
             case 8:
             case 10:
-                func_001611B8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
-                func_001612F8(&buf, 0x7C, 0, 3, 0x412, 0);
-                func_001613C0(&buf, 0, 1, 0xE);
+                InitGifPacket(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
+                ReserveGifPackedData(&buf, 0x7C, 0, 3, 0x412, 0);
+                BeginGifTag(&buf, 0, 1, 0xE);
                 if (rec->kind == 10) {
-                    func_00161708(&buf, 0x47, 0x53001);
-                    func_00161708(&buf, 0x42, 0x11);
+                    AddGifRegisterWrite(&buf, 0x47, 0x53001);
+                    AddGifRegisterWrite(&buf, 0x42, 0x11);
                 } else if (rec->f1 & 8) {
-                    func_00161708(&buf, 0x47, 0x7001B);
-                    func_00161708(&buf, 0x42, 0);
+                    AddGifRegisterWrite(&buf, 0x47, 0x7001B);
+                    AddGifRegisterWrite(&buf, 0x42, 0);
                 } else if (rec->f1 & 0x20) {
                     test = (rec->f1 & 4) ? 0x13001 : 0x11001;
                     test |= (rec->kind != 1) ? 0x20000 : 0x60000;
-                    func_00161708(&buf, 0x47, test);
-                    func_00161708(&buf, 0x42, 0);
+                    AddGifRegisterWrite(&buf, 0x47, test);
+                    AddGifRegisterWrite(&buf, 0x42, 0);
                 } else if (rec->f1 & 0x10) {
                     test = TEST_1B3510(1, (rec->kind == 1) ? 5 : 0, 0x7E, (rec->f1 & 4) ? 3 : 1, 0, 0, 1, (rec->kind == 1) ? 3 : 1);
-                    func_00161708(&buf, 0x47, test);
+                    AddGifRegisterWrite(&buf, 0x47, test);
                     sel = (rec->f1 & 1) ? 2 : 0;
-                    func_00161708(&buf, 0x42, ALPHA_1B3510(1, sel, 0, 0, 0));
+                    AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(1, sel, 0, 0, 0));
                 } else {
                     test = TEST_1B3510(1, (rec->kind == 1) ? 5 : 0, 0x7E, (rec->f1 & 4) ? 3 : 1, 0, 0, 1, (rec->kind == 1) ? 3 : 1);
-                    func_00161708(&buf, 0x47, test);
+                    AddGifRegisterWrite(&buf, 0x47, test);
                     sel = (rec->f1 & 1) ? 2 : 1;
-                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                    AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
                 }
-                func_00161708(&buf, 0x3D, ((Glob_1B3510*)D_00261990)->f204);
-                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
-                func_00152D70(&buf);
+                AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                SendTextureRegisters(rec->f14, j, 0, rec->kind, &buf);
+                CloseDmaTag(&buf);
                 break;
             case 4:
-                func_001611B8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                InitGifPacket(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
                 if (rec->f1 & 2) {
-                    func_001612F8(&buf, 0x7C, 0, 3, 0x412, 0);
-                    func_001613C0(&buf, 0, 1, 0xE);
-                    func_00161708(&buf, 0x47, 0x71001);
+                    ReserveGifPackedData(&buf, 0x7C, 0, 3, 0x412, 0);
+                    BeginGifTag(&buf, 0, 1, 0xE);
+                    AddGifRegisterWrite(&buf, 0x47, 0x71001);
                     sel = (rec->f1 & 1) ? 2 : 1;
-                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
-                    func_00161708(&buf, 0x3D, ((Glob_1B3510*)D_00261990)->f204);
-                    func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
+                    AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                    AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                    SendTextureRegisters(rec->f14, j, 0, rec->kind, &buf);
                 } else {
-                    func_001612F8(&buf, 0x4C, 0, 3, 0x4FF, 0);
-                    func_001613C0(&buf, 0, 1, 0xE);
-                    func_00161708(&buf, 0x47, 0x71001);
-                    func_00161708(&buf, 0x42, 0x6A);
-                    func_00161708(&buf, 1, 0x100000020);
+                    ReserveGifPackedData(&buf, 0x4C, 0, 3, 0x4FF, 0);
+                    BeginGifTag(&buf, 0, 1, 0xE);
+                    AddGifRegisterWrite(&buf, 0x47, 0x71001);
+                    AddGifRegisterWrite(&buf, 0x42, 0x6A);
+                    AddGifRegisterWrite(&buf, 1, 0x100000020);
                 }
                 ents++;
-                func_00152D70(&buf);
-                func_001528C8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                CloseDmaTag(&buf);
+                ClearPacketBuffer(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
                 ents++;
-                func_001612F8(&buf, 0x4C, 0, 3, 0x4FF, 0);
-                func_001613C0(&buf, 0, 1, 0xE);
-                func_00161708(&buf, 0x47, 0x71001);
-                func_00161708(&buf, 0x42, 0x6A);
-                func_00161708(&buf, 1, 0x180002000);
-                func_00152D70(&buf);
-                func_001528C8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                ReserveGifPackedData(&buf, 0x4C, 0, 3, 0x4FF, 0);
+                BeginGifTag(&buf, 0, 1, 0xE);
+                AddGifRegisterWrite(&buf, 0x47, 0x71001);
+                AddGifRegisterWrite(&buf, 0x42, 0x6A);
+                AddGifRegisterWrite(&buf, 1, 0x180002000);
+                CloseDmaTag(&buf);
+                ClearPacketBuffer(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
                 ents++;
-                func_001612F8(&buf, 0x6C, 0, 3, 0x4FF, 0);
-                func_001613C0(&buf, 0, 5, 0x12EEE);
-                func_00161708(&buf, 0x47, 0x75001);
+                ReserveGifPackedData(&buf, 0x6C, 0, 3, 0x4FF, 0);
+                BeginGifTag(&buf, 0, 5, 0x12EEE);
+                AddGifRegisterWrite(&buf, 0x47, 0x75001);
                 sel = (rec->f1 & 1) ? 2 : 1;
-                func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
-                func_00161708(&buf, 0x3D, ((Glob_1B3510*)D_00261990)->f204);
-                func_00161520(&buf, 0.0f, 0.0f, 1.0f);
+                AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                AddGifStEntry(&buf, 0.0f, 0.0f, 1.0f);
                 col[0] = (rec->col[0] + 1) >> 1;
                 col[1] = (rec->col[1] + 1) >> 1;
                 col[2] = (rec->col[2] + 1) >> 1;
                 col[3] = (rec->col[3] + 1) >> 1;
-                func_00161458(&buf, *(u32*)col);
-                func_00152D70(&buf);
-                func_001528C8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
+                AddGifRgbaEntry(&buf, *(u32*)col);
+                CloseDmaTag(&buf);
+                ClearPacketBuffer(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
                 if (rec->f1 & 2) {
-                    func_001612F8(&buf, 0x7D, 0, 3, 0x412, 0);
+                    ReserveGifPackedData(&buf, 0x7D, 0, 3, 0x412, 0);
                 } else {
-                    func_001612F8(&buf, 0x4D, 0, 3, 0x4FF, 0);
+                    ReserveGifPackedData(&buf, 0x4D, 0, 3, 0x4FF, 0);
                 }
-                func_001612F8(&buf, 0x6D, 0, 3, 0x4FF, 0);
+                ReserveGifPackedData(&buf, 0x6D, 0, 3, 0x4FF, 0);
                 if (rec->f1 & 2) {
-                    func_001612F8(&buf, 0x5D, 0, 1, 4, 0);
+                    ReserveGifPackedData(&buf, 0x5D, 0, 1, 4, 0);
                 } else {
-                    func_001612F8(&buf, 0x4D, 0, 1, 4, 0);
+                    ReserveGifPackedData(&buf, 0x4D, 0, 1, 4, 0);
                 }
-                func_001612F8(&buf, 0x4D, 0, 1, 4, 0);
-                func_00152D70(&buf);
+                ReserveGifPackedData(&buf, 0x4D, 0, 1, 4, 0);
+                CloseDmaTag(&buf);
                 break;
             case 2:
             case 3:
-                func_001611B8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
-                func_001613C0(&buf, 0, 1, 0xE);
-                func_00161708(&buf, 0x47, 0x5F001);
+                InitGifPacket(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
+                BeginGifTag(&buf, 0, 1, 0xE);
+                AddGifRegisterWrite(&buf, 0x47, 0x5F001);
                 if (rec->kind == 2) {
-                    func_00161708(&buf, 0x42, 0x44);
+                    AddGifRegisterWrite(&buf, 0x42, 0x44);
                 } else {
-                    func_00161708(&buf, 0x42, 0x49);
+                    AddGifRegisterWrite(&buf, 0x42, 0x49);
                 }
-                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
-                func_00161278(&buf, 1);
+                SendTextureRegisters(rec->f14, j, 0, rec->kind, &buf);
+                CloseGifTag(&buf, 1);
                 break;
             case 0: {
-                func_001611B8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
-                func_001612F8(&buf, 0x7C, 0, 4, 0x4F12, 0);
-                func_001613C0(&buf, 0, 1, 0xE);
+                InitGifPacket(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
+                ReserveGifPackedData(&buf, 0x7C, 0, 4, 0x4F12, 0);
+                BeginGifTag(&buf, 0, 1, 0xE);
                 if (rec->f1 & 8) {
-                    func_00161708(&buf, 0x47, 0x70000);
-                    func_00161708(&buf, 0x42, 0);
+                    AddGifRegisterWrite(&buf, 0x47, 0x70000);
+                    AddGifRegisterWrite(&buf, 0x42, 0);
                 } else {
-                    func_00161708(&buf, 0x47, (rec->f1 & 4) ? 0x737EB : 0x717EB);
+                    AddGifRegisterWrite(&buf, 0x47, (rec->f1 & 4) ? 0x737EB : 0x717EB);
                     sel = (rec->f1 & 1) ? 2 : 1;
-                    func_00161708(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
+                    AddGifRegisterWrite(&buf, 0x42, ALPHA_1B3510(0, sel, 0, 1, 0));
                 }
                 ents++;
-                func_00161708(&buf, 0x3D, ((Glob_1B3510*)D_00261990)->f204);
-                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
-                func_00152D70(&buf);
-                func_001528C8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
-                func_001612F8(&buf, 0x7C, 0, 4, 0x41F2, 0);
-                func_001613C0(&buf, 0, 1, 0xE);
-                func_00161708(&buf, 0x47, 0x53001);
+                AddGifRegisterWrite(&buf, 0x3D, ((Glob_1B3510*)g_camera)->f204);
+                SendTextureRegisters(rec->f14, j, 0, rec->kind, &buf);
+                CloseDmaTag(&buf);
+                ClearPacketBuffer(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
+                ReserveGifPackedData(&buf, 0x7C, 0, 4, 0x41F2, 0);
+                BeginGifTag(&buf, 0, 1, 0xE);
+                AddGifRegisterWrite(&buf, 0x47, 0x53001);
                 if (rec->f1 & 8) {
-                    func_00161708(&buf, 0x42, 0x8000000068);
+                    AddGifRegisterWrite(&buf, 0x42, 0x8000000068);
                 } else {
-                    func_00161708(&buf, 0x42, 0x48);
+                    AddGifRegisterWrite(&buf, 0x42, 0x48);
                 }
                 ents++;
-                func_00161708(&buf, 0x3D, 0);
-                func_001B29E0(rec->f14, j, 1, rec->kind, &buf);
-                func_00152D70(&buf);
-                func_001528C8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
-                func_001612F8(&buf, 0x7C, 0, 4, 0x4F12, 0);
-                func_001613C0(&buf, 0, 1, 0xE);
-                func_00161708(&buf, 0x47, 0x53001);
+                AddGifRegisterWrite(&buf, 0x3D, 0);
+                SendTextureRegisters(rec->f14, j, 1, rec->kind, &buf);
+                CloseDmaTag(&buf);
+                ClearPacketBuffer(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
+                ReserveGifPackedData(&buf, 0x7C, 0, 4, 0x4F12, 0);
+                BeginGifTag(&buf, 0, 1, 0xE);
+                AddGifRegisterWrite(&buf, 0x47, 0x53001);
                 if (rec->f1 & 8) {
-                    func_00161708(&buf, 0x42, 0x8000000068);
+                    AddGifRegisterWrite(&buf, 0x42, 0x8000000068);
                 } else {
-                    func_00161708(&buf, 0x42, 0x48);
+                    AddGifRegisterWrite(&buf, 0x42, 0x48);
                 }
-                func_00161708(&buf, 0x3D, 0);
-                AnimRecord* found = (AnimRecord*)func_001B4688(rec->f10);
+                AddGifRegisterWrite(&buf, 0x3D, 0);
+                AnimRecord* found = (AnimRecord*)FindAnimRecord(rec->f10);
                 if (found) {
-                    func_001B29E0((Elem_1B3510*)found->elems, j, 0, rec->kind, &buf);
+                    SendTextureRegisters((Elem_1B3510*)found->elems, j, 0, rec->kind, &buf);
                 } else {
-                    func_001B29E0(rec->f14, j, 2, rec->kind, &buf);
+                    SendTextureRegisters(rec->f14, j, 2, rec->kind, &buf);
                 }
-                func_00152D70(&buf);
+                CloseDmaTag(&buf);
                 break;
             }
             case 5:
-                func_001611B8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
-                func_001612F8(&buf, 0x24C, 0, 3, 0x412, 0);
-                func_001613C0(&buf, 0, 1, 0xE);
-                func_00161708(&buf, 0x48, 0x31001);
-                func_00161708(&buf, 0x43, 0x44);
-                func_001B29E0(rec->f14, j, 0, rec->kind, &buf);
-                func_00152D70(&buf);
+                InitGifPacket(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
+                ReserveGifPackedData(&buf, 0x24C, 0, 3, 0x412, 0);
+                BeginGifTag(&buf, 0, 1, 0xE);
+                AddGifRegisterWrite(&buf, 0x48, 0x31001);
+                AddGifRegisterWrite(&buf, 0x43, 0x44);
+                SendTextureRegisters(rec->f14, j, 0, rec->kind, &buf);
+                CloseDmaTag(&buf);
                 break;
             case 9:
-                func_001611B8(&buf);
-                func_001529C8(&buf, ents->type, ents->data + j * ents->type);
-                func_001612F8(&buf, 0x4C, 0, 3, 0x41F, 0);
-                func_001613C0(&buf, 0, 1, 0xE);
-                func_00161708(&buf, 0x47, 0x51001);
-                func_00161708(&buf, 0x42, 0x6A);
-                func_00152D70(&buf);
+                InitGifPacket(&buf);
+                UsePacketBufferMemory(&buf, ents->type, ents->data + j * ents->type);
+                ReserveGifPackedData(&buf, 0x4C, 0, 3, 0x41F, 0);
+                BeginGifTag(&buf, 0, 1, 0xE);
+                AddGifRegisterWrite(&buf, 0x47, 0x51001);
+                AddGifRegisterWrite(&buf, 0x42, 0x6A);
+                CloseDmaTag(&buf);
                 break;
             }
         }
@@ -980,13 +980,13 @@ s32 func_0015C1C0(s32 n);
 
 void func_001B2DF8(Ctx_1B2DF8* self)
 {
-    D_00262260 = func_00137BE0(self);
-    D_00262264 = new Ent_1B2DF8[D_00262260];
-    for (s32 i = 0; i < D_00262260; i++) {
-        func_0015D8A8(&D_00262264[i], self);
-        D_00262264[i].v80 = 1 << i;
+    g_fontCount = ReadBufferedU16(self);
+    g_fontRecords = new Ent_1B2DF8[g_fontCount];
+    for (s32 i = 0; i < g_fontCount; i++) {
+        LoadFont(&g_fontRecords[i], self);
+        g_fontRecords[i].v80 = 1 << i;
     }
-    D_0026227C = func_0015C1C0(0);
+    g_defaultFont = GetFontById(0);
 }
 
 extern f32 D_0026185C;

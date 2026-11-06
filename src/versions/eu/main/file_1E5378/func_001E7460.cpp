@@ -19,7 +19,7 @@ void func_001E7460(Obj_1E7460_eu* self)
     if (self->f584 != 0) {
         self->f584->desc->m02(self->f584);
         if (D_00270458 != 4) {
-            func_00126BC0(self->f584, self);
+            SetObjectTreeRecordsValue(self->f584, self);
         }
         self->f584->flags |= 0x100000000UL;
     }

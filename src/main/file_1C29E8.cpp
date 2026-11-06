@@ -87,11 +87,11 @@ void func_001C30E8(Obj_1C30E8* self)
     s32 best = none;
     u32 size = sizeof(Elem_1C30E8);
     u32 idx;
-    func_001619C0(&b);
+    InitVertexBatch(&b);
     *(u32*)&c = 0xFFFFFFFF;
-    func_00152B38(&D_002622A8);
+    BeginDmaTag(&g_vifPacketWriter);
     b.f98 = 0;
-    func_00161AB0(&b, ((u8*)&D_00248D30), (u8*)&D_002483D0);
+    SetVertexBatchTransform(&b, ((u8*)&D_00248D30), (u8*)&g_identityMatrix);
     func_00161BB0(&b, r->f4);
     func_00161B10(&b, ((u8*)&D_00248D30), ((Obj2_1C30E8*)r->f0)->f2A8);
     idx = r->f8;
@@ -100,8 +100,8 @@ void func_001C30E8(Obj_1C30E8* self)
             f32 zero = 0.0f;
             f32 full = 255.0f;
             Elem_1C30E8* e = (Elem_1C30E8*)((u8*)r->elems + idx * size);
-            f32 t = D_00261858.time - e->f0;
-            f32 v = (*(Range_1C30E8*)&D_00275C60).Clamp(r->poly.Eval(t));
+            f32 t = g_gameClock.time - e->f0;
+            f32 v = (*(Range_1C30E8*)&g_unitRange).Clamp(r->poly.Eval(t));
             f32 w = self->f50 * e->f4 * v;
             if (zero < w) {
                 w = w * full;
@@ -111,18 +111,18 @@ void func_001C30E8(Obj_1C30E8* self)
             } else {
                 c.a = 0;
             }
-            func_001626C0(&b, D_00274998);
+            SetVertexTexCoord(&b, D_00274998);
             idx++;
             c2 = c;
-            func_001626A8(&b, &c2);
-            func_00162680(&b, e->v10);
-            func_001626D8(&b, 0);
+            SetVertexColor(&b, &c2);
+            SetVertexPosition(&b, e->v10);
+            AddVertex(&b, 0);
             c.a = (s32)((f32)c.a * r->f10);
-            func_001626C0(&b, D_002749A0);
+            SetVertexTexCoord(&b, D_002749A0);
             c2 = c;
-            func_001626A8(&b, &c2);
-            func_00162680(&b, e->v20);
-            func_001626D8(&b, 0);
+            SetVertexColor(&b, &c2);
+            SetVertexPosition(&b, e->v20);
+            AddVertex(&b, 0);
             if (idx >= 0x40)
                 idx = 0;
         } while (idx != r->fC);
@@ -131,7 +131,7 @@ void func_001C30E8(Obj_1C30E8* self)
         r->f8 = best;
     else
         r->f8 = r->fC;
-    func_00162508(&b);
-    func_00152D70(&D_002622A8);
-    func_00161A88(&b, 2);
+    FlushVertexBatch(&b);
+    CloseDmaTag(&g_vifPacketWriter);
+    DestroyVertexBatch(&b, 2);
 }

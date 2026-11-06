@@ -21,6 +21,6 @@ void func_0014AEA0(Obj_14AEA0_eu* self, s32 n, f32 x, f32 y)
     self->pair->dy = y;
     self->count = n;
     V24A2* q = self->q;
-    func_001AAB20(self, self->f234, (f32)q->height * q->sy * (f32)n);
+    SetScreenElementSize(self, self->f234, (f32)q->height * q->sy * (f32)n);
     self->vtbl[16](self, 2);
 }

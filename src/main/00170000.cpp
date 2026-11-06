@@ -21,8 +21,8 @@ void func_00171DD8(Player* self)
     if (func_00171180(self) == 0) {
         if (self->f690 != 0) {
             func_001278A8((s32)self->f6C0, 0, (u8*)self + 0x6A0, 0, &loc, 0, 0);
-            loc.f8 = func_001EA480(loc.f8, 10.0f);
-            self->f638 = self->f638 + loc.f8 * D_00261860[0];
+            loc.f8 = ClampToMagnitude(loc.f8, 10.0f);
+            self->f638 = self->f638 + loc.f8 * g_frameDt[0];
         }
     }
     if (self->f250C == 0) return;
@@ -36,7 +36,7 @@ void func_00171DD8(Player* self)
     }
     if (self->f118C != 0) return;
     if (self->f1188 == 0) return;
-    if (func_001B63C0(self->f1188, 0x148) >= 0) func_001B6628(self->f2234, 0x148);
+    if (FindStateEntryIndex(self->f1188, 0x148) >= 0) TeleportStateWalker(self->f2234, 0x148);
     self->f118C = 1;
 }
 
@@ -44,7 +44,7 @@ void func_001B9680(void* self);
 
 void func_00172AE0(Player* self)
 {
-    func_001B9680(self);
+    SaveColliderPreviousPosition(self);
     self->f21CC = 0;
 }
 
@@ -55,11 +55,11 @@ void func_001D29C8(s32 id);
 
 void func_00173708(Player* a, void* b)
 {
-    func_001922E8(a, b);
+    HandleSwitchedColliderActivation(a, b);
     s32 id;
-    if (b != 0) id = *(s32*)(D_002623C0 + 0x19FC);
+    if (b != 0) id = *(s32*)(g_saveData + 0x19FC);
     else id = -1;
-    func_001D29C8(id);
+    ShowModeLabel(id);
 }
 
 f32 D_002637BC = 2.0f;
@@ -78,7 +78,7 @@ void func_00170528(Player* self, s32 flags, Out_170528* out)
         if (flags & 0x10) {
             f32 v;
             if (flags & 1) {
-                v = -self->mass * self->gravity.z * D_00261860[0] * D_002637BC;
+                v = -self->mass * self->gravity.z * g_frameDt[0] * D_002637BC;
             } else {
                 v = -self->mass * self->gravity.z * D_002637C0[0];
             }
@@ -112,7 +112,7 @@ void func_001705C8(Player* self)
         func_001C61E0(self, self->f2260);
     }
     if (self->f2254 & 0x10) {
-        func_001D4C98(self);
+        RunPlayerCallback(self);
     }
 }
 
@@ -202,7 +202,7 @@ void func_001B8420(void* self, void* p, f32 f);
 void func_00172B88(Player* self)
 {
     s32 i = 0;
-    func_001B8540(self);
+    UpdateColliderBounds(self);
     if (self->f21CC > 0) {
         Quad_172B88* p = (Quad_172B88*)self->v21D0;
         do {
@@ -218,27 +218,27 @@ s32 func_00182FC8(void* p);
 void* func_00172BF8(Player* self, s32* out)
 {
     void* p = self->f25D8[0];
-    if (p != 0 && func_00182FC8(p) != 0) {
+    if (p != 0 && IsObjectAttached(p) != 0) {
         *out = 0;
         return self->f25D8[0];
     }
     p = self->f25D8[2];
-    if (p != 0 && func_00182FC8(p) != 0) {
+    if (p != 0 && IsObjectAttached(p) != 0) {
         *out = 1;
         return self->f25D8[2];
     }
     p = self->f25D8[1];
-    if (p != 0 && func_00182FC8(p) != 0) {
+    if (p != 0 && IsObjectAttached(p) != 0) {
         *out = 2;
         return self->f25D8[1];
     }
     p = self->f25D8[3];
-    if (p != 0 && func_00182FC8(p) != 0) {
+    if (p != 0 && IsObjectAttached(p) != 0) {
         *out = 2;
         return self->f25D8[3];
     }
     p = self->f25D8[4];
-    if (p != 0 && func_00182FC8(p) != 0) {
+    if (p != 0 && IsObjectAttached(p) != 0) {
         *out = 1;
         return self->f25D8[4];
     }
@@ -258,7 +258,7 @@ void func_001C4618(Player* self, void* a1, void* a2, s32 a3, f32 f12, void* a4);
 
 void func_00172530(Player* self)
 {
-    func_001C5438(self);
+    RecomputeTurningColliderFrame(self);
     if (self->f2220 == 6 && self->f239C == 7) {
         self->f1290.f50 = 0;
         goto clear;
@@ -302,7 +302,7 @@ void func_00172B08(Player* self)
 {
     *(Quad_172B08*)&self->v21D0[1] = ((Inner_172B08*)self->f23D4)->q140;
     self->f21CC = 0;
-    func_001BC088(self, 0, D_00261860[0]);
+    func_001BC088(self, 0, g_frameDt[0]);
     if (self->f223C == 0) {
         *(Quad_172B08*)&self->v21D0[0] = *(Quad_172B08*)&self->v140;
         *(Quad_172B08*)&self->v21D0[2] = ((Inner_172B08*)self->f23D4)->q140;
@@ -345,12 +345,12 @@ void func_001725E0(Player* self, void* a, void* b)
     if (self->f2434 != 0.0f || self->f2430 != 0.0f)
     {
         ((Aux_1725E0*)self->f61C)->f2C8 &= ~(1ULL << 32);
-        func_00125B70(self, b, out);
+        BuildPlacedObjectTransform(self, b, out);
         out[16] *= 0.25f;
         for (i = 0; i < 4; i++)
         {
             func_00172078(self, buf, (f32)i * 0.25f);
-            func_00188B08((u8*)((Aux_1725E0*)self->f61C) + 0x140, buf, out);
+            BuildMatrixFromRotationAndTranslation((u8*)((Aux_1725E0*)self->f61C) + 0x140, buf, out);
             ((void (*)(void*, void*, f32*))((VtObj_1725E0*)((Aux_1725E0*)self->f61C))->vt[0xA0 / 4])(((Aux_1725E0*)self->f61C), a, out);
         }
         ((Aux_1725E0*)self->f61C)->f2C8 |= 0x100000000UL;
@@ -382,12 +382,12 @@ void func_001727B0(Player* self)
     }
     if (self->f242C != 0.0f) {
         *(f32*)((u8*)self + 0x2430) = self->f242C;
-        self->f2434 = func_002058A0(self->f2434 + self->f242C * D_00261860[0], 6.2831855f);
+        self->f2434 = func_002058A0(self->f2434 + self->f242C * g_frameDt[0], 6.2831855f);
     } else {
         if (self->f2434 == 0.0f) {
             return;
         }
-        f32 r = func_001EA4B8(&D_002638A0, self->f2434, 6.2831855f, &self->f2430, D_00261860[0]);
+        f32 r = ApproachValueWithRamp(&D_002638A0, self->f2434, 6.2831855f, &self->f2430, g_frameDt[0]);
         self->f2434 = r;
         if (r == 6.2831855f) {
             self->f2434 = 0.0f;
@@ -465,7 +465,7 @@ void func_00172898(Player* self)
     Contact03** slot;
     Contact03* n;
     Contact03* head = 0;
-    func_001BC4D8(self, self->f151C);
+    ExtractContactsByPartMode(self, self->f151C);
     row = self->contacts->head;
     if (row) {
         do {
@@ -476,7 +476,7 @@ void func_00172898(Player* self)
                     s32 k = (n->end[0].body != self);
                     if (*(void**)((u8*)n + (k << 6) + 4) == self->f23B0) {
                         void* other = n->end[1 - k].body;
-                        if (other == 0 || func_001300E8(other, 0x46, k) == 0) {
+                        if (other == 0 || IsObjectOfKind(other, 0x46, k) == 0) {
                             *slot = n->next;
                             n->next = head;
                             head = n;
@@ -500,9 +500,9 @@ void func_00172898(Player* self)
     func_001C57C8(self);
     if (self->f2220 == 8) {
         self->f690 = 1;
-        self->f694 = D_0026185C[0];
+        self->f694 = g_gameTime[0];
         func_00128018(((Aux_172898*)self->f24A0), 0, self->f24B0, &self->v6A0);
-        self->v6B0 = D_00248D20;
+        self->v6B0 = g_unitZVector;
         self->f6C0 = ((Aux_172898*)self->f24A0);
         row = self->contacts->head;
         if (row) {
@@ -531,7 +531,7 @@ void func_00172898(Player* self)
             } while (row);
         }
     }
-    func_001861E8(self->world, head);
+    FreePooledContactChain(self->world, head);
 }
 
 void func_001C5C10(Player* a, Collider* b, void* c, void* d);
@@ -573,7 +573,7 @@ void func_00172CF0(Player* self, Collider* a1, void* a2, void* a3, void* a4, voi
     }
     func_001C4790(self, a1, a4, &self->f1190);
     func_001C4790(self, a1, a4, &self->f1290);
-    v = (Collider*)func_00172BF8(self, &idx);
+    v = (Collider*)FindFirstAttachedSlotObject(self, &idx);
     if (v)
     {
         for (cur = a1; cur; cur = (Collider*)cur->parent)

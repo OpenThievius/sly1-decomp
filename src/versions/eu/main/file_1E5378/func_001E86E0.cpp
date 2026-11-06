@@ -23,27 +23,27 @@ void func_001E86E0(Obj_1E86E0_eu* self, s32 value)
 {
     if (value == self->f580) return;
     if (self->f580 == 0) {
-        func_eu_001AB238(&D_002701F8, 0);
+        func_eu_001AB238(&g_typedTextCaptionBox, 0);
     }
     self->f580 = value;
-    if (((Mgr_1E86E0_eu*)&D_002701F8)->f570 == 4) {
-        func_001E7460(self);
+    if (((Mgr_1E86E0_eu*)&g_typedTextCaptionBox)->f570 == 4) {
+        ApplyArcTarget(self);
         if (self->f580 != 0) {
             void** vt = *(void***)self;
             ((void (*)(void*, s32))vt[16])(self, 2);
-            func_001E7518(self, 1);
-            func_001E7440(self, 0);
+            SetArcPhase(self, 1);
+            SetArcFade(self, 0);
         } else {
             void** vt = *(void***)self;
             ((void (*)(void*, s32))vt[16])(self, 0);
-            func_001E7518(self, 3);
-            func_001E7440(self, 0);
-            func_001E87F0(self, 0);
+            SetArcPhase(self, 3);
+            SetArcFade(self, 0);
+            SetArcSpecialObject(self, 0);
         }
     } else {
         s32 st = self->f578;
         if (st >= 2) return;
         if (st < 0) return;
-        func_001E7518(self, 2);
+        SetArcPhase(self, 2);
     }
 }

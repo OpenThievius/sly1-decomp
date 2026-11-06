@@ -9,5 +9,5 @@ void func_0011E428(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
     args[3] = a3;
     args[4] = a4;
     args[5] = a5;
-    func_0011D968(0x3B, 0x18, args);
+    SendIopCommandAndWait(0x3B, 0x18, args);
 }

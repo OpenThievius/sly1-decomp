@@ -6,11 +6,11 @@ s32 func_0015C200(s32 a0)
 {
     u16 key = (u16)a0;
     s32 i = 0;
-    while (i < 5 && key != (u8)D_00262250[i] && key != ((u16*)&D_00262258)[i]) {
+    while (i < 5 && key != (u8)g_fontEscapeKeys[i] && key != ((u16*)&D_00262258)[i]) {
         i++;
     }
     if (i < 5) {
-        return D_00262268[i];
+        return g_fonts[i];
     }
     return 0;
 }

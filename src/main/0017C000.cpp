@@ -23,22 +23,22 @@ void func_001DDA50(void* p);
 void func_0017CE80(EntryQueue* self)
 {
     if (self->f3C != 0) {
-        func_0017BC20(self, 0);
+        ReplaceQueueOnOffObject(self, 0);
         func_0017BB78(self, 0);
         if (self->f50 != 0) {
-            func_0012E760(self->f50);
+            StopAnimationPlayer(self->f50);
             self->f50 = 0;
         }
-        func_00142ED0(1.0f);
+        SetGameClockScale(1.0f);
         self->f40 = self->f34;
         self->f4C = 0;
         self->f48 = 0;
         ((Comp_17CE80*)self->f3C)->f2740 = 0;
         self->f3C = 0;
-        func_001837E0(self, 25, 0, 0);
+        TriggerScriptEvent(self, 25, 0, 0);
         if (self->flag68 != 0) {
-            func_0016E118(4);
-            func_001DDA50(self->world);
+            ClearPadSelectFlags(4);
+            ReleasePadSelectFlag(self->world);
         }
     }
 }
@@ -48,13 +48,13 @@ Obj_17D040* func_0017CF38(void* self, s32 a, s32 b, s32 c);
 
 void func_0017D040(void* self, s32 value)
 {
-    Obj_17D040* o = func_0017CF38(self, 2, -1, 1);
+    Obj_17D040* o = AddQueueEntry(self, 2, -1, 1);
     o->f0C = value;
 }
 
 void func_0017D148(void* self, s32 a, s32 b, f32 value)
 {
-    Obj_17D040* o = func_0017CF38(self, 6, a, b);
+    Obj_17D040* o = AddQueueEntry(self, 6, a, b);
     o->f0Cf = value;
 }
 
@@ -62,14 +62,14 @@ void func_00152440(void* p);
 
 void func_0017FD70(void)
 {
-    func_00152440(&D_00264088);
+    ClearList(&g_pointObjects);
 }
 
 void func_00152438(void* self, s32 value);
 
 void func_0017FD48(void)
 {
-    func_00152438(&D_00264088, 0x50);
+    func_00152438(&g_pointObjects, 0x50);
 }
 
 void func_00182D48(void* self);
@@ -77,13 +77,13 @@ void func_00152470(void* table, void* self);
 
 void func_0017FD90(C80* self)
 {
-    func_00182D48(self);
-    func_00152470(&D_00264088, self);
+    RegisterObject(self);
+    AppendToList(&g_pointObjects, self);
 }
 
 s32 func_0017D220(void* self)
 {
-    return (s32)func_0017CF38(self, 0xC, -1, 0);
+    return (s32)AddQueueEntry(self, 0xC, -1, 0);
 }
 
 
@@ -92,15 +92,15 @@ void func_00152600(void* table, void* self);
 
 void func_0017FDC8(C80* self)
 {
-    func_00182ED0(self);
-    func_00152600(&D_00264088, self);
+    UnregisterObject(self);
+    RemoveFromList(&g_pointObjects, self);
 }
 
 void func_0017C660(EntryQueue* self);
 
 s32 func_0017CDA8(EntryQueue* self)
 {
-    func_0017C660(self);
+    AdvanceEntryQueue(self);
     if (self->f34 > 0) {
         return self->f40 < self->f34;
     }
@@ -112,7 +112,7 @@ void func_0017CE80(EntryQueue* self);
 void func_0017CDE0(EntryQueue* self)
 {
     if (self->f3C != 0) {
-        func_0017CE80(self);
+        UnbindEntryQueue(self);
         self->f34 = 0;
     } else {
         self->f34 = 0;
@@ -135,36 +135,36 @@ void func_0017CE20(void* a0, void* a1)
     ((Other_17CE20*)a1)->f2740 = self;
     self->f3C = a1;
     self->f40 = -1;
-    func_001837E0(self, 0x17, 0, 0);
+    TriggerScriptEvent(self, 0x17, 0, 0);
     if (self->flag68 != 0) {
-        func_0016E0F0(4);
-        func_001DDA20(self->world);
+        SetPadSelectFlags(4);
+        AcquirePadSelectFlag(self->world);
     }
 }
 
 void* func_0017CFC8(void* self, s32 b)
 {
-    return func_0017CF38(self, 0, b, 1);
+    return AddQueueEntry(self, 0, b, 1);
 }
 
 void* func_0017CFF0(void* self, s32 b)
 {
-    return func_0017CF38(self, 1, b, 1);
+    return AddQueueEntry(self, 1, b, 1);
 }
 
 void* func_0017D018(void* self, s32 b)
 {
-    return func_0017CF38(self, 10, b, 1);
+    return AddQueueEntry(self, 10, b, 1);
 }
 
 void* func_0017D078(void* self, s32 value)
 {
-    return func_0017CF38(self, 3, value, 1);
+    return AddQueueEntry(self, 3, value, 1);
 }
 
 void* func_0017D0D8(void* self, s32 value, s32 c)
 {
-    return func_0017CF38(self, 9, value, c);
+    return AddQueueEntry(self, 9, value, c);
 }
 
 struct Obj_17D100 {
@@ -175,7 +175,7 @@ struct Obj_17D100 {
 
 void func_0017D100(void* self, s32 b, s32 c, s32 d, s32 e)
 {
-    Obj_17D100* o = (Obj_17D100*)func_0017CF38(self, 5, b, e);
+    Obj_17D100* o = (Obj_17D100*)AddQueueEntry(self, 5, b, e);
     o->fC = c;
     o->f10 = d;
 }
@@ -187,7 +187,7 @@ struct Obj_17D1B8 {
 
 void func_0017D1B8(void* self, s32 b, s32 c, s32 d)
 {
-    Obj_17D1B8* o = (Obj_17D1B8*)func_0017CF38(self, 8, b, d);
+    Obj_17D1B8* o = (Obj_17D1B8*)AddQueueEntry(self, 8, b, d);
     o->fC = c;
 }
 
@@ -195,7 +195,7 @@ struct Obj_17D0A0 { u8 pad0[0xC]; f32 f0C; };
 
 void func_0017D0A0(void* self, s32 a, f32 value)
 {
-    Obj_17D0A0* o = (Obj_17D0A0*)func_0017CF38(self, 4, a, 0);
+    Obj_17D0A0* o = (Obj_17D0A0*)AddQueueEntry(self, 4, a, 0);
     o->f0C = value;
 }
 
@@ -203,7 +203,7 @@ struct Obj_17D180 { u8 pad0[0xC]; f32 f0C; };
 
 void func_0017D180(void* self, s32 b, s32 c, f32 value)
 {
-    Obj_17D180* o = (Obj_17D180*)func_0017CF38(self, 7, b, c);
+    Obj_17D180* o = (Obj_17D180*)AddQueueEntry(self, 7, b, c);
     o->f0C = value;
 }
 
@@ -211,7 +211,7 @@ struct Obj_17D1E8 { u8 pad0[0xC]; f32 f0C; };
 
 void func_0017D1E8(void* self, f32 value)
 {
-    Obj_17D1E8* o = (Obj_17D1E8*)func_0017CF38(self, 11, -1, 1);
+    Obj_17D1E8* o = (Obj_17D1E8*)AddQueueEntry(self, 11, -1, 1);
     o->f0C = value;
 }
 
@@ -266,8 +266,8 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
     Quad16& q = *(Quad16*)buf;
     q = *src;
     s32 hits = 0;
-    func_001ED780(&q, buf + 0x10, &D_00248D20, &D_00248D20);
-    func_00188B08(ctx, &q, buf + 0x30);
+    func_001ED780(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
+    BuildMatrixFromRotationAndTranslation(ctx, &q, buf + 0x30);
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
         func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i], buf + 0x70);
         func_00188700((Mat_17DE88*)(buf + 0x30), 1.0f, &D_00263EC0[i + 1], buf + 0x80);
@@ -278,7 +278,7 @@ s32 func_0017DE88(Obj_17DE88* self, Ctx_17DE88* ctx, Quad16* src)
                 Collider* c = (Collider*)a->parts.head;
                 while (c) {
                     if (!(c->flags538 & 0x80000000000ULL)) {
-                        if (func_00141C28(c, buf + 0x70, buf + 0x80, 1, buf + 0x90) > 0) {
+                        if (CollectColliderSpans(c, buf + 0x70, buf + 0x80, 1, buf + 0x90) > 0) {
                             if (i < 4) return 0;
                             if (*(f32*)(buf + 0xD0) == 0.0f) return 0;
                             if (0.7f < *(f32*)(buf + 0xB8)) hits++;

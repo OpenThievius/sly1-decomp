@@ -44,9 +44,9 @@ void func_0015D338(Self_eu_15D4E0* self, u32 color, f32 x0, f32 y0, f32 x1, f32 
 
 void func_0015D4E0(Self_eu_15D4E0* self, Item_eu_15D4E0* item, Rect_eu_15D4E0* r, Strm_eu_15D4E0* s)
 {
-    Entry_eu_15D4E0* e = func_0015DAB8(self, item->key);
+    Entry_eu_15D4E0* e = FindFontGlyph(self, item->key);
     if (e != 0) {
-        func_0015C8B8(item->f0, item->f10, item->f14);
+        PushFontScale(item->f0, item->f10, item->f14);
         f32 top = r->y;
         f32 sx = self->f44;
         f32 left = r->x;
@@ -72,16 +72,16 @@ void func_0015D4E0(Self_eu_15D4E0* self, Item_eu_15D4E0* item, Rect_eu_15D4E0* r
         self->disp->fnA((u8*)self + self->disp->offA, 0, s);
         f32 v2 = (f32)v2i;
         f32 u2 = (f32)u2i;
-        func_0015D338(self, item->color, x0, y0, x1, y1, u0, v0, u1, v1, s);
-        func_0015D338(self, item->color, x2, y0, x3, y1, u1, v0, u2, v1, s);
-        func_0015D338(self, item->color, x0, y2, x1, y3, u0, v1, u1, v2, s);
-        func_0015D338(self, item->color, x2, y2, x3, y3, u1, v1, u2, v2, s);
-        func_0015D338(self, item->color, x1, y0, x2, y1, u1, v0, u1, v1, s);
-        func_0015D338(self, item->color, x1, y2, x2, y3, u1, v1, u1, v2, s);
-        func_0015D338(self, item->color, x0, y1, x1, y2, u0, v1, u1, v1, s);
-        func_0015D338(self, item->color, x2, y1, x3, y2, u1, v1, u2, v1, s);
-        func_0015D338(self, item->color, x1, y1, x2, y2, u1, v1, u1, v1, s);
-        func_0015C900(item->f0);
+        DrawFontQuad(self, item->color, x0, y0, x1, y1, u0, v0, u1, v1, s);
+        DrawFontQuad(self, item->color, x2, y0, x3, y1, u1, v0, u2, v1, s);
+        DrawFontQuad(self, item->color, x0, y2, x1, y3, u0, v1, u1, v2, s);
+        DrawFontQuad(self, item->color, x2, y2, x3, y3, u1, v1, u2, v2, s);
+        DrawFontQuad(self, item->color, x1, y0, x2, y1, u1, v0, u1, v1, s);
+        DrawFontQuad(self, item->color, x1, y2, x2, y3, u1, v1, u1, v2, s);
+        DrawFontQuad(self, item->color, x0, y1, x1, y2, u0, v1, u1, v1, s);
+        DrawFontQuad(self, item->color, x2, y1, x3, y2, u1, v1, u2, v1, s);
+        DrawFontQuad(self, item->color, x1, y1, x2, y2, u1, v1, u1, v1, s);
+        PopFontScale(item->f0);
         self->disp->fnB((u8*)self + self->disp->offB, 0, s);
     }
 }

@@ -32,7 +32,7 @@ void func_eu_0018F210(Obj_eu_18F210* self)
         }
         self->f28 = self->f18 - self->f24;
     } else {
-        s32 t = func_0011E4F8() & 0xFFFFFF;
+        s32 t = GetIopRingPosition() & 0xFFFFFF;
         s32 base = self->f14;
         s32 pos = self->f1C;
         s32 size = self->f18;

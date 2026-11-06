@@ -35,7 +35,7 @@ void func_001830D8(void* self);
 void func_00180F20(C72* self)
 {
     Keep6E saved = self->keep;
-    func_001830D8(self);
+    CopyObjectData(self);
     self->keep = saved;
 }
 
@@ -45,7 +45,7 @@ void func_00181DA8(C1A* self, s32 n);
 void func_00181AF0(C1A* self)
 {
     func_00192C58(self);
-    func_00181DA8(self, 1);
+    SetModeWalkerMode(self, 1);
 }
 
 void func_00182D00(BaseObject* self)
@@ -65,7 +65,7 @@ void* func_001DBBD8(void);
 
 void func_001831E8(void* a0, void** head, void* item, s32 count)
 {
-    Node_1831E8* n = (Node_1831E8*)func_001DBBD8();
+    Node_1831E8* n = (Node_1831E8*)TakeCallRecord();
     n->f0 = item;
     n->f4 = count;
     n->f10 = *head;
@@ -83,7 +83,7 @@ void func_001841B0(void* a);
 
 void func_00183DC0(ConeVolume* self)
 {
-    func_00152600((u8*)self->world + 0x1BE8, self);
+    RemoveFromList((u8*)self->world + 0x1BE8, self);
     func_001841B0(self);
 }
 
@@ -135,7 +135,7 @@ void func_00181B20(void* unused, void* obj_)
     func_001BC260(D_00264190, obj, &first, &second);
     ((void (*)(void*, void*))obj->vtbl[0x90 / 4])(obj, &second);
     f32 r = func_00205778(second.y, second.x);
-    obj->x638 = func_001EA408(r + 3.1415927f);
+    obj->x638 = WrapAngle(r + 3.1415927f);
     func_001C5D58(obj);
     func_00175170(obj, 4, 0x2B);
 }
@@ -144,7 +144,7 @@ void func_001BC4D8(void* self, void* sub);
 
 void func_00181D88(C1A* self)
 {
-    func_001BC4D8(self, (u8*)self + 0xC04);
+    ExtractContactsByPartMode(self, (u8*)self + 0xC04);
 }
 
 void func_0013CE40(void* self);
@@ -156,12 +156,12 @@ void* func_0018D500(s32 size);
 void func_001824D8(C24* self)
 {
     func_0013CE40(self);
-    func_00124DF8(self, 2, D_00264230);
-    self->x6C8 = (StateWalker*)func_001B6290(self->x6C4, self, 0x36E, 0);
-    Alloc24* n = (Alloc24*)func_00121160(0);
+    ResolveObjectLinks(self, 2, D_00264230);
+    self->x6C8 = (StateWalker*)CreateStateWalker(self->x6C4, self, 0x36E, 0);
+    Alloc24* n = (Alloc24*)CreateWeightCurve(0);
     self->x6E8 = n;
     n->field8 = 0;
-    self->x6E8->field_c = func_0018D500(0xC00);
+    self->x6E8->field_c = AllocateFrontMemory(0xC00);
 }
 
 void func_00182C18(BaseObject* self)
@@ -174,7 +174,7 @@ void func_001837E0(void* self, s32 a, s32 b, s32 c);
 
 void func_00182C58(BaseObject* self)
 {
-    func_001837E0(self, 0, 0, 0);
+    TriggerScriptEvent(self, 0, 0, 0);
 }
 
 void func_00182F78(BaseObject* self, BaseObject* parent)
@@ -188,7 +188,7 @@ s32 func_00182FC8(void* p);
 
 void func_00183028(void* a0, s32* out)
 {
-    *out = func_00182FC8(a0);
+    *out = IsObjectAttached(a0);
 }
 
 void* func_0011E580(s32 a, void* b, s32 c, s32 d, s32 e);
@@ -198,7 +198,7 @@ struct Obj_183058 { void* vtbl; };
 
 void* func_00183058(BaseObject* self, void* a1, s32 a2)
 {
-    Obj_183058* r = (Obj_183058*)func_0011E580(self->desc->id, a1, a2, self->id, -1);
+    Obj_183058* r = (Obj_183058*)CreateTypedRecord(self->desc->id, a1, a2, self->id, -1);
     ((VFn_183058*)r->vtbl)[12](r, self);
     return r;
 }
@@ -208,8 +208,8 @@ void func_00183DC0(void* self);
 
 void func_00183E70(ConeVolume* self)
 {
-    func_001243E0(self);
-    func_00183DC0(self);
+    UnregisterPlacedObject(self);
+    RemoveConeVolumeFromWorldList(self);
 }
 
 s32 func_001EB050(void* target, f32 scale);
@@ -217,8 +217,8 @@ void func_00182DD8(void* self);
 
 void func_00182E40(void* self, void* target)
 {
-    if (func_001EB050(target, D_002623C8->dt)) {
-        func_00182DD8(self);
+    if (IsInsideRange(target, g_currentEntry->dt)) {
+        AddObjectKeyToOwner(self);
     }
 }
 
@@ -231,7 +231,7 @@ s32 func_00182FC8(void* self);
 
 void func_00182ED8(BaseObject* self)
 {
-    if (func_00182FC8(self)) {
+    if (IsObjectAttached(self)) {
         void (*f)(BaseObject*) = self->desc->m0F;
         if (f) {
             f(self);
@@ -264,13 +264,13 @@ void func_00183B20(BaseObject* a0, s32 a1, void* a2)
     ScriptValue a;
     ScriptValue b;
     void* p;
-    func_0011B008(&a);
-    p = func_0011C858();
+    InitScriptValue(&a);
+    p = AcquirePairPayload();
     *(Pack_183B20*)p = *(Pack_183B20*)a2;
-    func_0011B818(&a, (f32*)p);
-    func_001C2320(&b, a0, a1, &a);
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    SetScriptValuePair(&a, (f32*)p);
+    SetExtraObjectProperty(&b, a0, a1, &a);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
 }
 
 
@@ -278,11 +278,11 @@ void func_00183BB8(BaseObject* a0, s32 a1, s32 n)
 {
     ScriptValue a;
     ScriptValue b;
-    func_0011B008(&a);
-    func_0011B570(&a, n);
-    func_001C2320(&b, a0, a1, &a);
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    InitScriptValue(&a);
+    SetScriptValueInt(&a, n);
+    SetExtraObjectProperty(&b, a0, a1, &a);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
 }
 
 
@@ -293,13 +293,13 @@ void func_00183C38(BaseObject* a0, s32 a1, void* a2)
     ScriptValue a;
     ScriptValue b;
     f32* p;
-    func_0011B008(&a);
-    p = (f32*)func_0011C508();
+    InitScriptValue(&a);
+    p = (f32*)AcquireVectorAPayload();
     *(Quad16*)p = *(Quad16*)a2;
-    func_0011B740(&a, p);
-    func_001C2320(&b, a0, a1, &a);
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    SetScriptValueVectorA(&a, p);
+    SetExtraObjectProperty(&b, a0, a1, &a);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
 }
 
 void func_00125138(void* self);
@@ -308,7 +308,7 @@ void func_00184B58(void* self);
 
 void func_00183D88(ConeVolume* self)
 {
-    func_00125138(self);
+    ComputePlacedObjectWorldFrame(self);
     func_001841D0(self);
     func_00184B58(self);
 }
@@ -333,26 +333,26 @@ void func_0011A6C0(u8* a, void* b);
 void func_001830D8(BaseObject* self, BaseObject* src)
 {
     if (src->f04 != 0) {
-        R11B008List* p = func_0011BF30();
-        func_0011BEE0((R11B008List*)src->f04, p);
+        R11B008List* p = NewKeyedList();
+        CopyKeyedList((R11B008List*)src->f04, p);
         self->f04 = p;
-        func_0011A708(D_00259F38, p);
+        AddMarkRootList(D_00259F38, p);
     }
     const Desc01* d = src->desc;
     World* s0 = self->world;
-    func_0018D800((u8*)self + sizeof(BaseObject), (u8*)src + sizeof(BaseObject), d->size - sizeof(BaseObject));
-    u8* t = func_00159F20(s0, self->id);
-    func_00152600(t, self);
-    t = func_00159F20(s0, src->id);
-    func_00152470(t, self);
+    CopyMemory((u8*)self + sizeof(BaseObject), (u8*)src + sizeof(BaseObject), d->size - sizeof(BaseObject));
+    u8* t = GetHashedSlot(s0, self->id);
+    RemoveFromList(t, self);
+    t = GetHashedSlot(s0, src->id);
+    AppendToList(t, self);
     self->id = src->id;
     if (src->f2C != 0) {
         u8* s1 = D_00259F38;
-        func_0011A800(s1);
-        void* p = func_0011A630();
-        func_0011A5B0(src->f2C, p);
+        MarkPoolLiveEnds(s1);
+        void* p = NewScriptScope();
+        CopyScriptScope(src->f2C, p);
         self->f2C = p;
-        func_0011A6C0(s1, p);
+        AddUniqueMarkRoot(s1, p);
     }
     self->alias = src->alias;
 }
@@ -363,7 +363,7 @@ void func_00183DF8(ConeVolume* self)
 {
     void (*fn)(BaseObject*);
 
-    func_00152470((u8*)self->world + 0x1BE8, self);
+    AppendToList((u8*)self->world + 0x1BE8, self);
     fn = self->desc->m12;
     if (fn != 0) fn(self);
 }
@@ -373,8 +373,8 @@ void func_00183DF8(ConeVolume* self);
 
 void func_00183E40(ConeVolume* self)
 {
-    func_001240F8(self);
-    func_00183DF8(self);
+    RegisterPlacedObject(self);
+    AddConeVolumeToWorldList(self);
 }
 
 void func_00182D48(void* self);
@@ -382,8 +382,8 @@ void func_00152470(u8* table, void* self);
 
 void func_00180EB0(C72* self)
 {
-    func_00182D48(self);
-    func_00152470(&self->world->list1C9C, self);
+    RegisterObject(self);
+    AppendToList(&self->world->list1C9C, self);
 }
 
 void func_00182D48(BaseObject* self)
@@ -403,13 +403,13 @@ void func_00182D50(BaseObject* self)
     } else {
         sub = &((PlacedObject*)self->parent)->children;
     }
-    if (func_001526D0(sub, self) != 0) {
-        if (func_00182FC8(self) != 0) {
-            func_00152600(sub, self);
+    if (IsInList(sub, self) != 0) {
+        if (IsObjectAttached(self) != 0) {
+            RemoveFromList(sub, self);
             self->desc->m05(self);
             return;
         }
-        func_00152600(sub, self);
+        RemoveFromList(sub, self);
     }
 }
 
@@ -450,8 +450,8 @@ void func_00152600(u8* table, void* self);
 
 void func_00180EE8(C72* self)
 {
-    func_00182ED0(self);
-    func_00152600(&self->world->list1C9C, self);
+    UnregisterObject(self);
+    RemoveFromList(&self->world->list1C9C, self);
 }
 
 void func_001D73A8(void* self);
@@ -473,7 +473,7 @@ void func_00182DD8(PlacedObject* self)
         target = (PlacedObject*)self->parent;
     }
     if (target != 0) {
-        Key02* n = (Key02*)func_0018D500(8);
+        Key02* n = (Key02*)AllocateFrontMemory(8);
         n->key = self->id;
         n->next = target->keys;
         target->keys = n;
@@ -505,14 +505,14 @@ test:
     }
     *link = node->next;
     node->next = 0;
-    func_001DBC18(mgr, node);
+    ReleaseCallRecords(mgr, node);
 }
 
 s32 func_00183438(void* self);
 
 void func_00183478(void* self, s32* out)
 {
-    *out = func_00183438(self);
+    *out = GetAliasId(self);
 }
 
 
@@ -520,11 +520,11 @@ void func_00183910(BaseObject* a0, s32 a1, s32 a2)
 {
     ScriptValue a;
     ScriptValue b;
-    func_0011B008(&a);
-    func_0011B5F0(&a, a2);
-    func_001C2320(&b, a0, a1, &a);
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    InitScriptValue(&a);
+    SetScriptValueBool(&a, a2);
+    SetExtraObjectProperty(&b, a0, a1, &a);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
 }
 
 s32 func_00181AE0(C1A* p) { return p->fBF0 != 0; }
@@ -587,11 +587,11 @@ void func_00182C80(BaseObject* self)
     } else {
         sub = &((PlacedObject*)self->parent)->children;
     }
-    if (func_001526D0(sub, self) != 0) {
+    if (IsInList(sub, self) != 0) {
         return;
     }
-    func_00152470(sub, self);
-    if (func_00182FC8(self) != 0) {
+    AppendToList(sub, self);
+    if (IsObjectAttached(self) != 0) {
         self->desc->m04(self);
     }
 }
@@ -610,7 +610,7 @@ s32 func_00182FC8(BaseObject* self)
             sub = node->world;
             sub = (u8*)sub + 0x48;
         }
-        if (func_001526D0(sub, node) == 0) {
+        if (IsInList(sub, node) == 0) {
             return 0;
         }
         node = next;
@@ -626,17 +626,17 @@ void func_00183238(World* world, Callback01** head, void (*fn)(BaseObject*, s32,
 
 void func_00183290(BaseObject* self, void* fn, s32 ctx)
 {
-    func_001831E8(self->world, &self->callbacks, fn, ctx);
+    AddCallbackNode(self->world, &self->callbacks, fn, ctx);
 }
 
 void func_001832C0(BaseObject* self, s32 fn, s32 ctx)
 {
-    func_00183238(self->world, &self->callbacks, fn, ctx);
+    RemoveCallbackNode(self->world, &self->callbacks, fn, ctx);
 }
 
 void func_001832F0(BaseObject* self, BaseObject* src)
 {
-    func_001831E8(self->world, &self->callbacks, src->desc->m0D, src);
+    AddCallbackNode(self->world, &self->callbacks, src->desc->m0D, src);
 }
 
 
@@ -644,11 +644,11 @@ void func_00183990(BaseObject* a0, s32 a1, s32 n)
 {
     ScriptValue a;
     ScriptValue b;
-    func_0011B008(&a);
-    func_0011B570(&a, n);
-    func_001C2320(&b, a0, a1, &a);
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    InitScriptValue(&a);
+    SetScriptValueInt(&a, n);
+    SetExtraObjectProperty(&b, a0, a1, &a);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
 }
 
 
@@ -656,11 +656,11 @@ void func_00183A10(BaseObject* a0, s32 a1, f32 x)
 {
     ScriptValue a;
     ScriptValue b;
-    func_0011B008(&a);
-    func_0011B5B0(&a, x);
-    func_001C2320(&b, a0, a1, &a);
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    InitScriptValue(&a);
+    SetScriptValueFloat(&a, x);
+    SetExtraObjectProperty(&b, a0, a1, &a);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
 }
 
 
@@ -670,25 +670,25 @@ void func_00183A90(BaseObject* a0, s32 a1, void* a2)
 {
     ScriptValue a;
     ScriptValue b;
-    func_0011B008(&a);
-    f32* p = (f32*)func_0011C748();
+    InitScriptValue(&a);
+    f32* p = (f32*)AcquireVectorBPayload();
     *(Quad16*)p = *(Quad16*)a2;
-    func_0011B7D0(&a, p);
-    func_001C2320(&b, a0, a1, &a);
-    func_0011B060(&b, 2);
-    func_0011B060(&a, 2);
+    SetScriptValueVectorB(&a, p);
+    SetExtraObjectProperty(&b, a0, a1, &a);
+    DestroyScriptValue(&b, 2);
+    DestroyScriptValue(&a, 2);
 }
 
 void func_00183320(BaseObject* self, BaseObject* src)
 {
-    func_00183238(self->world, &self->callbacks, src->desc->m0D, src);
+    RemoveCallbackNode(self->world, &self->callbacks, src->desc->m0D, src);
 }
 
 void func_0011EC40(void* a, void* b);
 
 void func_001833D0(BaseObject* self, void* stream)
 {
-    func_0011EC40(self, stream);
+    ReadPropertyRecords(self, stream);
 }
 
 // NEAR: all calls and branches match; only the vtable load for the last call differs (retail loads the vtable into $v1 and the slot into $v0, ours the other way round)
@@ -727,27 +727,27 @@ s32 func_00181BC8(C1A* self, s32* arg)
     if (func_00160C58()) {
         self->fBF0 = 1;
     }
-    self->fBF4 = D_0026185C;
+    self->fBF4 = g_gameTime;
     r = func_00160C58();
     if (r == 0) {
-        g = D_00262E10;
+        g = g_player;
         if (g != 0) {
             goto then_block;
         }
     }
-    func_00181DA8(self, 2);
+    SetModeWalkerMode(self, 2);
     goto tail;
 then_block:
-    ((VFnV_181BC8)((Vt_181BC8*)D_00262E10)->vt[6])((void*)D_00262E10);
-    ((VFnP_181BC8)((Vt_181BC8*)D_00262E10)->vt[35])((void*)D_00262E10, self->fBC8);
+    ((VFnV_181BC8)((Vt_181BC8*)g_player)->vt[6])((void*)g_player);
+    ((VFnP_181BC8)((Vt_181BC8*)g_player)->vt[35])((void*)g_player, self->fBC8);
     ((VFnV_181BC8)((Vt_181BC8*)self->fBC8)->vt[7])(self->fBC8);
-    func_00192990((void*)D_00262E10, 1);
-    func_00175170((void*)D_00262E10, 2, 2);
-    func_001929D0((void*)D_00262E10);
-    func_00181DA8(self, 3);
-    func_001D7098(&loc, 0, self);
-    gp = (Vt_181BC8*)D_00262E10;
-    gp = (Vt_181BC8*)D_00262E10;
+    SetSwitchedColliderEnabled((void*)g_player, 1);
+    func_00175170((void*)g_player, 2, 2);
+    ActivateSwitchedCollider((void*)g_player);
+    SetModeWalkerMode(self, 3);
+    InitOwnerMessage(&loc, 0, self);
+    gp = (Vt_181BC8*)g_player;
+    gp = (Vt_181BC8*)g_player;
     loc.fn = func_00181B20;
     (void)((VFnR_181BC8)gp->vt[80])(gp, &loc);
 tail:
@@ -782,7 +782,7 @@ void func_00129FB0(void* o, f32 v);
 void func_00181448(C1A* self, f32 dt)
 {
     s32 buf[4];
-    func_001D9C98(self, dt);
+    UpdatePathFollower(self, dt);
     if (self->fC04 != 0) {
         Node_181448* n = (Node_181448*)self->fC04;
         do {
@@ -790,7 +790,7 @@ void func_00181448(C1A* self, f32 dt)
             Collider* c = n->s[1 - j].p;
             while (c != 0 && c->f4E0 == 0) c = (Collider*)c->parent;
             if (c != 0 && (c->f4E0 == 1 || c->f4E0 == 4)) {
-                func_001D7098(buf, 0, c);
+                InitOwnerMessage(buf, 0, c);
                 while (c != 0) {
                     if (((Vt_181448*)c->desc)->f12C((C1A*)c, n, buf) != 0) break;
                     c = (Collider*)c->parent;
@@ -799,13 +799,13 @@ void func_00181448(C1A* self, f32 dt)
             }
             n = n->next;
         } while (n != 0);
-        func_001861E8(self->world, self->fC04);
+        FreePooledContactChain(self->world, self->fC04);
         self->fC04 = 0;
     }
-    f32 t = D_00261858[1] - self->fBF4;
+    f32 t = g_gameClock[1] - self->fBF4;
     f32 v = D_00264140[0] + t * (D_00264140[1] + t * D_00264140[2]);
-    f32* r = D_00275C60;
-    f32 lo = D_00275C60[0];
+    f32* r = g_unitRange;
+    f32 lo = g_unitRange[0];
     f32 hi = r[1];
     f32 x;
     if (v < lo) x = lo;
@@ -813,7 +813,7 @@ void func_00181448(C1A* self, f32 dt)
     else x = v;
     func_00129E10(self->fBCC, x * D_00264150[0]);
     func_00129FB0(self->fBCC, x * D_00264154[0]);
-    if (self->fBF0 != 0 && self->fBB0 != 2 && D_00261858[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
+    if (self->fBF0 != 0 && self->fBB0 != 2 && g_gameClock[1] - self->fBF8 > 2.0f) self->fBF0 = 0;
 }
 
 struct Link_1834A0 { s32 a; void* b; Link_1834A0* next; };
@@ -835,40 +835,40 @@ void func_001834A0(BaseObject* self, s32 key, Item_1834A0* list)
     ScriptValue q1;
     ScriptValue q2;
     ScriptValue q3;
-    func_0011B008(&q0);
-    func_0011B008(&q1);
-    func_0011B008(&q2);
-    func_0011A800(D_00259F38);
-    if (func_0011A498(self->f2C, key, 1, &q0) == 0) {
-        func_0011B060(&q2, 2);
-        func_0011B060(&q1, 2);
-        func_0011B060(&q0, 2);
+    InitScriptValue(&q0);
+    InitScriptValue(&q1);
+    InitScriptValue(&q2);
+    MarkPoolLiveEnds(D_00259F38);
+    if (LookupScriptVariable(self->f2C, key, 1, &q0) == 0) {
+        DestroyScriptValue(&q2, 2);
+        DestroyScriptValue(&q1, 2);
+        DestroyScriptValue(&q0, 2);
         return;
     }
     Rec_1834A0* rec = (Rec_1834A0*)q0.p;
-    Slot_1834A0* slot = (Slot_1834A0*)func_0011A630();
-    func_0011A328(slot, rec->key);
-    func_0011B8A8(&q1, self);
-    func_0011A358(&q3, slot, rec->mid->kind, &q1);
-    func_0011B0A8(&q2, &q3);
-    func_0011B060(&q3, 2);
+    Slot_1834A0* slot = (Slot_1834A0*)NewScriptScope();
+    SetScriptScopeParent(slot, rec->key);
+    SetScriptValuePointerB(&q1, self);
+    DefineScriptVariable(&q3, slot, rec->mid->kind, &q1);
+    AssignScriptValue(&q2, &q3);
+    DestroyScriptValue(&q3, 2);
     if (list != 0) {
         Item_1834A0* it = list;
         Link_1834A0* l = rec->mid->head;
         do {
-            func_0011A358(&q3, slot, l->b, it);
-            func_0011B0A8(&q2, &q3);
-            func_0011B060(&q3, 2);
+            DefineScriptVariable(&q3, slot, l->b, it);
+            AssignScriptValue(&q2, &q3);
+            DestroyScriptValue(&q3, 2);
             it = it->next;
             l = l->next;
         } while (it != 0);
     }
-    func_00119A58(&q3, rec->f10, slot);
-    func_0011B0A8(&q2, &q3);
-    func_0011B060(&q3, 2);
-    func_0011B060(&q2, 2);
-    func_0011B060(&q1, 2);
-    func_0011B060(&q0, 2);
+    EvalScriptBody(&q3, rec->f10, slot);
+    AssignScriptValue(&q2, &q3);
+    DestroyScriptValue(&q3, 2);
+    DestroyScriptValue(&q2, 2);
+    DestroyScriptValue(&q1, 2);
+    DestroyScriptValue(&q0, 2);
 }
 
 s32 func_001DDA80(void* p);
@@ -897,18 +897,18 @@ s32 func_001B4688(s32 key);
 void func_00180F98(C1A* self)
 {
     func_001D7440(self);
-    func_00124DF8(self, 0xA, D_002640B0);
-    self->fBBC = (StateWalker*)func_001B6290(self->fBB8, self, -1, 0);
-    func_00129D00(self->fBCC, 5, &self->fBD0);
+    ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
+    self->fBBC = (StateWalker*)CreateStateWalker(self->fBB8, self, -1, 0);
+    AddMatrixAttachment(self->fBCC, 5, &self->fBD0);
     ((u8*)self->fBD0)[0x10] = 9;
     ((u8*)self->fBD0)[0x11] = 9;
     ((Vt_180F98*)self->fBCC)->vtbl[0xBC / 4](self->fBCC);
     func_00128018(0, self->fBC0, (u8*)self->fBCC + 0x140, (u8*)self + 0xBE0);
-    func_00181DA8(self, 1);
+    SetModeWalkerMode(self, 1);
     self->f864 = 3.4028234663852886e+38f;
     T217D_BF0* base = &D_00270650;
     ((Packed_180F98*)&base->f288)->v = 0.0f;
-    base->icon = func_001B4688(0x36A);
+    base->icon = FindAnimRecord(0x36A);
 }
 
 void func_00183350(BaseObject* self, s32 kind, void* arg)
@@ -935,24 +935,24 @@ void func_001837E0(BaseObject* self, s32 idx, s32 flag, s32* out)
     ScriptValue tmp;
     s32 a4;
 
-    func_0011B008(&r);
-    if (self->f2C == 0 || func_0011A498(self->f2C, idx, 1, &r) == 0) {
-        func_0011B060(&r, 2);
+    InitScriptValue(&r);
+    if (self->f2C == 0 || LookupScriptVariable(self->f2C, idx, 1, &r) == 0) {
+        DestroyScriptValue(&r, 2);
         goto done;
     }
-    func_0011A800(D_00259F38);
+    MarkPoolLiveEnds(D_00259F38);
     if (func_00183668(self, idx, flag, out) == 0) {
         if (flag != 0) {
-            func_001C1E48(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], out);
-            func_0011B0A8(&r, &tmp);
-            func_0011B060(&tmp, 2);
+            BuildScriptListFromPairs(&tmp, flag, (s32*)D_00244DFC + D_00244EC0[idx], out);
+            AssignScriptValue(&r, &tmp);
+            DestroyScriptValue(&tmp, 2);
             a4 = (s32)r.p;
         } else {
             a4 = 0;
         }
-        func_001DBCC8(self->world, (void*)(void (*)(void*, s32, void*))func_001834A0, self, idx, a4);
+        AppendQueuedCall(self->world, (void*)(void (*)(void*, s32, void*))RunScriptEventHandler, self, idx, a4);
     }
-    func_0011B060(&r, 2);
+    DestroyScriptValue(&r, 2);
 done:
     ;
 }
@@ -965,16 +965,16 @@ void func_00183CC8(ConeVolume* self)
 {
     self->flags = (self->flags & ~(0x3ULL << 40)) | ((u64)0x8000 << 25);
     self->mode = 0;
-    self->q320 = *(const Quad16*)&D_00248D20;
-    self->q340 = *(const Quad16*)&D_00248D10;
+    self->q320 = *(const Quad16*)&g_unitZVector;
+    self->q340 = *(const Quad16*)&g_unitYVector;
     self->rangeMin = 200.0f;
     self->rangeMax = 2000.0f;
     self->f2fc = 240.0f;
     self->f2f8 = 180.0f;
     self->f300 = 180.0f;
     self->outerAngle = 60.0f;
-    func_00184A70(self);
-    func_00123ED0(self);
+    UpdateConeVolumeTangents(self);
+    InitPlacedObject(self);
 }
 
 // EXACT: switch (mode) for the call dispatch; flag tail as mode==0, mode<0, mode>=4, mode>=2 chain
@@ -994,22 +994,22 @@ void func_00181DA8(C1A* self, s32 mode)
     old = self->fBB0;
     if (old < 4) {
         if (old >= 2) {
-            self->fBF8 = D_00261858[1];
+            self->fBF8 = g_gameClock[1];
         }
     }
     switch (mode) {
     case 0:
-        func_001B64D8(self->fBBC, 0x35E);
+        SetStateWalkerTarget(self->fBBC, 0x35E);
         break;
     case 1:
-        func_001B64D8(self->fBBC, 0x35F);
+        SetStateWalkerTarget(self->fBBC, 0x35F);
         break;
     case 2:
-        func_001B6628(self->fBBC, 0x361);
+        TeleportStateWalker(self->fBBC, 0x361);
         self->fBF8 = D_0024B168;
         break;
     case 3:
-        func_001B6628(self->fBBC, 0x362);
+        TeleportStateWalker(self->fBBC, 0x362);
         self->fBF8 = D_0024B168;
         break;
     }
@@ -1025,7 +1025,7 @@ void func_00181DA8(C1A* self, s32 mode)
         self->f580 = 1;
     }
     self->fBB0 = mode;
-    self->fBB4 = D_00261858[1];
+    self->fBB4 = g_gameClock[1];
 }
 
 s32 func_00182FC8(ConeVolume*);
@@ -1035,17 +1035,17 @@ void func_00127048(ConeVolume*, ConeVolume*);
 void func_00183EA0(ConeVolume* self, ConeVolume* other)
 {
     s32 changed = 0;
-    if (func_00182FC8(self)) {
+    if (IsObjectAttached(self)) {
         changed = self->value != other->value;
     }
     if (changed) {
-        func_00183DC0(self);
+        RemoveConeVolumeFromWorldList(self);
     }
     ConeVolumeSaved keep = self->saved;
-    func_00127048(self, other);
+    CopyPlacedObject(self, other);
     self->saved = keep;
     if (changed) {
-        func_00183DF8(self);
+        AddConeVolumeToWorldList(self);
     }
 }
 
@@ -1083,15 +1083,15 @@ void func_00181818(C1A* o, void* a, void* b)
     if (o->fBF0) {
         f32 t;
         if (o->fBB0 != 2) {
-            t = (D_00261858[1] - o->fBF8) * 0.5f;
+            t = (g_gameClock[1] - o->fBF8) * 0.5f;
         } else {
             t = 0.0f;
         }
-        f32 s = func_00205210((D_00261858[1] - o->fBF4) * 10.0f);
+        f32 s = func_00205210((g_gameClock[1] - o->fBF4) * 10.0f);
         f32 p = D_00264160[0] + t * (D_00264160[1] + t * D_00264160[2]);
-        f32 x = Clamp_181818::Of(p, D_00275C60[0], D_00275C60[1]);
+        f32 x = Clamp_181818::Of(p, g_unitRange[0], g_unitRange[1]);
         f32 q = D_00264170[0] + s * (D_00264170[1] + s * D_00264170[2]);
-        f32 y = Clamp_181818::Of(q, D_00275C60[0], D_00275C60[1]);
+        f32 y = Clamp_181818::Of(q, g_unitRange[0], g_unitRange[1]);
         f32 w = x * y;
         f32 u = 1.0f - w;
         c.r = (u8)(u * D_002623E0[0].r + w * from[0]);
@@ -1101,7 +1101,7 @@ void func_00181818(C1A* o, void* a, void* b)
     } else {
         c = D_002623E0[0];
     }
-    func_00126A48(o, *(u32*)&c);
+    SetObjectTreeRecordValue(o, *(u32*)&c);
     func_00125C90(o, a, b);
 }
 

@@ -45,7 +45,7 @@ void func_001AB198(Obj_1AB198_eu* self)
     if (self->f8 == 0) {
         return;
     }
-    g = (Glob_1AB198_eu*)&D_0026FF68;
+    g = (Glob_1AB198_eu*)&g_pauseMenuElement;
     scale = 1.0f;
     if (g->f560 != 0) {
         scale = g->f594;
@@ -63,8 +63,8 @@ void func_001AB198(Obj_1AB198_eu* self)
     func_00137260(out, q);
     func_00137268(out, 0);
     func_eu_001374E0(out, 0);
-    func_0015C8B8(self->f4, self->f51c, self->f51c);
+    PushFontScale(self->f4, self->f51c, self->f51c);
     func_eu_0015DCB8(buf, &self->f8, self->f4, 0);
-    func_eu_0015E7E0(buf, out, 0, &D_00262280);
-    func_0015C900(self->f4);
+    func_eu_0015E7E0(buf, out, 0, &g_gsPacketWriter);
+    PopFontScale(self->f4);
 }

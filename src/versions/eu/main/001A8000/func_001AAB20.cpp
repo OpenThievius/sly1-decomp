@@ -15,5 +15,5 @@ void func_001AAB20(Obj_001AAB20_eu* self, f32 x, f32 y) {
     if (0.0f <= y) {
         self->f238 = y;
     }
-    func_001AAB60(self);
+    PlaceScreenElement(self);
 }

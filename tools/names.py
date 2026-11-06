@@ -127,13 +127,14 @@ def problems(rows, functions=None, idents=None, header=None):
 def _is_use(row, path):
     """Whether the readable name's appearance in `path` is a use of the macro, not another identifier.
     A source that uses a name includes names.h through common.h; a name the source defines as a
-    struct, a field or a local would shadow the macro, so the check looks for its definition forms."""
+    struct, a field or a local would shadow the macro, so the check looks for its definition forms.
+    A global's name (g_) is never a type, and a type's name never reaches past a cast's bracket."""
     text = (ROOT / path).read_text(errors="replace")
     name = re.escape(row["name"])
     declares = (r"(?:^|[;{}(,])\s*(?!(?:return|case|goto|else|delete|throw|sizeof)\b)"
-                r"(?:(?:extern|static|const|volatile|unsigned|signed|struct)\s+)*[A-Za-z_]\w*"
+                r"(?:(?:extern|static|const|volatile|unsigned|signed|struct)\s+)*(?!g_)[A-Za-z_]\w*"
                 r"(?:\s*[\*&])*\s+[\*&]*%s\s*[;=\[,)]" % name)
-    defines = re.search(r"\b(struct|class|union|enum|typedef)\s+[^;{]*\b%s\b|%s" % (name, declares), text, re.M)
+    defines = re.search(r"\b(struct|class|union|enum|typedef)\s+[^;{()]*\b%s\b|%s" % (name, declares), text, re.M)
     return defines is None
 
 

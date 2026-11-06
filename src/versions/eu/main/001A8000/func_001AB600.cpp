@@ -17,10 +17,10 @@ void func_001ABE20(Self_001AB600_eu* self, s32 state);
 
 void func_001AB600(Self_001AB600_eu* self)
 {
-    func_001AA268(self);
-    self->p4 = (void*)func_0015C1C0(2);
+    SetupScreenElementText(self);
+    self->p4 = (void*)GetFontById(2);
     self->f274 = self->f270 = -1;
     self->f278 = D_0024CD48;
     self->f290 = 1;
-    func_001ABE20(self, 0);
+    SetTimerState(self, 0);
 }

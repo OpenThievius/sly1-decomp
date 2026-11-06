@@ -3,13 +3,13 @@
 void func_001F0EB8(void* obj, u8* s, void* c)
 {
     u8 tmp[0x50];
-    Camera* p = D_00261990;
+    Camera* p = g_camera;
     f32 keep1 = p->f1C4;
     f32 keep2 = p->f1C8;
-    func_00143940(p, 0.975f);
-    func_00125B70(obj, c, tmp);
-    func_00188B08(s + 0x40, s + 0x80, tmp);
+    SnapCameraZoom(p, 0.975f);
+    BuildPlacedObjectTransform(obj, c, tmp);
+    BuildMatrixFromRotationAndTranslation(s + 0x40, s + 0x80, tmp);
     func_00125C90(obj, s, tmp);
-    func_00143940(D_00261990, keep1);
-    D_00261990->f1C8 = keep2;
+    SnapCameraZoom(g_camera, keep1);
+    g_camera->f1C8 = keep2;
 }

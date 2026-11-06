@@ -2,7 +2,7 @@
 // PAL: also calls func_0018EB98 on the block at a2 + 0x80
 s32 func_0018ED78(void* a0, s32 a1, void* a2)
 {
-    func_0018F890((Object_18F890*)a2, 0);
-    func_0018EB98((Self_18EB98*)((u8*)a2 + 0x80));
+    FeedMovieDecoder((Object_18F890*)a2, 0);
+    UpdateMovieStream((Self_18EB98*)((u8*)a2 + 0x80));
     return 1;
 }

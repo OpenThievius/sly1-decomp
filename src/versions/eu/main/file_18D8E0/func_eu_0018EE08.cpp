@@ -21,26 +21,26 @@ void func_eu_0018EE08(Obj_eu_18EE08* self, s32 len, u8* dst)
     if (self->cols == 1) {
         return;
     }
-    func_0018D608();
+    PushBackMemoryMark();
     s32 chunk = self->cols << 10;
     u8* p = dst;
-    u8* buf = func_0018D658(chunk);
+    u8* buf = AllocateBackMemory(chunk);
     s32 rem = len;
     while (rem != 0) {
         s32 col = 0;
         s32 row = 0;
         s32 off = 0;
         for (; off < chunk; off += self->stride) {
-            func_0018D800(buf + ((col << 10) + row * self->stride), p + off, (u32)self->stride);
+            CopyMemory(buf + ((col << 10) + row * self->stride), p + off, (u32)self->stride);
             col++;
             if (col >= self->cols) {
                 row++;
                 col = 0;
             }
         }
-        func_0018D800(p, buf, (u32)chunk);
+        CopyMemory(p, buf, (u32)chunk);
         p += chunk;
         rem -= chunk;
     }
-    func_0018D6F0();
+    PopBackMemoryMark();
 }

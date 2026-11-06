@@ -25,8 +25,8 @@ void func_00152600(void* data, void* self);
 
 void func_0016A4C8(ListedCollisionPart* self)
 {
-    func_001B7B78(self);
-    func_00152600(&D_00262708, self);
+    UnregisterCollider(self);
+    RemoveFromList(&g_partList, self);
 }
 
 void func_001BA130(void* self);
@@ -34,7 +34,7 @@ void func_001BA130(void* self);
 void func_0016A500(ListedCollisionPart* self)
 {
     Link02 tmp = self->listLink;
-    func_001BA130(self);
+    CopyCollider(self);
     self->listLink = tmp;
 }
 
@@ -42,10 +42,10 @@ s32 func_001B8A08(Collider* a, Collider* b);
 
 s32 func_0016A548(Collider* a0, Collider* a1)
 {
-    if ((void*)a1 == D_00262E10 && (void*)a0 == ((Player*)a1)->f23B0) {
+    if ((void*)a1 == g_player && (void*)a0 == ((Player*)a1)->f23B0) {
         return 1;
     }
-    return func_001B8A08(a0, a1);
+    return TestCollidersMayContact(a0, a1);
 }
 
 void* func_0015A448(void* obj, s32 id, s32 flags);
@@ -54,16 +54,16 @@ void func_001F4ED0(void* p);
 void func_0016B520(T217D_12E0* self)
 {
     if (self->open != 0) {
-        void* p = func_0015A448(D_00275710, 0x4FD, 0);
+        void* p = func_0015A448(g_currentWorld, 0x4FD, 0);
         if (p != 0) {
-            func_001F4ED0(p);
+            PushObjectCameraController(p);
         }
     }
 }
 
 void func_0016B560(T217D_12E0* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
 }
 
 u32 func_0016BB78(u32 bit)
@@ -74,7 +74,7 @@ u32 func_0016BB78(u32 bit)
     } else {
         mask = 1 << bit;
     }
-    return D_002623C0->u19F4 & mask;
+    return g_saveData->u19F4 & mask;
 }
 
 extern s32 D_002BE470;
@@ -108,7 +108,7 @@ void func_001685B8(void)
     D_002BE470 = 0;
     func_00201A18(0, 1, 2, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
-    s32 cnt = D_002626C0;
+    s32 cnt = g_displayFrameCounter;
     D_002626CC = 0;
     D_00262484 = 0;
     D_002626C8 = flag;
@@ -122,8 +122,8 @@ void func_001685B8(void)
     s16 half = *(s16*)&D_002626C4;
     func_00202098(ptr, 0x800, 0x800, half);
     func_001F6C20(0);
-    D_002626C0 = D_002626C0 + 1;
-    func_00201FF8(D_00262490, D_002626C0);
+    g_displayFrameCounter = g_displayFrameCounter + 1;
+    func_00201FF8(D_00262490, g_displayFrameCounter);
 }
 
 struct Blob_168AF8 { u8 bytes[0x20]; };
@@ -141,11 +141,11 @@ void func_00168AF8(void)
     Blob_168AF8 a;
     Blob_168AF8 b;
 
-    func_00152888(&a);
-    func_001529C8(&a, 2, &b);
-    func_00152B80(&a, 0x2C, D_002BE1A0);
-    func_00152D30(&a);
-    func_001529E0(&a, 0, 0);
+    InitPacketBuffer(&a);
+    UsePacketBufferMemory(&a, 2, &b);
+    AddDmaRefTag(&a, 0x2C, D_002BE1A0);
+    AddDmaEndTag(&a);
+    DetachPacketBuffer(&a, 0, 0);
     func_00168A48(&b);
 }
 
@@ -175,20 +175,20 @@ void func_001692B0(void* self, void* arg)
     if (self == 0) {
         return;
     }
-    func_001611B8(&f);
-    func_0018D608();
-    func_00152980(&f, ((D_00274514 * 2 + D_00274514 + D_00274510) * 8) | 4);
-    func_00152B38(&f);
-    if (func_001690C0(self, arg, &f) != 0) {
-        func_001613C0(&f, 0, 1, 0xE);
-        func_00161708(&f, 0x3F, 0);
-        func_00161708(&f, 0x61, 0);
-        func_00161200(&f);
-        func_00152D30(&f);
-        func_001529E0(&f, 0, &f.value);
-        func_001686E8(D_00261F1C, f.value);
+    InitGifPacket(&f);
+    PushBackMemoryMark();
+    AllocateTempPacketBuffer(&f, ((D_00274514 * 2 + D_00274514 + D_00274510) * 8) | 4);
+    BeginDmaTag(&f);
+    if (PlaceMaskedImages(self, arg, &f) != 0) {
+        BeginGifTag(&f, 0, 1, 0xE);
+        AddGifRegisterWrite(&f, 0x3F, 0);
+        AddGifRegisterWrite(&f, 0x61, 0);
+        EndGifPacket(&f);
+        AddDmaEndTag(&f);
+        DetachPacketBuffer(&f, 0, &f.value);
+        func_001686E8(g_gifChannel, f.value);
     }
-    func_0018D6F0();
+    PopBackMemoryMark();
 }
 
 struct Ent_1696B8 { s32 a; s32 b; u32 value; s32 d; };
@@ -200,9 +200,9 @@ void func_001696B8(s32 idx, u32 lo, u32 take, u32 give)
 {
     u32 end = take + lo;
 
-    if (idx < D_002626D0) {
+    if (idx < g_meshQueueCount) {
         Ent_1696B8* e = &D_0027DC20[idx];
-        s32 n = D_002626D0 - idx;
+        s32 n = g_meshQueueCount - idx;
 
         do {
             if (e->value >= take && e->value < end) {
@@ -219,8 +219,8 @@ void func_00152470(void* table, void* self);
 
 void func_00169D20(C6F* self)
 {
-    func_00182D48(self);
-    func_00152470(&D_002626E8, self);
+    RegisterObject(self);
+    AppendToList(&g_targetCurveList, self);
 }
 
 void func_00182ED0(void* self);
@@ -228,8 +228,8 @@ void func_00152600(void* table, void* self);
 
 void func_0016A178(C7F* self)
 {
-    func_00182ED0(self);
-    func_00152600(&D_002626F8, self);
+    UnregisterObject(self);
+    RemoveFromList(&g_targetPointList, self);
 }
 
 struct Ent_262718 { s32 a; s32 b; s32 c; };
@@ -243,8 +243,8 @@ u32* func_00160810(s32 idx);
 
 void func_0016AA18(PartHolderObject* self)
 {
-    func_00124A48(self);
-    func_00124DF8(self, 9, &D_00262718);
+    StartPlacedObject(self);
+    ResolveObjectLinks(self, 9, &g_partHolderLinks);
 
     if ((u32)(self->id - 0x515) < 5) {
         s32 t = self->id - 0x514;
@@ -256,11 +256,11 @@ void func_0016AA18(PartHolderObject* self)
             }
             s32 flag;
             if (i == 8) {
-                flag = D_002623C0->levels[t].f448 & 0x20;
+                flag = g_saveData->levels[t].f448 & 0x20;
             } else {
                 s32 idx = s4 | i;
-                u32 r = func_001601D8(idx);
-                u32* p = func_00160810(idx);
+                u32 r = GetEntryFlags(idx);
+                u32* p = GetLevelEntryByKey(idx);
                 if ((r & 2) != 0) {
                     flag = *p & 2;
                 } else {
@@ -297,14 +297,14 @@ void func_001830D8(void* self);
 void func_00169DD8(C6F* self)
 {
     Keep6E saved = self->keep;
-    func_001830D8(self);
+    CopyObjectData(self);
     self->keep = saved;
 }
 
 void func_0016A140(C7F* self)
 {
-    func_00182D48(self);
-    func_00152470(&D_002626F8, self);
+    RegisterObject(self);
+    AppendToList(&g_targetPointList, self);
 }
 
 void func_0016A1B0(C7F* self)
@@ -319,7 +319,7 @@ void func_0016A1B0(C7F* self)
 void func_0016A1F8(C7F* self)
 {
     KeptBits saved = self->keep;
-    func_001830D8(self);
+    CopyObjectData(self);
     self->keep = saved;
 }
 
@@ -332,7 +332,7 @@ void func_0012A270(void* self, f32 k);
 void func_0016A3A8(ListedCollisionPart* self)
 {
     f32 k = 3.0f;
-    func_001B7968(self);
+    InitCollider(self);
     func_00129FB0(self, k);
     func_0012A080(self, k);
     func_0012A150(self, k);
@@ -344,8 +344,8 @@ void func_001B7A98(void* self);
 
 void func_0016A490(ListedCollisionPart* self)
 {
-    func_001B7A98(self);
-    func_00152470(&D_00262708, self);
+    RegisterCollider(self);
+    AppendToList(&g_partList, self);
 }
 
 void func_001613C0(void* p, s32 a, s32 b, s32 c);
@@ -354,12 +354,12 @@ void func_00161958(void* p, s32 x);
 
 void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ctx)
 {
-    func_001613C0(ctx, 0, 1, 0xE);
-    func_00161708(ctx, 0x50, ((u64)dbp << 32) | ((u64)dbw << 48) | ((u64)dpsm << 56));
-    func_00161708(ctx, 0x51, 0);
-    func_00161708(ctx, 0x52, rrw | ((u64)rrh << 32));
-    func_00161708(ctx, 0x53, 0);
-    func_00161958(ctx, x);
+    BeginGifTag(ctx, 0, 1, 0xE);
+    AddGifRegisterWrite(ctx, 0x50, ((u64)dbp << 32) | ((u64)dbw << 48) | ((u64)dpsm << 56));
+    AddGifRegisterWrite(ctx, 0x51, 0);
+    AddGifRegisterWrite(ctx, 0x52, rrw | ((u64)rrh << 32));
+    AddGifRegisterWrite(ctx, 0x53, 0);
+    AddGifImageTag(ctx, x);
 }
 
 struct Bits_168FB0 {
@@ -380,8 +380,8 @@ void func_00168FB0(V24A2_ImgA* self, u32 a1)
     bits->f0 = a1;
     bits->f14 = self->f9;
     bits->f20 = self->f8;
-    bits->f26 = func_00168D30(self->f0) & 0xF;
-    bits->f30 = func_00168D30(self->f2) & 0xF;
+    bits->f26 = CeilLog2(self->f0) & 0xF;
+    bits->f30 = CeilLog2(self->f2) & 0xF;
     bits->f34 = 1;
 }
 
@@ -389,25 +389,25 @@ void func_00168D98(u32 dbp, u32 dbw, u32 dpsm, u64 rrw, u32 rrh, s32 x, void* ct
 
 void func_00169088(V24A2_ImgA* d, u32 dbp, void* ctx)
 {
-    func_00168D98(dbp, d->f9, d->f8, d->f0, d->f2, d->f14, ctx);
+    BeginImageTransfer(dbp, d->f9, d->f8, d->f0, d->f2, d->f14, ctx);
 }
 
 void func_00152438(void* self, s32 value);
 
 void func_00169C58()
 {
-    func_00152438(&D_002626E8, 0x38);
-    func_00152438(&D_002626F8, 0x50);
-    func_00152438(&D_00262708, 0x558);
+    func_00152438(&g_targetCurveList, 0x38);
+    func_00152438(&g_targetPointList, 0x50);
+    func_00152438(&g_partList, 0x558);
 }
 
 void func_00152440(void* self);
 
 void func_00169CA0()
 {
-    func_00152440(&D_002626E8);
-    func_00152440(&D_002626F8);
-    func_00152440(&D_00262708);
+    ClearList(&g_targetCurveList);
+    ClearList(&g_targetPointList);
+    ClearList(&g_partList);
 }
 
 void func_00182ED0(void* self);
@@ -415,8 +415,8 @@ void func_00152600(void* data, void* self);
 
 void func_00169D58(C6F* self)
 {
-    func_00182ED0(self);
-    func_00152600(&D_002626E8, self);
+    UnregisterObject(self);
+    RemoveFromList(&g_targetCurveList, self);
 }
 
 struct Pool_1694F8 { s32 f0; s32 f4; s32 f8; s32 fC; };
@@ -441,7 +441,7 @@ void func_001694F8(StripMesh* a0, MeshStrip* a1, s32 a2, s32 a3, s32 a4, MeshNod
     if (a5 != 0) {
         link = a5->flags & 1;
     }
-    count = D_002626D0;
+    count = g_meshQueueCount;
     if (count >= 0x4000) {
         goto local_path;
     }
@@ -459,10 +459,10 @@ local_path:
     e = &local;
     goto store;
 pool_path:
-    n = D_002626D0;
+    n = g_meshQueueCount;
     e = (Pool_1694F8*)&D_0027DC20[n];
     n++;
-    D_002626D0 = n;
+    g_meshQueueCount = n;
 store:
     e->f0 = a3;
     idx = 0;
@@ -475,9 +475,9 @@ store:
     e->f8 = a2;
     e->fC = a4;
     e->f4 = base + (off << 4);
-    func_001694A0(e);
+    SubmitMeshQueueEntry(e);
     if (link != 0) {
-        Link_1694F8* p = (Link_1694F8*)func_0018D5C0(12);
+        Link_1694F8* p = (Link_1694F8*)AllocateZeroedFrontMemory(12);
         if (p != 0) {
             p->src = a1;
             p->dst = e;
@@ -497,21 +497,21 @@ void func_00169608(s32 a0, s32 a1, MeshNode* a2)
 {
     Pool_169608 local;
     Pool_169608* e;
-    s32 count = D_002626D0;
+    s32 count = g_meshQueueCount;
 
     if (count >= 0x4000) {
         e = &local;
     } else {
         e = (Pool_169608*)&D_0027DC20[count];
-        D_002626D0 = count + 1;
+        g_meshQueueCount = count + 1;
     }
     e->f0 = a1;
     e->f4 = (s32)a2 + 0xC;
     e->f8 = a0;
     e->fC = 0;
-    func_001694A0(e);
-    if (D_002626D0 < 0x4000) {
-        Link_169608* p = (Link_169608*)func_0018D5C0(12);
+    SubmitMeshQueueEntry(e);
+    if (g_meshQueueCount < 0x4000) {
+        Link_169608* p = (Link_169608*)AllocateZeroedFrontMemory(12);
         p->dst = e;
         p->src = 0;
         p->next = (Link_169608*)a2->links;
@@ -560,18 +560,18 @@ void func_001688B8(void)
     k.b2 = 0;
     k.b3 = 0x80;
     t = k;
-    func_00168770(D_002BDC20, &t, 0);
+    FillScreenColor(D_002BDC20, &t, 0);
     t = k;
-    func_00168770(D_002BE1A0, &t, 0);
+    FillScreenColor(D_002BE1A0, &t, 0);
     t = k;
-    func_00168770(D_002BDEE0, &t, 1);
-    D_002BE460 = func_001E2268((void*)0, (void*)1);
-    D_002BE464 = func_001E2268((void*)0, (void*)1);
+    FillScreenColor(D_002BDEE0, &t, 1);
+    D_002BE460 = CreateLockSemaphore((void*)0, (void*)1);
+    D_002BE464 = CreateLockSemaphore((void*)0, (void*)1);
     func_001F6950(2, func_001682C0, 0);
     func_001F6DA8(2);
     func_001F6950(0, func_00168698, 0);
     func_001F6DA8(0);
-    func_00168D00();
+    InitMeshQueue();
     func_001685B8();
 }
 
@@ -591,16 +591,16 @@ void func_00168A48(Blob_168AF8* b)
     func_001F6C20(0);
     do {
         void* p;
-        if (((i + D_002626C0) & 1) != 0) {
+        if (((i + g_displayFrameCounter) & 1) != 0) {
             p = D_002624E0;
         } else {
             p = D_002625D0;
         }
         func_00201C78(p);
         i++;
-        func_00202A80(D_00261F1C, b);
+        func_00202A80(g_gifChannel, b);
     } while (i < 2);
-    func_00202C38(D_00261F1C, 0, 0);
+    func_00202C38(g_gifChannel, 0, 0);
 }
 
 u32 func_00168D30(u32 n) { u32 count = 0; u32 value = 1; while (value < n && count < 31) { value <<= 1; count++; } return count; }
@@ -612,8 +612,8 @@ void func_00168D78(BumpAllocator* p) { p->next = p->start; }
 void func_00168D68(BumpAllocator*,s32,s32);
 void func_00168D00()
 {
-    func_00168D68(&D_002626D8,0x1E00,0x4000);
-    D_002626D0=0;
+    InitBumpAllocator(&g_bumpAllocator,0x1E00,0x4000);
+    g_meshQueueCount=0;
 }
 
 s32 func_00168D88(s32* self,s32 size)
@@ -656,7 +656,7 @@ void func_001683E8(void)
         D_002626C4 = (flag == 0);
     }
     u8* ptr;
-    if (D_002626C0 & 1) {
+    if (g_displayFrameCounter & 1) {
         ptr = D_002624F0;
     } else {
         ptr = D_002625E0;
@@ -664,10 +664,10 @@ void func_001683E8(void)
     s16 half = *(s16*)&D_002626C4;
     func_00202098(ptr, 0x800, 0x800, half);
     func_001F6C20(0);
-    D_002626C0 = D_002626C0 + 1;
-    func_00201FF8(D_00262490, D_002626C0);
+    g_displayFrameCounter = g_displayFrameCounter + 1;
+    func_00201FF8(D_00262490, g_displayFrameCounter);
     if ((u32)(D_002626CC - 1) < 2) {
-        func_00168130();
+        ApplyFieldDisplayOffset();
     }
     func_00201988(0, 0);
 }
@@ -692,7 +692,7 @@ void func_001684E8(void)
     }
     if (D_002BE474 != 0) {
         u32 flag = (*(u32*)0x12001000 >> 13) & 1;
-        s32 cnt = D_002626C0;
+        s32 cnt = g_displayFrameCounter;
         D_002BE474 = 0;
         D_002626C4 = (flag == 0);
         u8* ptr;
@@ -705,7 +705,7 @@ void func_001684E8(void)
         func_00202098(ptr, 0x800, 0x800, half);
         func_001F6C20(0);
         u8* ptr2;
-        if (D_002626C0 & 1) {
+        if (g_displayFrameCounter & 1) {
             ptr2 = D_002625D0;
         } else {
             ptr2 = D_002624E0;
@@ -737,21 +737,21 @@ s32 func_001693A8(void* self)
 {
     Frame_1693A8 f;
 
-    func_001611B8(&f);
+    InitGifPacket(&f);
     f.out = 0;
-    func_00168D68(f.span, 0x1400, 0x1E00);
-    func_0018D608();
-    func_00152980(&f, ((D_00274514 * 2 + D_00274514 + D_00274510) * 8) | 4);
-    func_00152B38(&f);
-    if (func_001690C0(self, f.span, &f) != 0) {
-        func_001613C0(&f, 0, 1, 0xE);
-        func_00161708(&f, 0x3F, 0);
-        func_00161200(&f);
-        func_00152D30(&f);
-        func_00152A50(&f, 0, 0, &f.out, 7);
-        func_001B3510(self);
+    InitBumpAllocator(f.span, 0x1400, 0x1E00);
+    PushBackMemoryMark();
+    AllocateTempPacketBuffer(&f, ((D_00274514 * 2 + D_00274514 + D_00274510) * 8) | 4);
+    BeginDmaTag(&f);
+    if (PlaceMaskedImages(self, f.span, &f) != 0) {
+        BeginGifTag(&f, 0, 1, 0xE);
+        AddGifRegisterWrite(&f, 0x3F, 0);
+        EndGifPacket(&f);
+        AddDmaEndTag(&f);
+        DetachPacketBufferCopy(&f, 0, 0, &f.out, 7);
+        BuildAnimRecordGifPackets(self);
     }
-    func_0018D6F0();
+    PopBackMemoryMark();
     return f.out;
 }
 
@@ -763,8 +763,8 @@ void func_00169718(void)
 {
     s32 i;
 
-    for (i = 0; i < D_002626D0; i++) {
-        func_001694A0(&D_0027DC20[i]);
+    for (i = 0; i < g_meshQueueCount; i++) {
+        SubmitMeshQueueEntry(&D_0027DC20[i]);
     }
 }
 
@@ -783,14 +783,14 @@ void func_0016AB38(void* self);
 
 void func_0016AED8(CurrentPlacedObject* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     self->flags = (self->flags & ~(3ULL << 40)) | (1ULL << 40);
-    D_0026FCF0 = (s32)self;
-    ((Obj_16AED8Glob*)D_00275BC0)->f30 = 2;
-    func_001E96F8(D_00275BC0, 2);
-    func_00124DF8(self, 0x12, D_00262788);
+    g_currentPlacedObject = (s32)self;
+    ((Obj_16AED8Glob*)g_elementStack)->f30 = 2;
+    SetElementStackState(g_elementStack, 2);
+    ResolveObjectLinks(self, 0x12, g_currentPlacedObjectLinks);
     self->f2D0 = -1;
-    func_001DBCC8(self->world, (void*)func_0016AB38, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)SetupCurrentObjectChoices, self, 0, 0);
 }
 
 struct Obj_16B0F8 { u8 pad0[0x2D0]; s32 f2D0; u8 pad1[0x28]; s32 f2FC; };
@@ -801,7 +801,7 @@ void func_0016B300(Obj_16B0F8* self, s32 idx, s32 zero);
 void func_0016B0F8(Obj_16B0F8* self, void* a1)
 {
     s32 n = self->f2D0;
-    s32 r = func_0016EC98(a1);
+    s32 r = GetPadHorizontalStep(a1);
     f32 f = (f32)r;
     s32 v = self->f2FC;
     s32 k = (v == 5);
@@ -819,7 +819,7 @@ void func_0016B0F8(Obj_16B0F8* self, void* a1)
             n++;
         }
     }
-    func_0016B300(self, n, 0);
+    SetCurrentObjectChoice(self, n, 0);
 }
 
 struct Node_16B7A8 {
@@ -840,15 +840,15 @@ void func_0016B7A8(T217D_12E0* self, s32 v)
         return;
     }
     if (v != 0) {
-        func_0016B300(self->node, ((Node_16B7A8*)self->node)->f2D0, 0);
-        func_0016E0F0(1);
-        func_0016EC88(&D_00262C70);
+        SetCurrentObjectChoice(self->node, ((Node_16B7A8*)self->node)->f2D0, 0);
+        SetPadSelectFlags(1);
+        ResetPadStepRepeat(&g_padRecord);
     } else {
         if (self->sound != 0) {
-            func_001BE998();
+            StopStreamVoice();
             self->sound = 0;
         }
-        func_0016E118(1);
+        ClearPadSelectFlags(1);
         self->vt->m15(self);
         D_0026F138.vt->m15(&D_0026F138);
     }
@@ -879,7 +879,7 @@ void func_00168B68(f32 t)
     s32 i = 0;
     s32 n;
 
-    func_001611B8(&f);
+    InitGifPacket(&f);
     n = (s32)(t * 59.999996f);
     func_001683B8();
     D_002626CC = 0;
@@ -889,16 +889,16 @@ void func_00168B68(f32 t)
             f32 y = x * 255.0f;
             s32 v = (s32)(x * y);
             i++;
-            func_001529C8(&f, 0x40, &f.value);
-            func_00152B38(&f);
-            func_0019DDA0(0.0f, 0.0f, 640.0f, 492.80002f, 0, 0, 0, v, &f);
-            func_001613C0(&f, 0, 1, 0xE);
-            func_00161708(&f, 0x61, 0);
-            func_00161200(&f);
-            func_00152D30(&f);
-            func_001529E0(&f, 0, 0);
-            func_001686E8(D_00261F1C, &f.value);
-            func_001683E8();
+            UsePacketBufferMemory(&f, 0x40, &f.value);
+            BeginDmaTag(&f);
+            WriteColoredSpritePacket(0.0f, 0.0f, 640.0f, 492.80002f, 0, 0, 0, v, &f);
+            BeginGifTag(&f, 0, 1, 0xE);
+            AddGifRegisterWrite(&f, 0x61, 0);
+            EndGifPacket(&f);
+            AddDmaEndTag(&f);
+            DetachPacketBuffer(&f, 0, 0);
+            func_001686E8(g_gifChannel, &f.value);
+            FlipDisplayFrame();
         } while (i < n);
     }
 }
@@ -921,32 +921,32 @@ s32 func_001690C0(s32 mask, BumpAllocator* b, V24A0* c)
     } else {
         saved = 0;
     }
-    for (s32 i = 0; i < D_00274508; i++) {
-        V24A2_ImgB* e = &D_0027450C[i];
+    for (s32 i = 0; i < g_imageRecordCountB; i++) {
+        V24A2_ImgB* e = &g_imageRecordsB[i];
         if ((e->f0 & mask) == mask) {
-            s32 v = func_00168D88(b, e->f6);
-            func_00168E78(e, v);
+            s32 v = AllocateBump(b, e->f6);
+            BuildPaletteTexRegister(e, v);
             if (c != 0) {
-                func_00168F48(e, v, c);
-                func_00152B80(c, e->fC, e->f8);
+                StartPaletteUpload(e, v, c);
+                AddDmaRefTag(c, e->fC, e->f8);
             }
         }
     }
     if ((b->next & 0x7F) != 0) {
-        func_00168D88(b, 0x80 - (b->next & 0x7F));
+        AllocateBump(b, 0x80 - (b->next & 0x7F));
     }
-    for (s32 i = 0; i < D_00274500; i++) {
-        V24A2_ImgA* e = &D_00274504[i];
+    for (s32 i = 0; i < g_imageRecordCountA; i++) {
+        V24A2_ImgA* e = &g_imageRecordsA[i];
         if ((e->f4 & mask) == mask) {
             s32 v;
             if (e->f8 == 0 && (b->next & 0x1F) != 0) {
-                func_00168D88(b, 0x20 - (b->next & 0x1F));
+                AllocateBump(b, 0x20 - (b->next & 0x1F));
             }
-            v = func_00168D88(b, e->f0A);
-            func_00168FB0(e, v);
+            v = AllocateBump(b, e->f0A);
+            BuildImageTexRegister(e, v);
             if (c != 0) {
-                func_00169088(e, v, c);
-                func_00152B80(c, e->f14, e->f10);
+                StartImageUpload(e, v, c);
+                AddDmaRefTag(c, e->f14, e->f10);
             }
         }
     }
@@ -992,7 +992,7 @@ void func_0016B190(Obj_16B190* self)
     s32 callB = 1;
     s32 idx = self->f2D0;
     if (idx != 0) {
-        if ((D_002623C0->levels[idx].f448 & 1) == 0) {
+        if ((g_saveData->levels[idx].f448 & 1) == 0) {
         if (idx != self->f300) {
             s32 s2 = 1;
             void* elt;
@@ -1000,7 +1000,7 @@ void func_0016B190(Obj_16B190* self)
             func_00160340(idx);
             elt = *(void**)(table + (self->f2D0 << 2));
             if (elt != 0) {
-                func_0012C7B0(elt, self, 0, 0, 0.0f, 1.0f);
+                CreateAnimationPlayerWithoutPresetTargets(elt, self, 0, 0, 0.0f, 1.0f);
                 elt = *(void**)(table + (self->f2D0 << 2));
                 if (elt != 0 && func_0012C9A8(elt) != 0) {
                     goto tail;
@@ -1013,26 +1013,26 @@ void func_0016B190(Obj_16B190* self)
                     flag = (a->f4 != a->f1C);
                 }
                 if (flag) {
-                    func_001F0428(a, -1, 1);
+                    StartObjectFade(a, -1, 1);
                 } else {
                     s2 = 0;
                 }
             }
         tail:
             if (s2) {
-                func_001E9570(D_00275BC0);
+                PopStackElement(g_elementStack);
             }
         } else {
             void* h = self->f2F8;
             callB = 0;
             if (h != 0) {
-                { func_001B64D8(h, D_00262860[idx].b); }
+                { SetStateWalkerTarget(h, D_00262860[idx].b); }
             }
         }
         }
     }
     if (callB) {
-        func_0016B300(self, self->f2D0, 1);
+        SetCurrentObjectChoice(self, self->f2D0, 1);
     }
 }
 
@@ -1048,11 +1048,11 @@ void func_0016BDD0(T217D_1330* self, s32 flag)
     }
     if (flag != 0) {
         s32 bit = 15;
-        func_0016E0F0(1);
-        func_0016EC88(&D_00262C70);
+        SetPadSelectFlags(1);
+        ResetPadStepRepeat(&g_padRecord);
         self->vt->m14(self);
-        s32 mask = func_0016BB78(15);
-        GameProgress* g = D_002623C0;
+        s32 mask = TestGridEntryBit(15);
+        GameProgress* g = g_saveData;
         for (; bit > 0; bit--) {
             if (g->u19F4 & mask) {
                 break;
@@ -1061,7 +1061,7 @@ void func_0016BDD0(T217D_1330* self, s32 flag)
         }
         self->cursor = bit;
     } else {
-        func_0016E118(1);
+        ClearPadSelectFlags(1);
         self->vt->m15(self);
     }
     self->open = flag;
@@ -1077,13 +1077,13 @@ void func_00169B18(TextureHeader* src, void* dst)
     if (cap < w) cap = w;
     s32 f = (s32)(src->tex0 & 0x3FFF) >> 5;
     s32 m = 1 << (s32)((src->tex0 >> 30) & 0xF);
-    func_001613C0(dst, 0x200, 1, 0xE);
-    func_00161708(dst, 0x4D, (u64)(cap / 64) << 16 | (u64)f);
-    func_00161708(dst, 0x4F, 0x30000000 | (u64)f | (u64)0x8000 << 17);
-    func_00161708(dst, 0x19, 0);
-    func_00161708(dst, 0x41, (u64)(w - 1) << 16 | (u64)(m - 1) << 48);
-    func_00161708(dst, 0x48, 0x31001);
-    func_00161708(dst, 0x43, 0x44);
+    BeginGifTag(dst, 0x200, 1, 0xE);
+    AddGifRegisterWrite(dst, 0x4D, (u64)(cap / 64) << 16 | (u64)f);
+    AddGifRegisterWrite(dst, 0x4F, 0x30000000 | (u64)f | (u64)0x8000 << 17);
+    AddGifRegisterWrite(dst, 0x19, 0);
+    AddGifRegisterWrite(dst, 0x41, (u64)(w - 1) << 16 | (u64)(m - 1) << 48);
+    AddGifRegisterWrite(dst, 0x48, 0x31001);
+    AddGifRegisterWrite(dst, 0x43, 0x44);
 }
 
 struct Bits_168E78 {
@@ -1140,7 +1140,7 @@ s32 func_0016A758(u8* self)
     s32 count = 0;
     void* node = w.First();
     while (node != 0) {
-        if (func_001300E8(node, 70)) {
+        if (IsObjectOfKind(node, 70)) {
             s32 x = *(s32*)((u8*)node + 0x550);
             if (1 < (u32)(x - 3)) {
             } else {
@@ -1156,7 +1156,7 @@ void func_00182C18(void* self);
 
 void func_00169CD8(C6F* self)
 {
-    func_00182C18(self);
+    InitObject(self);
     self->id44 = -1;
     self->f4C = 1;
     self->f50 = 3;
@@ -1194,11 +1194,11 @@ void func_00169E20(void* a0, void* a1, void* a2, f32 f);
 void func_00169FC0(Self_169FC0* self, f32* out, void* a2, void* a3)
 {
     Frame_169FC0 f;
-    u8* node = (u8*)func_001925F0();
+    u8* node = (u8*)GetActiveSwitchedCollider();
     Obj_169FC0* o = self->f34;
     f.c = 1;
     func_00128018(0, self->f18, node + 0x140, &f.a);
-    func_001280C0(0, self->f18, (void*)&D_00248D20, &f.b);
+    func_001280C0(0, self->f18, (void*)&g_unitZVector, &f.b);
     if (o->vt[10] != 0) {
         ((void (*)(void*, void*, void*, s32, s32, s32, void*))o->vt[10])(o, &f.a, &f.b, 0, 0, 0, &f.x);
     }
@@ -1253,22 +1253,22 @@ void func_0016A5F0(Obj_16A5F0* self, s32 v)
     }
     if (self->f550 == 1) {
         self->vtbl[25](self, 0);
-        func_001B9AE0(self, 0, 0, 0, 0);
-        func_001837E0(self, 3, 0, 0);
+        SetColliderAnchors(self, 0, 0, 0, 0);
+        TriggerScriptEvent(self, 3, 0, 0);
     }
     if (v == 1) {
-        self->vtbl[25](self, D_00262E10);
+        self->vtbl[25](self, g_player);
         self->vtbl[36](self, (void*)&D_00248D30);
         self->vtbl[37](self, (void*)&D_00248D30);
-        func_001B9AE0(self, 3, 0, 3, 0);
-        func_00189378((u8*)D_00262E10 + 0x110, 0, f.a);
+        SetColliderAnchors(self, 3, 0, 3, 0);
+        func_00189378((u8*)g_player + 0x110, 0, f.a);
         func_00189378((u8*)self + 0x110, f.c, f.b);
         func_00188D28(f.c, f.e, f.d);
         func_00189150(f.a, f.b, self->f224);
-        func_001837E0(self, 2, 0, 0);
+        TriggerScriptEvent(self, 2, 0, 0);
     }
     self->f550 = v;
-    self->f554 = D_0026185C[0];
+    self->f554 = g_gameTime[0];
 }
 
 void* func_001300E8(void* node, s32 flags);
@@ -1315,7 +1315,7 @@ void* func_0016A820(u8* self)
     f32 bestF = D_0024A79C;
     void* node = w.First();
     while (node != 0) {
-        if (func_001300E8(node, 0x46)) {
+        if (IsObjectOfKind(node, 0x46)) {
             Node_16A820* n = (Node_16A820*)node;
             if (n->f550 == 4 && n->f554 < bestF) {
                 best = node;
@@ -1355,9 +1355,9 @@ void func_0016AF80(Ctx_16AF80* self)
     } else if (self->f2D0 == 0) {
         D_0026F138.vt->m08(&D_0026F138, D_0024A7A8);
     } else {
-        s32 flags = D_002623C0->levels[self->f2D0].f448;
+        s32 flags = g_saveData->levels[self->f2D0].f448;
         if (flags & 1) {
-            func_001AD1E8(&D_0026F138);
+            SetElementTextFromIndexedCounts(&D_0026F138);
         } else if (self->f2D0 == self->f300) {
             D_0026F138.vt->m08(&D_0026F138, D_0024A7B0);
         } else {
@@ -1366,7 +1366,7 @@ void func_0016AF80(Ctx_16AF80* self)
         }
     }
 
-    func_001AA8B8(&D_0026F138, 0.0f);
+    SetScreenElementHoldTime(&D_0026F138, 0.0f);
     D_0026F138.announce = 0;
     D_0026F138.vt->m14(&D_0026F138);
 
@@ -1405,7 +1405,7 @@ void func_0018D800(Dst_1694A0* dst, void* src, s32 count);
 
 void func_001694A0(Rec_1694A0* self)
 {
-    func_0018D800(self->f8, (void*)self->f4, self->f0);
+    CopyMemory(self->f8, (void*)self->f4, self->f0);
     s32 flag = self->fC;
     if (flag != 0) {
         Dst_1694A0* d = self->f8;
@@ -1447,7 +1447,7 @@ extern const f32 D_0024A798 = 3.4028235e+38f;
 
 void func_0016A100(C7F* self)
 {
-    func_00182C18(self);
+    InitObject(self);
     f32 k = D_0024A798;
     self->targetId = -1;
     self->f68 = 1;
@@ -1463,15 +1463,15 @@ void func_0016A420(ListedCollisionPart* self)
     Quad16* dst;
     Quad16* src;
 
-    func_001BAC30(self);
+    LoadCollider(self);
     if (self->f224 == 0) {
-        self->f224 = (Rec2195_224*)func_0018D5C0(0xC0);
+        self->f224 = (Rec2195_224*)AllocateZeroedFrontMemory(0xC0);
 
     }
     b = self->f224;
     b->fB0 |= 1;
     dst = (Quad16*)self->f224;
-    src = (Quad16*)&D_002483D0;
+    src = (Quad16*)&g_identityMatrix;
     dst[0] = src[0];
     dst[1] = src[1];
     dst[2] = src[2];
@@ -1485,7 +1485,7 @@ void func_0016A580(ListedCollisionPart* self, f32 t)
 {
     Mat3U buf;
 
-    func_001B9338(self, t);
+    StepCollider(self, t);
     if (self->f550 != 0) {
         return;
     }
@@ -1517,38 +1517,38 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
     if (a == self->f2D0 && b == self->f2D4) return;
     if (a != self->f300 && a > 0) {
         Slot_16B300* slot = 0;
-        if (D_002623C0->levels[a].f448 & 1) {
-            s32 fl = D_002623C0->f19EC;
+        if (g_saveData->levels[a].f448 & 1) {
+            s32 fl = g_saveData->f19EC;
             if (!(fl & 2)) {
-                D_002623C0->f19EC = fl | 2;
+                g_saveData->f19EC = fl | 2;
                 slot = (Slot_16B300*)&D_00262950;
             }
         } else {
-            f32 t = D_00261858[1];
+            f32 t = g_gameClock[1];
             if (D_00262970 <= t - D_0026FA90.lastAt) {
                 D_0026FA90.lastAt = t;
                 slot = (Slot_16B300*)((u8*)D_00262890 + (a << 5));
             }
         }
         if (slot) {
-            func_001BE728(slot);
-            D_0026FCF4 = func_001BE980();
+            OpenKeyRecord(slot);
+            D_0026FCF4 = HasStreamVoice();
         }
     }
     void* h = self->f2E0;
     if (h) {
         if (self->f2D0 == -1) {
             if (a != 0) {
-                func_001B6628(h, D_00262860[a].b);
-                func_001B64D8(self->f2E0, D_00262860[a].a);
+                TeleportStateWalker(h, D_00262860[a].b);
+                SetStateWalkerTarget(self->f2E0, D_00262860[a].a);
             }
         } else {
-            func_001B64D8(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
+            SetStateWalkerTarget(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
         }
     }
     self->f2D0 = a;
     self->f2D4 = b;
-    self->f2D8 = D_00261858[1];
+    self->f2D8 = g_gameClock[1];
 }
 
 struct Sub_16B580 { u8 pad0[0x28]; s32 f28; s32 f2C; s32 f30; };
@@ -1593,9 +1593,9 @@ void func_0016B580(T217D_12E0* self, PadRecord* arg)
     }
     if (self->sound != 0) {
         if (func_001BE810() != 0) {
-            func_0011CE30();
+            PollIopCommands();
         }
-        self->sound = func_001BE980();
+        self->sound = HasStreamVoice();
     }
     if (D_00272420 != 0) {
         return;
@@ -1607,43 +1607,43 @@ void func_0016B580(T217D_12E0* self, PadRecord* arg)
     Sub_16B580* p = o->f2E0;
     if (o->f308 != 0) {
         if (o->f308 == o->f33C) {
-            func_0018C7F8(g_memoryCard);
+            StartMemoryCardSave(g_memoryCard);
         }
-        func_001518B8(o->f308);
+        ChooseStepSequenceState(o->f308);
         o->f308 = 0;
     }
-    func_0016AF80(o);
+    ShowCurrentObjectCaptions(o);
     f32 delay = 0.3f;
-    if (o->f2D4 == 1 && (p->f28 == p->f30 || delay <= D_0026185C[0] - o->f2D8)) {
+    if (o->f2D4 == 1 && (p->f28 == p->f30 || delay <= g_gameTime[0] - o->f2D8)) {
         s32 idx = o->f2D0;
         if (idx == 0) {
             if (D_0026FD00.mode != 0) {
                 return;
             }
-            func_001E9498(D_00275BC0, &D_0026FD00);
+            PushStackElement(g_elementStack, &D_0026FD00);
             return;
         }
-        if (D_0026F808.mode != 0) {
+        if (g_mapScreenList.mode != 0) {
             return;
         }
-        D_0026F808.current = D_0026F808.nodes[idx];
-        func_001E9498(D_00275BC0, &D_0026F808);
+        g_mapScreenList.current = g_mapScreenList.nodes[idx];
+        PushStackElement(g_elementStack, &g_mapScreenList);
         return;
     }
     if (p->f28 != p->f30) {
         return;
     }
-    if ((arg->flags & 0x800) || (arg->f14 == 1 && 5.0f <= D_0026185C[0])) {
-        func_0016EC20(arg, 0x800);
-        func_00194D30(&D_0026FF68, 0, 0x17);
+    if ((arg->flags & 0x800) || (arg->f14 == 1 && 5.0f <= g_gameTime[0])) {
+        ClearPadPressedBits(arg, 0x800);
+        SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x17);
         return;
     }
     if ((arg->flags & 0x140) != 0) {
-        func_0016EC20(arg, 0x140);
-        func_0016B190(o);
+        ClearPadPressedBits(arg, 0x140);
+        ConfirmCurrentObjectChoice(o);
         return;
     }
-    func_0016B0F8(o, arg);
+    MoveCurrentObjectChoice(o, arg);
 }
 
 extern s32 D_00262988[];
@@ -1653,12 +1653,12 @@ V24A2* func_0015C1C0(s32 index);
 
 void func_0016B4A0(T217D_12E0* self)
 {
-    func_001AA268(self);
-    if (func_0015C188(2)) {
+    SetupScreenElementText(self);
+    if (IsFontLoaded(2)) {
         self->frame = (V24A2**)D_00262988;
-        *self->frame = func_0015C1C0(2);
+        *self->frame = GetFontById(2);
     }
-    func_001AA8B8(self, 0.0f);
+    SetScreenElementHoldTime(self, 0.0f);
     self->node = 0;
     *(u32*)self->rgba.c = 0xDF7F7F7F;
     self->sound = 0;
@@ -1675,7 +1675,7 @@ void func_00168F48(V24A2_ImgB* e, s32 v, void* ctx)
     s32 n = e->f4 - 1;
     Dbp_168F48 p;
     p.v = v;
-    func_00168D98(p, 1, 0, step, ((n + step) & -step) / step, e->fC, ctx);
+    BeginImageTransfer(p, 1, 0, step, ((n + step) & -step) / step, e->fC, ctx);
 }
 
 void* func_001611B8(V24A0* f);
@@ -1688,17 +1688,17 @@ void func_00168770(V24A0* self, u8* color, s32 flag)
     V24A0 f;
     s32 x;
 
-    func_001611B8(&f);
-    func_001529C8(&f, 0x2C, self);
-    func_001613C0(&f, (s8)color[3] >= 0 ? 0x46 : 6, 1, 0xE);
-    func_00161708(&f, 1, (u64)color[0] | ((u64)color[1] << 8) | ((u64)color[2] << 16) | ((u64)color[3] << 24));
-    func_00161708(&f, 0x47, flag != 0 ? 0x32001 : 0x32000);
+    InitGifPacket(&f);
+    UsePacketBufferMemory(&f, 0x2C, self);
+    BeginGifTag(&f, (s8)color[3] >= 0 ? 0x46 : 6, 1, 0xE);
+    AddGifRegisterWrite(&f, 1, (u64)color[0] | ((u64)color[1] << 8) | ((u64)color[2] << 16) | ((u64)color[3] << 24));
+    AddGifRegisterWrite(&f, 0x47, flag != 0 ? 0x32001 : 0x32000);
     for (x = 0; x < 0x280; x += 0x20) {
-        func_00161708(&f, 5, (u64)((0x6C0 + x) << 4) | ((u64)(0x790 << 4) << 16));
-        func_00161708(&f, 5, (u64)((0x6E0 + x) << 4) | ((u64)(0x870 << 4) << 16));
+        AddGifRegisterWrite(&f, 5, (u64)((0x6C0 + x) << 4) | ((u64)(0x790 << 4) << 16));
+        AddGifRegisterWrite(&f, 5, (u64)((0x6E0 + x) << 4) | ((u64)(0x870 << 4) << 16));
     }
-    func_00161708(&f, 0x47, 0x70000);
-    func_00161200(&f);
+    AddGifRegisterWrite(&f, 0x47, 0x70000);
+    EndGifPacket(&f);
 }
 
 extern u8 D_002629A8[];
@@ -1709,10 +1709,10 @@ void func_0015C900(V24A2* font);
 
 void func_0016BA40(T217D_1330* self)
 {
-    func_001AA268(self);
-    if (func_0015C188(2)) {
+    SetupScreenElementText(self);
+    if (IsFontLoaded(2)) {
         self->frame = (V24A2**)D_002629A8;
-        *self->frame = func_0015C1C0(2);
+        *self->frame = GetFontById(2);
     }
     V24A2* a1 = self->font;
     f32 f20 = 60.0f;
@@ -1722,14 +1722,14 @@ void func_0016BA40(T217D_1330* self)
     self->font = n;
     self->color = 0xDF7F7F7F;
     f20 = (f32)n->height * n->sy + f20;
-    V24A2* s0 = func_0015C1C0(4);
-    func_0015C8B8(s0, 1.3f, 1.3f);
+    V24A2* s0 = GetFontById(4);
+    PushFontScale(s0, 1.3f, 1.3f);
     const V24A2_Vt* v = s0->vt;
     f32 r = v->width((V24A2*)((u8*)s0 + v->adj3), 0x5F);
     f21 = r * 4.0f + f21;
     f20 = f20 + (f32)s0->height * s0->sy * 4.0f;
-    func_0015C900(s0);
-    func_001AAB20(self, f21, f20);
+    PopFontScale(s0);
+    SetScreenElementSize(self, f21, f20);
 }
 
 struct Pm_168130 { u32 en1 : 1; u32 rest : 31; u32 hi : 32; };
@@ -1748,7 +1748,7 @@ extern s32 D_002626C8;
 
 void func_00168130(void)
 {
-    s32 i = D_002626C0 & 1;
+    s32 i = g_displayFrameCounter & 1;
     s32 field = D_002626C8;
     Pm_168130 pm = ((Rec_168130*)&D_00262490)[i].pmode;
 
@@ -1823,17 +1823,17 @@ void func_0016B860(T217D_12E0* self)
         if (h != 0) {
             slot = *(T217D_Word*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
-            Hd_16B860::Draw(self->frame, &out, &D_00262280);
+            Hd_16B860::Draw(self->frame, &out, &g_gsPacketWriter);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
-        f32 r = func_00205400(D_00261868 * 10.0f);
+        f32 r = func_00205400(g_elapsedTime * 10.0f);
         f32 t = r * 0.5f + 0.5f;
         f32 k = (1.0f - t) * 0.9f + t;
         f32 v = self->scale * k;
-        func_0015C8B8(self->font, v, v);
-        func_0015DB28(loc, &self->text[0], self->font);
-        func_0015E318(loc, &out, 0, &D_00262280);
-        func_0015C900(self->font);
+        PushFontScale(self->font, v, v);
+        InitTextReader(loc, &self->text[0], self->font);
+        DrawAlignedText(loc, &out, 0, &g_gsPacketWriter);
+        PopFontScale(self->font);
     }
 }
 
@@ -1878,24 +1878,24 @@ s32 func_00169780(u32 mask)
     s32 res;
     s32 i;
 
-    func_00168D68(&span, 0x1400, 0x1E00);
-    func_001611B8(&fa);
+    InitBumpAllocator(&span, 0x1400, 0x1E00);
+    InitGifPacket(&fa);
     res = 0;
-    func_001EE318(&fb);
-    func_0018D608();
-    func_00152980(&fb, (D_00274514 * 2 + D_00274514 + D_00274510) * 10 + 4);
-    func_00152B38(&fb);
-    func_001EE450(&fb);
-    for (i = 0; i < D_00274508; i++) {
-        V24A2_ImgB* e = (V24A2_ImgB*)((*(u8**)&D_0027450C) + i * 0x18);
+    InitPacketWriter(&fb);
+    PushBackMemoryMark();
+    AllocateTempPacketBuffer(&fb, (D_00274514 * 2 + D_00274514 + D_00274510) * 10 + 4);
+    BeginDmaTag(&fb);
+    WriteVifFlush(&fb);
+    for (i = 0; i < g_imageRecordCountB; i++) {
+        V24A2_ImgB* e = (V24A2_ImgB*)((*(u8**)&g_imageRecordsB) + i * 0x18);
         if ((e->f0 & mask) == mask) {
-            func_001528E0(&fa);
-            func_001529C8(&fa, 0xA, buf);
-            s32 n = func_00168D88(&span, e->f6);
-            func_00168E78(e, n);
-            func_00168F48(e, n, &fa);
+            RewindPacketBuffer(&fa);
+            UsePacketBufferMemory(&fa, 0xA, buf);
+            s32 n = AllocateBump(&span, e->f6);
+            BuildPaletteTexRegister(e, n);
+            StartPaletteUpload(e, n, &fa);
             *(u64*)(fa.curS - 0x10) |= 0x8000;
-            func_001529E0(&fa, &o0, &o1);
+            DetachPacketBuffer(&fa, &o0, &o1);
             func_001EE7D0(&fb, o0, o1, 0);
             func_001EE850(&fb, e->fC, e->f8, 0);
             if (e->f0 & 0x40000000) {
@@ -1903,18 +1903,18 @@ s32 func_00169780(u32 mask)
             }
         }
     }
-    if (D_00274500 > 0) {
+    if (g_imageRecordCountA > 0) {
         i = 0;
         do {
-            V24A2_ImgA* e = (V24A2_ImgA*)((*(u8**)&D_00274504) + i * 0x20);
+            V24A2_ImgA* e = (V24A2_ImgA*)((*(u8**)&g_imageRecordsA) + i * 0x20);
             if ((e->f4 & mask) == mask) {
-                func_001528E0(&fa);
-                func_001529C8(&fa, 0xA, buf);
-                s32 n = func_00168D88(&span, e->f0A);
-                func_00168FB0(e, n);
-                func_00169088(e, n, &fa);
+                RewindPacketBuffer(&fa);
+                UsePacketBufferMemory(&fa, 0xA, buf);
+                s32 n = AllocateBump(&span, e->f0A);
+                BuildImageTexRegister(e, n);
+                StartImageUpload(e, n, &fa);
                 *(u64*)(fa.curS - 0x10) |= 0x8000;
-                func_001529E0(&fa, &o0, &o1);
+                DetachPacketBuffer(&fa, &o0, &o1);
                 func_001EE7D0(&fb, o0, o1, 0);
                 func_001EE850(&fb, e->f14, e->f10, 0);
                 if (e->f4 & 0x40000000) {
@@ -1922,24 +1922,24 @@ s32 func_00169780(u32 mask)
                 }
             }
             i++;
-        } while (i < D_00274500);
+        } while (i < g_imageRecordCountA);
     }
     if (span.next > span.start) {
-        func_001528E0(&fa);
-        func_001529C8(&fa, 0xA, buf);
-        func_001613C0(&fa, 0, 1, 0xE);
-        func_00161708(&fa, 0x3F, 0);
-        func_00161200(&fa);
-        func_001529E0(&fa, &o0, &o1);
+        RewindPacketBuffer(&fa);
+        UsePacketBufferMemory(&fa, 0xA, buf);
+        BeginGifTag(&fa, 0, 1, 0xE);
+        AddGifRegisterWrite(&fa, 0x3F, 0);
+        EndGifPacket(&fa);
+        DetachPacketBuffer(&fa, &o0, &o1);
         func_001EE7D0(&fb, o0, o1, 0);
-        func_001EE450(&fb);
-        func_00152D70(&fb);
+        WriteVifFlush(&fb);
+        CloseDmaTag(&fb);
         *(u64*)fb.curS = 0x60000000;
         fb.curS += 0x10;
-        func_00152A50(&fb, 0, 0, &res, 7);
-        func_001B3510(mask);
+        DetachPacketBufferCopy(&fb, 0, 0, &res, 7);
+        BuildAnimRecordGifPackets(mask);
     }
-    func_0018D6F0();
+    PopBackMemoryMark();
     return res;
 }
 
@@ -1979,22 +1979,22 @@ void func_001E9498(u8* a, u8* b);
 
 void func_0016AB38(Self_16AB38* self)
 {
-    if (self->p[0].src) self->p[0].dst = func_001B6290(self->p[0].src, 0, -1, 0);
-    if (self->p[1].src) self->p[1].dst = func_001B6290(self->p[1].src, 0, -1, 0);
-    if (self->p[2].src) self->p[2].dst = func_001B6290(self->p[2].src, 0, -1, 0);
-    if (self->p[3].src) self->p[3].dst = func_001B6290(self->p[3].src, 0, -1, 1);
+    if (self->p[0].src) self->p[0].dst = CreateStateWalker(self->p[0].src, 0, -1, 0);
+    if (self->p[1].src) self->p[1].dst = CreateStateWalker(self->p[1].src, 0, -1, 0);
+    if (self->p[2].src) self->p[2].dst = CreateStateWalker(self->p[2].src, 0, -1, 0);
+    if (self->p[3].src) self->p[3].dst = CreateStateWalker(self->p[3].src, 0, -1, 1);
     self->cur = 5;
     for (;;) {
         s32 c = self->cur;
         if (c < 3) break;
-        if (D_002623C0->levels[c - 2].f448 & 0x20) break;
+        if (g_saveData->levels[c - 2].f448 & 0x20) break;
         s32 d = c - 1;
-        if (D_002623C0->levels[d].f448 & 1) break;
+        if (g_saveData->levels[d].f448 & 1) break;
         self->cur = d;
     }
     for (s32 i = 1; i <= self->cur; i++) {
         StateTrigger* o = self->objs[i - 1];
-        if (o && (D_002623C0->levels[i].f448 & 1)) o->desc->m02(o);
+        if (o && (g_saveData->levels[i].f448 & 1)) o->desc->m02(o);
     }
     self->chosen = 0;
     for (s32 i = 0; i < 4; i++) {
@@ -2019,35 +2019,35 @@ void func_0016AB38(Self_16AB38* self)
     if (self->chosen) {
         idx = 0;
     } else {
-        s32 a = D_002623CC;
-        if (a != -1 && (D_002623C0->levels[a].f448 & 1)) {
+        s32 a = g_previousLevelIndex;
+        if (a != -1 && (g_saveData->levels[a].f448 & 1)) {
             idx = a;
         } else {
             s32 c = self->cur;
-            if ((D_002623C0->levels[c - 1].f448 & 1) == 0) {
+            if ((g_saveData->levels[c - 1].f448 & 1) == 0) {
                 idx = c - 2;
-            } else if ((D_002623C0->levels[c].f448 & 1) == 0) {
+            } else if ((g_saveData->levels[c].f448 & 1) == 0) {
                 idx = c - 1;
             } else {
                 idx = c;
             }
         }
     }
-    func_0016B300(self, idx, 0);
+    SetCurrentObjectChoice(self, idx, 0);
     if (self->p[2].dst || self->p[3].dst) {
         idx = self->cur;
         if (idx != 5) {
             self->sel = idx;
         } else {
-            GameProgress* t = D_002623C0;
+            GameProgress* t = g_saveData;
             if (t->levels[4].f448 & 0x20) self->sel = 0;
             else if (t->levels[5].f448 & 1) self->sel = 0;
             else self->sel = idx;
         }
-        if (self->p[2].dst) func_001B6628(self->p[2].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
-        if (self->p[3].dst) func_001B6628(self->p[3].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
+        if (self->p[2].dst) TeleportStateWalker(self->p[2].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
+        if (self->p[3].dst) TeleportStateWalker(self->p[3].dst, ((SelEnt_16AB38*)&D_00262860)[self->sel].id);
     }
-    func_001E9498(D_00275BC0, (u8*)&D_0026FA90);
+    PushStackElement(g_elementStack, (u8*)&D_0026FA90);
 }
 
 struct Tag_16BBA8;
@@ -2069,27 +2069,27 @@ void func_0016BBA8(T217D_1330* ctx, PadRecord* o)
     s32 s1;
     s32 r2;
 
-    if ((o->flags & 0x9B0) != 0 || (o->f14 == 1 && 5.0f <= D_0026185C[0])) {
-        func_0016EC20(o, 0x9B0);
-        func_001E9570((Group_16BBA8*)D_00275BC0);
+    if ((o->flags & 0x9B0) != 0 || (o->f14 == 1 && 5.0f <= g_gameTime[0])) {
+        ClearPadPressedBits(o, 0x9B0);
+        PopStackElement((Group_16BBA8*)g_elementStack);
         return;
     }
     if ((o->flags & 0x40) != 0) {
-        func_0016EC20(o, 0x40);
-        if (func_0016BB78((Bits_16BBA8*)ctx->cursor) != 0) {
-            func_0018E4C0((Bits_16BBA8*)ctx->cursor);
+        ClearPadPressedBits(o, 0x40);
+        if (TestGridEntryBit((Bits_16BBA8*)ctx->cursor) != 0) {
+            QueueMovieByIndex((Bits_16BBA8*)ctx->cursor);
             return;
         }
-        func_001BFCD8((Tag_16BBA8*)0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect((Tag_16BBA8*)0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
-    s1 = func_0016EC98(o);
-    r2 = func_0016EED0(o);
+    s1 = GetPadHorizontalStep(o);
+    r2 = GetPadVerticalStep(o);
     if (s1 == 0 && r2 == 0) {
         return;
     }
-    o->f30 = D_00261858[4] + o->f34;
-    o->f38 = D_00261858[4] + o->f3C;
+    o->f30 = g_gameClock[4] + o->f34;
+    o->f38 = g_gameClock[4] + o->f3C;
 
     {
         s32 n = ctx->cursor;
@@ -2105,7 +2105,7 @@ void func_0016BBA8(T217D_1330* ctx, PadRecord* o)
         r = (r + dx) % 4;
         ctx->cursor = q * 4 + r;
     }
-    func_001BFCD8((Tag_16BBA8*)0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect((Tag_16BBA8*)0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }
 
 s32 D_00262480 = 0xF;

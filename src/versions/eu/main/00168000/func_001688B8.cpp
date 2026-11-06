@@ -22,18 +22,18 @@ void func_001688B8(void)
     k.b2 = 0;
     k.b3 = 0x80;
     t = k;
-    func_00168770(D_002BDC20, &t, 0);
+    FillScreenColor(D_002BDC20, &t, 0);
     t = k;
-    func_00168770(D_002BE1A0, &t, 0);
+    FillScreenColor(D_002BE1A0, &t, 0);
     t = k;
-    func_00168770(D_002BDEE0, &t, 1);
-    D_002BE460 = func_001E2268((void*)0, (void*)1);
-    D_002BE464 = func_001E2268((void*)0, (void*)1);
+    FillScreenColor(D_002BDEE0, &t, 1);
+    D_002BE460 = CreateLockSemaphore((void*)0, (void*)1);
+    D_002BE464 = CreateLockSemaphore((void*)0, (void*)1);
     func_001F6950(2, func_001682C0, 0);
     func_001F6DA8(2);
     func_001F6950(0, func_00168698, 0);
     func_001F6DA8(0);
-    func_00168D00();
+    InitMeshQueue();
     func_001685B8();
 }
 

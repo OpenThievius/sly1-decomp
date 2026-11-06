@@ -8,6 +8,6 @@ void func_001ABE20(Obj_1ABE20_eu* self, s32 state)
 {
     if (self->state != state) {
         self->state = state;
-        self->timer = D_0026185C;
+        self->timer = g_gameTime;
     }
 }

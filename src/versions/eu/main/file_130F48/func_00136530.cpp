@@ -19,7 +19,7 @@ s32 func_00136530(Obj_136530_eu* self)
         return 1;
     }
     func_eu_0015DCB8(buf, &self->flag, self->handle, 0);
-    s32 n = func_0015DF58(buf);
-    s32 v = (s32)((D_0026185C - self->f578) * self->scale);
+    s32 n = CountTextChars(buf);
+    s32 v = (s32)((g_gameTime - self->f578) * self->scale);
     return v >= n;
 }

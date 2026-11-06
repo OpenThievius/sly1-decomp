@@ -72,7 +72,7 @@ s32 func_001E0978(u8* at, Spec_1E0978* spec, s32** va)
                     }
                     adv = 1;
                 } else {
-                    adv = func_001E08F8(p, &spec->width);
+                    adv = ParseSignedDecimal(p, &spec->width);
                 }
                 if (p[adv] == 0x2E) {
                     next = 3;
@@ -91,7 +91,7 @@ s32 func_001E0978(u8* at, Spec_1E0978* spec, s32** va)
                     w = (w < 0) ? -w : w;
                     spec->prec = w;
                 } else {
-                    adv = func_001E08F8(p, &spec->prec);
+                    adv = ParseSignedDecimal(p, &spec->prec);
                 }
                 spec->noprec = spec->prec == 0;
                 next = 4;
@@ -122,12 +122,12 @@ s32 func_001E0978(u8* at, Spec_1E0978* spec, s32** va)
                     s32 r = 1;
                     s32 d;
                     s32 l;
-                    if (D_0024E879[*p] & 1) {
+                    if (g_charClassFlags[*p] & 1) {
                         a = 4;
                     }
                     spec->f24 = a;
                     d = *p;
-                    l = (D_0024E879[d] & 1) ? d + 0x20 : d;
+                    l = (g_charClassFlags[d] & 1) ? d + 0x20 : d;
                     if (l ^ 0x76) {
                         r = a;
                     }
@@ -146,9 +146,9 @@ s32 func_001E0978(u8* at, Spec_1E0978* spec, s32** va)
                     s32 e = *p;
                     s32 f;
                     s32 l;
-                    spec->upper = D_0024E879[e] & 1;
+                    spec->upper = g_charClassFlags[e] & 1;
                     f = *p;
-                    l = (D_0024E879[f] & 1) ? f + 0x20 : f;
+                    l = (g_charClassFlags[f] & 1) ? f + 0x20 : f;
                     spec->conv = l;
                 }
                 adv = 1;

@@ -7,5 +7,5 @@ void func_eu_0011E5F8(s32 a, s32 b)
     s32 buf[2];
     buf[0] = a;
     buf[1] = b;
-    (void)func_0011D968(0x5A, 8, buf);
+    (void)SendIopCommandAndWait(0x5A, 8, buf);
 }

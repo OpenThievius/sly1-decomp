@@ -20,21 +20,21 @@ struct __attribute__((packed)) PSys_1481A0_eu {
 void func_001481A0(void* self)
 {
     Effect* s = (Effect*)self;
-    GameProgress* g = D_002623C0;
+    GameProgress* g = g_saveData;
     s32 c = g->f19E8 + 1;
     s32 r;
     g->f19E8 = c;
     if (c >= 100) {
         r = func_00160D98();
         if (g->f19E4 < r) {
-            D_002623C0->f19E8 = 0;
+            g_saveData->f19E8 = 0;
             ((PSys_1481A0_eu*)&D_0026CE48)->f26C = 250.0f;
             ((Sys_1481A0_eu*)&D_0026CE48)->fn274 = func_00148038;
             ((Sys_1481A0_eu*)&D_0026CE48)->p278 = s->prev;
             return;
         }
-        if (D_002623C0->f19E0 < 99) {
-            D_002623C0->f19E8 = 0;
+        if (g_saveData->f19E0 < 99) {
+            g_saveData->f19E8 = 0;
             ((Sys_1481A0_eu*)&D_0026CE48)->f26C = 250.0f;
             ((Sys_1481A0_eu*)&D_0026CE48)->p278 = 0;
             ((Sys_1481A0_eu*)&D_0026CE48)->fn274 = func_00148178;
@@ -43,7 +43,7 @@ void func_001481A0(void* self)
                 obj->vtbl[14](obj);
             }
         } else {
-            D_002623C0->f19E8 = 99;
+            g_saveData->f19E8 = 99;
         }
     }
 }

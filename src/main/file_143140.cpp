@@ -383,7 +383,7 @@ void func_00143140(void)
 
 void func_00143148(void* a0, void* a1, Target_00143148* a2, void* a3)
 {
-    func_001ED650(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
+    ComputePolarOffset(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
 }
 
 ASM_FUNC(func_00143180);
@@ -401,7 +401,7 @@ void func_001434C8(Scaler_001434C8* self, f32* out, f32 p)
     f32 a = self->f200 * p;
     f32 b = self->f1FC;
     f32 c = self->f1F8;
-    func_00183FE0(out, out + 1, one, scale, b / c, (one - a) * scale);
+    FitReciprocalThroughPoints(out, out + 1, one, scale, b / c, (one - a) * scale);
     out[0] = out[0] + 8388608.0f;
     out[2] = self->f1F8;
     out[3] = out[0] + 36864.0f;
@@ -413,7 +413,7 @@ void func_00143648(Camera* self)
 {
     u8* s = (u8*)self;
 
-    func_00182C18(self);
+    InitObject(self);
     f32 one = 1.0f;
     *(f32*)(s + 0x1C0) = one;
     *(f32*)(s + 0x1C4) = one;
@@ -432,57 +432,57 @@ void func_00143648(Camera* self)
     *(f32*)(s + 0x1FC) = y;
     *(f32*)(s + 0x200) = z;
     *(struct Pk4_00143648*)(s + 0x204) = *(struct Pk4_00143648*)&D_002618B0;
-    *(struct Quad_00143648*)(s + 0x80) = *(struct Quad_00143648*)D_002483D0;
-    *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(D_002483D0 + 0x10);
-    *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(D_002483D0 + 0x20);
-    func_00143560(self);
+    *(struct Quad_00143648*)(s + 0x80) = *(struct Quad_00143648*)g_identityMatrix;
+    *(struct Quad_00143648*)(s + 0x90) = *(struct Quad_00143648*)(g_identityMatrix + 0x10);
+    *(struct Quad_00143648*)(s + 0xA0) = *(struct Quad_00143648*)(g_identityMatrix + 0x20);
+    UpdateCameraProjection(self);
     self->ctl454.vt = (const Vt2173*)D_00217398;
-    func_00149398(&self->ctl454, self);
+    SetCameraControllerOwner(&self->ctl454, self);
     self->ctl460.vt = (const Vt2173*)D_002173B0;
     func_00149660(&self->ctl460, self);
     self->ctl4C0.vt = (const Vt2173*)D_002173C8;
     func_0014A888(&self->ctl4C0, self);
     self->ctl510.vt = (const Vt2173*)D_002173E0;
-    func_00149398(&self->ctl510, self);
+    SetCameraControllerOwner(&self->ctl510, self);
     self->ctl520.vt = (const Vt2173*)D_002173F8;
-    func_00149398(&self->ctl520, self);
-    func_00143A60(self, 1);
+    SetCameraControllerOwner(&self->ctl520, self);
+    ResetCamera(self, 1);
 }
 
 void func_001437C0(void)
 {
-    func_00143940(D_00261990);
+    SnapCameraZoom(g_camera);
 }
 
 void func_001437E8(void)
 {
-    func_00143968(D_00261990);
+    SetCameraNearDistance(g_camera);
 }
 
 void func_00143810(void)
 {
-    func_00143988(D_00261990);
+    SetCameraFarDistance(g_camera);
 }
 
-void func_00143838(void) { func_001439A8(D_00261990); }
+void func_00143838(void) { func_001439A8(g_camera); }
 
-void func_00143860(void) { func_001439C8(D_00261990); }
+void func_00143860(void) { func_001439C8(g_camera); }
 
-void func_00143888(void) { func_001439E8(D_00261990); }
+void func_00143888(void) { func_001439E8(g_camera); }
 
-void func_001438B0(void) { func_00143A08(D_00261990); }
+void func_001438B0(void) { func_00143A08(g_camera); }
 
 void func_001438D8(void)
 {
-    func_00143A38(D_00261990);
+    func_00143A38(g_camera);
 }
 
 void func_00143900(void* self, void* value)
 {
-    func_001448C8(self, value, 0);
+    SetCameraPlacement(self, value, 0);
 }
 
-void func_00143920(void* arg, void* arg2) { func_001448C8(arg, 0, arg2); }
+void func_00143920(void* arg, void* arg2) { SetCameraPlacement(arg, 0, arg2); }
 
 void func_00143940(void* self, f32 x)
 {
@@ -490,51 +490,51 @@ void func_00143940(void* self, f32 x)
     c->f1C4 = x;
     c->f1C8 = x;
     c->i1CC = 0;
-    func_00143560(self);
+    UpdateCameraProjection(self);
 }
 
 void func_00143968(void* self, f32 x)
 {
     Camera* c = (Camera*)self;
     c->f1E4 = x;
-    func_00143560(self);
+    UpdateCameraProjection(self);
 }
 
 void func_00143988(Camera* self, f32 value)
 {
     self->f1E8 = value;
-    func_00143560(self);
+    UpdateCameraProjection(self);
 }
 
 void func_001439A8(Camera* self, f32 value)
 {
     self->f1F8 = value;
-    func_00143560(self);
+    UpdateCameraProjection(self);
 }
 
 void func_001439C8(Camera* self, f32 value)
 {
     self->f1FC = value;
-    func_00143560(self);
+    UpdateCameraProjection(self);
 }
 
 void func_001439E8(void* ptr, f32 value)
 {
     Camera* self = (Camera*)ptr;
     self->f200 = value;
-    func_00143560(self);
+    UpdateCameraProjection(self);
 }
 
 void func_00143A08(void* self, void* value)
 {
     *(Value_00143A08*)((u8*)self + 0x204) = *(Value_00143A08*)value;
-    func_00143560(self);
+    UpdateCameraProjection(self);
 }
 
 void func_00143A38(Camera* self, f32 value)
 {
     self->f1C0 = value;
-    func_00143560(D_00261990);
+    UpdateCameraProjection(g_camera);
 }
 
 void func_00143A60(Camera* self, s32 flag)
@@ -544,7 +544,7 @@ void func_00143A60(Camera* self, s32 flag)
     }
     self->stackCount = 0;
     func_001493B8(&self->ctl454, 0);
-    func_00145088(self, 0, &self->ctl454, 0, 0);
+    PushCameraController(self, 0, &self->ctl454, 0, 0);
     func_001455C0(self, 0);
     self->f21C = 0x0FFFFFFF;
     self->f218 = -10.0f;
@@ -568,7 +568,7 @@ void func_00143B20(Camera* list, s32 value)
 {
     for (s32 i = 0; i < list->f340; i++) {
         if (value == ((s32*)list->f344)[i]) {
-            func_0018D800(&((s32*)list->f344)[i], &((s32*)list->f344)[i + 1], (list->f340 - i - 1) * 4);
+            CopyMemory(&((s32*)list->f344)[i], &((s32*)list->f344)[i + 1], (list->f340 - i - 1) * 4);
             list->f340--;
             return;
         }
@@ -627,7 +627,7 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
                 }
                 const Vt2173* vt = n->vt;
                 if (vt->m04 != 0) {
-                    u8* t = (D_00262C68 & 1) ? D_00262C70 : D_00262D38;
+                    u8* t = (D_00262C68 & 1) ? g_padRecord : g_blankPadRecord;
                     vt->m04(n, x, t, dt);
                 }
                 prev = n;
@@ -637,10 +637,10 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
         }
     }
     if (self->f224 != 0) {
-        func_00143940(self, self->f1C8);
+        SnapCameraZoom(self, self->f1C8);
     } else if (self->f1C4 != self->f1C8) {
-        self->f1C4 = func_001EA620(self->f1C4, self->f1CC, self->f1C8, dt, &self->f1D0, &self->f1CC);
-        func_00143560(self);
+        self->f1C4 = ApproachValueClampingVelocity(self->f1C4, self->f1CC, self->f1C8, dt, &self->f1D0, &self->f1CC);
+        UpdateCameraProjection(self);
     }
     if (flag != 0) {
         self->f228 = 0;
@@ -661,7 +661,7 @@ void func_00144270(Camera* self)
     Ctx_144270* g;
 
     func_00144008(self);
-    g = *(Ctx_144270**)D_00275710;
+    g = *(Ctx_144270**)g_currentWorld;
     if (g != 0) {
         in = *(Quad_144270*)self->f40;
         func_001EEBB0((void*)g->f1EC4, &in, &out);
@@ -680,7 +680,7 @@ void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
     f32* d1;
     f32* d2;
     f32* d3;
-    func_001885E0(&m);
+    InitIdentityMatrix(&m);
     f32* pb = b;
     f32* pa = a;
     d3 = m.m + 12;
@@ -701,7 +701,7 @@ void func_001442C8(f32* b, f32* a, void* c, Quad_1442C8* out)
         pb++;
         pa++;
     } while (n >= 0);
-    func_00189AF0(&m, &v);
+    InvertMatrix4x4(&m, &v);
     func_00188668(r, c, &v);
     out[0] = r[0];
     out[1] = r[1];
@@ -715,11 +715,11 @@ ASM_FUNC(func_00144540);
 
 void func_00144848(u8* self)
 {
-    func_00152B38(D_002622A8);
-    func_001EE3B8(D_002622A8, 0, 0);
-    func_001EE668(D_002622A8, 0xC, 4, self + 0x100, 4);
-    func_001EE668(D_002622A8, 0xC, 4, self + 0x140, 8);
-    func_00152D70(D_002622A8);
+    BeginDmaTag(g_vifPacketWriter);
+    WriteVifBaseOffset(g_vifPacketWriter, 0, 0);
+    CopyWordsToWriter(g_vifPacketWriter, 0xC, 4, self + 0x100, 4);
+    CopyWordsToWriter(g_vifPacketWriter, 0xC, 4, self + 0x140, 8);
+    CloseDmaTag(g_vifPacketWriter);
 }
 
 void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b)
@@ -783,7 +783,7 @@ call:
 zero:
     t = 0.0f;
 store:
-    *out = func_001EA408(t + func_00205778(self->g80[1], self->g80[0]));
+    *out = WrapAngle(t + func_00205778(self->g80[1], self->g80[0]));
 
 }
 
@@ -822,7 +822,7 @@ void func_001451F0(Camera* self, s32 flags, s32 k0, T2173* k1, s32 k2, s32 k3)
             fn(s4, s5);
         }
         if (self->stackCount > 0) {
-            self->f364 = D_0026185C;
+            self->f364 = g_gameTime;
             T2173* o = self->stack[0].ctl;
             Fn2173 fn2 = o->vt->m00;
             if (fn2 != 0) {
@@ -873,7 +873,7 @@ s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, 
     for (i = 0; i < count; i++) {
         total += func_0013DFD8(objs[i]->p538, a2, a3, 0, 0x40 - total, &recs[total]);
     }
-    total = func_001429F8(total, recs);
+    total = MergeOverlappingSpans(total, recs);
     j = 0;
     for (k = 0;; k++) {
         if (total < k) return 0;
@@ -904,22 +904,22 @@ ASM_FUNC(func_00145E68);
 
 void func_00145FB8(Camera* self, s32 value)
 {
-    func_001495E8(&self->ctl460, value);
+    PushStackValue(&self->ctl460, value);
 }
 
 s32 func_00145FD8(Camera* self)
 {
-    return func_00149610(&self->ctl460);
+    return PopStackValue(&self->ctl460);
 }
 
 s32 func_00145FF8(Camera* self)
 {
-    return func_00149638(&self->ctl460);
+    return PeekStackValue(&self->ctl460);
 }
 
 void func_00146018(Camera* obj, s32 value, f32 first, f32 second) { obj->ctl460.f50 = value; obj->ctl460.f54 = first; obj->ctl460.f58 = second; }
 
-void func_00146028(Camera* obj) { obj->f218 = D_0026185C; }
+void func_00146028(Camera* obj) { obj->f218 = g_gameTime; }
 
 ASM_FUNC(func_00146038);
 

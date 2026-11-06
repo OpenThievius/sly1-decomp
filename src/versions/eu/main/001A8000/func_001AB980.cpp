@@ -39,21 +39,21 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
                 if (tenth != self->lastTenth)
                 {
                     if (tenth == 9)
-                        func_001BFCD8(0x7E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                        StartSoundEffect(0x7E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                     else if (tenth == 4)
-                        func_001BFCD8(0x7F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                        StartSoundEffect(0x7F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
                 }
             }
             else if (sec != self->lastSec)
             {
-                func_001BFCD8((sec & 1) ? 0x72 : 0x73, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect((sec & 1) ? 0x72 : 0x73, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
         }
     }
     self->lastTenth = tenth;
     self->lastSec = sec;
 
-    if (D_00261858.running != 0 && self->mode == 2 && (*(s32*)D_00262C68 & 2))
+    if (g_gameClock.running != 0 && self->mode == 2 && (*(s32*)D_00262C68 & 2))
     {
         s32 warn = 0;
         s32 end = 0;
@@ -82,8 +82,8 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
         if (end)
         {
             self->time = self->limit;
-            func_001BFCD8(1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
-            func_001ABE20(self, 0);
+            StartSoundEffect(1, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            SetTimerState(self, 0);
             if (self->onEnd != 0)
                 self->onEnd(self, 1);
         }
@@ -107,7 +107,7 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
     else
     {
         s32 s = (s32)t;
-        if (s != sec || (self->mode == 1 && D_00261858.time - self->start <= D_00261858.dt))
+        if (s != sec || (self->mode == 1 && g_gameClock.time - self->start <= g_gameClock.dt))
         {
             hi = s / 60;
             lo = s % 60;
@@ -117,7 +117,7 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
     }
     if (show)
     {
-        func_001E20B8(buf, 0x10, D_0024CD50, 0x54, hi, sep, (lo < 10 && !tenths) ? D_0024CD60 : D_0024CD68, lo);
+        FormatToStringBounded(buf, 0x10, D_0024CD50, 0x54, hi, sep, (lo < 10 && !tenths) ? D_0024CD60 : D_0024CD68, lo);
         func_eu_001AB238(self, buf);
     }
 }

@@ -7,5 +7,5 @@ void func_001ABE20(void* self, s32 v);
 void func_001AB958(Flag_1AB958_eu* self)
 {
     self->value = 1;
-    func_001ABE20(self, 0);
+    SetTimerState(self, 0);
 }

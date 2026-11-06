@@ -3,7 +3,7 @@
 void func_001DDB20(void* unused, s32 a1, s32 a2)
 {
     s32 saved = a1;
-    u8* p = (u8*)&D_0026FF68;
+    u8* p = (u8*)&g_pauseMenuElement;
     ((Unaligned_1DDB20*)(p + 0x590))->v = a2;
-    func_00194D30(&D_0026FF68, 0, saved);
+    SetPauseMenuLayerPage(&g_pauseMenuElement, 0, saved);
 }

@@ -14,7 +14,7 @@ void func_001AE510(Obj_1AE510* base)
     Obj_eu_1AE510* self = (Obj_eu_1AE510*)base;
     Key_eu_1AE510 key;
     func_eu_001AAFB0(base);
-    self->f4 = func_0015C1C0(2);
+    self->f4 = GetFontById(2);
     if ((u8*)self == (u8*)&D_00273C50) {
         key.pad = 0;
         key.id = 0x4C;

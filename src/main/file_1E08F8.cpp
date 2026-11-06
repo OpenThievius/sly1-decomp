@@ -615,7 +615,7 @@ s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
                     }
                     adv = 1;
                 } else {
-                    adv = func_001E08F8(p, &spec->width);
+                    adv = ParseSignedDecimal(p, &spec->width);
                 }
                 if (p[adv] == 0x2E) {
                     next = 3;
@@ -634,7 +634,7 @@ s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
                     w = (w < 0) ? -w : w;
                     spec->prec = w;
                 } else {
-                    adv = func_001E08F8(p, &spec->prec);
+                    adv = ParseSignedDecimal(p, &spec->prec);
                 }
                 spec->noprec = spec->prec == 0;
                 next = 4;
@@ -665,12 +665,12 @@ s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
                     s32 r = 1;
                     s32 d;
                     s32 l;
-                    if (D_0024E879[(s8)(u8)*p] & 1) {
+                    if (g_charClassFlags[(s8)(u8)*p] & 1) {
                         a = 4;
                     }
                     spec->f24 = a;
                     d = *p;
-                    l = (D_0024E879[d] & 1) ? d + 0x20 : d;
+                    l = (g_charClassFlags[d] & 1) ? d + 0x20 : d;
                     if (l ^ 0x76) {
                         r = a;
                     }
@@ -689,9 +689,9 @@ s32 func_001E0978(s8* at, Spec_1E0978* spec, s32** va)
                     s32 e = *p;
                     s32 f;
                     s32 l;
-                    spec->upper = D_0024E879[e] & 1;
+                    spec->upper = g_charClassFlags[e] & 1;
                     f = *p;
-                    l = (D_0024E879[f] & 1) ? f + 0x20 : f;
+                    l = (g_charClassFlags[f] & 1) ? f + 0x20 : f;
                     spec->conv = l;
                 }
                 adv = 1;
@@ -721,7 +721,7 @@ void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
         str = "(null)";
     }
     right = 0;
-    n = func_001E2100((Str_1E0CD0*)str);
+    n = GetStringLength((Str_1E0CD0*)str);
     left = 0;
     if (self->f1C != 0 && self->f1C < n) {
         n = self->f1C;
@@ -738,7 +738,7 @@ void func_001E0CD0(Obj_1E0CD0* self, Ctx_1E0CD0* ctx, const char* str) {
         }
     }
     ctx->Pad(pad, left);
-    func_001D7190(ctx, str, n);
+    AppendToOutputBuffer(ctx, str, n);
     ctx->Pad(0x20, right);
 }
 
@@ -812,7 +812,7 @@ s32 func_001E0F58(u8* buf, s32 len, u64 value, u32 radixArg)
     } while (v != 0 && end >= buf);
     s32 count = stop - end;
     if (count != 0 && buf < end) {
-        func_0018D800(buf, end, count);
+        CopyMemory(buf, end, count);
     }
     return count;
 }
@@ -841,7 +841,7 @@ void func_001E1028(Fmt_1E1028* self, OutputBuffer* sink, u64 value)
         zeros = 0;
         ndig = 0;
     } else {
-        s32 neg = func_001E0E18(self, &val);
+        s32 neg = ExtractIntegerSign(self, &val);
         zeros = self->f1C;
         pfx[0] = 0;
         switch ((u8)self->mode) {
@@ -854,7 +854,7 @@ void func_001E1028(Fmt_1E1028* self, OutputBuffer* sink, u64 value)
             } else if (self->f8) {
                 __builtin_strcpy(pfx, " ");
             }
-            zeros -= func_001E2100(pfx);
+            zeros -= GetStringLength(pfx);
             break;
         case 'b':
             if (self->fC) {
@@ -872,15 +872,15 @@ void func_001E1028(Fmt_1E1028* self, OutputBuffer* sink, u64 value)
             }
             break;
         }
-        plen = func_001E2100(pfx);
-        ndig = func_001E0F58(buf, 0x40, val.v, func_001E0EF8(self->mode));
+        plen = GetStringLength(pfx);
+        ndig = WriteIntegerDigits(buf, 0x40, val.v, GetConversionRadix(self->mode));
         zeros -= ndig;
         zeros = zeros >= 0 ? zeros : 0;
     }
     buf[ndig] = 0;
     if (self->f30) {
-        func_001E2218(pfx);
-        func_001E2218(buf);
+        UppercaseString(pfx);
+        UppercaseString(buf);
     }
     total = plen + zeros + ndig;
     lead = 0;
@@ -900,23 +900,23 @@ void func_001E1028(Fmt_1E1028* self, OutputBuffer* sink, u64 value)
     padc[0] = ' ';
     n = lead;
     while (n-- > 0) {
-        if (func_001D7190(sink, padc, 1) != 1) {
+        if (AppendToOutputBuffer(sink, padc, 1) != 1) {
             break;
         }
     }
-    func_001D7190(sink, pfx, plen);
+    AppendToOutputBuffer(sink, pfx, plen);
     padc[0] = '0';
     n = zeros;
     while (n-- > 0) {
-        if (func_001D7190(sink, padc, 1) != 1) {
+        if (AppendToOutputBuffer(sink, padc, 1) != 1) {
             break;
         }
     }
-    func_001D7190(sink, buf, ndig);
+    AppendToOutputBuffer(sink, buf, ndig);
     padc[0] = ' ';
     n = trail;
     while (n-- > 0) {
-        if (func_001D7190(sink, padc, 1) != 1) {
+        if (AppendToOutputBuffer(sink, padc, 1) != 1) {
             break;
         }
     }
@@ -946,8 +946,8 @@ s8 func_001E13D0(Obj_1E13D0* self0, s32 a, s32 b)
     } else {
         f32 t = func_00205C78(10.0f, (f32)(-b));
         Obj_1E13D0* p = func_001FCDE0(self, func_001FD868(t));
-        self = func_001EAE78(p);
-        p = func_001EAE78(func_001FCDE0(self, 0.1));
+        self = TruncateDouble(p);
+        p = TruncateDouble(func_001FCDE0(self, 0.1));
         p = func_001FCDE0(p, (u64)0x4024000000000000ULL);
         idx = func_001FD410(func_001FCD78(self, p));
     }
@@ -961,11 +961,11 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     bits.d = v;
     if ((bits.u & 0x7FF0000000000000UL) == 0x7FF0000000000000UL) {
         const char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? "(nan)" : "(inf)";
-        func_001E2138(buf, (char*)s);
-        return func_001E2100(buf);
+        CopyString(buf, (char*)s);
+        return GetStringLength(buf);
     }
     char* out = buf;
-    s32 e = func_001E1330(v);
+    s32 e = GetDecimalExponent(v);
     s32 isE = sp->conv == 'e';
     if (sp->conv == 'g') {
         if (e < -4 || e >= sp->prec) {
@@ -978,8 +978,8 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     s32 prec = sp->prec;
     f32 p = func_00205C78(10.0f, (f32)(base - prec));
     double r = func_001FCD20(v, func_001FCDE0(func_001FD868(p), 0.5));
-    s32 e2 = func_001E1330(r);
-    if (e < func_001E1330(r)) e = e2;
+    s32 e2 = GetDecimalExponent(r);
+    if (e < GetDecimalExponent(r)) e = e2;
     s32 n, i;
     if (isE) {
         n = 1;
@@ -992,13 +992,13 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
         i = 0;
     }
     while (n-- > 0) {
-        *out++ = func_001E13D0(r, e, i--);
+        *out++ = GetDecimalDigit(r, e, i--);
     }
     if (sp->noPoint == 0) {
         *out++ = '.';
         n = sp->prec;
         while (n-- > 0) {
-            *out++ = func_001E13D0(r, e, i--);
+            *out++ = GetDecimalDigit(r, e, i--);
         }
         if (sp->conv == 'g' && buf < out) {
             while (buf < out && out[-1] == '0') out--;
@@ -1048,10 +1048,10 @@ void func_001E17A8(Spec_001E1A08* spec, OutputBuffer* ctx, double value)
     if (neg) __builtin_strcpy(sign, "-");
     else if (spec->f04) __builtin_strcpy(sign, "+");
     else if (spec->f08) __builtin_strcpy(sign, " ");
-    slen = func_001E2100(sign);
-    len = func_001E1498(buf, 0x1B5, spec, value);
+    slen = GetStringLength(sign);
+    len = FormatFloatDigits(buf, 0x1B5, spec, value);
     buf[len] = 0;
-    if (spec->f30) func_001E2218(buf);
+    if (spec->f30) UppercaseString(buf);
     width = spec->f18;
     total = slen + len;
     lead = 0;
@@ -1065,19 +1065,19 @@ void func_001E17A8(Spec_001E1A08* spec, OutputBuffer* ctx, double value)
     padc[0] = ' ';
     n = lead;
     while (n-- > 0) {
-        if (func_001D7190(ctx, padc, 1) != 1) break;
+        if (AppendToOutputBuffer(ctx, padc, 1) != 1) break;
     }
     n = zeros;
-    func_001D7190(ctx, sign, slen);
+    AppendToOutputBuffer(ctx, sign, slen);
     padc[0] = '0';
     while (n-- > 0) {
-        if (func_001D7190(ctx, padc, 1) != 1) break;
+        if (AppendToOutputBuffer(ctx, padc, 1) != 1) break;
     }
-    func_001D7190(ctx, buf, len);
+    AppendToOutputBuffer(ctx, buf, len);
     n = left;
     padc[0] = ' ';
     while (n-- > 0) {
-        if (func_001D7190(ctx, padc, 1) != 1) break;
+        if (AppendToOutputBuffer(ctx, padc, 1) != 1) break;
     }
 }
 
@@ -1086,7 +1086,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
     u64 v;
     switch (sp->ch) {
     case '%':
-        func_001D7190(c, (const char*)sp + 0x2C, 1);
+        AppendToOutputBuffer(c, (const char*)sp + 0x2C, 1);
         return;
     case 'c': {
         signed char buf[16];
@@ -1094,13 +1094,13 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         *va = p + 8;
         s32 ch = *(s8*)p;
         buf[0] = ch;
-        func_001D7190(c, (const char*)buf, 1);
+        AppendToOutputBuffer(c, (const char*)buf, 1);
         return;
     }
     case 's': {
         u8* p = *va;
         *va = p + 8;
-        func_001E0CD0(sp, c, *(const char**)p);
+        FormatStringArg(sp, c, *(const char**)p);
         return;
     }
     case 'p':
@@ -1112,7 +1112,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         case 0: case 1: { u8* p = *va; *va = p + 8; v = *(u32*)p; break; }
         case 2: { u8* p = *va; *va = p + 8; v = *(u64*)p; break; }
         }
-        func_001E1028(sp, c, v);
+        FormatIntegerArg(sp, c, v);
         return;
     case 'e': case 'f': case 'g':
         if (sp->i24 != 0) {
@@ -1127,31 +1127,31 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
             const char* s6 = " }";
             f32* fp = *(f32**)a;
             if (sp->i28 >= 2) {
-                func_001D7190(c, s4, func_001E2100(s4));
+                AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
             for (s32 i = 0; i < sp->i28; ) {
                 s32 next;
                 if (i != 0) {
-                    func_001D7190(c, s8, func_001E2100(s8));
+                    AppendToOutputBuffer(c, s8, GetStringLength(s8));
                 }
                 next = i + 1;
-                func_001D7190(c, s7, func_001E2100(s7));
+                AppendToOutputBuffer(c, s7, GetStringLength(s7));
                 for (s32 j = 0; j < sp->i24; j++) {
                     if (j != 0) {
-                        func_001D7190(c, s5, func_001E2100(s5));
+                        AppendToOutputBuffer(c, s5, GetStringLength(s5));
                     }
-                    func_001E17A8(sp, c, func_001FD868(*fp++));
+                    FormatFloatArg(sp, c, func_001FD868(*fp++));
                 }
-                func_001D7190(c, s6, func_001E2100(s6));
+                AppendToOutputBuffer(c, s6, GetStringLength(s6));
                 i = next;
             }
             if (sp->i28 >= 2) {
-                func_001D7190(c, s4, func_001E2100(s4));
+                AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
         } else {
             u8* p = *va;
             *va = p + 8;
-            func_001E17A8(sp, c, *(s64*)p);
+            FormatFloatArg(sp, c, *(s64*)p);
         }
         return;
     case 'n':
@@ -1162,7 +1162,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         }
         return;
     default:
-        func_001D7190(c, fmt, len);
+        AppendToOutputBuffer(c, fmt, len);
         return;
     }
 }
@@ -1176,26 +1176,26 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
     loc.va = a2;
     if (*s1 != 0) {
         do {
-            char* s2 = func_001E21D8((Str_1E1DB8*)s1, '%');
+            char* s2 = FindCharInString((Str_1E1DB8*)s1, '%');
             s32 n = (s32)s2 - (s32)s1;
             if (s2 == 0) {
-                n = func_001E2100((Str_1E1DB8*)s1);
+                n = GetStringLength((Str_1E1DB8*)s1);
                 s2 = (char*)((s32)s1 + n);
             }
             if (n != 0) {
-                if (func_001D7190(ctx, s1, n) < n) {
+                if (AppendToOutputBuffer(ctx, s1, n) < n) {
                     break;
                 }
                 s1 = s2;
             }
             if (*s1 == '%') {
-                s32 n2 = func_001E0978(s1, loc.spec, (void*)&loc.va);
-                func_001E1A08(loc.spec, ctx, (void*)&loc.va, s1, n2);
+                s32 n2 = ParseFormatSpec(s1, loc.spec, (void*)&loc.va);
+                FormatConversionArg(loc.spec, ctx, (void*)&loc.va, s1, n2);
                 s1 = s1 + n2;
             }
         } while (*s1 != 0);
     }
-    func_001D72C8(ctx);
+    FlushOutputBuffer(ctx);
     return ctx->count;
 }
 
@@ -1203,32 +1203,32 @@ s32 func_001E1EB0(const char* fmt, void* ap)
 {
     Stream_1E1EB0 buf;
     func_001D7100(&buf, -1);
-    s32 n = func_001E1DB8(&buf, fmt, ap);
-    func_001D7148(&buf, 2);
+    s32 n = FormatToOutputBuffer(&buf, fmt, ap);
+    DestroyOutputBuffer(&buf, 2);
     return n;
 }
 
 s32 func_001E1F10(void* self, ...)
 {
     void* ap = (char*)__builtin_next_arg(self) - 56;
-    return func_001E1EB0(self, ap);
+    return PrintFormattedVa(self, ap);
 }
 
 s32 func_001E1F58(char* dst, const char* fmt, void* ap)
 {
     Stream_001E1F58 buf;
     func_001D7120(&buf, dst, 0);
-    s32 n = func_001E1DB8(&buf, fmt, ap);
+    s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     dst += n;
     *dst = 0;
-    func_001D7148(&buf, 2);
+    DestroyOutputBuffer(&buf, 2);
     return n;
 }
 
 s32 func_001E1FD0(char* dst, const char* fmt, ...)
 {
     void* ap = (char*)__builtin_next_arg(fmt) - 48;
-    return func_001E1F58(dst, fmt, ap);
+    return FormatToStringVa(dst, fmt, ap);
 }
 
 s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
@@ -1237,14 +1237,14 @@ s32 func_001E2018(char* dst, s32 cap, s32 a, s32 b)
     s32 n;
 
     func_001D7120(buf, dst, cap);
-    n = func_001E1DB8(buf, a, b);
+    n = FormatToOutputBuffer(buf, a, b);
     if (n >= cap) {
         n = -1;
         dst[cap - 1] = 0;
     } else {
         dst[n] = 0;
     }
-    func_001D7148(buf, 2);
+    DestroyOutputBuffer(buf, 2);
     return n;
 }
 
@@ -1253,7 +1253,7 @@ LINKER_REMNANT(func_001E20B0);
 s32 func_001E20B8(char* dst, s32 cap, const char* fmt, ...)
 {
     void* ap = (char*)__builtin_next_arg(fmt) - 40;
-    return func_001E2018(dst, cap, fmt, ap);
+    return FormatToStringBoundedVa(dst, cap, fmt, ap);
 }
 
 LINKER_REMNANT(func_001E20F8);
@@ -1262,16 +1262,16 @@ s32 func_001E2100(const char* s) { s32 length = 0; while (*s) { s++; length++; }
 
 void* func_001E2138(void* dst, void* src)
 {
-    s32 n = func_001E2100(src);
-    func_0018D800(dst, src, n + 1);
+    s32 n = GetStringLength(src);
+    CopyMemory(dst, src, n + 1);
     return dst;
 }
 
 void* func_001E2180(void* dst, void* src)
 {
-    s32 len = func_001E2100(dst);
-    s32 n = func_001E2100(src);
-    func_0018D800((u8*)dst + len, src, n + 1);
+    s32 len = GetStringLength(dst);
+    s32 n = GetStringLength(src);
+    CopyMemory((u8*)dst + len, src, n + 1);
     return dst;
 }
 
@@ -1293,7 +1293,7 @@ void func_001E2218(s8* p)
     while (*p != 0) {
         s32 c = *p;
         s32 r = c;
-        if (D_0024E879[c] & 2) {
+        if (g_charClassFlags[c] & 2) {
             r = c - 0x20;
         }
         *p = r;
@@ -1316,7 +1316,7 @@ LINKER_REMNANT(func_001E22B8);
 void func_001E22C0(IntPair_1E22C0* self)
 {
     self->a = -1;
-    self->b = func_001E2268(1, 1);
+    self->b = CreateLockSemaphore(1, 1);
 }
 
 void func_001E22F8(Tally_1E22F8* self)
@@ -1345,15 +1345,15 @@ void func_001E2398(void)
 {
     Init_1E2398 l;
 
-    D_00275958.f0 = func_001F6A90();
-    func_001F6A50(D_00275958.f0, 4);
+    g_mainAndRenderThreads.f0 = func_001F6A90();
+    func_001F6A50(g_mainAndRenderThreads.f0, 4);
     (void)func_001F5C0C(&l, 0, sizeof(l));
     l.f0C = 0x20000;
-    l.f08 = (s32)D_006056D0;
+    l.f08 = (s32)g_renderThreadStack;
     l.f14 = 2;
     l.f10 = (s32)D_002832F0;
-    l.f04 = func_0015EE80;
-    D_00275958.f4 = func_001F6A10(&l);
+    l.f04 = RunRenderThread;
+    g_mainAndRenderThreads.f4 = func_001F6A10(&l);
 }
 
 void* func_001E2420(void* self) { return self ? (u8*)self + 0x2F0 : (void*)D_00275980; }
@@ -1362,7 +1362,7 @@ ASM_FUNC(func_001E2438);
 
 void func_001E2520(OnOffObject* self)
 {
-    func_00123ED0(self);
+    InitPlacedObject(self);
     self->block2F0 = *(Block63*)D_00275980;
     self->f428 = 2.0f;
     self->f42C = 1.0f;
@@ -1380,23 +1380,23 @@ void func_001E2520(OnOffObject* self)
 
 void func_001E25F8(OnOffObject* self)
 {
-    func_001243E0(self);
-    func_001E2778(self, 0);
-    func_001DBD40(self->world, 2, 0, self, -1, 0);
+    UnregisterPlacedObject(self);
+    SetOnOffObjectState(self, 0);
+    RemoveQueuedCalls(self->world, 2, 0, self, -1, 0);
 }
 
 void func_001E2648(OnOffObject* self, void* a1)
 {
-    func_00137EB0(a1, &self->rot);
-    func_00137E70(a1, &self->pos);
+    ReadBufferedRotation3(a1, &self->rot);
+    ReadBufferedVector3(a1, &self->pos);
     const Desc01* vt = self->desc;
     if (vt->m12 != 0) {
         vt->m12(self);
     }
-    func_001E4C48(a1, (u8*)self + 0x2D4, (u8*)self + 0x2D8, (u8*)self + 0x2DC, (u8*)self + 0x2E0);
-    s32 idx = func_00137CC0(a1);
+    ReadMeshTables(a1, (u8*)self + 0x2D4, (u8*)self + 0x2D8, (u8*)self + 0x2DC, (u8*)self + 0x2E0);
+    s32 idx = ReadBufferedS8(a1);
     if (idx != -1) {
-        Arr63* o = (Arr63*)func_0014D9A8(idx);
+        Arr63* o = (Arr63*)CreatePathCurve(idx);
         self->obj = o;
         void** ovt = *(void***)o;
         if (ovt[0] != 0) {
@@ -1405,17 +1405,17 @@ void func_001E2648(OnOffObject* self, void* a1)
         Arr63* p = self->obj;
         self->f3F0 = p->data[p->count - 1];
     } else {
-        func_00137EB0(a1, (u8*)self + 0x3B0);
-        func_00137E70(a1, (u8*)self + 0x3E0);
+        ReadBufferedRotation3(a1, (u8*)self + 0x3B0);
+        ReadBufferedVector3(a1, (u8*)self + 0x3E0);
         *(s32*)&self->f3F0 = 0;
     }
     self->i414 = (self->obj != 0) ? 7 : 5;
-    func_0011EC40(self, a1);
+    ReadPropertyRecords(self, a1);
 }
 
 void func_001E2758(OnOffObject* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
 }
 
 void func_001E2778(void* selfv, s32 state)
@@ -1427,17 +1427,17 @@ void func_001E2778(void* selfv, s32 state)
             self->f394 = state;
             goto tail;
         }
-        u32 base = (u32)D_00261990;
-        func_00145088(base, self->f388 + 2, (void*)(base + 0x520), (s32)self->f2D0, self);
-        func_001837E0(self, 2, 0, 0);
+        u32 base = (u32)g_camera;
+        PushCameraController(base, self->f388 + 2, (void*)(base + 0x520), (s32)self->f2D0, self);
+        TriggerScriptEvent(self, 2, 0, 0);
     } else {
-        u32 base = (u32)D_00261990;
-        func_001451F0(base, 8, -1, 0, 0, self);
-        func_001837E0(self, 3, 0, 0);
+        u32 base = (u32)g_camera;
+        RemoveCameraControllers(base, 8, -1, 0, 0, self);
+        TriggerScriptEvent(self, 3, 0, 0);
     }
     self->f394 = state;
 tail:
-    self->f39C = D_0026185C;
+    self->f39C = g_gameTime;
 }
 
 void func_001E2840(void* selfv, s32 value)
@@ -1445,17 +1445,17 @@ void func_001E2840(void* selfv, s32 value)
     OnOffObject* self = (OnOffObject*)selfv;
     if (value == self->f398) return;
     self->f398 = value;
-    func_001E2870(self, 0, 0);
+    UpdateOnOffObjectState(self, 0, 0);
 }
 
 void func_001E2870(OnOffObject* self) {
     Loc_1E2870 loc;
-    void* p = func_001925F0();
+    void* p = GetActiveSwitchedCollider();
     if (p == 0) {
         return;
     }
     if (p != self->f2D0) {
-        func_001E2778(self, 0);
+        SetOnOffObjectState(self, 0);
         self->f2D0 = p;
     }
     s32 st;
@@ -1466,20 +1466,20 @@ void func_001E2870(OnOffObject* self) {
     } else {
         st = self->f398;
     }
-    if (self->f384 == 0 && p == (u8*)D_00262E10 && ((Pq_1E2870*)p)->f2220 == 2 &&
-        ((Glob_1E2870*)D_00261990)->f224 == 0) {
+    if (self->f384 == 0 && p == (u8*)g_player && ((Pq_1E2870*)p)->f2220 == 2 &&
+        ((Glob_1E2870*)g_camera)->f224 == 0) {
         if (self->f398 == -1) {
             return;
         }
     }
-    func_001E2778(self, st);
+    SetOnOffObjectState(self, st);
 }
 
 void func_001E2940(OnOffObject* self)
 {
-    func_00124FC0(self);
+    UpdatePlacedObject(self);
     if (self->f398 != 0) {
-        func_001DBCC8(self->world, (void*)(void (*)(OnOffObject*))func_001E2870, self, 0, 0);
+        AppendQueuedCall(self->world, (void*)(void (*)(OnOffObject*))UpdateOnOffObjectState, self, 0, 0);
     }
 }
 
@@ -1490,9 +1490,9 @@ void func_001E2988(void)
 
 void func_001E29A8(OnOffObject* self, void* p)
 {
-    func_0015FBB8(self, p);
+    SetPlacedObjectFrozen(self, p);
     if (p != 0) {
-        func_001E2778(self, 0);
+        SetOnOffObjectState(self, 0);
     }
 }
 
@@ -1509,7 +1509,7 @@ void func_001E30A0(T2173_3F8* self)
     Sub_1E30A0* s = (Sub_1E30A0*)self->ptr;
     if (s != 0) {
         if (s->f438 != 0.0f) {
-            Glob_1E30A0* g = (Glob_1E30A0*)D_00261990;
+            Glob_1E30A0* g = (Glob_1E30A0*)g_camera;
             g->f1C8 = s->f43C;
         }
     }
@@ -1570,7 +1570,7 @@ void func_001E4EA8(Self_1E4EA8* self)
     Sub_1E4EA8 sub;
     func_00191E70(2);
     if (self->f4 != 0) {
-        func_0018D410(&key);
+        ClearKeyId(&key);
         blob = *self->f4;
         self->f4 = 0;
         key.second = blob.w[1] ^ blob.w[7];
@@ -1583,48 +1583,48 @@ void func_001E4EA8(Self_1E4EA8* self)
             w70.v = 0x3F3F3F;
             w80.v = 0x3F3F;
             w90.v = 0x3F;
-            func_00193210(&o30, &w60, &w70, &w80, &w90);
-            func_00137290(&sub, 0x340C00, D_002C3B00, 6);
+            InitLoadProgress(&o30, &w60, &w70, &w80, &w90);
+            InitBufferedStream(&sub, 0x340C00, D_002C3B00, 6);
             sub.SetOwner(&o30);
             if (sub.owner != 0) func_00193270(sub.owner);
-            if (func_001373B0(&sub, &key) == 0) {
-                func_001372E0(&sub, 2);
+            if (OpenBufferedSectorStreamRange(&sub, &key) == 0) {
+                DestroyBufferedStream(&sub, 2);
                 goto end;
             }
-            func_001DB838(D_00275710);
-            D_00275710 = 0;
-            func_001DB928(ne, &sub);
-            func_001430B8(((u8*)&D_00261858), 0.0f);
-            func_0016E0F0(0x80);
+            ResetWorldSubsystems(g_currentWorld);
+            g_currentWorld = 0;
+            ReadBufferedBlockHeader(ne, &sub);
+            SetGameClockTime(((u8*)&g_gameClock), 0.0f);
+            SetPadSelectFlags(0x80);
             self->f14 = blob;
-            func_00160690(s2, self->f10);
-            D_00275710 = func_0011E580(0x6C, 0, 0, 3, -1);
-            func_001C06A0(0xA, 0, 0.0f);
-            D_00275710->desc->m0A(D_00275710, &sub);
-            func_001373D0(&sub);
+            SetCurrentLevelEntry(s2, self->f10);
+            g_currentWorld = CreateTypedRecord(0x6C, 0, 0, 3, -1);
+            SetVolumeChannelFactor(0xA, 0, 0.0f);
+            g_currentWorld->desc->m0A(g_currentWorld, &sub);
+            CloseBufferedStream(&sub);
             if (sub.owner != 0) func_00193300(sub.owner);
-            if (D_002623C0->f19EC & 0x100) {
+            if (g_saveData->f19EC & 0x100) {
                 Cur_1E4EA8* c = g_memoryCard.f4F44;
-                if (c != 0 && (c->f19D8 != D_002623C0->f19D8 || c->f19DC != D_002623C0->f19DC))
-                    func_0018C7F8(&g_memoryCard);
+                if (c != 0 && (c->f19D8 != g_saveData->f19D8 || c->f19DC != g_saveData->f19DC))
+                    StartMemoryCardSave(&g_memoryCard);
             }
-            func_001372E0(&sub, 2);
+            DestroyBufferedStream(&sub, 2);
         }
     }
-    func_00143A60((*(s32*)&D_00261990), 1);
-    func_001C0070();
-    func_001C06A0(0xA, 0, 1.0f);
-    func_001F4318(D_00275710, self->f8, self->fC);
+    ResetCamera((*(s32*)&g_camera), 1);
+    UpdateSoundEmitters();
+    SetVolumeChannelFactor(0xA, 0, 1.0f);
+    func_001F4318(g_currentWorld, self->f8, self->fC);
     func_00151E18(D_00261EF0);
     func_00160CE8(D_002623D8);
     func_0016B520(D_0026FA90);
-    func_00138C00(D_00275710, 0);
-    func_00143E40((*(s32*)&D_00261990), 0, D_0026186C);
+    func_00138C00(g_currentWorld, 0);
+    UpdateCamera((*(s32*)&g_camera), 0, g_frameStep);
     if (self->f10 & 0x10) ((VT1_1E4EA8*)D_0026C6C8.vt)->m38(&D_0026C6C8);
-    func_00142ED0(1.0f);
+    SetGameClockScale(1.0f);
 end:
-    func_001C06D8();
-    func_001C06A0(1, 1, D_00275710->f1D7C);
+    ResetVolumeChannelFactors();
+    SetVolumeChannelFactor(1, 1, g_currentWorld->f1D7C);
     func_00191EB0(2);
     self->f0 = 0;
 }
@@ -1638,7 +1638,7 @@ void func_001E5278(s32 mode)
         n = 0;
         break;
     case 1:
-        func_00140ED0((Ring_1E5278*)D_00261420);
+        StartScreenFadeFromFlagTable((Ring_1E5278*)g_flagTable);
         return;
     case 2:
         n = 2;
@@ -1647,7 +1647,7 @@ void func_001E5278(s32 mode)
         n = 4;
         break;
     }
-    func_001E4E80((Blk_1E5278*)&D_00275AF0, D_00275AF0.body, -1, -1, n);
+    QueueWorldLoad((Blk_1E5278*)&g_worldLoadRequest, g_worldLoadRequest.body, -1, -1, n);
 }
 
 

@@ -7,6 +7,6 @@ void* func_eu_001E3050(void* self, s32 n)
 {
     s32 r = func_eu_001E3018(n);
 
-    func_0018D800(self, n, (r + 1) << 1);
+    CopyMemory(self, n, (r + 1) << 1);
     return self;
 }

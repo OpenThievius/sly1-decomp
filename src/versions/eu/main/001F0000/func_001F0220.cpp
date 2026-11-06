@@ -9,7 +9,7 @@ void func_001F0220(ScreenFade* self, s32 mode)
     if (self->mode == mode) goto L0410;
     if (self->mode == 2) {
         if (D_0026FA68 != 0) {
-            func_001F1050(D_0026FA68, 0);
+            SetWarpPageMode(D_0026FA68, 0);
         }
     }
     if (mode == 1) goto L02E0;
@@ -29,7 +29,7 @@ void func_001F0220(ScreenFade* self, s32 mode)
 L02A0:
     if (self->active.kind != 0) {
         FadeRequest* q = &self->active;
-        func_001E4E80(D_00275AF0, (s32)q->key, q->f08, q->f0C, q->flags);
+        QueueWorldLoad(g_worldLoadRequest, (s32)q->key, q->f08, q->f0C, q->flags);
     }
     self->active.kind = 0;
     self->opacity = 1.0f;
@@ -46,15 +46,15 @@ L02E0:
 
 L0300:
     {
-        s32 v = func_001601A0((s32)self->active.key);
+        s32 v = GetEntryIdByKey((s32)self->active.key);
         s32 a3 = v >> 8;
         s32 a2 = v & 0xFF;
         if (D_0026FA68 == 0) goto L034C;
         if (v == -1) goto L034C;
         s32 a1 = 10;
         if (a3 != 0) a1 = a2;
-        func_001F1590(D_0026FA68, a1, 3);
-        func_001DDB58(D_00275710);
+        SetWarpCursor(D_0026FA68, a1, 3);
+        ShowCountedScreenElement(g_currentWorld);
         goto L0364;
     }
 
@@ -67,8 +67,8 @@ L0354:
     goto L02A0;
 
 L0364:
-    ((Sys_1F0220_eu*)D_00275BC0)->f30 = 8;
-    func_001E96F8(D_00275BC0, 8);
+    ((Sys_1F0220_eu*)g_elementStack)->f30 = 8;
+    SetElementStackState(g_elementStack, 8);
     self->mode = mode;
     goto L0404;
 
@@ -84,14 +84,14 @@ L0374:
 L038C:
     {
         if (self->style == D_00275BF0) {
-            s32 idx = D_002623CC;
+            s32 idx = g_previousLevelIndex;
             if (idx != -1) {
                 D_eu_00274868.f570 = D_eu_00274868.f574[idx];
             }
         }
         if (D_eu_00274868.f570 != 0) {
             ((C67*)D_eu_00274868.f570)->f2E0 = 3;
-            func_001F1050(D_eu_00274868.f570, 4);
+            SetWarpPageMode(D_eu_00274868.f570, 4);
             self->mode = mode;
             goto L0404;
         }
@@ -100,14 +100,14 @@ L038C:
     }
 
 L03EC:
-    func_00168B68(0.25f);
+    FadeScreenToBlack(0.25f);
     self->style = 0;
     goto L0400;
 
 L0400:
     self->mode = mode;
 L0404:
-    self->modeStartTime = D_00261868;
+    self->modeStartTime = g_elapsedTime;
 L0410:
     return;
 }

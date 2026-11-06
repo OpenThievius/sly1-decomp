@@ -449,7 +449,7 @@ void func_001310F0(T217D_440* self, s32 a1)
     self->h = 492.800018f;
     self->charsPerSecond = 15.0f;
     self->highlight = 0x80FFFFFF;
-    func_001AA1F0(self, a1);
+    InitScreenElement(self, a1);
 }
 
 void func_00131140(T217D_440* self)
@@ -484,21 +484,21 @@ void func_00132500(T217D_440* self, Gs_132500* gs)
     f32 offX;
     f32 offY;
 
-    func_001613C0(gs, 0, 1, 0xE);
-    func_00161708(gs, 0x47, 0x31001);
-    func_00161708(gs, 0x42, 0x44);
-    func_00161708(gs, 0x40, 0xA90003027F0000);
+    BeginGifTag(gs, 0, 1, 0xE);
+    AddGifRegisterWrite(gs, 0x47, 0x31001);
+    AddGifRegisterWrite(gs, 0x42, 0x44);
+    AddGifRegisterWrite(gs, 0x40, 0xA90003027F0000);
 
-    pad = (D_00262C68 & 2) ? &D_00262C70 : &D_00262D38;
+    pad = (D_00262C68 & 2) ? &g_padRecord : &g_blankPadRecord;
     k = 3.0f;
     if (0.0f < pad->f78) {
         k = 6.0f;
     } else if (pad->f78 < 0.0f) {
         k = -6.0f;
     }
-    self->spin = func_001EA408(self->spin + D_00261860 * k);
+    self->spin = WrapAngle(self->spin + g_frameDt * k);
 
-    alpha = (s32)(D_00261990->f478 * 24.999f) + 0x30;
+    alpha = (s32)(g_camera->f478 * 24.999f) + 0x30;
     switch (self->palette) {
     case 0:
         if (self->state == 5) {
@@ -537,8 +537,8 @@ void func_00132500(T217D_440* self, Gs_132500* gs)
     }
     }
 
-    func_00136EC8(self, &posX, &posY);
-    scale = D_00261990->f478 + 1.0f;
+    GetTextPanelCenter(self, &posX, &posY);
+    scale = g_camera->f478 + 1.0f;
 
     {
         f32 step = 1.0f / 24.0f;
@@ -553,71 +553,71 @@ void func_00132500(T217D_440* self, Gs_132500* gs)
         f32 u;
         s32 i;
 
-        func_001613C0(gs, 0x4C, 2, 0x41);
+        BeginGifTag(gs, 0x4C, 2, 0x41);
 
-        func_00161458(gs, *(u32*)&colB);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -3.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colB);
+        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colA);
+        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -3.0f), 0, 0);
         u = step;
         for (i = 1; i < 24; i++) {
             f32 x = x0 + scale * u * 70.0f;
             f32 y;
             f32 y2;
             u += step;
-            y = posY + scale * func_00131000(&D_002612E0, i);
+            y = posY + scale * EvalCurveSpan(&D_002612E0, i);
             y2 = y + scale * 5.0f;
-            func_00161458(gs, *(u32*)&colB);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
-            func_00161458(gs, *(u32*)&colA);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
+            AddGifRgbaEntry(gs, *(u32*)&colB);
+            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
+            AddGifRgbaEntry(gs, *(u32*)&colA);
+            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
         }
-        func_00161458(gs, *(u32*)&colB);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -4.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colB);
+        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colA);
+        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -4.0f), 0, 0);
 
-        func_00161458(gs, *(u32*)&colB);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_00161670(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -3.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colB);
+        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colA);
+        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -3.0f), 0, 0);
         u = step;
         for (i = 1; i < 24; i++) {
             f32 x = x0 + scale * u * 70.0f;
             f32 y;
             f32 y2;
             u += step;
-            y = posY - scale * func_00131000(&D_002612E0, i);
+            y = posY - scale * EvalCurveSpan(&D_002612E0, i);
             y2 = y - scale * 5.0f;
-            func_00161458(gs, *(u32*)&colB);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
-            func_00161458(gs, *(u32*)&colA);
-            func_001615F0(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
+            AddGifRgbaEntry(gs, *(u32*)&colB);
+            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
+            AddGifRgbaEntry(gs, *(u32*)&colA);
+            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
         }
-        func_00161458(gs, *(u32*)&colB);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
-        func_00161458(gs, *(u32*)&colA);
-        func_001615F0(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -4.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colB);
+        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&colA);
+        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -4.0f), 0, 0);
 
         if (self->state != 5) {
             s32 n;
 
             offX = 41.0f;
             offY = -5.0f;
-            func_001613C0(gs, 0xC6, 5, 0x44441);
+            BeginGifTag(gs, 0xC6, 5, 0x44441);
             for (n = 0; n < 64; n++) {
                 f32 px, py;
                 f32 s = Gfx_132500::Wave(offX, wide, self->spin);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
                 Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-                func_00161458(gs, *(u32*)&col);
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
+                AddGifRgbaEntry(gs, *(u32*)&col);
+                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px + scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
                 py = posY + scale * offY;
                 px = posX - scale * offX;
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px - scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
+                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px - scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
                 offX += 8.0f;
             }
 
@@ -629,20 +629,20 @@ void func_00132500(T217D_440* self, Gs_132500* gs)
                 px = posX + scale * offX;
                 py = posY + scale * offY;
                 Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-                func_00161458(gs, *(u32*)&col);
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py + scale * 2.0f), 0, 0);
+                AddGifRgbaEntry(gs, *(u32*)&col);
+                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py + scale * 2.0f), 0, 0);
                 py = posY - scale * offY;
                 px = posX + scale * offX;
-                func_00161670(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                func_001615F0(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py - scale * 2.0f), 0, 0);
+                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py - scale * 2.0f), 0, 0);
                 offY += 8.0f;
             }
         }
     }
 
-    func_001613C0(gs, 0, 1, 0xE);
-    func_00161708(gs, 0x40, 0xDF0000027F0000);
+    BeginGifTag(gs, 0, 1, 0xE);
+    AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
 }
 
 void func_00133B58(T217D_440* self, Gs_133B58* gs)
@@ -661,97 +661,97 @@ void func_00133B58(T217D_440* self, Gs_133B58* gs)
     s32 i;
     f32 x;
 
-    func_001613C0(gs, 0x8C, 2, 0x41);
+    BeginGifTag(gs, 0x8C, 2, 0x41);
 
-    func_00161458(gs, *(u32*)&c2);
-    func_00161670(gs, 0x6C00, 0x7B45, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x7B62, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7B45, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7B62, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = func_00131000(&D_00261280, i);
+        f32 v = EvalCurveSpan(&D_00261280, i);
         f32 sx = x * 640.0f;
         f32 v2 = v + 4.0f;
-        func_00161458(gs, *(u32*)&c2);
+        AddGifRgbaEntry(gs, *(u32*)&c2);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c1);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c2);
-    func_001615F0(gs, 0x9400, 0x7B45, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x7B62, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfEntry(gs, 0x9400, 0x7B45, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x7B62, 0, 0);
 
-    func_00161458(gs, *(u32*)&c2);
-    func_00161670(gs, 0x6C00, 0x80FA, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x80DD, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x80FA, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x80DD, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 v = func_00131000(&D_002612B0, i);
+        f32 v = EvalCurveSpan(&D_002612B0, i);
         f32 sx = x * 640.0f;
         f32 v2 = v - 4.0f;
-        func_00161458(gs, *(u32*)&c2);
+        AddGifRgbaEntry(gs, *(u32*)&c2);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c1);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c2);
-    func_001615F0(gs, 0x9400, 0x80FA, 0, 0);
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x80DD, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c2);
+    AddGifXyzfEntry(gs, 0x9400, 0x80FA, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x80DD, 0, 0);
 
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x7B62, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_00161670(gs, 0x6C00, 0x7B80, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7B62, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x7B80, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = func_00131000(&D_00261280, i);
+        f32 r = EvalCurveSpan(&D_00261280, i);
         f32 sx = x * 640.0f;
         f32 v = r + 4.0f;
         f32 v2 = v + 4.0f;
-        func_00161458(gs, *(u32*)&c1);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c0);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c0);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x7B62, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_001615F0(gs, 0x9400, 0x7B80, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x7B62, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfEntry(gs, 0x9400, 0x7B80, 0, 0);
 
-    func_00161458(gs, *(u32*)&c1);
-    func_00161670(gs, 0x6C00, 0x80DD, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_00161670(gs, 0x6C00, 0x80C0, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x80DD, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfNoDrawEntry(gs, 0x6C00, 0x80C0, 0, 0);
     x = 1.0f / 24.0f;
     for (i = 1; i < 24; i++)
     {
-        f32 r = func_00131000(&D_002612B0, i);
+        f32 r = EvalCurveSpan(&D_002612B0, i);
         f32 sx = x * 640.0f;
         f32 v = r - 4.0f;
         f32 v2 = v - 4.0f;
-        func_00161458(gs, *(u32*)&c1);
+        AddGifRgbaEntry(gs, *(u32*)&c1);
         s32 px = (s32)((sx + 1728.0f) * 16.0f);
         x += step;
-        func_001615F0(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-        func_00161458(gs, *(u32*)&c0);
-        func_001615F0(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifXyzfEntry(gs, px, (s32)((v * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+        AddGifRgbaEntry(gs, *(u32*)&c0);
+        AddGifXyzfEntry(gs, px, (s32)((v2 * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
     }
-    func_00161458(gs, *(u32*)&c1);
-    func_001615F0(gs, 0x9400, 0x80DD, 0, 0);
-    func_00161458(gs, *(u32*)&c0);
-    func_001615F0(gs, 0x9400, 0x80C0, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c1);
+    AddGifXyzfEntry(gs, 0x9400, 0x80DD, 0, 0);
+    AddGifRgbaEntry(gs, *(u32*)&c0);
+    AddGifXyzfEntry(gs, 0x9400, 0x80C0, 0, 0);
 }
 
 ASM_FUNC(func_00134AA0);
@@ -768,7 +768,7 @@ void func_00135228(T217D_440* self, V24A0* q)
             func_00134B48(self, q);
         }
         u32 mask;
-        func_00160D30(&mask);
+        GetCurrentLevelBit(&mask);
         if ((u32)func_00160D10() & mask)
         {
             u8 c0[4];
@@ -778,23 +778,23 @@ void func_00135228(T217D_440* self, V24A0* q)
             *(u32*)c0 = 0xFF408080;
             *(u32*)c1 = 0xFF406060;
             *(u32*)c2 = 0xFF404040;
-            f32 t = func_00205210(D_00261858[1] * D_00261260[0]) * 0.5f + 0.5f;
+            f32 t = func_00205210(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
-                f32 r = func_001EA4B8(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, D_00261858[2], &D_00261260[2], 0);
+                f32 r = ApproachValueWithRamp(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, g_gameClock[2], &D_00261260[2], 0);
                 self->blockB[i] = r;
                 for (s32 j = 0; j < 4; j++)
                 {
                     out[j] = (s32)((1.0f - r) * (f32)c2[j] + r * t * (f32)c1[j] + r * (1.0f - t) * (f32)c0[j]);
                 }
                 out[3] = (out[3] + 1) >> 1;
-                func_001613C0(q, 0x4D, 5, 0x44441);
-                func_00161458(q, *(u32*)out);
+                BeginGifTag(q, 0x4D, 5, 0x44441);
+                AddGifRgbaEntry(q, *(u32*)out);
                 for (s32 k = 0; k < 4; k++)
                 {
                     s32 xi = (s32)(((D_002611E0[i][k] + 320.0f) + 1728.0f) * 16.0f);
                     s32 yi = (s32)(((D_00261220[i][k] + 415.8000183f) * 0.45454547f + 1936.0f) * 16.0f);
-                    func_001615F0(q, xi, yi, 0, 0);
+                    AddGifXyzfEntry(q, xi, yi, 0, 0);
                 }
             }
         }
@@ -807,30 +807,30 @@ void func_00135550(T217D_440* self, s32 value)
         return;
     }
     if (self->mode == 0) {
-        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
             Iter_135550 it;
             Begin_135550::Of(&it, &g->list);
             Item_135550* obj;
             while ((obj = Next_135550::Of(&it)) != 0) {
-                func_0012F6B0(obj, 0.0f);
+                SetAnimationPlayerSpeed(obj, 0.0f);
             }
-            D_0027B314 = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.saved;
         }
     }
     if (value == 0) {
-        Group_135550* g = func_0015A418((*(Host_135550**)&D_00275710), 0x105, 0x495, 0);
+        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
             Iter_135550 it;
             Begin_135550::Of(&it, &g->list);
             Item_135550* obj;
             while ((obj = Next_135550::Of(&it)) != 0) {
-                func_0012F6B0(obj, 1.0f);
+                SetAnimationPlayerSpeed(obj, 1.0f);
             }
-            D_0027B314 = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.saved;
         }
     }
-    func_001AA998(self, value);
+    SetScreenElementMode(self, value);
 }
 
 void func_001356C0(T217D_440* self, s32 mode)
@@ -839,15 +839,15 @@ void func_001356C0(T217D_440* self, s32 mode)
         if (self->state != 1) {
             if (self->state < 2) {
                 if (self->state == 0) {
-                    func_00131140(self);
+                    ClearTextPanel(self);
                 }
             }
         } else {
-            func_001BFCD8(0x8F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x8F, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
         switch (mode) {
         case 1:
-            func_001BFCD8(0x8E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+            StartSoundEffect(0x8E, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             self->state = mode;
             break;
         case 4:
@@ -859,16 +859,16 @@ void func_001356C0(T217D_440* self, s32 mode)
             self->state = mode;
             break;
         }
-        self->stateSince = D_0026185C;
+        self->stateSince = g_gameTime;
     }
 }
 
 s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b)
 {
-    if (func_00182FC8(a->obj) == 0) {
+    if (IsObjectAttached(a->obj) == 0) {
         return 1;
     }
-    if (func_00182FC8(b->obj) == 0) {
+    if (IsObjectAttached(b->obj) == 0) {
         return -1;
     }
     if (a->key < b->key) {
@@ -881,11 +881,11 @@ s32 func_00135858(Entry_135858* a, Entry_135858* b)
 {
     s32 flag;
 
-    func_00199C10(a->obj, &flag);
+    GetNumberedItemFlag(a->obj, &flag);
     if (flag != 0) {
         return 1;
     }
-    func_00199C10(b->obj, &flag);
+    GetNumberedItemFlag(b->obj, &flag);
     if (flag != 0) {
         return -1;
     }
@@ -924,10 +924,10 @@ void func_00135E78(T217D_440* self, s32 state, s32 flag)
         T217D_440_Slot* e = self->entries;
         do {
             if (flag != 0) {
-                func_0019EBE8(e->handle);
+                RemoveEffect(e->handle);
                 func_001F5C0C(self->blockB, 0, 16);
             } else {
-                func_001A1DF0(e->handle, 2);
+                SetEffectPhase(e->handle, 2);
             }
             i++;
             e++;
@@ -942,17 +942,17 @@ void func_00135E78(T217D_440* self, s32 state, s32 flag)
 void func_00135F48(T217D_440* self)
 {
     Flag_135F48 flag;
-    func_00160D30(&flag);
+    GetCurrentLevelBit(&flag);
     if ((func_00160D10() & flag.v) == 0) {
-        func_00135E78(self, 0, 1);
+        ReleasePanelEntries(self, 0, 1);
         return;
     }
-    func_00135E78(self, 1, 0);
+    ReleasePanelEntries(self, 1, 0);
     if (self->bankState == 1) {
         f32 k = 3.4028235e38f;
-        Ctx_135F48* ctx = *(Ctx_135F48**)D_00275710;
+        Ctx_135F48* ctx = *(Ctx_135F48**)g_currentWorld;
         func_001358D0(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, ctx->f1D44, k);
-        func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)D_00275710)->f1D54, k);
+        func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)g_currentWorld)->f1D54, k);
     }
 }
 
@@ -977,26 +977,26 @@ void func_00136040(T217D_440* self, Pad_136040* p)
         } else if (hi2 < v) {
             v = hi2;
         }
-        if (D_002623C0->u19EC & 0x200) v = -v;
+        if (g_saveData->u19EC & 0x200) v = -v;
         va.x = self->stickX;
         va.y = self->stickY;
         va.z = 0;
         vb.x = u * 50.0f;
         vb.y = v * 50.0f;
         vb.z = 0;
-        f32* g = ((f32*)D_00261858);
+        f32* g = ((f32*)g_gameClock);
         *(Quad_136040*)&r = func_001EA818(*(Quad_136040*)&va, *(Quad_136040*)&vb, (0.0001f < p->f48 + p->f7C) ? &t0 : &t1, 0, g[2]);
         self->f314 += u * -0.08f;
         self->stickX = r.x;
         self->stickY = r.y;
-        self->f314 = func_001EAFE0(self->f314, 1.0f);
+        self->f314 = WrapModulo(self->f314, 1.0f);
         break;
     }
     case 5:
         self->stickY = 50.0f;
         break;
     }
-    func_00135F48(self, p);
+    RefreshPanelEntries(self, p);
 }
 extern const Tri_136040 D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
 extern const Tri_136040 D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
@@ -1015,12 +1015,12 @@ void func_00136238(T217D_440* self, s32 on)
     self->palette = 0;
     if (on != 0) {
         self->vt->m16(self, 2);
-        func_00160D30(&in);
+        GetCurrentLevelBit(&in);
         if (func_00160D10() & in.a) {
-            if (func_00160D10() & D_00261120[self->savedBank]) func_00135E78(self, self->savedBank, 1);
+            if (func_00160D10() & D_00261120[self->savedBank]) ReleasePanelEntries(self, self->savedBank, 1);
         }
         if (func_00160D10() & 0x800) {
-            n = func_0015A4F0(*(s32*)D_00275710, 0x205, 0x82, 0, 0x100, arr);
+            n = GatherObjectsById(*(s32*)g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
             n = Min_136238::Of(n, 0x100);
             if (n > 0) {
                 void** p = arr;
@@ -1031,15 +1031,15 @@ void func_00136238(T217D_440* self, s32 on)
     } else {
         self->vt->m16(self, 0);
         self->savedBank = self->bankState;
-        func_00135E78(self, 0, 1);
+        ReleasePanelEntries(self, 0, 1);
     }
 }
 
 void func_001363D0(T217D_440* self)
 {
-    func_001AA8C8(self);
+    ResetScreenElement(self);
     if (self->child != 0) {
-        func_00150790(self->child, 2);
+        SetStepSequenceState(self->child, 2);
     }
 }
 
@@ -1055,20 +1055,20 @@ void func_00136408(T217D_440* self, const char* name)
 
     self->lineCount = 0;
     if (name == 0) goto fail;
-    if (func_001E2100(name) == 0) goto fail;
-    func_001E2138(self->text, name);
+    if (GetStringLength(name) == 0) goto fail;
+    CopyString(self->text, name);
     s1 = 4;
     scale = 1.0f;
     if ((r = self->state) == s1) scale = 0.8f;
-    func_0015C8B8(self->font, scale, scale);
-    func_0015DB28(&buf, self->text, self->font);
+    PushFontScale(self->font, scale, scale);
+    InitTextReader(&buf, self->text, self->font);
     lim = 280.0f;
     if ((r = self->state) == s1) lim = 380.0f;
     s1 = 0;
-    func_0015E068(&buf, lim);
-    func_0015C900(self->font);
-    func_0015DB80(&buf);
-    while ((r = func_0015DBE0(&buf)) != 0) {
+    WrapTextLines(&buf, lim);
+    PopFontScale(self->font);
+    RewindTextReader(&buf);
+    while ((r = ReadTextChar(&buf)) != 0) {
         if (r == 10) {
             idx = self->lineCount;
             self->lineBreaks[idx] = s1;
@@ -1080,7 +1080,7 @@ void func_00136408(T217D_440* self, const char* name)
 fail:
     self->text[0] = 0;
 tail:
-    tab = (f32*)D_00261858;
+    tab = (f32*)g_gameClock;
     self->textSince = tab[1];
 }
 
@@ -1091,9 +1091,9 @@ s32 func_00136530(T217D_440* self)
     if (self->text[0] == 0) {
         return 1;
     }
-    func_0015DB28(buf, &self->text[0], self->font);
-    s32 n = func_0015DF58(buf);
-    s32 v = (s32)((D_0026185C - self->textSince) * self->charsPerSecond);
+    InitTextReader(buf, &self->text[0], self->font);
+    s32 n = CountTextChars(buf);
+    s32 v = (s32)((g_gameTime - self->textSince) * self->charsPerSecond);
     return v >= n;
 }
 
@@ -1114,7 +1114,7 @@ f32 func_001365F0(T217D_440* self)
     case 3:
     case 4:
     default:
-        return func_001AA898(self);
+        return GetScreenElementSlideInTime(self);
     }
 }
 
@@ -1127,7 +1127,7 @@ f32 func_00136648(T217D_440* s) {
     case 3:
     case 4:
     default:
-        return func_001AA8A8(s);
+        return GetScreenElementSlideOutTime(s);
     }
 }
 
@@ -1145,18 +1145,18 @@ void func_00136EF8(T217D_440* self)
     if (self->child != 0) {
         switch (((StepSequence*)self->child)->mode2D0) {
         case 0:
-            func_001356C0(self, 2);
+            SetTextPanelState(self, 2);
             break;
         case 1:
-            func_001356C0(self, 3);
+            SetTextPanelState(self, 3);
             break;
         case 2:
-            func_001356C0(self, 4);
+            SetTextPanelState(self, 4);
             break;
         }
-        func_00150790((StepSequence*)self->child, 3);
+        SetStepSequenceState((StepSequence*)self->child, 3);
     } else {
-        func_001356C0(self, 1);
+        SetTextPanelState(self, 1);
     }
 }
 
@@ -1164,10 +1164,10 @@ s32 func_00136FA8(Owner_136FA8* self)
 {
     s32 r;
     if (self->child != 0) {
-        r = func_00150790(self->child, 4);
+        r = SetStepSequenceState(self->child, 4);
         goto done;
     }
-    r = func_001356C0(self, 0);
+    r = SetTextPanelState(self, 0);
 done:
     return r;
 }

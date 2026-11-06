@@ -20,15 +20,15 @@ void func_001E62A8(Self_1E62A8_eu* self, V24A0* c, s32 k)
         f32 x = self->f534;
         s32 x0 = (s32)((x + 1728.0f) * 16.0f);
         s32 y0 = (s32)((y * 0.5462963f + 1920.0f) * 16.0f);
-        func_00161670(c, x0, y0, k, 0);
-        func_00161670(c, x0, (s32)(((y + self->f548) * 0.5462963f + 1920.0f) * 16.0f), k, 0);
-        func_001615F0(c, (s32)(((x + self->f544) + 1728.0f) * 16.0f), y0, k, 0);
+        AddGifXyzfNoDrawEntry(c, x0, y0, k, 0);
+        AddGifXyzfNoDrawEntry(c, x0, (s32)(((y + self->f548) * 0.5462963f + 1920.0f) * 16.0f), k, 0);
+        AddGifXyzfEntry(c, (s32)(((x + self->f544) + 1728.0f) * 16.0f), y0, k, 0);
         y = y + self->f548;
         x = x + self->f544;
-        func_001615F0(c, (s32)((x + 1728.0f) * 16.0f), (s32)((y * 0.5462963f + 1920.0f) * 16.0f), k, 0);
+        AddGifXyzfEntry(c, (s32)((x + 1728.0f) * 16.0f), (s32)((y * 0.5462963f + 1920.0f) * 16.0f), k, 0);
     } else {
         s32 r[2];
-        func_001E6268(self, &r[0], &r[1]);
+        GetArcVisibleRange(self, &r[0], &r[1]);
         if (r[0] != r[1]) {
             f32 a = self->f530 + 63.152542f;
             f32 b = self->f52C + self->f1170;
@@ -38,15 +38,15 @@ void func_001E62A8(Self_1E62A8_eu* self, V24A0* c, s32 k)
             y0 = (s32)(((a + self->e[r[0]].f8 * 63.152542f) * 0.5462963f + 1920.0f) * 16.0f);
             x0 = (s32)((b + 1728.0f) * 16.0f);
             t = bx + self->e[r[0]].f0 * 63.152542f;
-            func_00161670(c, x0, y0, k, 0);
-            func_00161670(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
+            AddGifXyzfNoDrawEntry(c, x0, y0, k, 0);
+            AddGifXyzfNoDrawEntry(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
             for (i = r[0]; i < r[1]; i++) {
                 Elem_1E62A8* p = &self->e[i];
                 t = bx + p->f4 * 63.152542f;
                 s32 x = (s32)((b + 1728.0f) * 16.0f);
                 y0 = (s32)(((a + p->fC * 63.152542f) * 0.5462963f + 1920.0f) * 16.0f);
-                func_001615F0(c, x, y0, k, 0);
-                func_001615F0(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
+                AddGifXyzfEntry(c, x, y0, k, 0);
+                AddGifXyzfEntry(c, (s32)((t + 1728.0f) * 16.0f), y0, k, 0);
             }
         }
     }

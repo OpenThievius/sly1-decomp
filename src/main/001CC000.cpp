@@ -45,8 +45,8 @@ void func_001CD7E0(Owner_001CD7E0* self, Node_001CD7E0* node, s32 flag)
         n = n->next;
     }
     if (n != 0) {
-        if (func_00182FC8(n) != 0) {
-            func_001385A0(self->a14, self->a480, ((Owner_001CD7E0*)n->sub)->a480,
+        if (IsObjectAttached(n) != 0) {
+            SetContactPairFlags(self->a14, self->a480, ((Owner_001CD7E0*)n->sub)->a480,
                           flag != 0 ? 0x40 : 0, flag != 0 ? 0 : 0x40);
         }
     }
@@ -194,7 +194,7 @@ void func_001C5DB8(Player* self, f32 t, void* out, void* extra);
 void func_001CDF78(Player* self, f32 t, void* out, void* extra)
 {
     if (self->f2220 == 3) {
-        func_001225D0(self, t, out, extra);
+        GetPlacedObjectRotationAt(self, t, out, extra);
     } else {
         func_001C5DB8(self, t, out, extra);
     }

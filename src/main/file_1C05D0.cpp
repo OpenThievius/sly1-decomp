@@ -382,12 +382,12 @@ s32 D_00274990 = 0;
 
 void func_001C05D0(f32 x)
 {
-    func_0011D480(8, (s32)(x * 1024.0f));
+    SetIopVolumeChannel(8, (s32)(x * 1024.0f));
 }
 
 void func_001C0600(s32 column)
 {
-    f32* p = &D_00274838[0][column];
+    f32* p = &g_volumeChannelFactors[0][column];
     f32 prod = 1.0f;
     s32 n = 10;
 
@@ -405,29 +405,29 @@ void func_001C0600(s32 column)
         prod = one;
     }
 
-    func_0011D480(column, (s32)(prod * 1024.0f));
+    SetIopVolumeChannel(column, (s32)(prod * 1024.0f));
 }
 
 void func_001C06A0(s32 row, s32 column, f32 value)
 {
-    D_00274838[row][column] = value;
-    func_001C0600(column);
+    g_volumeChannelFactors[row][column] = value;
+    ApplyVolumeChannelFactors(column);
 }
 
 void func_001C06D8(void)
 {
-    func_0018D800(D_00274838, D_00274758, 0xB0);
+    CopyMemory(g_volumeChannelFactors, g_defaultVolumeChannelFactors, 0xB0);
     func_001C05D0(1.0f);
     for (s32 i = 0; i < 4; i++) {
-        func_001C0600(i);
+        ApplyVolumeChannelFactors(i);
     }
-    func_001C0760(D_002623C0->f19EC & 0x80);
-    func_001C0790(D_002623C0->f19EC & 0x40);
+    func_001C0760(g_saveData->f19EC & 0x80);
+    func_001C0790(g_saveData->f19EC & 0x40);
 }
 
 void func_001C0760(s32 flag)
 {
-    func_001C06A0(3, 1, flag ? 0.0f : 1.0f);
+    SetVolumeChannelFactor(3, 1, flag ? 0.0f : 1.0f);
 }
 
 s32 func_001C0790(s32 value)
@@ -438,34 +438,34 @@ s32 func_001C0790(s32 value)
 void func_001C07B0(void)
 {
     func_0011E010();
-    func_001C0808(0);
-    func_001BEE48();
-    func_001C0CB0();
-    while (func_0011CE30() != 0) {
+    StopWorldSoundRecords(0);
+    ClearSoundLevels();
+    ClearCachedVoiceParams();
+    while (PollIopCommands() != 0) {
     }
     func_0011E110(1);
-    func_0011E1F8(0);
+    SyncDiscRead(0);
 }
 
 void func_001C0808(void* item)
 {
-    if (D_00275710) {
+    if (g_currentWorld) {
         Iter_1C0808 it;
         u8* obj;
-        Begin_1C0808::Of(&it, (List_1C0808*)&D_00275710->f1BAC);
+        Begin_1C0808::Of(&it, (List_1C0808*)&g_currentWorld->f1BAC);
         for (obj = Next_1C0808::Of(&it); obj; obj = Next_1C0808::Of(&it)) {
-            func_001BF788(obj, item);
+            StopSoundRecord(obj, item);
         }
         End_1C0808::Of(&it);
     }
-    func_0011CE30();
+    PollIopCommands();
 }
 
 void func_001C08B0(Stack_1C08B0* self, s32 a, s32 b)
 {
     if ((u32)self->count < 4) {
-        func_0011E328(2, D_00274808[a]);
-        func_0011E360(2, b, b);
+        SetIopChannelValue(2, D_00274808[a]);
+        SetIopChannelValuePair(2, b, b);
         self->pairs[self->count].a = a;
         self->pairs[self->count].b = b;
         self->count++;
@@ -477,15 +477,15 @@ void func_001C0950(Stack_1C0950* self)
     s32 n = self->count;
     if (n >= 2) {
         self->count = n - 1;
-        func_0011E328(2, D_00274808[self->pairs[n - 2].a]);
-        func_0011E360(2, self->pairs[self->count - 1].b, self->pairs[self->count - 1].b);
+        SetIopChannelValue(2, D_00274808[self->pairs[n - 2].a]);
+        SetIopChannelValuePair(2, self->pairs[self->count - 1].b, self->pairs[self->count - 1].b);
     }
 }
 
 void func_001C09D8(World* self, s32 index, s32 value)
 {
-    func_0011E328(2, D_00274808[index]);
-    func_0011E360(2, value, value);
+    SetIopChannelValue(2, D_00274808[index]);
+    SetIopChannelValuePair(2, value, value);
     *(s32*)self->f2328 = index;
     *(s32*)(self->f2328 + 4) = value;
     self->f2348 = 1;
@@ -518,7 +518,7 @@ void func_001C0B38(World* self)
 {
     for (s32 i = 0; i < self->f1D80; i++) {
         Ent_1C0B38* e = &((Ent_1C0B38*)self->f1D84)[i];
-        func_001BFCD8(e->key, D_002748E8, 0, 0, &e->a, &e->b, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f);
+        StartSoundEffect(e->key, D_002748E8, 0, 0, &e->a, &e->b, 8000.0f, 3000.0f, 1.0f, 0.0f, 0.0f);
     }
 }
 
@@ -526,7 +526,7 @@ void func_001C0C08(s32 idx, s32 val)
 {
     if (val != D_006053E0[idx]) {
         D_006053E0[idx] = val;
-        func_0011D8B0((Owner_1C0C08*)D_00274728, idx, val);
+        SetVoiceParam((Owner_1C0C08*)g_stagedBankVoice, idx, val);
     }
 }
 
@@ -537,13 +537,13 @@ s32 func_001C0C50(s32 index)
 
 void func_001C0C68(s32 i)
 {
-    D_006053E0[i] = func_0011D8F0(D_00274728, i);
+    D_006053E0[i] = GetVoiceParam(g_stagedBankVoice, i);
 }
 
 void func_001C0CB0(void)
 {
     for (s32 i = 0; i < 8; i++) {
-        func_001C0C08(i, 0);
+        SetCachedVoiceParam(i, 0);
     }
 }
 
@@ -553,7 +553,7 @@ extern const TabB_24D350 D_0024D350 = { { 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5,
 s32 func_001C0CF0() {
     TabA_24D2A8 a = D_0024D2A8;
     TabB_24D350 b = D_0024D350;
-    s32 r = func_001EAA70(0, 5);
+    s32 r = RandomIntInRange(0, 5);
     D_00274830 += *(s32*)((u8*)&a + (b.v[D_00274830 + 12] * 24 + r * 4));
     return D_00274830;
 }
@@ -561,8 +561,8 @@ s32 func_001C0CF0() {
 void func_001C0EC0(void)
 {
     if (D_002748EC != 0) {
-        f32 scale = (f32)func_001C0CF0();
-        func_001BFCD8(0x77, 0, 0, 0, 0.0f, 0.0f, 0.5f, scale * 0.083333336f, 0.0f, 0, 0);
+        f32 scale = (f32)StepBiasedRandomWalk();
+        StartSoundEffect(0x77, 0, 0, 0, 0.0f, 0.0f, 0.5f, scale * 0.083333336f, 0.0f, 0, 0);
     }
 }
 
@@ -570,48 +570,48 @@ ASM_FUNC(func_001C0F30);
 
 void func_001C0FF0(IdLinkedObject* self)
 {
-    func_00124A48(self);
-    func_001C1030(self, self->linkId);
+    StartPlacedObject(self);
+    SetObjectLinkId(self, self->linkId);
     self->desc->m03(self);
 }
 
 void func_001C1030(IdLinkedObject* self, s32 v)
 {
     if (self->link != 0) {
-        func_001B6438(self->link);
+        DestroyStateWalker(self->link);
         self->link = 0;
     }
-    s32 r = func_0015A418(self->world, 0x101, v, self);
+    s32 r = FindFirstObjectById(self->world, 0x101, v, self);
     self->linkTarget = r;
     if (r != 0) {
-        self->link = func_001B6290(r, self, -1, 1);
+        self->link = CreateStateWalker(r, self, -1, 1);
     }
     self->linkId = v;
 }
 
 void func_001C10A8(C81* self)
 {
-    func_00182C18(self);
+    InitObject(self);
     self->f58 = 3.4028235e38f;
 }
 
 void func_001C10D8(C81* self)
 {
-    func_00182D48(self);
-    func_00152470(&self->world->list1C84, self);
+    RegisterObject(self);
+    AppendToList(&self->world->list1C84, self);
 }
 
 void func_001C1110(C81* self)
 {
-    func_00182ED0(self);
-    func_00152600(&self->world->list1C84, self);
+    UnregisterObject(self);
+    RemoveFromList(&self->world->list1C84, self);
 }
 
 void func_001C1148(C81* self)
 {
     KeptBits saved;
     saved = self->keep;
-    func_001830D8(self);
+    CopyObjectData(self);
     self->keep = saved;
 }
 
@@ -620,46 +620,46 @@ void func_001C1190(World* self, BufferedStream* arg) {
     ScriptValue q1;
     ScriptValue q2;
     s32 i = 0;
-    func_0011B008(&q0);
-    self->f1EF0 = func_00137C40(arg);
-    self->f1EF4 = func_0018D500(self->f1EF0 << 3);
-    s32 n1 = func_00137C40(arg);
-    s32 n2 = func_00137C40(arg);
+    InitScriptValue(&q0);
+    self->f1EF0 = ReadBufferedU32(arg);
+    self->f1EF4 = AllocateFrontMemory(self->f1EF0 << 3);
+    s32 n1 = ReadBufferedU32(arg);
+    s32 n2 = ReadBufferedU32(arg);
     for (i = 0; i < self->f1EF0; i++) {
         {
             E_1C1190* e = (E_1C1190*)self->f1EF4 + i;
-            e->a = func_0011BA28(arg);
+            e->a = ReadScriptValueChain(arg);
             e->b = 0;
             if (D_00275714) {
-                func_00138518(arg);
-                func_00138518(arg);
-                func_00138518(arg);
+                SkipBufferedBlock(arg);
+                SkipBufferedBlock(arg);
+                SkipBufferedBlock(arg);
             }
         }
     }
     if (D_00275714) {
-        if (n1 > 0) { s32 k = n1; do func_00138518(arg); while (--k); }
-        if (n2 > 0) { s32 k = n2; do func_00138518(arg); while (--k); }
+        if (n1 > 0) { s32 k = n1; do SkipBufferedBlock(arg); while (--k); }
+        if (n2 > 0) { s32 k = n2; do SkipBufferedBlock(arg); while (--k); }
     }
-    s32 r = func_0011A630();
+    s32 r = NewScriptScope();
     i = 0;
     self->f2C = (void*)r;
-    func_0011A6C0(D_00259F38, r);
+    AddUniqueMarkRoot(D_00259F38, r);
     self->f1EF8 = n1;
-    func_0011B538(&q0, 0);
-    func_0011A358(&q1, (s32)self->f2C, self->f1EF8, &q0);
-    func_0011B060(&q1, 2);
+    SetScriptValueTag(&q0, 0);
+    DefineScriptVariable(&q1, (s32)self->f2C, self->f1EF8, &q0);
+    DestroyScriptValue(&q1, 2);
     if (self->f1EF0 > 0) {
         do {
-            func_0011B008(&q1);
-            func_001C13E8(&q2, i, self);
+            InitScriptValue(&q1);
+            EvalScriptEntry(&q2, i, self);
             i++;
-            func_0011B0A8(&q1, &q2);
-            func_0011B060(&q2, 2);
-            func_0011B060(&q1, 2);
+            AssignScriptValue(&q1, &q2);
+            DestroyScriptValue(&q2, 2);
+            DestroyScriptValue(&q1, 2);
         } while (i < self->f1EF0);
     }
-    func_0011B060(&q0, 2);
+    DestroyScriptValue(&q0, 2);
 }
 
 void* func_001C1390(s32 index, World* self)
@@ -669,7 +669,7 @@ void* func_001C1390(s32 index, World* self)
     } else {
         Entry_1C1390* e = (Entry_1C1390*)((index << 3) + (u32)self->f1EF4);
         void* p = e->value;
-        if (p != 0) func_0011A6C0(D_00259F38, p);
+        if (p != 0) AddUniqueMarkRoot(D_00259F38, p);
         return p;
     }
 }
@@ -679,24 +679,24 @@ ScriptValue* func_001C13E8(ScriptValue* self, s32 index, World* ctx)
     s32 off = index << 3;
     ScriptValue q;
     Ent_1C13E8* e;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     e = (Ent_1C13E8*)(off + (s32)ctx->f1EF4);
     if (e->a != 0 && e->b == 0) {
         ScriptValue t;
-        ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->b = func_0011A630();
-        func_0011A080(&t, ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->a, ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->b);
-        func_0011B0A8(&q, &t);
-        func_0011B060(&t, 2);
+        ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->b = NewScriptScope();
+        EvalScriptExpression(&t, ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->a, ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->b);
+        AssignScriptValue(&q, &t);
+        DestroyScriptValue(&t, 2);
     }
-    func_0011B538(&q, 0x22);
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(self, &q);
+    DestroyScriptValue(&q, 2);
     return self;
 }
 
 s32 func_001C14C0(KeyHolder_1C14C0* self, s32 key)
 {
-    KeyTable_1C14C0* entry = &D_00244950[self->ref->index];
+    KeyTable_1C14C0* entry = &g_classPropertyLists[self->ref->index];
     s32 lo = 0;
     s32 hi = entry->count - 1;
     KeyPair_1C14C0* items = entry->items;
@@ -720,18 +720,18 @@ ScriptValue* func_001C1530(ScriptValue* self, void* ctx, s32 v, Cb_1C1530 cb)
 {
     ScriptValue q;
     Rec_1C1530 r;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     r.a = v;
     r.head = 0;
     r.cnt = 0;
     cb(ctx, &r);
     if (r.head != 0) {
-        func_0011B6C0(&q, r.head);
+        SetScriptValueChain(&q, r.head);
     } else {
-        func_0011B538(&q, 0);
+        SetScriptValueTag(&q, 0);
     }
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(self, &q);
+    DestroyScriptValue(&q, 2);
     return self;
 }
 
@@ -743,13 +743,13 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
     f32 t24;
     char* p;
     Get_1C15D8 fn;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     if (d->flags & 1) {
-        s32* r = (s32*)func_0011AE78();
+        s32* r = (s32*)TakeZeroedPoolEntry();
         r[0] = (s32)base;
         r[1] = d->imm;
         r[2] = d->imm2;
-        func_0011B8E8(&q, (s32)r);
+        SetScriptValueIntC(&q, (s32)r);
     } else if (d->flags & 2) {
         if (d->flags & 0x1000) {
             p = (char*)d->base(base, 0) + d->off;
@@ -759,51 +759,51 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
         switch (d->kind) {
         case 5: case 6: case 7: case 8:
         case 14: case 15: case 16: case 17:
-            func_0011B570(&q, *(s32*)p);
+            SetScriptValueInt(&q, *(s32*)p);
             break;
         case 1:
-            func_0011B5B0(&q, *(f32*)p);
+            SetScriptValueFloat(&q, *(f32*)p);
             break;
         case 0:
-            func_0011B5F0(&q, *(s32*)p);
+            SetScriptValueBool(&q, *(s32*)p);
             break;
         case 2: {
-            Quad16* r = (Quad16*)func_0011C508();
+            Quad16* r = (Quad16*)AcquireVectorAPayload();
             *r = *(Quad16*)p;
-            func_0011B740(&q, (f32*)r);
+            SetScriptValueVectorA(&q, (f32*)r);
             break;
         }
         case 4: {
-            void* r = func_0011C618();
+            void* r = AcquireMatrixPayload();
             func_001884E0(r, p);
-            func_0011B788(&q, (f32*)r);
+            SetScriptValueMatrix(&q, (f32*)r);
             break;
         }
         case 9: {
-            Quad16* r = (Quad16*)func_0011C748();
+            Quad16* r = (Quad16*)AcquireVectorBPayload();
             *r = *(Quad16*)p;
-            func_0011B7D0(&q, (f32*)r);
+            SetScriptValueVectorB(&q, (f32*)r);
             break;
         }
         case 10: {
-            D8_1C15D8* r = (D8_1C15D8*)func_0011C858();
+            D8_1C15D8* r = (D8_1C15D8*)AcquirePairPayload();
             *r = *(D8_1C15D8*)p;
-            func_0011B818(&q, (f32*)r);
+            SetScriptValuePair(&q, (f32*)r);
             break;
         }
         case 11: {
-            Rec3_1C15D8* r = (Rec3_1C15D8*)func_0011C968();
+            Rec3_1C15D8* r = (Rec3_1C15D8*)AcquireTriplePayload();
             *r = *(Rec3_1C15D8*)p;
-            func_0011B860(&q, (f32*)r);
+            SetScriptValueTriple(&q, (f32*)r);
             break;
         }
         case 13:
             break;
         default:
             if (d->kind & 0x1000) {
-                func_0011B570(&q, *(s32*)p);
+                SetScriptValueInt(&q, *(s32*)p);
             } else if (d->kind & 0x2000) {
-                func_0011B8A8(&q, (void*)*(s32*)p);
+                SetScriptValuePointerB(&q, (void*)*(s32*)p);
             }
             break;
         }
@@ -822,66 +822,66 @@ ScriptValue* func_001C15D8(ScriptValue* out, void* base, Desc_1C15D8* d)
         case 5: case 6: case 7: case 8:
         case 14: case 15: case 16: case 17:
             fn(p, &t20);
-            func_0011B570(&q, t20);
+            SetScriptValueInt(&q, t20);
             break;
         case 1:
             fn(p, &t24);
-            func_0011B5B0(&q, t24);
+            SetScriptValueFloat(&q, t24);
             break;
         case 0:
             fn(p, &t28);
-            func_0011B5F0(&q, t28);
+            SetScriptValueBool(&q, t28);
             break;
         case 2: {
-            void* r = func_0011C508();
+            void* r = AcquireVectorAPayload();
             fn(p, r);
-            func_0011B740(&q, (f32*)r);
+            SetScriptValueVectorA(&q, (f32*)r);
             break;
         }
         case 4: {
-            void* r = func_0011C618();
+            void* r = AcquireMatrixPayload();
             fn(p, r);
             func_001884C0(r);
-            func_0011B788(&q, (f32*)r);
+            SetScriptValueMatrix(&q, (f32*)r);
             break;
         }
         case 9: {
-            void* r = func_0011C748();
+            void* r = AcquireVectorBPayload();
             fn(p, r);
-            func_0011B7D0(&q, (f32*)r);
+            SetScriptValueVectorB(&q, (f32*)r);
             break;
         }
         case 10: {
-            void* r = func_0011C858();
+            void* r = AcquirePairPayload();
             fn(p, r);
-            func_0011B818(&q, (f32*)r);
+            SetScriptValuePair(&q, (f32*)r);
             break;
         }
         case 11: {
-            void* r = func_0011C968();
+            void* r = AcquireTriplePayload();
             fn(p, r);
-            func_0011B860(&q, (f32*)r);
+            SetScriptValueTriple(&q, (f32*)r);
             break;
         }
         case 13:
             break;
         default:
             if (d->kind < 0) {
-                func_001C1530(&q2, base, d->kind & 0x7fffffff, fn);
-                func_0011B0A8(&q, &q2);
-                func_0011B060(&q2, 2);
+                BuildScriptListFromCallback(&q2, base, d->kind & 0x7fffffff, fn);
+                AssignScriptValue(&q, &q2);
+                DestroyScriptValue(&q2, 2);
             } else if (d->kind & 0x1000) {
                 fn(p, &t2c);
-                func_0011B570(&q, t2c);
+                SetScriptValueInt(&q, t2c);
             } else if (d->kind & 0x2000) {
                 fn(p, &t30);
-                func_0011B8A8(&q, (void*)t30);
+                SetScriptValuePointerB(&q, (void*)t30);
             }
             break;
         }
     }
-    func_0011B018(out, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(out, &q);
+    DestroyScriptValue(&q, 2);
     return out;
 }
 
@@ -893,10 +893,10 @@ s32 func_001C1A28(List_1C1A28* self, s32 value)
     d.flags = 2;
     d.kind = self->type;
     d.off = 0;
-    R11B008Node* n = func_0011AF28();
-    func_001C15D8(&t, value, &d);
-    func_0011B0A8(n, &t);
-    func_0011B060(&t, 2);
+    R11B008Node* n = NewScriptValueNode();
+    ReadPropertyValue(&t, value, &d);
+    AssignScriptValue(n, &t);
+    DestroyScriptValue(&t, 2);
     if (self->head != 0) {
         self->tail->next = n;
     } else {
@@ -909,15 +909,15 @@ s32 func_001C1A28(List_1C1A28* self, s32 value)
 s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val) {
     ScriptValue q;
     R11B008Node* l;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     l = cmd->list;
     if (l) {
         switch (cmd->kind) {
         case 1:
-            func_0011B5B0(&q, *(f32*)val);
+            SetScriptValueFloat(&q, *(f32*)val);
             break;
         case 0:
-            func_0011B5F0(&q, *val);
+            SetScriptValueBool(&q, *val);
             break;
         case 2: case 4: case 9: case 10: case 11: case 13:
             break;
@@ -925,21 +925,21 @@ s32 func_001C1AD8(Cmd_1C1AD8* cmd, s32* val) {
             if (cmd->kind & 0x1000) {
         case 5: case 6: case 7: case 8:
         case 14: case 15: case 16: case 17:
-                func_0011B570(&q, *val);
+                SetScriptValueInt(&q, *val);
             } else if (cmd->kind & 0x2000) {
-                func_0011B8A8(&q, (void*)*val);
+                SetScriptValuePointerB(&q, (void*)*val);
             }
             break;
         }
         while (l) {
-            if (func_0011B0F8(l, &q)) {
-                func_0011B060(&q, 2);
+            if (AreScriptValuesEqual(l, &q)) {
+                DestroyScriptValue(&q, 2);
                 return 1;
             }
             l = l->next;
         }
     }
-    func_0011B060(&q, 2);
+    DestroyScriptValue(&q, 2);
     return 0;
 }
 
@@ -950,9 +950,9 @@ ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32
     ScriptValue b;
     ScriptValue c;
     s32 i;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     for (i = 0; i < n; i++) {
-        func_0011B0A8(&q, args + i);
+        AssignScriptValue(&q, args + i);
         u32 t = kinds[i];
         void* d = dsts[i];
         switch (t) {
@@ -962,23 +962,23 @@ ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32
             if (q.tag == 0x14) {
                 goto store;
             }
-            func_0011B008(&a);
-            func_0011B928(&b, &q);
-            func_0011B0A8(&a, &b);
-            func_0011B060(&b, 2);
+            InitScriptValue(&a);
+            ConvertScriptValueToInt(&b, &q);
+            AssignScriptValue(&a, &b);
+            DestroyScriptValue(&b, 2);
             *(s32*)d = a.i;
-            func_0011B060(&a, 2);
+            DestroyScriptValue(&a, 2);
             break;
         case 1:
             if (q.tag == 0x15) {
                 *(f32*)d = q.f;
             } else {
-                func_0011B008(&a);
-                func_0011B9A8(&c, &q);
-                func_0011B0A8(&a, &c);
-                func_0011B060(&c, 2);
+                InitScriptValue(&a);
+                ConvertScriptValueToFloat(&c, &q);
+                AssignScriptValue(&a, &c);
+                DestroyScriptValue(&c, 2);
                 *(f32*)d = a.f;
-                func_0011B060(&a, 2);
+                DestroyScriptValue(&a, 2);
             }
             break;
         case 4:
@@ -1010,9 +1010,9 @@ ScriptValue* func_001C1BF8(ScriptValue* out, s32 n, ScriptValue* args, const u32
             break;
         }
     }
-    func_0011B538(&q, 0x22);
-    func_0011B018(out, &q);
-    func_0011B060(&q, 2);
+    SetScriptValueTag(&q, 0x22);
+    CopyConstructScriptValue(out, &q);
+    DestroyScriptValue(&q, 2);
     return out;
 }
 
@@ -1020,20 +1020,20 @@ ScriptValue* func_001C1E48(ScriptValue* self, s32 n, s32* keys, s32* vals)
 {
     ScriptValue q;
     List_1C1A28 list;
-    func_0011B008(&q);
+    InitScriptValue(&q);
     list.head = 0;
     list.tail = 0;
     for (s32 i = 0; i < n; i++) {
         list.type = keys[i];
-        func_001C1A28(&list, vals[i]);
+        AppendPropertyToScriptList(&list, vals[i]);
     }
     if (list.head) {
-        func_0011B6C0(&q, list.head);
+        SetScriptValueChain(&q, list.head);
     } else {
-        func_0011B538(&q, 0);
+        SetScriptValueTag(&q, 0);
     }
-    func_0011B018(self, &q);
-    func_0011B060(&q, 2);
+    CopyConstructScriptValue(self, &q);
+    DestroyScriptValue(&q, 2);
     return self;
 }
 
@@ -1043,14 +1043,14 @@ INCLUDE_ASM(func_001C1F20);
 ScriptValue* func_001C21A0(ScriptValue* self, Obj_1C21A0* p, s32 n)
 {
     if (n < 0x495) {
-        s32 r = (s32)func_001C14C0(p, n);
-        func_001C15D8(self, p, r);
+        s32 r = (s32)FindPropertyDescriptor(p, n);
+        ReadPropertyValue(self, p, r);
     } else {
         ScriptValue q;
-        func_0011B008(&q);
-        func_0011BE90(p->f4, n, &q);
-        func_0011B018(self, &q);
-        func_0011B060(&q, 2);
+        InitScriptValue(&q);
+        FindKeyedValue(p->f4, n, &q);
+        CopyConstructScriptValue(self, &q);
+        DestroyScriptValue(&q, 2);
     }
     return self;
 }
@@ -1058,26 +1058,26 @@ ScriptValue* func_001C21A0(ScriptValue* self, Obj_1C21A0* p, s32 n)
 ScriptValue* func_001C2238(ScriptValue* self, Obj_1C2238* p, s32 key, ScriptValue* value)
 {
     if (key < 0x495) {
-        void* v = func_001C14C0(p, key);
-        func_001C1F20(self, p, v, value);
+        void* v = FindPropertyDescriptor(p, key);
+        WritePropertyValue(self, p, v, value);
     } else {
-        func_0011BDD0(self, p->f4, key, value);
+        UpdateKeyedValue(self, p->f4, key, value);
     }
     return self;
 }
 
 ScriptValue* func_001C22B8(ScriptValue* self, Obj_1C22B8* p, s32 key, ScriptValue* value)
 {
-    func_00130110(p);
-    func_0011BD28(self, p->f4, key, value);
+    EnsureKeyedList(p);
+    AddKeyedValue(self, p->f4, key, value);
     return self;
 }
 
 ScriptValue* func_001C2320(ScriptValue* self, BaseObject* p, s32 key, ScriptValue* value)
 {
-    func_00130110(p);
-    if (func_0011BE90((R11B008List*)p->f04, key, 0)) func_0011BDD0(self, (R11B008List*)p->f04, key, value);
-    else func_0011BD28(self, (R11B008List*)p->f04, key, value);
+    EnsureKeyedList(p);
+    if (FindKeyedValue((R11B008List*)p->f04, key, 0)) UpdateKeyedValue(self, (R11B008List*)p->f04, key, value);
+    else AddKeyedValue(self, (R11B008List*)p->f04, key, value);
     return self;
 }
 
@@ -1095,7 +1095,7 @@ ScriptValue* func_001C23B0(ScriptValue* ret, s32 count, ScriptValue* args, const
             i--;
         } while (i != 0);
     }
-    func_001C1BF8(ret, count, args, (const u32*)kinds, arr);
+    StoreScriptArguments(ret, count, args, (const u32*)kinds, arr);
     return ret;
 }
 
@@ -1107,7 +1107,7 @@ void func_001C2430(s32 size, ...)
     ap = (VaList_1C2430)__builtin_next_arg(size) - (8 - __builtin_args_info(0)) * 8;
     u32 addr = e->base;
     if (e->state == 3) {
-        func_00202C38((*(void**)&D_00261F20), 0, 0);
+        func_00202C38((*(void**)&g_fromSprChannel), 0, 0);
     }
     e->state = 1;
     s32 data = VA_ARG_1C2430(ap, s32);
@@ -1129,7 +1129,7 @@ void func_001C2430(s32 size, ...)
         } while (size != 0);
     }
     e->count = n;
-    Chan_1C2430* c = D_00261F24;
+    Chan_1C2430* c = g_toSprChannel;
     c->f0 |= 0x40;
     c->f80 = (e->base & 0x0FFFFFFF) | 0x80000000;
     func_00202A80(c, (u32)e->tags & 0x0FFFFFFF);
@@ -1141,7 +1141,7 @@ void func_001C25B0(s32 first, ...) {
     s32 n = 0;
     s32 x = first;
     r->f4C = 3;
-    func_00202C38(D_00261F20, 0, 0);
+    func_00202C38(g_fromSprChannel, 0, 0);
     void* ap = (char*)__builtin_next_arg(first) - 56;
     while (x) {
         buf[n] = x;
@@ -1156,7 +1156,7 @@ void func_001C25B0(s32 first, ...) {
         n++;
         i++;
     }
-    Dma_1C25B0* d = D_00261F20;
+    Dma_1C25B0* d = g_fromSprChannel;
     *(u64*)(r->f8[n] - 0x10) = ((r->f28[n] >> 4) | 0x70000000) | ((u64)buf[i] << 32);
     d->f0 &= ~0x40;
     d->f80 = (r->f4 & 0xFFFFFFF) + 0x80000000;

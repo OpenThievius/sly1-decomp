@@ -34,7 +34,7 @@ void func_eu_001AE6D0(Obj_eu_1AE6D0* self, s32 st)
                         ui->vtbl->fn40(ui, 0);
                         func_eu_001ADE38(ui, D_eu_002636F0->f19D8, D_eu_002636F0->f19DC);
                         ui->f974 = 1;
-                        func_001AA8B8(ui, 0.0f);
+                        SetScreenElementHoldTime(ui, 0.0f);
                         ui->vtbl->fn40(ui, 2);
                     }
                 }
@@ -49,5 +49,5 @@ void func_eu_001AE6D0(Obj_eu_1AE6D0* self, s32 st)
             }
         }
     }
-    func_001AA998(self, st);
+    SetScreenElementMode(self, st);
 }

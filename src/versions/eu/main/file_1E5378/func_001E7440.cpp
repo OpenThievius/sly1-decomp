@@ -6,6 +6,6 @@ void func_001E7440(Obj_E7440_eu* a0, s32 a1)
 {
     if (a1 != a0->f570) {
         a0->f570 = a1;
-        a0->f574 = D_00261868;
+        a0->f574 = g_elapsedTime;
     }
 }

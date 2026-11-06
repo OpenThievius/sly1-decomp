@@ -16,23 +16,23 @@ void func_001AA268(Obj_1AAF88_eu* self);
 
 void func_001AAF88(Obj_1AAF88_eu* self)
 {
-    func_001AA268(self);
-    self->f004 = (u32)func_0015C1C0(2);
+    SetupScreenElementText(self);
+    self->f004 = (u32)GetFontById(2);
     self->f260 = -1;
     self->f26C = 6000.0f;
     switch (self->f214) {
     case 3:
-        self->f264 = &D_002623C0->f19E0;
+        self->f264 = &g_saveData->f19E0;
         break;
     case 4:
-        self->f264 = &D_002623C8->count64;
-        self->f268 = &D_00275710->count2300;
+        self->f264 = &g_currentEntry->count64;
+        self->f268 = &g_currentWorld->count2300;
         break;
     case 5:
-        self->f264 = &D_002623C4->f438;
+        self->f264 = &g_currentLevelRecord->f438;
         break;
     case 6:
-        self->f264 = &D_002623C0->f19E8;
+        self->f264 = &g_saveData->f19E8;
         break;
     case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 28: case 29:

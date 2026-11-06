@@ -21,18 +21,18 @@ struct Obj_1AB660_eu {
 
 void func_001AB660(Obj_1AB660_eu* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     if (self->mode == 0) {
         return;
     }
     if (self->flag == 0) {
-        s32 close = (1.0f <= D_0026185C - self->timer);
+        s32 close = (1.0f <= g_gameTime - self->timer);
         if ((u32)(self->mode - 1) < 2) {
             if (self->extra != 0 || close) {
                 self->vtbl[15](self);
             }
         }
     } else {
-        func_001AB980(self, D_00261860);
+        StepTimer(self, g_frameDt);
     }
 }

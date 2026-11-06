@@ -9,5 +9,5 @@ void func_eu_001AE0F8(u8* a0)
             return;
         }
     }
-    func_001AA958(a0);
+    HideScreenElement(a0);
 }

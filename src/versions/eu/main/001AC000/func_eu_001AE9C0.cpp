@@ -33,14 +33,14 @@ void func_eu_001AE9C0(Obj_eu_1AE9C0* self)
     func_eu_001AAFB0(self);
     Sub_eu_1AE9C0* sub = self->sub;
     self->sub = (Sub_eu_1AE9C0*)sub->info->fn((u8*)sub + sub->info->off, D_eu_0027DB98, D_eu_0027DB9C);
-    if (func_0015C1C0(2) != 0) {
+    if (GetFontById(2) != 0) {
         self->f520 = (s32*)D_eu_0027DBA0;
-        *self->f520 = (s32)func_0015C1C0(2);
+        *self->f520 = (s32)GetFontById(2);
     }
-    s32 r = (s32)func_001B4688(0x493);
+    s32 r = (s32)FindAnimRecord(0x493);
     self->f570 = r;
     if (r != 0) {
-        func_001AAB20(self, 366.75f, 165.75f);
+        SetScreenElementSize(self, 366.75f, 165.75f);
     } else {
         const char* text = func_eu_001DDAB0(0xB);
         ((void (*)(void*, const char*))self->vt[8])(self, text);

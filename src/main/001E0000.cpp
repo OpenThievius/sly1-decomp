@@ -23,7 +23,7 @@ void func_001E02C8(void* self, s32 n);
 
 void func_001E0828(void* self)
 {
-    func_001E02C8(self, 3);
+    SetBestTimeState(self, 3);
 }
 
 void func_001F5C0C(void* p, s32 zero, s32 size);
@@ -45,23 +45,23 @@ s32 func_001E9970(void);
 
 void func_001E00B0(T217D_1380* self)
 {
-    func_001AA298(self);
+    UpdateScreenElementSlide(self);
     switch (self->state) {
     case 0:
     case 1:
     {
         if (self->pressed != 0) {
-        if (D_00262C70.fAA & 4) {
-            func_0016EC20(&D_00262C70, 4);
-            func_001BE5F8(D_00275710->f2310);
-            if (D_00275710->f2314 != 0) {
-                func_001AA8B8(self, 15.0f);
-                self->vt->m08(self, (const char*)D_00275710->f2314);
+        if (g_padRecord.fAA & 4) {
+            ClearPadPressedBits(&g_padRecord, 4);
+            StartLockedStreamVoice(g_currentWorld->f2310);
+            if (g_currentWorld->f2314 != 0) {
+                SetScreenElementHoldTime(self, 15.0f);
+                self->vt->m08(self, (const char*)g_currentWorld->f2314);
             } else {
                 self->vt->m15(self);
             }
             self->pressed = 0;
-        } else if (D_0026185C >= 5.0f) {
+        } else if (g_gameTime >= 5.0f) {
             self->vt->m15(self);
             self->pressed = 0;
         }
@@ -70,19 +70,19 @@ void func_001E00B0(T217D_1380* self)
     }
     case 2:
     {
-        T217D_510* o = &D_0026E760;
+        T217D_510* o = &g_timerElement;
         s32 r;
         if (o->state == 0) {
-            func_001E02C8(self, 3);
+            SetBestTimeState(self, 3);
             return;
         }
-        func_001AB920(o, -func_00205C78(2.0f, (f32)D_002623DC));
-        r = func_001E9970();
+        SetTimerRate(o, -func_00205C78(2.0f, (f32)D_002623DC));
+        r = AreMenusAndFadeClear();
         if (r) o->vt->m14(o); else o->vt->m15(o);
-        if (D_002623C8->flags & 8) {
+        if (g_currentEntry->flags & 8) {
             s32 b = 0;
-            if (r && D_002701C4 == 0 && D_002623C8->f08 < D_0026E760.time) b = 1;
-            if (b) D_0026E9F8.vt->m14(&D_0026E9F8); else D_0026E9F8.vt->m15(&D_0026E9F8);
+            if (r && D_002701C4 == 0 && g_currentEntry->f08 < g_timerElement.time) b = 1;
+            if (b) g_timerCaption.vt->m14(&g_timerCaption); else g_timerCaption.vt->m15(&g_timerCaption);
         }
     }
     break;
@@ -125,8 +125,8 @@ void func_001E02C8(T217D_1380* self, s32 n)
         }
         break;
     case 2:
-        func_001AB958(&D_0026E760);
-        D_0026E760.vt->m15(&D_0026E760);
+        StopTimer(&g_timerElement);
+        g_timerElement.vt->m15(&g_timerElement);
         self->vt->m15(self);
         break;
     }
@@ -134,44 +134,44 @@ void func_001E02C8(T217D_1380* self, s32 n)
     case 2: {
         f32 zero = 0.0f;
         f32 one = 1.0f;
-        func_001BFCD8(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
+        StartSoundEffect(0x6D, 0, 0, 0, 3000.0f, 300.0f, one, zero, zero, 0, 0);
         func_00160C48(0);
-        func_001DDAD0(D_00275710);
-        func_001AB890(&D_0026E760, D_00275710->f230C + 0.99f);
-        func_001AB920(&D_0026E760, -func_00205C78(2.0f, (f32)D_002623DC));
-        func_001AB928(&D_0026E760, zero, 0);
-        func_001AB938(&D_0026E760);
-        G27C230* cam = D_002623C8;
+        func_001DDAD0(g_currentWorld);
+        StartTimer(&g_timerElement, g_currentWorld->f230C + 0.99f);
+        SetTimerRate(&g_timerElement, -func_00205C78(2.0f, (f32)D_002623DC));
+        SetTimerLimit(&g_timerElement, zero, 0);
+        StartTimerCounting(&g_timerElement);
+        G27C230* cam = g_currentEntry;
         if (cam->flags & 8) {
             f32 t = cam->f08;
             if (t < one) {
-                func_001E1FD0(&D_00275900, "Best time: &10.%d", (s32)(t * 10.0f));
+                FormatToString(&D_00275900, "Best time: &10.%d", (s32)(t * 10.0f));
             } else {
                 s32 s = (s32)t;
                 s32 minutes = s / 60;
                 s32 seconds = s % 60;
-                func_001E1FD0(&D_00275900, "Best time: &1%d:%02d", minutes, seconds);
+                FormatToString(&D_00275900, "Best time: &1%d:%02d", minutes, seconds);
             }
-            func_001AA8B8(self, zero);
+            SetScreenElementHoldTime(self, zero);
             self->vt->m08(self, D_00275900.c);
         } else {
-            func_001AA8B8(self, 5.0f);
+            SetScreenElementHoldTime(self, 5.0f);
             self->vt->m08(self, "Beginning Master Thief Sprint!");
         }
         self->vt->m14(self);
         break;
     }
     case 3: {
-        T217D_510* o = &D_0026E760;
+        T217D_510* o = &g_timerElement;
         s32 id;
         f32 t = o->time;
         if (0.0f < t) {
-            G27C230* cam = D_002623C8;
+            G27C230* cam = g_currentEntry;
             if (cam->flags & 8) {
                 if (cam->f08 < t) {
                     cam->f08 = t;
                     id = 0x1D;
-                    func_0018C7F8(&g_memoryCard);
+                    StartMemoryCardSave(&g_memoryCard);
                 } else {
                     id = 0x1E;
                 }
@@ -179,26 +179,26 @@ void func_001E02C8(T217D_1380* self, s32 n)
                 id = 0x1B;
                 cam->flags |= 8;
                 cam->f08 = o->time;
-                D_002623C4->f440 = D_002623C4->f440 + 1;
+                g_currentLevelRecord->f440 = g_currentLevelRecord->f440 + 1;
                 if (func_001602A0() & 8) {
                     func_001604B8(8);
-                    func_0018C7F8(&g_memoryCard);
+                    StartMemoryCardSave(&g_memoryCard);
                 }
             }
         } else {
             id = 0x1C;
-            if (D_002623C8->flags & 8) {
+            if (g_currentEntry->flags & 8) {
                 id = 0x1E;
             }
         }
-        func_00194D30(&D_0026FF68, 0, id);
+        SetPauseMenuLayerPage(&g_pauseMenuElement, 0, id);
         break;
     }
     }
     self->state = n;
     self->stateSince = *self->clock;
     if (n == 2) {
-        func_00148CE0(D_00275710);
+        func_00148CE0(g_currentWorld);
     }
     self->active = (self->state != 0);
 }
@@ -242,7 +242,7 @@ void func_001E0678(T217D_1380* self)
     u8 loc[0xB0];
 
     if (self->text[0] != 0) {
-        func_0015C8B8(self->font, self->scale, self->scale);
+        PushFontScale(self->font, self->scale, self->scale);
         tmp = self->colorWord;
         ((u8*)&tmp)[3] = (u8)((f32)((u8*)&tmp)[3] * self->blend);
         f32 p = self->w;
@@ -259,12 +259,12 @@ void func_001E0678(T217D_1380* self)
         if (h != 0) {
             slot = *(T217D_Word*)(h + 0x18);
             h[0x1B] = (u8)((f32)h[0x1B] * self->blend);
-            Hd_1E0678::Draw(self->frame, &out, D_00262280);
+            Hd_1E0678::Draw(self->frame, &out, g_gsPacketWriter);
             *(T217D_Word*)((u8*)self->frame + 0x18) = slot;
         }
-        func_0015DB28(loc, &self->text[0], self->font);
-        func_0015E318(loc, &out, 0, D_00262280);
-        func_0015C900(self->font);
+        InitTextReader(loc, &self->text[0], self->font);
+        DrawAlignedText(loc, &out, 0, g_gsPacketWriter);
+        PopFontScale(self->font);
     }
 }
 

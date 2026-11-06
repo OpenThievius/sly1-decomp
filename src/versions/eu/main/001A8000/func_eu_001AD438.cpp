@@ -66,10 +66,10 @@ void func_eu_001AD438(Actor_eu_1AD438* self)
             ((Attach_eu_1AD438*)self->f520)->col = saved;
         }
         v = self->f51C;
-        func_0015C8B8(self->p4, v, v);
+        PushFontScale(self->p4, v, v);
         u8 buf[0xC0];
         func_eu_0015DCB8(buf, (u8*)self + 8, self->p4, 0);
         func_eu_0015E7E0(buf, &L, 0, D_eu_00263590);
-        func_0015C900(self->p4);
+        PopFontScale(self->p4);
     }
 }

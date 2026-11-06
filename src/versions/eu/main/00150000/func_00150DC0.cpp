@@ -22,36 +22,36 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
     u16* nm;
     switch (msg->type) {
     case 0:
-        func_001BE728(msg->f4.i);
+        OpenKeyRecord(msg->f4.i);
         self->f2E8 |= 1;
         break;
     case 1:
     case 2:
         if (msg->f4.i != -1) {
-            s2 = (Slot_150DC0*)func_0015A418(self->world, 0x104, msg->f4.i, self->root ? self->root : self);
+            s2 = (Slot_150DC0*)FindFirstObjectById(self->world, 0x104, msg->f4.i, self->root ? self->root : self);
         } else {
             s2 = 0;
         }
         if (msg->f8.i != -1) {
-            s4 = (Slot_150DC0*)func_0015A418(self->world, 0x104, msg->f8.i, self->root ? self->root : self);
+            s4 = (Slot_150DC0*)FindFirstObjectById(self->world, 0x104, msg->f8.i, self->root ? self->root : self);
         } else {
             s4 = 0;
         }
         if (s2 && s2->f334) {
-            func_001B64D8(s2->f334, 0x34C);
+            SetStateWalkerTarget(s2->f334, 0x34C);
         }
         switch (msg->type) {
         case 1:
-            func_001E86E0(&D_002708E0, s2);
-            func_001E87F0(&D_002708E0, s4);
+            SetArcTarget(&D_002708E0, s2);
+            SetArcSpecialObject(&D_002708E0, s4);
             self->p2F0 = s2;
             if (s2) {
                 self->f2E8 |= 2;
             }
             break;
         case 2:
-            func_001E86E0(&D_00271558, s2);
-            func_001E87F0(&D_00271558, s4);
+            SetArcTarget(&D_00271558, s2);
+            SetArcSpecialObject(&D_00271558, s4);
             self->p2F4 = s2;
             if (s2) {
                 self->f2E8 |= 4;
@@ -62,38 +62,38 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
         }
         break;
     case 3:
-        if (self->p2F0 && func_001833F0((Slot_150DC0*)self->p2F0, msg->f18)) {
+        if (self->p2F0 && MatchesObjectId((Slot_150DC0*)self->p2F0, msg->f18)) {
             s2 = (Slot_150DC0*)self->p2F0;
-            func_001E7440(&D_002708E0, 1);
-            func_001E7440(&D_00271558, 0);
-        } else if (self->p2F4 && func_001833F0((Slot_150DC0*)self->p2F4, msg->f18)) {
+            SetArcFade(&D_002708E0, 1);
+            SetArcFade(&D_00271558, 0);
+        } else if (self->p2F4 && MatchesObjectId((Slot_150DC0*)self->p2F4, msg->f18)) {
             s2 = (Slot_150DC0*)self->p2F4;
-            func_001E7440(&D_00271558, 1);
-            func_001E7440(&D_002708E0, 0);
+            SetArcFade(&D_00271558, 1);
+            SetArcFade(&D_002708E0, 0);
         } else {
             s2 = 0;
         }
         a2 = msg->f1C;
         a0 = 0;
         if (a2 != -1) {
-            a0 = func_0015A418(self->world, 2, a2, self);
+            a0 = FindFirstObjectById(self->world, 2, a2, self);
             self->f2E8 |= 0x10;
         } else {
             if (s2) {
-                a0 = func_0015A418(self->world, 1, 0x54A, s2);
+                a0 = FindFirstObjectById(self->world, 1, 0x54A, s2);
             }
         }
         if (a0) {
-            func_0012C7B0(0.0f, 1.0f, (Slot_150DC0*)a0, (s32)s2, 1, &self->player2F8);
+            CreateAnimationPlayerWithoutPresetTargets(0.0f, 1.0f, (Slot_150DC0*)a0, (s32)s2, 1, &self->player2F8);
             func_0012F810(self->player2F8, self);
         }
         nm = (u16*)msg->f14;
         if (nm && *nm) {
-            (*(Hud_150DC0_eu*)&D_002701F8).vt->f20(&(*(Hud_150DC0_eu*)&D_002701F8), nm);
+            (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).vt->f20(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), nm);
             if (s2) {
-                *(Raw4_150DC0*)&(*(Hud_150DC0_eu*)&D_002701F8).f2F4 = s2->f2D0;
+                *(Raw4_150DC0*)&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = s2->f2D0;
             } else {
-                (*(Hud_150DC0_eu*)&D_002701F8).f2F4 = 0x80808080;
+                (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F4 = 0x80808080;
             }
             if (self->player2F8) {
                 if (msg->f1C == -1) {
@@ -105,31 +105,31 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
                 f20 = msg->f8.f;
             }
             if (0.0f < f20) {
-                (*(Hud_150DC0_eu*)&D_002701F8).f2F0 = (f32)(func_eu_001E3018((u16*)msg->f14) + 10) / f20;
+                (*(Hud_150DC0_eu*)&g_typedTextCaptionBox).f2F0 = (f32)(func_eu_001E3018((u16*)msg->f14) + 10) / f20;
             } else {
-                Hud_150DC0_eu* h3 = &(*(Hud_150DC0_eu*)&D_002701F8);
+                Hud_150DC0_eu* h3 = &(*(Hud_150DC0_eu*)&g_typedTextCaptionBox);
                 h3->f2F0 = 15.0f;
             }
             self->f2E8 |= 0x20;
         }
         if (msg->f4.f >= 0.0f) {
-            func_001365A8(&(*(Hud_150DC0_eu*)&D_002701F8), msg->f4.f + 1.0f);
+            SetTextPanelValuePercent(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), msg->f4.f + 1.0f);
             self->f2E8 |= 0x40;
         }
         if (msg->f8.f >= 0.0f) {
             self->f2E8 |= 0x80;
-            self->f2FC = D_0026185C[0] + msg->f8.f;
+            self->f2FC = g_gameTime[0] + msg->f8.f;
         }
         if (msg->f20 != -1) {
-            s32 r = func_0015A418(self->world, 0x104, msg->f20, self->root ? self->root : self);
-            func_001365A0(&(*(Hud_150DC0_eu*)&D_002701F8), r);
+            s32 r = FindFirstObjectById(self->world, 0x104, msg->f20, self->root ? self->root : self);
+            func_001365A0(&(*(Hud_150DC0_eu*)&g_typedTextCaptionBox), r);
         }
         if (msg->f24 != -1) {
-            D_00261990->ctl460.f5C = func_0015A448(self->world, msg->f24, 0);
+            g_camera->ctl460.f5C = func_0015A448(self->world, msg->f24, 0);
         } else if (self->second300 != -1) {
-            D_00261990->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+            g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
         } else {
-            D_00261990->ctl460.f5C = 0;
+            g_camera->ctl460.f5C = 0;
         }
         if (msg->fC) {
             self->f2E8 |= 0x100;
@@ -139,17 +139,17 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
         break;
     case 4: {
         void* tmp = &msg->f4;
-        func_001837E0(self, 0x10, 1, &tmp);
+        TriggerScriptEvent(self, 0x10, 1, &tmp);
         break;
     }
     case 5:
-        func_001DDB58(self->world);
+        ShowCountedScreenElement(self->world);
         break;
     case 6:
-        func_001DDBB8(self->world);
+        HideCountedScreenElement(self->world);
         break;
     case 7:
-        func_0018F0E8(D_00269A00, msg->f4.i);
+        QueueMovie(g_moviePlayer, msg->f4.i);
         break;
     }
 }

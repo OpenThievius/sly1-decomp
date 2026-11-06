@@ -21,5 +21,5 @@ void func_eu_001AD6E8(Obj_eu_001AD6E8* self, s32 a1)
             a1 = 1;
         }
     }
-    func_001AA998(self, a1);
+    SetScreenElementMode(self, a1);
 }

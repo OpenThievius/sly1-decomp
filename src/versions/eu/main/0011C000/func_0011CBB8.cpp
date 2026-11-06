@@ -27,19 +27,19 @@ void func_0011CBB8(s32 flags)
     D_0025C388.busy = 0;
     D_0025C390.fn = 0;
     D_0025C390.arg = 0;
-    D_00260E00.result = 0;
+    g_iopChannel2Result.result = 0;
     do {
         ASSERT_0011CBB8(func_001F80C0((Rpc_0011CBB8*)D_0027B4F0, 0x123457, 0) >= 0, 0xC4);
         for (n = 10000; --n != -1;) {
         }
     } while (((Rpc_0011CBB8*)D_0027B4F0)->f24 == 0);
-    D_00260DC0.f00 = 0;
+    g_iopSharedPacket.f00 = 0;
     D_0025C540[0] = 0;
     D_0025D540[0] = 0;
     D_0025C368[0] = 0xFFC;
     D_0025C368[1] = 0xFFC;
-    D_00260DC0.f10 = 0;
-    args[0] = (s32)&D_00260DC0;
+    g_iopSharedPacket.f10 = 0;
+    args[0] = (s32)&g_iopSharedPacket;
     args[1] = flags;
-    func_0011D968(0, 8, args);
+    SendIopCommandAndWait(0, 8, args);
 }

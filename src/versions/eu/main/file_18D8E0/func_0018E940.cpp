@@ -14,18 +14,18 @@ s32 func_0018E940(Obj_18E940* self_)
 {
     Obj_18E940_eu* self = (Obj_18E940_eu*)self_;
     func_0011D6A8(0xFFFFFFFF);
-    func_001C08B0(D_00275710, 0, 0);
+    PushIopChannel2Setting(g_currentWorld, 0, 0);
     func_0011E010();
-    while (func_0011CE30() != 0) {
+    while (PollIopCommands() != 0) {
     }
     func_0011E110(1);
-    func_0011E1F8(0);
-    self->fA0 = func_0011D4B8(2);
-    self->fA4 = func_0011D4B8(0x10);
-    func_0011D480(2, 0x400);
-    func_0011D480(0x10, 0x200);
+    SyncDiscRead(0);
+    self->fA0 = GetIopVolumeChannel(2);
+    self->fA4 = GetIopVolumeChannel(0x10);
+    SetIopVolumeChannel(2, 0x400);
+    SetIopVolumeChannel(0x10, 0x200);
     self->f00 = 1;
     self->f04 = -1;
-    func_0013C988(self->sub30, 0x28, self->f08);
-    func_0013C988(self->sub50, 0x20000, D_002CBB40);
+    InitRingBuffer(self->sub30, 0x28, self->f08);
+    InitRingBuffer(self->sub50, 0x20000, D_002CBB40);
 }

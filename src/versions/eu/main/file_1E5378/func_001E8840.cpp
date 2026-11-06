@@ -6,7 +6,7 @@ void func_001AA8C8(void* self);
 
 void func_001E8840(Obj_1E8840_eu* self)
 {
-    func_001AA8C8(self);
+    ResetScreenElement(self);
     self->f1190 = 0;
     self->f584 = 0;
     self->f580 = 0;

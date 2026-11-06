@@ -4,7 +4,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
     u64 v;
     switch (sp->ch) {
     case '%':
-        func_001D7190(c, (const char*)sp + 0x2C, 1);
+        AppendToOutputBuffer(c, (const char*)sp + 0x2C, 1);
         return;
     case 'c': {
         signed char buf[16];
@@ -12,13 +12,13 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         *va = p + 8;
         s32 ch = *(u8*)p;
         buf[0] = ch;
-        func_001D7190(c, (const char*)buf, 1);
+        AppendToOutputBuffer(c, (const char*)buf, 1);
         return;
     }
     case 's': {
         u8* p = *va;
         *va = p + 8;
-        func_001E0CD0(sp, c, *(const char**)p);
+        FormatStringArg(sp, c, *(const char**)p);
         return;
     }
     case 'p':
@@ -30,7 +30,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         case 0: case 1: { u8* p = *va; *va = p + 8; v = *(u32*)p; break; }
         case 2: { u8* p = *va; *va = p + 8; v = *(u64*)p; break; }
         }
-        func_001E1028(sp, c, v);
+        FormatIntegerArg(sp, c, v);
         return;
     case 'e': case 'f': case 'g':
         if (sp->i24 != 0) {
@@ -43,31 +43,31 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
             const char* s6 = " }";
             f32* fp = *(f32**)a;
             if (sp->i28 >= 2) {
-                func_001D7190(c, s4, func_001E2100(s4));
+                AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
             for (s32 i = 0; i < sp->i28; ) {
                 s32 next;
                 if (i != 0) {
-                    func_001D7190(c, s8, func_001E2100(s8));
+                    AppendToOutputBuffer(c, s8, GetStringLength(s8));
                 }
                 next = i + 1;
-                func_001D7190(c, s7, func_001E2100(s7));
+                AppendToOutputBuffer(c, s7, GetStringLength(s7));
                 for (s32 j = 0; j < sp->i24; j++) {
                     if (j != 0) {
-                        func_001D7190(c, s5, func_001E2100(s5));
+                        AppendToOutputBuffer(c, s5, GetStringLength(s5));
                     }
-                    func_001E17A8(sp, c, func_001FD868(*fp++));
+                    FormatFloatArg(sp, c, func_001FD868(*fp++));
                 }
-                func_001D7190(c, s6, func_001E2100(s6));
+                AppendToOutputBuffer(c, s6, GetStringLength(s6));
                 i = next;
             }
             if (sp->i28 >= 2) {
-                func_001D7190(c, s4, func_001E2100(s4));
+                AppendToOutputBuffer(c, s4, GetStringLength(s4));
             }
         } else {
             u8* p = *va;
             *va = p + 8;
-            func_001E17A8(sp, c, *(s64*)p);
+            FormatFloatArg(sp, c, *(s64*)p);
         }
         return;
     case 'n':
@@ -78,7 +78,7 @@ void func_001E1A08(Spec_001E1A08* sp, OutputBuffer* c, u8** va, const char* fmt,
         }
         return;
     default:
-        func_001D7190(c, fmt, len);
+        AppendToOutputBuffer(c, fmt, len);
         return;
     }
 }

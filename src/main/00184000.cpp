@@ -10,7 +10,7 @@ void func_00183F40(f32* out0, f32* out1, f32 a, f32 b, f32 c, f32 d);
 
 void func_001840B8(Vec2_1840B8* self, f32* out0, f32* out1)
 {
-    func_00183F40(out0, out1, self->x, 1.0f, self->y, 0.0f);
+    FitLineThroughPoints(out0, out1, self->x, 1.0f, self->y, 0.0f);
 }
 
 extern s32 D_002622CC;
@@ -98,7 +98,7 @@ void func_00184A70(void* self);
 void func_001849D0(ConeVolume* self, f32 v)
 {
     self->outerAngle = v;
-    func_00184A70(self);
+    UpdateConeVolumeTangents(self);
     func_001841D0(self);
     func_00184B58(self);
 }
@@ -106,7 +106,7 @@ void func_001849D0(ConeVolume* self, f32 v)
 void func_00184A08(ConeVolume* self, f32 v)
 {
     self->innerAngle = v;
-    func_00184A70(self);
+    UpdateConeVolumeTangents(self);
     func_001841D0(self);
 }
 
@@ -162,7 +162,7 @@ f32 func_00185C18(IndexPair_185C18* p)
     f32 den = D_00264840[p->a].a + D_00264840[p->b].a;
     f32 r = num / den;
     if (r < 0.0f) r = 0.0f;
-    if (D_00262C64 & 8) r = r * 0.2f;
+    if (g_buttonCodeFlags & 8) r = r * 0.2f;
     return r;
 }
 
@@ -190,7 +190,7 @@ void func_001861E8(u8* self, Contact03* head)
         Contact03* cur = head;
         do {
             Contact03* next = cur->next;
-            func_001B5F28(self + 0x1AFC, cur);
+            PushFreeSlot(self + 0x1AFC, cur);
             cur = next;
         } while (cur != 0);
     }
@@ -431,7 +431,7 @@ void func_001840F0(f32 a, f32 b, f32 c, f32 d, Out_1840F0* out0, void* out1)
     x = x + x * x * x;
     f32 y = func_00205210(c * 0.0087266471f);
     y = y + y * y * y;
-    func_00183F40(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
+    FitLineThroughPoints(x, b * 0.003921569f, y, d * 0.003921569f, out0, out1);
 }
 
 struct Pair_00186A70 { u8 pad0[4]; s16 k1; s16 k2; };

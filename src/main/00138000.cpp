@@ -31,7 +31,7 @@ void* func_0012CCE8(void);
 
 void func_00139B38(void)
 {
-    Owner_139B38* o = (Owner_139B38*)func_0012CCE8();
+    Owner_139B38* o = (Owner_139B38*)FindEntryByObjectId();
     if (o) {
         if (o->sub) {
             o->sub->flag = 1;
@@ -59,7 +59,7 @@ void func_00152470(void* list, void* item);
 
 OwnedRecord* func_00139C70(Obj_139C70* o)
 {
-    OwnedRecord* s = (OwnedRecord*)func_001B5EA0(o->ctx + 0x1B40);
+    OwnedRecord* s = (OwnedRecord*)PopFreeSlot(o->ctx + 0x1B40);
     if (!s) {
         return 0;
     }
@@ -67,17 +67,17 @@ OwnedRecord* func_00139C70(Obj_139C70* o)
     if (o->mode != 2) {
         s->owner = o;
     } else {
-        void* r = func_001B5EA0(o->ctx + 0x1B4C);
+        void* r = PopFreeSlot(o->ctx + 0x1B4C);
         s->extraRecord = r;
         if (r) {
             func_001F5C0C(r, 0, 0x580);
             s->owner = o;
         } else {
-            func_001B5F28(o->ctx + 0x1B40, s);
+            PushFreeSlot(o->ctx + 0x1B40, s);
             return 0;
         }
     }
-    func_00152470((u8*)o + 0x624, s);
+    AppendToList((u8*)o + 0x624, s);
     return s;
 }
 
@@ -90,8 +90,8 @@ void func_00152470(void* list, void* item);
 
 void func_00139D28(Sub_139D28* o)
 {
-    func_00152600((u8*)o->owner + 0x624, o);
-    func_00152470(&D_002622F0, o);
+    RemoveFromList((u8*)o->owner + 0x624, o);
+    AppendToList(&D_002622F0, o);
 }
 
 struct In_138278 { u8 pad0[0x10]; s32 base; };
@@ -101,20 +101,20 @@ void* func_0018D5C0(s32 size);
 
 void func_00138278(void* self, In_138278* in, Tree03* out)
 {
-    s32 x = func_00137BE0(self);
+    s32 x = ReadBufferedU16(self);
     out->count = x;
-    s32 y = func_00137BE0(self);
+    s32 y = ReadBufferedU16(self);
     out->count2 = y;
-    out->nodes = (TreeNode03*)func_0018D5C0(12 * out->count);
+    out->nodes = (TreeNode03*)AllocateZeroedFrontMemory(12 * out->count);
     for (s32 i = 0; i < out->count; i++) {
         TreeNode03* e = out->nodes + i;
-        s32 v = func_00137BE0(self);
+        s32 v = ReadBufferedU16(self);
         e->face = (void*)(in->base + (v << 5));
-        s32 w = func_00137BE0(self);
+        s32 w = ReadBufferedU16(self);
         if ((w & 0xFFFF) != 0xFFFF) {
             e->back = out->nodes + w;
         }
-        s32 z = func_00137BE0(self);
+        s32 z = ReadBufferedU16(self);
         if ((z & 0xFFFF) != 0xFFFF) {
             e->front = out->nodes + z;
         }
@@ -127,12 +127,12 @@ s32 func_00152720(void* sub);
 
 void func_0013A418(WorldListedObject* self, BaseObject* src)
 {
-    func_001832F0(self, src);
-    if (func_001300E8(src, 0x50) != 0) {
+    AddObjectListener(self, src);
+    if (IsObjectOfKind(src, 0x50) != 0) {
         EffectSpawner* from = (EffectSpawner*)src;
         self->source = from;
         self->f80 = from->f80;
-        if (func_00152720(from->list314) == 0) {
+        if (IsListEmpty(from->list314) == 0) {
             self->flags &= 0xFFFFFFFFF3FFFFFFULL;
             self->flags &= 0xFFFFFFFFCFFFFFFFULL;
         }
@@ -143,7 +143,7 @@ void* func_001387C0(void* self, void* other);
 
 s32 func_001387F8(void* self, void* other)
 {
-    s32* p = (s32*)func_001387C0(self, other);
+    s32* p = (s32*)FindContactRow(self, other);
     s32 r = 0;
     if (p != 0) {
         r = *p;
@@ -191,16 +191,16 @@ void func_001240F8(void* self);
 
 void func_00139E80(WorldListedObject* self)
 {
-    func_00152600(&self->world->list1CC0, self);
-    func_00152470(&self->world->list1CB4, self);
-    func_001240F8(self);
+    RemoveFromList(&self->world->list1CC0, self);
+    AppendToList(&self->world->list1CB4, self);
+    RegisterPlacedObject(self);
 }
 
 extern f32 D_0026185C;
 
 void func_0013BE00(ChildGroupObject* self, f32 delta)
 {
-    self->f554 = D_0026185C + delta;
+    self->f554 = g_gameTime + delta;
 }
 
 void func_001BAC30(void* self);
@@ -208,8 +208,8 @@ void func_00159478(void* sub, void* self);
 
 void func_0013B598(ChildGroupObject* self)
 {
-    func_001BAC30(self);
-    func_00159478(&self->member5BC, self);
+    LoadCollider(self);
+    FindOrBuildMemberGroup(&self->member5BC, self);
 }
 
 s32 func_00137BE0(void* src);
@@ -217,8 +217,8 @@ void func_00137A60(void* self, s32 size, void* obj);
 
 void func_00138518(void* self)
 {
-    s32 n = func_00137BE0(self);
-    func_00137A60(self, n, 0);
+    s32 n = ReadBufferedU16(self);
+    ReadBufferedStreamBytes(self, n, 0);
 }
 
 struct Range_138550 {
@@ -231,9 +231,9 @@ u32 func_0018D568(s32 size, void* src);
 void func_00138550(void* self, u32* out)
 {
     Range_138550 r;
-    func_00137A60(self, 0x20, &r);
+    ReadBufferedStreamBytes(self, 0x20, &r);
     if (r.w[1] != r.w[7]) {
-        *out = func_0018D568(0x20, &r);
+        *out = CopyToFrontMemory(0x20, &r);
     } else {
         *out = 0;
     }
@@ -274,9 +274,9 @@ void* func_001387C0(Collider* self, Collider* other)
 void* func_0018D500(s32 size);
 void func_001384A0(void* self, u8** out)
 {
-    s32 size = func_00137BE0(self);
-    u8* buffer = (u8*)func_0018D500(size + 1);
-    func_00137A60(self, size, buffer);
+    s32 size = ReadBufferedU16(self);
+    u8* buffer = (u8*)AllocateFrontMemory(size + 1);
+    ReadBufferedStreamBytes(self, size, buffer);
     buffer[size] = 0;
     *out = buffer;
 }
@@ -299,8 +299,8 @@ ContactRow03* func_00138788(void* unused, ContactRow03** head, Contacts03* key)
 void func_001BA130(void* self, void* other);
 void func_0013B5C8(ChildGroupObject* self, ChildGroupObject* other)
 {
-    func_001BA130(self, other);
-    if (other->slot) self->slot = (void*)func_0018D568(0x24, other->slot);
+    CopyCollider(self, other);
+    if (other->slot) self->slot = (void*)CopyToFrontMemory(0x24, other->slot);
 }
 
 struct Item_138398 {
@@ -319,22 +319,22 @@ s32 func_00137C40(void* src);
 
 void func_00138398(void* src, s32* count, Item_138398** out)
 {
-    s32 n = func_00137BE0(src);
+    s32 n = ReadBufferedU16(src);
     *count = n;
-    *out = (Item_138398*)func_0018D5C0(n << 5);
+    *out = (Item_138398*)AllocateZeroedFrontMemory(n << 5);
 
     for (s32 i = 0; i < *count; i++) {
         Item_138398* item = &(*out)[i];
-        func_00137E70(src, item);
-        item->f10 = func_00137DF8(src);
+        ReadBufferedVector3(src, item);
+        item->f10 = ReadBufferedFloat(src);
 
-        s32 v = func_00137C40(src);
+        s32 v = ReadBufferedU32(src);
         if ((v & 0x80000000) != 0) {
             item->f14 = v;
         } else {
             item->f14 = (s32)((*out) + v);
         }
-        v = func_00137C40(src);
+        v = ReadBufferedU32(src);
         if ((v & 0x80000000) != 0) {
             item->f18 = v;
         } else {
@@ -405,10 +405,10 @@ void func_0013A008(Obj_139F80* self);
 
 void func_00139F80(Obj_139F80* self, void* x)
 {
-    s32 r = func_001B4688(x);
+    s32 r = FindAnimRecord(x);
     self->f380 = r;
     if (r == 0) {
-        self->f380 = D_002744FC;
+        self->f380 = g_animRecords;
     }
     if (self->f590 == 0) {
         self->f590 = 1;
@@ -429,11 +429,11 @@ void func_0013BE00(ChildGroupObject* p, f32 delta);
 
 void func_0013B708(ChildGroupObject* self, s32 kind, ObjectMessage* msg)
 {
-    func_00127378(self, kind, msg);
+    HandlePlacedObjectNotification(self, kind, msg);
     if (kind == 0xA) {
         if ((ChildGroupObject*)msg->target == self) {
             if (((ChildGroupObject*)msg->target)->f550 == 0) {
-                func_0013BE00((ChildGroupObject*)msg->target, 0.0f);
+                StartChildGroupDelay((ChildGroupObject*)msg->target, 0.0f);
             }
         }
     }
@@ -445,8 +445,8 @@ void func_00123ED0(void* self);
 
 void func_00139DE8(WorldListedObject* self)
 {
-    func_00152470(&self->world->list1CC0, self);
-    func_00123ED0(self);
+    AppendToList(&self->world->list1CC0, self);
+    InitPlacedObject(self);
     func_00152438(&self->members, 0x1090);
     u64 b = self->flags;
     b &= 0xFFFFFFFFCFFFFFFFull;
@@ -462,10 +462,10 @@ void func_00129DF8(void* self);
 
 void func_0013A3A0(WorldListedObject* self)
 {
-    func_00124FC0(self);
+    UpdatePlacedObject(self);
     func_00129DF8(self);
     FlagRecord* sub = self->flagRecord;
-    Camera* g = D_00261990;
+    Camera* g = g_camera;
     s32 hit = 0;
     u32 flags = sub->flags;
     u32 mask = g->f21C;
@@ -488,14 +488,14 @@ void func_00139B70(s32 idx, void* arg)
 {
     V24A0 f;
 
-    func_001611B8(&f);
-    func_001528F0(&f, 4);
-    func_001613C0(&f, 0, 1, 0xE);
-    func_00161708(&f, 0x47, 0x7180B);
-    func_00161708(&f, 0x42, ((u64)(s64)idx << 2) | 0x40);
-    func_001612F8(&f, 0x54, 0, 0xA, 0x424242412EULL, 0);
-    func_00152D70(&f);
-    func_001529E0(&f, 0, arg);
+    InitGifPacket(&f);
+    AllocatePacketBuffer(&f, 4);
+    BeginGifTag(&f, 0, 1, 0xE);
+    AddGifRegisterWrite(&f, 0x47, 0x7180B);
+    AddGifRegisterWrite(&f, 0x42, ((u64)(s64)idx << 2) | 0x40);
+    ReserveGifPackedData(&f, 0x54, 0, 0xA, 0x424242412EULL, 0);
+    CloseDmaTag(&f);
+    DetachPacketBuffer(&f, 0, arg);
 }
 
 struct ParamBlock_13AD08 { void (*fn)(void* self); s32 zero; s32 count; u8 pad0[0x50 - 0x0C]; f32 radius; u8 pad1[0x60 - 0x54]; void* owner; u8 pad2[0x80 - 0x64]; };
@@ -518,7 +518,7 @@ void func_0013AD08(WorldListedObject* owner, s32 unused, Src_13AD08* src)
         blk.radius = 1.0f;
     }
     blk.owner = owner;
-    func_0019D410(&blk);
+    QueueDeferredRequest(&blk);
 }
 
 struct List_13B610 { s32 head; s32 pad; s32 off; };
@@ -543,7 +543,7 @@ void* func_0018D500(s32 size);
 
 void func_0013B610(ChildGroupObject* self)
 {
-    func_00124A48(self);
+    StartPlacedObject(self);
     Frame_13B610 f((List_13B610*)&self->children);
     void* n;
     void* t = *(void**)f.base;
@@ -551,7 +551,7 @@ void func_0013B610(ChildGroupObject* self)
     n = t;
     if (n != 0) {
         do {
-            if (func_001300E8(n, 0x27)) {
+            if (IsObjectOfKind(n, 0x27)) {
                 s32 c = self->count;
                 if ((u32)c < 16) {
                     self->arr[c] = (s32)n;
@@ -564,7 +564,7 @@ void func_0013B610(ChildGroupObject* self)
         } while (n != 0);
     }
     if (self->active != 0) {
-        self->entries = (Entry3B*)func_0018D500(0xC0);
+        self->entries = (Entry3B*)AllocateFrontMemory(0xC0);
     }
 }
 
@@ -589,25 +589,25 @@ void func_00139EC8(WorldListedObject* self)
     s32 e = (s32)&obj->members.head;
     fr.list = e;
     fr.cursor = e;
-    s32 old = *(s32*)&D_0027B314;
+    s32 old = *(s32*)&g_activeListFrames;
     s32 link = *(s32*)(e + 8);
     fr.prev = old;
     fr.link = link;
-    *(s32*)&D_0027B314 = (s32)&fr;
+    *(s32*)&g_activeListFrames = (s32)&fr;
     s32 head = obj->members.head;
     fr.cursor = head + fr.link;
     s32 node = head;
     while (node != 0) {
-        func_00139D28((void*)node);
+        DetachOwnedRecord((void*)node);
         s32 nx = *(s32*)fr.cursor;
         fr.cursor = nx + fr.link;
         node = nx;
     }
-    func_00152600(&obj->world->list1CB4, self);
-    func_00152470(&D_002622E0, self);
+    RemoveFromList(&obj->world->list1CB4, self);
+    AppendToList(&D_002622E0, self);
 
-    func_001243E0(self);
-    *(s32*)&D_0027B314 = fr.prev;
+    UnregisterPlacedObject(self);
+    *(s32*)&g_activeListFrames = fr.prev;
 }
 
 // NEAR: frame and loop shape right; retail tests the call condition as a 0/1 value (li a0,1 / beqzl) and orders registers differently
@@ -626,7 +626,7 @@ void func_0013B430(s32 mask)
     ListFrame frame;
 
     if (mask != 0) {
-        node = (Node_13B430*)D_00275710->list1CB4.head;
+        node = (Node_13B430*)g_currentWorld->list1CB4.head;
 
         if (node != 0) {
             do {
@@ -656,7 +656,7 @@ void func_00138F28(World* self, Collider* obj)
             if (obj->desc03()->m38(obj, n->owner) || n->owner->desc03()->m38(n->owner, obj)) {
                 s2 = 1;
             }
-            func_001385A0(self, (s32)obj->contacts, n, s2 == 0 ? 8 : 0, s2 ? 8 : 0);
+            SetContactPairFlags(self, (s32)obj->contacts, n, s2 == 0 ? 8 : 0, s2 ? 8 : 0);
         }
         n = n->next;
     }
@@ -673,7 +673,7 @@ Pair3B D_00261358 = { 0x41A00000, 0x42480000 };
 
 void func_0013B4C0(ChildGroupObject* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->f554 = D_00249D74;
     self->f55C = 200.0f;
     self->f560 = 200.0f;
@@ -713,24 +713,24 @@ void func_001385A0(World* w, s32 a, s32 b, u8 set, u8 clr) {
         u8 v2 = v | 0x80;
         *p = v2;
         *q = v2;
-        n1 = func_00138738(w, a, b);
-        n2 = func_00138738(w, b, a);
+        n1 = PushContactRow(w, a, b);
+        n2 = PushContactRow(w, b, a);
         n1->f8 = n2;
         n2->f8 = n1;
     } else if (v & 0x80) {
         u8 v2 = v & 0x7F;
         *p = v2;
         *q = v2;
-        n1 = func_00138788(w, a, b);
-        n2 = func_00138788(w, b, a);
+        n1 = UnlinkContactRow(w, a, b);
+        n2 = UnlinkContactRow(w, b, a);
         if (n1->f0) {
             u64 m = (u64)0x8000 << 40;
-            func_001861E8(w, n1->f0);
+            FreePooledContactChain(w, n1->f0);
             if (!(n1->fC->flags538 & m)) func_00129DF8(n1->fC);
             if (!(n2->fC->flags538 & m)) func_00129DF8(n2->fC);
         }
-        func_001B5F28((u8*)w + 0x1AF0, n1);
-        func_001B5F28((u8*)w + 0x1AF0, n2);
+        PushFreeSlot((u8*)w + 0x1AF0, n1);
+        PushFreeSlot((u8*)w + 0x1AF0, n2);
     }
 }
 
@@ -826,26 +826,26 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
         if (item->src != 0) break;
     }
     Src_139038* src = item->src;
-    func_0018D608();
-    Anim_139038* anim = func_0011E580(0x84, (s32)ctx->world, ctx, -1, -1);
+    PushBackMemoryMark();
+    Anim_139038* anim = CreateTypedRecord(0x84, (s32)ctx->world, ctx, -1, -1);
     anim->vtbl[7](anim);
     anim->nitems = count;
     anim->stride = stride;
-    anim->data = func_0018D500(count * stride);
+    anim->data = AllocateFrontMemory(count * stride);
     anim->nkeys = nkeys;
-    anim->keys = (Key_139038*)func_0018D500(nkeys * 12);
+    anim->keys = (Key_139038*)AllocateFrontMemory(nkeys * 12);
     for (s32 k = 0; k < nkeys; k++) {
         Key_139038* key = &anim->keys[k];
         key->f0 = keyA[k];
         key->f4 = keyB[k];
-        key->f8 = func_0018D500(key->f4 << 3);
+        key->f8 = AllocateFrontMemory(key->f4 << 3);
     }
     s32 total = 0;
     for (i = 0; i < count; i++) {
         item = (Item_139038*)(items + i * stride);
         if (item->src != 0) total += item->src->count;
     }
-    buf = func_0018D6A8(total * 0x1C);
+    buf = AllocateZeroedBackMemory(total * 0x1C);
     s32 used = 0;
     for (i = 0; i < count; i++) {
         item = (Item_139038*)(items + i * stride);
@@ -863,10 +863,10 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
         have:
             if (g->a != 0) {
                 if (e->a == 0) {
-                    Track_139038* t = func_00120FB0(2);
+                    Track_139038* t = CreatePositionCurve(2);
                     t->fC = (s32)anim;
                     t->f10 = (s32)anim->keys;
-                    t->f14 = (s32)func_0018D5C0(count << 2);
+                    t->f14 = (s32)AllocateZeroedFrontMemory(count << 2);
                     t->f8 = 1;
                     e->a = t;
                 }
@@ -875,10 +875,10 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
             }
             if (g->b != 0) {
                 if (e->b == 0) {
-                    Track_139038* t = func_00121050(2);
+                    Track_139038* t = CreateRotationCurve(2);
                     t->fC = (s32)anim;
                     t->f10 = (s32)anim->keys;
-                    t->f14 = (s32)func_0018D5C0(count << 2);
+                    t->f14 = (s32)AllocateZeroedFrontMemory(count << 2);
                     t->f8 = 1;
                     e->b = t;
                 }
@@ -887,10 +887,10 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
             }
             if (g->c != 0) {
                 if (e->c == 0) {
-                    Track_139038* t = func_00121160(3);
+                    Track_139038* t = CreateWeightCurve(3);
                     t->f8 = (s32)anim;
                     t->fC = (s32)anim->keys;
-                    t->f10 = (s32)func_0018D5C0(count << 2);
+                    t->f10 = (s32)AllocateZeroedFrontMemory(count << 2);
                     e->c = t;
                 }
                 ((Track_139038**)e->c->f10)[i] = g->c;
@@ -898,17 +898,17 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
             if (g->d != 0) {
                 if (e->d == 0) {
                     e->n = g->n;
-                    e->d = (Track_139038**)func_0018D5C0(g->n << 2);
+                    e->d = (Track_139038**)AllocateZeroedFrontMemory(g->n << 2);
                 }
                 for (s32 q = 0; q < g->n; q++) {
                     Track_139038* v = g->d[q];
                     if (v != 0) {
                         Track_139038* t = e->d[q];
                         if (t == 0) {
-                            Track_139038* nt = func_00121160(4);
+                            Track_139038* nt = CreateWeightCurve(4);
                             nt->f8 = (s32)anim;
                             nt->fC = (s32)anim->keys;
-                            nt->f10 = (s32)func_0018D5C0(count << 2);
+                            nt->f10 = (s32)AllocateZeroedFrontMemory(count << 2);
                             nt->f14 = q;
                             e->d[q] = nt;
                             t = nt;
@@ -920,7 +920,7 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
         }
     }
     anim->count = used;
-    anim->grps = func_0018D568(used * 0x1C, buf);
+    anim->grps = CopyToFrontMemory(used * 0x1C, buf);
     anim->f44 = src->f44;
     anim->f78 = src->f78;
     anim->f7C = src->f7C;
@@ -934,7 +934,7 @@ void func_00139038(Collider* ctx, s32 stride, s32 count, u8* items, s32 nkeys, s
         func_00138FF0(anim->f5C, anim->f60, src->f5C, src->f60);
     }
     *out = anim;
-    func_0018D6F0();
+    PopBackMemoryMark();
 }
 
 s32 func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
@@ -1004,7 +1004,7 @@ void func_0013A008(Ctx_13A008* self)
     self->a384 = a;
     e = self->entries;
     for (i = 0; i < b; i++) {
-        e->value = func_001B2988(blk, i, 0);
+        e->value = GetTextureRegisterBits(blk, i, 0);
         e->tag = 6;
         if (i < s4) {
             e[1] = *e;
@@ -1117,7 +1117,7 @@ void func_00138C00(World* w, s32 arg)
                 Contact03* old = node->f0;
                 if (old)
                 {
-                    func_001861E8(w, old);
+                    FreePooledContactChain(w, old);
                 }
                 Contact03* nw = func_00188270(w, pair, arg);
                 node->f0 = nw;
@@ -1199,7 +1199,7 @@ void func_001399F8(Gr8B* self, s32 a1, s32 a2, void* a3)
             node = node->f3C;
         } while (node != 0);
     }
-    func_0018D800(self->fB8, a3, a2 * a1);
+    CopyMemory(self->fB8, a3, a2 * a1);
     count = self->fBC;
     if (count == 0) {
         func_00139740(a1, a2, a3, 0, 0, 0, &self->f34);
@@ -1213,7 +1213,7 @@ void func_001399F8(Gr8B* self, s32 a1, s32 a2, void* a3)
     if (node != 0) {
         do {
             node->f14 = node->f14 * self->f34;
-            func_0012F1D8(node);
+            SettleListedPoseSources(node);
             node = node->f3C;
         } while (node != 0);
     }

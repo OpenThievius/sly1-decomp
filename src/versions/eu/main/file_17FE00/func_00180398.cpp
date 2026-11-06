@@ -8,11 +8,11 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
     Obj_180398* o;
 
     func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
-    o = func_001925F0();
+    o = GetActiveSwitchedCollider();
     if (o != 0 && (o = o->desc->m15C(o)) != 0 && o->desc->m144(o) == 2) {
         Vec_180398 v;
         f32 x, y;
-        func_001441C0(D_00261990, o->pos, &v);
+        func_001441C0(g_camera, o->pos, &v);
         x = Num_180398::Clamp(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
         mat[12] = (1.0f - t) * 320.0f + t * x;
         y = Num_180398::Clamp(v.y * -234.30508f + 234.30508f, 16.0f, 452.61017f);
@@ -25,9 +25,9 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
         Col_180398 base;
         s32 g;
         s32 vis;
-        func_001613C0(&D_00262280, 0, 1, 0xE);
-        func_00161708(&D_00262280, 0x47, 0x31001);
-        func_00161708(&D_00262280, 0x42, 0x44);
+        BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
+        AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x31001);
+        AddGifRegisterWrite(&g_gsPacketWriter, 0x42, 0x44);
         vis = 0;
         for (g = 4; g >= 0; g--) {
             TriangleList* r = &self->lists[g];
@@ -48,9 +48,9 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
             }
             if (r->count > 0) {
                 s32 i;
-                func_001613C0(&D_00262280, 0, 1, 1);
-                func_00161458(&D_00262280, *(u32*)&col);
-                func_001613C0(&D_00262280, (s8)col.c[3] >= 0 ? 0x43 : 0x83, 1, 4);
+                BeginGifTag(&g_gsPacketWriter, 0, 1, 1);
+                AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&col);
+                BeginGifTag(&g_gsPacketWriter, (s8)col.c[3] >= 0 ? 0x43 : 0x83, 1, 4);
                 for (i = 0; i < r->count; i++) {
                     u32* idx = (u32*)&r->triangles[i];
                     s32 j;
@@ -58,7 +58,7 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
                         Q_180108 p, q;
                         p.v = *(V128_180108*)&self->points[*idx];
                         q.v = func_00188740(mat, p.v);
-                        func_001615F0(&D_00262280, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+                        AddGifXyzfEntry(&g_gsPacketWriter, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
                         vis = vis || 0.0f < q.f[0] || q.f[0] < 640.0f || 0.0f < q.f[1] || q.f[1] < 468.61017f;
                     }
                 }
@@ -69,28 +69,28 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
             f32 d;
             lo.v = func_00188740(mat, *(V128_180108*)&self->minX);
             hi.v = func_00188740(mat, *(V128_180108*)&self->maxX);
-            func_001613C0(&D_00262280, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
-            func_00161458(&D_00262280, *(u32*)&base);
-            func_001615F0(&D_00262280, 0x6C00, 0x7800, 0, 0);
-            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x9400, 0x7800, 0, 0);
-            func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x9400, 0x8800, 0, 0);
-            func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x6C00, 0x8800, 0, 0);
-            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x6C00, 0x7800, 0, 0);
-            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+            BeginGifTag(&g_gsPacketWriter, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
+            AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&base);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x7800, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x9400, 0x7800, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x9400, 0x8800, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x8800, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x7800, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
             d = 1.0f - t;
             if (d <= 0.1f) {
                 Col_180398 fade = base;
                 fade.c[3] = (s32)((f32)fade.c[3] * (1.0f - d * 10.0f));
-                func_001613C0(&D_00262280, 0x44, 5, 0x44441);
-                func_00161458(&D_00262280, *(u32*)&fade);
-                func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-                func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-                func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
-                func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+                BeginGifTag(&g_gsPacketWriter, 0x44, 5, 0x44441);
+                AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&fade);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.5462963f + 1920.0f) * 16.0f), 0, 0);
             }
         }
     }

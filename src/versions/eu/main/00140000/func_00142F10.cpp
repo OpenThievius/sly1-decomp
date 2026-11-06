@@ -25,7 +25,7 @@ void func_00142F10(GameClock* self)
     if (self->running) {
         s = dt;
     }
-    s = s * (D_00261854 * D_00261850);
+    s = s * (g_stepScale * g_timeScale);
     if (0.02f <= s) {
         self->step = s;
     }

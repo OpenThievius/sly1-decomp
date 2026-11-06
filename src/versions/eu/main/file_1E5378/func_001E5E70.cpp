@@ -29,7 +29,7 @@ void func_001E5E70(Obj_1E5E70_eu* self, s32 kind)
     self->f544 = 160.0f;
     self->f548 = 126.305084f;
     self->f1174 = self->f1178 = 2.7457628f;
-    func_001AA1F0(self, kind);
+    InitScreenElement(self, kind);
     f32 sign;
     if (kind == 0x1A) {
         self->f1170 = 0.0f;
@@ -53,13 +53,13 @@ void func_001E5E70(Obj_1E5E70_eu* self, s32 kind)
         p->f3C = p->f40 = (i & 1) ? dim : 0x30808080;
         p->f44 = p->f48 = 0.0f;
         if (self->mode == special) {
-            p->f4C = func_001EAAE0(0.6f, 0.8f);
-            p->f50 = func_001EAAE0(0.4f, 0.6f);
-            p->f54 = func_001EAAE0(0.05f, 0.2f);
+            p->f4C = RandomFloatInRange(0.6f, 0.8f);
+            p->f50 = RandomFloatInRange(0.4f, 0.6f);
+            p->f54 = RandomFloatInRange(0.05f, 0.2f);
         } else {
-            p->f4C = func_001EAAE0(0.3f, 0.4f);
-            p->f50 = func_001EAAE0(0.2f, 0.3f);
-            p->f54 = func_001EAAE0(0.1f, 0.4f);
+            p->f4C = RandomFloatInRange(0.3f, 0.4f);
+            p->f50 = RandomFloatInRange(0.2f, 0.3f);
+            p->f54 = RandomFloatInRange(0.1f, 0.4f);
         }
         if (i != 0) {
             p->fC = p->f34;
@@ -70,12 +70,12 @@ void func_001E5E70(Obj_1E5E70_eu* self, s32 kind)
     self->f114C = 1.0f;
     self->f1144 = 0;
     if (self->mode == 0x1A) {
-        self->f1184 = func_001EAAE0(1.0f, 1.4f);
-        self->f1188 = func_001EAAE0(0.6f, 0.8f);
-        self->f118C = func_001EAAE0(0.1f, 0.2f);
+        self->f1184 = RandomFloatInRange(1.0f, 1.4f);
+        self->f1188 = RandomFloatInRange(0.6f, 0.8f);
+        self->f118C = RandomFloatInRange(0.1f, 0.2f);
     } else {
-        self->f1184 = func_001EAAE0(0.5f, 0.7f);
-        self->f1188 = func_001EAAE0(0.2f, 0.3f);
-        self->f118C = func_001EAAE0(0.3f, 0.5f);
+        self->f1184 = RandomFloatInRange(0.5f, 0.7f);
+        self->f1188 = RandomFloatInRange(0.2f, 0.3f);
+        self->f118C = RandomFloatInRange(0.3f, 0.5f);
     }
 }

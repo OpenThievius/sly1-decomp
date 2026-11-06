@@ -19,7 +19,7 @@ void* func_0019EA78(s32 a, s32 b);
 
 void func_00158108(void* a0, Owner_158108* a1, f32 f)
 {
-    Effect* o = (Effect*)func_0019EA78(4, 0);
+    Effect* o = (Effect*)CreateEffect(4, 0);
     if (o != 0) {
         ((VFn_158108)o->vt->m00)(o, a0, 0, f);
         o->life = 0.75f;
@@ -33,7 +33,7 @@ void func_00182C58(void* a0);
 
 void func_001585F8(C77* self)
 {
-    func_00182C58(self);
+    StartObject(self);
     self->desc->m03(self);
 }
 
@@ -81,9 +81,9 @@ C77* func_00183058(void* a, void* b, void* c);
 
 void func_00158980(C78* self)
 {
-    func_001830D8(self);
+    CopyObjectData(self);
     for (s32 i = 0; i < self->count; i++) {
-        C77* o = func_00183058(self->members[i], self->world, self->parent);
+        C77* o = CreateObjectCopy(self->members[i], self->world, self->parent);
         o->desc->m03(o);
         self->members[i] = o;
         o->group = self;
@@ -121,8 +121,8 @@ void func_00159770(CrossfadeAnimator* self, s32 mode);
 
 void func_001596E0(CrossfadeAnimator* self)
 {
-    func_001B4AD0(self);
-    AnimRecord* a = func_001B4688(self->recordKey2);
+    BindAnimatorRecord(self);
+    AnimRecord* a = FindAnimRecord(self->recordKey2);
     self->cursor2.record = a;
     if (a != 0) {
         if (a->owner == 0) {
@@ -141,7 +141,7 @@ void func_001596E0(CrossfadeAnimator* self)
     }
     self->mode = -1;
     self->count = (hi < lo) ? lo : hi;
-    func_00159770(self, 0);
+    SetCrossfadeMode(self, 0);
 }
 
 typedef void (*VFn_159AD0)(void* self);
@@ -158,8 +158,8 @@ void func_00159C28(Obj_159AD0* self);
 void func_00159AD0(Obj_159AD0* self, f32 dt)
 {
     if (self->f8 != 0.0f) {
-        if (func_00182FC8(self->f0) == 0) {
-            func_00159C28(self);
+        if (IsObjectAttached(self->f0) == 0) {
+            RemoveObjectNodeFromWorld(self);
             return;
         }
     }
@@ -168,11 +168,11 @@ void func_00159AD0(Obj_159AD0* self, f32 dt)
     if (self->f4 <= 0.0f && old > 0.0f) {
         Sub_159AD0* s = self->f0;
         s->vtbl[7](s);
-        func_00159C28(self);
+        RemoveObjectNodeFromWorld(self);
         return;
     }
     if (self->f4 >= 1.0f && old < 1.0f) {
-        func_00159C28(self);
+        RemoveObjectNodeFromWorld(self);
     }
 }
 
@@ -208,7 +208,7 @@ void func_00152470(List01* a, ObjectCycler* b);
 
 void func_0015AAE0(ObjectCycler* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->state = -1;
     self->p610.pk = D_00262180;
     self->p618.pk = D_00262188;
@@ -222,7 +222,7 @@ void func_0015AAE0(ObjectCycler* self)
     self->p670.pk = D_002621C0;
     self->indexStep = 1;
     self->f690 = -1;
-    func_00152470(&self->world->list1C48, self);
+    AppendToList(&self->world->list1C48, self);
 }
 
 void* func_001556E8(void* x);
@@ -230,14 +230,14 @@ void* func_001556E8(void* x);
 Rec79* func_00158DD8(C79* self, s32 own)
 {
     if (own == 1) {
-        self->rec = (Rec79*)func_001556E8(self->rec);
+        self->rec = (Rec79*)CloneSharedSpawnRecord(self->rec);
     }
     return self->rec;
 }
 
 void func_00158E10(C7A* self)
 {
-    func_00158B00(self);
+    InitRecordMember(self);
     self->idAC = -1;
     self->idB0 = -1;
     self->idB4 = -1;
@@ -252,20 +252,20 @@ void func_00158E48(C7A* self)
     Rec79* s;
     void* p;
 
-    func_00158C60(self);
+    ResolveRecordMemberTargets(self);
     if (self->idAC == -1 && *(s64*)&self->idB0 == -1) {
         return;
     }
-    s = func_00158DD8(self, 1);
+    s = GetOwnedSpawnRecord(self, 1);
     if (self->idAC != -1) {
-        s->found[0] = func_0015A418(self->world, 0x104, self->idAC, self);
+        s->found[0] = FindFirstObjectById(self->world, 0x104, self->idAC, self);
     }
     if (self->idB0 != -1) {
-        s->found[1] = func_0015A418(self->world, 0x104, self->idB0, self);
+        s->found[1] = FindFirstObjectById(self->world, 0x104, self->idB0, self);
     }
     if (self->idB4 != -1) {
-        p = func_0015A418(self->world, 0x104, self->idB4, self);
-        if (func_001300E8(p, 3) != 0) {
+        p = FindFirstObjectById(self->world, 0x104, self->idB4, self);
+        if (IsObjectOfKind(p, 3) != 0) {
             s->found[2] = p;
         }
     }
@@ -289,15 +289,15 @@ void func_00158F80(C7A* self, void* message)
     s32 done = 0;
 
     if (0.0f < self->delay) {
-        r = (Rec_158F80*)func_001B5EA0(&self->world->pool1BD0);
+        r = (Rec_158F80*)PopFreeSlot(&self->world->pool1BD0);
         if (r != 0) {
             r->owner = self;
             r->body = *(Body_158F80*)message;
             done = 1;
-            k = (f32*)D_00261858;
+            k = (f32*)g_gameClock;
             r->f60 = k[1] + self->delay;
             func_00152450((u8*)r + 0x64);
-            func_00152470(&self->world->list1BDC, r);
+            AppendToList(&self->world->list1BDC, r);
         }
     }
     if (done == 0) {
@@ -311,7 +311,7 @@ s32 func_00159068(void* self)
 {
     C7A* o = (C7A*)self;
     if (o->fA0 == 0) {
-        func_001BE4D8(&o->fA0);
+        InitSoundParams(&o->fA0);
     }
     return o->fA0;
 }
@@ -332,7 +332,7 @@ void func_00159478(void** out, void* self)
     s32 i;
     Node_159478* s2;
 
-    n = func_0015A4F0(o->world, 0x202, 0x77, self, 0x20, arr);
+    n = GatherObjectsById(o->world, 0x202, 0x77, self, 0x20, arr);
     switch (n) {
     case 0:
         *out = 0;
@@ -341,13 +341,13 @@ void func_00159478(void** out, void* self)
         *out = arr[0];
         return;
     }
-    s2 = (Node_159478*)func_0011E580(0x78, o->world, self, 0x202, -1);
+    s2 = (Node_159478*)CreateTypedRecord(0x78, o->world, self, 0x202, -1);
     cnt = 8;
     if (n < 8) {
         cnt = n;
     }
     s2->count = cnt;
-    func_0018D800(s2->items, arr, cnt * 4);
+    CopyMemory(s2->items, arr, cnt * 4);
     for (i = 0; i < n; i++) {
         Node_159478* p = (Node_159478*)arr[i];
         if (i < s2->count) {
@@ -388,12 +388,12 @@ void func_00158C60(C79* self)
     {
         s32 none = -1;
 
-        r = func_00158DD8(self, 1);
+        r = GetOwnedSpawnRecord(self, 1);
         if (self->id94 != none) {
-            r->target = func_0015A418(self->world, 260, self->id94, self);
+            r->target = FindFirstObjectById(self->world, 260, self->id94, self);
         }
         if (self->id98 != none) {
-            Rec_158C60* q = func_0015A418(self->world, 260, self->id98, self);
+            Rec_158C60* q = FindFirstObjectById(self->world, 260, self->id98, self);
             r->value20 = q->f34;
             r->target = q->f18;
         }
@@ -427,11 +427,11 @@ zero:
         f32 span = (f32)(n << 1) * (1.0f - s->ratio) / s->scale;
         s->pos = (f32)(n - 1) * s->ratio;
         s->step = span;
-        f32 r = func_001EAAE0(0.0f, 1.0f);
+        f32 r = RandomFloatInRange(0.0f, 1.0f);
         if (r < s->limit) {
             s->level = 0.0f;
         } else {
-            s->level = func_001EAAE0(s->lo, s->hi);
+            s->level = RandomFloatInRange(s->lo, s->hi);
         }
     }
     goto store;
@@ -450,7 +450,7 @@ store:
     s->mode = mode;
 
 tail:
-    s->stamp2 = D_0026185C;
+    s->stamp2 = g_gameTime;
 }
 
 extern f32 D_0026185C;
@@ -472,7 +472,7 @@ void func_00159890(CrossfadeAnimator* s, f32 dt)
     goto call;
 
 m0:
-    if (s->level <= D_0026185C - s->stamp2) mode = 1;
+    if (s->level <= g_gameTime - s->stamp2) mode = 1;
     goto call;
 
 m1:
@@ -500,9 +500,9 @@ m3:
     }
 
 call:
-    func_00159770(s, mode);
-    func_001B46E0(&s->cursor, (s32)s->pos);
-    func_001B46E0(&s->cursor2, (s32)s->pos);
+    SetCrossfadeMode(s, mode);
+    SetCursorFrame(&s->cursor, (s32)s->pos);
+    SetCursorFrame(&s->cursor2, (s32)s->pos);
 }
 
 
@@ -516,14 +516,14 @@ void func_00154EE0(void* a, void* b, void* c, void* d);
 
 void func_00158B30(C79* self, void* stream)
 {
-    Rec79* p = (Rec79*)func_0018D5C0(0x200);
+    Rec79* p = (Rec79*)AllocateZeroedFrontMemory(0x200);
     self->rec = p;
     func_001549C8(p);
-    func_001F3A40(self, stream);
-    s32 idx = func_00137CC0(stream);
+    ReadTransformObject(self, stream);
+    s32 idx = ReadBufferedS8(stream);
     if (idx != -1) {
-        Rec79* n = func_00158DD8(self, 1);
-        n->curve20 = func_0014D9A8(idx);
+        Rec79* n = GetOwnedSpawnRecord(self, 1);
+        n->curve20 = CreatePathCurve(idx);
         if (n->curve20->vt->m00 != 0) {
             n->curve20->vt->m00(n->curve20, stream);
         }
@@ -532,16 +532,16 @@ void func_00158B30(C79* self, void* stream)
     if (q->kind == 4) {
         func_00154C80(&q->curve20, stream);
     }
-    void* t = func_00137BE0(stream);
+    void* t = ReadBufferedU16(stream);
     if (t != 0) {
-        Rec79* m = func_00158DD8(self, 1);
-        func_00154EE0((u8*)m + 0x130, t, self, stream);
+        Rec79* m = GetOwnedSpawnRecord(self, 1);
+        ReadCappedWordList((u8*)m + 0x130, t, self, stream);
     }
 }
 
 void func_00158C28(C79* self)
 {
-    func_001830D8(self);
+    CopyObjectData(self);
     self->rec->uses += 1;
 }
 
@@ -550,13 +550,13 @@ void func_00159A00(CrossfadeAnimator* a0, f32 f12)
 {
     a0->ratio = f12;
     if (1.0f <= f12) {
-        func_00159770(a0, 2);
+        SetCrossfadeMode(a0, 2);
     } else {
         a0->mode = -1;
-        func_00159770(a0, 0);
+        SetCrossfadeMode(a0, 0);
     }
-    func_001B46E0(&a0->cursor, (s32)a0->pos);
-    func_001B46E0(&a0->cursor2, (s32)a0->pos);
+    SetCursorFrame(&a0->cursor, (s32)a0->pos);
+    SetCursorFrame(&a0->cursor2, (s32)a0->pos);
 }
 
 
@@ -570,15 +570,15 @@ void func_00124A48(void* self);
 
 void func_0015AEB0(ObjectCycler* self)
 {
-    func_00124DF8(self, 2, D_002621E0);
+    ResolveObjectLinks(self, 2, g_objectCyclerStartLinks);
     if (self->mode == 1) {
-        f32 t = func_001EAAE0(self->checkDelay.a, self->checkDelay.b);
-        self->nextCheckTime = D_00261858[1] + t;
-        t = func_001EAAE0(self->p670.a, self->p670.b);
-        self->f680 = D_00261858[1] + t;
+        f32 t = RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
+        self->nextCheckTime = g_gameClock[1] + t;
+        t = RandomFloatInRange(self->p670.a, self->p670.b);
+        self->f680 = g_gameClock[1] + t;
     }
     func_0015B7B8(self, self->startState);
-    func_00124A48(self);
+    StartPlacedObject(self);
     self->f64C = self->radius3CC + self->radius3CC;
 }
 
@@ -590,12 +590,12 @@ void func_00152470(void* where, Node_159BB0* node);
 
 Node_159BB0* func_00159BB0(PlacedObject* self)
 {
-    Node_159BB0* node = (Node_159BB0*)func_001B5EE0((u8*)D_00275710 + 0x1C18);
+    Node_159BB0* node = (Node_159BB0*)PopZeroedFreeSlot((u8*)g_currentWorld + 0x1C18);
     node->owner = self;
     if (self->f294 != 0) {
-        func_00152470((u8*)D_00275710 + 0x1C30, node);
+        AppendToList((u8*)g_currentWorld + 0x1C30, node);
     } else {
-        func_00152470((u8*)D_00275710 + 0x1C24, node);
+        AppendToList((u8*)g_currentWorld + 0x1C24, node);
     }
     return node;
 }
@@ -610,12 +610,12 @@ void func_001B5F28(void* where, Node_159C28* node);
 void func_00159C28(Node_159C28* node)
 {
     if (node->owner->flag294 != 0) {
-        func_00152600((u8*)D_00275710 + 0x1C30, node);
+        RemoveFromList((u8*)g_currentWorld + 0x1C30, node);
     } else {
-        func_00152600((u8*)D_00275710 + 0x1C24, node);
+        RemoveFromList((u8*)g_currentWorld + 0x1C24, node);
     }
     node->owner->flag298 = 0;
-    func_001B5F28((u8*)D_00275710 + 0x1C18, node);
+    PushFreeSlot((u8*)g_currentWorld + 0x1C18, node);
 }
 
 void func_00158A10(C78* self)
@@ -631,7 +631,7 @@ void func_00158A10(C78* self)
 
 void func_00158B00(C79* self)
 {
-    func_001F39F8(self);
+    InitTransformObject(self);
     self->id94 = -1;
     self->id98 = -1;
 }
@@ -642,8 +642,8 @@ f32 func_001EA4B8(void* p, s32 zero, f32 a, f32 b, f32 c);
 
 void func_0015A960(C60* self)
 {
-    func_00124FC0(self);
-    self->f2EC = func_001EA4B8(self->v, 0, self->f2EC, self->f2F0, D_00261860);
+    UpdatePlacedObject(self);
+    self->f2EC = ApproachValueWithRamp(self->v, 0, self->f2EC, self->f2F0, g_frameDt);
 }
 
 struct Frame_15A9A8 { Quad16 q0; u8 pad1[0x30]; Quad16 m40[4]; u8 pad2[0x10]; Quad16 m90[4]; };
@@ -657,7 +657,7 @@ void func_0015A9A8(C60* self, void* arg1, void* arg2)
 {
     Frame_15A9A8 f;
     func_0018A008(0, &f.q0, self->f2EC);
-    func_00125B70(self, arg2, f.m40);
+    BuildPlacedObjectTransform(self, arg2, f.m40);
     func_00188668(f.m90, f.m40, &f.q0);
     f.m40[0] = f.m90[0];
     f.m40[1] = f.m90[1];
@@ -678,11 +678,11 @@ void func_00159CA0(u8* a0)
 {
     Frame_159CA0 f;
     f.value = *(s32*)(a0 + 0x60);
-    func_00168770(&f, &f.value, 0);
-    V24A0* s = &D_002622A8;
-    func_00152B38(s);
+    FillScreenColor(&f, &f.value, 0);
+    V24A0* s = &g_vifPacketWriter;
+    BeginDmaTag(s);
     func_001EE7D0(s, 0x2C, &f, 0);
-    func_00152D70(s);
+    CloseDmaTag(s);
 }
 
 extern f32 D_0026185C;
@@ -695,8 +695,8 @@ void func_00159ED0(Ctx_159ED0* a0)
 {
     if (a0->f5C == 0) {
         a0->f5C = 1;
-        a0->f54 = D_0026185C;
-        func_00152470((u8*)D_00275710 + 0x1CD8, a0);
+        a0->f54 = g_gameTime;
+        AppendToList((u8*)g_currentWorld + 0x1CD8, a0);
     }
 }
 
@@ -725,7 +725,7 @@ s32 func_0015A480(void* self,s32 kind,void* arg)
 s32 func_0015A838(void* self,s32 flags,s32 kind,void* arg)
 {
     s32 out=0;
-    func_0015A4F0(self,flags|0x200,kind,arg,1,&out);
+    GatherObjectsById(self,flags|0x200,kind,arg,1,&out);
     return out;
 }
 
@@ -733,15 +733,15 @@ void func_001289C0(void*,void*);
 s32 func_001E4C48(void*,void*,void*,void*,void*);
 void func_0015A918(C60* self,void* other)
 {
-    func_001289C0(self,other);
-    func_001E4C48(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
+    LoadPlacedObject(self,other);
+    ReadMeshTables(other,&self->out2D0,&self->out2D4,&self->out2D8,&self->out2DC);
 }
 
 AnimCursor* func_001B4B48(CursorAnimator* self, const AnimRecord* key);
 
 AnimCursor* func_00159A80(CrossfadeAnimator* self, const AnimRecord* key)
 {
-    AnimCursor* p = func_001B4B48(self, key);
+    AnimCursor* p = FindAnimatorCursor(self, key);
     if (p == 0) {
         p = &self->cursor2;
         if ((key->key ^ self->recordKey2) != 0) {
@@ -755,8 +755,8 @@ void func_00158198(void*,void*,void*,f32,f32,f32,f32,void*);
 
 void func_00158D40(C79* self, void* a, void* b, f32 x, f32 y, f32 z, f32 w)
 {
-    u8* p = (u8*)func_00158DD8(self, 1);
-    func_00158198(p+16,a,b,x,y,z,w,self);
+    u8* p = (u8*)GetOwnedSpawnRecord(self, 1);
+    AddRangeEntry(p+16,a,b,x,y,z,w,self);
 }
 
 struct __attribute__((aligned(16))) Quad_15B720 { s32 a, b, c, d; };
@@ -809,13 +809,13 @@ void func_0015AD80(ObjectCycler* self)
 {
     PackedFloatPair tmp;
     tmp = self->f5DC;
-    func_001BA130();
+    CopyCollider();
     self->f5DC = tmp;
     if (self->mode == 0) {
-        func_001BFCD8(700.0f, 10.0f, 1.0f, 0.0f, 0x41, &self->handle, self, 0, 0.0f, 0, 0);
+        StartSoundEffect(700.0f, 10.0f, 1.0f, 0.0f, 0x41, &self->handle, self, 0, 0.0f, 0, 0);
     } else {
-        if (func_001526D0(&self->world->list1C48, self) != 0) {
-            func_00152600(&self->world->list1C48, self);
+        if (IsInList(&self->world->list1C48, self) != 0) {
+            RemoveFromList(&self->world->list1C48, self);
         }
     }
 }
@@ -830,9 +830,9 @@ void func_0015AE38(ObjectCycler* self, s32 flag)
 {
     if (self->mode == 0) {
         if (flag != 0) {
-            func_001BF788(self->handle, 0);
+            StopSoundRecord(self->handle, 0);
         } else {
-            func_001BFCD8(700.0f, 10.0f, 1.0f, 0.0f, 0x41, &self->handle, self, 0, 0.0f, 0, 0);
+            StartSoundEffect(700.0f, 10.0f, 1.0f, 0.0f, 0x41, &self->handle, self, 0, 0.0f, 0, 0);
         }
     }
 }
@@ -855,7 +855,7 @@ void func_00159D00(ColorFade* self)
     if (g == 2) return;
     Out_159D00 out; Rgba4 a, b;
 
-    f32 t = D_0026185C - self->startTime;
+    f32 t = g_gameTime - self->startTime;
     f32 d;
     if (t < self->fadeInTime) {
         a = self->startColor; b = self->holdColor;
@@ -868,9 +868,9 @@ void func_00159D00(ColorFade* self)
         } else {
             t -= self->holdTime;
             if (!(t < self->fadeOutTime)) {
-                u8* p = (u8*)D_00275710 + 0x1CD8;
+                u8* p = (u8*)g_currentWorld + 0x1CD8;
                 self->running = 0;
-                func_00152600(p, self);
+                RemoveFromList(p, self);
                 return;
             }
             a = self->holdColor; b = self->endColor;
@@ -883,13 +883,13 @@ void func_00159D00(ColorFade* self)
     Req_159D00 q;
     q.f = -1.0f;
 
-    q.fn = (void*)(void (*)(ColorFade*))func_00159CA0;
+    q.fn = (void*)(void (*)(ColorFade*))DrawScreenFill;
     q.col = out;
     switch (self->mode) {
     case 0: q.mode = 1; break;
     case 1: q.mode = 0x10; break;
     }
-    func_0019D410(&q);
+    QueueDeferredRequest(&q);
 }
 
 struct Entry_158198 {
@@ -915,7 +915,7 @@ void func_00158198(Emitter_158198* self, s32 a1, s32 a2, f32 f12, f32 f13, f32 f
 {
     self->kind = 3;
     if (self->entries == 0) {
-        self->entries = (Entry_158198*)func_0018D5C0(0x500);
+        self->entries = (Entry_158198*)AllocateZeroedFrontMemory(0x500);
     }
     if (self->count < 0x20) {
         s32 n = self->count;
@@ -952,13 +952,13 @@ void func_001587C8(C78* self, void* src)
     void* arr[8];
     s32 total;
     s32 i;
-    func_001F3A40(self, src);
-    total = func_00137D10(src);
+    ReadTransformObject(self, src);
+    total = ReadBufferedS16(src);
     for (i = 0; i < total; i++) {
-        s32 r1 = func_00137D10(src);
-        s32 r2 = func_00137D10(src);
-        s32 r3 = func_00137D10(src);
-        Node_1587C8* obj = (Node_1587C8*)func_0011E580(r1, self->world, self->parent, r2, r3);
+        s32 r1 = ReadBufferedS16(src);
+        s32 r2 = ReadBufferedS16(src);
+        s32 r3 = ReadBufferedS16(src);
+        Node_1587C8* obj = (Node_1587C8*)CreateTypedRecord(r1, self->world, self->parent, r2, r3);
         s32 n;
         ((Fn1_1587C8)obj->vtbl[14])(obj, src);
         if (((u32*)obj->vtbl)[2] & 0x100) {
@@ -981,7 +981,7 @@ void func_001587C8(C78* self, void* src)
             s32 j;
             for (j = n; j != 0; j--, s++) {
                 C77* o = (C77*)*s;
-                if (func_001300E8(o, 0x78) != 0 || func_001300E8(o, 0x7A) != 0) {
+                if (IsObjectOfKind(o, 0x78) != 0 || IsObjectOfKind(o, 0x7A) != 0) {
                     o->desc->m03(o);
                     u32 c = self->count;
                     if (c < 8) {
@@ -1077,7 +1077,7 @@ void func_00159F48(PlacedObject* self, s32 mode, s32 a2, s32 a3, PlacedObject* a
         goto add;
     case 5:
     add:
-        if (a2 == 0 && func_00182FC8(self) == 0) return;
+        if (a2 == 0 && IsObjectAttached(self) == 0) return;
         if (*count < cap) arr[*count] = self;
         (*count)++;
         return;
@@ -1102,8 +1102,8 @@ void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, 
 
 void func_0015B128(ObjectCycler* self)
 {
-    func_001B93F8(self);
-    if (self->stateEnd <= D_00261858[1]) {
+    UpdateCollider(self);
+    if (self->stateEnd <= g_gameClock[1]) {
         s32 a1 = self->state;
         switch (a1) {
         case 0:
@@ -1134,23 +1134,23 @@ void func_0015B128(ObjectCycler* self)
         switch (sub) {
         case 0:
             if (self->handle == 0) {
-                func_001BFCD8(0x41, &self->handle, (s32)self, 0, 700.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+                StartSoundEffect(0x41, &self->handle, (s32)self, 0, 700.0f, 10.0f, 1.0f, 0.0f, 0.0f, 0, 0);
             }
             self->index = (self->index + 1) % self->count;
             break;
         case 1:
             if (st == 0) {
-                if (self->nextCheckTime <= D_00261858[1]) {
+                if (self->nextCheckTime <= g_gameClock[1]) {
                     V128_15B128 tmp;
                     if (func_0015BD48(self, &tmp)) {
                         *(V128_15B128*)&self->v5F0 = tmp;
                         func_0015B7B8(self, 5);
                     } else {
-                        self->nextCheckTime = D_00261858[1] + func_001EAAE0(self->checkDelay.a, self->checkDelay.b);
+                        self->nextCheckTime = g_gameClock[1] + RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
                     }
                 }
             }
-            if (self->nextStepTime <= D_00261858[1]) {
+            if (self->nextStepTime <= g_gameClock[1]) {
                 s32 n = self->count;
                 if (n >= 2) {
                     s32 v = self->index + self->indexStep;
@@ -1162,17 +1162,17 @@ void func_0015B128(ObjectCycler* self)
                         self->index = 1;
                         self->indexStep = 1;
                     }
-                    self->nextStepTime = D_00261858[1] + self->stepInterval;
+                    self->nextStepTime = g_gameClock[1] + self->stepInterval;
                 }
             }
             break;
         }
-        if (0.15f < D_00261858[1] - self->stateStart) {
+        if (0.15f < g_gameClock[1] - self->stateStart) {
             ContactRow03* n = self->contacts->head;
             if (n != 0) {
                 for (; n != 0; n = n->next) {
                     if (n->head != 0) {
-                        self->stateEnd = D_00261858[1];
+                        self->stateEnd = g_gameClock[1];
                         break;
                     }
                 }
@@ -1183,10 +1183,10 @@ void func_0015B128(ObjectCycler* self)
     case 6:
         if (func_0015C0A0(self) || func_0015BFC0(self)) {
             func_0015B7B8(self, 0);
-        } else if (self->nextAdvanceTime <= D_00261858[1]) {
+        } else if (self->nextAdvanceTime <= g_gameClock[1]) {
             s32 idx = (self->index + 1) % self->altCount;
             self->index = idx;
-            self->nextAdvanceTime = D_00261858[1];
+            self->nextAdvanceTime = g_gameClock[1];
             f32 x, y;
             if (idx == 0) {
                 x = self->p660.a;
@@ -1195,7 +1195,7 @@ void func_0015B128(ObjectCycler* self)
                 x = self->p658.a;
                 y = self->p658.b;
             }
-            self->nextAdvanceTime += func_001EAAE0(x, y);
+            self->nextAdvanceTime += RandomFloatInRange(x, y);
         }
         break;
     }
@@ -1211,7 +1211,7 @@ void func_00123ED0(void* self);
 
 void func_0015A8B8(C60* self)
 {
-    func_00123ED0(self);
+    InitPlacedObject(self);
     f32* v = self->v;
     self->f2F0 = 1.0f;
     self->f2EC = 1.0f;
@@ -1256,13 +1256,13 @@ void func_00159588(World* self)
     Begin_00159588::Of(&it, &self->list1BDC);
     Node_00159588* node;
     while ((node = Next_00159588::Of(&it)) != 0) {
-        if (!(D_00261858[1] < node->f60)) {
+        if (!(g_gameClock[1] < node->f60)) {
             func_001590A0(node->f0, node->body);
-            func_00152600(&self->list1BDC, node);
-            func_001B5F28(&self->pool1BD0, node);
+            RemoveFromList(&self->list1BDC, node);
+            PushFreeSlot(&self->pool1BD0, node);
         }
     }
-    D_0027B314 = (ListFrame*)it.saved;
+    g_activeListFrames = (ListFrame*)it.saved;
 }
 
 
@@ -1279,9 +1279,9 @@ void func_00152600(List01* data, ObjectCycler* self);
 void func_0015AC08(ObjectCycler* self, void* arg)
 {
     u32 i;
-    func_001BAC30(self, arg);
-    func_00124DF8(self, 2, D_002621C8);
-    func_00159478((void**)&self->group, self);
+    LoadCollider(self, arg);
+    ResolveObjectLinks(self, 2, g_objectCyclerLoadLinks);
+    FindOrBuildMemberGroup((void**)&self->group, self);
     for (i = 0; i < 16; i++) {
         s32 kind = i + 0x23C;
         s32 p = func_0015A480((u8*)self->world, kind, self);
@@ -1304,8 +1304,8 @@ void func_0015AC08(ObjectCycler* self, void* arg)
         }
     }
     if (self->mode) {
-        if (func_001526D0(&self->world->list1C48, self))
-            func_00152600(&self->world->list1C48, self);
+        if (IsInList(&self->world->list1C48, self))
+            RemoveFromList(&self->world->list1C48, self);
     }
 }
 
@@ -1319,16 +1319,16 @@ void func_00125B70(ObjectCycler* self, void* c, void* out);
 void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
 {
     Out_15B4D0 out;
-    func_00125B70(self, a2, &out);
+    BuildPlacedObjectTransform(self, a2, &out);
     switch (self->state) {
     case 1: {
         f32 base = self->stateStart;
-        f32 num = D_0026185C - base;
+        f32 num = g_gameTime - base;
         f32 den = self->stateEnd - base;
         f32 t = num / den;
         f32 v = D_00262230[0] + t * (D_00262230[1] + t * D_00262230[2]);
-        f32 lo = D_00275C60[0];
-        f32 hi = D_00275C60[1];
+        f32 lo = g_unitRange[0];
+        f32 hi = g_unitRange[1];
         if (v < lo) v = lo;
         else if (hi < v) v = hi;
         out.scale = out.scale * v;
@@ -1337,12 +1337,12 @@ void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
     }
     case 3: {
         f32 base = self->stateStart;
-        f32 num = D_0026185C - base;
+        f32 num = g_gameTime - base;
         f32 den = self->stateEnd - base;
         f32 t = num / den;
         f32 v = D_00262240[0] + t * (D_00262240[1] + t * D_00262240[2]);
-        f32 lo = D_00275C60[0];
-        f32 hi = D_00275C60[1];
+        f32 lo = g_unitRange[0];
+        f32 hi = g_unitRange[1];
         if (v < lo) v = lo;
         else if (hi < v) v = hi;
         out.scale = out.scale * v;
@@ -1356,7 +1356,7 @@ void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
     default: {
         s32 idx = self->index;
         if (self->mode == 1 && self->swapKind != -1) {
-            f32 t = (D_0026185C - self->stateStart) / (self->stateEnd - self->stateStart);
+            f32 t = (g_gameTime - self->stateStart) / (self->stateEnd - self->stateStart);
             if (1.0f - self->swapTail < t) idx = self->swapIndex;
         }
         self->objs[idx]->desc02()->m24(self->objs[idx], a1, &out);
@@ -1396,7 +1396,7 @@ s32 func_0015A4F0(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, 
             obj = (PlacedObject*)obj->parent;
         }
         for (; obj != 0; obj = (PlacedObject*)obj->parent) {
-            if (func_001300E8(obj, id) != 0 && ((flags & 0x100) || func_00182FC8(obj) != 0)) {
+            if (IsObjectOfKind(obj, id) != 0 && ((flags & 0x100) || IsObjectAttached(obj) != 0)) {
                 if (c < max) {
                     found[c] = obj;
                 }
@@ -1408,7 +1408,7 @@ s32 func_0015A4F0(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, 
             return 0;
         }
         for (obj = (PlacedObject*)root->children.head; obj != 0; obj = (PlacedObject*)obj->next) {
-            if (func_001300E8(obj, id) == 0) {
+            if (IsObjectOfKind(obj, id) == 0) {
                 continue;
             }
             if (c < max) {
@@ -1438,9 +1438,9 @@ s32 func_0015A4F0(World* world, u32 flags, s32 id, PlacedObject* root, s32 max, 
             mark = 0;
             break;
         }
-        for (i = id; i < 0x95 && func_0015A4B8(i, id); i++) {
+        for (i = id; i < 0x95 && IsClassOfKind(i, id); i++) {
             for (obj = (PlacedObject*)world->f1884[i]; obj != 0; obj = (PlacedObject*)obj->nextById) {
-                func_00159F48(obj, kind, flags & 0x100, 0, root, max, &c, found, &min);
+                CollectObjectByMode(obj, kind, flags & 0x100, 0, root, max, &c, found, &min);
             }
         }
         for (p = mark; p != 0; p = (PlacedObject*)p->parent) {
@@ -1457,7 +1457,7 @@ void func_001B4AA0(CursorAnimator* self, const AnimatorParams* src);
 
 void func_00159680(CrossfadeAnimator* self, AnimatorParams* src)
 {
-    func_001B4AA0(self, src);
+    LoadAnimatorBase(self, src);
     self->cursor2.flags = self->cursor.flags;
     self->recordKey2 = src->s14;
     self->scale = src->f4;

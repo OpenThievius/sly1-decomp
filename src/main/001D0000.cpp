@@ -13,13 +13,13 @@ void func_001D27C0(Player* a0, s32 a1)
 {
     if (a0->f2718 != a1) {
         if (a0->f2718 == -1) {
-            func_001DDA20(a0->world);
-            func_001DDB58(a0->world);
+            AcquirePadSelectFlag(a0->world);
+            ShowCountedScreenElement(a0->world);
         }
         a0->f2718 = a1;
         if (a1 == -1) {
-            func_001DDA50(a0->world);
-            func_001DDBB8(a0->world);
+            ReleasePadSelectFlag(a0->world);
+            HideCountedScreenElement(a0->world);
         }
     }
 }
@@ -33,7 +33,7 @@ void func_001D1200(Player* self, s32 n)
         return;
     }
     self->f2684 = n;
-    self->f2688 = D_00261858.time;
+    self->f2688 = g_gameClock.time;
     self->f26A0 = 0;
     if (n <= 0) {
         return;
@@ -77,7 +77,7 @@ void func_001D1260(Player* self)
     o->f41C = 0;
     o->f390 = 0;
     o->f3A0 = 0;
-    func_001E2840(o, 0);
+    SetOnOffObjectForcedState(o, 0);
 }
 
 struct Obj_1D1478 { u8 pad[0x50]; s32 f50; };
@@ -85,7 +85,7 @@ s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 s32 func_001D1478(Player* self)
 {
     void* arr[64];
-    s32 n = func_0015A4F0(self->world, 5, 0x89, 0, 0x40, arr);
+    s32 n = GatherObjectsById(self->world, 5, 0x89, 0, 0x40, arr);
     for (s32 i = 0; i < n; i++) {
         Obj_1D1478* o = (Obj_1D1478*)arr[i];
         s32 v = o->f50;

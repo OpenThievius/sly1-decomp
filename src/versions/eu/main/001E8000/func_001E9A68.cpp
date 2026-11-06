@@ -9,10 +9,10 @@ s32 func_001E9A68(void)
 {
     s32 m;
     if (D_00275F84 != 0) goto fail;
-    if (((Gate_1E9A68_eu*)&D_0026FF68)->f56C != 0) goto fail;
-    if (((Gate_1E9A68_eu*)&D_0026FF68)->f560 != 0) goto fail;
-    if (((Gate_1E9A68_eu*)&D_0026F808)->f56C != 0) goto fail;
-    if (((Gate_1E9A68_eu*)&D_0026F808)->f560 != 0) goto fail;
+    if (((Gate_1E9A68_eu*)&g_pauseMenuElement)->f56C != 0) goto fail;
+    if (((Gate_1E9A68_eu*)&g_pauseMenuElement)->f560 != 0) goto fail;
+    if (((Gate_1E9A68_eu*)&g_mapScreenList)->f56C != 0) goto fail;
+    if (((Gate_1E9A68_eu*)&g_mapScreenList)->f560 != 0) goto fail;
     m = D_00270458;
     if (m == 4) goto fail;
     if (m != 1) goto ok;

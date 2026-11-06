@@ -94,22 +94,22 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d);
 void func_0017FE00(C80* self)
 {
     KeptBits tmp = self->keep;
-    func_001830D8(self);
+    CopyObjectData(self);
     self->keep = tmp;
 }
 
 void func_0017FE48(C80* self)
 {
-    func_00182C58(self);
+    StartObject(self);
     if (self->targetId != -1) {
-        self->target = func_0015A418(self->world, 0x104, self->targetId, self);
+        self->target = FindFirstObjectById(self->world, 0x104, self->targetId, self);
     }
 }
 
 void func_0017FE90(ColoredTriangleSet* self)
 {
-    func_00182C18(self);
-    D_002640A4 = self;
+    InitObject(self);
+    g_coloredTriangleSet = self;
 }
 
 void func_0017FEC0(ColoredTriangleSet* self, Stream8E* rd)
@@ -119,24 +119,24 @@ void func_0017FEC0(ColoredTriangleSet* self, Stream8E* rd)
     s32 j;
     s32 k;
 
-    func_0011EC40(self, rd);
-    self->pointCount = func_00137BE0(rd);
-    self->points = func_0018D5C0(self->pointCount << 4);
+    ReadPropertyRecords(self, rd);
+    self->pointCount = ReadBufferedU16(rd);
+    self->points = AllocateZeroedFrontMemory(self->pointCount << 4);
     for (i = 0; i < self->pointCount; i++) {
-        self->points[i].x = func_00137DF8(rd);
-        self->points[i].y = -func_00137DF8(rd);
+        self->points[i].x = ReadBufferedFloat(rd);
+        self->points[i].y = -ReadBufferedFloat(rd);
         self->points[i].w = 1.0f;
     }
-    self->minX = func_00137DF8(rd);
-    self->minY = func_00137DF8(rd);
+    self->minX = ReadBufferedFloat(rd);
+    self->minY = ReadBufferedFloat(rd);
     self->f4C = 1.0f;
-    self->maxX = func_00137DF8(rd);
-    self->maxY = func_00137DF8(rd);
+    self->maxX = ReadBufferedFloat(rd);
+    self->maxY = ReadBufferedFloat(rd);
     self->width = self->maxX - self->minX;
     self->f5C = 1.0f;
     m = 0;
     for (; m < 5; m++) {
-        TriangleColor* p = func_001B4688(m + 0x48E);
+        TriangleColor* p = FindAnimRecord(m + 0x48E);
         TriangleList* r = &self->lists[m];
         if (p != 0) {
             r->col = p[1];
@@ -148,13 +148,13 @@ void func_0017FEC0(ColoredTriangleSet* self, Stream8E* rd)
             *(u32*)&d = 0x80808080;
             r->col = d;
         }
-        r->count = func_00137BE0(rd);
-        r->triangles = func_0018D500(r->count * 12);
+        r->count = ReadBufferedU16(rd);
+        r->triangles = AllocateFrontMemory(r->count * 12);
         for (j = 0; j < r->count; j++) {
             TriangleIndices* e = &r->triangles[j];
-            e->a = func_00137BE0(rd);
-            e->b = func_00137BE0(rd);
-            e->c = func_00137BE0(rd);
+            e->a = ReadBufferedU16(rd);
+            e->b = ReadBufferedU16(rd);
+            e->c = ReadBufferedU16(rd);
         }
     }
 }
@@ -168,17 +168,17 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
     func_0018A008(0, sp, c);
     sp[12] = a;
     sp[13] = b;
-    func_001613C0(&D_00262280, 0, 1, 0xE);
-    func_00161708(&D_00262280, 0x47, 0x31001);
-    func_00161708(&D_00262280, 0x42, 0x44);
+    BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
+    AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x31001);
+    AddGifRegisterWrite(&g_gsPacketWriter, 0x42, 0x44);
     for (g = 4; g > 0; g--) {
         Group_180108* grp = &self->groups[g];
         if (grp->n > 0) {
-            func_001613C0(&D_00262280, 0, 1, 1);
+            BeginGifTag(&g_gsPacketWriter, 0, 1, 1);
             col = *(Col_180108*)((u32)(g - 3) < 2 ? &D_00264098 : &D_002640A0);
             col.a = (u8)(s32)((f32)col.a * d);
-            func_00161458(&D_00262280, *(u32*)&col);
-            func_001613C0(&D_00262280, (s8)col.a >= 0 ? 0x43 : 0x83, 1, 4);
+            AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&col);
+            BeginGifTag(&g_gsPacketWriter, (s8)col.a >= 0 ? 0x43 : 0x83, 1, 4);
             {
                 s32 i;
                 for (i = 0; i < grp->n; i++) {
@@ -187,7 +187,7 @@ void func_00180108(Obj_180108* self, f32 a, f32 b, f32 c, f32 d)
                     for (j = 2; j >= 0; j--) {
                         vv.v = self->verts[*idx++];
                         q.v = func_00188740(sp, vv.v);
-                        func_001615F0(&D_00262280, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                        AddGifXyzfEntry(&g_gsPacketWriter, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
                     }
                 }
             }
@@ -247,11 +247,11 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
     Obj_180398* o;
 
     func_0018A008(0, mat, (1.0f - t) * (1280.0f / self->width) + t * (4.0f / self->width));
-    o = func_001925F0();
+    o = GetActiveSwitchedCollider();
     if (o != 0 && (o = o->desc->m15C(o)) != 0 && o->desc->m144(o) == 2) {
         Vec_180398 v;
         f32 x, y;
-        func_001441C0(D_00261990, o->pos, &v);
+        func_001441C0(g_camera, o->pos, &v);
         x = Num_180398::Clamp(v.x * 320.0f + 320.0f, 10.0f, 630.0f);
         mat[12] = (1.0f - t) * 320.0f + t * x;
         y = Num_180398::Clamp(v.y * -246.40001f + 246.40001f, 16.0f, 476.80002f);
@@ -264,9 +264,9 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
         Col_180398 base;
         s32 g;
         s32 vis;
-        func_001613C0(&D_00262280, 0, 1, 0xE);
-        func_00161708(&D_00262280, 0x47, 0x31001);
-        func_00161708(&D_00262280, 0x42, 0x44);
+        BeginGifTag(&g_gsPacketWriter, 0, 1, 0xE);
+        AddGifRegisterWrite(&g_gsPacketWriter, 0x47, 0x31001);
+        AddGifRegisterWrite(&g_gsPacketWriter, 0x42, 0x44);
         vis = 0;
         for (g = 4; g >= 0; g--) {
             TriangleList* r = &self->lists[g];
@@ -287,9 +287,9 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
             }
             if (r->count > 0) {
                 s32 i;
-                func_001613C0(&D_00262280, 0, 1, 1);
-                func_00161458(&D_00262280, *(u32*)&col);
-                func_001613C0(&D_00262280, (s8)col.c[3] >= 0 ? 0x43 : 0x83, 1, 4);
+                BeginGifTag(&g_gsPacketWriter, 0, 1, 1);
+                AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&col);
+                BeginGifTag(&g_gsPacketWriter, (s8)col.c[3] >= 0 ? 0x43 : 0x83, 1, 4);
                 for (i = 0; i < r->count; i++) {
                     u32* idx = (u32*)&r->triangles[i];
                     s32 j;
@@ -297,7 +297,7 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
                         Q_180108 p, q;
                         p.v = *(V128_180108*)&self->points[*idx];
                         q.v = func_00188740(mat, p.v);
-                        func_001615F0(&D_00262280, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                        AddGifXyzfEntry(&g_gsPacketWriter, (s32)((q.f[0] + 1728.0f) * 16.0f), (s32)((q.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
                         vis = vis || 0.0f < q.f[0] || q.f[0] < 640.0f || 0.0f < q.f[1] || q.f[1] < 492.80002f;
                     }
                 }
@@ -308,28 +308,28 @@ void func_00180398(ColoredTriangleSet* self, f32 t)
             f32 d;
             lo.v = func_00188740(mat, *(V128_180108*)&self->minX);
             hi.v = func_00188740(mat, *(V128_180108*)&self->maxX);
-            func_001613C0(&D_00262280, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
-            func_00161458(&D_00262280, *(u32*)&base);
-            func_001615F0(&D_00262280, 0x6C00, 0x7900, 0, 0);
-            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x9400, 0x7900, 0, 0);
-            func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x9400, 0x8700, 0, 0);
-            func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x6C00, 0x8700, 0, 0);
-            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-            func_001615F0(&D_00262280, 0x6C00, 0x7900, 0, 0);
-            func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            BeginGifTag(&g_gsPacketWriter, (s8)base.c[3] >= 0 ? 0x44 : 0x84, 0xB, 0x44444444441ULL);
+            AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&base);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x7900, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x9400, 0x7900, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x9400, 0x8700, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x8700, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, 0x6C00, 0x7900, 0, 0);
+            AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
             d = 1.0f - t;
             if (d <= 0.1f) {
                 Col_180398 fade = base;
                 fade.c[3] = (s32)((f32)fade.c[3] * (1.0f - d * 10.0f));
-                func_001613C0(&D_00262280, 0x44, 5, 0x44441);
-                func_00161458(&D_00262280, *(u32*)&fade);
-                func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-                func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-                func_001615F0(&D_00262280, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
-                func_001615F0(&D_00262280, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                BeginGifTag(&g_gsPacketWriter, 0x44, 5, 0x44441);
+                AddGifRgbaEntry(&g_gsPacketWriter, *(u32*)&fade);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((lo.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((lo.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
+                AddGifXyzfEntry(&g_gsPacketWriter, (s32)((hi.f[0] + 1728.0f) * 16.0f), (s32)((hi.f[1] * 0.45454547f + 1936.0f) * 16.0f), 0, 0);
             }
         }
     }

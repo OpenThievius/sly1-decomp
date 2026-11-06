@@ -7,7 +7,7 @@ u32 func_002027A0(u32);
 extern s32 D_0027696C;
 extern u32 D_00279340[];
 s32 func_002006F0(void* p) { return *(s32*)p; }
-u32 func_002014F0() { return D_0027696C; }
+u32 func_002014F0() { return g_randomState; }
 extern u8 D_00279330[];
 u32 func_00201BA8() { return (u32)D_00279330; }
 u32 func_002027A0(u32 index) { if (index >= 10) return 0; return D_00279340[index]; }

@@ -4,7 +4,7 @@ struct __attribute__((packed)) BlockAt5B0_eu { u8 pad[0x5B0]; u32 field; };
 
 void func_00192A38(SwitchedCollider* self, u32 value)
 {
-    BlockAt5B0_eu* block = (BlockAt5B0_eu*)&D_002701F8;
+    BlockAt5B0_eu* block = (BlockAt5B0_eu*)&g_typedTextCaptionBox;
     block->field = value;
-    func_001E9498(D_00275BC0, &D_002701F8);
+    PushStackElement(g_elementStack, &g_typedTextCaptionBox);
 }

@@ -17,14 +17,14 @@ s32 func_0018F890(Object_18F890* self_, s32 wait)
     s32 count = self->buffer->head - self->buffer->tail;
     while (count == 0) {
         if (self->buffer->fEnd == 0) return 2;
-        func_00130070((StreamReaderWindow*)self->buffer);
+        PumpStreamReader((StreamReaderWindow*)self->buffer);
         count = self->buffer->head - self->buffer->tail;
         if (count == 0 && !wait) return 0;
     }
     func_001F6C20(0);
     Buffer_18F890_eu* buffer = self->buffer;
     s32 result = func_0020A518(self->pad10, buffer->base + buffer->tail, count);
-    func_001300D8((StreamReaderWindow*)self->buffer, result);
+    ConsumeStreamBytes((StreamReaderWindow*)self->buffer, result);
     if (result != 0) return 0;
     if (self->f70 >= count) {
         if (self->fE0 >= count) return 2;

@@ -22,24 +22,24 @@ s32 func_00151300(StepSequence* self)
         if (func_001BE810() == 0) flags &= 0xFFFFFFFE;
     }
     if (flags & 8) {
-        if (func_001BE980() == 0) flags &= 0xFFFFFFF7;
+        if (HasStreamVoice() == 0) flags &= 0xFFFFFFF7;
     }
     if (flags & 0x10) {
         if (self->value2F8 == 0) flags &= 0xFFFFFFEF;
     }
     if (flags & 0x20) {
-        if (func_00136530(&D_002701F8) != 0) flags &= 0xFFFFFFDF;
+        if (IsTextPanelTextTyped(&g_typedTextCaptionBox) != 0) flags &= 0xFFFFFFDF;
     }
     if (flags & 0x40) {
-        if (((Mgr_151300*)D_00261990)->f478 == ((Sc_151300_eu*)&D_002701F8)->f58C) flags &= 0xFFFFFFBF;
+        if (((Mgr_151300*)g_camera)->f478 == ((Sc_151300_eu*)&g_typedTextCaptionBox)->f58C) flags &= 0xFFFFFFBF;
     }
     if (flags & 0x80) {
-        if (self->f2FC <= D_0026185C[0]) flags &= 0xFFFFFF7F;
+        if (self->f2FC <= g_gameTime[0]) flags &= 0xFFFFFF7F;
     }
-    ((Sc_151300_eu*)&D_002701F8)->f584 = 0;
+    ((Sc_151300_eu*)&g_typedTextCaptionBox)->f584 = 0;
     if (flags == 0x100) {
         s32 r;
-        PadRecord* in = (D_00262C68 & 4) ? &D_00262C70 : &D_00262D38;
+        PadRecord* in = (D_00262C68 & 4) ? &g_padRecord : &g_blankPadRecord;
         s32 k = self->f2EC;
         r = 0;
         switch (k) {
@@ -56,11 +56,11 @@ s32 func_00151300(StepSequence* self)
             if (0.8f < __builtin_fabsf(in->f44)) r = 1;
             break;
         case 13:
-            if (D_00262E10 != 0 && ((Ctx_151300*)D_00262E10)->f2220 == 2) r = ((Ctx_151300*)D_00262E10)->f2228 == 3;
+            if (g_player != 0 && ((Ctx_151300*)g_player)->f2220 == 2) r = ((Ctx_151300*)g_player)->f2228 == 3;
             break;
         case 14:
         {
-            G27C230* fl = D_002623C8;
+            G27C230* fl = g_currentEntry;
             u32 t = fl->bits & 4;
             r = t != 0;
         }
@@ -72,7 +72,7 @@ s32 func_00151300(StepSequence* self)
         if (r != 0) {
             flags = 0;
         } else {
-            ((Sc_151300_eu*)&D_002701F8)->f584 = D_00261D28[k];
+            ((Sc_151300_eu*)&g_typedTextCaptionBox)->f584 = D_00261D28[k];
         }
     }
     self->f2E8 = flags;

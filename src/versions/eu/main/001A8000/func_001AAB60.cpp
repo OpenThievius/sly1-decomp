@@ -23,8 +23,8 @@ void func_001AAB60(Self_1AAB60_eu* self) {
     f32 y0 = x0;
 
     if (r->fC != -1) {
-        Self_1AAB60_eu** objs = (Self_1AAB60_eu**)D_002486B0;
-        Rec_1AAB60* recs = (Rec_1AAB60*)&D_0026C3E0;
+        Self_1AAB60_eu** objs = (Self_1AAB60_eu**)g_screenElements;
+        Rec_1AAB60* recs = (Rec_1AAB60*)&g_elementPlaces;
         do {
             Self_1AAB60_eu* o = objs[r->fC];
             if (o->vt->m48(o, self)) {
@@ -63,7 +63,7 @@ void func_001AAB60(Self_1AAB60_eu* self) {
     } else {
         self->f228 = y1 + b - self->f238;
     }
-    f32 t = func_001EAF28(self->f228 * 1.0925925970077515f) * 0.9152542352676392f;
+    f32 t = TruncateFloat(self->f228 * 1.0925925970077515f) * 0.9152542352676392f;
     self->f22C = self->f224;
     self->f228 = t;
     self->f230 = t;
@@ -83,5 +83,5 @@ void func_001AAB60(Self_1AAB60_eu* self) {
         self->f21C = self->f22C;
         self->f220 = self->f230;
     }
-    func_001AAEC0(self);
+    PlaceAnchoredScreenElements(self);
 }

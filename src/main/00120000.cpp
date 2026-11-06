@@ -13,7 +13,7 @@ void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
 
 void func_00120110(T2196_6E8* self, s32* outCount, f32** outTimes)
 {
-    func_0011F850(self->axis, outCount, outTimes);
+    GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
 struct Buffer_00120130 { u8 bytes[0x20]; };
@@ -26,14 +26,14 @@ void func_00120130(T2196_6F8* self, PlacedObject* parent, s32 mode,
                    void* output, void* state)
 {
     Buffer_00120130 buffer;
-    func_0011F9F8(self->count, self->keys, mode,
+    EvaluateVectorKeyCurve(self->count, self->keys, mode,
                   output ? &buffer.bytes[0] : 0,
                   state ? &buffer.bytes[0x10] : 0);
     if (output) {
-        func_00188A20(&buffer.bytes[0], output);
+        BuildEulerRotationMatrix(&buffer.bytes[0], output);
     }
     if (state) {
-        func_001EDE38(&buffer.bytes[0], &buffer.bytes[0x10], state);
+        RotateVectorByTwoAngles(&buffer.bytes[0], &buffer.bytes[0x10], state);
     }
     if (parent) {
         ((Finish_00120130)parent->desc02()->m29)(parent, output, state);
@@ -45,12 +45,12 @@ extern void func_0011FB98(s32, Key2196_Vec*, s32*, f32**);
 
 void func_001201D0(T2196_6F8* self)
 {
-	func_0011F9F8(self->count, self->keys);
+	EvaluateVectorKeyCurve(self->count, self->keys);
 }
 
 void func_001202C0(T2196_6F8* self, s32* outCount, f32** outTimes)
 {
-	func_0011FB98(self->count, self->keys, outCount, outTimes);
+	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
 struct Result_001202F0 { f32 x; f32 y; f32 z; };
@@ -76,12 +76,12 @@ void func_0011F798(T2196_Weight** a, Vec02* b, Stream83* c);
 
 void func_00120360(T2196_718* self, Stream83* p)
 {
-    func_0011F798(self->axis, &self->base, p);
+    ReadAxisCurves(self->axis, &self->base, p);
 }
 
 void func_00120388(T2196_718* self, s32* outCount, f32** outTimes)
 {
-	func_0011F850(self->axis, outCount, outTimes);
+	GatherAxisCurveTimes(self->axis, outCount, outTimes);
 }
 
 struct Result_001203A8 {
@@ -103,7 +103,7 @@ void func_001203A8(T2196_728* self, PlacedObject* unused, void* mode,
                    Output_001203A8* output, f32 factor)
 {
     Result_001203A8 result;
-    func_0011F9F8(self->count, self->keys, mode,
+    EvaluateVectorKeyCurve(self->count, self->keys, mode,
                   output ? &result.first : 0, 0, factor, 1.0f);
     if (output) {
         func_001F5C0C(output, 0, 0x30);
@@ -117,19 +117,19 @@ extern void func_0011FA88(s32*, Key2196_Vec**, Stream83*);
 
 void func_00120418(T2196_728* self, Stream83* stream)
 {
-	func_0011FA88(&self->count, &self->keys, stream);
+	ReadVectorKeys(&self->count, &self->keys, stream);
 }
 
 void func_00120440(T2196_728* self, s32* outCount, f32** outTimes)
 {
-	func_0011FB98(self->count, self->keys, outCount, outTimes);
+	GetVectorKeyTimes(self->count, self->keys, outCount, outTimes);
 }
 
 extern void* func_001B5EE0(void*);
 
 Attachment* func_00121228(World* root, PlacedObject* value, const T2195_Vt* table)
 {
-	Attachment* node = (Attachment*)func_001B5EE0(&root->pool1B20);
+	Attachment* node = (Attachment*)PopZeroedFreeSlot(&root->pool1B20);
 	node->vt = table;
 	table->init(node, value);
 	return node;
@@ -143,7 +143,7 @@ void func_001212D8(Attachment* self, Attachment* src)
 {
     Link2195 tmp = self->link;
     PlacedObject* saved = self->owner;
-    func_0018D800(self, src, D_00275710->pool1B20.size);
+    CopyMemory(self, src, g_currentWorld->pool1B20.size);
     self->link = tmp;
     self->owner = saved;
 }
@@ -296,7 +296,7 @@ void func_00121338(Attachment* self, PlacedObject* a1);
 
 void func_00122DA0(T2195_600* self, PlacedObject* a1)
 {
-    func_00121338(self, a1);
+    InitPoseSource(self, a1);
     self->f1C = 1.0f;
     self->f20 = 0.25f;
 }
@@ -307,11 +307,11 @@ void func_00121358(Attachment* self, s32 flags);
 void func_00122F28(T2195_7C0* self, s32 a1)
 {
     AnimationPlayer* o = self->player;
-    func_00152600(&o->list44, self);
+    RemoveFromList(&o->list44, self);
     if (o->driven == self) {
         o->driven = 0;
     }
-    func_00121358(self, a1);
+    ReleasePoseSource(self, a1);
 }
 
 extern f32 D_0026185C[];
@@ -329,12 +329,12 @@ void func_00122FE0(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
             f32 c18 = track->speed;
             tmp[1] = c18;
             tmp[0] = c14 + f * c18;
-            func_0012E9E0(track, &tmp[0], &tmp[1]);
+            ApplyAnimationLoopMode(track, &tmp[0], &tmp[1]);
         } else {
             tmp[0] = track->time;
         }
         if (self->mode0 == 4) {
-            f32 d = self->f18 - D_0026185C[0] - track->f10;
+            f32 d = self->f18 - g_gameTime[0] - track->f10;
             if (0.0f < d) {
                 tmp[0] = tmp[0] + d * track->speed;
             }
@@ -342,7 +342,7 @@ void func_00122FE0(T2195_7C0* self, Vec02* a1, Vec02* a2, f32 f)
         e->pos->vt->eval(e->pos, self->owner, 0, a1, a2, tmp[0], track->speed);
         return;
     }
-    func_001214B8(self, a1, a2);
+    GetOwnerPosition(self, a1, a2);
 }
 
 extern f32 D_0026185C[];
@@ -361,12 +361,12 @@ void func_00123120(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
             f32 c18 = track->speed;
             tmp[1] = c18;
             tmp[0] = c14 + f * c18;
-            func_0012E9E0(track, &tmp[0], &tmp[1]);
+            ApplyAnimationLoopMode(track, &tmp[0], &tmp[1]);
         } else {
             tmp[0] = track->time;
         }
         if (self->mode1 == 4) {
-            f32 d = self->f18 - D_0026185C[0] - track->f10;
+            f32 d = self->f18 - g_gameTime[0] - track->f10;
             if (0.0f < d) {
                 tmp[0] = tmp[0] + d * track->speed;
             }
@@ -374,7 +374,7 @@ void func_00123120(T2195_7C0* self, Mat02* a1, Vec02* a2, f32 f)
         e->rot->vt->eval(e->rot, p4, 0, a1, a2, tmp[0], track->speed);
         return;
     }
-    func_00121508(self, a1, a2);
+    GetOwnerRotation(self, a1, a2);
 }
 
 f32 func_00123358(T2195_7C0* self, s32 index)
@@ -408,9 +408,9 @@ s32 func_00140FF8(void* p);
 
 void func_00123408(StateTrigger* self)
 {
-    func_001B7968(self);
+    InitCollider(self);
     self->state = -1;
-    self->id6B0 = func_00140FF8(D_00261420);
+    self->id6B0 = TakeFlagTableIndex(g_flagTable);
 }
 
 extern void func_001BA130(Collider*);
@@ -418,7 +418,7 @@ extern void func_001BA130(Collider*);
 void func_00123540(StateTrigger* object)
 {
 	s32 value = object->id6B0;
-	func_001BA130(object);
+	CopyCollider(object);
 	object->id6B0 = value;
 }
 
@@ -435,28 +435,28 @@ s32 func_001300E8(void* node, s32 kind);
 
 void func_00123578(StateTrigger* self)
 {
-    func_001B93F8(self);
+    UpdateCollider(self);
     if (self->state == 2 && self->timeout != 0.0f) {
-        if (self->timeout < D_0026185C[0] - self->stateTime) {
-            func_00123888(self, 0);
+        if (self->timeout < g_gameTime[0] - self->stateTime) {
+            SetStateTriggerState(self, 0);
             goto done;
         }
     }
     if (self->count1 > 0) {
         if (self->done == self->count1) {
-            func_00123888(self, 1);
+            SetStateTriggerState(self, 1);
             goto done;
         }
     }
     if (self->state != 2) {
         goto done;
     }
-    if (D_00262E10->f2220 != 9) {
+    if (g_player->f2220 != 9) {
         goto done;
     }
     for (s32 i = 0; i < self->count1; i++) {
-        void* p = func_0015A418(self->world, 0x104, (void*)self->items1[i], self);
-        if (p != 0 && func_001300E8(p, 0x22) != 0) {
+        void* p = FindFirstObjectById(self->world, 0x104, (void*)self->items1[i], self);
+        if (p != 0 && IsObjectOfKind(p, 0x22) != 0) {
             Obj_123578* o = (Obj_123578*)p;
             o->vtbl[0x130 / 4](p);
         }
@@ -474,7 +474,7 @@ void func_00123AB0(StateTrigger* object, s32 mode)
     case 2: mapped = 1; break;
     default: return;
     }
-    func_00123888(object, mapped);
+    SetStateTriggerState(object, mapped);
 }
 
 void func_00123B18(StateTrigger* counter)
@@ -536,7 +536,7 @@ extern s32 func_0013EC00(void*, s32, void*, void*, void*, void*, void*);
 
 void func_00123D08(StateTrigger* object, void* a1, void* a2, void* a3, void* a4)
 {
-	func_0013EC00((u8*)object + 0x630, 8, (u8*)object + 0x62C,
+	UpsertKeyedEntry((u8*)object + 0x630, 8, (u8*)object + 0x62C,
 			  a1, a2, a3, a4);
 }
 
@@ -546,7 +546,7 @@ s32 func_00123D40(StateTrigger* self, void* arg)
 {
     s32 i;
     for (i = 0; i < self->outCount; i++) {
-        if (func_001C1A28(arg, &self->outItems[i]) == 0) {
+        if (AppendPropertyToScriptList(arg, &self->outItems[i]) == 0) {
             return 0;
         }
     }
@@ -571,7 +571,7 @@ void func_00126A48(PlacedObject* object, u32 value)
     *(u32*)(object->sub22C + 0x38) |= 2;
     while (child != 0) {
         if ((child->desc->flags & 1) != 0)
-            func_00126A48(child, value);
+            SetObjectTreeRecordValue(child, value);
         child = (PlacedObject*)child->next;
     }
 }
@@ -599,7 +599,7 @@ void func_00126BC0(Object_00126BC0* object, s32 value)
     Object_00126BC0* child = object->child;
     while (child != 0) {
         if ((child->vtable[2] & 1) != 0)
-            func_00126BC0(child, value);
+            SetObjectTreeRecordsValue(child, value);
         child = child->next;
     }
 }
@@ -634,7 +634,7 @@ void func_00122F88(T2195_7C0* self, Attachment* a1)
 {
     AnimationPlayer* saved = self->player;
     Pair2195 tmp = self->w20;
-    func_001212D8(self, a1);
+    CopyPoseSource(self, a1);
     self->w20 = tmp;
     self->player = saved;
 }
@@ -685,13 +685,13 @@ void func_001201F0(T2196_6F8* self, Stream83* arg)
     Locals_001201F0 loc;
     s32 result;
 
-    func_0011FA88(&self->count, &self->keys, arg);
+    ReadVectorKeys(&self->count, &self->keys, arg);
     if (self->count < 2) {
         result = 1;
     } else {
-        func_00188A20((u8*)self->keys + 0x10, loc.a);
+        BuildEulerRotationMatrix((u8*)self->keys + 0x10, loc.a);
         u8* tail = (u8*)((self->count << 6) + (s32)self->keys) - 0x30;
-        func_00188A20(tail, loc.b);
+        BuildEulerRotationMatrix(tail, loc.b);
         func_00189150(loc.a, loc.b, loc.c);
         func_00188D28(loc.c, &loc.first, loc.d);
         result = (loc.first < 0.01f) ? 1 : 0;
@@ -714,8 +714,8 @@ void func_00122488(Attachment* self, s32 val)
         break;
     case 3: {
         f32 cur = self->owner->f270[val];
-        f32 limit = self->owner->f294 ? D_0026186C : D_00261860;
-        self->owner->f270[val] = func_001EA4B8(D_00260E60, 0, cur, ret, limit);
+        f32 limit = self->owner->f294 ? g_frameStep : g_frameDt;
+        self->owner->f270[val] = ApproachValueWithRamp(g_valueRampProfile, 0, cur, ret, limit);
         break;
     }
     }
@@ -734,22 +734,22 @@ void func_00123448(StateTrigger* self)
 {
     Frame_123448 fr;
     s32 s0;
-    func_001DBCC8(self->world, (void*)func_001236C8, self, 0, 0);
-    func_00124A48(self);
+    AppendQueuedCall(self->world, (void*)ResolveStateTriggerObjects, self, 0, 0);
+    StartPlacedObject(self);
     s32 e = (s32)&self->children;
     fr.f04 = e;
     fr.f00 = e;
     s32 link = *(s32*)(e + 8);
-    s32 old = (s32)D_0027B314;
+    s32 old = (s32)g_activeListFrames;
     fr.f0C = old;
     fr.f08 = link;
-    D_0027B314 = (ListFrame*)&fr;
+    g_activeListFrames = (ListFrame*)&fr;
     s32 head = *(s32*)e;
     fr.f04 = head + fr.f08;
     s0 = head;
     if (s0 != 0) {
         do {
-            if (func_001300E8((void*)s0, 0x88) != 0) {
+            if (IsObjectOfKind((void*)s0, 0x88) != 0) {
                 if (self->found558 == 0) {
                     self->found558 = (void*)s0;
                 }
@@ -760,10 +760,10 @@ void func_00123448(StateTrigger* self)
         } while (s0 != 0);
     }
     if (self->found558 != 0) {
-        self->f55C = (StateWalker*)func_001B6290(self->found558, self, -1, 1);
+        self->f55C = (StateWalker*)CreateStateWalker(self->found558, self, -1, 1);
         func_00182ED8(self->found558);
     }
-    D_0027B314 = (ListFrame*)fr.f0C;
+    g_activeListFrames = (ListFrame*)fr.f0C;
 }
 
 void func_00121568(Attachment* self, f32* value, f32* slope);
@@ -779,7 +779,7 @@ void func_00122C48(Attachment* self, f32* a1, f32* a2)
     if (p != 0) {
         p->vt->getValue(p, a1, a2);
     } else {
-        func_00121568(self, a1, a2);
+        GetOwnerValue(self, a1, a2);
     }
 }
 
@@ -795,7 +795,7 @@ void func_00123270(T2195_7C0* self, f32* a1, f32* a2)
     if (target) {
         target->vt->eval(target, f4, 0, saved, a2, player->time, player->speed);
     } else {
-        func_00121568(self, saved, a2);
+        GetOwnerValue(self, saved, a2);
     }
 }
 
@@ -811,7 +811,7 @@ void func_001232E8(T2195_7C0* self, Mat02* a1)
     if (target) {
         target->vt->eval(target, f4, 0, saved, player->time);
     } else {
-        func_00121580(self, saved);
+        GetIdentityMatrix(self, saved);
     }
 }
 
@@ -829,16 +829,16 @@ void func_001236C8(StateTrigger* self)
     s32 kept = 0;
     s32 i;
     for (i = 0; i < self->count1; i++) {
-        void* node = func_0015A418(self->world, 0x104, self->items1[i], self);
-        if (node && func_001300E8(node, 0x22)) {
-            func_00123400((C22*)node, self);
+        void* node = FindFirstObjectById(self->world, 0x104, self->items1[i], self);
+        if (node && IsObjectOfKind(node, 0x22)) {
+            SetCountedObjectCounter((C22*)node, self);
             kept++;
         }
     }
     self->count1 = kept;
     for (i = 0; i < self->count2; i++) {
-        void* node = func_0015A418(self->world, 0x104, self->items2[i], self);
-        if (node && func_001300E8(node, 0x30)) {
+        void* node = FindFirstObjectById(self->world, 0x104, self->items2[i], self);
+        if (node && IsObjectOfKind(node, 0x30)) {
             s32 idx = self->outCount;
             self->outItems[idx] = (Collider*)node;
             self->outCount = idx + 1;
@@ -846,15 +846,15 @@ void func_001236C8(StateTrigger* self)
         }
     }
     for (i = 0; i < self->count3; i++) {
-        void* node = func_0015A418(self->world, 0x104, self->items3[i], self);
-        if (node && func_001300E8(node, 8)) {
+        void* node = FindFirstObjectById(self->world, 0x104, self->items3[i], self);
+        if (node && IsObjectOfKind(node, 8)) {
             func_001CAD40(node, self);
         }
     }
-    if (func_00141008(D_00261420, self->id6B0)) {
-        func_00123888(self, 1);
+    if (TestFlagTableBit(g_flagTable, self->id6B0)) {
+        SetStateTriggerState(self, 1);
     } else {
-        func_00123888(self, 0);
+        SetStateTriggerState(self, 0);
     }
 }
 
@@ -890,15 +890,15 @@ void func_00123888(StateTrigger* self, s32 mode)
     if (cur != 2) {
         goto store;
     }
-    func_001BF788(self->f620, 0);
-    func_001BF048(self->f624);
+    StopSoundRecord(self->f620, 0);
+    ReleaseSoundLevel(self->f624);
     func_0013ECB0(self->world, self->count62C, self->table630, self, 0);
     if (mode == 1) {
         func_00160D00(D_002623D8);
     }
 store:
     self->state = mode;
-    self->stateTime = D_0026185C[0];
+    self->stateTime = g_gameTime[0];
     if (mode == 1) {
         goto arm1;
     }
@@ -914,33 +914,33 @@ store:
     return;
 arm0:
     if (self->f55C != 0) {
-        func_001B64D8(self->f55C, 0x21A);
+        SetStateWalkerTarget(self->f55C, 0x21A);
     }
     func_00123B28(self);
     return;
 arm1:
     if (self->f55C != 0) {
-        func_001B6628(self->f55C, 0x220);
+        TeleportStateWalker(self->f55C, 0x220);
     }
     func_00123BB0(self);
-    if (func_00141008(D_00261420, self->id6B0) != 0) {
-        func_001837E0(self, 0x16, 0, 0);
+    if (TestFlagTableBit(g_flagTable, self->id6B0) != 0) {
+        TriggerScriptEvent(self, 0x16, 0, 0);
     } else {
-        func_001837E0(self, 3, 0, 0);
+        TriggerScriptEvent(self, 3, 0, 0);
     }
-    func_00141040(D_00261420, self->id6B0);
+    SetFlagTableBit(g_flagTable, self->id6B0);
     return;
 arm2:
     if (self->f55C != 0) {
-        func_001B64D8(self->f55C, 0x21F);
+        SetStateWalkerTarget(self->f55C, 0x21F);
     }
     if (self->f628 == 0) {
-        func_001BFCD8(0x15, &self->f620, self, 0, 8000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x15, &self->f620, self, 0, 8000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
-    self->f624 = func_001BEEF8(0x6B);
+    self->f624 = PushSoundLevel(0x6B);
     func_00123C20(self);
     func_0013ECB0(self->world, self->count62C, self->table630, self, 1);
-    func_001837E0(self, 2, 0, 0);
+    TriggerScriptEvent(self, 2, 0, 0);
     func_00160CF0(D_002623D8);
 }
 
@@ -955,16 +955,16 @@ T2196_Pos* func_00120FB0(s32 kind)
     T2196_Pos* p;
     switch (kind) {
     case 0:
-        p = (T2196_Pos*)func_0018D5C0(0x30);
-        p->vt = &D_002196B8;
+        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x30);
+        p->vt = &g_positionCurveKind0Methods;
         break;
     case 1:
-        p = (T2196_Pos*)func_0018D5C0(0x14);
-        p->vt = &D_002196C8;
+        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x14);
+        p->vt = &g_positionCurveKind1Methods;
         break;
     case 2:
-        p = (T2196_Pos*)func_0018D5C0(0x18);
-        p->vt = &D_002196D8;
+        p = (T2196_Pos*)AllocateZeroedFrontMemory(0x18);
+        p->vt = &g_positionCurveKind2Methods;
         break;
     default:
         p = 0;
@@ -987,7 +987,7 @@ void func_00121358(Attachment* self, s32 flags)
 {
     PlacedObject* m = self->owner;
     s32 local[4];
-    func_00152600(&m->list1E0, self);
+    RemoveFromList(&m->list1E0, self);
     Attachment* a = m->f1EC;
     Attachment* b = m->f1F0;
     m->desc02()->m2B(m);
@@ -996,7 +996,7 @@ void func_00121358(Attachment* self, s32 flags)
             func_001BA500(m, (u8*)m + 0x440, (u8*)m + 0x150, local, 0);
             m->desc02()->m20(m, (Vec02*)local);
         } else {
-            func_001274F8(m, D_00248D30);
+            SetPlacedObjectVelocity(m, D_00248D30);
         }
     }
     if (self == b && m->f1F0 == 0 && (flags & 2) != 0) {
@@ -1004,10 +1004,10 @@ void func_00121358(Attachment* self, s32 flags)
             func_001BA500(m, (u8*)m + 0x460, (u8*)m + 0x160, local, 0);
             m->desc02()->m21(m, (Vec02*)local);
         } else {
-            func_00127590(m, D_00248D30);
+            SetPlacedObjectSpin(m, D_00248D30);
         }
     }
-    func_001B5F28(&m->world->pool1B20, self);
+    PushFreeSlot(&m->world->pool1B20, self);
 }
 
 extern u8 D_002483D0[];
@@ -1015,7 +1015,7 @@ void func_00121338(Attachment* self, PlacedObject* a1);
 
 void func_00122708(T2195_588* self, PlacedObject* src)
 {
-    func_00121338(self, src);
+    InitPoseSource(self, src);
     self->pos = src->v190;
     self->rot.r[0] = src->m1A0.r[0];
     self->rot.r[1] = src->m1A0.r[1];
@@ -1026,7 +1026,7 @@ void func_00122708(T2195_588* self, PlacedObject* src)
             self->f80 = p->f8C;
         }
     }
-    Vec02* table = (Vec02*)D_002483D0;
+    Vec02* table = (Vec02*)g_identityMatrix;
     self->m90.r[0] = table[0];
     self->m90.r[1] = table[1];
     self->m90.r[2] = table[2];
@@ -1066,7 +1066,7 @@ void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
     if (!seq) {
         t = dt / cfg->length;
     } else {
-        idx = func_00139970(dt, cfg->length, seq->count, seq->pairs, &x2);
+        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
         t = x2 / seq->pairs[idx].b;
     }
     for (s32 i = 0; i < cfg->count; i++) {
@@ -1076,7 +1076,7 @@ void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
         T2196_Weight* tg = o->targets[i];
         if (!tg) {
             if (cam) {
-                f32 r = func_001EA408(((Rec2195_224*)cam->f224)->f90 - v0);
+                f32 r = WrapAngle(((Rec2195_224*)cam->f224)->f90 - v0);
                 v0 += r * e->weight / (w + e->weight);
             }
         } else {
@@ -1097,13 +1097,13 @@ void func_00120AA8(T2196_698* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
             if (w == 0.0f) {
                 v0 = x0;
             } else {
-                f32 r = func_001EA408(func_001EA408(x0) - v0);
+                f32 r = WrapAngle(WrapAngle(x0) - v0);
                 v0 += r * e->weight / (w + e->weight);
             }
             sum1 += e->weight * x1;
         }
         w += e->weight;
-        v0 = func_001EA408(v0);
+        v0 = WrapAngle(v0);
     }
     if (out0)
         *out0 = v0;
@@ -1142,7 +1142,7 @@ void func_00120D58(T2196_6A8* o, PlacedObject* cam, s32 c, f32* out0, f32* out1,
     if (!seq) {
         t = dt / cfg->length;
     } else {
-        idx = func_00139970(dt, cfg->length, seq->count, seq->pairs, &x2);
+        idx = FindCyclicRangeIndex(dt, cfg->length, seq->count, seq->pairs, &x2);
         t = x2 / seq->pairs[idx].b;
     }
     for (s32 i = 0; i < cfg->count; i++) {
@@ -1198,16 +1198,16 @@ T2196_Rot* func_00121050(s32 kind) {
     T2196_Rot* p;
     switch (kind) {
     case 0:
-        p = (T2196_Rot*)func_0018D5C0(0x30);
-        p->vt = &D_002196E8;
+        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x30);
+        p->vt = &g_rotationCurveKind0Methods;
         break;
     case 1:
-        p = (T2196_Rot*)func_0018D5C0(0x14);
-        p->vt = &D_002196F8;
+        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x14);
+        p->vt = &g_rotationCurveKind1Methods;
         break;
     case 2:
-        p = (T2196_Rot*)func_0018D5C0(0x1C);
-        p->vt = &D_00219708;
+        p = (T2196_Rot*)AllocateZeroedFrontMemory(0x1C);
+        p->vt = &g_rotationCurveKind2Methods;
         break;
     default:
         p = 0;
@@ -1227,12 +1227,12 @@ T2196_Scale* func_001210F0(s32 kind)
     T2196_Scale* p;
     switch (kind) {
     case 0:
-        p = (T2196_Scale*)func_0018D5C0(0x30);
-        p->vt = &D_00219718;
+        p = (T2196_Scale*)AllocateZeroedFrontMemory(0x30);
+        p->vt = &g_scaleCurveKind0Methods;
         break;
     case 1:
-        p = (T2196_Scale*)func_0018D5C0(0x10);
-        p->vt = &D_00219728;
+        p = (T2196_Scale*)AllocateZeroedFrontMemory(0x10);
+        p->vt = &g_scaleCurveKind1Methods;
         break;
     default:
         p = 0;
@@ -1248,7 +1248,7 @@ extern u8 D_00219560[];
 
 Attachment* func_00121280(Attachment* self, World* a, PlacedObject* b)
 {
-    Attachment* node = func_00121228(a, b, (const T2195_Vt*)D_00219560);
+    Attachment* node = CreatePoseSource(a, b, (const T2195_Vt*)D_00219560);
     node->vt->copy(node, self);
     return node;
 }
@@ -1269,7 +1269,7 @@ extern u8 D_002483D0[];
 
 void func_00121580(Attachment* unused, Mat02* out)
 {
-    Mat02* src = (Mat02*)D_002483D0;
+    Mat02* src = (Mat02*)g_identityMatrix;
     out->r[0] = src->r[0];
     out->r[1] = src->r[1];
     out->r[2] = src->r[2];
@@ -1282,7 +1282,7 @@ void func_00121338(Attachment* self, PlacedObject* a1);
 
 void func_00122890(T2195_5B0* self, PlacedObject* src)
 {
-    func_00121338(self, src);
+    InitPoseSource(self, src);
     self->pos = &src->v190;
     self->rot = &src->m1A0;
     self->count = &src->f26C;
@@ -1296,15 +1296,15 @@ void func_00122890(T2195_5B0* self, PlacedObject* src)
             self->p2C = &o->f8C;
         }
     }
-    self->ident = (Mat02*)D_002483D0;
+    self->ident = (Mat02*)g_identityMatrix;
 }
 
 void func_00121338(Attachment* self);
 
 void func_00122A18(T2195_5D8* self)
 {
-    func_00121338(self);
-    Vec02* src = (Vec02*)D_002483D0;
+    InitPoseSource(self);
+    Vec02* src = (Vec02*)g_identityMatrix;
     Vec02* d1 = self->m40.r;
     Vec02* d2 = self->m90.r;
     self->m40.r[0] = src[0];
@@ -1339,24 +1339,24 @@ T2196_Weight* func_00121160(u32 kind)
     T2196_Weight* o;
     switch (kind) {
     case 0:
-        o = (T2196_Weight*)func_0018D5C0((T2196_Weight*)0x10);
-        o->vt = &D_00219668;
+        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
+        o->vt = &g_weightCurveKind0Methods;
         break;
     case 1:
-        o = (T2196_Weight*)func_0018D5C0((T2196_Weight*)0x10);
-        o->vt = &D_00219678;
+        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
+        o->vt = &g_weightCurveKind1Methods;
         break;
     case 3:
-        o = (T2196_Weight*)func_0018D5C0((T2196_Weight*)0x14);
-        o->vt = &D_00219698;
+        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x14);
+        o->vt = &g_weightCurveKind3Methods;
         break;
     case 4:
-        o = (T2196_Weight*)func_0018D5C0((T2196_Weight*)0x18);
-        o->vt = &D_002196A8;
+        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x18);
+        o->vt = &g_weightCurveKind4Methods;
         break;
     case 2:
-        o = (T2196_Weight*)func_0018D5C0((T2196_Weight*)0x10);
-        o->vt = &D_00219688;
+        o = (T2196_Weight*)AllocateZeroedFrontMemory((T2196_Weight*)0x10);
+        o->vt = &g_weightCurveKind2Methods;
         break;
     default:
         o = 0;
@@ -1406,7 +1406,7 @@ void func_00123ED0(PlacedObject* self)
         self->bits24 = 2;
         self->bits26 = 2;
     }
-    func_00182C18(self);
+    InitObject(self);
     self->f80 = D_002499F0;
     self->f88 = 0x0FFFFFFF;
     self->f84 = D_002499F0;
@@ -1419,9 +1419,9 @@ void func_00123ED0(PlacedObject* self)
     self->p21C = D_00260EB0;
     self->p220 = D_00260EC0;
     self->b2C8 = 0;
-    Init_00123ED0::Copy(&self->rot, (const Mat02*)D_002483D0);
-    Init_00123ED0::Copy(&self->m110, (const Mat02*)D_002483D0);
-    Init_00123ED0::Copy(&self->m1A0, (const Mat02*)D_002483D0);
+    Init_00123ED0::Copy(&self->rot, (const Mat02*)g_identityMatrix);
+    Init_00123ED0::Copy(&self->m110, (const Mat02*)g_identityMatrix);
+    Init_00123ED0::Copy(&self->m1A0, (const Mat02*)g_identityMatrix);
     func_00152438(&self->list1E0, 8);
 }
 
