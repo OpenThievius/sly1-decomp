@@ -30,3 +30,4 @@ src/lib/throw.c	001FD920	001FE890	-	00278048	0062A798
 src/lib/soft_float.c	001FC910	001FD5D0	-	-	0062A770
 src/lib/soft_float_single.c	001FD5D0	001FD8A8	-	-	-
 src/lib/unwind.c	001FF048	001FFFD0	0024F110	-	0062A7B8
+src/main/file_1C3390.cpp	001C3390	001C4458	0024D560	002749B0	-

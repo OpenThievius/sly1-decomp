@@ -4,13 +4,6 @@
 #include "fpu.h"
 #include "globals.h"
 
-void func_001C4180(C1D* self, s32 value)
-{
-    s32 n = self->f698;
-    self->f69C[n] = value;
-    self->f698 = n + 1;
-}
-
 void func_00192B58(void* self);
 void func_001C4C20(void* self);
 
