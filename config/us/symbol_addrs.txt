@@ -61,6 +61,9 @@ D_0024F0B0 = 0x0024F0B0;
 // The end of src/lib/new_handler.cpp's .rodata (its type name "9bad_alloc"), where the next
 // object's string begins.
 D_0024F220 = 0x0024F220;
+// The end of src/lib/type_info.cpp's .rodata (its type name "9type_info"), where the next
+// object's string begins.
+D_0024F330 = 0x0024F330;
 // The end of soft_float.c's .bss inside a coarse label: the double routines' NaN result
 // (D_0062A770, 0x18 bytes, the unpacked double type) is followed by 0x10 bytes no code reads.
 D_0062A788 = 0x0062A788;

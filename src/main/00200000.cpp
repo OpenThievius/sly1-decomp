@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
-s32 func_002006F0(void*);
 u32 func_002014F0();
 u32 func_00201BA8();
 u32 func_002027A0(u32);
 extern s32 D_0027696C;
 extern u32 D_00279340[];
-s32 func_002006F0(void* p) { return *(s32*)p; }
 u32 func_002014F0() { return g_randomState; }
 extern u8 D_00279330[];
 u32 func_00201BA8() { return (u32)D_00279330; }

@@ -13,15 +13,6 @@ struct Node_2000F0 {
     s32 field3;
 };
 
-void func_002000F0(struct Node_2000F0 *self, s32 a1, s32 a2, s32 a3) {
-    if (self != 0) {
-        self->field0 = a1;
-        self->vtbl = (u8*)D_0024F230;
-        self->field2 = a2;
-        self->field3 = a3;
-    }
-}
-
 extern const Fn_Table D_0024F248[6];
 
 struct Node_200118 {
@@ -30,24 +21,7 @@ struct Node_200118 {
     s32 field2;
 };
 
-void func_00200118(struct Node_200118 *self, s32 a1, s32 a2) {
-    if (self != 0) {
-        self->field2 = a2;
-        self->field0 = a1;
-        self->vtbl = (u8*)D_0024F248;
-    }
-}
-
 extern const Fn_Table D_0024F260[6];
-
-void func_00200138(void* self, void* value)
-{
-    if (self != 0) {
-        *(void**)self = value;
-        *(void**)((u8*)self + 4) = (u8*)D_0024F260;
-    }
-}
-
 
 struct Node_2003F8 {
     s32 field0;
@@ -56,55 +30,11 @@ struct Node_2003F8 {
     s32 field3;
 };
 
-struct Node_2003F8 *func_002003F8(struct Node_2003F8 *self, s32 a1, s32 a2, s32 a3) {
-    self->field0 = a1;
-    self->vtbl = (u8*)D_0024F230;
-    self->field2 = a2;
-    self->field3 = a3;
-    return self;
-}
-
-
-void* func_00200488(void* self, void* a, void* b)
-{
-    *(void**)self = a;
-    *(void**)((u8*)self + 4) = (u8*)D_0024F248;
-    *(void**)((u8*)self + 8) = b;
-    return self;
-}
-
-
-void* func_00200518(void* self, void* value)
-{
-    *(void**)self = value;
-    *(void**)((u8*)self + 4) = (u8*)D_0024F260;
-    return self;
-}
-
 extern u8 D_0024F278[];
-
-void* func_002005D0(void* self)
-{
-    *(void**)self = D_0024F278;
-    return self;
-}
 
 extern u8 D_0024F290[];
 
-void* func_00200668(void* self)
-{
-    *(void**)self = D_0024F290;
-    return self;
-}
-
 extern const Fn_Table D_0024F2A8[4];
-
-void* func_002006F8(void* self, void* value)
-{
-    *(void**)self = value;
-    *(void**)((u8*)self + 4) = (u8*)D_0024F2A8;
-    return self;
-}
 
 // An entry of a table of functions defined at the end of this file.
 extern const Fn_Table D_0024F428[];
@@ -204,15 +134,6 @@ void func_00200CB0(struct Node_200CB0 *self, s32 a1, s32 a2, s32 a3) {
 struct Obj_200158;
 s32 func_002000B0(Obj_200158* self, s32 a1, s32 a2);
 
-s32 func_00200158(Obj_200158* self, s32 a1, s32 a2, s32 fallback)
-{
-    s32 result = fallback;
-    if (func_002000B0(self, a1, a2) == 0) {
-        result = 0;
-    }
-    return result;
-}
-
 // NEAR: identical except the register saves: retail saves s0/ra with sd (8 bytes), ours with sq (16 bytes); only the Sony 2.9-ee build saves in 8 bytes (docs/TOOLCHAIN.md), so the SN build cannot match this function.
 
 extern u8 D_0062C5C8[];
@@ -224,16 +145,6 @@ struct Node_200418 { s32 field0; };
 void func_00200118(struct Node_200418* self, void* a1, void* a2);
 
 void* func_00200530(void);
-void* func_00200418(void)
-{
-    u8* obj = D_0062C5C8;
-    if (*(void**)obj == 0) {
-        func_00200530();
-        func_00200118((struct Node_200418*)obj, (u8*)D_0024F2B8, D_0062C5D8);
-    }
-    return obj;
-}
-
 // NEAR: US: retail saves s0 and ra with sd (8 bytes, the Sony 2.9-ee compiler), the default compiler saves sq; the body matches.
 
 struct Self_002004A8;
@@ -244,16 +155,6 @@ void func_00200118(struct Self_002004A8* self, void* a1, void* a2);
 extern u8 D_0062C5E8[];
 extern u8 D_0062C5D8[];
 extern const char D_0024F2D0[24];
-
-void* func_002004A8(struct Self_002004A8* a0)
-{
-    u8* self = D_0062C5E8;
-    if (*(s32*)self == 0) {
-        func_00200530(a0);
-        func_00200118((struct Self_002004A8*)self, (u8*)D_0024F2D0, D_0062C5D8);
-    }
-    return self;
-}
 
 // NEAR: every instruction matches except the two register saves: retail
 // saves $s0 and $ra with sd (8 bytes), ours with sq (16 bytes): the Sony SDK
@@ -268,14 +169,6 @@ struct Ctx_200530 { s32 field0; };
 void func_00200118(struct Ctx_200530 *self, void *a1, void *a2);
 
 void* func_00200710(void);
-void *func_00200530(void) {
-    if (*(void **)D_0062C5D8 == 0) {
-        func_00200710();
-        func_00200118((struct Ctx_200530 *)D_0062C5D8, (u8*)D_0024F2E8, D_0027B320);
-    }
-    return D_0062C5D8;
-}
-
 // NEAR: the body is EXACT as far as the listing goes; retail saves $s0 and $ra with sd (8 bytes), ours with sq: only the prologue and epilogue differ.
 
 extern u8 D_0062C5F8[];
@@ -288,16 +181,6 @@ struct Obj_002005E8 {
 
 void* func_001FF008(void);
 void func_00200118(struct Obj_002005E8 *self, void *a1, void *a2);
-
-void *func_002005E8(void)
-{
-    struct Obj_002005E8 *p = (struct Obj_002005E8 *)D_0062C5F8;
-    if (p->vtbl == 0) {
-        func_001FF008();
-        func_00200118(p, (u8*)D_0024F300, D_0027B318);
-    }
-    return p;
-}
 
 // NEAR: retail saves $ra and $s0 with sd (8 bytes); this compiler saves them with sq (16 bytes). The body is otherwise identical.
 
@@ -312,24 +195,9 @@ struct Node_200680 {
 void* func_001FF008(void);
 void func_00200118(struct Node_200680 *self, void *a1, void *a2);
 
-void *func_00200680(void)
-{
-    struct Node_200680 *self = (struct Node_200680 *)D_0062C608;
-    if (self->field0 == 0) {
-        func_001FF008();
-        func_00200118(self, (u8*)D_0024F310, D_0027B318);
-    }
-    return self;
-}
-
 // NEAR: retail saves $ra with sd, default compiler with sq; body identical
 struct Ctx_002006D0;
 s32 func_002000B0(Ctx_002006D0* a, Ctx_002006D0* b);
-
-s32 func_002006D0(Ctx_002006D0* a, Ctx_002006D0* b)
-{
-	return func_002000B0(a, b) ^ 1;
-}
 
 // NEAR: body matches; retail saves $s0 and $ra with sd/ld (8 bytes), this compiler saves sq/lq: a lib-code compiler difference
 
@@ -341,14 +209,6 @@ struct Node_200710 {
 };
 
 void func_00200138(struct Node_200710 *self, void *value);
-
-void *func_00200710(void) {
-    void **p = (void **)D_0027B320;
-    if (*p == 0) {
-        func_00200138((struct Node_200710 *)D_0027B320, (u8*)&D_0024F320);
-    }
-    return D_0027B320;
-}
 
 // NEAR: retail saves $ra with sd (Sony 2.9-ee-991111 library code, 0x1F59C4 on); the default compiler saves it with sq. Nothing else differs.
 
@@ -737,45 +597,15 @@ s32 func_0018D778(void* self);
 struct Ctx_002004F8;
 s32 func_00200080(Ctx_002004F8* ctx);
 
-s32 func_002004F8(Ctx_002004F8* ctx)
-{
-    return func_00200080(ctx);
-}
-
 extern s32 func_00200080(void);
-s32 func_00200580(void)
-{
-    return func_00200080();
-}
-
 struct Obj_002005A0 { u8* f0; };
 
 s32 func_0018D778(Obj_002005A0* self);
 extern u8 D_0024F0D8[];
 
-u8* func_002005A0(Obj_002005A0* self, s32 flag)
-{
-    u8* value = D_0024F0D8;
-    self->f0 = value;
-    if (flag & 1) {
-        return (u8*)func_0018D778(self);
-    }
-    return value;
-}
-
 extern u8 D_0024F0D8[];
 
 s32 func_0018D778(void* self);
-
-s32 func_00200638(void* self, s32 flags)
-{
-    void* v = D_0024F0D8;
-    *(void**)self = v;
-    if (flags & 1) {
-        return func_0018D778(self);
-    }
-    return (s32)v;
-}
 
 s32 func_00200080(void);
 
@@ -856,24 +686,8 @@ void func_00201BB8(void* self)
 
 struct Obj_200080 { void* f0; void* f4; };
 u8* func_0018D778(struct Obj_200080* self);
-u8* func_00200080(struct Obj_200080* self, s32 flag)
-{
-    u8* p = (u8*)D_0024F2A8;
-    self->f4 = p;
-    if ((flag & 1) != 0) return func_0018D778(self);
-    return p;
-}
-
 struct Key_2000B0;
 s32 func_001F6738(Key_2000B0* p, s32 v);
-
-s32 func_002000B0(s32* a, s32* b)
-{
-    s32 r = 0;
-    if (b == a || func_001F6738((Key_2000B0*)*a, *b) == 0)
-        r = 1;
-    return r;
-}
 
 extern s32 func_002000B0(void*, void*);
 struct VTable {
@@ -884,25 +698,9 @@ struct VTable {
 };
 struct Object { u8 pad[4]; VTable* vtable; };
 struct Handler { u8 pad[8]; Object* object; };
-s32 func_00200188(Handler* handler, void* first, void* second, s32 fallback,
-                  void* arg4, void* last)
-{
-    if (func_002000B0(handler, first)) {
-        return fallback;
-    }
-    Object* object = handler->object;
-    VTable* vtable = object->vtable;
-    void* self = (u8*)object + vtable->offset;
-    return vtable->method(self, first, second, (void*)fallback, arg4, last);
-}
-
 struct Callee_200468 { u8 pad[4]; s32 f4; };
 
 s32 func_00200080(Callee_200468* self, s32 flag);
-
-s32 func_00200468(Callee_200468* self, s32 flag) {
-    return func_00200080(self, flag);
-}
 
 // func_00200D58: the callee pointers keep their order; the offset is read as an s32 local before the two calls.
 typedef void* (*Factory_200D58)(void);
@@ -1781,50 +1579,6 @@ struct Tab_200220 { s32 p0; s32 p4; Ent_200220* ents; u32 count; };
 
 s32 func_002000B0(Tab_200220* a, Obj_200220* b);
 
-s32 func_00200220(Tab_200220* self, Obj_200220* o, s32 flag, u8* base, s32 p, s32 q)
-{
-    s32 res;
-    u32 i;
-
-    if (func_002000B0(self, o)) {
-        return (s32)base;
-    }
-    res = 0;
-    for (i = 0; i < self->count; i++) {
-        s32 r;
-        Obj_200220* ob;
-        if (flag && (self->ents[i].w >> 30) != 1) {
-            continue;
-        }
-        r = (s32)(base + (self->ents[i].w & 0x1FFFFFFF));
-        if ((self->ents[i].w >> 29) & 1) {
-            r = *(s32*)r;
-        }
-        ob = self->ents[i].obj;
-        r = ob->vt->fn((Obj_200220*)((u8*)ob + ob->vt->delta), (s32)o, flag, r, p, q);
-        if (r != 0) {
-            if (res == 0) {
-                res = r;
-            } else if (res != r) {
-                if (p != 0) {
-                    s32 a, b;
-                    a = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, res, 0, 0);
-                    b = o->vt->fn((Obj_200220*)((u8*)o + o->vt->delta), p, 1, r, 0, 0);
-                    if (a == b) {
-                    } else if (a == q) {
-                        continue;
-                    } else if (b == q) {
-                        res = r;
-                        continue;
-                    }
-                }
-                return 0;
-            }
-        }
-    }
-    return res;
-}
-
 struct Cfg_2028A8 {
     u8 a, b, c, d;
     u16 e, f;
@@ -2020,18 +1774,8 @@ done:
 }
 
 // Data of this file: type-name strings, class tables and the runtime's zero-initialised objects.
-extern const char D_0024F220[16] = "bad_alloc";
-extern const Strs_24F210 D_0024F320 = { "9type_info", "bad_alloc" };
-extern const Fn_Table D_0024F230[6] = { 0, (Fn_Table)func_00200418, 0, (Fn_Table)func_00200468, 0, (Fn_Table)func_00200220 };
-extern const Fn_Table D_0024F248[6] = { 0, (Fn_Table)func_002004A8, 0, (Fn_Table)func_002004F8, 0, (Fn_Table)func_00200188 };
-extern const Fn_Table D_0024F260[6] = { 0, (Fn_Table)(void* (*)(void))func_00200530, 0, (Fn_Table)func_00200580, 0, (Fn_Table)func_00200158 };
-extern const Fn_Table D_0024F2A8[4] = { 0, (Fn_Table)(void* (*)(void))func_00200710, 0, (Fn_Table)(u8* (*)(struct Obj_200080*, s32))func_00200080 };
+extern const char D_0024F330[16] = "bad_alloc";
 extern const void* const D_0024F408[4] = { 0, (void*)func_00201380, 0, (void*)func_002013D0 };
-extern const char D_0024F2B8[24] = "17__class_type_info";
-extern const char D_0024F2D0[24] = "14__si_type_info";
-extern const char D_0024F2E8[24] = "16__user_type_info";
-extern const char D_0024F300[16] = "10bad_typeid";
-extern const char D_0024F310[16] = "8bad_cast";
 extern const char D_0024F438[24] = "17__array_type_info";
 extern const char D_0024F450[24] = "16__ptmd_type_info";
 extern const char D_0024F468[24] = "16__ptmf_type_info";

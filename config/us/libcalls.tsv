@@ -36,3 +36,10 @@ __tf9exception	func_001FF008	the type-information function of the exception base
 __ti9exception	D_0027B318	its type information
 __rtti_si	func_00200118	fill in the type information of a class with one public base
 __ti9bad_alloc	D_0062C5B8	the type information of bad_alloc (a common symbol)
+__ti17__class_type_info	D_0062C5C8	the type information of __class_type_info (a common symbol)
+__ti16__user_type_info	D_0062C5D8	the type information of __user_type_info (a common symbol)
+__ti14__si_type_info	D_0062C5E8	the type information of __si_type_info (a common symbol)
+__ti10bad_typeid	D_0062C5F8	the type information of bad_typeid (a common symbol)
+__ti8bad_cast	D_0062C608	the type information of bad_cast (a common symbol)
+__ti9type_info	D_0027B320	the type information of type_info (a common symbol)
+what__C9exception	func_001FEF00	what() of the exception base class
