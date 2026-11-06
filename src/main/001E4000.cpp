@@ -4053,8 +4053,6 @@ f32 D_0026A968 = 300.0f;
 Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
 f32 D_0026ABB0[4] = { 12.0f, 0.0f, 0.12f, 0.0f };
 f32 D_0026ABC0[4] = { 500.0f, 1.0f, 0.0f, 0.0f };
-f32 D_0026ABF0[4] = { 33218888.0f, 33218888.0f, 4.2520177e+09f, 0.0f };
-f32 D_0026AC00[4] = { 8.623489e+09f, 8.623489e+09f, 1.2884902e+10f, 0.0f };
 f32 D_0026B530[4] = { 1.0f, 1.666667f, -2.666667f, 0.0f };
 f32 D_0026B540 = 0.5f;
 f32 D_0026B544 = 0.5f;
@@ -4721,7 +4719,6 @@ s32 D_002626D0 = 0;
 // size: one 32-bit word (lw at func_00198D3C), label is 4 bytes
 s32 D_0026A914 = 0;
 // size: func_0019DF48 fills 18 rows of 0x80 bytes (fn at +0, -1 at +8; loop i=17..0, stride 0x80) = 0x900
-GroupMarker D_0026AC30[18] = {};
 // size: one s32 (lw, compared with 2), label 8 bytes with 4 of padding before the 8-aligned D_0026EC60
 extern s32 D_0026EC58;
 // size: one s32 (lw, compared with 0), label 8 bytes with 4 of padding before the 8-aligned D_0026EC68
@@ -4885,10 +4882,7 @@ u8 D_00269BA8[24] = {0};
 // 24 bytes, byte array in readers
 
 // Globals typed by worker dz202, from retail's bytes and their readers.
-struct Obj_26AC10 { s32 p0; u8 pad04[12]; };
 
-// word at 0 is the next free entry pointer; 16 bytes to next label
-Obj_26AC10 D_0026AC10 = {};
 // only address/offsets used by readers; size to next label
 extern u8 D_0026C6C8[640];
 // only address/offsets used by readers; size to next label

@@ -457,66 +457,26 @@ void func_0019CE28(C8B* value, f32 x, f32 y, f32 z)
 }
 
 struct Val_0019D468 { u8 pad[4]; f32 value; };
-int func_0019D468(Val_0019D468** a, Val_0019D468** b)
-{
-    Val_0019D468* left = *a;
-    Val_0019D468* right = *b;
-    if (right->value < left->value) return -1;
-    if (left->value < right->value) return 1;
-    return ((s32)left - (s32)right) >> 7;
-}
 
 extern u32 D_00604788;
 
-void func_0019D930(void)
-{
-    if (!D_00604788) {
-        D_00604788 = 1;
-        func_00144848((void*)g_camera);
-    }
-}
 
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
 
-void func_0019DA30(void)
-{
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
-}
 
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
 extern u32 D_00604788;
 
-void func_0019DAD8(void)
-{
-    UploadProjectionConstants();
-    func_0019D968();
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
-    D_00604788 = 0;
-}
 
 extern u8 D_00212160[];
 extern u8 D_00215C50[];
 
-void func_0019DB20(void)
-{
-    UploadProjectionConstants();
-    func_0019D930();
-    func_0019D968();
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00212160, D_00215C50);
-}
 
 extern u8 D_00215C60[];
 extern u8 D_00217348[];
 
-void func_0019DB68(void)
-{
-    UploadProjectionConstants();
-    func_0019D930();
-    func_0019D968();
-    AddDmaRefTagIfChanged(&g_vifPacketWriter, D_00215C60, D_00217348);
-}
 
 void func_0019E158(EffectOwner* a, Rec50* b)
 {
@@ -1342,3 +1302,4 @@ s32 D_0026A938[4] = { 0x0, 0x22C, 0x2D4, 0x0 };
 s32 D_0026A948[4] = { 0x0, 0x339, 0x5BC, 0x0 };
 s32 D_0026AB90[4] = { 0x0, 0x268, 0x5EC, 0x0 };
 s32 D_0026ABA0[4] = { 0x4, 0x267, 0x5FC, 0x0 };
+
