@@ -30,8 +30,8 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
     s3 = IsWarpEntryAvailable(self->f570, self->f570->f2DC, &loc[0], &loc[1]);
     s2 = GetPadHorizontalStep(t);
     v1 = GetPadVerticalStep(t);
-    t->f30 = g_gameClock[4] + t->f34;
-    t->f38 = g_gameClock[4] + t->f3C;
+    t->f30 = g_gameClock.elapsed + t->f34;
+    t->f38 = g_gameClock.elapsed + t->f3C;
 
     if (v1 < 0) {
         MoveWarpCursor(self->f570, 0);
@@ -62,5 +62,5 @@ void func_001F1A08(Obj_1F1A08_eu* self, PadRecord* t)
     } else {
         self->f590 = D_00275FC0;
     }
-    self->f58C = ApproachValueWithRamp((Q3_1F1A08*)D_00276278, 0, self->f58C, self->f590, g_gameClock[5]);
+    self->f58C = ApproachValueWithRamp((Q3_1F1A08*)D_00276278, 0, self->f58C, self->f590, g_gameClock.step);
 }
