@@ -88,3 +88,13 @@ D_00276658 = 0x00276658;
 // Two ranges at D_00275C60 (0 to 1, then -1 to 1): every reader takes the first (g_unitRange,
 // S1EB050); the second has no reader, so the disassembly has no label for it.
 D_00275C68 = 0x00275C68;
+// A second FLT_MAX after func_001419E8's (D_00249E44) that no code loads: the constant of a
+// function the linker stripped, ending file_1419E8's .rodata.
+D_00249E48 = 0x00249E48;
+// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): file_13C988's
+// .rodata starts with it, after class 0x3B's FLT_MAX at D_00249D78.
+D_00249D80 = 0x00249D80;
+// Two nops after func_0013E430's return, 8 bytes that no alignment explains (functions are
+// 8-aligned and func_0013E430 ends on 16): the words the linker left of a stripped function.
+// Named so that file_13CCF8 can hold them (LINKER_REMNANT).
+func_0013E650 = 0x0013E650; // type:func

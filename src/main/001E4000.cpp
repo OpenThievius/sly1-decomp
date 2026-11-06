@@ -3882,14 +3882,6 @@ void func_001FBDF8();
 
 extern const f32 D_00249A1C = 3.4028235e+38f;
 extern const f32 D_00249B10[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
-extern const f32 D_00249D64 = 3.4028235e+38f;
-extern const f32 D_00249D68 = -3.4028235e+38f;
-extern const f32 D_00249D6C = 3.4028235e+38f;
-extern const f32 D_00249D70 = -3.4028235e+38f;
-extern const f32 D_00249DD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
-extern const char D_00249E18[8] = ";1";
-extern const f32 D_00249E3C = 3.4028235e+38f;
-extern const f32 D_00249E40 = 3.4028235e+38f;
 extern const f32 D_00249E4C = 3.4028235e+38f;
 extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
@@ -4424,16 +4416,6 @@ f32 D_00260EC0[4] = { 15.0f, 0.0f, 0.5f, 45.0f };
 f32 D_00260ED0[4] = { 2.0f, 0.0f, 0.100000001f, 0.0f };
 f32 D_00260EE0[4] = { -50.0f, 4.0f, 0.0f, 0.0f };
 f32 D_00260EF0[4] = { 0.0f, 400.0f, 0.0f, 0.0f };
-f32 D_00261360 = 600.0f;
-f32 D_00261370[4] = { 1.0f, -1.0f, 0.0f, 0.0f };
-f32 D_00261380[4] = { 2.0f, -1.5f, 0.0f, 0.0f };
-f32 D_00261390[8] = { 0.0f, 0.0f, 0.0f, 0.0f, -100000000.0f, 0.0f, 0.0f, 0.0f };
-f32 D_002613B0[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
-f32* D_002613D0[4] = { D_00261390, 0, 0, 0 };
-f32* D_002613E0[3] = { D_002613B0, 0, 0 };
-s32 D_002613F0 = -1;
-f32 D_00261850 = 1.0f;
-f32 D_00261854 = 1.0f;
 f32 D_002619DC = -5.0f;
 f32 D_002619E0 = 0.25f;
 f32 D_002619E4 = 1.0f;
@@ -4628,14 +4610,6 @@ s32 D_002726AC = 0;
 s32 D_0027292C = 0;
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
-// size: f32 read by lwc1 (game clock), 4-byte label
-f32 D_00261868 = 0;
-// size: f32 read by lwc1, 4-byte label
-f32 D_0026186C = 0;
-// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
-u64 D_00261870 = 0;
-// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
-u64 D_00261878 = 0;
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
 s32 D_00261D38 = 0;
 // size: func_00151A68 clears 0x24 bytes of it
@@ -4702,16 +4676,6 @@ s32 D_0026FA64 = 0;
 // size: same Span type, 0x30, filled by func_00130F48 at 0x131418 and read by func_00131000
 // size: same Span type, 0x30, filled by func_00130F48 at 0x131444 and read by func_00131000
 // size: one f32, read and written only with lwc1/swc1 (0x1312B8..0x131B48)
-// size: one word, address passed to func_00139B70 (which func_001529E0 fills with sw) and read with lw at 0x13B1D0
-s32 D_00261314 = 0;
-// size: one word (sw by func_001529E0, lw at 0x13B1D8), then 4 bytes of padding before the 8-aligned next label
-s32 D_00261318 = 0;
-// size: one word, stored with sw and read with lw (0x14079C, 0x1409F4, 0x140B44, 0x18F348)
-s32 D_002613EC = 0;
-// size: one f32, read with lwc1 only; label is 4 bytes
-f32 D_0026185C = 0;
-// size: one f32, read with lwc1 only; 4 bytes of padding before the 8-aligned next label
-f32 D_00261860 = 0;
 
 // Globals typed by worker dz03, from retail's bytes and their readers.
 // A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
@@ -4819,10 +4783,6 @@ Obj_26EC70 D_0026EC70 = {0};
 // Globals typed by worker dz201, from retail's bytes and their readers.
 struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
 
-// 528 bytes, only its address is passed
-u8 D_00261420[528] = {0};
-// 544 bytes, only its address is passed
-u8 D_00261630[544] = {0};
 // 16 bytes, a pointer word read whole, rest padding
 // 16 bytes, address passed (byte array in readers)
 // 208 bytes, address only
