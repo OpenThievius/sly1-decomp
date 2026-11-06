@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // SIZE 488/492, checked 2026-11-06
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACC68.cpp func_eu_001ACC68 --unit src/main/001A8000.cpp
+// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001ACC68.cpp func_eu_001ACC68 --unit src/main/file_1AA268.cpp
 // Still differs: Menu object init; only the multiply differs (retail mult v0,v1 + mflo a0 with the store later, ours 3-operand mult a0,v0,v1; moving the statement or s64/u32 casts did not help).
 // Initialises a menu object: sets up its font, grid size from the mode and the label sizes.
+struct Game_eu_1AE6D0;
+extern Game_eu_1AE6D0* D_eu_002636F0;
 struct Vt_eu_1ACC68 { u8 pad0[0x18]; s16 off; u8 pad1[2]; f32 (*width)(void* at, s32 ch); };
 struct Font_eu_1ACC68 { u8 pad0[8]; s32 units; u8 pad1[0x3C]; f32 scale; Vt_eu_1ACC68* vt; };
 struct Menu_eu_1ACC68 {
@@ -17,7 +19,6 @@ struct Menu_eu_1ACC68 {
 };
 struct Mode_eu_1ACC68 { u8 pad0[0x19D8]; s32 mode; };
 struct Consts_eu_1ACC68 { f32 a; f32 b; f32 c; f32 d; };
-extern Mode_eu_1ACC68* D_eu_002636F0;
 extern f32 D_eu_0027DB00;
 extern f32 D_eu_0027DB04;
 extern f32 D_eu_0027DB08;
@@ -35,7 +36,7 @@ void func_eu_001ACC68(Menu_eu_1ACC68* self)
     self->a51C = 1.0f;
     self->a588 = 1.0f;
     self->a584 = 0.0f;
-    switch (D_eu_002636F0->mode) {
+    switch (((Mode_eu_1ACC68*)D_eu_002636F0)->mode) {
     case 1:
         self->cols = 4;
         self->rows = 1;

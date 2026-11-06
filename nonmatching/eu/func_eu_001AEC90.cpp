@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // BYTES 177/196 (90.3%), checked 2026-11-06
-// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AEC90.cpp func_eu_001AEC90 --unit src/main/001AC000.cpp
+// NEAR (only in PAL): python3 tools/check.py nonmatching/eu/func_eu_001AEC90.cpp func_eu_001AEC90 --unit src/main/file_1AA268.cpp
 // Still differs: Like func_eu_001AD5E0 then sets f574/f570 and calls func_eu_001AED58; ours schedules the flag=0 move and p load before the f574/f570 stores (6 lines).
 // Calls PAL-only func_eu_001AAFB0, replaces f4 with the callback at +0xC of the object at f4 + 0x4C (given f4 + f8 and two PAL-only floats), stores func_0015C1C0(2) through the pointer at f520 (= D_00274488) when func_0015C188(2) is not zero, then sets f574 and f570 from PAL-only globals and calls PAL-only func_eu_001AED58.
 extern f32 D_eu_0027DBBC;
@@ -8,7 +8,6 @@ extern f32 D_eu_0027DBC0;
 extern s32 D_eu_00263EEC;
 struct Pal_eu_001AEEA0;
 extern Pal_eu_001AEEA0* D_eu_0026ABE8;
-extern u8 D_00274488[];
 void func_eu_001AAFB0(void* self);
 void func_eu_001AED58(void* self);
 

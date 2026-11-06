@@ -2464,7 +2464,7 @@ func_001ACA68	-	absent
 func_001ACAA8	-	absent	
 func_001ACDA0	-	absent	
 func_001ACE38	-	absent	
-func_001ACEE0	func_001ADC50	match	
+func_001ACEE0	func_001ADC50	match	rodata
 func_001AD088	-	absent	
 func_001AD0D0	-	absent	
 func_001AD1E8	-	absent	

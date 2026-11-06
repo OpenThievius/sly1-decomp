@@ -3981,9 +3981,6 @@ extern const f32 D_0024CAF0 = 3.40282347e+38f;
 extern const f32 D_0024CAF4 = 3.40282347e+38f;
 extern const f32 D_0024CAF8 = 3.40282347e+38f;
 extern const f32 D_0024CAFC = 3.40282347e+38f;
-extern const char D_0024CBD0[8] = "&%c%c&.";
-extern const char D_0024CBD8[16] = "^05~b2a83d/\000\000\000\000";
-extern const char D_0024CBE8[8] = "~.^.\000\000\000";
 extern const f32 D_0024D164 = -3.40282347e+38f;
 extern const f32 D_0024D168 = 3.40282347e+38f;
 extern const f32 D_0024D260 = 3.40282347e+38f;
@@ -4137,12 +4134,6 @@ f32 D_0026B740[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
 f32 D_0026B750[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
 f32 D_0026B760[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
 f32 D_0026B770[2] = { 0.5f, 1.0f };
-f32 D_002743B0 = 18.0f;
-f32 D_002743B4 = 8.0f;
-f32 D_002743B8 = 26.0f;
-f32 D_002743BC = 340.0f;
-f32 D_002744A4 = 0.1f;
-f32 D_002744A8 = 1.3f;
 f32 D_002744F0 = 50.0f;
 s32 D_00274548[4] = { 0, 1, 2, 0 };
 s32 D_00274558[4] = { 2, 0, 1, 0 };
@@ -4701,18 +4692,6 @@ s32 D_00279430 = 0;
 s32 D_00279454 = 0;
 
 // Globals typed by worker dz05, from retail's bytes and their readers.
-// A 28-byte record func_001AEA70 clears (func_001F5C0C with 0x1C) and then fills.
-struct Obj_2743D0 {
-    void* f00;
-    u8 f04;
-    u8 pad05[3];
-    f32 f08;
-    f32 f0C;
-    f32 f10;
-    f32 f14;
-    u32 f18;
-};
-
 // size: lw at offset 0 only, a 4-byte scalar of its own label
 s32 D_00270454 = 0;
 // size: lw at offset 0 (a pointer, read with lqc2 0x140 off it), 4-byte label
@@ -4723,16 +4702,6 @@ s32 D_00270518 = 0;
 s32 D_002726AC = 0;
 // size: lw at offset 0 compared with a count, 4-byte label
 s32 D_0027292C = 0;
-// size: memset 0x1C bytes (label 32, 8-aligned next label)
-Obj_2743D0 D_002743D0 = {0};
-// size: memset 0x1C bytes (label 32, 8-aligned next label)
-Obj_2743D0 D_002743F0 = {0};
-// size: memset 0x1C bytes (label 32, 8-aligned next label)
-Obj_2743D0 D_00274410 = {0};
-// size: memset 0x1C bytes
-Obj_2743D0 D_00274450 = {0};
-// size: memset 0x1C bytes
-Obj_2743D0 D_00274488 = {0};
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
 struct Rec_262490 {
