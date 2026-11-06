@@ -3912,7 +3912,6 @@ extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
 extern const f32 D_00249EF0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249FB4 = 3.4028235e+38f;
-extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
 extern const f32 D_0024A120 = 3.4028235e+38f;
 extern const Vec2_24A210 D_0024A210 = {0.0f, 4.73242188f};
 extern const f32 D_0024A218[2] = {3.4028235e+38f, 0.0f};

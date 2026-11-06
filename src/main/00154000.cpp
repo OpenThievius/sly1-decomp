@@ -438,27 +438,6 @@ void func_00153528(ActiveSetSolver* loc, s32 count);
 void func_00152470(void* tmp, Item_154880* item);
 void func_00153EC0(ActiveSetSolver* loc, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-void func_00154880(s32 count, u8* data, f32* values, f32* out)
-{
-    ActiveSetSolver loc;
-    s32 i;
-
-    PushBackMemoryMark();
-    InitActiveSetSolver(&loc, count);
-    for (i = 0; i < count; i++) {
-        Item_154880* item = (Item_154880*)(loc.items + i * 0x60);
-        item->p44 = AllocateBackMemory(count * 4);
-        CopyMemory(item->p44, data + i * count * 4, count * 4);
-        item->f38 = values[i];
-        AppendToList(&loc.pending, item);
-    }
-    loc.count = count;
-    RunActiveSetSolver(&loc, 0, 0, 0, 0, 0);
-    for (i = 0; i < count; i++)
-        out[i] = *(f32*)(loc.items + i * 0x60 + 0x34);
-    PopBackMemoryMark();
-}
-
 void func_00155F90(EffectSpawner* self)
 {
     self->f340 = 3.4028234663852886e+38f;
