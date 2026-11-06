@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 215/232 (92.7%), checked 2026-11-05
+// BYTES 215/232 (92.7%), checked 2026-11-06
 // NEAR: registers only: every instruction lines up once the last test is `if (base == 0)` and the
 //       table is read through a pointer local; temporaries differ in the two table paths. The
 //       tables are Sjis_274588 in 001E4000.cpp.

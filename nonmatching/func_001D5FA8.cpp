@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 203/260 (78.1%), checked 2026-11-05
+// BYTES 203/260 (78.1%), checked 2026-11-06
 // NEAR: order: frame, calls and constants are retail's; the float constants get other registers
 //       (retail: -100.0 in f0, 1.0 in f1, reused for four stores), so the stores interleave
 //       differently.

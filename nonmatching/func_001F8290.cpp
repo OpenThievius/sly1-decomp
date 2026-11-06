@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 460/492 (93.5%), checked 2026-11-05
+// BYTES 460/492 (93.5%), checked 2026-11-06
 #include "common.h"
 // NEAR: store scheduling of the node/out init block and the flag-path exit (bnez to epilogue, v0=0 in delay slot) differ
 

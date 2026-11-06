@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 334/376 (88.8%), checked 2026-11-05
+// BYTES 334/376 (88.8%), checked 2026-11-06
 // Near match: the same instructions and block layout as retail; only registers differ.
 // Retail reloads n->key for the tag test through a copy ($v1), which GCC CSE does not do here
 // because CSE follows the key-test branch into the tag test. An empty do { } while (0) after the

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 560/592 (94.6%), checked 2026-11-05
+// BYTES 560/592 (94.6%), checked 2026-11-06
 #include "common.h"
 // NEAR: 2-3 instruction scheduling diffs: retail moves a2 to s5 right after sq ra, and loads fr.x into a1 (not v0) for the func_0013E430 call
 

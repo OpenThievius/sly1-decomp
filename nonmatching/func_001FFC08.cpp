@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 107/120 (89.2%), checked 2026-11-05
+// BYTES 107/120 (89.2%), checked 2026-11-06
 #include "common.h"
 // NEAR: the list search matches; retail tail-calls func_002014D0 with j and an inlined epilogue, ours emits jal then a branch to the shared epilogue.
 //       Sony's compiler tail-jumps only to a void call that ends a void function in every matched

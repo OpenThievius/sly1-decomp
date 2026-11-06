@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 185/212 (87.3%), checked 2026-11-05
+// BYTES 185/212 (87.3%), checked 2026-11-06
 #include "common.h"
 // NEAR: the switch on state gives retail branch layout; the float constants and field stores in the state-1 block are scheduled in a different order
 

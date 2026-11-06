@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 126/184 (68.5%), checked 2026-11-05
+// BYTES 126/184 (68.5%), checked 2026-11-06
 // NEAR: order: the zero stores come out in another order than retail's; a random order search
 //       reached 21 differing lines and was not kept.
 #include "common.h"

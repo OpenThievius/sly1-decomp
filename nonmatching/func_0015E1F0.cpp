@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 184/156, checked 2026-11-05
+// SIZE 184/156, checked 2026-11-06
 // NEAR: callback loop and maxima are modeled, but loop shape and max operation lowering differ.
 #include "common.h"
 

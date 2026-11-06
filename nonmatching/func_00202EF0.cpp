@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 139/148 (93.9%), checked 2026-11-05
+// BYTES 139/148 (93.9%), checked 2026-11-06
 // NEAR: D_00279428 is volatile, as func_00202DA0 (the callback that sets it) reads it: that puts
 //       the store of the first result in the second jal's delay slot, as retail has. Left: the
 //       last two stores, where ours loads D_00279430's high half before the store to D_00279420

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 37344/37392, checked 2026-11-05
+// SIZE 37344/37392, checked 2026-11-06
 #include "common.h"
 // NEAR: 9,336 instructions against retail's 9,348 (li -27, lui +7, addiu +7, move +1). 7,557
 // instructions match ignoring registers, 2,815 exactly, and 1,059 of 1,179 entries store in

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 98/108 (90.7%), checked 2026-11-05
+// BYTES 98/108 (90.7%), checked 2026-11-06
 // NEAR: order: 25 of 27 instructions line up; s2 and s3 (self and the loop counter) are swapped.
 //       Eight source variants did not move them.
 #include "common.h"
