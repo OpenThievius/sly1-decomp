@@ -3970,7 +3970,6 @@ extern const f32 D_0024AB7C = 3.40282347e+38f;
 extern const f32 D_0024AFA0 = 3.40282347e+38f;
 extern const f32 D_0024B164 = 3.40282347e+38f;
 extern const f32 D_0024B16C = 3.40282347e+38f;
-extern const f32 D_0024B258 = -3.40282347e+38f;
 extern const f32 D_0024B64C = 3.40282347e+38f;
 extern const f32 D_0024C930 = 3.40282347e+38f;
 extern const f32 D_0024C9B0 = 3.40282347e+38f;
