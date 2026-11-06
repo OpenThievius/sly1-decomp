@@ -4508,8 +4508,6 @@ f32 D_002613B0[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
 f32* D_002613D0[4] = { D_00261390, 0, 0, 0 };
 f32* D_002613E0[3] = { D_002613B0, 0, 0 };
 s32 D_002613F0 = -1;
-f32 D_00261850 = 1.0f;
-f32 D_00261854 = 1.0f;
 f32 D_002619DC = -5.0f;
 f32 D_002619E0 = 0.25f;
 f32 D_002619E4 = 1.0f;
@@ -4744,14 +4742,6 @@ struct Rec_262490 {
     u8 pad20[8];
 };
 
-// size: f32 read by lwc1 (game clock), 4-byte label
-f32 D_00261868 = 0;
-// size: f32 read by lwc1, 4-byte label
-f32 D_0026186C = 0;
-// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
-u64 D_00261870 = 0;
-// size: sd/ld of the cop0 count in func_001430C8/func_001430F8, 8-byte label
-u64 D_00261878 = 0;
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
 s32 D_00261D38 = 0;
 // size: func_00151A68 clears 0x24 bytes of it
@@ -4834,10 +4824,6 @@ s32 D_00261314 = 0;
 s32 D_00261318 = 0;
 // size: one word, stored with sw and read with lw (0x14079C, 0x1409F4, 0x140B44, 0x18F348)
 s32 D_002613EC = 0;
-// size: one f32, read with lwc1 only; label is 4 bytes
-f32 D_0026185C = 0;
-// size: one f32, read with lwc1 only; 4 bytes of padding before the 8-aligned next label
-f32 D_00261860 = 0;
 
 // Globals typed by worker dz03, from retail's bytes and their readers.
 // A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
