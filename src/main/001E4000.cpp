@@ -3984,9 +3984,6 @@ extern const f32 D_0024CAFC = 3.40282347e+38f;
 extern const char D_0024CBD0[8] = "&%c%c&.";
 extern const char D_0024CBD8[16] = "^05~b2a83d/\000\000\000\000";
 extern const char D_0024CBE8[8] = "~.^.\000\000\000";
-extern const f32 D_0024D164;
-extern const f32 D_0024D168;
-extern const f32 D_0024D260 = 3.40282347e+38f;
 
 // Globals typed by worker dv08, from retail's bytes and their readers.
 struct VtEnt_24F0D8 { s32 delta; void (*fn)(); };
@@ -4143,7 +4140,6 @@ f32 D_002743B8 = 26.0f;
 f32 D_002743BC = 340.0f;
 f32 D_002744A4 = 0.1f;
 f32 D_002744A8 = 1.3f;
-extern f32 D_002744F0;
 s32 D_00274548[4] = { 0, 1, 2, 0 };
 s32 D_00274558[4] = { 2, 0, 1, 0 };
 s32 D_00274568[4] = { 0, 2, 1, 0 };
@@ -4616,37 +4612,6 @@ f32 D_00263700 = 1.29999995f;
 f32 D_00263710[4] = { -1.5f, 0.00100000005f, 0.0f, 0.0f };
 
 // Globals typed by worker dz06, from retail's bytes and their readers.
-// size: 8-byte label, readers (001AC000, 001B0000) only lw/sw word at +0 (s32), next label 8-aligned
-// count: word reader, 0x28-stride record count
-s32 D_002744F8 = 0;
-// pointer from allocator (func_0018D5C0), indexed array base; 4-byte word
-void* D_002744FC = 0;
-// count: loop bound word
-s32 D_00274500 = 0;
-// pointer from allocator (count*0x20), word
-V24A2_ImgA* D_00274504 = 0;
-// count: loop bound word
-s32 D_00274508 = 0;
-// pointer from allocator (count*0x18), word
-V24A2_ImgB* D_0027450C = 0;
-// word counter
-s32 D_00274510 = 0;
-// word value
-s32 D_00274514 = 0;
-// word, compared with (s32)self
-s32 D_00274518 = 0;
-// list head pointer, word
-void* D_0027451C = 0;
-// size: loop m<6 stores D_00274520[m] (24 bytes)
-s32 D_00274520[6] = {0};
-// word handle
-s32 D_00274538 = 0;
-// word count
-s32 D_0027453C = 0;
-// pointer array allocator result, word
-void* D_00274540 = 0;
-// list pointer, word
-void* D_00274544 = 0;
 // word handle
 s32 D_00274728 = 0;
 // word
