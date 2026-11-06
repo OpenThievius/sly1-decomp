@@ -66,7 +66,8 @@ import versions  # noqa: E402
 ROOT = versions.ROOT
 WINDOW = 0x4000
 RODATA = (0x217380, 0x250580)          # US .rodata (docs/VERSIONS.md)
-DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b(?![^\n]*\bfunc_))[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
+# A C++ file's `extern "C"` definition counts as well (src/lib/type_info_kinds.cpp).
+DEFINITION = re.compile(r"^(?!\s)(?!.*;\s*$)(?!(?:struct|union|class|enum|typedef)\b(?![^\n]*\bfunc_))(?:extern \"C\" )?[A-Za-z_][\w \t\*&:<>,]*?\b(\w+)\s*\((?:[^;\n]*$|[^;\n]*\)\s*\{.*$)", re.M)
 
 
 def definitions(text):
@@ -79,7 +80,10 @@ def definitions(text):
         member = text[:m.start(1)].endswith("::") and not m.group(1).startswith("func_")
         # A C file's static inline helper (src/lib/divide.c) is compiled into its callers only.
         helper = m.group(0).startswith("static inline ") and not m.group(1).startswith("func_")
-        if brace >= 0 and (semi < 0 or brace < semi) and not member and not helper:
+        # An `extern "C"` routine under the name the compiler calls it by (__dynamic_cast) takes
+        # retail's name from config/us/generated.tsv, as a member does.
+        runtime = m.group(0).startswith('extern "C" ') and not m.group(1).startswith("func_")
+        if brace >= 0 and (semi < 0 or brace < semi) and not member and not helper and not runtime:
             yield m
 
 
