@@ -3553,7 +3553,7 @@ func_001FF490	func_00200850	match
 func_001FF518	func_002008D8	match	
 func_001FF740	func_00200B00	match	rodata
 func_001FF848	func_00200C08	match	rodata
-func_001FFBE0	func_00200FA0	match	
+func_001FFC08	func_00200FC8	match	
 func_001FFC80	func_00201040	match	
 func_001FFE58	func_00201218	match	
 func_001FFFD0	func_00201390	match	

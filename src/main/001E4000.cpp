@@ -4127,7 +4127,6 @@ extern const double D_0024E9D0 = 0.1;
 extern const double D_0024E9D8 = 1000000.0;
 extern const char D_0024EB78[3][8] = {"....", "....", "all"};
 extern const VtEnt_24F0D8 D_0024F0D8[3] = {{0, func_001FF008}, {0, func_001FEFC0}, {0, func_001FEF00}};
-extern const char D_0024F118[8] = "eh";
 extern const VtEnt_24F0D8 D_0024F278[3] = {{0, func_002005E8}, {0, func_002005A0}, {0, func_001FEF00}};
 extern const VtEnt_24F0D8 D_0024F290[3] = {{0, func_00200680}, {0, func_00200638}, {0, func_001FEF00}};
 extern const char D_0024F510[56] = "sceGsDefDispEnv:Not support displaymode for %d!!\n";
