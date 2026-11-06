@@ -3904,7 +3904,6 @@ extern const f32 D_00249D68 = -3.4028235e+38f;
 extern const f32 D_00249D6C = 3.4028235e+38f;
 extern const f32 D_00249D70 = -3.4028235e+38f;
 extern const f32 D_00249DD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
-extern const char D_00249E18[8] = ";1";
 extern const f32 D_00249E4C = 3.4028235e+38f;
 extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
@@ -4505,7 +4504,8 @@ f32 D_00261390[8] = { 0.0f, 0.0f, 0.0f, 0.0f, -100000000.0f, 0.0f, 0.0f, 0.0f };
 f32 D_002613B0[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 100000000.0f, 0.0f, 0.0f, 0.0f };
 f32* D_002613D0[4] = { D_00261390, 0, 0, 0 };
 f32* D_002613E0[3] = { D_002613B0, 0, 0 };
-s32 D_002613F0 = -1;
+// size: one word, stored with sw and read with lw (0x14079C, 0x1409F4, 0x140B44, 0x18F348)
+s32 D_002613EC = 0;
 f32 D_002619DC = -5.0f;
 f32 D_002619E0 = 0.25f;
 f32 D_002619E4 = 1.0f;
@@ -4820,8 +4820,6 @@ s32 D_0026FA64 = 0;
 s32 D_00261314 = 0;
 // size: one word (sw by func_001529E0, lw at 0x13B1D8), then 4 bytes of padding before the 8-aligned next label
 s32 D_00261318 = 0;
-// size: one word, stored with sw and read with lw (0x14079C, 0x1409F4, 0x140B44, 0x18F348)
-s32 D_002613EC = 0;
 
 // Globals typed by worker dz03, from retail's bytes and their readers.
 // A list head: first and last item, and the offset of the link inside an item (func_00152460 adds it).
