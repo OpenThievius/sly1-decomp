@@ -122,7 +122,10 @@ def write_c_data(key, data_placed):
     rows = ["name\taddress\tsize\tsection\tsource"]
     listings = {}
     for addr, size, obj, section, name in sorted(data_placed):
-        source = Path(obj).relative_to(Path("build") / key).with_suffix(".cpp").as_posix()
+        rel = Path(obj).relative_to(Path("build") / key)
+        # A C++ file, or a C file (the toolchain's runtime, docs/TOOLCHAIN.md).
+        source = next((rel.with_suffix(s) for s in (".cpp", ".c") if (ROOT / rel.with_suffix(s)).exists()),
+                      rel.with_suffix(".cpp")).as_posix()
         if section in (".rodata", ".data"):
             # A whole file's section: the labels it includes from the disassembly are not C.
             text = (ROOT / source).read_text()
