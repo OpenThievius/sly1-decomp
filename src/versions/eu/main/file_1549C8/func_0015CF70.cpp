@@ -49,7 +49,7 @@ void func_0015CF70(V24A2* self, u16 key, u32 color, V24A0* s, f32 x, f32 y)
             func_001618C0(s, sx2, sy, self->f40, 0);
             func_00161860(s, u1, v1);
             func_001618C0(s, sx2, sy2, self->f40, 0);
-            self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)g_gsPacketWriter);
+            self->vt->end((V24A2*)((u8*)self + self->vt->adj7), 0, (s32)&g_gsPacketWriter);
         }
     }
 }
