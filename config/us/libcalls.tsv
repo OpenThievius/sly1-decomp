@@ -15,16 +15,16 @@ __uncatch_exception	func_001FEBE0	leave a handler without catching
 __cp_pop_exception	func_001FEB18	pop the caught exception
 __terminate	func_001FE8F0	terminate
 terminate__Fv	func_001FE8F0	terminate
-_vt$12Error_1FEC10	D_0024F0D8	vtable of the runtime's exception base class
-_vt$15Unlisted_1FEC10	D_0024F0C0	vtable of the exception func_001FEC10 throws
-_$_15Unlisted_1FEC10	func_001FEF28	its destructor
-_vt$12Fault_1FEDC8	D_0024F290	vtable of the exception func_001FEDC8 throws
-_$_12Fault_1FEDC8	func_00200638	its destructor
-_vt$12Fault_1FEE48	D_0024F278	vtable of the exception func_001FEE48 throws
-_$_12Fault_1FEE48	func_002005A0	its destructor
+_vt$9exception	D_0024F0D8	vtable of the runtime's exception base class
+_vt$13bad_exception	D_0024F0C0	vtable of the exception func_001FEC10 throws
+_$_13bad_exception	func_001FEF28	its destructor
+_vt$8bad_cast	D_0024F290	vtable of the exception func_001FEDC8 throws
+_$_8bad_cast	func_00200638	its destructor
+_vt$10bad_typeid	D_0024F278	vtable of the exception func_001FEE48 throws
+_$_10bad_typeid	func_002005A0	its destructor
 memset	func_001F5C0C	fill memory (the compiler clears an aggregate with it)
 __check_eh_spec	func_001FEC10	the exception-specification check the compiler calls
-__tf12Fault_1FD8A8	func_00200000	the type-information function of the allocation-failure exception (our class name)
+__tf9bad_alloc	func_00200000	the type-information function of the allocation-failure exception
 litodp	func_001FD358	long to double
 dpmul	func_001FCDE0	double multiply
 dpadd	func_001FCD20	double add

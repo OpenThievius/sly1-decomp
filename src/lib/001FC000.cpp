@@ -302,29 +302,29 @@ struct Info_001FEC10 {
 extern void func_001FE938() __attribute__((noreturn));
 
 // The runtime's exceptions: a base class with a description, and the classes thrown below.
-class Error_1FEC10 {
+class exception {
 public:
-    Error_1FEC10() {}
-    virtual ~Error_1FEC10() {}
+    exception() {}
+    virtual ~exception() {}
     virtual const char* Describe() const;
 };
 
-class Unlisted_1FEC10 : public Error_1FEC10 {
+class bad_exception : public exception {
 public:
-    Unlisted_1FEC10() {}
-    virtual ~Unlisted_1FEC10() {}
+    bad_exception() {}
+    virtual ~bad_exception() {}
 };
 
-class Fault_1FEDC8 : public Error_1FEC10 {
+class bad_cast : public exception {
 public:
-    Fault_1FEDC8() {}
-    virtual ~Fault_1FEDC8() {}
+    bad_cast() {}
+    virtual ~bad_cast() {}
 };
 
-class Fault_1FEE48 : public Error_1FEC10 {
+class bad_typeid : public exception {
 public:
-    Fault_1FEE48() {}
-    virtual ~Fault_1FEE48() {}
+    bad_typeid() {}
+    virtual ~bad_typeid() {}
 };
 
 void func_001FEC10(s32 count, void** allowed)
@@ -351,7 +351,7 @@ void func_001FEC10(s32 count, void** allowed)
         void* type = func_001FEF70();
         for (i = 0; i < count; i++) {
             if (func_00200778((Res_001FEA18*)allowed[i], (s32)type, (s32)info->value)) {
-                throw Unlisted_1FEC10();
+                throw bad_exception();
             }
         }
         func_001FE8F0();
@@ -360,12 +360,12 @@ void func_001FEC10(s32 count, void** allowed)
 
 void func_001FEDC8()
 {
-    throw Fault_1FEDC8();
+    throw bad_cast();
 }
 
 void func_001FEE48()
 {
-    throw Fault_1FEE48();
+    throw bad_typeid();
 }
 
 // Tables of functions this file's code reads: a class's methods, or a dispatch table by kind.
@@ -421,16 +421,16 @@ s32 func_001FE9D0(Arg_1FE9D0* size)
 }
 
 // The exception an allocation failure throws (its typeinfo function is func_00200000).
-class Fault_1FD8A8 {
+class bad_alloc {
 public:
-    virtual ~Fault_1FD8A8();
+    virtual ~bad_alloc();
 };
 
 struct Arg_001FD8A8;
 
 void* func_0018D758(Arg_001FD8A8* q);
 
-void* func_001FD8A8(Arg_001FD8A8* a) throw(Fault_1FD8A8)
+void* func_001FD8A8(Arg_001FD8A8* a) throw(bad_alloc)
 {
     return func_0018D758(a);
 }
