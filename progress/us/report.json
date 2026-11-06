@@ -5,15 +5,15 @@
   "matched_code": "1032232",
   "matched_code_percent": 92.79357351159119,
   "total_data": "431059",
-  "matched_data": "389274",
-  "matched_data_percent": 90.30643137018366,
+  "matched_data": "389350",
+  "matched_data_percent": 90.32406236733254,
   "total_functions": 4806,
   "matched_functions": 4721,
   "matched_functions_percent": 98.23137744486058,
   "complete_code": "1032232",
   "complete_code_percent": 92.79357351159119,
-  "complete_data": "389274",
-  "complete_data_percent": 90.30643137018366,
+  "complete_data": "389350",
+  "complete_data_percent": 90.32406236733254,
   "total_units": 75,
   "complete_units": 30
  },
@@ -15049,8 +15049,7 @@
     "complete": false,
     "progress_categories": [
      "game"
-    ],
-    "source_path": "src/main/00154000.cpp"
+    ]
    }
   },
   {
@@ -45426,15 +45425,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "233915",
-    "matched_data": "224854",
-    "matched_data_percent": 96.12637069020798,
+    "matched_data": "224930",
+    "matched_data_percent": 96.15886112476754,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "224854",
-    "complete_data_percent": 96.12637069020798,
+    "complete_data": "224930",
+    "complete_data_percent": 96.15886112476754,
     "total_units": 1,
     "complete_units": 0
    },
@@ -45555,15 +45554,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "431059",
-    "matched_data": "389274",
-    "matched_data_percent": 90.30643137018366,
+    "matched_data": "389350",
+    "matched_data_percent": 90.32406236733254,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "389274",
-    "complete_data_percent": 90.30643137018366,
+    "complete_data": "389350",
+    "complete_data_percent": 90.32406236733254,
     "total_units": 4,
     "complete_units": 1
    }
