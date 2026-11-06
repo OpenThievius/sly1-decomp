@@ -4,23 +4,23 @@ s32 func_0018C250(MemoryCard* self)
 {
     char name[0x50];
     s32 info[4];
-    s32 r = FinishMemoryCardCall(func_0020A078(self->port, self->slot, "/"), 0x12, info);
+    s32 r = FinishMemoryCardCall((s32)func_0020A078(self->port, self->slot, "/"), (void*)0x12, (s32)info);
     if (r != 0) return r;
     s32 need = info[0] == 0 ? 2 : 1;
-    s32 sz = GetKeyedDataSize((void *)g_memoryCardIconKey);
+    s32 sz = GetKeyedDataSize((Obj_18C1E8*)g_memoryCardIconKey);
     need += 5;
     need += (sz + 1023) / 1024;
     need += 0x15;
     if (self->freeBlocks < need) return 1;
     const char* dir = "/BESCES-50917YAOTWTD!";
-    r = CreateMemoryCardDirectory(self, dir);
+    r = CreateMemoryCardDirectory(self, (void*)dir);
     if (r == 0) {
         const char* title = "Sly Raccoon";
-        r = CreateMemoryCardFile(self, "/BESCES-50917YAOTWTD!/BESCES-50917YAOTWTD!", title, 11);
+        r = CreateMemoryCardFile(self, (void*)"/BESCES-50917YAOTWTD!/BESCES-50917YAOTWTD!", (void*)title, 11);
         if (r == 0) {
-            r = WriteMemoryCardSaveHeader(self, dir, title);
+            r = WriteMemoryCardSaveHeader(self, (void*)dir, (void*)title);
             if (r == 0) {
-                r = WriteMemoryCardIcon(self, dir);
+                r = WriteMemoryCardIcon(self, (void*)dir);
                 if (r == 0) {
                     for (s32 i = 0; i < 3; i++) {
                         FormatToString(name, "/%s/%s%d", "BESCES-50917YAOTWTD!", "save", i + 1);

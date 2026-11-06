@@ -4901,7 +4901,7 @@ List01 D_00264088 = {0};
 s32 D_002649A8 = 0;
 // size: func_00193940 loops 1 <= i < 3 over elements of stride 0x1A5C (the full table is 3 * 0x1A5C = 0x4F14)
 // size: func_0018B5C0 sets words +0, +4, +0x10 (0x14 bytes)
-BackgroundJob D_00269990 = {0};
+extern BackgroundJob D_00269990;
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
 s32 D_00269C90 = 0;

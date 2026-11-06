@@ -2,7 +2,7 @@
 // PAL adds a check after the switch: for 0 or 12, a state other than 2 forces 11 and f14 = 1.
 s32 func_0018D0A0(MemoryCard* o)
 {
-    s32 r = FinishMemoryCardCall(func_00209CB8(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), 1, 0);
+    s32 r = FinishMemoryCardCall(func_00209CB8(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), (void*)1, 0);
     switch (r) {
     case 9:
     case 11:

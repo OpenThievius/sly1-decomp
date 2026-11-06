@@ -95,7 +95,7 @@ extern f32 D_0026A708;
 extern f32 D_0026A70C;
 s32 func_001FD7A0(f32 x);
 
-MemoryCard D_00264A40 = {};
+extern MemoryCard D_00264A40;
 extern u8 D_00275BC0[];
 extern u8 D_00247AD0[];
 

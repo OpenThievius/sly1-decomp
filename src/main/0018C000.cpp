@@ -10,41 +10,11 @@
 
 s32 func_0018D1F8(void* self);
 
-s32 func_0018C1A8(MemoryCard* self)
-{
-    s32 r = func_0018D1F8(self);
-    if (r != 0) {
-        self->targetState = 2;
-    } else {
-        self->targetState = 3;
-    }
-    return r;
-}
-
 struct Key_18C1E8 { s32 w0; s32 w4; s32 w8; s32 wC; };
 struct Obj_18C1E8 { s32 f00; s32 f04; u8 pad08[0xC]; s32 f14; u8 pad18[4]; s32 f1C; };
 
 void func_0018D410(void* p);
 s32 func_001407A0(void* p);
-
-s32 func_0018C1E8(Obj_18C1E8* self)
-{
-    Key_18C1E8 key;
-    s32 flag;
-    ClearKeyId(&key);
-    if (self == 0) {
-        flag = 0;
-    } else {
-        s32 x = self->f04 ^ self->f1C;
-        key.w0 = self->f00 ^ self->f14;
-        key.w4 = x;
-        flag = x != 0;
-    }
-    if (flag != 0) {
-        return func_001407A0(&key);
-    }
-    return 0;
-}
 
 extern s32 func_0018C888(void*, void*, s32, void*, void*);
 extern s32 func_0018BD00(s32, void*, s32);
@@ -54,15 +24,6 @@ extern void* func_002095B0(s32, s32, void*, void*);
 extern void* func_00209720(void*);
 extern void* func_00209990(void*, void*, void*);
 
-s32 func_0018C9C0(void* a0, void* a1, void* a2)
-{
-	s32 temp;
-	s32 result = ListMemoryCardDirectory(a0, a1, 1, a2, &temp);
-	if (result != 0)
-		return result;
-	return temp == 1 ? 0 : 14;
-}
-
 struct Obj_18D168 { u8 pad0[4]; void* p4; void* p8; u8 pad1[0x18]; s32 p24; s32 p28; s32 p2C; };
 
 s32 func_00209CB8(void* a, void* b, s32* c, s32* d, s32* e);
@@ -71,90 +32,17 @@ struct State_18CFC0 { s32 type; s32 size; s32 handle; };
 extern s32 func_00160650(void*);
 extern s32 func_0018D368(void*, void*, void*, s32);
 
-s32 func_0018CFC0(void* owner, void* name, State_18CFC0* state)
-{
-    state->type = 18;
-    state->size = 0x1A00;
-    return CreateMemoryCardFile(owner, name,
-        (state->handle = ChecksumGameProgress(state), state), 0x1A00);
-}
-
 extern void func_001605E8(void*);
 extern s32 func_0018CFC0(void*, void*, void*);
 extern s32 func_0018C9C0(void*, void*, void*);
 
-s32 func_0018D028(void* a0, void* a1, void* a2, void* a3)
-{
-    u8 local[0x60];
-    ResetGameProgress(a2);
-    if (a3 == 0) a3 = local;
-    s32 result = WriteMemoryCardSlotFile(a0, a1, (State_18CFC0*)a2);
-    if (result != 0) return result;
-    return CheckMemoryCardFileExists(a0, a1, a3);
-}
-
-s32 func_0018D168(Obj_18D168* a0, s32* a1)
-{
-    s32 v = FinishMemoryCardCall(func_00209CB8(a0->p4, a0->p8, &a0->p24, &a0->p28, &a0->p2C), 1, 0);
-    switch (v) {
-    case 9: v = 0; break;
-    case 10: v = 12; break;
-    }
-    if (v == 0) { *a1 = a0->p28 << 10; } else { *a1 = 0; }
-    return v;
-}
-
-s32 func_0018D1F8(void* p)
-{
-	void* result = func_00209FA8(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8));
-	return FinishMemoryCardCall((s32)result, (void*)0x10, 0);
-}
-
-s32 func_0018D228(void* p, void* value)
-{
-	s32 result = FinishMemoryCardCall((s32)func_002096E8(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), value), (void*)0xB, 0);
-	return result == 0x18 ? 0 : result;
-}
-
-s32 func_0018D268(void* p, void* a1, void* a2, void* a3)
-{
-	return FinishMemoryCardCall((s32)func_002095B0(*(s32*)((char*)p + 4), *(s32*)((char*)p + 8), a1, a2), (void*)2, (s32)a3);
-}
-
-void func_0018D2B0(void* unused, void* value)
-{
-	FinishMemoryCardCall((s32)func_00209720(value), (void*)3, 0);
-}
-
 s32 func_00209870(void* a, void* b, void* c);
 s32 func_0018BD00(s32 v, s32 code, void* extra);
-
-s32 func_0018D2E8(void* a0, void* a1, void* a2, void* a3, void* a4)
-{
-    return FinishMemoryCardCall(func_00209870(a1, a2, a3), 5, a4);
-}
-
-void func_0018D328(void* unused, void* a1, void* a2, void* a3, void* a4)
-{
-	FinishMemoryCardCall((s32)func_00209990(a1, a2, a3), (void*)6, (s32)a4);
-}
 
 struct Result_18D368 { s32 first; s32 second; };
 extern s32 func_0018D268(void*, void*, void*, void*);
 extern void func_0018D328(void*, void*, void*, void*, void*);
 extern void func_0018D2B0(void*, void*);
-
-s32 func_0018D368(void* self, void* code, void* data, s32 version)
-{
-    Result_18D368 result;
-    result.first = -1;
-    s32 status = OpenMemoryCardFile(self, code, (void*)514, &result.first);
-    if (status != 0) return status;
-    status = ((s32 (*)(void*, void*, void*, void*, void*))WriteMemoryCardFile)(self, (void*)result.first, data, (void*)version, &result.second);
-    if (status == 0) status = result.second == version ? 0 : 7;
-    CloseMemoryCardFile(self, (void*)result.first);
-    return status;
-}
 
 extern u8* D_002C2A1C;
 
@@ -283,97 +171,26 @@ void func_0018F198(void* self, s32 value);
 
 struct Elem_18C028 { u8 pad0[0xC]; f32 fC; u8 pad1[0x1A4C]; };
 
-extern u8 D_00269990[];
 
 s32 func_0018BFA8(void* lhs, void* rhs);
 void func_001605E8(void* self);
 void func_0018B670(void* a, void* fn, void* self);
 s32 func_0018C420(void* self);
-s32 func_0018D0A0(void* self);
-
-void func_0018C028(MemoryCard* self, s32 value)
-{
-    s32 old = self->state;
-    s32 n;
-    if (value == old) return;
-    if (old == 5) self->f4F48 = 0;
-    if (value == 3) goto c420;
-    if (value < 4) goto small;
-    if (value == 5) goto loop;
-    goto store;
-small:
-    if (value >= 2) goto store;
-    if (value < 0) goto store;
-    StartBackgroundJob(g_backgroundJob, (void*)PollMemoryCard, self);
-    goto store;
-c420:
-    StartBackgroundJob(g_backgroundJob, (void*)LoadMemoryCardSaveSlots, self);
-    goto store;
-loop: {
-    Elem_18C028* e;
-    Elem_18C028* p = (Elem_18C028*)((u8*)self + 0x1A30);
-    e = (Elem_18C028*)(self->f4F48 = (u8*)self + 0x30);
-    n = 2;
-    do {
-        if (e->fC != 0.0f) {
-            s32 r = CompareMemoryCardEntryTimes((u8*)self->f4F48 + 0x1A00, p);
-            if (r < 0) self->f4F48 = e;
-        } else {
-            ResetGameProgress(e);
-        }
-        p = (Elem_18C028*)((u8*)p + 0x1A5C);
-        e = (Elem_18C028*)((u8*)e + 0x1A5C);
-    } while (--n >= 0);
-}
-
-store:
-    self->state = value;
-    self->stateTime = g_gameClock.elapsed;
-}
 
 extern f32 D_00261868[];
-
-void func_0018C178(MemoryCard* self, s32 value)
-{
-    if (value != self->displayMode) {
-        if (value == 2) self->i4F44 = 0;
-        self->displayMode = value;
-        self->displayModeTime = g_elapsedTime[0];
-    }
-}
 
 typedef void (*VFn_18C7F8)(void* self);
 struct Gx_18C7F8 { u8 pad0[0x27C]; s32 f27C; };
 struct __attribute__((packed)) Pk_18C7F8 { s32 v; };
 struct Obj_18C7F8 { VFn_18C7F8* vtbl; };
 
-extern u8 D_00269990[];
-extern Gx_18C7F8 D_0026FF68[];
-extern Obj_18C7F8 D_00273EB0[];
 
 void func_00194D30(void* self, s32 a, s32 b);
 void func_0018B670(void* a, void* fn, void* self);
 s32 func_0018C638(void* self);
 
-void func_0018C7F8(MemoryCard* self)
-{
-    if (self->i4F44 != 0) {
-        if ((g_saveData->f19EC & 0x100) == 0) {
-            g_pauseMenuElement->f27C = -1;
-            SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x14);
-        } else {
-            StartBackgroundJob(g_backgroundJob, (void*)SaveGameToMemoryCardSlot, self);
-            u8* obj = (u8*)D_00273EB0;
-            ((Pk_18C7F8*)(obj + 0x260))->v = 0;
-            ((Obj_18C7F8*)obj)->vtbl[14](obj);
-        }
-    }
-}
-
 struct Ctx_18C888 { u8 pad0[4]; void* p4; void* p8; };
 
-extern u8 D_002BE540[];
-extern u8 D_002BE9C0[];
 
 s32 func_001E2100(void* p);
 void* func_001E2138(void* dst, void* src);
@@ -381,45 +198,6 @@ void func_001F5C0C(void* p, s32 zero, s32 size);
 s32 func_00209E48(void* a, void* b, void* c, s32 d, s32 e, void* f);
 s32 func_0018BD00(s32 v, s32 code, void* extra);
 void func_0018B780(void* a, void* b);
-
-s32 func_0018C888(Ctx_18C888* a, u8* b, s32 c, u8* d, s32* e)
-{
-    s32 flag;
-    s32 r;
-    u8* t;
-    s32 i;
-    u8* buf;
-    if (c >= 0x13) {
-        return 0x25;
-    }
-    if (b != 0) {
-        if ((u32)GetStringLength(b) >= 0x41) {
-            return 0xD;
-        }
-        CopyString(D_002BE9C0, b);
-        flag = 0;
-    } else {
-        flag = 1;
-        b = D_002BE9C0;
-    }
-    buf = D_002BE540;
-    func_001F5C0C(buf, 0, 0x480);
-    r = FinishMemoryCardCall(func_00209E48(a->p4, a->p8, b, flag, c, buf), 0xD, e);
-    if (r != 0) {
-        return r;
-    }
-    i = 0;
-    if (*e > 0) {
-        t = d;
-        do {
-            ConvertMemoryCardDirEntry(buf, t);
-            i++;
-            t += 0x5C;
-            buf += 0x40;
-        } while (i < *e);
-    }
-    return 0;
-}
 
 extern u8* D_002C2A14;
 extern u8* D_002C2A18;
@@ -499,41 +277,6 @@ extern s32 func_0018CBF8(void*, const char*);
 extern s32 func_001E1FD0(char*, const char*, ...);
 extern s32 func_0018D028(void*, void*, void*, void*);
 
-s32 func_0018C250(MemoryCard* self)
-{
-    char name[0x50];
-    s32 info[4];
-    s32 r = FinishMemoryCardCall(func_0020A078(self->port, self->slot, "/"), 0x12, info);
-    if (r != 0) return r;
-    s32 need = info[0] == 0 ? 2 : 1;
-    s32 sz = GetKeyedDataSize((void*)g_memoryCardIconKey);
-    need += 5;
-    need += (sz + 1023) / 1024;
-    need += 0x15;
-    if (self->freeBlocks < need) return 1;
-    const char* dir = "/BASCUS-97198YAOTWTD!";
-    r = CreateMemoryCardDirectory(self, dir);
-    if (r == 0) {
-        const char* title = "Sly Cooper";
-        r = CreateMemoryCardFile(self, "/BASCUS-97198YAOTWTD!/BASCUS-97198YAOTWTD!", title, 10);
-        if (r == 0) {
-            r = WriteMemoryCardSaveHeader(self, dir, title);
-            if (r == 0) {
-                r = WriteMemoryCardIcon(self, dir);
-                if (r == 0) {
-                    for (s32 i = 0; i < 3; i++) {
-                        FormatToString(name, "/%s/%s%d", "BASCUS-97198YAOTWTD!", "save", i + 1);
-                        r = WriteMemoryCardSlot(self, name, (u8*)self + 0x30 + i * 0x1A5C, (u8*)self + 0x1A30 + i * 0x1A5C);
-                        if (r != 0) return r;
-                    }
-                    if (self->targetState < 5) self->targetState = 5;
-                }
-            }
-        }
-    }
-    return r;
-}
-
 extern u32 D_00269A00[];
 extern s32 D_00261F1C;
 
@@ -549,45 +292,17 @@ extern s32 D_002626CC;
 
 void func_001B3450(void);
 
-extern const char D_0024B3A0[16];
-extern const char D_0024B3B0[24];
-extern const char D_0024B3C8[8];
 
 struct Buf_18C770 { u8 bytes[0x50]; };
 
 s32 func_001E1FD0(Buf_18C770* dst, const char* fmt, ...);
 s32 func_0018D028(MemoryCard* self, Buf_18C770* buf, void* a2, void* a3);
 
-s32 func_0018C770(MemoryCard* self)
-{
-    Buf_18C770 buf;
-    s32 f = self->i4F4C;
-    s32 n;
-    s32 g;
-
-    if (f == 0) {
-        return 0x2C;
-    }
-    n = f - 0x30;
-    n = n - (s32)self;
-    n = n * 0x26FFD927;
-    n = (n >> 2) + 1;
-    FormatToString(&buf, D_0024B3A0, D_0024B3B0, D_0024B3C8, n);
-    g = self->i4F4C;
-    return WriteMemoryCardSlot(self, &buf, (void*)g, (void*)(g + 0x1A00));
-}
-
 struct Obj_18CBF8;
 
 s32 func_0018CC20(Obj_18CBF8* self, void* b, void* c, void* d);
 
 extern const u32 D_00248470[8];
-extern const char D_0024B3D8[8];
-
-void func_0018CBF8(Obj_18CBF8* self, void* b)
-{
-    WriteMemoryCardKeyedFile(self, b, (void*)g_memoryCardIconKey, (void*)D_0024B3D8);
-}
 
 extern u8 D_00248D30[];
 
@@ -615,34 +330,6 @@ extern void* D_00269AEC;
 s32 func_00209CB8(void* a, void* b, s32* c, s32* d, s32* e);
 s32 func_0018BD00(s32 v, s32 code, s32 extra);
 
-s32 func_0018D0A0(MemoryCard* o)
-{
-    s32 r = FinishMemoryCardCall(func_00209CB8(o->port, o->slot, &o->f24, &o->freeBlocks, &o->f2C), 1, 0);
-    switch (r) {
-    case 9:
-    case 11:
-        o->targetState = 1;
-        r = 11;
-        break;
-    case 10:
-    case 12:
-        o->targetState = 2;
-        r = 12;
-        break;
-    case 0:
-        if (o->f2C != 0) {
-            if (o->targetState < 3)
-                o->targetState = 3;
-            else
-                break;
-        } else
-            o->targetState = 2;
-        break;
-    }
-    o->nextPollTime = g_elapsedTime[0] + 0.3f;
-    return r;
-}
-
 // EXACT: i declared before blocks, assigned inside the if(size != 0)
 
 void func_0018D780(void* dst, void* src, u32 count);
@@ -651,31 +338,10 @@ struct Blob_18C638 { s32 w[0x1A00 / 4]; };
 struct Buf_18C638 { u8 bytes[0x50]; };
 struct Ctx_18C638;
 
-extern const char D_0024B3A0[16];
-extern const char D_0024B3B0[24];
-extern const char D_0024B3C8[8];
 
 void func_001A7E90(Ctx_18C638* ctx);
 s32 func_001E1FD0(Buf_18C638* dst, const char* fmt, ...);
 s32 func_0018CFC0(MemoryCard* owner, Buf_18C638* name, u8* state);
-
-s32 func_0018C638(MemoryCard* self)
-{
-    Buf_18C638 buf;
-    s32 n;
-
-    if (self->p4F44 == 0) {
-        return 0x2C;
-    }
-    ApplyPadPatternSetting((Ctx_18C638*)(*(u8**)&g_saveData));
-    *(Blob_18C638*)self->p4F44 = *(Blob_18C638*)(*(u8**)&g_saveData);
-    n = (s32)self->p4F44 - 0x30;
-    n = n - (s32)self;
-    n = n * 0x26FFD927;
-    n = (n >> 2) + 1;
-    FormatToString(&buf, D_0024B3A0, D_0024B3B0, D_0024B3C8, n);
-    return WriteMemoryCardSlotFile(self, &buf, self->p4F44);
-}
 
 struct Src_18CA10 {
     s32 w0;
@@ -747,64 +413,11 @@ struct Obj_18CA10 { u8 pad[1]; };
 struct Owner_18CA10 { u8 pad[1]; };
 struct Buf_18CA10 { char s[0x50]; };
 
-extern const Src_18CA10 D_0024B3D0;
-extern const char D_0024B3E0[8];
-extern const char D_0024B3E8[24];
 
 s32 func_001F5C0C(Cfg_18CA10* dst, s32 value, s32 size);
 void func_001B5C40(Obj_18CA10* p, void* q);
 s32 func_001E1FD0(Buf_18CA10* dst, const char* fmt, ...);
 s32 func_0018D368(Owner_18CA10* a, Buf_18CA10* b, Cfg_18CA10* c, s32 d);
-
-s32 func_0018CA10(Owner_18CA10* owner, void* a1, Obj_18CA10* a2)
-{
-    Cfg_18CA10 c;
-    Buf_18CA10 buf;
-    (void)func_001F5C0C(&c, 0, 0x3C4);
-    c.f000 = ((Src_18CA10*)&D_0024B3D0)->w0;
-    c.f004 = ((Src_18CA10*)&D_0024B3D0)->b4;
-    c.f006 = 0x20;
-    c.f00C = 0x60;
-    c.f010 = 0;
-    c.f014 = 0x87;
-    c.f018 = 0xFF;
-    c.f020 = 0;
-    c.f024 = 0x29;
-    c.f028 = 0x6F;
-    c.f030 = 0;
-    c.f034 = 0x29;
-    c.f038 = 0x6F;
-    c.f040 = 0;
-    c.f044 = 0x87;
-    c.f048 = 0xFF;
-    c.f050 = 0;
-    c.f054 = 0.5f;
-    c.f058 = -0.5f;
-    c.f060 = 0.5f;
-    c.f064 = -0.4f;
-    c.f068 = 0.1f;
-    c.f070 = -0.5f;
-    c.f074 = 0.5f;
-    c.f078 = 0.5f;
-    c.f080 = 0.14f;
-    c.f084 = 0.03f;
-    c.f088 = 0.48f;
-    c.f090 = 0.33f;
-    c.f094 = 0;
-    c.f098 = 0.33f;
-    c.f0A0 = 0.14f;
-    c.f0A4 = 0.14f;
-    c.f0A8 = 0.38f;
-    c.f0B0 = 0.5f;
-    c.f0B4 = 0.5f;
-    c.f0B8 = 0.5f;
-    ConvertStringToCharCodes(a2, (u8*)&c + 0xC0);
-    c.f104 = (*(Name_18CA10*)&D_0024B3D8);
-    c.f144 = (*(Name_18CA10*)&D_0024B3D8);
-    c.f184 = (*(Name_18CA10*)&D_0024B3D8);
-    FormatToString(&buf, D_0024B3E0, a1, D_0024B3E8);
-    return CreateMemoryCardFile(owner, &buf, &c, 0x3C4);
-}
 
 struct Self_18CC20 { u8 pad[16]; };
 struct Key_18CC20 { s32 w0; s32 w4; u8 pad8[0xC]; s32 w14; u8 pad18[4]; s32 w1C; };
@@ -826,7 +439,6 @@ struct Pair_18CC20 : KeyId {
     }
 };
 
-extern const char D_0024B3E0[8];
 void func_0018D608(void);
 u8* func_0018D658(s32 size);
 s32 func_00137290(BufferedStream* o, s32 a, u8* b, s32 c);
@@ -840,47 +452,6 @@ void func_001373D0(BufferedStream* o);
 s32 func_0018D2B0(Self_18CC20* s, s32 a);
 void func_0018D6F0(void);
 void func_001372E0(BufferedStream* o, s32 f);
-
-s32 func_0018CC20(Self_18CC20* self, s32 a1, Key_18CC20* key, s32 a3)
-{
-    char text[0x50];
-    BufferedStream obj;
-    Pair_18CC20 pair;
-    u8 data[0x1000];
-    s32 code;
-    s32 got;
-    s32 status;
-
-    PushBackMemoryMark();
-    code = -1;
-    (void)InitBufferedStream(&obj, 0x8040, AllocateBackMemory(0x8040), 0);
-    FormatToString(text, D_0024B3E0, a1, a3);
-    status = OpenMemoryCardFile(self, text, 0x202, &code);
-    if (status == 0) {
-        if (!pair.Set(key) || !OpenBufferedSectorStreamRange(&obj, &pair)) {
-            status = 0x27;
-        } else {
-            s32 left = obj.f10;
-            while (left > 0) {
-                s32 n = 0x1000;
-                if (left <= 0xFFF) n = left;
-                ReadBufferedStreamBytes(&obj, n, data);
-                status = WriteMemoryCardFile(self, code, data, n, &got);
-                if (status) goto done;
-                left -= got;
-                if (got != n) { status = 7; goto done; }
-            }
-            status = 0;
-        }
-    done:
-        CloseBufferedStream(&obj);
-        s32 r = CloseMemoryCardFile(self, code);
-        if (status == 0) status = r;
-        PopBackMemoryMark();
-    }
-    DestroyBufferedStream(&obj, 2);
-    return status;
-}
 
 struct Key_18F198 {
     u32 w0;
@@ -954,45 +525,12 @@ struct Buf_18C420 {
     u8 raw[0x50];
 };
 
-extern const char D_0024B348[24];
-extern const char D_0024B3A0[16];
-extern const char D_0024B3B0[24];
-extern const char D_0024B3C8[8];
 
 s32 func_00209E48(void* a, void* b, void* c, s32 d, s32 e, void* f);
 s32 func_0018BD00(s32 v, s32 code, s32* out);
 s32 func_0018D168(Self_18C420* a0, s32* a1);
 s32 func_001E1FD0(Buf_18C420* dst, const char* fmt, ...);
 s32 func_0018CDD8(Self_18C420* self, Buf_18C420* buf, u8* a, u8* b);
-
-s32 func_0018C420(Self_18C420* self) {
-    Buf_18C420 buf;
-    s32 r;
-    s32 n;
-    Ent_18C420* e;
-    s32 local50;
-    s32 local54;
-
-    r = FinishMemoryCardCall(func_00209E48(self->f4, self->f8, (void*)D_0024B348, 0, -1, 0), 0xD, &local50);
-    if (local50 <= 0) {
-        GetMemoryCardFreeBytes(self, &local54);
-        if (local54 <= 0xC3FF) {
-            self->f14 = 4;
-        }
-        return 0xE;
-    }
-    n = 0;
-    if (r == 0) {
-        for (; r == 0 && n < 3; n++) {
-            FormatToString(&buf, D_0024B3A0, D_0024B3B0, D_0024B3C8, n + 1);
-            (void)ReadMemoryCardSlotFile(self, &buf, self->ent[n].a, self->ent[n].b);
-        }
-        if (r == 0 && self->f14 < 5) {
-            self->f14 = 5;
-        }
-    }
-    return r;
-}
 
 // EXACT: f04,f08,f10,f0C,f14 store order; func_001F5C0C declared s32, called as (void)
 
@@ -1026,16 +564,6 @@ void func_001300D8(Buffer_18F890*, s32);
 
 void func_001A7E90(GameProgress* ctx);
 
-s32 func_0018C568(MemoryCard* self)
-{
-    if (self->image == 0) {
-        return 0x2C;
-    }
-    *g_saveData = *self->image;
-    ApplyPadPatternSetting(g_saveData);
-    return 0;
-}
-
 s32 func_0020B058(void* a, s32 b, s32 c);
 void func_0018EDA8(s32 a, s32 b, s32 c, s32 d);
 void func_0018EF78(s32 a, s32 b, s32 c);
@@ -1053,40 +581,6 @@ s32 func_0018D268(void* a, void* b, s32 c, s32* h);
 s32 func_0018D2E8(void* a, s32 h, GameProgress* buf, s32 size, s32* got);
 void func_0018D2B0(void* a, s32 h);
 
-s32 func_0018CDD8(void* a0, void* a1, GameProgress* out, Info_18CDD8* info)
-{
-    Info_18CDD8 local;
-    GameProgress buf;
-    s32 handle = -1;
-    s32 got;
-    s32 r;
-    s32 size;
-    if (info == 0) info = &local;
-    func_001F5C0C(info, 0, 0x5C);
-    ResetGameProgress(out);
-    r = CheckMemoryCardFileExists(a0, a1, info);
-    if (r != 0) return r;
-    if ((info->f48 & 0xD4) != 4) return 20;
-    size = info->f44;
-    if (size != 0x1A00) return 28;
-    r = OpenMemoryCardFile(a0, a1, 1, &handle);
-    if (r != 0) return r;
-    r = ReadMemoryCardFile(a0, handle, &buf, 0x1A00, &got);
-    if (r == 0) {
-        r = 8;
-        if (got == size) {
-            if (buf.type != 18 || buf.size != got) r = 28;
-            else if (buf.sum != ChecksumGameProgress(&buf)) r = 27;
-            else {
-                *out = buf;
-                r = 0;
-            }
-        }
-    }
-    CloseMemoryCardFile(a0, handle);
-    return r;
-}
-
 extern u8 D_002D7B40[];
 extern u8 D_0045AAC0[];
 extern u8 D_0042AAC0[];
@@ -1098,9 +592,6 @@ extern u8 D_00148D68[];
 void func_0020ADA0(void);
 
 // Data defined from retail's bytes.
-extern const char D_0024B340[8] = "/";
-extern const char D_0024B360[48] = "/BASCUS-97198YAOTWTD!/BASCUS-97198YAOTWTD!";
-extern const char D_0024B390[16] = "Sly Cooper";
 extern const u32 D_00248470[8] = { 0x80CFADA9, 0x930F4F53, 0x7F1AF6BE, 0x5EAA1EBC, 0xDDC30E98, 0x80DB63DE, 0x7F1AF5F2, 0x930F1BCB };
 extern const Key_18F198 D_00248490 = { 0xEF312076, 0x53B6BFB5, 0x4846D1FF, 0x0EAD57EE, 0x9E3389D7, 0xEF3E4A62, 0x4846D2BB, 0x531DFFB1 };
 extern const u32 D_002484B0[128] = {
@@ -1121,14 +612,6 @@ extern const u32 D_002484B0[128] = {
      0x92E9986B, 0xD7FD98C1, 0x9A3D4AC0, 0x93483E1B, 0x6D268427, 0x92EF8F9B, 0x9A3D49FB, 0xD59D18C5 ,
      0x1B7736BC, 0x08EA9779, 0x9ABAE153, 0x01F1543B, 0x48D846BE, 0x1B72254A, 0x9ABAE26B, 0x0D7F577D 
 };
-extern const char D_0024B348[24] = "/BASCUS-97198YAOTWTD!";
-extern const char D_0024B3A0[16] = "/%s/%s%d";
-extern const char D_0024B3B0[24] = "BASCUS-97198YAOTWTD!";
-extern const char D_0024B3C8[8] = "save";
-extern const Src_18CA10 D_0024B3D0 = { 0x44325350, 0 };
-extern const char D_0024B3D8[8] = "sly.ico";
-extern const char D_0024B3E0[8] = "%s/%s";
-extern const char D_0024B3E8[24] = "icon.sys";
 
 extern s32 D_002699A8;
 ObjectLink D_00269B60[2] = { { 0x20, 0x167, 0x59C }, { 0x20, 0x168, 0x5A0 } };

@@ -255,13 +255,6 @@ void func_0018B2E8(C0C* self)
     }
 }
 
-void func_0018B580(void)
-{
-	func_002093F0();
-	InitBackgroundJob(&g_backgroundJob);
-	InitMemoryCard(&g_memoryCard, 0, 0);
-}
-
 struct Obj_18B720 { void* f0; void* f4; };
 
 
@@ -269,20 +262,6 @@ s32 func_0018B770(void* p);
 void func_001F6A50(void* a, s32 b);
 s32 func_001F6B60(void* a);
 void func_001F6B40(void* a);
-
-void func_0018B720(Obj_18B720* a0)
-{
-    if (IsBackgroundJobRunning(&g_backgroundJob)) {
-        func_001F6A50(a0->f4, 1);
-    }
-    func_001F6B60(a0->f0);
-    func_001F6B40(a0->f0);
-}
-
-s32 func_0018B770(void* p)
-{
-	return *(s32*)((char*)p + 4) != -1;
-}
 
 struct Src_18B780 {
     u8 pad0[1];
@@ -327,106 +306,11 @@ struct Dst_18B780 {
 void* func_001F5C0C(void* p, int c, int n);
 void* func_001E2138(void* dst, void* src);
 
-void func_0018B780(Src_18B780* s, Dst_18B780* d)
-{
-    func_001F5C0C(d, 0, 0x5C);
-    CopyString(d, s->sub20);
-    d->f44 = s->f10;
-    if (s->f14 & 0x1) {
-        *(s32*)((u8*)d + 0x48) |= 0x1;
-    }
-    if (s->f14 & 0x2) {
-        *(s32*)((u8*)d + 0x48) |= 0x2;
-    }
-    if (s->f14 & 0x4) {
-        *(s32*)((u8*)d + 0x48) |= 0x4;
-    }
-    if (s->f14 & 0x8) {
-        *(s32*)((u8*)d + 0x48) |= 0x8;
-    }
-    if (s->f14 & 0x20) {
-        *(s32*)((u8*)d + 0x48) |= 0x10;
-    }
-    if (s->f14 & 0x80) {
-        *(s32*)((u8*)d + 0x48) |= 0x20;
-    }
-    if (s->f14 & 0x800) {
-        *(s32*)((u8*)d + 0x48) |= 0x40;
-    }
-    if (s->f14 & 0x1000) {
-        *(s32*)((u8*)d + 0x48) |= 0x80;
-    }
-    d->f4A = s->b5;
-    d->f4B = s->b4;
-    d->f4C = s->h6;
-    d->f4E = s->b3;
-    d->f4F = s->b2;
-    d->f50 = s->b1;
-    d->f52 = s->bD;
-    d->f53 = s->bC;
-    d->f54 = s->hE;
-    d->f56 = s->bB;
-    d->f57 = s->bA;
-    d->f58 = s->b9;
-}
-
-s32 func_0018B910(s32 value)
-{
-	if (value == 0) return 29;
-	if (value > 0) return 30;
-	return 31;
-}
-
 struct Pair_18BC90 { s32 a; s32 b; };
 
 s32 func_00209B80(void* a0, s32* a1, s32* a2);
 s32 func_0018B930(s32 h);
 s32 func_0018B988(void* a0, s32 b);
-s32 func_0018B930(s32 value)
-{
-    switch (value) {
-    case 0: return 32;
-    case 1: return 33;
-    case -1: return 34;
-    default: return 31;
-    }
-}
-
-s32 func_0018BC90(void* a0, void* a1, s32* a2)
-{
-    Pair_18BC90 t;
-    s32 r = ClassifyMemoryCardSyncResult(func_00209B80(a0, &t.a, &t.b));
-    if (a2) {
-        *a2 = t.b;
-    }
-    if (r == 0x21) {
-        r = MapMemoryCardErrorCode(a1, t.b);
-    }
-    return r;
-}
-
-s32 func_0018BD00(s32 value, void* first, s32 second)
-{
-	s32 result = ClassifyMemoryCardCallResult(value);
-	if (result == 29)
-		result = SyncMemoryCardResult(0, first, (s32*)second);
-	return result;
-}
-
-s32 func_0018BFA8(void* lhs, void* rhs)
-{
-	s32 difference = *(u16*)((char*)lhs + 0x54) - *(u16*)((char*)rhs + 0x54);
-	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x52) - *(u8*)((char*)rhs + 0x52);
-	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x53) - *(u8*)((char*)rhs + 0x53);
-	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x56) - *(u8*)((char*)rhs + 0x56);
-	if (difference) return difference;
-	difference = *(u8*)((char*)lhs + 0x57) - *(u8*)((char*)rhs + 0x57);
-	if (difference) return difference;
-	return *(u8*)((char*)lhs + 0x58) - *(u8*)((char*)rhs + 0x58);
-}
 
 typedef s32 (*VFnI_0018AAE0)(void* self);
 
@@ -473,38 +357,11 @@ void func_0018AC58(C0C* self)
 struct Glob_18BDC8 { u8 pad0[0x25C]; s32 f25C; u8 pad260[8]; s32 f268; };
 
 extern f32 D_00261868[];
-extern Glob_18BDC8 D_0026FF68[];
 
 void func_0018B670(BackgroundJob* p, void* fn, MemoryCard* self);
 void func_0018C028(MemoryCard* self, s32 v);
 s32 func_0018D0A0(MemoryCard* self);
 void func_00194D30(Glob_18BDC8* g, s32 a, s32 b);
-
-void func_0018BDC8(MemoryCard* self)
-{
-    if (IsBackgroundJobRunning(&g_backgroundJob) != 0) return;
-    if (self->state == self->targetState) {
-        if (self->nextPollTime <= g_elapsedTime[0])
-            StartBackgroundJob(&g_backgroundJob, (void*)PollMemoryCard, self);
-    } else {
-        SetMemoryCardState(self, self->targetState);
-    }
-    if (IsBackgroundJobRunning(&g_backgroundJob) != 0) return;
-    if (self->displayMode == 1 && g_elapsedTime[0] - self->stateTime >= 0.3f) {
-        if (self->i4F44 != 0) {
-            if (self->state != 5) SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x15);
-        } else if (g_pauseMenuElement->f25C != 0 && g_pauseMenuElement->f268 == 0x11) {
-            if (self->state != 5) SetPauseMenuLayerPage(g_pauseMenuElement, 1, 0x20);
-        } else {
-            switch (self->state) {
-            case 1: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 3); break;
-            case 2: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 4); break;
-            case 3: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 7); break;
-            case 4: SetPauseMenuLayerPage(g_pauseMenuElement, 1, 10); break;
-            }
-        }
-    }
-}
 
 // Matches US and EU: retail's return-1 block is a shared target that every return-1 path branches to.
 extern f32 D_0026185C;
@@ -569,26 +426,8 @@ second:
 
 s32 func_001E2268(s32 a, s32 b);
 
-void func_0018B5C0(BackgroundJob* self)
-{
-    s32 r = CreateLockSemaphore(1, 1);
-    self->semaphoreId = r; self->thread = -1; self->result = 0x22;
-}
-
 void* func_001F5C0C(void* p, s32 zero, s32 size);
 void func_0018C178(void* self, s32 value);
-
-void func_0018BD58(MemoryCard* self, s32 a, s32 b)
-{
-    func_001F5C0C(self, 0, 0x4F50);
-    self->state = -1;
-    self->targetState = 0;
-    SetMemoryCardDisplayMode(self, 0);
-    self->port = (void*)a;
-    self->slot = (void*)b;
-    self->i4F48 = 0;
-    self->i4F44 = 0;
-}
 
 // NEAR: same callees, args and frame. Retail saves s2,s1,s0 then moves a2->s2, a1->s1 before the jal and fills its delay slot with self->s0; the compiler places move s0 early and fills the delay slot with move s1.
 typedef s32 (*Cb_18A910)(void* self, void* ctx);
@@ -762,143 +601,6 @@ struct Tail_18B988
     }
 };
 
-s32 func_0018B988(s32 a, s32 b)
-{
-    s32 r;
-    switch (a) {
-    case 1:
-        switch (b) {
-        case 0: return 0;
-        case -1: return 9;
-        case -2: return 10;
-        case -5: return 11;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 2:
-        switch (b) {
-        case -2: return 12;
-        case -3: return 1;
-        case -4: return 13;
-        case -5: return 6;
-        case -7: return 25;
-        }
-        if (b >= 0) return 0;
-        return Tail_18B988::Get(b, 11, -9);
-    case 3:
-        switch (b) {
-        case 0: return 0;
-        case -2: return 12;
-        case -4: return 16;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 4:
-        switch (b) {
-        case -2: return 12;
-        case -4: return 16;
-        }
-        if (b >= 0) return 0;
-        return Tail_18B988::Get(b, 11, -9);
-    case 5:
-        switch (b) {
-        case -2: return 12;
-        case -4: return 16;
-        case -5: return 17;
-        }
-        if (b >= 0) return 0;
-        return Tail_18B988::Get(b, 11, -9);
-    case 6:
-        switch (b) {
-        case -2: return 12;
-        case -3: return 1;
-        case -4: return 16;
-        case -5: return 18;
-        case -8: return 26;
-        }
-        if (b >= 0) return 0;
-        return Tail_18B988::Get(b, 11, -9);
-    case 10:
-        switch (b) {
-        case 0: return 0;
-        case -2: return 12;
-        case -4: return 16;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 11:
-        switch (b) {
-        case 0: return 0;
-        case -2: return 12;
-        case -3: return 1;
-        case -4: return 24;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 12:
-        switch (b) {
-        case 0: return 0;
-        case -2: return 12;
-        case -4: return 21;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 13:
-        switch (b) {
-        case -2: return 12;
-        case -4: return 21;
-        }
-        if (b >= 0) return 0;
-        return Tail_18B988::Get(b, 11, -9);
-    case 14:
-        switch (b) {
-        case 0: return 0;
-        case -2: return 12;
-        case -4: return 22;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 15:
-        switch (b) {
-        case 0: return 0;
-        case -2: return 12;
-        case -4: return 14;
-        case -5: return 19;
-        case -6: return 23;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 16:
-        r = 0;
-        if (b != 0) return Tail_18B988::Get(b, 4, 0);
-        break;
-    case 17:
-        r = 0;
-        if (b != 0) return Tail_18B988::Get(b, 5, 0);
-        break;
-    case 18:
-        switch (b) {
-        case -2: return 12;
-        }
-        if (b >= 0) return 0;
-        return Tail_18B988::Get(b, 11, -9);
-    case 19:
-        switch (b) {
-        case 0: return 0;
-        case -2: return 12;
-        case -4: return 22;
-        }
-        return Tail_18B988::Get(b, 11, -9);
-    case 20:
-        switch (b) {
-        case 0: return 0;
-        case -403: return 35;
-        }
-        return 31;
-    case 21:
-        if (b >= 0) return 0;
-        if ((u32)(b + 100) < 100) return 31;
-        return Tail_18B988::Get(b, 30, -99);
-    default:
-        r = 31;
-        break;
-    }
-    return r;
-}
-
 struct __attribute__((aligned(16))) Mat_1897F0 { f32 f[3][4]; };
 
 extern Mat_1897F0 D_002483D0;
@@ -967,20 +669,6 @@ extern u8 D_00275960[];
 s32 func_001F6B60(void* a);
 void func_001F6B40(void* a);
 s32 func_001F6A30();
-
-void func_0018B600()
-{
-    func_001F6B60(g_backgroundJob.semaphore);
-    BackgroundJob* o = &g_backgroundJob;
-    s32 r = o->job(o->arg);
-    o->result = r;
-    *(s32*)D_00275960 = -1;
-    o->thread = -1;
-    o->arg = 0;
-    o->job = 0;
-    func_001F6B40(g_backgroundJob.semaphore);
-    func_001F6A30();
-}
 
 struct Vec3_189230 { f32 x; f32 y; f32 z; };
 
