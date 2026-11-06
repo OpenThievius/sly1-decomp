@@ -73,19 +73,7 @@ void func_00140750(void* self)
 
 void func_001409D8(void) {}
 
-s32 func_00141008(u8* bits, s32 index)
-{
-    s32 mask = 1 << (index & 7);
-    bits += index / 8;
-    return (bits[0xC] & mask) != 0;
-}
 
-void func_001419C0(FlaggedObject* obj, void* item)
-{
-    s32 n = obj->nIdsA;
-    obj->idsA[n] = (s32)item;
-    obj->nIdsA = n + 1;
-}
 
 extern s32 D_002613EC;
 
@@ -137,88 +125,8 @@ void func_001406B0(TriggerZone* list, s32 value)
     list->idsIn[list->countIdsIn++] = value;
 }
 
-void func_001BA130(Collider* self);
-void* func_00183058(void* item, void* x, FlaggedObject* self);
 
-void func_001415D0(FlaggedObject* self)
-{
-    s32 keepB = self->flagIndex;
-    s32 keepA = self->ordinal;
-    CopyCollider(self);
-    self->flagIndex = keepB;
-    self->ordinal = keepA;
-    for (s32 i = 0; i < self->countA; i++) {
-        self->objsA[i] = CreateObjectCopy(self->objsA[i], self->world, self);
-    }
-    for (s32 j = 0; j < self->countB; j++) {
-        self->objsB[j] = CreateObjectCopy(self->objsB[j], self->world, self);
-    }
-}
 
-extern u8 D_00262C70[];
-
-void func_00141870(FlaggedObject* self);
-s32 func_001925F0(void* self, ObjectEvent* ev);
-s32 func_001BC320(void* self, ObjectEvent* ev);
-void func_0016EC38(void* p, f32 f, s32 n);
-
-s32 func_001417F0(FlaggedObject* self, ObjectEvent* ev)
-{
-    s32 r = GetActiveSwitchedCollider(self, ev);
-    if (ev->type == r) {
-        if ((ev->extraFlags & 0x10) == 0) {
-            StartPadRecordPattern(g_padRecord, 0.2f, 2);
-        }
-        RaiseObjectFlag(self);
-        return 1;
-    }
-    return HandleObjectEvent(self, ev);
-}
-
-extern u8 D_00261EF0[];
-extern u8 D_00261420[];
-
-void func_00151ED8(void* table, FlaggedObject* self);
-s32 func_00141008(void* table, s32 v);
-void func_00141040(void* table, s32 v);
-s32 func_00182F40(s32 v, FlaggedObject* self);
-void func_00140E10(void* table, s32 a, s32 idx);
-void func_0012C7B0(void* p, s32 a, s32 b, s32 c, f32 x, f32 y);
-void func_001B64D8(void* p, s32 n);
-
-void func_00141870(FlaggedObject* self)
-{
-    func_00151ED8(D_00261EF0, self);
-    s32 sel;
-    if (self->handle != 0) {
-        sel = TestFlagTableBit(g_flagTable, self->flagIndex) ? 0x549 : 0x548;
-    }
-    s32 idx = -1;
-    SetFlagTableBit(g_flagTable, self->flagIndex);
-    if (IsObjectDescendantOf((s32)self->child, self)) {
-        for (BaseObject* n = self; n != 0; n = n->parent) {
-            Alias01* sl = n->alias;
-            if (sl != 0) {
-                idx = sl->id;
-            }
-        }
-        if (idx == -1) {
-            idx = self->id;
-        }
-    }
-    SaveFlagTableSnapshot(g_flagTable, self->childId, idx);
-    for (s32 i = 0; i < self->countA; i++) {
-        CreateAnimationPlayerWithoutPresetTargets(self->objsA[i], 0, 0, 0, 0.0f, 1.0f);
-    }
-    if (self->handle != 0) {
-        SetStateWalkerTarget(self->handle, sel);
-    }
-}
-
-void func_001419A0(FlaggedObject* q, s32 value)
-{
-    q->idsB[q->nIdsB++] = value;
-}
 
 void func_001406D0(TriggerZone* self, s32 value)
 {
@@ -234,10 +142,6 @@ void func_001406F0(TriggerZone* self, s32 value)
     self->countKindsIn = n + 1;
 }
 
-void func_001419E0(FlaggedObject* self, s32 value)
-{
-    self->childId = value;
-}
 
 void func_00124A48(void* self);
 void func_0013EA38(void* p);
@@ -274,42 +178,6 @@ void func_00140200(ZoneCollider* self)
     self->zone.owner = self;
 }
 
-extern u8 D_00275B04[];
-extern u8 D_00275F80[];
-
-void func_001EFFA0(void* dst, void* args, s32 count);
-
-struct Args_140ED0 {
-    s32 kind;
-    void* text;
-    s32 x;
-    s32 y;
-    s32 z;
-};
-
-struct Ring_140ED0 {
-    u8 pad0[0x424];
-    s32 field424;
-    s32 field428;
-    s32 field42C;
-};
-
-void func_00140ED0(Ring_140ED0* r)
-{
-    Args_140ED0 args;
-    args.kind = 1;
-    args.text = D_00275B04;
-    if (r->field42C != 0) {
-        args.x = r->field424;
-        args.y = r->field428;
-        args.z = 0x11;
-    } else {
-        args.x = -1;
-        args.y = -1;
-        args.z = 0x10;
-    }
-    StartScreenFade(g_screenFade, &args, 1);
-}
 
 typedef signed int s32;
 typedef unsigned char u8;
@@ -331,14 +199,6 @@ void func_001405D0(void* a, void* b, s32 c)
     AppendToObjectQueue((u8*)a + 0x8, c);
 }
 
-struct Ctr_140FF8 { u8 pad0[4]; s32 count; };
-
-s32 func_00140FF8(void* p)
-{
-    Ctr_140FF8* c = (Ctr_140FF8*)p;
-    c->count = c->count + 1;
-    return c->count;
-}
 
 
 // Newly matched US functions from the small-function wave.
@@ -376,15 +236,6 @@ void func_001405F0(u8* self, s32 value)
     func_001405D0(self + 0x554, self, value);
 }
 
-struct __attribute__((aligned(16))) Quad_00141170 { f32 v[4]; };
-void func_001F3B48(void* self, void* value, void* out);
-s32 func_001E4DC0(void* self, void* value);
-s32 func_00141170(ObjectGatherer* self, void* value)
-{
-    Quad_00141170 local;
-    func_001F3B48(self, value, &local);
-    return func_001E4DC0(self->f8C, &local);
-}
 
 
 void func_001BAC30(void* self);
@@ -411,197 +262,18 @@ s32 func_00140028(TriggerZone* a0, void* a1)
     return r;
 }
 
-void func_00137EB0(void* a, void* b);
-void func_00137E70(void* a, void* b);
-s32 func_001E4C48(void*, void*, void*, void*, void*);
-void func_0011EC40(void* a, void* b);
-
-void func_00141108(void* a0, void* a1)
-{
-    ReadBufferedRotation3(a1, (u8*)a0 + 0x50);
-    ReadBufferedVector3(a1, (u8*)a0 + 0x40);
-    ReadMeshTables(a1, (u8*)a0 + 0x80, (u8*)a0 + 0x84, (u8*)a0 + 0x88, (u8*)a0 + 0x8C);
-    ReadPropertyRecords(a0, a1);
-}
-
-extern u8 D_00261420[];
-s32 func_00140FF8(void* p);
-void func_001B7968(Collider* self);
-void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
-
-void func_001411A8(FlaggedObject* self)
-{
-    InitCollider(self);
-    self->flagIndex = TakeFlagTableIndex(g_flagTable);
-    self->childId = -1;
-    World* in = self->world;
-    s32 n = in->count2304;
-    self->ordinal = n;
-    n = n + 1;
-    in->count2304 = n;
-    SetColliderAnchors(self, 3, 0, 3, 0);
-}
 
 
-void func_001249A8(void* self);
-void* func_0015A448(void* host, s32 id, void* ctx);
 
-void func_00141338(FlaggedObject* self)
-{
-    PostLoadPlacedObject(self);
-    s32 i = 0;
-    while (i < self->nIdsA) {
-        void* r = func_0015A448(self->world, self->idsA[i], self);
-        if (r != 0) {
-            s32 k = self->countA;
-            self->objsA[k] = r;
-            self->countA = k + 1;
-        }
-        i++;
-    }
-    i = 0;
-    while (i < self->nIdsB) {
-        void* r = func_0015A448(self->world, self->idsB[i], self);
-        if (r != 0) {
-            s32 k = self->countB;
-            self->objsB[k] = r;
-            self->countB = k + 1;
-        }
-        i++;
-    }
-}
 
-struct BitSet_141040 {
-    u8 pad0[8];
-    s32 count;
-    u8 bits[0x20C - 0xC];
-    s32 flag;
-};
 
-void func_00141040(BitSet_141040* self, s32 bit)
-{
-    u8* base = self->bits;
-    u8* byte = base + bit / 8;
-    s32 mask = 1 << (bit & 7);
-    s32 cur = *byte & mask;
-    if (cur == 0) {
-        self->flag = 1;
-        goto done;
-    }
-done:
-    if (!(*byte & mask)) {
-        *byte = (u8)(*byte | mask);
-        self->count++;
-    }
-}
 
-void func_001410A0(BitSet_141040* self, s32 bit)
-{
-    u8* base = self->bits;
-    u8* byte = base + bit / 8;
-    s32 mask = 1 << (bit & 7);
-    s32 cur = *byte & mask;
-    if (cur != 0) {
-        self->flag = 1;
-        goto done;
-    }
-done:
-    if ((*byte & mask) != 0) {
-        *byte = (u8)(*byte & ~mask);
-        self->count--;
-    }
-}
-
-struct Blk_140F48 { s32 b[0x81]; };
-
-void func_00140F48(u8* p)
-{
-    *(s32*)(p + 4) = 0;
-    *(Blk_140F48*)(p + 8) = *(Blk_140F48*)(p + 0x220);
-    *(s32*)(p + 0x20C) = 0;
-}
-
-struct Blk_140E10 { u8 b[0x200]; s32 tail; };
-
-struct Ring_140E10 {
-    u8 pad0[8];
-    Blk_140E10 src;
-    s32 tail1;
-    u8 pad1[0x10];
-    Blk_140E10 dst;
-    s32 field424;
-    s32 field428;
-    s32 field42C;
-};
-
-void func_00140E10(Ring_140E10* r, s32 a, s32 b)
-{
-    r->tail1 = 0;
-    r->dst = r->src;
-    r->field424 = a;
-    r->field428 = b;
-    r->field42C = 1;
-}
-
-struct Frame_141210;
-
-struct Frame_141210 {
-    void* list;
-    void* cursor;
-    s32 next_off;
-    Frame_141210* prev;
-    Frame_141210(List01* l)
-    {
-        list = l;
-        cursor = l;
-        next_off = l->offset;
-        prev = (Frame_141210*)D_0027B314;
-        D_0027B314 = (ListFrame*)this;
-    }
-    ~Frame_141210() { D_0027B314 = (ListFrame*)prev; }
-};
-
-extern u32 D_00261410[4];
-void func_001BAC30(Collider* self);
-void func_00124DF8(void* self, s32 a, void* b);
-s32 func_001300E8(void* node, s32 kind);
-void func_00182ED8(void* node);
-
-void func_00141210(FlaggedObject* self)
-{
-    LoadCollider(self);
-    ResolveObjectLinks(self, 1, g_flaggedObjectLinks);
-
-    Frame_141210 frame(&self->children);
-    void* head = *(void**)((u8*)self + 0x34);
-    frame.cursor = (void*)((s32)head + frame.next_off);
-    void* node = head;
-    if (node != 0) {
-        do {
-            if (IsObjectOfKind(node, 0x7B)) {
-                s32 n = self->countB;
-                self->objsB[n] = node;
-                self->countB = n + 1;
-            } else {
-                if (!IsObjectOfKind(node, 0x83)) {
-                    goto skip;
-                }
-                s32 n = self->countA;
-                self->objsA[n] = node;
-                self->countA = n + 1;
-            }
-            func_00182ED8(node);
-skip:
-            void* next = *(void**)frame.cursor;
-            frame.cursor = (void*)((s32)next + frame.next_off);
-            node = next;
-        } while (node != 0);
-    }
-}
 
 
 
 void func_0013E918(Zone28* p);
+void func_001B7968(Collider* self);
+void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001400A8(ZoneCollider* self)
 {
@@ -791,69 +463,8 @@ extern const Fn_Table D_002173C8[6] = { (Fn_Table)func_0014A8D0, 0, 0, 0, (Fn_Ta
 extern const Fn_Table D_002173E0[6] = { (Fn_Table)func_0014AA90, (Fn_Table)func_0014AA98, 0, 0, (Fn_Table)func_0014AAA0, 0 };
 extern const Fn_Table D_002173F8[6] = { (Fn_Table)func_001E2E68, (Fn_Table)func_001E30A0, (Fn_Table)func_001E30D8, (Fn_Table)func_001E30E0, (Fn_Table)func_001E31F0, 0 };
 
-struct List_141438 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_141438 { List_141438* list; u8* link; s32 offset; Iter_141438* saved; };
-struct Next_141438 {
-    static u8* Of(Iter_141438* it)
-    {
-        u8* obj = *(u8**)it->link;
-        it->link = obj + it->offset;
-        return obj;
-    }
-};
-struct Begin_141438 {
-    static void Of(Iter_141438* it, List_141438* list)
-    {
-        it->list = list;
-        it->link = (u8*)list;
-        it->offset = list->offset;
-        it->saved = (Iter_141438*)((void*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
-    }
-};
-
-extern u8 D_00261420[];
-void func_00124A48(FlaggedObject* self);
-void func_00182ED8(s32 a);
-s32 func_001300E8(u8* node, s32 kind);
-s32 func_00183438(u8* node);
-
-s32 func_00141008(u8* t, s32 v);
-void* func_001B6290(void* a, void* b, s32 c, s32 d);
-
-void func_00141438(FlaggedObject* self)
-{
-    StartPlacedObject(self);
-    for (s32 i = 0; i < self->countA; i++)
-        func_00182ED8((s32)self->objsA[i]);
-    for (s32 i = 0; i < self->countB; i++)
-        func_00182ED8((s32)self->objsB[i]);
-    if (self->childId == -1) {
-        Iter_141438 it;
-        u8* obj;
-        Begin_141438::Of(&it, (List_141438*)&self->children);
-        while ((obj = Next_141438::Of(&it)) != 0) {
-            if (IsObjectOfKind(obj, 0x74) != 0) {
-                self->childId = GetAliasId(obj);
-                if (self->childId == -1)
-                    self->childId = *(s32*)(obj + 8);
-                self->child = obj;
-            }
-        }
-        g_activeListFrames = (ListFrame*)it.saved;
-    } else {
-        self->child = func_0015A448(self->world, self->childId, self);
-    }
-    if (self->f5A8 != 0) {
-        self->handle = (StateWalker*)CreateStateWalker(self->f5A8, self, 0x546, 0);
-
-        if (TestFlagTableBit(g_flagTable, self->flagIndex) != 0)
-            SetStateWalkerTarget(self->handle, 0x547);
-    }
-}
 
 
-u32 D_00261410[4] = { 2, 0x545, 0x5A8, 0 };
 s32 D_002613F8[6] = { 0, 0, 0, 0, 0, 0 };
 extern const u32 D_00247AA0 = 0x17F;
 extern const u32 D_00247AA4 = 0x14E0EF;

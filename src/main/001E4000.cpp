@@ -3905,8 +3905,6 @@ extern const f32 D_00249D6C = 3.4028235e+38f;
 extern const f32 D_00249D70 = -3.4028235e+38f;
 extern const f32 D_00249DD0[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const char D_00249E18[8] = ";1";
-extern const f32 D_00249E3C = 3.4028235e+38f;
-extern const f32 D_00249E40 = 3.4028235e+38f;
 extern const f32 D_00249E4C = 3.4028235e+38f;
 extern const f32 D_00249E90[4] = {3.4028235e+38f, 0.0f, 0.0f, 0.0f};
 extern const f32 D_00249EA0[4] = {1.0f, 4.0f, 0.0f, 0.0f};
@@ -4940,10 +4938,6 @@ Obj_26EC70 D_0026EC70 = {0};
 // Globals typed by worker dz201, from retail's bytes and their readers.
 struct Obj_2639B8 { s32 f0; u8 pad04[4]; };
 
-// 528 bytes, only its address is passed
-u8 D_00261420[528] = {0};
-// 544 bytes, only its address is passed
-u8 D_00261630[544] = {0};
 // 16 bytes, a pointer word read whole, rest padding
 // 16 bytes, address passed (byte array in readers)
 u8 D_002624F0[16] = {0};
