@@ -139,6 +139,21 @@ class VersionsTest(unittest.TestCase):
                 self.assertIn("sha1: %s" % v["boot"]["sha1"], text, path)
                 self.assertIn("baserom/%s/%s" % (key, v["boot"]["name"]), text, path)
 
+    def test_sources_take_c_files(self):
+        found = versions.sources()
+        self.assertIn(versions.ROOT / "src" / "lib" / "throw.c", found)
+        self.assertTrue(all(p.suffix in (".cpp", ".c") for p in found))
+
+    def test_static_inline_helpers_are_not_functions(self):
+        text = "static inline u64 divide(u64 n)\n{\n    return n;\n}\n\nu64 func_001FBE00(u64 n)\n{\n    return divide(n);\n}\n"
+        self.assertEqual([m.group(1) for m in todo.definitions(text)], ["func_001FBE00"])
+
+    def test_c_units_get_the_c_predefines(self):
+        for cxx in ("-lang-c++", "-D__cplusplus", "-D__GNUG__=2"):
+            self.assertIn(cxx, compile.CPP_DEFINES)
+            self.assertNotIn(cxx, compile.C_DEFINES)
+        self.assertIn("-D__GNUC__=2", compile.C_DEFINES)
+
 
 if __name__ == "__main__":
     unittest.main()

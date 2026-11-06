@@ -20,13 +20,17 @@ splits are taken from other projects or from the prototype
 
 ## Next
 
-Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-05: the
-matching is in its long tail, the data mostly from C, the original assembly classified, 18
+Where each stands is in the README's table (`tools/progress.py`); in short, on 2026-11-06: the
+matching is in its long tail, the data mostly from C (88.7%), the original assembly classified, 18
 source files proved, PAL close behind US, and names and types under way.
 
-1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). About a hundred
-   US functions are left, many of them near misses in `nonmatching/`; the largest,
-   func_00109488 (37 KB, the property registry fill), differs only in register allocation.
+1. **Matching**, function by function ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md)). On 2026-11-06,
+   82 US functions are left (about 84 KB: 53 in game code, 29 in the libraries), 36 of them with
+   a near miss in `nonmatching/`. The largest, func_00109488 (37 KB, the property registry fill,
+   44% of what is left), is close but differs in code as well as registers: 9,336 instructions
+   against retail's 9,348. The toolchain's own runtime (`libgcc`) is C, built by `cc1` in `.c`
+   files under `src/lib/` (docs/TOOLCHAIN.md); its 64-bit remainders and unsigned divide are
+   near misses whose frames retail makes larger.
 2. **Data from C.** A C file's `.rodata` literals (float constants, strings) are linked now: the
    code takes retail's address for them and retail's bytes stay in the image (tools/rodata.py),
    which opens the functions tagged `rodata`. A C `switch` is linked too: its jump table goes with the
@@ -41,7 +45,8 @@ source files proved, PAL close behind US, and names and types under way.
    instructions, kernel and system instructions, code scheduled by hand, the disassembler's own
    mark, the toolchain's own `.S` routines) and the linker's leftovers, in game code and in Sony's
    libraries, are listed in `config/us/original_asm.tsv` and counted as finished, apart from the
-   exact C matches (docs/ASM_CLASSIFICATION.md; #18).
+   exact C matches (docs/ASM_CLASSIFICATION.md; #18). PAL's own functions are classified in
+   `config/eu/original_asm.tsv`.
 4. **File boundaries, found in retail.** Where one source file ends and the next begins, from
    retail's own code: which functions share static data, how `.rodata` and `.data` group, and
    compiler-generated functions (static initialisers) that end a file. The 16 KiB windows of
@@ -57,7 +62,10 @@ source files proved, PAL close behind US, and names and types under way.
    (`D_0027B130`) gives the exact end of every file with a static initialiser.
 5. **PAL's own code.** Its version-specific functions (`config/eu/map.tsv` rows with no
    counterpart, `differs` rows of `config/eu/c_status.tsv`) as version-specific C, in
-   `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)).
+   `src/versions/eu/` ([VERSIONS.md](VERSIONS.md#pals-own-c)). On 2026-11-06, 98 PAL functions
+   are left: one C function differs at its counterpart, 11 functions only PAL has are not
+   defined yet (`tools/version_src.py todo`), 10 have a near miss in `nonmatching/eu/`, and the
+   rest are the ones US has left too.
 6. **Names and types.** Ours, from what the code does, as the C is cleaned up. Types come
    first, one per object, so that each name is chosen once: a header per class family of
    retail's class descriptors (`include/cNN.h`, `config/us/classes.tsv`), per kind of the other
@@ -69,7 +77,7 @@ source files proved, PAL close behind US, and names and types under way.
    its built-ins, and the views kept for a stated reason. The names come after: a family's
    types, fields and header are renamed in place, and its functions and globals get readable
    names as macros over their address names (`config/names.tsv`, `include/names.h`,
-   [NAMING.md](NAMING.md)). On 2026-11-05 about 2,480 symbols have one, and about a hundred
+   [NAMING.md](NAMING.md)). On 2026-11-06, 2,484 symbols have one, and about a hundred
    types are named, from the base classes (`BaseObject`, `PlacedObject`, `Collider`) to the
    leaf families, shared records and global types; the types whose role the code does not show
    keep their ids. Function bodies use the readable names; declarations and definitions

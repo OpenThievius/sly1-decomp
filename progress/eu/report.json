@@ -1,15 +1,15 @@
 {
  "measures": {
-  "fuzzy_match_percent": 91.9863249025636,
+  "fuzzy_match_percent": 92.23076592714011,
   "total_code": "1117652",
-  "matched_code": "1025144",
-  "matched_code_percent": 91.7230050140831,
+  "matched_code": "1027876",
+  "matched_code_percent": 91.96744603865962,
   "total_data": "464563",
   "matched_data": "0",
   "matched_data_percent": 0.0,
   "total_functions": 4831,
-  "matched_functions": 4730,
-  "matched_functions_percent": 97.9093355412958,
+  "matched_functions": 4733,
+  "matched_functions_percent": 97.97143448561374,
   "complete_code": "0",
   "complete_code_percent": 0.0,
   "complete_data": "0",
@@ -41345,16 +41345,16 @@
   {
    "name": "lib/001FC000",
    "measures": {
-    "fuzzy_match_percent": 54.54545454545455,
+    "fuzzy_match_percent": 71.41798418972331,
     "total_code": "16192",
-    "matched_code": "8832",
-    "matched_code_percent": 54.54545454545455,
+    "matched_code": "11564",
+    "matched_code_percent": 71.41798418972331,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 70,
-    "matched_functions": 63,
-    "matched_functions_percent": 90.0,
+    "matched_functions": 66,
+    "matched_functions_percent": 94.28571428571429,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",
@@ -41375,7 +41375,7 @@
     {
      "name": "func_001FC1F8",
      "size": "1772",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "32",
      "metadata": {
       "virtual_address": "2081272"
@@ -41834,7 +41834,7 @@
     {
      "name": "func_001FF888",
      "size": "476",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14000",
      "metadata": {
       "virtual_address": "2095240"
@@ -41843,7 +41843,7 @@
     {
      "name": "func_001FFA68",
      "size": "484",
-     "fuzzy_match_percent": 0.0,
+     "fuzzy_match_percent": 100.0,
      "address": "14480",
      "metadata": {
       "virtual_address": "2095720"
@@ -45760,16 +45760,16 @@
    "id": "lib",
    "name": "Libraries",
    "measures": {
-    "fuzzy_match_percent": 84.73715134966993,
+    "fuzzy_match_percent": 87.09777762416617,
     "total_code": "115732",
-    "matched_code": "98068",
-    "matched_code_percent": 84.73715134966993,
+    "matched_code": "100800",
+    "matched_code_percent": 87.09777762416617,
     "total_data": "0",
     "matched_data": "0",
     "matched_data_percent": 100.0,
     "total_functions": 635,
-    "matched_functions": 597,
-    "matched_functions_percent": 94.01574803149606,
+    "matched_functions": 600,
+    "matched_functions_percent": 94.48818897637796,
     "complete_code": "0",
     "complete_code_percent": 0.0,
     "complete_data": "0",

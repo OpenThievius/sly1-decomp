@@ -54,8 +54,8 @@ UNIT = re.compile(r"--unit (\S+\.cpp)")
 
 def staged():
     """{(version, function): file} of every staged near miss."""
-    out = {("us", p.stem): p for p in sorted(DIR.glob("func_*.cpp"))}
-    out.update({("eu", p.stem): p for p in sorted((DIR / "eu").glob("func_*.cpp"))})
+    out = {("us", p.stem): p for p in sorted(DIR.glob("func_*.c*"))}
+    out.update({("eu", p.stem): p for p in sorted((DIR / "eu").glob("func_*.c*"))})
     return out
 
 

@@ -77,7 +77,9 @@ def definitions(text):
         # A class's own constructor or method (`Node::Node()`) is named by the compiler: a whole
         # file's takes retail's name from config/us/generated.tsv.
         member = text[:m.start(1)].endswith("::") and not m.group(1).startswith("func_")
-        if brace >= 0 and (semi < 0 or brace < semi) and not member:
+        # A C file's static inline helper (src/lib/divide.c) is compiled into its callers only.
+        helper = m.group(0).startswith("static inline ") and not m.group(1).startswith("func_")
+        if brace >= 0 and (semi < 0 or brace < semi) and not member and not helper:
             yield m
 
 

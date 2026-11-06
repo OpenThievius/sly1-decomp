@@ -79,7 +79,7 @@ def near_misses():
     import classify_asm
     import version_check
     done = set(version_check.defined_in_src()) | set(classify_asm.read_table())
-    for path in sorted((ROOT / "nonmatching").glob("func_*.cpp")):
+    for path in sorted((ROOT / "nonmatching").glob("func_*.c*")):
         if path.stem not in done:
             yield path, path.stem
 
