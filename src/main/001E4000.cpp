@@ -3971,7 +3971,6 @@ extern const f32 D_0024AFA0 = 3.40282347e+38f;
 extern const f32 D_0024B164 = 3.40282347e+38f;
 extern const f32 D_0024B16C = 3.40282347e+38f;
 extern const f32 D_0024B258 = -3.40282347e+38f;
-extern const f32 D_0024B64C = 3.40282347e+38f;
 extern const f32 D_0024C930 = 3.40282347e+38f;
 extern const f32 D_0024C9B0 = 3.40282347e+38f;
 extern const f32 D_0024C9B4 = 3.40282347e+38f;
@@ -4098,8 +4097,6 @@ f32 D_00264A00[4] = { 0.0f, 0.00125f, 0.0f, 0.0f };
 f32 D_00264A10[4] = { 0.0f, 0.0004f, 0.0f, 0.0f };
 f32 D_00264A20[5] = { 1.3f, -0.2546479f, 0.0f, 0.0f, 0.1f };
 f32 D_00264A38 = 20.0f;
-f32 D_00269B50[4] = { 2.0f, 0.0f, 0.1f, 0.0f };
-f32 D_00269B78[11] = { 0.0f, 0.5f, -0.5f, 1.0f, -1.0f, 1.5f, -1.5f, 2.0f, -2.0f, 2.5f, -2.5f };
 f32 D_0026A910 = 100.0f;
 f32 D_0026A968 = 300.0f;
 Rec_26A970 D_0026A970 = { { 0.85f, 0.75f, 100.0f, 0.0f, 1.0f, -3.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 0.0f, 1.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.2f, 0.25f, 0.0f }, func_00199850, { 0.0f, 0.0f, 0.0f } };
@@ -4904,7 +4901,6 @@ s32 D_002649A8 = 0;
 BackgroundJob D_00269990 = {0};
 // size: s32, word load/store only
 // size: s32 counter, word load/store only
-s32 D_00269C90 = 0;
 Obj_262C70 D_00262C70 = {};
 extern const LevelEntry D_00248748[33] = {
     { 0x00000100, 77.0f, { 0xB4D572D8, 0xF825BBFB, 0xD81D7156, 0x397F5178, 0x728793AF, 0xB4DDCF33, 0xD81D73EC, 0xF8032CCB }, D_0024DCB0 },
@@ -4970,7 +4966,6 @@ u8 D_002625F0[208] = {0};
 // 8 bytes, one word read whole
 Obj_2639B8 D_002639B8 = {0};
 // 24 bytes, byte array in readers
-u8 D_00269BA8[24] = {0};
 // 24 bytes, byte array in readers
 
 // Globals typed by worker dz202, from retail's bytes and their readers.

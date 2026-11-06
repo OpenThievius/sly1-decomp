@@ -2063,7 +2063,7 @@ func_00191E70	func_001929F8	match
 func_00191EB0	func_00192A38	match	
 func_00191EC0	func_00192A48	match	
 func_00191EE8	func_00192A70	match	
-func_00191F08	func_00192A90	match	
+func_00191F08	func_00192A90	match	rodata
 func_00191F68	func_00192AF0	match	
 func_00191FA0	func_00192B28	match	
 func_00191FD8	func_00192B60	match	

@@ -63,6 +63,12 @@ extern List01 D_002626E8;
 extern List01 D_002626F8;
 extern List01 D_00262708;       // its head is the first object of class 0x46 (Node_150298, Iter_16A820)
 extern List01 D_00264088;
-extern List01 D_00269BA8;       // func_00152438(D_00269BA8, 0x38) sets it up (00190000.cpp)
+// A list head (func_00152438(D_00269BA8, 0x38) sets it up, file_18F988.cpp defines it): its
+// label runs 0x18 bytes, to D_00269BC0, of which the list functions use the first 0xC.
+struct List_269BA8 {
+    List01 list;            // 0x00
+    u8 pad0C[0x18 - 0xC];
+};
+extern List_269BA8 D_00269BA8;
 
 #endif
