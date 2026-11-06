@@ -117,12 +117,13 @@ s32 func_002040E8(void* arg)
     return func_00204228(arg);
 }
 
-struct Slot_204228 { s32 a; s32 b; s32 c; u8 pad[0x10]; };
-struct Table_204228 { u8 pad[0x10]; Slot_204228 lo[4]; Slot_204228 hi[4]; };
+// The pad library's state of each port's 4 slots: the slot's buffer, whether it is open, and two
+// more words the setup clears.
+struct Slot_2044B0 { u8* buffer; u8 pad[0x0C]; s32 open; s32 f14; s32 f18; };
 struct Ctx_204228 { s32 kind; u8 pad[8]; s32 result; s32 f10; };
 struct Lock_204228;
 
-extern Table_204228 D_0062AAD0;
+extern Slot_2044B0 D_0062AAD0[][4];
 
 s32 func_001F8290(Lock_204228* l, s32 a, s32 b, Ctx_204228* c, s32 d, Ctx_204228* e, s32 f, s32 g, s32 h);
 
@@ -131,12 +132,12 @@ s32 func_00204228(void)
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        D_0062AAD0.lo[i].a = 0;
-        D_0062AAD0.lo[i].c = 0;
-        D_0062AAD0.lo[i].b = 0;
-        D_0062AAD0.hi[i].a = 0;
-        D_0062AAD0.hi[i].c = 0;
-        D_0062AAD0.hi[i].b = 0;
+        D_0062AAD0[0][i].open = 0;
+        D_0062AAD0[0][i].f18 = 0;
+        D_0062AAD0[0][i].f14 = 0;
+        D_0062AAD0[1][i].open = 0;
+        D_0062AAD0[1][i].f18 = 0;
+        D_0062AAD0[1][i].f14 = 0;
     }
     (*(Ctx_204228*)&D_0062ACC0).kind = 0x10;
     (*(Ctx_204228*)&D_0062ACC0).f10 = 0;
@@ -173,3 +174,72 @@ s32 func_00204C38(Owner_204C38* owner, s32 channel, s32 data)
 
 extern const char D_0024F780[40] = "libpad: Module version mismatch ";
 extern const char D_0024F7A8[40] = "[libpad.a = %d.%d, padman.irx = %d.%d]\n";
+
+// The two frames of a pad slot's buffer, the newer of which the readers below take. The second
+// multiply of each slot's index is mult1, which the compiler issues to the EE's second pipeline.
+struct Frame_2044B0 { u8 head[0x58]; s32 count; u8 pad5C[4]; s32 size; u8 pad64[0x0C]; u8 state; u8 mode; u8 pad72[0x0E]; };
+void func_00204EC8(Frame_2044B0* a, Frame_2044B0* b);
+void* func_001F5A58(void* dst, const void* src, s32 n);
+
+Frame_2044B0* func_002044B0(s32 port, s32 slot)
+{
+    Frame_2044B0* frames = (Frame_2044B0*)D_0062AAD0[port][slot].buffer;
+    s32 newer;
+    func_00204EC8(frames, frames + 2);
+    newer = frames[0].count < frames[1].count;
+    return &frames[newer];
+}
+
+s32 func_00204510(s32 port, s32 slot, u8* data)
+{
+    Frame_2044B0* frame;
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    frame = func_002044B0(port, slot);
+    func_001F5A58(data, frame, frame->size);
+    return frame->size;
+}
+
+s32 func_00204590(s32 port, s32 slot)
+{
+    Frame_2044B0* frame;
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0x63;
+    frame = func_002044B0(port, slot);
+    if (frame->state == 6) {
+        if (frame->mode == 2)
+            return 5;
+    }
+    return frame->state;
+}
+
+s32 func_00204610(s32 port, s32 slot, s32 value)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    func_002044B0(port, slot)->mode = value;
+    return 1;
+}
+
+u32 func_00204678(s32 port, s32 slot)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    return func_002044B0(port, slot)->mode;
+}
+
+s32 func_00204B80(s32 port, s32 slot);
+
+s32 func_00204CE8(s32 port, s32 slot)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    return func_00204B80(port, slot) == 0x3FFFF;
+}
+
+s32 func_00204D48(s32 port, s32 slot)
+{
+    if (D_0062AAD0[port][slot].open == 0)
+        return 0;
+    return func_00204C38((Owner_204C38*)port, slot, 0xFFF);
+}

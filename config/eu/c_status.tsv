@@ -3670,9 +3670,16 @@ func_00203E28	func_00205168	match
 func_00203EE0	func_00205220	match	
 func_002040E8	func_00205428	match	
 func_00204228	func_00205568	match	
+func_002044B0	func_002057F0	match	
+func_00204510	func_00205850	match	
+func_00204590	func_002058D0	match	
+func_00204610	func_00205950	match	
+func_00204678	func_002059B8	match	
 func_00204930	func_00205C70	match	
 func_00204AA8	func_00205DE8	match	
 func_00204C38	func_00205F78	match	
+func_00204CE8	func_00206028	match	
+func_00204D48	func_00206088	match	
 func_00204DB8	func_002060F8	match	
 func_00204F68	func_002062A8	match	
 func_00205210	func_00206550	match	

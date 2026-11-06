@@ -854,20 +854,13 @@ func_00203008	00203008	4	remnant	stripped-function leftover
 func_002030B8	002030B8	4	remnant	stripped-function leftover
 func_00203FD0	00203FD0	276	handwritten	128-bit MMI instruction
 func_002042C8	002042C8	484	handwritten	128-bit MMI instruction
-func_002044B0	002044B0	96	handwritten	128-bit MMI instruction
-func_00204510	00204510	124	handwritten	128-bit MMI instruction
-func_00204590	00204590	120	handwritten	128-bit MMI instruction
 func_00204608	00204608	4	remnant	stripped-function leftover
-func_00204610	00204610	100	handwritten	128-bit MMI instruction
-func_00204678	00204678	80	handwritten	128-bit MMI instruction
 func_002046C8	002046C8	4	remnant	stripped-function leftover
 func_002046D0	002046D0	288	handwritten	128-bit MMI instruction
 func_002047F0	002047F0	4	remnant	stripped-function leftover
 func_002047F8	002047F8	312	handwritten	128-bit MMI instruction
 func_002049E8	002049E8	192	handwritten	128-bit MMI instruction
 func_00204B80	00204B80	180	handwritten	128-bit MMI instruction
-func_00204CE8	00204CE8	92	handwritten	128-bit MMI instruction
-func_00204D48	00204D48	84	handwritten	128-bit MMI instruction
 func_00204DA0	00204DA0	20	remnant	stripped-function leftover
 func_00204E20	00204E20	164	handwritten	marked handwritten by the disassembler
 func_00204EC8	00204EC8	124	handwritten	marked handwritten by the disassembler
