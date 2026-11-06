@@ -3,6 +3,7 @@ func_0011D540	0011D540	4	remnant	stripped-function leftover
 func_0011E0C0	0011E0C0	12	remnant	stripped-function leftover
 func_0011E650	0011E650	4	remnant	stripped-function leftover
 func_00138840	00138840	12	remnant	stripped-function leftover
+func_0013E730	0013E730	544	handwritten	VU0 macro instruction
 func_0015E4A8	0015E4A8	824	handwritten	kernel or system instruction (max.s)
 func_00160710	00160710	4	remnant	stripped-function leftover
 func_001607F8	001607F8	4	remnant	stripped-function leftover

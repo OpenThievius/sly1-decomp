@@ -94,3 +94,7 @@ D_00249E48 = 0x00249E48;
 // The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): file_13C988's
 // .rodata starts with it, after class 0x3B's FLT_MAX at D_00249D78.
 D_00249D80 = 0x00249D80;
+// Two nops after func_0013E430's return, 8 bytes that no alignment explains (functions are
+// 8-aligned and func_0013E430 ends on 16): the words the linker left of a stripped function.
+// Named so that file_13CCF8 can hold them (LINKER_REMNANT).
+func_0013E650 = 0x0013E650; // type:func
