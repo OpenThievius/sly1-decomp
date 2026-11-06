@@ -222,3 +222,16 @@ it, where retail never does either: retail's `sqrt.s` behaves as an inline-assem
 fixed in place, with an early-clobbered result. include/fpu.h is that helper, `Fpu::Sqrt`, the
 one inline assembly AGENTS.md allows; with it, under the files' own flags, the functions match
 (func_001EDDB0 first). OpenRAC's RAC3 keeps a `sqrt.s` helper for the same reason.
+
+**The toolchain's runtime is C (2026-11-06).** Retail's 64-bit divide and remainder helpers
+(func_001FAE38, func_001FB790, func_001FBE00, func_001FC3D0) are word for word the members of
+the toolchain's `libgcc.a` (2.95.x and 2.9-ee-991111 alike), whose debug sections name a `.c`
+source; the C++ runtime's throw and rethrow (func_001FE6A8, func_001FE4C8) need
+`__builtin_unwind_init` and `__builtin_eh_return`, which `cc1.exe` has and `cc1plus.exe` lacks.
+So that code is C: tools/compile.py builds a `.c` file with the release's `cc1.exe` and the
+driver's C predefines. src/lib/throw.c matches with `-O2 -G0 -fexceptions` under 2.9-ee-991111;
+without `-fexceptions` the stub of func_001FE4C8 moves and cc1 fails on func_001FE6A8. The
+divide helpers multiply with one `multu`, read from lo and hi, which no C product gives (GCC
+multiplies twice or splits a 64-bit product): include/mul_wide.h is that helper, the second
+inline assembly AGENTS.md allows. As with libc and libm, nothing is taken from the archive but
+the kind of its source; the C is written from retail's code.

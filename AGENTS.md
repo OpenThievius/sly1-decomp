@@ -82,7 +82,13 @@ Every tool takes `--version us|eu|may19` where it makes sense, and reads its pat
 - **Plain C++.** No inline assembly in functions, no register pins, no artificial barriers.
   The one exception is the square root of include/fpu.h (`Fpu::Sqrt`): retail's bare `sqrt.s`
   behaves as an inline-assembly helper, which no C form reproduces (docs/TOOLCHAIN.md); a
-  function computes a bare square root through it, and nothing else writes inline assembly.
+  function computes a bare square root through it. The other is `MUL_WIDE` (include/mul_wide.h),
+  one `multu` whose halves are read from lo and hi, which the toolchain's runtime multiplied with
+  and no C product gives; only that runtime's C uses it. Nothing else writes inline assembly.
+  The toolchain's own runtime (`libgcc`, config/us/libcalls.tsv) was compiled as C, so its C is a
+  `.c` file under `src/lib/`, built by the release's `cc1` with its own row in config/cflags.tsv
+  (docs/TOOLCHAIN.md); its statement macros (`do { } while (0)`) are allowed as in the math
+  library, where they are the runtime's helpers of that form and retail's code needs them.
   A whole file (`config/us/files.tsv`) holds the original assembly functions inside its range
   (`config/us/original_asm.tsv`) at file scope, their bytes taken from the disassembly: that is
   not inline assembly in a function. As OpenRAC's decompilations mark them, hand-written assembly
