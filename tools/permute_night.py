@@ -49,6 +49,8 @@ def venv_python():
 
 def splice(near_miss, candidate, func):
     """The near miss's text with FUNC's definition taken from the candidate, or None."""
+    if not Path(near_miss).exists():
+        return None         # matched and removed while the run was on it
     text, cand = Path(near_miss).read_text(), Path(candidate).read_text()
     try:
         s, e = version_src.definition_span(text, func)
@@ -124,8 +126,11 @@ def main(argv=None):
         log.write("%s start: %d functions, %.0f min each, -j%d\n"
                   % (time.strftime("%H:%M:%S"), len(args.funcs), args.minutes, args.jobs))
         for n, func in enumerate(args.funcs, 1):
-            log.write("%s %3d/%d %-14s %s\n" % (time.strftime("%H:%M:%S"), n, len(args.funcs), func,
-                                                run_one(func, args.minutes, args.jobs, log, python)))
+            try:
+                note = run_one(func, args.minutes, args.jobs, log, python)
+            except Exception as e:      # one function's trouble never ends the night
+                note = "stopped: %s: %s" % (type(e).__name__, e)
+            log.write("%s %3d/%d %-14s %s\n" % (time.strftime("%H:%M:%S"), n, len(args.funcs), func, note))
         log.write("%s done\n" % time.strftime("%H:%M:%S"))
     return 0
 
