@@ -35,11 +35,11 @@ struct Buf_1F38F0 { u8 pad[0xC]; u32 count; Vec4_1F38F0 items[4]; };
 
 void* func_001F37D8(void* self, s32 mode, s32 flag);
 
-struct Scaler_001F3850 { u8 pad[0x64]; f32 scale; };
+// The scale (the reciprocal of the period) of an oscillator entry.
+struct OscillatorEntryScale { u8 pad[0x64]; f32 scale; };
 
 void* func_001F3810(void* self, s32 mode);
 
-struct Scaler_001F38A0 { u8 pad[0x64]; f32 scale; };
 
 void* func_001F3810(void* self, s32 mode);
 
@@ -221,7 +221,6 @@ void func_001B9AE0(C37* o, s32 a, s32 b, s32 c, s32 d);
 struct Ev_1F5868;
 s32 func_001300E8(Ev_1F5868* e, s32 kind);
 
-struct Obj_1F4378 { u8 pad[0x2D0]; s32 f2D0; };
 
 
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
@@ -347,7 +346,6 @@ struct Add_1F5008 {
     }
 };
 
-struct Glob_1F4808 { u8 pad[0x19DC]; s32 f19DC; };
 
 
 s32 func_001601A0(s32 a);
@@ -510,14 +508,14 @@ void* func_001F3830(void* self, s32 mode)
 
 void func_001F3850(void* self, f32 x)
 {
-    Scaler_001F3850* s = (Scaler_001F3850*)func_001F3810(self, 1);
+    OscillatorEntryScale* s = (OscillatorEntryScale*)GetOscillatorEntryForPeriod(self, 1);
     if (x == 0.0f) s->scale = 0.0f;
     else s->scale = 1.0f / x;
 }
 
 void func_001F38A0(void* self, f32* out)
 {
-    Scaler_001F38A0* s = (Scaler_001F38A0*)func_001F3810(self, 1);
+    OscillatorEntryScale* s = (OscillatorEntryScale*)GetOscillatorEntryForPeriod(self, 1);
     f32 v = s->scale;
     if (v == 0.0f) *out = 0.0f;
     else *out = 1.0f / v;
@@ -538,13 +536,13 @@ void func_001F38F0(Buf_1F38F0* buf, f32 x, f32 y, f32 z, f32 w)
 
 void func_001F3928(void* self, f32 a, f32 b, f32 c, f32 d)
 {
-    u8* p = (u8*)func_001F3830(self, 1);
+    u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
     AppendVector4ToBuffer(p + 0x30, a, b, c, d);
 }
 
 void func_001F3990(void* self, f32 a, f32 b, f32 c, f32 d)
 {
-    u8* p = (u8*)func_001F3830(self, 1);
+    u8* p = (u8*)GetOscillatorEntryForVectors(self, 1);
     AppendVector4ToBuffer(p + 0x80, a, b, c, d);
 }
 
@@ -693,16 +691,16 @@ done:
     return r;
 }
 
-Obj_1F4378* func_001F4378(void)
+ObjectSubGroup* func_001F4378(void)
 {
     void* arr[64];
-    Obj_1F4378* found = 0;
+    ObjectSubGroup* found = 0;
     s32 n = GatherObjectsById(g_currentWorld, 0x205, 0x7D, 0, 0x100, arr);
     s32 cap = 0x40;
     s32 lim = 0x3F;
     n = (lim < n) ? cap : n;
     for (s32 i = 0; i < n; i++) {
-        Obj_1F4378* o = (Obj_1F4378*)arr[i];
+        ObjectSubGroup* o = (ObjectSubGroup*)arr[i];
         if (o->f2D0 != 0) {
             found = o;
             break;
@@ -833,7 +831,7 @@ void func_001F4808(ObjectSubGroup* self)
     key = (BaseObject*)GetActiveSwitchedCollider();
     if (g_timerCaption.state == 2
         && (self->f2E0 != 0 || self->f2D4 != 0
-            || ((*(Glob_1F4808**)&g_saveData)->f19DC == 0 && (u8)GetEntryIdByKey(self->f2FC) == 1))) {
+            || (g_saveData->f19DC == 0 && (u8)GetEntryIdByKey(self->f2FC) == 1))) {
         FinishBestTimeRun(&g_timerCaption);
         SetObjectSubGroupState(self, 2);
         goto tail;
@@ -854,7 +852,7 @@ void func_001F4808(ObjectSubGroup* self)
         it = (Animation*)self->items[i];
         CreateAnimationPlayerWithoutPresetTargets(it, 0, 0, 0, 0.0f, 1.0f);
         next = 0;
-        if (found != 0 || func_0012C9A8(it) != 0) {
+        if (found != 0 || HasAnimationEventKind19(it) != 0) {
             next = 1;
         }
         found = next;
