@@ -13,7 +13,7 @@ INCLUDE_RODATA(D_0024DAD4);
 INCLUDE_RODATA(jtbl_0024DAE0);
 INCLUDE_RODATA(jtbl_0024DB00);
 
-struct __attribute__((aligned(16))) Blob_274E60_1D1260 { f32 f[36]; };
+struct __attribute__((aligned(16))) OnOffDefaultsBlock { f32 f[36]; };
 
 // The file's .data, in retail's order.
 float D_00274E00 = 150.0f;
@@ -40,7 +40,7 @@ float D_00274E50 = 1.5f;
 float D_00274E54 = 0.25f;
 float D_00274E58 = 0.5f;
 float D_00274E5C = 0.200000003f;
-Blob_274E60_1D1260 D_00274E60 = {
+OnOffDefaultsBlock D_00274E60 = {
     { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
       -225.0f, 1.0f, 0.0f, 0.0f, 20.0f, 1.0f, 0.0f, 0.0f,
       -3.40282347e+38f, 3.40282347e+38f, -3.40282347e+38f, 3.40282347e+38f, -3.40282347e+38f, 3.40282347e+38f,
@@ -54,44 +54,43 @@ ASM_FUNC(func_001CE590);
 
 ASM_FUNC(func_001CE800);
 
-struct Ref_001CE9E8 { u8 pad0[0x18]; void* p18; };
-struct Obj_001CE9E8 { void* p0; Ref_001CE9E8* p4; u8 pad1[0x10 - 8]; };
+// What a target cost search passes to its scorer: the player, the target, and the record at
+// +0x10 the scorer hands on.
+struct TargetCostContext { void* p0; BaseObject* p4; u8 pad1[0x10 - 8]; };
 struct Frame_001CE9E8 { u8 vecA[0x10]; u8 vecB[0x10]; f32 result; };
 
 void func_001CE800(void* a0, void* a1, void* a2, void* a3);
 void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
-f32 func_001CE9E8(Obj_001CE9E8* self)
+f32 func_001CE9E8(TargetCostContext* self)
 {
     Frame_001CE9E8 f;
-    func_001CE800(self->p0, self->p4, f.vecA, f.vecB);
-    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, f.vecB, 0, &f.result, 0, 0);
+    PlaceOnTargetObject(self->p0, self->p4, f.vecA, f.vecB);
+    ScorePlayerTargetPlacement(self->p0, (u8*)self + 0x10, self->p4->parent, f.vecA, f.vecB, 0, &f.result, 0, 0);
     return f.result;
 }
 
-struct Ref_001CEA58 { u8 pad0[0x18]; void* p18; };
-struct Obj_001CEA58 { void* p0; Ref_001CEA58* p4; u8 pad1[0x10 - 8]; };
 struct Frame_001CEA58 { u8 vecA[0x10]; f32 result; };
 
 void func_0016A240(void* a0, void* a1, s32 a2);
 void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
-f32 func_001CEA58(Obj_001CEA58* self)
+f32 func_001CEA58(TargetCostContext* self)
 {
     Frame_001CEA58 f;
-    func_0016A240(self->p4, f.vecA, 0);
-    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, 0, 0, &f.result, 0, 0);
+    PlaceOnTargetPoint(self->p4, f.vecA, 0);
+    ScorePlayerTargetPlacement(self->p0, (u8*)self + 0x10, self->p4->parent, f.vecA, 0, 0, &f.result, 0, 0);
     return f.result;
 }
 
 void func_00169E20(void* a0, void* a1, s32 a2);
 void func_001CE590(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, void* a6, s32 a7, s32 stack);
 
-f32 func_001CEAB8(Obj_001CEA58* self)
+f32 func_001CEAB8(TargetCostContext* self)
 {
     Frame_001CEA58 f;
-    func_00169E20(self->p4, f.vecA, 0);
-    func_001CE590(self->p0, (u8*)self + 0x10, self->p4->p18, f.vecA, 0, 0, &f.result, 0, 0);
+    PlaceOnTargetCurve(self->p4, f.vecA, 0);
+    ScorePlayerTargetPlacement(self->p0, (u8*)self + 0x10, self->p4->parent, f.vecA, 0, 0, &f.result, 0, 0);
     return f.result;
 }
 
@@ -154,18 +153,16 @@ f32 func_001CEE30(Self_1CEE30* self)
     l.b[1] = n->f18;
     l.c = l.a;
     
-    func_001EB168(0.5f, q, q, 3.0f, (void*)func_001CEDF8, l.b, 0, &l.out);
+    func_001EB168(0.5f, q, q, 3.0f, (void*)ScoreTargetPathAt, l.b, 0, &l.out);
     return l.out;
 }
 
 ASM_FUNC(func_001CEEC8);
 
-struct Obj_001CF138 { u8 pad0[0x2BDC]; s32 key; };
-
-f32 func_001CF138(Obj_001CF138* self, s32 id, f32 a, f32 b)
+f32 func_001CF138(Player* self, s32 id, f32 a, f32 b)
 {
     f32 r = a + b;
-    if (id == self->key) {
+    if (id == self->penalizedTargetId) {
         r = r + D_00274E3C;
     }
     return r;
@@ -219,7 +216,7 @@ void func_001D1260(Player* self)
     o->f2D4 = 0;
     o->f2DC = 0;
     o->obj = 0;
-    o->block2F0 = *(Block63*)&D_00274E60;
+    o->block2F0 = *(Block63*)&g_onOffObjectDefaults;
     o->f418 = 1;
     o->f388 = 3;
     o->f380 = 0;

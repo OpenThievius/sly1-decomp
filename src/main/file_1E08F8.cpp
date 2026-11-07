@@ -2,6 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "on_off_object.h"
+#include "collider.h"
 #include "world.h"
 #include "camera_controller.h"
 #include "globals.h"
@@ -9,6 +10,7 @@
 #include "key_id.h"
 #include "load_progress.h"
 #include "output_buffer.h"
+#include "game_progress.h"
 
 
 void* func_001D7120(u8* buf, char* dst, s32 cap);
@@ -35,7 +37,9 @@ s32 func_001E1EB0(void* self, void* ap);
 
 
 
-struct Stream_001E1F58 { u8 bytes[0x420]; };
+// The stack room of an output buffer as the format functions declare one: its header and the
+// 0x400 bytes AppendToOutputBuffer fills before it flushes.
+struct OutputBufferStorage { u8 bytes[0x420]; };
 
 void* func_001D7120(void* stream, char* dst, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
@@ -51,7 +55,6 @@ s32 func_001E2018(char* dst, s32 cap, const char* fmt, void* ap);
 
 
 
-struct Stream_1E1EB0 { u8 bytes[0x420]; };
 
 void* func_001D7100(void* stream, s32 cap);
 s32 func_001E1DB8(void* stream, const char* fmt, void* ap);
@@ -73,7 +76,9 @@ void func_0018D800(void* dst, void* src, s32 count);
 
 s32 func_001E2268(s32 a, s32 b);
 
-struct IntPair_1E22C0 { u8 pad0[4]; s32 a; s32 b; };
+// A lock one thread may take again (InitRecursiveLock, EnterRecursiveLock, LeaveRecursiveLock):
+// how many times its holder took it, the holder's thread id (-1 for none) and the semaphore.
+struct RecursiveLock { s32 count; s32 last; void* sema; };
 
 
 
@@ -90,7 +95,6 @@ void func_001E2870(void* self, s32 a, s32 b);
 
 
 
-struct Tally_1E2358 { s32 count; s32 last; void* ptr; };
 extern void func_001F6B40(void* a);
 
 
@@ -141,7 +145,6 @@ void func_0011EC40(void* a, void* b);
 
 
 struct Sub_1E30A0 { u8 pad[0x438]; f32 f438; f32 f43C; };
-struct Glob_1E30A0 { u8 pad[0x1C8]; f32 f1C8; };
 
 
 
@@ -164,7 +167,6 @@ void func_00123ED0(void* self);
 
 
 
-struct Tally_1E22F8 { s32 count; s32 last; void* ptr; };
 extern s32 func_001F6A90(void);
 extern s32 func_001F6B60(void* a);
 
@@ -181,7 +183,6 @@ struct Field_001E0E18 {
 
 
 
-struct Sub_1E2870;
 struct Mgr_1E2870;
 struct Loc_1E2870 {
     s32 v[4];
@@ -190,15 +191,11 @@ struct Pq_1E2870 {
     u8 pad0[0x2220];
     s32 f2220;
 };
-struct Glob_1E2870 {
-    u8 pad0[0x224];
-    s32 f224;
-};
 
 
 void* func_001925F0(void);
 void func_00128018(Mgr_1E2870* a0, OnOffObject* a1, void* a2, Loc_1E2870* a3);
-s32 func_001E4DC0(Sub_1E2870* self, Loc_1E2870* value);
+s32 func_001E4DC0(TreeNode03* self, Loc_1E2870* value);
 void func_001E2778(OnOffObject* self, s32 state);
 
 
@@ -400,7 +397,7 @@ double func_001FD358(s32 a);
 extern f32 D_00261858[];
 
 
-struct Ret_1E4880 { u8 pad[0x20]; f32 value; };
+struct SpanCandidate { u8 pad[0x20]; f32 value; };
 
 
 
@@ -451,9 +448,7 @@ struct Self_1E4EA8 { s32 f0; Blob_1E4EA8* f4; s32 f8; s32 fC; s32 f10; Blob_1E4E
 struct Sub_1E4EA8 : BufferedStream {
     void SetOwner(void* o) { owner = o; }
 };
-struct Cur_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 f19E0; };
-struct Cur2_1E4EA8 { u8 pad[0x19D8]; s32 f19D8; s32 f19DC; u32 pad19E0[3]; u32 f19EC; };
-struct Pl_1E4EA8 { u8 pad[0x4F44]; Cur_1E4EA8* f4F44; };
+struct Pl_1E4EA8 { u8 pad[0x4F44]; GameProgress* f4F44; };
 struct Vo_1E4EA8 { void* vt; };
 
 extern u8 D_002C3B00[];
@@ -462,7 +457,6 @@ extern u8 D_002623D8[];
 extern u8 D_0026FA90[];
 extern f32 D_0026186C;
 extern Vo_1E4EA8 D_0026C6C8;
-extern Cur2_1E4EA8* D_002623C0;
 extern Pl_1E4EA8 D_00264A40;
 
 void func_00191E70(s32 a);
@@ -1201,7 +1195,7 @@ s32 func_001E1DB8(OutputBuffer* ctx, const char* fmt, void* a2)
 
 s32 func_001E1EB0(const char* fmt, void* ap)
 {
-    Stream_1E1EB0 buf;
+    OutputBufferStorage buf;
     InitOutputBuffer(&buf, -1);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     DestroyOutputBuffer(&buf, 2);
@@ -1216,7 +1210,7 @@ s32 func_001E1F10(void* self, ...)
 
 s32 func_001E1F58(char* dst, const char* fmt, void* ap)
 {
-    Stream_001E1F58 buf;
+    OutputBufferStorage buf;
     InitStringOutputBuffer(&buf, dst, 0);
     s32 n = FormatToOutputBuffer(&buf, fmt, ap);
     dst += n;
@@ -1313,17 +1307,17 @@ void func_001E2268(void* a, void* b)
 
 LINKER_REMNANT(func_001E22B8);
 
-void func_001E22C0(IntPair_1E22C0* self)
+void func_001E22C0(RecursiveLock* self)
 {
-    self->a = -1;
-    self->b = CreateLockSemaphore(1, 1);
+    self->last = -1;
+    self->sema = (void*)CreateLockSemaphore(1, 1);
 }
 
-void func_001E22F8(Tally_1E22F8* self)
+void func_001E22F8(RecursiveLock* self)
 {
     s32 key = GetCurrentThreadId();
     if (key != self->last) {
-        (void)AwaitSemaphore(self->ptr);
+        (void)AwaitSemaphore(self->sema);
         self->last = key;
         self->count = 1;
     } else {
@@ -1331,11 +1325,11 @@ void func_001E22F8(Tally_1E22F8* self)
     }
 }
 
-void func_001E2358(Tally_1E2358* self)
+void func_001E2358(RecursiveLock* self)
 {
     if (--self->count == 0) {
         self->last = -1;
-        PostSemaphore(self->ptr);
+        PostSemaphore(self->sema);
     }
 }
 
@@ -1461,13 +1455,13 @@ void func_001E2870(OnOffObject* self) {
     s32 st;
     if (self->f398 == -1) {
         func_00128018(0, self, (u8*)p + 0x140, &loc);
-        s32 r = func_001E4DC0((Sub_1E2870*)self->f2E0, &loc);
+        s32 r = IsPointInsideFaceTree((TreeNode03*)self->f2E0, &loc);
         st = (0u < (u32)r);
     } else {
         st = self->f398;
     }
     if (self->f384 == 0 && p == (u8*)g_player && ((Pq_1E2870*)p)->f2220 == 2 &&
-        ((Glob_1E2870*)g_camera)->f224 == 0) {
+        g_camera->f224 == 0) {
         if (self->f398 == -1) {
             return;
         }
@@ -1509,7 +1503,7 @@ void func_001E30A0(OnOffCameraController* self)
     Sub_1E30A0* s = (Sub_1E30A0*)self->ptr;
     if (s != 0) {
         if (s->f438 != 0.0f) {
-            Glob_1E30A0* g = (Glob_1E30A0*)g_camera;
+            Camera* g = g_camera;
             g->f1C8 = s->f43C;
         }
     }
@@ -1528,7 +1522,7 @@ ASM_FUNC(func_001E31F0);
 
 ASM_FUNC(func_001E4578);
 
-f32 func_001E4880(void* a0, void* a1, void* a2, Ret_1E4880* a3)
+f32 func_001E4880(void* a0, void* a1, void* a2, SpanCandidate* a3)
 {
     return a3->value;
 }
@@ -1568,7 +1562,7 @@ void func_001E4EA8(Self_1E4EA8* self)
     LoadProgress o30;
     U32P w60, w70, w80, w90;
     Sub_1E4EA8 sub;
-    func_00191E70(2);
+    SetScreenOwner(2);
     if (self->f4 != 0) {
         ClearKeyId(&key);
         blob = *self->f4;
@@ -1586,7 +1580,7 @@ void func_001E4EA8(Self_1E4EA8* self)
             InitLoadProgress(&o30, &w60, &w70, &w80, &w90);
             InitBufferedStream(&sub, 0x340C00, D_002C3B00, 6);
             sub.SetOwner(&o30);
-            if (sub.owner != 0) func_00193270(sub.owner);
+            if (sub.owner != 0) BeginLoadProgress(sub.owner);
             if (OpenBufferedSectorStreamRange(&sub, &key) == 0) {
                 DestroyBufferedStream(&sub, 2);
                 goto end;
@@ -1602,9 +1596,9 @@ void func_001E4EA8(Self_1E4EA8* self)
             SetVolumeChannelFactor(0xA, 0, 0.0f);
             g_currentWorld->desc->m0A(g_currentWorld, &sub);
             CloseBufferedStream(&sub);
-            if (sub.owner != 0) func_00193300(sub.owner);
+            if (sub.owner != 0) EndLoadProgress(sub.owner);
             if (g_saveData->f19EC & 0x100) {
-                Cur_1E4EA8* c = g_memoryCard.f4F44;
+                GameProgress* c = g_memoryCard.f4F44;
                 if (c != 0 && (c->f19D8 != g_saveData->f19D8 || c->f19DC != g_saveData->f19DC))
                     StartMemoryCardSave(&g_memoryCard);
             }
@@ -1625,14 +1619,14 @@ void func_001E4EA8(Self_1E4EA8* self)
 end:
     ResetVolumeChannelFactors();
     SetVolumeChannelFactor(1, 1, g_currentWorld->f1D7C);
-    func_00191EB0(2);
+    ClearScreenOwner(2);
     self->f0 = 0;
 }
 
 void func_001E5278(s32 mode)
 {
     s32 n;
-    func_001C05D0(0.0f);
+    SetIopVolumeChannel8(0.0f);
     switch (mode) {
     case 0:
         n = 0;

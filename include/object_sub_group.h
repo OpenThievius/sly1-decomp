@@ -13,7 +13,7 @@
 // 0x7D: its own fields are read in two places only, the child table and what func_001F4500
 // reads from the stream.
 struct ObjectSubGroup : PlacedObject {
-    u8 pad2D0[0x2D4 - 0x2D0];
+    s32 f2D0;               // 0x2D0: FindActiveObjectSubGroup returns the first group with it set
     void* f2D4;             // 0x2D4: set means the object has something to do after its children
     s32 f2D8;               // 0x2D8
     u8 pad2DC[0x2E0 - 0x2DC];

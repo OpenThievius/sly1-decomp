@@ -130,7 +130,6 @@ void func_00137A60(void* self, s32 size, s32 obj);
 
 struct Entry_001DB1E8 { s32 active; s32 a; u8 pad[0x10]; f32 x; f32 y; s32 b; s32 c; };
 
-struct Link_001DBB20 { u32 pad[2]; u32 flags; };
 
 typedef void (*VFn_1DB0C8)(void* self, void* a, s32 b, void* c, s32 d, void* e, s32 f);
 struct Inner_1DB0C8 { VFn_1DB0C8* vtbl; };
@@ -362,8 +361,9 @@ s32 func_00160850(void* obj);
 
 s32 func_00160850(void* obj);
 
-struct Slot_1DD7E8 { s32 key; s32 value; };
-struct Slots_1DD7E8 { u8 pad[0x44]; Slot_1DD7E8 slots[4]; };
+// The four key/value slots after offset 0x44 of a level entry (SetEntrySlotValue, GetEntrySlotValue).
+struct EntrySlot { s32 key; s32 value; };
+struct EntrySlotTable { u8 pad[0x44]; EntrySlot slots[4]; };
 
 void* func_00160810(void* obj);
 
@@ -416,8 +416,6 @@ struct __attribute__((packed)) Pair_1DC150 { s32 n; void* buf; };
 void* func_0018D500(s32 size);
 void* func_00183058(void* a, void* b, void* c);
 
-struct Slot_DD888 { s32 key; s32 value; };
-struct Slots_DD888 { u8 pad[0x44]; Slot_DD888 slots[4]; };
 
 void* func_00160810(void* obj);
 
@@ -440,7 +438,6 @@ extern u8 D_00274738[];
 void func_001C06A0(s32 a, s32 b, f32 x);
 void func_0011D928(s32 a);
 
-struct Node_DC740 { u8 pad[8]; Node_DC740* next; Node_DC740* prev; };
 
 void* func_0018D5C0(u32 n);
 
@@ -1077,19 +1074,19 @@ void func_001D9C98(PathFollower* self, f32 t)
         }
     } else {
         UpdatePathFollowerPace(self);
-        func_001D87C8(self, &local);
-        func_001D8BD0(self);
+        AdvancePathFollowerAlongPath(self, &local);
+        ComputePathFollowerHeadingTarget(self);
     }
-    func_001D9678(self, t);
+    UpdatePathFollowerSound(self, t);
     SteerPathFollower(self);
     func_001D8E40(self);
-    func_001D9488(self, local);
-    func_001D9AC8(self);
+    AdvancePathFollowerEntry(self, local);
+    ProcessPathFollowerContacts(self);
     if (self->rot.r[2].z > 0.5f) {
         self->f850 = g_gameTime;
     }
     if (self->fB34 != 0) {
-        func_00129DF8(self);
+        ClearRootTries(self);
     }
 }
 
@@ -1105,9 +1102,9 @@ void func_001DA170(PathFollower* self)
         if (r != 0) {
             void* dev = r->f48;
             s32 code;
-            func_001B6568(dev, &code);
+            GetStateWalkerTargetKey(dev, &code);
             if (code == -1) {
-                func_001B6598(dev, &code);
+                GetStateWalkerCurrentKey(dev, &code);
             }
             if (code < 0x431) {
                 if (code >= 0x42F) {
@@ -1182,7 +1179,7 @@ ASM_FUNC(func_001DAD28);
 void func_001DAE18(PathFollower* self)
 {
     RecomputeColliderFrame(self);
-    func_001DAD28(self);
+    FindPathFollowerPathPosition(self);
 }
 
 void func_001DAE48(void)
@@ -1233,7 +1230,7 @@ void func_001DAFB8(PathFollower* self, Arg_1DAFB8* arg)
     self->f830 = arg;
     Obj_1DAFB8* o = arg->obj;
     if (o->vtbl[10]) ((VFn7_1DAFB8)o->vtbl[10])(o, (u8*)self + 0x100, 0, 0, 0, (u8*)self + 0x838, 0);
-    func_001DAD28(self);
+    FindPathFollowerPathPosition(self);
     self->f844 = self->f840;
     self->f834 = ((VFnF_1DAFB8)((Arg_1DAFB8*)self->f830)->obj->vtbl[8])(((Arg_1DAFB8*)self->f830)->obj);
     for (s32 i = 0; i < self->f870; i++) {
@@ -1339,7 +1336,7 @@ void func_001DB290(Obj_1DB290* self)
     c2 = c;
     CopyQuadword(&d, p650);
     d2 = d;
-    StoreQuadword(p670, func_001DB460(a2, b2, c2, d2));
+    StoreQuadword(p670, AddWeightedVectors(a2, b2, c2, d2));
     ((Bounds_1DB290*)&self->f680)->Blend(y, *(Bounds_1DB290*)&self->f640, x, *(Bounds_1DB290*)&self->f660);
     f32 r = ((Clamp2_1DB290*)&self->f680)->Clamp(*(f32*)p670);
     self->f860 = r;
@@ -1418,7 +1415,7 @@ void func_001DB4C8(World* self)
     if (g_buttonCodeFlags & 4) {
         x = -900.0f;
     }
-    func_001DBA90(self, x);
+    SetWorldGravityZ(self, x);
     self->f1D64 = 0x10;
     self->f1D65 = 0x10;
     self->f1D66 = 0x40;
@@ -1447,7 +1444,7 @@ void func_001DB838(s32 a0)
         ClearTargetVectorList();
         ClearObjectLists();
         StopAllSoundsAndWait();
-        func_001B40C8();
+        ResetScreenResources();
         ShutDownScriptValuePools();
         ResetElementStack(g_elementStack);
         ResetFrontMemory();
@@ -1518,7 +1515,7 @@ void* func_001DBB00(void* unused, void* a1, void* a2)
     return RefreshCachedVoiceParam(a1, a2);
 }
 
-s32 func_001DBB20(World* self, Link_001DBB20** link, u32 value) { return ((*link)->flags & 2) && self->count38 >= 0xF7 && value == 0; }
+s32 func_001DBB20(World* self, BaseObject* obj, u32 value) { return (obj->desc->flags & 2) && self->count38 >= 0xF7 && value == 0; }
 
 void* func_001DBB50(u8* self)
 {
@@ -1772,7 +1769,7 @@ void func_001DC740(World* self)
     self->tables = (Contacts03*)mem;
     self->freeTables = (Contacts03*)mem;
     for (s32 i = 0; i < 0x100; i++) {
-        Node_DC740* n = (Node_DC740*)((u8*)self->tables + (i << 4));
+        Contacts03* n = (Contacts03*)((u8*)self->tables + (i << 4));
         n->prev = (i < 1) ? 0 : n - 1;
         n->next = (i > 0xFE) ? 0 : n + 1;
     }
@@ -1808,10 +1805,10 @@ void func_001DC828(World* owner, Contacts03* handle)
             if (e->head != 0) {
                 FreePooledContactChain(owner, e->head);
                 if (!(e->other->flags538 & (1ULL << 55))) {
-                    func_00129DF8(e->other);
+                    ClearRootTries(e->other);
                 }
                 if (!(s1->other->flags538 & (1ULL << 55))) {
-                    func_00129DF8(s1->other);
+                    ClearRootTries(s1->other);
                 }
             }
             s1->head = 0;
@@ -1847,49 +1844,49 @@ void func_001DC9A0(Obj_1DC9A0* self)
 
     if (g_coneVolumeMask[0] & 1) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
-        func_001848B8(p, &D_00275670);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
+        SetConeVolumeDirection(p, &D_00275670);
     }
     if (g_coneVolumeMask[0] & 2) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 1);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
         SetConeVolumeRange(p, D_00275690);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
     if (g_coneVolumeMask[0] & 4) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 2);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
-        func_001848B8(p, &D_00275670);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
+        SetConeVolumeDirection(p, &D_00275670);
         SetConeVolumeRange(p, D_00275698);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
     if (g_coneVolumeMask[0] & 8) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 3);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
-        func_001848B8(p, &D_00275670);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
+        SetConeVolumeDirection(p, &D_00275670);
         SetConeVolumeRange(p, D_002756A0);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
@@ -1988,7 +1985,7 @@ void func_001DD3E0(Quad_001DD3E0* a, Quad_001DD3E0* b, Word_001DD3E0* c, u8* obj
     p = base;
     n = 1;
     do {
-        *(Q_1DD3E0*)p = func_00188740(obj + 0x100, *(Q_1DD3E0*)(p - 2));
+        *(Q_1DD3E0*)p = TransformVector4(obj + 0x100, *(Q_1DD3E0*)(p - 2));
         n--;
         p++;
     } while (n >= 0);
@@ -2035,13 +2032,13 @@ void func_001DD548(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, f32
 void func_001DD5F8(World* self, f32 v)
 {
     self->f1D6C = v;
-    D_00264260 = D_002622CC;
+    g_lightingChangeFrame = g_frameCount;
 }
 
 void func_001DD610(World* self, f32 v)
 {
     self->f1D68 = v;
-    D_00264260 = D_002622CC;
+    g_lightingChangeFrame = g_frameCount;
 }
 
 void func_001DD628(void* self, f32 x)
@@ -2051,7 +2048,7 @@ void func_001DD628(void* self, f32 x)
     s->f2318 = x;
     *(s32*)g_previousSoundLevel = -100;
     SetVolumeChannelFactor(7, 1, 1.0f);
-    func_0011D928((s32)(s->f2318 + 0.5f));
+    SendIopSoundLevel((s32)(s->f2318 + 0.5f));
 }
 
 s32 func_001DD690(void* self, void* obj)
@@ -2111,11 +2108,11 @@ s32 func_001DD7A0(void* self, void* obj)
 
 void func_001DD7E8(void* self, void* obj, s32 key, s32 value)
 {
-    Slots_1DD7E8* t = (Slots_1DD7E8*)GetLevelEntryByKey(obj);
+    EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
     if (t) {
-        Slot_1DD7E8* found = 0;
+        EntrySlot* found = 0;
         for (u32 i = 0; i < 4; i++) {
-            Slot_1DD7E8* p = &t->slots[i];
+            EntrySlot* p = &t->slots[i];
             if (found == 0 && p->key == 0) {
                 found = p;
                 continue;
@@ -2134,9 +2131,9 @@ void func_001DD7E8(void* self, void* obj, s32 key, s32 value)
 
 s32 func_001DD888(void* self, void* obj, s32 key)
 {
-    Slots_DD888* t = (Slots_DD888*)GetLevelEntryByKey(obj);
+    EntrySlotTable* t = (EntrySlotTable*)GetLevelEntryByKey(obj);
     if (t != 0) {
-        Slot_DD888* p = t->slots;
+        EntrySlot* p = t->slots;
         for (u32 i = 0; i < 4; i++) {
             if (p->key == key) {
                 return p->value;

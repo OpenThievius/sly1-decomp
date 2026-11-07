@@ -16,7 +16,7 @@ void func_001E00B0(Obj_1E00B0_eu* self)
     case 1:
     {
         if (self->f57C != 0) {
-        if (g_padRecord.fAA & 4) {
+        if (g_padRecord.flags & 4) {
             ClearPadPressedBits(&g_padRecord, 4);
             StartLockedStreamVoice((s32)g_currentWorld->f2310);
             if (g_currentWorld->f2314 != 0) {
