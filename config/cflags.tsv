@@ -68,3 +68,17 @@ src/libm/file_209260.c	-O2 -G0	2.9-ee-991111-01
 src/libm/file_2093C0.c	-O2 -G0	2.9-ee-991111-01
 src/libm/file_24FF70.c	-O2 -G0	2.9-ee-991111-01
 src/libm/file_24FF78.c	-O2 -G0	2.9-ee-991111-01
+src/lib/memory_compare.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/memory_copy.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/memory_move.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/memory_set.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/sort.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/random.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/string_compare.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/substring.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/tlb.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/patch_installer_3.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/patch_installer_2.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/patch_installer_1.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/request_thread.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/formatted_output.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111

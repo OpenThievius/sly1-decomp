@@ -126,3 +126,17 @@ src/libm/file_209210.c	00209210	00209238	-	-	-	-
 src/libm/file_209238.c	00209238	00209260	-	-	-	-
 src/libm/file_209260.c	00209260	002093C0	0024FF90	-	-	-
 src/libm/file_2093C0.c	002093C0	002093F0	-	-	-	-
+src/lib/memory_compare.cpp	001F59C4	001F5A58	-	-	-	-
+src/lib/memory_copy.cpp	001F5A58	001F5B08	-	-	-	-
+src/lib/memory_move.cpp	001F5B08	001F5C0C	-	-	-	-
+src/lib/memory_set.cpp	001F5C0C	001F5CD0	-	-	-	-
+src/lib/sort.cpp	001F5CD0	001F66F8	-	-	-	-
+src/lib/random.cpp	001F66F8	001F6738	-	-	-	-
+src/lib/string_compare.cpp	001F6738	001F6880	-	-	-	-
+src/lib/substring.cpp	001F6880	001F6900	-	-	-	-
+src/lib/tlb.cpp	001FA9B0	001FAC00	0024EC30	00277D70	-	-
+src/lib/patch_installer_3.cpp	001FA890	001FA9B0	-	002779C0	-	-
+src/lib/patch_installer_2.cpp	001F9EE8	001FA068	-	002771F0	-	-
+src/lib/patch_installer_1.cpp	001F6EE0	001F7020	-	00276980	-	-
+src/lib/request_thread.cpp	001F7020	001F7270	0024E988	00277128	00625770	-
+src/lib/formatted_output.cpp	001F7270	001F7BE8	0024E9B0	0027712C	00625F80	-
