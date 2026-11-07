@@ -1,6 +1,8 @@
 symbol	name	evidence
 func_001C4458	InitTurningCollider	slot 0 of class 0x06: runs InitActor, then sets 0x700 to 1.0, 0x360 from D_00274B20, the vector at 0x6F0 and the 12-byte blocks at 0x704 and 0x710 from tables
 func_001C44F0	StartTurningCollider	slot 16 of class 0x06: calls the base func_00124A48, resolves six object links (func_00124DF8), picks 0x610/0x614 from the fallbacks at 0x620/0x628 and 0x624/0x62C, loads the identity into 0x660
+func_001C4578	SetTurningColliderLinkFlag	sets or clears bit 2 of +0x98 in the attachment record (+0x224) of the two linked objects +0x61C and +0x618 when the record's flags (+0xB0) have 0x20; StartTurningCollider and SetPlayerState call it
+func_001C4790	KeepNearestPartSpan	when the part is active (+0x50) collects up to two spans of the object's tree between the part's points +0x70 and +0x60 (CollectColliderSpansInTree) and keeps the first one past time 0 in +0x90 when it is nearer; CollidePlayerWithObject calls it for the parts at 0x1190 and 0x1290
 func_001C49C8	DrawTurningCollider	slot 37 of class 0x06 (the draw slot): only runs DrawCollider; DrawAgent calls it as its base
 func_001C4A80	PlayPhaseCrossingSound	from a phase value and its previous one, when the phase crosses one of two marks in the table and 0.1 seconds have passed, picks a random sound id 0x47 to 0x4A different from the last (D_00605548), plays it at the object with func_001BFCD8 and notes the time
 func_001C4ED0	UpdateTurningCollider	slot 17 of class 0x06: runs UpdateActor then func_001C4C20

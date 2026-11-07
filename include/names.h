@@ -1417,6 +1417,7 @@
 #define GetAcceptsFlaggedObjects                   func_0013DA30
 #define AddAcceptedObjectId                        func_0013DA48
 #define AddAcceptedKind                            func_0013DA80
+#define AddMaskedColliderListEntry                 func_0013DAB8
 #define GetMaskedColliderSoundParams               func_0013DAF0
 #define IsObjectAccepted                           func_0013DB28
 #define UpdateTimedState                           func_0013DC38
@@ -1478,6 +1479,7 @@
 #define SetTriggerZoneEntry                        func_00140750
 #define SetZoneColliderEntry                       func_00140770
 #define ResetDiscSectorCheck                       func_00140790
+#define GetKeyIdSecond                             func_001407A0
 #define NormalizeDiscPath                          func_001407A8
 #define RefreshDiscStatus                          func_00140968
 #define InitDiscAccessModule                       func_001409D8
@@ -2251,6 +2253,8 @@
 #define SelectPlayerStateAnimation                 func_00174F50
 #define SetPlayerPartLayers                        func_00175078
 #define SetPlayerState                             func_00175170
+#define SwitchPlayerState11                        func_00177800
+#define SetPlayerProbeContactsDisabled             func_00177828
 #define FindNodeForQuery                           func_00177838
 #define CompareKeysAscending                       func_00177968
 #define IsPlayerCameraFree                         func_00177E20
@@ -2672,6 +2676,7 @@
 #define ReparentPointObject                        func_001920E0
 #define ConvertPointObjectPosition                 func_00192128
 #define LoadTextPointObject                        func_00192150
+#define ResetTextPointToHalf                       func_00192190
 #define InitSwitchedCollider                       func_001921A8
 #define CopySwitchedCollider                       func_001921E8
 #define HandleSwitchedColliderNotification         func_00192230
@@ -2709,6 +2714,7 @@
 #define DrawLoadProgressBar                        func_00193318
 #define GetMenuChoiceLabel                         func_00193598
 #define FormatGameSummary                          func_001935B0
+#define FindObject42CStateWalker                   func_00193660
 #define BuildPauseMenuPage                         func_001936A0
 #define InitPauseMenu                              func_00193E58
 #define ChangePauseMenuPage                        func_00193EE8
@@ -2732,6 +2738,7 @@
 #define LoadGaugeCollider                          func_001969C0
 #define StartGaugeCollider                         func_001969F8
 #define StepGaugeCollider                          func_00196B78
+#define AcceptColliderOfOtherRoot                  func_00196E48
 #define UpdateGaugeCollider                        func_00196EB0
 #define ApplyGaugeColliderRatioToEffect            func_001973D8
 #define EndGaugeColliderTimer                      func_00197458
@@ -3061,6 +3068,7 @@
 #define UpdateScreenElements                       func_001A9FD0
 #define HideScreenElements                         func_001AA060
 #define ResetScreenElements                        func_001AA0C0
+#define QueueEachScreenElementDraw                 func_001AA110
 #define DrawScreenElements                         func_001AA178
 #define InitScreenElement                          func_001AA1F0
 #define SetupScreenElementText                     func_001AA268
@@ -3514,10 +3522,13 @@
 #define AcceptHitCountColliderRequest              func_001C3D60
 #define HasHitCountColliderAcceptedRequest         func_001C3E50
 #define FinishHitCountCollider                     func_001C3E80
+#define SendHitCountColliderRequest                func_001C3F68
 #define SetHitCountColliderState                   func_001C3FC8
 #define AddHitCountColliderId                      func_001C4180
 #define InitTurningCollider                        func_001C4458
 #define StartTurningCollider                       func_001C44F0
+#define SetTurningColliderLinkFlag                 func_001C4578
+#define KeepNearestPartSpan                        func_001C4790
 #define DrawTurningCollider                        func_001C49C8
 #define PlayPhaseCrossingSound                     func_001C4A80
 #define UpdateTurningCollider                      func_001C4ED0
@@ -3545,11 +3556,16 @@
 #define SumChildPoseOffsets                        func_001C5F18
 #define CombineChildPoseRotations                  func_001C6028
 #define UpdatePlayerAimTarget                      func_001C6890
+#define HandlePlayerAimButton                      func_001C6928
 #define FindNearestClass75Ahead                    func_001C6AA8
+#define SetPlayerClass75AheadBlend                 func_001C6D00
+#define TurnPlayerToClass75AheadMask8              func_001C6E58
+#define TurnPlayerToClass75AheadMask4              func_001C6ED0
 #define InitAgent                                  func_001C6F48
 #define LoadAgent                                  func_001C7140
 #define CopyAgent                                  func_001C7188
 #define PostLoadAgent                              func_001C71E0
+#define RemoveAgentFromParent                      func_001C7278
 #define StartAgent                                 func_001C72A0
 #define TestAgentMayContact                        func_001C7468
 #define RegisterAgent                              func_001C74E8
@@ -3566,6 +3582,7 @@
 #define FaceAgentTowardGoalPoint                   func_001C8BC0
 #define UpdateAgentGoal                            func_001C8C08
 #define IsAgentNearPathEnd                         func_001C8D40
+#define CreateAgentAnimationPlayer                 func_001C8D78
 #define UpdateAgentState                           func_001C8E28
 #define ChangeAgentState                           func_001C8F20
 #define ForceAgentState                            func_001C8FD0
@@ -3607,6 +3624,7 @@
 #define AddAgentStateTrigger                       func_001CAD40
 #define AddAgentClipGroup                          func_001CAD60
 #define CollideAgentWithObject                     func_001CAD98
+#define LaunchObjectWithAgentVelocity              func_001CAEE0
 #define SetAgentMainClip                           func_001CB328
 #define RequestAgentLaunch                         func_001CB3C0
 #define IsAgentFree                                func_001CB3C8
@@ -4183,6 +4201,7 @@
 #define CopyArrivalPoint                           func_001F3EE0
 #define StartArrivalPoint                          func_001F3F80
 #define PlaceAtArrivalPoint                        func_001F4008
+#define SetTransformObjectKeyedValue               func_001F42D0
 #define FindOrActivateSwitchedCollider             func_001F4318
 #define FindActiveObjectSubGroup                   func_001F4378
 #define BeginLevelExit                             func_001F4408

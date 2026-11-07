@@ -18,6 +18,7 @@ func_0013D9F0	SetAcceptsFlaggedObjects	sets bit 2 of the accept mask 0x63C (clea
 func_0013DA30	GetAcceptsFlaggedObjects	writes bit 2 of the accept mask 0x63C to the result
 func_0013DA48	AddAcceptedObjectId	appends an id to the list at 0x644 (up to 4) and sets bit 1 of the accept mask; IsObjectAccepted compares each with func_001833F0
 func_0013DA80	AddAcceptedKind	appends a kind to the list at 0x658 (up to 4) and sets bit 1 of the accept mask; IsObjectAccepted tests each with func_001300E8
+func_0013DAB8	AddMaskedColliderListEntry	the setter FillObjectPropertyTable registers: appends the value to the three-entry list at +0x66C (count +0x668) while there is room and sets bit 2 of the mask
 func_0013DAF0	GetMaskedColliderSoundParams	returns the pointer at 0x6B4, setting it up with InitSoundParams first when it is 0
 func_0013DB28	IsObjectAccepted	returns 1 when the mask 0x63C is 0, or bit 0 and the object is the controlled one, or bit 2 and its class flags have 0x20, or bit 1 and it matches an id of 0x644 or a kind of 0x658
 func_0013DC38	UpdateTimedState	slot 17: after the base update, moves state 1 on to 2 once the elapsed clock exceeds limit or tries reaches 2, via SetTimedState

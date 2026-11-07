@@ -1297,7 +1297,7 @@ void func_00160690(s32 a0, s32 flags)
     } else if ((flags & 4) != 0) {
         ResetGameSession();
     } else {
-        func_00140D90(g_flagTable);
+        ResetFlagTable(g_flagTable);
     }
     g = g_saveData;
     g_previousLevelIndex = g->f19D8;
@@ -1346,7 +1346,7 @@ void func_001608E0(void)
     GameProgress* g = g_saveData;
     g->f19E0 = 5;
     g->f19E4 = 0;
-    func_00140D90((void*)g_flagTable);
+    ResetFlagTable((void*)g_flagTable);
 }
 
 void func_00160918(void)

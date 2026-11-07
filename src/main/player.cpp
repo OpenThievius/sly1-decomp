@@ -410,7 +410,7 @@ void func_00170528(Player* self, s32 flags, ContactLimit03* out)
             }
         }
     } else {
-        func_001C53A8(self, flags, out);
+        ClampColliderContactLimit(self, flags, out);
     }
 }
 
@@ -448,7 +448,7 @@ s32 func_001C5248(void* self);
 s32 func_00170790(Player* self, Contact03* e, s32 idx)
 {
     if (self->f2220 != 0xD) {
-        return func_001C5248(self);
+        return IsTurningColliderGroundContact(self);
     }
     f32 scale = D_00274AD0[idx];
     if (e->v80.z * scale < 0.7f) {
@@ -492,7 +492,7 @@ void func_00171DD8(Player* self)
     Vec3 loc;
     if (AimPlayerAtTarget(self) == 0) {
         if (self->f690 != 0) {
-            func_001278A8((s32)self->f6C0, 0, (u8*)self + 0x6A0, 0, &loc, 0, 0);
+            ComputeObjectMotionInFrame((s32)self->f6C0, 0, (u8*)self + 0x6A0, 0, &loc, 0, 0);
             loc.z = ClampToMagnitude(loc.z, 10.0f);
             self->f638 = self->f638 + loc.z * g_frameDt[0];
         }
@@ -520,7 +520,7 @@ void func_00171F28(Player* self, f32 unusedF12, f32 scale)
     tmp.z = tmp.z - 75.0f;
     Vec02 out;
     void* a1;
-    func_001EDEF0(&tmp, a1, &out, self);
+    ComputeBallisticLaunchVelocity(&tmp, a1, &out, self);
     self->desc02()->m20(self, &out);
     if (self->f2220 != 4) {
         SetPlayerState(self, 2, 6);
@@ -626,14 +626,14 @@ void func_001725E0(Player* self, void* a, void* b)
     }
     if (self->f2220 == 3)
     {
-        func_001CDD98(self);
+        UpdatePlayerLinkPose(self);
     }
     DrawTurningCollider(self, a, b);
     if (self->f21C0)
     {
         QueueTrailRibbonDraw(self->f1520, a);
     }
-    func_001D62E0(self, a, b);
+    QueuePlayerMarkerRingDraw(self, a, b);
 }
 
 
@@ -714,11 +714,11 @@ void func_00172898(Player* self)
             row = row->next;
         } while (row);
     }
-    func_001C57C8(self);
+    CollectTurningColliderContacts(self);
     if (self->f2220 == 8) {
         self->f690 = 1;
         self->f694 = g_gameTime[0];
-        func_00128018(self->f24A0, 0, self->f24B0, &self->v6A0);
+        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &self->v6A0);
         self->v6B0 = g_unitZVector;
         self->f6C0 = self->f24A0;
         row = self->contacts->head;
@@ -768,7 +768,7 @@ void func_00172B08(Player* self)
 {
     self->v21D0[1] = ((PlacedObject*)self->f23D4)->v140;
     self->f21CC = 0;
-    func_001BC088(self, 0, g_frameDt[0]);
+    MoveCollider(self, 0, g_frameDt[0]);
     if (self->f223C == 0) {
         self->v21D0[0] = self->v140;
         self->v21D0[2] = ((PlacedObject*)self->f23D4)->v140;
@@ -789,7 +789,7 @@ void func_00172B88(Player* self)
     if (self->f21CC > 0) {
         Vec02* p = self->v21D0;
         do {
-            func_001B8420(self, p, self->f2420);
+            ExpandColliderBoundsBySphere(self, p, self->f2420);
             i++;
             p++;
         } while (i < self->f21CC);
@@ -849,7 +849,7 @@ void func_00172CF0(Player* self, Collider* a1, void* a2, void* a3, void* a4, voi
             case 0x24:
             case 0x2A:
             case 0x2B:
-                func_001C5C10(self, a1, a4, a5);
+                AddTurningColliderProbeContact(self, a1, a4, a5);
                 break;
             }
         }
@@ -861,12 +861,12 @@ void func_00172CF0(Player* self, Collider* a1, void* a2, void* a3, void* a4, voi
     default:
         if (self->f2BD8 == 0)
         {
-            func_001C5C10(self, a1, a4, a5);
+            AddTurningColliderProbeContact(self, a1, a4, a5);
         }
         break;
     }
-    func_001C4790(self, a1, a4, &self->f1190);
-    func_001C4790(self, a1, a4, &self->f1290);
+    KeepNearestPartSpan(self, a1, a4, &self->f1190);
+    KeepNearestPartSpan(self, a1, a4, &self->f1290);
     v = (Collider*)FindFirstAttachedSlotObject(self, &idx);
     if (v)
     {
@@ -1474,7 +1474,7 @@ void func_00178D98(Player* self, s32 n, BaseObject** items, TargetHit* out, f32*
             cnt = cnt + 1;
             e->node = node;
             if (IsObjectOfKind(node, 0x6E) != 0) {
-                func_00128018(0, node->parent, &self->v140, &tmp);
+                TransformPointBetweenFrames(0, node->parent, &self->v140, &tmp);
                 PathCurve* s = ((PathCurveObject*)node)->curve;
                 if (s->vt->m10 != 0) {
                     s->vt->m10(s, &tmp, 0, 0, 0, 0, &e->f4);

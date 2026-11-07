@@ -998,7 +998,7 @@ void func_001E9108(ElementStack* obj)
 void func_001E9498(ElementStack* self, ScreenElement* node)
 {
     if (IsStreamVoiceLocked() && self->count == 1) {
-        func_001BEA28();
+        PauseStreamVoice();
     }
     if (self->count >= 2) {
         ScreenElement* last = self->items[self->count - 1];
@@ -1027,7 +1027,7 @@ void func_001E9570(ElementStack* g)
         if (other->vt->m03) other->vt->m03(other, 1);
     }
     if (IsStreamVoiceLocked()) {
-        if (g->count == 1) func_001BEA50();
+        if (g->count == 1) ResumeStreamVoice();
     }
 }
 
@@ -1038,7 +1038,7 @@ void func_001E9648(void)
 
 void func_001E9668(void)
 {
-    func_001AA110();
+    QueueEachScreenElementDraw();
 }
 
 void func_001E9688(ElementStack* self)
@@ -1220,12 +1220,12 @@ void func_001E9C78(World* self, f32 dt)
             vt->m49(h, dt, a);
         }
     }
-    func_0015FF58(self);
+    UpdateWorldObjectLists(self);
     {
         ListFrame it;
         BeginByteWalk::Of(&it, (List01*)&self->list60);
         for (u8* n = NextByte::Of(&it); n != 0; n = NextByte::Of(&it)) {
-            func_00124EE8(n, dt);
+            UpdateObjectTree(n, dt);
         }
         EndByteWalk::Of(&it);
     }
@@ -1277,7 +1277,7 @@ void func_001E9EE8(World* self, f32 dt)
     if (dt == 0.0f) return;
     ListFrame it;
     BeginNodeWalk::Of(&it, &self->list78);
-    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_00124EE8(obj, dt);
+    for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) UpdateObjectTree(obj, dt);
     EndNodeWalk::Of(&it);
     BeginNodeWalk::Of(&it, (List01*)&self->f1B70);
     for (ListedObject* obj = NextNode::Of(&it); obj; obj = NextNode::Of(&it)) func_0012EBD8(obj, dt);
@@ -1311,7 +1311,7 @@ void func_001EA118(World* self)
     if (clock->dt != 0.0f) {
         UpdateWorldDeltaLists(self, clock->dt);
         UpdateUnflaggedParts(self);
-        func_00138C00(self, 0);
+        UpdateWorldContacts(self, 0);
         ProcessColliderGroups(self, 1, clock->dt);
         BeginActorWalk::Of(&it, &self->list6C);
         for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
@@ -1320,12 +1320,12 @@ void func_001EA118(World* self)
             }
         }
         g_activeListFrames = it.prev;
-        func_00138C00(self, 1);
+        UpdateWorldContacts(self, 1);
         ProcessColliderGroups(self, 6, g_gameClock.dt);
         BeginActorWalk::Of(&it, &self->list60);
         for (Actor6C* obj; (obj = NextActor::Of(&it)) != 0;) {
             if (obj->tries < 2) {
-                if (func_00129D70(obj) != 0) {
+                if (IsObjectTreeAtRest(obj) != 0) {
                     obj->tries++;
                 } else {
                     ClearRootTries(obj);
@@ -1903,7 +1903,7 @@ void func_001EBFB0(TempoAgent* self)
     ResolveObjectLinks(self, 5, D_00275D08);
     void* r = CreateStateWalker(self->fC50, 0, -1, 0);
     self->fC54 = r;
-    func_001B6DF8(r, self);
+    AddStateWalkerListener(r, self);
     self->fC98 = 9;
     self->fC9C = CopyToFrontMemory(0x6C, D_00275D48);
     s32 i = 0;
@@ -2220,7 +2220,7 @@ void func_001ED090(TempoAgent* self, AnimationPlayer* a, s32 b)
     TempoPlayerEntry* e = &self->fC6C[self->fC68++];
     e->beats = b;
     e->player = a;
-    func_0012F810(a, self);
+    AddAnimationPlayerRecordCallback(a, self);
 }
 
 void func_001ED0D8(TempoAgent* self, AnimationPlayer* key)
@@ -2877,10 +2877,10 @@ void func_001EF900(C62* self, s32 state)
     if (self->id2D0 != state) {
         if (state != 0) {
             if (state == 2)
-                func_0013ECB0((World*)g_currentWorld, self->f2E4, self->f2E8, self, 1);
+                SetGatheredWalkerTargets((World*)g_currentWorld, self->f2E4, self->f2E8, self, 1);
         } else {
             if (self->id2D0 == 2)
-                func_0013ECB0((World*)g_currentWorld, self->f2E4, self->f2E8, self, 0);
+                SetGatheredWalkerTargets((World*)g_currentWorld, self->f2E4, self->f2E8, self, 0);
         }
         StateChangeMsg evt;
         evt.old = self->id2D0;
@@ -3676,7 +3676,7 @@ void func_001F18B0(WarpPage* self, s32 idx) {
     }
     BaseObject* r = *(BaseObject**)(base + idx * 0x34 + 0x30C);
     if (r != 0) {
-        func_00128018(r->parent, self, (u8*)r + 0x40, (Quad16*)(base + 0x550));
+        TransformPointBetweenFrames(r->parent, self, (u8*)r + 0x40, (Quad16*)(base + 0x550));
     } else {
         *(Quad16*)(base + 0x550) = *(Quad16*)&D_00248D30;
     }
@@ -3778,7 +3778,7 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
         }
         GameProgress* g = g_saveData;
         if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
-            func_001BED48();
+            PauseStagedBankVoice();
         }
         self->vt->m14(self);
         SetPadSelectFlags(1);
@@ -3796,7 +3796,7 @@ void func_001F1C90(T217D_0F0* self, s32 a1)
             SetElementStackState(g_elementStack, 3);
             GameProgress* g = g_saveData;
             if (((g->f19D8 << 8) | g->f19DC) == 0x308) {
-                func_001BED70();
+                ResumeStagedBankVoice();
             }
         }
     }

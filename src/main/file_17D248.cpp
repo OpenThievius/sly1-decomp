@@ -93,7 +93,7 @@ s32 func_0017DE88(Collider* self, void* ctx, Quad16* src)
     Quad16& q = *(Quad16*)buf;
     q = *src;
     s32 hits = 0;
-    func_001ED780(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
+    BuildPerpendicularPair(&q, buf + 0x10, &g_unitZVector, &g_unitZVector);
     BuildMatrixFromRotationAndTranslation(ctx, &q, buf + 0x30);
     for (s32 i = 0; (u32)i < 0x16; i += 2) {
         TransformByMatrixWithW(buf + 0x30, 1.0f, &D_00263EC0[i], buf + 0x70);

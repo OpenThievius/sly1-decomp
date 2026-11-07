@@ -380,7 +380,7 @@ void func_0013DD78(TimedStateObject* self, s32 state)
         f32 t = g_gameTime;
         self->stamp = t;
         if (state == 2) {
-            (void)func_00126D60(self->param);
+            (void)FadeOutPlacedObject(self->param);
         }
     }
 }
@@ -416,8 +416,8 @@ void func_0013DE38(MassScalingCollider* self, u8* table, s32 index)
     value = *(s32*)(table + ((one - index) << 6));
     if (self->f678 != 0) return;
     if (IsObjectAccepted(self, value) == 0) return;
-    if (self->sel6C4 != -1) func_001BB058(self, self->sel6C4);
-    if (self->sel6C8 != -1) func_001BB0C8(self, self->sel6C8);
+    if (self->sel6C4 != -1) SetColliderTurnAnchorPreset(self, self->sel6C4);
+    if (self->sel6C8 != -1) SetColliderMoveAnchorPreset(self, self->sel6C8);
     self->f678 = one;
     self->cur = value;
     self->mass = self->mass * self->scale;
@@ -1003,7 +1003,7 @@ void func_0013FA10(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->f7B0 << 4;
             }
-            func_001B9058(self, p, (s32)self->p20C, D_00248D30, (s32)self->p210, t);
+            SteerColliderTowardPosition(self, p, (s32)self->p20C, D_00248D30, (s32)self->p210, t);
         }
         break;
     case 1:
@@ -1012,7 +1012,7 @@ void func_0013FA10(TriggerZone* self, f32 t)
             if (self->zone.mode != 4) {
                 p += self->f7B0 * 0x30;
             }
-            func_001B91A8(self, p, (s32)self->p214, D_00248D30, (s32)self->p218, t);
+            SteerColliderTowardRotation(self, p, (s32)self->p214, D_00248D30, (s32)self->p218, t);
         }
         break;
     }

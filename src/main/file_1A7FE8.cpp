@@ -944,8 +944,8 @@ void func_001A94C0(FrameSource* self, Vec02* a1, Vec02* a2, void* a3)
         }
     }
     if (a3 != 0) {
-        func_00128018(0, a3, a1, a1);
-        func_00128150(0, a3, a2, a2);
+        TransformPointBetweenFrames(0, a3, a1, a1);
+        TransformRotationBetweenFrames(0, a3, a2, a2);
     }
 }
 
@@ -956,10 +956,10 @@ void func_001A97C8(u8* self, f32* out, int x)
     f32 v[12];
     if (*(void**)(self + 0x10) != 0) {
         GetObjectWorldRotation(*(void**)(self + 0x10), v);
-        func_00128150(0, x, v, v);
+        TransformRotationBetweenFrames(0, x, v, v);
         *out = ArctangentOfRatio(v[1], v[0]);
     } else if (*(u8**)(self + 0x14) != 0) {
-        func_00128150(0, x, *(u8**)(self + 0x14) + 0x110, v);
+        TransformRotationBetweenFrames(0, x, *(u8**)(self + 0x14) + 0x110, v);
         *out = ArctangentOfRatio(v[1], v[0]);
     } else {
         *out = *(f32*)(self + 0x8);

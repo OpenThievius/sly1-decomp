@@ -64,9 +64,9 @@ void func_00137260(CaptionLayout* out, s32 flag);
 void func_00137268(CaptionLayout* out, s32 flag);
 struct CaptionLayout {
     u8 b[32];
-    void Pos(f32 x, f32 y) { func_00137228(this, x, y); }
-    void Size(f32 x, f32 y) { func_00137238(this, x, y); }
-    void Color(s32* c) { func_00137248(this, c); }
+    void Pos(f32 x, f32 y) { SetTextLayoutPosition(this, x, y); }
+    void Size(f32 x, f32 y) { SetTextLayoutSize(this, x, y); }
+    void Color(s32* c) { SetTextLayoutColor(this, c); }
     void FlagA(s32 f) { func_00137260(this, f); }
     void FlagB(s32 f) { func_00137268(this, f); }
 };

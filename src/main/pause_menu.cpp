@@ -261,11 +261,11 @@ void func_001AE3B8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, Rgba4* c, s32
 
 struct SetupLayout { static void Do(Layout_137228* out, f32 x, f32 y, f32 w, f32 h, s32 color, s32 flag)
 {
-    func_00137228(out, x, y);
-    func_00137238(out, w, h);
+    SetTextLayoutPosition(out, x, y);
+    SetTextLayoutSize(out, w, h);
     Quad4 tmp;
     tmp.w[0] = color;
-    func_00137248(out, &tmp);
+    SetTextLayoutColor(out, &tmp);
     func_00137260(out, flag);
     func_00137268(out, 0);
 } };
@@ -640,7 +640,7 @@ void func_001940E8(T217D_6D0* self, s32 mode) {
     if (mode != 0) {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
         if (key == 0x308) {
-            func_001BED48();
+            PauseStagedBankVoice();
             SetElementStackState(g_elementStack, 5);
         } else if (D_0027051C != 0) {
             SetElementStackState(g_elementStack, 5);
@@ -659,7 +659,7 @@ void func_001940E8(T217D_6D0* self, s32 mode) {
     } else {
         s32 key = (g_saveData->f19D8 << 8) | g_saveData->f19DC;
         if (key == 0x308) {
-            func_001BED70();
+            ResumeStagedBankVoice();
             SetElementStackState(g_elementStack, 3);
         } else if (D_0027051C != 0) {
             SetElementStackState(g_elementStack, 3);
@@ -1088,12 +1088,12 @@ void func_00194F80(T217D_6D0* self)
     if (((MenuBoxStyle*)self->frame) != 0) {
         Layout_137228 out;
         s32 backColor = 0xFF808080;
-        func_00137228(&out, cx, cy);
-        func_00137238(&out, w, h);
+        SetTextLayoutPosition(&out, cx, cy);
+        SetTextLayoutSize(&out, w, h);
         {
             Quad4 tmp;
             tmp.w[0] = backColor;
-            func_00137248(&out, &tmp);
+            SetTextLayoutColor(&out, &tmp);
         }
         func_00137260(&out, 0);
         func_00137268(&out, 0);
@@ -1241,7 +1241,7 @@ void func_00195958(T217D_6D0* self)
         }
         case 18: {
             s32 v;
-            void* s2 = (void*)func_00193660();
+            void* s2 = (void*)FindObject42CStateWalker();
             void* s0 = GetActiveSwitchedCollider();
             if (s2 != 0 && s0 != 0 && IsObjectOfKind(s0, 0x19) != 0) {
                 GetStateWalkerCurrentKey(s2, &v);

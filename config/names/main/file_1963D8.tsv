@@ -7,6 +7,7 @@ func_00196938	InitGaugeCollider	slot 0 of class 0x18: runs InitSwitchedCollider,
 func_001969C0	LoadGaugeCollider	slot 10 of class 0x18: runs LoadCollider and resolves its one object link g_gaugeColliderLoadLinks
 func_001969F8	StartGaugeCollider	slot 16 of class 0x18: resolves g_gaugeColliderStartLinks, creates its state walkers and its pose source, and gathers the objects of ids 0x305, 0x105 and class 0x44 into its lists
 func_00196B78	StepGaugeCollider	slot 0x80 (step) of class 0x18: StepCollider, then turns it with BuildAxisAngleMatrix and passes the turn to func_001B9D10
+func_00196E48	AcceptColliderOfOtherRoot	a filter UpdateGaugeCollider passes by address: rejects a collider whose root (+0x50) is the given one, and a collider with flag bit 43 of +0x538 that is not of kind 0x1F
 func_00196EB0	UpdateGaugeCollider	slot 0x54 (update) of class 0x18: UpdateSwitchedCollider, then its own per-frame work (func_001BB290, ConvertPositionToWorld)
 func_001973D8	ApplyGaugeColliderRatioToEffect	clamps the count at 0x680 over the limit at 0x684 to 0..1 and passes 1 - ratio * 0.8 to func_00151E20 on D_00261EF0, as ApplyGaugeRatioToEffect does for the gauge manager
 func_00197458	EndGaugeColliderTimer	the timer's limit callback that HandleGaugeColliderNotification installs: on flag 1, unless the gauge collider's walker at 0x6B8 is at 0x3F4, sets its target to 0x3F5 and runs ApplyGaugeColliderRatioToEffect
