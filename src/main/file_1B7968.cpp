@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "sound_record.h"
 #include "script_value.h"
 #include "cursor_animator.h"
 #include "switched_collider.h"
@@ -193,20 +194,6 @@ s32 func_001493A0(u8* p);
 s32 func_00149638(u8* s);
 void func_001BF398(void);
 void func_001BF2E0(void);
-struct Rec_1BE4D8 {
-    s32 f00;
-    f32 f04;
-    f32 f08;
-    f32 f0C;
-    s32 f10;
-    f32 f14;
-    u8 pad18[4];
-    s32 f1C;
-    s32 f20;
-};
-struct Owner_1BE4D8 {
-    Rec_1BE4D8* rec;
-};
 void* func_0018D5C0(s32 bytes);
 extern s32 D_00274730;
 typedef s32 (*Cmp_1BE0A8)(void* a, void* b);
@@ -214,11 +201,8 @@ void func_001BE068(u8* base, s32 stride, s32 rowB, s32 rowA);
 s32 func_001BE980(void);
 void func_0018D410(void* p);
 s32 func_0011E048(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
-struct Obj_1BE5F8 { s32 w0; s32 w4; u8 pad8[0xC]; s32 w14; u8 pad18[4]; s32 w1C; };
-struct Local_1BE5F8 { s32 a; s32 b; };
 void func_001BE5D8(void);
 void func_0011E0E0(s32 a0, void (*a1)(void), u64 a2);
-struct Local_1BE728 { s32 a; s32 b; };
 void func_0011D420(void);
 void* func_001925F0(void);
 typedef s32 (*VFn_001BF3D0)(void* self);
@@ -232,7 +216,6 @@ void func_0011D798(void* a0, s32 a1, s32 a2);
 void func_001BFCD8(s32 a0, void* a1, s32 a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 void func_001BE860(void* self);
 void func_001BF718(void* slot);
-struct Rec_1BEB10 { s32 f0; s32 f4; s32 f8; u8 pad0[8]; s32 f14; s32 f18; s32 f1C; };
 void func_001BEA78(void);
 void func_001BE1E8(void);
 s32 func_0011E1F8(s32 a);
@@ -458,7 +441,9 @@ s32 func_001B6290(s32 p, void* ctx, s32 a2, s32 a3);
 void func_00182D48(void* self);
 void func_00152470(void* table, void* self);
 void func_001830D8(void* self);
-struct Entry_1C1390 { s32 key; void* value; };
+// An entry of World::f1EF4: an expression read from the level and the scope it was evaluated in
+// (0 until func_001C13E8 evaluates it).
+struct WorldScriptEntry { R11B008Node* expr; s32 scope; };
 extern u8 D_00259F38[];
 void func_0011A6C0(void* a, void* b);
 void func_0011D480(s32 a, s32 b);
@@ -537,7 +522,6 @@ void func_001C15D8(ScriptValue* self, void* a, s32 r);
 struct Owner_1C0C08 { u8 pad0[1]; };
 void func_0011D8B0(Owner_1C0C08* a0, s32 a1, s32 a2);
 void func_00182C18(BaseObject* self);
-struct E_1C1190 { R11B008Node* a; s32 b; };
 s32 func_00137C40(void* src);
 void* func_0018D500(u32 size);
 void func_00138518(void* self);
@@ -547,7 +531,6 @@ void* func_0011A358(ScriptValue* out, s32 a, s32 b, ScriptValue* body);
 extern s32 D_00275714;
 // NEAR: the entry pointer is loaded into v0 where retail uses v1 (register choice only); five lines differ.
 
-struct Ent_1C13E8 { R11B008Node* a; s32 b; };
 void func_0011A080(ScriptValue* t, R11B008Node* node, s32 b);
 struct Cmd_1C1AD8 { u32 kind; R11B008Node* list; };
 struct __attribute__((aligned(16))) Blob_1C1BF8 { Quad16 q[3]; };
@@ -1975,17 +1958,17 @@ void func_001BE4A8(s32 idx)
     EnsureSoundBankLoaded(*(Ent_1BE4A8**)((u8*)g_soundEntries + idx * 8));
 }
 
-void func_001BE4D8(Owner_1BE4D8* self)
+void func_001BE4D8(SoundRecord** self)
 {
-    self->rec = (Rec_1BE4D8*)AllocateZeroedFrontMemory(0x24);
-    self->rec->f00 = -1;
-    self->rec->f04 = 3000.0f;
-    self->rec->f08 = 300.0f;
-    self->rec->f0C = 1.0f;
-    self->rec->f10 = 0;
-    self->rec->f1C = 0;
-    self->rec->f14 = -1.0f;
-    self->rec->f20 = 0;
+    *self = (SoundRecord*)AllocateZeroedFrontMemory(0x24);
+    (*self)->f00 = -1;
+    (*self)->f04 = 3000.0f;
+    (*self)->f08 = 300.0f;
+    (*self)->f0C = 1.0f;
+    (*self)->f10 = 0;
+    (*self)->f1C = 0;
+    (*self)->f14 = -1.0f;
+    (*self)->f20 = 0;
 }
 
 s32 func_001BE568(s32 idx)
@@ -2005,7 +1988,7 @@ void func_001BE5D8(void)
 
 s32 func_001BE5E8(void) { return g_streamVoiceLocked; }
 
-void func_001BE5F8(Obj_1BE5F8* self)
+void func_001BE5F8(KeyRecord* self)
 {
     if (g_streamVoiceLocked != 0) {
         return;
@@ -2013,20 +1996,20 @@ void func_001BE5F8(Obj_1BE5F8* self)
     if (self == 0) {
         return;
     }
-    Local_1BE5F8 l;
-    Local_1BE5F8* p;
+    KeyId l;
+    KeyId* p;
     if (HasStreamVoice() != 0) {
         StopStreamVoice();
     }
     p = &l;
     ClearKeyId(p);
-    s32 b = self->w4 ^ self->w1C;
-    p->b = b;
-    p->a = self->w0 ^ self->w14;
+    s32 b = self->wordB ^ self->maskB;
+    p->second = b;
+    p->first = self->wordA ^ self->maskA;
     if (b == 0) {
         return;
     }
-    s32 h = StartStreamedVoice(p->a, 0, 0, 0, 0x400, 0, 2, 0, 0);
+    s32 h = StartStreamedVoice(p->first, 0, 0, 0, 0x400, 0, 2, 0, 0);
     if (h == 0) {
         return;
     }
@@ -2049,8 +2032,8 @@ void func_001BE728(KeyRecord* self)
     if (g_streamVoiceLocked != 0) {
         return;
     }
-    Local_1BE728 l;
-    Local_1BE728* p;
+    KeyId l;
+    KeyId* p;
     if (HasStreamVoice() != 0) {
         StopStreamVoice();
     }
@@ -2059,14 +2042,14 @@ void func_001BE728(KeyRecord* self)
     s32 r = 0;
     if (self != 0) {
         s32 b = self->wordB ^ self->maskB;
-        p->b = b;
-        l.a = self->wordA ^ self->maskA;
+        p->second = b;
+        l.first = self->wordA ^ self->maskA;
         r = b != 0;
     }
     if (r == 0) {
         return;
     }
-    s32 h = StartStreamedVoice(l.a, 0, 0, 0, 0x400, 0, 2, 0, 1);
+    s32 h = StartStreamedVoice(l.first, 0, 0, 0, 0x400, 0, 2, 0, 1);
     if (h == 0) {
         return;
     }
@@ -2174,7 +2157,7 @@ void func_001BEAC8(s32 h)
     }
 }
 
-void func_001BEB10(Rec_1BEB10* self)
+void func_001BEB10(KeyRecord* self)
 {
     s32 local[2];
     s32 same;
@@ -2184,7 +2167,7 @@ void func_001BEB10(Rec_1BEB10* self)
         StopStagedBankVoice();
         return;
     }
-    Rec_1BEB10* old = (Rec_1BEB10*)g_stagedBankRecord;
+    KeyRecord* old = (KeyRecord*)g_stagedBankRecord;
     if (self == old) {
         same = 1;
     } else if (self == 0) {
@@ -2192,7 +2175,7 @@ void func_001BEB10(Rec_1BEB10* self)
     } else if (old == 0) {
         same = 0;
     } else {
-        same = ((self->f8 ^ self->f18) ^ (old->f8 ^ old->f18)) == 0;
+        same = ((self->wordC ^ self->maskC) ^ (old->wordC ^ old->maskC)) == 0;
     }
     if (same != 0 && g_stagedBankState != 0) {
         return;
@@ -2206,8 +2189,8 @@ void func_001BEB10(Rec_1BEB10* self)
     if (self == 0) {
         flag = 0;
     } else {
-        s32 x = self->f4 ^ self->f1C;
-        local[0] = self->f0 ^ self->f14;
+        s32 x = self->wordB ^ self->maskB;
+        local[0] = self->wordA ^ self->maskA;
         local[1] = x;
         flag = x != 0;
     }
@@ -3020,9 +3003,9 @@ void func_001C1190(World* self, BufferedStream* arg) {
     s32 n2 = ReadBufferedU32(arg);
     for (i = 0; i < self->f1EF0; i++) {
         {
-            E_1C1190* e = (E_1C1190*)self->f1EF4 + i;
-            e->a = ReadScriptValueChain(arg);
-            e->b = 0;
+            WorldScriptEntry* e = (WorldScriptEntry*)self->f1EF4 + i;
+            e->expr = ReadScriptValueChain(arg);
+            e->scope = 0;
             if (D_00275714) {
                 SkipBufferedBlock(arg);
                 SkipBufferedBlock(arg);
@@ -3060,8 +3043,8 @@ void* func_001C1390(s32 index, World* self)
     if (index == -1) {
         return 0;
     } else {
-        Entry_1C1390* e = (Entry_1C1390*)((index << 3) + (u32)self->f1EF4);
-        void* p = e->value;
+        WorldScriptEntry* e = (WorldScriptEntry*)((index << 3) + (u32)self->f1EF4);
+        void* p = (void*)e->scope;
         if (p != 0) AddUniqueMarkRoot(g_markStacks, p);
         return p;
     }
@@ -3071,13 +3054,13 @@ ScriptValue* func_001C13E8(ScriptValue* self, s32 index, World* ctx)
 {
     s32 off = index << 3;
     ScriptValue q;
-    Ent_1C13E8* e;
+    WorldScriptEntry* e;
     InitScriptValue(&q);
-    e = (Ent_1C13E8*)(off + (s32)ctx->f1EF4);
-    if (e->a != 0 && e->b == 0) {
+    e = (WorldScriptEntry*)(off + (s32)ctx->f1EF4);
+    if (e->expr != 0 && e->scope == 0) {
         ScriptValue t;
-        ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->b = NewScriptScope();
-        EvalScriptExpression(&t, ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->a, ((Ent_1C13E8*)(off + (s32)ctx->f1EF4))->b);
+        ((WorldScriptEntry*)(off + (s32)ctx->f1EF4))->scope = NewScriptScope();
+        EvalScriptExpression(&t, ((WorldScriptEntry*)(off + (s32)ctx->f1EF4))->expr, ((WorldScriptEntry*)(off + (s32)ctx->f1EF4))->scope);
         AssignScriptValue(&q, &t);
         DestroyScriptValue(&t, 2);
     }

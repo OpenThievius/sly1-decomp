@@ -11,9 +11,10 @@
 struct KeyRecord {
     s32 wordA;             // 0x00: func_001BE728 (xor maskA gives the id word)
     s32 wordB;             // 0x04: func_001BE728 (xor maskB; only its non-zero is tested)
-    u8 pad08[0x14 - 0x08];
+    s32 wordC;             // 0x08: func_001BEB10 (xor maskC: the bank's identity)
+    u8 pad0C[0x14 - 0x0C];
     s32 maskA;               // 0x14: func_001BE728
-    u8 pad18[0x1C - 0x18];
+    s32 maskC;               // 0x18: func_001BEB10
     s32 maskB;               // 0x1C: func_001BE728
 };
 

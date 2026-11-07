@@ -7,8 +7,8 @@ void func_001BE728(KeyRecord* self)
     if (g_streamVoiceLocked != 0) {
         return;
     }
-    Local_1BE728 l;
-    Local_1BE728* p;
+    KeyId l;
+    KeyId* p;
     if (HasStreamVoice() != 0) {
         StopStreamVoice();
     }
@@ -17,14 +17,14 @@ void func_001BE728(KeyRecord* self)
     s32 r = 0;
     if (self != 0) {
         s32 b = self->wordB ^ self->maskB;
-        p->b = b;
-        l.a = self->wordA ^ self->maskA;
+        p->second = b;
+        l.first = self->wordA ^ self->maskA;
         r = b != 0;
     }
     if (r == 0) {
         return;
     }
-    s32 h = StartStreamedVoice(l.a, 0, 0, 0, 0x400, 0, 2, 0, 0, 1);
+    s32 h = StartStreamedVoice(l.first, 0, 0, 0, 0x400, 0, 2, 0, 0, 1);
     if (h == 0) {
         return;
     }
