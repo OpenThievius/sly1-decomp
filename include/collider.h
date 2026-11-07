@@ -57,15 +57,27 @@ struct ContactEnd03 {
     u8 pad20[0x40 - 0x20];
 };
 
+// One span a collision query returns (CollectColliderSpansInTree fills up to n of them, 0x70
+// bytes each): func_001C4790 keeps the one with the least f40, skipping a first one at 0.
+struct __attribute__((aligned(16))) ColliderSpan {
+    u8 pad00[0x40];
+    f32 f40;                // 0x40
+    u8 pad44[0x70 - 0x44];
+};
+
 // A contact between two bodies (0xE0 bytes, the world's pool at +0x1AFC: func_001DB4C8 sets it
 // up for 0xE0-byte records, func_001BC4D8 copies one whole; func_001861E8 gives a chain of them
 // back). Each body's table lists the contacts it is an end of.
 struct Contact03 {
     ContactEnd03 end[2];    // 0x00
-    Vec02 v80;              // 0x80: func_001F5008
-    u8 pad90[0x9C - 0x90];
+    Vec02 v80;              // 0x80: func_001F5008; its z, signed by the end, is how much end 0 faces up (func_001C5248)
+    u8 pad90[0x94 - 0x90];
+    f32 f94;                // 0x94: set by a body's slot 60 (func_001C5338: 1.5 or 0)
+    s32 f98;                // 0x98: cleared with it
     s32 kind;               // 0x9C: 8 and 9 are dropped when a part stops colliding (func_001B94F0)
-    u8 padA0[0xC4 - 0xA0];
+    s32 fA0;                // 0xA0: compared with TurningCollider::f6D4 at end 0 (kinds 1, 10; func_001C5248)
+    s32 fA4;                // 0xA4: the same at end 1 (kind 4)
+    u8 padA8[0xC4 - 0xA8];
     f32 timer;              // 0xC4: slot 67 tells both ends' slot 65 while it is positive
     u8 padC8[0xD0 - 0xC8];
     Contact03* next;        // 0xD0

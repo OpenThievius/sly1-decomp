@@ -4,19 +4,23 @@
 #include "base_object.h"
 #include "switched_collider.h"
 #include "globals.h"
+#include "screen_element.h"
+#include "attachment.h"
+#include "animation.h"
+#include "owner_message.h"
 
 // A quadratic in t (c[0] + t * (c[1] + t * c[2])), on 16 bytes: the file's four start on a
 // 16-byte line, so 0x274A48 is padding after the float before the first.
-struct __attribute__((aligned(16))) Quad_1C3390 { f32 c[3]; };
+struct __attribute__((aligned(16))) PaddedQuadratic { f32 c[3]; };
 
 // The file's .data, in retail's order.
 s32 D_002749B0[36] = { 4, 1317, 1632, 4, 1320, 1580, 2, 354, 1420, 2, 355, 1424, 6, 352, 1412, 0, 1319, 1636, 0, 1321, 1560, 0, 1322, 1564, 0, 1323, 1568, 0, 1324, 1572, 0, 1325, 1652, 0, 1326, 1656 };
 char D_00274A40[4] = "\r";
 f32 D_00274A44 = 150.0f;
-Quad_1C3390 D_00274A50 = { { 0.2f, 0.0f, 0.0f } };
+PaddedQuadratic D_00274A50 = { { 0.2f, 0.0f, 0.0f } };
 f32 D_00274A60[3] = { 40.0f, 0.0f, 0.3f };
-Quad_1C3390 D_00274A70 = { { 1.0f, 0.0f, -0.75f } };
-Quad_1C3390 D_00274A80 = { { 0.7f, 0.3f, 0.0f } };
+PaddedQuadratic D_00274A70 = { { 1.0f, 0.0f, -0.75f } };
+PaddedQuadratic D_00274A80 = { { 0.7f, 0.3f, 0.0f } };
 f32 D_00274A90[2] = { 1200.0f, 1.0f };
 f32 D_00274A98 = 0.25f;
 f32 D_00274A9C = 3000.0f;
@@ -24,7 +28,7 @@ f32 D_00274AA0 = 0.1f;
 f32 D_00274AA8[3] = { 20.0f, 0.0f, 0.3f };
 f32 D_00274AB4 = 1000.0f;
 f32 D_00274AB8[2] = { 0.0f, 300.0f };
-Quad_1C3390 D_00274AC0 = { { -1.0f, 1.0f, 0.0f } };
+PaddedQuadratic D_00274AC0 = { { -1.0f, 1.0f, 0.0f } };
 
 void func_001921A8(void* self);
 
@@ -35,13 +39,11 @@ void func_001C3390(HitCountCollider* self)
     self->f694 = 5;
 }
 
-struct __attribute__((packed)) Pk8_1C33C8 { u64 v; };
-struct __attribute__((packed)) Pp_1C33C8 { void* p; };
+// Two floats (+0x2DC, +0x2E0 of f62C) copied as one unaligned doubleword, and a pointer stored
+// unaligned into a screen element.
+struct __attribute__((packed)) UnalignedFloatPair { u64 v; };
+struct __attribute__((packed)) UnalignedPointer { void* p; };
 
-typedef void (*VFn_1C3928)(void*);
-struct Obj_1C3928 { VFn_1C3928* vtbl; };
-extern Obj_1C3928 D_0026DD48;
-extern Obj_1C3928 D_0026DFC8;
 
 void func_00124A48(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
@@ -57,13 +59,13 @@ void func_001C33C8(HitCountCollider* self)
     ResolveObjectLinks(self, 0xC, D_002749B0);
     self->f668 = CreateStateWalker(self->f664, self, -1, 0);
     self->f644 = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
-    PlacedObject* v = (PlacedObject*)self->f660;
+    PlacedObject* v = self->f660;
     self->f648 = ArctangentOfRatio(v->rot.r[0].y, v->rot.r[0].x);
-    *(Pk8_1C33C8*)&self->f630 = *(Pk8_1C33C8*)((u8*)self->f62C + 0x2DC);
+    *(UnalignedFloatPair*)&self->f630 = *(UnalignedFloatPair*)((u8*)self->f62C + 0x2DC);
     u8* g1 = (u8*)&D_0026DD48;
-    ((Pp_1C33C8*)(g1 + 0x264))->p = (u8*)self + 0x690;
+    ((UnalignedPointer*)(g1 + 0x264))->p = (u8*)self + 0x690;
     u8* g2 = (u8*)&D_0026DFC8;
-    ((Pp_1C33C8*)(g2 + 0x264))->p = (u8*)self + 0x694;
+    ((UnalignedPointer*)(g2 + 0x264))->p = (u8*)self + 0x694;
     *(void**)(g1 + 0x268) = D_00274A40;
     *(f32*)(g2 + 0x26C) = 4.0f;
     SetWorldActiveFollower(self->world, self);
@@ -73,10 +75,6 @@ void func_001C33C8(HitCountCollider* self)
     SetHitCountColliderState(self, 1);
 }
 
-struct Vt_1C34C8 { void* pad[7]; void (*f1C)(void*); void* pad2[0x1A]; void (*f88)(void*, void*); };
-struct Obj_1C34C8_Vt { Vt_1C34C8* vt; };
-struct Sub_1C34C8 { u8 pad[8]; struct Sub2_1C34C8* p8; u8 padC[8]; f32 f14; f32 f18; };
-struct Sub2_1C34C8 { u8 pad[0x34]; f32 f34; };
 extern f32 D_00275C60[];
 extern f32 D_0026185C[];
 extern f32 D_00261854;
@@ -102,20 +100,20 @@ void func_001C34C8(HitCountCollider* self, f32 t)
     u32 ca[4];
     u32 cb[4];
     UpdateSwitchedCollider(self, t);
-    if (((Obj_1C34C8_Vt*)self->f688)) {
-        void* h = FindFirstObjectByIdGathered(self->world, 0x101, 0x77, (s32)((Obj_1C34C8_Vt*)self->f688));
+    if (self->f688) {
+        void* h = FindFirstObjectByIdGathered(self->world, 0x101, 0x77, (s32)self->f688);
         if (h) SendEmptyMessage(h);
         self->f690 = self->f690 + 1;
-        ((Obj_1C34C8_Vt*)self->f688)->vt->f1C(((Obj_1C34C8_Vt*)self->f688));
+        self->f688->desc->m03(self->f688);
         self->f688 = 0;
     }
     if (self->f684) {
         func_001C3F68(self, self->f684);
         self->f684 = 0;
     }
-    if (((Sub_1C34C8*)self->f67C)) {
-        if (((Sub_1C34C8*)self->f67C)->f18 == 0.0f) {
-            StopAnimationPlayer(((Sub_1C34C8*)self->f67C));
+    if (self->f67C) {
+        if (self->f67C->speed == 0.0f) {
+            StopAnimationPlayer(self->f67C);
             self->f67C = 0;
         }
     } else if (self->f680) {
@@ -125,9 +123,9 @@ void func_001C34C8(HitCountCollider* self, f32 t)
     }
     self->f680 = 0;
     f32 u;
-    if (((Sub_1C34C8*)self->f67C)) {
+    if (self->f67C) {
         f32* lim = g_unitRange;
-        f32 r = ((Sub_1C34C8*)self->f67C)->f14 / ((Sub_1C34C8*)self->f67C)->p8->f34;
+        f32 r = self->f67C->time / self->f67C->anim->length;
         f32* pp = D_00274A50.c;
         f32 lo = lim[0];
         f32 hi = lim[1];
@@ -148,8 +146,8 @@ void func_001C34C8(HitCountCollider* self, f32 t)
     }
     f32 ang = ArctangentOfRatio(self->rot.r[0].y, self->rot.r[0].x);
     BuildAxisAngleMatrix((u8*)&g_unitZVector, buf, self->f648 - ang);
-    func_001EA918((u8*)((Obj_1C34C8_Vt*)self->f660) + 0xD0, buf, D_00274A60, buf2, 0, t);
-    ((Obj_1C34C8_Vt*)self->f660)->vt->f88(((Obj_1C34C8_Vt*)self->f660), buf2);
+    func_001EA918(&self->f660->rot, buf, D_00274A60, buf2, 0, t);
+    self->f660->desc02()->m1E(self->f660, (Mat02*)buf2);
     ca[0] = 0x8010FF00;
     cb[0] = 0x800000FF;
     if (self->f638) {
@@ -186,11 +184,11 @@ bool func_001E9970();
 void func_001C3928()
 {
     if (AreMenusAndFadeClear()) {
-        D_0026DD48.vtbl[14]((void*)&D_0026DD48);
-        D_0026DFC8.vtbl[14]((void*)&D_0026DFC8);
+        D_0026DD48.vt->m14(&D_0026DD48);
+        D_0026DFC8.vt->m14(&D_0026DFC8);
     } else {
-        D_0026DD48.vtbl[15]((void*)&D_0026DD48);
-        D_0026DFC8.vtbl[15]((void*)&D_0026DFC8);
+        D_0026DD48.vt->m15(&D_0026DD48);
+        D_0026DFC8.vt->m15(&D_0026DFC8);
     }
 }
 
@@ -198,22 +196,21 @@ ASM_FUNC(func_001C39A0);
 
 ASM_FUNC(func_001C3B40);
 
-struct Entry_1C3C00 { s32 first; u8 pad[60]; };
 s32 func_001300E8(s32 a, s32 b);
 s32 func_001833F0(s32 a, s32 b);
 
-void func_001C3C00(HitCountCollider* self, Entry_1C3C00* table, s32 idx)
+void func_001C3C00(HitCountCollider* self, Contact03* c, s32 end)
 {
-    Entry_1C3C00* e = (Entry_1C3C00*)((u8*)table + ((1 - idx) << 6));
-    if (IsObjectOfKind(e->first, 0x21)) {
+    ContactEnd03* e = &c->end[1 - end];
+    if (IsObjectOfKind((s32)e->body, 0x21)) {
         if (self->f694 > 0) {
             self->f680 = 1;
             return;
         }
-        if (self->f67C == 0) self->f684 = e->first;
+        if (self->f67C == 0) self->f684 = (s32)e->body;
         return;
     }
-    if (MatchesObjectId(e->first, 0x52F)) self->f688 = (void*)e->first;
+    if (MatchesObjectId((s32)e->body, 0x52F)) self->f688 = e->body;
 }
 
 ASM_FUNC(func_001C3C98);
@@ -224,26 +221,18 @@ s32 func_001DDA80(void* p);
 s32 func_001C3D28(HitCountCollider* self)
 { if ((g_buttonCodeFlags & 1) || func_001DDA80(self->world)) return 1; return 0; }
 
-typedef s32 (*VFnA_1C3D60)(void* self, s32 v);
-typedef void (*VFnB_1C3D60)(void* self, s32 v, void* data);
-typedef void (*VFnC_1C3D60)(void* a0, void* self);
-struct Arg_1C3D60 {
-    s32 f0;
-    s32 f4;
-    void* f8;
-    VFnC_1C3D60 fC;
-};
-struct Local_1C3D60 { void* self; s32 v; };
+// What slot 76 tells its own slot 14 (kind 0x17) when it is hit: itself and the message's owner.
+struct OwnerNotice { void* sender; s32 owner; };
 s32 func_00160C58();
 void func_001C3FC8(void* self, s32 flag);
 
-s32 func_001C3D60(HitCountCollider* self, Arg_1C3D60* arg)
+s32 func_001C3D60(HitCountCollider* self, OwnerMessage* arg)
 {
-    Local_1C3D60 local;
+    OwnerNotice local;
     s32 m;
-    if (((VFnA_1C3D60)((void**)self->desc)[79])(self, arg->f0)) return 0;
-    if (arg->f0 == 0) {
-        if (arg->fC != 0) arg->fC(arg->f8, self);
+    if (self->desc05()->m4B(self, arg->mode)) return 0;
+    if (arg->mode == 0) {
+        if (arg->reply != 0) arg->reply(arg->c, self);
     }
     m = self->f610;
     if (m < 5) {
@@ -257,9 +246,9 @@ s32 func_001C3D60(HitCountCollider* self, Arg_1C3D60* arg)
     } else {
         SetHitCountColliderState(self, 3);
     }
-    local.self = self;
-    local.v = arg->f4;
-    ((VFnB_1C3D60)((void**)self->desc)[18])(self, 0x17, &local);
+    local.sender = self;
+    local.owner = arg->owner;
+    self->desc->m0E(self, 0x17, &local);
     return 1;
 }
 
@@ -276,30 +265,27 @@ void func_001C3E80(HitCountCollider* self)
 
 ASM_FUNC(func_001C3EB0);
 
-typedef void (*VFn_1C3F68)(void*, void*);
-struct Local_1C3F68 { s32 pad[2]; s32 value; VFn_1C3F68 fn; };
 void func_001D7098(void* self, s32 a, s32 b);
-void func_001C3EB0(void* self, void* data);
+void func_001C3EB0(s32 c, void* receiver);
 
 void func_001C3F68(HitCountCollider* self, s32 value)
 {
-    Local_1C3F68 local;
+    OwnerMessage local;
     InitOwnerMessage(&local, 0, value);
-    local.value = value;
-    local.fn = func_001C3EB0;
+    local.c = value;
+    local.reply = func_001C3EB0;
     self->desc05()->m4C(self, (void*)&local);
 }
 
 extern f32 D_00261858[];
 extern s32 D_0026E228[8];
 extern u8 D_00261EF0[];
-extern u8 D_0026FF68[];
 
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EA408(f32 a);
 f32 func_001EA728(f32 x, f32 y, f32 z, u8* a, void* out);
 void func_00151E20(u8* a, f32 b);
-void func_00194D30(u8* a, s32 b, s32 c);
+void func_00194D30(T217D_6D0* a, s32 b, s32 c);
 void func_0012C918(void* a, PlacedObject* b, s32 c, void* d, f32 e, f32 f);
 
 #define F(o, off) (*(f32*)((u8*)(o) + (off)))
@@ -338,7 +324,7 @@ void func_001C3FC8(PlacedObject* self, s32 state)
     case 2: s2 = P(self, 0x620); F(self, 0x640) = 3.4028235e+38f; break;
     case 3: s2 = P(self, 0x624); break;
     case 4:
-        SetPauseMenuLayerPage(g_pauseMenuElement, 0, 0x1A);
+        SetPauseMenuLayerPage(&g_pauseMenuElement, 0, 0x1A);
         s2 = P(self, 0x624);
         f12 = F(s2, 0x34);
         break;

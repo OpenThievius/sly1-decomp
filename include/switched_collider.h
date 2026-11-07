@@ -48,8 +48,12 @@ struct Ent1C {
 // A 0x100-byte record class 0x07 keeps twice (0x1190, 0x1290), one per object it holds.
 struct Part07 {
     u8 pad00[0x50];
-    s32 f50;                // 0x50: cleared by func_00172530 when the object is missing
-    u8 pad54[0x100 - 0x54];
+    s32 f50;                // 0x50: cleared by func_00172530 when the object is missing; func_001C4790 needs it set
+    u8 pad54[0x60 - 0x54];
+    Vec02 v60;              // 0x60: the two points func_001C4790 queries a collider's spans between
+    Vec02 v70;              // 0x70
+    u8 pad80[0x90 - 0x80];
+    ColliderSpan span;      // 0x90: the nearest span found (func_001C4790)
 };
 
 // One of class 0x17's six groups at 0x658: count keys, the n objects they resolve to (slot 16),
@@ -113,7 +117,7 @@ struct Desc05 : Desc03 {
 
 // Class 0x06's descriptor (also 0x07's and 0x14's): four more slots.
 struct Desc06 : Desc05 {
-    void* m54;                                      // 0x160: slot 84 (class 0x06: func_001C53B0)
+    void (*m54)(TurningCollider* self);             // 0x160: slot 84, the matrix from the heading (class 0x06: func_001C53B0)
     s32 (*m55)(TurningCollider* self);                          // 0x164: slot 85 (class 0x06: func_001C4F00)
     void* m56;                                      // 0x168: slot 86 (class 0x06: func_001C5248)
     void* m57;                                      // 0x16C: slot 87 (class 0x08: func_001CB3C8)
@@ -886,17 +890,17 @@ struct HitCountCollider : SwitchedCollider {
     f32 f644;               // 0x644
     f32 f648;               // 0x648
     u8 pad64C[0x660 - 0x64C];
-    void* f660;             // 0x660
+    PlacedObject* f660;     // 0x660: an object it turns with itself (func_001C34C8 sets its matrix)
     void* f664;             // 0x664
     void* f668;             // 0x668
     u8 pad66C[0x670 - 0x66C];
     f32 f670;               // 0x670
     u8 pad674[0x678 - 0x674];
     void* f678;             // 0x678
-    void* f67C;             // 0x67C
+    AnimationPlayer* f67C;  // 0x67C: the player func_001C34C8 starts from f678 and stops at speed 0
     s32 f680;               // 0x680
     s32 f684;               // 0x684
-    void* f688;             // 0x688
+    BaseObject* f688;       // 0x688: an object id 0x52F that hit it (func_001C3C00); slot 3 takes it out
     f32 f68C;               // 0x68C
     s32 f690;               // 0x690
     s32 f694;               // 0x694
@@ -907,6 +911,7 @@ struct HitCountCollider : SwitchedCollider {
     void* f720[16];         // 0x720
 };
 
+typedef char check_Part07[sizeof(Part07) == 0x100 ? 1 : -1];
 typedef char check_Ent17[sizeof(Ent17) == 0x2C ? 1 : -1];
 typedef char check_Slot19[sizeof(Slot19) == 0x60 ? 1 : -1];
 typedef char check_SwitchedCollider[sizeof(SwitchedCollider) == 0x610 ? 1 : -1];
