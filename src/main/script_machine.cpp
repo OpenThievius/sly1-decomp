@@ -1637,7 +1637,39 @@ ScriptValue* TransformScriptMatrixByObject(ScriptValue* ret, s32 count, ScriptVa
     return ret;
 }
 
-INCLUDE_ASM(func_00116840);
+typedef f32 (*MathFn_259938)(f32 x);
+f32* AcquireMatrixPayload(void);
+void MatrixToAxisAngle(void* a, f32* b, f32* c);
+void ResetMatrixHomogeneous(void* p);
+
+void MultiplyMatrices3x3(void* a, void* b, void* out);
+void BuildAxisAngleMatrix(void* axis, void* out, f32 angle);
+
+ScriptValue* InterpolateScriptRotation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    Mat02 delta;
+    Vec02 axis;
+    Mat02 a;
+    Mat02 b;
+    f32 angle;
+    InitScriptValue(&obj);
+    f32* m = AcquireMatrixPayload();
+    MultiplyMatrices3x3(args[0].p, args[1].p, &delta);
+    MatrixToAxisAngle(&delta, &angle, (f32*)&axis);
+    BuildAxisAngleMatrix(&axis, &delta, angle * args[2].f);
+    const Mat02* src = (const Mat02*)args[0].p;
+    u128 v0 = Vu0::Q(src->r[0]);
+    Vu0::Q(b.r[0]) = Vu0::Q(a.r[0]) = Vu0::RotateUntied(delta, v0);
+    Vu0::Q(b.r[1]) = Vu0::Q(a.r[1]) = Vu0::RotateUntied(delta, Vu0::Q(src->r[1]));
+    Vu0::Q(b.r[2]) = Vu0::Q(a.r[2]) = Vu0::RotateUntied(delta, Vu0::Q(src->r[2]));
+    *(Mat02*)m = a;
+    ResetMatrixHomogeneous(m);
+    SetScriptValueMatrix(&obj, m);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 ScriptValue* GetScriptMatrixTranslation(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {
@@ -2426,7 +2458,22 @@ ScriptValue* TransformScriptRotationBetweenFrames(ScriptValue* ret, s32 count, S
     return ret;
 }
 
-INCLUDE_ASM(func_00118698);
+ScriptValue* GetScriptPointAheadOfCamera(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
+{
+    ScriptValue obj;
+    Vec02 t;
+    Vec02 k;
+    InitScriptValue(&obj);
+    f32* p = AcquireVectorAPayload();
+    Camera* c = g_camera;
+    Vu0::Q(k) = Vu0::FromFloatAt(c->f1E4);
+    Vu0::Q(t) = Vu0::MulX(Vu0::Q(c->f80), Vu0::Q(k));
+    Vu0::Q(*(Vec02*)p) = Vu0::Add(Vu0::Q(c->f40), Vu0::Q(t));
+    SetScriptValueVectorA(&obj, p);
+    CopyConstructScriptValue(ret, &obj);
+    DestroyScriptValue(&obj, 2);
+    return ret;
+}
 
 ScriptValue* StartScriptEffect(ScriptValue* ret, s32 count, ScriptValue* args, ScriptScope* scope)
 {

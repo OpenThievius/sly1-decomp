@@ -282,14 +282,62 @@ void VectorToAngles(Vec3* v, f32* a1, f32* a2)
     *a2 = ArctangentOfRatio(v->z, Fpu::Sqrt(v->x * v->x + v->y * v->y));
 }
 
-INCLUDE_ASM(func_001892A0);
+extern u8 g_unitYVector[];
+
+// The product a b of two rotations into out: b's rows each rotated by a.
+static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    *out = r;
+}
+
+void func_001892A0(Mat02* out, f32 yaw, f32 pitch)
+{
+    Mat02 a;
+    Mat02 b;
+    BuildAxisAngleMatrix((f32*)g_unitZVector, (Mat4*)&a, yaw);
+    BuildAxisAngleMatrix((f32*)g_unitYVector, (Mat4*)&b, -pitch);
+    MulRotation(out, a, b);
+}
 
 void BuildBasisFromX(void* self, void* value)
 {
     BuildBasisFromXAndZHint(self, g_unitZVector, value);
 }
 
-INCLUDE_ASM(func_00189378);
+void BuildShortestArcRotation(void* from, void* to, void* out);
+
+void func_00189378(Mat02* self, Mat02* scratch, Mat02* out)
+{
+    Mat02 local;
+    Mat02 m;
+    Mat02 t;
+    Mat02* z = scratch ? scratch : &local;
+    BuildShortestArcRotation(&self->r[2], g_unitZVector, z);
+    if (out) {
+        u128 x0 = Vu0::RotateUntied(*z, Vu0::Q(self->r[0]));
+        u128 x1 = Vu0::RotateUntied(*z, Vu0::Q(self->r[1]));
+        u128 x2 = Vu0::RotateUntied(*z, Vu0::Q(self->r[2]));
+        Vu0::Q(t.r[0]) = x0;
+        Vu0::Q(m.r[0]) = x0;
+        Vu0::Q(t.r[1]) = x1;
+        Vu0::Q(m.r[1]) = x1;
+        Vu0::Q(t.r[2]) = x2;
+        Vu0::Q(m.r[2]) = x2;
+        Vu0::Q(out->r[0]) = x0;
+        Vu0::Q(out->r[1]) = x1;
+        Vu0::Q(out->r[2]) = x2;
+    }
+}
 
 LINKER_REMNANT(func_00189430);
 
