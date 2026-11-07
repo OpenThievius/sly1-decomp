@@ -12,21 +12,21 @@ struct Obj_16AF80_eu {
     s32 f974;
 };
 
-void func_0016AF80(Ctx_16AF80* self)
+void func_0016AF80(CurrentPlacedObject* self)
 {
     s32 s1 = 0;
-    Pair_16AF80* p = self->f2E0;
+    StateWalker* p = self->walkers[0].walker;
 
-    if (p->f28 != p->f30) {
+    if (p->f28 != p->index) {
         func_eu_001AB238((&D_0026F138), D_eu_0024CC20);
-    } else if (self->f2D0 == 0) {
+    } else if (self->choice == 0) {
         void** vt = *(void***)(&D_0026F138);
         ((VFnS_16AF80)vt[8])((&D_0026F138), func_eu_001DDAB0(0x16));
     } else {
-        s32 flags = g_saveData->levels[self->f2D0].f448;
+        s32 flags = g_saveData->levels[self->choice].f448;
         if (flags & 1) {
             func_eu_001ADF10((&D_0026F138));
-        } else if (self->f2D0 == self->f300) {
+        } else if (self->choice == self->walkerChoice) {
             void** vt = *(void***)(&D_0026F138);
             ((VFnS_16AF80)vt[8])((&D_0026F138), func_eu_001DDAB0(0x18));
         } else {

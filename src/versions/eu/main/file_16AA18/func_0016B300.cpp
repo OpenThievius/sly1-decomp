@@ -7,10 +7,10 @@ extern s32 D_eu_00263BC0[];
 extern s32 D_eu_00275374;
 ChoiceSound* func_eu_001DE018(s32 id);
 
-void func_0016B300(Self_16B300* self, s32 a, s32 b)
+void func_0016B300(CurrentPlacedObject* self, s32 a, s32 b)
 {
-    if (a == self->f2D0 && b == self->f2D4) return;
-    if (a != self->f300 && a > 0) {
+    if (a == self->choice && b == self->keyIndex) return;
+    if (a != self->walkerChoice && a > 0) {
         ChoiceSound* slot = 0;
         if (g_saveData->levels[a].f448 & 1) {
             if (!(g_saveData->f19EC & 2)) {
@@ -29,18 +29,18 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
             D_eu_00275374 = HasStreamVoice();
         }
     }
-    void* h = self->f2E0;
+    void* h = self->walkers[0].walker;
     if (h) {
-        if (self->f2D0 == -1) {
+        if (self->choice == -1) {
             if (a != 0) {
                 TeleportStateWalker(h, D_00262860[a].targetKey);
-                SetStateWalkerTarget(self->f2E0, D_00262860[a].walkerKey);
+                SetStateWalkerTarget(self->walkers[0].walker, D_00262860[a].walkerKey);
             }
         } else {
             SetStateWalkerTarget(h, *(s32*)((u8*)D_00262860 + (a * 8 + b * 4)));
         }
     }
-    self->f2D0 = a;
-    self->f2D4 = b;
-    self->f2D8 = g_gameClock[1];
+    self->choice = a;
+    self->keyIndex = b;
+    self->choiceTime = g_gameClock[1];
 }

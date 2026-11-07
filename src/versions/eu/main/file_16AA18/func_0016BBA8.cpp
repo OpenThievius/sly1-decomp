@@ -8,16 +8,16 @@ void func_0016BBA8(Ctx_eu_16BBA8* ctx, PadRecord* o)
 
     if ((o->flags & 0x9B0) != 0 || (o->f14 == 1 && 5.0f <= g_gameTime[0])) {
         ClearPadPressedBits(o, 0x9B0);
-        PopStackElement((Group_16BBA8*)g_elementStack);
+        PopStackElement(g_elementStack);
         return;
     }
     if ((o->flags & 0x40) != 0) {
         ClearPadPressedBits(o, 0x40);
-        if (TestGridEntryBit((Bits_16BBA8*)ctx->f570) != 0) {
-            QueueMovieByIndex((Bits_16BBA8*)ctx->f570);
+        if (TestGridEntryBit(ctx->f570) != 0) {
+            QueueMovieByIndex(ctx->f570);
             return;
         }
-        StartSoundEffect((Tag_16BBA8*)0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        StartSoundEffect(0x7B, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         return;
     }
     s1 = GetPadHorizontalStep(o);
@@ -42,5 +42,5 @@ void func_0016BBA8(Ctx_eu_16BBA8* ctx, PadRecord* o)
         r = (r + dx) % 4;
         ctx->f570 = q * 4 + r;
     }
-    StartSoundEffect((Tag_16BBA8*)0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+    StartSoundEffect(0x79, 0, 0, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
 }

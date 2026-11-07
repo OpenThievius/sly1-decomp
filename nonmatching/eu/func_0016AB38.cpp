@@ -8,28 +8,28 @@
 // places them by the hash of the symbols' name strings modulo a table sized by the function:
 // this form puts D_00275BC0's in s7 but second; without the `cap` local it comes first but in fp
 // (5 lines). 32 combinations of natural rewrites elsewhere did not give both.
-void func_0016AB38(Self_16AB38* self)
+void func_0016AB38(CurrentPlacedObject* self)
 {
-    if (self->p[0].src) self->p[0].dst = func_001B6290(self->p[0].src, 0, -1, 0);
-    if (self->p[1].src) self->p[1].dst = func_001B6290(self->p[1].src, 0, -1, 0);
-    if (self->p[2].src) self->p[2].dst = func_001B6290(self->p[2].src, 0, -1, 0);
-    if (self->p[3].src) self->p[3].dst = func_001B6290(self->p[3].src, 0, -1, 1);
-    self->cur = 5;
+    if (self->walkers[0].graph) self->walkers[0].walker = func_001B6290(self->walkers[0].graph, 0, -1, 0);
+    if (self->walkers[1].graph) self->walkers[1].walker = func_001B6290(self->walkers[1].graph, 0, -1, 0);
+    if (self->walkers[2].graph) self->walkers[2].walker = func_001B6290(self->walkers[2].graph, 0, -1, 0);
+    if (self->walkers[3].graph) self->walkers[3].walker = func_001B6290(self->walkers[3].graph, 0, -1, 1);
+    self->lastChoice = 5;
     for (;;) {
-        s32 c = self->cur;
+        s32 c = self->lastChoice;
         if (c < 2) break;
         s32 d = c - 1;
         if (D_002623C0->levels[d].f448 & 0x20) break;
         if (D_002623C0->levels[c].f448 & 1) break;
-        self->cur = d;
+        self->lastChoice = d;
     }
-    for (s32 i = 1; i <= self->cur; i++) {
-        StateTrigger* o = self->objs[i - 1];
+    for (s32 i = 1; i <= self->lastChoice; i++) {
+        StateTrigger* o = self->levelObjects[i - 1];
         if (o && (D_002623C0->levels[i].f448 & 1)) o->desc->m02(o);
     }
-    self->chosen = 0;
+    self->pendingSequence = 0;
     for (s32 i = 0; i < 4; i++) {
-        Cand_16AB38* c = self->cands[i];
+        ChoiceSequence* c = self->sequences[i];
         if (c && *c->flagp == 0) {
             s32 v = 0;
             switch (i) {
@@ -41,29 +41,29 @@ void func_0016AB38(Self_16AB38* self)
             default: break;
             }
             if (v) {
-                self->chosen = c;
+                self->pendingSequence = c;
                 break;
             }
         }
     }
     s32 idx;
-    if (self->chosen) {
+    if (self->pendingSequence) {
         idx = 0;
     } else {
         s32 a = D_002623CC;
         if (a != -1 && (D_002623C0->levels[a].f448 & 1)) {
             idx = a;
         } else {
-            s32 c = self->cur;
+            s32 c = self->lastChoice;
             idx = c;
             if ((D_002623C0->levels[c].f448 & 1) == 0) idx = c - 1;
         }
     }
     func_0016B300(self, idx, 0);
-    if (self->p[2].dst || self->p[3].dst) {
-        self->sel = 0;
-        if (self->p[2].dst) func_001B6628(self->p[2].dst, D_00262860[self->sel].walkerKey);
-        if (self->p[3].dst) func_001B6628(self->p[3].dst, D_00262860[self->sel].walkerKey);
+    if (self->walkers[2].walker || self->walkers[3].walker) {
+        self->walkerChoice = 0;
+        if (self->walkers[2].walker) func_001B6628(self->walkers[2].walker, D_00262860[self->walkerChoice].walkerKey);
+        if (self->walkers[3].walker) func_001B6628(self->walkers[3].walker, D_00262860[self->walkerChoice].walkerKey);
     }
     u8* cap = (u8*)&D_0026FA90;
     func_001E9498(D_00275BC0, cap);
