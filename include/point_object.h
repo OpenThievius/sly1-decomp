@@ -59,7 +59,9 @@ struct ListedPointObject : PointObject {
 // func_001384A0, which allocates it).
 struct TextPointObject : PointObject {
     u8* text;               // 0x50
-    u8 pad54[0x60 - 0x54];
+    f32 f54;                // 0x54: 0.5 each, set by func_00192190 for every 0x82 object the
+    f32 f58;                // 0x58  text panel gathers when it opens (func_00136238)
+    u8 pad5C[0x60 - 0x5C];
 };
 
 // Each class ends at its descriptor's size.

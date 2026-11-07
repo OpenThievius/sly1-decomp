@@ -76,7 +76,6 @@ s32 func_00182FC8(void* p);
 s32 func_001300E8(void* a, s32 b);
 void func_00182F78(void* self, s32 value);
 void func_001384A0(void* other, void* sub);
-struct Obj_00192190 { u8 pad0[0x54]; f32 f54; f32 f58; };
 void func_001B7968(void* self);
 void func_00192990(SwitchedCollider* self, s32 value);
 extern void func_001C8F20(SeekingAgent* self, s32 mode, s32 value);
@@ -169,13 +168,8 @@ void func_001C8C08(SeekingAgent* self);
 void func_001C8418(SeekingAgent* self, void* p);
 s32 func_00182FC8(void* p);
 s32 func_001F3BD8(void* self, s32* arg);
-struct Out_190E30 {
-    u8 pad0[0x40];
-    f32 f40;
-    f32 f44;
-    u8 pad1[0x98];
-};
-s32 func_001909F0(void* a, s32 b, s32 c, s32 d, Out_190E30* e);
+// Up to d spans between two points of the graph (0xE0 bytes for d = 2: two ColliderSpans).
+s32 func_001909F0(void* a, s32 b, s32 c, s32 d, ColliderSpan* e);
 typedef void (*SlotFn)(void* self);
 extern u8* D_002623C0;
 void func_001B93F8(SwitchedCollider* self);
@@ -493,12 +487,12 @@ ASM_FUNC(func_001909F0);
 
 s32 func_00190E30(void* a, s32 b, s32 c)
 {
-    Out_190E30 out;
-    switch (func_001909F0(a, b, c, 2, &out)) {
+    ColliderSpan out[2];
+    switch (func_001909F0(a, b, c, 2, out)) {
     case 0:
         return 1;
     case 1:
-        if (out.f40 == 0.0f && out.f44 == 1.0f) {
+        if (out[0].time[0] == 0.0f && out[0].time[1] == 1.0f) {
             return 0;
         }
         return 1;
@@ -762,7 +756,7 @@ void func_00192150(TextPointObject* self, void* other)
     ReadBufferedString(other, &self->text);
 }
 
-void func_00192190(Obj_00192190* self)
+void func_00192190(TextPointObject* self)
 {
     self->f54 = 0.5f;
     self->f58 = 0.5f;

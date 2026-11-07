@@ -30,6 +30,7 @@
 #include "shapes.h"
 #include "id_filter_object.h"
 #include "c8b.h"
+#include "object_message.h"
 #include "queued_call.h"
 #include "stream_reader.h"
 #include "key_id.h"
@@ -834,18 +835,8 @@ struct EventObjectPair {
     s32 f8;
     f32 fC;
 };
-struct Req_12D5D0 {
-    s32 flags;
-    void* f4;
-    u8 pad8[0x20 - 0x8];
-    Vec4U buf;
-    f32 f30;
-    u8 pad34[4];
-    void* f38;
-    u8 pad3C[0x50 - 0x3C];
-};
 union EventScratch {
-    Req_12D5D0 req;
+    SlotMessage req;
     Vec4U v[3];
     void* p[3];
     s32 w[3];
@@ -4340,24 +4331,24 @@ void func_0012D5D0(AnimationPlayer* self, AnimEvent* msg, s32* out)
             Collider* s = (Collider*)FindFirstObjectById(world, 4, in->f4, scope);
             if (s != 0) {
                 if (IsObjectOfKind(s, 2) != 0) {
-                    u.req.f4 = s;
+                    u.req.owner = s;
                     u.req.flags |= 1;
                 } else if (IsObjectOfKind(s, 0x7E) != 0) {
                     u.req.flags |= 4;
-                    ConvertPositionToWorld(s, &u.req.buf);
+                    ConvertPositionToWorld(s, (Vec4U*)&u.req.qb);
                 } else if (IsObjectOfKind(s, 0x73) != 0) {
                     u.req.flags |= 4;
-                    GetObjectWorldPosition(s, &u.req.buf);
+                    GetObjectWorldPosition(s, (Vec4U*)&u.req.qb);
                 }
             }
         }
         if (u.req.flags == 0) {
             if (t->parent != 0 && IsObjectAttached(t->parent) != 0) {
                 u.req.flags |= 1;
-                u.req.f4 = t->parent;
+                u.req.owner = t->parent;
             } else {
                 u.req.flags |= 4;
-                GetObjectWorldPosition(t, &u.req.buf);
+                GetObjectWorldPosition(t, (Vec4U*)&u.req.qb);
             }
         }
         if (in->f8 != -1) {

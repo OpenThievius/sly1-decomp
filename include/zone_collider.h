@@ -13,8 +13,9 @@ struct ZoneCollider : Collider {
     s32 countIds;           // 0x550: how many ids it was loaded with (slot 16 looks each up)
     s32 ids[8];             // 0x554
     s32 countObjs;          // 0x574: the objects slot 16 found
-    s32 objs[16];           // 0x578: (the objects as the loop stores them)
-    u8 pad5B8[0x5BC - 0x5B8];
+    s32 objs[8];            // 0x578: (the objects as the loop stores them)
+    s32 countInside;        // 0x598: the objects inside at the last update (func_00140258 keeps them)
+    void* inside[8];        // 0x59C: func_00140550 hands each to a script list
     s32 f5BC;               // 0x5BC: set to 1 when there are no ids
     Zone28 zone;            // 0x5C0: its helpers take the record's address (func_0013E918, 0013E950, 0013EA38, 0013EB68)
     u8 pad78C[0x790 - 0x78C];

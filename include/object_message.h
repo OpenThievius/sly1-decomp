@@ -23,7 +23,10 @@ struct ObjectMessage {
 // A message an object receives through its slot 27 (Desc01::m1B), built in a 0x50-byte local:
 // its kind, and the sender (kind 1) or quadwords (kinds 4 and 6; file_198980.cpp, file_19E040.cpp).
 struct SlotMessage {
-    s32 kind;               // 0x00
+    union {
+        s32 kind;           // 0x00
+        s32 flags;          // 0x00: what func_0012D5D0 fills (1 owner, 4 qb, 8|0x10 f30, 0x20 f38)
+    };
     void* owner;            // 0x04
     u8 pad08[0x10 - 0x08];
     union {
@@ -34,7 +37,10 @@ struct SlotMessage {
         Quad16 qb;          // 0x20
         Vec02 vb;           // 0x20
     };
-    u8 pad30[0x50 - 0x30];
+    f32 f30;                // 0x30: func_0012D5D0 (event 48, with flags 0x18)
+    u8 pad34[0x38 - 0x34];
+    void* f38;              // 0x38: func_0012D5D0 (event 48, flag 0x20)
+    u8 pad3C[0x50 - 0x3C];
 };
 
 #endif

@@ -1218,16 +1218,10 @@ ASM_FUNC(func_00140258);
 
 s32 func_001C1A28(void* a, void* b);
 
-struct Self_140550 {
-    u8 pad0[0x598];
-    s32 f598;
-    void* f59C[32];
-};
-
-s32 func_00140550(Self_140550* self, void* arg)
+s32 func_00140550(ZoneCollider* self, void* arg)
 {
-    for (s32 i = 0; i < self->f598; i++) {
-        if (AppendPropertyToScriptList(arg, &self->f59C[i]) == 0) {
+    for (s32 i = 0; i < self->countInside; i++) {
+        if (AppendPropertyToScriptList(arg, &self->inside[i]) == 0) {
             return 0;
         }
     }
