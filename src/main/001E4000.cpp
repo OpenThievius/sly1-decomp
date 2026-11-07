@@ -3769,15 +3769,6 @@ extern const char D_0024A678[16] = "Sinking Peril";
 extern const char D_0024A688[24] = "A Strange Reunion";
 
 // Globals typed by worker dv07, from retail's bytes and their readers.
-extern const f32 D_0024C930 = 3.40282347e+38f;
-extern const f32 D_0024C9B0 = 3.40282347e+38f;
-extern const f32 D_0024C9B4 = 3.40282347e+38f;
-extern const f32 D_0024C9BC = 3.40282347e+38f;
-extern const f32 D_0024CAEC = 3.40282347e+38f;
-extern const f32 D_0024CAF0 = 3.40282347e+38f;
-extern const f32 D_0024CAF4 = 3.40282347e+38f;
-extern const f32 D_0024CAF8 = 3.40282347e+38f;
-extern const f32 D_0024CAFC = 3.40282347e+38f;
 
 // Globals typed by worker dv08, from retail's bytes and their readers.
 struct VtEnt_24F0D8 { s32 delta; void (*fn)(); };
@@ -3839,36 +3830,6 @@ extern const u8 D_0026A100[];
 extern const u8 D_0026A108[];
 extern const u8 D_0026A110[];
 
-f32 D_0026B530[4] = { 1.0f, 1.666667f, -2.666667f, 0.0f };
-f32 D_0026B540 = 0.5f;
-f32 D_0026B544 = 0.5f;
-f32 D_0026B548 = 1.5f;
-f32 D_0026B54C = 200.0f;
-f32 D_0026B550[4] = { 0.25f, 0.0f, 0.0f, 0.0f };
-f32 D_0026B590[4] = { 0.0f, 2.0f, -1.0f, 0.0f };
-f32 D_0026B5A0[4] = { 4.0f, -4.0f, 0.0f, 0.0f };
-f32 D_0026B5D0[4] = { 0.75f, -0.75f, -0.0f, 0.0f };
-f32 D_0026B5E0[4] = { 1.0f, 2.0f, -3.0f, 0.0f };
-f32 D_0026B5F0[4] = { 0.5f, 0.0f, 0.0f, 0.0f };
-f32 D_0026B620[4] = { 135.0f, 0.0f, -85.0f, 0.0f };
-f32 D_0026B630[4] = { 50.0f, 170.0f, -85.0f, 0.0f };
-f32 D_0026B640[4] = { 1.0f, 0.0005f, 0.0f, 0.0f };
-f32 D_0026B650[4] = { 1.0f, 10.0f, 0.0f, 0.0f };
-f32 D_0026B660[4] = { 1.65f, -0.0002f, 0.0f, 0.0f };
-f32 D_0026B670[4] = { 0.65f, 1.0f, 0.0f, 0.0f };
-f32 D_0026B680[4] = { 0.0f, 6.0f, 0.0f, 0.0f };
-f32 D_0026B690[4] = { 5.0f, 16.0f, 0.0f, 0.0f };
-f32 D_0026B6D0[4] = { 0.0f, -0.01f, 0.0f, 0.0f };
-f32 D_0026B6E0[2] = { -10.0f, 10.0f };
-f32 D_0026B6E8 = -1.0f;
-f32 D_0026B6EC = 200.0f;
-f32 D_0026B6F0[4] = { 0.75f, 1.25f, 0.0f, 0.0f };
-f32 D_0026B700[4] = { 0.0f, 0.001f, 0.0f, 0.0f };
-f32 D_0026B730[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
-f32 D_0026B740[4] = { 0.0f, 0.75f, 0.0f, 0.0f };
-f32 D_0026B750[4] = { 1.0f, 5.0f, 0.0f, 0.0f };
-f32 D_0026B760[4] = { 0.5f, 0.0f, 0.5f, 0.0f };
-f32 D_0026B770[2] = { 0.5f, 1.0f };
 
 // Globals typed by worker dv05, from retail's bytes and their readers.
 void func_0020D138();
