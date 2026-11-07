@@ -113,12 +113,12 @@ s32 func_002040E8(s32 mode)
     s32 major;
 
     D_0027AE80 = 1;
-    while (func_001F80C0(&D_0062AA80[0], 0x80000100, 0), D_0062AA80[0].server == 0) {
+    while (BindRemoteService(&D_0062AA80[0], 0x80000100, 0), D_0062AA80[0].server == 0) {
         for (i = 0x10000; i != -1; i--) {
         }
     }
     for (;;) {
-        func_001F80C0(&D_0062AA80[1], 0x80000101, 0);
+        BindRemoteService(&D_0062AA80[1], 0x80000101, 0);
         if (D_0062AA80[1].server != 0)
             break;
         for (i = 0x10000; i != -1; i--) {
@@ -150,7 +150,7 @@ s32 func_00204228(s32 mode)
     }
     ((PadRequest*)D_0062ACC0)->command = 0x10;
     ((PadRequest*)D_0062ACC0)->arg10 = 0;
-    if (func_001F8290(D_0062AA80, 1, 0, D_0062ACC0, 0x80, D_0062ACC0, 0x80, 0, 0) < 0)
+    if (CallRemoteService(D_0062AA80, 1, 0, D_0062ACC0, 0x80, D_0062ACC0, 0x80, 0, 0) < 0)
         return 0;
     return ((PadRequest*)D_0062ACC0)->result;
 }
@@ -178,7 +178,7 @@ s32 func_00204510(s32 port, s32 slot, u8* data)
     if (D_0062AAD0[port][slot].open == 0)
         return 0;
     frame = func_002044B0(port, slot);
-    func_001F5A58(data, frame, frame->size);
+    CopyBytes(data, frame, frame->size);
     return frame->size;
 }
 
@@ -228,7 +228,7 @@ s32 func_00204930(s32 port, s32 slot, s32 a2, s32 a3)
     request->command = 6;
     request->port = port;
     request->slot = slot;
-    if (func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+    if (CallRemoteService(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
         return 0;
     result = request->result;
     if (result == 1) {
@@ -253,7 +253,7 @@ s32 func_00204AA8(s32 port, s32 slot, u8* src)
         request->bytes[i] = src[i];
         i++;
     } while (i < 6);
-    if (func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+    if (CallRemoteService(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
         return 0;
     if (request->result == 1)
         func_00204610(port, slot, 2);
@@ -272,7 +272,7 @@ s32 func_00204C38(s32 port, s32 slot, s32 data)
     request->command = 10;
     request->port = port;
     request->slot = slot;
-    status = func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0);
+    status = CallRemoteService(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0);
     if (status < 0)
         return 0;
     result = request->result;
@@ -304,7 +304,7 @@ s32 func_00204DB8(void)
     PadRequest* request = (PadRequest*)D_0062ACC0;
 
     request->command = 0x12;
-    if (func_001F8290(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
+    if (CallRemoteService(D_0062AA80, 1, 0, request, 0x80, request, 0x80, 0, 0) < 0)
         return 0;
     return request->result;
 }

@@ -69,7 +69,7 @@ extern "C" const type_info& func_00200E08(void);
 
 bool type_info::before(const type_info& other) const
 {
-    return func_001F6738(name_, other.name_) < 0;
+    return CompareStrings(name_, other.name_) < 0;
 }
 
 // The object a handler for `want` receives when `have` is thrown at `object`, or 0.

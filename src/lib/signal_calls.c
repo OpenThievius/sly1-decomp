@@ -18,14 +18,14 @@ s32 func_002016A0(struct LibcState* state, s32 pid, s32 sig)
 {
     s32 ret;
 
-    D_0027B328 = 0;
-    ret = func_001FA0E0(pid, sig);
-    if (ret == -1 && D_0027B328 != 0)
-        state->error = D_0027B328;
+    g_systemCallError = 0;
+    ret = SignalProcess(pid, sig);
+    if (ret == -1 && g_systemCallError != 0)
+        state->error = g_systemCallError;
     return ret;
 }
 
 s32 func_00201700(struct LibcState* state)
 {
-    return func_001FA0D8();
+    return GetProcessId();
 }

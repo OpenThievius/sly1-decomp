@@ -73,8 +73,8 @@ void func_001FA8F8() {
     u32 k = 3;
     func_001FA8E8((Blk_1FA8F8*)s0[0], s0[1]);
     func_001FA890((Blk_1FA8F8*)0x80075000, D_002779C0, 0x328);
-    func_001F6C20(0);
-    func_001F6C20(2);
+    SyncDataCache(0);
+    SyncDataCache(2);
     func_001FA8E8((Blk_1FA8F8*)s0[2], s0[3]);
     func_001FA8E8((Blk_1FA8F8*)s0[4], s0[5]);
     s1 = s0 + 6;

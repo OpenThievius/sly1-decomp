@@ -111,23 +111,23 @@ void func_001F84D8(void)
         b.init_count = 1;
         b.option = 0;
         b.max_count = 1;
-        D_002771C0 = func_001F6B20(&b);
-        D_002771C4 = func_001F6B20(&b);
+        D_002771C0 = NewSemaphore(&b);
+        D_002771C4 = NewSemaphore(&b);
     }
 }
 
 s32 func_001F8538(s32 a0)
 {
     s32 s = a0;
-    func_001F84D8();
-    func_001F6B60(D_002771C0);
+    CreateFileTableLock();
+    AwaitSemaphore(D_002771C0);
     if ((u32)a0 >= 0x20u) {
-        func_001F6B40(D_002771C0);
+        PostSemaphore(D_002771C0);
         return 0;
     }
     s32 t = s << 4;
     t += (s32)D_00628940;
-    func_001F6B40(D_002771C0);
+    PostSemaphore(D_002771C0);
     return t;
 }
 
@@ -167,7 +167,7 @@ void func_001F85A8(void) {
     Word_1F85A8::Read(&dst, D_00628500 + 8);
     Word_1F85A8::Read(&size, D_00628500 + 12);
     if (sema >= 0) {
-        func_001F5A58(dst, UNCACHED_1F84D8(D_00628500 + 16), size);
+        CopyBytes(dst, UNCACHED_1F84D8(D_00628500 + 16), size);
     }
     switch (type) {
     case 2: {
@@ -202,7 +202,7 @@ void func_001F85A8(void) {
         if (psize > 0x400) {
             psize = 0x400;
         }
-        func_001F5A58(pdst, UNCACHED_1F84D8(D_00628500 + 28), psize);
+        CopyBytes(pdst, UNCACHED_1F84D8(D_00628500 + 28), psize);
         break;
     }
     if (sema < 0) {
@@ -216,7 +216,7 @@ void func_001F85A8(void) {
             if (++i >= 32) return;
         }
     } else {
-        func_001F6B50(sema);
+        PostSemaphoreFromInterrupt(sema);
     }
 }
 
@@ -227,14 +227,14 @@ void func_001F8968(void)
         d.init_count = 1;
         d.max_count = 1;
         d.option = 0;
-        D_002771BC = func_001F6B20(&d);
+        D_002771BC = NewSemaphore(&d);
     }
 }
 
 s32 func_001F89B8(s32 unused)
 {
-    func_001F8968();
-    func_001F6B60(D_002771BC);
+    CreateFileRequestLock();
+    AwaitSemaphore(D_002771BC);
     return 0;
 }
 
@@ -247,27 +247,27 @@ s32 func_001F8A28(void)
     s32 i;
     Client_1F84D8* q;
     Callback_1F84D8* g = &D_00628BC0;
-    (s32)func_001F7BE8(0);
+    (s32)InitRemoteCalls(0);
     D_00628BC0.func = 0;
     g->arg = 0;
-    func_001F9D60();
-    func_001FA4A0(0x80000011, (void*)&func_001F85A8, D_00628B80);
-    func_001FA4A0(0x80000013, (void*)&func_001F89F8, (void*)g);
-    (s32)func_001F9DA8();
+    DisableInterrupts();
+    SetCommandHandler(0x80000011, (void*)&HandleFileReply, D_00628B80);
+    SetCommandHandler(0x80000013, (void*)&func_001F89F8, (void*)g);
+    (s32)EnableInterrupts();
     for (;;) {
-        q = (Client_1F84D8*)D_00628B40;
-        if (func_001F80C0(q, 0x80000001, 0) < 0) return -1;
+        q = (Client_1F84D8*)g_fileClient;
+        if (BindRemoteService(q, 0x80000001, 0) < 0) return -1;
         if (q->bound != 0) break;
         for (i = 0x100000; i != -1; ) i--;
     }
-    func_001F84D8();
-    func_001F6B60(D_002771C0);
+    CreateFileTableLock();
+    AwaitSemaphore(D_002771C0);
     for (u8* p = D_00628940; p < D_00628940 + 0x200; p += 0x10) *(s32*)(p + 4) = 0;
-    func_001F6B40(D_002771C0);
+    PostSemaphore(D_002771C0);
     D_00627840 = D_00628500;
-    if (func_001F8290((Client_1F84D8*)D_00628B40, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;
+    if (CallRemoteService((Client_1F84D8*)g_fileClient, 0xFF, 0, &D_00627840, 4, D_006284C0, 4, 0, 0) < 0) return 0xFFFEFFFF;
     *(Word_1F85A8*)&D_00628B68 = *(Word_1F85A8*)UNCACHED_1F84D8(D_006284C0);
-    D_002771B8 = 1;
+    g_fileClientOpen = 1;
     return 0;
 }
 
@@ -275,8 +275,8 @@ LINKER_REMNANT(func_001F8BF0);
 
 s32 func_001F8BF8(void)
 {
-    D_002771B8 = 0;
-    func_001F5C0C(&D_00628B68, 0, 4);
+    g_fileClientOpen = 0;
+    FillMemory(&D_00628B68, 0, 4);
     return 0;
 }
 
@@ -295,13 +295,13 @@ s32 func_001F8C38(s32 a0)
     SemaParams_1F84D8 ctor;
     u8* q;
 
-    p = (Handle_1F84D8*)func_001F8538(a0);
+    p = (Handle_1F84D8*)FindFileHandle(a0);
     if (Lock_1F8C38::Ready(1) == 0) {
-        func_001F89E8();
+        UnlockFileRequests();
         return -1;
     }
     if (p == 0 || p->used == 0) {
-        func_001F89E8();
+        UnlockFileRequests();
         return -9;
     }
     g->id = p->id;
@@ -309,27 +309,27 @@ s32 func_001F8C38(s32 a0)
     ctor.max_count = 1;
     ctor.init_count = 0;
     ctor.option = 0;
-    h = func_001F6B20(&ctor);
+    h = NewSemaphore(&ctor);
     g->sema = h;
     g->result = (s32)&out;
     g->result_size = 4;
     q = D_006284C0;
-    v = func_001F8290((Client_1F84D8*)D_00628B40, 1, 0, g, 0x14, q, 4, 0, 0);
+    v = CallRemoteService((Client_1F84D8*)g_fileClient, 1, 0, g, 0x14, q, 4, 0, 0);
     if (v >= 0) {
         p->used = 0;
     } else {
-        func_001F6B30(h);
-        func_001F89E8();
+        FreeSemaphore(h);
+        UnlockFileRequests();
         return -0xB;
     }
     v = *(s32*)((s32)q | 0x20000000);
-    func_001F89E8();
+    UnlockFileRequests();
     if (v == 0) {
-        func_001F6B30(h);
+        FreeSemaphore(h);
         return -0xB;
     }
-    func_001F6B60(h);
-    func_001F6B30(h);
+    AwaitSemaphore(h);
+    FreeSemaphore(h);
     return Min_1F8C38::Of(out, 0);
 }
 
@@ -341,21 +341,21 @@ s32 func_001F92E8(s32 a0, s32 mode, u32* out)
 {
     Ioctl_1F92E8* g = (Ioctl_1F92E8*)D_00627880;
     s32 ret = 1;
-    Handle_1F84D8* ent = (Handle_1F84D8*)func_001F8538(a0);
-    (void)func_001F89B8(5);
+    Handle_1F84D8* ent = (Handle_1F84D8*)FindFileHandle(a0);
+    (void)LockFileRequests(5);
     D_00627844 = out;
-    if (D_002771B8 == 0) {
-        (void)func_001F8A28();
+    if (g_fileClientOpen == 0) {
+        (void)OpenFileClient();
     }
     if (ent == 0 || ent->used == 0) {
-        func_001F89E8();
+        UnlockFileRequests();
         return -9;
     }
     g->f414 = 0;
     g->f418 = 0;
     switch (mode) {
     case 1: {
-        (void)func_001F6B60(D_002771C4);
+        (void)AwaitSemaphore(D_002771C4);
         s32 i = 0;
         while (i < 32 && g_semaphoreSlots[i] == -1) {
             i++;
@@ -365,17 +365,17 @@ s32 func_001F92E8(s32 a0, s32 mode, u32* out)
         } else {
             *D_00627844 = 1;
         }
-        (void)func_001F6B40(D_002771C4);
-        func_001F89E8();
+        (void)PostSemaphore(D_002771C4);
+        UnlockFileRequests();
         return 0;
     }
     case 2:
         *out = *(u32*)((u32)(D_00628500 + 0x10) | 0x20000000);
-        func_001F89E8();
+        UnlockFileRequests();
         return 0;
     case 3:
         *(u64*)out = *(u64*)((u32)(D_00628500 + 0x10) | 0x20000000);
-        func_001F89E8();
+        UnlockFileRequests();
         return 0;
     default:
         break;
@@ -393,24 +393,24 @@ s32 func_001F92E8(s32 a0, s32 mode, u32* out)
     r.max_count = 1;
     r.init_count = 0;
     r.option = 0;
-    s32 h = func_001F6B20(&r);
+    s32 h = NewSemaphore(&r);
     g->sema = h;
     g->result = (s32)&sp30;
     g->result_size = 4;
-    func_001FA7D8(D_00627880, 0x420);
-    if (func_001F8290((Client_1F84D8*)D_00628B40, 5, 0, D_00627880, 0x420, D_006284C0, 4, 0, 0) < 0) {
-        func_001F6B30(h);
-        func_001F89E8();
+    WriteBackDataCacheRange(D_00627880, 0x420);
+    if (CallRemoteService((Client_1F84D8*)g_fileClient, 5, 0, D_00627880, 0x420, D_006284C0, 4, 0, 0) < 0) {
+        FreeSemaphore(h);
+        UnlockFileRequests();
         return -0xB;
     }
     u32 res = *(u32*)((u32)D_006284C0 | 0x20000000);
-    func_001F89E8();
+    UnlockFileRequests();
     if (res == 0) {
-        func_001F6B30(h);
+        FreeSemaphore(h);
         return -0xB;
     }
-    (void)func_001F6B60(h);
-    func_001F6B30(h);
+    (void)AwaitSemaphore(h);
+    FreeSemaphore(h);
     ret = sp30;
     return ret;
 }

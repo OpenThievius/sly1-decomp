@@ -25,22 +25,22 @@ void func_001FA140(Buf_1F72A8* b);
 
 void func_001F72A8(s32 c)
 {
-    s32 pos = D_0027712C;
+    s32 pos = g_outputLineLength;
     if (pos >= 0x7E) {
-        D_0027712C = 0;
-        D_00625F80[0x7F] = 0;
-        func_001FA140((Buf_1F72A8*)D_00625F80);
-        pos = D_0027712C;
+        g_outputLineLength = 0;
+        g_outputLine[0x7F] = 0;
+        PrintToDebugConsole((Buf_1F72A8*)g_outputLine);
+        pos = g_outputLineLength;
     }
     if (c == 0xA) {
-        D_0027712C = 0;
-        D_00625F80[pos] = (u8)c;
-        D_00625F80[pos + 1] = 0;
-        func_001FA140((Buf_1F72A8*)D_00625F80);
+        g_outputLineLength = 0;
+        g_outputLine[pos] = (u8)c;
+        g_outputLine[pos + 1] = 0;
+        PrintToDebugConsole((Buf_1F72A8*)g_outputLine);
         return;
     }
-    D_0027712C = pos + 1;
-    D_00625F80[pos] = (u8)c;
+    g_outputLineLength = pos + 1;
+    g_outputLine[pos] = (u8)c;
 }
 
 void func_001F7270(s32 c);
@@ -48,10 +48,10 @@ void func_001F7270(s32 c);
 void func_001F7358(s32 c)
 {
     if (c == 10) {
-        func_001F7270(13);
-        func_001F7270(10);
+        WriteSerialChar(13);
+        WriteSerialChar(10);
     } else {
-        func_001F7270(c);
+        WriteSerialChar(c);
     }
 }
 
@@ -72,7 +72,7 @@ void func_001F7420(double value)
     s32 exp10 = 0;
     if (func_001FD308(value, 0.0) < 0) {
         value = func_001FCD78(0.0, value);
-        D_00277130('-');
+        g_outputHook('-');
     }
     if (func_001FD308(value, 0.1) < 0) {
         while (func_001FD308(value, 0.1) < 0) {
@@ -86,11 +86,11 @@ void func_001F7420(double value)
         }
     }
     s32 digits = func_001F7390(func_001FB528(func_001FCDE0(value, 1000000.0)));
-    func_001F7B50("0.%d", digits);
+    PrintToOutputHook("0.%d", digits);
     if (exp10 >= 0)
-        func_001F7B50("e+%d", exp10);
+        PrintToOutputHook("e+%d", exp10);
     else
-        func_001F7B50("e%d", exp10);
+        PrintToOutputHook("e%d", exp10);
 }
 
 // A small formatter: %c %d %u %o %x %s %e %f, the length modifiers l and h and a
@@ -183,7 +183,7 @@ void func_001F7588(const char* fmt, char* ap)
                 }
                 while (*p)
                 {
-                    D_00277130(*p++);
+                    g_outputHook(*p++);
                 }
                 break;
             case 'x':
@@ -227,7 +227,7 @@ void func_001F7588(const char* fmt, char* ap)
                 }
                 while (*p)
                 {
-                    D_00277130(*p++);
+                    g_outputHook(*p++);
                 }
                 break;
             case 'd':
@@ -254,7 +254,7 @@ void func_001F7588(const char* fmt, char* ap)
                     if ((s64)val < 0)
                     {
                         val = -val;
-                        D_00277130('-');
+                        g_outputHook('-');
                     }
                     while (val)
                     {
@@ -268,7 +268,7 @@ void func_001F7588(const char* fmt, char* ap)
                 }
                 while (*p)
                 {
-                    D_00277130(*p++);
+                    g_outputHook(*p++);
                 }
                 break;
             case 'u':
@@ -304,7 +304,7 @@ void func_001F7588(const char* fmt, char* ap)
                 }
                 while (*p)
                 {
-                    D_00277130(*p++);
+                    g_outputHook(*p++);
                 }
                 break;
             case 'e':
@@ -313,11 +313,11 @@ void func_001F7588(const char* fmt, char* ap)
                 f32 f = NEXT_ARG_1F7588(ap, f32);
                 if (f == 0.0f)
                 {
-                    D_00277130('0');
+                    g_outputHook('0');
                     }
                 else
                 {
-                        func_001F7420(f);
+                        FormatExponent(f);
                 }
                 break;
             }
@@ -326,19 +326,19 @@ void func_001F7588(const char* fmt, char* ap)
                 char* str = NEXT_ARG_1F7588(ap, char*);
                 if (*str == 0)
                 {
-                    D_00277130('(');
-                    D_00277130('n');
-                    D_00277130('u');
-                    D_00277130('l');
-                    D_00277130('l');
-                    D_00277130(')');
+                    g_outputHook('(');
+                    g_outputHook('n');
+                    g_outputHook('u');
+                    g_outputHook('l');
+                    g_outputHook('l');
+                    g_outputHook(')');
                 }
                 else
                 {
                     p = str;
                     while (*p)
                     {
-                        D_00277130(*p);
+                        g_outputHook(*p);
                         p++;
                     }
                 }
@@ -346,13 +346,13 @@ void func_001F7588(const char* fmt, char* ap)
             }
             case 'c':
                 val = NEXT_ARG_1F7588(ap, char);
-                D_00277130(val);
+                g_outputHook(val);
                 break;
             }
         }
         else
         {
-            D_00277130(*fmt);
+            g_outputHook(*fmt);
         }
     }
 }
@@ -360,7 +360,7 @@ void func_001F7588(const char* fmt, char* ap)
 void func_001F7B50(const char* fmt, ...)
 {
     char* ap = (char*)__builtin_next_arg(fmt) - 56;
-    func_001F7588(fmt, ap);
+    FormatOutput(fmt, ap);
 }
 
 void func_001F72A8(s32 c);
@@ -368,8 +368,8 @@ void func_001F72A8(s32 c);
 void func_001F7B88(const char* fmt, ...)
 {
     char* ap = (char*)__builtin_next_arg(fmt) - 56;
-    PutChar_1F7588 saved = D_00277130;
-    D_00277130 = func_001F72A8;
-    func_001F7588(fmt, ap);
-    D_00277130 = saved;
+    PutChar_1F7588 saved = g_outputHook;
+    g_outputHook = BufferOutputChar;
+    FormatOutput(fmt, ap);
+    g_outputHook = saved;
 }

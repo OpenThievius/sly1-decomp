@@ -266,13 +266,13 @@ u8* func_001FF740(FrameDesc* f, CommonInfo* info)
     u32 len;
 
     info->augmentation = (char*)common + 9;
-    if (func_001F6738(info->augmentation, "") != 0 &&
-        func_001F6738(info->augmentation, "eh") != 0 &&
+    if (CompareStrings(info->augmentation, "") != 0 &&
+        CompareStrings(info->augmentation, "eh") != 0 &&
         info->augmentation[0] != 'z') {
         return 0;
     }
     p = (u8*)info->augmentation + func_001E2100(info->augmentation) + 1;
-    if (func_001F6738(info->augmentation, "eh") == 0) {
+    if (CompareStrings(info->augmentation, "eh") == 0) {
         info->handlerData = (void*)((Unaligned32*)p)->v;
         p += 4;
     } else {
@@ -383,7 +383,7 @@ u8* func_001FF848(u8* p, UnwindWork* rs, CommonInfo* cie, u32* pc)
             rs->s.cfaReg = offset;
             break;
         default:
-            func_002014D0();
+            AbortProgram();
             break;
         }
     }
@@ -409,7 +409,7 @@ FrameTable* func_001FFC08(void* value)
             slot = &t->next;
         } while (t->next != 0);
     }
-    func_002014D0();
+    AbortProgram();
 }
 
 UnwindState* func_001FFC80(void* target, UnwindState* out)
@@ -428,7 +428,7 @@ UnwindState* func_001FFC80(void* target, UnwindState* out)
     if (insn == 0)
         return 0;
 
-    func_001F5C0C(&work, 0, sizeof(work));
+    FillMemory(&work, 0, sizeof(work));
     work.s.returnColumn = info.returnColumn;
     work.s.handlerData = info.handlerData;
 

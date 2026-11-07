@@ -76,8 +76,8 @@ s32 func_001F9AD8(char* text, void* q)
     s32 len;
     s32 w;
 
-    func_001F6C40(text, q);
-    w = func_001F6CF0(0x80000000);
+    StopIopDma(text, q);
+    w = ReadIopRegister(0x80000000);
     D_00628E40.q = q;
     len = 0;
     if (text[0] != 0) {
@@ -95,13 +95,13 @@ s32 func_001F9AD8(char* text, void* q)
     span.b = w;
     span.c = 0x68;
     span.d = 0x44;
-    func_001FA7D8(&D_00628E40, 0x68);
-    func_001F6CE0(4, 0x40000);
-    if (func_001F6CA0(&span, 1) != 0) {
-        func_001F6CE0(4, 0x10000);
-        func_001F6CE0(4, 0x20000);
-        func_001F6CE0(0x80000002, 0);
-        func_001F6CE0(0x80000000, 0);
+    WriteBackDataCacheRange(&D_00628E40, 0x68);
+    WriteIopRegister(4, 0x40000);
+    if (StartIopDma(&span, 1) != 0) {
+        WriteIopRegister(4, 0x10000);
+        WriteIopRegister(4, 0x20000);
+        WriteIopRegister(0x80000002, 0);
+        WriteIopRegister(0x80000000, 0);
         return 1;
     }
     return 0;
@@ -109,7 +109,7 @@ s32 func_001F9AD8(char* text, void* q)
 
 s32 func_001F9C18(void)
 {
-    if ((func_001F6CF0(4) & 0x40000) != 0) {
+    if ((ReadIopRegister(4) & 0x40000) != 0) {
         func_001FA0A0();
         return 1;
     }
@@ -129,11 +129,11 @@ s32 func_001F9C50(char* arg)
     }
     base = arg - 11;
     if ((u32)(e - base) > 80) {
-        func_001F7B88("too long parameter '%s'\n", arg);
+        PrintBuffered("too long parameter '%s'\n", arg);
         return 0;
     }
-    func_001F7BE8(0);
-    func_001F7D88();
+    InitRemoteCalls(0);
+    ShutDownRemoteCalls();
     d = buf;
     while (*pre != 0) {
         *d++ = *pre++;
@@ -142,7 +142,7 @@ s32 func_001F9C50(char* arg)
         *d++ = *arg++;
     }
     *d = 0;
-    return func_001F9AD8(buf, 0);
+    return SendIopReset(buf, 0);
 }
 
 // The messages of the IOP's terminal, which no code reads.
@@ -162,8 +162,8 @@ void func_001F9DC0(void)
     f.w[2] = 1;
     f.w[9] = 1;
     f.w[10] = 1;
-    D_002771E4 = func_001F6B20(&f);
-    D_002771E8 = func_001F6B20((Frame_001F9DC0*)&f.w[8]);
+    D_002771E4 = NewSemaphore(&f);
+    D_002771E8 = NewSemaphore((Frame_001F9DC0*)&f.w[8]);
 }
 
 s32* func_001F9E08(s32 value)
@@ -179,7 +179,7 @@ ASM_FUNC(func_001F9E40);
 s32 func_001F9E50(void)
 {
     func_001F9E90(D_002771D8.num, D_002771D8.handler);
-    s32 r = func_001F9E40(func_001F9E08);
+    s32 r = func_001F9E40(FindKernelWord);
     return r - 0x20C;
 }
 
@@ -189,10 +189,10 @@ LINKER_REMNANT(func_001F9EA0);
 
 void func_001F9EA8()
 {
-    func_001F9DC0();
-    func_001F9E50();
-    func_001F6F48();
-    func_001F70F8();
-    func_001F9FB8();
-    func_001FA8F8();
+    CreateLibrarySemaphores();
+    InstallKernelWordSearch();
+    InstallFirstKernelPatch();
+    StartRequestThread();
+    InstallSecondKernelPatch();
+    InstallThirdKernelPatch();
 }

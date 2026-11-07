@@ -41,7 +41,7 @@ EhContext* (*D_0027804C)(void) = (EhContext* (*)(void))func_001FDA38;
 
 void func_001FD920(void)
 {
-    func_002014D0();
+    AbortProgram();
 }
 
 void func_001FD930(void)
@@ -54,7 +54,7 @@ typedef struct Obj_1FD958 Obj_1FD958;
 s32 func_001FD958(Obj_1FD958* self, s32 v, s32 fallback)
 {
     s32 result = fallback;
-    if (func_001F6738(self, v) != 0) {
+    if (CompareStrings(self, v) != 0) {
         result = 0;
     }
     return result;
@@ -77,7 +77,7 @@ Node_001FD990* func_001FD990(void)
     if (p == 0) {
         func_001FD930();
     }
-    (void)func_001F5C0C(p, 0, 0x18);
+    (void)FillMemory(p, 0, 0x18);
     p->f4 = (u8*)p + 0x10;
     return p;
 }
@@ -113,7 +113,7 @@ EhContext* func_001FDA60(void)
 {
     if (D_0062A7A8 == 0) {
         D_0062A7A8 = 1;
-        (void)func_001F5C0C(&D_0062A798, 0, 0x10);
+        (void)FillMemory(&D_0062A798, 0, 0x10);
         D_0062A798.b = D_0062A7B0;
     }
     return (EhContext*)&D_0062A798;
@@ -329,7 +329,7 @@ u8* func_001FDFF8(u32 idx, Obj_1FDFF8* self, Obj_1FDFF8* other)
     if (self->st[idx] == 1) {
         return self->f0 + self->tbl[idx];
     }
-    func_002014D0();
+    AbortProgram();
 }
 
 s32 func_001FE080(s32 a0, u32 a1, u32 a2)
@@ -345,7 +345,7 @@ s32 func_001FE080(s32 a0, u32 a1, u32 a2)
     } else {
         n = 16;
     }
-    return func_001F5A58(r2, r1, n);
+    return CopyBytes(r2, r1, n);
 }
 
 /* A frame being unwound: the unwind table entry at 4, the register slots from 0x10. */

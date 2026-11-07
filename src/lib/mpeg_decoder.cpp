@@ -23,12 +23,12 @@ s32 func_001F9DA8(void);
 void func_00211BA8(void);
 
 void func_0020ADA0(void) {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B000 &= 0xFFFFFEFF;
     *(volatile u32*)0x1000B400 &= 0xFFFFFEFF;
     *(u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
     *(volatile u32*)0x1000B020 = 0;
     *(volatile u32*)0x1000B420 = 0;
     func_00211BA8();
@@ -76,7 +76,7 @@ void func_0020C188(void);
 
 s32 func_0020AE40(Outer_20AE40* out, s32 mem, u32 size)
 {
-    func_001F5C0C(mem, 0, size);
+    FillMemory(mem, 0, size);
     Inner_20AE40* in = (Inner_20AE40*)(((u32)(mem + 3) >> 2) << 2);
     s32 diff = (s32)in - mem;
     u32 rest = size - diff;
@@ -687,13 +687,13 @@ struct Chan_20B870 {
 void func_0020B870(Chan_20B870* c) {
     c->f818 = 1;
     c->f1B0 = 0;
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B000 = 0;
     *(volatile u32*)0x1000B400 = 0;
     *(volatile u32*)0x1000D400 = 0;
     *(u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
     *(volatile u32*)0x1000B020 = 0;
     *(volatile u32*)0x1000B420 = 0;
     *(volatile u32*)0x1000D420 = 0;
@@ -857,11 +857,11 @@ void func_0020BEA0(Obj_20BEA0* obj, u32 value, u32 mask)
     func_0020F0F0(obj);
     *(volatile u32*)0x10002000 = 0;
     func_0020F0F0(obj);
-    (void)func_001F9D60();
+    (void)DisableInterrupts();
     *(volatile u32*)0x1000B410 = mask & 0x0FFFFFFF;
     *(volatile u32*)0x1000B420 = 4;
     *(volatile u32*)0x1000B400 = 0x101;
-    (void)func_001F9DA8();
+    (void)EnableInterrupts();
     func_0020F0C0(obj, value);
     func_0020F0F0(obj);
     req.mode = 3;

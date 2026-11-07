@@ -16,20 +16,20 @@ s32 func_001F9DA8(void);
 
 void func_002117D0(u32 value)
 {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B000 = value;
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
 }
 
 void func_00211838(u32 value)
 {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B400 = value;
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
 }
 
 struct Out_002118A0 { u32 w00; u32 w04; u32 w08; u32 w0C; u32 w10; u32 w14; u32 w18; u32 w1C; u32 w20; };

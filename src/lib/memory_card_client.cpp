@@ -74,13 +74,13 @@ s32 func_002093F0(void)
         req.f14 = 0;
         req.f08 = 1;
         req.f04 = 1;
-        D_0027AECC = func_001F6B20(&req);
+        D_0027AECC = NewSemaphore(&req);
     }
     func_00209B80(0, 0, 0);
-    func_001F6B60(D_0027AECC);
-    func_001F7BE8(0);
+    AwaitSemaphore(D_0027AECC);
+    InitRemoteCalls(0);
     for (;;) {
-        if (func_001F80C0((Sema_2093F0*)D_0062AD40, 0x80000400, 0) < 0) {
+        if (BindRemoteService((Sema_2093F0*)D_0062AD40, 0x80000400, 0) < 0) {
             PrintFormatted("bind error libmc \n");
             for (;;) {
             }
@@ -91,8 +91,8 @@ s32 func_002093F0(void)
         for (s32 i = 0x100000; i != 0; i--) {
         }
     }
-    s32 r = func_001F8290((Sema_2093F0*)D_0062AD40, 0xFE, 0, D_0062ADC0, 0x30, (Info_2093F0*)D_0062C300, 0xC, 0, 0);
-    func_001F6B40(D_0027AECC);
+    s32 r = CallRemoteService((Sema_2093F0*)D_0062AD40, 0xFE, 0, D_0062ADC0, 0x30, (Info_2093F0*)D_0062C300, 0xC, 0, 0);
+    PostSemaphore(D_0027AECC);
     if (r < 0) {
         ((Sema_2093F0*)D_0062AD40)->f24 = 0;
         return r - 100;
@@ -127,30 +127,30 @@ s32 func_00201720(Name_2095B0* dst, const char* src, s32 max);
 
 s32 func_002095B0(s32 a0, s32 a1, const char* a2, s32 a3)
 {
-    if (func_001F6B70((Handle_2095B0*)D_0027AECC) < 0) {
+    if (TrySemaphore((Handle_2095B0*)D_0027AECC) < 0) {
         return -200;
     }
     u8* pool = D_0062AD40;
     if (*(s32*)(pool + 0x24) == 0) {
-        func_001F6B40((Handle_2095B0*)D_0027AECC);
+        PostSemaphore((Handle_2095B0*)D_0027AECC);
         return -100;
     }
     if (a2 == 0 || *a2 == 0) {
-        func_001F6B40((Handle_2095B0*)D_0027AECC);
+        PostSemaphore((Handle_2095B0*)D_0027AECC);
         return -210;
     }
     u8* name = D_0062ADF0 + 0x14;
-    func_00201720((Name_2095B0*)name, a2, 0x3FF);
+    CopyStringBounded((Name_2095B0*)name, a2, 0x3FF);
     ((s32*)name)[-5] = a0;
     Rec_2095B0* r = (Rec_2095B0*)(name - 0x14);
     r->f08 = a3;
     r->f04 = a1;
     r->name[0x3FF] = 0;
-    s32 result = func_001F8290((Pool_2095B0*)pool, 2, 1, r, 0x414, D_0062C300, 4, 0, 0);
+    s32 result = CallRemoteService((Pool_2095B0*)pool, 2, 1, r, 0x414, D_0062C300, 4, 0, 0);
     if (result == 0) {
         D_0027AEC8 = 2;
     } else {
-        func_001F6B40((Handle_2095B0*)D_0027AECC);
+        PostSemaphore((Handle_2095B0*)D_0027AECC);
     }
     return result;
 }
@@ -176,20 +176,20 @@ s32 func_00209720(s32 value)
 {
     s32 r;
     Elt_209720* elt;
-    if (func_001F6B70((*(Hdl_209720**)&D_0027AECC)) < 0) {
+    if (TrySemaphore((*(Hdl_209720**)&D_0027AECC)) < 0) {
         return -200;
     }
     elt = (Elt_209720*)D_0062AD40;
     if (elt->f24 == 0) {
-        (void)func_001F6B40((*(Hdl_209720**)&D_0027AECC));
+        (void)PostSemaphore((*(Hdl_209720**)&D_0027AECC));
         return -100;
     }
     (*(Slot_209720*)&D_0062ADC0).v = value;
-    r = func_001F8290(elt, 3, 1, ((Slot_209720*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    r = CallRemoteService(elt, 3, 1, ((Slot_209720*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
     if (r == 0) {
         D_0027AEC8 = 3;
     } else {
-        (void)func_001F6B40((*(Hdl_209720**)&D_0027AECC));
+        (void)PostSemaphore((*(Hdl_209720**)&D_0027AECC));
     }
     return r;
 }
@@ -237,12 +237,12 @@ s32 func_00209870(void* a0, void* a1, void* a2)
     Slot_00209870* slot;
     void* tab;
     s32 r;
-    if (func_001F6B70((*(Dev_00209870**)&D_0027AECC)) < 0) {
+    if (TrySemaphore((*(Dev_00209870**)&D_0027AECC)) < 0) {
         return -200;
     }
     ctl = (Ctl_00209870*)D_0062AD40;
     if (ctl->busy == 0) {
-        func_001F6B40((*(Dev_00209870**)&D_0027AECC));
+        PostSemaphore((*(Dev_00209870**)&D_0027AECC));
         return -100;
     }
     tab = D_0062B240;
@@ -251,13 +251,13 @@ s32 func_00209870(void* a0, void* a1, void* a2)
     slot->tab = tab;
     slot->arg1 = a1;
     slot->arg2 = a2;
-    func_001FA7D8(a1, (s32)a2);
-    func_001FA7D8(tab, 0xC0);
-    r = func_001F8290((Dev_00209870*)ctl, 5, 1, slot, 0x30, D_0062C300, 4, (void*)func_002097E0, tab);
+    WriteBackDataCacheRange(a1, (s32)a2);
+    WriteBackDataCacheRange(tab, 0xC0);
+    r = CallRemoteService((Dev_00209870*)ctl, 5, 1, slot, 0x30, D_0062C300, 4, (void*)func_002097E0, tab);
     if (r == 0) {
         D_0027AEC8 = 5;
     } else {
-        func_001F6B40((*(Dev_00209870**)&D_0027AECC));
+        PostSemaphore((*(Dev_00209870**)&D_0027AECC));
     }
     return r;
 }
@@ -274,11 +274,11 @@ s32 func_001F8290(Pool_209990* p, s32 a1, s32 a2, Ctx_209990* a3, s32 a4, u8* a5
 s32 func_00209990(s32 self, u32 src, s32 n)
 {
     s32 r;
-    if (func_001F6B70((*(Obj_209990**)&D_0027AECC)) < 0) {
+    if (TrySemaphore((*(Obj_209990**)&D_0027AECC)) < 0) {
         return -200;
     }
     if ((*(Pool_209990*)&D_0062AD40).f24 == 0) {
-        func_001F6B40((*(Obj_209990**)&D_0027AECC));
+        PostSemaphore((*(Obj_209990**)&D_0027AECC));
         return -100;
     }
     (*(Ctx_209990*)&D_0062ADC0).f00 = self;
@@ -299,12 +299,12 @@ s32 func_00209990(s32 self, u32 src, s32 n)
             (*(Ctx_209990*)&D_0062ADC0).buf[i] = ((u8*)src)[i];
         }
     }
-    func_001F6C20(0);
-    r = func_001F8290(((Pool_209990*)&D_0062AD40), 6, 1, ((Ctx_209990*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    SyncDataCache(0);
+    r = CallRemoteService(((Pool_209990*)&D_0062AD40), 6, 1, ((Ctx_209990*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
     if (r == 0) {
         D_0027AEC8 = 6;
     } else {
-        func_001F6B40((*(Obj_209990**)&D_0027AECC));
+        PostSemaphore((*(Obj_209990**)&D_0027AECC));
     }
     return r;
 }
@@ -318,8 +318,8 @@ void func_001F6AB0(void);
 
 void func_00209B38(u16 id)
 {
-    func_001F69E0(id, func_00209B10, func_001F6A90());
-    func_001F6AB0();
+    ScheduleAlarm(id, func_00209B10, GetCurrentThreadId());
+    SleepCurrentThread();
 }
 
 struct Q_209B80;
@@ -333,9 +333,9 @@ s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
     if (D_0027AEC8 == 0) {
         return -1;
     }
-    ok = func_001F8480((Q_209B80*)D_0062AD40);
+    ok = IsRemoteCallPending((Q_209B80*)D_0062AD40);
     if (a0 == 0 && ok != 0) {
-        while (func_001F8480((Q_209B80*)D_0062AD40) != 0) {
+        while (IsRemoteCallPending((Q_209B80*)D_0062AD40) != 0) {
             func_00209B38(60);
         }
         ok = 0;
@@ -349,7 +349,7 @@ s32 func_00209B80(Obj_209B80* a0, s32* a1, s32* a2)
         if (a2 != 0) {
             *a2 = (*(s32*)&D_0062C300);
         }
-        (void)func_001F6B40((Dev_209B80*)D_0027AECC);
+        (void)PostSemaphore((Dev_209B80*)D_0027AECC);
     }
     return ok;
 }
@@ -375,11 +375,11 @@ s32 func_001F8290(Pool_209CB8* p, s32 a1, s32 a2, Rec_209CB8* r, s32 size, u8* d
 
 s32 func_00209CB8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
 {
-    if (func_001F6B70((Handle_209CB8*)D_0027AECC) < 0) {
+    if (TrySemaphore((Handle_209CB8*)D_0027AECC) < 0) {
         return -200;
     }
     if ((*(Pool_209CB8*)&D_0062AD40).f24 == 0) {
-        func_001F6B40((Handle_209CB8*)D_0027AECC);
+        PostSemaphore((Handle_209CB8*)D_0027AECC);
         return -100;
     }
     (*(Rec_209CB8*)&D_0062ADC0).f04 = a0;
@@ -403,12 +403,12 @@ s32 func_00209CB8(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4)
     (*(s32*)&D_0062AD68) = a2;
     (*(s32*)&D_0062AD6C) = a3;
     (*(s32*)&D_0062AD70) = a4;
-    (void)func_001FA7D8((Blk_209CB8*)D_0062B240, 0xC0);
-    s32 result = func_001F8290(((Pool_209CB8*)&D_0062AD40), 1, 1, ((Rec_209CB8*)&D_0062ADC0), 0x30, D_0062C300, 4, func_00209C60, D_0062B240);
+    (void)WriteBackDataCacheRange((Blk_209CB8*)D_0062B240, 0xC0);
+    s32 result = CallRemoteService(((Pool_209CB8*)&D_0062AD40), 1, 1, ((Rec_209CB8*)&D_0062ADC0), 0x30, D_0062C300, 4, func_00209C60, D_0062B240);
     if (result == 0) {
         D_0027AEC8 = 1;
     } else {
-        func_001F6B40((Handle_209CB8*)D_0027AECC);
+        PostSemaphore((Handle_209CB8*)D_0027AECC);
     }
     return result;
 }
@@ -427,17 +427,17 @@ s32 func_001F8290(Mgr_9E48* a, s32 b, s32 c, Rec_9E48* d, s32 e, u8* f, s32 g, s
 
 s32 func_00209E48(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, s32 a5)
 {
-    s32 status = func_001F6B70((Lock_9E48*)D_0027AECC);
+    s32 status = TrySemaphore((Lock_9E48*)D_0027AECC);
     if (status < 0) {
         return -200;
     }
     Mgr_9E48* mgr = (Mgr_9E48*)D_0062AD40;
     if (*(s32*)(D_0062AD40 + 0x24) == 0) {
-        func_001F6B40((Lock_9E48*)D_0027AECC);
+        PostSemaphore((Lock_9E48*)D_0027AECC);
         return -100;
     }
     if (name == 0 || *name == 0) {
-        func_001F6B40((Lock_9E48*)D_0027AECC);
+        PostSemaphore((Lock_9E48*)D_0027AECC);
         return -210;
     }
     Rec_9E48* rec = (Rec_9E48*)D_0062ADF0;
@@ -446,16 +446,16 @@ s32 func_00209E48(s32 a0, s32 a1, const char* name, s32 a3, s32 a4, s32 a5)
     rec->f8 = a3;
     rec->fC = a4;
     rec->f10 = a5;
-    func_00201720((u8*)rec + 0x14, name, 0x3FF);
+    CopyStringBounded((u8*)rec + 0x14, name, 0x3FF);
     ((u8*)rec)[0x413] = 0;
     if (a4 >= 0) {
-        func_001FA7D8(a5, a4 << 6);
+        WriteBackDataCacheRange(a5, a4 << 6);
     }
-    s32 r = func_001F8290(mgr, 0xD, 1, rec, 0x414, D_0062C300, 4, 0, 0);
+    s32 r = CallRemoteService(mgr, 0xD, 1, rec, 0x414, D_0062C300, 4, 0, 0);
     if (r == 0) {
         D_0027AEC8 = 0xD;
     } else {
-        func_001F6B40((Lock_9E48*)D_0027AECC);
+        PostSemaphore((Lock_9E48*)D_0027AECC);
     }
     return r;
 }
@@ -472,22 +472,22 @@ s32 func_001F8290(Pool_209FA8* p, s32 a1, s32 a2, Req_209FA8* q, s32 a4, u8* a5,
 
 s32 func_00209FA8(s32 a, s32 b)
 {
-    s32 r = func_001F6B70((Handle_209FA8*)(*(u32*)&D_0027AECC));
+    s32 r = TrySemaphore((Handle_209FA8*)(*(u32*)&D_0027AECC));
     s32 res;
     if (r < 0) {
         return -200;
     }
     if (((Pool_209FA8*)D_0062AD40)->busy == 0) {
-        func_001F6B40((Handle_209FA8*)(*(u32*)&D_0027AECC));
+        PostSemaphore((Handle_209FA8*)(*(u32*)&D_0027AECC));
         return -100;
     }
     (*(Req_209FA8*)&D_0062ADC0).b = b;
     (*(Req_209FA8*)&D_0062ADC0).a = a;
-    res = func_001F8290(((Pool_209FA8*)&D_0062AD40), 0x10, 1, ((Req_209FA8*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
+    res = CallRemoteService(((Pool_209FA8*)&D_0062AD40), 0x10, 1, ((Req_209FA8*)&D_0062ADC0), 0x30, D_0062C300, 4, 0, 0);
     if (res == 0) {
         (*(u32*)&D_0027AEC8) = 0x10;
     } else {
-        func_001F6B40((Handle_209FA8*)(*(u32*)&D_0027AECC));
+        PostSemaphore((Handle_209FA8*)(*(u32*)&D_0027AECC));
     }
     return res;
 }
@@ -516,28 +516,28 @@ s32 func_0020A078(s32 a0, s32 a1, s8* a2)
     Buf_0020A078* buf;
     Buf_0020A078* res;
 
-    if (func_001F6B70(D_0027AECC) < 0) {
+    if (TrySemaphore(D_0027AECC) < 0) {
         return -200;
     }
     reg = ((Reg_0020A078*)&D_0062AD40);
     if (reg->f24 == 0) {
-        func_001F6B40(D_0027AECC);
+        PostSemaphore(D_0027AECC);
         return -100;
     }
     if (a2 == 0 || *a2 == 0) {
-        func_001F6B40(D_0027AECC);
+        PostSemaphore(D_0027AECC);
         return -210;
     }
     buf = ((Buf_0020A078*)&D_0062ADF0);
     buf->f0 = a0;
     buf->f4 = a1;
-    func_00201720(buf->text14, a2, 0x3FF);
+    CopyStringBounded(buf->text14, a2, 0x3FF);
     buf->text14[0x3FF] = 0;
-    res = func_001F8290(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
+    res = CallRemoteService(reg, 0x12, 1, buf, 0x414, ((u32*)&D_0062C300), 4, 0, 0);
     if (res == 0) {
         D_0027AEC8 = 0x12;
     } else {
-        func_001F6B40(D_0027AECC);
+        PostSemaphore(D_0027AECC);
     }
     return (s32)res;
 }

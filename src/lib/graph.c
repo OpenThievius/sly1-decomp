@@ -99,15 +99,15 @@ void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
         ext = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
         p->mode = y;
         p->version = ext;
-        func_001F6C70(0xFF00);
+        WriteGsInterruptMask(0xFF00);
         p->field = (flag != 0);
         if (p->handler != 0) {
-            func_001F6D40(2);
-            func_001F6960(2, p->handler_id);
+            DisableInterruptCause(2);
+            RemoveInterruptHandler(2, p->handler_id);
             p->handler = 0;
             p->handler_id = 0;
         }
-        func_001F6910(x & 1, (u8)y, flag & 1);
+        SetVideoModeSyscall(x & 1, (u8)y, flag & 1);
         return;
     case 1:
         *(volatile u64*)0x12001000 = 0x100;
@@ -118,7 +118,7 @@ void func_00201A18(s16 mode, s16 x, s16 y, s16 flag)
         p->interlace = x;
         p->mode = y;
         p->version = (u16)((*(volatile u64*)0x12001000 >> 16) & 0xFF);
-        func_001F6910(x & 1, (u8)y, flag & 1);
+        SetVideoModeSyscall(x & 1, (u8)y, flag & 1);
         return;
     default:
         return;
@@ -219,8 +219,8 @@ s32 func_00201FF8(void* self, s32 flag)
 
 s32 func_00202058(s32 mask)
 {
-    s32 r = func_001F6C60(mask);
-    func_001F6C70(mask);
+    s32 r = ReadGsInterruptMask(mask);
+    WriteGsInterruptMask(mask);
     return r;
 }
 
@@ -249,7 +249,7 @@ void func_00202098(GsOffset* self, s16 a1, s16 a2, s16 a3)
 
 s32 func_00202120(s32 mask)
 {
-    return func_001F6C60(mask);
+    return ReadGsInterruptMask(mask);
 }
 
 INCLUDE_ASM(func_00202140);

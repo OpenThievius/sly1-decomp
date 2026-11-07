@@ -120,13 +120,13 @@ INCLUDE_ASM(func_001F7BE8);
 
 void func_001F7D88(void)
 {
-    func_001FA468();
-    D_00277134 = 0;
+    ShutDownCommandChannel();
+    g_remoteCallsReady = 0;
 }
 
 Packet_1F7BE8* func_001F7DB0(Pools_1F7BE8* self)
 {
-    func_001F9D60();
+    DisableInterrupts();
     s32 count = self->packet_count;
     s32 index = 0;
     Packet_1F7BE8* item = self->packets;
@@ -143,14 +143,14 @@ Packet_1F7BE8* func_001F7DB0(Pools_1F7BE8* self)
                 }
                 item->self = (u32)item;
                 item->id = id;
-                func_001F9DA8();
+                EnableInterrupts();
                 return item;
             }
             index++;
             item++;
         } while (index < count);
     }
-    func_001F9DA8();
+    EnableInterrupts();
     return 0;
 }
 
@@ -194,20 +194,20 @@ set_fields:
     s0->f18 = reply->f2C;
 after:
     s32 sema = s0->sema;
-    if (sema >= 0) func_001F6B50(sema);
-    func_001F7E58(s0->packet);
+    if (sema >= 0) PostSemaphoreFromInterrupt(sema);
+    FreeRequestPacket(s0->packet);
     s0->packet = 0;
 }
 
 void func_001F7F60(Packet_1F7BE8* src, Pools_1F7BE8* pools)
 {
-    Packet_1F7BE8* m = func_001F7E78(pools);
+    Packet_1F7BE8* m = NextReplyPacket(pools);
     u32 a = src->self;
     u32 b = src->client;
     m->self = a;
     m->client = b;
     m->cmd = 0x8000000C;
-    func_001FA670(0x80000008, m, 0x40, src->cmd, src->f24, src->f28);
+    SendCommandFromInterrupt(0x80000008, m, 0x40, src->cmd, src->f24, src->f28);
 }
 
 Entry_1F7FC0* func_001F7FC0(u32 key, Pools_1F7BE8* pools)
@@ -226,13 +226,13 @@ Entry_1F7FC0* func_001F7FC0(u32 key, Pools_1F7BE8* pools)
 
 void func_001F8010(Packet_1F7BE8* src, Pools_1F7BE8* pools)
 {
-    Packet_1F7BE8* m = func_001F7E78(pools);
+    Packet_1F7BE8* m = NextReplyPacket(pools);
     u32 a = src->self;
     u32 b = src->client;
     m->self = a;
     m->client = b;
     m->cmd = 0x80000009;
-    Entry_1F7FC0* n = func_001F7FC0(src->cmd, pools);
+    Entry_1F7FC0* n = FindRemoteService(src->cmd, pools);
     if (n == 0) {
         m->f24 = 0;
         m->f28 = 0;
@@ -242,7 +242,7 @@ void func_001F8010(Packet_1F7BE8* src, Pools_1F7BE8* pools)
         m->f28 = n->f8;
         m->f2C = n->f14;
     }
-    func_001FA670(0x80000008, m, 0x40, 0, 0, 0);
+    SendCommandFromInterrupt(0x80000008, m, 0x40, 0, 0, 0);
 }
 
 s32 func_001F80C0(Client_1F7BE8* self, u32 cmd, s32 mode)
@@ -253,7 +253,7 @@ s32 func_001F80C0(Client_1F7BE8* self, u32 cmd, s32 mode)
 
     self->f10 = 0;
     self->f24 = 0;
-    packet = func_001F7DB0(&D_00627800);
+    packet = TakeRequestPacket(&g_remoteCallState);
     if (packet == 0) return -1;
     self->packet = packet;
     self->id = packet->id;
@@ -263,26 +263,26 @@ s32 func_001F80C0(Client_1F7BE8* self, u32 cmd, s32 mode)
     if ((mode & 1) == 0) {
         params.init_count = 0;
         params.max_count = 1;
-        sema = func_001F6B20(&params);
+        sema = NewSemaphore(&params);
         self->sema = sema;
         if (sema < 0) {
-            func_001F7E58(packet);
+            FreeRequestPacket(packet);
             return -3;
         }
-        if (func_001FA630(0x80000009, packet, 0x40, 0, 0, 0) == 0) {
-            func_001F7E58(packet);
-            func_001F6B30(self->sema);
+        if (SendCommand(0x80000009, packet, 0x40, 0, 0, 0) == 0) {
+            FreeRequestPacket(packet);
+            FreeSemaphore(self->sema);
             return -2;
         }
-        func_001F6B60(self->sema);
-        func_001F6B30(self->sema);
+        AwaitSemaphore(self->sema);
+        FreeSemaphore(self->sema);
         return 0;
     }
     self->sema = -1;
-    if (func_001FA630(0x80000009, packet, 0x40, 0, 0, 0) != 0) {
+    if (SendCommand(0x80000009, packet, 0x40, 0, 0, 0) != 0) {
         return 0;
     }
-    func_001F7E58(packet);
+    FreeRequestPacket(packet);
     return -2;
 }
 
@@ -351,7 +351,7 @@ void func_001F8200(Ctx_001F8200* self)
     if (list->f04 != 0) {
         return;
     }
-    func_001F71D0((void*)list->f00);
+    QueueThreadRequest((void*)list->f00);
 }
 
 INCLUDE_ASM(func_001F8290);

@@ -63,11 +63,11 @@ s32 func_0020DF10(Obj_20DF10* o)
         *(volatile u32*)0x10002010 = 0x40000000;
         n.cmd = 3;
         func_0020B190(o->f858, &n);
-        func_001F9D60();
+        DisableInterrupts();
         *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
         *(volatile u32*)0x1000B000 = 0;
         *(u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-        func_001F9DA8();
+        EnableInterrupts();
         *(volatile u32*)0x1000B020 = 0;
     }
     return result;
@@ -1645,11 +1645,11 @@ s32 func_001F9DA8(void);
 
 void func_00210D90(u32 a, s32 b)
 {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000B010 = (a & 0xFFFFFFF) | 0x80000000;
     *(volatile u32*)0x1000B020 = b >> 4;
     *(volatile u32*)0x1000B000 = 0x100;
-    func_001F9DA8();
+    EnableInterrupts();
 }
 
 struct Hdl_210E00;
@@ -1663,11 +1663,11 @@ void func_00210E00(Obj_210E00* self, u32 a1, u32 a2)
 
     s32 tmp[8];
     while (*(volatile s32*)0x10002010 < 0) { }
-    (void)func_001F9D60();
+    (void)DisableInterrupts();
     *(volatile u32*)0x1000B010 = a1 & 0x0FFFFFFF;
     *(volatile u32*)0x1000B020 = a2 << 6;
     *(volatile u32*)0x1000B000 = 0x100;
-    (void)func_001F9DA8();
+    (void)EnableInterrupts();
     func_0020F0C0(self, a2 | 0x70000000);
     tmp[0] = 4;
     func_0020B190(self->f858, tmp);
@@ -1718,14 +1718,14 @@ void func_00211090(Self_211090* self, s32 addr, s32 size)
     xfer.done = 0;
     while (*(volatile s32*)0x10002010 < 0) {
     }
-    s32 id = func_001F6980(3, func_00210F18, 0, &xfer);
+    s32 id = AddDmaHandlerAlt(3, func_00210F18, 0, &xfer);
     *(volatile u32*)0x1000E010 = 8;
-    func_001F6E78(3);
-    func_001F9D60();
+    EnableDmaInterrupt(3);
+    DisableInterrupts();
     *(volatile u32*)0x1000B010 = addr & 0xFFFFFFF;
     *(volatile u32*)0x1000B020 = chunk << 6;
     *(volatile u32*)0x1000B000 = 0x100;
-    func_001F9DA8();
+    EnableInterrupts();
     *(volatile u32*)0x10002000 = chunk | 0x70000000;
     msg.cmd = 4;
     func_0020B190(self->f858, &msg);
@@ -1736,8 +1736,8 @@ void func_00211090(Self_211090* self, s32 addr, s32 size)
     }
     while (*(volatile s32*)0x10002010 < 0) {
     }
-    func_001F6E10(3);
-    func_001F6990(3, id);
+    DisableDmaInterrupt(3);
+    RemoveDmaHandler(3, id);
 }
 
 struct Xfer_00211240 { u32 size; u32 addr; };
@@ -1753,19 +1753,19 @@ s32 func_00211240(s32 unused, Xfer_00211240* p)
     }
     u32 max = 0xFFFF;
     if (p->size > max) {
-        (void)func_001F9D60();
+        (void)DisableInterrupts();
         *(volatile u32*)0x1000B410 = p->addr;
         *(volatile u32*)0x1000B420 = max;
         *(volatile u32*)0x1000B400 = 0x101;
-        (void)func_001F9DA8();
+        (void)EnableInterrupts();
         p->size = p->size - max;
         p->addr = (p->addr + 0xFFFF0) & 0xFFFFFFF;
     } else {
-        (void)func_001F9D60();
+        (void)DisableInterrupts();
         *(volatile u32*)0x1000B410 = p->addr;
         *(volatile u32*)0x1000B420 = p->size;
         *(volatile u32*)0x1000B400 = 0x101;
-        (void)func_001F9DA8();
+        (void)EnableInterrupts();
         p->size = 0;
     }
     return 0;
@@ -1831,14 +1831,14 @@ void func_00211348(Self_211348* self, Desc_211348* d)
     xfer.size = count * 0x18;
     xfer.addr = addr & 0xFFFFFFF;
     if (xfer.size > chunk) {
-        s32 id = func_001F6980(4, func_00211240, 0, &xfer);
+        s32 id = AddDmaHandlerAlt(4, func_00211240, 0, &xfer);
         *(volatile u32*)0x1000E010 = 0x10;
-        func_001F6E78(4);
-        (void)func_001F9D60();
+        EnableDmaInterrupt(4);
+        (void)DisableInterrupts();
         *(volatile u32*)0x1000B410 = xfer.addr;
         *(volatile u32*)0x1000B420 = chunk;
         *(volatile u32*)0x1000B400 = 0x101;
-        (void)func_001F9DA8();
+        (void)EnableInterrupts();
         xfer.addr = (xfer.addr + 0xFFFF0) & 0xFFFFFFF;
         xfer.size = xfer.size - chunk;
         if (small) {
@@ -1846,14 +1846,14 @@ void func_00211348(Self_211348* self, Desc_211348* d)
         } else {
             func_00211090(self, self->fD8, count);
         }
-        func_001F6E10(4);
-        func_001F6990(4, id);
+        DisableDmaInterrupt(4);
+        RemoveDmaHandler(4, id);
     } else {
-        (void)func_001F9D60();
+        (void)DisableInterrupts();
         *(volatile u32*)0x1000B410 = d->addr & 0xFFFFFFF;
         *(volatile u32*)0x1000B420 = xfer.size;
         *(volatile u32*)0x1000B400 = 0x101;
-        (void)func_001F9DA8();
+        (void)EnableInterrupts();
         xfer.size = 0;
         if (small) {
             func_00210E00(self, self->fD8, count);

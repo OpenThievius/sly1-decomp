@@ -35,11 +35,11 @@ s32 func_001F9DA8(void);
 
 void func_00211B40(u32 value)
 {
-    func_001F9D60();
+    DisableInterrupts();
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 | 0x10000;
     *(volatile u32*)0x1000B400 = value;
     *(volatile u32*)0x1000F590 = *(volatile u32*)0x1000F520 & 0xFFFEFFFF;
-    func_001F9DA8();
+    EnableInterrupts();
 }
 
 void func_00211BA8(void)
