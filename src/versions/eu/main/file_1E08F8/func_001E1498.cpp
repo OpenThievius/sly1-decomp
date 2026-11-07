@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the trailing '0' and '.' are read as unsigned bytes.
 
-s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
+s32 func_001E1498(char* buf, s32 unused, FormatSpec* sp, double v)
 {
-    Bits_001E1498 bits;
+    DoubleBits bits;
     bits.d = v;
     if ((bits.u & 0x7FF0000000000000UL) == 0x7FF0000000000000UL) {
         const char* s = (bits.u & 0x000FFFFFFFFFFFFFUL) ? "(nan)" : "(inf)";
@@ -40,7 +40,7 @@ s32 func_001E1498(char* buf, s32 unused, Spec_1E1498* sp, double v)
     while (n-- > 0) {
         *out++ = GetDecimalDigit(r, e, i--);
     }
-    if (sp->noPoint == 0) {
+    if (sp->noprec == 0) {
         *out++ = '.';
         n = sp->prec;
         while (n-- > 0) {
