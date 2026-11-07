@@ -44,3 +44,4 @@ src/lib/random.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/string_compare.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/substring.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
 src/lib/tlb.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
+src/lib/patch_installer_3.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
