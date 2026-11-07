@@ -174,7 +174,7 @@ struct AxisPositionCurve : PositionCurve {
 
 // Kind 1 (D_002196C8, 0x14 bytes).
 struct VectorKeyPositionCurve : PositionCurve {
-    u8 pad08[0x0C - 0x08]; // 0x08
+    s32 closed;                 // 0x08: the last key is within 1.0 of the first (squared) or there is one key
     s32 count;                  // 0x0C
     VectorKey* keys;          // 0x10
 };
@@ -182,9 +182,9 @@ struct VectorKeyPositionCurve : PositionCurve {
 // Kind 2 (D_002196D8, 0x18 bytes): nothing read yet.
 struct PositionCurveKind2 : PositionCurve {
     s32 f8;                 // 0x8
-    s32 fC;                 // 0xC
-    s32 f10;                // 0x10
-    s32 f14;                // 0x14
+    BlendConfig* cfg;       // 0xC: the records it mixes (func_00120470)
+    BlendSequence* seq;     // 0x10: the time map, or 0
+    PositionCurve** targets; // 0x14: one for each record of cfg
 };
 
 // ---------------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 #include "masked_collider.h"
 #include "animation.h"
 #include "attachment.h"
+#include "vu0.h"
 
 #include "anim_curve.h"
 
@@ -986,7 +987,16 @@ void EvaluateVectorKeyPositionCurve(VectorKeyPositionCurve* self, PlacedObject* 
         ((VectorCurveToldFn)other->desc02()->m28)(other, a3, a4);
 }
 
-INCLUDE_ASM(func_0011FE40);
+void ReadVectorKeyPositionCurve(VectorKeyPositionCurve* self, Stream83* arg)
+{
+    ReadVectorKeys(&self->count, &self->keys, arg);
+    if (self->count < 2) {
+        self->closed = 1;
+    } else {
+        u128 d = Vu0::Sub(Vu0::Q(self->keys->v0), Vu0::Q(self->keys[self->count - 1].v0));
+        self->closed = (Vu0::ToFloat(Vu0::Dot(d, d)) < 1.0f) ? 1 : 0;
+    }
+}
 
 void GetVectorKeyPositionCurveTimes(VectorKeyPositionCurve* self, s32* outCount, f32** outArr)
 {
@@ -1552,7 +1562,22 @@ void ApplyPoseSourceIndexedValue(Attachment* self, s32 val)
     }
 }
 
-INCLUDE_ASM(func_00122550);
+void GetPlacedObjectPositionAt(PlacedObject* self, f32 t, Vec02* pos, Vec02* vec)
+{
+    Vec02 k;
+    Attachment* source = self->f1EC;
+    if (t == 0.0f) {
+        *pos = self->pos;
+        *vec = self->v150;
+    } else if (source) {
+        source->vt->getPos(source, t, pos, vec);
+    } else {
+        u128 d = Vu0::Q(self->v150);
+        Vu0::Q(k) = Vu0::FromFloat(t);
+        Vu0::Q(*vec) = d;
+        Vu0::Q(*pos) = Vu0::Add(Vu0::Q(self->pos), Vu0::MulX(d, Vu0::Q(k)));
+    }
+}
 
 INCLUDE_ASM(func_001225D0);
 
@@ -1699,7 +1724,22 @@ void InitIdentityPoseSource(T2195_5D8* self)
     d2[2] = src[2];
 }
 
-INCLUDE_ASM(func_00122A80);
+void func_00122A80(T2195_588* self, f32 t, Vec02* pos, Vec02* vec)
+{
+    Attachment* p = self;
+    while ((p = p->link.next) != 0) {
+        s8 f = p->mode0;
+        if (f == 0) { p = 0; break; }
+        if (f != -1) break;
+    }
+    if (p != 0) {
+        p->vt->getPos(p, t, pos, vec);
+    } else {
+        GetOwnerPosition(self, pos, vec);
+    }
+    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(*pos), Vu0::Q(self->pos));
+    Vu0::Q(*vec) = Vu0::Add(Vu0::Q(*vec), Vu0::Q(self->vec));
+}
 
 INCLUDE_ASM(func_00122B30);
 
