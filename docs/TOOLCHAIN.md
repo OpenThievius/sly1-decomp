@@ -65,8 +65,60 @@ What else was measured:
   exception classes) do fill the slot; they have their own compiler and rows.
 - **`-ffunction-sections`** is added to every file so that the build can put
   each function at its retail address (tools/c_layout.py). It changes no code.
+- **`-mvu0-use-vf0-vf15`** gives the compiler the VU0 registers: the constraint
+  `j` (class `VU_REGS`) then allocates $vf1..$vf15 to 128-bit values, and the
+  compiler loads, stores and moves them itself (lqc2, sqc2, qmtc2, qmfc2).
+  Without it the class is empty and an asm that names it does not compile. It
+  also shifts the register choice of a few functions with no VU0 code, which is
+  how it is pinned to every file: with it, the only two game functions that
+  differed (ChooseBlinkObjectState, DrawAlignedText) each held a local standing
+  in for a constant, and written plainly they match with the option and not
+  without it. Retail's compiled C uses up to $vf13; vf13 to vf29 build the
+  same, vf30 and vf31 change func_00138C00. See "The VU0 helpers".
 - **The preprocessor** is the toolchain's `cpp.exe`, given the macros the
   compiler driver defines (tools/compile.py).
+
+## The VU0 helpers
+
+include/vu0.h holds the VU0 macro-mode sequences of the game's C (2026-11-07,
+found on the pilot list of docs/ASM_CLASSIFICATION.md's `inline` functions).
+What retail shows, and what the compiler does:
+
+- **The compiler allocates the vector registers.** Retail's $vf numbers change
+  from function to function and its lqc2/sqc2 are scheduled among the other
+  loads and stores: they are the compiler's, for `j` operands
+  (`-mvu0-use-vf0-vf15`, above). So a helper is one `__asm__` with `j`
+  operands holding only the arithmetic; the loads and stores are C.
+- **Operands are 128-bit scalars.** A struct or union as a `j` input stops the
+  compiler (internal errors in expr.c and function.c), and a float is not
+  allowed in the class at all. The helpers take and return `u128`
+  (`mode(TI)`); a vector in memory is read and written through `Vu0::Q`. A
+  float goes in with qmtc2 from a GPR ("r", the compiler adds the mfc1) and
+  comes out with qmfc2 to a GPR ("=r", the compiler adds the mtc1).
+- **Stack stores nothing reads are vector locals.** A local of a vector type
+  (Vec02, Mat02) lives on the stack, so a result assigned to it is stored
+  there even when every use takes the register. Retail stores every float it
+  turns into a vector that way: the C put it in a local first. A helper's
+  result that is used directly is never stored.
+- **Not volatile.** Retail moves loads, stores and other asm across the
+  sequences; a volatile helper is a barrier and changes the order.
+- **Register sharing.** A result may take an input's register ("=j", not
+  "=&j"). Which input it takes follows the order of the inputs: the
+  allocator ties the result to the first input that dies there. MulX lists
+  the scale first (retail's result takes the scale's register when the scale
+  dies there and the vector's otherwise), and Rotate's result is tied to its
+  vector ("0"), which is what retail's registers show in all six matched uses.
+  A register a sequence only writes (Dot's 1.0 in vaddw.x) is a second output.
+- **Matrices by reference.** Rotate reads its rows where they are: retail
+  forms the matrix's address once (`addiu v0, s0, 0xD0`) and loads the rows
+  through it, which a helper taking three row values does not give.
+
+The sequences still without a helper, by how often retail has them (runs of
+VU0 instructions in the `inline` functions): vsqrt/vwaitq/vaddq.x (208),
+vdiv/vwaitq/vmulq.xyzw (140), vmulax.xyzw/vmaddx.xyzw (75), the cross product
+vopmula.xyz/vopmsub.xyz/vsub.w (54), vmul.xy/vaddy.x (31), the 4x4 forms with
+vmaddw, vmove, vmax/vmini. The assembler takes `vsqrt` (the disassembler
+prints it as a `.word`).
 
 ## Getting the compiler
 

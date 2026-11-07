@@ -627,6 +627,7 @@ func_001274F8	func_00127618	match
 func_00127558	func_00127678	match	
 func_00127590	func_001276B0	match	
 func_001275F0	func_00127710	match	
+func_00127628	func_00127748	match	
 func_001276C0	func_001277E0	match	
 func_00128230	func_00128350	match	
 func_00128278	func_00128398	match	
@@ -1070,6 +1071,7 @@ func_001430B8	func_001433B8	match
 func_001430C0	func_001433C0	match	
 func_00143140	func_00143440	match	
 func_00143148	func_00143448	match	
+func_001433E0	func_001436E0	match	
 func_001434C8	func_001437C8	match	
 func_00143648	func_00143948	match	version-specific
 func_001437C0	func_00143AC0	match	
@@ -2219,6 +2221,7 @@ func_0019C728	func_0019D470	match
 func_0019CD90	func_0019DAD8	match	
 func_0019CE28	func_0019DB70	match	
 func_0019CE38	func_0019DB80	match	
+func_0019CE50	func_0019DB98	match	
 func_0019D2A8	func_0019DFF0	match	
 func_0019D338	func_0019E080	match	
 func_0019D410	func_0019E158	match	
@@ -2258,6 +2261,7 @@ func_0019F918	func_001A0660	match
 func_0019F950	func_001A0698	match	
 func_0019F988	func_001A06D0	match	
 func_0019F9D0	func_001A0718	match	
+func_0019FA98	func_001A07E0	match	
 func_0019FCE8	func_001A0A30	match	
 func_0019FD70	func_001A0AB8	match	
 func_0019FDC0	func_001A0B08	match	
@@ -2276,6 +2280,7 @@ func_001A0BA0	func_001A18E8	match
 func_001A0C50	func_001A1998	match	
 func_001A0F88	func_001A1CD0	match	
 func_001A0FE8	func_001A1D30	match	
+func_001A1398	func_001A20E0	match	
 func_001A1410	func_001A2158	match	
 func_001A1458	func_001A21A0	match	
 func_001A1498	func_001A21E0	match	
@@ -2664,6 +2669,7 @@ func_001B9680	func_001BA370	match
 func_001B97E0	func_001BA4D0	match	
 func_001B9AE0	func_001BA7D0	match	
 func_001B9B50	func_001BA840	match	
+func_001B9C80	func_001BA970	match	
 func_001B9F30	func_001BAC20	match	
 func_001B9FB0	func_001BACA0	match	
 func_001BA068	func_001BAD58	match	
@@ -2676,6 +2682,8 @@ func_001BAC30	func_001BB920	match
 func_001BAFE0	func_001BBCD0	match	
 func_001BB000	func_001BBCF0	match	
 func_001BB028	func_001BBD18	match	
+func_001BB058	func_001BBD48	match	
+func_001BB0C8	func_001BBDB8	match	
 func_001BB138	func_001BBE28	match	
 func_001BB168	func_001BBE58	match	
 func_001BB1A0	func_001BBE90	match	

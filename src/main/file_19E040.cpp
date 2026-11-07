@@ -9,6 +9,7 @@
 // triangle func_001A3C40 copies and the pose table func_001A4718 copies; its .data (0x26B530 to
 // 0x26C3E0) is the globals below. Named after its first address: it holds several families (the effects, class 0x15, the pair controller and its objects, the pad pattern player) and none of them names the whole.
 #include "common.h"
+#include "vu0.h"
 #include "list_iter.h"
 #include "c8b.h"
 #include "effect_owner.h"
@@ -1328,7 +1329,15 @@ void EndEffectWithImpact(Effect* self, s32 flag)
     }
 }
 
-INCLUDE_ASM(func_0019FA98);
+void InitRisingEffect(Effect* self)
+{
+    Vec02 k;
+    InitFallingEffect(self);
+    self->m30[0] = 0.33f;
+    Vu0::Q(k) = Vu0::FromFloat(-0.2f);
+    Vu0::Q(self->vC0) = Vu0::MulX(Vu0::Q(g_currentWorld->gravity), Vu0::Q(k));
+    self->fB0 = -8.0f;
+}
 
 INCLUDE_ASM(func_0019FB08);
 
@@ -1588,7 +1597,16 @@ INCLUDE_ASM(func_001A1030);
 
 INCLUDE_ASM(func_001A11C0);
 
-INCLUDE_ASM(func_001A1398);
+
+void DrawEmitterEffect(Effect* self, void* a1)
+{
+    Vec02 pos;
+    Mat02 rot;
+    Vu0::Q(pos) = Vu0::Rotate(self->rot50, Vu0::Q(self->q80));
+    Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(((PlacedObject*)self->p120)->v140));
+    rot = D_002483D0;
+    DrawEffectAt(self, a1, &pos, &rot);
+}
 
 void InitLongStreakEffect(Effect* self)
 {
