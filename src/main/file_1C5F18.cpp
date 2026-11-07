@@ -5,8 +5,19 @@
 #include "fpu.h"
 #include "globals.h"
 #include "pad_record.h"
+#include "attachment.h"
+#include "list_iter.h"
+#include "vu0.h"
 
 extern f32 g_gameTime[];
+extern const T2195_Vt D_00219560;
+
+// The pose source that adds up the offsets of the attachments after it (D_0021A9A8): the number
+// of them to take.
+struct ChildPoseSource : Attachment {
+    u8 pad18[0x1C - 0x18];  // 0x18
+    s32 count;              // 0x1C
+};
 
 struct Rec_274BA0 { s32 a[12]; f32 b; };
 
@@ -27,7 +38,36 @@ f32 D_00274C00[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
 s32 D_00274C10 = 0;
 s32 D_00274C14 = 0;
 
-INCLUDE_ASM(func_001C5F18);
+void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
+{
+    ListFrame frame;
+    Vec02 a;
+    Vec02 b;
+    Vec02 d;
+    PlacedObject* owner = self->owner;
+    *pos = owner->v190;
+    *vec = D_00248D30;
+    Attachment* c = self;
+    s32 n = ((ChildPoseSource*)c)->count;
+    if (n > 0) {
+        c = c->link.next;
+        while (c != 0) {
+            if ((u8)(c->mode0 + 1) >= 2) {
+                if (c->vt != &D_00219560) {
+                    c->vt->getPos(c, t, &a, &b);
+                    Vu0::Q(d) = Vu0::Sub(Vu0::Q(a), Vu0::Q(owner->v190));
+                    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(*pos), Vu0::Q(d));
+                    Vu0::Q(*vec) = Vu0::Add(Vu0::Q(*vec), Vu0::Q(b));
+                }
+                n--;
+            }
+            if (n <= 0) {
+                break;
+            }
+            c = c->link.next;
+        }
+    }
+}
 
 INCLUDE_ASM(func_001C6028);
 
