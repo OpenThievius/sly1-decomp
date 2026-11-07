@@ -11,7 +11,7 @@ void func_001A4EF0(PairController* self, s32 state)
     ListFrame frame;
     if (W(self, 0x650) == state) return;
     W(self, 0x650) = state;
-    F(self, 0x654) = g_gameTime[0];
+    F(self, 0x654) = g_gameClock[1];
     W(self, 0x658) = 0;
     switch (state) {
     case 0:
