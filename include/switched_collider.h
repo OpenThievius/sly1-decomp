@@ -365,7 +365,7 @@ struct Player : TurningCollider {
     void* f2BD0;            // 0x2BD0
     u8 pad2BD4[0x2BD8 - 0x2BD4];
     s32 f2BD8;              // 0x2BD8
-    u8 pad2BDC[0x2BE0 - 0x2BDC];
+    s32 penalizedTargetId;  // 0x2BDC: AddRepeatTargetPenalty adds a cost to the candidate with this id
     void* walkerActivation; // 0x2BE0: QueuePlayerWalkerActivation, taken by RunPlayerQueuedActivations
     void* firstActivation;  // 0x2BE4: QueuePlayerFirstActivation
     void* secondActivation; // 0x2BE8: QueuePlayerSecondActivation

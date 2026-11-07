@@ -1077,19 +1077,19 @@ void func_001D9C98(PathFollower* self, f32 t)
         }
     } else {
         UpdatePathFollowerPace(self);
-        func_001D87C8(self, &local);
-        func_001D8BD0(self);
+        AdvancePathFollowerAlongPath(self, &local);
+        ComputePathFollowerHeadingTarget(self);
     }
-    func_001D9678(self, t);
+    UpdatePathFollowerSound(self, t);
     SteerPathFollower(self);
     func_001D8E40(self);
-    func_001D9488(self, local);
+    AdvancePathFollowerEntry(self, local);
     func_001D9AC8(self);
     if (self->rot.r[2].z > 0.5f) {
         self->f850 = g_gameTime;
     }
     if (self->fB34 != 0) {
-        func_00129DF8(self);
+        ClearRootTries(self);
     }
 }
 
@@ -1105,9 +1105,9 @@ void func_001DA170(PathFollower* self)
         if (r != 0) {
             void* dev = r->f48;
             s32 code;
-            func_001B6568(dev, &code);
+            GetStateWalkerTargetKey(dev, &code);
             if (code == -1) {
-                func_001B6598(dev, &code);
+                GetStateWalkerCurrentKey(dev, &code);
             }
             if (code < 0x431) {
                 if (code >= 0x42F) {
@@ -1182,7 +1182,7 @@ ASM_FUNC(func_001DAD28);
 void func_001DAE18(PathFollower* self)
 {
     RecomputeColliderFrame(self);
-    func_001DAD28(self);
+    FindPathFollowerPathPosition(self);
 }
 
 void func_001DAE48(void)
@@ -1233,7 +1233,7 @@ void func_001DAFB8(PathFollower* self, Arg_1DAFB8* arg)
     self->f830 = arg;
     Obj_1DAFB8* o = arg->obj;
     if (o->vtbl[10]) ((VFn7_1DAFB8)o->vtbl[10])(o, (u8*)self + 0x100, 0, 0, 0, (u8*)self + 0x838, 0);
-    func_001DAD28(self);
+    FindPathFollowerPathPosition(self);
     self->f844 = self->f840;
     self->f834 = ((VFnF_1DAFB8)((Arg_1DAFB8*)self->f830)->obj->vtbl[8])(((Arg_1DAFB8*)self->f830)->obj);
     for (s32 i = 0; i < self->f870; i++) {
@@ -1339,7 +1339,7 @@ void func_001DB290(Obj_1DB290* self)
     c2 = c;
     CopyQuadword(&d, p650);
     d2 = d;
-    StoreQuadword(p670, func_001DB460(a2, b2, c2, d2));
+    StoreQuadword(p670, AddWeightedVectors(a2, b2, c2, d2));
     ((Bounds_1DB290*)&self->f680)->Blend(y, *(Bounds_1DB290*)&self->f640, x, *(Bounds_1DB290*)&self->f660);
     f32 r = ((Clamp2_1DB290*)&self->f680)->Clamp(*(f32*)p670);
     self->f860 = r;
@@ -1418,7 +1418,7 @@ void func_001DB4C8(World* self)
     if (g_buttonCodeFlags & 4) {
         x = -900.0f;
     }
-    func_001DBA90(self, x);
+    SetWorldGravityZ(self, x);
     self->f1D64 = 0x10;
     self->f1D65 = 0x10;
     self->f1D66 = 0x40;
@@ -1447,7 +1447,7 @@ void func_001DB838(s32 a0)
         ClearTargetVectorList();
         ClearObjectLists();
         StopAllSoundsAndWait();
-        func_001B40C8();
+        ResetScreenResources();
         ShutDownScriptValuePools();
         ResetElementStack(g_elementStack);
         ResetFrontMemory();
@@ -1808,10 +1808,10 @@ void func_001DC828(World* owner, Contacts03* handle)
             if (e->head != 0) {
                 FreePooledContactChain(owner, e->head);
                 if (!(e->other->flags538 & (1ULL << 55))) {
-                    func_00129DF8(e->other);
+                    ClearRootTries(e->other);
                 }
                 if (!(s1->other->flags538 & (1ULL << 55))) {
-                    func_00129DF8(s1->other);
+                    ClearRootTries(s1->other);
                 }
             }
             s1->head = 0;
@@ -1847,49 +1847,49 @@ void func_001DC9A0(Obj_1DC9A0* self)
 
     if (g_coneVolumeMask[0] & 1) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
-        func_001848B8(p, &D_00275670);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
+        SetConeVolumeDirection(p, &D_00275670);
     }
     if (g_coneVolumeMask[0] & 2) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 1);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
         SetConeVolumeRange(p, D_00275690);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
     if (g_coneVolumeMask[0] & 4) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 2);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
-        func_001848B8(p, &D_00275670);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
+        SetConeVolumeDirection(p, &D_00275670);
         SetConeVolumeRange(p, D_00275698);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
     if (g_coneVolumeMask[0] & 8) {
         p = CreateTypedRecord((Alloc_1DC9A0*)0x51, self, 0, 0x201, -1);
         SetConeVolumeMode(p, 3);
-        func_001847F0(p, D_00275640);
-        func_00184858(p, D_00275650);
-        func_00184818(p, D_00275654);
-        func_00184878(p, D_00275658);
-        func_00184838(p, D_0027565C);
-        func_00184898(p, D_00275660);
-        func_001848B8(p, &D_00275670);
+        SetConeVolumeColor(p, D_00275640);
+        SetConeVolumeFirstAngle(p, D_00275650);
+        SetConeVolumeSecondLevel(p, D_00275654);
+        SetConeVolumeSecondAngle(p, D_00275658);
+        SetConeVolumeThirdLevel(p, D_0027565C);
+        SetConeVolumeThirdAngle(p, D_00275660);
+        SetConeVolumeDirection(p, &D_00275670);
         SetConeVolumeRange(p, D_002756A0);
         p->desc02()->m1D(p, (Vec02*)D_00275680);
     }
@@ -1988,7 +1988,7 @@ void func_001DD3E0(Quad_001DD3E0* a, Quad_001DD3E0* b, Word_001DD3E0* c, u8* obj
     p = base;
     n = 1;
     do {
-        *(Q_1DD3E0*)p = func_00188740(obj + 0x100, *(Q_1DD3E0*)(p - 2));
+        *(Q_1DD3E0*)p = TransformVector4(obj + 0x100, *(Q_1DD3E0*)(p - 2));
         n--;
         p++;
     } while (n >= 0);
@@ -2035,13 +2035,13 @@ void func_001DD548(void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5, f32
 void func_001DD5F8(World* self, f32 v)
 {
     self->f1D6C = v;
-    D_00264260 = D_002622CC;
+    g_lightingChangeFrame = g_frameCount;
 }
 
 void func_001DD610(World* self, f32 v)
 {
     self->f1D68 = v;
-    D_00264260 = D_002622CC;
+    g_lightingChangeFrame = g_frameCount;
 }
 
 void func_001DD628(void* self, f32 x)
@@ -2051,7 +2051,7 @@ void func_001DD628(void* self, f32 x)
     s->f2318 = x;
     *(s32*)g_previousSoundLevel = -100;
     SetVolumeChannelFactor(7, 1, 1.0f);
-    func_0011D928((s32)(s->f2318 + 0.5f));
+    SendIopSoundLevel((s32)(s->f2318 + 0.5f));
 }
 
 s32 func_001DD690(void* self, void* obj)
