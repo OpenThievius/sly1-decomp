@@ -406,8 +406,10 @@ class ProgressCountTest(unittest.TestCase):
     def test_c_with_inline_assembly_is_c_to_match(self):
         inline = progress.inline_asm("us")
         self.assertEqual(progress.finished("us") & inline, set())
-        listed = {r[0]: r[4] for r in todo.todo()}
-        self.assertTrue(all("inline" in listed[name] for name in inline))
+        kinds = todo.classified()  # the committed table only: CI has no disassembly
+        self.assertTrue(all(kinds[name] == "inline" for name in inline))
+        self.assertEqual(todo.blocker({"inline", "vu", "calls"}), "helper")
+        self.assertEqual(todo.blocker({"inline", "calls"}), "none")
 
     def test_a_pal_function_follows_its_us_counterpart(self):
         pal = progress.original_asm("eu") - set(classify_asm.read_table(classify_asm.EU_TABLE))
