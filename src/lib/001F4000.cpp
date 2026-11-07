@@ -85,54 +85,6 @@ after:
     s0->f0 = 0;
 }
 
-struct Ctx_1F70F8 { s32 f0; void* f4; void* f8; s32 fC; void* f10; s32 f14; };
-struct Init_1F70F8 { s32 a; s32 b; s32 c; };
-struct Blk_1F70F8 { s32 a; s32 b; };
-struct Frame_1F70F8 { Ctx_1F70F8 ctx; u8 pad[0x18]; Init_1F70F8 init; u8 pad2[0x14]; };
-
-s32 D_00277128 = 0;
-extern s32 D_00625B70;
-extern Blk_1F70F8 D_00625B78;
-extern u8 D_00625770[];
-extern u8 D_002832F0[];
-
-s32 func_001F6B20(Init_1F70F8* p);
-s32 func_001F6A10(Ctx_1F70F8* p);
-void func_001F6B30(s32 h);
-void func_001F6A20(s32 h, Blk_1F70F8* b);
-s32 func_001F6A90(void);
-void func_001F6A50(s32 h, s32 v);
-void func_001F7020(void);
-
-s32 func_001F70F8(void)
-{
-    Frame_1F70F8 f;
-    if (D_00277128 > 0) {
-        return -1;
-    }
-    f.init.c = 0;
-    f.init.b = 0xFF;
-    D_00625B70 = func_001F6B20(&f.init);
-    if (D_00625B70 < 0) {
-        return -1;
-    }
-    f.ctx.f4 = (void*)func_001F7020;
-    f.ctx.f8 = D_00625770;
-    f.ctx.fC = 0x400;
-    f.ctx.f10 = D_002832F0;
-    f.ctx.f14 = 0;
-    D_00277128 = func_001F6A10(&f.ctx);
-    if (D_00277128 < 0) {
-        func_001F6B30(D_00625B70);
-        return -1;
-    }
-    D_00625B78.a = 0;
-    D_00625B78.b = 0;
-    func_001F6A20(D_00277128, &D_00625B78);
-    func_001F6A50(func_001F6A90(), 1);
-    return D_00277128;
-}
-
 struct Buf_1F72A8;
 void func_001FA140(Buf_1F72A8* b);
 extern u8 D_00625F80[];
@@ -513,40 +465,6 @@ void func_001F7F60(Src_1F7F60* src, Ring_1F7F60* ring)
     func_001FA670((Ctx_1FA670*)0x80000008, m, 0x40, src->f20, src->f24, src->f28);
 }
 
-struct Entry_1F7020 { u8 kind; u8 arg; };
-struct Queue_1F7020 { u32 head; u32 pad; Entry_1F7020 e[0x200]; };
-
-extern s32 D_00625B70;
-s32 func_001F6B60(s32 h);
-void func_001F6A70(s32 v);
-void func_001F6AC0(s32 v);
-void func_001F6AF0(s32 v);
-extern const char D_0024E988[];
-s32 func_001F7B50(const char* fmt, ...);
-
-void func_001F7020(Queue_1F7020* q)
-{
-    for (;;) {
-        func_001F6B60(D_00625B70);
-        u32 i = q->head & 0x1FF;
-        q->head = i + 1;
-        switch (q->e[i].kind) {
-        case 0:
-            func_001F6AC0(q->e[i].arg);
-            break;
-        case 1:
-            func_001F6A70(q->e[i].arg);
-            break;
-        case 2:
-            func_001F6AF0(q->e[i].arg);
-            break;
-        default:
-            func_001F7B50(D_0024E988);
-            break;
-        }
-    }
-}
-
 struct Item_1F7DB0 { u8 pad00[0x10]; u32 flags; Item_1F7DB0* next; s32 state; };
 struct Owner_1F7DB0 { s32 index; Item_1F7DB0* items; s32 count; };
 s32 func_001F9D60(Owner_1F7DB0*);
@@ -582,7 +500,6 @@ Item_1F7DB0* func_001F7DB0(Owner_1F7DB0* self)
     return 0;
 }
 
-extern const char D_0024E988[40] = "## internel error in libkernl.a!\n";
 extern const char D_0024E9B0[8] = "0.%d";
 extern const char D_0024E9B8[8] = "e+%d";
 extern const char D_0024E9C0[8] = "e%d";

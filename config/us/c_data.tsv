@@ -531,7 +531,7 @@ D_0024DCB0	0024DCB0	1287	.rodata	src/main/file_1DFE80.cpp
 D_0024E1C0	0024E1C0	1072	.rodata	src/main/file_1E08F8.cpp
 D_0024E600	0024E600	356	.rodata	src/main/file_1E88D0.cpp
 D_0024E840	0024E840	0	.rodata	src/main/file_1F2758.cpp
-D_0024E988	0024E988	40	.rodata.D_0024E988	src/lib/001F4000.cpp
+D_0024E988	0024E988	40	.rodata	src/lib/request_thread.cpp
 D_0024E9B0	0024E9B0	8	.rodata.D_0024E9B0	src/lib/001F4000.cpp
 D_0024E9B8	0024E9B8	8	.rodata.D_0024E9B8	src/lib/001F4000.cpp
 D_0024E9C0	0024E9C0	8	.rodata.D_0024E9C0	src/lib/001F4000.cpp
@@ -770,10 +770,8 @@ D_00275940	00275940	188	.data	src/main/file_1E08F8.cpp
 D_00275B28	00275B28	56	.data	src/main/file_1E5378.cpp
 D_00275B60	00275B60	2724	.data	src/main/file_1E88D0.cpp
 D_0027697C	0027697C	4	.data.D_0027697C	src/lib/001F8000.cpp
-D_00276980	00276980	1856	.data.D_00276980	src/lib/001F4000.cpp
-D_002770C0	002770C0	40	.data.D_002770C0	src/lib/001F4000.cpp
-D_002770E8	002770E8	64	.data.D_002770E8	src/lib/001F4000.cpp
-D_00277128	00277128	4	.data.D_00277128	src/lib/001F4000.cpp
+D_00276980	00276980	1960	.data	src/lib/patch_installer_1.cpp
+D_00277128	00277128	4	.data	src/lib/request_thread.cpp
 D_0027712C	0027712C	4	.data.D_0027712C	src/lib/001F4000.cpp
 D_00277130	00277130	4	.data.D_00277130	src/lib/001F4000.cpp
 D_00277134	00277134	4	.data.D_00277134	src/main/001E4000.cpp
@@ -786,8 +784,7 @@ D_002771D0	002771D0	4	.data.D_002771D0	src/lib/001F8000.cpp
 D_002771D8	002771D8	12	.data.D_002771D8	src/lib/001F8000.cpp
 D_002771E4	002771E4	4	.data.D_002771E4	src/lib/001F8000.cpp
 D_002771E8	002771E8	4	.data.D_002771E8	src/lib/001F8000.cpp
-D_002771F0	002771F0	1960	.data.D_002771F0	src/lib/001F8000.cpp
-D_00277998	00277998	24	.data.D_00277998	src/lib/001F8000.cpp
+D_002771F0	002771F0	1984	.data	src/lib/patch_installer_2.cpp
 D_002779B0	002779B0	8	.data.D_002779B0	src/lib/001F8000.cpp
 D_002779B8	002779B8	8	.data.D_002779B8	src/lib/001F8000.cpp
 D_002779C0	002779C0	944	.data	src/lib/patch_installer_3.cpp
@@ -848,6 +845,7 @@ D_0027C008	0027C008	8	.bss	src/main/file_149398.cpp
 D_002BE460	002BE460	24	.bss	src/main/file_167D68.cpp
 D_002BE478	002BE478	20	.bss	src/main/file_17B998.cpp
 D_00604700	00604700	128	.bss	src/main/file_18F988.cpp
+D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c
 D_0062A7B8	0062A7B8	4	.bss	src/lib/unwind.c
