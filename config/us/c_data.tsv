@@ -777,8 +777,7 @@ D_002771D8	002771D8	12	.data.D_002771D8	src/lib/001F8000.cpp
 D_002771E4	002771E4	4	.data.D_002771E4	src/lib/001F8000.cpp
 D_002771E8	002771E8	4	.data.D_002771E8	src/lib/001F8000.cpp
 D_002771F0	002771F0	1984	.data	src/lib/patch_installer_2.cpp
-D_002779B0	002779B0	8	.data.D_002779B0	src/lib/001F8000.cpp
-D_002779B8	002779B8	8	.data.D_002779B8	src/lib/001F8000.cpp
+D_002779B0	002779B0	16	.data	src/lib/file_1FA068.cpp
 D_002779C0	002779C0	944	.data	src/lib/patch_installer_3.cpp
 D_00277D70	00277D70	32	.data	src/lib/tlb.cpp
 D_00278000	00278000	72	.data	src/lib/allocate.cpp
@@ -840,6 +839,7 @@ D_00604700	00604700	128	.bss	src/main/file_18F988.cpp
 D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp
 D_00625F80	00625F80	128	.bss	src/lib/formatted_output.cpp
 D_00626000	00626000	6208	.bss	src/lib/file_1F7BE8.cpp
+D_006292C0	006292C0	640	.bss	src/lib/file_1FA068.cpp
 D_0062A540	0062A540	560	.bss	src/lib/file_1FAC00.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c

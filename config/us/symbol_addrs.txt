@@ -68,6 +68,10 @@ D_0024F330 = 0x0024F330;
 // .data of the system call stubs' object src/lib/file_1F6900.cpp), inside the coarse label
 // D_0027696C; func_001F9790 reads its last four bytes.
 D_00276970 = 0x00276970;
+// The end of the 32 words D_006294C0 of src/lib/file_1FA068.cpp (func_001FA1E8 clears 32, and
+// func_001FA1C0 reads them), inside splat's 0x1080-byte label: the 0x1000 bytes after them, which
+// no code reads, belong to that object or the next.
+D_00629540 = 0x00629540;
 // The starts of the math library's files' .rodata (src/libm/file_*.c), each object's literals
 // and tables in one piece, where a coarse label or one an instruction names spans two of them.
 D_0024F8E4 = 0x0024F8E4;
