@@ -43880,8 +43880,7 @@
     "complete": false,
     "progress_categories": [
      "lib"
-    ],
-    "source_path": "src/libm/00204000.cpp"
+    ]
    }
   },
   {
@@ -44090,8 +44089,7 @@
     "complete": false,
     "progress_categories": [
      "lib"
-    ],
-    "source_path": "src/libm/00208000.cpp"
+    ]
    }
   },
   {

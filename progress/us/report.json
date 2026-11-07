@@ -5,15 +5,15 @@
   "matched_code": "1032412",
   "matched_code_percent": 92.809421071557,
   "total_data": "431059",
-  "matched_data": "397592",
-  "matched_data_percent": 92.2360976107679,
+  "matched_data": "397759",
+  "matched_data_percent": 92.27483940713452,
   "total_functions": 4807,
   "matched_functions": 4723,
   "matched_functions_percent": 98.25254836696485,
   "complete_code": "1032412",
   "complete_code_percent": 92.809421071557,
-  "complete_data": "397592",
-  "complete_data_percent": 92.2360976107679,
+  "complete_data": "397759",
+  "complete_data_percent": 92.27483940713452,
   "total_units": 75,
   "complete_units": 30
  },
@@ -43745,8 +43745,7 @@
     "complete": true,
     "progress_categories": [
      "lib"
-    ],
-    "source_path": "src/libm/00204000.cpp"
+    ]
    }
   },
   {
@@ -43874,8 +43873,7 @@
     "complete": true,
     "progress_categories": [
      "lib"
-    ],
-    "source_path": "src/libm/00208000.cpp"
+    ]
    }
   },
   {
@@ -45407,15 +45405,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "233915",
-    "matched_data": "227168",
-    "matched_data_percent": 97.11561892140307,
+    "matched_data": "227335",
+    "matched_data_percent": 97.18701237629054,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "227168",
-    "complete_data_percent": 97.11561892140307,
+    "complete_data": "227335",
+    "complete_data_percent": 97.18701237629054,
     "total_units": 1,
     "complete_units": 0
    },
@@ -45536,15 +45534,15 @@
     "matched_code": "0",
     "matched_code_percent": 100.0,
     "total_data": "431059",
-    "matched_data": "397592",
-    "matched_data_percent": 92.2360976107679,
+    "matched_data": "397759",
+    "matched_data_percent": 92.27483940713452,
     "total_functions": 0,
     "matched_functions": 0,
     "matched_functions_percent": 100.0,
     "complete_code": "0",
     "complete_code_percent": 100.0,
-    "complete_data": "397592",
-    "complete_data_percent": 92.2360976107679,
+    "complete_data": "397759",
+    "complete_data_percent": 92.27483940713452,
     "total_units": 4,
     "complete_units": 1
    }
