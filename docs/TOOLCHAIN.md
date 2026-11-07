@@ -174,15 +174,54 @@ What retail shows, and what the compiler does:
   (MultiplyByTransposedMatrix3x3) returns a 3x3 matrix, and its callers copy the
   returned temporary.
 
+- **Two forms of the rotation.** Rotate ties its result to v; RotateUntied
+  leaves it free, and the result then takes the register of the first input
+  that dies, the rows before v. Retail has both: the rows of a product of two
+  rotations (placed_object.cpp's MulRotation) and func_00125750's rotated
+  position take a register Rotate's tie would not give, and Rotate untied
+  breaks its other uses.
+- **The cross product's operands.** Cross lists a before b; its result takes
+  a's register when a dies there and b's when a lives on. A value loaded in
+  another basic block cannot be tied (func_00157B88's spin, read before the
+  branch that picks the arm, leaves the result to the arm).
+- **vmove is the compiler's.** A vmove.xyzw is a copy the allocator makes
+  (a value kept across a loop, func_001CAB10), not a helper.
+- **Address registers of Q.** Q returns a reference, so `Q(v) = x` stores
+  through an address register; when the local is also passed by address
+  after a call, CSE keeps that address in a callee-saved register, where
+  retail forms it again for the call. Vu0::Set stores from the frame instead
+  (func_001BC828).
+- **Floats in memory.** Retail loads a float in memory straight into the GPR
+  for qmtc2 (`lw`, func_001CAB10, func_001A31A0, func_001D9AC8), where FromFloat
+  on a float gives lwc1 and mfc1. A FromFloat that passes the float's bits (a
+  union) gives the lw but moves func_001BC828's computed float from v0 to v1,
+  so the header keeps the float form; those three are near misses.
+- **A loop's alignment reaches later functions.** func_001579B0's C is
+  retail's bytes, but in the whole file's build the assembler then adds its
+  short-loop nops to func_00158F80's copy loop, 12 bytes on. The cause is the
+  `.p2align 3` cc1plus emits before the first function's loop label (no
+  padding there): without it, or without the function's `.align 3`, the later
+  loop assembles as retail's. tools/check.py, which builds each function in
+  its own section, does not see it; only the full build does.
+- **The time argument.** In EABI a float argument goes in $f12 wherever it
+  is in the list, but its place sets the order of evaluation: retail's mov.s
+  before the pointer arguments of func_00125750's calls of the position and
+  rotation methods (slots 34 and 35 of class 0x02) puts the time right after
+  the object.
+
 The sequences still without a helper, by how often retail has them (runs of
-VU0 instructions in the `inline` functions): the cross product
-vopmula.xyz/vopmsub.xyz/vsub.w (54), vmul.xy/vaddy.x (31), vmove, vmax/vmini,
-vadda/vmaddax/vmaddx (14), vmulax/vmaddax/vmaddx (13), the vmsubax + four vnop
-form (13), and a vector built from three floats in GPRs (pextlw, pcpyld,
-qmtc2) (func_00144AA0, func_001BFBF8). The Q-register forms have helpers
-(Sqrt, DivX, Length, NormalizeOr) and so do the matrix forms (Transform,
-Transform4, RotateRows, RotateTransposed, MulTransposed, MulXSum). The
-assembler takes `vsqrt` (the disassembler prints it as a `.word`).
+VU0 instructions in the `inline` functions): the two-term dot vmul.xy/vaddy.x
+(31; never alone in the functions tried so far, func_001A9868 joins it to the
+square root), vadda/vmaddax/vmaddx (14), vmulax/vmaddax/vmaddx (13), the
+vmsubax + four vnop form (13), a vector built from three floats in GPRs
+(pextlw, pcpyld, qmtc2; func_00144AA0, func_001BFBF8), a float splat to all
+four lanes (mfc1, pextlw, pextlw, qmtc2; func_00155868), and a vector's y and
+z read from a GPR copy (qmfc2, prot3w, pextuw; file_1B7968's velocity and
+spin setters). The Q-register forms have helpers (Sqrt, DivX, Length,
+NormalizeOr), so do the matrix forms (Transform, Transform4, RotateRows and
+RotateUntied, RotateTransposed, MulTransposed, MulXSum) and the cross
+product, Min and Max. vmove.xyzw is the compiler's own copy. The assembler
+takes `vsqrt` (the disassembler prints it as a `.word`).
 
 ## Getting the compiler
 

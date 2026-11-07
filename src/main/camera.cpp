@@ -17,6 +17,7 @@ extern void SetCameraFogStrength(void*);
 extern void SetCameraFogColor(void*);
 extern void SetCameraPlacement(void*, s32, void*);
 #include "list_iter.h"
+#include "game_clock.h"
 
 
 void SetCameraNearDistance(void* arg);
@@ -666,7 +667,60 @@ done:
     return r;
 }
 
-INCLUDE_ASM(func_00143BE0);
+// A part's state as func_00143BE0 writes it (0x28 bytes, PlacedObject::partStates): the time
+// until which the part is faded.
+struct PartFade {
+    u8 pad00[0x14];
+    f32 until;              // 0x14
+    u8 pad18[0x28 - 0x18];
+};
+
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), s32 p4, s32* n, Collider*** list);
+
+void func_00143BE0(Camera* self)
+{
+    Vec02 lo;
+    Vec02 hi;
+    ColliderSpan spans[0x20];
+    s32 n;
+    Collider** list;
+    PushBackMemoryMark();
+    lo = hi = *(Vec02*)self->f40;
+    for (s32 i = 0; i < self->f340; i++) {
+        PlacedObject* obj = (PlacedObject*)self->f344[i];
+        if (obj->flags & (1ULL << 37)) {
+            Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(obj->v140));
+            Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(obj->v140));
+        }
+    }
+    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, IsCameraObstacle, 0, &n, &list);
+    for (s32 j = 0; j < n; j++) {
+        Collider* c = list[j];
+        for (s32 k = 0; k < self->f340; k++) {
+            PlacedObject* obj = (PlacedObject*)self->f344[k];
+            if (!(obj->flags & (1ULL << 37))) {
+                continue;
+            }
+            s32 m = CollectTreeNodeSpans(c->tree.nodes, self->f40, &obj->v140, (s32)c->nodeGroups, 0x20, spans);
+            ColliderSpan* end = &spans[m];
+            for (ColliderSpan* sp = spans; sp < end; sp++) {
+                if (sp->group < 0) {
+                    continue;
+                }
+                for (s32 q = sp->group; q < c->groupCount; q++) {
+                    Pair03* e = &c->groups[q];
+                    if (e->a >= 0 && q != sp->group) {
+                        break;
+                    }
+                    ((PartFade*)c->partStates)[e->b].until = g_gameClock.elapsed + 0.1f;
+                }
+            }
+        }
+    }
+    PopBackMemoryMark();
+}
 
 void UpdateCamera(Camera* self, s32 flag, f32 dt)
 {

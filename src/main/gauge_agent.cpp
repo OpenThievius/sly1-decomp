@@ -58,7 +58,7 @@ s32 IsObjectOfKind(BaseObject* a, s32 b);
 s32 MatchesObjectId(BaseObject* a, s32 b);
 void PushBackMemoryMark(void* self, void* a1, void* a2);
 void PopBackMemoryMark(void);
-s32 ComputeObjectFrameAtTime(void* a, s32 b, void* c, s32 d, s32 e, s32 f, f32 g);
+void ComputeObjectFrameAtTime(void* a, s32 b, void* c, s32 d, s32 e, s32 f, f32 g);
 void GetStateWalkerCurrentKey(void* dev, s32* out);
 s32 IsPadSelectFlagHeld(void* p);
 void EnterAgentState(void* self);

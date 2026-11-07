@@ -230,7 +230,7 @@ struct TurningCollider : SwitchedCollider {
     f32 f6CC;               // 0x6CC
     s32 f6D0;               // 0x6D0: the index of the mesh's last vertex (func_001C4FF8)
     s32 f6D4;               // 0x6D4
-    Vec02* f6D8;            // 0x6D8: the lowest vertex of the mesh copy (func_001C4FF8)
+    Vec02* f6D8;            // 0x6D8: the lowest vertex of the mesh copy (func_001C4FF8); compared with Contact03::fA0 by the player (func_00170820)
     void* f6DC;             // 0x6DC
     f32 f6E0;               // 0x6E0
     f32 f6E4;               // 0x6E4
@@ -305,9 +305,10 @@ struct Player : TurningCollider {
     void* f22AC;            // 0x22AC
     u8 pad22B0[0x239C - 0x22B0];
     s32 f239C;              // 0x239C
-    void* f23A0;            // 0x23A0: the object the player is pushed along (func_001733B8)
+    void* f23A0;            // 0x23A0: the object the player is pushed along (func_001733B8); its +0x54 set keeps an agent from facing the player (func_001CB3D0)
     f32 f23A4;              // 0x23A4
-    u8 pad23A8[0x23B0 - 0x23A8];
+    void* f23A8;            // 0x23A8: its +0x6C set does the same (func_001CB3D0)
+    u8 pad23AC[0x23B0 - 0x23AC];
     void* heldObject;       // 0x23B0: the object the player holds (PrunePlayerContacts, TestListedCollisionPartMayContact)
     u8 pad23B4[0x23BC - 0x23B4];
     void* f23BC;            // 0x23BC
@@ -865,7 +866,10 @@ struct PathFollower : SwitchedCollider {
     u8 padB3C[0xB44 - 0xB3C];
     StateTrigger* fB44;     // 0xB44: the graph its walker (fB48) is made on
     void* fB48;             // 0xB48
-    u8 padB4C[0xB78 - 0xB4C];
+    u8 padB4C[0xB50 - 0xB4C];
+    s32 pushedCount;        // 0xB50: the objects in pushed (func_001D9AC8)
+    Collider* pushed[8];    // 0xB54: the objects its contacts pushed, each once (func_001D9AC8)
+    Contact03* contacts;    // 0xB74: the contacts to process, given back to the world's pool (func_001D9AC8)
     void* fB78;             // 0xB78
     u8 fB7C[0x4];           // 0xB7C
     u8 fB80[0x4];           // 0xB80

@@ -10,7 +10,8 @@
 //
 // - A helper takes and returns u128 by value (an aggregate as a `j` operand does not compile).
 //   A vector in memory (any 16-aligned 16-byte object) is read and written through Vu0::Q: one
-//   lqc2, one sqc2. A helper's result that is never named stays in its register.
+//   lqc2, one sqc2. A helper's result that is never named stays in its register. A local also
+//   passed by address is written with Vu0::Set where retail forms its address afresh for the call.
 // - A vector local (Vec02, Quad16) lives on the stack, so a result assigned to it is stored
 //   there even when nothing reads it back: retail's stores to the stack that nothing loads. A
 //   float made a vector (FromFloat) is always stored so in retail: it goes into a local.
@@ -45,6 +46,11 @@ struct Vu0 {
     // A 16-aligned, 16-byte object read or written as one 128-bit value.
     template <class T> static u128& Q(T& v) { return *(u128*)&v; }
     template <class T> static const u128& Q(const T& v) { return *(const u128*)&v; }
+    // v = x, stored where v is. Q(v) = x stores through the address Q returns, held in a
+    // register; when the local is also passed by address after a call, CSE keeps that address
+    // in a callee-saved register, where retail forms it again (addiu a1, sp, n) for the call.
+    // Set's store is addressed from the frame and leaves nothing to keep (func_001BC828).
+    template <class T> static void Set(T& v, u128 x) { *(u128*)&v = x; }
 
     // (0, 0, 0, 0): vsub.xyzw r, vf0, vf0.
     static u128 Zero()
@@ -168,6 +174,33 @@ struct Vu0 {
         return DivX(v, len);
     }
 
+    // The cross product a x b, its w zero: vopmula.xyz ACC, a, b; vopmsub.xyz r, b, a;
+    // vsub.w r, r, r.
+    static u128 Cross(u128 a, u128 b)
+    {
+        u128 r;
+        __asm__("vopmula.xyz ACC, %1, %2\n\tvopmsub.xyz %0, %2, %1\n\tvsub.w %0, %0, %0"
+                : "=j"(r) : "j"(a), "j"(b));
+        return r;
+    }
+
+    // The smaller of a and b in each of x, y and z: vmini.xyz r, a, b. The result's w is
+    // whatever its register held (retail gives the result a fresh register when a lives on).
+    static u128 Min(u128 a, u128 b)
+    {
+        u128 r;
+        __asm__("vmini.xyz %0, %1, %2" : "=j"(r) : "j"(a), "j"(b));
+        return r;
+    }
+
+    // The larger of a and b in each of x, y and z: vmax.xyz r, a, b (its w as Min's).
+    static u128 Max(u128 a, u128 b)
+    {
+        u128 r;
+        __asm__("vmax.xyz %0, %1, %2" : "=j"(r) : "j"(a), "j"(b));
+        return r;
+    }
+
     // The xyz of a 3x3 matrix's rows m[0], m[1], m[2] weighted by v's x, y and z (the matrix
     // times v): vmulax.xyz, vmadday.xyz, vmaddz.xyz. The matrix is any 16-aligned object whose
     // first three quadwords are the rows, read where it is.
@@ -274,6 +307,19 @@ struct Vu0 {
         u128 r;
         __asm__("vmulax.xyzw ACC, %2, %1x\n\tvmaddx.xyzw %0, %3, %4x" : "=j"(r) : "j"(s), "j"(a), "j"(b), "j"(t));
         return r;
+    }
+
+    // Rotate with its result untied, the matrix read where it is: RotateRows on its rows, the
+    // result free to take any input's
+    // register; retail has both forms. The result takes the register of the first input that
+    // dies there, the matrix's rows before v: in a product of two rotations (placed_object.cpp's
+    // MulRotation) the last row's product takes the register of the first matrix's first row,
+    // and func_00125750 gives a rotated position a fresh register, where Rotate's tie to v
+    // would keep v's.
+    template <class M> static u128 RotateUntied(const M& m, u128 v)
+    {
+        const u128* r = (const u128*)&m;
+        return RotateRows(r[0], r[1], r[2], v);
     }
 };
 

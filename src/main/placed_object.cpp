@@ -1706,9 +1706,108 @@ void BeginPlacedObjectMove(PlacedObject* self)
 
 INCLUDE_ASM(func_00125440);
 
-INCLUDE_ASM(func_00125750);
+// The product a b of two rotations into out: b's rows each rotated by a.
+static inline void MulRotation(Mat02* out, const Mat02& a, const Mat02& b)
+{
+    Mat02 r;
+    Vec02 x;
+    Vec02 y;
+    Vec02 z;
+    Vu0::Q(x) = Vu0::RotateUntied(a, Vu0::Q(b.r[0]));
+    r.r[0] = x;
+    Vu0::Q(y) = Vu0::RotateUntied(a, Vu0::Q(b.r[1]));
+    r.r[1] = y;
+    Vu0::Q(z) = Vu0::RotateUntied(a, Vu0::Q(b.r[2]));
+    r.r[2] = z;
+    *out = r;
+}
 
-INCLUDE_ASM(func_001259D8);
+typedef void (*PositionAtFn)(PlacedObject* self, f32 t, Vec02* pos, Vec02* vel);
+typedef void (*RotationAtFn)(PlacedObject* self, f32 t, Mat02* rot, Vec02* spin);
+
+void func_00125750(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+{
+    PlacedObject* chain[16];
+    Vec02 P;
+    Vec02 V;
+    Vec02 W;
+    Mat02 M;
+    Mat02 R;
+    Vec02 p;
+    Vec02 v;
+    Vec02 w;
+    s32 n = 0;
+    while (self != top) {
+        chain[n] = self;
+        n++;
+        Rec2195_224* rec = self->f224;
+        if (rec != 0 && (rec->fB0 & 0xC)) {
+            self = (PlacedObject*)rec->p60;
+        } else {
+            self = (PlacedObject*)self->parent;
+        }
+    }
+    M = g_identityMatrix;
+    P = D_00248D30;
+    V = D_00248D30;
+    W = D_00248D30;
+    for (n--; n >= 0; n--) {
+        PlacedObject* o = self = chain[n];
+        if (pos != 0 || vel != 0) {
+            ((PositionAtFn)o->desc02()->m22)(o, t, &p, &v);
+            Vu0::Q(p) = Vu0::RotateUntied(M, Vu0::Q(p));
+            Vu0::Q(P) = Vu0::Add(Vu0::Q(P), Vu0::Q(p));
+            if (vel != 0) {
+                Vu0::Q(V) = Vu0::Add(Vu0::Add(Vu0::Q(V), Vu0::Rotate(M, Vu0::Q(v))), Vu0::Cross(Vu0::Q(W), Vu0::Q(p)));
+            }
+        }
+        ((RotationAtFn)o->desc02()->m23)(o, t, &R, &w);
+        if (spin != 0 || vel != 0) {
+            Vu0::Q(W) = Vu0::Add(Vu0::Q(W), Vu0::Rotate(M, Vu0::Q(w)));
+        }
+        MulRotation(&M, M, R);
+    }
+    if (pos != 0) {
+        *pos = P;
+    }
+    if (rot != 0) {
+        *rot = M;
+    }
+    if (vel != 0) {
+        *vel = V;
+    }
+    if (spin != 0) {
+        *spin = W;
+    }
+}
+
+void func_001259D8(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+{
+    Mat02 m;
+    Vec02 p;
+    Vec02 v;
+    Vec02 w;
+    Vec02 r;
+    func_00125750(self, top, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0,
+                             (spin != 0 || vel != 0) ? &w : 0, t);
+    if (pos != 0 || vel != 0) {
+        if (pos != 0) {
+            Vu0::Q(r) = Vu0::Rotate(m, Vu0::Q(*pos));
+            Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Q(r));
+        } else {
+            r = D_00248D30;
+        }
+    }
+    if (vel != 0) {
+        Vu0::Q(*vel) = Vu0::Add(Vu0::Add(Vu0::Q(v), Vu0::Rotate(m, Vu0::Q(*vel))), Vu0::Cross(Vu0::Q(w), Vu0::Q(r)));
+    }
+    if (spin != 0) {
+        Vu0::Q(*spin) = Vu0::Add(Vu0::Q(w), Vu0::Rotate(m, Vu0::Q(*spin)));
+    }
+    if (rot != 0) {
+        MulRotation(rot, m, *rot);
+    }
+}
 
 void BuildPlacedObjectTransform(PlacedObject* self, Quad16* src, ScaledTransform* dst)
 {
@@ -2026,11 +2125,115 @@ void CopyPlacedObjectFrame(PlacedObject* self, PlacedObject* other)
     }
 }
 
-INCLUDE_ASM(func_001278A8);
+void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02* in, Vec02* out);
+
+void func_001278A8(PlacedObject* self, PlacedObject* top, Vec02* origin, Vec02* vel, Vec02* velSum, Vec02* spin, Vec02* spinSum)
+{
+    PlacedObject* chain[16];
+    Vec02 V;
+    Vec02 W;
+    Vec02 d;
+    Vec02 c1;
+    Vec02 t;
+    Vec02 c2;
+    Vec02 c3;
+    u128 zero = Vu0::Zero();
+    if (vel != 0) {
+        Vu0::Q(*vel) = zero;
+    }
+    if (spin != 0) {
+        Vu0::Q(*spin) = zero;
+    }
+    Vu0::Q(V) = zero;
+    Vu0::Q(W) = zero;
+    PlacedObject* o = self;
+    PlacedObject** p = chain;
+    while (o != top) {
+        *p = o;
+        p++;
+        Rec2195_224* rec = o->f224;
+        if (rec != 0 && (rec->fB0 & 0xC)) {
+            o = (PlacedObject*)rec->p60;
+        } else {
+            o = (PlacedObject*)o->parent;
+        }
+    }
+    PlacedObject* prev = 0;
+    for (p--; p >= chain; p--) {
+        o = *p;
+        if (vel != 0 || velSum != 0 || spin != 0) {
+            TransformDirectionBetweenFrames(prev, top, &o->v160, &d);
+            Vu0::Q(V) = Vu0::Add(Vu0::Q(V), Vu0::Q(d));
+        }
+        if (spinSum != 0 || spin != 0) {
+            TransformDirectionBetweenFrames(prev, top, &o->v180, &d);
+            Vu0::Q(W) = Vu0::Add(Vu0::Q(W), Vu0::Q(d));
+        }
+        if (vel != 0 || spin != 0) {
+            Vec02* at = p > chain ? &p[-1]->v140 : origin;
+            Vu0::Q(d) = Vu0::Sub(Vu0::Q(*at), Vu0::Q(o->v140));
+            TransformDirectionBetweenFrames(0, top, &d, &d);
+            Vu0::Q(c1) = Vu0::Cross(Vu0::Q(V), Vu0::Q(d));
+            if (vel != 0) {
+                Vu0::Q(*vel) = Vu0::Add(Vu0::Q(*vel), Vu0::Q(c1));
+                TransformDirectionBetweenFrames(prev, top, &o->v150, &t);
+                Vu0::Q(*vel) = Vu0::Add(Vu0::Q(*vel), Vu0::Q(t));
+            }
+            if (spin != 0) {
+                Vu0::Q(c2) = Vu0::Cross(Vu0::Q(V), Vu0::Q(c1));
+                Vu0::Q(*spin) = Vu0::Add(Vu0::Q(*spin), Vu0::Q(c2));
+                Vu0::Q(c3) = Vu0::Cross(Vu0::Q(W), Vu0::Q(d));
+                Vu0::Q(*spin) = Vu0::Add(Vu0::Q(*spin), Vu0::Q(c3));
+                TransformDirectionBetweenFrames(prev, top, &o->v170, &t);
+                Vu0::Q(*spin) = Vu0::Add(Vu0::Q(*spin), Vu0::Q(t));
+            }
+        }
+        prev = o;
+    }
+    if (velSum != 0) {
+        *velSum = V;
+    }
+    if (spinSum != 0) {
+        *spinSum = W;
+    }
+}
 
 INCLUDE_ASM(func_00127B20);
 
-INCLUDE_ASM(func_00127E60);
+void func_00127B20(PlacedObject* self, PlacedObject* top, s32 flag, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t);
+
+void func_00127E60(PlacedObject* self, PlacedObject* top, Vec02* pos, Mat02* rot, Vec02* vel, Vec02* spin, f32 t)
+{
+    Mat02 m;
+    Vec02 p;
+    Vec02 v;
+    Vec02 w;
+    Mat02 x;
+    func_00127B20(self, top, 1, (pos != 0 || vel != 0) ? &p : 0, &m, vel != 0 ? &v : 0,
+                  (spin != 0 || vel != 0) ? &w : 0, t);
+    if (pos != 0 || vel != 0) {
+        if (pos != 0) {
+            Vu0::Q(x.r[0]) = Vu0::Rotate(m, Vu0::Q(*pos));
+            Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Q(x.r[0]));
+        } else {
+            x.r[0] = D_00248D30;
+        }
+    }
+    if (vel != 0) {
+        Vu0::Q(x.r[1]) = Vu0::Rotate(m, Vu0::Q(*vel));
+        Vu0::Q(x.r[2]) = Vu0::Cross(Vu0::Q(w), Vu0::Q(x.r[0]));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(v), Vu0::Q(x.r[1]));
+        Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Q(x.r[2]));
+    }
+    if (spin != 0) {
+        Vu0::Q(x.r[0]) = Vu0::Rotate(m, Vu0::Q(*spin));
+        Vu0::Q(*spin) = Vu0::Add(Vu0::Q(w), Vu0::Q(x.r[0]));
+    }
+    if (rot != 0) {
+        MulRotation(&x, m, *rot);
+        *rot = x;
+    }
+}
 
 // The point in from's frame (the world's for none) in to's frame: through from's rotation and
 // position, then less to's position and through the transpose of to's rotation.

@@ -1647,7 +1647,45 @@ void NumberColliderParts(Collider* self, s32* index, Collider** list)
 
 ASM_FUNC(func_001BC7F8);
 
-INCLUDE_ASM(func_001BC828);
+// A row of what ComputeColliderImpulseResponse writes, one per part (Collider::index): the
+// change of velocity and of spin.
+struct ImpulseRow {
+    Vec02 linear;           // 0x00
+    Vec02 angular;          // 0x10
+};
+
+void ConstrainVectorByParentAnchor(Collider* self, Vec02* anchor, Vec02* in, Vec02* out, Vec02* dir);
+void ApplyColliderInverseInertia(Collider* self, Vec02* in, Vec02* out);
+
+void func_001BC828(void* self, s32 a1, Contact03* c, s32 idx, ContactEnd03* hit, ImpulseRow* rows)
+{
+    Vec02 dir;
+    Vec02 v;
+    Vec02 arm;
+    Vec02 k;
+    ContactEnd03* e = &c->end[idx];
+    if (idx == 0) {
+        dir = hit->v10;
+    } else {
+        Vu0::Q(v) = Vu0::FromFloat(-1.0f);
+        Vu0::Q(dir) = Vu0::MulX(Vu0::Q(hit->v10), Vu0::Q(v));
+    }
+    for (Collider* b = c->end[idx].part; b != 0; b = (Collider*)b->parent) {
+        if (b->flags538 & (1ULL << 54)) {
+            if (b->flags538 & (1ULL << 56)) {
+                break;
+            }
+            continue;
+        }
+        ImpulseRow* row = &rows[b->index];
+        Vu0::Set(arm, Vu0::Cross(Vu0::Sub(Vu0::Q(e->v10), Vu0::Q(b->v140)), Vu0::Q(dir)));
+        ConstrainVectorByParentAnchor(b, &b->v440, &dir, &v, &dir);
+        Vu0::Q(k) = Vu0::FromFloat(1.0f / b->mass);
+        Vu0::Q(row->linear) = Vu0::MulX(Vu0::Q(v), Vu0::Q(k));
+        ApplyColliderInverseInertia(b, &arm, &row->angular);
+        ConstrainVectorByParentAnchor(b, &b->v460, &row->angular, &row->angular, 0);
+    }
+}
 
 INCLUDE_ASM(func_001BC978);
 

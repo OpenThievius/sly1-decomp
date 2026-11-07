@@ -1353,7 +1353,7 @@ struct FramePoint_0019CE50 {
     Vec02 point;            // 0x40
 };
 
-s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
 
 void func_0019CE50(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
 {

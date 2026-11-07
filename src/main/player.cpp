@@ -23,6 +23,7 @@
 #include "scatter_controller.h"
 #include "render_frame.h"
 #include "background_job.h"
+#include "vu0.h"
 #include "group_marker.h"
 #include "game_progress.h"
 #include "bump_allocator.h"
@@ -496,7 +497,26 @@ s32 IsPlayerGroundContact(Player* self, Contact03* e, s32 idx)
     return 0;
 }
 
-INCLUDE_ASM(func_00170820);
+void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s32 idx);
+
+void func_00170820(Player* self, Contact03* c, s32 idx)
+{
+    ContactEnd03* e = &c->end[idx];
+    if (self->f2220 == 4) {
+        if (c->kind == 1 && idx == 0 && (Vec02*)c->fA0 == self->f6D8) {
+            Vec02 t;
+            u128 n = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
+            Vu0::Q(t) = Vu0::Sub(n, Vu0::MulX(Vu0::Q(c->v80), Vu0::Dot(n, Vu0::Q(c->v80))));
+            Vu0::Q(c->end[0].v30) = Vu0::Add(Vu0::Q(c->end[0].v30), Vu0::Q(t));
+        }
+    } else if (self->f2220 != 0xD) {
+        if (((s32 (*)(Player*, Contact03*, s32))self->desc06()->m56)(self, c, idx)) {
+            ResolveTurningColliderGroundContact(self, c, idx);
+        } else if (e->part == (Collider*)self) {
+            Vu0::Q(e->v30) = Vu0::Sub(Vu0::Q(e->v30), Vu0::Cross(Vu0::Q(self->v160), Vu0::Sub(Vu0::Q(e->v10), Vu0::Q(self->v140))));
+        }
+    }
+}
 
 INCLUDE_RODATA(jtbl_0024A8A0);
 INCLUDE_RODATA(jtbl_0024A8F0);
