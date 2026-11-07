@@ -1593,8 +1593,6 @@ void LaunchPlayerAtTarget(Player* self, TargetHit* s2, f32 f)
     SetPlayerState(self, 4, 0x2C);
 }
 
-extern const f32 D_0024AFA0 = 3.4028235e+38f;
-
 void EvaluateHermiteVectorSegment(void* a, void* b, void* c, void* d, f32 f12, f32 f13, f32 f14, void* a4, s32 a5, s32 a6);
 s32 CollectSpansFromList(void* a0, void* a1, s32 count, Collider** list, s32 a4, ColliderSpan* a5);
 
@@ -1607,7 +1605,7 @@ void ChooseTargetArcTime(PlacedObject* self, void* target, s32 count, Collider**
     Vec02 cur;
     Vec02 prev;
     ColliderSpan spans[8];
-    f32 bestTime = D_0024AFA0;
+    f32 bestTime = 3.4028234663852886e+38f;
     f32 bestScore = bestTime;
     start = self->v140;
     start.z = start.z - 75.0f;

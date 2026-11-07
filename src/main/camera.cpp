@@ -1104,9 +1104,6 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3
     return 1;
 }
 
-// The file's one .rodata word, the largest float, which the original assembly func_00145950
-// loads.
-extern const f32 D_00249E4C = 3.4028235e+38f;
 void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
 
 void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
@@ -1117,7 +1114,7 @@ void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
     f32 lo;
     f32 hi;
     f32 step = 5.0f / r;
-    f32 nearest = D_00249E4C;
+    f32 nearest = 3.4028234663852886e+38f;
     best = *origin;
     for (s32 i = 0; i < 9; i++) {
         f32 n = D_00261928[i];
