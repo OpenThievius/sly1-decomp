@@ -2,6 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "on_off_object.h"
+#include "collider.h"
 #include "world.h"
 #include "camera_controller.h"
 #include "globals.h"
@@ -181,7 +182,6 @@ struct Field_001E0E18 {
 
 
 
-struct Sub_1E2870;
 struct Mgr_1E2870;
 struct Loc_1E2870 {
     s32 v[4];
@@ -198,7 +198,7 @@ struct Glob_1E2870 {
 
 void* func_001925F0(void);
 void func_00128018(Mgr_1E2870* a0, OnOffObject* a1, void* a2, Loc_1E2870* a3);
-s32 func_001E4DC0(Sub_1E2870* self, Loc_1E2870* value);
+s32 func_001E4DC0(TreeNode03* self, Loc_1E2870* value);
 void func_001E2778(OnOffObject* self, s32 state);
 
 
@@ -400,7 +400,7 @@ double func_001FD358(s32 a);
 extern f32 D_00261858[];
 
 
-struct Ret_1E4880 { u8 pad[0x20]; f32 value; };
+struct SpanCandidate { u8 pad[0x20]; f32 value; };
 
 
 
@@ -1461,7 +1461,7 @@ void func_001E2870(OnOffObject* self) {
     s32 st;
     if (self->f398 == -1) {
         func_00128018(0, self, (u8*)p + 0x140, &loc);
-        s32 r = func_001E4DC0((Sub_1E2870*)self->f2E0, &loc);
+        s32 r = IsPointInsideFaceTree((TreeNode03*)self->f2E0, &loc);
         st = (0u < (u32)r);
     } else {
         st = self->f398;
@@ -1528,7 +1528,7 @@ ASM_FUNC(func_001E31F0);
 
 ASM_FUNC(func_001E4578);
 
-f32 func_001E4880(void* a0, void* a1, void* a2, Ret_1E4880* a3)
+f32 func_001E4880(void* a0, void* a1, void* a2, SpanCandidate* a3)
 {
     return a3->value;
 }
@@ -1568,7 +1568,7 @@ void func_001E4EA8(Self_1E4EA8* self)
     LoadProgress o30;
     U32P w60, w70, w80, w90;
     Sub_1E4EA8 sub;
-    func_00191E70(2);
+    SetScreenOwner(2);
     if (self->f4 != 0) {
         ClearKeyId(&key);
         blob = *self->f4;
@@ -1586,7 +1586,7 @@ void func_001E4EA8(Self_1E4EA8* self)
             InitLoadProgress(&o30, &w60, &w70, &w80, &w90);
             InitBufferedStream(&sub, 0x340C00, D_002C3B00, 6);
             sub.SetOwner(&o30);
-            if (sub.owner != 0) func_00193270(sub.owner);
+            if (sub.owner != 0) BeginLoadProgress(sub.owner);
             if (OpenBufferedSectorStreamRange(&sub, &key) == 0) {
                 DestroyBufferedStream(&sub, 2);
                 goto end;
@@ -1602,7 +1602,7 @@ void func_001E4EA8(Self_1E4EA8* self)
             SetVolumeChannelFactor(0xA, 0, 0.0f);
             g_currentWorld->desc->m0A(g_currentWorld, &sub);
             CloseBufferedStream(&sub);
-            if (sub.owner != 0) func_00193300(sub.owner);
+            if (sub.owner != 0) EndLoadProgress(sub.owner);
             if (g_saveData->f19EC & 0x100) {
                 Cur_1E4EA8* c = g_memoryCard.f4F44;
                 if (c != 0 && (c->f19D8 != g_saveData->f19D8 || c->f19DC != g_saveData->f19DC))
@@ -1625,14 +1625,14 @@ void func_001E4EA8(Self_1E4EA8* self)
 end:
     ResetVolumeChannelFactors();
     SetVolumeChannelFactor(1, 1, g_currentWorld->f1D7C);
-    func_00191EB0(2);
+    ClearScreenOwner(2);
     self->f0 = 0;
 }
 
 void func_001E5278(s32 mode)
 {
     s32 n;
-    func_001C05D0(0.0f);
+    SetIopVolumeChannel8(0.0f);
     switch (mode) {
     case 0:
         n = 0;
