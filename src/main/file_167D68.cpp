@@ -12,6 +12,7 @@
 #include "bump_allocator.h"
 #include "texture_header.h"
 #include "shapes.h"
+#include "vu0.h"
 
 void DrawAgent(void);
 
@@ -1125,9 +1126,45 @@ void CopyTargetPoint(TargetPoint* self)
     self->keep = saved;
 }
 
-INCLUDE_ASM(func_0016A240);
+void ConvertPositionToWorld(BaseObject* self, Vec02* out);
+void ComputePolarOffset(Vec02* out, f32 x, f32 y, f32 z);
+f32 WrapAngle(f32 a);
+f32 ArctangentOfRatio(f32 y, f32 x);
 
-INCLUDE_ASM(func_0016A320);
+void PlaceOnTargetPoint(TargetPoint* self, Vec02* out, f32* angleOut, f32 t)
+{
+    Vec02 offset;
+    f32 angle = t / self->radius5C;
+    if (out) {
+        f32 radius = self->radius5C;
+        switch (self->mode58) {
+        case 0:
+            radius += 20.0f;
+            break;
+        case 1:
+            radius += 70.0f;
+            break;
+        }
+        ComputePolarOffset(&offset, angle, radius, 0.0f);
+        ConvertPositionToWorld(self, out);
+        Vu0::Q(*out) = Vu0::Add(Vu0::Q(*out), Vu0::Q(offset));
+    }
+    if (angleOut) {
+        *angleOut = angle;
+        if (self->mode58 == 1)
+            *angleOut = WrapAngle(angle + 3.14159274f);
+    }
+}
+
+void func_0016A320(TargetPoint* self, Vec02* out, f32* angleOut)
+{
+    Vec02 here;
+    Vec02 d;
+    PlacedObject* active = (PlacedObject*)GetActiveSwitchedCollider();
+    ConvertPositionToWorld(self, &here);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(active->v140), Vu0::Q(here));
+    PlaceOnTargetPoint(self, out, angleOut, ArctangentOfRatio(d.y, d.x) * self->radius5C);
+}
 
 void InitListedCollisionPart(ListedCollisionPart* self)
 {
