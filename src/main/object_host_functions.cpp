@@ -1,4 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// 0x1000C8 to 0x112698 (.rodata from 0x248D80, .data from 0x2505D8): the script host functions
+// on objects (each a tag 0x21 function taking its object, the argument count and the arguments)
+// and FillObjectPropertyTable (func_00109488), which fills the property records of D_002505D8,
+// this file's .data, with them and the property setters. Named after what it holds.
 #include "common.h"
 #include "asm_func.h"
 #include "script_value.h"

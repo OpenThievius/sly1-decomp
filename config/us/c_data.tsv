@@ -421,7 +421,7 @@ D_00248D10	00248D10	16	.rodata.D_00248D10	src/main/001E4000.cpp
 D_00248D20	00248D20	16	.rodata.D_00248D20	src/main/001E4000.cpp
 D_00248D40	00248D40	16	.rodata.D_00248D40	src/main/001E4000.cpp
 D_00248D50	00248D50	16	.rodata.D_00248D50	src/main/001E4000.cpp
-D_00248D80	00248D80	608	.rodata	src/main/file_1000C8.cpp
+D_00248D80	00248D80	608	.rodata	src/main/object_host_functions.cpp
 D_00248FE0	00248FE0	532	.rodata	src/main/script_machine.cpp
 D_00249200	00249200	16	.rodata.D_00249200	src/main/00118000.cpp
 D_002492F0	002492F0	308	.rodata	src/main/value.cpp
@@ -589,7 +589,7 @@ D_00250260	00250260	153	.rodata	src/lib/mpeg_macroblock.cpp
 D_00250300	00250300	571	.rodata	src/lib/mpeg_ipu_decode.cpp
 D_002504F8	002504F8	48	.rodata.D_002504F8	src/main/001E4000.cpp
 D_002505C0	002505C0	24	.data.D_002505C0	src/main/001E4000.cpp
-D_002505D8	002505D8	37728	.data	src/main/file_1000C8.cpp
+D_002505D8	002505D8	37728	.data	src/main/object_host_functions.cpp
 D_00259938	00259938	9016	.data	src/main/script_machine.cpp
 D_0025C250	0025C250	160	.data	src/main/value.cpp
 D_0025C2F0	0025C2F0	80	.data	src/main/value_pools.cpp
