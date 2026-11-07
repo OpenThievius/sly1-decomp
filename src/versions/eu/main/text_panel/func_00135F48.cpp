@@ -11,7 +11,7 @@ void func_001358D0(Self_135F48_eu* self, s32 a1, void* a2, void* a3, s32 a4, s32
 
 void func_00135F48(Self_135F48_eu* self)
 {
-    Flag_135F48 flag;
+    LevelBit flag;
     GetCurrentLevelBit(&flag);
     if ((MaskWorldBitsBySave() & flag.v) == 0) {
         ReleasePanelEntries(self, 0, 1);

@@ -8,17 +8,17 @@ struct Self_133B58_eu
 
 void func_00133B58(Self_133B58_eu* self, PacketWriter* gs)
 {
-    Rgba_130F48 c0;
-    Rgba_130F48 c1;
-    Rgba_130F48 c2;
+    PanelColor c0;
+    PanelColor c1;
+    PanelColor c2;
     f32 step = 1.0f / 24.0f;
     f32 t;
     t = 0.5f - func_00205210(self->phase) * 0.5f;
-    c0 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    c0 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
     t = 0.5f - func_00205210(self->phase + 1.5707964f) * 0.5f;
-    c1 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    c1 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
     t = 0.5f - func_00205210(self->phase + 3.1415927f) * 0.5f;
-    c2 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    c2 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
     s32 i;
     f32 x;
 

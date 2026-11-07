@@ -25,8 +25,8 @@ struct Gfx_eu_132500 {
 
 void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
 {
-    Rgba_130F48 c0;
-    Rgba_130F48 c1;
+    PanelColor c0;
+    PanelColor c1;
     f32 k;
     PadRecord* pad;
     u8 alpha;
@@ -54,23 +54,23 @@ void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
     switch (self->f5AC) {
     case 0:
         if (self->f570 == 5) {
-            Rgba_130F48 t = D_00261110;
+            PanelColor t = D_00261110;
             t.a = alpha;
             c0 = t;
             t = D_00261108;
             t.a = alpha;
             c1 = t;
         } else {
-            Rgba_130F48 t = (*(Rgba_130F48*)&D_002610E0);
+            PanelColor t = (*(PanelColor*)&D_002610E0);
             t.a = alpha;
             c0 = t;
-            t = (*(Rgba_130F48*)&D_002610D8);
+            t = (*(PanelColor*)&D_002610D8);
             t.a = alpha;
             c1 = t;
         }
         break;
     case 1: {
-        Rgba_130F48 t = D_00261100;
+        PanelColor t = D_00261100;
         t.a = alpha;
         c0 = t;
         t = D_002610F8;
@@ -79,7 +79,7 @@ void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
         break;
     }
     case 2: {
-        Rgba_130F48 t = D_002610F0;
+        PanelColor t = D_002610F0;
         t.a = alpha;
         c0 = t;
         t = D_002610E8;
@@ -96,10 +96,10 @@ void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
         f32 step = 1.0f / 24.0f;
         f32 period = 256.0f;
         f32 wide = 512.0f;
-        f32 s = Gfx_132500::Wave(-8.0f, period, self->f598);
-        Rgba_130F48 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-        s = Gfx_132500::Wave(-18.0f, period, self->f598);
-        Rgba_130F48 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+        f32 s = CenterFrameMath::Wave(-8.0f, period, self->f598);
+        PanelColor colA = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
+        s = CenterFrameMath::Wave(-18.0f, period, self->f598);
+        PanelColor colB = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
         f32 x0 = posX - scale * 35.0f;
         f32 x1 = x0 + scale * 70.0f;
         f32 u;
@@ -159,10 +159,10 @@ void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
             BeginGifTag(gs, 0xC6, 5, 0x44441);
             for (n = 0; n < 64; n++) {
                 f32 px, py;
-                f32 s = Gfx_132500::Wave(offX, wide, self->f598);
+                f32 s = CenterFrameMath::Wave(offX, wide, self->f598);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                PanelColor col = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
                 AddGifRgbaEntry(gs, *(u32*)&col);
                 AddGifXyzfNoDrawEntry(gs, Gfx_eu_132500::ScreenX(px), Gfx_eu_132500::ScreenY(py), 0, 0);
                 AddGifXyzfEntry(gs, Gfx_eu_132500::ScreenX(px + scale * 2.0f), Gfx_eu_132500::ScreenY(py + scale * 10.0f), 0, 0);
@@ -177,10 +177,10 @@ void func_00132500(Obj_eu_132500* self, PacketWriter* gs)
             offY = 24.0f;
             for (n = 0; n < 32; n++) {
                 f32 px, py;
-                f32 s = Gfx_132500::Wave(offY, period, self->f598);
+                f32 s = CenterFrameMath::Wave(offY, period, self->f598);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                PanelColor col = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
                 AddGifRgbaEntry(gs, *(u32*)&col);
                 AddGifXyzfNoDrawEntry(gs, Gfx_eu_132500::ScreenX(px), Gfx_eu_132500::ScreenY(py), 0, 0);
                 AddGifXyzfEntry(gs, Gfx_eu_132500::ScreenX(px + scale * 10.0f), Gfx_eu_132500::ScreenY(py + scale * 2.0f), 0, 0);

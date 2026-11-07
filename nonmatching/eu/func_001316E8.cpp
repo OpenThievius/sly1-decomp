@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// BYTES 2125/2224 (95.5%), checked 2026-11-06
+// BYTES 2125/2224 (95.5%), checked 2026-11-07
 // NEAR (only in PAL): python3 tools/check.py build/swarm/palA/func_001316E8.cpp func_001316E8 --version eu --unit src/main/text_panel.cpp
 // Still differs: registers and spill slots only (about 33 lines of ~560): PAL keeps &L (sp+0x240) and
 // &col (sp+0x260) in spill slots 0x2B0/0x2B4 with self in s6, prev/next strings in s7/s8; ours puts &L in s6,
@@ -114,7 +114,7 @@ void func_001316E8(Obj_eu_1316E8* self, PacketWriter* gs)
 
     L.h = (f32)self->font->height * self->font->sy;
     L.w = D_00261310;
-    *(Rgba_130F48*)&L.color = Rgba_130F48(D_002610D8);
+    *(PanelColor*)&L.color = PanelColor(D_002610D8);
     L.x = xPrev;
     L.y = row;
     func_eu_0015E7E0(&sPrev, &L, 0, gs);
@@ -123,9 +123,9 @@ void func_001316E8(Obj_eu_1316E8* self, PacketWriter* gs)
     func_eu_0015E7E0(&sNext, &L, 0, gs);
 
     {
-        Quad_130F48 q = { 0.0f, 4.0f, -4.0f };
+        SpanHead q = { 0.0f, 4.0f, -4.0f };
         f32 t = q.c0 + frac * (q.c1 + frac * q.c2);
-        *(Rgba_130F48*)&L.color = Lerp_133B58::Mix(D_002610D8, Rgba_130F48(0x32, 0x84, 0xB0, 0x80), t);
+        *(PanelColor*)&L.color = BorderColorMix::Mix(D_002610D8, PanelColor(0x32, 0x84, 0xB0, 0x80), t);
     }
     L.x = xCur;
     L.y = row;

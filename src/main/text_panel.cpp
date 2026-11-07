@@ -13,12 +13,12 @@
 #include "pad_record.h"
 #include "game_progress.h"
 
-struct Quad_130F48 {
+struct SpanHead {
     f32 c0, c1, c2, c3;
 } __attribute__((aligned(16)));
 
-struct Span_130F48 {
-    Quad_130F48 head;
+struct CurveSpan {
+    SpanHead head;
     f32 len;
     f32 halfw;
     s32 lo;
@@ -30,15 +30,15 @@ struct Span_130F48 {
 
 void func_001365A0(T217D_440* self, s32 arg);
 
-struct Rgba_130F48
+struct PanelColor
 {
     u8 r;
     u8 g;
     u8 b;
     u8 a;
-    Rgba_130F48() {}
-    Rgba_130F48(const Rgba_130F48& o) { *this = o; }
-    Rgba_130F48(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
+    PanelColor() {}
+    PanelColor(const PanelColor& o) { *this = o; }
+    PanelColor(u8 r_, u8 g_, u8 b_, u8 a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 
 f32 func_00205210(f32 x);
@@ -47,7 +47,7 @@ void func_00161458(PacketWriter* gs, u32 c);
 void func_00161670(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
 void func_001615F0(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
 
-struct Lerp_133B58
+struct BorderColorMix
 {
     static s32 Channel(s32 a, s32 b, f32 t)
     {
@@ -62,9 +62,9 @@ struct Lerp_133B58
         return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
     }
 
-    static Rgba_130F48 Mix(Rgba_130F48 a, Rgba_130F48 b, f32 t)
+    static PanelColor Mix(PanelColor a, PanelColor b, f32 t)
     {
-        Rgba_130F48 c;
+        PanelColor c;
         c.r = Channel(a.r, b.r, t);
         c.g = Channel(a.g, b.g, t);
         c.b = Channel(a.b, b.b, t);
@@ -74,11 +74,11 @@ struct Lerp_133B58
 };
 
 
-struct Clock_132500 { u8 pad[0x468]; f32 heading; u8 pad46C[0x478 - 0x46C]; f32 f478; };
+struct CameraHeading { u8 pad[0x468]; f32 heading; u8 pad46C[0x478 - 0x46C]; f32 f478; };
 
 extern s32 D_00262C68;
 extern f32 D_00261860;
-extern Clock_132500* D_00261990;
+extern CameraHeading* D_00261990;
 
 void func_001613C0(PacketWriter* gs, s32 a, s32 b, u64 c);
 void func_00161708(PacketWriter* gs, s32 reg, u64 value);
@@ -89,7 +89,7 @@ f32 func_001EA408(f32 a);
 f32 func_00205210(f32 a);
 void func_00136EC8(T217D_440* self, f32* x, f32* y);
 
-struct Gfx_132500 {
+struct CenterFrameMath {
     static s32 LerpU8(s32 a, s32 b, f32 t)
     {
         if (a == b) {
@@ -101,9 +101,9 @@ struct Gfx_132500 {
         return b + (s32)((1.0f - t) * ((f32)a + 0.999f - (f32)b));
     }
 
-    static Rgba_130F48 Lerp(Rgba_130F48 a, Rgba_130F48 b, f32 t)
+    static PanelColor Lerp(PanelColor a, PanelColor b, f32 t)
     {
-        Rgba_130F48 r;
+        PanelColor r;
         r.r = LerpU8(a.r, b.r, t);
         r.g = LerpU8(a.g, b.g, t);
         r.b = LerpU8(a.b, b.b, t);
@@ -133,17 +133,12 @@ s32 func_00150790(void* obj, s32 mode);
 void func_001356C0(T217D_440* self, s32 mode);
 void func_00150790(StepSequence* obj, s32 mode);
 
-struct Entry_1357F0 {
+struct SortEntry {
     void* obj;
     f32 key;
 };
 
 s32 func_00182FC8(void* obj);
-
-struct Entry_135858 {
-    void* obj;
-    f32 key;
-};
 
 void func_00199C10(void* obj, s32* out);
 
@@ -161,7 +156,7 @@ extern void func_001373D0(void*);
 extern void func_0018D778(void*);
 extern void func_00137A60(void*, s32, void*);
 
-struct Value_1365A8 {
+struct PercentClamp {
     static void Set(T217D_440* self, f32 x, f32 lo, f32 hi) {
         if (x < lo) x = lo;
         else if (hi < x) x = hi;
@@ -176,7 +171,7 @@ s32 func_0015DF58(void* self);
 
 extern f32 D_00261858[];
 
-struct Scratch_00136408 {
+struct TextScratch {
     u8 bytes[0xB0];
 };
 
@@ -205,32 +200,23 @@ struct Ctx_135F48 {
     s32 f1D54;
 };
 
-struct Flag_135F48 { s32 v; };
 
-void func_00160D30(Flag_135F48* p);
+// The bit of the current level GetCurrentLevelBit (func_00160D30) gives back.
+struct LevelBit { s32 v; };
+void func_00160D30(LevelBit* p);
 s32 func_00160D10(void);
 void func_001358D0(T217D_440* self, s32 a1, void* a2, void* a3, s32 a4, s32 a5, f32 f);
 
-struct Tri_136040 { u64 a __attribute__((packed)); u32 b; };
+struct StickLimits { u64 a __attribute__((packed)); u32 b; };
 typedef u64 Quad_136040 __attribute__((mode(TI)));
 struct __attribute__((aligned(16))) Vec_136040 { f32 x, y, z, w; };
-struct Pad_136040 {
-    u8 pad_00[0x40];
-    f32 f40;
-    f32 f44;
-    f32 f48;
-    u8 pad_4C[0x74 - 0x4C];
-    f32 f74;
-    u8 pad_78[4];
-    f32 f7C;
-};
 
-extern const Tri_136040 D_00249D00;
-extern const Tri_136040 D_00249D10;
+extern const StickLimits D_00249D00;
+extern const StickLimits D_00249D10;
 
-Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, Tri_136040* c, s32 d, f32 f12);
+Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, StickLimits* c, s32 d, f32 f12);
 f32 func_001EAFE0(f32 x, f32 y);
-void func_00135F48(T217D_440* self, Pad_136040* p);
+void func_00135F48(T217D_440* self, PadRecord* p);
 
 struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
 struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
@@ -238,49 +224,44 @@ struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
 
 void func_001A1F40(PanelEntryPosition* v, s32 mode);
 
-struct Item_135550;
-struct List_135550 { u8* head; u8 pad4[4]; s32 offset; };
-struct Iter_135550 { List_135550* list; u8* link; s32 offset; Iter_135550* saved; };
-struct Group_135550 { u8 pad0[0x6C]; List_135550 list; };
-struct Host_135550;
+struct PlayerListHolder { u8 pad0[0x6C]; List01 list; };
 
-struct Next_135550 {
-    static Item_135550* Of(Iter_135550* it)
+struct ListWalkNext {
+    static AnimationPlayer* Of(ListFrame* it)
     {
-        Item_135550* obj = *(Item_135550**)it->link;
+        AnimationPlayer* obj = *(AnimationPlayer**)it->link;
         it->link = (u8*)obj + it->offset;
         return obj;
     }
 };
 
-struct Begin_135550 {
-    static void Of(Iter_135550* it, List_135550* list)
+struct ListWalkBegin {
+    static void Of(ListFrame* it, List01* list)
     {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_135550*)g_activeListFrames;
+        it->prev = g_activeListFrames;
         g_activeListFrames = (ListFrame*)it;
     }
 };
 
-Group_135550* func_0015A418(Host_135550* host, s32 a1, s32 a2, void* ctx);
-void func_0012F6B0(Item_135550* item, f32 x);
+PlayerListHolder* func_0015A418(World* host, s32 a1, s32 a2, void* ctx);
+void func_0012F6B0(AnimationPlayer* item, f32 x);
 
 struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
-struct In_136238 { s32 a; };
 
 extern u8 D_00275710[];
 
 void func_001BEA50(void);
 void func_001BEA28(void);
-void func_00160D30(In_136238* p);
+void func_00160D30(LevelBit* p);
 s32 func_00160D10(void);
 void func_00135E78(T217D_440* self, s32 state, s32 flag);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
 void func_00192190(void* p);
 
-struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
+struct ClampBelow { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
 void func_00160D30(u32* out);
 void func_00134B48(T217D_440* self, PacketWriter* q);
@@ -292,7 +273,7 @@ void func_001615F0(PacketWriter* q, s32 a, s32 b, s32 c, s32 d);
 
 // The file's .data, in retail's order from 0x261090. The colours and the two styles are built
 // by the static initialiser (func_00136FE8); their bytes are zero until then.
-struct Style_136FE8 {
+struct PanelStyle {
     s32 f0;
     u8 f4;
     f32 f8;
@@ -300,7 +281,7 @@ struct Style_136FE8 {
     f32 f10;
     f32 f14;
     u32 f18;
-    Style_136FE8(f32 w)
+    PanelStyle(f32 w)
     {
         FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
@@ -309,7 +290,7 @@ struct Style_136FE8 {
         f14 = 0.3f;
         f18 = 0xFF7D4B00;
     }
-    Style_136FE8(s32 w, s32 h)
+    PanelStyle(s32 w, s32 h)
     {
         FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
@@ -324,21 +305,21 @@ s32 D_00261090[4] = { 75, 0, 0, 0 };
 f32 D_002610A0[4] = { 80.0f, -288.0f, 288.0f, 0.0f };
 f32 D_002610B0[4] = { 280.800018f, 376.0f, -376.0f, 0.0f };
 f32 D_002610C0[4] = { -8.0f, -40.0f, 40.0f, 0.0f };
-Rgba_130F48 D_002610D0(0x00, 0x00, 0x00, 0x80);
-Rgba_130F48 D_002610D8(0x00, 0x52, 0x7E, 0x80);
-Rgba_130F48 D_002610E0(0x19, 0x1E, 0x6E, 0x80);
-Rgba_130F48 D_002610E8(0x7E, 0x28, 0x0A, 0x80);
-Rgba_130F48 D_002610F0(0x50, 0x28, 0x28, 0x80);
-Rgba_130F48 D_002610F8(0xF0, 0xF0, 0x00, 0x80);
-Rgba_130F48 D_00261100(0x28, 0x28, 0x00, 0x80);
-Rgba_130F48 D_00261108(0xFF, 0xFF, 0xFF, 0x80);
-Rgba_130F48 D_00261110(0xE6, 0xE6, 0xE6, 0x80);
-Rgba_130F48 D_00261118(0x2F, 0x72, 0x3E, 0x80);
+PanelColor D_002610D0(0x00, 0x00, 0x00, 0x80);
+PanelColor D_002610D8(0x00, 0x52, 0x7E, 0x80);
+PanelColor D_002610E0(0x19, 0x1E, 0x6E, 0x80);
+PanelColor D_002610E8(0x7E, 0x28, 0x0A, 0x80);
+PanelColor D_002610F0(0x50, 0x28, 0x28, 0x80);
+PanelColor D_002610F8(0xF0, 0xF0, 0x00, 0x80);
+PanelColor D_00261100(0x28, 0x28, 0x00, 0x80);
+PanelColor D_00261108(0xFF, 0xFF, 0xFF, 0x80);
+PanelColor D_00261110(0xE6, 0xE6, 0xE6, 0x80);
+PanelColor D_00261118(0x2F, 0x72, 0x3E, 0x80);
 s32 D_00261120[2] = { -268435456, -268435456 };
 // The eight compass points, read by func_00131198 and func_001316E8.
 const char* D_00261128[8] = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" };
-Style_136FE8 D_00261148(2.0f);
-Style_136FE8 D_00261168(32, 16);
+PanelStyle D_00261148(2.0f);
+PanelStyle D_00261168(32, 16);
 f32 D_00261184 = 1.0f;
 f32 D_00261188 = 0.5f;
 f32 D_00261190[4] = { 0.0f, 0.300000012f, 0.0f, 0.0f };
@@ -366,13 +347,13 @@ f32 D_00261220[4][4] = {
 f32 D_00261260[2] = { 8.0f, 0.0f };
 f32 D_00261268[3] = { 8.0f, 0.0f, 0.150000006f };
 f32 D_00261274 = 0.25f;
-Span_130F48 D_00261280;
-Span_130F48 D_002612B0;
-Span_130F48 D_002612E0;
+CurveSpan D_00261280;
+CurveSpan D_002612B0;
+CurveSpan D_002612E0;
 f32 D_00261310;
 
-void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y);
-f32 func_00131000(const Span_130F48* s, s32 x);
+void func_00130F48(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y);
+f32 func_00131000(const CurveSpan* s, s32 x);
 void func_001310F0(T217D_440* self, s32 a1);
 void func_00131140(T217D_440* self);
 void func_00132500(T217D_440* self, PacketWriter* gs);
@@ -380,13 +361,13 @@ void func_00133B58(T217D_440* self, PacketWriter* gs);
 void func_00135228(T217D_440* self, PacketWriter* q);
 void func_00135550(T217D_440* self, s32 value);
 void func_001356C0(T217D_440* self, s32 mode);
-s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b);
-s32 func_00135858(Entry_135858* a, Entry_135858* b);
+s32 func_001357F0(SortEntry* a, SortEntry* b);
+s32 func_00135858(SortEntry* a, SortEntry* b);
 void func_00135E30(PanelEntrySource* self, PanelEntryPosition* out, s32* flag);
 void func_00135E48(PanelEntrySource* self, s32 unused, PanelEntryPosition* out);
 void func_00135E78(T217D_440* self, s32 state, s32 flag);
 void func_00135F48(T217D_440* self);
-void func_00136040(T217D_440* self, Pad_136040* p);
+void func_00136040(T217D_440* self, PadRecord* p);
 void func_00136238(T217D_440* self, s32 on);
 void func_001363D0(T217D_440* self);
 void func_00136408(T217D_440* self, const char* name);
@@ -399,7 +380,7 @@ void func_00136EC8(T217D_440* self, f32* x, f32* y);
 void func_00136EF8(T217D_440* self);
 s32 func_00136FA8(Owner_136FA8* self);
 
-void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y)
+void func_00130F48(CurveSpan* d, const SpanHead* src, s32 n, f32 x, f32 y)
 {
     f32 fn = (f32)n;
     f32 inv = 1.0f / fn;
@@ -421,7 +402,7 @@ void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y)
     d->q = src->c0 + 0.5f * (src->c1 + 0.5f * src->c2) + y;
 }
 
-f32 func_00131000(const Span_130F48* s, s32 x)
+f32 func_00131000(const CurveSpan* s, s32 x)
 {
     if (x < s->lo || s->hi < x) {
         f32 u = (f32)x / s->len;
@@ -465,7 +446,7 @@ ASM_FUNC(func_00131198);
 
 
 
-struct Font_1316E8 {
+struct PanelFont {
     static Font* Of(T217D_440* self) { return *(Font**)((u8*)self + 0x310); }
 };
 
@@ -503,12 +484,12 @@ void func_001316E8(T217D_440* self, PacketWriter* gs)
 
     for (i = 0; i < 11; i++) {
         f32 x = left + ((f32)i - self->f314) * step * span;
-        s32 x0 = Gfx_132500::ScreenX(x);
+        s32 x0 = CenterFrameMath::ScreenX(x);
         x += tick;
-        AddGifXyzfNoDrawEntry(gs, x0, Gfx_132500::ScreenY(top), 0, 0);
-        s32 x1 = Gfx_132500::ScreenX(x);
-        AddGifXyzfNoDrawEntry(gs, x1, Gfx_132500::ScreenY(top), 0, 0);
-        s32 y = Gfx_132500::ScreenY(bottom);
+        AddGifXyzfNoDrawEntry(gs, x0, CenterFrameMath::ScreenY(top), 0, 0);
+        s32 x1 = CenterFrameMath::ScreenX(x);
+        AddGifXyzfNoDrawEntry(gs, x1, CenterFrameMath::ScreenY(top), 0, 0);
+        s32 y = CenterFrameMath::ScreenY(bottom);
         AddGifXyzfEntry(gs, x0, y, 0, 0);
         AddGifXyzfEntry(gs, x1, y, 0, 0);
     }
@@ -523,10 +504,10 @@ void func_001316E8(T217D_440* self, PacketWriter* gs)
     s32 next = (cur + 1) & 7;
     f32 frac = WrapModulo(a, 0.78539819f) / 0.78539819f;
     Font* font;
-    f32 wCur = MeasureFontString(Font_1316E8::Of(self), D_00261128[cur]);
+    f32 wCur = MeasureFontString(PanelFont::Of(self), D_00261128[cur]);
     f32 off = frac * w;
-    f32 wPrev = MeasureFontString(Font_1316E8::Of(self), D_00261128[prev]);
-    f32 wNext = MeasureFontString(Font_1316E8::Of(self), D_00261128[next]);
+    f32 wPrev = MeasureFontString(PanelFont::Of(self), D_00261128[prev]);
+    f32 wNext = MeasureFontString(PanelFont::Of(self), D_00261128[next]);
     f32 hPrev = (w - wPrev) * half;
     f32 hCur = (w - wCur) * half;
     f32 hNext = (w - wNext) * half;
@@ -544,25 +525,25 @@ void func_001316E8(T217D_440* self, PacketWriter* gs)
     L.SetF14(0);
     L.SetF18(0);
 
-    font = Font_1316E8::Of(self);
+    font = PanelFont::Of(self);
     L.h = (f32)font->height * font->sy;
     L.w = D_00261310;
-    *(Rgba_130F48*)&L.color = Rgba_130F48(D_002610D8);
+    *(PanelColor*)&L.color = PanelColor(D_002610D8);
     L.x = xPrev;
     L.y = row;
-    DrawFontString(Font_1316E8::Of(self), D_00261128[prev], &L, 0, gs);
+    DrawFontString(PanelFont::Of(self), D_00261128[prev], &L, 0, gs);
     L.x = xNext;
     L.y = row;
-    DrawFontString(Font_1316E8::Of(self), D_00261128[next], &L, 0, gs);
+    DrawFontString(PanelFont::Of(self), D_00261128[next], &L, 0, gs);
 
     {
-        Quad_130F48 q = { 0.0f, 4.0f, -4.0f };
+        SpanHead q = { 0.0f, 4.0f, -4.0f };
         f32 t = q.c0 + frac * (q.c1 + frac * q.c2);
-        *(Rgba_130F48*)&L.color = Lerp_133B58::Mix(D_002610D8, Rgba_130F48(0x32, 0x84, 0xB0, 0x80), t);
+        *(PanelColor*)&L.color = BorderColorMix::Mix(D_002610D8, PanelColor(0x32, 0x84, 0xB0, 0x80), t);
     }
     L.x = xCur;
     L.y = row;
-    DrawFontString(Font_1316E8::Of(self), D_00261128[cur], &L, 0, gs);
+    DrawFontString(PanelFont::Of(self), D_00261128[cur], &L, 0, gs);
 
     BeginGifTag(gs, 0, 1, 0xE);
     AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
@@ -576,8 +557,8 @@ INCLUDE_ASM(func_00131F60);
 
 void func_00132500(T217D_440* self, PacketWriter* gs)
 {
-    Rgba_130F48 c0;
-    Rgba_130F48 c1;
+    PanelColor c0;
+    PanelColor c1;
     f32 k;
     PadRecord* pad;
     u8 alpha;
@@ -605,23 +586,23 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
     switch (self->palette) {
     case 0:
         if (self->state == 5) {
-            Rgba_130F48 t = D_00261110;
+            PanelColor t = D_00261110;
             t.a = alpha;
             c0 = t;
             t = D_00261108;
             t.a = alpha;
             c1 = t;
         } else {
-            Rgba_130F48 t = (*(Rgba_130F48*)&D_002610E0);
+            PanelColor t = (*(PanelColor*)&D_002610E0);
             t.a = alpha;
             c0 = t;
-            t = (*(Rgba_130F48*)&D_002610D8);
+            t = (*(PanelColor*)&D_002610D8);
             t.a = alpha;
             c1 = t;
         }
         break;
     case 1: {
-        Rgba_130F48 t = D_00261100;
+        PanelColor t = D_00261100;
         t.a = alpha;
         c0 = t;
         t = D_002610F8;
@@ -630,7 +611,7 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
         break;
     }
     case 2: {
-        Rgba_130F48 t = D_002610F0;
+        PanelColor t = D_002610F0;
         t.a = alpha;
         c0 = t;
         t = D_002610E8;
@@ -647,10 +628,10 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
         f32 step = 1.0f / 24.0f;
         f32 period = 256.0f;
         f32 wide = 512.0f;
-        f32 s = Gfx_132500::Wave(-8.0f, period, self->spin);
-        Rgba_130F48 colA = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
-        s = Gfx_132500::Wave(-18.0f, period, self->spin);
-        Rgba_130F48 colB = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+        f32 s = CenterFrameMath::Wave(-8.0f, period, self->spin);
+        PanelColor colA = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
+        s = CenterFrameMath::Wave(-18.0f, period, self->spin);
+        PanelColor colB = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
         f32 x0 = posX - scale * 35.0f;
         f32 x1 = x0 + scale * 70.0f;
         f32 u;
@@ -659,9 +640,9 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
         BeginGifTag(gs, 0x4C, 2, 0x41);
 
         AddGifRgbaEntry(gs, *(u32*)&colB);
-        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
+        AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(x0), CenterFrameMath::ScreenY(posY + scale * -8.0f), 0, 0);
         AddGifRgbaEntry(gs, *(u32*)&colA);
-        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY + scale * -3.0f), 0, 0);
+        AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(x0), CenterFrameMath::ScreenY(posY + scale * -3.0f), 0, 0);
         u = step;
         for (i = 1; i < 24; i++) {
             f32 x = x0 + scale * u * 70.0f;
@@ -671,19 +652,19 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
             y = posY + scale * EvalCurveSpan(&D_002612E0, i);
             y2 = y + scale * 5.0f;
             AddGifRgbaEntry(gs, *(u32*)&colB);
-            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
+            AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x), CenterFrameMath::ScreenY(y), 0, 0);
             AddGifRgbaEntry(gs, *(u32*)&colA);
-            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
+            AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x), CenterFrameMath::ScreenY(y2), 0, 0);
         }
         AddGifRgbaEntry(gs, *(u32*)&colB);
-        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -8.0f), 0, 0);
+        AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x1), CenterFrameMath::ScreenY(posY + scale * -8.0f), 0, 0);
         AddGifRgbaEntry(gs, *(u32*)&colA);
-        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY + scale * -4.0f), 0, 0);
+        AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x1), CenterFrameMath::ScreenY(posY + scale * -4.0f), 0, 0);
 
         AddGifRgbaEntry(gs, *(u32*)&colB);
-        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
+        AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(x0), CenterFrameMath::ScreenY(posY - scale * -8.0f), 0, 0);
         AddGifRgbaEntry(gs, *(u32*)&colA);
-        AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(x0), Gfx_132500::ScreenY(posY - scale * -3.0f), 0, 0);
+        AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(x0), CenterFrameMath::ScreenY(posY - scale * -3.0f), 0, 0);
         u = step;
         for (i = 1; i < 24; i++) {
             f32 x = x0 + scale * u * 70.0f;
@@ -693,14 +674,14 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
             y = posY - scale * EvalCurveSpan(&D_002612E0, i);
             y2 = y - scale * 5.0f;
             AddGifRgbaEntry(gs, *(u32*)&colB);
-            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y), 0, 0);
+            AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x), CenterFrameMath::ScreenY(y), 0, 0);
             AddGifRgbaEntry(gs, *(u32*)&colA);
-            AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x), Gfx_132500::ScreenY(y2), 0, 0);
+            AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x), CenterFrameMath::ScreenY(y2), 0, 0);
         }
         AddGifRgbaEntry(gs, *(u32*)&colB);
-        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -8.0f), 0, 0);
+        AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x1), CenterFrameMath::ScreenY(posY - scale * -8.0f), 0, 0);
         AddGifRgbaEntry(gs, *(u32*)&colA);
-        AddGifXyzfEntry(gs, Gfx_132500::ScreenX(x1), Gfx_132500::ScreenY(posY - scale * -4.0f), 0, 0);
+        AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(x1), CenterFrameMath::ScreenY(posY - scale * -4.0f), 0, 0);
 
         if (self->state != 5) {
             s32 n;
@@ -710,17 +691,17 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
             BeginGifTag(gs, 0xC6, 5, 0x44441);
             for (n = 0; n < 64; n++) {
                 f32 px, py;
-                f32 s = Gfx_132500::Wave(offX, wide, self->spin);
+                f32 s = CenterFrameMath::Wave(offX, wide, self->spin);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                PanelColor col = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
                 AddGifRgbaEntry(gs, *(u32*)&col);
-                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px + scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
+                AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(px), CenterFrameMath::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(px + scale * 2.0f), CenterFrameMath::ScreenY(py + scale * 10.0f), 0, 0);
                 py = posY + scale * offY;
                 px = posX - scale * offX;
-                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px - scale * 2.0f), Gfx_132500::ScreenY(py + scale * 10.0f), 0, 0);
+                AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(px), CenterFrameMath::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(px - scale * 2.0f), CenterFrameMath::ScreenY(py + scale * 10.0f), 0, 0);
                 offX += 8.0f;
             }
 
@@ -728,17 +709,17 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
             offY = 24.0f;
             for (n = 0; n < 32; n++) {
                 f32 px, py;
-                f32 s = Gfx_132500::Wave(offY, period, self->spin);
+                f32 s = CenterFrameMath::Wave(offY, period, self->spin);
                 px = posX + scale * offX;
                 py = posY + scale * offY;
-                Rgba_130F48 col = Gfx_132500::Lerp(c0, c1, 0.5f - s * 0.5f);
+                PanelColor col = CenterFrameMath::Lerp(c0, c1, 0.5f - s * 0.5f);
                 AddGifRgbaEntry(gs, *(u32*)&col);
-                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py + scale * 2.0f), 0, 0);
+                AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(px), CenterFrameMath::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(px + scale * 10.0f), CenterFrameMath::ScreenY(py + scale * 2.0f), 0, 0);
                 py = posY - scale * offY;
                 px = posX + scale * offX;
-                AddGifXyzfNoDrawEntry(gs, Gfx_132500::ScreenX(px), Gfx_132500::ScreenY(py), 0, 0);
-                AddGifXyzfEntry(gs, Gfx_132500::ScreenX(px + scale * 10.0f), Gfx_132500::ScreenY(py - scale * 2.0f), 0, 0);
+                AddGifXyzfNoDrawEntry(gs, CenterFrameMath::ScreenX(px), CenterFrameMath::ScreenY(py), 0, 0);
+                AddGifXyzfEntry(gs, CenterFrameMath::ScreenX(px + scale * 10.0f), CenterFrameMath::ScreenY(py - scale * 2.0f), 0, 0);
                 offY += 8.0f;
             }
         }
@@ -750,17 +731,17 @@ void func_00132500(T217D_440* self, PacketWriter* gs)
 
 void func_00133B58(T217D_440* self, PacketWriter* gs)
 {
-    Rgba_130F48 c0;
-    Rgba_130F48 c1;
-    Rgba_130F48 c2;
+    PanelColor c0;
+    PanelColor c1;
+    PanelColor c2;
     f32 step = 1.0f / 24.0f;
     f32 t;
     t = 0.5f - Cosine(self->spin) * 0.5f;
-    c0 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    c0 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
     t = 0.5f - Cosine(self->spin + 1.5707964f) * 0.5f;
-    c1 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    c1 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
     t = 0.5f - Cosine(self->spin + 3.1415927f) * 0.5f;
-    c2 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
+    c2 = BorderColorMix::Mix(D_002610E0, D_002610D8, t);
     s32 i;
     f32 x;
 
@@ -910,27 +891,27 @@ void func_00135550(T217D_440* self, s32 value)
         return;
     }
     if (self->mode == 0) {
-        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
+        PlayerListHolder* g = FindFirstObjectById((*(World**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
-            Iter_135550 it;
-            Begin_135550::Of(&it, &g->list);
-            Item_135550* obj;
-            while ((obj = Next_135550::Of(&it)) != 0) {
+            ListFrame it;
+            ListWalkBegin::Of(&it, &g->list);
+            AnimationPlayer* obj;
+            while ((obj = ListWalkNext::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 0.0f);
             }
-            g_activeListFrames = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.prev;
         }
     }
     if (value == 0) {
-        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
+        PlayerListHolder* g = FindFirstObjectById((*(World**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
-            Iter_135550 it;
-            Begin_135550::Of(&it, &g->list);
-            Item_135550* obj;
-            while ((obj = Next_135550::Of(&it)) != 0) {
+            ListFrame it;
+            ListWalkBegin::Of(&it, &g->list);
+            AnimationPlayer* obj;
+            while ((obj = ListWalkNext::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 1.0f);
             }
-            g_activeListFrames = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.prev;
         }
     }
     SetScreenElementMode(self, value);
@@ -966,7 +947,7 @@ void func_001356C0(T217D_440* self, s32 mode)
     }
 }
 
-s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b)
+s32 func_001357F0(SortEntry* a, SortEntry* b)
 {
     if (IsObjectAttached(a->obj) == 0) {
         return 1;
@@ -980,7 +961,7 @@ s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b)
     return 1;
 }
 
-s32 func_00135858(Entry_135858* a, Entry_135858* b)
+s32 func_00135858(SortEntry* a, SortEntry* b)
 {
     s32 flag;
 
@@ -1044,7 +1025,7 @@ void func_00135E78(T217D_440* self, s32 state, s32 flag)
 
 void func_00135F48(T217D_440* self)
 {
-    Flag_135F48 flag;
+    LevelBit flag;
     GetCurrentLevelBit(&flag);
     if ((MaskWorldBitsBySave() & flag.v) == 0) {
         ReleasePanelEntries(self, 0, 1);
@@ -1059,7 +1040,7 @@ void func_00135F48(T217D_440* self)
     }
 }
 
-void func_00136040(T217D_440* self, Pad_136040* p)
+void func_00136040(T217D_440* self, PadRecord* p)
 {
     switch (self->state) {
     case 1: {
@@ -1069,8 +1050,8 @@ void func_00136040(T217D_440* self, Pad_136040* p)
         f32 lo = -1.0f;
         f32 hi = 1.0f;
         f32 sum = p->f40 + p->f74;
-        Tri_136040 t0 = D_00249D00;
-        Tri_136040 t1 = D_00249D10;
+        StickLimits t0 = D_00249D00;
+        StickLimits t1 = D_00249D10;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
         f32 v = p->f44;
         f32 lo2 = -1.0f;
@@ -1101,12 +1082,12 @@ void func_00136040(T217D_440* self, Pad_136040* p)
     }
     RefreshPanelEntries(self, p);
 }
-extern const Tri_136040 D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
-extern const Tri_136040 D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
+extern const StickLimits D_00249D00 = { 0x4248000042A00000ULL, 0x3F000000 };
+extern const StickLimits D_00249D10 = { 0x43480000437A0000ULL, 0x3DCCCCCD };
 
 void func_00136238(T217D_440* self, s32 on)
 {
-    In_136238 in;
+    LevelBit in;
     void* arr[0x100];
     s32 n;
     if ((on != 0) != (self->open == 0)) return;
@@ -1119,12 +1100,12 @@ void func_00136238(T217D_440* self, s32 on)
     if (on != 0) {
         self->vt->m16(self, 2);
         GetCurrentLevelBit(&in);
-        if (MaskWorldBitsBySave() & in.a) {
+        if (MaskWorldBitsBySave() & in.v) {
             if (MaskWorldBitsBySave() & D_00261120[self->savedBank]) ReleasePanelEntries(self, self->savedBank, 1);
         }
         if (MaskWorldBitsBySave() & 0x800) {
             n = GatherObjectsById(*(s32*)g_currentWorld, 0x205, 0x82, 0, 0x100, arr);
-            n = Min_136238::Of(n, 0x100);
+            n = ClampBelow::Of(n, 0x100);
             if (n > 0) {
                 void** p = arr;
                 s32 i = n;
@@ -1148,7 +1129,7 @@ void func_001363D0(T217D_440* self)
 
 void func_00136408(T217D_440* self, const char* name)
 {
-    Scratch_00136408 buf;
+    TextScratch buf;
     s32 s1;
     s32 r;
     s32 idx;
@@ -1204,7 +1185,7 @@ void func_001365A0(T217D_440* self, s32 value) { self->f2FC = value; }
 
 void func_001365A8(T217D_440* self, f32 value)
 {
-    Value_1365A8::Set(self, value * 0.01f, 0.0f, 1.0f);
+    PercentClamp::Set(self, value * 0.01f, 0.0f, 1.0f);
 }
 
 f32 func_001365F0(T217D_440* self)

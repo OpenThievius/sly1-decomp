@@ -9,27 +9,27 @@ void func_00135550(Obj_135550_eu* self, s32 value)
         return;
     }
     if (self->f560 == 0) {
-        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
+        PlayerListHolder* g = FindFirstObjectById((*(World**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
-            Iter_135550 it;
-            Begin_135550::Of(&it, &g->list);
-            Item_135550* obj;
-            while ((obj = Next_135550::Of(&it)) != 0) {
+            ListFrame it;
+            ListWalkBegin::Of(&it, &g->list);
+            AnimationPlayer* obj;
+            while ((obj = ListWalkNext::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 0.0f);
             }
-            g_activeListFrames = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.prev;
         }
     }
     if (value == 0) {
-        Group_135550* g = FindFirstObjectById((*(Host_135550**)&g_currentWorld), 0x105, 0x495, 0);
+        PlayerListHolder* g = FindFirstObjectById((*(World**)&g_currentWorld), 0x105, 0x495, 0);
         if (g != 0) {
-            Iter_135550 it;
-            Begin_135550::Of(&it, &g->list);
-            Item_135550* obj;
-            while ((obj = Next_135550::Of(&it)) != 0) {
+            ListFrame it;
+            ListWalkBegin::Of(&it, &g->list);
+            AnimationPlayer* obj;
+            while ((obj = ListWalkNext::Of(&it)) != 0) {
                 SetAnimationPlayerSpeed(obj, 1.0f);
             }
-            g_activeListFrames = (ListFrame*)it.saved;
+            g_activeListFrames = (ListFrame*)it.prev;
         }
     }
     SetScreenElementMode(self, value);

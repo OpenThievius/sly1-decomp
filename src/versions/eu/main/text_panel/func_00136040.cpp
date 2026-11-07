@@ -10,9 +10,9 @@ struct Self_136040_eu {
     f32 f314;
 };
 
-void func_00135F48(Self_136040_eu* self, Pad_136040* p);
+void func_00135F48(Self_136040_eu* self, PadRecord* p);
 
-void func_00136040(Self_136040_eu* self, Pad_136040* p)
+void func_00136040(Self_136040_eu* self, PadRecord* p)
 {
     switch (self->f260) {
     case 1: {
@@ -22,8 +22,8 @@ void func_00136040(Self_136040_eu* self, Pad_136040* p)
         f32 lo = -1.0f;
         f32 hi = 1.0f;
         f32 sum = p->f40 + p->f74;
-        Tri_136040 t0 = D_00249D00;
-        Tri_136040 t1 = D_00249D10;
+        StickLimits t0 = D_00249D00;
+        StickLimits t1 = D_00249D10;
         f32 u = (sum < lo) ? lo : ((hi < sum) ? hi : sum);
         f32 v = p->f44;
         f32 lo2 = -1.0f;

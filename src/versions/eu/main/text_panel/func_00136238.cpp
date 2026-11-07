@@ -13,11 +13,9 @@ struct Obj_136238_eu {
     s32 f5B8;
 };
 struct Sub_136238_eu { u8 pad0[0x2D4]; s32 f2D4; };
-struct In_136238_eu { s32 a; };
 
 void func_001BEA50(void);
 void func_001BEA28(void);
-void func_00160D30(In_136238_eu* p);
 s32 func_00160D10(void);
 void func_00135E78(Obj_136238_eu* self, s32 state, s32 flag);
 s32 func_0015A4F0(s32 a, s32 b, s32 c, void* d, s32 e, void* f);
@@ -27,7 +25,7 @@ struct Min_136238_eu { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; re
 
 void func_00136238(Obj_136238_eu* self, s32 on)
 {
-    In_136238_eu in;
+    LevelBit in;
     void* arr[0x100];
     s32 n;
     if ((on != 0) != (self->f56C == 0)) return;
@@ -40,7 +38,7 @@ void func_00136238(Obj_136238_eu* self, s32 on)
     if (on != 0) {
         self->vt->f40(self, 2);
         GetCurrentLevelBit(&in);
-        if (MaskWorldBitsBySave() & in.a) {
+        if (MaskWorldBitsBySave() & in.v) {
             if (MaskWorldBitsBySave() & D_00261120[self->f5B8]) ReleasePanelEntries(self, self->f5B8, 1);
         }
         if (MaskWorldBitsBySave() & 0x800) {
