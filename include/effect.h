@@ -92,7 +92,10 @@ struct Effect {
     Vec02 rot50[3];         // 0x50: the placement (func_0019F858 reads it with the one at +0x80)
     Quad219C q80;           // 0x80
     Quad219C q90;           // 0x90
-    u8 padA0[0xB0 - 0xA0];  // 0xA0
+    union {
+        Quad219C qA0;       // 0xA0
+        u8 padA0[0xB0 - 0xA0];  // 0xA0
+    };
     union {
         f32 fB0;            // 0xB0
         s32 iB0;            // 0xB0

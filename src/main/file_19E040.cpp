@@ -1572,7 +1572,21 @@ void InitShortFallingEffect(Effect* self)
 
 INCLUDE_ASM(func_001A0C98);
 
-INCLUDE_ASM(func_001A0D60);
+void func_00130540(void* a, void* b, const T219C_Params* c, const f32* d, void* e, void* f, s32 g, f32 t, f32 u, f32 v);
+void func_00144128(Camera* cam, void* point, void* out);
+
+void func_001A0D60(Effect* self, f32 f)
+{
+    Quad219C a;
+    Quad219C b;
+    f32 t = self->start + self->life - g_gameTime;
+    t = t >? f;
+    func_00130540(&self->f120, &self->qA0, self->params, self->params->rows + 4, &a, &b, 0, t, f, 1.0f);
+    *(Quad219C*)&self->f120 = a;
+    self->qA0 = b;
+    func_00144128(g_camera, &a, &self->q80);
+}
+
 
 INCLUDE_ASM(func_001A0DF0);
 
