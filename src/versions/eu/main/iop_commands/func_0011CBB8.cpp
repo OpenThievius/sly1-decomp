@@ -33,12 +33,12 @@ void func_0011CBB8(s32 flags)
         for (n = 10000; --n != -1;) {
         }
     } while (g_iopBankLoadRpc.server == 0);
-    g_iopSharedPacket.f00 = 0;
+    g_iopSharedPacket.busy = 0;
     D_0025C540[0] = 0;
     D_0025D540[0] = 0;
     g_iopCommandSpace[0] = 0xFFC;
     g_iopCommandSpace[1] = 0xFFC;
-    g_iopSharedPacket.f10 = 0;
+    g_iopSharedPacket.result = 0;
     args[0] = (s32)&g_iopSharedPacket;
     args[1] = flags;
     SendIopCommandAndWait(0, 8, args);

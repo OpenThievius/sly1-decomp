@@ -18,10 +18,10 @@ void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
         return;
     }
     (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
-    (*(Pair_11D2A8*)&g_iopChannel2Args).a = (s32)a0;
-    (*(Pair_11D2A8*)&g_iopChannel2Args).b = a1;
-    (*(Args_11D2A8*)&D_0025C390).a = a2;
-    (*(Args_11D2A8*)&D_0025C390).c = a3;
+    (*(WordPairArgs*)&g_iopChannel2Args).a = (s32)a0;
+    (*(WordPairArgs*)&g_iopChannel2Args).b = a1;
+    D_0025C390.fn = a2;
+    D_0025C390.arg = a3;
     while (func_001F8480(&g_iopBankLoadRpc)) {
         if (D_eu_0025D6B8 == 0) {
             PrintFormatted(D_002494E8);
@@ -30,5 +30,5 @@ void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
         func_001F6C20(0);
     }
     D_0025C388.busy = 1;
-    func_001F8290(&g_iopBankLoadRpc, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
+    func_001F8290(&g_iopBankLoadRpc, 3, 1, ((WordPairArgs*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
 }

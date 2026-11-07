@@ -16,8 +16,8 @@ EntryPool D_0025C2D0;
 
 // The payloads of tags 0x19 and 0x1A as func_0011B258 copies them (ldl/ldr for the first two
 // words: the pool does not align them).
-struct Pair_11B258 { U64P xy; };
-struct Triple_11B258 { U64P xy; s32 z; };
+struct PairPayload { U64P xy; };
+struct TriplePayload { U64P xy; s32 z; };
 
 void func_0018D778(void* p);
 void* func_0018D5C0(s32 size);
@@ -228,15 +228,15 @@ void func_0011B258(const ScriptValue* src, ScriptValue* dst, s32 first)
         break;
     }
     case 0x19: {
-        Pair_11B258* p = (Pair_11B258*)AcquirePairPayload();
-        *p = *(Pair_11B258*)src->p;
+        PairPayload* p = (PairPayload*)AcquirePairPayload();
+        *p = *(PairPayload*)src->p;
         (void)AddRefPairPayload(p);
         dst->p = p;
         break;
     }
     case 0x1A: {
-        Triple_11B258* p = (Triple_11B258*)AcquireTriplePayload();
-        *p = *(Triple_11B258*)src->p;
+        TriplePayload* p = (TriplePayload*)AcquireTriplePayload();
+        *p = *(TriplePayload*)src->p;
         (void)AddRefTriplePayload(p);
         dst->p = p;
         break;

@@ -363,15 +363,15 @@ void func_0011C900(u32 addr)
 LINKER_REMNANT(func_0011C960);
 
 extern s32 D_0062C598[];
-struct Pool_11C968;
-Pool_11C968* func_001B5EA0(s32* pool);
-void func_001F5C0C(Pool_11C968* p, s32 zero, s32 size);
+struct TriplePayloadSlot;
+TriplePayloadSlot* func_001B5EA0(s32* pool);
+void func_001F5C0C(TriplePayloadSlot* p, s32 zero, s32 size);
 void func_0011AB58(u8* p);
-Pool_11C968* func_001B5EE0(s32* pool);
+TriplePayloadSlot* func_001B5EE0(s32* pool);
 
-Pool_11C968* func_0011C968(void)
+TriplePayloadSlot* func_0011C968(void)
 {
-    Pool_11C968* p = PopFreeSlot(g_triplePayloadPool);
+    TriplePayloadSlot* p = PopFreeSlot(g_triplePayloadPool);
     if (p) {
         FillMemory(p, 0, g_triplePayloadPool[0]);
     } else {
@@ -393,16 +393,17 @@ s32 func_0011C9E0(u32 offset)
     return v;
 }
 
-struct Table_0011CA20 {
-    s32 pad_00;
-    u32 origin;
+// A slot pool's head: the slot size, then the first slot's address (func_0011CA20 indexes by it).
+struct SlotPool {
+    s32 slotSize;           // 0x00
+    u32 origin;             // 0x04
 };
 
-void func_001B5F28(Table_0011CA20* t, u8* item);
+void func_001B5F28(SlotPool* t, u8* item);
 
 void func_0011CA20(u8* p)
 {
-    Table_0011CA20* t = (Table_0011CA20*)((u8*)&g_triplePayloadPool);
+    SlotPool* t = (SlotPool*)((u8*)&g_triplePayloadPool);
     u32 index = ((u32)p - t->origin) / 12;
     u8* cell = g_triplePayloadRefCounts + index;
     *cell = (u8)(*cell - 1);
@@ -412,27 +413,26 @@ void func_0011CA20(u8* p)
     PushFreeSlot(t, p);
 }
 
-struct Dst_11CA90 { u8 pad[4]; };
 extern u8* D_0027B304;
 extern u8* D_0027B308;
 extern u8* D_0027B30C;
-void func_001B5DD0(Dst_11CA90* p, s32 size, s32 val);
+void func_001B5DD0(SlotPool* p, s32 size, s32 val);
 
-struct Init_11CA90 {
+struct PayloadPoolInit {
     static void Load(void* buf, s32 size, s32* id, u8** out)
     {
-        InitSlotPool((Dst_11CA90*)buf, size, *id);
+        InitSlotPool((SlotPool*)buf, size, *id);
         *out = (u8*)AllocateZeroedFrontMemory(*id);
     }
 };
 
 void func_0011CA90(void)
 {
-    Init_11CA90::Load(((u8*)&g_vectorAPayloadPool), 0x10, &g_vectorAPayloadCapacity, &g_payloadRefCounts[0]);
-    Init_11CA90::Load(g_matrixPayloadPool, 0x40, &g_matrixPayloadCapacity, &D_0027B304);
-    Init_11CA90::Load(g_vectorBPayloadPool, 0x10, &g_vectorBPayloadCapacity, &D_0027B308);
-    Init_11CA90::Load(g_pairPayloadPool, 0x08, &g_pairPayloadCapacity, &D_0027B30C);
-    Init_11CA90::Load(((u8*)&g_triplePayloadPool), 0x0C, g_triplePayloadCapacity, &g_triplePayloadRefCounts);
+    PayloadPoolInit::Load(((u8*)&g_vectorAPayloadPool), 0x10, &g_vectorAPayloadCapacity, &g_payloadRefCounts[0]);
+    PayloadPoolInit::Load(g_matrixPayloadPool, 0x40, &g_matrixPayloadCapacity, &D_0027B304);
+    PayloadPoolInit::Load(g_vectorBPayloadPool, 0x10, &g_vectorBPayloadCapacity, &D_0027B308);
+    PayloadPoolInit::Load(g_pairPayloadPool, 0x08, &g_pairPayloadCapacity, &D_0027B30C);
+    PayloadPoolInit::Load(((u8*)&g_triplePayloadPool), 0x0C, g_triplePayloadCapacity, &g_triplePayloadRefCounts);
 }
 
 void func_0011CBB0(void)

@@ -29,12 +29,14 @@ extern s32 D_0025F540[1024];
 extern s32 D_00260540[272];
 extern s32 D_00260980[272];
 
-struct Flag_25C388 { s32 busy; s32 pad; };
-struct Pend_11CE30 { s32 fn; s32 pad; u64 arg; };
-struct Cb_25C3A0 { s32 fn; s32 pad; };
-struct Reply_25C3C0 { s32 head; s32 result; s32 pad[14]; };
-struct Rpc_260E00 { s32 result; s32 pad[15]; };
-struct Packet_0011CBB8 { s32 f00; u8 pad[0xC]; s32 f10; u8 pad2[0x2C]; };
+struct LoadBusyFlag { s32 busy; s32 pad; };
+// A callback and its argument, as the callback tables and the bank load keep them.
+struct IopCallback { s32 fn; s32 pad; u64 arg; };
+struct ReplyCallback { s32 fn; s32 pad; };
+struct IopCommandReply { s32 head; s32 result; s32 pad[14]; };
+struct IopRpcResult { s32 result; s32 pad[15]; };
+// The packet the IOP shares with the EE: a busy word the IOP clears and a result.
+struct IopSharedPacket { s32 busy; u8 pad[0xC]; s32 result; u8 pad2[0x2C]; };
 
 s32* D_0025C340 = 0;
 s32 D_0025C344 = 0;
@@ -50,11 +52,11 @@ s32* D_0025C370[2] = { D_0025E540, D_0025F540 };
 s32* D_0025C378[2] = { D_00260540, D_00260980 };
 s32 D_0025C380 = 0;
 s32 D_0025C384 = 0;
-Flag_25C388 D_0025C388 = { 0, 0 };
-Pend_11CE30 D_0025C390 = { 0, 0, 0 };
-Cb_25C3A0 D_0025C3A0 = { 0, 0 };
+LoadBusyFlag D_0025C388 = { 0, 0 };
+IopCallback D_0025C390 = { 0, 0, 0 };
+ReplyCallback D_0025C3A0 = { 0, 0 };
 u64 D_0025C3A8[3] = { 0, 0, 0 };
-Reply_25C3C0 D_0025C3C0 = { 0 };
+IopCommandReply D_0025C3C0 = { 0 };
 u8 D_0025C400[320] = { 0 };
 s32 D_0025C540[1024] = { 0 };
 s32 D_0025D540[1024] = { 0 };
@@ -62,8 +64,8 @@ s32 D_0025E540[1024] = { 0 };
 s32 D_0025F540[1024] = { 0 };
 s32 D_00260540[272] = { 0 };
 s32 D_00260980[272] = { 0 };
-volatile Packet_0011CBB8 D_00260DC0 = { 0 };
-Rpc_260E00 D_00260E00 = { 0 };
+volatile IopSharedPacket D_00260DC0 = { 0 };
+IopRpcResult D_00260E00 = { 0 };
 s32 D_00260E40[8] = { 0 };
 
 // An RPC client of the IOP: InitIopCommandChannels binds the two (func_001F80C0) and waits for
@@ -116,19 +118,18 @@ void func_0011CBB8(void)
         for (n = 10000; --n != -1;) {
         }
     } while (g_iopBankLoadRpc.server == 0);
-    g_iopSharedPacket.f00 = 0;
+    g_iopSharedPacket.busy = 0;
     g_iopCommandBuffer0[0] = 0;
     g_iopCommandBuffer1[0] = 0;
     g_iopCommandSpace[0] = 0xFFC;
     g_iopCommandSpace[1] = 0xFFC;
-    g_iopSharedPacket.f10 = 0;
+    g_iopSharedPacket.result = 0;
     n = (s32)&g_iopSharedPacket;
     SendIopCommandAndWait(0, 4, &n);
 }
 
-struct Entry_11CE30 { s32 fn; s32 pad; u64 arg; };
-typedef s32 (*Cb_11CE30)(s32 ctx, u64 arg);
-typedef void (*Cb1_11CE30)(s32 a0);
+typedef s32 (*IopCallbackFn)(s32 ctx, u64 arg);
+typedef void (*IopNotifyFn)(s32 a0);
 s32 func_0011D078(void);
 void func_0011DE18(void);
 s32 func_0011E1F8(s32 flag);
@@ -139,11 +140,11 @@ s32 func_0011CE30(void)
     s32 i;
     s32 idx;
     s32 k;
-    Cb_11CE30 f;
+    IopCallbackFn f;
     if (g_iopReplyBuffer != 0 && IsIopReplyReady() != 0) {
         if (g_iopReplyCallbackPending != 0) {
             if (g_iopReplyCallback.fn != 0)
-                ((Cb_11CE30)g_iopReplyCallback.fn)(g_iopCommandReply.result, g_iopReplyCallbackArg[0]);
+                ((IopCallbackFn)g_iopReplyCallback.fn)(g_iopCommandReply.result, g_iopReplyCallbackArg[0]);
             g_iopReplyCallback.fn = 0;
             g_iopReplyCallbackPending = 0;
         } else {
@@ -151,9 +152,9 @@ s32 func_0011CE30(void)
             i = 0;
             if (g_iopCommandBuffers[idx][0] > 0) {
                 do {
-                    Entry_11CE30* e = (Entry_11CE30*)(i * 16 + (s32)g_iopCallbackTables[idx]);
+                    IopCallback* e = (IopCallback*)(i * 16 + (s32)g_iopCallbackTables[idx]);
                     if (e->fn != 0)
-                        ((Cb_11CE30)e->fn)(g_iopReplyTables[idx][i + 1], e->arg);
+                        ((IopCallbackFn)e->fn)(g_iopReplyTables[idx][i + 1], e->arg);
                     i++;
                 } while (i < g_iopCommandBuffers[idx][0]);
             }
@@ -165,7 +166,7 @@ s32 func_0011CE30(void)
         if ((u32)k != 0xFFFFFFFFu) {
             if (g_soundBankLoadCallback.fn != 0) {
                 u64 a = g_soundBankLoadCallback.arg;
-                Cb_11CE30 g = (Cb_11CE30)g_soundBankLoadCallback.fn;
+                IopCallbackFn g = (IopCallbackFn)g_soundBankLoadCallback.fn;
                 g_soundBankLoadCallback.fn = 0;
                 g_soundBankLoadCallback.arg = 0;
                 g(k, a);
@@ -183,10 +184,10 @@ s32 func_0011CE30(void)
         SyncDiscRead(1);
         if (g_discReadDone != 0) {
             g_discReadPending = 0;
-            f = (Cb_11CE30)g_discReadDoneCallback;
+            f = (IopCallbackFn)g_discReadDoneCallback;
             g_discReadDone = 0;
             if (f != 0)
-                ((Cb1_11CE30)f)(1);
+                ((IopNotifyFn)f)(1);
         }
     }
     if (g_iopReplyBuffer != 0 || g_soundBankLoadBusy.busy != 0)
@@ -274,8 +275,8 @@ s32 func_0011D140(s32 a0, s32 a1)
     return g_iopChannel2Result.result;
 }
 
-struct Pair_11D2A8 { s32 a; s32 b; };
-struct Args_11D2A8 { s32 a; s32 pad; s64 c; };
+// Two argument words.
+struct WordPairArgs { s32 a; s32 b; };
 void func_001F6C20(s32 a);
 
 void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
@@ -290,17 +291,17 @@ void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
         return;
     }
     (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
-    (*(Pair_11D2A8*)&g_iopChannel2Args).a = (s32)a0;
-    (*(Pair_11D2A8*)&g_iopChannel2Args).b = a1;
-    (*(Args_11D2A8*)&g_soundBankLoadCallback).a = a2;
-    (*(Args_11D2A8*)&g_soundBankLoadCallback).c = a3;
+    (*(WordPairArgs*)&g_iopChannel2Args).a = (s32)a0;
+    (*(WordPairArgs*)&g_iopChannel2Args).b = a1;
+    g_soundBankLoadCallback.fn = a2;
+    g_soundBankLoadCallback.arg = a3;
     while (IsRemoteCallPending(&g_iopBankLoadRpc)) {
         PrintFormatted(D_002494E8);
         PollIopCommands();
         SyncDataCache(0);
     }
     g_soundBankLoadBusy.busy = 1;
-    CallRemoteService(&g_iopBankLoadRpc, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
+    CallRemoteService(&g_iopBankLoadRpc, 3, 1, ((WordPairArgs*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
 }
 
 LINKER_REMNANT(func_0011D3E8);
@@ -352,7 +353,8 @@ void func_0011D520(s32 x, s32 y)
     QueueIopCommand(0xD, 8, args, 0, 0);
 }
 
-struct Args_11D558
+// The argument words of a command that takes an address and two words.
+struct AddressCommandArgs
 {
     void* a0;
     s32 a1;
@@ -361,7 +363,7 @@ struct Args_11D558
 
 void func_0011D558(void* a0, s32 a1, s32 a2)
 {
-    Args_11D558 args;
+    AddressCommandArgs args;
     args.a0 = a0;
     args.a1 = a1;
     args.a2 = a2;
@@ -398,14 +400,14 @@ void func_0011D640(s32 value)
     QueueIopCommand(0x13, 4, &local, 0, 0);
 }
 
-struct Args_11D670
+struct AddressArg
 {
     void* a0;
 };
 
 void func_0011D670(void* a0)
 {
-    Args_11D670 args;
+    AddressArg args;
     args.a0 = a0;
     QueueIopCommand(0x14, 4, &args, 0, 0);
 }
@@ -446,16 +448,9 @@ void func_0011D760(s32 a0, s32 a1)
 
 LINKER_REMNANT(func_0011D790);
 
-struct Args_11D798
-{
-    void* a0;
-    s32 a1;
-    s32 a2;
-};
-
 void func_0011D798(void* a0, s32 a1, s32 a2)
 {
-    Args_11D798 args;
+    AddressCommandArgs args;
     args.a0 = a0;
     args.a1 = a1;
     args.a2 = a2;
@@ -463,11 +458,10 @@ void func_0011D798(void* a0, s32 a1, s32 a2)
 }
 
 s32 func_0011D968(s32 kind, s32 count, void* words);
-struct Words_11D7D8 { s32 a; s32 b; };
 
 s32 func_0011D7D8(s32 a, s32 b)
 {
-    Words_11D7D8 w;
+    WordPairArgs w;
     w.a = a;
     w.b = b;
     return SendIopCommandAndWait(0x1C, 8, &w);
@@ -497,27 +491,18 @@ void func_0011D860(s32 a0, s32 a1, s32 a2, s32 a3)
 
 LINKER_REMNANT(func_0011D8A0);
 
-struct Args_11D8B0
-{
-    void* a0;
-    s32 a1;
-    s32 a2;
-};
-
 void func_0011D8B0(void* a0, s32 a1, s32 a2)
 {
-    Args_11D8B0 args;
+    AddressCommandArgs args;
     args.a0 = a0;
     args.a1 = a1;
     args.a2 = a2;
     QueueIopCommand(0x29, 0xC, &args, 0, 0);
 }
 
-struct Words_11D8F0 { s32 a; s32 b; };
-
 void func_0011D8F0(s32 a, s32 b)
 {
-    Words_11D8F0 w;
+    WordPairArgs w;
     w.a = a;
     w.b = b;
     SendIopCommandAndWait(0x28, 8, &w);
@@ -525,11 +510,11 @@ void func_0011D8F0(s32 a, s32 b)
 
 LINKER_REMNANT(func_0011D920);
 
-struct Word_11D928 { s32 a; };
+struct WordArg { s32 a; };
 
 void func_0011D928(s32 a)
 {
-    Word_11D928 w;
+    WordArg w;
     w.a = a;
     QueueIopCommand(0x27, 4, &w, 0, 0);
 }
@@ -681,11 +666,11 @@ void func_0011E010()
 
 LINKER_REMNANT(func_0011E040);
 
-struct Pack7_11E048 { void* w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
+struct PackedCommandArgs { void* w0; s32 w1; s32 w2; s32 w3; s32 w4; s32 w5; s32 w6; };
 
 s32 func_0011E048(void* a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8)
 {
-    Pack7_11E048 buf;
+    PackedCommandArgs buf;
     buf.w0 = a0;
     buf.w1 = a1;
     buf.w2 = (a4 << 16) | (a2 & 0xFFFF);
@@ -716,13 +701,6 @@ void func_0011E110(s32 a0)
     SendIopCommandAndWait(0x36, 4, &buf);
 }
 
-// The RPC completion flag: func_0011E1F8 waits for another thread to clear it.
-struct Sync_11E138 {
-    s32 busy;
-    s32 pad[3];
-    s32 result;
-};
-
 s32 func_00203B18(s32 a0, s32 a1, s32 a2, u8* a3);
 
 s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
@@ -736,8 +714,8 @@ s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
     }
     s32 args[3];
     args[0] = a0;
-    (*(volatile Sync_11E138*)&g_iopSharedPacket).busy = 1;
-    (*(volatile Sync_11E138*)&g_iopSharedPacket).result = 0;
+    g_iopSharedPacket.busy = 1;
+    g_iopSharedPacket.result = 0;
     args[1] = a1;
     args[2] = a2;
     QueueIopCommand(0x38, 0xC, args, 0, 0);
@@ -789,7 +767,7 @@ s32 func_0011E2E8()
 {
     if (g_iopDiscAccess == 0)
         return GetDiscError();
-    return g_iopSharedPacket.f10;
+    return g_iopSharedPacket.result;
 }
 
 void func_0011E328(s32 a0, s32 a1)
