@@ -323,23 +323,6 @@ void func_00211B40(u32 value)
     func_001F9DA8();
 }
 
-extern u8 D_0027B198[];
-extern u8 D_0062C540[];
-void func_001FFBE0(u8* a, u8* b);
-
-void func_00211DE0(void)
-{
-    func_001FFBE0(D_0027B198, D_0062C540);
-}
-
-extern u8 D_0027B198[];
-void func_001FFC08(u8* a);
-
-void func_00211DF8(void)
-{
-    func_001FFC08(D_0027B198);
-}
-
 struct Str_2115C0 { u64 w0; u32 f8; u32 fC; u32 f10; u32 pad14; u64 w18; u32 f20; u32 f24; u32 f28; };
 void func_00211618(Str_2115C0* self, s32 n);
 

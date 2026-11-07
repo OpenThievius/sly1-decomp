@@ -35,3 +35,4 @@ src/lib/type_info.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/type_info_kinds.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/allocate.cpp	-O2 -G0	2.9-ee-991111-01
 src/lib/exception.cpp	-O2 -G0	2.9-ee-991111-01
+src/lib/file_211DE0.cpp	-O2 -G0 -fno-exceptions	2.9-ee-991111
