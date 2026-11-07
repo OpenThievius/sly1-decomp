@@ -1622,7 +1622,7 @@ ScriptValue* func_00116B08(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     f32* c = AcquireVectorAPayload();
     SetScriptValueVectorA(b, c);
     a->next = b;
-    func_00188D28(args[0].p, &vec.x, c);
+    MatrixToAxisAngle(args[0].p, &vec.x, c);
     SetScriptValueFloat(a, vec.x);
     SetScriptValueChain(&t, a);
     CopyConstructScriptValue(ret, &t);
@@ -2490,7 +2490,7 @@ ScriptValue* func_00118F48(ScriptValue* ret, R11B008Node* expr, R11A630* scope)
         R11B008Node* v = c->node;
         R11B008Node* w = v->next;
         PrintFormatted(D_00249200);
-        func_00113730(&t, 1, w, scope);
+        IgnoreScriptArgument(&t, 1, w, scope);
         DestroyScriptValue(&t, 2);
     }
     SetScriptValueTag(&q, 0x22);
