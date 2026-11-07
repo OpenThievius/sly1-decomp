@@ -873,7 +873,21 @@ void BuildViewProjectionMatrix(f32* b, f32* a, void* c, Quad16* out)
     out[3] = r[3];
 }
 
-INCLUDE_ASM(func_001443C8);
+// v made unit length: DivX by its Length.
+static inline u128 Unit(u128 v)
+{
+    return Vu0::DivX(v, Vu0::Length(v));
+}
+
+void func_001443C8(Mat02* m, Vec02* out, f32 x, f32 y)
+{
+    f32 nx = -x;
+    f32 ny = -y;
+    Vu0::Q(out[0]) = Vu0::Cross(Vu0::Q(m->r[2]), Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[1]), Vu0::Scalar(x))));
+    Vu0::Q(out[1]) = Vu0::Cross(Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[1]), Vu0::Scalar(nx))), Vu0::Q(m->r[2]));
+    Vu0::Q(out[2]) = Vu0::Cross(Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[2]), Vu0::Scalar(y))), Vu0::Q(m->r[1]));
+    Vu0::Q(out[3]) = Vu0::Cross(Vu0::Q(m->r[1]), Unit(Vu0::MulAddX(Vu0::Q(m->r[0]), Vu0::Q(m->r[2]), Vu0::Scalar(ny))));
+}
 
 INCLUDE_ASM(func_00144540);
 
