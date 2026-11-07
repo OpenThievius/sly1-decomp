@@ -24,6 +24,8 @@ struct WarpPage;    // a warp page, class 0x67 (include/warp_page.h)
 
 // A four-byte word that may sit at any address: copying one is a pair of unaligned loads.
 struct __attribute__((packed)) T217D_Word { s32 v; };
+// A float that may sit at any address: storing one is a pair of unaligned stores (swl, swr).
+struct __attribute__((packed)) T217D_Float { f32 v; };
 // A colour as four bytes (red, green, blue, alpha), copied as a whole.
 struct T217D_Rgba { u8 c[4]; };
 
@@ -136,8 +138,8 @@ void func_001ABE20(T217D_510* self, s32 state);
 
 // The gauge (D_002182E0): a filled bar that follows a value and flashes a letter.
 struct T217D_2E0 : ScreenElement {
-    u8 pad260[0x264 - 0x260];
-    s32 f264;               // 0x264
+    s32 f260;               // 0x260: copied into f26C when a gauge mode starts (func_0017B410)
+    s32 f264;               // 0x264: copied into f270 then
     s32 f268;               // 0x268
     union {
         u8 letter;          // 0x26C: the glyph to show, from 'r'
@@ -329,7 +331,7 @@ struct T217D_1380 : ScreenElement {
 struct T217D_BF0 : ScreenElement {
     u8 pad260[0x284 - 0x260];
     s32 icon;                   // 0x284: func_001B4688(0x36A) (func_00180F98)
-    f32 f288;                   // 0x288: 0.0 at the start
+    f32 f288;                   // 0x288: 0.0 at the start, stored through T217D_Float (func_001793F0, func_00180F98)
 };
 
 // D_00218720 (D_00272E08): four sub-elements of the same kind (D_00218330) stacked, drawn together.

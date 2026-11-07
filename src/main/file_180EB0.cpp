@@ -158,7 +158,6 @@ struct Vt_180F98 {
     VFn_180F98* vtbl;
 };
 
-struct Packed_180F98 { f32 v; } __attribute__((packed));
 
 void func_001D7440(void* self);
 
@@ -267,7 +266,7 @@ void func_00180F98(ModeWalker* self)
     SetModeWalkerMode(self, 1);
     self->f864 = 3.4028234663852886e+38f;
     T217D_BF0* base = &D_00270650;
-    ((Packed_180F98*)&base->f288)->v = 0.0f;
+    ((T217D_Float*)&base->f288)->v = 0.0f;
     base->icon = FindAnimRecord(0x36A);
 }
 

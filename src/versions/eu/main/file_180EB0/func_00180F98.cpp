@@ -15,7 +15,7 @@ void func_00180F98(ModeWalker* self)
     SetModeWalkerMode(self, 1);
     self->f864 = 3.4028234663852886e+38f;
     u8* base = (u8*)&D_00270650;
-    ((Packed_180F98*)(base + 0x598))->v = 0.0f;
+    ((T217D_Float*)(base + 0x598))->v = 0.0f;
     *(s32*)(base + 0x594) = FindAnimRecord(0x36A);
 }
 
