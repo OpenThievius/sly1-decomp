@@ -152,6 +152,8 @@ union DoubleBits {
     u64 u;
 };
 double func_001FCD20(double a, double b);
+// An object of the world's lists at 0x78, 0x1B70 and 0x1C30 as func_001E9EE8 walks them: the
+// slot at 0x7C of the first list's objects is called with the frame time.
 struct ListedObject;
 struct ListedObjectVt {
     u8 pad0[0x7C];
@@ -252,6 +254,7 @@ void func_00182C58(void);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
 void func_001ED318(Timeline* self, s32* p);
 Entry90* func_001ED4C8(void* self, s32 kind, s32 p);
+// What ComputeSinCos writes for func_001ED650.
 struct SinCos { f32 sine; f32 cosine; };
 void func_001EAD88(f32* a, f32* b);
 void func_00192820(void);
@@ -289,6 +292,7 @@ void func_00138398(void* src, s32* count, void** out);
 s32 func_00137BE0(void* src);
 s32 func_00137C40(void* src);
 void func_0011EC40(void* a, void* b);
+// The message (kind 11) func_001EF3D8 sends the object it detaches.
 struct DetachMsg { AttachedSet* self; Collider* obj; };
 void func_001EF520(AttachedSet* self);
 void func_00127378(void* self, s32 kind, void* msg);
@@ -319,6 +323,7 @@ void func_001AC060(void* p);
 void func_001EE7D0(PacketWriter* self, s32 n, void* buf, s32 flag);
 extern u8 D_0024A0E0[];
 s32 func_00152888(PacketWriter* self);
+// The ListFrame of func_001EECE0's walk of its children, opened and closed by its lifetime.
 struct ChildWalkFrame {
     s32* a; s32* b; s32 c; ChildWalkFrame* prev;
     ChildWalkFrame(s32* p) : a(p), b(p), c(p[2]), prev((ChildWalkFrame*)g_activeListFrames) {}
@@ -326,6 +331,7 @@ struct ChildWalkFrame {
 };
 void func_00124A48(AttachedSet* self);
 void func_001F55A8(void* self);
+// The message (kind 0x16) func_001EF900 sends with a state change: the old and new states.
 struct StateChangeMsg {
     void* self;
     s32 old;
@@ -358,7 +364,7 @@ struct MoveItemsDown {
     }
 };
 void func_001DDAD0(World* x);
-struct IsSessionKey {
+struct SameAsFixedKey {
     static s32 Of(IdentityKey* t)
     {
         IdentityKey* p;
@@ -410,7 +416,7 @@ void func_001AA8C0(void* self, f32 v);
 void func_001BED48(void);
 void func_001BED70(void);
 s32 func_0016E0F0(s32 bits);
-struct SameSessionKey {
+struct SameKeys {
     static s32 Of(IdentityKey* t, IdentityKey* o)
     {
         if (t == o) {
@@ -3048,7 +3054,7 @@ void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count)
                 PopActiveSequenceElement(g_currentWorld);
             }
         }
-        if (args->key == 0 || IsSessionKey::Of(args->key)) {
+        if (args->key == 0 || SameAsFixedKey::Of(args->key)) {
             args->flags |= 8;
         } else {
             args->flags &= ~8;
@@ -3083,7 +3089,7 @@ s32 func_001F00F0(ScreenFade* self, PadRecord* o, void* param2)
         self->style = self->queuedStyle;
         FadeRequest* rr = &self->active;
         IdentityKey* kk = rr->key;
-        if (kk == 0 || SameSessionKey::Of(kk, &D_00275B04)) {
+        if (kk == 0 || SameKeys::Of(kk, &D_00275B04)) {
             rr->flags |= 8;
         } else {
             rr->flags &= ~8;
