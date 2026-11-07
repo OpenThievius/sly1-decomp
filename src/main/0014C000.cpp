@@ -6,7 +6,7 @@
 #include "world.h"
 #include "screen_element.h"
 #include "object_link.h"
-#include "g261ef0.h"
+#include "scatter_controller.h"
 #include "shapes.h"
 
 s32 func_0014D1A0(s32 n, f32* arr, void* p2, f32* lo, f32* hi);

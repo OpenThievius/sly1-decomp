@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // 0x14EE40 to 0x1549C8: the methods of classes 0x46, 0x23, 0x65 and 0x61, the threshold
-// tables of G261EF0, the display-list writer (V24A0, with its base vtable D_0024A0E0) and the
+// tables of ScatterController, the display-list writer (V24A0, with its base vtable D_0024A0E0) and the
 // active-set solver (func_00153528 to func_00154880). One file between two edges: its .rodata,
 // 0x249FE0 to 0x24A114, is followed by 12 bytes of padding before the next file's.
 #include "common.h"
@@ -11,7 +11,7 @@
 #include "world.h"
 #include "screen_element.h"
 #include "object_link.h"
-#include "g261ef0.h"
+#include "scatter_controller.h"
 #include "shapes.h"
 #include "list_iter.h"
 #include "c61.h"
@@ -448,7 +448,7 @@ extern void* func_00160CA0(void*, u32);
 extern void func_001F5C0C(void*, u32, u32);
 
 f32 func_001EB0F8(void*, f32);
-void func_00152410(G261EF0* object, f32 unused);
+void func_00152410(ScatterController* object, f32 unused);
 f32 func_001EB0F8(void*, f32);
 
 extern f32 func_001EB0F8(void*, f32);
@@ -1846,12 +1846,12 @@ void func_00151A68(void* state)
 	FillMemory(state, 0, 0x24);
 }
 
-void func_00151A88(G261EF0* self)
+void func_00151A88(ScatterController* self)
 {
-    self->f04 = 4;
-    self->f08 = 6;
-    self->f0C = 1;
-    self->f10 = 3;
+    self->refillLo = 4;
+    self->refillHi = 6;
+    self->countLo = 1;
+    self->countHi = 3;
     GameProgress* g = g_saveData;
     if (g->f19D8 == 0 || g->f19D8 == 5 || g->f19DC == 1) self->table = &D_00261E90;
     else if (!(g_currentEntry->flags & 2)) self->table = D_00261D70;
@@ -1874,12 +1874,12 @@ void func_00151A88(G261EF0* self)
     s32 r = RandomIntInRange(ra, rc);
     s32 i = 0;
     ThresholdRange* e = 0;
-    self->f14 = r;
+    self->countdown = r;
     for (; i < ((Tab_151A88*)self->table)->count; i++) {
         e = &((Tab_151A88*)self->table)->list[i];
         if (e->threshold <= g_currentEntry->f10) break;
     }
-    self->f18 = RandomIntInRange(e->low, e->high);
+    self->bandCountdown = RandomIntInRange(e->low, e->high);
     self->f20 = 0;
 }
 
@@ -1908,7 +1908,7 @@ void func_00151E18(void* self)
 {
 }
 
-void func_00151E20(G261EF0* self, f32 amount)
+void func_00151E20(ScatterController* self, f32 amount)
 {
     f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
     SetScatterLevel(self, x);
@@ -1926,7 +1926,7 @@ void func_00151E20(G261EF0* self, f32 amount)
     g_currentEntry->f10 = result;
 }
 
-void func_00151ED8(G261EF0* obj, FlaggedObject* node)
+void func_00151ED8(ScatterController* obj, FlaggedObject* node)
 {
     f32 value;
     if (node != 0) {
@@ -1951,7 +1951,7 @@ have:
     }
 }
 
-void func_00151FC8(G261EF0* object)
+void func_00151FC8(ScatterController* object)
 {
 	SetScatterLevel(object, 0.0f);
 	G27C230* manager = g_currentEntry;
@@ -1960,18 +1960,18 @@ void func_00151FC8(G261EF0* object)
 	FillMemory(manager->bits74, 0, 1);
 }
 
-void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
+void func_00152010(ScatterController* self, void* p, s32 n, s32 flag)
 {
     s32 did = 0;
     if ((g_currentWorld)->f2354 != 0 && n != 0) {
         if (!flag) {
-            self->f18--;
-            self->f14--;
+            self->bandCountdown--;
+            self->countdown--;
         }
         if (n > 0) {
             ScatterObjectsAroundCircle(g_currentWorld, 0x58, p, n, 0);
         } else {
-            if (self->f18 < 0) {
+            if (self->bandCountdown < 0) {
                 if (g_currentEntry->f10 != 0.0f) {
                     did = 1;
                     g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((Table_152010*)self->table)->f44);
@@ -1983,13 +1983,13 @@ void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
                     if (g_currentEntry->f10 >= r->threshold) break;
                     i++;
                 }
-                self->f18 = RandomIntInRange(r->lo, r->hi);
+                self->bandCountdown = RandomIntInRange(r->lo, r->hi);
             }
             if (!flag) {
                 for (s32 i = 0; i < ((Table_152010*)self->table)->count - 1; i++) {
                     if (((Table_152010*)self->table)->ranges[i].threshold <= g_currentEntry->f10) {
                         s32 v = RandomIntInRange(((Table_152010*)self->table)->ranges[i].lo, ((Table_152010*)self->table)->ranges[i].hi);
-                        self->f18 = (self->f18 < v) ? self->f18 : v;
+                        self->bandCountdown = (self->bandCountdown < v) ? self->bandCountdown : v;
                         goto done;
                     }
                 }
@@ -1999,13 +1999,13 @@ void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
                 ScatterObjectsAroundCircle(g_currentWorld, 0x57, p, 1, 0);
             } else {
                 s32 a, b;
-                if (self->f14 < 0) {
-                    a = self->f04;
-                    b = self->f08;
-                    self->f14 = RandomIntInRange(Lerp_152010::Get(((Table_152010*)self->table)->f1C, ((Table_152010*)self->table)->f24), Lerp_152010::Get(((Table_152010*)self->table)->f20, ((Table_152010*)self->table)->f28));
+                if (self->countdown < 0) {
+                    a = self->refillLo;
+                    b = self->refillHi;
+                    self->countdown = RandomIntInRange(Lerp_152010::Get(((Table_152010*)self->table)->f1C, ((Table_152010*)self->table)->f24), Lerp_152010::Get(((Table_152010*)self->table)->f20, ((Table_152010*)self->table)->f28));
                 } else {
-                    a = self->f0C;
-                    b = self->f10;
+                    a = self->countLo;
+                    b = self->countHi;
                 }
                 n = RandomIntInRange(a, b);
                 if (n) ScatterObjectsAroundCircle(g_currentWorld, 0x58, p, n, 0);
@@ -2017,7 +2017,7 @@ void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
     }
 }
 
-void func_00152410(G261EF0* object, f32 unused)
+void func_00152410(ScatterController* object, f32 unused)
 {
 	f32 value = ((f32 (*)(void*))ClampToRange)(object->table);
 	g_currentEntry->dt = value;

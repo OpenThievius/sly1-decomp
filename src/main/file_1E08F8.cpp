@@ -7,7 +7,7 @@
 #include "globals.h"
 #include "buffered_stream.h"
 #include "key_id.h"
-#include "s193210.h"
+#include "load_progress.h"
 #include "output_buffer.h"
 
 
@@ -467,7 +467,7 @@ extern Pl_1E4EA8 D_00264A40;
 
 void func_00191E70(s32 a);
 void func_0018D410(KeyId* q);
-S193210* func_00193210(S193210* q, U32P* a, U32P* b, U32P* c, U32P* d);
+LoadProgress* func_00193210(LoadProgress* q, U32P* a, U32P* b, U32P* c, U32P* d);
 void* func_00137290(BufferedStream* q, s32 a, u8* b, s32 c);
 void func_00193270(void* q);
 s32 func_001373B0(BufferedStream* q, KeyId* k);
@@ -1565,7 +1565,7 @@ void func_001E4EA8(Self_1E4EA8* self)
 {
     KeyId key;
     Blob_1E4EA8 blob;
-    S193210 o30;
+    LoadProgress o30;
     U32P w60, w70, w80, w90;
     Sub_1E4EA8 sub;
     func_00191E70(2);

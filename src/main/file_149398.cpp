@@ -19,7 +19,7 @@
 #include "pooled_object.h"
 #include "masked_collider.h"
 #include "object_link.h"
-#include "g261ef0.h"
+#include "scatter_controller.h"
 #include "shapes.h"
 
 s32 func_001300E8(void* node, s32 kind);

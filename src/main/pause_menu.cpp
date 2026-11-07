@@ -6,7 +6,7 @@
 #include "v24a0.h"
 #include "v24a2.h"
 #include "shapes.h"
-#include "s193210.h"
+#include "load_progress.h"
 #include "text_reader.h"
 #include "layout_137228.h"
 #include "game_progress.h"
@@ -493,7 +493,7 @@ f32 D_0026A704 = 0;
 f32 D_0026A708 = 0;
 f32 D_0026A70C = 0;
 
-S193210* func_00193210(S193210* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
+LoadProgress* func_00193210(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4);
 void func_00193270(S_193270* p);
 void func_00193288(State_193288* self, s32 value);
 void func_00193300(S_193300* p);
@@ -515,7 +515,7 @@ void func_00195928(T217D_6D0* self, s32 v);
 void func_00195958(T217D_6D0* self);
 void func_001961C0(T217D_6D0* self);
 
-S193210* func_00193210(S193210* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4)
+LoadProgress* func_00193210(LoadProgress* self, U32P* s1, U32P* s2, U32P* s3, U32P* s4)
 {
     self->f14 = *s1;
     self->f18 = *s2;

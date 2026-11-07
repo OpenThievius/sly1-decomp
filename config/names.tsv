@@ -2113,7 +2113,7 @@ D_0021E3F8	g_circleAnimatorMethods	method table func_001B4980 returns for cursor
 D_0021E418	g_triangleAnimatorMethods	method table func_001B4980 returns for cursor animator type 8, the table of TriangleAnimator (include/cursor_animator.h)
 D_00275710	g_currentWorld	GetScriptWorld returns it, FindScriptObject and ResolveObjectLinks look objects up on it, and classes read it as their world (C6C*); about 220 uses.
 D_0027B314	g_activeListFrames	RemoveFromList walks this chain of live iteration frames and moves each frame that points at a removed item to the next one; list_iter.h declares it as the ListFrame chain head.
-D_00275C60	g_unitRange	an S1EB050 range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (00150000.cpp) and func_001EB460 clamps its blend factor to.
+D_00275C60	g_unitRange	an ValueRange range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (00150000.cpp) and func_001EB460 clamps its blend factor to.
 D_00275958	g_mainAndRenderThreads	func_001E2398 stores the current thread id in word 0 and the id of the thread it creates (entry func_0015EE80, stack D_006056D0) in word 1; InitRenderFrames starts word 1.
 D_006056D0	g_renderThreadStack	func_001E2398 passes it as the stack (size 0x20000) in the record that creates the render thread stored in g_mainAndRenderThreads.
 D_00275964	g_movieDecodeThread	CreateMovieDecodeThread stores the id returned by the thread-create call (entry RunMovieDecodeThread) there and then starts it.
@@ -2587,7 +2587,7 @@ func_00117180	RoundScriptFloatUp	builtin: returns (int)(argument + 1.0), the int
 func_00117D78	FindScriptObjectListById	builtin: the list twin of FindScriptObjectById: func_0015A198 on the world with kind 0x104 into a 0x40-entry buffer, returned through MakeScriptRefList
 func_00118580	TransformScriptDirectionBetweenFrames	builtin: calls func_001280C0 (the frame conversion ReparentCollider applies to its anchor vectors) into a vector payload, as TransformScriptPointBetweenFrames does with func_00128018
 func_0011A6B8	ShutDownMarkRoots	empty; ShutDownScriptValuePools calls it on D_00259F38 last, as InitScriptValuePools starts with ResetMarkRoots on it
-D_00259958	g_scriptBuiltins	the built-ins' table (r119bb0.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
+D_00259958	g_scriptBuiltins	the built-ins' table (script_builtin.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
 D_00259F38	g_markStacks	the collector's roots and mark stacks (0x2318 bytes): ResetMarkRoots, AddMarkRootList and the Push/PopMark functions use it, DrainMarkStacks walks it and CollectScriptPools runs it
 D_0025C2D0	g_propertyRefPool	the fifth pool of value.cpp, 0x80 entries of 12 bytes (InitScriptValuePools): TakeZeroedPoolEntry takes from it, and func_001C15D8 fills one with an object and two words of a property's descriptor for a script value
 func_0011C1D0	ShutDownEntryPool	empty; ShutDownScriptValuePools calls it on each of the five entry pools InitScriptValuePools set up with InitEntryPool

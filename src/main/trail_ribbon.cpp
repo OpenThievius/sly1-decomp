@@ -5,7 +5,7 @@
 #include "globals.h"
 #include "shapes.h"
 #include "vertex_batch.h"
-#include "s1eb050.h"
+#include "value_range.h"
 #include "game_clock.h"
 
 // A point of the ring: the time it was added, its alpha, and the ribbon's two edges.

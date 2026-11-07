@@ -20,7 +20,7 @@
 #include "v24a2.h"
 #include "level_entry.h"
 #include "threshold_range.h"
-#include "g261ef0.h"
+#include "scatter_controller.h"
 #include "render_frame.h"
 #include "background_job.h"
 #include "group_marker.h"

@@ -68,7 +68,7 @@ struct Set_001E9498 {
 s32 func_001BE5E8(void);
 void func_001BEA28(void);
 f32 func_002058A0(f32 v);
-s32 func_001EB050(S1EB050* span, f32 x);
+s32 func_001EB050(ValueRange* span, f32 x);
 typedef void (*VFn3_1E9570)(void* self, int arg);
 typedef void (*VFn7_1E9570)(void* self);
 struct VTable_1E9570 {
@@ -741,8 +741,8 @@ INCLUDE_DATA(D_00275C34);
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 Quad16 D_00275C40 = {0};
 f32 D_00275C50[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
-S1EB050 D_00275C60 = { 0.0f, 1.0f };
-S1EB050 D_00275C68 = { -1.0f, 1.0f };
+ValueRange D_00275C60 = { 0.0f, 1.0f };
+ValueRange D_00275C68 = { -1.0f, 1.0f };
 f32 D_00275C70[4] = { 0.5f, 0.8f, 0.0f, 0.0f };
 f32 D_00275C80[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 ObjectLink D_00275C90[1] = { { 0, 0x4C9, 0x610 } };
@@ -1842,7 +1842,7 @@ void func_001EB018(f32* a0, f32 x, f32 y, f32 z, f32 w)
     a0[1] = q - r;
 }
 
-s32 func_001EB050(S1EB050* span, f32 x)
+s32 func_001EB050(ValueRange* span, f32 x)
 {
     s32 inside = 0;
     if (span->lo < x) {
@@ -1853,7 +1853,7 @@ s32 func_001EB050(S1EB050* span, f32 x)
     return inside;
 }
 
-s32 func_001EB080(s32 count, S1EB050* spans, f32 x)
+s32 func_001EB080(s32 count, ValueRange* spans, f32 x)
 {
     for (s32 i = 0; i < count; i++) {
         if (IsInsideRange(&spans[i], x)) {
@@ -1863,7 +1863,7 @@ s32 func_001EB080(s32 count, S1EB050* spans, f32 x)
     return 0;
 }
 
-f32 func_001EB0F8(S1EB050* span, f32 x)
+f32 func_001EB0F8(ValueRange* span, f32 x)
 {
     if (x < span->lo) {
         return span->lo;
@@ -2914,7 +2914,7 @@ void func_001EEC60(C1F* self)
     self->f360 = 1.0f;
     SetColliderAnchors(self, 3, 0, 3, 0);
     InitTrackedNodes(&self->rec590, self);
-    self->rec590.f4 = 3;
+    self->rec590.f04 = 3;
 }
 
 void func_001EECE0(C1F* self)

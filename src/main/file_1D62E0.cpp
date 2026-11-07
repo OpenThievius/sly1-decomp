@@ -17,11 +17,11 @@
 #include "shapes.h"
 #include "globals.h"
 #include "world.h"
-#include "s1dbbd8.h"
+#include "queued_call.h"
 #include "effect.h"
 #include "game_progress.h"
 #include "buffered_stream.h"
-#include "s1eb050.h"
+#include "value_range.h"
 #include "script_value.h"
 #include "cone_volume.h"
 #include "redirect_object.h"
@@ -240,7 +240,7 @@ extern u8 D_00261EF0[];
 
 void func_00151E20(void* msg, f32 value);
 
-s32 func_001EB080(s32 count, S1EB050* spans, f32 x);
+s32 func_001EB080(s32 count, ValueRange* spans, f32 x);
 
 struct Sub_1DB4C8 { u8 b; };
 
@@ -597,7 +597,7 @@ f32 D_00275490[4] = { 0.05f, 0.0f, 0.25f, 0.0f };
 f32 D_002754A0[4] = { 1.5f, 2.5f, 0.0f, 0.0f };
 f32 D_002754B0[4] = { 1000.0f, -0.5f, 0.0f, 0.0f };
 f32 D_002754C0[2] = { 0.0f, 625.0f };
-S1EB050 D_002754C8 = { -1300.0f, 1300.0f };
+ValueRange D_002754C8 = { -1300.0f, 1300.0f };
 f32 D_002754D0[3] = { 1125.0f, 0.0f, 0.100000001f };
 f32 D_002754DC = 750.0f;
 f32 D_002754E0[2] = { 1.0f, 0.0f };
@@ -903,7 +903,7 @@ void func_001D7440(C19* self)
 
 ASM_FUNC(func_001D7778);
 
-f32 func_001D8470(s32 count, S1EB050* spans, f32 x)
+f32 func_001D8470(s32 count, ValueRange* spans, f32 x)
 {
     if (IsInsideAnyRange(count, spans, x) == 0) {
         return x;
@@ -911,7 +911,7 @@ f32 func_001D8470(s32 count, S1EB050* spans, f32 x)
     f32 bestDist = 3.4028234663852886e+38f;
     f32 best = bestDist;
     if (count > 0) {
-        S1EB050* s = spans;
+        ValueRange* s = spans;
         s32 n = count;
         do {
             f32 d = __builtin_fabsf(x - s->lo);
@@ -1554,11 +1554,11 @@ void func_001DBC18(u8* self, T219CHook* node)
     }
 }
 
-S1DBBD8* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d);
+QueuedCall* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d);
 
 void func_001DBC60(World* self, s32 a1, s32 a2, s32 a3, s32 a4)
 {
-    S1DBBD8* n = self->f1EC8;
+    QueuedCall* n = self->f1EC8;
     if (n != 0) {
         do {
             if (n->k0 == a1 && n->k1 == a2 && n->k2 == a3 && n->k3 == a4) {
@@ -1570,9 +1570,9 @@ void func_001DBC60(World* self, s32 a1, s32 a2, s32 a3, s32 a4)
     AppendQueuedCall(self, a1, a2, a3, a4);
 }
 
-S1DBBD8* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d)
+QueuedCall* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d)
 {
-    S1DBBD8* e = (S1DBBD8*)TakeCallRecord(self);
+    QueuedCall* e = (QueuedCall*)TakeCallRecord(self);
     e->k0 = a;
     e->k1 = b;
     e->k2 = c;
@@ -1585,10 +1585,10 @@ S1DBBD8* func_001DBCC8(World* self, s32 a, s32 b, s32 c, s32 d)
 
 void func_001DBD40(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
 {
-    S1DBBD8* prev = 0;
-    S1DBBD8* removed = 0;
-    S1DBBD8* cur = self->f1EC8;
-    S1DBBD8* next;
+    QueuedCall* prev = 0;
+    QueuedCall* removed = 0;
+    QueuedCall* cur = self->f1EC8;
+    QueuedCall* next;
     s32 bit;
 
     if (cur != 0) {
@@ -1637,7 +1637,7 @@ void func_001DBD40(World* self, u32 mask, s32 k0, s32 k1, s32 k2, s32 k3)
 void func_001DBE48(World* self)
 {
     while (self->f1EC8 != 0) {
-        S1DBBD8* node = self->f1EC8;
+        QueuedCall* node = self->f1EC8;
         if (node == self->f1ECC) self->f1ECC = 0;
         self->f1EC8 = node->next;
         node->next = 0;

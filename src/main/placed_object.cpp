@@ -25,7 +25,7 @@
 #include "shapes.h"
 #include "id_filter_object.h"
 #include "c8b.h"
-#include "s1dbbd8.h"
+#include "queued_call.h"
 #include "stream_reader.h"
 #include "key_id.h"
 #include "game_progress.h"
@@ -5324,9 +5324,9 @@ void func_0012F760(AnimationPlayer* self, s32 a1, s32 a2)
     if (obj != 0) {
         obj->vtbl[18](obj);
     }
-    S1DBBD8* node = self->fE4;
+    QueuedCall* node = self->fE4;
     while (node != 0) {
-        S1DBBD8* next = node->next;
+        QueuedCall* next = node->next;
         node->fn(node->k1, a1, a2);
         node = next;
     }
