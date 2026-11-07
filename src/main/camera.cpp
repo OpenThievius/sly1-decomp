@@ -346,7 +346,7 @@ INCLUDE_DATA(D_00261900);
 INCLUDE_DATA(D_00261910);
 INCLUDE_DATA(D_00261920);
 INCLUDE_DATA(D_00261924);
-INCLUDE_DATA(D_00261928);
+f32 D_00261928[9] = { 1.0f, 5.0f, 10.0f, 12.0f, 15.0f, 12.0f, 10.0f, 5.0f, 1.0f };
 f32 D_0026194C = 250.0f;
 INCLUDE_DATA(D_00261950);
 RampProfile D_00261958 = { 2500.0f, 0.0f, 0.25f, 0.0f };
@@ -1107,7 +1107,37 @@ s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3
 // The file's one .rodata word, the largest float, which the original assembly func_00145950
 // loads.
 extern const f32 D_00249E4C = 3.4028235e+38f;
-INCLUDE_ASM(func_00145950);
+void ComputeDirectionFromAngles(Vec02* out, f32 first, f32 second, f32 scale);
+
+void func_00145950(s32 count, Collider** objs, Vec02* origin, Vec02* out, f32 r)
+{
+    Vec02 dir;
+    Vec02 cand;
+    Vec02 best;
+    f32 lo;
+    f32 hi;
+    f32 step = 5.0f / r;
+    f32 nearest = D_00249E4C;
+    best = *origin;
+    for (s32 i = 0; i < 9; i++) {
+        f32 n = D_00261928[i];
+        f32 pitch = (f32)(i - 4) * 0.39269909f;
+        for (s32 j = 0; (f32)j < n; j++) {
+            ComputeDirectionFromAngles(&dir, (f32)j * 3.14159274f / n, pitch, r);
+            Vu0::Q(cand) = Vu0::Add(Vu0::Q(*origin), Vu0::Q(dir));
+            if (FindFirstFreeSpan(count, objs, step + step, origin, &cand, &lo, &hi) != 0) {
+                if (0.0f < lo) {
+                    lo = lo + step;
+                }
+                if (lo < nearest) {
+                    nearest = lo;
+                    Vu0::Q(best) = Vu0::MulXSum(Vu0::Q(*origin), Vu0::Scalar(1.0f - nearest), Vu0::Q(cand), Vu0::Scalar(nearest));
+                }
+            }
+        }
+    }
+    *out = best;
+}
 
 INCLUDE_ASM(func_00145B68);
 
