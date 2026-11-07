@@ -17,7 +17,7 @@
 #include "placed_object.h"
 
 struct Animation;     // an animation (c83.h)
-struct S1DBBD8; // a callback record (s1dbbd8.h)
+struct QueuedCall; // a callback record (queued_call.h)
 struct Attachment;
 
 // The table. Slots 4 and 5 give the position and the orientation (each with a vector next to
@@ -91,7 +91,7 @@ struct AnimationPlayer {
     s32 f5C;                // 0x5C: the number of f60 entries (func_0012C288)
     void* f60;              // 0x60: its own +0x64 at set-up (func_0012D3F8)
     u8 pad64[0xE4 - 0x64]; // 0x64
-    S1DBBD8* fE4;           // 0xE4: its callbacks, records of World::pool1B14 (func_0012F760 calls each, func_0012E760 gives them back)
+    QueuedCall* fE4;           // 0xE4: its callbacks, records of World::pool1B14 (func_0012F760 calls each, func_0012E760 gives them back)
     u8 padE8[0xEC - 0xE8]; // 0xE8
 };
 

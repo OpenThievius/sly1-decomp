@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Class 0x6E (descriptor D_00217740, 0x38 bytes), a path curve object: an object that keeps a
-// key-frame curve (include/t2176.h) read from the level stream and moves it with its frame,
+// key-frame curve (include/path_curve.h) read from the level stream and moves it with its frame,
 // and the four classes under it: 0x6F (0x60), 0x70 (0x70), 0x71 (0x5C) and 0x72 (0x40).
 // Written for this project from what retail's code does (config/us/classes.tsv).
 //
@@ -11,7 +11,7 @@
 #define PATH_CURVE_OBJECT_H
 
 #include "base_object.h"
-#include "t2176.h"
+#include "path_curve.h"
 
 // Eight bytes that each subclass keeps through a copy (slot 9: saved, the parent's copy,
 // restored); retail moves them as one unaligned doubleword.
@@ -21,7 +21,7 @@ struct __attribute__((packed)) PathCurveKeptBits { u64 bits; };
 // itself (slot 0 of its table); ReparentPathCurveObject tells it (slot 4) the frames of the
 // old parent and of the new one.
 struct PathCurveObject : BaseObject {
-    T2176* curve;           // 0x34
+    PathCurve* curve;           // 0x34
 };
 
 // 0x6F, a target curve: registers itself in the list D_002626E8 (g_targetCurveList, slots 6

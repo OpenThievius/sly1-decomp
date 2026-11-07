@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the D_00270650 words at 0x594 and 0x598 (US 0x284 and 0x288).
 
-void func_001793F0(C1B* self)
+void func_001793F0(ModeCollider* self)
 {
     StartPlacedObject(self);
     ResolveObjectLinks(self, 0x1A, g_modeColliderLinks);

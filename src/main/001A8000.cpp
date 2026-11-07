@@ -5,7 +5,7 @@
 #include "world.h"
 #include "object_pool.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "shapes.h"
 #include "game_clock.h"
 #include "game_progress.h"
@@ -13,12 +13,12 @@
 #include "globals.h"
 
 // The font object's calls.
-V24A2* func_0015C1C0(s32 k);
-void func_0015C8B8(V24A2* font, f32 x, f32 y);
-f32 func_0015C418(V24A2* font, void* text);
-void func_0015C638(V24A2* font, void* text, void* out, s32 zero, void* d);
-void func_0015C900(V24A2* font);
-void* func_0015DB28(void* out, void* text, V24A2* font);
+Font* func_0015C1C0(s32 k);
+void func_0015C8B8(Font* font, f32 x, f32 y);
+f32 func_0015C418(Font* font, void* text);
+void func_0015C638(Font* font, void* text, void* out, s32 zero, void* d);
+void func_0015C900(Font* font);
+void* func_0015DB28(void* out, void* text, Font* font);
 void func_0015E318(void* buf, void* out, s32 zero, void* d);
 
 void func_00182ED0(void* self);
@@ -50,25 +50,25 @@ void func_00137248(void* out, s32* value);
 void func_00137260(void* out, s32 flag);
 void func_00137268(void* out, s32 flag);
 
-void func_001C72A0(C0D* self);
-void func_001DDC38(void* sub, C0D* self);
+void func_001C72A0(GaugeBarAgent* self);
+void func_001DDC38(void* sub, GaugeBarAgent* self);
 
 
 s32 func_001DDA80(void* sub);
 
 
 typedef void* (*VFn_1A9960)(void* self);
-void func_001C8C08(C0D* self);
-void func_001C8418(C0D* self, void* p);
+void func_001C8C08(GaugeBarAgent* self);
+void func_001C8418(GaugeBarAgent* self, void* p);
 
 
-void func_001C8E28(C0D* self);
-void func_001C8BC0(C0D* self);
+void func_001C8E28(GaugeBarAgent* self);
+void func_001C8BC0(GaugeBarAgent* self);
 
 
 extern u8 D_00264A40[];
 
-void func_001C91C8(C0D* self);
+void func_001C91C8(GaugeBarAgent* self);
 void func_001603E8(s32 n);
 void func_0018C7F8(u8* p);
 

@@ -4,11 +4,11 @@
 #include "placed_object.h"
 #include "switched_collider.h"
 #include "world.h"
-#include "v24a2.h"
+#include "font.h"
 #include "shapes.h"
 #include "level_entry.h"
 #include "threshold_range.h"
-#include "g261ef0.h"
+#include "scatter_controller.h"
 #include "render_frame.h"
 #include "background_job.h"
 #include "group_marker.h"
@@ -4090,7 +4090,7 @@ extern s32 D_0027292C;
 // size: s32 counter (lw/sw), 4 bytes before an 8-aligned next label
 s32 D_00261D38 = 0;
 // size: func_00151A68 clears 0x24 bytes of it
-G261EF0 D_00261EF0 = {};
+ScatterController D_00261EF0 = {};
 // size: semaphore id from func_002027A0 (lw/sw), 4-byte label
 s32 D_00261F14 = 0;
 s32 D_00261F18 = 0;

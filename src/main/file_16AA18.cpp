@@ -10,8 +10,8 @@
 #include "part_holder_object.h"
 #include "list_iter.h"
 #include "screen_element.h"
-#include "v24a0.h"
-#include "v24a2.h"
+#include "packet_writer.h"
+#include "font.h"
 #include "game_progress.h"
 #include "attachment.h"
 #include "pad_record.h"
@@ -137,11 +137,11 @@ struct Out_16B860 {
     void FlagB(s32 f) { func_00137268(this, f); }
 };
 struct Hd_16B860 {
-    static void Draw(V24A2** h, Out_16B860* out, void* tbl)
+    static void Draw(Font** h, Out_16B860* out, void* tbl)
     {
         if (*h != 0) {
-            const V24A2_Vt* vt = (*h)->vt;
-            vt->drawBox((V24A2*)((u8*)*h + vt->adj9), h, out, tbl);
+            const FontVt* vt = (*h)->vt;
+            vt->drawBox((Font*)((u8*)*h + vt->adj9), h, out, tbl);
         }
     }
 };
@@ -445,12 +445,12 @@ void func_0016B300(Self_16B300* self, s32 a, s32 b)
 }
 
 s32 func_0015C188(s32 index);
-V24A2* func_0015C1C0(s32 index);
+Font* func_0015C1C0(s32 index);
 void func_0016B4A0(T217D_12E0* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&D_00262988;
+        self->frame = (Font**)&D_00262988;
         *self->frame = GetFontById(2);
     }
     SetScreenElementHoldTime(self, 0.0f);
@@ -580,10 +580,10 @@ void func_0016B7A8(T217D_12E0* self, s32 v)
 }
 
 f32 func_00205400(f32 x);
-void func_0015C8B8(V24A2* font, f32 a, f32 b);
-void* func_0015DB28(void* out, void* p, V24A2* font);
+void func_0015C8B8(Font* font, f32 a, f32 b);
+void* func_0015DB28(void* out, void* p, Font* font);
 void func_0015E318(void* a, void* b, s32 c, void* d);
-void func_0015C900(V24A2* font);
+void func_0015C900(Font* font);
 void func_0016B860(T217D_12E0* self)
 {
     T217D_Word tmp;
@@ -623,27 +623,27 @@ void func_0016B860(T217D_12E0* self)
 }
 
 s32 func_0015C188(s32 k);
-void func_0015C8B8(V24A2* font, f32 x, f32 y);
-void func_0015C900(V24A2* font);
+void func_0015C8B8(Font* font, f32 x, f32 y);
+void func_0015C900(Font* font);
 void func_0016BA40(T217D_1330* self)
 {
     SetupScreenElementText(self);
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&D_002629A8;
+        self->frame = (Font**)&D_002629A8;
         *self->frame = GetFontById(2);
     }
-    V24A2* a1 = self->font;
+    Font* a1 = self->font;
     f32 f20 = 60.0f;
     f32 f21 = 90.0f;
-    const V24A2_Vt* vt = a1->vt;
-    V24A2* n = vt->clone((V24A2*)((u8*)a1 + vt->adj1), 1.0f, 1.0f);
+    const FontVt* vt = a1->vt;
+    Font* n = vt->clone((Font*)((u8*)a1 + vt->adj1), 1.0f, 1.0f);
     self->font = n;
     self->color = 0xDF7F7F7F;
     f20 = (f32)n->height * n->sy + f20;
-    V24A2* s0 = GetFontById(4);
+    Font* s0 = GetFontById(4);
     PushFontScale(s0, 1.3f, 1.3f);
-    const V24A2_Vt* v = s0->vt;
-    f32 r = v->width((V24A2*)((u8*)s0 + v->adj3), 0x5F);
+    const FontVt* v = s0->vt;
+    f32 r = v->width((Font*)((u8*)s0 + v->adj3), 0x5F);
     f21 = r * 4.0f + f21;
     f20 = f20 + (f32)s0->height * s0->sy * 4.0f;
     PopFontScale(s0);

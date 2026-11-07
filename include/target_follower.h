@@ -8,7 +8,7 @@
 
 #include "collider.h"
 
-struct C2A;
+struct FollowableObject;
 struct Obj_1BF0D8;
 
 // The 0x14-byte entries of the records at +0x550 (func_0016CE80 looks for the one whose two
@@ -55,7 +55,7 @@ struct Tune47 {
 struct TargetFollower : Collider {
     List47* list550;        // 0x550: loaded (table D_002629D0, id 0x2EE)
     void* f554;             // 0x554: func_001B6290(list550, self, -1, 1)
-    C2A* f558;              // 0x558: the class 0x2A object it follows (func_0016D3F0)
+    FollowableObject* f558;              // 0x558: the class 0x2A object it follows (func_0016D3F0)
     List01 list55C;         // 0x55C: the 0x2A objects, linked at their +0x7B0 (slot 0, func_0016DFE0)
     void* f568;             // 0x568: loaded (id 0x2F7)
     f32 f56C;               // 0x56C: the object's z less that of f568

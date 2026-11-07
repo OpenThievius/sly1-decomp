@@ -9,7 +9,7 @@
 #include "state_trigger.h"
 #include "world.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "globals.h"
 #include "game_progress.h"
 #include "level_entry.h"
@@ -95,7 +95,7 @@ struct Cur_11A338 { u8 pad0[4]; s32 a; u8 pad1[0x1C - 8]; s32 b; s32 differs() {
 void* func_001DFE80(s32 k);
 s32 func_001E2100(void* p);
 s32 func_0015C188(s32 k);
-V24A2* func_0015C1C0(s32 k);
+Font* func_0015C1C0(s32 k);
 s32 func_001DD7A0(World* g, s32 k);
 void func_001E02C8(T217D_1380* self, s32 n);
 
@@ -117,7 +117,7 @@ void func_001DFEB8(T217D_1380* self)
         }
     }
     if (IsFontLoaded(2)) {
-        self->frame = (V24A2**)&g_commentaryFrameStyle;
+        self->frame = (Font**)&g_commentaryFrameStyle;
         *self->frame = GetFontById(2);
     }
     SetScreenElementScale(self, 0.6f);
@@ -333,20 +333,20 @@ struct Out_1E0678 {
     void FlagB(s32 f) { func_00137268(this, f); }
 };
 struct Hd_1E0678 {
-    static void Draw(V24A2** h, Out_1E0678* out, void* tbl)
+    static void Draw(Font** h, Out_1E0678* out, void* tbl)
     {
         if (*h != 0) {
-            const V24A2_Vt* vt = (*h)->vt;
-            vt->drawBox((V24A2*)((u8*)*h + vt->adj9), h, out, tbl);
+            const FontVt* vt = (*h)->vt;
+            vt->drawBox((Font*)((u8*)*h + vt->adj9), h, out, tbl);
         }
     }
 };
 
 extern f32 D_0027240C;
-void func_0015C8B8(V24A2* font, f32 a, f32 b);
-void* func_0015DB28(void* out, void* p, V24A2* font);
+void func_0015C8B8(Font* font, f32 a, f32 b);
+void* func_0015DB28(void* out, void* p, Font* font);
 void func_0015E318(void* a, void* b, s32 c, void* d);
-void func_0015C900(V24A2* font);
+void func_0015C900(Font* font);
 
 void func_001E0678(T217D_1380* self)
 {

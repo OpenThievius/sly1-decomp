@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Class 0x5E (RedirectObject) and class 0x14 (C14), from 0x1DDCE0 to 0x1DFD48. Its .data opens
+// Class 0x5E (RedirectObject) and class 0x14 (TintBlendCollider), from 0x1DDCE0 to 0x1DFD48. Its .data opens
 // with the vector func_001DDCE0 reads (0x275730), just after the zeroed globals that close the
 // previous file's, and ends at 0x2758D0, where file_1DFD48.cpp's starts; its .rodata is the one
 // float func_001DFBE0 reads (0x24DCA8).
@@ -11,7 +11,7 @@
 #include "redirect_object.h"
 #include "world.h"
 #include "screen_element.h"
-#include "v24a2.h"
+#include "font.h"
 #include "globals.h"
 #include "game_progress.h"
 #include "level_entry.h"
@@ -83,11 +83,11 @@ void func_001DE768(RedirectObject* self)
 }
 
 
-void func_001C4458(C14* self);
+void func_001C4458(TintBlendCollider* self);
 f32 func_00205778(f32 a, f32 b);
 void func_00188850(const Vec02* t, void* out, f32 x);
 
-void func_001DE798(C14* self)
+void func_001DE798(TintBlendCollider* self)
 {
     f32 f;
 
@@ -113,9 +113,9 @@ void func_00129D00(void* a, s32 b, void* c);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 void func_001DFBE0(void* self, s32 flag);
 
-void func_001DE808(C14* self)
+void func_001DE808(TintBlendCollider* self)
 {
-    C14* s = self;
+    TintBlendCollider* s = self;
     s32 flag;
 
     StartTurningCollider(self);
@@ -148,14 +148,14 @@ typedef void (*VFnObj_1DE910)(void* self, void* a1);
 extern f32 D_00261858[];
 
 void func_001C4ED0(void);
-s32 func_00128230(C14* self);
-void func_001DEB30(C14* self);
+s32 func_00128230(TintBlendCollider* self);
+void func_001DEB30(TintBlendCollider* self);
 void func_001D7098(OwnerMessage* l, s32 zero, Collider* c);
 void func_001861E8(Pa_1DE910* a0, Contact03* a1);
 void func_00129E10(Pb_1DE910* a, f32 v);
 void func_00129FB0(Pb_1DE910* a, f32 v);
 
-void func_001DE910(C14* self)
+void func_001DE910(TintBlendCollider* self)
 {
     OwnerMessage loc;
     f32 f20;
@@ -223,7 +223,7 @@ ASM_FUNC(func_001DEB30);
 void func_00192C58(void* self);
 void func_001DFBE0(void* self, s32 flag);
 
-void func_001DEBB8(C14* self)
+void func_001DEBB8(TintBlendCollider* self)
 {
     func_00192C58(self);
     SetTintBlendColliderState(self, 1);
@@ -233,7 +233,7 @@ ASM_FUNC(func_001DEBE8);
 
 void func_001922E8(void* self, void* p);
 
-void func_001DF290(C14* self, void* p)
+void func_001DF290(TintBlendCollider* self, void* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p == 0) {
@@ -252,10 +252,10 @@ struct Clamp_1DF2C8 {
 };
 
 f32 func_00205210(f32 x);
-void func_00126A48(C14* s, u32 c);
-void func_00125C90(C14* s, void* a, void* b);
+void func_00126A48(TintBlendCollider* s, u32 c);
+void func_00125C90(TintBlendCollider* s, void* a, void* b);
 
-void func_001DF2C8(C14* self, void* a1, void* a2)
+void func_001DF2C8(TintBlendCollider* self, void* a1, void* a2)
 {
     Rgba4 out;
     Rgba4 col;
@@ -291,7 +291,7 @@ ASM_FUNC(func_001DF520);
 
 s32 func_001DDA80(void* p);
 
-s32 func_001DF5A0(C14* self, s32 mode)
+s32 func_001DF5A0(TintBlendCollider* self, s32 mode)
 {
     if (mode == 5 || self->f720 == 2 || self->f720 == 0 || self->f720 == 3 || self->f728 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
@@ -304,7 +304,7 @@ ASM_FUNC(func_001DF700);
 void func_001BC4D8(void* self, void* sub);
 void func_001C57C8(void* self);
 
-void func_001DFA10(C14* self)
+void func_001DFA10(TintBlendCollider* self)
 {
     ExtractContactsByPartMode(self, (u8*)self + 0x740);
     func_001C57C8(self);
@@ -316,9 +316,9 @@ typedef s32 (*Pred_1DFA40)(void* self, void* out);
 
 extern f32 D_0026185C;
 
-void func_001DFA40(C14* self, void* out)
+void func_001DFA40(TintBlendCollider* self, void* out)
 {
-    C14* obj = self;
+    TintBlendCollider* obj = self;
     Out_1DFA40* o = (Out_1DFA40*)out;
 
     if (((Pred_1DFA40)obj->desc06()->m56)(self, out)) {
@@ -352,7 +352,7 @@ void func_001B6598(void* dev, s32* out);
 void func_001B6568(void* dev, s32* out);
 void func_00192230(void* self, s32 kind, MessageBody* rec);
 
-void func_001DFB08(C14* self, s32 code, MessageBody* rec)
+void func_001DFB08(TintBlendCollider* self, s32 code, MessageBody* rec)
 {
     s32 loc[2];
 
@@ -380,7 +380,7 @@ void func_001DFB08(C14* self, s32 code, MessageBody* rec)
     HandleSwitchedColliderNotification(self, code, rec);
 }
 
-s32 func_001DFBD0(C14* self)
+s32 func_001DFBD0(TintBlendCollider* self)
 {
     return self->f728 != 0;
 }
@@ -393,7 +393,7 @@ void func_001B64D8(StateTrigger* h, s32 b);
 void func_001B6628(StateTrigger* h, s32 b);
 void func_00188850(const Vec02* tab, void* out, f32 v);
 
-void func_001DFBE0(C14* self, s32 mode)
+void func_001DFBE0(TintBlendCollider* self, s32 mode)
 {
     s32 old = self->f720;
     if (mode != old) {

@@ -7,25 +7,25 @@
 #include "world.h"
 #include "animation.h"
 #include "attachment.h"
-#include "t2196.h"
+#include "anim_curve.h"
 
-void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
+void func_0011F850(WeightCurve** axis, s32* outCount, f32** outTimes);
 
 struct Buffer_00120130 { u8 bytes[0x20]; };
 typedef void (*Finish_00120130)(PlacedObject* self, void* output, void* state);
-extern void func_0011F9F8(s32, Key2196_Vec*, s32, void*, void*);
+extern void func_0011F9F8(s32, VectorKey*, s32, void*, void*);
 extern void func_00188A20(void*, void*);
 extern void func_001EDE38(void*, void*, void*);
 
-extern void func_0011F9F8(s32, Key2196_Vec*);
-extern void func_0011FB98(s32, Key2196_Vec*, s32*, f32**);
+extern void func_0011F9F8(s32, VectorKey*);
+extern void func_0011FB98(s32, VectorKey*, s32*, f32**);
 
 struct Result_001202F0 { f32 x; f32 y; f32 z; };
 struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
-extern void func_0011F6B0(T2196_Weight**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
+extern void func_0011F6B0(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
-void func_0011F798(T2196_Weight** a, Vec02* b, Stream83* c);
+void func_0011F798(WeightCurve** a, Vec02* b, Stream83* c);
 
 struct Result_001203A8 {
     f32 first;
@@ -39,9 +39,9 @@ struct Output_001203A8 {
     u8 pad18[0x10];
     f32 third;
 };
-extern void func_0011F9F8(s32, Key2196_Vec*, void*, f32*, s32, f32, f32);
+extern void func_0011F9F8(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
-extern void func_0011FA88(s32*, Key2196_Vec**, Stream83*);
+extern void func_0011FA88(s32*, VectorKey**, Stream83*);
 
 extern void* func_001B5EE0(void*);
 
@@ -160,7 +160,7 @@ extern void func_00121580(Attachment* self, Mat02* a1);
 typedef void (*VFn_1236C8)(void* self, void* arg);
 struct Obj_1236C8 { VFn_1236C8* vt; };
 void* func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
-void func_00123400(C22* node, StateTrigger* value);
+void func_00123400(CountedObject* node, StateTrigger* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
 
@@ -180,9 +180,9 @@ s32 func_00160CF0(void* p);
 void func_001BFCD8(s32 a0, void* a1, StateTrigger* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 // The position curves' tables, defined at the end of this file.
-extern const T2196_PosVt D_002196B8;
-extern const T2196_PosVt D_002196C8;
-extern const T2196_PosVt D_002196D8;
+extern const PositionCurveVt D_002196B8;
+extern const PositionCurveVt D_002196C8;
+extern const PositionCurveVt D_002196D8;
 void* func_0018D5C0(s32 bytes);
 
 extern u8 D_00248D30[];
@@ -194,15 +194,15 @@ void func_001B5F28(void* a, void* b);
 
 extern u8 D_002483D0[];
 
-s32 func_00139970(f32 x, f32 period, s32 count, Pair2196* p, f32* out);
+s32 func_00139970(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
 f32 func_001EA408(f32 a);
 
-extern const T2196_RotVt D_002196E8;
-extern const T2196_RotVt D_002196F8;
-extern const T2196_RotVt D_00219708;
+extern const RotationCurveVt D_002196E8;
+extern const RotationCurveVt D_002196F8;
+extern const RotationCurveVt D_00219708;
 
-extern const T2196_ScaleVt D_00219718;
-extern const T2196_ScaleVt D_00219728;
+extern const ScaleCurveVt D_00219718;
+extern const ScaleCurveVt D_00219728;
 void* func_0018D5C0(u32 n);
 
 extern u8 D_00219560[];
@@ -236,12 +236,12 @@ void func_00120388();
 void func_001203A8();
 void func_00120418();
 void func_00120440();
-extern const T2196_WeightVt D_00219668 = { (T2196_WeightEval)func_0011F0C8, (T2196_WeightRead)func_0011EFC8, (T2196_WeightTimes)func_0011F180, 0 };
-extern const T2196_WeightVt D_00219678 = { (T2196_WeightEval)func_0011F320, (T2196_WeightRead)func_0011F210, (T2196_WeightTimes)func_0011F3E8, 0 };
-extern const T2196_WeightVt D_00219688 = { (T2196_WeightEval)func_0011F478, (T2196_WeightRead)func_0011F568, (T2196_WeightTimes)func_0011F620, 0 };
-extern const T2196_WeightVt D_00219698 = { (T2196_WeightEval)func_00120AA8, 0, (T2196_WeightTimes)func_0011EFB0, 0 };
-extern const T2196_WeightVt D_002196A8 = { (T2196_WeightEval)func_00120D58, 0, (T2196_WeightTimes)func_0011EFB0, 0 };
-void* func_0018D5C0(T2196_Weight* n);
+extern const WeightCurveVt D_00219668 = { (WeightCurveEval)func_0011F0C8, (WeightCurveRead)func_0011EFC8, (WeightCurveTimes)func_0011F180, 0 };
+extern const WeightCurveVt D_00219678 = { (WeightCurveEval)func_0011F320, (WeightCurveRead)func_0011F210, (WeightCurveTimes)func_0011F3E8, 0 };
+extern const WeightCurveVt D_00219688 = { (WeightCurveEval)func_0011F478, (WeightCurveRead)func_0011F568, (WeightCurveTimes)func_0011F620, 0 };
+extern const WeightCurveVt D_00219698 = { (WeightCurveEval)func_00120AA8, 0, (WeightCurveTimes)func_0011EFB0, 0 };
+extern const WeightCurveVt D_002196A8 = { (WeightCurveEval)func_00120D58, 0, (WeightCurveTimes)func_0011EFB0, 0 };
+void* func_0018D5C0(WeightCurve* n);
 
 typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
@@ -277,12 +277,12 @@ void func_0011FFD8();
 void func_0011EF68();
 void func_0011EF70();
 void func_00120700();
-extern const T2196_PosVt D_002196B8 = { (T2196_PosEval)func_0011FC20, (T2196_PosRead)func_0011FC90, (T2196_PosTimes)func_0011FDB8, 0 };
-extern const T2196_PosVt D_002196C8 = { (T2196_PosEval)func_0011FDD8, (T2196_PosRead)func_0011FE40, (T2196_PosTimes)func_0011FED8, 0 };
-extern const T2196_PosVt D_002196D8 = { (T2196_PosEval)func_00120470, 0, (T2196_PosTimes)func_0011EF48, 0 };
-extern const T2196_RotVt D_002196E8 = { (T2196_RotEval)func_0011FF08, (T2196_RotGet)func_0011FFA8, (T2196_RotRead)func_0011FFD8, (T2196_RotTimes)func_00120110 };
-extern const T2196_RotVt D_002196F8 = { (T2196_RotEval)func_00120130, (T2196_RotGet)func_001201D0, (T2196_RotRead)func_001201F0, (T2196_RotTimes)func_001202C0 };
-extern const T2196_RotVt D_00219708 = { (T2196_RotEval)func_00120700, (T2196_RotGet)func_0011EF68, 0, (T2196_RotTimes)func_0011EF70 };
-extern const T2196_ScaleVt D_00219718 = { (T2196_ScaleEval)func_001202F0, (T2196_ScaleRead)func_00120360, (T2196_ScaleTimes)func_00120388, 0 };
-extern const T2196_ScaleVt D_00219728 = { (T2196_ScaleEval)func_001203A8, (T2196_ScaleRead)func_00120418, (T2196_ScaleTimes)func_00120440, 0 };
+extern const PositionCurveVt D_002196B8 = { (PositionCurveEval)func_0011FC20, (PositionCurveRead)func_0011FC90, (PositionCurveTimes)func_0011FDB8, 0 };
+extern const PositionCurveVt D_002196C8 = { (PositionCurveEval)func_0011FDD8, (PositionCurveRead)func_0011FE40, (PositionCurveTimes)func_0011FED8, 0 };
+extern const PositionCurveVt D_002196D8 = { (PositionCurveEval)func_00120470, 0, (PositionCurveTimes)func_0011EF48, 0 };
+extern const RotationCurveVt D_002196E8 = { (RotationCurveEval)func_0011FF08, (RotationCurveGet)func_0011FFA8, (RotationCurveRead)func_0011FFD8, (RotationCurveTimes)func_00120110 };
+extern const RotationCurveVt D_002196F8 = { (RotationCurveEval)func_00120130, (RotationCurveGet)func_001201D0, (RotationCurveRead)func_001201F0, (RotationCurveTimes)func_001202C0 };
+extern const RotationCurveVt D_00219708 = { (RotationCurveEval)func_00120700, (RotationCurveGet)func_0011EF68, 0, (RotationCurveTimes)func_0011EF70 };
+extern const ScaleCurveVt D_00219718 = { (ScaleCurveEval)func_001202F0, (ScaleCurveRead)func_00120360, (ScaleCurveTimes)func_00120388, 0 };
+extern const ScaleCurveVt D_00219728 = { (ScaleCurveEval)func_001203A8, (ScaleCurveRead)func_00120418, (ScaleCurveTimes)func_00120440, 0 };
 

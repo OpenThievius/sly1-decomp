@@ -66,13 +66,13 @@ void func_001B64D8(s32, s32);
 s32 func_001A8C90(void* obj, s32 v);
 void func_001C9DE0(void* self, s32 code, void* req);
 
-void func_0018A388(C0C* self)
+void func_0018A388(GaugeAgent* self)
 {
 	InitAgent(self);
 	*(s32*)((char*)self + 0xE3C) = -1;
 }
 
-void func_0018A3B8(C0C* self)
+void func_0018A3B8(GaugeAgent* self)
 {
     LoadAgent(self);
     ResolveObjectLinks(self, 2, D_00264910);
@@ -80,7 +80,7 @@ void func_0018A3B8(C0C* self)
 
 struct Ent_18A3F0 { s32 key; s32 pad4; s32 value; };
 
-void func_0018A3F0(C0C* self)
+void func_0018A3F0(GaugeAgent* self)
 {
     s32 n;
     s32 i;
@@ -171,7 +171,7 @@ typedef s32 (*Cb_18A910)(void* self, Rec_18A830* ctx);
 
 void func_001DC238(void* a0, s32 a1, void* a2, void* a3, Cb_18A910 a4, void* a5, s32* a6, s32* a7);
 
-s32 func_0018A910(C0C* self, void* a1, void* a2)
+s32 func_0018A910(GaugeAgent* self, void* a1, void* a2)
 {
     u8 buf[0x70];
     s32 x;
@@ -191,7 +191,7 @@ struct Loc_18A9A8 {
     s32 code;
 };
 
-s32 func_0018A9A8(C0C* self)
+s32 func_0018A9A8(GaugeAgent* self)
 {
     u8* obj = (u8*)self;
     Loc_18A9A8 loc;
@@ -224,14 +224,14 @@ s32 func_0018A9A8(C0C* self)
             return 0;
         }
     }
-    if (IsGaugeAgentLineBlocked((C0C*)obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
+    if (IsGaugeAgentLineBlocked((GaugeAgent*)obj, obj + 0x140, (u8*)sub + 0x140) != 0) {
         goto second;
     }
 one:
     return 1;
 second:
     func_00125750(sub, 0, loc.buf, 0, 0, 0, D_002649C8);
-    if (IsGaugeAgentLineBlocked((C0C*)obj, obj + 0x140, loc.buf) == 0) {
+    if (IsGaugeAgentLineBlocked((GaugeAgent*)obj, obj + 0x140, loc.buf) == 0) {
         goto one;
     }
     return 0;
@@ -239,7 +239,7 @@ second:
 
 typedef s32 (*VFnI_0018AAE0)(void* self);
 
-s32 func_0018AAE0(C0C* self)
+s32 func_0018AAE0(GaugeAgent* self)
 {
     s32 out;
     if (IsPadSelectFlagHeld(self->world) != 0) goto zero;
@@ -260,7 +260,7 @@ one:
     return 1;
 }
 
-void func_0018AB88(C0C* self)
+void func_0018AB88(GaugeAgent* self)
 {
     EnterAgentState(self);
     s32 st = self->f724;
@@ -276,7 +276,7 @@ void func_0018AB88(C0C* self)
     }
 }
 
-s32 func_0018ABF0(C0C* self)
+s32 func_0018ABF0(GaugeAgent* self)
 {
     if (self->f724 == 4) {
         s32 kind;
@@ -289,7 +289,7 @@ s32 func_0018ABF0(C0C* self)
     return ChooseAgentState(self);
 }
 
-void func_0018AC58(C0C* self)
+void func_0018AC58(GaugeAgent* self)
 {
     DecrementGaugeCount((u8*)&g_gaugeBarElement);
     s32 idx = self->fE28;
@@ -304,7 +304,7 @@ void func_0018ACD0(void)
     UpdateAgent();
 }
 
-void func_0018ACF0(C0C* self)
+void func_0018ACF0(GaugeAgent* self)
 {
     s32 kind;
     GetStateWalkerCurrentKey(self->fE10, &kind);
@@ -328,7 +328,7 @@ INCLUDE_ASM(func_0018AD88);
 
 ASM_FUNC(func_0018AE38);
 
-void func_0018B2E8(C0C* self)
+void func_0018B2E8(GaugeAgent* self)
 {
     LeaveAgentState(self);
     if (self->f724 == 16) {
@@ -352,7 +352,7 @@ struct Obj_18B340 {
     Quad_18B340 fF0;
 };
 
-void func_0018B340(C0C* self, s32 a1, Key_18B340* key)
+void func_0018B340(GaugeAgent* self, s32 a1, Key_18B340* key)
 {
     if (a1 == 0x13 && key->a == (s32)self->f7E0) {
         switch (key->b) {
@@ -392,7 +392,7 @@ void func_0018B340(C0C* self, s32 a1, Key_18B340* key)
 }
 
 // Hoisting 1.0f into a local `one` matched the constant scheduling.
-void func_0018B460(C0C* a0, f32* a1)
+void func_0018B460(GaugeAgent* a0, f32* a1)
 {
     s32 kind;
     GetStateWalkerCurrentKey(a0->fE10, &kind);

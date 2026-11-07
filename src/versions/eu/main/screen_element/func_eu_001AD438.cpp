@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Draws a fading label: builds a transform/colour block, lets the attached object draw into it, then draws the text.
 struct Actor_eu_1AD438 {
-    u8 pad0[4]; V24A2* p4; u16 f08; u8 pad1[0x408 - 0xA]; T217D_Word f408;
+    u8 pad0[4]; Font* p4; u16 f08; u8 pad1[0x408 - 0xA]; T217D_Word f408;
     u8 pad2[0x518 - 0x40C]; T217D_Word col; f32 f51C; void* f520; u8 pad3[8];
     f32 f52C; f32 f530; u8 pad4[0x10]; f32 f544; f32 f548; f32 f54C;
 };

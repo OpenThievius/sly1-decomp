@@ -9,7 +9,7 @@
 #include "world.h"
 #include "child_group_object.h"
 #include "c8b.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "owned_record.h"
 #include "object_message.h"
 #include "globals.h"
@@ -966,7 +966,7 @@ INCLUDE_ASM(func_001388A0);
 #include "world.h"
 #include "child_group_object.h"
 #include "c8b.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "owned_record.h"
 #include "object_message.h"
 #include "globals.h"
@@ -1460,17 +1460,17 @@ void func_00139B38(void)
     }
 }
 
-void* func_001611B8(V24A0* f);
-void func_001528F0(V24A0* f, s32 n);
-void func_001613C0(V24A0* f, s32 a, s32 b, s32 c);
-void func_00161708(V24A0* f, s32 a, u64 b);
-void func_001612F8(V24A0* f, s32 a, s32 b, s32 c, u64 d, s32 e);
-void func_00152D70(V24A0* f);
-void func_001529E0(V24A0* f, s32 a, void* b);
+void* func_001611B8(PacketWriter* f);
+void func_001528F0(PacketWriter* f, s32 n);
+void func_001613C0(PacketWriter* f, s32 a, s32 b, s32 c);
+void func_00161708(PacketWriter* f, s32 a, u64 b);
+void func_001612F8(PacketWriter* f, s32 a, s32 b, s32 c, u64 d, s32 e);
+void func_00152D70(PacketWriter* f);
+void func_001529E0(PacketWriter* f, s32 a, void* b);
 
 void func_00139B70(s32 idx, void* arg)
 {
-    V24A0 f;
+    PacketWriter f;
 
     InitGifPacket(&f);
     AllocatePacketBuffer(&f, 4);

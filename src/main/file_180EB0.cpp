@@ -20,7 +20,7 @@ void func_001830D8(void* self);
 
 void func_00192C58(void* self);
 
-void func_00181DA8(C1A* self, s32 n);
+void func_00181DA8(ModeWalker* self, s32 n);
 
 void func_00152600(void* a, void* b);
 
@@ -123,14 +123,14 @@ struct Vt_181BC8 { void** vt; };
 
 struct Loc_181BC8 { void* self; s32 val; s32 pad8; Fn_181BC8 fn; };
 
-typedef s32 (*Fn_181448)(C1A*, void*, void*);
+typedef s32 (*Fn_181448)(ModeWalker*, void*, void*);
 
 struct Vt_181448 { u8 pad0[0x12C]; Fn_181448 f12C; };
 
 struct Slot_181448 { Collider* p; u8 pad[0x3C]; };
 
 struct Node_181448 {
-    C1A* owner;
+    ModeWalker* owner;
     Slot_181448 s[2];
     u8 pad[0xD0 - 0x84];
     Node_181448* next;
@@ -140,7 +140,7 @@ extern f32 D_00261858[];
 
 extern f32 D_00275C60[];
 
-void func_001D9C98(C1A* self, f32 dt);
+void func_001D9C98(ModeWalker* self, f32 dt);
 
 void func_001D7098(void* out, s32 mode, Collider* c);
 
@@ -194,9 +194,9 @@ extern Rgba4 D_002623E0[];
 
 f32 func_00205210(f32 x);
 
-void func_00126A48(C1A* o, u32 c);
+void func_00126A48(ModeWalker* o, u32 c);
 
-void func_00125C90(C1A* o, void* a, void* b);
+void func_00125C90(ModeWalker* o, void* a, void* b);
 
 f32 func_00205210(f32 value);
 
@@ -248,13 +248,13 @@ void func_00180F20(ListedKeepObject* self)
     self->keep = saved;
 }
 
-void func_00180F68(C1A* self)
+void func_00180F68(ModeWalker* self)
 {
     InitPathFollower(self);
     self->fBF4 = -10.0f;
 }
 
-void func_00180F98(C1A* self)
+void func_00180F98(ModeWalker* self)
 {
     StartPathFollower(self);
     ResolveObjectLinks(self, 0xA, g_modeWalkerLinks);
@@ -273,7 +273,7 @@ void func_00180F98(C1A* self)
 
 ASM_FUNC(func_00181078);
 
-void func_00181448(C1A* self, f32 dt)
+void func_00181448(ModeWalker* self, f32 dt)
 {
     s32 buf[4];
     UpdatePathFollower(self, dt);
@@ -286,7 +286,7 @@ void func_00181448(C1A* self, f32 dt)
             if (c != 0 && (c->f4E0 == 1 || c->f4E0 == 4)) {
                 InitOwnerMessage(buf, 0, c);
                 while (c != 0) {
-                    if (((Vt_181448*)c->desc)->f12C((C1A*)c, n, buf) != 0) break;
+                    if (((Vt_181448*)c->desc)->f12C((ModeWalker*)c, n, buf) != 0) break;
                     c = (Collider*)c->parent;
                 }
                 ((Desc05*)self->desc)->m4C(self, buf);
@@ -314,7 +314,7 @@ ASM_FUNC(func_00181658);
 
 ASM_FUNC(func_00181780);
 
-void func_00181818(C1A* o, void* a, void* b)
+void func_00181818(ModeWalker* o, void* a, void* b)
 {
     Rgba4 c;
     u8 from[4];
@@ -344,22 +344,22 @@ void func_00181818(C1A* o, void* a, void* b)
     func_00125C90(o, a, b);
 }
 
-void func_00181A58(C1A* self, void* outv)
+void func_00181A58(ModeWalker* self, void* outv)
 {
     Quad_181A58* out = (Quad_181A58*)((u8*)outv + 0x10);
     CapturePathFollowerPose();
     *out = ((Inner_181A58*)self->fBC0)->q140;
 }
 
-s32 func_00181A98(C1A* self)
+s32 func_00181A98(ModeWalker* self)
 {
     if (self->fBB0 != 1 || self->fBF0 != 0 || IsPadSelectFlagHeld(self->world) != 0) return 1;
     return 0;
 }
 
-s32 func_00181AE0(C1A* p) { return p->fBF0 != 0; }
+s32 func_00181AE0(ModeWalker* p) { return p->fBF0 != 0; }
 
-void func_00181AF0(C1A* self)
+void func_00181AF0(ModeWalker* self)
 {
     func_00192C58(self);
     SetModeWalkerMode(self, 1);
@@ -380,7 +380,7 @@ void func_00181B20(void* unused, void* obj_)
     SetPlayerState(obj, 4, 0x2B);
 }
 
-s32 func_00181BC8(C1A* self, s32* arg)
+s32 func_00181BC8(ModeWalker* self, s32* arg)
 {
     Loc_181BC8 loc;
     s32 r;
@@ -425,7 +425,7 @@ tail:
     return 1;
 }
 
-void func_00181D28(C1A* self, s32 code, MessageBody* rec)
+void func_00181D28(ModeWalker* self, s32 code, MessageBody* rec)
 {
     if (code == 0x13) {
         Sub_181D28* sub = ((Sub_181D28*)self->fBBC);
@@ -444,12 +444,12 @@ void func_00181D28(C1A* self, s32 code, MessageBody* rec)
     HandlePathFollowerNotification(self, code, rec);
 }
 
-void func_00181D88(C1A* self)
+void func_00181D88(ModeWalker* self)
 {
     ExtractContactsByPartMode(self, (u8*)self + 0xC04);
 }
 
-void func_00181DA8(C1A* self, s32 mode)
+void func_00181DA8(ModeWalker* self, s32 mode)
 {
     s32 old;
 

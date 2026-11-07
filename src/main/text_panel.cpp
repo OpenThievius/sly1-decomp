@@ -7,8 +7,8 @@
 #include "layout_137228.h"
 #include "screen_element.h"
 #include "step_sequence.h"
-#include "v24a0.h"
-#include "v24a2.h"
+#include "packet_writer.h"
+#include "font.h"
 #include "shapes.h"
 #include "pad_record.h"
 #include "game_progress.h"
@@ -42,10 +42,10 @@ struct Rgba_130F48
 };
 
 f32 func_00205210(f32 x);
-void func_001613C0(V24A0* gs, s32 a, s32 b, u64 c);
-void func_00161458(V24A0* gs, u32 c);
-void func_00161670(V24A0* gs, s32 x, s32 y, s32 a3, s32 a4);
-void func_001615F0(V24A0* gs, s32 x, s32 y, s32 a3, s32 a4);
+void func_001613C0(PacketWriter* gs, s32 a, s32 b, u64 c);
+void func_00161458(PacketWriter* gs, u32 c);
+void func_00161670(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
+void func_001615F0(PacketWriter* gs, s32 x, s32 y, s32 a3, s32 a4);
 
 struct Lerp_133B58
 {
@@ -80,11 +80,11 @@ extern s32 D_00262C68;
 extern f32 D_00261860;
 extern Clock_132500* D_00261990;
 
-void func_001613C0(V24A0* gs, s32 a, s32 b, u64 c);
-void func_00161708(V24A0* gs, s32 reg, u64 value);
-void func_00161458(V24A0* gs, u32 color);
-void func_00161670(V24A0* gs, s32 x, s32 y, s32 z, s32 f);
-void func_001615F0(V24A0* gs, s32 x, s32 y, s32 z, s32 f);
+void func_001613C0(PacketWriter* gs, s32 a, s32 b, u64 c);
+void func_00161708(PacketWriter* gs, s32 reg, u64 value);
+void func_00161458(PacketWriter* gs, u32 color);
+void func_00161670(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
+void func_001615F0(PacketWriter* gs, s32 x, s32 y, s32 z, s32 f);
 f32 func_001EA408(f32 a);
 f32 func_00205210(f32 a);
 void func_00136EC8(T217D_440* self, f32* x, f32* y);
@@ -171,7 +171,7 @@ struct Value_1365A8 {
 
 extern f32 D_0026185C;
 
-V24A2* func_0015DB28(void* out, void* p, V24A2* font);
+Font* func_0015DB28(void* out, void* p, Font* font);
 s32 func_0015DF58(void* self);
 
 extern f32 D_00261858[];
@@ -182,9 +182,9 @@ struct Scratch_00136408 {
 
 s32 func_001E2100(const char* s);
 void* func_001E2138(void* dst, const char* src);
-void func_0015C8B8(V24A2* font, f32 x, f32 y);
+void func_0015C8B8(Font* font, f32 x, f32 y);
 s32 func_0015E068(void* buf, f32 x);
-void func_0015C900(V24A2* font);
+void func_0015C900(Font* font);
 void func_0015DB80(void* buf);
 s32 func_0015DBE0(void* buf);
 
@@ -285,12 +285,12 @@ void func_00192190(void* p);
 struct Min_136238 { static s32 Of(s32 a, s32 b) { if (b - 1 < a) return b; return a; } };
 
 void func_00160D30(u32* out);
-void func_00134B48(T217D_440* self, V24A0* q);
+void func_00134B48(T217D_440* self, PacketWriter* q);
 f32 func_00205210(f32 x);
 f32 func_001EA4B8(f32 a, f32 b, f32 c, f32* p, s32 zero);
-void func_001613C0(V24A0* q, s32 a, s32 b, u64 c);
-void func_00161458(V24A0* q, u32 v);
-void func_001615F0(V24A0* q, s32 a, s32 b, s32 c, s32 d);
+void func_001613C0(PacketWriter* q, s32 a, s32 b, u64 c);
+void func_00161458(PacketWriter* q, u32 v);
+void func_001615F0(PacketWriter* q, s32 a, s32 b, s32 c, s32 d);
 
 // The file's .data, in retail's order from 0x261090. The colours and the two styles are built
 // by the static initialiser (func_00136FE8); their bytes are zero until then.
@@ -377,9 +377,9 @@ void func_00130F48(Span_130F48* d, const Quad_130F48* src, s32 n, f32 x, f32 y);
 f32 func_00131000(const Span_130F48* s, s32 x);
 void func_001310F0(T217D_440* self, s32 a1);
 void func_00131140(T217D_440* self);
-void func_00132500(T217D_440* self, V24A0* gs);
-void func_00133B58(T217D_440* self, V24A0* gs);
-void func_00135228(T217D_440* self, V24A0* q);
+void func_00132500(T217D_440* self, PacketWriter* gs);
+void func_00133B58(T217D_440* self, PacketWriter* gs);
+void func_00135228(T217D_440* self, PacketWriter* q);
 void func_00135550(T217D_440* self, s32 value);
 void func_001356C0(T217D_440* self, s32 mode);
 s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b);
@@ -468,13 +468,13 @@ ASM_FUNC(func_00131198);
 
 
 struct Font_1316E8 {
-    static V24A2* Of(T217D_440* self) { return *(V24A2**)((u8*)self + 0x310); }
+    static Font* Of(T217D_440* self) { return *(Font**)((u8*)self + 0x310); }
 };
 
-f32 func_0015C418(V24A2* font, const char* text);
-void func_0015C638(V24A2* font, const char* text, Layout_137228* layout, s32 zero, V24A0* gs);
+f32 func_0015C418(Font* font, const char* text);
+void func_0015C638(Font* font, const char* text, Layout_137228* layout, s32 zero, PacketWriter* gs);
 
-void func_001316E8(T217D_440* self, V24A0* gs)
+void func_001316E8(T217D_440* self, PacketWriter* gs)
 {
     Layout_137228 L;
     s32 i;
@@ -524,7 +524,7 @@ void func_001316E8(T217D_440* self, V24A0* gs)
     s32 prev = (cur + 7) & 7;
     s32 next = (cur + 1) & 7;
     f32 frac = WrapModulo(a, 0.78539819f) / 0.78539819f;
-    V24A2* font;
+    Font* font;
     f32 wCur = MeasureFontString(Font_1316E8::Of(self), D_00261128[cur]);
     f32 off = frac * w;
     f32 wPrev = MeasureFontString(Font_1316E8::Of(self), D_00261128[prev]);
@@ -576,7 +576,7 @@ INCLUDE_RODATA(D_00249CE8);
 INCLUDE_RODATA(D_00249CF0);
 INCLUDE_ASM(func_00131F60);
 
-void func_00132500(T217D_440* self, V24A0* gs)
+void func_00132500(T217D_440* self, PacketWriter* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;
@@ -750,7 +750,7 @@ void func_00132500(T217D_440* self, V24A0* gs)
     AddGifRegisterWrite(gs, 0x40, 0xDF0000027F0000);
 }
 
-void func_00133B58(T217D_440* self, V24A0* gs)
+void func_00133B58(T217D_440* self, PacketWriter* gs)
 {
     Rgba_130F48 c0;
     Rgba_130F48 c1;
@@ -864,7 +864,7 @@ ASM_FUNC(func_00134AA0);
 INCLUDE_RODATA(D_00249CF8);
 ASM_FUNC(func_00134B48);
 
-void func_00135228(T217D_440* self, V24A0* q)
+void func_00135228(T217D_440* self, PacketWriter* q)
 {
     if (self->state == 1)
     {

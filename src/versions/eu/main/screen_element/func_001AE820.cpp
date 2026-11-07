@@ -5,7 +5,7 @@ extern f32 D_eu_0027939C;
 typedef void (*VFn_1AE820)(void* self);
 struct Obj_1AE820_eu {
     VFn_1AE820* vtbl;
-    V24A2* f4;
+    Font* f4;
     u8 pad0[0x518 - 8];
     s32 f208;
     f32 f20c;

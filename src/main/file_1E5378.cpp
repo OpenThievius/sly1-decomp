@@ -4,7 +4,7 @@
 #include "asm_func.h"
 #include "fpu.h"
 #include "list_iter.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "screen_element.h"
 #include "message_body.h"
 #include "shapes.h"
@@ -14,7 +14,7 @@ extern u8* D_00275710;
 void func_001921A8(void* self);
 void* func_0018D500(s32 size);
 
-void func_001E5378(C16* self)
+void func_001E5378(PlayerLinkedCollider* self)
 {
     InitSwitchedCollider(self);
     self->f644 = 1;
@@ -26,7 +26,7 @@ void func_001E5378(C16* self)
     self->f654 = 0.7f;
 }
 
-void func_001E53F8(C16* self, void* value)
+void func_001E53F8(PlayerLinkedCollider* self, void* value)
 {
     s32 n = self->f638;
     if (n < 0x11) {
@@ -43,7 +43,7 @@ struct Vt_1E5428 {
 
 struct Peer_1E5428 {
     u8 pad0[0xC2C];
-    C16* owner;
+    PlayerLinkedCollider* owner;
 };
 
 extern s32 D_00275B28[10];
@@ -55,7 +55,7 @@ void* func_0015A448(void* a, s32 b, void* c);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_00189230(void* a, void* b, void* c);
 
-void func_001E5428(C16* self)
+void func_001E5428(PlayerLinkedCollider* self)
 {
     void* r2;
     s32 i;
@@ -102,7 +102,7 @@ void func_00192B58(void* self);
 s32 func_0015A4F0(void* a0, s32 a1, s32 a2, void* a3, s32 a4, void* a5);
 void func_001C8F20(void* node, s32 kind, s32 flag);
 
-void func_001E55D0(C16* self)
+void func_001E55D0(PlayerLinkedCollider* self)
 {
     void* arr[8];
     s32 n;
@@ -144,7 +144,7 @@ void func_001E5C78(void* self);
 s32 func_00182FC8(void);
 void func_001F5C0C(void* p, s32 v, s32 n);
 
-void func_001E56A0(C16* self, void* obj, f32 t)
+void func_001E56A0(PlayerLinkedCollider* self, void* obj, f32 t)
 {
     u8 buf[0xC4];
     u8* o;
@@ -196,7 +196,7 @@ void func_001451F0(void* a, s32 b, s32 c, void* d, void* e, s32 f);
 s32 func_00149610(void* a);
 void func_001B64D8(void* a, s32 b);
 
-void func_001E5750(C16* self, u8* p)
+void func_001E5750(PlayerLinkedCollider* self, u8* p)
 {
     HandleSwitchedColliderActivation(self, p);
     if (p != 0) {
@@ -258,7 +258,7 @@ void func_001B6568(void* dev, s32* out);
 s32 func_001A8C50(void* a);
 void func_001B64D8(void* dev, s32 value);
 
-void func_001E5C78(C16* self)
+void func_001E5C78(PlayerLinkedCollider* self)
 {
     s32 a;
     s32 b;
@@ -277,7 +277,7 @@ struct Hdl_1E5CE8 { u8 pad[0x7E0]; s32 f7E0; };
 void func_00192230(void* self, s32 kind, MessageBody* rec);
 s32 func_001A8C90(void* a, s32 b);
 
-void func_001E5CE8(C16* self, s32 kind, MessageBody* rec)
+void func_001E5CE8(PlayerLinkedCollider* self, s32 kind, MessageBody* rec)
 {
     HandleSwitchedColliderNotification(self, kind, rec);
     if (kind == 0x13) {
@@ -303,7 +303,7 @@ void func_001E5CE8(C16* self, s32 kind, MessageBody* rec)
 s32 func_001B8A08(void* a, void* b);
 s32 func_001A8820(void* p, void* v);
 
-s32 func_001E5DA8(C16* self, void* arg)
+s32 func_001E5DA8(PlayerLinkedCollider* self, void* arg)
 {
     if (TestCollidersMayContact(self, arg)) {
         return 1;
@@ -321,7 +321,7 @@ typedef void (*VFn_5E08)(void* self);
 
 void func_001924C8(void* self);
 
-void func_001E5E08(C16* self)
+void func_001E5E08(PlayerLinkedCollider* self)
 {
     if (self->f624 != 0) {
         VFn_5E08 fn = *(VFn_5E08*)(*(u8**)self->f624 + 0x148);
@@ -333,13 +333,13 @@ void func_001E5E08(C16* self)
 
 struct Pair_1E5E50 { s32 lo; s32 hi; };
 
-void func_001E5E50(C16* a0, void* a1, Pair_1E5E50* out)
+void func_001E5E50(PlayerLinkedCollider* a0, void* a1, Pair_1E5E50* out)
 {
     out->lo = 0;
     out->hi = 0;
 }
 
-void* func_001E5E60(C16* self) { return self->f620 ? self->f620 : self; }
+void* func_001E5E60(PlayerLinkedCollider* self) { return self->f620 ? self->f620 : self; }
 
 // A view of the vertices that starts one vertex before the first (0x254): through it, the fields
 // of the vertex i are at 0x2C more (x at 0x2C, y at 0x34, the colours at 0x3C and 0x40, the
@@ -466,10 +466,10 @@ void func_001E6188(T217D_3F0* self)
 void func_001E6268(T217D_3F0* self, s32* first, s32* second) { s32 n = (s32)(self->size * 57.0f); s32 half = (57 - n) / 2; *first = half; *second = half + n; }
 
 extern s32 D_00270458;
-void func_00161670(V24A0* c, s32 a, s32 b, s32 d, s32 e);
-void func_001615F0(V24A0* c, s32 a, s32 b, s32 d, s32 e);
+void func_00161670(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
+void func_001615F0(PacketWriter* c, s32 a, s32 b, s32 d, s32 e);
 
-void func_001E62A8(T217D_3F0* self, V24A0* c, s32 k)
+void func_001E62A8(T217D_3F0* self, PacketWriter* c, s32 k)
 {
     if (D_00270458 == 4) {
         f32 y = self->shownY;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // PAL: the four global pointer slots are 0x310 further in (0x574, 0x578 instead of 0x264, 0x268).
-void func_001DAE68(C19* self, void* v)
+void func_001DAE68(PathFollower* self, void* v)
 {
     HandleSwitchedColliderActivation(self, v);
     if (v != 0) {
