@@ -8,13 +8,14 @@
 // table at +0 and calls its slot 0; func_00121358, slot 2, gives it back). An object keeps its
 // attachments in the list at PlacedObject::list1E0 (the link at +8), and the ones that give its position
 // and orientation in PlacedObject::f1EC and PlacedObject::f1F0. Eight tables (D_00219560 ...) of ten slots make
-// eight variants; they share this base, up to +0x13, and each adds fields from there.
+// eight variants; they share this base, up to +0x17, and each adds fields from there.
 // Every field line ends with its offset. The size of a record is the pool's, which no code here
 // shows (the largest variant reaches 0xC8), so the variants have no sizeof check.
 #ifndef ATTACHMENT_H
 #define ATTACHMENT_H
 
 #include "placed_object.h"
+#include "shapes.h"   // Quad16
 
 struct Animation;     // an animation (c83.h)
 struct QueuedCall; // a callback record (queued_call.h)
@@ -49,15 +50,31 @@ struct Attachment {
     s8 mode1;               // 0x11: the same for the orientation (0 ends the chain of func_00122C48)
     s8 mode2;               // 0x12
     s8 mode3;               // 0x13
+    s32 key;                // 0x14: the list is kept in descending key order (func_001299E0, func_00129A58)
 };
 
-// The 0xC0-byte record the owner points to at PlacedObject::f224: its value (+0x8C) and its flags (+0xB0).
+// The 0xC0-byte record the owner points to at PlacedObject::f224 (func_00128C10 reads it from the
+// stream by the flag bits at +0xB0): two matrices, then either the objects it follows (ids until
+// func_00128DB8 resolves them) or, with flag 0x80, four quadwords of its own (func_001261C0).
 struct Rec2195_224 {
-    u8 pad00[0x8C]; // 0x00
-    f32 f8C;                // 0x8C
-    f32 f90;                // 0x90: func_00120AA8
-    u8 pad94[0xB0 - 0x94]; // 0x94
-    s32 fB0;                // 0xB0: bit 0x20 gives the value at +0x8C
+    u8 pad00[0x60];         // 0x00: two matrices (flags 1 and 2), each the identity at first
+    union {
+        Quad16 q60[4];      // 0x60: flag 0x80, given by func_001261C0
+        struct {
+            BaseObject* p60;    // 0x60: the object followed (flags 4 and 8, 0x10, 0x40)
+            BaseObject* p64;    // 0x64: the second one (flag 0x40)
+            u8 pad68[0x80 - 0x68]; // 0x68
+            s32 f80;            // 0x80: the parent of p84 (flag 0x20)
+            BaseObject* p84;    // 0x84: flag 0x20
+            void* p88;          // 0x88: the ancestor the owner shares with f80
+            f32 f8C;            // 0x8C
+            f32 f90;            // 0x90: func_00120AA8
+        };
+    };
+    u8 padA0[0xA4 - 0xA0];  // 0xA0
+    s32 fA4;                // 0xA4: whether q60 is set (func_001261C0)
+    u8 padA8[0xB0 - 0xA8];  // 0xA8
+    s32 fB0;                // 0xB0: the flags; bit 0x20 gives the value at +0x8C
 };
 
 // The player an animation track attachment follows (D_002197C0): it holds the animation, a
@@ -102,7 +119,7 @@ struct __attribute__((packed)) Pair2195 { s32 lo; s32 hi; };
 
 // D_00219588: a copy of the owner's position, matrix and values, taken when it is set up.
 struct T2195_588 : Attachment {
-    u8 pad14[0x20 - 0x14]; // 0x14
+    u8 pad18[0x20 - 0x18]; // 0x18
     Vec02 pos;              // 0x20: PlacedObject::v190
     Vec02 vec;              // 0x30
     Mat02 rot;              // 0x40: PlacedObject::m1A0
@@ -117,7 +134,7 @@ struct T2195_588 : Attachment {
 
 // D_002195B0: pointers into the owner's own fields.
 struct T2195_5B0 : Attachment {
-    u8 pad14[0x1C - 0x14]; // 0x14
+    u8 pad18[0x1C - 0x18]; // 0x18
     Vec02* pos;             // 0x1C: &PlacedObject::v190
     Vec02* vec;             // 0x20: D_00248D30
     Mat02* rot;             // 0x24: &PlacedObject::m1A0
@@ -131,7 +148,7 @@ struct T2195_5B0 : Attachment {
 
 // D_002195D8: two matrices of its own.
 struct T2195_5D8 : Attachment {
-    u8 pad14[0x40 - 0x14]; // 0x14
+    u8 pad18[0x40 - 0x18]; // 0x18
     Mat02 m40;              // 0x40: the identity
     u8 pad70[0x90 - 0x70]; // 0x70
     Mat02 m90;              // 0x90: the identity
@@ -139,7 +156,7 @@ struct T2195_5D8 : Attachment {
 
 // D_00219600: a value of its own.
 struct T2195_600 : Attachment {
-    u8 pad14[0x1C - 0x14]; // 0x14
+    u8 pad18[0x1C - 0x18]; // 0x18
     f32 f1C;                // 0x1C: 1.0
     f32 f20;                // 0x20: 0.25
 };
@@ -147,7 +164,6 @@ struct T2195_600 : Attachment {
 // D_002197C0: follows a track of an animation: the animation's player drives it (slots 4 to 8
 // ask the track's curves).
 struct T2195_7C0 : Attachment {
-    s32 f14;                // 0x14: the player's start (func_0012C288, func_0012D5D0)
     f32 f18;                // 0x18
     AnimationPlayer* player;     // 0x1C
     Pair2195 w20;           // 0x20: kept by slot 1
@@ -156,24 +172,25 @@ struct T2195_7C0 : Attachment {
 
 // D_0021A790: an aim at a target.
 struct T2195_790 : Attachment {
-    u8 pad14[0x1C - 0x14]; // 0x14
+    u8 pad18[0x1C - 0x18]; // 0x18
     s32 hasTarget;          // 0x1C
     s32 f20;                // 0x20: -1
     void* target;           // 0x24
     u8 pad28[0x30 - 0x28]; // 0x28
     Vec02 point;            // 0x30
-    f32 f40;                // 0x40: 800.0
-    s32 f44;                // 0x44: 1
-    s32 f48;                // 0x48: -1
-    u8 pad4C[0x50 - 0x4C]; // 0x4C
-    Vec02 v50;              // 0x50
-    Pk8_2195 p60;           // 0x60
+    f32 f40;                // 0x40: 800.0; the aim range, the distance that picks f44 or f48 (func_00185498)
+    s32 f44;                // 0x44: 1; the key taken when the target is within f40
+    s32 f48;                // 0x48: -1; the key taken when the target is beyond f40
+    s32 hold;               // 0x4C: while set, func_00185538 hands back the owner's own matrix
+    Vec02 v50;              // 0x50: the quadratic (a, b, c) applied to the yaw toward the target
+    Pk8_2195 p60;           // 0x60: the low and high the yaw is clamped to
     u8 pad68[0x70 - 0x68]; // 0x68
-    Vec02 v70;              // 0x70
-    Pk8_2195 p80;           // 0x80
+    Vec02 v70;              // 0x70: the same for the pitch
+    Pk8_2195 p80;           // 0x80: the low and high the pitch is clamped to
 };
 
-typedef char check_Attachment[sizeof(Attachment) == 0x14 ? 1 : -1];
+typedef char check_Rec2195_224[sizeof(Rec2195_224) == 0xC0 ? 1 : -1];
+typedef char check_Attachment[sizeof(Attachment) == 0x18 ? 1 : -1];
 typedef char check_T2195_Vt[sizeof(T2195_Vt) == 0x28 ? 1 : -1];
 
 #endif

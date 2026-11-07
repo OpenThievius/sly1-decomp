@@ -14,6 +14,8 @@
 struct PlacedObject;
 struct Attachment;   // an attachment (t2195.h): a record of the world's pool at World::pool1B20
 struct Rec2195_224;     // the 0xC0-byte record at +0x224 (t2195.h)
+struct T2195_790;       // the aim attachment at +0x200 (attachment.h)
+struct T2195_600;       // the own-value attachment at +0x204 (attachment.h)
 struct RangeRecord;         // the 0x2E0-byte record at +0x284 (s1291d0.h)
 struct SoundRecord;         // the 0x24-byte record at +0x2AC (s1be4d8.h)
 
@@ -112,9 +114,9 @@ struct PlacedObject : BaseObject {
     Attachment* f1F0;            // 0x1F0: the one that gives the orientation (slot 5)
     void* f1F4;             // 0x1F4
     void** f1F8;            // 0x1F8: f26C entries
-    void* f1FC;             // 0x1FC
-    void* f200;             // 0x200
-    void* f204;             // 0x204
+    Attachment* f1FC;       // 0x1FC: the base attachment (func_001296E0, table D_00219560)
+    T2195_790* f200;        // 0x200: the aim attachment (func_00129730)
+    T2195_600* f204;        // 0x204: the own-value attachment (func_0012A8D8)
     u8 pad208[0x20C - 0x208];
     u8* p20C;               // 0x20C: D_00260E70 until slot 9 copies it
     u8* p210;               // 0x210: D_00260E80
