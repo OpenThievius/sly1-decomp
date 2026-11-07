@@ -122,6 +122,8 @@ void ReadBufferedRotation3(BufferedStream* in, Mat02* p);
 void ReadBufferedVector3(BufferedStream* in, Vec02* p);
 void ComputeColliderInverseInertia(Collider* self, f32 x);
 void CopyBytes(void* dst, void* src, s32 n);
+void BuildMatrixFromRotationAndTranslation(void* a, void* b, void* out);
+void func_001BBC38(Collider* self);
 s32 InvertMatrix3x3(Mat02* in, Mat02* out);
 s32 ReadBufferedU16(BufferedStream* in);
 s32 ReadBufferedS16(BufferedStream* in);
@@ -1537,7 +1539,29 @@ s32 HandleObjectEvent(Collider* self, ObjectEvent* shape)
     return shape->eventFlags != 0;
 }
 
-INCLUDE_ASM(func_001BC368);
+void CopyColliderMeshesInFrame(Collider* self, Collider* src, s32 extra)
+{
+    Vec02 m[4];
+    Mesh03 tmp;
+    BuildMatrixFromRotationAndTranslation((u8*)src + 0x100, (u8*)src + 0xD0, m);
+    f32 maxDist = 0.0f;
+    for (s32 i = 0; i < src->mesh.vertCount; i++) {
+        f32 d = Vu0::ToFloat(Vu0::Dot(Vu0::Q(((Vec02*)src->mesh.verts)[i]), Vu0::Q(((Vec02*)src->mesh.verts)[i])));
+        if (maxDist < d) {
+            maxDist = d;
+        }
+    }
+    self->radius3CC = Fpu::Sqrt(maxDist);
+    tmp = src->mesh;
+    tmp.vertCount = tmp.vertCount + extra;
+    CopyMeshTransformed(&tmp, (s32)m, &self->mesh);
+    BuildMatrixFromRotationAndTranslation((u8*)self + 0x140, (u8*)self + 0x110, m);
+    CopyMeshTransformed(&self->mesh, (s32)m, &self->meshCopy);
+    self->f4B8 = 0;
+    CloneTreeNodes(&src->meshCopy, &src->tree, &self->meshCopy, &self->tree);
+    CloneTreeNodes(&src->mesh2Copy, &src->tree2, &self->mesh2Copy, &self->tree2);
+    func_001BBC38(self);
+}
 
 void ExtractContactsByPartMode(Collider* self, Contact03** out)
 {
