@@ -11,6 +11,7 @@
 #define OBJECT_POOL_H
 
 #include "base_object.h"
+#include "shapes.h"   // Quad16
 
 struct Quad16;
 
@@ -65,7 +66,12 @@ struct ObjectPool : BaseObject {
     u8 padDC[0xE0 - 0xDC];
     void* fE0;              // 0xE0
     void* fE4;              // 0xE4
-    u8 padE8[0x110 - 0xE8];
+    u8 padE8[0xF0 - 0xE8];
+    union {
+        Quad16 fF0;         // 0xF0: a place func_0018B340 copies in whole before releasing it
+        f32 posF0[4];       // (its z, 0xF8, set or raised after the copy)
+    };
+    u8 pad100[0x110 - 0x100];
     V8C v110;               // 0x110
     u8 pad11C[0x120 - 0x11C];
     s32 f120;               // 0x120

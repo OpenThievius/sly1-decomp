@@ -182,7 +182,9 @@ extern TextStyle D_002743F0;
 
 s32 func_001F6738(const char* a, const char* b);
 
-struct Mgr_001AD718 { u8 pad0[4]; s32 f4; u8 pad1[0x2C - 8]; s32 f2C; };
+// The element stack (g_elementStack) as func_001AD718 reads it: a state word, and at 0x2C how
+// many elements it holds (file_1E88D0's PushStackElement keeps them at 0x0C).
+struct ElementStackView { u8 pad0[4]; s32 f4; u8 pad1[0x2C - 8]; s32 count; };
 
 extern u8 D_00275BC0[];
 
@@ -1736,14 +1738,14 @@ void func_001AD6A8(T217D_420* self)
 void func_001AD718(T217D_420* self)
 {
     Player* g;
-    Mgr_001AD718* m;
+    ElementStackView* m;
 
     UpdateScreenElementSlide(self);
     if (self->flag == 0) goto tail;
     g = g_player;
     if (g != 0 && g->f2220 == 6) goto tail;
-    m = (Mgr_001AD718*)g_elementStack;
-    if (m->f4 == 3 && m->f2C < 2) {
+    m = (ElementStackView*)g_elementStack;
+    if (m->f4 == 3 && m->count < 2) {
         self->vt->m14(self);
         return;
     }

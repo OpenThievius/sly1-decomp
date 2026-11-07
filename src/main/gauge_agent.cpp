@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "object_pool.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "memory_card.h"
@@ -348,22 +349,17 @@ void func_0018B2E8(GaugeAgent* self)
     }
 }
 
-struct Obj_18B340 {
-    u8 pad0[0xF0];
-    Quad16 fF0;
-};
-
 void func_0018B340(GaugeAgent* self, s32 a1, MessageBody* key)
 {
     if (a1 == 0x13 && key->sourceId == (s32)self->f7E0) {
         switch (key->code) {
         case 0x442:
         case 0x443: {
-            Obj_18B340* obj;
+            ObjectPool* obj;
             if (key->code == 0x442) {
-                obj = (Obj_18B340*)self->fE18;
+                obj = (ObjectPool*)self->fE18;
             } else {
-                obj = (Obj_18B340*)self->fE1C;
+                obj = (ObjectPool*)self->fE1C;
             }
             s32 kind;
             GetStateWalkerCurrentKey(self->fE10, &kind);
@@ -371,11 +367,11 @@ void func_0018B340(GaugeAgent* self, s32 a1, MessageBody* key)
             case 0x43A:
             case 0x43C:
                 obj->fF0 = (*(Quad16*)&self->vE40);
-                *(f32*)((u8*)obj + 0xF8) = self->v140.z + D_00264A34;
+                obj->posF0[2] = self->v140.z + D_00264A34;
                 break;
             case 0x43E:
                 obj->fF0 = (*(Quad16*)&self->vE40);
-                *(f32*)((u8*)obj + 0xF8) = *(f32*)((u8*)obj + 0xF8) + D_00264A38;
+                obj->posF0[2] = obj->posF0[2] + D_00264A38;
                 break;
             }
             func_001A8C90(obj, 1);

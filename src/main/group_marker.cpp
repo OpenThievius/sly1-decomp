@@ -17,6 +17,7 @@
 #include "deferred_request.h"
 #include "color_fade.h"
 #include "render_frame.h"
+#include "warp_page.h"
 #include "asm_func.h"
 
 // The scale and offset the projection constants upload (func_0019D860); func_001DD3E0 reads
@@ -58,8 +59,7 @@ void func_0019D860(void);
 void func_0019D930(void);
 void func_0015EAE0(void* self, void* a, void* b);
 void func_001EE468(void* self);
-struct Ctx_19DBB0 { u8 pad0[0x2F4]; s32 idx2F4; };
-extern Ctx_19DBB0* D_0026FA68;
+extern WarpPage* D_0026FA68;   // the warp page on view (file_1E88D0 sets its mode and cursor)
 extern s32 D_00274520[];
 extern Camera* D_00261990;
 void func_00143940(Camera* self, f32 v);
@@ -296,7 +296,7 @@ void func_0019DBB0(void)
     UploadCameraOncePerFrame();
 
     if (D_0026FA68 != 0) {
-        s32 v = D_00274520[D_0026FA68->idx2F4];
+        s32 v = D_00274520[D_0026FA68->slot];
         if (v != 0) {
             *(u64*)self->cur = ((u64)v << 32) | 0x50000000;
             self->cur = self->cur + 0x10;

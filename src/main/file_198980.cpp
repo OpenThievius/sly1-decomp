@@ -163,20 +163,9 @@ void func_001B7968(Collider* self);
 void func_00152470(void* list, void* item);
 void func_00152600(void* table, void* self);
 extern f32 D_00261858[];
-struct Frame_19D2A8 { Quad16 q0; Quad16 q1; s32 w20; s32 w24; };
 void func_0019CEC0(void* a, void* b, void* c, f32 d);
 void func_0019D0E0(void* a, void* b, void* c, void* d, void* e);
 void func_0019C9C8(void* a, s32 b, void* c);
-struct Frame_19D338 {
-    Quad16 q0;
-    Quad16 q1;
-    Quad16 q2;
-    Quad16 q3;
-    s32 w40;
-    s32 w44;
-    s32 w48;
-    s32 w4C;
-};
 void func_001B7B78(Collider* self);
 struct LoadStream;
 s32 func_00137D10(LoadStream* in);
@@ -1316,27 +1305,35 @@ ASM_FUNC(func_0019D0E0);
 
 void func_0019D2A8(Player* self, void* x, void* y)
 {
-    Frame_19D2A8 f;
+    Quad16 q0;
+    Quad16 q1;
+    s32 w20;
+    s32 w24;
     if (y != 0) {
         f32 d = self->f2424 - g_gameClock[1];
         if (d < g_gameClock[2]) {
             d = g_gameClock[2];
         }
-        func_0019CEC0(x, y, &f.q0, d);
-        func_0019D0E0(x, &f.q0, &f.q1, &f.w20, &f.w24);
-        func_0019C9C8(x, f.w20, &f.q1);
+        func_0019CEC0(x, y, &q0, d);
+        func_0019D0E0(x, &q0, &q1, &w20, &w24);
+        func_0019C9C8(x, w20, &q1);
     }
 }
 
 void func_0019D338(void* self, void* dst, PathCurveObject* src, f32* k)
 {
-    Frame_19D338 f;
-    func_00128018(0, (s32)src->parent, (u8*)self + 0x140, &f.q0);
+    Quad16 q0;
+    Quad16 q1;
+    Quad16 q2;
+    Quad16 q3;
+    s32 w40;
+    s32 w44;
+    func_00128018(0, (s32)src->parent, (u8*)self + 0x140, &q0);
     PathCurve* o = src->curve;
     if (o->vt->m12 != 0) {
-        o->vt->m12(o, *k, &f.q0, 0, (f32*)&f.q1, 0, 0, k);
+        o->vt->m12(o, *k, &q0, 0, (f32*)&q1, 0, 0, k);
     }
-    func_00128018((void*)src->parent, (s32)self, &f.q1, &f.q2);
-    func_0019D0E0(dst, &f.q2, &f.q3, &f.w40, &f.w44);
-    func_0019C9C8(dst, f.w40, &f.q3);
+    func_00128018((void*)src->parent, (s32)self, &q1, &q2);
+    func_0019D0E0(dst, &q2, &q3, &w40, &w44);
+    func_0019C9C8(dst, w40, &q3);
 }

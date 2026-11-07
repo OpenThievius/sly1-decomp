@@ -663,8 +663,9 @@ extern const Fn_Table D_002195B0[10];
 extern const Fn_Table D_002195D8[10];
 extern const Fn_Table D_00219600[26];
 
-struct Context_001288F0;
-s32 func_001C1A28(Context_001288F0* context, PlacedObject** obj);
+// The script list a property getter fills (file_1B7968 defines it; AppendPropertyToScriptList).
+struct ScriptListBuilder;
+s32 func_001C1A28(ScriptListBuilder* context, PlacedObject** obj);
 
 struct ListWalkNextPlaced {
     static PlacedObject* Of(ListFrame* it)
@@ -2000,7 +2001,7 @@ ASM_FUNC(func_00128330);
 
 ASM_FUNC(func_00128598);
 
-s32 func_001288F0(PlacedObject* self, Context_001288F0* context)
+s32 func_001288F0(PlacedObject* self, ScriptListBuilder* context)
 {
     ListFrame it;
     ListWalkBegin::Of(&it, (List01*)&self->children);

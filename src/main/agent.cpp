@@ -1002,12 +1002,12 @@ s32 func_001C96B8(Agent* self) { if (!self->f720) return 3; return *(s32*)((u32)
 ASM_FUNC(func_001C96D8);
 
 // What slot 76 is asked about: a kind and the object concerned.
-struct Req_1C9990 { s32 kind00; BaseObject* ref04; };
+struct AgentRequest { s32 kind00; BaseObject* ref04; };
 
 void func_001F5C0C(void* p, s32 v, s32 n);
 s32 func_00177838(void* p, s32 a, s32 b);
 
-s32 func_001C9990(Agent* self, Req_1C9990* req)
+s32 func_001C9990(Agent* self, AgentRequest* req)
 {
     NodeQuery f;
 
@@ -1172,17 +1172,15 @@ void func_001CA720(Agent* self, s32 a1, s32 a2)
     }
 }
 
-struct Item_001CA758 { u8 pad0[0x48]; s32 state; };
-
 void* func_0015A418(void* source, s32 kind, void* arg, s32 mode);
 void func_0012D398(void* item, Agent* host);
 void func_00182ED8(void* item);
 
 void* func_001CA758(Agent* self, void* arg)
 {
-    Item_001CA758* item = (Item_001CA758*)FindFirstObjectById(self->world, 0x101, arg, self->fB74);
+    Animation* item = (Animation*)FindFirstObjectById(self->world, 0x101, arg, self->fB74);
     if (item != 0) {
-        item->state = 0;
+        item->enabled = 0;
         func_0012D398(item, self);
         ResolveAndStartObject(item);
     }

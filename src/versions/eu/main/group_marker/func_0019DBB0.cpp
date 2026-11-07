@@ -8,7 +8,7 @@ void func_0019DBB0(void)
     func_0019D930();
 
     if (D_0026FA68 != 0) {
-        s32 v = D_00274520[D_0026FA68->idx2F4];
+        s32 v = D_00274520[D_0026FA68->slot];
         if (v != 0) {
             *(u64*)self->cur = ((u64)v << 32) | 0x50000000;
             self->cur = self->cur + 0x10;
