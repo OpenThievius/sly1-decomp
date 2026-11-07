@@ -8,6 +8,7 @@
 #define OBJECT_MESSAGE_H
 
 #include "common.h"
+#include "shapes.h"
 
 struct ObjectMessage {
     union {
@@ -16,6 +17,17 @@ struct ObjectMessage {
     };
     void* target;           // 0x04: an object (ChildGroupObject in func_0013B708, TimedStateObject in func_0013DCA8, StandIn in func_001D7040)
     s32 key;                // 0x08: func_00198EF8
+};
+
+// A message an object receives through its slot 27 (Desc01::m1B), built in a 0x50-byte local:
+// its kind, and the sender (kind 1) or quadwords (kinds 4 and 6; file_198980.cpp, file_19E040.cpp).
+struct SlotMessage {
+    s32 kind;               // 0x00
+    void* owner;            // 0x04
+    u8 pad08[0x10 - 0x08];
+    Quad16 qa;              // 0x10
+    Quad16 qb;              // 0x20
+    u8 pad30[0x50 - 0x30];
 };
 
 #endif

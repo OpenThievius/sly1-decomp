@@ -41,16 +41,6 @@ void func_00182ED8(void* node);
 typedef void (*SlotFn)(void* self);
 void* func_0012C8F8(void* item, s32 a, f32 x, s32 b, f32 y, s32 c);
 void func_001837E0(void* self, s32 a, s32 b, s32 c);
-// A message an object receives through its slot 27 (Desc01::m1B), built in a 0x50-byte local:
-// its kind, and the sender (kind 1) or two quadwords (kind 6).
-struct SlotMessage {
-    s32 kind;               // 0x00
-    void* owner;            // 0x04
-    u8 pad08[0x10 - 0x08];
-    Quad16 qa;              // 0x10
-    Quad16 qb;              // 0x20
-    u8 pad30[0x50 - 0x30];
-};
 s32 func_00182FC8(void* self);
 void func_001BA130(void*);
 void func_00198980(ObjectSet*);
