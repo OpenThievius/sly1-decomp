@@ -3085,9 +3085,64 @@ void StartPairedObject(PairedObject* self)
     self->desc->m03(self);
 }
 
-INCLUDE_RODATA(jtbl_0024CB00);
+s32 ChoosePairedObjectState(PairedObject* self);
+void SteerPairedObjectWithinArea(PairedObject* self, Vec02* goal, s32 flag);
+void ConvertPositionToWorld(void* frame, Vec02* out);
 
-INCLUDE_ASM(func_001A65C8);
+// The distance from b to a on the ground (their x and y).
+static inline f32 GroundDistance(u128 a, u128 b)
+{
+    u128 d = Vu0::Sub(a, b);
+    return Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(d, d)));
+}
+
+// Each frame: the state the object should be in, then where it steers in it.
+void UpdatePairedObject(PairedObject* self)
+{
+    Vec02 v;
+    UpdateCollider(self);
+    s32 s;
+    for (;;) {
+        s = ChoosePairedObjectState(self);
+        if (s == self->state) {
+            break;
+        }
+        SetPairedState(self, s);
+    }
+    switch (s) {
+    case 1:
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        SteerPairedObjectWithinArea(self, &v, 0);
+        break;
+    case 2: {
+        if (self->f580 < g_gameClock[1] || GroundDistance(Vu0::Q(self->v140), Vu0::Q(*(Vec02*)((u8*)self + 0x570))) < 50.0f) {
+            RandomizePairedObjectOffset((PairController*)self->controller, self);
+            self->f580 = g_gameClock[1] + RandomFloatInRange(self->f584, self->f588);
+        }
+        SteerPairedObjectWithinArea(self, (Vec02*)((u8*)self + 0x570), 0);
+        break;
+    }
+    case 3:
+        SteerPairedObjectWithinArea(self, &((PlacedObject*)self->partner)->v140, 0);
+        break;
+    case 5:
+        ConvertPositionToWorld(*(void**)((u8*)self->attachment + 0x564), &v);
+        SteerPairedObjectWithinArea(self, &v, 1);
+        break;
+    case 6:
+        SteerPairedObjectWithinArea(self, &((PlacedObject*)self->attachment)->v140, 1);
+        break;
+    case 0:
+    case 4:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+        self->desc02()->m20(self, (Vec02*)&D_00248D30);
+        self->desc02()->m21(self, (Vec02*)&D_00248D30);
+        break;
+    }
+}
 
 INCLUDE_ASM(func_001A6788);
 
