@@ -16,6 +16,10 @@ func_00123CB8	AddStateTriggerItemId	appends an id to the second list (up to 16),
 func_00123CE0	AddStateTriggerAgentId	appends an id to the third list (up to 6), whose objects of kind 8 are told func_001CAD40
 func_00123D08	AddStateTriggerTableEntry	passes the 8-entry table at 0x630 and its count at 0x62C to func_0013EC00 with four values
 func_00123D40	TestStateTriggerItemsAccepted	returns 0 as soon as func_001C1A28 refuses one of the found items in outItems (0x5C0, count 0x5BC), else 1; same walk as TestListedEntriesAccepted
+func_00123DC0	IsVelocityNegligible	original assembly: true when the squared length of the vector is below 4.0 (a speed under 2); MovePlacedObject tests the velocity at +0x150 with it, as do SetPlacedObjectVelocity, IsObjectTreeAtRest and MoveEffect
+func_00123E00	IsSpinNegligible	original assembly: true when the squared length of the vector is below 0.0004 (under 0.02); MovePlacedObject tests the spin at +0x160 with it, as do SetPlacedObjectSpin, IsObjectTreeAtRest and MoveEffect
+func_00123E48	IsAccelerationNegligible	original assembly: true when the squared length of the vector is below 25.0 (under 5); MovePlacedObject tests the acceleration at +0x170 with it after IsVelocityNegligible, and MoveEffect
+func_00123E88	IsSpinAccelerationNegligible	original assembly: true when the squared length of the vector is below 0.0025 (under 0.05); MovePlacedObject tests the angular acceleration at +0x180 with it after IsSpinNegligible
 func_00123ED0	InitPlacedObject	slot 0 of class 0x02: sets up the children and attachment lists, the placement bits by whether it has a parent, then runs the root set-up func_00182C18 and the default fields
 func_00124050	AttachPlacedObject	slot 4 of class 0x02: walks the children running the hook slot 6 first and each child's slot 4, then slot 14 with kind 1
 func_001240F8	RegisterPlacedObject	slot 6 of class 0x02: appends itself to the world's lists at +0x54, +0x60, +0x6C or +0x78 (as a root), sets the root pointer, positions it from its path objects and calls slot 12 hook
@@ -23,18 +27,26 @@ func_00124338	DetachPlacedObject	slot 5 of class 0x02: runs the hook slot 7, eac
 func_001243E0	UnregisterPlacedObject	slot 7 of class 0x02: the reverse of func_001240F8: removes itself from the world's lists, clears the root pointer, releases f54 and the 0x1C00 entry
 func_00124540	SavePlacedObjectInitialFrame	copies pos and the rotation rows to the cached vector/matrix at +0x190/+0x1A0, calls slot 42 on it and stores the inverse at +0x1D0; PostLoadPlacedObject calls it once
 func_001245A8	ReparentPlacedObject	slot 21 of class 0x02: the override of ReparentObject; func_001B9B50 converts the frames around the call it makes
+func_00124868	ReframePlacedObject	original assembly; slot 22 of class 0x02: converts the position, rotation, velocity and spin from the given object's frame (TransformPointBetweenFrames, TransformRotationBetweenFrames, TransformDirectionBetweenFrames, ComputeObjectMotionInFrame), sets them through slots 29, 30, 32 and 33 and saves the frame at +0x190; ReframeColliderAnchors calls it
 func_001249A8	PostLoadPlacedObject	slot 15 of class 0x02: prepares the record at +0x224 and the attachments, and runs slot 15 of each child
 func_00124A48	StartPlacedObject	slot 16 of class 0x02: runs StartObject, starts the attachments and effects, resolves the id keys at +0x2C4 and runs slot 16 of each key object and each child
 func_00124CC0	StartAnimationFromContext	reads the context at +0x2A0, picks a start time by its mode (the value, the value clamped to 0..1 times the node's length, or one computed with func_0012C9E8) and starts CreateAnimationPlayer on the found node
 func_00124DF8	ResolveObjectLinks	walks count ObjectLink entries, finds each object by id with func_0015A418, stores it at self + offset unless flag 8, and calls func_00182ED8 / func_001832F0 by flags 4 and 0x10
+func_00124EE8	UpdateObjectTree	calls the object's slot 17 (UpdatePlacedObject) and, while it is attached, recurses into each child whose class flags have bit 0, under a list frame; UpdateWorldDeltaLists and UpdateWorldStepLists call it
 func_00124FC0	UpdatePlacedObject	slot 17 of class 0x02: advances the attachment block and the records by the frame time, calls each attached entry's update and fires event 1
 func_001250C8	ClearObjectRecordValues	sets the word at +8 to -1 in each 0x28-byte record of the object's block at +0x22C
 func_00125108	RecomputePlacedObjectFrame	slot 18 of class 0x02: calls slot 19 when it is set; the position, rotation and velocity setters call slot 18 after storing
 func_00125138	ComputePlacedObjectWorldFrame	slot 19 of class 0x02: builds the world position at +0x140 and matrix at +0x110 from the local ones at +0x100 and +0xD0 and the parent's frame, per the flags of the record at +0x224
+func_00125438	BeginPlacedObjectMove	empty; slot 28 of class 0x02, which MovePlacedObject calls with g_frameDt before it moves the object
+func_00125440	MovePlacedObject	original assembly; slot 27 of class 0x02: calls slot 28, applies the position and orientation sources (ApplyPoseSourcePosition, ApplyPoseSourceRotation) or integrates velocity, acceleration, spin and angular acceleration unless negligible, recurses into the children through slot 27 and recomputes the frame (slot 18)
+func_00125750	ComputeObjectFrameAtTime	original assembly: composes the position and rotation each object of the parent chain gives for a time (slots 34 and 35, GetPlacedObjectPositionAt and GetPlacedObjectRotationAt) from the given ancestor down to the object; about twenty movers and predictors call it
+func_001259D8	TransformPointAtTime	original assembly: takes the frame ComputeObjectFrameAtTime gives for a time and transforms an optional point and direction by it (callers func_00171238, ComputeTargetArc and others)
 func_00125B70	BuildPlacedObjectTransform	copies a given 0x50-byte transform block to dst, or with none builds one from the object's position and matrix (func_00188C10) and sets its two scale floats to 1.0
 func_00126A48	SetObjectTreeRecordValue	stores the value at +0x3C of the block at +0x22C, sets bit 2 of its flags and repeats for every child whose class flag bit 0 is set
 func_00126BC0	SetObjectTreeRecordsValue	sets type 2 and the value in each 0x70-byte record of the object and recurses into children whose class flag bit 0 is set
 func_00126C58	EnsureObjectWorldNode	when +0x298 is empty gets a node from AddObjectNodeToWorld and stores 1.0 or 0.0 in its +4 by IsObjectAttached
+func_00126CB8	FadeInPlacedObject	original assembly: adds the object to its parent's list (slot 2) through EnsureObjectWorldNode's node at +0x298 and sets the node's rate (+8) to 1 over the given time, or jumps the level to full at time 0; RunAnimationEvent and func_001C41A0 call it
+func_00126D60	FadeOutPlacedObject	original assembly: the counterpart of FadeInPlacedObject: sets the rate of the node at +0x298 to -1 over the given time (or empties the level at once at time 0); SetTimedState, SetPooledObjectState, EnterAgentState and ShowModeLabel call it
 func_00126F78	ClonePlacedObject	slot 8 of class 0x02: copies from the owner with slot 9, then makes a copy of each of the owner's children for itself with func_00183058
 func_00127048	CopyPlacedObject	slot 9 of class 0x02: keeps its own links and lists, calls the root copy func_001830D8, copies the attachment block func_00165920 and duplicates the 0xC0-byte record at +0x224
 func_00127378	HandlePlacedObjectNotification	slot 13 of class 0x02: on kind 1, when the attachment record at +0x2AC has not started yet and the clock is non-zero, starts it with func_001BFCD8
@@ -45,6 +57,10 @@ func_00127558	SetPlacedObjectVelocityFromFloats	packs x, y, z into a vector and 
 func_00127590	SetPlacedObjectSpin	slot 33 of class 0x02: stores the vector at +0x160, refreshes the path object at +0x1F0 and wakes the object when non-zero; the path object's rotation rate goes here
 func_001275F0	SetPlacedObjectSpinFromFloats	packs x, y, z into a vector and calls slot 33 (SetPlacedObjectSpin)
 func_001276C0	CopyPlacedObjectFrame	slot 31 of class 0x02: converts another object's position, matrix and rates into its own parent's frame and sets them through slots 29, 30, 32 and 33
+func_001278A8	ComputeObjectMotionInFrame	original assembly: walks from the object up its parent chain to the given ancestor and adds each level's spin (+0x160, through TransformDirectionBetweenFrames) and velocity into the motion of a point in the ancestor's frame; ReparentPlacedObject, ReframePlacedObject, ConvertSpawnToAnchorSpace and many movers call it
+func_00128018	TransformPointBetweenFrames	original assembly: transforms a point from the first object's frame (rotation at +0x110, position at +0x140) to world, then into the second object's frame; nothing when both are the same; TransformScriptPointBetweenFrames, ReparentPlacedObject and CopyPlacedObjectFrame call it
+func_001280C0	TransformDirectionBetweenFrames	original assembly: TransformPointBetweenFrames without the position: rotates a direction from the first object's frame into the second's
+func_00128150	TransformRotationBetweenFrames	original assembly: the matrix counterpart of TransformPointBetweenFrames: carries a rotation from the first object's frame into the second's; TransformScriptRotationBetweenFrames, ReparentPlacedObject and SetFollowObjects call it
 func_001288F0	TestChildrenAccepted	walks the children with the list iterator and returns 0 as soon as func_001C1A28 refuses one, else 1
 func_00128998	CreateTrackAttachment	takes an attachment from the world's pool with the table D_002197C0 (the animation-track variant) for the item and does nothing else
 func_001289C0	LoadPlacedObject	slot 10 of class 0x02: reads from the stream the matrices at +0xD0 and +0x100, the placement bits, the floats at 0x80..0x88, then the property records and the child tables
@@ -81,7 +97,22 @@ func_00129B98	FindObjectAnimationPlayer	walks the world's animation-player list 
 func_00129C20	FindObjectHandle	walks the world's handle list (+0x1B94) for the first handle owned by the object (+0x1C) whose item matches the key (-1 matches any)
 func_00129CA8	FindTrackPlayer	walks up the parent chain to the first object whose position or orientation attachment uses the track table D_002197C0 and returns that attachment's player
 func_00129D00	AddMatrixAttachment	takes an attachment with the two-matrix table D_002195D8, stores its argument at +0x14 (the key), inserts it into list1E0 and returns it through the pointer
+func_00129D70	IsObjectTreeAtRest	true when the object's velocity and spin are negligible (IsVelocityNegligible, IsSpinNegligible) and so are those of every child whose class flags have bit 0; ProcessColliderGroups and UpdateWorld call it
 func_00129DF8	ClearRootTries	zeroes the tries count at +0x228 of the object's root (+0x50), when it has one
+func_00129E10	SetScaledPositionSpring	stores the default position spring profile D_00260E70 scaled by the float argument through SetPositionSpring
+func_00129E88	SetPositionSpring	gives the object its own 16-byte position spring profile at +0x20C (allocated with AllocateFrontMemory while it still points at the default D_00260E70) and copies the argument into it; ComputePositionSpringAcceleration reads it
+func_00129EE0	SetScaledVelocitySpring	stores the default velocity spring profile D_00260E80 scaled by the float argument through SetVelocitySpring
+func_00129F58	SetVelocitySpring	gives the object its own velocity spring profile at +0x210 (allocated while it still points at the default D_00260E80) and copies the argument into it; ComputePositionSpringAcceleration reads it
+func_00129FB0	SetScaledRotationSpring	stores the default rotation spring profile D_00260E90 scaled by the float argument through SetRotationSpring
+func_0012A028	SetRotationSpring	gives the object its own rotation spring profile at +0x214 (allocated while it still points at the default D_00260E90) and copies the argument into it; ComputeRotationSpringAcceleration reads it
+func_0012A080	SetScaledSpinSpring	stores the default spin spring profile D_00260EA0 scaled by the float argument through SetSpinSpring
+func_0012A0F8	SetSpinSpring	gives the object its own spin spring profile at +0x218 (allocated while it still points at the default D_00260EA0) and copies the argument into it; ComputeRotationSpringAcceleration reads it
+func_0012A150	SetScaledPositionRamp	scales the first, second and fourth floats of the default position ramp D_00260EB0 by the argument and stores the result through SetPositionRamp
+func_0012A200	SetPositionRamp	gives the object its own position ramp profile at +0x21C (allocated while it still points at the default D_00260EB0) and copies the argument into it; ApplyPoseSourcePosition passes it to ApproachValueWithRamp
+func_0012A270	SetScaledRotationRamp	scales the first, second and fourth floats of the default rotation ramp D_00260EC0 by the argument and stores the result through SetRotationRamp
+func_0012A320	SetRotationRamp	gives the object its own rotation ramp profile at +0x220 (allocated while it still points at the default D_00260EC0) and copies the argument into it; ApplyPoseSourceRotation passes it to ApproachValueWithRamp
+func_0012A390	SetDefaultPositionMode	stores its argument in the byte at +0x2C9, the position mode ChoosePoseSourceModes takes for the object's pose sources
+func_0012A398	SetDefaultOrientationMode	stores its argument in the byte at +0x2CA, the orientation mode ChoosePoseSourceModes takes for the object's pose sources
 func_0012A3A0	SetPositionSourceEnabled	calls SetPositionSourceMode with 1 for a non-zero argument and -1 for zero
 func_0012A430	SetPositionSourceMode	makes the base attachment at +0x1FC (EnsureBaseAttachment) and stores its argument in mode0 (+0x10), then runs slot 43 refresh
 func_0012A478	SetOrientationSourceEnabled	calls SetOrientationSourceMode with 1 for a non-zero argument and -1 for zero
@@ -90,6 +121,14 @@ func_0012A4E8	SetBaseAttachmentSortKey	stores its argument in the key word (+0x1
 func_0012A528	SetAimOrientationMode	makes the aim attachment, stores its argument (3 becomes 9) in mode1 (+0x11) and runs slot 43
 func_0012A580	SetAimRange	makes the aim attachment (EnsureAimAttachment) and stores a float at +0x40, the distance whose square func_00185498 compares with the squared distance to the target
 func_0012A5B8	GetAimRange	reads the float at +0x40 of the aim attachment, 0.0 when there is none
+func_0012A5D0	SetAimYawCurve	makes the aim attachment and stores a 16-byte (a, b, c) at +0x50, the quadratic func_00185538 applies to the yaw toward the target before clamping it
+func_0012A610	GetAimYawCurve	copies the aim attachment's yaw quadratic at +0x50, or D_00275C40 when there is none
+func_0012A630	SetAimYawLimits	makes the aim attachment and stores the pair of floats at +0x60, the low and high func_00185538 clamps the yaw to
+func_0012A678	GetAimYawLimits	copies the aim attachment's yaw limits at +0x60, or g_unitRange when there is none
+func_0012A6A0	SetAimPitchCurve	makes the aim attachment and stores a 16-byte (a, b, c) at +0x70, the quadratic func_00185538 applies to the pitch toward the target before clamping it
+func_0012A6E0	GetAimPitchCurve	copies the aim attachment's pitch quadratic at +0x70, or D_00275C40 when there is none
+func_0012A700	SetAimPitchLimits	makes the aim attachment and stores the pair of floats at +0x80, the low and high func_00185538 clamps the pitch to before BuildYawPitchMatrix
+func_0012A748	GetAimPitchLimits	copies the aim attachment's pitch limits at +0x80, or g_unitRange when there is none
 func_0012A770	SetAimNearKey	makes the aim attachment and stores its argument at +0x44, the key func_00185498 takes when the target is within +0x40
 func_0012A7A8	GetAimNearKey	reads +0x44 of the aim attachment, 0 when there is none
 func_0012A7C0	SetAimFarKey	makes the aim attachment and stores its argument at +0x48, the key func_00185498 takes when the target is beyond +0x40
@@ -135,12 +174,14 @@ func_0012B2C0	GetTintByte3	stores tint byte 3 (+0x2B3)
 func_0012B2E8	TestOtherFlagged	slot 45 of class 0x02: true when the other object's word at +0x0C is non-zero
 func_0012B2F8	SelectValueEntryByKey	looks the key up in the (key, value) table at +0x2BC; -1 clears mode3 of the attachment at +0x2C0, a hit makes it (table D_002195B0), sets mode3 to 3 and gives it the value
 func_0012B420	SetObjectCameraTracked	sets or clears bit 36 of the flags at +0x2C8 and, when that changes it on an attached object, adds it to or removes it from the camera's objects (AddCameraObject, RemoveCameraObject)
+func_0012B4C8	SetPlacedObjectFrameStepClock	sets +0x294, which puts a parentless object in the world's list at +0x78 instead of +0x54 and makes ApplyPoseSourcePosition use g_frameStep instead of g_frameDt; an attached root is taken out of and put back in its list (slots 3 and 2) around the change
 func_0012B5B8	SetFollowObjects	makes the +0x224 record when either argument is set, stores them as the followed objects (flag bits 4 and 8, none when it is the parent) and refreshes the two matrices
 func_0012B6B8	InitCodeChecksum	slot 0: sets range 0x100018 .. D_00148D64, crc to 0xFFFFFFFF and fills table with the CRC-32 table
 func_0012B760	UpdateCodeChecksum	slot 17: folds up to 64 words of the range into crc and flags a mismatch when the sum is nonzero at the end
 func_0012B870	InitAnimation	slot 0 of class 0x83: runs the base set-up, sets the property list's element size to 0x3C, and the value at +0x80 to 1.0, +0x84 and +0x88 to 0, +0x90 to 0, +0x94 and +0x98 to 1.0
 func_0012B8C8	LoadAnimation	slot 10 of class 0x83: reads id, length, the target ids, the tracks with their position, rotation, scale, weight and morph curves, and the start, timed and end event lists
 func_0012BC38	ReadAnimationEvents	reads a count and that many 16-byte events from the stream, each by its kind in a large switch, merging equal-time kind 0 events into one group
+func_0012C140	CopyAnimation	slot 9 of class 0x83: calls CopyObjectData
 func_0012C160	StartClampedKinematicValue	after StartObject computes pos + t*(vel + t*acc) with t from the current entry, clamps it to lo..hi into out, and schedules func_0012C208 with the world when enabled
 func_0012C208	StartLinkedObjectAnimation	looks up the object with its id (kind 4, then 0x104) on its host with FindFirstObjectById and calls CreateAnimationPlayerWithoutPresetTargets for it
 func_0012C288	CreateAnimationPlayer	takes a player from the world's pool, sets its time and speed, links it into the animation's list and the world's lists, binds each track to the object found for its target key, runs the start events and the seek
@@ -154,6 +195,9 @@ func_0012C9A8	HasAnimationEventKind19	returns 1 when one of the animation's time
 func_0012CCE8	FindEntryByObjectId	walks the 0x1C-byte entries at +0x3C and returns the first whose key MatchesObjectId accepts
 func_0012D1B0	GatherAnimationEventObjects	counts the 16-byte events of type 0x29 and fills a new array with the object func_0015A418 finds for each one's id
 func_0012D2A8	MoveAnimationTrackToEnd	copies the track out, shifts the later tracks down with func_001F5B08, puts it last and stores it in f9C
+func_0012D3E0	SkipAnimationPlayerLoad	empty; slot 10 (the load slot, LoadObjectProperties in class 0x01) of class 0x84, the animation player
+func_0012D3E8	SkipAnimationPlayerStart	empty; slot 16 (the start slot, StartObject in class 0x01) of class 0x84
+func_0012D3F0	SkipAnimationPlayerCopy	empty; slot 9 (the copy slot, CopyObjectData in class 0x01) of class 0x84
 func_0012D3F8	NewAnimationPlayer	takes a record from the world's pool at 0x1B58, stores the table D_002197B8, makes the attachment list with offset 0x20 and points +0x60 at its own +0x64
 func_0012D448	SetAnimationPlayerPadSelect	when the flag differs from the byte at +0x24, takes (AcquirePadSelectFlag) or gives back (ReleasePadSelectFlag) the world's pad select flag and stores it
 func_0012D4A8	SeekAnimationEventCursor	sets the next-event index (0x20) to the first timed event at or after the time (forward speed) or one past the last event at or before it (backward)
@@ -173,6 +217,8 @@ func_0012F6B0	SetAnimationPlayerSpeed	stores x times the speed scale (0x1C) time
 func_0012F6D0	SetAnimationPlayerSpeedScale	stores a new speed scale at 0x1C and re-applies the old speed divided by the old scale through SetAnimationPlayerSpeed
 func_0012F718	SetAttachmentSortKeys	stores the value at +0x14 of each node of the owner's list and re-sorts each node's attachments (SortAttachments)
 func_0012F760	NotifyAnimationPlayerCallbacks	calls slot 18 of the player's object, then each callback record of the list at 0xE4 with the two arguments
+func_0012F7E0	AddAnimationPlayerCallback	adds a callback (function and argument) to the player's callback list at +0xE4 with AddCallbackNode, the list NotifyAnimationPlayerCallbacks calls; StartNextStateWalkerEdge calls it
+func_0012F810	AddAnimationPlayerRecordCallback	adds a callback to the player's list at +0xE4 whose function is the word at +0x40 of the object the argument's first word points to and whose argument is the argument itself (RunGaugeTimedEvent, ActivateRandomGaugeSlot, AddTempoAgentEntry and others)
 func_0012F840	InitIdFilterObject	slot 0: runs the base set-up, clears two ranges with func_001B9AE0 and sets id to -1
 func_0012F888	CopyIdFilterObject	slot 9: runs the base removal and, with no parent, hands itself to func_00138F28 with its world
 func_0012F8C8	StartIdFilterObject	slot 16: finds the object by id (mode 2) or takes the placement of its single child of class 0x7E into pos (mode 1)
@@ -195,5 +241,6 @@ func_001300E8	IsObjectOfKind	walks the object's class descriptor chain through t
 func_00130110	EnsureKeyedList	when +0x04 is empty makes a list with NewKeyedList, stores it and registers it with AddMarkRootList
 func_00130168	SolveBezierSegment	bisects 16 times for the parameter of a cubic Bezier whose x matches the given time, then evaluates the segment's value (outF) and its slope (outI)
 func_001303F0	EvaluateHermiteSegment	from t/duration evaluates the cubic Hermite basis for a value (p0), its first derivative (p1) and second derivative (p2), using end values, the two tangents scaled by the duration and a scale factor
+func_00130540	EvaluateHermiteVectorSegment	original assembly: the cubic Hermite basis of t/duration applied to two 16-byte end points and two tangents (vmula/vmadda), writing the point and, when asked, its derivative; EvaluateVectorKeyCurve, SampleCurvePoints and ApplyPoseSourcePosition call it
 func_00130B48	SampleCurvePoints	calls func_00130540 count times for evenly spaced parameters from start to end, writing 16-byte points; DrawProjectedCurve and func_00130C20 use it
 func_00130C20	MeasureCurveSegmentLength	samples 20 points of a segment with SampleCurvePoints and returns the total of their lengths through AccumulateSegmentLengths (GetSplineLengthAtTime and FillSplinePathLengths call it)
