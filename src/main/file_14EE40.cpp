@@ -461,7 +461,6 @@ void func_001516C0(StepSequence* self);
 void func_001E9570(void* p);
 void func_001517C0(StepSequence* self);
 
-struct Mgr_151300 { u8 pad[0x478]; f32 f478; };
 
 extern s32 D_00262C68;
 extern u16 D_00261D08[16];
@@ -1456,7 +1455,7 @@ s32 func_00151300(StepSequence* self)
         if (IsTextPanelTextTyped(&g_typedTextCaptionBox) != 0) flags &= 0xFFFFFFDF;
     }
     if (flags & 0x40) {
-        if (((Mgr_151300*)g_camera)->f478 == g_typedTextCaptionBox.value) flags &= 0xFFFFFFBF;
+        if (g_camera->ctl460.g18 == g_typedTextCaptionBox.value) flags &= 0xFFFFFFBF;
     }
     if (flags & 0x80) {
         if (self->f2FC <= g_gameTime[0]) flags &= 0xFFFFFF7F;

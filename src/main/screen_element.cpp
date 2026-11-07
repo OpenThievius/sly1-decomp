@@ -24,6 +24,7 @@
 #include "layout_137228.h"
 #include "texture_table.h"
 #include "cursor_animator.h"
+#include "warp_page.h"
 #include "asm_func.h"
 
 extern void* const D_002486B0[];
@@ -81,7 +82,6 @@ void func_00128150(void* a0, void* a1, void* a2, void* a3);
 void func_00152438(void* self, s32 value);
 
 
-struct Local_001AB710 { f32 x; f32 y; u8 pad0[0x8]; T217D_Word w10; u8 pad1[0xC]; s32 tag; u8 pad2[0xC]; T217D_Word w30; };
 void func_00137248(void* out, void* p);
 void func_00137260(void* out, s32 v);
 void func_00137268(void* out, s32 v);
@@ -257,15 +257,8 @@ extern s32 func_001E2180(char*, const char*);
 u32 func_001601D8(u32 packed);
 char* func_00160148(u32 packed);
 
-struct Buf_001AD7B0 { u8 pad[0x30]; };
-
 f32 func_001EA408(f32 a);
 f32 func_00205210(f32 x);
-void func_00137228(Buf_001AD7B0* out, f32 x, f32 y);
-void func_00137238(Buf_001AD7B0* out, f32 x, f32 y);
-void func_00137248(Buf_001AD7B0* out, s32* value);
-void func_00137260(Buf_001AD7B0* out, s32 flag);
-void func_00137268(Buf_001AD7B0* out, s32 flag);
 
 extern const char* D_00274478[];
 extern const char* D_00274484;
@@ -338,10 +331,6 @@ u64 func_001B2988(TextureTable* t, s32 i, s32 j);
 
 
 
-struct Inner_1AD3F0 {
-    u8 pad[0x2D0];
-    s32 f2D0;
-};
 void func_001613C0(PacketWriter* f, s32 a, s32 b, u64 c);
 void func_00161708(PacketWriter* f, u64 a, u64 b);
 void func_00161458(PacketWriter* f, u32 v);
@@ -1007,15 +996,17 @@ void func_001AB660(T217D_510* self)
 
 void func_001AB710(T217D_510* self)
 {
-    Local_001AB710 L;
+    Layout_137228 L;
+    Quad4 tag;
+    T217D_Word warn;
     if (self->text[0] != 0) {
         f32 f234 = self->w;
         f32 f238 = self->h;
         s32 s0v = self->color;
         func_00137228(&L, self->x, self->y);
         func_00137238(&L, f234, f238);
-        L.tag = s0v;
-        func_00137248(&L, &L.tag);
+        tag.w[0] = s0v;
+        func_00137248(&L, &tag.w[0]);
         func_00137260(&L, 0);
         func_00137268(&L, 0);
         void* obj = self->frame;
@@ -1029,16 +1020,16 @@ void func_001AB710(T217D_510* self)
         f32 v = self->scale;
         u8* dp = (u8*)&g_gsPacketWriter;
         PushFontScale(self->font, v, v);
-        ((u8*)&L.tag)[0] = 0x54;
-        ((u8*)&L.tag)[1] = 0;
-        DrawFontString(self->font, &L.tag, &L, 0, dp);
-        f32 r = MeasureFontString(self->font, &L.tag);
+        ((u8*)&tag)[0] = 0x54;
+        ((u8*)&tag)[1] = 0;
+        DrawFontString(self->font, &tag, &L, 0, dp);
+        f32 r = MeasureFontString(self->font, &tag);
         f32 a = self->x + r;
         L.y = self->y;
         L.x = a;
         if (self->warned != 0) {
-            L.w30 = self->warnColor;
-            L.w10 = L.w30;
+            warn = self->warnColor;
+            *(T217D_Word*)&L.color = warn;
         }
         DrawFontString(self->font, (u8*)self + 9, &L, 0, dp);
         PopFontScale(self->font);
@@ -1708,7 +1699,7 @@ void func_001AD3F0(T217D_3D0* self)
         PacketWriter* s = &g_gsPacketWriter;
         f32 sc = scale;
         f32 y;
-        if (g2->open != 0 && g2->current != 0 && ((Inner_1AD3F0*)g2->current)->f2D0 == 2) {
+        if (g2->open != 0 && g2->current != 0 && g2->current->mode == 2) {
             sc = 1.0f;
         }
         ((u8*)&slot)[0] = 0;
@@ -1762,7 +1753,8 @@ tail:
 
 void func_001AD7B0(T217D_420* self)
 {
-    Buf_001AD7B0 buf;
+    Layout_137228 buf;
+    Quad4 tmp;
     s32 mask = (s32)0xFF808080;
     DrawScreenElementText(self);
     f32 half = 0.5f;
@@ -1775,8 +1767,8 @@ void func_001AD7B0(T217D_420* self)
     func_00137228(&buf, self->x + 2.0f + self->w * half - w * half,
                   self->y + 14.0f + self->h * half - ht * half);
     func_00137238(&buf, w, ht);
-    *(s32*)((u8*)&buf + 0x20) = mask;
-    func_00137248(&buf, (s32*)((u8*)&buf + 0x20));
+    tmp.w[0] = mask;
+    func_00137248(&buf, &tmp.w[0]);
     func_00137260(&buf, 0);
     func_00137268(&buf, 0);
     DrawFontString(h, (void*)"L", &buf, 0, &g_gsPacketWriter);

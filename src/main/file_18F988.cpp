@@ -109,7 +109,6 @@ struct Obj_191AA8 {
 };
 s32 func_001909F0(void* p);
 void func_001F6C20(s32 a);
-struct S_190EA8 { u8 pad[4]; s32 value; };
 void func_001830D8(void* self);
 void func_00152438(void* self, s32 value);
 void func_00152440(void* p);
@@ -509,7 +508,7 @@ s32 func_00190E30(void* a, s32 b, s32 c)
     return 1;
 }
 
-s32 func_00190EA8(S_190EA8* p, s32 x) { return (x - p->value) >> 5; }
+s32 func_00190EA8(PointGraph* p, s32 x) { return (x - (s32)p->points) >> 5; }
 
 ASM_FUNC(func_00190EB8);
 

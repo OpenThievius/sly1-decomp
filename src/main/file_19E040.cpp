@@ -42,7 +42,6 @@
 #include "message_body.h"
 #include "asm_func.h"
 
-struct Obj_0019F8E8 { u8 pad[0x44]; s32 value; };
 void func_001831E8(void* world, void* list, void* a, void* b);
 void func_00183238(void* world, void* list, void* a, void* b);
 
@@ -1285,8 +1284,8 @@ void func_0019F858(Effect* self, void* a1)
 
 void func_0019F8E8(void* obj, void* arg)
 {
-    Obj_0019F8E8* value = *(Obj_0019F8E8**)arg;
-    AddCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, (void*)value->value, arg);
+    const Desc01* desc = ((BaseObject*)arg)->desc;
+    AddCallbackNode((void*)g_currentWorld, (u8*)obj + 0x118, (void*)desc->m0D, arg);
 }
 
 void func_0019F918(void* obj, void* a1, void* a2)

@@ -55,7 +55,11 @@ struct TargetCameraController : CameraController {
     s32 f0C;                // 0x0C: 0
     f32 f10;                // 0x10: D_00261BF0
     s32 f14;                // 0x14
-    s32 f18;                // 0x18
+    union {
+        s32 f18;            // 0x18
+        f32 g18;            // 0x18 as a float: func_00151300 compares it with the typed caption's
+                            // value, func_00132500 scales text by it (the camera's +0x478)
+    };
     s32 f1C;                // 0x1C
     f32 f20;                // 0x20: 10.0, the divisor func_001496C0 takes the rate by
     f32 f24;                // 0x24: the camera's f1C8 divided by f20

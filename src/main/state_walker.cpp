@@ -15,6 +15,7 @@
 #include "queued_call.h"
 #include "globals.h"
 #include "asm_func.h"
+#include "c60.h"
 
 f32 func_001EAAE0(f32 a, f32 b);
 extern f32 D_0026185C;
@@ -88,10 +89,6 @@ void* func_0018D658(u32 bytes);
 void* func_00121228(World* root, s32 value, void* table);
 void func_001299E0(PlacedObject* self, void* src);
 extern f32 D_002746A0[8];
-struct Sub_1B7638 {
-    u8 pad0[0x2F0];
-    f32 f2F0;
-};
 s32 func_001C96B8(CompanionAgent *self);
 s32 func_001CB578(CompanionAgent *self);
 void* func_0018D658(s32 size);
@@ -887,7 +884,7 @@ void func_001B7638(CompanionAgent *self) {
         f = 0.1f;
         break;
     }
-    ((struct Sub_1B7638 *)self->fC14)->f2F0 = f;
+    ((C60*)self->fC14)->f2F0 = f;
 }
 
 void func_001B7790(CompanionAgent* self)

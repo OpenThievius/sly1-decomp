@@ -135,13 +135,11 @@ void func_001372E0(BufferedStream* self, s32 flags);
 
 extern u8 D_00247448[];
 
-struct Arg_11E580 { s32 v; };
-
 void* func_0018D5C0(s32 bytes);
 
 void func_001DB480(void* self);
 
-void* func_001C1390(Arg_11E580* id, void* ctx);
+void* func_001C1390(s32 index, void* ctx);
 
 void* func_00159F20(void* base, s32 n);
 
@@ -314,8 +312,7 @@ BaseObject* func_0011E580(s32 index, void* a1, s32 a2, s32 a3, s32 a4)
     }
     r->parent = (BaseObject*)a2;
     r->world = (World*)a1;
-    Arg_11E580* id = (Arg_11E580*)a4;
-    r->f2C = GetScriptEntryScope(id, a1);
+    r->f2C = GetScriptEntryScope(a4, a1);
     AppendToList(GetHashedSlot(r->world, r->id), r);
     u8* base = (u8*)r->world + 0x1884;
     void** slot = (void**)(base + off);

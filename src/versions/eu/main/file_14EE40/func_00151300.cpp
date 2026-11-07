@@ -31,7 +31,7 @@ s32 func_00151300(StepSequence* self)
         if (IsTextPanelTextTyped(&g_typedTextCaptionBox) != 0) flags &= 0xFFFFFFDF;
     }
     if (flags & 0x40) {
-        if (((Mgr_151300*)g_camera)->f478 == ((Sc_151300_eu*)&g_typedTextCaptionBox)->f58C) flags &= 0xFFFFFFBF;
+        if (g_camera->ctl460.g18 == ((Sc_151300_eu*)&g_typedTextCaptionBox)->f58C) flags &= 0xFFFFFFBF;
     }
     if (flags & 0x80) {
         if (self->f2FC <= g_gameTime[0]) flags &= 0xFFFFFF7F;

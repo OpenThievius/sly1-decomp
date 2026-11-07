@@ -11,9 +11,9 @@ void func_00148598(SaveNotifier* self, s32 mode)
             g_currentLevelRecord->f438++;
         }
         D_0026CBC8.vt->m14(&D_0026CBC8);
-        void* r = (void*)GetActiveSwitchedCollider();
+        SwitchedCollider* r = GetActiveSwitchedCollider();
         if (r != 0) {
-            ((VObj3_148598*)r)->vtbl[82](r, 0, self);
+            r->desc05()->m4E(r, 0, self);
         }
         TriggerScriptEvent(self, 2, 0, 0);
         mode = 2;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "asm_func.h"
+#include "key_id.h"
 
 // The sector check's state, the word before this file's .data: GCC aligns the read errors
 // (24 bytes) to 8, so a .data that started at 0x2613EC would put them at 0x261400.
@@ -43,11 +44,10 @@ void func_00140790(void)
     g_discSectorCheckState = 3;
 }
 
-struct Holder_1407A0 { u8 pad[0x4]; s32 value; };
-
-s32 func_001407A0(Holder_1407A0* holder)
+// The second word of a key (GetKeyedDataSize, func_0018C1E8, hands it one).
+s32 func_001407A0(KeyId* key)
 {
-    return holder->value;
+    return key->second;
 }
 
 s32 func_001407A8(s8* path)

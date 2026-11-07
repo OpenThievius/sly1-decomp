@@ -12,6 +12,7 @@
 #include "shapes.h"
 #include "pad_record.h"
 #include "game_progress.h"
+#include "world.h"
 
 struct SpanHead {
     f32 c0, c1, c2, c3;
@@ -193,12 +194,6 @@ extern u8 D_00275710[];
 extern u8 func_00135E20[];
 extern u8 func_00135E40[];
 
-struct Ctx_135F48 {
-    u8 pad000[0x1D44];
-    s32 f1D44;
-    u8 pad1D48[0x0C];
-    s32 f1D54;
-};
 
 
 // The bit of the current level GetCurrentLevelBit (func_00160D30) gives back.
@@ -249,7 +244,6 @@ struct ListWalkBegin {
 PlayerListHolder* func_0015A418(World* host, s32 a1, s32 a2, void* ctx);
 void func_0012F6B0(AnimationPlayer* item, f32 x);
 
-struct Sub_136238 { u8 pad0[0x2D4]; s32 f2D4; };
 
 extern u8 D_00275710[];
 
@@ -1034,9 +1028,9 @@ void func_00135F48(T217D_440* self)
     ReleasePanelEntries(self, 1, 0);
     if (self->bankState == 1) {
         f32 k = 3.4028235e38f;
-        Ctx_135F48* ctx = *(Ctx_135F48**)g_currentWorld;
-        CollectPanelEntriesOfClass(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, ctx->f1D44, k);
-        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)g_currentWorld)->f1D54, k);
+        World* world = *(World**)g_currentWorld;
+        CollectPanelEntriesOfClass(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)world->slot1CE8[23], k);
+        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (s32)(*(World**)g_currentWorld)->slot1CE8[27], k);
     }
 }
 
@@ -1091,7 +1085,7 @@ void func_00136238(T217D_440* self, s32 on)
     void* arr[0x100];
     s32 n;
     if ((on != 0) != (self->open == 0)) return;
-    if (self->child != 0 && ((Sub_136238*)self->child)->f2D4 == 3) {
+    if (self->child != 0 && ((StepSequence*)self->child)->state2D4 == 3) {
         if (on != 0) func_001BEA50();
         else func_001BEA28();
     }

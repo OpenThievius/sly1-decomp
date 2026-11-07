@@ -10,7 +10,9 @@ void func_eu_0015E7E0(void* buf, void* out, s32 zero, void* d);
 
 void func_001AB710(Actor_001AB710_eu* self)
 {
-    Local_001AB710 L;
+    Layout_137228 L;
+    Quad4 tag;
+    T217D_Word warn;
     u8 buf[0xC0];
     if (self->f08 != 0) {
         f32 f544 = self->f544;
@@ -18,8 +20,8 @@ void func_001AB710(Actor_001AB710_eu* self)
         s32 s0v = self->f518;
         func_00137228(&L, self->f52C, self->f530);
         func_00137238(&L, f544, f548);
-        L.tag = s0v;
-        func_00137248(&L, &L.tag);
+        tag.w[0] = s0v;
+        func_00137248(&L, &tag.w[0]);
         func_00137260(&L, 0);
         func_00137268(&L, 0);
         func_eu_001374E0(&L, 0);
@@ -34,16 +36,16 @@ void func_001AB710(Actor_001AB710_eu* self)
         f32 v = self->f51C;
         u8* dp = (u8*)&g_gsPacketWriter;
         PushFontScale(self->p4, v, v);
-        ((u8*)&L.tag)[0] = 0x54;
-        ((u8*)&L.tag)[1] = 0;
-        func_eu_0015C778(self->p4, &L.tag, &L, 0, dp);
-        f32 r = MeasureFontString(self->p4, &L.tag);
+        ((u8*)&tag)[0] = 0x54;
+        ((u8*)&tag)[1] = 0;
+        func_eu_0015C778(self->p4, &tag, &L, 0, dp);
+        f32 r = MeasureFontString(self->p4, &tag);
         f32 a = self->f52C + r;
         L.y = self->f530;
         L.x = a;
         if (self->f594 != 0) {
-            L.w30 = self->w58C;
-            L.w10 = L.w30;
+            warn = self->w58C;
+            *(T217D_Word*)&L.color = warn;
         }
         func_eu_0015DCB8(buf, (u8*)self + 10, self->p4, 0);
         func_eu_0015E7E0(buf, &L, 0, dp);

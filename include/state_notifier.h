@@ -32,7 +32,8 @@ struct StateNotifier : PlacedObject {
     u8 pad2D4[0x2D8 - 0x2D4];
     s32 initialMode;               // 0x2D8
     s32 f2DC;               // 0x2DC
-    u8 pad2E0[0x2E8 - 0x2E0];
+    f32 f2E0;               // 0x2E0: i times D_00261B40 for the i-th scattered (func_00148AC0)
+    u8 pad2E4[0x2E8 - 0x2E4];
     void* f2E8;             // 0x2E8: the object whose message ends it (func_00147EF8)
     void* f2EC;             // 0x2EC
     u8 pad2F0[0x320 - 0x2F0];

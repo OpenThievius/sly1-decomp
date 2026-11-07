@@ -78,22 +78,12 @@ struct __attribute__((packed)) PSys_1481A0 {
 void func_00148038(World* self);
 void func_00148178(void);
 s32 func_00160D98(void);
-typedef void (*VFn_148CE0)(void* self, s32 arg);
 
-struct Node_148CE0 {
-    VFn_148CE0* vtbl;
-    u8 pad0[0x374 - 4];
-    Node_148CE0* next;
-};
 
 extern s32 D_0026EC58;
 s32 func_001300E8(void* node, s32 kind);
 SwitchedCollider* func_001925F0(void);
-typedef void (*VFn3_148598)(void* self, s32 a, void* b);
 
-struct VObj3_148598 {
-    VFn3_148598* vtbl;
-};
 
 extern s32 D_00275C34;
 extern u8 D_00261EF0[];
@@ -133,59 +123,24 @@ extern u8 D_0026EC60[];
 
 extern u8 D_00261990[];
 extern u8 D_002483D0[];
-struct Obj_148AC0;
-
-struct Vt_148AC0 {
-    u8 pad00[0x18];
-    void (*f18)(Obj_148AC0* self);
-    u8 pad1C[0x64 - 0x1C];
-    void (*f64)(Obj_148AC0* self, s32 a);
-    u8 pad68[0x84 - 0x68];
-    void (*f84)(Obj_148AC0* self, s32 a);
-    void (*f88)(Obj_148AC0* self, void* a);
-    u8 pad8C[4];
-    void (*f90)(Obj_148AC0* self, void* a);
-    void (*f94)(Obj_148AC0* self, void* a);
-    u8 pad98[0xCC - 0x98];
-    void (*fCC)(Obj_148AC0* self, s32 a);
-};
-
-struct Obj_148AC0 {
-    Vt_148AC0* vt;
-    u8 pad04[0x88 - 0x04];
-    u8 f88[0x2A8 - 0x88];
-    f32 f2A8;
-    u8 pad2AC[0x2E0 - 0x2AC];
-    f32 f2E0;
-    u8 pad2E4[0x33C - 0x2E4];
-    s32 f33C;
-};
 
 extern u8 D_002483D0[];
 extern u8 D_00248D30[];
 extern f32 D_00261B40;
 void func_0018D608(void);
-Obj_148AC0** func_0018D658(s32 size);
-s32 func_00148938(World* self, s32 a1, s32 n, Obj_148AC0** arr);
+StateNotifier** func_0018D658(s32 size);
+s32 func_00148938(World* self, s32 a1, s32 n, StateNotifier** arr);
 f32 func_001EAAE0(f32 a, f32 b);
 void func_001ED650(void* out, f32 x, f32 y, f32 z);
 void func_001EEB60(World* a, f32 f, void* b, void* c);
 void func_0018D6F0(void);
 
-struct Obj_148038 {
-    void** vtbl;
-    u8 pad0[0x2A8 - 4];
-    f32 f2A8;
-};
 
 struct __attribute__((aligned(16))) Quad_148038 {
     s32 a, b, c, d;
 };
 
 struct Ctx_148038;
-typedef void (*Fn0_148038)(void* self);
-typedef void (*Fn1_148038)(void* self, void* a);
-typedef void (*Fn1s_148038)(void* self, s32 a);
 extern f32 D_00261AB0[4];
 extern u8 D_002483D0[];
 extern u8 D_00248D30[];
@@ -437,29 +392,29 @@ void func_00147FB0(TimeRangeNotifier* self)
 
 void func_00148038(World* self)
 {
-    void* obj;
+    SoundNotifier* obj;
     s32 buf[4];
     GameProgress* g;
     s32 n;
     s32 c;
 
-    if (GatherObjectsOfKind(self, 0x56, 1, &obj) == 0) {
+    if (GatherObjectsOfKind(self, 0x56, 1, (void**)&obj) == 0) {
         g = g_saveData;
         n = GetSpareCountLimit();
         c = g->f19E4 + 1;
         c = (c < n) ? c : n;
         g_saveData->f19E4 = c;
     } else {
-        ((Fn0_148038)((Obj_148038*)obj)->vtbl[6])(obj);
-        ((Fn1s_148038)((Obj_148038*)obj)->vtbl[25])(obj, 0);
+        obj->desc->m02(obj);
+        obj->desc->m15(obj, 0);
         func_00144128(*(Ctx_148038**)g_camera, (void*)D_00261AB0, buf);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[33])(obj, buf);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[34])(obj, g_identityMatrix);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[36])(obj, D_00248D30);
-        ((Fn1_148038)((Obj_148038*)obj)->vtbl[37])(obj, D_00248D30);
-        ((Fn1s_148038)((Obj_148038*)obj)->vtbl[51])(obj, 4);
+        obj->desc02()->m1D(obj, (Vec02*)buf);
+        obj->desc02()->m1E(obj, (Mat02*)g_identityMatrix);
+        obj->desc02()->m20(obj, (Vec02*)D_00248D30);
+        obj->desc02()->m21(obj, (Vec02*)D_00248D30);
+        obj->desc02()->m2F(obj, 4);
         *(Quad_148038*)((u8*)obj + 0x300) = D_00261AC0;
-        func_001EEB60((Ctx_148038*)self->f1EC4, ((Obj_148038*)obj)->f2A8, (u8*)obj + 0x140, (u8*)obj + 0x88);
+        func_001EEB60((Ctx_148038*)self->f1EC4, obj->f2A8, (u8*)obj + 0x140, (u8*)obj + 0x88);
     }
 }
 
@@ -601,9 +556,9 @@ void func_00148598(SaveNotifier* self, s32 mode)
             s32 g = D_00275C34; s32 old = cx->f438; cx->f438 = old + 1; if (g != 0) cx->f438 = old;
         }
         D_0026CBC8.vt->m14(&D_0026CBC8);
-        void* r = (void*)GetActiveSwitchedCollider();
+        SwitchedCollider* r = GetActiveSwitchedCollider();
         if (r != 0) {
-            ((VObj3_148598*)r)->vtbl[82](r, 0, self);
+            r->desc05()->m4E(r, 0, self);
         }
         TriggerScriptEvent(self, 2, 0, 0);
         mode = 2;
@@ -691,9 +646,9 @@ INCLUDE_RODATA(D_00249E90);
 
 ASM_FUNC(func_00148938);
 
-s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
+s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, StateNotifier** arr)
 {
-    Obj_148AC0** p;
+    StateNotifier** p;
     s32 i;
     s32 count;
     f32 ang;
@@ -708,20 +663,20 @@ s32 func_00148AC0(World* self, s32 a1, s32 a2, s32 n, Obj_148AC0** arr)
     ang = RandomFloatInRange(0.0f, 6.2831855f);
     {
         for (; i < count;) {
-            Obj_148AC0* o = arr[i];
+            StateNotifier* o = arr[i];
             u8* q = (u8*)o + 0x300;
             f32 a;
             f32 b;
-            o->vt->f18(o);
-            o->vt->f64(o, 0);
-            o->vt->f84(o, a2);
-            o->vt->f88(o, g_identityMatrix);
-            o->vt->f90(o, D_00248D30);
-            o->vt->f94(o, D_00248D30);
+            o->desc->m02(o);
+            o->desc->m15(o, 0);
+            o->desc02()->m1D(o, (Vec02*)a2);
+            o->desc02()->m1E(o, (Mat02*)g_identityMatrix);
+            o->desc02()->m20(o, (Vec02*)D_00248D30);
+            o->desc02()->m21(o, (Vec02*)D_00248D30);
             o->f2E0 = (f32)i * D_00261B40;
             o->f33C = 0;
             i++;
-            o->vt->fCC(o, 3);
+            o->desc02()->m2F(o, 3);
             a = RandomFloatInRange(D_00261B48[0], D_00261B48[1]);
             b = RandomFloatInRange(D_00261B50[0], D_00261B50[1]);
             ComputePolarOffset(q, ang, a, b);
@@ -741,13 +696,13 @@ void func_00148CE0(World* self)
     if (g->f19E4 < r) {
         if (D_0026EC58 < 2) return;
     }
-    Node_148CE0* p = (Node_148CE0*)self->list1C54.head;
+    StateNotifier* p = (StateNotifier*)self->list1C54.head;
     if (p == 0) return;
     do {
         if (IsObjectOfKind(p, 0x56) != 0) {
-            p->vtbl[51](p, 2);
+            p->desc02()->m2F(p, 2);
         }
-        p = p->next;
+        p = p->next374;
     } while (p != 0);
 }
 
