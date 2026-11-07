@@ -830,7 +830,8 @@ struct PathFollower : SwitchedCollider {
     };
     f32 f680;               // 0x680: the blend of the two ranges
     f32 f684;               // 0x684
-    u8 pad688[0x694 - 0x688];
+    u8 pad688[0x690 - 0x688];
+    PlacedObject* f690;     // 0x690: drawn with this one's scale (func_001DAA18)
     f32 f694;               // 0x694
     f32 f698;               // 0x698: divided by f610 or f614 into the slots (func_001D8D90); 0 in func_001D9C98
     f32 f69C;               // 0x69C: eased by func_001D8D90
@@ -863,7 +864,9 @@ struct PathFollower : SwitchedCollider {
     s32 fB0C;               // 0xB0C
     f32 fB10;               // 0xB10: -10.0 at reset (func_001DB290)
     BaseObject* fB14;       // 0xB14
-    u8 padB18[0xB30 - 0xB18];
+    u8 padB18[0xB28 - 0xB18];
+    void* fB28;             // 0xB28: func_001DAA18 draws a quad for each of these two
+    void* fB2C;             // 0xB2C
     s32 fB30;               // 0xB30
     s32 fB34;               // 0xB34
     f32 fB38;               // 0xB38
