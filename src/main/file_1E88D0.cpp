@@ -919,7 +919,7 @@ s32 D_00276654;
 
 void func_001E88D0(C0B* self)
 {
-    func_00167D68(self);
+    InitConeAgent(self);
     self->fC58 = 0x2D8;
     self->fC14 = 30000.0f;
     self->fC10 = 30000000.0f;
@@ -943,7 +943,7 @@ void func_001E8948(C0B* self)
     for (u32 i = 0; i < 4; i++) {
         self->fC80[i] = TakeFlagTableIndex(g_flagTable);
     }
-    func_00167E08(self);
+    StartConeAgent(self);
 }
 
 ASM_FUNC(func_001E89F0);

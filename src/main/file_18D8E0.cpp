@@ -610,12 +610,12 @@ void func_0018E558(void)
         t->f134 = 0;
         func_001F6B60(t->f130);
         t->f134 = 1;
-        func_001686E8(g_gifChannel, t->f114);
+        SendGsPacketAndWait(g_gifChannel, t->f114);
         t->f134 = 2;
-        func_001684E8();
-        func_001686E8(g_gifChannel, t->f118);
+        ApplyPendingDisplayFlip();
+        SendGsPacketAndWait(g_gifChannel, t->f118);
         FlipDisplayFrame();
-        func_001686E8(g_gifChannel, t->f118);
+        SendGsPacketAndWait(g_gifChannel, t->f118);
         FlipDisplayFrame();
     }
 }

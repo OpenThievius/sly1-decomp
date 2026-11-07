@@ -520,7 +520,7 @@ void func_001683B8(void) {
 void func_001683E8(void)
 {
     D_002BE470 = 1;
-    func_001683B8();
+    SignalDisplaySync();
     s32 a0 = D_002626C4;
     s32 a1 = D_00262484;
     D_002626C8 = a0;
@@ -581,8 +581,8 @@ void func_001684E8(void)
 void func_001685B8(void)
 {
     D_002BE470 = 1;
-    func_00168AF8();
-    func_001683B8();
+    SendDisplayResetPacket();
+    SignalDisplaySync();
     D_002BE470 = 0;
     func_00201A18(0, 1, 2, 1);
     u32 flag = (*(u32*)0x12001000 >> 13) & 1;
@@ -668,7 +668,7 @@ void func_001688B8(void)
     func_001F6950(0, func_00168698, 0);
     func_001F6DA8(0);
     InitMeshQueue();
-    func_001685B8();
+    ResetDisplayBuffers();
 }
 
 void func_00168A48(Blob_168AF8* b)
@@ -699,7 +699,7 @@ void func_00168AF8(void)
     AddDmaRefTag(&a, 0x2C, D_002BE1A0);
     AddDmaEndTag(&a);
     DetachPacketBuffer(&a, 0, 0);
-    func_00168A48(&b);
+    SendPacketToBothBuffers(&b);
 }
 
 void func_00168B68(f32 t)
@@ -710,7 +710,7 @@ void func_00168B68(f32 t)
 
     InitGifPacket(&f);
     n = (s32)(t * 59.999996f);
-    func_001683B8();
+    SignalDisplaySync();
     D_002626CC = 0;
     if (n > 0) {
         do {
@@ -726,7 +726,7 @@ void func_00168B68(f32 t)
             EndGifPacket(&f);
             AddDmaEndTag(&f);
             DetachPacketBuffer(&f, 0, 0);
-            func_001686E8(g_gifChannel, &f.value);
+            SendGsPacketAndWait(g_gifChannel, &f.value);
             FlipDisplayFrame();
         } while (i < n);
     }
@@ -854,7 +854,7 @@ void func_001692B0(void* self, void* arg)
         EndGifPacket(&f);
         AddDmaEndTag(&f);
         DetachPacketBuffer(&f, 0, &f.value);
-        func_001686E8(g_gifChannel, f.value);
+        SendGsPacketAndWait(g_gifChannel, f.value);
     }
     PopBackMemoryMark();
 }

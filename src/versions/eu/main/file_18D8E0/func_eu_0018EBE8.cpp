@@ -25,13 +25,13 @@ void func_eu_0018EBE8(void)
         g->f148 = 0;
         func_001F6B60(g->f144);
         g->f148 = 1;
-        func_001686E8(D_eu_0026321C, g->f128);
+        SendGsPacketAndWait(D_eu_0026321C, g->f128);
         g->f148 = 2;
-        func_001684E8();
-        func_001686E8(D_eu_0026321C, g->f12C);
+        ApplyPendingDisplayFlip();
+        SendGsPacketAndWait(D_eu_0026321C, g->f12C);
         FlipDisplayFrame();
         if (i % 3 != 0) {
-            func_001686E8(D_eu_0026321C, g->f12C);
+            SendGsPacketAndWait(D_eu_0026321C, g->f12C);
             FlipDisplayFrame();
         }
     }

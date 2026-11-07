@@ -1503,10 +1503,19 @@
 #define UpdateAttachments                          func_00165FE0
 #define UpdateAttachmentFrames                     func_001660E8
 #define FlipVifBaseOffset                          func_00166658
+#define InitConeAgent                              func_00167D68
+#define StartConeAgent                             func_00167E08
+#define DrawConeAgent                              func_00167EF0
 #define ApplyFieldDisplayOffset                    func_00168130
+#define SignalDisplaySync                          func_001683B8
 #define FlipDisplayFrame                           func_001683E8
+#define ApplyPendingDisplayFlip                    func_001684E8
+#define ResetDisplayBuffers                        func_001685B8
+#define SendGsPacketAndWait                        func_001686E8
 #define FillScreenColor                            func_00168770
 #define InitDisplay                                func_001688B8
+#define SendPacketToBothBuffers                    func_00168A48
+#define SendDisplayResetPacket                     func_00168AF8
 #define FadeScreenToBlack                          func_00168B68
 #define InitMeshQueue                              func_00168D00
 #define CeilLog2                                   func_00168D30
@@ -1535,6 +1544,7 @@
 #define UnregisterTargetCurve                      func_00169D58
 #define PostLoadTargetCurve                        func_00169D90
 #define CopyTargetCurve                            func_00169DD8
+#define FindTargetCurveLengthNearCollider          func_00169FC0
 #define InitTargetPoint                            func_0016A100
 #define RegisterTargetPoint                        func_0016A140
 #define UnregisterTargetPoint                      func_0016A178
@@ -1547,6 +1557,8 @@
 #define CopyKeepingListLink                        func_0016A500
 #define TestListedCollisionPartMayContact          func_0016A548
 #define StepListedCollisionPart                    func_0016A580
+#define SetPooledObjectPlayerHold                  func_0016A5F0
+#define CountHeldPooledChildren                    func_0016A758
 #define FindEarliestPooledChild                    func_0016A820
 #define CallFlaggedParts                           func_0016AA18
 #define SetupCurrentObjectChoices                  func_0016AB38

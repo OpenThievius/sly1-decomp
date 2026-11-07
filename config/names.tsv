@@ -2626,3 +2626,15 @@ func_001618C0	AddGifXyzfRegListEntry	counts a register-list entry and writes the
 func_00161BB0	SetVertexBatchMode	flushes the vertex batch (FlushVertexBatch), stores the mode at +0xF8 and sets the vertex colour to white
 func_00163938	WriteStripMeshMscal	writes the VIF MSCAL of the strip mesh's microprogram (0x18C0 or 0x18F8 by mode); BuildStripMeshPacket and BuildLitStripMeshPacket call it
 func_00163990	WriteMorphTargetMscal	writes the VIF MSCAL of the morph target's microprogram (0xFA0 or 0xFD8 by mode); BuildMorphTargetPacket calls it
+func_00167D68	InitConeAgent	slot 0x10 of class 0x0A: runs InitAgent and sets its two ranges (1000, 1500), two angles (pi/4, pi), the distances 2000 and 300, the angle pi/3 at +0x74C and the ids +0xC18 and +0xC30 to -1
+func_00167E08	StartConeAgent	slot 0x50 of class 0x0A: runs StartAgent, finds the objects of its ids +0xC18 and +0xC30 (FindFirstObjectByIdMode4) and gives each object its animation events gather a small list of its own
+func_00167EF0	DrawConeAgent	slot 0xA4 of class 0x0A: runs DrawAgent
+func_001683B8	SignalDisplaySync	sets D_002BE46C and signals D_002BE460 (func_001F6B60); FlipDisplayFrame, ResetDisplayBuffers and FadeScreenToBlack call it
+func_001684E8	ApplyPendingDisplayFlip	when a flip is pending (D_002BE474) clears it, reads the field bit of the GS CSR and sets the display and draw buffers for the frame counter's parity (RunRenderThread calls it)
+func_001685B8	ResetDisplayBuffers	sends the display reset packet, sets the GS mode, zeroes the flip state, sets the buffers by the field bit and advances g_displayFrameCounter (InitDisplay calls it)
+func_001686E8	SendGsPacketAndWait	sets D_002BE468, sets the GS CSR's FINISH bit, sends a packet on a DMA channel and waits on D_002BE464 (SendMaskedImagesToGif and the render thread call it)
+func_00168A48	SendPacketToBothBuffers	sends a packet on the GIF channel once for each of the two draw buffers and waits for the channel
+func_00168AF8	SendDisplayResetPacket	builds a packet that refers to the 0x2C quadwords at D_002BE1A0 and sends it to both draw buffers (SendPacketToBothBuffers)
+func_00169FC0	FindTargetCurveLengthNearCollider	projects the active switched collider's position onto the target curve's track through its slot 10, keeps the result 30 inside the track's ends unless it wraps, places the target there (func_00169E20) and returns it (func_001CFFD0 calls it)
+func_0016A5F0	SetPooledObjectPlayerHold	sets a pooled object's hold state +0x550: leaving 1 reparents it to nothing and sends script event 3; entering 1 reparents it to g_player, anchors it and sends script event 2; stamps the game time at +0x554 (func_00175170 calls it)
+func_0016A758	CountHeldPooledChildren	counts the objects of kind 0x46 in a list at +0x34 whose state +0x550 is 3 or 4 (func_0014F270 calls it)

@@ -3582,10 +3582,10 @@ void func_0015EE80(void)
             D_00262314 = 0;
         }
         ActivateRenderFrame((RenderFrame*)g_drawingFrame);
-        func_001684E8();
-        func_001686E8(g_vif1Channel, ((RenderFrame*)g_drawingFrame)->bufBAddr);
+        ApplyPendingDisplayFlip();
+        SendGsPacketAndWait(g_vif1Channel, ((RenderFrame*)g_drawingFrame)->bufBAddr);
         *(volatile s32*)0x10003010 = 0;
-        func_001686E8(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufAAddr);
+        SendGsPacketAndWait(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufAAddr);
         func_0015F320();
         func_00202C38(g_vif1Channel, 0, 0);
         func_001F6B40(g_frameDoneSemaphore);
@@ -3597,10 +3597,10 @@ void func_0015EE80(void)
 void func_0015EF88(Pair_15EF88* self, s32 flag)
 {
     ActivateRenderFrame(self, flag);
-    func_001686E8(g_vif1Channel, self->fC);
+    SendGsPacketAndWait(g_vif1Channel, self->fC);
     if (flag != 0) {
         *(volatile s32*)0x10003010 = 0;
-        func_001686E8(g_gifChannel, self->f4);
+        SendGsPacketAndWait(g_gifChannel, self->f4);
     }
 }
 

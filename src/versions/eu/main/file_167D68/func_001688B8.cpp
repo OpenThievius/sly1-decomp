@@ -34,6 +34,6 @@ void func_001688B8(void)
     func_001F6950(0, func_00168698, 0);
     func_001F6DA8(0);
     InitMeshQueue();
-    func_001685B8();
+    ResetDisplayBuffers();
 }
 

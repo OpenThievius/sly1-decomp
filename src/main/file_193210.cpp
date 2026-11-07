@@ -534,7 +534,7 @@ void func_00193270(S_193270* p) { p->a=0; p->e=0; p->d=0; p->c=0; p->b=0; }
 void func_00193288(State_193288* self, s32 value)
 {
 	if (self->ptr != 0) {
-		if (self->size == 0) { self->scaled = value << 1; self->size = value; func_00168AF8(self); }
+		if (self->size == 0) { self->scaled = value << 1; self->size = value; SendDisplayResetPacket(self); }
 		else if (self->value == value) self->repeat++;
 		else self->repeat = 0;
 		self->value = value;
@@ -584,7 +584,7 @@ void func_00193318(Obj_193318* o)
     AddDmaEndTag(&buf.f);
     CloseDmaTag(&buf.f);
     DetachPacketBuffer(&buf.f, 0, 0);
-    func_00168A48(&buf);
+    SendPacketToBothBuffers(&buf);
 }
 
 char* func_00193598(s32 index)
