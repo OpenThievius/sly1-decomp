@@ -2405,10 +2405,12 @@
 #define ChooseAgentState                           func_001C8010
 #define HasAgentReachedPathEnd                     func_001C84C0
 #define BuildAgentPath                             func_001C8590
+#define FaceAgentTowardGoalPoint                   func_001C8BC0
 #define UpdateAgentGoal                            func_001C8C08
 #define IsAgentNearPathEnd                         func_001C8D40
 #define UpdateAgentState                           func_001C8E28
 #define ChangeAgentState                           func_001C8F20
+#define ForceAgentState                            func_001C8FD0
 #define LeaveAgentState                            func_001C9008
 #define EnterAgentState                            func_001C91C8
 #define HandleAgentObjectEvent                     func_001C96D8
