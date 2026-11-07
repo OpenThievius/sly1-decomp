@@ -952,7 +952,7 @@ void func_001233C0(CountedObject* object)
 {
 	if (!object->hold)
 		CountStateTriggerDone(object->counter);
-	func_0013D278(object);
+	HandleMaskedColliderActivation(object);
 }
 
 void func_00123400(CountedObject* state, StateTrigger* value)
@@ -1066,7 +1066,7 @@ void func_001236C8(StateTrigger* self)
     for (i = 0; i < self->count3; i++) {
         void* node = FindFirstObjectById(self->world, 0x104, self->items3[i], self);
         if (node && IsObjectOfKind(node, 8)) {
-            func_001CAD40(node, self);
+            AddAgentStateTrigger(node, self);
         }
     }
     if (TestFlagTableBit(g_flagTable, self->id6B0)) {
@@ -1093,7 +1093,7 @@ void func_00123888(StateTrigger* self, s32 mode)
     }
     StopSoundRecord(self->f620, 0);
     ReleaseSoundLevel(self->f624);
-    func_0013ECB0(self->world, self->count62C, self->table630, self, 0);
+    SetGatheredWalkerTargets(self->world, self->count62C, self->table630, self, 0);
     if (mode == 1) {
         ReleaseCounterRef(D_002623D8);
     }
@@ -1139,8 +1139,8 @@ arm2:
         StartSoundEffect(0x15, &self->f620, self, 0, 8000.0f, 5000.0f, 1.0f, 0.0f, 0.0f, 0, 0);
     }
     self->f624 = PushSoundLevel(0x6B);
-    func_00123C20(self);
-    func_0013ECB0(self->world, self->count62C, self->table630, self, 1);
+    FinishStateTriggerOutputs(self);
+    SetGatheredWalkerTargets(self->world, self->count62C, self->table630, self, 1);
     TriggerScriptEvent(self, 2, 0, 0);
     IncrementCounter(D_002623D8);
 }
@@ -1795,7 +1795,7 @@ void func_00127048(PlacedObject* self, PlacedObject* src)
         InsertAttachment(self, self->f204);
     }
     if (src->f284) {
-        u8* p = func_001B5EC0(&self->world->pool1BF4);
+        u8* p = TakePoolSlot(&self->world->pool1BF4);
         CopyMemory(p, src->f284, 0x2E0);
         ClearListLinks(p + 0xB8);
         self->f284 = (RangeRecord*)p;
@@ -2590,7 +2590,7 @@ void func_0012A3A0(void* self, s32 value) { SetPositionSourceMode(self, value ? 
 
 void func_0012A3C8(void* self, s32 a1)
 {
-    func_0012A3E8(self, a1 != 0);
+    SetGroupActivityMode(self, a1 != 0);
 }
 
 void func_0012A3E8(PlacedObject* self, u32 value)
@@ -2787,7 +2787,7 @@ Class75Object* func_0012A970(PlacedObject* self)
 
 void func_0012A9C8(PlacedObject* self, s32 value)
 {
-    Class75Object* o = func_0012A970(self);
+    Class75Object* o = FindOrCreateClass75Object(self);
     if (value != -1) {
         o->count = value;
     }
@@ -2795,12 +2795,12 @@ void func_0012A9C8(PlacedObject* self, s32 value)
 
 void func_0012AA00(void* self, f32 value)
 {
-    func_0012A970(self)->scale = value;
+    FindOrCreateClass75Object(self)->scale = value;
 }
 
 void func_0012AA28(void* self, void* value)
 {
-    Class75Object* ctx = func_0012A970(self);
+    Class75Object* ctx = FindOrCreateClass75Object(self);
     ctx->f90 = value;
 }
 
@@ -3762,7 +3762,7 @@ AnimEvent* func_0012CBE8(Animation* self, s32 key) {
 
 f32 func_0012CCC0(void)
 {
-    f32* p = (f32*)func_0012CBE8();
+    f32* p = (f32*)FindAnimationMarkerEvent();
     f32 r = 0.0f;
     if (p != 0) {
         r = *p;

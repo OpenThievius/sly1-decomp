@@ -1066,7 +1066,7 @@ ScriptValue* func_001017A0(ScriptValue* ret, Collider* obj, s32 unused, ScriptVa
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    s32 r = func_001BC670(obj, &vec);
+    s32 r = IsPointInsideCollider(obj, &vec);
     SetScriptValueBool(&q, r);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -1178,7 +1178,7 @@ ScriptValue* func_00101C88(ScriptValue* ret, Animation* obj, s32 unused, ScriptV
     (void)StoreScriptArgumentsVa(&t, 1, args, &kinds, &v);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    f32 r = func_0012CCC0(obj, v);
+    f32 r = GetAnimationMarkerTime(obj, v);
     SetScriptValueFloat(&q, r);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2262,7 +2262,7 @@ ScriptValue* func_001049D8(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00146028(obj);
+    RecordCameraTimestamp(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2277,7 +2277,7 @@ ScriptValue* func_00104A78(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001455F0(obj);
+    RequestPlainCameraSnap(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2297,7 +2297,7 @@ ScriptValue* func_00104B18(ScriptValue* ret, Camera* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 3, args, &kinds, &vec, &fx, &fy);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_00146038(obj, &vec, fx, fy));
+    SetScriptValueBool(&q, IsSphereInCameraView(obj, &vec, fx, fy));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -2567,7 +2567,7 @@ ScriptValue* func_00105658(ScriptValue* ret, CompanionAgent* obj, s32 unused, Sc
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001B70B0(obj, o1, o2);
+    SetCompanionAgentLookId(obj, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2679,7 +2679,7 @@ ScriptValue* func_00105AB0(ScriptValue* ret, Player* obj, s32 unused, ScriptValu
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001D2830(obj, out);
+    SetPlayerPath(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2804,7 +2804,7 @@ ScriptValue* func_00105F70(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* 
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0019CE28(obj, o0, o1, o2);
+    SetC8BObjectVector(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2824,7 +2824,7 @@ ScriptValue* func_00106048(ScriptValue* ret, C8B* obj, s32 unused, ScriptValue* 
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0019CE38(obj, o0, o1, o2);
+    SetC8BObjectVectorFlagged(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3194,7 +3194,7 @@ ScriptValue* func_00106FA0(ScriptValue* ret, C5D* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001993C0(obj);
+    QueueWalkerActivationOnPlayer(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3245,7 +3245,7 @@ ScriptValue* func_00107180(ScriptValue* ret, Oscillator* obj, s32 unused, Script
     (void)StoreScriptArgumentsVa(&t, 4, args, &kinds, &x, &y, &z, &w);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001F3928(obj, x, y, z, w);
+    AddOscillatorEntryVectorA(obj, x, y, z, w);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3266,7 +3266,7 @@ ScriptValue* func_00107268(ScriptValue* ret, Oscillator* obj, s32 unused, Script
     StoreScriptArgumentsVa(&t, 4, args, &kinds, &x, &y, &z, &w);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001F3990(obj, x, y, z, w);
+    AddOscillatorEntryVectorB(obj, x, y, z, w);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3373,7 +3373,7 @@ ScriptValue* func_00107718(ScriptValue* ret, TransformObject* obj, s32 unused, S
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &vec);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_00141170(obj, &vec));
+    SetScriptValueBool(&q, TestPointAgainstObjectShape(obj, &vec));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -4033,7 +4033,7 @@ ScriptValue* func_00109258(ScriptValue* ret, HitCountCollider* obj, s32 unused, 
     (void)StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_001C4180(obj, out);
+    (void)AddHitCountColliderId(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
