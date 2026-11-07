@@ -898,7 +898,15 @@ struct ModeCollider : SwitchedCollider {
     u8 pad66C[0x680 - 0x66C];
     s32 f680;               // 0x680
     f32 f684;               // 0x684
-    u8 pad688[0x6C0 - 0x688];
+    u8 pad688[0x690 - 0x688];
+    f32 f690;               // 0x690
+    u8 pad694[0x69C - 0x694];
+    f32 f69C;               // 0x69C
+    u8 pad6A0[0x6A8 - 0x6A0];
+    f32 f6A8;               // 0x6A8
+    u8 pad6AC[0x6B4 - 0x6AC];
+    f32 f6B4;               // 0x6B4
+    u8 pad6B8[0x6C0 - 0x6B8];
     void* f6C0;             // 0x6C0
     u8 pad6C4[0x6D0 - 0x6C4];
     s32 f6D0;               // 0x6D0
@@ -906,7 +914,7 @@ struct ModeCollider : SwitchedCollider {
     f32 f6D8;               // 0x6D8
     u8 pad6DC[0x6E0 - 0x6DC];
     s32 f6E0;               // 0x6E0
-    u8 pad6E4[0x6E8 - 0x6E4];
+    void* f6E4;             // 0x6E4
     void* f6E8;             // 0x6E8
     u8 pad6EC[0x704 - 0x6EC];
     s32 f704;               // 0x704
