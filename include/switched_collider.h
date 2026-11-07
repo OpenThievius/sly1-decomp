@@ -324,7 +324,7 @@ struct Player : TurningCollider {
     s32 f26C4;              // 0x26C4
     f32 f26C8;              // 0x26C8
     u8 pad26CC[0x2718 - 0x26CC];
-    s32 f2718;              // 0x2718
+    s32 f2718;              // 0x2718: -1, or a mode that holds the pad-select flag (func_001D27C0)
     u8 pad271C[0x2730 - 0x271C];
     s32 f2730;              // 0x2730
     u8 pad2734[0x2750 - 0x2734];

@@ -2451,6 +2451,7 @@
 #define GroupAnimationEventObjects                 func_001CB8B8
 #define SyncPlayerTarget                           func_001CD088
 #define GetPlayerPose                              func_001CDF78
+#define SetPlayerPadSelectMode                     func_001D27C0
 #define ShowModeLabel                              func_001D29C8
 #define UpdateModeSelection                        func_001D2BB8
 #define FindNextTableIndexMatchingMask             func_001D3100

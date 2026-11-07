@@ -2791,3 +2791,4 @@ func_001C5D58	TurnColliderTowardHeading	turns the rotation vector at +0x160's th
 func_001C5E50	ScaleTurningColliderRamp	copies the ramp D_00274B80 to +0x6E0 and scales its first two values by the factor and the third by the factor's inverse square root
 func_001C8BC0	FaceAgentTowardGoalPoint	works out the two angles from the agent's position (+0x140) to the point at +0xA40 with func_001454E0 and sets them with SetAgentFacingAngles
 func_001C8FD0	ForceAgentState	clears the forced flag at +0xB88 for mode -1; otherwise sets it and runs ChangeAgentState with the mode and value (func_00105360 calls it)
+func_001D27C0	SetPlayerPadSelectMode	stores a mode at +0x2718 of the player: leaving -1 takes the world's pad-select flag and shows the counted screen element (AcquirePadSelectFlag, ShowCountedScreenElement), going back to -1 releases and hides them; func_00109488 and func_001D1BB0 call it
