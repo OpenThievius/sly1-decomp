@@ -665,7 +665,7 @@ ASM_FUNC(func_001919F8);
 
 void func_00191A68(Owner_191A68* self)
 {
-    func_00191290(&self->part);
+    FindPointGraphPath(&self->part);
 }
 
 void func_00191A88(Owner_191A88* self)

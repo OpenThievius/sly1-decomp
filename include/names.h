@@ -2424,10 +2424,13 @@
 #define ClassifyAgainstUnitRange                   func_001909B0
 #define IsPointPathShortcutBlocked                 func_00190E30
 #define GetPointGraphItemIndex                     func_00190EA8
+#define SearchPointGraph                           func_00190EB8
 #define SimplifyPointPath                          func_00191128
+#define FindPointGraphPath                         func_00191290
 #define SnapPointToPointGraph                      func_00191570
 #define LoadPointGraph                             func_001916D0
 #define MeasurePointGraphEdges                     func_001919F8
+#define FindOwnerGraphPath                         func_00191A68
 #define SnapPointToOwnerGraph                      func_00191A88
 #define SetScreenOwner                             func_00191E70
 #define ClearScreenOwner                           func_00191EB0
