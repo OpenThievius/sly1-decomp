@@ -146,15 +146,15 @@ void func_001373D0(BufferedStream* self)
     switch (self->mode) {
     case 0:
         if (self->f34 >= 0) {
-            func_001F8C38(self->f34);
+            CloseFile(self->f34);
         }
         break;
     case 1:
         if (self->f3C != 0) {
             if ((self->flags & 2) != 0) {
-                func_00203E28();
+                StopDiscRead();
             } else {
-                func_0011E2A0();
+                CloseDiscStream();
             }
         }
         break;
@@ -238,8 +238,8 @@ void func_00140C28(s32 a, s32 b, s32 c);
 struct Io_137490 {
     static void Read(Strm_137490* self, s32 sector, s32 len, s32 dst)
     {
-        if (self->flags & 2) func_00140CC8(sector, len, dst);
-        else func_00140C28(sector, len, dst);
+        if (self->flags & 2) StartLowLevelDiscReadUntilAccepted(sector, len, dst);
+        else StartDiscReadUntilAccepted(sector, len, dst);
     }
 };
 
@@ -260,18 +260,18 @@ void func_00137490(Strm_137490* self)
     do {
         if (self->size > 0) {
             s32 got;
-            if (self->flags & 2) got = func_00203AE8();
+            if (self->flags & 2) got = GetDiscReadPosition();
             else got = 0;
             got = Min_137490::Of(got + self->start, self->size);
             if (self->done < got) {
                 self->done = got;
             } else {
                 s32 busy;
-                if (self->flags & 2) busy = func_002032C8(1);
+                if (self->flags & 2) busy = SyncDiscNCommand(1);
                 else busy = SyncDiscRead(1);
                 if (busy == 0) {
                     s32 err;
-                    if (self->flags & 2) err = func_00203D90();
+                    if (self->flags & 2) err = GetDiscError();
                     else err = GetDiscReadError();
                     if (err == 0) {
                         s32 size = self->size;
@@ -325,7 +325,7 @@ void func_001377C0(Obj_1377C0* self)
     s32 limit = self->f14;
     self->f20 = self->f8;
     size = (size > 0x8000) ? Min_1377C0::Of(0x8000, limit) : Min_1377C0::Of(size, limit);
-    self->f24 = func_001F8DB8(self->f34, self->f20, size);
+    self->f24 = ReadFile(self->f34, self->f20, size);
 }
 
 struct State_001365A8 { u8 pad[0x300]; f32 value;
@@ -372,8 +372,8 @@ struct Begin_135550 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_135550*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_135550*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -415,7 +415,7 @@ void func_001378A0(BufferedStream* d)
     s32 more;
     s32 carry = d->f2C;
     if (carry > 0) {
-        func_001F5A58((void*)0x70000000, (void*)0x70002000, carry);
+        CopyBytes((void*)0x70000000, (void*)0x70002000, carry);
         pos = d->f2C;
     }
     while ((more = pos < 0x2000) != 0) {
@@ -855,8 +855,8 @@ void func_001385A0(World* w, s32 a, s32 b, u8 set, u8 clr) {
         if (n1->f0) {
             u64 m = (u64)0x8000 << 40;
             FreePooledContactChain(w, n1->f0);
-            if (!(n1->fC->flags538 & m)) func_00129DF8(n1->fC);
-            if (!(n2->fC->flags538 & m)) func_00129DF8(n2->fC);
+            if (!(n1->fC->flags538 & m)) ClearRootTries(n1->fC);
+            if (!(n2->fC->flags538 & m)) ClearRootTries(n2->fC);
         }
         PushFreeSlot((u8*)w + 0x1AF0, n1);
         PushFreeSlot((u8*)w + 0x1AF0, n2);
@@ -1098,11 +1098,11 @@ void func_00138C00(World* w, s32 arg)
                 {
                     if (!(pair[0]->bits538 & (0x8000ull << 40)))
                     {
-                        func_00129DF8(pair[0]);
+                        ClearRootTries(pair[0]);
                     }
                     if (!(pair[1]->bits538 & (0x8000ull << 40)))
                     {
-                        func_00129DF8(pair[1]);
+                        ClearRootTries(pair[1]);
                     }
                 }
             }
@@ -1504,14 +1504,14 @@ OwnedRecord* func_00139C70(Obj_139C70* o)
     if (!s) {
         return 0;
     }
-    func_001F5C0C(s, 0, 0x10C0);
+    FillMemory(s, 0, 0x10C0);
     if (o->mode != 2) {
         s->owner = o;
     } else {
         void* r = PopFreeSlot(o->ctx + 0x1B4C);
         s->extraRecord = r;
         if (r) {
-            func_001F5C0C(r, 0, 0x580);
+            FillMemory(r, 0, 0x580);
             s->owner = o;
         } else {
             PushFreeSlot(o->ctx + 0x1B40, s);
@@ -1738,7 +1738,7 @@ void func_00129DF8(void* self);
 void func_0013A3A0(WorldListedObject* self)
 {
     UpdatePlacedObject(self);
-    func_00129DF8(self);
+    ClearRootTries(self);
     FlagRecord* sub = self->flagRecord;
     Camera* g = g_camera;
     s32 hit = 0;
@@ -1791,7 +1791,7 @@ void func_0013AD80(void* self);
 void func_0013AD08(WorldListedObject* owner, s32 unused, Src_13AD08* src)
 {
     ParamBlock_13AD08 blk;
-    func_001F5C0C(&blk, 0, (u32)0x80);
+    FillMemory(&blk, 0, (u32)0x80);
     blk.count = 0xF;
     blk.fn = func_0013AD80;
     blk.zero = 0;

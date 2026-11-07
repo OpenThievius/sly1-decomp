@@ -113,7 +113,7 @@ struct Gfx_132500 {
 
     static f32 Wave(f32 x, f32 period, f32 phase)
     {
-        return func_00205210(phase + (x / period) * 2.0f * 3.1415927f);
+        return Cosine(phase + (x / period) * 2.0f * 3.1415927f);
     }
 
     static s32 ScreenX(f32 x)
@@ -261,8 +261,8 @@ struct Begin_135550 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_135550*)D_0027B314;
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_135550*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -304,7 +304,7 @@ struct Style_136FE8 {
     u32 f18;
     Style_136FE8(f32 w)
     {
-        func_001F5C0C(this, 0, 0x1C);
+        FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
         f8 = w;
         f10 = 0.3f;
@@ -313,7 +313,7 @@ struct Style_136FE8 {
     }
     Style_136FE8(s32 w, s32 h)
     {
-        func_001F5C0C(this, 0, 0x1C);
+        FillMemory(this, 0, 0x1C);
         f4 = 0x2D;
         f8 = w;
         fC = h;
@@ -757,11 +757,11 @@ void func_00133B58(T217D_440* self, V24A0* gs)
     Rgba_130F48 c2;
     f32 step = 1.0f / 24.0f;
     f32 t;
-    t = 0.5f - func_00205210(self->spin) * 0.5f;
+    t = 0.5f - Cosine(self->spin) * 0.5f;
     c0 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->spin + 1.5707964f) * 0.5f;
+    t = 0.5f - Cosine(self->spin + 1.5707964f) * 0.5f;
     c1 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
-    t = 0.5f - func_00205210(self->spin + 3.1415927f) * 0.5f;
+    t = 0.5f - Cosine(self->spin + 3.1415927f) * 0.5f;
     c2 = Lerp_133B58::Mix(D_002610E0, D_002610D8, t);
     s32 i;
     f32 x;
@@ -883,7 +883,7 @@ void func_00135228(T217D_440* self, V24A0* q)
             *(u32*)c0 = 0xFF408080;
             *(u32*)c1 = 0xFF406060;
             *(u32*)c2 = 0xFF404040;
-            f32 t = func_00205210(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
+            f32 t = Cosine(g_gameClock[1] * D_00261260[0]) * 0.5f + 0.5f;
             for (u32 i = 0; i < 4; i++)
             {
                 f32 r = ApproachValueWithRamp(self->blockB[i], self->blockA[i] ? 1.0f : 0.0f, g_gameClock[2], &D_00261260[2], 0);
@@ -1030,7 +1030,7 @@ void func_00135E78(T217D_440* self, s32 state, s32 flag)
         do {
             if (flag != 0) {
                 RemoveEffect(e->handle);
-                func_001F5C0C(self->blockB, 0, 16);
+                FillMemory(self->blockB, 0, 16);
             } else {
                 SetEffectPhase(e->handle, 2);
             }
@@ -1040,7 +1040,7 @@ void func_00135E78(T217D_440* self, s32 state, s32 flag)
     }
     self->count = 0;
     self->countA = 0;
-    func_001F5C0C(blockA, 0, 16);
+    FillMemory(blockA, 0, 16);
     self->bankState = state;
 }
 

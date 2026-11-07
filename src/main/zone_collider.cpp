@@ -589,8 +589,8 @@ struct Begin_13E950 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = ((Iter_13E950*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->saved = ((Iter_13E950*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 
@@ -683,7 +683,7 @@ void func_0013EB68(void* a, s32 b)
     }
     *(s32*)((u8*)self + 0x12C) = b;
     self->stamp = g_gameTime;
-    func_00129DF8(self->owner);
+    ClearRootTries(self->owner);
     if (s1 != 0) {
         func_0013EF50(self, 0, 0);
     }
@@ -801,16 +801,16 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
                 if (t >= 0.0f) {
                     dir = 2;
                 }
-                func_0012C8F8(obj, other, dir, 0, 0.0f, t);
+                FindOrCreateSeekedAnimationPlayer(obj, other, dir, 0, 0.0f, t);
             } else if (self->f138 != 0) {
                 f32 t = self->f118;
                 dir = 0;
                 if (t < 0.0f) {
                     dir = 2;
                 }
-                func_0012C8F8(obj, other, dir, 0, 0.0f, t);
+                FindOrCreateSeekedAnimationPlayer(obj, other, dir, 0, 0.0f, t);
             } else {
-                func_0012C8F8(obj, other, 1, 0, 0.0f, self->f118);
+                FindOrCreateSeekedAnimationPlayer(obj, other, 1, 0, 0.0f, self->f118);
             }
         }
     }
@@ -899,7 +899,7 @@ void func_0013F140(TriggerZone* self, void* a1, Quad28* q)
         if (n > 0) {
             u8* p = (u8*)self + n * 16;
             s32 o = n * 16;
-            func_001F5B08((u8*)(o + (s32)self) + 0x7C0, &self->quads[0], o);
+            MoveMemory((u8*)(o + (s32)self) + 0x7C0, &self->quads[0], o);
         }
     } else {
         idx = n;
@@ -1011,7 +1011,7 @@ s32 func_0013F940(TriggerZone* s, f32* out)
         }
     }
     if (out != 0) {
-        *out = func_00205578(best);
+        *out = Arccosine(best);
     }
     return idx;
 }
@@ -1137,7 +1137,7 @@ void func_0013FD20(TriggerZone* self)
                 else if (s0 == 1 && !mode) r = 1;
             }
             if (self->f7B0 != s0) {
-                func_00129DF8(self);
+                ClearRootTries(self);
                 self->f7B0 = s0;
             }
             break;

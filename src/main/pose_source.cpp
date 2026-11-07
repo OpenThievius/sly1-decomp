@@ -952,7 +952,7 @@ void func_0011F850(T2196_Weight** objs, s32* outCount, f32** outArr)
         w += counts[i];
     }
     w = arr + 1;
-    func_001F5CD0(arr, total, 4, CompareFloats);
+    SortElements(arr, total, 4, CompareFloats);
     f32* r = w;
     for (total = last - 1; total >= 0; total--) {
         if (*r != w[-1]) { *w = *r; w++; }
@@ -1138,7 +1138,7 @@ void func_001202F0(T2196_718* self, PlacedObject* second, void* third,
     func_0011F6B0(self->axis, second, third, &self->base,
                   output ? &result : 0, 0, factor, 1.0f);
     if (output) {
-        func_001F5C0C(output, 0, 0x30);
+        FillMemory(output, 0, 0x30);
         output->x = result.x;
         output->y = result.y;
         output->z = result.z;
@@ -1162,7 +1162,7 @@ void func_001203A8(T2196_728* self, PlacedObject* unused, void* mode,
     EvaluateVectorKeyCurve(self->count, self->keys, mode,
                   output ? &result.first : 0, 0, factor, 1.0f);
     if (output) {
-        func_001F5C0C(output, 0, 0x30);
+        FillMemory(output, 0, 0x30);
         output->first = result.first;
         output->second = result.second;
         output->third = result.third;

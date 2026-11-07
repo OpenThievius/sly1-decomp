@@ -129,7 +129,7 @@ void func_001409E0(void)
     s32 s1;
     switch (g_discSectorCheckState) {
     case 3:
-        if (func_00203EE0(2, tmp) != 0) {
+        if (CheckDiscChanged(2, tmp) != 0) {
             if (tmp[0] != 0) {
                 if (func_00140968() == 0) {
                     SetPauseMenuLayerPage(g_pauseMenuElement, 2, 0x16);
@@ -204,9 +204,9 @@ void func_00140CC8(void* a, void* b, void* c)
 {
     s32 result;
     do {
-        result = func_00203B18(a, b, c, (void*)&D_00247AA0);
+        result = ReadDiscSectors(a, b, c, (void*)&D_00247AA0);
         g_lastDiscReadResult = result;
-        if (result != 1) { func_002032C8(0); g_discReadErrors[0] = func_00203D90(); }
+        if (result != 1) { SyncDiscNCommand(0); g_discReadErrors[0] = GetDiscError(); }
     } while (result != 1);
 }
 

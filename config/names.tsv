@@ -3334,3 +3334,149 @@ func_0020DF10	WaitIpuDecodeDone	waits for the IPU's block decode, running the de
 func_0020E3B8	DecodeAllMacroblocks	decodes every macroblock of a picture (half of them for a field) with DecodeSliceMacroblocks, then adds the residuals, reporting "= Skip to the next picture =" on an error
 func_0020E5F0	DecodeSliceMacroblocks	decodes macroblocks up to a count, reading each slice's start and each macroblock's address increment, and returns 1 to 3 when it has to stop
 func_00210090	DecodePictureData	picks the output picture by the picture structure (reporting "odd number of field pictures" or "unknown picture sutructure") and decodes its macroblocks with DecodeAllMacroblocks
+func_00112698	AddScriptValues	built-in (original assembly): sums its arguments by tag, ints and floats with add.s, 16-byte vectors with vadd, matrices element by element, and returns an int, float, vector or matrix
+func_00112968	SubtractScriptValues	built-in (original assembly): the same shape as AddScriptValues with sub.s and vsub: subtracts the later arguments from the first by tag
+func_00112C38	MultiplyScriptValues	built-in (original assembly): multiplies its arguments by tag: numbers with mul.s, a vector by a number (vmulx, func_00118D30), matrices with MultiplyMatrices, into vector, pair or matrix payloads
+func_00113240	DivideScriptValues	built-in (original assembly): divides the first argument by the others by tag with div.s, a vector or matrix by a number through its reciprocal
+func_00115F70	GetScriptDotProduct	built-in (original assembly): the dot product of its two vector arguments (vmul.xyz, then the three components summed), returned as a float
+func_00115FF8	GetScriptCrossProduct	built-in (original assembly): the cross product of its two vector arguments (vopmula/vopmsub) in a new vector payload
+func_00116080	GetScriptVectorLength	built-in (original assembly): the square root (vsqrt) of the vector argument's dot product with itself, returned as a float
+func_00116108	GetScriptDistance	built-in (original assembly): the length of the difference of its two vector arguments, or of the first from the zero vector D_00248D30 when only one is given
+func_001161F8	GetScriptDistanceSquared	built-in (original assembly): GetScriptDistance without the square root: the squared length of the difference of its vectors
+func_001162D0	NormalizeScriptVector	built-in (original assembly): divides the vector argument by its length into a new vector payload, unless the length is below 0.0001
+func_00116400	ProjectScriptVector	built-in (original assembly): the second vector scaled by its dot product with the first (vmul, vmulx), in a new vector payload
+func_00116490	RemoveScriptVectorComponent	built-in (original assembly): the first vector minus its component along the second (the second scaled by their dot product), in a new vector payload
+func_001167C0	TransformScriptMatrixByObject	built-in: TransformMatrixByObject with the two arguments into a new matrix payload, returned as a script matrix
+func_00116BC8	MakeScriptDirectionMatrix	built-in (original assembly): a matrix payload built by func_00189C28 from the difference of its two vector arguments and an up vector (the third argument, else g_unitZVector), reset with ResetMatrixHomogeneous
+func_001188F0	SendScriptPointEventToWorldListener	built-in: an object and a float argument forwarded to SendPointEventToWorldListener, empty result
+func_00118D30	ScaleQuadword	original assembly: multiplies the 16-byte vector in its second argument by the x of its first (vmulx) and returns the quadword; MultiplyScriptValues calls it
+func_0011D928	SendIopSoundLevel	queues IOP command 0x27 with one word; every caller passes a sound level plus 0x14 (ClearSoundLevels, ReleaseSoundLevel, InitSoundSystem, UpdateSoundEmitters)
+func_0011E010	StopAllIopSounds	queues IOP command 0x34 without data; StopAllSoundsAndWait and StartMovieStream call it before waiting on command 0x36
+func_0011E2A0	CloseDiscStream	without IOP disc access calls StopDiscRead, else queues IOP command 0x37 and returns 1; CloseBufferedStream calls it
+func_0011E498	StopIopMovieStream	sends IOP command 0x3C without data and waits (SendIopCommandAndWait); StopMovieStream calls it
+func_0011E4C0	UpdateIopMovieStream	sends IOP command 0x3E with five words and waits; UpdateMovieStream calls it with its two stream words
+D_00249428	g_rpcBindErrorFormat	the format string InitIopCommandChannels prints (func_001E1F10) when binding an RPC client fails
+D_0025C348	g_soundBankLoadError	cleared when LoadSoundBankAtLocation or StartSoundBankLoad starts and set to 0x106 when the RPC call fails
+D_0025C350	g_discReadDoneCallback	the function PollIopCommands calls with 1 once a pending disc read (g_discReadPending) has finished
+D_0025C354	g_discReadPending	set to 1 by StartDiscRead; PollIopCommands syncs the read while it is set and clears it when g_discReadDone is set
+D_0025C358	g_discReadDone	SyncDiscRead's result: whether the shared packet's word has dropped below 1, i.e. the read is done
+D_0025C35C	g_iopReplyCallbackPending	when set, PollIopCommands calls g_iopReplyCallback with the reply's result instead of the per-command callbacks, then clears both
+D_0025C384	g_iopFlushDeferred	while set, PollIopCommands does not flush the command buffer; QueueIopCommand clears it when it has to wait for buffer space
+D_0025C388	g_soundBankLoadBusy	nonzero while a sound bank load runs on the second RPC client; the loads refuse to start while it is set and PollIopCommands clears it with the result
+D_0025C390	g_soundBankLoadCallback	a function and its argument PollIopCommands calls with the bank load's result once it arrives; StartSoundBankLoad stores them
+D_0025C3A0	g_iopReplyCallback	the function PollIopCommands calls with the reply's result and g_iopReplyCallbackArg when g_iopReplyCallbackPending is set
+D_0025C3A8	g_iopReplyCallbackArg	the argument passed to g_iopReplyCallback
+D_0025C3C0	g_iopCommandReply	the 12-byte reply buffer of the command RPC client: SendIopCommandAndWait and QueueIopCommand arm it and read its result word
+D_0025C540	g_iopCommandBuffer0	the first 0x1000-byte IOP command buffer, g_iopCommandBuffers[0] (InitIopCommandChannels)
+D_0025D540	g_iopCommandBuffer1	the second 0x1000-byte IOP command buffer, g_iopCommandBuffers[1]
+D_0025E540	g_iopCallbackTable0	the callback entries of the first command buffer, g_iopCallbackTables[0]; PollIopCommands calls them with the replies
+D_0025F540	g_iopCallbackTable1	the callback entries of the second command buffer, g_iopCallbackTables[1]
+D_00260540	g_iopReplyTable0	the reply words of the first command buffer, g_iopReplyTables[0]
+D_00260980	g_iopReplyTable1	the reply words of the second command buffer, g_iopReplyTables[1]
+func_0011E560	InitObjectBuiltinTable	entry 12 of the startup table D_002647C0: calls func_00109488, which fills the table D_002505D8 with the object built-ins (TestScriptObjectOfKind, func_00100218, ...)
+func_0011EF40	EvaluateNoPositionCurve	empty; slot 10 of D_00219600, the position-curve slot whose times slot (12) is GetNoPositionCurveTimes
+func_0011EF60	EvaluateNoRotationCurve	empty; slot 14 of D_00219600, before GetNoRotationCurve, the rotation-curve slots whose times slot (17) is GetNoRotationCurveTimes
+func_0011EF68	GetNoRotationCurve	empty; slot 15 of D_00219600 and slot 1 of D_00219708, where the keyed rotation curves have GetAxisRotationCurve and GetKeyedRotationCurve
+func_0011EF88	EvaluateNoScaleCurve	empty; slot 18 of D_00219600, the scale-curve slot whose times slot (20) is GetNoScaleCurveTimes
+func_0011EFA8	EvaluateNoWeightCurve	empty; slot 22 of D_00219600, the weight-curve slot whose times slot (24) is GetNoWeightCurveTimes
+func_0011FC90	ReadAxisPositionCurve	original assembly; slot 1 of D_002196B8 between EvaluateAxisPositionCurve and GetAxisPositionCurveTimes, the read slot of the other curve tables
+func_0011FE40	ReadVectorKeyPositionCurve	original assembly; slot 1 of D_002196C8 between EvaluateVectorKeyPositionCurve and GetVectorKeyPositionCurveTimes, the read slot of the other curve tables
+func_00122A80	GetIdentityPosePosition	original assembly; slot 4 of InitIdentityPoseSource's table D_002195D8: the position of the source at +0x8 (its slot 4) or GetOwnerPosition, plus its own offset (vadd)
+func_00122B30	GetIdentityPoseRotation	original assembly; slot 5 of D_002195D8: the rotation of the source at +0x8 or GetOwnerRotation, combined with its own matrix
+func_00122CB0	GetIdentityPoseMatrix	original assembly; slot 7 of D_002195D8: the matrix of the source at +0x8 or GetIdentityMatrix, combined with its own
+func_00122D90	GetIdentityPoseIndexedValue	returns 0.0; slot 8 of D_002195D8, the indexed-value slot (GetOwnerIndexedValue, GetSnapshotIndexedValue)
+func_00122DA0	InitAimPoseSource	slot 0 of D_00219600: InitPoseSource, then 1.0 at +0x1C and 0.25 at +0x20
+func_00122DE0	GetAimPoseRotation	original assembly; slot 5 of D_00219600: builds its rotation with func_00189C28 (as MakeScriptDirectionMatrix does) from a difference of two points scaled by a reciprocal (vdiv)
+func_00123B18	CountStateTriggerDone	adds one to the state trigger's done counter
+func_00123B28	ResetStateTriggerOutputModes	for each output object whose word at +0x560 is -1, calls its slot 73 (+0x134: SetTimedGroupMode, SetSequencedObjectMode) with mode 0, when present
+func_00123BB0	EndStateTriggerOutputs	calls slot 74 (+0x138: RequestTimedGroupEnd, RequestSequencedObjectEnd) of each output object, when present
+func_00129440	GetRangeRecordPresent	stores whether the range record at +0x284 exists (the getter beside SetRangeRecordPresent)
+func_00129DF8	ClearRootTries	zeroes the tries count at +0x228 of the object's root (+0x50), when it has one
+func_0012AA50	SetElementsScrollScale	calls SetScrollScale with its two floats on each of the object's elements of kind 6
+func_0012AAE8	SetCrossfadeRatioDeep	calls SetCrossfadeRatio on each element of kind 5, then recurses into the children whose class flags have bit 0
+func_0012ACA0	SetSoundOuterRange	makes the sound record and stores a float at +0x04, the value GetSoundOuterRange reads
+func_0012ACF8	SetSoundInnerRange	makes the sound record and stores a float at +0x08, the value GetSoundInnerRange reads
+func_0012AE20	SetPlayingSoundVolume	passes its float on to SetSoundRecordVolume for the sound handle at +0x1C of the sound record, when both exist
+func_0012AEB0	SetPlayingSoundPitch	passes its float on to SetSoundRecordPitch for the sound handle at +0x1C of the sound record, when both exist
+func_0012B260	GetTintRgb	stores tint byte 0 (+0x2B0), which SetTintRgb sets with bytes 1 and 2
+func_0012B270	SetTintByte0	stores its argument in tint byte 0 (+0x2B0)
+func_0012B278	GetTintByte0	stores tint byte 0 (+0x2B0)
+func_0012B288	SetTintByte1	stores its argument in tint byte 1 (+0x2B1)
+func_0012B290	GetTintByte1	stores tint byte 1 (+0x2B1)
+func_0012B2A0	SetTintByte2	stores its argument in tint byte 2 (+0x2B2)
+func_0012B2A8	GetTintByte2	stores tint byte 2 (+0x2B2)
+func_0012B2B8	SetTintByte3	stores its argument in tint byte 3 (+0x2B3)
+func_0012B2C0	GetTintByte3	stores tint byte 3 (+0x2B3)
+func_0012B420	SetObjectCameraTracked	sets or clears bit 36 of the flags at +0x2C8 and, when that changes it on an attached object, adds it to or removes it from the camera's objects (AddCameraObject, RemoveCameraObject)
+func_0012C8F8	FindOrCreateSeekedAnimationPlayer	calls FindOrCreateAnimationPlayerAndSeek with its arguments and returns the player it stores
+func_0012C9A8	HasAnimationEventKind19	returns 1 when one of the animation's timed entries (+0x4 of each 16-byte entry) has kind 0x19, else 0
+func_0012D448	SetAnimationPlayerPadSelect	when the flag differs from the byte at +0x24, takes (AcquirePadSelectFlag) or gives back (ReleasePadSelectFlag) the world's pad select flag and stores it
+func_0012F718	SetAttachmentSortKeys	stores the value at +0x14 of each node of the owner's list and re-sorts each node's attachments (SortAttachments)
+D_00260F00	g_colorPresets	the 64-byte colour records SetColorPreset copies over an object's colour record by index
+D_00261000	g_defaultColorRecord	the 64-byte colour record EnsureColorRecord copies into a new record
+func_00100218	RemoveScriptObjectFromParentList	builtin: no arguments, calls slot 3 (RemoveObjectFromParentList) on the object, empty result
+func_001002C0	AddScriptObjectToParentList	builtin: no arguments, calls slot 2 (AddObjectToParentList) on the object, empty result
+func_00100438	ReparentScriptObject	builtin: one argument forwarded to slot 21 (ReparentObject), with the object argument as the new parent, empty result
+func_00100720	SetScriptExtraObjectPropertyInt	builtin: two arguments forwarded to SetExtraObjectPropertyInt, empty result
+func_001008B8	SetScriptExtraObjectPropertyVectorB	builtin: two arguments forwarded to SetExtraObjectPropertyVectorB, empty result
+func_00100A78	SetScriptExtraObjectPropertyWord	builtin: two arguments forwarded to SetExtraObjectPropertyWord, empty result
+func_00100B48	SetScriptExtraObjectPropertyVectorA	builtin: two arguments forwarded to SetExtraObjectPropertyVectorA, empty result
+func_00101568	CopyScriptPlacedObjectFrame	builtin: one argument forwarded to slot 31 of class 0x02 (CopyPlacedObjectFrame), with the object argument as the source, empty result
+func_001023F8	TestScriptRequestBlocked	builtin: one argument, the result of slot 75 (IsSwitchedColliderRequestBlocked, IsAgentRequestBlocked) returned as a script bool
+func_00102650	SetScriptTimedObjectMode	builtin: one argument forwarded to slot 73, when present (SetTimedGroupMode, SetSequencedObjectMode), empty result
+func_00102710	RequestScriptTimedObjectEnd	builtin: no arguments, calls slot 74, when present (RequestTimedGroupEnd, RequestSequencedObjectEnd) on the object, empty result
+func_00102A70	SetScriptEffectSpawnerInactive	builtin: no arguments, calls SetEffectSpawnerInactive on the object, empty result
+func_00102D40	SendScriptEmptyMessageC7A	builtin: no arguments, calls SendEmptyMessage (on a class 0x7A object) on the object, empty result
+func_00102DE0	SendScriptTwoVectorMessageC7A	builtin: six arguments forwarded to SendTwoVectorMessage (on a class 0x7A object), empty result
+func_00102F10	SendScriptEmptyMessageC78	builtin: no arguments, calls SendEmptyMessage (on a class 0x78 object) on the object, empty result
+func_00102FB0	SendScriptTwoVectorMessageC78	builtin: six arguments forwarded to SendTwoVectorMessage (on a class 0x78 object), empty result
+func_00103D70	RecomputeScriptSaveCompletion	builtin: no arguments, the result of RecomputeSaveCompletion returned as a script int
+func_00103E10	PopScriptActiveSequenceElement	builtin: no arguments, calls PopActiveSequenceElement on the object, empty result
+func_00103EB0	ShowScriptPauseMenuPageWith	builtin: two arguments forwarded to ShowPauseMenuPageWith, empty result
+func_001040C0	PushScriptSoundLevel	builtin: one argument, the result of PushSoundLevelBuiltin returned as a script int
+func_00104170	RemoveScriptSoundLevel	builtin: one argument forwarded to RemoveSoundLevelBuiltin, empty result
+func_00104220	SetScriptCachedVoiceParam	builtin: two arguments forwarded to SetCachedVoiceParamBuiltin, empty result
+func_001042F0	GetScriptCachedVoiceParam	builtin: one argument, the result of GetCachedVoiceParamBuiltin returned as a script int
+func_001043A0	RefreshScriptCachedVoiceParam	builtin: two arguments forwarded to RefreshCachedVoiceParamBuiltin, empty result
+func_00105878	PlaceScriptPlayerOnGround	builtin: three arguments forwarded to PlacePlayerOnGround, empty result
+func_00105960	ReleaseScriptPlayerToState2	builtin: no arguments, calls ReleasePlayerToState2 on the object, empty result
+func_00105C10	SeekScriptObjects105Animations	builtin: one argument forwarded to SeekObjects105Animations, empty result
+func_00106270	AddScriptContactListId	builtin: one argument forwarded to func_0018DD50 (AddContactListId), empty result
+func_00106320	AddScriptContactListKind	builtin: one argument forwarded to func_0018DD78 (AddContactListKind), empty result
+func_00106C50	SetScriptStepSequenceModeOne	builtin: no arguments, calls SetStepSequenceModeOne on the object, empty result
+func_00106CF0	SetScriptStepSequenceCameraMode	builtin: no arguments, calls SetStepSequenceCameraMode on the object, empty result
+func_00107040	AddScriptC8DXEntry	builtin: no arguments, calls AddC8DXEntry on the object, empty result
+func_001070E0	AddScriptC8DYZEntry	builtin: no arguments, calls AddC8DYZEntry on the object, empty result
+func_00107350	AdvanceScriptGaugeAgentPhase	builtin: no arguments, calls AdvanceGaugeAgentPhase on the object, empty result
+func_001074C0	AddScriptPathFollowerEntry	builtin: one argument forwarded to AddPathFollowerEntry, empty result
+func_00107570	AddScriptPathFollowerActiveEntry	builtin: five arguments forwarded to AddPathFollowerActiveEntry, empty result
+func_00107678	ResetScriptPathFollower	builtin: no arguments, calls ResetPathFollower on the object, empty result
+func_00107898	AddScriptSeekingAgentObject	builtin: one argument, the result of func_00190660 (AddSeekingAgentObject) returned as a script bool
+func_00107C00	AddScriptQueueEntryKind0	builtin: one argument forwarded to AddQueueEntryKind0, empty result
+func_00107CB0	AddScriptQueueEntryKind1	builtin: one argument forwarded to AddQueueEntryKind1, empty result
+func_00107D60	AddScriptQueueEntryKind10	builtin: one argument forwarded to AddQueueEntryKind10, empty result
+func_00107E10	AddScriptQueueEntryKind2	builtin: one argument forwarded to AddQueueEntryKind2, empty result
+func_00107EC0	AddScriptQueueEntryKind3	builtin: one argument forwarded to AddQueueEntryKind3, empty result
+func_00107F70	AddScriptQueueEntryKind4	builtin: two arguments forwarded to AddQueueEntryKind4, empty result
+func_00108038	AddScriptQueueEntryKind5	builtin: four arguments forwarded to AddQueueEntryKind5, empty result
+func_00108128	AddScriptQueueEntryKind6	builtin: three arguments forwarded to AddQueueEntryKind6, empty result
+func_00108208	AddScriptQueueEntryKind7	builtin: three arguments forwarded to AddQueueEntryKind7, empty result
+func_001082E8	AddScriptQueueEntryKind8	builtin: three arguments forwarded to AddQueueEntryKind8, empty result
+func_001083C8	AddScriptQueueEntryKind9	builtin: two arguments forwarded to AddQueueEntryKind9, empty result
+func_00108498	AddScriptQueueEntryKind11	builtin: one argument forwarded to AddQueueEntryKind11, empty result
+func_00108548	AddScriptQueueEntryKind12	builtin: no arguments, calls AddQueueEntryKind12 on the object, empty result
+func_00108688	PlayScriptGaugeModeObjectTarget	builtin: no arguments, calls PlayGaugeModeObjectTarget on the object, empty result
+func_00108728	SetScriptGaugeModeObjectTarget	builtin: one argument forwarded to SetGaugeModeObjectTarget, empty result
+func_00108928	EndScriptHeldTimeline	builtin: no arguments, calls EndHeldTimeline on the object, empty result
+func_001089C8	AddScriptC13Entry	builtin: two arguments forwarded to AddC13Entry, empty result
+func_00108BE8	AppendScriptTimelineKind0Entry	builtin: three arguments forwarded to AppendTimelineKind0Entry, empty result
+func_00108CC8	AppendScriptTimelineKind1Entry	builtin: three arguments forwarded to AppendTimelineKind1Entry, empty result
+func_00108DA8	AppendScriptTimelineKind2Entry	builtin: two arguments forwarded to AppendTimelineKind2Entry, empty result
+func_00108E70	AppendScriptTimelineKind3Entry	builtin: two arguments forwarded to AppendTimelineKind3Entry, empty result
+func_00108F38	AppendScriptTimelineKind4Entry	builtin: two arguments forwarded to AppendTimelineKind4Entry, empty result
+func_00109000	AppendScriptTimelineKind5Entry	builtin: two arguments forwarded to AppendTimelineKind5Entry, empty result
+func_001090C8	SetScriptGaugeBarAgentValues	builtin: three arguments forwarded to func_001A9C58 (SetGaugeBarAgentValues), empty result
+func_001093B8	TakeScriptCountedColliderTouch	builtin: two arguments forwarded to TakeCountedColliderTouch, empty result
+func_00100EE0	SetScriptElementsScrollScale	builtin: two arguments forwarded to SetElementsScrollScale, empty result
+func_00100FA8	SetScriptCrossfadeRatioDeep	builtin: one argument forwarded to SetCrossfadeRatioDeep, empty result
+func_00101B80	FindOrCreateScriptSeekedAnimationPlayer	builtin: five arguments, the result of FindOrCreateSeekedAnimationPlayer returned as a script pointer

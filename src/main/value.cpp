@@ -65,7 +65,7 @@ extern s32 D_00275714;
 void* func_0011AE78(void)
 {
     void* p = TakePoolEntry(&g_propertyRefPool);
-    func_001F5C0C(p, 0, 12);
+    FillMemory(p, 0, 12);
     return p;
 }
 
@@ -82,7 +82,7 @@ void func_0011AEB8(R11B008Node* src, R11B008Node* dst, s32 first)
 R11B008Node* func_0011AF28(void)
 {
     R11B008Node* node = (R11B008Node*)TakePoolEntry(&g_valueNodePool);
-    func_001F5C0C(node, 0, 12);
+    FillMemory(node, 0, 12);
     InitScriptValue(node);
     node->tag = -1;
     return node;
@@ -108,7 +108,7 @@ void func_0011AF98(R11AFC8* src, R11AFC8* dst, s32 first)
 R11AFC8* func_0011AFC8(void)
 {
     R11AFC8* p = (R11AFC8*)TakePoolEntry(&g_payloadPool);
-    func_001F5C0C(p, 0, 0x14);
+    FillMemory(p, 0, 0x14);
     return p;
 }
 
@@ -165,7 +165,7 @@ s32 func_0011B0F8(const ScriptValue* a, const ScriptValue* b)
         return r;
     }
     case 0x17:
-        return func_001F59C4(a->p, b->p, 0x40) == 0;
+        return CompareMemory(a->p, b->p, 0x40) == 0;
     case 0x19: {
         f32* pa = a->v;
         f32* pb = b->v;
@@ -601,7 +601,7 @@ void func_0011BEE0(R11B008List* self, R11B008List* out)
 R11B008List* func_0011BF30(void)
 {
     R11B008List* p = (R11B008List*)AllocateZeroedFrontMemory(4);
-    func_001F5C0C(p, 0, 4);
+    FillMemory(p, 0, 4);
     return p;
 }
 

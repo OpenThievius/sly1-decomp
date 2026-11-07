@@ -156,10 +156,10 @@ struct Frame_141210 {
         list = l;
         cursor = l;
         next_off = l->offset;
-        prev = (Frame_141210*)D_0027B314;
-        D_0027B314 = (ListFrame*)this;
+        prev = (Frame_141210*)g_activeListFrames;
+        g_activeListFrames = (ListFrame*)this;
     }
-    ~Frame_141210() { D_0027B314 = (ListFrame*)prev; }
+    ~Frame_141210() { g_activeListFrames = (ListFrame*)prev; }
 };
 
 void func_001BAC30(Collider* self);
@@ -243,8 +243,8 @@ struct Begin_141438 {
         it->list = list;
         it->link = (u8*)list;
         it->offset = list->offset;
-        it->saved = (Iter_141438*)((void*)D_0027B314);
-        D_0027B314 = (ListFrame*)it;
+        it->saved = (Iter_141438*)((void*)g_activeListFrames);
+        g_activeListFrames = (ListFrame*)it;
     }
 };
 

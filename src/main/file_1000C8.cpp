@@ -847,7 +847,7 @@ ScriptValue* func_00100EE0(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     (void)StoreScriptArgumentsVa(&t, 2, args, &kinds, &x, &y);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0012AA50(obj, x, y);
+    SetElementsScrollScale(obj, x, y);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -865,7 +865,7 @@ ScriptValue* func_00100FA8(ScriptValue* ret, PlacedObject* obj, s32 unused, Scri
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &f0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    (void)func_0012AAE8(obj, f0);
+    (void)SetCrossfadeRatioDeep(obj, f0);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -1158,7 +1158,7 @@ ScriptValue* func_00101B80(ScriptValue* ret, Animation* obj, s32 unused, ScriptV
     (void)StoreScriptArgumentsVa(&t, 5, args, &kinds, &o1, &o2, &o3, &o4, &o5);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValuePointerB(&q, func_0012C8F8(obj, o1, o3, o4, o2, o5));
+    SetScriptValuePointerB(&q, FindOrCreateSeekedAnimationPlayer(obj, o1, o3, o4, o2, o5));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -2872,7 +2872,7 @@ ScriptValue* func_00106270(ScriptValue* ret, C3C* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0018DD50(obj, out);
+    AddContactListId(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -2890,7 +2890,7 @@ ScriptValue* func_00106320(ScriptValue* ret, C3C* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_0018DD78(obj, out);
+    AddContactListKind(obj, out);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
@@ -3404,7 +3404,7 @@ ScriptValue* func_00107898(ScriptValue* ret, C0E* obj, s32 unused, ScriptValue* 
     StoreScriptArgumentsVa(&t, 1, args, &kinds, &out);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    SetScriptValueBool(&q, func_00190660(obj, out));
+    SetScriptValueBool(&q, AddSeekingAgentObject(obj, out));
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);
     return ret;
@@ -3994,7 +3994,7 @@ ScriptValue* func_001090C8(ScriptValue* ret, C0D* obj, s32 unused, ScriptValue* 
     (void)StoreScriptArgumentsVa(&t, 3, args, &kinds, &o0, &o1, &o2);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_001A9C58(obj, o0, o1, o2);
+    SetGaugeBarAgentValues(obj, o0, o1, o2);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

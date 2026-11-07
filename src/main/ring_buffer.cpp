@@ -140,7 +140,7 @@ s32 func_0013CC80(MemoryReader* self, s32 want, void* dst)
     if (want < n) {
         n = want;
     }
-    func_001F5A58(dst, base + pos, n);
+    CopyBytes(dst, base + pos, n);
     self->pos += n;
     self->remain -= n;
     return n;

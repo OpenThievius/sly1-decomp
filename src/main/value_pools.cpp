@@ -81,7 +81,7 @@ extern void* func_0011C1D8(void*);
 void* func_0011C240(void* self)
 {
     void* result = PopPoolFreeEntry(self);
-    func_001F5C0C(result, 0, *(s32*)self - 8);
+    FillMemory(result, 0, *(s32*)self - 8);
     return result;
 }
 
@@ -187,7 +187,7 @@ void func_001F5C0C(void* dst, s32 value, u32 size);
 R11B008Key* func_0011C498(void)
 {
     R11B008Key* n = (R11B008Key*)TakePoolEntry(&g_keyedValuePool);
-    func_001F5C0C(n, 0, 16);
+    FillMemory(n, 0, 16);
     InitScriptValue(&n->value);
     n->value.tag = -1;
     return n;
@@ -207,7 +207,7 @@ void* func_0011C508(void)
 {
     void* p = PopFreeSlot(&g_vectorAPayloadPool);
     if (p != 0) {
-        func_001F5C0C(p, 0, g_vectorAPayloadPool);
+        FillMemory(p, 0, g_vectorAPayloadPool);
     } else {
         CollectScriptPools(g_markStacks);
         p = PopZeroedFreeSlot(&g_vectorAPayloadPool);
@@ -251,7 +251,7 @@ void* func_0011C618(void)
 {
     void* s0 = PopFreeSlot(g_matrixPayloadPool);
     if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)g_matrixPayloadPool);
+        FillMemory(s0, 0, *(u32*)g_matrixPayloadPool);
     } else {
         CollectScriptPools(g_markStacks);
         s0 = PopZeroedFreeSlot(g_matrixPayloadPool);
@@ -292,7 +292,7 @@ void* func_0011C748(void)
 {
     void* s0 = PopFreeSlot(g_vectorBPayloadPool);
     if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)g_vectorBPayloadPool);
+        FillMemory(s0, 0, *(u32*)g_vectorBPayloadPool);
     } else {
         CollectScriptPools(g_markStacks);
         s0 = PopZeroedFreeSlot(g_vectorBPayloadPool);
@@ -330,7 +330,7 @@ void* func_0011C858(void)
 {
     void* s0 = PopFreeSlot(g_pairPayloadPool);
     if (s0 != 0) {
-        func_001F5C0C(s0, 0, *(u32*)g_pairPayloadPool);
+        FillMemory(s0, 0, *(u32*)g_pairPayloadPool);
     } else {
         CollectScriptPools(g_markStacks);
         s0 = PopZeroedFreeSlot(g_pairPayloadPool);
@@ -373,7 +373,7 @@ Pool_11C968* func_0011C968(void)
 {
     Pool_11C968* p = PopFreeSlot(g_triplePayloadPool);
     if (p) {
-        func_001F5C0C(p, 0, g_triplePayloadPool[0]);
+        FillMemory(p, 0, g_triplePayloadPool[0]);
     } else {
         CollectScriptPools(g_markStacks);
         p = PopZeroedFreeSlot(g_triplePayloadPool);
@@ -421,8 +421,8 @@ void func_001B5DD0(Dst_11CA90* p, s32 size, s32 val);
 struct Init_11CA90 {
     static void Load(void* buf, s32 size, s32* id, u8** out)
     {
-        func_001B5DD0((Dst_11CA90*)buf, size, *id);
-        *out = (u8*)func_0018D5C0(*id);
+        InitSlotPool((Dst_11CA90*)buf, size, *id);
+        *out = (u8*)AllocateZeroedFrontMemory(*id);
     }
 };
 

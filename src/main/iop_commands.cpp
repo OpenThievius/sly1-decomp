@@ -86,7 +86,7 @@ s32 func_0011D968(s32 id, s32 size, void* data);
 
 #define ASSERT_0011CBB8(cond, line) \
     if (!(cond)) { \
-        func_001E1F10(D_00249428, D_00249450, line); \
+        PrintFormatted(g_rpcBindErrorFormat, D_00249450, line); \
         for (;;) { \
         } \
     }
@@ -95,30 +95,30 @@ void func_0011CBB8(void)
 {
     s32 n;
 
-    g_iopCommandBuffers[0] = (s32*)D_0025C540;
-    g_iopCommandBuffers[1] = (s32*)D_0025D540;
-    g_iopReplyTables[0] = D_00260540;
-    g_iopReplyTables[1] = D_00260980;
-    g_iopCallbackTables[0] = D_0025E540;
-    g_iopCallbackTables[1] = D_0025F540;
-    func_001F7BE8(0);
+    g_iopCommandBuffers[0] = (s32*)g_iopCommandBuffer0;
+    g_iopCommandBuffers[1] = (s32*)g_iopCommandBuffer1;
+    g_iopReplyTables[0] = g_iopReplyTable0;
+    g_iopReplyTables[1] = g_iopReplyTable1;
+    g_iopCallbackTables[0] = g_iopCallbackTable0;
+    g_iopCallbackTables[1] = g_iopCallbackTable1;
+    InitRemoteCalls(0);
     do {
-        ASSERT_0011CBB8(func_001F80C0(&g_iopCommandRpc, 0x123456, 0) >= 0, 0x6E);
+        ASSERT_0011CBB8(BindRemoteService(&g_iopCommandRpc, 0x123456, 0) >= 0, 0x6E);
         for (n = 10000; --n != -1;) {
         }
     } while (g_iopCommandRpc.server == 0);
-    D_0025C388.busy = 0;
-    D_0025C390.fn = 0;
-    D_0025C390.arg = 0;
+    g_soundBankLoadBusy.busy = 0;
+    g_soundBankLoadCallback.fn = 0;
+    g_soundBankLoadCallback.arg = 0;
     g_iopChannel2Result.result = 0;
     do {
-        ASSERT_0011CBB8(func_001F80C0(&g_iopBankLoadRpc, 0x123457, 0) >= 0, 0x83);
+        ASSERT_0011CBB8(BindRemoteService(&g_iopBankLoadRpc, 0x123457, 0) >= 0, 0x83);
         for (n = 10000; --n != -1;) {
         }
     } while (g_iopBankLoadRpc.server == 0);
     g_iopSharedPacket.f00 = 0;
-    D_0025C540[0] = 0;
-    D_0025D540[0] = 0;
+    g_iopCommandBuffer0[0] = 0;
+    g_iopCommandBuffer1[0] = 0;
     g_iopCommandSpace[0] = 0xFFC;
     g_iopCommandSpace[1] = 0xFFC;
     g_iopSharedPacket.f10 = 0;
@@ -141,11 +141,11 @@ s32 func_0011CE30(void)
     s32 k;
     Cb_11CE30 f;
     if (g_iopReplyBuffer != 0 && IsIopReplyReady() != 0) {
-        if (D_0025C35C != 0) {
-            if (D_0025C3A0.fn != 0)
-                ((Cb_11CE30)D_0025C3A0.fn)(D_0025C3C0.result, D_0025C3A8[0]);
-            D_0025C3A0.fn = 0;
-            D_0025C35C = 0;
+        if (g_iopReplyCallbackPending != 0) {
+            if (g_iopReplyCallback.fn != 0)
+                ((Cb_11CE30)g_iopReplyCallback.fn)(g_iopCommandReply.result, g_iopReplyCallbackArg[0]);
+            g_iopReplyCallback.fn = 0;
+            g_iopReplyCallbackPending = 0;
         } else {
             idx = g_iopBufferIndex != 1;
             i = 0;
@@ -159,37 +159,37 @@ s32 func_0011CE30(void)
             }
         }
     }
-    if (D_0025C388.busy != 0) {
-        func_001F6C20(0);
+    if (g_soundBankLoadBusy.busy != 0) {
+        SyncDataCache(0);
         k = g_iopChannel2Result.result;
         if ((u32)k != 0xFFFFFFFFu) {
-            if (D_0025C390.fn != 0) {
-                u64 a = D_0025C390.arg;
-                Cb_11CE30 g = (Cb_11CE30)D_0025C390.fn;
-                D_0025C390.fn = 0;
-                D_0025C390.arg = 0;
+            if (g_soundBankLoadCallback.fn != 0) {
+                u64 a = g_soundBankLoadCallback.arg;
+                Cb_11CE30 g = (Cb_11CE30)g_soundBankLoadCallback.fn;
+                g_soundBankLoadCallback.fn = 0;
+                g_soundBankLoadCallback.arg = 0;
                 g(k, a);
             }
             g_iopChannel2Result.result = 0;
-            D_0025C388.busy = 0;
+            g_soundBankLoadBusy.busy = 0;
         }
     }
     if (g_iopReplyBuffer == 0) {
         s32* p = g_iopCommandBuffers[g_iopBufferIndex];
-        if (p[0] != 0 && D_0025C384 == 0)
+        if (p[0] != 0 && g_iopFlushDeferred == 0)
             FlushIopCommandBuffer();
     }
-    if (D_0025C354 != 0) {
+    if (g_discReadPending != 0) {
         SyncDiscRead(1);
-        if (D_0025C358 != 0) {
-            D_0025C354 = 0;
-            f = (Cb_11CE30)D_0025C350;
-            D_0025C358 = 0;
+        if (g_discReadDone != 0) {
+            g_discReadPending = 0;
+            f = (Cb_11CE30)g_discReadDoneCallback;
+            g_discReadDone = 0;
             if (f != 0)
                 ((Cb1_11CE30)f)(1);
         }
     }
-    if (g_iopReplyBuffer != 0 || D_0025C388.busy != 0)
+    if (g_iopReplyBuffer != 0 || g_soundBankLoadBusy.busy != 0)
         return 1;
     return 0;
 }
@@ -202,11 +202,11 @@ s32 func_0011D078(void)
 {
     u32* table;
 
-    func_001F6C20(0);
+    SyncDataCache(0);
     if (g_iopReplyBuffer == 0) {
         return 1;
     }
-    if (func_001F8480(&g_iopCommandRpc) != 0) {
+    if (IsRemoteCallPending(&g_iopCommandRpc) != 0) {
         return 0;
     }
     table = (u32*)g_iopReplyBuffer;
@@ -239,8 +239,8 @@ s32 func_0011D140(s32 a0, s32 a1)
     s32 v1;
     u32 m;
 
-    D_0025C348 = 0;
-    if (D_0025C388.busy != 0) {
+    g_soundBankLoadError = 0;
+    if (g_soundBankLoadBusy.busy != 0) {
         PrintFormatted(D_00249570);
         return 0;
     }
@@ -254,21 +254,21 @@ s32 func_0011D140(s32 a0, s32 a1)
     *p = (s32)m;
     g_iopChannel2Args[1] = a1;
     g_iopChannel2Args[0] = a0;
-    while (func_001F8480(&g_iopBankLoadRpc)) {
+    while (IsRemoteCallPending(&g_iopBankLoadRpc)) {
         PrintFormatted(D_002494E8);
         PollIopCommands();
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
-    w = func_001F8290(&g_iopBankLoadRpc, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
+    w = CallRemoteService(&g_iopBankLoadRpc, 3, 1, g_iopChannel2Args, 8, &g_iopChannel2Result.result, 4, 0, 0);
     v1 = g_iopChannel2Result.result;
     if (w < 0) {
         PrintFormatted(D_002495C0);
-        D_0025C348 = 0x106;
+        g_soundBankLoadError = 0x106;
         return 0;
     }
     if ((u32)v1 == 0xFFFFFFFFu) {
         do {
-            func_001F6C20(0);
+            SyncDataCache(0);
         } while ((u32)g_iopChannel2Result.result == 0xFFFFFFFFu);
     }
     return g_iopChannel2Result.result;
@@ -280,8 +280,8 @@ void func_001F6C20(s32 a);
 
 void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
 {
-    D_0025C348 = 0;
-    if (D_0025C388.busy != 0) {
+    g_soundBankLoadError = 0;
+    if (g_soundBankLoadBusy.busy != 0) {
         PrintFormatted(D_00249570);
         return;
     }
@@ -292,15 +292,15 @@ void func_0011D2A8(void* a0, s32 a1, s32 a2, s64 a3)
     (*(u32*)&g_iopChannel2Result.result) = 0xFFFFFFFF;
     (*(Pair_11D2A8*)&g_iopChannel2Args).a = (s32)a0;
     (*(Pair_11D2A8*)&g_iopChannel2Args).b = a1;
-    (*(Args_11D2A8*)&D_0025C390).a = a2;
-    (*(Args_11D2A8*)&D_0025C390).c = a3;
-    while (func_001F8480(&g_iopBankLoadRpc)) {
+    (*(Args_11D2A8*)&g_soundBankLoadCallback).a = a2;
+    (*(Args_11D2A8*)&g_soundBankLoadCallback).c = a3;
+    while (IsRemoteCallPending(&g_iopBankLoadRpc)) {
         PrintFormatted(D_002494E8);
         PollIopCommands();
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
-    D_0025C388.busy = 1;
-    func_001F8290(&g_iopBankLoadRpc, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
+    g_soundBankLoadBusy.busy = 1;
+    CallRemoteService(&g_iopBankLoadRpc, 3, 1, ((Pair_11D2A8*)&g_iopChannel2Args), 8, ((u32*)&g_iopChannel2Result.result), 4, 0, 0);
 }
 
 LINKER_REMNANT(func_0011D3E8);
@@ -546,22 +546,22 @@ s32 func_0011D968(s32 id, s32 size, void* data)
         g_iopCommandArgs[i] = ((u8*)data)[i];
     while ((s32)g_iopReplyBuffer) {
         PollIopCommands();
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
-    ArmIopReplyBuffer(&D_0025C3C0, 1);
-    while (func_001F8480(&g_iopCommandRpc)) {
+    ArmIopReplyBuffer(&g_iopCommandReply, 1);
+    while (IsRemoteCallPending(&g_iopCommandRpc)) {
         PrintFormatted(D_002494E8);
         PollIopCommands();
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
     if (size)
-        func_001F8290(&g_iopCommandRpc, id, 1, g_iopCommandArgs, size, &D_0025C3C0, 0xC, 0, 0);
+        CallRemoteService(&g_iopCommandRpc, id, 1, g_iopCommandArgs, size, &g_iopCommandReply, 0xC, 0, 0);
     else
-        func_001F8290(&g_iopCommandRpc, id, 1, 0, 0, &D_0025C3C0, 0xC, 0, 0);
+        CallRemoteService(&g_iopCommandRpc, id, 1, 0, 0, &g_iopCommandReply, 0xC, 0, 0);
     while (!IsIopReplyReady()) {
     }
-    r = D_0025C3C0.result;
-    if (*g_iopCommandBuffers[g_iopBufferIndex] != 0 && D_0025C384 == 0)
+    r = g_iopCommandReply.result;
+    if (*g_iopCommandBuffers[g_iopBufferIndex] != 0 && g_iopFlushDeferred == 0)
         FlushIopCommandBuffer();
     return r;
 }
@@ -575,14 +575,14 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     s32 flag = 0;
     s32 i;
 
-    if (D_0025C384 == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
-        ArmIopReplyBuffer((&D_0025C3C0), 1);
-        while (func_001F8480(&g_iopCommandRpc) != 0) {
+    if (g_iopFlushDeferred == 0 && g_iopReplyBuffer == 0 && len == 0 && arg == 0) {
+        ArmIopReplyBuffer((&g_iopCommandReply), 1);
+        while (IsRemoteCallPending(&g_iopCommandRpc) != 0) {
             PrintFormatted(D_002494E8);
             PollIopCommands();
-            func_001F6C20(0);
+            SyncDataCache(0);
         }
-        func_001F8290(&g_iopCommandRpc, cmd, 1, 0, 0, (&D_0025C3C0), 12, 0, 0);
+        CallRemoteService(&g_iopCommandRpc, cmd, 1, 0, 0, (&g_iopCommandReply), 12, 0, 0);
         return;
     }
 
@@ -597,8 +597,8 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     for (;; i++) {
         if (*g_iopCommandBuffers[g_iopBufferIndex] != 0x100 && g_iopCommandSpace[g_iopBufferIndex] >= size)
             break;
-        if (D_0025C384 != 0) {
-            D_0025C384 = 0;
+        if (g_iopFlushDeferred != 0) {
+            g_iopFlushDeferred = 0;
             flag = 1;
         }
         PollIopCommands();
@@ -608,7 +608,7 @@ void func_0011DB00(s32 cmd, s32 len, u8* data, s32 arg, u64 val)
     if (i != 0)
         PrintFormatted(D_00249838, i);
     if (flag != 0)
-        D_0025C384 = 1;
+        g_iopFlushDeferred = 1;
 
     {
         s16* p = (s16*)(((u8*)g_iopCommandBuffers[g_iopBufferIndex]) - (g_iopCommandSpace[g_iopBufferIndex] - 0x1000));
@@ -641,11 +641,11 @@ void func_0011D110(s32* ptr, s32 count);
 void func_0011DE18(void)
 {
     ArmIopReplyBuffer(g_iopReplyTables[g_iopBufferIndex], *g_iopCommandBuffers[g_iopBufferIndex]);
-    while (func_001F8480(&g_iopCommandRpc)) {
+    while (IsRemoteCallPending(&g_iopCommandRpc)) {
         PrintFormatted(D_002494E8);
-        func_001F6C20(0);
+        SyncDataCache(0);
     }
-    (void)func_001F8290(&g_iopCommandRpc, 0x4D, 1, g_iopCommandBuffers[g_iopBufferIndex],
+    (void)CallRemoteService(&g_iopCommandRpc, 0x4D, 1, g_iopCommandBuffers[g_iopBufferIndex],
                   0x1000 - g_iopCommandSpace[g_iopBufferIndex], g_iopReplyTables[g_iopBufferIndex],
                   *g_iopCommandBuffers[g_iopBufferIndex] * 4 + 8, 0, 0);
     s32 n = (g_iopBufferIndex ^ 1) != 0;
@@ -660,7 +660,7 @@ s32 func_0011DF58(s32 a, s32 b, s32 c, s32 d)
     s32 r;
     if (g_iopDiscAccess == 1)
         return 0;
-    if (D_0025C388.busy) {
+    if (g_soundBankLoadBusy.busy) {
         do {
         } while (PollIopCommands());
     }
@@ -729,7 +729,7 @@ s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
 {
     void QueueIopCommand(s32 id, s32 size, s32* args, s32 a3, s32 a4);  // the argument words
     if (g_iopDiscAccess == 0) {
-        return func_00203B18(a0, a1, a2, a3);
+        return ReadDiscSectors(a0, a1, a2, a3);
     }
     if (SyncDiscRead(1) == 1) {
         return 0;
@@ -741,8 +741,8 @@ s32 func_0011E138(s32 a0, s32 a1, s32 a2, u8* a3)
     args[1] = a1;
     args[2] = a2;
     QueueIopCommand(0x38, 0xC, args, 0, 0);
-    D_0025C354 = 1;
-    D_0025C358 = 0;
+    g_discReadPending = 1;
+    g_discReadDone = 0;
     return 1;
 }
 
@@ -752,21 +752,21 @@ void func_001F6C20(s32 value);
 s32 func_0011E1F8(s32 flag)
 {
     if (g_iopDiscAccess == 0) {
-        return func_002032C8(flag);
+        return SyncDiscNCommand(flag);
     }
-    func_001F6C20(0);
+    SyncDataCache(0);
     u32 ready = (*(volatile u32*)&g_iopSharedPacket) < 1;
-    (*(u32*)&D_0025C358) = ready;
+    (*(u32*)&g_discReadDone) = ready;
     if (ready == 1) {
         return 0;
     }
     if (flag == 1) {
         return 1;
     }
-    while ((*(u32*)&D_0025C358) == 0) {
+    while ((*(u32*)&g_discReadDone) == 0) {
         PollIopCommands();
-        func_001F6C20(0);
-        (*(u32*)&D_0025C358) = (*(volatile u32*)&g_iopSharedPacket) < 1;
+        SyncDataCache(0);
+        (*(u32*)&g_discReadDone) = (*(volatile u32*)&g_iopSharedPacket) < 1;
     }
     return 0;
 }
@@ -776,7 +776,7 @@ s32 func_00203E28(void);
 s32 func_0011E2A0()
 {
     if (g_iopDiscAccess == 0)
-        return func_00203E28();
+        return StopDiscRead();
     QueueIopCommand(0x37, 0, 0, 0, 0);
     return 1;
 }
@@ -788,7 +788,7 @@ s32 func_00203D90();
 s32 func_0011E2E8()
 {
     if (g_iopDiscAccess == 0)
-        return func_00203D90();
+        return GetDiscError();
     return g_iopSharedPacket.f10;
 }
 
