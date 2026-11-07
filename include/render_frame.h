@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// The two 0x48-byte records at D_00262320 (001E4000.cpp defines both as zeros) and the
+// The two 0x48-byte records at D_00262320 (file_1549C8.cpp defines both as zeros) and the
 // pointer D_002622D8 to the one in use: three lists and the words func_0015E810,
-// func_0015E9F0, func_0015ED50, func_0015EE80 and func_0015EFE8 (0015C000.cpp) keep. Written
+// func_0015E9F0, func_0015ED50, func_0015EE80 and func_0015EFE8 (file_1549C8.cpp) keep. Written
 // for this project from what retail's code does (build/swarm/st3/groups.tsv, g1808).
 //
 // The size: D_00262320 runs 0x90 bytes to the next label, two records.
@@ -40,7 +40,7 @@ struct RenderFrame {
 
 typedef char check_RenderFrame[sizeof(RenderFrame) == 0x48 ? 1 : -1];
 
-extern RenderFrame D_00262320[2];   // 001E4000.cpp
-extern RenderFrame* D_002622D8;     // 001E4000.cpp
+extern RenderFrame D_00262320[2];   // file_1549C8.cpp
+extern RenderFrame* D_002622D8;     // file_1549C8.cpp
 
 #endif

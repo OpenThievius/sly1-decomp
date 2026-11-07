@@ -3600,3 +3600,68 @@ void func_0015F658(void)
 {
     ConstructPacketWriters(1, 0xFFFF);
 }
+
+// The file's .data, 0x261F70 to 0x2623BC, in retail's order. The labels only func_001549C8 (not
+// matched yet) and the original assembly func_00156288 use, and the two packet streams
+// (globals.h), whose labels are shorter than PacketWriter, are included from the disassembly.
+// size: s32 (lw/sw), 4-byte label
+s32 D_00261F70 = 0;
+INCLUDE_DATA(D_00261F74);
+INCLUDE_DATA(D_00261F80);
+INCLUDE_DATA(D_00262050);
+f32 D_00262178[2] = { 0.5f, 2.0f };
+PackedFloatPair D_00262180 = { 0x4348000043480000ULL };
+PackedFloatPair D_00262188 = { 0x42C8000042C80000ULL };
+PackedFloatPair D_00262190 = { 0x4448000043FA0000ULL };
+PackedFloatPair D_00262198 = { 0x43960000C3960000ULL };
+PackedFloatPair D_002621A0 = { 0x4270000041700000ULL };
+PackedFloatPair D_002621A8 = { 0x42F0000041F00000ULL };
+PackedFloatPair D_002621B0 = { 0x3E4CCCCD3D4CCCCDULL };
+PackedFloatPair D_002621B8 = { 0x3F4CCCCD3DCCCCCDULL };
+PackedFloatPair D_002621C0 = { 0x4170000040A00000ULL };
+s32 D_002621C8[6] = { 0, 0x256, 0x5D0, 2, 0x259, 0x678 };
+s32 D_002621E0[6] = { 4, 0x258, 0x5D8, 2, 0x25A, 0x67C };
+f32 D_002621F8[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
+f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
+f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
+f32 D_00262230[4] = { 1.0f, 1.5f, -2.5f, 0.0f };
+f32 D_00262240[4] = { 0.0f, 2.0f, 0.0f, 0.0f };
+s8 D_00262250[8] = "02134";
+s32 D_00262258 = -8;
+s32 D_0026225C = -8;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00262260 = 0;
+// size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label
+u8* D_00262264 = 0;
+// size: loop bound 5, stride 4 in func_0015C200
+s32 D_00262268[5] = {0};
+// size: s32 (lw/sw), 4-byte label
+s32 D_0026227C = 0;
+INCLUDE_DATA(D_00262280);
+INCLUDE_DATA(D_002622A8);
+s32 D_002622CC = 1;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002622D0 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_002622D4 = 0;
+// size: pointer (lw/sw), 4 bytes before an 8-aligned next label
+RenderFrame* D_002622D8 = 0;
+// size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
+List01 D_002622E0 = {};
+// size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
+List01 D_002622F0 = {};
+// size: 12-byte record copied into Slot r38 by func_0015EC68
+List01 D_00262300 = {};
+s32 D_0026230C = 0;
+// size: s32 (sw), 4-byte label
+s32 D_00262310 = 0;
+u32 D_00262314 = 0;
+// size: s32 (lw/sw), 4-byte label
+s32 D_00262318 = 0;
+void* D_0026231C = 0;
+// size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
+RenderFrame D_00262320[2] = {};
+void* D_002623B0 = 0;
+// size: pointer (lw/sw), 4-byte label
+void* D_002623B4 = 0;
+volatile s32 D_002623B8 = 0;

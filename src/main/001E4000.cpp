@@ -3824,48 +3824,8 @@ extern const Vec02 D_00248D20 = { 0.0f, 0.0f, 1.0f, 0.0f };
 extern const f32 D_00248D40[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 extern const f32 D_00248D50[4] = { 3.40282347e+38f, 3.40282347e+38f, 3.40282347e+38f, 0.0f };
 
-f32 D_00262178[2] = { 0.5f, 2.0f };
-f32 D_002621F8[6] = { 7.0f, 1.0f, 0.25f, 0.0f, 0.0f, 0.0f };
-f32 D_00262210[4] = { 0.0f, 0.25f, 0.000250000012f, 0.0f };
-f32 D_00262220[4] = { 0.0f, 0.25f, 0.0250000004f, 0.0f };
-char D_00262250[8] = "02134";
-s32 D_002622CC = 1;
-GameProgress* D_002623C0 = &D_0027C220;
-G27C230* D_002623C4 = D_0027C230;
-G27C230* D_002623C8 = D_0027C230;
-s32 D_002623CC = -1;
 
 // Globals typed by worker dz02, from retail's bytes and their readers.
-// size: s32 (lw/sw), 4-byte label
-s32 D_00261F70 = 0;
-// size: s32 (lw/sw), 4-byte label
-s32 D_00262260 = 0;
-// size: pointer to array allocated by new Ent[D_00262260] (lw/sw), 4-byte label
-u8* D_00262264 = 0;
-// size: loop bound 5, stride 4 in func_0015C200
-s32 D_00262268[5] = {0};
-// size: s32 (lw/sw), 4-byte label
-s32 D_0026227C = 0;
-// size: s32 (lw/sw), 4-byte label
-s32 D_002622D0 = 0;
-// size: s32 (lw/sw), 4-byte label
-s32 D_002622D4 = 0;
-// size: pointer (lw/sw), 4 bytes before an 8-aligned next label
-RenderFrame* D_002622D8 = 0;
-// size: 12-byte record copied into Slot r20 by func_0015EC68, 4 bytes pad before 16-aligned next label
-List01 D_002622E0 = {};
-// size: 12-byte record copied into Slot r2C by func_0015EC68, 4 bytes pad before 16-aligned next label
-List01 D_002622F0 = {};
-// size: 12-byte record copied into Slot r38 by func_0015EC68
-List01 D_00262300 = {};
-// size: s32 (sw), 4-byte label
-s32 D_00262310 = 0;
-// size: s32 (lw/sw), 4-byte label
-s32 D_00262318 = 0;
-// size: func_0015E810 loops 2 records of stride 0x48 (end = base + 0x90)
-RenderFrame D_00262320[2] = {};
-// size: pointer (lw/sw), 4-byte label
-void* D_002623B4 = 0;
 
 // size: s32, word load/store only
 // size: s32 counter, word load/store only

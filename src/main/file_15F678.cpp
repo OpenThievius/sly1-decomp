@@ -351,7 +351,12 @@ struct ColorWord
     ColorWord(u32 v) { rgba = v; }
 };
 
-// The file's .data, in retail's order.
+// The file's .data, in retail's order. It begins with the game progress pointers
+// (game_progress.h), which this file's functions read and file_1549C8's do not.
+GameProgress* D_002623C0 = &D_0027C220;
+G27C230* D_002623C4 = D_0027C230;
+G27C230* D_002623C8 = D_0027C230;
+s32 D_002623CC = -1;
 char D_002623D0[8] = "<none>";
 u8 D_002623D8[4] = { 0 };
 s32 D_002623DC = 0;
