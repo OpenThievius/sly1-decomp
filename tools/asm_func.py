@@ -67,6 +67,9 @@ def numeric(line):
     j = re.match(r"^(\s*)jlabel\s+(\S+)\s*$", line)
     if j:  # a jump table's target: a plain label
         return "%s%s:" % j.groups()
+    a = re.match(r"^(\s*)alabel\s+(\S+)\s*$", line)
+    if a:  # data inside a function's code (func_0020DE88's constant): a plain label
+        return "%s%s:" % a.groups()
     m = ENCODED.match(line)
     # A short backward branch (a loop of a few instructions) is written as its word too: that
     # assembler pads a short loop with nops for the R5900's short-loop erratum, which retail's
