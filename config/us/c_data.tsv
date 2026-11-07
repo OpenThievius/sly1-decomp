@@ -500,7 +500,7 @@ D_0024B000	0024B000	0	.rodata	src/main/entry_queue.cpp
 D_0024B060	0024B060	0	.rodata	src/main/file_17D248.cpp
 D_0024B164	0024B164	8	.rodata	src/main/file_180EB0.cpp
 D_0024B170	0024B170	0	.rodata	src/main/base_object.cpp
-D_0024B1E8	0024B1E8	109	.rodata	src/main/file_184D78.cpp
+D_0024B1E8	0024B1E8	109	.rodata	src/main/main_loop.cpp
 D_0024B258	0024B258	4	.rodata	src/main/file_185C18.cpp
 D_0024B260	0024B260	16	.rodata	src/main/file_1884C0.cpp
 D_0024B270	0024B270	4	.rodata	src/main/file_18A388.cpp
@@ -679,7 +679,7 @@ D_00263E34	00263E34	20	.data	src/main/entry_queue.cpp
 D_00263E50	00263E50	580	.data	src/main/file_17D248.cpp
 D_00264098	00264098	16	.data	src/main/colored_triangle_set.cpp
 D_002640B0	002640B0	432	.data	src/main/file_180EB0.cpp
-D_00264260	00264260	1500	.data	src/main/file_184D78.cpp
+D_00264260	00264260	1500	.data	src/main/main_loop.cpp
 D_00264840	00264840	208	.data	src/main/file_185C18.cpp
 D_00264910	00264910	300	.data	src/main/file_18A388.cpp
 D_00264A40	00264A40	20324	.data	src/main/file_18B580.cpp

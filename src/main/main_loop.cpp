@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// The file from 0x184D78 to 0x185C18: an object sort, the aim helpers, the main loop with the
+// IOP modules it loads and the startup initializers it runs. Its name is ours, after the loop.
 #include "common.h"
 #include "asm_func.h"
 

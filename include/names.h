@@ -1805,6 +1805,8 @@
 #define ResolveAimTarget                           func_00185468
 #define RunMainLoop                                func_00185758
 #define LoadIopModules                             func_001858F8
+#define SendVif0StartupPacket                      func_00185A58
+#define SendVif1StartupPacket                      func_00185AC8
 #define RunStartupInitializers                     func_00185B38
 #define FreePooledContactChain                     func_001861E8
 #define GroupEdgesByKey                            func_001867C8

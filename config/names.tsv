@@ -1238,7 +1238,7 @@ func_00148EF8	CountDownNotifierTimer	slot 17 of class 0x57: runs UpdateStateNoti
 func_00148828	UpdateNotifierWorldDeadline	slot 17 of class 0x5A: runs UpdateStateNotifier and in state 0 calls slot 47 with 6 once the world's clock at 0x2308 has passed D_0026185C
 func_00140C28	StartDiscReadUntilAccepted	calls StartDiscRead (func_0011E138) with the descriptor D_00247AA0 until it returns 1, and after each refusal runs SyncDiscRead(0) and stores GetDiscReadError in D_002613F8[0]; the sector-stream refill func_00137490 calls it
 func_00140CC8	StartLowLevelDiscReadUntilAccepted	the same retry loop as func_00140C28 but calling the low-level pair func_00203B18, func_002032C8 and func_00203D90 that StartDiscRead, SyncDiscRead and GetDiscReadError forward to; func_00137490 picks it when flags bit 2 is set
-func_00140D68	TestDiscReadDone	calls SyncDiscRead with (value < 1), which only polls when value is 0, and returns whether it answered 0; func_001409E0 and the disc set-up in file_184D78 call it
+func_00140D68	TestDiscReadDone	calls SyncDiscRead with (value < 1), which only polls when value is 0, and returns whether it answered 0; func_001409E0 and the disc set-up in main_loop call it
 func_00140B60	FormatDiscPath	copies the name behind a backslash, runs func_001407A8 on it, turns the NULs between its components back into backslashes and writes it with "%s\%s" after "cdrom0:" (or an empty prefix when flag is 0)
 func_001407A8	NormalizeDiscPath	uppercases the path, appends ";1" unless it ends in a separator, then rewrites it in place as NUL-separated components of at most 8 name and 3 extension characters with non-alphanumerics replaced by '_', returning the component count
 func_001409E0	StepDiscSectorCheck	state machine on D_002613EC: reads sector data into D_0027B800 with StartDiscRead and, once TestDiscReadDone reports the read finished, runs a CRC-32 over 0x800 bytes with the table D_002476A0 and compares it with the constant D_00247AA8, going back to state 1 on a mismatch
@@ -2224,7 +2224,7 @@ D_00262788	g_currentPlacedObjectLinks	0x12-entry link table func_0016AED8 (Curre
 D_002613EC	g_discSectorCheckState	state of StepDiscSectorCheck: ResetDiscSectorCheck stores 3, the steps move it to 1 and 2, file_18D8E0 tests it for 3
 D_002613F4	g_lastDiscReadResult	result of the last StartDiscRead call, stored by StartDiscReadUntilAccepted and its twin func_00140CC8
 D_002613F8	g_discReadErrors	array whose word 0 receives GetDiscReadError after each refused disc read in StartDiscReadUntilAccepted
-D_00261F14	g_vif0Channel	handle func_00152810 gets from func_002027A0(0) (DMA channel 0, VIF0); file_184D78.cpp sets bit 0x40 in its first word
+D_00261F14	g_vif0Channel	handle func_00152810 gets from func_002027A0(0) (DMA channel 0, VIF0); main_loop.cpp sets bit 0x40 in its first word
 D_00261F18	g_vif1Channel	handle from func_002027A0(1) (DMA channel 1, VIF1): the render thread sends it the buffer of the second packet writer (bufB)
 D_00261F1C	g_gifChannel	handle from func_002027A0(2) (DMA channel 2, GIF): the render thread sends it the buffer of the first packet writer (bufA)
 D_00261F20	g_fromSprChannel	handle from func_002027A0(8) (DMA channel 8, fromSPR), stored once by func_00152810
@@ -2709,3 +2709,5 @@ func_00183A90	SetExtraObjectPropertyVectorB	copies a vector into a payload of th
 func_00183BB8	SetExtraObjectPropertyWord	the same body as SetExtraObjectPropertyInt: wraps an integer in a script value for SetExtraObjectProperty (func_00100A78 calls it)
 func_00183C38	SetExtraObjectPropertyVectorA	copies a vector into a payload of the first vector kind (AcquireVectorAPayload), wraps it and passes it to SetExtraObjectProperty
 func_001841D0	RefreshConeVolumeShape	original assembly: recomputes a cone volume after any of its settings changes (SetConeVolumeMode, SetConeVolumeRange and every setter after them call it)
+func_00185A58	SendVif0StartupPacket	a startup initializer (D_00264814, run by RunStartupInitializers): sets bit 0x40 of the VIF0 channel's control word, sends the packet D_00211E10 on it, waits and clears the bit
+func_00185AC8	SendVif1StartupPacket	a startup initializer (D_00264818, run by RunStartupInitializers): sets bit 0x40 of the VIF1 channel's control word, sends the packet D_00212110 on it, waits and clears the bit
