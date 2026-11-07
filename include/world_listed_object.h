@@ -11,9 +11,14 @@
 
 #include "placed_object.h"
 
-struct FlagRecord {
-    u8 pad00[0xC];
-    u32 flags;              // 0x0C
+struct AnimRecord;      // cursor_animator.h
+
+// A register write of the object's texture setting (func_0013A008): the value and the GS
+// register it goes to (6), as a 16-byte record.
+struct __attribute__((aligned(16))) TextureRegWrite {
+    u64 value;              // 0x00
+    s32 reg;                // 0x08
+    s32 pad0C;              // 0x0C
 };
 
 // The list at +0x624: first element, a pad, and the offset of the link inside an element
@@ -26,11 +31,20 @@ struct OffsetList {
 
 struct WorldListedObject : PlacedObject {
     void* source;                // 0x2D0: the object a copy was taken from (func_0013A418)
-    u8 pad2D4[0x380 - 0x2D4];
-    FlagRecord* flagRecord;           // 0x380
-    u8 pad384[0x624 - 0x384];
+    u8 pad2D4[0x320 - 0x2D4];
+    s32 mode;               // 0x320: 2 gives each owned record an extra record (func_00139C70)
+    u8 pad324[0x380 - 0x324];
+    AnimRecord* flagRecord;           // 0x380: its anim record (func_00139F80); func_0013A3A0 and func_0013B430 test its mask
+    s32 regCount;           // 0x384: a power of two up to 16 (func_0013A008)
+    u8 pad388[0x390 - 0x388];
+    TextureRegWrite regs[32]; // 0x390: one for each texture entry, the first ones doubled to fill regCount
+    s32 colorTaken;         // 0x590: set once the colour is taken from the record (func_00139F80)
+    u8 color[4];            // 0x594: the record's bytes 4..7 halved
+    u8 pad598[0x620 - 0x598];
+    s32 f620;               // 0x620: cleared by func_00139D68
     OffsetList members;               // 0x624
-    u8 pad630[0x640 - 0x630];
+    WorldListedObject* next;          // 0x630: in World::list1CB4 (func_0013B430)
+    u8 pad634[0x640 - 0x634];
 };
 
 typedef char check_WorldListedObject[sizeof(WorldListedObject) == 0x640 ? 1 : -1];

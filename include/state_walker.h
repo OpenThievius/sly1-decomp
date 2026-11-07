@@ -19,7 +19,9 @@ struct StateWalker {
     const void* vt;         // 0x00: D_002198E8
     u8 pad04[0x08 - 0x04];
     StateWalker* next;      // 0x08: in its graph's list (func_001B6388 walks it)
-    u8 pad0C[0x18 - 0x0C];
+    u8 pad0C[0x10 - 0x0C];
+    StateWalker* worldNext; // 0x10: in World::list1B94 (offset 0x10; func_00129C20 walks it)
+    u8 pad14[0x18 - 0x14];
     StateGraph* owner;      // 0x18: func_001B6290's first argument; func_001B6568, func_001B6628
     s32 f1C;                // 0x1C: the second: the object it drives, its key in the graph's list
     s32 f20;                // 0x20: the fourth

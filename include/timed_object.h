@@ -33,7 +33,7 @@ struct Desc30 : Desc03 {
     void (*m49)(TimedObject* self, s32 flag);       // 0x134: func_001B00E8, func_001B0EA8
     void (*m4A)(TimedObject* self);                 // 0x138: func_001B0120, func_001B0EE0
     void (*m4B)(TimedObject* self);                 // 0x13C: func_001B0160, func_001B0F70
-    void (*m4C)(TimedObject* self, s32 value);      // 0x140: func_001AECE0
+    void (*m4C)(TimedObject* self, StateTrigger* trigger); // 0x140: slot 76, keep the trigger (func_001AECE0; func_001236C8)
     void (*m4D)(TimedObject* self, s32 state);      // 0x144: enter a state (func_001AECE8)
 };
 

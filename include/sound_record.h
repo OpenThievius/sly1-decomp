@@ -8,6 +8,7 @@
 #define SOUND_RECORD_H
 
 #include "common.h"
+#include "shapes.h"   // U64P
 
 struct SoundRecord {
     union {
@@ -19,7 +20,8 @@ struct SoundRecord {
     f32 f0C;                // 0x0C
     f32 f10;                // 0x10
     union {
-        u8 b14[8];          // 0x14: handed on as a block (func_001BFCD8)
+        U64P b14;           // 0x14: an eight-byte pair, moved with ldl/ldr (func_0012AD30, func_0012AF00)
+                            // and handed on as a block (func_001BFCD8)
         struct {
             f32 f14;        // 0x14: -1.0 at set-up (func_001BE4D8)
             s32 f18;        // 0x18

@@ -35,6 +35,33 @@ struct Kin83 {
     f32 acc;                // 0x08
 };
 
+// An event of an animation's three lists (func_0012BC38 reads them): its time, its kind, and two
+// words whose meaning the kind gives (func_0012D5D0 runs it).
+struct AnimEvent {
+    union {
+        f32 f;              // 0x00: the time, in seconds
+        s32 i;
+    } a0;
+    s32 kind;               // 0x04
+    union {
+        s32 i;
+        f32 f;
+        void* p;
+        struct {
+            s16 lo;
+            s16 hi;
+        } h;
+    } a8;                   // 0x08
+    union {
+        s32 i;
+        f32 f;
+        struct {
+            s16 lo;
+            s16 hi;
+        } h;
+    } aC;                   // 0x0C
+};
+
 // 0x83: an animation. func_0012B8C8 reads it: the object id, the length in seconds, the target
 // ids, the tracks and the three event lists (counts and records at 0x54..0x68).
 struct Animation : BaseObject {
@@ -47,11 +74,11 @@ struct Animation : BaseObject {
     s32 f4C;                // 0x4C
     s32 f50;                // 0x50
     s32 startCount;         // 0x54: the list that runs when it starts
-    s32 startList;          // 0x58
+    AnimEvent* startList;   // 0x58
     s32 timedCount;         // 0x5C: the timed list
-    s32 timedList;          // 0x60
+    AnimEvent* timedList;   // 0x60
     s32 endCount;           // 0x64: the list that runs when it ends
-    s32 endList;            // 0x68
+    AnimEvent* endList;     // 0x68
     u8 props6C[0x80 - 0x6C]; // 0x6C: the property list (func_00152438 sets its element size 0x3C)
     Kin83 kin;              // 0x80
     u8 pad8C[0x90 - 0x8C];
@@ -69,6 +96,7 @@ struct C84 : Animation {
     u8 padB0[0xD0 - 0xB0];
 };
 
+typedef char check_AnimEvent[sizeof(AnimEvent) == 0x10 ? 1 : -1];
 typedef char check_Animation[sizeof(Animation) == 0xB0 ? 1 : -1];
 typedef char check_C84[sizeof(C84) == 0xD0 ? 1 : -1];
 typedef char check_Track83[sizeof(Track83) == 0x1C ? 1 : -1];

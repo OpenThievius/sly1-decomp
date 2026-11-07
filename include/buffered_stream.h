@@ -39,8 +39,14 @@ struct BufferedStream {
     s32 f34;                // 0x34: func_001373D0
     s32 f38;                // 0x38
     s32 f3C;                // 0x3C
-    s32 f40;                // 0x40
-    u8 pad44[0x60 - 0x44];
+    s32 f40;                // 0x40: the bytes left of a sector stream (func_00137328; func_00137480 counts it down)
+    s32 f44;                // 0x44
+    s32 sector;             // 0x48: the start sector of a sector stream (func_00137328)
+    s32 chunkCount;         // 0x4C: the chunks of its ring, two or more
+    s32 f50;                // 0x50
+    s32 f54;                // 0x54
+    s32 lastChunk;          // 0x58: chunkCount - 1
+    u8 pad5C[0x60 - 0x5C];
 };
 
 #endif

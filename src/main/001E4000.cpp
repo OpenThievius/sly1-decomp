@@ -1589,7 +1589,7 @@ extern const ClassDescriptor<72> D_0021A660 = { &D_00217568, 0x3A, 0x3, 0x570, {
     (Fn_Table)func_001B9680, (Fn_Table)func_001B9F30, (Fn_Table)func_001BA5B0, (Fn_Table)func_001BBC30,
 } };
 extern const T2195_Vt D_0021A790 = {
-    (AttachInit)func_00185358, (AttachCopy)func_001212D8, (AttachRelease)func_00121358, (void*)func_00185498,
+    (AttachInit)func_00185358, (AttachCopy)func_001212D8, (AttachRelease)func_00121358, (AttachUpdate)func_00185498,
     (AttachGetPos)func_001214B8, (AttachGetRot)func_00185538, (AttachGetValue)func_00121568, (AttachGetMatrix)func_00121580,
     (AttachGetIndexed)func_001215A8, 0,
 };
