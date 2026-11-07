@@ -856,10 +856,10 @@ void func_0014C138(GaugeManager* self)
     func_001B6DF8(self->device, self);
     for (; i < self->slotCount; i++) {
         GaugeSlot* s = &self->slots[i];
-        Node_14C138* n = (Node_14C138*)func_0015A448(self->world, s->obj, self);
+        Node_14C138* n = (Node_14C138*)FindFirstObjectByIdMode4(self->world, s->obj, self);
         s->obj = n;
-        s->f8 = func_0015A480(n->f14, 0x3F7, n);
-        s->f4 = func_0015A480(n->f14, 0x3F6, n);
+        s->f8 = FindFirstObjectByIdMode1(n->f14, 0x3F7, n);
+        s->f4 = FindFirstObjectByIdMode1(n->f14, 0x3F6, n);
     }
     f32* p = self->poly;
     f32 g = g_currentEntry->dt;

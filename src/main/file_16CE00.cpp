@@ -111,7 +111,7 @@ void func_0016DAC0(TargetFollower* self, s32 mode);
 void func_0016D040(TargetFollower* self, void* x)
 {
     self->f578 = (s32)x;
-    C2A* p = (C2A*)func_0015A448(self->world, x, self);
+    C2A* p = (C2A*)FindFirstObjectByIdMode4(self->world, x, self);
     if (p != 0) {
         SetFollowedObject(self, p);
         func_0016D788(self);

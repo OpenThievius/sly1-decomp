@@ -2166,7 +2166,7 @@ ScriptValue* func_00117C48(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     u8 buf[0x100];
     ScriptValue t;
     InitScriptValue(&q);
-    s32 r = func_0015A198(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
+    s32 r = GatherObjectsByMode(g_currentWorld, args[1].i ? 0x101 : 0x105, args[0].i, args[1].p, 0x40, buf);
     MakeScriptRefList(&t, r, buf);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2193,7 +2193,7 @@ ScriptValue* func_00117D78(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     u8 buf[0x100];
     ScriptValue t;
     InitScriptValue(&q);
-    s32 r = func_0015A198(g_currentWorld, 0x104, args[0].i, args[1].p, 0x40, buf);
+    s32 r = GatherObjectsByMode(g_currentWorld, 0x104, args[0].i, args[1].p, 0x40, buf);
     MakeScriptRefList(&t, r, buf);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
@@ -2458,7 +2458,7 @@ ScriptValue* func_001188F0(ScriptValue* ret, s32 count, ScriptValue* args, R11A6
     InitScriptValue(&t);
     void* s1 = args[0].p;
     ConvertScriptValueToFloat(&u, args + 1);
-    func_001566C8(s1, u.f);
+    SendPointEventToWorldListener(s1, u.f);
     DestroyScriptValue(&u, 2);
     SetScriptValueTag(&t, 0x22);
     CopyConstructScriptValue(ret, &t);

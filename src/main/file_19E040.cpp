@@ -2292,7 +2292,7 @@ void func_001A4070(C15* self, s32 n)
     }
     for (s32 i = 0; i < self->f668; i++) {
         if (flag) SetEffectSpawnerActiveForever(((void**)self->f66C)[i]);
-        else func_00155FA0(((void**)self->f66C)[i]);
+        else SetEffectSpawnerInactive(((void**)self->f66C)[i]);
     }
     if (self->f644) {
         if (old == -1) TeleportStateWalker(self->f644, snd);
@@ -2390,11 +2390,11 @@ void func_001A43C8(C15* self, s32 code, Rec_1A43C8* rec)
     return;
 kind295:
     StartSoundEffect(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
-    func_00155FA0(self->f65C);
+    SetEffectSpawnerInactive(self->f65C);
     return;
 kind296:
     StartSoundEffect(0x152, 0, 0, (s32)((u8*)self + 0x140), 12000.0f, 8000.0f, 0.5f, 0.0f, 0.0f, 0, 0);
-    func_00155FA0(self->f660);
+    SetEffectSpawnerInactive(self->f660);
     return;
 code5:
     if (rec == self->f684) {
@@ -3199,7 +3199,7 @@ void func_001A7128(HitTarget* self)
     if (sub != 0) {
         f32 t = -self->v150.z;
         if (9.99999975e-05f < t) {
-            func_00155FA0(sub);
+            SetEffectSpawnerInactive(sub);
             TimePolynomial* v = &self->scalePoly;
             f32 p = v->x + t * (v->y + t * v->z);
             f32 lo = g_unitRange[0];

@@ -465,7 +465,7 @@ void func_001F4ED0(void* p);
 void func_0016B520(T217D_12E0* self)
 {
     if (self->open != 0) {
-        void* p = func_0015A448(g_currentWorld, 0x4FD, 0);
+        void* p = FindFirstObjectByIdMode4(g_currentWorld, 0x4FD, 0);
         if (p != 0) {
             PushObjectCameraController(p);
         }

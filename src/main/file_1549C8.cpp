@@ -970,7 +970,7 @@ void func_001550E8(EffectSpawner* self)
     if (self->id2F8[0] != -1) {
         Rec_001550E8* r = FindFirstObjectById(self->world, 0x104, self->id2F8[0], self);
         s2->target = r;
-        if (r != 0) AppendQueuedCall(self->world, (void (*)(void))func_001550B8, self, 0, 0);
+        if (r != 0) AppendQueuedCall(self->world, (void (*)(void))ReparentEffectSpawnerToSource, self, 0, 0);
     }
     if (self->id2F8[1] != -1) {
         s2->found[0] = FindFirstObjectById(self->world, 0x104, self->id2F8[1], self);
@@ -1098,7 +1098,7 @@ s32 func_00155FB0(EffectSpawner* self)
 void func_00156000(Obj_156000* self, s32 a1)
 {
     if (a1 != 0) {
-        func_00155FA0(self);
+        SetEffectSpawnerInactive(self);
     } else {
         SetEffectSpawnerActiveForever();
     }
@@ -1133,7 +1133,7 @@ void func_00156108(EffectSpawner* self, s32 a1)
         if (a1 == 0) {
             SetEffectSpawnerActiveForever();
         } else if (a1 == -1) {
-            func_00155FA0(self);
+            SetEffectSpawnerInactive(self);
         } else {
             self->f2D8 = a1;
         }
@@ -2067,21 +2067,21 @@ INCLUDE_ASM(func_0015A198);
 Rec_158C60* func_0015A418(void* self,s32 flags,s32 kind,void* arg)
 {
     s32 out=0;
-    func_0015A198(self,flags|0x200,kind,arg,1,&out);
+    GatherObjectsByMode(self,flags|0x200,kind,arg,1,&out);
     return (Rec_158C60*)out;
 }
 
 s32 func_0015A448(void* self,s32 kind,void* arg)
 {
     s32 out=0;
-    func_0015A198(self,0x204,kind,arg,1,&out);
+    GatherObjectsByMode(self,0x204,kind,arg,1,&out);
     return out;
 }
 
 s32 func_0015A480(void* self,s32 kind,void* arg)
 {
     s32 out=0;
-    func_0015A198(self,0x201,kind,arg,1,&out);
+    GatherObjectsByMode(self,0x201,kind,arg,1,&out);
     return out;
 }
 
@@ -2266,7 +2266,7 @@ void func_0015AC08(ObjectCycler* self, void* arg)
     FindOrBuildMemberGroup((void**)&self->group, self);
     for (i = 0; i < 16; i++) {
         s32 kind = i + 0x23C;
-        s32 p = func_0015A480((u8*)self->world, kind, self);
+        s32 p = FindFirstObjectByIdMode1((u8*)self->world, kind, self);
         if (!p)
             continue;
         func_00182ED8(p);
@@ -2278,7 +2278,7 @@ void func_0015AC08(ObjectCycler* self, void* arg)
     }
     if (self->mode == 1) {
         for (i = 0; i < 8; i++) {
-            s32 p = func_0015A480((u8*)self->world, i + 0x24D, self);
+            s32 p = FindFirstObjectByIdMode1((u8*)self->world, i + 0x24D, self);
             if (p) {
                 func_00182ED8(p);
                 self->altObjects[self->altCount++] = (PlacedObject*)p;
@@ -2416,7 +2416,7 @@ void func_0015B128(ObjectCycler* self)
         break;
     }
     case 6:
-        if (func_0015C0A0(self) || func_0015BFC0(self)) {
+        if (IsObjectCyclerUnsupported(self) || func_0015BFC0(self)) {
             func_0015B7B8(self, 0);
         } else if (self->nextAdvanceTime <= g_gameClock[1]) {
             s32 idx = (self->index + 1) % self->altCount;
@@ -2541,7 +2541,7 @@ s32 func_0015C0A0(ObjectCycler* self)
     }
     PushBackMemoryMark(self);
     Frame_15C0A0 fr;
-    func_001DC4D0((s32)self->world, 0, &self->v140, func_0015C058, self, &fr.a, &fr.b, self->f64C);
+    func_001DC4D0((s32)self->world, 0, &self->v140, IsCyclerGroundCandidate, self, &fr.a, &fr.b, self->f64C);
     fr.q = self->v140;
     fr.q.z = fr.q.z - self->f64C;
     s32 r = FindNearestSpanObject(0, &self->v140, &fr.q, fr.a, fr.b, 0);
@@ -3581,7 +3581,7 @@ void func_0015EE80(void)
         if (D_00262314 >= 2) {
             D_00262314 = 0;
         }
-        func_0015ED50((RenderFrame*)g_drawingFrame);
+        ActivateRenderFrame((RenderFrame*)g_drawingFrame);
         func_001684E8();
         func_001686E8(g_vif1Channel, ((RenderFrame*)g_drawingFrame)->bufBAddr);
         *(volatile s32*)0x10003010 = 0;
@@ -3596,7 +3596,7 @@ void func_0015EE80(void)
 
 void func_0015EF88(Pair_15EF88* self, s32 flag)
 {
-    func_0015ED50(self, flag);
+    ActivateRenderFrame(self, flag);
     func_001686E8(g_vif1Channel, self->fC);
     if (flag != 0) {
         *(volatile s32*)0x10003010 = 0;
@@ -3680,5 +3680,5 @@ void func_0015F618(s32 flag, s32 code)
 
 void func_0015F658(void)
 {
-    func_0015F618(1, 0xFFFF);
+    ConstructPacketWriters(1, 0xFFFF);
 }

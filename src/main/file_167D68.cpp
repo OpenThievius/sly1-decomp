@@ -461,10 +461,10 @@ void func_00167E08(C0A* self)
 
     StartAgent(self);
     if (self->fC18 != -1) {
-        self->fC1C = (s32)func_0015A448(self->world, self->fC18, self);
+        self->fC1C = (s32)FindFirstObjectByIdMode4(self->world, self->fC18, self);
     }
     if (self->fC30 != -1) {
-        self->fC34 = (s32)func_0015A448(self->world, self->fC30, self);
+        self->fC34 = (s32)FindFirstObjectByIdMode4(self->world, self->fC30, self);
     }
     if (self->f750 != 0) {
         PushBackMemoryMark();
@@ -1142,7 +1142,7 @@ void func_00169D58(C6F* self)
 void func_00169D90(C6F* self)
 {
     if (self->id44 != -1) {
-        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->world, self->id44, self->parent);
+        Res_0015A448* r = (Res_0015A448*)FindFirstObjectByIdMode4(self->world, self->id44, self->parent);
         self->found48 = r;
         r->f398 = 0;
     }
@@ -1207,7 +1207,7 @@ void func_0016A178(C7F* self)
 void func_0016A1B0(C7F* self)
 {
     if (self->targetId != -1) {
-        Res_0015A448* r = (Res_0015A448*)func_0015A448(self->world, self->targetId, self->parent);
+        Res_0015A448* r = (Res_0015A448*)FindFirstObjectByIdMode4(self->world, self->targetId, self->parent);
         self->target = r;
         r->f398 = 0;
     }

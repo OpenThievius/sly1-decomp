@@ -1190,7 +1190,7 @@ void func_0015FF88(IdLookupObject* self)
     FoundList* sub = &self->found;
     sub->items = (s32*)AllocateFrontMemory(self->idCount * 4);
     for (s32 i = 0; i < self->idCount; i++) {
-        s32 r = func_0015A480(cur, self->ids[i], self->parent);
+        s32 r = FindFirstObjectByIdMode1(cur, self->ids[i], self->parent);
         if (r != 0) { s32 n = sub->count; sub->items[n] = r; sub->count = n + 1; }
     }
     RegisterObjectGroup(cur, &self->found);
@@ -2823,7 +2823,7 @@ void func_00165828(Obj_165828* self, PlacedObject* ctx)
 
     for (i = 0; i < self->count; i++) {
         Elem_165828* e = &self->elems[i];
-        Node_165828* r = (Node_165828*)func_0015A448(ctx->world, self->keys[i], ctx);
+        Node_165828* r = (Node_165828*)FindFirstObjectByIdMode4(ctx->world, self->keys[i], ctx);
         e->p0 = r;
         if (r != 0) {
             BuildMatrixFromRotationAndTranslation(&ctx->v140, &ctx->m110, &f.a);

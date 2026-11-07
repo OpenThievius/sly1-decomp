@@ -1517,7 +1517,7 @@ ScriptValue* func_00102A70(ScriptValue* ret, EffectSpawner* obj, s32 unused, Scr
     StoreScriptArgumentsVa(&t, 0, args, 0);
     AssignScriptValue(&q, &t);
     DestroyScriptValue(&t, 2);
-    func_00155FA0(obj);
+    SetEffectSpawnerInactive(obj);
     SetScriptValueTag(&q, 0x22);
     CopyConstructScriptValue(ret, &q);
     DestroyScriptValue(&q, 2);

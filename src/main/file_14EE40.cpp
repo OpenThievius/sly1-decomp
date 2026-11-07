@@ -956,7 +956,7 @@ void func_0014F850(C23* self)
     PostLoadPlacedObject(self);
     if (self->count744 > 0) {
         do {
-            void* p = func_0015A448(self->world, self->items748[i], self);
+            void* p = FindFirstObjectByIdMode4(self->world, self->items748[i], self);
             if (p != 0) {
                 if (IsObjectOfKind(p, 0x41) != 0) {
                     s32 n = self->count768;
@@ -981,7 +981,7 @@ void func_0014F920(C23* self)
     func_0013CE40(self);
     ResolveObjectLinks(self, 3, g_takerLinks);
     ((Held23*)self->p734->f200)->f4C = 1;
-    Src_14F920* s2 = func_0015A480(self->world, self->f6C0, self);
+    Src_14F920* s2 = FindFirstObjectByIdMode1(self->world, self->f6C0, self);
     *(Quad16*)&self->q6F0[0] = s2->q190[0];
     *(Quad16*)&self->q6F0[1] = s2->q190[1];
     *(Quad16*)&self->q6F0[2] = s2->q190[2];
@@ -1384,7 +1384,7 @@ void func_00150790(StepSequence* self, s32 next)
             PushStackValue(&g_camera->ctl460, 3);
             if (self->mode2D0 == 0) {
                 if (self->second300 != -1) {
-                    g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+                    g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
                 } else {
                     g_camera->ctl460.f5C = 0;
                 }
@@ -1615,9 +1615,9 @@ void func_00150DC0(StepSequence* self, Msg_150DC0* msg)
             func_001365A0(&g_typedTextCaptionBox, r);
         }
         if (msg->f24 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, msg->f24, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, msg->f24, 0);
         } else if (self->second300 != -1) {
-            g_camera->ctl460.f5C = func_0015A448(self->world, self->second300, 0);
+            g_camera->ctl460.f5C = FindFirstObjectByIdMode4(self->world, self->second300, 0);
         } else {
             g_camera->ctl460.f5C = 0;
         }

@@ -139,7 +139,7 @@ void func_001C71E0(Agent* self)
     s32 v;
     PostLoadPlacedObject(self);
     if (self->f924 != -1) {
-        self->f928 = func_0015A448((s32)self->world, self->f924, self);
+        self->f928 = FindFirstObjectByIdMode4((s32)self->world, self->f924, self);
     }
     if (self->fB4C != -1) {
         func_001CAB10(self);
@@ -1311,7 +1311,7 @@ void func_001CA998(Agent* self, s32 index)
     if (index == -1) {
         v = 0;
     } else {
-        v = func_0015A448(self->world, index, self);
+        v = FindFirstObjectByIdMode4(self->world, index, self);
         if (v == 0)
             return;
     }
@@ -1621,7 +1621,7 @@ FoundItem* func_0015A448(u32 a, FoundItem* b, ItemKeeper* c);
 void func_001CB7A0(ItemKeeper* a0)
 {
     for (s32 i = 0; i < a0->owned.wantedCount; i++) {
-        FoundItem* r = func_0015A448((u32)g_currentWorld, a0->owned.wanted[i], a0);
+        FoundItem* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->owned.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->owned.count;
             if ((u32)n < 16) {
@@ -1632,7 +1632,7 @@ void func_001CB7A0(ItemKeeper* a0)
         }
     }
     for (s32 i = 0; i < a0->listed.wantedCount; i++) {
-        FoundItem* r = func_0015A448((u32)g_currentWorld, a0->listed.wanted[i], a0);
+        FoundItem* r = FindFirstObjectByIdMode4((u32)g_currentWorld, a0->listed.wanted[i], a0);
         if (r != 0) {
             s32 n = a0->listed.count;
             if ((u32)n < 16) {

@@ -2571,3 +2571,31 @@ func_00152CE0	AppendPacketQuadwords	copies a number of quadwords to the packet b
 func_00152E18	SkipDisplayListWriterSlot	slot 3 of the display-list writer's base table D_0024A0E0: does nothing
 func_00152E28	InitC61Object	slot 0 of class 0x61: runs InitPlacedObject only
 D_00261EF0	g_scatterController	the 0x24-byte record ResetScatterController sets up and ScatterObjectsAtPoint counts down: count ranges, two counts and the table of level bands
+func_001550B8	ReparentEffectSpawnerToSource	calls the spawner's slot 25 (0x64, reparent) with the word at +0x7C of the object at +0x2D0 (ResolveEffectSpawnerLinks calls it)
+func_00155270	StartEffectSpawner	original assembly: slot 0x50 of class 0x50
+func_00155AB0	UpdateEffectSpawner	original assembly: slot 0x54 of class 0x50
+func_00155FA0	SetEffectSpawnerInactive	stores -1 as the deadline at 0x340, so IsEffectSpawnerActive fails on the clock (script built-ins and five other functions call it)
+func_00156000	SetEffectSpawnerDisabled	with a nonzero argument makes the spawner inactive (SetEffectSpawnerInactive), else active forever (SetEffectSpawnerActiveForever); a script built-in of func_00109488
+func_00156030	GetEffectSpawnerInactive	writes the negation of IsEffectSpawnerActive through its out pointer (a script built-in of func_00109488)
+func_00156108	SetEffectSpawnerLimit	stores its argument at 0x2D8 while the state 0x2D4 is -1; in state 0 maps 0 to active forever, -1 to inactive and stores other values; marks the spawner changed (+0x34C)
+func_00156250	SetOwnedSpawnRecordKind	gets the spawner's owned record (GetOwnedSpawnRecord) and passes it to SetSpawnRecordKind
+func_001566C8	SendPointEventToWorldListener	sends message kind 12 with a point and a float to the world's object at +0x1D0C through its slot 31, when there is one
+func_00157FF8	BroadcastPointEvent	sends each object of the world's list a message with the point: kind 4, or 0x14 with a float or 0x24 with an object as its +0x90 record asks (func_001EEF90 calls it)
+func_00158108	SpawnBriefEffectAt	creates an effect of kind 4 (CreateEffect) at a point, gives it 0.75 of life and the owner's +0x278 record's +0x0C (func_0019ED58 calls it)
+func_001585F8	StartMemberObject	slot 0x50 of class 0x77: runs StartObject, then the object's slot 3
+func_001587C0	SendMemberObjectMessage	slot 0x7C of class 0x77: does nothing (0x78 and 0x7A override it)
+func_00158A10	ResolveGroupMembers	slot 0x4C of class 0x78: calls the resolve slot (15) of each of its members
+func_00158D38	SendRecordMemberMessage	slot 0x7C of class 0x79: does nothing
+func_0015A198	GatherObjectsByMode	unmatched yet: collects objects for a mode and an id into an array (CollectObjectByMode), as FindFirstObjectById and the two finders after it call it with one result wanted
+func_0015A448	FindFirstObjectByIdMode4	runs GatherObjectsByMode with mode 0x204, one result wanted, and returns that object (SetStepSequenceState and a dozen others call it)
+func_0015A480	FindFirstObjectByIdMode1	runs GatherObjectsByMode with mode 0x201, one result wanted, and returns that object
+func_0015A8B8	InitC60Object	slot 0x10 of class 0x60: runs InitPlacedObject and sets its two scale floats to 1 and its three-float value to 1, 0.2, 0.1
+func_0015A918	LoadC60Object	slot 0x38 of class 0x60: runs LoadPlacedObject and reads its four mesh tables (ReadMeshTables)
+func_0015A960	UpdateC60Object	slot 0x54 of class 0x60: runs UpdatePlacedObject and moves the scale at +0x2EC toward +0x2F0 (ApproachValueWithRamp)
+func_0015A9A8	DrawC60Object	slot 0xA4 of class 0x60: draws the object with its transform scaled by the scale at +0x2EC
+func_0015AF50	StepObjectCycler	original assembly: slot 0x80 of class 0x40
+func_0015C058	IsCyclerGroundCandidate	the filter IsObjectCyclerUnsupported passes: rejects an object with flag bit 43 or the cycler's own +0x50, else accepts it when bit 0 of its +0x2CC is clear
+func_0015C0A0	IsObjectCyclerUnsupported	at most every 0.05 s: looks for a span object under the cycler, between its position and that point lowered by +0x64C (FindNearestSpanObject), and returns 1 when there is none (UpdateObjectCycler calls it)
+func_0015CC80	BeginFontGlyphPacket	a slot of the font's GCC vtable D_0024A220: adds the font's images (AddFontImagesToFrame) and opens a GIF tag with its register writes
+func_0015ED50	ActivateRenderFrame	sets g_drawFrameData and the image mask of a render frame, and when it has a pending list sends D_00274538 on the GIF channel (RunRenderThread and SendRenderFrameToDma call it)
+func_0015F618	ConstructPacketWriters	the file's static initialiser: on the construction pass sets up g_gsPacketWriter and g_vifPacketWriter (ResetPacketWriters calls it)

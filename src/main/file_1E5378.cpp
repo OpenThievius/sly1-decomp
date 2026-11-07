@@ -65,7 +65,7 @@ void func_001E5428(C16* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 3, D_00275B28);
     self->f614 = CreateStateWalker(self->f610, self, -1, 1);
-    r = func_0015A448(g_currentWorld, 7, self);
+    r = FindFirstObjectByIdMode4(g_currentWorld, 7, self);
     if (r != 0) {
         self->f620 = r;
         self->f624 = r;
@@ -85,7 +85,7 @@ void func_001E5428(C16* self)
 
     n = 0;
     while (n < self->f638) {
-        r2 = func_0015A448(self->world, ((s32*)self->f640)[n], self);
+        r2 = FindFirstObjectByIdMode4(self->world, ((s32*)self->f640)[n], self);
         if (r2 != 0) {
             ((void**)self->f63C)[n] = r2;
             n++;

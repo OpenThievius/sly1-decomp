@@ -470,7 +470,7 @@ void func_001B61F0(Bank_1B61F0* self)
     }
     s32 r;
     if (self->count_3C > 0 && e != 0 && e->value_40 != -1) {
-        r = func_0015A448(self->owner_14, e->value_40, self);
+        r = FindFirstObjectByIdMode4(self->owner_14, e->value_40, self);
     } else {
         r = 0;
     }
@@ -939,7 +939,7 @@ void func_001B6F50(C09* self)
         if (key == best) {
             e->val = 0;
         } else {
-            e->val = func_0015A448((Hdr_1B6F50*)self->world, key, self);
+            e->val = FindFirstObjectByIdMode4((Hdr_1B6F50*)self->world, key, self);
         }
         e++;
         j--;
@@ -994,7 +994,7 @@ void func_001B7128(C09* self)
     StartAgent(self);
     func_001B6F50(self);
     if (self->fC28 != -1) {
-        self->fC2C = func_0015A448(self->world, self->fC28, self);
+        self->fC2C = FindFirstObjectByIdMode4(self->world, self->fC28, self);
     }
     if (self->fCD4 > 0) {
         s32 i = 0;

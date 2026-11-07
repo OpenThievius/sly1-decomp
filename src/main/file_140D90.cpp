@@ -240,7 +240,7 @@ void func_00141338(FlaggedObject* self)
     PostLoadPlacedObject(self);
     s32 i = 0;
     while (i < self->nIdsA) {
-        void* r = func_0015A448(self->world, self->idsA[i], self);
+        void* r = FindFirstObjectByIdMode4(self->world, self->idsA[i], self);
         if (r != 0) {
             s32 k = self->countA;
             self->objsA[k] = r;
@@ -250,7 +250,7 @@ void func_00141338(FlaggedObject* self)
     }
     i = 0;
     while (i < self->nIdsB) {
-        void* r = func_0015A448(self->world, self->idsB[i], self);
+        void* r = FindFirstObjectByIdMode4(self->world, self->idsB[i], self);
         if (r != 0) {
             s32 k = self->countB;
             self->objsB[k] = r;
@@ -307,7 +307,7 @@ void func_00141438(FlaggedObject* self)
         }
         g_activeListFrames = (ListFrame*)it.saved;
     } else {
-        self->child = func_0015A448(self->world, self->childId, self);
+        self->child = FindFirstObjectByIdMode4(self->world, self->childId, self);
     }
     if (self->f5A8 != 0) {
         self->handle = (StateWalker*)CreateStateWalker(self->f5A8, self, 0x546, 0);

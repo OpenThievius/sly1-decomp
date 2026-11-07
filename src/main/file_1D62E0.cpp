@@ -892,7 +892,7 @@ void func_001D7440(C19* self)
         }
     }
     if (self->fB30 == 1) {
-        s32 n = func_0015A198(self->world, 0x105, 0x426, 0, 0x10, buf);
+        s32 n = GatherObjectsByMode(self->world, 0x105, 0x426, 0, 0x10, buf);
         for (s32 i = 0; i < n; i++) {
             buf[i]->vt->fn6C(buf[i], self);
         }
