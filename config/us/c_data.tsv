@@ -532,9 +532,7 @@ D_0024E1C0	0024E1C0	1072	.rodata	src/main/file_1E08F8.cpp
 D_0024E600	0024E600	356	.rodata	src/main/file_1E88D0.cpp
 D_0024E840	0024E840	0	.rodata	src/main/file_1F2758.cpp
 D_0024E988	0024E988	40	.rodata	src/lib/request_thread.cpp
-D_0024E9B0	0024E9B0	8	.rodata.D_0024E9B0	src/lib/001F4000.cpp
-D_0024E9B8	0024E9B8	8	.rodata.D_0024E9B8	src/lib/001F4000.cpp
-D_0024E9C0	0024E9C0	8	.rodata.D_0024E9C0	src/lib/001F4000.cpp
+D_0024E9B0	0024E9B0	340	.rodata	src/lib/formatted_output.cpp
 D_0024E9C8	0024E9C8	8	.rodata.D_0024E9C8	src/main/001E4000.cpp
 D_0024E9D0	0024E9D0	8	.rodata.D_0024E9D0	src/main/001E4000.cpp
 D_0024E9D8	0024E9D8	8	.rodata.D_0024E9D8	src/main/001E4000.cpp
@@ -772,8 +770,7 @@ D_00275B60	00275B60	2724	.data	src/main/file_1E88D0.cpp
 D_0027697C	0027697C	4	.data.D_0027697C	src/lib/001F8000.cpp
 D_00276980	00276980	1960	.data	src/lib/patch_installer_1.cpp
 D_00277128	00277128	4	.data	src/lib/request_thread.cpp
-D_0027712C	0027712C	4	.data.D_0027712C	src/lib/001F4000.cpp
-D_00277130	00277130	4	.data.D_00277130	src/lib/001F4000.cpp
+D_0027712C	0027712C	8	.data	src/lib/formatted_output.cpp
 D_00277134	00277134	4	.data.D_00277134	src/main/001E4000.cpp
 D_00277138	00277138	128	.data.D_00277138	src/main/001E4000.cpp
 D_002771B8	002771B8	4	.data.D_002771B8	src/main/001E4000.cpp
@@ -846,6 +843,7 @@ D_002BE460	002BE460	24	.bss	src/main/file_167D68.cpp
 D_002BE478	002BE478	20	.bss	src/main/file_17B998.cpp
 D_00604700	00604700	128	.bss	src/main/file_18F988.cpp
 D_00625770	00625770	2064	.bss	src/lib/request_thread.cpp
+D_00625F80	00625F80	128	.bss	src/lib/formatted_output.cpp
 D_0062A770	0062A770	24	.bss	src/lib/soft_float.c
 D_0062A798	0062A798	32	.bss	src/lib/throw.c
 D_0062A7B8	0062A7B8	4	.bss	src/lib/unwind.c
