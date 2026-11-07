@@ -4,6 +4,7 @@
 #include "switched_collider.h"
 #include "fpu.h"
 #include "globals.h"
+#include "pad_record.h"
 
 extern f32 D_0026185C[];
 
@@ -61,11 +62,10 @@ void func_001C6890(Player* s)
     }
 }
 
-struct Other_1C6928 { u8 pad[0xAA]; u16 flags; };
 void func_00175170(Player* self, s32 a, s32 b);
 void func_001C61E0(Player* self, s32 state);
 
-void func_001C6928(Player* self, Other_1C6928* other)
+void func_001C6928(Player* self, PadRecord* other)
 {
     s32 flag = 1;
     s32 held = other->flags & 0x80;

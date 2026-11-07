@@ -48,7 +48,6 @@ void func_00152470(void* a, void* b);
 
 
 
-struct Pair_00197A68 { u8 pad[0x94]; f32 f94; f32 f98; };
 
 
 
@@ -304,7 +303,7 @@ void func_001974D8(GaugeCollider* a, void* b);
 void func_00197788(GaugeCollider* self);
 void func_00197848(GaugeCollider* self);
 void func_00197A08(u8* self, GaugeColliderAgent* ctx);
-void func_00197A68(GaugeCollider* ctx, Pair_00197A68* out);
+void func_00197A68(GaugeCollider* ctx, Contact03* out);
 void func_00197F10(GaugeCollider* self, s32 kind, void* rec);
 void func_00198090(GaugeColliderAgent* self);
 s32 func_001982A0(GaugeColliderAgent* self);
@@ -642,7 +641,7 @@ void func_00197A08(u8* self, GaugeColliderAgent* ctx)
     ctx->fC14 = 0;
 }
 
-void func_00197A68(GaugeCollider* ctx, Pair_00197A68* out)
+void func_00197A68(GaugeCollider* ctx, Contact03* out)
 {
     (void)ctx;
     out->f98 = D_0026A83C;

@@ -375,13 +375,11 @@ s32 func_00160D10(void);
 
 // NEAR: control flow and the calls match; the compiler picks s0 for self and s1 for n (retail: s1, s0),
 // and keeps the loaded count in $a2 where retail uses $v1.
-struct Dst_137A60;
-
 void func_001378A0(BufferedStream* self);
 void func_00137820(BufferedStream* self);
-void func_0018D800(Dst_137A60* dst, void* src, s32 count);
+void func_0018D800(void* dst, void* src, s32 count);
 
-void func_00137A60(BufferedStream* self, s32 remaining, Dst_137A60* dst)
+void func_00137A60(BufferedStream* self, s32 remaining, u8* dst)
 {
     if (self->remaining < 0) {
         return;
@@ -417,7 +415,7 @@ void func_00137A60(BufferedStream* self, s32 remaining, Dst_137A60* dst)
         }
         if (dst != 0) {
             CopyMemory(dst, (void*)self->ptr, n);
-            dst = (Dst_137A60*)((u8*)dst + n);
+            dst += n;
         }
         remaining -= n;
         self->ptr += n;
@@ -595,12 +593,11 @@ void func_00137F08(void* self, u8* p)
 
 ASM_FUNC(func_00137FB0);
 
-struct In_138278 { u8 pad0[0x10]; s32 base; };
 
 s32 func_00137BE0(void* self);
 void* func_0018D5C0(s32 size);
 
-void func_00138278(void* self, In_138278* in, Tree03* out)
+void func_00138278(void* self, Mesh03* in, Tree03* out)
 {
     s32 x = ReadBufferedU16(self);
     out->count = x;
@@ -610,7 +607,7 @@ void func_00138278(void* self, In_138278* in, Tree03* out)
     for (s32 i = 0; i < out->count; i++) {
         TreeNode03* e = out->nodes + i;
         s32 v = ReadBufferedU16(self);
-        e->face = (void*)(in->base + (v << 5));
+        e->face = (u8*)in->faces + (v << 5);
         s32 w = ReadBufferedU16(self);
         if ((w & 0xFFFF) != 0xFFFF) {
             e->back = out->nodes + w;
@@ -1330,14 +1327,12 @@ void func_001399F8(Gr8B* self, s32 a1, s32 a2, void* a3)
     }
 }
 
-struct Sub_139B38 { u8 pad[0x18]; s32 flag; };
-struct Owner_139B38 { u8 pad[8]; Sub_139B38* sub; };
 
 void* func_0012CCE8(void);
 
 void func_00139B38(void)
 {
-    Owner_139B38* o = (Owner_139B38*)FindEntryByObjectId();
+    Entry8B* o = (Entry8B*)FindEntryByObjectId();
     if (o) {
         if (o->sub) {
             o->sub->flag = 1;

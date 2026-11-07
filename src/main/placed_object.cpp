@@ -787,7 +787,6 @@ s32 func_0012C7B0(void* self, void* a1, f32 fa, f32 fb, void* a2, void** out);
 
 s32 func_001833F0(void* a, s32 b);
 
-struct Entry_12CCE8 { s32 key; u8 pad[0x18]; };
 
 s32 func_001B8A08(Collider* self, Collider* key);
 s32 func_001300E8(void* key, s32 kind);
@@ -3787,7 +3786,7 @@ f32 func_0012CCC0(void)
 void* func_0012CCE8(Gr8B* self, void* key)
 {
     for (s32 i = 0; i < self->f38; i++) {
-        Entry_12CCE8* e = (Entry_12CCE8*)(self->f3C + i * 0x1C);
+        Entry8B* e = (Entry8B*)(self->f3C + i * 0x1C);
         if (MatchesObjectId(key, e->key) != 0) {
             return e;
         }

@@ -91,6 +91,15 @@ struct Contact03 {
     u8 fD4[0x0C];           // 0xD4: the tail func_001BC4D8 copies with the rest
 };
 
+// What a body's slot 66 (0x108) is handed to limit a contact (func_001C5388 for colliders,
+// func_00170528 for the player, func_001CACB0 for agents): the contact, and a limit the player
+// lowers and an agent clears when the contact faces up (its v80.z above 0.7).
+struct ContactLimit03 {
+    Contact03* contact;     // 0x00
+    u8 pad04[0x30 - 0x04];
+    f32 limit;              // 0x30
+};
+
 // A row of a body's contact table: its contacts with one other body (func_001BD558,
 // func_001BD678) and where its last link is kept.
 struct ContactRow03 {

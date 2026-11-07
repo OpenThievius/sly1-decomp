@@ -11,6 +11,7 @@
 #include "c62.h"
 #include "animation.h"
 #include "attachment.h"
+#include "c8b.h"
 
 extern f32 D_0026185C[];
 
@@ -605,13 +606,9 @@ void func_001C8BC0(Agent* self)
     SetAgentFacingAngles(self, x, y);
 }
 
-struct Tgt_1C8C08;
-typedef void (*TFn_1C8C08)(Tgt_1C8C08* t, Agent* s, f32 x, f32 y, s32 z, void* out, s32 w);
-struct Tgt_1C8C08 { TFn_1C8C08* vtbl; };
-struct Res_1C8C08 { s32 pad0; Tgt_1C8C08* t; };
 void func_001C8418(Agent* self, void* p);
 void func_0012C9E8(f32 c, void* a, Agent* b, void* d, void* e, void* f, s32 g);
-Res_1C8C08* func_0012CCE8(void* a, Agent* b);
+Entry8B* func_0012CCE8(void* a, Agent* b);
 
 void func_001C8C08(Agent* self, s32 flag)
 {
@@ -635,7 +632,7 @@ void func_001C8C08(Agent* self, s32 flag)
                     break;
                 case 1: {
                     self->f914 = self->f918;
-                    Tgt_1C8C08* t = FindEntryByObjectId(self->f750, self)->t;
+                    Mover8B* t = FindEntryByObjectId(self->f750, self)->mover;
                     t->vtbl[0](t, self, self->f914, 1.0f, 0, &q, 0);
                     break;
                 }
@@ -1358,13 +1355,11 @@ void func_001CAC30(Agent* self, Contact03* out)
     }
 }
 
-struct Inner_1CACB0 { u8 pad0[0x88]; f32 f88; };
-struct Out_1CACB0 { Inner_1CACB0* p0; u8 pad1[0x30 - 4]; s32 f30; };
-void func_001C5388(Agent*, s32, Out_1CACB0*);
+void func_001C5388(Agent*, s32, ContactLimit03*);
 
-void func_001CACB0(Agent* self, s32 flags, Out_1CACB0* out)
+void func_001CACB0(Agent* self, s32 flags, ContactLimit03* out)
 { func_001C5388(self, flags, out);
-    if (self->fC04 != 0) { if ((flags & 0x12) == 0x12) { if (0.7f < out->p0->f88) { out->f30 = 0; } } } }
+    if (self->fC04 != 0) { if ((flags & 0x12) == 0x12) { if (0.7f < out->contact->v80.z) { out->limit = 0; } } } }
 
 void func_001CAD28(Agent* self, f32 value) { self->f74C = value * 0.017453294f; }
 

@@ -53,7 +53,6 @@ f32 D_00262E30 = 50.0f;
 
 struct Sub_170410 { u8 pad0[0x40]; s32 f40; };
 typedef s32 (*VFn_170410)(Player* self, void* out);
-struct Out_170410 { u8 pad0[0x94]; f32 f94; f32 f98; };
 
 f32 D_00262E34 = 0.8f;
 f32 D_00262E38 = 0.5f;
@@ -352,7 +351,7 @@ ASM_FUNC(func_0016FD70);
 INCLUDE_RODATA(jtbl_0024A870);
 ASM_FUNC(func_001701B0);
 
-void func_00170410(Player* self, Out_170410* out)
+void func_00170410(Player* self, Contact03* out)
 {
     f32 a;
     f32 b;
@@ -396,12 +395,7 @@ extern f32 D_002637C0[3];
 
 void func_001C53A8(void* self, s32 flags, void* out);
 
-struct Out_170528 {
-    u8 pad0[0x30];
-    f32 f30;
-};
-
-void func_00170528(Player* self, s32 flags, Out_170528* out)
+void func_00170528(Player* self, s32 flags, ContactLimit03* out)
 {
     if (self->f2220 == 4) {
         if (flags & 0x10) {
@@ -411,8 +405,8 @@ void func_00170528(Player* self, s32 flags, Out_170528* out)
             } else {
                 v = -self->mass * self->gravity.z * D_002637C0[0];
             }
-            if (v < out->f30) {
-                out->f30 = v;
+            if (v < out->limit) {
+                out->limit = v;
             }
         }
     } else {
@@ -451,23 +445,16 @@ extern f32 D_00274AD0[];
 
 s32 func_001C5248(void* self);
 
-struct Ent_170790 {
-    u8 pad0[0x88];
-    f32 f88;
-    u8 pad1[0x10];
-    s32 i9C;
-};
-
-s32 func_00170790(Player* self, Ent_170790* e, s32 idx)
+s32 func_00170790(Player* self, Contact03* e, s32 idx)
 {
     if (self->f2220 != 0xD) {
         return func_001C5248(self);
     }
     f32 scale = D_00274AD0[idx];
-    if (e->f88 * scale < 0.7f) {
+    if (e->v80.z * scale < 0.7f) {
         return 0;
     }
-    s32 k = e->i9C;
+    s32 k = e->kind;
     if (k < 7) {
         if (k >= 4) {
             return idx == 0;
