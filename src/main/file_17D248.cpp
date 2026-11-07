@@ -7,6 +7,7 @@
 #include "placed_object.h"
 #include "asm_func.h"
 #include "fpu.h"
+#include "vu0.h"
 
 // From 0x17D248 to colored_triangle_set: player helpers in VU0 code, the probe test func_0017DE88, and the
 // point-object list of class 0x80. Its .data runs from 0x263E50 to 0x264094 (tuning floats the
@@ -80,7 +81,50 @@ INCLUDE_ASM(func_0017D248);
 INCLUDE_RODATA(jtbl_0024B090);
 INCLUDE_ASM(func_0017D5D8);
 
-INCLUDE_ASM(func_0017DCE0);
+// An edge of a mesh: the two vertices it joins and the two faces it lies between.
+struct MeshEdge {
+    s16 vertA;
+    s16 vertB;
+    s16 faceA;
+    s16 faceB;
+};
+
+// A face of a mesh: its normal, then its slope (the normal's y) at +8.
+struct MeshFace {
+    Vec02 normal;           // 0x00
+    u8 pad10[0x20 - 0x10];
+};
+
+s32 func_0017DCE0(void* unused, Collider* c, MeshEdge* e, Vec02* out)
+{
+    Mesh03* mesh = &c->meshCopy;
+    MeshFace* faces = (MeshFace*)mesh->faces;
+    MeshFace* fa = &faces[e->faceA];
+    MeshFace* fb = &faces[e->faceB];
+    MeshFace* flat;
+    if (0.7f < fa->normal.z && fb->normal.z < 0.55f) {
+        flat = fb;
+    } else if (fa->normal.z < 0.55f && 0.7f < fb->normal.z) {
+        flat = fa;
+    } else {
+        return 0;
+    }
+    Vec02* verts = (Vec02*)mesh->verts;
+    Vec02 d;
+    Vec02 n;
+    u128 vb = Vu0::Q(verts[e->vertB]);
+    u128 va = Vu0::Q(verts[e->vertA]);
+    Vu0::Q(d) = Vu0::Sub(vb, va);
+    n.z = 0.0f;
+    n.y = d.x;
+    n.x = -d.y;
+    Vu0::Set(n, Vu0::NormalizeOr(Vu0::Q(n), Vu0::Q(g_unitXVector)));
+    if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(n), Vu0::Q(flat->normal))) < 0.0f) {
+        Vu0::Q(n) = Vu0::MulX(Vu0::Q(n), Vu0::Scalar(-1.0f));
+    }
+    *out = n;
+    return 1;
+}
 
 
 void BuildPerpendicularPair(Quad16* q, void* out, const Vec02* a, const Vec02* b);
