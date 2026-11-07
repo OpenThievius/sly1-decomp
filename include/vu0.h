@@ -60,6 +60,14 @@ struct Vu0 {
         return r;
     }
 
+    // (1, 1, 1, 1): vmaxw.xyzw r, vf0, vf0w (vf0's w is 1.0, the larger in every field).
+    static u128 Ones()
+    {
+        u128 r;
+        __asm__("vmaxw.xyzw %0, vf0, vf0w" : "=j"(r));
+        return r;
+    }
+
     // a + b: vadd.xyzw.
     static u128 Add(u128 a, u128 b)
     {
@@ -102,6 +110,15 @@ struct Vu0 {
     {
         Slot t;
         Q(t) = FromFloat(f);
+        return Q(t);
+    }
+
+    // Scalar of a float in memory: FromFloatAt into the helper's 16-byte local, so the float is
+    // loaded with lw straight into qmtc2's GPR, and stored to the stack as Scalar's is.
+    static u128 ScalarAt(const f32& f)
+    {
+        Slot t;
+        Q(t) = FromFloatAt(f);
         return Q(t);
     }
 
@@ -148,6 +165,17 @@ struct Vu0 {
     {
         u128 r;
         __asm__("vadda.xyzw ACC, %1, vf0\n\tvmaddx.xyzw %0, %2, %3x" : "=j"(r) : "j"(a), "j"(b), "j"(s));
+        return r;
+    }
+
+    // a + b * s.x + c * t.x: vadda.xyzw ACC, a, vf0 (a into ACC, as MulAddX); vmaddax.xyzw
+    // ACC, b, s.x; vmaddx.xyzw. The weights are Scalars (or ScalarAts). Listed c first: where
+    // all die there, retail's result takes c's register (func_00198BD8).
+    static u128 MulAddX2(u128 a, u128 b, u128 s, u128 c, u128 t)
+    {
+        u128 r;
+        __asm__("vadda.xyzw ACC, %2, vf0\n\tvmaddax.xyzw ACC, %3, %4x\n\tvmaddx.xyzw %0, %1, %5x"
+                : "=j"(r) : "j"(c), "j"(a), "j"(b), "j"(s), "j"(t));
         return r;
     }
 
@@ -339,6 +367,46 @@ struct Vu0 {
     {
         u128 r;
         __asm__("vmulax.xyzw ACC, %2, %1x\n\tvmaddx.xyzw %0, %3, %4x" : "=j"(r) : "j"(s), "j"(a), "j"(b), "j"(t));
+        return r;
+    }
+
+    // Which of four planes the sphere at v of radius s.x lies wholly behind: the planes' unit
+    // normals are the columns of a 3x4 matrix whose rows are m[0], m[1], m[2] (any 16-aligned
+    // object, read where it is), so m[0] * v.x + m[1] * v.y + m[2] * v.z is v's distance from
+    // each plane, less ones * s.x (ones is Ones()). Only ACC is written: vmulax.xyzw,
+    // vmadday.xyzw, vmaddaz.xyzw, vmsubax.xyzw, then four vnop for the flags to settle and
+    // cfc2 of the MAC flags (vi17) into a GPR. Their sign bits are 0x80 (x) to 0x10 (w): a
+    // result of 0xF0 is all four negative, the sphere inside every plane.
+    static u32 PlaneSigns(u128 r0, u128 r1, u128 r2, u128 v, u128 ones, u128 s)
+    {
+        u32 flags;
+        __asm__("vmulax.xyzw ACC, %1, %4x\n\tvmadday.xyzw ACC, %2, %4y\n\tvmaddaz.xyzw ACC, %3, %4z\n\t"
+                "vmsubax.xyzw ACC, %5, %6x\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2 %0, $vi17"
+                : "=r"(flags) : "j"(r0), "j"(r1), "j"(r2), "j"(v), "j"(ones), "j"(s));
+        return flags;
+    }
+
+    // a * s.x + b * t.x + c * u.x, three vectors weighted (a direction from the three axes of a
+    // heading, blend weights): vmulax.xyzw ACC, vmaddax.xyzw ACC, vmaddx.xyzw. The weights are
+    // Scalars. As in MulXSum the inputs are listed s, a, then the rest: retail's result takes
+    // s's register where s and a die there.
+    static u128 MulXSum3(u128 a, u128 s, u128 b, u128 t, u128 c, u128 u)
+    {
+        u128 r;
+        __asm__("vmulax.xyzw ACC, %2, %1x\n\tvmaddax.xyzw ACC, %3, %4x\n\tvmaddx.xyzw %0, %5, %6x"
+                : "=j"(r) : "j"(s), "j"(a), "j"(b), "j"(t), "j"(c), "j"(u));
+        return r;
+    }
+
+    // a * s.x + b * t.x + c * u.x + d * v.x, four vectors weighted (the gap between the
+    // points at given fractions of two segments, a Hermite segment's point): vmulax.xyzw ACC,
+    // two vmaddax.xyzw ACC, vmaddx.xyzw. The weights are Scalars, listed first as in MulXSum.
+    static u128 MulXSum4(u128 a, u128 s, u128 b, u128 t, u128 c, u128 u, u128 d, u128 v)
+    {
+        u128 r;
+        __asm__("vmulax.xyzw ACC, %2, %1x\n\tvmaddax.xyzw ACC, %3, %4x\n\tvmaddax.xyzw ACC, %5, %6x\n\t"
+                "vmaddx.xyzw %0, %7, %8x"
+                : "=j"(r) : "j"(s), "j"(a), "j"(b), "j"(t), "j"(c), "j"(u), "j"(d), "j"(v));
         return r;
     }
 
