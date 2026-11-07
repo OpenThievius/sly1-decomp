@@ -1031,9 +1031,45 @@ void RemoveCameraControllers(Camera* self, s32 flags, s32 k0, CameraController* 
 
 ASM_FUNC(func_001453B0);
 
-INCLUDE_ASM(func_00145438);
+void func_00145438(const Vec02* a, const Vec02* b, f32* angle, f32* dist, f32* height)
+{
+    Vec02 d;
+    if (b != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*b));
+    } else {
+        d = *a;
+    }
+    if (angle != 0) {
+        *angle = WrapAngle(ArctangentOfRatio(d.y, d.x));
+    }
+    if (dist != 0) {
+        u128 v = Vu0::Q(d);
+        *(u32*)dist = Vu0::ToBits(Vu0::Sqrt(Vu0::DotXY(v, v)));
+    }
+    if (height != 0) {
+        *height = d.z;
+    }
+}
 
-INCLUDE_ASM(func_001454E0);
+void ConvertOffsetToSpherical(const Vec02* a, const Vec02* b, f32* heading, f32* pitch, f32* dist)
+{
+    Vec02 d;
+    if (b != 0) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(*a), Vu0::Q(*b));
+    } else {
+        d = *a;
+    }
+    if (heading != 0) {
+        *heading = WrapAngle(ArctangentOfRatio(d.y, d.x));
+    }
+    if (pitch != 0) {
+        u128 v = Vu0::Q(d);
+        *pitch = WrapAngle(ArctangentOfRatio(d.z, Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(v, v)))));
+    }
+    if (dist != 0) {
+        *(u32*)dist = Vu0::ToBits(Vu0::Length(Vu0::Q(d)));
+    }
+}
 
 void RequestCameraSnap(Camera* self, f32* src)
 {
@@ -1181,6 +1217,20 @@ void SetCameraControllerSettings(Camera* obj, s32 value, f32 first, f32 second) 
 
 void RecordCameraTimestamp(Camera* obj) { obj->f218 = g_gameTime; }
 
-INCLUDE_ASM(func_00146038);
+s32 ComputeCameraDistanceFade(Camera* self, u128 d, f32* fade, f32 radius, f32 x);
+
+s32 IsSphereInCameraView(Camera* self, Vec02* p, f32 radius, f32 x)
+{
+    Vec02 r;
+    f32 fade;
+    s32 in = 0;
+    u128 d = Vu0::Sub(Vu0::Q(*p), Vu0::Q(self->f40));
+    u128 ones = Vu0::Ones();
+    Vu0::Q(r) = Vu0::FromFloat(radius);
+    if ((Vu0::PlaneSigns(Vu0::Q(self->planes[0]), Vu0::Q(self->planes[1]), Vu0::Q(self->planes[2]), d, ones, Vu0::Q(r)) ^ 0xF0) == 0) {
+        in = ComputeCameraDistanceFade(self, d, &fade, radius, x) != 0;
+    }
+    return in;
+}
 
 

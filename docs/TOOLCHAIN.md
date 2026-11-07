@@ -209,19 +209,60 @@ What retail shows, and what the compiler does:
   rotation methods (slots 34 and 35 of class 0x02) puts the time right after
   the object.
 
+- **The two-term dot.** `vmul.xy` then `vaddy.x` (DotXY) is a dot of x and y; with
+  a vector and itself and then Sqrt it is a length on the ground plane, retail's most
+  common use (func_001A9868, the pair controller's nearest-object searches, the gauge
+  agent's goals).
+- **A word stored from qmfc2.** Retail's `qmfc2` followed by `sw` of the word (a
+  float stored as bits: func_00160EA0's plane distances, the camera's ground length)
+  is ToBits, qmfc2 into a u32; ToFloat's f32 goes through mtc1 and swc1.
+- **The compiler's own qmfc2.** A u128 converted to an integer in C (`(u32)v`, a
+  u64, a u16) makes the compiler move the VU0 register itself with qmfc2, the same
+  encoding as retail's `qmfc2.ni`, but the truncation always follows as code
+  (`dsll32`/`dsra32`, or `andi`), never folded into the store; a union reads it back
+  through memory (sqc2, then lw or lwc1). No plain C form gives qmfc2 then sw or mtc1.
+  A u128 given to an asm as an `"r"` operand is moved the same way, with nothing
+  after it: ToFloatMoved holds only the `mtc1`, the qmfc2 being the compiler's,
+  which reorg puts in a branch's delay slot (an asm statement never goes there) and
+  the compiler makes in each arm that meets at the conversion. It finished
+  func_0014EB10 (the delay-slot near miss), func_0019BC40, func_0019CF68 and
+  func_001D12F0, and matches func_0016D828. Every user of ToFloat but one matches
+  with this form too; func_00187B60 takes other VU0 registers with it, so the two
+  stay: ToFloat where retail keeps the value in its VU0 register up to the qmfc2.
+- **A u128 across a call is spilled by the compiler.** VU0 registers do not survive
+  a call, so a u128 local live across one is stored with sqc2 and reloaded with
+  lqc2 (func_00198570's position); a plain copy of a vector to a local instead
+  compiles to lq and sq.
+- **The view test.** `vmulax/vmadday/vmaddaz/vmsubax.xyzw` into ACC, four `vnop`
+  and `cfc2 v0, $vi17` (PlaneSigns) are the distances of a point from the camera's
+  four side planes (their normals the columns of the 3x4 matrix at Camera+0x50) less
+  a radius, read as the MAC flags; `(flags ^ 0xF0) == 0` (xori, bnez: all four
+  negative) is retail's test, where `== 0xF0` gives li, bne and a nop. The radius's
+  `(1, 1, 1, 1)` is Ones (`vmaxw.xyzw r, vf0, vf0w`), a separate asm because retail
+  schedules it apart. The test is IsSphereInCameraView (func_00146038), inlined in
+  ten more functions: func_001A0758 is matched; func_00125C90, func_00126270,
+  func_00134B48, func_001358D0, func_0013AD80, func_0018F9D8, func_0019F620,
+  func_001A3250, func_001AFBB0 and func_001F4AE0 have it. The assembler wants
+  `$vi17`, written so, not an operand.
+- **Weighted sums.** MulXSum3 and MulXSum4 (`vmulax`, `vmaddax` once or twice,
+  `vmaddx`) weight three or four vectors by Scalars and list the first weight first,
+  as MulXSum: retail's result takes its register (func_00130540, func_001D4698).
+  MulAddX2 (`vadda` with vf0, `vmaddax`, `vmaddx`) adds two weighted vectors to a,
+  listing the last vector first: retail's result takes its register
+  (func_00198BD8). A weight read from memory is ScalarAt: FromFloatAt into
+  Scalar's slot, the lw retail has (func_00198BD8's two, func_001D4698's speed).
+
 The sequences still without a helper, by how often retail has them (runs of
-VU0 instructions in the `inline` functions): the two-term dot vmul.xy/vaddy.x
-(31; never alone in the functions tried so far, func_001A9868 joins it to the
-square root), vadda/vmaddax/vmaddx (14), vmulax/vmaddax/vmaddx (13), the
-vmsubax + four vnop form (13), a vector built from three floats in GPRs
-(pextlw, pcpyld, qmtc2; func_00144AA0, func_001BFBF8), a float splat to all
-four lanes (mfc1, pextlw, pextlw, qmtc2; func_00155868), and a vector's y and
-z read from a GPR copy (qmfc2, prot3w, pextuw; file_1B7968's velocity and
-spin setters). The Q-register forms have helpers (Sqrt, DivX, Length,
-NormalizeOr), so do the matrix forms (Transform, Transform4, RotateRows and
-RotateUntied, RotateTransposed, MulTransposed, MulXSum) and the cross
-product, Min and Max. vmove.xyzw is the compiler's own copy. The assembler
-takes `vsqrt` (the disassembler prints it as a `.word`).
+VU0 instructions in the `inline` functions): a vector built from three floats in
+GPRs (pextlw, pcpyld, qmtc2; func_00144AA0, func_001BFBF8, func_00141690), a
+float splat to all four lanes (mfc1, pextlw, pextlw, qmtc2; func_00155868), and
+a vector's y and z read from a GPR copy (qmfc2, prot3w, pextuw; file_1B7968's
+velocity and spin setters). The Q-register forms have helpers (Sqrt, DivX,
+Length, NormalizeOr), so do the matrix forms (Transform, Transform4, RotateRows
+and RotateUntied, RotateTransposed, MulTransposed), the weighted sums (MulXSum,
+MulXSum3, MulXSum4, MulAddX, MulAddX2), the dots (Dot, DotXY), the view test
+(PlaneSigns, Ones), the cross product, Min and Max. vmove.xyzw is the compiler's
+own copy. The assembler takes `vsqrt` (the disassembler prints it as a `.word`).
 
 ## Getting the compiler
 

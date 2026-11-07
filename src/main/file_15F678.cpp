@@ -1596,7 +1596,31 @@ void ClearRecordBody(ClearedRecord* self)
     self->f18 = 0;
 }
 
-INCLUDE_ASM(func_00160EA0);
+void CopyMeshTransformed(Mesh03* src, s32 matrix, Mesh03* dst)
+{
+    dst->vertCount = src->vertCount;
+    dst->verts = CopyToFrontMemory(src->vertCount << 4, src->verts);
+    dst->faceCount = src->faceCount;
+    dst->faces = CopyToFrontMemory(src->faceCount << 5, src->faces);
+    dst->points = CopyToFrontMemory(src->faceCount << 4, src->points);
+    dst->words = CopyToFrontMemory(src->faceCount << 2, src->words);
+    dst->edgeCount = src->edgeCount;
+    dst->edges = src->edges;
+    if (matrix != 0) {
+        for (s32 i = 0; i < dst->vertCount; i++) {
+            Vec02* v = &((Vec02*)dst->verts)[i];
+            TransformByMatrixWithW((void*)matrix, 1.0f, v, v);
+        }
+        for (s32 i = 0; i < dst->faceCount; i++) {
+            u8* face = (u8*)dst->faces + (i << 5);
+            TransformByMatrixWithW((void*)matrix, 0.0f, face, face);
+            Vec02* vert = (Vec02*)((*(u16*)(face + 0x1E) << 4) + (s32)dst->verts);
+            *(u32*)(face + 0x10) = Vu0::ToBits(Vu0::Dot(Vu0::Q(*(Vec02*)face), Vu0::Q(*vert)));
+            Vec02* p = &((Vec02*)dst->points)[i];
+            TransformByMatrixWithW((void*)matrix, 1.0f, p, p);
+        }
+    }
+}
 
 s32 CollectEntriesForKey(KeyedPointSet* dst, KeyedPointSet* src, s32 key, s32 maxOut, KeyedEdge** out)
 {

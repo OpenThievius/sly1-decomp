@@ -13,7 +13,7 @@
 #include "collider.h"
 
 struct ObjectSet : Collider {
-    u8 pad550[0x554 - 0x550];
+    f32 f550;               // 0x550: added to the active collider's reach (func_00198BD8)
     s32 f554;               // 0x554: slot 0 (func_00198980) sets 1; func_00198E98 (slot 72) tests it
     s32 f558;               // 0x558: func_00198B28 (slot 16) sets 1 when a kept object answers
     s32 n55C;               // 0x55C: how many ids follow; func_00198ED8 appends at keys560[n55C++]

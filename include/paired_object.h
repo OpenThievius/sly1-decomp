@@ -16,7 +16,8 @@ struct PairedObject : Collider {
     void* attachment;  // 0x560
     u8 pad564[0x574 - 0x564];
     f32 f574;  // 0x574
-    u8 pad578[0x584 - 0x578];
+    u8 pad578[0x580 - 0x578];
+    f32 f580;  // 0x580: the clock time after which state 2 moves the offset on (func_001A65C8)
     f32 f584;  // 0x584: 1.0 at set-up
     f32 f588;  // 0x588: 2.5 at set-up
     void* f58C;  // 0x58C: handles func_001A6BE0 starts by state (f58C..f5A4)

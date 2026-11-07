@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// SIZE 436/432, checked 2026-11-07
-// NEAR: identical but for the VU0 registers of the dot product (retail vf2 for the point, vf1 for the direction; ours the other way) and the word stored at +0x20 of the entry: retail stores the qmfc2 result with sw, ours mtc1+swc1 (or one extra move through a union). Needs a helper that returns the qmfc2 word as an integer.
+// BYTES 413/432 (95.6%), checked 2026-11-07
+// NEAR: the word at +0x20 is now stored as retail does (Vu0::ToBits: qmfc2, then sw). Still differs in registers only: retail keeps the entry pointer in v1 (the product of count and 0x30 in a0) and takes qmfc2 into v0, the point in vf2 and the direction in vf1; here the entry is in a0, qmfc2 in v1 and the vectors the other way. The loads in either order, both stores before the dot, the word in a local first, the dot on fresh loads: no closer.
 #include "common.h"
 #include "child_group_object.h"
 #include "attachment.h"
@@ -54,7 +54,7 @@ void func_0013B828(ChildGroupObject* self)
         u128 point = Vu0::Q(span.q[0]);
         Vu0::Q(*(Vec02*)((u8*)e + 0x00)) = point;
         u128 dir = Vu0::Q(span.q[2]);
-        e->value = Vu0::ToFloat(Vu0::Dot(point, dir));
+        *(u32*)&e->value = Vu0::ToBits(Vu0::Dot(point, dir));
         Vu0::Q(*(Vec02*)((u8*)e + 0x10)) = dir;
         if (self->entryCount >= 4) {
             return;

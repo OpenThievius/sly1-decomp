@@ -20,6 +20,7 @@
 #include "text_reader.h"
 #include "globals.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 // The font object's calls.
 Font* GetFontById(s32 k);
@@ -966,7 +967,18 @@ void GetPlacementRecordAngle(u8* self, f32* out, int x)
     }
 }
 
-INCLUDE_ASM(func_001A9868);
+void func_001A9868(u8* self, f32* out, int x)
+{
+    f32 v[12] __attribute__((aligned(16)));
+    if (*(void**)(self + 0x10) != 0) {
+        GetObjectWorldRotation(*(void**)(self + 0x10), v);
+        TransformRotationBetweenFrames(0, x, v, v);
+        u128 r = Vu0::Q(*(u128*)v);
+        *out = ArctangentOfRatio(v[2], Vu0::ToFloat(Vu0::Sqrt(Vu0::DotXY(r, r))));
+    } else {
+        *out = *(f32*)(self + 0x4);
+    }
+}
 
 void StartGaugeBarAgent(GaugeBarAgent* self)
 {

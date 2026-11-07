@@ -242,7 +242,26 @@ void PlaceTargetFollowerOnFollowed(TargetFollower* self) {
     ((VFn_16D788*)self->desc)[33](self, &v);
 }
 
-INCLUDE_ASM(func_0016D828);
+void ComputeBallisticLaunchVelocity(f32 t, Vec02* from, Vec02* to, Vec02* out, void* self);
+extern f32 g_gameTime;
+
+void LaunchTargetFollowerAtFollowed(TargetFollower* self)
+{
+    Vec02 target;
+    Vec02 vel;
+    Vec02 d;
+    ConvertPositionToWorld(self->f558->f7A4, (Vec3*)&target);
+    target.z = target.z + self->f56C;
+    ComputeBallisticLaunchVelocity(0.5f, &self->v140, &target, &vel, self);
+    SetColliderAnchors(self, 0, 0, 3, 0);
+    ((VFn_16D788*)self->desc)[36](self, &vel);
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(target), Vu0::Q(self->v140));
+    f32 dist = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(d), Vu0::Q(d))));
+    f32 speed = Vu0::ToFloatMoved(Vu0::Sqrt(Vu0::DotXY(Vu0::Q(vel), Vu0::Q(vel))));
+    f32 t = g_gameTime + dist / speed;
+    self->f5AC = t;
+    self->f5A8 = t - self->f5A4;
+}
 
 extern const KeyRecord g_streamVoiceKeys[7];
 
