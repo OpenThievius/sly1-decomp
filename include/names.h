@@ -1388,6 +1388,7 @@
 #define DrawPlacedObjectParts                      func_001533A8
 #define InitActiveSetSolver                        func_00153528
 #define ResetActiveSetSolver                       func_00153608
+#define AddActiveSetItem                           func_001536C8
 #define PivotActiveSet                             func_00153A50
 #define RunActiveSetSolver                         func_00153EC0
 #define SolveActiveSetSystem                       func_00154880
@@ -1429,6 +1430,7 @@
 #define SpawnBriefEffectAt                         func_00158108
 #define AddRangeEntry                              func_00158198
 #define StartMemberObject                          func_001585F8
+#define ComputeChainedWorldFrame                   func_00158630
 #define SendEmptyMessage                           func_00158730
 #define SendTwoVectorMessage                       func_00158778
 #define SendMemberObjectMessage                    func_001587C0
