@@ -1013,7 +1013,51 @@ void CopyCollider(Collider* self, Collider* other)
     self->flags538 |= 0x20000000000ULL;
 }
 
-INCLUDE_ASM(func_001BA2E8);
+void ConstrainVectorByParentAnchor(Collider* self, VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem)
+{
+    Vec02 axis;
+    Vec02 tmp;
+    if (out == 0) {
+        out = &tmp;
+    }
+    switch (c->kind) {
+    case 0:
+        if (out != in) {
+            *out = *in;
+        }
+        break;
+    case 2: {
+        Vec02* a;
+        PlacedObject* parent = (PlacedObject*)self->parent;
+        if (parent != 0) {
+            Vu0::Q(axis) = Vu0::Rotate(parent->m110, Vu0::Q(c->axis));
+            a = &axis;
+        } else {
+            a = &c->axis;
+        }
+        Vu0::Q(*out) = Vu0::MulX(Vu0::Q(*a), Vu0::Dot(Vu0::Q(*in), Vu0::Q(*a)));
+        break;
+    }
+    case 1: {
+        Vec02* a;
+        PlacedObject* parent = (PlacedObject*)self->parent;
+        if (parent != 0) {
+            Vu0::Q(axis) = Vu0::Rotate(parent->m110, Vu0::Q(c->axis));
+            a = &axis;
+        } else {
+            a = &c->axis;
+        }
+        Vu0::Q(*out) = Vu0::Sub(Vu0::Q(*in), Vu0::MulX(Vu0::Q(*a), Vu0::Dot(Vu0::Q(*in), Vu0::Q(*a))));
+        break;
+    }
+    case 3:
+        Vu0::Q(*out) = Vu0::Zero();
+        break;
+    }
+    if (rem != 0) {
+        Vu0::Q(*rem) = Vu0::Sub(Vu0::Q(*in), Vu0::Q(*out));
+    }
+}
 
 void ConstrainVectorByAnchor(VectorConstraint* c, Vec02* in, Vec02* out, Vec02* rem)
 {
