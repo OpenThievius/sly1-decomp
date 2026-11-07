@@ -6,7 +6,7 @@
 // (build/swarm/st3/groups.tsv, g2307 and g4680).
 //
 // func_0018E410, func_0018F0E8 and func_0018F198 (movie_player.cpp) take one as a parameter;
-// D_00248490 is one (0018C000.cpp defines it), D_00275B04 another (its label is 0x1C bytes: its
+// D_00248490 is one (global_tables.cpp defines it), D_00275B04 another (its label is 0x1C bytes: its
 // readers stop at the seventh word), and every entry of D_00247AF0 begins with one (s1600a0.h).
 // The same-key test stays with its views: their forms differ (SessionKey also tests this).
 #ifndef IDENTITY_KEY_H
@@ -23,7 +23,7 @@ struct IdentityKey {
 
 typedef char check_IdentityKey[sizeof(IdentityKey) == 0x20 ? 1 : -1];
 
-extern const IdentityKey D_00248490;    // 0018C000.cpp
+extern const IdentityKey D_00248490;    // global_tables.cpp
 extern IdentityKey D_00275B04;      // 001F0000.cpp, file_15F678.cpp (label of 0x1C bytes)
 
 #endif

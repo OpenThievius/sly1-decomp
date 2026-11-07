@@ -5,7 +5,7 @@
 // touches the bodies it is in contact with, func_0019E558). The objects are pooled: the world
 // keeps the unused ones in a list at +0x1B38 (linked at +0x564) and the last one it handed out
 // at +0x1B3C (func_0019E040). Written for this project from what retail's code does
-// (config/us/classes.tsv; src/main/0019C000.cpp).
+// (config/us/classes.tsv; src/main/class_descriptors.cpp).
 //
 // Its fields follow class 0x03's and end at the size the descriptor gives; the pads keep every
 // field at its retail offset. The class adds no slot to 0x03's descriptor.

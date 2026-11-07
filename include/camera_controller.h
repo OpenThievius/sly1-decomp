@@ -10,7 +10,7 @@
 // first entry is in action, and func_00143E40 gives it the frame (slot 4).
 //
 // The tables are D_00217398, D_002173B0, D_002173C8, D_002173E0 and D_002173F8, defined in
-// src/main/00140000.cpp as arrays of function pointers; CameraControllerVt gives their slots types, and
+// src/main/class_descriptors.cpp as arrays of function pointers; CameraControllerVt gives their slots types, and
 // every object's first field points to its table (cast from the array where it is stored).
 #ifndef CAMERA_CONTROLLER_H
 #define CAMERA_CONTROLLER_H
