@@ -4076,8 +4076,6 @@ s32 D_002623CC = -1;
 // size: s32 compared with 1/2 in 00148000 and 00194000
 // size: func_0012A610/func_0012A6E0 copy it as a 16-byte vector
 // size: s32 state compared/assigned in 001EC000
-// size: u32 cleared by func_001F7D88
-u32 D_00277134 = 0;
 // size: s32 flag set/cleared in 001F8000
 s32 D_002771B8 = 0;
 

@@ -39570,8 +39570,7 @@
     "complete": false,
     "progress_categories": [
      "game"
-    ],
-    "source_path": "src/main/001F4000.cpp"
+    ]
    }
   },
   {
@@ -40365,8 +40364,7 @@
     "complete": false,
     "progress_categories": [
      "lib"
-    ],
-    "source_path": "src/lib/001F4000.cpp"
+    ]
    }
   },
   {
