@@ -1061,7 +1061,43 @@ void CopyTargetCurve(TargetCurve* self)
     self->keep = saved;
 }
 
-INCLUDE_ASM(func_00169E20);
+f32 WrapAngle(f32 a);
+f32 ArctangentOfRatio(f32 y, f32 x);
+
+void func_00169E20(TargetCurve* self, Vec02* out, f32* angleOut, f32 t)
+{
+    Vec02 pos;
+    Vec02 tangent;
+    PathCurve* o = self->curve;
+    if (o->vt->m02 != 0) {
+        ((void (*)(PathCurve*, f32, void*, void*))o->vt->m02)(o, t, &pos, &tangent);
+    }
+    TransformPointBetweenFrames(self->parent, 0, &pos, &pos);
+    TransformDirectionBetweenFrames(self->parent, 0, &tangent, &tangent);
+    f32 radius;
+    switch (self->mode40) {
+    case 0:
+        radius = 20.0f;
+        break;
+    case 1:
+        radius = 70.0f;
+        break;
+    default:
+        radius = 0.0f;
+        break;
+    }
+    if (out) {
+        u128 base = Vu0::Q(pos);
+        u128 k = Vu0::Scalar(radius);
+        Vu0::Q(*out) = Vu0::MulAddX(base, Vu0::NormalizeOr(Vu0::Cross(Vu0::Q(tangent), Vu0::Q(g_unitZVector)), Vu0::Q(D_00248D30)), k);
+    }
+    if (angleOut) {
+        *angleOut = ArctangentOfRatio(-tangent.x, tangent.y);
+        if (self->mode40 == 1) {
+            *angleOut = WrapAngle(*angleOut + 3.14159274f);
+        }
+    }
+}
 
 void FindTargetCurveLengthNearCollider(TargetCurve* self, f32* out, void* a2, void* a3)
 {

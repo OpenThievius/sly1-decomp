@@ -6,6 +6,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "mul_rotation.h"
 #include "list_iter.h"
 #include "placed_object.h"
 #include "state_trigger.h"
@@ -1873,7 +1874,24 @@ void SetObjectRecordValue(PlacedObject* state, u32 value)
 	*(u32*)(state->sub22C + 0x38) |= 2;
 }
 
-INCLUDE_ASM(func_00126AC8);
+void ConvertHsv255ToRgb255(Vec02* hsv, f32* rgb);
+f32 Sine(f32 x);
+
+void func_00126AC8(PlacedObject* self)
+{
+    Vec02 hsv;
+    ColorRecord* r = self->f288;
+    f32 c = Sine(FloatRemainder(g_gameTime[0], r->factor) * 6.2831855f / r->factor) * 0.5f + 0.5f;
+    Vu0::Q(hsv) = Vu0::Add(Vu0::MulX(Vu0::Q(r->c10), Vu0::Scalar(c)), Vu0::MulX(Vu0::Q(r->c20), Vu0::Scalar(1.0f - c)));
+    f32 rgb[4];
+    u8 color[4];
+    ConvertHsv255ToRgb255(&hsv, rgb);
+    color[0] = (s32)rgb[0];
+    color[1] = (s32)rgb[1];
+    color[2] = (s32)rgb[2];
+    color[3] = 0x80;
+    SetObjectTreeRecordValue(self, *(u32*)color);
+}
 
 void SetObjectTreeRecordsValue(PlacedObject* object, s32 value)
 {
@@ -2276,7 +2294,27 @@ void TransformDirectionBetweenFrames(PlacedObject* from, PlacedObject* to, Vec02
     *out = *in;
 }
 
-INCLUDE_ASM(func_00128150);
+Mat02 MultiplyByTransposedMatrix3x3(void* m, Mat02* in);
+
+// The rotation in from's frame (the world's for none) in to's frame: through from's rotation,
+// then the product with the transpose of to's.
+void TransformRotationBetweenFrames(PlacedObject* from, PlacedObject* to, Mat02* in, Mat02* out)
+{
+    Mat02 world;
+    Mat02 t;
+    if (from != to) {
+        if (from != 0) {
+            MulRotationRows(&world, from->m110, *in);
+            in = &world;
+        }
+        if (to != 0) {
+            t = MultiplyByTransposedMatrix3x3(&to->m110, in);
+            *out = t;
+            return;
+        }
+    }
+    *out = *in;
+}
 
 s32 HasAnimationDrivenAttachment(SwitchedCollider *self) {
     Attachment *p = self->f1EC;
@@ -2461,9 +2499,28 @@ void ResolveFollowRecordObjects(PlacedObject* self)
     }
 }
 
-INCLUDE_ASM(func_00128E88);
+void func_00128E88(PlacedObject* self, Mat02* m, Vec02* v)
+{
+    Rec2195_224* p = self->f224;
+    if (p != 0) {
+        Mat02 t;
+        if ((p->fB0 & 1) && m != 0) {
+            MulRotationRows(&t, *m, *(Mat02*)p);
+            *m = t;
+        }
+        if (p->fB0 & 2) {
+            if (m != 0) {
+                MulRotationRowsX(&t, *(Mat02*)(p->pad00 + 0x30), *m);
+                *m = t;
+            }
+            if (v != 0) {
+                Vu0::Q(t.r[0]) = Vu0::Rotate(*(Mat02*)(p->pad00 + 0x30), Vu0::Q(*v));
+                *v = t.r[0];
+            }
+        }
+    }
+}
 
-Mat02 MultiplyByTransposedMatrix3x3(void* m, Mat02* in);
 
 // Applies the record's matrices (+0x224) to m: with its flag 1, the first one's transpose
 // times m; with flag 2, the second one (MultiplyByTransposedMatrix3x3, which returns a 3x3
