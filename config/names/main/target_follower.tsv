@@ -19,7 +19,7 @@ func_0016DD00	ClearCurrentTargetFollower	sets g_currentTargetFollower to 0 (the 
 func_0016DD10	InitEntryTableObject	slot 0 of the 0x64 class: calls the base set-up func_00123ED0 then stores the seven tuning floats at 0x31C..0x334
 func_0016DD90	LoadEntryTable	slot 10 of the 0x64 class: after the base load, func_0015A4F0 fills the sixteen-entry table at 0x2D0 and the count (clamped to 0x10) is stored at 0x310
 func_0016DDE8	StartEntryTableObject	slot 0x50 of class 0x64: runs StartPlacedObject, then its slot 3
-func_0016DE20	ChooseEntryTableObject	picks one object of the entry table (+0x2D0, count +0x310): a random one in mode 0 (+0x314), the one nearest the active switched collider in mode 1 (GetObjectWorldPosition), else none; func_0016D1E0 and func_0016DAC0 call it
+func_0016DE20	ChooseEntryTableObject	picks one object of the entry table (+0x2D0, count +0x310): the one nearest the active switched collider in mode 0 (+0x314, GetObjectWorldPosition), a random one in mode 1, else none; func_0016D1E0 and func_0016DAC0 call it
 func_0016DF30	InitFollowableObject	slot 0 of class 0x2A: after the base set-up clears the zone duration and sets the ids at +0x7A0 and +0x7A8 to -1
 func_0016DF68	ResolveFollowableObjectLinks	slot 19 of class 0x2A: after the base step finds the object by id +0x7A0 (kind 4) or else the first class 0x7E child, and the object by id +0x7A8, storing them at +0x7A4 and +0x7AC
 func_0016DFE0	HandleFollowableObjectNotification	slot 13 of class 0x2A: after the base handler, kinds 2, 0xC and 0xD remove it from, append it to or remove it from the list at +0x55C of the current follower D_002629C8

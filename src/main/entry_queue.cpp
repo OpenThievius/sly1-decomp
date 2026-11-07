@@ -18,6 +18,7 @@
 #include "path_curve_object.h"
 #include "on_off_object.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 // The entry queue (class 0x8F): its set-up, the functions that start, advance, bind and fill it,
 // and the script commands that add entries. Its .rodata (0x24B000-0x24B054) is the jump tables
@@ -110,7 +111,35 @@ void GetNodeAnchorAndHeading(EntryQueue* self, BaseObject* n, Vec02* out, f32* o
     }
 }
 
-INCLUDE_ASM(func_0017BB78);
+// The part of the player func_0017BB78 aims: a position, a time, the aim and the mark it leaves.
+struct Aim_0017BB78 {
+    u8 pad0[0x100];
+    Vec02 pos;              // 0x100
+    u8 pad110[0x554 - 0x110];
+    s32 f554;               // 0x554
+    u8 pad558[0x560 - 0x558];
+    Vec02 aim;              // 0x560
+    u8 pad570[0x2530 - 0x570];
+    Vec02 mark;             // 0x2530
+};
+
+void func_0017BB78(EntryQueue* self, BaseObject* target)
+{
+    Aim_0017BB78* p = (Aim_0017BB78*)self->f3C;
+    if (self->f54 != 0) {
+        Vu0::Q(p->mark) = Vu0::Sub(Vu0::Q(p->aim), Vu0::Q(p->pos));
+        p->f554 = 0;
+        p->mark.z = 0.0f;
+        self->f54 = 0;
+    }
+    if (target != 0) {
+        p->f554 = 1;
+        GetNodeAnchorAndHeading(self, target, &p->aim, 0);
+        p->aim.z += 125.0f;
+        p->mark = D_00248D30;
+        self->f54 = target;
+    }
+}
 
 
 void SetOnOffObjectForcedState(void* p, s32 n);
@@ -206,7 +235,6 @@ void BindEntryQueueToObject(void* a0, void* a1)
 }
 
 
-void SetEntryQueueTargetNode(void* self, s32 n);
 void StopAnimationPlayer(void* p);
 void SetGameClockScale(f32 x);
 void TriggerScriptEvent(void* self, s32 a, s32 b, s32 c);
@@ -217,7 +245,7 @@ void UnbindEntryQueue(EntryQueue* self)
 {
     if (self->f3C != 0) {
         ReplaceQueueOnOffObject(self, 0);
-        SetEntryQueueTargetNode(self, 0);
+        func_0017BB78(self, 0);
         if (self->f50 != 0) {
             StopAnimationPlayer(self->f50);
             self->f50 = 0;

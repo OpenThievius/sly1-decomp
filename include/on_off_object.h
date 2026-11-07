@@ -44,15 +44,20 @@ struct OnOffObject : PlacedObject {
     s32 f380;               // 0x380
     s32 f384;               // 0x384
     s32 f388;               // 0x388
-    u8 f38C[0x390 - 0x38C]; // 0x38C
+    s32 f38C;               // 0x38C
     s32 f390;               // 0x390
     s32 f394;               // 0x394
     s32 f398;               // 0x398: -1 at construction
     f32 f39C;               // 0x39C
-    s32 f3A0;               // 0x3A0
+    union {
+        s32 f3A0;           // 0x3A0
+        f32 angle3A0;       // 0x3A0: the angle round the object the camera is at (func_001E30E8)
+    };
     u8 pad3A4[0x3F0 - 0x3A4];
     f32 f3F0;               // 0x3F0: the list's last value, or 0
-    u8 pad3F4[0x414 - 0x3F4];
+    u8 pad3F4[0x400 - 0x3F4];
+    Vec02 v400;             // 0x400: the point the angle is measured from
+    f32 f410;               // 0x410: scales the angle
     s32 i414;               // 0x414: 7 with a list, 5 without
     s32 f418;               // 0x418
     s32 f41C;               // 0x41C

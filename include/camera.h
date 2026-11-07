@@ -7,6 +7,7 @@
 
 #include "base_object.h"
 #include "camera_controller.h"
+#include "placed_object.h"   // Vec02
 
 // func_00143648 (slot 0) fills the identity frame at 0x80 and the settings at 0x1C0..0x208,
 // then five sub-objects at 0x454, 0x460, 0x4C0, 0x510 and 0x520.
@@ -36,7 +37,9 @@ struct Camera : BaseObject {
     u8 pad1D4[0x1E4 - 0x1D4];
     f32 f1E4;               // 0x1E4
     f32 f1E8;               // 0x1E8
-    u8 pad1EC[0x1F8 - 0x1EC];
+    u8 pad1EC[0x1F0 - 0x1EC];
+    f32 f1F0;               // 0x1F0: ProjectPointToCamera divides the screen x by it
+    f32 f1F4;               // 0x1F4: and the screen y
     f32 f1F8;               // 0x1F8
     f32 f1FC;               // 0x1FC
     f32 f200;               // 0x200
@@ -48,7 +51,9 @@ struct Camera : BaseObject {
     s32 f224;               // 0x224
     s32 f228;               // 0x228
     f32 f22C;               // 0x22C
-    u8 pad230[0x2B0 - 0x230];
+    Vec02 v230;             // 0x230: from p to the screen point's place on the view ray (func_00145610)
+    Vec02 v240;             // 0x240: D_00248D30 at func_00145610
+    u8 pad250[0x2B0 - 0x250];
     f32 f2B0;               // 0x2B0
     f32 f2B4;               // 0x2B4
     f32 f2B8;               // 0x2B8

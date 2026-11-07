@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "shapes.h"
+#include "vu0.h"
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
@@ -12,12 +13,15 @@
 #include "animation.h"
 #include "attachment.h"
 #include "c8b.h"
+#include "vu0.h"
 
 extern f32 g_gameTime[];
 
 // A quadratic in t (c[0] + t * (c[1] + t * c[2])) on 16 bytes, as in hit_count_collider: the file's
 // .data starts on 16 (0x274C18 to 0x274C20 is padding after the previous file's), and 0x274C54
 // to 0x274C5F is the quadratic's own.
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 WrapAngle(f32 a);
 void* ResolveAgentClip(Agent* self, void* arg);
 void* ResolveAgentClip(Agent* self, s32 arg);
 
@@ -287,7 +291,17 @@ void UnregisterAgent(Agent* self)
 
 INCLUDE_ASM(func_001C75B0);
 
-INCLUDE_ASM(func_001C7A60);
+f32 func_001C7A60(Agent* self)
+{
+    PlacedObject* other = (PlacedObject*)self->desc08()->m62(self);
+    if (other == 0) {
+        return 0.0f;
+    }
+    Vec02 d;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(other->v140), Vu0::Q(self->v140));
+    f32 a = ArctangentOfRatio(d.y, d.x);
+    return WrapAngle(a - ArctangentOfRatio(self->m110.r[0].y, self->m110.r[0].x));
+}
 
 s32 IsAgentFacingBlocked(void* self);
 void BuildYawPitchMatrix(f32 a, f32 b, void* out);
@@ -320,7 +334,23 @@ void SettleAgentState(Agent* self)
     }
 }
 
-INCLUDE_ASM(func_001C7BE8);
+extern f32 g_frameDt;
+void func_00128598(f32 a, f32 b, Agent* self, s32 c, s32 d, f32* e, f32* f, f32* g);
+void SetAgentFacingAngles(Agent* self, f32 x, f32 y);
+
+void func_001C7BE8(Agent* self)
+{
+    f32 out[3];
+    f32 zero = 0.0f;
+    out[1] = zero;
+    func_00128598(g_frameDt, self->f638, self, 0, 0, &out[0], self->fB1C ? &out[1] : 0, &out[2]);
+    f32 len = Vu0::ToFloat(Vu0::Length(Vu0::Q(self->v640)));
+    if (0.0001f < out[2] && 0.0001f < len) {
+        self->f754->speed *= len / out[2];
+    }
+    f32 y = out[1];
+    SetAgentFacingAngles(self, out[0], y);
+}
 
 INCLUDE_ASM(func_001C7CB8);
 

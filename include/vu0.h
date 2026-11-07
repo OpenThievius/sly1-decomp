@@ -10,16 +10,25 @@
 //
 // - A helper takes and returns u128 by value (an aggregate as a `j` operand does not compile).
 //   A vector in memory (any 16-aligned 16-byte object) is read and written through Vu0::Q: one
-//   lqc2, one sqc2. A helper's result that is never named stays in its register.
+//   lqc2, one sqc2. A helper's result that is never named stays in its register. A local also
+//   passed by address is written with Vu0::Set where retail forms its address afresh for the call.
 // - A vector local (Vec02, Quad16) lives on the stack, so a result assigned to it is stored
 //   there even when nothing reads it back: retail's stores to the stack that nothing loads. A
 //   float made a vector (FromFloat) is always stored so in retail: it goes into a local.
+// - A float weight retail stores in a slot of its own that later weights reuse goes through
+//   Scalar, a helper whose 16-byte local takes the store (not a local of the caller's).
 // - None is volatile: retail schedules loads, stores and other code across them.
 // - A result may take an input's register ("=j"). The order of the inputs matters: the
 //   allocator gives the result the register of the first input that dies there, so each
 //   helper lists its inputs in the order retail's registers show (MulX the scale first), and
 //   Rotate's result is tied to the vector it rotates ("0"). A register a sequence only
 //   writes (Dot's 1.0) is a second output.
+// - A float read from memory goes in with FromFloatAt: retail loads it with lw straight into
+//   the GPR qmtc2 takes, which an f32 operand does not give (the compiler loads it into an FPR
+//   and moves it with mfc1); a float computed in an FPR goes in with FromFloat.
+// - Length and NormalizeOr are C over the helpers, not sequences of their own: NormalizeOr's
+//   test is compiled code, and its fallback is an argument because retail loads it before the
+//   test (lq, then qmtc2 on the fallback's path).
 #ifndef VU0_H
 #define VU0_H
 
@@ -29,9 +38,19 @@
 typedef unsigned int u128 __attribute__((mode(TI)));
 
 struct Vu0 {
+    // A vector local of a helper's own (Scalar): 16-aligned, so it lives on the stack.
+    struct __attribute__((aligned(16))) Slot {
+        f32 v[4];
+    };
+
     // A 16-aligned, 16-byte object read or written as one 128-bit value.
     template <class T> static u128& Q(T& v) { return *(u128*)&v; }
     template <class T> static const u128& Q(const T& v) { return *(const u128*)&v; }
+    // v = x, stored where v is. Q(v) = x stores through the address Q returns, held in a
+    // register; when the local is also passed by address after a call, CSE keeps that address
+    // in a callee-saved register, where retail forms it again (addiu a1, sp, n) for the call.
+    // Set's store is addressed from the frame and leaves nothing to keep (func_001BC828).
+    template <class T> static void Set(T& v, u128 x) { *(u128*)&v = x; }
 
     // (0, 0, 0, 0): vsub.xyzw r, vf0, vf0.
     static u128 Zero()
@@ -63,6 +82,27 @@ struct Vu0 {
         u128 r;
         __asm__("qmtc2 %1, %0" : "=j"(r) : "r"(f));
         return r;
+    }
+
+    // A float in memory into the x of a VU0 register: qmtc2 of its bits, which the compiler
+    // loads with lw (FromFloat's operand would be loaded into an FPR and moved with mfc1).
+    static u128 FromFloatAt(const f32& f)
+    {
+        u128 r;
+        __asm__("qmtc2 %1, %0" : "=j"(r) : "r"(*(const u32*)&f));
+        return r;
+    }
+
+    // A float as a vector of its own: FromFloat into a 16-byte local of the helper, stored to
+    // the stack though nothing reads it back. Retail's weights show it: the two of a MulXSum
+    // (or three, with a MulAddX after it) share one stack slot, as locals of calls that have
+    // ended do, the first stored first, each store after the arithmetic that uses it. The
+    // same float twice (Scalar(dt) in two expressions) is one qmtc2 and two stores.
+    static u128 Scalar(f32 f)
+    {
+        Slot t;
+        Q(t) = FromFloat(f);
+        return Q(t);
     }
 
     // The x of a VU0 register as a float: qmfc2 (the compiler moves it on to an FPR).
@@ -99,6 +139,68 @@ struct Vu0 {
         return r;
     }
 
+    // The square root of a's x, in x: vsqrt Q, a.x; vwaitq; vaddq.x (the disassembler prints
+    // vsqrt as a .word). The result may take a's register.
+    static u128 Sqrt(u128 a)
+    {
+        u128 r;
+        __asm__("vsqrt Q, %1x\n\tvwaitq\n\tvaddq.x %0, vf0, Q" : "=j"(r) : "j"(a));
+        return r;
+    }
+
+    // a / s.x: vdiv Q, vf0w, s.x (1 / s.x into Q); vwaitq; vmulq.xyzw. The scale comes first,
+    // as in MulX: the result takes its register when it dies there, a's otherwise.
+    static u128 DivX(u128 a, u128 s)
+    {
+        u128 r;
+        __asm__("vdiv Q, vf0w, %1x\n\tvwaitq\n\tvmulq.xyzw %0, %2, Q" : "=j"(r) : "j"(s), "j"(a));
+        return r;
+    }
+
+    // The length of v's xyz, in x: Dot of v with itself, then Sqrt (the sequences stay two:
+    // retail schedules other code between them).
+    static u128 Length(u128 v)
+    {
+        return Sqrt(Dot(v, v));
+    }
+
+    // v made unit length (DivX by its Length), or fallback when v is shorter than 0.0001.
+    static u128 NormalizeOr(u128 v, u128 fallback)
+    {
+        u128 len = Length(v);
+        if (ToFloat(len) < 0.0001f) {
+            return fallback;
+        }
+        return DivX(v, len);
+    }
+
+    // The cross product a x b, its w zero: vopmula.xyz ACC, a, b; vopmsub.xyz r, b, a;
+    // vsub.w r, r, r.
+    static u128 Cross(u128 a, u128 b)
+    {
+        u128 r;
+        __asm__("vopmula.xyz ACC, %1, %2\n\tvopmsub.xyz %0, %2, %1\n\tvsub.w %0, %0, %0"
+                : "=j"(r) : "j"(a), "j"(b));
+        return r;
+    }
+
+    // The smaller of a and b in each of x, y and z: vmini.xyz r, a, b. The result's w is
+    // whatever its register held (retail gives the result a fresh register when a lives on).
+    static u128 Min(u128 a, u128 b)
+    {
+        u128 r;
+        __asm__("vmini.xyz %0, %1, %2" : "=j"(r) : "j"(a), "j"(b));
+        return r;
+    }
+
+    // The larger of a and b in each of x, y and z: vmax.xyz r, a, b (its w as Min's).
+    static u128 Max(u128 a, u128 b)
+    {
+        u128 r;
+        __asm__("vmax.xyz %0, %1, %2" : "=j"(r) : "j"(a), "j"(b));
+        return r;
+    }
+
     // The xyz of a 3x3 matrix's rows m[0], m[1], m[2] weighted by v's x, y and z (the matrix
     // times v): vmulax.xyz, vmadday.xyz, vmaddz.xyz. The matrix is any 16-aligned object whose
     // first three quadwords are the rows, read where it is.
@@ -109,6 +211,115 @@ struct Vu0 {
         __asm__("vmulax.xyz ACC, %1, %4x\n\tvmadday.xyz ACC, %2, %4y\n\tvmaddz.xyz %0, %3, %4z"
                 : "=j"(out) : "j"(r[0]), "j"(r[1]), "j"(r[2]), "0"(v));
         return out;
+    }
+
+    // Rotate with the rows as values r0, r1, r2 (the caller loads them once, as a matrix
+    // product does, or builds them): vmulax.xyz, vmadday.xyz, vmaddz.xyz, the result not tied
+    // to v. As with Transform4, it takes the register of the first of r0, r1, r2, v that dies
+    // there: v's while the rows live on, row 0's at their last use (func_00116840's three
+    // rows). Retail uses Rotate where the matrix is read where it is and the result takes v's
+    // register; this one where the rows are values and the result may take row 0's.
+    static u128 RotateRows(u128 r0, u128 r1, u128 r2, u128 v)
+    {
+        u128 out;
+        __asm__("vmulax.xyz ACC, %1, %4x\n\tvmadday.xyz ACC, %2, %4y\n\tvmaddz.xyz %0, %3, %4z"
+                : "=j"(out) : "j"(r0), "j"(r1), "j"(r2), "j"(v));
+        return out;
+    }
+
+    // The point v through a 4x4 matrix whose fourth row is the translation: m[0], m[1], m[2]
+    // weighted by v's x, y and z, plus m[3] weighted by w (1 for a point, 0 for a direction),
+    // in xyz: vmulax.xyz, vmadday.xyz, vmaddaz.xyz, vmaddx.xyz. w goes in as a float, made a
+    // vector by Scalar inside: retail gives w's register after v's and stores it after the
+    // sequence. The result may take a row's or v's register, the first of m[0], m[1], m[2],
+    // m[3], v that dies there.
+    template <class M> static u128 Transform(const M& m, u128 v, f32 w)
+    {
+        const u128* r = (const u128*)&m;
+        u128 s = Scalar(w);
+        u128 out;
+        __asm__("vmulax.xyz ACC, %1, %5x\n\tvmadday.xyz ACC, %2, %5y\n\tvmaddaz.xyz ACC, %3, %5z\n\t"
+                "vmaddx.xyz %0, %4, %6x"
+                : "=j"(out) : "j"(r[0]), "j"(r[1]), "j"(r[2]), "j"(r[3]), "j"(v), "j"(s));
+        return out;
+    }
+
+    // The vector v through a 4x4 matrix whose rows are m0, m1, m2, m3: the rows weighted by
+    // v's x, y, z and w: vmulax.xyzw, vmadday.xyzw, vmaddaz.xyzw, vmaddw.xyzw. The rows are
+    // values the caller loads once: a product of matrices stores each row of the result
+    // between the sequences, which would make rows read in place be read again. The result
+    // may take a row's or v's register, the first of m0, m1, m2, m3, v that dies there.
+    static u128 Transform4(u128 m0, u128 m1, u128 m2, u128 m3, u128 v)
+    {
+        u128 out;
+        __asm__("vmulax.xyzw ACC, %1, %5x\n\tvmadday.xyzw ACC, %2, %5y\n\tvmaddaz.xyzw ACC, %3, %5z\n\t"
+                "vmaddw.xyzw %0, %4, %5w"
+                : "=j"(out) : "j"(m0), "j"(m1), "j"(m2), "j"(m3), "j"(v));
+        return out;
+    }
+
+    // The product of a's transpose and b, for 3x3 matrices (any 16-aligned objects whose first
+    // three quadwords are the rows, read where they are), into out: row c of the product is b's
+    // rows weighted by column c of a, b[0] * a[0].c + b[1] * a[1].c + b[2] * a[2].c, with
+    // vmulac.xyzw ACC, vmaddac.xyzw ACC and vmaddc.xyzw. One sequence per row (retail's
+    // registers: x and z new, y in b[0]'s, which dies there; the scheduler orders them z, x,
+    // y). The rows are read into values first, b's then a's, so a store of out between the
+    // sequences does not make them be read again (func_00128FD0's a is not an argument).
+    template <class M> static void MulTransposed(M& out, const M& a, const M& b)
+    {
+        const u128* p = (const u128*)&a;
+        const u128* q = (const u128*)&b;
+        u128 b0 = q[0], b1 = q[1], b2 = q[2];
+        u128 a0 = p[0], a1 = p[1], a2 = p[2];
+        u128* r = (u128*)&out;
+        __asm__("vmulax.xyzw ACC, %1, %4x\n\tvmaddax.xyzw ACC, %2, %5x\n\tvmaddx.xyzw %0, %3, %6x"
+                : "=j"(r[0]) : "j"(b0), "j"(b1), "j"(b2), "j"(a0), "j"(a1), "j"(a2));
+        __asm__("vmulay.xyzw ACC, %1, %4y\n\tvmadday.xyzw ACC, %2, %5y\n\tvmaddy.xyzw %0, %3, %6y"
+                : "=j"(r[1]) : "j"(b0), "j"(b1), "j"(b2), "j"(a0), "j"(a1), "j"(a2));
+        __asm__("vmulaz.xyzw ACC, %1, %4z\n\tvmaddaz.xyzw ACC, %2, %5z\n\tvmaddz.xyzw %0, %3, %6z"
+                : "=j"(r[2]) : "j"(b0), "j"(b1), "j"(b2), "j"(a0), "j"(a1), "j"(a2));
+    }
+
+    // v through the transpose of a 3x3 matrix whose rows are m[0], m[1], m[2]: the dot
+    // products of v with each row, into x, y and z (w is whatever the register held):
+    // vmul.xyzw of each row by v, (1, 1, 1, 1) into a scratch (vmaxw.xyzw r, vf0, vf0w), then
+    // vadday.x/vmaddz.x, vaddax.y/vmaddz.y, vaddax.z/vmaddy.z to sum each product's terms.
+    // For a rotation it is the inverse of Rotate. The result and the four scratch registers are
+    // written while the inputs are still read ("=&j"); listed result, 1.0, then the products
+    // of rows 0, 1, 2, they take retail's registers (result first, the 1.0 last).
+    template <class M> static u128 RotateTransposed(const M& m, u128 v)
+    {
+        const u128* r = (const u128*)&m;
+        u128 out, p0, p1, p2, one;
+        __asm__("vmul.xyzw %2, %5, %8\n\tvmaxw.xyzw %1, vf0, vf0w\n\tvmul.xyzw %3, %6, %8\n\tvmul.xyzw %4, %7, %8\n\t"
+                "vadday.x ACC, %2, %2y\n\tvmaddz.x %0, %1, %2z\n\tvaddax.y ACC, %3, %3x\n\tvmaddz.y %0, %1, %3z\n\t"
+                "vaddax.z ACC, %4, %4x\n\tvmaddy.z %0, %1, %4y"
+                : "=&j"(out), "=&j"(one), "=&j"(p0), "=&j"(p1), "=&j"(p2)
+                : "j"(r[0]), "j"(r[1]), "j"(r[2]), "j"(v));
+        return out;
+    }
+
+    // a * s.x + b * t.x (a linear blend when s and t are 1 - u and u, a spring's force):
+    // vmulax.xyzw ACC, then vmaddx.xyzw. The weights are Scalars. The inputs are listed s, a,
+    // b, t: where s and a both die there, retail's result takes s's register.
+    static u128 MulXSum(u128 a, u128 s, u128 b, u128 t)
+    {
+        u128 r;
+        __asm__("vmulax.xyzw ACC, %2, %1x\n\tvmaddx.xyzw %0, %3, %4x" : "=j"(r) : "j"(s), "j"(a), "j"(b), "j"(t));
+        return r;
+    }
+
+    // Rotate with its result untied, the matrix read where it is: RotateRows on its rows, the
+    // result free to take any input's
+    // register; retail has both forms. The result takes the register of the first input that
+    // dies there, the matrix's rows before v: in a product of two rotations (placed_object.cpp's
+    // MulRotation) the last row's product takes the register of the first matrix's first row,
+    // and func_00125750 gives a rotated position a fresh register, where Rotate's tie to v
+    // would keep v's.
+    template <class M> static u128 RotateUntied(const M& m, u128 v)
+    {
+        const u128* r = (const u128*)&m;
+        return RotateRows(r[0], r[1], r[2], v);
     }
 };
 

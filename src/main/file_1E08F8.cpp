@@ -16,6 +16,8 @@
 #include "thread_params.h"
 #include "memory_card.h"
 #include "screen_element.h"
+#include "vu0.h"
+#include "fpu.h"
 
 
 void* InitStringOutputBuffer(u8* buf, char* dst, s32 cap);
@@ -1455,6 +1457,10 @@ INCLUDE_ASM(func_001E2A00);
 
 INCLUDE_ASM(func_001E2BF0);
 
+// The five quadwords func_00143418 gives for a camera and its target: the placement.
+struct CameraPlacement { Vec02 q[5]; };
+void BlendOnOffCameraPoint(void* block, CameraPlacement* eye, Vec02* out, OnOffObject* object);
+
 INCLUDE_ASM(func_001E2E68);
 
 void DeactivateOnOffCameraController(OnOffCameraController* self)
@@ -1475,7 +1481,34 @@ void NoteOnOffCameraControllerPushed(OnOffCameraController* self, s32 arg)
 
 void NoteOnOffCameraControllerRemoved(OnOffCameraController* self, s32 arg) {}
 
-INCLUDE_ASM(func_001E30E8);
+f32 ArctangentOfRatio(f32 y, f32 x);
+
+void func_001E30E8(OnOffCameraController* self, CameraPlacement* eye)
+{
+    Vec02 blended;
+    Vec02 here;
+    Vec02 delta;
+    OnOffObject* object = (OnOffObject*)self->ptr;
+    if (!object)
+        return;
+    if (!object->obj && !object->f38C)
+        return;
+    BlendOnOffCameraPoint(GetOnOffObjectBlock(object), eye, &blended, 0);
+    TransformPointBetweenFrames(0, object, &blended, (FacePoint*)&here);
+    if (object->obj) {
+        typedef void (*Fn)(f32, Arr63*, Vec02*, s32, s32, s32, s32, f32*);
+        Fn fn = *(Fn*)(*(u8**)object->obj + 0x30);
+        if (!fn)
+            return;
+        fn(object->angle3A0, object->obj, &here, 0, 0, 0, 0, &object->angle3A0);
+    } else {
+        Vu0::Q(delta) = Vu0::Sub(Vu0::Q(here), Vu0::Q(object->v400));
+        f32 angle = ArctangentOfRatio(delta.y, delta.x);
+        if (angle < 0.0f)
+            angle += 6.2831855f;
+        object->angle3A0 = angle * object->f410;
+    }
+}
 
 INCLUDE_ASM(func_001E31F0);
 

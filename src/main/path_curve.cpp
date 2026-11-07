@@ -3,9 +3,11 @@
 // with the method tables D_002176D0 and D_00217708), and the segment-length and lookup helpers.
 #include "common.h"
 #include "asm_func.h"
+#include "vu0.h"
 #include "path_curve.h"
 #include "shapes.h"
 #include "placed_object.h"
+#include "vu0.h"
 
 // What the nearest-time search (func_001EB168) passes its measure: the curve and the two points
 // of the segment MeasurePathCurveDistance measures against (FindPathCurveNearestTime,
@@ -52,6 +54,7 @@ void TransformMatrixByObject(void* self, void* arg, Quad16* out);
 void* AllocateFrontMemory(s32 size);
 void* AllocateZeroedFrontMemory(u32 n);
 void DrawProjectedLine(void* a, void* b, void* c, s32 d, s32 e);
+void DrawProjectedCurve(void* a, void* b, void* c, void* d, void* color, s32 e, s32 f, f32 x);
 void FindLocalMinimum(void* fn, f32 f12, f32 f13, f32 f14, f32 f15, void* ctx, void* out, s32 a3);
 
 f32 AccumulateSegmentLengths(s32 n, void* buf, void* other);
@@ -94,7 +97,24 @@ void FillSplinePathLengths(SplinePathCurve* self);
 void FindSplinePathNearestTime(SplinePathCurve* self, s32 a1, s32 a2, s32 a3, s32 a4, f32* a5, f32* a6, f32 f12);
 void ProjectOntoSplinePathNearLength(SplinePathCurve* self, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 p6);
 
-INCLUDE_ASM(func_0014D0A8);
+f32 AccumulateSegmentLengths(s32 n, void* buf, void* other)
+{
+    Vec02* pts = (Vec02*)buf;
+    f32* lengths = (f32*)other;
+    Vec02 d;
+    f32 total = 0.0f;
+    if (lengths != 0) {
+        lengths[0] = total;
+    }
+    for (s32 i = 1; i < n; i++) {
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(pts[i]), Vu0::Q(pts[i - 1]));
+        total += Vu0::ToFloat(Vu0::Length(Vu0::Q(d)));
+        if (lengths != 0) {
+            lengths[i] = total;
+        }
+    }
+    return total;
+}
 
 f32 WrapCurveTime(s32 count, f32* table, s32 wrap, f32 x)
 {
@@ -397,9 +417,40 @@ void SampleSplinePathAtLength(SplinePathCurve* self, s32 a1, void* a2)
     }
 }
 
-INCLUDE_ASM(func_0014E710);
+// The segment from key idx to the next as a curve through the matrix m: its two points and
+// their tangents, drawn in the color at a4.
+void DrawSplinePathSegment(SplinePathCurve* self, s32 idx, Quad16* m, s32 a3, void* a4)
+{
+    Vec02 a;
+    Vec02 b;
+    Vec02 ta;
+    Vec02 tb;
+    if (idx != self->count - 1) {
+        s32 next = idx + 1;
+        f32 dt = self->times[next] - self->times[idx];
+        Vu0::Q(a) = Vu0::Transform(*m, Vu0::Q(((Vec02*)self->points)[idx]), 1.0f);
+        Vu0::Q(b) = Vu0::Transform(*m, Vu0::Q(((Vec02*)self->points)[idx + 1]), 1.0f);
+        Vu0::Q(ta) = Vu0::Rotate(*m, Vu0::Q(((Vec02*)self->outTan)[idx]));
+        Vu0::Q(tb) = Vu0::Rotate(*m, Vu0::Q(((Vec02*)self->inTan)[idx + 1]));
+        U32P color = *(U32P*)a4;
+        DrawProjectedCurve(&a, &ta, &b, &tb, &color, a3, 1, dt);
+    }
+}
 
-INCLUDE_ASM(func_0014E828);
+void TransformSplinePathPoints(SplinePathCurve* self, void* a, void* b)
+{
+    Vec02 m[4];
+    s32 i;
+    TransformMatrixByObject(b, a, (Quad16*)m);
+    Mat02* rot = (Mat02*)m;
+    for (i = 0; i < self->count; i++) {
+        u8* p = (u8*)self->points + (i << 4);
+        TransformByMatrixWithW(m, p, p, 1.0f);
+        Vu0::Q(((Vec02*)self->inTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->inTan)[i]));
+        Vu0::Q(((Vec02*)self->outTan)[i]) = Vu0::Rotate(*rot, Vu0::Q(((Vec02*)self->outTan)[i]));
+    }
+    ResetSplineSegmentCache(self);
+}
 
 f32 GetSplineLengthAtTime(SplinePathCurve* self, f32 t0)
 {

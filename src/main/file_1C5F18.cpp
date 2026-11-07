@@ -5,8 +5,28 @@
 #include "fpu.h"
 #include "globals.h"
 #include "pad_record.h"
+#include "attachment.h"
+#include "list_iter.h"
+#include "vu0.h"
+#include "transform_object.h"
 
 extern f32 g_gameTime[];
+extern u8 g_class75List[];
+void BuildAxisAngleMatrix(const Vec02* axis, Mat02* out, f32 angle);
+void TransformPointBetweenFrames(void* a0, s32 a1, void* a2, void* a3);
+s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, f32 t, s32 e, s32 f);
+void GetObjectWorldPosition(void* p, Vec02* out);
+void MeasurePointToSegment(Vec02* p, Vec02* a, Vec02* b, f32* o1, f32* o2);
+f32 WrapAngle(f32 a);
+f32 ArctangentOfRatio(f32 a, f32 b);
+extern const T2195_Vt D_00219560;
+
+// The pose source that adds up the offsets of the attachments after it (D_0021A9A8): the number
+// of them to take.
+struct ChildPoseSource : Attachment {
+    u8 pad18[0x1C - 0x18];  // 0x18
+    s32 count;              // 0x1C
+};
 
 struct Rec_274BA0 { s32 a[12]; f32 b; };
 
@@ -27,7 +47,36 @@ f32 D_00274C00[4] = { 125.0f, 0.0f, 0.0f, 0.0f };
 s32 D_00274C10 = 0;
 s32 D_00274C14 = 0;
 
-INCLUDE_ASM(func_001C5F18);
+void SumChildPoseOffsets(ChildPoseSource* self, f32 t, Vec02* pos, Vec02* vec)
+{
+    ListFrame frame;
+    Vec02 a;
+    Vec02 b;
+    Vec02 d;
+    PlacedObject* owner = self->owner;
+    *pos = owner->v190;
+    *vec = D_00248D30;
+    Attachment* c = self;
+    s32 n = ((ChildPoseSource*)c)->count;
+    if (n > 0) {
+        c = c->link.next;
+        while (c != 0) {
+            if ((u8)(c->mode0 + 1) >= 2) {
+                if (c->vt != &D_00219560) {
+                    c->vt->getPos(c, t, &a, &b);
+                    Vu0::Q(d) = Vu0::Sub(Vu0::Q(a), Vu0::Q(owner->v190));
+                    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(*pos), Vu0::Q(d));
+                    Vu0::Q(*vec) = Vu0::Add(Vu0::Q(*vec), Vu0::Q(b));
+                }
+                n--;
+            }
+            if (n <= 0) {
+                break;
+            }
+            c = c->link.next;
+        }
+    }
+}
 
 INCLUDE_ASM(func_001C6028);
 
@@ -125,7 +174,62 @@ tail:
     func_001C61E0(self, st);
 }
 
-INCLUDE_ASM(func_001C6AA8);
+void FindNearestClass75Ahead(Player* self, s32 mode, void* tbl, void** found, f32* dir, f32 a, f32 b)
+{
+    ListFrame frame;
+    Mat02 rot;
+    Vec02 eye;
+    Vec02 here;
+    Vec02 world;
+    Vec02 local;
+    Mat02 objRot;
+    Vec02 objOrigin;
+    Vec02 delta;
+    Vec02 hitPoint;
+    Vec02 bestPoint;
+    u8* list = g_class75List;
+    f32 bestDist = 300.0f;
+    Class75Object* best = 0;
+    BuildAxisAngleMatrix(&g_unitZVector, &rot, self->f638);
+    {
+        Vec02 k;
+        Vu0::Q(k) = Vu0::FromFloat(a);
+        Vu0::Q(eye) = Vu0::MulAddX(Vu0::Q(self->pos), Vu0::Q(self->v150), Vu0::Q(k));
+    }
+    TransformPointBetweenFrames(self, 0, tbl, &here);
+    Vu0::Q(world) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(*(Vec02*)tbl)), Vu0::Q(eye));
+    Vu0::Q(local) = Vu0::Sub(Vu0::Q(world), Vu0::Q(here));
+    for (Class75Object* n = *(Class75Object**)list; n != 0; n = *(Class75Object**)((u8*)n + 0x80)) {
+        Vec02 bestDir;
+        f32 hit[2];
+        if ((n->count & mode) == 0) {
+            continue;
+        }
+        ComputeObjectFrameAtTime(n->parent, 0, &objOrigin, &objRot, a, 0, 0);
+        GetObjectWorldPosition(n, &delta);
+        Vu0::Q(delta) = Vu0::Add(Vu0::Q(delta), Vu0::Q(local));
+        Vu0::Q(hitPoint) = Vu0::Add(Vu0::Rotate(objRot, Vu0::Q(*(Vec02*)((u8*)n + 0x40))), Vu0::Q(objOrigin));
+        MeasurePointToSegment(&world, &delta, &hitPoint, &hit[0], &hit[1]);
+        if (n->parent != 0) {
+            if (((PlacedObject*)n->parent)->root->desc->flags & 8) {
+                hit[1] = hit[1] + D_00274BD4;
+            }
+        }
+        if (hit[1] < bestDist) {
+            Vu0::Q(bestDir) = Vu0::Sub(Vu0::Q(delta), Vu0::Q(self->v140));
+            f32 ang = ArctangentOfRatio(bestDir.y, bestDir.x);
+            f32 diff = WrapAngle(ang - self->f638);
+            if (__builtin_fabsf(diff) > b) {
+                continue;
+            }
+            best = n;
+            Vu0::Q(bestPoint) = Vu0::Sub(Vu0::Q(hitPoint), Vu0::Q(eye));
+            bestDist = hit[1];
+        }
+    }
+    *found = best;
+    Vu0::Q(*(Vec02*)dir) = Vu0::Q(bestPoint);
+}
 
 // What FindNearestClass75Ahead finds: the direction to the nearest class 0x75 object ahead
 // and the object, 0 for none.

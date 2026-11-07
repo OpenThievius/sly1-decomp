@@ -3,10 +3,13 @@
 #include "asm_func.h"
 #include "switched_collider.h"
 #include "fpu.h"
+#include "vu0.h"
 #include "globals.h"
 #include "object_link.h"
 #include "attachment.h"
 #include "pad_record.h"
+#include "game_clock.h"
+#include "vu0.h"
 
 
 // The file's .rodata: the constants only its assembly reads.
@@ -208,7 +211,7 @@ void SetTurningColliderRotation(TurningCollider* self, Mat02* rot)
 INCLUDE_ASM(func_001C4FF8);
 
 void StepCollider(void* self);
-void ApplyTurningColliderDrive(void* self);
+void ApplyTurningColliderDrive(TurningCollider* self);
 
 void StepTurningCollider(TurningCollider* self)
 {
@@ -216,7 +219,35 @@ void StepTurningCollider(TurningCollider* self)
     ApplyTurningColliderDrive(self);
 }
 
-INCLUDE_ASM(func_001C5148);
+extern f32 g_frameDt;
+void TurnColliderTowardRotation(TurningCollider* self, f32 t, Mat02* out, void* data);
+void ConstrainColliderVector(void* a, void* b, void* c, void* d, s32 e);
+void AddColliderForce(void* target, void* slot);
+
+void func_001C5148(TurningCollider* self)
+{
+    TurnColliderTowardRotation(self, g_frameDt, &self->m660, &self->f6E0);
+    if (self->f6DC == 0) {
+        return;
+    }
+    Vec02* pivot;
+    if (self->f690 != 0) {
+        pivot = &self->v6A0;
+    } else {
+        pivot = (Vec02*)self->f6D4;
+    }
+    Vec02 arm;
+    Vec02 v;
+    Vec02 w;
+    Vu0::Q(arm) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(*pivot));
+    Vu0::Q(v) = Vu0::Cross(Vu0::Q(self->v180), Vu0::Q(arm));
+    ConstrainColliderVector(self, &self->v440, &v, &v, 0);
+    AddColliderForce(self, &v);
+    Vu0::Q(w) = Vu0::Cross(Vu0::Q(self->v160), Vu0::Q(arm));
+    Vu0::Q(v) = Vu0::Cross(Vu0::Q(self->v160), Vu0::Q(w));
+    ConstrainColliderVector(self, &self->v440, &v, &v, 0);
+    AddColliderForce(self, &v);
+}
 
 s32 IsTurningColliderGroundContact(TurningCollider* self, Contact03* a, s32 idx)
 {
@@ -353,4 +384,16 @@ void ScaleTurningColliderRamp(TurningCollider* self, f32 s)
     self->f6E8 *= 1.0f / Fpu::Sqrt(s);
 }
 
-INCLUDE_ASM(func_001C5EA8);
+void SetColliderMass(Collider* self, f32 m);
+
+void func_001C5EA8(TurningCollider* self, f32 s)
+{
+    f32 n = 0.1f;
+    n >?= s;
+    SetColliderMass(self, self->mass * self->f700 / n);
+    f32 ratio = n / self->f700;
+    Vec02 k;
+    Vu0::Q(k) = Vu0::FromFloat(ratio);
+    self->f700 = n;
+    Vu0::Q(self->gravity) = Vu0::MulX(Vu0::Q(self->gravity), Vu0::Q(k));
+}

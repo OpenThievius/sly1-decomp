@@ -8,12 +8,16 @@
 #include "fpu.h"
 #include "asm_func.h"
 #include "vu0.h"
+#include "ramp_profile.h"
+#include "placed_object.h"
+#include "switched_collider.h"
 extern void SetCameraFogNear(void*);
 extern void SetCameraFogFar(void*);
 extern void SetCameraFogStrength(void*);
 extern void SetCameraFogColor(void*);
 extern void SetCameraPlacement(void*, s32, void*);
 #include "list_iter.h"
+#include "game_clock.h"
 
 
 void SetCameraNearDistance(void* arg);
@@ -342,9 +346,9 @@ INCLUDE_DATA(D_00261910);
 INCLUDE_DATA(D_00261920);
 INCLUDE_DATA(D_00261924);
 INCLUDE_DATA(D_00261928);
-INCLUDE_DATA(D_0026194C);
+f32 D_0026194C = 250.0f;
 INCLUDE_DATA(D_00261950);
-INCLUDE_DATA(D_00261958);
+RampProfile D_00261958 = { 2500.0f, 0.0f, 0.25f, 0.0f };
 INCLUDE_DATA(D_00261970);
 INCLUDE_DATA(D_00261980);
 void* g_camera = 0;
@@ -358,9 +362,71 @@ void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3
     ComputePolarOffset(a3, a2->f30 + 3.1415927f, a2->f34, 0.0f);
 }
 
-INCLUDE_ASM(func_00143180);
+// One step of a damped spring pulling pos toward target: the velocity gains (target - pos) * k
+// + vel * damp over dt, and pos moves by the velocity over dt. With f224 set, pos is placed at
+// target at rest.
+void SpringCameraVector(Camera* self, Vec02* pos, Vec02* vel, Vec02* target, f32 k, f32 damp, f32 dt)
+{
+    if (self->f224 != 0) {
+        *pos = *target;
+        Vu0::Q(*vel) = Vu0::Zero();
+        return;
+    }
+    Vec02 d;
+    Vec02 acc;
+    Vu0::Q(d) = Vu0::Sub(Vu0::Q(*target), Vu0::Q(*pos));
+    Vu0::Q(acc) = Vu0::MulXSum(Vu0::Q(d), Vu0::Scalar(k), Vu0::Q(*vel), Vu0::Scalar(damp));
+    Vu0::Q(*vel) = Vu0::MulAddX(Vu0::Q(*vel), Vu0::Q(acc), Vu0::Scalar(dt));
+    Vu0::Q(*pos) = Vu0::MulAddX(Vu0::Q(*pos), Vu0::Q(*vel), Vu0::Scalar(dt));
+}
 
-INCLUDE_ASM(func_00143208);
+// The camera func_00143208 springs towards the target's offset: the spring's two vectors
+// (+0x250/+0x260 and +0x270/+0x280) and the record func_00143148 reads.
+struct Spring_00143208 {
+    u8 pad0[0x250];
+    Vec02 v250;             // 0x250
+    Vec02 v260;             // 0x260
+    Vec02 v270;             // 0x270
+    Vec02 v280;             // 0x280
+};
+
+struct Record_00143208 {
+    u8 pad0[0x10];
+    Vec02 v10;              // 0x10
+    u8 pad20[0x40 - 0x20];
+    Vec02 v40;              // 0x40
+};
+
+extern Player* g_player;
+extern const Vec02 D_00248D30;
+void SpringCameraVector(Spring_00143208* self, Vec02* a, Vec02* b, const Vec02* target, f32 x, f32 y, f32 dt);
+void ComputeOffsetBehindTarget(void* a0, void* a1, Target_00143148* a2, void* a3);
+
+void func_00143208(Spring_00143208* self, void* target, Record_00143208* rec, f32 dt)
+{
+    Vec02 offset;
+
+    ComputeOffsetBehindTarget(self, target, (Target_00143148*)rec, &offset);
+    if (target == g_player) {
+        switch (g_player->f268C) {
+        case 0:
+            SpringCameraVector(self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
+            SpringCameraVector(self, &self->v270, &self->v280, &D_00248D30, 5.0f, -3.5f, dt);
+            break;
+        case 1:
+            SpringCameraVector(self, &self->v250, &self->v260, &offset, 1.0f, -10.0f, dt);
+            SpringCameraVector(self, &self->v270, &self->v280, &self->v270, 0.0f, -10.0f, dt);
+            break;
+        case 2:
+            SpringCameraVector(self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
+            break;
+        }
+    } else {
+        SpringCameraVector(self, &self->v250, &self->v260, &offset, 5.0f, -3.5f, dt);
+        SpringCameraVector(self, &self->v270, &self->v280, &D_00248D30, 5.0f, -3.5f, dt);
+    }
+    Vu0::Q(rec->v40) = Vu0::Add(Vu0::Q(rec->v10), Vu0::Q(self->v250));
+}
 
 // What func_001433E0 resets: the offset ComputeOffsetBehindTarget gives (+0x250) and three
 // vectors after it.
@@ -601,7 +667,60 @@ done:
     return r;
 }
 
-INCLUDE_ASM(func_00143BE0);
+// A part's state as func_00143BE0 writes it (0x28 bytes, PlacedObject::partStates): the time
+// until which the part is faded.
+struct PartFade {
+    u8 pad00[0x14];
+    f32 until;              // 0x14
+    u8 pad18[0x28 - 0x18];
+};
+
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(World* world, s32 p1, Vec02* lo, Vec02* hi, s32 (*filter)(void*, Collider*), s32 p4, s32* n, Collider*** list);
+
+void func_00143BE0(Camera* self)
+{
+    Vec02 lo;
+    Vec02 hi;
+    ColliderSpan spans[0x20];
+    s32 n;
+    Collider** list;
+    PushBackMemoryMark();
+    lo = hi = *(Vec02*)self->f40;
+    for (s32 i = 0; i < self->f340; i++) {
+        PlacedObject* obj = (PlacedObject*)self->f344[i];
+        if (obj->flags & (1ULL << 37)) {
+            Vu0::Q(lo) = Vu0::Min(Vu0::Q(lo), Vu0::Q(obj->v140));
+            Vu0::Q(hi) = Vu0::Max(Vu0::Q(hi), Vu0::Q(obj->v140));
+        }
+    }
+    GatherCollidersInBox(g_currentWorld, 0, &lo, &hi, IsCameraObstacle, 0, &n, &list);
+    for (s32 j = 0; j < n; j++) {
+        Collider* c = list[j];
+        for (s32 k = 0; k < self->f340; k++) {
+            PlacedObject* obj = (PlacedObject*)self->f344[k];
+            if (!(obj->flags & (1ULL << 37))) {
+                continue;
+            }
+            s32 m = CollectTreeNodeSpans(c->tree.nodes, self->f40, &obj->v140, (s32)c->nodeGroups, 0x20, spans);
+            ColliderSpan* end = &spans[m];
+            for (ColliderSpan* sp = spans; sp < end; sp++) {
+                if (sp->group < 0) {
+                    continue;
+                }
+                for (s32 q = sp->group; q < c->groupCount; q++) {
+                    Pair03* e = &c->groups[q];
+                    if (e->a >= 0 && q != sp->group) {
+                        break;
+                    }
+                    ((PartFade*)c->partStates)[e->b].until = g_gameClock.elapsed + 0.1f;
+                }
+            }
+        }
+    }
+    PopBackMemoryMark();
+}
 
 void UpdateCamera(Camera* self, s32 flag, f32 dt)
 {
@@ -657,7 +776,31 @@ void UpdateCamera(Camera* self, s32 flag, f32 dt)
 
 ASM_FUNC(func_00144008);
 
-INCLUDE_ASM(func_00144128);
+// The camera's frame as func_00144128 reads it: rows at 0x80, a position at 0x40, two scales.
+struct Frame_00144128 {
+    u8 pad0[0x40];
+    Vec02 pos;              // 0x40
+    u8 pad50[0x80 - 0x50];
+    Mat02 rot;              // 0x80
+    u8 padB0[0x1F0 - 0xB0];
+    f32 scaleY;             // 0x1F0
+    f32 scaleZ;             // 0x1F4
+};
+
+void func_00144128(Frame_00144128* self, f32* a, Vec02* out)
+{
+    Vec02 v;
+    v.x = a[2];
+    v.y = -a[0];
+    v.z = a[1];
+    if (1e-4f < a[2]) {
+        v.y = -a[0] * a[2];
+        v.z = a[1] * a[2];
+    }
+    v.y = v.y * self->scaleY;
+    v.z = v.z * self->scaleZ;
+    Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(self->rot, Vu0::Q(v)), Vu0::Q(self->pos));
+}
 
 INCLUDE_ASM(func_001441C0);
 
@@ -864,10 +1007,28 @@ void RequestPlainCameraSnap(void* p)
     RequestCameraSnap((Camera*)p, 0);
 }
 
-INCLUDE_ASM(func_00145610);
+extern const Vec02 D_00248D30;
+void MeasurePointToLine(Vec02* p, Vec02* a, Vec02* b, f32* t, f32* dist);
+
+// The view ray through the screen point (x, y): from the camera 100 units along the direction
+// (1, -x f1F0, y f1F4) in its frame, the point of it nearest p; v230 is that point less p.
+void func_00145610(Camera* self, Vec02* p, f32 x, f32 y)
+{
+    Vec02 dir;
+    Vec02 far;
+    f32 t;
+    f32 dist;
+    self->v240 = D_00248D30;
+    dir.x = 1.0f;
+    dir.y = -x * self->f1F0;
+    dir.z = y * self->f1F4;
+    Vu0::Q(far) = Vu0::MulAddX(Vu0::Q(self->f40), Vu0::Rotate(self->f80, Vu0::Q(dir)), Vu0::Scalar(100.0f));
+    MeasurePointToLine(p, (Vec02*)self->f40, &far, &t, &dist);
+    Vu0::Q(far) = Vu0::MulXSum(Vu0::Q(self->f40), Vu0::Scalar(1.0f - t), Vu0::Q(far), Vu0::Scalar(t));
+    Vu0::Q(self->v230) = Vu0::Sub(Vu0::Q(far), Vu0::Q(*p));
+}
 
 INCLUDE_ASM(func_00145718);
-
 s32 FindFirstFreeSpan(s32 count, Collider** objs, f32 thresh, void* a2, void* a3, f32* lo, f32* hi)
 {
     ColliderSpan recs[64];
@@ -908,7 +1069,22 @@ s32 HasColliderSecondTree(void* unused, Collider* other)
     return other->tree2.nodes != 0;
 }
 
-INCLUDE_ASM(func_00145DE8);
+// The vectors func_00145DE8 reads: a direction at +0x10 and a distance at +0x20.
+struct Heading_00145DE8 {
+    u8 pad0[0x10];
+    Quad16 dir;             // 0x10
+    f32 dist;               // 0x20
+};
+
+extern f32 g_frameStep;
+f32 ApproachValueWithRamp(f32 a, f32 b, f32 c, RampProfile* p, f32* out);
+
+f32 func_00145DE8(Camera* self, void* unused, Quad16* v, Heading_00145DE8* h)
+{
+    f32 out;
+    ApproachValueWithRamp(h->dist, *(f32*)((u8*)self + 0x1EC) - D_0026194C, g_frameStep, &D_00261958, &out);
+    return Vu0::ToFloat(Vu0::Dot(Vu0::Q(*v), Vu0::Q(h->dir))) - out;
+}
 
 INCLUDE_ASM(func_00145E68);
 

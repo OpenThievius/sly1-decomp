@@ -19,24 +19,31 @@ struct __attribute__((packed)) PackedS64 {
 
 struct ObjectGatherer : Collider {
     s32 state;            // 0x550: -1 at set-up (func_0019B188, slot 16); func_0019BE08 (slot 45) tests it for 3
-    u8 pad554[0x55C - 0x554];
+    f32 f554;               // 0x554: g_gameClock[1] when the mode last changed (func_0019C1C0)
+    f32 f558;               // 0x558: when the mode next changes
     f32 f55C;               // 0x55C: slot 0 (func_0019B038) stores func_001EAB48 of the clock
-    u8 pad560[0x564 - 0x560];
+    s32 ring;               // 0x560: which of the found objects the ring is on (func_0019BC40)
     s32 lowCount;               // 0x564: how many of lowObjects are filled (slot 10, func_0019B0A0)
     void* lowObjects[16];         // 0x568: the found objects of ids 0x269..0x278
     s32 highCount;               // 0x5A8: how many of highObjects are filled
-    void* highObjects[19];         // 0x5AC: those of ids 0x279..0x287
+    void* highObjects[16];         // 0x5AC: those of ids 0x279..0x287
+    void* base5EC;          // 0x5EC: the object of id 0x268 (g_objectGathererLoadLinks)
+    f32 near5F0;            // 0x5F0: how far the point moves before the ring advances in state 1
+    f32 near5F4;            // 0x5F4: the same in state 2
     void* group;             // 0x5F8: the record func_00159478 sets up (slot 10); its first word is the
                             //        object func_0019BE08 sends a message to
     void* f5FC;             // 0x5FC
     PackedS64 q600;            // 0x600: kept by slot 9 (func_0019B250)
     f32 f608;               // 0x608: 0.5 at set-up
     f32 f60C;               // 0x60C: 1.0 at set-up
-    u8 pad610[0x650 - 0x610];
+    f32 f610;               // 0x610
+    u8 pad614[0x640 - 0x614];
+    Vec02 v640;             // 0x640: the point mode 1 picks
     Vec02 v650;             // 0x650: v140, copied by slot 16
     void* f660;             // 0x660
     s32 f664;               // 0x664: -1 at set-up
-    u8 pad668[0x670 - 0x668];
+    s32 f668;               // 0x668
+    u8 pad66C[0x670 - 0x66C];
 };
 
 typedef char check_ObjectGatherer[sizeof(ObjectGatherer) == 0x670 ? 1 : -1];

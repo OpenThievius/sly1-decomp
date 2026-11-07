@@ -6,6 +6,8 @@
 #include "animation.h"
 #include "sound_record.h"
 #include "asm_func.h"
+#include "vu0.h"
+#include "collider.h"
 #include "list_iter.h"
 #include "packet_writer.h"
 #include "game_progress.h"
@@ -30,6 +32,9 @@ struct VisitNode { VisitClass* cls; u8 pad0[0x18]; VisitNode* next; u8 pad1[0x14
 
 
 void SpliceListToEnd(void* dst, void* src);
+void TransformByMatrixWithW(void* m, f32 w, const void* src, void* out);
+void SetColliderAnchors(Collider* self, s32 a, s32 b, s32 c, s32 d);
+void FreeTouchNodes(void* owner, Touch03* node);
 
 
 s32 IsObjectAttached(void* p);
@@ -1092,7 +1097,23 @@ void SetPlacedObjectFrozen(PlacedObject* self, s32 flag)
     }
 }
 
-INCLUDE_ASM(func_0015FCD8);
+void SetColliderFrozen(Collider* self, s32 flag)
+{
+    if (flag != 0) {
+        self->save90 = self->mode450;
+        self->save94 = self->mode470;
+        SetColliderAnchors(self, 3, 0, 3, 0);
+        u128 zero = Vu0::Zero();
+        Vu0::Q(*(Vec02*)((u8*)self + 0x170)) = zero;
+        Vu0::Q(*(Vec02*)((u8*)self + 0x180)) = zero;
+        FreeTouchNodes(self->world, self->touching);
+        self->touching = 0;
+        SetPlacedObjectFrozen(self, 1);
+    } else {
+        SetPlacedObjectFrozen(self, 0);
+        SetColliderAnchors(self, self->save90, 0, self->save94, 0);
+    }
+}
 
 INCLUDE_ASM(func_0015FD78);
 

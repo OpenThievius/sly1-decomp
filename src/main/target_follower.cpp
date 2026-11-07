@@ -17,6 +17,7 @@
 #include "game_progress.h"
 #include "shapes.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 // The target follower (class 0x47), the entry-table object (0x64) and the followable object
 // (0x2A). Its .data runs from 0x2629C8 to 0x262A30: the current follower, the two link tables of
@@ -144,8 +145,41 @@ void StepTargetFollower(TargetFollower* self, f32 t)
     TurnColliderTowardRotation(self, t, &buf, self->sub5B0);
 }
 
-INCLUDE_RODATA(jtbl_0024A7F0);
-INCLUDE_ASM(func_0016D128);
+void UpdateCollider(Collider* self);
+void PlayPendingFollowerSound(TargetFollower* self);
+s32 ChooseTargetFollowerMode(TargetFollower* self);
+void SetTargetFollowerMode(TargetFollower* self, s32 mode);
+Collider* GetActiveSwitchedCollider(void);
+f32 ArctangentOfRatio(f32 a, f32 b);
+
+void func_0016D128(TargetFollower* self)
+{
+    UpdateCollider(self);
+    PlayPendingFollowerSound(self);
+    if ((s32)self != g_currentTargetFollower) {
+        return;
+    }
+    s32 mode;
+    while ((mode = ChooseTargetFollowerMode(self)) != self->f598) {
+        SetTargetFollowerMode(self, mode);
+    }
+    switch (mode) {
+    case 0:
+    case 1:
+    case 3:
+        break;
+    case 2:
+    case 4:
+        Collider* other = GetActiveSwitchedCollider();
+        if (other == 0) {
+            return;
+        }
+        Vec02 d;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(other->v140), Vu0::Q(self->v140));
+        self->f5A0 = ArctangentOfRatio(d.y, d.x);
+        break;
+    }
+}
 
 INCLUDE_RODATA(jtbl_0024A810);
 INCLUDE_ASM(func_0016D1E0);
@@ -340,8 +374,37 @@ void StartEntryTableObject(EntryTableObject* self)
     self->desc->m03(self);
 }
 
-INCLUDE_RODATA(D_0024A844);
-INCLUDE_ASM(func_0016DE20);
+s32 GetObjectWorldPosition(void* p, Vec02* out);
+
+void* func_0016DE20(EntryTableObject* self)
+{
+    if (self->entryCount > 0) {
+        if (self->mode314 != 0) {
+            if (self->mode314 != 1) {
+                return 0;
+            }
+            s32 r = RandomIntInRange(0, self->entryCount - 1);
+            void** base = (void**)self->entries;
+            return *(void**)((u8*)base + r * 4);
+        }
+        f32 best = 3.40282347e+38f;
+        void* found = 0;
+        Collider* player = GetActiveSwitchedCollider();
+        for (s32 i = 0; i < self->entryCount; i++) {
+            void* obj = ((void**)self->entries)[i];
+            Vec02 pos;
+            GetObjectWorldPosition(obj, &pos);
+            u128 d = Vu0::Sub(Vu0::Q(pos), Vu0::Q(player->v140));
+            f32 dist = Vu0::ToFloat(Vu0::Dot(d, d));
+            if (dist < best) {
+                best = dist;
+                found = obj;
+            }
+        }
+        return found;
+    }
+    return 0;
+}
 
 void InitFollowableObject(FollowableObject* self)
 {

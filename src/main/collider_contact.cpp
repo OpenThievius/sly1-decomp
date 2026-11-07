@@ -2,6 +2,7 @@
 #include "common.h"
 #include "asm_func.h"
 #include "fpu.h"
+#include "vu0.h"
 #include "collider.h"
 #include "cone_volume.h"
 #include "placed_object.h"
@@ -79,7 +80,32 @@ INCLUDE_ASM(func_00185D20);
 
 INCLUDE_ASM(func_00185F48);
 
-INCLUDE_ASM(func_001860A8);
+void ComputeObjectMotionInFrame(void* a, s32 b, void* c, void* d, s32 e, s32 f, s32 g);
+Collider* FindHandlerForSlot(Collider* node, s32 offset);
+
+void func_001860A8(void* a0, s32 n, Contact03** list)
+{
+    for (s32 i = 0; i < n; i++) {
+        Contact03* c = list[i];
+        s32 e;
+        for (e = 0; e < 2; e++) {
+            if (c->end[e].part != 0) {
+                ComputeObjectMotionInFrame(c->end[e].part, 0, &c->end[e].v10, (u8*)&c->end[e] + 0x30, 0, 0, 0);
+                ((void (*)(Collider*, Contact03*, s32))c->end[e].part->desc03()->m3B)(c->end[e].part, c, e);
+            }
+        }
+        for (e = 0; e < 2; e++) {
+            Collider* obj = FindHandlerForSlot(c->end[e].part, 0x104);
+            if (obj != 0) {
+                void (*fn)(Collider*, Contact03*, s32) = (void (*)(Collider*, Contact03*, s32))obj->desc03()->m3D;
+                if (fn != 0) {
+                    fn(obj, c, e);
+                }
+            }
+        }
+        Vu0::Q(*(Vec02*)((u8*)c + 0xB0)) = Vu0::Sub(Vu0::Q(*(Vec02*)((u8*)&c->end[0] + 0x30)), Vu0::Q(*(Vec02*)((u8*)&c->end[1] + 0x30)));
+    }
+}
 
 void PushFreeSlot(u8* a, void* b);
 
@@ -330,7 +356,33 @@ void AddMeshContacts(void* a0, void* a1, void* a2, void* a3, void* a4, void* a5,
 
 INCLUDE_ASM(func_00187A88);
 
-INCLUDE_ASM(func_00187B60);
+void FindPartSupportPoint(void* a0, void* a1, void* a2, void* a3, f32 f)
+{
+    Collider* part = (Collider*)a0;
+    Vec02* dir = (Vec02*)a1;
+    Vec02* out = (Vec02*)a2;
+    f32 best = Vu0::ToFloat(Vu0::Dot(Vu0::Q(part->v140), Vu0::Q(*dir)));
+    if (part->meshCopy.vertCount > 0) {
+        Vec02* verts = (Vec02*)part->meshCopy.verts;
+        Vu0::Q(*out) = Vu0::Q(part->v140);
+        s32 i = part->meshCopy.vertCount; i--; for (; i >= 0; i--) {
+            u128 p = Vu0::Q(verts[i]);
+            f32 d = Vu0::ToFloat(Vu0::Dot(p, Vu0::Q(*dir)));
+            if (d < best) {
+                Vu0::Q(*out) = p;
+                best = d;
+            }
+        }
+    } else {
+        f32 r = part->radius3CC;
+        Vec02 k;
+        best -= r;
+        Vu0::Q(k) = Vu0::FromFloat(-r);
+        Vu0::Q(*out) = Vu0::MulAddX(Vu0::Q(part->v140), Vu0::Q(*dir), Vu0::Q(k));
+    }
+    best -= f;
+    *(f32*)a3 = best;
+}
 
 
 s32 CollectTreeNodeSpans(void* a0, void* a1, void* a2, s32 a3, s32 a4, void* a5);

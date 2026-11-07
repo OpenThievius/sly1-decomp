@@ -87,6 +87,7 @@ s32 func_0013E658(void* a, s32 b);
 void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, s32 a5);
 
 s32 DrawEffectAt(void* self, void* a1, void* a2, void* a3);
+void BuildBasisFromXAndZHint(void* a, void* b, void* c);
 
 struct ColorFade;
 
@@ -1376,9 +1377,33 @@ void InitDroppingEffect(Effect* self)
     self->i20 = v;
 }
 
-INCLUDE_ASM(func_0019FE50);
+void func_0019FE50(Effect* self, f32 dt)
+{
+    Vec02 k;
+    while (self->target != 0 && IsObjectAttached(self->target) == 0) {
+        self->target = (Collider*)self->target->parent;
+    }
+    if (g_gameClock[1] - self->start > 0.15f) {
+        Vu0::Q(k) = Vu0::FromFloat(0.5f);
+        self->fB0 = -8.0f;
+        Vu0::Q(self->vC0) = Vu0::MulX(Vu0::Q(g_currentWorld->gravity), Vu0::Q(k));
+    }
+    UpdateEffect(self, dt);
+}
 
-INCLUDE_ASM(func_0019FF20);
+void func_001268B8(void* world, void* a1, void* a2, void* a3, f32 a, f32 b);
+
+void func_0019FF20(Effect* self, void* a1)
+{
+    DrawEffect(self, a1);
+    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(self->q90));
+    if (100.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
+        f32 t = (g_gameTime - self->start) / self->life;
+        f32 x;
+        ClampedQuadratic::Get(x, (const QuadraticCoeffs*)&self->q40, t);
+        func_001268B8(g_currentWorld->slot1CE8[7], a1, &self->q90, &self->q80, 0.1f, x);
+    }
+}
 
 void EndDroppingEffect(Effect* self, void* other)
 {
@@ -1438,7 +1463,61 @@ void DetachTrailSegment(Effect* self)
     SetTrailSegmentAnchor(self, 0, 0);
 }
 
-INCLUDE_ASM(func_001A0338);
+void OnTrailAnchorEnded(void* self, s32 kind, s32 extra);
+
+void SetTrailSegmentAnchor(void* selfv, s32 kind, void* extra)
+{
+    Effect* self = (Effect*)selfv;
+    if (self->i120 == kind) {
+        return;
+    }
+    switch (self->i120) {
+    case 1:
+        RemoveEffectCallback(self->p124, (void*)OnTrailAnchorEnded, self);
+        if (kind == 0) {
+            Vu0::Q(self->q90) = Vu0::Q(self->p124->q80);
+        }
+        self->i120 = kind;
+        break;
+    case 2: {
+        BaseObject* anchor = (BaseObject*)self->p128;
+        ((void (*)(BaseObject*, void*, void*))((s32*)anchor->desc)[0x78 / 4])(anchor, (void*)OnTrailAnchorEnded, self);
+        if (kind == 0) {
+            if (extra != 0) {
+                Vu0::Q(self->q90) = Vu0::Q(*(Quad219C*)extra);
+            } else {
+                Vu0::Q(self->q90) = Vu0::Q(((PlacedObject*)self->p128)->v140);
+            }
+        }
+        self->i120 = kind;
+        break;
+    }
+    default:
+        self->i120 = kind;
+        break;
+    }
+    switch (kind) {
+    case 1: {
+        Effect* other = (Effect*)extra;
+        Vu0::Q(self->q80) = Vu0::Q(other->q80);
+        Vu0::Q(self->qA0) = Vu0::Q(other->qA0);
+        self->p124 = other;
+        AddEffectCallback(other, (void*)OnTrailAnchorEnded, self);
+        break;
+    }
+    case 2: {
+        PlacedObject* other = (PlacedObject*)extra;
+        Vu0::Q(self->q80) = Vu0::Q(other->v140);
+        Vu0::Q(self->qA0) = Vu0::Q(other->v150);
+        self->p128 = (Effect*)other;
+        ((void (*)(BaseObject*, void*, void*))((s32*)other->desc)[0x74 / 4])(other, (void*)OnTrailAnchorEnded, self);
+        break;
+    }
+    case 0:
+        Vu0::Q(self->qA0) = Vu0::Zero();
+        break;
+    }
+}
 
 void SplitTrailSegment(Effect* self)
 {
@@ -1471,7 +1550,45 @@ void SplitTrailSegment(Effect* self)
     }
 }
 
-INCLUDE_ASM(func_001A05D8);
+// One step of a trail segment: its velocity damped by fB0 and pulled by vC0 over dt, its two
+// ends moved by it. Then the anchor's (kind 1: another segment's, kind 2: a placed object's)
+// speed and distance decide whether it lets go or splits.
+void MoveTrailSegment(Effect* self, f32 dt)
+{
+    Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Q(self->qA0), Vu0::Scalar(self->fB0 * dt + 1.0f), Vu0::Q(self->qC0), Vu0::Scalar(dt));
+    Vu0::Q(self->q80) = Vu0::MulAddX(Vu0::Q(self->q80), Vu0::Q(self->qA0), Vu0::Scalar(dt));
+    Vec02* vel;
+    Vec02* pos;
+    switch (self->i120) {
+    case 0:
+        Vu0::Q(self->q90) = Vu0::MulAddX(Vu0::Q(self->q90), Vu0::Q(self->qA0), Vu0::Scalar(dt));
+        return;
+    case 1:
+        pos = (Vec02*)&self->p124->q80;
+        vel = (Vec02*)&self->p124->qA0;
+        break;
+    case 2: {
+        PlacedObject* o = (PlacedObject*)self->p128;
+        if (o->flags & ((u64)0x8000 << 20)) {
+            SetTrailSegmentAnchor(self, 0, 0);
+            return;
+        }
+        pos = &o->v140;
+        vel = &o->v150;
+        break;
+    }
+    default:
+        return;
+    }
+    if (Vu0::ToFloat(Vu0::Dot(Vu0::Q(*vel), Vu0::Q(*vel))) < 40000.0f) {
+        SetTrailSegmentAnchor(self, 0, 0);
+        return;
+    }
+    u128 d = Vu0::Sub(Vu0::Q(self->q80), Vu0::Q(*pos));
+    if (625.0f < Vu0::ToFloat(Vu0::Dot(d, d))) {
+        SplitTrailSegment(self);
+    }
+}
 
 INCLUDE_ASM(func_001A0758);
 
@@ -1717,9 +1834,60 @@ s32 CompareByFloatKeyAscending(AngledPoint* a, AngledPoint* b)
 
 INCLUDE_ASM(func_001A1F40);
 
-INCLUDE_RODATA(D_0024C9BC);
+// A point of ComputeProjectedHull: where it is, where it projects (x and y over z), and its
+// angle about the lowest one (0x30 bytes).
+struct HullPoint {
+    Vec02 world;            // 0x00
+    Vec02 screen;           // 0x10
+    f32 angle;              // 0x20
+    u8 pad24[0x30 - 0x24];
+};
 
-INCLUDE_ASM(func_001A2070);
+void TransformByMatrixWithW(void* m, Vec02* in, Vec02* out, f32 w);
+void SortElements(void* base, s32 n, s32 size, s32 (*cmp)(AngledPoint*, AngledPoint*));
+
+s32 func_001A2070(void* m, s32 n, HullPoint* pts)
+{
+    HullPoint tmp;
+    f32 lowest = 3.40282347e+38f;
+    s32 low = -1;
+    s32 i;
+    HullPoint* p;
+    for (i = 0; i < n; i++) {
+        p = &pts[i];
+        TransformByMatrixWithW(m, &p->world, &p->screen, 1.0f);
+        f32 z = p->screen.z;
+        p->screen.y /= z;
+        p->screen.x /= z;
+        if (p->screen.y < lowest) {
+            lowest = p->screen.y;
+            low = i;
+        }
+    }
+    tmp = pts[0];
+    pts[0] = pts[low];
+    pts[low] = tmp;
+    for (i = 1; i < n; i++) {
+        p = &pts[i];
+        Vu0::Q(tmp.world) = Vu0::Sub(Vu0::Q(p->screen), Vu0::Q(pts[0].screen));
+        p->angle = ArctangentOfRatio(tmp.world.y, tmp.world.x);
+    }
+    SortElements(&pts[1], n - 1, 0x30, CompareByFloatKeyAscending);
+    HullPoint* out = pts;
+    for (i = 0; i < n; i++) {
+        p = &pts[i];
+        while (out >= &pts[2]) {
+            u128 side = Vu0::Cross(Vu0::Sub(Vu0::Q(out[-1].screen), Vu0::Q(out[-2].screen)), Vu0::Q(g_unitZVector));
+            if (Vu0::ToFloat(Vu0::Dot(Vu0::Sub(Vu0::Q(p->screen), Vu0::Q(out[-2].screen)), side)) < 0.0f) {
+                break;
+            }
+            out--;
+        }
+        *out = *p;
+        out++;
+    }
+    return out - pts;
+}
 
 void CopyEffectSourceIds(Effect* self, Rec50* src)
 {
@@ -1727,7 +1895,24 @@ void CopyEffectSourceIds(Effect* self, Rec50* src)
     self->i124 = src->f1F0;
 }
 
-INCLUDE_ASM(func_001A22E0);
+void func_001A22E0(Effect* self, void* a1)
+{
+    Vec02 dir;
+    Mat02 rot;
+    Vec02 k;
+    u128 d;
+    Vec02* p = &dir;
+    if (self->i124 != 0) {
+        u128 g = Vu0::Q(g_camera->g80);
+        Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+        d = Vu0::MulX(g, Vu0::Q(k));
+    } else {
+        d = Vu0::Q(g_unitZVector);
+    }
+    Vu0::Q(*p) = d;
+    BuildBasisFromXAndZHint(&self->qA0, &dir, &rot);
+    DrawEffectAt(self, a1, &self->q80, &rot);
+}
 
 INCLUDE_ASM(func_001A2380);
 
@@ -1852,7 +2037,36 @@ void InitDelayedEffect(Effect* self, f32 x)
     *(s32*)&self->m30[2] = 0;
 }
 
-INCLUDE_ASM(func_001A35F0);
+s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void MultiplyMatrices3x3(Mat02* a, Mat02* b, Mat02* out);
+void MatrixToAxisAngle(Mat02* m, f32* angle, void* axis);
+
+// Takes the source object's pose (+0x134) and lets it go: the effect starts there and moves
+// over its life to where its target object (+0x20) will be then, turning by the rotation
+// between the two frames.
+void TakeDelayedEffectSourcePose(Effect* self)
+{
+    Vec02 pos;
+    Mat02 rot;
+    Mat02 turn;
+    PlacedObject* src = (PlacedObject*)self->p134;
+    *(Vec02*)&self->q80 = src->v140;
+    self->rot50[0] = src->m110.r[0];
+    self->rot50[1] = src->m110.r[1];
+    self->rot50[2] = src->m110.r[2];
+    ComputeObjectFrameAtTime(self->p20, 0, &pos, &rot, 0, 0, self->life);
+    Vu0::Q(self->qA0) = Vu0::MulXSum(Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->q80)), Vu0::Scalar(1.0f / self->life),
+                                     Vu0::Q(self->qC0), Vu0::Scalar(self->life * -0.5f));
+    MultiplyMatrices3x3(&rot, (Mat02*)self->rot50, &turn);
+    MatrixToAxisAngle(&turn, &self->f130, &self->f120);
+    if (0.0f < self->f130) {
+        self->f130 = self->f130 + 6.28318548f;
+    } else {
+        self->f130 = self->f130 - 6.28318548f;
+    }
+    ((BaseObject*)self->p134)->desc->m03((BaseObject*)self->p134);
+    self->p134 = 0;
+}
 
 INCLUDE_ASM(func_001A3730);
 

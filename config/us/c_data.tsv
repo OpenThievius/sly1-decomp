@@ -26,7 +26,7 @@ D_0024A2D0	0024A2D0	1136	.rodata	src/main/file_15F678.cpp
 D_0024A794	0024A794	12	.rodata	src/main/file_167D68.cpp
 D_0024A7A0	0024A7A0	56	.rodata	src/main/file_16AA18.cpp
 D_0024A7DC	0024A7DC	12	.rodata	src/main/file_16C470.cpp
-D_0024A7F0	0024A7F0	0	.rodata	src/main/target_follower.cpp
+D_0024A7F0	0024A7F0	36	.rodata	src/main/target_follower.cpp
 D_0024A848	0024A848	24	.rodata	src/main/pad_input.cpp
 D_0024A860	0024A860	220	.rodata	src/main/player.cpp
 D_0024AFF4	0024AFF4	0	.rodata	src/main/file_1793C0.cpp
@@ -43,8 +43,8 @@ D_0024B438	0024B438	416	.rodata	src/main/movie_player.cpp
 D_0024B5E0	0024B5E0	4	.rodata	src/main/file_18F988.cpp
 D_0024B660	0024B660	4368	.rodata	src/main/pause_menu.cpp
 D_0024C860	0024C860	12	.rodata	src/main/file_1963D8.cpp
-D_0024C870	0024C870	12	.rodata	src/main/file_198980.cpp
-D_0024C930	0024C930	520	.rodata	src/main/file_19E040.cpp
+D_0024C870	0024C870	32	.rodata	src/main/file_198980.cpp
+D_0024C930	0024C930	524	.rodata	src/main/file_19E040.cpp
 D_0024CBC4	0024CBC4	4	.rodata	src/main/file_1A7FE8.cpp
 D_0024CBD0	0024CBD0	979	.rodata	src/main/screen_element.cpp
 D_0024CFC0	0024CFC0	356	.rodata	src/main/timed_object.cpp
@@ -58,12 +58,12 @@ D_0024D5A0	0024D5A0	56	.rodata	src/main/file_1C5F18.cpp
 D_0024D650	0024D650	468	.rodata	src/main/agent.cpp
 D_0024DAA0	0024DAA0	20	.rodata	src/main/player_target.cpp
 D_0024DB20	0024DB20	112	.rodata	src/main/player_mode.cpp
-D_0024DBD0	0024DBD0	104	.rodata	src/main/player_request.cpp
+D_0024DBD0	0024DBD0	184	.rodata	src/main/player_request.cpp
 D_0024DC90	0024DC90	24	.rodata	src/main/file_1D62E0.cpp
 D_0024DCA8	0024DCA8	4	.rodata	src/main/tint_blend_collider.cpp
 D_0024DCB0	0024DCB0	1287	.rodata	src/main/commentary_best_time.cpp
 D_0024E1C0	0024E1C0	1072	.rodata	src/main/file_1E08F8.cpp
-D_0024E600	0024E600	356	.rodata	src/main/file_1E88D0.cpp
+D_0024E600	0024E600	404	.rodata	src/main/file_1E88D0.cpp
 D_0024E840	0024E840	0	.rodata	src/main/file_1F2758.cpp
 D_0024E988	0024E988	40	.rodata	src/lib/request_thread.cpp
 D_0024E9B0	0024E9B0	340	.rodata	src/lib/formatted_output.cpp
@@ -133,7 +133,7 @@ D_00261390	00261390	96	.data	src/main/zone_collider.cpp
 D_002613F0	002613F0	32	.data	src/main/disc_access.cpp
 D_00261410	00261410	1088	.data	src/main/flagged_object.cpp
 D_00261850	00261850	48	.data	src/main/game_clock.cpp
-D_00261880	00261880	76	.data	src/main/camera.cpp
+D_00261880	00261880	104	.data	src/main/camera.cpp
 D_002619A0	002619A0	568	.data	src/main/state_notifier.cpp
 D_00261BF0	00261BF0	212	.data	src/main/file_149398.cpp
 D_00261CC8	00261CC8	668	.data	src/main/file_14EE40.cpp

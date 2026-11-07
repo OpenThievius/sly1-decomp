@@ -30,7 +30,7 @@ struct Entry3B {
 struct ChildGroupObject : Collider {
     s32 f550;               // 0x550: 0 at set-up; a message of kind 10 starts the clock while it is 0
     f32 f554;               // 0x554: FLT_MAX at set-up; the clock plus a delay (func_0013BE00)
-    u8 pad558[0x55C - 0x558];
+    f32 f558;               // 0x558: a speed: slower than it, or once the clock passes f554, slot 17 settles it (func_0013BF68)
     f32 f55C;               // 0x55C: 200.0
     f32 f560;               // 0x560: 200.0
     u8 pad564[0x568 - 0x564];
@@ -46,7 +46,13 @@ struct ChildGroupObject : Collider {
     u8 pad5E8[0x5F0 - 0x5E8];
     Quad3B f5F0;            // 0x5F0
     Pair3B f600;            // 0x600
-    u8 pad608[0x674 - 0x608];
+    s32 mode608;            // 0x608: 0, 1 or 2: how RecordChildGroupPose (func_0013BC80) takes the pose
+    s32 flag60C;            // 0x60C: set by it (func_0013BA70 and func_0013BC80 do nothing while it is set)
+    Vec02 v610;             // 0x610: the position it was given, or the object's own
+    Mat02 m620;             // 0x620: the orientation it records
+    Vec02 v650;             // 0x650: the object's v150
+    Vec02 v660;             // 0x660: the object's v160
+    Collider* obj670;       // 0x670: the object it was given
     s32 f674;               // 0x674: 1 at set-up
     s32 f678;               // 0x678: 1 at set-up
     s32 f67C;               // 0x67C: 0 at set-up

@@ -31,7 +31,9 @@
 #include "attachment.h"
 #include "animation.h"
 #include "ramp_profile.h"
+#include "vu0.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 void SteerAgentAlongPath(void);
 void InitElementStack(void* p);
@@ -1878,7 +1880,32 @@ s32 AcceptBeatPressColliderRequest(void)
     return 0;
 }
 
-INCLUDE_ASM(func_001EBD10);
+// What GetBeatPressColliderPositionAt reads of its f67C: an object to place at a time (+0x18) and
+// a point in its frame (+0x40).
+struct FramePoint_001EBD10 {
+    u8 pad0[0x18];
+    void* object;           // 0x18
+    u8 pad1C[0x40 - 0x1C];
+    Vec02 point;            // 0x40
+};
+
+void GetPlacedObjectPositionAt(void* self, f32 t, Vec02* pos, Vec02* vel);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, Vec02* e, Vec02* f, f32 t);
+
+void func_001EBD10(BeatPressCollider* self, f32 t, Vec02* pos, Vec02* vel)
+{
+    if (self->f67C == 0) {
+        GetPlacedObjectPositionAt(self, t, pos, vel);
+        return;
+    }
+    Vec02 p;
+    Mat02 rot;
+    Vec02 v;
+    Vec02 w;
+    ComputeObjectFrameAtTime(((FramePoint_001EBD10*)self->f67C)->object, 0, &p, &rot, &v, &w, t);
+    Vu0::Q(*pos) = Vu0::Add(Vu0::Q(p), Vu0::Rotate(rot, Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
+    Vu0::Q(*vel) = Vu0::Add(Vu0::Q(v), Vu0::Cross(Vu0::Q(w), Vu0::Q(((FramePoint_001EBD10*)self->f67C)->point)));
+}
 
 INCLUDE_ASM(func_001EBDD0);
 
@@ -2194,8 +2221,56 @@ tail:
     UpdateAgentGoal(self);
 }
 
-INCLUDE_RODATA(jtbl_0024E780);
-INCLUDE_ASM(func_001ECF10);
+void UpdateAgentState(TempoAgent* self);
+void SetAgentFacingAngles(TempoAgent* self, f32 angle, f32 zero);
+
+void UpdateTempoAgentState(TempoAgent* self)
+{
+    Vec02 diff;
+    Mat3U rot;
+    s32 code;
+    SwitchedCollider* p;
+    f32 y;
+    f32 x;
+    GetStateWalkerCurrentKey(self->fC54, &code);
+    switch (code) {
+    case 0x4ED:
+    case 0x4F0:
+    case 0x4F3:
+    case 0x4F6:
+        p = GetActiveSwitchedCollider();
+        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(p->v140), Vu0::Q(self->v140));
+        goto fromDiff;
+    case 0x4EC:
+    case 0x4EF:
+    case 0x4F2:
+    case 0x4F5:
+        if (self->f724 >= 15) goto other;
+        if (self->f724 < 13) goto other;
+        if (self->fC48 == 0) goto other;
+        GetObjectWorldRotation(self->fC48, &rot);
+        y = rot.m[0][1];
+        x = rot.m[0][0];
+        goto angle;
+    case 0x4EE:
+    case 0x4F1:
+    case 0x4F4:
+    case 0x4F7:
+        if (self->f724 >= 15) goto other;
+        if (self->f724 < 13) goto other;
+        p = GetActiveSwitchedCollider();
+        Vu0::Q(diff) = Vu0::Sub(Vu0::Q(self->v140), Vu0::Q(p->v140));
+    fromDiff:
+        y = diff.y;
+        x = diff.x;
+    angle:
+        SetAgentFacingAngles(self, ArctangentOfRatio(y, x), 0.0f);
+        return;
+    default:
+    other:
+        UpdateAgentState(self);
+    }
+}
 
 void SetTempoAgentPendingTimeline(TempoAgent* self, s32 value)
 {
@@ -2429,7 +2504,18 @@ void ForwardBallisticLaunchVelocity(void* self)
     ComputeBallisticLaunchVelocity(self);
 }
 
-INCLUDE_ASM(func_001EE2B0);
+void ClampVectorLength(Vec02* v, Vec02* out, f32 max)
+{
+    u128 q = Vu0::Q(*v);
+    f32 len = Vu0::ToFloat(Vu0::Length(q));
+    if (max < len) {
+        Vec02 s;
+        Vu0::Q(s) = Vu0::FromFloat(max / len);
+        Vu0::Q(*out) = Vu0::MulX(q, Vu0::Q(s));
+    } else if (v != out) {
+        Vu0::Q(*out) = q;
+    }
+}
 
 PacketWriter* InitPacketWriter(PacketWriter* self)
 {
@@ -2723,7 +2809,32 @@ void StartAttachedSet(AttachedSet* self)
     }
 }
 
-INCLUDE_ASM(func_001EED68);
+void TransformDirectionBetweenFrames(s32 a, void* obj, void* in, void* out);
+void func_00127E60(void* obj, s32 a1, void* a2, s32 a3, void* a4, void* a5);
+void ComputeOscillatorDisplacement(f32 f, void* a0, void* a1, void* a2, void* a3, void* a4, void* a5);
+
+void func_001EED68(AttachedSet* self, void* in, Quad16* outA, Quad16* outB)
+{
+    Vec02 a;
+    Quad16 b;
+    Quad16 c;
+    Vec02 d;
+    TransformDirectionBetweenFrames(0, self, in, &a);
+    b = *(Quad16*)((u8*)self + 0x570);
+    a.z = 0.0f;
+    c = *(Quad16*)&D_00248D30;
+    func_00127E60(self, 0, &a, 0, &b, &c);
+    if (self->f278 != 0) {
+        ComputeOscillatorDisplacement(50.0f, *(void**)(self->f278 + 0xC), in, 0, 0, 0, &d);
+        Vu0::Q(*(Vec02*)&b) = Vu0::Add(Vu0::Q(*(Vec02*)&b), Vu0::Q(d));
+    }
+    if (outA != 0) {
+        *outA = b;
+    }
+    if (outB != 0) {
+        *outB = c;
+    }
+}
 
 void ReconcileColliderAttachments(void* owner, Attach03** head)
 {
@@ -3672,7 +3783,31 @@ void MoveWarpCursor(WarpPage* self, s32 idx)
     }
 }
 
-INCLUDE_ASM(func_001F17A0);
+void TransformPointBetweenFrames(void* from, void* to, void* in, void* out);
+void ProjectPointToCamera(Camera* cam, void* point, f32* out);
+
+void ProjectWarpEntryToScreen(WarpPage* self, s32 idx, s32 flag, f32* out)
+{
+    Vec02 v;
+    BaseObject* o;
+    if (flag != 0) {
+        o = (BaseObject*)self->entries[idx].f18;
+    } else {
+        o = (BaseObject*)self->entries[idx].f14;
+    }
+    if (o != 0) {
+        TransformPointBetweenFrames(o->parent, self, (u8*)o + 0x40, &v);
+        Camera* g = g_camera;
+        Vu0::Q(v) = Vu0::Rotate(g->f80, Vu0::Q(v));
+        Vu0::Q(v) = Vu0::Add(Vu0::Q(g->f40), Vu0::Q(v));
+        ProjectPointToCamera(g, &v, out);
+        out[0] = out[0] * 320.0f + 320.0f;
+        out[1] = out[1] * -246.40001f + 246.40001f;
+    } else {
+        out[0] = 320.0f;
+        out[1] = 246.40001f;
+    }
+}
 
 void SetWarpPageSelectedEntry(WarpPage* self, s32 idx) {
     u8* base = (u8*)self;

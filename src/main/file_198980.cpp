@@ -32,6 +32,11 @@
 #include "asm_func.h"
 #include "vu0.h"
 void InitCollider(void* self);
+void func_0019BE80(ObjectGatherer* self);
+void ComputePolarOffset(void* out, f32 x, f32 y, f32 z);
+void ScatterObjectsAtPoint(void* p, void* v, s32 a, s32 b);
+extern u8 g_scatterController[];
+void SetObjectGathererSuspended(ObjectGatherer* self, s32 a1);
 void PostLoadPlacedObject(void* self);
 void* FindFirstObjectByIdMode4(void* a, void* b, void* c);
 // A descriptor slot called by its index (the slots past class 0x01's, whose types the
@@ -1139,8 +1144,51 @@ void SetObjectGathererSuspended(ObjectGatherer *self, s32 a1) {
     self->desc02()->m21(self, (Vec02 *)&D_00248D30);
 }
 
-INCLUDE_RODATA(jtbl_0024C910);
-INCLUDE_ASM(func_0019C1C0);
+void func_0019C1C0(ObjectGatherer* self, s32 mode)
+{
+    Vec02 offset;
+    if (self->state == mode) {
+        return;
+    }
+    if (self->state == 4) {
+        SetObjectGathererSuspended(self, 0);
+        self->f660 = 0;
+    }
+    *(s32*)((u8*)self->f5FC + 0x88) = 14;
+    self->f558 = g_gameClock[1];
+    switch (mode) {
+    case 0:
+        self->f558 = self->f558 + RandomFloatInRange(self->f608, self->f60C);
+        self->ring = 0;
+        Vu0::Q(self->v650) = Vu0::Q(self->v140);
+        break;
+    case 1: {
+        f32 angle = RandomFloatInRange(0.0f, 6.2831855f);
+        f32 radius = RandomFloatInRange(0.0f, self->f610);
+        ComputePolarOffset(&offset, angle, radius, 0.0f);
+        Vu0::Q(self->v640) = Vu0::Add(Vu0::Q(self->v190), Vu0::Q(offset));
+        self->ring = 0;
+        self->f558 = self->f558 + RandomFloatInRange(3.0f, 5.0f);
+        break;
+    }
+    case 2:
+        func_0019BE80(self);
+        self->f558 = self->f558 + 10.0f;
+        self->ring = 0;
+        break;
+    case 3:
+        StartSoundEffect(0x3A, 0, 0, (s32)&self->v140, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
+        ScatterObjectsAtPoint(g_scatterController, &self->v140, self->f664, self->f668);
+        self->desc->m03(self);
+        break;
+    case 4:
+        SetObjectGathererSuspended(self, 1);
+        self->f558 = self->f558 + RandomFloatInRange(3.0f, 15.0f);
+        break;
+    }
+    self->state = mode;
+    self->f554 = g_gameClock[1];
+}
 
 void RegisterC7CObject(BaseObject* obj)
 {
@@ -1305,7 +1353,7 @@ struct FramePoint_0019CE50 {
     Vec02 point;            // 0x40
 };
 
-s32 ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
+void ComputeObjectFrameAtTime(void* object, s32 b, Vec02* pos, Mat02* rot, s32 e, s32 f, f32 t);
 
 void func_0019CE50(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
 {
@@ -1315,7 +1363,23 @@ void func_0019CE50(void* self, FramePoint_0019CE50* p, Vec02* out, f32 t)
     Vu0::Q(*out) = Vu0::Add(Vu0::Rotate(rot, Vu0::Q(p->point)), Vu0::Q(pos));
 }
 
-INCLUDE_ASM(func_0019CEC0);
+// What func_0019CEC0 reads of its first argument: the object whose frame it measures in.
+struct FrameOwner_0019CEC0 {
+    u8 pad0[0x3C];
+    void* object;           // 0x3C
+};
+
+// The point func_0019CE50 places at time t, in the frame of self's object at that time.
+void func_0019CEC0(void* self, void* p, void* out, f32 t)
+{
+    Vec02 pos;
+    Vec02 point;
+    Mat02 rot;
+    func_0019CE50(self, (FramePoint_0019CE50*)p, &point, t);
+    ComputeObjectFrameAtTime(((FrameOwner_0019CEC0*)self)->object, 0, &pos, &rot, 0, 0, t);
+    Vu0::Q(point) = Vu0::Sub(Vu0::Q(point), Vu0::Q(pos));
+    Vu0::Q(*(Vec02*)out) = Vu0::RotateTransposed(rot, Vu0::Q(point));
+}
 
 INCLUDE_ASM(func_0019CF68);
 

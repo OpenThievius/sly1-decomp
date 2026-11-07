@@ -23,12 +23,14 @@
 #include "scatter_controller.h"
 #include "render_frame.h"
 #include "background_job.h"
+#include "vu0.h"
 #include "group_marker.h"
 #include "game_progress.h"
 #include "bump_allocator.h"
 #include "camera.h"
 #include "path_curve_object.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 extern f32 g_frameDt[];
 extern f32 g_gameTime[];
@@ -351,6 +353,7 @@ INCLUDE_ASM(func_0016FD70);
 INCLUDE_RODATA(jtbl_0024A870);
 INCLUDE_ASM(func_001701B0);
 
+
 void ComputePlayerSlideRates(Player* self, Contact03* out)
 {
     f32 a;
@@ -439,7 +442,38 @@ void ApplyPendingPlayerStateRequest(Player* self)
     }
 }
 
-INCLUDE_ASM(func_00170660);
+void FreePooledContactChain(void* a, Contact03* b);
+void PinPlayerToPath(void* self);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+void PinPlayerToTarget(void* self);
+void BuildPerpendicularPair(Vec02* dir, Vec02* out, const Vec02* a, const Vec02* b);
+void AddPlayerObjectContacts(void* self, s32 a, void* b, Vec02* c, s32 d, Vec02* e);
+void func_00170660(Player* self)
+{
+    FreePooledContactChain(self->world, self->contacts4B4);
+    self->contacts4B4 = 0;
+    switch (self->f2220) {
+    case 7:
+        PinPlayerToPath(self);
+        break;
+    case 6:
+        PinPlayerToTarget(self);
+        break;
+    case 8: {
+        Vec02 pos;
+        Mat02 m;
+        Vec02 k;
+        TransformPointBetweenFrames(self->f24A0, 0, self->f24B0, &pos);
+        Vu0::Q(k) = Vu0::FromFloat(-1.0f);
+        Vu0::Q(m.r[0]) = Vu0::MulX(Vu0::Q(self->v24C0), Vu0::Q(k));
+        Vu0::Q(pos) = Vu0::Add(Vu0::Q(pos), Vu0::Q(self->v24D0));
+        BuildPerpendicularPair(&m.r[0], &m.r[1], &g_unitZVector, &g_unitZVector);
+        Vu0::Q(pos) = Vu0::Sub(Vu0::Q(pos), Vu0::Rotate(m, Vu0::Q(self->v24E0)));
+        AddPlayerObjectContacts(self, 7, self->f24A0, &pos, 0, &self->v140);
+        break;
+    }
+    }
+}
 
 extern f32 D_00274AD0[];
 
@@ -463,23 +497,117 @@ s32 IsPlayerGroundContact(Player* self, Contact03* e, s32 idx)
     return 0;
 }
 
-INCLUDE_ASM(func_00170820);
+void ResolveTurningColliderGroundContact(TurningCollider* self, Contact03* c, s32 idx);
+
+void func_00170820(Player* self, Contact03* c, s32 idx)
+{
+    ContactEnd03* e = &c->end[idx];
+    if (self->f2220 == 4) {
+        if (c->kind == 1 && idx == 0 && (Vec02*)c->fA0 == self->f6D8) {
+            Vec02 t;
+            u128 n = Vu0::Rotate(self->m660, Vu0::Q(self->v640));
+            Vu0::Q(t) = Vu0::Sub(n, Vu0::MulX(Vu0::Q(c->v80), Vu0::Dot(n, Vu0::Q(c->v80))));
+            Vu0::Q(c->end[0].v30) = Vu0::Add(Vu0::Q(c->end[0].v30), Vu0::Q(t));
+        }
+    } else if (self->f2220 != 0xD) {
+        if (((s32 (*)(Player*, Contact03*, s32))self->desc06()->m56)(self, c, idx)) {
+            ResolveTurningColliderGroundContact(self, c, idx);
+        } else if (e->part == (Collider*)self) {
+            Vu0::Q(e->v30) = Vu0::Sub(Vu0::Q(e->v30), Vu0::Cross(Vu0::Q(self->v160), Vu0::Sub(Vu0::Q(e->v10), Vu0::Q(self->v140))));
+        }
+    }
+}
 
 INCLUDE_RODATA(jtbl_0024A8A0);
 INCLUDE_RODATA(jtbl_0024A8F0);
 INCLUDE_RODATA(jtbl_0024A930);
 INCLUDE_ASM(func_00170960);
 
-INCLUDE_ASM(func_00171180);
+struct PoseHolder47;
+struct PoseHolderDesc { u8 pad00[8]; void (*m2)(PoseHolder47* self, Vec02* out, f32 t, s32 a); };
+struct PoseHolder47 { PoseHolderDesc* desc; };
+// The object at 0x2208: a frame at +0x18 and a holder of poses at +0x34.
+struct PoseTarget { u8 pad00[0x18]; void* frame; u8 pad1C[0x34 - 0x1C]; PoseHolder47* holder; };
+s32 GetObjectWorldPosition(void* p, Vec02* out);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
+f32 ArctangentOfRatio(f32 a, f32 b);
+
+s32 func_00171180(Player* self)
+{
+    Vec02 pos;
+    Vec02 d1;
+    Vec02 d2;
+    f32 y;
+    f32 x;
+    if (self->f2200 != 0) {
+        GetObjectWorldPosition(self->f2200, &pos);
+        Vu0::Q(d1) = Vu0::Sub(Vu0::Q(pos), Vu0::Q(self->v140));
+        y = d1.y;
+        x = d1.x;
+    } else if (self->f2208 != 0) {
+        PoseHolder47* h = ((PoseTarget*)self->f2208)->holder;
+        if (h->desc->m2 != 0) {
+            h->desc->m2(h, &pos, *(f32*)((u8*)self + 0x220C), 0);
+        }
+        TransformPointBetweenFrames(((PoseTarget*)self->f2208)->frame, 0, &pos, &d1);
+        Vu0::Q(d2) = Vu0::Sub(Vu0::Q(d1), Vu0::Q(self->v140));
+        y = d2.y;
+        x = d2.x;
+    } else {
+        return 0;
+    }
+    self->f638 = ArctangentOfRatio(y, x);
+    return 1;
+}
 
 INCLUDE_ASM(func_00171238);
 
 INCLUDE_ASM(func_001719E8);
 
-INCLUDE_ASM(func_00171C80);
+// The record of a probe the player keeps for each of its two parts (+0x1190, +0x1290) and the
+// block of the part it fills (func_00171C80).
+struct ProbeRecord { u8 pad00[4]; void* f04; u8 pad08[8]; Vec02 v10; u8 pad20[0x10]; Vec02 v30; Vec02 v40; };
+struct ProbeResult { u8 pad00[0x20]; Vec02 v20; };
+s32 FindNearestSpanObject(void* a, Vec02* from, Vec02* to, s32 count, Collider** list, void* out);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
+
+
+s32 func_00171C80(Player* self, void* record, void* part)
+{
+    ProbeRecord* p = (ProbeRecord*)record;
+    ProbeResult* result = (ProbeResult*)part;
+    if (p->f04 == 0) {
+        return 1;
+    }
+    PushBackMemoryMark();
+    ColliderSpan span;
+    Vec02 from;
+    Vec02 to;
+    Vec02 world;
+    s32 count;
+    Collider** list;
+    TransformPointBetweenFrames(self, 0, &p->v30, &from);
+    TransformPointBetweenFrames(self, 0, &p->v40, &to);
+    GatherCollidersInBox(self->world, self->root, &from, &to, 0, 0, &count, &list);
+    s32 found = FindNearestSpanObject(0, &from, &to, count, list, &span);
+    PopBackMemoryMark();
+    if (found != 0) {
+        Vu0::Q(span.q[0]) = Vu0::Sub(Vu0::Q(span.q[0]), Vu0::Q(g_unitZVector));
+        TransformPointBetweenFrames(0, (s32)self, &span, &world);
+        Vu0::Q(result->v20) = Vu0::Sub(Vu0::Q(world), Vu0::Q(p->v10));
+        return 1;
+    }
+    result->v20 = D_00248D30;
+    if (self->f690 != 0 && p->v40.z < -85.0f) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 AimPlayerAtTarget(void* self);
-s32 func_00171C80(void* self, void* p, void* part);
+
 void func_001719E8(void* self, s32 a, s32 b, void* part, f32 k, void* d);
 void ComputeObjectMotionInFrame(s32 a, s32 b, void* c, s32 d, void* e, s32 f, s32 g);
 f32 ClampToMagnitude(f32 a, f32 b);
@@ -914,7 +1042,36 @@ void SetPlayerTracked(Player* a, void* b)
     ShowModeLabel(id);
 }
 
-INCLUDE_ASM(func_00173750);
+void PushBackMemoryMark(void);
+void PopBackMemoryMark(void);
+void GatherCollidersInBox(void* world, void* self, Vec02* a, Vec02* b, s32 c, s32 d, s32* count, Collider*** list);
+s32 CollectColliderSpans(Collider* self, void* a1, void* a2, s32 a3, void* a4);
+
+s32 func_00173750(Player* self, Vec02* offset)
+{
+    s32 count;
+    Collider** list;
+    Vec02 from;
+    Vec02 to;
+    ColliderSpan spans[8];
+    s32 i = 0;
+    PushBackMemoryMark();
+    from = *self->f6D8;
+    Vu0::Q(to) = Vu0::Add(Vu0::Q(*self->f6D8), Vu0::Q(*offset));
+    GatherCollidersInBox(self->world, self, &from, &to, 0, 0, &count, &list);
+    for (; i < count; i++) {
+        s32 n = CollectColliderSpans(list[i], &from, &to, 8, spans);
+        for (s32 j = 0; j < n; j++) {
+            ColliderSpan* p = &spans[j];
+            if (p->time[0] != 0.0f && ((Vec02*)&p->q[2])->z > 0.7f) {
+                PopBackMemoryMark();
+                return 1;
+            }
+        }
+    }
+    PopBackMemoryMark();
+    return 0;
+}
 
 INCLUDE_RODATA(jtbl_0024A9F0);
 INCLUDE_RODATA(jtbl_0024AA10);
@@ -1210,7 +1367,67 @@ void RegisterPlayer(Player* self)
     RegisterSwitchedCollider(self);
 }
 
-INCLUDE_ASM(func_00178068);
+// An object the player was queued to (+0x2BE0): a walker handle at +0x2D8, and the list of the
+// objects at +0x304 (count at +0x300) whose own walkers it sets.
+struct WalkerListObject;
+struct WalkerHost { u8 pad00[0x140]; Vec02 v140; u8 pad150[0x2D4 - 0x150]; void* f2D4; void* f2D8; u8 pad2DC[0x300 - 0x2DC]; s32 count; WalkerHost* list[1]; };
+void GetStateWalkerCurrentKey(void* p, s32* out);
+void GetStateWalkerTargetKey(void* p, s32* out);
+void SetStateWalkerTarget(void* p, s32 key);
+
+void func_00178068(Player* self)
+{
+    s32 state = self->f2220;
+    if (state < 0) {
+        return;
+    }
+    if (state >= 2 && state != 5) {
+        return;
+    }
+    PlacedObject* a = (PlacedObject*)self->firstActivation;
+    if (a != 0) {
+        self->firstActivation = 0;
+    } else {
+        a = (PlacedObject*)self->secondActivation;
+        if (a == 0) {
+            goto walker;
+        }
+        self->secondActivation = 0;
+    }
+    if (*(s32*)((u8*)a + 0x2D0) == 0) {
+        a->desc02()->m2F(a, 1);
+    }
+    return;
+walker:
+    {
+        WalkerHost* host = (WalkerHost*)self->walkerActivation;
+        if (host == 0) {
+            return;
+        }
+        self->walkerActivation = 0;
+        s32 cur;
+        s32 target;
+        GetStateWalkerCurrentKey(host->f2D8, &cur);
+        GetStateWalkerTargetKey(host->f2D8, &target);
+        if (cur != 0x22E) {
+            return;
+        }
+        if (target != cur && target != -1) {
+            return;
+        }
+        if (g_currentLevelRecord->f438 > 0) {
+            g_player->f26D4 = host;
+            SetPlayerState(g_player, 9, 0x1E);
+            return;
+        }
+        for (s32 i = 0; i < host->count; i++) {
+            SetStateWalkerTarget(host->list[i]->f2D4, 0x231);
+        }
+        Vec02 d;
+        Vu0::Q(d) = Vu0::Sub(Vu0::Q(host->v140), Vu0::Q(g_player->v140));
+        g_player->f638 = ArctangentOfRatio(d.y, d.x);
+    }
+}
 
 // NEAR: the float store of f6D4 is scheduled before the li/sw of f6D0; retail stores f6D0 first
 
@@ -1233,7 +1450,7 @@ void ReplaceAnimationPlayer(void* a, CountdownCollider* b, s32 c, void* d, f32 e
 s32 HandleObjectEvent(void* self, ObjectEvent* msg);
 
 
-void TransformPointBetweenFrames(void* a, void* b, void* c, Vec02* d);
+void TransformPointBetweenFrames(void* a, s32 b, void* c, void* d);
 
 // Matches retail's bytes (EXACT us and eu): the call result is tested directly with a goto to the zero return.
 

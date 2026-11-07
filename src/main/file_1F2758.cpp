@@ -22,6 +22,7 @@
 #include "animation.h"
 #include "object_gatherer.h"
 #include "asm_func.h"
+#include "vu0.h"
 
 #include "common.h"
 
@@ -517,7 +518,15 @@ void TransformObjectIntoFrame(TransformObject* self, BaseObject* other)
     TransformRotationBetweenFrames(other, 0, &self->rot, &self->rot);
 }
 
-INCLUDE_ASM(func_001F3B48);
+// The world point p in the object's own frame: into its parent's frame, less the position,
+// through the transpose of the rotation.
+void ConvertPointIntoObjectFrame(TransformObject* self, Vec02* p, Vec02* out)
+{
+    Vec02 t;
+    TransformPointBetweenFrames(0, self->parent, p, &t);
+    Vu0::Q(t) = Vu0::Sub(Vu0::Q(t), Vu0::Q(self->pos));
+    Vu0::Q(*out) = Vu0::RotateTransposed(self->rot, Vu0::Q(t));
+}
 
 s32 GetObjectWorldPosition(BaseObject* self, s32 arg)
 {
@@ -611,7 +620,85 @@ void StartArrivalPoint(TransformSet* self)
     }
 }
 
-INCLUDE_ASM(func_001F4008);
+// The player-like object func_001F4008 hands the arrival point's pose to (class 0x16's slots 34
+// to 37 take a direction, a velocity, a position and a spin).
+struct ArrivingObject {
+    struct Vt {
+        u8 pad0[0x88];
+        void (*getDir)(ArrivingObject* self, void* out);        // 0x88
+        u8 pad8C[4];
+        void (*setVel)(ArrivingObject* self, void* in);         // 0x90
+        void (*setSpin)(ArrivingObject* self, void* in);        // 0x94
+    };
+    const Vt* vt;
+    u8 pad04[0x538 - 4];
+    u64 flags538;
+};
+struct ArrivalWatcher {
+    struct Vt { u8 pad0[0x1C]; void (*start)(ArrivalWatcher* self); };
+    const Vt* vt;
+};
+
+void PlaceCameraLookingAt(void* camera, void* eye, void* at);
+void RequestCameraSnap(void* camera, void* angle);
+void PlaceColliderClearOfContacts(void* obj, void* pos, void* up);
+void SetGatheredWalkerTargets(void* world, void* a, void* b, void* c, s32 d);
+ArrivalWatcher* FindFirstObjectById(void* world, s32 kind, void* id, void* ctx);
+void SetObjectSubGroupState(void* obj, s32 state);
+f32 ArctangentOfRatio(f32 a, f32 b);
+f32 WrapAngle(f32 a);
+
+void func_001F4008(TransformSet* self)
+{
+    void CreateAnimationPlayerWithoutPresetTargets(void* obj, s32 a, s32 b, s32 c, f32 x, f32 y);
+    Vec02 pos;
+    Mat02 rot;
+    Vec02 look;
+    Vec02 k;
+    ArrivalWatcher* found[0x40];
+    f32 angle;
+    ArrivingObject* who = (ArrivingObject*)GetCurrentSwitchedCollider();
+    GetObjectWorldPosition(self, (s32)&pos);
+    GetObjectWorldRotation(self, (s32)&rot);
+    if (who == 0) {
+        Vu0::Q(k) = Vu0::FromFloat(-300.0f);
+        Vu0::Q(look) = Vu0::MulAddX(Vu0::Q(pos), Vu0::Q(rot.r[0]), Vu0::Q(k));
+        PlaceCameraLookingAt(g_camera, &look, &pos);
+        RequestCameraSnap(g_camera, 0);
+        return;
+    }
+    who->vt->getDir(who, &rot);
+    PlaceColliderClearOfContacts(who, &pos, (void*)&D_00248D20);
+    who->vt->setVel(who, (u8*)self + 0x80);
+    who->vt->setSpin(who, (void*)&D_00248D30);
+    ActivateSwitchedCollider(who);
+    for (s32 i = 0; i < self->count; i++) {
+        CreateAnimationPlayerWithoutPresetTargets((void*)self->objects[i], 0, 0, 0, 0.0f, 1.0f);
+    }
+    SetGatheredWalkerTargets(self->world, *(void**)((u8*)self + 0xB4), (u8*)self + 0xB8, self, 1);
+    for (s32 i = 0; i < self->idCount; i++) {
+        ArrivalWatcher* w = FindFirstObjectById(self->world, 0x104, (void*)self->ids[i], self);
+        if (w != 0) {
+            w->vt->start(w);
+        }
+    }
+    s32 n = GatherObjectsById(self->world, 0x205, 0x7D, 0, 0x40, found);
+    n = MinOf::Of(n, 0x40);
+    for (n = n - 1; n >= 0; n--) {
+        if (*(s32*)((u8*)found[n] + 0x2E4) != 2) {
+            SetObjectSubGroupState(found[n], 0);
+        }
+    }
+    if (who->flags538 & (0x8000ULL << 30)) {
+        if (*(s32*)((u8*)self + 0x98) != 0) {
+            angle = WrapAngle(ArctangentOfRatio(rot.r[0].y, rot.r[0].x) + *(f32*)((u8*)self + 0x9C));
+            RequestCameraSnap(g_camera, &angle);
+        } else {
+            RequestCameraSnap(g_camera, 0);
+        }
+    }
+    TriggerScriptEvent(self, 2, 0, 0);
+}
 
 void SetTransformObjectKeyedValue(void* self, void* a1, void* a2, void* a3, void* a4) { UpsertKeyedEntry((u8*)self + 0xB8, 4, (u8*)self + 0xB4, a1, a2, a3, a4); }
 
