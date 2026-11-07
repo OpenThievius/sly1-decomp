@@ -51,7 +51,7 @@ func_001B5F50 = 0x001B5F50; // type:func
 func_001B9940 = 0x001B9940; // type:func
 
 // Data labels no instruction names: the start of a proved file's .rodata, reached only through a
-// pointer table in its .data (text_panel.cpp's compass strings, pointed to by D_00261128; file_193210's
+// pointer table in its .data (text_panel.cpp's compass strings, pointed to by D_00261128; pause_menu's
 // menu strings, pointed to by its menu table D_00269D50).
 D_00249CA0 = 0x00249CA0;
 D_0024B660 = 0x0024B660;
@@ -65,7 +65,7 @@ D_0024F220 = 0x0024F220;
 // object's string begins.
 D_0024F330 = 0x0024F330;
 // The start of the kernel library's identification string "PsIIlibkernl2430" (16 bytes, the
-// .data of the system call stubs' object src/lib/file_1F6900.cpp), inside the coarse label
+// .data of the system call stubs' object src/lib/system_calls.cpp), inside the coarse label
 // D_0027696C; func_001F9790 reads its last four bytes.
 D_00276970 = 0x00276970;
 // The end of the 32 words D_006294C0 of src/lib/command_channel.cpp (func_001FA1E8 clears 32, and
@@ -179,7 +179,7 @@ D_00250540 = 0x00250540;
 D_0024EB80 = 0x0024EB80;
 D_0024EB88 = 0x0024EB88;
 D_002771C8 = 0x002771C8;
-// pointer table in its .data (file_130F48's compass strings, pointed to by D_00261128; pause_menu's
-// function the linker stripped, ending file_1419E8's .rodata.
-// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): file_13C988's
-// Named so that file_13CCF8 can hold them (LINKER_REMNANT).
+// pointer table in its .data (text_panel's compass strings, pointed to by D_00261128; pause_menu's
+// function the linker stripped, ending collider_span's .rodata.
+// The vtable of the ring buffer reader's base class (one virtual, func_0013CCE8): ring_buffer's
+// Named so that zone_collider can hold them (LINKER_REMNANT).
