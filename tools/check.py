@@ -428,7 +428,7 @@ def disassemble(data, addr):
     with tempfile.NamedTemporaryFile(suffix=".bin") as f:
         f.write(data)
         f.flush()
-        out = subprocess.run(["mips-linux-gnu-objdump", "-D", "-b", "binary", "-m", "mips:5900", "-EL",
+        out = subprocess.run(["mips-linux-gnu-objdump", "-D", "-z", "-b", "binary", "-m", "mips:5900", "-EL",
                               "--adjust-vma=0x%X" % addr, f.name], capture_output=True, text=True).stdout
     lines = []
     for line in out.splitlines():

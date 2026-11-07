@@ -3663,9 +3663,11 @@ func_00202EF0	func_00204230	match
 func_00202F88	func_002042C8	match	
 func_00203010	func_00204350	match	
 func_00203050	func_00204390	match	
+func_002030C0	func_00204400	match	rodata
 func_00203230	func_00204570	match	
 func_002032C8	func_00204608	match	rodata
 func_00203368	func_002046A8	match	rodata
+func_002033D8	func_00204718	match	rodata
 func_00203A20	func_00204D60	match	
 func_00203AE8	func_00204E28	match	
 func_00203CF8	func_00205038	match	
