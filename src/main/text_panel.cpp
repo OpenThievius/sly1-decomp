@@ -232,13 +232,11 @@ Quad_136040 func_001EA818(Quad_136040 a, Quad_136040 b, Tri_136040* c, s32 d, f3
 f32 func_001EAFE0(f32 x, f32 y);
 void func_00135F48(T217D_440* self, Pad_136040* p);
 
-struct __attribute__((aligned(16))) Vec_135E30 { s32 a, b, c, d; };
-struct Obj_135E30 { char pad[0x140]; Vec_135E30 v; };
+struct __attribute__((aligned(16))) PanelEntryPosition { s32 a, b, c, d; };
+struct PanelEntrySource { char pad[0x140]; PanelEntryPosition v; };
 
-struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
-struct Obj_135E48 { char pad[0x140]; Vec_135E48 v; };
 
-void func_001A1F40(Vec_135E48* v, s32 mode);
+void func_001A1F40(PanelEntryPosition* v, s32 mode);
 
 struct Item_135550;
 struct List_135550 { u8* head; u8 pad4[4]; s32 offset; };
@@ -384,8 +382,8 @@ void func_00135550(T217D_440* self, s32 value);
 void func_001356C0(T217D_440* self, s32 mode);
 s32 func_001357F0(Entry_1357F0* a, Entry_1357F0* b);
 s32 func_00135858(Entry_135858* a, Entry_135858* b);
-void func_00135E30(Obj_135E30* self, Vec_135E30* out, s32* flag);
-void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out);
+void func_00135E30(PanelEntrySource* self, PanelEntryPosition* out, s32* flag);
+void func_00135E48(PanelEntrySource* self, s32 unused, PanelEntryPosition* out);
 void func_00135E78(T217D_440* self, s32 state, s32 flag);
 void func_00135F48(T217D_440* self);
 void func_00136040(T217D_440* self, Pad_136040* p);
@@ -455,7 +453,7 @@ void func_001310F0(T217D_440* self, s32 a1)
 void func_00131140(T217D_440* self)
 {
     self->vt->m08(self, 0);
-    func_001365A0(self, 0);
+    SetTextPanelSubject(self, 0);
     self->value = 0;
     self->stickX = 0;
     self->stickY = 0;
@@ -1004,7 +1002,7 @@ ASM_FUNC(func_001358D0);
 
 LINKER_REMNANT(func_00135E20);
 
-void func_00135E30(Obj_135E30* self, Vec_135E30* out, s32* flag)
+void func_00135E30(PanelEntrySource* self, PanelEntryPosition* out, s32* flag)
 {
     *out = self->v;
     *flag = 0;
@@ -1012,7 +1010,7 @@ void func_00135E30(Obj_135E30* self, Vec_135E30* out, s32* flag)
 
 LINKER_REMNANT(func_00135E40);
 
-void func_00135E48(Obj_135E48* self, s32 unused, Vec_135E48* out)
+void func_00135E48(PanelEntrySource* self, s32 unused, PanelEntryPosition* out)
 {
     *out = self->v;
     func_001A1F40(out, 1);
@@ -1056,8 +1054,8 @@ void func_00135F48(T217D_440* self)
     if (self->bankState == 1) {
         f32 k = 3.4028235e38f;
         Ctx_135F48* ctx = *(Ctx_135F48**)g_currentWorld;
-        func_001358D0(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, ctx->f1D44, k);
-        func_001358D0(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)g_currentWorld)->f1D54, k);
+        CollectPanelEntriesOfClass(self, 0x2E, func_00135E20 + 0x10, func_00135E40 + 8, 5, ctx->f1D44, k);
+        CollectPanelEntriesOfClass(self, 0x21, func_00135E20 + 0x10, func_00135E40 + 8, 5, (*(Ctx_135F48**)g_currentWorld)->f1D54, k);
     }
 }
 

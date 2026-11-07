@@ -74,10 +74,10 @@ s32 func_00141B48(void* a0, void* a1, s32 count, Collider** list, s32 a4, s32 a5
 s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
 {
     if (self->tree.nodes != 0) {
-        return func_0013DFD8((void*)self->tree.nodes, a1, a2, 0, a3, (void*)a4);
+        return CollectTreeNodeSpans((void*)self->tree.nodes, a1, a2, 0, a3, (void*)a4);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return func_00141F48((u8*)self + 0x140, a1, a2, a3, a4, self->radius3CC);
+        return CollectBoundsSpans((u8*)self + 0x140, a1, a2, a3, a4, self->radius3CC);
     }
     return 0;
 }
@@ -85,10 +85,10 @@ s32 func_00141C28(Collider* self, void* a1, void* a2, s32 a3, s32 a4)
 s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5)
 {
     if (a1 != 0) {
-        return func_0013DFD8(a1, a2, a3, 0, a4, a5);
+        return CollectTreeNodeSpans(a1, a2, a3, 0, a4, a5);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return func_00141F48((u8*)self + 0x140, a2, a3, a4, (s32)a5, self->radius3CC);
+        return CollectBoundsSpans((u8*)self + 0x140, a2, a3, a4, (s32)a5, self->radius3CC);
     }
     return 0;
 }
@@ -96,10 +96,10 @@ s32 func_00141C90(Collider* self, void* a1, void* a2, void* a3, s32 a4, void* a5
 s32 func_00141D00(Collider* self, void* p1, void* p2, f32 x, void* p3, s32 p4)
 {
     if (self->tree.nodes != 0) {
-        return func_00142B78((u8*)self + 0x3F0, (u8*)self + 0x3A4, p1, p2, (s32)p3, p4, x);
+        return TestTreeSegmentHit((u8*)self + 0x3F0, (u8*)self + 0x3A4, p1, p2, (s32)p3, p4, x);
     }
     if (self->flags538 & ((u64)0x8000 << 25)) {
-        return func_00142170((u8*)self + 0x140, p1, p2, p3, p4, self->radius3CC, x);
+        return TestBoundsSegmentHit((u8*)self + 0x140, p1, p2, p3, p4, self->radius3CC, x);
     }
     return 0;
 }

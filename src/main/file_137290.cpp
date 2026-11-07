@@ -23,8 +23,6 @@ typedef u64 Quad_136040 __attribute__((mode(TI)));
 
 f32 func_001EAFE0(f32 x, f32 y);
 
-struct __attribute__((aligned(16))) Vec_135E30 { s32 a, b, c, d; };
-
 struct __attribute__((aligned(16))) Vec_135E48 { s32 a, b, c, d; };
 
 void func_001A1F40(Vec_135E48* v, s32 mode);
@@ -953,7 +951,7 @@ void func_00138828(World* self, void* arg)
         e->flag = one;
         a3 += 4;
     } while (n >= 0);
-    func_001389C8(self);
+    MarkSweepAxesUnsorted(self);
 }
 
 INCLUDE_ASM(func_001388A0);
@@ -1054,7 +1052,7 @@ void func_00138C00(World* w, s32 arg)
     Obj_138C00* pair[2];
     Obj_138C00* o;
     Child_138C00* ch;
-    func_001389D0(w);
+    SortSweepAxes(w);
     for (o = (Obj_138C00*)w->list6C.head; o; o = o->next)
     {
         pair[0] = o;
@@ -1663,7 +1661,7 @@ void func_00139F80(Obj_139F80* self, void* x)
             i++;
         } while (i < 4);
     }
-    func_0013A008(self);
+    RebuildAnimRecordEntries(self);
 }
 
 s32 func_00185D20(void*, s32, void*, void*, s32, s32, s32, void*, f32);
@@ -1832,7 +1830,7 @@ void func_0013B430(s32 mask)
                     go = 1;
                 }
                 if (go) {
-                    func_0013A008(node);
+                    RebuildAnimRecordEntries(node);
                 }
                 node = node->next_630;
             } while (node != 0);

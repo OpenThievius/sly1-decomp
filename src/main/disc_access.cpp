@@ -131,7 +131,7 @@ void func_001409E0(void)
     case 3:
         if (CheckDiscChanged(2, tmp) != 0) {
             if (tmp[0] != 0) {
-                if (func_00140968() == 0) {
+                if (RefreshDiscStatus() == 0) {
                     SetPauseMenuLayerPage(g_pauseMenuElement, 2, 0x16);
                     g_discSectorCheckState = 1;
                 }
@@ -141,7 +141,7 @@ void func_001409E0(void)
     case 1:
         s1 = *(s32*)D_002701B8;
         if (s1 == 2) {
-            if (func_00140968() != 0) {
+            if (RefreshDiscStatus() != 0) {
                 if (StartDiscRead((s32)D_00247AA4, 1, g_discCheckSectorBuffer, (void*)&D_00247AA0) == 1) {
                     g_discSectorCheckState = s1;
                 }

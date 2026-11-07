@@ -3,7 +3,10 @@ func_0013CCF8	InitMaskedCollider	slot 0 of class 0x20: runs InitCollider, sets t
 func_0013CD80	LoadMaskedCollider	slot 10 of class 0x20: runs LoadCollider, then resolves the key at 0x614 (func_0015A418, or func_00159478 when it is -1) into 0x618
 func_0013CDE8	CopyMaskedCollider	slot 9 of class 0x20: keeps id688 across the base copy and duplicates the 0x24-byte block at 0x6B4 with func_0018D568
 func_0013CE40	StartMaskedCollider	slot 16 of class 0x20: runs StartPlacedObject and queues func_0013CE80 on the world with AppendQueuedCall
+func_0013CE80	AttachMaskedColliderChildren	the call StartMaskedCollider queues (AppendQueuedCall): walks the children at 0x50 (skipping kinds 0x75, 0x7A, 0x53, and when 0x678 is set every child but unflagged 0x2E items), links each to its slot of the queue at 0x554 or appends it as kind 4, and calls each child's slot 3
 func_0013D068	UpdateMaskedCollider	slot 17 of class 0x20: runs UpdateCollider, then when the flag at 0x678 is set clears it and calls the object's slot at 0x48 of its table
+func_0013D0B0	HandleMaskedColliderEvent	class 0x20's slot at 0xC4 (inherited by six classes), the slot whose other classes' versions handle an object's events
+func_0013D278	HandleMaskedColliderActivation	class 0x20's slot at 0x130 (inherited by four classes), the activation slot; ReleaseCountedObject and ReleasePooledHolder reach it
 func_0013D820	SetObjectHold	stores its argument in hold (0x680) and raises (non-zero) or clears the bit id688 of the table D_00261420 with func_00141040 / func_001410A0
 func_0013D868	AddMaskedColliderKeyKind0	appends (key, kind 0) to the at most 16 slots of a masked collider counted at +0x550
 func_0013D8B0	AddMaskedColliderKeyKind1	appends (key, kind 1) to the at most 16 slots of a masked collider counted at +0x550
@@ -26,6 +29,7 @@ func_0013DDF0	InitMassScalingCollider	slot 0 of class 0x25: runs InitMaskedColli
 func_0013DE38	LatchContactObject	a method of class 0x25: when not held or busy and the other object of the contact passes IsObjectAccepted, runs the two selectors, sets busy 0x678, keeps the object in 0x6CC and multiplies the mass by the scale at 0x6C0
 func_0013DEE8	LatchAcceptedSwitchedCollider	slot 60 (+0x100) of class 0x26: LatchContactObject, then, unless held, keeps the other contact at +0x6D4 when it is of kind 5 and IsObjectAccepted
 func_0013DF68	UpdateLatchedSwitchCollider	slot 17 (+0x54) of class 0x26: UpdateMaskedCollider, then sends an owner message to the switched collider latched at +0x6D4 through its slot 76 when it is still GetActiveSwitchedCollider, and clears it
+func_0013DFD8	CollectTreeNodeSpans	queries a collider's tree nodes for spans, writing up to a maximum of 0x70-byte records and returning their count: the tree case of CollectColliderSpans, FindFirstFreeSpan, CollectEdgeContacts and CollectMeshHits
 func_0013E6C8	CloneTreeNodes	copies the counts of a node tree, allocates count * 12 bytes and rebases each node's face, back and front pointers onto the new array
 func_0013E7C0	ResolveZoneObjects	for each id of a counted list finds the object (func_0015A418 kind 0x104) and appends it to the queue with AppendToQueuedObjects
 func_0013E868	IsObjectInIdList	walks a counted list of ids from the end and returns 1 when func_001833F0 says the object has one of them
@@ -34,16 +38,24 @@ func_0013E8F8	AppendToObjectQueue	appends a value to a counted 16-entry queue (c
 func_0013E918	InitZoneRecord	takes a table id into id120 with func_00140FF8 and sets 0x140 to -1
 func_0013E950	CollectZoneChildren	walks the owner's children, sets the zone's owner and queues each whose class flag 0x40 is set and that is in neither pair list
 func_0013EA38	StartZoneRecord	the zone record's start (called by StartZoneCollider): sets mode -1, resolves both pairs' objects with ResolveZoneObjects and, when its flag-table bit is set, schedules func_0013EAE0
+func_0013EAE0	DeferZoneRecordActivation	called with mode 0 it queues itself on the owner's world (AppendQueuedCall, kind 0xC); called back it runs ActivateZoneRecord on the zone record
 func_0013EB30	SetZoneEntry	passes the zone's keyed table at 0x14C (8 entries, count 0x148) and four arguments to UpsertKeyedEntry
 func_0013EB68	SetZoneMode	changes the zone's mode (0x12C), stamps the clock, resets the owner's tries and runs the enter step on 0 to 1 and the leave step on a change to 0
 func_0013EC00	UpsertKeyedEntry	finds the 16-byte entry whose first key matches and second key matches or is -1 and stores a value in one of two fields by a flag, else appends a new entry (up to the capacity)
+func_0013ECB0	SetGatheredWalkerTargets	for each 16-byte entry gathers the objects of the entry's id (GatherObjectsByMode, kind 0x304), finds the handle the entry names and gives it the target at +8 (flag set) or +0xC with SetStateWalkerTarget; RunZoneRecordEntries, SetStateTriggerState and others call it
+func_0013ED90	RunZoneRecordEntries	plays each queued animation entry of the zone record's pair (FindOrCreateSeekedAnimationPlayer, direction from the time at 0x118), sets the walker targets of the table at 0x14C (SetGatheredWalkerTargets) and steps the sequence at 0x140; ActivateZoneRecord passes pair 0, DeactivateZoneRecord pair 1
+func_0013EF50	ActivateZoneRecord	sends the owner script event 2 (0x16 when forced), plays the sound when 0x134 is clear, runs the entries of pair 0, sets zone mode 2 unless 0x13C is set, sets the flag bit 0x120 and sends the owner notice 0xC; SetZoneMode and DeferZoneRecordActivation call it
+func_0013F070	DeactivateZoneRecord	sends the owner script event 3, runs the entries of pair 1 (RunZoneRecordEntries) and sends the owner notice 13; SetZoneMode calls it
 func_0013F0E0	InitTriggerZone	slot 0 of class 0x28: runs InitCollider and InitZoneRecord on the zone record at 0x554
 func_0013F110	LoadTriggerZone	slot 10 of class 0x28: runs LoadCollider then CollectZoneChildren on the zone record
+func_0013F140	AddTriggerZoneQuad	appends a 16-byte quad to the trigger zone's list at 0x7C0 (count 0x7B4), or puts it first, moving the others up, when the object matches id 0x200; StartTriggerZone calls it
+func_0013F290	StartTriggerZone	class 0x28's slot at 0x50, the start slot of the other classes (StartZoneCollider, StartMaskedCollider)
 func_0013F6C0	CopyTriggerZone	slot 9 of class 0x28: keeps id120 across the base copy and sets the zone's owner to itself
 func_0013F6F8	SetTriggerZoneMode	calls SetZoneMode on the zone record at 0x554
 func_0013F718	PassesTriggerFilters	returns 1 when the object is in the required id list (or not in the excluded one) and has a required kind (or not an excluded one), by the four counted lists at 0x720..0x790
 func_0013F940	FindLargestEntryIndex	measures each 0x30-byte entry at 0x7F0 (func_00188CE0 of its transform) and returns the index of the largest, writing its square root to out
 func_0013FA10	StepTriggerZone	slot 28 of class 0x28: runs StepCollider then, by state 0 or 1, steps with the quad or entry record chosen by the mode and the entry 0x7B0
+func_0013FAE8	ReleaseTriggerZoneContacts	class 0x28's slot at 0x110, the slot ReleasePlayerContacts fills for the player
 func_0013FD20	UpdateTriggerZone	slot 17 of class 0x28: runs the base update then switches on the zone mode and state to pick the next mode and sets it with SetTriggerZoneMode
 func_00140028	HandleTriggerZoneEvent	the 0xC4 slot of class 0x28: runs HandleObjectEvent and, when it returned non-zero, the event's flags have no bit 4, state is 3 and the zone mode is 0, calls func_0013F6F8 with 1
 func_001400A8	InitZoneCollider	slot 0 of class 0x29: runs InitCollider, initialises the embedded zone record with func_0013E918, sets bit 0x8000<<28 in flags538 and clears two ranges with func_001B9AE0
@@ -51,6 +63,7 @@ func_00140100	LoadZoneCollider	slot 10 of class 0x29: runs LoadCollider, loads t
 func_00140140	StartZoneCollider	slot 16 of class 0x29: runs the base start, starts the zone record (func_0013EA38), looks each loaded id up in the world with func_0015A448 into objs, and sets f5BC when there are no ids
 func_00140200	CopyZoneCollider	slot 9 of class 0x29: keeps zone.id120 across the collider copy func_001BA130 and points zone.owner back at itself
 func_00140238	SetZoneColliderMode	passes its zone record (+0x5C0) and the mode on to SetZoneMode; StartZoneCollider calls it with 0
+func_00140258	UpdateZoneCollider	class 0x29's slot at 0x54 (inherited by one class), the update slot of the other classes
 func_00140550	TestListedEntriesAccepted	returns 0 as soon as func_001C1A28 refuses one of the f598 entries at 0x59C, else 1
 func_001405D0	AppendZoneFirstQueue	appends a value to the first queue (+0x08) of a zone record (AppendToObjectQueue)
 func_001405F0	AppendTriggerZoneFirstQueue	AppendZoneFirstQueue on the zone record at +0x554 of a trigger zone
@@ -62,5 +75,6 @@ func_001406B0	AddIncludedId	appends its argument to idsIn (count at 0x720) of a 
 func_001406D0	AddExcludedId	appends its argument to idsOut (count at 0x744) of a class 0x28 object
 func_001406F0	AddIncludedKind	appends its argument to kindsIn (count at 0x768) of a class 0x28 object
 func_00140710	AddExcludedKind	appends its argument to kindsOut (count at 0x78C) of a class 0x28 object
+func_00140730	AddZoneColliderId	appends its argument to the zone collider's ids at 0x554 (count 0x550), which its set-up looks up; its address is stored by the code at 0x10B850 among the script built-ins
 func_00140750	SetTriggerZoneEntry	SetZoneEntry on the zone record at +0x554 of a trigger zone, its four arguments passed through
 func_00140770	SetZoneColliderEntry	SetZoneEntry on the zone record at +0x5C0 of a zone collider, its four arguments passed through

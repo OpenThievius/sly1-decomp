@@ -133,7 +133,7 @@ void func_0013B9D8(ChildGroupObject* self, s32 key, s32 a2, s32 a3, s32 a4, void
         }
         if (i < self->entryCount) {
             Entry3B* e = &self->entries[i];
-            func_00185D20(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
+            CreatePooledContact(self, key, e, &e->data, 9, 0, 0, arg5, e->value);
         }
     }
 }

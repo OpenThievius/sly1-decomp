@@ -32,7 +32,12 @@ func_00138738	PushContactRow	takes a record from the pool at world+0x1AF0, clear
 func_00138788	UnlinkContactRow	walks a singly linked row list for the row whose other end is the key's owner, unlinks it and returns it
 func_001387C0	FindContactRow	walks the root's contact table for the row whose other end is the other object's root and returns it or 0
 func_001387F8	GetContactRowHead	returns the first word of the row FindContactRow finds, 0 when there is none
+func_00138828	AddColliderToSweepAxes	RegisterCollider calls it: appends, in each of the world's three 0x1800-byte axis lists at 0x1AD8, a start entry pointing at the collider's bound at 0x420 and an end entry at 0x430 (one float per axis), then MarkSweepAxesUnsorted
+func_001388A0	RemoveColliderFromSweepAxes	UnregisterCollider's counterpart of AddColliderToSweepAxes: takes the collider's entries out of the three axis lists at 0x1AD8
+func_001389C8	MarkSweepAxesUnsorted	clears the world's 0x1AEC, so SortSweepAxes re-sorts the axis lists; AddColliderToSweepAxes and RecomputeColliderFrame call it
+func_001389D0	SortSweepAxes	when 0x1AEC is clear, insertion-sorts each of the three axis lists at 0x1AD8 by the bound each entry points at, calling SetContactPairFlags (func_001385A0) for the pairs whose start and end entries cross; UpdateWorldContacts calls it first
 func_00138BE0	ClearRootObjectStateBits	clears the given bits of the root object's word at +0x4B8
+func_00138C00	UpdateWorldContacts	sorts the axes (SortSweepAxes), then for each pair of objects on the world's list at 0x6C rebuilds their contact chain (FreePooledContactChain, func_00188270) and calls the objects' children's slots 0x110 and 0x10C; LoadWorld, RunPendingWorldLoad and UpdateWorld call it
 func_00138F28	InitContactPairFlags	clears the object's +0x4B8 then, for each contact table in use but its own, calls func_001385A0 with a set or clear value of 8 chosen by slot 14 of either object
 func_00139600	ComputeWrappedDeltas	for each element with an object at +4 fills a table of values from func_0012CCC0 and stores the difference to the previous one, adding the object's period at +0x34 when it is negative
 func_00139970	FindCyclicRangeIndex	returns the index of the first (start, length) pair with a nonzero length that contains x modulo period, writing the offset into the range through out
@@ -44,7 +49,10 @@ func_00139D68	ResetFirstListedObject	takes the first object of the world list at
 func_00139DE8	InitWorldListedObject	slot 0: adds itself to its world's list at +0x1CC0, sets up members and sets flags and the float at 0x80
 func_00139E80	LeaveWorldLists	slot 6: removes itself from its world's lists at +0x1CC0 and +0x1CB4
 func_00139EC8	ReleaseWorldListedObject	slot 7: walks the members list calling func_00139D28 on each, then removes itself from the world list at +0x1CB4 and D_002622E0
+func_00139F80	AssignAnimRecord	stores at 0x380 the record FindAnimRecord finds (g_animRecords when none), on the first call copies its four bytes at +4 halved into 0x594, then RebuildAnimRecordEntries
+func_0013A008	RebuildAnimRecordEntries	from the count in the record's block (byte at +4) picks a power of two below 0x20 for 0x384 and fills the 16-byte entries at 0x390 with func_001B2988; AssignAnimRecord and UpdateMatchingListedObjects call it
 func_0013A3A0	UpdateWorldListedObject	slot 17: runs base updates then, unless the flagRecord's flags satisfy the global mask, calls its own method 3
 func_0013A418	CopyWorldListedObject	slot 23: copies from the source object and, when it is of class 0x50, keeps it as source and takes its float at 0x80
+func_0013A940	MoveWorldListedObject	class 0x4D's slot at 0x7C, the move slot of the other classes (MoveStateNotifier, MoveModeCollider)
 func_0013AD08	SubmitWorldListedObjectBlock	slot 37: builds a zeroed 0x80-byte parameter block (count 0xF, radius from the source or 1.0, owner itself) and passes it to func_0019D410
 func_0013B430	UpdateMatchingListedObjects	for a nonzero mask walks the world list at +0x1CB4 and calls func_0013A008 on each object whose flag record has bit 0x10000000 or all of the mask's bits

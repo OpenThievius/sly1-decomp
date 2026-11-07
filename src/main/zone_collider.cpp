@@ -99,7 +99,7 @@ void* func_001DBCC8(void* target, Hook_CE40 fn, MaskedCollider* ctx, s32 a3, s32
 void func_0013CE40(MaskedCollider* self)
 {
     StartPlacedObject(self);
-    AppendQueuedCall(self->world, func_0013CE80, self, 0, 0);
+    AppendQueuedCall(self->world, AttachMaskedColliderChildren, self, 0, 0);
 }
 
 extern u8 D_00261420[];
@@ -635,7 +635,7 @@ void func_0013EA38(Zone28* self)
     } while (--n >= 0);
     if (self->f11C != 0) {
         if (TestFlagTableBit((FlagTable*)g_flagTable, self->id120)) {
-            AppendQueuedCall(target, (void*)func_0013EAE0, self, 0, 0);
+            AppendQueuedCall(target, (void*)DeferZoneRecordActivation, self, 0, 0);
         }
     }
 }
@@ -647,9 +647,9 @@ void func_0013EAE0(void* selfp, s32 mode)
 {
     Zone28* self = (Zone28*)selfp;
     if (mode == 0) {
-        AppendQueuedCall(self->owner->world, (void*)func_0013EAE0, self, 0xC, 0);
+        AppendQueuedCall(self->owner->world, (void*)DeferZoneRecordActivation, self, 0xC, 0);
     } else {
-        func_0013EF50(self, 1, 1);
+        ActivateZoneRecord(self, 1, 1);
     }
 }
 
@@ -685,10 +685,10 @@ void func_0013EB68(void* a, s32 b)
     self->stamp = g_gameTime;
     ClearRootTries(self->owner);
     if (s1 != 0) {
-        func_0013EF50(self, 0, 0);
+        ActivateZoneRecord(self, 0, 0);
     }
     if (s2 != 0) {
-        func_0013F070(self, 0);
+        DeactivateZoneRecord(self, 0);
     }
 }
 
@@ -814,7 +814,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q)
             }
         }
     }
-    func_0013ECB0(self->owner->world, self->count148, (Ent_13ECB0*)self->table14C, self->owner, mode == 0);
+    SetGatheredWalkerTargets(self->owner->world, self->count148, (Ent_13ECB0*)self->table14C, self->owner, mode == 0);
     if (self->f140 != -1 && q == 0) {
         void* t = FindFirstObjectByIdMode4(self->owner->world, self->f140, self->owner);
         if (mode != 0) {
@@ -848,7 +848,7 @@ void func_0013EF50(Zone28* self, void* p, void* q)
             StartSoundEffect(kind_13EF50_2, 0, (s32)self->owner, 0, 3000.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0, 0);
         }
     }
-    func_0013ED90(self, 0, p, q);
+    RunZoneRecordEntries(self, 0, p, q);
     if (self->f13C == 0) {
         SetZoneMode(self, 2);
     }
@@ -864,7 +864,7 @@ void func_0013ED90(Zone28* self, s32 mode, void* p, void* q);
 void func_0013F070(Zone28* self, void* p)
 {
     TriggerScriptEvent(self->owner, 3, 0, 0);
-    func_0013ED90(self, 1, p, 0);
+    RunZoneRecordEntries(self, 1, p, 0);
     Collider* o = self->owner;
     o->desc->m0E(o, 13, self);
 }
@@ -1003,7 +1003,7 @@ s32 func_0013F940(TriggerZone* s, f32* out)
     }
     for (i = s->count7E0 - 1; i >= 0; i--) {
         Entry28* e = (Entry28*)((u8*)s + 0x7F0 + i * 0x30);
-        func_00189150(&s->rot, e, &loc);
+        MultiplyMatrices3x3(&s->rot, e, &loc);
         f32 t = GetMatrixRotationCosine(&loc);
         if (best < t) {
             best = t;

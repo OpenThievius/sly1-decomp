@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
 #include "camera.h"
+#include "pad_record.h"
 #include "asm_func.h"
 extern void func_001439A8(void*);
 extern void func_001439C8(void*);
@@ -166,8 +167,6 @@ extern const Fn_Table D_002173F8[];
 
 
 extern s32 D_00262C68;
-extern u8 D_00262C70[];
-extern u8 D_00262D38[];
 
 f32 func_001EA620(f32 a, f32 b, f32 c, f32 d, void* p, void* q);
 void func_001433E0(Camera* c, void* n, void* x);
@@ -180,14 +179,6 @@ typedef void (*VFn_143E40)(void* self, f32 dt, void* a);
 
 
 
-struct Probe_00144FF8 {
-    u8 pad_00[0x40];
-    f32 x_40;
-    f32 y_44;
-    u8 pad_48[0x2C];
-    f32 x_74;
-    f32 y_78;
-};
 
 
 f32 func_00205778(f32 a, f32 b);
@@ -331,7 +322,7 @@ void func_00144848(u8* self);
 void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b);
 void func_00144938(Camera* self, void* p, s32 q);
 void func_00144B70(Camera* self, Vec_144B70* arg);
-void func_00144FF8(Camera* self, Probe_00144FF8* p, s32 mode, f32* out);
+void func_00144FF8(Camera* self, PadRecord* p, s32 mode, f32* out);
 void func_001451F0(Camera* self, s32 flags, s32 k0, CameraController* k1, s32 k2, s32 k3);
 void func_001455C0(Camera* self, f32* src);
 void func_001455E0(Camera* self);
@@ -466,7 +457,7 @@ void func_001438B0(void) { func_00143A08(g_camera); }
 
 void func_001438D8(void)
 {
-    func_00143A38(g_camera);
+    SetCameraDistanceScale(g_camera);
 }
 
 void func_00143900(void* self, void* value)
@@ -532,12 +523,12 @@ void func_00143A38(Camera* self, f32 value)
 void func_00143A60(Camera* self, s32 flag)
 {
     if (flag != 0) {
-        func_00144938(self, D_00261880, D_00261890);
+        PlaceCameraLookingAt(self, D_00261880, D_00261890);
     }
     self->stackCount = 0;
     SetCameraControllerValue(&self->ctl454, 0);
     PushCameraController(self, 0, &self->ctl454, 0, 0);
-    func_001455C0(self, 0);
+    RequestCameraSnap(self, 0);
     self->f21C = 0x0FFFFFFF;
     self->f218 = -10.0f;
 }
@@ -608,9 +599,9 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
                     if (o != last) {
                         ((VFn_143E40)(*(void***)o)[0x124 / 4])(o, dt, x);
                         if (prev != 0 || o != self->f2E0) {
-                            func_001433E0(self, o, x);
+                            ResetCameraTargetTracking(self, o, x);
                         }
-                        func_00143208(self, o, dt, x);
+                        UpdateCameraTargetTracking(self, o, dt, x);
                         self->f2E0 = o;
                         last = o;
                     }
@@ -619,8 +610,8 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
                 }
                 const CameraControllerVt* vt = n->vt;
                 if (vt->m04 != 0) {
-                    u8* t = (g_padRouting & 1) ? g_padRecord : g_blankPadRecord;
-                    vt->m04(n, x, t, dt);
+                    PadRecord* t = (g_padRouting & 1) ? &g_padRecord : &g_blankPadRecord;
+                    vt->m04(n, x, (u8*)t, dt);
                 }
                 prev = n;
                 if (self->stackCount <= 0) break;
@@ -724,7 +715,7 @@ void func_001448C8(Camera* self, Quad_1448C8* a, Quad_1448C8* b)
         *(Quad_1448C8*)self->f90 = b[1];
         *(Quad_1448C8*)self->fA0 = b[2];
     }
-    func_00144540(self);
+    UpdateCameraMatrices(self);
     f32 zero = 0.0f;
     self->f2C0 = zero;
     self->f2BC = zero;
@@ -745,26 +736,26 @@ ASM_FUNC(func_00144AA0);
 void func_00144B70(Camera* self, Vec_144B70* arg)
 {
     Vec_144B70 tmp;
-    func_00144AA0((Vec_144B70*)self->f2D0, (Vec_144B70*)self->f40, &tmp, self->f2B0, self->f2B4, self->f2B8);
-    func_00144978(arg, (Vec_144B70*)self->f40, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
+    ApplyLookFrameCoordinates((Vec_144B70*)self->f2D0, (Vec_144B70*)self->f40, &tmp, self->f2B0, self->f2B4, self->f2B8);
+    ComputeLookFrameCoordinates(arg, (Vec_144B70*)self->f40, &tmp, &self->f2B0, &self->f2B4, &self->f2B8);
     *(Vec_144B70*)self->f2D0 = *arg;
 }
 
 ASM_FUNC(func_00144BE8);
 
-void func_00144FF8(Camera* self, Probe_00144FF8* p, s32 mode, f32* out)
+void func_00144FF8(Camera* self, PadRecord* p, s32 mode, f32* out)
 {
     f32 t;
     f32 x;
     f32 y;
     switch (mode) {
     case 0:
-        y = p->y_44;
-        x = p->x_40;
+        y = p->f44;
+        x = p->f40;
         goto call;
     case 1:
-        y = p->y_78;
-        x = p->x_74;
+        y = p->f78;
+        x = p->f74;
         goto call;
     default:
         goto zero;
@@ -846,7 +837,7 @@ void func_001455E0(Camera* self)
 
 void func_001455F0(void* p)
 {
-    func_001455C0((Camera*)p, 0);
+    RequestCameraSnap((Camera*)p, 0);
 }
 
 ASM_FUNC(func_00145610);
@@ -863,7 +854,7 @@ s32 func_00145810(s32 count, Obj_145810** objs, f32 thresh, void* a2, void* a3, 
     f32 f2;
     f32 f1;
     for (i = 0; i < count; i++) {
-        total += func_0013DFD8(objs[i]->p538, a2, a3, 0, 0x40 - total, &recs[total]);
+        total += CollectTreeNodeSpans(objs[i]->p538, a2, a3, 0, 0x40 - total, &recs[total]);
     }
     total = MergeOverlappingSpans(total, recs);
     j = 0;

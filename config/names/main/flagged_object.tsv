@@ -1,4 +1,5 @@
 symbol	name	evidence
+func_00140D90	ResetFlagTable	zeroes the words at 0x4/0x8, the 0x200 bytes at 0xC and the 0x20C bytes at 0x220, fills the four floats at 0x210 with D_00249E3C and sets 0x424/0x428 to -1; ResetReserveCounts and SetCurrentLevelEntry call it on g_flagTable
 func_00140E10	SaveFlagTableSnapshot	clears the word at +0x20C, copies the 0x204-byte bitmap block at +8 to the second block, stores its two arguments at 0x424 and 0x428 and sets the saved flag at 0x42C
 func_00140ED0	StartScreenFadeFromFlagTable	starts a screen fade (func_001EFFA0 on g_screenFade) with the table's saved values at 0x424 and 0x428 when the saved flag at 0x42C is set, else with -1, -1; func_001E5278 calls it with D_00261420
 func_00140F48	RestoreFlagTableSnapshot	clears the counter at +4, copies the saved 0x204-byte block back over the bitmap at +8 and clears the changed flag at +0x20C
@@ -7,6 +8,7 @@ func_00141008	TestFlagTableBit	returns whether bit (index & 7) of byte index / 8
 func_00141040	SetFlagTableBit	sets that bit in the bitmap at +0xC, counts it (+8) and raises the changed flag at +0x20C when it was clear
 func_001410A0	ClearFlagTableBit	clears that bit of the bitmap at +0xC, uncounts it (+8) and raises the changed flag at +0x20C when it was set
 func_00141108	ReadObjectTransformAndTables	reads a buffered rotation to +0x50, a vector to +0x40 and four mesh table words to +0x80..0x8C, then the property records
+func_00141170	TestPointAgainstObjectShape	expresses the given position in the object's frame (func_001F3B48) and returns func_001E4DC0 of the shape at 0x8C for it; UpdateFlaggedObject, UpdateObjectGatherer and IsConeAgentFree call it
 func_001411A8	InitFlaggedObject	Slot 0 of class 0x38: takes a bit index from the table at D_00261420 into flagIndex, sets childId to -1, counts itself in the world.
 func_00141210	CollectChildLists	Slot 10 of class 0x38: walks the children and appends those of kind 0x7B to objsB and kind 0x83 to objsA.
 func_00141338	ResolveListIds	Slot 15 of class 0x38: looks up each id of idsA and idsB in the world and appends the found objects to objsA and objsB.

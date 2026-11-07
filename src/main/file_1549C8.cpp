@@ -988,7 +988,7 @@ void func_001550E8(EffectSpawner* self)
         s2->target = r->f18;
     }
 tail:
-    func_00158288(self->rec, self);
+    ResolveSpawnRecordTargets(self->rec, self);
 }
 
 extern const f32 D_0024A120 = 3.4028235e+38f;
@@ -1118,7 +1118,7 @@ void func_00156088(u8* self)
 {
     *(s32*)(self+0x34C)=0;
     if (*(void**)(self+0x348)) func_0013A128(*(void**)(self+0x348),*(void**)(self+0x2D0));
-    if (*(void**)(self+0x344)) func_0019E158(*(void**)(self+0x344),*(void**)(self+0x2D0));
+    if (*(void**)(self+0x344)) CopyEffectOwnerMargin(*(void**)(self+0x344),*(void**)(self+0x2D0));
     f32 value;
     if (*(s32*)(self+0x2D4)==3) value=RandomFloatInRange(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0))*60.0f;
     else value=RandomFloatInRange(*(f32*)(self+0x2DC),*(f32*)(self+0x2E0));
@@ -1218,7 +1218,7 @@ void func_00157320(Rec50* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q
         if (h) {
             if (h->f4) *h->f4 = (s32)node;
         }
-        func_0019E158(node, self);
+        CopyEffectOwnerMargin(node, self);
         if (h) {
             if (h->f8) {
                 typedef void (*F)(EffectOwner*, s32);
@@ -1257,7 +1257,7 @@ void func_00157320(Rec50* self, Hdr_157320* h, s32 n, Q_157320* pos, Q_157320* q
             typedef void (*F1)(f32, EffectOwner*, void*, s32);
             F1 fn = *(F1*)(*(u8**)o);
             fn(AT(f32, it, 0x30) * 0.5f, o, (u8*)it + 0x80, 0);
-            func_001A0338(o, 1, it);
+            SetTrailSegmentAnchor(o, 1, it);
         }
         {
             u8* cl = AT(u8*, it, 0);
@@ -1568,7 +1568,7 @@ void func_00158C60(RecordMember* self)
 tail:
     c = self->rec;
 tail_c:
-    func_00158288(c, self);
+    ResolveSpawnRecordTargets(c, self);
 }
 
 void func_00158D38(void)
@@ -1927,7 +1927,7 @@ void func_00159CA0(u8* a0)
     FillScreenColor(&f, &f.value, 0);
     PacketWriter* s = &g_vifPacketWriter;
     BeginDmaTag(s);
-    func_001EE7D0(s, 0x2C, &f, 0);
+    WriteVifDirect(s, 0x2C, &f, 0);
     CloseDmaTag(s);
 }
 
@@ -2326,7 +2326,7 @@ void func_0015AEB0(ObjectCycler* self)
         t = RandomFloatInRange(self->p670.a, self->p670.b);
         self->f680 = g_gameClock[1] + t;
     }
-    func_0015B7B8(self, self->startState);
+    SetObjectCyclerState(self, self->startState);
     StartPlacedObject(self);
     self->f64C = self->radius3CC + self->radius3CC;
 }
@@ -2343,7 +2343,7 @@ void func_0015B128(ObjectCycler* self)
         switch (a1) {
         case 0:
         case 3:
-            func_0015B7B8(self, -1);
+            SetObjectCyclerState(self, -1);
             a1 = 0;
             break;
         case 1:
@@ -2358,7 +2358,7 @@ void func_0015B128(ObjectCycler* self)
         default:
             break;
         }
-        func_0015B7B8(self, a1);
+        SetObjectCyclerState(self, a1);
     }
     s32 st = self->state;
     switch (st) {
@@ -2379,7 +2379,7 @@ void func_0015B128(ObjectCycler* self)
                     V128_15B128 tmp;
                     if (func_0015BD48(self, &tmp)) {
                         *(V128_15B128*)&self->v5F0 = tmp;
-                        func_0015B7B8(self, 5);
+                        SetObjectCyclerState(self, 5);
                     } else {
                         self->nextCheckTime = g_gameClock[1] + RandomFloatInRange(self->checkDelay.a, self->checkDelay.b);
                     }
@@ -2417,7 +2417,7 @@ void func_0015B128(ObjectCycler* self)
     }
     case 6:
         if (IsObjectCyclerUnsupported(self) || func_0015BFC0(self)) {
-            func_0015B7B8(self, 0);
+            SetObjectCyclerState(self, 0);
         } else if (self->nextAdvanceTime <= g_gameClock[1]) {
             s32 idx = (self->index + 1) % self->altCount;
             self->index = idx;
@@ -2494,7 +2494,7 @@ void func_0015B4D0(ObjectCycler* self, void* a1, void* a2)
 s32 func_0015B720(ObjectCycler* self, Rec_15B720* r)
 {
     if (self->state != 1) {
-        func_0015B7B8(self, 1);
+        SetObjectCyclerState(self, 1);
         if ((r->fC & 8) != 0) {
             func_001BC0E0(self, r->f8, &r->f20, &r->f30);
         }
@@ -3465,7 +3465,7 @@ void func_0015E9F0(void)
 {
     s32 idx;
 
-    func_00191E70(3);
+    SetScreenOwner(3);
     AwaitSemaphore(g_frameDoneSemaphore);
     idx = g_nextBuildFrameIndex;
     g_nextBuildFrameIndex = idx + 1;
@@ -3541,9 +3541,9 @@ void func_0015ED50(RenderFrame* self)
 {
     g_drawFrameData = self->i10;
     SwitchActiveImageMask(self->f44);
-    if (self->f1C != 0 && D_00274538 != 0) {
+    if (self->f1C != 0 && g_maskedImagesPacket != 0) {
         *(volatile s32*)0x10003010 = 4;
-        StartDmaChain(g_gifChannel, D_00274538);
+        StartDmaChain(g_gifChannel, g_maskedImagesPacket);
     }
 }
 
@@ -3586,7 +3586,7 @@ void func_0015EE80(void)
         SendGsPacketAndWait(g_vif1Channel, ((RenderFrame*)g_drawingFrame)->bufBAddr);
         *(volatile s32*)0x10003010 = 0;
         SendGsPacketAndWait(g_gifChannel, ((RenderFrame*)g_drawingFrame)->bufAAddr);
-        func_0015F320();
+        BlitFrameToDisplay();
         WaitDmaChannel(g_vif1Channel, 0, 0);
         PostSemaphore(g_frameDoneSemaphore);
         FlipDisplayFrame();
@@ -3653,7 +3653,7 @@ void func_0015F210(s32 flag)
         s32 n = 2;
         do {
             SendRenderFrameToDma(g_drawingFrame, 1);
-            func_0015F320();
+            BlitFrameToDisplay();
             FlipDisplayFrame();
         } while (--n >= 0);
         D_002626CC = 3;
@@ -3664,7 +3664,7 @@ void func_0015F210(s32 flag)
         ReleaseFrameNodes(p);
         p += 0x48;
     } while (p < end);
-    func_00191EB0(3);
+    ClearScreenOwner(3);
     g_drawingFrame = 0;
 }
 
