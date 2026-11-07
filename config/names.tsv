@@ -1165,8 +1165,8 @@ func_001F1590	SetWarpCursor	in modes 0 and 4 stores the cursor entry (+0x2DC) an
 func_001F1610	BeginWarpPageClose	enters mode 4 through func_001F1050 when the page is in mode 1 or 2
 func_001F1050	SetWarpPageMode	leaves the current mode (stops the sound, hides or shows the elements, restarts the element animations) and enters the next one (starts the animation, cursor placement and sound), stamping the clock D_00261858[4] at +0x2D4
 func_001F0F70	HandleWarpPageNotification	runs HandlePlacedObjectNotification, then for kind 5 moves the page on by its mode: mode 1 re-enters mode 1, mode 3 sets the screen fade to mode 2, mode 4 ends the fade and sets mode 0
-func_001F0660	InitWarpPage	base set-up, then sets the page's slot from its id (0x1C6 to 0x1CA give slots 4, 1, 2, 3, 5) and stores the page in D_0026F808.nodes[slot]
-func_001F0758	StartWarpPage	runs the placed-object start, installs the table D_00275FE0 with func_00124DF8, starts each child and gives each of the 11 elements random phase (0 to 2*pi) and speed (0.5 to 0.7), selection -1
+func_001F0660	StartWarpPage	slot 16 of class 0x67: runs StartPlacedObject, sets flag bits 40-41 to 1, sets the page's slot from its id (0x1C6 to 0x1CA give slots 4, 1, 2, 3, 5, others the save data's level) and stores the page in D_0026F808.nodes[slot]
+func_001F0758	PostLoadWarpPage	slot 15 of class 0x67: runs PostLoadPlacedObject, resolves its links (D_00275FE0, with ResolveObjectLinks), starts each child and gives each of the 11 elements a random phase (0 to 2 pi) and speed (0.5 to 0.7), selection -1
 func_001F18B0	SetWarpPageSelectedEntry	stores a new selected entry at +0x534: copies the entry's placement to +0x550 (or the identity from D_00248D30), clears the entry's float and sets the previous selection's float to 1
 func_001F08F0	SetPendingWarpEntry	stores its second and third arguments into D_00276250 and D_00276654, which func_001F0908 reads and clears
 func_001F1960	InitWarpMenu	base set-up, takes the font record (func_0015C1C0) if one exists, sets colour and scale, writes the help text 'Back / Move / Warp' with slot 2, clears current and the 6 node pointers

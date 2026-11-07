@@ -3043,8 +3043,8 @@
 #define GetCurrentWarpEntry                        func_001F0468
 #define IsWarpEntryAvailable                       func_001F0490
 #define IsWarpEntryReachable                       func_001F0580
-#define InitWarpPage                               func_001F0660
-#define StartWarpPage                              func_001F0758
+#define StartWarpPage                              func_001F0660
+#define PostLoadWarpPage                           func_001F0758
 #define SelectWarpPageEntry                        func_001F0878
 #define SetPendingWarpEntry                        func_001F08F0
 #define UpdateWarpPage                             func_001F0AE0
