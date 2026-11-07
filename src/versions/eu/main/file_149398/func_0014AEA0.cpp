@@ -10,7 +10,7 @@ struct Obj_14AEA0_eu {
     u8 pad548[0x570 - 0x548];
     s32 count;
     u8 pad574[0x578 - 0x574];
-    V24A2* q;
+    Font* q;
 };
 
 void func_001AAB20(Obj_14AEA0_eu* self, f32 a, f32 b);
@@ -20,7 +20,7 @@ void func_0014AEA0(Obj_14AEA0_eu* self, s32 n, f32 x, f32 y)
     self->pair->dx = x;
     self->pair->dy = y;
     self->count = n;
-    V24A2* q = self->q;
+    Font* q = self->q;
     SetScreenElementSize(self, self->f234, (f32)q->height * q->sy * (f32)n);
     self->vtbl[16](self, 2);
 }

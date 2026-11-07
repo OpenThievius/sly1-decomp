@@ -88,9 +88,9 @@ void func_001384A0(void* other, void* sub);
 struct Obj_00192190 { u8 pad0[0x54]; f32 f54; f32 f58; };
 void func_001B7968(void* self);
 void func_00192990(SwitchedCollider* self, s32 value);
-extern void func_001C8F20(C0E* self, s32 mode, s32 value);
+extern void func_001C8F20(SeekingAgent* self, s32 mode, s32 value);
 struct Req_190770 { s32 f_0; u8 pad4[4]; s32 f_8; };
-extern void func_001C9DE0(C0E* self, s32 code, Req_190770* req);
+extern void func_001C9DE0(SeekingAgent* self, s32 code, Req_190770* req);
 extern void func_00160DA0(void);
 void func_001BA130(SwitchedCollider* self);
 void func_00192990(SwitchedCollider* self, s32 mode);
@@ -134,7 +134,7 @@ void func_001B9F30(void);
 f32 func_001EA4B8(f32 a, f32 b, f32 c, Quad_192380* p, s32 zero);
 struct Msg_1904E0 { s32 id; };
 struct Args_1904E0 {
-    C0E* self;
+    SeekingAgent* self;
     s32 id;
 };
 s32 func_00160C58(void* a, void* b);
@@ -176,8 +176,8 @@ void func_0018D800(void* dst, void* src, s32 bytes);
 void func_0018D6F0(void);
 s32 func_00190E30(void* self, s32 a, s32 b);
 s32 func_00160148(s32 v);
-void func_001C8C08(C0E* self);
-void func_001C8418(C0E* self, void* p);
+void func_001C8C08(SeekingAgent* self);
+void func_001C8418(SeekingAgent* self, void* p);
 s32 func_00182FC8(void* p);
 s32 func_001F3BD8(void* self, s32* arg);
 struct Out_190E30 {
@@ -233,14 +233,14 @@ ASM_FUNC(func_0018F9D8);
 INCLUDE_RODATA(D_0024B5E0);
 INCLUDE_RODATA(jtbl_0024B5F0);
 
-void func_0018FEF8(C0E* self)
+void func_0018FEF8(SeekingAgent* self)
 {
     InitAgent(self);
     self->fBD4 = 0;
     self->fBD0 = 0;
 }
 
-void func_0018FF28(C0E* self)
+void func_0018FF28(SeekingAgent* self)
 {
     StartAgent(self);
     ResolveObjectLinks(self, 2, D_00269B60);
@@ -251,7 +251,7 @@ void func_0018FF28(C0E* self)
     self->fC44 = ResolveAgentClip(self, 0x16B);
 }
 
-void func_0018FFB0(C0E* self, s32 a1, s32 a2)
+void func_0018FFB0(SeekingAgent* self, s32 a1, s32 a2)
 {
     s32 a2v = a2;
     switch (self->f724) {
@@ -284,7 +284,7 @@ void func_0018FFB0(C0E* self, s32 a1, s32 a2)
     }
 }
 
-void func_001900A0(C0E* self)
+void func_001900A0(SeekingAgent* self)
 {
     LeaveAgentState(self);
     s32 kind = self->f724;
@@ -302,7 +302,7 @@ void func_001900A0(C0E* self)
     }
 }
 
-void func_00190128(C0E* self, s32 flag)
+void func_00190128(SeekingAgent* self, s32 flag)
 {
     s32 tmp[4];
 
@@ -348,7 +348,7 @@ void func_00190128(C0E* self, s32 flag)
 ASM_FUNC(func_00190258);
 INCLUDE_RODATA(jtbl_0024B610);
 
-s32 func_001903F0(C0E* self, s32 a1)
+s32 func_001903F0(SeekingAgent* self, s32 a1)
 {
     if (g_buttonCodeFlags & 1) {
         return 1;
@@ -359,7 +359,7 @@ s32 func_001903F0(C0E* self, s32 a1)
     return 1;
 }
 
-s32 func_00190450(C0E* self, s32* arg)
+s32 func_00190450(SeekingAgent* self, s32* arg)
 {
     if (self->desc05()->m4B(self, arg[0])) {
         return 0;
@@ -374,7 +374,7 @@ s32 func_00190450(C0E* self, s32* arg)
     return AcceptAgentRequest(self, arg);
 }
 
-s32 func_001904E0(C0E* self, Msg_1904E0* msg)
+s32 func_001904E0(SeekingAgent* self, Msg_1904E0* msg)
 {
     Args_1904E0 args;
     if (HasSpareCount(self, msg) != 0 && self->fC34 == 0) {
@@ -391,7 +391,7 @@ s32 func_001904E0(C0E* self, Msg_1904E0* msg)
     return 1;
 }
 
-s32 func_00190570(C0E* self)
+s32 func_00190570(SeekingAgent* self)
 {
     s32 i;
     if (self->fC28 != 0) {
@@ -423,7 +423,7 @@ s32 func_00190658(void)
     return 0;
 }
 
-s32 func_00190660(C0E* self, Agent* item)
+s32 func_00190660(SeekingAgent* self, Agent* item)
 {
     if (item != 0 && IsObjectAttached(item) != 0) {
         if (IsObjectOfKind(item, 8) == 0 || item->f724 != 0xB) {
@@ -438,17 +438,17 @@ s32 func_00190660(C0E* self, Agent* item)
     return 0;
 }
 
-void func_001906E8(C0E* self, s32 value)
+void func_001906E8(SeekingAgent* self, s32 value)
 {
     self->fC28 = (void*)value;
 }
 
-void func_001906F0(C0E* self, s32 value)
+void func_001906F0(SeekingAgent* self, s32 value)
 {
     self->fC24 = (void*)value;
 }
 
-void func_001906F8(C0E* self, s32 flag, PlacedObject* extra)
+void func_001906F8(SeekingAgent* self, s32 flag, PlacedObject* extra)
 {
     StartSwitchedColliderEffect(self, flag, extra);
     if (flag == 0) {
@@ -458,7 +458,7 @@ void func_001906F8(C0E* self, s32 flag, PlacedObject* extra)
 
 // was NEAR: GCC folds the final return 1/return 0 into sltiu/xori; retail keeps li v0,16 + bne and a separate move v0,zero tail
 
-s32 func_00190740(C0E* self)
+s32 func_00190740(SeekingAgent* self)
 {
     switch (self->f724) {
     case 0x10: return 1;
@@ -467,7 +467,7 @@ s32 func_00190740(C0E* self)
     return 0;
 }
 
-void func_00190770(C0E* self, s32 code, Req_190770* req)
+void func_00190770(SeekingAgent* self, s32 code, Req_190770* req)
 {
     HandleAgentNotification(self, code, req);
     if (code == 0x13) {

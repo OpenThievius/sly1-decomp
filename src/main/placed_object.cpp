@@ -12,7 +12,7 @@
 #include "world.h"
 #include "animation.h"
 #include "attachment.h"
-#include "t2196.h"
+#include "anim_curve.h"
 #include "range_record.h"
 #include "sound_record.h"
 #include "object_link.h"
@@ -25,7 +25,7 @@
 #include "shapes.h"
 #include "id_filter_object.h"
 #include "c8b.h"
-#include "s1dbbd8.h"
+#include "queued_call.h"
 #include "stream_reader.h"
 #include "key_id.h"
 #include "game_progress.h"
@@ -47,23 +47,23 @@ void* func_0015A448(void* world, s32 id, void* scope);
 AnimationPlayer* func_0012D3F8(World* pool);
 void func_0012FDE8(StreamReader* a0);
 
-void func_0011F850(T2196_Weight** axis, s32* outCount, f32** outTimes);
+void func_0011F850(WeightCurve** axis, s32* outCount, f32** outTimes);
 
 struct Buffer_00120130 { u8 bytes[0x20]; };
 typedef void (*Finish_00120130)(PlacedObject* self, void* output, void* state);
-extern void func_0011F9F8(s32, Key2196_Vec*, s32, void*, void*);
+extern void func_0011F9F8(s32, VectorKey*, s32, void*, void*);
 extern void func_00188A20(void*, void*);
 extern void func_001EDE38(void*, void*, void*);
 
-extern void func_0011F9F8(s32, Key2196_Vec*);
-extern void func_0011FB98(s32, Key2196_Vec*, s32*, f32**);
+extern void func_0011F9F8(s32, VectorKey*);
+extern void func_0011FB98(s32, VectorKey*, s32*, f32**);
 
 struct Result_001202F0 { f32 x; f32 y; f32 z; };
 struct Output_001202F0 { f32 x; u8 pad4[0x10]; f32 y; u8 pad18[0x10]; f32 z; };
-extern void func_0011F6B0(T2196_Weight**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
+extern void func_0011F6B0(WeightCurve**, PlacedObject*, void*, Vec02*, void*, s32, f32, f32);
 extern void func_001F5C0C(void*, s32, s32);
 
-void func_0011F798(T2196_Weight** a, Vec02* b, Stream83* c);
+void func_0011F798(WeightCurve** a, Vec02* b, Stream83* c);
 
 struct Result_001203A8 {
     f32 first;
@@ -77,9 +77,9 @@ struct Output_001203A8 {
     u8 pad18[0x10];
     f32 third;
 };
-extern void func_0011F9F8(s32, Key2196_Vec*, void*, f32*, s32, f32, f32);
+extern void func_0011F9F8(s32, VectorKey*, void*, f32*, s32, f32, f32);
 
-extern void func_0011FA88(s32*, Key2196_Vec**, Stream83*);
+extern void func_0011FA88(s32*, VectorKey**, Stream83*);
 
 extern void* func_001B5EE0(void*);
 
@@ -195,7 +195,7 @@ extern void func_00121580(Attachment* self, Mat02* a1);
 
 typedef void (*VFn_1236C8)(void* self, void* arg);
 struct Obj_1236C8 { VFn_1236C8* vt; };
-void func_00123400(C22* node, StateTrigger* value);
+void func_00123400(CountedObject* node, StateTrigger* value);
 void func_001CAD40(void* node, void* self);
 s32 func_00141008(void* table, s32 v);
 
@@ -215,9 +215,9 @@ s32 func_00160CF0(void* p);
 void func_001BFCD8(s32 a0, void* a1, StateTrigger* a2, s32 a3, f32 f12, f32 f13, f32 f14, f32 f15, f32 f16, s32 a4, s32 a5);
 
 // The position curves' tables, defined at the end of this file.
-extern const T2196_PosVt D_002196B8;
-extern const T2196_PosVt D_002196C8;
-extern const T2196_PosVt D_002196D8;
+extern const PositionCurveVt D_002196B8;
+extern const PositionCurveVt D_002196C8;
+extern const PositionCurveVt D_002196D8;
 void* func_0018D5C0(s32 bytes);
 
 void func_00152600(void* a, void* b);
@@ -227,15 +227,15 @@ void func_00127590(void* a, void* b);
 void func_001B5F28(void* a, void* b);
 
 
-s32 func_00139970(f32 x, f32 period, s32 count, Pair2196* p, f32* out);
+s32 func_00139970(f32 x, f32 period, s32 count, BlendTimeScale* p, f32* out);
 f32 func_001EA408(f32 a);
 
-extern const T2196_RotVt D_002196E8;
-extern const T2196_RotVt D_002196F8;
-extern const T2196_RotVt D_00219708;
+extern const RotationCurveVt D_002196E8;
+extern const RotationCurveVt D_002196F8;
+extern const RotationCurveVt D_00219708;
 
-extern const T2196_ScaleVt D_00219718;
-extern const T2196_ScaleVt D_00219728;
+extern const ScaleCurveVt D_00219718;
+extern const ScaleCurveVt D_00219728;
 void* func_0018D5C0(u32 n);
 
 extern u8 D_00219560[];
@@ -269,12 +269,12 @@ void func_00120388();
 void func_001203A8();
 void func_00120418();
 void func_00120440();
-extern const T2196_WeightVt D_00219668;
-extern const T2196_WeightVt D_00219678;
-extern const T2196_WeightVt D_00219688;
-extern const T2196_WeightVt D_00219698;
-extern const T2196_WeightVt D_002196A8;
-void* func_0018D5C0(T2196_Weight* n);
+extern const WeightCurveVt D_00219668;
+extern const WeightCurveVt D_00219678;
+extern const WeightCurveVt D_00219688;
+extern const WeightCurveVt D_00219698;
+extern const WeightCurveVt D_002196A8;
+void* func_0018D5C0(WeightCurve* n);
 
 typedef void (*Told_121508)(PlacedObject* self, Mat02* out1, Vec02* out2);
 
@@ -867,10 +867,10 @@ s32 func_00137B90(Stream83* p);
 void func_0012D2A8(Animation* a, Track83* b);
 void func_0012BC38(Animation* a, Stream83* b, s32 c, s32* d, s32* e);
 void func_0011EC40(Animation* a, Stream83* b);
-T2196_Pos* func_00120FB0(s32 cc);
-T2196_Rot* func_00121050(s32 cc);
-T2196_Scale* func_001210F0(s32 cc);
-T2196_Weight* func_00121160(s32 cc);
+PositionCurve* func_00120FB0(s32 cc);
+RotationCurve* func_00121050(s32 cc);
+ScaleCurve* func_001210F0(s32 cc);
+WeightCurve* func_00121160(s32 cc);
 
 struct Sub_12B5B8 {
     u8 pad0[0x60];
@@ -1571,14 +1571,14 @@ struct Out_130B48 { u8 pad0[16]; };
 
 void func_00130540(f32 f12, Self_130B48* a, u8* b, u8* c, u8* d, f32 f13, f32 f14, s32 a4, s32 a5, s32 a6);
 
-void func_001233C0(C22* object)
+void func_001233C0(CountedObject* object)
 {
 	if (!object->hold)
 		CountStateTriggerDone(object->counter);
 	func_0013D278(object);
 }
 
-void func_00123400(C22* state, StateTrigger* value)
+void func_00123400(CountedObject* state, StateTrigger* value)
 {
     state->counter = value;
 }
@@ -1672,7 +1672,7 @@ void func_001236C8(StateTrigger* self)
     for (i = 0; i < self->count1; i++) {
         void* node = FindFirstObjectById(self->world, 0x104, self->items1[i], self);
         if (node && IsObjectOfKind(node, 0x22)) {
-            SetCountedObjectCounter((C22*)node, self);
+            SetCountedObjectCounter((CountedObject*)node, self);
             kept++;
         }
     }
@@ -3916,10 +3916,10 @@ void func_0012B8C8(Animation* self, Stream83* other)
     s32 k;
     Track83* sel = 0;
     Track83* e;
-    T2196_Pos* qp;
-    T2196_Rot* qr;
-    T2196_Scale* qs;
-    T2196_Weight* qw;
+    PositionCurve* qp;
+    RotationCurve* qr;
+    ScaleCurve* qs;
+    WeightCurve* qw;
     s32 i;
     s32 j;
     s32 t;
@@ -3964,7 +3964,7 @@ void func_0012B8C8(Animation* self, Stream83* other)
         }
         if (flags & 0x10) {
             e->morphCount = ReadBufferedU8(other);
-            e->morph = (T2196_Weight**)AllocateZeroedFrontMemory(e->morphCount << 2);
+            e->morph = (WeightCurve**)AllocateZeroedFrontMemory(e->morphCount << 2);
             for (j = 0; j < e->morphCount; j++) {
                 t = ReadBufferedS8(other);
                 if (t != -1) {
@@ -5324,9 +5324,9 @@ void func_0012F760(AnimationPlayer* self, s32 a1, s32 a2)
     if (obj != 0) {
         obj->vtbl[18](obj);
     }
-    S1DBBD8* node = self->fE4;
+    QueuedCall* node = self->fE4;
     while (node != 0) {
-        S1DBBD8* next = node->next;
+        QueuedCall* next = node->next;
         node->fn(node->k1, a1, a2);
         node = next;
     }

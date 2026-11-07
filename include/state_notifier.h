@@ -62,19 +62,19 @@ struct StateNotifier : PlacedObject {
     u8 pad38C[0x390 - 0x38C];
 };
 
-struct C56 : StateNotifier {};
-struct C59 : StateNotifier {};
-struct C5A : StateNotifier {};
-struct C5B : StateNotifier {};
+struct SoundNotifier : StateNotifier {};
+struct SaveNotifier : StateNotifier {};
+struct DeadlineNotifier : StateNotifier {};
+struct ArmedStateNotifier : StateNotifier {};
 
 // 0x57 and 0x58: a timer (timeLeft) that counts down from a value chosen between two limits.
-struct C57 : StateNotifier {
+struct CountdownNotifier : StateNotifier {
     f32 timeMin;               // 0x390
     f32 timeMax;               // 0x394
     f32 timeLeft;               // 0x398
     u8 pad39C[0x3A0 - 0x39C];
 };
-struct C58 : StateNotifier {
+struct TimeRangeNotifier : StateNotifier {
     f32 timeMin;               // 0x390
     f32 timeMax;               // 0x394
     f32 timeLeft;               // 0x398
@@ -82,12 +82,12 @@ struct C58 : StateNotifier {
 };
 
 typedef char check_StateNotifier[sizeof(StateNotifier) == 0x390 ? 1 : -1];
-typedef char check_C56[sizeof(C56) == 0x390 ? 1 : -1];
-typedef char check_C57[sizeof(C57) == 0x3A0 ? 1 : -1];
-typedef char check_C58[sizeof(C58) == 0x3A0 ? 1 : -1];
-typedef char check_C59[sizeof(C59) == 0x390 ? 1 : -1];
-typedef char check_C5A[sizeof(C5A) == 0x390 ? 1 : -1];
-typedef char check_C5B[sizeof(C5B) == 0x390 ? 1 : -1];
+typedef char check_SoundNotifier[sizeof(SoundNotifier) == 0x390 ? 1 : -1];
+typedef char check_CountdownNotifier[sizeof(CountdownNotifier) == 0x3A0 ? 1 : -1];
+typedef char check_TimeRangeNotifier[sizeof(TimeRangeNotifier) == 0x3A0 ? 1 : -1];
+typedef char check_SaveNotifier[sizeof(SaveNotifier) == 0x390 ? 1 : -1];
+typedef char check_DeadlineNotifier[sizeof(DeadlineNotifier) == 0x390 ? 1 : -1];
+typedef char check_ArmedStateNotifier[sizeof(ArmedStateNotifier) == 0x390 ? 1 : -1];
 
 // The methods (config/us/classes.tsv); a slot's function takes its class's object.
 void func_00146340(StateNotifier* self);                       // 0x55 slot 0
@@ -97,23 +97,23 @@ void func_00146470(StateNotifier* self);                       // 0x55 slot 16
 s32 func_001473E0(StateNotifier* self, ContactObject* other);           // 0x55 slot 45
 void func_00147428(StateNotifier* self);                       // 0x55 slot 17 (original assembly)
 void func_00147AB0(StateNotifier* self, s32 mode);             // 0x55 slot 47
-void func_00147E40(C58* self);                       // 0x58 slot 0
-void func_00147EF8(C58* self, s32 kind, void* target);
-void func_00147FB0(C58* self);
-void func_00148298(C58* self, s32 mode);
-void func_00148400(C56* self);
-void func_00148470(C56* self, s32 mode);
-void func_00148510(C59* self);
-void func_00148598(C59* self, s32 mode);
-void func_00148698(C5A* self);
-void func_00148718(C5A* self);
-void func_00148770(C5A* self, s32 kind, void* msg);
-void func_00148828(C5A* self);
-void func_00148888(C5A* self, s32 mode);
-void func_00148D90(C57* self);
-void func_00148E40(C57* self, s32 kind, void* msg);
-void func_00148EF8(C57* self);
-void func_00148FF0(C57* self, s32 mode);
-void func_00149168(C5B* self);
+void func_00147E40(TimeRangeNotifier* self);                       // 0x58 slot 0
+void func_00147EF8(TimeRangeNotifier* self, s32 kind, void* target);
+void func_00147FB0(TimeRangeNotifier* self);
+void func_00148298(TimeRangeNotifier* self, s32 mode);
+void func_00148400(SoundNotifier* self);
+void func_00148470(SoundNotifier* self, s32 mode);
+void func_00148510(SaveNotifier* self);
+void func_00148598(SaveNotifier* self, s32 mode);
+void func_00148698(DeadlineNotifier* self);
+void func_00148718(DeadlineNotifier* self);
+void func_00148770(DeadlineNotifier* self, s32 kind, void* msg);
+void func_00148828(DeadlineNotifier* self);
+void func_00148888(DeadlineNotifier* self, s32 mode);
+void func_00148D90(CountdownNotifier* self);
+void func_00148E40(CountdownNotifier* self, s32 kind, void* msg);
+void func_00148EF8(CountdownNotifier* self);
+void func_00148FF0(CountdownNotifier* self, s32 mode);
+void func_00149168(ArmedStateNotifier* self);
 
 #endif

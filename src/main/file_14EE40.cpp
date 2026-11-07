@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // 0x14EE40 to 0x1549C8: the methods of classes 0x46, 0x23, 0x65 and 0x61, the threshold
-// tables of G261EF0, the display-list writer (V24A0, with its base vtable D_0024A0E0) and the
+// tables of ScatterController, the display-list writer (PacketWriter, with its base vtable D_0024A0E0) and the
 // active-set solver (func_00153528 to func_00154880). One file between two edges: its .rodata,
 // 0x249FE0 to 0x24A114, is followed by 12 bytes of padding before the next file's.
 #include "common.h"
@@ -11,7 +11,7 @@
 #include "world.h"
 #include "screen_element.h"
 #include "object_link.h"
-#include "g261ef0.h"
+#include "scatter_controller.h"
 #include "shapes.h"
 #include "list_iter.h"
 #include "c61.h"
@@ -20,7 +20,7 @@
 #include "attachment.h"
 #include "camera.h"
 #include "flagged_object.h"
-#include "v24a0.h"
+#include "packet_writer.h"
 #include "globals.h"
 #include "game_progress.h"
 #include "threshold_range.h"
@@ -169,7 +169,7 @@ void func_0013CE40(void* self);
 void func_00124DF8(void* self, s32 n, void* table);
 Src_14F920* func_0015A480(void* a, s32 kind, void* arg);
 void* func_00183058(void* item, void* x, void* self);
-void func_0014F900(C23* self);
+void func_0014F900(PooledHolder* self);
 void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void* func_001B6290(void* a, void* b, s32 c, s32 d);
 
@@ -232,8 +232,8 @@ void* func_0018D5C0(u32 n);
 // NEAR: the calls and branches match; the store of 1 into the inner object comes before the
 // float load of D_0026185C in retail, ours schedules the float load first (5 instructions).
 
-s32 func_0014FEC0(C23* self);
-PooledObject* func_00150338(C23* self);
+s32 func_0014FEC0(PooledHolder* self);
+PooledObject* func_00150338(PooledHolder* self);
 s32 func_00182FC8(PooledObject* p);
 void func_001853F0(Held23* a, PooledObject* b, u8* c);
 
@@ -241,7 +241,7 @@ void func_001853F0(Held23* a, PooledObject* b, u8* c);
 
 
 s32 func_00152720(void* p);
-void func_00150298(C23* self);
+void func_00150298(PooledHolder* self);
 void func_001B9AE0(Collider* o, s32 a, s32 b, s32 c, s32 d);
 
 // NEAR: the search index is kept in a0 where retail uses a2, and hi is saved in s3 before the call in retail; the loop shape is otherwise the same.
@@ -253,12 +253,12 @@ f32 func_0014D138(Tab_14D1A0* count, f32* table, void* wrap, f32 x);
 void func_001B93F8(Collider* self);
 void func_0014F270(PooledObject* self, f32 f);
 
-void func_0013D068(C23* self);
+void func_0013D068(PooledHolder* self);
 void func_001B6598(void* p, s32* out);
 void func_001B6568(void* p, s32* out);
-void func_0014FDA8(C23* self, s32* state);
-void func_00150008(C23* self);
-void func_0014FCE8(C23* self, s32 state);
+void func_0014FDA8(PooledHolder* self, s32* state);
+void func_00150008(PooledHolder* self);
+void func_0014FCE8(PooledHolder* self, s32 state);
 
 struct Slot_14CBA8 {
     void* p0;
@@ -448,7 +448,7 @@ extern void* func_00160CA0(void*, u32);
 extern void func_001F5C0C(void*, u32, u32);
 
 f32 func_001EB0F8(void*, f32);
-void func_00152410(G261EF0* object, f32 unused);
+void func_00152410(ScatterController* object, f32 unused);
 f32 func_001EB0F8(void*, f32);
 
 extern f32 func_001EB0F8(void*, f32);
@@ -469,7 +469,7 @@ struct Buffer_00152938 { u8* end; u8* current; u8 pad[4]; u8* allocated; };
 
 extern u8* func_0018D658(u32);
 
-void func_00152D70(V24A0* self);
+void func_00152D70(PacketWriter* self);
 
 void func_00152D70(void* self);
 u32 func_0018D568(u32 size, u32 src);
@@ -530,7 +530,7 @@ void func_00148CE0(void*);
 
 struct VEnt_0024A0E0 { s32 delta; void (*fn)(); };
 void func_00152E18();
-void func_001528C8(V24A0* p);
+void func_001528C8(PacketWriter* p);
 
 struct __attribute__((packed)) Blk_150790 { u8 pad0[0x324]; s32 f324; };
 struct Glob_150790 { u8 pad0[0x260]; StepSequence* f260; };
@@ -621,7 +621,7 @@ s32 func_001BE5E8(void);
 void func_00150790(StepSequence* self, s32 mode);
 void func_001F5C0C(s32* p, s32 v, s32 n);
 Ent65* func_001925F0(void);
-s32 func_001493A0(T2173* p);
+s32 func_001493A0(CameraController* p);
 void func_001518B8(StepSequence* self);
 void func_00151860(StepSequence* value, Ent65* object);
 void func_001516C0(StepSequence* self);
@@ -728,27 +728,27 @@ struct Self_152E48 {
     s32 f2E0;
 };
 
-void* func_001611B8(V24A0* p);
-void* func_001EE318(V24A0* p);
+void* func_001611B8(PacketWriter* p);
+void* func_001EE318(PacketWriter* p);
 void func_0018D608(void);
-void func_00152980(V24A0* p, s32 size);
-void func_001EE480(V24A0* p);
-void func_00169B18(TextureHeader* t, V24A0* p);
-void func_001613C0(V24A0* p, s32 a, s32 b, u64 c);
-void func_00161458(V24A0* p, s32 a);
-void func_00161588(V24A0* p, s32 a, s32 b, u64 c);
-void func_00161708(V24A0* p, s32 a, u64 v);
-void func_00161200(V24A0* p);
-void func_001EE8D0(V24A0* p, V24A0* q);
-void func_001EE3B8(V24A0* p, s32 a, s32 b);
-void func_001EE668(V24A0* p, s32 size, s32 count, void* data, s32 flags);
-void func_001528C8(V24A0* p);
-void func_001529C8(V24A0* p, s32 n, Quad4* q);
-void func_001612F8(V24A0* p, s32 a, s32 b, s32 c, u64 d, s32 e);
-void func_00152A50(V24A0* p, s32* a, s32 b, s32* c, s32 d);
+void func_00152980(PacketWriter* p, s32 size);
+void func_001EE480(PacketWriter* p);
+void func_00169B18(TextureHeader* t, PacketWriter* p);
+void func_001613C0(PacketWriter* p, s32 a, s32 b, u64 c);
+void func_00161458(PacketWriter* p, s32 a);
+void func_00161588(PacketWriter* p, s32 a, s32 b, u64 c);
+void func_00161708(PacketWriter* p, s32 a, u64 v);
+void func_00161200(PacketWriter* p);
+void func_001EE8D0(PacketWriter* p, PacketWriter* q);
+void func_001EE3B8(PacketWriter* p, s32 a, s32 b);
+void func_001EE668(PacketWriter* p, s32 size, s32 count, void* data, s32 flags);
+void func_001528C8(PacketWriter* p);
+void func_001529C8(PacketWriter* p, s32 n, Quad4* q);
+void func_001612F8(PacketWriter* p, s32 a, s32 b, s32 c, u64 d, s32 e);
+void func_00152A50(PacketWriter* p, s32* a, s32 b, s32* c, s32 d);
 void func_0018D6F0(void);
-void func_001614C8(V24A0* p, s32 a, s32 b);
-void func_001EE450(V24A0* p);
+void func_001614C8(PacketWriter* p, s32 a, s32 b);
+void func_001EE450(PacketWriter* p);
 
 struct Sub_1533A8 {
     u8 pad0[0x238];
@@ -920,13 +920,13 @@ ASM_FUNC(func_0014F168);
 
 ASM_FUNC(func_0014F270);
 
-void func_0014F740(C23* self)
+void func_0014F740(PooledHolder* self)
 {
     InitPlayerFlaggedCollider(self);
     self->f6C0 = -1;
 }
 
-void func_0014F770(C23* self, s32 kind, void* msg)
+void func_0014F770(PooledHolder* self, s32 kind, void* msg)
 {
     s32 result;
 
@@ -950,7 +950,7 @@ void func_0014F770(C23* self, s32 kind, void* msg)
     }
 }
 
-void func_0014F850(C23* self)
+void func_0014F850(PooledHolder* self)
 {
     s32 i = 0;
     PostLoadPlacedObject(self);
@@ -969,14 +969,14 @@ void func_0014F850(C23* self)
     }
 }
 
-void func_0014F900(C23* self)
+void func_0014F900(PooledHolder* self)
 {
     if (g_player != 0) {
         self->f6DC = (s32)g_player->f24F8;
     }
 }
 
-void func_0014F920(C23* self)
+void func_0014F920(PooledHolder* self)
 {
     StartMaskedCollider(self);
     ResolveObjectLinks(self, 3, g_takerLinks);
@@ -1005,7 +1005,7 @@ void func_0014F920(C23* self)
     self->p740 = CreateStateWalker(self->p73C, self, 0x2B7, 1);
 }
 
-void func_0014FA88(C23* self)
+void func_0014FA88(PooledHolder* self)
 {
     s32 st[2];
     UpdateMaskedCollider(self);
@@ -1046,7 +1046,7 @@ void func_0014FA88(C23* self)
     }
 }
 
-s32 func_0014FBE0(C23* self, Collider* obj)
+s32 func_0014FBE0(PooledHolder* self, Collider* obj)
 {
     if (IsObjectOfKind(obj, 0x46) != 0) {
         if (((PooledObject*)obj)->taker == self) {
@@ -1056,7 +1056,7 @@ s32 func_0014FBE0(C23* self, Collider* obj)
     return TestCollidersMayContact(self, obj);
 }
 
-void func_0014FC38(C23* self)
+void func_0014FC38(PooledHolder* self)
 {
     s32 status;
 
@@ -1079,7 +1079,7 @@ void func_0014FC38(C23* self)
     func_0013D278(self);
 }
 
-void func_0014FCE8(C23* self, s32 code)
+void func_0014FCE8(PooledHolder* self, s32 code)
 {
     s32 r;
 
@@ -1104,7 +1104,7 @@ void func_0014FCE8(C23* self, s32 code)
     SetStateWalkerTarget(self->p740, code);
 }
 
-void func_0014FDA8(C23* self, s32* state)
+void func_0014FDA8(PooledHolder* self, s32* state)
 {
     if (*state == 0x2B8) {
         ((Held23*)self->p734->f200)->f1C = 0;
@@ -1130,7 +1130,7 @@ void func_0014FDA8(C23* self, s32* state)
     }
 }
 
-s32 func_0014FEC0(C23* self) {
+s32 func_0014FEC0(PooledHolder* self) {
     PooledObject* s0;
 
     if (self->p6C8 != 0) {
@@ -1162,7 +1162,7 @@ s32 func_0014FEC0(C23* self) {
 
 ASM_FUNC(func_00150008);
 
-void func_00150298(C23* self)
+void func_00150298(PooledHolder* self)
 {
 	ListFrame frame;
 	if (self->p6CC != 0) return;
@@ -1178,7 +1178,7 @@ void func_00150298(C23* self)
 	if (best != 0) { SetPooledObjectState(best, 5); self->p6CC = best; }
 }
 
-PooledObject* func_00150338(C23* state)
+PooledObject* func_00150338(PooledHolder* state)
 {
 	for (s32 i = 0; i < state->f78C; ++i) {
 		PooledObject* item = (PooledObject*)state->f790[i];
@@ -1190,7 +1190,7 @@ PooledObject* func_00150338(C23* state)
 	return 0;
 }
 
-void func_001503E0(C23* self, void* item)
+void func_001503E0(PooledHolder* self, void* item)
 {
     u32 n = (u32)self->count744;
     if (n < 8) {
@@ -1199,13 +1199,13 @@ void func_001503E0(C23* self, void* item)
     }
 }
 
-void func_00150408(C23* self)
+void func_00150408(PooledHolder* self)
 {
     self->f78C = 0;
     self->f7B0 = 0;
 }
 
-void func_00150418(C23* self, void* event)
+void func_00150418(PooledHolder* self, void* event)
 {
     if (IsObjectOfKind(event, 7)) {
         self->f7B0 = 1;
@@ -1846,12 +1846,12 @@ void func_00151A68(void* state)
 	FillMemory(state, 0, 0x24);
 }
 
-void func_00151A88(G261EF0* self)
+void func_00151A88(ScatterController* self)
 {
-    self->f04 = 4;
-    self->f08 = 6;
-    self->f0C = 1;
-    self->f10 = 3;
+    self->refillLo = 4;
+    self->refillHi = 6;
+    self->countLo = 1;
+    self->countHi = 3;
     GameProgress* g = g_saveData;
     if (g->f19D8 == 0 || g->f19D8 == 5 || g->f19DC == 1) self->table = &D_00261E90;
     else if (!(g_currentEntry->flags & 2)) self->table = D_00261D70;
@@ -1874,12 +1874,12 @@ void func_00151A88(G261EF0* self)
     s32 r = RandomIntInRange(ra, rc);
     s32 i = 0;
     ThresholdRange* e = 0;
-    self->f14 = r;
+    self->countdown = r;
     for (; i < ((Tab_151A88*)self->table)->count; i++) {
         e = &((Tab_151A88*)self->table)->list[i];
         if (e->threshold <= g_currentEntry->f10) break;
     }
-    self->f18 = RandomIntInRange(e->low, e->high);
+    self->bandCountdown = RandomIntInRange(e->low, e->high);
     self->f20 = 0;
 }
 
@@ -1908,7 +1908,7 @@ void func_00151E18(void* self)
 {
 }
 
-void func_00151E20(G261EF0* self, f32 amount)
+void func_00151E20(ScatterController* self, f32 amount)
 {
     f32 x = g_currentEntry->dt + amount * *(f32*)((u8*)self->table + 0x10);
     SetScatterLevel(self, x);
@@ -1926,7 +1926,7 @@ void func_00151E20(G261EF0* self, f32 amount)
     g_currentEntry->f10 = result;
 }
 
-void func_00151ED8(G261EF0* obj, FlaggedObject* node)
+void func_00151ED8(ScatterController* obj, FlaggedObject* node)
 {
     f32 value;
     if (node != 0) {
@@ -1951,7 +1951,7 @@ have:
     }
 }
 
-void func_00151FC8(G261EF0* object)
+void func_00151FC8(ScatterController* object)
 {
 	SetScatterLevel(object, 0.0f);
 	G27C230* manager = g_currentEntry;
@@ -1960,18 +1960,18 @@ void func_00151FC8(G261EF0* object)
 	FillMemory(manager->bits74, 0, 1);
 }
 
-void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
+void func_00152010(ScatterController* self, void* p, s32 n, s32 flag)
 {
     s32 did = 0;
     if ((g_currentWorld)->f2354 != 0 && n != 0) {
         if (!flag) {
-            self->f18--;
-            self->f14--;
+            self->bandCountdown--;
+            self->countdown--;
         }
         if (n > 0) {
             ScatterObjectsAroundCircle(g_currentWorld, 0x58, p, n, 0);
         } else {
-            if (self->f18 < 0) {
+            if (self->bandCountdown < 0) {
                 if (g_currentEntry->f10 != 0.0f) {
                     did = 1;
                     g_currentEntry->f10 = ClampToRange(&g_unitRange, g_currentEntry->f10 + ((Table_152010*)self->table)->f44);
@@ -1983,13 +1983,13 @@ void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
                     if (g_currentEntry->f10 >= r->threshold) break;
                     i++;
                 }
-                self->f18 = RandomIntInRange(r->lo, r->hi);
+                self->bandCountdown = RandomIntInRange(r->lo, r->hi);
             }
             if (!flag) {
                 for (s32 i = 0; i < ((Table_152010*)self->table)->count - 1; i++) {
                     if (((Table_152010*)self->table)->ranges[i].threshold <= g_currentEntry->f10) {
                         s32 v = RandomIntInRange(((Table_152010*)self->table)->ranges[i].lo, ((Table_152010*)self->table)->ranges[i].hi);
-                        self->f18 = (self->f18 < v) ? self->f18 : v;
+                        self->bandCountdown = (self->bandCountdown < v) ? self->bandCountdown : v;
                         goto done;
                     }
                 }
@@ -1999,13 +1999,13 @@ void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
                 ScatterObjectsAroundCircle(g_currentWorld, 0x57, p, 1, 0);
             } else {
                 s32 a, b;
-                if (self->f14 < 0) {
-                    a = self->f04;
-                    b = self->f08;
-                    self->f14 = RandomIntInRange(Lerp_152010::Get(((Table_152010*)self->table)->f1C, ((Table_152010*)self->table)->f24), Lerp_152010::Get(((Table_152010*)self->table)->f20, ((Table_152010*)self->table)->f28));
+                if (self->countdown < 0) {
+                    a = self->refillLo;
+                    b = self->refillHi;
+                    self->countdown = RandomIntInRange(Lerp_152010::Get(((Table_152010*)self->table)->f1C, ((Table_152010*)self->table)->f24), Lerp_152010::Get(((Table_152010*)self->table)->f20, ((Table_152010*)self->table)->f28));
                 } else {
-                    a = self->f0C;
-                    b = self->f10;
+                    a = self->countLo;
+                    b = self->countHi;
                 }
                 n = RandomIntInRange(a, b);
                 if (n) ScatterObjectsAroundCircle(g_currentWorld, 0x58, p, n, 0);
@@ -2017,7 +2017,7 @@ void func_00152010(G261EF0* self, void* p, s32 n, s32 flag)
     }
 }
 
-void func_00152410(G261EF0* object, f32 unused)
+void func_00152410(ScatterController* object, f32 unused)
 {
 	f32 value = ((f32 (*)(void*))ClampToRange)(object->table);
 	g_currentEntry->dt = value;
@@ -2188,16 +2188,16 @@ void func_00152810()
 
 extern const VEnt_0024A0E0 D_0024A0E0[4] = {{0, 0}, {0, func_00152E18}, {0, 0}, {0, 0}};
 
-V24A0* func_00152888(V24A0* self)
+PacketWriter* func_00152888(PacketWriter* self)
 {
     self->f10 = 0;
     self->f14 = 0;
-    self->vt = (const V24A0_Vt*)D_0024A0E0;
+    self->vt = (const PacketWriterVt*)D_0024A0E0;
     ClearPacketBuffer(self);
     return self;
 }
 
-void func_001528C8(V24A0* p)
+void func_001528C8(PacketWriter* p)
 {
 	p->end = 0;
 	p->begin = 0;
@@ -2205,14 +2205,14 @@ void func_001528C8(V24A0* p)
 	p->cur = 0;
 }
 
-void func_001528E0(V24A0* p)
+void func_001528E0(PacketWriter* p)
 {
 	u8* b = p->begin;
 	p->f08 = 0;
 	p->cur = b;
 }
 
-void func_001528F0(V24A0* self, s32 count)
+void func_001528F0(PacketWriter* self, s32 count)
 {
     s32 size = count << 4;
     u8* base = ReservePermanentMemory(size);
@@ -2230,7 +2230,7 @@ void func_00152938(Buffer_00152938* buffer, u32 count)
 	buffer->current = memory;
 }
 
-void func_00152980(V24A0* buffer, u32 count)
+void func_00152980(PacketWriter* buffer, u32 count)
 {
 	u32 bytes = count << 4;
 	u8* memory = AllocateBackMemory(bytes);
@@ -2239,14 +2239,14 @@ void func_00152980(V24A0* buffer, u32 count)
 	buffer->begin = memory;
 }
 
-void func_001529C8(V24A0* self, s32 count, u8* base)
+void func_001529C8(PacketWriter* self, s32 count, u8* base)
 {
     self->begin = base;
     self->cur = base;
     self->end = base + count * 16;
 }
 
-void func_001529E0(V24A0* self, u32* outCount, u8** outBegin)
+void func_001529E0(PacketWriter* self, u32* outCount, u8** outBegin)
 {
     CloseDmaTag(self);
     if (outCount != 0) {
@@ -2258,7 +2258,7 @@ void func_001529E0(V24A0* self, u32* outCount, u8** outBegin)
     ClearPacketBuffer(self);
 }
 
-void func_00152A50(V24A0* self, u32* count, u32* begin, u32* out)
+void func_00152A50(PacketWriter* self, u32* count, u32* begin, u32* out)
 {
     CloseDmaTag(self);
     u32 n = (self->curU - (u32)self->begin) >> 4;
@@ -2274,7 +2274,7 @@ void func_00152A50(V24A0* self, u32* count, u32* begin, u32* out)
     ClearPacketBuffer(self);
 }
 
-void func_00152AE0(V24A0* self, void* dma)
+void func_00152AE0(PacketWriter* self, void* dma)
 {
     CloseDmaTag(self);
     SyncDataCache(0);
@@ -2284,7 +2284,7 @@ void func_00152AE0(V24A0* self, void* dma)
 
 LINKER_REMNANT(func_00152B30);
 
-void func_00152B38(V24A0* self)
+void func_00152B38(PacketWriter* self)
 {
     CloseDmaTag(self);
     u8* q = self->cur;
@@ -2294,7 +2294,7 @@ void func_00152B38(V24A0* self)
     *(u64*)((u8*)self->f08 + 8) = 0;
 }
 
-void func_00152B80(V24A0* self, s32 lo, s32 hi)
+void func_00152B80(PacketWriter* self, s32 lo, s32 hi)
 {
     s32 flag = 0;
     if (self->f08 != 0) {
@@ -2314,7 +2314,7 @@ void func_00152B80(V24A0* self, s32 lo, s32 hi)
     }
 }
 
-void func_00152C18(V24A0* self, s32 hi)
+void func_00152C18(PacketWriter* self, s32 hi)
 {
     s32 flag = 0;
     if (self->f08 != 0) {
@@ -2334,7 +2334,7 @@ void func_00152C18(V24A0* self, s32 hi)
     }
 }
 
-void func_00152CA0(V24A0* self)
+void func_00152CA0(PacketWriter* self)
 {
     CloseDmaTag(self);
     u64* p = (u64*)self->cur;
@@ -2358,7 +2358,7 @@ void func_00152D30(void* self)
     *(u64*)(cursor + 8) = 0;
 }
 
-void func_00152D70(V24A0* self)
+void func_00152D70(PacketWriter* self)
 {
     if (self->f10 != 0) {
         s32 p = self->curS;
@@ -2369,8 +2369,8 @@ void func_00152D70(V24A0* self)
         }
         self->curS = p;
     } else if (self->f14 != 0) {
-        const V24A0_Vt* t = self->vt;
-        t->close((V24A0*)((u8*)self + t->adj1), 0);
+        const PacketWriterVt* t = self->vt;
+        t->close((PacketWriter*)((u8*)self + t->adj1), 0);
     }
     s32* q = self->f08;
     if (q != 0) {
@@ -2390,8 +2390,8 @@ void func_00152E28(C61* self)
 
 void func_00152E48(Self_152E48* self, RangeRecord* a)
 {
-    V24A0 pa;
-    V24A0 pb;
+    PacketWriter pa;
+    PacketWriter pb;
     Vec_152E48 v0;
     Vec_152E48 v1;
     Quad4 q;

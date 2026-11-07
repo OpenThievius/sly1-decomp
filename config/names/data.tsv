@@ -101,7 +101,7 @@ D_0024E879	g_charClassFlags	per-character class bits; UppercaseString shifts let
 D_0024FF70	g_mathInfinity	a double's positive infinity, which the checked functions return as an error's result (infinity.c)
 D_0024FF78	g_mathErrorMode	the math library's error mode, 1; the checked functions return the kernel's result unchanged when it is -1 (error_mode.c)
 D_00259938	g_scriptMathFunctions	table of eight one-float functions; CallScriptMathFunction calls D_00259938[index]
-D_00259958	g_scriptBuiltins	the built-ins' table (r119bb0.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
+D_00259958	g_scriptBuiltins	the built-ins' table (script_builtin.h): 125 records of function, argument count and rest flag that EvalScriptCall indexes with a tag 0x1D value
 D_00259F38	g_markStacks	the collector's roots and mark stacks (0x2318 bytes): ResetMarkRoots, AddMarkRootList and the Push/PopMark functions use it, DrainMarkStacks walks it and CollectScriptPools runs it
 D_0025C250	g_valueNodePool	EntryPool of 0xC-byte chain value nodes: func_0011AF28 takes from it, func_0011AF78 is its removeCallback
 D_0025C270	g_scopePool	EntryPool of 0x1C-byte scope records: func_0011A630 takes from it, func_0011A670 is its removeCallback
@@ -309,9 +309,9 @@ D_002744D8	g_sequencedObjectLinks	the ObjectLink table SetupSequencedObject pass
 D_002744F8	g_animRecordCount	func_001B3040 sets it from func_00137BE0 and sizes the record array by it; FindAnimRecord bounds its index by it
 D_002744FC	g_animRecords	the array of 0x28-byte AnimRecords func_001B3040 allocates; FindAnimRecord indexes it
 D_00274500	g_imageRecordCountA	func_001B2CF8 sets it to the count of the 0x20-byte image records of g_imageRecordsA; PlaceMaskedImages loops to it
-D_00274504	g_imageRecordsA	the array of V24A2_ImgA records (0x20 bytes each) func_001B2CF8 allocates; PlaceMaskedImages and LoadFont index it
+D_00274504	g_imageRecordsA	the array of ImageRecord records (0x20 bytes each) func_001B2CF8 allocates; PlaceMaskedImages and LoadFont index it
 D_00274508	g_imageRecordCountB	func_001B2BA8 sets it to the count of the 0x18-byte image records of g_imageRecordsB; PlaceMaskedImages loops to it
-D_0027450C	g_imageRecordsB	the array of V24A2_ImgB records (0x18 bytes each) func_001B2BA8 allocates; PlaceMaskedImages and LoadFont index it
+D_0027450C	g_imageRecordsB	the array of PaletteRecord records (0x18 bytes each) func_001B2BA8 allocates; PlaceMaskedImages and LoadFont index it
 D_00274510	g_imageSlotsA	the larger of the counts of first image records with and without bit 0x10000000 (LoadImageRecordsA); the image senders func_001692B0, func_001693A8 and func_00169780 read it
 D_00274514	g_imageSlotsB	the larger of the counts of second image records with and without bit 0x10000000 (LoadImageRecordsB); the image senders func_001692B0, func_001693A8 and func_00169780 read it
 D_00274518	g_activeImageMask	the image mask SwitchActiveImageMask last sent; it sends again only for another mask, and SendResidentImages clears it
@@ -351,7 +351,7 @@ D_00275958	g_mainAndRenderThreads	func_001E2398 stores the current thread id in 
 D_00275964	g_movieDecodeThread	CreateMovieDecodeThread stores the id returned by the thread-create call (entry RunMovieDecodeThread) there and then starts it.
 D_00275AF0	g_worldLoadRequest	the request record built at start-up by the constructor Ctor_1E4E38 that QueueWorldLoad fills and RunPendingWorldLoad consumes
 D_00275BC0	g_elementStack	the stack object InitGlobalElementStack, func_0016B580, func_0016BBA8, func_001940E8 and func_001DB838 pass to PushStackElement, PopStackElement, SetElementStackState and ResetElementStack
-D_00275C60	g_unitRange	an S1EB050 range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (00150000.cpp) and func_001EB460 clamps its blend factor to.
+D_00275C60	g_unitRange	an ValueRange range {0.0, 1.0} that func_001EB0F8 clamps the level record's word 0x10 to (00150000.cpp) and func_001EB460 clamps its blend factor to.
 D_00275F80	g_screenFade	the one ScreenFade record: func_001EFFA0 starts a fade on it, func_001EFD10 advances it, func_001EFEE0 draws it
 D_0027696C	g_libraryState	the C library's state record: its first word is the error number (GetErrorNumberAddress returns it), +0x58 the random seed SeedRandom and NextRandom use, +0x1D4 the signal table MakeSignalTable allocates
 D_00277128	g_requestThreadId	the request thread's id; StartRequestThread returns early when it is already positive
