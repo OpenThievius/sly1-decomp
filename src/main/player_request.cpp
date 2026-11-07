@@ -221,6 +221,86 @@ void func_001D4148(TurningCollider* self, BlendSlot* slots, Gr8B** gr)
     BuildCombinedBlendAnimation(self, 0x20, 8, slots, 0, 0, 0, gr);
     SetBlendItemWeights(*gr, 0x20, 8, slots);
 }
+struct PlayerBlendItem {
+    f32 weight;             // 0x00
+    BlendSlotObject* object; // 0x04
+    u8 pad08[0x10 - 0x08];
+    Vec02 v10;              // 0x10
+    Vec02 v20;              // 0x20
+    f32 f30;                // 0x30
+    u8 pad34[0x40 - 0x34];
+    f32 f40;                // 0x40
+    u8 pad44[0x50 - 0x44];
+};
+struct PlayerBlendCurve { u8 pad00[0x10]; void* f10; };
+
+void ComputeWrappedDeltas(s32 stride, s32 count, void* base, s32 off, s32 mode, void* table);
+
+void func_001D36F0(TurningCollider* self, PlayerBlendItem* items, Gr8B** out)
+{
+    Vec02 a0;
+    Vec02 a10;
+    Vec02 a20;
+    Vec02 a30;
+    Gr8B* blend;
+    f32 one;
+    s32 i;
+
+    if (items[0].object == 0) {
+        *out = 0;
+        return;
+    }
+    items[0].weight = 1.0f;
+    one = 1.0f;
+    ComputeWrappedDeltas(0x50, 6, items, 0x30, 2, D_00274FA0);
+    ComputeWrappedDeltas(0x50, 6, items, 0x40, 2, D_00274FA8);
+    for (i = 0; i < 6; i++) {
+        PlayerBlendItem* it = &items[i];
+        BlendSlotObject* o = it->object;
+        if (o != 0) {
+            SlotMover* m = o->holder->mover;
+            (*m->vtbl)((Mover8B*)m, self, 0.0f, one, 0, &a0, 0);
+            m = o->holder->mover;
+            (*m->vtbl)((Mover8B*)m, self, o->f34, one, 0, &a10, 0);
+            Vu0::Q(it->v10) = Vu0::DivX(Vu0::Sub(Vu0::Q(a0), Vu0::Q(a10)), Vu0::FromFloatAt(o->f34));
+            m = (SlotMover*)FindEntryByObjectId(it->object, self->f610)->mover;
+            (*m->vtbl)((Mover8B*)m, self->f610, it->f30, one, 0, &a20, 0);
+            m = (SlotMover*)FindEntryByObjectId(it->object, self->f614)->mover;
+            (*m->vtbl)((Mover8B*)m, self->f614, it->f40, one, 0, &a30, 0);
+            u128 h = Vu0::FromFloat(0.5f);
+            Vu0::Q(it->v20) = Vu0::MulXSum(Vu0::Q(a20), h, Vu0::Q(a30), h);
+        }
+    }
+    BuildCombinedBlendAnimation((TurningCollider*)self, 0x50, 6, (BlendSlot*)items, 2, (s32)D_00274FB8, (s32)D_00274FB0, &blend);
+    for (i = 0; i < blend->f38; i++) {
+        Entry8B* e = (Entry8B*)(blend->f3C + i * 0x1C);
+        s32 k = e->key;
+        if (k >= 0x37) {
+            if (k < 0x3A) {
+                continue;
+            }
+            if (k < 0x3D) {
+                if (e->mover != 0) {
+                    ((PlayerBlendCurve*)e->mover)->f10 = blend->pC0 + 1;
+                }
+                if (e->sub != 0) {
+                    ((PlayerBlendCurve*)e->sub)->f10 = blend->pC0 + 1;
+                }
+                continue;
+            }
+        }
+        if (e->mover != 0) {
+            ((PlayerBlendCurve*)e->mover)->f10 = 0;
+        }
+        if (e->sub != 0) {
+            ((PlayerBlendCurve*)e->sub)->f10 = 0;
+        }
+    }
+    SetBlendItemWeights(blend, 0x50, 6, items);
+    if (out != 0) {
+        *out = blend;
+    }
+}
 INCLUDE_ASM(func_001D4348);
 INCLUDE_ASM(func_001D4698);
 
