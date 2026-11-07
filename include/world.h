@@ -45,7 +45,7 @@ struct Actor6C {
 struct ActorList6C { Actor6C* head; u8 pad4[4]; s32 offset; };
 
 // A pool of free records of one size (func_001B5EA0 takes the first, func_001B5EE0 clears it).
-struct Pool6C { s32 size; u8 pad4[4]; void* head; };
+struct Pool6C { s32 size; void* base; void* head; };   // base: the records' block (func_001B5DD0)
 
 struct World : BaseObject {
     s32 count34;            // 0x34: the 0x03 objects in the world (func_001B7A98, func_001B7B78)

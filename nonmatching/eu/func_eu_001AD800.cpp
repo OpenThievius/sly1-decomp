@@ -78,10 +78,10 @@ void func_eu_001AD800(Label_eu_1AD800* self)
         func_00137260(&L, 0);
         func_00137268(&L, 0);
         func_eu_001374E0(&L, 0);
-        SubObj_001AB710* sub = *(SubObj_001AB710**)self->f520;
+        Font* sub = *(Font**)self->f520;
         if (sub != 0) {
-            VDesc_001AB710* d = sub->desc4C;
-            d->fn4C((u8*)sub + d->off48, self->f520, &L, D_eu_00263590);
+            const FontVt* d = sub->vt;
+            d->drawBox((Font*)((u8*)sub + d->adj9), self->f520, &L, D_eu_00263590);
         }
     }
     {

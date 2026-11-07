@@ -88,8 +88,6 @@ void func_00152438(void* self, s32 value);
 
 
 struct Local_001AB710 { f32 x; f32 y; u8 pad0[0x8]; T217D_Word w10; u8 pad1[0xC]; s32 tag; u8 pad2[0xC]; T217D_Word w30; };
-struct VDesc_001AB710 { u8 pad0[0x48]; s16 off48; u8 pad1[2]; void (*fn4C)(void* self, void* obj, void* out, void* d); };
-struct SubObj_001AB710 { u8 pad0[0x4C]; VDesc_001AB710* desc4C; };
 void func_00137248(void* out, void* p);
 void func_00137260(void* out, s32 v);
 void func_00137268(void* out, s32 v);
@@ -1109,10 +1107,10 @@ void func_001AB710(T217D_510* self)
         func_00137268(&L, 0);
         void* obj = self->frame;
         if (obj != 0) {
-            SubObj_001AB710* sub = *(SubObj_001AB710**)obj;
+            Font* sub = *(Font**)obj;
             if (sub != 0) {
-                VDesc_001AB710* d = sub->desc4C;
-                d->fn4C((u8*)sub + d->off48, obj, &L, &g_gsPacketWriter);
+                const FontVt* d = sub->vt;
+                d->drawBox((Font*)((u8*)sub + d->adj9), obj, &L, &g_gsPacketWriter);
             }
         }
         f32 v = self->scale;

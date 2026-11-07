@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "common.h"
+#include "shapes.h"
 #include "script_value.h"
 #include "cursor_animator.h"
 #include "switched_collider.h"
@@ -17,8 +18,8 @@
 
 f32 func_001EAAE0(f32 a, f32 b);
 extern f32 D_0026185C;
-struct Vec2_1B55A8 { f32 x; f32 y; };
-struct Walk_1B5D80 { s32 a; u32 b; u32 c; };
+// Two floats (CopyVec2).
+struct Point2 { f32 x; f32 y; };
 void func_0012F6B0(void* p);
 s32 func_001300E8(void* a, s32 b);
 s32 func_00182F40(Collider* e, void* b);
@@ -27,8 +28,6 @@ void func_001BF048(void* p);
 void func_001B6E28(StateWalker* self, s32 a, s32 b);
 void func_001B6C68(StateWalker* self);
 void func_001B66A0(StateWalker* self);
-typedef void (*VFn_1B6D78)(void* self);
-struct Obj_1B6D78 { VFn_1B6D78* vtbl; };
 void func_001837E0(StateGraph* host, s32 a, s32 b, void* args);
 // A free slot of a world pool (Pool6C): its first word links the next.
 struct FreeSlot { FreeSlot* next; };
@@ -44,14 +43,11 @@ void func_0012E760(void* p);
 void func_001DBC18(void* a, void* b);
 void func_00152600(void* a, void* b);
 void func_001B5F28(void* a, void* b);
-struct Vec3_1B5588 { f32 x; f32 y; f32 z; };
 struct __attribute__((aligned(16))) Quad_001B4580 { f32 v[4]; };
 s32 func_001CA600(s32 index);
 void func_00124A48(void* self);
-struct Walk_1B5DD0 { s32 a; void* b; s32 c; };
 void* func_0018D500(s32 size);
 void func_001B5D80(void* s, s32 v, s32 n);
-struct Walk_1B5E30 { s32 a; void* b; s32 c; };
 void func_001831E8(void* a, void* b, s32 c, void* d);
 void func_001C72A0(void* self);
 void func_001B6F50(void* self);
@@ -59,8 +55,6 @@ s32 func_0015A448(void* host, s32 id, void* ctx);
 s32 func_0015A418(void* host, s32 a1, s32 a2, void* ctx);
 void func_001C7CB8(void* self);
 void func_001B7638(void* self);
-typedef void (*VFn_1B7790)(void* self);
-struct Sub_1B7790 { VFn_1B7790* vtbl; };
 void func_001C91C8(void* self);
 typedef s32 (*VFn_1B7818)(void* self);
 s32 func_001CA468(void* self);
@@ -80,40 +74,24 @@ s32 func_001B63F8(StateGraph* self, s32 key);
 void func_001B6C68(StateWalker* self);
 void func_0012E760(AnimationPlayer* obj);
 void func_001B66A0(StateWalker* self);
-struct Entry_2198E8 { const u8* f0; s32 f4; };
-extern const Entry_2198E8 D_002198E8;
+// A class descriptor of two words: the parent's and the class id (config/us/classes.tsv, kind head).
+// A class descriptor of two words, the parent's and the class id (classes.tsv, kind head).
+struct ClassHead { const u8* f0; s32 f4; };
+extern const ClassHead D_002198E8;
 void* func_001B5EE0(Pool6C* pool);
 void func_00152470(List01* list, StateWalker* item);
-struct Hdr_1B6F50;
-struct Elem_1B6F50;
-struct Sub_1B6F50 { u8 p0[0x11]; u8 f11; u8 p1[0x0A]; s32 f1C; u8 p2[0x60]; s32 f80; s32 f84; };
-typedef void (*VFn_1B6F50)(void* self);
-struct Elem_1B6F50 { VFn_1B6F50* vtbl; };
 extern u8 D_0021A790[];
-void* func_0015A448(Hdr_1B6F50* obj, s32 id, CompanionAgent* flags);
-s32 func_0015A4F0(Hdr_1B6F50* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
-s32 func_001833F0(Elem_1B6F50* a, s32 b);
+s32 func_0015A4F0(World* a0, s32 a1, s32 a2, CompanionAgent* a3, s32 a4, void* a5);
+s32 func_001833F0(BaseObject* a, s32 b);
 void func_0018D608(void);
 void func_0018D6F0(void);
 void* func_0018D658(u32 bytes);
-void* func_00121228(Hdr_1B6F50* root, s32 value, void* table);
-void func_001299E0(Hdr_1B6F50* self, void* src);
+void* func_00121228(World* root, s32 value, void* table);
+void func_001299E0(PlacedObject* self, void* src);
 extern f32 D_002746A0[8];
-struct Quad_1B7638 {
-    s32 a;
-    s32 b;
-    s32 c;
-    s32 d;
-} __attribute__((aligned(16)));
 struct Sub_1B7638 {
     u8 pad0[0x2F0];
     f32 f2F0;
-};
-struct Target_1B7638 {
-    u8 pad0[0x24];
-    void *field24;
-    u8 pad1[0x30 - 0x28];
-    struct Quad_1B7638 quad30;
 };
 s32 func_001C96B8(CompanionAgent *self);
 s32 func_001CB578(CompanionAgent *self);
@@ -126,14 +104,16 @@ void func_0012F190(void* obj, s32 zero);
 void func_0012E760(void* obj);
 void func_001B6D78(StateWalker* self, s32 a, StateWalker* b);
 
-struct Sjis_274588 { u16 code; u16 id; };
+// A Shift-JIS code and the character it stands for (MapCharToCode).
+// A Shift-JIS code and the character it stands for (MapCharToCode reads the tables).
+struct SjisCharEntry { u16 code; u16 id; };
 
 // The file's .data, in retail's order.
 s32 D_00274548[4] = { 0, 1, 2, 0 };
 s32 D_00274558[4] = { 2, 0, 1, 0 };
 s32 D_00274568[4] = { 0, 2, 1, 0 };
 s32 D_00274578[4] = { 1, 0, 2, 0 };
-Sjis_274588 D_00274588[34] = {
+SjisCharEntry D_00274588[34] = {
     { 0x8140, 0x0020 }, { 0x8149, 0x0021 }, { 0x8168, 0x0022 }, { 0x8194, 0x0023 },
     { 0x8190, 0x0024 }, { 0x8193, 0x0025 }, { 0x8195, 0x0026 }, { 0x8166, 0x0027 },
     { 0x8169, 0x0028 }, { 0x816A, 0x0029 }, { 0x8196, 0x002A }, { 0x817B, 0x002B },
@@ -144,21 +124,21 @@ Sjis_274588 D_00274588[34] = {
     { 0x8165, 0x0060 }, { 0x816F, 0x007B }, { 0x8162, 0x007C }, { 0x8170, 0x007D },
     { 0x8150, 0x007E }, { 0x0000, 0x0000 }
 };
-Sjis_274588 D_00274610[4] = {
+SjisCharEntry D_00274610[4] = {
     { 0x824F, 0x0030 }, { 0x8260, 0x0041 }, { 0x8281, 0x0061 }, { 0x0000, 0x0000 }
 };
 f32 D_00274620[16] = { 0.0f, 0.0f, -80.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f, -70.0f, 40.0f, 0.0f, 0.0f, 70.0f, 40.0f, 0.0f };
 f32 D_00274660[16] = { 0.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 70.0f, 0.0f, 0.0f, -30.0f, 30.0f, 0.0f, 0.0f, 30.0f, 30.0f, 0.0f };
 f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };
 
-void func_001B5588(Vec3_1B5588* dst, Vec3_1B5588* src)
+void func_001B5588(Vec3* dst, Vec3* src)
 {
     dst->x = src->x;
     dst->y = src->y;
     dst->z = src->z;
 }
 
-void func_001B55A8(Vec2_1B55A8* a0, Vec2_1B55A8* a1)
+void func_001B55A8(Point2* a0, Point2* a1)
 {
     a0->x = a1->x;
     a0->y = a1->y;
@@ -201,31 +181,31 @@ void func_001B5D28(CameraPositionedObject* self)
     self->desc02()->m1D(self, &q);
 }
 
-void func_001B5D80(Walk_1B5D80* s, s32 v, s32 n)
+void func_001B5D80(Pool6C* s, s32 v, s32 n)
 {
-    u32 cur = s->b;
-    s->a = v;
-    s->c = cur;
+    u32 cur = (u32)s->base;
+    s->size = v;
+    s->head = (void*)cur;
     for (s32 i = 1; i < n; i++) {
         u32 prev = cur;
-        s32 a = s->a;
-        cur = s->b + i * a;
+        s32 a = s->size;
+        cur = (u32)s->base + i * a;
         *(u32*)prev = cur;
     }
     *(u32*)cur = 0;
 }
 
-void func_001B5DD0(Walk_1B5DD0* s, s32 size, s32 count)
+void func_001B5DD0(Pool6C* s, s32 size, s32 count)
 {
     s32 stride = (size + 7) & ~7;
-    s->b = AllocateFrontMemory(stride * count);
+    s->base = AllocateFrontMemory(stride * count);
     BuildFreeList(s, stride, count);
 }
 
-void func_001B5E30(Walk_1B5E30* s, s32 size, s32 count)
+void func_001B5E30(Pool6C* s, s32 size, s32 count)
 {
     s32 addr = (s32)AllocateFrontMemory(size * count + 0x30);
-    s->b = (void*)((addr + 0x3F) & -0x40);
+    s->base = (void*)((addr + 0x3F) & -0x40);
     BuildFreeList(s, size, count);
 }
 
@@ -692,9 +672,9 @@ void func_001B6CF0(Node_1B6CF0* self, f32 t)
 
 void func_001B6D78(StateWalker* self, s32 a, s32 b)
 {
-    Obj_1B6D78* o = (Obj_1B6D78*)self->f1C;
+    BaseObject* o = (BaseObject*)self->f1C;
     if (o != 0) {
-        o->vtbl[18](o);
+        o->desc->m0E(o, a, (void*)b);
     }
     QueuedCall* link = self->calls;
     if (link != 0) {
@@ -762,7 +742,7 @@ void func_001B6F50(CompanionAgent* self)
         if (key == best) {
             e->obj = 0;
         } else {
-            e->obj = (void*)FindFirstObjectByIdMode4((Hdr_1B6F50*)self->world, key, self);
+            e->obj = (void*)FindFirstObjectByIdMode4(self->world, key, self);
         }
         e++;
         j--;
@@ -770,15 +750,15 @@ void func_001B6F50(CompanionAgent* self)
 
     PushBackMemoryMark();
     best = 0;
-    s32 count = GatherObjectsById((Hdr_1B6F50*)self->world, 0x201, 0x60, self, 0, 0);
-    Elem_1B6F50** list = (Elem_1B6F50**)AllocateBackMemory(count << 2);
-    count = GatherObjectsById((Hdr_1B6F50*)self->world, 0x201, 0x60, self, count, list);
+    s32 count = GatherObjectsById(self->world, 0x201, 0x60, self, 0, 0);
+    BaseObject** list = (BaseObject**)AllocateBackMemory(count << 2);
+    count = GatherObjectsById(self->world, 0x201, 0x60, self, count, list);
     if (count > 0) {
         do {
             if (MatchesObjectId(*list, self->fC10) != 0) {
                 best = (s32)*list;
             } else {
-                (*list)->vtbl[7](*list);
+                (*list)->desc->m03(*list);
             }
             list++;
             count--;
@@ -787,11 +767,11 @@ void func_001B6F50(CompanionAgent* self)
     self->fC14 = (void*)best;
     PopBackMemoryMark();
     if (self->fC14 != 0) {
-        self->fC34 = CreatePoseSource((Hdr_1B6F50*)self->world, (s32)self->fC14, D_0021A790);
-        ((Sub_1B6F50*)self->fC34)->f11 = 2;
-        ((Sub_1B6F50*)self->fC34)->f1C = 1;
-        ((Sub_1B6F50*)self->fC34)->f84 = ((Sub_1B6F50*)self->fC34)->f80 = 0;
-        InsertAttachment((Hdr_1B6F50*)self->fC14, self->fC34);
+        self->fC34 = CreatePoseSource(self->world, (s32)self->fC14, D_0021A790);
+        ((T2195_790*)self->fC34)->mode1 = 2;
+        ((T2195_790*)self->fC34)->hasTarget = 1;
+        ((T2195_790*)self->fC34)->f84 = ((T2195_790*)self->fC34)->f80 = 0;
+        InsertAttachment((PlacedObject*)self->fC14, self->fC34);
         self->fBF0 = (s32)self->fC14;
     }
 }
@@ -858,7 +838,7 @@ void func_001B7608(CompanionAgent* self)
 }
 
 void func_001B7638(CompanionAgent *self) {
-    struct Target_1B7638 *t;
+    T2195_790 *t;
     s32 r;
     s32 res;
     f32 f;
@@ -866,17 +846,17 @@ void func_001B7638(CompanionAgent *self) {
     if (self->fC14 == 0) {
         return;
     }
-    t = (struct Target_1B7638 *)self->fC34;
+    t = (T2195_790 *)self->fC34;
     r = GetAgentRosterState(self);
     switch (r) {
     case 0:
     case 1:
         if ((void *)self->fC30 != 0) {
-            t->field24 = (void *)self->fC30;
-            t->quad30 = *(struct Quad_1B7638 *)&D_00248D30;
+            t->target = (void *)self->fC30;
+            t->point = *(Vec02 *)&D_00248D30;
         } else {
-            t->field24 = self;
-            t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+            t->target = self;
+            t->point = *(Vec02 *)D_002746A0;
         }
         f = 1.3f;
         if (r == 0) {
@@ -885,26 +865,26 @@ void func_001B7638(CompanionAgent *self) {
         break;
     case 2:
         if ((void *)self->fC30 != 0) {
-            t->field24 = (void *)self->fC30;
-            t->quad30 = *(struct Quad_1B7638 *)&D_00248D30;
+            t->target = (void *)self->fC30;
+            t->point = *(Vec02 *)&D_00248D30;
         } else if (IsAgentFacingBlocked(self) != 0) {
-            t->field24 = self;
-            t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+            t->target = self;
+            t->point = *(Vec02 *)D_002746A0;
         } else {
             res = (s32)self->desc08()->m62(self);
             if (res != 0) {
-                t->field24 = (void *)res;
-                t->quad30 = *(struct Quad_1B7638 *)&D_00248D30;
+                t->target = (void *)res;
+                t->point = *(Vec02 *)&D_00248D30;
             } else {
-                t->field24 = self;
-                t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+                t->target = self;
+                t->point = *(Vec02 *)D_002746A0;
             }
         }
         f = 1.3f;
         break;
     case 3:
-        t->field24 = self;
-        t->quad30 = *(struct Quad_1B7638 *)D_002746A0;
+        t->target = self;
+        t->point = *(Vec02 *)D_002746A0;
         f = 0.1f;
         break;
     }
@@ -919,9 +899,9 @@ void func_001B7790(CompanionAgent* self)
         self->fCC4 = 0;
         break;
     case 0xB: {
-        Sub_1B7790* p = ((Sub_1B7790*)self->fC14);
+        BaseObject* p = ((BaseObject*)self->fC14);
         if (p != 0) {
-            p->vtbl[7](p);
+            p->desc->m03(p);
         }
         ReleaseSoundLevel(self->fCC0);
         self->fCC0 = 0;

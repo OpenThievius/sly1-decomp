@@ -172,7 +172,13 @@ struct T2195_790 : Attachment {
     Pk8_2195 p60;           // 0x60
     u8 pad68[0x70 - 0x68]; // 0x68
     Vec02 v70;              // 0x70
-    Pk8_2195 p80;           // 0x80
+    union {
+        Pk8_2195 p80;       // 0x80
+        struct {
+            s32 f80;        // 0x80: 0 (func_001B6F50)
+            s32 f84;        // 0x84: 0 (func_001B6F50)
+        };
+    };
 };
 
 typedef char check_Attachment[sizeof(Attachment) == 0x14 ? 1 : -1];

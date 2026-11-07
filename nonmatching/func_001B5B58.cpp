@@ -2,7 +2,7 @@
 // BYTES 215/232 (92.7%), checked 2026-11-06
 // NEAR: registers only: every instruction lines up once the last test is `if (base == 0)` and the
 //       table is read through a pointer local; temporaries differ in the two table paths. The
-//       tables are Sjis_274588 in 001E4000.cpp.
+//       tables are SjisCharEntry in 001E4000.cpp.
 #include "common.h"
 #include "script_value.h"
 #include "cursor_animator.h"
@@ -87,17 +87,17 @@ void func_001B5108(AngleFrameAnimator* p)
     }
 }
 
-struct Vec2_1B5160 { f32 x; f32 y; };
-struct Inner_1B5160 { u8 pad0[0x34]; s32 i34; };
-struct Other_1B5160 {
-    void* vt; u8 pad0[0xC]; Vec2_1B5160 vec; u8 pad1[0x60]; Inner_1B5160* p78;
+struct FacingXY { f32 x; f32 y; };
+struct PartFacingSource { u8 pad0[0x34]; s32 i34; };
+struct DrawnPart {
+    void* vt; u8 pad0[0xC]; FacingXY vec; u8 pad1[0x60]; PartFacingSource* p78;
 };
 
 extern u8 func_00166690[];
 f32 func_00205778(f32 a, f32 b);
 f32 func_001EAFE0(f32 a, f32 b);
 
-void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
+void func_001B5160(AngleFrameAnimator* p, void* unused, DrawnPart* q)
 {
     if (p->cursor.record == 0) {
         return;
@@ -108,11 +108,11 @@ void func_001B5160(AngleFrameAnimator* p, void* unused, Other_1B5160* q)
     if (*(void**)q != (void*)func_00166690) {
         return;
     }
-    Vec2_1B5160* vv;
+    FacingXY* vv;
     if (q->p78->i34 != 0) {
         vv = &q->vec;
     } else {
-        vv = (Vec2_1B5160*)D_00261990->g80;
+        vv = (FacingXY*)D_00261990->g80;
     }
     f32 t = func_00205778(vv->y, vv->x);
     f32 r = func_001EAFE0(p->phase - t, p->sector);
@@ -1187,9 +1187,9 @@ void func_001B5200(ScrollAnimator* p, AnimatorParams* s)
     p->cursor.flags = (p->cursor.flags & ~1) | 2;
 }
 
-struct Sjis_274588 { u16 sjis; u16 ascii; };
-extern Sjis_274588 D_00274588[];
-extern Sjis_274588 D_00274610[];
+struct SjisCharEntry { u16 sjis; u16 ascii; };
+extern SjisCharEntry D_00274588[];
+extern SjisCharEntry D_00274610[];
 
 u16 func_001B5B58(u8 ch)
 {
@@ -1215,7 +1215,7 @@ u16 func_001B5B58(u8 ch)
     if (base == 0) {
         return D_00274610[idx].sjis + ch - D_00274610[idx].ascii;
     }
-    Sjis_274588* e = &D_00274588[ch - (base + 0x1F)];
+    SjisCharEntry* e = &D_00274588[ch - (base + 0x1F)];
     return e->sjis;
 }
 s32 func_001E2100(void* p);
@@ -1380,8 +1380,8 @@ void func_001B64D8(Node_1B64D8* self, s32 key)
     }
 }
 
-struct Entry_2198E8 { const u8* f0; s32 f4; };
-extern const Entry_2198E8 D_002198E8;
+struct ClassHead { const u8* f0; s32 f4; };
+extern const ClassHead D_002198E8;
 extern const u8 D_00217410[];
 
 void* func_001B5EE0(Pool6C* pool);
@@ -1601,8 +1601,8 @@ void func_001B7638(CompanionAgent *self) {
     ((struct Sub_1B7638 *)self->fC14)->f2F0 = f;
 }
 
-struct Lo_1B4FC0 { s32 v; };
-s32 func_001EAA70(Lo_1B4FC0 lo, s32 hi);
+struct RandomRangeLow { s32 v; };
+s32 func_001EAA70(RandomRangeLow lo, s32 hi);
 f32 func_001EAAE0(f32 a, f32 b);
 
 void func_001B4FC0(RandomJumpAnimator* self, f32 x)
@@ -1617,7 +1617,7 @@ void func_001B4FC0(RandomJumpAnimator* self, f32 x)
         self->wait = self->wait - x;
         return;
     }
-    Lo_1B4FC0 lo;
+    RandomRangeLow lo;
     lo.v = 1;
     s32 v = func_001EAA70(lo, count - 1);
     s32 rem = (self->cursor.frame + v) % self->cursor.record->count;
@@ -1882,5 +1882,5 @@ done:
     func_001B6D78(self, 0x14, self);
 }
 
-extern const Entry_2198E8 D_002198E8 = { D_00217410, 0x93 };
+extern const ClassHead D_002198E8 = { D_00217410, 0x93 };
 f32 D_002746A0[8] = { 1000.0f, 0.0f, 0.0f, 0.0f, 2.0f, -2.0f, 0.0f, 0.0f };

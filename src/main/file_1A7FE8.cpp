@@ -100,10 +100,10 @@ void* func_0015A448(void* obj, s32 id, void* owner);
 s32 func_001300E8(void* node, s32 kind);
 
 
-void func_001F5C0C(void* p, s32 value, s32 size);
+s32 func_001F5C0C(void* p, s32 value, s32 size);
 
 
-void func_001F5C0C(void* p, s32 value, s32 size);
+s32 func_001F5C0C(void* p, s32 value, s32 size);
 
 
 void func_001A93C8(void* self);
@@ -155,9 +155,6 @@ void func_00137268(void* out, s32 flag);
 
 
 
-struct Local_001AB710 { f32 x; f32 y; u8 pad0[0x8]; T217D_Word w10; u8 pad1[0xC]; s32 tag; u8 pad2[0xC]; T217D_Word w30; };
-struct VDesc_001AB710 { u8 pad0[0x48]; s16 off48; u8 pad1[2]; void (*fn4C)(void* self, void* obj, void* out, void* d); };
-struct SubObj_001AB710 { u8 pad0[0x4C]; VDesc_001AB710* desc4C; };
 
 void func_00137228(void* out, f32 x, f32 y);
 void func_00137238(void* out, f32 x, f32 y);
@@ -533,8 +530,6 @@ void* func_001DBCC8(void* owner, void* fn, void* arg, s32 a3, s32 a4);
 void func_001A8208(ObjectPool* self);
 
 
-struct Buf_1A7FE8 { u8 b[1]; };
-s32 func_001F5C0C(Buf_1A7FE8* p, s32 zero, s32 size);
 
 void func_001A7FE8(ObjectPool* self)
 {
@@ -544,19 +539,19 @@ void func_001A7FE8(ObjectPool* self)
     self->id50 = -1;
     self->id54 = -1;
     self->id58 = -1;
-    (void)FillMemory((Buf_1A7FE8*)s1, 0, 0x80);
+    (void)FillMemory(s1, 0, 0x80);
     const Quad16* src = (const Quad16*)&g_identityMatrix;
     *(Quad16*)(s1 + 0x20) = src[0];
     *(Quad16*)(s1 + 0x30) = src[1];
     *(Quad16*)(s1 + 0x40) = src[2];
-    (void)FillMemory((Buf_1A7FE8*)((u8*)self + 0xE0), 0, 0x70);
+    (void)FillMemory(((u8*)self + 0xE0), 0, 0x70);
     V8C* p = &self->v110;
     p->a = 0;
     p->b = 1.0f;
     p->c = 0;
     self->f120 = 0;
     self->f124 = 20000.0f;
-    (void)FillMemory((Buf_1A7FE8*)((u8*)self + 0x150), 0, 0x18);
+    (void)FillMemory(((u8*)self + 0x150), 0, 0x18);
     f32 d = 3.4028235e+38f;
     self->fD8 = 5.0f;
     self->f168 = 0;

@@ -25,10 +25,10 @@ struct Attach_eu_1AD438 { u8 pad0[0x18]; T217D_Word col; };
 struct Hd_eu_1AD438 {
     static void Draw(void* h, Out_eu_1AD438* out, void* tbl)
     {
-        SubObj_001AB710* sub = *(SubObj_001AB710**)h;
+        Font* sub = *(Font**)h;
         if (sub != 0) {
-            VDesc_001AB710* d = sub->desc4C;
-            d->fn4C((u8*)sub + d->off48, h, (void*)out, tbl);
+            const FontVt* d = sub->vt;
+            d->drawBox((Font*)((u8*)sub + d->adj9), h, (void*)out, tbl);
         }
     }
 };
