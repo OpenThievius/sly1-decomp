@@ -4,15 +4,15 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 half_f = 0.5f;
-static const f32 sin_x3 = -1.6666667163e-01f;
-static const f32 sin_x5 = 8.3333337680e-03f;
-static const f32 sin_x7 = -1.9841270114e-04f;
-static const f32 sin_x9 = 2.7557314297e-06f;
-static const f32 sin_x11 = -2.5050759689e-08f;
-static const f32 sin_x13 = 1.5896910177e-10f;
+static const f32 g_half = 0.5f;
+static const f32 g_sinX3 = -1.6666667163e-01f;
+static const f32 g_sinX5 = 8.3333337680e-03f;
+static const f32 g_sinX7 = -1.9841270114e-04f;
+static const f32 g_sinX9 = 2.7557314297e-06f;
+static const f32 g_sinX11 = -2.5050759689e-08f;
+static const f32 g_sinX13 = 1.5896910177e-10f;
 
-f32 func_00208C48(s32 has_tail, f32 x, f32 y)
+f32 func_00208C48(s32 hasTail, f32 x, f32 y)
 {
     s32 bits, magnitude;
     f32 x2, x3, poly;
@@ -23,8 +23,8 @@ f32 func_00208C48(s32 has_tail, f32 x, f32 y)
         return x;
     x2 = x * x;
     x3 = x2 * x;
-    poly = x2 * (x2 * (x2 * (x2 * sin_x13 + sin_x11) + sin_x9) + sin_x7) + sin_x5;
-    if (has_tail == 0)
-        return x + x3 * (x2 * poly + sin_x3);
-    return x - ((x2 * (y * half_f - x3 * poly) - y) - x3 * sin_x3);
+    poly = x2 * (x2 * (x2 * (x2 * g_sinX13 + g_sinX11) + g_sinX9) + g_sinX7) + g_sinX5;
+    if (hasTail == 0)
+        return x + x3 * (x2 * poly + g_sinX3);
+    return x - ((x2 * (y * g_half - x3 * poly) - y) - x3 * g_sinX3);
 }

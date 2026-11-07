@@ -18,9 +18,9 @@ f32 func_002058A0(f32 x, f32 y)
     if (y == 0.0f) {
         e.kind = 1;
         e.function = "fmodf";
-        e.error_code = 0;
-        e.first_arg = (double)x;
-        e.second_arg = (double)y;
+        e.errorCode = 0;
+        e.firstArg = (double)x;
+        e.secondArg = (double)y;
         if (D_0024FF78 == 0) {
             e.result = (double)x;
         } else {
@@ -29,8 +29,8 @@ f32 func_002058A0(f32 x, f32 y)
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x21;
         }
-        if (e.error_code != 0) {
-            *func_002014F0() = e.error_code;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }

@@ -16,17 +16,17 @@ f32 func_00205778(f32 y, f32 x)
         return value;
     }
     if (x == 0.0f && y == 0.0f) {
-        e.first_arg = (double)y;
-        e.second_arg = (double)x;
+        e.firstArg = (double)y;
+        e.secondArg = (double)x;
         e.kind = 1;
         e.function = "atan2f";
         e.result = 0.0;
-        e.error_code = 0;
+        e.errorCode = 0;
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x21;
         }
-        if (e.error_code != 0) {
-            *func_002014F0() = e.error_code;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }

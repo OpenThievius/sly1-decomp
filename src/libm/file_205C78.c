@@ -19,17 +19,17 @@ f32 func_00205C78(f32 x, f32 y)
         if (y == 0.0f) {
             e.kind = 1;
             e.function = "powf";
-            e.error_code = 0;
-            e.first_arg = (double)x;
-            e.second_arg = (double)y;
+            e.errorCode = 0;
+            e.firstArg = (double)x;
+            e.secondArg = (double)y;
             e.result = (double)x;
             if (D_0024FF78 == 2) {
                 e.result = 1.0;
             } else if (!func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
-            if (e.error_code != 0) {
-                *func_002014F0() = e.error_code;
+            if (e.errorCode != 0) {
+                *func_002014F0() = e.errorCode;
             }
             return (f32)e.result;
         }
@@ -39,26 +39,26 @@ f32 func_00205C78(f32 x, f32 y)
         if (y == 0.0f) {
             e.kind = 1;
             e.function = "powf";
-            e.error_code = 0;
-            e.first_arg = (double)x;
-            e.second_arg = (double)y;
+            e.errorCode = 0;
+            e.firstArg = (double)x;
+            e.secondArg = (double)y;
             e.result = 0.0;
             if (D_0024FF78 != 0) {
                 e.result = 1.0;
             } else if (!func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
-            if (e.error_code != 0) {
-                *func_002014F0() = e.error_code;
+            if (e.errorCode != 0) {
+                *func_002014F0() = e.errorCode;
             }
             return (f32)e.result;
         }
         if (func_00209210(y) && y < 0.0f) {
             e.kind = 1;
             e.function = "powf";
-            e.error_code = 0;
-            e.first_arg = (double)x;
-            e.second_arg = (double)y;
+            e.errorCode = 0;
+            e.firstArg = (double)x;
+            e.secondArg = (double)y;
             if (D_0024FF78 == 0) {
                 e.result = 0.0;
             } else {
@@ -67,8 +67,8 @@ f32 func_00205C78(f32 x, f32 y)
             if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
                 *func_002014F0() = 0x21;
             }
-            if (e.error_code != 0) {
-                *func_002014F0() = e.error_code;
+            if (e.errorCode != 0) {
+                *func_002014F0() = e.errorCode;
             }
             return (f32)e.result;
         }
@@ -78,9 +78,9 @@ f32 func_00205C78(f32 x, f32 y)
         if (func_00209238(value)) {
             e.kind = 1;
             e.function = "powf";
-            e.error_code = 0;
-            e.first_arg = (double)x;
-            e.second_arg = (double)y;
+            e.errorCode = 0;
+            e.firstArg = (double)x;
+            e.secondArg = (double)y;
             if (D_0024FF78 == 0) {
                 e.result = 0.0;
             } else {
@@ -92,9 +92,9 @@ f32 func_00205C78(f32 x, f32 y)
         } else {
             e.kind = 3;
             e.function = "powf";
-            e.error_code = 0;
-            e.first_arg = (double)x;
-            e.second_arg = (double)y;
+            e.errorCode = 0;
+            e.firstArg = (double)x;
+            e.secondArg = (double)y;
             if (D_0024FF78 == 0) {
                 e.result = 3.40282346638528859812e+38;
                 y *= 0.5;
@@ -112,23 +112,23 @@ f32 func_00205C78(f32 x, f32 y)
                 *func_002014F0() = 0x22;
             }
         }
-        if (e.error_code != 0) {
-            *func_002014F0() = e.error_code;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }
     if (value == 0.0f && func_00209210(x) && func_00209210(y)) {
         e.kind = 4;
         e.function = "powf";
-        e.error_code = 0;
-        e.first_arg = (double)x;
-        e.second_arg = (double)y;
+        e.errorCode = 0;
+        e.firstArg = (double)x;
+        e.secondArg = (double)y;
         e.result = 0.0;
         if (D_0024FF78 == 2 || !func_00208FE8(&e)) {
             *func_002014F0() = 0x22;
         }
-        if (e.error_code != 0) {
-            *func_002014F0() = e.error_code;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }

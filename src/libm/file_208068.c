@@ -4,12 +4,12 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const f32 one_f = 1.0f;
-static const f32 ten_to_minus_30 = 1.0e-30f;
+static const f32 g_one = 1.0f;
+static const f32 g_tenToMinus30 = 1.0e-30f;
 
 f32 func_00208068(f32 x)
 {
-    s32 bits, exponent, i, twice_root, root, trial, bit;
+    s32 bits, exponent, i, twiceRoot, root, trial, bit;
     f32 result;
 
     FLOAT_TO_BITS(bits, x);
@@ -32,13 +32,13 @@ f32 func_00208068(f32 x)
     bits <<= exponent & 1;
     bits <<= 1;
     exponent >>= 1;
-    twice_root = 0;
+    twiceRoot = 0;
     root = 0;
     bit = 0x1000000;
     while (bit != 0) {
-        trial = twice_root + bit;
+        trial = twiceRoot + bit;
         if (trial <= bits) {
-            twice_root = trial + bit;
+            twiceRoot = trial + bit;
             bits -= trial;
             root += bit;
         }

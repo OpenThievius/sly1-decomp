@@ -16,9 +16,9 @@ f32 func_00205B28(f32 x)
         return value;
     }
     if (x <= 0.0f) {
-        e.error_code = 0;
+        e.errorCode = 0;
         e.function = "log10f";
-        e.first_arg = e.second_arg = (double)x;
+        e.firstArg = e.secondArg = (double)x;
         if (D_0024FF78 == 0) {
             e.result = -3.40282346638528859812e+38;
         } else {
@@ -37,8 +37,8 @@ f32 func_00205B28(f32 x)
                 *func_002014F0() = 0x21;
             }
         }
-        if (e.error_code != 0) {
-            *func_002014F0() = e.error_code;
+        if (e.errorCode != 0) {
+            *func_002014F0() = e.errorCode;
         }
         return (f32)e.result;
     }

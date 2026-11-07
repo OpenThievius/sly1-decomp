@@ -4,7 +4,7 @@
  * docs/TOOLCHAIN.md). Written for this project from retail's code. */
 #include "common.h"
 #include "float_bits.h"
-static const double round_bias[] = { 4.50359962737049600000e+15, -4.50359962737049600000e+15 };
+static const double g_roundBias[] = { 4.50359962737049600000e+15, -4.50359962737049600000e+15 };
 
 double func_00209010(double x)
 {
@@ -22,8 +22,8 @@ double func_00209010(double x)
             high &= 0xFFFE0000;
             high |= ((u32)(low | -low) >> 12) & 0x80000;
             SET_DOUBLE_HIGH(x, high);
-            biased = round_bias[sign] + x;
-            rounded = biased - round_bias[sign];
+            biased = g_roundBias[sign] + x;
+            rounded = biased - g_roundBias[sign];
             DOUBLE_HIGH(high, rounded);
             SET_DOUBLE_HIGH(rounded, (high & 0x7FFFFFFF) | (sign << 31));
             return rounded;
@@ -45,6 +45,6 @@ double func_00209010(double x)
         if ((low & mask) != 0) low = (low & ~mask) | (0x40000000 >> (exponent - 20));
     }
     WORDS_TO_DOUBLE(x, high, low);
-    biased = round_bias[sign] + x;
-    return biased - round_bias[sign];
+    biased = g_roundBias[sign] + x;
+    return biased - g_roundBias[sign];
 }

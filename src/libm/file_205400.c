@@ -7,7 +7,7 @@
 
 s32 func_00207C88(f32 x, f32* parts);
 f32 func_002081A0(f32 x, f32 y);
-f32 func_00208C48(s32 has_tail, f32 x, f32 y);
+f32 func_00208C48(s32 hasTail, f32 x, f32 y);
 
 f32 func_00205400(f32 x)
 {

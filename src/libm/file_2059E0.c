@@ -15,9 +15,9 @@ f32 func_002059E0(f32 x)
     if (D_0024FF78 == -1 || func_00209238(x) || x > 0.0f) {
         return value;
     }
-    e.error_code = 0;
+    e.errorCode = 0;
     e.function = "logf";
-    e.first_arg = e.second_arg = (double)x;
+    e.firstArg = e.secondArg = (double)x;
     if (D_0024FF78 == 0) {
         e.result = -3.40282346638528859812e+38;
     } else {
@@ -36,8 +36,8 @@ f32 func_002059E0(f32 x)
             *func_002014F0() = 0x21;
         }
     }
-    if (e.error_code != 0) {
-        *func_002014F0() = e.error_code;
+    if (e.errorCode != 0) {
+        *func_002014F0() = e.errorCode;
     }
     return (f32)e.result;
 }

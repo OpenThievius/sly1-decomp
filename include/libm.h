@@ -13,10 +13,10 @@
 typedef struct MathError {
     s32 kind;
     const char* function;
-    double first_arg;
-    double second_arg;
+    double firstArg;
+    double secondArg;
     double result;
-    s32 error_code;
+    s32 errorCode;
 } MathError;
 
 extern const s32 D_0024FF78;    /* the error mode: -1 none, 0, 1, 2 (only the error code) */

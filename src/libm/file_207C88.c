@@ -5,7 +5,7 @@
 #include "common.h"
 #include "float_bits.h"
 
-static const s32 digits_2_over_pi[] = {
+static const s32 g_digits2OverPi[] = {
     0xA2, 0xF9, 0x83, 0x6E, 0x4E, 0x44, 0x15, 0x29, 0xFC, 0x27, 0x57, 0xD1,
     0xF5, 0x34, 0xDD, 0xC0, 0xDB, 0x62, 0x95, 0x99, 0x3C, 0x43, 0x90, 0x41,
     0xFE, 0x51, 0x63, 0xAB, 0xDE, 0xBB, 0xC5, 0x61, 0xB7, 0x24, 0x6E, 0x3A,
@@ -25,7 +25,7 @@ static const s32 digits_2_over_pi[] = {
     0x60, 0xE2, 0x7B, 0xC0, 0x8C, 0x6B,
 };
 
-static const s32 half_pi_multiples[] = {
+static const s32 g_halfPiMultiples[] = {
     0x3FC90F00, 0x40490F00, 0x4096CB00, 0x40C90F00,
     0x40FB5300, 0x4116CB00, 0x412FED00, 0x41490F00,
     0x41623100, 0x417B5300, 0x418A3A00, 0x4196CB00,
@@ -36,24 +36,24 @@ static const s32 half_pi_multiples[] = {
     0x42363600, 0x423C7E00, 0x4242C700, 0x42490F00,
 };
 
-static const f32 zero_f = 0.0f;
-static const f32 half_f = 0.5f;
-static const f32 digit_base = 2.5600000000e+02f;
-static const f32 inv_half_pi = 6.3661980629e-01f;
-static const f32 half_pi_head1 = 1.5707855225e+00f;
-static const f32 half_pi_tail1 = 1.0804334124e-05f;
-static const f32 half_pi_head2 = 1.0804273188e-05f;
-static const f32 half_pi_tail2 = 6.0770999344e-11f;
-static const f32 half_pi_head3 = 6.0770943833e-11f;
-static const f32 half_pi_tail3 = 6.1232342629e-17f;
+static const f32 g_zero = 0.0f;
+static const f32 g_half = 0.5f;
+static const f32 g_digitBase = 2.5600000000e+02f;
+static const f32 g_invHalfPi = 6.3661980629e-01f;
+static const f32 g_halfPiHead1 = 1.5707855225e+00f;
+static const f32 g_halfPiTail1 = 1.0804334124e-05f;
+static const f32 g_halfPiHead2 = 1.0804273188e-05f;
+static const f32 g_halfPiTail2 = 6.0770999344e-11f;
+static const f32 g_halfPiHead3 = 6.0770943833e-11f;
+static const f32 g_halfPiTail3 = 6.1232342629e-17f;
 
 f32 func_002052F8(f32 x);
-s32 func_002082F8(f32* digits, f32* parts, s32 exponent, s32 digit_count, s32 precision, const s32* two_over_pi);
+s32 func_002082F8(f32* digits, f32* parts, s32 exponent, s32 digitCount, s32 precision, const s32* twoOverPi);
 
 s32 func_00207C88(f32 x, f32* parts)
 {
-    s32 bits, magnitude, rem_bits, quadrant, i, x_exp, exponent, digit_count;
-    f32 scaled, rem, correction, abs_x, quadrant_f, digits[3];
+    s32 bits, magnitude, remBits, quadrant, i, xExp, exponent, digitCount;
+    f32 scaled, rem, correction, absX, quadrantF, digits[3];
 
     FLOAT_TO_BITS(bits, x);
     magnitude = bits & 0x7FFFFFFF;
@@ -64,55 +64,55 @@ s32 func_00207C88(f32 x, f32* parts)
     }
     if (magnitude <= 0x4016CBE3) {
         if (bits > 0) {
-            scaled = x - half_pi_head1;
+            scaled = x - g_halfPiHead1;
             if ((magnitude & 0xFFFFFFF0) != 0x3FC90FD0) {
-                parts[0] = scaled - half_pi_tail1;
-                parts[1] = (scaled - parts[0]) - half_pi_tail1;
+                parts[0] = scaled - g_halfPiTail1;
+                parts[1] = (scaled - parts[0]) - g_halfPiTail1;
             } else {
-                scaled -= half_pi_head2;
-                parts[0] = scaled - half_pi_tail2;
-                parts[1] = (scaled - parts[0]) - half_pi_tail2;
+                scaled -= g_halfPiHead2;
+                parts[0] = scaled - g_halfPiTail2;
+                parts[1] = (scaled - parts[0]) - g_halfPiTail2;
             }
             return 1;
         } else {
-            scaled = x + half_pi_head1;
+            scaled = x + g_halfPiHead1;
             if ((magnitude & 0xFFFFFFF0) != 0x3FC90FD0) {
-                parts[0] = scaled + half_pi_tail1;
-                parts[1] = (scaled - parts[0]) + half_pi_tail1;
+                parts[0] = scaled + g_halfPiTail1;
+                parts[1] = (scaled - parts[0]) + g_halfPiTail1;
             } else {
-                scaled += half_pi_head2;
-                parts[0] = scaled + half_pi_tail2;
-                parts[1] = (scaled - parts[0]) + half_pi_tail2;
+                scaled += g_halfPiHead2;
+                parts[0] = scaled + g_halfPiTail2;
+                parts[1] = (scaled - parts[0]) + g_halfPiTail2;
             }
             return -1;
         }
     }
     if (magnitude <= 0x43490F80) {
-        abs_x = func_002052F8(x);
-        quadrant = (s32)(abs_x * inv_half_pi + half_f);
-        quadrant_f = (f32)quadrant;
-        rem = abs_x - quadrant_f * half_pi_head1;
-        correction = quadrant_f * half_pi_tail1;
-        if (quadrant < 32 && (magnitude & 0xFFFFFF00) != half_pi_multiples[quadrant - 1]) {
+        absX = func_002052F8(x);
+        quadrant = (s32)(absX * g_invHalfPi + g_half);
+        quadrantF = (f32)quadrant;
+        rem = absX - quadrantF * g_halfPiHead1;
+        correction = quadrantF * g_halfPiTail1;
+        if (quadrant < 32 && (magnitude & 0xFFFFFF00) != g_halfPiMultiples[quadrant - 1]) {
             parts[0] = rem - correction;
         } else {
             parts[0] = rem - correction;
-            x_exp = magnitude >> 23;
-            FLOAT_TO_BITS(rem_bits, parts[0]);
-            i = x_exp - (((u32)rem_bits >> 23) & 0xFF);
+            xExp = magnitude >> 23;
+            FLOAT_TO_BITS(remBits, parts[0]);
+            i = xExp - (((u32)remBits >> 23) & 0xFF);
             if (i > 8) {
-                abs_x = rem;
-                correction = quadrant_f * half_pi_head2;
-                rem = abs_x - correction;
-                correction = quadrant_f * half_pi_tail2 - ((abs_x - rem) - correction);
+                absX = rem;
+                correction = quadrantF * g_halfPiHead2;
+                rem = absX - correction;
+                correction = quadrantF * g_halfPiTail2 - ((absX - rem) - correction);
                 parts[0] = rem - correction;
-                FLOAT_TO_BITS(rem_bits, parts[0]);
-                i = x_exp - (((u32)rem_bits >> 23) & 0xFF);
+                FLOAT_TO_BITS(remBits, parts[0]);
+                i = xExp - (((u32)remBits >> 23) & 0xFF);
                 if (i > 25) {
-                    abs_x = rem;
-                    correction = quadrant_f * half_pi_head3;
-                    rem = abs_x - correction;
-                    correction = quadrant_f * half_pi_tail3 - ((abs_x - rem) - correction);
+                    absX = rem;
+                    correction = quadrantF * g_halfPiHead3;
+                    rem = absX - correction;
+                    correction = quadrantF * g_halfPiTail3 - ((absX - rem) - correction);
                     parts[0] = rem - correction;
                 }
             }
@@ -133,14 +133,14 @@ s32 func_00207C88(f32 x, f32* parts)
     BITS_TO_FLOAT(scaled, magnitude - (exponent << 23));
     for (i = 0; i < 2; i++) {
         digits[i] = (f32)(s32)scaled;
-        scaled = (scaled - digits[i]) * digit_base;
+        scaled = (scaled - digits[i]) * g_digitBase;
     }
     digits[2] = scaled;
-    digit_count = 3;
-    while (digits[digit_count - 1] == zero_f) {
-        digit_count--;
+    digitCount = 3;
+    while (digits[digitCount - 1] == g_zero) {
+        digitCount--;
     }
-    quadrant = func_002082F8(digits, parts, exponent, digit_count, 2, digits_2_over_pi);
+    quadrant = func_002082F8(digits, parts, exponent, digitCount, 2, g_digits2OverPi);
     if (bits < 0) {
         parts[0] = -parts[0];
         parts[1] = -parts[1];
