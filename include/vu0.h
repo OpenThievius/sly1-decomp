@@ -113,6 +113,28 @@ struct Vu0 {
         return r;
     }
 
+    // The x of a VU0 register as a float, the move to a GPR the compiler's: the value goes in
+    // as "r" and the sequence is only the mtc1, so the qmfc2 is the compiler's own copy, which
+    // it schedules and may put in a branch's delay slot (an asm statement never goes there), and
+    // which it makes in each arm of an if whose arms meet at the conversion (func_0014EB10).
+    // The two allocate differently: func_00187B60 matches with ToFloat and takes other VU0
+    // registers with this one, which matches every other user of ToFloat.
+    static f32 ToFloatMoved(u128 a)
+    {
+        f32 r;
+        __asm__("mtc1 %1, %0" : "=f"(r) : "r"(a));
+        return r;
+    }
+
+    // The x of a VU0 register as the bits of a float: qmfc2 into a GPR, which retail stores
+    // with sw straight to memory (ToFloat's f32 goes on to an FPR: mtc1, then swc1).
+    static u32 ToBits(u128 a)
+    {
+        u32 r;
+        __asm__("qmfc2 %0, %1" : "=r"(r) : "j"(a));
+        return r;
+    }
+
     // a * s.x: vmulx.xyzw.
     static u128 MulX(u128 a, u128 s)
     {
@@ -136,6 +158,17 @@ struct Vu0 {
         u128 r, one;
         __asm__("vmul.xyz %0, %2, %3\n\tvaddw.x %1, vf0, vf0w\n\tvadday.x ACC, %0, %0y\n\tvmaddz.x %0, %1, %0z"
                 : "=j"(r), "=j"(one) : "j"(a), "j"(b));
+        return r;
+    }
+
+    // The two-term dot product of a and b (their x and y), in x: vmul.xy r, a, b; vaddy.x r,
+    // r, r.y. With a and b the same vector it is the squared length of its xy, which retail
+    // mostly takes the Sqrt of (a length on the ground plane). The result may take an input's
+    // register.
+    static u128 DotXY(u128 a, u128 b)
+    {
+        u128 r;
+        __asm__("vmul.xy %0, %1, %2\n\tvaddy.x %0, %0, %0y" : "=j"(r) : "j"(a), "j"(b));
         return r;
     }
 
