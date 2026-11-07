@@ -1206,7 +1206,7 @@ void func_001AB980(T217D_510* self, f32 dt)
     self->lastTenth = tenth;
     self->lastSecond = sec;
 
-    if (g_gameClock.running != 0 && self->state == 2 && (*(s32*)D_00262C68 & 2))
+    if (g_gameClock.running != 0 && self->state == 2 && (*(s32*)g_padRouting & 2))
     {
         s32 warn = 0;
         s32 end = 0;

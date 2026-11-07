@@ -1049,7 +1049,7 @@ void func_00192A70(void* self, PadRecord* rec)
 {
     if (IsTopCameraController(&g_camera->ctl454) != 0)
         return;
-    PadRecord* a1 = (D_00262C68 & 4) ? &g_padRecord : &g_blankPadRecord;
+    PadRecord* a1 = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
     StepSequence* ctx = D_0027051C;
     if (ctx != 0 && ctx->state2D4 == 3 && ctx->f32C == 0 && (a1->flags & 0xC) != 0
         && *(s32*)ctx->target304 != 0) {

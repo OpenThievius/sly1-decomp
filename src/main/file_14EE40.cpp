@@ -1687,7 +1687,7 @@ s32 func_00151300(StepSequence* self)
     g_typedTextCaptionBox.f2F8 = 0;
     if (flags == 0x100) {
         s32 r;
-        PadRecord* in = (D_00262C68 & 4) ? &g_padRecord : &g_blankPadRecord;
+        PadRecord* in = (g_padRouting & 4) ? &g_padRecord : &g_blankPadRecord;
         s32 k = self->f2EC;
         r = 0;
         switch (k) {

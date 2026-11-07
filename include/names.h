@@ -164,6 +164,8 @@
 #define g_passwordMessageButtonSequence            D_00262C28
 #define g_passwordMessageButtonCode                D_00262C48
 #define g_buttonCodeFlags                          D_00262C64
+#define g_padRouting                               D_00262C68
+#define g_padSelectFlags                           D_00262C6C
 #define g_padRecord                                D_00262C70
 #define g_blankPadRecord                           D_00262D38
 #define g_buttonCodes                              D_00262DFC
@@ -1603,6 +1605,7 @@
 #define InitPadSystem                              func_0016E0B8
 #define SetPadSelectFlags                          func_0016E0F0
 #define ClearPadSelectFlags                        func_0016E118
+#define UpdatePadRouting                           func_0016E148
 #define InitPadRecord                              func_0016E1A0
 #define UpdatePadConnection                        func_0016E238
 #define SetPadConnectionState                      func_0016E630

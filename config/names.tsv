@@ -2649,3 +2649,6 @@ func_0016D788	PlaceTargetFollowerOnFollowed	anchors the follower (SetColliderAnc
 func_0016D9A8	PlayPendingFollowerSound	when a sound is pending (+0x5CC) and func_001BE810 no longer holds, clears it and plays it with the volume and pan at +0x5C4 and +0x5C8 (PlaySoundAndApplyVolumePan)
 func_0016DD00	ClearCurrentTargetFollower	sets g_currentTargetFollower to 0 (the script built-in func_00106560 calls it)
 func_0016DDE8	StartEntryTableObject	slot 0x50 of class 0x64: runs StartPlacedObject, then its slot 3
+func_0016E148	UpdatePadRouting	sets g_padRouting from g_padSelectFlags: 0 with flag 0x80 or 4, 5 with flag 1, 4 with flag 2, else 7 (InitPadSystem, SetPadSelectFlags and ClearPadSelectFlags call it)
+D_00262C68	g_padRouting	the mask of which readers see g_padRecord rather than g_blankPadRecord (bits 1, 2 and 4, tested by the camera, the step sequence and others); UpdatePadRouting sets it
+D_00262C6C	g_padSelectFlags	the flags SetPadSelectFlags sets and ClearPadSelectFlags clears, from which UpdatePadRouting sets g_padRouting

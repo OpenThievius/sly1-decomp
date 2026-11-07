@@ -53,7 +53,7 @@ void func_001AB980(Clock_1AB980_eu* self, f32 dt)
     self->lastTenth = tenth;
     self->lastSec = sec;
 
-    if (g_gameClock.running != 0 && self->mode == 2 && (*(s32*)D_00262C68 & 2))
+    if (g_gameClock.running != 0 && self->mode == 2 && (*(s32*)g_padRouting & 2))
     {
         s32 warn = 0;
         s32 end = 0;

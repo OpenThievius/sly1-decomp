@@ -1137,7 +1137,7 @@ void func_001A9FD0(void)
     }
     u8* g = g_screenFade;
     void* b;
-    if (*(s32*)D_00262C68 & 4) {
+    if (*(s32*)g_padRouting & 4) {
         b = g_padRecord;
     } else {
         b = g_blankPadRecord;

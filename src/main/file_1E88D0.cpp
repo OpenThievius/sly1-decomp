@@ -1094,13 +1094,13 @@ void func_001E9108(Obj_1E9108* obj)
     s32 s1 = obj->state;
     PadRecord* s2;
     s32 s5;
-    if (D_00262C68 & 4) {
+    if (g_padRouting & 4) {
         s2 = &g_padRecord;
     } else {
         s2 = &g_blankPadRecord;
     }
     s5 = 0;
-    if (D_00262C6C & 0x80) {
+    if (g_padSelectFlags & 0x80) {
         if (0.1f < g_gameClock.time) {
             ClearPadSelectFlags(0x80);
         }
@@ -1141,7 +1141,7 @@ void func_001E9108(Obj_1E9108* obj)
         break;
     }
     case 3: {
-        if (D_00262C6C & 2) break;
+        if (g_padSelectFlags & 2) break;
         if (g_screenFade.mode) break;
         {
             u32 v = s2->flags;
@@ -1417,7 +1417,7 @@ void func_001E9C78(World* self, f32 dt)
         Vt_1E9C78* vt = h->vt;
         if (vt->fn134 != 0) {
             u8* a;
-            if ((*(s32*)&D_00262C68) & 2)
+            if ((*(s32*)&g_padRouting) & 2)
                 a = (u8*)&g_padRecord;
             else
                 a = ((u8*)&g_blankPadRecord);

@@ -627,7 +627,7 @@ void func_00143E40(Camera* self, s32 flag, f32 dt)
                 }
                 const Vt2173* vt = n->vt;
                 if (vt->m04 != 0) {
-                    u8* t = (D_00262C68 & 1) ? g_padRecord : g_blankPadRecord;
+                    u8* t = (g_padRouting & 1) ? g_padRecord : g_blankPadRecord;
                     vt->m04(n, x, t, dt);
                 }
                 prev = n;

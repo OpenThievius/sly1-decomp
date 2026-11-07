@@ -6,8 +6,8 @@ void func_001DB838(s32 a0)
         ActivateSwitchedColliderIndex(-1);
         g_switchedColliderCount = 0;
         g_player = 0;
-        D_00262C6C = 0;
-        func_0016E148();
+        g_padSelectFlags = 0;
+        UpdatePadRouting();
         ClearCameraObjectList(g_camera);
         func_001DFD70();
         ClearPointObjectList();

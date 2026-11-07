@@ -41,7 +41,7 @@ void func_00132500(Obj_eu_132500* self, Gs_132500* gs)
     AddGifRegisterWrite(gs, 0x42, 0x44);
     AddGifRegisterWrite(gs, 0x40, 0xBE0004027F0000);
 
-    pad = (D_00262C68 & 2) ? &g_padRecord : &g_blankPadRecord;
+    pad = (g_padRouting & 2) ? &g_padRecord : &g_blankPadRecord;
     k = 3.0f;
     if (0.0f < pad->f78) {
         k = 6.0f;
