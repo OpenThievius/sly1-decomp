@@ -6,6 +6,7 @@
 #include "shapes.h"
 #include "placed_object.h"
 #include "asm_func.h"
+#include "fpu.h"
 
 // From 0x17D248 to colored_triangle_set: player helpers in VU0 code, the probe test func_0017DE88, and the
 // point-object list of class 0x80. Its .data runs from 0x263E50 to 0x264094 (tuning floats the
@@ -145,14 +146,58 @@ INCLUDE_RODATA(jtbl_0024B0D0);
 INCLUDE_RODATA(jtbl_0024B110);
 INCLUDE_ASM(func_0017F018);
 
-INCLUDE_ASM(func_0017FAC0);
+s32 SolveQuadratic(f32* roots, f32 a, f32 b, f32 c);
+
+s32 func_0017FAC0(Player* self, Vec02* a, Vec02* b, Vec02* c, Vec02* d, f32* out)
+{
+    f32 roots[2];
+    s32 count = SolveQuadratic(roots, self->gravity.z * 0.5f, b->z - d->z, a->z - c->z);
+    switch (count) {
+    case 0:
+        return 0;
+    case 1:
+        break;
+    case 2:
+        roots[0] = Fpu::Max(roots[1], roots[0]);
+        break;
+    }
+    if (roots[0] <= 0.0f) {
+        return 0;
+    }
+    *out = roots[0];
+    return 1;
+}
 
 INCLUDE_RODATA(jtbl_0024B150);
 INCLUDE_ASM(func_0017FB78);
 
-INCLUDE_ASM(func_0017FC48);
+static inline f32 EvalClampedQuadratic(const f32* poly, const f32* range, f32 z)
+{
+    f32 v = poly[0] + z * (poly[1] + z * poly[2]);
+    f32 lo = range[0];
+    f32 hi = range[1];
+    if (v < lo) {
+        v = lo;
+    } else if (hi < v) {
+        v = hi;
+    }
+    return v;
+}
 
-INCLUDE_ASM(func_0017FCC8);
+void func_0017FC48(PlacedObject* self, Vec02* out)
+{
+    *out = self->v150;
+    f32 z = EvalClampedQuadratic(D_00264050, D_00264060, out->z);
+    out->z = z;
+    out->z = Fpu::Max(z, self->v150.z);
+}
+void func_0017FCC8(PlacedObject* self, Vec02* out)
+{
+    *out = self->v150;
+    f32 z = EvalClampedQuadratic(D_00264070, D_00264080, out->z);
+    out->z = z;
+    out->z = Fpu::Max(z, self->v150.z);
+}
 
 void SetListLinkOffset(void* self, s32 value);
 

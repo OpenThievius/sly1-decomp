@@ -1777,6 +1777,9 @@ func_0017D1E8	func_0017D848	match
 func_0017D220	func_0017D880	match	
 func_0017DE88	func_0017E4E8	match	
 func_0017E6D0	func_0017ED30	match	
+func_0017FAC0	func_00180120	match	
+func_0017FC48	func_001802A8	match	
+func_0017FCC8	func_00180328	match	
 func_0017FD48	func_001803A8	match	
 func_0017FD70	func_001803D0	match	
 func_0017FD90	func_001803F0	match	
@@ -2487,6 +2490,7 @@ func_001AE130	-	absent
 func_001AE178	-	absent	
 func_001AE3B8	func_001AF0F8	match	
 func_001AE510	func_001AF250	match	version-specific
+func_001AE5E0	func_001AF2C8	match	version-specific
 func_001AE758	func_001AF438	match	version-specific
 func_001AE7F8	func_001AF4D8	match	version-specific
 func_001AE820	func_001AF500	match	version-specific, rodata
