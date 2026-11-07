@@ -10252,7 +10252,7 @@
    }
   },
   {
-   "name": "game/file_13CCF8",
+   "name": "game/zone_collider",
    "measures": {
     "fuzzy_match_percent": 98.75742841707185,
     "total_code": "14808",
@@ -11034,11 +11034,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_13CCF8.cpp"
+    "source_path": "src/main/zone_collider.cpp"
    }
   },
   {
-   "name": "game/file_140790",
+   "name": "game/disc_access",
    "measures": {
     "fuzzy_match_percent": 95.76719576719577,
     "total_code": "1512",
@@ -11172,11 +11172,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_140790.cpp"
+    "source_path": "src/main/disc_access.cpp"
    }
   },
   {
-   "name": "game/file_140D90",
+   "name": "game/flagged_object",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "3116",
@@ -11391,11 +11391,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_140D90.cpp"
+    "source_path": "src/main/flagged_object.cpp"
    }
   },
   {
-   "name": "game/file_1419E8",
+   "name": "game/collider_span",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "5316",
@@ -11547,11 +11547,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_1419E8.cpp"
+    "source_path": "src/main/collider_span.cpp"
    }
   },
   {
-   "name": "game/file_142ED0",
+   "name": "game/game_clock",
    "measures": {
     "fuzzy_match_percent": 100.0,
     "total_code": "612",
@@ -11640,11 +11640,11 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_142ED0.cpp"
+    "source_path": "src/main/game_clock.cpp"
    }
   },
   {
-   "name": "game/file_143140",
+   "name": "game/camera",
    "measures": {
     "fuzzy_match_percent": 97.04907161803713,
     "total_code": "12064",
@@ -12336,7 +12336,7 @@
     "progress_categories": [
      "game"
     ],
-    "source_path": "src/main/file_143140.cpp"
+    "source_path": "src/main/camera.cpp"
    }
   },
   {

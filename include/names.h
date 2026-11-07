@@ -119,6 +119,7 @@
 #define g_frameDt                                  D_00261860
 #define g_elapsedTime                              D_00261868
 #define g_frameStep                                D_0026186C
+#define g_lastCycleCount                           D_00261878
 #define g_camera                                   D_00261990
 #define g_stateNotifierLinks                       D_002619A0
 #define g_gaugeManagerLinks                        D_00261CA0
@@ -276,6 +277,7 @@
 #define g_activeListFrames                         D_0027B314
 #define g_iopCommandRpc                            D_0027B4C8
 #define g_iopBankLoadRpc                           D_0027B4F0
+#define g_discCheckSectorBuffer                    D_0027B800
 #define g_permanentCursor                          D_002C2A14
 #define g_frontResetMark                           D_002C2A18
 #define g_frontCursor                              D_002C2A1C
@@ -979,6 +981,8 @@
 #define InitMaskedCollider                         func_0013CCF8
 #define LoadMaskedCollider                         func_0013CD80
 #define CopyMaskedCollider                         func_0013CDE8
+#define StartMaskedCollider                        func_0013CE40
+#define UpdateMaskedCollider                       func_0013D068
 #define SetObjectHold                              func_0013D820
 #define SetAcceptsPlayer                           func_0013D9A0
 #define GetAcceptsPlayer                           func_0013D9E0
@@ -986,11 +990,13 @@
 #define GetAcceptsFlaggedObjects                   func_0013DA30
 #define AddAcceptedObjectId                        func_0013DA48
 #define AddAcceptedKind                            func_0013DA80
+#define GetMaskedColliderSoundParams               func_0013DAF0
 #define IsObjectAccepted                           func_0013DB28
 #define UpdateTimedState                           func_0013DC38
 #define HandleTimedStateNotification               func_0013DCA8
 #define TestTimedStateContact                      func_0013DD08
 #define SetTimedState                              func_0013DD78
+#define InitPlayerFlaggedCollider                  func_0013DDB8
 #define InitMassScalingCollider                    func_0013DDF0
 #define LatchContactObject                         func_0013DE38
 #define CloneTreeNodes                             func_0013E6C8
@@ -1044,6 +1050,8 @@
 #define CopyFlaggedObject                          func_001415D0
 #define HandleFlaggedObjectEvent                   func_001417F0
 #define RaiseObjectFlag                            func_00141870
+#define AppendFlaggedObjectIdB                     func_001419A0
+#define AppendFlaggedObjectIdA                     func_001419C0
 #define SetFlaggedChildId                          func_001419E0
 #define FindNearestSpanObject                      func_001419E8
 #define CollectSpansFromList                       func_00141B48
@@ -1056,8 +1064,13 @@
 #define AdvanceGameClockElapsed                    func_00143030
 #define SetGameClockTime                           func_001430B8
 #define SetGameClockRunning                        func_001430C0
+#define ResetGameClockTick                         func_001430C8
+#define ReadCycleCounter                           func_001430F8
 #define UpdateCameraProjection                     func_00143560
 #define InitCamera                                 func_00143648
+#define SnapCurrentCameraZoom                      func_001437C0
+#define SetCurrentCameraNearDistance               func_001437E8
+#define SetCurrentCameraFarDistance                func_00143810
 #define SetCameraPosition                          func_00143900
 #define SetCameraOrientation                       func_00143920
 #define SnapCameraZoom                             func_00143940

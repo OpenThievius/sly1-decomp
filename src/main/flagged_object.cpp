@@ -7,6 +7,7 @@
 #include "world.h"
 #include "object_event.h"
 #include "screen_fade.h"
+#include "flag_table.h"
 
 // The file's .rodata: the FLT_MAX constants of its two assembly functions.
 extern const f32 D_00249E3C = 3.4028235e+38f;
@@ -20,45 +21,25 @@ u8 D_00261630[544] = {0};
 
 ASM_FUNC(func_00140D90);
 
-struct Blk_140E10 { u8 b[0x200]; s32 tail; };
-
-struct Ring_140E10 {
-    u8 pad0[8];
-    Blk_140E10 src;
-    s32 tail1;
-    u8 pad1[0x10];
-    Blk_140E10 dst;
-    s32 field424;
-    s32 field428;
-    s32 field42C;
-};
-
-void func_00140E10(Ring_140E10* r, s32 a, s32 b)
+void func_00140E10(FlagTable* r, s32 a, s32 b)
 {
-    r->tail1 = 0;
-    r->dst = r->src;
-    r->field424 = a;
-    r->field428 = b;
-    r->field42C = 1;
+    r->changed = 0;
+    r->saved = r->live;
+    r->fadeA = a;
+    r->fadeB = b;
+    r->hasFade = 1;
 }
-
-struct Ring_140ED0 {
-    u8 pad0[0x424];
-    s32 field424;
-    s32 field428;
-    s32 field42C;
-};
 
 void func_001EFFA0(ScreenFade* fade, FadeRequest* args, s32 count);
 
-void func_00140ED0(Ring_140ED0* r)
+void func_00140ED0(FlagTable* r)
 {
     FadeRequest args;
     args.kind = 1;
     args.key = &D_00275B04;
-    if (r->field42C != 0) {
-        args.f08 = r->field424;
-        args.f0C = r->field428;
+    if (r->hasFade != 0) {
+        args.f08 = r->fadeA;
+        args.f0C = r->fadeB;
         args.flags = 0x11;
     } else {
         args.f08 = -1;
@@ -68,25 +49,20 @@ void func_00140ED0(Ring_140ED0* r)
     StartScreenFade(&g_screenFade, &args, 1);
 }
 
-struct Blk_140F48 { s32 b[0x81]; };
-
-void func_00140F48(u8* p)
+void func_00140F48(FlagTable* p)
 {
-    *(s32*)(p + 4) = 0;
-    *(Blk_140F48*)(p + 8) = *(Blk_140F48*)(p + 0x220);
-    *(s32*)(p + 0x20C) = 0;
+    p->nextIndex = 0;
+    p->live = p->saved;
+    p->changed = 0;
 }
 
-struct Ctr_140FF8 { u8 pad0[4]; s32 count; };
-
-s32 func_00140FF8(void* p)
+s32 func_00140FF8(FlagTable* c)
 {
-    Ctr_140FF8* c = (Ctr_140FF8*)p;
-    c->count = c->count + 1;
-    return c->count;
+    c->nextIndex = c->nextIndex + 1;
+    return c->nextIndex;
 }
 
-s32 func_00141008(void* table, s32 index)
+s32 func_00141008(FlagTable* table, s32 index)
 {
     u8* bits = (u8*)table;
     s32 mask = 1 << (index & 7);
@@ -94,46 +70,37 @@ s32 func_00141008(void* table, s32 index)
     return (bits[0xC] & mask) != 0;
 }
 
-struct BitSet_141040 {
-    u8 pad0[8];
-    s32 count;
-    u8 bits[0x20C - 0xC];
-    s32 flag;
-};
-
-void func_00141040(void* table, s32 bit)
+void func_00141040(FlagTable* self, s32 bit)
 {
-    BitSet_141040* self = (BitSet_141040*)table;
-    u8* base = self->bits;
+    u8* base = self->live.bits;
     u8* byte = base + bit / 8;
     s32 mask = 1 << (bit & 7);
     s32 cur = *byte & mask;
     if (cur == 0) {
-        self->flag = 1;
+        self->changed = 1;
         goto done;
     }
 done:
     if (!(*byte & mask)) {
         *byte = (u8)(*byte | mask);
-        self->count++;
+        self->live.count++;
     }
 }
 
-void func_001410A0(void* table, s32 bit)
+void func_001410A0(FlagTable* self, s32 bit)
 {
-    BitSet_141040* self = (BitSet_141040*)table;
-    u8* base = self->bits;
+    u8* base = self->live.bits;
     u8* byte = base + bit / 8;
     s32 mask = 1 << (bit & 7);
     s32 cur = *byte & mask;
     if (cur != 0) {
-        self->flag = 1;
+        self->changed = 1;
         goto done;
     }
 done:
     if ((*byte & mask) != 0) {
         *byte = (u8)(*byte & ~mask);
-        self->count--;
+        self->live.count--;
     }
 }
 
@@ -167,7 +134,7 @@ void func_001B9AE0(void* self, s32 a, s32 b, s32 c, s32 d);
 void func_001411A8(FlaggedObject* self)
 {
     InitCollider(self);
-    self->flagIndex = TakeFlagTableIndex(g_flagTable);
+    self->flagIndex = TakeFlagTableIndex((FlagTable*)g_flagTable);
     self->childId = -1;
     World* in = self->world;
     s32 n = in->count2304;
@@ -312,7 +279,7 @@ void func_00141438(FlaggedObject* self)
     if (self->f5A8 != 0) {
         self->handle = (StateWalker*)CreateStateWalker(self->f5A8, self, 0x546, 0);
 
-        if (TestFlagTableBit(g_flagTable, self->flagIndex) != 0)
+        if (TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) != 0)
             SetStateWalkerTarget(self->handle, 0x547);
     }
 }
@@ -368,10 +335,10 @@ void func_00141870(FlaggedObject* self)
     func_00151ED8(D_00261EF0, self);
     s32 sel;
     if (self->handle != 0) {
-        sel = TestFlagTableBit(g_flagTable, self->flagIndex) ? 0x549 : 0x548;
+        sel = TestFlagTableBit((FlagTable*)g_flagTable, self->flagIndex) ? 0x549 : 0x548;
     }
     s32 idx = -1;
-    SetFlagTableBit(g_flagTable, self->flagIndex);
+    SetFlagTableBit((FlagTable*)g_flagTable, self->flagIndex);
     if (IsObjectDescendantOf((s32)self->child, self)) {
         for (BaseObject* n = self; n != 0; n = n->parent) {
             Alias01* sl = n->alias;
@@ -383,7 +350,7 @@ void func_00141870(FlaggedObject* self)
             idx = self->id;
         }
     }
-    SaveFlagTableSnapshot((Ring_140E10*)g_flagTable, self->childId, idx);
+    SaveFlagTableSnapshot((FlagTable*)g_flagTable, self->childId, idx);
     for (s32 i = 0; i < self->countA; i++) {
         CreateAnimationPlayerWithoutPresetTargets(self->objsA[i], 0, 0, 0, 0.0f, 1.0f);
     }

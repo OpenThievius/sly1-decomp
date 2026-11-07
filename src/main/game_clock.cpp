@@ -22,7 +22,7 @@ void func_00142ED0(f32 x)
 
 void func_00142F10(GameClock* self)
 {
-    s64 now = func_001430F8();
+    s64 now = ReadCycleCounter();
     s64 delta = now - self->lastTick;
     u64 half = (u64)delta >> 1;
     f32 t;
@@ -61,7 +61,7 @@ void func_00142F10(GameClock* self)
 
 void func_00143030(GameClock* self)
 {
-    s64 now = func_001430F8();
+    s64 now = ReadCycleCounter();
     s64 delta = now - self->lastTick;
     u64 half = (u64)delta >> 1;
     f32 t;

@@ -23,7 +23,7 @@
 // it through this pointer. 001E4000.cpp defines it (= 0).
 extern World* D_00275710;
 
-// The camera, class 0x6D (c6d.h): 22 views in 5 files. file_143140.cpp defines it (= 0).
+// The camera, class 0x6D (c6d.h): 22 views in 5 files. camera.cpp defines it (= 0).
 extern Camera* D_00261990;
 
 // The player, an object of class 0x07 (c05.h): its views reach 0x2758..0x275C, inside the class's

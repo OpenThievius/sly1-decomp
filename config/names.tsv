@@ -2528,3 +2528,16 @@ func_00136FA8	EndTextPanelState	slot 7 of the panel table, after ChooseTextPanel
 func_0013C950	GetChildGroupSoundParams	returns the pointer at the object's sound slot, setting it up with InitSoundParams first when it is 0 (as GetMaskedColliderSoundParams does)
 func_0013CCE8	ReadNothing	the one virtual of the reader's base class (entry 1 of D_00249D80, where ReadMemoryReader is in the memory reader's table): returns 0, no bytes read
 D_00249D80	g_baseReaderMethods	the GCC vtable of the memory reader's base class, its entry 1 being ReadNothing; nothing builds that class, the memory reader's own table is g_memoryReaderMethods
+func_0013CE40	StartMaskedCollider	slot 16 of class 0x20: runs StartPlacedObject and queues func_0013CE80 on the world with AppendQueuedCall
+func_0013D068	UpdateMaskedCollider	slot 17 of class 0x20: runs UpdateCollider, then when the flag at 0x678 is set clears it and calls the object's slot at 0x48 of its table
+func_0013DAF0	GetMaskedColliderSoundParams	returns the pointer at 0x6B4, setting it up with InitSoundParams first when it is 0
+func_0013DDB8	InitPlayerFlaggedCollider	slot 0 of class 0x21 (the parent of 0x22, 0x23 and 0x24): runs InitMaskedCollider, sets the accept mask to 5 (the player, bit 0, and flagged objects, bit 2, as IsObjectAccepted tests them) and 0x698 to -1
+D_0027B800	g_discCheckSectorBuffer	the sector buffer StepDiscSectorCheck reads the checked sector into (StartDiscRead, one sector) and runs the CRC-32 over (0x800 bytes) to compare with the expected value
+func_001419A0	AppendFlaggedObjectIdB	appends an id to idsB of a class 0x38 object (count at 0x578), the ids ResolveListIds looks up into objsB
+func_001419C0	AppendFlaggedObjectIdA	appends an id to idsA of a class 0x38 object (count at 0x550), the ids ResolveListIds looks up into objsA
+func_001430C8	ResetGameClockTick	original assembly: stores the CPU's count register (cop0 register 9) in D_00261878, then the 64-bit count from ReadCycleCounter in the clock's last tick (D_00261870, g_gameClock + 0x18)
+func_001430F8	ReadCycleCounter	original assembly: reads the CPU's count register and extends it to 64 bits, counting a wrap in D_0027C000 whenever it is below the last value kept in D_00261878, which it then updates; AdvanceGameClock and AdvanceGameClockElapsed take their ticks from it
+D_00261878	g_lastCycleCount	the CPU count register's last value: ResetGameClockTick sets it and ReadCycleCounter compares the new count against it to count wraps, then stores the new count
+func_001437C0	SnapCurrentCameraZoom	calls SnapCameraZoom on g_camera with the float it is given
+func_001437E8	SetCurrentCameraNearDistance	calls SetCameraNearDistance on g_camera with the float it is given
+func_00143810	SetCurrentCameraFarDistance	calls SetCameraFarDistance on g_camera with the float it is given

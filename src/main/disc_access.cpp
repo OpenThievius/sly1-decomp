@@ -142,7 +142,7 @@ void func_001409E0(void)
         s1 = *(s32*)D_002701B8;
         if (s1 == 2) {
             if (func_00140968() != 0) {
-                if (StartDiscRead((s32)D_00247AA4, 1, D_0027B800, (void*)&D_00247AA0) == 1) {
+                if (StartDiscRead((s32)D_00247AA4, 1, g_discCheckSectorBuffer, (void*)&D_00247AA0) == 1) {
                     g_discSectorCheckState = s1;
                 }
             }
@@ -150,7 +150,7 @@ void func_001409E0(void)
         break;
     case 2:
         if (TestDiscReadDone(0) != 0) {
-            u8* p = D_0027B800;
+            u8* p = g_discCheckSectorBuffer;
             u32* tbl = g_crc32Table;
             u32 crc = 0xFFFFFFFF;
             s32 n = 0x7FF;
