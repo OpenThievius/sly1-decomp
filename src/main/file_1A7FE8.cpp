@@ -1004,7 +1004,7 @@ ASM_FUNC(func_001A9868);
 void func_001A98F8(C0D* self)
 {
     StartAgent(self);
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
 }
 
 s32 func_001A9928(C0D* self)
@@ -1088,7 +1088,7 @@ void func_001A9C68()
     D_0026E4E0.vt = (const T217D_Vt*)D_002181A0;
     g_timerElement.vt = (const T217D_Vt*)D_00218510;
     g_timerCaption.vt = (const T217D_Vt*)D_00221380;
-    D_0026EC70.vt = (const T217D_Vt*)D_00218330;
+    g_buttonHintElement.vt = (const T217D_Vt*)D_00218330;
     D_0026EED0.vt = (const T217D_Vt*)D_00218380;
     D_0026F138.vt = (const T217D_Vt*)D_002183D0;
     D_0026F5A0.vt = (const T217D_Vt*)D_00218420;

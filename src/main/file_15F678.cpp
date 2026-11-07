@@ -1625,7 +1625,7 @@ void func_00160DA0(void)
     u8* x = (u8*)g_currentWorld;
     s32 t = o->f19E0 - 1;
     o->f19E0 = t;
-    func_001DDAD0((Call_160DA0*)x);
+    PopActiveSequenceElement((Call_160DA0*)x);
     StopLockedStreamVoice();
     GameProgress* p = g_saveData;
     s32 m = p->f19DC;

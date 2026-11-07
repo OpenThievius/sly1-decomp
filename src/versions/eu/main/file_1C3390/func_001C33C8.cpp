@@ -16,7 +16,7 @@ void func_001C33C8(C1D* self)
     ((Pp_1C33C8*)(g2 + 0x574))->p = (u8*)self + 0x694;
     *(void**)(g1 + 0x578) = D_00274A40;
     *(f32*)(g2 + 0x57C) = 4.0f;
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
     s32 c = self->f71C;
     self->f720[c] = self;
     self->f71C = c + 1;

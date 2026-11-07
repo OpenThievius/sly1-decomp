@@ -86,7 +86,7 @@ void func_0018A3F0(C0C* self)
     s32 i;
 
     StartAgent(self);
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
     ResolveObjectLinks(self, 3, D_00264928);
     func_001D36F0(self, (u8*)self + 0xC20, (u8*)self + 0xE00);
     self->f758[12].obj = (void*)self->fE00;

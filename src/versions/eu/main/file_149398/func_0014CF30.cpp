@@ -29,7 +29,7 @@ void func_0014CF30(GaugeManager* self, s32 kind, void* key)
             if (out == 0x3FD) {
                 (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f574 = &self->amount;
                 (*(Glob_eu_14CF30*)&g_gaugeAmountCaption).f578 = &self->maxAmount;
-                func_001DDC38(self->world, self);
+                SetWorldActiveFollower(self->world, self);
                 StartTimer(&g_timerElement, self->f2D8);
                 SetTimerLimit(&g_timerElement, 0.0f, func_0014C668);
                 StartTimerCounting(&g_timerElement);
@@ -37,7 +37,7 @@ void func_0014CF30(GaugeManager* self, s32 kind, void* key)
             if (self->tag430 == 0x3FD) {
                 g_gaugeAmountCaption.vt->m15(&g_gaugeAmountCaption);
                 g_timerElement.vt->m15(&g_timerElement);
-                func_001DDC38(self->world, 0);
+                SetWorldActiveFollower(self->world, 0);
             }
             self->tag430 = out;
         }

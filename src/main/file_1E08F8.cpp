@@ -1614,7 +1614,7 @@ void func_001E4EA8(Self_1E4EA8* self)
     ResetCamera((*(s32*)&g_camera), 1);
     UpdateSoundEmitters();
     SetVolumeChannelFactor(0xA, 0, 1.0f);
-    func_001F4318(g_currentWorld, self->f8, self->fC);
+    FindOrActivateSwitchedCollider(g_currentWorld, self->f8, self->fC);
     func_00151E18(D_00261EF0);
     func_00160CE8(D_002623D8);
     func_0016B520(D_0026FA90);

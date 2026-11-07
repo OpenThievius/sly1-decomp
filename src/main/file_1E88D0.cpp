@@ -935,7 +935,7 @@ extern const f32 D_0024E600[4] = {3.40282347e+38f, 0.0f, 0.0f, 0.0f};
 void func_001E8948(C0B* self)
 {
     ResolveObjectLinks(self, 8, D_00275B60);
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
     if (self->fC50 != 0) {
         self->fC54 = CreateStateWalker(self->fC50, 0, 0x2D7, 0);
     }
@@ -1549,7 +1549,7 @@ void func_001EA118(World* self)
         RunQueuedCalls(self);
         StepAnimators(g_gameClock.dt);
     }
-    func_001DDC40(self);
+    NotifyWorldActiveFollower(self);
     Begin_1EA118::Of(&it, &self->list1B7C);
     for (Actor6C* obj; (obj = Next_1EA118::Of(&it)) != 0;) {
         ReleaseWorldListEntry(obj);
@@ -1926,7 +1926,7 @@ void func_001EB598(C1C* self)
     StartPlacedObject(self);
     ResolveObjectLinks(self, 4, D_00275CA0);
     self->f614 = CreateStateWalker(self->f610, self, 0x4CA, 1);
-    AppendQueuedCall(self->world, (void*)func_001EB550, self, 0, 0);
+    AppendQueuedCall(self->world, (void*)CopyPlayerAttachBlock, self, 0, 0);
 }
 
 void func_001EB608(C1C* self, void* p)
@@ -2012,7 +2012,7 @@ void func_001EB748(C1C* self, In_1EB748* in)
                 msg.fn = func_001EB698;
                 ((s32 (*)(Player*, OwnerMessage*))((GFn_1EB748*)g_player->desc)[0x140 / 4])(g_player, &msg);
                 o = (C13*)FindFirstObjectByIdGathered(self->world, 5, 0x13, 0);
-                func_001ED020(o);
+                EndHeldTimeline(o);
                 o->fBFC = g_gameTime[0];
                 SetCachedVoiceParam(2, 1);
                 goto next;
@@ -2103,7 +2103,7 @@ INCLUDE_ASM(func_001EBF40);
 void func_001EBFB0(C13* self)
 {
     StartAgent(self);
-    func_001DDC38(self->world, self);
+    SetWorldActiveFollower(self->world, self);
     ResolveObjectLinks(self, 5, D_00275D08);
     void* r = CreateStateWalker(self->fC50, 0, -1, 0);
     self->fC54 = r;
@@ -2275,7 +2275,7 @@ void func_001EC570(C13* self, s32 a, s32 b)
         if (r[2] < 0x4EF) {
             if (r[2] >= 0x4EC) n = 2;
         }
-        func_001ED090(self, ((Sub_1EC570*)self->f7E0), n);
+        AddC13Entry(self, ((Sub_1EC570*)self->f7E0), n);
         if (n == 2) ((Sub_1EC570*)self->f7E0)->f14 = ((Sub_1EC570*)self->f7E0)->inner->f34 * (self->fC7C / (f32)n);
         else ((Sub_1EC570*)self->f7E0)->f14 = ((Sub_1EC570*)self->f7E0)->inner->f34 * (self->fC7C / (f32)n);
         break;
@@ -2328,7 +2328,7 @@ void func_001ECBC8(C13* self)
         if (sub != 0) {
             self->fC34 = 0;
             self->fC38 = sub;
-            func_001ED1D8(sub);
+            RestartTimeline(sub);
         }
         D_00275DB8 = 0;
     }
@@ -2403,7 +2403,7 @@ void func_001ED018(C13* self, s32 value)
 
 void func_001ED020(C13* self)
 {
-    func_001ED210(self->fC38);
+    EndTimeline(self->fC38);
     self->fC38 = 0;
 }
 
@@ -3251,7 +3251,7 @@ void func_001EFFA0(ScreenFade* dst, FadeRequest* args, s32 count)
     if (dst->mode == 0) {
         if (D_0027051C != 0) {
             if (*(s32*)((u8*)D_0027051C + 0x2D0) != 2) {
-                func_001DDAD0(g_currentWorld);
+                PopActiveSequenceElement(g_currentWorld);
             }
         }
         if (args->key == 0 || Match_1EFFA0::Of(args->key)) {

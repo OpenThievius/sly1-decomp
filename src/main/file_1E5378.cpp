@@ -152,7 +152,7 @@ void func_001E56A0(C16* self, void* obj, f32 t)
     func_001E5938();
     if (*(u16*)((u8*)obj + 0xAA) & 0xC0) {
         ClearPadPressedBits(obj, 0xC0);
-        func_001E5C78(self);
+        AdvancePlayerLinkedColliderWalker(self);
     }
     o = g_player;
     if (o != 0) {

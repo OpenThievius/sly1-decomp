@@ -58,7 +58,7 @@ void func_00195958(Menu_195958_eu* self)
                 func_001B6598(s2, &v);
                 if (v < 0x431) {
                     if (v >= 0x42F) {
-                        func_001D9338(s0);
+                        RecordPathFollowerProgress(s0);
                         TeleportStateWalker(s2, 0x42E);
                     }
                 }

@@ -472,7 +472,7 @@ void func_00167E08(C0A* self)
         for (i = 0; i < out.count; i++) {
             Ent_167E08* e = out.items[i];
             if (e->f328 == 0) {
-                void* t = func_001EFA30();
+                void* t = CreateRecord2505C0();
                 e->f328 = (s32)t;
                 AppendToSmallList(t, e);
             }

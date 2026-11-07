@@ -22,7 +22,7 @@ struct Obj_16C470 {
 void func_0016C470(void* a0)
 {
     Obj_16C470* self = (Obj_16C470*)a0;
-    func_001DFD90(a0);
+    InitClass75Object(a0);
     self->f88 = 1;
     self->fA8 = 8;
     self->fAC = 9;
